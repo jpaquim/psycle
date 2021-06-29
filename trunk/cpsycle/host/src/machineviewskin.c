@@ -90,8 +90,7 @@ void machineviewskin_settheme(MachineViewSkin* self, psy_Property* p, const char
 
 	self->hastransparency = FALSE;
 	self->transparency = psy_ui_colour_make(0x00000000);
-	if (p) {
-		self->colour = psy_ui_colour_make(psy_property_at_colour(p, "mv_colour", 0x00232323));
+	if (p) {		
 		self->wirecolour = psy_ui_colour_make(psy_property_at_colour(p, "mv_wirecolour", 0x005F5F5F));
 		self->selwirecolour = psy_ui_colour_make(psy_property_at_colour(p, "mv_selwirecolour", 0x007F7F7F));
 		self->hoverwirecolour = psy_ui_colour_make(psy_property_at_colour(p, "mv_hoverwirecolour", 0x007F7F7F));
@@ -105,8 +104,7 @@ void machineviewskin_settheme(MachineViewSkin* self, psy_Property* p, const char
 		machine_skin_name = psy_property_at_str(p, "machine_skin", 0);
 		self->transparency = psy_ui_colour_make(psy_property_at_colour(p, "transparency", 0x00000000));
 		self->hastransparency = psy_property_at(p, "transparency", PSY_PROPERTY_TYPE_NONE) != NULL;		
-	} else {
-		self->colour = psy_ui_colour_make(0x00232323);
+	} else {		
 		self->wirecolour = psy_ui_colour_make(0x005F5F5F);
 		self->selwirecolour = psy_ui_colour_make(0x007F7F7F);
 		self->hoverwirecolour = psy_ui_colour_make(0x007F7F7F);

@@ -5,10 +5,12 @@
 
 #include "../../detail/prefix.h"
 
-#include "minmaximize.h"
 
+#include "minmaximize.h"
+/* ui */
 #include <uicomponent.h>
 
+/* implementation */
 void minmaximize_init(MinMaximize* self)
 {
 	self->minmaximize = NULL;	

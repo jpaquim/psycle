@@ -9,6 +9,7 @@
 /* host */
 #include "seqeditheader.h"
 #include "seqeditheaderdesc.h"
+#include "seqeditproperties.h"
 #include "seqedittrackdesc.h"
 #include "seqedittracks.h"
 #include "seqedittoolbar.h"
@@ -32,7 +33,8 @@ typedef struct SeqEditor {
 	ZoomBox vzoom;
 	psy_ui_Component trackdescpane;
 	SeqEditTrackDesc trackdesc;
-	SeqEditorTracks tracks;	
+	SeqEditorTracks tracks;
+	SeqEditProperties properties;
 	SeqEditState state;
 	SequenceCmds cmds;	
 	bool expanded;

@@ -1,20 +1,25 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "midiloader.h"
-// local
+/* local */
 #include "pattern.h"
 #include "patterns.h"
 #include "song.h"
-// std
+/* std */
 #include <assert.h>
-// platform
+/* platform */
 #include "../../detail/portable.h"
 
-// MidiFile stores in big endian. The swap functions convert to little endian
-// todo: combine duplicate code (asiodriver.cpp)
+/*
+** MidiFile stores in big endian. The swap functions convert to little endian
+** todo: combine duplicate code (asiodriver.cpp)
+*/
 #define swaplong(v) ((((v)>>24)&0xFF)|(((v)>>8)&0xFF00)|(((v)&0xFF00)<<8)|(((v)&0xFF)<<24)) 
 #define swapshort(v) ((((v)>>8)&0xFF)|(((v)&0xFF)<<8))
 
@@ -50,16 +55,18 @@ void miditrackstate_reset(MidiTrackState* self)
     }    
 }
 
-// MidiLoader
-// prototypes
+/*
+** MidiLoader
+** prototypes
+*/
 static void midiloader_reset(MidiLoader*);
-// Midi File
+/* Midi File */
 int midiloader_readmthd(MidiLoader*);
-// Midi Track
+/* Midi Track */
 static int midiloader_readtrk(MidiLoader*, MCHUNK, uintptr_t trackidx);
 static void midiloader_appendtrack(MidiLoader*, uintptr_t trackidx);
 static int midiloader_readtrackevents(MidiLoader*, MCHUNK, uintptr_t trackidx);
-// Midi Events
+/* Midi Events */
 static int midiloader_readdeltatime(MidiLoader*);
 static int midiloader_readstatusbyte(MidiLoader*);
 static int midiloader_readnoteon(MidiLoader*);
@@ -70,7 +77,7 @@ static int midiloader_readcontroller(MidiLoader*);
 static int midiloader_readprogramchange(MidiLoader*);
 static int midiloader_readchannelpressure(MidiLoader*);
 static int midiloader_readpitchbend(MidiLoader*);
-// Midi Meta Events
+/* Midi Meta Events */
 static int midiloader_readmetaevent(MidiLoader*, bool* rv_eoftrack);
 static int midiloader_readmeta_text(MidiLoader*);
 static int midiloader_readmeta_copyright(MidiLoader*);
@@ -88,14 +95,13 @@ static int midiloader_readmeta_smpte(MidiLoader*);
 static int midiloader_readmeta_timesignature(MidiLoader*);
 static int midiloader_readmeta_keysignature(MidiLoader*);
 static int midiloader_readmeta_properietaryevent(MidiLoader*);
-// Misc methods
+/* Misc methods */
 static  void midiloader_writepatternevent(MidiLoader*, psy_audio_PatternEvent);
 static int midiloader_readchunk(MidiLoader*, MCHUNK* rv);
 static int midiloader_readbyte1(MidiLoader*, uint8_t* rv_int);
 int readvarlen(PsyFile* fp, uint32_t* rv);
 static int midiloader_readvarlentext(PsyFile*, char_dyn_t** rv_text);
-
-// implementation
+/* implementation */
 void midiloader_init(MidiLoader* self, psy_audio_SongFile* songfile)
 {
 	assert(self);
@@ -203,21 +209,21 @@ void midiloader_appendtrack(MidiLoader* self, uintptr_t trackidx)
     uintptr_t patidx;
     
     song = self->songfile->song;
-    // reset trackstate
+    /* reset trackstate */
     miditrackstate_reset(&self->currtrack);
     self->currtrack.trackidx = trackidx;    
-    // create pattern
+    /* create pattern */
     pattern = psy_audio_pattern_allocinit();
     psy_audio_pattern_setname(pattern, "unnamed");
     patidx = psy_audio_patterns_append(&song->patterns, pattern);
-    // append new sequence track 
+    /* append new sequence track */
     self->currtrack.track = psy_audio_sequencetrack_allocinit();
     psy_audio_sequence_appendtrack(&song->sequence, self->currtrack.track);
     psy_audio_sequence_insert(&self->songfile->song->sequence,
         psy_audio_orderindex_make(trackidx, 0), patidx);
-    // prepare currpattern            
+    /* prepare currpattern */
     self->currtrack.pattern = pattern;    
-    // insert pattern    
+    /* insert pattern */
     self->currtrack.position = 0.0;
     self->currtrack.patternnode = NULL;    
 }
@@ -231,7 +237,7 @@ int midiloader_readtrackevents(MidiLoader* self, MCHUNK chunk, uintptr_t trackid
     status = PSY_OK;
     eoftrack = FALSE;
     currentpos = psyfile_getpos(self->fp);
-    // insert events   
+    /* insert events */
     while (!eoftrack && !psyfile_eof(self->fp) ||
             (psyfile_getpos(self->fp) - currentpos < chunk.length)) {
         uint32_t ln;
@@ -706,10 +712,10 @@ int midiloader_readmeta_tempo(MidiLoader* self)
     bpm = 60.0 * 1000000.0 / (microsecsperquarternote);
     bpm = (uintptr_t)(bpm * 1000) / 1000.0f;
     if (self->currtrack.position == 0.0) {
-        // tempo event at track start: set change as song tempo
+        /* tempo event at track start: set change as song tempo */
         psy_audio_song_setbpm(self->songfile->song, bpm);
     } else {
-        // tempo event inside track: insert pattern bpm change
+        /* tempo event inside track: insert pattern bpm change */
         psy_audio_PatternEvent ev;
 
         psy_audio_patternevent_init(&ev);
@@ -753,8 +759,7 @@ int midiloader_readmeta_smpte(MidiLoader* self)
 }
 
 int midiloader_readmeta_timesignature(MidiLoader* self)
-{
-    // Time Signature
+{    
     uint8_t nn;
     uint8_t dd;
     uint8_t cc;
@@ -784,8 +789,7 @@ int midiloader_readmeta_keysignature(MidiLoader* self)
     uint8_t sf;
     uint8_t mi;
     int status;
-
-    // Key Signature
+    
     if (psyfile_skip(self->fp, 1) == -1) {
         return PSY_ERRFILE;
     }
@@ -812,7 +816,7 @@ int midiloader_readmeta_properietaryevent(MidiLoader* self)
     return PSY_OK;
 }
 
-// misc midi file read
+/* common midi file read */
 int midiloader_readchunk(MidiLoader* self, MCHUNK* rv)
 {    
     int status;
@@ -834,7 +838,7 @@ int midiloader_isvalid(MidiLoader* self)
 	return FALSE;
 }
 
-// reads the first byte or uses the running status
+/* reads the first byte or uses the running status */
 int midiloader_readbyte1(MidiLoader* self, uint8_t* rv)
 {
     int status;
@@ -876,8 +880,8 @@ void midiloader_writepatternevent(MidiLoader* self, psy_audio_PatternEvent ev)
                             self->currtrack.patternnode = self->currtrack.pattern->events->tail;
                         }
                     } else {
-                        // noteoff was in previous patttern
-                        // todo
+                        /* noteoff was in previous patttern */
+                        /* todo */
                     }                
                 }
                 channelvoice = voice;
@@ -902,7 +906,7 @@ void midiloader_writepatternevent(MidiLoader* self, psy_audio_PatternEvent ev)
 }
 
 
-// midi variable length fileio funtions
+/* midi variable length fileio funtions */
 int midiloader_readvarlentext(PsyFile* fp, char_dyn_t** rv)
 {
     int status;

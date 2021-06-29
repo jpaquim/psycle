@@ -1,20 +1,23 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "pattern.h"
-// std
+/* std */
 #include <math.h>
-// platform
+/* platform */
 #include "../../detail/portable.h"
 
 static double hermitecurveinterpolate(intptr_t kf0, intptr_t kf1, intptr_t kf2,
 	intptr_t kf3, intptr_t curposition, intptr_t maxposition, double tangmult,
 	bool interpolation);
 
-// psy_audio_PatternCursor
-// implementation
+/* psy_audio_PatternCursor */
+/* implementation */
 void psy_audio_patterncursor_init(psy_audio_PatternCursor* self)
 {
 	assert(self);
@@ -64,8 +67,8 @@ int psy_audio_patterncursor_equal(psy_audio_PatternCursor* lhs,
 		rhs->patternid == lhs->patternid;
 }
 
-// PatternSelection
-// implementation
+/* PatternSelection */
+/* implementation */
 void psy_audio_patternselection_init(psy_audio_PatternSelection* self)
 {
 	psy_audio_patterncursor_init(&self->topleft);
@@ -145,17 +148,17 @@ psy_audio_PatternSelection psy_audio_patternselection_make(
 
 static uintptr_t defaultlines = 64;
 
-// Pattern
-// prototypes
+/* Pattern */
+/* prototypes */
 static void psy_audio_pattern_init_signals(psy_audio_Pattern*);
 static void psy_audio_pattern_dispose_signals(psy_audio_Pattern*);
-// implementation
+/* implementation */
 void psy_audio_pattern_init(psy_audio_Pattern* self)
 {
 	assert(self);
 
 	self->events = NULL;
-	// todo needs player lpb to be correct
+	/* todo needs player lpb to be correct */
 	self->length = defaultlines / (psy_dsp_big_beat_t)4.0;
 	self->name = strdup("Untitled");	
 	self->opcount = 0;
@@ -245,12 +248,23 @@ psy_audio_Pattern* psy_audio_pattern_clone(psy_audio_Pattern* self)
 void psy_audio_pattern_remove(psy_audio_Pattern* self, psy_audio_PatternNode* node)
 {
 	assert(self);
+
 	if (node) {
 		psy_audio_PatternEntry* entry = (psy_audio_PatternEntry*)(node->entry);
 		psy_list_remove(&self->events, node);
 		psy_audio_patternentry_dispose(entry);
 		free(entry);
 		++self->opcount;		
+	}
+}
+
+void psy_audio_pattern_erase(psy_audio_Pattern* self, psy_audio_PatternNode* node)
+{
+	assert(self);
+
+	if (node) {
+		psy_audio_PatternEntry* entry = (psy_audio_PatternEntry*)(node->entry);
+		psy_list_remove(&self->events, node);		
 	}
 }
 
@@ -388,7 +402,7 @@ psy_audio_PatternNode* psy_audio_pattern_last(psy_audio_Pattern* self)
 	return psy_list_last(self->events);
 }
 
-psy_audio_PatternNode* psy_audio_pattern_next_track(psy_audio_Pattern* self,
+psy_audio_PatternNode* psy_audio_patternnode_next_track(
 	psy_audio_PatternNode* node, uintptr_t track)
 {	
 	if (node) {
@@ -409,7 +423,7 @@ psy_audio_PatternNode* psy_audio_pattern_next_track(psy_audio_Pattern* self,
 	return NULL;
 }
 
-psy_audio_PatternNode* psy_audio_pattern_prev_track(psy_audio_Pattern* self,
+psy_audio_PatternNode* psy_audio_patternnode_prev_track(
 	psy_audio_PatternNode* node, uintptr_t track)
 {
 	if (node) {
@@ -787,9 +801,8 @@ psy_audio_PatternCursor psy_audio_pattern_searchinpattern(psy_audio_Pattern*
 	return cursor;
 }
 
-
-// psy_audio_PatternCursorNavigator
-// implementation
+/* psy_audio_PatternCursorNavigator */
+/* implementation */
 bool psy_audio_patterncursornavigator_advancelines(psy_audio_PatternCursorNavigator*
 	self, uintptr_t lines)
 {
@@ -1014,8 +1027,10 @@ void psy_audio_pattern_blockpaste(psy_audio_Pattern* self,
 		end.offset = psy_audio_pattern_length(self);
 	}
 	psy_audio_pattern_blockremove(self, begin, end);
-	// sequencer_checkiterators(&workspace_player(self->workspace).sequencer,
-	//	node);
+	/*
+	** sequencer_checkiterators(&workspace_player(self->workspace).sequencer,
+	**  	node);
+	*/
 	while (p != NULL) {
 		psy_audio_PatternEntry* pasteentry;
 		psy_audio_PatternNode* node;
@@ -1097,9 +1112,11 @@ void psy_audio_pattern_swingfill(psy_audio_Pattern* self,
 	psy_audio_PatternNode* node;
 	uintptr_t l;
 	float var = (variance / 100.0f);
-	// time to do our fill
-	// first some math
-	// our range has to go from spd+var to spd-var and back in width+1 lines
+	/*
+	** time to do our fill
+	** first some math
+	** our range has to go from spd+var to spd-var and back in width+1 lines
+	*/
 	float step = twopi / (width);
 	float index = phase * twopi / 360;
 	float dcoffs = 0;
@@ -1116,8 +1133,10 @@ void psy_audio_pattern_swingfill(psy_audio_Pattern* self,
 		begin.line = 0;
 		end.line = (int)(psy_audio_pattern_length(self) / bpl);		
 	}	
-	// remember we are at each speed for the length of time it takes to do one tick
-	// this approximately calculates the offset	
+	/*
+	** remember we are at each speed for the length of time it takes to do one tick
+	** this approximately calculates the offset	
+	*/
 	if (offset) {
 		float swing = 0;
 		for (l = 0; l < (uintptr_t)width; l++) {
@@ -1127,14 +1146,16 @@ void psy_audio_pattern_swingfill(psy_audio_Pattern* self,
 		}
 		dcoffs = ((swing - width) * tempo) / width;
 	}
-	// now fill the pattern
+	/* now fill the pattern */
 	for (line = begin.line; line < end.line; ++line) {
 		psy_dsp_big_beat_t offset;
 		int val;
 		
 		offset = line * bpl;
-		// -0x20; // ***** proposed change to ffxx command to allow
-		// moreuseable range since the tempo bar only uses this range anyway...
+		/*
+		** -0x20; // ***** proposed change to ffxx command to allow
+		**  moreuseable range since the tempo bar only uses this range anyway...
+		*/
 		val = (int)((((sinf(index) * var * tempo) + tempo) + dcoffs) + 0.5f);
 		if (val < 1) {
 			val = 1;
@@ -1172,4 +1193,134 @@ void psy_audio_pattern_setdefaultlines(uintptr_t numlines)
 uintptr_t psy_audio_pattern_defaultlines(void)
 {
 	return defaultlines;
+}
+
+psy_audio_Loop psy_audio_pattern_loop_at(psy_audio_Pattern* self, uintptr_t index,
+	uintptr_t track)
+{
+	psy_audio_Loop rv;
+	psy_audio_PatternNode* curr;	
+	uintptr_t c;
+
+	curr = self->events;	
+	
+	c = 0;
+	rv.start = rv.end = NULL;
+	while (curr != NULL) {
+		psy_audio_PatternEntry* entry;
+		psy_audio_PatternEvent e;
+
+		entry = (psy_audio_PatternEntry*)curr->entry;
+		if (entry->track == track) {
+			e = *psy_audio_patternentry_front(entry);
+			if (e.cmd == 0xFE && ((e.parameter & 0xFF) == 0xB0)) {
+				if (c == index) {
+					rv.start = curr;				
+					rv.end = psy_audio_patternnode_next_track(curr, track);					
+					break;
+				}
+				++c;
+			}
+		}
+		curr = curr->next;
+	}
+	return rv;
+}
+
+uintptr_t psy_audio_pattern_loop_index(psy_audio_Pattern* self,
+	psy_audio_PatternNode* node, uintptr_t track)
+{
+	uintptr_t rv;
+	psy_audio_PatternNode* curr;	
+	uintptr_t c;
+
+	curr = self->events;	
+	c = 0;
+	rv = psy_INDEX_INVALID;	
+	while (curr != NULL) {
+		psy_audio_PatternEntry* entry;
+		psy_audio_PatternEvent e;
+
+		entry = (psy_audio_PatternEntry*)curr->entry;
+		if (entry->track == track) {			
+			e = *psy_audio_patternentry_front(entry);
+			if (e.cmd == 0xFE && (e.parameter & 0xFF) == 0xB0) {
+				if (curr == node) {
+					rv = c;				
+					break;
+				}
+				++c;			
+			} else if (e.cmd == 0xFE && (e.parameter & 0xF0) == 0xB0) {
+				if (curr == node) {
+					if (c > 0) {
+						rv = c - 1;
+						break;
+					}
+				}
+			}
+		}
+		curr = curr->next;
+	}
+	return rv;
+}
+
+psy_audio_PatternNode* psy_audio_pattern_timesig_at(psy_audio_Pattern* self, uintptr_t index,
+	uintptr_t track)
+{
+	psy_audio_PatternNode* rv;
+	psy_audio_PatternNode* curr;	
+	uintptr_t c;
+
+	curr = self->events;	
+	
+	c = 0;
+	rv = NULL;
+	while (curr != NULL) {
+		psy_audio_PatternEntry* entry;
+		psy_audio_PatternEvent e;
+
+		entry = (psy_audio_PatternEntry*)curr->entry;
+		if (entry->track == track) {
+			e = *psy_audio_patternentry_front(entry);
+			if (e.note == psy_audio_NOTECOMMANDS_TIMESIG) {
+				if (c == index) {
+					rv = curr;									
+					break;
+				}
+				++c;
+			}
+		}
+		curr = curr->next;
+	}
+	return rv;
+}
+
+uintptr_t psy_audio_pattern_timesig_index(psy_audio_Pattern* self,
+	psy_audio_PatternNode* node, uintptr_t track)
+{
+	uintptr_t rv;
+	psy_audio_PatternNode* curr;	
+	uintptr_t c;
+
+	curr = self->events;	
+	c = 0;
+	rv = psy_INDEX_INVALID;	
+	while (curr != NULL) {
+		psy_audio_PatternEntry* entry;
+		psy_audio_PatternEvent e;
+
+		entry = (psy_audio_PatternEntry*)curr->entry;
+		if (entry->track == track) {					
+			e = *psy_audio_patternentry_front(entry);
+			if (e.note == psy_audio_NOTECOMMANDS_TIMESIG) {
+				if (curr == node) {
+					rv = c;				
+					break;
+				}
+				++c;
+			}
+		}
+		curr = curr->next;
+	}
+	return rv;
 }

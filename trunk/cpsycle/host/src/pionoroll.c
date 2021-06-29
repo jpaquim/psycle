@@ -780,8 +780,8 @@ void pianogrid_onmousemove(Pianogrid* self, psy_ui_MouseEvent* ev)
 
 				preventry = psy_audio_patternnode_entry(prev);
 				if (preventry->track != self->gridstate->cursor.track) {
-					prev = psy_audio_pattern_prev_track(pianogridstate_pattern(self->gridstate),
-						prev, self->gridstate->cursor.track);
+					prev = psy_audio_patternnode_prev_track(prev,
+						self->gridstate->cursor.track);
 				}
 				if (psy_audio_patternentry_front(preventry)->note == psy_audio_NOTECOMMANDS_RELEASE) {
 					prev = NULL;
@@ -909,8 +909,7 @@ void pianogrid_onmouseup(Pianogrid* self, psy_ui_MouseEvent* ev)
 
 					preventry = psy_audio_patternnode_entry(prev);
 					if (preventry->track != cursor.track) {
-						prev = psy_audio_pattern_prev_track(pianogridstate_pattern(self->gridstate),
-							prev, cursor.track);
+						prev = psy_audio_patternnode_prev_track(prev, cursor.track);
 					}
 				}
 				node = prev;
@@ -927,8 +926,7 @@ void pianogrid_onmouseup(Pianogrid* self, psy_ui_MouseEvent* ev)
 					return;
 				}
 				if (patternentry->offset == cursor.offset) {
-					next = psy_audio_pattern_next_track(pianogridstate_pattern(self->gridstate),
-						node, cursor.track);
+					next = psy_audio_patternnode_next_track(node, cursor.track);
 					if (self->hoverpatternentry == psy_audio_patternnode_entry(node)) {
 						self->hoverpatternentry = NULL;
 					}
@@ -960,8 +958,7 @@ void pianogrid_onmouseup(Pianogrid* self, psy_ui_MouseEvent* ev)
 					} else {
 						psy_audio_PatternEvent release;
 
-						next = psy_audio_pattern_next_track(pianogridstate_pattern(self->gridstate), node,
-							cursor.track);
+						next = psy_audio_patternnode_next_track(node, cursor.track);
 						if (next) {
 							psy_audio_PatternEntry* nextentry;							
 
@@ -1024,8 +1021,7 @@ bool pianogrid_keyhittest(Pianogrid* self, psy_audio_PatternNode* node,
 		** (note: noterelease event has no key but is drawn next to
 		** the prev note or if there is none with middlec as key)
 		*/
-		prevtrack = psy_audio_pattern_prev_track(pianogridstate_pattern(
-			self->gridstate), node, track);
+		prevtrack = psy_audio_patternnode_prev_track(node, track);
 		if (prevtrack) {
 			/* compare cursor key with the previous note key */
 			if (cursorkey == psy_audio_patternentry_front(

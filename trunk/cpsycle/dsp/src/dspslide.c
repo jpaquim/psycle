@@ -1,13 +1,19 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
+
+#include "../../detail/prefix.h"
+
 
 #include "dspslide.h"
-// platform
+/* platform */
 #include "../../detail/portable.h"
 
 static uintptr_t m_length = 0;
 static float l_table_[2048];
 
+/* implementation */
 void psy_dsp_slider_init(psy_dsp_Slider* self)
 {
 	self->m_source = 0.0f;

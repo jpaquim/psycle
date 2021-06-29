@@ -1,9 +1,16 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "machineviewconfig.h"
+/* host */
+#include "styles.h"
+/* ui */
+#include <uiapp.h>
 
 static void machineviewconfig_makeview(MachineViewConfig*,
 	psy_Property* parent);
@@ -121,32 +128,32 @@ void machineviewconfig_maketheme(MachineViewConfig* self, psy_Property* parent)
 		"settingsview.mv.theme.effect-font-flags");
 	psy_property_settext(
 		psy_property_sethint(psy_property_append_int(self->theme,
-			"mv_colour", 0x00232323, 0, 0), //
+			"mv_colour", 0x00232323, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
 		"settingsview.mv.theme.background");
 	psy_property_settext(
 		psy_property_sethint(psy_property_append_int(self->theme,
-			"mv_wirecolour", 0x005F5F5F, 0, 0),//
+			"mv_wirecolour", 0x005F5F5F, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
 		"settingsview.mv.theme.wirecolour");
 	psy_property_settext(
 		psy_property_sethint(psy_property_append_int(self->theme,
-			"mv_wirecolour2", 0x005F5F5F, 0, 0),//
+			"mv_wirecolour2", 0x005F5F5F, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
 		"settingsview.mv.theme.wirecolour2");
 	psy_property_settext(
 		psy_property_sethint(psy_property_append_int(self->theme,
-			"mv_polycolour", 0x00B1C8B0, 0, 0),//
+			"mv_polycolour", 0x00B1C8B0, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
 		"settingsview.mv.theme.polygons");
 	psy_property_settext(
 		psy_property_sethint(psy_property_append_int(self->theme,
-			"mv_generator_fontcolour", 0x00B1C8B0, 0, 0),//
+			"mv_generator_fontcolour", 0x00B1C8B0, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
 		"settingsview.mv.theme.generators-font");
 	psy_property_settext(
 		psy_property_sethint(psy_property_append_int(self->theme,
-			"mv_effect_fontcolour", 0x00D1C5B6, 0, 0),//
+			"mv_effect_fontcolour", 0x00D1C5B6, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
 		"settingsview.mv.theme.effects-font");
 	psy_property_settext(
@@ -166,10 +173,10 @@ void machineviewconfig_maketheme(MachineViewConfig* self, psy_Property* parent)
 		"settingsview.mv.theme.machine-background");
 	psy_property_settext(
 		psy_property_sethint(psy_property_append_int(self->theme,
-			"mv_triangle_size", 0x0A, 0, 0),//
+			"mv_triangle_size", 0x0A, 0, 0),
 			PSY_PROPERTY_HINT_EDIT),
 		"settingsview.mv.theme.polygon-size");
-	psy_property_append_str(self->theme, "machine_skin", "");//	
+	psy_property_append_str(self->theme, "machine_skin", "");
 }
 
 void machineviewconfig_resettheme(MachineViewConfig* self)
@@ -189,7 +196,32 @@ void machineviewconfig_settheme(MachineViewConfig* self, psy_Property* skin)
 
 	if (self->theme) {
 		psy_property_sync(self->theme, skin);
+		/* machineviewconfig_updatestyles(self, &psy_ui_appdefaults()->styles); */
 		psy_signal_emit(&self->signal_themechanged, self, 1, self->theme);
+	}
+}
+
+void machineviewconfig_updatestyles(MachineViewConfig* self, psy_ui_Styles* styles)
+{
+	if (self->theme) {
+		psy_ui_Style* style;
+		psy_ui_Colour bgcolour;
+		
+		/* MachineView */
+		bgcolour = psy_ui_colour_make(psy_property_at_colour(self->theme, "mv_colour",
+			0x00232323));
+		style = psy_ui_styles_at(styles, STYLE_MACHINEVIEW);
+		if (style) {						
+			psy_ui_style_setbackgroundcolour(style, bgcolour);
+		}
+		style = psy_ui_styles_at(styles, STYLE_MACHINEVIEW_WIRES);
+		if (style) {						
+			psy_ui_style_setbackgroundcolour(style, bgcolour);
+		}
+		style = psy_ui_styles_at(styles, STYLE_MACHINEVIEW_STACK);
+		if (style) {						
+			psy_ui_style_setbackgroundcolour(style, bgcolour);
+		}
 	}
 }
 
@@ -243,8 +275,7 @@ bool machineviewconfig_stackview_drawsmalleffects(const MachineViewConfig* self)
 	return psy_property_at_bool(self->stackview, "drawsmalleffects", FALSE);
 }
 
-
-// events
+/* events */
 bool machineviewconfig_onchanged(MachineViewConfig* self, psy_Property*
 	property)
 {

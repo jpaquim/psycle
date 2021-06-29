@@ -1,15 +1,18 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "machineparamconfig.h"
-// host
+/* host */
 #include "paramview.h"
 #include "resources/resource.h"
-// audio
+/* audio */
 #include <plugin_interface.h>
-// platform
+/* platform */
 #include "../../detail/portable.h"
 
 static bool paramskin_initialized = FALSE;
@@ -130,7 +133,7 @@ void machineparamconfig_resettheme(MachineParamConfig* self)
 	machineparamconfig_maketheme(self, self->paramview);
 	if (paramskin_initialized) {
 		machineparamconfig_releaseskin();
-		// forces a reload of the dialbitmap
+		/* forces a reload of the dialbitmap */
 		machineparamconfig_skin(self);
 	}
 }
@@ -143,7 +146,7 @@ void machineparamconfig_settheme(MachineParamConfig* self, psy_Property* theme)
 		psy_property_sync(self->theme, theme);
 		if (paramskin_initialized) {
 			machineparamconfig_releaseskin();
-			// forces a reload of the dialbitmap
+			/* forces a reload of the dialbitmap */
 			machineparamconfig_skin(self);
 		}
 	}
@@ -177,7 +180,7 @@ void machineparamconfig_setdialbpm(MachineParamConfig* self,
 	
 	psy_property_set_str(self->theme, "machinedialbmp", filename);
 	machineparamconfig_releaseskin();
-	// forces a reload of the dialbitmap
+	/* forces a reload of the dialbitmap */
 	machineparamconfig_skin(self);
 }
 
@@ -193,7 +196,7 @@ psy_ui_FontInfo machineparamconfig_fontinfo(const MachineParamConfig* self)
 	return rv;
 }
 
-// events
+/* events */
 bool machineparamconfig_onchanged(MachineParamConfig* self, psy_Property*
 	property)
 {
@@ -208,7 +211,7 @@ bool machineparamconfig_onthemechanged(MachineParamConfig* self, psy_Property* p
 	assert(self);
 
 	machineparamconfig_releaseskin();
-	// forces a reload of the dialbitmap
+	/* forces a reload of the dialbitmap */
 	machineparamconfig_skin(self);
 	psy_signal_emit(&self->signal_themechanged, self, 1, self->theme);
 	return TRUE;
@@ -253,7 +256,7 @@ ParamSkin* machineparamconfig_skin(MachineParamConfig* self)
 		paramskin.fonttopcolour = psy_ui_colour_make(psy_property_at_colour(theme, "machineguifonttopcolour", 0x00CDCDCD));
 		paramskin.bottomcolour = psy_ui_colour_make(psy_property_at_colour(theme, "machineguibottomcolour", 0x00444444));
 		paramskin.fontbottomcolour = psy_ui_colour_make(psy_property_at_colour(theme, "machineguifontbottomcolour", 0x00E7BD18));
-		//highlighted param colours
+		/* highlighted param colours */
 		paramskin.htopcolour = psy_ui_colour_make(psy_property_at_colour(theme, "machineguihtopcolour", 0x00555555));
 		paramskin.fonthtopcolour = psy_ui_colour_make(psy_property_at_colour(theme, "machineguihfonttopcolour", 0x00CDCDCD));
 		paramskin.hbottomcolour = psy_ui_colour_make(psy_property_at_colour(theme, "machineguihbottomcolour", 0x00292929));

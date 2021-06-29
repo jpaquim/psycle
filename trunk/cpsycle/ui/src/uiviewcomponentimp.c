@@ -465,7 +465,7 @@ void view_dev_setposition(psy_ui_ViewComponentImp* self, psy_ui_Point topleft,
 	const psy_ui_TextMetric* tm;
 	psy_ui_Size parentsize;
 	psy_ui_Size* pparentsize;
-		
+					
 	tm = view_dev_textmetric(self);
 	if (psy_ui_size_has_percent(&size)) {
 		if (psy_ui_component_parent_const(self->component)) {
@@ -477,14 +477,14 @@ void view_dev_setposition(psy_ui_ViewComponentImp* self, psy_ui_Point topleft,
 		pparentsize = &parentsize;
 	} else {
 		pparentsize = NULL;		
-	}	
+	}		
 	self->position = psy_ui_realrectangle_make(
 		psy_ui_realpoint_make(
 			psy_ui_value_px(&topleft.x, tm, pparentsize),
 			psy_ui_value_px(&topleft.y, tm, pparentsize)),
 		psy_ui_realsize_make(
 			psy_ui_value_px(&size.width, tm, pparentsize),
-			psy_ui_value_px(&size.height, tm, pparentsize)));
+			psy_ui_value_px(&size.height, tm, pparentsize)));	
 }
 
 psy_ui_Size view_dev_size(const psy_ui_ViewComponentImp* self)

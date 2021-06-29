@@ -1,10 +1,13 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "audioconfig.h"
-// platform
+/* platform */
 #include "../../detail/portable.h"
 
 static void audioconfig_makesection(AudioConfig* self, psy_Property* parent);
@@ -157,10 +160,12 @@ void audioconfig_makedriverlist(AudioConfig* self)
 #endif		
 	psy_property_append_str(self->drivers, "silent", "silentdriver");
 #if defined(DIVERSALIS__OS__MICROSOFT)
-	// output target for the audio driver dlls is {solutiondir}/Debug or 
-	// {solutiondir}/Release
-	// if they aren't found, check if direcories fit and if
-	// dlls are compiled
+	/*
+	** output target for the audio driver dlls is {solutiondir}/Debug or 
+	** {solutiondir}/Release
+	** if they aren't found, check if direcories fit and if
+	** dlls are compiled
+	*/
 	psy_property_append_str(self->drivers, "mme", ".\\mme.dll");
 	psy_property_append_str(self->drivers, "directx", ".\\directx.dll");
 	psy_property_append_str(self->drivers, "wasapi", ".\\wasapi.dll");
@@ -320,7 +325,7 @@ bool audioconfig_onpropertychanged(AudioConfig* self, psy_Property* property,
 	}
 	return FALSE;
 }
-// events
+/* events */
 bool audioconfig_onchanged(AudioConfig* self, psy_Property*
 	property)
 {

@@ -5,6 +5,7 @@
 
 #include "../../detail/prefix.h"
 
+
 #include "help.h"
 /* file */
 #include <dir.h>
@@ -23,8 +24,7 @@ static void help_ontabbarchanged(Help*, psy_ui_Component* sender,
 	uintptr_t tabindex);
 static void help_loadpage(Help*, uintptr_t index);
 static void help_onalign(Help*, psy_ui_Component* sender);
-	
-// implementation
+ /* implementation  */
 void help_init(Help* self, psy_ui_Component* parent, Workspace* workspace)
 {	
 	psy_ui_Margin margin;

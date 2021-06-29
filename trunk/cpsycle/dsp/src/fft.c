@@ -30,18 +30,22 @@
 	calculate a real FFT and a real power spectrum.
 
 **********************************************************************/
+
+#include "../../detail/prefix.h"
+
+
 #include "fft.h"
+/* local */
 #include "operations.h"
 #include "quantize.h"
 #include "convert.h"
-
-#include <stdlib.h>
+/* std */
 #include <stdio.h>
 
 #include "../../detail/portable.h"
 
 int **gFFTBitTable = NULL;
-//const int MaxFastBits = 16;
+/* const int MaxFastBits = 16; */
 const int MaxFastBits = 12;
 
 /* Declare Static functions */
@@ -107,9 +111,10 @@ void FFT(int NumSamples,
 	double tr, ti;                /* temp real, temp imaginary */
 
 	if (!IsPowerOfTwo(NumSamples)) {
-		// std::ostringstream s;
-		// s << "FFT called with size "<< NumSamples;
-		// throw universalis::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
+		/* std::ostringstream s;
+		s << "FFT called with size "<< NumSamples;
+		throw universalis::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
+		*/
 	}
 
 	NumBits = NumberOfBitsNeeded(NumSamples);
@@ -119,7 +124,6 @@ void FFT(int NumSamples,
 
 	if (InverseTransform)
 		angle_numerator = -angle_numerator;
-
 
 	/*
 	**   Do simultaneous data copy and bit-reversal ordering into outputs...
@@ -351,8 +355,8 @@ void PowerSpectrum(int NumSamples, float* In, float* Out)
 }
 
 /*
-	* Windowing Functions
-	*/
+** Windowing Functions
+*/
 
 int NumWindowFuncs()
 {
@@ -379,7 +383,7 @@ void WindowFunc(int whichFunction, int NumSamples, float *in)
 	int i;
 
 	if (whichFunction == 1) {
-		// Bartlett (triangular) window
+		/* Bartlett (triangular) window */
 		for (i = 0; i < NumSamples / 2; i++) {
 			in[i] *= (i / (float) (NumSamples / 2));
 			in[i + (NumSamples / 2)] *=
@@ -388,21 +392,21 @@ void WindowFunc(int whichFunction, int NumSamples, float *in)
 	}
 
 	if (whichFunction == 2) {
-		// Hamming
+		/* Hamming */
 		for (i = 0; i < NumSamples; i++)
 			in[i] *= (float)(0.54f - 0.46 * cos(2 * psy_dsp_PI * i / (NumSamples - 1)));
 	}
 
 	if (whichFunction == 3) {
-		// Hanning
+		/* Hanning */
 		for (i = 0; i < NumSamples; i++)
 			in[i] *= (float)(0.50 - 0.50 * cos(2 * psy_dsp_PI * i / (NumSamples - 1)));
 	}
 }
 
-//
-///////////////////////////////////////////////////
-//
+/*
+***************************************************
+*/
 	void fftclass_init(FFTClass* self)
 	{
 		self->bit_reverse = 0;
@@ -529,9 +533,10 @@ void WindowFunc(int whichFunction, int NumSamples, float *in)
 	void fftclass_setup(FFTClass* self, FftWindowType type, size_t sizeBuf, size_t sizeBands)
 	{
 		if (!IsPowerOfTwo(sizeBuf)) {
-			// std::ostringstream s;
-			// s << "FFT called with size "<< sizeBuf;
-			// throw universalis::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
+			/* std::ostringstream s;
+			s << "FFT called with size "<< sizeBuf;
+			throw universalis::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
+			*/
 		}
 		self->bands = sizeBands;
 		if (self->window == NULL || sizeBuf != self->bufferSize) {
@@ -578,7 +583,7 @@ void WindowFunc(int whichFunction, int NumSamples, float *in)
 			}
 		}
 		else if (self->outputSize/self->bands <= 4 ) {
-			//exponential.
+			/* exponential. */
 			const float factor = (float)self->outputSize/(self->bands*self->bands);
 			size_t n;
 
@@ -587,10 +592,12 @@ void WindowFunc(int whichFunction, int NumSamples, float *in)
 			}
 		}
 		else {
-			//constant note scale.
-			//factor -> set range from 2^0 to 2^8.
-			//factor2 -> scale the result to the FFT output size
-			//Note: x^(y*z) = (x^z)^y
+			/*
+			** constant note scale.
+			** factor -> set range from 2^0 to 2^8.
+			** factor2 -> scale the result to the FFT output size
+			** Note: x^(y*z) = (x^z)^y
+			*/
 			const float factor = 8.f/(float)self->bands;
 			const float factor2 = (float)self->outputSize/256.f;
 			size_t n;
@@ -658,7 +665,7 @@ void WindowFunc(int whichFunction, int NumSamples, float *in)
 		{
 			float afloat = self->fftLog[h];
 			/*if (afloat < 1.f) {
-				//This was intended as a DC bar, but it isn't only DC.
+				// This was intended as a DC bar, but it isn't only DC.
 				j = calculatedfftIn[a];
 			}
 			else*/ if (afloat +1.0f > self->fftLog[h+1]) {
@@ -675,7 +682,7 @@ void WindowFunc(int whichFunction, int NumSamples, float *in)
 					j = psy_max(j,calculatedfftIn[a]);
 					a++;
 				}
-			}//+0.0000000001f is -100dB of power. Used to prevent evaluating powerdB(0.0)
+			} /* +0.0000000001f is -100dB of power. Used to prevent evaluating powerdB(0.0) */
 			banddBOut[h] = (float)(10 * log10(j + 0.0000000001f) + dbinvSamples);
 		}
 	}

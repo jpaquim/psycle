@@ -179,7 +179,7 @@ void playbar_startplay(PlayBar* self)
 	psy_ui_button_highlight(&self->play);
 	sequence = self->player->sequencer.sequence;	
 	entry = psy_audio_sequence_entry(sequence,
-		self->workspace->sequenceselection.editposition);
+		psy_audio_sequenceselection_first(&self->workspace->sequenceselection));
 	if (entry) {
 		psy_audio_exclusivelock_enter();		
 		psy_audio_player_stop(self->player);

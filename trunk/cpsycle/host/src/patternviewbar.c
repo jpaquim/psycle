@@ -24,8 +24,8 @@ static void patternviewbar_ondisplaysinglepattern(PatternViewBar*,
 	psy_ui_CheckBox* sender);
 static void patternviewbar_onupdatestatus(PatternViewBar*,
 	Workspace* sender);
-static void patternviewbar_onsequenceselectionchanged(PatternViewBar*,
-	psy_audio_SequenceSelection* sender);
+static void patternviewbar_onsequenceselect(PatternViewBar*,
+	psy_audio_SequenceSelection* sender, psy_audio_OrderIndex*);
 static void patternviewbar_onsongchanged(PatternViewBar*, Workspace* sender,
 	int flag, psy_audio_Song*);
 static void patternviewbar_updatestatus(PatternViewBar*);
@@ -72,8 +72,8 @@ void patternviewbar_init(PatternViewBar* self, psy_ui_Component* parent,
 		patternviewbar_onconfigure);
 	psy_signal_connect(&workspace->signal_patterncursorchanged, self,
 		patternviewbar_onupdatestatus);
-	psy_signal_connect(&workspace->sequenceselection.signal_changed,
-		self, patternviewbar_onsequenceselectionchanged);
+	psy_signal_connect(&workspace->sequenceselection.signal_select,
+		self, patternviewbar_onsequenceselect);
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		patternviewbar_onsongchanged);
 	if (patternviewconfig_ismovecursorwhenpaste(psycleconfig_patview(
@@ -116,8 +116,8 @@ void patternviewbar_onupdatestatus(PatternViewBar* self, Workspace* sender)
 	patternviewbar_updatestatus(self);
 }
 
-void patternviewbar_onsequenceselectionchanged(PatternViewBar* self,
-	psy_audio_SequenceSelection* sender)
+void patternviewbar_onsequenceselect(PatternViewBar* self,
+	psy_audio_SequenceSelection* sender, psy_audio_OrderIndex* index)
 {
 	patternviewbar_updatestatus(self);
 }
@@ -134,7 +134,7 @@ void patternviewbar_updatestatus(PatternViewBar* self)
 	if (self->workspace->song) {			
 		entry = psy_audio_sequence_entry(
 			&self->workspace->song->sequence,
-			self->workspace->sequenceselection.editposition);
+			psy_audio_sequenceselection_first(&self->workspace->sequenceselection));
 		if (entry && entry->type == psy_audio_SEQUENCEENTRY_PATTERN) {
 			patternid = ((psy_audio_SequencePatternEntry*)entry)->patternslot;
 		}

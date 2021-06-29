@@ -1,17 +1,20 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "instrumentfilterview.h"
-// dsp
+/* dsp */
 #include <valuemapper.h>
-// std
+/* std */
 #include <math.h>
-// platform
+/* platform */
 #include "../../detail/portable.h"
 
-// prototypes
+/* prototypes */
 static void instrumentfilterview_ondestroy(InstrumentFilterView*,
 	psy_ui_Component* sender);
 static void instrumentfilterview_updateslider(InstrumentFilterView*);
@@ -29,7 +32,7 @@ static void instrumentfilterview_ontweaked(InstrumentFilterView*,
 static void instrumentfilterview_onenvelopeviewtweaked(InstrumentFilterView*,
 	psy_ui_Component* sender, int pointindex);
 
-// implementation
+/* implementation */
 void instrumentfilterview_init(InstrumentFilterView* self,
 	psy_ui_Component* parent, psy_audio_Instruments* instruments,
 	Workspace* workspace)

@@ -5,10 +5,11 @@
 
 #include "../../detail/prefix.h"
 
+#define HASHSIZE 401
 
 #include "translator.h"
 /* local */
-#include "propertiesio.h"
+#include "inireader.h"
 /* platform */
 #include "../../detail/portable.h"
 /* std */
@@ -17,35 +18,38 @@
 static bool translator_hastranslation(const char* key,
 	const char* translation);
 static const char* translator_remove_section(psy_Translator*, const char* key);
+static void psy_translator_build(psy_Translator*, psy_Property* lang);
+static int psy_translator_enum(psy_Translator*, psy_Property*,
+	uintptr_t level);
+static void psy_translator_onread(psy_Translator*, psy_IniReader* sender,
+	const char* key, const char* value);
+static void psy_translator_ontest(psy_Translator*, psy_IniReader* sender,
+	const char* key, const char* value);
 
 void psy_translator_init(psy_Translator* self)
 {
 	assert(self);
-
-	self->dictionary = NULL;
-	self->defaultdictionary = NULL;
-	psy_signal_init(&self->signal_languagechanged);	
+	
+	psy_table_init_keysize(&self->container, HASHSIZE);
+	psy_signal_init(&self->signal_languagechanged);
+	self->testid = NULL;
 }
 
 void psy_translator_dispose(psy_Translator* self)
 {
 	assert(self);
 
-	psy_property_deallocate(self->dictionary);
-	psy_property_deallocate (self->defaultdictionary);
-	psy_signal_dispose(&self->signal_languagechanged);
+	psy_table_disposeall(&self->container, NULL);
+	free(self->testid);
+	self->testid = NULL;
 }
 
 void psy_translator_setdefault(psy_Translator* self, const psy_Property* lang)
 {
 	assert(self);
 	
-	psy_translator_reset(self);
-	psy_property_deallocate(self->defaultdictionary);
-	self->defaultdictionary = NULL;
-	if (lang) {
-		self->defaultdictionary = psy_property_clone(lang);
-		self->dictionary = psy_property_clone(lang);
+	if (lang) {		
+		psy_translator_build(self, (psy_Property*)lang);
 	}	
 }
 
@@ -53,69 +57,64 @@ void psy_translator_reset(psy_Translator* self)
 {
 	assert(self);
 	
-	psy_property_deallocate(self->dictionary);
-	self->dictionary = NULL;	
+	psy_table_disposeall(&self->container, NULL);
+	psy_table_init_keysize(&self->container, HASHSIZE);
 }
 
 bool psy_translator_load(psy_Translator* self, const char* path)
 {	
+	int success;
+	psy_Path dicpath;	
+	psy_IniReader inireader;
+
 	assert(self);
 
-	if (self->dictionary) {
-		int success;
-		psy_Path dicpath;
-
-		assert(self);
-
-		psy_path_init(&dicpath, path);
-		success = propertiesio_load(self->dictionary, &dicpath, FALSE);
-		psy_path_dispose(&dicpath);
-		psy_signal_emit(&self->signal_languagechanged, self, 0);
-		return success;
-	}
-	return FALSE;
+	psy_path_init(&dicpath, path);	
+	psy_inireader_init(&inireader);
+	psy_signal_connect(&inireader.signal_read, self, 
+		psy_translator_onread);
+	success = inireader_load(&inireader, &dicpath);
+	psy_inireader_dispose(&inireader);
+	psy_path_dispose(&dicpath);
+	psy_signal_emit(&self->signal_languagechanged, self, 0);
+	return success;	
 }
 
 bool psy_translator_test(const psy_Translator* self, const char* path, char* id)
-{
-	psy_Property* lang;
-	psy_Path dicpath;
+{	
+	psy_Path dicpath;	
+	psy_IniReader inireader;
 
 	assert(self);
 
-	lang = psy_property_allocinit_key(NULL);	
-
-	assert(self);
-
-	psy_path_init(&dicpath, path);
-	if (propertiesio_load(lang, &dicpath, 1) == PSY_OK) {
-		psy_Property* p;
-		
-		p = psy_property_at(lang, "lang", PSY_PROPERTY_TYPE_NONE);
-		if (p) {
-			psy_snprintf(id, 256, "%s", psy_property_item_str(p));
-			psy_property_deallocate(lang);
-			psy_path_dispose(&dicpath);
-			return TRUE;
+	psy_path_init(&dicpath, path);	
+	free(((psy_Translator*)self)->testid);
+	((psy_Translator*)self)->testid = NULL;
+	psy_inireader_init(&inireader);
+	psy_signal_connect(&inireader.signal_read, (psy_Translator*)self, 
+		psy_translator_ontest);
+	id[0] = '\0';
+	if (inireader_load(&inireader, &dicpath) == PSY_OK) {
+		if (self->testid) {
+			psy_snprintf(id, 256, "%s", self->testid);
 		}
 	}
+	psy_inireader_dispose(&inireader);
 	psy_path_dispose(&dicpath);
-	psy_property_deallocate(lang);
-	return FALSE;
+	return psy_strlen(id) != 0;	
 }
 
 const char* psy_translator_translate(psy_Translator* self, const char* key)
 {		
 	assert(self);
 
-	if (self->dictionary && key) {
+	if (psy_strlen(key) > 0) {
 		const char* rv;
 
-		rv = psy_property_at_str(self->dictionary, key, key);
-		if (!translator_hastranslation(rv, key)) {
-			return translator_remove_section(self, rv);
+		rv = psy_table_at_strhash(&self->container, key);
+		if (rv) {
+			return rv;
 		}
-		return rv;
 	}
 	return key;
 }
@@ -125,33 +124,64 @@ bool translator_hastranslation(const char* key, const char* translation)
 	return key != translation;	
 }
 
-const char* translator_remove_section(psy_Translator* self, const char* key)
-{
+const char* psy_translator_langid(const psy_Translator* self)
+{	
 	const char* rv;
 
-	assert(self);
-
-	if (key) {
-		rv = strrchr(key, '.');
-		rv = (rv != NULL)
-			? rv + 1
-			: key;
-	} else {
-		rv = NULL;
-	}
-	if (rv == NULL) {
-		rv = "";
-	}
-	return rv;
-}
-
-const char* psy_translator_langid(const psy_Translator* self)
-{
-	psy_Property* p;
-
-	p = psy_property_at(self->dictionary, "lang", PSY_PROPERTY_TYPE_NONE);
-	if (p) {
-		return psy_property_item_str(p);
+	rv = psy_table_at_strhash(&((psy_Translator*)self)->container, "lang");
+	if (rv) {
+		return rv;
 	}
 	return "en";
+}
+
+void psy_translator_build(psy_Translator* self, psy_Property* lang)
+{
+	psy_translator_reset(self);	
+	if (lang) {
+		psy_property_enumerate(lang, self,
+			(psy_PropertyCallback)
+			psy_translator_enum);
+	}
+}
+
+int psy_translator_enum(psy_Translator* self, psy_Property* property, uintptr_t level)
+{
+	if (psy_property_type(property) == PSY_PROPERTY_TYPE_STRING) {
+		char_dyn_t* key;
+
+		key = psy_property_fullkey(property);
+		psy_table_insert_strhash(&self->container, key,
+			psy_strdup(psy_property_item_str(property)));
+		free(key);
+	}
+	return 1;
+}
+
+void psy_translator_onread(psy_Translator* self, psy_IniReader* sender,
+	const char* key, const char* value)
+{
+	char* fullkey;
+	uintptr_t len;
+
+	len = psy_strlen(sender->section) + psy_strlen(key) + 1;
+	fullkey = (char*)malloc(len + 1);
+	if (sender->section) {
+		psy_snprintf(fullkey, len + 1, "%s.%s", sender->section, key);
+	} else {
+		psy_snprintf(fullkey, len + 1, "%s", key);
+	}
+	if (psy_table_at_strhash(&self->container, fullkey)) {
+		psy_table_insert_strhash(&self->container, fullkey, psy_strdup(value));
+	}
+	free(fullkey);
+	fullkey = NULL;
+}
+
+void psy_translator_ontest(psy_Translator* self, psy_IniReader* sender,
+	const char* key, const char* value)
+{
+	if (psy_strlen(sender->section) == 0 && strcmp(key, "lang") == 0) {
+		psy_strreset(&self->testid, value);
+	}
 }

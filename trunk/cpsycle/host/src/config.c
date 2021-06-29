@@ -1,17 +1,21 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
+
+#include "../../detail/prefix.h"
+
 
 #include "config.h"
-#include "skinio.h"
-
-// host
+/* host */
 #include "defaultlang.h"
 #include "skinio.h"
-// ui
-#include <uicomponent.h> // Translator
-// file
+/* ui */
+#include <uicomponent.h> /* Translator */
+#include <uiapp.h> /* Styles */
+/* file */
 #include <dir.h>
-// platform
+/* platform */
 #include "../../detail/portable.h"
 #include "../../detail/os.h"
 
@@ -19,7 +23,7 @@
 	#define _MAX_PATH 4096
 #endif
 
-// prototypes
+/* prototypes */
 static void psycleconfig_definelanguage(PsycleConfig*);
 static void psycleconfig_initsections(PsycleConfig*, psy_audio_Player*,
 	psy_audio_MachineFactory*);
@@ -27,7 +31,7 @@ static void psycleconfig_makeglobal(PsycleConfig*);
 static void psycleconfig_makevisual(PsycleConfig*);
 static void psycleconfig_makemidiconfiguration(PsycleConfig*);
 static void psycleconfig_makemidicontrollers(PsycleConfig*);
-// implementation
+/* implementation */
 void psycleconfig_init(PsycleConfig* self, psy_audio_Player* player,
 	psy_audio_MachineFactory* machinefactory)
 {	
@@ -67,7 +71,7 @@ void psycleconfig_definelanguage(PsycleConfig* self)
 	psy_property_dispose(&defaultlang);
 }
 
-// creation
+/* creation */
 void psycleconfig_initsections(PsycleConfig* self, psy_audio_Player* player,
 	psy_audio_MachineFactory* machinefactory)
 {
@@ -142,7 +146,7 @@ void psycleconfig_makevisual(PsycleConfig* self)
 	machineparamconfig_init(&self->macparam, self->visual);
 }
 
-// settings
+/* settings */
 void psycleconfig_loadskin(PsycleConfig* self, const psy_Path* path)
 {
 	psy_Property skin;
@@ -179,6 +183,7 @@ void psycleconfig_loadskin(PsycleConfig* self, const psy_Path* path)
 	}
 	machineparamconfig_settheme(&self->macparam, &skin);
 	machineviewconfig_settheme(&self->macview, &skin);
+	machineviewconfig_updatestyles(&self->macview, &psy_ui_appdefaults()->styles);
 	patternviewconfig_settheme(&self->patview, &skin);
 	psy_property_dispose(&skin);
 }
@@ -189,6 +194,7 @@ void psycleconfig_resetskin(PsycleConfig* self)
 		
 	patternviewconfig_resettheme(&self->patview);
 	machineviewconfig_resettheme(&self->macview);
+	machineviewconfig_updatestyles(&self->macview, &psy_ui_appdefaults()->styles);
 	machineparamconfig_resettheme(&self->macparam);
 }
 

@@ -1,16 +1,19 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "instnotemapview.h"
-// host
+/* host */
 #include "styles.h"
-// dsp
+/* dsp */
 #include <notestab.h>
-// std
+/* std */
 #include <math.h>
-// platform
+/* platform */
 #include "../../detail/portable.h"
 
 #define COLWIDTH 12.0
@@ -33,8 +36,10 @@ static uint8_t whitekeytokey(uint8_t whitekey)
 {
 	uint8_t octave = whitekey / 7;
 	uint8_t offset = whitekey % 7;
-	// 0 1 2 3 4 5 6 7 8 9 10 11
-	// c   d   e f   g   a    h 
+	/*
+	** 0 1 2 3 4 5 6 7 8 9 10 11
+	** c   d   e f   g   a    h
+	*/
 	static int numkey[] = { 0, 2, 4, 5, 7, 9, 11 };
 	return octave * 12 + numkey[offset];
 }
@@ -46,8 +51,10 @@ static uint8_t screentokey(double x, double keysize)
 
 	numwhitekey = (uint8_t)(psy_max(0.0, x) / keysize);
 	rv = whitekeytokey(numwhitekey);
-	// 0 1 2 3 4 5 6 7 8 9 10 11
-	// c   d   e f   g   a    h 
+	/*
+	** 0 1 2 3 4 5 6 7 8 9 10 11
+	** c   d   e f   g   a    h 
+	*/
 	if ((rv % 12) != 4 && (rv % 12) != 11) {
 		double delta;
 
@@ -62,13 +69,18 @@ static uint8_t screentokey(double x, double keysize)
 	return rv;	
 }
 
-// keyboardview
+/* keyboardview */
+/* prototypes */
 static void instrumentkeyboardview_ondraw(InstrumentKeyboardView*,
 	psy_ui_Graphics*);
 static void instrumentkeyboardview_onsize(InstrumentKeyboardView*,
 	psy_ui_Size*);
 static void instrumentkeyboardview_updatemetrics(InstrumentKeyboardView*);
-
+static void instrumentkeyboardview_drawwhitekeys(InstrumentKeyboardView*,
+	psy_ui_Graphics*);
+static void instrumentkeyboardview_drawblackkeys(InstrumentKeyboardView*,
+	psy_ui_Graphics*);
+/* vtable */
 static psy_ui_ComponentVtable instrumentkeyboardview_vtable;
 static bool instrumentkeyboardview_vtable_initialized = FALSE;
 
@@ -85,7 +97,7 @@ static void instrumentkeyboardview_vtable_init(InstrumentKeyboardView* self)
 		instrumentkeyboardview_vtable_initialized = TRUE;
 	}
 }
-
+/* implementation */
 void instrumentkeyboardview_init(InstrumentKeyboardView* self,
 	psy_ui_Component* parent)
 {	
@@ -105,20 +117,26 @@ void instrumentkeyboardview_init(InstrumentKeyboardView* self,
 
 void instrumentkeyboardview_ondraw(InstrumentKeyboardView* self,
 	psy_ui_Graphics* g)
-{		
+{				
+	instrumentkeyboardview_drawwhitekeys(self, g);	
+	instrumentkeyboardview_drawblackkeys(self, g);	
+}
+
+void instrumentkeyboardview_drawwhitekeys(InstrumentKeyboardView* self,
+	psy_ui_Graphics* g)
+{
+	psy_ui_RealSize size;
 	int keymin = 0;
 	int keymax = psy_audio_NOTECOMMANDS_RELEASE;
 	int key;
 	double cp = 0;
 	double top = 0.60;
-	double bottom = 1 - top;	
-	psy_ui_RealSize size;
+	double bottom = 1 - top;		
 	
 	size = psy_ui_component_size_px(&self->component);
 	psy_ui_setcolour(g, psy_ui_colour_make(0x00333333));
 	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
-	psy_ui_settextcolour(g, psy_ui_colour_make(0x00333333));
-	// draw white keys
+	psy_ui_settextcolour(g, psy_ui_colour_make(0x00333333));	
 	for (key = keymin; key < keymax; ++key) {
 		if (!psy_dsp_isblack(key)) {
 			psy_ui_RealRectangle r;
@@ -138,8 +156,21 @@ void instrumentkeyboardview_ondraw(InstrumentKeyboardView* self,
 			cp += self->metrics.keysize;			
 		}
 	}
+}
+
+void instrumentkeyboardview_drawblackkeys(InstrumentKeyboardView* self,
+	psy_ui_Graphics* g)
+{
+	psy_ui_RealSize size;
+	int keymin = 0;
+	int keymax = psy_audio_NOTECOMMANDS_RELEASE;
+	int key;
+	double cp = 0;
+	double top = 0.60;
+	double bottom = 1 - top;		
+	
+	size = psy_ui_component_size_px(&self->component);
 	psy_ui_settextcolour(g, psy_ui_colour_make(0x00CACACA));
-	// draw black keys
 	for (cp = 0, key = keymin; key < keymax; ++key) {							
 		if (!psy_dsp_isblack(key)) {
 			cp += self->metrics.keysize;
@@ -192,7 +223,8 @@ void instrumentkeyboardview_updatemetrics(InstrumentKeyboardView* self)
 		psy_ui_value_make_px(self->metrics.lineheight * 3));
 }
 
-// entry view
+/* InstrumentEntryView */
+/* prototypes */
 static void instrumententryview_ondestroy(InstrumentEntryView*);
 static void instrumententryview_onpreferredsize(InstrumentEntryView*,
 	psy_ui_Size* limit, psy_ui_Size* rv);
@@ -214,8 +246,7 @@ static void instrumententryview_onentryupdate(
 	psy_audio_InstrumentEntry*);
 static void instrumententryview_outputstatus(InstrumentEntryView*,
 	uint8_t key);
-
-// vtable
+/* vtable */
 static psy_ui_ComponentVtable instrumententryview_vtable;
 static bool instrumententryview_vtable_initialized = FALSE;
 
@@ -247,7 +278,7 @@ static void instrumententryview_vtable_init(InstrumentEntryView* self)
 		instrumententryview_vtable_initialized = TRUE;
 	}
 }
-// implementation
+/* implementation */
 void instrumententryview_init(InstrumentEntryView* self,
 	psy_ui_Component* parent, InstrumentEntryState* state)
 {	
@@ -639,8 +670,8 @@ void instrumententryview_outputstatus(InstrumentEntryView* self, uint8_t key)
 	workspace_outputstatus(self->state->workspace, text);
 }
 
-// Table
-// TableColumn
+/* Table */
+/* TableColumn */
 void instrumententrytablecolumn_init(InstrumentEntryTableColumn* self,
 	const char* label)
 {	
@@ -681,7 +712,8 @@ void instrumententrytablecolumn_settranslation(InstrumentEntryTableColumn* self,
 	psy_strreset(&self->translation, text);
 }
 
-// InstrumentEntryState
+/* InstrumentEntryState */
+/* implementation */
 void instrumententrystate_init(InstrumentEntryState* self, Workspace* workspace)
 {
 	InstrumentEntryTableColumn* column;				
@@ -690,16 +722,16 @@ void instrumententrystate_init(InstrumentEntryState* self, Workspace* workspace)
 	psy_signal_init(&self->signal_select);
 	psy_signal_init(&self->signal_entrychanged);
 	psy_table_init(&self->columns);
-	// sample index
+	/* sample index */
 	column = instrumententrytablecolumn_allocinit("instrumentview.smplidx");
 	psy_table_insert(&self->columns, 0, column);
-	// key low
+	/* key low */
 	column = instrumententrytablecolumn_allocinit("instrumentview.keylo");
 	psy_table_insert(&self->columns, 1, column);
-	// key hi
+	/* key hi */
 	column = instrumententrytablecolumn_allocinit("instrumentview.keyhi");
 	psy_table_insert(&self->columns, 2, column);
-	// fixedkey
+	/* fixedkey */
 	column = instrumententrytablecolumn_allocinit("instrumentview.keyfixed");
 	psy_table_insert(&self->columns, 3, column);
 	self->curredit = NULL;
@@ -806,13 +838,13 @@ uintptr_t instrumententrystate_pxtocolumn(
 	return 0;
 }
 
-// InstrumentEntryTableViewHeader
-// prototypes
+/* InstrumentEntryTableViewHeader */
+/* prototypes */
 static void instrumententrytableviewheader_ondraw(InstrumentEntryTableViewHeader*,
 	psy_ui_Graphics*);
 static void instrumententrytableviewheader_onpreferredsize(InstrumentEntryTableViewHeader*,
 	const psy_ui_Size* limit, psy_ui_Size* rv);
-// vtable
+/* vtable */
 static psy_ui_ComponentVtable instrumententrytableviewheader_vtable;
 static bool instrumententrytableviewheader_vtable_initialized = FALSE;
 
@@ -828,7 +860,7 @@ static void instrumententrytableviewheader_vtable_init(InstrumentEntryTableViewH
 		instrumententrytableviewheader_vtable_initialized = TRUE;
 	}
 }
-// implementation
+/* implementation */
 void instrumententrytableviewheader_init(InstrumentEntryTableViewHeader* self,
 	psy_ui_Component* parent, InstrumentEntryState* state,
 	Workspace* workspace)
@@ -874,8 +906,8 @@ void instrumententrytableviewheader_onpreferredsize(InstrumentEntryTableViewHead
 	*rv = psy_ui_size_make_em(80.0, 1.0);
 }
 
-// InstrumentEntryRow
-// prototypes
+/* InstrumentEntryRow */
+/* prototypes */
 static void instrumententryrow_ondestroy(InstrumentEntryRow*);
 static void instrumententryrow_ondraw(InstrumentEntryRow*, psy_ui_Graphics*);
 static void instrumententryrow_onpreferredsize(InstrumentEntryRow*,
@@ -896,7 +928,7 @@ static void instrumententryrow_onentryupdate(
 	InstrumentEntryView*, InstrumentEntryState* sender,
 	psy_audio_InstrumentEntry* entry);
 static void instrumententryrow_updatestyles(InstrumentEntryRow*);
-// vtable
+/* vtable */
 static psy_ui_ComponentVtable instrumententryrow_vtable;
 static bool instrumententryrow_vtable_initialized = FALSE;
 
@@ -926,7 +958,7 @@ static void instrumententryrow_vtableinit_init(InstrumentEntryRow* self)
 	}
 	self->component.vtable = &instrumententryrow_vtable;
 }
-// implementation
+/* implementation */
 void instrumententryrow_init(InstrumentEntryRow* self, psy_ui_Component* parent,
 	psy_ui_Component* view, psy_audio_InstrumentEntry* entry,
 	InstrumentEntryState* state)
@@ -1152,25 +1184,26 @@ void instrumententryrow_onentryupdate(
 
 void instrumententryrow_updatestyles(InstrumentEntryRow* self)
 {		
-	// if (self->selected) {
-	//	self->component.style.currstyle = &self->component.style.select;
-	// } else if (self->hover) {
-	//	self->component.style.currstyle = &self->component.style.hover;
-	// } else {
-		self->component.style.currstyle = &self->component.style.overridestyle;
-	// }
+	/*
+	** if (self->selected) {
+	** 	self->component.style.currstyle = &self->component.style.select;
+	**  } else if (self->hover) {
+	** 	self->component.style.currstyle = &self->component.style.hover;
+	** } else {
+	** 	self->component.style.currstyle = &self->component.style.overridestyle;
+	** }
+	*/
 	psy_ui_component_invalidate(&self->component);
 }
 
-// InstrumentEntryTableView
-// prototypes
+/* InstrumentEntryTableView */
+/* prototypes */
 static void instrumententrytableview_ondestroy(InstrumentEntryTableView*);
 static void instrumententrytableview_onpreferredsize(InstrumentEntryTableView*,
 	const psy_ui_Size* limit, psy_ui_Size* rv);
 static void instrumententrytableview_ondraw(InstrumentEntryTableView*,
 	psy_ui_Graphics*);
-
-// vtable
+/* vtable */
 static psy_ui_ComponentVtable instrumententrytableview_vtable;
 static bool instrumententrytableview_vtable_initialized = FALSE;
 
@@ -1237,7 +1270,7 @@ void instrumententrytableview_build(InstrumentEntryTableView* self)
 
 			entry = (psy_audio_InstrumentEntry*)psy_list_entry(p);
 			row = (InstrumentEntryRow*)instrumententryrow_allocinit(
-				&self->component, NULL, //&self->component,
+				&self->component, NULL, /* &self->component */
 				entry, self->state);			
 		}
 	}
@@ -1255,8 +1288,8 @@ void instrumententrytableview_onpreferredsize(InstrumentEntryTableView* self,
 	}
 }
 
-// InstrumentNoteMapButtons
-// implementation
+/* InstrumentNoteMapButtons */
+/* implementation */
 void instrumentnotemapbuttons_init(InstrumentNoteMapButtons* self,
 	psy_ui_Component* parent)
 {	
@@ -1269,8 +1302,8 @@ void instrumentnotemapbuttons_init(InstrumentNoteMapButtons* self,
 	psy_ui_button_settext(&self->remove, "instrumentview.remove");	
 }
 
-// InstrumentNoteMapView
-// prototypes
+/* InstrumentNoteMapView */
+/* prototypes */
 static void instrumentnotemapview_ondestroy(InstrumentNoteMapView*);	
 static void instrumentnotemapview_initentries(InstrumentNoteMapView*,
 	Workspace*);
@@ -1288,7 +1321,7 @@ static void instrumentnotemapview_onentryupdate(
 	InstrumentNoteMapView*, InstrumentEntryState* sender,
 	psy_audio_InstrumentEntry*);
 static void instrumentnotemapview_onlanguagechanged(InstrumentNoteMapView*);
-// vtable
+/* vtable */
 static psy_ui_ComponentVtable instrumentnotemapview_vtable;
 static bool instrumentnotemapview_vtable_initialized = FALSE;
 
@@ -1306,7 +1339,7 @@ static void instrumentnotemapview_vtable_init(InstrumentNoteMapView* self)
 	}
 	self->component.vtable = &instrumentnotemapview_vtable;
 }
-// implementation
+/* implementation */
 void instrumentnotemapview_init(InstrumentNoteMapView* self,
 	psy_ui_Component* parent, Workspace* workspace)
 {
@@ -1382,7 +1415,6 @@ void instrumentnotemapview_initentries(InstrumentNoteMapView* self, Workspace* w
 
 void instrumentnotemapview_inittable(InstrumentNoteMapView* self, Workspace* workspace)
 {
-	// table	
 	psy_ui_component_init(&self->table, &self->component, NULL);
 	psy_ui_component_setalign(&self->table, psy_ui_ALIGN_BOTTOM);
 	psy_ui_component_setpreferredsize(&self->table,

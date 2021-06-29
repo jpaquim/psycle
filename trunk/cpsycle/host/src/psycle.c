@@ -26,7 +26,8 @@ int psycle_run(uintptr_t instance, int options)
 	psy_ui_App app;
 	MainFrame* mainframe;
 		
-	psy_insertpathenv(psy_workdir(workpath)); /* set env for scintilla module */
+	/* set env for scintilla module */
+	psy_insertpathenv(psy_workdir(workpath));
 	psy_ui_app_init(&app, psy_ui_DARKTHEME, instance);	
 	mainframe = mainframe_allocinit();
 	if (mainframe) {	

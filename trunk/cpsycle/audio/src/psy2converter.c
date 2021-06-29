@@ -1,21 +1,27 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "psy2converter.h"
-#include "psy2loader.h"
+/* local */
+#include "constants.h"
 #include "machinefactory.h"
+#include "plugin.h"
+#include "psy2loader.h"
 #include "song.h"
 #include "songio.h"
-#include "plugin.h"
-#include <assert.h>
-#include <string.h>
-#include <stdlib.h>
+/* dsp */
+#include <scale.h>
+/* file */
 #include <dir.h>
+/* std */
+#include <assert.h>
 #include <math.h>
-#include "constants.h"
-#include "scale.h"
+/* platform */
 #include "../../detail/portable.h"
 
 #if !defined DIVERSALIS__OS__MICROSOFT
@@ -209,11 +215,13 @@ psy_audio_Machine* internalmachinesconvert_redirect(
 	}
 	psy_audio_psy2loader_read_wires(songfile, (uintptr_t)(*index));	
 	psyfile_read(songfile->file, &connectionpoint, sizeof(connectionpoint));
-	// numInputs and numOutputs
+	/* numInputs and numOutputs */
 	psyfile_skip(songfile->file, 2 * sizeof(int32_t));
 	psyfile_read(songfile->file, &panning, sizeof(panning));
-	// Machine::SetPan(_panning);
-	psyfile_skip(songfile->file, 40); // skips sampler data.
+	if (machine) {		
+		psy_audio_machine_setpanning(machine, panning / 128.f);
+	}	
+	psyfile_skip(songfile->file, 40); /* skips sampler data. */
 	switch (type) {
 		case delay:
 		{
@@ -352,7 +360,7 @@ void readplugin(InternalMachinesConvert* self, psy_audio_Machine* machine,
 	Vals = malloc(sizeof(int32_t) * numParameters);
 	psyfile_read(songfile->file, Vals, numParameters * sizeof(int));
 	if (type == psy_audio_DUMMY) {
-		//do nothing.
+		/* do nothing. */
 	} else if (strcmp(name, abass) == 0) {
 		retweak_parameters(songfile, machine, type, name, Vals, 15, 0);
 		param = psy_audio_machine_parameter(machine, 19);
@@ -398,7 +406,7 @@ void readplugin(InternalMachinesConvert* self, psy_audio_Machine* machine,
 			psy_audio_machine_parameter_tweak_scaled(machine, param, 0);
 		}
 	} else  if (strcmp(name, asynth21) == 0) {
-		//I am unsure which was the diference between asynth2 and asynth21 (need to chech sources in the cvs)
+		/* I am unsure which was the diference between asynth2 and asynth21 (need to chech sources in the cvs) */
 		retweak_parameters(songfile, machine, type, name, Vals, numParameters, 0);
 		param = psy_audio_machine_parameter(machine, 24);
 		if (param) {
@@ -417,8 +425,8 @@ void readplugin(InternalMachinesConvert* self, psy_audio_Machine* machine,
 
 void internalmachineconverter_retweak_song(InternalMachinesConvert* self, psy_audio_Song* song, double samplerate)
 {
-	/// \todo must each twk repeat the machine number ?
-	// int previous_machines [MAX_TRACKS]; for(int i = 0 ; i < MAX_TRACKS ; ++i) previous_machines[i] = 255;
+	/* \todo must each twk repeat the machine number ? */
+	/* int previous_machines [MAX_TRACKS]; for(int i = 0 ; i < MAX_TRACKS ; ++i) previous_machines[i] = 255; */
 	psy_TableIterator it;
 
 	for (it = psy_table_begin(&song->patterns.slots);

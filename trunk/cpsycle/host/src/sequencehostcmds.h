@@ -35,8 +35,6 @@ void sequencecmds_decpattern(SequenceCmds*);
 void sequencecmds_changepattern(SequenceCmds*, uintptr_t step);
 void sequencecmds_copy(SequenceCmds*);
 void sequencecmds_paste(SequenceCmds*);
-void sequencecmds_singleselection(SequenceCmds*);
-void sequencecmds_multiselection(SequenceCmds*);
 void sequencecmds_clear(SequenceCmds*);
 void sequencecmds_appendtrack(SequenceCmds*);
 void sequencecmds_inserttrack(SequenceCmds*);

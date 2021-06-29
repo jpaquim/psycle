@@ -209,7 +209,6 @@ void machinestackpane_init(MachineStackPane*, psy_ui_Component* parent,
 
 void machinestackpane_build(MachineStackPane*);
 void machinestackpane_updatevus(MachineStackPane*);
-void machinestackpane_updateskin(MachineStackPane*);
 
 // MachineStackVolumes
 typedef struct MachineStackVolumes {

@@ -1,20 +1,19 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
+
+
 #include "../../detail/os.h"
-
 #include "patternevent.h"
-
 #include "cmddriver.h"
-#include "../../driver/eventdriver.h"
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-
 #include "cmdsnotes.h"
-
+#include "../../driver/eventdriver.h"
+/* std */
+#include <stdio.h>
+/* platform */
 #include "../../detail/portable.h"
 
 #if defined DIVERSALIS__OS__MICROSOFT    
@@ -44,6 +43,7 @@ typedef struct {
 	char* section;
 } CmdDriver;
 
+/* prototypes */
 static void driver_free(psy_EventDriver*);
 static int driver_init(psy_EventDriver*);
 static int driver_open(psy_EventDriver*);
@@ -65,7 +65,7 @@ static psy_EventDriverInput driver_input(psy_EventDriver* context)
 	CmdDriver* self = (CmdDriver*)context;
 	return self->lastinput;
 }
-
+/* vtable */
 static psy_EventDriverVTable vtable;
 static bool vtable_initialized = FALSE;
 
@@ -91,6 +91,7 @@ static void vtable_init(void)
 	}
 }
 
+/* implementation */
 int onerror(int err, const char* msg)
 {
 #if defined DIVERSALIS__OS__MICROSOFT    
@@ -205,7 +206,7 @@ void driver_write(psy_EventDriver* driver, psy_EventDriverInput input)
 
 	self = (CmdDriver*)(driver);
 
-	// patternview chordmode
+	/* patternview chordmode */
 	psy_audio_decodeinput((uint32_t)input.param1, &keycode, &self->shift, &ctrl, &alt, &up);
 	if (keycode == 0x11 /* psy_ui_KEY_CONTROL */) {
 		return;

@@ -255,6 +255,7 @@ static void setalign(psy_ui_Component* self, psy_ui_AlignType align) {  }
 static void ondestroy(psy_ui_Component* self) {	}
 static void ondestroyed(psy_ui_Component* self) { }
 static void onsize(psy_ui_Component* self, const psy_ui_Size* size) { }
+static void beforealign(psy_ui_Component* self) { }
 static void onalign(psy_ui_Component* self) { }
 static void onpreferredsize(psy_ui_Component*, const psy_ui_Size* limit, psy_ui_Size* rv);
 static void onpreferredscrollsize(psy_ui_Component*, const psy_ui_Size* limit, psy_ui_Size* rv);
@@ -385,7 +386,8 @@ static void vtable_init(void)
 		/* events */
 		vtable.ondestroy = ondestroy;
 		vtable.ondestroyed = ondestroyed;
-		vtable.ondraw = 0;
+		vtable.ondraw = NULL;
+		vtable.beforealign = beforealign;
 		vtable.onalign = onalign;
 		vtable.onpreferredsize = onpreferredsize;
 		vtable.onpreferredscrollsize = onpreferredscrollsize;
@@ -918,6 +920,7 @@ void psy_ui_component_align(psy_ui_Component* self)
 		psy_ui_LCLAligner aligner;
 
 		psy_ui_lclaligner_init(&aligner, self);
+		self->vtable->beforealign(self);
 		psy_signal_emit(&self->signal_beforealign, self, 0);
 		psy_ui_aligner_align(psy_ui_lclaligner_base(&aligner));
 		psy_signal_emit(&self->signal_align, self, 0);
@@ -928,6 +931,7 @@ void psy_ui_component_align(psy_ui_Component* self)
 		psy_ui_GridAligner aligner;
 
 		psy_ui_gridaligner_init(&aligner, self);
+		self->vtable->beforealign(self);
 		psy_signal_emit(&self->signal_beforealign, self, 0);
 		psy_ui_aligner_align(psy_ui_gridaligner_base(&aligner));
 		psy_signal_emit(&self->signal_align, self, 0);

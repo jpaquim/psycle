@@ -1,43 +1,46 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "instrumentgenview.h"
-// audio
+/* audio */
 #include <exclusivelock.h>
 #include <instruments.h>
 #include <machinefactory.h>
 #include <virtualgenerator.h>
-// dsp
+/* dsp */
 #include <valuemapper.h>
-// std
+/* std */
 #include <math.h>
-// platform
+/* platform */
 #include "../../detail/portable.h"
 
-// prototypes
+/* prototypes */
 static void instrumentgeneralview_onfitrow(InstrumentGeneralView*,
 	psy_ui_Component* sender);
-// nna
+/* nna */
 static void instrumentgeneralview_onnnacut(InstrumentGeneralView*);
 static void instrumentgeneralview_onnnarelease(InstrumentGeneralView*);
 static void instrumentgeneralview_onnnafadeout(InstrumentGeneralView*);
 static void instrumentgeneralview_onnnanone(InstrumentGeneralView*);
 static void instrumentgeneralview_nnahighlight(InstrumentGeneralView*, psy_ui_Button*);
-// dct
+/* dct */
 static void instrumentgeneralview_ondctnone(InstrumentGeneralView*, psy_ui_Button* sender);	
 static void instrumentgeneralview_ondctnote(InstrumentGeneralView*, psy_ui_Button* sender);
 static void instrumentgeneralview_ondctsample(InstrumentGeneralView*, psy_ui_Button* sender);
 static void instrumentgeneralview_ondctinstrument(InstrumentGeneralView*, psy_ui_Button* sender);
 static void instrumentgeneralview_updatedct(InstrumentGeneralView*);
-// dca
+/* dca */
 static void instrumentgeneralview_ondcacut(InstrumentGeneralView*);
 static void instrumentgeneralview_ondcarelease(InstrumentGeneralView*);
 static void instrumentgeneralview_ondcafadeout(InstrumentGeneralView*);
 static void instrumentgeneralview_ondcanone(InstrumentGeneralView*);
 static void instrumentgeneralview_updatedca(InstrumentGeneralView*);
-// slider
+/* slider */
 static void instrumentgeneralview_updateslider(InstrumentGeneralView*);
 static void instrumentgeneralview_ongeneralviewdescribe(InstrumentGeneralView*,
 	psy_ui_Slider*, char* text);
@@ -45,7 +48,7 @@ static void instrumentgeneralview_ongeneralviewtweak(InstrumentGeneralView*,
 	psy_ui_Slider*, float value);
 static void instrumentgeneralview_ongeneralviewvalue(InstrumentGeneralView*,
 	psy_ui_Slider*, float* value);
-// implementation
+/* implementation */
 void instrumentgeneralview_init(InstrumentGeneralView* self,
 	psy_ui_Component* parent, psy_audio_Instruments* instruments,
 	Workspace* workspace)
@@ -58,7 +61,7 @@ void instrumentgeneralview_init(InstrumentGeneralView* self,
 	psy_ui_margin_init_em(&margin, 0.0, 2.0, 1.5, 0.0);
 	self->instruments = instruments;
 	self->instrument = NULL;
-	// nna
+	/* nna */
 	psy_ui_component_init(&self->nna, &self->component, NULL);
 	psy_ui_component_setdefaultalign(&self->nna, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
@@ -79,7 +82,7 @@ void instrumentgeneralview_init(InstrumentGeneralView* self,
 	psy_ui_button_init_connect(&self->nnanone, &self->nna, NULL,
 		self, instrumentgeneralview_onnnanone);	
 	psy_ui_button_settext(&self->nnanone, "instrumentview.none");
-	// dct
+	/* dct */
 	psy_ui_component_init(&self->dct, &self->component, NULL);
 	psy_ui_component_setdefaultalign(&self->dct, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));	
@@ -98,7 +101,7 @@ void instrumentgeneralview_init(InstrumentGeneralView* self,
 		self, instrumentgeneralview_ondctinstrument);
 	psy_ui_button_settext(&self->dctinstrument,
 		"instrumentview.instrument");
-	// dca	
+	/* dca */
 	psy_ui_label_init_text(&self->dcaheader, &self->dct, NULL,
 		"instrumentview.do");
 	psy_ui_button_init_connect(&self->dcacut, &self->dct, NULL,
@@ -113,7 +116,7 @@ void instrumentgeneralview_init(InstrumentGeneralView* self,
 	psy_ui_button_init_connect(&self->dcanone, &self->dct, NULL,
 		self, instrumentgeneralview_ondcanone);
 	psy_ui_button_settext(&self->dcanone, "instrumentview.none");	
-	// fitrow
+	/* fitrow */
 	psy_ui_component_init(&self->fitrow, &self->component, NULL);
 	margin = psy_ui_defaults_vmargin(psy_ui_defaults());
 	margin.top = psy_ui_value_make_eh(1.0);
@@ -248,7 +251,7 @@ void instrumentgeneralview_nnahighlight(InstrumentGeneralView* self,
 	}	
 }
 
-// dct
+/* dct */
 void instrumentgeneralview_ondctnone(InstrumentGeneralView* self,
 	psy_ui_Button* sender)
 {
@@ -324,7 +327,7 @@ void instrumentgeneralview_updatedct(InstrumentGeneralView* self)
 	}
 }
 
-// dca
+/* dca */
 void instrumentgeneralview_ondcacut(InstrumentGeneralView* self)
 {
 	if (self->instrument) {
@@ -419,4 +422,3 @@ void instrumentgeneralview_ongeneralviewdescribe(InstrumentGeneralView* self,
 		}
 	}
 }
-

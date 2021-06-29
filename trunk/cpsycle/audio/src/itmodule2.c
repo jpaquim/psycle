@@ -1,10 +1,13 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "itmodule2.h"
-// local
+/* local */
 #include "constants.h"
 #include "instrument.h"
 #include "instruments.h"
@@ -12,12 +15,12 @@
 #include "sample.h"
 #include "song.h"
 #include "xmsampler.h"
-// dsp
+/* dsp */
 #include <valuemapper.h>
 #include <operations.h>
-// std
+/* std */
 #include <assert.h>
-// platform
+/* platform */
 #include "../../detail/portable.h"
 #include "../../detail/trace.h"
 
@@ -25,7 +28,7 @@
 #define ASSERT assert
 #endif
 
-// default sampulse group
+/* default sampulse group */
 #define INSTRUMENTGROUP 1
 
 /*
@@ -50,11 +53,10 @@ static int calclpbfromspeed(int trackerspeed, int* outextraticks)
 	return lpb;
 }
 
-// BitsBlock
-
+/* BitsBlock */
 bool bitsblock_readblock(BitsBlock* self, PsyFile* file)
 {
-	// block layout : uint16 size, <size> bytes data
+	/* block layout : uint16 size, <size> bytes data */
 	uint16_t size;
 	int status;
 
@@ -80,38 +82,42 @@ uint32_t bitsblock_readbits(BitsBlock* self, unsigned char bitwidth)
 
 	val = 0;
 	b = 0;
-	// If reached the end of the buffer, exit.
+	/* If reached the end of the buffer, exit. */
 	if (self->rpos >= self->rend) {
 		return val;
 	}
-	// while we have more bits to read than the remaining bits in this byte
+	/* while we have more bits to read than the remaining bits in this byte */
 	while (bitwidth > self->rembits) {
-		// add to val, the data-bits from rpos, shifting the necessary number
-		// of bits.
+		/*
+		** add to val, the data-bits from rpos, shifting the necessary number
+		** of bits.
+		*/
 		val |= *(self->rpos++) << b;
-		//if reached the end, exit.
+		/* if reached the end, exit. */
 		if (self->rpos >= self->rend) {
 			return val;
 		}
-		// increment the shift
+		/* increment the shift */
 		b += self->rembits;
-		// decrease the remaining bits to read
+		/* decrease the remaining bits to read */
 		bitwidth -= self->rembits;
-		// set back the number of bits.
+		/* set back the number of bits. */
 		self->rembits = 8;
 	}
-	// Filter the bottom-most bitwidth bytes from rpos, and shift them by b to add
-	// to the final value.
+	/*
+	** Filter the bottom-most bitwidth bytes from rpos, and shift them by b to add
+	** to the final value.
+	*/
 	val |= ((*self->rpos) & ((1 << bitwidth) - 1)) << b;
-	// shift down the remaining bits so that they are read the next time.
+	/* shift down the remaining bits so that they are read the next time. */
 	*(self->rpos) >>= bitwidth;
-	// reduce the remaining bits.
+	/* reduce the remaining bits. */
 	self->rembits -= bitwidth;
 	return val;
 }
 
-// ITModule2
-// prototypes
+/* ITModule2 */
+/* prototypes */
 static void itmodule2_reset(ITModule2*);
 static void itmodule2_setsongcomments(ITModule2*);
 static bool itmodule2_makexmsampler(ITModule2*);
@@ -139,8 +145,7 @@ static bool itmodule2_loaditsampledata(ITModule2*, psy_audio_Sample*,
 	uint32_t iLen, bool bstereo, bool b16Bit, unsigned char convert);
 static bool itmodule2_loaditcompresseddata(ITModule2*,
 	psy_dsp_amp_t* pWavedata, uint32_t iLen, bool b16Bit, unsigned char convert);
-
-// implementation
+/* implementation */
 void itmodule2_init(ITModule2* self, psy_audio_SongFile* songfile)
 {
 	assert(self);

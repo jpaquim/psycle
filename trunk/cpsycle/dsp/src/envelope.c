@@ -1,16 +1,19 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "envelope.h"
-// platform
+/* platform */
 #include "../../detail/portable.h"
 #include "../../detail/trace.h"
 
 static const psy_dsp_seconds_t defaultfastrelease = 0.003f;
 
-// envelope point
+/* envelope point */
 void psy_dsp_envelopepoint_init(psy_dsp_EnvelopePoint* self, 
 	psy_dsp_seconds_t time, psy_dsp_amp_t value,
 	psy_dsp_seconds_t mintime, psy_dsp_seconds_t maxtime,
@@ -79,7 +82,7 @@ psy_dsp_EnvelopePoint psy_dsp_envelopepoint_make_start(void)
 	return rv;
 }
 
-// envelope settings
+/* envelope settings */
 void psy_dsp_envelope_init(psy_dsp_Envelope* self)
 {
 	assert(self);
@@ -95,21 +98,21 @@ void psy_dsp_envelope_init(psy_dsp_Envelope* self)
 	self->points = NULL;
 }
 
-// adsr envelope settings
+/* adsr envelope settings */
 void psy_dsp_envelope_init_adsr(psy_dsp_Envelope* self)
 {
 	assert(self);
 
 	psy_dsp_envelope_init(self);
-	// start attack
+	/* start attack */
 	psy_dsp_envelope_append(self, psy_dsp_envelopepoint_make_start());
-	// start decay
+	/* start decay */
 	psy_dsp_envelope_append(self,
 		psy_dsp_envelopepoint_make_all(0.005f, 1.f, 0.f, 65535.f, 1.f, 1.f));
-	// start release
+	/* start release */
 	psy_dsp_envelope_append(self,
 		psy_dsp_envelopepoint_make_all(0.01f, 1.f, 0.f, 65535.f, 0.f, 1.f));
-	// end release
+	/* end release */
 	psy_dsp_envelope_append(self,
 		psy_dsp_envelopepoint_make_all(0.015f, 0.f, 0.f, 65535.f, 0.f, 0.f));
 	psy_dsp_envelope_setsustainbegin(self, 2);
@@ -149,7 +152,7 @@ void psy_dsp_envelope_init_copy(psy_dsp_Envelope* self,
 	self->loopstart = source->loopstart;
 	self->loopend = source->loopend;
 	self->timemode = source->timemode;
-	self->str = NULL; // don't copy tostring cache	
+	self->str = NULL; /* don't copy tostring cache */
 }
 
 void psy_dsp_envelope_append(psy_dsp_Envelope* self,
@@ -333,12 +336,11 @@ void psy_dsp_envelope_setadsr(psy_dsp_Envelope* self,
 	psy_dsp_envelope_setsustainend(self, 2);
 }
 
-// psy_dsp_EnvelopeController
-// prototypes
+/* psy_dsp_EnvelopeController */
+/* prototypes */
 static void psy_dsp_envelope_startstage(psy_dsp_EnvelopeController*);
 static psy_dsp_amp_t psy_dsp_envelope_stagevalue(psy_dsp_EnvelopeController*);
-
-// implementation
+/* implementation */
 void psy_dsp_envelopecontroller_init(psy_dsp_EnvelopeController* self)
 {
 	psy_dsp_envelope_init(&self->settings);	

@@ -7,9 +7,10 @@
 
 
 #include "inputhandler.h"
+/* std */
+#include <assert.h>
 /* platform */
 #include "../../detail/portable.h"
-#include <assert.h>
 
 /* InputSlot */
 /* implementation */

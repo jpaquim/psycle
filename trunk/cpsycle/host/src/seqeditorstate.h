@@ -15,6 +15,15 @@
 extern "C" {
 #endif
 
+typedef enum SeqEditItemType {
+	SEQEDITITEM_NONE,
+	SEQEDITITEM_PATTERN,
+	SEQEDITITEM_SAMPLE,
+	SEQEDITITEM_MARKER,
+	SEQEDITITEM_TIMESIG,
+	SEQEDITITEM_LOOP
+} SeqEditItemType;
+
 typedef enum {
 	SEQEDIT_DRAGTYPE_UNDEFINED = 0,
 	SEQEDIT_DRAGTYPE_MOVE      = 1,
@@ -37,7 +46,11 @@ typedef enum {
 } SeqEdtCmd;
 
 typedef struct SeqEditState {
+	/* signals */
 	psy_Signal signal_cursorchanged;
+	psy_Signal signal_itemselected;
+	psy_Signal signal_timesigchanged;
+	psy_Signal signal_loopchanged;	
 	double pxperbeat;
 	double defaultpxperbeat;
 	psy_ui_Value lineheight;
@@ -67,6 +80,7 @@ void seqeditstate_init(SeqEditState*, SequenceCmds*, psy_ui_Edit*, psy_ui_Compon
 void seqeditstate_dispose(SeqEditState*);
 
 psy_audio_Sequence* seqeditstate_sequence(SeqEditState*);
+const psy_audio_Sequence* seqeditstate_sequence_const(const SeqEditState*);
 void seqeditstate_outputstatusposition(SeqEditState*);
 
 INLINE psy_audio_OrderIndex seqeditstate_editposition(const SeqEditState* self)
@@ -80,6 +94,18 @@ INLINE double seqeditstate_beattopx(const SeqEditState* self,
 	assert(self);
 
 	return floor(position * self->pxperbeat);
+}
+
+INLINE psy_ui_Value seqeditstate_preferredwidth(const SeqEditState* self)
+{
+	assert(self);
+
+	if (seqeditstate_sequence_const(self)) {
+		return psy_ui_value_make_px(seqeditstate_beattopx(self,
+			psy_audio_sequence_duration(seqeditstate_sequence_const(self)) +
+			400.0));
+	}
+	return psy_ui_value_make_px(seqeditstate_beattopx(self, 400.0));
 }
 
 INLINE psy_dsp_big_beat_t seqeditstate_pxtobeat(const

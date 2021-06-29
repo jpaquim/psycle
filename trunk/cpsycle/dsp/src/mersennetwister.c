@@ -45,6 +45,8 @@
 // (64-bit compatibility by johan boule)
 // (made thread-safe by eliminating static data by johan boule)
 
+/* todo new faster version available */
+
 #include "mersennetwister.h"
 
 #include <math.h>

@@ -242,6 +242,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\src\inireader.c"
+				>
+			</File>
+			<File
 				RelativePath=".\src\playlist.c"
 				>
 			</File>
@@ -286,6 +290,10 @@
 			</File>
 			<File
 				RelativePath="src\fileio.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\inireader.h"
 				>
 			</File>
 			<File

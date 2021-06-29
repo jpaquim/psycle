@@ -30,10 +30,6 @@ static void sequencebuttons_oncopy(SequenceButtons*,
 	psy_ui_Button* sender);
 static void sequencebuttons_onpaste(SequenceButtons*,
 	psy_ui_Button* sender);
-static void sequencebuttons_onsingleselection(SequenceButtons*,
-	psy_ui_Button* sender);
-static void sequencebuttons_onmultiselection(SequenceButtons*,
-	psy_ui_Button* sender);
 static void sequencebuttons_onclear(SequenceButtons*,
 	psy_ui_Button* sender);
 static void sequencebuttons_onrename(SequenceButtons*,
@@ -54,8 +50,7 @@ void sequencebuttons_init(SequenceButtons* self, psy_ui_Component* parent,
 		&self->newentry, &self->delentry, &self->cloneentry,
 		&self->more,
 		&self->clear, &self->rename, &self->copy,
-		&self->paste, &self->singlesel, &self->multisel
-	};
+		&self->paste};
 	
 	self->cmds = cmds;
 	psy_ui_component_init(&self->component, parent, NULL);
@@ -129,12 +124,6 @@ void sequencebuttons_init(SequenceButtons* self, psy_ui_Component* parent,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	psy_ui_button_init_text(&self->paste, &self->row3, view,
 		"seqview.paste");
-	psy_ui_button_init_text(&self->singlesel, &self->row3, view,
-		"seqview.singlesel");
-	psy_ui_button_init_text(&self->multisel, &self->row3, view,
-		"seqview.multisel");
-	psy_ui_button_highlight(&self->singlesel);
-	psy_ui_button_disablehighlight(&self->multisel);
 	psy_ui_component_hide(&self->block);
 
 	for (i = 0; i < sizeof(buttons) / sizeof(psy_ui_Button*); ++i) {		
@@ -163,10 +152,6 @@ void sequencebuttons_init(SequenceButtons* self, psy_ui_Component* parent,
 		sequencebuttons_oncopy);
 	psy_signal_connect(&self->paste.signal_clicked, self,
 		sequencebuttons_onpaste);
-	psy_signal_connect(&self->singlesel.signal_clicked, self,
-		sequencebuttons_onsingleselection);
-	psy_signal_connect(&self->multisel.signal_clicked, self,
-		sequencebuttons_onmultiselection);
 	psy_signal_connect(&self->clear.signal_clicked, self,
 		sequencebuttons_onclear);
 	psy_signal_connect(&self->more.signal_clicked, self,
@@ -238,22 +223,6 @@ void sequencebuttons_onpaste(SequenceButtons* self, psy_ui_Button* sender)
 	sequencecmds_paste(self->cmds);
 }
 
-void sequencebuttons_onsingleselection(SequenceButtons* self,
-	psy_ui_Button* sender)
-{
-	psy_ui_button_highlight(&self->singlesel);
-	psy_ui_button_disablehighlight(&self->multisel);	
-	sequencecmds_singleselection(self->cmds);
-}
-
-void sequencebuttons_onmultiselection(SequenceButtons* self,
-	psy_ui_Button* sender)
-{
-	psy_ui_button_highlight(&self->multisel);
-	psy_ui_button_disablehighlight(&self->singlesel);
-	sequencecmds_multiselection(self->cmds);
-}
-
 void sequencebuttons_onclear(SequenceButtons* self, psy_ui_Button* sender)
 {
 	if (workspace_song(self->cmds->workspace)) {
@@ -270,7 +239,7 @@ void sequencebuttons_onrename(SequenceButtons* self, psy_ui_Button* sender)
 		psy_ui_edit_enableinputfield(&self->edit);
 		
 		pattern = psy_audio_sequence_pattern(self->cmds->sequence,
-			self->cmds->workspace->sequenceselection.editposition);
+			psy_audio_sequenceselection_first(&self->cmds->workspace->sequenceselection));
 		if (pattern) {			
 			psy_ui_edit_settext(&self->edit, psy_audio_pattern_name(pattern));
 			psy_ui_edit_setsel(&self->edit, 0, -1);
@@ -292,7 +261,8 @@ void sequencebuttons_oneditaccept(SequenceButtons* self, psy_ui_Edit* sender)
 
 		entry = (self->cmds->sequence)
 			? psy_audio_sequence_entry(self->cmds->sequence,
-				self->cmds->workspace->sequenceselection.editposition)
+				psy_audio_sequenceselection_first(
+					&self->cmds->workspace->sequenceselection))
 			: NULL;
 		if (entry && entry->type == psy_audio_SEQUENCEENTRY_PATTERN) {
 			psy_audio_Pattern* pattern;

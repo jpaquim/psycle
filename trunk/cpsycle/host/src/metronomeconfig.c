@@ -1,7 +1,10 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
+
 
 #include "metronomeconfig.h"
 
@@ -41,7 +44,7 @@ void metronomeconfig_make(MetronomeConfig* self, psy_Property* parent)
 		"settingsview.metronome.note");
 }
 
-// Properties
+/* Properties */
 uint8_t metronomeconfig_note(const MetronomeConfig* self)
 {
 	assert(self);
@@ -63,7 +66,7 @@ bool metronomeconfig_showmetronomebar(const MetronomeConfig* self)
 	return (psy_property_at_bool(self->metronome, "showmetronome", FALSE));
 }
 
-// events
+/* events */
 bool metronomeconfig_onchanged(MetronomeConfig* self, psy_Property*
 	property)
 {

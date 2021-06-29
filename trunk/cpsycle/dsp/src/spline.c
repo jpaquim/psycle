@@ -1,10 +1,13 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
-#include "spline.h"
 
+#include "spline.h"
+/* std */
 #include "math.h"
 
 extern float cubic_table[CUBIC_RESOLUTION * 4];
@@ -99,7 +102,7 @@ float work_float(psy_dsp_SplineResampler* self,
 	const float foffset = (float)floor(offset);
 	const int ioffset = (int)(foffset);
 	uint32_t res = (uint32_t)((offset - foffset) * CUBIC_RESOLUTION);
-	res <<= 2;//Since we have four floats in the table, the position is 16byte aligned.
+	res <<= 2; /* Since we have four floats in the table, the position is 16byte aligned. */
 	data += ioffset;
 	yo = (ioffset == 0) ? *loopEnd : *(data - 1);
 	y0 = *data;	
@@ -117,7 +120,7 @@ float work_float_unchecked(psy_dsp_SplineResampler* self,
 	const float y2 = *(data + 2);
 	float* table;
 	res >>= 32 - CUBIC_RESOLUTION_LOG;
-	res <<= 2;//Since we have four floats in the table, the position is 16byte aligned.	
+	res <<= 2; /* Since we have four floats in the table, the position is 16byte aligned. */
 	table = &cubic_table[res];
 	return table[0] * yo + table[1] * y0 + table[2] * y1 + table[3] * y2;
 }

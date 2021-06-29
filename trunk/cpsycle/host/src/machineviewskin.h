@@ -29,8 +29,7 @@ void machinecoords_init(MachineCoords*);
 typedef struct MachineViewSkin {
 	MachineCoords master;
 	MachineCoords generator;
-	MachineCoords effect;
-	psy_ui_Colour colour;
+	MachineCoords effect;	
 	psy_ui_Colour wirecolour;
 	psy_ui_Colour selwirecolour;
 	psy_ui_Colour hoverwirecolour;

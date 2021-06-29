@@ -13,6 +13,7 @@
 #include "knobui.h"
 #include "resources/resource.h"
 #include "slidergroupui.h"
+#include "styles.h"
 /* audio */
 #include <exclusivelock.h>
 #include <plugin_interface.h>
@@ -1344,8 +1345,7 @@ void machinestackpane_init(MachineStackPane* self, psy_ui_Component* parent,
 	self->skin = skin;
 	self->state = state;	
 	self->vudrawupdate = FALSE;
-	self->opcount = 0;	
-	machinestackpane_updateskin(self);	
+	self->opcount = 0;
 	machinestackpane_build(self);	
 }
 
@@ -1444,11 +1444,6 @@ psy_ui_Component* machinestackpane_insert(MachineStackPane* self, uintptr_t slot
 		return rv;
 	}	
 	return NULL;
-}
-
-void machinestackpane_updateskin(MachineStackPane* self)
-{
-	psy_ui_component_setbackgroundcolour(&self->component, self->skin->colour);
 }
 
 void machinestackpane_updatevus(MachineStackPane* self)
@@ -1582,7 +1577,7 @@ static void machinestackview_setmachines(MachineStackView*,
 static psy_ui_ComponentVtable vtable;
 static bool vtable_initialized = FALSE;
 
-static psy_ui_ComponentVtable* vtable_init(MachineStackView* self)
+static void vtable_init(MachineStackView* self)
 {
 	assert(self);
 
@@ -1592,7 +1587,7 @@ static psy_ui_ComponentVtable* vtable_init(MachineStackView* self)
 			machinestackview_destroy;
 		vtable_initialized = TRUE;
 	}
-	return &vtable;
+	psy_ui_component_setvtable(&self->component, &vtable);
 }
 // implementation
 void machinestackview_init(MachineStackView* self, psy_ui_Component* parent,
@@ -1601,8 +1596,9 @@ void machinestackview_init(MachineStackView* self, psy_ui_Component* parent,
 {
 	assert(self);
 
-	psy_ui_component_init(&self->component, parent, NULL);	
-	psy_ui_component_setvtable(&self->component, vtable_init(self));
+	psy_ui_component_init(&self->component, parent, NULL);
+	vtable_init(self);	
+	psy_ui_component_setstyletype(&self->component, STYLE_MACHINEVIEW_STACK);
 	self->paramviews = paramviews;
 	self->workspace = workspace;	
 	machinestackstate_init(&self->state, self->paramviews);

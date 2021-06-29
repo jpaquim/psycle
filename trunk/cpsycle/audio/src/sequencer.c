@@ -1,23 +1,24 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "sequencer.h"
-// local
+/* local */
 #include "exclusivelock.h"
 #include "instruments.h"
 #include "pattern.h"
-// container
+/* container */
 #include <containerconvert.h>
 #include <qsort.h>
-// std
+/* std */
 #include <math.h>
-// platform
+/* platform */
 #include "../../detail/portable.h"
 #include "../../detail/trace.h"
-
-#include <math.h>
 
 #define QSORTARRAYRESIZE 1024
 
@@ -53,7 +54,7 @@ static void psy_audio_sequencerrowdelay_init(psy_audio_SequencerRowDelay* self)
 	assert(self);
 
 	self->active = 0;
-	// line delay
+	/* line delay */
 	self->rowspeed = (psy_dsp_big_beat_t) 1.f;
 }
 
@@ -249,7 +250,7 @@ void psy_audio_sequencer_setposition(psy_audio_Sequencer* self,
 	psy_audio_sequencer_cleardelayed(self);
 	psy_audio_sequencer_clearcurrtracks(self);
 	self->seqtime.position = offset;
-	// todo only estimated sample pos on current bpm
+	/* todo only estimated sample pos on current bpm */
 	self->seqtime.playcounter = psy_audio_sequencer_frames(self,
 		offset);
 	self->seqtime.lastbarposition = floor(offset / 4) * 4;		
@@ -609,7 +610,7 @@ uintptr_t psy_audio_sequencer_updatelinetickcount(psy_audio_Sequencer* self,
 
 void psy_audio_sequencer_clockstart(psy_audio_Sequencer* self)
 {	
-	// todo lock
+	/* todo lock */
 	psy_audio_sequencer_stop(self);
 	psy_audio_sequencer_setposition(self, (psy_dsp_big_beat_t)0.0);
 	psy_audio_sequencer_start(self);
@@ -617,7 +618,7 @@ void psy_audio_sequencer_clockstart(psy_audio_Sequencer* self)
 
 void psy_audio_sequencer_clock(psy_audio_Sequencer* self)
 {	
-	// todo sync
+	/* todo sync */
 }
 
 void psy_audio_sequencer_clockcontinue(psy_audio_Sequencer* self)
@@ -811,9 +812,11 @@ void psy_audio_sequencer_executeline(psy_audio_Sequencer* self,
 
 	assert(self);
 
-	// First execute global events on the same offset (e.g. tracker row start)
-	// before adding them to the current event list that time changes are
-	// applied to all of them independend of the channel order
+	/*
+	** First execute global events on the same offset (e.g. tracker row start)
+	** before adding them to the current event list that time changes are
+	** applied to all of them independend of the channel order
+	*/
 	rowoffset = offset;
 	events = NULL;
 	while (track->iterator->patternnode && rowoffset ==
@@ -832,7 +835,7 @@ void psy_audio_sequencer_executeline(psy_audio_Sequencer* self,
 		}
 		psy_audio_sequencetrackiterator_inc(track->iterator);		
 	}
-	// global events are applied, now execute the events
+	/* global events are applied, now execute the events */
 	for (p = events; p != NULL; psy_list_next(&p)) {
 		psy_audio_sequencer_addsequenceevent(self,
 			psy_audio_patternnode_entry(p), track, rowoffset);
@@ -1062,7 +1065,7 @@ void psy_audio_sequencer_addsequenceevent(psy_audio_Sequencer* self,
 						lastmachine);
 				}
 			}
-			// Does this machine really exist and is not muted?
+			/* Does this machine really exist and is not muted? */
 			if (machine && !psy_audio_machine_muted(machine)) {
 				if (ev->cmd == psy_audio_PATTERNCMD_NOTE_DELAY) {
 					psy_audio_sequencer_notedelay(self, patternentry,
@@ -1086,11 +1089,11 @@ void psy_audio_sequencer_addsequenceevent(psy_audio_Sequencer* self,
 			entry = psy_audio_patternentry_clone(patternentry);
 			newev = psy_audio_patternentry_front(entry);
 			entry->track += track->channeloffset;
-			// volume column used to store mach
+			/* volume column used to store mach */
 			newev->vol = (newev->mach == psy_audio_NOTECOMMANDS_psy_audio_EMPTY)
 				? psy_audio_MASTER_INDEX
 				: newev->mach;
-			// master handles all wire's volumes
+			/* master handles all wire's volumes */
 			newev->mach = psy_audio_MASTER_INDEX;
 			psy_audio_patternentry_setbpm(entry, self->seqtime.bpm);
 			entry->delta = offset - self->seqtime.position;
@@ -1295,7 +1298,7 @@ void psy_audio_sequencer_maketweakslideevents(psy_audio_Sequencer* self,
 		psy_audio_patternentry_setbpm(slideentry, self->seqtime.bpm);
 		slideentry->delta = offset +
 			psy_audio_sequencer_frametooffset(self, slide * framesperslide);
-		slideentry->priority = 1; // not used right now
+		slideentry->priority = 1; /* not used right now */
 		psy_list_append(&self->delayedevents, slideentry);
 	}			
 }
@@ -1337,14 +1340,14 @@ void psy_audio_sequencer_makeretriggercontinueevents(psy_audio_Sequencer* self,
 	assert(self);
 	
 	if ((psy_audio_patternentry_front(entry)->parameter & 0xf0) != 0) {
-		uint8_t retriggerrate; // x / 16 = row duration per trigger
+		uint8_t retriggerrate; /* x / 16 = row duration per trigger */
 
 		retriggerrate = psy_audio_patternentry_front(entry)->parameter & 0xf0;
-		// convert retriggerrate to beat unit
+		/* convert retriggerrate to beat unit */
 		retriggerstep = retriggerrate *
 			(psy_audio_sequencer_currbeatsperline(self) / 256.f);
 	} else {
-		// use current retriggerrate	
+		/* use current retriggerrate */
 		retriggerstep = track->state.retriggerstep;		
 	}
 	retriggeroffset = track->state.retriggeroffset + retriggerstep;
@@ -1522,7 +1525,7 @@ uintptr_t psy_audio_sequencer_currframesperline(psy_audio_Sequencer* self)
 		psy_audio_sequencer_currbeatsperline(self));	
 }
 
-// sort events by position and pattern track
+/* sort events by position and pattern track */
 void psy_audio_sequencer_sortevents(psy_audio_Sequencer* self)
 {	
 	uintptr_t numevents;
@@ -1534,15 +1537,17 @@ void psy_audio_sequencer_sortevents(psy_audio_Sequencer* self)
 		if (psy_audio_sequencer_comp_events(self->events->entry,
 				psy_list_last(self->events)->entry) > 0) {
 			psy_audio_PatternEntry* temp;		
-			// swap	entries
+			/* swap	entries */
 			temp = self->events->entry;
 			self->events->entry = self->events->tail->entry;
 			self->events->tail->entry = temp;
 		}
 	} else if (numevents > 1) {
-		// sort with qsort
-		// convert the event list to an array, sort the array and recreate
-		// the sorted event list
+		/*
+		** sort with qsort
+		** convert the event list to an array, sort the array and recreate
+		** the sorted event list
+		*/
 		psy_audio_PatternNode** eventarray;		
 						
 		psy_audio_sequencer_resizeqsortarray(self, numevents);
@@ -1550,21 +1555,21 @@ void psy_audio_sequencer_sortevents(psy_audio_Sequencer* self)
 		if (eventarray) {			
 			psy_audio_PatternNode* sorted;			
 				
-			// copy events to qsort array
+			/* copy events to qsort array */
 			psy_list_to_array((void**)eventarray, numevents, self->events);				
-			// sort array
+			/* sort array */
 			psy_qsort((void**)eventarray, 0, numevents - 1, (psy_fp_comp)
 				psy_audio_sequencer_comp_events);
-			// recreate sorted events
+			/* recreate sorted events */
 			sorted = psy_array_to_list((void**)eventarray, numevents);			
 			psy_list_free(self->events);
 			self->events = sorted;
 		}		
 	}
-	// psy_audio_sequencer_assertorder(self);
+	/* psy_audio_sequencer_assertorder(self); */
 }
 
-// if qsortarraysize is too small reallocate it according to numevents
+/* if qsortarraysize is too small reallocate it according to numevents */
 void psy_audio_sequencer_resizeqsortarray(psy_audio_Sequencer* self,
 	uintptr_t numevents)
 {	

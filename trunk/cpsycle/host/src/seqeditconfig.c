@@ -39,7 +39,7 @@ void seqeditconfig_make(SeqEditConfig* self, psy_Property* parent)
 		PSY_PROPERTY_HINT_EDITHEX);
 }
 
-// Properties
+/* properties */
 uintptr_t seqeditconfig_machine(const SeqEditConfig* self)
 {
 	assert(self);
@@ -47,7 +47,7 @@ uintptr_t seqeditconfig_machine(const SeqEditConfig* self)
 	return (psy_property_at_int(self->seqedit, "machine", 0x3E));
 }
 
-// events
+/* events */
 bool seqeditconfig_onchanged(SeqEditConfig* self, psy_Property*
 	property)
 {

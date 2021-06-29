@@ -1065,11 +1065,11 @@ void psy_audio_xmsamplerchannel_volumeslide(psy_audio_XMSamplerChannel* self,
 		speed = GETSLIDEDOWNVAL(speed);
 		self->m_EffectFlags |= XM_SAMPLER_EFFECT_VOLUMESLIDE;
 		if (psy_audio_xmsamplerchannel_foregroundvoice(self))
-		{
+		{			
 			psy_audio_xmsamplerchannel_foregroundvoice(self)->m_VolumeSlideSpeed = -(speed << 1);
-				if (speed == 0xF) {
-					psy_audio_xmsamplervoice_volumeslide(psy_audio_xmsamplerchannel_foregroundvoice(self));
-				}
+			if (speed == 0xF) {
+				psy_audio_xmsamplervoice_volumeslide(psy_audio_xmsamplerchannel_foregroundvoice(self));
+			}
 		}
 	} else if (ISFINESLIDEUP(speed)) { // FineSlide Up
 		if (psy_audio_xmsamplerchannel_foregroundvoice(self))

@@ -137,8 +137,6 @@ void psy_ui_notebook_onalign(psy_ui_Notebook* self)
 			}
 		}
 		psy_list_free(q);
-	} else {
-		psy_ui_component_align(&self->component);
 	}
 }
 

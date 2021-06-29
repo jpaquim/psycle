@@ -328,6 +328,7 @@
     <ClCompile Include="src\kbdhelp.c" />
     <ClCompile Include="src\keyboardmiscconfig.c" />
     <ClCompile Include="src\knobui.c" />
+    <ClCompile Include="src\labeledit.c" />
     <ClCompile Include="src\labelpair.c" />
     <ClCompile Include="src\labelui.c" />
     <ClCompile Include="src\languageconfig.c" />
@@ -408,6 +409,7 @@
     <ClCompile Include="src\seqeditor.c" />
     <ClCompile Include="src\seqeditorentry.c" />
     <ClCompile Include="src\seqeditorstate.c" />
+    <ClCompile Include="src\seqeditproperties.c" />
     <ClCompile Include="src\seqeditruler.c" />
     <ClCompile Include="src\seqedittimesig.c" />
     <ClCompile Include="src\seqedittoolbar.c" />
@@ -514,6 +516,7 @@
     <ClInclude Include="src\kbdhelp.h" />
     <ClInclude Include="src\keyboardmiscconfig.h" />
     <ClInclude Include="src\knobui.h" />
+    <ClInclude Include="src\labeledit.h" />
     <ClInclude Include="src\labelpair.h" />
     <ClInclude Include="src\labelui.h" />
     <ClInclude Include="src\languageconfig.h" />
@@ -594,6 +597,7 @@
     <ClInclude Include="src\seqeditor.h" />
     <ClInclude Include="src\seqeditorentry.h" />
     <ClInclude Include="src\seqeditorstate.h" />
+    <ClInclude Include="src\seqeditproperties.h" />
     <ClInclude Include="src\seqeditruler.h" />
     <ClInclude Include="src\seqedittimesig.h" />
     <ClInclude Include="src\seqedittoolbar.h" />

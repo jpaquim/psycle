@@ -346,8 +346,8 @@ void transformpatternview_searchentiresong(TransformPatternView* self,
 									
 					orderindex = psy_audio_sequence_patternfirstused(
 						&workspace_song(self->workspace)->sequence,
-						psy_tableiterator_key(&it));
-					psy_audio_sequenceselection_seteditposition(
+						psy_tableiterator_key(&it));					
+					psy_audio_sequenceselection_select_first(
 						&self->workspace->sequenceselection,
 						orderindex);					
 					workspace_setpatterncursor(self->workspace, cursor);
@@ -428,7 +428,7 @@ psy_audio_Pattern* transformpatternview_currpattern(TransformPatternView* self)
 
 	if (self->workspace->song) {
 		return pattern = psy_audio_sequence_pattern(&self->workspace->song->sequence,
-			self->workspace->sequenceselection.editposition);		
+			psy_audio_sequenceselection_first(&self->workspace->sequenceselection));	
 	}
 	return NULL;
 }

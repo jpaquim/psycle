@@ -1,15 +1,19 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "envelopeview.h"
-// ui
+/* ui */
 #include <uiapp.h>
 #include <math.h>
-// platform
+/* platform */
 #include "../../detail/portable.h"
 
+/* prototypes */
 static void envelopebox_ondraw(EnvelopeBox*, psy_ui_Graphics*);
 static void envelopebox_drawgrid(EnvelopeBox*, psy_ui_Graphics*);
 static void envelopebox_drawpoints(EnvelopeBox*, psy_ui_Graphics*);
@@ -29,7 +33,7 @@ static psy_dsp_EnvelopePoint envelopebox_pxtopoint(EnvelopeBox*, double x, doubl
 static psy_dsp_big_seconds_t envelopebox_displaymaxtime(EnvelopeBox*);
 
 static void checkadjustpointrange(psy_List* pointnode);
-
+/* vtable */
 static psy_ui_ComponentVtable envelopebox_vtable;
 static bool envelopebox_vtable_initialized = FALSE;
 
@@ -48,7 +52,7 @@ static void envelopebox_vtable_init(EnvelopeBox* self)
 		envelopebox_vtable_initialized = TRUE;
 	}
 }
-
+/* implementation */
 void envelopebox_init(EnvelopeBox* self, psy_ui_Component* parent)
 {				
 	psy_ui_component_init(&self->component, parent, NULL);

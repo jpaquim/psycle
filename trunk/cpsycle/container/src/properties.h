@@ -146,6 +146,9 @@ const psy_Property* psy_property_findsection_const(const psy_Property*, const ch
 psy_Property* psy_property_findsectionex(psy_Property*, const char* key,
 	psy_Property** prev);
 char_dyn_t* psy_property_sections(const psy_Property*);
+void psy_property_sort(psy_Property*);
+void psy_property_sort_keys(psy_Property*);
+void psy_property_sort_keys_recursive(psy_Property*);
 
 /*
 ** Setter key/value
@@ -154,6 +157,8 @@ char_dyn_t* psy_property_sections(const psy_Property*);
 psy_Property* psy_property_at(psy_Property*, const char* key, psy_PropertyType);
 const psy_Property* psy_property_at_const(const psy_Property*, const char* key,
 	psy_PropertyType);
+psy_Property* psy_property_at_sorted(psy_Property*, const char* key,
+	psy_PropertyType type);
 psy_Property* psy_property_at_section(psy_Property*, const char* key);
 const psy_Property* psy_property_at_section_const(const psy_Property*, const char* key);
 psy_Property* psy_property_at_index(psy_Property*, intptr_t index);
@@ -194,6 +199,7 @@ psy_Property* psy_property_append_action(psy_Property*, const char* key);
 /* Definition */
 void psy_property_change_key(psy_Property*, const char* key);
 const char* psy_property_key(const psy_Property*);
+char_dyn_t* psy_property_fullkey(const psy_Property* self);
 int psy_property_type(const psy_Property*);
 psy_Property* psy_property_setreadonly(psy_Property*, bool on);
 bool psy_property_readonly(const psy_Property*);

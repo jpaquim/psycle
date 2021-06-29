@@ -83,7 +83,7 @@ void seqviewtrack_init(SeqViewTrack* self, psy_ui_Component* parent,
 	psy_signal_connect(
 		&state->cmds->workspace->sequenceselection.signal_deselect,
 		self, seqviewtrack_onsequencedeselect);
-	if (state->cmds->workspace->sequenceselection.editposition.track ==
+	if (psy_audio_sequenceselection_first(&state->cmds->workspace->sequenceselection).track ==
 			trackindex) {
 		psy_ui_component_addstylestate(&self->component,
 			psy_ui_STYLESTATE_SELECT);
@@ -129,7 +129,7 @@ void seqviewtrack_ondraw(SeqViewTrack* self, psy_ui_Graphics* g)
 	uintptr_t endrow;		
 	double lineheightpx;	
 	const psy_ui_TextMetric* tm;
-	psy_audio_OrderIndex first;	
+	psy_audio_OrderIndex editposition;	
 		
 	tm = psy_ui_component_textmetric(&self->component);
 	lineheightpx = psy_max(1.0, floor(psy_ui_value_px(&self->state->lineheight,
@@ -142,7 +142,7 @@ void seqviewtrack_ondraw(SeqViewTrack* self, psy_ui_Graphics* g)
 	psy_ui_settextcolour(g, psy_ui_style(STYLE_SEQLISTVIEW_ITEM)->colour);
 	psy_ui_realpoint_init_all(&cp, 0.0, lineheightpx * startrow);
 	p = psy_list_at(self->track->entries, startrow);
-	first = psy_audio_sequenceselection_first(
+	editposition = psy_audio_sequenceselection_first(
 		&self->state->cmds->workspace->sequenceselection);
 	for (row = startrow; p != NULL; psy_list_next(&p), ++row,
 			cp.y += lineheightpx) {
@@ -156,7 +156,9 @@ void seqviewtrack_ondraw(SeqViewTrack* self, psy_ui_Graphics* g)
 			seqviewtrack_drawprogressbar(self, g, cp);
 		}				
 		seqviewtrack_drawentry(self, g, seqentry, row, cp, rowplaying,
-			(first.track == self->trackindex) && (first.order == row));
+			psy_audio_sequenceselection_isselected(
+			&self->state->cmds->workspace->sequenceselection,
+			psy_audio_orderindex_make(self->trackindex, row)));
 	}
 }
 
@@ -354,8 +356,24 @@ void seqviewtrack_onmousedown(SeqViewTrack* self, psy_ui_MouseEvent* ev)
 				self->state->col = (uintptr_t)(ev->pt.x / self->state->colwidth);
 				self->state->col = psy_min(self->state->col, COLMAX - 1);
 			}
-			workspace_setseqeditposition(self->state->cmds->workspace,
-				self->state->cmd_orderindex);			
+			if (ev->ctrl_key) {
+				if (!psy_audio_sequenceselection_isselected(
+						&self->state->cmds->workspace->sequenceselection,
+						self->state->cmd_orderindex)) {
+					psy_audio_sequenceselection_select(
+						&self->state->cmds->workspace->sequenceselection,
+						self->state->cmd_orderindex);
+				} else {
+					psy_audio_sequenceselection_deselect(
+						&self->state->cmds->workspace->sequenceselection,
+						self->state->cmd_orderindex);
+				}
+			} else {
+				psy_audio_sequenceselection_deselectall(
+						&self->state->cmds->workspace->sequenceselection);
+				workspace_setseqeditposition(self->state->cmds->workspace,
+					self->state->cmd_orderindex);
+			}
 		} else {
 			self->state->cmd_orderindex.track = self->trackindex;
 			self->state->cmd_orderindex.order = psy_INDEX_INVALID;
@@ -557,15 +575,15 @@ bool seqviewlist_oninput(SeqviewList* self, InputHandler* sender)
 
 	cmd = inputhandler_cmd(sender);
 	if (cmd.id != -1) {
-		psy_audio_OrderIndex first;
+		psy_audio_OrderIndex editposition;
 
-		first = psy_audio_sequenceselection_first(
+		editposition = psy_audio_sequenceselection_first(
 			&self->state->cmds->workspace->sequenceselection);
 		switch (cmd.id) {
 		case CMD_NAVLEFT:
 			if (self->state->col > 0) {
 				--self->state->col;
-				seqviewlist_invalidaterow(self, first.order);
+				seqviewlist_invalidaterow(self, editposition.order);
 			} else {
 				self->state->col = COLMAX - 1;
 				workspace_songposdec(self->state->cmds->workspace);
@@ -577,7 +595,7 @@ bool seqviewlist_oninput(SeqviewList* self, InputHandler* sender)
 				self->state->col = 0;
 				workspace_songposinc(self->state->cmds->workspace);
 			}
-			seqviewlist_invalidaterow(self, first.order);
+			seqviewlist_invalidaterow(self, editposition.order);
 			break;
 		case CMD_NAVDOWN:
 			workspace_songposinc(self->state->cmds->workspace);
@@ -586,39 +604,41 @@ bool seqviewlist_oninput(SeqviewList* self, InputHandler* sender)
 			workspace_songposdec(self->state->cmds->workspace);
 			break;
 		case CMD_COLUMNPREV:
-			if (first.track > 0) {
+			if (editposition.track > 0) {
 				uintptr_t rows;
 					
-				--first.track;		
+				--editposition.track;
 				sequencecmds_update(self->state->cmds);
-				rows = psy_audio_sequence_track_size(self->state->cmds->sequence, first.track);
-				if (rows < first.order) {
+				rows = psy_audio_sequence_track_size(self->state->cmds->sequence,
+					editposition.track);
+				if (rows < editposition.order) {
 					if (rows > 0) {
-						first.order = rows - 1;
+						editposition.order = rows - 1;
 					} else {
-						first.order = 0;
+						editposition.order = 0;
 					}
 				}
 				workspace_setseqeditposition(self->state->cmds->workspace,
-					first);
+					editposition);
 			}
 			break;
 		case CMD_COLUMNNEXT:				
 			sequencecmds_update(self->state->cmds);
-			if (first.track + 1 < psy_audio_sequence_width(self->state->cmds->sequence)) {
+			if (editposition.track + 1 < psy_audio_sequence_width(self->state->cmds->sequence)) {
 				uintptr_t rows;
 
-				++first.track;
-				rows = psy_audio_sequence_track_size(self->state->cmds->sequence, first.track);
-				if (rows < first.order) {
+				++editposition.track;
+				rows = psy_audio_sequence_track_size(self->state->cmds->sequence,
+					editposition.track);
+				if (rows < editposition.order) {
 					if (rows > 0) {
-						first.order = rows - 1;
+						editposition.order = rows - 1;
 					} else {
-						first.order = 0;
+						editposition.order = 0;
 					}
 				}
 				workspace_setseqeditposition(self->state->cmds->workspace,
-					first);
+					editposition);
 			}
 			break;
 		case CMD_DIGIT0:
@@ -652,12 +672,13 @@ bool seqviewlist_oninput(SeqviewList* self, InputHandler* sender)
 void seqviewlist_inputdigit(SeqviewList* self, uint8_t digit)
 {
 	psy_audio_SequenceEntry* entry;
-	psy_audio_OrderIndex first;
+	psy_audio_OrderIndex editposition;
 
-	first = psy_audio_sequenceselection_first(
+	editposition = psy_audio_sequenceselection_first(
 		&self->state->cmds->workspace->sequenceselection);
 	sequencecmds_update(self->state->cmds);
-	entry = psy_audio_sequence_entry(self->state->cmds->sequence, first);
+	entry = psy_audio_sequence_entry(self->state->cmds->sequence,
+			editposition);
 	if (!entry) {
 		return;
 	}
@@ -690,10 +711,10 @@ void seqviewlist_inputdigit(SeqviewList* self, uint8_t digit)
 
 void seqviewlist_onfocus(SeqviewList* self)
 {
-	psy_audio_OrderIndex first;
+	psy_audio_OrderIndex editposition;
 	
 	seqviewlist_super_vtable.onfocus(&self->component);
-	first = psy_audio_sequenceselection_first(
+	editposition = psy_audio_sequenceselection_first(
 		&self->state->cmds->workspace->sequenceselection);
 	self->state->active = TRUE;
 	psy_ui_component_setborder(
@@ -702,19 +723,19 @@ void seqviewlist_onfocus(SeqviewList* self)
 	psy_ui_component_addstylestate(
 		psy_ui_component_parent(psy_ui_component_parent(&self->component)),
 		psy_ui_STYLESTATE_SELECT);
-	seqviewlist_invalidaterow(self, first.order);
+	seqviewlist_invalidaterow(self, editposition.order);
 	self->state->cmds->workspace->seqviewactive = TRUE;
 }
 
 void seqviewlist_onfocuslost(SeqviewList* self)
 {
-	psy_audio_OrderIndex first;
+	psy_audio_OrderIndex editposition;
 
 	seqviewlist_super_vtable.onfocuslost(&self->component);
-	first = psy_audio_sequenceselection_first(
+	editposition = psy_audio_sequenceselection_first(
 		&self->state->cmds->workspace->sequenceselection);
 	self->state->active = FALSE;
-	seqviewlist_invalidaterow(self, first.order);
+	seqviewlist_invalidaterow(self, editposition.order);
 	self->state->cmds->workspace->seqviewactive = FALSE;
 	psy_ui_component_setborder(
 		psy_ui_component_parent(psy_ui_component_parent(&self->component)),

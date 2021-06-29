@@ -36,10 +36,6 @@ static void seqeditortoolbar_onconfigure(SeqEditToolBar*,
 	psy_ui_Button* sender);
 static psy_audio_SequenceSampleEntry* seqeditortoolbar_sampleentry(
 	SeqEditToolBar* self);
-static void seqeditortoolbar_oneditaccept(SeqEditToolBar*,
-	psy_ui_Edit* sender);
-static void seqeditortoolbar_oneditreject(SeqEditToolBar*,
-	psy_ui_Edit* sender);
 static void seqeditortoolbar_ontrackeditaccept(SeqEditToolBar*,
 	psy_ui_Edit* sender);
 static void seqeditortoolbar_ontrackeditreject(SeqEditToolBar*,
@@ -102,19 +98,11 @@ void seqedittoolbar_init(SeqEditToolBar* self, psy_ui_Component* parent,
 	psy_ui_component_hide(psy_ui_checkbox_base(&self->usesamplerindex));
 	psy_ui_component_hide(intedit_base(&self->samplerindex));	
 	/* timesig */
-	psy_ui_button_init_text(&self->timesig, &self->component, NULL, "Timesig");	
+	psy_ui_button_init_text(&self->timesig, &self->component, NULL, "Timesigs");
+	psy_ui_button_seticon(&self->timesig, psy_ui_ICON_MORE);
 	/* loop */
 	psy_ui_button_init_text(&self->loop, &self->component, NULL, "Repetitions");
-	/* edit */
-	psy_ui_edit_init(&self->edit, &self->component);
-	psy_ui_edit_setcharnumber(&self->edit, 10);
-	psy_ui_edit_enableinputfield(&self->edit);
-	psy_ui_component_hide(&self->edit.component);
-	psy_signal_connect(&self->edit.signal_accept,
-		self, seqeditortoolbar_oneditaccept);
-	psy_signal_connect(&self->edit.signal_reject,
-		self, seqeditortoolbar_oneditreject);
-
+	psy_ui_button_seticon(&self->timesig, psy_ui_ICON_MORE);
 	psy_signal_connect(&self->inserttype.signal_selchanged, self,
 		seqedittoolbar_oninserttypeselchange);
 	psy_signal_connect(&self->move.signal_clicked, self,
@@ -189,21 +177,12 @@ void seqeditortoolbar_onsequenceselectionselect(SeqEditToolBar* self,
 			psy_ui_component_show(intedit_base(&self->samplerindex));			
 			psy_ui_component_show_align(psy_ui_button_base(&self->assignsample));			
 		}
-	} else if (entry && entry->type == psy_audio_SEQUENCEENTRY_MARKER) {
-		psy_audio_SequenceMarkerEntry* markerentry;
-
-		markerentry = (psy_audio_SequenceMarkerEntry*)entry;
-		psy_ui_component_show_align(psy_ui_edit_base(&self->edit));
-		psy_ui_edit_settext(&self->edit, markerentry->text);
 	} else {
 		if (psy_ui_component_visible(psy_ui_button_base(&self->assignsample))) {
 			psy_ui_component_hide(psy_ui_checkbox_base(&self->usesamplerindex));
 			psy_ui_component_hide(intedit_base(&self->samplerindex));			
 			psy_ui_component_hide_align(psy_ui_button_base(&self->assignsample));
-		}
-		if (psy_ui_component_visible(psy_ui_edit_base(&self->edit))) {
-			psy_ui_component_hide(psy_ui_edit_base(&self->edit));
-		}
+		}		
 	}	
 	sampleentry = seqeditortoolbar_sampleentry(self);
 	if (sampleentry) {
@@ -339,34 +318,6 @@ void seqeditortoolbar_ontrackeditaccept(SeqEditToolBar* self,
 }
 
 void seqeditortoolbar_ontrackeditreject(SeqEditToolBar* self,
-	psy_ui_Edit* sender)
-{
-	psy_ui_component_setfocus(self->state->view);
-}
-
-void seqeditortoolbar_oneditaccept(SeqEditToolBar* self,
-	psy_ui_Edit* sender)
-{
-	psy_audio_Sequence* sequence;
-	
-	sequence = seqeditstate_sequence(self->state);
-	if (sequence) {
-		psy_audio_SequenceEntry* seqentry;
-
-		seqentry = psy_audio_sequence_entry(sequence,
-			seqeditstate_editposition(self->state));
-		if (seqentry && seqentry->type == psy_audio_SEQUENCEENTRY_MARKER) {
-			psy_audio_SequenceMarkerEntry* markerentry;
-
-			markerentry = (psy_audio_SequenceMarkerEntry*)seqentry;
-			psy_strreset(&markerentry->text, psy_ui_edit_text(&self->edit));
-			psy_ui_component_invalidate(self->state->view);
-			psy_ui_component_setfocus(self->state->view);
-		}
-	}
-}
-
-void seqeditortoolbar_oneditreject(SeqEditToolBar* self,
 	psy_ui_Edit* sender)
 {
 	psy_ui_component_setfocus(self->state->view);

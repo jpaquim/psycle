@@ -42,7 +42,8 @@ typedef struct TrackerLineNumbersLabel {
 } TrackerLineNumbersLabel;
 
 void trackerlinenumberslabel_init(TrackerLineNumbersLabel*,
-	psy_ui_Component* parent, TrackerLineState*, Workspace*);
+	psy_ui_Component* parent, psy_ui_Component* view, 
+	TrackerLineState*, Workspace*);
 
 INLINE void trackerlinenumberslabel_setheaderheight(TrackerLineNumbersLabel* self,
 	double headerheight)
@@ -84,7 +85,7 @@ INLINE psy_ui_Component* trackerlinenumberslabel_base(TrackerLineNumbersLabel* s
 	return &self->component;
 }
 
-
+/* TrackerLineNumbers*/
 typedef struct TrackerLineNumbers {
 	/* inherits */
 	psy_ui_Component component;
@@ -100,7 +101,7 @@ typedef struct TrackerLineNumbers {
 } TrackerLineNumbers;
 
 void trackerlinenumbers_init(TrackerLineNumbers*, psy_ui_Component* parent,
-	TrackerLineState*, Workspace*);
+	psy_ui_Component* view,  TrackerLineState*, Workspace*);
 void trackerlinenumbers_setsharedlinestate(TrackerLineNumbers*, TrackerLineState*);
 void trackerlinenumbers_invalidatecursor(TrackerLineNumbers*,
 	const psy_audio_PatternCursor*);

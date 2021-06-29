@@ -144,6 +144,7 @@ typedef struct psy_ui_ComponentVTable {
 	psy_ui_fp_component_ondraw ondraw;
 	psy_ui_fp_component_onsize onsize;
 	psy_ui_fp_component_onclose onclose;
+	psy_ui_fp_component_onalign beforealign;
 	psy_ui_fp_component_onalign onalign;
 	psy_ui_fp_component_onpreferredsize onpreferredsize;
 	psy_ui_fp_component_onpreferredscrollsize onpreferredscrollsize;

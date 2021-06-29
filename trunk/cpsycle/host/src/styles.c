@@ -44,19 +44,22 @@ void inithoststyles(psy_ui_Styles* self, psy_ui_ThemeMode theme)
 	psy_ui_styles_setstyle(self, STYLE_SEQVIEW_BUTTONS, style);
 	
 	style = psy_ui_style_allocinit();
-	psy_ui_style_setcolour(style, material.onprimary_medium);
+	psy_ui_style_setcolours(style, material.onprimary_medium,
+		material.surface_overlay_5p);
 	psy_ui_border_init_solid_radius(&style->border, material.surface_overlay_7p, 6.0);
 	psy_ui_style_setspacing_em(style, 0.25, 1.0, 0.25, 1.0);
 	psy_ui_styles_setstyle(self, STYLE_SEQVIEW_BUTTON, style);
 	
 	style = psy_ui_style_allocinit();
-	psy_ui_style_setbackgroundoverlay(style, 4);
+	psy_ui_style_setcolours(style, material.onprimary_medium,
+		material.surface_overlay_9p);
 	psy_ui_border_init_solid_radius(&style->border, material.surface_overlay_11p, 6.0);
 	psy_ui_style_setspacing_em(style, 0.25, 1.0, 0.25, 1.0);
 	psy_ui_styles_setstyle(self, STYLE_SEQVIEW_BUTTON_HOVER, style);
 	
 	style = psy_ui_style_allocinit();
-	psy_ui_style_setcolours(style, material.onsecondary, material.overlay_4p);
+	psy_ui_style_setcolours(style,  material.onsecondary,
+		material.surface_overlay_9p);	
 	psy_ui_border_init_solid_radius(&style->border, material.surface_overlay_16p, 6.0);
 	psy_ui_style_setspacing_em(style, 0.25, 1.0, 0.25, 1.0);
 	psy_ui_styles_setstyle(self, STYLE_SEQVIEW_BUTTON_SELECT, style);
@@ -214,6 +217,18 @@ void inithoststyles(psy_ui_Styles* self, psy_ui_ThemeMode theme)
 	psy_ui_styles_setstyle(self, STYLE_SEQEDT_LEFT, style);
 
 	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolour(style, material.onprimary_weak);	
+	psy_ui_styles_setstyle(self, STYLE_SEQEDT_LOOP, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolour(style, material.onprimary_medium);	
+	psy_ui_styles_setstyle(self, STYLE_SEQEDT_LOOP_HOVER, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolour(style, material.onprimary_strong);
+	psy_ui_styles_setstyle(self, STYLE_SEQEDT_LOOP_ACTIVE, style);
+
+	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolours(style, material.secondary,
 		psy_ui_colour_overlayed(&material.surface, &material.overlay, 0.24));
 	psy_ui_styles_setstyle(self, STYLE_SEQ_PROGRESS, style);
@@ -236,6 +251,14 @@ void inithoststyles(psy_ui_Styles* self, psy_ui_ThemeMode theme)
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setbackgroundcolour(style, material.surface_overlay_9p);
 	psy_ui_styles_setstyle(self, STYLE_MACHINEVIEW, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setbackgroundcolour(style, material.surface_overlay_9p);
+	psy_ui_styles_setstyle(self, STYLE_MACHINEVIEW_WIRES, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setbackgroundcolour(style, material.surface_overlay_9p);
+	psy_ui_styles_setstyle(self, STYLE_MACHINEVIEW_STACK, style);
 
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setbackgroundcolour(style, material.surface_overlay_9p);
@@ -769,6 +792,15 @@ void initlighttheme(psy_ui_Styles* self)
 	style = psy_ui_style_allocinit();	
 	psy_ui_styles_setstyle(self, STYLE_SEQEDT_LEFT, style);
 
+	style = psy_ui_style_allocinit();	
+	psy_ui_styles_setstyle(self, STYLE_SEQEDT_LOOP, style);
+
+	style = psy_ui_style_allocinit();	
+	psy_ui_styles_setstyle(self, STYLE_SEQEDT_LOOP_HOVER, style);
+
+	style = psy_ui_style_allocinit();	
+	psy_ui_styles_setstyle(self, STYLE_SEQEDT_LOOP_ACTIVE, style);
+
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolours(style, material.secondary,
 		psy_ui_colour_overlayed(&material.surface, &material.overlay, 0.24));
@@ -792,6 +824,14 @@ void initlighttheme(psy_ui_Styles* self)
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setbackgroundcolour(style, material.surface_overlay_9p);
 	psy_ui_styles_setstyle(self, STYLE_MACHINEVIEW, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setbackgroundcolour(style, material.surface_overlay_9p);
+	psy_ui_styles_setstyle(self, STYLE_MACHINEVIEW_WIRES, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setbackgroundcolour(style, material.surface_overlay_9p);
+	psy_ui_styles_setstyle(self, STYLE_MACHINEVIEW_STACK, style);
 
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setbackgroundcolour(style, material.surface_overlay_9p);
@@ -1162,8 +1202,6 @@ void initlighttheme(psy_ui_Styles* self)
 	psy_ui_styles_setstyle(self, STYLE_TIMEBAR_NUMLABEL, style);
 }
 
-
-
 /* Win98Theme */
 void initwin98theme(psy_ui_Styles* self)
 {
@@ -1305,6 +1343,15 @@ void initwin98theme(psy_ui_Styles* self)
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolours(style, win.cl_black, win.cl_silver);
 	psy_ui_styles_setstyle(self, STYLE_SEQEDT_LEFT, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_styles_setstyle(self, STYLE_SEQEDT_LOOP, style);
+
+	style = psy_ui_style_allocinit();	
+	psy_ui_styles_setstyle(self, STYLE_SEQEDT_LOOP_HOVER, style);
+
+	style = psy_ui_style_allocinit();	
+	psy_ui_styles_setstyle(self, STYLE_SEQEDT_LOOP_ACTIVE, style);
 	
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolours(style, win.cl_black, win.cl_white);
@@ -1321,6 +1368,14 @@ void initwin98theme(psy_ui_Styles* self)
 	style = psy_ui_style_allocinit();	
 	psy_ui_style_setborder(style, &win.lowered);
 	psy_ui_styles_setstyle(self, STYLE_MACHINEVIEW, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setborder(style, &win.lowered);
+	psy_ui_styles_setstyle(self, STYLE_MACHINEVIEW_WIRES, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setborder(style, &win.lowered);
+	psy_ui_styles_setstyle(self, STYLE_MACHINEVIEW_STACK, style);
 
 	style = psy_ui_style_allocinit();	
 	psy_ui_style_setborder(style, &win.lowered);

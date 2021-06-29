@@ -5,6 +5,7 @@
 
 #include "properties.h"
 #include "list.h"
+#include "qsort.h"
 
 #include <assert.h>
 #include <stdio.h>
@@ -103,6 +104,7 @@ static psy_Property* psy_property_create_int(const char* key, intptr_t value,
 	intptr_t min, intptr_t max);
 static psy_Property* psy_property_create_bool(const char* key, bool value);
 static psy_Property* psy_property_create_choice(const char* key, intptr_t value);
+static int psy_property_comp_key(psy_Property* p, psy_Property* q);
 
 // Implementation
 static const char* searchkey;
@@ -618,6 +620,69 @@ char_dyn_t* psy_property_sections(const psy_Property* self)
 	return rv;
 }
 
+char_dyn_t* psy_property_fullkey(const psy_Property* self)
+{
+	char_dyn_t* rv;
+	
+	assert(self);
+
+	rv = psy_property_sections(self);
+	if (psy_strlen(rv) > 0) {
+		rv = psy_strcat_realloc(rv, ".");
+		rv = psy_strcat_realloc(rv, psy_property_key(self));		
+	}
+	return rv;
+}
+
+void psy_property_sort_keys(psy_Property* self)
+{	
+	if (self) {
+		uintptr_t i;
+		uintptr_t num;
+		psy_List* p;
+		psy_Property** propertiesptr;
+
+		num = psy_property_size(self);
+		propertiesptr = (psy_Property**)malloc(sizeof(psy_Property*) * num);
+		if (propertiesptr) {
+			p = psy_property_begin(self);
+			for (i = 0; p != NULL && i < num; p = p->next, ++i) {
+				propertiesptr[i] = (psy_Property*)psy_list_entry(p);
+			}
+			psy_qsort((void **)propertiesptr, 0, (int)(num - 1),
+				psy_property_comp_key);
+			p = psy_property_begin(self);
+			for (i = 0; p != NULL && i < num; p = p->next, ++i) {
+				p->entry = (void*)propertiesptr[i];
+			}
+			free(propertiesptr);
+		}
+	}
+}
+
+void psy_property_sort_keys_recursive(psy_Property* self)
+{	
+	psy_List* p;
+
+	assert(self);
+
+	psy_property_sort_keys(self);	
+	for (p = psy_property_begin(self); p != NULL; psy_list_next(&p)) {
+		psy_property_sort_keys((psy_Property*)p->entry);				
+	}		
+}
+
+int psy_property_comp_key(psy_Property* p, psy_Property* q)
+{
+	const char* left;
+	const char* right;
+
+	left = psy_property_key(p);	
+	right = psy_property_key(q);	
+	return strcmp(left, right);
+}
+
+
 psy_Property* psy_property_at(psy_Property* self, const char* key,
 	psy_PropertyType type)
 {
@@ -665,6 +730,80 @@ psy_Property* psy_property_at(psy_Property* self, const char* key,
 	return (p)
 		? (psy_Property*)psy_list_entry(p)
 		: NULL;
+}
+
+static psy_Property* psy_property_binsearch(psy_Property*,
+	const char* str, uintptr_t low, uintptr_t up);
+
+psy_Property* psy_property_at_sorted(psy_Property* self, const char* key,
+	psy_PropertyType type)
+{
+	psy_List* p = NULL;
+	char* c;
+	psy_Property* found;
+	psy_Property* property;
+
+	assert(self);
+
+	if (!key) {
+		return NULL;
+	}
+	c = strrchr(key, '.');
+	property = self;
+	if (c) {		
+		char* path;
+		ptrdiff_t count;
+
+		count = c - key;
+		path = malloc(count + 1);
+		if (path) {
+			strncpy(path, key, count);
+			path[count] = '\0';
+			key = c + 1;
+			property = psy_property_findsection(self, path);
+			free(path);
+		}
+	}	
+	if (property) {		
+		found = psy_property_binsearch(property, key, 0, psy_list_size(property->children) - 1);
+		if (found) {
+			if (((type == PSY_PROPERTY_TYPE_NONE) || (found->item.typ == type))) {
+				return found;
+			}
+		}
+	}
+	return NULL;
+}
+
+psy_Property* psy_property_binsearch(psy_Property* self, const char* str,
+	uintptr_t low, uintptr_t up)
+{
+	psy_List* p;
+	const char* midstr;
+	uintptr_t mid;
+	int comp;
+
+	if (up < low) {
+		return NULL;
+	}
+	mid = (low + up) / 2;
+	p = psy_list_at(self->children, mid);
+	if (!p) {
+		return NULL;
+	}
+	midstr = (const char*)psy_property_key((p->entry));
+	if (!midstr) {
+		return NULL;
+	}
+	comp = strcmp(str, midstr);
+	if (comp == 0) {
+		return (psy_Property*)p->entry;
+	}
+	if (comp < 0) {
+		return psy_property_binsearch(self, str, low, mid - 1);
+	} else {
+		return psy_property_binsearch(self, str, mid + 1, up);
+	}	
 }
 
 const psy_Property* psy_property_at_const(const psy_Property* self,

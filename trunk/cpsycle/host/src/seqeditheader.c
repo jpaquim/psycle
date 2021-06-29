@@ -25,9 +25,10 @@ void seqeditheader_init(SeqEditHeader* self, psy_ui_Component* parent,
 {
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_init(&self->pane, &self->component, NULL);
+	psy_ui_component_doublebuffer(&self->pane);
 	psy_ui_component_setalign(&self->pane, psy_ui_ALIGN_FIXED);
 	/* timesig */
-	seqedittimesig_init(&self->timesig, &self->pane, state);
+	seqedittimesigs_init(&self->timesig, &self->pane, state);
 	psy_ui_component_hide(&self->timesig.component);
 	psy_ui_component_setalign(&self->timesig.component, psy_ui_ALIGN_TOP);
 	/* loops */

@@ -21,7 +21,7 @@ typedef struct SeqEditHeader {
 	psy_ui_Component component;
 	/* internal */
 	psy_ui_Component pane;
-	SeqEditTimeSig timesig;
+	SeqEditTimeSigs timesig;
 	SeqEditLoops loops;
 	SeqEditRuler ruler;
 	/* references */

@@ -1,18 +1,18 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
-// prefix file for each .c file
 #include "../../detail/prefix.h"
 
+
 #include "trackerlinenumbers.h"
-// local
+/* local */
 #include "patternview.h"
-// std
-#include <stdlib.h>
-#include <string.h>
+/* std */
 #include <math.h>
 #include <assert.h>
-// platform
+/* platform */
 #include "../../detail/trace.h"
 #include "../../detail/portable.h"
 
@@ -30,8 +30,8 @@ static int testcursor(psy_audio_PatternCursor cursor, TrackerLineState* linestat
 static void setcolumncolour(PatternViewSkin* skin, psy_ui_Graphics* g,
 	TrackerColumnFlags flags, uintptr_t track, uintptr_t numtracks);
 
-// TrackerLineNumbers
-// prototypes
+/* TrackerLineNumbers */
+/* prototypes */
 static void trackerlinenumbers_ondraw(TrackerLineNumbers*, psy_ui_Graphics*);
 static void trackerlinenumbers_onalign(TrackerLineNumbers*);
 static void trackerlinenumbers_onpreferredsize(TrackerLineNumbers*, psy_ui_Size* limit,
@@ -46,7 +46,7 @@ static TrackerColumnFlags trackerlinennumbers_columnflags(TrackerLineNumbers*,
 	psy_dsp_big_beat_t offset, psy_dsp_big_beat_t seqoffset, psy_audio_PatternCursor);
 static void trackerlinennumbers_drawtext(TrackerLineNumbers*, psy_ui_Graphics*,
 	const char* format, double y, double width, const char* text);
-// vtable
+/* vtable */
 static psy_ui_ComponentVtable trackerlinenumbers_vtable;
 static int trackerlinenumbers_vtable_initialized = 0;
 
@@ -61,11 +61,13 @@ static void trackerlinenumbers_vtable_init(TrackerLineNumbers* self)
 		trackerlinenumbers_vtable_initialized = 1;
 	}
 }
-// implementation
+/* implementation */
 void trackerlinenumbers_init(TrackerLineNumbers* self, psy_ui_Component* parent,
-	TrackerLineState* linestate, Workspace* workspace)
+	psy_ui_Component* view, TrackerLineState* linestate, Workspace* workspace)
 {
-	psy_ui_component_init(&self->component, parent, NULL);
+	psy_ui_component_init(&self->component, parent, view);
+	psy_ui_component_setbackgroundmode(&self->component,
+		psy_ui_NOBACKGROUND);
 	trackerlinenumbers_vtable_init(self);
 	self->component.vtable = &trackerlinenumbers_vtable;
 	self->workspace = workspace;
@@ -73,10 +75,7 @@ void trackerlinenumbers_init(TrackerLineNumbers* self, psy_ui_Component* parent,
 	self->showcursor = TRUE;
 	self->shownumbersinhex = TRUE;
 	self->showbeat = FALSE;
-	trackerlinenumbers_setsharedlinestate(self, linestate);
-	psy_ui_component_doublebuffer(&self->component);
-	psy_ui_component_setbackgroundcolour(&self->component,
-		self->linestate->skin->background);
+	trackerlinenumbers_setsharedlinestate(self, linestate);	
 	psy_signal_connect(&self->component.signal_scroll, self,
 		trackerlinenumbers_onscroll);
 	psy_signal_connect(&self->workspace->signal_patterncursorchanged, self,
@@ -384,9 +383,9 @@ void trackerlinenumbers_showlinenumbersinhex(TrackerLineNumbers* self,
 	psy_ui_component_invalidate(&self->component);
 }
 
-// LineNumbersLabel
-// prototypes
-static void trackerlinenumberslabel_ondestroy(TrackerLineNumbersLabel*, psy_ui_Component* sender);
+/* LineNumbersLabel */
+/* prototypes */
+static void trackerlinenumberslabel_ondestroy(TrackerLineNumbersLabel*);
 static void trackerlinenumberslabel_updatetext(TrackerLineNumbersLabel*);
 static void trackerlinenumberslabel_onlanguagechanged(TrackerLineNumbersLabel*);
 static void trackerlinenumberslabel_setsharedlinestate(TrackerLineNumbersLabel*,
@@ -404,7 +403,11 @@ static void trackerlinenumberslabel_vtable_init(TrackerLineNumbersLabel* self)
 {
 	if (!trackerlinenumberslabel_vtable_initialized) {
 		trackerlinenumberslabel_vtable = *(self->component.vtable);
-		trackerlinenumberslabel_vtable.ondraw = (psy_ui_fp_component_ondraw)
+		trackerlinenumberslabel_vtable.ondestroy =
+			(psy_ui_fp_component_ondestroy)
+			trackerlinenumberslabel_ondestroy;
+		trackerlinenumberslabel_vtable.ondraw =
+			(psy_ui_fp_component_ondraw)
 			trackerlinenumberslabel_ondraw;
 		trackerlinenumberslabel_vtable.onmousedown =
 			(psy_ui_fp_component_onmouseevent)
@@ -415,41 +418,42 @@ static void trackerlinenumberslabel_vtable_init(TrackerLineNumbersLabel* self)
 		trackerlinenumberslabel_vtable.onlanguagechanged =
 			(psy_ui_fp_component_onlanguagechanged)
 			trackerlinenumberslabel_onlanguagechanged;
+		trackerlinenumberslabel_vtable_initialized = TRUE;
 	}
+	self->component.vtable = &trackerlinenumberslabel_vtable;
 }
 
 void trackerlinenumberslabel_init(TrackerLineNumbersLabel* self,
-	psy_ui_Component* parent, TrackerLineState* linestate,
-	Workspace* workspace)
+	psy_ui_Component* parent, psy_ui_Component* view,
+	TrackerLineState* linestate, Workspace* workspace)
 {
-	psy_ui_component_init(&self->component, parent, NULL);
+	psy_ui_component_init(&self->component, parent, view);
 	trackerlinenumberslabel_vtable_init(self);
-	self->component.vtable = &trackerlinenumberslabel_vtable;
+	psy_ui_component_setbackgroundmode(&self->component,
+		psy_ui_NOBACKGROUND);	
 	trackerlinenumberslabel_setsharedlinestate(self, linestate);
 	self->linestr = NULL;
 	self->defaultstr = NULL;
 	self->workspace = workspace;
-	self->headerheight = 12;
+	self->headerheight = 12.0;
 	self->showdefaultline = TRUE;
 	self->showbeatoffset = FALSE;
 	self->useheaderbitmap = TRUE;
 	trackerlinenumberslabel_updatetext(self);	
-	psy_signal_connect(&self->component.signal_destroy, self,
-		trackerlinenumberslabel_ondestroy);
 }
 
-void trackerlinenumberslabel_ondestroy(TrackerLineNumbersLabel* self, psy_ui_Component* sender)
+void trackerlinenumberslabel_ondestroy(TrackerLineNumbersLabel* self)
 {
 	free(self->linestr);
+	self->linestr = NULL;
 	free(self->defaultstr);
+	self->defaultstr = NULL;
 }
 
 void trackerlinenumberslabel_updatetext(TrackerLineNumbersLabel* self)
 {
-	free(self->linestr);
-	free(self->defaultstr);
-	self->linestr = strdup(psy_ui_translate("patternview.line"));
-	self->defaultstr = strdup(psy_ui_translate("patternview.defaults"));
+	psy_strreset(&self->linestr, psy_ui_translate("patternview.line"));
+	psy_strreset(&self->defaultstr, psy_ui_translate("patternview.defaults"));
 }
 
 void trackerlinenumberslabel_onlanguagechanged(TrackerLineNumbersLabel* self)
@@ -483,7 +487,7 @@ void trackerlinenumberslabel_onmousedown(TrackerLineNumbersLabel* self,
 void trackerlinenumberslabel_ondraw(TrackerLineNumbersLabel* self, psy_ui_Graphics* g)
 {
 	psy_ui_RealSize size;
-	psy_ui_RealRectangle r;	
+	psy_ui_RealRectangle r;		
 	
 	size = psy_ui_component_scrollsize_px(&self->component);
 	psy_ui_setrectangle(&r, 0, 0, size.width, size.height);
@@ -577,23 +581,24 @@ void setcolumncolour(PatternViewSkin* skin, psy_ui_Graphics* g,
 	}
 }
 
-
-
-// TrackerLineNumberBar
-// prototypes
-
-// implementation
+/* TrackerLineNumberBar */
+/* implementation */
 void trackerlinenumberbar_init(TrackerLineNumberBar* self, psy_ui_Component* parent,
 	TrackerLineState* linestate, Workspace* workspace)
 {
 	psy_ui_component_init(&self->component, parent, NULL);
-	trackerlinenumberslabel_init(&self->linenumberslabel, &self->component, linestate,
-		workspace);
+	psy_ui_component_setbackgroundmode(&self->component, psy_ui_NOBACKGROUND);
+	trackerlinenumberslabel_init(&self->linenumberslabel, &self->component, NULL,
+		linestate, workspace);
 	psy_ui_component_setalign(&self->linenumberslabel.component, psy_ui_ALIGN_TOP);
+	/* scrollpane */
 	psy_ui_component_init(&self->linenumberpane, &self->component, NULL);
 	psy_ui_component_setalign(&self->linenumberpane, psy_ui_ALIGN_CLIENT);
-	trackerlinenumbers_init(&self->linenumbers, &self->linenumberpane, linestate,
-		workspace);
+	psy_ui_component_doublebuffer(&self->linenumberpane);
+	psy_ui_component_setbackgroundcolour(&self->component, linestate->skin->background);
+	/* linenumbers */
+	trackerlinenumbers_init(&self->linenumbers, &self->linenumberpane,
+		 &self->linenumberpane, linestate, workspace);
 	psy_ui_component_setalign(&self->linenumbers.component, psy_ui_ALIGN_FIXED);
 	zoombox_init(&self->zoombox, &self->component);
 	psy_ui_component_setpreferredsize(&self->zoombox.component,

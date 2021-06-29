@@ -17,8 +17,8 @@
 /* prototypes */
 static void seqview_onsongchanged(SeqView*, Workspace*, int flag,
 	psy_audio_Song*);
-static void seqview_onselectionchanged(SeqView*,
-	psy_audio_SequenceSelection*);
+static void seqview_onsequenceselect(SeqView*,
+	psy_audio_SequenceSelection*, psy_audio_OrderIndex*);
 static void seqview_ontrackreposition(SeqView*,
 	psy_audio_Sequence* sender, uintptr_t trackidx);
 static void seqview_onsequencechanged(SeqView*,
@@ -69,8 +69,8 @@ void seqview_init(SeqView* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(&self->duration.component, psy_ui_ALIGN_BOTTOM);	
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		seqview_onsongchanged);		
-	psy_signal_connect(&workspace->sequenceselection.signal_changed, self,
-		seqview_onselectionchanged);
+	psy_signal_connect(&workspace->sequenceselection.signal_select, self,
+		seqview_onsequenceselect);
 	if (self->cmds.sequence && self->cmds.sequence->patterns) {
 		psy_signal_connect(&self->cmds.sequence->patterns->signal_namechanged,
 			&self->listview,
@@ -129,15 +129,15 @@ void seqview_oneditseqlist(SeqView* self, psy_ui_Button* sender)
 	psy_ui_component_setfocus(&self->listview.component);
 }
 
-void seqview_onselectionchanged(SeqView* self,
-	psy_audio_SequenceSelection* sender)
+void seqview_onsequenceselect(SeqView* self,
+	psy_audio_SequenceSelection* sender, psy_audio_OrderIndex* index)
 {		
 	uintptr_t c = 0;
 	double visilines;
 	double listviewtop;
 	psy_ui_RealSize clientsize;
 	
-	c = sender->editposition.order;
+	c = psy_audio_sequenceselection_first(sender).order;
 	if (c == psy_INDEX_INVALID) {
 		c = 0;
 	}

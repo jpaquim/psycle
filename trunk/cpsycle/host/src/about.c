@@ -1,15 +1,20 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "about.h"
-// host
+/* host */
 #include "resources/resource.h"
 #include "styles.h"
-// platform
+/* platform */
 #include "../../detail/portable.h"
 
+/* Contrib*/
+/* implementation */
 void contrib_init(Contrib* self, psy_ui_Component* parent)
 {	
 	psy_ui_component_init(contrib_base(self), parent, NULL);
@@ -80,12 +85,13 @@ void version_init(Version* self, psy_ui_Component* parent)
 	psy_ui_label_settext(&self->versioninfo, PSYCLE__BUILD__IDENTIFIER("\r\n"));
 }
 
-// Version
+/* Version */
+/* prototypes */
 static void licence_set_en(Licence*);
 static void licence_set_es(Licence*);
 static void licence_setlanguage(Licence*);
 static void licence_onlanguagechanged(Licence*, psy_Translator* sender);
-
+/* implementation */
 void licence_init(Licence* self, psy_ui_Component* parent)
 {
 	psy_ui_component_init(&self->component, parent, NULL);
@@ -221,14 +227,14 @@ void licence_setlanguage(Licence* self)
 	psy_ui_editor_gotoline(&self->licenceinfo, 0);
 }
 
-// About
-// prototypes
+/* About */
+/* prototypes */
 static void about_initbuttons(About*);
 static void about_onbutton(About*, psy_ui_Button* sender);
 static void about_selectinfobox(About*, uintptr_t index);
 static void about_onmousedoubleclick(About*, psy_ui_MouseEvent*);
 static void about_onfocus(About*);
-// vtable
+/* vtable */
 static psy_ui_ComponentVtable about_vtable;
 static bool about_vtable_initialized = FALSE;
 
@@ -246,7 +252,7 @@ static void about_vtable_init(About* self)
 	}
 	self->component.vtable = &about_vtable;
 }
-// implementation
+/* implementation */
 void about_init(About* self, psy_ui_Component* parent, Workspace* workspace)
 {				
 	psy_ui_component_init(&self->component, parent, NULL);

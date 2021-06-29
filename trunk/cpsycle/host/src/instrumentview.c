@@ -1,28 +1,32 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "instrumentview.h"
-// host
+/* host */
 #include "styles.h"
-// ui
+/* ui */
 #include <uiopendialog.h>
 #include <uisavedialog.h>
-// audio
+/* audio */
 #include <exclusivelock.h>
 #include <instruments.h>
 #include <songio.h>
 #include <xmsongloader.h>
 #include <machinefactory.h>
 #include <virtualgenerator.h>
-// dsp
+/* dsp */
 #include <valuemapper.h>
-// std
+/* std */
 #include <math.h>
-
+/* platform */
 #include "../../detail/portable.h"
 
+/* prototypes */
 static void virtualgeneratorbox_updategenerator(VirtualGeneratorsBox*);
 static void virtualgeneratorbox_ongeneratorschanged(VirtualGeneratorsBox*,
 	psy_ui_Component* sender, int slot);
@@ -30,7 +34,7 @@ static void virtualgeneratorbox_onsamplerschanged(VirtualGeneratorsBox*,
 	psy_ui_Component* sender, int slot);
 static void virtualgeneratorbox_onactivechanged(VirtualGeneratorsBox*,
 	psy_ui_Component* sender);
-
+/* implementation */
 void virtualgeneratorbox_init(VirtualGeneratorsBox* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {	
@@ -175,9 +179,10 @@ void virtualgeneratorbox_update(VirtualGeneratorsBox* self)
 	}	
 }
 
-// InstrumentPredefsBar
+/* InstrumentPredefsBar */
+/* prototypes */
 static void instrumentpredefsbar_onpredefs(InstrumentPredefsBar* self, psy_ui_Button* sender);
-
+/* implementation */
 void instrumentpredefsbar_init(InstrumentPredefsBar* self, psy_ui_Component* parent,
 	psy_audio_Instrument* instrument, InstrumentView* view, Workspace* workspace)
 {
@@ -232,13 +237,13 @@ void instrumentpredefsbar_onpredefs(InstrumentPredefsBar* self, psy_ui_Button* s
 	}
 }
 
-// InstrumentHeaderView
-// prototypes
+/* InstrumentHeaderView */
+/* prototypes */
 static void instrumentheaderview_onprevinstrument(InstrumentHeaderView*, psy_ui_Component* sender);
 static void instrumentheaderview_onnextinstrument(InstrumentHeaderView*, psy_ui_Component* sender);
 static void instrumentheaderview_oneditaccept(InstrumentHeaderView*, psy_ui_Edit* sender);
 static void instrumentheaderview_oneditreject(InstrumentHeaderView*, psy_ui_Edit* sender);
-// implementation
+/* implementation */
 void instrumentheaderview_init(InstrumentHeaderView* self, psy_ui_Component* parent,
 	psy_audio_Instruments* instruments, InstrumentView* view,
 	Workspace* workspace)
@@ -272,9 +277,9 @@ void instrumentheaderview_init(InstrumentHeaderView* self, psy_ui_Component* par
 		workspace);
 	instrumentpredefsbar_init(&self->predefs, &self->more, NULL,
 		view, workspace);		
-	// tab = margin;
-	//tab.right = psy_ui_value_make_ew(4.0);
-	//psy_ui_component_setmargin(&self->more, tab);
+	/* tab = margin;
+	tab.right = psy_ui_value_make_ew(4.0);
+	psy_ui_component_setmargin(&self->more, tab); */
 	psy_ui_component_hide(&self->more);	
 }
 

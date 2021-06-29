@@ -1,24 +1,27 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
-#include "song.h"
-#include "constants.h"
 
+#include "song.h"
+/* local */
+#include "constants.h"
 #include "machinefactory.h"
-// platform
+/* platform */
 #include "../../detail/portable.h"
 
-// psy_audio_SongProperties
-// prototypes
+/* psy_audio_SongProperties */
+/* prototypes */
 static void song_initproperties(psy_audio_Song*);
 static void song_initmachines(psy_audio_Song*);
 static void song_initpatterns(psy_audio_Song*);
 static void song_initsequence(psy_audio_Song*);
 static void song_initsignals(psy_audio_Song*);
 static void song_disposesignals(psy_audio_Song*);
-// implementation
+/* implementation */
 void psy_audio_songproperties_init(psy_audio_SongProperties* self,
 	const char* title,
 	const char* credits,
@@ -107,7 +110,7 @@ void psy_audio_songproperties_setcredits(psy_audio_SongProperties* self,
 	psy_strreset(&self->credits, credits);
 }
 
-// psy_audio_Song
+/* psy_audio_Song */
 void psy_audio_song_init(psy_audio_Song* self, psy_audio_MachineFactory*
 	machinefactory)
 {
@@ -237,8 +240,10 @@ void psy_audio_song_insertvirtualgenerator(psy_audio_Song* self,
 {
 	assert(self);
 
-	// && mac != NULL && (mac->_type == psy_audio_SAMPLER ||
-	//    mac->_type == psy_audio_XMSAMPLER))
+	/*
+	** && mac != NULL && (mac->_type == psy_audio_SAMPLER ||
+	**    mac->_type == psy_audio_XMSAMPLER))
+	*/
 	if (virtual_inst >= MAX_MACHINES && virtual_inst < MAX_VIRTUALINSTS) {
 		psy_audio_Machine* machine;
 		
