@@ -1,12 +1,15 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
-// derived from EXS24 For Renoise Matt Allan (MIT Licence)
-// https://github.com/matt-allan/renoise-exs24/blob/master/exs24.lua
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** derived from EXS24 For Renoise Matt Allan (MIT Licence)
+** https://github.com/matt-allan/renoise-exs24/blob/master/exs24.lua
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "exs24loader.h"
-// local
+/* local */
 #include "constants.h"
 #include "psyconvert.h"
 #include "plugin_interface.h"
@@ -15,18 +18,18 @@
 #include "machinefactory.h"
 #include "wire.h"
 #include "waveio.h"
-// dsp
+/* dsp */
 #include <envelope.h>
 #include <datacompression.h>
 #include <operations.h>
-// file
+/* file */
 #include <dir.h>
-// platform
+/* platform */
 #include "../../detail/portable.h"
 
 int32_t twos_complement(int32_t value, uint32_t bits)
 {
-	// if sign bit is set(128 - 255 for 8 bit)
+	/* if sign bit is set(128 - 255 for 8 bit) */
 	if ((value & (1 << (bits - 1))) != 0) {
 		return (value - (1 << bits));
 	}
@@ -74,7 +77,7 @@ typedef struct EXS24Sample {
 	char file_name[256];
 } EXS24Sample;
 
-// prototypes
+/* prototypes */
 static int psy_audio_exs24loader_readmagic(psy_audio_EXS24Loader*);
 static int psy_audio_exs24loader_readsizeexpand(psy_audio_EXS24Loader*);
 static int psy_audio_exs24loader_readzone(psy_audio_EXS24Loader*,
@@ -82,11 +85,11 @@ static int psy_audio_exs24loader_readzone(psy_audio_EXS24Loader*,
 static int psy_audio_exs24loader_readsample(psy_audio_EXS24Loader*,
 	uint32_t i, uint32_t size, EXS24Sample*);
 
-// todo: combine duplicate code (asiodriver.cpp)
+/* todo: combine duplicate code (asiodriver.cpp) */
 #define swaplong(v) ((((v)>>24)&0xFF)|(((v)>>8)&0xFF00)|(((v)&0xFF00)<<8)|(((v)&0xFF)<<24)) 
 #define swapshort(v) ((((v)>>8)&0xFF)|(((v)&0xFF)<<8))
 
-// implementation
+/* implementation */
 void psy_audio_exs24loader_init(psy_audio_EXS24Loader* self,
 	psy_audio_SongFile* songfile)
 {
@@ -194,7 +197,7 @@ int psy_audio_exs24loader_load(psy_audio_EXS24Loader* self)
 			if (size < 104) {
 				return PSY_ERRFILE;
 			}
-			//table.insert(exs.zones, create_zone(fh, i, size + 84, big_endian))
+			/* table.insert(exs.zones, create_zone(fh, i, size + 84, big_endian)) */
 			psy_audio_exs24loader_readzone(self, i, size + 84, &zone);
 			entry = psy_audio_instrumententry_allocinit();
 			entry->keyrange.low = zone.key_low;
@@ -218,7 +221,7 @@ int psy_audio_exs24loader_load(psy_audio_EXS24Loader* self)
 				return FALSE;
 			}
 			psy_audio_exs24loader_readsample(self, i, size + 84, &sample);
-			// table.insert(exs.samples, create_sample(fh, i, size + 84, big_endian))			
+			/* table.insert(exs.samples, create_sample(fh, i, size + 84, big_endian)) */
 			wave = psy_audio_sample_allocinit(0);
 			psy_audio_sample_setname(wave, sample.name);
 			psy_audio_samples_insert(&self->song->samples, wave,
@@ -229,10 +232,12 @@ int psy_audio_exs24loader_load(psy_audio_EXS24Loader* self)
 				psy_Path path;
 				psy_Path parentpath;
 
-				// find sample path
-				// 1. assume the parent dir of exs + last dir of sample.file_path
-				// 2. assume current dir of exs
-				// sample.file_path
+				/*
+				** find sample path
+				** 1. assume the parent dir of exs + last dir of sample.file_path
+				** 2. assume current dir of exs
+				** sample.file_path
+				*/
 				psy_path_init(&path, self->songfile->path);
 				psy_path_init(&parentpath, psy_path_prefix(&path));
 				samplepath = NULL;
@@ -327,7 +332,7 @@ int psy_audio_exs24loader_readzone(psy_audio_EXS24Loader* self,
 	if (status = psyfile_read(self->fp, &zone->name, 4)) {
 		return status;
 	}
-	// rtrim zone.name = rtrim(fh : read(64))
+	/* rtrim zone.name = rtrim(fh : read(64)) */
 	if (psyfile_seek(self->fp, i + 84) == -1) {
 		return PSY_ERRFILE;
 	}
@@ -349,29 +354,29 @@ int psy_audio_exs24loader_readzone(psy_audio_EXS24Loader* self,
 	if (status = psyfile_read(self->fp, &zone->fine_tuning, 1)) {
 		return status;
 	}
-	//zone->fine_tuning = twos_complement(zone->fine_tuning, 8);
-	// twos_complement(string.byte(fh:read(1)), 8)
+	/* zone->fine_tuning = twos_complement(zone->fine_tuning, 8); */
+	/* twos_complement(string.byte(fh:read(1)), 8) */
 	if (psyfile_seek(self->fp, i + 87) == -1) {
 		return PSY_ERRFILE;
 	}
 	if (status = psyfile_read(self->fp, &zone->pan, 1)) {
 		return status;
 	}
-	// twos_complement(string.byte(fh:read(1)), 8)
+	/* twos_complement(string.byte(fh:read(1)), 8) */
 	if (psyfile_seek(self->fp, i + 88) == -1) {
 		return PSY_ERRFILE;
 	}
 	if (status = psyfile_read(self->fp, &zone->volume, 1)) {
 		return status;
 	}
-	// twos_complement(string.byte(fh:read(1)), 8)
+	/* twos_complement(string.byte(fh:read(1)), 8) */
 	if (psyfile_seek(self->fp, i + 164) == -1) {
 		return PSY_ERRFILE;
 	}
 	if (status = psyfile_read(self->fp, &zone->coarse_tuning, 1)) {
 		return status;
 	}
-	// twos_complement(string.byte(fh:read(1)), 8)
+	/* twos_complement(string.byte(fh:read(1)), 8) */
 	if (psyfile_seek(self->fp, i + 90) == -1) {
 		return PSY_ERRFILE;
 	}
@@ -525,7 +530,7 @@ int psy_audio_exs24loader_readsample(psy_audio_EXS24Loader* self,
 	if (status = psyfile_read(self->fp, &sample->name, 64)) {
 		return status;
 	}
-	// rtrim(fh : read(64))			
+	/* rtrim(fh : read(64)) */
 	if (psyfile_seek(self->fp, i + 88) == -1) {
 		return PSY_ERRFILE;
 	}
@@ -565,7 +570,7 @@ int psy_audio_exs24loader_readsample(psy_audio_EXS24Loader* self,
 	if (status = psyfile_read(self->fp, &sample->file_path, 256)) {
 		return status;
 	}
-	// rtrim(fh : read(256))
+	/* rtrim(fh : read(256)) */
 	if (size > 420) {
 		if (psyfile_seek(self->fp, i + 420) == -1) {
 			return PSY_ERRFILE;
@@ -573,7 +578,7 @@ int psy_audio_exs24loader_readsample(psy_audio_EXS24Loader* self,
 		if (status = psyfile_read(self->fp, &sample->file_name, 256)) {
 			return status;
 		}
-		//rtrim(fh : read(256))
+		/* rtrim(fh : read(256)) */
 	} else {
 		if (psyfile_seek(self->fp, i + 20) == -1) {
 			return PSY_ERRFILE;
@@ -581,8 +586,7 @@ int psy_audio_exs24loader_readsample(psy_audio_EXS24Loader* self,
 		if (status = psyfile_read(self->fp, &sample->file_name, 64)) {
 			return status;
 		}
-		// rtrim(fh : read(64))
+		/* rtrim(fh : read(64)) */
 	}
 	return PSY_OK;
 }
-			

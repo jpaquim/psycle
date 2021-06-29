@@ -1,17 +1,20 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "eventdriverconfig.h"
-// host
+/* host */
 #include "cmdproperties.h"
-// ui
+/* ui */
 #include <uiopendialog.h>
 #include <uisavedialog.h>
-// file
+/* file */
 #include <dir.h>
-// platform
+/* platform */
 #include "../../detail/portable.h"
 
 void eventdriverconfig_init(EventDriverConfig* self, psy_Property* parent,
@@ -54,7 +57,7 @@ void eventdriverconfig_makeeventdriverlist(EventDriverConfig* self)
 	assert(self);
 
 	psy_property_settext(self->eventinputs, "settingsview.event-input");
-	// change number to set startup driver, if no psycle.ini found
+	/* change number to set startup driver, if no psycle.ini found */
 	self->installeddriver = psy_property_settext(
 		psy_property_append_choice(self->eventinputs, "installeddriver", 0),
 		"Input Drivers");
@@ -167,7 +170,7 @@ void eventdriverconfig_loadeventdriverconfiguration(EventDriverConfig* self)
 				eventdriverconfig_showactiveeventdriverconfig(self,
 					psy_property_item_int(self->activedrivers));
 			}
-			// eventdriverconfig_update_driverconfigure_section(self);
+			/* eventdriverconfig_update_driverconfigure_section(self); */
 			psy_property_deallocate(local);
 		}
 		psy_ui_opendialog_dispose(&opendialog);

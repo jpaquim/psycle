@@ -1,22 +1,24 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "greet.h"
-// host
+/* host */
 #include "resources/resource.h"
 #include "styles.h"
 
-// prototypes
+/* prototypes */
 static void greet_ondestroy(Greet*);
 static void greet_onalign(Greet*);
 static void greet_addstring(Greet*, const char* text);
 static void greet_build(Greet*);
 static void greet_buildoriginal(Greet*);
 static void greet_onoriginal(Greet*, psy_ui_Component* sender);
-
-// vtable
+/* vtable */
 static psy_ui_ComponentVtable greet_vtable;
 static bool greet_vtable_initialized = FALSE;
 
@@ -31,7 +33,7 @@ static void greet_vtable_init(Greet* self)
 	}
 	self->component.vtable = &greet_vtable;
 }
-// implementation
+/* implementation */
 void greet_init(Greet* self, psy_ui_Component* parent)
 {
 	psy_ui_component_init(&self->component, parent, NULL);
@@ -101,28 +103,28 @@ void greet_build(Greet* self)
 	greet_addstring(self, "All at #psycle [EFnet]");
 
 	greet_addstring(self, "Alk [Extreme testing + Coding]");
-//	greet_addstring(self, "BigTick [for his excellent VSTs]");
+/*	greet_addstring(self, "BigTick [for his excellent VSTs]"); */
 	greet_addstring(self, "bohan");
 	greet_addstring(self, "Byte");
 	greet_addstring(self, "CyanPhase [for porting VibraSynth]");
 	greet_addstring(self, "dazld");
 	greet_addstring(self, "dj_d [Beta testing]");
 	greet_addstring(self, "DJMirage");
-//	greet_addstring(self, "Drax_D [for asking to be here ;D]");
+/*	greet_addstring(self, "Drax_D [for asking to be here ;D]"); */
 	greet_addstring(self, "Druttis [psy_audio_Machines]");
 	greet_addstring(self, "Erodix");
-//	greet_addstring(self, "Felix Kaplan / Spirit Of India");
-//	greet_addstring(self, "Felix Petrescu 'WakaX'");
-//	greet_addstring(self, "Gerwin / FreeH2o");
-//	greet_addstring(self, "Imagineer");
+/*	greet_addstring(self, "Felix Kaplan / Spirit Of India"); */
+/*	greet_addstring(self, "Felix Petrescu 'WakaX'"); */
+/*	greet_addstring(self, "Gerwin / FreeH2o"); */
+/*	greet_addstring(self, "Imagineer"); */
 	greet_addstring(self, "Arguru/Guru R.I.P. [We follow your steps]");
-//	greet_addstring(self, "KooPer");
-//	greet_addstring(self, "Krzysztof Foltman / fsm [Coding help]");
-//	greet_addstring(self, "krokpitr");
+/*	greet_addstring(self, "KooPer"); */
+/*	greet_addstring(self, "Krzysztof Foltman / fsm [Coding help]"); */
+/*	greet_addstring(self, "krokpitr"); */
 	greet_addstring(self, "ksn [Psycledelics WebMaster]");
 	greet_addstring(self, "lastfuture");
 	greet_addstring(self, "LegoStar [asio]");
-//	greet_addstring(self, "Loby [for being away]");
+/*	greet_addstring(self, "Loby [for being away]"); */
 	greet_addstring(self, "Pikari");
 	greet_addstring(self, "pooplog [psy_audio_Machines + Coding]");
 	greet_addstring(self, "sampler");
@@ -130,7 +132,7 @@ void greet_build(Greet* self)
 	greet_addstring(self, "hugo Vinagre [Extreme testing]");
 	greet_addstring(self, "TAo-AAS");
 	greet_addstring(self, "TimEr [Site Graphics and more]");
-//	greet_addstring(self, "Vir|us");
+/*	greet_addstring(self, "Vir|us"); */
 }
 
 void greet_buildoriginal(Greet* self)

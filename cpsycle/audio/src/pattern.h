@@ -25,6 +25,8 @@ extern "C" {
 */
 
 #define psy_audio_GLOBALPATTERN INT32_MAX - 1
+#define psy_audio_GLOBALPATTERN_TIMESIGTRACK 0
+#define psy_audio_GLOBALPATTERN_LOOPTRACK 1
 
 /* edit position in the pattern */
 typedef struct {	
@@ -162,6 +164,11 @@ INLINE uintptr_t psy_audio_patternsearchreplacemode_replacewithnewval(uintptr_t 
 	return newval;
 }
 
+typedef struct psy_audio_Loop {
+	psy_audio_PatternNode* start;
+	psy_audio_PatternNode* end;
+} psy_audio_Loop;
+
 typedef struct psy_audio_Pattern {
 	/* public */
 	psy_Signal signal_namechanged;
@@ -206,8 +213,12 @@ psy_audio_Pattern* psy_audio_pattern_clone(psy_audio_Pattern*);
 ** inserts an event by copy
 ** \return the pattern node containing the inserted event
 */
-psy_audio_PatternNode* psy_audio_pattern_insert(psy_audio_Pattern*, psy_audio_PatternNode* prev, uintptr_t track,
-	psy_dsp_big_beat_t offset, const psy_audio_PatternEvent*);
+psy_audio_PatternNode* psy_audio_pattern_insert(psy_audio_Pattern*,
+	psy_audio_PatternNode* prev, uintptr_t track, psy_dsp_big_beat_t offset,
+	const psy_audio_PatternEvent*);
+psy_audio_PatternNode* psy_audio_pattern_insert(psy_audio_Pattern*,
+	psy_audio_PatternNode* prev, uintptr_t track, psy_dsp_big_beat_t offset,
+	const psy_audio_PatternEvent*);
 /* removes a pattern node */
 void psy_audio_pattern_remove(psy_audio_Pattern*, psy_audio_PatternNode*);
 /* finds the pattern node greater or equal than the offset */
@@ -233,11 +244,11 @@ INLINE psy_audio_PatternNode* psy_audio_pattern_begin(const psy_audio_Pattern* s
 psy_audio_PatternNode* psy_audio_pattern_last(psy_audio_Pattern*);
 /* finds the next pattern node on a track */
 /* \return next pattern node on a track or NULL */
-psy_audio_PatternNode* psy_audio_pattern_next_track(psy_audio_Pattern*,
+psy_audio_PatternNode* psy_audio_patternnode_next_track(
 	psy_audio_PatternNode* node, uintptr_t track);
 /* finds the prev pattern node on a track */
 /* \return prev pattern node on a track or NULL */
-psy_audio_PatternNode* psy_audio_pattern_prev_track(psy_audio_Pattern*,
+psy_audio_PatternNode* psy_audio_patternnode_prev_track(
 	psy_audio_PatternNode* node, uintptr_t track);
 /* test if track is used */
 /* \return TRUE if track used else FALSE */
@@ -327,6 +338,18 @@ psy_audio_PatternCursor psy_audio_pattern_searchinpattern(psy_audio_Pattern*,
 void psy_audio_pattern_setdefaultlines(uintptr_t numlines);
 /* return number of lines a pattern will be created */
 uintptr_t psy_audio_pattern_defaultlines(void);
+/* return loop */
+psy_audio_Loop psy_audio_pattern_loop_at(psy_audio_Pattern*, uintptr_t index,
+	uintptr_t track);
+/* return loop index */
+uintptr_t psy_audio_pattern_loop_index(psy_audio_Pattern*, psy_audio_PatternNode*,
+	uintptr_t track);
+/* return loop */
+psy_audio_PatternNode* psy_audio_pattern_timesig_at(psy_audio_Pattern*, uintptr_t index,
+	uintptr_t track);
+/* return loop index */
+uintptr_t psy_audio_pattern_timesig_index(psy_audio_Pattern*, psy_audio_PatternNode*,
+	uintptr_t track);
 
 /* psy_audio_PatternCursorNavigator */
 typedef struct {

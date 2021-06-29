@@ -161,7 +161,7 @@ int psy_audio_lysongexport_write_patd(psy_audio_LySongExport* self,
 				if (entry->track != track) {
 					continue;
 				}
-				nextnode = psy_audio_pattern_next_track(pattern, node, entry->track);
+				nextnode = psy_audio_patternnode_next_track(node, entry->track);
 				if (nextnode) {
 					psy_audio_PatternEntry* nextentry;
 					psy_dsp_big_beat_t newlength;

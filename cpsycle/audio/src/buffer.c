@@ -1,12 +1,18 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "buffer.h"
+/* local */
 #include "connections.h"
 #include <operations.h>
+/* dsp */
 #include <rms.h>
+/* std */
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
@@ -286,7 +292,7 @@ void psy_audio_buffer_insertsamples(psy_audio_Buffer* self,
 		if (self->numchannels > 1) {
 			psy_dsp_rmsvol_tick(self->rms, self->samples[0],
 				self->samples[1],
-				(int)numsamples); ///\todo int cast?
+				(int)numsamples); /* \todo int cast? */
 		}
 	}
 }
@@ -340,7 +346,7 @@ void psy_audio_buffer_writesamples(psy_audio_Buffer* self,
 		if (self->numchannels > 1) {
 			psy_dsp_rmsvol_tick(self->rms, self->samples[0],
 				self->samples[1],
-				(int)numsamples); ///\todo int cast?
+				(int)numsamples); /* /\todo int cast? */
 		}
 	}
 }

@@ -27,8 +27,8 @@ static void seqeditruler_drawruler(SeqEditRuler*, psy_ui_Graphics*,
 	double baseline);
 static void seqeditruler_draweditposition(SeqEditRuler*, psy_ui_Graphics*,
 	double baseline);
-static void seqeditruler_onsequenceselectionchanged(SeqEditRuler*,
-	psy_audio_SequenceSelection* sender);
+static void seqeditruler_onsequenceselect(SeqEditRuler*,
+	psy_audio_SequenceSelection* sender, psy_audio_OrderIndex*);
 static void seqeditruler_onpreferredsize(SeqEditRuler*,
 	const psy_ui_Size* limit, psy_ui_Size* rv);
 static psy_dsp_big_beat_t seqeditruler_step(const SeqEditRuler*);
@@ -73,12 +73,12 @@ void seqeditruler_init(SeqEditRuler* self, psy_ui_Component* parent,
 	assert(self);
 	assert(state);	
 
-	psy_ui_component_init(&self->component, parent, NULL);
-	seqeditruler_vtable_init(self);	
-	psy_ui_component_doublebuffer(&self->component);	
-	self->state = state;	
-	psy_signal_connect(&state->workspace->sequenceselection.signal_changed,
-		self, seqeditruler_onsequenceselectionchanged);	
+	psy_ui_component_init(&self->component, parent, parent);
+	seqeditruler_vtable_init(self);		
+	self->state = state;
+	psy_ui_component_setbackgroundmode(&self->component, psy_ui_NOBACKGROUND);
+	psy_signal_connect(&state->workspace->sequenceselection.signal_select,
+		self, seqeditruler_onsequenceselect);	
 	psy_signal_connect(&self->state->signal_cursorchanged, self,
 		seqeditruler_oncursorchanged);		
 }
@@ -86,8 +86,8 @@ void seqeditruler_init(SeqEditRuler* self, psy_ui_Component* parent,
 void seqeditruler_ondestroy(SeqEditRuler* self)
 {
 	psy_signal_disconnect(
-		&self->state->workspace->sequenceselection.signal_changed,
-		self, seqeditruler_onsequenceselectionchanged);
+		&self->state->workspace->sequenceselection.signal_select,
+		self, seqeditruler_onsequenceselect);
 }
 
 void seqeditruler_ondraw(SeqEditRuler* self, psy_ui_Graphics* g)
@@ -209,7 +209,8 @@ void seqeditruler_draweditposition(SeqEditRuler* self, psy_ui_Graphics* g,
 	psy_audio_SequenceEntry* seqentry;
 
 	seqentry = psy_audio_sequence_entry(seqeditstate_sequence(self->state),
-		self->state->workspace->sequenceselection.editposition);
+		psy_audio_sequenceselection_first(
+			&self->state->workspace->sequenceselection));
 	if (seqentry) {
 		psy_ui_RealSize size;		
 		psy_ui_IconDraw icondraw;
@@ -240,8 +241,8 @@ psy_dsp_big_beat_t seqeditruler_step(const SeqEditRuler* self)
 	return 1.0;
 }
 
-void seqeditruler_onsequenceselectionchanged(SeqEditRuler* self,
-	psy_audio_SequenceSelection* sender)
+void seqeditruler_onsequenceselect(SeqEditRuler* self,
+	psy_audio_SequenceSelection* sender, psy_audio_OrderIndex* index)
 {
 	psy_ui_component_invalidate(&self->component);
 }

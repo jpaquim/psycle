@@ -158,8 +158,8 @@ void psy_ui_button_ondestroy(psy_ui_Button* self)
 void psy_ui_button_onlanguagechanged(psy_ui_Button* self)
 {
 	assert(self);
-
-	if (self->translate) {
+	
+	if (self->translate) {		
 		psy_strreset(&self->translation, psy_ui_translate(self->text));
 		psy_ui_component_invalidate(&self->component);
 	}

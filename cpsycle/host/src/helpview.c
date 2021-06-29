@@ -20,7 +20,6 @@ static void helpview_onselectsection(HelpView*, psy_ui_Component* sender,
 	uintptr_t section, uintptr_t options);
 static void helpview_onfocus(HelpView*, psy_ui_Component* sender);
 static void helpview_onfloatsection(HelpView*, psy_ui_Button* sender);
-
 /* implementation */
 void helpview_init(HelpView* self, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, Workspace* workspace)
@@ -32,7 +31,7 @@ void helpview_init(HelpView* self, psy_ui_Component* parent,
 	helpview_initsectionfloated(self);
 	psy_ui_tabbar_select(&self->tabbar, HELPVIEWSECTION_ABOUT);
 }
-/* construction */
+
 void helpview_initbase(HelpView* self, psy_ui_Component* parent)
 {
 	psy_ui_component_init(helpview_base(self), parent, NULL);
@@ -86,7 +85,6 @@ void helpview_initsectionfloated(HelpView* self)
 		psy_ui_ALIGN_CENTER);
 }
 
-/* events */
 void helpview_onselectsection(HelpView* self, psy_ui_Component* sender,
 	uintptr_t section, uintptr_t options)
 {

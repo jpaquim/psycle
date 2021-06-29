@@ -16,12 +16,15 @@
 void seqeditstate_init(SeqEditState* self, SequenceCmds* cmds,
 	psy_ui_Edit* edit, psy_ui_Component* view)
 {	
+	psy_signal_init(&self->signal_cursorchanged);
+	psy_signal_init(&self->signal_itemselected);
+	psy_signal_init(&self->signal_timesigchanged);
+	psy_signal_init(&self->signal_loopchanged);
 	self->workspace = cmds->workspace;
 	self->cmds = cmds;
 	self->edit = edit;
 	self->view = view;
-	self->inserttype = psy_audio_SEQUENCEENTRY_PATTERN;
-	psy_signal_init(&self->signal_cursorchanged);
+	self->inserttype = psy_audio_SEQUENCEENTRY_PATTERN;	
 	self->defaultpxperbeat = 10;
 	self->pxperbeat = self->defaultpxperbeat;	
 	self->defaultlineheight = psy_ui_value_make_eh(2.0);	
@@ -43,12 +46,23 @@ void seqeditstate_init(SeqEditState* self, SequenceCmds* cmds,
 void seqeditstate_dispose(SeqEditState* self)
 {
 	psy_signal_dispose(&self->signal_cursorchanged);
+	psy_signal_dispose(&self->signal_itemselected);
+	psy_signal_dispose(&self->signal_timesigchanged);
+	psy_signal_dispose(&self->signal_loopchanged);
 }
 
 psy_audio_Sequence* seqeditstate_sequence(SeqEditState* self)
 {
 	if (workspace_song(self->workspace)) {
 		return &workspace_song(self->workspace)->sequence;
+	}
+	return NULL;
+}
+
+const psy_audio_Sequence* seqeditstate_sequence_const(const SeqEditState* self)
+{
+	if (workspace_song_const(self->workspace)) {
+		return &workspace_song_const(self->workspace)->sequence;
 	}
 	return NULL;
 }

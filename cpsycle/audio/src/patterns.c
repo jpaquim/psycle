@@ -1,14 +1,17 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
-#include "patterns.h"
 
+#include "patterns.h"
+/* std */
 #include <assert.h>
 #include <stdlib.h>
 
-// prototypes
+/* prototypes */
 static void psy_audio_patterns_init_signals(psy_audio_Patterns*);
 static void psy_audio_patterns_init_global(psy_audio_Patterns*);
 static void psy_audio_patterns_dispose_signals(psy_audio_Patterns*);
@@ -18,7 +21,7 @@ static void psy_audio_patterns_onpatternnamechanged(psy_audio_Patterns*,
 	psy_audio_Pattern* sender);
 static void psy_audio_patterns_onpatternlengthchanged(psy_audio_Patterns*,
 	psy_audio_Pattern* sender);
-// implementation
+/* implementation */
 void psy_audio_patterns_init(psy_audio_Patterns* self)
 {
 	assert(self);
@@ -128,7 +131,7 @@ uintptr_t psy_audio_patterns_firstfreeslot(psy_audio_Patterns* self)
 
 	assert(self);
 
-	// find first free slot
+	/* find first free slot */
 	while (psy_table_exists(&self->slots, rv)) {
 		++rv;
 	}

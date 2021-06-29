@@ -1,12 +1,15 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "recentview.h"
-// host
+/* host */
 #include "styles.h"
-// audio
+/* audio */
 #include <exclusivelock.h>
 #include <songio.h>
 
@@ -29,7 +32,8 @@ void playlistbar_init(PlaylistBar* self, psy_ui_Component* parent)
 		"playlist.clear");
 }
 
-// PlaylistView
+/* PlaylistView */
+/* prototypes */
 static psy_Property* playlistview_next(PlaylistView*);
 static void playlistview_onselected(PlaylistView*, PropertiesView* sender,
 	psy_Property*);
@@ -44,7 +48,7 @@ static void playlistview_onmousedown(PlaylistView*, psy_ui_MouseEvent*);
 static void playlistview_onsongchanged(PlaylistView*, Workspace* sender,
 	int flag, psy_audio_Song*);
 static void playlistview_onplaylistchanged(PlaylistView*, psy_Playlist* sender);
-// vtable
+/* vtable */
 static psy_ui_ComponentVtable vtable;
 static bool vtable_initialized = FALSE;
 
@@ -60,7 +64,7 @@ static void vtable_init(PlaylistView* self)
 	}
 	self->component.vtable = &vtable;
 }
-
+/* implementation */
 void playlistview_init(PlaylistView* self, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, Workspace* workspace)
 {	

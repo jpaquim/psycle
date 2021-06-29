@@ -26,6 +26,13 @@ void labelpair_init_right(LabelPair*, psy_ui_Component* parent, const char* firs
 void labelpair_init_top(LabelPair*, psy_ui_Component* parent, const char* first,
 	double charnumber);
 
+INLINE psy_ui_Component* labelpair_base(LabelPair* self)
+{
+	assert(self);
+
+	return &self->component;
+}
+
 #ifdef __cplusplus
 }
 #endif

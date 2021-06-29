@@ -35,6 +35,9 @@
     <ClCompile Include="src\zipreader.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\inireader.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\datacompression.h">
@@ -65,6 +68,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\zconf.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\inireader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

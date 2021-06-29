@@ -54,7 +54,7 @@ psy_audio_LegacyPattern psy_audio_allocoldpattern(psy_audio_Pattern* pattern,
 		entry = (psy_audio_PatternEntry*)node->entry;
 		row = (int32_t)(entry->offset * lpb);
 		track = (int32_t)entry->track;
-		if (track < MAX_TRACKS) {
+		if (track < MAX_TRACKS && row < lines) {
 			data = psy_audio_ptrackline(rv, track, row);
 			data->_note = psy_audio_patternentry_front(entry)->note;
 			data->_inst = (uint8_t)(psy_audio_patternentry_front(entry)->inst & 0xFF);

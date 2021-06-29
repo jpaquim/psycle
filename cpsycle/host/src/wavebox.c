@@ -1,13 +1,15 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
-#include "wavebox.h"
 
-// dsp
+#include "wavebox.h"
+/* dsp */
 #include <operations.h>
-// platform
+/* platform */
 #include "../../detail/portable.h"
 
 static void waveboxselection_swap(WaveBoxSelection*);
@@ -208,14 +210,14 @@ psy_dsp_amp_t waveboxcontext_frame_at(WaveBoxContext* self, float frame)
 	if (self->sample && self->sample->numframes > 0) {				
 		return psy_dsp_resampler_work_float(
 			&self->resampler.resampler,
-			// ptr to sample data absolute start (frame 0)
+			/* ptr to sample data absolute start (frame 0) */
 			self->sample->channels.samples[self->channel], 
-			frame, // offset in float
-			// bound checks
+			frame, /* offset in float */
+			/* bound checks */
 			self->sample->numframes,
-			// ptr to loop begin data
+			/* ptr to loop begin data */
 			self->sample->channels.samples[self->channel],
-			// ptr to loop end data
+			/* ptr to loop end data */
 			self->sample->channels.samples[self->channel] +
 				(self->sample->numframes - 1));
 	}
@@ -471,7 +473,7 @@ void wavebox_ondraw(WaveBox* self, psy_ui_Graphics* g)
 					r.top = r.bottom;
 					r.bottom = temp;
 				}
-				psy_ui_drawrectangle(g, r); // x, centery, x, centery - (int)(framevalue * scaley));
+				psy_ui_drawrectangle(g, r); /* x, centery, x, centery - (int)(framevalue * scaley)); */
 			}
 			
 			if (frame >= waveboxcontext_numframes(&self->context)) {

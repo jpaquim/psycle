@@ -130,6 +130,7 @@ void psy_table_insert(psy_Table* self, uintptr_t k, void* value)
 void psy_table_insert_strhash(psy_Table* self, const char* strkey, void* value)
 {
 	assert(self);
+
 	psy_table_insert(self, psy_strhash(strkey), value);
 }
 

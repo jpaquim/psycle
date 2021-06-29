@@ -1,20 +1,23 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "instrumentpitchview.h"
-// platform
+/* platform */
 #include "../../detail/portable.h"
 
-// prototypes
+/* prototypes */
 static void instrumentpitchview_ondestroy(InstrumentPitchView*,
 	psy_ui_Component* sender);
 static void instrumentpitchview_ontweaked(InstrumentPitchView*,
 	psy_ui_Component*, int pointindex);
 static void instrumentpitchview_onenvelopeviewtweaked(InstrumentPitchView*,
 	psy_ui_Component* sender, int pointindex);
-// implementation
+/* implementation */
 void instrumentpitchview_init(InstrumentPitchView* self,
 	psy_ui_Component* parent, psy_audio_Instruments* instruments,
 	Workspace* workspace)

@@ -36,7 +36,6 @@ static void seqeditor_ontrackresize(SeqEditor*, psy_ui_Component* sender,
 	uintptr_t trackid, double* height);
 static void seqeditor_ontoggletimesig(SeqEditor*, psy_ui_Button* sender);
 static void seqeditor_ontoggleloop(SeqEditor*, psy_ui_Button* sender);
-static void seqeditor_onloopchange(SeqEditor*, SeqEditLoops* sender);
 /* vtable */
 static psy_ui_ComponentVtable seqeditor_vtable;
 static bool seqeditor_vtable_initialized = FALSE;
@@ -80,6 +79,9 @@ void seqeditor_init(SeqEditor* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(&self->spacer, psy_ui_ALIGN_TOP);
 	psy_ui_component_setpreferredsize(&self->spacer,
 		psy_ui_size_make_em(0.0, 0.25));
+	/* properties */
+	seqeditproperties_init(&self->properties, &self->component, &self->state);
+	psy_ui_component_setalign(&self->properties.component, psy_ui_ALIGN_RIGHT);
 	/* left */
 	psy_ui_component_init(&self->left, &self->component, NULL);
 	psy_ui_component_setalign(&self->left, psy_ui_ALIGN_LEFT);	
@@ -106,8 +108,6 @@ void seqeditor_init(SeqEditor* self, psy_ui_Component* parent,
 	/* header */
 	seqeditheader_init(&self->header, &self->component, &self->state);
 	psy_ui_component_setalign(&self->header.component, psy_ui_ALIGN_TOP);
-	psy_signal_connect(&self->header.loops.signal_changed, self,
-		seqeditor_onloopchange);
 	/* connect expand */
 	psy_signal_connect(&self->toolbar.expand.signal_clicked, self,
 		seqeditor_ontoggleexpand);
@@ -121,7 +121,8 @@ void seqeditor_init(SeqEditor* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(&self->scroller.component, psy_ui_ALIGN_CLIENT);	
 	psy_ui_component_setpreferredsize(&self->component, psy_ui_size_make(
 		psy_ui_value_make_ew(20.0), psy_ui_value_make_ph(0.30)));
-	seqeditor_updatesong(self);
+	seqeditor_updatesong(self);	
+	/* connect signals */
 	psy_signal_connect(&self->state.workspace->signal_songchanged, self,
 		seqeditor_onsongchanged);
 	psy_signal_connect(&self->tracks.component.signal_scroll, self,
@@ -305,12 +306,14 @@ void seqeditor_ontoggletimesig(SeqEditor* self, psy_ui_Button* sender)
 	size = psy_ui_component_preferredsize(&self->header.component, NULL);
 	if (psy_ui_component_visible(&self->header.timesig.component)) {
 		psy_ui_button_highlight(sender);
+		psy_ui_button_seticon(sender, psy_ui_ICON_LESS);
 		psy_ui_component_align(psy_ui_component_parent(
 			psy_ui_button_base(sender)));		
 	} else {		
 		psy_ui_button_disablehighlight(sender);
+		psy_ui_button_seticon(sender, psy_ui_ICON_MORE);
 		psy_ui_component_align(psy_ui_component_parent(
-			psy_ui_button_base(sender)));		
+			psy_ui_button_base(sender)));
 	}
 	psy_ui_component_setpreferredheight(&self->headerdescbar.component,
 		size.height);
@@ -343,7 +346,3 @@ void seqeditor_ontoggleloop(SeqEditor* self, psy_ui_Button* sender)
 	psy_ui_component_align(&self->component);
 }
 
-void seqeditor_onloopchange(SeqEditor* self, SeqEditLoops* sender)
-{
-	psy_ui_component_invalidate(&self->tracks.component);
-}

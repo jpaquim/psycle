@@ -347,8 +347,7 @@ void machineview_onthemechanged(MachineView* self, MachineViewConfig* sender,
 {
 	machineviewskin_settheme(&self->skin, theme,
 		dirconfig_skins(&self->workspace->config.directories));
-	machinewireview_updateskin(&self->wireview);
-	machinestackpane_updateskin(&self->stackview.pane);	
+	machinewireview_updateskin(&self->wireview);	
 	psy_ui_component_invalidate(&self->component);
 }
 

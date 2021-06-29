@@ -9,7 +9,7 @@
 #include "fileview.h"
 /* file */
 #include <dir.h>
-// container
+/* container */
 #include <qsort.h>
 /* platform */
 #include "../../detail/os.h"

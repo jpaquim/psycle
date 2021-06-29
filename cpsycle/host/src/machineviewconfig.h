@@ -9,6 +9,8 @@
 /* container */
 #include <properties.h>
 #include <signal.h>
+/* ui */
+#include <uistyle.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -36,6 +38,7 @@ void machineviewconfig_init(MachineViewConfig*, psy_Property* parent);
 void machineviewconfig_dispose(MachineViewConfig*);
 void machineviewconfig_resettheme(MachineViewConfig*);
 void machineviewconfig_settheme(MachineViewConfig*, psy_Property* skin);
+void machineviewconfig_updatestyles(MachineViewConfig* self, psy_ui_Styles*);
 bool machineviewconfig_hasthemeproperty(const MachineViewConfig*,
 	psy_Property*);
 bool machineviewconfig_hasproperty(const MachineViewConfig*, psy_Property*);
@@ -48,6 +51,7 @@ bool machineviewconfig_stackview_drawsmalleffects(const MachineViewConfig*);
 
 bool machineviewconfig_onchanged(MachineViewConfig*, psy_Property*);
 bool machineviewconfig_onthemechanged(MachineViewConfig*, psy_Property*);
+
 
 #ifdef __cplusplus
 }

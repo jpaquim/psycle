@@ -50,8 +50,6 @@ typedef struct SequenceButtons {
 	psy_ui_Button copy;
 	psy_ui_Component row3;
 	psy_ui_Button paste;
-	psy_ui_Button singlesel;
-	psy_ui_Button multisel;
 	/* references */
 	SequenceCmds* cmds;
 } SequenceButtons;

@@ -32,8 +32,8 @@ static void patternview_ontabbarchange(PatternView*, psy_ui_Component* sender,
 	uintptr_t tabindex);
 static void patternview_onsongchanged(PatternView*, Workspace* sender,
 	int flag, psy_audio_Song*);
-static void patternview_onsequenceselectionchanged(PatternView*,
-	psy_audio_SequenceSelection* sender);
+static void patternview_onsequenceselect(PatternView*,
+	psy_audio_SequenceSelection* sender, psy_audio_OrderIndex*);
 static void patternview_onconfigurepatternview(PatternView*,
 	PatternViewConfig*, psy_Property*);
 static void patternview_onmiscconfigure(PatternView*, KeyboardMiscConfig*,
@@ -56,6 +56,7 @@ static void patternview_onsequencechanged(PatternView*, psy_audio_Sequence*
 	sender);
 static void patternview_onpatterncursorchanged(PatternView* self,
 	Workspace* sender);
+static void patternview_beforealign(PatternView*);
 static void patternview_onalign(PatternView*);
 static void patternview_computemetrics(PatternView*);
 static void patternview_ongridscroll(PatternView*, psy_ui_Component* sender);
@@ -104,6 +105,9 @@ static void patternview_vtable_init(PatternView* self)
 		patternview_vtable.ontimer =
 			(psy_ui_fp_component_ontimer)
 			patternview_ontimer;
+		patternview_vtable.beforealign =
+			(psy_ui_fp_component_onalign)
+			patternview_beforealign;
 		patternview_vtable.onalign =
 			(psy_ui_fp_component_onalign)
 			patternview_onalign;
@@ -140,7 +144,7 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 	self->trackmodeswingfill = TRUE;
 	self->display = PROPERTY_ID_PATTERN_DISPLAYMODE_TRACKER;
 	self->aligndisplay = TRUE;
-	self->updatealign = FALSE;
+	self->updatealign = 0;
 	patternview_initbasefontsize(self);	
 	psy_ui_component_setbackgroundmode(&self->component,
 		psy_ui_NOBACKGROUND);
@@ -304,8 +308,8 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 		self, patternview_oncontextmenu);
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		patternview_onsongchanged);	
-	psy_signal_connect(&workspace->sequenceselection.signal_changed,
-		self, patternview_onsequenceselectionchanged);
+	psy_signal_connect(&workspace->sequenceselection.signal_select,
+		self, patternview_onsequenceselect);
 	psy_signal_connect(&self->workspace->signal_patterncursorchanged, self,
 		patternview_onpatterncursorchanged);
 	psy_signal_connect(&self->tracker.component.signal_scroll, self,
@@ -445,7 +449,7 @@ void patternview_onsongchanged(PatternView* self, Workspace* workspace,
 	if (workspace->song) {
 		pattern = psy_audio_sequence_pattern(
 			&workspace->song->sequence,
-			workspace->sequenceselection.editposition);
+			psy_audio_sequenceselection_first(&workspace->sequenceselection));
 		patternview_setpattern(self, pattern);
 		pianoroll_setpattern(&self->pianoroll, pattern);		
 		psy_signal_connect(&workspace->song->sequence.signal_changed,
@@ -463,15 +467,17 @@ void patternview_onsongchanged(PatternView* self, Workspace* workspace,
 	}	
 }
 
-void patternview_onsequenceselectionchanged(PatternView* self,
-	psy_audio_SequenceSelection* sender)
+void patternview_onsequenceselect(PatternView* self,
+	psy_audio_SequenceSelection* sender,
+	psy_audio_OrderIndex* index)
 {		
 	psy_audio_SequenceEntry* entry;	
 		
 	if (self->workspace->song) {
 		entry = psy_audio_sequence_entry(
 			&self->workspace->song->sequence,
-			self->workspace->sequenceselection.editposition);
+			psy_audio_sequenceselection_first(
+				&self->workspace->sequenceselection));
 	} else {
 		entry = NULL;
 	}
@@ -496,13 +502,7 @@ void patternview_onsequenceselectionchanged(PatternView* self,
 void patternview_onsequencechanged(PatternView* self,
 	psy_audio_Sequence* sender)
 {
-	self->updatealign = TRUE;	
-	/*psy_ui_component_updateoverflow(&self->left.linenumbers.component);
-	psy_ui_component_updateoverflow(&self->tracker.component);
-	psy_ui_component_updateoverflow(&self->pianoroll.grid.component);
-	psy_ui_component_invalidate(&self->tracker.component);
-	psy_ui_component_invalidate(&self->pianoroll.grid.component);
-	psy_ui_component_invalidate(&self->left.linenumbers.component);*/
+	self->updatealign = 1;	
 }
 
 void patternview_onpatternpropertiesapply(PatternView* self,
@@ -759,14 +759,18 @@ void patternview_readfont(PatternView* self)
 	}
 }
 
+void patternview_beforealign(PatternView* self)
+{
+	psy_ui_Size preferredheadersize;	
+
+	preferredheadersize = psy_ui_component_preferredsize(&self->header.component, NULL);
+	trackerlinenumberslabel_setheaderheight(&self->left.linenumberslabel,
+		psy_ui_value_px(&preferredheadersize.height,
+		psy_ui_component_textmetric(&self->header.component), NULL));				
+}
+
 void patternview_onalign(PatternView* self)
 {
-	psy_ui_RealSize headersize;	
-
-	headersize = psy_ui_component_scrollsize_px(&self->header.component);	
-	trackerlinenumberslabel_setheaderheight(&self->left.linenumberslabel,
-		headersize.height);
-	psy_ui_component_align(&self->left.component);
 	patternview_computemetrics(self);
 }
 
@@ -800,6 +804,7 @@ void patternview_ongridscroll(PatternView* self, psy_ui_Component* sender)
 			psy_ui_component_scrolltop_px(&self->left.linenumbers.component)) {
 		psy_ui_component_setscrolltop(&self->left.linenumbers.component,
 			psy_ui_component_scrolltop(&self->tracker.component));
+		psy_ui_component_invalidate(&self->left.linenumberpane);
 	}
 }
 
@@ -993,22 +998,25 @@ void patternview_ontimer(PatternView* self, uintptr_t timerid)
 			? trackergridstate_pattern(&self->gridstate)->opcount
 			: 0;
 	}
-	if (self->updatealign) {
+	if (self->updatealign == 1) {
 		psy_ui_component_align(&self->left.linenumberpane);
+		psy_ui_component_invalidate(&self->left.linenumberpane);
 		if (psy_ui_component_visible(&self->trackerscroller.component)) {
 			psy_ui_component_align(&self->trackerscroller.pane);
 		}
 		if (psy_ui_component_visible(&self->pianoroll.scroller.pane)) {
 			psy_ui_component_align(&self->pianoroll.scroller.pane);
 			psy_ui_component_align(&self->pianoroll.top);
-		}
-		self->updatealign = FALSE;
+		}		
+	}
+	if (self->updatealign > 0) {
+		--self->updatealign;
 	}
 }
 
 void patternview_updateksin(PatternView* self)
 {
-	psy_ui_component_setbackgroundcolour(&self->left.linenumbers.component,
+	psy_ui_component_setbackgroundcolour(&self->left.linenumberpane,
 		patternviewskin_backgroundcolour(self->gridstate.skin, 0, 0));	
 	psy_ui_component_setbackgroundcolour(&self->transformpattern.component,
 		patternviewskin_backgroundcolour(self->gridstate.skin, 0, 0));
@@ -1332,7 +1340,8 @@ void patternview_updatestates(PatternView* self)
 			&self->workspace->song->sequence);		
 		pattern = psy_audio_sequence_pattern(
 			&self->workspace->song->sequence,
-			self->workspace->sequenceselection.editposition);
+			psy_audio_sequenceselection_first(
+				&self->workspace->sequenceselection));
 		trackergridstate_setpattern(&self->gridstate,
 			pattern);
 		trackergridstate_setpatterns(&self->gridstate,

@@ -34,9 +34,8 @@ typedef struct SeqEditToolBar {
 	psy_ui_Button expand;
 	psy_ui_Button timesig;
 	psy_ui_Button loop;
-	psy_ui_Label trackname;
-	psy_ui_Edit edit;
-	psy_ui_Edit trackedit;
+	psy_ui_Label trackname;	
+	psy_ui_Edit trackedit;	
 	/* references */	
 	SeqEditState* state;
 } SeqEditToolBar;

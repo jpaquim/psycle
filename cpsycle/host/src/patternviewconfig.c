@@ -1,7 +1,10 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
+
 
 #include "patternviewconfig.h"
 
@@ -88,13 +91,15 @@ void patternviewconfig_makeview(PatternViewConfig* self, psy_Property* parent)
 	psy_property_settext(
 		psy_property_append_bool(pvc, "displaysinglepattern", TRUE),
 		"settingsview.pv.displaysinglepattern");
-	// useheaderbitmap
-	// default set to false, because the bitmap skins dont fit to recent
-	// resolutions
+	/*
+	** useheaderbitmap
+	** default set to false, because the bitmap skins dont fit to recent
+	** resolutions
+	*/
 	psy_property_settext(
 		psy_property_append_bool(pvc, "useheaderbitmap", FALSE),
 		"settingsview.pv.useheaderbitmap");
-	// pattern display choice
+	/* pattern display choice */
 	choice = psy_property_setid(psy_property_settext(
 		psy_property_append_choice(pvc,
 			"patterndisplay", 0),
@@ -320,7 +325,7 @@ bool patternviewconfig_hasproperty(const PatternViewConfig* self,
 	return (psy_property_insection(property, self->patternview));
 }
 
-// getter
+/* getter */
 bool patternviewconfig_linenumbers(const PatternViewConfig* self)
 {
 	assert(self);
@@ -460,7 +465,8 @@ bool patternviewconfig_showtrackscopes(const PatternViewConfig* self)
 
 	return psy_property_at_bool(self->patternview, "trackscopes", TRUE);
 }
-// events
+
+/* events */
 bool patternviewconfig_onchanged(PatternViewConfig* self, psy_Property* property)
 {
 	assert(self);

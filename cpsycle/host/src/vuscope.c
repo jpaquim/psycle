@@ -1,7 +1,10 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
+
 
 #include "vuscope.h"
 
@@ -150,11 +153,11 @@ void vuscope_drawscale(VuScope* self, psy_ui_Graphics* g)
 		charwidth, tm->tmHeight);
 	psy_ui_drawsolidrectangle(g, rect, psy_ui_colour_make(0x00606060));
 
-	psy_snprintf(buf, 64, "Refresh %.2fhz", 1000.0f / self->scope_peak_rate);
-	//oldFont = bufDC.SelectObject(&font);
+	psy_snprintf(buf, 64, "Refresh %.2fhz", 1000.0f / self->scope_peak_rate);	
 	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 	psy_ui_settextcolour(g, psy_ui_colour_make(0x505050));
-	psy_ui_textout(g, tm->tmAveCharWidth, psy_ui_value_px(&size.height, tm, NULL) - tm->tmHeight, buf, psy_strlen(buf));
+	psy_ui_textout(g, tm->tmAveCharWidth, psy_ui_value_px(&size.height, tm,
+		NULL) - tm->tmHeight, buf, psy_strlen(buf));
 }
 
 void vuscope_drawlabel(VuScope* self, psy_ui_Graphics* g, const char* text,
@@ -357,10 +360,10 @@ void vuscope_stop(VuScope* self)
 	self->running = FALSE;
 }
 
-/// linear -> deciBell
-/// amplitude normalized to 1.0f.
+/* linear -> deciBell */
+/* amplitude normalized to 1.0f. */
 psy_dsp_amp_t dB(psy_dsp_amp_t amplitude)
 {
-	///\todo merge with psycle::helpers::math::linear_to_deci_bell
+	/* todo merge with psycle::helpers::math::linear_to_deci_bell */
 	return (psy_dsp_amp_t) (20.0 * log10(amplitude));
 }

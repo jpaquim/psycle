@@ -1,13 +1,16 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "defaultlang.h"
 
-// container
+/* container */
 #include <propertiesio.h>
-// std
+/* std */
 #include <string.h>
 
 static psy_Property* currsection = NULL;
@@ -25,7 +28,7 @@ static void add(const char* key, const char* translation)
 	psy_property_set_str(currsection, key, translation);
 }
 
-// prototypes
+/* prototypes */
 static void make_translator_make_filebar(psy_Property* parent);
 static void make_translator_make_undobar(psy_Property* parent);
 static void make_translator_make_playbar(psy_Property* parent);
@@ -59,11 +62,10 @@ static void make_translator_make_samplesview(psy_Property* parent);
 static void make_translator_make_general(psy_Property* parent);
 static void make_translator_make_tracker(psy_Property* parent);
 static void make_translator_make_messages(psy_Property* parent);
-// implementation
+/* implementation */
 void make_translator_default(psy_Property* lang)
 {
 	psy_Property* section;
-	// psy_Property* subsection;
 
 	assert(lang);
 
@@ -133,6 +135,9 @@ void make_translator_make_playbar(psy_Property* parent)
 	add("record-notes", "Record Notes");
 	add("play", "Play");
 	add("stop", "Stop");
+	add("song", "Song");
+	add("sel", "Sel");
+	add("beats", "Beats");
 }
 
 void make_translator_make_playlist(psy_Property* parent)
@@ -344,7 +349,7 @@ void make_translator_make_settingsview(psy_Property* parent)
 	psy_Property* subsection;
 
 	section = setsection(psy_property_append_section(parent, "settingsview"));
-	// settingsview
+	/* settingsview */
 	add("event-input", "Event Input");
 	add("audio-drivers", "Audio Drivers");
 	add("configure", "Configure");	
@@ -353,7 +358,7 @@ void make_translator_make_settingsview(psy_Property* parent)
 	add("none", "None");
 	add("from", "from");
 	add("to", "to");
-	// settingsview global
+	/* settingsview global */
 	setsection(psy_property_append_section(section, "global"));
 	add("configuration", "Configuration");
 	add("enable-audio", "Enable Audio");
@@ -362,7 +367,7 @@ void make_translator_make_settingsview(psy_Property* parent)
 	add("de", "german");
 	add("en", "english");
 	add("es", "spanish");
-	// settingsview/midicontrollers	
+	/* settingsview-midicontrollers	*/
 	setsection(psy_property_append_section(section, "midicontrollers"));
 	add("controllers", "MIDI Controllers");
 	add("add", "Add Controller Map");
@@ -378,19 +383,18 @@ void make_translator_make_settingsview(psy_Property* parent)
 	add("mapping-map-velocity", "Map Velocity");
 	add("mapping-map-pitchwheel", "Map Pitch Wheel");
 	add("mapping-map-controller", "Map Controller");
-	add("mapping-map-active", "active");	
-	
-	// settingsview/metronome
+	add("mapping-map-active", "active");		
+	/* settingsview-metronome */
 	setsection(psy_property_append_section(section, "metronome"));
 	add("metronome", "Metronome");
 	add("show", "Show Metronome Bar");
 	add("machine", "Machine");
 	add("note", "Note");
-	// settingsview/seqedit
+	/* settingsview-seqedit */
 	setsection(psy_property_append_section(section, "seqeditor"));
 	add("seqeditor", "Sequence Editor");	
 	add("machine", "New Song Default Sampler (For current change song properties)");
-	// settingsview/directories
+	/* settingsview-directories */
 	setsection(psy_property_append_section(section, "dirs"));
 	add("dirs", "Directories");
 	add("song", "Song directory");
@@ -402,13 +406,13 @@ void make_translator_make_settingsview(psy_Property* parent)
 	add("vst64", "Vst64 directories");
 	add("ladspa", "Ladspa directories");
 	add("skin", "Skin directory");
-	// settingsview/theme
+	/* settingsview-theme */
 	setsection(section);
 	add("theme", "Theme");
 	add("background", "Background");
 	add("font", "Font");
 	add("name", "Name");
-	// settingsview/general
+	/* settingsview-general */
 	setsection(psy_property_append_section(section, "general"));
 	add("general", "General");
 	add("version", "Version");
@@ -421,7 +425,7 @@ void make_translator_make_settingsview(psy_Property* parent)
 	add("save-recent-songs", "Save recent songs");
 	add("play-song-after-load", "Play Song After Load");	
 	add("show-pattern-names", "Show Pattern Names");
-	// settingsview/visual
+	/* settingsview-visual */
 	setsection(psy_property_append_section(section, "visual"));
 	add("visual", "Visual");
 	add("load-skin", "Load skin");
@@ -432,7 +436,7 @@ void make_translator_make_settingsview(psy_Property* parent)
 	add("apptheme", "App Theme");
 	add("light", "light");
 	add("dark", "dark");
-	// settingsview/patternview
+	/* settingsview-patternview */
 	subsection = setsection(psy_property_append_section(section, "pv"));
 	add("patternview", "Pattern View");
 	add("font", "Font");
@@ -459,7 +463,7 @@ void make_translator_make_settingsview(psy_Property* parent)
 	add("splithorizontal", "both one below the other");
 	add("move-cursor-when-paste", "Move Cursor When Paste");	
 	setsection(psy_property_append_section(subsection, "theme"));
-	// settingsview/patternview/theme
+	/* settingsview-patternview/theme */
 	add("theme", "Theme");
 	add("fontface", "Pattern Fontface");
 	add("fontpoint", "Pattern Fontpoint");
@@ -493,7 +497,7 @@ void make_translator_make_settingsview(psy_Property* parent)
 	add("cursor2", "Cursor Right");
 	add("midline", "Midline Left");
 	add("midline2", "Midline Right");
-	// settingsview/machineview		
+	/* settingsview-machineview	*/
 	subsection = setsection(psy_property_append_section(section, "mv"));
 	add("machineview", "Machine View");
 	add("draw-machine-indexes", "Draw Machine Indexes");
@@ -502,9 +506,9 @@ void make_translator_make_settingsview(psy_Property* parent)
 	add("draw-virtualgenerators", "Draw Virtual Generators");
 	add("stackview", "Stackview");
 	add("stackview-draw-smalleffects", "Draw Small Effects");
-	// settingsview/machineview/stackview	
+	/* settingsview-machineview-stackview */
 	setsection(psy_property_append_section(subsection, "theme"));
-	// settingsview/machineview/theme
+	/* settingsview-machineview-theme */
 	add("theme", "Theme");
 	add("vu-background", "Vu BackGround");
 	add("vu-bar", "Vu Bar");
@@ -525,14 +529,14 @@ void make_translator_make_settingsview(psy_Property* parent)
 	add("machine-background", "Machine Background");
 	add("polygon-size", "Polygon size");
 	add("machineskin", "Machineskin");
-	// settingsview/paramview
+	/* settingsview-paramview */
 	subsection = setsection(psy_property_append_section(section, "paramview"));
 	add("native-machine-parameter-window",
 		"Native Machine Parameter Window");
 	add("font", "Font");
 	add("load-dial-bitmap", "Load Dial Bitmap");
 	add("default-skin", "Default skin");
-	// settingsview/paramview-theme
+	/* settingsview-paramview-theme */
 	setsection(psy_property_append_section(subsection, "theme"));
 	add("theme", "Theme");
 	add("title-background", "Title Background");
@@ -546,7 +550,7 @@ void make_translator_make_settingsview(psy_Property* parent)
 	add("selvalue-background", "SelValue Background");
 	add("selvalue-font", "SelValue Font");
 	add("machinedialbmp", "Machine Dial Bitmap");
-	// settingsview/keyboard/misc	
+	/* settingsview-keyboard-misc */
 	setsection(psy_property_append_section(section, "kbd"));
 	add("kbd-misc", "Keyboard and misc");
 	add("record-tws",

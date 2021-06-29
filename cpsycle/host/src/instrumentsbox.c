@@ -1,12 +1,15 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "instrumentsbox.h"
-// std
+/* std */
 #include <assert.h>
-// platform
+/* platform */
 #include "../../detail/portable.h"
 
 #define FT2_INSTRUMENTNAME_LEN 22
@@ -45,7 +48,7 @@ void instrumentsbox_init(InstrumentsBox* self, psy_ui_Component* parent,
 	psy_ui_component_setminimumsize(&self->grouplist.component,
 		psy_ui_size_make_em(0.0, 10.0));
 	psy_ui_component_setalign(&self->grouplist.component, psy_ui_ALIGN_TOP);
-	// Instruments
+	/* Instruments */
 	psy_ui_component_init(&self->instheader, &self->component, NULL);
 	psy_ui_component_setalign(&self->instheader, psy_ui_ALIGN_TOP);
 	psy_ui_label_init_text(&self->group, &self->component, NULL,

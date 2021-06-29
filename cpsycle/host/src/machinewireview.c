@@ -11,6 +11,7 @@
 #include "machineview.h"
 #include "machineviewbar.h"
 #include "machineui.h"
+#include "styles.h"
 // audio
 #include <exclusivelock.h>
 // std
@@ -89,7 +90,7 @@ static void machinewireview_onalign(MachineWireView*);
 static psy_ui_ComponentVtable vtable;
 static bool vtable_initialized = FALSE;
 
-static psy_ui_ComponentVtable* vtable_init(MachineWireView* self)
+static void vtable_init(MachineWireView* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
@@ -122,7 +123,7 @@ static psy_ui_ComponentVtable* vtable_init(MachineWireView* self)
 			machinewireview_onalign;
 		vtable_initialized = TRUE;
 	}
-	return &vtable;
+	psy_ui_component_setvtable(&self->component, &vtable);	
 }
 
 void machinewireview_init(MachineWireView* self, psy_ui_Component* parent,
@@ -130,7 +131,8 @@ void machinewireview_init(MachineWireView* self, psy_ui_Component* parent,
 	ParamViews* paramviews, Workspace* workspace)
 {
 	psy_ui_component_init(&self->component, parent, NULL);
-	psy_ui_component_setvtable(&self->component, vtable_init(self));	
+	vtable_init(self);
+	psy_ui_component_setstyletype(&self->component, STYLE_MACHINEVIEW_WIRES);
 	self->opcount = 0;
 	self->centermaster = TRUE;
 	psy_ui_component_setscrollstep(&self->component,
@@ -200,9 +202,7 @@ void machinewireview_ondestroy(MachineWireView* self)
 }
 
 void machinewireview_updateskin(MachineWireView* self)
-{	
-	psy_ui_component_setbackgroundcolour(&self->component,
-		self->skin->colour);
+{		
 	machinewireview_buildmachineuis(self);
 }
 

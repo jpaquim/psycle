@@ -1,19 +1,25 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "patternio.h"
+/* local */
 #include "pattern.h"
+/* std */
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 
 #define EVENT_SIZE 5
 
+/* prototypes */
 static void loadblock(FILE*, psy_audio_Pattern*, psy_dsp_big_beat_t bpl);
 static void saveblock(FILE*, psy_audio_Pattern*, psy_dsp_big_beat_t bpl, uintptr_t songtracks);
-
+/* implementation */
 void psy_audio_patternio_load(psy_audio_Pattern* pattern, const psy_Path* path, psy_dsp_big_beat_t bpl)
 {
 	FILE* fp;
@@ -47,20 +53,22 @@ void loadblock(FILE* fp, psy_audio_Pattern* pattern, psy_dsp_big_beat_t bpl)
 		}
 		for (line = 0; line < nl; ++line) {
 			for (track = 0; track < nt; ++track) {			
-				// if (l < MAX_LINES && t < MAX_TRACKS)
+				/* if (l < MAX_LINES && t < MAX_TRACKS) */
 					unsigned char* ptrack;
 					psy_audio_PatternEvent event;
 					psy_dsp_big_beat_t offset;
 
 					ptrack = &source[(line * nt + track) * EVENT_SIZE];
 					offset = bpl * line;
-					// Psy3 PatternEntry format
-					// type				offset
-					// uint8_t note;		0
-					// uint8_t inst;		1
-					// uint8_t mach;		2
-					// uint8_t cmd;			3
-					// uint8_t parameter;	4												
+					/*
+					** Psy3 PatternEntry format
+					** type				offset
+					** uint8_t note;		0
+					** uint8_t inst;		1
+					** uint8_t mach;		2
+					** uint8_t cmd;			3
+					** uint8_t parameter;	4
+					*/
 					psy_audio_patternevent_clear(&event);					
 					event.note = ptrack[0];
 					event.inst = (ptrack[1] == 0xFF)

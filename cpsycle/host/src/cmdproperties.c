@@ -1,5 +1,7 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
@@ -277,7 +279,7 @@ void cmdproperties_makenotes(psy_Property* self)
 		psy_property_setid(psy_property_append_int(notes, "cmd_note_stop",
 			psy_audio_encodeinput('1', 0, 0, 0, 0), 0, 0), CMD_NOTE_STOP),
 		"off");
-	// special
+	/* special */
 	psy_property_settext(
 		psy_property_setid(psy_property_append_int(notes, "cmd_note_tweakm",
 			psy_audio_encodeinput(192, 0, 0, 0, 0), 0, 0), CMD_NOTE_TWEAKM),

@@ -153,7 +153,7 @@ void seqtick(psy_audio_VirtualGenerator* self, uintptr_t channel,
 			// 1. tick with cmd and parameter
 			psy_audio_machine_seqtick(sampler, channel, &realevent);			
 			if (ev->inst != psy_audio_NOTECOMMANDS_INST_EMPTY) {
-				// 
+				realevent.note = psy_audio_NOTECOMMANDS_EMPTY;
 				if (psy_audio_machine_type(sampler) == psy_audio_XMSAMPLER) {
 					realevent.cmd = 0x1E;
 				} else {

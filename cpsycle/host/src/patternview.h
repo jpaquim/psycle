@@ -79,7 +79,7 @@ typedef struct PatternView {
 	int baselfheight;
 	uintptr_t display;
 	bool aligndisplay;
-	bool updatealign;
+	int updatealign;
 	/* references */
 	Workspace* workspace;
 } PatternView;

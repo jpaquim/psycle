@@ -1,17 +1,20 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "adsrsliders.h"
-// dsp
+/* dsp */
 #include <valuemapper.h>
-// std
+/* std */
 #include <math.h>
-// platform
+/* platform */
 #include "../../detail/portable.h"
 
-// prototypes
+/* prototypes */
 static void adsrsliders_ondestroy(AdsrSliders*, psy_ui_Component* sender);
 static void adsrsliders_onvolumeviewdescribe(AdsrSliders*,
 	psy_ui_Slider*, char* txt);
@@ -19,7 +22,7 @@ static void adsrsliders_onvolumeviewtweak(AdsrSliders*,
 	psy_ui_Slider*, float value);
 static void adsrsliders_onvolumeviewvalue(AdsrSliders*,
 	psy_ui_Slider*, float* value);
-// implementation
+/* implementation */
 void adsrsliders_init(AdsrSliders* self, psy_ui_Component* parent)
 {	
 	int i;

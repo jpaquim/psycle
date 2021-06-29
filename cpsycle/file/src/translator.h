@@ -9,6 +9,7 @@
 /* container */
 #include <properties.h>
 #include <signal.h>
+#include <hashtbl.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -38,8 +39,8 @@ typedef struct psy_Translator {
 	/* signals */
 	psy_Signal signal_languagechanged;
 	/* internal */
-	psy_Property* dictionary;
-	psy_Property* defaultdictionary;	
+	psy_Table container;
+	char* testid;
 } psy_Translator;
 
 void psy_translator_init(psy_Translator*);

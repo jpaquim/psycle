@@ -321,7 +321,7 @@ int xmsongloader_loadsinglepattern(XMSongLoader* self, uintptr_t start,
 	int32_t headerlen;
 	int16_t numrows;
 	int16_t packedsize;
-	uint16_t lastmach[64];
+	uint8_t lastmach[64];
 	int temp;
 	psy_audio_LegacyPattern ppattern;
 	psy_audio_Pattern* pattern;
