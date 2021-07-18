@@ -1,16 +1,19 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "patternheader.h"
-// local
+/* local */
 #include "patterncmds.h"
 #include "skingraphics.h"
-// platform
+/* platform */
 #include "../../detail/portable.h"
 
-// prototypes
+/* prototypes */
 static void patterntrackbox_ondraw(PatternTrackBox*, psy_ui_Graphics*);
 static void patterntrackbox_drawbackground(PatternTrackBox*, psy_ui_Graphics*);
 static void patterntrackbox_drawplayon(PatternTrackBox*, psy_ui_Graphics*);
@@ -24,7 +27,7 @@ static void patterntrackbox_onmousedown(PatternTrackBox*, psy_ui_MouseEvent*);
 static void patterntrackbox_onmousedown(PatternTrackBox*, psy_ui_MouseEvent*);
 static void patterntrackbox_onpreferredsize(PatternTrackBox*,
 	const psy_ui_Size* limit, psy_ui_Size* rv);
-// vtable
+/* vtable */
 static psy_ui_ComponentVtable patterntrackbox_vtable;
 static bool patterntrackbox_vtable_initialized = FALSE;
 
@@ -46,6 +49,7 @@ static void patterntrackbox_vtable_init(PatternTrackBox* self)
 	self->component.vtable = &patterntrackbox_vtable;
 }
 
+/* implementation */
 void patterntrackbox_init(PatternTrackBox* self, psy_ui_Component* parent,
 	psy_ui_Component* view, uintptr_t index, TrackerGridState* state)
 {
@@ -262,15 +266,14 @@ void patterntrackbox_onpreferredsize(PatternTrackBox* self,
 		self->state->skin->headercoords.background.dest.top);
 }
 
-// TrackerHeader
-// prototypes
+/* TrackerHeader */
+/* prototypes */
 static void trackerheader_ondestroy(TrackerHeader*);
 static void trackerheader_onpatterncursorchanged(TrackerHeader*, Workspace*);
 static void trackerheader_ontimer(TrackerHeader*, uintptr_t timerid);
 static void trackerheader_updateplayons(TrackerHeader*);
 static void trackerheader_onmousewheel(TrackerHeader*, psy_ui_MouseEvent*);
-
-// vtable
+/* vtable */
 static psy_ui_ComponentVtable trackerheader_vtable;
 static bool trackerheader_vtable_initialized = FALSE;
 
@@ -290,16 +293,17 @@ static void trackerheader_vtable_init(TrackerHeader* self)
 	}
 	self->component.vtable = &trackerheader_vtable;
 }
-// implementation
+
+/* implementation */
 void trackerheader_init(TrackerHeader* self, psy_ui_Component* parent,
 	TrackConfig* trackconfig, TrackerGridState* state,
 	Workspace* workspace)
 {
-	psy_ui_component_init(&self->component, parent, NULL);
+	psy_ui_component_init(&self->component, parent, parent);
+	psy_ui_component_setbackgroundmode(&self->component, psy_ui_NOBACKGROUND);
 	trackerheader_vtable_init(self);
 	psy_ui_component_setalignexpand(&self->component,
-		psy_ui_HEXPAND);
-	psy_ui_component_doublebuffer(&self->component);
+		psy_ui_HEXPAND);	
 	self->state = state;	
 	self->workspace = workspace;
 	self->currtrack = 0;
@@ -331,7 +335,7 @@ void trackerheader_build(TrackerHeader* self)
 			psy_ui_ALIGN_LEFT);		
 		psy_table_insert(&self->boxes, index, (void*)trackbox);
 	}
-	psy_ui_component_align(psy_ui_component_parent(&self->component));
+	psy_ui_component_align(&self->component);
 }
 
 void trackerheader_onpatterncursorchanged(TrackerHeader* self,

@@ -207,6 +207,7 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 		patternview_onzoomboxchanged);	
 	/* header */
 	psy_ui_component_init(&self->headerpane, &self->component, NULL);
+	psy_ui_component_doublebuffer(&self->headerpane);
 	psy_ui_component_setalign(&self->headerpane, psy_ui_ALIGN_TOP);
 	trackerheader_init(&self->header, &self->headerpane,
 		&self->trackconfig, &self->gridstate, self->workspace);
@@ -797,6 +798,7 @@ void patternview_ongridscroll(PatternView* self, psy_ui_Component* sender)
 		psy_ui_component_scrollleftpx(&self->header.component)) {
 		psy_ui_component_setscrollleft(&self->header.component,
 			psy_ui_component_scrollleft(&self->tracker.component));
+		psy_ui_component_invalidate(&self->headerpane);
 		psy_ui_component_setscrollleft(&self->griddefaults.component,
 			psy_ui_component_scrollleft(&self->tracker.component));
 	}
@@ -856,9 +858,10 @@ void patternview_onzoomboxchanged(PatternView* self, ZoomBox* sender)
 		psy_ui_component_align(&self->left.component);		
 		psy_ui_component_align(&self->left.linenumbers.component);
 		psy_ui_component_align(&self->component);
-		psy_ui_component_updateoverflow(&self->tracker.component);
+		psy_ui_component_updateoverflow(&self->tracker.component);		
 		psy_ui_component_invalidate(&self->tracker.component);
-		psy_ui_component_invalidate(&self->header.component);
+		psy_ui_component_align(&self->headerpane);
+		psy_ui_component_invalidate(&self->headerpane);
 		psy_ui_component_invalidate(&self->left.linenumbers.component);
 		psy_ui_component_invalidate(&self->left.linenumberslabel.component);
 		psy_ui_component_align(&self->trackerscroller.pane);
@@ -1026,7 +1029,7 @@ void patternview_updateksin(PatternView* self)
 		patternviewskin_fontcolour(self->gridstate.skin, 0, 0));
 	psy_ui_component_setbackgroundcolour(&self->left.component,
 		patternviewskin_backgroundcolour(self->gridstate.skin, 0, 0));
-	psy_ui_component_setbackgroundcolour(&self->header.component,
+	psy_ui_component_setbackgroundcolour(&self->headerpane,
 		patternviewskin_backgroundcolour(self->gridstate.skin, 0, 0));
 	psy_ui_component_setcolour(&self->left.component,
 		patternviewskin_fontcolour(self->gridstate.skin, 0, 0));	
@@ -1044,8 +1047,10 @@ void patternview_rebuild(PatternView* self)
 {
 	trackerheader_build(&self->header);	
 	trackergrid_build(&self->tracker);	
-	trackergrid_build(&self->griddefaults);	
-	psy_ui_component_invalidate(trackerheader_base(&self->header));
+	trackergrid_build(&self->griddefaults);
+	trackerheader_build(&self->header);
+	
+	psy_ui_component_invalidate(&self->headerpane);
 	psy_ui_component_invalidate(trackergrid_base(&self->tracker));
 	psy_ui_component_invalidate(trackergrid_base(&self->griddefaults));
 }

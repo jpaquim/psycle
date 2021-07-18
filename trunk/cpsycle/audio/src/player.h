@@ -20,6 +20,7 @@
 #include "../../driver/audiodriver.h"
 /* container */
 #include <signal.h>
+#include "../../thread/src/lock.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -33,6 +34,12 @@ typedef enum {
 	VUMETER_PEAK,
 	VUMETER_RMS,	
 } VUMeterMode;
+
+
+typedef struct psy_audio_MachineWork {
+	uintptr_t amount;
+	uintptr_t slot;
+} psy_audio_MachineWork;
 
 typedef struct psy_audio_Player {
 	psy_AudioDriver* driver;
@@ -66,6 +73,13 @@ typedef struct psy_audio_Player {
 	psy_audio_ActiveChannels playon;
 	bool measure_cpu_usage;
 	psy_audio_Sampler sampler;
+	uintptr_t thread_count;
+	psy_List* threads_;
+	bool stop_requested_;
+	psy_List* nodes_queue_;
+	psy_Lock mutex;
+	psy_Lock block;
+	uintptr_t waiting;
 } psy_audio_Player;
 
 void psy_audio_player_init(psy_audio_Player*, psy_audio_Song*,
@@ -290,6 +304,11 @@ INLINE void psy_audio_player_deactivatemetronome(psy_audio_Player* self)
 {
 	self->sequencer.metronome.active = FALSE;
 }
+
+void psy_audio_player_start_threads(psy_audio_Player*, uintptr_t thread_count);
+void psy_audio_player_stop_threads(psy_audio_Player*);
+
+uintptr_t psy_audio_player_numthreads(psy_audio_Player*);
 
 #ifdef __cplusplus
 }

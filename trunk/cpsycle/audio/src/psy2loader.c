@@ -886,16 +886,28 @@ int psy2loader_read_machines(PSY2Loader* self)
 	/* Patch 0: Some extra data added around the 1.0 release. */
 	for (i = 0; i < OLD_MAX_INSTRUMENTS; ++i) {
 		uint8_t loop;
-
+		psy_audio_Instrument* instr;
+		
 		if (status = psyfile_read(self->fp, &loop, sizeof(loop))) {
 			return status;
+		}
+		instr = psy_audio_instruments_at(&self->song->instruments, 
+			psy_audio_instrumentindex_make(0, i));
+		if (instr) {
+			instr->loop = loop;
 		}
 	}
 	for (i = 0; i < OLD_MAX_INSTRUMENTS; ++i) {
 		int32_t lines;
+		psy_audio_Instrument* instr;
 
 		if (status = psyfile_read(self->fp, &lines, sizeof(lines))) {
 			return status;
+		}
+		instr = psy_audio_instruments_at(&self->song->instruments, 
+			psy_audio_instrumentindex_make(0, i));
+		if (instr) {
+			instr->lines = lines;
 		}
 	}
 	return PSY_OK;
@@ -1232,7 +1244,8 @@ int psy2loader_master_load(PSY2Loader* self, psy_audio_Machine* master,
 	if (status = psyfile_read(self->fp, &panning, sizeof(panning))) {
 		return status;
 	}
-	psy_audio_machine_setpanning(master, panning / 128.f);
+	/* set always mid master panning */
+	psy_audio_machine_setpanning(master, 0.5f);
 	if (psyfile_skip(self->fp, 40) == -1) {
 		return PSY_ERRFILE;
 	}

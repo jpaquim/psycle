@@ -3,10 +3,8 @@
 ** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
 */
 
-#ifndef psy_audio_PSYCLESCRIPT_H
-#define psy_audio_PSYCLESCRIPT_H
-
-#include "machineinfo.h"
+#ifndef psy_PSYCLESCRIPT_H
+#define psy_PSYCLESCRIPT_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -23,32 +21,30 @@ typedef struct {
 	lua_State* L;
 	char* modulepath;
 	char* errstr;
-} psy_audio_PsycleScript;
+} psy_PsycleScript;
 
-int psyclescript_init(psy_audio_PsycleScript*);
-int psyclescript_load(psy_audio_PsycleScript*, const char* path);
-int psyclescript_loadstring(psy_audio_PsycleScript*, const char* script);
-int psyclescript_preparestate(psy_audio_PsycleScript*, const luaL_Reg methods[],
+int psyclescript_init(psy_PsycleScript*);
+int psyclescript_load(psy_PsycleScript*, const char* path);
+int psyclescript_loadstring(psy_PsycleScript*, const char* script);
+int psyclescript_preparestate(psy_PsycleScript*, const luaL_Reg methods[],
 	void* host);
-int psyclescript_run(psy_audio_PsycleScript*);
-int psyclescript_start(psy_audio_PsycleScript*);
-int psyclescript_dispose(psy_audio_PsycleScript*);
+int psyclescript_run(psy_PsycleScript*);
+int psyclescript_start(psy_PsycleScript*);
+int psyclescript_dispose(psy_PsycleScript*);
 
-INLINE bool psyclescript_empty(psy_audio_PsycleScript* self)
+INLINE bool psyclescript_empty(psy_PsycleScript* self)
 {
 	return self->L == NULL || self->modulepath == NULL;
 }
 
-INLINE const char* psyclescript_modulepath(psy_audio_PsycleScript* self)
+INLINE const char* psyclescript_modulepath(psy_PsycleScript* self)
 {
 	return self->modulepath;
 }
 
-int psyclescript_machineinfo(psy_audio_PsycleScript*, psy_audio_MachineInfo*);
-int psyclescript_parse_machineinfo(psy_audio_PsycleScript*, psy_audio_MachineInfo*);
 int psyclescript_open(lua_State*, const char* meta, const luaL_Reg methods[],
 	lua_CFunction gc, lua_CFunction tostring);
-void psyclescript_require(psy_audio_PsycleScript*, const char* name, lua_CFunction openf);
+void psyclescript_require(psy_PsycleScript*, const char* name, lua_CFunction openf);
 void psyclescript_register_weakuserdata(lua_State*, void* ud);
 void* psyclescript_checkself(lua_State*, int index, const char* meta);
 int psyclescript_createuserdata(lua_State*, int index, const char* meta, void* ud);
@@ -65,4 +61,5 @@ void* psyclescript_host(lua_State*);
 }
 #endif
 
-#endif /* psy_audio_PSYCLESCRIPT_H */
+#endif /* psy_PSYCLESCRIPT_H */
+

@@ -19,6 +19,8 @@
 /* local */
 #include "waveio.h"
 #include <fileio.h>
+/* thread */
+#include <thread.h>
 /* platform */
 #if defined(DIVERSALIS__OS__MICROSOFT)	
 #include <windows.h>
@@ -56,6 +58,7 @@ typedef struct FileOutDriver {
 	FileContext filecontext;
 	psy_audio_WaveFormatChunk format;
 	bool write32bitsasint;
+	psy_Thread thread;
 } FileOutDriver;
 
 /* prototypes */
@@ -67,7 +70,7 @@ static const psy_Property* driver_configuration(const psy_AudioDriver*);
 static int driver_close(psy_AudioDriver*);
 static int driver_dispose(psy_AudioDriver*);
 static psy_dsp_big_hz_t samplerate(psy_AudioDriver*);
-static void PollerThread(void *fileoutdriver);
+static unsigned int __stdcall PollerThread(void *fileoutdriver);
 static void fileoutdriver_createfile(FileOutDriver*);
 static void fileoutdriver_writebuffer(FileOutDriver*, float* pBuf,
 	uintptr_t amount);
@@ -128,6 +131,7 @@ int fileoutdriver_init(FileOutDriver* self)
 #endif	
 	self->pollsleep = 0;
 	self->stoppolling = 0;
+	psy_thread_init(&self->thread);
 	self->filecontext.path = strdup("Untitled.wav");
 	return 0;
 }
@@ -137,6 +141,7 @@ int driver_dispose(psy_AudioDriver* driver)
 	FileOutDriver* self;
 
 	self = (FileOutDriver*) driver;
+	psy_thread_dispose(&self->thread);
 	psy_property_deallocate(self->configuration);
 	self->configuration = NULL;
 	psy_signal_dispose(&driver->signal_stop);
@@ -147,14 +152,14 @@ int driver_dispose(psy_AudioDriver* driver)
 
 int driver_open(psy_AudioDriver* driver)
 {	
-	FileOutDriver* self;
+	FileOutDriver* self;	
 
 	self = (FileOutDriver*) driver;
 	self->stoppolling = 0;
 #if defined(DIVERSALIS__OS__MICROSOFT)	
 	ResetEvent(self->hEvent);
-	_beginthread(PollerThread, 0, self);
 #endif	
+	psy_thread_start(&self->thread, self, PollerThread);
 	return 0;
 }
 
@@ -330,7 +335,7 @@ psy_dsp_big_hz_t samplerate(psy_AudioDriver* self)
 	return (psy_dsp_big_hz_t)44100.0;
 }
 
-void PollerThread(void* driver)
+unsigned int __stdcall PollerThread(void* driver)
 {	
 	int n;	
 	uint32_t blocksize = 2048;
@@ -352,12 +357,7 @@ void PollerThread(void* driver)
 		fileoutdriver_writebuffer(self, pBuf, blocksize);
 		self->filecontext.numsamples += blocksize;
 		if (self->pollsleep > 0) {
-#if defined(DIVERSALIS__OS__MICROSOFT)		
-			Sleep(self->pollsleep);
-#endif
-#if defined(DIVERSALIS__OS__UNIX)			
-			usleep(self->pollsleep * 1000);
-#endif
+			psy_sleep_for(self->pollsleep);
 		}
 	}
 	fileoutdriver_closefile(self);
@@ -365,9 +365,7 @@ void PollerThread(void* driver)
 	SetEvent(self->hEvent);
 #endif	
 	psy_signal_emit(&self->driver.signal_stop, self, 0);
-#if defined(DIVERSALIS__OS__MICROSOFT)	
-	_endthread();
-#endif	
+	return 0;
 }
 
 void fileoutdriver_createfile(FileOutDriver* self)

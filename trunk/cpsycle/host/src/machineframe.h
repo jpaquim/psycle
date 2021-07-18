@@ -70,7 +70,7 @@ typedef struct MachineFrame {
 	psy_audio_Machine* machine;	
 	NewValView newval;
 	bool showfullmenu;
-	uintptr_t macid;
+	uintptr_t macid;	
 	// references
 	ParamView* paramview;
 	struct ParamViews* paramviews;

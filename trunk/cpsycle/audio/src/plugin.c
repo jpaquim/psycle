@@ -295,7 +295,7 @@ void psy_audio_plugin_init(psy_audio_Plugin* self, psy_audio_MachineCallback* ca
 					self->library.path, 0);								
 				psy_audio_machine_seteditname(psy_audio_plugin_base(self),
 					pInfo->ShortName);
-				if (strcmp(self->plugininfo->ShortName, "BexPhase!") == 0) {
+				if (strcmp(self->plugininfo->shortname, "BexPhase!") == 0) {
 					self->preventnewline = 1;
 				}
 			}

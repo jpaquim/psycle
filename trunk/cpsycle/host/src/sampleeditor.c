@@ -1060,7 +1060,7 @@ void sampleeditor_amplify(SampleEditor* self, uintptr_t channel,
 void sampleeditor_processlua(SampleEditor* self, uintptr_t channel,
 	uintptr_t framestart, uintptr_t frameend)
 {
-	psy_audio_PsycleScript processor;
+	psy_PsycleScript processor;
 	char text[65535];
 
 	psy_ui_editor_clear(&self->processview.luaprocessor.console);

@@ -7,37 +7,37 @@
 
 
 #include "exclusivelock.h"
-/* local */
-#include "lock.h"
+/* script */
+#include <lock.h>
 
-static psy_audio_Lock lock;
+static psy_Lock lock;
 
 void psy_audio_exclusivelock_init(void)
 {
-	psy_audio_lock_init(&lock);	
+	psy_lock_init(&lock);	
 }
 
 void psy_audio_exclusivelock_dispose(void)
 {	
-	psy_audio_lock_dispose(&lock);
+	psy_lock_dispose(&lock);
 }
 
 void psy_audio_exclusivelock_enable(void)
 {
-	psy_audio_lock_enable(&lock);
+	psy_lock_enable(&lock);
 }
 
 void psy_audio_exclusivelock_disable(void)
 {
-	psy_audio_lock_disable(&lock);
+	psy_lock_disable(&lock);
 }
 
 void psy_audio_exclusivelock_enter(void)
 {
-	psy_audio_lock_enter(&lock);
+	psy_lock_enter(&lock);
 }
 
 void psy_audio_exclusivelock_leave(void)
 {
-	psy_audio_lock_leave(&lock);
+	psy_lock_leave(&lock);
 }

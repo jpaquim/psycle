@@ -69,6 +69,8 @@ static void mainframe_ontabbarchanged(MainFrame*, psy_ui_Component* sender,
 	uintptr_t tabindex);
 static void mainframe_onsettingshelptabbarchanged(MainFrame*,
 	psy_ui_Component* sender, uintptr_t tabindex);
+static void mainframe_onscripttabbarchanged(MainFrame*, psy_ui_Component* sender,
+	uintptr_t tabindex);
 static void mainframe_onsongchanged(MainFrame*, Workspace* sender,
 	int flag, psy_audio_Song*);
 static void mainframe_onviewselected(MainFrame*, Workspace*, uintptr_t view,
@@ -82,6 +84,7 @@ static bool mainframe_oninput(MainFrame*, InputHandler* sender);
 static bool mainframe_onnotes(MainFrame*, InputHandler* sender);
 static void mainframe_ontoggleseqeditor(MainFrame*, psy_ui_Component* sender);
 static void mainframe_ontogglestepsequencer(MainFrame*, psy_ui_Component* sender);
+static void mainframe_ontogglescripts(MainFrame*, psy_ui_Component* sender);
 static void mainframe_updatestepsequencerbuttons(MainFrame*);
 static void mainframe_connectstepsequencerbuttons(MainFrame*);
 static void mainframe_updateseqeditorbuttons(MainFrame*);
@@ -189,6 +192,10 @@ void mainframe_init(MainFrame* self)
 	if (!workspace_hasplugincache(&self->workspace)) {
 		workspace_scanplugins(&self->workspace);
 	}
+	startscript_init(&self->startscript, self);
+	startscript_run(&self->startscript);
+	psy_signal_connect(&self->scripttabbar.signal_change, self,
+		mainframe_onscripttabbarchanged);
 	workspace_setstartpage(&self->workspace);
 	self->machineview.wireview.centermaster = TRUE;	
 }
@@ -200,11 +207,13 @@ void mainframe_initframe(MainFrame* self)
 	psy_ui_app_setmain(psy_ui_app(), mainframe_base(self));
 	psy_ui_component_seticonressource(mainframe_base(self), IDI_PSYCLEICON);
 	inithoststyles(&psy_ui_appdefaults()->styles, psy_ui_defaults()->styles.theme);
+	self->titlemodified = FALSE;
 }
 
 void mainframe_ondestroyed(MainFrame* self)
 {
-	minmaximize_dispose(&self->minmaximize);
+	startscript_dispose(&self->startscript);
+	minmaximize_dispose(&self->minmaximize);	
 	workspace_dispose(&self->workspace);
 	interpreter_dispose(&self->interpreter);
 	psy_ui_app_stop(psy_ui_app());
@@ -412,6 +421,9 @@ void mainframe_inittabbars(MainFrame* self)
 	psy_ui_component_setalign(&self->tabspacer, psy_ui_ALIGN_TOP);
 	psy_ui_component_setpreferredsize(&self->tabspacer,
 		psy_ui_size_make_em(0.0, 0.4));
+	psy_ui_tabbar_init(&self->scripttabbar, &self->mainviews);
+	psy_ui_component_setalign(&self->scripttabbar.component, psy_ui_ALIGN_TOP);
+	psy_ui_component_hide(&self->scripttabbar.component);	
 }
 
 void mainframe_initnavigation(MainFrame* self)
@@ -435,7 +447,11 @@ void mainframe_initmaintabbar(MainFrame* self)
 	psy_ui_tabbar_append(&self->tabbar, "main.instruments",
 		psy_INDEX_INVALID, psy_INDEX_INVALID, psy_ui_colour_white());
 	psy_ui_tabbar_append(&self->tabbar, "main.properties",
-		psy_INDEX_INVALID, psy_INDEX_INVALID, psy_ui_colour_white());	
+		psy_INDEX_INVALID, psy_INDEX_INVALID, psy_ui_colour_white());
+	psy_ui_button_init_text_connect(&self->togglescripts, &self->tabbars, NULL,
+		"main.scripts", self, mainframe_ontogglescripts);
+	psy_ui_component_setalign(psy_ui_button_base(&self->togglescripts),
+		psy_ui_ALIGN_LEFT);
 }
 
 void mainframe_inithelpsettingstabbar(MainFrame* self)
@@ -444,7 +460,7 @@ void mainframe_inithelpsettingstabbar(MainFrame* self)
 	psy_ui_component_setalign(psy_ui_tabbar_base(&self->helpsettingstabbar),
 		psy_ui_ALIGN_LEFT);
 	psy_ui_component_setmargin(psy_ui_tabbar_base(&self->helpsettingstabbar),
-		psy_ui_margin_make_em(0.0, 4.0, 0.0, 4.0));
+		psy_ui_margin_make_em(0.0, 4.0, 0.0, 4.0));	
 	psy_ui_tabbar_append(&self->helpsettingstabbar, "main.settings",
 		IDB_SETTINGS_LIGHT, IDB_SETTINGS_DARK, psy_ui_colour_white());
 	psy_ui_tabbar_append(&self->helpsettingstabbar, "main.help",
@@ -916,6 +932,10 @@ void mainframe_ontimer(MainFrame* self, uintptr_t timerid)
 {
 	workspace_idle(&self->workspace);
 	mainstatusbar_idle(&self->statusbar);
+	if (self->titlemodified != workspace_songmodified(&self->workspace)) {
+		self->titlemodified = workspace_songmodified(&self->workspace);
+		mainframe_updatesongtitle(self);
+	}
 }
 
 void mainframe_onviewselected(MainFrame* self, Workspace* sender, uintptr_t index,
@@ -944,7 +964,7 @@ void mainframe_onviewselected(MainFrame* self, Workspace* sender, uintptr_t inde
 	}
 	if (index == psy_INDEX_INVALID) {
 		view = psy_ui_notebook_activepage(&self->notebook);
-	} else {
+	} else {		
 		view = psy_ui_notebook_page(&self->notebook, index);
 	}
 	if (view) {
@@ -955,7 +975,7 @@ void mainframe_onviewselected(MainFrame* self, Workspace* sender, uintptr_t inde
 			psy_ui_component_selectsection(view, section, options);
 		}
 		psy_ui_component_setfocus(view);
-	}
+	}	
 }
 
 void mainframe_onfocusview(MainFrame* self, Workspace* sender)
@@ -971,10 +991,10 @@ void mainframe_ontabbarchanged(MainFrame* self, psy_ui_Component* sender,
 	psy_ui_Component* component;
 
 	if (self->workspace.startpage) {
-		psy_ui_tabbar_select(&self->helpview.tabbar, 0);
+		psy_ui_tabbar_select(&self->helpview.tabbar, 1);
 		self->workspace.startpage = FALSE;
 	}
-	psy_ui_tabbar_unmark(&self->helpsettingstabbar);
+	psy_ui_tabbar_unmark(&self->helpsettingstabbar);	
 	psy_ui_notebook_select(&self->statusbar.viewstatusbars, tabindex);
 	psy_ui_notebook_select(&self->viewtabbars, tabindex);	
 	component = psy_ui_notebook_activepage(&self->notebook);
@@ -984,7 +1004,7 @@ void mainframe_ontabbarchanged(MainFrame* self, psy_ui_Component* sender,
 		psy_ui_component_setfocus(component);
 	}
 	psy_ui_component_align(&self->component);
-	psy_ui_component_invalidate(&self->tabbars);
+	psy_ui_component_invalidate(&self->tabbars);	
 }
 
 void mainframe_onsettingshelptabbarchanged(MainFrame* self, psy_ui_Component* sender,
@@ -994,7 +1014,7 @@ void mainframe_onsettingshelptabbarchanged(MainFrame* self, psy_ui_Component* se
 	psy_ui_Component* component;
 
 	psy_ui_tabbar_unmark(&self->tabbar);
-	switch (tabindex) {
+	switch (tabindex) {	
 		case 0:
 			viewid = VIEW_ID_SETTINGSVIEW;
 			break;
@@ -1004,18 +1024,23 @@ void mainframe_onsettingshelptabbarchanged(MainFrame* self, psy_ui_Component* se
 		default:
 			viewid = VIEW_ID_SETTINGSVIEW;
 			break;
-	}
+	}	
 	psy_ui_notebook_select(&self->notebook, viewid);
 	psy_ui_notebook_select(&self->statusbar.viewstatusbars, viewid);
 	psy_ui_notebook_select(&self->viewtabbars, viewid);
 	component = psy_ui_notebook_activepage(&self->notebook);
 	if (component) {
 		workspace_onviewchanged(&self->workspace, viewhistoryentry_make(viewid,
-			psy_ui_component_section(component), psy_INDEX_INVALID));
+		psy_ui_component_section(component), psy_INDEX_INVALID));
 		psy_ui_component_setfocus(component);
 	}
 	psy_ui_component_align(&self->component);
-	psy_ui_component_invalidate(&self->tabbars);
+	psy_ui_component_invalidate(&self->tabbars);	
+}
+
+void mainframe_onscripttabbarchanged(MainFrame* self, psy_ui_Component* sender,
+	uintptr_t tabindex)
+{
 }
 
 void mainframe_onterminaloutput(MainFrame* self, Workspace* sender,
@@ -1214,6 +1239,11 @@ void mainframe_connectseqeditorbuttons(MainFrame* self)
 			psy_ui_component_hide(seqeditor_base(&self->seqeditor));
 			psy_ui_component_hide(psy_ui_splitter_base(&self->splitseqeditor));
 	}
+}
+
+void mainframe_ontogglescripts(MainFrame* self, psy_ui_Component* sender)
+{
+	psy_ui_component_togglevisibility(psy_ui_tabbar_base(&self->scripttabbar));
 }
 
 void mainframe_ontogglestepsequencer(MainFrame* self, psy_ui_Component* sender)

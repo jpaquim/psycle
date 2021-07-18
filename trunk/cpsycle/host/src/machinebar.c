@@ -1,16 +1,22 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
+
 
 #include "machinebar.h"
 #include <songio.h>
 #include <containerconvert.h>
 #include <plugin_interface.h>
-// 
+/* platform */ 
 #include "../../detail/portable.h"
 
+/* prototypes */
 static void machinebar_ondestroy(MachineBar*, psy_ui_Component* component);
+static MachineBarInstParamMode machinebar_mode(MachineBar*);
+static void machinebar_updatemode(MachineBar*);
 static void machinebar_onmachineboxselchange(MachineBar*,
 	psy_ui_Component* sender, int sel);
 static void machinebar_buildmachinebox(MachineBar*);
@@ -38,31 +44,7 @@ static void machinebar_clearmachinebox(MachineBar* self);
 static void machinebar_onprevmachine(MachineBar*, psy_ui_Component* sender);
 static void machinebar_onnextmachine(MachineBar*, psy_ui_Component* sender);
 
-static MachineBarInstParamMode machinebar_mode(MachineBar* self)
-{
-	if (psy_ui_combobox_cursel(&self->selectinstparam) == 0) {
-		return MACHINEBAR_PARAM;
-	}
-	if (psy_audio_machines_selectedmachine(self->machines) &&
-			psy_audio_machine_numauxcolumns(
-				psy_audio_machines_selectedmachine(self->machines)) > 0) {
-		return MACHINEBAR_AUX;
-	}
-	return MACHINEBAR_INST;
-}
-
-static void machinebar_updatemode(MachineBar* self)
-{
-	psy_audio_Machine* machine;
-
-	machine = psy_audio_machines_selectedmachine(self->machines);	
-	if (machine && (machine_supports(machine, psy_audio_SUPPORTS_INSTRUMENTS) ||
-		psy_audio_machine_numauxcolumns(machine))) {
-		psy_ui_combobox_setcursel(&self->selectinstparam, 1);
-	} else {
-		psy_ui_combobox_setcursel(&self->selectinstparam, 0);
-	}
-}
+/* implementation */
 
 void machinebar_init(MachineBar* self, psy_ui_Component* parent, Workspace* workspace)
 {		
@@ -122,6 +104,33 @@ void machinebar_ondestroy(MachineBar* self, psy_ui_Component* component)
 {
 	psy_table_dispose(&self->comboboxslots);
 	psy_table_dispose(&self->slotscombobox);
+}
+
+
+MachineBarInstParamMode machinebar_mode(MachineBar* self)
+{
+	if (psy_ui_combobox_cursel(&self->selectinstparam) == 0) {
+		return MACHINEBAR_PARAM;
+	}
+	if (psy_audio_machines_selectedmachine(self->machines) &&
+			psy_audio_machine_numauxcolumns(
+				psy_audio_machines_selectedmachine(self->machines)) > 0) {
+		return MACHINEBAR_AUX;
+	}
+	return MACHINEBAR_INST;
+}
+
+void machinebar_updatemode(MachineBar* self)
+{
+	psy_audio_Machine* machine;
+
+	machine = psy_audio_machines_selectedmachine(self->machines);	
+	if (machine && (machine_supports(machine, psy_audio_SUPPORTS_INSTRUMENTS) ||
+		psy_audio_machine_numauxcolumns(machine))) {
+		psy_ui_combobox_setcursel(&self->selectinstparam, 1);
+	} else {
+		psy_ui_combobox_setcursel(&self->selectinstparam, 0);
+	}
 }
 
 void machinebar_clearmachinebox(MachineBar* self)
@@ -199,12 +208,12 @@ void machinebar_buildmachinebox(MachineBar* self)
 int machinebar_insertmachine(MachineBar* self, size_t slot, psy_audio_Machine* machine)
 {			
 	if (slot != psy_audio_MASTER_INDEX && psy_audio_machine_info(machine) &&
-			psy_audio_machine_info(machine)->ShortName) {
+			psy_audio_machine_info(machine)->shortname) {
 		intptr_t comboboxindex;
 
 		char buffer[128];
 		psy_snprintf(buffer, 128, "%02X: %s", slot, 
-			machine->vtable->info(machine)->ShortName); 
+			machine->vtable->info(machine)->shortname); 
 		comboboxindex = psy_ui_combobox_addtext(&self->machinebox, buffer);
 		psy_table_insert(&self->comboboxslots, comboboxindex, (void*)slot);
 		psy_table_insert(&self->slotscombobox, slot, (void*) comboboxindex);

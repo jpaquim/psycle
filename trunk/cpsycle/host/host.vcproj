@@ -47,7 +47,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\lua54\src\,..\ui\src,..\file\src,..\audio\src,..\container\src,..\dsp\src"
+				AdditionalIncludeDirectories="..\thread\src\,..\script\src\,..\lua54\src\,..\ui\src,..\luaui\src,..\file\src,..\audio\src,..\container\src,..\dsp\src"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -80,7 +80,7 @@
 				OutputFile="$(OutDir)host.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="..\lua54\Debug,..\ui\Debug,..\file\Debug,..\audio\Debug,..\container\Debug,..\dsp\Debug"
+				AdditionalLibraryDirectories="..\thread\Debug,..\script\Debug,..\lua54\Debug,..\ui\Debug,..\luaui\Debug,..\file\Debug,..\audio\Debug,..\container\Debug,..\dsp\Debug"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile=".\Debug/host.pdb"
 				SubSystem="2"
@@ -147,7 +147,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\lua54\src\,..\ui\src,..\file\src,..\audio\src,..\container\src,..\dsp\src"
+				AdditionalIncludeDirectories="..\thread\src\,..\script\src\,..\lua54\src\,..\ui\src,..\file\src,..\audio\src,..\container\src,..\dsp\src"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -178,7 +178,7 @@
 				OutputFile="$(OutDir)host.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="..\lua54\Release,..\ui\Release,..\file\Release,..\audio\Release,..\container\Release,..\dsp\Release"
+				AdditionalLibraryDirectories="..\thread\Release,..\script\Release,..\lua54\Release,..\ui\Release,..\file\Release,..\audio\Release,..\container\Release,..\dsp\Release"
 				ProgramDatabaseFile=".\Release/host.pdb"
 				SubSystem="2"
 				RandomizedBaseAddress="1"
@@ -2755,6 +2755,14 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\src\startscript.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\startscript.h"
+				>
 			</File>
 			<File
 				RelativePath=".\src\viewhistory.c"

@@ -842,7 +842,7 @@ int mode(psy_audio_Machine* self)
 int machine_supports(psy_audio_Machine* self, int option)
 {
 	if (psy_audio_machine_info(self)) {
-		return (psy_audio_machine_info(self)->Flags & option) == option;
+		return (psy_audio_machine_info(self)->flags & option) == option;
 	}
 	return 0;
 }

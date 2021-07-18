@@ -89,7 +89,7 @@ void machinesbox_insertslot(MachinesBox* self, uintptr_t slot, psy_audio_Machine
 		char buffer[128];
 		psy_snprintf(buffer, 128, "%02X:", slot);
 		if (machine && machine->vtable->info(machine)) {
-			strcat(buffer, machine->vtable->info(machine)->ShortName); 
+			strcat(buffer, machine->vtable->info(machine)->shortname); 
 		} else {
 			strcat(buffer, ""); 
 		}
@@ -101,7 +101,7 @@ void machinesbox_insertslot(MachinesBox* self, uintptr_t slot, psy_audio_Machine
 void machinesbox_insertmachine(MachinesBox* self, uintptr_t slot, psy_audio_Machine* machine)
 {	
 	if (machinesbox_checkmachinemode(self, machine) && psy_audio_machine_info(machine) &&
-			psy_audio_machine_info(machine)->ShortName) {
+			psy_audio_machine_info(machine)->shortname) {
 		machinesbox_insertslot(self, slot, machine);
 	}	
 }

@@ -5,7 +5,8 @@
 #define psy_audio_LUAPLUGIN_H
 
 #include "custommachine.h"
-#include "psyclescript.h"
+/* script */
+#include <psyclescript.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -56,14 +57,14 @@ void psy_audio_luapluginmachineparam_init(psy_audio_LuaPluginMachineParam*, stru
 void psy_audio_luapluginmachineparam_dispose(psy_audio_LuaPluginMachineParam*);
 psy_audio_LuaPluginMachineParam* psy_audio_luapluginmachineparam_alloc(void);
 
-struct psy_audio_Lock;
+struct psy_Lock;
 
 typedef struct psy_audio_LuaPlugin {
 	psy_audio_CustomMachine custommachine;
-	psy_audio_PsycleScript script;
+	psy_PsycleScript script;
 	psy_audio_LuaMachine* client;
 	psy_audio_MachineInfo* plugininfo;
-	struct psy_audio_Lock* lock;
+	struct psy_Lock* lock;
 	psy_audio_LuaPluginMachineParam parameter;
 	bool usenoteon;
 } psy_audio_LuaPlugin;

@@ -103,7 +103,7 @@ int luapluginparam_label(psy_audio_LuaPluginMachineParam* self, char* text)
 	if (self->index >= 0 && self->index < self->plugin->client->numparameters_) {
 		psy_LuaImport in;
 
-		psy_audio_lock_enter(self->plugin->lock);
+		psy_lock_enter(self->plugin->lock);
 		psy_luaimport_init(&in, self->plugin->script.L, self->plugin->client);
 		if (psy_luaimport_open(&in, 0)) {
 			const char* str;
@@ -116,7 +116,7 @@ int luapluginparam_label(psy_audio_LuaPluginMachineParam* self, char* text)
 			rv = TRUE;
 		}
 		psy_luaimport_dispose(&in);
-		psy_audio_lock_leave(self->plugin->lock);
+		psy_lock_leave(self->plugin->lock);
 		return rv;
 	}
 	return rv;
@@ -129,7 +129,7 @@ int luapluginparam_name(psy_audio_LuaPluginMachineParam* self, char* text)
 	if (self->index >= 0 && self->index < self->plugin->client->numparameters_) {
 		psy_LuaImport in;
 
-		psy_audio_lock_enter(self->plugin->lock);
+		psy_lock_enter(self->plugin->lock);
 		psy_luaimport_init(&in, self->plugin->script.L, self->plugin->client);
 		if (psy_luaimport_open(&in, 0)) {
 			const char* str;
@@ -142,7 +142,7 @@ int luapluginparam_name(psy_audio_LuaPluginMachineParam* self, char* text)
 			rv = TRUE;
 		}
 		psy_luaimport_dispose(&in);
-		psy_audio_lock_leave(self->plugin->lock);
+		psy_lock_leave(self->plugin->lock);
 		return rv;
 	}
 	return rv;
@@ -153,7 +153,7 @@ void luapluginparam_tweak(psy_audio_LuaPluginMachineParam* self, float value)
 	// Parameter tweak range is [0..1]	
 	psy_LuaImport in;
 
-	psy_audio_lock_enter(self->plugin->lock);
+	psy_lock_enter(self->plugin->lock);
 	psy_luaimport_init(&in, self->plugin->script.L, self->plugin->client);
 	if (psy_luaimport_open(&in, 0)) {
 		getparam(&in, self->index, "setnorm");
@@ -161,7 +161,7 @@ void luapluginparam_tweak(psy_audio_LuaPluginMachineParam* self, float value)
 		psy_luaimport_pcall(&in, 0);
 	}
 	psy_luaimport_dispose(&in);
-	psy_audio_lock_leave(self->plugin->lock);
+	psy_lock_leave(self->plugin->lock);
 }
 
 int luapluginparam_describe(psy_audio_LuaPluginMachineParam* self, char* text)
@@ -171,7 +171,7 @@ int luapluginparam_describe(psy_audio_LuaPluginMachineParam* self, char* text)
 	if (self->index >= 0 && self->index < self->plugin->client->numparameters_) {
 		psy_LuaImport in;
 
-		psy_audio_lock_enter(self->plugin->lock);
+		psy_lock_enter(self->plugin->lock);
 		psy_luaimport_init(&in, self->plugin->script.L, self->plugin->client);
 		if (psy_luaimport_open(&in, 0)) {
 			const char* str;
@@ -184,7 +184,7 @@ int luapluginparam_describe(psy_audio_LuaPluginMachineParam* self, char* text)
 			rv = TRUE;
 		}
 		psy_luaimport_dispose(&in);
-		psy_audio_lock_leave(self->plugin->lock);
+		psy_lock_leave(self->plugin->lock);
 		return rv;
 	}
 	return rv;
@@ -195,7 +195,7 @@ float luapluginparam_normvalue(psy_audio_LuaPluginMachineParam* self)
 	psy_LuaImport in;
 	lua_Number v;
 
-	psy_audio_lock_enter(self->plugin->lock);
+	psy_lock_enter(self->plugin->lock);
 	psy_luaimport_init(&in, self->plugin->script.L, self->plugin->client);
 	if (psy_luaimport_open(&in, 0)) {
 		getparam(&in, self->index, "norm");
@@ -205,7 +205,7 @@ float luapluginparam_normvalue(psy_audio_LuaPluginMachineParam* self)
 		v = 0;
 	}
 	psy_luaimport_dispose(&in);
-	psy_audio_lock_leave(self->plugin->lock);
+	psy_lock_leave(self->plugin->lock);
 	return (float)v;
 }
 
@@ -215,7 +215,7 @@ void luapluginparam_range(psy_audio_LuaPluginMachineParam* self, intptr_t* minva
 	psy_LuaImport in;
 	lua_Number v;
 
-	psy_audio_lock_enter(self->plugin->lock);
+	psy_lock_enter(self->plugin->lock);
 	psy_luaimport_init(&in, self->plugin->script.L, self->plugin->client);
 	if (psy_luaimport_open(&in, 0)) {
 		getparam(&in, self->index, "range");
@@ -230,7 +230,7 @@ void luapluginparam_range(psy_audio_LuaPluginMachineParam* self, intptr_t* minva
 		*maxval = 65535;
 	}
 	psy_luaimport_dispose(&in);
-	psy_audio_lock_leave(self->plugin->lock);
+	psy_lock_leave(self->plugin->lock);
 }
 
 int luapluginparam_type(psy_audio_LuaPluginMachineParam* self)
@@ -238,7 +238,7 @@ int luapluginparam_type(psy_audio_LuaPluginMachineParam* self)
 	psy_LuaImport in;
 	lua_Integer v;
 
-	psy_audio_lock_enter(self->plugin->lock);
+	psy_lock_enter(self->plugin->lock);
 	psy_luaimport_init(&in, self->plugin->script.L, self->plugin->client);
 	if (psy_luaimport_open(&in, 0)) {
 		getparam(&in, self->index, "mpf");
@@ -248,10 +248,118 @@ int luapluginparam_type(psy_audio_LuaPluginMachineParam* self)
 		v = MPF_STATE;
 	}
 	psy_luaimport_dispose(&in);
-	psy_audio_lock_leave(self->plugin->lock);
+	psy_lock_leave(self->plugin->lock);
 	return (int)v;
 }
 
+static int luaplugin_parse_machineinfo(psy_PsycleScript* self, psy_audio_MachineInfo* rv);
+
+static int luaplugin_machineinfo(psy_PsycleScript* self, psy_audio_MachineInfo* rv)
+{
+	int err = 0;
+	lua_getglobal(self->L, "psycle");
+	if (lua_isnil(self->L, -1)) {
+		err = 1; // throw std::runtime_error("Psycle not available.");
+		return err;
+	}
+	lua_getfield(self->L, -1, "info");
+	if (!lua_isnil(self->L, -1)) {
+		int status = lua_pcall(self->L, 0, 1, 0);    
+		if (status) {         
+			const char* msg = lua_tostring(self->L, -1); 
+			// ui::error(msg);
+			err = 1; // throw std::runtime_error(msg);
+			return err;
+		}		
+		luaplugin_parse_machineinfo(self, rv);
+	} else {
+		err = 1;
+		// throw std::runtime_error("no info found");
+	}
+	return err;
+}
+
+int luaplugin_parse_machineinfo(psy_PsycleScript* self, psy_audio_MachineInfo* rv)
+{  
+	char* name = 0;
+	char* vendor = 0;	
+	int mode = psy_audio_MACHMODE_FX;
+	int version = 0;
+	int apiversion = 0;
+	int noteon = 0;
+	int err = 0;
+	
+	if (lua_istable(self->L, -1)) {
+		size_t len;
+		for (lua_pushnil(self->L); lua_next(self->L, -2);
+				lua_pop(self->L, 1)) {
+			const char* key = luaL_checklstring(self->L, -2, &len);
+			if (strcmp(key, "vendor") == 0) {
+				const char* value = luaL_checklstring(self->L, -1, &len);
+				if (value) {
+					vendor = strdup(value);
+				}        
+			} else
+			if (strcmp(key, "name") == 0) {
+				const char* value = luaL_checklstring(self->L, -1, &len);
+				if (value) {
+					name = strdup(value);
+				}          
+			} else
+			if (strcmp(key, "mode") == 0) {
+				int64_t value;
+
+				if (lua_isnumber(self->L, -1) == 0) {
+					err = 1;
+					break;
+					// throw std::runtime_error("info mode not a number"); 
+				}			
+				value = luaL_checkinteger(self->L, -1);
+				switch (value) {
+					case 0:
+						mode = psy_audio_MACHMODE_GENERATOR;
+					break;
+					case 3:
+						// mode = MACHMODE_HOST;
+						mode = psy_audio_MACHMODE_FX;
+					break;
+					default:
+						mode = psy_audio_MACHMODE_FX;
+					break;
+				}
+			} else
+			if (strcmp(key, "generator") == 0) {
+				// deprecated, use mode instead
+				int64_t value = luaL_checkinteger(self->L, -1);
+				mode = (value == 1) ? psy_audio_MACHMODE_GENERATOR : psy_audio_MACHMODE_FX;
+			} else
+			if (strcmp(key, "version") == 0) {
+				version = (int) luaL_checkinteger(self->L, -1);
+			} else
+			if (strcmp(key, "api") == 0) {
+				apiversion = (int) luaL_checkinteger(self->L, -1);			
+			} else
+			if (strcmp(key, "noteon") == 0) {
+				noteon = (int) luaL_checkinteger(self->L, -1);
+				rv->flags = noteon;
+			}
+		}
+	}	     
+	// std::ostringstream s;
+	// s << (result.mode == psy_audio_MACHMODE_GENERATOR ? "Lua instrument"
+	//                                          : "Lua effect")
+	//    << " by "
+	//    << result.vendor;
+	// result.desc = s.str();
+	machineinfo_set(rv, vendor, "", 0, mode, name, name, (short) apiversion, 
+		(short) version, psy_audio_LUA, "", 0, "", "Lua", "");
+	free(name);
+	free(vendor);
+	return err;
+}
+
+
+/* prototypes */
 static void generateaudio(psy_audio_LuaPlugin*, psy_audio_BufferContext*);
 static void seqtick(psy_audio_LuaPlugin*, uintptr_t channel,
 	const psy_audio_PatternEvent*);
@@ -269,7 +377,7 @@ static void luamachine_newshareduserdata(lua_State*, const char* meta, void* ud,
 static void luaplugin_initmachine(psy_audio_LuaPlugin*);
 static bool hasdirectmetaaccess(psy_audio_LuaPlugin*);
 void psy_audio_luaplugin_getinfo(psy_audio_LuaPlugin*);
-int psy_audio_plugin_luascript_exportcmodules(psy_audio_PsycleScript*);
+int psy_audio_plugin_luascript_exportcmodules(psy_PsycleScript*);
 static int loadspecific(psy_audio_LuaPlugin*, psy_audio_SongFile*,
 	uintptr_t slot);
 static int savespecific(psy_audio_LuaPlugin*, psy_audio_SongFile*,
@@ -356,7 +464,7 @@ void psy_audio_luaplugin_init(psy_audio_LuaPlugin* self, psy_audio_MachineCallba
 	if (err = psyclescript_run(&self->script)) {
 		return;
 	}
-	self->lock = psy_audio_lock_allocinit();
+	self->lock = psy_lock_allocinit();
 	if (!self->lock) {
 		return;
 	}
@@ -364,15 +472,15 @@ void psy_audio_luaplugin_init(psy_audio_LuaPlugin* self, psy_audio_MachineCallba
 		return;
 	}
 	self->plugininfo = machineinfo_allocinit();
-	if (psyclescript_machineinfo(&self->script, self->plugininfo) != 0) {
+	if (luaplugin_machineinfo(&self->script, self->plugininfo) != 0) {
 		psy_audio_luaplugin_getinfo(self);
 	}
 	free(self->plugininfo->modulepath);
 	self->plugininfo->modulepath = strdup(path);
-	self->usenoteon = self->plugininfo->Flags;
+	self->usenoteon = self->plugininfo->flags;
 	luaplugin_initmachine(self);	
 	psy_audio_machine_seteditname(psy_audio_luaplugin_base(self),
-		self->plugininfo->ShortName);
+		self->plugininfo->shortname);
 }
 
 void dispose(psy_audio_LuaPlugin* self)
@@ -384,7 +492,7 @@ void dispose(psy_audio_LuaPlugin* self)
 	}	
     psyclescript_dispose(&self->script);
 	psy_audio_custommachine_dispose(&self->custommachine);
-	psy_audio_lock_dispose(self->lock);
+	psy_lock_dispose(self->lock);
 	free(self->lock);
 	psy_audio_luapluginmachineparam_dispose(&self->parameter);
 }
@@ -404,7 +512,7 @@ void reload(psy_audio_LuaPlugin* self)
 
 int psy_audio_plugin_luascript_test(const char* path, psy_audio_MachineInfo* machineinfo)
 {		
-	psy_audio_PsycleScript script;
+	psy_PsycleScript script;
 	int err = 0;	
 	
 	psyclescript_init(&script);
@@ -422,7 +530,7 @@ int psy_audio_plugin_luascript_test(const char* path, psy_audio_MachineInfo* mac
 	{
 		return 0;
 	}
-	err = psyclescript_machineinfo(&script, machineinfo);
+	err = luaplugin_machineinfo(&script, machineinfo);
 	if (err != 0) {
 		psy_audio_LuaPlugin plugin;
 		
@@ -444,7 +552,7 @@ int psy_audio_plugin_luascript_test(const char* path, psy_audio_MachineInfo* mac
 	return 1;
 }
 
-int psy_audio_plugin_luascript_exportcmodules(psy_audio_PsycleScript* self)
+int psy_audio_plugin_luascript_exportcmodules(psy_PsycleScript* self)
 {
 	psyclescript_require(self, "psycle.machine", luamachine_open);
 	psyclescript_require(self, "psycle.array",
@@ -467,7 +575,7 @@ void generateaudio(psy_audio_LuaPlugin* self, psy_audio_BufferContext* bc)
 	if (bc->numsamples > 0) {				
 		psy_LuaImport in;
 
-		psy_audio_lock_enter(self->lock);
+		psy_lock_enter(self->lock);
 		psy_luaimport_init(&in, self->script.L, self->client);		
 		if (psy_luaimport_open(&in, "work")) {
 			self->client->bcshared_ = TRUE;
@@ -483,7 +591,7 @@ void generateaudio(psy_audio_LuaPlugin* self, psy_audio_BufferContext* bc)
 			}
 		}
 		psy_luaimport_dispose(&in);
-		psy_audio_lock_leave(self->lock);
+		psy_lock_leave(self->lock);
     }	
 }
 
@@ -492,7 +600,7 @@ void seqtick(psy_audio_LuaPlugin* self, uintptr_t channel,
 {
 	psy_LuaImport in;
 
-	psy_audio_lock_enter(self->lock);
+	psy_lock_enter(self->lock);
 	psy_luaimport_init(&in, self->script.L, self->client);
 	if (psy_luaimport_open(&in, "seqtick")) {
 		lua_pushinteger(self->script.L, channel);
@@ -506,33 +614,33 @@ void seqtick(psy_audio_LuaPlugin* self, uintptr_t channel,
 		}
     }
 	psy_luaimport_dispose(&in);
-	psy_audio_lock_leave(self->lock);
+	psy_lock_leave(self->lock);
 }
 
 void newline(psy_audio_LuaPlugin* self)
 {	
 	psy_LuaImport in;
 	
-	psy_audio_lock_enter(self->lock);
+	psy_lock_enter(self->lock);
 	psy_luaimport_init(&in, self->script.L, self->client);
 	if (psy_luaimport_open(&in, "sequencertick")) {		
 		psy_luaimport_pcall(&in, 0);		
     }
 	psy_luaimport_dispose(&in);
-	psy_audio_lock_leave(self->lock);
+	psy_lock_leave(self->lock);
 }
 
 void stop(psy_audio_LuaPlugin* self)
 {
 	psy_LuaImport in;
 
-	psy_audio_lock_enter(self->lock);
+	psy_lock_enter(self->lock);
 	psy_luaimport_init(&in, self->script.L, self->client);
 	if (psy_luaimport_open(&in, "stop")) {
 		psy_luaimport_pcall(&in, 0);
 	}
 	psy_luaimport_dispose(&in);
-	psy_audio_lock_leave(self->lock);
+	psy_lock_leave(self->lock);
 }
 
 psy_audio_MachineInfo* info(psy_audio_LuaPlugin* self)
@@ -1079,7 +1187,7 @@ void psy_audio_luaplugin_getinfo(psy_audio_LuaPlugin* self)
 	if (psy_luaimport_open(&in, "info")) {
 		psy_luaimport_pcall(&in, 1);
 		if (in.lasterr == 0) {
-			psyclescript_parse_machineinfo(&self->script, self->plugininfo);
+			luaplugin_parse_machineinfo(&self->script, self->plugininfo);
 		}
 		else {
 			machineinfo_dispose(self->plugininfo);
@@ -1117,7 +1225,7 @@ int loadspecific(psy_audio_LuaPlugin* self, psy_audio_SongFile* songfile,
 	//It is done this way to allow parameters to change without disrupting the loader.
 	psy_table_init(&ids);
 	psy_table_init(&vals);
-	psy_audio_lock_enter(self->lock);
+	psy_lock_enter(self->lock);
 	for (i = 0; i < numparams; i++) {
 		int temp;
 		if (status = psyfile_read(songfile->file, &temp, sizeof(temp))) {
@@ -1160,7 +1268,7 @@ int loadspecific(psy_audio_LuaPlugin* self, psy_audio_SongFile* songfile,
 	}
 	psy_table_dispose(&vals);
 	psy_table_dispose(&ids);
-	psy_audio_lock_leave(self->lock);
+	psy_lock_leave(self->lock);
 	if (psyfile_skip(songfile->file, size - sizeof(numparams) - (numparams * sizeof(uint32_t))) == -1) {
 		return PSY_ERRFILE;
 	}

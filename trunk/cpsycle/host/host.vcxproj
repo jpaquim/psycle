@@ -101,7 +101,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(SolutionDir)lua54\src\;$(SolutionDir)ui\src;$(SolutionDir)audio\src;$(SolutionDir)file\src;$(SolutionDir)container\src;$(SolutionDir)dsp\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)script\src;$(SolutionDir)thread\src;$(SolutionDir)lua54\src\;$(SolutionDir)ui\src;$(SolutionDir)audio\src;$(SolutionDir)file\src;$(SolutionDir)container\src;$(SolutionDir)dsp\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -120,10 +120,10 @@
       <Culture>0x0407</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>zlib.lib;lua54.lib;ui.lib;odbc32.lib;odbccp32.lib;comctl32.lib;file.lib;winmm.lib;container.lib;dsp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>audio.lib;thread.lib;script.lib;zlib.lib;lua54.lib;ui.lib;odbc32.lib;odbccp32.lib;comctl32.lib;file.lib;winmm.lib;container.lib;dsp.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)host.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>$(SolutionDir)zlib\Debug;$(SolutionDir)lua54\Debug;$(SolutionDir)ui\Debug;$(SolutionDir)audio\Debug;$(SolutionDir)file\Debug;$(SolutionDir)container\Debug;$(SolutionDir)dsp\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)audio\Debug;$(SolutionDir)script\Debug;$(SolutionDir)thread\Debug;$(SolutionDir)zlib\Debug;$(SolutionDir)lua54\Debug;$(SolutionDir)ui\Debug;$(SolutionDir)audio\Debug;$(SolutionDir)file\Debug;$(SolutionDir)container\Debug;$(SolutionDir)dsp\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(IntDir)host.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
@@ -150,7 +150,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(SolutionDir)lua54\src\;$(SolutionDir)ui\src;$(SolutionDir)audio\src;$(SolutionDir)file\src;$(SolutionDir)container\src;$(SolutionDir)dsp\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)script\src;$(SolutionDir)thread\src;$(SolutionDir)lua54\src\;$(SolutionDir)ui\src;$(SolutionDir)audio\src;$(SolutionDir)file\src;$(SolutionDir)container\src;$(SolutionDir)dsp\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -168,10 +168,10 @@
       <Culture>0x0407</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>zlib.lib;lua54.lib;ui.lib;odbc32.lib;odbccp32.lib;comctl32.lib;file.lib;winmm.lib;container.lib;dsp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>audio.lib;thread.lib;script.lib;zlib.lib;lua54.lib;ui.lib;odbc32.lib;odbccp32.lib;comctl32.lib;file.lib;winmm.lib;container.lib;dsp.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)host.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>$(SolutionDir)zlib\Debug;$(SolutionDir)lua54\Debug;$(SolutionDir)ui\Debug;$(SolutionDir)audio\Debug;$(SolutionDir)file\Debug;$(SolutionDir)container\Debug;$(SolutionDir)dsp\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)audio\Debug;$(SolutionDir)script\Debug;$(SolutionDir)thread\Debug;$(SolutionDir)zlib\Debug;$(SolutionDir)lua54\Debug;$(SolutionDir)ui\Debug;$(SolutionDir)file\Debug;$(SolutionDir)container\Debug;$(SolutionDir)dsp\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(IntDir)host.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
@@ -201,7 +201,7 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <AdditionalIncludeDirectories>$(SolutionDir)lua54\src\;$(SolutionDir)ui\src;$(SolutionDir)audio\src;$(SolutionDir)file\src;$(SolutionDir)container\src;$(SolutionDir)dsp\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)script\src;$(SolutionDir)thread\src;$(SolutionDir)lua54\src\;$(SolutionDir)ui\src;$(SolutionDir)audio\src;$(SolutionDir)file\src;$(SolutionDir)container\src;$(SolutionDir)dsp\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -218,10 +218,10 @@
       <Culture>0x0407</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>zlib.lib;lua54.lib;ui.lib;odbc32.lib;odbccp32.lib;comctl32.lib;file.lib;winmm.lib;container.lib;dsp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>audio.lib;thread.lib;script.lib;zlib.lib;lua54.lib;ui.lib;odbc32.lib;odbccp32.lib;comctl32.lib;file.lib;winmm.lib;container.lib;dsp.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)host.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>$(SolutionDir)zlib\Release;$(SolutionDir)lua54\Release;$(SolutionDir)ui\Release;$(SolutionDir)audio\Release;$(SolutionDir)file\Release;$(SolutionDir)container\Release;$(SolutionDir)dsp\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)audio\Release;$(SolutionDir)script\Release;$(SolutionDir)thread\Release;$(SolutionDir)zlib\Release;$(SolutionDir)lua54\Release;$(SolutionDir)ui\Release;$(SolutionDir)audio\Release;$(SolutionDir)file\Release;$(SolutionDir)container\Release;$(SolutionDir)dsp\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ProgramDatabaseFile>$(IntDir)host.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
@@ -248,7 +248,7 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <AdditionalIncludeDirectories>$(SolutionDir)lua54\src\;$(SolutionDir)ui\src;$(SolutionDir)audio\src;$(SolutionDir)file\src;$(SolutionDir)container\src;$(SolutionDir)dsp\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)script\src;$(SolutionDir)thread\src;$(SolutionDir)lua54\src\;$(SolutionDir)ui\src;$(SolutionDir)audio\src;$(SolutionDir)file\src;$(SolutionDir)container\src;$(SolutionDir)dsp\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -265,10 +265,10 @@
       <Culture>0x0407</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>zlib.lib;lua54.lib;ui.lib;odbc32.lib;odbccp32.lib;comctl32.lib;file.lib;winmm.lib;container.lib;dsp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>audio.lib;thread.lib;script.lib;zlib.lib;lua54.lib;ui.lib;odbc32.lib;odbccp32.lib;comctl32.lib;file.lib;winmm.lib;container.lib;dsp.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)host.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>$(SolutionDir)zlib\Release;$(SolutionDir)lua54\Release;$(SolutionDir)ui\Release;$(SolutionDir)audio\Release;$(SolutionDir)file\Release;$(SolutionDir)container\Release;$(SolutionDir)dsp\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)audio\Release;$(SolutionDir)script\Release;$(SolutionDir)thread\Release;$(SolutionDir)zlib\Release;$(SolutionDir)lua54\Release;$(SolutionDir)ui\Release;$(SolutionDir)audio\Release;$(SolutionDir)file\Release;$(SolutionDir)container\Release;$(SolutionDir)dsp\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ProgramDatabaseFile>$(IntDir)host.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
@@ -434,6 +434,7 @@
     <ClCompile Include="src\songproperties.c" />
     <ClCompile Include="src\songtrackbar.c" />
     <ClCompile Include="src\spectrumanalyzer.c" />
+    <ClCompile Include="src\startscript.c" />
     <ClCompile Include="src\stepbox.c" />
     <ClCompile Include="src\stepsequencerview.c" />
     <ClCompile Include="src\stereophase.c" />
@@ -622,6 +623,7 @@
     <ClInclude Include="src\songproperties.h" />
     <ClInclude Include="src\songtrackbar.h" />
     <ClInclude Include="src\spectrumanalyzer.h" />
+    <ClInclude Include="src\startscript.h" />
     <ClInclude Include="src\stepbox.h" />
     <ClInclude Include="src\stepsequencerview.h" />
     <ClInclude Include="src\stereophase.h" />

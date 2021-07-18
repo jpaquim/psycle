@@ -627,8 +627,11 @@
     <ClCompile Include="src\seqviewtrackheaders.c">
       <Filter>sequence\seqview</Filter>
     </ClCompile>
+    <ClCompile Include="src\startscript.c">
+      <Filter>app</Filter>
+    </ClCompile>
     <ClCompile Include="src\seqeditproperties.c">
-      <Filter>sequence\seqeditor</Filter>
+      <Filter>sequence</Filter>
     </ClCompile>
     <ClCompile Include="src\labeledit.c">
       <Filter>uicontrols</Filter>
@@ -1163,8 +1166,11 @@
     <ClInclude Include="src\seqviewtrackheaders.h">
       <Filter>sequence\seqview</Filter>
     </ClInclude>
+    <ClInclude Include="src\startscript.h">
+      <Filter>app</Filter>
+    </ClInclude>
     <ClInclude Include="src\seqeditproperties.h">
-      <Filter>sequence\seqeditor</Filter>
+      <Filter>sequence</Filter>
     </ClInclude>
     <ClInclude Include="src\labeledit.h">
       <Filter>uicontrols</Filter>

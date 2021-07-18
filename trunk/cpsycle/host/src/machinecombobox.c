@@ -122,12 +122,12 @@ void machinecombobox_buildmachinebox(MachineComboBox* self)
 int machinecombobox_insertmachine(MachineComboBox* self, size_t slot, psy_audio_Machine* machine)
 {				
 	if ((slot != psy_audio_MASTER_INDEX || self->showmaster) && psy_audio_machine_info(machine) &&
-			psy_audio_machine_info(machine)->ShortName) {
+			psy_audio_machine_info(machine)->shortname) {
 		intptr_t comboboxindex;
 		char buffer[128];
 
 		psy_snprintf(buffer, 128, "%02X: %s", slot, 
-			machine->vtable->info(machine)->ShortName); 
+			machine->vtable->info(machine)->shortname); 
 		comboboxindex = psy_ui_combobox_addtext(&self->machinebox, buffer);
 		psy_table_insert(&self->comboboxslots, comboboxindex, (void*)slot);
 		psy_table_insert(&self->slotscombobox, slot, (void*) comboboxindex);

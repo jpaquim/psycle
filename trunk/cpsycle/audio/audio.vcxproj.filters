@@ -40,9 +40,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\psyclescript.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\song.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -172,9 +169,6 @@
     <ClCompile Include="src\custommachine.c">
       <Filter>machine</Filter>
     </ClCompile>
-    <ClCompile Include="src\lock.c">
-      <Filter>player</Filter>
-    </ClCompile>
     <ClCompile Include="src\cputimeclock.c">
       <Filter>player</Filter>
     </ClCompile>
@@ -200,9 +194,6 @@
       <Filter>machine\plugins\lua</Filter>
     </ClCompile>
     <ClCompile Include="src\luafilter.c">
-      <Filter>machine\plugins\lua</Filter>
-    </ClCompile>
-    <ClCompile Include="src\luaimport.c">
       <Filter>machine\plugins\lua</Filter>
     </ClCompile>
     <ClCompile Include="src\luamidinotes.c">
@@ -444,9 +435,6 @@
     <ClInclude Include="src\midiconfig.h">
       <Filter>player</Filter>
     </ClInclude>
-    <ClInclude Include="src\lock.h">
-      <Filter>player</Filter>
-    </ClInclude>
     <ClInclude Include="src\kbddriver.h">
       <Filter>player</Filter>
     </ClInclude>
@@ -507,9 +495,6 @@
     <ClInclude Include="src\luafilter.h">
       <Filter>machine\plugins\lua</Filter>
     </ClInclude>
-    <ClInclude Include="src\luaimport.h">
-      <Filter>machine\plugins\lua</Filter>
-    </ClInclude>
     <ClInclude Include="src\luamidinotes.h">
       <Filter>machine\plugins\lua</Filter>
     </ClInclude>
@@ -568,9 +553,6 @@
       <Filter>machine\plugins</Filter>
     </ClInclude>
     <ClInclude Include="src\constants.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\psyclescript.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="src\song.h">

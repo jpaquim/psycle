@@ -2489,3 +2489,11 @@ void psy_ui_component_clearbuffer(psy_ui_Component* self)
 	psy_ui_bitmap_dispose(&self->bufferbitmap);
 	psy_ui_bitmap_init(&self->bufferbitmap);
 }
+
+void* psy_ui_component_platform(psy_ui_Component* self)
+{
+	assert(self);
+	assert(self->imp);
+
+	return self->imp->vtable->dev_platform_handle(self->imp);
+}

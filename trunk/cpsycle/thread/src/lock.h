@@ -3,8 +3,8 @@
 ** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
 */
 
-#ifndef psy_audio_LOCK_H
-#define psy_audio_LOCK_H
+#ifndef psy_LOCK_H
+#define psy_LOCK_H
 
 #include "../../detail/os.h"
 
@@ -18,27 +18,27 @@
 extern "C" {
 #endif
 
-typedef struct psy_audio_Lock {
+typedef struct psy_Lock {
 #if defined DIVERSALIS__OS__POSIX
 	pthread_mutex_t lock;
 #elif defined DIVERSALIS__OS__MICROSOFT
 	CRITICAL_SECTION lock;
 #endif
 	int disabled;
-} psy_audio_Lock;
+} psy_Lock;
 
-void psy_audio_lock_init(psy_audio_Lock*);
-void psy_audio_lock_dispose(psy_audio_Lock*);
-psy_audio_Lock* psy_audio_lock_alloc(void);
-psy_audio_Lock* psy_audio_lock_allocinit(void);
+void psy_lock_init(psy_Lock*);
+void psy_lock_dispose(psy_Lock*);
+psy_Lock* psy_lock_alloc(void);
+psy_Lock* psy_lock_allocinit(void);
 
-void psy_audio_lock_enable(psy_audio_Lock*);
-void psy_audio_lock_disable(psy_audio_Lock*);
-void psy_audio_lock_enter(psy_audio_Lock*);
-void psy_audio_lock_leave(psy_audio_Lock*);
+void psy_lock_enable(psy_Lock*);
+void psy_lock_disable(psy_Lock*);
+void psy_lock_enter(psy_Lock*);
+void psy_lock_leave(psy_Lock*);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* psy_audio_EXCLUSIVELOCK_H */
+#endif /* psy_LOCK_H */

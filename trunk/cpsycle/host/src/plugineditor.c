@@ -172,7 +172,7 @@ void plugineditor_onmachineschangeslot(PluginEditor* self,
 		char catchername[256];
 		
 		psy_snprintf(catchername, 256, "%s:0",
-			psy_audio_machine_info(machine)->Name);		
+			psy_audio_machine_info(machine)->name);		
 		path = psy_audio_plugincatcher_searchpath(&self->workspace->plugincatcher, catchername,
 			psy_audio_LUA);
 		if (path) {
