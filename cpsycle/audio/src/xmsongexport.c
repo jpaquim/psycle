@@ -94,8 +94,8 @@ int xmsongexport_writesongheader(XMSongExport* self)
 					const psy_audio_MachineInfo* info;
 
 					info = psy_audio_machine_info(psy_audio_machines_at(&self->song->machines, i));
-					if (info && info->Name) {
-						const char* str = info->Name;
+					if (info && info->name) {
+						const char* str = info->name;
 						if (strstr(str, "blitz")) {						
 							self->isBlitzorVst[i + 1] = TRUE;
 						}

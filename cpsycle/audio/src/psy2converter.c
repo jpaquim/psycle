@@ -442,6 +442,7 @@ void internalmachineconverter_retweak_song(InternalMachinesConvert* self, psy_au
 		for (p = pattern->events; p != NULL; psy_list_next(&p)) {
 			psy_audio_PatternEntry* entry;
 			psy_audio_PatternEvent* event;
+			psy_audio_Machine* machine;
 
 			entry = (psy_audio_PatternEntry*)psy_list_entry(p);
 			event = psy_audio_patternentry_front(entry);
@@ -451,15 +452,15 @@ void internalmachineconverter_retweak_song(InternalMachinesConvert* self, psy_au
 				event->mach += 0x40;
 				event->note = psy_audio_NOTECOMMANDS_TWEAK;
 			}
-			if (event->note == psy_audio_NOTECOMMANDS_TWEAK && event->mach < MAX_MACHINES)
-			{
-				if (psy_table_exists(&self->machine_converted_from, event->mach)) {
+			machine = psy_audio_machines_at(&song->machines, event->mach);
+			if (event->note == psy_audio_NOTECOMMANDS_TWEAK && event->mach < MAX_MACHINES && machine)
+			{								
+				if (psy_table_exists(&self->machine_converted_from, (uintptr_t)machine)) {
 					ConverterType* convertertype;
 					int parameter;
 					int value;
 
-					convertertype = psy_table_at(&self->machine_converted_from,
-						event->mach);
+					convertertype = psy_table_at(&self->machine_converted_from, (uintptr_t)machine);
 					parameter = event->inst;
 					value = ((event->cmd << 8) + event->parameter);
 
@@ -472,15 +473,13 @@ void internalmachineconverter_retweak_song(InternalMachinesConvert* self, psy_au
 					event->cmd = value >> 8;
 					event->parameter = 0xff & value;
 				}				
-			} else
-			if (event->cmd == 0x0E && event->mach < MAX_MACHINES) {
-				if (psy_table_exists(&self->machine_converted_from, event->mach)) {
+			} else if (event->cmd == 0x0E && event->mach < MAX_MACHINES && machine) {
+				if (psy_table_exists(&self->machine_converted_from, (uintptr_t)machine)) {
 					ConverterType* convertertype;
 					int param;
 					int value;
 
-					convertertype = psy_table_at(&self->machine_converted_from,
-						event->mach);		
+					convertertype = psy_table_at(&self->machine_converted_from, (uintptr_t)machine);		
 					param = 25;
 					value = event->parameter;
 					retweak_parameter(song, samplerate,

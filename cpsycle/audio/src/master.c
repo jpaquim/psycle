@@ -1,26 +1,30 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "master.h"
+/* local */
 #include "song.h"
 #include "songio.h"
 #include "machines.h"
 #include "plugin_interface.h"
-
+/* dsp */
 #include <convert.h>
-// dsp
 #include <operations.h>
 #include <valuemapper.h>
-
-#include <string.h>
+/* std */
 #include <math.h>
-
+/* platform */
 #include "../../detail/portable.h"
+#include "../../detail/trace.h"
 
 #define psy_audio_MASTER_MINCOLS 6
 
+/* prototypes */
 static void master_generateaudio(psy_audio_Master*, psy_audio_BufferContext*);
 static void master_seqtick(psy_audio_Master*, uintptr_t channel,
 	const psy_audio_PatternEvent* ev);
@@ -47,7 +51,6 @@ static uintptr_t numtweakparameters(psy_audio_Master*);
 static uintptr_t numparametercols(psy_audio_Master*);
 static uintptr_t numinputwires(psy_audio_Master*);
 static uintptr_t paramstrobe(const psy_audio_Master*);
-
 static void master_describeeditname(psy_audio_Master*, char* text, uintptr_t slot);
 static void master_title_name(psy_audio_Master*,
 	psy_audio_CustomMachineParam* sender, char* text);
@@ -61,10 +64,10 @@ static void master_level_normvalue(psy_audio_Master*,
 	psy_audio_CustomMachineParam* sender, float* rv);
 static void master_level_describe(psy_audio_Master*,
 	psy_audio_CustomMachineParam* sender, int* active, char* text);
-
 static void onconnected(psy_audio_Master*, psy_audio_Connections*, uintptr_t outputslot, uintptr_t inputslot);
 static void ondisconnected(psy_audio_Master*, psy_audio_Connections*, uintptr_t outputslot, uintptr_t inputslot);
 
+/* implementation */
 static psy_dsp_amp_range_t amprange(psy_audio_Master* self)
 {
 	return PSY_DSP_AMP_RANGE_IGNORE;
@@ -168,7 +171,7 @@ const psy_audio_MachineInfo* info(psy_audio_Master* self)
 }
 
 void master_generateaudio(psy_audio_Master* self, psy_audio_BufferContext* bc)
-{
+{	
 	psy_audio_buffer_mulsamples(bc->output, bc->numsamples, self->volume);	
 }
 

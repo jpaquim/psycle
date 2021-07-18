@@ -167,6 +167,7 @@ void make_translator_make_mainview(psy_Property* parent)
 	add("samples", "Samples");
 	add("instrument", "Instrument");
 	add("instruments", "Instruments");
+	add("scripts", "...");
 	add("help", "Help");
 	add("settings", "Settings");
 	add("properties", "Properties");

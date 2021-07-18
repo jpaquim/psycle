@@ -148,10 +148,10 @@ void newmachinedetail_update(NewMachineDetail* self,
 		psy_audio_machineinfo_from_property(property, &machineinfo);		
 		newmachinedetail_setdescription(self, machineinfo.desc);		
 		psy_path_init(&path, machineinfo.modulepath);
-		newmachinedetail_setplugname(self, machineinfo.Name);
+		newmachinedetail_setplugname(self, machineinfo.name);
 		newmachinedetail_setdllname(self, psy_path_filename(&path));
-		newmachinedetail_setapiversion(self, machineinfo.APIVersion);
-		newmachinedetail_setplugversion(self, machineinfo.PlugVersion);
+		newmachinedetail_setapiversion(self, machineinfo.apiversion);
+		newmachinedetail_setplugversion(self, machineinfo.plugversion);
 		newmachinedetail_setcategoryname(self, machineinfo.category);		
 		psy_path_dispose(&path);
 		machineinfo_dispose(&machineinfo);

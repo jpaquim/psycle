@@ -1,7 +1,11 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
+
+
 #include "../../detail/os.h"
 #include "../../detail/stdint.h"
 
@@ -13,21 +17,18 @@
 
 #include "psyclescript.h"
 #include "luaimport.h"
-#include "machinedefs.h"
-#include "lock.h"
+#include <lock.h>
 
 #include <dir.h>
 
 #include <lauxlib.h>
 #include <lualib.h>
 #include "../../detail/portable.h"
-#include <string.h>
-#include <stdlib.h>
 
-static void psyclescript_setsearchpath(psy_audio_PsycleScript*, const char* modulepath);
-static void psyclescript_seterrorstr(psy_audio_PsycleScript*, const char* str);
+static void psyclescript_setsearchpath(psy_PsycleScript*, const char* modulepath);
+static void psyclescript_seterrorstr(psy_PsycleScript*, const char* str);
 
-int psyclescript_init(psy_audio_PsycleScript* self)
+int psyclescript_init(psy_PsycleScript* self)
 {
 	self->L = luaL_newstate();
 	luaL_openlibs(self->L);
@@ -36,7 +37,7 @@ int psyclescript_init(psy_audio_PsycleScript* self)
 	return 0;
 }
 
-int psyclescript_dispose(psy_audio_PsycleScript* self)
+int psyclescript_dispose(psy_PsycleScript* self)
 {
   int err = 0;
 
@@ -51,13 +52,13 @@ int psyclescript_dispose(psy_audio_PsycleScript* self)
   return err;
 }
 
-void psyclescript_seterrorstr(psy_audio_PsycleScript* self, const char* str)
+void psyclescript_seterrorstr(psy_PsycleScript* self, const char* str)
 {
 	free(self->errstr);
 	self->errstr = strdup(str);
 }
 
-int psyclescript_load(psy_audio_PsycleScript* self, const char* path)
+int psyclescript_load(psy_PsycleScript* self, const char* path)
 {
 	int status;
 	char temp[_MAX_PATH];
@@ -78,7 +79,7 @@ int psyclescript_load(psy_audio_PsycleScript* self, const char* path)
 	return status;
 }
 
-int psyclescript_loadstring(psy_audio_PsycleScript* self, const char* script)
+int psyclescript_loadstring(psy_PsycleScript* self, const char* script)
 {
 	int status;
 
@@ -92,14 +93,14 @@ int psyclescript_loadstring(psy_audio_PsycleScript* self, const char* script)
 	return status;
 }
 
-int psyclescript_preparestate(psy_audio_PsycleScript* self, const luaL_Reg methods[],
+int psyclescript_preparestate(psy_PsycleScript* self, const luaL_Reg methods[],
 	void* host)
 {
-  psy_audio_PsycleScript** ud;
+  psy_PsycleScript** ud;
 
   lua_newtable(self->L);
   luaL_setfuncs(self->L, methods, 0);
-  ud = (psy_audio_PsycleScript **)lua_newuserdata(self->L, sizeof(psy_audio_PsycleScript *));
+  ud = (psy_PsycleScript **)lua_newuserdata(self->L, sizeof(psy_PsycleScript *));
   luaL_newmetatable(self->L, "psyhostmeta");
   lua_setmetatable(self->L, -2);
   *ud = host;
@@ -128,7 +129,7 @@ void* psyclescript_host(lua_State* L)
 	return host;
 }
 
-int psyclescript_run(psy_audio_PsycleScript* self)
+int psyclescript_run(psy_PsycleScript* self)
 { 
   int status;
 
@@ -139,7 +140,7 @@ int psyclescript_run(psy_audio_PsycleScript* self)
   return status;
 }
 
-int psyclescript_start(psy_audio_PsycleScript* self)
+int psyclescript_start(psy_PsycleScript* self)
 {
   lua_getglobal(self->L, "psycle");
   if (lua_isnil(self->L, -1)) {
@@ -156,110 +157,6 @@ int psyclescript_start(psy_audio_PsycleScript* self)
     }
   }
   return 0;
-}
-
-int psyclescript_machineinfo(psy_audio_PsycleScript* self, psy_audio_MachineInfo* rv)
-{
-	int err = 0;
-	lua_getglobal(self->L, "psycle");
-	if (lua_isnil(self->L, -1)) {
-		err = 1; // throw std::runtime_error("Psycle not available.");
-		return err;
-	}
-	lua_getfield(self->L, -1, "info");
-	if (!lua_isnil(self->L, -1)) {
-		int status = lua_pcall(self->L, 0, 1, 0);    
-		if (status) {         
-			const char* msg = lua_tostring(self->L, -1); 
-			// ui::error(msg);
-			err = 1; // throw std::runtime_error(msg);
-			return err;
-		}		
-		psyclescript_parse_machineinfo(self, rv);
-	} else {
-		err = 1;
-		// throw std::runtime_error("no info found");
-	}
-	return err;
-}
-
-int psyclescript_parse_machineinfo(psy_audio_PsycleScript* self, psy_audio_MachineInfo* rv)
-{  
-	char* name = 0;
-	char* vendor = 0;	
-	int mode = psy_audio_MACHMODE_FX;
-	int version = 0;
-	int apiversion = 0;
-	int noteon = 0;
-	int err = 0;
-	
-	if (lua_istable(self->L, -1)) {
-		size_t len;
-		for (lua_pushnil(self->L); lua_next(self->L, -2);
-				lua_pop(self->L, 1)) {
-			const char* key = luaL_checklstring(self->L, -2, &len);
-			if (strcmp(key, "vendor") == 0) {
-				const char* value = luaL_checklstring(self->L, -1, &len);
-				if (value) {
-					vendor = strdup(value);
-				}        
-			} else
-			if (strcmp(key, "name") == 0) {
-				const char* value = luaL_checklstring(self->L, -1, &len);
-				if (value) {
-					name = strdup(value);
-				}          
-			} else
-			if (strcmp(key, "mode") == 0) {
-				int64_t value;
-
-				if (lua_isnumber(self->L, -1) == 0) {
-					err = 1;
-					break;
-					// throw std::runtime_error("info mode not a number"); 
-				}			
-				value = luaL_checkinteger(self->L, -1);
-				switch (value) {
-					case 0:
-						mode = psy_audio_MACHMODE_GENERATOR;
-					break;
-					case 3:
-						// mode = MACHMODE_HOST;
-						mode = psy_audio_MACHMODE_FX;
-					break;
-					default:
-						mode = psy_audio_MACHMODE_FX;
-					break;
-				}
-			} else
-			if (strcmp(key, "generator") == 0) {
-				// deprecated, use mode instead
-				int64_t value = luaL_checkinteger(self->L, -1);
-				mode = (value == 1) ? psy_audio_MACHMODE_GENERATOR : psy_audio_MACHMODE_FX;
-			} else
-			if (strcmp(key, "version") == 0) {
-				version = (int) luaL_checkinteger(self->L, -1);
-			} else
-			if (strcmp(key, "api") == 0) {
-				apiversion = (int) luaL_checkinteger(self->L, -1);			
-			} else
-			if (strcmp(key, "noteon") == 0) {
-				noteon = (int) luaL_checkinteger(self->L, -1);
-				rv->Flags = noteon;
-			}
-		}
-	}	     
-	// std::ostringstream s;
-	// s << (result.mode == psy_audio_MACHMODE_GENERATOR ? "Lua instrument"
-	//                                          : "Lua effect")
-	//    << " by "
-	//    << result.vendor;
-	// result.desc = s.str();
-	machineinfo_set(rv, vendor, "", 0, mode, name, name, (short) apiversion, 
-		(short) version, psy_audio_LUA, "", 0, "", "Lua", "");
-	free(name);
-	free(vendor);
-	return err;
 }
 
 int psyclescript_open(lua_State* L,
@@ -281,14 +178,14 @@ int psyclescript_open(lua_State* L,
     return 1;
 }
 
-void psyclescript_require(psy_audio_PsycleScript* self, const char* name,
+void psyclescript_require(psy_PsycleScript* self, const char* name,
 	lua_CFunction openf)
 {
 	luaL_requiref(self->L, name, openf, 1);
     lua_pop(self->L, 1);
 }
 
-void psyclescript_setsearchpath(psy_audio_PsycleScript* self, const char* modulepath)
+void psyclescript_setsearchpath(psy_PsycleScript* self, const char* modulepath)
 {    
 	psy_Path path;  
 	char luapath[_MAX_PATH];	

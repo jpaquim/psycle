@@ -54,25 +54,25 @@ static void makeplugininfo(
 
 		p = psy_property_append_section(parent, name);
 		psy_property_append_int(p, "type", type, 0, 0);
-		psy_property_append_int(p, "flags", info->Flags, 0, 0);
+		psy_property_append_int(p, "flags", info->flags, 0, 0);
 		psy_property_append_int(p, "mode", info->mode, 0, 0);
-		psy_property_append_str(p, "name", info->Name);
-		psy_property_append_str(p, "shortname", info->ShortName);
-		psy_property_append_str(p, "author", info->Author);
-		psy_property_append_str(p, "command", info->Command);
+		psy_property_append_str(p, "name", info->name);
+		psy_property_append_str(p, "shortname", info->shortname);
+		psy_property_append_str(p, "author", info->author);
+		psy_property_append_str(p, "command", info->command);
 		psy_property_append_str(p, "path", path);
 		if (type == psy_audio_PLUGIN) {
 			char text[256];
 			psy_snprintf(text, 256, "Psycle %s by %s ",
 				info->mode == psy_audio_MACHMODE_FX ? "effect" : "instrument",
-				info->Author);
+				info->author);
 			psy_property_append_str(p, "desc", text);
 		} else {
 			psy_property_append_str(p, "desc", "");
 		}
 		psy_property_append_int(p, "shellidx", info->shellidx, 0, 0);
-		psy_property_append_int(p, "apiversion", info->APIVersion, 0, 0);
-		psy_property_append_int(p, "plugversion", info->PlugVersion, 0, 0);
+		psy_property_append_int(p, "apiversion", info->apiversion, 0, 0);
+		psy_property_append_int(p, "plugversion", info->plugversion, 0, 0);
 		psy_property_append_int(p, "favorite", 0, 0, 0);
 		if (categories && psy_strlen(info->category) == 0) {
 			psy_property_append_str(p, "category",
@@ -178,7 +178,7 @@ void psy_audio_pluginsections_add(psy_audio_PluginSections* self,
 			psy_audio_plugincatcher_catchername(
 				psy_strlen(macinfo->modulepath) > 0
 				? macinfo->modulepath
-				: macinfo->ShortName,
+				: macinfo->shortname,
 				name,
 				(psy_strlen(macinfo->modulepath) > 0)
 				? macinfo->shellidx
@@ -324,9 +324,9 @@ psy_Property* psy_audio_pluginsections_pluginexists(psy_audio_PluginSections* se
 			char name[_MAX_PATH];
 
 			psy_audio_plugincatcher_catchername(
-				psy_strlen(macinfo->modulepath)	> 0
+				(psy_strlen(macinfo->modulepath) > 0)
 				? macinfo->modulepath
-				: macinfo->ShortName,
+				: macinfo->shortname,
 				name,
 				(psy_strlen(macinfo->modulepath) > 0)
 				? macinfo->shellidx

@@ -12,7 +12,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
-
+/* platform */
 #include "../../detail/trace.h"
 
 // prototypes
@@ -33,6 +33,7 @@ static bool isleaf(psy_audio_Machines*, uintptr_t slot, psy_Table* worked);
 static uintptr_t machines_findmaxindex(psy_audio_Machines*);
 static void compute_leafs(psy_audio_Machines*, uintptr_t slot,
 	psy_List** leafs);
+static void machines_tracepath(const char* text, psy_List* path);
 // implementation
 void psy_audio_machines_init(psy_audio_Machines* self)
 {
@@ -402,7 +403,7 @@ void machines_setpath(psy_audio_Machines* self, MachineList* path)
 		psy_list_free(self->path);
 	}
 	self->path = path;
-	// machines_sortpath(self);
+	machines_sortpath(self);
 }
 
 // this orders the machines that can be processed parallel
@@ -423,7 +424,8 @@ void machines_sortpath(psy_audio_Machines* self)
 		psy_List* q;
 
 		psy_table_init(&worked);
-		p = self->path;		
+		p = self->path;
+		machines_tracepath("single", self->path);
 		while (self->path) {
 			p = self->path;			
 			while (p != NULL) {
@@ -446,8 +448,25 @@ void machines_sortpath(psy_audio_Machines* self)
 		}
 		psy_table_dispose(&worked);
 		psy_list_free(self->path);
-		self->path = sorted;		
+		self->path = sorted;
+		machines_tracepath("multi", self->path);
 	}	
+}
+
+void machines_tracepath(const char* text, psy_List* path)
+{
+	psy_List* p;
+
+	TRACE("MACHINEPATH (");
+	TRACE(text);
+	TRACE("): ");
+	for (p = path; p != NULL; p = p->next) {
+		TRACE_INT((int)p->entry);
+		if (p->next) {
+			TRACE("; ");
+		}
+	}
+	TRACE("\n");
 }
 
 bool isleaf(psy_audio_Machines* self, uintptr_t slot, psy_Table* worked)

@@ -1,10 +1,13 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "machinewireview.h"
-// host
+/* host */
 #include "resources/resource.h"
 #include "skingraphics.h"
 #include "wireview.h"
@@ -12,16 +15,16 @@
 #include "machineviewbar.h"
 #include "machineui.h"
 #include "styles.h"
-// audio
+/* audio */
 #include <exclusivelock.h>
-// std
+/* std */
 #include <math.h>
-// platform
+/* platform */
 #include "../../detail/portable.h"
 #include "../../detail/trace.h"
 
-// MachineWireView
-// prototypes
+/* MachineWireView */
+/* prototypes */
 static void machinewireview_ondestroy(MachineWireView*);
 static psy_ui_RealRectangle machinewireview_bounds(MachineWireView*);
 static void machinewireview_setmachines(MachineWireView*, psy_audio_Machines*);
@@ -87,6 +90,7 @@ static bool machinewireview_dragmachine(MachineWireView*, uintptr_t slot,
 static void machinewireview_setdragstatus(MachineWireView*, uintptr_t slot);
 static void machinewireview_onalign(MachineWireView*);
 
+/* vtable */
 static psy_ui_ComponentVtable vtable;
 static bool vtable_initialized = FALSE;
 
@@ -126,6 +130,7 @@ static void vtable_init(MachineWireView* self)
 	psy_ui_component_setvtable(&self->component, &vtable);	
 }
 
+/* implementation */
 void machinewireview_init(MachineWireView* self, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, MachineViewSkin* skin,
 	ParamViews* paramviews, Workspace* workspace)
@@ -651,6 +656,7 @@ void machinewireview_onmouseup(MachineWireView* self, psy_ui_MouseEvent* ev)
 	if (self->dragslot != psy_INDEX_INVALID) {
 		if (machinewireview_dragging_machine(self)) {
 			psy_ui_component_updateoverflow(&self->component);
+			workspace_marksongmodified(self->workspace);
 			psy_ui_mouseevent_stop_propagation(ev);
 		} else if (machinewireview_dragging_connection(self)) {
 			if (self->mousemoved) {
@@ -678,11 +684,11 @@ void machinewireview_onmouseup(MachineWireView* self, psy_ui_MouseEvent* ev)
 				}
 				psy_ui_mouseevent_stop_propagation(ev);
 			} else if (ev->button == 2) {
-				//if (!self->workspace->gearvisible) {
+				/* if (!self->workspace->gearvisible) {
 
-					//workspace_togglegear(self->workspace);					
-				//}
-				//psy_ui_mouseevent_stop_propagation(ev);
+					workspace_togglegear(self->workspace);					
+				}
+				psy_ui_mouseevent_stop_propagation(ev); */
 			}			
 		}
 	}

@@ -19,6 +19,8 @@
 #include <rms.h>
 /* file */
 #include <fileio.h>
+/* thread */
+#include <thread.h>
 /* std */
 #include "math.h"
 #include <time.h>
@@ -52,6 +54,7 @@ static uint16_t midi_combinebytes(unsigned char data1, unsigned char data2)
 	return rv_14bit;
 }
 
+/* prototpyes */
 static void psy_audio_player_initdriver(psy_audio_Player*);
 static void psy_audio_player_initkbddriver(psy_audio_Player*);
 static void psy_audio_player_initsignals(psy_audio_Player*);
@@ -75,6 +78,9 @@ static uintptr_t psy_audio_player_multichannelaudition(psy_audio_Player*,
 	const psy_audio_PatternEvent*);
 static void psy_audio_player_recordnotes(psy_audio_Player*,
 	uintptr_t track, const psy_audio_PatternEvent*);
+static unsigned int __stdcall psy_audio_player_thread_function(psy_audio_Player*);
+static void psy_audio_player_process_loop(psy_audio_Player*);
+
 /* implementation */
 void psy_audio_player_init(psy_audio_Player* self, psy_audio_Song* song,
 	void* handle)
@@ -96,6 +102,13 @@ void psy_audio_player_init(psy_audio_Player* self, psy_audio_Song* song,
 	self->resyncplayposinsamples = 0;
 	self->resyncplayposinbeats = 0.0;
 	self->measure_cpu_usage = FALSE;
+	self->thread_count = 1;
+	self->threads_ = NULL;
+	self->waiting = 0;
+	self->stop_requested_ = FALSE;
+	self->nodes_queue_ = NULL;
+	psy_lock_init(&self->mutex);
+	psy_lock_init(&self->block);
 	psy_dsp_dither_init(&self->dither);	
 	psy_audio_sequencer_init(&self->sequencer,
 		&self->song->sequence,
@@ -140,17 +153,22 @@ void psy_audio_player_initsignals(psy_audio_Player* self)
 void psy_audio_player_dispose(psy_audio_Player* self)
 {
 	assert(self);
-
+	
 	psy_audio_player_unloaddriver(self);
 	psy_library_dispose(&self->drivermodule);
-	psy_audio_eventdrivers_dispose(&self->eventdrivers);	
+	psy_audio_eventdrivers_dispose(&self->eventdrivers);
+	self->stop_requested_ = TRUE;
+	psy_list_deallocate(&self->threads_, (psy_fp_disposefunc)psy_thread_dispose);
+	psy_list_deallocate(&self->nodes_queue_, NULL);
+	psy_lock_dispose(&self->mutex);
+	psy_lock_dispose(&self->block);
 	psy_signal_dispose(&self->signal_lpbchanged);
 	psy_signal_dispose(&self->signal_inputevent);
 	psy_audio_activechannels_dispose(&self->playon);
 	psy_audio_sequencer_dispose(&self->sequencer);
 	psy_table_dispose(&self->notestotracks);
 	psy_table_dispose(&self->trackstonotes);
-	psy_table_dispose(&self->worked);
+	psy_table_dispose(&self->worked);	
 	psy_audio_pattern_dispose(&self->patterndefaults);
 	psy_dsp_dither_dispose(&self->dither);
 #ifdef PSYCLE_LOG_WORKEVENTS
@@ -260,27 +278,51 @@ void psy_audio_player_notifylinetick(psy_audio_Player* self)
 void psy_audio_player_workpath(psy_audio_Player* self, uintptr_t amount)
 {
 	MachinePath* path;
+	uintptr_t waiting;
 
 	assert(self);
-
+	
 	path = psy_audio_machines_path(&self->song->machines);
 	if (path) {		
 		for ( ; path != 0; path = path->next) {
 			size_t slot;			
+			psy_audio_MachineWork* work;
 			
-			slot = (size_t)path->entry;			
-			if (slot == psy_INDEX_INVALID) {
-				/*
-				** delimits the machines that could be processed parallel
-				**  todo: add thread functions
-				*/
-				continue;				
-			}			
-			if (!psy_audio_machines_ismixersend(&self->song->machines, slot)) {
-				psy_audio_player_workmachine(self, amount, slot);
+			slot = (size_t)path->entry;
+			if (self->thread_count < 2) {
+				if (slot != psy_INDEX_INVALID) {
+					if (!psy_audio_machines_ismixersend(&self->song->machines, slot)) {
+						psy_audio_player_workmachine(self, amount, slot);
+					}
+				}
+			} else if (slot != psy_INDEX_INVALID) {
+				psy_lock_enter(&self->mutex);
+				work = (psy_audio_MachineWork*)malloc(sizeof(psy_audio_MachineWork));
+				work->amount = amount;
+				work->slot = slot;
+				psy_list_append(&self->nodes_queue_, (void*)work);
+				psy_lock_leave(&self->mutex);
+			} else {
+				bool waiting;
+
+				do {
+					psy_lock_enter(&self->mutex);
+					waiting = psy_list_size(self->nodes_queue_) > 0;
+					psy_lock_leave(&self->mutex);
+				} while (waiting);				
 			}
-		}		
+		}
 	}	
+	do {
+		psy_lock_enter(&self->mutex);
+		waiting = psy_list_size(self->nodes_queue_) > 0;
+		psy_lock_leave(&self->mutex);
+	} while (waiting);	
+	do {
+		psy_lock_enter(&self->block);
+		waiting = self->waiting;
+		psy_lock_leave(&self->block);
+	} while (waiting > 0);	
 }
 
 void psy_audio_player_workmachine(psy_audio_Player* self, uintptr_t amount,
@@ -318,7 +360,7 @@ void psy_audio_player_workmachine(psy_audio_Player* self, uintptr_t amount,
 			psy_audio_buffercontext_init(&bc, events, output, output, amount,
 				(self->song && !self->sequencer.metronome.active)
 				? psy_audio_song_numsongtracks(self->song)
-				: MAX_TRACKS);
+				: MAX_TRACKS);			
 			psy_audio_buffer_scale(output, psy_audio_machine_amprange(machine),
 				amount);
 			if (self->measure_cpu_usage) {
@@ -338,9 +380,9 @@ void psy_audio_player_workmachine(psy_audio_Player* self, uintptr_t amount,
 					}					
 				}
 				psy_list_deallocate(&bc.outevents, NULL);
-			}			
+			}
 			psy_audio_buffer_pan(output, psy_audio_machine_panning(machine),
-				amount);
+				amount);			
 			psy_audio_machine_updatememory(machine, &bc);
 			psy_signal_emit(&machine->signal_worked, machine, 2, slot, &bc);
 			if (self->measure_cpu_usage) {
@@ -937,4 +979,83 @@ psy_dsp_big_beat_t psy_audio_player_realbpm(const psy_audio_Player* self)
 {
 	return psy_audio_player_bpm(self) * psy_audio_sequencer_speed(
 		&self->sequencer);
+}
+
+void psy_audio_player_start_threads(psy_audio_Player* self, uintptr_t thread_count)
+{
+	uintptr_t numthreads;
+	uintptr_t i;
+
+	if (psy_list_size(self->threads_) > 0) {
+		/* scheduler threads are already running */
+		return;
+	}
+	if (self->thread_count == 0) {
+		numthreads = psy_thread_hardware_concurrency();	
+	} else {
+		numthreads = thread_count;
+	}
+	self->thread_count = numthreads;
+	if (numthreads < 2) {
+		/* don't create any thread, will use a single-threaded */
+		return;
+	}
+	self->stop_requested_ = FALSE;		
+	for (i = 0; i < numthreads; ++i) {
+		psy_Thread* thread;
+
+		/* start the scheduling threads */
+		thread = (psy_Thread*)malloc(sizeof(psy_Thread));
+		psy_thread_init_start(thread, self, psy_audio_player_thread_function);
+		psy_list_append(&self->threads_, thread);			
+	}
+}
+
+unsigned int __stdcall psy_audio_player_thread_function(psy_audio_Player* self)
+{
+	psy_audio_player_process_loop(self);
+	return 0;
+}
+
+void psy_audio_player_process_loop(psy_audio_Player* self)
+{
+	while (!self->stop_requested_) {
+		psy_audio_MachineWork* work;
+
+		work = NULL;
+		psy_lock_enter(&self->mutex);
+		if (psy_list_size(self->nodes_queue_) > 0) {
+			work = (psy_audio_MachineWork*)psy_list_last(self->nodes_queue_)->entry;
+			psy_list_remove(&self->nodes_queue_, self->nodes_queue_->tail);
+		}
+		psy_lock_leave(&self->mutex);
+		if (work != NULL) {
+			if (!psy_audio_machines_ismixersend(&self->song->machines, work->slot)) {
+				psy_lock_enter(&self->block);
+				++self->waiting;
+				psy_lock_leave(&self->block);
+				psy_audio_player_workmachine(self, work->amount, work->slot);
+				psy_lock_enter(&self->block);
+				--self->waiting;
+				psy_lock_leave(&self->block);
+			}
+			free(work);
+		}
+	}
+}
+
+void psy_audio_player_stop_threads(psy_audio_Player* self)
+{
+	self->stop_requested_ = TRUE;
+	psy_list_deallocate(&self->threads_,
+		(psy_fp_disposefunc)psy_thread_dispose);
+	psy_list_deallocate(&self->nodes_queue_, NULL);
+}
+
+uintptr_t psy_audio_player_numthreads(psy_audio_Player* self)
+{
+	if (self->thread_count < 2) {
+		return 1;
+	}
+	return psy_list_size(&self->threads_);
 }

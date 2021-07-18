@@ -289,7 +289,7 @@ void psy_audio_ladspaplugin_init(psy_audio_LadspaPlugin* self, psy_audio_Machine
 					"");
 				// TODO: for LADSPA, it is more correct to use psDescriptor->Label to identify it.						
 				psy_audio_machine_seteditname(psy_audio_ladspaplugin_base(self),
-					self->plugininfo->ShortName);
+					self->plugininfo->shortname);
 				prepareparams(self);
 			}
 		}

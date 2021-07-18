@@ -4,7 +4,7 @@
 */
 
 #include "../../detail/prefix.h"
-#include "../../detail/psyconf.h"
+
 
 #include "workspace.h"
 /* local */
@@ -24,17 +24,6 @@
 /* ui */
 #include <uiopendialog.h>
 #include <uisavedialog.h>
-#ifdef DIVERSALIS__OS__MICROSOFT
-/* For directx drivers to get the win32 mainwindow handle */
-#include <imps/win32/uiwincomponentimp.h>
-/*  thread for pluginscan */
-#include <windows.h>
-#include <process.h>
-#endif
-#ifdef DIVERSALIS__OS__UNIX
-	#include <pthread.h>
-	#include <unistd.h>
-#endif
 /* platform */
 #include "../../detail/os.h"
 #include "../../detail/portable.h"
@@ -59,7 +48,7 @@ static void workspace_onscanprogress(Workspace*, psy_audio_PluginCatcher*,
 	int progress);
 static void workspace_onpatternviewconfigurationchanged(Workspace*,
 	PatternViewConfig* sender);
-/*configure actions */
+/* configure actions */
 static void workspace_onloadskin(Workspace*);
 static void workspace_ondefaultskin(Workspace*);
 static void workspace_ondefaultcontrolskin(Workspace*);
@@ -70,7 +59,7 @@ static void workspace_onediteventdriverconfiguration(Workspace*);
 static void workspace_setdefaultfont(Workspace*, psy_Property*);
 static void workspace_setapptheme(Workspace*, psy_Property*);
 static void workspace_updatemetronome(Workspace*);
-/* Machinecallback */
+/* machinecallback */
 static psy_audio_MachineFactory* onmachinefactory(Workspace*);
 static bool onmachinefileselectload(Workspace*, char filter[],
 	char inoutName[]);
@@ -89,14 +78,14 @@ static void workspace_onterminaloutput(Workspace*,
 	psy_audio_SongFile* sender, const char* text);
 static void workspace_onterminalerror(Workspace*,
 	psy_audio_SongFile* sender, const char* text);
-/* EventDriver Input Handler */
+/* pluginscan */
 static void workspace_onscanstart(Workspace*, psy_audio_PluginCatcher* sender);
 static void workspace_onscanend(Workspace*, psy_audio_PluginCatcher* sender);
 static void workspace_onscanfile(Workspace*, psy_audio_PluginCatcher* sender,
 	const char* path, int type);
 static void workspace_onscantaskstart(Workspace*,
 	psy_audio_PluginCatcher* sender, psy_audio_PluginScanTask*);
-static void workspace_onplugincachechanged(Workspace* self,
+static void workspace_onplugincachechanged(Workspace*,
 	psy_audio_PluginCatcher* sender);
 /* MachineCallback VTable */
 static psy_audio_MachineCallbackVtable machinecallback_vtable;
@@ -133,22 +122,22 @@ static void psy_audio_machinecallbackvtable_init(Workspace* self)
 	}
 }
 
-void workspace_init(Workspace* self, void* mainhandle)
+void workspace_init(Workspace* self, psy_ui_Component* main)
 {
 	assert(self);
 
 	psy_audio_machinecallback_init(&self->machinecallback);
 	psy_audio_machinecallbackvtable_init(self);
 	self->machinecallback.vtable = &machinecallback_vtable;
-	psy_audio_lock_init(&self->pluginscanlock);
-	psy_audio_lock_init(&self->outputlock);
+	psy_lock_init(&self->pluginscanlock);
+	psy_lock_init(&self->outputlock);
 	psy_audio_init();
 	self->fontheight = 12;
 	self->cursorstep = 1;
 	self->followsong = 0;
 	self->recordtweaks = 0;
 	self->startpage = FALSE;
-	self->mainhandle = (psy_ui_Component*)mainhandle;
+	self->main = main;
 	self->filename = psy_strdup(PSYCLE_UNTITLED);
 	self->lastentry = 0;
 	self->undosavepoint = 0;
@@ -165,7 +154,10 @@ void workspace_init(Workspace* self, void* mainhandle)
 	self->errorstrs = NULL;
 	self->statusoutputstrs = NULL;
 	self->driverconfigloading = FALSE;
-	self->seqviewactive = FALSE;	
+	self->seqviewactive = FALSE;
+	self->modified_without_undo = FALSE;
+	psy_thread_init(&self->driverconfigloadthread);
+	psy_thread_init(&self->pluginscanthread);
 	viewhistory_init(&self->viewhistory);
 	psy_playlist_init(&self->playlist);
 	workspace_initplugincatcherandmachinefactory(self);
@@ -260,6 +252,8 @@ void workspace_dispose(Workspace* self)
 {
 	assert(self);
 
+	psy_thread_dispose(&self->driverconfigloadthread);
+	psy_thread_dispose(&self->pluginscanthread);
 	workspace_save_styleconfiguration(self);
 	psy_audio_player_dispose(&self->player);
 	psy_audio_song_deallocate(self->song);
@@ -278,8 +272,8 @@ void workspace_dispose(Workspace* self)
 	psy_audio_sequencepaste_dispose(&self->sequencepaste);
 	psy_playlist_dispose(&self->playlist);
 	psy_audio_dispose();
-	psy_audio_lock_dispose(&self->pluginscanlock);
-	psy_audio_lock_dispose(&self->outputlock);
+	psy_lock_dispose(&self->pluginscanlock);
+	psy_lock_dispose(&self->outputlock);
 	free(self->scanfilename);
 	self->scanfilename = NULL;
 	psy_list_deallocate(&self->errorstrs, NULL);
@@ -353,17 +347,12 @@ void workspace_clearsequencepaste(Workspace* self)
 void workspace_initplayer(Workspace* self)
 {
 	assert(self);
-
-#ifdef DIVERSALIS__OS__MICROSOFT
-#if PSYCLE_USE_TK == PSYCLE_TK_WIN32
+		
 	psy_audio_player_init(&self->player, self->song,
-		((psy_ui_win_ComponentImp*)(self->mainhandle->imp))->hwnd);
-#else
-	psy_audio_player_init(&self->player, self->song, 0);
-#endif
-#else
-	psy_audio_player_init(&self->player, self->song, 0);
-#endif
+		/* mainwindow platform handle for directx driver */
+		(self->main)
+		? psy_ui_component_platform(self->main)
+		: NULL);
 	psy_audio_machinecallback_setplayer(&self->machinecallback, &self->player);
 	psy_audio_eventdrivers_setcmds(&self->player.eventdrivers,
 		cmdproperties_create());
@@ -399,7 +388,7 @@ void workspace_configvisual(Workspace* self)
 	psy_ui_font_init(&font, &fontinfo);
 	fontinfo = psy_ui_font_fontinfo(&font);
 	self->fontheight = fontinfo.lfHeight;
-	psy_ui_replacedefaultfont(self->mainhandle, &font);
+	psy_ui_replacedefaultfont(self->main, &font);
 	psy_ui_font_dispose(&font);
 }
 
@@ -408,7 +397,7 @@ const char* workspace_driverpath(Workspace* self)
 	return audioconfig_driverpath(&self->config.audio);
 }
 
-static void pluginscanthread(void* context)
+static unsigned int __stdcall pluginscanthread(void* context)
 {
 	Workspace* self;
 
@@ -421,16 +410,14 @@ static void pluginscanthread(void* context)
 	self->scantaskstart = 0;
 	free(self->scanfilename);
 	self->scanfilename = NULL;
+	return 0;
 }
 
 void workspace_scanplugins(Workspace* self)
 {
-	assert(self);
+	assert(self);	
 
 	if (!psy_audio_plugincatcher_scanning(&self->plugincatcher)) {
-#ifdef DIVERSALIS__OS__UNIX		
-		pthread_t threadid;
-#endif				
 		free(self->scanfilename);
 		self->scanfilename = NULL;
 		self->filescanned = 0;
@@ -438,14 +425,8 @@ void workspace_scanplugins(Workspace* self)
 		self->scanstart = 0;
 		self->scantaskstart = 0;
 		free(self->scanfilename);
-		self->scanplugintype = psy_audio_UNDEFINED;
-#ifdef DIVERSALIS__OS__MICROSOFT
-		_beginthread(pluginscanthread, 0, self);
-#endif
-#ifdef DIVERSALIS__OS__UNIX		
-		pthread_create(&threadid, NULL, (void* (*)(void*))pluginscanthread,
-			(void*)self);
-#endif
+		self->scanplugintype = psy_audio_UNDEFINED;		
+		psy_thread_start(&self->pluginscanthread, self, pluginscanthread);
 	}
 }
 
@@ -849,6 +830,7 @@ void workspace_setsong(Workspace* self, psy_audio_Song* song, int flag)
 		psy_audio_player_setemptysong(&self->player);
 		workspace_clearsequencepaste(self);
 		workspace_clearundo(self);
+		self->modified_without_undo = FALSE;
 		psy_audio_sequenceselection_select_first(
 			&self->sequenceselection, psy_audio_orderindex_make(0, 0));
 		view = viewhistory_currview(&self->viewhistory);
@@ -1130,6 +1112,9 @@ void workspace_startaudio(Workspace* self)
 {
 	if (self->player.driver) {
 		psy_audiodriver_open(self->player.driver);
+		psy_audio_player_stop_threads(&self->player);
+		psy_audio_player_start_threads(&self->player,
+			audioconfig_numthreads(&self->config.audio));
 	}
 }
 
@@ -1163,7 +1148,7 @@ void workspace_wait_for_driverconfigureload(Workspace* self)
 	}
 }
 
-static void driverconfigloadthread(void* context)
+static unsigned int __stdcall driverconfigloadthread(void* context)
 {
 	Workspace* self;
 	psy_Path path;	
@@ -1180,10 +1165,11 @@ static void driverconfigloadthread(void* context)
 	self->driverconfigloading = FALSE;
 	if (psycleconfig_audioenabled(&self->config)) {
 		workspace_startaudio(self);
-		psy_audio_lock_enter(&self->outputlock);
+		psy_lock_enter(&self->outputlock);
 		psy_list_append(&self->statusoutputstrs, psy_strdup("Audio started"));
-		psy_audio_lock_leave(&self->outputlock);
+		psy_lock_leave(&self->outputlock);
 	}
+	return 0;
 }
 
 void workspace_postload_driverconfigurations(Workspace* self)
@@ -1191,19 +1177,12 @@ void workspace_postload_driverconfigurations(Workspace* self)
 	assert(self);
 
 	if (!self->driverconfigloading) {
+		psy_Thread thread;
+
 		self->driverconfigloading = TRUE;
 		
-		psy_list_append(&self->statusoutputstrs, psy_strdup("Starting audio"));		
-#ifdef DIVERSALIS__OS__UNIX
-		pthread_t threadid;
-#endif				
-#ifdef DIVERSALIS__OS__MICROSOFT
-		_beginthread(driverconfigloadthread, 0, self);
-#endif
-#ifdef DIVERSALIS__OS__UNIX		
-		pthread_create(&threadid, NULL, (void* (*)(void*))driverconfigloadthread,
-			(void*)self);
-#endif
+		psy_list_append(&self->statusoutputstrs, psy_strdup("Starting audio"));
+		psy_thread_start(&thread, self, driverconfigloadthread);
 	}
 }
 
@@ -1483,32 +1462,32 @@ void workspace_idle(Workspace* self)
 		}
 	}
 	if (self->scanstart) {
-		psy_audio_lock_enter(&self->pluginscanlock);
+		psy_lock_enter(&self->pluginscanlock);
 		psy_signal_emit(&self->signal_scanstart, self, 0);
 		self->scanstart = 0;
-		psy_audio_lock_leave(&self->pluginscanlock);
+		psy_lock_leave(&self->pluginscanlock);
 	}
 	if (self->scanend) {
-		psy_audio_lock_enter(&self->pluginscanlock);
+		psy_lock_enter(&self->pluginscanlock);
 		psy_signal_emit(&self->signal_scanend, self, 0);
 		self->scanend = 0;
-		psy_audio_lock_leave(&self->pluginscanlock);
+		psy_lock_leave(&self->pluginscanlock);
 	}
 	if (self->scantaskstart) {
-		psy_audio_lock_enter(&self->pluginscanlock);
+		psy_lock_enter(&self->pluginscanlock);
 		psy_signal_emit(&self->signal_scantaskstart, self, 1,
 			&self->lastscantask);
 		self->scantaskstart = 0;
-		psy_audio_lock_leave(&self->pluginscanlock);
+		psy_lock_leave(&self->pluginscanlock);
 	}
 	if (self->filescanned) {
-		psy_audio_lock_enter(&self->pluginscanlock);
+		psy_lock_enter(&self->pluginscanlock);
 		psy_signal_emit(&self->signal_scanfile, self, 2, self->scanfilename,
 			self->scanplugintype);
 		self->filescanned = 0;
 		free(self->scanfilename);
 		self->scanfilename = NULL;
-		psy_audio_lock_leave(&self->pluginscanlock);
+		psy_lock_leave(&self->pluginscanlock);
 	}
 	if (self->scanprogresschanged) {
 		assert(self);
@@ -1517,10 +1496,10 @@ void workspace_idle(Workspace* self)
 		self->scanprogresschanged = 0;
 	}
 	if (self->plugincachechanged) {
-		psy_audio_lock_enter(&self->pluginscanlock);
+		psy_lock_enter(&self->pluginscanlock);
 		psy_signal_emit(&self->signal_plugincachechanged, self, 0);
 		self->plugincachechanged = 0;
-		psy_audio_lock_leave(&self->pluginscanlock);
+		psy_lock_leave(&self->pluginscanlock);
 	}
 	psy_audio_player_idle(&self->player);
 	if (self->playrow && !psy_audio_player_playing(&self->player)) {
@@ -1548,13 +1527,13 @@ void workspace_idle(Workspace* self)
 	}
 	if (self->statusoutputstrs) {
 		psy_List* p;
-		psy_audio_lock_enter(&self->outputlock);
+		psy_lock_enter(&self->outputlock);
 		for (p = self->statusoutputstrs; p != NULL; p = p->next) {
 			psy_signal_emit(&self->signal_status_out, self, 1,
 				(const char*)p->entry);
 		}
 		psy_list_deallocate(&self->statusoutputstrs, NULL);
-		psy_audio_lock_leave(&self->outputlock);
+		psy_lock_leave(&self->outputlock);
 	}
 }
 
@@ -1780,8 +1759,14 @@ bool workspace_songmodified(const Workspace* self)
 {
 	assert(self);
 
-	return psy_list_size(self->undoredo.undo) != self->undosavepoint ||
+	return self->modified_without_undo ||
+		psy_list_size(self->undoredo.undo) != self->undosavepoint ||
 		psy_list_size(self->song->machines.undoredo.undo) != self->machines_undosavepoint;
+}
+
+void workspace_marksongmodified(Workspace* self)
+{
+	self->modified_without_undo = TRUE;
 }
 
 psy_dsp_NotesTabMode workspace_notetabmode(Workspace* self)
@@ -2226,34 +2211,34 @@ void workspace_oninput(Workspace* self, uintptr_t cmdid)
 void workspace_onscanprogress(Workspace* self, psy_audio_PluginCatcher* sender,
 	int progress)
 {
-	psy_audio_lock_enter(&self->pluginscanlock);
+	psy_lock_enter(&self->pluginscanlock);
 	self->scanprogresschanged = 1;
 	self->scanprogress = progress;
-	psy_audio_lock_leave(&self->pluginscanlock);
+	psy_lock_leave(&self->pluginscanlock);
 }
 
 void workspace_onscanfile(Workspace* self, psy_audio_PluginCatcher* sender,
 	const char* path, int type)
 {
-	psy_audio_lock_enter(&self->pluginscanlock);
+	psy_lock_enter(&self->pluginscanlock);
 	self->filescanned = 1;
 	psy_strreset(&self->scanfilename, path);
 	self->scanplugintype = type;
-	psy_audio_lock_leave(&self->pluginscanlock);
+	psy_lock_leave(&self->pluginscanlock);
 }
 
 void workspace_onscanstart(Workspace* self, psy_audio_PluginCatcher* sender)
 {
-	psy_audio_lock_enter(&self->pluginscanlock);
+	psy_lock_enter(&self->pluginscanlock);
 	self->scanstart = 1;	
-	psy_audio_lock_leave(&self->pluginscanlock);
+	psy_lock_leave(&self->pluginscanlock);
 }
 
 void workspace_onscanend(Workspace* self, psy_audio_PluginCatcher* sender)
 {
-	psy_audio_lock_enter(&self->pluginscanlock);
+	psy_lock_enter(&self->pluginscanlock);
 	self->scanend = 1;	
-	psy_audio_lock_leave(&self->pluginscanlock);
+	psy_lock_leave(&self->pluginscanlock);
 }
 
 void workspace_onscantaskstart(Workspace* self, psy_audio_PluginCatcher* sender,
@@ -2261,18 +2246,18 @@ void workspace_onscantaskstart(Workspace* self, psy_audio_PluginCatcher* sender,
 {
 	assert(task);
 
-	psy_audio_lock_enter(&self->pluginscanlock);
+	psy_lock_enter(&self->pluginscanlock);
 	self->scantaskstart = 1;
 	self->lastscantask = *task;
-	psy_audio_lock_leave(&self->pluginscanlock);
+	psy_lock_leave(&self->pluginscanlock);
 }
 
 void workspace_onplugincachechanged(Workspace* self,
 	psy_audio_PluginCatcher* sender)
 {
-	psy_audio_lock_enter(&self->pluginscanlock);
+	psy_lock_enter(&self->pluginscanlock);
 	self->plugincachechanged = 1;
-	psy_audio_lock_leave(&self->pluginscanlock);
+	psy_lock_leave(&self->pluginscanlock);
 }
 
 void workspace_apptitle(Workspace* self, char* rv_title, uintptr_t max_len)
@@ -2281,9 +2266,14 @@ void workspace_apptitle(Workspace* self, char* rv_title, uintptr_t max_len)
 
 	rv_title[0] = '\n';
 	psy_path_init(&path, self->filename);
-	psy_snprintf(rv_title, max_len, "[%s.%s]  Psycle Modular Music Creation Studio ",
-		psy_path_name(&path), psy_path_ext(&path));
-	psy_path_dispose(&path);
+	if (workspace_songmodified(self)) {
+		psy_snprintf(rv_title, max_len, "[%s.%s*] Psycle Modular Music Creation Studio",
+			psy_path_name(&path), psy_path_ext(&path));
+	} else {
+		psy_snprintf(rv_title, max_len, "[%s.%s] Psycle Modular Music Creation Studio" ,
+			psy_path_name(&path), psy_path_ext(&path));
+	}
+	psy_path_dispose(&path);	
 }
 
 const char* workspace_songtitle(const Workspace* self)

@@ -398,6 +398,8 @@ void psy_ui_component_setid(psy_ui_Component*, uintptr_t id);
 uintptr_t psy_ui_component_id(const psy_ui_Component*);
 psy_ui_Component* psy_ui_component_byid(psy_ui_Component*, uintptr_t id);
 
+void* psy_ui_component_platform(psy_ui_Component*);
+
 /* psy_ui_ComponentImp */
 /* flags */
 typedef enum psy_ui_ComponentImpFlags {

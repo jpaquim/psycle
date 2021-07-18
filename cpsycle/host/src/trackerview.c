@@ -1331,6 +1331,7 @@ void trackergrid_onmousemove(TrackerGrid* self, psy_ui_MouseEvent* ev)
 	if (ev->button == 1) {
 		if (self->gridstate->trackconfig->colresize) {
 			psy_signal_emit(&self->signal_colresize, self, 0);
+			psy_ui_mouseevent_stop_propagation(ev);
 		} else {					
 			if (!psy_audio_patterncursor_equal(&self->gridstate->dragcursor,
 					&self->lastdragcursor)) {

@@ -79,7 +79,7 @@ void cpumoduleview_ondraw(CPUModuleView* self, psy_ui_Graphics* g)
 							psy_audio_machine_editname(machine),
 							psy_min(psy_strlen(psy_audio_machine_editname(machine)), 14));
 						psy_ui_textout(g, tm->tmAveCharWidth * 21, cpy,
-							info->Name, psy_strlen(info->Name));
+							info->name, psy_strlen(info->name));
 						if (psy_audio_player_measuring_cpu_usage(workspace_player(self->workspace))) {
 							psy_snprintf(text, 40, "%.1f%%", 100.0f * psy_audio_machine_cpu_time(machine).perc);						
 						} else {

@@ -215,7 +215,7 @@ void psy_audio_vstplugin_init(psy_audio_VstPlugin* self,
 			makemachineinfo(effect, self->plugininfo, self->library.path,
 				0);
 			psy_audio_machine_seteditname(psy_audio_vstplugin_base(self),
-				self->plugininfo->ShortName);			
+				self->plugininfo->shortname);			
 			initparameters(self);
 		}
 	}

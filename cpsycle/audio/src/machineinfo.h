@@ -14,20 +14,20 @@ extern "C" {
 
 typedef struct psy_audio_MachineInfo {
 	/* API version.Use MI_VERSION */
-	short APIVersion;
+	short apiversion;
 	/* plug version. Your machine version. Shown in Hexadecimal. */
-	short PlugVersion;
+	short plugversion;
 	/* psy_audio_Machine flags */
-	int Flags;
+	int flags;
 	/* Defines the type of machine */
 	int mode;
-	char  * Name;
+	char* name;
 	/* "Name of the machine in machine Display" */
-	char  * ShortName;
+	char* shortname;
 	/* "Name of author" */
-	char  * Author;
+	char* author;
 	/* "Text to show as custom command (see Command method)" */
-	char  * Command;	
+	char* command;	
 	/* host type */
 	int type;		
 	/* module path */

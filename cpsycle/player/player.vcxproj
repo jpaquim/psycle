@@ -98,7 +98,7 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <AdditionalIncludeDirectories>$(SolutionDir)lua54\src\;$(SolutionDir)ui\src;$(SolutionDir)audio\src;$(SolutionDir)file\src;$(SolutionDir)container\src;$(SolutionDir)dsp\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)script\src;$(SolutionDir)thread\src;$(SolutionDir)lua54\src\;$(SolutionDir)ui\src;$(SolutionDir)audio\src;$(SolutionDir)file\src;$(SolutionDir)container\src;$(SolutionDir)dsp\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -114,10 +114,10 @@
       <Culture>0x0407</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>odbc32.lib;odbccp32.lib;lua54.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>audio.lib;thread.lib;script.lib;odbc32.lib;odbccp32.lib;lua54.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)player.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>$(SolutionDir)lua54\Release;$(SolutionDir)audio\Debug;$(SolutionDir)file\Release;$(SolutionDir)container\Release;$(SolutionDir)dsp\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)thread\Release;$(SolutionDir)audio\Release;$(SolutionDir)script\Release;$(SolutionDir)lua54\Release;$(SolutionDir)audio\Debug;$(SolutionDir)file\Release;$(SolutionDir)container\Release;$(SolutionDir)dsp\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ProgramDatabaseFile>$(IntDir)player.pdb</ProgramDatabaseFile>
       <SubSystem>Console</SubSystem>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
@@ -138,7 +138,7 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <AdditionalIncludeDirectories>$(SolutionDir)lua54\src\;$(SolutionDir)ui\src;$(SolutionDir)audio\src;$(SolutionDir)file\src;$(SolutionDir)container\src;$(SolutionDir)dsp\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)script\src;$(SolutionDir)thread\src;$(SolutionDir)lua54\src\;$(SolutionDir)ui\src;$(SolutionDir)audio\src;$(SolutionDir)file\src;$(SolutionDir)container\src;$(SolutionDir)dsp\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -154,10 +154,10 @@
       <Culture>0x0407</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>odbc32.lib;odbccp32.lib;lua54.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>audio.lib;thread.lib;script.lib;odbc32.lib;odbccp32.lib;lua54.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)player.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>$(SolutionDir)lua54\Release;$(SolutionDir)audio\Debug;$(SolutionDir)file\Release;$(SolutionDir)container\Release;$(SolutionDir)dsp\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)thread\Release;$(SolutionDir)audio\Release;$(SolutionDir)script\Release;$(SolutionDir)lua54\Release;$(SolutionDir)audio\Debug;$(SolutionDir)file\Release;$(SolutionDir)container\Release;$(SolutionDir)dsp\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ProgramDatabaseFile>$(IntDir)player.pdb</ProgramDatabaseFile>
       <SubSystem>Console</SubSystem>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
@@ -237,10 +237,10 @@
       <Culture>0x0407</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>odbc32.lib;odbccp32.lib;lua54.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>audio.lib;thread.lib;script.lib;odbc32.lib;odbccp32.lib;lua54.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)player.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>$(SolutionDir)lua54\Debug;$(SolutionDir)audio\Debug;$(SolutionDir)file\Debug;$(SolutionDir)container\Debug;$(SolutionDir)dsp\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)script\Debug;$(SolutionDir)thread\Debug;$(SolutionDir)audio\Debug;$(SolutionDir)lua54\Debug;$(SolutionDir)audio\Debug;$(SolutionDir)file\Debug;$(SolutionDir)container\Debug;$(SolutionDir)dsp\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(IntDir)player.pdb</ProgramDatabaseFile>
       <SubSystem>Console</SubSystem>

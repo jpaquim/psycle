@@ -36,6 +36,7 @@
 #include "samplesview.h"
 #include "sequenceview.h"
 #include "seqeditor.h"
+#include "startscript.h"
 #include "stepbox.h"
 #include "stepsequencerview.h"
 #include "songbar.h"
@@ -91,8 +92,11 @@ typedef struct MainFrame {
 	psy_ui_Terminal terminal;
 	psy_ui_Splitter splitbar;
 	psy_ui_Splitter splitbarterminal;
+	StartScript startscript;
 	Navigation navigation;
 	psy_ui_TabBar tabbar;
+	psy_ui_TabBar scripttabbar;
+	psy_ui_Button togglescripts;
 	psy_ui_TabBar helpsettingstabbar;
 	psy_ui_Notebook notebook;
 	FileBar filebar;
@@ -144,6 +148,7 @@ typedef struct MainFrame {
 	InstrumentsViewBar instrumentsviewbar;	
 	ConfirmBox checkunsavedbox;		
 	Interpreter interpreter;	
+	bool titlemodified;
 } MainFrame;
 
 void mainframe_init(MainFrame*);

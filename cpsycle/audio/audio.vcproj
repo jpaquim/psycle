@@ -42,7 +42,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\file\src,..\container\src,..\dsp\src,..\lua54\src"
+				AdditionalIncludeDirectories="..\thread\src\,..\script\src,..\file\src,..\container\src,..\dsp\src,..\lua54\src"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -120,7 +120,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\file\src,..\container\src,..\dsp\src,..\lua54\src,..\vst-2.4\vst2.x"
+				AdditionalIncludeDirectories="..\thread\src,..\script\src,..\file\src,..\container\src,..\dsp\src,..\lua54\src,..\vst-2.4\vst2.x"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -462,14 +462,6 @@
 			</File>
 			<File
 				RelativePath="src\library.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\lock.c"
-				>
-			</File>
-			<File
-				RelativePath=".\src\lock.h"
 				>
 			</File>
 			<File
@@ -1346,32 +1338,6 @@
 						>
 					</File>
 					<File
-						RelativePath="src\luaimport.c"
-						>
-						<FileConfiguration
-							Name="Debug|Win32"
-							>
-							<Tool
-								Name="VCCLCompilerTool"
-								AdditionalIncludeDirectories=""
-								PreprocessorDefinitions=""
-							/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Release|Win32"
-							>
-							<Tool
-								Name="VCCLCompilerTool"
-								AdditionalIncludeDirectories=""
-								PreprocessorDefinitions=""
-							/>
-						</FileConfiguration>
-					</File>
-					<File
-						RelativePath="src\luaimport.h"
-						>
-					</File>
-					<File
 						RelativePath=".\src\luamidinotes.c"
 						>
 					</File>
@@ -1412,32 +1378,6 @@
 					</File>
 					<File
 						RelativePath=".\src\luawaveosc.h"
-						>
-					</File>
-					<File
-						RelativePath="src\psyclescript.c"
-						>
-						<FileConfiguration
-							Name="Debug|Win32"
-							>
-							<Tool
-								Name="VCCLCompilerTool"
-								AdditionalIncludeDirectories=""
-								PreprocessorDefinitions=""
-							/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Release|Win32"
-							>
-							<Tool
-								Name="VCCLCompilerTool"
-								AdditionalIncludeDirectories=""
-								PreprocessorDefinitions=""
-							/>
-						</FileConfiguration>
-					</File>
-					<File
-						RelativePath="src\psyclescript.h"
 						>
 					</File>
 					<File

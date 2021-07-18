@@ -376,7 +376,7 @@ void psy_ui_tabbar_unmark(psy_ui_TabBar* self)
 
 void psy_ui_tabbar_select(psy_ui_TabBar* self, uintptr_t tabindex)
 {
-	psy_ui_tabbar_mark(self, tabindex);
+	psy_ui_tabbar_mark(self, tabindex);	
 	psy_signal_emit(&self->signal_change, self, 1, tabindex);	
 }
 

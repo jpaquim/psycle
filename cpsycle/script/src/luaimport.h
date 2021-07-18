@@ -17,7 +17,7 @@ enum {
 };
 
 typedef struct {	
-	psy_audio_PsycleScript script;
+	psy_PsycleScript script;
 	int begin_top_, num_ret_;  
 	lua_State* L_;
 	// const LockIF* lh_;

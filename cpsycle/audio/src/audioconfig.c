@@ -10,7 +10,8 @@
 /* platform */
 #include "../../detail/portable.h"
 
-static void audioconfig_makesection(AudioConfig* self, psy_Property* parent);
+static void audioconfig_makesection(AudioConfig*, psy_Property* parent);
+static void audioconfig_makethreads(AudioConfig*);
 static void audioconfig_makeconfiguration(AudioConfig*, psy_Property*);
 static void audioconfig_makedriverlist(AudioConfig*);
 
@@ -37,6 +38,7 @@ void audioconfig_makesection(AudioConfig* self, psy_Property* parent)
 		psy_property_append_section(parent, "inputoutput"),
 		"Input/Output");
 	audioconfig_makedriverlist(self);
+	audioconfig_makethreads(self);
 	self->driverconfigure = psy_property_settext(
 		psy_property_append_section(self->inputoutput, "configure"),
 		"settingsview.configure");
@@ -99,6 +101,19 @@ void audioconfig_makeconfiguration_driverkey(AudioConfig* self, const char* key)
 			}
 		}
 	}
+}
+
+void audioconfig_makethreads(AudioConfig* self)
+{	
+	psy_Property* threads;
+
+	threads = psy_property_settext(
+		psy_property_append_section(self->inputoutput, "threads"),
+		"Audio Threads");
+	psy_property_setid(psy_property_settext(
+		psy_property_append_int(threads, "num", 0, 0, 99),
+		"Use the value 0 to autodetect your cpu threads"),
+		PROPERTY_ID_NUMAUDIOTHREADS);
 }
 
 void audioconfig_makeconfiguration(AudioConfig* self, psy_Property* property)
@@ -317,6 +332,11 @@ bool audioconfig_onpropertychanged(AudioConfig* self, psy_Property* property,
 		audioconfig_enableaudio(self, psy_property_item_bool(property));
 		return TRUE;
 	}
+	if (psy_property_hasid(property, PROPERTY_ID_NUMAUDIOTHREADS)) {
+		psy_audio_player_stop_threads(self->player);
+		psy_audio_player_start_threads(self->player, psy_property_item_int(property));
+		return FALSE;
+	}
 	choice = psy_property_item_choice_parent(property);		
 	if (choice && psy_property_hasid(choice, PROPERTY_ID_AUDIODRIVERS)) {
 		audioconfig_onaudiodriverselect(self, self->audioenabled);
@@ -325,6 +345,20 @@ bool audioconfig_onpropertychanged(AudioConfig* self, psy_Property* property,
 	}
 	return FALSE;
 }
+
+uintptr_t audioconfig_numthreads(const AudioConfig* self)
+{
+	psy_Property* p;
+
+	assert(self);
+
+	if (p = psy_property_at(self->inputoutput, "threads",
+			PSY_PROPERTY_TYPE_NONE)) {		
+		return psy_property_at_int(p, "num", 0);		
+	}
+	return 0;
+}
+
 /* events */
 bool audioconfig_onchanged(AudioConfig* self, psy_Property*
 	property)

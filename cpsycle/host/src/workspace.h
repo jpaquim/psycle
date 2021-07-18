@@ -21,8 +21,9 @@
 // ui
 #include <uicomponent.h>
 #include <uiapp.h>
-// audio
+/* thread */
 #include <lock.h>
+#include <thread.h>
 // file
 #include <playlist.h>
 #include <propertiesio.h>
@@ -61,6 +62,7 @@ extern "C" {
 #define	VIEW_ID_CHECKUNSAVED	9
 #define	VIEW_ID_CONFIRM			10
 #define	VIEW_NUM				11
+#define	VIEW_ID_SCRIPTS			12
 
 #define SECTION_ID_MACHINEVIEW_WIRES		0
 #define	SECTION_ID_MACHINEVIEW_STACK		1
@@ -140,16 +142,14 @@ typedef struct Workspace {
 	psy_Signal signal_docksection;
 	psy_Signal signal_machineeditresize;
 	psy_Signal signal_buschanged;
-	psy_Signal signal_gearselect;
-	// audio
+	psy_Signal signal_gearselect;	
 	psy_audio_Song* song;
 	psy_audio_Player player;
 	psy_audio_PluginCatcher plugincatcher;	
 	psy_audio_MachineFactory machinefactory;	
-	// Psycle settings	
 	PsycleConfig config;
 	psy_Playlist playlist;	
-	psy_ui_Component* mainhandle;	
+	psy_ui_Component* main;	
 	ViewHistory viewhistory;
 	ViewHistoryEntry restoreview;
 	psy_audio_PatternCursor patterneditposition;	
@@ -166,13 +166,14 @@ typedef struct Workspace {
 	// ui
 	int fontheight;	
 	bool hasnewline;
-	bool gearvisible;	
+	bool gearvisible;
+	bool modified_without_undo;
 	// UndoRedo
 	psy_UndoRedo undoredo;
 	uintptr_t undosavepoint;
 	uintptr_t machines_undosavepoint;
-	psy_audio_Lock pluginscanlock;
-	psy_audio_Lock outputlock;
+	psy_Lock pluginscanlock;
+	psy_Lock outputlock;
 	int filescanned;
 	char* scanfilename;
 	int scanstart;
@@ -193,9 +194,11 @@ typedef struct Workspace {
 	bool driverconfigloading;
 	bool seqviewactive;	
 	InputHandler inputhandler;
+	psy_Thread driverconfigloadthread;
+	psy_Thread pluginscanthread;
 } Workspace;
 
-void workspace_init(Workspace*, void* handle);
+void workspace_init(Workspace*, psy_ui_Component* handle);
 void workspace_dispose(Workspace*);
 void workspace_load_configuration(Workspace*);
 void workspace_postload_driverconfigurations(Workspace*);
@@ -215,6 +218,7 @@ bool workspace_exportlyfile_fileselect(Workspace*);
 void workspace_exportmidifile(Workspace*, const char* path);
 void workspace_exportlyfile(Workspace*, const char* path);
 void workspace_scanplugins(Workspace*);
+void workspace_marksongmodified(Workspace*);
 
 INLINE PsycleConfig* workspace_conf(Workspace* self) { return &self->config; }
 
