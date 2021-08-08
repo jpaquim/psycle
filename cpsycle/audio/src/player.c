@@ -246,12 +246,22 @@ psy_dsp_amp_t* psy_audio_player_work(psy_audio_Player* self, int* numsamples,
 
 void psy_audio_player_workamount(psy_audio_Player* self, uintptr_t amount,
 	uintptr_t* numsamplex, psy_dsp_amp_t** psamples)
-{	
+{		
 	assert(self);
 
-	psy_audio_sequencer_frametick(&self->sequencer, amount);
-	if (self->song) {
-		psy_audio_player_workpath(self, amount);
+	if (self->song) {		
+		uintptr_t numsamples;		
+
+		numsamples = amount;
+		while (numsamples > 0) {
+			uintptr_t worked;
+
+			worked = psy_audio_sequencer_frametick(&self->sequencer, numsamples);
+			if (worked > 0) {
+				psy_audio_player_workpath(self, worked);
+				numsamples -= worked;
+			}
+		}			
 	}
 	psy_audio_player_filldriver(self, *psamples, amount);
 	*numsamplex -= amount;
@@ -1057,5 +1067,5 @@ uintptr_t psy_audio_player_numthreads(psy_audio_Player* self)
 	if (self->thread_count < 2) {
 		return 1;
 	}
-	return psy_list_size(&self->threads_);
+	return psy_list_size(self->threads_);
 }

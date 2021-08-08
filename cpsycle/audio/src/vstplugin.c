@@ -389,10 +389,10 @@ void processevents(psy_audio_VstPlugin* self, psy_audio_BufferContext* bc)
 					(char)psy_audio_patternentry_front_const(entry)->inst,
 					(char)psy_audio_patternentry_front_const(entry)->cmd,
 					(char)psy_audio_patternentry_front_const(entry)->parameter);
-			} else {						
+			} else {
 				// Panning
 				if (psy_audio_patternentry_front(entry)->cmd == 0xC2) {
-					psy_audio_vstevents_append_midi_control(&self->vstevents,						
+					psy_audio_vstevents_append_midi_control(&self->vstevents,
 						midichannel, 0x0A, (unsigned char)
 						(psy_audio_patternentry_front(entry)->parameter >> 1));
 				}
@@ -982,6 +982,8 @@ void update_vsttimeinfo(psy_audio_VstPlugin* self)
 	if (sequencertime->playstarting || sequencertime->playstopping) {
 		self->vsttimeinfo->flags |= kVstTransportChanged;
 	}
+	self->vsttimeinfo->timeSigNumerator = sequencertime->timesig_numerator;
+	self->vsttimeinfo->timeSigDenominator = sequencertime->timesig_denominator;
 }
 
 // VSTCALLBACK

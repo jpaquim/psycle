@@ -97,8 +97,9 @@ const psy_ui_Font* psy_ui_component_font(const psy_ui_Component* self)
 
 void psy_ui_component_setbackgroundcolour(psy_ui_Component* self,
 	psy_ui_Colour colour)
-{		
-	psy_ui_componentstyle_setbackgroundcolour(&self->style, colour);
+{			
+	psy_ui_componentstyle_setbackgroundcolour(&self->style, colour);	
+	psy_ui_component_invalidate(self);
 }
 
 psy_ui_Colour psy_ui_component_backgroundcolour(psy_ui_Component* self)

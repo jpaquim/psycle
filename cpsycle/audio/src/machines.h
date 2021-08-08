@@ -7,6 +7,7 @@
 #define psy_audio_MACHINES_H
 
 #include "machine.h"
+#include "machineselection.h"
 #include "connections.h"
 #include <signal.h>
 #include <undoredo.h>
@@ -41,7 +42,7 @@ typedef struct psy_audio_Machines {
 	float* samplebuffers;
 	int numsamplebuffers;
 	int currsamplebuffer;
-	uintptr_t selected;
+	psy_audio_MachineSelection selection;	
 	uintptr_t paramselected;	
 	uintptr_t soloed;
 	psy_audio_Wire selectedwire;

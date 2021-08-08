@@ -753,8 +753,8 @@ void work_dogenerateaudio(psy_audio_Machine* self, psy_audio_BufferContext* bc,
 
 		restorenumsamples = psy_audio_buffercontext_numsamples(bc);
 		psy_audio_buffercontext_setnumsamples(bc, amount);
-		psy_audio_buffercontext_setoffset(bc, position);
-		psy_audio_machine_generateaudio(self, bc);
+		psy_audio_buffercontext_setoffset(bc, position);		
+		psy_audio_machine_generateaudio(self, bc);		
 		psy_audio_buffercontext_setnumsamples(bc, restorenumsamples);
 		psy_audio_buffercontext_setoffset(bc, 0);
 	}	

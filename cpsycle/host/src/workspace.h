@@ -153,7 +153,7 @@ typedef struct Workspace {
 	ViewHistory viewhistory;
 	ViewHistoryEntry restoreview;
 	psy_audio_PatternCursor patterneditposition;	
-	psy_audio_SequenceSelection sequenceselection;
+	psy_audio_SequenceSelection sequenceselection;	
 	int cursorstep;	
 	char* filename;
 	int followsong;

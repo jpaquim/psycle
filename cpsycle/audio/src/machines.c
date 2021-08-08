@@ -1,5 +1,7 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
@@ -15,7 +17,7 @@
 /* platform */
 #include "../../detail/trace.h"
 
-// prototypes
+/* prototypes */
 static void machines_initsignals(psy_audio_Machines*);
 static void machines_disposesignals(psy_audio_Machines*);
 static void machines_free(psy_audio_Machines*);
@@ -41,6 +43,7 @@ void psy_audio_machines_init(psy_audio_Machines* self)
 
 	psy_table_init(&self->slots);	
 	psy_audio_connections_init(&self->connections);	
+	psy_audio_machineselection_init(&self->selection);
 	psy_table_init(&self->inputbuffers);
 	psy_table_init(&self->outputbuffers);
 	psy_table_init(&self->nopath);
@@ -49,8 +52,7 @@ void psy_audio_machines_init(psy_audio_Machines* self)
 	self->samplebuffers = dsp.memory_alloc(psy_audio_MAX_STREAM_SIZE *
 		self->numsamplebuffers, sizeof(psy_dsp_amp_t));
 	assert(self->samplebuffers);
-	self->currsamplebuffer = 0;
-	self->selected = psy_INDEX_INVALID;
+	self->currsamplebuffer = 0;	
 	self->paramselected = 0;	
 	self->soloed = psy_INDEX_INVALID;
 	self->buffers = 0;
@@ -81,6 +83,7 @@ void psy_audio_machines_dispose(psy_audio_Machines* self)
 {	
 	assert(self);
 
+	psy_audio_machineselection_dispose(&self->selection);
 	machines_disposesignals(self);
 	machines_free(self);
 	psy_table_dispose(&self->inputbuffers);
@@ -217,8 +220,11 @@ void psy_audio_machines_erase(psy_audio_Machines* self, uintptr_t slot)
 	psy_table_remove(&self->slots, slot);
 	machines_setpath(self, psy_audio_compute_path(self, psy_audio_MASTER_INDEX,
 		TRUE));	
+	psy_audio_machineselection_deselect(&self->selection,
+		psy_audio_machineindex_make(slot));
 	if (slot == self->maxindex) {
-		self->selected = machines_findmaxindex(self);
+		psy_audio_machineselection_select(&self->selection,
+			psy_audio_machineindex_make(machines_findmaxindex(self)));		
 	}		
 	psy_signal_emit(&self->signal_removed, self, 1, slot);
 	psy_audio_exclusivelock_leave();
@@ -461,7 +467,7 @@ void machines_tracepath(const char* text, psy_List* path)
 	TRACE(text);
 	TRACE("): ");
 	for (p = path; p != NULL; p = p->next) {
-		TRACE_INT((int)p->entry);
+		TRACE_INT((int)(intptr_t)p->entry);
 		if (p->next) {
 			TRACE("; ");
 		}
@@ -699,7 +705,9 @@ void psy_audio_machines_select(psy_audio_Machines* self, uintptr_t slot)
 {
 	assert(self);
 
-	self->selected = slot;
+	psy_audio_machineselection_clear(&self->selection);		
+	psy_audio_machineselection_select(&self->selection,
+		psy_audio_machineindex_make(slot));	
 	psy_signal_emit(&self->signal_slotchange, self, 1, slot);
 }
 
@@ -728,9 +736,12 @@ void psy_audio_machines_selectauxcolumn(psy_audio_Machines* self, uintptr_t inde
 
 uintptr_t psy_audio_machines_selected(const psy_audio_Machines* self)
 {
+	psy_audio_MachineIndex index;
+	
 	assert(self);
 
-	return self->selected;
+	index = psy_audio_machineselection_first(&self->selection);
+	return index.macid;
 }
 
 psy_audio_Machine* psy_audio_machines_selectedmachine(psy_audio_Machines* self)
