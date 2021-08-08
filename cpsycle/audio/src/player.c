@@ -256,8 +256,11 @@ void psy_audio_player_workamount(psy_audio_Player* self, uintptr_t amount,
 		while (numsamples > 0) {
 			uintptr_t worked;
 
-			worked = psy_audio_sequencer_frametick(&self->sequencer, numsamples);
+			worked = psy_audio_sequencer_frametick(&self->sequencer, numsamples);			
 			if (worked > 0) {
+				if (worked > numsamples) {
+					worked = numsamples;
+				}
 				psy_audio_player_workpath(self, worked);
 				numsamples -= worked;
 			}
