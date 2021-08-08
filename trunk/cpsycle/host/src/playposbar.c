@@ -48,7 +48,7 @@ void playposbar_init(PlayPosBar* self, psy_ui_Component* parent,
 	self->player = player;	
 	psy_ui_label_init(&self->position, &self->component, NULL);	
 	psy_ui_label_preventtranslation(&self->position);
-	psy_ui_label_setcharnumber(&self->position, 20);	
+	psy_ui_label_setcharnumber(&self->position, 24);
 	playposbar_updatelabel(self);	
 	psy_ui_component_starttimer(&self->component, 0, 50);
 }
@@ -65,8 +65,10 @@ void playposbar_updatelabel(PlayPosBar* self)
 
 	currplaytime = psy_audio_sequencer_currplaytime(
 		&self->player->sequencer);
-	psy_snprintf(text, 40, "%02dm%02ds %.2fb",
+	psy_snprintf(text, 40, "%02dm%02ds %.2fb %d/%d",
 		(int)(currplaytime / 60), ((int)currplaytime % 60),
-		(float)psy_audio_player_position(self->player));
-	psy_ui_label_settext(&self->position, text);
+		(float)psy_audio_player_position(self->player),
+		(int)self->player->sequencer.seqtime.timesig_numerator,
+		(int)self->player->sequencer.seqtime.timesig_denominator);
+	psy_ui_label_settext(&self->position, text);	
 }

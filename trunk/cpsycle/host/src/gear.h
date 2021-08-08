@@ -1,34 +1,38 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #if !defined(GEAR_H)
 #define GEAR_H
 
-// host
+/* host */
 #include "instrumentsbox.h"
 #include "machinesbox.h"
 #include "samplesbox.h"
 #include "titlebar.h"
-#include <uitabbar.h>
 #include "workspace.h"
-// ui
-#include "uibutton.h"
-#include "uilistbox.h"
-#include "uinotebook.h"
+/* ui */
+#include <uibutton.h>
+#include <uilistbox.h>
+#include <uinotebook.h>
+#include <uitabbar.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// Gear
-// The Gear Rack is a convenient way to organise your machines. Use the
-// buttons "Generators", "Effects" and "Instruments" to switch between the
-// different tabs
+/*
+** Gear
+** The Gear Rack is a convenient way to organise your machines. Use the
+** buttons "Generators", "Effects" and "Instruments" to switch between the
+** different tabs
+*/
 
 typedef struct GearButtons {
-	// inherits
+	/* inherits */
 	psy_ui_Component component;
-	// ui elements
+	/* internal */
 	psy_ui_Button createreplace;
 	psy_ui_Button del;
 	psy_ui_Button parameters;
@@ -48,9 +52,9 @@ INLINE psy_ui_Component* gearbuttons_base(GearButtons* self)
 }
 
 typedef struct Gear {
-	// inherits
+	/* inherits */
 	psy_ui_Component component;
-	// ui elements
+	/* ui elements */
 	psy_ui_Component client;
 	psy_ui_TabBar tabbar;
 	TitleBar titlebar;
@@ -61,7 +65,7 @@ typedef struct Gear {
 	InstrumentsBox instrumentsbox;
 	SamplesBox samplesbox;	
 	GearButtons buttons;
-	// references
+	/* references */
 	psy_audio_Machines* machines;
 	Workspace* workspace;	
 } Gear;

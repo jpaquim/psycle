@@ -171,6 +171,8 @@ void workspace_init(Workspace* self, psy_ui_Component* main)
 	self->song = psy_audio_song_allocinit(&self->machinefactory);	
 	psy_audio_machinecallback_setsong(&self->machinecallback, self->song);
 	psy_audio_sequenceselection_init(&self->sequenceselection);
+	psy_audio_sequenceselection_select(&self->sequenceselection,
+		psy_audio_orderindex_make(0, 0));
 	psy_audio_sequencepaste_init(&self->sequencepaste);
 	psy_undoredo_init(&self->undoredo);
 	workspace_initsignals(self);
@@ -1179,8 +1181,7 @@ void workspace_postload_driverconfigurations(Workspace* self)
 	if (!self->driverconfigloading) {
 		psy_Thread thread;
 
-		self->driverconfigloading = TRUE;
-		
+		self->driverconfigloading = TRUE;		
 		psy_list_append(&self->statusoutputstrs, psy_strdup("Starting audio"));
 		psy_thread_start(&thread, self, driverconfigloadthread);
 	}

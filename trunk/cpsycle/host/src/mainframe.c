@@ -1147,11 +1147,12 @@ void mainframe_oncheckunsaved(MainFrame* self, ConfirmBox* sender,
 		if (mode == CONFIRM_SEQUENCECLEAR) {
 			workspace_restoreview(&self->workspace);
 		} else {
+			self->workspace.modified_without_undo = FALSE;
 			self->workspace.undosavepoint = psy_list_size(
 				self->workspace.undoredo.undo);
 			self->workspace.machines_undosavepoint = psy_list_size(
 				self->workspace.song->machines.undoredo.undo);
-			if (mode == CONFIRM_CLOSE) {
+			if (mode == CONFIRM_CLOSE) {				
 				psy_ui_app_close(psy_ui_app());
 			} else if (mode == CONFIRM_LOAD) {
 				if (keyboardmiscconfig_ft2fileexplorer(psycleconfig_misc(

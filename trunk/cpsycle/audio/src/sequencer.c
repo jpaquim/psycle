@@ -394,7 +394,27 @@ void psy_audio_sequencer_makecurrtracks(psy_audio_Sequencer* self,
 
 	assert(self);
 
-	for (p = self->sequence->tracks, trackindex = 0; p != NULL;
+	trackindex = 0;
+	{	/* add global track */
+		psy_audio_SequencerTrack* track;
+
+		track = malloc(sizeof(psy_audio_SequencerTrack));
+		if (track) {
+			track->track = &self->sequence->globaltrack;
+			track->channeloffset = 0;
+			track->iterator = (psy_audio_SequenceTrackIterator*)
+				malloc(sizeof(psy_audio_SequenceTrackIterator));
+			if (track->iterator) {
+				*track->iterator = psy_audio_sequence_begin(self->sequence,
+					track->track, offset);
+				track->state.retriggeroffset = 0;
+				track->state.retriggerstep = 0;
+				psy_list_append(&self->currtracks, track);
+			}
+		}
+	}
+	trackindex = 0;
+	for (p = self->sequence->tracks; p != NULL;
 			psy_list_next(&p), ++trackindex) {
 		psy_audio_SequencerTrack* track;
 
@@ -411,25 +431,7 @@ void psy_audio_sequencer_makecurrtracks(psy_audio_Sequencer* self,
 				psy_list_append(&self->currtracks, track);
 			}
 		}
-	}
-	{	/* add global track */		
-		psy_audio_SequencerTrack* track;
-		
-		track = malloc(sizeof(psy_audio_SequencerTrack));
-		if (track) {
-			track->track = &self->sequence->globaltrack;
-			track->channeloffset = 0;
-			track->iterator = (psy_audio_SequenceTrackIterator*)
-				malloc(sizeof(psy_audio_SequenceTrackIterator));
-			if (track->iterator) {
-				*track->iterator = psy_audio_sequence_begin(self->sequence, 
-					track->track, offset);
-				track->state.retriggeroffset = 0;
-				track->state.retriggerstep = 0;
-				psy_list_append(&self->currtracks, track);
-			}
-		}
-	}
+	}	
 }
 
 psy_dsp_big_beat_t psy_audio_sequencer_skiptrackiterators(
@@ -484,16 +486,18 @@ void psy_audio_sequencer_clearinputevents(psy_audio_Sequencer* self)
 		psy_audio_patternentry_dispose);	
 }
 
-void psy_audio_sequencer_frametick(psy_audio_Sequencer* self,
+uintptr_t psy_audio_sequencer_frametick(psy_audio_Sequencer* self,
 	uintptr_t numframes)
 {	
 	assert(self);
-
-	if (self->seqtime.playing) {		
-		self->seqtime.playcounter += numframes;		
-	}	
+	
 	psy_audio_sequencer_tick(self, psy_audio_sequencer_frametooffset(self,
 		numframes));
+	//numframes = psy_audio_sequencer_frames(self, self->window);
+	if (self->seqtime.playing) {
+		self->seqtime.playcounter += numframes;
+	}
+	return numframes;
 }
 
 void psy_audio_sequencer_tick(psy_audio_Sequencer* self,
@@ -508,6 +512,7 @@ void psy_audio_sequencer_tick(psy_audio_Sequencer* self,
 		self->seqtime.currplaytime = psy_audio_sequencer_currplaytime(self);
 		psy_audio_sequencer_advanceposition(self, width);		
 	}
+	self->window = width;
 	psy_audio_sequencer_clearevents(self);
 	psy_audio_sequencer_insertinputevents(self);
 	if (psy_audio_sequencer_playing(self)) {
@@ -538,7 +543,7 @@ void psy_audio_sequencer_tick(psy_audio_Sequencer* self,
 		self->seqtime.playstarting = FALSE;
 		self->seqtime.playstopping = FALSE;
 	}
-	psy_audio_sequencer_sortevents(self);
+	psy_audio_sequencer_sortevents(self);	
 }
 
 void psy_audio_sequencer_advanceposition(psy_audio_Sequencer* self,
@@ -547,7 +552,6 @@ void psy_audio_sequencer_advanceposition(psy_audio_Sequencer* self,
 	assert(self);
 
 	self->seqtime.position += self->window;
-	self->window = width;	
 }
 
 void psy_audio_sequencer_updateplaymodeposition(psy_audio_Sequencer* self)
@@ -772,7 +776,7 @@ void psy_audio_sequencer_insertevents(psy_audio_Sequencer* self)
 		psy_audio_sequencer_setposition(self, 0.f);
 	} else {
 		self->seqtime.playing = continueplaying;
-	}
+	}	
 }
 
 void psy_audio_sequencer_insertmetronometicks(psy_audio_Sequencer* self,
@@ -857,7 +861,12 @@ bool psy_audio_sequencer_executeglobalcommands(psy_audio_Sequencer* self,
 		psy_audio_PatternEvent* ev;
 
 		ev = (psy_audio_PatternEvent*) p->entry;
-		if (ev->note < psy_audio_NOTECOMMANDS_TWEAK ||
+		if (ev->note == psy_audio_NOTECOMMANDS_TIMESIG) {
+			self->seqtime.timesig_numerator = ev->cmd;
+			self->seqtime.timesig_denominator = ev->parameter;
+			self->window = offset - self->seqtime.position + 
+				psy_audio_sequencer_frametooffset(self, 1);
+		} else if (ev->note < psy_audio_NOTECOMMANDS_TWEAK ||
 				ev->note == psy_audio_NOTECOMMANDS_EMPTY) {
 			switch (ev->cmd) {
 				case psy_audio_PATTERNCMD_EXTENDED:

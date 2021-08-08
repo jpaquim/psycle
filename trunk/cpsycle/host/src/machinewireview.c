@@ -217,17 +217,22 @@ void machinewireview_ondraw(MachineWireView* self, psy_ui_Graphics* g)
 		machinewireview_drawwires(self, g);
 	}	
 	if (!self->vudrawupdate) {
-		if (self->machines) {
-			psy_ui_RealRectangle position;
-			psy_ui_Component* machineui;
-			uintptr_t slot;
+		if (self->machines) {				
+			psy_List* p;
 
-			slot = psy_audio_machines_selected(self->machines);
-			machineui = (psy_ui_Component*)machineuis_at(self, slot);
-			if (machineui) {
-				position = psy_ui_component_position(machineui);
-				psy_ui_setcolour(g, self->skin->wirecolour);
-				machineui_drawhighlight(g, position);
+			for (p = self->machines->selection.entries; p != NULL; p = p->next) {
+				psy_audio_MachineIndex* index;
+				psy_ui_Component* machineui;
+
+				index = (psy_audio_MachineIndex*)p->entry;
+				machineui = (psy_ui_Component*)machineuis_at(self, index->macid);
+				if (machineui) {
+					psy_ui_RealRectangle position;
+
+					position = psy_ui_component_position(machineui);
+					psy_ui_setcolour(g, self->skin->wirecolour);
+					machineui_drawhighlight(g, position);
+				}
 			}
 		}
 		machinewireview_drawdragwire(self, g);				

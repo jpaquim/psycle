@@ -297,7 +297,12 @@ void effectui_onmousedown(EffectUi* self, psy_ui_MouseEvent* ev)
 {	
 	if (ev->button == 1) {
 		if (self->intern.slot != psy_audio_machines_selected(self->intern.machines)) {
-			psy_audio_machines_select(self->intern.machines, self->intern.slot);
+			if (ev->ctrl_key) {
+				psy_audio_machineselection_select(&self->intern.machines->selection,
+					psy_audio_machineindex_make(self->intern.slot));
+			} else {
+				psy_audio_machines_select(self->intern.machines, self->intern.slot);
+			}
 		}
 		if (effectui_hittestcoord(self, ev->pt,
 			&self->intern.skin->effect.bypass)) {

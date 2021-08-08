@@ -41,6 +41,10 @@ typedef struct psy_audio_SequencerTime {
 	bool playstarting;
 	/* stopping */
 	bool playstopping;
+	/* Time Signature Numerator */
+	uintptr_t timesig_numerator;
+	/* Time Signature Denominator */
+	uintptr_t timesig_denominator;
 } psy_audio_SequencerTime;
 
 INLINE void psy_audio_sequencertime_init(psy_audio_SequencerTime* self)
@@ -52,6 +56,8 @@ INLINE void psy_audio_sequencertime_init(psy_audio_SequencerTime* self)
 	self->lastbarposition = (psy_dsp_big_beat_t)0.0;
 	self->samplestonextclock = 0;
 	self->currplaytime = 0.0;
+	self->timesig_numerator = 4;
+	self->timesig_denominator = 4;
 	self->playing = FALSE;
 	self->playstarting = FALSE;
 	self->playstopping = FALSE;
@@ -147,7 +153,7 @@ void psy_audio_sequencer_init(psy_audio_Sequencer*, psy_audio_Sequence*,
 void psy_audio_sequencer_dispose(psy_audio_Sequencer*);
 void psy_audio_sequencer_reset(psy_audio_Sequencer*, psy_audio_Sequence*,
 	psy_audio_Machines*, psy_dsp_big_hz_t samplerate);
-void psy_audio_sequencer_frametick(psy_audio_Sequencer*,
+uintptr_t psy_audio_sequencer_frametick(psy_audio_Sequencer*,
 	uintptr_t numsamples);
 void psy_audio_sequencer_tick(psy_audio_Sequencer*,
 	psy_dsp_big_beat_t offset);

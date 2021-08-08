@@ -1,16 +1,19 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "gear.h"
-// host
+/* host */
 #include "styles.h"
-// audio
+/* audio */
 #include <songio.h>
 
-// GearButtons
-// implementation
+/* GearButtons */
+/* implementation */
 void gearbuttons_init(GearButtons* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {
@@ -39,8 +42,10 @@ void gearbuttons_init(GearButtons* self, psy_ui_Component* parent,
 		"gear.mute-unmute");
 }
 
-// Gear
-// prototypes
+/*
+** Gear
+** prototypes
+*/
 static void gear_inittitle(Gear*);
 static void gear_oncreate(Gear*, psy_ui_Component* sender);
 static void gear_ondelete(Gear*, psy_ui_Component* sender);
@@ -59,7 +64,7 @@ static void gear_onmachineselected(Gear*, psy_audio_Machines* sender,
 static void gear_showgenerators(Gear*);
 static void gear_showeffects(Gear*);
 
-// implementation
+/* implementation */
 void gear_init(Gear* self, psy_ui_Component* parent, Workspace* workspace)
 {		
 	psy_signal_connect(&workspace->signal_songchanged, self,
@@ -69,14 +74,14 @@ void gear_init(Gear* self, psy_ui_Component* parent, Workspace* workspace)
 		STYLE_RECENTVIEW_MAINSECTION);
 	self->workspace = workspace;
 	self->machines = &workspace->song->machines;
-	// client
+	/* client */
 	psy_ui_component_init(&self->client, gear_base(self), NULL);
 	psy_ui_component_setalign(&self->client, psy_ui_ALIGN_CLIENT);
 	psy_ui_component_setmargin(&self->client,
 		psy_ui_defaults_cmargin(psy_ui_defaults()));
-	// titlebar
+	/* titlebar */
 	gear_inittitle(self);	
-	// client
+	/* client */
 	psy_ui_tabbar_init(&self->tabbar, &self->client);
 	psy_ui_tabbar_append_tabs(&self->tabbar, "gear.generators", "gear.effects",
 		"gear.instruments", "gear.waves", NULL);
