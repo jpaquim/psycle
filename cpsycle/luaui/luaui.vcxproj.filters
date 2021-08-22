@@ -18,9 +18,15 @@
     <ClCompile Include="src\luaui.c">
       <Filter>Quelldateien</Filter>
     </ClCompile>
+    <ClCompile Include="src\luapoint.c">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\luaui.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="src\luapoint.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
   </ItemGroup>

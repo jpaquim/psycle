@@ -15,9 +15,10 @@
 #define _MAX_PATH 4096
 #endif
 
+#include <lock.h>
 #include "psyclescript.h"
 #include "luaimport.h"
-#include <lock.h>
+
 
 #include <dir.h>
 

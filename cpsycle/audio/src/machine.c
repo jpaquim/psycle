@@ -255,7 +255,7 @@ static psy_audio_MachineInfo const macinfo = {
 struct psy_audio_Player;
 
 static void reload(psy_audio_Machine* self) {}
-static psy_audio_Machine* clone(psy_audio_Machine* self) { return 0; }
+static psy_audio_Machine* machine_clone(psy_audio_Machine* self) { return NULL; }
 static psy_audio_Buffer* mix(psy_audio_Machine*, size_t slot, uintptr_t amount,
 	psy_audio_MachineSockets*, psy_audio_Machines*, struct psy_audio_Player*);
 static void work(psy_audio_Machine*, psy_audio_BufferContext*);
@@ -574,7 +574,7 @@ static bool vtable_initialized = FALSE;
 static void vtable_init(void)
 {
 	if (!vtable_initialized) {
-		vtable.clone = clone;
+		vtable.clone = machine_clone;
 		vtable.dispose = machine_base_dispose;
 		vtable.reload = reload;
 		vtable.mix = mix;

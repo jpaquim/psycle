@@ -331,6 +331,9 @@
     <ClCompile Include="src\machineselection.c">
       <Filter>machine</Filter>
     </ClCompile>
+    <ClCompile Include="src\luaplayer.c">
+      <Filter>machine\plugins\lua</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\library.h">
@@ -632,6 +635,9 @@
     </ClInclude>
     <ClInclude Include="src\machineselection.h">
       <Filter>machine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\luaplayer.h">
+      <Filter>machine\plugins\lua</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

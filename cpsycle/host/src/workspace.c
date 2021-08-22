@@ -21,6 +21,7 @@
 #include <exclusivelock.h>
 #include <kbddriver.h>
 #include <songio.h>
+#include <luaplayer.h>
 /* ui */
 #include <uiopendialog.h>
 #include <uisavedialog.h>
@@ -358,6 +359,7 @@ void workspace_initplayer(Workspace* self)
 	psy_audio_machinecallback_setplayer(&self->machinecallback, &self->player);
 	psy_audio_eventdrivers_setcmds(&self->player.eventdrivers,
 		cmdproperties_create());
+	psy_audio_luabind_setplayer(&self->player);
 	workspace_initaudio(self);
 }
 
@@ -399,7 +401,11 @@ const char* workspace_driverpath(Workspace* self)
 	return audioconfig_driverpath(&self->config.audio);
 }
 
+#if defined DIVERSALIS__OS__MICROSOFT
 static unsigned int __stdcall pluginscanthread(void* context)
+#else
+static unsigned int pluginscanthread(void* context)
+#endif
 {
 	Workspace* self;
 
@@ -1150,7 +1156,11 @@ void workspace_wait_for_driverconfigureload(Workspace* self)
 	}
 }
 
+#if defined DIVERSALIS__OS__MICROSOFT
 static unsigned int __stdcall driverconfigloadthread(void* context)
+#else
+static unsigned int driverconfigloadthread(void* context)
+#endif
 {
 	Workspace* self;
 	psy_Path path;	

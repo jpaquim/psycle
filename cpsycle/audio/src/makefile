@@ -1,5 +1,5 @@
 CC = gcc -Wfatal-errors
-inc = -I../../dsp/src -I../../file/src -I../../container/src -I../../../diversalis/src -I/usr/include/lua5.3
+inc = -I../../luaui/src -I../../thread/src -I../../script/src -I../../dsp/src -I../../file/src -I../../container/src -I../../../diversalis/src -I/usr/include/lua5.3
 src = $(wildcard *.c)
 obj = $(src:.c=.o)
 

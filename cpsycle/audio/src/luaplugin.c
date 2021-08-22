@@ -7,6 +7,7 @@
 #include "lauxlib.h"
 #include "lualib.h"
 #include "luaimport.h"
+#include "luaplayer.h"
 #include "array.h"
 #include "luaarray.h"
 #include "luaenvelope.h"
@@ -21,6 +22,7 @@
 #include "lock.h"
 #include "machines.h"
 #include "machinefactory.h"
+#include <luapoint.h>
 
 #include <list.h>
 
@@ -567,6 +569,11 @@ int psy_audio_plugin_luascript_exportcmodules(psy_PsycleScript* self)
 		psy_audio_luabind_midinotes_open);
 	psyclescript_require(self, "psycle.osc",
 		psy_audio_luabind_waveosc_open);
+	psyclescript_require(self, "psycle.player",
+		psy_audio_luabind_player_open);
+	// ui
+	// psyclescript_require(self, "psycle.point",
+	//	psy_luaui_point_open);
 	return 1;
 }
 
@@ -693,14 +700,14 @@ int luascript_setmachine(lua_State* L)
 	proxy = *(psy_audio_LuaPlugin**)luaL_checkudata(L, -1, "psyhostmeta");
 	luaL_checktype(L, 1, LUA_TTABLE);
 	lua_getfield(L, 1, "__self");	
-	ud = (psy_audio_LuaMachine**) luaL_checkudata(L, -1, "psypluginmeta");	
+	ud = (psy_audio_LuaMachine**)luaL_checkudata(L, -1, "psypluginmeta");	
 	if (*ud && proxy) {
 		proxy->client = *ud;
 	}
-	lua_pushvalue(L, 1);
+	lua_getglobal(L, "psycle");	
 	if (proxy) {
 		psyclescript_register_weakuserdata(L, proxy->client);
-	}
+	}	
 	lua_setfield(L, 2, "proxy");
 	return 0;
 }

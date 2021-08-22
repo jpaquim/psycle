@@ -891,7 +891,10 @@ const char* psy_audio_plugincatcher_searchpath(psy_audio_PluginCatcher* self, co
 	self->all = psy_audio_pluginsections_section_plugins(&self->sections, "all");
 	psy_property_enumerate(self->all, self,
 		(psy_PropertyCallback)onpropertiesenum);
-	return psy_property_at_str(searchresult, "path", 0);
+	if (searchresult) {
+		return psy_property_at_str(searchresult, "path", 0);
+	}
+	return "";
 }
 
 psy_Property* psy_audio_plugincatcher_at(psy_audio_PluginCatcher* self, const char* id)
