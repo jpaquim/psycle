@@ -1433,6 +1433,7 @@ static void dev_setbackgroundcolour(psy_ui_ComponentImp* self, psy_ui_Colour col
 static void dev_settitle(psy_ui_ComponentImp* self, const char* title) { }
 static void dev_setfocus(psy_ui_ComponentImp* self) { }
 static int dev_hasfocus(psy_ui_ComponentImp* self) { return 0;  }
+static bool dev_issystem(psy_ui_ComponentImp* self) { return FALSE; }
 static void* dev_platform(psy_ui_ComponentImp* self) { return (void*) self; }
 static uintptr_t dev_platform_handle(psy_ui_ComponentImp* self) { return psy_INDEX_INVALID; }
 static uintptr_t dev_flags(const psy_ui_ComponentImp* self) { return 0; }
@@ -1498,6 +1499,7 @@ static void imp_vtable_init(void)
 		imp_vtable.dev_settitle = dev_settitle;
 		imp_vtable.dev_setfocus = dev_setfocus;
 		imp_vtable.dev_hasfocus = dev_hasfocus;
+		imp_vtable.dev_issystem = dev_issystem;
 		imp_vtable.dev_platform = dev_platform;
 		imp_vtable.dev_platform_handle = dev_platform_handle;
 		imp_vtable.dev_flags = dev_flags;

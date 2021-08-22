@@ -120,10 +120,10 @@
       <Culture>0x0407</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>audio.lib;thread.lib;script.lib;zlib.lib;lua54.lib;ui.lib;odbc32.lib;odbccp32.lib;comctl32.lib;file.lib;winmm.lib;container.lib;dsp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>luaui.lib;audio.lib;thread.lib;script.lib;zlib.lib;lua54.lib;ui.lib;odbc32.lib;odbccp32.lib;comctl32.lib;file.lib;winmm.lib;container.lib;dsp.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)host.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>$(SolutionDir)audio\Debug;$(SolutionDir)script\Debug;$(SolutionDir)thread\Debug;$(SolutionDir)zlib\Debug;$(SolutionDir)lua54\Debug;$(SolutionDir)ui\Debug;$(SolutionDir)audio\Debug;$(SolutionDir)file\Debug;$(SolutionDir)container\Debug;$(SolutionDir)dsp\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)luaui\Debug;$(SolutionDir)audio\Debug;$(SolutionDir)script\Debug;$(SolutionDir)thread\Debug;$(SolutionDir)zlib\Debug;$(SolutionDir)lua54\Debug;$(SolutionDir)ui\Debug;$(SolutionDir)audio\Debug;$(SolutionDir)file\Debug;$(SolutionDir)container\Debug;$(SolutionDir)dsp\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(IntDir)host.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
@@ -168,10 +168,10 @@
       <Culture>0x0407</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>audio.lib;thread.lib;script.lib;zlib.lib;lua54.lib;ui.lib;odbc32.lib;odbccp32.lib;comctl32.lib;file.lib;winmm.lib;container.lib;dsp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>luaui.lib;audio.lib;thread.lib;script.lib;zlib.lib;lua54.lib;ui.lib;odbc32.lib;odbccp32.lib;comctl32.lib;file.lib;winmm.lib;container.lib;dsp.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)host.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>$(SolutionDir)audio\Debug;$(SolutionDir)script\Debug;$(SolutionDir)thread\Debug;$(SolutionDir)zlib\Debug;$(SolutionDir)lua54\Debug;$(SolutionDir)ui\Debug;$(SolutionDir)file\Debug;$(SolutionDir)container\Debug;$(SolutionDir)dsp\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)luaui\Debug;$(SolutionDir)audio\Debug;$(SolutionDir)script\Debug;$(SolutionDir)thread\Debug;$(SolutionDir)zlib\Debug;$(SolutionDir)lua54\Debug;$(SolutionDir)ui\Debug;$(SolutionDir)file\Debug;$(SolutionDir)container\Debug;$(SolutionDir)dsp\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(IntDir)host.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>

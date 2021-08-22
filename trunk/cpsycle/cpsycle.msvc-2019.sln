@@ -8,6 +8,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "audio", "audio\audio.vcxpro
 		{6DFB8613-0151-4473-B90B-597577CAE6E7} = {6DFB8613-0151-4473-B90B-597577CAE6E7}
 		{F6A28730-D5C8-4C09-A2AC-73B903CB9090} = {F6A28730-D5C8-4C09-A2AC-73B903CB9090}
 		{EC2EF073-5EB8-49B4-9A73-CBB2DBC20F66} = {EC2EF073-5EB8-49B4-9A73-CBB2DBC20F66}
+		{0BFF7BA5-DFE9-4BD3-85A0-29C3ACBE528C} = {0BFF7BA5-DFE9-4BD3-85A0-29C3ACBE528C}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "container", "container\container.vcxproj", "{8CEB65BD-4B67-416C-9DDE-03F395CC522F}"
@@ -83,6 +84,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "doc", "doc", "{6D6F16D8-A804-4DAA-86A6-EF90252D7E0E}"
 	ProjectSection(SolutionItems) = preProject
 		doc\cpsycle-developer-guide.docx = doc\cpsycle-developer-guide.docx
+		readme.txt = readme.txt
 		doc\uicomponent-vtable.txt = doc\uicomponent-vtable.txt
 	EndProjectSection
 EndProject

@@ -56,7 +56,7 @@ void psy_ui_edit_init(psy_ui_Edit* self, psy_ui_Component* parent)
 	imp = psy_ui_impfactory_allocinit_editimp(
 		psy_ui_app_impfactory(psy_ui_app()), &self->component, parent);
 #else
-	imp = psy_ui_native_editimp_allocinit(&self->component, parent)->imp;
+	imp = psy_ui_native_editimp_allocinit(&self->component, parent, NULL)->imp;
 #endif
 	psy_ui_component_init_imp(psy_ui_edit_base(self), parent, NULL, imp);
 	vtable_init(self);	
@@ -83,7 +83,7 @@ void psy_ui_edit_multiline_init(psy_ui_Edit* self, psy_ui_Component* parent)
 	imp = psy_ui_impfactory_allocinit_editimp_multiline(
 		psy_ui_app_impfactory(psy_ui_app()), &self->component, parent);
 #else
-	imp = psy_ui_native_editimp_allocinit_multiline(&self->component, parent)->imp;
+	imp = psy_ui_native_editimp_allocinit(&self->component, parent, NULL)->imp;
 #endif
 	psy_ui_component_init_imp(psy_ui_edit_base(self), parent, NULL, imp);
 	vtable_init(self);

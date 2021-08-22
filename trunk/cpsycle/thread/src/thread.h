@@ -35,8 +35,11 @@ typedef
 	#endif
 	psy_native_handle_type;
 
-
+#if defined DIVERSALIS__OS__MICROSOFT
 typedef unsigned int (__stdcall *psy_fp_thread_callback)(void* context);
+#else
+typedef unsigned int (*psy_fp_thread_callback)(void* context);
+#endif
 
 typedef struct psy_Thread {
 	psy_native_handle_type native_handle_;

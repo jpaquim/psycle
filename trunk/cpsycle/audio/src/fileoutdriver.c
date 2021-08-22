@@ -70,7 +70,12 @@ static const psy_Property* driver_configuration(const psy_AudioDriver*);
 static int driver_close(psy_AudioDriver*);
 static int driver_dispose(psy_AudioDriver*);
 static psy_dsp_big_hz_t samplerate(psy_AudioDriver*);
+
+#if defined DIVERSALIS__OS__MICROSOFT
 static unsigned int __stdcall PollerThread(void *fileoutdriver);
+#else
+static unsigned int PollerThread(void *fileoutdriver);
+#endif
 static void fileoutdriver_createfile(FileOutDriver*);
 static void fileoutdriver_writebuffer(FileOutDriver*, float* pBuf,
 	uintptr_t amount);
@@ -335,7 +340,11 @@ psy_dsp_big_hz_t samplerate(psy_AudioDriver* self)
 	return (psy_dsp_big_hz_t)44100.0;
 }
 
+#if defined DIVERSALIS__OS__MICROSOFT
 unsigned int __stdcall PollerThread(void* driver)
+#else
+unsigned int PollerThread(void* driver)
+#endif
 {	
 	int n;	
 	uint32_t blocksize = 2048;

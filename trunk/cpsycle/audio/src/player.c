@@ -78,7 +78,11 @@ static uintptr_t psy_audio_player_multichannelaudition(psy_audio_Player*,
 	const psy_audio_PatternEvent*);
 static void psy_audio_player_recordnotes(psy_audio_Player*,
 	uintptr_t track, const psy_audio_PatternEvent*);
+#if defined DIVERSALIS__OS__MICROSOFT	
 static unsigned int __stdcall psy_audio_player_thread_function(psy_audio_Player*);
+#else
+static unsigned int psy_audio_player_thread_function(psy_audio_Player*);
+#endif
 static void psy_audio_player_process_loop(psy_audio_Player*);
 
 /* implementation */
@@ -1024,7 +1028,11 @@ void psy_audio_player_start_threads(psy_audio_Player* self, uintptr_t thread_cou
 	}
 }
 
+#if defined DIVERSALIS__OS__MICROSOFT
 unsigned int __stdcall psy_audio_player_thread_function(psy_audio_Player* self)
+#else
+unsigned int psy_audio_player_thread_function(psy_audio_Player* self)
+#endif
 {
 	psy_audio_player_process_loop(self);
 	return 0;

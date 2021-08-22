@@ -107,6 +107,7 @@ static psy_ui_RealPoint translatecoords(psy_ui_win_ComponentImp*, psy_ui_Compone
 	psy_ui_Component* dst);
 static psy_ui_RealPoint mapcoords(psy_ui_win_ComponentImp* self, psy_ui_Component* src,
 	psy_ui_Component* dst);
+static bool dev_issystem(psy_ui_win_ComponentImp* self) { return TRUE; }
 /* vtable */
 static psy_ui_ComponentImpVTable vtable;
 static bool vtable_initialized = FALSE;
@@ -273,7 +274,10 @@ static void win_imp_vtable_init(psy_ui_win_ComponentImp* self)
 			dev_initialized;
 		vtable.dev_platform_handle =
 			(psy_ui_fp_componentimp_dev_platform_handle)
-			dev_platform_handle;		
+			dev_platform_handle;
+		vtable.dev_issystem =
+			(psy_ui_fp_componentimp_dev_issystem)
+			dev_issystem;
 		vtable_initialized = TRUE;
 	}
 }

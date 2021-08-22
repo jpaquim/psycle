@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
 */
 
 #ifndef psy_ui_COMPONENT_H
@@ -457,6 +457,7 @@ typedef void (*psy_ui_fp_componentimp_dev_settitle)(struct psy_ui_ComponentImp*,
 typedef void (*psy_ui_fp_componentimp_dev_setfocus)(struct psy_ui_ComponentImp*);
 typedef int (*psy_ui_fp_componentimp_dev_hasfocus)(struct psy_ui_ComponentImp*);
 typedef void* (*psy_ui_fp_componentimp_dev_platform)(struct psy_ui_ComponentImp*);
+typedef bool (*psy_ui_fp_componentimp_dev_issystem)(struct psy_ui_ComponentImp*);
 typedef uintptr_t (*psy_ui_fp_componentimp_dev_platform_handle)(struct psy_ui_ComponentImp*);
 typedef uintptr_t (*psy_ui_fp_componentimp_dev_flags)(const struct psy_ui_ComponentImp*);
 typedef void (*psy_ui_fp_componentimp_dev_clear)(struct psy_ui_ComponentImp*);
@@ -513,6 +514,7 @@ typedef struct psy_ui_ComponentImpVTable {
 	psy_ui_fp_componentimp_dev_settitle dev_settitle;
 	psy_ui_fp_componentimp_dev_setfocus dev_setfocus;
 	psy_ui_fp_componentimp_dev_hasfocus dev_hasfocus;
+	psy_ui_fp_componentimp_dev_issystem dev_issystem;
 	psy_ui_fp_componentimp_dev_platform dev_platform;
 	psy_ui_fp_componentimp_dev_platform_handle dev_platform_handle;
 	psy_ui_fp_componentimp_dev_flags dev_flags;

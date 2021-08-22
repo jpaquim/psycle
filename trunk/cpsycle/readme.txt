@@ -6,12 +6,28 @@ and ImpulseTracker format aren't yet supported.
 
 Building
 
+Visual Studio
+
 To build the windows version with Visual Studio 2019, check out the psycle
 svn trunk, open in the cpsycle directory  "cpsycle.msvc-2019.sln", choose
 Build target Win32 or X64) and ensure that the startproject is host. Compile
 the solution. If something went wrong press CTRL + SHIFT + B to try again.
 
+Linux
+
+A very basic port has now been done to let cpsycle run on a linux platform.
+It is very unstable and some things like double clicks aren't working correctly,
+images arent supported and some native components available under win32
+arent yet emulated. If you like to compile and test it anyways,
+install the base compiler system and other needed dev libaries of x11, xft and asound2.
+In cpsycle/host run make. This will execute the makefile of the submodules
+In cpsycle/plugins run make to build the psycle plugins.
+In cpsycle/host/src you find psycle that you can start with ./psycle
+
+
 Installation
+
+Windows 
 
 In cpsycle/debug{release}/x86{x64} you find host.exe asio.dll mme.dll
 mmemidi.dll directx.dll wasapi.dll you need to copy  into the bin 
