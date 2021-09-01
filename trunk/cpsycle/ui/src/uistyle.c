@@ -44,6 +44,7 @@ void psy_ui_style_init(psy_ui_Style* self)
 	psy_ui_colour_init(&self->colour);
 	psy_ui_colour_init(&self->backgroundcolour);
 	self->backgroundid = psy_INDEX_INVALID;
+	self->backgroundpath = NULL;
 	self->backgroundrepeat = psy_ui_REPEAT;
 	self->backgroundposition = psy_ui_ALIGNMENT_NONE;
 	self->overlaycolour = psy_ui_colour_make(psy_ui_RGB_WHITE);
@@ -75,6 +76,7 @@ void psy_ui_style_init_colours(psy_ui_Style* self, psy_ui_Colour colour,
 	self->colour = colour;
 	self->backgroundcolour = background;
 	self->backgroundid = psy_INDEX_INVALID;
+	self->backgroundpath = NULL;
 	self->backgroundrepeat = psy_ui_REPEAT;
 	self->backgroundposition = psy_ui_ALIGNMENT_NONE;
 	psy_ui_bitmapanimate_init(&self->backgroundanimation);
@@ -112,6 +114,7 @@ void psy_ui_style_dispose(psy_ui_Style* self)
 	if (self->use_font) {
 		psy_ui_font_dispose(&self->font);
 	}	
+	free(self->backgroundpath);
 }
 
 void psy_ui_style_copy(psy_ui_Style* self, const psy_ui_Style* other)
@@ -119,6 +122,7 @@ void psy_ui_style_copy(psy_ui_Style* self, const psy_ui_Style* other)
 	self->colour = other->colour;
 	self->backgroundcolour = other->backgroundcolour;
 	self->backgroundid = other->backgroundid;
+	psy_strreset(&self->backgroundpath, other->backgroundpath);
 	self->backgroundrepeat = other->backgroundrepeat;
 	self->backgroundposition = other->backgroundposition;
 	self->backgroundanimation = other->backgroundanimation;
@@ -192,6 +196,12 @@ void psy_ui_style_setfont(psy_ui_Style* self, const char* family, int size)
 	self->use_font = 1;
 	psy_ui_fontinfo_init(&fontinfo, family, size);
 	psy_ui_font_init(&self->font, &fontinfo);
+}
+
+void psy_ui_style_setbackgroundpath(psy_ui_Style* self,
+	const char* path)
+{
+		psy_strreset(&self->backgroundpath, path);
 }
 
 /*

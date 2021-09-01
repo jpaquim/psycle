@@ -30,6 +30,7 @@ psy_ui_KeyboardEvent psy_ui_x11_keyboardevent_make(XKeyEvent* event)
 	xkevent = *event;
 	shift = (xkevent.state & ShiftMask) == ShiftMask;
 	ctrl = (xkevent.state & ControlMask) == ControlMask;
+	xkevent.state = 0;	
 	ret = XLookupString(&xkevent, buf, sizeof buf, &keysym, 0);
 	switch (keysym) {
 	case XK_Home:
@@ -82,7 +83,7 @@ psy_ui_KeyboardEvent psy_ui_x11_keyboardevent_make(XKeyEvent* event)
 	case XK_F1:
 		keysym = psy_ui_KEY_F1;
 		break;
-	case XK_F2:
+	case XK_F2:		
 		keysym = psy_ui_KEY_F2;
 		break;
 	case XK_F3:
@@ -189,8 +190,90 @@ XKeyEvent psy_ui_x11_xkeyevent_make(psy_ui_KeyboardEvent* e,
 {
 	XKeyEvent rv;
 	KeyCode keycode;
+	uint32_t keysym;
 	
-	keycode = XKeysymToKeycode(dpy, e->keycode); 	
+	
+	switch (e->keycode) {
+	case psy_ui_KEY_CONTROL:
+		keysym = XK_Control_L;
+	break;
+	case psy_ui_KEY_SHIFT:	
+		keysym = XK_Shift_L;
+		break;		
+	case psy_ui_KEY_HOME:
+		keysym = XK_Home;
+		break;
+	case psy_ui_KEY_END:
+		keysym = XK_End;
+		break;
+	case psy_ui_KEY_UP:
+		keysym = XK_Up;
+		break;
+	case psy_ui_KEY_DOWN:
+		keysym = XK_Down;
+		break;
+	case psy_ui_KEY_LEFT:
+		keysym = XK_Left;
+		break;
+	case psy_ui_KEY_RIGHT:
+		keysym = XK_Right;
+		break;
+	case psy_ui_KEY_TAB:
+		keysym = XK_Tab;
+		break;
+	case psy_ui_KEY_PRIOR:
+		keysym = XK_Prior;
+		break;
+	case psy_ui_KEY_NEXT:
+		keysym = XK_Next;
+		break;
+	case psy_ui_KEY_DELETE:
+		keysym = XK_Delete;
+		break;
+	case psy_ui_KEY_BACK:
+		keysym = XK_BackSpace;
+		break;	
+	case psy_ui_KEY_F1:
+		keysym = XK_F1;
+		break;
+	case psy_ui_KEY_F2:
+		keysym = XK_F2;
+		break;
+	case psy_ui_KEY_F3:
+		keysym = XK_F3;
+		break;
+	case psy_ui_KEY_F4:
+		keysym = XK_F4;
+		break;
+	case psy_ui_KEY_F5:
+		keysym = XK_F5;
+		break;
+	case psy_ui_KEY_F6:
+		keysym = XK_F6;
+		break;
+	case psy_ui_KEY_F7:
+		keysym = XK_F7;
+		break;
+	case psy_ui_KEY_F8:
+		keysym = XK_F8;
+		break;
+	case psy_ui_KEY_F9:
+		keysym = XK_F9;
+		break;
+	case psy_ui_KEY_F10:
+		keysym = XK_F10;
+		break;
+	case psy_ui_KEY_F11:
+		keysym = XK_F11;
+		break;
+	case psy_ui_KEY_F12:
+		keysym = XK_F12;
+		break;
+	default:
+		keysym = e->keycode;
+		break;	
+	}	
+	keycode = XKeysymToKeycode(dpy, keysym); 	
 	rv.type = KeyPress;
     rv.display = dpy;
     rv.window = win;
@@ -203,7 +286,13 @@ XKeyEvent psy_ui_x11_xkeyevent_make(psy_ui_KeyboardEvent* e,
     rv.y_root = 0;
     rv.same_screen = True;
     rv.keycode = keycode;
-    rv.state = 0; //modifiers;	
+    rv.state = 0; /* modifiers */
+    if (e->shift_key != 0) {
+		rv.state |= ShiftMask;
+	}
+	if (e->ctrl_key != 0) {
+		rv.state |= ControlMask;
+	}    
 	return rv;
 }
 

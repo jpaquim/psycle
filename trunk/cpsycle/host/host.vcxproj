@@ -448,7 +448,6 @@
     <ClCompile Include="src\trackercolumn.c" />
     <ClCompile Include="src\trackergridstate.c" />
     <ClCompile Include="src\trackerlinenumbers.c" />
-    <ClCompile Include="src\trackerlinestate.c" />
     <ClCompile Include="src\trackerview.c" />
     <ClCompile Include="src\trackscopeview.c" />
     <ClCompile Include="src\transformpatternview.c" />
@@ -637,7 +636,6 @@
     <ClInclude Include="src\trackercolumn.h" />
     <ClInclude Include="src\trackergridstate.h" />
     <ClInclude Include="src\trackerlinenumbers.h" />
-    <ClInclude Include="src\trackerlinestate.h" />
     <ClInclude Include="src\trackerview.h" />
     <ClInclude Include="src\trackscopeview.h" />
     <ClInclude Include="src\transformpatternview.h" />

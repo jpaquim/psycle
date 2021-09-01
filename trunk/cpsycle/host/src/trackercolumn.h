@@ -8,7 +8,6 @@
 
 /* host */
 #include "trackergridstate.h"
-#include "trackerlinestate.h"
 #include "workspace.h"
 /* ui */
 #include <uicomponent.h>
@@ -36,20 +35,19 @@ typedef struct TrackerColumn {
 	psy_ui_RealSize resizestartsize;	
 	/* internal */
 	/* references */
-	TrackerGridState* gridstate;
-	TrackerLineState* linestate;	
+	TrackerGridState* gridstate;	
 	TrackDef* trackdef;
 	Workspace* workspace;
 } TrackerColumn;
 
 void trackercolumn_init(TrackerColumn*, psy_ui_Component* parent,
 	psy_ui_Component* view, uintptr_t index, TrackerGridState*,
-	TrackerLineState*, Workspace*);
+	Workspace*);
 
 TrackerColumn* trackercolumn_alloc(void);
 TrackerColumn* trackercolumn_allocinit(psy_ui_Component* parent,
 	psy_ui_Component* view, uintptr_t index, TrackerGridState* gridstate,
-	TrackerLineState* linestate, Workspace* workspace);
+	Workspace* workspace);
 
 INLINE psy_ui_Component* trackercolumn_base(TrackerColumn* self)
 {

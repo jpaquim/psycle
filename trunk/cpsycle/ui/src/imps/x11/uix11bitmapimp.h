@@ -18,6 +18,7 @@ extern "C" {
 typedef struct psy_ui_x11_BitmapImp {
 	psy_ui_BitmapImp imp;
 	Pixmap pixmap;
+	Pixmap mask;
 } psy_ui_x11_BitmapImp;
 
 void psy_ui_x11_bitmapimp_init(psy_ui_x11_BitmapImp* self,

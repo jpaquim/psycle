@@ -459,6 +459,15 @@ void psy_ui_x11_g_imp_drawstretchedbitmap(psy_ui_x11_GraphicsImp* self,
 	psy_ui_Bitmap* bitmap, double x, double y, double width,
 	double height, double xsrc, double ysrc, double wsrc, double hsrc)
 {
+	Pixmap xtbitmap; 
+    
+    xtbitmap = ((psy_ui_x11_BitmapImp*)bitmap->imp)->pixmap;
+    if (xtbitmap) {        
+        XCopyArea(self->display, xtbitmap, self->window, self->gc,
+            xsrc, ysrc, width, height,
+            x - (int)(self->org.x),
+            y - (int)(self->org.y));
+    }
 }
 
 void psy_ui_x11_g_imp_setcolour(psy_ui_x11_GraphicsImp* self, psy_ui_Colour color)

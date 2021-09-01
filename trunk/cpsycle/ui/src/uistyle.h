@@ -37,6 +37,7 @@ typedef struct psy_ui_Style {
 	psy_ui_Colour colour;
 	psy_ui_Colour backgroundcolour;
 	uintptr_t backgroundid;
+	char* backgroundpath;
 	psy_ui_BackgroundRepeat backgroundrepeat;
 	psy_ui_Alignment backgroundposition;
 	psy_ui_BitmapAnimate backgroundanimation;
@@ -89,6 +90,9 @@ INLINE void psy_ui_style_setbackgroundid(psy_ui_Style* self,
 {
 	self->backgroundid = id;
 }
+
+void psy_ui_style_setbackgroundpath(psy_ui_Style* self,
+	const char* path);
 
 INLINE void psy_ui_style_animatebackground(psy_ui_Style* self,
 	uintptr_t interval, psy_ui_RealSize framesize, bool horizontal)

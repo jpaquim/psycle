@@ -127,6 +127,23 @@ void trackergridstate_init(TrackerGridState* self, TrackConfig* trackconfig,
 	self->playbar = TRUE;
 	trackereventtable_init(&self->trackevents);
 	psy_audio_patternentry_init(&self->empty);
+	self->defaultlineheight = psy_ui_value_make_eh(1.0);
+	self->lineheight = self->defaultlineheight;
+	self->lineheightpx = 13.0;
+	self->flatsize = 8;
+	self->lpb = 4;
+	self->bpl = 1.0 / self->lpb;
+	self->skin = NULL;
+	self->pattern = NULL;	
+	self->lastplayposition = -1.f;
+	self->sequenceentryoffset = 0.f;
+	self->drawcursor = TRUE;
+	self->visilines = 25;
+	self->cursorchanging = FALSE;
+	self->gridfont = NULL;
+	self->singlemode = TRUE;
+	self->trackidx = 0;
+	self->maxlines = psy_INDEX_INVALID;
 }
 
 void trackergridstate_dispose(TrackerGridState* self)
@@ -644,4 +661,66 @@ ScrollDir trackergridstate_prevcol(TrackerGridState* self, bool wrap)
 		}
 	}
 	return SCROLL_DIR_NONE;
+}
+
+static int testcursor(psy_audio_PatternCursor cursor, uintptr_t track,
+	psy_dsp_big_beat_t offset, uintptr_t lpb)
+{
+	return cursor.track == track && psy_dsp_testrange(cursor.offset, offset, 1.0 / lpb);
+}
+
+bool trackergridstate_testplaybar(TrackerGridState* self, psy_dsp_big_beat_t offset)
+{
+	assert(self);
+
+	return psy_dsp_testrange(
+		self->lastplayposition - ((self->singlemode)
+			? self->sequenceentryoffset
+			: 0.0),
+		offset, self->bpl);
+}
+
+uintptr_t trackergridstate_numlines(const TrackerGridState* self)
+{
+	assert(self);
+
+	return trackergridstate_beattoline(self,
+		trackergridstate_length(self));
+}
+
+psy_dsp_big_beat_t trackergridstate_length(const TrackerGridState* self)
+{
+	assert(self);
+
+	if (self->singlemode) {
+		if (self->pattern) {
+			return psy_audio_pattern_length(self->pattern);
+		}
+	} else if (self->sequence) {
+		psy_audio_SequenceTrack* track;
+
+		track = psy_audio_sequence_track_at(self->sequence, self->trackidx);
+		if (track) {
+			return psy_audio_sequencetrack_duration(track,
+				self->sequence->patterns);
+		}
+		return psy_audio_sequence_duration(self->sequence);
+	}
+	return 0.0;
+}
+
+void trackergridstate_lineclip(TrackerGridState* self, const psy_ui_RealRectangle* clip,
+	psy_audio_PatternSelection* rv)
+{
+	assert(self);
+
+	rv->topleft.column = 0;
+	rv->topleft.digit = 0;
+	rv->topleft.offset = trackergridstate_pxtobeat(self, psy_max(0.0, clip->top));
+	rv->topleft.line = trackergridstate_beattoline(self, rv->topleft.offset);
+	rv->bottomright.column = 0;
+	rv->bottomright.digit = 0;
+	rv->bottomright.offset = trackergridstate_pxtobeatnotquantized(self,
+		psy_max(0.0, clip->bottom));
+	rv->bottomright.line = (uintptr_t)(rv->bottomright.offset * self->lpb + 0.5);
 }

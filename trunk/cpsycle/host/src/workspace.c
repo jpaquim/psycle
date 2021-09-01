@@ -32,6 +32,7 @@
 
 #if defined DIVERSALIS__OS__UNIX
 #define _MAX_PATH 4096
+#include <unistd.h>
 #endif
 
 /* audio */
@@ -2005,7 +2006,7 @@ void workspace_connectloadprogress(Workspace* self, void* context,
 }
 
 void workspace_oninput(Workspace* self, uintptr_t cmdid)
-{	
+{
 	switch (cmdid) {
 	case CMD_IMM_ADDMACHINE:
 		workspace_selectview(self, VIEW_ID_MACHINEVIEW,
