@@ -477,9 +477,6 @@
     <ClCompile Include="src\trackerlinenumbers.c">
       <Filter>pattern\tracker</Filter>
     </ClCompile>
-    <ClCompile Include="src\trackerlinestate.c">
-      <Filter>pattern\tracker</Filter>
-    </ClCompile>
     <ClCompile Include="src\trackerview.c">
       <Filter>pattern\tracker</Filter>
     </ClCompile>
@@ -1014,9 +1011,6 @@
       <Filter>pattern\tracker</Filter>
     </ClInclude>
     <ClInclude Include="src\trackerlinenumbers.h">
-      <Filter>pattern\tracker</Filter>
-    </ClInclude>
-    <ClInclude Include="src\trackerlinestate.h">
       <Filter>pattern\tracker</Filter>
     </ClInclude>
     <ClInclude Include="src\trackerview.h">

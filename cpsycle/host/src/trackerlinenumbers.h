@@ -8,7 +8,6 @@
 
 /* host */
 #include "trackergridstate.h"
-#include "trackerlinestate.h"
 #include "workspace.h"
 #include "zoombox.h"
 
@@ -36,14 +35,13 @@ typedef struct TrackerLineNumbersLabel {
 	bool useheaderbitmap;
 	/* references */
 	struct TrackerView* view;
-	TrackerLineState* linestate;
-	TrackerLineState defaultlinestate;
+	TrackerGridState* linestate;	
 	Workspace* workspace;
 } TrackerLineNumbersLabel;
 
 void trackerlinenumberslabel_init(TrackerLineNumbersLabel*,
 	psy_ui_Component* parent, psy_ui_Component* view, 
-	TrackerLineState*, Workspace*);
+	TrackerGridState*, Workspace*);
 
 INLINE void trackerlinenumberslabel_setheaderheight(TrackerLineNumbersLabel* self,
 	double headerheight)
@@ -95,14 +93,12 @@ typedef struct TrackerLineNumbers {
 	bool shownumbersinhex;
 	bool showbeat;
 	/* references */
-	TrackerLineState* linestate;
-	TrackerLineState defaultlinestate;
+	TrackerGridState* linestate;	
 	Workspace* workspace;
 } TrackerLineNumbers;
 
 void trackerlinenumbers_init(TrackerLineNumbers*, psy_ui_Component* parent,
-	psy_ui_Component* view,  TrackerLineState*, Workspace*);
-void trackerlinenumbers_setsharedlinestate(TrackerLineNumbers*, TrackerLineState*);
+	psy_ui_Component* view, TrackerGridState*, Workspace*);
 void trackerlinenumbers_invalidatecursor(TrackerLineNumbers*,
 	const psy_audio_PatternCursor*);
 void trackerlinenumbers_invalidateline(TrackerLineNumbers*,
@@ -130,7 +126,7 @@ typedef struct TrackerLineNumberBar {
 } TrackerLineNumberBar;
 
 void trackerlinenumberbar_init(TrackerLineNumberBar*, psy_ui_Component*
-	parent, TrackerLineState*, Workspace*);
+	parent, TrackerGridState*, Workspace*);
 
 INLINE psy_ui_Component* trackerlinenumberbar_base(TrackerLineNumberBar* self)
 {

@@ -9,7 +9,6 @@
 /* host */
 #include "trackercolumn.h"
 #include "trackergridstate.h"
-#include "trackerlinestate.h"
 #include "patternhostcmds.h"
 /* ui */
 #include <uibutton.h>
@@ -40,7 +39,6 @@ typedef struct TrackerGrid {
 	psy_Signal signal_colresize;
 	/* internal */
 	TrackerGridState defaultgridstate;	
-	TrackerLineState defaultlinestate;	
 	psy_dsp_NotesTabMode notestabmode;   
 	psy_audio_PatternCursor oldcursor;
 	psy_audio_PatternCursor lastdragcursor;	
@@ -61,20 +59,18 @@ typedef struct TrackerGrid {
 	bool preventeventdriver;
 	PatternCmds cmds;
 	/* references */
-	TrackerGridState* gridstate;
-	TrackerLineState* linestate;
+	TrackerGridState* gridstate;	
 	psy_ui_Component* view;
 	Workspace* workspace;
 } TrackerGrid;
 
 void trackergrid_init(TrackerGrid*, psy_ui_Component* parent,
 	psy_ui_Component* view, TrackConfig*, TrackerGridState*,
-	TrackerLineState*, Workspace*);
+	Workspace*);
 
 void trackergrid_build(TrackerGrid*);
 void trackergrid_setsharedgridstate(TrackerGrid*, TrackerGridState*,
 	TrackConfig*);
-void trackergrid_setsharedlinestate(TrackerGrid*, TrackerLineState*);
 void trackergrid_setpattern(TrackerGrid*, psy_audio_Pattern*);
 void trackergrid_showemptydata(TrackerGrid*, int showstate);
 void trackergrid_invalidateline(TrackerGrid*, psy_dsp_big_beat_t offset);

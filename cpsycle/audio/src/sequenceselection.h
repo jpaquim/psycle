@@ -6,8 +6,6 @@
 #ifndef psy_audio_SEQUENCESELECTION_H
 #define psy_audio_SEQUENCESELECTION_H
 
-/* local */
-#include "sequenceentry.h"
 /* container */
 #include <list.h>
 #include <signal.h>

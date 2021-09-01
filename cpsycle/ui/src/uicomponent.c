@@ -203,6 +203,11 @@ uintptr_t psy_ui_component_backgroundimageid(const psy_ui_Component* self)
 	return self->style.currstyle->backgroundid;		
 }
 
+const char* psy_ui_component_backgroundimagepath(const psy_ui_Component* self)
+{
+	return self->style.currstyle->backgroundpath;		
+}
+
 void psy_ui_replacedefaultfont(psy_ui_Component* main, psy_ui_Font* font)
 {		
 	if (main) {
@@ -1826,11 +1831,27 @@ void psy_ui_component_drawbackground(psy_ui_Component* self,
 				psy_ui_component_backgroundcolour(self));
 		} else {		
 			uintptr_t image_id;
+			const char* path;
 			bool success;
 			
 			success = FALSE;
 			image_id = psy_ui_component_backgroundimageid(self);
-			if (image_id != psy_INDEX_INVALID) {
+			path = psy_ui_component_backgroundimagepath(self);
+			if (path) {
+				psy_ui_Bitmap bitmap;
+
+				psy_ui_bitmap_init(&bitmap);
+				psy_ui_bitmap_load(&bitmap, path);
+				success = !psy_ui_bitmap_empty(&bitmap);
+				if (success && self->style.currstyle->backgroundrepeat == psy_ui_NOREPEAT) {
+					psy_ui_drawsolidrectangle(g, g->clip,
+						psy_ui_component_backgroundcolour(self));
+				}
+				psy_ui_component_drawbackgroundimage(self, g, &bitmap,
+					self->style.currstyle->backgroundrepeat,
+					self->style.currstyle->backgroundposition);
+				psy_ui_bitmap_dispose(&bitmap);				
+			} else if (image_id != psy_INDEX_INVALID) {
 				psy_ui_Bitmap bitmap;
 
 				psy_ui_bitmap_init(&bitmap);
@@ -1844,7 +1865,7 @@ void psy_ui_component_drawbackground(psy_ui_Component* self,
 					self->style.currstyle->backgroundrepeat,
 					self->style.currstyle->backgroundposition);
 				psy_ui_bitmap_dispose(&bitmap);
-			}
+			}			
 			if (!success) {
 				psy_ui_drawsolidrectangle(g, g->clip,
 					psy_ui_component_backgroundcolour(self));

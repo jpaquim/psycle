@@ -67,8 +67,7 @@ typedef struct PatternView {
 	TransformPatternView transformpattern;
 	InterpolateCurveView interpolatecurveview;
 	SwingFillView swingfillview;
-	/* internal data */
-	TrackerLineState linestate;
+	/* internal data */	
 	TrackConfig trackconfig;
 	TrackerGridState gridstate;
 	PatternViewSkin skin;	

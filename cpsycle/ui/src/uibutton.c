@@ -194,6 +194,7 @@ void psy_ui_button_ondraw(psy_ui_Button* self, psy_ui_Graphics* g)
 		double vcenter;		
 		double ratio;
 				
+		printf("%s\n", "draw bitmap");
 		srcbpmsize = psy_ui_bitmap_size(&self->bitmapicon);		
 		ratio = (tm->tmAscent - tm->tmDescent) / srcbpmsize.height;
 		if (fabs(ratio - 1.0) < 0.15) {
@@ -202,13 +203,21 @@ void psy_ui_button_ondraw(psy_ui_Button* self, psy_ui_Graphics* g)
 		destbpmsize.width = srcbpmsize.width * ratio;
 		destbpmsize.height = srcbpmsize.height * ratio;
 		vcenter = (size.height - destbpmsize.height) / 2.0;
+		
+		
+#if defined(DIVERSALIS__OS__MICROSOFT)		
 		psy_ui_drawstretchedbitmap(g, &self->bitmapicon,
-			psy_ui_realrectangle_make(
-				psy_ui_realpoint_make(cpx, vcenter),
-				destbpmsize),
-			psy_ui_realpoint_zero(),
-			srcbpmsize);
+		psy_ui_realrectangle_make(
+			psy_ui_realpoint_make(cpx, vcenter),
+			destbpmsize),
+		psy_ui_realpoint_zero(),
+		srcbpmsize);
+#else
+		psy_ui_drawfullbitmap(g, &self->bitmapicon,
+			psy_ui_realpoint_zero());
+#endif
 		cpx += destbpmsize.width + tm->tmAveCharWidth * self->bitmapident;
+
 	}
 	if (self->icon != psy_ui_ICON_NONE) {
 		psy_ui_IconDraw icondraw;

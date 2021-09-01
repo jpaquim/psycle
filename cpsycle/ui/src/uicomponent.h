@@ -356,6 +356,7 @@ void psy_ui_component_checksortedalign(psy_ui_Component*, psy_ui_AlignType);
 const psy_ui_Border* psy_ui_component_border(const psy_ui_Component*);
 void psy_ui_component_setborder(psy_ui_Component*, const psy_ui_Border*);
 uintptr_t psy_ui_component_backgroundimageid(const psy_ui_Component*);
+const char* psy_ui_component_backgroundimagepath(const psy_ui_Component*);
 
 void psy_ui_component_setalign(psy_ui_Component* self, psy_ui_AlignType);
 

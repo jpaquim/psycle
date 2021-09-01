@@ -13,6 +13,8 @@
 #include <uiappstyles.h>
 #include <uimaterial.h>
 #include <uiwintheme.h>
+/* portable */
+#include "../../detail/portable.h"
 
 /* prototypes */
 static void initlighttheme(psy_ui_Styles*);
@@ -322,7 +324,12 @@ void inithoststyles(psy_ui_Styles* self, psy_ui_ThemeMode theme)
 	
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setbackgroundcolour(style, material.surface_overlay_5p);
-	psy_ui_style_setbackgroundid(style, IDB_ABOUT);
+	if (psy_strlen(PSYCLE_RES_DIR) == 0) {
+		psy_ui_style_setbackgroundid(style, IDB_ABOUT);
+	} else {
+		psy_ui_style_setbackgroundpath(style,
+			PSYCLE_RES_DIR"/""splash_screen.bmp");		
+	}
 	style->backgroundrepeat = psy_ui_NOREPEAT;
 	style->backgroundposition = psy_ui_ALIGNMENT_CENTER;
 	psy_ui_styles_setstyle(self, STYLE_ABOUT, style);

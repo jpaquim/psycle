@@ -127,6 +127,22 @@ typedef struct TrackerGridState {
 	psy_audio_PatternCursor dragselectionbase;
 	psy_audio_PatternCursor dragcursor;
 	psy_audio_PatternEntry empty;
+	psy_ui_Value lineheight;
+	psy_ui_Value defaultlineheight;
+	double lineheightpx;
+	double flatsize;
+	uintptr_t lpb;
+	psy_dsp_big_beat_t bpl;
+	bool drawcursor;
+	psy_dsp_big_beat_t lastplayposition;
+	psy_dsp_big_beat_t sequenceentryoffset;
+	uintptr_t trackidx;
+	// precomputed
+	intptr_t visilines;
+	bool cursorchanging;
+	// references	
+	const psy_ui_Font* gridfont;	
+	uintptr_t maxlines;
 } TrackerGridState;
 
 void trackergridstate_init(TrackerGridState*, TrackConfig*,
@@ -238,5 +254,114 @@ void trackergridstate_selectbar(TrackerGridState*);
 void trackergridstate_selectall(TrackerGridState*);
 ScrollDir trackergridstate_nextcol(TrackerGridState*, bool wrap);
 ScrollDir trackergridstate_prevcol(TrackerGridState*, bool wrap);
+
+uintptr_t trackergridstate_numlines(const TrackerGridState*);
+psy_dsp_big_beat_t trackergridstate_length(const TrackerGridState*);
+bool trackergridstate_testplaybar(TrackerGridState*, psy_dsp_big_beat_t
+	offset);
+
+INLINE intptr_t trackergridstate_beattoline(const TrackerGridState* self,
+	psy_dsp_big_beat_t offset)
+{
+	assert(self);
+
+	return cast_decimal(offset * self->lpb);
+}
+
+INLINE void trackergridstate_setlpb(TrackerGridState* self, uintptr_t lpb)
+{
+	self->lpb = lpb;
+	self->bpl = 1.0 / lpb;
+}
+
+INLINE uintptr_t trackergridstate_lpb(const TrackerGridState* self)
+{
+	return self->lpb;
+}
+
+INLINE psy_dsp_big_beat_t trackergridstate_bpl(const TrackerGridState* self)
+{
+	return self->bpl;
+}
+
+INLINE psy_audio_Sequence* trackergridstate_sequence(TrackerGridState* self)
+{
+	assert(self);
+
+	return self->sequence;
+}
+
+INLINE psy_dsp_big_beat_t trackergridstate_quantize(const TrackerGridState*
+	self, psy_dsp_big_beat_t position)
+{
+	assert(self);
+
+	return trackergridstate_beattoline(self, position) *
+		self->bpl;
+}
+
+/* quantized */
+INLINE double trackergridstate_beattopx(TrackerGridState* self,
+	psy_dsp_big_beat_t position)
+{
+	assert(self);
+
+	return self->lineheightpx * trackergridstate_beattoline(self, position);
+}
+
+INLINE double trackergridstate_linetopx(TrackerGridState* self,
+	uintptr_t line)
+{
+	assert(self);
+
+	return self->lineheightpx * line;
+}
+
+INLINE double trackergridstate_lineheight(TrackerGridState* self)
+{
+	assert(self);
+
+	return self->lineheightpx;
+}
+
+// quantized
+INLINE psy_dsp_big_beat_t trackergridstate_pxtobeat(
+	const TrackerGridState* self, double px)
+{
+	assert(self);
+
+	return trackergridstate_quantize(self,
+		(px / (psy_dsp_big_beat_t)self->lineheightpx) * self->bpl);
+}
+
+INLINE psy_dsp_big_beat_t trackergridstate_pxtobeatnotquantized(
+	TrackerGridState* self, double px)
+{
+	assert(self);
+
+	return (px / self->lineheightpx) * self->bpl;
+}
+
+INLINE bool trackergridstate_testplayposition(TrackerGridState* self,
+	psy_dsp_big_beat_t position)
+{
+	assert(self);
+
+	if (self->pattern) {
+		return psy_dsp_testrange(position, self->sequenceentryoffset,
+			psy_audio_pattern_length(self->pattern));
+	}
+	return FALSE;
+}
+
+void trackergridstate_lineclip(TrackerGridState*, const psy_ui_RealRectangle* clip,
+	psy_audio_PatternSelection* rv);
+
+INLINE uintptr_t trackergridstate_midline(const TrackerGridState* self,
+	double scrolltop_px)
+{
+	return trackergridstate_beattoline(self, trackergridstate_pxtobeat(
+		self, scrolltop_px) + self->visilines / 2);
+}
 
 #endif /* TRACKERGRIDSTATE_H */

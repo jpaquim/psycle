@@ -84,7 +84,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "doc", "doc", "{6D6F16D8-A804-4DAA-86A6-EF90252D7E0E}"
 	ProjectSection(SolutionItems) = preProject
 		doc\cpsycle-developer-guide.docx = doc\cpsycle-developer-guide.docx
-		readme.txt = readme.txt
 		doc\uicomponent-vtable.txt = doc\uicomponent-vtable.txt
 	EndProjectSection
 EndProject

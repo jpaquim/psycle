@@ -415,8 +415,13 @@ void mainframe_inittabbars(MainFrame* self)
 		self, mainframe_onmaxminimizeview);
 	psy_ui_component_setalign(psy_ui_button_base(&self->maximizebtn),
 		psy_ui_ALIGN_RIGHT);
-	psy_ui_button_loadresource(&self->maximizebtn,
-		IDB_EXPAND_LIGHT, IDB_EXPAND_DARK, psy_ui_colour_white());	
+	if (psy_strlen(PSYCLE_RES_DIR) == 0) {
+		psy_ui_button_loadresource(&self->maximizebtn,
+			IDB_EXPAND_LIGHT, IDB_EXPAND_DARK, psy_ui_colour_white());		
+	} else {
+		psy_ui_bitmap_load(&self->maximizebtn.bitmapicon, 
+			PSYCLE_RES_DIR"/""expand-dark.bmp");
+	}
 	psy_ui_component_init(&self->tabspacer, &self->mainviews, NULL);
 	psy_ui_component_setalign(&self->tabspacer, psy_ui_ALIGN_TOP);
 	psy_ui_component_setpreferredsize(&self->tabspacer,
@@ -1331,7 +1336,7 @@ void mainframe_onfileload(MainFrame* self, FileView* sender)
 }
 
 void mainframe_onkeydown(MainFrame* self, psy_ui_KeyboardEvent* ev)
-{
+{	
 	/* TODO add immediate mode */
 	if (ev->keycode == psy_ui_KEY_ESCAPE) {
 		if (psy_ui_component_hasfocus(&self->sequenceview.listview.component)) {

@@ -18,7 +18,7 @@ Linux
 A very basic port has now been done to let cpsycle run on a linux platform.
 It is very unstable and some things like double clicks aren't working correctly,
 images arent supported and some native components available under win32
-arent yet emulated. If you like to compile and test it anyways,
+arent yet emulated. If you like to compile and test it still,
 install the base compiler system and other needed dev libaries of x11, xft and asound2.
 In cpsycle/host run make. This will execute the makefile of the submodules
 In cpsycle/plugins run make to build the psycle plugins.
