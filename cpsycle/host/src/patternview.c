@@ -743,7 +743,7 @@ void patternview_readfont(PatternView* self)
 			psy_ui_app_zoomrate(psy_ui_app());
 #if PSYCLE_USE_TK == PSYCLE_TK_X11
 		/* todo */
-		self->linestate.lineheight = psy_ui_value_make_eh(1.0);
+		self->gridstate.lineheight = psy_ui_value_make_eh(1.0);		
 		fontinfo.lfHeight = 18;
 		self->baselfheight = 18;
 #else			
