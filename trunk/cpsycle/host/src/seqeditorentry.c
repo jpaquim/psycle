@@ -266,25 +266,25 @@ void seqeditpatternentry_onmousedown(SeqEditPatternEntry* self,
 	psy_ui_MouseEvent* ev)
 {
 	if (self->sequenceentry) {
-		psy_audio_PatternCursor cursor;		
+		psy_audio_SequenceCursor cursor;		
 		psy_audio_OrderIndex seqeditpos;
 
 		seqeditpos = seqeditstate_editposition(self->seqeditorentry.state);
 		seqeditentry_startdrag(&self->seqeditorentry, ev);
-		cursor = self->seqeditorentry.state->workspace->patterneditposition;
-		cursor.offset = self->seqeditorentry.state->dragposition;
+		cursor = self->seqeditorentry.state->workspace->cursor;
+		cursor.cursor.offset = self->seqeditorentry.state->dragposition;
 		if (ev->button == 1 && self->seqeditorentry.state->dragstatus == SEQEDIT_DRAG_START) {
 			if ((workspace_currview(self->seqeditorentry.state->workspace).id ==
 				VIEW_ID_PATTERNVIEW) &&
 				psy_audio_orderindex_equal(&self->seqeditorentry.seqpos, seqeditpos)) {
-				workspace_setpatterncursor(self->seqeditorentry.state->workspace, cursor);
-				cursor = self->seqeditorentry.state->workspace->patterneditposition;
-				workspace_gotocursor(self->seqeditorentry.state->workspace, cursor);
+				workspace_setcursor(self->seqeditorentry.state->workspace, cursor);
+				cursor = self->seqeditorentry.state->workspace->cursor;
+				workspace_gotocursor(self->seqeditorentry.state->workspace, cursor.cursor);
 			} else {
-				cursor.offset = 0;
-				workspace_setpatterncursor(self->seqeditorentry.state->workspace, cursor);
-				cursor = self->seqeditorentry.state->workspace->patterneditposition;
-				workspace_gotocursor(self->seqeditorentry.state->workspace, cursor);
+				cursor.cursor.offset = 0;
+				workspace_setcursor(self->seqeditorentry.state->workspace, cursor);
+				cursor = self->seqeditorentry.state->workspace->cursor;
+				workspace_gotocursor(self->seqeditorentry.state->workspace, cursor.cursor);
 			}
 			if (workspace_currview(self->seqeditorentry.state->workspace).id !=
 				VIEW_ID_PATTERNVIEW) {

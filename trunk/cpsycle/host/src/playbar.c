@@ -188,11 +188,11 @@ void playbar_startplay(PlayBar* self)
 		startposition = psy_audio_sequenceentry_offset(entry);
 		if (psy_audio_sequencer_playmode(&self->player->sequencer)
 				== psy_audio_SEQUENCERPLAYMODE_PLAYNUMBEATS) {
-			psy_audio_PatternCursor editposition;
+			psy_audio_SequenceCursor editposition;
 
-			editposition = workspace_patterncursor(self->workspace);			
-			startposition += (psy_dsp_big_beat_t) editposition.offset;
-			numplaybeats = (psy_dsp_big_beat_t) atof(psy_ui_edit_text(
+			editposition = workspace_cursor(self->workspace);			
+			startposition += (psy_dsp_big_beat_t)editposition.cursor.offset;
+			numplaybeats = (psy_dsp_big_beat_t)atof(psy_ui_edit_text(
 				&self->loopbeatsedit));
 			self->player->sequencer.numplaybeats = numplaybeats;
 		}

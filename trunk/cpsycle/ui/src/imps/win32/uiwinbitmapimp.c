@@ -16,7 +16,7 @@
 
 /* prototypes */
 static void dev_dispose(psy_ui_win_BitmapImp*);
-static int dev_load(psy_ui_win_BitmapImp*, const char* path);
+static int dev_load(psy_ui_win_BitmapImp*, struct psy_ui_Bitmap* bitmap, const char* path);
 static int dev_loadresource(psy_ui_win_BitmapImp*, uintptr_t resourceid);
 static psy_ui_RealSize dev_size(const psy_ui_win_BitmapImp*);
 static bool dev_empty(const psy_ui_win_BitmapImp*);
@@ -80,22 +80,22 @@ void dev_dispose(psy_ui_win_BitmapImp* self)
 	}
 }
 
-int dev_load(psy_ui_win_BitmapImp* self, const char* path)
+int dev_load(psy_ui_win_BitmapImp* self, struct psy_ui_Bitmap* bitmap, const char* path)
 {
-	HBITMAP bitmap;
+	HBITMAP win32_bitmap;
 
 	assert(self);
 
-	bitmap = (HBITMAP)LoadImage(NULL,
+	win32_bitmap = (HBITMAP)LoadImage(NULL,
 		(LPCTSTR)path,
 		IMAGE_BITMAP,
 		0, 0,
 		LR_DEFAULTSIZE | LR_LOADFROMFILE);
-	if (bitmap != NULL) {
+	if (win32_bitmap != NULL) {
 		dev_dispose(self);
-		self->bitmap = bitmap;
+		self->bitmap = win32_bitmap;
 	}
-	return bitmap == 0;
+	return win32_bitmap == 0;
 }
 
 int dev_loadresource(psy_ui_win_BitmapImp* self, uintptr_t resourceid)

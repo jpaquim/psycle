@@ -1,54 +1,60 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #if !defined(WORKSPACE_H)
 #define WORKSPACE_H
 
-// host
+/* host */
 #include "config.h"
 #include "inputhandler.h"
 #include "undoredo.h"
 #include "viewhistory.h"
-// audio
+/* audio */
 #include <machinefactory.h>
 #include <player.h>
 #include <plugincatcher.h>
 #include <song.h>
 #include <sequence.h>
 #include <signal.h>
-// dsp
+/* dsp */
 #include <notestab.h>
-// ui
+/* ui */
 #include <uicomponent.h>
 #include <uiapp.h>
 /* thread */
 #include <lock.h>
 #include <thread.h>
-// file
+/* file */
 #include <playlist.h>
 #include <propertiesio.h>
 
-// Workspace
-//
-// connects the player with the psycle host ui and configures both
-//
-// psy_audio_MachineCallback
-//         ^
-//         |
-//       Workspace
-//             <>---- PsycleConfig;	              host
-//             <>---- ViewHistory
-//             <>---- psy_audio_Player;           audio imports
-//             <>---- psy_audio_MachineFactory
-//             <>---- psy_audio_PluginCatcher
-//             <>---- psy_audio_Song
+/*
+** Workspace
+**
+**  connects the player with the psycle host ui and configures both
+**
+**  psy_audio_MachineCallback
+**         ^
+**         |
+**       Workspace
+**             <>---- PsycleConfig;	              host
+**             <>---- ViewHistory
+**             <>---- psy_audio_Player;           audio imports
+**             <>---- psy_audio_MachineFactory
+**             <>---- psy_audio_PluginCatcher
+**             <>---- psy_audio_Song
+*/
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// The view id belongs to a component of the client notebook of the mainframe
-// view_id = component insert order
+/*
+** The view id belongs to a component of the client notebook of the mainframe
+** view_id = component insert order
+*/
 
 #define	VIEW_ID_MACHINEVIEW		0
 #define	VIEW_ID_PATTERNVIEW		1
@@ -81,11 +87,11 @@ typedef enum {
 	NEWMACHINE_ADDEFFECTSTACK = 64,
 } NewMachineBarOptions;
 
-// The patternview display modes
+/* The patternview display modes */
 typedef enum {
-	PATTERN_DISPLAYMODE_TRACKER,					// only tracker visible
-	PATTERN_DISPLAYMODE_PIANOROLL,					// only pianoroll visible
-	PATTERN_DISPLAYMODE_TRACKER_PIANOROLL_VERTICAL,	// both of them visible
+	PATTERN_DISPLAYMODE_TRACKER,					/* only tracker visible */
+	PATTERN_DISPLAYMODE_PIANOROLL,					/* only pianoroll visible */
+	PATTERN_DISPLAYMODE_TRACKER_PIANOROLL_VERTICAL,	/* both of them visible */
 	PATTERN_DISPLAYMODE_TRACKER_PIANOROLL_HORIZONTAL,
 	PATTERN_DISPLAYMODE_NUM
 } PatternDisplayMode;
@@ -110,16 +116,16 @@ typedef void (*fp_workspace_songloadprogress)(void* context,
 	struct Workspace* sender, intptr_t progress);
 
 typedef struct Workspace {
-	// implements
+	/* implements */
 	psy_audio_MachineCallback machinecallback;
-	// Signals
+	/* signals */
 	psy_Signal signal_octavechanged;
 	psy_Signal signal_songchanged;
 	psy_Signal signal_configchanged;	
 	psy_Signal signal_changecontrolskin;
-	psy_Signal signal_patterncursorchanged;
-	psy_Signal signal_gotocursor;
-	// psy_Signal signal_sequenceselectionchanged;
+	psy_Signal signal_cursorchanged;
+	psy_Signal signal_playlinechanged;
+	psy_Signal signal_gotocursor;	
 	psy_Signal signal_loadprogress;
 	psy_Signal signal_scanprogress;
 	psy_Signal signal_scanstart;
@@ -152,7 +158,7 @@ typedef struct Workspace {
 	psy_ui_Component* main;	
 	ViewHistory viewhistory;
 	ViewHistoryEntry restoreview;
-	psy_audio_PatternCursor patterneditposition;	
+	psy_audio_SequenceCursor cursor;
 	psy_audio_SequenceSelection sequenceselection;	
 	int cursorstep;	
 	char* filename;
@@ -163,17 +169,16 @@ typedef struct Workspace {
 	psy_audio_SequencePaste sequencepaste;
 	int navigating;
 	bool patternsinglemode;
-	// ui
+	/* ui */
 	int fontheight;	
 	bool hasnewline;
 	bool gearvisible;
 	bool modified_without_undo;
-	// UndoRedo
+	/* UndoRedo */
 	psy_UndoRedo undoredo;
 	uintptr_t undosavepoint;
 	uintptr_t machines_undosavepoint;
-	psy_Lock pluginscanlock;
-	psy_Lock outputlock;
+	psy_Lock pluginscanlock;	
 	int filescanned;
 	char* scanfilename;
 	int scanstart;
@@ -188,11 +193,10 @@ typedef struct Workspace {
 	psy_audio_SequencerPlayMode restoreplaymode;
 	psy_dsp_big_beat_t restorenumplaybeats;
 	bool restoreloop;
-	bool startpage;
-	psy_List* errorstrs;
-	psy_List* statusoutputstrs;
+	bool startpage;	
 	bool driverconfigloading;
 	bool seqviewactive;	
+	uintptr_t lastplayline;
 	InputHandler inputhandler;
 	psy_Thread driverconfigloadthread;
 	psy_Thread pluginscanthread;
@@ -253,8 +257,8 @@ void workspace_configurationchanged(Workspace*, psy_Property*,
 void workspace_onconfigurationchanged(Workspace*, psy_Property*);
 void workspace_undo(Workspace*);
 void workspace_redo(Workspace*);
-void workspace_setpatterncursor(Workspace*, psy_audio_PatternCursor);
-psy_audio_PatternCursor workspace_patterncursor(Workspace*);
+void workspace_setcursor(Workspace*, psy_audio_SequenceCursor);
+psy_audio_SequenceCursor workspace_cursor(const Workspace*);
 void workspace_setseqeditposition(Workspace*, psy_audio_OrderIndex);
 psy_audio_OrderIndex workspace_sequenceeditposition(const Workspace*);
 void workspace_setcursorstep(Workspace*, int step);
@@ -303,6 +307,8 @@ void workspace_outputstatus(Workspace*, const char* text);
 void workspace_songposdec(Workspace*);
 void workspace_songposinc(Workspace*);
 void workspace_gotocursor(Workspace*, psy_audio_PatternCursor);
+psy_dsp_big_beat_t workspace_cursorseqoffset(const Workspace*,
+	psy_audio_OrderIndex);
 PatternDisplayMode workspace_patterndisplaytype(Workspace*);
 void workspace_selectpatterndisplay(Workspace*, PatternDisplayMode);
 void workspace_multiselectgear(Workspace*, psy_List* slotlist);

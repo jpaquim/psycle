@@ -48,6 +48,8 @@ typedef struct MainStatusBar {
 	uintptr_t terminalstyleid;
 	intptr_t pluginscanprogress;
 	uintptr_t clockcounter;
+	psy_List* strbuffer;
+	psy_Lock outputlock;
 	/* references */
 	Workspace* workspace;
 } MainStatusBar;

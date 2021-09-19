@@ -33,9 +33,9 @@ void patterncmds_init(PatternCmds*, Workspace*);
 void patterncmds_update(PatternCmds*);
 void patterncmds_setpattern(PatternCmds*, psy_audio_Pattern*);
 void patterncmds_blocktranspose(PatternCmds*, psy_audio_PatternSelection,
-	psy_audio_PatternCursor, int offset);
+	psy_audio_SequenceCursor, int offset);
 void patterncmds_blockdelete(PatternCmds*, psy_audio_PatternSelection);
-void patterncmds_blockpaste(PatternCmds*, psy_audio_PatternCursor, bool mix);
+void patterncmds_blockpaste(PatternCmds*, psy_audio_SequenceCursor, bool mix);
 void patterncmds_blockcopy(PatternCmds*, psy_audio_PatternSelection);
 void patterncmds_changeinstrument(PatternCmds*, psy_audio_PatternSelection);
 void patterncmds_changemachine(PatternCmds*, psy_audio_PatternSelection);

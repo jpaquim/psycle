@@ -43,7 +43,7 @@ static void insertcommandcommand_vtable_init(InsertCommand* self)
 }
 // implementation
 InsertCommand* insertcommand_alloc(psy_audio_Pattern* pattern, double bpl,
-	psy_audio_PatternCursor cursor, psy_audio_PatternEvent event,
+	psy_audio_SequenceCursor cursor, psy_audio_PatternEvent event,
 	Workspace* workspace)
 {
 	InsertCommand* rv;
@@ -71,8 +71,8 @@ void insertcommand_execute(InsertCommand* self)
 	psy_audio_PatternNode* prev;
 
 	node = psy_audio_pattern_findnode(self->pattern,
-		self->cursor.track,
-		(psy_dsp_big_beat_t)self->cursor.offset,
+		self->cursor.cursor.track,
+		(psy_dsp_big_beat_t)self->cursor.cursor.offset,
 		(psy_dsp_big_beat_t)self->bpl, &prev);
 	if (node) {
 		self->oldevent = psy_audio_pattern_event(self->pattern, node);
@@ -81,13 +81,13 @@ void insertcommand_execute(InsertCommand* self)
 	} else {
 		node = psy_audio_pattern_insert(self->pattern,
 			prev,
-			self->cursor.track,
-			(psy_dsp_big_beat_t)self->cursor.offset,
+			self->cursor.cursor.track,
+			(psy_dsp_big_beat_t)self->cursor.cursor.offset,
 			&self->event);
 		self->insert = 1;
 	}
 	if (self->workspace) {
-		workspace_setpatterncursor(self->workspace, self->cursor);
+		workspace_setcursor(self->workspace, self->cursor);
 	}
 }
 
@@ -97,8 +97,8 @@ void insertcommand_revert(InsertCommand* self)
 	psy_audio_PatternNode* prev;
 
 	node = psy_audio_pattern_findnode(self->pattern,
-		self->cursor.track,
-		self->cursor.offset,
+		self->cursor.cursor.track,
+		self->cursor.cursor.offset,
 		self->bpl, &prev);
 	if (node) {
 		if (self->insert) {
@@ -113,7 +113,7 @@ void insertcommand_revert(InsertCommand* self)
 		}
 	}
 	if (self->workspace) {
-		workspace_setpatterncursor(self->workspace, self->cursor);
+		workspace_setcursor(self->workspace, self->cursor);
 	}
 }
 
@@ -138,7 +138,7 @@ static void removecommandcommand_vtable_init(RemoveCommand* self)
 }
 // implementation
 RemoveCommand* removecommand_alloc(psy_audio_Pattern* pattern, double bpl,
-	psy_audio_PatternCursor cursor, Workspace* workspace)
+	psy_audio_SequenceCursor cursor, Workspace* workspace)
 {
 	RemoveCommand* rv;
 
@@ -164,8 +164,8 @@ void removecommand_execute(RemoveCommand* self)
 	psy_audio_PatternNode* prev;
 
 	node = psy_audio_pattern_findnode(self->pattern,
-		self->cursor.track,
-		(psy_dsp_big_beat_t)self->cursor.offset,
+		self->cursor.cursor.track,
+		(psy_dsp_big_beat_t)self->cursor.cursor.offset,
 		(psy_dsp_big_beat_t)self->bpl, &prev);
 	if (node) {
 		self->oldevent = psy_audio_pattern_event(self->pattern, node);
@@ -180,7 +180,7 @@ void removecommand_execute(RemoveCommand* self)
 		self->remove = 0;
 	}
 	if (self->workspace) {
-		workspace_setpatterncursor(self->workspace, self->cursor);
+		workspace_setcursor(self->workspace, self->cursor);
 	}
 }
 
@@ -191,16 +191,16 @@ void removecommand_revert(RemoveCommand* self)
 		psy_audio_PatternNode* prev;
 
 		node = psy_audio_pattern_findnode(self->pattern,
-			self->cursor.track,
-			self->cursor.offset,
+			self->cursor.cursor.track,
+			self->cursor.cursor.offset,
 			self->bpl, &prev);		
 		node = psy_audio_pattern_insert(self->pattern,
 			prev,
-			self->cursor.track,
-			(psy_dsp_big_beat_t)self->cursor.offset,
+			self->cursor.cursor.track,
+			(psy_dsp_big_beat_t)self->cursor.cursor.offset,
 			&self->oldevent);
 		if (self->workspace) {
-			workspace_setpatterncursor(self->workspace, self->cursor);
+			workspace_setcursor(self->workspace, self->cursor);
 		}
 		self->remove = 0;
 	}
@@ -225,7 +225,7 @@ static void blocktransposecommandcommand_vtable_init(BlockTransposeCommand* self
 }
 
 BlockTransposeCommand* blocktransposecommand_alloc(psy_audio_Pattern* pattern,
-	psy_audio_PatternSelection block, psy_audio_PatternCursor cursor, int transposeoffset,
+	psy_audio_PatternSelection block, psy_audio_SequenceCursor cursor, int transposeoffset,
 	Workspace* workspace)
 {
 	BlockTransposeCommand* rv;
@@ -252,7 +252,7 @@ void BlockTransposeCommandDispose(BlockTransposeCommand* self)
 
 void BlockTransposeCommandExecute(BlockTransposeCommand* self)
 {
-	workspace_setpatterncursor(self->workspace, self->cursor);
+	workspace_setcursor(self->workspace, self->cursor);
 	psy_audio_pattern_copy(&self->oldpattern, self->pattern);
 	psy_audio_pattern_blocktranspose(self->pattern,
 		self->block.topleft,
@@ -263,7 +263,7 @@ void BlockTransposeCommandRevert(BlockTransposeCommand* self)
 {
 	assert(self->pattern);
 	if (self->pattern) {
-		workspace_setpatterncursor(self->workspace, self->cursor);
+		workspace_setcursor(self->workspace, self->cursor);
 		psy_audio_pattern_copy(self->pattern, &self->oldpattern);
 	}
 }
@@ -373,7 +373,7 @@ static void blockpastecommandcommand_vtable_init(BlockPasteCommand* self)
 }
 // implementation
 BlockPasteCommand* blockpastecommand_alloc(psy_audio_Pattern* pattern,
-	psy_audio_Pattern* source, psy_audio_PatternCursor destcursor,
+	psy_audio_Pattern* source, psy_audio_SequenceCursor destcursor,
 	psy_dsp_big_beat_t bpl, bool mix, Workspace* workspace)
 {
 	BlockPasteCommand* rv;
@@ -406,11 +406,11 @@ void BlockPasteCommandExecute(BlockPasteCommand* self)
 	}
 	if (self->mix) {
 		psy_audio_pattern_blockmixpaste(self->pattern,
-			&self->source, self->destcursor,
+			&self->source, self->destcursor.cursor,
 			self->bpl);
 	} else {
 		psy_audio_pattern_blockpaste(self->pattern,
-			&self->source, self->destcursor,
+			&self->source, self->destcursor.cursor,
 			self->bpl);
 	}
 	self->paste = TRUE;

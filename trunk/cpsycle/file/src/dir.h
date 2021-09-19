@@ -31,6 +31,7 @@ void psy_path_setprefix(psy_Path*, const char* prefix);
 void psy_path_setname(psy_Path*, const char* name);
 void psy_path_setext(psy_Path*, const char* name);
 void psy_path_append_dir(psy_Path*, const char* dir);
+bool psy_path_remove_dir(psy_Path*);
 
 INLINE const char* psy_path_full(const psy_Path* self)
 {
@@ -80,6 +81,9 @@ bool psy_direxists(const char* path);
 bool psy_filereadable(const char* fname);
 psy_List* psy_drives(void);
 psy_List* psy_directories(const char* path);
+
+uintptr_t psy_file_size(const psy_Path*);
+bool psy_file_is_directory(const psy_Path* p);
 
 #ifdef __cplusplus
 }

@@ -35,18 +35,18 @@ typedef struct TrackerColumn {
 	psy_ui_RealSize resizestartsize;	
 	/* internal */
 	/* references */
-	TrackerGridState* gridstate;	
+	TrackerState* gridstate;	
 	TrackDef* trackdef;
 	Workspace* workspace;
 } TrackerColumn;
 
 void trackercolumn_init(TrackerColumn*, psy_ui_Component* parent,
-	psy_ui_Component* view, uintptr_t index, TrackerGridState*,
+	psy_ui_Component* view, uintptr_t index, TrackerState*,
 	Workspace*);
 
 TrackerColumn* trackercolumn_alloc(void);
 TrackerColumn* trackercolumn_allocinit(psy_ui_Component* parent,
-	psy_ui_Component* view, uintptr_t index, TrackerGridState* gridstate,
+	psy_ui_Component* view, uintptr_t index, TrackerState* gridstate,
 	Workspace* workspace);
 
 INLINE psy_ui_Component* trackercolumn_base(TrackerColumn* self)

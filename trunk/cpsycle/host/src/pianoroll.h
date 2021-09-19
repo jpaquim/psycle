@@ -116,14 +116,14 @@ typedef struct Pianogrid {
 	psy_audio_PatternEntry* hoverpatternentry;   
 	psy_dsp_big_beat_t sequenceentryoffset;
 	psy_dsp_big_beat_t lastplayposition;
-	psy_audio_PatternCursor oldcursor;
-	psy_audio_PatternCursor dragcursor;
+	psy_audio_SequenceCursor oldcursor;
+	psy_audio_SequenceCursor dragcursor;
 	bool cursoronnoterelease;
 	PianoTrackDisplay trackdisplay;
 	bool cursorchanging;
 	psy_audio_PatternSelection selection;
-	psy_audio_PatternCursor dragselectionbase;
-	psy_audio_PatternCursor lastdragcursor;
+	psy_audio_SequenceCursor dragselectionbase;
+	psy_audio_SequenceCursor lastdragcursor;
 	intptr_t pgupdownstep;	
 	/* references */
 	KeyboardState* keyboardstate;
@@ -137,7 +137,7 @@ void pianogrid_setsharedgridstate(Pianogrid*, PianoGridState*);
 void pianogrid_setsharedkeyboardstate(Pianogrid*, KeyboardState*);
 void pianogrid_invalidateline(Pianogrid*, psy_dsp_big_beat_t offset);
 void pianogrid_invalidatecursor(Pianogrid*);
-void pianogrid_setcursor(Pianogrid*, psy_audio_PatternCursor);
+void pianogrid_setcursor(Pianogrid*, psy_audio_SequenceCursor);
 void pianogrid_storecursor(Pianogrid*);
 void pianogrid_onpatternchange(Pianogrid*, psy_audio_Pattern*);
 void pianogrid_settrackdisplay(Pianogrid*, PianoTrackDisplay);

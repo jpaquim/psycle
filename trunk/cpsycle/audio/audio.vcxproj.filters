@@ -334,6 +334,9 @@
     <ClCompile Include="src\luaplayer.c">
       <Filter>machine\plugins\lua</Filter>
     </ClCompile>
+    <ClCompile Include="src\patterncursor.c">
+      <Filter>pattern</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\library.h">
@@ -638,6 +641,9 @@
     </ClInclude>
     <ClInclude Include="src\luaplayer.h">
       <Filter>machine\plugins\lua</Filter>
+    </ClInclude>
+    <ClInclude Include="src\patterncursor.h">
+      <Filter>pattern</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

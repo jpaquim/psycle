@@ -15,15 +15,15 @@ typedef struct PatternTrackBox {
 	uintptr_t index;
 	bool playon;
 	// references
-	TrackerGridState* state;
+	TrackerState* state;
 } PatternTrackBox;
 
 void patterntrackbox_init(PatternTrackBox*, psy_ui_Component* parent,
-	psy_ui_Component* view, uintptr_t index, TrackerGridState*);
+	psy_ui_Component* view, uintptr_t index, TrackerState*);
 
 PatternTrackBox* patterntrackbox_alloc(void);
 PatternTrackBox* patterntrackbox_allocinit(psy_ui_Component* parent,
-	psy_ui_Component* view, uintptr_t index, TrackerGridState*);
+	psy_ui_Component* view, uintptr_t index, TrackerState*);
 
 void patterntrackbox_playon(PatternTrackBox*);
 void patterntrackbox_playoff(PatternTrackBox*);
@@ -42,12 +42,12 @@ typedef struct TrackerHeader {
 	uintptr_t currtrack;		
 	psy_Table boxes;
 	// references
-	TrackerGridState* state;
+	TrackerState* state;
 	Workspace* workspace;
 } TrackerHeader;
 
 void trackerheader_init(TrackerHeader*, psy_ui_Component* parent, TrackConfig*,
-	TrackerGridState*, Workspace*);
+	TrackerState*, Workspace*);
 void trackerheader_build(TrackerHeader*);
 
 INLINE psy_ui_Component* trackerheader_base(TrackerHeader* self)

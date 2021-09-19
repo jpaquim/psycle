@@ -10,8 +10,12 @@
 /* host */
 #include "resources/resource.h"
 #include "styles.h"
+/* platform */
+#include "../../detail/portable.h"
 
 /* prototypes */
+static void mainstatusbar_ondestroy(MainStatusBar*);
+static void psy_ui_terminal_ondestroy(MainStatusBar*);
 static void mainstatusbar_initzoombox(MainStatusBar*);
 static void mainstatusbar_initviewstatusbars(MainStatusBar*);
 static void mainstatusbar_initstatuslabel(MainStatusBar*);
@@ -27,13 +31,33 @@ static void mainstatusbar_onpluginscanprogress(MainStatusBar*, Workspace*,
 	int progress);
 static void mainstatusbar_onstatus(MainStatusBar*, Workspace* sender,
 	const char* text);
+
+/* vtable */
+static psy_ui_ComponentVtable vtable;
+static bool vtable_initialized = FALSE;
+
+static void vtable_init(MainStatusBar* self)
+{
+	if (!vtable_initialized) {
+		vtable = *(self->component.vtable);
+		vtable.ondestroy =
+			(psy_ui_fp_component_ondestroy)
+			mainstatusbar_ondestroy;		
+		vtable_initialized = TRUE;
+	}
+	self->component.vtable = &vtable;
+}
+
 /* implementation */
 void mainstatusbar_init(MainStatusBar* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {	
 	psy_ui_component_init(&self->component, parent, NULL);
+	vtable_init(self);
 	self->workspace = workspace;
 	self->clockcounter = 20;
+	psy_lock_init(&self->outputlock);
+	self->strbuffer = NULL;
 	psy_ui_component_setstyletype(&self->component, STYLE_STATUSBAR);
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_margin_make_em(0.0, 1.0, 0.0, 0.0));
@@ -44,7 +68,13 @@ void mainstatusbar_init(MainStatusBar* self, psy_ui_Component* parent,
 	mainstatusbar_initclockbar(self);
 	mainstatusbar_initkbdhelpbutton(self);
 	mainstatusbar_initterminalbutton(self);
-	mainstatusbar_initprogressbar(self);
+	mainstatusbar_initprogressbar(self);	
+}
+
+void mainstatusbar_ondestroy(MainStatusBar* self)
+{
+	psy_list_deallocate(&self->strbuffer, NULL);
+	psy_lock_dispose(&self->outputlock);
 }
 
 void mainstatusbar_initzoombox(MainStatusBar* self)
@@ -133,8 +163,13 @@ void mainstatusbar_initprogressbar(MainStatusBar* self)
 void mainstatusbar_onstatus(MainStatusBar* self, Workspace* sender,
 	const char* text)
 {
-	psy_ui_label_settext(&self->statusbarlabel, text);
-	psy_ui_label_fadeout(&self->statusbarlabel);
+	assert(self);
+
+	if (text) {
+		psy_lock_enter(&self->outputlock);
+		psy_list_append(&self->strbuffer, psy_strdup(text));
+		psy_lock_leave(&self->outputlock);
+	}	
 }
 
 void mainstatusbar_updateterminalbutton(MainStatusBar* self)
@@ -146,7 +181,7 @@ void mainstatusbar_updateterminalbutton(MainStatusBar* self)
 
 void mainstatusbar_setdefaultstatustext(MainStatusBar* self, const char* text)
 {
-	psy_ui_label_settext(&self->statusbarlabel,text);
+	psy_ui_label_settext(&self->statusbarlabel, text);
 	psy_ui_label_setdefaulttext(&self->statusbarlabel, text);
 }
 
@@ -185,4 +220,15 @@ void mainstatusbar_idle(MainStatusBar* self)
 		self->clockcounter = 20;
 	}
 	--self->clockcounter;
+	if (self->strbuffer) {
+		psy_List* p;
+
+		psy_lock_enter(&self->outputlock);
+		for (p = self->strbuffer; p != NULL; p = p->next) {
+			psy_ui_label_settext(&self->statusbarlabel, (const char*)p->entry);
+			psy_ui_label_fadeout(&self->statusbarlabel);			
+		}
+		psy_list_deallocate(&self->strbuffer, NULL);
+		psy_lock_leave(&self->outputlock);
+	}	
 }

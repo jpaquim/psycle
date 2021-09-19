@@ -110,7 +110,7 @@ void psy_audio_player_init(psy_audio_Player* self, psy_audio_Song* song,
 	self->threads_ = NULL;
 	self->waiting = 0;
 	self->stop_requested_ = FALSE;
-	self->nodes_queue_ = NULL;
+	self->nodes_queue_ = NULL;	
 	psy_lock_init(&self->mutex);
 	psy_lock_init(&self->block);
 	psy_dsp_dither_init(&self->dither);	
@@ -283,12 +283,15 @@ void psy_audio_player_notifylinetick(psy_audio_Player* self)
 	if (self->song) {
 		psy_TableIterator it;
 		
+		if (psy_audio_player_playing(self)) {			
+			++self->sequencer.seqtime.linecounter;			
+		}
 		for (it = psy_audio_machines_begin(&self->song->machines); 
 				!psy_tableiterator_equal(&it, psy_table_end());		
 				psy_tableiterator_inc(&it)) {			
 			psy_audio_machine_newline((psy_audio_Machine*)
 				psy_tableiterator_value(&it));
-		}
+		}		
 	}
 }
 
@@ -642,7 +645,7 @@ void psy_audio_player_setsong(psy_audio_Player* self, psy_audio_Song* song)
 		self->sequencer.metronome.precount = restoreprecount;
 		self->sequencer.metronome.active = restoremetronomeactive;
 		psy_audio_player_setsamplerindex(self,
-			psy_audio_song_samplerindex(self->song));
+			psy_audio_song_samplerindex(self->song));		
 	}
 }
 
@@ -967,7 +970,7 @@ void psy_audio_player_setemptysong(psy_audio_Player* self)
 {
 	assert(self);
 
-	psy_audio_exclusivelock_enter();
+	psy_audio_exclusivelock_enter();	
 	psy_audio_player_setsong(self, &self->emptysong);
 	dsp.clear(bufferdriver, MAX_SAMPLES_WORKFN);
 	psy_audio_exclusivelock_leave();

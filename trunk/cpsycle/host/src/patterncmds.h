@@ -16,7 +16,7 @@ extern "C" {
 typedef struct {
 	// inherits
 	psy_Command command;
-	psy_audio_PatternCursor cursor;
+	psy_audio_SequenceCursor cursor;
 	psy_audio_Pattern* pattern;
 	double bpl;
 	psy_audio_PatternEvent event;
@@ -26,13 +26,13 @@ typedef struct {
 } InsertCommand;
 
 InsertCommand* insertcommand_alloc(psy_audio_Pattern* pattern, double bpl,
-	psy_audio_PatternCursor cursor, psy_audio_PatternEvent event,
+	psy_audio_SequenceCursor cursor, psy_audio_PatternEvent event,
 	Workspace* workspace);
 
 typedef struct {
 	// inherits
 	psy_Command command;
-	psy_audio_PatternCursor cursor;
+	psy_audio_SequenceCursor cursor;
 	psy_audio_Pattern* pattern;
 	double bpl;
 	psy_audio_PatternEvent event;
@@ -42,7 +42,7 @@ typedef struct {
 } RemoveCommand;
 
 RemoveCommand* removecommand_alloc(psy_audio_Pattern*, double bpl,
-	psy_audio_PatternCursor, Workspace*);
+	psy_audio_SequenceCursor, Workspace*);
 
 // BlockTranspose
 typedef struct {
@@ -50,14 +50,14 @@ typedef struct {
 	psy_Command command;
 	psy_audio_Pattern* pattern;
 	psy_audio_Pattern oldpattern;
-	psy_audio_PatternCursor cursor;
+	psy_audio_SequenceCursor cursor;
 	psy_audio_PatternSelection block;
 	int transposeoffset;
 	Workspace* workspace;
 } BlockTransposeCommand;
 
 BlockTransposeCommand* blocktransposecommand_alloc(psy_audio_Pattern* pattern,
-	psy_audio_PatternSelection block, psy_audio_PatternCursor cursor, int transposeoffset,
+	psy_audio_PatternSelection block, psy_audio_SequenceCursor cursor, int transposeoffset,
 	Workspace* workspace);
 
 typedef struct {
@@ -76,7 +76,7 @@ BlockRemoveCommand* blockremovecommand_alloc(psy_audio_Pattern*,
 typedef struct BlockPasteCommand {
 	// inherits
 	psy_Command command;
-	psy_audio_PatternCursor destcursor;
+	psy_audio_SequenceCursor destcursor;
 	psy_audio_Pattern* pattern;
 	psy_audio_Pattern source;
 	psy_audio_Pattern oldpattern;
@@ -87,7 +87,7 @@ typedef struct BlockPasteCommand {
 } BlockPasteCommand;
 
 BlockPasteCommand* blockpastecommand_alloc(psy_audio_Pattern*,
-	psy_audio_Pattern* source, psy_audio_PatternCursor,
+	psy_audio_Pattern* source, psy_audio_SequenceCursor,
 	psy_dsp_big_beat_t bpl, bool mix, Workspace*);
 
 

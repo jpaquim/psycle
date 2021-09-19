@@ -9,6 +9,8 @@
 #include "styles.h"
 /* host */
 #include "resources/resource.h"
+/* file */
+#include <dir.h>
 /* ui */
 #include <uiappstyles.h>
 #include <uimaterial.h>
@@ -328,7 +330,7 @@ void inithoststyles(psy_ui_Styles* self, psy_ui_ThemeMode theme)
 		psy_ui_style_setbackgroundid(style, IDB_ABOUT);
 	} else {
 		psy_ui_style_setbackgroundpath(style,
-			PSYCLE_RES_DIR"/""splash_screen.bmp");		
+			PSYCLE_RES_DIR psy_SLASHSTR "splash_screen.bmp");
 	}
 	style->backgroundrepeat = psy_ui_NOREPEAT;
 	style->backgroundposition = psy_ui_ALIGNMENT_CENTER;

@@ -108,10 +108,14 @@ void make_translator_default(psy_Property* lang)
 
 void make_translator_make_filebar(psy_Property* parent)
 {	
-	setsection(psy_property_append_section(parent, "file"));
+	setsection(psy_property_append_section(parent, "file"));	
+	add("showall", "Show all");
+	add("file", "File:");
 	add("song", "Song");
+	add("diskop", "Disk op.");
 	add("load", "Load");
 	add("save", "Save");
+	add("refresh", "Refresh");
 	add("export", "Export");
 	add("new", "New");
 	add("render", "Render");
@@ -119,6 +123,7 @@ void make_translator_make_filebar(psy_Property* parent)
 	add("savesong", "Save Song");
 	add("plugin-filesave", "Plugin File Load");
 	add("plugin-fileload", "Plugin File Save");
+	add("exit", "Exit");
 }
 
 void make_translator_make_undobar(psy_Property* parent)
@@ -877,6 +882,8 @@ void make_translator_make_messages(psy_Property* parent)
 	add("loadsong", "New Load Request, but your Song is not saved!");
 	add("saveload", "Save and Load Song");
 	add("nosaveload", "Load Song (no save)");
+	add("audiostarting", "Audio starting");
+	add("audiostarted", "Audio started");
 }
 
 #ifdef PSYCLE_MAKE_DEFAULT_LANG

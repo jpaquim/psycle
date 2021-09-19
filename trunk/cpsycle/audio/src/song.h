@@ -233,14 +233,14 @@ INLINE psy_audio_Machines* psy_audio_song_machines(psy_audio_Song* self)
 	return &self->machines;
 }
 /* return: Patterns of song */
-INLINE psy_audio_Patterns* psy_audio_song_sequence(psy_audio_Song* self)
+INLINE psy_audio_Patterns* psy_audio_song_patterns(psy_audio_Song* self)
 {
 	assert(self);
 
 	return &self->patterns;
 }
 /* return: Sequence of song */
-INLINE psy_audio_Sequence* psy_audio_song_(psy_audio_Song* self)
+INLINE psy_audio_Sequence* psy_audio_song_sequence(psy_audio_Song* self)
 {
 	assert(self);
 

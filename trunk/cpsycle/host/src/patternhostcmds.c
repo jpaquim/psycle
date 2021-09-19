@@ -43,7 +43,7 @@ void patterncmds_update(PatternCmds* self)
 
 void patterncmds_blocktranspose(PatternCmds* self,
 	psy_audio_PatternSelection selection,
-	psy_audio_PatternCursor cursor, int offset)
+	psy_audio_SequenceCursor cursor, int offset)
 {	
 	if (self->pattern && psy_audio_patternselection_valid(&selection)) {
 		psy_undoredo_execute(&self->workspace->undoredo,
@@ -76,7 +76,7 @@ void patterncmds_blockcopy(PatternCmds* self, psy_audio_PatternSelection selecti
 }
 
 
-void patterncmds_blockpaste(PatternCmds* self, psy_audio_PatternCursor cursor,
+void patterncmds_blockpaste(PatternCmds* self, psy_audio_SequenceCursor cursor,
 	bool mix)
 {
 	assert(self);
@@ -86,7 +86,7 @@ void patterncmds_blockpaste(PatternCmds* self, psy_audio_PatternCursor cursor,
 		psy_undoredo_execute(&self->workspace->undoredo,
 			&blockpastecommand_alloc(self->pattern,
 				&self->workspace->patternpaste, cursor,
-				1.0 / (double)cursor.lpb, mix, self->workspace)->command);		
+				1.0 / (double)cursor.cursor.lpb, mix, self->workspace)->command);		
 	}
 }
 

@@ -634,11 +634,11 @@ int psy_audio_psy3saver_write_epat(psy_audio_PSY3Saver* self, int32_t index,
 
 	/* timesig */	
 	if (status = psyfile_write_uint32(self->fp,
-			(uint32_t)pattern->timesig_nominator)) {
+			(uint32_t)pattern->timesig.numerator)) {
 		return status;
 	}
 	if (status = psyfile_write_uint32(self->fp,
-		(uint32_t)pattern->timesig_denominator)) {
+		(uint32_t)pattern->timesig.denominator)) {
 		return status;
 	}
 	/* length */

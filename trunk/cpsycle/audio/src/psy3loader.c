@@ -740,11 +740,11 @@ int psy_audio_psy3loader_read_epat(psy_audio_PSY3Loader* self, int32_t index,
 	if (status = psyfile_read(self->fp, &utemp, sizeof utemp)) {
 		return status;
 	}
-	pattern->timesig_nominator = utemp;
+	pattern->timesig.numerator = utemp;
 	if (status = psyfile_read(self->fp, &utemp, sizeof utemp)) {
 		return status;
 	}
-	pattern->timesig_denominator = utemp;					
+	pattern->timesig.denominator = utemp;					
 	/* pattern length */
 	if (status = psyfile_read(self->fp, &ftemp, sizeof ftemp)) {
 		return status;

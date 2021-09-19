@@ -9,7 +9,7 @@
 /* host */
 #include "patternviewskin.h"
 /* audio */
-#include <pattern.h>
+#include <sequence.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -17,7 +17,7 @@ extern "C" {
 
 /* PianoGridState */
 typedef struct PianoGridState {
-	psy_audio_PatternCursor cursor;
+	psy_audio_SequenceCursor cursor;
 	uintptr_t lpb;	
 	double pxperbeat;
 	double defaultbeatwidth;
@@ -42,15 +42,15 @@ INLINE psy_audio_Pattern* pianogridstate_pattern(PianoGridState* self)
 	return self->pattern;
 }
 
-INLINE psy_audio_PatternCursor pianogridstate_setcursor(PianoGridState* self,
-	psy_audio_PatternCursor cursor)
+INLINE psy_audio_SequenceCursor pianogridstate_setcursor(PianoGridState* self,
+	psy_audio_SequenceCursor cursor)
 {
 	assert(self);
 
 	self->cursor = cursor;
 }
 
-INLINE psy_audio_PatternCursor pianogridstate_cursor(const PianoGridState* self)
+INLINE psy_audio_SequenceCursor pianogridstate_cursor(const PianoGridState* self)
 {
 	assert(self);
 

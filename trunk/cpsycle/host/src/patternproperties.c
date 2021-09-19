@@ -163,13 +163,13 @@ void patternproperties_init(PatternProperties* self, psy_ui_Component* parent,
 	psy_ui_edit_setcharnumber(&self->lengthedit, 20);
 	psy_ui_button_init_connect(&self->applybutton, &self->component, NULL, self,
 		patternproperties_onapply);
-	intedit_init(&self->timesig_nominator, &self->component,
+	intedit_init(&self->timesig_numerator, &self->component,
 		"Timesignature", 0, 0, 128);
-	psy_ui_component_setspacing(&self->timesig_nominator.less.component,
+	psy_ui_component_setspacing(&self->timesig_numerator.less.component,
 		psy_ui_margin_make_em(0.0, 0.0, 0.0, 0.0));
-	psy_ui_component_setspacing(&self->timesig_nominator.more.component,
+	psy_ui_component_setspacing(&self->timesig_numerator.more.component,
 		psy_ui_margin_make_em(0.0, 0.0, 0.0, 0.0));
-	psy_signal_connect(&self->timesig_nominator.signal_changed, self,
+	psy_signal_connect(&self->timesig_numerator.signal_changed, self,
 		patternproperties_ontimesignominator);
 	intedit_init(&self->timesig_denominator, &self->component,
 		"", 0, 0, 128);
@@ -196,8 +196,8 @@ void patternproperties_setpattern(PatternProperties* self,
 	if (self->pattern) {		
 		psy_ui_edit_settext(&self->nameedit, psy_audio_pattern_name(pattern));
 		psy_snprintf(buffer, 20, "%.4f", (float)psy_audio_pattern_length(pattern));
-		intedit_setvalue(&self->timesig_nominator, (int)pattern->timesig_nominator);
-		intedit_setvalue(&self->timesig_denominator, (int)pattern->timesig_denominator);
+		intedit_setvalue(&self->timesig_numerator, (int)pattern->timesig.numerator);
+		intedit_setvalue(&self->timesig_denominator, (int)pattern->timesig.denominator);
 	} else {
 		psy_ui_edit_settext(&self->nameedit, "");
 		psy_snprintf(buffer, 10, "");
@@ -300,10 +300,10 @@ void patternproperties_updateskin(PatternProperties* self)
 
 void patternproperties_ontimesignominator(PatternProperties* self, IntEdit* sender)
 {
-	self->pattern->timesig_nominator = intedit_value(sender);
+	self->pattern->timesig.numerator = intedit_value(sender);
 }
 
 void patternproperties_ontimesigdenominator(PatternProperties* self, IntEdit* sender)
 {
-	self->pattern->timesig_denominator = intedit_value(sender);
+	self->pattern->timesig.denominator = intedit_value(sender);
 }

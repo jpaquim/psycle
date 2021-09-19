@@ -985,6 +985,21 @@ psy_ui_Component* psy_ui_component_preferredsize_parent(psy_ui_Component* self)
 	return curr;
 }
 
+psy_ui_Component* psy_ui_component_root(psy_ui_Component* self)
+{
+	psy_ui_Component* curr;
+
+	assert(self);
+
+	curr = self;
+	while (curr) {		
+		if (psy_ui_component_parent(curr)) {
+			curr = psy_ui_component_parent(curr);
+		}
+	}
+	return curr;
+}
+
 void onpreferredsize(psy_ui_Component* self, const psy_ui_Size* limit,
 	psy_ui_Size* rv)
 {		

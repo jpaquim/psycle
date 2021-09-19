@@ -7,6 +7,7 @@
 #define psy_audio_PATTERN_H
 
 /* local */
+#include "patterncursor.h"
 #include "patternentry.h"
 /* container */
 #include <signal.h>
@@ -28,37 +29,7 @@ extern "C" {
 #define psy_audio_GLOBALPATTERN_TIMESIGTRACK 0
 #define psy_audio_GLOBALPATTERN_LOOPTRACK 1
 
-/* edit position in the pattern */
-typedef struct {	
-	uintptr_t track;
-	psy_dsp_big_beat_t offset;
-	psy_dsp_big_beat_t seqoffset;
-	uintptr_t lpb;
-	uintptr_t line;
-	uintptr_t column;
-	uintptr_t digit;
-	uintptr_t patternid;
-	uint8_t key;
-} psy_audio_PatternCursor;
-
-void psy_audio_patterncursor_init(psy_audio_PatternCursor*);
-
-psy_audio_PatternCursor psy_audio_patterncursor_make(
-	uintptr_t track, psy_dsp_big_beat_t offset);
-psy_audio_PatternCursor psy_audio_patterncursor_make_all(
-	uintptr_t track, psy_dsp_big_beat_t offset, uint8_t key);
-
-INLINE psy_dsp_big_beat_t psy_audio_patterncursor_offset(
-	const psy_audio_PatternCursor* self)
-{
-	return self->offset;
-}
-
-/* compares two pattern edit positions, if they are equal */
-int psy_audio_patterncursor_equal(psy_audio_PatternCursor* lhs,
-	psy_audio_PatternCursor* rhs);
-
-typedef struct {
+typedef struct psy_audio_PatternSelection {
 	psy_audio_PatternCursor topleft;
 	psy_audio_PatternCursor bottomright;
 	bool valid;
@@ -70,7 +41,8 @@ void psy_audio_patternselection_init_all(psy_audio_PatternSelection*,
 psy_audio_PatternSelection psy_audio_patternselection_make(
 	psy_audio_PatternCursor topleft, psy_audio_PatternCursor bottomright);
 
-INLINE bool psy_audio_patternselection_valid(const psy_audio_PatternSelection* self)
+INLINE bool psy_audio_patternselection_valid(
+	const psy_audio_PatternSelection* self)
 {
 	return self->valid;
 }
@@ -80,7 +52,8 @@ INLINE void psy_audio_patternselection_enable(psy_audio_PatternSelection* self)
 	self->valid = TRUE;
 }
 
-INLINE void psy_audio_patternselection_disable(psy_audio_PatternSelection* self)
+INLINE void psy_audio_patternselection_disable(
+	psy_audio_PatternSelection* self)
 {
 	self->valid = FALSE;
 }
@@ -102,8 +75,10 @@ void psy_audio_patternselection_drag(psy_audio_PatternSelection*,
 	psy_audio_PatternCursor dragselectionbase,
 	psy_audio_PatternCursor cursor, double bpl);
 
-typedef bool (*psy_audio_fp_matches)(const uintptr_t test, const uintptr_t reference);
-typedef uintptr_t (*psy_audio_fp_replacewith)(const uintptr_t current, const uintptr_t newval);
+typedef bool (*psy_audio_fp_matches)(const uintptr_t test,
+	const uintptr_t reference);
+typedef uintptr_t (*psy_audio_fp_replacewith)(const uintptr_t current,
+	const uintptr_t newval);
 
 typedef struct psy_audio_PatternSearchReplaceMode
 {	
@@ -146,29 +121,43 @@ INLINE bool psy_audio_patternsearchreplacemode_matchesequal(uintptr_t test,
 	return test == reference;
 }
 
-INLINE uintptr_t psy_audio_patternsearchreplacemode_replacewithempty(uintptr_t c,
-	uintptr_t nv)
+INLINE uintptr_t psy_audio_patternsearchreplacemode_replacewithempty(
+	uintptr_t c, uintptr_t nv)
 {
 	return 0xff;
 }
 
-INLINE uintptr_t psy_audio_patternsearchreplacemode_replacewithcurrent(uintptr_t current,
-	uintptr_t nv)
+INLINE uintptr_t psy_audio_patternsearchreplacemode_replacewithcurrent(
+	uintptr_t current, uintptr_t nv)
 {
 	return current;
 }
 
-INLINE uintptr_t psy_audio_patternsearchreplacemode_replacewithnewval(uintptr_t c,
-	uintptr_t newval)
+INLINE uintptr_t psy_audio_patternsearchreplacemode_replacewithnewval(
+	uintptr_t c, uintptr_t newval)
 {
 	return newval;
 }
 
+/* psy_audio_Loop */
 typedef struct psy_audio_Loop {
 	psy_audio_PatternNode* start;
 	psy_audio_PatternNode* end;
 } psy_audio_Loop;
 
+/* psy_audio_TimeSig */
+typedef struct psy_audio_TimeSig {
+	/* 0 = not set */
+	uintptr_t numerator;
+	/* 0 = not set */
+	uintptr_t denominator;
+} psy_audio_TimeSig;
+
+void psy_audio_timesig_init(psy_audio_TimeSig*);
+void psy_audio_timesig_init_all(psy_audio_TimeSig*,
+	uintptr_t numerator, uintptr_t denominator);
+
+/* psy_audio_Pattern */
 typedef struct psy_audio_Pattern {
 	/* public */
 	psy_Signal signal_namechanged;
@@ -184,8 +173,7 @@ typedef struct psy_audio_Pattern {
 	/* used by the paste pattern, player uses songtracks of patterns */
 	uintptr_t maxsongtracks;
 	char* name;
-	uintptr_t timesig_nominator;
-	uintptr_t timesig_denominator;
+	psy_audio_TimeSig timesig;	
 } psy_audio_Pattern;
 
 /* initializes a pattern */

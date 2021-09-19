@@ -74,7 +74,7 @@ void dispose(psy_ui_Bitmap* self)
 
 int load(psy_ui_Bitmap* self, const char* path)
 {
-	return self->imp->vtable->dev_load(self->imp, path);
+	return self->imp->vtable->dev_load(self->imp, self, path);
 }
 
 int loadresource(psy_ui_Bitmap* self, uintptr_t resourceid)
@@ -99,7 +99,8 @@ void settransparency(psy_ui_Bitmap* self, psy_ui_Colour colour)
 
 // psy_ui_BitmapImp
 static void psy_ui_bitmap_imp_dispose(psy_ui_BitmapImp* self) { }
-static int psy_ui_bitmap_imp_load(psy_ui_BitmapImp* self, const char* path)
+static int psy_ui_bitmap_imp_load(psy_ui_BitmapImp* self,
+	struct psy_ui_Bitmap* bitmap, const char* path)
 {
 	return 0;
 }

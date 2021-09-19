@@ -61,6 +61,7 @@ static void workspace_onediteventdriverconfiguration(Workspace*);
 static void workspace_setdefaultfont(Workspace*, psy_Property*);
 static void workspace_setapptheme(Workspace*, psy_Property*);
 static void workspace_updatemetronome(Workspace*);
+static void workspace_updatesavepoint(Workspace*);
 /* machinecallback */
 static psy_audio_MachineFactory* onmachinefactory(Workspace*);
 static bool onmachinefileselectload(Workspace*, char filter[],
@@ -89,6 +90,9 @@ static void workspace_onscantaskstart(Workspace*,
 	psy_audio_PluginCatcher* sender, psy_audio_PluginScanTask*);
 static void workspace_onplugincachechanged(Workspace*,
 	psy_audio_PluginCatcher* sender);
+static void workspace_onsequenceselect(Workspace*,
+	psy_audio_SequenceSelection* sender, const psy_audio_OrderIndex*);
+static void workspace_select(Workspace*, psy_audio_OrderIndex);
 /* MachineCallback VTable */
 static psy_audio_MachineCallbackVtable machinecallback_vtable;
 static bool machinecallback_vtable_initialized = FALSE;
@@ -132,7 +136,6 @@ void workspace_init(Workspace* self, psy_ui_Component* main)
 	psy_audio_machinecallbackvtable_init(self);
 	self->machinecallback.vtable = &machinecallback_vtable;
 	psy_lock_init(&self->pluginscanlock);
-	psy_lock_init(&self->outputlock);
 	psy_audio_init();
 	self->fontheight = 12;
 	self->cursorstep = 1;
@@ -153,11 +156,10 @@ void workspace_init(Workspace* self, psy_ui_Component* main)
 	self->restoreplaymode = psy_audio_SEQUENCERPLAYMODE_PLAYALL;
 	self->restorenumplaybeats = 4.0;
 	self->restoreloop = TRUE;
-	self->errorstrs = NULL;
-	self->statusoutputstrs = NULL;
 	self->driverconfigloading = FALSE;
 	self->seqviewactive = FALSE;
 	self->modified_without_undo = FALSE;
+	self->lastplayline = psy_INDEX_INVALID;
 	psy_thread_init(&self->driverconfigloadthread);
 	psy_thread_init(&self->pluginscanthread);
 	viewhistory_init(&self->viewhistory);
@@ -180,9 +182,11 @@ void workspace_init(Workspace* self, psy_ui_Component* main)
 	workspace_initsignals(self);
 	workspace_initplayer(self);	
 	eventdriverconfig_registereventdrivers(&self->config.input);
-	inputhandler_init(&self->inputhandler, &self->player, NULL, NULL);
-	psy_audio_patterncursor_init(&self->patterneditposition);
-	psy_audio_pattern_init(&self->patternpaste);	
+	inputhandler_init(&self->inputhandler, &self->player, NULL, NULL);	
+	psy_audio_sequencecursor_init(&self->cursor);
+	psy_audio_pattern_init(&self->patternpaste);
+	psy_signal_connect(&self->sequenceselection.signal_select,
+		self, workspace_onsequenceselect);
 }
 
 void workspace_initplugincatcherandmachinefactory(Workspace* self)
@@ -224,7 +228,8 @@ void workspace_initsignals(Workspace* self)
 	psy_signal_init(&self->signal_songchanged);
 	psy_signal_init(&self->signal_configchanged);
 	psy_signal_init(&self->signal_changecontrolskin);
-	psy_signal_init(&self->signal_patterncursorchanged);
+	psy_signal_init(&self->signal_cursorchanged);
+	psy_signal_init(&self->signal_playlinechanged);
 	psy_signal_init(&self->signal_gotocursor);
 	/* psy_signal_init(&self->signal_sequenceselectionchanged); */
 	psy_signal_init(&self->signal_loadprogress);
@@ -276,12 +281,9 @@ void workspace_dispose(Workspace* self)
 	psy_audio_sequencepaste_dispose(&self->sequencepaste);
 	psy_playlist_dispose(&self->playlist);
 	psy_audio_dispose();
-	psy_lock_dispose(&self->pluginscanlock);
-	psy_lock_dispose(&self->outputlock);
+	psy_lock_dispose(&self->pluginscanlock);	
 	free(self->scanfilename);
-	self->scanfilename = NULL;
-	psy_list_deallocate(&self->errorstrs, NULL);
-	psy_list_deallocate(&self->statusoutputstrs, NULL);
+	self->scanfilename = NULL;	
 	inputhandler_dispose(&self->inputhandler);
 }
 
@@ -314,7 +316,8 @@ void workspace_disposesignals(Workspace* self)
 	psy_signal_dispose(&self->signal_songchanged);
 	psy_signal_dispose(&self->signal_configchanged);
 	psy_signal_dispose(&self->signal_changecontrolskin);
-	psy_signal_dispose(&self->signal_patterncursorchanged);
+	psy_signal_dispose(&self->signal_cursorchanged);
+	psy_signal_dispose(&self->signal_playlinechanged);
 	psy_signal_dispose(&self->signal_gotocursor);
 	psy_signal_dispose(&self->signal_loadprogress);
 	psy_signal_dispose(&self->signal_scanprogress);
@@ -813,6 +816,8 @@ void workspace_loadsong(Workspace* self, const char* filename, bool play)
 		workspace_clearundo(self);
 		psy_signal_emit(&self->signal_terminal_out, self, 1, "ready\n");
 		if (play) {
+			psy_audio_player_stop(&self->player);
+			psy_audio_player_setposition(&self->player, 0.0);
 			psy_audio_player_start(&self->player);
 		}
 	}
@@ -832,16 +837,14 @@ void workspace_setsong(Workspace* self, psy_audio_Song* song, int flag)
 
 	if (self->song != song) {
 		psy_audio_Song* oldsong;
-		ViewHistoryEntry view;
+		ViewHistoryEntry view;		
 
 		oldsong = self->song;
 		psy_audio_player_stop(&self->player);
 		psy_audio_player_setemptysong(&self->player);
 		workspace_clearsequencepaste(self);
 		workspace_clearundo(self);
-		self->modified_without_undo = FALSE;
-		psy_audio_sequenceselection_select_first(
-			&self->sequenceselection, psy_audio_orderindex_make(0, 0));
+		self->modified_without_undo = FALSE;		
 		view = viewhistory_currview(&self->viewhistory);
 		viewhistory_clear(&self->viewhistory);
 		viewhistory_add(&self->viewhistory, view);
@@ -851,12 +854,14 @@ void workspace_setsong(Workspace* self, psy_audio_Song* song, int flag)
 			song);
 		self->song = song;
 		psy_audio_player_setsong(&self->player, self->song);
-		workspace_updatemetronome(self);		
-		psy_audio_exclusivelock_leave();
+		workspace_updatemetronome(self);				
 		if (flag == WORKSPACE_NEWSONG) {
 			psy_audio_player_setsamplerindex(&self->player,
 				seqeditconfig_machine(&self->config.seqedit));
 		}
+		psy_audio_sequenceselection_clear(&self->sequenceselection);		
+		workspace_select(self, psy_audio_orderindex_make(0, 0));
+		psy_audio_exclusivelock_leave();
 		psy_signal_emit(&self->signal_songchanged, self, 2, flag, self->song);
 		psy_signal_emit(&self->song->patterns.signal_numsongtrackschanged, self,
 			1, self->song->patterns.songtracks);
@@ -995,17 +1000,12 @@ void workspace_exportlyfile(Workspace* self, const char* path)
 
 	assert(self);
 
-	psy_audio_songfile_init(&songfile);
-	songfile.file = 0;
-	songfile.song = self->song;
+	psy_audio_songfile_init_song(&songfile, self->song);	
 	psy_signal_emit(&self->signal_beforesavesong, self, 1, &songfile);
-
 	if (psy_audio_songfile_exportlyfile(&songfile, path)) {
-		psy_signal_emit(&self->signal_terminal_error, self, 1,
-			songfile.serr);
+		workspace_outputerror(self, songfile.serr);
 	} else {
-		self->undosavepoint = psy_list_size(self->undoredo.undo);
-		self->machines_undosavepoint = psy_list_size(self->undoredo.undo);
+		workspace_updatesavepoint(self);
 	}
 	psy_audio_songfile_dispose(&songfile);
 	workspace_output(self, "ready\n");
@@ -1017,19 +1017,21 @@ void workspace_savesong(Workspace* self, const char* path)
 
 	assert(self);
 
-	psy_audio_songfile_init(&songfile);
-	songfile.file = 0;
-	songfile.song = self->song;
+	psy_audio_songfile_init_song(&songfile, self->song);	
 	psy_signal_emit(&self->signal_beforesavesong, self, 1, &songfile);
 	if (psy_audio_songfile_save(&songfile, path)) {
-		psy_signal_emit(&self->signal_terminal_error, self, 1,
-			songfile.serr);
+		workspace_outputerror(self, songfile.serr);
 	} else {
-		self->undosavepoint = psy_list_size(self->undoredo.undo);
-		self->machines_undosavepoint = psy_list_size(self->undoredo.undo);
+		workspace_updatesavepoint(self);
 	}
 	psy_audio_songfile_dispose(&songfile);
 	workspace_output(self, "ready\n");
+}
+
+void workspace_updatesavepoint(Workspace* self)
+{
+	self->undosavepoint = psy_list_size(self->undoredo.undo);
+	self->machines_undosavepoint = psy_list_size(self->undoredo.undo);
 }
 
 psy_Playlist* workspace_playlist(Workspace* self)
@@ -1167,8 +1169,8 @@ static unsigned int driverconfigloadthread(void* context)
 	psy_Path path;	
 
 	assert(context);
+	
 	self = (Workspace*)context;
-
 	psy_path_init(&path, NULL);
 	psy_path_setprefix(&path, dirconfig_configdir(&self->config.directories));
 	psy_path_setname(&path, PSYCLE_INI);	
@@ -1178,9 +1180,7 @@ static unsigned int driverconfigloadthread(void* context)
 	self->driverconfigloading = FALSE;
 	if (psycleconfig_audioenabled(&self->config)) {
 		workspace_startaudio(self);
-		psy_lock_enter(&self->outputlock);
-		psy_list_append(&self->statusoutputstrs, psy_strdup("Audio started"));
-		psy_lock_leave(&self->outputlock);
+		workspace_outputstatus(self, psy_ui_translate("msg.audiostarted"));
 	}
 	return 0;
 }
@@ -1192,8 +1192,8 @@ void workspace_postload_driverconfigurations(Workspace* self)
 	if (!self->driverconfigloading) {
 		psy_Thread thread;
 
-		self->driverconfigloading = TRUE;		
-		psy_list_append(&self->statusoutputstrs, psy_strdup("Starting audio"));
+		self->driverconfigloading = TRUE;
+		workspace_outputstatus(self, psy_ui_translate("msg.audiostarting"));
 		psy_thread_start(&thread, self, driverconfigloadthread);
 	}
 }
@@ -1280,6 +1280,8 @@ bool workspace_currview_hasredo(Workspace* self)
 
 void workspace_clearundo(Workspace* self)
 {
+	assert(self);
+
 	psy_undoredo_dispose(&self->undoredo);
 	psy_undoredo_init(&self->undoredo);
 	self->undosavepoint = 0;
@@ -1290,33 +1292,19 @@ void workspace_clearundo(Workspace* self)
 	self->machines_undosavepoint = 0;
 }
 
-void workspace_setpatterncursor(Workspace* self,
-	psy_audio_PatternCursor editposition)
+void workspace_setcursor(Workspace* self, psy_audio_SequenceCursor cursor)
 {
 	assert(self);
-
-	if (!self->patternsinglemode) {
-		psy_audio_SequenceEntry* entry;
-
-		entry = psy_audio_sequence_entry(&self->song->sequence,
-			psy_audio_sequenceselection_first(&self->sequenceselection));
-		if (entry) {
-			editposition.seqoffset = psy_audio_sequenceentry_offset(entry);
-		}
-	} else {
-		editposition.seqoffset = 0.0;
-	}
-	self->patterneditposition = editposition;
-	self->patterneditposition.line =
-		(uintptr_t)(editposition.offset * psy_audio_player_lpb(&self->player));
-	psy_signal_emit(&self->signal_patterncursorchanged, self, 0);
+	
+	self->cursor = cursor;
+	psy_signal_emit(&self->signal_cursorchanged, self, 0);
 }
 
-psy_audio_PatternCursor workspace_patterncursor(Workspace* self)
+psy_audio_SequenceCursor workspace_cursor(const Workspace* self)
 {
 	assert(self);
 
-	return self->patterneditposition;
+	return self->cursor;
 }
 
 void workspace_setseqeditposition(Workspace* self,
@@ -1420,6 +1408,18 @@ void workspace_idle(Workspace* self)
 {
 	assert(self);
 
+	psy_audio_SequencerTime* seqtime;
+
+	seqtime = psy_audio_player_sequencertime(&self->player);
+	if (seqtime->playing) {
+		if (seqtime->linecounter != self->lastplayline) {
+			self->lastplayline = seqtime->linecounter;
+		}
+		psy_signal_emit(&self->signal_playlinechanged, self, 0);
+	} else if (self->lastplayline != psy_INDEX_INVALID) {		
+		self->lastplayline = psy_INDEX_INVALID;
+		psy_signal_emit(&self->signal_playlinechanged, self, 0);
+	}
 	if (self->followsong) {
 		psy_audio_SequenceTrackIterator it;
 
@@ -1445,31 +1445,26 @@ void workspace_idle(Workspace* self)
 				}
 			}
 			if (self->lastentry) {
-				self->patterneditposition.line = (int) (
+				int line;
+
+				line = (int) (
 					(psy_audio_player_position(&self->player) -
-						psy_audio_sequenceentry_offset(&self->lastentry->entry)) * psy_audio_player_lpb(&self->player));
-				self->patterneditposition.offset =
-					psy_audio_player_position(&self->player) - psy_audio_sequenceentry_offset(&self->lastentry->entry);
-				self->patterneditposition.offset =
-					self->patterneditposition.line /
+						psy_audio_sequenceentry_offset(&self->lastentry->entry)) * psy_audio_player_lpb(&self->player));				
+				self->cursor.cursor.offset = line /
 					(psy_dsp_big_beat_t) psy_audio_player_lpb(&self->player);
 				if (!self->patternsinglemode) {
-					self->patterneditposition.seqoffset = psy_audio_sequenceentry_offset(&self->lastentry->entry);
+					self->cursor.cursor.seqoffset = psy_audio_sequenceentry_offset(&self->lastentry->entry);
 				}
-				workspace_setpatterncursor(self,
-					self->patterneditposition);
+				workspace_setcursor(self, self->cursor);
 			}
 		} else if (self->lastentry) {
-			self->patterneditposition.line = (int) (
+			int line;
+			line = (int) (
 				(psy_audio_player_position(&self->player) -
-					psy_audio_sequenceentry_offset(&self->lastentry->entry)) * psy_audio_player_lpb(&self->player));
-			self->patterneditposition.offset =
-				psy_audio_player_position(&self->player) - psy_audio_sequenceentry_offset(&self->lastentry->entry);
-			self->patterneditposition.offset =
-				self->patterneditposition.line /
+					psy_audio_sequenceentry_offset(&self->lastentry->entry)) * psy_audio_player_lpb(&self->player));			
+			self->cursor.cursor.offset = line /
 				(psy_dsp_big_beat_t)psy_audio_player_lpb(&self->player);
-			workspace_setpatterncursor(self,
-				self->patterneditposition);
+			workspace_setcursor(self, self->cursor);
 			self->lastentry = 0;
 		}
 	}
@@ -1526,27 +1521,7 @@ void workspace_idle(Workspace* self)
 			psy_audio_sequencer_stoploop(&self->player.sequencer);
 		}
 		self->player.sequencer.playtrack = psy_INDEX_INVALID;
-	}
-	if (self->errorstrs) {
-		psy_List* p;
-		psy_audio_exclusivelock_enter();
-		for (p = self->errorstrs; p != NULL; p = p->next) {
-			psy_signal_emit(&self->signal_terminal_error, self, 1,
-				(const char*)p->entry);
-		}
-		psy_list_deallocate(&self->errorstrs, NULL);
-		psy_audio_exclusivelock_leave();
-	}
-	if (self->statusoutputstrs) {
-		psy_List* p;
-		psy_lock_enter(&self->outputlock);
-		for (p = self->statusoutputstrs; p != NULL; p = p->next) {
-			psy_signal_emit(&self->signal_status_out, self, 1,
-				(const char*)p->entry);
-		}
-		psy_list_deallocate(&self->statusoutputstrs, NULL);
-		psy_lock_leave(&self->outputlock);
-	}
+	}	
 }
 
 void workspace_showparameters(Workspace* self, uintptr_t machineslot)
@@ -1907,8 +1882,9 @@ void onmachineterminaloutput(Workspace* self, const char* text)
 	assert(self);
 
 	psy_audio_exclusivelock_enter();
-	psy_list_append(&self->errorstrs, psy_strdup(text));
-	psy_audio_exclusivelock_leave();
+	psy_signal_emit(&self->signal_terminal_error, self, 1,
+		(void*)text);
+	psy_audio_exclusivelock_leave();	
 }
 
 static bool onmachineeditresize(Workspace* self, psy_audio_Machine* sender, intptr_t w, intptr_t h)
@@ -2184,8 +2160,8 @@ void workspace_oninput(Workspace* self, uintptr_t cmdid)
 	case CMD_COLUMN_F:
 		if (self->song && psy_audio_song_numsongtracks(self->song) >=
 				(uintptr_t)(cmdid - CMD_COLUMN_0)) {
-			self->patterneditposition.track = (cmdid - CMD_COLUMN_0);
-			workspace_setpatterncursor(self, self->patterneditposition);
+			self->cursor.cursor.track = (cmdid - CMD_COLUMN_0);
+			workspace_setcursor(self, self->cursor);
 		}
 		break;
 	case CMD_IMM_TAB1:
@@ -2305,4 +2281,58 @@ void workspace_setstartpage(Workspace* self)
 		workspace_selectview(self, VIEW_ID_MACHINEVIEW, 0, 0);
 	}
 	self->startpage = TRUE;
+}
+
+void workspace_onsequenceselect(Workspace* self,
+	psy_audio_SequenceSelection* sender,
+	const psy_audio_OrderIndex* orderindex)
+{
+	assert(self);
+	assert(orderindex);
+
+	if (!self->song) {
+		return;
+	}
+	if (psy_audio_orderindex_equal(orderindex,
+				psy_audio_sequenceselection_first(sender)) &&
+			!psy_audio_orderindex_equal(orderindex, self->cursor.orderindex)) {
+		workspace_select(self, *orderindex);
+	}	
+}
+
+void workspace_select(Workspace* self,	
+	psy_audio_OrderIndex orderindex)
+{
+	assert(self);
+	
+	psy_audio_SequenceEntry* entry;
+
+	if (!self->song) {
+		return;
+	}
+	entry = psy_audio_sequence_entry(&self->song->sequence, orderindex);
+	if (entry && entry->type == psy_audio_SEQUENCEENTRY_PATTERN) {
+		psy_audio_SequenceCursor cursor;
+		psy_audio_SequencePatternEntry* patternentry;
+
+		patternentry = (psy_audio_SequencePatternEntry*)entry;
+		psy_audio_sequencecursor_init_all(&cursor, orderindex);
+		cursor.cursor.seqoffset = workspace_cursorseqoffset(self, orderindex);
+		cursor.cursor.patternid = patternentry->patternslot;
+		workspace_setcursor(self, cursor);		
+	}
+}
+
+psy_dsp_big_beat_t workspace_cursorseqoffset(const Workspace* self,
+	psy_audio_OrderIndex orderindex)
+{
+	const psy_audio_SequenceEntry* entry;	
+
+	entry = psy_audio_sequence_entry_const(&self->song->sequence, orderindex);
+	if (entry) {				
+		if (!self->patternsinglemode) {
+			return psy_audio_sequenceentry_offset(entry);
+		}
+	}
+	return 0.0;
 }

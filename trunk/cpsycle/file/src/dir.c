@@ -13,6 +13,25 @@
 /* std */
 #include <errno.h>
 #include <stdio.h>
+#include <sys/stat.h>
+
+#if defined(DIVERSALIS__OS__MICROSOFT)
+/*
+** Windows does not define the S_ISREGand S_ISDIR macros in stat.h, so we do.
+** We have to define _CRT_INTERNAL_NONSTDC_NAMES 1 before #including sys/stat.h
+** in order for Microsoft's stat.h to define names like S_IFMT, S_IFREG, and S_IFDIR,
+** rather than just defining  _S_IFMT, _S_IFREG, and _S_IFDIR as it normally does.
+*/
+#define _CRT_INTERNAL_NONSTDC_NAMES 1
+#include <sys/stat.h>
+#if !defined(S_ISREG) && defined(S_IFMT) && defined(S_IFREG)
+#define S_ISREG(m) (((m) & S_IFMT) == S_IFREG)
+#endif
+#if !defined(S_ISDIR) && defined(S_IFMT) && defined(S_IFDIR)
+#define S_ISDIR(m) (((m) & S_IFMT) == S_IFDIR)
+#endif
+#endif
+
 /* platform */
 #include "../../detail/portable.h"
 
@@ -76,16 +95,50 @@ void psy_path_setext(psy_Path* self, const char* ext)
 
 void psy_path_append_dir(psy_Path* self, const char* dir)
 {
+	if (psy_strlen(dir) == 0) {
+		return;
+	}
 	if (psy_strlen(self->prefix) == 0) {
 		psy_strreset(&self->prefix, dir);
 	} else if (psy_strlen(self->prefix) > 0 &&
 			self->prefix[psy_strlen(self->prefix) - 1] == psy_SLASH) {
 		self->prefix = psy_strcat_realloc(self->prefix, dir);
-	} else {
-		self->prefix = psy_strcat_realloc(self->prefix, psy_SLASHSTR);
+	} else {	
+		if (dir[0] != psy_SLASH) {
+			self->prefix = psy_strcat_realloc(self->prefix, psy_SLASHSTR);
+		}
 		self->prefix = psy_strcat_realloc(self->prefix, dir);
 	}
 	psy_path_update(self);
+}
+
+bool psy_path_remove_dir(psy_Path* self)
+{
+	const char* str;
+
+	str = psy_path_full(self);
+	if (str) {
+		char* p;
+		uintptr_t pos;
+
+		pos = psy_INDEX_INVALID;
+		p = strrchr(str, psy_SLASH);
+		if (p) {
+			pos = p - str;
+		}								
+		if (pos != psy_INDEX_INVALID) {
+			char* parentdir;
+
+			parentdir = (char*)malloc(pos + 2);
+			psy_snprintf(parentdir, pos + 1, str);
+			psy_path_dispose(self);
+			psy_path_init(self, NULL);
+			psy_path_append_dir(self, parentdir);
+			free(parentdir);
+			return TRUE;
+		}							
+	}
+	return FALSE;
 }
 
 void psy_path_update(psy_Path* self)
@@ -171,6 +224,34 @@ void psy_path_extract_path(psy_Path* self)
 		self->filename = psy_strcat_realloc(self->filename, ".");
 		self->filename = psy_strcat_realloc(self->filename, self->ext);
 	}
+}
+
+uintptr_t psy_file_size(const psy_Path* p)
+{
+	struct stat sb;
+	const char* filename;
+
+	assert(p);
+
+	filename = psy_path_full(p);
+	if (stat(filename, &sb) == -1) {
+		return psy_INDEX_INVALID;
+	}
+	return sb.st_size;
+}
+
+bool psy_file_is_directory(const psy_Path* p)
+{
+	struct stat sb;
+	const char* filename;
+
+	assert(p);
+
+	filename = psy_path_full(p);
+	if (stat(filename, &sb) == -1) {
+		return psy_INDEX_INVALID;
+	}
+	return S_ISDIR(sb.st_mode) != 0;
 }
 
 
@@ -633,8 +714,19 @@ psy_List* psy_drives(void)
 	if (dwResult > 0 && dwResult <= MAX_PATH) {
 		char* szSingleDrive = szLogicalDrives;
 		while (*szSingleDrive) {
-			psy_list_append(&rv, strdup(szSingleDrive));
-			szSingleDrive += psy_strlen(szSingleDrive) + 1;
+			char* drive;
+			char* slash;			
+
+			drive = strdup(szSingleDrive);
+			slash = strrchr(drive, psy_SLASH);
+			if (slash) {
+				uintptr_t pos;
+
+				pos = slash - drive;
+				drive[pos] = '\0';
+			}
+			psy_list_append(&rv, drive);
+			szSingleDrive += psy_strlen(szSingleDrive) + 1;			
 		}
 	}
 	return rv;
@@ -672,6 +764,7 @@ psy_List* psy_directories(const char* root)
 	}
 	return rv;
 }
+
 
 #else
 

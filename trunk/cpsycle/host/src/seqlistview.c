@@ -418,7 +418,7 @@ void seqviewtrack_onsequencedeselect(SeqViewTrack* self,
 /* prototypes */
 static void seqviewlist_onpreferredsize(SeqviewList*,
 	const psy_ui_Size* limit, psy_ui_Size* rv);
-static void seqviewlist_ontimer(SeqviewList*, uintptr_t timerid);
+static void seqviewlist_onplaylinechanged(SeqviewList*, Workspace* sender);
 static psy_ui_RealRectangle seqviewlist_rowrectangle(SeqviewList*,
 	uintptr_t row);
 static void seqviewlist_invalidaterow(SeqviewList*, uintptr_t row);
@@ -436,10 +436,7 @@ static void seqviewlist_vtable_init(SeqviewList* self)
 {
 	if (!seqviewlist_vtable_initialized) {
 		seqviewlist_vtable = *(self->component.vtable);
-		seqviewlist_super_vtable = *(self->component.vtable);
-		seqviewlist_vtable.ontimer =
-			(psy_ui_fp_component_ontimer)
-			seqviewlist_ontimer;
+		seqviewlist_super_vtable = *(self->component.vtable);		
 		seqviewlist_vtable.onpreferredsize =
 			(psy_ui_fp_component_onpreferredsize)
 			seqviewlist_onpreferredsize;		
@@ -459,10 +456,8 @@ void seqviewlist_init(SeqviewList* self, psy_ui_Component* parent,
 {
 	psy_ui_component_init(&self->component, parent, NULL);
 	seqviewlist_vtable_init(self);	
-	self->state = state;
-	self->lastplayposition = -1.f;
-	self->lastplayrow = psy_INDEX_INVALID;
-	self->refreshcount = 0;
+	self->state = state;	
+	self->lastplayrow = psy_INDEX_INVALID;	
 	self->showpatternnames = generalconfig_showingpatternnames(
 		psycleconfig_general(workspace_conf(self->state->cmds->workspace)));	
 	psy_ui_component_doublebuffer(&self->component);
@@ -476,6 +471,8 @@ void seqviewlist_init(SeqviewList* self, psy_ui_Component* parent,
 			&self->state->cmds->sequence->patterns->signal_namechanged,
 			self, seqviewlist_onpatternnamechanged);
 	}
+	psy_signal_connect(&self->state->cmds->workspace->signal_playlinechanged, self,
+		seqviewlist_onplaylinechanged);
 	psy_ui_component_setscrollstep(&self->component,
 		psy_ui_size_make(self->state->trackwidth, self->state->lineheight));
 	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_SCROLL);	
@@ -527,32 +524,18 @@ void seqviewlist_showpatternslots(SeqviewList* self)
 	psy_ui_component_invalidate(&self->component);
 }
 
-void seqviewlist_ontimer(SeqviewList* self, uintptr_t timerid)
+void seqviewlist_onplaylinechanged(SeqviewList* self, Workspace* sender)
 {
-	if (psy_audio_player_playing(self->state->cmds->player)) {
-		if (psy_audio_player_playlist_position(self->state->cmds->player) !=
-				self->lastplayrow) {
-			/* invalidate previous row */
-			seqviewlist_invalidaterow(self, self->lastplayrow);
-			self->lastplayrow = psy_audio_player_playlist_position(
-				self->state->cmds->player);
-			/* next(curr) row is invalidated with row progress bar */
-		}
-		if (self->refreshcount == 2) { /* todo: check for player line change */
-			/* invalidate row progress bar and at row change the new row */			
-			if (psy_audio_player_playlist_position(self->state->cmds->player)
-					!= psy_INDEX_INVALID) {
-				seqviewlist_invalidaterow(self,
-					psy_audio_player_playlist_position(self->state->cmds->player));
-			}
-			self->refreshcount = 0;
-		}
-		++self->refreshcount;
-	} else if (self->lastplayrow != psy_INDEX_INVALID) {
-		/* if player stops invalidate to remove the progress bar */
+	uintptr_t row;
+
+	row = psy_audio_player_playlist_position(
+		self->state->cmds->player);
+	if (row != self->lastplayrow) {
+		/* invalidate previous sequence row */
 		seqviewlist_invalidaterow(self, self->lastplayrow);
-		self->lastplayrow = psy_INDEX_INVALID;
-	}
+		self->lastplayrow = row;
+	}	
+	seqviewlist_invalidaterow(self, self->lastplayrow);	
 }
 
 void seqviewlist_onpatternnamechanged(SeqviewList* self,

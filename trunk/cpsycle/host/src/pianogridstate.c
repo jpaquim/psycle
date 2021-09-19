@@ -18,5 +18,5 @@ void pianogridstate_init(PianoGridState* self, PatternViewSkin* skin)
 	self->pxperbeat = self->defaultbeatwidth;
 	self->lpb = 4;	
 	self->skin = skin;		
-	psy_audio_patterncursor_init(&self->cursor);
+	psy_audio_sequencecursor_init(&self->cursor);
 }

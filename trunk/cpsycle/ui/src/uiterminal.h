@@ -9,6 +9,8 @@
 /* local */
 #include "uicomponent.h"
 #include "uieditor.h"
+/* thread */
+#include <lock.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -20,11 +22,14 @@ typedef struct psy_ui_Terminal {
 	/* inherits */
 	psy_ui_Component component;
 	/* internal */
-	psy_ui_Editor output;   
+	psy_ui_Editor output;
+	psy_List* strbuffer;
+	psy_Lock outputlock;	
 } psy_ui_Terminal;
 
 void psy_ui_terminal_init(psy_ui_Terminal*, psy_ui_Component* parent);
 
+/* output synchronized with ui thread */
 void psy_ui_terminal_output(psy_ui_Terminal*, const char* text);
 void psy_ui_terminal_clear(psy_ui_Terminal*);
 
