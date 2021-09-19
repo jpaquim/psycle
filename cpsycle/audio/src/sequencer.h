@@ -23,6 +23,8 @@ extern "C" {
 typedef struct psy_audio_SequencerTime {
 	/* current play position in frames */
 	psy_dsp_frame_t playcounter;
+	/* current play position in lines */
+	uintptr_t linecounter;
 	/* current samplerate in cycle/second (often 44100.0 Hz) */
 	psy_dsp_big_hz_t samplerate;
 	/* current play position in beats (1.0 bts = 1 quarter note) */
@@ -50,6 +52,7 @@ typedef struct psy_audio_SequencerTime {
 INLINE void psy_audio_sequencertime_init(psy_audio_SequencerTime* self)
 {
 	self->playcounter = (psy_dsp_frame_t)0;
+	self->linecounter = 0;
 	self->samplerate = (psy_dsp_big_hz_t)44100.0;
 	self->position = (psy_dsp_big_beat_t)0.0;
 	self->bpm = (psy_dsp_big_beat_t)125.0;

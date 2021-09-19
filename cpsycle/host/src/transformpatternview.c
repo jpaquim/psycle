@@ -341,7 +341,7 @@ void transformpatternview_searchentiresong(TransformPatternView* self,
 						psy_audio_patterncursor_make(MAX_TRACKS,
 							psy_audio_pattern_length(currpattern))),
 					searchreplacemode);
-				if (cursor.line != psy_INDEX_INVALID) {
+				if (cursor.patternid != psy_INDEX_INVALID) {
 					psy_audio_OrderIndex orderindex;
 									
 					orderindex = psy_audio_sequence_patternfirstused(
@@ -350,7 +350,7 @@ void transformpatternview_searchentiresong(TransformPatternView* self,
 					psy_audio_sequenceselection_select_first(
 						&self->workspace->sequenceselection,
 						orderindex);					
-					workspace_setpatterncursor(self->workspace, cursor);
+					// workspace_setcursor(self->workspace, cursor);
 					break;
 				}
 			}
@@ -375,8 +375,8 @@ void transformpatternview_searchpattern(TransformPatternView* self,
 				psy_audio_patterncursor_make(MAX_TRACKS,
 					psy_audio_pattern_length(currpattern))),
 			searchreplacemode);
-		if (cursor.line != psy_INDEX_INVALID) {
-			workspace_setpatterncursor(self->workspace, cursor);
+		if (cursor.patternid != psy_INDEX_INVALID) {
+			// workspace_setcursor(self->workspace, cursor);
 		}
 	}
 }
@@ -395,8 +395,8 @@ void transformpatternview_searchcurrentselection(TransformPatternView* self,
 		cursor = psy_audio_pattern_searchinpattern(currpattern,
 			self->patternselection,
 			searchreplacemode);
-		if (cursor.line != psy_INDEX_INVALID) {
-			workspace_setpatterncursor(self->workspace, cursor);
+		if (cursor.patternid != psy_INDEX_INVALID) {
+			// workspace_setcursor(self->workspace, cursor);
 		}
 	}	
 }

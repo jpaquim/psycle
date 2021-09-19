@@ -28,7 +28,7 @@ typedef struct {
 	psy_ui_Edit nameedit;
 	psy_ui_Edit lengthedit;
 	psy_ui_Button applybutton;
-	IntEdit timesig_nominator;
+	IntEdit timesig_numerator;
 	IntEdit timesig_denominator;
 	// references
 	psy_audio_Pattern* pattern;

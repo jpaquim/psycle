@@ -61,7 +61,8 @@ static void mainframe_delegatekeyboard(MainFrame*, intptr_t message,
 static void mainframe_ontogglegearworkspace(MainFrame*, Workspace* sender);
 static void mainframe_onmaxminimizeview(MainFrame*, psy_ui_Button* sender);
 static void mainframe_onrecentsongs(MainFrame*, psy_ui_Component* sender);
-static void mainframe_onfileloadview(MainFrame*, psy_ui_Component* sender);
+static void mainframe_onfilesaveview(MainFrame*, psy_ui_Component* sender);
+static void mainframe_ondiskop(MainFrame*, psy_ui_Component* sender);
 static void mainframe_onplugineditor(MainFrame*, psy_ui_Component* sender);
 static void mainframe_onsettingsviewchanged(MainFrame*, PropertiesView* sender,
 	psy_Property*, uintptr_t* rebuild);
@@ -643,17 +644,23 @@ void mainframe_initrecentview(MainFrame* self)
 void mainframe_initfileview(MainFrame* self)
 {	
 	/* ft2 style file load view */	
-	fileview_init(&self->fileloadview, mainframe_base(self));
-	psy_ui_component_setalign(&self->fileloadview.component, psy_ui_ALIGN_LEFT);
-	psy_ui_component_hide(&self->fileloadview.component);
-	psy_signal_connect(&self->fileloadview.signal_selected,
+	fileview_init(&self->fileview, mainframe_base(self));
+#if defined(DIVERSALIS__OS__MICROSOFT)	
+	fileview_setdirectory(&self->fileview,
+		dirconfig_songs(&self->workspace.config.directories));
+#endif		
+	psy_ui_component_setalign(&self->fileview.component, psy_ui_ALIGN_LEFT);
+	psy_ui_component_hide(&self->fileview.component);
+	psy_signal_connect(&self->fileview.signal_selected,
 		self, mainframe_onfileload);
 	if (keyboardmiscconfig_ft2fileexplorer(psycleconfig_misc(
-		workspace_conf(&self->workspace)))) {
-		psy_signal_connect(&self->filebar.loadbutton.signal_clicked, self,
-			mainframe_onfileloadview);
+		workspace_conf(&self->workspace)))) {		
 		filebar_useft2fileexplorer(&self->filebar);
 	}
+	psy_signal_connect(&self->filebar.diskop.signal_clicked, self,
+		mainframe_ondiskop);
+	psy_signal_connect(&self->fileview.save.signal_clicked, self,
+		mainframe_onfilesaveview);
 }
 
 void mainframe_initsequenceview(MainFrame* self)
@@ -854,9 +861,20 @@ void mainframe_onrecentsongs(MainFrame* self, psy_ui_Component* sender)
 		psy_ui_component_visible(playlistview_base(&self->playlist)));
 }
 
-void mainframe_onfileloadview(MainFrame* self, psy_ui_Component* sender)
+void mainframe_onfilesaveview(MainFrame* self, psy_ui_Component* sender)
 {
-	psy_ui_component_togglevisibility(&self->fileloadview.component);
+	char fname[4096];
+
+	psy_ui_component_show_align(&self->fileview.component);
+	fileview_filename(&self->fileview, fname, 4096);
+	if (psy_strlen(fname) > 0) {
+		workspace_savesong(&self->workspace, fname);
+	}
+}
+
+void mainframe_ondiskop(MainFrame* self, psy_ui_Component* sender)
+{
+	psy_ui_component_togglevisibility(&self->fileview.component);
 }
 
 void mainframe_onplugineditor(MainFrame* self, psy_ui_Component* sender)
@@ -898,13 +916,9 @@ void mainframe_onsettingsviewchanged(MainFrame* self, PropertiesView* sender,
 		break;
 	case PROPERTY_ID_FT2FILEEXPLORER:
 		if (keyboardmiscconfig_ft2fileexplorer(psycleconfig_misc(
-			workspace_conf(&self->workspace)))) {
-			psy_signal_connect(&self->filebar.loadbutton.signal_clicked, self,
-				mainframe_onfileloadview);
+			workspace_conf(&self->workspace)))) {			
 			filebar_useft2fileexplorer(&self->filebar);
-		} else {
-			psy_signal_disconnect(&self->filebar.loadbutton.signal_clicked, self,
-				mainframe_onfileloadview);
+		} else {			
 			filebar_usenativefileexplorer(&self->filebar);
 		}
 		break;
@@ -1135,7 +1149,7 @@ void mainframe_oncheckunsaved(MainFrame* self, ConfirmBox* sender,
 				if (keyboardmiscconfig_ft2fileexplorer(psycleconfig_misc(
 					workspace_conf(&self->workspace)))) {
 					const char* path;
-					path = fileview_path(&self->fileloadview);
+					path = fileview_path(&self->fileview);
 					workspace_loadsong(&self->workspace,
 						path,
 						generalconfig_playsongafterload(psycleconfig_general(
@@ -1164,7 +1178,7 @@ void mainframe_oncheckunsaved(MainFrame* self, ConfirmBox* sender,
 					workspace_conf(&self->workspace)))) {
 					const char* path;
 
-					path = fileview_path(&self->fileloadview);
+					path = fileview_path(&self->fileview);
 					workspace_loadsong(&self->workspace,
 						path,
 						generalconfig_playsongafterload(psycleconfig_general(

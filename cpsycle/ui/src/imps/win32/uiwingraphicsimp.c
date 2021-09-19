@@ -289,18 +289,18 @@ void psy_ui_win_g_imp_drawroundrectangle(psy_ui_win_GraphicsImp* self,
 
 void psy_ui_win_g_imp_drawsolidrectangle(psy_ui_win_GraphicsImp* self,
 	const psy_ui_RealRectangle r, psy_ui_Colour colour)
-{
-     HBRUSH hBrush;     
-     RECT   rect;	 
-	                
-     SetRect (&rect,
-		 (int)r.left - (int)(self->org.x),
-		 (int)r.top - (int)(self->org.y),
-		 (int)r.right - (int)(self->org.x),
-		 (int)r.bottom - (int)(self->org.y));
-     hBrush = CreateSolidBrush(psy_ui_colour_colorref(&colour));
-     FillRect (self->hdc, &rect, hBrush);     
-     DeleteObject (hBrush) ;
+{	
+	HBRUSH hBrush;
+	RECT   rect;
+
+	SetRect(&rect,
+		(int)r.left - (int)(self->org.x),
+		(int)r.top - (int)(self->org.y),
+		(int)r.right - (int)(self->org.x),
+		(int)r.bottom - (int)(self->org.y));
+	hBrush = CreateSolidBrush(psy_ui_colour_colorref(&colour));
+	FillRect(self->hdc, &rect, hBrush);
+	DeleteObject(hBrush);
 }
 
 void psy_ui_win_g_imp_drawsolidroundrectangle(psy_ui_win_GraphicsImp* self,

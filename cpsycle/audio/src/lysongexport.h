@@ -13,6 +13,8 @@
 extern "C" {
 #endif
 
+/* Lilypond song export */
+
 struct psy_audio_SongFile;
 
 typedef struct psy_audio_LySongExport {	

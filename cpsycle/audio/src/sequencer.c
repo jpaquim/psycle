@@ -255,7 +255,8 @@ void psy_audio_sequencer_setposition(psy_audio_Sequencer* self,
 	self->seqtime.position = offset;
 	/* todo only estimated sample pos on current bpm */
 	self->seqtime.playcounter = psy_audio_sequencer_frames(self,
-		offset);
+		offset);	
+	self->seqtime.linecounter = (uintptr_t)(self->seqtime.position * (double)self->lpb);
 	self->seqtime.lastbarposition = floor(offset / 4) * 4;		
 	self->seqtime.samplestonextclock =
 		psy_audio_sequencer_frames(self, offset + 1 / 24.0) - self->seqtime.playcounter;
@@ -396,26 +397,7 @@ void psy_audio_sequencer_makecurrtracks(psy_audio_Sequencer* self,
 	uintptr_t trackindex;
 
 	assert(self);
-
-	trackindex = 0;
-	{	/* add global track */
-		psy_audio_SequencerTrack* track;
-
-		track = malloc(sizeof(psy_audio_SequencerTrack));
-		if (track) {
-			track->track = &self->sequence->globaltrack;
-			track->channeloffset = 0;
-			track->iterator = (psy_audio_SequenceTrackIterator*)
-				malloc(sizeof(psy_audio_SequenceTrackIterator));
-			if (track->iterator) {
-				*track->iterator = psy_audio_sequence_begin(self->sequence,
-					track->track, offset);
-				track->state.retriggeroffset = 0;
-				track->state.retriggerstep = 0;
-				psy_list_append(&self->currtracks, track);
-			}
-		}
-	}
+	
 	trackindex = 0;
 	for (p = self->sequence->tracks; p != NULL;
 			psy_list_next(&p), ++trackindex) {
@@ -435,6 +417,24 @@ void psy_audio_sequencer_makecurrtracks(psy_audio_Sequencer* self,
 			}
 		}
 	}	
+	{	/* append global track */
+		psy_audio_SequencerTrack* track;
+
+		track = malloc(sizeof(psy_audio_SequencerTrack));
+		if (track) {
+			track->track = &self->sequence->globaltrack;
+			track->channeloffset = 0;
+			track->iterator = (psy_audio_SequenceTrackIterator*)
+				malloc(sizeof(psy_audio_SequenceTrackIterator));
+			if (track->iterator) {
+				*track->iterator = psy_audio_sequence_begin(self->sequence,
+					track->track, offset);
+				track->state.retriggeroffset = 0;
+				track->state.retriggerstep = 0;
+				psy_list_append(&self->currtracks, track);
+			}
+		}
+	}
 }
 
 psy_dsp_big_beat_t psy_audio_sequencer_skiptrackiterators(
@@ -1711,7 +1711,7 @@ psy_dsp_percent_t psy_audio_sequencer_rowprogress(
 			}
 		}		
 	}	
-	if (length > 0.0) {
+	if (length > 0.0) {		
 		return (psy_dsp_percent_t)
 			((psy_audio_sequencer_position(self) - seqoffset) / length);
 	}

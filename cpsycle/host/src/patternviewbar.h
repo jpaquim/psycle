@@ -1,13 +1,15 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #if !defined(PATTERNVIEWBAR_H)
 #define PATTERNVIEWBAR_H
 
-// host
+/* host */
 #include "stepbox.h"
 #include "workspace.h"
-// ui
+/* ui */
 #include <uicheckbox.h>
 #include <uilabel.h>
 
@@ -15,21 +17,22 @@
 extern "C" {
 #endif
 
-// PatternViewBar
-//
-// The bar displayed in the mainframe status bar, if the patternview is active
+/*
+** PatternViewBar
+**
+** The bar displayed in the mainframe status bar, if the patternview is active
+*/
 
 typedef struct PatternViewBar {
-	// inherits
+	/* inherits */
 	psy_ui_Component component;
-	// internal
-	// ui elements
+	/* internal */
 	PatternCursorStepBox cursorstep;
 	psy_ui_CheckBox movecursorwhenpaste;
 	psy_ui_CheckBox defaultentries;
 	psy_ui_CheckBox displaysinglepattern;
 	psy_ui_Label status;
-	// references
+	/* references */
 	Workspace* workspace;
 } PatternViewBar;
 

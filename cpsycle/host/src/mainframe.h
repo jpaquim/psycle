@@ -135,7 +135,7 @@ typedef struct MainFrame {
 	psy_ui_Splitter midisplitter;
 	PlaylistView playlist;
 	psy_ui_Splitter playlistsplitter;
-	FileView fileloadview;
+	FileView fileview;
 	MainStatusBar statusbar;
 	MinMaximize minmaximize;
 	psy_ui_Notebook viewtabbars;

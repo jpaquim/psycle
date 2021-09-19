@@ -51,13 +51,23 @@ void psy_audio_songfile_init(psy_audio_SongFile* self)
 	psy_signal_init(&self->signal_warning);
 	self->machinesoloed = -1;
 	self->legacywires = NULL;
-	self->path = NULL;	
+	self->path = NULL;
+	self->song = NULL;
+	self->file = NULL;
+	self->serr = NULL;
+}
+
+void psy_audio_songfile_init_song(psy_audio_SongFile* self,
+	psy_audio_Song* song)
+{
+	psy_audio_songfile_init(self);
+	self->song = song;
 }
 
 void psy_audio_songfile_dispose(psy_audio_SongFile* self)
 {
 	free(self->path);
-	self->path = NULL;
+	self->path = NULL;	
 	psy_signal_dispose(&self->signal_output);
 	psy_signal_dispose(&self->signal_warning);		
 }

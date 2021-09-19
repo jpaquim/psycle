@@ -43,9 +43,7 @@ typedef struct SeqviewList {
 	/* internal */
 	int foundselected;	
 	double avgcharwidth;
-	bool showpatternnames;
-	psy_dsp_beat_t lastplayposition;	
-	int refreshcount;
+	bool showpatternnames;	
 	uintptr_t lastplayrow;	
 	/* references */
 	SeqViewState* state;	

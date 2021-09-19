@@ -590,11 +590,9 @@ void interpolatecurveview_oninterpolate(InterpolateCurveView* self,
 
 			psy_audio_patterncursor_init(&start);
 			psy_audio_patterncursor_init(&end);
-			start.offset = lastoffset;
-			start.line = (uintptr_t)(lastoffset / 0.25f);
+			start.offset = lastoffset;			
 			entry = (KeyFrame*)kf->entry;
-			end.offset = (entry->offset + self->box.selection.topleft.offset);
-			end.line = (uintptr_t)(end.offset / bpl) + 1;
+			end.offset = (entry->offset + self->box.selection.topleft.offset);			
 			if (lastentry->curve == INTERPOLATECURVETYPE_LINEAR) {
 				psy_audio_pattern_blockinterpolaterange(self->box.pattern,
 					start, end,

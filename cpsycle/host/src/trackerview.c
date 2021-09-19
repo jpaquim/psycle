@@ -79,7 +79,7 @@ static void trackergrid_onmousedown(TrackerGrid*, psy_ui_MouseEvent*);
 static void trackergrid_onmousemove(TrackerGrid*, psy_ui_MouseEvent*);
 static void trackergrid_onmouseup(TrackerGrid*, psy_ui_MouseEvent*);
 static void trackergrid_onmousedoubleclick(TrackerGrid*, psy_ui_MouseEvent*);
-static void trackergrid_dragselection(TrackerGrid*, psy_audio_PatternCursor);
+static void trackergrid_dragselection(TrackerGrid*, psy_audio_SequenceCursor);
 static void trackergrid_onscroll(TrackerGrid*, psy_ui_Component* sender);
 static void trackergrid_clearmidline(TrackerGrid*);
 static bool trackergrid_movecursorwhenpaste(TrackerGrid*);
@@ -148,7 +148,7 @@ static psy_ui_ComponentVtable* vtable_init(TrackerGrid* self)
 }
 /* implementation */
 void trackergrid_init(TrackerGrid* self, psy_ui_Component* parent, psy_ui_Component* view,
-	TrackConfig* trackconfig, TrackerGridState* gridstate,
+	TrackConfig* trackconfig, TrackerState* state,
 	Workspace* workspace)
 {
 	assert(self);
@@ -161,8 +161,8 @@ void trackergrid_init(TrackerGrid* self, psy_ui_Component* parent, psy_ui_Compon
 	self->view = view;
 	patterncmds_init(&self->cmds, workspace);
 	psy_table_init(&self->columns);
-	trackergridstate_init(&self->defaultgridstate, trackconfig, NULL, NULL);	
-	trackergrid_setsharedgridstate(self, gridstate, trackconfig);	
+	trackerstate_init(&self->defaultgridstate, trackconfig, NULL, NULL);	
+	trackergrid_setsharedgridstate(self, state, trackconfig);	
 	trackergrid_storecursor(self);
 	/* setup base component */
 	psy_ui_component_setbackgroundmode(&self->component,
@@ -173,11 +173,11 @@ void trackergrid_init(TrackerGrid* self, psy_ui_Component* parent, psy_ui_Compon
 		psy_ui_HEXPAND);
 	/* init internal */
 	self->syncpattern = TRUE;	
-	self->gridstate->midline = FALSE;	
+	self->state->midline = FALSE;	
 	self->chordmode = FALSE;
 	self->chordbegin = 0;
 	self->wraparound = TRUE;
-	self->gridstate->showemptydata = FALSE;	
+	self->state->showemptydata = FALSE;	
 	self->movecursoronestep = FALSE;
 	self->ft2home = TRUE;
 	self->ft2delete = TRUE;
@@ -195,7 +195,7 @@ void trackergrid_init(TrackerGrid* self, psy_ui_Component* parent, psy_ui_Compon
 	inputhandler_connect(&workspace->inputhandler, INPUTHANDLER_VIEW,
 		psy_EVENTDRIVER_MIDI, "", VIEW_ID_PATTERNVIEW, 
 		self, (fp_inputhandler_input)trackergrid_onmidicmds);
-	psy_audio_patternselection_init(&self->gridstate->selection);
+	psy_audio_patternselection_init(&self->state->selection);
 	/* handle midline invalidation */
 	psy_signal_connect(&self->component.signal_scroll, self,
 		trackergrid_onscroll);		
@@ -209,7 +209,7 @@ void trackergrid_ondestroy(TrackerGrid* self)
 
 	trackergrid_dispose_signals(self);
 	psy_table_dispose(&self->columns);
-	trackergridstate_dispose(&self->defaultgridstate);	
+	trackerstate_dispose(&self->defaultgridstate);	
 }
 
 void trackergrid_init_signals(TrackerGrid* self)
@@ -226,15 +226,15 @@ void trackergrid_dispose_signals(TrackerGrid* self)
 	psy_signal_dispose(&self->signal_colresize);
 }
 
-void trackergrid_setsharedgridstate(TrackerGrid* self, TrackerGridState*
-	gridstate, TrackConfig* trackconfig)
+void trackergrid_setsharedgridstate(TrackerGrid* self, TrackerState*
+	state, TrackConfig* trackconfig)
 {
 	assert(self);
 	
-	if (gridstate) {
-		self->gridstate = gridstate;
+	if (state) {
+		self->state = state;
 	} else {		
-		self->gridstate = &self->defaultgridstate;
+		self->state = &self->defaultgridstate;
 	}
 }
 
@@ -242,11 +242,11 @@ void trackergrid_ondraw(TrackerGrid* self, psy_ui_Graphics* g)
 {
 	psy_audio_PatternSelection clip;
 		
-	trackergridstate_lineclip(self->gridstate, &g->clip, &clip);
-	trackergridstate_clip(self->gridstate, &g->clip, &clip);
+	trackerstate_lineclip(self->state, &g->clip, &clip);
+	trackerstate_clip(self->state, &g->clip, &clip);
 	trackergrid_drawbackground(self, g, &clip);
 	/* prepares entry draw done in trackergridcolumn */
-	if (trackergridstate_pattern(self->gridstate)) {		
+	if (trackerstate_pattern(self->state)) {		
 		trackergrid_updatetrackevents(self, &clip);	
 	}
 }
@@ -275,8 +275,8 @@ void trackergrid_drawbackground(TrackerGrid* self, psy_ui_Graphics* g,
 				psy_ui_realsize_make(
 					columnposition.right - columnposition.left,
 					clientsize.height)),
-			patternviewskin_separatorcolour(self->gridstate->skin, track,
-				trackergridstate_numsongtracks(self->gridstate)));
+			patternviewskin_separatorcolour(self->state->skin, track,
+				trackerstate_numsongtracks(self->state)));
 	}
 	psy_list_free(q);
 }
@@ -295,22 +295,22 @@ void trackergrid_updatetrackevents(TrackerGrid* self,
 
 	assert(self);
 	
-	trackereventtable_clearevents(&self->gridstate->trackevents);
-	ite.pattern = self->gridstate->pattern;
+	trackereventtable_clearevents(&self->state->trackevents);
+	ite.pattern = self->state->pattern;
 	ite.patternnode = NULL;
 	ite.patterns = &self->workspace->song->patterns;
 	seqoffset = 0.0;
 	length = ite.pattern->length;
 	offset = clip->topleft.offset;
-	if (!self->gridstate->singlemode && self->gridstate->sequence) {
+	if (!self->state->singlemode && self->state->sequence) {
 		psy_audio_SequenceTrackNode* tracknode;
 
-		tracknode = psy_list_at(self->gridstate->sequence->tracks,
+		tracknode = psy_list_at(self->state->sequence->tracks,
 			workspace_sequenceeditposition(self->workspace).track);
 		if (!tracknode) {
-			tracknode = self->gridstate->sequence->tracks;
+			tracknode = self->state->sequence->tracks;
 		}
-	 	ite = psy_audio_sequence_begin(self->gridstate->sequence,			
+	 	ite = psy_audio_sequence_begin(self->state->sequence,			
 			tracknode ? (psy_audio_SequenceTrack*)tracknode->entry : NULL,
 			offset);
 	 	if (ite.sequencentrynode) {
@@ -322,11 +322,11 @@ void trackergrid_updatetrackevents(TrackerGrid* self,
 	} else {
 		ite.sequencentrynode = NULL;
 		ite.patternnode = psy_audio_pattern_greaterequal(
-			trackergridstate_pattern(self->gridstate),
+			trackerstate_pattern(self->state),
 			(psy_dsp_big_beat_t)offset - seqoffset);
 	}		
-	line = trackergridstate_beattoline(self->gridstate, offset);	
-	maxlines = trackergridstate_numlines(self->gridstate);
+	line = trackerstate_beattoline(self->state, offset);	
+	maxlines = trackerstate_numlines(self->state);
 	while (offset <= clip->bottomright.offset && line < maxlines) {		
 		bool fill;
 		
@@ -341,14 +341,14 @@ void trackergrid_updatetrackevents(TrackerGrid* self,
 					psy_dsp_testrange_e(
 						psy_audio_sequencetrackiterator_offset(&ite),
 						offset,
-						trackergridstate_bpl(self->gridstate))) {
+						trackerstate_bpl(self->state))) {
 				psy_audio_PatternEntry* entry;
 
 				entry = psy_audio_sequencetrackiterator_patternentry(&ite);
 				if (entry->track == track) {
 					psy_List** trackevents;
 
-					trackevents = trackereventtable_track(&self->gridstate->trackevents, entry->track);
+					trackevents = trackereventtable_track(&self->state->trackevents, entry->track);
 					psy_list_append(trackevents, entry);
 					psy_list_next(&ite.patternnode);
 					hasevent = TRUE;
@@ -359,7 +359,7 @@ void trackergrid_updatetrackevents(TrackerGrid* self,
 			if (!hasevent) {				
 				psy_List** trackevents;
 
-				trackevents = trackereventtable_track(&self->gridstate->trackevents, track);
+				trackevents = trackereventtable_track(&self->state->trackevents, track);
 				psy_list_append(trackevents, NULL);
 			} else if (ite.patternnode && ((psy_audio_PatternEntry*)(ite.patternnode->entry))->track <= track) {
 				fill = TRUE;
@@ -368,10 +368,10 @@ void trackergrid_updatetrackevents(TrackerGrid* self,
 		/* skip remaining events of the line */
 		while (ite.patternnode && (offset < seqoffset + length) && 
 			(psy_audio_sequencetrackiterator_offset(&ite) + psy_dsp_epsilon * 2 <
-				offset + trackergridstate_bpl(self->gridstate))) {
+				offset + trackerstate_bpl(self->state))) {
 			psy_list_next(&ite.patternnode);
 		}
-		offset += trackergridstate_bpl(self->gridstate);
+		offset += trackerstate_bpl(self->state);
 		if (offset >= seqoffset + length) {
 			/* go to next seqentry or end draw */
 			if (ite.sequencentrynode && ite.sequencentrynode->next) {
@@ -388,30 +388,30 @@ void trackergrid_updatetrackevents(TrackerGrid* self,
 			}
 		}		
 	}
-	self->gridstate->trackevents.seqoffset = seqoffset;
-	self->gridstate->trackevents.clip = *clip;	
-	self->gridstate->trackevents.currcursorline =
-		trackergridstate_beattoline(self->gridstate,
-		self->gridstate->cursor.offset + self->gridstate->cursor.seqoffset);
-	self->gridstate->trackevents.currplaybarline =
-		trackergridstate_beattoline(self->gridstate,
-		self->gridstate->lastplayposition -
-		((self->gridstate->singlemode)
-			? self->gridstate->sequenceentryoffset
+	self->state->trackevents.seqoffset = seqoffset;
+	self->state->trackevents.clip = *clip;	
+	self->state->trackevents.currcursorline =
+		trackerstate_beattoline(self->state,
+		self->state->cursor.cursor.offset + self->state->cursor.cursor.seqoffset);
+	self->state->trackevents.currplaybarline =
+		trackerstate_beattoline(self->state,
+		self->state->lastplayposition -
+		((self->state->singlemode)
+			? self->state->sequenceentryoffset
 			: 0.0));	
 }
 
 psy_audio_OrderIndex trackergrid_checkupdatecursorseqoffset(TrackerGrid* self,
 		psy_audio_PatternCursor* rv) {
 	if (rv->offset < 0 || rv->offset >=
-			psy_audio_pattern_length(self->gridstate->pattern)) {
+			psy_audio_pattern_length(self->state->pattern)) {
 		uintptr_t order;
 		psy_audio_SequenceEntry* entry;
 
-		order = psy_audio_sequence_order(self->gridstate->sequence,
+		order = psy_audio_sequence_order(self->state->sequence,
 			0, rv->offset + rv->seqoffset);
 		if (order != psy_INDEX_INVALID) {
-			entry = psy_audio_sequence_entry(self->gridstate->sequence,
+			entry = psy_audio_sequence_entry(self->state->sequence,
 				psy_audio_orderindex_make(
 					workspace_sequenceeditposition(self->workspace).track,
 					order));
@@ -431,7 +431,7 @@ psy_dsp_big_beat_t trackergrid_currseqoffset(TrackerGrid* self)
 {
 	psy_audio_SequenceEntry* entry;
 
-	entry = psy_audio_sequence_entry(self->gridstate->sequence,
+	entry = psy_audio_sequence_entry(self->state->sequence,
 		workspace_sequenceeditposition(self->workspace));
 	if (entry) {
 		return psy_audio_sequenceentry_offset(entry);
@@ -446,13 +446,13 @@ void trackergrid_prevtrack(TrackerGrid* self)
 	assert(self);
 
 	psy_audio_patterncursornavigator_init(&cursornavigator,
-		&self->gridstate->cursor, trackergridstate_pattern(self->gridstate),
-		trackergridstate_bpl(self->gridstate), self->wraparound, 0);
+		&self->state->cursor.cursor, trackerstate_pattern(self->state),
+		trackerstate_bpl(self->state), self->wraparound, 0);
 	if (psy_audio_patterncursornavigator_prevtrack(&cursornavigator,
-			trackergridstate_numsongtracks(self->gridstate))) {
-		trackergrid_scrollleft(self, self->gridstate->cursor);
+			trackerstate_numsongtracks(self->state))) {
+		trackergrid_scrollleft(self, self->state->cursor);
 		trackergrid_invalidatecursor(self);
-	} else if (trackergrid_scrollright(self, self->gridstate->cursor)) {
+	} else if (trackergrid_scrollright(self, self->state->cursor)) {
 		trackergrid_invalidatecursor(self);
 	}	
 }
@@ -461,7 +461,7 @@ void trackergrid_storecursor(TrackerGrid* self)
 {
 	assert(self);
 
-	self->oldcursor = self->gridstate->cursor;
+	self->oldcursor = self->state->cursor;
 }
 
 void trackergrid_nexttrack(TrackerGrid* self)
@@ -469,44 +469,44 @@ void trackergrid_nexttrack(TrackerGrid* self)
 	psy_audio_PatternCursorNavigator cursornavigator;	
 
 	psy_audio_patterncursornavigator_init(&cursornavigator,
-		&self->gridstate->cursor, trackergridstate_pattern(self->gridstate),
-		trackergridstate_bpl(self->gridstate), self->wraparound, 0);
+		&self->state->cursor.cursor, trackerstate_pattern(self->state),
+		trackerstate_bpl(self->state), self->wraparound, 0);
 	if (psy_audio_patterncursornavigator_nexttrack(&cursornavigator,
-		trackergridstate_numsongtracks(self->gridstate))) {
-		if (trackergrid_scrollleft(self, self->gridstate->cursor)) {
+		trackerstate_numsongtracks(self->state))) {
+		if (trackergrid_scrollleft(self, self->state->cursor)) {
 			trackergrid_invalidatecursor(self);
 		}		
 	} else {
-		trackergrid_scrollright(self, self->gridstate->cursor);
+		trackergrid_scrollright(self, self->state->cursor);
 		trackergrid_invalidatecursor(self);
 	}
 }
 
-bool trackergrid_scrollup(TrackerGrid* self, psy_audio_PatternCursor cursor)
+bool trackergrid_scrollup(TrackerGrid* self, psy_audio_SequenceCursor cursor)
 {
 	intptr_t line;
 	intptr_t topline;	
 	double top;
 
-	line = trackergridstate_beattoline(self->gridstate,
-		cursor.offset + cursor.seqoffset);
-	top = self->gridstate->lineheightpx * line;	
-	if (self->gridstate->midline) {
+	line = trackerstate_beattoline(self->state,
+		cursor.cursor.offset + cursor.cursor.seqoffset);
+	top = self->state->lineheightpx * line;	
+	if (self->state->midline) {
 		psy_ui_RealSize gridsize;		
 
 		gridsize = psy_ui_component_scrollsize_px(&self->component);
-		topline = (intptr_t)(gridsize.height / self->gridstate->lineheightpx / 2.0);
+		topline = (intptr_t)(gridsize.height / self->state->lineheightpx / 2.0);
 	} else {
 		topline = 0;
 	}
 	if (psy_ui_component_scrolltop_px(&self->component) +
-			topline * self->gridstate->lineheightpx > top) {
+			topline * self->state->lineheightpx > top) {
 		intptr_t dlines;		
 		
 		dlines = (intptr_t)((psy_ui_component_scrolltop_px(&self->component) +
-			topline * self->gridstate->lineheightpx - top) /
-			(self->gridstate->lineheightpx));				
-		self->gridstate->cursorchanging = TRUE;		
+			topline * self->state->lineheightpx - top) /
+			(self->state->lineheightpx));				
+		self->state->cursorchanging = TRUE;		
 		psy_ui_component_setscrolltop_px(&self->component,			
 			psy_ui_component_scrolltop_px(&self->component) -
 			psy_ui_component_scrollstep_height_px(&self->component) * dlines);
@@ -515,27 +515,27 @@ bool trackergrid_scrollup(TrackerGrid* self, psy_audio_PatternCursor cursor)
 	return TRUE;
 }
 
-bool trackergrid_scrolldown(TrackerGrid* self, psy_audio_PatternCursor cursor)
+bool trackergrid_scrolldown(TrackerGrid* self, psy_audio_SequenceCursor cursor)
 {
 	intptr_t line;
 	intptr_t visilines;	
 	
-	visilines = self->gridstate->visilines;
-	if (self->gridstate->midline) {
+	visilines = self->state->visilines;
+	if (self->state->midline) {
 		visilines /= 2;
 	} else {
 		--visilines;
 	}
-	line = trackergridstate_beattoline(self->gridstate,
-		cursor.offset + cursor.seqoffset);	
+	line = trackerstate_beattoline(self->state,
+		cursor.cursor.offset + cursor.cursor.seqoffset);
 	if (visilines < line - psy_ui_component_scrolltop_px(&self->component) /
-			self->gridstate->lineheightpx) {
+			self->state->lineheightpx) {
 		intptr_t dlines;
 
 		dlines = (intptr_t)
 			(line - psy_ui_component_scrolltop_px(&self->component) /
-			self->gridstate->lineheightpx - visilines);
-		self->gridstate->cursorchanging = TRUE;
+			self->state->lineheightpx - visilines);
+		self->state->cursorchanging = TRUE;
 		psy_ui_component_setscrolltop_px(&self->component,			
 			psy_ui_component_scrolltop_px(&self->component) +
 			psy_ui_component_scrollstep_height_px(&self->component) * dlines);
@@ -544,7 +544,7 @@ bool trackergrid_scrolldown(TrackerGrid* self, psy_audio_PatternCursor cursor)
 	return TRUE;
 }
 
-bool trackergrid_scrollleft(TrackerGrid* self, psy_audio_PatternCursor cursor)
+bool trackergrid_scrollleft(TrackerGrid* self, psy_audio_SequenceCursor cursor)
 {	
 	psy_ui_Component* column;
 	uintptr_t index;
@@ -555,10 +555,10 @@ bool trackergrid_scrollleft(TrackerGrid* self, psy_audio_PatternCursor cursor)
 		psy_ui_realpoint_make(psy_ui_component_scrollleftpx(&self->component),
 			0.0), &index);
 	if (index != psy_INDEX_INVALID) {		
-		if (index > cursor.track) {
+		if (index > cursor.cursor.track) {
 			psy_ui_RealRectangle position;
 
-			column = (psy_ui_Component*)psy_table_at(&self->columns, cursor.track);
+			column = (psy_ui_Component*)psy_table_at(&self->columns, cursor.cursor.track);
 			position = psy_ui_component_position(column);
 			psy_ui_component_setscrollleft(&self->component,
 				psy_ui_value_make_px(position.left));
@@ -568,7 +568,7 @@ bool trackergrid_scrollleft(TrackerGrid* self, psy_audio_PatternCursor cursor)
 	return TRUE;
 }
 
-bool trackergrid_scrollright(TrackerGrid* self, psy_audio_PatternCursor cursor)
+bool trackergrid_scrollright(TrackerGrid* self, psy_audio_SequenceCursor cursor)
 {
 	uintptr_t visitracks;
 	uintptr_t tracks;
@@ -581,13 +581,13 @@ bool trackergrid_scrollright(TrackerGrid* self, psy_audio_PatternCursor cursor)
 
 	size = psy_ui_component_clientsize_px(&self->component);
 	tm = psy_ui_component_textmetric(&self->component);	
-	trackleft = trackergridstate_pxtotrack(self->gridstate,
+	trackleft = trackerstate_pxtotrack(self->state,
 		psy_ui_component_scrollleftpx(&self->component));
-	trackright = trackergridstate_pxtotrack(self->gridstate,
+	trackright = trackerstate_pxtotrack(self->state,
 		size.width +
 		psy_ui_component_scrollleftpx(&self->component));	
 	visitracks = trackright - trackleft;
-	tracks = cursor.track + 1;
+	tracks = cursor.cursor.track + 1;
 	if (tracks > trackleft + visitracks) {		
 		psy_ui_Component* column;
 
@@ -624,52 +624,52 @@ void trackergrid_advancelines(TrackerGrid* self, uintptr_t lines, bool wrap)
 {
 	assert(self);
 
-	if (trackergridstate_pattern(self->gridstate)) {
+	if (trackerstate_pattern(self->state)) {
 		psy_audio_PatternCursorNavigator cursornavigator;
 		bool restorewrap;
 
 		restorewrap = wrap;
-		if (!self->gridstate->singlemode) {
+		if (!self->state->singlemode) {
 			wrap = TRUE;
 		}
 		psy_audio_patterncursornavigator_init(&cursornavigator,
-			&self->gridstate->cursor,
-			trackergridstate_pattern(self->gridstate),
-			trackergridstate_bpl(self->gridstate), wrap, 0);		
+			&self->state->cursor.cursor,
+			trackerstate_pattern(self->state),
+			trackerstate_bpl(self->state), wrap, 0);		
 		if (psy_audio_patterncursornavigator_advancelines(&cursornavigator, lines)) {
-			trackergrid_scrolldown(self, self->gridstate->cursor);
-		} else if (!self->gridstate->singlemode) {
+			trackergrid_scrolldown(self, self->state->cursor);
+		} else if (!self->state->singlemode) {
 			psy_audio_OrderIndex index;
 
-			self->gridstate->cursor.offset =
-				psy_audio_pattern_length(self->gridstate->pattern);
+			self->state->cursor.cursor.offset =
+				psy_audio_pattern_length(self->state->pattern);
 			index = trackergrid_checkupdatecursorseqoffset(self,
-				&self->gridstate->cursor);
+				&self->state->cursor.cursor);
 			if (psy_audio_orderindex_valid(&index)) {
 				self->preventscrolltop = TRUE;
 				workspace_setseqeditposition(self->workspace,
 					index);
 				self->preventscrolltop = FALSE;
 			} else if (restorewrap) {
-				self->gridstate->cursor.offset = 0;
+				self->state->cursor.cursor.offset = 0;
 				self->preventscrolltop = TRUE;
 				workspace_setseqeditposition(self->workspace,
 					psy_audio_orderindex_make(
 						workspace_sequenceeditposition(self->workspace).track, 0));
 				self->preventscrolltop = FALSE;
-				trackergrid_scrollup(self, self->gridstate->cursor);
+				trackergrid_scrollup(self, self->state->cursor);
 				trackergrid_storecursor(self);
 				return;
 			} else {
-				self->gridstate->cursor.offset =
-					psy_audio_pattern_length(self->gridstate->pattern) -
-					trackergridstate_bpl(self->gridstate);				
+				self->state->cursor.cursor.offset =
+					psy_audio_pattern_length(self->state->pattern) -
+					trackerstate_bpl(self->state);				
 			}
-			trackergrid_scrolldown(self, self->gridstate->cursor);
+			trackergrid_scrolldown(self, self->state->cursor);
 		} else {
-			trackergrid_scrollup(self, self->gridstate->cursor);
+			trackergrid_scrollup(self, self->state->cursor);
 		}		
-		trackergridstate_synccursor(self->gridstate);
+		workspace_setcursor(self->workspace, self->state->cursor);		
 		trackergrid_invalidatecursor(self);
 	}
 }
@@ -678,58 +678,58 @@ void trackergrid_prevlines(TrackerGrid* self, uintptr_t lines, bool wrap)
 {
 	assert(self);
 
-	if (trackergridstate_pattern(self->gridstate)) {
+	if (trackerstate_pattern(self->state)) {
 		psy_audio_PatternCursorNavigator cursornavigator;
 		bool restorewrap;
 
 		restorewrap = wrap;
-		if (!self->gridstate->singlemode) {
+		if (!self->state->singlemode) {
 			wrap = TRUE;
 		}
-		psy_audio_patterncursornavigator_init(&cursornavigator, &self->gridstate->cursor,
-			trackergridstate_pattern(self->gridstate), trackergridstate_bpl(self->gridstate), wrap, 0);		
+		psy_audio_patterncursornavigator_init(&cursornavigator, &self->state->cursor.cursor,
+			trackerstate_pattern(self->state), trackerstate_bpl(self->state), wrap, 0);		
 		if (!psy_audio_patterncursornavigator_prevlines(&cursornavigator, lines)) {
-			trackergrid_scrollup(self, self->gridstate->cursor);
-		} else if (!self->gridstate->singlemode) {
+			trackergrid_scrollup(self, self->state->cursor);
+		} else if (!self->state->singlemode) {
 			psy_audio_OrderIndex index;			
 			
-			self->gridstate->cursor.offset = -trackergridstate_bpl(self->gridstate);
+			self->state->cursor.cursor.offset = -trackerstate_bpl(self->state);
 			index = trackergrid_checkupdatecursorseqoffset(self,
-				&self->gridstate->cursor);
+				&self->state->cursor.cursor);
 			if (psy_audio_orderindex_valid(&index)) {
-				psy_audio_PatternCursor cursor;
+				psy_audio_SequenceCursor cursor;
 
-				cursor = self->gridstate->cursor;
+				cursor = self->state->cursor;
 				self->preventscrolltop = TRUE;
 				workspace_setseqeditposition(self->workspace, index);
 				self->preventscrolltop = FALSE;
-				self->gridstate->cursor = cursor;
+				self->state->cursor = cursor;
 			} else if (restorewrap) {				
 				self->preventscrolltop = TRUE;
 				workspace_setseqeditposition(self->workspace,
 					psy_audio_orderindex_make(
 						workspace_sequenceeditposition(self->workspace).track,
 						psy_audio_sequence_track_size(
-							self->gridstate->sequence, 0) - 1));
+							self->state->sequence, 0) - 1));
 				self->preventscrolltop = FALSE;
-				if (self->gridstate->pattern) {
-					self->gridstate->cursor.offset =
-						psy_audio_pattern_length(self->gridstate->pattern) -
-						trackergridstate_bpl(self->gridstate);
+				if (self->state->pattern) {
+					self->state->cursor.cursor.offset =
+						psy_audio_pattern_length(self->state->pattern) -
+						trackerstate_bpl(self->state);
 				}
-				trackergrid_scrolldown(self, self->gridstate->cursor);
+				trackergrid_scrolldown(self, self->state->cursor);
 				trackergrid_storecursor(self);
 				return;
 			} else {
-				self->gridstate->cursor.offset =
-					psy_audio_pattern_length(self->gridstate->pattern) -
-					trackergridstate_bpl(self->gridstate);
+				self->state->cursor.cursor.offset =
+					psy_audio_pattern_length(self->state->pattern) -
+					trackerstate_bpl(self->state);
 			}			
-			trackergrid_scrollup(self, self->gridstate->cursor);
+			trackergrid_scrollup(self, self->state->cursor);
 		} else {
-			trackergrid_scrolldown(self, self->gridstate->cursor);
+			trackergrid_scrolldown(self, self->state->cursor);
 		}
-		trackergridstate_synccursor(self->gridstate);
+		workspace_setcursor(self->workspace, self->state->cursor);
 		trackergrid_invalidatecursor(self);
 	}
 }
@@ -739,18 +739,18 @@ void trackergrid_home(TrackerGrid* self)
 	assert(self);
 
 	if (self->ft2home) {
-		self->gridstate->cursor.offset = 0.0;
-		trackergrid_scrollup(self, self->gridstate->cursor);
+		self->state->cursor.cursor.offset = 0.0;
+		trackergrid_scrollup(self, self->state->cursor);
 	} else {
-		if (self->gridstate->cursor.column != 0) {
-			self->gridstate->cursor.column = 0;
+		if (self->state->cursor.cursor.column != 0) {
+			self->state->cursor.cursor.column = 0;
 		} else {
-			self->gridstate->cursor.track = 0;
-			self->gridstate->cursor.column = 0;
+			self->state->cursor.cursor.track = 0;
+			self->state->cursor.cursor.column = 0;
 		}
-		trackergrid_scrollleft(self, self->gridstate->cursor);
+		trackergrid_scrollleft(self, self->state->cursor);
 	}
-	trackergridstate_synccursor(self->gridstate);
+	workspace_setcursor(self->workspace, self->state->cursor);
 	trackergrid_invalidatecursor(self);
 }
 
@@ -759,34 +759,34 @@ void trackergrid_end(TrackerGrid* self)
 	assert(self);
 
 	if (self->ft2home) {
-		self->gridstate->cursor.offset = trackergridstate_pattern(self->gridstate)->length - trackergridstate_bpl(self->gridstate);
-		trackergrid_scrolldown(self, self->gridstate->cursor);
+		self->state->cursor.cursor.offset = trackerstate_pattern(self->state)->length - trackerstate_bpl(self->state);
+		trackergrid_scrolldown(self, self->state->cursor);
 	} else {
 		TrackDef* trackdef;
 		TrackColumnDef* columndef;
 
-		trackdef = trackergridstate_trackdef(self->gridstate, self->gridstate->cursor.track);
-		columndef = trackdef_columndef(trackdef, self->gridstate->cursor.column);
-		if (self->gridstate->cursor.track != trackergridstate_numsongtracks(self->gridstate) - 1 ||
-				self->gridstate->cursor.digit != columndef->numdigits - 1 ||
-				self->gridstate->cursor.column != TRACKER_COLUMN_PARAM) {
-			if (self->gridstate->cursor.column == TRACKER_COLUMN_PARAM &&
-				self->gridstate->cursor.digit == columndef->numdigits - 1) {
-				self->gridstate->cursor.track = trackergridstate_numsongtracks(self->gridstate) - 1;
-				trackdef = trackergridstate_trackdef(self->gridstate, self->gridstate->cursor.track);
+		trackdef = trackerstate_trackdef(self->state, self->state->cursor.cursor.track);
+		columndef = trackdef_columndef(trackdef, self->state->cursor.cursor.column);
+		if (self->state->cursor.cursor.track != trackerstate_numsongtracks(self->state) - 1 ||
+				self->state->cursor.cursor.digit != columndef->numdigits - 1 ||
+				self->state->cursor.cursor.column != TRACKER_COLUMN_PARAM) {
+			if (self->state->cursor.cursor.column == TRACKER_COLUMN_PARAM &&
+				self->state->cursor.cursor.digit == columndef->numdigits - 1) {
+				self->state->cursor.cursor.track = trackerstate_numsongtracks(self->state) - 1;
+				trackdef = trackerstate_trackdef(self->state, self->state->cursor.cursor.track);
 				columndef = trackdef_columndef(trackdef, TRACKER_COLUMN_PARAM);
-				self->gridstate->cursor.column = TRACKER_COLUMN_PARAM;
-				self->gridstate->cursor.digit = columndef->numdigits - 1;
-				trackergrid_scrollright(self, self->gridstate->cursor);
+				self->state->cursor.cursor.column = TRACKER_COLUMN_PARAM;
+				self->state->cursor.cursor.digit = columndef->numdigits - 1;
+				trackergrid_scrollright(self, self->state->cursor);
 			} else {
-				trackdef = trackergridstate_trackdef(self->gridstate, self->gridstate->cursor.track);
+				trackdef = trackerstate_trackdef(self->state, self->state->cursor.cursor.track);
 				columndef = trackdef_columndef(trackdef, TRACKER_COLUMN_PARAM);
-				self->gridstate->cursor.column = TRACKER_COLUMN_PARAM;
-				self->gridstate->cursor.digit = columndef->numdigits - 1;
+				self->state->cursor.cursor.column = TRACKER_COLUMN_PARAM;
+				self->state->cursor.cursor.digit = columndef->numdigits - 1;
 			}			
 		}
 	}
-	trackergridstate_synccursor(self->gridstate);
+	workspace_setcursor(self->workspace, self->state->cursor);
 	trackergrid_invalidatecursor(self);
 }
 
@@ -795,16 +795,16 @@ void trackergrid_prevcol(TrackerGrid* self)
 	bool invalidate;
 
 	invalidate = TRUE;
-	switch (trackergridstate_prevcol(self->gridstate, self->wraparound)) {
+	switch (trackerstate_prevcol(self->state, self->wraparound)) {
 	case SCROLL_DIR_LEFT:
-		invalidate = trackergrid_scrollleft(self, self->gridstate->cursor);
+		invalidate = trackergrid_scrollleft(self, self->state->cursor);
 		break;
 	case SCROLL_DIR_RIGHT:
-		invalidate = trackergrid_scrollright(self, self->gridstate->cursor);
+		invalidate = trackergrid_scrollright(self, self->state->cursor);
 		break;
 	default:;
 	}
-	trackergridstate_synccursor(self->gridstate);
+	workspace_setcursor(self->workspace, self->state->cursor);
 	if (invalidate) {
 		trackergrid_invalidatecursor(self);
 	}
@@ -815,16 +815,16 @@ void trackergrid_nextcol(TrackerGrid* self)
 	bool invalidate;
 
 	invalidate = TRUE;
-	switch (trackergridstate_nextcol(self->gridstate, self->wraparound)) {
+	switch (trackerstate_nextcol(self->state, self->wraparound)) {
 	case SCROLL_DIR_LEFT:
-		invalidate = trackergrid_scrollleft(self, self->gridstate->cursor);
+		invalidate = trackergrid_scrollleft(self, self->state->cursor);
 		break;
 	case SCROLL_DIR_RIGHT:
-		invalidate = trackergrid_scrollright(self, self->gridstate->cursor);
+		invalidate = trackergrid_scrollright(self, self->state->cursor);
 		break;
 	default:;
 	}
-	trackergridstate_synccursor(self->gridstate);
+	workspace_setcursor(self->workspace, self->state->cursor);
 	if (invalidate) {
 		trackergrid_invalidatecursor(self);
 	}
@@ -834,7 +834,7 @@ void trackergrid_selectall(TrackerGrid* self)
 {
 	assert(self);
 
-	trackergridstate_selectall(self->gridstate);
+	trackerstate_selectall(self->state);
 	psy_ui_component_invalidate(&self->component);
 }
 
@@ -842,7 +842,7 @@ void trackergrid_selectcol(TrackerGrid* self)
 {
 	assert(self);
 
-	trackergridstate_selectcol(self->gridstate);
+	trackerstate_selectcol(self->state);
 	psy_ui_component_invalidate(&self->component);
 }
 
@@ -850,7 +850,7 @@ void trackergrid_selectbar(TrackerGrid* self)
 {
 	assert(self);
 
-	trackergridstate_selectbar(self->gridstate);
+	trackerstate_selectbar(self->state);
 	psy_ui_component_invalidate(&self->component);
 }
 
@@ -864,8 +864,8 @@ void trackergrid_selectmachine(TrackerGrid* self)
 		psy_audio_PatternNode* node;
 		
 		node = psy_audio_pattern_findnode_cursor(
-			trackergridstate_pattern(self->gridstate),
-			self->gridstate->cursor, &prev);
+			trackerstate_pattern(self->state),
+			self->state->cursor.cursor, &prev);
 		if (node) {
 			psy_audio_PatternEvent* ev;
 
@@ -887,7 +887,7 @@ void trackergrid_setdefaultevent(TrackerGrid* self,
 
 	assert(self);
 
-	node = psy_audio_pattern_findnode_cursor(defaults, self->gridstate->cursor,
+	node = psy_audio_pattern_findnode_cursor(defaults, self->state->cursor.cursor,
 		&prev);
 	if (node) {
 		psy_audio_PatternEvent* defaultevent;
@@ -909,7 +909,7 @@ void trackergrid_rowdelete(TrackerGrid* self)
 {
 	assert(self);
 
-	if (self->gridstate->cursor.offset - trackergridstate_bpl(self->gridstate) >= 0) {
+	if (self->state->cursor.cursor.offset - trackerstate_bpl(self->state) >= 0) {
 		psy_audio_PatternNode* prev;
 		psy_audio_PatternNode* p;
 		psy_audio_PatternNode* q;
@@ -919,23 +919,23 @@ void trackergrid_rowdelete(TrackerGrid* self)
 			trackergrid_prevline(self);
 		}
 		node = psy_audio_pattern_findnode_cursor(
-			trackergridstate_pattern(self->gridstate),
-			self->gridstate->cursor, &prev);
+			trackerstate_pattern(self->state),
+			self->state->cursor.cursor, &prev);
 		if (node) {
-			psy_audio_pattern_remove(trackergridstate_pattern(self->gridstate), node);
+			psy_audio_pattern_remove(trackerstate_pattern(self->state), node);
 			psy_audio_sequencer_checkiterators(
 				&workspace_player(self->workspace)->sequencer,
 				node);
 		}
 		p = (prev)
 			? prev->next
-			: psy_audio_pattern_begin(trackergridstate_pattern(self->gridstate));
+			: psy_audio_pattern_begin(trackerstate_pattern(self->state));
 		for (; p != NULL; p = q) {
 			psy_audio_PatternEntry* entry;
 
 			q = p->next;
 			entry = psy_audio_patternnode_entry(p);
-			if (entry->track == self->gridstate->cursor.track) {
+			if (entry->track == self->state->cursor.cursor.track) {
 				psy_audio_PatternEvent event;
 				psy_dsp_big_beat_t offset;
 				uintptr_t track;
@@ -945,13 +945,13 @@ void trackergrid_rowdelete(TrackerGrid* self)
 				event = *psy_audio_patternentry_front(entry);
 				offset = entry->offset;
 				track = entry->track;
-				psy_audio_pattern_remove(trackergridstate_pattern(self->gridstate), p);
+				psy_audio_pattern_remove(trackerstate_pattern(self->state), p);
 				psy_audio_sequencer_checkiterators(
 					&workspace_player(self->workspace)->sequencer, p);
-				offset -= (psy_dsp_big_beat_t)trackergridstate_bpl(self->gridstate);
+				offset -= (psy_dsp_big_beat_t)trackerstate_bpl(self->state);
 				node = psy_audio_pattern_findnode(
-					trackergridstate_pattern(self->gridstate), track, offset,
-					(psy_dsp_big_beat_t)trackergridstate_bpl(self->gridstate),
+					trackerstate_pattern(self->state), track, offset,
+					(psy_dsp_big_beat_t)trackerstate_bpl(self->state),
 					&prev);
 				if (node) {
 					psy_audio_PatternEntry* entry;
@@ -960,7 +960,7 @@ void trackergrid_rowdelete(TrackerGrid* self)
 					*psy_audio_patternentry_front(entry) = event;
 				} else {
 					psy_audio_pattern_insert(
-						trackergridstate_pattern(self->gridstate), prev, track,
+						trackerstate_pattern(self->state), prev, track,
 						offset, &event);
 				}
 			}
@@ -972,12 +972,12 @@ void trackergrid_rowclear(TrackerGrid* self)
 {
 	assert(self);
 
-	if (self->gridstate->cursor.column == TRACKER_COLUMN_NOTE) {
+	if (self->state->cursor.cursor.column == TRACKER_COLUMN_NOTE) {
 		psy_undoredo_execute(&self->workspace->undoredo,
-			&removecommand_alloc(trackergridstate_pattern(self->gridstate),
-				trackergridstate_bpl(self->gridstate),
-			self->gridstate->cursor,
-			(self->gridstate->synccursor)
+			&removecommand_alloc(trackerstate_pattern(self->state),
+				trackerstate_bpl(self->state),
+			self->state->cursor,
+			(self->state->synccursor)
 				? self->workspace
 				: NULL)->command);
 		trackergrid_advanceline(self);		
@@ -985,8 +985,8 @@ void trackergrid_rowclear(TrackerGrid* self)
 		TrackDef* trackdef;
 		TrackColumnDef* columndef;
 
-		trackdef = trackergridstate_trackdef(self->gridstate, self->gridstate->cursor.track);
-		columndef = trackdef_columndef(trackdef, self->gridstate->cursor.column);
+		trackdef = trackerstate_trackdef(self->state, self->state->cursor.cursor.track);
+		columndef = trackdef_columndef(trackdef, self->state->cursor.cursor.column);
 		trackergrid_inputvalue(self, columndef->emptyvalue, 0);
 	}
 }
@@ -1010,8 +1010,8 @@ bool trackergrid_onnotecmds(TrackerGrid* self, InputHandler* sender)
 			psy_audio_player_playevent(&self->workspace->player, &ev);
 			return 1;
 		} else if (cmd.id == CMD_NOTE_CHORD_END) {
-			self->gridstate->cursor.track = self->chordbegin;
-			trackergrid_scrollleft(self, self->gridstate->cursor);
+			self->state->cursor.cursor.track = self->chordbegin;
+			trackergrid_scrollleft(self, self->state->cursor);
 			trackergrid_advanceline(self);			
 			return 1;
 		} else if (cmd.id >= CMD_NOTE_CHORD_C_0 && cmd.id < CMD_NOTE_STOP) {
@@ -1023,18 +1023,18 @@ bool trackergrid_onnotecmds(TrackerGrid* self, InputHandler* sender)
 			psy_audio_player_playevent(&self->workspace->player, &ev);
 		}
 		psy_undoredo_execute(&self->workspace->undoredo,
-			&insertcommand_alloc(trackergridstate_pattern(self->gridstate),
-				trackergridstate_bpl(self->gridstate),
-				self->gridstate->cursor, ev,
-				(self->gridstate->synccursor) ? self->workspace : NULL)->command);
+			&insertcommand_alloc(trackerstate_pattern(self->state),
+				trackerstate_bpl(self->state),
+				self->state->cursor, ev,
+				(self->state->synccursor) ? self->workspace : NULL)->command);
 		if (chord != FALSE) {
 			trackergrid_nexttrack(self);
 		} else {
 			trackergrid_advanceline(self);
 		}
 		if (ev.note < psy_audio_NOTECOMMANDS_RELEASE) {
-			self->gridstate->cursor.key = ev.note;
-			trackergridstate_synccursor(self->gridstate);
+			self->state->cursor.cursor.key = ev.note;
+			workspace_setcursor(self->workspace, self->state->cursor);
 		}
 		trackergrid_enablepatternsync(self);
 		return 1;
@@ -1068,14 +1068,14 @@ bool trackergrid_onmidicmds(TrackerGrid* self, InputHandler* sender)
 						self->workspace))) {
 				trackergrid_preventpatternsync(self);
 				psy_undoredo_execute(&self->workspace->undoredo,
-					&insertcommand_alloc(trackergridstate_pattern(self->gridstate),
-						trackergridstate_bpl(self->gridstate),
-						self->gridstate->cursor, ev,
-						(self->gridstate->synccursor) ? self->workspace : NULL)->command);
+					&insertcommand_alloc(trackerstate_pattern(self->state),
+						trackerstate_bpl(self->state),
+						self->state->cursor, ev,
+						(self->state->synccursor) ? self->workspace : NULL)->command);
 				trackergrid_advanceline(self);
 				if (ev.note < psy_audio_NOTECOMMANDS_RELEASE) {
-					self->gridstate->cursor.key = ev.note;
-					trackergridstate_synccursor(self->gridstate);
+					self->state->cursor.cursor.key = ev.note;
+					workspace_setcursor(self->workspace, self->state->cursor);
 				}
 				trackergrid_enablepatternsync(self);
 			}
@@ -1089,7 +1089,7 @@ void trackergrid_inputvalue(TrackerGrid* self, intptr_t value, intptr_t digit)
 {
 	assert(self);
 
-	if (trackergridstate_pattern(self->gridstate) && value != -1) {
+	if (trackerstate_pattern(self->state) && value != -1) {
 		psy_audio_PatternNode* prev;
 		psy_audio_PatternEntry* entry;
 		psy_audio_PatternNode* node;
@@ -1097,28 +1097,28 @@ void trackergrid_inputvalue(TrackerGrid* self, intptr_t value, intptr_t digit)
 		TrackDef* trackdef;
 		TrackColumnDef* columndef;
 
-		trackdef = trackergridstate_trackdef(self->gridstate, self->gridstate->cursor.track);
-		columndef = trackdef_columndef(trackdef, self->gridstate->cursor.column);
+		trackdef = trackerstate_trackdef(self->state, self->state->cursor.cursor.track);
+		columndef = trackdef_columndef(trackdef, self->state->cursor.cursor.column);
 		psy_audio_patternentry_init(&newentry);
 		node = psy_audio_pattern_findnode_cursor(
-			trackergridstate_pattern(self->gridstate),
-			self->gridstate->cursor, &prev);
+			trackerstate_pattern(self->state),
+			self->state->cursor.cursor, &prev);
 		if (node) {
 			entry = (psy_audio_PatternEntry*)node->entry;
 		} else {
 			entry = &newentry;
 		}
 		if (digit) {
-			trackergrid_enterdigitcolumn(self, entry, self->gridstate->cursor,
+			trackergrid_enterdigitcolumn(self, entry, self->state->cursor.cursor,
 				value);
 		} else {
-			entervaluecolumn(entry, self->gridstate->cursor.column, value);
+			entervaluecolumn(entry, self->state->cursor.cursor.column, value);
 		}
 		trackergrid_preventpatternsync(self);
 		psy_undoredo_execute(&self->workspace->undoredo,
-			&insertcommand_alloc(trackergridstate_pattern(self->gridstate),
-				trackergridstate_bpl(self->gridstate),
-				self->gridstate->cursor,
+			&insertcommand_alloc(trackerstate_pattern(self->state),
+				trackerstate_bpl(self->state),
+				self->state->cursor,
 				*psy_audio_patternentry_front(entry),
 				self->workspace)->command);
 		if (self->effcursoralwaysdown) {
@@ -1128,16 +1128,16 @@ void trackergrid_inputvalue(TrackerGrid* self, intptr_t value, intptr_t digit)
 				if (columndef->wrapclearcolumn == TRACKER_COLUMN_NONE) {
 					trackergrid_nextcol(self);
 				} else {
-					self->gridstate->cursor.digit = 0;
-					self->gridstate->cursor.column = columndef->wrapclearcolumn;
+					self->state->cursor.cursor.digit = 0;
+					self->state->cursor.cursor.column = columndef->wrapclearcolumn;
 					trackergrid_advanceline(self);
 				}
-			} else if (self->gridstate->cursor.digit + 1 >= columndef->numdigits) {
+			} else if (self->state->cursor.cursor.digit + 1 >= columndef->numdigits) {
 				if (columndef->wrapeditcolumn == TRACKER_COLUMN_NONE) {
 					trackergrid_nextcol(self);
 				} else {
-					self->gridstate->cursor.digit = 0;
-					self->gridstate->cursor.column = columndef->wrapeditcolumn;
+					self->state->cursor.cursor.digit = 0;
+					self->state->cursor.cursor.column = columndef->wrapeditcolumn;
 					trackergrid_advanceline(self);
 				}
 			} else {
@@ -1154,8 +1154,8 @@ void trackergrid_invalidatecursor(TrackerGrid* self)
 {	
 	assert(self);
 
-	trackergrid_invalidateinternalcursor(self, self->oldcursor);
-	trackergrid_invalidateinternalcursor(self, self->gridstate->cursor);
+	trackergrid_invalidateinternalcursor(self, self->oldcursor.cursor);
+	trackergrid_invalidateinternalcursor(self, self->state->cursor.cursor);
 	trackergrid_storecursor(self);	
 }
 
@@ -1173,11 +1173,11 @@ void trackergrid_invalidateinternalcursor(TrackerGrid* self,
 			psy_ui_realrectangle_make(
 				psy_ui_realpoint_make(
 					0.0,
-					trackergridstate_beattopx(self->gridstate, cursor.offset +
+					trackerstate_beattopx(self->state, cursor.offset +
 						cursor.seqoffset)),
 				psy_ui_realsize_make(
 					size.width,
-					trackergridstate_lineheight(self->gridstate))));
+					trackerstate_lineheight(self->state))));
 	}
 }
 
@@ -1185,13 +1185,13 @@ void trackergrid_invalidateline(TrackerGrid* self, psy_dsp_big_beat_t position)
 {
 	assert(self);
 
-	if (!trackergridstate_pattern(self->gridstate)) {
+	if (!trackerstate_pattern(self->state)) {
 		return;
 	}	
-	if (!self->gridstate->singlemode ||
-			psy_dsp_testrange(position, self->gridstate->sequenceentryoffset,
-			psy_audio_pattern_length(trackergridstate_pattern(
-				self->gridstate)))) {
+	if (!self->state->singlemode ||
+			psy_dsp_testrange(position, self->state->sequenceentryoffset,
+			psy_audio_pattern_length(trackerstate_pattern(
+				self->state)))) {
 		psy_ui_RealSize size;		
 		
 		size = psy_ui_component_scrollsize_px(&self->component);		
@@ -1199,17 +1199,17 @@ void trackergrid_invalidateline(TrackerGrid* self, psy_dsp_big_beat_t position)
 			psy_ui_realrectangle_make(
 				psy_ui_realpoint_make(					
 					psy_ui_component_scrollleftpx(&self->component),
-					trackergridstate_beattopx(self->gridstate,
+					trackerstate_beattopx(self->state,
 						position -
-						((self->gridstate->singlemode)
-						? self->gridstate->sequenceentryoffset
+						((self->state->singlemode)
+						? self->state->sequenceentryoffset
 						: 0.0))),
-				psy_ui_realsize_make(size.width, self->gridstate->lineheightpx)));
-		if (trackergridstate_pattern(
-			self->gridstate)) {
+				psy_ui_realsize_make(size.width, self->state->lineheightpx)));
+		if (trackerstate_pattern(
+			self->state)) {
 			trackergrid_preventpatternsync(self);
-			trackergridstate_pattern(
-				self->gridstate)->opcount++;
+			trackerstate_pattern(
+				self->state)->opcount++;
 			trackergrid_resetpatternsync(self);
 		}
 	}
@@ -1219,7 +1219,7 @@ void trackergrid_onscroll(TrackerGrid* self, psy_ui_Component* sender)
 {
 	assert(self);
 
-	if (self->gridstate->midline) {
+	if (self->state->midline) {
 		trackergrid_clearmidline(self);
 	}
 }
@@ -1231,23 +1231,23 @@ void trackergrid_clearmidline(TrackerGrid* self)
 	assert(self);
 
 	size = psy_ui_component_scrollsize_px(&self->component);	
-	self->gridstate->midline = FALSE;
+	self->state->midline = FALSE;
 	psy_ui_component_invalidaterect(&self->component,
 		psy_ui_realrectangle_make(
 			psy_ui_realpoint_make(
 				psy_ui_component_scrollleftpx(&self->component),
-				((self->gridstate->visilines) / 2 - 1) * self->gridstate->lineheightpx +
+				((self->state->visilines) / 2 - 1) * self->state->lineheightpx +
 					psy_ui_component_scrolltop_px(&self->component)),
-			psy_ui_realsize_make(size.width, self->gridstate->lineheightpx)));
+			psy_ui_realsize_make(size.width, self->state->lineheightpx)));
 	psy_ui_component_update(&self->component);
-	self->gridstate->midline = TRUE;
+	self->state->midline = TRUE;
 	psy_ui_component_invalidaterect(&self->component,
 		psy_ui_realrectangle_make(
 			psy_ui_realpoint_make(
 				psy_ui_component_scrollleftpx(&self->component),
-				(self->gridstate->visilines / 2 - 2) * self->gridstate->lineheightpx +
+				(self->state->visilines / 2 - 2) * self->state->lineheightpx +
 				psy_ui_component_scrolltop_px(&self->component)),
-			psy_ui_realsize_make(size.width, self->gridstate->lineheightpx * 4)));		
+			psy_ui_realsize_make(size.width, self->state->lineheightpx * 4)));		
 }
 
 void trackergrid_centeroncursor(TrackerGrid* self)
@@ -1256,18 +1256,18 @@ void trackergrid_centeroncursor(TrackerGrid* self)
 
 	assert(self);
 
-	line = trackergridstate_beattoline(self->gridstate,
-		self->gridstate->cursor.offset);
+	line = trackerstate_beattoline(self->state,
+		self->state->cursor.cursor.offset);
 	psy_ui_component_setscrolltop_px(&self->component,		
-		-(self->gridstate->visilines / 2 - line) *
-			self->gridstate->lineheightpx);
+		-(self->state->visilines / 2 - line) *
+			self->state->lineheightpx);
 }
 
 void trackergrid_setcentermode(TrackerGrid* self, int mode)
 {
 	assert(self);
 
-	self->gridstate->midline = mode;
+	self->state->midline = mode;
 	if (mode) {
 		psy_ui_component_setoverflow(&self->component,
 			(psy_ui_Overflow)(psy_ui_OVERFLOW_SCROLL | psy_ui_OVERFLOW_VSCROLLCENTER));
@@ -1283,14 +1283,14 @@ void trackergrid_onmousedown(TrackerGrid* self, psy_ui_MouseEvent* ev)
 {
 	assert(self);
 
-	if (self->gridstate->trackconfig->colresize) {
+	if (self->state->trackconfig->colresize) {
 		psy_signal_emit(&self->signal_colresize, self, 0);
-	} else if (trackergridstate_pattern(self->gridstate) && ev->button == 1) {		
-		if (!self->gridstate->singlemode) {
+	} else if (trackerstate_pattern(self->state) && ev->button == 1) {		
+		if (!self->state->singlemode) {
 			psy_audio_OrderIndex index;
 
 			index = trackergrid_checkupdatecursorseqoffset(self,
-				&self->gridstate->dragselectionbase);
+				&self->state->dragselectionbase.cursor);
 			if (psy_audio_orderindex_valid(&index)) {
 				self->preventscrolltop = TRUE;
 				workspace_setseqeditposition(self->workspace,
@@ -1298,10 +1298,10 @@ void trackergrid_onmousedown(TrackerGrid* self, psy_ui_MouseEvent* ev)
 				self->preventscrolltop = FALSE;
 			}
 		}
-		self->lastdragcursor = self->gridstate->dragselectionbase;
-		psy_audio_patternselection_init_all(&self->gridstate->selection,
-			self->gridstate->dragselectionbase, self->gridstate->dragselectionbase);
-		psy_audio_patternselection_disable(&self->gridstate->selection);
+		self->lastdragcursor = self->state->dragselectionbase;
+		psy_audio_patternselection_init_all(&self->state->selection,
+			self->state->dragselectionbase.cursor, self->state->dragselectionbase.cursor);
+		psy_audio_patternselection_disable(&self->state->selection);
 		if (!psy_ui_component_hasfocus(&self->component)) {
 			psy_ui_component_setfocus(&self->component);
 		}
@@ -1314,44 +1314,44 @@ void trackergrid_onmousemove(TrackerGrid* self, psy_ui_MouseEvent* ev)
 	assert(self);
 
 	if (ev->button == 1) {
-		if (self->gridstate->trackconfig->colresize) {
+		if (self->state->trackconfig->colresize) {
 			psy_signal_emit(&self->signal_colresize, self, 0);
 			psy_ui_mouseevent_stop_propagation(ev);
 		} else {					
-			if (!psy_audio_patterncursor_equal(&self->gridstate->dragcursor,
-					&self->lastdragcursor)) {
-				if (!psy_audio_patternselection_valid(&self->gridstate->selection)) {
-					trackergridstate_startdragselection(self->gridstate,
-						self->gridstate->dragcursor,
-						trackergridstate_bpl(self->gridstate));
+			if (!psy_audio_patterncursor_equal(&self->state->dragcursor.cursor,
+					&self->lastdragcursor.cursor)) {
+				if (!psy_audio_patternselection_valid(&self->state->selection)) {
+					trackerstate_startdragselection(self->state,
+						self->state->dragcursor,
+						trackerstate_bpl(self->state));
 				} else {					
-					trackergrid_dragselection(self, self->gridstate->dragcursor);
+					trackergrid_dragselection(self, self->state->dragcursor);
 				}
 				psy_ui_component_invalidate(&self->component);
-				self->lastdragcursor = self->gridstate->dragcursor;
+				self->lastdragcursor = self->state->dragcursor;
 			}			
 		}
 	}
 }
 
-void trackergrid_dragselection(TrackerGrid* self, psy_audio_PatternCursor cursor)
+void trackergrid_dragselection(TrackerGrid* self, psy_audio_SequenceCursor cursor)
 {
-	int restoremidline = self->gridstate->midline;
+	int restoremidline = self->state->midline;
 	
-	self->gridstate->midline = 0;
-	trackergridstate_dragselection(self->gridstate, cursor,
-		trackergridstate_bpl(self->gridstate));
-	if (cursor.offset < self->lastdragcursor.offset) {
+	self->state->midline = 0;
+	trackerstate_dragselection(self->state, cursor,
+		trackerstate_bpl(self->state));
+	if (cursor.cursor.offset < self->lastdragcursor.cursor.offset) {
 		trackergrid_scrollup(self, cursor);
 	} else {
 		trackergrid_scrolldown(self, cursor);
 	}
-	if (cursor.track < self->lastdragcursor.track) {
+	if (cursor.cursor.track < self->lastdragcursor.cursor.track) {
 		trackergrid_scrollleft(self, cursor);
 	} else {
 		trackergrid_scrollright(self, cursor);
 	}
-	self->gridstate->midline = restoremidline;
+	self->state->midline = restoremidline;
 }
 
 void trackergrid_onmouseup(TrackerGrid* self, psy_ui_MouseEvent* ev)
@@ -1362,16 +1362,16 @@ void trackergrid_onmouseup(TrackerGrid* self, psy_ui_MouseEvent* ev)
 	if (ev->button != 1) {
 		return;
 	}	
-	if (self->gridstate->trackconfig->colresize) {
-		self->gridstate->trackconfig->colresize = FALSE;
+	if (self->state->trackconfig->colresize) {
+		self->state->trackconfig->colresize = FALSE;
 		psy_signal_emit(&self->signal_colresize, self, 0);		
-	} else if (!psy_audio_patternselection_valid(&self->gridstate->selection)) {
+	} else if (!psy_audio_patternselection_valid(&self->state->selection)) {
 		/* set cursor only, if no selection was made */
-		if (!self->gridstate->singlemode) {
+		if (!self->state->singlemode) {
 			psy_audio_OrderIndex index;
 			
 			index = trackergrid_checkupdatecursorseqoffset(self,
-				&self->gridstate->dragselectionbase);
+				&self->state->dragselectionbase.cursor);
 			if (psy_audio_orderindex_valid(&index)) {
 				self->preventscrolltop = TRUE;
 				workspace_setseqeditposition(self->workspace,
@@ -1379,11 +1379,11 @@ void trackergrid_onmouseup(TrackerGrid* self, psy_ui_MouseEvent* ev)
 				self->preventscrolltop = FALSE;
 			}			
 		}
-		self->gridstate->cursor = self->gridstate->dragselectionbase;
-		if (!psy_audio_patterncursor_equal(&self->oldcursor, &self->gridstate->cursor)) {
+		self->state->cursor = self->state->dragselectionbase;
+		if (!psy_audio_patterncursor_equal(&self->oldcursor.cursor, &self->state->cursor.cursor)) {
 			trackergrid_invalidatecursor(self);
 		}
-		trackergridstate_synccursor(self->gridstate);
+		workspace_setcursor(self->workspace, self->state->cursor);
 	}	
 }
 
@@ -1401,39 +1401,39 @@ void trackergrid_setpattern(TrackerGrid* self, psy_audio_Pattern* pattern)
 	assert(self);
 		
 	patterncmds_setpattern(&self->cmds, pattern);
-	trackergridstate_setpattern(self->gridstate, pattern);	
-	trackergridstate_setpattern(self->gridstate, pattern);
+	trackerstate_setpattern(self->state, pattern);	
+	trackerstate_setpattern(self->state, pattern);
 	trackergrid_resetpatternsync(self);
 	psy_ui_component_updateoverflow(trackergrid_base(self));	
 	if (psy_audio_player_playing(workspace_player(self->workspace)) ||
-			!trackergridstate_cursorposition_valid(self->gridstate)) {		
-		if (!self->gridstate->singlemode) {
-			self->gridstate->cursor.seqoffset =
+			!trackerstate_cursorposition_valid(self->state)) {		
+		if (!self->state->singlemode) {
+			self->state->cursor.cursor.seqoffset =
 				trackergrid_currseqoffset(self);
 			if (!workspace_followingsong(self->workspace)) {
 				psy_ui_component_setscrolltop_px(&self->component,
-					trackergridstate_beattopx(self->gridstate,
-						self->gridstate->cursor.offset +
-						self->gridstate->cursor.seqoffset));
+					trackerstate_beattopx(self->state,
+						self->state->cursor.cursor.offset +
+						self->state->cursor.cursor.seqoffset));
 			} else {
-				self->gridstate->cursor.offset = 0;
+				self->state->cursor.cursor.offset = 0;
 			}
 		} else {
-			self->gridstate->cursor.offset = 0;
+			self->state->cursor.cursor.offset = 0;
 			psy_ui_component_setscrolltop_px(&self->component, 0.0);
 		}		
-	} else if (!self->gridstate->singlemode) {
-		self->gridstate->cursor.offset = 0;
-		self->gridstate->cursor.seqoffset =
+	} else if (!self->state->singlemode) {
+		self->state->cursor.cursor.offset = 0;
+		self->state->cursor.cursor.seqoffset =
 			trackergrid_currseqoffset(self);		
 		if (!self->preventscrolltop) {
 			psy_ui_component_setscrolltop_px(&self->component,
-				trackergridstate_beattopx(self->gridstate,
-					self->gridstate->cursor.offset +
-					self->gridstate->cursor.seqoffset));
+				trackerstate_beattopx(self->state,
+					self->state->cursor.cursor.offset +
+					self->state->cursor.cursor.seqoffset));
 		}
 	}
-	if (self->gridstate->midline) {
+	if (self->state->midline) {
 		trackergrid_centeroncursor(self);
 	}
 }
@@ -1458,9 +1458,9 @@ void trackergrid_resetpatternsync(TrackerGrid* self)
 {
 	assert(self);
 
-	if (trackergridstate_pattern(self->gridstate)) {
-		self->component.opcount = trackergridstate_pattern(
-			self->gridstate)->opcount;
+	if (trackerstate_pattern(self->state)) {
+		self->component.opcount = trackerstate_pattern(
+			self->state)->opcount;
 	} else {
 		self->component.opcount = 0;
 	}
@@ -1470,7 +1470,7 @@ void trackergrid_changegenerator(TrackerGrid* self)
 {
 	assert(self);
 
-	patterncmds_changemachine(&self->cmds, self->gridstate->selection);
+	patterncmds_changemachine(&self->cmds, self->state->selection);
 	psy_ui_component_invalidate(&self->component);
 }
 
@@ -1478,7 +1478,7 @@ void trackergrid_changeinstrument(TrackerGrid* self)
 {
 	assert(self);
 	
-	patterncmds_changeinstrument(&self->cmds, self->gridstate->selection);
+	patterncmds_changeinstrument(&self->cmds, self->state->selection);
 	psy_ui_component_invalidate(&self->component);	
 }
 
@@ -1494,14 +1494,14 @@ void trackergrid_blockcopy(TrackerGrid* self)
 {
 	assert(self);
 
-	patterncmds_blockcopy(&self->cmds, self->gridstate->selection);
+	patterncmds_blockcopy(&self->cmds, self->state->selection);
 }
 
 void trackergrid_blockpaste(TrackerGrid* self)
 {
 	assert(self);
 
-	patterncmds_blockpaste(&self->cmds,	self->gridstate->cursor, FALSE);
+	patterncmds_blockpaste(&self->cmds,	self->state->cursor, FALSE);
 	trackergrid_movecursorwhenpaste(self);
 	psy_ui_component_invalidate(&self->component);
 }
@@ -1510,7 +1510,7 @@ void trackergrid_blockmixpaste(TrackerGrid* self)
 {
 	assert(self);
 
-	patterncmds_blockpaste(&self->cmds,	self->gridstate->cursor, TRUE);
+	patterncmds_blockpaste(&self->cmds,	self->state->cursor, TRUE);
 	trackergrid_movecursorwhenpaste(self);
 	psy_ui_component_invalidate(&self->component);	
 }
@@ -1524,17 +1524,17 @@ bool trackergrid_movecursorwhenpaste(TrackerGrid* self)
 		psy_audio_PatternCursor begin;
 		psy_audio_PatternCursor end;
 
-		begin = end = self->gridstate->cursor;
+		begin = end = self->state->cursor.cursor;
 		end.track += self->workspace->patternpaste.maxsongtracks;
 		end.offset += self->workspace->patternpaste.length;
 		end.track = begin.track;
-		if (end.offset >= psy_audio_pattern_length(trackergridstate_pattern(self->gridstate))) {
-			end.offset = psy_audio_pattern_length(trackergridstate_pattern(self->gridstate)) -
-				trackergridstate_bpl(self->gridstate);
+		if (end.offset >= psy_audio_pattern_length(trackerstate_pattern(self->state))) {
+			end.offset = psy_audio_pattern_length(trackerstate_pattern(self->state)) -
+				trackerstate_bpl(self->state);
 		}		
-		self->gridstate->cursor = end;
-		trackergridstate_synccursor(self->gridstate);
-		self->oldcursor = end;
+		self->state->cursor.cursor = end;
+		workspace_setcursor(self->workspace, self->state->cursor);
+		self->oldcursor.cursor = end;
 		return TRUE;
 	}
 	return FALSE;
@@ -1544,7 +1544,7 @@ void trackergrid_blockdelete(TrackerGrid* self)
 {
 	assert(self);
 	
-	patterncmds_blockdelete(&self->cmds, self->gridstate->selection);
+	patterncmds_blockdelete(&self->cmds, self->state->selection);
 	psy_ui_component_invalidate(&self->component);	
 }
 
@@ -1552,10 +1552,10 @@ void trackergrid_blockstart(TrackerGrid* self)
 {
 	assert(self);
 
-	self->gridstate->dragselectionbase = self->gridstate->cursor;
-	trackergridstate_startdragselection(self->gridstate,
-		self->gridstate->cursor,
-		trackergridstate_bpl(self->gridstate));
+	self->state->dragselectionbase = self->state->cursor;
+	trackerstate_startdragselection(self->state,
+		self->state->cursor,
+		trackerstate_bpl(self->state));
 	psy_ui_component_invalidate(&self->component);
 }
 
@@ -1563,7 +1563,7 @@ void trackergrid_blockend(TrackerGrid* self)
 {
 	assert(self);
 
-	trackergrid_dragselection(self, self->gridstate->cursor);
+	trackergrid_dragselection(self, self->state->cursor);
 	psy_ui_component_invalidate(&self->component);
 }
 
@@ -1571,7 +1571,7 @@ void trackergrid_blockunmark(TrackerGrid* self)
 {
 	assert(self);
 
-	psy_audio_patternselection_disable(&self->gridstate->selection);
+	psy_audio_patternselection_disable(&self->state->selection);
 	psy_ui_component_invalidate(&self->component);
 }
 
@@ -1579,32 +1579,32 @@ void trackergrid_blocktransposeup(TrackerGrid* self)
 {
 	assert(self);
 	
-	patterncmds_blocktranspose(&self->cmds, self->gridstate->selection,
-		self->gridstate->cursor, +1);
+	patterncmds_blocktranspose(&self->cmds, self->state->selection,
+		self->state->cursor, +1);
 }
 
 void trackergrid_blocktransposedown(TrackerGrid* self)
 {
 	assert(self);
 
-	patterncmds_blocktranspose(&self->cmds, self->gridstate->selection,
-		self->gridstate->cursor, -1);
+	patterncmds_blocktranspose(&self->cmds, self->state->selection,
+		self->state->cursor, -1);
 }
 
 void trackergrid_blocktransposeup12(TrackerGrid* self)
 {
 	assert(self);
 
-	patterncmds_blocktranspose(&self->cmds,	self->gridstate->selection,
-		self->gridstate->cursor, 12);
+	patterncmds_blocktranspose(&self->cmds,	self->state->selection,
+		self->state->cursor, 12);
 }
 
 void trackergrid_blocktransposedown12(TrackerGrid* self)
 {
 	assert(self);
 
-	patterncmds_blocktranspose(&self->cmds,	self->gridstate->selection,
-		self->gridstate->cursor, -12);
+	patterncmds_blocktranspose(&self->cmds,	self->state->selection,
+		self->state->cursor, -12);
 }
 
 void trackergrid_enterdigitcolumn(TrackerGrid* self,
@@ -1615,7 +1615,7 @@ void trackergrid_enterdigitcolumn(TrackerGrid* self,
 
 	assert(self);
 
-	trackdef = trackergridstate_trackdef(self->gridstate, cursor.track);
+	trackdef = trackerstate_trackdef(self->state, cursor.track);
 	if (trackdef) {
 		uintptr_t value;
 		uintptr_t num;
@@ -1763,7 +1763,7 @@ bool trackergrid_handlecommand(TrackerGrid* self, intptr_t cmd)
 	case CMD_DIGITD:
 	case CMD_DIGITE:
 	case CMD_DIGITF:
-		if (self->gridstate->cursor.column != TRACKER_COLUMN_NOTE) {
+		if (self->state->cursor.cursor.column != TRACKER_COLUMN_NOTE) {
 			int digit = (int)cmd - CMD_DIGIT0;
 			if (digit != -1) {
 				trackergrid_inputvalue(self, digit, 1);
@@ -1803,8 +1803,8 @@ void trackergrid_tweak(TrackerGrid* self, int slot, uintptr_t tweak,
 		event.inst = (unsigned char)tweak;
 		trackergrid_preventpatternsync(self);
 		psy_undoredo_execute(&self->workspace->undoredo,
-			&insertcommand_alloc(trackergridstate_pattern(self->gridstate), trackergridstate_bpl(self->gridstate),
-				self->gridstate->cursor, event, self->workspace)->command);
+			&insertcommand_alloc(trackerstate_pattern(self->state), trackerstate_bpl(self->state),
+				self->state->cursor, event, self->workspace)->command);
 		if (keyboardmiscconfig_advancelineonrecordtweak(&self->workspace->config.misc) &&
 			!(workspace_followingsong(self->workspace) &&
 				psy_audio_player_playing(workspace_player(self->workspace)))) {
@@ -1828,7 +1828,7 @@ void trackergrid_showemptydata(TrackerGrid* self, int showstate)
 {
 	assert(self);
 
-	self->gridstate->showemptydata = showstate;
+	self->state->showemptydata = showstate;
 	psy_ui_component_invalidate(&self->component);
 }
 
@@ -1838,18 +1838,18 @@ void trackergrid_ongotocursor(TrackerGrid* self, Workspace* sender,
 	double y;
 	psy_ui_RealSize clientsize;
 	
-	y = trackergridstate_beattopx(self->gridstate,
+	y = trackerstate_beattopx(self->state,
 		cursor->offset -
-		((self->gridstate->singlemode)
-			? self->gridstate->sequenceentryoffset
+		((self->state->singlemode)
+			? self->state->sequenceentryoffset
 			: 0.0));
 	clientsize = psy_ui_component_clientsize_px(&self->component);
 	if (y < psy_ui_component_scrolltop_px(&self->component) ||
 		y > psy_ui_component_scrolltop_px(&self->component) + clientsize.height) {
 		psy_ui_component_setscrolltop_px(&self->component,
-			trackergridstate_beattopx(self->gridstate,
-				self->gridstate->cursor.offset +
-				self->gridstate->cursor.seqoffset));
+			trackerstate_beattopx(self->state,
+				self->state->cursor.cursor.offset +
+				self->state->cursor.cursor.seqoffset));
 	}
 }
 
@@ -1859,11 +1859,11 @@ void trackergrid_build(TrackerGrid* self)
 	
 	psy_ui_component_clear(&self->component);
 	psy_table_clear(&self->columns);
-	for (t = 0; t < trackergridstate_numsongtracks(self->gridstate); ++t) {
-		psy_table_insert(&self->columns, t, (void*)
+	for (t = 0; t < trackerstate_numsongtracks(self->state); ++t) {
+		psy_table_insert(&self->columns, t, (void*)	
 			trackercolumn_allocinit(&self->component,
 				(self->view) ? self->view : &self->component, t,
-				self->gridstate, self->workspace));
+				self->state, self->workspace));
 	}
 	psy_ui_component_align(&self->component);
 }

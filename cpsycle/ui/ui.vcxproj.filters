@@ -307,6 +307,9 @@
     <ClCompile Include="src\imps\natives\uinativelistboximp.c">
       <Filter>imps\natives\comps</Filter>
     </ClCompile>
+    <ClCompile Include="src\uibmpreader.c">
+      <Filter>graphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\uibutton.h">
@@ -554,6 +557,9 @@
     </ClInclude>
     <ClInclude Include="src\imps\natives\uinativelistboximp.h">
       <Filter>imps\natives\comps</Filter>
+    </ClInclude>
+    <ClInclude Include="src\uibmpreader.h">
+      <Filter>graphics</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

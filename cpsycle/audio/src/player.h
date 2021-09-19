@@ -79,7 +79,7 @@ typedef struct psy_audio_Player {
 	psy_List* nodes_queue_;
 	psy_Lock mutex;
 	psy_Lock block;
-	uintptr_t waiting;
+	uintptr_t waiting;	
 } psy_audio_Player;
 
 void psy_audio_player_init(psy_audio_Player*, psy_audio_Song*,

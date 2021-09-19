@@ -69,7 +69,7 @@ typedef struct PatternView {
 	SwingFillView swingfillview;
 	/* internal data */	
 	TrackConfig trackconfig;
-	TrackerGridState gridstate;
+	TrackerState state;
 	PatternViewSkin skin;	
 	bool showdefaultline;
 	PatternCursorStepMode pgupdownstepmode;
@@ -77,6 +77,7 @@ typedef struct PatternView {
 	bool trackmodeswingfill;	
 	int baselfheight;
 	uintptr_t display;
+	uintptr_t lastplayline;
 	bool aligndisplay;
 	int updatealign;
 	/* references */

@@ -296,6 +296,23 @@ double psy_audio_sequence_trackheight(const psy_audio_Sequence*,
 void psy_audio_sequence_settrackheight(psy_audio_Sequence*,
 	uintptr_t trackindex, double height);
 
+/* psy_audio_SequenceCursor */
+typedef struct psy_audio_SequenceCursor {
+	psy_audio_PatternCursor cursor;
+	psy_audio_OrderIndex orderindex;
+} psy_audio_SequenceCursor;
+
+void psy_audio_sequencecursor_init(psy_audio_SequenceCursor*);
+void psy_audio_sequencecursor_init_all(psy_audio_SequenceCursor*,
+	psy_audio_OrderIndex orderindex);
+
+uintptr_t psy_audio_sequencecursor_patternid(const psy_audio_SequenceCursor*,
+	const psy_audio_Sequence*);
+uintptr_t psy_audio_sequencecursor_line(const psy_audio_SequenceCursor*);
+uintptr_t psy_audio_sequencecursor_track(const psy_audio_SequenceCursor*);
+uintptr_t psy_audio_sequencecursor_column(const psy_audio_SequenceCursor*);
+uintptr_t psy_audio_sequencecursor_digit(const psy_audio_SequenceCursor*);
+
 #ifdef __cplusplus
 }
 #endif

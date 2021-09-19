@@ -25,6 +25,7 @@ typedef struct {
 } psy_audio_MachineUi;
 
 struct psy_audio_Instrument;
+struct psy_audio_Song;
 
 /* song loadand save */
 typedef struct psy_audio_SongFile {
@@ -42,6 +43,7 @@ typedef struct psy_audio_SongFile {
 } psy_audio_SongFile;
 
 void psy_audio_songfile_init(psy_audio_SongFile*);
+void psy_audio_songfile_init_song(psy_audio_SongFile*, struct psy_audio_Song*);
 void psy_audio_songfile_dispose(psy_audio_SongFile*);
 int psy_audio_songfile_load(psy_audio_SongFile*, const char* filename);
 int psy_audio_songfile_save(psy_audio_SongFile*, const char* filename);

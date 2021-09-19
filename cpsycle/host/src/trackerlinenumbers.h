@@ -35,13 +35,13 @@ typedef struct TrackerLineNumbersLabel {
 	bool useheaderbitmap;
 	/* references */
 	struct TrackerView* view;
-	TrackerGridState* linestate;	
+	TrackerState* linestate;	
 	Workspace* workspace;
 } TrackerLineNumbersLabel;
 
 void trackerlinenumberslabel_init(TrackerLineNumbersLabel*,
 	psy_ui_Component* parent, psy_ui_Component* view, 
-	TrackerGridState*, Workspace*);
+	TrackerState*, Workspace*);
 
 INLINE void trackerlinenumberslabel_setheaderheight(TrackerLineNumbersLabel* self,
 	double headerheight)
@@ -88,17 +88,17 @@ typedef struct TrackerLineNumbers {
 	/* inherits */
 	psy_ui_Component component;
 	/* internal */
-	psy_audio_PatternCursor lastcursor;	
+	psy_audio_SequenceCursor lastcursor;	
 	bool showcursor;
 	bool shownumbersinhex;
 	bool showbeat;
 	/* references */
-	TrackerGridState* linestate;	
+	TrackerState* linestate;	
 	Workspace* workspace;
 } TrackerLineNumbers;
 
 void trackerlinenumbers_init(TrackerLineNumbers*, psy_ui_Component* parent,
-	psy_ui_Component* view, TrackerGridState*, Workspace*);
+	psy_ui_Component* view, TrackerState*, Workspace*);
 void trackerlinenumbers_invalidatecursor(TrackerLineNumbers*,
 	const psy_audio_PatternCursor*);
 void trackerlinenumbers_invalidateline(TrackerLineNumbers*,
@@ -126,7 +126,7 @@ typedef struct TrackerLineNumberBar {
 } TrackerLineNumberBar;
 
 void trackerlinenumberbar_init(TrackerLineNumberBar*, psy_ui_Component*
-	parent, TrackerGridState*, Workspace*);
+	parent, TrackerState*, Workspace*);
 
 INLINE psy_ui_Component* trackerlinenumberbar_base(TrackerLineNumberBar* self)
 {
