@@ -57,6 +57,9 @@ extern "C" {
 #define STYLE_MACHINEVIEW_WIRES              32062
 #define STYLE_MACHINEVIEW_STACK              32063
 #define STYLE_STEPSEQUENCER                  32080
+#define STYLE_STEPSEQUENCER_TILE             32081
+#define STYLE_STEPSEQUENCER_TILE_ACTIVE      32082
+#define STYLE_STEPSEQUENCER_TILE_SELECT      32083
 #define STYLE_TOP                            33020
 #define STYLE_TOPROWS                        33060
 #define STYLE_TOPROW0                        34000

@@ -995,7 +995,10 @@ psy_audio_SequenceCursor pianogrid_makecursor(Pianogrid* self, double x, double 
 {
 	psy_audio_SequenceCursor rv;
 
-	psy_audio_sequencecursor_init(&rv);
+	rv = self->gridstate->cursor;	
+	psy_audio_sequencecursor_updateseqoffset(&rv,
+		&self->workspace->song->sequence);
+	rv.cursor.seqoffset = 0.0;
 	rv.cursor.offset = pianogridstate_quantize(self->gridstate,
 		pianogridstate_pxtobeat(self->gridstate, x));
 	rv.cursor.key = keyboardstate_pxtokey(self->keyboardstate, y);
@@ -1369,6 +1372,7 @@ void pianobar_init(PianoBar* self, psy_ui_Component* parent,
 /* Pianoroll */
 /* protoypes */
 static void pianoroll_ontimer(Pianoroll*, uintptr_t timerid);
+static void pianoroll_onplaylinechanged(Pianoroll*, Workspace* sender);
 static void pianoroll_onlpbchanged(Pianoroll*, psy_audio_Player*,
 	uintptr_t lpb);
 static void pianoroll_onalign(Pianoroll*);
@@ -1479,6 +1483,8 @@ void pianoroll_init(Pianoroll* self, psy_ui_Component* parent,
 		self, pianoroll_onthemechanged);
 	psy_signal_connect(&self->workspace->signal_cursorchanged,
 		self, pianoroll_oncursorchanged);
+	psy_signal_connect(&self->workspace->signal_playlinechanged, self,
+		pianoroll_onplaylinechanged);
 	pianoroll_updatetheme(self);
 	inputhandler_connect(&workspace->inputhandler, INPUTHANDLER_FOCUS,
 		psy_EVENTDRIVER_CMD, "pianoroll", psy_INDEX_INVALID, 
@@ -1504,29 +1510,31 @@ void pianoroll_setpattern(Pianoroll* self, psy_audio_Pattern* pattern)
 	pianoroll_updatescroll(self);
 }
 
+void pianoroll_onplaylinechanged(Pianoroll* self, Workspace* sender)
+{
+	assert(self);
+
+	if (pianogridstate_pattern(&self->gridstate)) {
+		if (sender->lastplayline != psy_INDEX_INVALID) {
+			pianogrid_invalidateline(&self->grid,
+				self->grid.lastplayposition - self->grid.sequenceentryoffset);
+			self->grid.lastplayposition =
+				psy_audio_player_position(workspace_player(self->workspace));
+			pianogrid_invalidateline(&self->grid,
+				self->grid.lastplayposition - self->grid.sequenceentryoffset);
+		} else {
+			pianogrid_invalidateline(&self->grid,
+				self->grid.lastplayposition - self->grid.sequenceentryoffset);
+			self->grid.lastplayposition = -1;
+		}
+	}
+}
+
 void pianoroll_ontimer(Pianoroll* self, uintptr_t timerid)
 {
 	assert(self);
 
-	if (pianogridstate_pattern(&self->gridstate) &&
-			psy_ui_component_visible(&self->component)) {
-		if (psy_audio_player_playing(workspace_player(self->workspace))) {
-			intptr_t line;
-			line = (intptr_t)(psy_audio_player_position(workspace_player(self->workspace)) /
-				self->gridstate.lpb);
-			if (self->grid.lastplayposition / self->gridstate.lpb != line) {
-				pianogrid_invalidateline(&self->grid,
-					self->grid.lastplayposition - self->grid.sequenceentryoffset);
-				self->grid.lastplayposition =
-					psy_audio_player_position(workspace_player(self->workspace));
-				pianogrid_invalidateline(&self->grid,
-					self->grid.lastplayposition - self->grid.sequenceentryoffset);
-			}
-		} else if (self->grid.lastplayposition != -1) {
-			pianogrid_invalidateline(&self->grid,
-				self->grid.lastplayposition - self->grid.sequenceentryoffset);
-			self->grid.lastplayposition = -1;
-		}		
+	if (pianogridstate_pattern(&self->gridstate)) {	
 		if (pianogridstate_pattern(&self->gridstate) &&
 				pianogridstate_pattern(&self->gridstate)->opcount != self->opcount &&
 				self->syncpattern) {

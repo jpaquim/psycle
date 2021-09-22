@@ -850,22 +850,22 @@ void workspace_setsong(Workspace* self, psy_audio_Song* song, int flag)
 		viewhistory_add(&self->viewhistory, view);
 		self->lastentry = 0;
 		psy_audio_exclusivelock_enter();
-		psy_audio_machinecallback_setsong(&self->machinecallback,
-			song);
+		psy_audio_machinecallback_setsong(&self->machinecallback, song);
 		self->song = song;
 		psy_audio_player_setsong(&self->player, self->song);
 		workspace_updatemetronome(self);				
 		if (flag == WORKSPACE_NEWSONG) {
 			psy_audio_player_setsamplerindex(&self->player,
 				seqeditconfig_machine(&self->config.seqedit));
-		}
-		psy_audio_sequenceselection_clear(&self->sequenceselection);		
-		workspace_select(self, psy_audio_orderindex_make(0, 0));
+		}				
 		psy_audio_exclusivelock_leave();
 		psy_signal_emit(&self->signal_songchanged, self, 2, flag, self->song);
 		psy_signal_emit(&self->song->patterns.signal_numsongtrackschanged, self,
 			1, self->song->patterns.songtracks);
-		psy_audio_song_deallocate(oldsong);		
+		psy_audio_song_deallocate(oldsong);
+		psy_audio_sequenceselection_clear(&self->sequenceselection);
+		psy_audio_sequenceselection_select_first(&self->sequenceselection,
+			psy_audio_orderindex_make(0, 0));
 	}
 }
 
@@ -1307,22 +1307,6 @@ psy_audio_SequenceCursor workspace_cursor(const Workspace* self)
 	return self->cursor;
 }
 
-void workspace_setseqeditposition(Workspace* self,
-	psy_audio_OrderIndex index)
-{
-	if (workspace_song(self) && !psy_audio_orderindex_equal(&index,
-			psy_audio_sequenceselection_first(&self->sequenceselection)) &&
-			index.track < psy_audio_sequence_width(&self->song->sequence)) {
-		psy_audio_sequenceselection_deselect(&self->sequenceselection,
-				psy_audio_sequenceselection_first(&self->sequenceselection));
-		psy_audio_sequenceselection_select_first(&self->sequenceselection, index);
-		if (!self->navigating) {
-			viewhistory_addseqpos(&self->viewhistory,
-				psy_audio_sequenceselection_first(&self->sequenceselection).order);
-		}		
-	}
-}
-
 psy_audio_OrderIndex workspace_sequenceeditposition(const Workspace* self)
 {
 	return psy_audio_sequenceselection_first(&self->sequenceselection);
@@ -1437,9 +1421,10 @@ void workspace_idle(Workspace* self)
 				self->lastentry = (psy_audio_SequencePatternEntry*)it.sequencentrynode->entry;
 				prevented = viewhistory_prevented(&self->viewhistory);
 				viewhistory_prevent(&self->viewhistory);
-				workspace_setseqeditposition(self,
-					psy_audio_orderindex_make(
-						0, entry->entry.row));
+				psy_audio_sequenceselection_clear(&self->sequenceselection);
+				psy_audio_sequenceselection_select_first(
+					&self->sequenceselection,
+					psy_audio_orderindex_make(0, entry->entry.row));
 				if (!prevented) {
 					viewhistory_enable(&self->viewhistory);
 				}
@@ -1770,11 +1755,13 @@ void workspace_songposdec(Workspace* self)
 {
 	if (self->song && psy_audio_sequenceselection_first(
 			&self->sequenceselection).order > 0) {
-		workspace_setseqeditposition(self,
-			psy_audio_orderindex_make(
-				psy_audio_sequenceselection_first(&self->sequenceselection).track,
-				psy_audio_sequenceselection_first(&self->sequenceselection).order - 1
-			));
+		psy_audio_SequenceCursor cursor;
+
+		cursor = self->cursor;
+		cursor.orderindex = psy_audio_orderindex_make(
+			psy_audio_sequenceselection_first(&self->sequenceselection).track,
+			psy_audio_sequenceselection_first(&self->sequenceselection).order - 1);
+		workspace_setcursor(self, cursor);
 	}
 }
 
@@ -1783,10 +1770,12 @@ void workspace_songposinc(Workspace* self)
 	if (self->song && psy_audio_sequenceselection_first(&self->sequenceselection).order + 1 <
 			psy_audio_sequence_track_size(&self->song->sequence,
 				psy_audio_sequenceselection_first(&self->sequenceselection).track)) {
-		workspace_setseqeditposition(self,
-			psy_audio_orderindex_make(
-				psy_audio_sequenceselection_first(&self->sequenceselection).track,
-				psy_audio_sequenceselection_first(&self->sequenceselection).order + 1));
+		psy_audio_SequenceCursor cursor;
+
+		cursor = self->cursor;
+		cursor.orderindex = psy_audio_orderindex_make(
+			psy_audio_sequenceselection_first(&self->sequenceselection).track,
+			psy_audio_sequenceselection_first(&self->sequenceselection).order + 1);		
 	}
 }
 
@@ -2275,7 +2264,7 @@ const char* workspace_songtitle(const Workspace* self)
 void workspace_setstartpage(Workspace* self)
 {
 	if (generalconfig_showaboutatstart(psycleconfig_general(
-		workspace_conf(self)))) {
+			workspace_conf(self)))) {
 		workspace_selectview(self, VIEW_ID_HELPVIEW, 1, 0);
 	} else {
 		workspace_selectview(self, VIEW_ID_MACHINEVIEW, 0, 0);
@@ -2293,15 +2282,10 @@ void workspace_onsequenceselect(Workspace* self,
 	if (!self->song) {
 		return;
 	}
-	if (psy_audio_orderindex_equal(orderindex,
-				psy_audio_sequenceselection_first(sender)) &&
-			!psy_audio_orderindex_equal(orderindex, self->cursor.orderindex)) {
-		workspace_select(self, *orderindex);
-	}	
+	workspace_select(self, *orderindex);		
 }
 
-void workspace_select(Workspace* self,	
-	psy_audio_OrderIndex orderindex)
+void workspace_select(Workspace* self, psy_audio_OrderIndex orderindex)
 {
 	assert(self);
 	
@@ -2317,22 +2301,13 @@ void workspace_select(Workspace* self,
 
 		patternentry = (psy_audio_SequencePatternEntry*)entry;
 		psy_audio_sequencecursor_init_all(&cursor, orderindex);
-		cursor.cursor.seqoffset = workspace_cursorseqoffset(self, orderindex);
-		cursor.cursor.patternid = patternentry->patternslot;
+		cursor.seqoffset = psy_audio_sequenceentry_offset(entry);			
+		if (self->patternsinglemode) {
+			cursor.cursor.seqoffset = 0;
+		} else {
+			cursor.cursor.seqoffset = cursor.seqoffset;
+		}		
+		cursor.cursor.patternid = patternentry->patternslot;		
 		workspace_setcursor(self, cursor);		
 	}
-}
-
-psy_dsp_big_beat_t workspace_cursorseqoffset(const Workspace* self,
-	psy_audio_OrderIndex orderindex)
-{
-	const psy_audio_SequenceEntry* entry;	
-
-	entry = psy_audio_sequence_entry_const(&self->song->sequence, orderindex);
-	if (entry) {				
-		if (!self->patternsinglemode) {
-			return psy_audio_sequenceentry_offset(entry);
-		}
-	}
-	return 0.0;
 }

@@ -108,7 +108,8 @@ void seqeditentry_startdrag(SeqEditEntry* self, psy_ui_MouseEvent* ev)
 	} else {
 		psy_audio_sequenceselection_deselectall(
 			&self->state->workspace->sequenceselection);
-		workspace_setseqeditposition(self->state->workspace,
+		psy_audio_sequenceselection_select(
+			&self->state->workspace->sequenceselection,		
 			seqeditentry_seqpos(self));
 	}	
 	self->state->dragposition = seqeditstate_quantize(self->state,

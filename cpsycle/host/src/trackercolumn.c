@@ -109,7 +109,6 @@ static void trackercolumn_onmouseup(TrackerColumn*,
 	psy_ui_MouseEvent*);
 static psy_audio_SequenceCursor trackercolumn_makecursor(TrackerColumn*,
 	psy_ui_RealPoint);
-static psy_dsp_big_beat_t trackercolumn_currseqoffset(TrackerColumn*);
 static void trackercolumn_onpreferredsize(TrackerColumn*,
 	const psy_ui_Size* limit, psy_ui_Size* rv);
 
@@ -497,9 +496,13 @@ psy_audio_SequenceCursor trackercolumn_makecursor(TrackerColumn* self,
 	double cpx;	
 
 	rv = self->gridstate->cursor;
+	if (self->gridstate->sequence) {
+		psy_audio_sequencecursor_updateseqoffset(&rv,
+			self->gridstate->sequence);
+	}
 	rv.cursor.seqoffset = (self->gridstate->singlemode)
 		? 0.0
-		: trackercolumn_currseqoffset(self);
+		: rv.seqoffset;	
 	rv.cursor.offset = trackerstate_pxtobeat(self->gridstate, pt.y) - rv.cursor.seqoffset;	
 	rv.cursor.lpb = trackerstate_lpb(self->gridstate);
 	if (trackerstate_pattern(self->gridstate) &&
@@ -530,18 +533,6 @@ psy_audio_SequenceCursor trackercolumn_makecursor(TrackerColumn* self,
 	self->gridstate->cursor.cursor.patternid =
 		workspace_cursor(self->workspace).cursor.patternid;
 	return rv;
-}
-
-psy_dsp_big_beat_t trackercolumn_currseqoffset(TrackerColumn* self)
-{
-	psy_audio_SequenceEntry* entry;
-
-	entry = psy_audio_sequence_entry(self->gridstate->sequence,
-		workspace_sequenceeditposition(self->workspace));
-	if (entry) {
-		return psy_audio_sequenceentry_offset(entry);
-	}
-	return 0.0;
 }
 
 void trackercolumn_onpreferredsize(TrackerColumn* self,

@@ -180,10 +180,13 @@ void sequencetrackbox_onlabelclick(SequenceTrackBox* self, psy_ui_Label* sender,
 	psy_ui_MouseEvent* ev)
 {
 	psy_audio_OrderIndex editposition;	
-	
+	psy_audio_SequenceCursor cursor;
+
 	editposition = psy_audio_sequenceselection_first(&self->workspace->sequenceselection);
-	editposition.track = self->trackidx;
-	workspace_setseqeditposition(self->workspace, editposition);
+	editposition.track = self->trackidx;	
+	psy_audio_sequencecursor_init(&cursor);
+	cursor.orderindex = editposition;
+	workspace_setcursor(self->workspace, cursor);	
 }
 
 void sequencetrackbox_onresize(SequenceTrackBox* self, psy_ui_Component* sender,
