@@ -256,7 +256,8 @@ void sequencecmds_clear(SequenceCmds* self)
 			&psy_audio_sequenceclearcommand_alloc(self->sequence,
 				&self->workspace->sequenceselection)->command);
 		psy_audio_exclusivelock_leave();
-		workspace_setseqeditposition(self->workspace,
+		psy_audio_sequenceselection_select_first(
+			&self->workspace->sequenceselection,
 			psy_audio_orderindex_make(0, 0));		
 		psy_audio_exclusivelock_enter();
 		psy_audio_player_setposition(&self->workspace->player, 0.0);		
@@ -271,8 +272,9 @@ void sequencecmds_appendtrack(SequenceCmds* self)
 		psy_audio_exclusivelock_enter();
 		psy_audio_sequence_appendtrack(self->sequence,
 			psy_audio_sequencetrack_allocinit());
-		psy_audio_exclusivelock_leave();		
-		workspace_setseqeditposition(self->workspace,
+		psy_audio_exclusivelock_leave();
+		psy_audio_sequenceselection_select_first(
+			&self->workspace->sequenceselection,
 			psy_audio_orderindex_make(
 				psy_audio_sequence_width(&self->workspace->song->sequence) - 1,
 				0));
@@ -289,8 +291,9 @@ void sequencecmds_inserttrack(SequenceCmds* self)
 		psy_audio_exclusivelock_enter();		
 		editpos.track = psy_audio_sequence_inserttrack(self->sequence,
 			psy_audio_sequencetrack_allocinit(), editpos.track);			
-		psy_audio_exclusivelock_leave();		
-		workspace_setseqeditposition(self->workspace, editpos);
+		psy_audio_exclusivelock_leave();	
+		psy_audio_sequenceselection_select_first(
+			&self->workspace->sequenceselection, editpos);
 	}
 }
 
@@ -305,8 +308,9 @@ void sequencecmds_deltrack(SequenceCmds* self, uintptr_t trackindex)
 			psy_audio_exclusivelock_enter();
 			psy_audio_sequence_removetrack(self->sequence, position.tracknode);
 			psy_audio_exclusivelock_leave();
-			workspace_setseqeditposition(self->workspace,
-				psy_audio_orderindex_make(trackindex, 0));
+			psy_audio_sequenceselection_select_first(
+				&self->workspace->sequenceselection,
+				psy_audio_orderindex_make(trackindex, 0));			
 		}
 	}
 }

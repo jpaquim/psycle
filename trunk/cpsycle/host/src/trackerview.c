@@ -647,15 +647,17 @@ void trackergrid_advancelines(TrackerGrid* self, uintptr_t lines, bool wrap)
 				&self->state->cursor.cursor);
 			if (psy_audio_orderindex_valid(&index)) {
 				self->preventscrolltop = TRUE;
-				workspace_setseqeditposition(self->workspace,
-					index);
+				self->state->cursor.orderindex = index;
+				workspace_setcursor(self->workspace,
+					self->state->cursor);
 				self->preventscrolltop = FALSE;
 			} else if (restorewrap) {
 				self->state->cursor.cursor.offset = 0;
 				self->preventscrolltop = TRUE;
-				workspace_setseqeditposition(self->workspace,
-					psy_audio_orderindex_make(
-						workspace_sequenceeditposition(self->workspace).track, 0));
+				self->state->cursor.orderindex = psy_audio_orderindex_make(
+					workspace_sequenceeditposition(self->workspace).track, 0);
+				workspace_setcursor(self->workspace,
+					self->state->cursor);
 				self->preventscrolltop = FALSE;
 				trackergrid_scrollup(self, self->state->cursor);
 				trackergrid_storecursor(self);
@@ -701,16 +703,19 @@ void trackergrid_prevlines(TrackerGrid* self, uintptr_t lines, bool wrap)
 
 				cursor = self->state->cursor;
 				self->preventscrolltop = TRUE;
-				workspace_setseqeditposition(self->workspace, index);
-				self->preventscrolltop = FALSE;
-				self->state->cursor = cursor;
-			} else if (restorewrap) {				
+				cursor.orderindex = index;
+				workspace_setcursor(self->workspace, cursor);
+				self->preventscrolltop = FALSE;				
+			} else if (restorewrap) {		
+				psy_audio_SequenceCursor cursor;
+
 				self->preventscrolltop = TRUE;
-				workspace_setseqeditposition(self->workspace,
-					psy_audio_orderindex_make(
-						workspace_sequenceeditposition(self->workspace).track,
-						psy_audio_sequence_track_size(
-							self->state->sequence, 0) - 1));
+				cursor = self->state->cursor;
+				cursor.orderindex = psy_audio_orderindex_make(
+					workspace_sequenceeditposition(self->workspace).track,
+					psy_audio_sequence_track_size(
+						self->state->sequence, 0) - 1);				
+				workspace_setcursor(self->workspace, cursor);				
 				self->preventscrolltop = FALSE;
 				if (self->state->pattern) {
 					self->state->cursor.cursor.offset =
@@ -1292,9 +1297,12 @@ void trackergrid_onmousedown(TrackerGrid* self, psy_ui_MouseEvent* ev)
 			index = trackergrid_checkupdatecursorseqoffset(self,
 				&self->state->dragselectionbase.cursor);
 			if (psy_audio_orderindex_valid(&index)) {
+				psy_audio_SequenceCursor cursor;
+
 				self->preventscrolltop = TRUE;
-				workspace_setseqeditposition(self->workspace,
-					index);
+				cursor = self->state->cursor;
+				cursor.orderindex = index;
+				workspace_setcursor(self->workspace, cursor);				
 				self->preventscrolltop = FALSE;
 			}
 		}
@@ -1373,9 +1381,12 @@ void trackergrid_onmouseup(TrackerGrid* self, psy_ui_MouseEvent* ev)
 			index = trackergrid_checkupdatecursorseqoffset(self,
 				&self->state->dragselectionbase.cursor);
 			if (psy_audio_orderindex_valid(&index)) {
+				psy_audio_SequenceCursor cursor;
+				
 				self->preventscrolltop = TRUE;
-				workspace_setseqeditposition(self->workspace,
-					index);
+				cursor = self->state->cursor;
+				cursor.orderindex = index;
+				workspace_setcursor(self->workspace, cursor);					
 				self->preventscrolltop = FALSE;
 			}			
 		}

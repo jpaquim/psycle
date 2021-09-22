@@ -439,16 +439,9 @@ void patternview_setpattern(PatternView* self, psy_audio_Pattern* pattern)
 
 void patternview_onsongchanged(PatternView* self, Workspace* workspace,
 	int flag, psy_audio_Song* song)
-{
-	psy_audio_Pattern* pattern;
-	
+{	
 	patternview_updatestates(self);
 	if (workspace->song) {
-		pattern = psy_audio_sequence_pattern(
-			&workspace->song->sequence,
-			psy_audio_sequenceselection_first(&workspace->sequenceselection));
-		patternview_setpattern(self, pattern);
-		pianoroll_setpattern(&self->pianoroll, pattern);		
 		psy_signal_connect(&workspace->song->sequence.signal_changed,
 			self, patternview_onsequencechanged);
 		psy_signal_connect(
@@ -458,16 +451,16 @@ void patternview_onsongchanged(PatternView* self, Workspace* workspace,
 			self, patternview_ontrackstatechanged);
 		psy_signal_connect(&workspace->signal_songchanged, self,
 			patternview_onsongchanged);
-	} else {		
-		patternview_setpattern(self, NULL);
-		pianoroll_setpattern(&self->pianoroll, NULL);
-	}	
+	}
+	self->state.pattern = NULL;
+	self->state.cursor.orderindex = psy_audio_orderindex_zero();
+	self->state.cursor.cursor.patternid = psy_INDEX_INVALID;
 }
 
 void patternview_onsequencechanged(PatternView* self,
 	psy_audio_Sequence* sender)
 {
-	self->updatealign = 1;	
+	self->updatealign = 1;
 }
 
 void patternview_onpatternpropertiesapply(PatternView* self,
@@ -864,8 +857,7 @@ void patternview_oncursorchanged(PatternView* self, Workspace* sender)
 
 	oldcursor = self->state.cursor;	
 	cursor = workspace_cursor(sender);
-	if (!psy_audio_orderindex_equal(&cursor.orderindex,
-			oldcursor.orderindex)) {
+	if (cursor.cursor.patternid != oldcursor.cursor.patternid) {
 		patternview_select(self, &cursor.orderindex);			
 	}
 	self->state.cursor = cursor;
@@ -1338,7 +1330,7 @@ void patternview_updatestates(PatternView* self)
 		psy_audio_Pattern* pattern;
 
 		trackerstate_setsequence(&self->state,
-			&self->workspace->song->sequence);				
+			&self->workspace->song->sequence);		
 		pattern = psy_audio_sequence_pattern(
 			&self->workspace->song->sequence,
 			psy_audio_sequenceselection_first(

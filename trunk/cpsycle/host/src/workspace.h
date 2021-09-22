@@ -259,7 +259,6 @@ void workspace_undo(Workspace*);
 void workspace_redo(Workspace*);
 void workspace_setcursor(Workspace*, psy_audio_SequenceCursor);
 psy_audio_SequenceCursor workspace_cursor(const Workspace*);
-void workspace_setseqeditposition(Workspace*, psy_audio_OrderIndex);
 psy_audio_OrderIndex workspace_sequenceeditposition(const Workspace*);
 void workspace_setcursorstep(Workspace*, int step);
 int workspace_cursorstep(Workspace*);
@@ -307,8 +306,6 @@ void workspace_outputstatus(Workspace*, const char* text);
 void workspace_songposdec(Workspace*);
 void workspace_songposinc(Workspace*);
 void workspace_gotocursor(Workspace*, psy_audio_PatternCursor);
-psy_dsp_big_beat_t workspace_cursorseqoffset(const Workspace*,
-	psy_audio_OrderIndex);
 PatternDisplayMode workspace_patterndisplaytype(Workspace*);
 void workspace_selectpatterndisplay(Workspace*, PatternDisplayMode);
 void workspace_multiselectgear(Workspace*, psy_List* slotlist);

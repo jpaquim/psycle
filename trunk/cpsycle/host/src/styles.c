@@ -280,6 +280,18 @@ void inithoststyles(psy_ui_Styles* self, psy_ui_ThemeMode theme)
 	psy_ui_border_init_solid_radius(&style->border,
 		material.surface_overlay_9p, 10.0);
 	psy_ui_styles_setstyle(self, STYLE_STEPSEQUENCER, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setbackgroundcolour(style, psy_ui_colour_make(0x00292929));	
+	psy_ui_styles_setstyle(self, STYLE_STEPSEQUENCER_TILE, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setbackgroundcolour(style, psy_ui_colour_make(0x009F7B00));
+	psy_ui_styles_setstyle(self, STYLE_STEPSEQUENCER_TILE_ACTIVE, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setbackgroundcolour(style, psy_ui_colour_make(0x00CACACA));
+	psy_ui_styles_setstyle(self, STYLE_STEPSEQUENCER_TILE_SELECT, style);
 	
 	style = psy_ui_style_allocinit();	
 	psy_ui_border_init_top(&style->border, psy_ui_BORDER_SOLID,
@@ -860,6 +872,18 @@ void initlighttheme(psy_ui_Styles* self)
 	psy_ui_styles_setstyle(self, STYLE_STEPSEQUENCER, style);
 
 	style = psy_ui_style_allocinit();
+	psy_ui_style_setbackgroundcolour(style, psy_ui_colour_make(0x00292929));
+	psy_ui_styles_setstyle(self, STYLE_STEPSEQUENCER_TILE, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setbackgroundcolour(style, psy_ui_colour_make(0x009F7B00));
+	psy_ui_styles_setstyle(self, STYLE_STEPSEQUENCER_TILE_ACTIVE, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setbackgroundcolour(style, psy_ui_colour_make(0x00CACACA));
+	psy_ui_styles_setstyle(self, STYLE_STEPSEQUENCER_TILE_SELECT, style);
+
+	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolours(style, light.cl_font_1, light.cl_white_1);
 	psy_ui_style_setspacing_em(style, 0.0, 1.0, 0.0, 1.0);
 	psy_ui_styles_setstyle(self, STYLE_STATUSBAR, style);
@@ -1401,6 +1425,18 @@ void initwin98theme(psy_ui_Styles* self)
 	psy_ui_border_init_solid_radius(&style->border,
 		win.cl_silver, 10.0);
 	psy_ui_styles_setstyle(self, STYLE_STEPSEQUENCER, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setbackgroundcolour(style, psy_ui_colour_make(0x00292929));	
+	psy_ui_styles_setstyle(self, STYLE_STEPSEQUENCER_TILE, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setbackgroundcolour(style, psy_ui_colour_make(0x009F7B00));
+	psy_ui_styles_setstyle(self, STYLE_STEPSEQUENCER_TILE_ACTIVE, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setbackgroundcolour(style, psy_ui_colour_make(0x00CACACA));
+	psy_ui_styles_setstyle(self, STYLE_STEPSEQUENCER_TILE_SELECT, style);
 
 	style = psy_ui_style_allocinit();
 	psy_ui_border_init_top(&style->border, psy_ui_BORDER_SOLID,
