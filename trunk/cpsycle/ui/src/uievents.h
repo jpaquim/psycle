@@ -35,6 +35,7 @@ typedef struct psy_ui_Event {
 	bool bubbles;
 	bool default_prevented;
 	struct psy_ui_Component* target;
+	uintptr_t timestamp;
 } psy_ui_Event;
 
 void psy_ui_event_init(psy_ui_Event* ,int type);

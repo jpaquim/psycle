@@ -674,7 +674,7 @@ void psy_ui_component_init_base(psy_ui_Component* self) {
 	}	
 	self->sizehints = &sizehints;
 	self->id = psy_INDEX_INVALID;
-	psy_ui_componentstyle_init(&self->style);	
+	psy_ui_componentstyle_init(&self->style);		
 	self->align = psy_ui_ALIGN_NONE;
 	self->alignsorted = psy_ui_ALIGN_NONE;
 	self->deallocate = FALSE;	
@@ -2367,6 +2367,30 @@ void psy_ui_component_mouseup(psy_ui_Component* self, psy_ui_MouseEvent* ev,
 	psy_ui_app()->mousetracking = FALSE;
 }
 
+void psy_ui_component_mousedoubleclick(psy_ui_Component* self,
+	psy_ui_MouseEvent* ev, psy_List* viewcomponents)
+{
+	psy_List* p;
+
+	for (p = viewcomponents; p != NULL; psy_list_next(&p)) {
+		psy_ui_Component* child;
+		psy_ui_RealRectangle r;
+
+		child = (psy_ui_Component*)p->entry;
+		if (psy_ui_component_visible(child)) {
+			r = psy_ui_component_position(child);
+			if (psy_ui_realrectangle_intersect(&r, ev->pt)) {
+				ev->pt.x -= r.left;
+				ev->pt.y -= r.top;				
+				child->imp->vtable->dev_mousedoubleclick(child->imp, ev);
+				ev->pt.x += r.left;
+				ev->pt.y += r.top;
+				break;
+			}
+		}
+	}
+}
+
 void psy_ui_component_mousewheel(psy_ui_Component* self, psy_ui_MouseEvent* ev,
 	intptr_t delta)
 {
@@ -2534,5 +2558,5 @@ void* psy_ui_component_platform(psy_ui_Component* self)
 	assert(self);
 	assert(self->imp);
 
-	return self->imp->vtable->dev_platform_handle(self->imp);
+	return (void*)self->imp->vtable->dev_platform_handle(self->imp);
 }

@@ -163,8 +163,7 @@ typedef struct Workspace {
 	int cursorstep;	
 	char* filename;
 	int followsong;
-	int recordtweaks;
-	psy_audio_SequencePatternEntry* lastentry;
+	int recordtweaks;	
 	psy_audio_Pattern patternpaste;
 	psy_audio_SequencePaste sequencepaste;
 	int navigating;

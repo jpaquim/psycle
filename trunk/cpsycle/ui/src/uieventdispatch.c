@@ -8,8 +8,11 @@
 
 #include "uieventdispatch.h"
 #include "uiapp.h"
+#include "timers.h"
 /* local */
 #include "uicomponent.h" 
+/* platform */
+#include "../../detail/os.h"
 
 
 /* prototypes */
@@ -22,7 +25,14 @@ static psy_ui_Component* psy_ui_eventdispatch_eventtarget(
 void psy_ui_eventdispatch_init(psy_ui_EventDispatch* self)
 {
 	self->targetids = NULL;
-	self->eventretarget = NULL;
+	self->eventretarget = NULL;	
+	self->lastbutton = 0;
+	self->lastbuttontimestamp = 0;
+#ifdef DIVERSALIS__OS__MICROSOFT	
+	self->handledoubleclick = FALSE;
+#else
+	self->handledoubleclick = TRUE;
+#endif
 }
 
 void psy_ui_eventdispatch_dispose(psy_ui_EventDispatch* self)
@@ -76,19 +86,60 @@ void psy_ui_eventdispatch_keyup(psy_ui_EventDispatch* self,
 void psy_ui_eventdispatch_buttondown(psy_ui_EventDispatch* self,
 	struct psy_ui_Component* component, psy_ui_MouseEvent* ev)
 {
+	uintptr_t eventtime;	
+	
 	assert(component);
 
 	ev->event.type = psy_ui_ButtonPress;
-	ev->event.target = psy_ui_eventdispatch_eventtarget(self, component);
-	component->imp->vtable->dev_mousedown(component->imp, ev);
+	ev->event.target = psy_ui_eventdispatch_eventtarget(self, component);	
+	if (ev->event.timestamp == 0) { /* CurrentTime */
+		eventtime = self->lastbuttontimestamp;
+	} else {
+		eventtime = ev->event.timestamp;
+	}
+	if (self->handledoubleclick) {		
+		if (self->lastbutton == ev->button &&
+			(eventtime - self->lastbuttontimestamp) < 500) {
+			psy_ui_eventdispatch_doubleclick(self, component, ev);
+			self->lastbutton = 0;
+			self->lastbuttontimestamp = 0;
+			return;
+		} else {
+			self->lastbutton = ev->button;
+			component->imp->vtable->dev_mousedown(component->imp, ev);
+		}
+	} else {
+		component->imp->vtable->dev_mousedown(component->imp, ev);
+	}
 	if (ev->event.bubbles != FALSE) {		
 		component->vtable->onmousedown(component, ev);
 		psy_signal_emit(&component->signal_mousedown, component, 1, ev);
 	}		
+	if (ev->event.bubbles != FALSE) {	
+		psy_ui_eventdispatch_sendtoparent(self, component, &ev->event);		
+	}	
+	self->lastbuttontimestamp = eventtime;
+}
+
+void psy_ui_eventdispatch_doubleclick(psy_ui_EventDispatch* self,
+	struct psy_ui_Component* component, psy_ui_MouseEvent* ev)
+{
+	assert(component);
+
+	ev->event.type = psy_ui_DoubleClick;
+	ev->event.target = psy_ui_eventdispatch_eventtarget(self, component);	
+	component->imp->vtable->dev_mousedoubleclick(component->imp, ev);
+	if (ev->event.bubbles != FALSE) {
+		component->vtable->onmousedoubleclick(component, ev);
+		psy_signal_emit(&component->signal_mousedoubleclick, component, 1, ev);
+	}
 	if (ev->event.bubbles != FALSE) {
 		bool bubble;
 
-		bubble = psy_ui_eventdispatch_sendtoparent(self, component, &ev->event);		
+		bubble = psy_ui_eventdispatch_sendtoparent(self, component, &ev->event);
+	} else {
+		psy_list_free(self->targetids);
+		self->targetids = NULL;
 	}
 }
 
@@ -139,28 +190,6 @@ void psy_ui_eventdispatch_mousemove(psy_ui_EventDispatch* self,
 	}
 }
 
-void psy_ui_eventdispatch_doubleclick(psy_ui_EventDispatch* self,
-	struct psy_ui_Component* component, psy_ui_MouseEvent* ev)
-{
-	assert(component);
-
-	ev->event.type = psy_ui_DoubleClick;
-	ev->event.target = psy_ui_eventdispatch_eventtarget(self, component);	
-	component->imp->vtable->dev_mousedoubleclick(component->imp, ev);
-	if (ev->event.bubbles != FALSE) {
-		component->vtable->onmousedoubleclick(component, ev);
-		psy_signal_emit(&component->signal_mousedoubleclick, component, 1, ev);
-	}
-	if (ev->event.bubbles != FALSE) {
-		bool bubble;
-
-		bubble = psy_ui_eventdispatch_sendtoparent(self, component, &ev->event);
-	} else {
-		psy_list_free(self->targetids);
-		self->targetids = NULL;
-	}
-}
-
 void psy_ui_eventdispatch_size(psy_ui_EventDispatch* self,
 	psy_ui_Component* component, psy_ui_Size size)
 {
@@ -190,21 +219,21 @@ void psy_ui_eventdispatch_timer(psy_ui_EventDispatch* self,
 
 bool psy_ui_eventdispatch_sendtoparent(psy_ui_EventDispatch* self,
 	psy_ui_Component* component, psy_ui_Event* ev)
-{
+{	
 	if (psy_ui_component_parent(component)) {
 		psy_list_append(&self->targetids, 
 			(void*)component->imp->vtable->dev_platform_handle(component->imp));
-		self->eventretarget = component;
+		self->eventretarget = component;	
 		psy_ui_app()->imp->vtable->dev_sendevent(
 			psy_ui_app()->imp, psy_ui_component_parent(component),
-			ev);		
-		self->eventretarget = 0;
+			ev);				
+		self->eventretarget = 0;		
 		return TRUE;
 	} else {
 		psy_list_free(self->targetids);
 		self->targetids = NULL;
 	}
-	self->eventretarget = 0;
+	self->eventretarget = 0;	
 	return FALSE;
 }
 

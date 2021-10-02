@@ -982,8 +982,10 @@ void update_vsttimeinfo(psy_audio_VstPlugin* self)
 	if (sequencertime->playstarting || sequencertime->playstopping) {
 		self->vsttimeinfo->flags |= kVstTransportChanged;
 	}
-	self->vsttimeinfo->timeSigNumerator = sequencertime->timesig_numerator;
-	self->vsttimeinfo->timeSigDenominator = sequencertime->timesig_denominator;
+	self->vsttimeinfo->timeSigNumerator = (VstInt32)
+		sequencertime->timesig_numerator;
+	self->vsttimeinfo->timeSigDenominator = (VstInt32)
+		sequencertime->timesig_denominator;
 }
 
 // VSTCALLBACK

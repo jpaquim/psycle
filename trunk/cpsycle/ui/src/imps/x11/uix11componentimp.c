@@ -1487,6 +1487,7 @@ void dev_mousemove(psy_ui_x11_ComponentImp* self, psy_ui_MouseEvent* ev)
 
 void dev_mousedoubleclick(psy_ui_x11_ComponentImp* self, psy_ui_MouseEvent* ev)
 {
+	psy_ui_component_mousedoubleclick(self->component, ev, self->viewcomponents);
 }
 
 void dev_mouseenter(psy_ui_x11_ComponentImp* self)

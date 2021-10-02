@@ -24,10 +24,6 @@
 /* std */
 #include <stdio.h>
 
-/* double click */
-static int buttonclicks = 0;
-static int buttonclickcounter = 0;
-static int doubleclicktime = 50;
 static psy_ui_MouseEvent buttonpressevent;
 /* prototypes */
 static void psy_ui_x11app_initdbe(psy_ui_X11App*);
@@ -47,6 +43,7 @@ static void psy_ui_x11app_handle_mouseevent(psy_ui_X11App*,
 static void psy_ui_x11app_mousewheel(psy_ui_X11App*, psy_ui_x11_ComponentImp*,
 	XEvent*);
 static int psy_ui_x11app_translate_x11button(int button);
+static int psy_ui_x11app_make_x11button(int button);
 static bool psy_ui_x11app_sendeventtoparent(psy_ui_X11App*,
 	psy_ui_x11_ComponentImp*, int mask, XEvent*);
 static void psy_ui_x11app_adjustcoordinates(psy_ui_Component*,
@@ -239,12 +236,7 @@ void psy_ui_x11app_close(psy_ui_X11App* self)
 }
 
 int psy_ui_x11app_timertick(psy_ui_X11App* self)
-{
-	if (buttonclicks == 1 && buttonclickcounter > 0) {
-		--buttonclickcounter;
-	} else {
-		buttonclicks = 0;
-	}
+{	
 	psy_timers_tick(&self->wintimers);
 }
 
@@ -474,11 +466,9 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 			return 0;
 		}
 		break;
-    case ButtonPress: {
-		bool doubleclick;
+    case ButtonPress: {		
 		psy_ui_MouseEvent ev;
-		
-		doubleclick = FALSE;
+				
 		if (self->dograb) {
 			psy_ui_Component* grab;
 			psy_ui_Component* curr;
@@ -497,43 +487,16 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 		if (event->xbutton.button == 4 || event->xbutton.button == 5) {
 			psy_ui_x11app_mousewheel(self, imp, event);				
 			return 0;
-		}
-		if ((event->xbutton.state & 256) == 256) {			
-			doubleclick = TRUE;
-		} else if (buttonclicks == 0) {
-			/* first click */
-			buttonclicks = 1;
-			buttonclickcounter = doubleclicktime;
-			buttonpressevent = ev;			
-		} else { 
-			/* second click */
-			buttonclicks = 0;
-			/* check distance */
-			if (ev.pt.x != buttonpressevent.pt.x ||
-					ev.pt.y != buttonpressevent.pt.y) {
-				/* single click */				
-			} else {				
-				doubleclick = TRUE;				
-			}
-		}
-		if (doubleclick) {
-			printf("double press\n");
-			buttonclicks = 0;
-			buttonclickcounter = doubleclicktime;
-		}
+		}		
 		psy_ui_mouseevent_init_all(&ev,	
 				psy_ui_realpoint_make(event->xbutton.x, event->xbutton.y),
 				psy_ui_x11app_translate_x11button(event->xbutton.button),
 				0, 0, 0);
+		ev.event.timestamp = (uintptr_t)event->xbutton.time;		
 		psy_ui_x11app_update_mouseevent_mods(self, &ev);
-		psy_ui_x11app_adjustcoordinates(imp->component, &ev.pt);
-		if (doubleclick) {	
-			psy_ui_eventdispatch_doubleclick(&self->app->eventdispatch,
-				imp->component, &ev);
-		} else {					
-			psy_ui_eventdispatch_buttondown(&self->app->eventdispatch,
-				imp->component, &ev);			
-		}
+		psy_ui_x11app_adjustcoordinates(imp->component, &ev.pt);		
+		psy_ui_eventdispatch_buttondown(&self->app->eventdispatch,
+			imp->component, &ev);		
 		break; }
 	case ButtonRelease: { 
 		psy_ui_MouseEvent ev;							
@@ -542,6 +505,7 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 			psy_ui_realpoint_make(event->xbutton.x, event->xbutton.y),
 			psy_ui_x11app_translate_x11button(event->xbutton.button),
 			0, 0, 0);
+		ev.event.timestamp = (uintptr_t)event->xbutton.time;			
 		ev.event.type = psy_ui_ButtonRelease;
 		psy_ui_x11app_update_mouseevent_mods(self, &ev);
 		psy_ui_x11app_adjustcoordinates(imp->component, &ev.pt);		
@@ -553,10 +517,7 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 		psy_ui_MouseEvent ev;
 		XMotionEvent xme;
 		int button;
-
-		if (buttonclicks == 1) {
-			buttonclicks = 0;
-		}
+		
 		xme = event->xmotion;
 		if (xme.state & Button1Mask) {
 			button = 1;
@@ -652,12 +613,30 @@ void psy_ui_x11app_update_mouseevent_mods(psy_ui_X11App* self,
 int psy_ui_x11app_translate_x11button(int button)
 {
 	switch (button) {
+		case 0: /* no button */
+			return 0;
 		case 1: /* left button */
 			return 1;
 		case 2: /* middle button */
 			return 3;
 		case 3: /* right button */
 			return 2;
+		default:
+			return 1;
+	}
+}
+
+int psy_ui_x11app_make_x11button(int button)
+{
+	switch (button) {
+		case 0: /* no button */
+			return 0;
+		case 1: /* left button */
+			return 1;
+		case 3: /* middle button */
+			return 2;
+		case 2: /* right button */
+			return 3;
 		default:
 			return 1;
 	}
@@ -750,8 +729,8 @@ bool psy_ui_x11app_sendeventtoparent(psy_ui_X11App* self,
 		psy_list_append(&self->targetids, (void*)imp->hwnd);
 		self->eventretarget = imp->component;
 		event = *xev;
-		event.xany.window = imp->parent->hwnd;
-		XSendEvent(self->dpy, imp->parent->hwnd, True, mask, xev);
+		event.xany.window = imp->parent->hwnd;		
+		XSendEvent(self->dpy, imp->parent->hwnd, True, mask, xev);		
 		self->eventretarget = 0;
 		return TRUE;
 	} else {
@@ -794,69 +773,58 @@ void psy_ui_x11app_sendevent(psy_ui_X11App* self, psy_ui_Component* component,
 		XSendEvent(self->dpy, imp->hwnd, True, KeyReleaseMask, (XEvent*)&xev);
 		XFlush(self->dpy);	
 		break; }
-	case psy_ui_ButtonPress: {		
+	case psy_ui_ButtonPress:
+	case psy_ui_DoubleClick: {		
 		psy_ui_MouseEvent* mouseevent;
 		XButtonEvent xbutton;
+		XEvent event;
 		
 		mouseevent = (psy_ui_MouseEvent*)ev;
-		xbutton.display       = self->dpy;
-		xbutton.root          = DefaultRootWindow(self->dpy);
-		xbutton.time          = CurrentTime;
-		xbutton.same_screen   = True;
-		xbutton.button        = Button1;
-		xbutton.state         = 0;
-		xbutton.x             = mouseevent->pt.x;
-		xbutton.y             = mouseevent->pt.y;
-		xbutton.x_root        = mouseevent->pt.x;
-		xbutton.y_root        = mouseevent->pt.y;
-		xbutton.window        = imp->hwnd;   
-		xbutton.type = ButtonPress;	
-		XSendEvent(self->dpy, imp->hwnd, True, ButtonPressMask,
+		xbutton.display      = self->dpy;
+		xbutton.root         = DefaultRootWindow(self->dpy);
+		xbutton.time         = (Time)ev->timestamp;
+		xbutton.same_screen  = True;
+		xbutton.button       = psy_ui_x11app_make_x11button(mouseevent->button);
+		xbutton.state        = 0;
+		xbutton.x            = mouseevent->pt.x;
+		xbutton.y            = mouseevent->pt.y;
+		xbutton.x_root       = mouseevent->pt.x;
+		xbutton.y_root       = mouseevent->pt.y;
+		xbutton.window       = imp->hwnd;   
+		xbutton.type = ButtonPress;			
+		XSendEvent(self->dpy, imp->hwnd, FALSE, ButtonPressMask,
 			(XEvent*)&xbutton);
-		XFlush(self->dpy);
+		XSync(self->dpy, 0);
+		while (XPending(self->dpy)) {		
+			XNextEvent(self->dpy, &event);
+			psy_ui_x11app_handle_event(self, &event);
+		}				
 		break; }
 	case psy_ui_ButtonRelease: {
 		psy_ui_MouseEvent* mouseevent;
 		XButtonEvent xbutton;
+		XEvent event;
 		
 		mouseevent = (psy_ui_MouseEvent*)ev;
-		xbutton.display       = self->dpy;
-		xbutton.root          = DefaultRootWindow(self->dpy);
-		xbutton.time          = CurrentTime;
-		xbutton.same_screen   = True;
-		xbutton.button        = Button1;
-		xbutton.state         = 0;
-		xbutton.x             = mouseevent->pt.x;
-		xbutton.y             = mouseevent->pt.y;
-		xbutton.x_root        = 0;
-		xbutton.y_root        = 0;
+		xbutton.display      = self->dpy;
+		xbutton.root         = DefaultRootWindow(self->dpy);
+		xbutton.time         = (Time)ev->timestamp;
+		xbutton.same_screen  = True;
+		xbutton.button       = psy_ui_x11app_make_x11button(mouseevent->button);
+		xbutton.state        = 0;
+		xbutton.x            = mouseevent->pt.x;
+		xbutton.y            = mouseevent->pt.y;
+		xbutton.x_root       = mouseevent->pt.x;;
+		xbutton.y_root       = mouseevent->pt.y;
 		xbutton.window        = imp->hwnd;   
-		xbutton.type = ButtonRelease;	
-		XSendEvent(self->dpy, imp->hwnd, True, ButtonReleaseMask,
+		xbutton.type = ButtonRelease;					
+		XSendEvent(self->dpy, imp->hwnd, FALSE, ButtonReleaseMask,
 			(XEvent*)&xbutton);
-		XFlush(self->dpy);
-		break; }
-	case psy_ui_DoubleClick: {
-		psy_ui_MouseEvent* mouseevent;
-		XButtonEvent xbutton;
-		
-		printf("double click\n");
-		mouseevent = (psy_ui_MouseEvent*)ev;
-		xbutton.display       = self->dpy;
-		xbutton.root          = DefaultRootWindow(self->dpy);
-		xbutton.time          = CurrentTime;
-		xbutton.same_screen   = True;
-		xbutton.button        = Button1;
-		xbutton.state         = 256; /* double click */
-		xbutton.x             = mouseevent->pt.x;
-		xbutton.y             = mouseevent->pt.y;
-		xbutton.x_root        = 0;
-		xbutton.y_root        = 0;
-		xbutton.window        = imp->hwnd;   
-		xbutton.type = ButtonPress;	
-		XSendEvent(self->dpy, imp->hwnd, True, ButtonPressMask,
-			(XEvent*)&xbutton);
-		XFlush(self->dpy);
+		XSync(self->dpy, 0);
+		while (XPending(self->dpy)) {		
+			XNextEvent(self->dpy, &event);
+			psy_ui_x11app_handle_event(self, &event);
+		}			
 		break; }		
 	/*case psy_ui_DoubleClick: {
 		psy_ui_MouseEvent* mouseevent;

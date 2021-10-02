@@ -260,7 +260,7 @@ void seqeditor_onmousemove(SeqEditor* self, psy_ui_MouseEvent* ev)
 }
 
 void seqeditor_onmouseup(SeqEditor* self, psy_ui_MouseEvent* ev)
-{
+{	
 	if (self->state.cmd == SEQEDTCMD_NEWTRACK) {
 		sequencecmds_appendtrack(self->state.cmds);
 	} else if (self->state.cmd == SEQEDTCMD_DELTRACK) {

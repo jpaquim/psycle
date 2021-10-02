@@ -1717,3 +1717,14 @@ psy_dsp_percent_t psy_audio_sequencer_rowprogress(
 	}
 	return (psy_dsp_percent_t)0.f;
 }
+
+psy_audio_SequencerTrack* psy_audio_sequencer_currtrack(psy_audio_Sequencer* self,
+	uintptr_t track)
+{
+	psy_List* p;
+	p = psy_list_at(self->currtracks, track);
+	if (p) {
+		return (psy_audio_SequencerTrack*)(p->entry);
+	}
+	return NULL;
+}
