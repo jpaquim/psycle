@@ -18,6 +18,9 @@ struct psy_ui_Component;
 typedef struct psy_ui_EventDispatch {
 	psy_List* targetids;
 	struct psy_ui_Component* eventretarget;
+	bool handledoubleclick;
+	uintptr_t lastbutton;
+	uintptr_t lastbuttontimestamp;		
 } psy_ui_EventDispatch;
 
 void psy_ui_eventdispatch_init(psy_ui_EventDispatch*);

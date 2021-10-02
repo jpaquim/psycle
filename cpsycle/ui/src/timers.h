@@ -43,6 +43,8 @@ void psy_timers_addtimer(psy_Timers*, uintptr_t id, void* context,
 	psy_fp_timerwork timerwork, uintptr_t customid, uintptr_t interval);
 void psy_timers_removetimer(psy_Timers*, uintptr_t id, uintptr_t customid);
 
+uintptr_t psy_gettime_ms(void);
+
 #ifdef __cplusplus
 }
 #endif

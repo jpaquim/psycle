@@ -221,6 +221,7 @@ void psy_ui_tab_onpreferredsize(psy_ui_Tab* self, const psy_ui_Size* limit,
 
 void psy_ui_tab_onmousedown(psy_ui_Tab* self, psy_ui_MouseEvent* ev)
 {
+	printf("tab pressed\n");
 	if (self->mode != psy_ui_TABMODE_LABEL) {
 		if (self->istoggle) {
 			if (self->checkstate != TABCHECKSTATE_OFF) {

@@ -66,6 +66,14 @@ INLINE void psy_audio_sequencertime_init(psy_audio_SequencerTime* self)
 	self->playstopping = FALSE;
 }
 
+INLINE bool psy_audio_sequencertime_playing(const psy_audio_SequencerTime*
+	self)
+{
+	assert(self);
+
+	return self->playing;
+}
+
 typedef enum {
 	psy_audio_SEQUENCERPLAYMODE_PLAYALL,
 	psy_audio_SEQUENCERPLAYMODE_PLAYNUMBEATS,
@@ -83,6 +91,15 @@ typedef struct {
 	psy_audio_SequenceTrackIterator* iterator;
 	uintptr_t channeloffset;
 } psy_audio_SequencerTrack;
+
+INLINE psy_audio_SequenceEntry* psy_audio_sequencertrack_entry(
+	psy_audio_SequencerTrack* self)
+{
+	if (self->iterator) {
+		return psy_audio_sequencetrackiterator_entry(self->iterator);
+	}
+	return NULL;
+}
 
 typedef struct {
 	bool active;
@@ -325,7 +342,7 @@ INLINE psy_dsp_big_beat_t psy_audio_sequencer_currbeatsperline(
 void psy_audio_sequencer_checkiterators(psy_audio_Sequencer*,
 	const psy_audio_PatternNode*);
 
-// elapsed playtime in seconds
+/* elapsed playtime in seconds */
 INLINE psy_dsp_seconds_t psy_audio_sequencer_currplaytime(
 	const psy_audio_Sequencer* self)
 {
@@ -335,6 +352,9 @@ INLINE psy_dsp_seconds_t psy_audio_sequencer_currplaytime(
 
 psy_dsp_percent_t psy_audio_sequencer_rowprogress(const
 	psy_audio_Sequencer* self, uintptr_t track);
+
+psy_audio_SequencerTrack* psy_audio_sequencer_currtrack(psy_audio_Sequencer*,
+	uintptr_t track);
 
 #ifdef __cplusplus
 }

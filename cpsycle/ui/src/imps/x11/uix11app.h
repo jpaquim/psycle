@@ -22,27 +22,20 @@
 extern "C" {
 #endif
 
-//typedef LRESULT (CALLBACK *psy_ui_fp_winproc)(HWND hwnd, UINT message,
-	//WPARAM wParam, LPARAM lParam);
-
 struct psy_ui_Component;
 
 typedef struct psy_ui_X11App {
-	// implements
+	/* implements */
 	psy_ui_AppImp imp;
-	// internal
+	/* internal */
 	int reserved;	
 	Display * dpy;	
 	const char* appclass;
-	const char* componentclass;
-	// winproc
-	// comwinproc
+	const char* componentclass;	
 	psy_Table selfmap;
 	psy_Table winidmap;
-	uintptr_t winid;
-	// defaultbackgroundbrush
-	struct psy_ui_Component* eventretarget;
-	// mousehook
+	uintptr_t winid;	
+	struct psy_ui_Component* eventretarget;	
 	Atom wmDeleteMessage;
 	bool running;	
 	psy_ui_X11Colours colourmap;
@@ -55,8 +48,8 @@ typedef struct psy_ui_X11App {
 	psy_Timers wintimers;
 	bool shiftstate;
 	bool controlstate;
-	bool altstate;
-	// references
+	bool altstate;	
+	/* references */
 	psy_ui_App* app;
 } psy_ui_X11App;
 

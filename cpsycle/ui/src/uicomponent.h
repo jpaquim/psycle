@@ -229,7 +229,7 @@ typedef struct psy_ui_Component {
 	bool dropdown;
 	psy_ui_Bitmap bufferbitmap;
 	bool drawtobuffer;
-	bool ncpaint;
+	bool ncpaint;	
 } psy_ui_Component;
 
 void psy_ui_replacedefaultfont(psy_ui_Component* main, psy_ui_Font*);
@@ -955,6 +955,8 @@ void psy_ui_component_draw(psy_ui_Component*, psy_ui_Graphics*,
 void psy_ui_component_mousedown(psy_ui_Component*, psy_ui_MouseEvent*,
 	psy_List* viewcomponents);
 void psy_ui_component_mouseup(psy_ui_Component*, psy_ui_MouseEvent*,
+	psy_List* viewcomponents);
+void psy_ui_component_mousedoubleclick(psy_ui_Component*, psy_ui_MouseEvent*,
 	psy_List* viewcomponents);
 void psy_ui_component_mousewheel(psy_ui_Component*, psy_ui_MouseEvent*,
 	intptr_t delta);

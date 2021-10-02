@@ -10,6 +10,13 @@
 /* std */
 #include <stdlib.h>
 
+/* time calculation */
+#ifdef WIN32
+#include <Windows.h>
+#else
+#include <sys/time.h>
+#endif
+
 void psy_timertask_init(psy_TimerTask* self, uintptr_t id,
 	void* context, psy_fp_timerwork timerwork, uintptr_t customid,
 	uintptr_t interval)
@@ -112,4 +119,40 @@ void psy_timers_removetimer(psy_Timers* self, uintptr_t id, uintptr_t customid)
 			psy_list_remove(&self->tasks, p);
 		}		
 	}
+}
+
+/* http://stackoverflow.com/questions/1861294/how-to-calculate-execution-time-of-a-code-snippet-in-c */
+uintptr_t psy_gettime_ms(void)
+{
+#ifdef WIN32
+	/* Windows */
+	FILETIME ft;
+	LARGE_INTEGER li;
+
+	/* Get the amount of 100 nano seconds intervals elapsed since January 1, 1601 (UTC) and copy it
+	 * to a LARGE_INTEGER structure. */
+	GetSystemTimeAsFileTime(&ft);
+	li.LowPart = ft.dwLowDateTime;
+	li.HighPart = ft.dwHighDateTime;
+
+	uintptr_t ret = li.QuadPart;
+	ret -= 116444736000000000LL; /* Convert from file time to UNIX epoch time. */
+	ret /= 10000; /* From 100 nano seconds (10^-7) to 1 millisecond (10^-3) intervals */
+
+	return ret;
+#else
+	/* Linux */
+	struct timeval tv;
+
+	gettimeofday(&tv, NULL);
+
+	uintptr_t ret = tv.tv_usec;
+	/* Convert from micro seconds (10^-6) to milliseconds (10^-3) */
+	ret /= 1000;
+
+	/* Adds the seconds (10^0) after converting them to milliseconds (10^-3) */
+	ret += (tv.tv_sec * 1000);
+
+	return ret;
+#endif
 }

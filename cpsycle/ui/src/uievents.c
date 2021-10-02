@@ -17,6 +17,7 @@ void psy_ui_event_init(psy_ui_Event* self, int type)
 	self->bubbles = TRUE;
 	self->default_prevented = FALSE;
 	self->target = NULL;
+	self->timestamp = 0;
 }
 
 /* psy_ui_KeyboardEvent */
