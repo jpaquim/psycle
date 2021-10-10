@@ -707,6 +707,26 @@ void psy_audio_player_start(psy_audio_Player* self)
 	psy_audio_sequencer_start(&self->sequencer);
 }
 
+void psy_audio_player_start_begin(psy_audio_Player* self)
+{
+	psy_audio_player_setposition(self, 0.0);
+	psy_audio_player_start(self);
+}
+
+void psy_audio_player_start_currseqpos(psy_audio_Player* self)
+{
+	assert(self);
+
+	if (self->song) {
+		psy_audio_player_setposition(self,
+			psy_audio_sequence_offset(&self->song->sequence,
+				psy_audio_sequencecursor_orderindex(
+					&self->song->sequence.cursor)));
+		psy_audio_player_start(self);
+	}
+}
+
+
 void psy_audio_player_stop(psy_audio_Player* self)
 {	
 	assert(self);

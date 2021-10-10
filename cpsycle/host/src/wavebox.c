@@ -244,7 +244,7 @@ static int wavebox_hittest_range(WaveBox*, uintptr_t framemin, uintptr_t framema
 	double x);
 static uintptr_t wavebox_screentoframe(WaveBox*, double x);
 static double wavebox_frametoscreen(WaveBox*, uintptr_t frame);
-static void  wavebox_onsize(WaveBox*, psy_ui_Size*);
+static void wavebox_onsize(WaveBox*);
 static psy_dsp_amp_t wavebox_amp(WaveBox*, float frame);
 /* vtable */
 static psy_ui_ComponentVtable vtable;
@@ -254,8 +254,12 @@ static void vtable_init(WaveBox* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);		
-		vtable.ondraw = (psy_ui_fp_component_ondraw)wavebox_ondraw;
-		vtable.onsize = (psy_ui_fp_component_onsize)wavebox_onsize;
+		vtable.ondraw =
+			(psy_ui_fp_component_ondraw)
+			wavebox_ondraw;
+		vtable.onsize =
+			(psy_ui_fp_component_onsize)
+			wavebox_onsize;
 		vtable_initialized = TRUE;
 	}
 	self->component.vtable = &vtable;
@@ -898,9 +902,12 @@ void wavebox_refresh(WaveBox* self)
 	waveboxcontext_updateoffsetstep(&self->context);
 }
 
-void  wavebox_onsize(WaveBox* self, psy_ui_Size* size)
+void  wavebox_onsize(WaveBox* self)
 {	
-	waveboxcontext_setsize(&self->context, size);	
+	psy_ui_Size size;
+
+	size = psy_ui_component_scrollsize(&self->component);
+	waveboxcontext_setsize(&self->context, &size);	
 }
 
 void wavebox_setquality(WaveBox* self, psy_dsp_ResamplerQuality quality)

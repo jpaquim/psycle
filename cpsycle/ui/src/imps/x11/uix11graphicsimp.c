@@ -54,6 +54,7 @@ static unsigned int psy_ui_x11_g_devlinewidth(psy_ui_x11_GraphicsImp*);
 static void psy_ui_x11_g_devsetorigin(psy_ui_x11_GraphicsImp*, double x, double y);
 static psy_ui_RealPoint psy_ui_x11_g_devorigin(const psy_ui_x11_GraphicsImp*);
 static int psy_ui_x11_g_imp_colourindex(psy_ui_x11_GraphicsImp*, psy_ui_Colour);
+static uintptr_t psy_ui_x11_g_dev_gc(psy_ui_x11_GraphicsImp*);
 /* vtable */
 static psy_ui_GraphicsImpVTable x11_imp_vtable;
 static bool x11_imp_vtable_initialized = FALSE;
@@ -140,6 +141,9 @@ static void x11_imp_vtable_init(psy_ui_x11_GraphicsImp* self)
 		x11_imp_vtable.dev_origin =
 			(psy_ui_fp_graphicsimp_dev_origin)
 			psy_ui_x11_g_devorigin;
+		x11_imp_vtable.dev_gc =
+			(psy_ui_fp_graphicsimp_dev_gc)
+			psy_ui_x11_g_dev_gc;
 		x11_imp_vtable_initialized = TRUE;
 	}
 	self->imp.vtable = &x11_imp_vtable;
@@ -588,5 +592,9 @@ psy_ui_RealPoint psy_ui_x11_g_devorigin(const psy_ui_x11_GraphicsImp* self)
 	return self->org;
 }
 
+uintptr_t psy_ui_x11_g_dev_gc(psy_ui_x11_GraphicsImp* self)
+{
+	return (uintptr_t)self->gc;
+}
 
-#endif
+#endif /* PSYCLE_USE_TK == PSYCLE_TK_X11 */

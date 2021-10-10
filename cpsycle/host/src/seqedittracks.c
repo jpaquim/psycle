@@ -77,9 +77,9 @@ void seqeditortracks_init(SeqEditorTracks* self, psy_ui_Component* parent,
 	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_SCROLL);	
 	psy_ui_component_setdefaultalign(&self->component,
 		psy_ui_ALIGN_TOP, psy_ui_margin_zero());
-	psy_signal_connect(&workspace->sequenceselection.signal_select, self,
+	psy_signal_connect(&workspace->song->sequence.sequenceselection.signal_select, self,
 		seqeditortracks_onsequenceselectionselect);
-	psy_signal_connect(&workspace->sequenceselection.signal_deselect, self,
+	psy_signal_connect(&workspace->song->sequence.sequenceselection.signal_deselect, self,
 		seqeditortracks_onsequenceselectiondeselect);
 	seqeditortracks_build(self);
 	psy_signal_connect(&self->state->signal_cursorchanged, self,
@@ -217,7 +217,7 @@ void seqeditortracks_updateseqeditlineposition(SeqEditorTracks* self)
 		seqentry = psy_audio_sequence_entry(
 			seqeditstate_sequence(self->state),
 			psy_audio_sequenceselection_first(
-				&self->workspace->sequenceselection));
+				&self->workspace->song->sequence.sequenceselection));
 		if (seqentry) {
 			seqeditorline_updateposition(self->seqeditposline,
 				seqentry->offset);

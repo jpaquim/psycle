@@ -60,12 +60,12 @@ void seqeditentry_init(SeqEditEntry* self,
 	self->seqpos = seqpos;
 	self->state = state;
 	self->preventresize = FALSE;
-	psy_signal_connect(&state->workspace->sequenceselection.signal_select,
+	psy_signal_connect(&state->workspace->song->sequence.sequenceselection.signal_select,
 		self, seqeditentry_onsequenceselectionselect);
-	psy_signal_connect(&state->workspace->sequenceselection.signal_deselect,
+	psy_signal_connect(&state->workspace->song->sequence.sequenceselection.signal_deselect,
 		self, seqeditentry_onsequenceselectiondeselect);
 	if (psy_audio_orderindex_equal(&self->seqpos,
-		psy_audio_sequenceselection_first(&self->state->workspace->sequenceselection))) {
+		psy_audio_sequenceselection_first(&self->state->workspace->song->sequence.sequenceselection))) {
 		psy_ui_component_addstylestate(&self->component,
 			psy_ui_STYLESTATE_SELECT);
 	}
@@ -74,10 +74,10 @@ void seqeditentry_init(SeqEditEntry* self,
 void seqeditentry_ondestroy(SeqEditEntry* self)
 {
 	psy_signal_disconnect(
-		&self->state->workspace->sequenceselection.signal_select,
+		&self->state->workspace->song->sequence.sequenceselection.signal_select,
 		self, seqeditentry_onsequenceselectionselect);
 	psy_signal_disconnect(
-		&self->state->workspace->sequenceselection.signal_deselect,
+		&self->state->workspace->song->sequence.sequenceselection.signal_deselect,
 		self, seqeditentry_onsequenceselectiondeselect);
 }
 
@@ -95,21 +95,21 @@ void seqeditentry_startdrag(SeqEditEntry* self, psy_ui_MouseEvent* ev)
 {	
 	if (ev->ctrl_key) {
 		if (!psy_audio_sequenceselection_isselected(
-				&self->state->workspace->sequenceselection,
+				&self->state->workspace->song->sequence.sequenceselection,
 				seqeditentry_seqpos(self))) {
 			psy_audio_sequenceselection_select(
-				&self->state->workspace->sequenceselection,
+				&self->state->workspace->song->sequence.sequenceselection,
 				seqeditentry_seqpos(self));
 		} else {
 			psy_audio_sequenceselection_deselect(
-				&self->state->workspace->sequenceselection,
+				&self->state->workspace->song->sequence.sequenceselection,
 				seqeditentry_seqpos(self));
 		}
 	} else {
 		psy_audio_sequenceselection_deselectall(
-			&self->state->workspace->sequenceselection);
+			&self->state->workspace->song->sequence.sequenceselection);
 		psy_audio_sequenceselection_select(
-			&self->state->workspace->sequenceselection,		
+			&self->state->workspace->song->sequence.sequenceselection,
 			seqeditentry_seqpos(self));
 	}	
 	self->state->dragposition = seqeditstate_quantize(self->state,
@@ -272,19 +272,27 @@ void seqeditpatternentry_onmousedown(SeqEditPatternEntry* self,
 
 		seqeditpos = seqeditstate_editposition(self->seqeditorentry.state);
 		seqeditentry_startdrag(&self->seqeditorentry, ev);
-		cursor = self->seqeditorentry.state->workspace->cursor;
+		cursor = self->seqeditorentry.state->workspace->song->sequence.cursor;
 		cursor.cursor.offset = self->seqeditorentry.state->dragposition;
 		if (ev->button == 1 && self->seqeditorentry.state->dragstatus == SEQEDIT_DRAG_START) {
 			if ((workspace_currview(self->seqeditorentry.state->workspace).id ==
-				VIEW_ID_PATTERNVIEW) &&
-				psy_audio_orderindex_equal(&self->seqeditorentry.seqpos, seqeditpos)) {
-				workspace_setcursor(self->seqeditorentry.state->workspace, cursor);
-				cursor = self->seqeditorentry.state->workspace->cursor;
+					VIEW_ID_PATTERNVIEW) &&
+					psy_audio_orderindex_equal(&self->seqeditorentry.seqpos, seqeditpos)) {
+				if (self->seqeditorentry.state->workspace && workspace_song(self->seqeditorentry.state->workspace)) {
+					psy_audio_sequence_setcursor(
+						psy_audio_song_sequence(workspace_song(self->seqeditorentry.state->workspace)),
+						cursor);
+				}				
+				cursor = self->seqeditorentry.state->workspace->song->sequence.cursor;
 				workspace_gotocursor(self->seqeditorentry.state->workspace, cursor.cursor);
 			} else {
 				cursor.cursor.offset = 0;
-				workspace_setcursor(self->seqeditorentry.state->workspace, cursor);
-				cursor = self->seqeditorentry.state->workspace->cursor;
+				if (self->seqeditorentry.state->workspace && workspace_song(self->seqeditorentry.state->workspace)) {
+					psy_audio_sequence_setcursor(
+						psy_audio_song_sequence(workspace_song(self->seqeditorentry.state->workspace)),
+						cursor);
+				}				
+				cursor = self->seqeditorentry.state->workspace->song->sequence.cursor;
 				workspace_gotocursor(self->seqeditorentry.state->workspace, cursor.cursor);
 			}
 			if (workspace_currview(self->seqeditorentry.state->workspace).id !=

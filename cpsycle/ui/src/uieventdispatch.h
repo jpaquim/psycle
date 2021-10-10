@@ -26,22 +26,19 @@ typedef struct psy_ui_EventDispatch {
 void psy_ui_eventdispatch_init(psy_ui_EventDispatch*);
 void psy_ui_eventdispatch_dispose(psy_ui_EventDispatch*);
 
-void psy_ui_eventdispatch_focuslost(psy_ui_EventDispatch*,
-	struct psy_ui_Component*);
-void psy_ui_eventdispatch_keydown(psy_ui_EventDispatch*,
-	struct psy_ui_Component*, psy_ui_KeyboardEvent*);
-void psy_ui_eventdispatch_keyup(psy_ui_EventDispatch*,
-	struct psy_ui_Component*, psy_ui_KeyboardEvent*);
-void psy_ui_eventdispatch_buttondown(psy_ui_EventDispatch*,
-	struct psy_ui_Component*, psy_ui_MouseEvent*);
-void psy_ui_eventdispatch_buttonup(psy_ui_EventDispatch*,
-	struct psy_ui_Component*, psy_ui_MouseEvent*);
-void psy_ui_eventdispatch_mousemove(psy_ui_EventDispatch*,
-	struct psy_ui_Component*, psy_ui_MouseEvent*);
-void psy_ui_eventdispatch_doubleclick(psy_ui_EventDispatch*,
-	struct psy_ui_Component*, psy_ui_MouseEvent*);
-void psy_ui_eventdispatch_size(psy_ui_EventDispatch*,
-	struct psy_ui_Component*, psy_ui_Size);
+INLINE void psy_ui_eventdispatch_handle_doubleclick(psy_ui_EventDispatch* self)
+{
+	self->handledoubleclick = TRUE;
+}
+
+INLINE void psy_ui_eventdispatch_disable_handle_doubleclick(
+	psy_ui_EventDispatch* self)
+{
+	self->handledoubleclick = FALSE;
+}
+
+void psy_ui_eventdispatch_send(psy_ui_EventDispatch*,
+	struct psy_ui_Component*, psy_ui_Event*);
 void psy_ui_eventdispatch_timer(psy_ui_EventDispatch*,
 	struct psy_ui_Component*, uintptr_t timerid);
 

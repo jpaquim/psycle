@@ -35,7 +35,7 @@ typedef struct TrackerLineNumbersLabel {
 	bool useheaderbitmap;
 	/* references */
 	struct TrackerView* view;
-	TrackerState* linestate;	
+	TrackerState* state;	
 	Workspace* workspace;
 } TrackerLineNumbersLabel;
 
@@ -93,7 +93,7 @@ typedef struct TrackerLineNumbers {
 	bool shownumbersinhex;
 	bool showbeat;
 	/* references */
-	TrackerState* linestate;	
+	TrackerState* state;	
 	Workspace* workspace;
 } TrackerLineNumbers;
 

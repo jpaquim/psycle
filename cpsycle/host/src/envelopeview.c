@@ -19,7 +19,7 @@ static void envelopebox_drawgrid(EnvelopeBox*, psy_ui_Graphics*);
 static void envelopebox_drawpoints(EnvelopeBox*, psy_ui_Graphics*);
 static void envelopebox_drawlines(EnvelopeBox*, psy_ui_Graphics*);
 static void envelopebox_drawruler(EnvelopeBox*, psy_ui_Graphics*);
-static void envelopebox_onsize(EnvelopeBox*, const psy_ui_Size*);
+static void envelopebox_onsize(EnvelopeBox*);
 static void envelopebox_ondestroy(EnvelopeBox*, psy_ui_Component* sender);
 static void envelopebox_onmousedown(EnvelopeBox*, psy_ui_MouseEvent*);
 static void envelopebox_onmousemove(EnvelopeBox*, psy_ui_MouseEvent*);
@@ -41,24 +41,31 @@ static void envelopebox_vtable_init(EnvelopeBox* self)
 {
 	if (!envelopebox_vtable_initialized) {
 		envelopebox_vtable = *(self->component.vtable);
-		envelopebox_vtable.onsize = (psy_ui_fp_component_onsize) envelopebox_onsize;
-		envelopebox_vtable.ondraw = (psy_ui_fp_component_ondraw) envelopebox_ondraw;		
-		envelopebox_vtable.onmousedown = (psy_ui_fp_component_onmouseevent)
+		envelopebox_vtable.onsize =
+			(psy_ui_fp_component_onsize)
+			envelopebox_onsize;
+		envelopebox_vtable.ondraw =
+			(psy_ui_fp_component_ondraw)
+			envelopebox_ondraw;		
+		envelopebox_vtable.onmousedown =
+			(psy_ui_fp_component_onmouseevent)
 			envelopebox_onmousedown;
-		envelopebox_vtable.onmousemove = (psy_ui_fp_component_onmouseevent)
+		envelopebox_vtable.onmousemove =
+			(psy_ui_fp_component_onmouseevent)
 			envelopebox_onmousemove;
-		envelopebox_vtable.onmouseup = (psy_ui_fp_component_onmouseevent)
+		envelopebox_vtable.onmouseup =
+			(psy_ui_fp_component_onmouseevent)
 			envelopebox_onmouseup;
 		envelopebox_vtable_initialized = TRUE;
 	}
+	self->component.vtable = &envelopebox_vtable;
 }
 /* implementation */
 void envelopebox_init(EnvelopeBox* self, psy_ui_Component* parent)
 {				
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_preventalign(&self->component);
-	envelopebox_vtable_init(self);
-	self->component.vtable = &envelopebox_vtable;
+	envelopebox_vtable_init(self);	
 	self->zoomleft = 0.f;
 	self->zoomright = 1.f;
 	self->modamount = 1.f;
@@ -265,14 +272,16 @@ void envelopebox_drawruler(EnvelopeBox* self, psy_ui_Graphics* g)
 	}
 }
 
-void envelopebox_onsize(EnvelopeBox* self, const psy_ui_Size* size)
+void envelopebox_onsize(EnvelopeBox* self)
 {
+	psy_ui_RealSize size;
 	const psy_ui_TextMetric* tm;
 
+	size = psy_ui_component_scrollsize_px(&self->component);
 	tm = psy_ui_component_textmetric(&self->component);
-	self->cx = psy_ui_value_px(&size->width, tm, NULL) - psy_ui_value_px(&self->spacing.left, tm, NULL) -
+	self->cx = size.width - psy_ui_value_px(&self->spacing.left, tm, NULL) -
 		psy_ui_value_px(&self->spacing.right, tm, NULL);
-	self->cy = psy_ui_value_px(&size->height, tm, NULL) - psy_ui_value_px(&self->spacing.top, tm, NULL) -
+	self->cy = size.height - psy_ui_value_px(&self->spacing.top, tm, NULL) -
 		psy_ui_value_px(&self->spacing.bottom, tm, NULL);
 }
 

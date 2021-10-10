@@ -85,7 +85,10 @@ void seqeditstate_outputstatusposition(SeqEditState*);
 
 INLINE psy_audio_OrderIndex seqeditstate_editposition(const SeqEditState* self)
 {	
-	return workspace_sequenceeditposition(self->workspace);
+	if (self->workspace->song) {
+		return self->workspace->song->sequence.cursor.orderindex;
+	}
+	return psy_audio_orderindex_make(0, 0);
 }
 
 INLINE double seqeditstate_beattopx(const SeqEditState* self,

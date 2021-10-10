@@ -511,13 +511,13 @@ void pianogriddraw_drawcursor(PianoGridDraw* self, psy_ui_Graphics* g, psy_audio
 {
 	assert(self);
 
-	if (!self->cursorchanging && !self->cursoronnoterelease &&
+	if (self->workspace->song && !self->cursorchanging && !self->cursoronnoterelease &&
 			!(psy_audio_player_playing(workspace_player(self->workspace)) &&
 			workspace_followingsong(self->workspace))) {
 		psy_audio_SequenceCursor cursor;		
 		intptr_t key;
 						
-		cursor = workspace_cursor(self->workspace);
+		cursor = self->workspace->song->sequence.cursor;
 		if (cursor.cursor.key != psy_audio_NOTECOMMANDS_EMPTY) {
 			key = cursor.cursor.key;
 		} else {
@@ -699,7 +699,7 @@ void pianogriddraw_drawevent(PianoGridDraw* self, psy_ui_Graphics* g,
 
 	assert(self);
 
-	cursor = workspace_cursor(self->workspace);
+	cursor = self->workspace->song->sequence.cursor;
 	left = ev->offset * self->gridstate->pxperbeat;
 	width = length * self->gridstate->pxperbeat;
 	corner = psy_ui_realsize_make(2, 2);
@@ -893,7 +893,11 @@ void pianogrid_onmouseup(Pianogrid* self, psy_ui_MouseEvent* ev)
 					pianogridstate_pattern(self->gridstate),
 					pianogridstate_step(self->gridstate),
 					cursor, patternevent,self->workspace)->command);
-			workspace_setcursor(self->workspace, cursor);			
+			if (self->workspace && workspace_song(self->workspace)) {
+				psy_audio_sequence_setcursor(
+					psy_audio_song_sequence(workspace_song(self->workspace)),
+					cursor);
+			}			
 		} else if (ev->button == 2) {
 			/* right button */
 			psy_audio_PatternNode* node;
@@ -921,7 +925,11 @@ void pianogrid_onmouseup(Pianogrid* self, psy_ui_MouseEvent* ev)
 				patternentry = psy_audio_patternnode_entry(node);				
 				if (!pianogrid_keyhittest(self, node, cursor.cursor.track, cursor.cursor.key)) {
 					pianogrid_storecursor(self);
-					workspace_setcursor(self->workspace, cursor);
+					if (self->workspace && workspace_song(self->workspace)) {
+						psy_audio_sequence_setcursor(
+							psy_audio_song_sequence(workspace_song(self->workspace)),
+							cursor);
+					}
 					pianogrid_invalidatecursor(self);
 					return;
 				}
@@ -950,10 +958,18 @@ void pianogrid_onmouseup(Pianogrid* self, psy_ui_MouseEvent* ev)
 									cursor, self->workspace)->command);
 						}
 					}
-					workspace_setcursor(self->workspace, cursor);
+					if (self->workspace && workspace_song(self->workspace)) {
+						psy_audio_sequence_setcursor(
+							psy_audio_song_sequence(workspace_song(self->workspace)),
+							cursor);
+					}					
 				} else {
 					if (psy_audio_patternentry_front(patternentry)->note == psy_audio_NOTECOMMANDS_RELEASE) {
-						workspace_setcursor(self->workspace, cursor);
+						if (self->workspace && workspace_song(self->workspace)) {
+							psy_audio_sequence_setcursor(
+								psy_audio_song_sequence(workspace_song(self->workspace)),
+								cursor);
+						}
 						return;
 					} else {
 						psy_audio_PatternEvent release;
@@ -982,7 +998,11 @@ void pianogrid_onmouseup(Pianogrid* self, psy_ui_MouseEvent* ev)
 								cursor, release,
 								self->workspace)->command);
 						cursor.cursor.key = psy_audio_patternentry_front(patternentry)->note;
-						workspace_setcursor(self->workspace, cursor);
+						if (self->workspace && workspace_song(self->workspace)) {
+							psy_audio_sequence_setcursor(
+								psy_audio_song_sequence(workspace_song(self->workspace)),
+								cursor);
+						}
 					}
 				}
 			}
@@ -1103,8 +1123,11 @@ void pianogrid_prevlines(Pianogrid* self, uintptr_t lines, bool wrap)
 		} else {
 			pianogrid_scrollleft(self, self->gridstate->cursor.cursor);
 		}
-		workspace_setcursor(self->workspace,
-			pianogridstate_cursor(self->gridstate));
+		if (self->workspace && workspace_song(self->workspace)) {
+			psy_audio_sequence_setcursor(
+				psy_audio_song_sequence(workspace_song(self->workspace)),
+				pianogridstate_cursor(self->gridstate));
+		}		
 		pianogrid_invalidatecursor(self);
 	}
 }
@@ -1128,8 +1151,11 @@ void pianogrid_prevkeys(Pianogrid* self, uint8_t lines, bool wrap)
 		} else {
 			pianogrid_scrolldown(self, self->gridstate->cursor.cursor);
 		}
-		workspace_setcursor(self->workspace,
-			pianogridstate_cursor(self->gridstate));
+		if (self->workspace && workspace_song(self->workspace)) {
+			psy_audio_sequence_setcursor(
+				psy_audio_song_sequence(workspace_song(self->workspace)),
+				pianogridstate_cursor(self->gridstate));
+		}
 		pianogrid_invalidatecursor(self);
 	}
 }
@@ -1158,7 +1184,11 @@ void pianogrid_advancelines(Pianogrid* self, uintptr_t lines, bool wrap)
 		} else {
 			pianogrid_scrollleft(self, self->gridstate->cursor.cursor);
 		}
-		workspace_setcursor(self->workspace, self->gridstate->cursor);
+		if (self->workspace && workspace_song(self->workspace)) {
+			psy_audio_sequence_setcursor(
+				psy_audio_song_sequence(workspace_song(self->workspace)),
+				pianogridstate_cursor(self->gridstate));
+		}
 		pianogrid_invalidatecursor(self);
 	}
 }
@@ -1180,7 +1210,11 @@ void pianogrid_advancekeys(Pianogrid* self, uint8_t lines, bool wrap)
 		} else {
 			pianogrid_scrolldown(self, self->gridstate->cursor.cursor);
 		}
-		workspace_setcursor(self->workspace, self->gridstate->cursor);
+		if (self->workspace && workspace_song(self->workspace)) {
+			psy_audio_sequence_setcursor(
+				psy_audio_song_sequence(workspace_song(self->workspace)),
+				pianogridstate_cursor(self->gridstate));
+		}
 		pianogrid_invalidatecursor(self);
 	}
 }
@@ -1387,7 +1421,9 @@ static void pianoroll_ondisplayactivetracks(Pianoroll*, psy_ui_Button* sender);
 static void pianoroll_updatetrackdisplaybuttons(Pianoroll*);
 static void pianoroll_onthemechanged(Pianoroll*, PatternViewConfig*, psy_Property* theme);
 static void pianoroll_updatetheme(Pianoroll*);
-static void pianoroll_oncursorchanged(Pianoroll*, Workspace* sender);
+static void pianoroll_oncursorchanged(Pianoroll*, psy_audio_Sequence* sender);
+static void pianoroll_onsongchanged(Pianoroll*, Workspace* sender,
+	int flag, psy_audio_Song*);
 static bool pianoroll_onrollcmds(Pianoroll*, InputHandler* sender);
 static bool pianoroll_onnotecmds(Pianoroll*, InputHandler* sender);
 /* vtable */
@@ -1481,10 +1517,12 @@ void pianoroll_init(Pianoroll* self, psy_ui_Component* parent,
 	psy_signal_connect(
 		&psycleconfig_patview(workspace_conf(workspace))->signal_themechanged,
 		self, pianoroll_onthemechanged);
-	psy_signal_connect(&self->workspace->signal_cursorchanged,
+	psy_signal_connect(&self->workspace->song->sequence.signal_cursorchanged,
 		self, pianoroll_oncursorchanged);
 	psy_signal_connect(&self->workspace->signal_playlinechanged, self,
 		pianoroll_onplaylinechanged);
+	psy_signal_connect(&workspace->signal_songchanged, self,
+		pianoroll_onsongchanged);
 	pianoroll_updatetheme(self);
 	inputhandler_connect(&workspace->inputhandler, INPUTHANDLER_FOCUS,
 		psy_EVENTDRIVER_CMD, "pianoroll", psy_INDEX_INVALID, 
@@ -1595,12 +1633,20 @@ void pianoroll_onlpbchanged(Pianoroll* self, psy_audio_Player* sender,
 	psy_ui_component_invalidate(pianogrid_base(&self->grid));
 }
 
-void pianoroll_oncursorchanged(Pianoroll* self,
-	Workspace* sender)
+void pianoroll_oncursorchanged(Pianoroll* self, psy_audio_Sequence* sender)
 {	
 	assert(self);
 
-	pianogrid_setcursor(&self->grid, workspace_cursor(self->workspace));
+	pianogrid_setcursor(&self->grid, sender->cursor);
+}
+
+void pianoroll_onsongchanged(Pianoroll* self, Workspace* workspace,
+	int flag, psy_audio_Song* song)
+{	
+	if (workspace->song) {
+		psy_signal_connect(&self->workspace->song->sequence.signal_cursorchanged, self,
+			pianoroll_oncursorchanged);
+	}	
 }
 
 void pianoroll_ongridscroll(Pianoroll* self, psy_ui_Component* sender)
@@ -1909,7 +1955,11 @@ bool pianoroll_onnotecmds(Pianoroll* self, InputHandler* sender)
 		if (ev.note < psy_audio_NOTECOMMANDS_RELEASE) {
 			self->gridstate.cursor.cursor.key = ev.note;
 		}
-		workspace_setcursor(self->workspace, self->gridstate.cursor);
+		if (self->workspace && workspace_song(self->workspace)) {
+			psy_audio_sequence_setcursor(
+				psy_audio_song_sequence(workspace_song(self->workspace)),
+				pianogridstate_cursor(&self->gridstate));
+		}
 		return 1;
 	}
 	return 0;
@@ -1942,8 +1992,11 @@ void pianoroll_navup(Pianoroll* self)
 		pianogrid_storecursor(&self->grid);
 		++self->gridstate.cursor.cursor.key;
 		pianogrid_scrollup(&self->grid, self->gridstate.cursor.cursor);
-		workspace_setcursor(self->workspace,
-			self->gridstate.cursor);
+		if (self->workspace && workspace_song(self->workspace)) {
+			psy_audio_sequence_setcursor(
+				psy_audio_song_sequence(workspace_song(self->workspace)),
+				pianogridstate_cursor(&self->gridstate));
+		}
 		pianogrid_invalidatecursor(&self->grid);
 	} 
 }
@@ -1954,8 +2007,11 @@ void pianoroll_navdown(Pianoroll* self)
 		pianogrid_storecursor(&self->grid);
 		--self->gridstate.cursor.cursor.key;
 		pianogrid_scrolldown(&self->grid, self->gridstate.cursor.cursor);
-		workspace_setcursor(self->workspace,
-			self->gridstate.cursor);
+		if (self->workspace && workspace_song(self->workspace)) {
+			psy_audio_sequence_setcursor(
+				psy_audio_song_sequence(workspace_song(self->workspace)),
+				pianogridstate_cursor(&self->gridstate));
+		}
 		pianogrid_invalidatecursor(&self->grid);
 	}
 }

@@ -179,18 +179,18 @@ void playbar_startplay(PlayBar* self)
 	psy_ui_button_highlight(&self->play);
 	sequence = self->player->sequencer.sequence;	
 	entry = psy_audio_sequence_entry(sequence,
-		psy_audio_sequenceselection_first(&self->workspace->sequenceselection));
+		psy_audio_sequenceselection_first(&self->workspace->song->sequence.sequenceselection));
 	if (entry) {
 		psy_audio_exclusivelock_enter();		
 		psy_audio_player_stop(self->player);
 		psy_audio_sequence_setplayselection(sequence,
-			&self->workspace->sequenceselection);
+			&self->workspace->song->sequence.sequenceselection);
 		startposition = psy_audio_sequenceentry_offset(entry);
 		if (psy_audio_sequencer_playmode(&self->player->sequencer)
 				== psy_audio_SEQUENCERPLAYMODE_PLAYNUMBEATS) {
 			psy_audio_SequenceCursor editposition;
 
-			editposition = workspace_cursor(self->workspace);			
+			editposition = self->workspace->song->sequence.cursor;
 			startposition += (psy_dsp_big_beat_t)editposition.cursor.offset;
 			numplaybeats = (psy_dsp_big_beat_t)atof(psy_ui_edit_text(
 				&self->loopbeatsedit));

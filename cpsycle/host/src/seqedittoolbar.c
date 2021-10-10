@@ -109,9 +109,9 @@ void seqedittoolbar_init(SeqEditToolBar* self, psy_ui_Component* parent,
 		seqeditortoolbar_ondragmodemove);
 	psy_signal_connect(&self->reorder.signal_clicked, self,
 		seqeditortoolbar_ondragmodereorder);
-	psy_signal_connect(&state->workspace->sequenceselection.signal_select,
+	psy_signal_connect(&state->workspace->song->sequence.sequenceselection.signal_select,
 		self, seqeditortoolbar_onsequenceselectionselect);
-	psy_signal_connect(&state->workspace->sequenceselection.signal_deselect,
+	psy_signal_connect(&state->workspace->song->sequence.sequenceselection.signal_deselect,
 		self, seqeditortoolbar_onsequenceselectiondeselect);
 }
 

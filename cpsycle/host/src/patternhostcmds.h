@@ -22,15 +22,11 @@ extern "C" {
 typedef struct PatternCmds {
 	/* references */
 	Workspace* workspace;
-	psy_audio_Pattern* pattern;
-	psy_audio_Patterns* patterns;
-	psy_audio_Sequence* sequence;
-	psy_audio_Player* player;
+	psy_audio_Pattern* pattern;	
 } PatternCmds;
 
 void patterncmds_init(PatternCmds*, Workspace*);
 
-void patterncmds_update(PatternCmds*);
 void patterncmds_setpattern(PatternCmds*, psy_audio_Pattern*);
 void patterncmds_blocktranspose(PatternCmds*, psy_audio_PatternSelection,
 	psy_audio_SequenceCursor, int offset);

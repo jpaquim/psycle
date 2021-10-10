@@ -69,7 +69,7 @@ void seqview_init(SeqView* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(&self->duration.component, psy_ui_ALIGN_BOTTOM);	
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		seqview_onsongchanged);		
-	psy_signal_connect(&workspace->sequenceselection.signal_select, self,
+	psy_signal_connect(&workspace->song->sequence.sequenceselection.signal_select, self,
 		seqview_onsequenceselect);
 	if (self->cmds.sequence && self->cmds.sequence->patterns) {
 		psy_signal_connect(&self->cmds.sequence->patterns->signal_namechanged,

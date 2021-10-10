@@ -86,8 +86,10 @@ void insertcommand_execute(InsertCommand* self)
 			&self->event);
 		self->insert = 1;
 	}
-	if (self->workspace) {
-		workspace_setcursor(self->workspace, self->cursor);
+	if (self->workspace && workspace_song(self->workspace)) {
+		psy_audio_sequence_setcursor(
+			psy_audio_song_sequence(workspace_song(self->workspace)),
+			self->cursor);		
 	}
 }
 
@@ -112,8 +114,10 @@ void insertcommand_revert(InsertCommand* self)
 			psy_audio_pattern_setevent(self->pattern, node, &self->oldevent);
 		}
 	}
-	if (self->workspace) {
-		workspace_setcursor(self->workspace, self->cursor);
+	if (self->workspace && workspace_song(self->workspace)) {
+		psy_audio_sequence_setcursor(
+			psy_audio_song_sequence(workspace_song(self->workspace)),
+			self->cursor);
 	}
 }
 
@@ -179,8 +183,10 @@ void removecommand_execute(RemoveCommand* self)
 	} else {		
 		self->remove = 0;
 	}
-	if (self->workspace) {
-		workspace_setcursor(self->workspace, self->cursor);
+	if (self->workspace && workspace_song(self->workspace)) {
+		psy_audio_sequence_setcursor(
+			psy_audio_song_sequence(workspace_song(self->workspace)),
+			self->cursor);
 	}
 }
 
@@ -199,8 +205,10 @@ void removecommand_revert(RemoveCommand* self)
 			self->cursor.cursor.track,
 			(psy_dsp_big_beat_t)self->cursor.cursor.offset,
 			&self->oldevent);
-		if (self->workspace) {
-			workspace_setcursor(self->workspace, self->cursor);
+		if (self->workspace && workspace_song(self->workspace)) {
+			psy_audio_sequence_setcursor(
+				psy_audio_song_sequence(workspace_song(self->workspace)),
+				self->cursor);
 		}
 		self->remove = 0;
 	}
@@ -252,7 +260,11 @@ void BlockTransposeCommandDispose(BlockTransposeCommand* self)
 
 void BlockTransposeCommandExecute(BlockTransposeCommand* self)
 {
-	workspace_setcursor(self->workspace, self->cursor);
+	if (self->workspace && workspace_song(self->workspace)) {
+		psy_audio_sequence_setcursor(
+			psy_audio_song_sequence(workspace_song(self->workspace)),
+			self->cursor);
+	}
 	psy_audio_pattern_copy(&self->oldpattern, self->pattern);
 	psy_audio_pattern_blocktranspose(self->pattern,
 		self->block.topleft,
@@ -263,7 +275,11 @@ void BlockTransposeCommandRevert(BlockTransposeCommand* self)
 {
 	assert(self->pattern);
 	if (self->pattern) {
-		workspace_setcursor(self->workspace, self->cursor);
+		if (self->workspace && workspace_song(self->workspace)) {
+			psy_audio_sequence_setcursor(
+				psy_audio_song_sequence(workspace_song(self->workspace)),
+				self->cursor);
+		}
 		psy_audio_pattern_copy(self->pattern, &self->oldpattern);
 	}
 }

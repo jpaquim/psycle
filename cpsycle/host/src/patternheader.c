@@ -269,7 +269,9 @@ void patterntrackbox_onpreferredsize(PatternTrackBox* self,
 /* TrackerHeader */
 /* prototypes */
 static void trackerheader_ondestroy(TrackerHeader*);
-static void trackerheader_oncursorchanged(TrackerHeader*, Workspace*);
+static void trackerheader_onsongchanged(TrackerHeader*, Workspace* sender,
+	int flag, psy_audio_Song*);
+static void trackerheader_oncursorchanged(TrackerHeader*, psy_audio_Sequence*);
 static void trackerheader_ontimer(TrackerHeader*, uintptr_t timerid);
 static void trackerheader_updateplayons(TrackerHeader*);
 static void trackerheader_onmousewheel(TrackerHeader*, psy_ui_MouseEvent*);
@@ -308,7 +310,9 @@ void trackerheader_init(TrackerHeader* self, psy_ui_Component* parent,
 	self->workspace = workspace;
 	self->currtrack = 0;
 	psy_table_init(&self->boxes);	
-	psy_signal_connect(&self->workspace->signal_cursorchanged, self,
+	psy_signal_connect(&workspace->signal_songchanged, self,
+		trackerheader_onsongchanged);
+	psy_signal_connect(&self->workspace->song->sequence.signal_cursorchanged, self,
 		trackerheader_oncursorchanged);	
 	trackerheader_build(self);	
 	psy_ui_component_starttimer(&self->component, 0, 50);
@@ -338,16 +342,25 @@ void trackerheader_build(TrackerHeader* self)
 	psy_ui_component_align(&self->component);
 }
 
-void trackerheader_oncursorchanged(TrackerHeader* self,
-	Workspace* sender)
+void trackerheader_onsongchanged(TrackerHeader* self, Workspace* workspace,
+	int flag, psy_audio_Song* song)
 {
+	if (workspace->song) {
+		psy_signal_connect(&self->workspace->song->sequence.signal_cursorchanged, self,
+			trackerheader_oncursorchanged);
+	}
+}
+
+void trackerheader_oncursorchanged(TrackerHeader* self,
+	psy_audio_Sequence* sender)
+{	
 	psy_audio_SequenceCursor cursor;
 
-	cursor = workspace_cursor(sender);
+	cursor = sender->cursor;		
 	if (self->currtrack != cursor.cursor.track) {
 		self->currtrack = cursor.cursor.track;
-		psy_ui_component_invalidate(&self->component);
-	}
+		psy_ui_component_invalidate(&self->component);	
+	}		
 }
 
 void trackerheader_ontimer(TrackerHeader* self, uintptr_t timerid)

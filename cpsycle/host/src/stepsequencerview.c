@@ -73,7 +73,7 @@ bool stepsequencerstate_update_positions(StepSequencerState* self)
 	assert(self);
 	
 	/* update stepsequencer editposition */
-	cursor = workspace_cursor(self->workspace);
+	cursor = self->workspace->song->sequence.cursor;
 	seqoffset = 0.0;
 	if (workspace_song(self->workspace)) {
 		psy_audio_sequencecursor_updateseqoffset(&cursor,
@@ -109,7 +109,7 @@ bool stepsequencerstate_updatepattern(StepSequencerState* self)
 	if (workspace_song(self->workspace)) {
 		psy_audio_SequenceCursor cursor;
 
-		cursor = workspace_cursor(self->workspace);
+		cursor = self->workspace->song->sequence.cursor;
 		pattern = psy_audio_sequence_pattern(
 			psy_audio_song_sequence(workspace_song(self->workspace)),
 			psy_audio_sequencecursor_orderindex(&cursor));
@@ -276,7 +276,7 @@ void stepsequencerbar_update(StepsequencerBar* self)
 		uintptr_t i;
 		uintptr_t line;
 				
-		cursor = workspace_cursor(self->state->workspace);
+		cursor = self->state->workspace->song->sequence.cursor;
 		curr = psy_audio_pattern_begin(self->state->pattern);
 		seqtime = psy_audio_player_sequencertime(workspace_player(
 			self->state->workspace));
@@ -344,7 +344,7 @@ void stepsequencerbar_onmousedown(StepsequencerBar* self,
 		bpl = (psy_dsp_big_beat_t) 1 / psy_audio_player_lpb(workspace_player(
 			self->state->workspace));
 		step = (intptr_t)(ev->pt.x / stepwidth + self->state->editposition.steprow * self->state->numtiles);
-		cursor = workspace_cursor(self->state->workspace);
+		cursor = self->state->workspace->song->sequence.cursor;
 		cursor.cursor.column = 0;	
 		cursor.cursor.offset = step / (psy_dsp_big_beat_t) psy_audio_player_lpb(
 			workspace_player(self->state->workspace));		
@@ -624,13 +624,17 @@ void stepsequencerbarselect_onmousedown(StepsequencerBarSelect* self,
 	if (self->state->barbuttonindex != psy_INDEX_INVALID) {
 		psy_audio_SequenceCursor cursor;		
 		
-		cursor = workspace_cursor(self->state->workspace);
+		cursor = self->state->workspace->song->sequence.cursor;
 		cursor.cursor.offset =
 			(double)(self->state->barbuttonindex * self->state->numtiles) /
 			(double)cursor.cursor.lpb +
 			(double)self->state->editposition.seqentryline /
 			(double)cursor.cursor.lpb;
-		workspace_setcursor(self->state->workspace, cursor);
+		if (self->state->workspace && workspace_song(self->state->workspace)) {
+			psy_audio_sequence_setcursor(
+				psy_audio_song_sequence(workspace_song(self->state->workspace)),
+				cursor);
+		}
 	}
 	self->state->barbuttonindex = psy_INDEX_INVALID;
 }
@@ -644,7 +648,7 @@ static void stepsequencerview_onplaylinechanged(StepsequencerView*,
 static void stepsequencerview_onsongchanged(StepsequencerView*,
 	Workspace* sender, int flag, psy_audio_Song*);
 static void stepsequencerview_oncursorchanged(StepsequencerView*,
-	Workspace* sender);
+	psy_audio_Sequence* sender);
 static void stepsequencerview_update(StepsequencerView*);
 static void stepsequencerview_connectpattern(StepsequencerView*);
 static void stepsequencerview_onpatternlengthchanged(StepsequencerView*,
@@ -681,8 +685,10 @@ void stepsequencerview_connectworkspace(StepsequencerView* self,
 
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		stepsequencerview_onsongchanged);
-	psy_signal_connect(&workspace->signal_cursorchanged, self,
-		stepsequencerview_oncursorchanged);
+	if (workspace->song) {
+		psy_signal_connect(&workspace->song->sequence.signal_cursorchanged, self,
+			stepsequencerview_oncursorchanged);
+	}
 	psy_signal_connect(&workspace->signal_playlinechanged,
 		self, stepsequencerview_onplaylinechanged);	
 }
@@ -698,7 +704,7 @@ void stepsequencerview_onplaylinechanged(StepsequencerView* self,
 }
 
 void stepsequencerview_oncursorchanged(StepsequencerView* self,
-	Workspace* sender)
+	psy_audio_Sequence* sender)
 {
 	assert(self);
 
@@ -710,6 +716,10 @@ void stepsequencerview_onsongchanged(StepsequencerView* self, Workspace*
 {	
 	assert(self);
 
+	if (workspace->song) {
+		psy_signal_connect(&workspace->song->sequence.signal_cursorchanged, self,
+			stepsequencerview_oncursorchanged);
+	}
 	stepsequencerview_update(self);
 }
 

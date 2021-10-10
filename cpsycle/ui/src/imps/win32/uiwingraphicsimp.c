@@ -52,6 +52,7 @@ static void psy_ui_win_g_devsetlinewidth(psy_ui_win_GraphicsImp*, uintptr_t widt
 static unsigned int psy_ui_win_g_devlinewidth(psy_ui_win_GraphicsImp*);
 static void psy_ui_win_g_devsetorigin(psy_ui_win_GraphicsImp*, double x, double y);
 static psy_ui_RealPoint psy_ui_win_g_devorigin(const psy_ui_win_GraphicsImp*);
+static uintptr_t psy_ui_win_g_dev_gc(psy_ui_win_GraphicsImp*);
 
 static psy_ui_TextMetric converttextmetric(const TEXTMETRIC*);
 /* vtable */
@@ -140,15 +141,18 @@ static void win_imp_vtable_init(psy_ui_win_GraphicsImp* self)
 		win_imp_vtable.dev_origin =
 			(psy_ui_fp_graphicsimp_dev_origin)
 			psy_ui_win_g_devorigin;
+		win_imp_vtable.dev_gc =
+			(psy_ui_fp_graphicsimp_dev_gc)
+			psy_ui_win_g_dev_gc;
 		win_imp_vtable_initialized = TRUE;
 	}
+	self->imp.vtable = &win_imp_vtable;
 }
 /* implementation */
 void psy_ui_win_graphicsimp_init(psy_ui_win_GraphicsImp* self, HDC hdc)
 {
 	psy_ui_graphics_imp_init(&self->imp);
-	win_imp_vtable_init(self);
-	self->imp.vtable = &win_imp_vtable;
+	win_imp_vtable_init(self);	
 	self->hdc = hdc;
 	self->shareddc = TRUE;
 	self->pen = CreatePen(PS_SOLID, 1,
@@ -621,4 +625,9 @@ psy_ui_RealPoint psy_ui_win_g_devorigin(const psy_ui_win_GraphicsImp* self)
 	return self->org;
 }
 
-#endif
+uintptr_t psy_ui_win_g_dev_gc(psy_ui_win_GraphicsImp* self)
+{
+	return (uintptr_t)self->hdc;
+}
+
+#endif /* PSYCLE_USE_TK == PSYCLE_TK_WIN32 */

@@ -494,11 +494,13 @@ psy_audio_SequenceCursor trackercolumn_makecursor(TrackerColumn* self,
 	psy_audio_SequenceCursor rv;
 	TrackDef* trackdef;	
 	double cpx;	
-
+	psy_audio_Sequence* sequence;
+	
 	rv = self->gridstate->cursor;
-	if (self->gridstate->sequence) {
+	sequence = trackerstate_sequence(self->gridstate);
+	if (sequence) {
 		psy_audio_sequencecursor_updateseqoffset(&rv,
-			self->gridstate->sequence);
+			sequence);
 	}
 	rv.cursor.seqoffset = (self->gridstate->singlemode)
 		? 0.0
@@ -515,7 +517,7 @@ psy_audio_SequenceCursor trackercolumn_makecursor(TrackerColumn* self,
 	rv.cursor.track = self->index;
 	rv.cursor.column = 0;
 	rv.cursor.digit = 0;
-	rv.cursor.key = self->workspace->cursor.cursor.key;
+	rv.cursor.key = self->workspace->song->sequence.cursor.cursor.key;
 	trackdef = trackerstate_trackdef(self->gridstate, rv.cursor.track);
 	cpx = 0;	
 	while (rv.cursor.column < trackdef_numcolumns(trackdef) &&
@@ -531,7 +533,7 @@ psy_audio_SequenceCursor trackercolumn_makecursor(TrackerColumn* self,
 		rv.cursor.digit = trackdef_numdigits(trackdef, rv.cursor.column) - 1;
 	}
 	self->gridstate->cursor.cursor.patternid =
-		workspace_cursor(self->workspace).cursor.patternid;
+		self->workspace->song->sequence.cursor.cursor.patternid;		
 	return rv;
 }
 

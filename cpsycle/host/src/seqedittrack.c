@@ -287,13 +287,13 @@ void seqedittrack_onmousedown(SeqEditTrack* self, psy_ui_MouseEvent* ev)
 	if (ev->button == 1) {
 		if (self->state->dragstatus == SEQEDIT_DRAG_NONE) {
 			psy_audio_OrderIndex seqpos;
-
-			seqpos = workspace_sequenceeditposition(self->state->workspace);
+			
+			seqpos = seqeditstate_editposition(self->state);
 			if (self->trackindex != seqpos.track) {
 				seqpos.track = self->trackindex;
 				seqpos.order = psy_INDEX_INVALID;
 				psy_audio_sequenceselection_select(
-					&self->state->workspace->sequenceselection,
+					&self->state->workspace->song->sequence.sequenceselection,
 					seqpos);				
 			}
 		} else {

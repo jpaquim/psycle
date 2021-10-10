@@ -239,7 +239,7 @@ void sequencebuttons_onrename(SequenceButtons* self, psy_ui_Button* sender)
 		psy_ui_edit_enableinputfield(&self->edit);
 		
 		pattern = psy_audio_sequence_pattern(self->cmds->sequence,
-			psy_audio_sequenceselection_first(&self->cmds->workspace->sequenceselection));
+			psy_audio_sequenceselection_first(&self->cmds->workspace->song->sequence.sequenceselection));
 		if (pattern) {			
 			psy_ui_edit_settext(&self->edit, psy_audio_pattern_name(pattern));
 			psy_ui_edit_setsel(&self->edit, 0, -1);
@@ -262,7 +262,7 @@ void sequencebuttons_oneditaccept(SequenceButtons* self, psy_ui_Edit* sender)
 		entry = (self->cmds->sequence)
 			? psy_audio_sequence_entry(self->cmds->sequence,
 				psy_audio_sequenceselection_first(
-					&self->cmds->workspace->sequenceselection))
+					&self->cmds->workspace->song->sequence.sequenceselection))
 			: NULL;
 		if (entry && entry->type == psy_audio_SEQUENCEENTRY_PATTERN) {
 			psy_audio_Pattern* pattern;
