@@ -9,6 +9,7 @@
 /* host */
 #include "patternviewskin.h"
 #include "trackercmds.h"
+#include "workspace.h"
 /* audio */
 #include <pattern.h>
 #include <sequence.h>
@@ -108,8 +109,6 @@ typedef struct TrackerState {
 	psy_audio_SequenceCursor cursor;
 	/* references */
 	psy_audio_Pattern* pattern;
-	psy_audio_Patterns* patterns;
-	psy_audio_Sequence* sequence;
 	PatternViewSkin* skin;
 	TrackConfig* trackconfig;
 	bool singlemode;
@@ -140,10 +139,10 @@ typedef struct TrackerState {
 	/* references */
 	const psy_ui_Font* gridfont;	
 	uintptr_t maxlines;
+	psy_audio_Song* song;
 } TrackerState;
 
-void trackerstate_init(TrackerState*, TrackConfig*,
-	psy_audio_Patterns*, psy_audio_Sequence*);
+void trackerstate_init(TrackerState*, TrackConfig*, psy_audio_Song* song);
 void trackerstate_dispose(TrackerState*);
 double trackerstate_trackwidth(const TrackerState*, uintptr_t track);
 double trackerstate_defaulttrackwidth(const TrackerState*);
@@ -151,13 +150,12 @@ TrackDef* trackerstate_trackdef(TrackerState*, uintptr_t track);
 uintptr_t trackerstate_pxtotrack(const TrackerState*, double x);
 double trackerstate_basewidth(TrackerState*, uintptr_t track);
 
-INLINE void trackerstate_setsequence(TrackerState* self,
-	psy_audio_Sequence* sequence)
+INLINE void trackerstate_setsong(TrackerState* self,
+	psy_audio_Song* song)
 {
-	assert(self);
-
-	self->sequence = sequence;
+	self->song = song;
 }
+
 
 INLINE void trackerstate_setpattern(TrackerState* self,
 	psy_audio_Pattern* pattern)
@@ -167,19 +165,24 @@ INLINE void trackerstate_setpattern(TrackerState* self,
 	self->pattern = pattern;
 }
 
-INLINE void trackerstate_setpatterns(TrackerState* self,
-	psy_audio_Patterns* patterns)
-{
-	assert(self);
-	
-	self->patterns = patterns;
-}
-
 INLINE psy_audio_Patterns* trackerstate_patterns(TrackerState* self)
 {
 	assert(self);
 
-	return self->patterns;
+	if (self->song) {
+		return &self->song->patterns;
+	}
+	return NULL;
+}
+
+INLINE psy_audio_Patterns* trackerstate_patterns_const(const TrackerState* self)
+{
+	assert(self);
+
+	if (self->song) {
+		return &self->song->patterns;
+	}
+	return NULL;
 }
 
 INLINE psy_audio_Pattern* trackerstate_pattern(TrackerState* self)
@@ -201,8 +204,8 @@ INLINE double trackerstate_preferredtrackwidth(const
 
 INLINE uintptr_t trackerstate_numsongtracks(const TrackerState* self)
 {
-	if (self->patterns) {
-		return psy_audio_patterns_numtracks(self->patterns);
+	if (trackerstate_patterns_const(self)) {
+		return psy_audio_patterns_numtracks(trackerstate_patterns_const(self));
 	}
 	return 0;
 }
@@ -284,7 +287,20 @@ INLINE psy_audio_Sequence* trackerstate_sequence(TrackerState* self)
 {
 	assert(self);
 
-	return self->sequence;
+	if (self->song) {
+		return &self->song->sequence;
+	}
+	return NULL;
+}
+
+INLINE psy_audio_Sequence* trackerstate_sequence_const(const TrackerState* self)
+{
+	assert(self);
+
+	if (self->song) {
+		return &self->song->sequence;
+	}
+	return NULL;
 }
 
 INLINE psy_dsp_big_beat_t trackerstate_quantize(const TrackerState*

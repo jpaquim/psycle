@@ -107,12 +107,11 @@ psy_List** trackereventtable_track(TrackerEventTable* self, uintptr_t index)
 /* TrackerState */
 /* implementation */
 void trackerstate_init(TrackerState* self, TrackConfig* trackconfig,
-	psy_audio_Patterns* patterns, psy_audio_Sequence* sequence)
-{	
+	psy_audio_Song* song)
+{		
+	self->song = song;
 	self->trackconfig = trackconfig;
-	self->pattern = NULL;
-	self->patterns = patterns;
-	self->sequence = sequence;
+	self->pattern = NULL;	
 	self->skin = NULL;	
 	self->drawbeathighlights = TRUE;
 	self->synccursor = TRUE;
@@ -688,15 +687,16 @@ psy_dsp_big_beat_t trackerstate_length(const TrackerState* self)
 		if (self->pattern) {
 			return psy_audio_pattern_length(self->pattern);
 		}
-	} else if (self->sequence) {
+	} else if (trackerstate_sequence_const(self)) {
 		psy_audio_SequenceTrack* track;
 
-		track = psy_audio_sequence_track_at(self->sequence, self->trackidx);
+		track = psy_audio_sequence_track_at(
+			trackerstate_sequence_const(self), self->trackidx);
 		if (track) {
 			return psy_audio_sequencetrack_duration(track,
-				self->sequence->patterns);
+				trackerstate_patterns_const(self));
 		}
-		return psy_audio_sequence_duration(self->sequence);
+		return psy_audio_sequence_duration(trackerstate_sequence_const(self));
 	}
 	return 0.0;
 }

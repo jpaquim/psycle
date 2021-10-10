@@ -56,24 +56,25 @@ void psy_audio_sequenceinsertcommand_dispose(psy_audio_SequenceInsertCommand* se
 }
 
 void psy_audio_sequenceinsertcommand_execute(psy_audio_SequenceInsertCommand* self)
-{		
+{	
+	psy_audio_SequenceCursor cursor;
+
 	psy_audio_sequenceselection_copy(&self->restoreselection, self->selection);
 	psy_audio_sequence_insert(self->sequence, self->index, self->patidx);	
 	self->index = psy_audio_orderindex_make(
-		self->index.track, self->index.order + 1);
-	psy_audio_sequenceselection_deselect(self->selection,
-		psy_audio_sequenceselection_first(self->selection));
-	psy_audio_sequenceselection_select_first(self->selection, self->index);	
+		self->index.track, self->index.order + 1);	
+	cursor = self->sequence->cursor;
+	cursor.orderindex = self->index;
+	psy_audio_sequence_setcursor(self->sequence, cursor);
 }
 
 void psy_audio_sequenceinsertcommand_revert(psy_audio_SequenceInsertCommand* self)
-{
+{	
 	psy_audio_sequence_remove(self->sequence, self->index);
 	self->index = psy_audio_orderindex_make(
-		self->index.track, self->index.order - 1);
+		self->index.track, self->index.order - 1);	
 	psy_audio_sequenceselection_copy(self->selection, &self->restoreselection);
-	psy_audio_sequenceselection_select_first(self->selection, self->index);
-	//psy_audio_sequenceselection_seteditposition(self->selection, self->index);	
+	psy_audio_sequenceselection_select_first(self->selection, self->index);	
 }
 
 /*

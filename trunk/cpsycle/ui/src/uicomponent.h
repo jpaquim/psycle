@@ -101,7 +101,7 @@ typedef void (*psy_ui_fp_component_onpreferredsize)(struct psy_ui_Component*,
 typedef void (*psy_ui_fp_component_onpreferredscrollsize)(struct psy_ui_Component*,
 	const psy_ui_Size* limit, psy_ui_Size* rv);
 typedef void (*psy_ui_fp_component_ondraw)(struct psy_ui_Component*, psy_ui_Graphics*);
-typedef void (*psy_ui_fp_component_onsize)(struct psy_ui_Component*, const psy_ui_Size*);
+typedef void (*psy_ui_fp_component_onsize)(struct psy_ui_Component*);
 typedef bool (*psy_ui_fp_component_onclose)(struct psy_ui_Component*);
 typedef void (*psy_ui_fp_component_onmouseevent)(struct psy_ui_Component*, psy_ui_MouseEvent*);
 typedef void (*psy_ui_fp_component_onmouseenter)(struct psy_ui_Component*);
@@ -381,14 +381,20 @@ void psy_ui_component_setpreferredsize(psy_ui_Component*, psy_ui_Size);
 void psy_ui_component_setpreferredheight(psy_ui_Component*, psy_ui_Value);
 psy_ui_Size psy_ui_component_preferredsize(psy_ui_Component*, const psy_ui_Size* limit);
 psy_ui_Size psy_ui_component_preferredscrollsize(psy_ui_Component*, const psy_ui_Size* limit);
-psy_ui_RealSize psy_ui_component_preferredscrollsize_px(psy_ui_Component* self,
+psy_ui_RealSize psy_ui_component_preferredscrollsize_px(psy_ui_Component*,
 	const psy_ui_Size* limit);
-void psy_ui_component_setmaximumsize(psy_ui_Component*, psy_ui_Size size);
+void psy_ui_component_setmaximumsize(psy_ui_Component*, psy_ui_Size);
 const psy_ui_Size psy_ui_component_maximumsize(const psy_ui_Component*);
-void psy_ui_component_setminimumsize(psy_ui_Component*, psy_ui_Size size);
+void psy_ui_component_setminimumsize(psy_ui_Component*, psy_ui_Size);
 const psy_ui_Size psy_ui_component_minimumsize(const psy_ui_Component*);
 void psy_ui_component_seticonressource(psy_ui_Component*, int ressourceid);
 void psy_ui_component_doublebuffer(psy_ui_Component*);
+
+INLINE bool psy_ui_component_doublebuffered(const psy_ui_Component* self)
+{
+	return self->doublebuffered;
+}
+
 void psy_ui_component_setcursor(psy_ui_Component*, psy_ui_CursorStyle);
 
 psy_List* psy_ui_components_setalign(psy_List*, psy_ui_AlignType,

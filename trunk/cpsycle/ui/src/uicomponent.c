@@ -260,7 +260,7 @@ static void setalign(psy_ui_Component* self, psy_ui_AlignType align) {  }
 /* events */
 static void ondestroy(psy_ui_Component* self) {	}
 static void ondestroyed(psy_ui_Component* self) { }
-static void onsize(psy_ui_Component* self, const psy_ui_Size* size) { }
+static void onsize(psy_ui_Component* self) { }
 static void beforealign(psy_ui_Component* self) { }
 static void onalign(psy_ui_Component* self) { }
 static void onpreferredsize(psy_ui_Component*, const psy_ui_Size* limit, psy_ui_Size* rv);
@@ -572,12 +572,12 @@ void setposition(psy_ui_Component* self, psy_ui_Point topleft,
 		((self->imp->vtable->dev_flags && self->imp->vtable->dev_flags(self->imp)
 			& psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN) ==
 			psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN)) {		
-		self->vtable->onsize(self, &size);
+		self->vtable->onsize(self);
 		psy_ui_component_align(self);				
 		if (self->scroll->overflow != psy_ui_OVERFLOW_HIDDEN) {
 			psy_ui_component_updateoverflow(self);
 		}		
-		psy_signal_emit(&self->signal_size, self, 1, (void*)&size);
+		psy_signal_emit(&self->signal_size, self, 0);
 	}
 }
 

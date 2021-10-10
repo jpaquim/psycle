@@ -64,9 +64,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\uiapp.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\uibutton.c">
       <Filter>comps</Filter>
     </ClCompile>
@@ -253,9 +250,6 @@
     <ClCompile Include="src\uidropdownbox.c">
       <Filter>comps</Filter>
     </ClCompile>
-    <ClCompile Include="src\uieventdispatch.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\uiwintheme.c">
       <Filter>common</Filter>
     </ClCompile>
@@ -309,6 +303,12 @@
     </ClCompile>
     <ClCompile Include="src\uibmpreader.c">
       <Filter>graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uieventdispatch.c">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uiapp.c">
+      <Filter>common</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -377,9 +377,6 @@
     </ClInclude>
     <ClInclude Include="src\uiframe.h">
       <Filter>comps</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uiapp.h">
-      <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="src\uidefaults.h">
       <Filter>configuration</Filter>
@@ -504,9 +501,6 @@
     <ClInclude Include="src\uidropdownbox.h">
       <Filter>comps</Filter>
     </ClInclude>
-    <ClInclude Include="src\uieventdispatch.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\uiwintheme.h">
       <Filter>common</Filter>
     </ClInclude>
@@ -560,6 +554,12 @@
     </ClInclude>
     <ClInclude Include="src\uibmpreader.h">
       <Filter>graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\uieventdispatch.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="src\uiapp.h">
+      <Filter>common</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

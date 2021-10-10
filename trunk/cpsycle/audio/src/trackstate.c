@@ -8,6 +8,7 @@
 
 #include "trackstate.h"
 
+/* implementation */
 void psy_audio_trackstate_init(psy_audio_TrackState* self)
 {	
 	psy_signal_init(&self->signal_changed);

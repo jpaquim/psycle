@@ -73,8 +73,7 @@ static uint8_t screentokey(double x, double keysize)
 /* prototypes */
 static void instrumentkeyboardview_ondraw(InstrumentKeyboardView*,
 	psy_ui_Graphics*);
-static void instrumentkeyboardview_onsize(InstrumentKeyboardView*,
-	psy_ui_Size*);
+static void instrumentkeyboardview_onsize(InstrumentKeyboardView*);
 static void instrumentkeyboardview_updatemetrics(InstrumentKeyboardView*);
 static void instrumentkeyboardview_drawwhitekeys(InstrumentKeyboardView*,
 	psy_ui_Graphics*);
@@ -96,14 +95,15 @@ static void instrumentkeyboardview_vtable_init(InstrumentKeyboardView* self)
 			instrumentkeyboardview_onsize;
 		instrumentkeyboardview_vtable_initialized = TRUE;
 	}
+	self->component.vtable = &instrumentkeyboardview_vtable;
 }
+
 /* implementation */
 void instrumentkeyboardview_init(InstrumentKeyboardView* self,
 	psy_ui_Component* parent)
 {	
 	psy_ui_component_init(&self->component, parent, NULL);
-	instrumentkeyboardview_vtable_init(self);		
-	self->component.vtable = &instrumentkeyboardview_vtable;
+	instrumentkeyboardview_vtable_init(self);
 	psy_ui_component_doublebuffer(&self->component);
 	self->metrics.keysize = 6;
 	self->metrics.lineheight = 15;
@@ -195,7 +195,7 @@ void instrumentkeyboardview_drawblackkeys(InstrumentKeyboardView* self,
 	}
 }
 
-void instrumentkeyboardview_onsize(InstrumentKeyboardView* self, psy_ui_Size* size)
+void instrumentkeyboardview_onsize(InstrumentKeyboardView* self)
 {
 	instrumentkeyboardview_updatemetrics(self);
 }
@@ -229,7 +229,7 @@ static void instrumententryview_ondestroy(InstrumentEntryView*);
 static void instrumententryview_onpreferredsize(InstrumentEntryView*,
 	psy_ui_Size* limit, psy_ui_Size* rv);
 static void instrumententryview_ondraw(InstrumentEntryView*, psy_ui_Graphics*);
-static void instrumententryview_onsize(InstrumentEntryView*, psy_ui_Size*);
+static void instrumententryview_onsize(InstrumentEntryView*);
 static void instrumententryview_onmousedown(InstrumentEntryView*,
 	psy_ui_MouseEvent*);
 static void instrumententryview_onmousemove(InstrumentEntryView*,
@@ -436,7 +436,7 @@ void instrumententryview_ondraw(InstrumentEntryView* self, psy_ui_Graphics* g)
 	}
 }
 
-void instrumententryview_onsize(InstrumentEntryView* self, psy_ui_Size* size)
+void instrumententryview_onsize(InstrumentEntryView* self)
 {
 	instrumententryview_updatemetrics(self);
 }

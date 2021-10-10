@@ -1378,7 +1378,8 @@ void mainframe_checkplaystartwithrctrl(MainFrame* self, psy_ui_KeyboardEvent* ev
 			int extended = (ev->keydata & 0x01000000) != 0;
 			if (extended) {
 				/* right ctrl */
-				workspace_playstart(&self->workspace);
+				psy_audio_player_start_currseqpos(workspace_player(
+					&self->workspace));				
 				return;
 			}
 		} else if (psy_audio_player_playing(&self->workspace.player) &&

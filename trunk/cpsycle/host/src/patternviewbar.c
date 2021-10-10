@@ -25,7 +25,7 @@ static void patternviewbar_ondefaultline(PatternViewBar*,
 static void patternviewbar_ondisplaysinglepattern(PatternViewBar*,
 	psy_ui_CheckBox* sender);
 static void patternviewbar_oncursorchanged(PatternViewBar*,
-	Workspace* sender);
+	psy_audio_Sequence* sender);
 static void patternviewbar_onsongchanged(PatternViewBar*, Workspace* sender,
 	int flag, psy_audio_Song*);
 static void patternviewbar_updatestatus(PatternViewBar*);
@@ -85,7 +85,7 @@ void patternviewbar_init(PatternViewBar* self, psy_ui_Component* parent,
 		psy_ui_checkbox_disablecheck(&self->movecursorwhenpaste);
 	}	
 	patternviewbar_updatestatus(self);
-	psy_signal_connect(&self->workspace->signal_cursorchanged, self,
+	psy_signal_connect(&self->workspace->song->sequence.signal_cursorchanged, self,
 		patternviewbar_oncursorchanged);
 }
 
@@ -120,11 +120,13 @@ void patternviewbar_onsongchanged(PatternViewBar* self, Workspace* sender,
 {
 	assert(self);
 
+	psy_signal_connect(&self->workspace->song->sequence.signal_cursorchanged, self,
+		patternviewbar_oncursorchanged);
 	patternviewbar_updatestatus(self);
 }
 
 void patternviewbar_oncursorchanged(PatternViewBar* self,
-	Workspace* sender)
+	psy_audio_Sequence* sender)
 {
 	assert(self);
 
@@ -149,10 +151,10 @@ void patternviewbar_statustext(PatternViewBar* self, uintptr_t maxcount,
 
 	assert(self);
 	assert(self->workspace);
-
-	cursor = workspace_cursor(self->workspace);	
+	
 	patternid = psy_INDEX_INVALID;
 	if (workspace_song(self->workspace)) {
+		cursor = self->workspace->song->sequence.cursor;
 		patternid = psy_audio_sequencecursor_patternid(&cursor,
 			psy_audio_song_sequence(workspace_song(self->workspace)));
 	}

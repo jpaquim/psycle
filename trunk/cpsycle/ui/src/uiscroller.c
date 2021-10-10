@@ -68,7 +68,7 @@ static bool psy_ui_scrollanimate_tick(psy_ui_ScrollAnimate* self)
 
 /* psy_ui_Scroller */
 /* prototypes */
-static void psy_ui_scroller_onpanesize(psy_ui_Scroller*, psy_ui_Component* sender, psy_ui_Size*);
+static void psy_ui_scroller_onpanesize(psy_ui_Scroller*, psy_ui_Component* sender);
 static void psy_ui_scroller_onpanedraw(psy_ui_Scroller*, psy_ui_Component* sender, psy_ui_Graphics* g);
 static void psy_ui_scroller_onscroll(psy_ui_Scroller*, psy_ui_Component* sender);
 static void psy_ui_scroller_onscrollbarclicked(psy_ui_Scroller*, psy_ui_Component* sender);
@@ -181,7 +181,7 @@ void psy_ui_scroller_setbackgroundmode(psy_ui_Scroller* self,
 	psy_ui_component_setbackgroundmode(&self->pane, pane);
 }
 
-void psy_ui_scroller_onpanesize(psy_ui_Scroller* self, psy_ui_Component* sender, psy_ui_Size* size)
+void psy_ui_scroller_onpanesize(psy_ui_Scroller* self, psy_ui_Component* sender)
 {
 	if (self->client) {
 		double nPosX;

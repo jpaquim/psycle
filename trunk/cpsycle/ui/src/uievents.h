@@ -14,13 +14,16 @@ extern "C" {
 #endif
 
 typedef enum psy_ui_EventType {
-	psy_ui_KeyPress      = 2,
-	psy_ui_KeyRelease    = 3,
-	psy_ui_ButtonPress   = 4,
-	psy_ui_ButtonRelease = 5,
-	psy_ui_MotionNotify  = 6,
-	psy_ui_DoubleClick   = 7,
-	psy_ui_Drag          = 8
+	psy_ui_UNKNOWNEVENT  = 1,
+	psy_ui_KEYDOWN       = 2,
+	psy_ui_KEYUP         = 3,
+	psy_ui_MOUSEDOWN     = 4,
+	psy_ui_MOUSEUP       = 5,
+	psy_ui_MOUSEMOVE     = 6,	
+	psy_ui_DBLCLICK      = 7,
+	psy_ui_DRAG          = 8,
+	psy_ui_FOCUSOUT      = 9,
+	psy_ui_RESIZE        = 10
 } psy_ui_EventType;
 
 /* Forward Handler for Event target */
@@ -31,14 +34,14 @@ struct psy_ui_Component;
 ** An event gives additional data to an event method triggered by the ui imp
 */
 typedef struct psy_ui_Event {
-	int type;
+	psy_ui_EventType type;
 	bool bubbles;
 	bool default_prevented;
 	struct psy_ui_Component* target;
 	uintptr_t timestamp;
 } psy_ui_Event;
 
-void psy_ui_event_init(psy_ui_Event* ,int type);
+void psy_ui_event_init(psy_ui_Event*, psy_ui_EventType type);
 
 INLINE bool psy_ui_event_default_prevented(const psy_ui_Event* self)
 {
@@ -100,6 +103,12 @@ INLINE psy_ui_Event* psy_ui_keyboardevent_base(psy_ui_KeyboardEvent* self)
 	return &self->event;
 }
 
+INLINE void psy_ui_keyboardevent_settype(psy_ui_KeyboardEvent* self,
+	psy_ui_EventType type)
+{
+	self->event.type = type;
+}
+
 /* psy_ui_MouseEvent */
 typedef struct psy_ui_MouseEvent {
 	psy_ui_Event event;
@@ -133,6 +142,12 @@ INLINE struct psy_ui_Component* psy_ui_mouseevent_target(psy_ui_MouseEvent* self
 INLINE psy_ui_Event* psy_ui_mouseevent_base(psy_ui_MouseEvent* self)
 {
 	return &self->event;
+}
+
+INLINE void psy_ui_mouseevent_settype(psy_ui_MouseEvent* self,
+	psy_ui_EventType type)
+{
+	self->event.type = type;
 }
 
 /* Forward Handler for dataTransfer */

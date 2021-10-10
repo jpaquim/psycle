@@ -77,7 +77,7 @@ void seqeditruler_init(SeqEditRuler* self, psy_ui_Component* parent,
 	seqeditruler_vtable_init(self);		
 	self->state = state;
 	psy_ui_component_setbackgroundmode(&self->component, psy_ui_NOBACKGROUND);
-	psy_signal_connect(&state->workspace->sequenceselection.signal_select,
+	psy_signal_connect(&state->workspace->song->sequence.sequenceselection.signal_select,
 		self, seqeditruler_onsequenceselect);	
 	psy_signal_connect(&self->state->signal_cursorchanged, self,
 		seqeditruler_oncursorchanged);		
@@ -86,7 +86,7 @@ void seqeditruler_init(SeqEditRuler* self, psy_ui_Component* parent,
 void seqeditruler_ondestroy(SeqEditRuler* self)
 {
 	psy_signal_disconnect(
-		&self->state->workspace->sequenceselection.signal_select,
+		&self->state->workspace->song->sequence.sequenceselection.signal_select,
 		self, seqeditruler_onsequenceselect);
 }
 
@@ -210,7 +210,7 @@ void seqeditruler_draweditposition(SeqEditRuler* self, psy_ui_Graphics* g,
 
 	seqentry = psy_audio_sequence_entry(seqeditstate_sequence(self->state),
 		psy_audio_sequenceselection_first(
-			&self->state->workspace->sequenceselection));
+			&self->state->workspace->song->sequence.sequenceselection));
 	if (seqentry) {
 		psy_ui_RealSize size;		
 		psy_ui_IconDraw icondraw;

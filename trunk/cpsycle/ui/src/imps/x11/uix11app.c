@@ -37,9 +37,6 @@ static psy_ui_Component* psy_ui_x11app_component(psy_ui_X11App*,
 	uintptr_t platformhandle);
 
 static int psy_ui_x11app_handle_event(psy_ui_X11App*, XEvent*);
-static void psy_ui_x11app_handle_mouseevent(psy_ui_X11App*,
-	psy_ui_x11_ComponentImp*, XEvent*,
-	psy_ui_fp_component_onmouseevent fp, psy_Signal* signal);
 static void psy_ui_x11app_mousewheel(psy_ui_X11App*, psy_ui_x11_ComponentImp*,
 	XEvent*);
 static int psy_ui_x11app_translate_x11button(int button);
@@ -53,6 +50,11 @@ static void psy_ui_x11app_update_keyevent_mods(psy_ui_X11App*,
 	psy_ui_KeyboardEvent*);
 static void psy_ui_x11app_update_mouseevent_mods(psy_ui_X11App*,
 	psy_ui_MouseEvent*);
+static XButtonEvent psy_ui_X11app_make_x11buttonevent(psy_ui_MouseEvent*,
+	Display*, int hwnd);	
+static void psy_ui_x11app_sendx11event(psy_ui_X11App*, int mask, int hwnd,
+	XEvent*);
+static void psy_ui_x11app_sync(psy_ui_X11App*);
 
 /* vtable */
 static psy_ui_AppImpVTable imp_vtable;
@@ -293,8 +295,8 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 					event->xexpose.x,
 					event->xexpose.y),
 				psy_ui_realsize_make(
-				event->xexpose.width,
-				event->xexpose.height));
+					event->xexpose.width,
+					event->xexpose.height));
 		if (!imp->exposeareavalid) {
 			imp->exposearea = r;
 			imp->exposeareavalid = TRUE;
@@ -380,8 +382,6 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 		XConfigureEvent xce = event->xconfigure;
 
 		if (xce.width != imp->prev_w || xce.height != imp->prev_h) {
-			psy_ui_Size size;
-
 			imp->prev_w = xce.width;
 			imp->prev_h = xce.height;
 			if (self->dbe) {
@@ -389,20 +389,18 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 
 				gx11 = (psy_ui_x11_GraphicsImp*)imp->g.imp;
 				psy_ui_x11_graphicsimp_updatexft(gx11);
-			}
-			psy_ui_component_align(imp->component);
-			size.width = psy_ui_value_make_px(xce.width);
-			size.height = psy_ui_value_make_px(xce.height);
-			imp->component->vtable->onsize(imp->component, &size);
-			if (psy_ui_component_overflow(imp->component) !=
-					psy_ui_OVERFLOW_HIDDEN) {
-				psy_ui_component_updateoverflow(imp->component);
-			}
-			psy_signal_emit(&imp->component->signal_size, imp->component, 1,
-				(void*)&size);
+			}							
+			if (imp->component) {
+				psy_ui_Event ev;
+
+				imp->sizecachevalid = FALSE;
+				psy_ui_event_init(&ev, psy_ui_RESIZE);
+				psy_ui_event_stop_propagation(&ev);				
+				psy_ui_eventdispatch_send(&self->app->eventdispatch,
+					imp->component, &ev);
+			}			
 		}
-		return 0 ;
-		break; }
+		return 0; }
 	case ClientMessage:
         if (event->xclient.data.l[0] == self->wmDeleteMessage) {
 			XEvent e;			
@@ -443,12 +441,10 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 		if (imp->component) {
 			psy_ui_KeyboardEvent ev;
 
-			ev = psy_ui_x11_keyboardevent_make(&event->xkey);			
-			psy_ui_eventdispatch_keydown(&self->app->eventdispatch,
-				imp->component, &ev);					
-			if (ev.event.default_prevented) {
-			//		imp->preventwmchar = 1;
-			}					
+			ev = psy_ui_x11_keyboardevent_make(&event->xkey);
+			ev.event.type = psy_ui_KEYDOWN;
+			psy_ui_eventdispatch_send(&self->app->eventdispatch,
+				imp->component, &ev.event);			
 			return 0;
 		}
 		break; }
@@ -456,13 +452,10 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 		if (imp->component) {
 			psy_ui_KeyboardEvent ev;
 
-			ev = psy_ui_x11_keyboardevent_make(&event->xkey);
-			ev.event.type = psy_ui_KeyRelease;			
-			psy_ui_eventdispatch_keyup(&self->app->eventdispatch,
-				imp->component, &ev);					
-			if (ev.event.default_prevented) {
-			//		imp->preventwmchar = 1;
-			}					
+			ev = psy_ui_x11_keyboardevent_make(&event->xkey);			
+			ev.event.type = psy_ui_KEYUP;
+			psy_ui_eventdispatch_send(&self->app->eventdispatch,
+				imp->component, &ev.event);			
 			return 0;
 		}
 		break;
@@ -493,10 +486,11 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 				psy_ui_x11app_translate_x11button(event->xbutton.button),
 				0, 0, 0);
 		ev.event.timestamp = (uintptr_t)event->xbutton.time;		
+		ev.event.type = psy_ui_MOUSEDOWN;
 		psy_ui_x11app_update_mouseevent_mods(self, &ev);
 		psy_ui_x11app_adjustcoordinates(imp->component, &ev.pt);		
-		psy_ui_eventdispatch_buttondown(&self->app->eventdispatch,
-			imp->component, &ev);		
+		psy_ui_eventdispatch_send(&self->app->eventdispatch,
+			imp->component, &ev.event);		
 		break; }
 	case ButtonRelease: { 
 		psy_ui_MouseEvent ev;							
@@ -506,11 +500,11 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 			psy_ui_x11app_translate_x11button(event->xbutton.button),
 			0, 0, 0);
 		ev.event.timestamp = (uintptr_t)event->xbutton.time;			
-		ev.event.type = psy_ui_ButtonRelease;
+		ev.event.type = psy_ui_MOUSEUP;
 		psy_ui_x11app_update_mouseevent_mods(self, &ev);
 		psy_ui_x11app_adjustcoordinates(imp->component, &ev.pt);		
-		psy_ui_eventdispatch_buttonup(&self->app->eventdispatch,
-			imp->component, &ev);
+		psy_ui_eventdispatch_send(&self->app->eventdispatch,
+			imp->component, &ev.event);
 		return 0;		
 		break; }
 	case MotionNotify: {
@@ -529,9 +523,12 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 		psy_ui_mouseevent_init_all(&ev,
 			psy_ui_realpoint_make(xme.x, xme.y),
 			button, 0, 0, 0);
+		ev.event.type = psy_ui_MOUSEMOVE;
 		psy_ui_x11app_update_mouseevent_mods(self, &ev);
-		psy_ui_x11app_adjustcoordinates(imp->component, &ev.pt);
-		imp->imp.vtable->dev_mousemove(&imp->imp, &ev);
+		psy_ui_x11app_adjustcoordinates(imp->component, &ev.pt);		
+		ev.event.timestamp = (uintptr_t)event->xbutton.time;					
+		psy_ui_eventdispatch_send(&self->app->eventdispatch,
+			imp->component, &ev.event);		
 		return 0;
 		break; }
 	case EnterNotify: {
@@ -541,8 +538,14 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 		imp->imp.vtable->dev_mouseleave(&imp->imp);
 		break; }
 	case FocusOut: {
-		imp->component->vtable->onfocuslost(imp->component);
-		psy_signal_emit(&imp->component->signal_focuslost, imp->component, 0);
+		if (imp->component) {
+			psy_ui_Event ev;
+
+			psy_ui_event_init(&ev, psy_ui_FOCUSOUT);
+			ev.bubbles = FALSE;
+			psy_ui_eventdispatch_send(&self->app->eventdispatch,
+				imp->component, &ev);					
+		}		
 		break; }
 	default:
 		break;
@@ -612,90 +615,22 @@ void psy_ui_x11app_update_mouseevent_mods(psy_ui_X11App* self,
 
 int psy_ui_x11app_translate_x11button(int button)
 {
-	switch (button) {
-		case 0: /* no button */
-			return 0;
-		case 1: /* left button */
-			return 1;
-		case 2: /* middle button */
-			return 3;
-		case 3: /* right button */
-			return 2;
-		default:
-			return 1;
+	static const int map[] = { 0, 1, 3, 2 };
+	
+	if (button >= 0 && button < 4) {
+		return map[button];
 	}
+	return button;
 }
 
 int psy_ui_x11app_make_x11button(int button)
 {
-	switch (button) {
-		case 0: /* no button */
-			return 0;
-		case 1: /* left button */
-			return 1;
-		case 3: /* middle button */
-			return 2;
-		case 2: /* right button */
-			return 3;
-		default:
-			return 1;
+	static const int map[] = { 0, 1, 3, 2 };
+	
+	if (button >= 0 && button < 4) {
+		return map[button];
 	}
-}
-
-void psy_ui_x11app_handle_mouseevent(psy_ui_X11App* self,
-	psy_ui_x11_ComponentImp* imp, XEvent* xe,
-	psy_ui_fp_component_onmouseevent fp,
-	psy_Signal* signal)
-{
-	psy_ui_MouseEvent ev;
-	bool up;
-
-	psy_ui_mouseevent_init_all(&ev,	
-		psy_ui_realpoint_make(xe->xbutton.x, xe->xbutton.y),
-		psy_ui_x11app_translate_x11button(xe->xbutton.button),
-		0, 0, 0);
-	psy_ui_x11app_update_mouseevent_mods(self, &ev);
-	psy_ui_x11app_adjustcoordinates(imp->component, &ev.pt);
-	ev.event.target = imp->component; /* eventtarget(component)); */
-	up = FALSE;
-	if (xe->type == ButtonPress) {
-		imp->imp.vtable->dev_mousedown(&imp->imp, &ev);
-	} else if (xe->type == ButtonRelease) {
-		imp->imp.vtable->dev_mouseup(&imp->imp, &ev);
-	}
-	if (ev.event.bubbles != FALSE) {
-		fp(imp->component, &ev);
-		psy_signal_emit(signal, imp->component, 1, &ev);
-	}
-	return;
-	/* todo */
-	if (ev.event.bubbles != FALSE) {
-		bool bubble;
-		int mask;
-		
-		if (xe->type == ButtonRelease) {
-			mask = ButtonReleaseMask;
-		} else if (xe->type == MotionNotify) {
-			mask = ButtonMotionMask;
-		} else {
-			mask = ButtonPressMask;
-		}
-		bubble = psy_ui_x11app_sendeventtoparent(self, imp, mask, xe);
-		if (up && !bubble) {
-			psy_ui_app_stopdrag(psy_ui_app());
-		} else if (xe->type == MotionNotify && !bubble) {
-			if (!psy_ui_app()->dragevent.mouse.event.default_prevented) {
-				psy_ui_component_setcursor(psy_ui_app()->main,
-					psy_ui_CURSORSTYLE_NODROP);
-			} else {
-				psy_ui_component_setcursor(psy_ui_app()->main,
-					psy_ui_CURSORSTYLE_GRAB);
-			}
-			psy_ui_app()->dragevent.mouse.event.default_prevented = FALSE;
-		}
-	} else if (up) {
-		psy_ui_app_stopdrag(psy_ui_app());
-	}
+	return 0;	
 }
 
 void psy_ui_x11app_mousewheel(psy_ui_X11App* self,
@@ -749,102 +684,50 @@ void psy_ui_x11app_sendevent(psy_ui_X11App* self, psy_ui_Component* component,
 	psy_ui_Event* ev)
 {
 	psy_ui_x11_ComponentImp* imp;
+	
+	assert(component);	
 
 	imp = (psy_ui_x11_ComponentImp*)component->imp;	
+	if (!imp) {
+		return;
+	}	
 	switch (ev->type) {
-	case psy_ui_KeyPress: {
-		psy_ui_KeyboardEvent* keyevent;
-		XKeyEvent xev;
-		
-		keyevent = (psy_ui_KeyboardEvent*)ev;
-		xev = psy_ui_x11_xkeyevent_make(keyevent,
-			self->dpy, imp->hwnd, DefaultRootWindow(self->dpy));			
-		XSendEvent(self->dpy, imp->hwnd, True, KeyPressMask, (XEvent*)&xev);
-		XFlush(self->dpy);		
-		break; }
-	case psy_ui_KeyRelease: {
-		psy_ui_KeyboardEvent* keyevent;
-		XKeyEvent xev;
-		
-		keyevent = (psy_ui_KeyboardEvent*)ev;
-		xev = psy_ui_x11_xkeyevent_make(keyevent,
+	case psy_ui_KEYDOWN: {
+		XKeyEvent xkey;
+				
+		xkey = psy_ui_x11_xkeyevent_make((psy_ui_KeyboardEvent*)ev,
 			self->dpy, imp->hwnd, DefaultRootWindow(self->dpy));
-		xev.type = KeyRelease;			
-		XSendEvent(self->dpy, imp->hwnd, True, KeyReleaseMask, (XEvent*)&xev);
-		XFlush(self->dpy);	
+		xkey.type = KeyPress;		
+		psy_ui_x11app_sendx11event(self, KeyPressMask,
+			imp->hwnd, (XEvent*)&xkey);
 		break; }
-	case psy_ui_ButtonPress:
-	case psy_ui_DoubleClick: {		
-		psy_ui_MouseEvent* mouseevent;
-		XButtonEvent xbutton;
-		XEvent event;
-		
-		mouseevent = (psy_ui_MouseEvent*)ev;
-		xbutton.display      = self->dpy;
-		xbutton.root         = DefaultRootWindow(self->dpy);
-		xbutton.time         = (Time)ev->timestamp;
-		xbutton.same_screen  = True;
-		xbutton.button       = psy_ui_x11app_make_x11button(mouseevent->button);
-		xbutton.state        = 0;
-		xbutton.x            = mouseevent->pt.x;
-		xbutton.y            = mouseevent->pt.y;
-		xbutton.x_root       = mouseevent->pt.x;
-		xbutton.y_root       = mouseevent->pt.y;
-		xbutton.window       = imp->hwnd;   
-		xbutton.type = ButtonPress;			
-		XSendEvent(self->dpy, imp->hwnd, FALSE, ButtonPressMask,
-			(XEvent*)&xbutton);
-		XSync(self->dpy, 0);
-		while (XPending(self->dpy)) {		
-			XNextEvent(self->dpy, &event);
-			psy_ui_x11app_handle_event(self, &event);
-		}				
+	case psy_ui_KEYUP: {		
+		XKeyEvent xkey;
+				
+		xkey = psy_ui_x11_xkeyevent_make((psy_ui_KeyboardEvent*)ev,
+			self->dpy, imp->hwnd, DefaultRootWindow(self->dpy));
+		xkey.type = KeyRelease;		
+		psy_ui_x11app_sendx11event(self, KeyReleaseMask,
+			imp->hwnd, (XEvent*)&xkey);
 		break; }
-	case psy_ui_ButtonRelease: {
-		psy_ui_MouseEvent* mouseevent;
-		XButtonEvent xbutton;
-		XEvent event;
-		
-		mouseevent = (psy_ui_MouseEvent*)ev;
-		xbutton.display      = self->dpy;
-		xbutton.root         = DefaultRootWindow(self->dpy);
-		xbutton.time         = (Time)ev->timestamp;
-		xbutton.same_screen  = True;
-		xbutton.button       = psy_ui_x11app_make_x11button(mouseevent->button);
-		xbutton.state        = 0;
-		xbutton.x            = mouseevent->pt.x;
-		xbutton.y            = mouseevent->pt.y;
-		xbutton.x_root       = mouseevent->pt.x;;
-		xbutton.y_root       = mouseevent->pt.y;
-		xbutton.window        = imp->hwnd;   
-		xbutton.type = ButtonRelease;					
-		XSendEvent(self->dpy, imp->hwnd, FALSE, ButtonReleaseMask,
-			(XEvent*)&xbutton);
-		XSync(self->dpy, 0);
-		while (XPending(self->dpy)) {		
-			XNextEvent(self->dpy, &event);
-			psy_ui_x11app_handle_event(self, &event);
-		}			
-		break; }		
-	/*case psy_ui_DoubleClick: {
-		psy_ui_MouseEvent* mouseevent;
-		int16_t loword;
-		int16_t hiword;
-		LPARAM lparam;
+	case psy_ui_MOUSEDOWN:
+	case psy_ui_DBLCLICK : {				
+		XButtonEvent xbutton;		
+				
+		xbutton = psy_ui_X11app_make_x11buttonevent((psy_ui_MouseEvent*)ev,
+			self->dpy, imp->hwnd);		
+		psy_ui_x11app_sendx11event(self, ButtonPressMask,
+			imp->hwnd, (XEvent*)&xbutton);
+		break; }
+	case psy_ui_MOUSEUP: {		
+		XButtonEvent xbutton;		
 
-		mouseevent = (psy_ui_MouseEvent*)ev;
-		loword = (int16_t)mouseevent->pt.x;
-		hiword = (int16_t)mouseevent->pt.y;
-		lparam = loword | (hiword << 16);
-		if (mouseevent->button == 1) {
-			SendMessage(imp->hwnd, (UINT)WM_LBUTTONDBLCLK, (WPARAM)mouseevent->button, (LPARAM)lparam);
-		} else if (mouseevent->button == 2) {
-			SendMessage(imp->hwnd, (UINT)WM_RBUTTONDBLCLK, (WPARAM)mouseevent->button, (LPARAM)lparam);
-		} else if (mouseevent->button == 3) {
-			SendMessage(imp->hwnd, (UINT)WM_MBUTTONDBLCLK, (WPARAM)mouseevent->button, (LPARAM)lparam);
-		}
-		break; } */
-	case psy_ui_MotionNotify: {
+		xbutton = psy_ui_X11app_make_x11buttonevent((psy_ui_MouseEvent*)ev,
+			self->dpy, imp->hwnd);
+		psy_ui_x11app_sendx11event(self, ButtonReleaseMask,
+			imp->hwnd, (XEvent*)&xbutton);
+		break; }		
+	case psy_ui_MOUSEMOVE: {
 		psy_ui_MouseEvent* mouseevent;
 		XMotionEvent xme;		
 
@@ -870,6 +753,50 @@ void psy_ui_x11app_sendevent(psy_ui_X11App* self, psy_ui_Component* component,
 	default:
 		break;
 	}
+}
+
+void psy_ui_x11app_sendx11event(psy_ui_X11App* self, int mask, int hwnd,
+	XEvent* ev)
+{	
+	assert(ev);
+	
+	XSendEvent(self->dpy,hwnd, FALSE, mask, ev);
+	psy_ui_x11app_sync(self);	
+}
+
+void psy_ui_x11app_sync(psy_ui_X11App* self)
+{
+	XEvent event;
+	
+	XSync(self->dpy, 0);
+	while (XPending(self->dpy)) {		
+		XNextEvent(self->dpy, &event);
+		psy_ui_x11app_handle_event(self, &event);
+	}
+}
+
+XButtonEvent psy_ui_X11app_make_x11buttonevent(psy_ui_MouseEvent* ev,
+	Display* dpy, int hwnd)
+{
+	XButtonEvent rv;
+	
+	rv.display      = dpy;
+	rv.root         = DefaultRootWindow(dpy);
+	rv.time         = (Time)ev->event.timestamp;
+	rv.same_screen  = True;
+	rv.button       = psy_ui_x11app_make_x11button(ev->button);
+	rv.state        = 0;
+	rv.x            = ev->pt.x;
+	rv.y            = ev->pt.y;
+	rv.x_root       = ev->pt.x;;
+	rv.y_root       = ev->pt.y;
+	rv.window       = hwnd;   
+	if (ev->event.type == psy_ui_MOUSEUP) {
+		rv.type = ButtonRelease;
+	} else {
+		rv.type = ButtonPress;
+	}							
+	return rv;
 }
 
 psy_ui_Component* psy_ui_x11app_component(psy_ui_X11App* self,

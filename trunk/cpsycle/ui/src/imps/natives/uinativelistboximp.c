@@ -24,7 +24,7 @@ static void psy_ui_listboxclient_onpreferredsize(psy_ui_ListBoxClient*,
 	psy_ui_Size* limit, psy_ui_Size* rv);
 static void psy_ui_listboxclient_onmousedown(psy_ui_ListBoxClient*,
 	psy_ui_MouseEvent*);
-static void psy_ui_listboxclient_onsize(psy_ui_ListBoxClient*, const psy_ui_Size*);
+static void psy_ui_listboxclient_onsize(psy_ui_ListBoxClient*);
 static intptr_t  psy_ui_listboxclient_count(psy_ui_ListBoxClient* self);
 
 static psy_ui_ComponentVtable psy_ui_listboxclient_vtable;
@@ -73,7 +73,7 @@ void psy_ui_listboxclient_ondestroy(psy_ui_ListBoxClient* self,
 	psy_table_disposeall(&self->items, NULL);
 }
 
-void psy_ui_listboxclient_onsize(psy_ui_ListBoxClient* self, const psy_ui_Size* size)
+void psy_ui_listboxclient_onsize(psy_ui_ListBoxClient* self)
 {
 	const psy_ui_TextMetric* tm;
 	int lineheight;

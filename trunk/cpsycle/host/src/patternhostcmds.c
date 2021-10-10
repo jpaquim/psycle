@@ -11,34 +11,22 @@
 #include "patterncmds.h"
 /* audio */
 #include <exclusivelock.h>
-// platform
+/* platform */
 #include "../../detail/portable.h"
 #include "../../detail/trace.h"
 
 /* implementation */
 void patterncmds_init(PatternCmds* self, Workspace* workspace)
 {
+	assert(workspace);
+
 	self->workspace = workspace;
-	self->player = &self->workspace->player;
-	self->pattern = NULL;
-	patterncmds_update(self);
+	self->pattern = NULL;	
 }
 
 void patterncmds_setpattern(PatternCmds* self, psy_audio_Pattern* pattern)
-{
-	patterncmds_update(self);
+{	
 	self->pattern = pattern;
-}
-
-void patterncmds_update(PatternCmds* self)
-{
-	if (workspace_song(self->workspace)) {
-		self->patterns = &workspace_song(self->workspace)->patterns;
-		self->sequence = &workspace_song(self->workspace)->sequence;
-	} else {
-		self->patterns = NULL;
-		self->sequence = NULL;
-	}
 }
 
 void patterncmds_blocktranspose(PatternCmds* self,
