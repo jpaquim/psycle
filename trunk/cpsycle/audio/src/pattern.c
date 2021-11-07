@@ -12,90 +12,10 @@
 /* platform */
 #include "../../detail/portable.h"
 
+static uintptr_t defaultlines = 64;
 static double hermitecurveinterpolate(intptr_t kf0, intptr_t kf1, intptr_t kf2,
 	intptr_t kf3, intptr_t curposition, intptr_t maxposition, double tangmult,
 	bool interpolation);
-
-/* PatternSelection */
-/* implementation */
-void psy_audio_patternselection_init(psy_audio_PatternSelection* self)
-{
-	psy_audio_patterncursor_init(&self->topleft);
-	psy_audio_patterncursor_init(&self->bottomright);
-	self->valid = FALSE;
-}
-
-void psy_audio_patternselection_init_all(psy_audio_PatternSelection* self,
-	psy_audio_PatternCursor topleft, psy_audio_PatternCursor bottomright)
-{
-	assert(self);
-
-	self->topleft = topleft;
-	self->bottomright = bottomright;
-	self->valid = TRUE;
-}
-
-void psy_audio_patternselection_startdrag(psy_audio_PatternSelection* self,
-	psy_audio_PatternCursor dragselectionbase,
-	psy_audio_PatternCursor cursor, double bpl)
-{
-	assert(self);
-
-	psy_audio_patternselection_enable(self);
-	self->topleft = cursor;
-	self->bottomright = cursor;
-	if (cursor.track >= dragselectionbase.track) {
-		self->topleft.track = dragselectionbase.track;
-		self->bottomright.track = cursor.track;
-	} else {
-		self->topleft.track = cursor.track;
-		self->bottomright.track = dragselectionbase.track;
-	}
-	if (cursor.offset >= dragselectionbase.offset) {
-		self->topleft.offset = dragselectionbase.offset;
-		self->bottomright.offset = cursor.offset + bpl;
-	} else {
-		self->topleft.offset = cursor.offset;
-		self->bottomright.offset = dragselectionbase.offset +
-			bpl;
-	}
-	self->bottomright.track += 1;
-}
-
-void psy_audio_patternselection_drag(psy_audio_PatternSelection* self,
-	psy_audio_PatternCursor dragselectionbase,
-	psy_audio_PatternCursor cursor, double bpl)
-{
-	assert(self);
-
-	if (cursor.track >= dragselectionbase.track) {
-		self->topleft.track = dragselectionbase.track;
-		self->bottomright.track = cursor.track + 1;
-	} else {
-		self->topleft.track = cursor.track;
-		self->bottomright.track = dragselectionbase.track + 1;
-	}
-	if (cursor.offset >= dragselectionbase.offset) {
-		self->topleft.offset = dragselectionbase.offset;
-		self->bottomright.offset = cursor.offset + bpl;
-	} else {
-		self->topleft.offset = cursor.offset;
-		self->bottomright.offset = dragselectionbase.offset + bpl;
-	}
-}
-
-psy_audio_PatternSelection psy_audio_patternselection_make(
-	psy_audio_PatternCursor topleft, psy_audio_PatternCursor bottomright)
-{
-	psy_audio_PatternSelection rv;
-
-	psy_audio_patternselection_init_all(&rv, topleft, bottomright);
-	rv.topleft = topleft;
-	rv.bottomright = bottomright;
-	return rv;
-}
-
-static uintptr_t defaultlines = 64;
 
 /* TimeSig */
 void psy_audio_timesig_init(psy_audio_TimeSig* self)
@@ -461,22 +381,22 @@ void psy_audio_pattern_scale(psy_audio_Pattern* self, float factor)
 }
 
 void psy_audio_pattern_blockremove(psy_audio_Pattern* self,
-	psy_audio_PatternCursor begin,
-	psy_audio_PatternCursor end)
+	psy_audio_SequenceCursor begin,
+	psy_audio_SequenceCursor end)
 {	
 	psy_audio_PatternNode* p;
 	psy_audio_PatternNode* q;
 
 	assert(self);
 
-	p = psy_audio_pattern_greaterequal(self, (psy_dsp_big_beat_t) begin.offset);
+	p = psy_audio_pattern_greaterequal(self, (psy_dsp_big_beat_t) begin.cursor.offset);
 	while (p != NULL) {			
 		psy_audio_PatternEntry* entry;
 		q = p->next;
 
 		entry = (psy_audio_PatternEntry*)psy_list_entry(p);
-		if (entry->offset < end.offset) {
-			if (entry->track >= begin.track && entry->track < end.track) {
+		if (entry->offset < end.cursor.offset) {
+			if (entry->track >= begin.cursor.track && entry->track < end.cursor.track) {
 				psy_audio_pattern_remove(self, p);
 			}
 		} else {
@@ -487,14 +407,14 @@ void psy_audio_pattern_blockremove(psy_audio_Pattern* self,
 }
 
 void psy_audio_pattern_blockinterpolatelinear(psy_audio_Pattern* self,
-	const psy_audio_PatternSelection* selection, psy_dsp_big_beat_t bpl)
+	const psy_audio_BlockSelection* selection, psy_dsp_big_beat_t bpl)
 {
 	intptr_t startval;
 	intptr_t endval;
 	psy_audio_PatternNode* prev;
 	psy_audio_PatternNode* node;
-	psy_audio_PatternCursor begin;
-	psy_audio_PatternCursor end;
+	psy_audio_SequenceCursor begin;
+	psy_audio_SequenceCursor end;
 	uintptr_t beginline;
 	uintptr_t endline;
 
@@ -502,13 +422,13 @@ void psy_audio_pattern_blockinterpolatelinear(psy_audio_Pattern* self,
 
 	begin = selection->topleft;
 	end = selection->bottomright;
-	beginline = (uintptr_t)(begin.offset / bpl);
-	endline = (uintptr_t)(end.offset / bpl);
-	node = psy_audio_pattern_findnode(self, begin.track, beginline * bpl, bpl, &prev);
+	beginline = (uintptr_t)(begin.cursor.offset / bpl);
+	endline = (uintptr_t)(end.cursor.offset / bpl);
+	node = psy_audio_pattern_findnode(self, begin.cursor.track, beginline * bpl, bpl, &prev);
 	startval = (node)
 		? psy_audio_patternevent_tweakvalue(psy_audio_patternentry_front(node->entry))
 		: 0;
-	node = psy_audio_pattern_findnode(self, begin.track, (endline - 1) * bpl, bpl, &prev);
+	node = psy_audio_pattern_findnode(self, begin.cursor.track, (endline - 1) * bpl, bpl, &prev);
 	endval = (node)
 		? psy_audio_patternevent_tweakvalue(psy_audio_patternentry_front(node->entry))
 		: 0;
@@ -516,8 +436,8 @@ void psy_audio_pattern_blockinterpolatelinear(psy_audio_Pattern* self,
 }
 
 void psy_audio_pattern_blockinterpolaterange(psy_audio_Pattern* self,
-	psy_audio_PatternCursor begin,
-	psy_audio_PatternCursor end,
+	psy_audio_SequenceCursor begin,
+	psy_audio_SequenceCursor end,
 	psy_dsp_big_beat_t bpl, intptr_t startval, intptr_t endval)
 {
 	uintptr_t line;
@@ -529,8 +449,8 @@ void psy_audio_pattern_blockinterpolaterange(psy_audio_Pattern* self,
 
 	assert(self);
 	
-	beginline = (uintptr_t)(begin.offset / bpl);
-	endline = (uintptr_t)(end.offset / bpl);
+	beginline = (uintptr_t)(begin.cursor.offset / bpl);
+	endline = (uintptr_t)(end.cursor.offset / bpl);
 	step = (endval - startval) / (float)(endline - beginline - 1);
 	for (line = beginline; line < endline; ++line) {
 		psy_dsp_big_beat_t offset;
@@ -538,7 +458,7 @@ void psy_audio_pattern_blockinterpolaterange(psy_audio_Pattern* self,
 
 		offset = line * bpl;
 		value = (int)((step * (line - beginline) + startval));
-		node = psy_audio_pattern_findnode(self, begin.track, offset, bpl, &prev);
+		node = psy_audio_pattern_findnode(self, begin.cursor.track, offset, bpl, &prev);
 		if (node) {
 			psy_audio_patternevent_settweakvalue(psy_audio_patternentry_front(
 				node->entry), value);
@@ -549,14 +469,14 @@ void psy_audio_pattern_blockinterpolaterange(psy_audio_Pattern* self,
 
 			psy_audio_patternevent_clear(&ev);
 			psy_audio_patternevent_settweakvalue(&ev, value);
-			prev = psy_audio_pattern_insert(self, prev, begin.track, offset, &ev);
+			prev = psy_audio_pattern_insert(self, prev, begin.cursor.track, offset, &ev);
 		}
 	}
 }
 
 void psy_audio_pattern_blockinterpolaterangehermite(psy_audio_Pattern* self,
-	psy_audio_PatternCursor begin,
-	psy_audio_PatternCursor end,
+	psy_audio_SequenceCursor begin,
+	psy_audio_SequenceCursor end,
 	psy_dsp_big_beat_t bpl, intptr_t startval, intptr_t endval)
 {
 	uintptr_t line;
@@ -577,14 +497,14 @@ void psy_audio_pattern_blockinterpolaterangehermite(psy_audio_Pattern* self,
 	val2 = endval;
 	val3 = endval;
 
-	beginline = (uintptr_t)(begin.offset / bpl);
-	endline = (uintptr_t)(end.offset / bpl);
+	beginline = (uintptr_t)(begin.cursor.offset / bpl);
+	endline = (uintptr_t)(end.cursor.offset / bpl);
 	distance = endline - beginline - 1;
 	for (line = beginline; line < endline; ++line) {
 		psy_dsp_big_beat_t offset;
 
 		offset = line * bpl;
-		node = psy_audio_pattern_findnode(self, begin.track, offset, bpl, &prev);
+		node = psy_audio_pattern_findnode(self, begin.cursor.track, offset, bpl, &prev);
 		if (node) {
 			double curveval;
 			
@@ -598,7 +518,7 @@ void psy_audio_pattern_blockinterpolaterangehermite(psy_audio_Pattern* self,
 
 			psy_audio_patternevent_clear(&ev);
 			psy_audio_patternevent_settweakvalue(&ev, (uint16_t)curveval);
-			prev = psy_audio_pattern_insert(self, prev, begin.track, offset, &ev);
+			prev = psy_audio_pattern_insert(self, prev, begin.cursor.track, offset, &ev);
 		}
 	}
 }
@@ -626,22 +546,22 @@ double hermitecurveinterpolate(intptr_t kf0, intptr_t kf1, intptr_t kf2,
 }
 
 void psy_audio_pattern_blocktranspose(psy_audio_Pattern* self,
-	psy_audio_PatternCursor begin,
-	psy_audio_PatternCursor end, int offset)
+	psy_audio_SequenceCursor begin,
+	psy_audio_SequenceCursor end, int offset)
 {	
 	psy_audio_PatternNode* p;
 	psy_audio_PatternNode* q;
 
 	assert(self);
 
-	p = psy_audio_pattern_greaterequal(self, (psy_dsp_big_beat_t) begin.offset);
+	p = psy_audio_pattern_greaterequal(self, (psy_dsp_big_beat_t) begin.cursor.offset);
 	while (p != NULL) {			
 		psy_audio_PatternEntry* entry;
 		q = p->next;
 
 		entry = (psy_audio_PatternEntry*)psy_list_entry(p);
-		if (entry->offset < end.offset) {
-			if (entry->track >= begin.track && entry->track < end.track) {
+		if (entry->offset < end.cursor.offset) {
+			if (entry->track >= begin.cursor.track && entry->track < end.cursor.track) {
 				if (psy_audio_patternentry_front(entry)->note < psy_audio_NOTECOMMANDS_RELEASE) {
 					if (psy_audio_patternentry_front(entry)->note + offset < 0) {
 						psy_audio_patternentry_front(entry)->note = 0;
@@ -662,22 +582,22 @@ void psy_audio_pattern_blocktranspose(psy_audio_Pattern* self,
 }
 
 void psy_audio_pattern_changemachine(psy_audio_Pattern* self,
-	psy_audio_PatternCursor begin,
-	psy_audio_PatternCursor end, uintptr_t machine)
+	psy_audio_SequenceCursor begin,
+	psy_audio_SequenceCursor end, uintptr_t machine)
 {
 	psy_audio_PatternNode* p;
 	psy_audio_PatternNode* q;
 
 	assert(self);
 
-	p = psy_audio_pattern_greaterequal(self, (psy_dsp_big_beat_t) begin.offset);
+	p = psy_audio_pattern_greaterequal(self, (psy_dsp_big_beat_t) begin.cursor.offset);
 	while (p != NULL) {			
 		psy_audio_PatternEntry* entry;
 		q = p->next;
 
 		entry = (psy_audio_PatternEntry*)psy_list_entry(p);
-		if (entry->offset < end.offset) {
-			if (entry->track >= begin.track && entry->track < end.track) {
+		if (entry->offset < end.cursor.offset) {
+			if (entry->track >= begin.cursor.track && entry->track < end.cursor.track) {
 				psy_audio_patternentry_front(entry)->mach = (uint8_t)machine;
 			}
 		} else {
@@ -688,22 +608,22 @@ void psy_audio_pattern_changemachine(psy_audio_Pattern* self,
 }
 
 void psy_audio_pattern_changeinstrument(psy_audio_Pattern* self,
-	psy_audio_PatternCursor begin,
-	psy_audio_PatternCursor end, uintptr_t instrument)
+	psy_audio_SequenceCursor begin,
+	psy_audio_SequenceCursor end, uintptr_t instrument)
 {
 	psy_audio_PatternNode* p;
 	psy_audio_PatternNode* q;
 
 	assert(self);
 
-	p = psy_audio_pattern_greaterequal(self, (psy_dsp_big_beat_t) begin.offset);
+	p = psy_audio_pattern_greaterequal(self, (psy_dsp_big_beat_t)begin.cursor.offset);
 	while (p != NULL) {			
 		psy_audio_PatternEntry* entry;
 		q = p->next;
 
 		entry = (psy_audio_PatternEntry*)psy_list_entry(p);
-		if (entry->offset < end.offset) {
-			if (entry->track >= begin.track && entry->track < end.track) {
+		if (entry->offset < end.cursor.offset) {
+			if (entry->track >= begin.cursor.track && entry->track < end.cursor.track) {
 				psy_audio_patternentry_front(entry)->inst = (uint16_t)instrument;
 			}
 		} else {
@@ -728,7 +648,7 @@ uintptr_t psy_audio_pattern_maxsongtracks(const psy_audio_Pattern* self)
 }
 
 psy_audio_PatternCursor psy_audio_pattern_searchinpattern(psy_audio_Pattern*
-	self, psy_audio_PatternSelection selection, psy_audio_PatternSearchReplaceMode mode)
+	self, psy_audio_BlockSelection selection, psy_audio_PatternSearchReplaceMode mode)
 {
 	psy_audio_PatternCursor cursor;
 	psy_audio_PatternNode* p;
@@ -743,16 +663,16 @@ psy_audio_PatternCursor psy_audio_pattern_searchinpattern(psy_audio_Pattern*
 	assert(self);
 
 	psy_audio_patterncursor_init(&cursor);
-	cursor.seqoffset = 0;
+	cursor.absolute = TRUE;
 	cursor.offset = -1.0;	
-	p = psy_audio_pattern_greaterequal(self, (psy_dsp_big_beat_t)selection.topleft.offset);
+	p = psy_audio_pattern_greaterequal(self, (psy_dsp_big_beat_t)selection.topleft.cursor.offset);
 	while (p != NULL) {
 		psy_audio_PatternEntry* entry;
 		q = p->next;
 
 		entry = (psy_audio_PatternEntry*)psy_list_entry(p);
-		if (entry->offset < selection.bottomright.offset) {
-			if (entry->track >= selection.topleft.track && entry->track < selection.bottomright.track) {
+		if (entry->offset < selection.bottomright.cursor.offset) {
+			if (entry->track >= selection.topleft.cursor.track && entry->track < selection.bottomright.cursor.track) {
 				psy_audio_PatternEvent* patternevent;
 
 				patternevent = psy_audio_patternentry_front(entry);
@@ -925,7 +845,7 @@ bool psy_audio_patterncursornavigator_nexttrack(
 }
 
 void psy_audio_pattern_blockcopy(psy_audio_Pattern* self,
-	psy_audio_Pattern* source, psy_audio_PatternSelection selection)
+	psy_audio_Pattern* source, psy_audio_BlockSelection selection)
 {
 	psy_audio_PatternNode* begin;
 	psy_audio_PatternNode* p;
@@ -939,9 +859,9 @@ void psy_audio_pattern_blockcopy(psy_audio_Pattern* self,
 
 	restore_opcount = self->opcount;
 	begin = psy_audio_pattern_greaterequal(source,
-		(psy_dsp_big_beat_t)selection.topleft.offset);
-	offset = (psy_dsp_big_beat_t)selection.topleft.offset;
-	trackoffset = selection.topleft.track;
+		(psy_dsp_big_beat_t)selection.topleft.cursor.offset);
+	offset = (psy_dsp_big_beat_t)selection.topleft.cursor.offset;
+	trackoffset = selection.topleft.cursor.track;
 	psy_audio_pattern_dispose(self);
 	psy_audio_pattern_init(self);
 	p = begin;
@@ -950,9 +870,9 @@ void psy_audio_pattern_blockcopy(psy_audio_Pattern* self,
 		q = p->next;
 
 		entry = psy_audio_patternnode_entry(p);
-		if (entry->offset < selection.bottomright.offset) {
-			if (entry->track >= selection.topleft.track &&
-				entry->track < selection.bottomright.track) {
+		if (entry->offset < selection.bottomright.cursor.offset) {
+			if (entry->track >= selection.topleft.cursor.track &&
+				entry->track < selection.bottomright.cursor.track) {
 				prev = psy_audio_pattern_insert(self,
 					prev, entry->track - trackoffset,
 					entry->offset - offset,
@@ -964,36 +884,36 @@ void psy_audio_pattern_blockcopy(psy_audio_Pattern* self,
 		p = q;
 	}
 	psy_audio_pattern_setmaxsongtracks(self,
-		selection.bottomright.track -
-		selection.topleft.track);
+		selection.bottomright.cursor.track -
+		selection.topleft.cursor.track);
 	psy_audio_pattern_setlength(self,
-		(psy_dsp_big_beat_t)(selection.bottomright.offset -
-			selection.topleft.offset));
+		(psy_dsp_big_beat_t)(selection.bottomright.cursor.offset -
+			selection.topleft.cursor.offset));
 	self->opcount = restore_opcount + 1;
 }
 
 void psy_audio_pattern_blockpaste(psy_audio_Pattern* self,
-	psy_audio_Pattern* source, psy_audio_PatternCursor destcursor,
+	psy_audio_Pattern* source, psy_audio_SequenceCursor destcursor,
 	psy_dsp_big_beat_t bpl)
 {
 	psy_audio_PatternNode* p;
 	psy_audio_PatternNode* prev = 0;
 	psy_dsp_big_beat_t offset;
 	intptr_t trackoffset;
-	psy_audio_PatternCursor begin;
-	psy_audio_PatternCursor end;
+	psy_audio_SequenceCursor begin;
+	psy_audio_SequenceCursor end;
 
 	assert(self);
 
-	offset = (psy_dsp_big_beat_t)destcursor.offset;
-	trackoffset = destcursor.track;
+	offset = (psy_dsp_big_beat_t)destcursor.cursor.offset;
+	trackoffset = destcursor.cursor.track;
 	p = source->events;
 
 	begin = end = destcursor;
-	end.track += source->maxsongtracks;
-	end.offset += source->length;
-	if (end.offset >= psy_audio_pattern_length(self)) {
-		end.offset = psy_audio_pattern_length(self);
+	end.cursor.track += source->maxsongtracks;
+	end.cursor.offset += source->length;
+	if (end.cursor.offset >= psy_audio_pattern_length(self)) {
+		end.cursor.offset = psy_audio_pattern_length(self);
 	}
 	psy_audio_pattern_blockremove(self, begin, end);
 	/*
@@ -1028,25 +948,25 @@ void psy_audio_pattern_blockpaste(psy_audio_Pattern* self,
 }
 
 void psy_audio_pattern_blockmixpaste(psy_audio_Pattern* self,
-	psy_audio_Pattern* source, psy_audio_PatternCursor destcursor,
+	psy_audio_Pattern* source, psy_audio_SequenceCursor destcursor,
 	psy_dsp_big_beat_t bpl)
 {
 	psy_audio_PatternNode* p;
 	psy_audio_PatternNode* prev = 0;
 	psy_dsp_big_beat_t offset;
 	uintptr_t trackoffset;
-	psy_audio_PatternCursor begin;
-	psy_audio_PatternCursor end;
+	psy_audio_SequenceCursor begin;
+	psy_audio_SequenceCursor end;
 
 	assert(self);
 
-	offset = (psy_dsp_big_beat_t)destcursor.offset;
-	trackoffset = destcursor.track;
+	offset = (psy_dsp_big_beat_t)destcursor.cursor.offset;
+	trackoffset = destcursor.cursor.track;
 	begin = end = destcursor;
-	end.track += source->maxsongtracks;
-	end.offset += source->length;
-	if (end.offset >= psy_audio_pattern_length(self)) {
-		end.offset = psy_audio_pattern_length(self);
+	end.cursor.track += source->maxsongtracks;
+	end.cursor.offset += source->length;
+	if (end.cursor.offset >= psy_audio_pattern_length(self)) {
+		end.cursor.offset = psy_audio_pattern_length(self);
 	}
 	p = source->events;
 	while (p != NULL) {
@@ -1069,7 +989,7 @@ void psy_audio_pattern_blockmixpaste(psy_audio_Pattern* self,
 }
 
 void psy_audio_pattern_swingfill(psy_audio_Pattern* self,
-	const psy_audio_PatternSelection* selection,	
+	const psy_audio_BlockSelection* selection,	
 	bool bTrackMode,
 	psy_dsp_big_beat_t bpl,
 	int tempo, int width, float variance, float phase,
@@ -1089,8 +1009,8 @@ void psy_audio_pattern_swingfill(psy_audio_Pattern* self,
 	float step = twopi / (width);
 	float index = phase * twopi / 360;
 	float dcoffs = 0;
-	psy_audio_PatternCursor begin;
-	psy_audio_PatternCursor end;
+	psy_audio_SequenceCursor begin;
+	psy_audio_SequenceCursor end;
 	uintptr_t beginline;
 	uintptr_t endline;	
 
@@ -1098,10 +1018,10 @@ void psy_audio_pattern_swingfill(psy_audio_Pattern* self,
 
 	begin = selection->topleft;
 	end = selection->bottomright;
-	beginline = (uintptr_t)(begin.offset / bpl);
-	endline = (uintptr_t)(end.offset / bpl);
-	beginline = (uintptr_t)(begin.offset / bpl);
-	endline = (uintptr_t)(end.offset / bpl);
+	beginline = (uintptr_t)(begin.cursor.offset / bpl);
+	endline = (uintptr_t)(end.cursor.offset / bpl);
+	beginline = (uintptr_t)(begin.cursor.offset / bpl);
+	endline = (uintptr_t)(end.cursor.offset / bpl);
 	if (bTrackMode) {		
 		beginline = 0;
 		endline = (int)(psy_audio_pattern_length(self) / bpl);		
@@ -1136,7 +1056,7 @@ void psy_audio_pattern_swingfill(psy_audio_Pattern* self,
 			val = 255;
 		}
 		index += step;
-		node = psy_audio_pattern_findnode(self, begin.track, offset, bpl,
+		node = psy_audio_pattern_findnode(self, begin.cursor.track, offset, bpl,
 			&prev);				
 		if (node) {
 			psy_audio_PatternEntry* entry;
@@ -1153,7 +1073,7 @@ void psy_audio_pattern_swingfill(psy_audio_Pattern* self,
 			psy_audio_patternevent_clear(&ev);
 			ev.cmd = 0xff;
 			ev.parameter = (unsigned char)(val);
-			prev = psy_audio_pattern_insert(self, prev, begin.track, offset, &ev);
+			prev = psy_audio_pattern_insert(self, prev, begin.cursor.track, offset, &ev);
 		}		
 	}
 }

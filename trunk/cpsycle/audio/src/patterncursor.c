@@ -22,7 +22,7 @@ void psy_audio_patterncursor_init(psy_audio_PatternCursor* self)
 	self->key = psy_audio_NOTECOMMANDS_MIDDLEC;
 	self->track = 0;
 	self->offset = 0.0;
-	self->seqoffset = 0.0;	
+	self->absolute = FALSE;	
 	self->lpb = 4;
 	self->column = 0;
 	self->digit = 0;

@@ -633,6 +633,9 @@
     <ClCompile Include="src\labeledit.c">
       <Filter>uicontrols</Filter>
     </ClCompile>
+    <ClCompile Include="src\patternviewstate.c">
+      <Filter>pattern\common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\languageconfig.h">
@@ -1168,6 +1171,9 @@
     </ClInclude>
     <ClInclude Include="src\labeledit.h">
       <Filter>uicontrols</Filter>
+    </ClInclude>
+    <ClInclude Include="src\patternviewstate.h">
+      <Filter>pattern\common</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

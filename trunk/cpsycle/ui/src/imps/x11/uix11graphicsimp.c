@@ -5,6 +5,7 @@
 
 #include "../../detail/prefix.h"
 
+
 #include "uix11graphicsimp.h"
 
 #if PSYCLE_USE_TK == PSYCLE_TK_X11
@@ -55,6 +56,9 @@ static void psy_ui_x11_g_devsetorigin(psy_ui_x11_GraphicsImp*, double x, double 
 static psy_ui_RealPoint psy_ui_x11_g_devorigin(const psy_ui_x11_GraphicsImp*);
 static int psy_ui_x11_g_imp_colourindex(psy_ui_x11_GraphicsImp*, psy_ui_Colour);
 static uintptr_t psy_ui_x11_g_dev_gc(psy_ui_x11_GraphicsImp*);
+static void psy_ui_x11_g_dev_setcliprect(psy_ui_x11_GraphicsImp*, psy_ui_RealRectangle);
+static psy_ui_RealRectangle psy_ui_x11_g_dev_cliprect(const psy_ui_x11_GraphicsImp*);
+
 /* vtable */
 static psy_ui_GraphicsImpVTable x11_imp_vtable;
 static bool x11_imp_vtable_initialized = FALSE;
@@ -144,6 +148,12 @@ static void x11_imp_vtable_init(psy_ui_x11_GraphicsImp* self)
 		x11_imp_vtable.dev_gc =
 			(psy_ui_fp_graphicsimp_dev_gc)
 			psy_ui_x11_g_dev_gc;
+		x11_imp_vtable.dev_setcliprect =
+			(psy_ui_fp_graphicsimp_dev_setcliprect)
+			psy_ui_x11_g_dev_setcliprect;
+		x11_imp_vtable.dev_cliprect =
+			(psy_ui_fp_graphicsimp_dev_cliprect)
+			psy_ui_x11_g_dev_cliprect;
 		x11_imp_vtable_initialized = TRUE;
 	}
 	self->imp.vtable = &x11_imp_vtable;
@@ -186,6 +196,7 @@ void psy_ui_x11_graphicsimp_init(psy_ui_x11_GraphicsImp* self,
 	self->region = XCreateRegion();
 	self->bitmap = FALSE;
 	psy_ui_realpoint_init(&self->cp);
+	self->clip = psy_ui_realrectangle_zero();
 }
 
 void psy_ui_x11_graphicsimp_init_bitmap(psy_ui_x11_GraphicsImp* self,
@@ -595,6 +606,39 @@ psy_ui_RealPoint psy_ui_x11_g_devorigin(const psy_ui_x11_GraphicsImp* self)
 uintptr_t psy_ui_x11_g_dev_gc(psy_ui_x11_GraphicsImp* self)
 {
 	return (uintptr_t)self->gc;
+}
+
+void psy_ui_x11_g_dev_setcliprect(psy_ui_x11_GraphicsImp* self, psy_ui_RealRectangle clip)
+{
+	Region rgn;
+
+	self->clip = clip;
+	rgn = XCreateRegion();
+	if ((((int)clip.right - (int)clip.left) == 0) ||
+			(((int)clip.bottom - (int)clip.top) == 0)) {		
+		XRectangle r;
+				
+		r.x = 0;
+		r.y = 0;
+		r.width = 16384;
+		r.height = 16384;	
+		XUnionRectWithRegion(&r, rgn, rgn);		
+	} else {
+		XRectangle r;
+		
+		r.x = (int)clip.left - (int)(self->org.x);
+		r.y = (int)clip.top - (int)(self->org.y);
+		r.width = (int)clip.right - (int)clip.left;
+		r.height = (int)clip.bottom - (int)clip.top;
+		XUnionRectWithRegion(&r, rgn, rgn);		
+	}
+	XSetRegion(self->display, self->gc, rgn);
+	XDestroyRegion(rgn);
+}
+
+psy_ui_RealRectangle psy_ui_x11_g_dev_cliprect(const psy_ui_x11_GraphicsImp* self)
+{
+	return self->clip;
 }
 
 #endif /* PSYCLE_USE_TK == PSYCLE_TK_X11 */

@@ -56,8 +56,9 @@ typedef struct psy_ui_App {
 	bool setpositioncacheonly;	
 	/* references */
 	struct psy_ui_Component* main;
-	struct psy_ui_Component* capture;	
+	struct psy_ui_Component* capture_;
 	struct psy_ui_Component* hover;
+	struct psy_ui_Component* focus;
 	psy_ui_DragEvent dragevent;
 	int deltaperline;
 	int accumwheeldelta;
@@ -92,7 +93,12 @@ void psy_ui_app_stopdrag(psy_ui_App*);
 
 INLINE struct psy_ui_Component* psy_ui_app_capture(psy_ui_App* self)
 {
-	return self->capture;
+	return self->capture_;
+}
+
+INLINE void psy_ui_app_setcapture(psy_ui_App* self, struct psy_ui_Component* component)
+{
+	self->capture_ = component;
 }
 
 INLINE struct psy_ui_ImpFactory* psy_ui_app_impfactory(psy_ui_App* self)

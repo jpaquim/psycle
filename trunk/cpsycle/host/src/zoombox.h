@@ -32,7 +32,7 @@ typedef struct ZoomBox {
 	psy_Signal signal_changed;
 } ZoomBox;
 
-void zoombox_init(ZoomBox*, psy_ui_Component* parent);
+void zoombox_init(ZoomBox*, psy_ui_Component* parent, psy_ui_Component* view);
 void zoombox_init_connect(ZoomBox*, psy_ui_Component* parent,
 	void* context, void* fp);
 

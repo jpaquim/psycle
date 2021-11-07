@@ -110,6 +110,10 @@ typedef void (*psy_ui_fp_graphicsimp_dev_setorigin)(struct psy_ui_GraphicsImp*,
 typedef psy_ui_RealPoint(*psy_ui_fp_graphicsimp_dev_origin)(
 	const struct psy_ui_GraphicsImp*);
 typedef uintptr_t(*psy_ui_fp_graphicsimp_dev_gc)(struct psy_ui_GraphicsImp*);
+typedef void (*psy_ui_fp_graphicsimp_dev_setcliprect)(
+	struct psy_ui_GraphicsImp*, psy_ui_RealRectangle);
+typedef psy_ui_RealRectangle(*psy_ui_fp_graphicsimp_dev_cliprect)(
+	const struct psy_ui_GraphicsImp*);
 
 typedef struct psy_ui_GraphicsImpVTable {
 	psy_ui_fp_graphicsimp_dev_dispose dev_dispose;
@@ -140,6 +144,8 @@ typedef struct psy_ui_GraphicsImpVTable {
 	psy_ui_fp_graphicsimp_dev_setorigin dev_setorigin;
 	psy_ui_fp_graphicsimp_dev_origin dev_origin;
 	psy_ui_fp_graphicsimp_dev_gc dev_gc;
+	psy_ui_fp_graphicsimp_dev_setcliprect dev_setcliprect;
+	psy_ui_fp_graphicsimp_dev_cliprect dev_cliprect;
 } psy_ui_GraphicsImpVTable;
 
 typedef struct psy_ui_GraphicsImp {
@@ -417,6 +423,16 @@ INLINE psy_ui_RealPoint psy_ui_origin(const psy_ui_Graphics* self)
 INLINE uintptr_t psy_ui_graphics_dev_gc(psy_ui_Graphics* self)
 {
 	return self->imp->vtable->dev_gc(self->imp);
+}
+
+INLINE void psy_ui_setcliprect(psy_ui_Graphics* self, psy_ui_RealRectangle clip)
+{
+	self->imp->vtable->dev_setcliprect(self->imp, clip);
+}
+
+INLINE psy_ui_RealRectangle psy_ui_cliprect(const psy_ui_Graphics* self)
+{
+	return self->imp->vtable->dev_cliprect(self->imp);
 }
 
 void psy_ui_drawborder(psy_ui_Graphics* self, psy_ui_RealRectangle,

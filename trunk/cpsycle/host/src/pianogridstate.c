@@ -9,14 +9,13 @@
 #include "pianogridstate.h"
 
 /* PianoGridState */
-void pianogridstate_init(PianoGridState* self, PatternViewSkin* skin)
+void pianogridstate_init(PianoGridState* self, PatternViewSkin* skin,
+	psy_audio_Song* song)
 {
 	assert(self);
 
-	self->pattern = NULL;
+	patternviewstate_init(&self->pv, song);	
+	self->pv.skin = skin;
 	self->defaultbeatwidth = 90;
-	self->pxperbeat = self->defaultbeatwidth;
-	self->lpb = 4;	
-	self->skin = skin;		
-	psy_audio_sequencecursor_init(&self->cursor);
+	self->pxperbeat = self->defaultbeatwidth;	
 }

@@ -12,6 +12,7 @@
 #include "patternproperties.h"
 #include "patternviewmenu.h"
 #include "patternviewbar.h"
+#include "patternviewstate.h"
 #include "pianoroll.h"
 #include "stepbox.h"
 #include "trackerlinenumbers.h"
@@ -58,9 +59,8 @@ typedef struct PatternView {
 	psy_ui_Component headerpane;
 	TrackerHeader header;
 	psy_ui_Notebook notebook;
-	psy_ui_Notebook editnotebook;
-	psy_ui_Scroller trackerscroller;
-	TrackerGrid tracker;
+	psy_ui_Notebook editnotebook;	
+	TrackerView trackerview;
 	Pianoroll pianoroll;	
 	PatternProperties properties;
 	PatternBlockMenu blockmenu;
@@ -69,15 +69,11 @@ typedef struct PatternView {
 	SwingFillView swingfillview;
 	/* internal data */	
 	TrackConfig trackconfig;
-	TrackerState state;
+	TrackerState state;	
 	PatternViewSkin skin;	
-	bool showdefaultline;
-	PatternCursorStepMode pgupdownstepmode;
-	intptr_t pgupdownstep;
 	bool trackmodeswingfill;	
 	int baselfheight;
-	uintptr_t display;
-	uintptr_t lastplayline;
+	PatternDisplayMode display;
 	bool aligndisplay;
 	int updatealign;
 	/* references */

@@ -193,6 +193,8 @@ typedef struct Workspace {
 	bool driverconfigloading;
 	bool seqviewactive;	
 	uintptr_t lastplayline;
+	psy_dsp_big_beat_t currplayposition;
+	psy_dsp_big_beat_t lastplayposition;
 	InputHandler inputhandler;
 	psy_Thread driverconfigloadthread;
 	psy_Thread pluginscanthread;

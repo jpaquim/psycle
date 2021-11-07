@@ -64,7 +64,7 @@ void helpview_inittabbar(HelpView* self, psy_ui_Component* tabbarparent,
 
 void helpview_initsections(HelpView* self, Workspace* workspace)
 {
-	psy_ui_notebook_init(&self->notebook, helpview_base(self));
+	psy_ui_notebook_init(&self->notebook, helpview_base(self), NULL);
 	psy_ui_component_setalign(psy_ui_notebook_base(&self->notebook),
 		psy_ui_ALIGN_CLIENT);
 	psy_ui_notebook_connectcontroller(&self->notebook,

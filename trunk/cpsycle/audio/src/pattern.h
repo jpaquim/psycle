@@ -1,4 +1,5 @@
 /*
+/*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 ** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
 */
@@ -7,6 +8,7 @@
 #define psy_audio_PATTERN_H
 
 /* local */
+#include "blockselection.h"
 #include "patterncursor.h"
 #include "patternentry.h"
 /* container */
@@ -28,52 +30,6 @@ extern "C" {
 #define psy_audio_GLOBALPATTERN INT32_MAX - 1
 #define psy_audio_GLOBALPATTERN_TIMESIGTRACK 0
 #define psy_audio_GLOBALPATTERN_LOOPTRACK 1
-
-typedef struct psy_audio_PatternSelection {
-	psy_audio_PatternCursor topleft;
-	psy_audio_PatternCursor bottomright;
-	bool valid;
-} psy_audio_PatternSelection;
-
-void psy_audio_patternselection_init(psy_audio_PatternSelection*);
-void psy_audio_patternselection_init_all(psy_audio_PatternSelection*,
-	psy_audio_PatternCursor topleft, psy_audio_PatternCursor bottomright);
-psy_audio_PatternSelection psy_audio_patternselection_make(
-	psy_audio_PatternCursor topleft, psy_audio_PatternCursor bottomright);
-
-INLINE bool psy_audio_patternselection_valid(
-	const psy_audio_PatternSelection* self)
-{
-	return self->valid;
-}
-
-INLINE void psy_audio_patternselection_enable(psy_audio_PatternSelection* self)
-{
-	self->valid = TRUE;
-}
-
-INLINE void psy_audio_patternselection_disable(
-	psy_audio_PatternSelection* self)
-{
-	self->valid = FALSE;
-}
-
-INLINE bool psy_audio_patternselection_test(psy_audio_PatternSelection* self,
-	uintptr_t track, psy_dsp_big_beat_t offset)
-{
-	return psy_audio_patternselection_valid(self) &&
-		track >= self->topleft.track &&
-		track < self->bottomright.track&&
-		offset >= self->topleft.offset + self->topleft.seqoffset &&
-		offset < self->bottomright.offset + self->bottomright.seqoffset;
-}
-
-void psy_audio_patternselection_startdrag(psy_audio_PatternSelection*,
-	psy_audio_PatternCursor dragselectionbase,
-	psy_audio_PatternCursor cursor, double bpl);
-void psy_audio_patternselection_drag(psy_audio_PatternSelection*,
-	psy_audio_PatternCursor dragselectionbase,
-	psy_audio_PatternCursor cursor, double bpl);
 
 typedef bool (*psy_audio_fp_matches)(const uintptr_t test,
 	const uintptr_t reference);
@@ -281,38 +237,38 @@ INLINE uintptr_t psy_audio_pattern_opcount(const psy_audio_Pattern* self)
 void psy_audio_pattern_scale(psy_audio_Pattern*, float factor);
 /* erases all entries of the block */
 void psy_audio_pattern_blockremove(psy_audio_Pattern*,
-	psy_audio_PatternCursor begin, psy_audio_PatternCursor end);
+	psy_audio_SequenceCursor begin, psy_audio_SequenceCursor end);
 /* erases the pattern and copies the block from a source pattern */
 void psy_audio_pattern_blockcopy(psy_audio_Pattern* self,
-	psy_audio_Pattern* source, psy_audio_PatternSelection selection);
+	psy_audio_Pattern* source, psy_audio_BlockSelection selection);
 /* paste the block from a source pattern to the cursor position */
 void psy_audio_pattern_blockpaste(psy_audio_Pattern* self,
-	psy_audio_Pattern* source, psy_audio_PatternCursor destcursor,
+	psy_audio_Pattern* source, psy_audio_SequenceCursor destcursor,
 	psy_dsp_big_beat_t bpl);
 /* mix paste the block from a source pattern to the cursor position */
 void psy_audio_pattern_blockmixpaste(psy_audio_Pattern* self,
-	psy_audio_Pattern* source, psy_audio_PatternCursor destcursor,
+	psy_audio_Pattern* source, psy_audio_SequenceCursor destcursor,
 	psy_dsp_big_beat_t bpl);
 /* interpolates linear all entries of the block */
 void psy_audio_pattern_blockinterpolatelinear(psy_audio_Pattern*,
-	const psy_audio_PatternSelection*, psy_dsp_big_beat_t bpl);
-void psy_audio_pattern_blockinterpolaterange(psy_audio_Pattern* self, psy_audio_PatternCursor begin,
-	psy_audio_PatternCursor end, psy_dsp_big_beat_t bpl, intptr_t startval, intptr_t endval);
-void psy_audio_pattern_blockinterpolaterangehermite(psy_audio_Pattern* self, psy_audio_PatternCursor begin,
-	psy_audio_PatternCursor end, psy_dsp_big_beat_t bpl, intptr_t startval, intptr_t endval);
+	const psy_audio_BlockSelection*, psy_dsp_big_beat_t bpl);
+void psy_audio_pattern_blockinterpolaterange(psy_audio_Pattern* self, psy_audio_SequenceCursor begin,
+	psy_audio_SequenceCursor end, psy_dsp_big_beat_t bpl, intptr_t startval, intptr_t endval);
+void psy_audio_pattern_blockinterpolaterangehermite(psy_audio_Pattern* self, psy_audio_SequenceCursor begin,
+	psy_audio_SequenceCursor end, psy_dsp_big_beat_t bpl, intptr_t startval, intptr_t endval);
 /* transposes all entries of the block with the offset */
-void psy_audio_pattern_blocktranspose(psy_audio_Pattern*, psy_audio_PatternCursor begin,
-	psy_audio_PatternCursor end, int offset);
+void psy_audio_pattern_blocktranspose(psy_audio_Pattern*, psy_audio_SequenceCursor begin,
+	psy_audio_SequenceCursor end, int offset);
 /* swingfill */
 void psy_audio_pattern_swingfill(psy_audio_Pattern*,
-	const psy_audio_PatternSelection*, bool bTrackMode, psy_dsp_big_beat_t bpl,
+	const psy_audio_BlockSelection*, bool bTrackMode, psy_dsp_big_beat_t bpl,
 	int tempo, int width, float variance, float phase, bool offset);
 /* changes the machine column of all entries of the block with the offset */
-void psy_audio_pattern_changemachine(psy_audio_Pattern*, psy_audio_PatternCursor begin,
-	psy_audio_PatternCursor end, uintptr_t machine);
+void psy_audio_pattern_changemachine(psy_audio_Pattern*, psy_audio_SequenceCursor begin,
+	psy_audio_SequenceCursor end, uintptr_t machine);
 /* changes the instrument column of all entries of the block with the offset */
-void psy_audio_pattern_changeinstrument(psy_audio_Pattern*, psy_audio_PatternCursor begin,
-	psy_audio_PatternCursor end, uintptr_t machine);
+void psy_audio_pattern_changeinstrument(psy_audio_Pattern*, psy_audio_SequenceCursor begin,
+	psy_audio_SequenceCursor end, uintptr_t machine);
 /* sets the maximum number of songtracks */
 /* used by the paste pattern, player uses songtracks of patterns */
 void psy_audio_pattern_setmaxsongtracks(psy_audio_Pattern*, uintptr_t num);
@@ -321,7 +277,7 @@ void psy_audio_pattern_setmaxsongtracks(psy_audio_Pattern*, uintptr_t num);
 uintptr_t psy_audio_pattern_maxsongtracks(const psy_audio_Pattern*);
 /* searches the pattern */
 psy_audio_PatternCursor psy_audio_pattern_searchinpattern(psy_audio_Pattern*,
-	psy_audio_PatternSelection, psy_audio_PatternSearchReplaceMode);
+	psy_audio_BlockSelection, psy_audio_PatternSearchReplaceMode);
 /* number of lines a pattern will be created */
 void psy_audio_pattern_setdefaultlines(uintptr_t numlines);
 /* return number of lines a pattern will be created */

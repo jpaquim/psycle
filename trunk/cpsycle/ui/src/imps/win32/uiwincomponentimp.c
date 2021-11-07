@@ -412,10 +412,11 @@ void dev_clear(psy_ui_win_ComponentImp* self)
 	psy_List* p;
 	psy_List* q;
 
-	for (p = self->viewcomponents; p != NULL; psy_list_next(&p)) {
+	for (p = self->viewcomponents; p != NULL; p = q) {
 		psy_ui_Component* component;
 		bool deallocate;
 
+		q = p->next;
 		component = (psy_ui_Component*)psy_list_entry(p);
 		deallocate = component->deallocate;
 		psy_ui_component_destroy(component);		
@@ -427,14 +428,17 @@ void dev_clear(psy_ui_win_ComponentImp* self)
 	self->viewcomponents = NULL;	
 
 	if (self->component) {
-		q = psy_ui_component_children(self->component, psy_ui_NONRECURSIVE);
-		for (p = q; p != NULL; psy_list_next(&p)) {
+		psy_List* c;
+		
+		c = psy_ui_component_children(self->component, psy_ui_NONRECURSIVE);
+		for (p = c; p != NULL; p = q) {
 			psy_ui_Component* component;			
 
+			q = p->next;
 			component = (psy_ui_Component*)psy_list_entry(p);			
 			psy_ui_component_destroy(component);			
 		}
-		psy_list_free(q);
+		psy_list_free(c);
 	}
 }
 
@@ -1261,17 +1265,25 @@ void dev_mousemove(psy_ui_win_ComponentImp* self, psy_ui_MouseEvent* ev)
 			psy_ui_app()->mousetracking = TRUE;
 		}		
 	}
-	if (psy_ui_app()->capture) {
+	if (psy_ui_app_capture(psy_ui_app())) {
 		psy_ui_Component* capture;
 		psy_ui_RealPoint translation;
 		
-		capture = psy_ui_app()->capture;
-		translation = mapcoords(self, capture, self->component);
-		psy_ui_realpoint_sub(&ev->pt, translation);			
-		capture->vtable->onmousemove(capture, ev);
-		psy_signal_emit(&capture->signal_mousemove,
-			capture, 1, ev);
-		psy_ui_realpoint_add(&ev->pt, translation);		
+		capture = psy_ui_app_capture(psy_ui_app());
+		do {
+			translation = mapcoords(self, capture, self->component);
+			psy_ui_realpoint_sub(&ev->pt, translation);
+			capture->vtable->onmousemove(capture, ev);
+			psy_signal_emit(&capture->signal_mousemove,
+				capture, 1, ev);
+			psy_ui_realpoint_add(&ev->pt, translation);
+			if (ev->event.bubbles) {
+				capture = psy_ui_component_parent(capture);
+			} else {
+				capture = NULL;
+			}
+		} while (capture);
+		ev->event.bubbles = FALSE;
 	} else {
 		bool intersect;
 
@@ -1310,7 +1322,6 @@ void dev_mousemove(psy_ui_win_ComponentImp* self, psy_ui_MouseEvent* ev)
 		psy_signal_emit(&self->component->signal_mousemove,
 			self->component, 1, ev);
 	}
-
 }
 
 void dev_mousedoubleclick(psy_ui_win_ComponentImp* self, psy_ui_MouseEvent* ev)

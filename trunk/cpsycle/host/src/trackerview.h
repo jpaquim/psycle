@@ -26,12 +26,6 @@ extern "C" {
 **  the SeqView as a tracker grid.
 */
 
-typedef enum {
-	PATTERNCURSOR_STEP_BEAT,
-	PATTERNCURSOR_STEP_4BEAT,
-	PATTERNCURSOR_STEP_LINES
-} PatternCursorStepMode;
-
 typedef struct TrackerGrid {
 	/* inherits */
 	psy_ui_Component component;
@@ -60,7 +54,6 @@ typedef struct TrackerGrid {
 	PatternCmds cmds;
 	/* references */
 	TrackerState* state;	
-	psy_ui_Component* view;
 	Workspace* workspace;
 } TrackerGrid;
 
@@ -81,16 +74,16 @@ bool trackergrid_scrollright(TrackerGrid*, psy_audio_SequenceCursor);
 void trackergrid_storecursor(TrackerGrid*);
 void trackergrid_invalidatecursor(TrackerGrid*);
 void trackergrid_invalidateinternalcursor(TrackerGrid*,
-	psy_audio_PatternCursor);
+	psy_audio_SequenceCursor);
 void trackergrid_centeroncursor(TrackerGrid*);
 void trackergrid_setcentermode(TrackerGrid*, int mode);
 void trackergrid_tweak(TrackerGrid*, int slot, uintptr_t tweak,
 	float normvalue);
 
-INLINE const psy_audio_PatternSelection* trackergrid_selection(
+INLINE const psy_audio_BlockSelection* trackergrid_selection(
 	const TrackerGrid* self)
 {
-	return &self->state->selection;
+	return &self->state->pv.selection;
 }
 
 INLINE void trackergrid_enableft2home(TrackerGrid* self)
@@ -133,11 +126,6 @@ INLINE void trackergrid_disableffcursoralwaysdown(TrackerGrid* self)
 	self->movecursoronestep = FALSE;
 }
 
-INLINE void trackergrid_setpgupdownstep(TrackerGrid* self, intptr_t step)
-{
-	self->pgupdownstep = step;
-}
-
 bool trackergrid_handlecommand(TrackerGrid*, intptr_t cmd);
 /* block menu */
 void trackergrid_changegenerator(TrackerGrid*);
@@ -166,6 +154,30 @@ INLINE psy_ui_Component* trackergrid_base(TrackerGrid* self)
 
 	return &self->component;
 }
+
+INLINE bool trackergrid_checkupdate(const TrackerGrid* self)
+{
+	if (self->state->pv.pattern) {
+		bool rv;
+		uintptr_t opcount;
+
+		opcount = self->state->pv.pattern->opcount;
+		rv = (opcount != self->component.opcount && self->syncpattern);
+		((TrackerGrid*)self)->component.opcount = opcount;
+		return rv;
+	}
+	return FALSE;
+}
+
+/* TrackerView */
+
+typedef struct TrackerView {
+	psy_ui_Scroller scroller;
+	TrackerGrid grid;
+} TrackerView;
+
+void trackerview_init(TrackerView*, psy_ui_Component* parent, TrackConfig*,
+	TrackerState*, Workspace*);
 
 #ifdef __cplusplus
 }

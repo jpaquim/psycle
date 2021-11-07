@@ -5,13 +5,11 @@
 
 #include "../../detail/prefix.h"
 
+
 #include "uiedit.h"
 #include "uiapp.h"
-#ifdef PSY_USE_PLATFORM_EDIT
 #include "uiimpfactory.h"
-#else
 #include "imps/natives/uinativeeditimp.h"
-#endif
 #include "../../detail/portable.h"
 
 static void ondestroy(psy_ui_Edit*, psy_ui_Component* sender);
@@ -53,8 +51,12 @@ void psy_ui_edit_init(psy_ui_Edit* self, psy_ui_Component* parent)
 	psy_ui_ComponentImp* imp;
 
 #ifdef PSY_USE_PLATFORM_EDIT
-	imp = psy_ui_impfactory_allocinit_editimp(
-		psy_ui_app_impfactory(psy_ui_app()), &self->component, parent);
+	if (parent && parent->view) {
+		imp = psy_ui_native_editimp_allocinit(&self->component, parent, NULL)->imp;
+	} else {
+		imp = psy_ui_impfactory_allocinit_editimp(
+			psy_ui_app_impfactory(psy_ui_app()), &self->component, parent);
+	}
 #else
 	imp = psy_ui_native_editimp_allocinit(&self->component, parent, NULL)->imp;
 #endif

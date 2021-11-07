@@ -638,11 +638,7 @@ INLINE void psy_ui_component_settitle(psy_ui_Component* self, const char* text)
 void psy_ui_component_capture(psy_ui_Component* self);
 void psy_ui_component_releasecapture(psy_ui_Component* self);
 
-INLINE void psy_ui_component_setfocus(psy_ui_Component* self)
-{
-	self->imp->vtable->dev_setfocus(self->imp);
-}
-
+void psy_ui_component_setfocus(psy_ui_Component*);
 INLINE int psy_ui_component_hasfocus(psy_ui_Component* self)
 {
 	return self->imp->vtable->dev_hasfocus(self->imp);

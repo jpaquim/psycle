@@ -91,7 +91,7 @@ void wireview_init(WireView* self, psy_ui_Component* parent, psy_audio_Wire wire
 	wireview_initbottomgroup(self);
 	wireview_initrategroup(self);
 	wireview_inittabbar(self);	
-	psy_ui_notebook_init(&self->notebook, wireview_base(self));	
+	psy_ui_notebook_init(&self->notebook, wireview_base(self), NULL);
 	psy_ui_component_setalign(psy_ui_notebook_base(&self->notebook),
 		psy_ui_ALIGN_CLIENT);
 	/* Vuscope */

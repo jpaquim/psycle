@@ -529,14 +529,20 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 		ev.event.timestamp = (uintptr_t)event->xbutton.time;					
 		psy_ui_eventdispatch_send(&self->app->eventdispatch,
 			imp->component, &ev.event);		
-		return 0;
-		break; }
+		return 0; }
 	case EnterNotify: {
 		imp->imp.vtable->dev_mouseenter(&imp->imp);
 		break; }
 	case LeaveNotify: {
-		imp->imp.vtable->dev_mouseleave(&imp->imp);
-		break; }
+		if (imp->component) {
+			psy_ui_Event ev;
+
+			psy_ui_event_init(&ev, psy_ui_MOUSELEAVE);
+			psy_ui_event_stop_propagation(&ev);
+			psy_ui_eventdispatch_send(&self->app->eventdispatch,
+				imp->component, &ev);
+		}
+		return 0; }
 	case FocusOut: {
 		if (imp->component) {
 			psy_ui_Event ev;

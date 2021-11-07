@@ -102,7 +102,7 @@ void seqeditor_init(SeqEditor* self, psy_ui_Component* parent,
 		seqeditor_ontrackresize);
 	psy_ui_component_setalign(&self->trackdesc.component,
 		psy_ui_ALIGN_HCLIENT);	
-	zoombox_init(&self->vzoom, &self->left);
+	zoombox_init(&self->vzoom, &self->left, NULL);
 	psy_ui_component_setalign(&self->vzoom.component, psy_ui_ALIGN_BOTTOM);
 	psy_signal_connect(&self->vzoom.signal_changed, self, seqeditor_onvzoom);	
 	/* header */

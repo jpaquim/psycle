@@ -87,7 +87,7 @@ void gear_init(Gear* self, psy_ui_Component* parent, Workspace* workspace)
 		"gear.instruments", "gear.waves", NULL);
 	psy_ui_tabbar_select(&self->tabbar, 0);
 	psy_ui_component_setalign(psy_ui_tabbar_base(&self->tabbar), psy_ui_ALIGN_BOTTOM);
-	psy_ui_notebook_init(&self->notebook, &self->client);
+	psy_ui_notebook_init(&self->notebook, &self->client, NULL);
 	psy_ui_component_setalign(psy_ui_notebook_base(&self->notebook),
 		psy_ui_ALIGN_CLIENT);
 	machinesbox_init(&self->machinesboxgen, psy_ui_notebook_base(&self->notebook), 

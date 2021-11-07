@@ -79,7 +79,7 @@ void mainstatusbar_ondestroy(MainStatusBar* self)
 
 void mainstatusbar_initzoombox(MainStatusBar* self)
 {
-	zoombox_init(&self->zoombox, &self->component);
+	zoombox_init(&self->zoombox, &self->component, NULL);
 	psy_signal_connect(&self->zoombox.signal_changed,
 		self, mainstatusbar_onzoomboxchanged);
 }
@@ -96,7 +96,7 @@ void mainstatusbar_initstatuslabel(MainStatusBar* self)
 
 void mainstatusbar_initviewstatusbars(MainStatusBar* self)
 {
-	psy_ui_notebook_init(&self->viewstatusbars, &self->component);
+	psy_ui_notebook_init(&self->viewstatusbars, &self->component, NULL);
 	psy_ui_component_setalign(psy_ui_notebook_base(&self->viewstatusbars),
 		psy_ui_ALIGN_CLIENT);	
 	psy_ui_component_setdefaultalign(

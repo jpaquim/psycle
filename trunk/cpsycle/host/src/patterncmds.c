@@ -233,7 +233,7 @@ static void blocktransposecommandcommand_vtable_init(BlockTransposeCommand* self
 }
 
 BlockTransposeCommand* blocktransposecommand_alloc(psy_audio_Pattern* pattern,
-	psy_audio_PatternSelection block, psy_audio_SequenceCursor cursor, int transposeoffset,
+	psy_audio_BlockSelection block, psy_audio_SequenceCursor cursor, int transposeoffset,
 	Workspace* workspace)
 {
 	BlockTransposeCommand* rv;
@@ -305,7 +305,7 @@ static void blockremovecommandcommand_vtable_init(BlockRemoveCommand* self)
 }
 // implementation
 BlockRemoveCommand* blockremovecommand_alloc(psy_audio_Pattern* pattern,
-	psy_audio_PatternSelection selection, Workspace* workspace)
+	psy_audio_BlockSelection selection, Workspace* workspace)
 {
 	BlockRemoveCommand* rv;
 
@@ -422,12 +422,10 @@ void BlockPasteCommandExecute(BlockPasteCommand* self)
 	}
 	if (self->mix) {
 		psy_audio_pattern_blockmixpaste(self->pattern,
-			&self->source, self->destcursor.cursor,
-			self->bpl);
+			&self->source, self->destcursor, self->bpl);
 	} else {
 		psy_audio_pattern_blockpaste(self->pattern,
-			&self->source, self->destcursor.cursor,
-			self->bpl);
+			&self->source, self->destcursor, self->bpl);
 	}
 	self->paste = TRUE;
 	//psy_audio_sequencer_checkiterators(

@@ -290,11 +290,13 @@ void view_dev_dispose(psy_ui_ViewComponentImp* self)
 void view_dev_clear(psy_ui_ViewComponentImp* self)
 {
 	psy_List* p;
+	psy_List* q;
 
-	for (p = self->viewcomponents; p != NULL; psy_list_next(&p)) {
+	for (p = self->viewcomponents; p != NULL; p = q) {
 		psy_ui_Component* component;
 		bool deallocate;
 
+		q = p->next;
 		component = (psy_ui_Component*)psy_list_entry(p);
 		deallocate = component->deallocate;
 		psy_ui_component_destroy(component);
@@ -341,34 +343,39 @@ psy_ui_ViewComponentImp* psy_ui_viewcomponentimp_allocinit(
 void view_dev_destroy(psy_ui_ViewComponentImp* self)
 {
 	psy_ui_Component* component;
+	psy_ui_Component* parent;
+	psy_List* c;	
 	psy_List* p;	
 	psy_List* q;
 
 	component = self->component;
 	if (!component) {
 		return;
+	}	
+	parent = psy_ui_component_parent(component);
+	psy_signal_emit(&component->signal_destroy,
+		self->component, 0);
+	component->vtable->ondestroy(component);	
+	if (parent) {
+		psy_ui_component_erase(parent, component);
 	}
-	if (component) {
-		psy_signal_emit(&component->signal_destroy,
-			self->component, 0);
-		component->vtable->ondestroy(component);		
-	}
-	q = psy_ui_component_children(self->component, psy_ui_NONRECURSIVE);
-	for (p = q; p != NULL; p = p->next) {
+	c = psy_ui_component_children(self->component, psy_ui_NONRECURSIVE);
+	for (p = c; p != NULL; p = q) {
 		psy_ui_Component* component;
 		bool deallocate;
 
+		q = p->next;
 		component = (psy_ui_Component*)psy_list_entry(p);		
-		deallocate = component->deallocate;
-		psy_ui_component_destroy(component);
+		deallocate = component->deallocate;	
+		psy_ui_component_destroy(component);		
 		if (deallocate) {
 			free(component);
 		}
 	}
-	psy_list_free(q);	
+	psy_list_free(c);	
 	psy_list_free(self->viewcomponents);
 	self->viewcomponents = NULL;	
-	component->imp->vtable->dev_destroyed(component->imp);	
+	component->imp->vtable->dev_destroyed(component->imp);			
 }
 
 void view_dev_destroyed(psy_ui_ViewComponentImp* self)
@@ -407,13 +414,14 @@ int view_dev_drawvisible(psy_ui_ViewComponentImp* self)
 
 void view_dev_move(psy_ui_ViewComponentImp* self, psy_ui_Point origin)
 {
-	const psy_ui_TextMetric* tm;
+	const psy_ui_TextMetric* tm;	
 	
 	tm = view_dev_textmetric(self);
 	psy_ui_realrectangle_settopleft(&self->position,
 		psy_ui_realpoint_make(
 			psy_ui_value_px(&origin.x, tm, NULL),
-			psy_ui_value_px(&origin.y, tm, NULL)));
+			psy_ui_value_px(&origin.y, tm, NULL)));	
+	view_dev_invalidate(self);
 }
 
 void view_dev_resize(psy_ui_ViewComponentImp* self, psy_ui_Size size)
@@ -576,7 +584,7 @@ void view_dev_setorder(psy_ui_ViewComponentImp* self, psy_ui_ViewComponentImp*
 
 void view_dev_capture(psy_ui_ViewComponentImp* self)
 {
-	psy_ui_app()->capture = self->component;
+	psy_ui_app_setcapture(psy_ui_app(), self->component);
 	self->view->imp->vtable->dev_capture(self->view->imp);
 }
 
@@ -703,12 +711,17 @@ void view_dev_settitle(psy_ui_ViewComponentImp* self, const char* title)
 
 void view_dev_setfocus(psy_ui_ViewComponentImp* self)
 {
-	psy_ui_component_setfocus(self->view);
+	assert(self);
+	assert(self->view);
+	
+	if (!psy_ui_component_hasfocus(self->view)) {
+		psy_ui_component_setfocus(self->view);
+	}	
 }
 
 int view_dev_hasfocus(psy_ui_ViewComponentImp* self)
 {
-	return psy_ui_component_hasfocus(self->view);
+	return psy_ui_app()->focus == self->component;
 }
 
 uintptr_t view_dev_flags(const psy_ui_ComponentImp* self)
@@ -719,11 +732,13 @@ uintptr_t view_dev_flags(const psy_ui_ComponentImp* self)
 void view_dev_draw(psy_ui_ViewComponentImp* self, psy_ui_Graphics* g)
 {	
 	if (self->visible) {
-
 		psy_ui_Graphics bitmap_g;
 		psy_ui_Graphics* temp_g;
+		psy_ui_RealRectangle oldclip;
+		psy_ui_RealRectangle clip;
 
 		temp_g = NULL;
+		oldclip = psy_ui_cliprect(g);
 		if (self->component->drawtobuffer) {
 			if (psy_ui_bitmap_empty(&self->component->bufferbitmap)) {
 				psy_ui_RealSize size;
@@ -741,6 +756,13 @@ void view_dev_draw(psy_ui_ViewComponentImp* self, psy_ui_Graphics* g)
 				return;
 			}
 		}
+		clip = psy_ui_realrectangle_make(
+			psy_ui_realpoint_zero(),
+			psy_ui_component_scrollsize_px(self->component));
+		if ((oldclip.bottom - oldclip.top != 0.0)) {
+			psy_ui_realrectangle_intersection(&clip, &oldclip);
+		}
+		psy_ui_setcliprect(g, clip);
 		// draw background		
 		if (self->component->backgroundmode != psy_ui_NOBACKGROUND) {			
 			psy_ui_component_drawbackground(self->component, g);
@@ -765,7 +787,7 @@ void view_dev_draw(psy_ui_ViewComponentImp* self, psy_ui_Graphics* g)
 				psy_ui_setorigin(g, psy_ui_realpoint_make(
 					origin.x - (int)psy_ui_value_px(&spacing.left, tm, NULL),
 					origin.y - (int)psy_ui_value_px(&spacing.top, tm, NULL)));
-			}			
+			}
 			self->component->vtable->ondraw(self->component, g);
 			psy_ui_setorigin(g, origin);
 		}
@@ -778,6 +800,7 @@ void view_dev_draw(psy_ui_ViewComponentImp* self, psy_ui_Graphics* g)
 					psy_ui_realpoint_zero());
 			}
 		}
+		psy_ui_setcliprect(g, oldclip);
 	}	
 }
 

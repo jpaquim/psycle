@@ -24,8 +24,8 @@ extern "C" {
 typedef struct psy_audio_PatternCursor {
 	uintptr_t track;
 	psy_dsp_big_beat_t offset;
-	psy_dsp_big_beat_t seqoffset;
-	uintptr_t lpb;	
+	bool absolute;	
+	uintptr_t lpb;
 	uintptr_t column;
 	uintptr_t digit;
 	uintptr_t patternid;

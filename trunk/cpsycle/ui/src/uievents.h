@@ -20,10 +20,12 @@ typedef enum psy_ui_EventType {
 	psy_ui_MOUSEDOWN     = 4,
 	psy_ui_MOUSEUP       = 5,
 	psy_ui_MOUSEMOVE     = 6,	
-	psy_ui_DBLCLICK      = 7,
-	psy_ui_DRAG          = 8,
-	psy_ui_FOCUSOUT      = 9,
-	psy_ui_RESIZE        = 10
+	psy_ui_MOUSEENTER	 = 7,
+	psy_ui_MOUSELEAVE    = 8,
+	psy_ui_DBLCLICK      = 9,
+	psy_ui_DRAG          = 10,
+	psy_ui_FOCUSOUT      = 11,
+	psy_ui_RESIZE        = 12
 } psy_ui_EventType;
 
 /* Forward Handler for Event target */

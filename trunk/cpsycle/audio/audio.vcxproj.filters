@@ -337,6 +337,12 @@
     <ClCompile Include="src\patterncursor.c">
       <Filter>pattern</Filter>
     </ClCompile>
+    <ClCompile Include="src\blockselection.c">
+      <Filter>sequence</Filter>
+    </ClCompile>
+    <ClCompile Include="src\sequencecursor.c">
+      <Filter>sequence</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\library.h">
@@ -644,6 +650,12 @@
     </ClInclude>
     <ClInclude Include="src\patterncursor.h">
       <Filter>pattern</Filter>
+    </ClInclude>
+    <ClInclude Include="src\blockselection.h">
+      <Filter>sequence</Filter>
+    </ClInclude>
+    <ClInclude Include="src\sequencecursor.h">
+      <Filter>sequence</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

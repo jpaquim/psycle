@@ -76,7 +76,7 @@ typedef struct InterpolateCurveBox {
 	intptr_t minval;
 	intptr_t maxval;
 	psy_audio_Pattern* pattern;
-	psy_audio_PatternSelection selection;
+	psy_audio_BlockSelection selection;
 	psy_List* dragkeyframe;
 	psy_List* selected;
 	psy_dsp_big_beat_t bpl;
@@ -97,7 +97,7 @@ typedef struct InterpolateCurveView {
 void interpolatecurveview_init(InterpolateCurveView*, psy_ui_Component* parent,
 	intptr_t startsel, intptr_t endsel, uintptr_t lpb, Workspace*);
 void interpolatecurveview_setselection(InterpolateCurveView*,
-	const psy_audio_PatternSelection*);
+	const psy_audio_BlockSelection*);
 void interpolatecurveview_setpattern(InterpolateCurveView*,
 	psy_audio_Pattern*);
 
