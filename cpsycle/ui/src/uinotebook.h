@@ -23,7 +23,9 @@ typedef struct psy_ui_Notebook {
 	bool preventalign;
 } psy_ui_Notebook;
 
-void psy_ui_notebook_init(psy_ui_Notebook*, psy_ui_Component* parent);
+void psy_ui_notebook_init(psy_ui_Notebook*, psy_ui_Component* parent,
+	psy_ui_Component* view);
+
 void psy_ui_notebook_select(psy_ui_Notebook*, uintptr_t page);
 uintptr_t psy_ui_notebook_pageindex(psy_ui_Notebook*);
 psy_ui_Component* psy_ui_notebook_activepage(psy_ui_Notebook*);

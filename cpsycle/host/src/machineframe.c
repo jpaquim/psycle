@@ -47,7 +47,7 @@ void parameterbar_init(ParameterBar* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->row0, &self->component, NULL);
 	psy_ui_component_setalignexpand(&self->row0,
 		psy_ui_HEXPAND);	
-	zoombox_init(&self->zoombox, &self->row0);
+	zoombox_init(&self->zoombox, &self->row0, NULL);
 	psy_ui_component_setalign(zoombox_base(&self->zoombox), psy_ui_ALIGN_LEFT);
 	self->zoombox.zoomstep = 0.10;	
 	psy_ui_component_init(&self->buttons, &self->row0, NULL);
@@ -191,7 +191,7 @@ void machineframe_init(MachineFrame* self, psy_ui_Component* parent,
 		psycleconfig_macparam(workspace_conf(workspace)));
 	psy_ui_component_setalign(&self->parameterbox.component,
 		psy_ui_ALIGN_RIGHT);
-	psy_ui_notebook_init(&self->notebook, &self->client);
+	psy_ui_notebook_init(&self->notebook, &self->client, NULL);
 	psy_ui_component_setalign(psy_ui_notebook_base(&self->notebook),
 		psy_ui_ALIGN_CLIENT);
 	psy_ui_editor_init(&self->help, psy_ui_notebook_base(&self->notebook));

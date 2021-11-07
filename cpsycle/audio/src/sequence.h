@@ -172,39 +172,6 @@ void psy_audio_sequenceposition_init(psy_audio_SequencePosition*);
 psy_audio_SequenceEntry* psy_audio_sequenceposition_entry(
 	psy_audio_SequencePosition*);
 
-/* psy_audio_SequenceCursor */
-
-struct psy_audio_Sequence;
-
-typedef struct psy_audio_SequenceCursor {
-	psy_audio_PatternCursor cursor;
-	psy_audio_OrderIndex orderindex;
-	psy_dsp_big_beat_t seqoffset;
-} psy_audio_SequenceCursor;
-
-void psy_audio_sequencecursor_init(psy_audio_SequenceCursor*);
-void psy_audio_sequencecursor_init_all(psy_audio_SequenceCursor*,
-	psy_audio_OrderIndex orderindex);
-
-void psy_audio_sequencecursor_updateseqoffset(psy_audio_SequenceCursor*,
-	const struct psy_audio_Sequence*);
-uintptr_t psy_audio_sequencecursor_patternid(const psy_audio_SequenceCursor*,
-	const struct psy_audio_Sequence*);
-psy_dsp_big_beat_t psy_audio_sequencecursor_seqoffset(
-	const struct psy_audio_SequenceCursor*);
-uintptr_t psy_audio_sequencecursor_line(const psy_audio_SequenceCursor*);
-uintptr_t psy_audio_sequencecursor_track(const psy_audio_SequenceCursor*);
-uintptr_t psy_audio_sequencecursor_column(const psy_audio_SequenceCursor*);
-uintptr_t psy_audio_sequencecursor_digit(const psy_audio_SequenceCursor*);
-
-INLINE psy_audio_OrderIndex psy_audio_sequencecursor_orderindex(
-	const psy_audio_SequenceCursor* self)
-{
-	assert(self);
-
-	return self->orderindex;
-}
-
 
 struct psy_audio_Sequencer;
 
@@ -339,6 +306,11 @@ void psy_audio_sequence_setcursor(psy_audio_Sequence*,
 void psy_audio_sequence_dec_seqpos(psy_audio_Sequence*);
 void psy_audio_sequence_inc_seqpos(psy_audio_Sequence*);
 
+INLINE psy_audio_SequenceCursor psy_audio_sequence_cursor(
+	const psy_audio_Sequence* self)
+{
+	return self->cursor;
+}
 
 #ifdef __cplusplus
 }

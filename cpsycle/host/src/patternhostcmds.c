@@ -30,10 +30,10 @@ void patterncmds_setpattern(PatternCmds* self, psy_audio_Pattern* pattern)
 }
 
 void patterncmds_blocktranspose(PatternCmds* self,
-	psy_audio_PatternSelection selection,
+	psy_audio_BlockSelection selection,
 	psy_audio_SequenceCursor cursor, int offset)
 {	
-	if (self->pattern && psy_audio_patternselection_valid(&selection)) {
+	if (self->pattern && psy_audio_blockselection_valid(&selection)) {
 		psy_undoredo_execute(&self->workspace->undoredo,
 			&blocktransposecommand_alloc(self->pattern,
 				selection, cursor, offset, self->workspace)->command);
@@ -41,11 +41,11 @@ void patterncmds_blocktranspose(PatternCmds* self,
 }
 
 void patterncmds_blockdelete(PatternCmds* self,
-	psy_audio_PatternSelection selection)
+	psy_audio_BlockSelection selection)
 {
 	assert(self);
 
-	if (self->pattern && psy_audio_patternselection_valid(&selection)) {
+	if (self->pattern && psy_audio_blockselection_valid(&selection)) {
 		psy_undoredo_execute(&self->workspace->undoredo,
 			&blockremovecommand_alloc(self->pattern,
 				selection,
@@ -53,11 +53,11 @@ void patterncmds_blockdelete(PatternCmds* self,
 	}
 }
 
-void patterncmds_blockcopy(PatternCmds* self, psy_audio_PatternSelection selection)
+void patterncmds_blockcopy(PatternCmds* self, psy_audio_BlockSelection selection)
 {
 	assert(self);
 
-	if (self->pattern && psy_audio_patternselection_valid(&selection)) {
+	if (self->pattern && psy_audio_blockselection_valid(&selection)) {
 		psy_audio_pattern_blockcopy(&self->workspace->patternpaste,
 			self->pattern, selection);
 	}
@@ -79,7 +79,7 @@ void patterncmds_blockpaste(PatternCmds* self, psy_audio_SequenceCursor cursor,
 }
 
 void patterncmds_changeinstrument(PatternCmds* self,
-	psy_audio_PatternSelection selection)
+	psy_audio_BlockSelection selection)
 {
 	assert(self);
 
@@ -92,7 +92,7 @@ void patterncmds_changeinstrument(PatternCmds* self,
 }
 
 void patterncmds_changemachine(PatternCmds* self,
-	psy_audio_PatternSelection selection)
+	psy_audio_BlockSelection selection)
 {
 	assert(self);
 

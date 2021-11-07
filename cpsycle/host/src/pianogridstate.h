@@ -8,6 +8,7 @@
 
 /* host */
 #include "patternviewskin.h"
+#include "patternviewstate.h"
 /* audio */
 #include <sequence.h>
 
@@ -17,51 +18,27 @@ extern "C" {
 
 /* PianoGridState */
 typedef struct PianoGridState {
-	psy_audio_SequenceCursor cursor;
-	uintptr_t lpb;	
+	PatternViewState pv;	
 	double pxperbeat;
-	double defaultbeatwidth;
-	/* references */
-	psy_audio_Pattern* pattern;
-	PatternViewSkin* skin;
+	double defaultbeatwidth;	
 } PianoGridState;
 
-void pianogridstate_init(PianoGridState*, PatternViewSkin* skin);
+void pianogridstate_init(PianoGridState*, PatternViewSkin*, psy_audio_Song*);
 
-INLINE void pianogridstate_setpattern(PianoGridState* self, psy_audio_Pattern* pattern)
-{
-	assert(self);
-
-	self->pattern = pattern;
-}
-
-INLINE psy_audio_Pattern* pianogridstate_pattern(PianoGridState* self)
-{
-	assert(self);
-
-	return self->pattern;
-}
 
 INLINE psy_audio_SequenceCursor pianogridstate_setcursor(PianoGridState* self,
 	psy_audio_SequenceCursor cursor)
 {
 	assert(self);
 
-	self->cursor = cursor;
+	self->pv.cursor = cursor;
 }
 
 INLINE psy_audio_SequenceCursor pianogridstate_cursor(const PianoGridState* self)
 {
 	assert(self);
 
-	return self->cursor;
-}
-
-INLINE void pianogridstate_setlpb(PianoGridState* self, uintptr_t lpb)
-{
-	assert(self);
-
-	self->lpb = lpb;
+	return self->pv.cursor;
 }
 
 INLINE void pianogridstate_setzoom(PianoGridState* self, psy_dsp_big_beat_t rate)
@@ -76,7 +53,7 @@ INLINE intptr_t pianogridstate_beattosteps(const PianoGridState* self,
 {
 	assert(self);
 
-	return (intptr_t)(position * self->lpb);
+	return (intptr_t)(position * self->pv.cursor.cursor.lpb);
 }
 
 INLINE psy_dsp_big_beat_t pianogridstate_quantize(const PianoGridState* self,
@@ -85,7 +62,7 @@ INLINE psy_dsp_big_beat_t pianogridstate_quantize(const PianoGridState* self,
 	assert(self);
 
 	return pianogridstate_beattosteps(self, position) *
-		(1 / (psy_dsp_big_beat_t)self->lpb);
+		(1 / (psy_dsp_big_beat_t)self->pv.cursor.cursor.lpb);
 }
 
 INLINE psy_dsp_big_beat_t pianogridstate_pxtobeat(const PianoGridState* self, double px)
@@ -115,7 +92,7 @@ INLINE psy_dsp_big_beat_t pianogridstate_step(const PianoGridState* self)
 {
 	assert(self);
 
-	return 1 / (psy_dsp_big_beat_t)self->lpb;
+	return 1 / (psy_dsp_big_beat_t)self->pv.cursor.cursor.lpb;
 }
 
 INLINE double pianogridstate_steppx(const PianoGridState* self)
@@ -142,23 +119,13 @@ INLINE void pianogridstate_clip(PianoGridState* self,
 
 	*rv_left = pianogridstate_quantize(self,
 		pianogridstate_pxtobeat(self, clip_left_px));
-	if (pianogridstate_pattern(self)) {
+	if (patternviewstate_pattern(&self->pv)) {
 		*rv_right = psy_min(
-			psy_audio_pattern_length(pianogridstate_pattern(self)),
+			psy_audio_pattern_length(patternviewstate_pattern(&self->pv)),
 			pianogridstate_pxtobeat(self, clip_right_px));
 	} else {
 		*rv_right = 0;
 	}
-}
-
-INLINE psy_dsp_big_beat_t pianogridstate_length(const PianoGridState* self)
-{
-	assert(self);
-
-	if (self->pattern) {
-		return psy_audio_pattern_length(self->pattern);
-	}
-	return 0.0;
 }
 
 #ifdef __cplusplus

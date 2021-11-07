@@ -60,7 +60,7 @@ typedef struct TransformPatternView {
 	// internal data
 	psy_ui_Margin sectionmargin;
 	int applyto;
-	psy_audio_PatternSelection patternselection;
+	psy_audio_BlockSelection patternselection;
 	// references
 	Workspace* workspace;
 } TransformPatternView;
@@ -69,7 +69,7 @@ void transformpatternview_init(TransformPatternView*, psy_ui_Component* parent,
 	Workspace*);
 
 void transformpatternview_setpatternselection(TransformPatternView*,
-	const psy_audio_PatternSelection*);
+	const psy_audio_BlockSelection*);
 
 INLINE psy_ui_Component* transformpatternview_base(TransformPatternView* self)
 {

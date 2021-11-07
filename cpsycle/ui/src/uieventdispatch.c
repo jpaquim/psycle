@@ -40,12 +40,14 @@ void psy_ui_eventdispatch_send(psy_ui_EventDispatch* self,
 	psy_ui_Component* component, psy_ui_Event* ev)
 {
 	uintptr_t eventtime;
+	bool preventbubble;
 
 	assert(component);
 	assert(ev);
 
 	ev->target = psy_ui_eventdispatch_eventtarget(self, component);
 	eventtime = 0;
+	preventbubble = FALSE;
 	switch (ev->type) {
 	case psy_ui_RESIZE:
 		if (component->containeralign &&
@@ -69,7 +71,7 @@ void psy_ui_eventdispatch_send(psy_ui_EventDispatch* self,
 	case psy_ui_KEYUP:
 		component->vtable->onkeyup(component, (psy_ui_KeyboardEvent*)ev);
 		psy_signal_emit(&component->signal_keyup, component, 1, ev);
-		break;
+		break;	
 	case psy_ui_MOUSEDOWN: {			
 		if (ev->timestamp == 0) { /* CurrentTime */
 			eventtime = self->lastbuttontimestamp;
@@ -130,24 +132,33 @@ void psy_ui_eventdispatch_send(psy_ui_EventDispatch* self,
 				1, ev);
 		}
 		break;
-	case psy_ui_MOUSEMOVE:							
-		assert(component);
-				
+	case psy_ui_MOUSEMOVE: {
+		psy_ui_App* app;
+
+		app = psy_ui_app();
 		component->imp->vtable->dev_mousemove(component->imp,
 			(psy_ui_MouseEvent*)ev);
-		if (ev->bubbles != FALSE && psy_ui_app()->dragevent.active) {
+		if (ev->bubbles != FALSE && app->dragevent.active) {
 			component->vtable->onmousemove(component, (psy_ui_MouseEvent*)ev);
 			psy_signal_emit(&component->signal_mousemove, component, 1,
 				(psy_ui_MouseEvent*)ev);
-		}		
+		}
 		if (!psy_ui_app()->dragevent.active) {
 			return;
 		}
+		break; }
+	case psy_ui_MOUSEENTER:
+		component->imp->vtable->dev_mouseenter(component->imp);
+		preventbubble = TRUE;
+		break;
+	case psy_ui_MOUSELEAVE:
+		component->imp->vtable->dev_mouseleave(component->imp);
+		preventbubble = TRUE;
 		break;
 	default:
-		return;
-	}
-	if (ev->bubbles != FALSE) {
+		preventbubble = TRUE;		
+	}	
+	if (!preventbubble && ev->bubbles != FALSE) {
 		psy_ui_eventdispatch_sendtoparent(self, component, ev);
 	} else {
 		psy_list_free(self->targetids);
@@ -176,13 +187,16 @@ bool psy_ui_eventdispatch_sendtoparent(psy_ui_EventDispatch* self,
 	psy_ui_Component* component, psy_ui_Event* ev)
 {	
 	if (psy_ui_component_parent(component)) {
-		psy_list_append(&self->targetids, 
+		psy_list_append(&self->targetids,
 			(void*)component->imp->vtable->dev_platform_handle(component->imp));
-		self->eventretarget = component;	
+		self->eventretarget = component;
 		psy_ui_app()->imp->vtable->dev_sendevent(
 			psy_ui_app()->imp, psy_ui_component_parent(component),
-			ev);				
-		self->eventretarget = 0;		
+			ev);
+		self->eventretarget = 0;
+		if (ev->type == psy_ui_MOUSEUP && psy_ui_app()->dragevent.active) {
+			psy_ui_app_stopdrag(psy_ui_app());
+		}
 		return TRUE;
 	} else {
 		psy_list_free(self->targetids);

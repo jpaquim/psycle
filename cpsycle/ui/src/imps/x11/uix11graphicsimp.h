@@ -42,13 +42,7 @@ typedef struct psy_ui_x11_GraphicsImp {
 	bool shareddc;
 	bool bitmap;
 	psy_ui_RealPoint cp;	
-	/*HDC hdc;
-	HFONT hfont;
-	HFONT hFontPrev;	
-	HPEN pen;  
-	HPEN penprev;
-	HBRUSH brush;
-	HBRUSH hBrushPrev;*/
+	psy_ui_RealRectangle clip;
 } psy_ui_x11_GraphicsImp;
 
 void psy_ui_x11_graphicsimp_init(psy_ui_x11_GraphicsImp* self, 

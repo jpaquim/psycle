@@ -28,13 +28,13 @@ typedef struct PatternCmds {
 void patterncmds_init(PatternCmds*, Workspace*);
 
 void patterncmds_setpattern(PatternCmds*, psy_audio_Pattern*);
-void patterncmds_blocktranspose(PatternCmds*, psy_audio_PatternSelection,
+void patterncmds_blocktranspose(PatternCmds*, psy_audio_BlockSelection,
 	psy_audio_SequenceCursor, int offset);
-void patterncmds_blockdelete(PatternCmds*, psy_audio_PatternSelection);
+void patterncmds_blockdelete(PatternCmds*, psy_audio_BlockSelection);
 void patterncmds_blockpaste(PatternCmds*, psy_audio_SequenceCursor, bool mix);
-void patterncmds_blockcopy(PatternCmds*, psy_audio_PatternSelection);
-void patterncmds_changeinstrument(PatternCmds*, psy_audio_PatternSelection);
-void patterncmds_changemachine(PatternCmds*, psy_audio_PatternSelection);
+void patterncmds_blockcopy(PatternCmds*, psy_audio_BlockSelection);
+void patterncmds_changeinstrument(PatternCmds*, psy_audio_BlockSelection);
+void patterncmds_changemachine(PatternCmds*, psy_audio_BlockSelection);
 
 #ifdef __cplusplus
 }

@@ -472,12 +472,12 @@ void interpolatecurveview_ondestroy(InterpolateCurveView* self,
 }
 
 void interpolatecurveview_setselection(InterpolateCurveView* self,
-	const psy_audio_PatternSelection* selection)
+	const psy_audio_BlockSelection* selection)
 {
 	assert(selection);
 
-	self->box.range = selection->bottomright.offset -
-		selection->topleft.offset;
+	self->box.range = selection->bottomright.cursor.offset -
+		selection->topleft.cursor.offset;
 	self->box.selection = *selection;
 	interpolatecurvebox_buildkeyframes(&self->box);
 	if (self->box.keyframes) {
@@ -507,12 +507,12 @@ void interpolatecurvebox_buildkeyframes(InterpolateCurveBox* self)
 		intptr_t insertlast = 1;
 
 		p = psy_audio_pattern_greaterequal(self->pattern,
-			(psy_dsp_beat_t)self->selection.topleft.offset);
+			(psy_dsp_beat_t)self->selection.topleft.cursor.offset);
 		if (p) {
 			psy_audio_PatternEntry* entry;
 
 			entry = psy_audio_patternnode_entry(p);
-			if (entry->offset > self->selection.topleft.offset) {
+			if (entry->offset > self->selection.topleft.cursor.offset) {
 				KeyFrame* keyframe;
 
 				keyframe = keyframe_allocinit(0.f, 0,
@@ -527,17 +527,17 @@ void interpolatecurvebox_buildkeyframes(InterpolateCurveBox* self)
 			q = p->next;
 
 			entry = psy_audio_patternnode_entry(p);
-			if (entry->offset < self->selection.bottomright.offset) {
-				if (entry->track == self->selection.topleft.track) {
+			if (entry->offset < self->selection.bottomright.cursor.offset) {
+				if (entry->track == self->selection.topleft.cursor.track) {
 					KeyFrame* keyframe;
 
 					keyframe = keyframe_allocinit(
-						entry->offset - self->selection.topleft.offset,
+						entry->offset - self->selection.topleft.cursor.offset,
 						psy_audio_patternentry_front(entry)->parameter,
 						INTERPOLATECURVETYPE_LINEAR);
 					if (keyframe) {
 						psy_list_append(&self->keyframes, keyframe);
-						if (entry->offset == self->selection.bottomright.offset - 0.25f) {
+						if (entry->offset == self->selection.bottomright.cursor.offset - 0.25f) {
 							insertlast = 0;
 							break;
 						}
@@ -552,7 +552,7 @@ void interpolatecurvebox_buildkeyframes(InterpolateCurveBox* self)
 			KeyFrame* keyframe;
 
 			keyframe = keyframe_allocinit(
-				self->selection.bottomright.offset - self->selection.topleft.offset - 0.25f,
+				self->selection.bottomright.cursor.offset - self->selection.topleft.cursor.offset - 0.25f,
 				0,
 				INTERPOLATECURVETYPE_LINEAR);
 			if (keyframe) {
@@ -581,29 +581,28 @@ void interpolatecurveview_oninterpolate(InterpolateCurveView* self,
 
 		entry = (KeyFrame*) self->box.keyframes->entry;
 		lastentry = entry;
-		lastoffset = entry->offset + self->box.selection.topleft.offset;
+		lastoffset = entry->offset + self->box.selection.topleft.cursor.offset;
 		lastvalue = entry->value;
 		for (kf = self->box.keyframes->next; kf != 0; kf = kf->next) {
 			KeyFrame* entry;
-			psy_audio_PatternCursor start;
-			psy_audio_PatternCursor end;
+			psy_audio_SequenceCursor start;
+			psy_audio_SequenceCursor end;
 
-			psy_audio_patterncursor_init(&start);
-			psy_audio_patterncursor_init(&end);
-			start.offset = lastoffset;			
+			psy_audio_sequencecursor_init(&start);
+			psy_audio_sequencecursor_init(&end);
+			start.cursor.offset = lastoffset;			
 			entry = (KeyFrame*)kf->entry;
-			end.offset = (entry->offset + self->box.selection.topleft.offset);			
+			end.cursor.offset = (entry->offset + self->box.selection.topleft.cursor.offset);
 			if (lastentry->curve == INTERPOLATECURVETYPE_LINEAR) {
 				psy_audio_pattern_blockinterpolaterange(self->box.pattern,
 					start, end,
 					bpl, lastvalue, entry->value);
-			} else
-			if (lastentry->curve == INTERPOLATECURVETYPE_HERMITE) {
+			} else if (lastentry->curve == INTERPOLATECURVETYPE_HERMITE) {
 				psy_audio_pattern_blockinterpolaterangehermite(self->box.pattern,
 					start, end,
 					bpl, lastvalue, entry->value);
 			}
-			lastoffset = entry->offset + self->box.selection.topleft.offset;
+			lastoffset = entry->offset + self->box.selection.topleft.cursor.offset;
 			lastvalue = entry->value;
 			lastentry = entry;
 		}

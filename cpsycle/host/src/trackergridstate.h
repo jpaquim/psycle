@@ -8,6 +8,7 @@
 
 /* host */
 #include "patternviewskin.h"
+#include "patternviewstate.h"
 #include "trackercmds.h"
 #include "workspace.h"
 /* audio */
@@ -16,7 +17,7 @@
 
 /*
 ** The TrackerView is where you enter notes. It displays a Pattern selected by
-** the SeqView as a tracker grid.
+** the SequenceView as a tracker grid.
 */
 
 typedef enum {
@@ -45,8 +46,10 @@ typedef struct TrackColumnDef {
 	uintptr_t emptyvalue;
 } TrackColumnDef;
 
-void trackcolumndef_init(TrackColumnDef* self, int numdigits, int numchars,
-	double marginright, int wrapeditcolumn, int wrapclearcolumn, int emptyvalue);
+void trackcolumndef_init(TrackColumnDef* self, uintptr_t numdigits,
+	uintptr_t numchars, double marginright, int wrapeditcolumn,
+	int wrapclearcolumn,
+	int emptyvalue);
 
 typedef struct TrackDef {
 	TrackColumnDef note;
@@ -92,7 +95,7 @@ void trackconfig_initcolumns(TrackConfig*, bool wideinst);
 typedef struct TrackerEventTable {
 	psy_Table tracks;
 	double seqoffset;
-	psy_audio_PatternSelection clip;
+	psy_audio_BlockSelection clip;
 	uintptr_t currcursorline;
 	uintptr_t currplaybarline;	
 } TrackerEventTable;
@@ -106,40 +109,25 @@ psy_List** trackereventtable_track(TrackerEventTable*, uintptr_t index);
 /* TrackerState */
 typedef struct TrackerState {		
 	/* internal */
-	psy_audio_SequenceCursor cursor;
-	/* references */
-	psy_audio_Pattern* pattern;
-	PatternViewSkin* skin;
-	TrackConfig* trackconfig;
-	bool singlemode;
-	TrackerEventTable trackevents;
-	psy_audio_PatternSelection selection;
+	PatternViewState pv;	
+	TrackConfig* trackconfig;	
+	TrackerEventTable trackevents;	
 	bool showemptydata;
 	bool midline;
-	bool playbar;
 	bool drawbeathighlights;
 	bool synccursor;	
-	bool showresizecursor;
-	psy_audio_SequenceCursor dragselectionbase;
-	psy_audio_SequenceCursor dragcursor;
+	bool showresizecursor;	
 	psy_audio_PatternEntry empty;
 	psy_ui_Value lineheight;
 	psy_ui_Value defaultlineheight;
 	double lineheightpx;
-	double flatsize;
-	uintptr_t lpb;
-	psy_dsp_big_beat_t bpl;
-	bool drawcursor;
-	psy_dsp_big_beat_t lastplayposition;
-	psy_dsp_big_beat_t sequenceentryoffset;
-	uintptr_t trackidx;
+	double flatsize;	
+	bool drawcursor;		
 	/* precomputed */
 	intptr_t visilines;
-	bool cursorchanging;
+	bool cursorchanging;	
 	/* references */
 	const psy_ui_Font* gridfont;	
-	uintptr_t maxlines;
-	psy_audio_Song* song;
 } TrackerState;
 
 void trackerstate_init(TrackerState*, TrackConfig*, psy_audio_Song* song);
@@ -150,97 +138,27 @@ TrackDef* trackerstate_trackdef(TrackerState*, uintptr_t track);
 uintptr_t trackerstate_pxtotrack(const TrackerState*, double x);
 double trackerstate_basewidth(TrackerState*, uintptr_t track);
 
-INLINE void trackerstate_setsong(TrackerState* self,
-	psy_audio_Song* song)
-{
-	self->song = song;
-}
-
-
-INLINE void trackerstate_setpattern(TrackerState* self,
-	psy_audio_Pattern* pattern)
-{
-	assert(self);
-
-	self->pattern = pattern;
-}
-
-INLINE psy_audio_Patterns* trackerstate_patterns(TrackerState* self)
-{
-	assert(self);
-
-	if (self->song) {
-		return &self->song->patterns;
-	}
-	return NULL;
-}
-
-INLINE psy_audio_Patterns* trackerstate_patterns_const(const TrackerState* self)
-{
-	assert(self);
-
-	if (self->song) {
-		return &self->song->patterns;
-	}
-	return NULL;
-}
-
-INLINE psy_audio_Pattern* trackerstate_pattern(TrackerState* self)
-{
-	assert(self);
-
-	return self->pattern;
-}
-
 INLINE double trackerstate_preferredtrackwidth(const
 	TrackerState* self)
 {
-	if (self->skin) {
-		return self->skin->headercoords.background.dest.right - 
-			self->skin->headercoords.background.dest.left;
+	if (self->pv.skin) {
+		return self->pv.skin->headercoords.background.dest.right -
+			self->pv.skin->headercoords.background.dest.left;
 	}
 	return 0;
 }
 
-INLINE uintptr_t trackerstate_numsongtracks(const TrackerState* self)
+INLINE bool trackerstate_cursorposition_valid(TrackerState* self)
 {
-	if (trackerstate_patterns_const(self)) {
-		return psy_audio_patterns_numtracks(trackerstate_patterns_const(self));
+	if (patternviewstate_pattern(&self->pv)) {
+		return psy_audio_sequencecursor_offset(&self->pv.cursor) <
+			psy_audio_pattern_length(patternviewstate_pattern(&self->pv));
 	}
-	return 0;
+	return psy_audio_sequencecursor_offset(&self->pv.cursor) != 0.0;
 }
 
-INLINE psy_audio_SequenceCursor trackerstate_cursor(TrackerState* self)
-{
-	return self->cursor;
-}
-
-INLINE uintptr_t trackerstate_cursorposition_valid(TrackerState* self)
-{
-	if (self->pattern) {
-		return self->cursor.cursor.offset < psy_audio_pattern_length(self->pattern);
-	}
-	return self->cursor.cursor.offset != 0.0;
-}
-
-void trackerstate_setcursor(TrackerState*, psy_audio_SequenceCursor);
 void trackerstate_clip(TrackerState*, const psy_ui_RealRectangle* clip,
-	psy_audio_PatternSelection* rv);
-
-INLINE void trackerstate_enableplaybar(TrackerState* self)
-{
-	self->playbar = TRUE;
-}
-
-INLINE void trackerstate_preventplaybar(TrackerState* self)
-{
-	self->playbar = FALSE;
-}
-
-INLINE bool trackerstate_hasplaybar(const TrackerState* self)
-{
-	return self->playbar;
-}
+	psy_audio_BlockSelection* rv);
 
 void trackerstate_startdragselection(TrackerState*,
 	psy_audio_SequenceCursor, double bpl);
@@ -253,54 +171,27 @@ void trackerstate_selectbar(TrackerState*);
 void trackerstate_selectall(TrackerState*);
 ScrollDir trackerstate_nextcol(TrackerState*, bool wrap);
 ScrollDir trackerstate_prevcol(TrackerState*, bool wrap);
-
 uintptr_t trackerstate_numlines(const TrackerState*);
-psy_dsp_big_beat_t trackerstate_length(const TrackerState*);
-bool trackerstate_testplaybar(TrackerState*, psy_dsp_big_beat_t
-	offset);
+bool trackerstate_testplaybar(TrackerState*,
+	psy_dsp_big_beat_t playposition,
+	psy_dsp_big_beat_t offset);
+
+INLINE uintptr_t trackerstate_lpb(const TrackerState* self)
+{
+	return self->pv.cursor.cursor.lpb;
+}
+
+INLINE psy_dsp_big_beat_t trackerstate_bpl(const TrackerState* self)
+{
+	return (psy_dsp_big_beat_t)1.0 / self->pv.cursor.cursor.lpb;
+}
 
 INLINE intptr_t trackerstate_beattoline(const TrackerState* self,
 	psy_dsp_big_beat_t offset)
 {
 	assert(self);
 
-	return cast_decimal(offset * self->lpb);
-}
-
-INLINE void trackerstate_setlpb(TrackerState* self, uintptr_t lpb)
-{
-	self->lpb = lpb;
-	self->bpl = 1.0 / lpb;
-}
-
-INLINE uintptr_t trackerstate_lpb(const TrackerState* self)
-{
-	return self->lpb;
-}
-
-INLINE psy_dsp_big_beat_t trackerstate_bpl(const TrackerState* self)
-{
-	return self->bpl;
-}
-
-INLINE psy_audio_Sequence* trackerstate_sequence(TrackerState* self)
-{
-	assert(self);
-
-	if (self->song) {
-		return &self->song->sequence;
-	}
-	return NULL;
-}
-
-INLINE psy_audio_Sequence* trackerstate_sequence_const(const TrackerState* self)
-{
-	assert(self);
-
-	if (self->song) {
-		return &self->song->sequence;
-	}
-	return NULL;
+	return cast_decimal(offset * trackerstate_lpb(self));
 }
 
 INLINE psy_dsp_big_beat_t trackerstate_quantize(const TrackerState*
@@ -309,7 +200,7 @@ INLINE psy_dsp_big_beat_t trackerstate_quantize(const TrackerState*
 	assert(self);
 
 	return trackerstate_beattoline(self, position) *
-		self->bpl;
+		trackerstate_bpl(self);
 }
 
 /* quantized */
@@ -343,7 +234,8 @@ INLINE psy_dsp_big_beat_t trackerstate_pxtobeat(
 	assert(self);
 
 	return trackerstate_quantize(self,
-		(px / (psy_dsp_big_beat_t)self->lineheightpx) * self->bpl);
+		(px / (psy_dsp_big_beat_t)self->lineheightpx) *
+		trackerstate_bpl(self));
 }
 
 INLINE psy_dsp_big_beat_t trackerstate_pxtobeatnotquantized(
@@ -351,7 +243,7 @@ INLINE psy_dsp_big_beat_t trackerstate_pxtobeatnotquantized(
 {
 	assert(self);
 
-	return (px / self->lineheightpx) * self->bpl;
+	return (px / self->lineheightpx) * trackerstate_bpl(self);
 }
 
 INLINE bool trackerstate_testplayposition(TrackerState* self,
@@ -359,15 +251,15 @@ INLINE bool trackerstate_testplayposition(TrackerState* self,
 {
 	assert(self);
 
-	if (self->pattern) {
-		return psy_dsp_testrange(position, self->sequenceentryoffset,
-			psy_audio_pattern_length(self->pattern));
+	if (self->pv.pattern) {
+		return psy_dsp_testrange(position, self->pv.cursor.seqoffset,
+			psy_audio_pattern_length(self->pv.pattern));
 	}
 	return FALSE;
 }
 
 void trackerstate_lineclip(TrackerState*, const psy_ui_RealRectangle* clip,
-	psy_audio_PatternSelection* rv);
+	psy_audio_BlockSelection* rv);
 
 INLINE uintptr_t trackerstate_midline(const TrackerState* self,
 	double scrolltop_px)
@@ -375,5 +267,8 @@ INLINE uintptr_t trackerstate_midline(const TrackerState* self,
 	return trackerstate_beattoline(self, trackerstate_pxtobeat(
 		self, scrolltop_px) + self->visilines / 2);
 }
+
+void trackerstate_setfont(TrackerState*, const psy_ui_Font*,
+	const psy_ui_TextMetric*);
 
 #endif /* TRACKERGRIDSTATE_H */

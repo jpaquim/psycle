@@ -1025,7 +1025,7 @@ void samplesview_init(SamplesView* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(&self->right, psy_ui_ALIGN_CLIENT);
 	psy_ui_margin_init_em(&margin, 0.0, 0.0, 0.0, 2.0);
 	psy_ui_component_setmargin(&self->right, margin);
-	psy_ui_notebook_init(&self->clientnotebook, &self->right);	
+	psy_ui_notebook_init(&self->clientnotebook, &self->right, NULL);
 	psy_ui_component_setalign(&self->clientnotebook.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_component_init(&self->client, &self->clientnotebook.component, NULL);
 	psy_ui_tabbar_init(&self->tabbar, &self->client);
@@ -1034,7 +1034,7 @@ void samplesview_init(SamplesView* self, psy_ui_Component* parent,
 		psy_INDEX_INVALID, psy_INDEX_INVALID, psy_ui_colour_white());
 	psy_ui_tabbar_append(&self->tabbar, "Vibrato",
 		psy_INDEX_INVALID, psy_INDEX_INVALID, psy_ui_colour_white());
-	psy_ui_notebook_init(&self->notebook, &self->client);
+	psy_ui_notebook_init(&self->notebook, &self->client, NULL);
 	psy_ui_component_setmargin(psy_ui_notebook_base(&self->notebook),
 		psy_ui_margin_make_em(0.0, 0.0, 0.0, 0.5));
 	psy_ui_component_setalign(psy_ui_notebook_base(&self->notebook),

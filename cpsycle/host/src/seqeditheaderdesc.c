@@ -57,7 +57,7 @@ void seqeditorheaderdescbar_init(SeqEditorHeaderDescBar* self,
 	psy_ui_button_loadresource(&self->down, IDB_ARROW_DOWN_DARK,
 		IDB_ARROW_DOWN_DARK, psy_ui_colour_white());
 	psy_ui_component_setmargin(psy_ui_button_base(&self->down), margin);
-	zoombox_init(&self->hzoom, &self->top);
+	zoombox_init(&self->hzoom, &self->top, NULL);
 }
 
 void seqeditorheaderdescbar_oninserttrack(SeqEditorHeaderDescBar* self,

@@ -51,6 +51,7 @@ static void setlinewidth(psy_ui_Graphics*, uintptr_t width);
 static uintptr_t linewidth(psy_ui_Graphics*);
 static void setorigin(psy_ui_Graphics* self, double x, double y);
 static psy_ui_RealPoint origin(const psy_ui_Graphics* self);
+
 /* vtable */
 static psy_ui_GraphicsVTable vtable;
 static bool vtable_initialized = FALSE;
@@ -294,6 +295,8 @@ static unsigned int dev_linewidth(psy_ui_GraphicsImp* self) { return 1; }
 static void dev_setorigin(psy_ui_GraphicsImp* self, double x, double y) { }
 static psy_ui_RealPoint dev_origin(psy_ui_GraphicsImp* self) { }
 static uintptr_t dev_gc(psy_ui_GraphicsImp* self) { return 0; }
+static void dev_setcliprect(psy_ui_GraphicsImp* self, psy_ui_RealRectangle r) { }
+static psy_ui_RealRectangle dev_cliprect(const psy_ui_GraphicsImp* self) { return psy_ui_realrectangle_zero(); }
 
 /* vtable */
 static psy_ui_GraphicsImpVTable imp_vtable;
@@ -328,6 +331,8 @@ static void imp_vtable_init(psy_ui_GraphicsImp* self)
 		imp_vtable.dev_linewidth = dev_linewidth;
 		imp_vtable.dev_setorigin = dev_setorigin;
 		imp_vtable.dev_gc = dev_gc;
+		imp_vtable.dev_setcliprect = dev_setcliprect;
+		imp_vtable.dev_cliprect = dev_cliprect;
 		imp_vtable_initialized = TRUE;
 	}
 	self->vtable = &imp_vtable;

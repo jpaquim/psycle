@@ -53,6 +53,8 @@ static unsigned int psy_ui_win_g_devlinewidth(psy_ui_win_GraphicsImp*);
 static void psy_ui_win_g_devsetorigin(psy_ui_win_GraphicsImp*, double x, double y);
 static psy_ui_RealPoint psy_ui_win_g_devorigin(const psy_ui_win_GraphicsImp*);
 static uintptr_t psy_ui_win_g_dev_gc(psy_ui_win_GraphicsImp*);
+static void psy_ui_win_g_dev_setcliprect(psy_ui_win_GraphicsImp*, psy_ui_RealRectangle);
+static psy_ui_RealRectangle psy_ui_win_g_dev_cliprect(const psy_ui_win_GraphicsImp*);
 
 static psy_ui_TextMetric converttextmetric(const TEXTMETRIC*);
 /* vtable */
@@ -144,6 +146,12 @@ static void win_imp_vtable_init(psy_ui_win_GraphicsImp* self)
 		win_imp_vtable.dev_gc =
 			(psy_ui_fp_graphicsimp_dev_gc)
 			psy_ui_win_g_dev_gc;
+		win_imp_vtable.dev_setcliprect =
+			(psy_ui_fp_graphicsimp_dev_setcliprect)
+			psy_ui_win_g_dev_setcliprect;
+		win_imp_vtable.dev_cliprect =
+			(psy_ui_fp_graphicsimp_dev_cliprect)
+			psy_ui_win_g_dev_cliprect;
 		win_imp_vtable_initialized = TRUE;
 	}
 	self->imp.vtable = &win_imp_vtable;
@@ -534,19 +542,19 @@ void psy_ui_win_g_imp_devcurveto(psy_ui_win_GraphicsImp* self,
    
 	pts[0].x = (int)control_p1.x - (int)(self->org.x);
 	pts[0].y = (int)control_p1.y - (int)(self->org.y);
-	pts[1].x = (int)control_p2.x - (int)(self->org.x);
-	pts[1].y = (int)control_p2.y - (int)(self->org.y);
-	pts[2].x = (int)p.x;
-	pts[2].y = (int)p.y;
-	PolyBezierTo(self->hdc, pts, 3);
+pts[1].x = (int)control_p2.x - (int)(self->org.x);
+pts[1].y = (int)control_p2.y - (int)(self->org.y);
+pts[2].x = (int)p.x;
+pts[2].y = (int)p.y;
+PolyBezierTo(self->hdc, pts, 3);
 }
 
 void psy_ui_win_g_imp_devdrawarc(psy_ui_win_GraphicsImp* self,
 	psy_ui_RealRectangle r, double angle_start, double angle_end)
-{  
-	int x, y, w, h, x3, y3, x4, y4;	
+{
+	int x, y, w, h, x3, y3, x4, y4;
 	double mul;
-  
+
 	x = (int)r.left - (int)(self->org.x);
 	y = (int)r.right - (int)(self->org.y);
 	w = (int)(r.right - r.left);
@@ -555,7 +563,7 @@ void psy_ui_win_g_imp_devdrawarc(psy_ui_win_GraphicsImp* self,
 	x3 = x + w / 2 + (int)(w * cos(angle_start * mul));
 	y3 = y + h / 2 - (int)(h * sin(angle_start * mul));
 	x4 = x + w / 2 + (int)(w * cos(angle_end * mul));
-	y4 = y + h / 2 - (int)(h * sin(angle_end * mul));  
+	y4 = y + h / 2 - (int)(h * sin(angle_end * mul));
 	Arc(self->hdc,
 		(int)(r.left) - (int)(self->org.x),
 		(int)(r.top) - (int)(self->org.y),
@@ -570,7 +578,7 @@ void psy_ui_win_g_devsetlinewidth(psy_ui_win_GraphicsImp* self, uintptr_t width)
 	HPEN pen;
 
 	GetObject(self->pen, sizeof(LOGPEN), &currpen);
-	currpen.lopnWidth.x = (int)width;	
+	currpen.lopnWidth.x = (int)width;
 	pen = CreatePenIndirect(&currpen);
 	SelectObject(self->hdc, pen);
 	if (self->pen) {
@@ -615,9 +623,9 @@ psy_ui_TextMetric converttextmetric(const TEXTMETRIC* tm)
 }
 
 void psy_ui_win_g_devsetorigin(psy_ui_win_GraphicsImp* self, double x, double y)
-{	
+{
 	self->org.x = x;
-	self->org.y = y;	
+	self->org.y = y;
 }
 
 psy_ui_RealPoint psy_ui_win_g_devorigin(const psy_ui_win_GraphicsImp* self)
@@ -628,6 +636,48 @@ psy_ui_RealPoint psy_ui_win_g_devorigin(const psy_ui_win_GraphicsImp* self)
 uintptr_t psy_ui_win_g_dev_gc(psy_ui_win_GraphicsImp* self)
 {
 	return (uintptr_t)self->hdc;
+}
+
+void psy_ui_win_g_dev_setcliprect(psy_ui_win_GraphicsImp* self, psy_ui_RealRectangle clip)
+{
+	if ((((int)clip.right - (int)clip.left) == 0) ||
+			(((int)clip.bottom - (int)clip.top) == 0)) {
+		SelectClipRgn(self->hdc, NULL);
+	} else {
+		HRGN rgn;
+
+		rgn = CreateRectRgn(
+			(int)clip.left - (int)(self->org.x),
+			(int)clip.top - (int)(self->org.y),
+			(int)clip.right - (int)(self->org.x),
+			(int)clip.bottom - (int)(self->org.y));
+		SelectClipRgn(self->hdc, rgn);
+		DeleteObject(rgn);
+	}
+}
+
+psy_ui_RealRectangle psy_ui_win_g_dev_cliprect(const psy_ui_win_GraphicsImp* self)
+{
+	psy_ui_RealRectangle rv;
+	HRGN rgn;
+
+	rgn = CreateRectRgn(0, 0, 0, 0);
+	if (GetClipRgn(self->hdc, rgn) != -1) {
+		RECT rc;
+
+		GetRgnBox(rgn, &rc);	
+		rv = psy_ui_realrectangle_make(
+			psy_ui_realpoint_make(
+				rc.left + (int)(self->org.x),
+				rc.top + (int)(self->org.y)),
+			psy_ui_realsize_make(
+				rc.right - rc.left,
+				rc.bottom - rc.top));
+	} else {
+		rv = psy_ui_realrectangle_zero();
+	}
+	DeleteObject(rgn);
+	return rv;
 }
 
 #endif /* PSYCLE_USE_TK == PSYCLE_TK_WIN32 */

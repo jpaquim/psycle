@@ -58,7 +58,7 @@ typedef struct PianoGridDraw {
 	bool cursoronnoterelease;
 	psy_dsp_big_beat_t sequenceentryoffset;	
 	PianoTrackDisplay trackdisplay;	
-	psy_audio_PatternSelection selection;
+	psy_audio_BlockSelection selection;
 	/* references */
 	KeyboardState* keyboardstate;
 	PianoGridState* gridstate;
@@ -77,7 +77,7 @@ void pianogriddraw_init(PianoGridDraw*,
 	psy_audio_PatternEntry* hoverpatternentry,	
 	PianoTrackDisplay,
 	bool cursorchanging, bool cursoronnoterelease,
-	psy_audio_PatternSelection selection,
+	psy_audio_BlockSelection selection,
 	psy_ui_RealSize, const psy_ui_TextMetric*, Workspace*);
 void pianogriddraw_ondraw(PianoGridDraw*, psy_ui_Graphics*);
 
@@ -113,18 +113,14 @@ typedef struct Pianogrid {
 	/* internal */
 	PianoGridState defaultgridstate;   
 	KeyboardState defaultkeyboardstate;
-	psy_audio_PatternEntry* hoverpatternentry;   
-	psy_dsp_big_beat_t sequenceentryoffset;
+	psy_audio_PatternEntry* hoverpatternentry;	
 	psy_dsp_big_beat_t lastplayposition;
 	psy_audio_SequenceCursor oldcursor;
 	psy_audio_SequenceCursor dragcursor;
 	bool cursoronnoterelease;
 	PianoTrackDisplay trackdisplay;
-	bool cursorchanging;
-	psy_audio_PatternSelection selection;
-	psy_audio_SequenceCursor dragselectionbase;
-	psy_audio_SequenceCursor lastdragcursor;
-	intptr_t pgupdownstep;	
+	bool cursorchanging;	
+	psy_audio_SequenceCursor lastdragcursor;	
 	/* references */
 	KeyboardState* keyboardstate;
 	PianoGridState* gridstate;
@@ -142,11 +138,6 @@ void pianogrid_storecursor(Pianogrid*);
 void pianogrid_onpatternchange(Pianogrid*, psy_audio_Pattern*);
 void pianogrid_settrackdisplay(Pianogrid*, PianoTrackDisplay);
 
-INLINE void pianogrid_setpgupdownstep(Pianogrid* self, intptr_t step)
-{
-	self->pgupdownstep = step;
-}
-
 INLINE PianoTrackDisplay pianogrid_trackdisplay(const Pianogrid* self)
 {
 	assert(self);
@@ -154,11 +145,11 @@ INLINE PianoTrackDisplay pianogrid_trackdisplay(const Pianogrid* self)
 	return self->trackdisplay;
 }
 
-INLINE const psy_audio_PatternSelection* pianogrid_selection(const Pianogrid* self)
+INLINE const psy_audio_BlockSelection* pianogrid_selection(const Pianogrid* self)
 {
 	assert(self);
 
-	return &self->selection;
+	return &self->gridstate->pv.selection;
 }
 
 INLINE psy_ui_Component* pianogrid_base(Pianogrid* self)
@@ -223,11 +214,6 @@ void pianoroll_setpattern(Pianoroll*, psy_audio_Pattern*);
 void pianoroll_updatescroll(Pianoroll*);
 void pianoroll_makecmds(psy_Property* parent);
 bool pianoroll_handlecommand(Pianoroll*, uintptr_t cmd);
-
-INLINE void pianoroll_setpgupdownstep(Pianoroll* self, intptr_t step)
-{
-	pianogrid_setpgupdownstep(&self->grid, step);
-}
 
 /* block operations */
 void pianoroll_navup(Pianoroll*);

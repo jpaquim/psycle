@@ -221,6 +221,12 @@ void psy_ui_replacedefaultfont(psy_ui_Component* main, psy_ui_Font* font)
 	}
 }
 
+void psy_ui_component_setfocus(psy_ui_Component* self)
+{
+	self->imp->vtable->dev_setfocus(self->imp);
+	psy_ui_app()->focus = self;
+}
+
 void psy_ui_component_capture(psy_ui_Component* self)
 {
 	self->imp->vtable->dev_capture(self->imp);
@@ -228,7 +234,7 @@ void psy_ui_component_capture(psy_ui_Component* self)
 
 void psy_ui_component_releasecapture(psy_ui_Component* self)
 {
-	psy_ui_app()->capture = NULL;
+	psy_ui_app_setcapture(psy_ui_app(), NULL);
 	self->imp->vtable->dev_releasecapture(self->imp);
 }
 
@@ -359,6 +365,7 @@ static void onfocus(psy_ui_Component* self)
 static void onfocuslost(psy_ui_Component* self)
 {
 	psy_ui_component_removestylestate(self, psy_ui_STYLESTATE_FOCUS);
+	psy_ui_app()->focus = NULL;
 }
 
 static void onupdatestyles(psy_ui_Component* self) { }
@@ -2328,21 +2335,29 @@ void psy_ui_component_mousedown(psy_ui_Component* self, psy_ui_MouseEvent* ev,
 void psy_ui_component_mouseup(psy_ui_Component* self, psy_ui_MouseEvent* ev,
 	psy_List* viewcomponents)
 {
-	if (psy_ui_app()->capture) {
+	if (psy_ui_app_capture(psy_ui_app())) {
 		psy_ui_RealPoint translation;
 		psy_ui_RealMargin spacing;
 		psy_ui_Component* capture;
-
-		capture = psy_ui_app()->capture;		
-		translation = mapcoords(capture, self);
-		spacing = psy_ui_component_spacing_px(capture);
-		psy_ui_realpoint_sub(&ev->pt, translation);
-		psy_ui_realpoint_sub(&ev->pt, psy_ui_realpoint_make(
-			spacing.left, spacing.top));
-		capture->vtable->onmouseup(capture, ev);
-		psy_signal_emit(&capture->signal_mouseup,
-			capture, 1, ev);
-		psy_ui_realpoint_add(&ev->pt, translation);
+		
+		capture = psy_ui_app_capture(psy_ui_app());
+		do {
+			translation = mapcoords(capture, self);
+			spacing = psy_ui_component_spacing_px(capture);
+			psy_ui_realpoint_sub(&ev->pt, translation);
+			psy_ui_realpoint_sub(&ev->pt, psy_ui_realpoint_make(
+				spacing.left, spacing.top));
+			capture->vtable->onmouseup(capture, ev);
+			psy_signal_emit(&capture->signal_mouseup,
+				capture, 1, ev);
+			psy_ui_realpoint_add(&ev->pt, translation);
+			if (ev->event.bubbles) {
+				capture = psy_ui_component_parent(capture);
+			} else {
+				capture = NULL;
+			}
+		} while (capture);	
+		ev->event.bubbles = FALSE;
 	} else {
 		psy_List* p;
 

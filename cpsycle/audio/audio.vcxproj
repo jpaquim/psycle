@@ -230,6 +230,7 @@
     <ClCompile Include="src\array.c" />
     <ClCompile Include="src\audioconfig.c" />
     <ClCompile Include="src\audiorecorder.c" />
+    <ClCompile Include="src\blockselection.c" />
     <ClCompile Include="src\buffer.c">
       <RuntimeTypeInfo Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</RuntimeTypeInfo>
       <RuntimeTypeInfo Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</RuntimeTypeInfo>
@@ -367,6 +368,7 @@
       <RuntimeTypeInfo Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</RuntimeTypeInfo>
     </ClCompile>
     <ClCompile Include="src\sequencecmds.c" />
+    <ClCompile Include="src\sequencecursor.c" />
     <ClCompile Include="src\sequenceentry.c" />
     <ClCompile Include="src\sequencer.c">
       <RuntimeTypeInfo Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</RuntimeTypeInfo>
@@ -411,6 +413,7 @@
     <ClInclude Include="src\array.h" />
     <ClInclude Include="src\audioconfig.h" />
     <ClInclude Include="src\audiorecorder.h" />
+    <ClInclude Include="src\blockselection.h" />
     <ClInclude Include="src\buffer.h" />
     <ClInclude Include="src\buffercontext.h" />
     <ClInclude Include="src\cmddriver.h" />
@@ -485,6 +488,7 @@
     <ClInclude Include="src\samples.h" />
     <ClInclude Include="src\sequence.h" />
     <ClInclude Include="src\sequencecmds.h" />
+    <ClInclude Include="src\sequencecursor.h" />
     <ClInclude Include="src\sequenceentry.h" />
     <ClInclude Include="src\sequencer.h" />
     <ClInclude Include="src\sequenceselection.h" />

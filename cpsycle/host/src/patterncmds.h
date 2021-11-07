@@ -51,19 +51,19 @@ typedef struct {
 	psy_audio_Pattern* pattern;
 	psy_audio_Pattern oldpattern;
 	psy_audio_SequenceCursor cursor;
-	psy_audio_PatternSelection block;
+	psy_audio_BlockSelection block;
 	int transposeoffset;
 	Workspace* workspace;
 } BlockTransposeCommand;
 
 BlockTransposeCommand* blocktransposecommand_alloc(psy_audio_Pattern* pattern,
-	psy_audio_PatternSelection block, psy_audio_SequenceCursor cursor, int transposeoffset,
+	psy_audio_BlockSelection block, psy_audio_SequenceCursor cursor, int transposeoffset,
 	Workspace* workspace);
 
 typedef struct {
 	// inherits
 	psy_Command command;
-	psy_audio_PatternSelection selection;
+	psy_audio_BlockSelection selection;
 	psy_audio_Pattern* pattern;
 	psy_audio_Pattern oldpattern;
 	bool remove;
@@ -71,7 +71,7 @@ typedef struct {
 } BlockRemoveCommand;
 
 BlockRemoveCommand* blockremovecommand_alloc(psy_audio_Pattern*,
-	psy_audio_PatternSelection, Workspace*);
+	psy_audio_BlockSelection, Workspace*);
 
 typedef struct BlockPasteCommand {
 	// inherits

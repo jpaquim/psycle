@@ -51,7 +51,7 @@ void transformpatternview_init(TransformPatternView* self, psy_ui_Component*
 	psy_ui_component_init(transformpatternview_base(self), parent, NULL);
 	self->workspace = workspace;
 	self->applyto = 0;
-	psy_audio_patternselection_init(&self->patternselection);
+	psy_audio_blockselection_init(&self->patternselection);
 	psy_ui_margin_init_em(&self->sectionmargin, 0.0, 0.0, 0.0, 2.0);
 	psy_ui_component_setdefaultalign(transformpatternview_base(self),
 		psy_ui_ALIGN_TOP, psy_ui_margin_make(psy_ui_value_make_px(0),
@@ -336,7 +336,7 @@ void transformpatternview_searchentiresong(TransformPatternView* self,
 				psy_audio_PatternCursor cursor;
 
 				cursor = psy_audio_pattern_searchinpattern(currpattern,
-					psy_audio_patternselection_make(
+					psy_audio_blockselection_make(
 						psy_audio_patterncursor_make(0, (psy_dsp_big_beat_t)0.0),
 						psy_audio_patterncursor_make(MAX_TRACKS,
 							psy_audio_pattern_length(currpattern))),
@@ -370,7 +370,7 @@ void transformpatternview_searchpattern(TransformPatternView* self,
 		psy_audio_PatternCursor cursor;
 
 		cursor = psy_audio_pattern_searchinpattern(currpattern,
-			psy_audio_patternselection_make(
+			psy_audio_blockselection_make(
 				psy_audio_patterncursor_make(0, (psy_dsp_big_beat_t)0.0),
 				psy_audio_patterncursor_make(MAX_TRACKS,
 					psy_audio_pattern_length(currpattern))),
@@ -402,7 +402,7 @@ void transformpatternview_searchcurrentselection(TransformPatternView* self,
 }
 
 void transformpatternview_setpatternselection(TransformPatternView* self,
-	const psy_audio_PatternSelection* selection)
+	const psy_audio_BlockSelection* selection)
 {
 	assert(self && selection);
 	

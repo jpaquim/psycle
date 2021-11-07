@@ -13,9 +13,9 @@
 
 /* prototypes */
 static void pianoruler_ondraw(PianoRuler*, psy_ui_Graphics*);
-static psy_audio_PatternSelection pianoruler_clipselection(PianoRuler*,
+static psy_audio_BlockSelection pianoruler_clipselection(PianoRuler*,
 	psy_ui_RealRectangle clip);
-static void pianoruler_drawruler(PianoRuler*, psy_ui_Graphics*, psy_audio_PatternSelection);
+static void pianoruler_drawruler(PianoRuler*, psy_ui_Graphics*, psy_audio_BlockSelection);
 void pianoruler_drawbeat(PianoRuler*, psy_ui_Graphics*, intptr_t beat, double x,
 	double baseline, double tmheight);
 static void pianoruler_onpreferredsize(PianoRuler*, const psy_ui_Size* limit,
@@ -60,7 +60,7 @@ void pianoruler_setsharedgridstate(PianoRuler* self, PianoGridState* gridstate)
 	if (gridstate) {
 		self->gridstate = gridstate;
 	} else {
-		pianogridstate_init(&self->defaultgridstate, NULL);
+		pianogridstate_init(&self->defaultgridstate, NULL, NULL);
 		self->gridstate = &self->defaultgridstate;
 	}
 }
@@ -70,9 +70,9 @@ void pianoruler_onpreferredsize(PianoRuler* self, const psy_ui_Size* limit,
 {
 	assert(self);
 
-	rv->width = (pianogridstate_pattern(self->gridstate))
+	rv->width = (patternviewstate_pattern(&self->gridstate->pv))
 		? psy_ui_value_make_px(pianogridstate_beattopx(self->gridstate,
-		  psy_audio_pattern_length(pianogridstate_pattern(self->gridstate))))
+		  psy_audio_pattern_length(patternviewstate_pattern(&self->gridstate->pv))))
 		: psy_ui_value_make_px(0);
 	rv->height = psy_ui_value_make_eh(1.0);
 }
@@ -84,27 +84,27 @@ void pianoruler_ondraw(PianoRuler* self, psy_ui_Graphics* g)
 	pianoruler_drawruler(self, g, pianoruler_clipselection(self, g->clip));
 }
 
-psy_audio_PatternSelection pianoruler_clipselection(PianoRuler* self,
+psy_audio_BlockSelection pianoruler_clipselection(PianoRuler* self,
 	psy_ui_RealRectangle clip)
 {
-	psy_audio_PatternSelection rv;
+	psy_audio_BlockSelection rv;
 
 	assert(self);
 
-	rv.topleft.offset = pianogridstate_quantize(self->gridstate,
+	rv.topleft.cursor.offset = pianogridstate_quantize(self->gridstate,
 		pianogridstate_pxtobeat(self->gridstate, clip.left));
-	if (pianogridstate_pattern(self->gridstate)) {
-		rv.bottomright.offset = psy_min(
-			psy_audio_pattern_length(pianogridstate_pattern(self->gridstate)),
+	if (patternviewstate_pattern(&self->gridstate->pv)) {
+		rv.bottomright.cursor.offset = psy_min(
+			psy_audio_pattern_length(patternviewstate_pattern(&self->gridstate->pv)),
 			pianogridstate_pxtobeat(self->gridstate, clip.right));
 	} else {
-		rv.bottomright.offset = 0;
+		rv.bottomright.cursor.offset = 0;
 	}
 	return rv;
 }
 
 void pianoruler_drawruler(PianoRuler* self, psy_ui_Graphics* g,
-	psy_audio_PatternSelection clip)
+	psy_audio_BlockSelection clip)
 {	
 	const psy_ui_TextMetric* tm;
 	psy_ui_RealSize size;
@@ -124,20 +124,20 @@ void pianoruler_drawruler(PianoRuler* self, psy_ui_Graphics* g,
 	baseline = size.height - 1;
 	baselinetop = baseline - tm->tmHeight / 3;
 	scrollleft = psy_ui_component_scrollleftpx(&self->component);
-	psy_ui_setcolour(g, patternviewskin_rowbeatcolour(self->gridstate->skin,
+	psy_ui_setcolour(g, patternviewskin_rowbeatcolour(self->gridstate->pv.skin,
 		0, 0));
 	psy_ui_drawline(g, psy_ui_realpoint_make(scrollleft, baseline),
 		psy_ui_realpoint_make(size.width + scrollleft, baseline));
-	currstep = pianogridstate_beattosteps(self->gridstate, clip.topleft.offset);
+	currstep = pianogridstate_beattosteps(self->gridstate, clip.topleft.cursor.offset);
 	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
-	for (c = clip.topleft.offset; c <= clip.bottomright.offset;
+	for (c = clip.topleft.cursor.offset; c <= clip.bottomright.cursor.offset;
 			c += pianogridstate_step(self->gridstate), ++currstep) {
 		double cpx;
 		
 		cpx = pianogridstate_beattopx(self->gridstate, c);
 		psy_ui_drawline(g, psy_ui_realpoint_make(cpx, baseline),
 			psy_ui_realpoint_make(cpx, baselinetop));
-		if ((currstep % self->gridstate->lpb) == 0) {
+		if ((currstep % self->gridstate->pv.cursor.cursor.lpb) == 0) {
 			pianoruler_drawbeat(self, g, (intptr_t)(c), cpx, baseline, tm->tmHeight);
 		}
 	}
@@ -151,16 +151,16 @@ void pianoruler_drawbeat(PianoRuler* self, psy_ui_Graphics* g, intptr_t beat,
 	assert(self);
 
 	if ((beat % 4) == 0) {
-		psy_ui_settextcolour(g, patternviewskin_row4beatcolour(self->gridstate->skin,
+		psy_ui_settextcolour(g, patternviewskin_row4beatcolour(self->gridstate->pv.skin,
 			0, 0));
 	} else {
-		psy_ui_settextcolour(g, patternviewskin_rowbeatcolour(self->gridstate->skin,
+		psy_ui_settextcolour(g, patternviewskin_rowbeatcolour(self->gridstate->pv.skin,
 			0, 0));
 	}
 	psy_ui_drawline(g, psy_ui_realpoint_make(x, baseline),
 		psy_ui_realpoint_make(x, baseline - tmheight / 2));
 	psy_snprintf(txt, 40, "%d", beat);
 	psy_ui_textout(g, x + 3, baseline - tmheight, txt, psy_strlen(txt));
-	psy_ui_setcolour(g, patternviewskin_rowbeatcolour(self->gridstate->skin,
+	psy_ui_setcolour(g, patternviewskin_rowbeatcolour(self->gridstate->pv.skin,
 		0, 0));
 }

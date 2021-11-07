@@ -34,9 +34,10 @@ static void vtable_init(psy_ui_Notebook* self)
 	psy_ui_component_setvtable(&self->component, &vtable);
 }
 /* implementation */
-void psy_ui_notebook_init(psy_ui_Notebook* self, psy_ui_Component* parent)
+void psy_ui_notebook_init(psy_ui_Notebook* self, psy_ui_Component* parent,
+	psy_ui_Component* view)
 {  
-    psy_ui_component_init(psy_ui_notebook_base(self), parent, NULL);
+    psy_ui_component_init(psy_ui_notebook_base(self), parent, view);
 	vtable_init(self);
 	psy_ui_component_setbackgroundmode(psy_ui_notebook_base(self),
 		psy_ui_NOBACKGROUND);	

@@ -190,7 +190,7 @@ void patternblockmenu_onchangegenerator(PatternBlockMenu* self,
 	psy_ui_Component* sender)
 {
 	if (self->target == PATTERNVIEWTARGET_TRACKER) {
-		trackergrid_changegenerator(&self->view->tracker);
+		trackergrid_changegenerator(&self->view->trackerview.grid);
 	} else {
 
 	}
@@ -200,7 +200,7 @@ void patternblockmenu_onchangeinstrument(PatternBlockMenu* self,
 	psy_ui_Component* sender)
 {
 	if (self->target == PATTERNVIEWTARGET_TRACKER) {
-		trackergrid_changeinstrument(&self->view->tracker);
+		trackergrid_changeinstrument(&self->view->trackerview.grid);
 	} else {
 
 	}

@@ -286,7 +286,7 @@ void oscilloscopecontrols_init(OscilloscopeControls* self, psy_ui_Component* par
 	psy_ui_label_settext(&self->amplbl, "Amp");
 	psy_ui_margin_setright(&margin, psy_ui_value_make_ew(0.5));
 	psy_ui_component_setmargin(&self->amplbl.component, margin);
-	zoombox_init(&self->ampzoom, &self->component);
+	zoombox_init(&self->ampzoom, &self->component, NULL);
 	psy_signal_connect(&self->ampzoom.signal_changed, self,
 		oscilloscopecontrols_onampzoomchanged);	
 	psy_ui_component_setalign_children(&self->component, psy_ui_ALIGN_LEFT);		

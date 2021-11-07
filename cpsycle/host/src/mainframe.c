@@ -475,7 +475,7 @@ void mainframe_inithelpsettingstabbar(MainFrame* self)
 
 void mainframe_initviewtabbars(MainFrame* self)
 {
-	psy_ui_notebook_init(&self->viewtabbars, &self->tabbars);
+	psy_ui_notebook_init(&self->viewtabbars, &self->tabbars, NULL);
 	psy_ui_component_setalign(&self->viewtabbars.component, psy_ui_ALIGN_LEFT);
 }
 
@@ -485,7 +485,7 @@ void mainframe_initmainpane(MainFrame* self)
 	psy_ui_component_setalign(&self->mainpane, psy_ui_ALIGN_CLIENT);	
 	psy_ui_component_setbackgroundmode(&self->mainpane,
 		psy_ui_NOBACKGROUND);	
-	psy_ui_notebook_init(&self->notebook, &self->mainpane);	
+	psy_ui_notebook_init(&self->notebook, &self->mainpane, NULL);
 	psy_ui_component_setalign(psy_ui_notebook_base(&self->notebook),
 		psy_ui_ALIGN_CLIENT);	
 	psy_ui_notebook_connectcontroller(&self->notebook,

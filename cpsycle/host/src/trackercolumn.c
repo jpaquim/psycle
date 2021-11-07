@@ -199,10 +199,10 @@ void trackercolumn_drawtrackevents(TrackerColumn* self, psy_ui_Graphics* g)
 		self->gridstate->trackconfig->textwidth,
 		self->gridstate->lineheightpx - 1);
 	for (p = *events,
-			offset = self->gridstate->trackevents.clip.topleft.offset,
+			offset = self->gridstate->trackevents.clip.topleft.cursor.offset,
 			cpy = trackerstate_beattopx(self->gridstate, offset),
-			line = (uintptr_t)(self->gridstate->trackevents.clip.topleft.offset *
-				self->gridstate->trackevents.clip.topleft.lpb);
+			line = (uintptr_t)(self->gridstate->trackevents.clip.topleft.cursor.offset *
+				self->gridstate->trackevents.clip.topleft.cursor.lpb);
 			p != NULL;
 			p = p->next, ++line, cpy += self->gridstate->lineheightpx,
 			offset += trackerstate_bpl(self->gridstate)) {				
@@ -239,12 +239,11 @@ TrackerColumnFlags trackercolumn_columnflags(TrackerColumn* self,
 		rv.mid = 0;
 	}
 	rv.cursor = (self->gridstate->trackevents.currcursorline == line) &&
-		(track == self->gridstate->cursor.cursor.track) &&
+		(track == self->gridstate->pv.cursor.cursor.track) &&
 		self->gridstate->drawcursor;
-	rv.selection = psy_audio_patternselection_test(
-		&self->gridstate->selection, track, offset);
-	rv.playbar = trackerstate_hasplaybar(self->gridstate) &&
-		psy_audio_player_playing(workspace_player(self->workspace)) &&
+	rv.selection = psy_audio_blockselection_test(
+		&self->gridstate->pv.selection, track, offset);
+	rv.playbar = psy_audio_player_playing(workspace_player(self->workspace)) &&
 		(self->gridstate->trackevents.currplaybarline == line);
 	rv.focus = TRUE;
 	return rv;
@@ -255,23 +254,23 @@ void trackercolumn_drawentry(TrackerColumn* self, psy_ui_Graphics* g,
 {
 	uintptr_t i;
 	psy_ui_RealPoint cp;	
+	psy_audio_PatternEvent* event;
 
+	if (!entry) {
+		entry = &self->gridstate->empty;
+	}
+	event = psy_audio_patternentry_front(entry);
 	cp = psy_ui_realpoint_make(0.0, y);
-	for (i = 0; i < self->trackdef->numnotes; ++i) {
-		psy_audio_PatternEvent* event;
+	for (i = 0; i < self->trackdef->numnotes; ++i) {		
 		TrackerColumnFlags currcolumnflags;
 		uintptr_t column;
 		const char* notestr;		
 		psy_ui_RealPoint cp_leftedge;
-
-		if (!entry) {
-			entry = &self->gridstate->empty;
-		}
-		event = psy_audio_patternentry_front(entry);
+	
 		currcolumnflags = columnflags;
-		currcolumnflags.cursor &= self->gridstate->cursor.cursor.column == 0;
-		setcolumncolour(self->gridstate->skin, g, currcolumnflags, entry->track,
-			trackerstate_numsongtracks(self->gridstate));
+		currcolumnflags.cursor &= self->gridstate->pv.cursor.cursor.column == 0;
+		setcolumncolour(self->gridstate->pv.skin, g, currcolumnflags, entry->track,
+			patternviewstate_numsongtracks(&self->gridstate->pv));
 		cp_leftedge = cp;
 		cp_leftedge.x += self->gridstate->trackconfig->textleftedge;
 		// draw note
@@ -312,14 +311,14 @@ void trackercolumn_drawentry(TrackerColumn* self, psy_ui_Graphics* g,
 				}
 			}
 			currcolumnflags.cursor = columnflags.cursor && (column ==
-				self->gridstate->cursor.cursor.column);
+				self->gridstate->pv.cursor.cursor.column);
 			for (num = coldef->numdigits, digit = 0; digit < num; ++digit) {
 				if (columnflags.cursor) {
 					currcolumnflags.cursor = columnflags.cursor &&
-						(self->gridstate->cursor.cursor.column == column) &&
-						(self->gridstate->cursor.cursor.digit == digit);
-					setcolumncolour(self->gridstate->skin, g, currcolumnflags,
-						entry->track, trackerstate_numsongtracks(self->gridstate));
+						(self->gridstate->pv.cursor.cursor.column == column) &&
+						(self->gridstate->pv.cursor.cursor.digit == digit);
+					setcolumncolour(self->gridstate->pv.skin, g, currcolumnflags,
+						entry->track, patternviewstate_numsongtracks(&self->gridstate->pv));
 				}
 				if (!empty) {
 					digitstr = hex_tab[((value >> ((num - digit - 1) * 4)) & 0x0F)];
@@ -397,11 +396,11 @@ void trackercolumn_onmousedown(TrackerColumn* self, psy_ui_MouseEvent* ev)
 			psy_ui_component_invalidate(&self->component);
 			psy_ui_component_capture(&self->component);
 		} else {
-			if (psy_audio_patternselection_valid(&self->gridstate->selection)) {
-				psy_audio_patternselection_disable(&self->gridstate->selection);
+			if (psy_audio_blockselection_valid(&self->gridstate->pv.selection)) {
+				psy_audio_blockselection_disable(&self->gridstate->pv.selection);
 				psy_ui_component_invalidate(psy_ui_component_parent(&self->component));
 			}
-			self->gridstate->dragselectionbase = trackercolumn_makecursor(
+			self->gridstate->pv.dragselectionbase = trackercolumn_makecursor(
 				self, ev->pt);
 		}
 	}
@@ -423,7 +422,7 @@ void trackercolumn_onmousemove(TrackerColumn* self, psy_ui_MouseEvent* ev)
 			self->gridstate->trackconfig->resizesize.width = ev->pt.x;			
 		}
 	} else {
-		self->gridstate->dragcursor =
+		self->gridstate->pv.dragcursor =
 			trackerstate_checkcursorbounds(self->gridstate,
 			trackercolumn_makecursor(self, ev->pt));
 	}	
@@ -441,7 +440,6 @@ void trackercolumn_onmouseup(TrackerColumn* self, psy_ui_MouseEvent* ev)
 			self->gridstate->trackconfig->resizesize.width > 0.0) {
 		double basewidth;
 		
-
 		self->trackdef = trackerstate_trackdef(self->gridstate, self->index);
 		basewidth = trackdef_basewidth(self->trackdef, self->gridstate->trackconfig->textwidth);
 		if (self->gridstate->trackconfig->noteresize) {
@@ -496,21 +494,19 @@ psy_audio_SequenceCursor trackercolumn_makecursor(TrackerColumn* self,
 	double cpx;	
 	psy_audio_Sequence* sequence;
 	
-	rv = self->gridstate->cursor;
-	sequence = trackerstate_sequence(self->gridstate);
+	rv = self->gridstate->pv.cursor;
+	sequence = patternviewstate_sequence(&self->gridstate->pv);
 	if (sequence) {
 		psy_audio_sequencecursor_updateseqoffset(&rv,
 			sequence);
 	}
-	rv.cursor.seqoffset = (self->gridstate->singlemode)
-		? 0.0
-		: rv.seqoffset;	
-	rv.cursor.offset = trackerstate_pxtobeat(self->gridstate, pt.y) - rv.cursor.seqoffset;	
+	rv.cursor.absolute = !self->gridstate->pv.singlemode;	
+	rv.cursor.offset = trackerstate_pxtobeat(self->gridstate, pt.y);		
 	rv.cursor.lpb = trackerstate_lpb(self->gridstate);
-	if (trackerstate_pattern(self->gridstate) &&
-			rv.cursor.offset >= psy_audio_pattern_length(trackerstate_pattern(self->gridstate))) {
-		if (self->gridstate->singlemode) {
-			rv.cursor.offset = psy_audio_pattern_length(trackerstate_pattern(self->gridstate)) -
+	if (patternviewstate_pattern(&self->gridstate->pv) &&
+			rv.cursor.offset >= psy_audio_pattern_length(patternviewstate_pattern(&self->gridstate->pv))) {
+		if (self->gridstate->pv.singlemode) {
+			rv.cursor.offset = psy_audio_pattern_length(patternviewstate_pattern(&self->gridstate->pv)) -
 				trackerstate_bpl(self->gridstate);
 		}
 	}
@@ -532,7 +528,7 @@ psy_audio_SequenceCursor trackercolumn_makecursor(TrackerColumn* self,
 	if (rv.cursor.digit >= trackdef_numdigits(trackdef, rv.cursor.column)) {
 		rv.cursor.digit = trackdef_numdigits(trackdef, rv.cursor.column) - 1;
 	}
-	self->gridstate->cursor.cursor.patternid =
+	self->gridstate->pv.cursor.cursor.patternid =
 		self->workspace->song->sequence.cursor.cursor.patternid;		
 	return rv;
 }
@@ -546,15 +542,10 @@ void trackercolumn_onpreferredsize(TrackerColumn* self,
 	} else {
 		rv->width = psy_ui_value_make_px(trackerstate_trackwidth(
 			self->gridstate, self->index));		
-	}
-	if (self->gridstate->maxlines == psy_INDEX_INVALID) {
-		rv->height = psy_ui_value_make_px(
-			(trackerstate_numlines(self->gridstate)) *
-			self->gridstate->lineheightpx);
-	} else {
-		rv->height = psy_ui_value_make_px((self->gridstate->maxlines) *
-			self->gridstate->lineheightpx);
-	}
+	}	
+	rv->height = psy_ui_value_make_px(
+		(trackerstate_numlines(self->gridstate)) *
+		self->gridstate->lineheightpx);	
 }
 
 void setcolumncolour(PatternViewSkin* skin, psy_ui_Graphics* g,

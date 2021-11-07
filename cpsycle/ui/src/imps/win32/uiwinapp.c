@@ -12,8 +12,6 @@
 #include "../../uicomponent.h"
 /* windows */
 #include "uiwincomponentimp.h"
-#include "uiwinfontimp.h"
-#include "uiwingraphicsimp.h"
 #include <excpt.h>
 /* common control header */
 #include <commctrl.h>
@@ -26,7 +24,8 @@ static psy_ui_WinApp* winapp = NULL;
 static psy_ui_KeyboardEvent keyboardevent(psy_ui_EventType, WPARAM, LPARAM);
 static psy_ui_MouseEvent mouseevent(int msg, WPARAM, LPARAM);
 static bool handle_ctlcolor(int msg, HWND, WPARAM, LPARAM, LRESULT* rv);
-static void handle_scroll(psy_ui_win_ComponentImp* imp, HWND hwnd, WPARAM, LPARAM, int bar);
+static void handle_scroll(psy_ui_win_ComponentImp* imp, HWND hwnd, WPARAM,
+	LPARAM, int bar);
 static void handle_scrollparam(SCROLLINFO*, WPARAM);
 static void adjustcoordinates(psy_ui_Component*, psy_ui_RealPoint*);
 static void psy_ui_winapp_onappdefaultschange(psy_ui_WinApp*);
@@ -554,6 +553,9 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 
 				ev = mouseevent(message, wParam, lParam);
 				adjustcoordinates(component, &ev.pt);
+				if (component->id == 100) {
+					component = component;
+				}
 				psy_ui_eventdispatch_send(&winapp->app->eventdispatch,
 					component, psy_ui_mouseevent_base(&ev));
 				return 0;
@@ -599,8 +601,15 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 			}
 			break;
 		case WM_MOUSELEAVE:
-			imp->imp.vtable->dev_mouseleave(&imp->imp);
-			return 0;			
+			if (component) {
+				psy_ui_Event ev;
+
+				psy_ui_event_init(&ev, psy_ui_MOUSELEAVE);
+				psy_ui_event_stop_propagation(&ev);
+				psy_ui_eventdispatch_send(&winapp->app->eventdispatch,
+					component, &ev);				
+			}			
+			return 0;
 		case WM_VSCROLL:			
 			if (component) {
 				handle_scroll(imp, hwnd, wParam, lParam, SB_VERT);
