@@ -27,9 +27,9 @@ typedef struct PatternViewState {
 	PatternCursorStepMode pgupdownstepmode;
 	intptr_t pgupdownstep;
 	psy_audio_BlockSelection selection;
-	psy_audio_SequenceCursor dragselectionbase;
-	psy_audio_SequenceCursor dragcursor;
+	psy_audio_SequenceCursor dragselectionbase;	
 	bool singlemode;
+	PatternDisplayMode display;
 	/* references */
 	psy_audio_Pattern* pattern;
 	psy_audio_Song* song;
@@ -42,9 +42,9 @@ void patternviewstate_dispose(PatternViewState*);
 INLINE intptr_t patternviewstate_currpgupdownstep(const PatternViewState* self)
 {
 	if (self->pgupdownstepmode == PATTERNCURSOR_STEP_BEAT) {
-		return self->cursor.cursor.lpb;
+		return self->cursor.lpb;
 	} else if (self->pgupdownstepmode == PATTERNCURSOR_STEP_4BEAT) {
-		return self->cursor.cursor.lpb * 4;
+		return self->cursor.lpb * 4;
 	}
 	return self->pgupdownstep;
 }

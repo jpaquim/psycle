@@ -4,7 +4,9 @@
 #include "../../detail/prefix.h"
 
 #include "transformpatternview.h"
-
+/* audio */
+#include <sequencecursor.h>
+/* platform */
 #include "../../detail/portable.h"
 
 static const char notes[12][3] = { "C-","C#","D-","D#","E-","F-","F#","G-","G#","A-","A#","B-" };
@@ -333,12 +335,12 @@ void transformpatternview_searchentiresong(TransformPatternView* self,
 			currpattern = (psy_audio_Pattern*)psy_tableiterator_value(&it);
 			if (psy_audio_sequence_patternused(&workspace_song(self->workspace)->sequence,
 					psy_tableiterator_key(&it))) {
-				psy_audio_PatternCursor cursor;
+				psy_audio_SequenceCursor cursor;
 
 				cursor = psy_audio_pattern_searchinpattern(currpattern,
 					psy_audio_blockselection_make(
-						psy_audio_patterncursor_make(0, (psy_dsp_big_beat_t)0.0),
-						psy_audio_patterncursor_make(MAX_TRACKS,
+						psy_audio_sequencecursor_make(0, (psy_dsp_big_beat_t)0.0),
+						psy_audio_sequencecursor_make(MAX_TRACKS,
 							psy_audio_pattern_length(currpattern))),
 					searchreplacemode);
 				if (cursor.patternid != psy_INDEX_INVALID) {
@@ -367,12 +369,12 @@ void transformpatternview_searchpattern(TransformPatternView* self,
 
 	currpattern = transformpatternview_currpattern(self);
 	if (currpattern) {
-		psy_audio_PatternCursor cursor;
+		psy_audio_SequenceCursor cursor;
 
 		cursor = psy_audio_pattern_searchinpattern(currpattern,
 			psy_audio_blockselection_make(
-				psy_audio_patterncursor_make(0, (psy_dsp_big_beat_t)0.0),
-				psy_audio_patterncursor_make(MAX_TRACKS,
+				psy_audio_sequencecursor_make(0, (psy_dsp_big_beat_t)0.0),
+				psy_audio_sequencecursor_make(MAX_TRACKS,
 					psy_audio_pattern_length(currpattern))),
 			searchreplacemode);
 		if (cursor.patternid != psy_INDEX_INVALID) {
@@ -390,7 +392,7 @@ void transformpatternview_searchcurrentselection(TransformPatternView* self,
 
 	currpattern = transformpatternview_currpattern(self);
 	if (currpattern) {
-		psy_audio_PatternCursor cursor;
+		psy_audio_SequenceCursor cursor;
 
 		cursor = psy_audio_pattern_searchinpattern(currpattern,
 			self->patternselection,

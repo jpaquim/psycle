@@ -316,7 +316,6 @@
       <RuntimeTypeInfo Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</RuntimeTypeInfo>
       <RuntimeTypeInfo Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</RuntimeTypeInfo>
     </ClCompile>
-    <ClCompile Include="src\patterncursor.c" />
     <ClCompile Include="src\patternentry.c" />
     <ClCompile Include="src\patternevent.c" />
     <ClCompile Include="src\patternio.c" />
@@ -463,7 +462,6 @@
     <ClInclude Include="src\mixer.h" />
     <ClInclude Include="src\paramtranslator.h" />
     <ClInclude Include="src\pattern.h" />
-    <ClInclude Include="src\patterncursor.h" />
     <ClInclude Include="src\patternentry.h" />
     <ClInclude Include="src\patternevent.h" />
     <ClInclude Include="src\patternio.h" />

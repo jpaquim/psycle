@@ -15,17 +15,59 @@
 /* SequenceCursor */
 void psy_audio_sequencecursor_init(psy_audio_SequenceCursor* self)
 {
-	psy_audio_patterncursor_init(&self->cursor);
 	self->orderindex = psy_audio_orderindex_make(0, 0);
 	self->seqoffset = (psy_dsp_big_beat_t)0.0;
+	self->key = psy_audio_NOTECOMMANDS_MIDDLEC;
+	self->track = 0;
+	self->offset = 0.0;
+	self->absolute = FALSE;
+	self->lpb = 4;
+	self->column = 0;
+	self->digit = 0;
+	self->patternid = 0;
 }
 
 void psy_audio_sequencecursor_init_all(psy_audio_SequenceCursor* self,
 	psy_audio_OrderIndex orderindex)
 {
-	psy_audio_patterncursor_init(&self->cursor);
+	psy_audio_sequencecursor_init(self);
 	self->orderindex = orderindex;
 	self->seqoffset = 0.0;
+}
+
+psy_audio_SequenceCursor psy_audio_sequencecursor_make_all(
+	uintptr_t track, psy_dsp_big_beat_t offset, uint8_t key)
+{
+	psy_audio_SequenceCursor rv;
+	
+	psy_audio_sequencecursor_init(&rv);
+	rv.track = track;
+	rv.offset = offset;
+	rv.key = key;
+	return rv;
+}
+
+psy_audio_SequenceCursor psy_audio_sequencecursor_make(
+	uintptr_t track, psy_dsp_big_beat_t offset)
+{
+	psy_audio_SequenceCursor rv;
+
+	psy_audio_sequencecursor_init(&rv);
+	rv.track = track;
+	rv.offset = offset;
+	return rv;
+}
+
+bool psy_audio_sequencecursor_equal(psy_audio_SequenceCursor* lhs,
+	psy_audio_SequenceCursor* rhs)
+{
+	assert(lhs && rhs);
+	return
+		rhs->column == lhs->column &&
+		rhs->digit == lhs->digit &&
+		rhs->track == lhs->track &&
+		rhs->offset == lhs->offset &&
+		rhs->patternid == lhs->patternid;
 }
 
 void psy_audio_sequencecursor_updateseqoffset(psy_audio_SequenceCursor* self,
@@ -69,20 +111,20 @@ psy_dsp_big_beat_t psy_audio_sequencecursor_seqoffset(
 
 uintptr_t psy_audio_sequencecursor_line(const psy_audio_SequenceCursor* self)
 {
-	return (uintptr_t)(self->cursor.offset * self->cursor.lpb);
+	return (uintptr_t)(self->offset * self->lpb);
 }
 
 uintptr_t psy_audio_sequencecursor_track(const psy_audio_SequenceCursor* self)
 {
-	return (self->cursor.track);
+	return (self->track);
 }
 
 uintptr_t psy_audio_sequencecursor_column(const psy_audio_SequenceCursor* self)
 {
-	return (self->cursor.column);
+	return (self->column);
 }
 
 uintptr_t psy_audio_sequencecursor_digit(const psy_audio_SequenceCursor* self)
 {
-	return (self->cursor.digit);
+	return (self->digit);
 }

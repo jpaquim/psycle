@@ -46,8 +46,8 @@ void trackercolumn_init(TrackerColumn*, psy_ui_Component* parent,
 
 TrackerColumn* trackercolumn_alloc(void);
 TrackerColumn* trackercolumn_allocinit(psy_ui_Component* parent,
-	psy_ui_Component* view, uintptr_t index, TrackerState* gridstate,
-	Workspace* workspace);
+	psy_ui_Component* view, uintptr_t index, TrackerState*,
+	Workspace*);
 
 INLINE psy_ui_Component* trackercolumn_base(TrackerColumn* self)
 {

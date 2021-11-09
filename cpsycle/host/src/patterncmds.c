@@ -71,8 +71,8 @@ void insertcommand_execute(InsertCommand* self)
 	psy_audio_PatternNode* prev;
 
 	node = psy_audio_pattern_findnode(self->pattern,
-		self->cursor.cursor.track,
-		(psy_dsp_big_beat_t)self->cursor.cursor.offset,
+		self->cursor.track,
+		(psy_dsp_big_beat_t)self->cursor.offset,
 		(psy_dsp_big_beat_t)self->bpl, &prev);
 	if (node) {
 		self->oldevent = psy_audio_pattern_event(self->pattern, node);
@@ -81,8 +81,8 @@ void insertcommand_execute(InsertCommand* self)
 	} else {
 		node = psy_audio_pattern_insert(self->pattern,
 			prev,
-			self->cursor.cursor.track,
-			(psy_dsp_big_beat_t)self->cursor.cursor.offset,
+			self->cursor.track,
+			(psy_dsp_big_beat_t)self->cursor.offset,
 			&self->event);
 		self->insert = 1;
 	}
@@ -99,8 +99,8 @@ void insertcommand_revert(InsertCommand* self)
 	psy_audio_PatternNode* prev;
 
 	node = psy_audio_pattern_findnode(self->pattern,
-		self->cursor.cursor.track,
-		self->cursor.cursor.offset,
+		self->cursor.track,
+		self->cursor.offset,
 		self->bpl, &prev);
 	if (node) {
 		if (self->insert) {
@@ -168,8 +168,8 @@ void removecommand_execute(RemoveCommand* self)
 	psy_audio_PatternNode* prev;
 
 	node = psy_audio_pattern_findnode(self->pattern,
-		self->cursor.cursor.track,
-		(psy_dsp_big_beat_t)self->cursor.cursor.offset,
+		self->cursor.track,
+		(psy_dsp_big_beat_t)self->cursor.offset,
 		(psy_dsp_big_beat_t)self->bpl, &prev);
 	if (node) {
 		self->oldevent = psy_audio_pattern_event(self->pattern, node);
@@ -197,13 +197,13 @@ void removecommand_revert(RemoveCommand* self)
 		psy_audio_PatternNode* prev;
 
 		node = psy_audio_pattern_findnode(self->pattern,
-			self->cursor.cursor.track,
-			self->cursor.cursor.offset,
+			self->cursor.track,
+			self->cursor.offset,
 			self->bpl, &prev);		
 		node = psy_audio_pattern_insert(self->pattern,
 			prev,
-			self->cursor.cursor.track,
-			(psy_dsp_big_beat_t)self->cursor.cursor.offset,
+			self->cursor.track,
+			(psy_dsp_big_beat_t)self->cursor.offset,
 			&self->oldevent);
 		if (self->workspace && workspace_song(self->workspace)) {
 			psy_audio_sequence_setcursor(

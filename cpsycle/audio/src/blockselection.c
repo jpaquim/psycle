@@ -42,43 +42,43 @@ void psy_audio_blockselection_startdrag(psy_audio_BlockSelection* self,
 	psy_audio_blockselection_enable(self);
 	self->topleft = cursor;
 	self->bottomright = cursor;
-	if (cursor.cursor.track >= dragselectionbase.cursor.track) {
-		self->topleft.cursor.track = dragselectionbase.cursor.track;
-		self->bottomright.cursor.track = cursor.cursor.track;
+	if (cursor.track >= dragselectionbase.track) {
+		self->topleft.track = dragselectionbase.track;
+		self->bottomright.track = cursor.track;
 	} else {
-		self->topleft.cursor.track = cursor.cursor.track;
-		self->bottomright.cursor.track = dragselectionbase.cursor.track;
+		self->topleft.track = cursor.track;
+		self->bottomright.track = dragselectionbase.track;
 	}
-	if (cursor.cursor.offset >= dragselectionbase.cursor.offset) {
-		self->topleft.cursor.offset = dragselectionbase.cursor.offset;
-		self->bottomright.cursor.offset = cursor.cursor.offset + bpl;
+	if (cursor.offset >= dragselectionbase.offset) {
+		self->topleft.offset = dragselectionbase.offset;
+		self->bottomright.offset = cursor.offset + bpl;
 	} else {
-		self->topleft.cursor.offset = cursor.cursor.offset;
-		self->bottomright.cursor.offset = dragselectionbase.cursor.offset +
+		self->topleft.offset = cursor.offset;
+		self->bottomright.offset = dragselectionbase.offset +
 			bpl;
 	}
-	self->bottomright.cursor.track += 1;
+	self->bottomright.track += 1;
 }
 
 void psy_audio_blockselection_drag(psy_audio_BlockSelection* self,
-	psy_audio_PatternCursor dragselectionbase,
-	psy_audio_PatternCursor cursor, double bpl)
+	psy_audio_SequenceCursor dragselectionbase,
+	psy_audio_SequenceCursor cursor, double bpl)
 {
 	assert(self);
 
 	if (cursor.track >= dragselectionbase.track) {
-		self->topleft.cursor.track = dragselectionbase.track;
-		self->bottomright.cursor.track = cursor.track + 1;
+		self->topleft.track = dragselectionbase.track;
+		self->bottomright.track = cursor.track + 1;
 	} else {
-		self->topleft.cursor.track = cursor.track;
-		self->bottomright.cursor.track = dragselectionbase.track + 1;
+		self->topleft.track = cursor.track;
+		self->bottomright.track = dragselectionbase.track + 1;
 	}
 	if (cursor.offset >= dragselectionbase.offset) {
-		self->topleft.cursor.offset = dragselectionbase.offset;
-		self->bottomright.cursor.offset = cursor.offset + bpl;
+		self->topleft.offset = dragselectionbase.offset;
+		self->bottomright.offset = cursor.offset + bpl;
 	} else {
-		self->topleft.cursor.offset = cursor.offset;
-		self->bottomright.cursor.offset = dragselectionbase.offset + bpl;
+		self->topleft.offset = cursor.offset;
+		self->bottomright.offset = dragselectionbase.offset + bpl;
 	}
 }
 

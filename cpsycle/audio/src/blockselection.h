@@ -35,9 +35,9 @@ typedef struct psy_audio_BlockSelection {
 
 void psy_audio_blockselection_init(psy_audio_BlockSelection*);
 void psy_audio_blockselection_init_all(psy_audio_BlockSelection*,
-	psy_audio_PatternCursor topleft, psy_audio_PatternCursor bottomright);
+	psy_audio_SequenceCursor topleft, psy_audio_SequenceCursor bottomright);
 psy_audio_BlockSelection psy_audio_blockselection_make(
-	psy_audio_PatternCursor topleft, psy_audio_PatternCursor bottomright);
+	psy_audio_SequenceCursor topleft, psy_audio_SequenceCursor bottomright);
 
 INLINE bool psy_audio_blockselection_valid(
 	const psy_audio_BlockSelection* self)
@@ -60,10 +60,10 @@ INLINE bool psy_audio_blockselection_test(psy_audio_BlockSelection* self,
 	uintptr_t track, psy_dsp_big_beat_t offset)
 {
 	return psy_audio_blockselection_valid(self) &&
-		track >= self->topleft.cursor.track &&
-		track < self->bottomright.cursor.track&&
-		offset >= self->topleft.cursor.offset /* + self->topleft.seqoffset */ &&
-		offset < self->bottomright.cursor.offset /* + self->bottomright.seqoffset */;
+		track >= self->topleft.track &&
+		track < self->bottomright.track&&
+		offset >= self->topleft.offset /* + self->topleft.seqoffset */ &&
+		offset < self->bottomright.offset /* + self->bottomright.seqoffset */;
 }
 
 void psy_audio_blockselection_startdrag(psy_audio_BlockSelection*,

@@ -334,9 +334,6 @@
     <ClCompile Include="src\luaplayer.c">
       <Filter>machine\plugins\lua</Filter>
     </ClCompile>
-    <ClCompile Include="src\patterncursor.c">
-      <Filter>pattern</Filter>
-    </ClCompile>
     <ClCompile Include="src\blockselection.c">
       <Filter>sequence</Filter>
     </ClCompile>
@@ -647,9 +644,6 @@
     </ClInclude>
     <ClInclude Include="src\luaplayer.h">
       <Filter>machine\plugins\lua</Filter>
-    </ClInclude>
-    <ClInclude Include="src\patterncursor.h">
-      <Filter>pattern</Filter>
     </ClInclude>
     <ClInclude Include="src\blockselection.h">
       <Filter>sequence</Filter>

@@ -1,21 +1,26 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "swingfillview.h"
-// platform
+/* platform */
 #include "../../detail/portable.h"
 
 #define DESC_CHARNUM 22
 #define EDIT_CHARNUM 10
 
+/* Prototypes */
 static void swingfillview_initactions(SwingFillView*);
 static void swingfillview_onhide(SwingFillView*, psy_ui_Component* sender);
 static void swingfillview_onactualbpm(SwingFillView*, psy_ui_Component* sender);
 static void swingfillview_oncenterbpm(SwingFillView*, psy_ui_Component* sender);
 static void swingfillview_setoffset(SwingFillView*, bool offset);
 
+/* implementation */
 void swingfillview_init(SwingFillView* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {
@@ -86,14 +91,16 @@ void swingfillview_setvalues(SwingFillView* self, int tempo, int width,
 	swingfillview_setoffset(self, offset);
 }
 
-void swingfillview_values(SwingFillView* self, int* rv_tempo, int* rv_width,
-	float* rv_variance, float* rv_phase, bool* rv_offset)
+psy_audio_SwingFill swingfillview_values(SwingFillView* self)
 {
-	*rv_tempo = intedit_value(&self->tempo);
-	*rv_width = intedit_value(&self->width);
-	*rv_variance = realedit_value(&self->variance);
-	*rv_phase = realedit_value(&self->phase);
-	*rv_offset = self->offset;
+	psy_audio_SwingFill rv;
+	
+	rv.tempo = intedit_value(&self->tempo);
+	rv.width = intedit_value(&self->width);
+	rv.variance = realedit_value(&self->variance);
+	rv.phase = realedit_value(&self->phase);
+	rv.offset = self->offset;
+	return rv;
 }
 
 void swingfillview_onhide(SwingFillView* self, psy_ui_Component* sender)
