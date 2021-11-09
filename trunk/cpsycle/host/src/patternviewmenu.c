@@ -10,7 +10,7 @@
 
 // prototypes
 static const char* patternblockmenu_section(PatternBlockMenu*);
-static void patternblockmenu_execute(PatternBlockMenu* self, int id);
+static void patternblockmenu_execute(PatternBlockMenu*, int id);
 static void patternblockmenu_oncut(PatternBlockMenu*, psy_ui_Component* sender);
 static void patternblockmenu_oncopy(PatternBlockMenu*, psy_ui_Component* sender);
 static void patternblockmenu_onpaste(PatternBlockMenu*, psy_ui_Component* sender);

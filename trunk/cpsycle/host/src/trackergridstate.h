@@ -15,10 +15,6 @@
 #include <pattern.h>
 #include <sequence.h>
 
-/*
-** The TrackerView is where you enter notes. It displays a Pattern selected by
-** the SequenceView as a tracker grid.
-*/
 
 typedef enum {
 	SCROLL_DIR_NONE,
@@ -125,7 +121,8 @@ typedef struct TrackerState {
 	bool drawcursor;		
 	/* precomputed */
 	intptr_t visilines;
-	bool cursorchanging;	
+	bool cursorchanging;
+	intptr_t seqstartline;
 	/* references */
 	const psy_ui_Font* gridfont;	
 } TrackerState;
@@ -178,12 +175,12 @@ bool trackerstate_testplaybar(TrackerState*,
 
 INLINE uintptr_t trackerstate_lpb(const TrackerState* self)
 {
-	return self->pv.cursor.cursor.lpb;
+	return self->pv.cursor.lpb;
 }
 
 INLINE psy_dsp_big_beat_t trackerstate_bpl(const TrackerState* self)
 {
-	return (psy_dsp_big_beat_t)1.0 / self->pv.cursor.cursor.lpb;
+	return (psy_dsp_big_beat_t)1.0 / self->pv.cursor.lpb;
 }
 
 INLINE intptr_t trackerstate_beattoline(const TrackerState* self,
@@ -270,5 +267,8 @@ INLINE uintptr_t trackerstate_midline(const TrackerState* self,
 
 void trackerstate_setfont(TrackerState*, const psy_ui_Font*,
 	const psy_ui_TextMetric*);
+
+psy_audio_SequenceCursor trackerstate_makecursor(TrackerState*,
+	psy_ui_RealPoint pt, uintptr_t index);
 
 #endif /* TRACKERGRIDSTATE_H */

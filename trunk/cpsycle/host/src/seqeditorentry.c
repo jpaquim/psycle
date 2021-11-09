@@ -273,7 +273,7 @@ void seqeditpatternentry_onmousedown(SeqEditPatternEntry* self,
 		seqeditpos = seqeditstate_editposition(self->seqeditorentry.state);
 		seqeditentry_startdrag(&self->seqeditorentry, ev);
 		cursor = self->seqeditorentry.state->workspace->song->sequence.cursor;
-		cursor.cursor.offset = self->seqeditorentry.state->dragposition;
+		cursor.offset = self->seqeditorentry.state->dragposition;
 		if (ev->button == 1 && self->seqeditorentry.state->dragstatus == SEQEDIT_DRAG_START) {
 			if ((workspace_currview(self->seqeditorentry.state->workspace).id ==
 					VIEW_ID_PATTERNVIEW) &&
@@ -284,16 +284,16 @@ void seqeditpatternentry_onmousedown(SeqEditPatternEntry* self,
 						cursor);
 				}				
 				cursor = self->seqeditorentry.state->workspace->song->sequence.cursor;
-				workspace_gotocursor(self->seqeditorentry.state->workspace, cursor.cursor);
+				workspace_gotocursor(self->seqeditorentry.state->workspace, cursor);
 			} else {
-				cursor.cursor.offset = 0;
+				cursor.offset = 0;
 				if (self->seqeditorentry.state->workspace && workspace_song(self->seqeditorentry.state->workspace)) {
 					psy_audio_sequence_setcursor(
 						psy_audio_song_sequence(workspace_song(self->seqeditorentry.state->workspace)),
 						cursor);
 				}				
 				cursor = self->seqeditorentry.state->workspace->song->sequence.cursor;
-				workspace_gotocursor(self->seqeditorentry.state->workspace, cursor.cursor);
+				workspace_gotocursor(self->seqeditorentry.state->workspace, cursor);
 			}
 			if (workspace_currview(self->seqeditorentry.state->workspace).id !=
 				VIEW_ID_PATTERNVIEW) {

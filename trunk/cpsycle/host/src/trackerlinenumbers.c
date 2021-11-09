@@ -88,7 +88,7 @@ void trackerlinenumbers_init(TrackerLineNumbers* self, psy_ui_Component* parent,
 	}
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		trackerlinenumbers_onsongchanged);
-	psy_audio_patterncursor_init(&self->lastcursor.cursor);
+	psy_audio_sequencecursor_init(&self->lastcursor);
 	self->lastcursor.orderindex = psy_audio_orderindex_make(0, 0);
 	psy_ui_component_setscrollstep_height(&self->component,
 		state->lineheight);
@@ -114,8 +114,8 @@ void trackerlinenumbers_ondraw(TrackerLineNumbers* self, psy_ui_Graphics* g)
 		
 		sequence = patternviewstate_sequence(&self->state->pv);
 		trackerstate_lineclip(self->state, &g->clip, &clip);		
-		offset = clip.topleft.cursor.offset;
-		line = trackerstate_beattoline(self->state, clip.topleft.cursor.offset);
+		offset = clip.topleft.offset;
+		line = trackerstate_beattoline(self->state, clip.topleft.offset);
 		cpy = trackerstate_beattopx(self->state, offset);
 		size = psy_ui_component_scrollsize_px(&self->component);				
 		cursor = self->workspace->song->sequence.cursor;
@@ -145,7 +145,7 @@ void trackerlinenumbers_ondraw(TrackerLineNumbers* self, psy_ui_Graphics* g)
 			ite.sequencentrynode = NULL;			
 		}
 		maxlines = trackerstate_numlines(self->state);
-		while (offset <= clip.bottomright.cursor.offset && line < (intptr_t)maxlines) {
+		while (offset <= clip.bottomright.offset && line < (intptr_t)maxlines) {
 			double ystart;			
 			char text[64];
 				
@@ -230,7 +230,7 @@ TrackerColumnFlags trackerlinennumbers_columnflags(TrackerLineNumbers* self,
 	TrackerColumnFlags rv;
 
 	rv.playbar = psy_audio_player_playing(workspace_player(self->workspace)) &&
-		trackerstate_testplaybar(self->state, self->workspace->lastplayposition, offset);
+		trackerstate_testplaybar(self->state, self->workspace->currplayposition, offset);
 	rv.mid = 0;
 	rv.cursor = self->showcursor &&
 		self->state->drawcursor && !self->state->cursorchanging &&
@@ -300,7 +300,7 @@ void trackerlinennumbers_oncursorchanged(TrackerLineNumbers* self,
 	psy_audio_SequenceCursor currcursor;
 
 	currcursor = sender->cursor;
-	if (self->lastcursor.cursor.offset != currcursor.cursor.offset) {
+	if (self->lastcursor.offset != currcursor.offset) {
 		if (!self->state->cursorchanging) {
 			trackerlinenumbers_invalidatecursor(self, &self->lastcursor);
 		}
@@ -332,25 +332,22 @@ void trackerlinenumbers_invalidatecursor(TrackerLineNumbers* self,
 			psy_ui_realsize_make(size.width, self->state->lineheightpx)));
 }
 
-void trackerlinenumbers_invalidateline(TrackerLineNumbers* self, psy_dsp_big_beat_t offset)
-{			
-	if (!self->state->pv.singlemode ||(patternviewstate_pattern(&self->state->pv) &&
-			trackerstate_testplayposition(self->state, offset))) {
-		psy_ui_RealSize size;		
-		intptr_t line;
+void trackerlinenumbers_invalidateline(TrackerLineNumbers* self, intptr_t line)
+{				
+	psy_ui_RealSize size;
+	intptr_t seqstartline;
 
-		size = psy_ui_component_scrollsize_px(&self->component);		
-		line = trackerstate_beattoline(self->state,
-			offset - ((self->state->pv.singlemode)
-				? self->state->pv.cursor.seqoffset
-				: 0.0));
-		psy_ui_component_invalidaterect(&self->component,
-			psy_ui_realrectangle_make(
-				psy_ui_realpoint_make(0.0,
-					self->state->lineheightpx * line),
-				psy_ui_realsize_make(
-					size.width, self->state->lineheightpx)));
-	}
+	seqstartline = trackerstate_beattoline(self->state,
+		((self->state->pv.singlemode)
+			? self->state->pv.cursor.seqoffset
+			: 0.0));
+	size = psy_ui_component_scrollsize_px(&self->component);		
+	psy_ui_component_invalidaterect(&self->component,
+		psy_ui_realrectangle_make(
+			psy_ui_realpoint_make(0.0,
+				self->state->lineheightpx * (line - seqstartline)),
+			psy_ui_realsize_make(
+				size.width, self->state->lineheightpx)));	
 }
 
 void trackerlinenumbers_onpreferredsize(TrackerLineNumbers* self,
@@ -606,11 +603,11 @@ void trackerlinenumberbar_init(TrackerLineNumberBar* self, psy_ui_Component* par
 void trackerlinenumberbar_onplaylinechanged(TrackerLineNumberBar* self,
 	Workspace* sender)
 {
-	if (!workspace_followingsong(sender) &&
-			psy_ui_component_drawvisible(&self->component)) {		
+	if (!workspace_followingsong(sender) && psy_ui_component_drawvisible(
+			&self->component)) {				
 		trackerlinenumbers_invalidateline(&self->linenumbers,
-			sender->lastplayposition);
+			sender->lastplayline);
 		trackerlinenumbers_invalidateline(&self->linenumbers,
-			sender->currplayposition);
+			sender->currplayline);
 	}
 }

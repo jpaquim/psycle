@@ -187,7 +187,7 @@ void patterntrackbox_drawledarmed(PatternTrackBox* self, psy_ui_Graphics* g)
 
 void patterntrackbox_drawselection(PatternTrackBox* self, psy_ui_Graphics* g)
 {
-	if (self->index == self->state->pv.cursor.cursor.track) {
+	if (self->index == self->state->pv.cursor.track) {
 		psy_ui_setcolour(g, self->state->pv.skin->font);
 		psy_ui_drawline(g, psy_ui_realpoint_zero(),
 			psy_ui_realpoint_make(
@@ -240,7 +240,7 @@ void patterntrackbox_onmousedown(PatternTrackBox* self,
 			psy_audio_SequenceCursor cursor;
 
 			cursor = self->state->pv.cursor;
-			cursor.cursor.track = self->index;
+			cursor.track = self->index;
 			patternviewstate_setcursor(&self->state->pv, cursor);
 			repaint = FALSE;
 		}
@@ -373,8 +373,8 @@ void trackerheader_oncursorchanged(TrackerHeader* self,
 	psy_audio_SequenceCursor cursor;
 
 	cursor = sender->cursor;		
-	if (self->currtrack != cursor.cursor.track) {
-		self->currtrack = cursor.cursor.track;
+	if (self->currtrack != cursor.track) {
+		self->currtrack = cursor.track;
 		psy_ui_component_invalidate(&self->component);	
 	}		
 }

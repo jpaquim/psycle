@@ -1,21 +1,24 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #if !defined(PATTERNVIEWMENU_H)
 #define PATTERNVIEWMENU_H
 
-// host
+/* host */
 #include "workspace.h"
-// ui
+/* ui */
 #include <uibutton.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// PatternBlockMenu
-//
-// Context Menu for PatternView (Trackerview and Pianoroll)
+/*
+** PatternBlockMenu
+** Context Menu for PatternView (Trackerview and Pianoroll)
+*/
 
 struct PatternView;
 
@@ -26,9 +29,9 @@ typedef enum {
 } PatternViewTarget;
 
 typedef struct PatternBlockMenu {
-	// inherits
+	/* inherits */
 	psy_ui_Component component;
-	// ui elements
+	/* internal */
 	psy_ui_Button cut;
 	psy_ui_Button copy;
 	psy_ui_Button paste;
@@ -46,10 +49,9 @@ typedef struct PatternBlockMenu {
 	psy_ui_Button blocktransposeup12;
 	psy_ui_Button blocktransposedown12;
 	psy_ui_Button importbtn;
-	psy_ui_Button exportbtn;
-	// internal data
+	psy_ui_Button exportbtn;	
 	PatternViewTarget target;
-	// references
+	/* references */
 	struct PatternView* view;
 	Workspace* workspace;
 } PatternBlockMenu;

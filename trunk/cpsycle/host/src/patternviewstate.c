@@ -20,14 +20,14 @@
 void patternviewstate_init(PatternViewState* self, psy_audio_Song* song)
 {
 	psy_audio_sequencecursor_init(&self->cursor);
-	psy_audio_blockselection_init(&self->selection);
-	psy_audio_sequencecursor_init(&self->dragcursor);
+	psy_audio_blockselection_init(&self->selection);	
 	self->pgupdownstepmode = PATTERNCURSOR_STEP_BEAT;
 	self->pgupdownstep = 4;	
 	self->singlemode = TRUE;
 	self->song = song;
 	self->pattern = NULL;
 	self->skin = NULL;	
+	self->display = PROPERTY_ID_PATTERN_DISPLAYMODE_TRACKER;
 }
 
 void patternviewstate_dispose(PatternViewState* self)

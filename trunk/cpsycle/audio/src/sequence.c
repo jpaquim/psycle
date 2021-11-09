@@ -949,7 +949,7 @@ void psy_audio_sequence_setcursor(psy_audio_Sequence* self,
 
 			patternentry = (psy_audio_SequencePatternEntry*)entry;
 			self->cursor.seqoffset = psy_audio_sequenceentry_offset(entry);			
-			self->cursor.cursor.patternid = patternentry->patternslot;
+			self->cursor.patternid = patternentry->patternslot;
 		}		
 		psy_audio_sequenceselection_deselect(&self->sequenceselection,
 			psy_audio_sequenceselection_first(&self->sequenceselection));

@@ -53,7 +53,7 @@ INLINE intptr_t pianogridstate_beattosteps(const PianoGridState* self,
 {
 	assert(self);
 
-	return (intptr_t)(position * self->pv.cursor.cursor.lpb);
+	return (intptr_t)(position * self->pv.cursor.lpb);
 }
 
 INLINE psy_dsp_big_beat_t pianogridstate_quantize(const PianoGridState* self,
@@ -62,7 +62,7 @@ INLINE psy_dsp_big_beat_t pianogridstate_quantize(const PianoGridState* self,
 	assert(self);
 
 	return pianogridstate_beattosteps(self, position) *
-		(1 / (psy_dsp_big_beat_t)self->pv.cursor.cursor.lpb);
+		(1 / (psy_dsp_big_beat_t)self->pv.cursor.lpb);
 }
 
 INLINE psy_dsp_big_beat_t pianogridstate_pxtobeat(const PianoGridState* self, double px)
@@ -92,7 +92,7 @@ INLINE psy_dsp_big_beat_t pianogridstate_step(const PianoGridState* self)
 {
 	assert(self);
 
-	return 1 / (psy_dsp_big_beat_t)self->pv.cursor.cursor.lpb;
+	return 1 / (psy_dsp_big_beat_t)self->pv.cursor.lpb;
 }
 
 INLINE double pianogridstate_steppx(const PianoGridState* self)

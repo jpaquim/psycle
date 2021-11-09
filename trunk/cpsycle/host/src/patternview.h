@@ -71,9 +71,8 @@ typedef struct PatternView {
 	TrackConfig trackconfig;
 	TrackerState state;	
 	PatternViewSkin skin;	
-	bool trackmodeswingfill;	
-	int baselfheight;
-	PatternDisplayMode display;
+	bool trackmodeswingfill;
+	int baselfheight;	
 	bool aligndisplay;
 	int updatealign;
 	/* references */

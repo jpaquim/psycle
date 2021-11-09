@@ -158,7 +158,7 @@ void workspace_init(Workspace* self, psy_ui_Component* main)
 	self->driverconfigloading = FALSE;
 	self->seqviewactive = FALSE;
 	self->modified_without_undo = FALSE;
-	self->lastplayline = psy_INDEX_INVALID;
+	self->lastplayline = psy_INDEX_INVALID;	
 	self->currplayposition = 0.0;
 	self->lastplayposition = -1.0;
 	psy_thread_init(&self->driverconfigloadthread);
@@ -1334,7 +1334,7 @@ psy_EventDriver* workspace_kbddriver(Workspace* self)
 	return psy_audio_player_kbddriver(&self->player);
 }
 
-int workspace_followingsong(Workspace* self)
+bool workspace_followingsong(const Workspace* self)
 {
 	assert(self);
 
@@ -1365,8 +1365,14 @@ void workspace_idle(Workspace* self)
 {
 	assert(self);
 	
+	self->currplayposition = psy_audio_player_position(&self->player);			
+	self->currplayline = cast_decimal(self->player.sequencer.lpb *
+		self->currplayposition);
 	workspace_updateplaycursor(self);	
 	workspace_notifynewline(self);
+	self->lastplayposition = self->currplayposition;	
+	self->lastplayline = cast_decimal(self->player.sequencer.lpb *
+		self->lastplayposition);
 	if (self->scanstart) {
 		psy_lock_enter(&self->pluginscanlock);
 		psy_signal_emit(&self->signal_scanstart, self, 0);
@@ -1433,11 +1439,8 @@ void workspace_notifynewline(Workspace* self)
 
 	seqtime = psy_audio_player_sequencertime(&self->player);
 	if (psy_audio_sequencertime_playing(seqtime)) {
-		if (seqtime->linecounter != self->lastplayline) {
-			self->lastplayline = seqtime->linecounter;
-			self->currplayposition = psy_audio_player_position(&self->player);
-			psy_signal_emit(&self->signal_playlinechanged, self, 0);
-			self->lastplayposition = self->currplayposition;
+		if (seqtime->linecounter != self->lastplayline) {			
+			psy_signal_emit(&self->signal_playlinechanged, self, 0);			
 		}		
 	} else if (self->lastplayline != psy_INDEX_INVALID) {
 		self->lastplayline = psy_INDEX_INVALID;
@@ -1493,19 +1496,18 @@ psy_audio_SequenceCursor workspace_playcursor(Workspace* self)
 					psy_audio_orderindex_make(
 						self->song->sequence.cursor.orderindex.track,
 						seqentry->row));
-				rv.cursor.track = self->song->sequence.cursor.cursor.track;
-				rv.cursor.column = self->song->sequence.cursor.cursor.column;
-				rv.cursor.digit = self->song->sequence.cursor.cursor.digit;
-				rv.cursor.lpb = psy_audio_song_lpb(self->song);
-				rv.cursor.key = self->song->sequence.cursor.cursor.key;
-				rv.cursor.patternid = 
+				rv.track = self->song->sequence.cursor.track;
+				rv.column = self->song->sequence.cursor.column;
+				rv.digit = self->song->sequence.cursor.digit;
+				rv.lpb = psy_audio_song_lpb(self->song);
+				rv.key = self->song->sequence.cursor.key;
+				rv.patternid = 
 					psy_audio_sequencetrackiterator_patidx(track->iterator);
 				rv.seqoffset = psy_audio_sequenceentry_offset(seqentry);
-				line = (uintptr_t)(
-					(psy_audio_player_position(&self->player) -
-					rv.seqoffset) * rv.cursor.lpb);
-				rv.cursor.offset = line / (psy_dsp_big_beat_t)rv.cursor.lpb;
-				rv.cursor.absolute = !self->patternsinglemode;				
+				line = (uintptr_t)((self->currplayposition - rv.seqoffset) *
+					rv.lpb);
+				rv.offset = line / (psy_dsp_big_beat_t)rv.lpb;
+				rv.absolute = !self->patternsinglemode;				
 				return rv;
 			}			
 		}
@@ -1756,7 +1758,7 @@ psy_dsp_NotesTabMode workspace_notetabmode(Workspace* self)
 		: psy_dsp_NOTESTAB_A220;
 }
 
-void workspace_gotocursor(Workspace* self, psy_audio_PatternCursor cursor)
+void workspace_gotocursor(Workspace* self, psy_audio_SequenceCursor cursor)
 {
 	psy_signal_emit(&self->signal_gotocursor, self, 1, &cursor);
 }
@@ -2117,7 +2119,7 @@ void workspace_oninput(Workspace* self, uintptr_t cmdid)
 	case CMD_COLUMN_F:
 		if (self->song && psy_audio_song_numsongtracks(self->song) >=
 				(uintptr_t)(cmdid - CMD_COLUMN_0)) {
-			self->song->sequence.cursor.cursor.track = (cmdid - CMD_COLUMN_0);			
+			self->song->sequence.cursor.track = (cmdid - CMD_COLUMN_0);			
 			psy_audio_sequence_setcursor(psy_audio_song_sequence(self->song),
 				self->song->sequence.cursor);
 		}

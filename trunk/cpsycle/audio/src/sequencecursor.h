@@ -7,9 +7,10 @@
 #define psy_audio_SEQUENCECURSOR_H
 
 /* local */
-#include "patterncursor.h"
 #include "sequenceselection.h"
-
+/* dsp */
+#include <dsptypes.h>
+/* platform */
 #include "../../detail/psydef.h"
 
 #ifdef __cplusplus
@@ -20,15 +21,31 @@ extern "C" {
 ** psy_audio_SequenceCursor
 */
 
-typedef struct psy_audio_SequenceCursor {
-	psy_audio_PatternCursor cursor;
+typedef struct psy_audio_SequenceCursor {	
 	psy_audio_OrderIndex orderindex;
 	psy_dsp_big_beat_t seqoffset;
+	uintptr_t track;
+	psy_dsp_big_beat_t offset;
+	bool absolute;
+	uintptr_t lpb;
+	uintptr_t column;
+	uintptr_t digit;
+	uintptr_t patternid;
+	uint8_t key;
 } psy_audio_SequenceCursor;
 
 void psy_audio_sequencecursor_init(psy_audio_SequenceCursor*);
 void psy_audio_sequencecursor_init_all(psy_audio_SequenceCursor*,
 	psy_audio_OrderIndex orderindex);
+
+psy_audio_SequenceCursor psy_audio_sequencecursor_make_all(
+	uintptr_t track, psy_dsp_big_beat_t offset, uint8_t key);
+psy_audio_SequenceCursor psy_audio_sequencecursor_make(
+	uintptr_t track, psy_dsp_big_beat_t offset);
+
+/* compares two pattern edit positions, if they are equal */
+bool psy_audio_sequencecursor_equal(psy_audio_SequenceCursor* lhs,
+	psy_audio_SequenceCursor* rhs);
 
 void psy_audio_sequencecursor_updateseqoffset(psy_audio_SequenceCursor*,
 	const struct psy_audio_Sequence*);
@@ -43,15 +60,15 @@ uintptr_t psy_audio_sequencecursor_digit(const psy_audio_SequenceCursor*);
 
 INLINE psy_dsp_big_beat_t psy_audio_sequencecursor_offset_abs(const psy_audio_SequenceCursor* self)
 {
-	return self->cursor.offset + (
-		(self->cursor.absolute)
+	return self->offset + (
+		(self->absolute)
 		? 0.0
 		: self->seqoffset);
 }
 
 INLINE psy_dsp_big_beat_t psy_audio_sequencecursor_offset(const psy_audio_SequenceCursor* self)
 {
-	return self->cursor.offset;
+	return self->offset;
 }
 
 INLINE psy_audio_OrderIndex psy_audio_sequencecursor_orderindex(
@@ -65,19 +82,19 @@ INLINE psy_audio_OrderIndex psy_audio_sequencecursor_orderindex(
 INLINE uintptr_t psy_audio_sequencecursor_lpb(const psy_audio_SequenceCursor*
 	self)
 {
-	return self->cursor.lpb;
+	return self->lpb;
 }
 
 INLINE psy_dsp_big_beat_t psy_audio_sequencecursor_bpl(
 	const psy_audio_SequenceCursor* self)
 {
-	return (psy_dsp_big_beat_t)1.0 / (psy_dsp_big_beat_t)self->cursor.lpb;
+	return (psy_dsp_big_beat_t)1.0 / (psy_dsp_big_beat_t)self->lpb;
 }
 
 INLINE void psy_audio_sequencecursor_setlpb(psy_audio_SequenceCursor* self,
 	uintptr_t lpb)
 {
-	self->cursor.lpb = lpb;
+	self->lpb = lpb;
 }
 
 #ifdef __cplusplus

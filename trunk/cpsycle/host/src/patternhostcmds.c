@@ -74,7 +74,7 @@ void patterncmds_blockpaste(PatternCmds* self, psy_audio_SequenceCursor cursor,
 		psy_undoredo_execute(&self->workspace->undoredo,
 			&blockpastecommand_alloc(self->pattern,
 				&self->workspace->patternpaste, cursor,
-				1.0 / (double)cursor.cursor.lpb, mix, self->workspace)->command);		
+				1.0 / (double)cursor.lpb, mix, self->workspace)->command);		
 	}
 }
 
