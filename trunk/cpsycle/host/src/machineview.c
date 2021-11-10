@@ -65,7 +65,7 @@ static psy_ui_ComponentVtable* machineview_vtable_init(MachineView* self)
 	if (!machineview_vtable_initialized) {
 		machineview_vtable = *(self->component.vtable);
 		machineview_vtable.ondestroy =
-			(psy_ui_fp_component_ondestroy)
+			(psy_ui_fp_component_event)
 			machineview_ondestroy;
 		machineview_vtable.onmousedown =
 			(psy_ui_fp_component_onmouseevent)
@@ -86,7 +86,7 @@ static psy_ui_ComponentVtable* machineview_vtable_init(MachineView* self)
 			(psy_ui_fp_component_ontimer)
 			machineview_ontimer;
 		machineview_vtable.onfocus =
-			(psy_ui_fp_component_onfocus)
+			(psy_ui_fp_component_event)
 			machineview_onfocus;
 		machineview_vtable.show =
 			(psy_ui_fp_component_show)

@@ -56,7 +56,7 @@ static void vtable_init(psy_ui_Splitter* self)
 			(psy_ui_fp_component_onmouseevent)
 			splitter_onmouseup;
 		vtable.onmouseenter =
-			(psy_ui_fp_component_onmouseenter)
+			(psy_ui_fp_component_event)
 			splitter_onmouseenter;
 		vtable.hide =
 			(psy_ui_fp_component_hide)

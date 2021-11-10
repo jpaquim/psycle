@@ -45,7 +45,7 @@ static void seqviewtrack_vtable_init(SeqViewTrack* self)
 	if (!seqviewtrack_vtable_initialized) {
 		seqviewtrack_vtable = *(self->component.vtable);
 		seqviewtrack_vtable.ondestroy =
-			(psy_ui_fp_component_ondestroy)
+			(psy_ui_fp_component_event)
 			seqviewtrack_ondestroy;
 		seqviewtrack_vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
@@ -448,10 +448,10 @@ static void seqviewlist_vtable_init(SeqviewList* self)
 			(psy_ui_fp_component_onpreferredsize)
 			seqviewlist_onpreferredsize;		
 		seqviewlist_vtable.onfocus =
-			(psy_ui_fp_component_onfocus)
+			(psy_ui_fp_component_event)
 			seqviewlist_onfocus;
 		seqviewlist_vtable.onfocuslost =
-			(psy_ui_fp_component_onfocuslost)
+			(psy_ui_fp_component_event)
 			seqviewlist_onfocuslost;
 		seqviewlist_vtable_initialized = TRUE;
 	}

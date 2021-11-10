@@ -20,12 +20,10 @@ typedef struct {
 	/* inherits */
 	psy_ui_Component component;	
 	/* references */
-	PianoGridState* gridstate;
-	PianoGridState defaultgridstate;
+	PianoGridState* gridstate;	
 } PianoRuler;
 
 void pianoruler_init(PianoRuler*, psy_ui_Component* parent, PianoGridState*);
-void pianoruler_setsharedgridstate(PianoRuler*, PianoGridState*);
 
 INLINE psy_ui_Component* pianoruler_base(PianoRuler* self)
 {

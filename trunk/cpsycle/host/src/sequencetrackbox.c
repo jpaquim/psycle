@@ -28,7 +28,7 @@ static void sequencetrackbox_vtable_init(SequenceTrackBox* self)
 	if (!sequencetrackbox_vtable_initialized) {
 		sequencetrackbox_vtable = *(sequencetrackbox_base(self)->vtable);		
 		sequencetrackbox_vtable.ondestroy =
-			(psy_ui_fp_component_ondestroy)
+			(psy_ui_fp_component_event)
 			sequencetrackbox_ondestroy;		
 		sequencetrackbox_vtable_initialized = TRUE;
 	}

@@ -30,7 +30,7 @@ static void psy_ui_listbox_vtable_init(psy_ui_ListBox* self)
 	if (!psy_ui_listbox_vtable_initialized) {
 		psy_ui_listbox_vtable = *(self->component.vtable);
 		psy_ui_listbox_vtable.ondestroy =
-			(psy_ui_fp_component_ondestroy)
+			(psy_ui_fp_component_event)
 			psy_ui_listbox_ondestroy;
 		psy_ui_listbox_vtable.onpreferredsize =
 			(psy_ui_fp_component_onpreferredsize)

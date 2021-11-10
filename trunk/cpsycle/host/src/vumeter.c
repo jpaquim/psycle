@@ -41,7 +41,7 @@ static void vumeter_vtable_init(Vumeter* self)
 	if (!vumeter_vtable_initialized) {
 		vumeter_vtable = *(self->component.vtable);
 		vumeter_vtable.ondestroy =
-			(psy_ui_fp_component_ondestroy)
+			(psy_ui_fp_component_event)
 			vumeter_ondestroy;
 		vumeter_vtable.ondraw =
 			(psy_ui_fp_component_ondraw)

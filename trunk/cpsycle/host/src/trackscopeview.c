@@ -36,12 +36,20 @@ static psy_ui_ComponentVtable* vtable_init(TrackScopes* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.ontimer = (psy_ui_fp_component_ontimer)trackscopes_ontimer;
-		vtable.onalign = (psy_ui_fp_component_onalign)trackscopes_onalign;
-		vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
+		vtable.ontimer =
+			(psy_ui_fp_component_ontimer)
+			trackscopes_ontimer;
+		vtable.onalign =
+			(psy_ui_fp_component_event)
+			trackscopes_onalign;
+		vtable.onpreferredsize =
+			(psy_ui_fp_component_onpreferredsize)
 			trackscopes_onpreferredsize;
-		vtable.ondraw = (psy_ui_fp_component_ondraw)trackscopes_ondraw;
-		vtable.onmousedown = (psy_ui_fp_component_onmouseevent)
+		vtable.ondraw =
+			(psy_ui_fp_component_ondraw)
+			trackscopes_ondraw;
+		vtable.onmousedown =
+			(psy_ui_fp_component_onmouseevent)
 			trackscopes_onmousedown;
 		vtable_initialized = TRUE;
 	}

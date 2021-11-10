@@ -7,6 +7,7 @@
 #define PATTERNVIEWMENU_H
 
 /* host */
+#include "patternviewstate.h"
 #include "workspace.h"
 /* ui */
 #include <uibutton.h>
@@ -21,12 +22,6 @@ extern "C" {
 */
 
 struct PatternView;
-
-typedef enum {
-	PATTERNVIEWTARGET_TRACKER,
-	PATTERNVIEWTARGET_PIANOROLL,
-	PATTERNVIEWTARGET_DEFAULTLINE
-} PatternViewTarget;
 
 typedef struct PatternBlockMenu {
 	/* inherits */
@@ -50,19 +45,13 @@ typedef struct PatternBlockMenu {
 	psy_ui_Button blocktransposedown12;
 	psy_ui_Button importbtn;
 	psy_ui_Button exportbtn;	
-	PatternViewTarget target;
 	/* references */
 	struct PatternView* view;
-	Workspace* workspace;
+	PatternViewState* pvstate;	
 } PatternBlockMenu;
 
 void patternblockmenu_init(PatternBlockMenu*, psy_ui_Component*,
-	struct PatternView*, Workspace*);
-
-INLINE PatternViewTarget patternblockmenu_target(const PatternBlockMenu* self)
-{
-	return self->target;
-}
+	struct PatternView*, PatternViewState*);
 
 INLINE psy_ui_Component* patternblockmenu_base(PatternBlockMenu* self)
 {

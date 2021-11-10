@@ -211,7 +211,7 @@ static void kbdbox_vtable_init(KbdBox* self)
 	if (!kbdbox_vtable_initialized) {
 		kbdbox_vtable = *(self->component.vtable);
 		kbdbox_vtable.ondestroy =
-			(psy_ui_fp_component_ondestroy)
+			(psy_ui_fp_component_event)
 			kbdbox_ondestroy;
 		kbdbox_vtable.onmousedown =
 			(psy_ui_fp_component_onmouseevent)

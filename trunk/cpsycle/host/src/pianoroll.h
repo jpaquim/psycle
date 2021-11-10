@@ -111,6 +111,7 @@ typedef struct Pianogrid {
 	/* inherits */
 	psy_ui_Component component;
 	/* internal */
+	PatternViewState defaultpvstate;
 	PianoGridState defaultgridstate;   
 	KeyboardState defaultkeyboardstate;
 	psy_audio_PatternEntry* hoverpatternentry;	
@@ -149,7 +150,7 @@ INLINE const psy_audio_BlockSelection* pianogrid_selection(const Pianogrid* self
 {
 	assert(self);
 
-	return &self->gridstate->pv.selection;
+	return &self->gridstate->pv->selection;
 }
 
 INLINE psy_ui_Component* pianogrid_base(Pianogrid* self)
@@ -198,17 +199,16 @@ typedef struct Pianoroll {
 	PianoBar bar;	
 	KeyboardState keyboardstate;
 	psy_ui_Component keyboardpane;
-	PianoKeyboard keyboard;
+	PianoKeyboard keyboard;	
 	PianoGridState gridstate;	
 	uintptr_t opcount;
-	bool syncpattern;
-	PatternCmds cmds;
+	bool syncpattern;	
 	uintptr_t chordbegin;
 	/* references */
 	Workspace* workspace;
 } Pianoroll;
 
-void pianoroll_init(Pianoroll*, psy_ui_Component* parent, PatternViewSkin*,
+void pianoroll_init(Pianoroll*, psy_ui_Component* parent, PatternViewState*,
 	Workspace*);
 void pianoroll_setpattern(Pianoroll*, psy_audio_Pattern*);
 void pianoroll_updatescroll(Pianoroll*);

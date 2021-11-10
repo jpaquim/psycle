@@ -258,7 +258,7 @@ psy_EventDriverCmd driver_getcmd(psy_EventDriver* driver, const char* section)
 	
 	rv.id = -1;
 	self = (CmdDriver*)(driver);	
-	if (strcmp(self->section, section) == 0) {
+	if (!section || strcmp(self->section, section) == 0) {
 		rv = self->lastcmd;
 	}
 	return rv;

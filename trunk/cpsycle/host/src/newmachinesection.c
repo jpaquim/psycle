@@ -32,7 +32,7 @@ static void newmachinesection_vtable_init(NewMachineSection* self)
 	if (!newmachinesection_vtable_initialized) {
 		newmachinesection_vtable = *(self->component.vtable);
 		newmachinesection_vtable.ondestroy =
-			(psy_ui_fp_component_ondestroy)
+			(psy_ui_fp_component_event)
 			newmachinesection_ondestroy;
 		newmachinesection_vtable.onmousedown =
 			(psy_ui_fp_component_onmouseevent)

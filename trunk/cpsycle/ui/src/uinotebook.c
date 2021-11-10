@@ -27,7 +27,7 @@ static void vtable_init(psy_ui_Notebook* self)
 		vtable = *(self->component.vtable);
 		super_vtable = *(self->component.vtable);		
 		vtable.onalign =
-			(psy_ui_fp_component_onalign)
+			(psy_ui_fp_component_event)
 			psy_ui_notebook_onalign;
 		vtable_initialized = TRUE;
 	}

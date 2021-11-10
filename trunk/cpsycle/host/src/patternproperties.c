@@ -128,7 +128,7 @@ static psy_ui_ComponentVtable* patternproperties_vtable_init(PatternProperties* 
 			(psy_ui_fp_component_onkeyevent)
 			patternproperties_onkeyup;
 		patternproperties_vtable.onfocus =
-			(psy_ui_fp_component_onfocus)
+			(psy_ui_fp_component_event)
 			patternproperties_onfocus;
 		patternproperties_vtable_initialized = TRUE;
 	}

@@ -26,7 +26,8 @@ static psy_ui_ComponentVtable* vtable_init(ParameterBar* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.onalign = (psy_ui_fp_component_onalign)
+		vtable.onalign =
+			(psy_ui_fp_component_event)
 			parameterbar_onalign;
 		vtable_initialized = TRUE;
 	}
@@ -147,7 +148,7 @@ static void machineframe_vtable_init(MachineFrame* self)
 	if (!machineframe_vtable_initialized) {
 		machineframe_vtable = *(self->component.vtable);
 		machineframe_vtable.ondestroy =
-			(psy_ui_fp_component_ondestroy)
+			(psy_ui_fp_component_event)
 			machineframe_ondestroy;
 		machineframe_vtable.ontimer =
 			(psy_ui_fp_component_ontimer)

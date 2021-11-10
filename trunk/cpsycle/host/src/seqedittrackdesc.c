@@ -41,7 +41,7 @@ static void seqedittrackdesc_vtable_init(SeqEditTrackDesc* self)
 	if (!seqedittrackdesc_vtable_initialized) {
 		seqedittrackdesc_vtable = *(self->component.vtable);		
 		seqedittrackdesc_vtable.ondestroy =
-			(psy_ui_fp_component_ondestroy)
+			(psy_ui_fp_component_event)
 			seqedittrackdesc_ondestroy;		
 		seqedittrackdesc_vtable.ondragover =
 			(psy_ui_fp_component_ondragover)

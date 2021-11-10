@@ -33,6 +33,17 @@ void psy_audio_blockselection_init_all(psy_audio_BlockSelection* self,
 	self->valid = TRUE;
 }
 
+psy_audio_BlockSelection psy_audio_blockselection_make(
+	psy_audio_SequenceCursor topleft, psy_audio_SequenceCursor bottomright)
+{
+	psy_audio_BlockSelection rv;
+
+	psy_audio_blockselection_init_all(&rv, topleft, bottomright);
+	rv.topleft = topleft;
+	rv.bottomright = bottomright;
+	return rv;
+}
+
 void psy_audio_blockselection_startdrag(psy_audio_BlockSelection* self,
 	psy_audio_SequenceCursor dragselectionbase,
 	psy_audio_SequenceCursor cursor, double bpl)
@@ -82,13 +93,13 @@ void psy_audio_blockselection_drag(psy_audio_BlockSelection* self,
 	}
 }
 
-psy_audio_BlockSelection psy_audio_blockselection_make(
-	psy_audio_SequenceCursor topleft, psy_audio_SequenceCursor bottomright)
-{
-	psy_audio_BlockSelection rv;
-
-	psy_audio_blockselection_init_all(&rv, topleft, bottomright);
-	rv.topleft = topleft;
-	rv.bottomright = bottomright;
-	return rv;
+void psy_audio_blockselection_select(psy_audio_BlockSelection* self,
+	uintptr_t track, uintptr_t numtracks,
+	psy_dsp_big_beat_t offset, psy_dsp_big_beat_t length)
+{	
+	self->topleft.offset = offset;
+	self->topleft.track = track;
+	self->bottomright.offset = offset + length;
+	self->bottomright.track = track + numtracks;
+	psy_audio_blockselection_enable(self);	
 }

@@ -266,7 +266,7 @@ void psy_audio_pattern_blockinterpolaterangehermite(psy_audio_Pattern* self, psy
 	psy_audio_SequenceCursor end, psy_dsp_big_beat_t bpl, intptr_t startval, intptr_t endval);
 /* transposes all entries of the block with the offset */
 void psy_audio_pattern_blocktranspose(psy_audio_Pattern*, psy_audio_SequenceCursor begin,
-	psy_audio_SequenceCursor end, int offset);
+	psy_audio_SequenceCursor end, intptr_t offset);
 /* swingfill */
 void psy_audio_pattern_swingfill(psy_audio_Pattern*,
 	const psy_audio_BlockSelection*, bool bTrackMode, psy_dsp_big_beat_t bpl,

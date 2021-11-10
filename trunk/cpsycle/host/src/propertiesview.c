@@ -437,7 +437,7 @@ static void propertiesrenderer_vtable_init(PropertiesRenderer* self)
 	if (!propertiesrenderer_vtable_initialized) {
 		propertiesrenderer_vtable = *(self->component.vtable);
 		propertiesrenderer_vtable.ondestroy =
-			(psy_ui_fp_component_ondestroy)
+			(psy_ui_fp_component_event)
 			propertiesrenderer_ondestroy;
 		propertiesrenderer_vtable.onmousedown =
 			(psy_ui_fp_component_onmouseevent)
@@ -925,7 +925,7 @@ static void propertiesview_vtable_init(PropertiesView* self)
 	if (!propertiesview_vtable_initialized) {
 		propertiesview_vtable = *(self->component.vtable);
 		propertiesview_vtable.ondestroy =
-			(psy_ui_fp_component_ondestroy)
+			(psy_ui_fp_component_event)
 			propertiesview_ondestroy;
 		propertiesview_vtable.onmousedown =
 			(psy_ui_fp_component_onmouseevent)

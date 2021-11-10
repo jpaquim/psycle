@@ -93,36 +93,28 @@ typedef void (*psy_ui_fp_component_preventinput)(struct psy_ui_Component*);
 typedef void (*psy_ui_fp_component_invalidate)(struct psy_ui_Component*);
 typedef void (*psy_ui_fp_component_setalign)(struct psy_ui_Component*, psy_ui_AlignType);
 /* vtable events function pointers */
-typedef void (*psy_ui_fp_component_ondestroy)(struct psy_ui_Component*);
-typedef void (*psy_ui_fp_component_ondestroyed)(struct psy_ui_Component*);
-typedef void (*psy_ui_fp_component_onalign)(struct psy_ui_Component*);
+typedef void (*psy_ui_fp_component_event)(struct psy_ui_Component*);
+typedef bool (*psy_ui_fp_component_onclose)(struct psy_ui_Component*);
 typedef void (*psy_ui_fp_component_onpreferredsize)(struct psy_ui_Component*,
 	const psy_ui_Size* limit, psy_ui_Size* rv);
 typedef void (*psy_ui_fp_component_onpreferredscrollsize)(struct psy_ui_Component*,
 	const psy_ui_Size* limit, psy_ui_Size* rv);
 typedef void (*psy_ui_fp_component_ondraw)(struct psy_ui_Component*, psy_ui_Graphics*);
-typedef void (*psy_ui_fp_component_onsize)(struct psy_ui_Component*);
-typedef bool (*psy_ui_fp_component_onclose)(struct psy_ui_Component*);
 typedef void (*psy_ui_fp_component_onmouseevent)(struct psy_ui_Component*, psy_ui_MouseEvent*);
-typedef void (*psy_ui_fp_component_onmouseenter)(struct psy_ui_Component*);
-typedef void (*psy_ui_fp_component_onmouseleave)(struct psy_ui_Component*);
 typedef void (*psy_ui_fp_component_onkeyevent)(struct psy_ui_Component*, psy_ui_KeyboardEvent*);
 typedef void (*psy_ui_fp_component_ontimer)(struct psy_ui_Component*, uintptr_t);
 typedef void (*psy_ui_fp_component_onlanguagechanged)(struct psy_ui_Component*);
-typedef void (*psy_ui_fp_component_onfocus)(struct psy_ui_Component*);
-typedef void (*psy_ui_fp_component_onfocuslost)(struct psy_ui_Component*);
-typedef void (*psy_ui_fp_component_onupdatestyles)(struct psy_ui_Component*);
 typedef uintptr_t (*psy_ui_fp_component_section)(const struct psy_ui_Component*);
 typedef void (*psy_ui_fp_component_ondragstart)(struct psy_ui_Component*, psy_ui_DragEvent*);
 typedef void (*psy_ui_fp_component_ondragover)(struct psy_ui_Component*, psy_ui_DragEvent*);
 typedef void (*psy_ui_fp_component_ondrop)(struct psy_ui_Component*, psy_ui_DragEvent*);
 
 typedef struct psy_ui_ComponentVTable {
-	psy_ui_fp_component_dispose dispose;
-	psy_ui_fp_component_destroy destroy;
-	psy_ui_fp_component_show show;
+	psy_ui_fp_component_event dispose;
+	psy_ui_fp_component_event destroy;
+	psy_ui_fp_component_event show;
 	psy_ui_fp_component_showstate showstate;
-	psy_ui_fp_component_hide hide;
+	psy_ui_fp_component_event hide;
 	psy_ui_fp_component_visible visible;
 	psy_ui_fp_component_visible drawvisible;
 	psy_ui_fp_component_move move;
@@ -139,13 +131,13 @@ typedef struct psy_ui_ComponentVTable {
 	psy_ui_fp_component_section section;
 	psy_ui_fp_component_setalign setalign;
 	/* events */
-	psy_ui_fp_component_ondestroy ondestroy;
-	psy_ui_fp_component_ondestroyed ondestroyed;
+	psy_ui_fp_component_event ondestroy;
+	psy_ui_fp_component_event ondestroyed;
 	psy_ui_fp_component_ondraw ondraw;
-	psy_ui_fp_component_onsize onsize;
+	psy_ui_fp_component_event onsize;
 	psy_ui_fp_component_onclose onclose;
-	psy_ui_fp_component_onalign beforealign;
-	psy_ui_fp_component_onalign onalign;
+	psy_ui_fp_component_event beforealign;
+	psy_ui_fp_component_event onalign;
 	psy_ui_fp_component_onpreferredsize onpreferredsize;
 	psy_ui_fp_component_onpreferredscrollsize onpreferredscrollsize;
 	psy_ui_fp_component_onmouseevent onmousedown;
@@ -153,15 +145,15 @@ typedef struct psy_ui_ComponentVTable {
 	psy_ui_fp_component_onmouseevent onmousewheel;
 	psy_ui_fp_component_onmouseevent onmouseup;
 	psy_ui_fp_component_onmouseevent onmousedoubleclick;
-	psy_ui_fp_component_onmouseenter onmouseenter;
-	psy_ui_fp_component_onmouseleave onmouseleave;
+	psy_ui_fp_component_event onmouseenter;
+	psy_ui_fp_component_event onmouseleave;
 	psy_ui_fp_component_onkeyevent onkeydown;
 	psy_ui_fp_component_onkeyevent onkeyup;
 	psy_ui_fp_component_ontimer ontimer;
 	psy_ui_fp_component_onlanguagechanged onlanguagechanged;
-	psy_ui_fp_component_onfocus onfocus;
-	psy_ui_fp_component_onfocus onfocuslost;
-	psy_ui_fp_component_onupdatestyles onupdatestyles;
+	psy_ui_fp_component_event onfocus;
+	psy_ui_fp_component_event onfocuslost;
+	psy_ui_fp_component_event onupdatestyles;
 	psy_ui_fp_component_ondragstart ondragstart;
 	psy_ui_fp_component_ondragover ondragover;
 	psy_ui_fp_component_ondrop ondrop;

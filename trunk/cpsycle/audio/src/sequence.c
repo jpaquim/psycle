@@ -957,7 +957,7 @@ void psy_audio_sequence_setcursor(psy_audio_Sequence* self,
 			self->cursor.orderindex);
 	}
 	psy_signal_emit(&self->signal_cursorchanged, self, 0);
-	self->lastcursor = cursor;
+	self->lastcursor = self->cursor;
 }
 
 void psy_audio_sequence_dec_seqpos(psy_audio_Sequence* self)

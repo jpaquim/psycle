@@ -181,7 +181,6 @@ void workspace_init(Workspace* self, psy_ui_Component* main)
 	workspace_initplayer(self);	
 	eventdriverconfig_registereventdrivers(&self->config.input);
 	inputhandler_init(&self->inputhandler, &self->player, NULL, NULL);	
-	psy_audio_pattern_init(&self->patternpaste);
 }
 
 void workspace_initplugincatcherandmachinefactory(Workspace* self)
@@ -268,8 +267,7 @@ void workspace_dispose(Workspace* self)
 	psy_audio_machinefactory_dispose(&self->machinefactory);
 	psy_undoredo_dispose(&self->undoredo);
 	viewhistory_dispose(&self->viewhistory);
-	workspace_disposesignals(self);
-	psy_audio_pattern_dispose(&self->patternpaste);	
+	workspace_disposesignals(self);	
 	psy_audio_sequencepaste_dispose(&self->sequencepaste);
 	psy_playlist_dispose(&self->playlist);
 	psy_audio_dispose();

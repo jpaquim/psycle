@@ -10,7 +10,6 @@
 
 // prototypes
 static const char* patternblockmenu_section(PatternBlockMenu*);
-static void patternblockmenu_execute(PatternBlockMenu*, int id);
 static void patternblockmenu_oncut(PatternBlockMenu*, psy_ui_Component* sender);
 static void patternblockmenu_oncopy(PatternBlockMenu*, psy_ui_Component* sender);
 static void patternblockmenu_onpaste(PatternBlockMenu*, psy_ui_Component* sender);
@@ -31,17 +30,17 @@ static void patternblockmenu_onimport(PatternBlockMenu*, psy_ui_Component* sende
 static void patternblockmenu_onexport(PatternBlockMenu*, psy_ui_Component* sender);
 // implementation
 void patternblockmenu_init(PatternBlockMenu* self, psy_ui_Component* parent,
-	PatternView* view, Workspace* workspace)
+	PatternView* view, PatternViewState* pvstate)
 {
 	psy_ui_Margin spacing;
 
 	assert(self);
-	assert(view);
-	assert(workspace);
+	assert(view);	
+	assert(pvstate);
 
-	psy_ui_component_init(&self->component, parent, NULL);
-	self->workspace = workspace;
+	psy_ui_component_init(&self->component, parent, NULL);	
 	self->view = view;
+	self->pvstate = pvstate;
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_TOP,
 		psy_ui_margin_zero());	
 	psy_ui_button_init_text_connect(&self->cut, &self->component, NULL, "edit.cut",
@@ -81,153 +80,116 @@ void patternblockmenu_init(PatternBlockMenu* self, psy_ui_Component* parent,
 	psy_ui_button_init_text_connect(&self->exportbtn, &self->component, NULL, "Export (psb)",
 		self, patternblockmenu_onexport);	
 	spacing = psy_ui_margin_make_em(0.25, 0.25, 0.25, 0.25);
-	psy_ui_component_setspacing_children(&self->component, spacing);
-	self->target = PATTERNVIEWTARGET_TRACKER;
+	psy_ui_component_setspacing_children(&self->component, spacing);	
 }
 
 const char* patternblockmenu_section(PatternBlockMenu* self)
-{
-	if (self->target == PATTERNVIEWTARGET_TRACKER) {
-		return "tracker";
-	}
-	return "pianoroll";
-}
-
-void patternblockmenu_execute(PatternBlockMenu* self, int id)
-{
-	psy_audio_player_sendcmd(workspace_player(self->workspace),
-		patternblockmenu_section(self),
-		psy_eventdrivercmd_makeid(id));
+{	
+	return "tracker";
 }
 
 void patternblockmenu_oncut(PatternBlockMenu* self,
 	psy_ui_Component* sender)
-{	
-	patternblockmenu_execute(self, CMD_BLOCKCUT);
+{		
+	patternviewstate_blockcut(self->pvstate);	
 }
 
 void patternblockmenu_oncopy(PatternBlockMenu* self,
 	psy_ui_Component* sender)
 {	
-	patternblockmenu_execute(self, CMD_BLOCKCOPY);
+	patternviewstate_blockcopy(self->pvstate);	
 }
 
 void patternblockmenu_onpaste(PatternBlockMenu* self,
 	psy_ui_Component* sender)
 {	
-	patternblockmenu_execute(self, CMD_BLOCKPASTE);
+	patternviewstate_blockpaste(self->pvstate);	
 }
 
 void patternblockmenu_onmixpaste(PatternBlockMenu* self,
 	psy_ui_Component* sender)
 {	
-	patternblockmenu_execute(self, CMD_BLOCKMIX);
+	patternviewstate_blockmixpaste(self->pvstate);	
 }
 
 void patternblockmenu_ondelete(PatternBlockMenu* self,
 	psy_ui_Component* sender)
 {
-	patternblockmenu_execute(self, CMD_BLOCKDELETE);
+	pattternviewstate_blockdelete(self->pvstate);	
 }
 
 void patternblockmenu_onreplace(PatternBlockMenu* self,
 	psy_ui_Component* sender)
-{
-	if (self->target == PATTERNVIEWTARGET_TRACKER) {
-		patternview_toggletransformpattern(self->view,
-			&self->view->component);
-	} else {
-
-	}
+{	
+	patternview_toggletransformpattern(self->view,
+		&self->view->component);
 }
 
 void patternblockmenu_onblockswingfill(PatternBlockMenu* self,
 	psy_ui_Component* sender)
-{
-	if (self->target == PATTERNVIEWTARGET_TRACKER) {
-		self->view->trackmodeswingfill = FALSE;
-		patternview_toggleswingfill(self->view,
+{	
+	self->view->trackmodeswingfill = FALSE;
+	patternview_toggleswingfill(self->view,
 			&self->view->component);
-	} else {
-
-	}
 }
 
 void patternblockmenu_ontrackswingfill(PatternBlockMenu* self,
 	psy_ui_Component* sender)
-{
-	if (self->target == PATTERNVIEWTARGET_TRACKER) {
-		self->view->trackmodeswingfill = TRUE;
-		patternview_toggleswingfill(self->view,
-			&self->view->component);
-	} else {
-
-	}
+{	
+	self->view->trackmodeswingfill = TRUE;
+	patternview_toggleswingfill(self->view,
+		&self->view->component);
 }
 
 void patternblockmenu_oninterpolatelinear(PatternBlockMenu* self,
 	psy_ui_Component* sender)
-{
-	if (self->target == PATTERNVIEWTARGET_TRACKER) {
-		patternview_oninterpolatelinear(self->view);
-	} else {
-
-	}
+{	
+	patternviewstate_interpolatelinear(self->pvstate);	
 }
 
 void patternblockmenu_oninterpolatecurve(PatternBlockMenu* self,
 	psy_ui_Component* sender)
-{
-	if (self->target == PATTERNVIEWTARGET_TRACKER) {
-		patternview_toggleinterpolatecurve(self->view,
-			&self->view->component);
-	} else {
-
-	}
+{	
+	patternview_toggleinterpolatecurve(self->view,
+		&self->view->component);
 }
 
 void patternblockmenu_onchangegenerator(PatternBlockMenu* self,
 	psy_ui_Component* sender)
 {
-	if (self->target == PATTERNVIEWTARGET_TRACKER) {
-		trackergrid_changegenerator(&self->view->trackerview.grid);
-	} else {
-
-	}
+	patterncmds_changemachine(self->pvstate->cmds,
+		self->pvstate->selection);
 }
 
 void patternblockmenu_onchangeinstrument(PatternBlockMenu* self,
 	psy_ui_Component* sender)
 {
-	if (self->target == PATTERNVIEWTARGET_TRACKER) {
-		trackergrid_changeinstrument(&self->view->trackerview.grid);
-	} else {
-
-	}
+	patterncmds_changeinstrument(self->pvstate->cmds,
+		self->pvstate->selection);	
 }
 
 void patternblockmenu_onblocktransposeup(PatternBlockMenu* self,
 	psy_ui_Component* sender)
 {	
-	patternblockmenu_execute(self, CMD_TRANSPOSEBLOCKINC);
+	patternviewstate_blocktranspose(self->pvstate, -1);	
 }
 
 void patternblockmenu_onblocktransposedown(PatternBlockMenu* self,
 	psy_ui_Component* sender)
 {	
-	patternblockmenu_execute(self, CMD_TRANSPOSEBLOCKDEC);
+	patternviewstate_blocktranspose(self->pvstate, 1);
 }
 
 void patternblockmenu_onblocktransposeup12(PatternBlockMenu* self,
 	psy_ui_Component* sender)
 {	
-	patternblockmenu_execute(self, CMD_TRANSPOSEBLOCKINC12);
+	patternviewstate_blocktranspose(self->pvstate, -12);
 }
 
 void patternblockmenu_onblocktransposedown12(PatternBlockMenu* self,
 	psy_ui_Component* sender)
 {	
-	patternblockmenu_execute(self, CMD_TRANSPOSEBLOCKDEC12);
+	patternviewstate_blocktranspose(self->pvstate, 12);
 }
 
 void patternblockmenu_onimport(PatternBlockMenu* self,

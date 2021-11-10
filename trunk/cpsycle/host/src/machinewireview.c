@@ -99,7 +99,7 @@ static void vtable_init(MachineWireView* self)
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
 		vtable.ondestroy =
-			(psy_ui_fp_component_ondestroy)
+			(psy_ui_fp_component_event)
 			machinewireview_ondestroy;
 		vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
@@ -123,7 +123,7 @@ static void vtable_init(MachineWireView* self)
 			(psy_ui_fp_component_onpreferredsize)
 			machinewireview_onpreferredsize;
 		vtable.onalign =
-			(psy_ui_fp_component_onalign)
+			(psy_ui_fp_component_event)
 			machinewireview_onalign;
 		vtable_initialized = TRUE;
 	}

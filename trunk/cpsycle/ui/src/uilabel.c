@@ -37,7 +37,7 @@ static void vtable_init(psy_ui_Label* self)
 		vtable = *(self->component.vtable);
 		super_vtable = *(self->component.vtable);
 		vtable.ondestroy =
-			(psy_ui_fp_component_ondestroy)
+			(psy_ui_fp_component_event)
 			psy_ui_label_ondestroy;
 		vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
@@ -49,7 +49,7 @@ static void vtable_init(psy_ui_Label* self)
 			(psy_ui_fp_component_onlanguagechanged)
 			psy_ui_label_onlanguagechanged;
 		vtable.onupdatestyles =
-			(psy_ui_fp_component_onupdatestyles)
+			(psy_ui_fp_component_event)
 			psy_ui_label_onupdatestyles;
 		vtable.ontimer = (psy_ui_fp_component_ontimer)
 			psy_ui_label_ontimer;

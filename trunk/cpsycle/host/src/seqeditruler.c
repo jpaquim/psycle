@@ -45,7 +45,7 @@ static void seqeditruler_vtable_init(SeqEditRuler* self)
 	if (!seqeditruler_vtable_initialized) {
 		seqeditruler_vtable = *(self->component.vtable);
 		seqeditruler_vtable.ondestroy =
-			(psy_ui_fp_component_ondestroy)
+			(psy_ui_fp_component_event)
 			seqeditruler_ondestroy;
 		seqeditruler_vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
@@ -57,10 +57,10 @@ static void seqeditruler_vtable_init(SeqEditRuler* self)
 			(psy_ui_fp_component_onmouseevent)
 			seqeditruler_onmousemove;
 		seqeditruler_vtable.onmouseenter =
-			(psy_ui_fp_component_onmouseenter)
+			(psy_ui_fp_component_event)
 			seqeditruler_onmouseenter;
 		seqeditruler_vtable.onmouseleave =
-			(psy_ui_fp_component_onmouseleave)
+			(psy_ui_fp_component_event)
 			seqeditruler_onmouseleave;
 		seqeditruler_vtable_initialized = TRUE;
 	}

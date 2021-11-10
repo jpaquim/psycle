@@ -34,7 +34,7 @@ static void vtable_init(psy_ui_ComboBox* self)
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
 		vtable.ondestroy =
-			(psy_ui_fp_component_ondestroy)
+			(psy_ui_fp_component_event)
 			psy_ui_combobox_ondestroy;
 		vtable.onmousewheel =
 			(psy_ui_fp_component_onmouseevent)

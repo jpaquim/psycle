@@ -16,14 +16,11 @@
 #include "../../detail/trace.h"
 #include "../../detail/portable.h"
 
-/*
-** TrackerConfig
-** implementation
-*/
+/* TrackerConfig */
+/* implementation */
 void trackconfig_init(TrackConfig* self, bool wideinst)
 {	
 	self->textwidth = 9;
-	self->textleftedge = 2;
 	self->textleftedge = 2;	
 	self->colresize = FALSE;
 	self->noteresize = FALSE;
@@ -85,8 +82,7 @@ void trackdef_init(TrackDef* self)
 void trackereventtable_init(TrackerEventTable* self)
 {
 	psy_table_init(&self->tracks);
-	self->currcursorline = 0;
-	self->currplaybarline = 0;
+	self->currcursorline = 0;	
 }
 
 void trackereventtable_dispose(TrackerEventTable* self)
@@ -141,10 +137,10 @@ psy_List** trackereventtable_track(TrackerEventTable* self, uintptr_t index)
 /* TrackerState */
 /* implementation */
 void trackerstate_init(TrackerState* self, TrackConfig* trackconfig,
-	psy_audio_Song* song)
-{		
-	patternviewstate_init(&self->pv, song);	
-	self->trackconfig = trackconfig;	
+	PatternViewState* pvstate)
+{			
+	self->trackconfig = trackconfig;
+	self->pv = pvstate;
 	self->drawbeathighlights = TRUE;
 	self->synccursor = TRUE;
 	self->showresizecursor = TRUE;		
@@ -179,7 +175,7 @@ double trackerstate_trackwidth(const TrackerState* self, uintptr_t track)
 				? self->trackconfig->textwidth
 				: 12) + 1;
 	}
-	return trackerstate_preferredtrackwidth(self);	
+	return patternviewstate_preferredtrackwidth(self->pv);
 }
 
 double trackerstate_defaulttrackwidth(const TrackerState* self)
@@ -193,7 +189,7 @@ double trackerstate_defaulttrackwidth(const TrackerState* self)
 			? self->trackconfig->textwidth
 			: 12) + 1;		
 	}
-	return trackerstate_preferredtrackwidth(self);
+	return patternviewstate_preferredtrackwidth(self->pv);
 }
 
 uintptr_t trackerstate_pxtotrack(const TrackerState* self, double x)
@@ -201,7 +197,7 @@ uintptr_t trackerstate_pxtotrack(const TrackerState* self, double x)
 	double currx = 0;
 	uintptr_t rv = 0;
 
-	while (rv < patternviewstate_numsongtracks(&self->pv)) {
+	while (rv < patternviewstate_numsongtracks(self->pv)) {
 		currx += trackerstate_trackwidth(self, rv);
 		if (currx > x) {
 			break;
@@ -461,14 +457,14 @@ void trackerstate_clip(TrackerState* self, const psy_ui_RealRectangle* clip,
 	rv->topleft.track = trackerstate_pxtotrack(self, clip->left);
 	rv->topleft.column = 0;
 	rv->topleft.digit = 0;
-	rv->topleft.lpb = (uintptr_t)(1.0 / trackerstate_bpl(self));
+	rv->topleft.lpb = patternviewstate_lpb(self->pv);
 	rv->bottomright.track = trackerstate_pxtotrack(self, clip->right) + 1;
-	if (rv->bottomright.track > patternviewstate_numsongtracks(&self->pv)) {
-		rv->bottomright.track = patternviewstate_numsongtracks(&self->pv);
+	if (rv->bottomright.track > patternviewstate_numsongtracks(self->pv)) {
+		rv->bottomright.track = patternviewstate_numsongtracks(self->pv);
 	}
 	rv->bottomright.column = 0;
 	rv->bottomright.digit = 0;
-	rv->bottomright.lpb = trackerstate_lpb(self);
+	rv->bottomright.lpb = patternviewstate_lpb(self->pv);
 }
 
 void trackerstate_startdragselection(TrackerState* self,
@@ -476,8 +472,8 @@ void trackerstate_startdragselection(TrackerState* self,
 {
 	assert(self);
 
-	psy_audio_blockselection_startdrag(&self->pv.selection,
-		self->pv.dragselectionbase, cursor, bpl);
+	psy_audio_blockselection_startdrag(&self->pv->selection,
+		self->pv->dragselectionbase, cursor, bpl);
 }
 
 void trackerstate_dragselection(TrackerState* self, psy_audio_SequenceCursor cursor,
@@ -485,8 +481,8 @@ void trackerstate_dragselection(TrackerState* self, psy_audio_SequenceCursor cur
 {
 	assert(self);
 
-	psy_audio_blockselection_drag(&self->pv.selection,
-		self->pv.dragselectionbase, cursor, bpl);
+	psy_audio_blockselection_drag(&self->pv->selection,
+		self->pv->dragselectionbase, cursor, bpl);
 }
 
 psy_audio_SequenceCursor trackerstate_checkcursorbounds(TrackerState* self,
@@ -498,9 +494,9 @@ psy_audio_SequenceCursor trackerstate_checkcursorbounds(TrackerState* self,
 	if (rv.offset < 0) {
 		rv.offset = 0;
 	} else {
-		if (self->pv.pattern) {
-			if (rv.offset >= psy_audio_pattern_length(self->pv.pattern)) {
-				rv.offset = psy_audio_pattern_length(self->pv.pattern);
+		if (self->pv->pattern) {
+			if (rv.offset >= psy_audio_pattern_length(self->pv->pattern)) {
+				rv.offset = psy_audio_pattern_length(self->pv->pattern);
 			}
 		} else {
 			rv.offset = 0;
@@ -508,85 +504,41 @@ psy_audio_SequenceCursor trackerstate_checkcursorbounds(TrackerState* self,
 	}
 	if (rv.track < 0) {
 		rv.track = 0;
-	} else if (rv.track >= patternviewstate_numsongtracks(&self->pv)) {
-		rv.track = patternviewstate_numsongtracks(&self->pv);
+	} else if (rv.track >= patternviewstate_numsongtracks(self->pv)) {
+		rv.track = patternviewstate_numsongtracks(self->pv);
 	}
 	return rv;
 }
 
-void trackerstate_selectcol(TrackerState* self)
-{
-	assert(self);
-
-	if (patternviewstate_pattern(&self->pv)) {
-		self->pv.selection.topleft.offset = 0;
-		self->pv.selection.topleft.track = self->pv.cursor.track;
-		self->pv.selection.bottomright.offset = patternviewstate_pattern(&self->pv)->length;
-		self->pv.selection.bottomright.track = self->pv.cursor.track + 1;
-		psy_audio_blockselection_enable(&self->pv.selection);
-	}
-}
-
-void trackerstate_selectbar(TrackerState* self)
-{
-	assert(self);
-
-	if (patternviewstate_pattern(&self->pv)) {
-		self->pv.selection.topleft.offset = self->pv.cursor.offset;
-		self->pv.selection.topleft.track = self->pv.cursor.track;
-		self->pv.selection.bottomright.offset = self->pv.cursor.offset + 4.0;
-		if (self->pv.cursor.offset > patternviewstate_pattern(&self->pv)->length) {
-			self->pv.cursor.offset = patternviewstate_pattern(&self->pv)->length;
-		}
-		self->pv.selection.bottomright.track = self->pv.cursor.track + 1;
-		psy_audio_blockselection_enable(&self->pv.selection);
-	}
-}
-
-void trackerstate_selectall(TrackerState* self)
-{
-	assert(self);
-
-	if (patternviewstate_pattern(&self->pv)) {
-		psy_audio_blockselection_init(&self->pv.selection);
-		self->pv.selection.topleft.key = psy_audio_NOTECOMMANDS_B9;
-		self->pv.selection.bottomright.offset = psy_audio_pattern_length(
-			patternviewstate_pattern(&self->pv));
-		self->pv.selection.bottomright.track =
-			patternviewstate_numsongtracks(&self->pv);
-		psy_audio_blockselection_enable(&self->pv.selection);
-	}
-}
-
 ScrollDir trackerstate_nextcol(TrackerState* self, bool wrap)
 {
-	if (self->pv.pattern) {
+	assert(self);
+
+	if (self->pv->pattern) {
 		TrackDef* trackdef;
-		int invalidate = 1;
+		int invalidate = 1;		
 
-		assert(self);
-
-		trackdef = trackerstate_trackdef(self, self->pv.cursor.track);
-		if (self->pv.cursor.column == trackdef_numcolumns(trackdef) - 1 &&
-			self->pv.cursor.digit == trackdef_numdigits(trackdef,
-				self->pv.cursor.column) - 1) {
-			if (self->pv.cursor.track < patternviewstate_numsongtracks(&self->pv) - 1) {
-				self->pv.cursor.column = 0;
-				self->pv.cursor.digit = 0;
-				++self->pv.cursor.track;
+		trackdef = trackerstate_trackdef(self, self->pv->cursor.track);
+		if (self->pv->cursor.column == trackdef_numcolumns(trackdef) - 1 &&
+			self->pv->cursor.digit == trackdef_numdigits(trackdef,
+				self->pv->cursor.column) - 1) {
+			if (self->pv->cursor.track < patternviewstate_numsongtracks(self->pv) - 1) {
+				self->pv->cursor.column = 0;
+				self->pv->cursor.digit = 0;
+				++self->pv->cursor.track;
 				return SCROLL_DIR_RIGHT;				
 			} else if (wrap) {
-				self->pv.cursor.column = 0;
-				self->pv.cursor.digit = 0;
-				self->pv.cursor.track = 0;
+				self->pv->cursor.column = 0;
+				self->pv->cursor.digit = 0;
+				self->pv->cursor.track = 0;
 				return SCROLL_DIR_LEFT;				
 			}
 		} else {
-			++self->pv.cursor.digit;
-			if (self->pv.cursor.digit >=
-				trackdef_numdigits(trackdef, self->pv.cursor.column)) {
-				++self->pv.cursor.column;
-				self->pv.cursor.digit = 0;
+			++self->pv->cursor.digit;
+			if (self->pv->cursor.digit >=
+				trackdef_numdigits(trackdef, self->pv->cursor.column)) {
+				++self->pv->cursor.column;
+				self->pv->cursor.digit = 0;
 			}
 		}		
 	}
@@ -599,37 +551,37 @@ ScrollDir trackerstate_prevcol(TrackerState* self, bool wrap)
 
 	assert(self);
 
-	if (self->pv.cursor.column == 0 && self->pv.cursor.digit == 0) {
-		if (self->pv.cursor.track > 0) {
+	if (self->pv->cursor.column == 0 && self->pv->cursor.digit == 0) {
+		if (self->pv->cursor.track > 0) {
 			TrackDef* trackdef;
 
-			--self->pv.cursor.track;
-			trackdef = trackerstate_trackdef(self, self->pv.cursor.track);
-			self->pv.cursor.column = trackdef_numcolumns(trackdef) - 1;
-			self->pv.cursor.digit = trackdef_numdigits(trackdef,
-				self->pv.cursor.column) - 1;
+			--self->pv->cursor.track;
+			trackdef = trackerstate_trackdef(self, self->pv->cursor.track);
+			self->pv->cursor.column = trackdef_numcolumns(trackdef) - 1;
+			self->pv->cursor.digit = trackdef_numdigits(trackdef,
+				self->pv->cursor.column) - 1;
 			return SCROLL_DIR_LEFT;			
 		} else if (wrap) {
 			TrackDef* trackdef;
 
-			self->pv.cursor.track = patternviewstate_numsongtracks(&self->pv) - 1;
-			trackdef = trackerstate_trackdef(self, self->pv.cursor.track);
-			self->pv.cursor.column = trackdef_numcolumns(trackdef) - 1;
-			self->pv.cursor.digit = trackdef_numdigits(trackdef,
-				self->pv.cursor.column) - 1;
+			self->pv->cursor.track = patternviewstate_numsongtracks(self->pv) - 1;
+			trackdef = trackerstate_trackdef(self, self->pv->cursor.track);
+			self->pv->cursor.column = trackdef_numcolumns(trackdef) - 1;
+			self->pv->cursor.digit = trackdef_numdigits(trackdef,
+				self->pv->cursor.column) - 1;
 			return SCROLL_DIR_RIGHT;			
 		}
 	} else {
-		if (self->pv.cursor.digit > 0) {
-			--self->pv.cursor.digit;
+		if (self->pv->cursor.digit > 0) {
+			--self->pv->cursor.digit;
 		} else {
 			TrackDef* trackdef;
 
 			trackdef = trackerstate_trackdef(self,
-				self->pv.cursor.track);
-			--self->pv.cursor.column;
-			self->pv.cursor.digit = trackdef_numdigits(trackdef,
-				self->pv.cursor.column) - 1;
+				self->pv->cursor.track);
+			--self->pv->cursor.column;
+			self->pv->cursor.digit = trackdef_numdigits(trackdef,
+				self->pv->cursor.column) - 1;
 		}
 	}
 	return SCROLL_DIR_NONE;
@@ -648,18 +600,10 @@ bool trackerstate_testplaybar(TrackerState* self,
 
 	return psy_dsp_testrange(
 		playposition -
-			((self->pv.singlemode)
-			? self->pv.cursor.seqoffset
+			((self->pv->singlemode)
+			? self->pv->cursor.seqoffset
 			: 0.0),
-		offset, trackerstate_bpl(self));
-}
-
-uintptr_t trackerstate_numlines(const TrackerState* self)
-{
-	assert(self);
-
-	return trackerstate_beattoline(self,
-		patternviewstate_length(&self->pv));
+		offset, patternviewstate_bpl(self->pv));
 }
 
 void trackerstate_lineclip(TrackerState* self, const psy_ui_RealRectangle* clip,
@@ -670,7 +614,7 @@ void trackerstate_lineclip(TrackerState* self, const psy_ui_RealRectangle* clip,
 	rv->topleft.column = 0;
 	rv->topleft.digit = 0;
 	rv->topleft.offset = trackerstate_pxtobeat(self, psy_max(0.0, clip->top));
-	rv->topleft.lpb = trackerstate_lpb(self);
+	rv->topleft.lpb = patternviewstate_lpb(self->pv);
 	rv->bottomright.column = 0;
 	rv->bottomright.digit = 0;
 	rv->bottomright.offset = trackerstate_pxtobeatnotquantized(self,
@@ -697,26 +641,30 @@ psy_audio_SequenceCursor trackerstate_makecursor(TrackerState* self,
 	double cpx;
 	psy_audio_Sequence* sequence;
 
-	rv = self->pv.cursor;
-	sequence = patternviewstate_sequence(&self->pv);
+	rv = self->pv->cursor;
+	sequence = patternviewstate_sequence(self->pv);
 	if (sequence) {
 		psy_audio_sequencecursor_updateseqoffset(&rv,
 			sequence);
 	}
-	rv.absolute = !self->pv.singlemode;
+	rv.absolute = !self->pv->singlemode;
 	rv.offset = trackerstate_pxtobeat(self, pt.y);
-	rv.lpb = trackerstate_lpb(self);
-	if (patternviewstate_pattern(&self->pv) &&
-		rv.offset >= psy_audio_pattern_length(patternviewstate_pattern(&self->pv))) {
-		if (self->pv.singlemode) {
-			rv.offset = psy_audio_pattern_length(patternviewstate_pattern(&self->pv)) -
-				trackerstate_bpl(self);
+	rv.lpb = patternviewstate_lpb(self->pv);
+	if (patternviewstate_pattern(self->pv) &&
+		rv.offset >= psy_audio_pattern_length(patternviewstate_pattern(self->pv))) {
+		if (self->pv->singlemode) {
+			rv.offset = psy_audio_pattern_length(patternviewstate_pattern(self->pv)) -
+				patternviewstate_bpl(self->pv);
 		}
 	}
 	rv.track = index;
 	rv.column = 0;
 	rv.digit = 0;
-	rv.key = sequence->cursor.key;
+	if (sequence) {
+		rv.key = sequence->cursor.key;
+	} else {
+		rv.key = 0;
+	}
 	trackdef = trackerstate_trackdef(self, rv.track);
 	cpx = 0;
 	while (rv.column < trackdef_numcolumns(trackdef) &&
@@ -731,6 +679,6 @@ psy_audio_SequenceCursor trackerstate_makecursor(TrackerState* self,
 	if (rv.digit >= trackdef_numdigits(trackdef, rv.column)) {
 		rv.digit = trackdef_numdigits(trackdef, rv.column) - 1;
 	}
-	self->pv.cursor.patternid = sequence->cursor.patternid;
+	self->pv->cursor.patternid = sequence->cursor.patternid;
 	return rv;
 }

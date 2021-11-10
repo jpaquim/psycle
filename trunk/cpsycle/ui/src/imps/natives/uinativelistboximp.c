@@ -44,7 +44,7 @@ static void psy_ui_listboxclient_vtable_init(psy_ui_ListBoxClient* self)
 			(psy_ui_fp_component_onmouseevent)
 			psy_ui_listboxclient_onmousedown;
 		psy_ui_listboxclient_vtable.onsize =
-			(psy_ui_fp_component_onsize)
+			(psy_ui_fp_component_event)
 			psy_ui_listboxclient_onsize;
 		psy_ui_listboxclient_vtable_initialized = 1;
 	}
