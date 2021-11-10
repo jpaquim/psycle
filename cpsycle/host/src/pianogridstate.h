@@ -18,12 +18,12 @@ extern "C" {
 
 /* PianoGridState */
 typedef struct PianoGridState {
-	PatternViewState pv;	
+	PatternViewState* pv;	
 	double pxperbeat;
 	double defaultbeatwidth;	
 } PianoGridState;
 
-void pianogridstate_init(PianoGridState*, PatternViewSkin*, psy_audio_Song*);
+void pianogridstate_init(PianoGridState*, PatternViewState*);
 
 
 INLINE psy_audio_SequenceCursor pianogridstate_setcursor(PianoGridState* self,
@@ -31,14 +31,14 @@ INLINE psy_audio_SequenceCursor pianogridstate_setcursor(PianoGridState* self,
 {
 	assert(self);
 
-	self->pv.cursor = cursor;
+	self->pv->cursor = cursor;
 }
 
 INLINE psy_audio_SequenceCursor pianogridstate_cursor(const PianoGridState* self)
 {
 	assert(self);
 
-	return self->pv.cursor;
+	return self->pv->cursor;
 }
 
 INLINE void pianogridstate_setzoom(PianoGridState* self, psy_dsp_big_beat_t rate)
@@ -53,7 +53,7 @@ INLINE intptr_t pianogridstate_beattosteps(const PianoGridState* self,
 {
 	assert(self);
 
-	return (intptr_t)(position * self->pv.cursor.lpb);
+	return (intptr_t)(position * self->pv->cursor.lpb);
 }
 
 INLINE psy_dsp_big_beat_t pianogridstate_quantize(const PianoGridState* self,
@@ -62,7 +62,7 @@ INLINE psy_dsp_big_beat_t pianogridstate_quantize(const PianoGridState* self,
 	assert(self);
 
 	return pianogridstate_beattosteps(self, position) *
-		(1 / (psy_dsp_big_beat_t)self->pv.cursor.lpb);
+		(1 / (psy_dsp_big_beat_t)self->pv->cursor.lpb);
 }
 
 INLINE psy_dsp_big_beat_t pianogridstate_pxtobeat(const PianoGridState* self, double px)
@@ -92,7 +92,7 @@ INLINE psy_dsp_big_beat_t pianogridstate_step(const PianoGridState* self)
 {
 	assert(self);
 
-	return 1 / (psy_dsp_big_beat_t)self->pv.cursor.lpb;
+	return 1 / (psy_dsp_big_beat_t)self->pv->cursor.lpb;
 }
 
 INLINE double pianogridstate_steppx(const PianoGridState* self)
@@ -119,9 +119,9 @@ INLINE void pianogridstate_clip(PianoGridState* self,
 
 	*rv_left = pianogridstate_quantize(self,
 		pianogridstate_pxtobeat(self, clip_left_px));
-	if (patternviewstate_pattern(&self->pv)) {
+	if (patternviewstate_pattern(self->pv)) {
 		*rv_right = psy_min(
-			psy_audio_pattern_length(patternviewstate_pattern(&self->pv)),
+			psy_audio_pattern_length(patternviewstate_pattern(self->pv)),
 			pianogridstate_pxtobeat(self, clip_right_px));
 	} else {
 		*rv_right = 0;

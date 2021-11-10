@@ -510,7 +510,7 @@ static void seqeditproperties_vtable_init(SeqEditProperties* self)
 	if (!seqeditproperties_vtable_initialized) {
 		seqeditproperties_vtable = *(self->component.vtable);		
 		seqeditproperties_vtable.ondestroy =
-			(psy_ui_fp_component_ondestroy)
+			(psy_ui_fp_component_event)
 			seqeditproperties_ondestroy;
 		seqeditproperties_vtable_initialized = TRUE;
 	}

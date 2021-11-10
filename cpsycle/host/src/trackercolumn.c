@@ -203,10 +203,10 @@ void trackercolumn_drawtrackevents(TrackerColumn* self, psy_ui_Graphics* g)
 				self->gridstate->trackevents.clip.topleft.lpb);
 			p != NULL;
 			p = p->next, ++line, cpy += self->gridstate->lineheightpx,
-			offset += trackerstate_bpl(self->gridstate)) {				
+			offset += patternviewstate_bpl(self->gridstate->pv)) {
 		trackercolumn_drawentry(self, g, (psy_audio_PatternEntry*)p->entry,
 			cpy, trackercolumn_columnflags(self,
-				line - trackerstate_beattoline(self->gridstate,
+				line - patternviewstate_beattoline(self->gridstate->pv,
 					self->gridstate->trackevents.seqoffset),
 				self->index, offset));
 
@@ -224,7 +224,7 @@ TrackerColumnFlags trackercolumn_columnflags(TrackerColumn* self,
 	if (self->gridstate->drawbeathighlights) {
 		uintptr_t lpb;
 
-		lpb = trackerstate_lpb(self->gridstate);
+		lpb = patternviewstate_lpb(self->gridstate->pv);
 		rv.beat = (line % lpb) == 0;
 		rv.beat4 = (line % (lpb * 4)) == 0;		
 		rv.mid = self->gridstate->midline &&
@@ -235,14 +235,15 @@ TrackerColumnFlags trackercolumn_columnflags(TrackerColumn* self,
 		rv.beat = 0;
 		rv.beat4 = 0;
 		rv.mid = 0;
-	}
+	}		
 	rv.cursor = (self->gridstate->trackevents.currcursorline == line) &&
-		(track == self->gridstate->pv.cursor.track) &&
+		(track == self->gridstate->pv->cursor.track) &&
 		self->gridstate->drawcursor;
 	rv.selection = psy_audio_blockselection_test(
-		&self->gridstate->pv.selection, track, offset);
+		&self->gridstate->pv->selection, track, offset);
 	rv.playbar = psy_audio_player_playing(workspace_player(self->workspace)) &&
-		(self->gridstate->trackevents.currplaybarline == line);
+		(self->workspace->currplayline == line +
+			patternviewstate_seqstartline(self->gridstate->pv));
 	rv.focus = TRUE;
 	return rv;
 }
@@ -266,9 +267,9 @@ void trackercolumn_drawentry(TrackerColumn* self, psy_ui_Graphics* g,
 		psy_ui_RealPoint cp_leftedge;
 	
 		currcolumnflags = columnflags;
-		currcolumnflags.cursor &= self->gridstate->pv.cursor.column == 0;
-		setcolumncolour(self->gridstate->pv.skin, g, currcolumnflags, entry->track,
-			patternviewstate_numsongtracks(&self->gridstate->pv));
+		currcolumnflags.cursor &= self->gridstate->pv->cursor.column == 0;
+		setcolumncolour(self->gridstate->pv->skin, g, currcolumnflags, entry->track,
+			patternviewstate_numsongtracks(self->gridstate->pv));
 		cp_leftedge = cp;
 		cp_leftedge.x += self->gridstate->trackconfig->textleftedge;
 		// draw note
@@ -309,14 +310,14 @@ void trackercolumn_drawentry(TrackerColumn* self, psy_ui_Graphics* g,
 				}
 			}
 			currcolumnflags.cursor = columnflags.cursor && (column ==
-				self->gridstate->pv.cursor.column);
+				self->gridstate->pv->cursor.column);
 			for (num = coldef->numdigits, digit = 0; digit < num; ++digit) {
 				if (columnflags.cursor) {
 					currcolumnflags.cursor = columnflags.cursor &&
-						(self->gridstate->pv.cursor.column == column) &&
-						(self->gridstate->pv.cursor.digit == digit);
-					setcolumncolour(self->gridstate->pv.skin, g, currcolumnflags,
-						entry->track, patternviewstate_numsongtracks(&self->gridstate->pv));
+						(self->gridstate->pv->cursor.column == column) &&
+						(self->gridstate->pv->cursor.digit == digit);
+					setcolumncolour(self->gridstate->pv->skin, g, currcolumnflags,
+						entry->track, patternviewstate_numsongtracks(self->gridstate->pv));
 				}
 				if (!empty) {
 					digitstr = hex_tab[((value >> ((num - digit - 1) * 4)) & 0x0F)];
@@ -394,11 +395,11 @@ void trackercolumn_onmousedown(TrackerColumn* self, psy_ui_MouseEvent* ev)
 			psy_ui_component_invalidate(&self->component);
 			psy_ui_component_capture(&self->component);
 		} else {
-			if (psy_audio_blockselection_valid(&self->gridstate->pv.selection)) {
-				psy_audio_blockselection_disable(&self->gridstate->pv.selection);
+			if (psy_audio_blockselection_valid(&self->gridstate->pv->selection)) {
+				psy_audio_blockselection_disable(&self->gridstate->pv->selection);
 				psy_ui_component_invalidate(psy_ui_component_parent(&self->component));
 			}
-			self->gridstate->pv.dragselectionbase = trackerstate_makecursor(
+			self->gridstate->pv->dragselectionbase = trackerstate_makecursor(
 				self->gridstate, ev->pt, self->index);
 		}
 	}
@@ -491,7 +492,7 @@ void trackercolumn_onpreferredsize(TrackerColumn* self,
 			self->gridstate, self->index));		
 	}	
 	rv->height = psy_ui_value_make_px(
-		(trackerstate_numlines(self->gridstate)) *
+		(patternviewstate_numlines(self->gridstate->pv)) *
 		self->gridstate->lineheightpx);	
 }
 

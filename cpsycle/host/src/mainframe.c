@@ -129,7 +129,7 @@ static void vtable_init(MainFrame* self)
 			(psy_ui_fp_component_onclose)
 			mainframe_onclose;
 		vtable.ondestroyed =
-			(psy_ui_fp_component_ondestroyed)
+			(psy_ui_fp_component_event)
 			mainframe_ondestroyed;
 		vtable.onkeydown =
 			(psy_ui_fp_component_onkeyevent)

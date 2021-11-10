@@ -152,7 +152,7 @@ static void vtable_init(InputDefiner* self)
 		vtable = *(self->component.vtable);
 		super_vtable = *(self->component.vtable);
 		vtable.ondestroy =
-			(psy_ui_fp_component_ondestroy)
+			(psy_ui_fp_component_event)
 			inputdefiner_ondestroy;
 		vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
@@ -164,10 +164,10 @@ static void vtable_init(InputDefiner* self)
 			(psy_ui_fp_component_onkeyevent)
 			inputdefiner_onkeyup;
 		vtable.onfocus =
-			(psy_ui_fp_component_onfocus)
+			(psy_ui_fp_component_event)
 			inputdefiner_onfocus;
 		vtable.onfocuslost =
-			(psy_ui_fp_component_onfocuslost)
+			(psy_ui_fp_component_event)
 			inputdefiner_onfocuslost;
 		vtable_initialized = TRUE;
 	}

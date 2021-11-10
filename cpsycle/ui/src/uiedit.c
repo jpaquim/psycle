@@ -33,10 +33,10 @@ static void vtable_init(psy_ui_Edit* self)
 			(psy_ui_fp_component_onpreferredsize)
 			onpreferredsize;
 		vtable.onfocus =
-			(psy_ui_fp_component_onfocus)
+			(psy_ui_fp_component_event)
 			psy_ui_edit_onfocus;
 		vtable.onfocuslost =
-			(psy_ui_fp_component_onfocuslost)
+			(psy_ui_fp_component_event)
 			psy_ui_edit_onfocuslost;
 		vtable.onkeydown =
 			(psy_ui_fp_component_onkeyevent)

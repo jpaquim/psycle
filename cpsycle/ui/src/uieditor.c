@@ -58,9 +58,11 @@ static void vtable_init(psy_ui_Editor* self)
 	if (!vtable_initialized) {		
 		vtable = *(self->component.vtable);
 		super_setfont = vtable.setfont;
-		vtable.setfont = (psy_ui_fp_component_setfont)psy_ui_editor_setfont;
+		vtable.setfont =
+			(psy_ui_fp_component_setfont)
+			psy_ui_editor_setfont;
 		vtable.onupdatestyles =
-			(psy_ui_fp_component_onupdatestyles)
+			(psy_ui_fp_component_event)
 			psy_ui_editor_onstylesupdate;
 		vtable_initialized = TRUE;
 	}

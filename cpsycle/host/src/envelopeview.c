@@ -42,7 +42,7 @@ static void envelopebox_vtable_init(EnvelopeBox* self)
 	if (!envelopebox_vtable_initialized) {
 		envelopebox_vtable = *(self->component.vtable);
 		envelopebox_vtable.onsize =
-			(psy_ui_fp_component_onsize)
+			(psy_ui_fp_component_event)
 			envelopebox_onsize;
 		envelopebox_vtable.ondraw =
 			(psy_ui_fp_component_ondraw)

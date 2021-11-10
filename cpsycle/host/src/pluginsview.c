@@ -437,7 +437,7 @@ static void pluginsview_vtable_init(PluginsView* self)
 		pluginsview_vtable = *(self->component.vtable);
 		pluginsview_super_vtable = pluginsview_vtable;
 		pluginsview_vtable.ondestroy =
-			(psy_ui_fp_component_ondestroy)
+			(psy_ui_fp_component_event)
 			pluginsview_ondestroy;
 		pluginsview_vtable.ondraw =
 			(psy_ui_fp_component_ondraw)

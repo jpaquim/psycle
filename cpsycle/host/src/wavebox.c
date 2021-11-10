@@ -258,7 +258,7 @@ static void vtable_init(WaveBox* self)
 			(psy_ui_fp_component_ondraw)
 			wavebox_ondraw;
 		vtable.onsize =
-			(psy_ui_fp_component_onsize)
+			(psy_ui_fp_component_event)
 			wavebox_onsize;
 		vtable_initialized = TRUE;
 	}

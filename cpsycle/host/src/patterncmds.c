@@ -233,8 +233,8 @@ static void blocktransposecommandcommand_vtable_init(BlockTransposeCommand* self
 }
 
 BlockTransposeCommand* blocktransposecommand_alloc(psy_audio_Pattern* pattern,
-	psy_audio_BlockSelection block, psy_audio_SequenceCursor cursor, int transposeoffset,
-	Workspace* workspace)
+	psy_audio_BlockSelection block, psy_audio_SequenceCursor cursor,
+	intptr_t transposeoffset, psy_audio_Song* song)
 {
 	BlockTransposeCommand* rv;
 
@@ -247,8 +247,8 @@ BlockTransposeCommand* blocktransposecommand_alloc(psy_audio_Pattern* pattern,
 		psy_audio_pattern_init(&rv->oldpattern);
 		rv->block = block;
 		rv->cursor = cursor;
-		rv->transposeoffset = transposeoffset;
-		rv->workspace = workspace;
+		rv->transposeoffset = transposeoffset;		
+		rv->song = song;
 	}
 	return rv;
 }
@@ -260,9 +260,9 @@ void BlockTransposeCommandDispose(BlockTransposeCommand* self)
 
 void BlockTransposeCommandExecute(BlockTransposeCommand* self)
 {
-	if (self->workspace && workspace_song(self->workspace)) {
+	if (self->song) {
 		psy_audio_sequence_setcursor(
-			psy_audio_song_sequence(workspace_song(self->workspace)),
+			psy_audio_song_sequence(self->song),
 			self->cursor);
 	}
 	psy_audio_pattern_copy(&self->oldpattern, self->pattern);
@@ -274,12 +274,9 @@ void BlockTransposeCommandExecute(BlockTransposeCommand* self)
 void BlockTransposeCommandRevert(BlockTransposeCommand* self)
 {
 	assert(self->pattern);
-	if (self->pattern) {
-		if (self->workspace && workspace_song(self->workspace)) {
-			psy_audio_sequence_setcursor(
-				psy_audio_song_sequence(workspace_song(self->workspace)),
-				self->cursor);
-		}
+	if (self->pattern && self->song) {
+		psy_audio_sequence_setcursor(psy_audio_song_sequence(self->song),
+			self->cursor);		
 		psy_audio_pattern_copy(self->pattern, &self->oldpattern);
 	}
 }
@@ -303,9 +300,9 @@ static void blockremovecommandcommand_vtable_init(BlockRemoveCommand* self)
 		blockremovecommandcommand_vtable_initialized = TRUE;
 	}
 }
-// implementation
+/* implementation */
 BlockRemoveCommand* blockremovecommand_alloc(psy_audio_Pattern* pattern,
-	psy_audio_BlockSelection selection, Workspace* workspace)
+	psy_audio_BlockSelection selection, psy_audio_Song* song)
 {
 	BlockRemoveCommand* rv;
 
@@ -317,7 +314,7 @@ BlockRemoveCommand* blockremovecommand_alloc(psy_audio_Pattern* pattern,
 		rv->selection = selection;
 		rv->remove = FALSE;
 		rv->pattern = pattern;
-		rv->workspace = workspace;
+		rv->song = song;
 	}
 	return rv;
 }
@@ -326,13 +323,13 @@ void BlockRemoveCommandDispose(BlockRemoveCommand* self) { }
 
 void BlockRemoveCommandExecute(BlockRemoveCommand* self)
 {
-	bool isplaying;
+//	bool isplaying;
 
 	psy_audio_exclusivelock_enter();
-	isplaying = psy_audio_player_playing(&self->workspace->player);		
+/*	isplaying = psy_audio_player_playing(&self->workspace->player);
 	if (isplaying) {
 		psy_audio_player_pause(&self->workspace->player);
-	}
+	} */
 	if (!self->remove) {
 		psy_audio_pattern_init(&self->oldpattern);
 		psy_audio_pattern_copy(&self->oldpattern,
@@ -342,28 +339,28 @@ void BlockRemoveCommandExecute(BlockRemoveCommand* self)
 		self->selection.topleft,
 		self->selection.bottomright);
 	self->remove = TRUE;
-	if (isplaying) {
+	/*if (isplaying) {
 		psy_audio_player_resume(&self->workspace->player);
-	}
+	}*/
 	psy_audio_exclusivelock_leave();
 }
 
 void BlockRemoveCommandRevert(BlockRemoveCommand* self)
 {
 	if (self->remove) {
-		bool isplaying;
+//		bool isplaying;
 
 		psy_audio_exclusivelock_enter();
-		isplaying = psy_audio_player_playing(&self->workspace->player);
+/*		isplaying = psy_audio_player_playing(&self->workspace->player);
 		if (isplaying) {
 			psy_audio_player_pause(&self->workspace->player);
-		}
+		}*/
 		psy_audio_pattern_copy(self->pattern, &self->oldpattern);
 		psy_audio_pattern_dispose(&self->oldpattern);
 		self->remove = 0;
-		if (isplaying) {
+/*		if (isplaying) {
 			psy_audio_player_resume(&self->workspace->player);
-		}
+		}*/
 		psy_audio_exclusivelock_leave();
 	}
 }
@@ -390,7 +387,7 @@ static void blockpastecommandcommand_vtable_init(BlockPasteCommand* self)
 // implementation
 BlockPasteCommand* blockpastecommand_alloc(psy_audio_Pattern* pattern,
 	psy_audio_Pattern* source, psy_audio_SequenceCursor destcursor,
-	psy_dsp_big_beat_t bpl, bool mix, Workspace* workspace)
+	psy_dsp_big_beat_t bpl, bool mix)
 {
 	BlockPasteCommand* rv;
 
@@ -406,7 +403,6 @@ BlockPasteCommand* blockpastecommand_alloc(psy_audio_Pattern* pattern,
 		rv->mix = mix;
 		psy_audio_pattern_init(&rv->source);
 		psy_audio_pattern_copy(&rv->source, source);
-		rv->workspace = workspace;
 	}
 	return rv;
 }

@@ -568,7 +568,7 @@ static void newmachinesectionspane_vtable_init(NewMachineSectionsPane* self)
 	if (!newmachinesectionspane_vtable_initialized) {
 		newmachinesectionspane_vtable = *(self->component.vtable);
 		newmachinesectionspane_vtable.ondestroy =
-			(psy_ui_fp_component_ondestroy)
+			(psy_ui_fp_component_event)
 			newmachinesectionspane_ondestroy;
 		newmachinesectionspane_vtable.onmousedown =
 			(psy_ui_fp_component_onmouseevent)
@@ -811,7 +811,7 @@ static void newmachine_vtable_init(NewMachine* self)
 	if (!newmachine_vtable_initialized) {
 		newmachine_vtable = *(self->component.vtable);
 		newmachine_vtable.ondestroy =
-			(psy_ui_fp_component_ondestroy)
+			(psy_ui_fp_component_event)
 			newmachine_ondestroy;
 		newmachine_vtable.onmousedown =
 			(psy_ui_fp_component_onmouseevent)

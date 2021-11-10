@@ -67,10 +67,12 @@ typedef struct PatternView {
 	TransformPatternView transformpattern;
 	InterpolateCurveView interpolatecurveview;
 	SwingFillView swingfillview;
-	/* internal data */	
+	/* internal */	
 	TrackConfig trackconfig;
-	TrackerState state;	
+	PatternViewState pvstate;
+	TrackerState state;		
 	PatternViewSkin skin;	
+	PatternCmds cmds;
 	bool trackmodeswingfill;
 	int baselfheight;	
 	bool aligndisplay;
@@ -81,7 +83,6 @@ typedef struct PatternView {
 
 void patternview_init(PatternView*, psy_ui_Component* parent,
 		psy_ui_Component* tabbarparent,	Workspace*);
-void patternview_setpattern(PatternView*, psy_audio_Pattern*);
 void patternview_selectdisplay(PatternView*, PatternDisplayMode);
 void patternview_showlinenumbers(PatternView*);
 void patternview_hidelinenumbers(PatternView*);
@@ -91,7 +92,6 @@ void patternview_toggleblockmenu(PatternView*);
 void patternview_toggleinterpolatecurve(PatternView*, psy_ui_Component* sender);
 void patternview_toggletransformpattern(PatternView*, psy_ui_Component* sender);
 void patternview_toggleswingfill(PatternView*, psy_ui_Component* sender);
-void patternview_oninterpolatelinear(PatternView*);
 void patternview_onpatternimport(PatternView*);
 void patternview_onpatternexport(PatternView*);
 

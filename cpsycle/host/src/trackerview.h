@@ -32,6 +32,7 @@ typedef struct TrackerGrid {
 	/* signals */
 	psy_Signal signal_colresize;
 	/* internal */
+	PatternViewState defaultpvstate;
 	TrackerState defaultgridstate;	
 	psy_dsp_NotesTabMode notestabmode;   
 	psy_audio_SequenceCursor oldcursor;
@@ -46,20 +47,17 @@ typedef struct TrackerGrid {
 	bool ft2home;
 	bool ft2delete;
 	bool effcursoralwaysdown;
-	bool movecursoronestep;
-	intptr_t pgupdownstep;
+	bool movecursoronestep;	
 	bool preventscrolltop;
 	psy_Table columns;
-	bool preventeventdriver;
-	PatternCmds cmds;
+	bool preventeventdriver;	
 	/* references */
 	TrackerState* state;	
 	Workspace* workspace;
 } TrackerGrid;
 
 void trackergrid_init(TrackerGrid*, psy_ui_Component* parent,
-	psy_ui_Component* view, TrackConfig*, TrackerState*,
-	Workspace*);
+	TrackConfig*, TrackerState*, Workspace*);
 
 void trackergrid_build(TrackerGrid*);
 void trackergrid_setsharedgridstate(TrackerGrid*, TrackerState*,
@@ -67,6 +65,7 @@ void trackergrid_setsharedgridstate(TrackerGrid*, TrackerState*,
 void trackergrid_setpattern(TrackerGrid*, psy_audio_Pattern*);
 void trackergrid_showemptydata(TrackerGrid*, int showstate);
 void trackergrid_invalidateline(TrackerGrid*, intptr_t line);
+void trackergrid_invalidatelines(TrackerGrid*, intptr_t line1, intptr_t line2);
 bool trackergrid_scrollup(TrackerGrid*, psy_audio_SequenceCursor);
 bool trackergrid_scrolldown(TrackerGrid*, psy_audio_SequenceCursor);
 bool trackergrid_scrollleft(TrackerGrid*, psy_audio_SequenceCursor);
@@ -83,7 +82,7 @@ void trackergrid_tweak(TrackerGrid*, int slot, uintptr_t tweak,
 INLINE const psy_audio_BlockSelection* trackergrid_selection(
 	const TrackerGrid* self)
 {
-	return &self->state->pv.selection;
+	return &self->state->pv->selection;
 }
 
 INLINE void trackergrid_enableft2home(TrackerGrid* self)
@@ -132,16 +131,6 @@ void trackergrid_changegenerator(TrackerGrid*);
 void trackergrid_changeinstrument(TrackerGrid*);
 void trackergrid_blockstart(TrackerGrid*);
 void trackergrid_blockend(TrackerGrid*);
-void trackergrid_blockunmark(TrackerGrid*);
-void trackergrid_blockcut(TrackerGrid*);
-void trackergrid_blockcopy(TrackerGrid*);
-void trackergrid_blockpaste(TrackerGrid*);
-void trackergrid_blockmixpaste(TrackerGrid*);
-void trackergrid_blockdelete(TrackerGrid*);
-void trackergrid_blocktransposeup(TrackerGrid*);
-void trackergrid_blocktransposedown(TrackerGrid*);
-void trackergrid_blocktransposeup12(TrackerGrid*);
-void trackergrid_blocktransposedown12(TrackerGrid*);
 
 INLINE bool trackergrid_midline(TrackerGrid* self)
 {
@@ -157,12 +146,12 @@ INLINE psy_ui_Component* trackergrid_base(TrackerGrid* self)
 
 INLINE bool trackergrid_checkupdate(const TrackerGrid* self)
 {
-	if (self->state->pv.pattern) {
+	if (self->state->pv->pattern) {
 		bool rv;
 		uintptr_t opcount;
 
-		opcount = self->state->pv.pattern->opcount;
-		rv = (opcount != self->component.opcount && self->syncpattern);
+		opcount = self->state->pv->pattern->opcount;
+		rv = (opcount != self->component.opcount);
 		((TrackerGrid*)self)->component.opcount = opcount;
 		return rv;
 	}

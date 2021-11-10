@@ -550,7 +550,7 @@ double hermitecurveinterpolate(intptr_t kf0, intptr_t kf1, intptr_t kf2,
 
 void psy_audio_pattern_blocktranspose(psy_audio_Pattern* self,
 	psy_audio_SequenceCursor begin,
-	psy_audio_SequenceCursor end, int offset)
+	psy_audio_SequenceCursor end, intptr_t offset)
 {	
 	psy_audio_PatternNode* p;
 	psy_audio_PatternNode* q;

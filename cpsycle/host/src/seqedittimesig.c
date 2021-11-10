@@ -82,10 +82,10 @@ static void seqedittimesig_vtable_init(SeqEditTimeSig* self)
 			(psy_ui_fp_component_onmouseevent)
 			seqedittimesig_onmouseup;
 		seqedittimesig_vtable.onmouseenter =
-			(psy_ui_fp_component_onmouseenter)
+			(psy_ui_fp_component_event)
 			seqedittimesig_onmouseenter;
 		seqedittimesig_vtable.onmouseleave =
-			(psy_ui_fp_component_onmouseleave)
+			(psy_ui_fp_component_event)
 			seqedittimesig_onmouseleave;
 		seqedittimesig_vtable_initialized = TRUE;
 	}
@@ -308,7 +308,7 @@ static void seqedittimesigs_vtable_init(SeqEditTimeSigs* self)
 	if (!seqedittimesigs_vtable_initialized) {
 		seqedittimesigs_vtable = *(self->component.vtable);
 		seqedittimesigs_vtable.ondestroy =
-			(psy_ui_fp_component_ondestroy)
+			(psy_ui_fp_component_event)
 			seqedittimesigs_ondestroy;		
 		seqedittimesigs_vtable.onpreferredsize =
 			(psy_ui_fp_component_onpreferredsize)
@@ -320,16 +320,16 @@ static void seqedittimesigs_vtable_init(SeqEditTimeSigs* self)
 			(psy_ui_fp_component_onmouseevent)
 			seqedittimesigs_onmousemove;
 		seqedittimesigs_vtable.onmouseenter =
-			(psy_ui_fp_component_onmouseenter)
+			(psy_ui_fp_component_event)
 			seqedittimesigs_onmouseenter;
 		seqedittimesigs_vtable.onmouseleave =
-			(psy_ui_fp_component_onmouseleave)
+			(psy_ui_fp_component_event)
 			seqedittimesigs_onmouseleave;
 		seqedittimesigs_vtable.onmousedoubleclick =
 			(psy_ui_fp_component_onmouseevent)
 			seqedittimesigs_onmousedoubleclick;
 		seqedittimesigs_vtable.onalign =
-			(psy_ui_fp_component_onalign)
+			(psy_ui_fp_component_event)
 			seqedittimesigs_onalign;
 		seqedittimesigs_vtable_initialized = TRUE;
 	}

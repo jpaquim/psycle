@@ -27,7 +27,7 @@ static void greet_vtable_init(Greet* self)
 	if (!greet_vtable_initialized) {
 		greet_vtable = *(self->component.vtable);		
 		greet_vtable.onalign =
-			(psy_ui_fp_component_onalign)
+			(psy_ui_fp_component_event)
 			greet_onalign;		
 		greet_vtable_initialized = TRUE;
 	}

@@ -52,13 +52,14 @@ typedef struct {
 	psy_audio_Pattern oldpattern;
 	psy_audio_SequenceCursor cursor;
 	psy_audio_BlockSelection block;
-	int transposeoffset;
+	intptr_t transposeoffset;
 	Workspace* workspace;
+	psy_audio_Song* song;
 } BlockTransposeCommand;
 
 BlockTransposeCommand* blocktransposecommand_alloc(psy_audio_Pattern* pattern,
-	psy_audio_BlockSelection block, psy_audio_SequenceCursor cursor, int transposeoffset,
-	Workspace* workspace);
+	psy_audio_BlockSelection block, psy_audio_SequenceCursor, intptr_t transposeoffset,
+	psy_audio_Song*);
 
 typedef struct {
 	// inherits
@@ -67,11 +68,11 @@ typedef struct {
 	psy_audio_Pattern* pattern;
 	psy_audio_Pattern oldpattern;
 	bool remove;
-	Workspace* workspace;
+	psy_audio_Song* song;	
 } BlockRemoveCommand;
 
 BlockRemoveCommand* blockremovecommand_alloc(psy_audio_Pattern*,
-	psy_audio_BlockSelection, Workspace*);
+	psy_audio_BlockSelection, psy_audio_Song*);
 
 typedef struct BlockPasteCommand {
 	// inherits
@@ -82,13 +83,12 @@ typedef struct BlockPasteCommand {
 	psy_audio_Pattern oldpattern;
 	psy_dsp_big_beat_t bpl;
 	bool paste;
-	bool mix;
-	Workspace* workspace;
+	bool mix;	
 } BlockPasteCommand;
 
 BlockPasteCommand* blockpastecommand_alloc(psy_audio_Pattern*,
 	psy_audio_Pattern* source, psy_audio_SequenceCursor,
-	psy_dsp_big_beat_t bpl, bool mix, Workspace*);
+	psy_dsp_big_beat_t bpl, bool mix);
 
 
 #ifdef __cplusplus

@@ -23,7 +23,7 @@ static void vtable_init(psy_ui_Terminal* self)
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);		
 		vtable.ondestroy =
-			(psy_ui_fp_component_ondestroy)
+			(psy_ui_fp_component_event)
 			psy_ui_terminal_ondestroy;
 		vtable.ontimer =
 			(psy_ui_fp_component_ontimer)

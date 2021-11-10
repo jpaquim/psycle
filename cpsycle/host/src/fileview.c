@@ -35,7 +35,7 @@ static void fileviewfilter_vtable_init(FileViewFilter* self)
 	if (!fileviewfilter_vtable_initialized) {
 		fileviewfilter_vtable = *(self->component.vtable);
 		fileviewfilter_vtable.ondestroy =
-			(psy_ui_fp_component_ondestroy)
+			(psy_ui_fp_component_event)
 			fileviewfilter_ondestroy;
 		fileviewfilter_vtable_initialized = TRUE;
 	}

@@ -28,9 +28,11 @@ static void vtable_init(ZoomBox* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.ondestroy = (psy_ui_fp_component_ondestroy)
+		vtable.ondestroy =
+			(psy_ui_fp_component_event)
 			zoombox_ondestroy;
-		vtable.onmousewheel = (psy_ui_fp_component_onmouseevent)
+		vtable.onmousewheel =
+			(psy_ui_fp_component_onmouseevent)
 			zoombox_onmousewheel;		
 		vtable_initialized = TRUE;
 	}

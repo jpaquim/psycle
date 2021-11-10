@@ -31,7 +31,7 @@ static void psy_ui_tab_vtable_init(psy_ui_Tab* self)
 	if (!psy_ui_tab_vtable_initialized) {
 		psy_ui_tab_vtable = *(self->component.vtable);
 		psy_ui_tab_vtable.ondestroy =
-			(psy_ui_fp_component_ondestroy)
+			(psy_ui_fp_component_event)
 			psy_ui_tab_ondestroy;
 		psy_ui_tab_vtable.onmousedown =
 			(psy_ui_fp_component_onmouseevent)
@@ -46,7 +46,7 @@ static void psy_ui_tab_vtable_init(psy_ui_Tab* self)
 			(psy_ui_fp_component_onlanguagechanged)
 			psy_ui_tab_onlanguagechanged;
 		psy_ui_tab_vtable.onupdatestyles =
-			(psy_ui_fp_component_onupdatestyles)
+			(psy_ui_fp_component_event)
 			psy_ui_tab_onupdatestyles;
 		psy_ui_tab_vtable_initialized = TRUE;
 	}
@@ -280,7 +280,7 @@ static void vtable_init(psy_ui_TabBar* self)
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
 		vtable.ondestroy =
-			(psy_ui_fp_component_ondestroy)
+			(psy_ui_fp_component_event)
 			tabbar_ondestroy;
 		vtable.onmousewheel =
 			(psy_ui_fp_component_onmouseevent)

@@ -819,7 +819,8 @@ static psy_ui_ComponentVtable* machinestackdesc_vtable_init(MachineStackDesc* se
 {
 	if (!machinestackdesc_vtable_initialized) {
 		machinestackdesc_vtable = *(self->component.vtable);
-		machinestackdesc_vtable.onalign = (psy_ui_fp_component_onalign)
+		machinestackdesc_vtable.onalign =
+			(psy_ui_fp_component_event)
 			machinestackdesc_onalign;
 		machinestackdesc_vtable.onpreferredsize =
 			(psy_ui_fp_component_onpreferredsize)
@@ -972,7 +973,7 @@ static psy_ui_ComponentVtable* machinestackinputs_vtable_init(MachineStackInputs
 			(psy_ui_fp_component_onpreferredsize)
 			machinestackinputs_onpreferredsize;
 		machinestackinputs_vtable.onmouseenter =
-			(psy_ui_fp_component_onmouseenter)
+			(psy_ui_fp_component_event)
 			machinestackinputs_onmouseenter;
 		machinestackinputs_vtable.onmousedoubleclick =
 			(psy_ui_fp_component_onmouseevent)
@@ -1583,7 +1584,8 @@ static void vtable_init(MachineStackView* self)
 
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);		
-		vtable.ondestroy = (psy_ui_fp_component_ondestroy)
+		vtable.ondestroy =
+			(psy_ui_fp_component_event)
 			machinestackview_destroy;
 		vtable_initialized = TRUE;
 	}

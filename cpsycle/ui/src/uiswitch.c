@@ -23,7 +23,7 @@ static void vtable_init(psy_ui_Switch* self)
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
 		vtable.ondestroy =
-			(psy_ui_fp_component_ondestroy)
+			(psy_ui_fp_component_event)
 			psy_ui_switch_ondestroy;
 		vtable.ondraw =
 			(psy_ui_fp_component_ondraw)

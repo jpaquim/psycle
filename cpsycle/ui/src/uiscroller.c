@@ -87,9 +87,11 @@ static void vtable_init(psy_ui_Scroller* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.ontimer = (psy_ui_fp_component_ontimer)
+		vtable.ontimer =
+			(psy_ui_fp_component_ontimer)
 			psy_ui_scroller_ontimer;
-		vtable.onupdatestyles = (psy_ui_fp_component_onupdatestyles)
+		vtable.onupdatestyles =
+			(psy_ui_fp_component_event)
 			psy_ui_scroller_onupdatestyles;
 		vtable_initialized = TRUE;
 	}

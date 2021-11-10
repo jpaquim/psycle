@@ -35,7 +35,7 @@ static void seqeditentry_vtable_init(SeqEditEntry* self)
 	if (!seqeditentry_vtable_initialized) {
 		seqeditentry_vtable = *(self->component.vtable);
 		seqeditentry_vtable.ondestroy =
-			(psy_ui_fp_component_ondestroy)
+			(psy_ui_fp_component_event)
 			seqeditentry_ondestroy;
 		seqeditentry_vtable.onpreferredsize =
 			(psy_ui_fp_component_onpreferredsize)
@@ -344,10 +344,10 @@ static void seqeditsampleentry_vtable_init(
 	if (!seqeditsampleentry_vtable_initialized) {
 		seqeditsampleentry_vtable = *(seqeditsampleentry_base(self)->vtable);
 		seqeditsampleentry_vtable.ondestroy =
-			(psy_ui_fp_component_ondestroy)
+			(psy_ui_fp_component_event)
 			seqeditsampleentry_ondestroy;
 		seqeditsampleentry_vtable.onalign =
-			(psy_ui_fp_component_onalign)
+			(psy_ui_fp_component_event)
 			seqeditsampleentry_onalign;
 		seqeditsampleentry_vtable.onmousedown =
 			(psy_ui_fp_component_onmouseevent)

@@ -28,7 +28,7 @@ static void newmachinedetail_vtable_init(NewMachineDetail* self)
 	if (!newmachinedetail_vtable_initialized) {
 		newmachinedetail_vtable = *(self->component.vtable);
 		newmachinedetail_vtable.ondestroy =
-			(psy_ui_fp_component_ondestroy)
+			(psy_ui_fp_component_event)
 			newmachinedetail_ondestroy;
 		newmachinedetail_vtable_initialized = TRUE;
 	}

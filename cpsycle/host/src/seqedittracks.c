@@ -35,7 +35,7 @@ static void seqeditortracks_vtable_init(SeqEditorTracks* self)
 	if (!seqeditortracks_vtable_initialized) {
 		seqeditortracks_vtable = *(self->component.vtable);		
 		seqeditortracks_vtable.onalign =
-			(psy_ui_fp_component_onalign)
+			(psy_ui_fp_component_event)
 			seqeditortracks_onalign;
 		seqeditortracks_vtable.ontimer =
 			(psy_ui_fp_component_ontimer)
@@ -50,10 +50,10 @@ static void seqeditortracks_vtable_init(SeqEditorTracks* self)
 			(psy_ui_fp_component_onmouseevent)
 			seqeditortracks_onmousemove;
 		seqeditortracks_vtable.onmouseenter =
-			(psy_ui_fp_component_onmouseenter)
+			(psy_ui_fp_component_event)
 			seqeditortracks_onmouseenter;
 		seqeditortracks_vtable.onmouseleave =
-			(psy_ui_fp_component_onmouseleave)
+			(psy_ui_fp_component_event)
 			seqeditortracks_onmouseleave;		
 		seqeditortracks_vtable_initialized = TRUE;
 	}

@@ -16,12 +16,21 @@
 #include "../../detail/trace.h"
 
 /* implementation */
-void patterncmds_init(PatternCmds* self, Workspace* workspace)
+void patterncmds_init(PatternCmds* self, psy_audio_Song* song,
+	psy_UndoRedo* undoredo, psy_audio_Pattern* patternpaste)
 {
-	assert(workspace);
+	assert(self);
+	assert(undoredo);	
+	
+	self->pattern = NULL;
+	self->song = song;
+	self->undoredo = undoredo;
+	self->patternpaste = patternpaste;
+}
 
-	self->workspace = workspace;
-	self->pattern = NULL;	
+void patterncmds_setsong(PatternCmds* self, psy_audio_Song* song)
+{
+	self->song = song;
 }
 
 void patterncmds_setpattern(PatternCmds* self, psy_audio_Pattern* pattern)
@@ -31,25 +40,24 @@ void patterncmds_setpattern(PatternCmds* self, psy_audio_Pattern* pattern)
 
 void patterncmds_blocktranspose(PatternCmds* self,
 	psy_audio_BlockSelection selection,
-	psy_audio_SequenceCursor cursor, int offset)
+	psy_audio_SequenceCursor cursor, intptr_t offset)
 {	
 	if (self->pattern && psy_audio_blockselection_valid(&selection)) {
-		psy_undoredo_execute(&self->workspace->undoredo,
+		psy_undoredo_execute(self->undoredo,
 			&blocktransposecommand_alloc(self->pattern,
-				selection, cursor, offset, self->workspace)->command);
+				selection, cursor, offset, self->song)->command);
 	}
 }
 
-void patterncmds_blockdelete(PatternCmds* self,
-	psy_audio_BlockSelection selection)
+void patterncmds_blockdelete(PatternCmds* self, psy_audio_BlockSelection
+	selection)
 {
 	assert(self);
 
 	if (self->pattern && psy_audio_blockselection_valid(&selection)) {
-		psy_undoredo_execute(&self->workspace->undoredo,
+		psy_undoredo_execute(self->undoredo,
 			&blockremovecommand_alloc(self->pattern,
-				selection,
-				self->workspace)->command);		
+				selection, self->song)->command);
 	}
 }
 
@@ -58,7 +66,7 @@ void patterncmds_blockcopy(PatternCmds* self, psy_audio_BlockSelection selection
 	assert(self);
 
 	if (self->pattern && psy_audio_blockselection_valid(&selection)) {
-		psy_audio_pattern_blockcopy(&self->workspace->patternpaste,
+		psy_audio_pattern_blockcopy(self->patternpaste,
 			self->pattern, selection);
 	}
 }
@@ -70,11 +78,11 @@ void patterncmds_blockpaste(PatternCmds* self, psy_audio_SequenceCursor cursor,
 	assert(self);
 
 	if (self->pattern && !psy_audio_pattern_empty(
-			&self->workspace->patternpaste)) {
-		psy_undoredo_execute(&self->workspace->undoredo,
+			self->patternpaste)) {
+		psy_undoredo_execute(self->undoredo,
 			&blockpastecommand_alloc(self->pattern,
-				&self->workspace->patternpaste, cursor,
-				1.0 / (double)cursor.lpb, mix, self->workspace)->command);		
+				self->patternpaste, cursor,
+				1.0 / (double)cursor.lpb, mix)->command);		
 	}
 }
 
@@ -83,11 +91,10 @@ void patterncmds_changeinstrument(PatternCmds* self,
 {
 	assert(self);
 
-	if (self->pattern && workspace_song(self->workspace)) {
+	if (self->pattern && self->song) {
 		psy_audio_pattern_changeinstrument(self->pattern,
 			selection.topleft, selection.bottomright,
-			psy_audio_instruments_selected(&workspace_song(
-				self->workspace)->instruments).subslot);
+			psy_audio_instruments_selected(&self->song->instruments).subslot);
 	}
 }
 
@@ -96,10 +103,9 @@ void patterncmds_changemachine(PatternCmds* self,
 {
 	assert(self);
 
-	if (self->pattern && workspace_song(self->workspace)) {
+	if (self->pattern && self->song) {
 		psy_audio_pattern_changemachine(self->pattern,
 			selection.topleft, selection.bottomright,
-			psy_audio_machines_selected(&workspace_song(
-				self->workspace)->machines));
+			psy_audio_machines_selected(&self->song->machines));
 	}
 }

@@ -43,22 +43,32 @@ static void vtable_init(psy_ui_SliderPane* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.ondraw = (psy_ui_fp_component_ondraw) psy_ui_sliderpane_ondraw;		
-		vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
+		vtable.ondraw =
+			(psy_ui_fp_component_ondraw)
+			psy_ui_sliderpane_ondraw;		
+		vtable.onpreferredsize =
+			(psy_ui_fp_component_onpreferredsize)
 			psy_ui_sliderpane_onpreferredsize;
-		vtable.onmousedown = (psy_ui_fp_component_onmouseevent)
+		vtable.onmousedown =
+			(psy_ui_fp_component_onmouseevent)
 			psy_ui_sliderpane_onmousedown;
-		vtable.onalign = (psy_ui_fp_component_onalign)
+		vtable.onalign =
+			(psy_ui_fp_component_event)
 			psy_ui_sliderpane_onalign;
-		vtable.onmousemove = (psy_ui_fp_component_onmouseevent)
+		vtable.onmousemove =
+			(psy_ui_fp_component_onmouseevent)
 			psy_ui_sliderpane_onmousemove;
-		vtable.onmousewheel = (psy_ui_fp_component_onmouseevent)
+		vtable.onmousewheel =
+			(psy_ui_fp_component_onmouseevent)
 			psy_ui_sliderpane_onmousewheel;
-		vtable.onmouseup = (psy_ui_fp_component_onmouseevent)
+		vtable.onmouseup =
+			(psy_ui_fp_component_onmouseevent)
 			psy_ui_sliderpane_onmouseup;
-		vtable.onmouseenter = (psy_ui_fp_component_onmouseenter)
+		vtable.onmouseenter =
+			(psy_ui_fp_component_event)
 			psy_ui_sliderpane_onmouseenter;
-		vtable.onmouseleave = (psy_ui_fp_component_onmouseleave)
+		vtable.onmouseleave = 
+			(psy_ui_fp_component_event)
 			psy_ui_sliderpane_onmouseleave;	
 		vtable_initialized = TRUE;
 	}
