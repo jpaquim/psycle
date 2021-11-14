@@ -11,7 +11,7 @@
 #include "../../detail/portable.h"
 
 static void machineproperties_onsongchanged(MachineProperties*, Workspace*,
-	int flag, psy_audio_Song*);
+	int flag);
 static void machineproperties_connectsongsignals(MachineProperties*);
 static void machineproperties_ontogglebus(MachineProperties*,
 	psy_ui_Component* sender);
@@ -188,8 +188,7 @@ void machineproperties_oneditreject(MachineProperties* self,
 	psy_ui_component_setfocus(psy_ui_component_parent(&self->component));
 }
 
-void machineproperties_onsongchanged(MachineProperties* self, Workspace* workspace, int flag,
-	psy_audio_Song* song)
+void machineproperties_onsongchanged(MachineProperties* self, Workspace* workspace, int flag)
 {
 	self->machines = (workspace_song(workspace))
 		? &workspace_song(workspace)->machines

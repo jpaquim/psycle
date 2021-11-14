@@ -17,6 +17,7 @@ void psy_ui_event_init(psy_ui_Event* self, psy_ui_EventType type)
 	self->bubbles = TRUE;
 	self->default_prevented = FALSE;
 	self->target = NULL;
+	self->currenttarget = NULL;
 	self->timestamp = 0;
 }
 
@@ -42,14 +43,17 @@ void psy_ui_keyboardevent_init_all(psy_ui_KeyboardEvent* self, uint32_t keycode,
 void psy_ui_mouseevent_init(psy_ui_MouseEvent* self)
 {
 	psy_ui_mouseevent_init_all(self, psy_ui_realpoint_zero(),
+		psy_ui_realpoint_zero(),
 		0, 0, 0, 0);
 }
 
-void psy_ui_mouseevent_init_all(psy_ui_MouseEvent* self, psy_ui_RealPoint pt,
+void psy_ui_mouseevent_init_all(psy_ui_MouseEvent* self,
+	psy_ui_RealPoint pt, psy_ui_RealPoint offset,
 	uintptr_t button, intptr_t delta, bool shift, bool ctrl)
 {
 	psy_ui_event_init(&self->event, psy_ui_MOUSEDOWN);
 	self->pt = pt;
+	self->offset = offset;
 	self->button = button;
 	self->delta = delta;	
 	self->shift_key = shift;

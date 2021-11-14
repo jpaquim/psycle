@@ -37,7 +37,7 @@ static void machinebar_oninstrumentnamechanged(MachineBar*, psy_ui_Component* se
 static void machinebar_oninstrumentinsert(MachineBar*, psy_audio_Instruments* sender, uintptr_t slot);
 static void machinebar_oninstrumentslotchanged(MachineBar* self, psy_audio_Instrument* sender,
 	const psy_audio_InstrumentIndex* slot);
-static void machinebar_onsongchanged(MachineBar*, Workspace*, int flag, psy_audio_Song*);
+static void machinebar_onsongchanged(MachineBar*, Workspace*, int flag);
 static void machinebar_connectsongsignals(MachineBar*);
 static void machinebar_connectinstrumentsignals(MachineBar*);
 static void machinebar_clearmachinebox(MachineBar* self);
@@ -392,8 +392,7 @@ void machinebar_oninstparamboxselchange(MachineBar* self, psy_ui_Component* send
 	}	
 }
 
-void machinebar_onsongchanged(MachineBar* self, Workspace* workspace, int flag,
-	psy_audio_Song* song)
+void machinebar_onsongchanged(MachineBar* self, Workspace* workspace, int flag)
 {	
 	self->machines = &workspace->song->machines;
 	self->instruments = &workspace->song->instruments;	

@@ -349,6 +349,7 @@ LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 				ScreenToClient(imp->hwnd, &pt_client);
 				psy_ui_mouseevent_init_all(&ev,
 					psy_ui_realpoint_make(pt_client.x, pt_client.y),
+					psy_ui_realpoint_make(pt_client.x, pt_client.y),
 					(short)LOWORD(wParam), (short)HIWORD(wParam),
 					GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);
 				component->vtable->onmousewheel(component, &ev);
@@ -587,6 +588,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				ScreenToClient(imp->hwnd, &pt_client);
 				psy_ui_mouseevent_init_all(&ev,
 					psy_ui_realpoint_make(pt_client.x, pt_client.y),
+					psy_ui_realpoint_make(pt_client.x, pt_client.y),
 					(short)LOWORD(wParam), (short)HIWORD(wParam),
 					GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);
 				adjustcoordinates(component, &ev.pt);
@@ -764,6 +766,7 @@ psy_ui_MouseEvent mouseevent(int msg, WPARAM wparam, LPARAM lparam)
 
 	psy_ui_mouseevent_init_all(&rv,
 		psy_ui_realpoint_make((SHORT)LOWORD(lparam), (SHORT)HIWORD(lparam)),
+		psy_ui_realpoint_make((SHORT)LOWORD(lparam), (SHORT)HIWORD(lparam)),
 		translate_win_button(msg), 0, GetKeyState(VK_SHIFT) < 0,
 		GetKeyState(VK_CONTROL) < 0);
 	if (msg == WM_MOUSEMOVE) {
@@ -863,6 +866,7 @@ LRESULT CALLBACK MouseHookProc(int nCode, WPARAM wParam, LPARAM lParam) {
 		MOUSEHOOKSTRUCT* pMouseStruct = (MOUSEHOOKSTRUCT*)lParam;
 
 		psy_ui_mouseevent_init_all(&ev,
+			psy_ui_realpoint_make(pMouseStruct->pt.x, pMouseStruct->pt.y),
 			psy_ui_realpoint_make(pMouseStruct->pt.x, pMouseStruct->pt.y),
 			(wParam == WM_LBUTTONDOWN) ? 0 : 1,
 			0, GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);

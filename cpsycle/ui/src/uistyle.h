@@ -11,7 +11,6 @@
 #include "uibitmap.h"
 #include "uifont.h"
 #include "uidef.h"
-#include "uistyle.h"
 /* container */
 #include <hashtbl.h>
 #include <properties.h>
@@ -45,8 +44,8 @@ typedef struct psy_ui_Style {
 	psy_ui_Border border;
 	psy_ui_Margin margin;
 	bool marginset;
-	psy_ui_Margin spacing;
-	bool spacingset;
+	psy_ui_Margin padding;
+	bool paddingset;
 	bool use_font;
 	int dbgflag;	
 } psy_ui_Style;
@@ -130,18 +129,23 @@ INLINE void psy_ui_style_setmargin_em(psy_ui_Style* self,
 		psy_ui_margin_make_em(top, right, bottom, left));
 }
 
-INLINE void psy_ui_style_setspacing(psy_ui_Style* self,
-	psy_ui_Margin spacing)
+INLINE void psy_ui_style_setpadding(psy_ui_Style* self,
+	psy_ui_Margin padding)
 {
-	self->spacing = spacing;
-	self->spacingset = TRUE;
+	self->padding = padding;
+	self->paddingset = TRUE;
 }
 
-INLINE void psy_ui_style_setspacing_em(psy_ui_Style* self,
+INLINE void psy_ui_style_setpadding_em(psy_ui_Style* self,
 	double top, double right, double bottom, double left)
 {
-	psy_ui_style_setspacing(self,
+	psy_ui_style_setpadding(self,
 		psy_ui_margin_make_em(top, right, bottom, left));	
+}
+
+INLINE psy_ui_Margin psy_ui_style_padding(const psy_ui_Style* self)
+{
+	return self->padding;
 }
 
 INLINE void psy_ui_style_setborder(psy_ui_Style* self, const psy_ui_Border* border)
@@ -151,28 +155,6 @@ INLINE void psy_ui_style_setborder(psy_ui_Style* self, const psy_ui_Border* bord
 	self->border = *border;
 }
 
-INLINE psy_ui_Margin psy_ui_style_spacing(const psy_ui_Style* self)
-{
-	return self->spacing;
-}
-
-/* psy_ui_Styles */
-typedef struct psy_ui_Styles {
-	psy_Table styles;
-	psy_Property config;
-	psy_ui_ThemeMode theme;
-
-} psy_ui_Styles;
-
-void psy_ui_styles_init(psy_ui_Styles*);
-void psy_ui_styles_dispose(psy_ui_Styles*);
-
-void psy_ui_styles_setstyle(psy_ui_Styles*, uintptr_t styletype, psy_ui_Style*);
-psy_ui_Style* psy_ui_styles_at(psy_ui_Styles* self, uintptr_t styletype);
-const psy_ui_Style* psy_ui_styles_at_const(const psy_ui_Styles*,
-	uintptr_t styletype);
-void psy_ui_styles_configure(psy_ui_Styles*, psy_Property*);
-const psy_Property* psy_ui_styles_configuration(const psy_ui_Styles*);
 
 #ifdef __cplusplus
 }

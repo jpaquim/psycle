@@ -284,6 +284,7 @@
     <ClCompile Include="src\uislider.c" />
     <ClCompile Include="src\uisplitbar.c" />
     <ClCompile Include="src\uistyle.c" />
+    <ClCompile Include="src\uistyles.c" />
     <ClCompile Include="src\uiswitch.c" />
     <ClCompile Include="src\uitabbar.c" />
     <ClCompile Include="src\uiterminal.c" />
@@ -369,6 +370,7 @@
     <ClInclude Include="src\uislider.h" />
     <ClInclude Include="src\uisplitbar.h" />
     <ClInclude Include="src\uistyle.h" />
+    <ClInclude Include="src\uistyles.h" />
     <ClInclude Include="src\uiswitch.h" />
     <ClInclude Include="src\uitabbar.h" />
     <ClInclude Include="src\uiterminal.h" />

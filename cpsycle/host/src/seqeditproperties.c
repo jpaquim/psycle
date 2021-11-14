@@ -497,8 +497,7 @@ static void seqeditproperties_onitemselected(SeqEditProperties*,
 	SeqEditState* sender, uintptr_t itemtype, uintptr_t param, uintptr_t param1);
 static void seqeditproperties_onsequencetrackreposition(SeqEditProperties*,
 	psy_audio_Sequence* sender, uintptr_t trackidx);
-static void seqeditproperties_onsongchanged(SeqEditProperties*, Workspace*, int flag,
-	psy_audio_Song*);
+static void seqeditproperties_onsongchanged(SeqEditProperties*, Workspace*, int flag);
 static void seqeditproperties_connectsong(SeqEditProperties*);
 
 /* vtable */
@@ -609,8 +608,7 @@ void seqeditproperties_onitemselected(SeqEditProperties* self,
 	seqeditproperties_selectitem(self, (SeqEditItemType)itemtype, param1, param2);
 }
 
-void seqeditproperties_onsongchanged(SeqEditProperties* self, Workspace* sender, int flag,
-	psy_audio_Song* song)
+void seqeditproperties_onsongchanged(SeqEditProperties* self, Workspace* sender, int flag)
 {
 	seqeditproperties_connectsong(self);
 	seqeditproperties_selectitem(self, SEQEDITITEM_NONE, 0, 0);

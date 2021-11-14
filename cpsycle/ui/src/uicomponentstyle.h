@@ -6,7 +6,7 @@
 #ifndef psy_ui_COMPONENTSTYLE_H
 #define psy_ui_COMPONENTSTYLE_H
 
-#include "uistyle.h"
+#include "uistyles.h"
 
 /*
 ** psy_ui_ComponentStyle
@@ -99,15 +99,15 @@ INLINE psy_ui_Margin psy_ui_componentstyle_margin(const psy_ui_ComponentStyle* s
 
 INLINE void psy_ui_componentstyle_setspacing(psy_ui_ComponentStyle* self, psy_ui_Margin spacing)
 {
-	psy_ui_style_setspacing(&self->overridestyle, spacing);
+	psy_ui_style_setpadding(&self->overridestyle, spacing);
 }
 
 INLINE psy_ui_Margin psy_ui_componentstyle_spacing(const psy_ui_ComponentStyle * self)
 {
-	if (self->overridestyle.spacingset) {
-		return self->overridestyle.spacing;
+	if (self->overridestyle.paddingset) {
+		return self->overridestyle.padding;
 	}
-	return self->currstyle->spacing;
+	return self->currstyle->padding;
 }
 
 INLINE psy_ui_Colour psy_ui_componentstyle_colour(const psy_ui_ComponentStyle* self)

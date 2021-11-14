@@ -154,8 +154,7 @@ void trackerstate_init(TrackerState* self, TrackConfig* trackconfig,
 	self->flatsize = 8;			
 	self->drawcursor = TRUE;
 	self->visilines = 25;
-	self->cursorchanging = FALSE;
-	self->gridfont = NULL;	
+	self->cursorchanging = FALSE;	
 }
 
 void trackerstate_dispose(TrackerState* self)
@@ -622,14 +621,13 @@ void trackerstate_lineclip(TrackerState* self, const psy_ui_RealRectangle* clip,
 	rv->bottomright.lpb = rv->topleft.lpb;
 }
 
-void trackerstate_setfont(TrackerState* self, const psy_ui_Font* font,
-	const psy_ui_TextMetric* tm)
-{	
-	self->gridfont = font;
-	self->lineheightpx = psy_max(1.0, psy_ui_value_px(
-		&self->lineheight, tm, NULL));	
-	self->trackconfig->textwidth = (int)(tm->tmAveCharWidth * 1.5) +
-		2;	
+void trackerstate_updatemetric(TrackerState* self, const psy_ui_TextMetric* tm,
+	double lineheight)
+{		
+	self->lineheight = psy_ui_value_make_eh(lineheight);
+	self->lineheightpx = psy_max(1.0, psy_ui_value_px(&self->lineheight, tm,
+		NULL));	
+	self->trackconfig->textwidth = (int)((double)tm->tmAveCharWidth * 1.5) + 2;
 	self->flatsize = (double)(tm->tmAveCharWidth) + 2.0;
 }
 

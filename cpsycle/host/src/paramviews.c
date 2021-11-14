@@ -8,8 +8,7 @@
 #include "../../detail/portable.h"
 
 // prototypes
-static void paramviews_onsongchanged(ParamViews*, Workspace*, int flag,
-	psy_audio_Song*);
+static void paramviews_onsongchanged(ParamViews*, Workspace*, int flag);
 static psy_audio_Machines* paramviews_machines(ParamViews*);
 // implementation
 void paramviews_init(ParamViews* self, psy_ui_Component* view,
@@ -109,8 +108,7 @@ MachineFrame* paramviews_frame(ParamViews* self, uintptr_t macid)
 	return (MachineFrame*)psy_table_at(&self->frames, macid);
 }
 
-void paramviews_onsongchanged(ParamViews* self, Workspace* workspace,
-	int flag, psy_audio_Song* song)
+void paramviews_onsongchanged(ParamViews* self, Workspace* workspace, int flag)
 {
 	paramviews_removeall(self);
 }

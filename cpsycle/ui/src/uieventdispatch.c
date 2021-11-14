@@ -46,6 +46,7 @@ void psy_ui_eventdispatch_send(psy_ui_EventDispatch* self,
 	assert(ev);
 
 	ev->target = psy_ui_eventdispatch_eventtarget(self, component);
+	ev->currenttarget = component;
 	eventtime = 0;
 	preventbubble = FALSE;
 	switch (ev->type) {

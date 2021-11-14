@@ -120,9 +120,7 @@ typedef struct TrackerState {
 	bool drawcursor;		
 	/* precomputed */
 	intptr_t visilines;
-	bool cursorchanging;	
-	/* references */
-	const psy_ui_Font* gridfont;	
+	bool cursorchanging;		
 } TrackerState;
 
 void trackerstate_init(TrackerState*, TrackConfig*, PatternViewState* pvstate);
@@ -203,8 +201,8 @@ INLINE uintptr_t trackerstate_midline(const TrackerState* self,
 		self, scrolltop_px) + self->visilines / 2);
 }
 
-void trackerstate_setfont(TrackerState*, const psy_ui_Font*,
-	const psy_ui_TextMetric*);
+void trackerstate_updatemetric(TrackerState*, const psy_ui_TextMetric*,
+	double lineheight);
 
 psy_audio_SequenceCursor trackerstate_makecursor(TrackerState*,
 	psy_ui_RealPoint pt, uintptr_t index);

@@ -17,8 +17,7 @@
 
 /* prototypes */
 static void clockbar_updatelabel(ClockBar*);
-static void clockbar_onsongchanged(ClockBar*, Workspace*,
-	int flag, psy_audio_Song*);
+static void clockbar_onsongchanged(ClockBar*, Workspace*, int flag);
 /* implementation */
 void clockbar_init(ClockBar* self, psy_ui_Component* parent,
 	Workspace* workspace)
@@ -55,8 +54,7 @@ void clockbar_updatelabel(ClockBar* self)
 	psy_ui_label_settext(&self->position, text);
 }
 
-void clockbar_onsongchanged(ClockBar* self, Workspace* sender, int flag,
-	psy_audio_Song* song)
+void clockbar_onsongchanged(ClockBar* self, Workspace* sender, int flag)
 {
 	self->start = time(NULL);
 	clockbar_updatelabel(self);

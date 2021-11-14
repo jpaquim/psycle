@@ -69,7 +69,7 @@ static void machinewireview_onconnected(MachineWireView*,
 static void machinewireview_ondisconnected(MachineWireView*,
 	psy_audio_Connections*, uintptr_t outputslot, uintptr_t inputslot);
 static void machinewireview_onsongchanged(MachineWireView*, Workspace*,
-	int flag, psy_audio_Song*);
+	int flag);
 static void machinewireview_buildmachineuis(MachineWireView*);
 static void machinewireview_destroywireframes(MachineWireView*);
 static void machinewireview_showwireview(MachineWireView*, psy_audio_Wire);
@@ -1064,11 +1064,11 @@ void machinewireview_buildmachineuis(MachineWireView* self)
 }
 
 void machinewireview_onsongchanged(MachineWireView* self, Workspace* sender,
-	int flag, psy_audio_Song* song)
+	int flag)
 {		
 	self->machines = &sender->song->machines;	
-	if (song) {
-		machinewireview_setmachines(self, psy_audio_song_machines(song));
+	if (sender->song) {
+		machinewireview_setmachines(self, psy_audio_song_machines(sender->song));
 	} else {		
 		machinewireview_setmachines(self, NULL);
 	}	

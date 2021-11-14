@@ -29,39 +29,41 @@ static void add(const char* key, const char* translation)
 }
 
 /* prototypes */
-static void make_translator_make_filebar(psy_Property* parent);
-static void make_translator_make_undobar(psy_Property* parent);
-static void make_translator_make_playbar(psy_Property* parent);
-static void make_translator_make_playlist(psy_Property* parent);
-static void make_translator_make_metronomebar(psy_Property* parent);
-static void make_translator_make_mainview(psy_Property* parent);
-static void make_translator_make_help(psy_Property* parent);
-static void make_translator_make_greetings(psy_Property* parent);
-static void make_translator_make_machinebar(psy_Property* parent);
-static void make_translator_make_trackbar(psy_Property* parent);
-static void make_translator_make_octavebar(psy_Property* parent);
-static void make_translator_make_edit(psy_Property* parent);
-static void make_translator_make_timebar(psy_Property* parent);
-static void make_translator_make_linesperbeatbar(psy_Property* parent);
-static void make_translator_make_channelmapping(psy_Property* parent);
-static void make_translator_make_renderview(psy_Property* parent);
-static void make_translator_make_export(psy_Property* parent);
-static void make_translator_make_gear(psy_Property* parent);
-static void make_translator_make_cpu(psy_Property* parent);
-static void make_translator_make_songproperties(psy_Property* parent);
-static void make_translator_make_settingsview(psy_Property* parent);
-static void make_translator_make_instrumentsbox(psy_Property* parent);
-static void make_translator_make_instrumentview(psy_Property* parent);
-static void make_translator_make_machineview(psy_Property* parent);
-static void make_translator_make_machineframe(psy_Property* parent);
-static void make_translator_make_patternview(psy_Property* parent);
-static void make_translator_make_sequenceview(psy_Property* parent);
-static void make_translator_make_seqedit(psy_Property* parent);
-static void make_translator_make_newmachine(psy_Property* parent);
-static void make_translator_make_samplesview(psy_Property* parent);
-static void make_translator_make_general(psy_Property* parent);
-static void make_translator_make_tracker(psy_Property* parent);
-static void make_translator_make_messages(psy_Property* parent);
+static void make_translator_filebar(psy_Property* parent);
+static void make_translator_undobar(psy_Property* parent);
+static void make_translator_playbar(psy_Property* parent);
+static void make_translator_playlist(psy_Property* parent);
+static void make_translator_metronomebar(psy_Property* parent);
+static void make_translator_mainview(psy_Property* parent);
+static void make_translator_help(psy_Property* parent);
+static void make_translator_greetings(psy_Property* parent);
+static void make_translator_machinebar(psy_Property* parent);
+static void make_translator_trackbar(psy_Property* parent);
+static void make_translator_octavebar(psy_Property* parent);
+static void make_translator_edit(psy_Property* parent);
+static void make_translator_timebar(psy_Property* parent);
+static void make_translator_linesperbeatbar(psy_Property* parent);
+static void make_translator_channelmapping(psy_Property* parent);
+static void make_translator_renderview(psy_Property* parent);
+static void make_translator_export(psy_Property* parent);
+static void make_translator_gear(psy_Property* parent);
+static void make_translator_cpu(psy_Property* parent);
+static void make_translator_songproperties(psy_Property* parent);
+static void make_translator_settingsview(psy_Property* parent);
+static void make_translator_instrumentsbox(psy_Property* parent);
+static void make_translator_instrumentview(psy_Property* parent);
+static void make_translator_machineview(psy_Property* parent);
+static void make_translator_machineframe(psy_Property* parent);
+static void make_translator_patternview(psy_Property* parent);
+static void make_translator_transformpattern(psy_Property* parent);
+static void make_translator_swingfillview(psy_Property* parent);
+static void make_translator_sequenceview(psy_Property* parent);
+static void make_translator_seqedit(psy_Property* parent);
+static void make_translator_newmachine(psy_Property* parent);
+static void make_translator_samplesview(psy_Property* parent);
+static void make_translator_general(psy_Property* parent);
+static void make_translator_tracker(psy_Property* parent);
+static void make_translator_messages(psy_Property* parent);
 /* implementation */
 void make_translator_default(psy_Property* lang)
 {
@@ -71,42 +73,44 @@ void make_translator_default(psy_Property* lang)
 
 	section = setsection(lang);
 	add("lang", "en");
-	make_translator_make_filebar(lang);
-	make_translator_make_undobar(lang);
-	make_translator_make_playbar(lang);
-	make_translator_make_playlist(lang);
-	make_translator_make_metronomebar(lang);	
-	make_translator_make_mainview(lang);
-	make_translator_make_help(lang);
-	make_translator_make_greetings(lang);
-	make_translator_make_machinebar(lang);
-	make_translator_make_trackbar(lang);
-	make_translator_make_octavebar(lang);
-	make_translator_make_edit(lang);
-	make_translator_make_timebar(lang);
-	make_translator_make_linesperbeatbar(lang);
-	make_translator_make_channelmapping(lang);
-	make_translator_make_renderview(lang);
-	make_translator_make_export(lang);
-	make_translator_make_gear(lang);
-	make_translator_make_cpu(lang);
-	make_translator_make_songproperties(lang);
-	make_translator_make_settingsview(lang);
-	make_translator_make_instrumentsbox(lang);
-	make_translator_make_instrumentview(lang);
-	make_translator_make_machineview(lang);
-	make_translator_make_machineframe(lang);
-	make_translator_make_patternview(lang);
-	make_translator_make_sequenceview(lang);
-	make_translator_make_seqedit(lang);
-	make_translator_make_newmachine(lang);
-	make_translator_make_samplesview(lang);
-	make_translator_make_general(lang);
-	make_translator_make_tracker(lang);
-	make_translator_make_messages(lang);
+	make_translator_filebar(lang);
+	make_translator_undobar(lang);
+	make_translator_playbar(lang);
+	make_translator_playlist(lang);
+	make_translator_metronomebar(lang);	
+	make_translator_mainview(lang);
+	make_translator_help(lang);
+	make_translator_greetings(lang);
+	make_translator_machinebar(lang);
+	make_translator_trackbar(lang);
+	make_translator_octavebar(lang);
+	make_translator_edit(lang);
+	make_translator_timebar(lang);
+	make_translator_linesperbeatbar(lang);
+	make_translator_channelmapping(lang);
+	make_translator_renderview(lang);
+	make_translator_export(lang);
+	make_translator_gear(lang);
+	make_translator_cpu(lang);
+	make_translator_songproperties(lang);
+	make_translator_settingsview(lang);
+	make_translator_instrumentsbox(lang);
+	make_translator_instrumentview(lang);
+	make_translator_machineview(lang);
+	make_translator_machineframe(lang);
+	make_translator_patternview(lang);
+	make_translator_transformpattern(lang);
+	make_translator_swingfillview(lang);	
+	make_translator_sequenceview(lang);
+	make_translator_seqedit(lang);
+	make_translator_newmachine(lang);
+	make_translator_samplesview(lang);
+	make_translator_general(lang);
+	make_translator_tracker(lang);
+	make_translator_messages(lang);
 }
 
-void make_translator_make_filebar(psy_Property* parent)
+void make_translator_filebar(psy_Property* parent)
 {	
 	setsection(psy_property_append_section(parent, "file"));	
 	add("showall", "Show all");
@@ -126,14 +130,14 @@ void make_translator_make_filebar(psy_Property* parent)
 	add("exit", "Exit");
 }
 
-void make_translator_make_undobar(psy_Property* parent)
+void make_translator_undobar(psy_Property* parent)
 {
 	setsection(psy_property_append_section(parent, "undo"));
 	add("undo", "Undo");
 	add("redo", "Redo");
 }
 
-void make_translator_make_playbar(psy_Property* parent)
+void make_translator_playbar(psy_Property* parent)
 {	
 	setsection(psy_property_append_section(parent, "play"));
 	add("loop", "Loop");
@@ -145,7 +149,7 @@ void make_translator_make_playbar(psy_Property* parent)
 	add("beats", "Beats");
 }
 
-void make_translator_make_playlist(psy_Property* parent)
+void make_translator_playlist(psy_Property* parent)
 {
 	setsection(psy_property_append_section(parent, "playlist"));
 	add("play", "Play");
@@ -155,7 +159,7 @@ void make_translator_make_playlist(psy_Property* parent)
 	add("recent-songs", "Recent Songs");
 }
 
-void make_translator_make_metronomebar(psy_Property* parent)
+void make_translator_metronomebar(psy_Property* parent)
 {
 	setsection(psy_property_append_section(parent, "metronome"));
 	add("metronome", "Metronome");
@@ -163,7 +167,7 @@ void make_translator_make_metronomebar(psy_Property* parent)
 	add("precount", "Precount");
 }
 
-void make_translator_make_mainview(psy_Property* parent)
+void make_translator_mainview(psy_Property* parent)
 {
 	setsection(psy_property_append_section(parent, "main"));	
 	add("machines", "Machines");
@@ -181,7 +185,7 @@ void make_translator_make_mainview(psy_Property* parent)
 	add("terminal", "Terminal");
 }
 
-void make_translator_make_help(psy_Property* parent)
+void make_translator_help(psy_Property* parent)
 {
 	setsection(psy_property_append_section(parent, "help"));
 	add("help", "Help");
@@ -194,7 +198,7 @@ void make_translator_make_help(psy_Property* parent)
 	add("combine", "Combine Help");
 }
 
-void make_translator_make_greetings(psy_Property* parent)
+void make_translator_greetings(psy_Property* parent)
 {
 	setsection(psy_property_append_section(parent, "greetings"));
 	add("thanks", "Thanks! / ");
@@ -205,7 +209,7 @@ void make_translator_make_greetings(psy_Property* parent)
 	add("showcurrent", "Show Current Greetings");
 }
 
-void make_translator_make_machinebar(psy_Property* parent)
+void make_translator_machinebar(psy_Property* parent)
 {
 	setsection(psy_property_append_section(parent, "machinebar"));
 	add("gear", "Gear Rack");
@@ -215,19 +219,19 @@ void make_translator_make_machinebar(psy_Property* parent)
 	add("midi", "MIDI");
 }
 
-void make_translator_make_trackbar(psy_Property* parent)
+void make_translator_trackbar(psy_Property* parent)
 {
 	setsection(psy_property_append_section(parent, "trackbar"));
 	add("tracks", "Tracks");
 }
 
-void make_translator_make_octavebar(psy_Property* parent)
+void make_translator_octavebar(psy_Property* parent)
 {
 	setsection(psy_property_append_section(parent, "octavebar"));
 	add("octave", "Octave");
 }
 
-void make_translator_make_edit(psy_Property* parent)
+void make_translator_edit(psy_Property* parent)
 {
 	setsection(psy_property_append_section(parent, "edit"));
 	add("cut", "Cut");
@@ -239,21 +243,35 @@ void make_translator_make_edit(psy_Property* parent)
 	add("clear", "Clear");
 	add("duplicate", "Duplicate");
 	add("clone", "Clone");
+	add("transposeblockinc", "Transpose +1");
+	add("transposeblockdec", "Transpose -1");
+	add("transposeblockinc12", "Transpose +12");
+	add("transposeblockdec12", "Transpose -12");
+	add("transposeblockdec12", "Transpose -12");
+	add("blockinterpolate", "Interpolate (Linear)");
+	add("blockinterpolatecurve", "Interpolate (Curve)");
+	add("blocksetinstr", "Change Instrument");
+	add("blocksetmachine", "Change Machine");
+	add("blockswingfill", "Swing Fill Block");
+	add("trackswingfill", "Swing Fill Track");
+	add("searchreplace", "Search and Replace");
+	add("importpsb", "Import (psb)");
+	add("exportpsb", "Export (psb)");
 }
 
-void make_translator_make_timebar(psy_Property* parent)
+void make_translator_timebar(psy_Property* parent)
 {
 	setsection(psy_property_append_section(parent, "timebar"));
 	add("tempo", "Tempo");
 }
 
-void make_translator_make_linesperbeatbar(psy_Property* parent)
+void make_translator_linesperbeatbar(psy_Property* parent)
 {
 	setsection(psy_property_append_section(parent, "lpb"));
 	add("lines-per-beat", "Lines per beat");
 }
 
-void make_translator_make_channelmapping(psy_Property* parent)
+void make_translator_channelmapping(psy_Property* parent)
 {
 	setsection(psy_property_append_section(parent, "channelmapping"));
 	add("autowire", "Autowire");
@@ -262,7 +280,7 @@ void make_translator_make_channelmapping(psy_Property* parent)
 		"Remove connection with right click");
 }
 
-void make_translator_make_renderview(psy_Property* parent)
+void make_translator_renderview(psy_Property* parent)
 {
 	setsection(psy_property_append_section(parent, "render"));
 	add("render", "Render");
@@ -293,7 +311,7 @@ void make_translator_make_renderview(psy_Property* parent)
 	add("save-each-unmuted", "Save each unmuted");
 }
 
-void make_translator_make_export(psy_Property* parent)
+void make_translator_export(psy_Property* parent)
 {
 	setsection(psy_property_append_section(parent, "export"));
 	add("export-module", "Export Module");
@@ -301,7 +319,7 @@ void make_translator_make_export(psy_Property* parent)
 	add("export-lyfile", "Export LilyPond File");
 }
 
-void make_translator_make_gear(psy_Property* parent)
+void make_translator_gear(psy_Property* parent)
 {
 	setsection(psy_property_append_section(parent, "gear"));
 	add("clone", "Clone");
@@ -319,7 +337,7 @@ void make_translator_make_gear(psy_Property* parent)
 	add("waves", "Waves");
 }
 
-void make_translator_make_cpu(psy_Property* parent)
+void make_translator_cpu(psy_Property* parent)
 {
 	setsection(psy_property_append_section(parent, "cpu"));
 	add("performance", "CPU Performance");
@@ -334,7 +352,7 @@ void make_translator_make_cpu(psy_Property* parent)
 	add("routing", "Routing");	
 }
 
-void make_translator_make_songproperties(psy_Property* parent)
+void make_translator_songproperties(psy_Property* parent)
 {
 	setsection(psy_property_append_section(parent, "songproperties"));
 	add("title", "Song Title");
@@ -349,7 +367,7 @@ void make_translator_make_songproperties(psy_Property* parent)
 	add("extcomments", "Extended Comments");
 }
 
-void make_translator_make_settingsview(psy_Property* parent)
+void make_translator_settingsview(psy_Property* parent)
 {
 	psy_Property* section;
 	psy_Property* subsection;
@@ -580,14 +598,14 @@ void make_translator_make_settingsview(psy_Property* parent)
 	add("ft2-explorer", "Use FT2 Style Fileexplorer");
 }
 
-void make_translator_make_instrumentsbox(psy_Property* parent)
+void make_translator_instrumentsbox(psy_Property* parent)
 {
 	setsection(psy_property_append_section(parent, "instrumentsbox"));
 	add("instrument-groups", "Instrument Groups");
 	add("group-instruments", "Group Instruments");
 }
 
-void make_translator_make_instrumentview(psy_Property* parent)
+void make_translator_instrumentview(psy_Property* parent)
 {
 	setsection(psy_property_append_section(parent, "instrumentview"));
 	add("instrument", "Instrument");
@@ -632,7 +650,7 @@ void make_translator_make_instrumentview(psy_Property* parent)
 	add("keyfixed", "Key Fixed");
 }
 
-void make_translator_make_machineview(psy_Property* parent)
+void make_translator_machineview(psy_Property* parent)
 {
 	setsection(psy_property_append_section(parent, "machineview"));
 	add("new-machine", "New Machine");
@@ -653,7 +671,7 @@ void make_translator_make_machineview(psy_Property* parent)
 	add("volumes", "Volumes");
 }
 
-void make_translator_make_machineframe(psy_Property* parent)
+void make_translator_machineframe(psy_Property* parent)
 {
 	setsection(psy_property_append_section(parent, "machineframe"));
 	add("about", "About");
@@ -670,7 +688,7 @@ void make_translator_make_machineframe(psy_Property* parent)
 	add("saveas", "Save as");
 }
 
-void make_translator_make_patternview(psy_Property* parent)
+void make_translator_patternview(psy_Property* parent)
 {
 	setsection(psy_property_append_section(parent, "patternview"));
 	add("line", "Line");
@@ -688,7 +706,38 @@ void make_translator_make_patternview(psy_Property* parent)
 	add("properties", "Properties");
 }
 
-void make_translator_make_sequenceview(psy_Property* parent)
+void make_translator_transformpattern(psy_Property* parent)
+{
+	setsection(psy_property_append_section(parent, "transformpattern"));
+	add("searchpattern", "Search pattern");
+	add("note", "Note");
+	add("instr", "Instrum/Aux");
+	add("mac", "Machine");
+	add("replacepattern", "Replace pattern");
+	add("search", "Search");	
+	add("replaceall", "Replace all");
+	add("cancel", "Cancel");	
+	add("searchon", "Search on");
+	add("entiresong", "Entire song");
+	add("currentpattern", "Current pattern");
+	add("currentselection", "Current selection");
+}
+
+void make_translator_swingfillview(psy_Property* parent)
+{
+	setsection(psy_property_append_section(parent, "swingfill"));
+	add("tempo", "Tempo(BPM)");
+	add("bpm", "BPM");
+	add("center", "Center");
+	add("actual", "Actual");
+	add("cycle", "Cycle Length(lines)");
+	add("variance", "Variance(%)");
+	add("phase", "Phase (degrees)");	
+	add("cancel", "Cancel");
+	add("apply", "Apply");
+}
+
+void make_translator_sequenceview(psy_Property* parent)
 {
 	setsection(psy_property_append_section(parent, "seqview"));
 	add("follow-song", "Follow Song");
@@ -719,14 +768,14 @@ void make_translator_make_sequenceview(psy_Property* parent)
 	add("hidestepsequencer", "Hide Stepsequencer");
 }
 
-void make_translator_make_seqedit(psy_Property* parent)
+void make_translator_seqedit(psy_Property* parent)
 {
 	setsection(psy_property_append_section(parent, "seqedit"));
 	add("move", "Move");
 	add("reorder", "Reorder");
 }
 
-void make_translator_make_newmachine(psy_Property* parent)
+void make_translator_newmachine(psy_Property* parent)
 {
 	setsection(psy_property_append_section(parent, "newmachine"));
 	add("all", "All");
@@ -766,7 +815,7 @@ void make_translator_make_newmachine(psy_Property* parent)
 	add("stopping", "Stopping");
 }
 
-void make_translator_make_samplesview(psy_Property* parent)
+void make_translator_samplesview(psy_Property* parent)
 {
 	setsection(psy_property_append_section(parent, "samplesview"));
 	add("samplename", "Samplename");
@@ -801,7 +850,7 @@ void make_translator_make_samplesview(psy_Property* parent)
 	add("keymap", "Keymap");	
 }
 
-void make_translator_make_general(psy_Property* parent)
+void make_translator_general(psy_Property* parent)
 {
 	add("help", "Help");
 	add("helpshortcut", "Kbd Help");
@@ -824,7 +873,7 @@ void make_translator_make_general(psy_Property* parent)
 	add("instrinc", "Current Instrument +1");
 }
 
-void make_translator_make_tracker(psy_Property* parent)
+void make_translator_tracker(psy_Property* parent)
 {
 	add("navup", "Nav Up");
 	add("navdown", "Nav Down");
@@ -865,7 +914,7 @@ void make_translator_make_tracker(psy_Property* parent)
 	add("followsong", "Follow Song");
 }
 
-void make_translator_make_messages(psy_Property* parent)
+void make_translator_messages(psy_Property* parent)
 {
 	setsection(psy_property_append_section(parent, "msg"));
 	add("psyreq", "Psycle Request");
@@ -886,7 +935,7 @@ void make_translator_make_messages(psy_Property* parent)
 	add("audiostarted", "Audio started");
 }
 
-#ifdef PSYCLE_MAKE_DEFAULT_LANG
+#ifdef PSYCLE_DEFAULT_LANG
 static int onenumproperties(void* context, psy_Property* property, uintptr_t level);
 
 void save_translator_default(void)

@@ -17,8 +17,7 @@ static void octavebar_onoctaveboxselchange(OctaveBar*,
 	psy_ui_Component* sender, intptr_t sel);
 static void octavebar_onoctavechanged(OctaveBar*, Workspace*,
 	intptr_t octave);
-static void octavebar_onsongchanged(OctaveBar*, Workspace*, int flag,
-	psy_audio_Song*);
+static void octavebar_onsongchanged(OctaveBar*, Workspace*, int flag);
 /* implementation */
 void octavebar_init(OctaveBar* self, psy_ui_Component* parent,
 	Workspace* workspace)
@@ -71,7 +70,7 @@ void octavebar_onoctavechanged(OctaveBar* self, Workspace* workspace,
 }
 
 void octavebar_onsongchanged(OctaveBar* self, Workspace* workspace,
-	int flag, psy_audio_Song* song)
+	int flag)
 {	
 	psy_ui_combobox_setcursel(&self->octavebox,
 		workspace_octave(self->workspace));

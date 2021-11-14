@@ -716,7 +716,10 @@ void view_dev_setfocus(psy_ui_ViewComponentImp* self)
 	
 	if (!psy_ui_component_hasfocus(self->view)) {
 		psy_ui_component_setfocus(self->view);
-	}	
+	} else if (self->component) {
+		self->component->vtable->onfocus(self->component);
+		psy_signal_emit(&self->component->signal_focus, self, 0);		
+	}
 }
 
 int view_dev_hasfocus(psy_ui_ViewComponentImp* self)
@@ -848,6 +851,7 @@ void view_dev_mousedown(psy_ui_ViewComponentImp* self, psy_ui_MouseEvent* ev)
 		if (!self->viewcomponents) {
 			ev->event.target = self->component;
 		}
+		ev->event.currenttarget = self->component;
 		self->component->vtable->onmousedown(self->component, ev);
 		psy_signal_emit(&self->component->signal_mousedown,
 			self->component, 1, ev);
@@ -874,6 +878,7 @@ void view_dev_mouseup(psy_ui_ViewComponentImp* self, psy_ui_MouseEvent* ev)
 		}
 	}
 	if (ev->event.bubbles) {
+		ev->event.currenttarget = self->component;
 		self->component->vtable->onmouseup(self->component, ev);
 		psy_signal_emit(&self->component->signal_mouseup,
 			self->component, 1, ev);
@@ -920,6 +925,7 @@ void view_dev_mousemove(psy_ui_ViewComponentImp* self, psy_ui_MouseEvent* ev)
 		}		
 	}
 	if (ev->event.bubbles) {
+		ev->event.currenttarget = self->component;
 		self->component->vtable->onmousemove(self->component, ev);
 		psy_signal_emit(&self->component->signal_mousemove,
 			self->component, 1, ev);

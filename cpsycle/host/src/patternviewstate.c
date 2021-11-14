@@ -7,6 +7,8 @@
 
 
 #include "patternviewstate.h"
+/* host */
+#include "styles.h"
 /* audio */
 #include <pattern.h>
 /* std */
@@ -17,7 +19,8 @@
 #include "../../detail/portable.h"
 
 /* implementation */
-void patternviewstate_init(PatternViewState* self, psy_audio_Song* song, PatternCmds* cmds)
+void patternviewstate_init(PatternViewState* self,
+	PatternViewConfig* patconfig, psy_audio_Song* song, PatternCmds* cmds)
 {
 	psy_audio_sequencecursor_init(&self->cursor);
 	psy_audio_blockselection_init(&self->selection);	
@@ -25,12 +28,19 @@ void patternviewstate_init(PatternViewState* self, psy_audio_Song* song, Pattern
 	self->pgupdownstep = 4;	
 	self->singlemode = TRUE;
 	self->song = song;
-	self->pattern = NULL;
-	self->skin = NULL;		
+	self->pattern = NULL;	
+	self->patconfig = patconfig;
 	self->display = PROPERTY_ID_PATTERN_DISPLAYMODE_TRACKER;
 	self->cmds = cmds;
+	self->ft2home = TRUE;
+	self->ft2delete = TRUE;
 	self->movecursorwhenpaste = TRUE;
-	psy_audio_pattern_init(&self->patternpaste);
+	self->movecursoronestep = FALSE;
+	self->wraparound = TRUE;
+	psy_audio_pattern_init(&self->patternpaste);	
+	if (cmds) {
+		cmds->patternpaste = &self->patternpaste;
+	}
 }
 
 void patternviewstate_dispose(PatternViewState* self)
@@ -46,6 +56,7 @@ void patternviewstate_selectcol(PatternViewState* self)
 		psy_audio_blockselection_select(&self->selection,
 			self->cursor.track, 1, 0.0,
 			psy_audio_pattern_length(patternviewstate_pattern(self)));
+		patternviewstate_invalidate(self);
 	}
 }
 
@@ -61,6 +72,7 @@ void patternviewstate_selectbar(PatternViewState* self)
 		if (self->cursor.offset > patternviewstate_pattern(self)->length) {
 			self->cursor.offset = patternviewstate_pattern(self)->length;
 		}
+		patternviewstate_invalidate(self);
 	}
 }
 
@@ -75,6 +87,29 @@ void patternviewstate_selectall(PatternViewState* self)
 			0, patternviewstate_numsongtracks(self),
 			0.0, psy_audio_pattern_length(
 				patternviewstate_pattern(self)));
+		patternviewstate_invalidate(self);
 	}
 }
 
+void patternviewstate_configure_keyboard(PatternViewState* self,
+	KeyboardMiscConfig* config)
+{
+	self->ft2home = keyboardmiscconfig_ft2home(config);
+	self->ft2delete = keyboardmiscconfig_ft2delete(config);
+	self->movecursoronestep = keyboardmiscconfig_movecursoronestep(config);
+	patternviewstate_setpgupdown(self,
+		(PatternCursorStepMode)keyboardmiscconfig_pgupdowntype(config),
+		keyboardmiscconfig_pgupdownstep(config));
+}
+
+void patternviewstate_configure(PatternViewState* self)
+{
+	self->movecursorwhenpaste = patternviewconfig_ismovecursorwhenpaste(
+		self->patconfig);
+	self->wraparound = patternviewconfig_wraparound(self->patconfig);
+	if (patternviewconfig_issinglepatterndisplay(self->patconfig)) {
+		patternviewstate_displaypattern(self);
+	} else {
+		patternviewstate_displaysequence(self);
+	}
+}

@@ -42,12 +42,8 @@ typedef struct TrackerGrid {
 	uintptr_t chordbegin;
 	uintptr_t dragtrack;
 	uintptr_t dragparamcol;
-	bool syncpattern;
-	bool wraparound;	
-	bool ft2home;
-	bool ft2delete;
-	bool effcursoralwaysdown;
-	bool movecursoronestep;	
+	bool syncpattern;	
+	bool effcursoralwaysdown;	
 	bool preventscrolltop;
 	psy_Table columns;
 	bool preventeventdriver;	
@@ -66,11 +62,6 @@ void trackergrid_setpattern(TrackerGrid*, psy_audio_Pattern*);
 void trackergrid_showemptydata(TrackerGrid*, int showstate);
 void trackergrid_invalidateline(TrackerGrid*, intptr_t line);
 void trackergrid_invalidatelines(TrackerGrid*, intptr_t line1, intptr_t line2);
-bool trackergrid_scrollup(TrackerGrid*, psy_audio_SequenceCursor);
-bool trackergrid_scrolldown(TrackerGrid*, psy_audio_SequenceCursor);
-bool trackergrid_scrollleft(TrackerGrid*, psy_audio_SequenceCursor);
-bool trackergrid_scrollright(TrackerGrid*, psy_audio_SequenceCursor);
-void trackergrid_storecursor(TrackerGrid*);
 void trackergrid_invalidatecursor(TrackerGrid*);
 void trackergrid_invalidateinternalcursor(TrackerGrid*,
 	psy_audio_SequenceCursor);
@@ -83,46 +74,6 @@ INLINE const psy_audio_BlockSelection* trackergrid_selection(
 	const TrackerGrid* self)
 {
 	return &self->state->pv->selection;
-}
-
-INLINE void trackergrid_enableft2home(TrackerGrid* self)
-{
-	self->ft2home = TRUE;
-}
-
-INLINE void trackergrid_enableithome(TrackerGrid* self)
-{
-	self->ft2home = FALSE;
-}
-
-INLINE void trackergrid_enableft2delete(TrackerGrid* self)
-{
-	self->ft2delete = TRUE;
-}
-
-INLINE void trackergrid_enableitdelete(TrackerGrid* self)
-{
-	self->ft2delete = FALSE;
-}
-
-INLINE void trackergrid_enablemovecursoronestep(TrackerGrid* self)
-{
-	self->movecursoronestep = TRUE;
-}
-
-INLINE void trackergrid_disablemovecursoronestep(TrackerGrid* self)
-{
-	self->movecursoronestep = FALSE;
-}
-
-INLINE void trackergrid_enableeffcursoralwaysdown(TrackerGrid* self)
-{
-	self->movecursoronestep = TRUE;
-}
-
-INLINE void trackergrid_disableffcursoralwaysdown(TrackerGrid* self)
-{
-	self->movecursoronestep = FALSE;
 }
 
 bool trackergrid_handlecommand(TrackerGrid*, intptr_t cmd);
@@ -161,12 +112,17 @@ INLINE bool trackergrid_checkupdate(const TrackerGrid* self)
 /* TrackerView */
 
 typedef struct TrackerView {
+	/* inherits */
 	psy_ui_Scroller scroller;
 	TrackerGrid grid;
+	/* references */
+	Workspace* workspace;
 } TrackerView;
 
 void trackerview_init(TrackerView*, psy_ui_Component* parent, TrackConfig*,
 	TrackerState*, Workspace*);
+
+void trackerview_updatefollowsong(TrackerView*);
 
 #ifdef __cplusplus
 }

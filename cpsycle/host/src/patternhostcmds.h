@@ -25,10 +25,11 @@ typedef struct PatternCmds {
 	psy_audio_Pattern* pattern;
 	psy_UndoRedo* undoredo;
 	psy_audio_Pattern* patternpaste;
+	DirConfig* dirconfig;
 } PatternCmds;
 
 void patterncmds_init(PatternCmds*, psy_audio_Song*, psy_UndoRedo*,
-	psy_audio_Pattern* patternpaste);
+	psy_audio_Pattern* patternpaste, DirConfig*);
 
 void patterncmds_setsong(PatternCmds*, psy_audio_Song*);
 void patterncmds_setpattern(PatternCmds*, psy_audio_Pattern*);
@@ -39,6 +40,9 @@ void patterncmds_blockpaste(PatternCmds*, psy_audio_SequenceCursor, bool mix);
 void patterncmds_blockcopy(PatternCmds*, psy_audio_BlockSelection);
 void patterncmds_changeinstrument(PatternCmds*, psy_audio_BlockSelection);
 void patterncmds_changemachine(PatternCmds*, psy_audio_BlockSelection);
+void patterncmds_importpattern(PatternCmds*, psy_dsp_big_beat_t bpl);
+void patterncmds_exportpattern(PatternCmds*, psy_dsp_big_beat_t bpl,
+	uintptr_t numtracks);
 
 #ifdef __cplusplus
 }

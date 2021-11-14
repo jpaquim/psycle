@@ -10,7 +10,7 @@
 #include <properties.h>
 #include <signal.h>
 /* ui */
-#include <uistyle.h>
+#include <uistyles.h>
 
 #ifdef __cplusplus
 extern "C" {

@@ -646,7 +646,7 @@ static void stepsequencerview_connectworkspace(StepsequencerView*, Workspace*);
 static void stepsequencerview_onplaylinechanged(StepsequencerView*,
 	Workspace* sender);
 static void stepsequencerview_onsongchanged(StepsequencerView*,
-	Workspace* sender, int flag, psy_audio_Song*);
+	Workspace* sender, int flag);
 static void stepsequencerview_oncursorchanged(StepsequencerView*,
 	psy_audio_Sequence* sender);
 static void stepsequencerview_update(StepsequencerView*);
@@ -712,7 +712,7 @@ void stepsequencerview_oncursorchanged(StepsequencerView* self,
 }
 
 void stepsequencerview_onsongchanged(StepsequencerView* self, Workspace*
-	workspace, int flag, psy_audio_Song* song)
+	workspace, int flag)
 {	
 	assert(self);
 

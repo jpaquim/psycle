@@ -325,8 +325,7 @@ static void midimonitor_initcorestatusleft(MidiMonitor*);
 static void midimonitor_initcorestatusright(MidiMonitor*);
 static void midimonitor_initflags(MidiMonitor*);
 static void midimonitor_initchannelmapping(MidiMonitor*);
-static void midimonitor_onsongchanged(MidiMonitor*, Workspace*, int flag,
-	psy_audio_Song* song);
+static void midimonitor_onsongchanged(MidiMonitor*, Workspace*, int flag);
 static void midimonitor_onmachineslotchange(MidiMonitor* self, psy_audio_Machines* sender,
 	uintptr_t slot);
 static void midimonitor_ontimer(MidiMonitor*, uintptr_t timerid);
@@ -473,8 +472,7 @@ void midimonitor_initchannelmapping(MidiMonitor* self)
 	}
 }
 
-void midimonitor_onsongchanged(MidiMonitor* self, Workspace* sender, int flag,
-	psy_audio_Song* song)
+void midimonitor_onsongchanged(MidiMonitor* self, Workspace* sender, int flag)
 {
 	self->channelmapupdate =
 		workspace_player(self->workspace)->midiinput.stats.channelmapupdate - 1;

@@ -7,7 +7,7 @@
 #define PATTERNVIEWSTATE_H
 
 /* host */
-#include "patternviewskin.h"
+#include "patternviewconfig.h"
 #include "patternhostcmds.h"
 #include "trackercmds.h"
 #include "workspace.h"
@@ -27,20 +27,25 @@ typedef struct PatternViewState {
 	psy_audio_SequenceCursor cursor;
 	PatternCursorStepMode pgupdownstepmode;
 	intptr_t pgupdownstep;
+	bool movecursoronestep;
 	psy_audio_BlockSelection selection;
 	psy_audio_SequenceCursor dragselectionbase;	
 	bool singlemode;
 	PatternDisplayMode display;
 	bool movecursorwhenpaste;
+	bool ft2home;
+	bool ft2delete;
+	bool wraparound;
 	psy_audio_Pattern patternpaste;
 	/* references */
 	psy_audio_Pattern* pattern;
-	psy_audio_Song* song;
-	PatternViewSkin* skin;
+	psy_audio_Song* song;	
 	PatternCmds* cmds;
+	PatternViewConfig* patconfig;
 } PatternViewState;
 
-void patternviewstate_init(PatternViewState*, psy_audio_Song*, PatternCmds* cmds);
+void patternviewstate_init(PatternViewState*, PatternViewConfig*,
+	psy_audio_Song*, PatternCmds* cmds);
 void patternviewstate_dispose(PatternViewState*);
 
 INLINE intptr_t patternviewstate_currpgupdownstep(const PatternViewState* self)
@@ -208,7 +213,7 @@ INLINE intptr_t patternviewstate_beattoline(const PatternViewState* self,
 INLINE uintptr_t patternviewstate_numlines(const PatternViewState* self)
 {
 	assert(self);
-
+	
 	return patternviewstate_beattoline(self,
 		patternviewstate_length(self));
 }
@@ -236,12 +241,9 @@ void patternviewstate_selectall(PatternViewState*);
 
 INLINE double patternviewstate_preferredtrackwidth(const
 	PatternViewState* self)
-{
-	if (self->skin) {
-		return self->skin->headercoords.background.dest.right -
-			self->skin->headercoords.background.dest.left;
-	}
-	return 0.0;
+{	
+	return self->patconfig->skin.headercoords.background.dest.right -
+		self->patconfig->skin.headercoords.background.dest.left;
 }
 
 INLINE bool patternviewstate_cursorposition_valid(PatternViewState* self)
@@ -307,7 +309,7 @@ INLINE void patternviewstate_blockcopy(PatternViewState* self)
 	patternviewstate_invalidate(self);
 }
 
-INLINE void pattternviewstate_blockdelete(PatternViewState* self)
+INLINE void patternviewstate_blockdelete(PatternViewState* self)
 {
 	assert(self);
 
@@ -320,7 +322,7 @@ INLINE void patternviewstate_blockcut(PatternViewState* self)
 	assert(self);
 
 	patternviewstate_blockcopy(self);
-	pattternviewstate_blockdelete(self);
+	patternviewstate_blockdelete(self);
 	patternviewstate_invalidate(self);
 }
 
@@ -349,6 +351,15 @@ INLINE void patternviewstate_blocktranspose(PatternViewState* self, intptr_t off
 	patterncmds_blocktranspose(self->cmds, self->selection, self->cursor,
 		offset);
 	patternviewstate_invalidate(self);
+}
+
+void patternviewstate_configure_keyboard(PatternViewState*,
+	KeyboardMiscConfig*);
+void patternviewstate_configure(PatternViewState*);
+
+INLINE PatternViewSkin* patternviewstate_skin(PatternViewState* self)
+{
+	return &self->patconfig->skin;
 }
 
 #endif /* PATTERNVIEWSTATE_H */

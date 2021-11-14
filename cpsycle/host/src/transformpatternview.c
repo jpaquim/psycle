@@ -57,7 +57,7 @@ void transformpatternview_init(TransformPatternView* self, psy_ui_Component*
 	psy_ui_margin_init_em(&self->sectionmargin, 0.0, 0.0, 0.0, 2.0);
 	psy_ui_component_setdefaultalign(transformpatternview_base(self),
 		psy_ui_ALIGN_TOP, psy_ui_margin_make(psy_ui_value_make_px(0),
-			psy_ui_value_make_ew(0), psy_ui_value_make_eh(0.5),
+			psy_ui_value_make_ew(0.0), psy_ui_value_make_eh(0.5),
 			psy_ui_value_make_ew(2.0)));
 	transformpatternview_init_search(self);
 	transformpatternview_init_replace(self);
@@ -66,6 +66,9 @@ void transformpatternview_init(TransformPatternView* self, psy_ui_Component*
 	transformpatternview_initselection(self);
 	psy_signal_connect(&self->component.signal_destroy, self,
 		transformpatternview_ondestroy);
+	psy_ui_component_setalign(transformpatternview_base(self),
+		psy_ui_ALIGN_RIGHT);
+	psy_ui_component_hide(transformpatternview_base(self));
 }
 
 void transformpatternview_ondestroy(TransformPatternView* self)
@@ -83,7 +86,8 @@ void transformpatternview_init_search(TransformPatternView* self)
 	psy_ui_component_setalign(&self->searchtop, psy_ui_ALIGN_TOP);
 	// title
 	psy_ui_label_init(&self->searchtitle, &self->searchtop, NULL);
-	psy_ui_label_settext(&self->searchtitle, "Search pattern");	
+	psy_ui_label_settext(&self->searchtitle,
+		"transformpattern.searchpattern");	
 	psy_ui_component_setalign(psy_ui_label_base(&self->searchtitle), psy_ui_ALIGN_LEFT);
 	// hide button
 	psy_ui_button_init_connect(&self->hide, &self->searchtop, NULL,
@@ -94,15 +98,15 @@ void transformpatternview_init_search(TransformPatternView* self)
 		self->sectionmargin);
 	// Note
 	psy_ui_label_init(&self-> searchnotedesc, &self->search, NULL);
-	psy_ui_label_settext(&self->searchnotedesc, "Note");
+	psy_ui_label_settext(&self->searchnotedesc, "transformpattern.note");
 	psy_ui_combobox_init(&self->searchnote, &self->search, NULL);	
 	// Inst
 	psy_ui_label_init(&self->searchinstdesc, &self->search, NULL);
-	psy_ui_label_settext(&self->searchinstdesc, "Instrum/Aux");
+	psy_ui_label_settext(&self->searchinstdesc, "transformpattern.instr");
 	psy_ui_combobox_init(&self->searchinst, &self->search, NULL);
 	// Mach	
 	psy_ui_label_init(&self-> searchmachdesc, &self->search, NULL);
-	psy_ui_label_settext(&self->searchmachdesc, "Machine");	
+	psy_ui_label_settext(&self->searchmachdesc, "transformpattern.mac");	
 	psy_ui_combobox_init(&self->searchmach, &self->search, NULL);
 }
 
@@ -114,20 +118,20 @@ void transformpatternview_init_replace(TransformPatternView* self)
 	psy_ui_component_setdefaultalign(&self->replace,
 		psy_ui_ALIGN_TOP, psy_ui_defaults_vmargin(psy_ui_defaults()));
 	psy_ui_label_init(&self->replacetitle, &self->replace, NULL);
-	psy_ui_label_settext(&self->replacetitle, "Replace pattern");	
+	psy_ui_label_settext(&self->replacetitle, "transformpattern.replacepattern");	
 	psy_ui_component_setdefaultalign(&self->replace, psy_ui_ALIGN_TOP,
 		self->sectionmargin);
 	// Note
 	psy_ui_label_init(&self->replacenotedesc, &self->replace, NULL);
-	psy_ui_label_settext(&self->replacenotedesc, "Note");
+	psy_ui_label_settext(&self->replacenotedesc, "transformpattern.note");
 	psy_ui_combobox_init(&self->replacenote, &self->replace, NULL);
 	// Inst
 	psy_ui_label_init(&self->replaceinstdesc, &self->replace, NULL);
-	psy_ui_label_settext(&self->replaceinstdesc, "Instrum/Aux");
+	psy_ui_label_settext(&self->replaceinstdesc, "transformpattern.instr");
 	psy_ui_combobox_init(&self->replaceinst, &self->replace, NULL);
 	// Mach
 	psy_ui_label_init(&self->replacemachdesc, &self->replace, NULL);
-	psy_ui_label_settext(&self->replacemachdesc, "Machine");
+	psy_ui_label_settext(&self->replacemachdesc, "transformpattern.mac");
 	psy_ui_combobox_init(&self->replacemach, &self->replace, NULL);
 }
 
@@ -139,18 +143,18 @@ void transformpatternview_init_searchon(TransformPatternView* self)
 	psy_ui_component_setdefaultalign(&self->searchon,
 		psy_ui_ALIGN_TOP, psy_ui_defaults_vmargin(psy_ui_defaults()));
 	psy_ui_label_init_text(&self->searchontitle, &self->searchon, NULL,
-		"Search on");
+		"transformpattern.searchon");
 	psy_ui_component_init(&self->searchonchoice, &self->searchon, NULL);
 	psy_signal_connect(&self->searchonchoice.signal_mousedown, self,
 		transformpatternview_onsearchonmousedown);
 	psy_ui_component_setdefaultalign(&self->searchonchoice,
 		psy_ui_ALIGN_TOP, self->sectionmargin);
 	psy_ui_label_init_text(&self->entire, &self->searchonchoice, NULL,
-		"Entire song");
+		"transformpattern.entiresong");
 	psy_ui_label_init_text(&self->currpattern, &self->searchonchoice, NULL,
-		"Current pattern");
+		"transformpattern.currentpattern");
 	psy_ui_label_init_text(&self->currselection, &self->searchonchoice, NULL,
-		"Current selection");
+		"transformpattern.currentselection");
 	psy_ui_component_preventinput(psy_ui_label_base(&self->currselection),
 		psy_ui_NONRECURSIVE);
 	transformpatternview_applyto(self, 1);
@@ -170,15 +174,15 @@ void transformpatternview_init_actions(TransformPatternView* self)
 	// search
 	psy_ui_button_init_connect(&self->dosearch, &self->actions, NULL,
 		self, transformpatternview_onsearch);
-	psy_ui_button_settext(&self->dosearch, "Search");
+	psy_ui_button_settext(&self->dosearch, "transformpattern.search");
 	// replace
 	psy_ui_button_init_connect(&self->doreplace, &self->actions, NULL,
 		self, transformpatternview_onreplace);
-	psy_ui_button_settext(&self->doreplace, "Replace all");
+	psy_ui_button_settext(&self->doreplace, "transformpattern.replaceall");
 	// cancel
 	psy_ui_button_init_connect(&self->docancel, &self->actions, NULL,
 		self, transformpatternview_onhide);	
-	psy_ui_button_settext(&self->docancel, "Cancel");
+	psy_ui_button_settext(&self->docancel, "transformpattern.cancel");
 	psy_ui_component_setalign(psy_ui_button_base(&self->docancel), psy_ui_ALIGN_RIGHT);
 }
 
@@ -494,7 +498,8 @@ psy_audio_PatternSearchReplaceMode setupsearchreplacemode(int searchnote, int se
 	case 1002: mode.machreplacer = psy_audio_patternsearchreplacemode_replacewithcurrent; break;
 	default: mode.machreplacer = psy_audio_patternsearchreplacemode_replacewithnewval; break;
 	}
-	mode.tweakreplacer = (repltweak) ? psy_audio_patternsearchreplacemode_replacewithempty : psy_audio_patternsearchreplacemode_replacewithcurrent;
+	mode.tweakreplacer = (repltweak)
+		? psy_audio_patternsearchreplacemode_replacewithempty
+		: psy_audio_patternsearchreplacemode_replacewithcurrent;
 	return mode;
 }
-

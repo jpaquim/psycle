@@ -222,9 +222,9 @@ void psy_ui_replacedefaultfont(psy_ui_Component* main, psy_ui_Font* font)
 }
 
 void psy_ui_component_setfocus(psy_ui_Component* self)
-{
-	self->imp->vtable->dev_setfocus(self->imp);
+{	
 	psy_ui_app()->focus = self;
+	self->imp->vtable->dev_setfocus(self->imp);		
 }
 
 void psy_ui_component_capture(psy_ui_Component* self)
@@ -1034,7 +1034,7 @@ void psy_ui_component_setmargin_children(psy_ui_Component* self,
 		(psy_fp_margin)psy_ui_component_setmargin, margin);
 }
 
-void psy_ui_component_setspacing_children(psy_ui_Component* self,
+void psy_ui_component_setpadding_children(psy_ui_Component* self,
 	psy_ui_Margin spacing)
 {
 	psy_ui_component_traverse_margin(self,

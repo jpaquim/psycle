@@ -1560,7 +1560,7 @@ void machinestackvolumes_build(MachineStackVolumes* self)
 // prototypes
 static void machinestackview_destroy(MachineStackView*);
 static void machinestackview_onsongchanged(MachineStackView*, Workspace*,
-	int flag, psy_audio_Song*);
+	int flag);
 static void machinestackview_onbuschanged(MachineStackView*, Workspace*,
 	psy_audio_Machine*);
 static void machinestackview_build(MachineStackView*);
@@ -1652,9 +1652,12 @@ void machinestackview_destroy(MachineStackView* self)
 }
 
 void machinestackview_onsongchanged(MachineStackView* self,
-	Workspace* workspace, int flag, psy_audio_Song* song)
+	Workspace* sender, int flag)
 {
-	machinestackview_setmachines(self, (song) ? &song->machines : NULL);	
+	machinestackview_setmachines(self,
+		(sender->song)
+		? &sender->song->machines
+		: NULL);	
 }
 
 void machinestackview_onbuschanged(MachineStackView* self, Workspace* sender,
