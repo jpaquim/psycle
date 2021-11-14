@@ -848,7 +848,7 @@ void workspace_setsong(Workspace* self, psy_audio_Song* song, int flag)
 				seqeditconfig_machine(&self->config.seqedit));
 		}				
 		psy_audio_exclusivelock_leave();
-		psy_signal_emit(&self->signal_songchanged, self, 2, flag, self->song);
+		psy_signal_emit(&self->signal_songchanged, self, 1, flag);
 		psy_signal_emit(&self->song->patterns.signal_numsongtrackschanged, self,
 			1, self->song->patterns.songtracks);
 		psy_audio_song_deallocate(oldsong);
@@ -1362,15 +1362,13 @@ void workspace_stopfollowsong(Workspace* self)
 void workspace_idle(Workspace* self)
 {
 	assert(self);
-	
-	self->currplayposition = psy_audio_player_position(&self->player);			
-	self->currplayline = cast_decimal(self->player.sequencer.lpb *
-		self->currplayposition);
+		
+	self->currplayline = self->player.sequencer.seqtime.linecounter;
+	self->currplayposition = self->currplayline / (double)self->player.sequencer.lpb;		
 	workspace_updateplaycursor(self);	
 	workspace_notifynewline(self);
-	self->lastplayposition = self->currplayposition;	
-	self->lastplayline = cast_decimal(self->player.sequencer.lpb *
-		self->lastplayposition);
+	self->lastplayposition = self->currplayposition;
+	self->lastplayline = self->currplayline;
 	if (self->scanstart) {
 		psy_lock_enter(&self->pluginscanlock);
 		psy_signal_emit(&self->signal_scanstart, self, 0);

@@ -27,7 +27,7 @@ static void patternviewbar_ondisplaysinglepattern(PatternViewBar*,
 static void patternviewbar_oncursorchanged(PatternViewBar*,
 	psy_audio_Sequence* sender);
 static void patternviewbar_onsongchanged(PatternViewBar*, Workspace* sender,
-	int flag, psy_audio_Song*);
+	int flag);
 static void patternviewbar_updatestatus(PatternViewBar*);
 static void patternviewbar_statustext(PatternViewBar*, uintptr_t maxcount,
 	char* rv);
@@ -116,7 +116,7 @@ void patternviewbar_ondisplaysinglepattern(PatternViewBar* self, psy_ui_CheckBox
 }
 
 void patternviewbar_onsongchanged(PatternViewBar* self, Workspace* sender,
-	int flag, psy_audio_Song* song)
+	int flag)
 {
 	assert(self);
 

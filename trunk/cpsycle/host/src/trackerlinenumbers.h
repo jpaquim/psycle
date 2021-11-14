@@ -31,8 +31,7 @@ typedef struct TrackerLineNumbersLabel {
 	char_dyn_t* defaultstr;
 	double headerheight;
 	bool showdefaultline;
-	bool showbeatoffset;
-	bool useheaderbitmap;
+	bool showbeatoffset;	
 	/* references */
 	struct TrackerView* view;
 	TrackerState* state;	
@@ -122,10 +121,14 @@ typedef struct TrackerLineNumberBar {
 	TrackerLineNumbers linenumbers;
 	ZoomBox zoombox;	
 	int zoomheightbase;
+	/* references */
+	Workspace* workspace;
 } TrackerLineNumberBar;
 
 void trackerlinenumberbar_init(TrackerLineNumberBar*, psy_ui_Component*
 	parent, psy_ui_Component* view, TrackerState*, Workspace*);
+
+void trackerlinenumberbar_updatefollowsong(TrackerLineNumberBar*);
 
 INLINE psy_ui_Component* trackerlinenumberbar_base(TrackerLineNumberBar* self)
 {

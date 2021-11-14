@@ -8,7 +8,7 @@
 
 /* local */
 #include "uigraphics.h"
-#include "uistyle.h"
+#include "uistyles.h"
 
 #ifdef __cplusplus
 extern "C" {

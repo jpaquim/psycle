@@ -8,6 +8,7 @@
 
 /* host */
 #include "intedit.h"
+#include "patternviewstate.h"
 #include "realedit.h"
 #include "workspace.h"
 /* ui */
@@ -40,11 +41,15 @@ typedef struct SwingFillView {
 	psy_ui_Button apply;
 	psy_ui_Button cancel;	
 	bool offset;
+	bool trackmodeswingfill;
 	/* references */
 	Workspace* workspace;
+	PatternViewState* pvstate;
 } SwingFillView;
 
-void swingfillview_init(SwingFillView*, psy_ui_Component* parent, Workspace*);
+void swingfillview_init(SwingFillView*, psy_ui_Component* parent,
+	PatternViewState*);
+
 void swingfillview_reset(SwingFillView* self, int bpm);
 void swingfillview_setvalues(SwingFillView*, int tempo, int width, float variance,
 	float phase, bool offset);

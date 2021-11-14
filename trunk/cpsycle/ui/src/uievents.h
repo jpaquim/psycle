@@ -40,6 +40,7 @@ typedef struct psy_ui_Event {
 	bool bubbles;
 	bool default_prevented;
 	struct psy_ui_Component* target;
+	struct psy_ui_Component* currenttarget;
 	uintptr_t timestamp;
 } psy_ui_Event;
 
@@ -65,9 +66,22 @@ INLINE void psy_ui_event_stop_propagation(psy_ui_Event* self)
 	self->bubbles = FALSE;
 }
 
+/*
+** The component that produced the event (the top of the bubble list).
+** (opposed to currenttarget which is the current bubble component)
+*/
 INLINE struct psy_ui_Component* psy_ui_event_target(psy_ui_Event* self)
 {
 	return self->target;
+}
+
+/*
+** The current component as the event is bubbling (self of event method).
+** (opposed to target which produced the event)
+*/
+INLINE struct psy_ui_Component* psy_ui_event_currenttarget(psy_ui_Event* self)
+{
+	return self->currenttarget;
 }
 
 /* psy_ui_KeyboardEvent */
@@ -115,6 +129,7 @@ INLINE void psy_ui_keyboardevent_settype(psy_ui_KeyboardEvent* self,
 typedef struct psy_ui_MouseEvent {
 	psy_ui_Event event;
 	psy_ui_RealPoint pt;
+	psy_ui_RealPoint offset;
 	uintptr_t button;
 	intptr_t delta;
 	bool shift_key;
@@ -124,7 +139,8 @@ typedef struct psy_ui_MouseEvent {
 
 void psy_ui_mouseevent_init(psy_ui_MouseEvent*);
 void psy_ui_mouseevent_init_all(psy_ui_MouseEvent*, psy_ui_RealPoint,
-	uintptr_t button, intptr_t delta, bool shift, bool ctrl);
+	psy_ui_RealPoint /* offset */, uintptr_t button, intptr_t delta,
+	bool shift, bool ctrl);
 
 INLINE void psy_ui_mouseevent_stop_propagation(psy_ui_MouseEvent* self)
 {
@@ -150,6 +166,15 @@ INLINE void psy_ui_mouseevent_settype(psy_ui_MouseEvent* self,
 	psy_ui_EventType type)
 {
 	self->event.type = type;
+}
+
+/*
+** X/Y offset coordinate of the mouse pointer relative to the padding edge of
+** the current target
+*/
+INLINE psy_ui_RealPoint psy_ui_mouseevent_offset(const psy_ui_MouseEvent* self)
+{
+	return self->offset;
 }
 
 /* Forward Handler for dataTransfer */

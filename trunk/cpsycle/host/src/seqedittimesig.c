@@ -292,8 +292,7 @@ static void seqedittimesigs_onpreferredsize(SeqEditTimeSigs*,
 static void seqedittimesigs_editnode(SeqEditTimeSigs*, psy_audio_PatternNode*,
 	psy_ui_RealPoint);
 static void seqedittimesigs_onalign(SeqEditTimeSigs*);
-static void seqedittimesigs_onsongchanged(SeqEditTimeSigs*, Workspace*, int flag,
-	psy_audio_Song*);
+static void seqedittimesigs_onsongchanged(SeqEditTimeSigs*, Workspace*, int flag);
 static void seqedittimesigs_build(SeqEditTimeSigs*);
 static void seqedittimesigs_ontimesigchanged(SeqEditTimeSigs*, SeqEditState* sender);
 static void seqedittimesigs_remove(SeqEditTimeSigs*, psy_audio_PatternNode*);
@@ -515,7 +514,7 @@ void seqedittimesigs_onalign(SeqEditTimeSigs* self)
 }
 
 void seqedittimesigs_onsongchanged(SeqEditTimeSigs* self, Workspace* sender,
-	int flag, psy_audio_Song* song)
+	int flag)
 {
 	seqedittimesigs_build(self);
 	psy_ui_component_invalidate(&self->component);

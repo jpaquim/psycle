@@ -370,6 +370,7 @@
     <ClCompile Include="src\paramview.c" />
     <ClCompile Include="src\paramviews.c" />
     <ClCompile Include="src\patterncmds.c" />
+    <ClCompile Include="src\patterndefaultline.c" />
     <ClCompile Include="src\patternheader.c" />
     <ClCompile Include="src\patternhostcmds.c" />
     <ClCompile Include="src\patternproperties.c" />
@@ -379,6 +380,8 @@
     <ClCompile Include="src\patternviewmenu.c" />
     <ClCompile Include="src\patternviewskin.c" />
     <ClCompile Include="src\patternviewstate.c" />
+    <ClCompile Include="src\patternviewtabbar.c" />
+    <ClCompile Include="src\pianogrid.c" />
     <ClCompile Include="src\pianogridstate.c" />
     <ClCompile Include="src\pianokeyboard.c" />
     <ClCompile Include="src\pianokeyboardstate.c" />
@@ -559,6 +562,7 @@
     <ClInclude Include="src\paramview.h" />
     <ClInclude Include="src\paramviews.h" />
     <ClInclude Include="src\patterncmds.h" />
+    <ClInclude Include="src\patterndefaultline.h" />
     <ClInclude Include="src\patternheader.h" />
     <ClInclude Include="src\patternhostcmds.h" />
     <ClInclude Include="src\patternproperties.h" />
@@ -568,6 +572,8 @@
     <ClInclude Include="src\patternviewmenu.h" />
     <ClInclude Include="src\patternviewskin.h" />
     <ClInclude Include="src\patternviewstate.h" />
+    <ClInclude Include="src\patternviewtabbar.h" />
+    <ClInclude Include="src\pianogrid.h" />
     <ClInclude Include="src\pianogridstate.h" />
     <ClInclude Include="src\pianokeyboard.h" />
     <ClInclude Include="src\pianokeyboardstate.h" />

@@ -387,7 +387,7 @@ void instrumentviewbuttons_init(InstrumentViewButtons* self,
 
 // InstrumentViewBar
 static void instrumentsviewbar_onsongchanged(InstrumentsViewBar*, Workspace*,
-	int flag, psy_audio_Song*);
+	int flag);
 
 void instrumentsviewbar_init(InstrumentsViewBar* self, psy_ui_Component* parent,
 	Workspace* workspace)
@@ -411,8 +411,8 @@ void instrumentsviewbar_settext(InstrumentsViewBar* self, const char* text)
 	psy_ui_label_settext(&self->status, text);
 }
 
-void instrumentsviewbar_onsongchanged(InstrumentsViewBar* self, Workspace* workspace,
-	int flag, psy_audio_Song* song)
+void instrumentsviewbar_onsongchanged(InstrumentsViewBar* self,
+	Workspace* workspace, int flag)
 {	
 }
 
@@ -441,8 +441,8 @@ static void instrumentview_onmachinesinsert(InstrumentView*,
 	psy_audio_Machines* sender, int slot);
 static void instrumentview_onmachinesremoved(InstrumentView*,
 	psy_audio_Machines* sender, int slot);
-static void instrumentview_onsongchanged(InstrumentView*,
-	Workspace* sender, int flag, psy_audio_Song*);
+static void instrumentview_onsongchanged(InstrumentView*, Workspace* sender,
+	int flag);
 static void instrumentview_onstatuschanged(InstrumentView*,
 	psy_ui_Component* sender, char* text);
 // implementation
@@ -608,7 +608,7 @@ void instrumentview_setinstrument(InstrumentView* self, psy_audio_InstrumentInde
 }
 
 void instrumentview_onsongchanged(InstrumentView* self, Workspace* workspace,
-	int flag, psy_audio_Song* song)
+	int flag)
 {
 	if (workspace->song) {
 		self->header.instruments = &workspace->song->instruments;

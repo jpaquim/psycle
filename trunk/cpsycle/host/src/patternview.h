@@ -12,11 +12,11 @@
 #include "patternproperties.h"
 #include "patternviewmenu.h"
 #include "patternviewbar.h"
-#include "patternviewstate.h"
+#include "patternviewtabbar.h"
 #include "pianoroll.h"
 #include "stepbox.h"
 #include "trackerlinenumbers.h"
-#include "trackerview.h"
+#include "patterndefaultline.h"
 #include "transformpatternview.h"
 #include "swingfillview.h"
 #include "workspace.h"
@@ -48,14 +48,10 @@ extern "C" {
 typedef struct PatternView {
 	/* inherits */
 	psy_ui_Component component;
-	/* internal */
-	/* ui elements */
-	psy_ui_Component sectionbar;
-	psy_ui_TabBar tabbar;
-	psy_ui_Button contextbutton;
+	/* internal */	
+	PatternViewTabBar tabbar;	
 	TrackerLineNumberBar left;
-	psy_ui_Component griddefaultspane;
-	TrackerGrid griddefaults;
+	PatternDefaultLine defaultline;	
 	psy_ui_Component headerpane;
 	TrackerHeader header;
 	psy_ui_Notebook notebook;
@@ -66,15 +62,11 @@ typedef struct PatternView {
 	PatternBlockMenu blockmenu;
 	TransformPatternView transformpattern;
 	InterpolateCurveView interpolatecurveview;
-	SwingFillView swingfillview;
-	/* internal */	
+	SwingFillView swingfillview;	
 	TrackConfig trackconfig;
 	PatternViewState pvstate;
-	TrackerState state;		
-	PatternViewSkin skin;	
-	PatternCmds cmds;
-	bool trackmodeswingfill;
-	int baselfheight;	
+	TrackerState state;	
+	PatternCmds cmds;	
 	bool aligndisplay;
 	int updatealign;
 	/* references */
@@ -82,18 +74,8 @@ typedef struct PatternView {
 } PatternView;
 
 void patternview_init(PatternView*, psy_ui_Component* parent,
-		psy_ui_Component* tabbarparent,	Workspace*);
+	psy_ui_Component* tabbarparent,	Workspace*);
 void patternview_selectdisplay(PatternView*, PatternDisplayMode);
-void patternview_showlinenumbers(PatternView*);
-void patternview_hidelinenumbers(PatternView*);
-void patternview_showbeatnumbers(PatternView*);
-void patternview_hidebeatnumbers(PatternView*);
-void patternview_toggleblockmenu(PatternView*);
-void patternview_toggleinterpolatecurve(PatternView*, psy_ui_Component* sender);
-void patternview_toggletransformpattern(PatternView*, psy_ui_Component* sender);
-void patternview_toggleswingfill(PatternView*, psy_ui_Component* sender);
-void patternview_onpatternimport(PatternView*);
-void patternview_onpatternexport(PatternView*);
 
 INLINE psy_ui_Component* patternview_base(PatternView* self)
 {

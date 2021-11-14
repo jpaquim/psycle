@@ -16,7 +16,7 @@
 // prototypes
 static void songpropertiesview_read(SongPropertiesView*);
 static void songpropertiesview_onsongchanged(SongPropertiesView*, Workspace*,
-	int flag, psy_audio_Song*);
+	int flag);
 static void songpropertiesview_onhide(SongPropertiesView*,
 	psy_ui_Component* sender);
 static void songpropertiesview_oneditaccept(SongPropertiesView*,
@@ -188,7 +188,7 @@ void songpropertiesview_read(SongPropertiesView* self)
 }
 
 void songpropertiesview_onsongchanged(SongPropertiesView* self,
-	Workspace* workspace, int flag, psy_audio_Song* song)
+	Workspace* workspace, int flag)
 {
 	if (flag == WORKSPACE_LOADSONG) {
 		songpropertiesview_disableedit(self);

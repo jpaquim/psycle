@@ -141,7 +141,8 @@ void psycleconfig_makevisual(PsycleConfig* self)
 	psy_property_settext(
 		psy_property_append_int(self->apptheme, "win98", psy_ui_WIN98THEME, 0, 2),
 		"Windows 98");
-	patternviewconfig_init(&self->patview, self->visual);
+	patternviewconfig_init(&self->patview, self->visual,		
+		PSYCLE_SKINS_DEFAULT_DIR);
 	machineviewconfig_init(&self->macview, self->visual);
 	machineparamconfig_init(&self->macparam, self->visual);
 }

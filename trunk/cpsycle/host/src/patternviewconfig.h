@@ -6,6 +6,10 @@
 #if !defined(PATTERNVIEWCONFIG_H)
 #define PATTERNVIEWCONFIG_H
 
+/* host */
+#include "patternviewskin.h"
+/* ui*/
+#include <uifont.h>
 /* dsp */
 #include <notestab.h>
 /* container */
@@ -34,11 +38,14 @@ typedef struct PatternViewConfig {
 	/* internal */
 	psy_Property* patternview;
 	psy_Property* theme;
+	PatternViewSkin skin;
+	char* skindir;
 	/* references */
 	psy_Property* parent;
 } PatternViewConfig;
 
-void patternviewconfig_init(PatternViewConfig*, psy_Property* parent);
+void patternviewconfig_init(PatternViewConfig*, psy_Property* parent,
+	const char* skindir);
 void patternviewconfig_dispose(PatternViewConfig*);
 
 void patternviewconfig_resettheme(PatternViewConfig* self);
@@ -67,6 +74,7 @@ void patternviewconfig_togglepatdefaultline(PatternViewConfig*);
 bool patternviewconfig_issmoothscrolling(const PatternViewConfig*);
 void patternviewconfig_setsmoothscrolling(PatternViewConfig*, bool on);
 int patternviewconfig_patterndisplay(const PatternViewConfig*);
+psy_ui_FontInfo patternviewconfig_readfont(PatternViewConfig*, double zoom);
 /* events */
 bool patternviewconfig_onchanged(PatternViewConfig*, psy_Property*);
 bool patternviewconfig_onthemechanged(PatternViewConfig*, psy_Property*);

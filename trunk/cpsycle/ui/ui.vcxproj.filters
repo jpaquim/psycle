@@ -310,6 +310,9 @@
     <ClCompile Include="src\uiapp.c">
       <Filter>common</Filter>
     </ClCompile>
+    <ClCompile Include="src\uistyles.c">
+      <Filter>common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\uibutton.h">
@@ -559,6 +562,9 @@
       <Filter>common</Filter>
     </ClInclude>
     <ClInclude Include="src\uiapp.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="src\uistyles.h">
       <Filter>common</Filter>
     </ClInclude>
   </ItemGroup>

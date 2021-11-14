@@ -72,8 +72,7 @@ static void mainframe_onsettingshelptabbarchanged(MainFrame*,
 	psy_ui_Component* sender, uintptr_t tabindex);
 static void mainframe_onscripttabbarchanged(MainFrame*, psy_ui_Component* sender,
 	uintptr_t tabindex);
-static void mainframe_onsongchanged(MainFrame*, Workspace* sender,
-	int flag, psy_audio_Song*);
+static void mainframe_onsongchanged(MainFrame*, Workspace* sender, int flag);
 static void mainframe_onviewselected(MainFrame*, Workspace*, uintptr_t view,
 	uintptr_t section, int option);
 static void mainframe_onfocusview(MainFrame*, Workspace*);
@@ -749,10 +748,11 @@ bool mainframe_oninput(MainFrame* self, InputHandler* sender)
 			psy_ui_Tab* tab;
 			psy_ui_component_togglevisibility(&self->patternview.properties.component);
 
-			tab = psy_ui_tabbar_tab(&self->patternview.tabbar, 5);
+			tab = psy_ui_tabbar_tab(&self->patternview.tabbar.tabbar, 5);
 			if (tab) {
 				tab->checkstate = TABCHECKSTATE_ON;
-				psy_ui_component_invalidate(psy_ui_tabbar_base(&self->patternview.tabbar));
+				psy_ui_component_invalidate(psy_ui_tabbar_base(
+					&self->patternview.tabbar.tabbar));
 			}
 		}
 		psy_ui_component_setfocus(&self->patternview.properties.component);
@@ -795,8 +795,7 @@ bool mainframe_onnotes(MainFrame* self, InputHandler* sender)
 	return 0;
 }
 
-void mainframe_onsongchanged(MainFrame* self, Workspace* sender, int flag,
-	psy_audio_Song* song)
+void mainframe_onsongchanged(MainFrame* self, Workspace* sender, int flag)
 {
 	if (flag == WORKSPACE_LOADSONG) {
 		if (generalconfig_showsonginfoonload(psycleconfig_general(

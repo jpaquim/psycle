@@ -7,7 +7,7 @@
 #define psy_ui_APPSTYLES_H
 
 /* local */
-#include "uistyle.h"
+#include "uistyles.h"
 
 #ifdef __cplusplus
 extern "C" {

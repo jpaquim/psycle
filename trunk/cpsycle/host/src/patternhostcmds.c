@@ -9,15 +9,22 @@
 #include "patternhostcmds.h"
 /* host*/
 #include "patterncmds.h"
+/* ui */
+#include <uiopendialog.h>
+#include <uisavedialog.h>
 /* audio */
 #include <exclusivelock.h>
+#include <patternio.h>
 /* platform */
 #include "../../detail/portable.h"
 #include "../../detail/trace.h"
 
+static char patternfilter[] = "Pattern (*.psb)" "|*.psb";
+
 /* implementation */
 void patterncmds_init(PatternCmds* self, psy_audio_Song* song,
-	psy_UndoRedo* undoredo, psy_audio_Pattern* patternpaste)
+	psy_UndoRedo* undoredo, psy_audio_Pattern* patternpaste,
+	DirConfig* dirconfig)
 {
 	assert(self);
 	assert(undoredo);	
@@ -26,6 +33,7 @@ void patterncmds_init(PatternCmds* self, psy_audio_Song* song,
 	self->song = song;
 	self->undoredo = undoredo;
 	self->patternpaste = patternpaste;
+	self->dirconfig = dirconfig;
 }
 
 void patterncmds_setsong(PatternCmds* self, psy_audio_Song* song)
@@ -107,5 +115,37 @@ void patterncmds_changemachine(PatternCmds* self,
 		psy_audio_pattern_changemachine(self->pattern,
 			selection.topleft, selection.bottomright,
 			psy_audio_machines_selected(&self->song->machines));
+	}
+}
+
+void patterncmds_importpattern(PatternCmds* self, psy_dsp_big_beat_t bpl)
+{
+	if (self->pattern) {
+		psy_ui_OpenDialog dialog;
+
+		psy_ui_opendialog_init_all(&dialog, 0, "Import Pattern", patternfilter,
+			"PSB", dirconfig_songs(self->dirconfig));
+		if (psy_ui_opendialog_execute(&dialog)) {
+			psy_audio_patternio_load(self->pattern,
+				psy_ui_opendialog_path(&dialog), bpl);
+		}
+		psy_ui_opendialog_dispose(&dialog);
+	}
+}
+
+void patterncmds_exportpattern(PatternCmds* self, psy_dsp_big_beat_t bpl,
+	uintptr_t numtracks)
+{
+	if (self->pattern) {
+		psy_ui_SaveDialog dialog;
+
+		psy_ui_savedialog_init_all(&dialog, 0, "Export Pattern", patternfilter,
+			"PSB", dirconfig_songs(self->dirconfig));
+		if (psy_ui_savedialog_execute(&dialog)) {
+			psy_audio_patternio_save(self->pattern,
+				psy_ui_savedialog_path(&dialog), bpl,
+				numtracks);				
+		}
+		psy_ui_savedialog_dispose(&dialog);
 	}
 }

@@ -18,7 +18,7 @@
 
 // MachineViewBar
 static void machineviewbar_onsongchanged(MachineViewBar*, Workspace*,
-	int flag, psy_audio_Song*);
+	int flag);
 void machineviewbar_setmachines(MachineViewBar*, psy_audio_Machines*);
 static void machineviewbar_onmixerconnectmodeclick(MachineViewBar*,
 	psy_ui_Component* sender);
@@ -73,10 +73,10 @@ void machineviewbar_updateconnectasmixersend(MachineViewBar* self)
 }
 
 void machineviewbar_onsongchanged(MachineViewBar* self, Workspace* sender,
-	int flag, psy_audio_Song* song)
+	int flag)
 {		
-	if (song) {
-		machineviewbar_setmachines(self, psy_audio_song_machines(song));
+	if (sender->song) {
+		machineviewbar_setmachines(self, psy_audio_song_machines(sender->song));
 	} else {
 		machineviewbar_setmachines(self, NULL);
 	}		

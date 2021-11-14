@@ -110,7 +110,7 @@ void newmachinesectionbar_init(NewMachineSectionBar* self,
 	psy_ui_button_init_text(&self->removefromsection, &self->component, NULL,
 		"newmachine.delete");	
 	psy_ui_margin_init_em(&spacing, 0.2, 0.2, 0.2, 0.2);
-	psy_ui_component_setspacing_children(&self->component, spacing);	
+	psy_ui_component_setpadding_children(&self->component, spacing);	
 }
 
 /* NewMachineSortBar */
@@ -145,7 +145,7 @@ void newmachinesortbar_init(NewMachineSortBar* self, psy_ui_Component* parent,
 		"newmachine.type", self, newmachinesortbar_onsortbytype);
 	psy_ui_button_init_text_connect(&self->sortbymode, &self->component, NULL,
 		"newmachine.mode", self, newmachinesortbar_onsortbymode);	
-	psy_ui_component_setspacing_children(&self->component,
+	psy_ui_component_setpadding_children(&self->component,
 		psy_ui_margin_make_em(0.2, 0.2, 0.2, 0.2));
 }
 

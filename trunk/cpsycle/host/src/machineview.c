@@ -39,8 +39,7 @@ static void machineview_inittabbar(MachineView*,
 	psy_ui_Component* tabbarparent);
 static void machineview_connectsignals(MachineView*);
 static uintptr_t machineview_section(const MachineView*);
-static void machineview_onsongchanged(MachineView*, Workspace*, int flag,
-	psy_audio_Song*);
+static void machineview_onsongchanged(MachineView*, Workspace*, int flag);
 static void machineview_onmousedown(MachineView*, psy_ui_MouseEvent*);
 static void machineview_onmouseup(MachineView*, psy_ui_MouseEvent*);
 static void machineview_onmousedoubleclick(MachineView*, psy_ui_MouseEvent*);
@@ -317,7 +316,7 @@ void machineview_selectsection(MachineView* self, psy_ui_Component* sender,
 }
 
 void machineview_onsongchanged(MachineView* self, Workspace* workspace,
-	int flag, psy_audio_Song* song)
+	int flag)
 {	
 	psy_ui_tabbar_select(&self->tabbar, SECTION_ID_MACHINEVIEW_WIRES);	
 }

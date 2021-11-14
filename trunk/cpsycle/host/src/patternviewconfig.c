@@ -7,18 +7,31 @@
 
 
 #include "patternviewconfig.h"
+/* host */
+#include "styles.h"
+/* ui */
+#include <uiapp.h>
+#include <uistyle.h>
+/* platform */
+#include "../../detail/portable.h"
 
+/* prototypes*/
 static void patternviewconfig_makeview(PatternViewConfig*, psy_Property*
 	parent);
 static void patternviewconfig_maketheme(PatternViewConfig*, psy_Property*
 	parent);
 
-void patternviewconfig_init(PatternViewConfig* self, psy_Property* parent)
+/* implementation */
+void patternviewconfig_init(PatternViewConfig* self, psy_Property* parent,
+	const char* skindir)
 {
 	assert(self && parent);
 
 	self->parent = parent;
+	self->skindir = psy_strdup(skindir);
+	patternviewskin_init(&self->skin);	
 	patternviewconfig_makeview(self, parent);
+	patternviewskin_settheme(&self->skin, self->theme, skindir);
 	psy_signal_init(&self->signal_changed);
 	psy_signal_init(&self->signal_themechanged);
 }
@@ -29,6 +42,8 @@ void patternviewconfig_dispose(PatternViewConfig* self)
 		
 	psy_signal_dispose(&self->signal_changed);
 	psy_signal_dispose(&self->signal_themechanged);
+	patternviewskin_dispose(&self->skin);
+	free(self->skindir);
 }
 
 void patternviewconfig_makeview(PatternViewConfig* self, psy_Property* parent)
@@ -481,8 +496,17 @@ bool patternviewconfig_onchanged(PatternViewConfig* self, psy_Property* property
 
 bool patternviewconfig_onthemechanged(PatternViewConfig* self, psy_Property* property)
 {
+	psy_ui_Style* style;
+
 	assert(self);
 
+	patternviewskin_settheme(&self->skin, self->theme, self->skindir);
+	style = psy_ui_app_style(psy_ui_app(), STYLE_PATTERNVIEW);
+	if (style) {
+		psy_ui_style_setcolours(style,
+			patternviewskin_fontcolour(&self->skin, 0, 0),
+			patternviewskin_backgroundcolour(&self->skin, 0, 0));		
+	}
 	psy_signal_emit(&self->signal_themechanged, self, 1, self->theme);
 	return TRUE;
 }
@@ -511,4 +535,20 @@ int patternviewconfig_patterndisplay(const PatternViewConfig* self)
 		return (int)psy_property_item_int(property);
 	}
 	return PROPERTY_ID_PATTERN_DISPLAYMODE_TRACKER;		
+}
+
+psy_ui_FontInfo patternviewconfig_readfont(PatternViewConfig* self, double zoom)
+{
+	psy_ui_FontInfo fontinfo;
+	
+	psy_ui_fontinfo_init_string(&fontinfo,
+		psy_property_at_str(self->patternview, "font", "tahoma;-16"));	
+#if PSYCLE_USE_TK == PSYCLE_TK_X11	
+	self->state.lineheight = psy_ui_value_make_eh(1.0);
+	fontinfo.lfHeight = 18;
+	self->baselfheight = 18;
+#else				
+	fontinfo.lfHeight = (int32_t)((double)fontinfo.lfHeight * zoom);
+#endif		
+	return fontinfo;
 }

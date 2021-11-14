@@ -1,17 +1,20 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "patternproperties.h"
-// host
+/* host */
 #include "patternviewskin.h"
-// audio
+/* audio */
 #include "command.h"
-// platform
+/* platform */
 #include "../../detail/portable.h"
 
-// Commands
+/* Commands */
 typedef struct {
 	psy_Command command;
 	psy_audio_Pattern* pattern;
@@ -28,7 +31,7 @@ static void patternpropertiesapplycommand_execute(
 static void patternpropertiesapplycommand_revert(
 	PatternPropertiesApplyCommand*);
 
-// vtable
+/* vtable */
 static psy_CommandVtable patternpropertiesapplycommand_vtable;
 static bool patternpropertiesapplycommand_vtable_initialized = FALSE;
 
@@ -99,7 +102,7 @@ void patternpropertiesapplycommand_revert(PatternPropertiesApplyCommand* self)
 }
 
 static void patternproperties_onsongchanged(PatternProperties*, Workspace*,
-	int flag, psy_audio_Song*);
+	int flag);
 static void patternproperties_connectsongsignals(PatternProperties*);
 static void patternproperties_onpatternnamechanged(PatternProperties*,
 	psy_audio_Patterns*, uintptr_t slot);
@@ -110,7 +113,6 @@ static void patternproperties_onapply(PatternProperties*,
 static void patternproperties_onkeydown(PatternProperties*, psy_ui_KeyboardEvent*);
 static void patternproperties_onkeyup(PatternProperties*, psy_ui_KeyboardEvent*);
 static void patternproperties_onfocus(PatternProperties*);
-static void patternproperties_updateskin(PatternProperties*);
 static void patternproperties_ontimesignominator(PatternProperties*, IntEdit* sender);
 static void patternproperties_ontimesigdenominator(PatternProperties*, IntEdit* sender);
 
@@ -136,20 +138,17 @@ static psy_ui_ComponentVtable* patternproperties_vtable_init(PatternProperties* 
 }
 
 void patternproperties_init(PatternProperties* self, psy_ui_Component* parent,
-	psy_audio_Pattern* pattern, PatternViewSkin* skin,
-	Workspace* workspace)
+	psy_audio_Pattern* pattern, Workspace* workspace)
 {
 	self->workspace = workspace;
-	self->pattern = pattern;
-	self->skin = skin;
+	self->pattern = pattern;	
 
-	psy_ui_component_init(&self->component, parent, NULL);
+	psy_ui_component_init(&self->component, parent, NULL);	
 	psy_ui_component_setvtable(&self->component,
 		patternproperties_vtable_init(self));
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_margin_make(psy_ui_value_make_px(0), psy_ui_value_make_ew(2.0),
-			psy_ui_value_make_eh(1.0), psy_ui_value_make_px(0)));
-	patternproperties_updateskin(self);
+			psy_ui_value_make_eh(1.0), psy_ui_value_make_px(0)));	
 	psy_ui_label_init_text(&self->namelabel, &self->component, NULL,
 		"patternview.patname");
 	psy_ui_label_settextalignment(&self->namelabel, psy_ui_ALIGNMENT_LEFT);
@@ -186,12 +185,15 @@ void patternproperties_init(PatternProperties* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->workspace->signal_songchanged, self,
 		patternproperties_onsongchanged);
 	patternproperties_connectsongsignals(self);
+	psy_ui_component_setalign(&self->component, psy_ui_ALIGN_TOP);
+	psy_ui_component_hide(&self->component);
 }
 
-void patternproperties_setpattern(PatternProperties* self,
-	psy_audio_Pattern* pattern)
+void patternproperties_setpattern(PatternProperties* self, psy_audio_Pattern*
+	pattern)
 {
 	char buffer[20];
+
 	self->pattern = pattern;
 	if (self->pattern) {		
 		psy_ui_edit_settext(&self->nameedit, psy_audio_pattern_name(pattern));
@@ -274,8 +276,8 @@ void patternproperties_onpatternlengthchanged(PatternProperties* self,
 	}
 }
 
-void patternproperties_onsongchanged(PatternProperties* self, Workspace* workspace, int flag,
-	psy_audio_Song* song)
+void patternproperties_onsongchanged(PatternProperties* self,
+	Workspace* sender, int flag)
 {
 	patternproperties_connectsongsignals(self);
 }
@@ -288,14 +290,6 @@ void patternproperties_connectsongsignals(PatternProperties* self)
 		psy_signal_connect(&workspace_song(self->workspace)->patterns.signal_lengthchanged, self,
 			patternproperties_onpatternlengthchanged);
 	}
-}
-
-void patternproperties_updateskin(PatternProperties* self)
-{	
-	psy_ui_component_setbackgroundcolour(&self->component,
-		self->skin->background);
-	psy_ui_component_setcolour(&self->component,
-		self->skin->font);	
 }
 
 void patternproperties_ontimesignominator(PatternProperties* self, IntEdit* sender)

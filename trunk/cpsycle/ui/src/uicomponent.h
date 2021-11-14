@@ -14,7 +14,7 @@
 #include "uievents.h"
 #include "uigraphics.h"
 #include "uimenu.h"
-#include "uistyle.h"
+#include "uistyles.h"
 /* container */
 #include <list.h>
 #include <signal.h>
@@ -343,7 +343,7 @@ INLINE psy_ui_Margin psy_ui_component_spacing(const psy_ui_Component* self)
 	return psy_ui_componentstyle_spacing(&self->style);
 }
 
-void psy_ui_component_setspacing_children(psy_ui_Component*, psy_ui_Margin);
+void psy_ui_component_setpadding_children(psy_ui_Component*, psy_ui_Margin);
 void psy_ui_component_setalign_children(psy_ui_Component*, psy_ui_AlignType);
 void psy_ui_component_checksortedalign(psy_ui_Component*, psy_ui_AlignType);
 const psy_ui_Border* psy_ui_component_border(const psy_ui_Component*);

@@ -21,7 +21,9 @@ extern "C" {
 ** Context Menu for PatternView (Trackerview and Pianoroll)
 */
 
-struct PatternView;
+struct SwingFillView;
+struct TransformPatternView;
+struct InterpolateCurveView;
 
 typedef struct PatternBlockMenu {
 	/* inherits */
@@ -46,12 +48,15 @@ typedef struct PatternBlockMenu {
 	psy_ui_Button importbtn;
 	psy_ui_Button exportbtn;	
 	/* references */
-	struct PatternView* view;
+	struct SwingFillView* swingfill;
+	struct TransformPatternView* transformpattern;
+	struct InterpolateCurveView* interpolatecurveview;	
 	PatternViewState* pvstate;	
 } PatternBlockMenu;
 
 void patternblockmenu_init(PatternBlockMenu*, psy_ui_Component*,
-	struct PatternView*, PatternViewState*);
+	struct SwingFillView*, struct TransformPatternView*,
+	struct InterpolateCurveView*, PatternViewState*);
 
 INLINE psy_ui_Component* patternblockmenu_base(PatternBlockMenu* self)
 {
