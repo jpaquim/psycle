@@ -87,8 +87,8 @@ void playlistview_init(PlaylistView* self, psy_ui_Component* parent,
 		playlistview_onmoveup);
 	psy_signal_connect(&self->bar.down.signal_clicked, self,
 		playlistview_onmovedown);
-	propertiesview_init(&self->view, &self->component, tabbarparent,
-		workspace_recentsongs(workspace), 1, workspace);
+	propertiesview_init(&self->view, &self->component, &self->component,
+		tabbarparent, workspace_recentsongs(workspace), 1, workspace);
 	propertiesview_enablemousepropagation(&self->view);
 	psy_ui_component_setbackgroundmode(&self->view.scroller.pane,
 		psy_ui_SETBACKGROUND);	

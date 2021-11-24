@@ -38,6 +38,7 @@ static void patternblockmenu_toggleinterpolatecurve(PatternBlockMenu*);
 static void patternblockmenu_toggletransformpattern(PatternBlockMenu*);
 /* implementation */
 void patternblockmenu_init(PatternBlockMenu* self, psy_ui_Component* parent,
+	psy_ui_Component* view,
 	SwingFillView* swingfill, TransformPatternView* transformpattern,
 	InterpolateCurveView* interpolatecurveview, PatternViewState* pvstate)
 {
@@ -47,7 +48,7 @@ void patternblockmenu_init(PatternBlockMenu* self, psy_ui_Component* parent,
 	assert(interpolatecurveview);
 	assert(pvstate);
 
-	psy_ui_component_init(&self->component, parent, NULL);	
+	psy_ui_component_init(&self->component, parent, view);	
 	self->swingfill = swingfill;
 	self->transformpattern = transformpattern;
 	self->interpolatecurveview = interpolatecurveview;
@@ -221,7 +222,7 @@ void patternblockmenu_toggleswingfill(PatternBlockMenu* self)
 		swingfillview_reset(self->swingfill,
 			(int)self->pvstate->song->properties.bpm);
 	}
-	psy_ui_component_togglevisibility(swingfillview_base(self->swingfill));
+	psy_ui_component_togglevisibility(swingfillview_base(self->swingfill));	
 }
 
 void patternblockmenu_toggleinterpolatecurve(PatternBlockMenu* self)

@@ -25,7 +25,8 @@ static void realedit_oneditfocuslost(RealEdit*, psy_ui_Component* sender,
 
 // implementation
 void realedit_init(RealEdit* self, psy_ui_Component* parent,
-	const char* desc, realedit_real_t value, realedit_real_t minval, realedit_real_t maxval)
+	psy_ui_Component* view, const char* desc, realedit_real_t value,
+	realedit_real_t minval, realedit_real_t maxval)
 {
 	psy_ui_component_init(realedit_base(self), parent, NULL);
 	psy_ui_component_setalignexpand(realedit_base(self), psy_ui_HEXPAND);
@@ -36,8 +37,8 @@ void realedit_init(RealEdit* self, psy_ui_Component* parent,
 	self->restore = value;
 	psy_ui_label_init(&self->desc, realedit_base(self), NULL);
 	psy_ui_label_settext(&self->desc, desc);
-	psy_ui_edit_init(&self->edit, realedit_base(self));
-	psy_ui_edit_setcharnumber(&self->edit, 5);	
+	psy_ui_textinput_init(&self->edit, realedit_base(self), view);
+	psy_ui_textinput_setcharnumber(&self->edit, 5);
 	psy_ui_button_init_connect(&self->less, realedit_base(self), NULL,
 		self, realedit_onlessclicked);
 	psy_ui_button_seticon(&self->less, psy_ui_ICON_LESS);
@@ -57,10 +58,10 @@ void realedit_init(RealEdit* self, psy_ui_Component* parent,
 }
 
 void realedit_init_connect(RealEdit* self, psy_ui_Component* parent,
-	const char* desc, realedit_real_t value, realedit_real_t minval, realedit_real_t maxval,
-	void* context, void* fp)
+	psy_ui_Component* view, const char* desc, realedit_real_t value,
+	realedit_real_t minval, realedit_real_t maxval, void* context, void* fp)
 {
-	realedit_init(self, parent, desc, value, minval, maxval);
+	realedit_init(self, parent, view, desc, value, minval, maxval);
 	psy_signal_connect(&self->signal_changed, context, fp);
 }
 
@@ -72,7 +73,7 @@ void realedit_ondestroy(RealEdit* self, psy_ui_Component* sender)
 realedit_real_t realedit_value(RealEdit* self)
 {
 	return (realedit_real_t)
-		atof(psy_ui_edit_text(&self->edit));
+		atof(psy_ui_textinput_text(&self->edit));
 }
 
 void realedit_setvalue(RealEdit* self, realedit_real_t value)
@@ -83,24 +84,24 @@ void realedit_setvalue(RealEdit* self, realedit_real_t value)
 		value = psy_min(psy_max(value, self->minval), self->maxval);
 	}
 	psy_snprintf(text, 128, "%.2f", (float)value);
-	psy_ui_edit_settext(&self->edit, text);
+	psy_ui_textinput_settext(&self->edit, text);
 	psy_signal_emit(&self->signal_changed, self, 0);
 	self->restore = value;
 }
 
 void realedit_enableedit(RealEdit* self)
 {
-	psy_ui_edit_enableedit(&self->edit);
+	psy_ui_textinput_enableedit(&self->edit);
 }
 
 void realedit_preventedit(RealEdit* self)
 {
-	psy_ui_edit_preventedit(&self->edit);
+	psy_ui_textinput_preventedit(&self->edit);
 }
 
 void realedit_seteditcharnumber(RealEdit* self, int charnumber)
 {
-	psy_ui_edit_setcharnumber(&self->edit, charnumber);
+	psy_ui_textinput_setcharnumber(&self->edit, charnumber);
 }
 
 void realedit_setdesccharnumber(RealEdit* self, int charnumber)

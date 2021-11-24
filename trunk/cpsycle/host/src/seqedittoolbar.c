@@ -93,7 +93,7 @@ void seqedittoolbar_init(SeqEditToolBar* self, psy_ui_Component* parent,
 	psy_ui_checkbox_init_text(&self->usesamplerindex, &self->component, "Define Sampler");
 	psy_signal_connect(&self->usesamplerindex.signal_clicked, self,
 		seqeditortoolbar_onusesamplerindex);
-	intedit_init_connect(&self->samplerindex, &self->component, "Index",
+	intedit_init_connect(&self->samplerindex, &self->component, NULL, "Index",
 		0x3E, 0, 0x3F, self, seqeditortoolbar_onsamplerindexchange);	
 	psy_ui_component_hide(psy_ui_checkbox_base(&self->usesamplerindex));
 	psy_ui_component_hide(intedit_base(&self->samplerindex));	

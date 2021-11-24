@@ -594,7 +594,7 @@ void newmachinesectionspane_init(NewMachineSectionsPane* self, psy_ui_Component*
 	newmachinesectionsheader_init(&self->sectionsheader, &self->component, psy_INDEX_INVALID);
 	psy_ui_component_setalign(&self->sectionsheader.component, psy_ui_ALIGN_TOP);
 	/* navbar */
-	psy_ui_tabbar_init(&self->navsections, &self->sectionsheader.component);
+	psy_ui_tabbar_init(&self->navsections, &self->sectionsheader.component, NULL);
 	psy_ui_component_setalign(psy_ui_tabbar_base(&self->navsections), psy_ui_ALIGN_CLIENT);	
 	psy_signal_connect(&self->navsections.signal_change, self,
 		newmachinesectionspane_ontabbarchanged);	

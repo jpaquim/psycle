@@ -48,7 +48,7 @@ typedef struct SwingFillView {
 } SwingFillView;
 
 void swingfillview_init(SwingFillView*, psy_ui_Component* parent,
-	PatternViewState*);
+	psy_ui_Component* view, PatternViewState*);
 
 void swingfillview_reset(SwingFillView* self, int bpm);
 void swingfillview_setvalues(SwingFillView*, int tempo, int width, float variance,

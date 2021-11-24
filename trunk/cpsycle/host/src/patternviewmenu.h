@@ -54,7 +54,8 @@ typedef struct PatternBlockMenu {
 	PatternViewState* pvstate;	
 } PatternBlockMenu;
 
-void patternblockmenu_init(PatternBlockMenu*, psy_ui_Component*,
+void patternblockmenu_init(PatternBlockMenu*, psy_ui_Component* parent,
+	psy_ui_Component* view,
 	struct SwingFillView*, struct TransformPatternView*,
 	struct InterpolateCurveView*, PatternViewState*);
 

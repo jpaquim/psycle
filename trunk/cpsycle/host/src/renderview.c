@@ -55,8 +55,8 @@ void renderview_init(RenderView* self, psy_ui_Component* parent,
 	self->workspace = workspace;
 	self->fileoutdriver = psy_audio_create_fileout_driver();
 	renderview_build(self);
-	propertiesview_init(&self->view, &self->component, tabbarparent,
-		self->properties, 3, workspace);
+	propertiesview_init(&self->view, &self->component, &self->component,
+		tabbarparent, self->properties, 3, workspace);
 	propertiesview_prevent_maximize_mainsections(&self->view);	
 	psy_signal_connect(&self->view.signal_changed, self,
 		renderview_onsettingsviewchanged);

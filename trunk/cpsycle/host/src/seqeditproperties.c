@@ -255,14 +255,14 @@ void seqedittimesigproperties_init(SeqEditTimesigProperties* self, psy_ui_Compon
 	psy_ui_component_setalign(psy_ui_label_base(&self->caption),
 		psy_ui_ALIGN_TOP);
 	/* nominator */
-	intedit_init(&self->nominator, &self->component, "Nominator", 1, 1, 0xF);
+	intedit_init(&self->nominator, &self->component, NULL, "Nominator", 1, 1, 0xF);
 	psy_ui_component_setalign(intedit_base(&self->nominator),
 		psy_ui_ALIGN_TOP);
 	psy_ui_label_setcharnumber(&self->nominator.desc, 14.0);
 	psy_ui_component_setmargin(&self->nominator.component,
 		psy_ui_margin_make_em(0.5, 0.0, 0.0, 0.0));	
 	/* denominator */
-	intedit_init(&self->denominator, &self->component, "Denominator", 1, 1, 0xF);
+	intedit_init(&self->denominator, &self->component, NULL, "Denominator", 1, 1, 0xF);
 	psy_ui_component_setalign(intedit_base(&self->denominator),
 		psy_ui_ALIGN_TOP);
 	psy_ui_label_setcharnumber(&self->denominator.desc, 14.0);
@@ -381,7 +381,7 @@ void seqeditloopproperties_init(SeqEditLoopProperties* self, psy_ui_Component* p
 	psy_ui_label_settext(&self->caption, "Loop Item selected");
 	psy_ui_component_setalign(psy_ui_label_base(&self->caption),
 		psy_ui_ALIGN_TOP);	
-	intedit_init(&self->numloops, &self->component, "Repetitions", 1, 1, 0xF);
+	intedit_init(&self->numloops, &self->component, NULL, "Repetitions", 1, 1, 0xF);
 	psy_ui_component_setalign(intedit_base(&self->numloops),
 		psy_ui_ALIGN_TOP);
 	psy_ui_label_setcharnumber(&self->numloops.desc, 12.0);

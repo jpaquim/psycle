@@ -179,7 +179,7 @@ void machineview_initnewmachine(MachineView* self,
 
 void machineview_inittabbar(MachineView* self, psy_ui_Component* tabbarparent)
 {
-	psy_ui_tabbar_init(&self->tabbar, tabbarparent);
+	psy_ui_tabbar_init(&self->tabbar, tabbarparent, NULL);
 	psy_ui_component_setalign(psy_ui_tabbar_base(&self->tabbar),
 		psy_ui_ALIGN_LEFT);	
 	psy_ui_tabbar_append(&self->tabbar, "machineview.wires",

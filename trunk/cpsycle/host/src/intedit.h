@@ -9,7 +9,7 @@
 // ui
 #include <uibutton.h>
 #include <uilabel.h>
-#include <uiedit.h>
+#include <uitextinput.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -22,7 +22,7 @@ typedef struct IntEdit {
 	psy_Signal signal_changed;
 	// ui elements
 	psy_ui_Label desc;
-	psy_ui_Edit edit;
+	psy_ui_TextInput input;
 	psy_ui_Button less;
 	psy_ui_Button more;
 	// internal data
@@ -31,15 +31,16 @@ typedef struct IntEdit {
 	int restore;	
 } IntEdit;
 
-void intedit_init(IntEdit*, psy_ui_Component* parent,
+void intedit_init(IntEdit*, psy_ui_Component* parent, psy_ui_Component* view,
 	const char* desc, int value, int minval, int maxval);
 void intedit_init_connect(IntEdit*, psy_ui_Component* parent,
-	const char* desc, int value, int minval, int maxval,
-	void* context, void* fp);
+	psy_ui_Component* view, const char* desc, int value, int minval,
+	int maxval, void* context, void* fp);
 
 IntEdit* intedit_alloc(void);
 IntEdit* intedit_allocinit(psy_ui_Component* parent,
-	const char* desc, int value, int minval, int maxval);
+	psy_ui_Component* view, const char* desc, int value, int minval,
+	int maxval);
 
 int intedit_value(IntEdit*);
 void intedit_setvalue(IntEdit*, int value);

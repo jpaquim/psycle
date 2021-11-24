@@ -426,7 +426,7 @@ void mainframe_inittabbars(MainFrame* self)
 	psy_ui_component_setalign(&self->tabspacer, psy_ui_ALIGN_TOP);
 	psy_ui_component_setpreferredsize(&self->tabspacer,
 		psy_ui_size_make_em(0.0, 0.4));
-	psy_ui_tabbar_init(&self->scripttabbar, &self->mainviews);
+	psy_ui_tabbar_init(&self->scripttabbar, &self->mainviews, NULL);
 	psy_ui_component_setalign(&self->scripttabbar.component, psy_ui_ALIGN_TOP);
 	psy_ui_component_hide(&self->scripttabbar.component);	
 }
@@ -440,7 +440,7 @@ void mainframe_initnavigation(MainFrame* self)
 
 void mainframe_initmaintabbar(MainFrame* self)
 {	
-	psy_ui_tabbar_init(&self->tabbar, &self->tabbars);	
+	psy_ui_tabbar_init(&self->tabbar, &self->tabbars, NULL);
 	psy_ui_component_setalign(psy_ui_tabbar_base(&self->tabbar),
 		psy_ui_ALIGN_LEFT);
 	psy_ui_tabbar_append(&self->tabbar, "main.machines",
@@ -461,7 +461,7 @@ void mainframe_initmaintabbar(MainFrame* self)
 
 void mainframe_inithelpsettingstabbar(MainFrame* self)
 {
-	psy_ui_tabbar_init(&self->helpsettingstabbar, &self->tabbars);
+	psy_ui_tabbar_init(&self->helpsettingstabbar, &self->tabbars, NULL);
 	psy_ui_component_setalign(psy_ui_tabbar_base(&self->helpsettingstabbar),
 		psy_ui_ALIGN_LEFT);
 	psy_ui_component_setmargin(psy_ui_tabbar_base(&self->helpsettingstabbar),
@@ -504,6 +504,7 @@ void mainframe_initmainpane(MainFrame* self)
 		psy_ui_notebook_base(&self->viewtabbars),
 		&self->workspace);
 	propertiesview_init(&self->settingsview,
+		psy_ui_notebook_base(&self->notebook),
 		psy_ui_notebook_base(&self->notebook),
 		psy_ui_notebook_base(&self->viewtabbars),
 		&self->workspace.config.config, 3,

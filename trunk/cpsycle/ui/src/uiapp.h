@@ -47,7 +47,7 @@ typedef struct psy_ui_App {
 	psy_Signal signal_mousehook;
 	/* internal data */
 	struct psy_ui_AppImp* imp;
-	struct psy_ui_ImpFactory* imp_factory;
+	struct psy_ui_ImpFactory* impfactory;
 	psy_ui_AppZoom zoom;
 	psy_ui_Defaults defaults;
 	psy_Translator translator;	
@@ -105,8 +105,15 @@ INLINE struct psy_ui_ImpFactory* psy_ui_app_impfactory(psy_ui_App* self)
 {
 	assert(self);
 
-	return self->imp_factory;
+	return self->impfactory;
 }
+
+INLINE struct psy_ui_Component* psy_ui_app_focus(psy_ui_App* self)
+{
+	return self->focus;
+}
+
+void psy_ui_app_setfocus(psy_ui_App*, struct psy_ui_Component*);
 
 psy_ui_Style* psy_ui_style(uintptr_t styletype);
 const psy_ui_Style* psy_ui_style_const(uintptr_t styletype);

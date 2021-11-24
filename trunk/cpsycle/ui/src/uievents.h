@@ -24,8 +24,9 @@ typedef enum psy_ui_EventType {
 	psy_ui_MOUSELEAVE    = 8,
 	psy_ui_DBLCLICK      = 9,
 	psy_ui_DRAG          = 10,
-	psy_ui_FOCUSOUT      = 11,
-	psy_ui_RESIZE        = 12
+	psy_ui_FOCUS         = 11,
+	psy_ui_FOCUSOUT      = 12,
+	psy_ui_RESIZE        = 13
 } psy_ui_EventType;
 
 /* Forward Handler for Event target */
@@ -44,7 +45,8 @@ typedef struct psy_ui_Event {
 	uintptr_t timestamp;
 } psy_ui_Event;
 
-void psy_ui_event_init(psy_ui_Event*, psy_ui_EventType type);
+void psy_ui_event_init(psy_ui_Event*, psy_ui_EventType);
+void psy_ui_event_init_stop_propagation(psy_ui_Event*, psy_ui_EventType);
 
 INLINE bool psy_ui_event_default_prevented(const psy_ui_Event* self)
 {

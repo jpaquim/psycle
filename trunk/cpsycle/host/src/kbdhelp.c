@@ -24,7 +24,7 @@ void kbdhelp_init(KbdHelp* self, psy_ui_Component* parent,
 	kbdbox_init(&self->kbdbox, kbdhelp_base(self), workspace);
 	psy_ui_component_setalign(kbdbox_base(&self->kbdbox),
 		psy_ui_ALIGN_CENTER);	
-	psy_ui_tabbar_init(&self->tabbar, &self->component);	
+	psy_ui_tabbar_init(&self->tabbar, &self->component, NULL);
 	psy_ui_tabbar_settabalign(&self->tabbar, psy_ui_ALIGN_TOP);
 	psy_ui_component_setalign(psy_ui_tabbar_base(&self->tabbar),
 		psy_ui_ALIGN_RIGHT);

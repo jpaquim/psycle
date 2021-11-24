@@ -21,6 +21,12 @@ void psy_ui_event_init(psy_ui_Event* self, psy_ui_EventType type)
 	self->timestamp = 0;
 }
 
+void psy_ui_event_init_stop_propagation(psy_ui_Event* self, psy_ui_EventType type)
+{
+	psy_ui_event_init(self, type);
+	psy_ui_event_stop_propagation(self);
+}
+
 /* psy_ui_KeyboardEvent */
 void psy_ui_keyboardevent_init(psy_ui_KeyboardEvent* self)
 {

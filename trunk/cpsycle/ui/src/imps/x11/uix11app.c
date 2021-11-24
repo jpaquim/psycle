@@ -483,6 +483,7 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 		}		
 		psy_ui_mouseevent_init_all(&ev,	
 				psy_ui_realpoint_make(event->xbutton.x, event->xbutton.y),
+				psy_ui_realpoint_make(event->xbutton.x, event->xbutton.y),
 				psy_ui_x11app_translate_x11button(event->xbutton.button),
 				0, 0, 0);
 		ev.event.timestamp = (uintptr_t)event->xbutton.time;		
@@ -496,6 +497,7 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 		psy_ui_MouseEvent ev;							
 
 		psy_ui_mouseevent_init_all(&ev,	
+			psy_ui_realpoint_make(event->xbutton.x, event->xbutton.y),
 			psy_ui_realpoint_make(event->xbutton.x, event->xbutton.y),
 			psy_ui_x11app_translate_x11button(event->xbutton.button),
 			0, 0, 0);
@@ -521,6 +523,7 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 			button = 2;
 		}
 		psy_ui_mouseevent_init_all(&ev,
+			psy_ui_realpoint_make(xme.x, xme.y),
 			psy_ui_realpoint_make(xme.x, xme.y),
 			button, 0, 0, 0);
 		ev.event.type = psy_ui_MOUSEMOVE;
@@ -653,6 +656,7 @@ void psy_ui_x11app_mousewheel(psy_ui_X11App* self,
 		delta = 0;
 	}
 	psy_ui_mouseevent_init_all(&ev,
+		psy_ui_realpoint_make(xe->xbutton.x, xe->xbutton.y),
 		psy_ui_realpoint_make(xe->xbutton.x, xe->xbutton.y),
 		0, delta, 0, 0);
 	psy_ui_x11app_update_mouseevent_mods(self, &ev);

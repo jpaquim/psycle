@@ -223,8 +223,7 @@ void psy_ui_replacedefaultfont(psy_ui_Component* main, psy_ui_Font* font)
 
 void psy_ui_component_setfocus(psy_ui_Component* self)
 {	
-	psy_ui_app()->focus = self;
-	self->imp->vtable->dev_setfocus(self->imp);		
+	psy_ui_app_setfocus(psy_ui_app(), self);		
 }
 
 void psy_ui_component_capture(psy_ui_Component* self)
@@ -1924,15 +1923,16 @@ bool psy_ui_component_togglevisibility(psy_ui_Component* self)
 		if (psy_ui_component_visible(self)) {
 			psy_ui_component_hide(self);
 			psy_ui_component_align(psy_ui_component_parent(self));
+			psy_ui_component_invalidate(psy_ui_component_parent(self));
 			return FALSE;
 		} else {
 			psy_ui_component_hide(self);
 			self->visible = 1;
 			psy_ui_component_align(psy_ui_component_parent(self));
 			psy_ui_component_show(self);
+			psy_ui_component_invalidate(psy_ui_component_parent(self));
 			return TRUE;
-		}
-		psy_ui_component_invalidate(psy_ui_component_parent(self));
+		}		
 	}
 	return FALSE;
 }

@@ -122,7 +122,7 @@ void ui_app_initimpfactory(psy_ui_App* self)
 	assert(self);
 
 #if PSYCLE_USE_TK == PSYCLE_TK_WIN32	
-	self->imp_factory = (psy_ui_ImpFactory*)
+	self->impfactory = (psy_ui_ImpFactory*)
 		psy_ui_win_impfactory_allocinit();
 #elif PSYCLE_USE_TK == PSYCLE_TK_CURSES
 	/* todo
@@ -132,11 +132,11 @@ void ui_app_initimpfactory(psy_ui_App* self)
 		  psy_ui_curses_impfactory_allocinit(); */
 #elif PSYCLE_USE_TK == PSYCLE_TK_X11
 	printf("Create X11 Impfactory\n");
-	self->imp_factory = (psy_ui_ImpFactory*)
+	self->impfactory = (psy_ui_ImpFactory*)
 		psy_ui_x11_impfactory_allocinit();	
 	printf("X11 Impfactory created\n");
 #elif PSYCLE_USE_TK == PSYCLE_TK_GTK
-	self->imp_factory = (psy_ui_ImpFactory*)
+	self->impfactory = (psy_ui_ImpFactory*)
 		psy_ui_gtk_impfactory_allocinit();
 #else
 	#error "Platform not supported"
@@ -147,8 +147,8 @@ void ui_app_initimp(psy_ui_App* self, uintptr_t instance)
 {
 	assert(self);
 
-	if (self->imp_factory) {		
-		self->imp = psy_ui_impfactory_allocinit_appimp(self->imp_factory, self,
+	if (self->impfactory) {		
+		self->imp = psy_ui_impfactory_allocinit_appimp(self->impfactory, self,
 			instance);
 		if (!self->imp) {
 			printf("Create App Imp failed\n");
@@ -172,9 +172,9 @@ void psy_ui_app_dispose(psy_ui_App* self)
 		free(self->imp);
 		self->imp = NULL;
 	}
-	if (self->imp_factory) {
-		free(self->imp_factory);
-		self->imp_factory = NULL;
+	if (self->impfactory) {
+		free(self->impfactory);
+		self->impfactory = NULL;
 	}	
 	psy_translator_dispose(&self->translator);
 	psy_ui_dragevent_dispose(&self->dragevent);
@@ -356,6 +356,23 @@ psy_ui_Style* psy_ui_style(uintptr_t styletype)
 const psy_ui_Style* psy_ui_style_const(uintptr_t styletype)
 {
 	return psy_ui_app_style_const(psy_ui_app(), styletype);
+}
+
+void psy_ui_app_setfocus(psy_ui_App* self, psy_ui_Component* component)
+{
+	if (self->focus) {
+		psy_ui_Event ev;
+
+		psy_ui_event_init_stop_propagation(&ev, psy_ui_FOCUSOUT);			
+		psy_ui_eventdispatch_send(&self->eventdispatch, self->focus, &ev);			
+	}
+	self->focus = component;
+	if (self->focus) {
+		psy_ui_Event ev;
+
+		psy_ui_event_init_stop_propagation(&ev, psy_ui_FOCUS);		
+		psy_ui_eventdispatch_send(&self->eventdispatch, self->focus, &ev);
+	}	
 }
 
 /* psy_ui_AppImp */

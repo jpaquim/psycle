@@ -94,7 +94,8 @@ typedef struct psy_ui_TabBar {
 	psy_ui_AlignType tabalignment;
 } psy_ui_TabBar;
 
-void psy_ui_tabbar_init(psy_ui_TabBar*, psy_ui_Component* parent);
+void psy_ui_tabbar_init(psy_ui_TabBar*, psy_ui_Component* parent,
+	psy_ui_Component* view);
 
 psy_ui_Tab* psy_ui_tabbar_append(psy_ui_TabBar*, const char* label,
 	uintptr_t lightresourceid, uintptr_t darkresourceid,

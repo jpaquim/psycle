@@ -25,12 +25,12 @@ static void swingfillview_onapply(SwingFillView*, psy_ui_Component* sender);
 
 /* implementation */
 void swingfillview_init(SwingFillView* self, psy_ui_Component* parent,
-	PatternViewState* pvstate)
+	psy_ui_Component* view, PatternViewState* pvstate)
 {
 	assert(self);
 	assert(pvstate);
 
-	psy_ui_component_init(swingfillview_base(self), parent, NULL);	
+	psy_ui_component_init(swingfillview_base(self), parent, view);	
 	self->pvstate = pvstate;
 	self->trackmodeswingfill = FALSE;
 	psy_ui_component_init(&self->client, swingfillview_base(self), NULL);
@@ -39,7 +39,7 @@ void swingfillview_init(SwingFillView* self, psy_ui_Component* parent,
 		psy_ui_defaults_cmargin(psy_ui_defaults()));
 	psy_ui_component_setdefaultalign(&self->client, psy_ui_ALIGN_TOP,
 		psy_ui_defaults_vmargin(psy_ui_defaults()));
-	intedit_init(&self->tempo, &self->client, "swingfill.tempo", 125, 0, 0);
+	intedit_init(&self->tempo, &self->client, NULL, "swingfill.tempo", 125, 0, 0);
 	intedit_seteditcharnumber(&self->tempo, EDIT_CHARNUM);
 	intedit_setdesccharnumber(&self->tempo, DESC_CHARNUM);
 	psy_ui_component_init(&self->offsetrow, &self->client, NULL);
@@ -52,15 +52,15 @@ void swingfillview_init(SwingFillView* self, psy_ui_Component* parent,
 	psy_ui_button_init_text_connect(&self->actual_bpm, &self->offsetrow, NULL,
 		"swingfill.actual", self, swingfillview_onactualbpm);		
 	swingfillview_setoffset(self, TRUE);
-	intedit_init(&self->width, &self->client,
+	intedit_init(&self->width, &self->client, NULL,
 		"swingfill.cycle", 2, 0, 0);
 	intedit_seteditcharnumber(&self->width, EDIT_CHARNUM);
 	intedit_setdesccharnumber(&self->width, DESC_CHARNUM);	
-	realedit_init(&self->variance, &self->client,
+	realedit_init(&self->variance, &self->client, NULL,
 		"swingfill.variance", 13.f, 0, 100.0f);
 	realedit_seteditcharnumber(&self->variance, EDIT_CHARNUM);
 	realedit_setdesccharnumber(&self->variance, DESC_CHARNUM);
-	realedit_init(&self->phase, &self->client,
+	realedit_init(&self->phase, &self->client, NULL,
 		"swingfill.phase", -90.f, 0, 0);
 	realedit_seteditcharnumber(&self->phase, EDIT_CHARNUM);
 	realedit_setdesccharnumber(&self->phase, DESC_CHARNUM);		

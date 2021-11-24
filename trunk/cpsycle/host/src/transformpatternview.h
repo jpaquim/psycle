@@ -1,12 +1,14 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #if !defined(TRANSFORMPATTERNVIEW_H)
 #define TRANSFORMPATTERNVIEW_H
 
-// host
+/* host */
 #include "workspace.h"
-// ui
+/* ui */
 #include <uibutton.h>
 #include <uicheckbox.h>
 #include <uicombobox.h>
@@ -16,16 +18,18 @@
 extern "C" {
 #endif
 
-// TransformPatternView view
-//
-// The search and replace view, where some sustitutions can be made on all the
-// patterns.
+/*
+** TransformPatternView view
+**
+** The search and replace view, where some sustitutions can be made on all the
+** patterns.
+*/
 
 typedef struct TransformPatternView {
-	// inherits
+	/* inherits */
 	psy_ui_Component component;
-	// ui elements	
-	// search
+	/* internal */
+	/* search */
 	psy_ui_Component search;
 	psy_ui_Component searchtop;
 	psy_ui_Button hide;
@@ -36,7 +40,7 @@ typedef struct TransformPatternView {
 	psy_ui_ComboBox searchnote;	
 	psy_ui_ComboBox searchinst;
 	psy_ui_ComboBox searchmach;	
-	// replace
+	/* replace */
 	psy_ui_Component replace;
 	psy_ui_Label replacetitle;
 	psy_ui_Label replacenotedesc;
@@ -45,28 +49,28 @@ typedef struct TransformPatternView {
 	psy_ui_ComboBox replacenote;
 	psy_ui_ComboBox replaceinst;
 	psy_ui_ComboBox replacemach;
-	// searchon
+	/* searchon */
 	psy_ui_Component searchon;
 	psy_ui_Label searchontitle;
 	psy_ui_Component searchonchoice;
 	psy_ui_Label entire;
 	psy_ui_Label currpattern;
 	psy_ui_Label currselection;
-	// actions	
+	/* actions */
 	psy_ui_Component actions;
 	psy_ui_Button dosearch;
 	psy_ui_Button doreplace;
 	psy_ui_Button docancel;
-	// internal data
+	/* misc */
 	psy_ui_Margin sectionmargin;
 	int applyto;
 	psy_audio_BlockSelection patternselection;
-	// references
+	/* references */
 	Workspace* workspace;
 } TransformPatternView;
 
 void transformpatternview_init(TransformPatternView*, psy_ui_Component* parent,
-	Workspace*);
+	psy_ui_Component* view, Workspace*);
 
 void transformpatternview_setpatternselection(TransformPatternView*,
 	const psy_audio_BlockSelection*);
