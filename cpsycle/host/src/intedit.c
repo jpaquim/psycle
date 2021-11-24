@@ -1,18 +1,20 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
 #include "intedit.h"
-// audio
+/* audio */
 #include <songio.h>
-// std
+/* std */
 #include <ctype.h>
-// platform
+/* platform */
 #include "../../detail/portable.h"
 
-// IntEdit
-// prototypes
+/* IntEdit */
+/* prototypes */
 static void intedit_ondestroy(IntEdit*, psy_ui_Component* sender);
 static void intedit_onlessclicked(IntEdit*, psy_ui_Component* sender);
 static void intedit_onmoreclicked(IntEdit*, psy_ui_Component* sender);
@@ -22,9 +24,10 @@ static void intedit_oneditkeyup(IntEdit*, psy_ui_Component* sender,
 	psy_ui_KeyboardEvent*);
 static void intedit_oneditfocuslost(IntEdit*, psy_ui_Component* sender);
 
-// implementation
+/* implementation */
 void intedit_init(IntEdit* self, psy_ui_Component* parent,
-	const char* desc, int value, int minval, int maxval)
+	psy_ui_Component* view, const char* desc, int value, int minval,
+	int maxval)
 {
 	psy_ui_component_init(intedit_base(self), parent, NULL);
 	psy_ui_component_setalignexpand(intedit_base(self), psy_ui_HEXPAND);
@@ -34,8 +37,8 @@ void intedit_init(IntEdit* self, psy_ui_Component* parent,
 	self->maxval = maxval;
 	self->restore = value;
 	psy_ui_label_init_text(&self->desc, intedit_base(self), NULL, desc);
-	psy_ui_edit_init(&self->edit, intedit_base(self));
-	psy_ui_edit_setcharnumber(&self->edit, 5);	
+	psy_ui_textinput_init(&self->input, intedit_base(self), view);
+	psy_ui_textinput_setcharnumber(&self->input, 5);	
 	psy_ui_button_init_connect(&self->less, intedit_base(self), NULL,
 		self, intedit_onlessclicked);
 	psy_ui_button_seticon(&self->less, psy_ui_ICON_LESS);
@@ -44,21 +47,21 @@ void intedit_init(IntEdit* self, psy_ui_Component* parent,
 	psy_ui_button_seticon(&self->more, psy_ui_ICON_MORE);
 	psy_signal_init(&self->signal_changed);
 	intedit_setvalue(self, value);
-	psy_signal_connect(&self->edit.component.signal_keydown, self,
+	psy_signal_connect(&self->input.component.signal_keydown, self,
 		intedit_oneditkeydown);	
-	psy_signal_connect(&self->edit.component.signal_keyup, self,
+	psy_signal_connect(&self->input.component.signal_keyup, self,
 		intedit_oneditkeyup);
-	psy_signal_connect(&self->edit.component.signal_focuslost, self,
+	psy_signal_connect(&self->input.component.signal_focuslost, self,
 		intedit_oneditfocuslost);
 	psy_signal_connect(&self->component.signal_destroy, self,
 		intedit_ondestroy);
 }
 
 void intedit_init_connect(IntEdit* self, psy_ui_Component* parent,
-	const char* desc, int value, int minval, int maxval,
-	void* context, void* fp)
+	psy_ui_Component* view, const char* desc, int value, int minval,
+	int maxval, void* context, void* fp)
 {
-	intedit_init(self, parent, desc, value, minval, maxval);
+	intedit_init(self, parent, view, desc, value, minval, maxval);
 	psy_signal_connect(&self->signal_changed, context, fp);
 }
 
@@ -68,13 +71,14 @@ IntEdit* intedit_alloc(void)
 }
 
 IntEdit* intedit_allocinit(psy_ui_Component* parent,
-	const char* desc, int value, int minval, int maxval)
+	psy_ui_Component* view, const char* desc, int value, int minval,
+	int maxval)
 {
 	IntEdit* rv;
 
 	rv = intedit_alloc();
 	if (rv) {
-		intedit_init(rv, parent, desc, value, minval, maxval);
+		intedit_init(rv, parent, view, desc, value, minval, maxval);
 		psy_ui_component_deallocateafterdestroyed(&rv->component);
 	}
 	return rv;
@@ -87,7 +91,7 @@ void intedit_ondestroy(IntEdit* self, psy_ui_Component* sender)
 
 int intedit_value(IntEdit* self)
 {
-	return atoi(psy_ui_edit_text(&self->edit));
+	return atoi(psy_ui_textinput_text(&self->input));
 }
 
 void intedit_setvalue(IntEdit* self, int value)
@@ -98,24 +102,24 @@ void intedit_setvalue(IntEdit* self, int value)
 		value = psy_min(psy_max(value, self->minval), self->maxval);
 	}
 	psy_snprintf(text, 128, "%d", value);
-	psy_ui_edit_settext(&self->edit, text);
+	psy_ui_textinput_settext(&self->input, text);
 	psy_signal_emit(&self->signal_changed, self, 0);
 	self->restore = value;
 }
 
 void intedit_enableedit(IntEdit* self)
 {
-	psy_ui_edit_enableedit(&self->edit);
+	psy_ui_textinput_enableedit(&self->input);
 }
 
 void intedit_preventedit(IntEdit* self)
 {
-	psy_ui_edit_preventedit(&self->edit);
+	psy_ui_textinput_preventedit(&self->input);
 }
 
 void intedit_seteditcharnumber(IntEdit* self, int charnumber)
 {
-	psy_ui_edit_setcharnumber(&self->edit, charnumber);
+	psy_ui_textinput_setcharnumber(&self->input, charnumber);
 }
 
 void intedit_setdesccharnumber(IntEdit* self, int charnumber)

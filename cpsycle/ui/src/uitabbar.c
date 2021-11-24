@@ -290,11 +290,12 @@ static void vtable_init(psy_ui_TabBar* self)
 	self->component.vtable = &vtable;
 }
 /* implementation */
-void psy_ui_tabbar_init(psy_ui_TabBar* self, psy_ui_Component* parent)
+void psy_ui_tabbar_init(psy_ui_TabBar* self, psy_ui_Component* parent,
+	psy_ui_Component* view)
 {
 	assert(self);
 
-	psy_ui_component_init(psy_ui_tabbar_base(self), parent, NULL);
+	psy_ui_component_init(psy_ui_tabbar_base(self), parent, view);
 	vtable_init(self);
 	psy_ui_component_doublebuffer(psy_ui_tabbar_base(self));	
 	psy_ui_component_setstyletype(&self->component, psy_ui_STYLE_TABBAR);

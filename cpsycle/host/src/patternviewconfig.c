@@ -544,9 +544,7 @@ psy_ui_FontInfo patternviewconfig_readfont(PatternViewConfig* self, double zoom)
 	psy_ui_fontinfo_init_string(&fontinfo,
 		psy_property_at_str(self->patternview, "font", "tahoma;-16"));	
 #if PSYCLE_USE_TK == PSYCLE_TK_X11	
-	self->state.lineheight = psy_ui_value_make_eh(1.0);
-	fontinfo.lfHeight = 18;
-	self->baselfheight = 18;
+	fontinfo.lfHeight = 18;	
 #else				
 	fontinfo.lfHeight = (int32_t)((double)fontinfo.lfHeight * zoom);
 #endif		

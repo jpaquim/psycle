@@ -313,6 +313,9 @@
     <ClCompile Include="src\uistyles.c">
       <Filter>common</Filter>
     </ClCompile>
+    <ClCompile Include="src\uitextinput.c">
+      <Filter>comps</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\uibutton.h">
@@ -566,6 +569,9 @@
     </ClInclude>
     <ClInclude Include="src\uistyles.h">
       <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="src\uitextinput.h">
+      <Filter>comps</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

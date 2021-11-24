@@ -46,11 +46,11 @@ static psy_audio_Pattern* transformpatternview_currpattern(TransformPatternView*
 
 // implementation
 void transformpatternview_init(TransformPatternView* self, psy_ui_Component*
-	parent, Workspace* workspace)
+	parent, psy_ui_Component* view, Workspace* workspace)
 {
 	assert(self);
 
-	psy_ui_component_init(transformpatternview_base(self), parent, NULL);
+	psy_ui_component_init(transformpatternview_base(self), parent, view);
 	self->workspace = workspace;
 	self->applyto = 0;
 	psy_audio_blockselection_init(&self->patternselection);
@@ -308,17 +308,17 @@ void transformpatternview_onsearch(TransformPatternView* self)
 			psy_ui_combobox_cursel(&self->searchmach)),
 		-1, -1, -1, FALSE);
 	switch (self->applyto) {
-		case 0:
-			transformpatternview_searchentiresong(self, searchreplacemode);
-			break;
-		case 1:
-			transformpatternview_searchpattern(self, searchreplacemode);
-			break;
-		case 2:
-			transformpatternview_searchcurrentselection(self, searchreplacemode);
-			break;
-		default:
-			break;
+	case 0:
+		transformpatternview_searchentiresong(self, searchreplacemode);
+		break;
+	case 1:
+		transformpatternview_searchpattern(self, searchreplacemode);
+		break;
+	case 2:
+		transformpatternview_searchcurrentselection(self, searchreplacemode);
+		break;
+	default:
+		break;
 	}	
 }
 
@@ -382,7 +382,8 @@ void transformpatternview_searchpattern(TransformPatternView* self,
 					psy_audio_pattern_length(currpattern))),
 			searchreplacemode);
 		if (cursor.patternid != psy_INDEX_INVALID) {
-			// workspace_setcursor(self->workspace, cursor);
+			psy_audio_sequence_setcursor(&self->workspace->song->sequence,
+				cursor);			
 		}
 	}
 }
@@ -451,7 +452,9 @@ void transformpatternview_onhide(TransformPatternView* self)
 	psy_ui_component_hide_align(&self->component);
 }
 
-psy_audio_PatternSearchReplaceMode setupsearchreplacemode(int searchnote, int searchinst, int searchmach, int replnote, int replinst, int replmach, bool repltweak)
+psy_audio_PatternSearchReplaceMode setupsearchreplacemode(int searchnote,
+	int searchinst, int searchmach, int replnote, int replinst, int replmach,
+	bool repltweak)
 {
 	psy_audio_PatternSearchReplaceMode mode;
 

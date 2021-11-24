@@ -19,6 +19,9 @@ static bool psy_ui_eventdispatch_sendtoparent(psy_ui_EventDispatch*,
 	psy_ui_Component*, psy_ui_Event*);
 static psy_ui_Component* psy_ui_eventdispatch_eventtarget(
 	psy_ui_EventDispatch*, psy_ui_Component* component);
+static psy_ui_Component* psy_ui_eventdispatch_next_bubble(
+	psy_ui_EventDispatch*, psy_ui_Component* component);
+static void psy_ui_eventdispatch_reset_bubble(psy_ui_EventDispatch*);
 
 /* implementation*/
 void psy_ui_eventdispatch_init(psy_ui_EventDispatch* self)
@@ -61,18 +64,42 @@ void psy_ui_eventdispatch_send(psy_ui_EventDispatch* self,
 		}
 		psy_signal_emit(&component->signal_size, component, 0);
 		break;
+	case psy_ui_FOCUS:
+		component->vtable->onfocus(component);
+		psy_signal_emit(&component->signal_focus, component, 0);
+		break;
 	case psy_ui_FOCUSOUT:
 		component->vtable->onfocuslost(component);
 		psy_signal_emit(&component->signal_focuslost, component, 0);
 		break;
-	case psy_ui_KEYDOWN:
-		component->vtable->onkeydown(component, (psy_ui_KeyboardEvent*)ev);
-		psy_signal_emit(&component->signal_keydown, component, 1, ev);
-		break;
-	case psy_ui_KEYUP:
-		component->vtable->onkeyup(component, (psy_ui_KeyboardEvent*)ev);
-		psy_signal_emit(&component->signal_keyup, component, 1, ev);
-		break;	
+	case psy_ui_KEYDOWN: {
+		psy_ui_Component* curr;
+		
+		curr = component;
+		while (curr) {
+			curr->vtable->onkeydown(curr, (psy_ui_KeyboardEvent*)ev);
+			psy_signal_emit(&curr->signal_keydown, curr, 1, ev);
+			if (!ev->bubbles) {
+				break;
+			}
+			curr = psy_ui_eventdispatch_next_bubble(self, curr);
+		}
+		psy_ui_eventdispatch_reset_bubble(self);
+		return; }
+	case psy_ui_KEYUP: {
+		psy_ui_Component* curr;
+
+		curr = component;
+		while (curr) {
+			curr->vtable->onkeyup(curr, (psy_ui_KeyboardEvent*)ev);
+			psy_signal_emit(&curr->signal_keyup, curr, 1, ev);
+			if (!ev->bubbles) {
+				break;
+			}
+			curr = psy_ui_eventdispatch_next_bubble(self, curr);
+		}
+		psy_ui_eventdispatch_reset_bubble(self);
+		return;	}
 	case psy_ui_MOUSEDOWN: {			
 		if (ev->timestamp == 0) { /* CurrentTime */
 			eventtime = self->lastbuttontimestamp;
@@ -172,6 +199,22 @@ void psy_ui_eventdispatch_send(psy_ui_EventDispatch* self,
 		self->lastbutton = 0;
 		self->lastbuttontimestamp = 0;
 	}
+}
+
+psy_ui_Component* psy_ui_eventdispatch_next_bubble(psy_ui_EventDispatch* self,
+	psy_ui_Component* component)
+{	
+	psy_list_append(&self->targetids,
+	(void*)component->imp->vtable->dev_platform_handle(component->imp));
+	self->eventretarget = component;
+	return psy_ui_component_parent(component);
+}
+
+void psy_ui_eventdispatch_reset_bubble(psy_ui_EventDispatch* self)
+{
+	psy_list_free(self->targetids);
+	self->targetids = NULL;
+	self->eventretarget = 0;
 }
 
 void psy_ui_eventdispatch_timer(psy_ui_EventDispatch* self,

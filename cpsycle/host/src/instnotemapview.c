@@ -1070,7 +1070,7 @@ void instrumententryrow_onmousedown(InstrumentEntryRow* self,
 				if (self->state->curredit) {
 					psy_ui_component_destroy(&self->state->curredit->component);
 				}
-				self->state->curredit = intedit_allocinit(&self->component, "", 0, 0, 0);
+				self->state->curredit = intedit_allocinit(&self->component, NULL, "", 0, 0, 0);
 				psy_signal_connect(&self->state->curredit->signal_changed, self,
 					instrumententryrow_oneditchanged);
 			}

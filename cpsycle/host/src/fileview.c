@@ -177,7 +177,7 @@ void fileview_init(FileView* self, psy_ui_Component* parent)
 		"file.exit", self, fileview_onhide);
 	psy_ui_component_setalign(&self->exit.component, psy_ui_ALIGN_TOP);
 	/* drives */
-	psy_ui_tabbar_init(&self->drives, fileview_base(self));
+	psy_ui_tabbar_init(&self->drives, fileview_base(self), NULL);
 	psy_ui_tabbar_settabalign(&self->drives, psy_ui_ALIGN_TOP);
 	psy_ui_component_setalign(psy_ui_tabbar_base(&self->drives),
 		psy_ui_ALIGN_LEFT);

@@ -47,7 +47,7 @@ void patternviewtabbar_init(PatternViewTabBar* self, psy_ui_Component* parent,
 	vtable_init(self);
 	self->workspace = workspace;
 	psy_signal_init(&self->signal_toggle_properties);
-	psy_ui_tabbar_init(&self->tabbar, &self->component);
+	psy_ui_tabbar_init(&self->tabbar, &self->component, NULL);
 	psy_ui_component_setalign(psy_ui_tabbar_base(&self->tabbar),
 		psy_ui_ALIGN_LEFT);
 	psy_ui_tabbar_append_tabs(&self->tabbar, "patternview.tracker",

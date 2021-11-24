@@ -138,31 +138,32 @@ static psy_ui_ComponentVtable* patternproperties_vtable_init(PatternProperties* 
 }
 
 void patternproperties_init(PatternProperties* self, psy_ui_Component* parent,
-	psy_audio_Pattern* pattern, Workspace* workspace)
-{
-	self->workspace = workspace;
-	self->pattern = pattern;	
-
-	psy_ui_component_init(&self->component, parent, NULL);	
+	psy_ui_Component* view, psy_audio_Pattern* pattern, Workspace* workspace)
+{	
+	psy_ui_component_init(&self->component, parent, view);	
 	psy_ui_component_setvtable(&self->component,
 		patternproperties_vtable_init(self));
+	self->workspace = workspace;
+	self->pattern = pattern;
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_margin_make(psy_ui_value_make_px(0), psy_ui_value_make_ew(2.0),
 			psy_ui_value_make_eh(1.0), psy_ui_value_make_px(0)));	
 	psy_ui_label_init_text(&self->namelabel, &self->component, NULL,
 		"patternview.patname");
 	psy_ui_label_settextalignment(&self->namelabel, psy_ui_ALIGNMENT_LEFT);
-	psy_ui_edit_init(&self->nameedit, &self->component);
-	psy_ui_edit_settext(&self->nameedit, "patternview.nopattern");
-	psy_ui_edit_setcharnumber(&self->nameedit, 40);
+	psy_ui_textinput_init(&self->nameedit, &self->component, NULL);
+	psy_ui_textinput_settext(&self->nameedit, "patternview.nopattern");
+	psy_ui_textinput_setcharnumber(&self->nameedit, 40);
+	// psy_ui_textinput_enableinputfield(&self->nameedit);
 	psy_ui_label_init_text(&self->lengthlabel, &self->component, NULL,
 		"patternview.length");
 	psy_ui_label_settextalignment(&self->lengthlabel, psy_ui_ALIGNMENT_LEFT);
-	psy_ui_edit_init(&self->lengthedit, &self->component);
-	psy_ui_edit_setcharnumber(&self->lengthedit, 20);
+	psy_ui_textinput_init(&self->lengthedit, &self->component, NULL);
+	psy_ui_textinput_setcharnumber(&self->lengthedit, 20);
+	// psy_ui_textinput_enableinputfield(&self->lengthedit);
 	psy_ui_button_init_connect(&self->applybutton, &self->component, NULL, self,
-		patternproperties_onapply);
-	intedit_init(&self->timesig_numerator, &self->component,
+		patternproperties_onapply);	
+	intedit_init(&self->timesig_numerator, &self->component, NULL,
 		"Timesignature", 0, 0, 128);
 	psy_ui_component_setspacing(&self->timesig_numerator.less.component,
 		psy_ui_margin_make_em(0.0, 0.0, 0.0, 0.0));
@@ -170,14 +171,14 @@ void patternproperties_init(PatternProperties* self, psy_ui_Component* parent,
 		psy_ui_margin_make_em(0.0, 0.0, 0.0, 0.0));
 	psy_signal_connect(&self->timesig_numerator.signal_changed, self,
 		patternproperties_ontimesignominator);
-	intedit_init(&self->timesig_denominator, &self->component,
+	intedit_init(&self->timesig_denominator, &self->component, NULL,
 		"", 0, 0, 128);
 	psy_ui_component_setspacing(&self->timesig_denominator.less.component,
 		psy_ui_margin_make_em(0.0, 0.0, 0.0, 0.0));
 	psy_ui_component_setspacing(&self->timesig_denominator.more.component,
 		psy_ui_margin_make_em(0.0, 0.0, 0.0, 0.0));	
 	psy_signal_connect(&self->timesig_denominator.signal_changed, self,
-		patternproperties_ontimesigdenominator);
+		patternproperties_ontimesigdenominator);	
 	psy_ui_button_settext(&self->applybutton, "patternview.apply");
 	psy_ui_component_setspacing(&self->applybutton.component,
 		psy_ui_margin_make_em(0.0, 0.0, 0.0, 0.0));
@@ -196,15 +197,15 @@ void patternproperties_setpattern(PatternProperties* self, psy_audio_Pattern*
 
 	self->pattern = pattern;
 	if (self->pattern) {		
-		psy_ui_edit_settext(&self->nameedit, psy_audio_pattern_name(pattern));
+		psy_ui_textinput_settext(&self->nameedit, psy_audio_pattern_name(pattern));
 		psy_snprintf(buffer, 20, "%.4f", (float)psy_audio_pattern_length(pattern));
 		intedit_setvalue(&self->timesig_numerator, (int)pattern->timesig.numerator);
 		intedit_setvalue(&self->timesig_denominator, (int)pattern->timesig.denominator);
 	} else {
-		psy_ui_edit_settext(&self->nameedit, "");
+		psy_ui_textinput_settext(&self->nameedit, "");
 		psy_snprintf(buffer, 10, "");
 	}
-	psy_ui_edit_settext(&self->lengthedit, buffer);
+	psy_ui_textinput_settext(&self->lengthedit, buffer);
 }
 
 void patternproperties_onapply(PatternProperties* self,
@@ -217,8 +218,8 @@ void patternproperties_onapply(PatternProperties* self,
 			self, patternproperties_onpatternlengthchanged);
 		psy_undoredo_execute(&self->workspace->undoredo,
 			&patternpropertiesapplycommand_allocinit(self->pattern,
-				psy_ui_edit_text(&self->nameedit),
-				(psy_dsp_big_beat_t)atof(psy_ui_edit_text(&self->lengthedit))
+				psy_ui_textinput_text(&self->nameedit),
+				(psy_dsp_big_beat_t)atof(psy_ui_textinput_text(&self->lengthedit))
 			)->command);
 		psy_signal_enable(&workspace_song(self->workspace)->patterns.signal_namechanged,
 			self, patternproperties_onpatternnamechanged);
@@ -247,7 +248,7 @@ void patternproperties_onkeyup(PatternProperties* self, psy_ui_KeyboardEvent* ev
 
 void patternproperties_onfocus(PatternProperties* self)
 {
-	psy_ui_component_setfocus(psy_ui_edit_base(&self->lengthedit));
+	psy_ui_component_setfocus(psy_ui_textinput_base(&self->lengthedit));
 }
 
 void patternproperties_onpatternnamechanged(PatternProperties* self,
@@ -257,7 +258,7 @@ void patternproperties_onpatternnamechanged(PatternProperties* self,
 
 	pattern = psy_audio_patterns_at(patterns, slot);
 	if (pattern && pattern == self->pattern) {
-		psy_ui_edit_settext(&self->nameedit,
+		psy_ui_textinput_settext(&self->nameedit,
 			psy_audio_pattern_name(pattern));
 	}
 }
@@ -272,7 +273,7 @@ void patternproperties_onpatternlengthchanged(PatternProperties* self,
 		char buffer[20];
 
 		psy_snprintf(buffer, 20, "%.4f", pattern->length);
-		psy_ui_edit_settext(&self->lengthedit, buffer);
+		psy_ui_textinput_settext(&self->lengthedit, buffer);
 	}
 }
 

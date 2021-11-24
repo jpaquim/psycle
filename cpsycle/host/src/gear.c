@@ -82,7 +82,7 @@ void gear_init(Gear* self, psy_ui_Component* parent, Workspace* workspace)
 	/* titlebar */
 	gear_inittitle(self);	
 	/* client */
-	psy_ui_tabbar_init(&self->tabbar, &self->client);
+	psy_ui_tabbar_init(&self->tabbar, &self->client, NULL);
 	psy_ui_tabbar_append_tabs(&self->tabbar, "gear.generators", "gear.effects",
 		"gear.instruments", "gear.waves", NULL);
 	psy_ui_tabbar_select(&self->tabbar, 0);

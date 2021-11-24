@@ -640,7 +640,7 @@ void paramrack_init(ParamRack* self, psy_ui_Component* parent,
 	psy_ui_component_init_align(&self->bottom, &self->component, NULL,
 		psy_ui_ALIGN_BOTTOM);	
 	// IntEdit
-	intedit_init(&self->leveledit, &self->bottom, "", 2, 0, INT32_MAX);
+	intedit_init(&self->leveledit, &self->bottom, NULL, "", 2, 0, INT32_MAX);
 	psy_ui_component_setalign(&self->leveledit.component, psy_ui_ALIGN_RIGHT);
 	psy_signal_connect(&self->leveledit.signal_changed, self, paramrack_onlevelchanged);
 	// ChainMode

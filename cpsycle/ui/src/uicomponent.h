@@ -525,7 +525,7 @@ typedef struct psy_ui_ComponentImpVTable {
 	psy_ui_fp_componentimp_dev_mouseevent dev_mousemove;
 	psy_ui_fp_componentimp_dev_mouseevent dev_mousedoubleclick;
 	psy_ui_fp_componentimp_dev_mouseenter dev_mouseenter;
-	psy_ui_fp_componentimp_dev_mouseleave dev_mouseleave;
+	psy_ui_fp_componentimp_dev_mouseleave dev_mouseleave;	
 	psy_ui_fp_componentimp_dev_initialized dev_initialized;
 } psy_ui_ComponentImpVTable;
 

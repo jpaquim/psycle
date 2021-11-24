@@ -531,6 +531,9 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 
 				keyevent = keyboardevent(translate_win_event_type(message),
 					wParam, lParam);
+				if (psy_ui_app_focus(psy_ui_app())) {
+					component = psy_ui_app_focus(psy_ui_app());
+				}
 				psy_ui_eventdispatch_send(&winapp->app->eventdispatch,
 					component, psy_ui_keyboardevent_base(&keyevent));
 				if (psy_ui_event_default_prevented(&keyevent.event)) {

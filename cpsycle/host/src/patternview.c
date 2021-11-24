@@ -108,8 +108,8 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 		psy_ui_NOBACKGROUND);
 	psy_ui_notebook_select(&self->editnotebook, 0);	
 	/* Pattern Properties */
-	patternproperties_init(&self->properties, &self->component, NULL,
-		workspace);	
+	patternproperties_init(&self->properties, &self->component, &self->component,
+		NULL, workspace);	
 	/* Shared states */	
 	patterncmds_init(&self->cmds, workspace->song, &workspace->undoredo, NULL,
 		&workspace->config.directories);		
@@ -155,13 +155,14 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 		patternview_onpatternpropertiesapply);
 	/* Blockmenu */
 	patternblockmenu_init(&self->blockmenu, patternview_base(self),
-		&self->swingfillview, &self->transformpattern,
+		&self->component, &self->swingfillview, &self->transformpattern,
 		&self->interpolatecurveview, &self->pvstate);
 	/* TransformPattern */
 	transformpatternview_init(&self->transformpattern, &self->component,
-		workspace);	
+		&self->component, workspace);
 	/* SwingFill */
-	swingfillview_init(&self->swingfillview, &self->component, &self->pvstate);	
+	swingfillview_init(&self->swingfillview, &self->component,
+		&self->component, &self->pvstate);
 	/* Interpolate */
 	interpolatecurveview_init(&self->interpolatecurveview, &self->component, 0,
 		0, 0, workspace);

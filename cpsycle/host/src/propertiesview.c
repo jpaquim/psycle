@@ -20,7 +20,7 @@
 
 /* PropertiesRenderState */
 void propertiesrenderstate_init(PropertiesRenderState* self, uintptr_t numcols,
-	psy_ui_Edit* edit, psy_ui_Component* dummy)
+	psy_ui_TextInput* edit, psy_ui_Component* dummy)
 {	
 	self->property = self->selected = NULL;
 	self->selectedline = NULL;
@@ -216,7 +216,7 @@ void propertiesrenderline_onmousedown(PropertiesRenderLine* self,
 	psy_ui_MouseEvent* ev)
 {
 	self->state->property = NULL;	
-	if (psy_ui_component_visible(psy_ui_edit_base(self->state->edit))) {
+	if (psy_ui_component_visible(psy_ui_textinput_base(self->state->edit))) {
 		return;
 	}	
 	if (self->combo) {
@@ -418,9 +418,9 @@ static void propertiesrenderer_oninputdefineraccept(PropertiesRenderer*,
 static void propertiesrenderer_oneditkeydown(PropertiesRenderer*,
 	psy_ui_Component* sender, psy_ui_KeyboardEvent* ev);
 static void propertiesrenderer_oneditaccept(PropertiesRenderer*,
-	psy_ui_Edit* sender);
+	psy_ui_TextInput* sender);
 static void propertiesrenderer_oneditreject(PropertiesRenderer*,
-	psy_ui_Edit* sender);
+	psy_ui_TextInput* sender);
 static void propertiesview_gotosection(PropertiesView*, uintptr_t index);
 static void propertiesrenderer_checkdialog(PropertiesRenderer*,
 	psy_Property* selected);
@@ -476,8 +476,8 @@ void propertiesrenderer_init(PropertiesRenderer* self,
 	psy_ui_component_hide(&self->dummy);
 	propertiesrenderstate_init(&self->state, numcols, &self->edit,
 		&self->dummy);	
-	psy_ui_edit_init(&self->edit, &self->component);
-	psy_ui_edit_enableinputfield(&self->edit);
+	psy_ui_textinput_init(&self->edit, &self->component, NULL);
+	psy_ui_textinput_enableinputfield(&self->edit);
 	psy_signal_connect(&self->edit.component.signal_keydown, self,
 		propertiesrenderer_oneditkeydown);
 	psy_signal_connect(&self->edit.signal_accept, self,
@@ -699,7 +699,7 @@ void propertiesrenderer_onmousedown(PropertiesRenderer* self,
 		return;
 	}
 	selected = self->state.selected;
-	if (!selected || psy_ui_component_visible(psy_ui_edit_base(&self->edit))) {
+	if (!selected || psy_ui_component_visible(psy_ui_textinput_base(&self->edit))) {
 		if (self->state.preventmousepropagation) {
 			psy_ui_mouseevent_stop_propagation(ev);
 		}
@@ -806,15 +806,15 @@ void propertiesrenderer_checkedit(PropertiesRenderer* self,
 			psy_snprintf(text, 40,
 				(psy_property_ishex(selected)) ? "%X" : "%d",
 				(int)psy_property_item_int(selected));
-			psy_ui_edit_settext(&self->edit, text);
+			psy_ui_textinput_settext(&self->edit, text);
 			propertiesrenderer_showedit(self, self->state.selectedline,
-				psy_ui_edit_base(&self->edit));
+				psy_ui_textinput_base(&self->edit));
 		}
 		break;
 	case PSY_PROPERTY_TYPE_STRING:
-		psy_ui_edit_settext(&self->edit, psy_property_item_str(selected));
+		psy_ui_textinput_settext(&self->edit, psy_property_item_str(selected));
 		propertiesrenderer_showedit(self, self->state.selectedline,
-			psy_ui_edit_base(&self->edit));
+			psy_ui_textinput_base(&self->edit));
 		break;
 	default:
 		break;
@@ -862,28 +862,28 @@ void propertiesrenderer_oneditkeydown(PropertiesRenderer* self,
 }
 
 void propertiesrenderer_oneditaccept(PropertiesRenderer* self,
-	psy_ui_Edit* sender)
+	psy_ui_TextInput* sender)
 {
-	psy_ui_component_hide(psy_ui_edit_base(sender));
+	psy_ui_component_hide(psy_ui_textinput_base(sender));
 	psy_ui_component_setfocus(&self->component);
 	if (self->state.selected) {
 		if (psy_property_isint(self->state.selected)) {
 			psy_property_setitem_int(self->state.selected,
 				(psy_property_ishex(self->state.selected))
-				? strtol(psy_ui_edit_text(&self->edit), NULL, 16)
-				: atoi(psy_ui_edit_text(&self->edit)));
+				? strtol(psy_ui_textinput_text(&self->edit), NULL, 16)
+				: atoi(psy_ui_textinput_text(&self->edit)));
 		} else if (psy_property_isstr(self->state.selected)) {
 			psy_property_setitem_str(self->state.selected,
-				psy_ui_edit_text(&self->edit));
+				psy_ui_textinput_text(&self->edit));
 		}
 		psy_signal_emit(&self->signal_changed, self, 1, self->state.selected);
 	}
 }
 
 void propertiesrenderer_oneditreject(PropertiesRenderer* self,
-	psy_ui_Edit* sender)
+	psy_ui_TextInput* sender)
 {
-	psy_ui_component_hide(psy_ui_edit_base(sender));
+	psy_ui_component_hide(psy_ui_textinput_base(sender));
 	psy_ui_component_setfocus(&self->component);
 }
 
@@ -938,8 +938,8 @@ static void propertiesview_vtable_init(PropertiesView* self)
 }
 /* implementation */
 void propertiesview_init(PropertiesView* self, psy_ui_Component* parent,
-	psy_ui_Component* tabbarparent, psy_Property* properties,
-	uintptr_t numcols, Workspace* workspace)
+	psy_ui_Component* view, psy_ui_Component* tabbarparent,
+	psy_Property* properties, uintptr_t numcols, Workspace* workspace)
 {	
 	psy_ui_component_init(&self->component, parent, NULL);
 	propertiesview_vtable_init(self);
@@ -950,13 +950,12 @@ void propertiesview_init(PropertiesView* self, psy_ui_Component* parent,
 	propertiesrenderer_init(&self->renderer, &self->component, properties,
 		numcols);
 	psy_ui_scroller_init(&self->scroller, &self->renderer.component,
-		&self->component, NULL);	
+		&self->component, NULL);
 	psy_ui_component_setalign(&self->scroller.component, psy_ui_ALIGN_CLIENT);	
 	psy_ui_component_setalign(&self->renderer.component, psy_ui_ALIGN_HCLIENT);
 	psy_signal_connect(&self->component.signal_selectsection, self,
-		propertiesview_selectsection);
-	psy_ui_tabbar_init(&self->tabbar, &self->component);
-	self->tabbar.component.id = 10;
+		propertiesview_selectsection);	
+	psy_ui_tabbar_init(&self->tabbar, &self->component, &self->component);	
 	psy_ui_tabbar_settabalign(&self->tabbar, psy_ui_ALIGN_TOP);
 	psy_ui_component_setalign(psy_ui_tabbar_base(&self->tabbar),
 		psy_ui_ALIGN_RIGHT);

@@ -1002,7 +1002,7 @@ void samplesview_init(SamplesView* self, psy_ui_Component* parent,
 	samplesviewbuttons_init(&self->buttons, &self->left, workspace);
 	psy_ui_component_setalign(&self->buttons.component, psy_ui_ALIGN_TOP);
 	/* tabbarparent */
-	psy_ui_tabbar_init(&self->clienttabbar, tabbarparent);
+	psy_ui_tabbar_init(&self->clienttabbar, tabbarparent, NULL);
 	psy_ui_component_setalign(&self->clienttabbar.component, psy_ui_ALIGN_LEFT);
 	psy_ui_component_hide(&self->clienttabbar.component);
 	psy_ui_tabbar_append_tabs(&self->clienttabbar, "Properties", "Import", "Editor", NULL);
@@ -1027,7 +1027,7 @@ void samplesview_init(SamplesView* self, psy_ui_Component* parent,
 	psy_ui_notebook_init(&self->clientnotebook, &self->right, NULL);
 	psy_ui_component_setalign(&self->clientnotebook.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_component_init(&self->client, &self->clientnotebook.component, NULL);
-	psy_ui_tabbar_init(&self->tabbar, &self->client);
+	psy_ui_tabbar_init(&self->tabbar, &self->client, NULL);
 	psy_ui_component_setalign(psy_ui_tabbar_base(&self->tabbar), psy_ui_ALIGN_TOP);	
 	psy_ui_tabbar_append(&self->tabbar, "General",
 		psy_INDEX_INVALID, psy_INDEX_INVALID, psy_ui_colour_white());
