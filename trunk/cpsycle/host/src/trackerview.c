@@ -78,6 +78,7 @@ static void trackergrid_onmousemove(TrackerGrid*, psy_ui_MouseEvent*);
 static void trackergrid_onmouseup(TrackerGrid*, psy_ui_MouseEvent*);
 static void trackergrid_onmousedoubleclick(TrackerGrid*, psy_ui_MouseEvent*);
 static void trackergrid_dragselection(TrackerGrid*, psy_audio_SequenceCursor);
+static psy_ui_RealRectangle trackergrid_selection_bounds(TrackerGrid* self);
 static void trackergrid_onscroll(TrackerGrid*, psy_ui_Component* sender);
 static void trackergrid_clearmidline(TrackerGrid*);
 static void trackergrid_enterdigitcolumn(TrackerGrid*, psy_audio_PatternEntry*,
@@ -153,6 +154,7 @@ void trackergrid_init(TrackerGrid* self, psy_ui_Component* parent,
 	TrackConfig* trackconfig, TrackerState* state, Workspace* workspace)
 {
 	assert(self);
+	assert(workspace);
 
 	/* init base component */
 	psy_ui_component_init(&self->component, parent, NULL);
@@ -1332,7 +1334,7 @@ void trackergrid_onmousedown(TrackerGrid* self, psy_ui_MouseEvent* ev)
 {
 	assert(self);
 
-	if (self->state->trackconfig->colresize) {
+	if (self->state->trackconfig->resize.column) {
 		psy_signal_emit(&self->signal_colresize, self, 0);
 	} else if (patternviewstate_pattern(self->state->pv) && ev->button == 1) {
 		if (!self->state->pv->singlemode) {
@@ -1370,9 +1372,9 @@ void trackergrid_onmousemove(TrackerGrid* self, psy_ui_MouseEvent* ev)
 	assert(self);	
 	
 	if (ev->button == 1) {
-		if (self->state->trackconfig->colresize) {
+		if (trackresize_column_dragging(&self->state->trackconfig->resize)) {
 			psy_signal_emit(&self->signal_colresize, self, 0);
-			psy_ui_mouseevent_stop_propagation(ev);
+			psy_ui_mouseevent_stop_propagation(ev);			
 		} else {
 			psy_audio_SequenceCursor cursor;
 			TrackerColumn* column;
@@ -1380,19 +1382,25 @@ void trackergrid_onmousemove(TrackerGrid* self, psy_ui_MouseEvent* ev)
 
 			column = (TrackerColumn*)psy_ui_component_intersect(
 				&self->component, ev->pt, &index);
-			if (column) {
+			if (column) {				
 				cursor = trackerstate_checkcursorbounds(self->state,
 					trackerstate_makecursor(self->state,
 						ev->pt, column->index));
 				if (!psy_audio_sequencecursor_equal(&cursor,
-						&self->lastdragcursor)) {
-					if (!psy_audio_blockselection_valid(&self->state->pv->selection)) {
+						&self->lastdragcursor)) {					
+					psy_ui_RealRectangle rc;
+					psy_ui_RealRectangle rc_curr;
+
+					rc = trackergrid_selection_bounds(self);
+					if (!psy_audio_blockselection_valid(&self->state->pv->selection)) {						
 						trackerstate_startdragselection(self->state, cursor,
 							patternviewstate_bpl(self->state->pv));
 					} else {
 						trackergrid_dragselection(self, cursor);
-					}
-					psy_ui_component_invalidate(&self->component);
+					}					
+					rc_curr = trackergrid_selection_bounds(self);
+					psy_ui_realrectangle_union(&rc, &rc_curr);
+					psy_ui_component_invalidaterect(&self->component, rc);
 					self->lastdragcursor = cursor;
 				}
 			}
@@ -1428,10 +1436,14 @@ void trackergrid_onmouseup(TrackerGrid* self, psy_ui_MouseEvent* ev)
 	if (ev->button != 1) {
 		return;
 	}	
-	if (self->state->trackconfig->colresize) {
-		self->state->trackconfig->colresize = FALSE;
-		psy_signal_emit(&self->signal_colresize, self, 0);		
-	} else if (!psy_audio_blockselection_valid(&self->state->pv->selection)) {
+	/* End track resize? */
+	if (trackresize_column_dragging(&self->state->trackconfig->resize)) {
+		trackresize_stop(&self->state->trackconfig->resize);		
+		psy_signal_emit(&self->signal_colresize, self, 0);
+		return;
+	}
+	/* End drag selection? */
+	if (!psy_audio_blockselection_valid(&self->state->pv->selection)) {
 		/* set cursor only, if no selection was made */
 		if (!self->state->pv->singlemode) {
 			psy_audio_OrderIndex index;
@@ -1456,13 +1468,45 @@ void trackergrid_onmouseup(TrackerGrid* self, psy_ui_MouseEvent* ev)
 		if (!psy_audio_sequencecursor_equal(&self->oldcursor, &self->state->pv->cursor)) {
 			trackergrid_invalidatecursor(self);
 		}
-		if (self->workspace && workspace_song(self->workspace)) {
+		if (workspace_song(self->workspace)) {
 			psy_audio_sequence_setcursor(
 				psy_audio_song_sequence(workspace_song(self->workspace)),
 				self->state->pv->cursor);
 		}
 	}	
 }
+
+psy_ui_RealRectangle trackergrid_selection_bounds(TrackerGrid* self)
+{
+	psy_ui_RealRectangle rv;
+
+	psy_ui_realrectangle_init(&rv);
+	if (self->state->pv->selection.valid) {
+		TrackerColumn* column;
+
+		rv.top = trackerstate_beattopx(self->state, self->state->pv->selection.topleft.offset);
+		rv.bottom = trackerstate_beattopx(self->state,
+			self->state->pv->selection.bottomright.offset);
+		/* left */
+		column = (TrackerColumn*)psy_table_at(&self->columns, self->state->pv->selection.topleft.track);
+		if (column) {
+			psy_ui_RealRectangle position;
+
+			position = psy_ui_component_position(trackercolumn_base(column));
+			rv.left = position.left;
+		}
+		/* right */
+		column = (TrackerColumn*)psy_table_at(&self->columns, self->state->pv->selection.bottomright.track);
+		if (column) {
+			psy_ui_RealRectangle position;
+
+			position = psy_ui_component_position(trackercolumn_base(column));
+			rv.right = position.left;
+		}
+	}
+	return rv;
+}
+
 
 void trackergrid_onmousedoubleclick(TrackerGrid* self, psy_ui_MouseEvent* ev)
 {

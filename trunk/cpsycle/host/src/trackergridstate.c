@@ -18,14 +18,37 @@
 
 /* TrackerConfig */
 /* implementation */
+void trackresize_init(TrackResize* self)
+{	
+	self->column = FALSE;
+	self->note = FALSE;
+	self->track = psy_INDEX_INVALID;
+	psy_ui_realsize_init(&self->size);
+}
+
+void trackresize_stop(TrackResize* self)
+{
+	self->column = FALSE;
+	self->note = FALSE;
+}
+
+bool trackresize_column_dragging(const TrackResize* self)
+{
+	return self->column;
+}
+
+bool trackresize_note_dragging(const TrackResize* self)
+{
+	return self->note;
+}
+
+/* TrackerConfig */
+/* implementation */
 void trackconfig_init(TrackConfig* self, bool wideinst)
 {	
 	self->textwidth = 9;
 	self->textleftedge = 2;	
-	self->colresize = FALSE;
-	self->noteresize = FALSE;
-	self->resizetrack = psy_INDEX_INVALID;
-	psy_ui_realsize_init(&self->resizesize);
+	trackresize_init(&self->resize);	
 	psy_table_init(&self->trackconfigs);
 	trackconfig_initcolumns(self, wideinst);
 }

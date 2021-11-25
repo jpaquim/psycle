@@ -7,8 +7,8 @@
 #define MAINFRAME_H
 
 /* host */
+#include "mainviewbar.h"
 #include "mainstatusbar.h"
-#include "minmaximize.h"
 #include "confirmbox.h"
 #include "cpuview.h"
 #include "filebar.h"
@@ -24,7 +24,6 @@
 #include "machineviewbar.h"
 #include "metronomebar.h"
 #include "midimonitor.h"
-#include "navigation.h"
 #include "paramgear.h"
 #include "playbar.h"
 #include "playposbar.h"
@@ -77,9 +76,7 @@ typedef struct MainFrame {
 	psy_ui_Component toprow0_bars;
 	psy_ui_Component toprow1;
 	psy_ui_Component toprow2;
-	psy_ui_Component maximize;
-	psy_ui_Button maximizebtn;
-	psy_ui_Component tabbars;
+	MainViewBar mainviewbar;		
 	psy_ui_Component topspacer;
 	psy_ui_Component tabspacer;
 	psy_ui_Component client;
@@ -92,12 +89,9 @@ typedef struct MainFrame {
 	psy_ui_Terminal terminal;
 	psy_ui_Splitter splitbar;
 	psy_ui_Splitter splitbarterminal;
-	StartScript startscript;
-	Navigation navigation;
-	psy_ui_TabBar tabbar;
+	StartScript startscript;	
 	psy_ui_TabBar scripttabbar;
-	psy_ui_Button togglescripts;
-	psy_ui_TabBar helpsettingstabbar;
+	psy_ui_Button togglescripts;	
 	psy_ui_Notebook notebook;
 	FileBar filebar;
 	UndoRedoBar undoredobar;
@@ -136,9 +130,7 @@ typedef struct MainFrame {
 	PlaylistView playlist;
 	psy_ui_Splitter playlistsplitter;
 	FileView fileview;
-	MainStatusBar statusbar;
-	MinMaximize minmaximize;
-	psy_ui_Notebook viewtabbars;
+	MainStatusBar statusbar;	
 	psy_ui_Component left;
 	psy_ui_Component right;
 	Workspace workspace;
