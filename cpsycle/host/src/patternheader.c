@@ -253,10 +253,10 @@ void patterntrackbox_onmousedown(PatternTrackBox* self,
 void patterntrackbox_onpreferredsize(PatternTrackBox* self,
 	const psy_ui_Size* limit, psy_ui_Size* rv)
 {
-	if (self->state->trackconfig->colresize &&
-			self->state->trackconfig->resizetrack == self->index) {
+	if (self->state->trackconfig->resize.column &&
+			self->state->trackconfig->resize.track == self->index) {
 		rv->width = psy_ui_value_make_px(
-			self->state->trackconfig->resizesize.width);
+			self->state->trackconfig->resize.size.width);
 	} else {
 		rv->width = psy_ui_value_make_px(trackerstate_trackwidth(
 			self->state, self->index));

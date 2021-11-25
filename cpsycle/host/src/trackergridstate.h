@@ -47,6 +47,21 @@ void trackcolumndef_init(TrackColumnDef* self, uintptr_t numdigits,
 	int wrapclearcolumn,
 	int emptyvalue);
 
+/* TrackResize */
+typedef struct TrackResize {
+	bool column;
+	bool note;
+	uintptr_t track;
+	psy_ui_RealSize size;
+} TrackResize;
+
+void trackresize_init(TrackResize*);
+
+void trackresize_stop(TrackResize*);
+bool trackresize_column_dragging(const TrackResize*);
+bool trackresize_note_dragging(const TrackResize*);
+
+/* TrackDef */
 typedef struct TrackDef {
 	TrackColumnDef note;
 	TrackColumnDef inst;
@@ -76,11 +91,8 @@ typedef struct TrackConfig {
 	psy_Table trackconfigs;
 	TrackDef trackdef;
 	double textwidth;
-	double textleftedge;	
-	bool colresize;
-	bool noteresize;
-	uintptr_t resizetrack;
-	psy_ui_RealSize resizesize;	
+	double textleftedge;
+	TrackResize resize;
 } TrackConfig;
 
 void trackconfig_init(TrackConfig*, bool wideinst);

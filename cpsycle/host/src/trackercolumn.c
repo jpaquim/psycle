@@ -170,8 +170,8 @@ TrackerColumn* trackercolumn_allocinit(psy_ui_Component* parent,
 void trackercolumn_ondraw(TrackerColumn* self, psy_ui_Graphics* g)
 {	
 	trackercolumn_drawtrackevents(self, g);
-	if (self->gridstate->trackconfig->colresize &&
-			self->gridstate->trackconfig->resizetrack == self->index) {
+	if (self->gridstate->trackconfig->resize.column &&
+			self->gridstate->trackconfig->resize.track == self->index) {
 		trackercolumn_drawresizebar(self, g);
 	}
 }
@@ -342,7 +342,7 @@ void trackercolumn_drawresizebar(TrackerColumn* self, psy_ui_Graphics* g)
 	psy_ui_RealSize size;
 	
 	size = psy_ui_component_size_px(&self->component);
-	if (self->gridstate->trackconfig->noteresize) {
+	if (self->gridstate->trackconfig->resize.note) {
 		double notewidth;
 		TrackDef* trackdef;
 
@@ -375,19 +375,19 @@ void trackercolumn_onmousedown(TrackerColumn* self, psy_ui_MouseEvent* ev)
 			self->gridstate->trackconfig->textwidth);
 		size = psy_ui_component_size_px(&self->component);
 		if (ev->pt.x > notewidth - 5 && ev->pt.x < notewidth) {
-			self->gridstate->trackconfig->resizetrack = self->index;
-			self->gridstate->trackconfig->colresize = TRUE;
-			self->gridstate->trackconfig->noteresize = TRUE;
+			self->gridstate->trackconfig->resize.track = self->index;
+			self->gridstate->trackconfig->resize.column = TRUE;
+			self->gridstate->trackconfig->resize.note = TRUE;
 			self->resizestartsize = size;
-			self->gridstate->trackconfig->resizesize = size;
+			self->gridstate->trackconfig->resize.size = size;
 			psy_ui_component_invalidate(&self->component);
 			psy_ui_component_capture(&self->component);
 		} else if (ev->pt.x > size.width - 5) {
-			self->gridstate->trackconfig->resizetrack = self->index;
-			self->gridstate->trackconfig->colresize = TRUE;
-			self->gridstate->trackconfig->noteresize = FALSE;
+			self->gridstate->trackconfig->resize.track = self->index;
+			self->gridstate->trackconfig->resize.column = TRUE;
+			self->gridstate->trackconfig->resize.note = FALSE;
 			self->resizestartsize = size;
-			self->gridstate->trackconfig->resizesize = size;
+			self->gridstate->trackconfig->resize.size = size;
 			psy_ui_component_invalidate(&self->component);
 			psy_ui_component_capture(&self->component);
 		} else {
@@ -406,7 +406,7 @@ void trackercolumn_onmousemove(TrackerColumn* self, psy_ui_MouseEvent* ev)
 	psy_ui_RealSize size;
 	
 	size = psy_ui_component_size_px(&self->component);
-	if (self->gridstate->trackconfig->colresize) {
+	if (trackresize_column_dragging(&self->gridstate->trackconfig->resize)) {
 		double basewidth;
 		TrackDef* trackdef;
 
@@ -414,7 +414,7 @@ void trackercolumn_onmousemove(TrackerColumn* self, psy_ui_MouseEvent* ev)
 		basewidth = trackdef_basewidth(trackdef,
 			self->gridstate->trackconfig->textwidth);
 		if (ev->pt.x > basewidth) {
-			self->gridstate->trackconfig->resizesize.width = ev->pt.x;			
+			self->gridstate->trackconfig->resize.size.width = ev->pt.x;
 		}
 	}	
 	if (self->gridstate->showresizecursor &&
@@ -427,18 +427,18 @@ void trackercolumn_onmousemove(TrackerColumn* self, psy_ui_MouseEvent* ev)
 void trackercolumn_onmouseup(TrackerColumn* self, psy_ui_MouseEvent* ev)
 {
 	psy_ui_component_releasecapture(&self->component);
-	if (self->gridstate->trackconfig->colresize &&
-			self->gridstate->trackconfig->resizesize.width > 0.0) {
+	if (self->gridstate->trackconfig->resize.column &&
+			self->gridstate->trackconfig->resize.size.width > 0.0) {
 		double basewidth;
 		TrackDef* trackdef;
 		
 		trackdef = trackerstate_trackdef(self->gridstate, self->index);
 		basewidth = trackdef_basewidth(trackdef, self->gridstate->trackconfig->textwidth);
-		if (self->gridstate->trackconfig->noteresize) {
+		if (self->gridstate->trackconfig->resize.note) {
 			uintptr_t numnotes;
 
 			numnotes = (uintptr_t)psy_max(1.0,
-				(psy_max(0.0, self->gridstate->trackconfig->resizesize.width)) /
+				(psy_max(0.0, self->gridstate->trackconfig->resize.size.width)) /
 				trackerstate_defaulttrackwidth(self->gridstate));
 			if (trackdef != &self->gridstate->trackconfig->trackdef) {
 				trackdef->numfx = 1;
@@ -458,7 +458,7 @@ void trackercolumn_onmouseup(TrackerColumn* self, psy_ui_MouseEvent* ev)
 			uintptr_t numfx;
 
 			numfx = (uintptr_t)psy_max(1.0,
-				(psy_max(0.0, self->gridstate->trackconfig->resizesize.width - basewidth)) /
+				(psy_max(0.0, self->gridstate->trackconfig->resize.size.width - basewidth)) /
 				(self->gridstate->trackconfig->textwidth * 4.0));
 			if (trackdef != &self->gridstate->trackconfig->trackdef) {
 				trackdef->numfx = numfx;
@@ -475,15 +475,15 @@ void trackercolumn_onmouseup(TrackerColumn* self, psy_ui_MouseEvent* ev)
 			}
 		}
 	}	
-	self->gridstate->trackconfig->resizetrack = psy_INDEX_INVALID;	
+	self->gridstate->trackconfig->resize.track = psy_INDEX_INVALID;
 }
 
 void trackercolumn_onpreferredsize(TrackerColumn* self,
 	const psy_ui_Size* limit, psy_ui_Size* rv)
 {
-	if (self->gridstate->trackconfig->colresize &&
-			self->gridstate->trackconfig->resizetrack == self->index) {
-		rv->width = psy_ui_value_make_px(self->gridstate->trackconfig->resizesize.width);
+	if (self->gridstate->trackconfig->resize.column &&
+			self->gridstate->trackconfig->resize.track == self->index) {
+		rv->width = psy_ui_value_make_px(self->gridstate->trackconfig->resize.size.width);
 	} else {
 		rv->width = psy_ui_value_make_px(trackerstate_trackwidth(
 			self->gridstate, self->index));		

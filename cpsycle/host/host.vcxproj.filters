@@ -645,6 +645,9 @@
     <ClCompile Include="src\patternviewtabbar.c">
       <Filter>pattern\common</Filter>
     </ClCompile>
+    <ClCompile Include="src\mainviewbar.c">
+      <Filter>toolbars</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\languageconfig.h">
@@ -1192,6 +1195,9 @@
     </ClInclude>
     <ClInclude Include="src\patternviewtabbar.h">
       <Filter>pattern\common</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mainviewbar.h">
+      <Filter>toolbars</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
