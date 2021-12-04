@@ -32,6 +32,7 @@ typedef struct psy_audio_SequenceCursor {
 	uintptr_t digit;
 	uintptr_t patternid;
 	uint8_t key;
+	uintptr_t noteindex;
 } psy_audio_SequenceCursor;
 
 void psy_audio_sequencecursor_init(psy_audio_SequenceCursor*);
@@ -57,6 +58,7 @@ uintptr_t psy_audio_sequencecursor_line(const psy_audio_SequenceCursor*);
 uintptr_t psy_audio_sequencecursor_track(const psy_audio_SequenceCursor*);
 uintptr_t psy_audio_sequencecursor_column(const psy_audio_SequenceCursor*);
 uintptr_t psy_audio_sequencecursor_digit(const psy_audio_SequenceCursor*);
+uintptr_t psy_audio_sequencecursor_noteindex(const psy_audio_SequenceCursor*);
 
 INLINE psy_dsp_big_beat_t psy_audio_sequencecursor_offset_abs(const psy_audio_SequenceCursor* self)
 {
@@ -66,7 +68,8 @@ INLINE psy_dsp_big_beat_t psy_audio_sequencecursor_offset_abs(const psy_audio_Se
 		: self->seqoffset);
 }
 
-INLINE psy_dsp_big_beat_t psy_audio_sequencecursor_offset(const psy_audio_SequenceCursor* self)
+INLINE psy_dsp_big_beat_t psy_audio_sequencecursor_offset(
+	const psy_audio_SequenceCursor* self)
 {
 	return self->offset;
 }

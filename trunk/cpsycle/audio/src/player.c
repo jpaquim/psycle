@@ -129,9 +129,14 @@ void psy_audio_player_init(psy_audio_Player* self, psy_audio_Song* song,
 	psy_table_init(&self->notestotracks);
 	psy_table_init(&self->trackstonotes);
 	psy_table_init(&self->worked);
-	psy_audio_pattern_init(&self->patterndefaults);
-	psy_audio_pattern_setlength(&self->patterndefaults,
+	self->patterndefaults = psy_audio_pattern_allocinit();
+	psy_audio_pattern_setlength(self->patterndefaults,
 		(psy_dsp_big_beat_t)0.25);
+	psy_audio_patterns_init(&self->defaultpatterns);
+	psy_audio_sequence_init(&self->defaultsequence, &self->defaultpatterns,
+		NULL);
+	psy_audio_patterns_insert(&self->defaultpatterns, 0,
+		self->patterndefaults);
 #ifdef PSYCLE_LOG_WORKEVENTS
 	psyfile_create(&logfile, "C:\\Users\\user\\psycle-workevent-log.txt", 1);
 #endif
@@ -173,7 +178,8 @@ void psy_audio_player_dispose(psy_audio_Player* self)
 	psy_table_dispose(&self->notestotracks);
 	psy_table_dispose(&self->trackstonotes);
 	psy_table_dispose(&self->worked);	
-	psy_audio_pattern_dispose(&self->patterndefaults);
+	psy_audio_sequence_dispose(&self->defaultsequence);
+	psy_audio_patterns_dispose(&self->defaultpatterns);	
 	psy_dsp_dither_dispose(&self->dither);
 #ifdef PSYCLE_LOG_WORKEVENTS
 	psyfile_close(&logfile);

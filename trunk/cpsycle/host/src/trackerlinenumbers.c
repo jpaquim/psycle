@@ -28,9 +28,6 @@ static int testcursor(psy_audio_SequenceCursor cursor, TrackerState* state,
 	return (cursorline == currline);
 }
 
-static void setcolumncolour(PatternViewSkin* skin, psy_ui_Graphics* g,
-	TrackerColumnFlags flags, uintptr_t track, uintptr_t numtracks);
-
 /* TrackerLineNumbers */
 /* prototypes */
 static void trackerlinenumbers_ondraw(TrackerLineNumbers*, psy_ui_Graphics*);
@@ -149,15 +146,19 @@ void trackerlinenumbers_ondraw(TrackerLineNumbers* self, psy_ui_Graphics* g)
 		while (offset <= clip.bottomright.offset && line < (intptr_t)maxlines) {
 			double ystart;			
 			char text[64];
+			psy_ui_Colour bg;
+			psy_ui_Colour fore;
 				
 			trackerlinennumbers_linetext(self,
 				self->shownumbersinhex,
 				!self->state->pv->singlemode && seqoffset == offset,
 				self->showbeat,
 				(int)patidx, (int)line, (float)offset, text);
-			setcolumncolour(patternviewstate_skin(self->state->pv), g,
+			trackerstate_columncolours(self->state,
 				trackerlinennumbers_columnflags(self, offset, seqoffset,
-					cursor), 0, 0);
+				cursor), 0, &bg, &fore);
+			psy_ui_setbackgroundcolour(g, bg);
+			psy_ui_settextcolour(g, fore);			
 			trackerlinennumbers_drawtext(self, g, text, cpy, size.width, text);					
 			cpy += self->state->lineheightpx;
 			ystart = cpy;
@@ -502,60 +503,6 @@ void trackerlinenumberslabel_onpreferredsize(TrackerLineNumbersLabel* self,
 	rv->width = (self->showbeatoffset)
 		? psy_ui_value_make_ew(10.0)
 		: psy_ui_value_make_ew(0.0);
-}
-
-void setcolumncolour(PatternViewSkin* skin, psy_ui_Graphics* g,
-	TrackerColumnFlags flags, uintptr_t track, uintptr_t numtracks)
-{
-	if (flags.cursor != 0) {
-		psy_ui_setbackgroundcolour(g, skin->cursor);
-		psy_ui_settextcolour(g,
-			patternviewskin_fontcurcolour(skin, track, numtracks));
-	} else if (flags.playbar) {
-		psy_ui_setbackgroundcolour(g,
-			patternviewskin_playbarcolour(skin, track, numtracks));
-		psy_ui_settextcolour(g,
-			patternviewskin_fontplaycolour(skin, track, numtracks));
-	} else if (flags.selection) {
-		if (flags.beat4) {
-			psy_ui_setbackgroundcolour(g,
-				patternviewskin_selection4beatcolour(skin, track, numtracks));
-		} else if (flags.beat) {
-			psy_ui_setbackgroundcolour(g,
-				patternviewskin_selectionbeatcolour(skin, track, numtracks));
-		} else {
-			psy_ui_setbackgroundcolour(g,
-				patternviewskin_selectioncolour(skin, track, numtracks));
-		}
-		psy_ui_settextcolour(g,
-			patternviewskin_fontselcolour(skin, track, numtracks));
-	} else if (flags.mid) {
-		psy_ui_setbackgroundcolour(g,
-			patternviewskin_midlinecolour(skin, track, numtracks));
-		if (flags.cursor != 0) {
-			psy_ui_settextcolour(g,
-				patternviewskin_fontcurcolour(skin, track, numtracks));
-		} else {
-			psy_ui_settextcolour(g,
-				patternviewskin_fontcolour(skin, track, numtracks));
-		}
-	} else {
-		if (flags.beat4) {
-			psy_ui_setbackgroundcolour(g,
-				patternviewskin_row4beatcolour(skin, track, numtracks));
-			psy_ui_settextcolour(g, skin->font);
-		} else if (flags.beat) {
-			psy_ui_setbackgroundcolour(g,
-				patternviewskin_rowbeatcolour(skin, track, numtracks));
-			psy_ui_settextcolour(g,
-				patternviewskin_fontcolour(skin, track, numtracks));
-		} else {
-			psy_ui_setbackgroundcolour(g,
-				patternviewskin_rowcolour(skin, track, numtracks));
-			psy_ui_settextcolour(g,
-				patternviewskin_fontcolour(skin, track, numtracks));
-		}
-	}
 }
 
 /* TrackerLineNumberBar */

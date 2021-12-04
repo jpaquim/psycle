@@ -552,7 +552,7 @@ void patternview_updatescrollstep(PatternView* self)
 
 	assert(self);
 
-	step = psy_ui_value_make_px(trackerstate_defaulttrackwidth(&self->state));
+	step = psy_ui_value_make_px(trackerstate_trackwidth(&self->state, psy_INDEX_INVALID));
 	psy_ui_component_setscrollstep_width(trackergrid_base(
 		&self->trackerview.grid), step);
 	psy_ui_component_setscrollstep_width(trackergrid_base(&self->defaultline.grid),

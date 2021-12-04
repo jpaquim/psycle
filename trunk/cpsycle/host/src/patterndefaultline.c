@@ -14,30 +14,51 @@
 
 /* PatternDefaultLine */
 /* prototypes */
+static void patterndefaultline_ondestroy(PatternDefaultLine*);
 static void patterndefaultline_onconfigure(PatternDefaultLine*,
 	PatternViewConfig*, psy_Property*);
+
+/* vtable */
+static psy_ui_ComponentVtable vtable;
+static bool vtable_initialized = FALSE;
+
+static void vtable_init(PatternDefaultLine* self)
+{
+	if (!vtable_initialized) {
+		vtable = *(self->component.vtable);
+		vtable.ondestroy =
+			(psy_ui_fp_component_event)
+			patterndefaultline_ondestroy;
+		vtable_initialized = TRUE;
+	}
+	self->component.vtable = &vtable;
+}
 
 /* implementation */
 void patterndefaultline_init(PatternDefaultLine* self, psy_ui_Component* parent,
 	TrackConfig* trackconfig, Workspace* workspace)
 {
 	psy_ui_component_init(&self->component, parent, parent);
+	vtable_init(self);
 	psy_ui_component_setalign(&self->component, psy_ui_ALIGN_TOP);
 	trackergrid_init(&self->grid, &self->component, trackconfig, NULL,
-		workspace);
+		workspace);	
 	psy_ui_component_setwheelscroll(trackergrid_base(&self->grid), 0);
 	psy_ui_component_setalign(&self->grid.component,
 		psy_ui_ALIGN_FIXED);
 	self->grid.state->drawbeathighlights = FALSE;
 	self->grid.preventeventdriver = TRUE;
-	self->grid.state->synccursor = FALSE;
-	self->grid.state->showresizecursor = TRUE;
+	self->grid.state->synccursor = FALSE;	
 	trackergrid_setpattern(&self->grid,
-		&workspace_player(workspace)->patterndefaults);
+		workspace_player(workspace)->patterndefaults);
 	trackergrid_build(&self->grid);
 	/* configuration */
 	psy_signal_connect(&workspace->config.patview.signal_changed, self,
 		patterndefaultline_onconfigure);
+}
+
+void patterndefaultline_ondestroy(PatternDefaultLine* self)
+{		
 }
 
 void patterndefaultline_onconfigure(PatternDefaultLine* self,

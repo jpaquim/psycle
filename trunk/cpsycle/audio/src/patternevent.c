@@ -73,3 +73,51 @@ int psy_audio_patternevent_has_volume(const psy_audio_PatternEvent* self)
 {
 	return self->vol != psy_audio_NOTECOMMANDS_VOL_EMPTY;
 }
+
+uintptr_t psy_audio_patternevent_value(const psy_audio_PatternEvent* self,
+	psy_audio_PatternEventColumn column)
+{	
+	switch (column) {
+	case PATTERNEVENT_COLUMN_NOTE:
+		return self->note;
+	case PATTERNEVENT_COLUMN_INST:
+		return self->inst;
+	case PATTERNEVENT_COLUMN_MACH:
+		return self->mach;
+	case PATTERNEVENT_COLUMN_VOL:
+		return self->vol;
+	case PATTERNEVENT_COLUMN_CMD:
+		return self->cmd;
+	case PATTERNEVENT_COLUMN_PARAM:
+		return self->parameter;
+	default:
+		return 0;
+	}		
+}
+
+void psy_audio_patternevent_setvalue(psy_audio_PatternEvent* self,
+	psy_audio_PatternEventColumn column, uintptr_t value)
+{
+	switch (column) {
+	case PATTERNEVENT_COLUMN_NOTE:
+		self->note = value;
+		break;
+	case PATTERNEVENT_COLUMN_INST:
+		self->inst = value;
+		break;
+	case PATTERNEVENT_COLUMN_MACH:
+		self->mach = value;
+		break;
+	case PATTERNEVENT_COLUMN_VOL:
+		self->vol = value;
+		break;
+	case PATTERNEVENT_COLUMN_CMD:
+		self->cmd = value;
+		break;
+	case PATTERNEVENT_COLUMN_PARAM:
+		self->parameter = value;
+		break;
+	default:
+		break;
+	}
+}

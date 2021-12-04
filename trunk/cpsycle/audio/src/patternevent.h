@@ -90,6 +90,16 @@ typedef	enum {
 	psy_audio_NOTECOMMANDS_GATE_EMPTY = 0xFF
 } psy_audio_NoteCommands;
 
+typedef enum psy_audio_PatternEventColumn {	
+	PATTERNEVENT_COLUMN_NOTE = 0,
+	PATTERNEVENT_COLUMN_INST = 1,
+	PATTERNEVENT_COLUMN_MACH = 2,
+	PATTERNEVENT_COLUMN_VOL = 3,
+	PATTERNEVENT_COLUMN_CMD = 4,
+	PATTERNEVENT_COLUMN_PARAM = 5,
+	PATTERNEVENT_COLUMN_END = 6
+} psy_audio_PatternEventColumn;
+
 typedef struct psy_audio_PatternEvent {
 	uint8_t note;	
 	uint16_t inst;	
@@ -116,6 +126,14 @@ void psy_audio_patternevent_init_all(psy_audio_PatternEvent*,
 	uint8_t vol,
 	uint8_t cmd,
 	uint8_t parameter);
+
+INLINE psy_audio_PatternEvent psy_audio_patternevent_zero(void)
+{
+	psy_audio_PatternEvent rv;
+
+	psy_audio_patternevent_init(&rv);
+	return rv;
+}
 
 INLINE psy_audio_PatternEvent* psy_audio_patternevent_alloc(void)
 {
@@ -167,6 +185,11 @@ INLINE void psy_audio_patternevent_settweakvalue(psy_audio_PatternEvent* self, u
 	self->parameter = (uint8_t)(tweakval & 0xFF);
 	
 }
+
+uintptr_t psy_audio_patternevent_value(const psy_audio_PatternEvent*,
+	psy_audio_PatternEventColumn);
+void psy_audio_patternevent_setvalue(psy_audio_PatternEvent*,
+	psy_audio_PatternEventColumn, uintptr_t value);
 
 #ifdef __cplusplus
 }

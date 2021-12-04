@@ -231,10 +231,16 @@ INLINE int psy_audio_pattern_empty(const psy_audio_Pattern* self)
 	return self->events == NULL;
 }
 /* sets the event or an empty event if event is 0 */
-void psy_audio_pattern_setevent(psy_audio_Pattern*, psy_audio_PatternNode*, const psy_audio_PatternEvent*);
+void psy_audio_pattern_setevent(psy_audio_Pattern*, psy_audio_PatternNode*,
+	const psy_audio_PatternEvent*, uintptr_t index);
 /* gets the event or an empty event if node is 0 */
 /* \return gets the event or an empty event if node is 0 */
-psy_audio_PatternEvent psy_audio_pattern_event(psy_audio_Pattern*, psy_audio_PatternNode*);
+psy_audio_PatternEvent psy_audio_pattern_event(psy_audio_Pattern*,
+	psy_audio_PatternNode*, uintptr_t index);
+/* \return gets the event or an empty event at the cursor position */
+psy_audio_PatternEvent psy_audio_pattern_event_at_cursor(
+	const psy_audio_Pattern*, psy_audio_SequenceCursor);
+
 /* gets the op count to determine changes */
 INLINE uintptr_t psy_audio_pattern_opcount(const psy_audio_Pattern* self)
 {

@@ -66,6 +66,18 @@ INLINE const psy_audio_PatternEvent* psy_audio_patternentry_front_const(
 	return (const psy_audio_PatternEvent*)(self->events->entry);
 }
 
+INLINE psy_audio_PatternEvent* psy_audio_patternentry_at(psy_audio_PatternEntry* self,
+	uintptr_t index)
+{
+	psy_List* p;
+
+	p = psy_list_at(self->events, index);
+	if (p) {
+		return (psy_audio_PatternEvent*)p->entry;
+	}
+	return NULL;
+}
+
 INLINE void psy_audio_patternentry_setbpm(psy_audio_PatternEntry* self, psy_dsp_big_beat_t bpm)
 {
 	assert(self);
@@ -75,6 +87,8 @@ INLINE void psy_audio_patternentry_setbpm(psy_audio_PatternEntry* self, psy_dsp_
 
 void psy_audio_patternentry_addevent(psy_audio_PatternEntry*,
 	const psy_audio_PatternEvent*);
+void psy_audio_patternentry_setevent(psy_audio_PatternEntry*,
+	const psy_audio_PatternEvent*, uintptr_t index);
 
 
 /* a list of event entries ordered by position in beat unit */

@@ -1530,7 +1530,7 @@ void psy_audio_sequencer_recordinputevent(psy_audio_Sequencer* self,
 			node = psy_audio_pattern_findnode(pattern, 0,
 				quantizedpatternoffset, 1.0 / self->lpb, &prev);
 			if (node) {					
-				psy_audio_pattern_setevent(pattern, node, event);
+				psy_audio_pattern_setevent(pattern, node, event, 0);
 			} else {
 				psy_audio_pattern_insert(pattern, prev, 0,
 					quantizedpatternoffset, event);

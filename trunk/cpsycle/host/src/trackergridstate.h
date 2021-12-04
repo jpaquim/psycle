@@ -47,19 +47,18 @@ void trackcolumndef_init(TrackColumnDef* self, uintptr_t numdigits,
 	int wrapclearcolumn,
 	int emptyvalue);
 
-/* TrackResize */
-typedef struct TrackResize {
-	bool column;
-	bool note;
+/* TrackDrag */
+typedef struct TrackDrag {
+	bool active;	
 	uintptr_t track;
 	psy_ui_RealSize size;
-} TrackResize;
+} TrackDrag;
 
-void trackresize_init(TrackResize*);
+void trackdrag_init(TrackDrag*);
 
-void trackresize_stop(TrackResize*);
-bool trackresize_column_dragging(const TrackResize*);
-bool trackresize_note_dragging(const TrackResize*);
+void trackdrag_start(TrackDrag*, uintptr_t track, double width);
+void trackdrag_stop(TrackDrag*);
+bool trackdrag_active(const TrackDrag*);
 
 /* TrackDef */
 typedef struct TrackDef {
@@ -68,36 +67,60 @@ typedef struct TrackDef {
 	TrackColumnDef mach;
 	TrackColumnDef vol;
 	TrackColumnDef cmd;
-	TrackColumnDef param;
-	uintptr_t numfx;
+	TrackColumnDef param;	
 	uintptr_t numnotes;
 } TrackDef;
 
 void trackdef_init(TrackDef*);
+
+TrackDef* trackdef_alloc(void);
+TrackDef* trackdef_allocinit(void);
+void trackdef_deallocate(TrackDef*);
+
 uintptr_t trackdef_numdigits(TrackDef*, uintptr_t column);
-uintptr_t trackdef_numcolumns(TrackDef*);
+uintptr_t trackdef_numcolumns(const TrackDef*);
+uintptr_t trackdef_numnotes(const TrackDef*);
 uintptr_t trackdef_value(TrackDef*, uintptr_t column,
 	const psy_audio_PatternEntry*);
+uintptr_t trackdef_event_value(TrackDef*, uintptr_t column,
+	const psy_audio_PatternEvent*);
 uintptr_t trackdef_emptyvalue(TrackDef*, uintptr_t column);
 void trackdef_setvalue(TrackDef*, uintptr_t column,
-	psy_audio_PatternEntry*, uintptr_t value);
-double trackdef_width(TrackDef*, double textwidth);
-double trackdef_basewidth(TrackDef* self, double textwidth);
-TrackColumnDef* trackdef_columndef(TrackDef* self, intptr_t column);
-double trackdef_columnwidth(TrackDef* self, intptr_t column, double textwidth);
-double trackdef_marginright(TrackDef* self, intptr_t column);
+	psy_audio_PatternEntry*, uintptr_t value, uintptr_t index);
+// double trackdef_width(TrackDef*, double textwidth);
+double trackdef_basewidth(const TrackDef* self, double textwidth);
+double trackdef_defaulttrackwidth(const TrackDef*, double textwidth);
+TrackColumnDef* trackdef_columndef(TrackDef*, intptr_t column);
+double trackdef_columnwidth(const TrackDef*, intptr_t column,
+	double textwidth);
+double trackdef_marginright(TrackDef*, intptr_t column);
+psy_audio_PatternEvent trackdef_setevent_digit(TrackDef*,
+	uintptr_t column, uintptr_t digit, const psy_audio_PatternEvent*,
+	uintptr_t digitvalue);
 
 typedef struct TrackConfig {
 	psy_Table trackconfigs;
 	TrackDef trackdef;
 	double textwidth;
 	double textleftedge;
-	TrackResize resize;
+	TrackDrag resize;
+	bool multicolumn;
 } TrackConfig;
 
 void trackconfig_init(TrackConfig*, bool wideinst);
 void trackconfig_dispose(TrackConfig*);
+
 void trackconfig_initcolumns(TrackConfig*, bool wideinst);
+double trackconfig_width(const TrackConfig*, uintptr_t track);
+double trackconfig_width_cmdparam(const TrackConfig* self);
+TrackDef* trackconfig_insert_trackdef(TrackConfig*, uintptr_t track,
+	uintptr_t numnotes);
+TrackDef* trackerconfig_trackdef(TrackConfig*, uintptr_t track);
+TrackDef* trackerconfig_trackdef_const(const TrackConfig*, uintptr_t track);
+void trackconfig_settrack(TrackConfig*, uintptr_t track,
+	uintptr_t numnotes);
+void trackconfig_resize(TrackConfig*, uintptr_t track, double width);
+
 
 /* TrackerEventTable */
 typedef struct TrackerEventTable {
@@ -113,6 +136,16 @@ void trackereventtable_dispose(TrackerEventTable*);
 void trackereventtable_clearevents(TrackerEventTable*);
 psy_List** trackereventtable_track(TrackerEventTable*, uintptr_t index);
 
+typedef struct TrackerColumnFlags {
+	int playbar;
+	int cursor;
+	int selection;
+	int beat;
+	int beat4;
+	int mid;
+	int focus;
+} TrackerColumnFlags;
+
 /* TrackerState */
 typedef struct TrackerState {		
 	/* internal */
@@ -123,7 +156,6 @@ typedef struct TrackerState {
 	bool midline;
 	bool drawbeathighlights;
 	bool synccursor;	
-	bool showresizecursor;	
 	psy_audio_PatternEntry empty;
 	psy_ui_Value lineheight;
 	psy_ui_Value defaultlineheight;
@@ -132,14 +164,13 @@ typedef struct TrackerState {
 	bool drawcursor;		
 	/* precomputed */
 	intptr_t visilines;
-	bool cursorchanging;		
+	bool cursorchanging;	
 } TrackerState;
 
 void trackerstate_init(TrackerState*, TrackConfig*, PatternViewState* pvstate);
 void trackerstate_dispose(TrackerState*);
 
 double trackerstate_trackwidth(const TrackerState*, uintptr_t track);
-double trackerstate_defaulttrackwidth(const TrackerState*);
 TrackDef* trackerstate_trackdef(TrackerState*, uintptr_t track);
 uintptr_t trackerstate_pxtotrack(const TrackerState*, double x);
 double trackerstate_basewidth(TrackerState*, uintptr_t track);
@@ -218,5 +249,7 @@ void trackerstate_updatemetric(TrackerState*, const psy_ui_TextMetric*,
 
 psy_audio_SequenceCursor trackerstate_makecursor(TrackerState*,
 	psy_ui_RealPoint pt, uintptr_t index);
+void trackerstate_columncolours(TrackerState*, TrackerColumnFlags,
+	uintptr_t track, psy_ui_Colour* bg, psy_ui_Colour* fore);
 
 #endif /* TRACKERGRIDSTATE_H */

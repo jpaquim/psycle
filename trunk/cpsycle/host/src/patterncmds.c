@@ -4,6 +4,7 @@
 // prefix file for each .c file
 #include "../../detail/prefix.h"
 
+
 #include "patterncmds.h"
 #include "workspace.h"
 
@@ -22,12 +23,13 @@
 #include "../../detail/trace.h"
 #include "../../detail/portable.h"
 
-// InsertCommand
-// prototypes
+/* InsertCommand */
+/* prototypes */
 static void insertcommand_dispose(InsertCommand*);
 static void insertcommand_execute(InsertCommand*);
 static void insertcommand_revert(InsertCommand*);
-// vtable
+
+/* vtable */
 static psy_CommandVtable insertcommandcommand_vtable;
 static bool insertcommandcommand_vtable_initialized = FALSE;
 
@@ -41,8 +43,9 @@ static void insertcommandcommand_vtable_init(InsertCommand* self)
 		insertcommandcommand_vtable_initialized = TRUE;
 	}
 }
-// implementation
-InsertCommand* insertcommand_alloc(psy_audio_Pattern* pattern, double bpl,
+
+/* implementation */
+InsertCommand* insertcommand_allocinit(psy_audio_Pattern* pattern,
 	psy_audio_SequenceCursor cursor, psy_audio_PatternEvent event,
 	Workspace* workspace)
 {
@@ -53,12 +56,11 @@ InsertCommand* insertcommand_alloc(psy_audio_Pattern* pattern, double bpl,
 		psy_command_init(&rv->command);
 		insertcommandcommand_vtable_init(rv);
 		rv->command.vtable = &insertcommandcommand_vtable;
-		rv->cursor = cursor;
-		rv->bpl = bpl;
-		rv->event = event;
-		rv->insert = 0;
+		rv->insert = FALSE;
+		rv->cursor = cursor;		
+		rv->event = event;		
 		rv->pattern = pattern;
-		rv->workspace = workspace;
+		rv->workspace = workspace;		
 	}
 	return rv;
 }
@@ -71,25 +73,27 @@ void insertcommand_execute(InsertCommand* self)
 	psy_audio_PatternNode* prev;
 
 	node = psy_audio_pattern_findnode(self->pattern,
-		self->cursor.track,
-		(psy_dsp_big_beat_t)self->cursor.offset,
-		(psy_dsp_big_beat_t)self->bpl, &prev);
-	if (node) {
-		self->oldevent = psy_audio_pattern_event(self->pattern, node);
-		psy_audio_pattern_setevent(self->pattern, node, &self->event);
-		self->insert = 0;
+		psy_audio_sequencecursor_track(&self->cursor),
+		psy_audio_sequencecursor_offset(&self->cursor),
+		psy_audio_sequencecursor_bpl(&self->cursor),
+		&prev);
+	if (node) {		
+		self->oldevent = psy_audio_pattern_event(self->pattern, node,
+			psy_audio_sequencecursor_noteindex(&self->cursor));
+		psy_audio_pattern_setevent(self->pattern, node, &self->event,
+			psy_audio_sequencecursor_noteindex(&self->cursor));
+		self->insert = FALSE;
 	} else {
 		node = psy_audio_pattern_insert(self->pattern,
 			prev,
-			self->cursor.track,
-			(psy_dsp_big_beat_t)self->cursor.offset,
+			psy_audio_sequencecursor_track(&self->cursor),
+			psy_audio_sequencecursor_offset(&self->cursor),
 			&self->event);
-		self->insert = 1;
+		self->insert = TRUE;
 	}
 	if (self->workspace && workspace_song(self->workspace)) {
-		psy_audio_sequence_setcursor(
-			psy_audio_song_sequence(workspace_song(self->workspace)),
-			self->cursor);		
+		psy_audio_sequence_setcursor(psy_audio_song_sequence(workspace_song(
+			self->workspace)), self->cursor);		
 	}
 }
 
@@ -101,7 +105,8 @@ void insertcommand_revert(InsertCommand* self)
 	node = psy_audio_pattern_findnode(self->pattern,
 		self->cursor.track,
 		self->cursor.offset,
-		self->bpl, &prev);
+		psy_audio_sequencecursor_bpl(&self->cursor),
+		&prev);
 	if (node) {
 		if (self->insert) {
 			psy_audio_pattern_remove(self->pattern, node);
@@ -111,7 +116,8 @@ void insertcommand_revert(InsertCommand* self)
 					node);
 			}
 		} else {
-			psy_audio_pattern_setevent(self->pattern, node, &self->oldevent);
+			psy_audio_pattern_setevent(self->pattern, node, &self->oldevent,
+				self->cursor.noteindex);
 		}
 	}
 	if (self->workspace && workspace_song(self->workspace)) {
@@ -121,12 +127,12 @@ void insertcommand_revert(InsertCommand* self)
 	}
 }
 
-// RemoveCommand
-// prototypes
+/* RemoveCommand */
+/* prototypes */
 static void removecommand_dispose(RemoveCommand*);
 static void removecommand_execute(RemoveCommand*);
 static void removecommand_revert(RemoveCommand*);
-// vtable
+/* vtable */
 static psy_CommandVtable removecommandcommand_vtable;
 static bool removecommandcommand_vtable_initialized = FALSE;
 
@@ -140,8 +146,8 @@ static void removecommandcommand_vtable_init(RemoveCommand* self)
 		removecommandcommand_vtable_initialized = TRUE;
 	}
 }
-// implementation
-RemoveCommand* removecommand_alloc(psy_audio_Pattern* pattern, double bpl,
+/* implementation */
+RemoveCommand* removecommand_allocinit(psy_audio_Pattern* pattern,
 	psy_audio_SequenceCursor cursor, Workspace* workspace)
 {
 	RemoveCommand* rv;
@@ -151,9 +157,8 @@ RemoveCommand* removecommand_alloc(psy_audio_Pattern* pattern, double bpl,
 		psy_command_init(&rv->command);
 		removecommandcommand_vtable_init(rv);
 		rv->command.vtable = &removecommandcommand_vtable;
-		rv->cursor = cursor;
-		rv->bpl = bpl;
-		rv->remove = 0;
+		rv->cursor = cursor;		
+		rv->remove = FALSE;
 		rv->pattern = pattern;
 		rv->workspace = workspace;
 	}
@@ -170,18 +175,20 @@ void removecommand_execute(RemoveCommand* self)
 	node = psy_audio_pattern_findnode(self->pattern,
 		self->cursor.track,
 		(psy_dsp_big_beat_t)self->cursor.offset,
-		(psy_dsp_big_beat_t)self->bpl, &prev);
+		psy_audio_sequencecursor_bpl(&self->cursor),
+		&prev);
 	if (node) {
-		self->oldevent = psy_audio_pattern_event(self->pattern, node);
+		self->oldevent = psy_audio_pattern_event(self->pattern, node,
+			self->cursor.noteindex);
 		psy_audio_pattern_remove(self->pattern, node);
 		if (self->workspace) {
 			psy_audio_sequencer_checkiterators(
 				&workspace_player(self->workspace)->sequencer,
 				node);
 		}
-		self->remove = 1;
+		self->remove = TRUE;
 	} else {		
-		self->remove = 0;
+		self->remove = FALSE;
 	}
 	if (self->workspace && workspace_song(self->workspace)) {
 		psy_audio_sequence_setcursor(
@@ -198,8 +205,9 @@ void removecommand_revert(RemoveCommand* self)
 
 		node = psy_audio_pattern_findnode(self->pattern,
 			self->cursor.track,
-			self->cursor.offset,
-			self->bpl, &prev);		
+			psy_audio_sequencecursor_offset(&self->cursor),
+			psy_audio_sequencecursor_bpl(&self->cursor),
+			&prev);
 		node = psy_audio_pattern_insert(self->pattern,
 			prev,
 			self->cursor.track,
