@@ -177,7 +177,7 @@ psy_audio_PatternNode* psy_audio_pattern_insert(psy_audio_Pattern* self,
 }
 
 void psy_audio_pattern_setevent(psy_audio_Pattern* self, psy_audio_PatternNode* node,
-	const psy_audio_PatternEvent* event)
+	const psy_audio_PatternEvent* event, uintptr_t index)
 {
 	assert(self);
 	if (node) {
@@ -185,28 +185,59 @@ void psy_audio_pattern_setevent(psy_audio_Pattern* self, psy_audio_PatternNode* 
 			
 		entry = (psy_audio_PatternEntry*) node->entry;
 		if (event) {			
-			*psy_audio_patternentry_front(entry) = *event;
+			psy_audio_patternentry_setevent(entry, event, index);			
 		} else {
 			psy_audio_PatternEvent empty;
 
 			psy_audio_patternevent_clear(&empty);
-			*psy_audio_patternentry_front(entry) = empty;
+			psy_audio_patternentry_setevent(entry, &empty, index);			
 		}
 		++self->opcount;
 	}
 }
 
-psy_audio_PatternEvent psy_audio_pattern_event(psy_audio_Pattern* self, psy_audio_PatternNode* node)
+psy_audio_PatternEvent psy_audio_pattern_event(psy_audio_Pattern* self,
+	psy_audio_PatternNode* node, uintptr_t index)
 {
-	assert(self);
-	if (node) {
-		return *psy_audio_patternentry_front(((psy_audio_PatternEntry*)node->entry));
-	} else {
-		psy_audio_PatternEvent empty;
+	psy_audio_PatternEvent empty;
 
-		psy_audio_patternevent_clear(&empty);
-		return empty;
-	}	
+	assert(self);
+
+	if (node) {
+		psy_List* p;
+		psy_audio_PatternEntry* entry;
+
+		entry = (psy_audio_PatternEntry*)node->entry;
+		p = psy_list_at(entry->events, index);
+		if (p) {
+			return *((psy_audio_PatternEvent*)p->entry);
+		}
+	}
+	psy_audio_patternevent_clear(&empty);
+	return empty;		
+}
+
+psy_audio_PatternEvent psy_audio_pattern_event_at_cursor(
+	const psy_audio_Pattern* self, psy_audio_SequenceCursor cursor)
+{
+	psy_audio_PatternEvent rv;
+	psy_audio_PatternNode* prev;	
+	psy_audio_PatternNode* node;
+
+	assert(self);
+	
+	node = psy_audio_pattern_findnode_cursor(self, cursor, &prev);
+	if (node) {
+		psy_audio_PatternEntry* entry;
+		psy_audio_PatternEvent* ev;
+
+		entry = (psy_audio_PatternEntry*)node->entry;
+		ev = psy_audio_patternentry_at(entry, cursor.noteindex);
+		if (ev) {
+			return *ev;
+		}
+	}
+	return psy_audio_patternevent_zero();
 }
 
 psy_audio_PatternNode* psy_audio_pattern_greaterequal(psy_audio_Pattern* self, psy_dsp_big_beat_t offset)

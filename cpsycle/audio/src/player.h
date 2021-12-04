@@ -63,7 +63,9 @@ typedef struct psy_audio_Player {
 	psy_Table notestotracks;
 	psy_Table trackstonotes;
 	psy_Table worked;
-	psy_audio_Pattern patterndefaults;
+	psy_audio_Pattern* patterndefaults;
+	psy_audio_Patterns defaultpatterns;
+	psy_audio_Sequence defaultsequence;
 	psy_dsp_Dither dither;
 	bool dodither;
 	uint8_t octave;

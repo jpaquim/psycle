@@ -18,28 +18,28 @@
 
 /* TrackerConfig */
 /* implementation */
-void trackresize_init(TrackResize* self)
+void trackdrag_init(TrackDrag* self)
 {	
-	self->column = FALSE;
-	self->note = FALSE;
+	self->active = FALSE;	
 	self->track = psy_INDEX_INVALID;
 	psy_ui_realsize_init(&self->size);
 }
 
-void trackresize_stop(TrackResize* self)
+void trackdrag_start(TrackDrag* self, uintptr_t track, double width)
 {
-	self->column = FALSE;
-	self->note = FALSE;
+	self->track = self->track;
+	self->size.width = width;
+	self->active = TRUE;
 }
 
-bool trackresize_column_dragging(const TrackResize* self)
+void trackdrag_stop(TrackDrag* self)
 {
-	return self->column;
+	self->active = FALSE;	
 }
 
-bool trackresize_note_dragging(const TrackResize* self)
+bool trackdrag_active(const TrackDrag* self)
 {
-	return self->note;
+	return self->active;
 }
 
 /* TrackerConfig */
@@ -47,8 +47,9 @@ bool trackresize_note_dragging(const TrackResize* self)
 void trackconfig_init(TrackConfig* self, bool wideinst)
 {	
 	self->textwidth = 9;
-	self->textleftedge = 2;	
-	trackresize_init(&self->resize);	
+	self->textleftedge = 2;
+	self->multicolumn = FALSE;
+	trackdrag_init(&self->resize);	
 	psy_table_init(&self->trackconfigs);
 	trackconfig_initcolumns(self, wideinst);
 }
@@ -67,7 +68,121 @@ void trackconfig_initcolumns(TrackConfig* self, bool wideinst)
 	}
 }
 
+double trackconfig_width(const TrackConfig* self, uintptr_t track)
+{
+	const TrackDef* trackdef;
+	double rv;
+	double cmdparam;
+	uintptr_t column;	
+
+	trackdef = trackerconfig_trackdef_const(self, track);
+	cmdparam = 0.0;
+	for (column = 0, rv = 0.0; column < trackdef_numcolumns(trackdef);
+			++column) {
+		double width;
+
+		width = trackdef_columnwidth(trackdef, column, self->textwidth);
+		if (column >= PATTERNEVENT_COLUMN_CMD) {
+			cmdparam += width;
+		}
+		rv += width;
+	}
+	if (self->multicolumn) {
+		return rv + (trackdef->numnotes - 1) * cmdparam + 1.0;
+	}
+	return trackdef->numnotes * rv + 1.0;
+}
+
+double trackconfig_width_cmdparam(const TrackConfig* self)
+{
+	const TrackDef* trackdef;
+	double rv;	
+	uintptr_t column;
+
+	trackdef = trackerconfig_trackdef_const(self, psy_INDEX_INVALID);	
+	for (column = PATTERNEVENT_COLUMN_CMD, rv = 0.0;
+		column < trackdef_numcolumns(trackdef);
+		++column) {
+		double width;
+
+		width = trackdef_columnwidth(trackdef, column, self->textwidth);		
+		rv += width;
+	}	
+	return rv;
+}
+
+TrackDef* trackconfig_insert_trackdef(TrackConfig* self, uintptr_t track,
+	uintptr_t numnotes)
+{
+	TrackDef* rv;
+	
+	rv = trackdef_allocinit();
+	if (rv) {
+		trackdef_init(rv);		
+		rv->numnotes = numnotes;
+		psy_table_insert(&self->trackconfigs, track, rv);		
+	}
+	return rv;
+}
+
+void trackconfig_settrack(TrackConfig* self, uintptr_t track,
+	uintptr_t numnotes)
+{
+	TrackDef* trackdef;
+
+	numnotes = psy_max(1, numnotes);	
+	trackdef = trackerconfig_trackdef(self, track);
+	if (trackdef != &self->trackdef) {		
+		trackdef->numnotes = numnotes;
+	} else {
+		trackconfig_insert_trackdef(self, track, numnotes);
+	}
+}
+
+TrackDef* trackerconfig_trackdef(TrackConfig* self, uintptr_t track)
+{	
+	TrackDef* rv;
+
+	rv = (TrackDef*)psy_table_at(&self->trackconfigs, track);
+	if (!rv) {
+		return &self->trackdef;
+	}
+	return rv;	
+}
+
+TrackDef* trackerconfig_trackdef_const(const TrackConfig* self, uintptr_t track)
+{
+	return trackerconfig_trackdef((TrackConfig*)self, track);
+}
+
+void trackconfig_resize(TrackConfig* self, uintptr_t track, double width)
+{	
+	if (trackdrag_active(&self->resize)) {
+		TrackDef* trackdef;
+		double basewidth;
+		uintptr_t numnotes;
+
+		trackdef = trackerconfig_trackdef(self, track);
+		basewidth = trackdef_defaulttrackwidth(trackdef, self->textwidth);
+		width = psy_max(0.0, width);
+		self->resize.size.width = width;
+		self->resize.track = track;
+		if (self->multicolumn) {
+			numnotes = (uintptr_t)psy_max(1.0,
+				psy_max(0.0, (width - (basewidth - trackconfig_width_cmdparam(self)))) /
+				trackconfig_width_cmdparam(self));
+		} else {
+			numnotes = (uintptr_t)(psy_max(1.0,
+				(psy_max(0.0, self->resize.size.width)) /
+				basewidth) + 0.9);
+		}
+		trackconfig_settrack(self, track, numnotes);
+	}
+}
+
 /* TrackColumnDef */
+static void enterdigit(int digit, int newval, unsigned char* val);
+
 /* implementation */
 void trackcolumndef_init(TrackColumnDef* self, uintptr_t numdigits,
 	uintptr_t numchars, double marginright, int wrapeditcolumn,
@@ -95,11 +210,30 @@ void trackdef_init(TrackDef* self)
 	trackcolumndef_init(&self->cmd, 2, 2, 0,
 		TRACKER_COLUMN_NONE, TRACKER_COLUMN_CMD, 0x00);
 	trackcolumndef_init(&self->param, 2, 2, 1,
-		TRACKER_COLUMN_CMD, TRACKER_COLUMN_PARAM, 0x00);
-	self->numfx = 1;
+		TRACKER_COLUMN_CMD, TRACKER_COLUMN_PARAM, 0x00);	
 	self->numnotes = 1;
 }
 
+TrackDef* trackdef_alloc(void)
+{
+	return (TrackDef*)malloc(sizeof(TrackDef));
+}
+
+TrackDef* trackdef_allocinit(void)
+{
+	TrackDef* rv;
+
+	rv = trackdef_alloc();
+	if (rv) {
+		trackdef_init(rv);
+	}
+	return rv;
+}
+
+void trackdef_deallocate(TrackDef* self)
+{
+	free(self);
+}
 
 /* TrackerEventTable */
 void trackereventtable_init(TrackerEventTable* self)
@@ -165,10 +299,9 @@ void trackerstate_init(TrackerState* self, TrackConfig* trackconfig,
 	self->trackconfig = trackconfig;
 	self->pv = pvstate;
 	self->drawbeathighlights = TRUE;
-	self->synccursor = TRUE;
-	self->showresizecursor = TRUE;		
+	self->synccursor = TRUE;	
 	self->showemptydata = FALSE;
-	self->midline = FALSE;	
+	self->midline = FALSE;
 	trackereventtable_init(&self->trackevents);
 	psy_audio_patternentry_init(&self->empty);
 	self->defaultlineheight = psy_ui_value_make_eh(1.0);
@@ -188,30 +321,14 @@ void trackerstate_dispose(TrackerState* self)
 
 double trackerstate_trackwidth(const TrackerState* self, uintptr_t track)
 {
-	TrackDef* trackdef;
-	
-	trackdef = trackerstate_trackdef((TrackerState*)self, track);
-	if (trackdef) {
-		return trackdef_width(trackdef,
-			(self->trackconfig)
-				? self->trackconfig->textwidth
-				: 12) + 1;
-	}
-	return patternviewstate_preferredtrackwidth(self->pv);
-}
+	assert(self);
+	assert(self->trackconfig);
 
-double trackerstate_defaulttrackwidth(const TrackerState* self)
-{
-	TrackDef* trackdef;
-
-	if (self->trackconfig) {
-		trackdef = &self->trackconfig->trackdef;		
-		return trackdef_width(trackdef,
-			(self->trackconfig)
-			? self->trackconfig->textwidth
-			: 12) + 1;		
+	if (self->trackconfig->resize.active &&
+			self->trackconfig->resize.track == track) {
+		return self->trackconfig->resize.size.width;
 	}
-	return patternviewstate_preferredtrackwidth(self->pv);
+	return trackconfig_width(self->trackconfig, track);
 }
 
 uintptr_t trackerstate_pxtotrack(const TrackerState* self, double x)
@@ -259,18 +376,74 @@ uintptr_t trackdef_numdigits(TrackDef* self, uintptr_t column)
 		: 0;
 }
 
-uintptr_t trackdef_numcolumns(TrackDef* self)
+uintptr_t trackdef_numcolumns(const TrackDef* self)
 {
-	return 4 + self->numfx * 2;
+	return PATTERNEVENT_COLUMN_END;
 }
 
-void trackdef_setvalue(TrackDef* self, uintptr_t column,
-	psy_audio_PatternEntry* entry, uintptr_t value)
+uintptr_t trackdef_numnotes(const TrackDef* self)
 {
-	if (column < TRACKER_COLUMN_CMD) {
+	return self->numnotes;
+}
+
+psy_audio_PatternEvent trackdef_setevent_digit(TrackDef* self,
+	uintptr_t column, uintptr_t digit, const psy_audio_PatternEvent* ev,
+	uintptr_t digitvalue)
+{
+	uintptr_t value;
+	uintptr_t num;
+	ptrdiff_t pos;
+	uint8_t* data;
+	psy_audio_PatternEvent rv;
+	TrackColumnDef* columndef;
+
+	assert(ev);
+
+	rv = *ev;
+	columndef = trackdef_columndef(self, column);
+	if (!columndef) {
+		return *ev;
+	}
+	if (digitvalue != 0xF && digitvalue == trackdef_emptyvalue(self, column)) {
+		value = 0;
+	} else {
+		value = psy_audio_patternevent_value(ev, column);
+	}
+	if (value == trackdef_emptyvalue(self, column)) {
+		value = 0;
+	}
+	num = trackdef_numdigits(self, column);
+	pos = num / 2 - digit / 2 - 1;
+	data = (uint8_t*)&value + pos;
+	enterdigit(digit % 2, (uint8_t)digitvalue, data);
+	psy_audio_patternevent_setvalue(&rv, column, value);
+	return rv;
+}
+
+void enterdigit(int digit, int newval, unsigned char* val)
+{
+	if (digit == 0) {
+		*val = (*val & 0x0F) | ((newval & 0x0F) << 4);
+	} else if (digit == 1) {
+		*val = (*val & 0xF0) | (newval & 0x0F);
+	}
+}
+
+
+void trackdef_setvalue(TrackDef* self, uintptr_t column,
+	psy_audio_PatternEntry* entry, uintptr_t value,
+	uintptr_t index)
+{		
+	if (column < TRACKER_COLUMN_CMD ||  (index > 0 && column < TRACKER_COLUMN_END)) {
+		psy_audio_PatternEvent* ev;
+
+		ev = psy_audio_patternentry_at(entry, index);
+		if (!ev) {
+			return;
+		}
 		switch (column) {
 		case TRACKER_COLUMN_NOTE:
-			psy_audio_patternentry_front(entry)->note = (uint8_t)value;
+			ev->note = (uint8_t)value;
 			break;
 		case TRACKER_COLUMN_INST:
 			if ((self->inst.numchars == 2) && value == 0xFF) {
@@ -279,16 +452,16 @@ void trackdef_setvalue(TrackDef* self, uintptr_t column,
 				** value, if only two digits are visible
 				** (settings wideinstrumentcolum: off)
 				*/
-				psy_audio_patternentry_front(entry)->inst = 0xFFFF;
+				ev->inst = 0xFFFF;
 			} else {
-				psy_audio_patternentry_front(entry)->inst = (uint16_t)value;
+				ev->inst = (uint16_t)value;
 			}
 			break;
 		case TRACKER_COLUMN_MACH:
-			psy_audio_patternentry_front(entry)->mach = (uint8_t)value;
+			ev->mach = (uint8_t)value;
 			break;
 		case TRACKER_COLUMN_VOL:
-			psy_audio_patternentry_front(entry)->vol = (uint16_t)value;
+			ev->vol = (uint16_t)value;
 			break;
 		default:
 			break;
@@ -334,29 +507,38 @@ void trackdef_setvalue(TrackDef* self, uintptr_t column,
 	}
 }
 
+uintptr_t trackdef_event_value(TrackDef* self, uintptr_t column,
+	const psy_audio_PatternEvent* ev)
+{
+	if (column < TRACKER_COLUMN_END) {
+		switch (column) {
+		case TRACKER_COLUMN_NOTE:
+			return ev->note;			
+		case TRACKER_COLUMN_INST:
+			return ev->inst;			
+		case TRACKER_COLUMN_MACH:
+			return ev->mach;			
+		case TRACKER_COLUMN_VOL:
+			return ev->vol;	
+		case TRACKER_COLUMN_CMD:
+			return ev->cmd;
+		case TRACKER_COLUMN_PARAM:
+			return ev->parameter;
+		default:			
+			break;
+		}
+	}
+	return 0;
+}
+
 uintptr_t trackdef_value(TrackDef* self, uintptr_t column,
 	const psy_audio_PatternEntry* entry)
 {
 	uintptr_t rv;
 
 	if (column < TRACKER_COLUMN_CMD) {
-		switch (column) {
-		case TRACKER_COLUMN_NOTE:
-			rv = psy_audio_patternentry_front_const(entry)->note;
-			break;
-		case TRACKER_COLUMN_INST:
-			rv = psy_audio_patternentry_front_const(entry)->inst;
-			break;
-		case TRACKER_COLUMN_MACH:
-			rv = psy_audio_patternentry_front_const(entry)->mach;
-			break;
-		case TRACKER_COLUMN_VOL:
-			rv = psy_audio_patternentry_front_const(entry)->vol;
-			break;
-		default:
-			rv = 0;
-			break;
-		}
+		rv = trackdef_event_value(self, column,
+			psy_audio_patternentry_front_const(entry));		
 	} else {
 		uintptr_t c;
 		uintptr_t num;
@@ -395,7 +577,7 @@ uintptr_t trackdef_emptyvalue(TrackDef* self, uintptr_t column)
 	return coldef ? coldef->emptyvalue : 0;
 }
 
-double trackdef_basewidth(TrackDef* self, double textwidth)
+double trackdef_basewidth(const TrackDef* self, double textwidth)
 {
 	double rv = 0;
 	uintptr_t column;
@@ -406,23 +588,22 @@ double trackdef_basewidth(TrackDef* self, double textwidth)
 	return rv;
 }
 
-double trackdef_width(TrackDef* self, double textwidth)
+double trackdef_defaulttrackwidth(const TrackDef* self, double textwidth)
 {
 	double rv = 0;
 	uintptr_t column;
-	
-	for (column = 0; column < trackdef_numcolumns(self); ++column) {
-		rv += trackdef_columnwidth(self, column, textwidth);		
+
+	for (column = 0; column < TRACKER_COLUMN_END; ++column) {
+		rv += trackdef_columnwidth(self, column, textwidth);
 	}
-	rv = self->numnotes * rv;
 	return rv;
 }
 
-double trackdef_columnwidth(TrackDef* self, intptr_t column, double textwidth)
+double trackdef_columnwidth(const TrackDef* self, intptr_t column, double textwidth)
 {
-	TrackColumnDef* coldef;
+	const TrackColumnDef* coldef;
 
-	coldef = trackdef_columndef(self, column);
+	coldef = trackdef_columndef((TrackDef*)self, column);
 	return coldef ? coldef->numchars * textwidth + coldef->marginright : 0;
 }
 
@@ -544,24 +725,36 @@ ScrollDir trackerstate_nextcol(TrackerState* self, bool wrap)
 		if (self->pv->cursor.column == trackdef_numcolumns(trackdef) - 1 &&
 			self->pv->cursor.digit == trackdef_numdigits(trackdef,
 				self->pv->cursor.column) - 1) {
-			if (self->pv->cursor.track < patternviewstate_numsongtracks(self->pv) - 1) {
-				self->pv->cursor.column = 0;
+			if (self->pv->cursor.noteindex + 1 < trackdef_numnotes(trackdef)) {
+				++self->pv->cursor.noteindex;
+				if (!self->trackconfig->multicolumn) {
+					self->pv->cursor.column = 0;
+				} else {
+					self->pv->cursor.column = PATTERNEVENT_COLUMN_CMD;
+				}
 				self->pv->cursor.digit = 0;
-				++self->pv->cursor.track;
-				return SCROLL_DIR_RIGHT;				
-			} else if (wrap) {
-				self->pv->cursor.column = 0;
-				self->pv->cursor.digit = 0;
-				self->pv->cursor.track = 0;
-				return SCROLL_DIR_LEFT;				
+			} else {
+				if (self->pv->cursor.track < patternviewstate_numsongtracks(self->pv) - 1) {
+					self->pv->cursor.column = 0;
+					self->pv->cursor.digit = 0;
+					self->pv->cursor.noteindex = 0;
+					++self->pv->cursor.track;
+					return SCROLL_DIR_RIGHT;
+				} else if (wrap) {
+					self->pv->cursor.column = 0;
+					self->pv->cursor.digit = 0;
+					self->pv->cursor.track = 0;
+					self->pv->cursor.noteindex = 0;
+					return SCROLL_DIR_LEFT;
+				}
 			}
-		} else {
+		} else {			
 			++self->pv->cursor.digit;
 			if (self->pv->cursor.digit >=
 				trackdef_numdigits(trackdef, self->pv->cursor.column)) {
 				++self->pv->cursor.column;
 				self->pv->cursor.digit = 0;
-			}
+			}			
 		}		
 	}
 	return SCROLL_DIR_NONE;
@@ -687,7 +880,15 @@ psy_audio_SequenceCursor trackerstate_makecursor(TrackerState* self,
 		rv.key = 0;
 	}
 	trackdef = trackerstate_trackdef(self, rv.track);
-	cpx = 0;
+	if (trackdef->numnotes == 1) {		
+		cpx = 0.0;
+		rv.noteindex = 0;
+	} else {
+		rv.noteindex = (uintptr_t)(pt.x / trackdef_defaulttrackwidth(
+			trackdef, self->trackconfig->textwidth));
+		cpx = trackdef_defaulttrackwidth(trackdef,
+			self->trackconfig->textwidth) * rv.noteindex;		
+	}
 	while (rv.column < trackdef_numcolumns(trackdef) &&
 		cpx + trackdef_columnwidth(trackdef, rv.column,
 			self->trackconfig->textwidth) < pt.x) {
@@ -702,4 +903,52 @@ psy_audio_SequenceCursor trackerstate_makecursor(TrackerState* self,
 	}
 	self->pv->cursor.patternid = sequence->cursor.patternid;
 	return rv;
+}
+
+void trackerstate_columncolours(TrackerState* self,
+	TrackerColumnFlags flags, uintptr_t track,
+	psy_ui_Colour* bg, psy_ui_Colour* fore)
+{		
+	PatternViewSkin* skin;
+	uintptr_t numtracks;
+
+	assert(bg);
+	assert(fore);
+
+	skin = &self->pv->patconfig->skin;
+	numtracks = patternviewstate_numsongtracks(self->pv);
+	if (flags.cursor != FALSE) {		
+		*bg = skin->cursor;
+		*fore = patternviewskin_fontcurcolour(skin, track, numtracks);
+	} else if (flags.playbar) {
+		*bg = patternviewskin_playbarcolour(skin, track, numtracks);
+		*fore = patternviewskin_fontplaycolour(skin, track, numtracks);
+	} else if (flags.selection) {
+		if (flags.beat4) {
+			*bg = patternviewskin_selection4beatcolour(skin, track, numtracks);
+		} else if (flags.beat) {
+			*bg = patternviewskin_selectionbeatcolour(skin, track, numtracks);
+		} else {
+			*bg = patternviewskin_selectioncolour(skin, track, numtracks);
+		}
+		*fore = patternviewskin_fontselcolour(skin, track, numtracks);
+	} else if (flags.mid) {
+		*bg = patternviewskin_midlinecolour(skin, track, numtracks);
+		if (flags.cursor != FALSE) {
+			*fore = patternviewskin_fontcurcolour(skin, track, numtracks);
+		} else {
+			*fore = patternviewskin_fontcolour(skin, track, numtracks);
+		}
+	} else {
+		if (flags.beat4) {
+			*bg = patternviewskin_row4beatcolour(skin, track, numtracks);
+			*fore = skin->font;
+		} else if (flags.beat) {
+			*bg = patternviewskin_rowbeatcolour(skin, track, numtracks);
+			*fore = patternviewskin_fontcolour(skin, track, numtracks);
+		} else {
+			*bg = patternviewskin_rowcolour(skin, track, numtracks);
+			*fore = patternviewskin_fontcolour(skin, track, numtracks);
+		}
+	}	
 }

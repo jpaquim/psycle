@@ -25,6 +25,7 @@ void psy_audio_sequencecursor_init(psy_audio_SequenceCursor* self)
 	self->column = 0;
 	self->digit = 0;
 	self->patternid = 0;
+	self->noteindex = 0;
 }
 
 void psy_audio_sequencecursor_init_all(psy_audio_SequenceCursor* self,
@@ -62,12 +63,14 @@ bool psy_audio_sequencecursor_equal(psy_audio_SequenceCursor* lhs,
 	psy_audio_SequenceCursor* rhs)
 {
 	assert(lhs && rhs);
+
 	return
 		rhs->column == lhs->column &&
 		rhs->digit == lhs->digit &&
 		rhs->track == lhs->track &&
 		rhs->offset == lhs->offset &&
-		rhs->patternid == lhs->patternid;
+		rhs->patternid == lhs->patternid &&
+		rhs->noteindex == lhs->noteindex;
 }
 
 void psy_audio_sequencecursor_updateseqoffset(psy_audio_SequenceCursor* self,
@@ -127,4 +130,9 @@ uintptr_t psy_audio_sequencecursor_column(const psy_audio_SequenceCursor* self)
 uintptr_t psy_audio_sequencecursor_digit(const psy_audio_SequenceCursor* self)
 {
 	return (self->digit);
+}
+
+uintptr_t psy_audio_sequencecursor_noteindex(const psy_audio_SequenceCursor* self)
+{
+	return (self->noteindex);
 }

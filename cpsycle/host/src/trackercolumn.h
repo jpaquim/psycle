@@ -16,26 +16,15 @@
 extern "C" {
 #endif
 
-typedef struct TrackerColumnFlags {
-	int playbar;
-	int cursor;
-	int selection;
-	int beat;
-	int beat4;
-	int mid;
-	int focus;
-} TrackerColumnFlags;
-
 /* TrackerColumn */
 typedef struct TrackerColumn {
 	/* inherits */
 	psy_ui_Component component;
-	uintptr_t index;
+	uintptr_t track;
 	psy_ui_RealSize digitsize;	
-	psy_ui_RealSize resizestartsize;	
 	/* internal */
 	/* references */
-	TrackerState* gridstate;	
+	TrackerState* state;	
 	Workspace* workspace;
 } TrackerColumn;
 

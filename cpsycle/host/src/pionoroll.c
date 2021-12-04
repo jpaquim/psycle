@@ -596,8 +596,7 @@ bool pianoroll_onnotecmds(Pianoroll* self, InputHandler* sender)
 			ev = psy_audio_player_patternevent(&self->workspace->player, (uint8_t)cmd.id);
 		}
 		psy_undoredo_execute(&self->workspace->undoredo,
-			&insertcommand_alloc(patternviewstate_pattern(self->gridstate.pv),
-				1.0 / (double)self->gridstate.pv->cursor.lpb,
+			&insertcommand_allocinit(patternviewstate_pattern(self->gridstate.pv),				
 				self->gridstate.pv->cursor, ev,
 				self->workspace)->command);
 		if (chord != FALSE) {
@@ -676,8 +675,7 @@ void pianoroll_enter(Pianoroll* self)
 	psy_audio_patternevent_clear(&patternevent);
 	patternevent.note = self->gridstate.pv->cursor.key;
 	psy_undoredo_execute(&self->workspace->undoredo,
-		&insertcommand_alloc(patternviewstate_pattern(self->gridstate.pv),
-			pianogridstate_step(&self->gridstate),
+		&insertcommand_allocinit(patternviewstate_pattern(self->gridstate.pv),			
 			self->gridstate.pv->cursor, patternevent,
 			self->workspace)->command);
 	pianogrid_advanceline(&self->grid);
@@ -686,8 +684,7 @@ void pianoroll_enter(Pianoroll* self)
 void pianoroll_rowclear(Pianoroll* self)
 {
 	psy_undoredo_execute(&self->workspace->undoredo,
-		&removecommand_alloc(self->gridstate.pv->pattern,
-			pianogridstate_step(&self->gridstate),
+		&removecommand_allocinit(self->gridstate.pv->pattern,
 			self->gridstate.pv->cursor, self->workspace)->command);
 	pianogrid_advanceline(&self->grid);
 }

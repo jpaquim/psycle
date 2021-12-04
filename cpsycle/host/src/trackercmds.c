@@ -1,15 +1,17 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
-// prefix file for each .c file
 #include "../../detail/prefix.h"
 
+
 #include "trackercmds.h"
-// ui
+/* ui */
 #include <uidef.h>
-// eventdriver
+/* eventdriver */
 #include "../../driver/eventdriver.h"
-// platform
+/* platform */
 #include "../../detail/portable.h"
 
 static void setcmdall(psy_Property*, int cmd, uint32_t keycode, bool shift,
@@ -99,11 +101,13 @@ void trackercmds_make(psy_Property* parent)
 	setcmd(cmds, CMD_DIGITF, psy_ui_KEY_F, "digitF", "F");
 }
 
-// Appends a property with shortcut defaults for the keyboard driver
-// key		: cmd id used by the trackerview
-// text		: "cmds.key" language dictionary key used by the translator
-// shorttext: short description for the keyboard help view
-// value	: encoded key shortcut (keycode/shift/ctrl)
+/*
+** Appends a property with shortcut defaults for the keyboard driver
+** key		: cmd id used by the trackerview
+** text		: "cmds.key" language dictionary key used by the translator
+** shorttext: short description for the keyboard help view
+** value	: encoded key shortcut (keycode/shift/ctrl)
+*/
 void setcmdall(psy_Property* cmds, int cmd, uint32_t keycode, bool shift,
 	bool ctrl, const char* key, const char* shorttext)
 {

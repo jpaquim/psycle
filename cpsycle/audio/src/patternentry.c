@@ -18,7 +18,7 @@ void psy_audio_patternentry_init(psy_audio_PatternEntry* self)
 
 	assert(self);
 
-	memset(self, 0, sizeof(psy_audio_PatternEntry));
+	memset(self, 0, sizeof(psy_audio_PatternEntry));	
 	psy_audio_patternevent_clear(&first);
 	psy_audio_patternentry_addevent(self, &first);
 }
@@ -119,9 +119,36 @@ void psy_audio_patternentry_addevent(psy_audio_PatternEntry* self,
 	psy_audio_PatternEvent* copy;
 
 	assert(self);
+
 	copy = (psy_audio_PatternEvent*)malloc(sizeof(psy_audio_PatternEvent));
 	if (copy) {
 		*copy = *event;
 		psy_list_append(&self->events, copy);
+	}
+}
+
+void psy_audio_patternentry_setevent(psy_audio_PatternEntry* self,
+	const psy_audio_PatternEvent* ev, uintptr_t index)
+{
+	uintptr_t i;
+	psy_List* p;
+
+	for (i = 0, p = self->events; i <= index; ++i) {		
+		if (!p) {
+			psy_audio_PatternEvent empty;
+
+			psy_audio_patternevent_clear(&empty);
+			psy_audio_patternentry_addevent(self, &empty);
+			p = psy_list_last(self->events);
+		}
+		if (p && (i == index)) {
+			psy_audio_PatternEvent* curr;
+
+			curr = (psy_audio_PatternEvent*)p->entry;
+			*curr = *ev;			
+		}
+		if (p) {
+			p = p->next;
+		}
 	}
 }
