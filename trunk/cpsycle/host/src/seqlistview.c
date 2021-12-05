@@ -459,15 +459,14 @@ static void seqviewlist_vtable_init(SeqviewList* self)
 }
 /* implementation */
 void seqviewlist_init(SeqviewList* self, psy_ui_Component* parent,
-	SeqViewState* state)
+	psy_ui_Component* view, SeqViewState* state)
 {
-	psy_ui_component_init(&self->component, parent, NULL);
+	psy_ui_component_init(&self->component, parent, view);
 	seqviewlist_vtable_init(self);	
 	self->state = state;	
 	self->lastplayrow = psy_INDEX_INVALID;	
 	self->showpatternnames = generalconfig_showingpatternnames(
 		psycleconfig_general(workspace_conf(self->state->cmds->workspace)));	
-	psy_ui_component_doublebuffer(&self->component);
 	psy_ui_component_setwheelscroll(&self->component, 1);	
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_margin_zero());
@@ -503,8 +502,7 @@ void seqviewlist_build(SeqviewList* self)
 			++trackindex) {
 		SeqViewTrack* track;
 
-		track = seqviewtrack_allocinit(&self->component,
-			&self->component,
+		track = seqviewtrack_allocinit(&self->component, NULL,
 			trackindex, (psy_audio_SequenceTrack*)psy_list_entry(p),
 			self->state);		
 	}

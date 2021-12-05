@@ -1378,6 +1378,7 @@ void psy_audio_sequence_setpatternindex(psy_audio_Sequence* self,
 	if (entry && entry->type == psy_audio_SEQUENCEENTRY_PATTERN) {
 		psy_audio_Pattern* pattern;
 		psy_dsp_big_beat_t oldlength;
+		psy_audio_SequenceTrack* track;
 		
 		oldlength = psy_audio_sequenceentry_length(entry);
 		pattern = psy_audio_patterns_at(self->patterns, patidx);
@@ -1387,14 +1388,10 @@ void psy_audio_sequence_setpatternindex(psy_audio_Sequence* self,
 			/* todo set correct default lines */
 		}						
 		psy_audio_sequencepatternentry_setpatternslot(
-			(psy_audio_SequencePatternEntry*)entry, patidx);
-		if (psy_audio_pattern_length(pattern) != oldlength) {
-			psy_audio_SequenceTrack* track;
-
-			track = psy_audio_sequence_track_at(self, index.track);
-			if (track) {
-				psy_audio_sequence_reposition_track(self, track);
-			}
+			(psy_audio_SequencePatternEntry*)entry, patidx);		
+		track = psy_audio_sequence_track_at(self, index.track);
+		if (track) {
+			psy_audio_sequence_reposition_track(self, track);		
 		}
 	}
 }

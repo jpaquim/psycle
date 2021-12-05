@@ -49,7 +49,8 @@ typedef struct SeqviewList {
 	SeqViewState* state;	
 } SeqviewList;
 
-void seqviewlist_init(SeqviewList*, psy_ui_Component* parent, SeqViewState*);
+void seqviewlist_init(SeqviewList*, psy_ui_Component* parent,
+	psy_ui_Component* view, SeqViewState*);
 void seqviewlist_showpatternnames(SeqviewList*);
 void seqviewlist_showpatternslots(SeqviewList*);
 void seqviewlist_rename(SeqviewList*);

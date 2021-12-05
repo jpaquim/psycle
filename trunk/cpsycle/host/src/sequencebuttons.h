@@ -15,7 +15,7 @@
 /* ui */
 #include <uibutton.h>
 #include <uicheckbox.h>
-#include <uiedit.h>
+#include <uitextinput.h>
 #include <uilabel.h>
 #include <uiscroller.h>
 #include <uisplitbar.h>
@@ -45,7 +45,7 @@ typedef struct SequenceButtons {
 	psy_ui_Component row2;
 	psy_ui_Button clear;
 	psy_ui_Button rename;
-	psy_ui_Edit edit;
+	psy_ui_TextInput edit;
 	/* psy_ui_Button cut; */
 	psy_ui_Button copy;
 	psy_ui_Component row3;
@@ -55,7 +55,7 @@ typedef struct SequenceButtons {
 } SequenceButtons;
 
 void sequencebuttons_init(SequenceButtons*, psy_ui_Component* parent,
-	SequenceCmds*);
+	psy_ui_Component* view, SequenceCmds*);
 
 INLINE psy_ui_Component* sequencebuttons_base(SequenceButtons* self)
 {

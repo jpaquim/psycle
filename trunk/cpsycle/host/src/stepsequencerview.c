@@ -223,14 +223,13 @@ static void vtable_init(StepsequencerBar* self)
 
 /* implementation */
 void stepsequencerbar_init(StepsequencerBar* self, psy_ui_Component* parent,
-	StepSequencerState* state)
+	psy_ui_Component* view, StepSequencerState* state)
 {	
 	assert(self);
 
 	self->state = state;	
-	psy_ui_component_init(&self->component, parent, NULL);
+	psy_ui_component_init(&self->component, parent, view);
 	vtable_init(self);	
-	psy_ui_component_doublebuffer(&self->component);	
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_margin_make_em(0.0, 1.0, 0.0, 0.0));
 	psy_ui_component_setalignexpand(&self->component, psy_ui_HEXPAND);
@@ -556,14 +555,14 @@ static void stepsequencerbarselect_vtable_init(StepsequencerBarSelect* self)
 
 /* implementation */
 void stepsequencerbarselect_init(StepsequencerBarSelect* self,
-	psy_ui_Component* parent, StepSequencerState* state)
+	psy_ui_Component* parent, psy_ui_Component* view,
+	StepSequencerState* state)
 {
 	assert(self);
 
-	psy_ui_component_init(&self->component, parent, parent);	
+	psy_ui_component_init(&self->component, parent, view);	
 	stepsequencerbarselect_vtable_init(self);
-	self->state = state;
-	psy_ui_component_doublebuffer(&self->component);
+	self->state = state;	
 	psy_ui_component_setalignexpand(&self->component, psy_ui_HEXPAND);
 	 psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_TOP,
 		psy_ui_margin_zero());	
@@ -661,13 +660,14 @@ void stepsequencerview_init(StepsequencerView* self, psy_ui_Component* parent,
 
 	psy_ui_component_init(&self->component, parent, NULL);		
 	psy_ui_component_setstyletype(&self->component, STYLE_STEPSEQUENCER);
+	psy_ui_component_doublebuffer(&self->component);
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_margin_make_em(0.5, 0.0, 0.5, 2.0));
 	stepsequencerstate_init(&self->state, workspace);
 	stepsequencerbarselect_init(&self->stepsequencerbarselect,
-		&self->component, &self->state);	
+		&self->component, &self->component, &self->state);	
 	psy_ui_component_init(&self->tilerow, &self->component, &self->component);
-	stepsequencerbar_init(&self->stepsequencerbar, &self->tilerow,
+	stepsequencerbar_init(&self->stepsequencerbar, &self->tilerow, NULL,
 		&self->state);
 	psy_ui_component_setalign(&self->stepsequencerbar.component,
 		psy_ui_ALIGN_TOP);

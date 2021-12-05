@@ -22,7 +22,9 @@ typedef struct PatternDefaultLine {
 	/* inherits */
 	psy_ui_Component component;
 	/* internal */
-	TrackerGrid grid;	
+	TrackerGrid grid;
+	PatternViewState pvstate;
+	TrackerState state;
 } PatternDefaultLine;
 
 void patterndefaultline_init(PatternDefaultLine*, psy_ui_Component* parent,

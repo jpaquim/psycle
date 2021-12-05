@@ -22,17 +22,6 @@ typedef enum {
 	SCROLL_DIR_RIGHT
 } ScrollDir;
 
-enum {
-	TRACKER_COLUMN_NONE = -1,
-	TRACKER_COLUMN_NOTE = 0,
-	TRACKER_COLUMN_INST = 1,
-	TRACKER_COLUMN_MACH = 2,
-	TRACKER_COLUMN_VOL = 3,
-	TRACKER_COLUMN_CMD = 4,
-	TRACKER_COLUMN_PARAM = 5,
-	TRACKER_COLUMN_END = 6
-};
-
 typedef struct TrackColumnDef {
 	uintptr_t numdigits;
 	uintptr_t numchars;
@@ -59,6 +48,7 @@ void trackdrag_init(TrackDrag*);
 void trackdrag_start(TrackDrag*, uintptr_t track, double width);
 void trackdrag_stop(TrackDrag*);
 bool trackdrag_active(const TrackDrag*);
+bool trackdrag_trackactive(const TrackDrag*, uintptr_t track);
 
 /* TrackDef */
 typedef struct TrackDef {
@@ -68,7 +58,7 @@ typedef struct TrackDef {
 	TrackColumnDef vol;
 	TrackColumnDef cmd;
 	TrackColumnDef param;	
-	uintptr_t numnotes;
+	uintptr_t visinotes;
 } TrackDef;
 
 void trackdef_init(TrackDef*);
@@ -79,15 +69,17 @@ void trackdef_deallocate(TrackDef*);
 
 uintptr_t trackdef_numdigits(TrackDef*, uintptr_t column);
 uintptr_t trackdef_numcolumns(const TrackDef*);
-uintptr_t trackdef_numnotes(const TrackDef*);
+
+INLINE uintptr_t trackdef_visinotes(const TrackDef* self)
+{	
+	return self->visinotes;
+}
+
 uintptr_t trackdef_value(TrackDef*, uintptr_t column,
 	const psy_audio_PatternEntry*);
 uintptr_t trackdef_event_value(TrackDef*, uintptr_t column,
 	const psy_audio_PatternEvent*);
 uintptr_t trackdef_emptyvalue(TrackDef*, uintptr_t column);
-void trackdef_setvalue(TrackDef*, uintptr_t column,
-	psy_audio_PatternEntry*, uintptr_t value, uintptr_t index);
-// double trackdef_width(TrackDef*, double textwidth);
 double trackdef_basewidth(const TrackDef* self, double textwidth);
 double trackdef_defaulttrackwidth(const TrackDef*, double textwidth);
 TrackColumnDef* trackdef_columndef(TrackDef*, intptr_t column);

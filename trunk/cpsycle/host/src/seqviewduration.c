@@ -24,10 +24,10 @@ static void seqviewduration_ontimer(SeqviewDuration* self,
 static void seqviewduration_ondestroy(SeqviewDuration* self,
 	psy_ui_Component* sender);	
 /* implementation */
-void seqviewduration_init(SeqviewDuration* self,
-	psy_ui_Component* parent, Workspace* workspace)
+void seqviewduration_init(SeqviewDuration* self, psy_ui_Component* parent,
+	psy_ui_Component* view, Workspace* workspace)
 {	
-	psy_ui_component_init(&self->component, parent, NULL);
+	psy_ui_component_init(&self->component, parent, view);
 	self->workspace = workspace;
 	self->duration_ms = 0;
 	self->duration_bts = 0.0;

@@ -31,9 +31,7 @@ typedef struct TrackerGrid {
 	psy_ui_Component component;
 	/* signals */
 	psy_Signal signal_colresize;
-	/* internal */
-	PatternViewState defaultpvstate;
-	TrackerState defaultgridstate;	
+	/* internal */	
 	psy_dsp_NotesTabMode notestabmode;   
 	psy_audio_SequenceCursor oldcursor;
 	psy_audio_SequenceCursor lastdragcursor;	
@@ -53,11 +51,9 @@ typedef struct TrackerGrid {
 } TrackerGrid;
 
 void trackergrid_init(TrackerGrid*, psy_ui_Component* parent,
-	TrackConfig*, TrackerState*, Workspace*);
+	TrackerState*, Workspace*);
 
 void trackergrid_build(TrackerGrid*);
-void trackergrid_setsharedgridstate(TrackerGrid*, TrackerState*,
-	TrackConfig*);
 void trackergrid_setpattern(TrackerGrid*, psy_audio_Pattern*);
 void trackergrid_showemptydata(TrackerGrid*, int showstate);
 void trackergrid_invalidateline(TrackerGrid*, intptr_t line);
@@ -119,8 +115,8 @@ typedef struct TrackerView {
 	Workspace* workspace;
 } TrackerView;
 
-void trackerview_init(TrackerView*, psy_ui_Component* parent, TrackConfig*,
-	TrackerState*, Workspace*);
+void trackerview_init(TrackerView*, psy_ui_Component* parent, TrackerState*,
+	Workspace*);
 
 void trackerview_updatefollowsong(TrackerView*);
 
