@@ -415,7 +415,8 @@ psy_audio_SequenceChangePatternCommand* psy_audio_sequencechangepatterncommand_a
 		rv->step = step;
 		rv->success = FALSE;
 		psy_audio_sequenceselection_init(&rv->restoreselection);
-		psy_audio_sequence_init(&rv->restoresequence, sequence->patterns, sequence->samples);
+		psy_audio_sequence_init(&rv->restoresequence, sequence->patterns,
+			sequence->samples);
 	}
 	return rv;
 }
@@ -453,14 +454,18 @@ void psy_audio_sequencechangepatterncommand_execute(
 		seqpatternentry = (psy_audio_SequencePatternEntry*)seqentry;
 		if ((self->step > 0 || (self->step < 0 &&
 				seqpatternentry->patternslot >= (uintptr_t)(self->step * (-1))))) {
+			psy_audio_SequenceCursor cursor;
+
+			cursor = self->sequence->cursor;
 			psy_audio_sequence_setpatternindex(self->sequence,
 				*orderindex, seqpatternentry->patternslot + self->step);
+			cursor.patternid = psy_audio_sequence_patternindex(self->sequence,
+				cursor.orderindex);
+			psy_audio_sequence_setcursor(self->sequence, cursor);
 			self->success = TRUE;
 		}
-	}
-	
-	psy_audio_exclusivelock_leave();
-//	psy_audio_sequenceselection_update(self->selection);
+	}	
+	psy_audio_exclusivelock_leave();	
 }
 
 void psy_audio_sequencechangepatterncommand_revert(

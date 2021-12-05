@@ -117,7 +117,7 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 		patternviewconfig_showwideinstcolumn(
 			psycleconfig_patview(workspace_conf(workspace))));
 	patternviewstate_init(&self->pvstate, &workspace->config.patview,
-		workspace_song(workspace), &self->cmds);	
+		workspace_song(workspace), &self->cmds);
 	trackerstate_init(&self->state, &self->trackconfig, &self->pvstate);
 	/* Configuration */
 	psy_signal_connect(&self->pvstate.patconfig->signal_changed, self,
@@ -145,7 +145,7 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 		patternview_oncolresize);
 	/* Tracker */
 	trackerview_init(&self->trackerview, &self->editnotebook.component,		
-		&self->trackconfig, &self->state, workspace);		
+		&self->state, workspace);
 	psy_signal_connect(&self->trackerview.grid.signal_colresize, self,
 		patternview_oncolresize);
 	/* Pianoroll */
@@ -197,7 +197,7 @@ void patternview_ondestroy(PatternView* self)
 
 	trackerstate_dispose(&self->state);
 	trackconfig_dispose(&self->trackconfig);
-	patternviewstate_dispose(&self->pvstate);	
+	patternviewstate_dispose(&self->pvstate);
 }
 
 void patternview_ontoggleproperties(PatternView* self,

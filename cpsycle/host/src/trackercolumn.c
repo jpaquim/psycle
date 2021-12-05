@@ -22,7 +22,7 @@ static const char* notetostr(psy_audio_PatternEvent ev,
 }
 
 /* TrackerColumn */
-/* Prototypes */
+/* prototypes */
 static void trackercolumn_ondraw(TrackerColumn*, psy_ui_Graphics*);
 static void trackercolumn_drawtrackevents(TrackerColumn*, psy_ui_Graphics*);
 static  TrackerColumnFlags trackercolumn_columnflags(TrackerColumn*,
@@ -69,6 +69,7 @@ static void trackercolumn_vtable_init(TrackerColumn* self)
 	self->component.vtable = &trackercolumn_vtable;
 }
 
+/* implementation */
 void trackercolumn_init(TrackerColumn* self, psy_ui_Component* parent,
 	uintptr_t index, TrackerState* state, Workspace* workspace)
 {
@@ -102,8 +103,8 @@ TrackerColumn* trackercolumn_allocinit(psy_ui_Component* parent,
 void trackercolumn_ondraw(TrackerColumn* self, psy_ui_Graphics* g)
 {	
 	trackercolumn_drawtrackevents(self, g);
-	if (trackdrag_active(&self->state->trackconfig->resize) &&
-			self->state->trackconfig->resize.track == self->track) {
+	if (trackdrag_trackactive(&self->state->trackconfig->resize,
+			self->track)) {
 		trackercolumn_drawresizebar(self, g);
 	}
 }
@@ -188,7 +189,7 @@ void trackercolumn_drawentry(TrackerColumn* self, psy_ui_Graphics* g,
 	emptystr = (self->state->showemptydata) ? "." : "";
 	curr = entry->events;
 	psy_audio_patternevent_init(&emptyevent);
-	for (noteindex = 0; noteindex < trackdef->numnotes; ++noteindex) {
+	for (noteindex = 0; noteindex < trackdef_visinotes(trackdef); ++noteindex) {
 		psy_audio_PatternEvent* ev;
 		TrackerColumnFlags currcolumnflags;
 		uintptr_t column;		
@@ -250,7 +251,7 @@ void trackercolumn_drawentry(TrackerColumn* self, psy_ui_Graphics* g,
 			if (empty) {
 				digitstr = emptystr;
 			}
-			if (column > TRACKER_COLUMN_VOL &&
+			if (column > PATTERNEVENT_COLUMN_VOL &&
 					psy_audio_patternevent_tweakvalue(ev) != 0) {
 				empty = FALSE;				
 			}

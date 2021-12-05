@@ -27,7 +27,7 @@ typedef struct SeqviewTrackHeaders {
 } SeqviewTrackHeaders;
 
 void seqviewtrackheaders_init(SeqviewTrackHeaders* self,
-	psy_ui_Component* parent, SeqViewState*);
+	psy_ui_Component* parent, psy_ui_Component* view, SeqViewState*);
 
 void seqviewtrackheaders_build(SeqviewTrackHeaders*);
 

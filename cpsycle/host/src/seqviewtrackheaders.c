@@ -9,6 +9,7 @@
 #include "seqviewtrackheaders.h"
 
 /* SeqviewTrackHeaders */
+
 /* prototypes */
 static void seqviewtrackheaders_ondestroy(SeqviewTrackHeaders*);
 static void seqviewtrackheaders_onmouseup(SeqviewTrackHeaders*,
@@ -17,6 +18,7 @@ static void seqviewtrackheaders_onnewtrack(SeqviewTrackHeaders*,
 	psy_ui_Button* sender);
 static void seqviewtrackheaders_ondeltrack(SeqviewTrackHeaders*,
 	TrackBox* sender);
+
 /* vtable */
 static psy_ui_ComponentVtable trackheaderviews_vtable;
 static bool trackheaderviews_vtable_initialized = FALSE;
@@ -34,11 +36,12 @@ static void trackheaderview_vtable_init(SeqviewTrackHeaders* self)
 		trackheaderviews_vtable_initialized = TRUE;
 	}
 }
+
 /* implemenetation */
 void seqviewtrackheaders_init(SeqviewTrackHeaders* self,
-	psy_ui_Component* parent, SeqViewState* state)
+	psy_ui_Component* parent, psy_ui_Component* view, SeqViewState* state)
 {
-	psy_ui_component_init(&self->component, parent, NULL);
+	psy_ui_component_init(&self->component, parent, view);
 	trackheaderview_vtable_init(self);
 	self->component.vtable = &trackheaderviews_vtable;
 	self->state = state;	

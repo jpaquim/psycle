@@ -32,7 +32,7 @@ typedef struct SeqviewDuration {
 } SeqviewDuration;
 
 void seqviewduration_init(SeqviewDuration*, psy_ui_Component* parent,
-	Workspace*);
+	psy_ui_Component* view, Workspace*);
 void seqviewduration_update(SeqviewDuration*, bool force);
 void seqviewduration_stopdurationcalc(SeqviewDuration*);
 

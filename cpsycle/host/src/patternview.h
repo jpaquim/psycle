@@ -65,7 +65,7 @@ typedef struct PatternView {
 	SwingFillView swingfillview;	
 	TrackConfig trackconfig;
 	PatternViewState pvstate;
-	TrackerState state;	
+	TrackerState state;
 	PatternCmds cmds;	
 	bool aligndisplay;
 	int updatealign;

@@ -109,23 +109,24 @@ static psy_ui_ComponentVtable* vtable_init(TrackerGrid* self)
 	}
 	return &vtable;
 }
+
 /* implementation */
 void trackergrid_init(TrackerGrid* self, psy_ui_Component* parent,
-	TrackConfig* trackconfig, TrackerState* state, Workspace* workspace)
+	TrackerState* state, Workspace* workspace)
 {
 	assert(self);
 	assert(workspace);
+	assert(state);
 
 	/* init base component */
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_setvtable(&self->component, vtable_init(self));
 	/* set references */
 	self->workspace = workspace;	
-	psy_table_init(&self->columns);
-	patternviewstate_init(&self->defaultpvstate, &workspace->config.patview,
-		workspace_song(workspace), NULL);
-	trackerstate_init(&self->defaultgridstate, trackconfig, &self->defaultpvstate);		
-	trackergrid_setsharedgridstate(self, state, trackconfig);	
+	psy_table_init(&self->columns);	
+	self->state = state;
+	psy_signal_connect(&self->workspace->signal_playlinechanged, self,
+		trackergrid_onplaylinechanged);	
 	trackergrid_storecursor(self);
 	/* setup base component */
 	psy_ui_component_setbackgroundmode(&self->component,
@@ -169,7 +170,6 @@ void trackergrid_ondestroy(TrackerGrid* self)
 
 	trackergrid_dispose_signals(self);
 	psy_table_dispose(&self->columns);
-	trackerstate_dispose(&self->defaultgridstate);	
 }
 
 void trackergrid_init_signals(TrackerGrid* self)
@@ -184,20 +184,6 @@ void trackergrid_dispose_signals(TrackerGrid* self)
 	assert(self);
 	
 	psy_signal_dispose(&self->signal_colresize);
-}
-
-void trackergrid_setsharedgridstate(TrackerGrid* self, TrackerState*
-	state, TrackConfig* trackconfig)
-{
-	assert(self);
-	
-	if (state) {
-		self->state = state;
-		psy_signal_connect(&self->workspace->signal_playlinechanged, self,
-			trackergrid_onplaylinechanged);
-	} else {		
-		self->state = &self->defaultgridstate;
-	}
 }
 
 void trackergrid_ondraw(TrackerGrid* self, psy_ui_Graphics* g)
@@ -754,19 +740,19 @@ void trackergrid_end(TrackerGrid* self)
 		columndef = trackdef_columndef(trackdef, self->state->pv->cursor.column);
 		if (self->state->pv->cursor.track != patternviewstate_numsongtracks(self->state->pv) - 1 ||
 				self->state->pv->cursor.digit != columndef->numdigits - 1 ||
-				self->state->pv->cursor.column != TRACKER_COLUMN_PARAM) {
-			if (self->state->pv->cursor.column == TRACKER_COLUMN_PARAM &&
+				self->state->pv->cursor.column != PATTERNEVENT_COLUMN_PARAM) {
+			if (self->state->pv->cursor.column == PATTERNEVENT_COLUMN_PARAM &&
 				self->state->pv->cursor.digit == columndef->numdigits - 1) {
 				self->state->pv->cursor.track = patternviewstate_numsongtracks(self->state->pv) - 1;
 				trackdef = trackerstate_trackdef(self->state, self->state->pv->cursor.track);
-				columndef = trackdef_columndef(trackdef, TRACKER_COLUMN_PARAM);
-				self->state->pv->cursor.column = TRACKER_COLUMN_PARAM;
+				columndef = trackdef_columndef(trackdef, PATTERNEVENT_COLUMN_PARAM);
+				self->state->pv->cursor.column = PATTERNEVENT_COLUMN_PARAM;
 				self->state->pv->cursor.digit = columndef->numdigits - 1;
 				trackergrid_scrollright(self, self->state->pv->cursor);
 			} else {
 				trackdef = trackerstate_trackdef(self->state, self->state->pv->cursor.track);
-				columndef = trackdef_columndef(trackdef, TRACKER_COLUMN_PARAM);
-				self->state->pv->cursor.column = TRACKER_COLUMN_PARAM;
+				columndef = trackdef_columndef(trackdef, PATTERNEVENT_COLUMN_PARAM);
+				self->state->pv->cursor.column = PATTERNEVENT_COLUMN_PARAM;
 				self->state->pv->cursor.digit = columndef->numdigits - 1;
 			}			
 		}
@@ -946,7 +932,7 @@ void trackergrid_rowclear(TrackerGrid* self)
 {
 	assert(self);
 
-	if (self->state->pv->cursor.column == TRACKER_COLUMN_NOTE) {
+	if (self->state->pv->cursor.column == PATTERNEVENT_COLUMN_NOTE) {
 		psy_undoredo_execute(&self->workspace->undoredo,
 			&removecommand_allocinit(
 				patternviewstate_pattern(self->state->pv),
@@ -1096,7 +1082,7 @@ void trackergrid_inputvalue(TrackerGrid* self, uintptr_t newvalue, bool isdigit)
 			trackdef = trackerstate_trackdef(self->state, self->state->pv->cursor.track);
 			columndef = trackdef_columndef(trackdef, self->state->pv->cursor.column);
 			if (!isdigit) {
-				if (columndef->wrapclearcolumn == TRACKER_COLUMN_NONE) {
+				if (columndef->wrapclearcolumn == PATTERNEVENT_COLUMN_NONE) {
 					trackergrid_nextcol(self);
 				} else {
 					self->state->pv->cursor.digit = 0;
@@ -1104,7 +1090,7 @@ void trackergrid_inputvalue(TrackerGrid* self, uintptr_t newvalue, bool isdigit)
 					trackergrid_advanceline(self);
 				}
 			} else if (self->state->pv->cursor.digit + 1 >= columndef->numdigits) {
-				if (columndef->wrapeditcolumn == TRACKER_COLUMN_NONE) {
+				if (columndef->wrapeditcolumn == PATTERNEVENT_COLUMN_NONE) {
 					trackergrid_nextcol(self);
 				} else {
 					self->state->pv->cursor.digit = 0;
@@ -1691,7 +1677,7 @@ bool trackergrid_handlecommand(TrackerGrid* self, intptr_t cmd)
 	case CMD_DIGITD:
 	case CMD_DIGITE:
 	case CMD_DIGITF:
-		if (self->state->pv->cursor.column != TRACKER_COLUMN_NOTE) {
+		if (self->state->pv->cursor.column != PATTERNEVENT_COLUMN_NOTE) {
 			int digit = (int)cmd - CMD_DIGIT0;
 			if (digit >= 0) {
 				trackergrid_inputvalue(self, (uint8_t)digit, ISDIGIT);
@@ -1820,9 +1806,9 @@ static void trackerview_onconfigure(TrackerView*, PatternViewConfig*,
 
 /* implementation */
 void trackerview_init(TrackerView* self, psy_ui_Component* parent,
-	TrackConfig* trackconfig, TrackerState* state, Workspace* workspace)
+	TrackerState* state, Workspace* workspace)
 {
-	trackergrid_init(&self->grid, parent, trackconfig, state, workspace);
+	trackergrid_init(&self->grid, parent, state, workspace);
 	self->workspace = workspace;
 	psy_ui_component_setwheelscroll(&self->grid.component, 4);
 	psy_ui_component_setoverflow(trackergrid_base(&self->grid),

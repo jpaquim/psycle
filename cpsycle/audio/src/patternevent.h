@@ -97,7 +97,8 @@ typedef enum psy_audio_PatternEventColumn {
 	PATTERNEVENT_COLUMN_VOL = 3,
 	PATTERNEVENT_COLUMN_CMD = 4,
 	PATTERNEVENT_COLUMN_PARAM = 5,
-	PATTERNEVENT_COLUMN_END = 6
+	PATTERNEVENT_COLUMN_END = 6,
+	PATTERNEVENT_COLUMN_NONE = 7
 } psy_audio_PatternEventColumn;
 
 typedef struct psy_audio_PatternEvent {
