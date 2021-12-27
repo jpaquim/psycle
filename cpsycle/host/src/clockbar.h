@@ -33,8 +33,7 @@ typedef struct ClockBar {
 	Workspace* workspace;
 } ClockBar;
 
-void clockbar_init(ClockBar*, psy_ui_Component* parent,
-	Workspace* workspace);
+void clockbar_init(ClockBar*, psy_ui_Component* parent, Workspace* workspace);
 
 void clockbar_idle(ClockBar*);
 

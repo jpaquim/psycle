@@ -29,19 +29,18 @@ void metronomebar_init(MetronomeBar* self, psy_ui_Component* parent,
 	self->player = &workspace->player;
 	/* activated */
 	psy_ui_button_init_text_connect(&self->activated, metronomebar_base(self),
-		NULL, "metronome.metronome",
-		self, metronomebar_ontogglemetronomestate);
+		"metronome.metronome", self, metronomebar_ontogglemetronomestate);
 	/* precount */
-	psy_ui_label_init_text(&self->desc, metronomebar_base(self), NULL,
+	psy_ui_label_init_text(&self->desc, metronomebar_base(self),
 		"metronome.precount");
-	psy_ui_combobox_init(&self->precount, metronomebar_base(self), NULL);
+	psy_ui_combobox_init(&self->precount, metronomebar_base(self));
 	psy_ui_combobox_setcharnumber(&self->precount, 6);
 	metronomebar_fillprecount(self);
 	psy_ui_combobox_setcursel(&self->precount, 0);
 	psy_signal_connect(&self->precount.signal_selchanged, self,
 		metronomebar_onprecountchanged);
 	/* configure */
-	psy_ui_button_init_connect(&self->configure, metronomebar_base(self), NULL,
+	psy_ui_button_init_connect(&self->configure, metronomebar_base(self),
 		self, metronomebar_onconfigure);
 	psy_ui_button_loadresource(&self->configure, IDB_SETTINGS_LIGHT,
 		IDB_SETTINGS_DARK, psy_ui_colour_white());

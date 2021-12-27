@@ -1,14 +1,19 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
+
 
 #include "uiapp.h"
 #include "uisavedialog.h"
 #include "uiimpfactory.h"
+/* std */
 #include <string.h>
 #include <stdlib.h>
 
+/* implementation */
 void psy_ui_savedialog_init(psy_ui_SaveDialog* self, psy_ui_Component* parent)
 {
 	self->imp = psy_ui_impfactory_allocinit_savedialogimp(

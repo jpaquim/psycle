@@ -43,6 +43,7 @@ typedef struct VuBar {
 void vubar_init(VuBar*, psy_ui_Component* parent, Workspace*);
 
 void vubar_reset(VuBar*);
+void vubar_idle(VuBar*);
 
 INLINE psy_ui_Component* vubar_base(VuBar* self)
 {

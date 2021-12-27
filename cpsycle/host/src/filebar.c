@@ -29,31 +29,30 @@ void filebar_init(FileBar* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_ui_component_setstyletype(filebar_base(self), STYLE_FILEBAR);
 	psy_ui_component_setdefaultalign(filebar_base(self), psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
-	psy_ui_button_init(&self->recentbutton, filebar_base(self), NULL);
+	psy_ui_button_init(&self->recentbutton, filebar_base(self));
 	psy_ui_button_seticon(&self->recentbutton, psy_ui_ICON_MORE);	
-	psy_ui_label_init_text(&self->header, filebar_base(self), NULL,
-		"file.song");	
-	psy_ui_button_init_text_connect(&self->newbutton, filebar_base(self), NULL,
+	psy_ui_label_init_text(&self->header, filebar_base(self), "file.song");
+	psy_ui_button_init_text_connect(&self->newbutton, filebar_base(self),
 		"file.new", self, filebar_onnewsong);
 	psy_ui_bitmap_loadresource(&self->newbutton.bitmapicon, IDB_NEW_DARK);
 	psy_ui_bitmap_settransparency(&self->newbutton.bitmapicon, psy_ui_colour_make(0x00FFFFFF));	
-	psy_ui_button_init_text_connect(&self->diskop, filebar_base(self), NULL,
+	psy_ui_button_init_text_connect(&self->diskop, filebar_base(self),
 		"file.diskop", self, filebar_ondiskop);	
-	psy_ui_button_init_text(&self->loadbutton, filebar_base(self), NULL,
+	psy_ui_button_init_text(&self->loadbutton, filebar_base(self),
 		"file.load");
 	psy_ui_button_loadresource(&self->loadbutton, IDB_OPEN_LIGHT,
 		IDB_OPEN_DARK, psy_ui_colour_white()); 
 	psy_signal_connect(&self->loadbutton.signal_clicked, self,
 		filebar_onloadsong);
-	psy_ui_button_init_text_connect(&self->savebutton, filebar_base(self), NULL,
+	psy_ui_button_init_text_connect(&self->savebutton, filebar_base(self),
 		"file.save", self, filebar_onsavesong);
 	psy_ui_button_loadresource(&self->savebutton, IDB_SAVE_LIGHT,
 		IDB_SAVE_DARK, psy_ui_colour_white());
-	psy_ui_button_init_text(&self->exportbutton, filebar_base(self), NULL,
+	psy_ui_button_init_text(&self->exportbutton, filebar_base(self),
 		"file.export");
 	psy_ui_button_loadresource(&self->exportbutton, IDB_EARTH_LIGHT,
 		IDB_EARTH_DARK, psy_ui_colour_white());
-	psy_ui_button_init_text(&self->renderbutton, filebar_base(self), NULL,
+	psy_ui_button_init_text(&self->renderbutton, filebar_base(self),
 		"file.render");	
 	psy_ui_button_loadresource(&self->renderbutton, IDB_PULSE_LIGHT,
 		IDB_PULSE_DARK, psy_ui_colour_white());

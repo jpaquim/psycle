@@ -10,7 +10,7 @@
 #include "workspace.h"
 /* ui */
 #include <uilabel.h>
-#include <uiedit.h>
+#include <uitextinput.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -21,7 +21,7 @@ typedef struct LabelEdit {
 	psy_ui_Component component;
 	/* internal */
 	psy_ui_Label desc;
-	psy_ui_Edit edit;	
+	psy_ui_TextInput edit;	
 } LabelEdit;
 
 void labeledit_init(LabelEdit*, psy_ui_Component* parent,

@@ -1,44 +1,46 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #if !defined(INSTRUMENTGENVIEW_H)
 #define INSTRUMENTGENVIEW_H
 
-// host
+/* host */
 #include "envelopeview.h"
 #include "instnotemapview.h"
 #include "workspace.h"
-// ui elements
+/* ui */
 #include <uibutton.h>
 #include <uicheckbox.h>
 #include <uicombobox.h>
-#include <uiedit.h>
 #include <uilabel.h>
 #include <uislider.h>
+#include <uitextinput.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 typedef struct InstrumentGeneralView {
-	// inherits
+	/* inherits */
 	psy_ui_Component component;
-	// ui elements
-	// nna
+	/* internal */
+	/* nna */
 	psy_ui_Component nna;	
 	psy_ui_Label nnaheader;
 	psy_ui_Button nnacut;
 	psy_ui_Button nnarelease;
 	psy_ui_Button nnafadeout;
 	psy_ui_Button nnanone;
-	// dct
+	/* dct */
 	psy_ui_Component dct;
 	psy_ui_Label dctheader;
 	psy_ui_Button dctnone;
 	psy_ui_Button dctnote;
 	psy_ui_Button dctsample;
 	psy_ui_Button dctinstrument;	
-	// dca
+	/* dca */
 	psy_ui_Component dca;
 	psy_ui_Label dcaheader;
 	psy_ui_Button dcacut;
@@ -47,7 +49,7 @@ typedef struct InstrumentGeneralView {
 	psy_ui_Button dcanone;
 	psy_ui_Component fitrow;
 	psy_ui_CheckBox fitrowcheck;
-	psy_ui_Edit fitrowedit;
+	psy_ui_TextInput fitrowedit;
 	psy_ui_Label fitrowlabel;
 	psy_ui_Component left;
 	psy_ui_Slider globalvolume;	

@@ -12,12 +12,12 @@ void labelpair_init(LabelPair* self, psy_ui_Component* parent, const char* first
 {
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_setstyletype(&self->component, STYLE_LABELPAIR);
-	psy_ui_label_init_text(&self->first, &self->component, NULL, first);
+	psy_ui_label_init_text(&self->first, &self->component, first);
 	psy_ui_component_setstyletype(&self->first.component, STYLE_LABELPAIR_FIRST);
 	psy_ui_label_settextalignment(&self->first, psy_ui_ALIGNMENT_LEFT);
 	psy_ui_label_setcharnumber(&self->first, desccharnumber);
 	psy_ui_component_setalign(&self->first.component, psy_ui_ALIGN_LEFT);
-	psy_ui_label_init(&self->second, &self->component, NULL);
+	psy_ui_label_init(&self->second, &self->component);
 	psy_ui_component_setstyletype(&self->second.component, STYLE_LABELPAIR_SECOND);
 	psy_ui_label_preventtranslation(&self->second);
 	psy_ui_label_settextalignment(&self->second, psy_ui_ALIGNMENT_LEFT);

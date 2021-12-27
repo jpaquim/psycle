@@ -45,7 +45,6 @@ static bool psy_ui_x11app_sendeventtoparent(psy_ui_X11App*,
 	psy_ui_x11_ComponentImp*, int mask, XEvent*);
 static void psy_ui_x11app_adjustcoordinates(psy_ui_Component*,
 	psy_ui_RealPoint*);
-static int psy_ui_x11app_timertick(psy_ui_X11App*);
 static void psy_ui_x11app_update_keyevent_mods(psy_ui_X11App*,
 	psy_ui_KeyboardEvent*);
 static void psy_ui_x11app_update_mouseevent_mods(psy_ui_X11App*,
@@ -128,8 +127,7 @@ void psy_ui_x11app_init(psy_ui_X11App* self, psy_ui_App* app, void* instance)
 	psy_ui_x11colours_init(&self->colourmap, self->dpy);
 	self->dograb = FALSE;
 	self->grabwin = 0;
-	self->targetids = NULL;
-	psy_timers_init(&self->wintimers);
+	self->targetids = NULL;	
 	self->shiftstate = FALSE;
 	self->controlstate = FALSE;
 	self->altstate = FALSE;
@@ -192,8 +190,7 @@ void psy_ui_x11app_dispose(psy_ui_X11App* self)
 	psy_table_dispose(&self->winidmap);
 	XCloseDisplay(self->dpy);
 	psy_ui_x11colours_dispose(&self->colourmap);
-	psy_list_free(self->targetids);
-	psy_timers_dispose(&self->wintimers);
+	psy_list_free(self->targetids);	
 }
 
 int psy_ui_x11app_run(psy_ui_X11App* self)
@@ -214,8 +211,8 @@ int psy_ui_x11app_run(psy_ui_X11App* self)
 			XNextEvent(self->dpy, &event);
 			psy_ui_x11app_handle_event(self, &event);
 		} else {
-			if (select(x11_fd + 1, &in_fds, 0, 0, &tv) == 0) {
-				psy_ui_x11app_timertick(self);
+			if (select(x11_fd + 1, &in_fds, 0, 0, &tv) == 0) {				
+				psy_timers_tick(&self->app->wintimers);
 			}
 			if (tv.tv_usec == 0) {
 				tv.tv_sec = 0;
@@ -235,29 +232,6 @@ void psy_ui_x11app_stop(psy_ui_X11App* self)
 void psy_ui_x11app_close(psy_ui_X11App* self)
 {
 	self->running = FALSE;
-}
-
-int psy_ui_x11app_timertick(psy_ui_X11App* self)
-{	
-	psy_timers_tick(&self->wintimers);
-}
-
-void psy_ui_x11app_starttimer(psy_ui_X11App* self, uintptr_t hwnd, uintptr_t id,
-	uintptr_t interval)
-{
-	psy_ui_x11_ComponentImp* imp;
-
-	imp = (psy_ui_x11_ComponentImp*)psy_table_at(&self->selfmap, hwnd);
-	if (!imp && !imp->component) {
-		return;
-	}
-	psy_timers_addtimer(&self->wintimers, hwnd, imp->component,
-		(psy_fp_timerwork)imp->component->vtable->ontimer, id, interval);
-}
-
-void psy_ui_x11app_stoptimer(psy_ui_X11App* self, uintptr_t hwnd, uintptr_t id)
-{
-	psy_timers_removetimer(&self->wintimers, hwnd, id);
 }
 
 int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
@@ -575,14 +549,10 @@ void psy_ui_x11app_destroy_window(psy_ui_X11App* self, Window window)
 		component = imp->component;
 		deallocate = FALSE;
 		if (imp->component) {
-
             deallocate = imp->component->deallocate;
             psy_signal_emit(&imp->component->signal_destroy,
 					imp->component, 0);
-			imp->component->vtable->ondestroy(imp->component);
-            psy_signal_emit(&imp->component->signal_destroyed,
-				imp->component, 0);
-				imp->component->vtable->ondestroyed(imp->component);
+			imp->component->vtable->ondestroy(imp->component);    
 			psy_ui_component_dispose(imp->component);
 		} else {
 			imp->imp.vtable->dev_dispose(&imp->imp);

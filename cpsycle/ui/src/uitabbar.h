@@ -21,7 +21,7 @@
 **  psy_ui_Component <>----<> psy_ui_ComponentImp
 **        ^
 **         |
-**         |            psy_ui_Component <>----<> psy_ui_ViewComponentImp
+**         |            psy_ui_Component
 **         |                    ^
 **         |                    |
 **  psy_ui_TabBar <@>------ psy_ui_Tab
@@ -63,11 +63,11 @@ typedef struct psy_ui_Tab {
 	psy_ui_Colour bitmaptransparency;
 } psy_ui_Tab;
 
-void psy_ui_tab_init(psy_ui_Tab*, psy_ui_Component* parent, psy_ui_Component* view,
+void psy_ui_tab_init(psy_ui_Tab*, psy_ui_Component* parent,
 	const char* text, uintptr_t index);
 
 psy_ui_Tab* psy_ui_tab_alloc(void);
-psy_ui_Tab* psy_ui_tab_allocinit(psy_ui_Component* parent, psy_ui_Component* view,
+psy_ui_Tab* psy_ui_tab_allocinit(psy_ui_Component* parent,
 	const char* text, uintptr_t index);
 
 void psy_ui_tab_settext(psy_ui_Tab*, const char* text);
@@ -94,8 +94,7 @@ typedef struct psy_ui_TabBar {
 	psy_ui_AlignType tabalignment;
 } psy_ui_TabBar;
 
-void psy_ui_tabbar_init(psy_ui_TabBar*, psy_ui_Component* parent,
-	psy_ui_Component* view);
+void psy_ui_tabbar_init(psy_ui_TabBar*, psy_ui_Component* parent);
 
 psy_ui_Tab* psy_ui_tabbar_append(psy_ui_TabBar*, const char* label,
 	uintptr_t lightresourceid, uintptr_t darkresourceid,

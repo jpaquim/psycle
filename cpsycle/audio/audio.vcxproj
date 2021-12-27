@@ -191,7 +191,7 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <AdditionalIncludeDirectories>$(SolutionDir)script\src;$(SolutionDir)thread\src;$(SolutionDir)file\src;$(SolutionDir)container\src;$(SolutionDir)dsp\src;$(SolutionDir)lua54\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)luaui\src;$(SolutionDir)script\src;$(SolutionDir)thread\src;$(SolutionDir)file\src;$(SolutionDir)container\src;$(SolutionDir)dsp\src;$(SolutionDir)lua54\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>

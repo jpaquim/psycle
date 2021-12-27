@@ -67,33 +67,33 @@ void playbar_init(PlayBar* self, psy_ui_Component* parent, Workspace* workspace)
 	self->workspace = workspace;
 	self->player = workspace_player(workspace);
 	/* loop */
-	psy_ui_button_init_text_connect(&self->loop, playbar_base(self), NULL,
+	psy_ui_button_init_text_connect(&self->loop, playbar_base(self),
 		"play.loop", self, playbar_onloopclicked);	
 	psy_ui_button_loadresource(&self->loop, IDB_LOOP_LIGHT, IDB_LOOP_DARK,
 		psy_ui_colour_white());
 	/* record */
 	psy_ui_button_init_text_connect(&self->recordnotes, playbar_base(self),
-		NULL, "play.record-notes", self, playbar_onrecordnotesclicked);
+		"play.record-notes", self, playbar_onrecordnotesclicked);
 	/* play */
-	psy_ui_button_init_text_connect(&self->play, playbar_base(self), NULL,
+	psy_ui_button_init_text_connect(&self->play, playbar_base(self),
 		"play.play", self, playbar_onplayclicked);
 	psy_ui_button_loadresource(&self->play, IDB_PLAY_LIGHT, IDB_PLAY_DARK,
 		psy_ui_colour_white());
 	/* playmode */
-	psy_ui_combobox_init(&self->playmode, playbar_base(self), NULL);
+	psy_ui_combobox_init(&self->playmode, playbar_base(self));
 	psy_ui_combobox_setcharnumber(&self->playmode, 6.0);	
 	/* play beat num */
-	psy_ui_edit_init(&self->loopbeatsedit, playbar_base(self));
-	psy_ui_edit_settext(&self->loopbeatsedit, "4.00");
-	psy_ui_edit_setcharnumber(&self->loopbeatsedit, 6);
-	psy_ui_button_init_connect(&self->loopbeatsless, playbar_base(self), NULL,
+	psy_ui_textinput_init(&self->loopbeatsedit, playbar_base(self));
+	psy_ui_textinput_settext(&self->loopbeatsedit, "4.00");
+	psy_ui_textinput_setcharnumber(&self->loopbeatsedit, 6);
+	psy_ui_button_init_connect(&self->loopbeatsless, playbar_base(self),
 		self, playbar_onnumplaybeatsless);
 	psy_ui_button_seticon(&self->loopbeatsless, psy_ui_ICON_LESS);	
-	psy_ui_button_init_connect(&self->loopbeatsmore, playbar_base(self), NULL,
+	psy_ui_button_init_connect(&self->loopbeatsmore, playbar_base(self),
 		self, playbar_onnumplaybeatsmore);
 	psy_ui_button_seticon(&self->loopbeatsmore, psy_ui_ICON_MORE);	
 	/* stop */
-	psy_ui_button_init_text_connect(&self->stop, playbar_base(self), NULL,
+	psy_ui_button_init_text_connect(&self->stop, playbar_base(self),
 		"play.stop", self, playbar_onstopclicked);	
 	psy_ui_button_loadresource(&self->stop, IDB_STOP_LIGHT, IDB_STOP_DARK,
 		psy_ui_colour_white());
@@ -127,13 +127,13 @@ void playbar_onnumplaybeatsless(PlayBar* self, psy_ui_Button* sender)
 	psy_dsp_big_beat_t playbeats;
 	char text[40];
 	
-	playbeats = (psy_dsp_big_beat_t) atof(psy_ui_edit_text(&self->loopbeatsedit));
+	playbeats = (psy_dsp_big_beat_t) atof(psy_ui_textinput_text(&self->loopbeatsedit));
 	if (playbeats > 1) {
 		playbeats -= 1;
 	}
 	psy_audio_sequencer_setnumplaybeats(&self->player->sequencer, playbeats);
 	psy_snprintf(text, 40, "%f", (double) playbeats);
-	psy_ui_edit_settext(&self->loopbeatsedit, text);
+	psy_ui_textinput_settext(&self->loopbeatsedit, text);
 }
 
 void playbar_onnumplaybeatsmore(PlayBar* self, psy_ui_Button* sender)
@@ -141,11 +141,11 @@ void playbar_onnumplaybeatsmore(PlayBar* self, psy_ui_Button* sender)
 	psy_dsp_big_beat_t playbeats;
 	char text[40];
 	
-	playbeats = (psy_dsp_big_beat_t) atof(psy_ui_edit_text(&self->loopbeatsedit));	
+	playbeats = (psy_dsp_big_beat_t) atof(psy_ui_textinput_text(&self->loopbeatsedit));
 	playbeats += 1;		
 	psy_audio_sequencer_setnumplaybeats(&self->player->sequencer, playbeats);
 	psy_snprintf(text, 40, "%f", (double) playbeats);
-	psy_ui_edit_settext(&self->loopbeatsedit, text);
+	psy_ui_textinput_settext(&self->loopbeatsedit, text);
 }
 
 void playbar_onplayclicked(PlayBar* self, psy_ui_Component* sender)
@@ -192,7 +192,7 @@ void playbar_startplay(PlayBar* self)
 
 			editposition = self->workspace->song->sequence.cursor;
 			startposition += (psy_dsp_big_beat_t)editposition.offset;
-			numplaybeats = (psy_dsp_big_beat_t)atof(psy_ui_edit_text(
+			numplaybeats = (psy_dsp_big_beat_t)atof(psy_ui_textinput_text(
 				&self->loopbeatsedit));
 			self->player->sequencer.numplaybeats = numplaybeats;
 		}

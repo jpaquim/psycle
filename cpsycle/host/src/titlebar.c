@@ -1,21 +1,24 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
 #include "titlebar.h"
-// host
+/* host */
 #include "styles.h"
-// std
+/* std */
 #include <stdlib.h>
-// platform
+/* platform */
 #include "../../detail/portable.h"
 
-// prototypes
+/* prototypes */
 static void titlebar_ondestroy(TitleBar*);
 static void titlebar_onhide(TitleBar*);
 static void titlebar_ondragstart(TitleBar*, psy_ui_DragEvent*);
-// vtable
+
+/* vtable  */
 static psy_ui_ComponentVtable titlebar_vtable;
 static bool titlebar_vtable_initialized = FALSE;
 
@@ -33,8 +36,9 @@ static void titlebar_vtable_init(TitleBar* self)
 	}
 	self->component.vtable = &titlebar_vtable;
 }
-// implementation
-void titlebar_init(TitleBar* self, psy_ui_Component* parent,
+
+/* implementation */
+void titlebar_init(TitleBar* self, psy_ui_Component* parent,	
 	psy_ui_Component* view, const char* title)
 {
 	psy_ui_Margin margin;
@@ -45,9 +49,9 @@ void titlebar_init(TitleBar* self, psy_ui_Component* parent,
 	psy_ui_component_setstyletype(&self->component, STYLE_HEADER);
 	psy_ui_component_init_align(&self->client, &self->component, NULL,
 		psy_ui_ALIGN_CLIENT);
-	psy_ui_label_init_text(&self->title, &self->client, NULL, title);
+	psy_ui_label_init_text(&self->title, &self->client, title);
 	psy_ui_component_setalign(&self->title.component, psy_ui_ALIGN_LEFT);
-	psy_ui_button_init(&self->hide, &self->component, NULL);
+	psy_ui_button_init(&self->hide, &self->component);
 	psy_ui_button_preventtranslation(&self->hide);
 	psy_ui_button_settext(&self->hide, "X");	
 	psy_ui_component_setalign(&self->hide.component, psy_ui_ALIGN_RIGHT);

@@ -63,13 +63,12 @@ static void vtable_init(psy_ui_Button* self)
 	}
 	psy_ui_component_setvtable(psy_ui_button_base(self), &vtable);
 }
+
 /* implementation */
-void psy_ui_button_init(psy_ui_Button* self, psy_ui_Component* parent,
-	psy_ui_Component* view)
+void psy_ui_button_init(psy_ui_Button* self, psy_ui_Component* parent)
 {
-	psy_ui_component_init(psy_ui_button_base(self), parent, view);	
-	vtable_init(self);
-	psy_ui_component_doublebuffer(psy_ui_button_base(self));
+	psy_ui_component_init(psy_ui_button_base(self), parent, NULL);
+	vtable_init(self);	
 	self->icon = psy_ui_ICON_NONE;
 	self->charnumber = 0.0;
 	self->linespacing = 1.0;
@@ -99,29 +98,29 @@ void psy_ui_button_init(psy_ui_Button* self, psy_ui_Component* parent,
 }
 
 void psy_ui_button_init_text(psy_ui_Button* self, psy_ui_Component* parent,
-	psy_ui_Component* view, const char* text)
+	const char* text)
 {
 	assert(self);
 
-	psy_ui_button_init(self, parent, view);
+	psy_ui_button_init(self, parent);
 	psy_ui_button_settext(self, text);
 }
 
 void psy_ui_button_init_connect(psy_ui_Button* self, psy_ui_Component* parent,
-	psy_ui_Component* view, void* context, void* fp)
+	void* context, void* fp)
 {
 	assert(self);
 
-	psy_ui_button_init(self, parent, view);
+	psy_ui_button_init(self, parent);
 	psy_signal_connect(&self->signal_clicked, context, fp);
 }
 
 void psy_ui_button_init_text_connect(psy_ui_Button* self, psy_ui_Component*
-	parent, psy_ui_Component* view, const char* text, void* context, void* fp)
+	parent, const char* text, void* context, void* fp)
 {
 	assert(self);
 
-	psy_ui_button_init_connect(self, parent, view, context, fp);
+	psy_ui_button_init_connect(self, parent, context, fp);
 	psy_ui_button_settext(self, text);	
 }
 
@@ -130,14 +129,13 @@ psy_ui_Button* psy_ui_button_alloc(void)
 	return (psy_ui_Button*)malloc(sizeof(psy_ui_Button));
 }
 
-psy_ui_Button* psy_ui_button_allocinit(psy_ui_Component* parent,
-	psy_ui_Component* view)
+psy_ui_Button* psy_ui_button_allocinit(psy_ui_Component* parent)
 {
 	psy_ui_Button* rv;
 
 	rv = psy_ui_button_alloc();
 	if (rv) {
-		psy_ui_button_init(rv, parent, view);
+		psy_ui_button_init(rv, parent);
 		psy_ui_component_deallocateafterdestroyed(&rv->component);
 	}
 	return rv;

@@ -49,16 +49,16 @@ void sampleeditorbar_init(SampleEditorBar* self, psy_ui_Component* parent,
 	psy_ui_checkbox_settext(&self->selecttogether,
 		"samplesview.select-together");
 	psy_ui_checkbox_check(&self->selecttogether);
-	psy_ui_label_init_text(&self->selstartlabel, &self->component, NULL,
+	psy_ui_label_init_text(&self->selstartlabel, &self->component,
 		"samplesview.selstart");
-	psy_ui_edit_init(&self->selstartedit, &self->component);
-	psy_ui_edit_setcharnumber(&self->selstartedit, 10);			
-	psy_ui_label_init_text(&self->selendlabel, &self->component, NULL,
+	psy_ui_textinput_init(&self->selstartedit, &self->component);
+	psy_ui_textinput_setcharnumber(&self->selstartedit, 10);			
+	psy_ui_label_init_text(&self->selendlabel, &self->component,
 		"samplesview.selend");
-	psy_ui_edit_init(&self->selendedit, &self->component);
-	psy_ui_edit_setcharnumber(&self->selendedit, 10);
+	psy_ui_textinput_init(&self->selendedit, &self->component);
+	psy_ui_textinput_setcharnumber(&self->selendedit, 10);
 	psy_ui_label_init_text(&self->visualrepresentationdesc, &self->component,
-		NULL, "samplesview.visual");
+		"samplesview.visual");
 	psy_ui_checkbox_init(&self->doublecontloop, &self->component);
 	psy_ui_checkbox_settext(&self->doublecontloop, "samplesview.doublecont");		
 	psy_signal_connect(&self->doublecontloop.signal_clicked, self,
@@ -74,8 +74,7 @@ void sampleeditorbar_init(SampleEditorBar* self, psy_ui_Component* parent,
 	{	// resampling methods
 		int quality;
 		
-		psy_ui_combobox_init(&self->visualrepresentation, &self->component,
-			NULL);
+		psy_ui_combobox_init(&self->visualrepresentation, &self->component);
 		psy_ui_combobox_setcharnumber(&self->visualrepresentation, 12);
 		for (quality = 0; quality < psy_dsp_RESAMPLERQUALITY_NUMRESAMPLERS;
 				++quality) {
@@ -100,20 +99,20 @@ void sampleeditorbar_setselection(SampleEditorBar* self,
 {
 	char text[128];
 
-	psy_ui_edit_enableedit(&self->selstartedit);
-	psy_ui_edit_enableedit(&self->selendedit);
+	psy_ui_textinput_enableedit(&self->selstartedit);
+	psy_ui_textinput_enableedit(&self->selendedit);
 	psy_snprintf(text, 128, "%u", (unsigned int)selectionstart);
-	psy_ui_edit_settext(&self->selstartedit, text);
+	psy_ui_textinput_settext(&self->selstartedit, text);
 	psy_snprintf(text, 128, "%u", (unsigned int)selectionend);
-	psy_ui_edit_settext(&self->selendedit, text);
+	psy_ui_textinput_settext(&self->selendedit, text);
 }
 
 void sampleeditorbar_clearselection(SampleEditorBar* self)
 {
-	psy_ui_edit_preventedit(&self->selstartedit);
-	psy_ui_edit_preventedit(&self->selendedit);
-	psy_ui_edit_settext(&self->selstartedit, "");
-	psy_ui_edit_settext(&self->selendedit, "");
+	psy_ui_textinput_preventedit(&self->selstartedit);
+	psy_ui_textinput_preventedit(&self->selendedit);
+	psy_ui_textinput_settext(&self->selstartedit, "");
+	psy_ui_textinput_settext(&self->selendedit, "");
 }
 
 void sampleeditorbar_ondoublecontloop(SampleEditorBar* self,
@@ -154,15 +153,15 @@ void sampleeditoroperations_init(SampleEditorOperations* self,
 	psy_ui_Component* parent, Workspace* workspace)
 {
 	psy_ui_component_init(&self->component, parent, NULL);
-	psy_ui_button_init(&self->cut, &self->component, NULL);
+	psy_ui_button_init(&self->cut, &self->component);
 	psy_ui_button_settext(&self->cut, "edit.cut");
-	psy_ui_button_init(&self->crop, &self->component, NULL);
+	psy_ui_button_init(&self->crop, &self->component);
 	psy_ui_button_settext(&self->crop, "edit.crop");
-	psy_ui_button_init(&self->copy, &self->component, NULL);
+	psy_ui_button_init(&self->copy, &self->component);
 	psy_ui_button_settext(&self->copy, "edit.copy");
-	psy_ui_button_init(&self->paste, &self->component, NULL);
+	psy_ui_button_init(&self->paste, &self->component);
 	psy_ui_button_settext(&self->paste, "edit.paste");
-	psy_ui_button_init(&self->del, &self->component, NULL);
+	psy_ui_button_init(&self->del, &self->component);
 	psy_ui_button_settext(&self->del, "edit.delete");
 	sampleeditoroperations_initalign(self);
 }
@@ -192,10 +191,9 @@ void sampleeditoramplify_init(SampleEditorAmplify* self,
 	self->workspace = workspace;
 	self->gainvalue = (psy_dsp_amp_t) 2/3.f;
 	psy_ui_component_init(&self->component, parent, NULL);
-	psy_ui_label_init_text(&self->header, &self->component, NULL,
-		"Adjust Volume");
+	psy_ui_label_init_text(&self->header, &self->component, "Adjust Volume");
 	psy_ui_component_setalign(&self->header.component, psy_ui_ALIGN_TOP);
-	psy_ui_slider_init(&self->gain, &self->component, NULL);
+	psy_ui_slider_init(&self->gain, &self->component);
 	psy_ui_slider_showvertical(&self->gain);
 	psy_ui_slider_setcharnumber(&self->gain, 4);
 	psy_ui_slider_connect(&self->gain, self,
@@ -203,7 +201,7 @@ void sampleeditoramplify_init(SampleEditorAmplify* self,
 		(ui_slider_fptweak)sampleeditoramplify_ontweak,
 		(ui_slider_fpvalue)sampleeditoramplify_onvalue);
 	psy_ui_component_setalign(&self->gain.component, psy_ui_ALIGN_LEFT);
-	psy_ui_label_init(&self->dbdisplay, &self->component, NULL);
+	psy_ui_label_init(&self->dbdisplay, &self->component);
 	psy_ui_label_preventtranslation(&self->dbdisplay);
 	sampleeditoramplify_ondescribe(self, 0, text);
 	psy_ui_label_settext(&self->dbdisplay, text);
@@ -242,7 +240,7 @@ void sampleeditluaprocessor_init(SampleEditLuaProcessor* self,
 {
 	self->workspace = workspace;
 	psy_ui_component_init(&self->component, parent, NULL);
-	psy_ui_label_init_text(&self->header, &self->component, NULL,
+	psy_ui_label_init_text(&self->header, &self->component,
 		"Lua Processor");
 	psy_ui_component_setalign(&self->header.component, psy_ui_ALIGN_TOP);
 	psy_ui_editor_init(&self->editor, &self->component);
@@ -261,6 +259,7 @@ static void sampleeditorprocessview_onprocessorselected(
 	SampleEditorProcessView*, psy_ui_Component* sender, int index);
 static void sampleeditor_selectionbound(SampleEditor*, uintptr_t* framestart,
 	uintptr_t* frameend, bool* hasselection);
+
 /* implementation */
 void sampleprocessview_init(SampleEditorProcessView* self,
 	psy_ui_Component* parent, Workspace* workspace)
@@ -275,7 +274,7 @@ void sampleprocessview_init(SampleEditorProcessView* self,
 	psy_ui_component_setmargin(&self->client, margin);
 	sampleeditoroperations_init(&self->copypaste, &self->client, workspace);
 	psy_ui_component_setalign(&self->copypaste.component, psy_ui_ALIGN_TOP);
-	psy_ui_button_init(&self->process, &self->client, NULL);
+	psy_ui_button_init(&self->process, &self->client);
 	psy_ui_button_settext(&self->process, "samplesview.process");
 	psy_ui_component_setalign(&self->process.component, psy_ui_ALIGN_TOP);
 	psy_ui_margin_init_em(&margin, 1.5, 0.0, 0.5, 0.0);		
@@ -300,9 +299,9 @@ void sampleprocessview_init(SampleEditorProcessView* self,
 		psy_ui_notebook_base(&self->notebook), NULL);
 	psy_ui_component_init(&self->emptypage6,
 		psy_ui_notebook_base(&self->notebook), NULL);
-	sampleeditluaprocessor_init(&self->luaprocessor,
+/*	sampleeditluaprocessor_init(&self->luaprocessor,
 		psy_ui_notebook_base(&self->notebook),
-		workspace);	
+		workspace);	*/
 	psy_ui_listbox_setcursel(&self->processors, 0);
 	psy_ui_notebook_select(&self->notebook, 0);
 	psy_signal_connect(&self->processors.signal_selchanged, self,
@@ -319,7 +318,7 @@ void sampleprocessview_buildprocessorlist(SampleEditorProcessView* self)
 	psy_ui_listbox_addtext(&self->processors, "Normalize");
 	psy_ui_listbox_addtext(&self->processors, "Remove DC");
 	psy_ui_listbox_addtext(&self->processors, "Reverse");
-	psy_ui_listbox_addtext(&self->processors, "Lua");
+	/* psy_ui_listbox_addtext(&self->processors, "Lua"); */
 }
 
 void sampleeditorprocessview_onprocessorselected(SampleEditorProcessView* self,
@@ -372,9 +371,9 @@ void sampleeditorplaybar_init(SampleEditorPlayBar* self,
 	// psy_ui_button_init(&self->loop, &self->component);
 	// psy_ui_button_settext(&self->loop, "Loop");	
 	// psy_signal_connect(&self->loop.signal_clicked, self, onloopclicked);	
-	psy_ui_button_init(&self->play, &self->component, NULL);
+	psy_ui_button_init(&self->play, &self->component);
 	psy_ui_button_settext(&self->play, "samplesview.play");	
-	psy_ui_button_init(&self->stop, &self->component, NULL);
+	psy_ui_button_init(&self->stop, &self->component);
 	psy_ui_button_settext(&self->stop, "samplesview.stop");
 	// psy_signal_connect(&self->stop.signal_clicked, self, onstopclicked);	
 	sampleeditorplaybar_initalign(self);	
@@ -417,14 +416,14 @@ static void sampleeditorheader_vtable_init(SampleEditorHeader* self)
 	}
 	self->component.vtable = &sampleeditorheader_vtable;
 }
+
 /* implementation */
 void sampleeditorheader_init(SampleEditorHeader* self,
 	psy_ui_Component* parent)
 {
 	self->metric = 0;
 	psy_ui_component_init(&self->component, parent, NULL);
-	sampleeditorheader_vtable_init(self);	
-	psy_ui_component_doublebuffer(&self->component);	
+	sampleeditorheader_vtable_init(self);			
 }
 
 void sampleeditorheader_setwaveboxmetric(SampleEditorHeader* self,
@@ -692,7 +691,7 @@ void sampleeditor_init(SampleEditor* self, psy_ui_Component* parent,
 		sampleeditor_oncrop);
 	psy_signal_connect(&self->processview.copypaste.del.signal_clicked, self,
 		sampleeditor_ondelete);
-	psy_ui_splitter_init(&self->splitbar, &self->component, NULL);
+	psy_ui_splitter_init(&self->splitbar, &self->component);
 	psy_ui_component_setalign(&self->splitbar.component, psy_ui_ALIGN_RIGHT);
 	sampleeditorplaybar_init(&self->playbar, &self->component, workspace);
 	psy_signal_connect(&self->playbar.play.signal_clicked, self,
@@ -922,16 +921,16 @@ void sampleeditor_onprocess(SampleEditor* self, psy_ui_Component* sender)
 		} else			
 		if (selected == 7) {
 			if (self->sample) {
-				psy_ui_editor_settext(&self->processview.luaprocessor.console,
-					"No Selection, first mark samples to process");
+				/*psy_ui_editor_settext(&self->processview.luaprocessor.console,
+					"No Selection, first mark samples to process"); */
 			} 			
 		}		
 	}
 	if (psy_table_size(&self->samplebox.waveboxes) == 0) {
 		if (selected == 7) {
 			if (!self->sample) {
-				psy_ui_editor_settext(&self->processview.luaprocessor.console,
-					"No wave data, first load sample");
+			/*	psy_ui_editor_settext(&self->processview.luaprocessor.console,
+					"No wave data, first load sample"); */
 			}
 		}
 	}
@@ -1059,7 +1058,7 @@ void sampleeditor_amplify(SampleEditor* self, uintptr_t channel,
 void sampleeditor_processlua(SampleEditor* self, uintptr_t channel,
 	uintptr_t framestart, uintptr_t frameend)
 {
-	psy_PsycleScript processor;
+	/* psy_PsycleScript processor;
 	char text[65535];
 
 	psy_ui_editor_clear(&self->processview.luaprocessor.console);
@@ -1110,7 +1109,7 @@ void sampleeditor_processlua(SampleEditor* self, uintptr_t channel,
 		psyclescript_dispose(&processor);
 		return;
 	}
-	psyclescript_dispose(&processor);
+	psyclescript_dispose(&processor); */
 }
 
 void sampleeditor_removeDC(SampleEditor* self, uintptr_t channel,

@@ -35,6 +35,7 @@ static void vtable_init(LinesPerBeatBar* self)
 	}	
 	psy_ui_component_setvtable(linesperbeatbar_base(self), &vtable);
 }
+
 /* implementation */
 void linesperbeatbar_init(LinesPerBeatBar* self, psy_ui_Component* parent,
 	psy_audio_Player* player)
@@ -53,13 +54,13 @@ void linesperbeatbar_init(LinesPerBeatBar* self, psy_ui_Component* parent,
 		psy_ui_ALIGN_LEFT, psy_ui_defaults_hmargin(psy_ui_defaults()));
 	/* lpb description label */
 	psy_ui_label_init_text(&self->desc, linesperbeatbar_base(self),
-		NULL, "lpb.lines-per-beat");	
+		"lpb.lines-per-beat");	
 	/* less button */
 	psy_ui_button_init_connect(&self->less, linesperbeatbar_base(self),
-		NULL, self, linesperbeatbar_onlessclicked);
+		self, linesperbeatbar_onlessclicked);
 	psy_ui_button_seticon(&self->less, psy_ui_ICON_LESS);
 	/* lpb number label */
-	psy_ui_label_init(&self->number, linesperbeatbar_base(self), NULL);
+	psy_ui_label_init(&self->number, linesperbeatbar_base(self));
 	psy_ui_component_setstyletype(psy_ui_label_base(&self->number),
 		STYLE_LPB_NUMLABEL);
 	psy_ui_label_preventtranslation(&self->number);
@@ -67,7 +68,7 @@ void linesperbeatbar_init(LinesPerBeatBar* self, psy_ui_Component* parent,
 	psy_ui_label_settextalignment(&self->number, psy_ui_ALIGNMENT_CENTER);
 	/* more button */
 	psy_ui_button_init_connect(&self->more, linesperbeatbar_base(self),
-		NULL, self, linesperbeatbar_onmoreclicked);
+		self, linesperbeatbar_onmoreclicked);
 	psy_ui_button_seticon(&self->more, psy_ui_ICON_MORE);
 	/* start lpb poll timer */
 	psy_ui_component_starttimer(linesperbeatbar_base(self), 0,

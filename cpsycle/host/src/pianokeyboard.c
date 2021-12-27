@@ -46,8 +46,7 @@ void pianokeyboard_init(PianoKeyboard* self, psy_ui_Component* parent,
 	psy_ui_component_init(pianokeyboard_base(self), parent, NULL);
 	psy_ui_component_setvtable(pianokeyboard_base(self),
 		pianokeyboard_vtable_init(self));
-	pianokeyboard_setsharedkeyboardstate(self, keyboardstate);
-	psy_ui_component_doublebuffer(pianokeyboard_base(self));
+	pianokeyboard_setsharedkeyboardstate(self, keyboardstate);	
 	psy_ui_component_setbackgroundmode(pianokeyboard_base(self),
 		psy_ui_NOBACKGROUND);
 	psy_ui_component_setpreferredsize(pianokeyboard_base(self),

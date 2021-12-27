@@ -60,12 +60,12 @@ typedef struct PropertiesRenderLine {
 } PropertiesRenderLine;
 
 void propertiesrenderline_init(PropertiesRenderLine*,
-	psy_ui_Component* parent, psy_ui_Component* view,
-	PropertiesRenderState*, psy_Property*, uintptr_t level);
+	psy_ui_Component* parent, PropertiesRenderState*, psy_Property*,
+	uintptr_t level);
 
 PropertiesRenderLine* propertiesrenderline_alloc(void);
 PropertiesRenderLine* propertiesrenderline_allocinit(
-	psy_ui_Component* parent, psy_ui_Component* view,
+	psy_ui_Component* parent,
 	PropertiesRenderState*, psy_Property*, uintptr_t level);
 
 void propertiesrenderline_update(PropertiesRenderLine*);
@@ -146,7 +146,7 @@ typedef struct PropertiesView {
 } PropertiesView;
 
 void propertiesview_init(PropertiesView*, psy_ui_Component* parent,
-	psy_ui_Component* view, psy_ui_Component* tabbarparent, psy_Property*,
+	psy_ui_Component* tabbarparent, psy_Property*,
 	uintptr_t numcols, Workspace*);
 
 void propertiesview_reload(PropertiesView*);

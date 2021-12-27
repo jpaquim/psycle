@@ -19,11 +19,11 @@ typedef struct PatternTrackBox {
 } PatternTrackBox;
 
 void patterntrackbox_init(PatternTrackBox*, psy_ui_Component* parent,
-	psy_ui_Component* view, uintptr_t index, TrackerState*);
+	uintptr_t index, TrackerState*);
 
 PatternTrackBox* patterntrackbox_alloc(void);
 PatternTrackBox* patterntrackbox_allocinit(psy_ui_Component* parent,
-	psy_ui_Component* view, uintptr_t index, TrackerState*);
+	uintptr_t index, TrackerState*);
 
 void patterntrackbox_playon(PatternTrackBox*);
 void patterntrackbox_playoff(PatternTrackBox*);

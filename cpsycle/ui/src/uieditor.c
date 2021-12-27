@@ -39,21 +39,21 @@ static HMODULE scimodule = 0;
 
 static int loadscilexer(void);
 static void onappdestroy(void*, psy_ui_App* sender);
-static void psy_ui_editor_setfont(psy_ui_Editor*, psy_ui_Font*);
-static void psy_ui_editor_styleclearall(psy_ui_Editor*);
-static void psy_ui_editor_setcaretcolour(psy_ui_Editor*, psy_ui_Colour colour);
-static intptr_t sci(psy_ui_Editor*, uintptr_t msg, uintptr_t wparam,
+static void psy_ui_editor_setfont(psy_ui_TextInputor*, psy_ui_Font*);
+static void psy_ui_editor_styleclearall(psy_ui_TextInputor*);
+static void psy_ui_editor_setcaretcolour(psy_ui_TextInputor*, psy_ui_Colour colour);
+static intptr_t sci(psy_ui_TextInputor*, uintptr_t msg, uintptr_t wparam,
 	uintptr_t lparam);
-static void psy_ui_editor_getrange(psy_ui_Editor*, intptr_t start, intptr_t end, char* text);
-static void setstyle(psy_ui_Editor*, int style, COLORREF fore, COLORREF back,
+static void psy_ui_editor_getrange(psy_ui_TextInputor*, intptr_t start, intptr_t end, char* text);
+static void setstyle(psy_ui_TextInputor*, int style, COLORREF fore, COLORREF back,
 	int size, const char* face);
-static void psy_ui_editor_onstylesupdate(psy_ui_Editor*);
+static void psy_ui_editor_onstylesupdate(psy_ui_TextInputor*);
 
 static psy_ui_ComponentVtable vtable;
 static bool vtable_initialized = FALSE;
 static psy_ui_fp_component_setfont super_setfont;
 
-static void vtable_init(psy_ui_Editor* self)
+static void vtable_init(psy_ui_TextInputor* self)
 {
 	if (!vtable_initialized) {		
 		vtable = *(self->component.vtable);
@@ -69,7 +69,7 @@ static void vtable_init(psy_ui_Editor* self)
 	self->component.vtable = &vtable;
 }
 /* implementation */
-void psy_ui_editor_init(psy_ui_Editor* self, psy_ui_Component* parent)
+void psy_ui_editor_init(psy_ui_TextInputor* self, psy_ui_Component* parent)
 {  				
 	int err;
 
@@ -158,14 +158,14 @@ void onappdestroy(void* context, psy_ui_App* sender)
 	}
 }
 
-intptr_t sci(psy_ui_Editor* self, uintptr_t msg, uintptr_t wparam,
+intptr_t sci(psy_ui_TextInputor* self, uintptr_t msg, uintptr_t wparam,
 	uintptr_t lparam)
 {
 	return SendMessage((HWND) psy_ui_win_component_details(&self->component)->hwnd,
 		(UINT)msg, (WPARAM)wparam, (LPARAM)lparam);
 }
 
-void setstyle(psy_ui_Editor* self, int style, COLORREF fore, COLORREF back,
+void setstyle(psy_ui_TextInputor* self, int style, COLORREF fore, COLORREF back,
 	int size, const char* face)
 {
 	sci(self, SCI_STYLESETFORE, (uintptr_t)style, (uintptr_t)fore);
@@ -176,7 +176,7 @@ void setstyle(psy_ui_Editor* self, int style, COLORREF fore, COLORREF back,
 		sci(self, SCI_STYLESETFONT, (uintptr_t)style, (uintptr_t)face);
 }
 
-void psy_ui_editor_load(psy_ui_Editor* self, const char* path)
+void psy_ui_editor_load(psy_ui_TextInputor* self, const char* path)
 {	
 	FILE* fp;
 	
@@ -200,7 +200,7 @@ void psy_ui_editor_load(psy_ui_Editor* self, const char* path)
 	sci(self, SCI_GOTOPOS, 0, 0);
 }
 
-void psy_ui_editor_save(psy_ui_Editor* self, const char* path)
+void psy_ui_editor_save(psy_ui_TextInputor* self, const char* path)
 {
 	FILE* fp;
 
@@ -225,7 +225,7 @@ void psy_ui_editor_save(psy_ui_Editor* self, const char* path)
 	}
 }
 
-void psy_ui_editor_getrange(psy_ui_Editor* self, intptr_t start, intptr_t end, char* text)
+void psy_ui_editor_getrange(psy_ui_TextInputor* self, intptr_t start, intptr_t end, char* text)
 {
 	struct TextRange tr;
 
@@ -235,7 +235,7 @@ void psy_ui_editor_getrange(psy_ui_Editor* self, intptr_t start, intptr_t end, c
 	sci(self, SCI_GETTEXTRANGE, 0, (LPARAM)(&tr));
 }
 
-void psy_ui_editor_settext(psy_ui_Editor* self, const char* text)
+void psy_ui_editor_settext(psy_ui_TextInputor* self, const char* text)
 {
 	if (text) {
 		bool readonly;
@@ -255,14 +255,14 @@ void psy_ui_editor_settext(psy_ui_Editor* self, const char* text)
 	}
 }
 
-void psy_ui_editor_addtext(psy_ui_Editor* self, const char* text)
+void psy_ui_editor_addtext(psy_ui_TextInputor* self, const char* text)
 {
 	if (text) {
 		sci(self, SCI_ADDTEXT, strlen(text), (uintptr_t)text);
 	}
 }
 
-char* psy_ui_editor_text(psy_ui_Editor* self, uintptr_t maxlength, char* text)
+char* psy_ui_editor_text(psy_ui_TextInputor* self, uintptr_t maxlength, char* text)
 {
 	uintptr_t length;
 	
@@ -274,47 +274,47 @@ char* psy_ui_editor_text(psy_ui_Editor* self, uintptr_t maxlength, char* text)
 	return text;
 }
 
-uintptr_t psy_ui_editor_length(psy_ui_Editor* self)
+uintptr_t psy_ui_editor_length(psy_ui_TextInputor* self)
 {
 	return (uintptr_t)sci(self, SCI_GETLENGTH, 0, 0);
 }
 
-void psy_ui_editor_clear(psy_ui_Editor* self)
+void psy_ui_editor_clear(psy_ui_TextInputor* self)
 {
 	sci(self, SCI_CLEARALL, 0, 0);
 }
 
-void psy_ui_editor_setcolour(psy_ui_Editor* self, psy_ui_Colour colour)
+void psy_ui_editor_setcolour(psy_ui_TextInputor* self, psy_ui_Colour colour)
 {
 	sci(self, SCI_STYLESETFORE, STYLE_DEFAULT, psy_ui_colour_colorref(&colour));
 }
 
-void psy_ui_editor_setbackgroundcolour(psy_ui_Editor* self, psy_ui_Colour colour)
+void psy_ui_editor_setbackgroundcolour(psy_ui_TextInputor* self, psy_ui_Colour colour)
 {
 	sci(self, SCI_STYLESETBACK, STYLE_DEFAULT, psy_ui_colour_colorref(&colour));
 }
 
-void psy_ui_editor_styleclearall(psy_ui_Editor* self)
+void psy_ui_editor_styleclearall(psy_ui_TextInputor* self)
 {
 	sci(self, SCI_STYLECLEARALL, 0, 0);
 }
 
-void psy_ui_editor_setcaretcolour(psy_ui_Editor* self, psy_ui_Colour colour)
+void psy_ui_editor_setcaretcolour(psy_ui_TextInputor* self, psy_ui_Colour colour)
 {
 	sci(self, SCI_SETCARETFORE, psy_ui_colour_colorref(&colour), 0);
 }
 
-void psy_ui_editor_preventedit(psy_ui_Editor* self)
+void psy_ui_editor_preventedit(psy_ui_TextInputor* self)
 {	
 	sci(self, SCI_SETREADONLY, 1, 0);
 }
 
-void psy_ui_editor_enableedit(psy_ui_Editor* self)
+void psy_ui_editor_enableedit(psy_ui_TextInputor* self)
 {
 	sci(self, SCI_SETREADONLY, 0, 0);	
 }
 
-void psy_ui_editor_setfont(psy_ui_Editor* self, psy_ui_Font* source)
+void psy_ui_editor_setfont(psy_ui_TextInputor* self, psy_ui_Font* source)
 {
 	psy_ui_FontInfo fontinfo;
 	const psy_ui_Font* font;
@@ -338,17 +338,17 @@ void psy_ui_editor_setfont(psy_ui_Editor* self, psy_ui_Font* source)
 	psy_ui_editor_styleclearall(self);
 }
 
-void psy_ui_editor_enablewrap(psy_ui_Editor* self)
+void psy_ui_editor_enablewrap(psy_ui_TextInputor* self)
 {
 	sci(self, SCI_SETWRAPMODE, SC_WRAP_WORD, 0);
 }
 
-void psy_ui_editor_disablewrap(psy_ui_Editor* self)
+void psy_ui_editor_disablewrap(psy_ui_TextInputor* self)
 {
 	sci(self, SCI_SETWRAPMODE, SC_WRAP_NONE, 0);
 }
 
-void psy_ui_editor_onstylesupdate(psy_ui_Editor* self)
+void psy_ui_editor_onstylesupdate(psy_ui_TextInputor* self)
 {
 	psy_ui_editor_setcolour(self, psy_ui_style_const(psy_ui_STYLE_ROOT)->colour);
 	psy_ui_editor_setcaretcolour(self,
@@ -358,72 +358,72 @@ void psy_ui_editor_onstylesupdate(psy_ui_Editor* self)
 	psy_ui_editor_setfont(self, NULL);
 }
 
-void psy_ui_editor_gotoline(psy_ui_Editor* self, uintptr_t line)
+void psy_ui_editor_gotoline(psy_ui_TextInputor* self, uintptr_t line)
 {
 	sci(self, SCI_GOTOLINE, line, 0);
 }
 
 #else
 
-void psy_ui_editor_init(psy_ui_Editor* self, psy_ui_Component* parent)
+void psy_ui_editor_init(psy_ui_TextInputor* self, psy_ui_Component* parent)
 {
 	psy_ui_component_init(&self->component, parent, NULL);
 }
-void psy_ui_editor_load(psy_ui_Editor* self, const char* path)
+void psy_ui_editor_load(psy_ui_TextInputor* self, const char* path)
 {
 
 }
 
-void psy_ui_editor_save(psy_ui_Editor* self, const char* path)
+void psy_ui_editor_save(psy_ui_TextInputor* self, const char* path)
 {
     
 }
 
-void psy_ui_editor_settext(psy_ui_Editor* self, const char* text)
+void psy_ui_editor_settext(psy_ui_TextInputor* self, const char* text)
 {
 
 }
-void psy_ui_editor_addtext(psy_ui_Editor* self, const char* text)
-{
-
-}
-
-char* psy_ui_editor_text(psy_ui_Editor* self, uintptr_t maxlength, char* text)
-{
-}
-
-void psy_ui_editor_clear(psy_ui_Editor* self)
-{
-
-}
-void psy_ui_editor_setcolour(psy_ui_Editor* self, psy_ui_Colour colour)
-{
-
-}
-void psy_ui_editor_setbackgroundcolour(psy_ui_Editor* v, psy_ui_Colour colour)
-{
-
-}
-void psy_ui_editor_enableedit(psy_ui_Editor* self)
-{
-
-}
-void psy_ui_editor_preventedit(psy_ui_Editor* self)
+void psy_ui_editor_addtext(psy_ui_TextInputor* self, const char* text)
 {
 
 }
 
-void psy_ui_editor_enablewrap(psy_ui_Editor* self)
+char* psy_ui_editor_text(psy_ui_TextInputor* self, uintptr_t maxlength, char* text)
 {
-	
 }
 
-void psy_ui_editor_disablewrap(psy_ui_Editor* self)
+void psy_ui_editor_clear(psy_ui_TextInputor* self)
+{
+
+}
+void psy_ui_editor_setcolour(psy_ui_TextInputor* self, psy_ui_Colour colour)
+{
+
+}
+void psy_ui_editor_setbackgroundcolour(psy_ui_TextInputor* v, psy_ui_Colour colour)
+{
+
+}
+void psy_ui_editor_enableedit(psy_ui_TextInputor* self)
+{
+
+}
+void psy_ui_editor_preventedit(psy_ui_TextInputor* self)
+{
+
+}
+
+void psy_ui_editor_enablewrap(psy_ui_TextInputor* self)
 {
 	
 }
 
-void psy_ui_editor_gotoline(psy_ui_Editor* self, uintptr_t line)
+void psy_ui_editor_disablewrap(psy_ui_TextInputor* self)
+{
+	
+}
+
+void psy_ui_editor_gotoline(psy_ui_TextInputor* self, uintptr_t line)
 {
 	
 }

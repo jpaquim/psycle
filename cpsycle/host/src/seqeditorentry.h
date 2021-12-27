@@ -28,9 +28,9 @@ typedef struct SeqEditEntry {
 	psy_audio_SequenceEntry* seqentry;
 } SeqEditEntry;
 
-void seqeditentry_init(SeqEditEntry*,
-	psy_ui_Component* parent, psy_ui_Component* view, psy_audio_SequenceEntry*,
-	psy_audio_OrderIndex seqpos, struct SeqEditState*);
+void seqeditentry_init(SeqEditEntry*, psy_ui_Component* parent, 
+	psy_audio_SequenceEntry*, psy_audio_OrderIndex seqpos,
+	struct SeqEditState*);
 
 void seqeditentry_startdrag(SeqEditEntry*, psy_ui_MouseEvent*);
 
@@ -49,13 +49,12 @@ typedef struct SeqEditPatternEntry {
 } SeqEditPatternEntry;
 
 void seqeditpatternentry_init(SeqEditPatternEntry*,
-	psy_ui_Component* parent, psy_ui_Component* view,
+	psy_ui_Component* parent,
 	psy_audio_SequencePatternEntry*, psy_audio_OrderIndex seqpos,
 	struct SeqEditState*);
 
 SeqEditPatternEntry* seqeditpatternentry_alloc(void);
-SeqEditPatternEntry* seqeditpatternentry_allocinit(
-	psy_ui_Component* parent, psy_ui_Component* view,
+SeqEditPatternEntry* seqeditpatternentry_allocinit(psy_ui_Component* parent,
 	psy_audio_SequencePatternEntry* entry, psy_audio_OrderIndex seqpos,
 	struct SeqEditState*);
 
@@ -75,14 +74,12 @@ typedef struct SeqEditMarkerEntry {
 	psy_audio_SequenceMarkerEntry* sequenceentry;	
 } SeqEditMarkerEntry;
 
-void seqeditmarkerentry_init(SeqEditMarkerEntry*,
-	psy_ui_Component* parent, psy_ui_Component* view,
+void seqeditmarkerentry_init(SeqEditMarkerEntry*, psy_ui_Component* parent,
 	psy_audio_SequenceMarkerEntry*, psy_audio_OrderIndex seqpos,
 	struct SeqEditState*);
 
 SeqEditMarkerEntry* seqeditmarkerentry_alloc(void);
-SeqEditMarkerEntry* seqeditmarkerentry_allocinit(
-	psy_ui_Component* parent, psy_ui_Component* view,
+SeqEditMarkerEntry* seqeditmarkerentry_allocinit(psy_ui_Component* parent,
 	psy_audio_SequenceMarkerEntry* entry, psy_audio_OrderIndex seqpos,
 	struct SeqEditState*);
 
@@ -105,14 +102,12 @@ typedef struct SeqEditSampleEntry {
 	bool preventedit;
 } SeqEditSampleEntry;
 
-void seqeditsampleentry_init(SeqEditSampleEntry*,
-	psy_ui_Component* parent, psy_ui_Component* view,
+void seqeditsampleentry_init(SeqEditSampleEntry*, psy_ui_Component* parent,
 	psy_audio_SequenceSampleEntry*, psy_audio_OrderIndex seqpos,
 	struct SeqEditState*);
 
 SeqEditSampleEntry* seqeditsampleentry_alloc(void);
-SeqEditSampleEntry* seqeditsampleentry_allocinit(
-	psy_ui_Component* parent, psy_ui_Component* view,
+SeqEditSampleEntry* seqeditsampleentry_allocinit(psy_ui_Component* parent,
 	psy_audio_SequenceSampleEntry* entry, psy_audio_OrderIndex seqpos,
 	struct SeqEditState*);
 

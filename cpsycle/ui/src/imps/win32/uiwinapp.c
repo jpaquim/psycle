@@ -31,6 +31,7 @@ static void adjustcoordinates(psy_ui_Component*, psy_ui_RealPoint*);
 static void psy_ui_winapp_onappdefaultschange(psy_ui_WinApp*);
 static psy_ui_EventType translate_win_event_type(int message);
 static int translate_win_button(int message);
+static void CALLBACK psy_ui_winapp_timerproc(HWND, UINT, UINT_PTR, DWORD);
 
 static LPARAM psy_ui_winapp_pack_pt(psy_ui_RealPoint pt)
 {
@@ -209,9 +210,7 @@ LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 		switch (message) {
 		case WM_NCDESTROY:
 			/* restore default winproc */
-			if (component) {
-				psy_signal_emit(&component->signal_destroyed,
-					component, 0);					
+			if (component) {				
 				component->vtable->ondestroyed(component);					
 			}
 #if defined(_WIN64)		
@@ -232,13 +231,7 @@ LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 				psy_signal_emit(&component->signal_destroy, component, 0);
 				component->vtable->ondestroy(component);
 			}								
-			break;			
-		case WM_TIMER:				
-			if (component) {
-				psy_ui_eventdispatch_timer(&winapp->app->eventdispatch,
-					component, (uintptr_t)wParam);
-			}				
-			break;
+			break;		
 		case WM_CHAR:
 			if (imp->preventwmchar) {
 				imp->preventwmchar = 0;
@@ -402,12 +395,6 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				psy_ui_eventdispatch_send(&winapp->app->eventdispatch,
 					component, &ev);
 			}
-			return 0;
-		case WM_TIMER:
-			if (component) {
-				psy_ui_eventdispatch_timer(&winapp->app->eventdispatch,
-					component, (uintptr_t)wParam);
-			}
 			return 0;		
 		case WM_ERASEBKGND:
 			return 1;
@@ -486,12 +473,13 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 
 			deallocate = FALSE;
 			if (component) {
-				deallocate = component->deallocate;
-				psy_signal_emit(&component->signal_destroyed, component, 0);
-				component->vtable->ondestroyed(component);
+				deallocate = component->deallocate;				
 			}
 			psy_ui_component_dispose(component);
 			psy_table_remove(&winapp->selfmap, (uintptr_t)hwnd);
+			if (component) {				
+				component->vtable->ondestroyed(component);
+			}
 			if (deallocate) {
 				free(component);
 			}
@@ -882,12 +870,22 @@ LRESULT CALLBACK MouseHookProc(int nCode, WPARAM wParam, LPARAM lParam) {
 int psy_ui_winapp_run(psy_ui_WinApp* self) 
 {
 	MSG msg;
-		
+
+	SetTimer(NULL, 1, 5, (TIMERPROC)psy_ui_winapp_timerproc);
 	while (GetMessage(&msg, NULL, 0, 0)) {
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
 	}	
     return (int)msg.wParam ;
+}
+
+void CALLBACK psy_ui_winapp_timerproc(
+	HWND hwnd,        /* handle to window for timer messages */
+	UINT message,     /* WM_TIMER message */
+	UINT_PTR idTimer, /* timer identifier */
+	DWORD dwTime)     /* current system time */
+{
+	psy_timers_tick(&winapp->app->wintimers);
 }
 
 void psy_ui_winapp_startmousehook(psy_ui_WinApp* self)

@@ -10,10 +10,9 @@
 #include "workspace.h"
 /* ui */
 #include <uibutton.h>
-#include <uiedit.h>
-#include <uieditor.h>
 #include <uilabel.h>
 #include <uinotebook.h>
+#include <uiscroller.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -30,12 +29,14 @@ typedef struct Contrib {
 	/* inherits */
 	psy_ui_Component component;
 	/* internal */
+	psy_ui_Scroller scroller;
+	psy_ui_Component bottom;
 	psy_ui_Label asio;
-	psy_ui_Edit	sourceforge;
-	psy_ui_Edit	psycledelics;
+	psy_ui_Label sourceforge;
+	psy_ui_Label psycledelics;
 	psy_ui_Label steincopyright;		
 	psy_ui_Label headercontrib;
-	psy_ui_Edit	contrib;	
+	psy_ui_Label contrib;	
 } Contrib;
 
 void contrib_init(Contrib*, psy_ui_Component* parent);
@@ -69,7 +70,8 @@ typedef struct Licence {
 	/* inherits */
 	psy_ui_Component component;
 	/* internal */
-	psy_ui_Editor licenceinfo;
+	psy_ui_Label licenceinfo;
+	psy_ui_Scroller scroller;
 } Licence;
 
 void licence_init(Licence*, psy_ui_Component* parent);

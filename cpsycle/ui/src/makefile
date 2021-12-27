@@ -3,20 +3,17 @@ inc = -I ../src -I../../thread/src -I ../src -I../../container/src -I../../file/
 cflags = -Wfatal-errors
 src = $(wildcard *.c)
 srcimp = $(wildcard imps/x11/*.c)
-srcnativeimp = $(wildcard imps/natives/*.c)
 obj = $(src:.c=.o)
 objimp = $(srcimp:.c=.o)
-objnativeimp = $(srcnativeimp:.c=.o)
-objall = $(obj) $(objimp) $(objnativeimp)
+objall = $(obj) $(objimp)
 
 libpsyui.a: $(obj)
 	ar rsv $@ *.o
 	
 %.o: %.c
 	$(CC) $(cflags) $(inc) -g3 -c $(src);
-	$(CC) $(cflags) $(inc) -g3 -c $(srcimp);
-	$(CC) $(cflags) $(inc) -g3 -c $(srcnativeimp);
+	$(CC) $(cflags) $(inc) -g3 -c $(srcimp);	
 
 .PHONY: clean	
 clean:
-	rm -f $(obj) $(objimp) $(objnativeimp) libpsyui.a	
+	rm -f $(obj) $(objimp) libpsyui.a	

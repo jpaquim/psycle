@@ -2228,6 +2228,8 @@ const char* workspace_songtitle(const Workspace* self)
 
 void workspace_setstartpage(Workspace* self)
 {
+	workspace_selectview(self, VIEW_ID_MACHINEVIEW, 0, 0);
+
 	if (generalconfig_showaboutatstart(psycleconfig_general(
 			workspace_conf(self)))) {
 		workspace_selectview(self, VIEW_ID_HELPVIEW, 1, 0);

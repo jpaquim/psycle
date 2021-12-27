@@ -26,20 +26,19 @@ static void seqview_onconfigure(SeqView*, GeneralConfig*, psy_Property*);
 static void seqview_onscroll(SeqView*, psy_ui_Component* sender);
 static void seqview_rebuild(SeqView*);
 static void seqview_oneditseqlist(SeqView*, psy_ui_Button* sender);
+
 /* implementation */
 void seqview_init(SeqView* self, psy_ui_Component* parent,
-	Workspace* workspace)
+	psy_ui_Component* view, Workspace* workspace)
 {	
-	psy_ui_component_init(&self->component, parent, NULL);
-	psy_ui_component_doublebuffer(&self->component);
+	psy_ui_component_init(&self->component, parent, view);	
 	sequencecmds_init(&self->cmds, workspace);
 	/* shared state */
 	seqviewstate_init(&self->state, &self->cmds);
 	/* sequence listview */
-	seqviewlist_init(&self->listview, &self->component, &self->component,
-		&self->state);
+	seqviewlist_init(&self->listview, &self->component, &self->state);
 	psy_ui_scroller_init(&self->scroller, &self->listview.component,
-		&self->component, &self->component);
+		&self->component);
 	psy_ui_component_setspacing(psy_ui_scroller_base(&self->scroller),
 		psy_ui_margin_make_em(0.5, 0.5, 0.0, 1.0));
 	psy_ui_scroller_setbackgroundmode(&self->scroller,
@@ -50,8 +49,7 @@ void seqview_init(SeqView* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(&self->listview.component,
 		psy_ui_ALIGN_FIXED);
 	/* button bar */
-	sequencebuttons_init(&self->buttons, &self->component, &self->component,
-		&self->cmds);
+	sequencebuttons_init(&self->buttons, &self->component, &self->cmds);
 	psy_ui_component_setalign(&self->buttons.component, psy_ui_ALIGN_TOP);
 	/* spacer */
 	psy_ui_component_init_align(&self->spacer, &self->component, NULL,
@@ -59,14 +57,13 @@ void seqview_init(SeqView* self, psy_ui_Component* parent,
 	psy_ui_component_setpreferredsize(&self->spacer,
 		psy_ui_size_make_em(0.0, 0.3));	
 	/* header */
-	seqviewtrackheaders_init(&self->trackheader, &self->component,
-		&self->component, &self->state);
+	seqviewtrackheaders_init(&self->trackheader, seqview_base(self),
+		&self->state);
 	psy_ui_component_setalign(&self->trackheader.component, psy_ui_ALIGN_TOP);
 	psy_signal_connect(&self->listview.component.signal_scroll, self,
 		seqview_onscroll);	
 	/* duration*/
-	seqviewduration_init(&self->duration, &self->component, &self->component,
-		workspace);
+	seqviewduration_init(&self->duration, seqview_base(self), workspace);
 	psy_ui_component_setalign(&self->duration.component, psy_ui_ALIGN_BOTTOM);	
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		seqview_onsongchanged);		
@@ -95,6 +92,11 @@ void seqview_onscroll(SeqView* self, psy_ui_Component* sender)
 void seqview_clear(SeqView* self)
 {
 	sequencecmds_clear(&self->cmds);
+}
+
+void seqview_idle(SeqView* self)
+{
+	seqviewduration_idle(&self->duration);
 }
 
 void seqview_onsongchanged(SeqView* self, Workspace* sender, int flag)

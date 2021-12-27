@@ -7,10 +7,11 @@
 #define HELP_H
 
 /* host */
-#include <uitabbar.h>
 #include "workspace.h"
 /* ui */
-#include <uieditor.h>
+#include <uilabel.h>
+#include <uiscroller.h>
+#include <uitabbar.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -21,17 +22,15 @@ extern "C" {
 **
 ** Integrated textfile viewer to show the psycle help files inside the psycle
 ** doc directory. Configure the used files with PSYCLE_HELPFILES in psyconf.h.
-** It uses Scintilla, an open source editor component, first used with
-** psycle 1.12.
 */
 
 typedef struct Help {
 	/* inherits */
 	psy_ui_Component component;
-	/* ui elements */
-	psy_ui_Editor editor;
-	psy_ui_TabBar tabbar;
 	/* internal */
+	psy_ui_Scroller scroller;
+	psy_ui_Label text;
+	psy_ui_TabBar tabbar;	
 	psy_Table filenames;
 	psy_ui_AlignType lastalign;
 	/* references */

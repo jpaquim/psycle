@@ -107,8 +107,7 @@ typedef struct StepsequencerBarSelect {
 } StepsequencerBarSelect;
 
 void stepsequencerbarselect_init(StepsequencerBarSelect*,	
-	psy_ui_Component* parent, psy_ui_Component* view,
-	StepSequencerState*);
+	psy_ui_Component* parent, StepSequencerState*);
 
 /* StepSequencerTile */
 typedef struct StepSequencerTile {
@@ -116,11 +115,11 @@ typedef struct StepSequencerTile {
 	psy_ui_Component component;	
 } StepSequencerTile;
 
-void stepsequencertile_init(StepSequencerTile*, psy_ui_Component* parent,
-	psy_ui_Component* view);
+void stepsequencertile_init(StepSequencerTile*, psy_ui_Component* parent);
+
 StepSequencerTile* stepsequencertile_alloc(void);
 StepSequencerTile* stepsequencertile_allocinit(
-	psy_ui_Component* parent, psy_ui_Component* view);
+	psy_ui_Component* parent);
 
 void stepsequencertile_turnoff(StepSequencerTile*);
 void stepsequencertile_play(StepSequencerTile*);
@@ -142,7 +141,7 @@ typedef struct StepsequencerBar {
 } StepsequencerBar;
 
 void stepsequencerbar_init(StepsequencerBar*, psy_ui_Component* parent,
-	psy_ui_Component* view, StepSequencerState*);
+	StepSequencerState*);
 
 /* StepsequencerView */
 typedef struct StepsequencerView {

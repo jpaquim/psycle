@@ -53,7 +53,6 @@ static void machineview_onthemechanged(MachineView*, MachineViewConfig*,
 	psy_Property* theme);
 static void machineview_onnewmachineselected(MachineView*,
 	psy_ui_Component* sender, psy_Property*);
-static void machineview_ontimer(MachineView*, uintptr_t timerid);
 static void machineview_onshow(MachineView*);
 /* vtable */
 static psy_ui_ComponentVtable machineview_vtable;
@@ -80,10 +79,7 @@ static psy_ui_ComponentVtable* machineview_vtable_init(MachineView* self)
 			machineview_onkeydown;
 		machineview_vtable.section =
 			(psy_ui_fp_component_section)
-			machineview_section;
-		machineview_vtable.ontimer =
-			(psy_ui_fp_component_ontimer)
-			machineview_ontimer;
+			machineview_section;		
 		machineview_vtable.onfocus =
 			(psy_ui_fp_component_event)
 			machineview_onfocus;
@@ -101,7 +97,7 @@ void machineview_init(MachineView* self, psy_ui_Component* parent,
 	machineview_initcomponent(self, parent);
 	self->shownewmachine = FALSE;
 	self->workspace = workspace;
-	paramviews_init(&self->paramviews, &self->component, workspace);	
+	paramviews_init(&self->paramviews, self->component.view, workspace);	
 	machineviewskin_init(&self->skin,	
 		psycleconfig_macview(workspace_conf(self->workspace))->theme,
 		dirconfig_skins(&self->workspace->config.directories));	
@@ -110,7 +106,7 @@ void machineview_init(MachineView* self, psy_ui_Component* parent,
 	machineview_initwireview(self, tabbarparent);
 	machineview_initstackview(self, tabbarparent);	
 	machineview_initnewmachine(self, tabbarparent);	
-	machineview_inittabbar(self, tabbarparent);	
+	machineview_inittabbar(self, tabbarparent);
 	machineview_connectsignals(self);	
 	psy_ui_tabbar_select(&self->tabbar, SECTION_ID_MACHINEVIEW_WIRES);
 	psy_ui_component_starttimer(&self->component, 0, 50);
@@ -153,11 +149,10 @@ void machineview_initwireview(MachineView* self, psy_ui_Component* tabbarparent)
 		psy_ui_notebook_base(&self->notebook), tabbarparent, &self->skin,
 		&self->paramviews, self->workspace);
 	psy_ui_scroller_init(&self->scroller, &self->wireview.component,
-		psy_ui_notebook_base(&self->notebook), NULL);
+		psy_ui_notebook_base(&self->notebook));
 	psy_ui_component_setalign(&self->wireview.component,
 		psy_ui_ALIGN_FIXED);
 	psy_ui_component_setalign(&self->scroller.component, psy_ui_ALIGN_CLIENT);
-
 }
 
 void machineview_initstackview(MachineView* self,
@@ -179,7 +174,7 @@ void machineview_initnewmachine(MachineView* self,
 
 void machineview_inittabbar(MachineView* self, psy_ui_Component* tabbarparent)
 {
-	psy_ui_tabbar_init(&self->tabbar, tabbarparent, NULL);
+	psy_ui_tabbar_init(&self->tabbar, tabbarparent);
 	psy_ui_component_setalign(psy_ui_tabbar_base(&self->tabbar),
 		psy_ui_ALIGN_LEFT);	
 	psy_ui_tabbar_append(&self->tabbar, "machineview.wires",
@@ -414,24 +409,25 @@ uintptr_t machineview_section(const MachineView* self)
 {
 	switch (psy_ui_tabbar_selected(&self->tabbar)) {
 	case 0:
-		return SECTION_ID_MACHINEVIEW_WIRES;
-		break;
+		return SECTION_ID_MACHINEVIEW_WIRES;		
 	case 1:
 		return SECTION_ID_MACHINEVIEW_STACK;
-		break;
 	case 2:
-		return SECTION_ID_MACHINEVIEW_NEWMACHINE;
-		break;
+		return SECTION_ID_MACHINEVIEW_NEWMACHINE;		
 	default:
-		break;
-	}
-	return SECTION_ID_MACHINEVIEW_WIRES;
+		return SECTION_ID_MACHINEVIEW_WIRES;
+	}	
 }
 
-void machineview_ontimer(MachineView* self, uintptr_t timerid)
-{
-	machinewireview_idle(&self->wireview);
-	machinestackview_idle(&self->stackview);
+void machineview_idle(MachineView* self)
+{	
+	if (workspace_currview(self->workspace).section ==
+			SECTION_ID_MACHINEVIEW_WIRES) {
+		machinewireview_idle(&self->wireview);
+	} else if (workspace_currview(self->workspace).section ==
+			SECTION_ID_MACHINEVIEW_STACK) {
+		machinestackview_idle(&self->stackview);
+	}
 	machineproperties_idle(&self->properties);
 }
 

@@ -13,18 +13,19 @@ static void kbdhelp_ontabbarchange(KbdHelp*, psy_ui_Component* sender,
 	int tabindex);
 static void kbdhelp_setcmdsection(KbdHelp* self, uintptr_t index);
 static const psy_Property* kbdhelp_cmds(const KbdHelp*);
+
 /* implementation */
 void kbdhelp_init(KbdHelp* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {	
-	psy_ui_component_init(kbdhelp_base(self), parent, NULL);
+	psy_ui_component_init(kbdhelp_base(self), parent, NULL);	
 	psy_ui_component_setspacing(&self->component,
-		psy_ui_margin_make_em(0.5, 0.0, 0.0, 0.0));
+		psy_ui_margin_make_em(0.5, 0.0, 0.0, 0.0));	
 	self->workspace = workspace;
 	kbdbox_init(&self->kbdbox, kbdhelp_base(self), workspace);
 	psy_ui_component_setalign(kbdbox_base(&self->kbdbox),
 		psy_ui_ALIGN_CENTER);	
-	psy_ui_tabbar_init(&self->tabbar, &self->component, NULL);
+	psy_ui_tabbar_init(&self->tabbar, &self->component);
 	psy_ui_tabbar_settabalign(&self->tabbar, psy_ui_ALIGN_TOP);
 	psy_ui_component_setalign(psy_ui_tabbar_base(&self->tabbar),
 		psy_ui_ALIGN_RIGHT);

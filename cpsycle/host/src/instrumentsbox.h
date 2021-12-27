@@ -32,8 +32,9 @@ typedef struct {
 	psy_audio_Instruments* instruments;
 } InstrumentsBox;
 
-void instrumentsbox_init(InstrumentsBox*, psy_ui_Component* parent, psy_audio_Instruments*,
-	Workspace*);
+void instrumentsbox_init(InstrumentsBox*, psy_ui_Component* parent,
+	psy_audio_Instruments*, Workspace*);
+
 void instrumentsbox_setinstruments(InstrumentsBox*, psy_audio_Instruments* instruments);
 psy_audio_InstrumentIndex instrumentsbox_selected(InstrumentsBox*);
 void instrumentsbox_rebuild(InstrumentsBox*);

@@ -80,9 +80,6 @@ static void dev_enableinput(psy_ui_win_ComponentImp*);
 static void dev_preventinput(psy_ui_win_ComponentImp*);
 static bool dev_inputprevented(const psy_ui_win_ComponentImp* self);
 static void dev_setcursor(psy_ui_win_ComponentImp*, psy_ui_CursorStyle);
-static void dev_starttimer(psy_ui_win_ComponentImp*, uintptr_t id,
-	uintptr_t interval);
-static void dev_stoptimer(psy_ui_win_ComponentImp*, uintptr_t id);
 static void dev_seticonressource(psy_ui_win_ComponentImp*, int ressourceid);
 static const psy_ui_TextMetric* dev_textmetric(const psy_ui_win_ComponentImp*);
 static psy_ui_Size dev_textsize(psy_ui_win_ComponentImp*, const char* text,
@@ -217,13 +214,7 @@ static void win_imp_vtable_init(psy_ui_win_ComponentImp* self)
 			dev_inputprevented;		
 		vtable.dev_setcursor =
 			(psy_ui_fp_componentimp_dev_setcursor)
-			dev_setcursor;
-		vtable.dev_starttimer =
-			(psy_ui_fp_componentimp_dev_starttimer)
-			dev_starttimer;
-		vtable.dev_stoptimer =
-			(psy_ui_fp_componentimp_dev_stoptimer)
-			dev_stoptimer;
+			dev_setcursor;		
 		vtable.dev_seticonressource =
 			(psy_ui_fp_componentimp_dev_seticonressource)
 			dev_seticonressource;
@@ -397,7 +388,7 @@ void psy_ui_win_component_init_wndproc(psy_ui_win_ComponentImp* self,
 	}
 }
 
-// win32 implementation method for psy_ui_Component
+/* win32 implementation method for psy_ui_Component */
 void dev_dispose(psy_ui_win_ComponentImp* self)
 {
 	if (self->background) {
@@ -502,7 +493,7 @@ void dev_hide(psy_ui_win_ComponentImp* self)
 int dev_visible(psy_ui_win_ComponentImp* self)
 {
 	return self->visible;
-	//return IsWindowVisible(self->hwnd);
+	/* return IsWindowVisible(self->hwnd); */
 }
 
 int dev_drawvisible(psy_ui_win_ComponentImp* self)
@@ -614,7 +605,7 @@ void dev_setposition(psy_ui_win_ComponentImp* self, psy_ui_Point topleft,
 			(int)psy_ui_value_px(&topleft.y, tm, &parentsize),
 			(int)(psy_ui_value_px(&size.width, tm, &parentsize)),
 			(int)(psy_ui_value_px(&size.height, tm, &parentsize)),
-			// SWP_NOREDRAW | SWP_NOZORDER);
+			/* SWP_NOREDRAW | SWP_NOZORDER); */
 			SWP_NOZORDER);
 	} else {
 		if (!psy_ui_app()->setpositioncacheonly) {
@@ -623,7 +614,7 @@ void dev_setposition(psy_ui_win_ComponentImp* self, psy_ui_Point topleft,
 				(int)psy_ui_value_px(&topleft.y, tm, NULL),
 				(int)(psy_ui_value_px(&size.width, tm, NULL)),
 				(int)(psy_ui_value_px(&size.height, tm, NULL)),
-				// SWP_NOREDRAW | SWP_NOZORDER);
+				/* SWP_NOREDRAW | SWP_NOZORDER); */
 				SWP_NOZORDER);
 		} else {
 			self->topleftcache = topleft;
@@ -722,19 +713,14 @@ void dev_insert(psy_ui_win_ComponentImp* self, psy_ui_win_ComponentImp* child,
 		psy_list_append(&self->viewcomponents, child->component);
 	} else {
 		SetParent(child->hwnd, self->hwnd);
-		if (insertafter) {
-			// psy_ui_WinApp* winapp;
-			// HINSTANCE instance;
+		if (insertafter) {			
 			int err = 0;
 			SetWindowPos(
 				child->hwnd,
 				(insertafter) ? insertafter->hwnd : (HWND)NULL,
 				0, 0, 0, 0,
 				SWP_NOMOVE | SWP_NOSIZE
-			);
-			// winapp = (psy_ui_WinApp*)app.platform;
-			// psy_list_free(winapp->targetids);
-			// winapp->targetids = NULL;
+			);			
 		}
 	}
 }
@@ -756,7 +742,7 @@ void dev_remove(psy_ui_win_ComponentImp* self, psy_ui_win_ComponentImp* child)
 		}		
 	} else {
 		assert(0);
-		// todo
+		/* todo */
 	}
 }
 
@@ -772,7 +758,7 @@ void dev_erase(psy_ui_win_ComponentImp* self, psy_ui_win_ComponentImp* child)
 		}
 	} else {
 		assert(0);
-		// todo
+		/* todo */
 	}
 }
 
@@ -840,8 +826,7 @@ void dev_applyposition(psy_ui_win_ComponentImp* self)
 	GetClientRect(self->hwnd, &rc);
 	if (left != pt.x || top != pt.y || w != rc.right || h != rc.bottom) {
 		SetWindowPos(self->hwnd, 0,
-			left, top, w, h,
-			// SWP_NOREDRAW | SWP_NOZORDER);
+			left, top, w, h,			
 			SWP_NOREDRAW | SWP_NOZORDER);
 	}
 }
@@ -861,9 +846,7 @@ psy_List* dev_children(psy_ui_win_ComponentImp* self, int recursive)
 {	
 	psy_List* rv = 0;
 	psy_List* p = 0;
-	// if (recursive == psy_ui_RECURSIVE) {
-	//	EnumChildWindows(self->hwnd, allchildenumproc, (LPARAM) &rv);		
-	// } else
+	
 	{
 		uintptr_t hwnd = (uintptr_t)GetWindow(self->hwnd, GW_CHILD);
 		if (hwnd) {
@@ -994,7 +977,7 @@ const psy_ui_TextMetric* dev_textmetric(const psy_ui_win_ComponentImp* self)
 		rv.tmStruckOut = tm.tmStruckOut;
 		rv.tmPitchAndFamily = tm.tmPitchAndFamily;
 		rv.tmCharSet = tm.tmCharSet;
-		// mutable
+		/* mutable */
 		((psy_ui_win_ComponentImp*)(self))->tm = rv;
 		((psy_ui_win_ComponentImp*)(self))->tmcachevalid = TRUE;
 	}
@@ -1088,17 +1071,6 @@ void dev_setcursor(psy_ui_win_ComponentImp* self, psy_ui_CursorStyle
 	}
 }
 
-void dev_starttimer(psy_ui_win_ComponentImp* self, uintptr_t id,
-	uintptr_t interval)
-{
-	SetTimer(self->hwnd, id, (UINT)interval, 0);
-}
-
-void dev_stoptimer(psy_ui_win_ComponentImp* self, uintptr_t id)
-{
-	KillTimer(self->hwnd, id);
-}
-
 void dev_seticonressource(psy_ui_win_ComponentImp* self, int ressourceid)
 {
 	psy_ui_WinApp* winapp;
@@ -1108,8 +1080,7 @@ void dev_seticonressource(psy_ui_win_ComponentImp* self, int ressourceid)
 
 	winapp = (psy_ui_WinApp*)psy_ui_app()->imp;
 	hicon = (intptr_t)LoadIcon(winapp->instance, MAKEINTRESOURCE(ressourceid));
-	SendMessage(self->hwnd, WM_SETICON, ICON_SMALL, (LPARAM)hicon);
-	//SendMessage(hwnd, WM_SETICON, ICON_BIG, (LPARAM)hiconbig);
+	SendMessage(self->hwnd, WM_SETICON, ICON_SMALL, (LPARAM)hicon);	
 }
 
 psy_ui_Size dev_textsize(psy_ui_win_ComponentImp* self, const char* text,
@@ -1145,15 +1116,11 @@ void dev_settitle(psy_ui_win_ComponentImp* self, const char* title)
 
 void dev_setfocus(psy_ui_win_ComponentImp* self)
 {
-	SetFocus(self->hwnd);
-	if (self->component) {
-		self->component->vtable->onfocus(self->component);
-		psy_signal_emit(&self->component->signal_focus, self, 0);
-	}
+	SetFocus(self->hwnd);	
 }
 
 int dev_hasfocus(psy_ui_win_ComponentImp* self)
-{
+{	
 	return self->hwnd == GetFocus();
 }
 
@@ -1349,10 +1316,10 @@ void dev_mousedoubleclick(psy_ui_win_ComponentImp* self, psy_ui_MouseEvent* ev)
 
 void dev_mouseenter(psy_ui_win_ComponentImp* self)
 {
-//	if (psy_ui_app()->hover) {
-//		psy_ui_app()->hover->vtable->onmouseleave(psy_ui_app()->hover);
-//	}
-//	psy_ui_app_sethover(psy_ui_app(), NULL);
+/* if (psy_ui_app()->hover) {
+		psy_ui_app()->hover->vtable->onmouseleave(psy_ui_app()->hover);
+	}
+	psy_ui_app_sethover(psy_ui_app(), NULL); */
 	self->component->vtable->onmouseenter(self->component);
 	psy_signal_emit(&self->component->signal_mouseenter,
 		self->component, 0);

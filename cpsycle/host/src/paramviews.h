@@ -15,11 +15,11 @@
 extern "C" {
 #endif
 
-// ParamViews is the container of all Machine Frames (Native/Vst/Internal)
+/* ParamViews is the container of all Machine Frames(Native / Vst / Internal) */
 
 typedef struct ParamViews {
 	psy_Table frames;	
-	// references	
+	/* references */
 	psy_ui_Component* view;
 	Workspace* workspace;
 } ParamViews;

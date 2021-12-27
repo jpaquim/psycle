@@ -340,7 +340,7 @@ void seqedittimesigs_init(SeqEditTimeSigs* self, psy_ui_Component* parent,
 	assert(self);
 	assert(state);
 
-	psy_ui_component_init(&self->component, parent, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	seqedittimesigs_vtable_init(self);		
 	self->state = state;		
 	self->entries = NULL;

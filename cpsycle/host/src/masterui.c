@@ -47,23 +47,24 @@ static psy_ui_ComponentVtable* masterui_vtable_init(MasterUi* self)
 	}
 	return &masterui_vtable;
 }
-// implementation
+
+/* implementation */
 void masterui_init(MasterUi* self, psy_ui_Component* parent, MachineViewSkin* skin,
-	psy_ui_Component* view, ParamViews* paramviews, Workspace* workspace)
+	ParamViews* paramviews, Workspace* workspace)
 {
 	assert(self);
+	assert(parent);
 	assert(workspace);
 	assert(workspace->song);
-	assert(skin);
-	assert(view);
+	assert(skin);	
 
-	psy_ui_component_init(&self->component, parent, view);	
+	psy_ui_component_init(&self->component, parent, NULL);	
 	masterui_vtable_init(self);
 	self->component.vtable = &masterui_vtable;
 	psy_ui_component_setbackgroundmode(&self->component,
 		psy_ui_NOBACKGROUND);
-	machineuicommon_init(&self->intern, psy_audio_MASTER_INDEX, skin, view,
-		paramviews, workspace);
+	machineuicommon_init(&self->intern, &self->component, psy_audio_MASTER_INDEX,
+		skin, paramviews, workspace);
 	self->intern.coords = &skin->master;
 	self->intern.font = skin->effect_fontcolour;
 	self->intern.bgcolour = psy_ui_colour_make(0x00333333);
@@ -151,7 +152,9 @@ void masterui_showparameters(MasterUi* self, psy_ui_Component* parent)
 void masterui_onmousedoubleclick(MasterUi* self, psy_ui_MouseEvent* ev)
 {
 	if (ev->button == 1) {				
-		masterui_showparameters(self, self->intern.view);		
+		if (self->component.view) {
+			masterui_showparameters(self, self->component.view);
+		}
 		psy_ui_mouseevent_stop_propagation(ev);
 	}
 }
@@ -167,7 +170,9 @@ void masterui_onshowparameters(MasterUi* self, Workspace* sender,
 	uintptr_t slot)
 {
 	if (slot == self->intern.slot) {
-		masterui_showparameters(self, self->intern.view);
+		if (self->component.view) {
+			masterui_showparameters(self, self->component.view);
+		}
 	}
 }
 

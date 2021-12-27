@@ -28,9 +28,9 @@ void octavebar_init(OctaveBar* self, psy_ui_Component* parent,
 	psy_ui_component_setalignexpand(octavebar_base(self),
 		psy_ui_HEXPAND);
 	self->workspace = workspace;
-	psy_ui_label_init_text(&self->headerlabel, octavebar_base(self), NULL,
+	psy_ui_label_init_text(&self->headerlabel, octavebar_base(self),
 		"octavebar.octave");
-	psy_ui_combobox_init(&self->octavebox, octavebar_base(self), NULL);
+	psy_ui_combobox_init(&self->octavebox, octavebar_base(self));
 	psy_ui_combobox_setcharnumber(&self->octavebox, 3);	
 	octavebar_buildoctavebox(self);
 	psy_signal_connect(&self->octavebox.signal_selchanged, self,

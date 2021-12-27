@@ -38,14 +38,14 @@ static void sequencetrackbox_vtable_init(SequenceTrackBox* self)
 
 /* implementation */
 void sequencetrackbox_init(SequenceTrackBox* self, psy_ui_Component* parent,
-	psy_ui_Component* view, psy_audio_Sequence* sequence,
+	psy_audio_Sequence* sequence,
 	uintptr_t trackidx, Workspace* workspace)
 {
 	assert(self);
 
-	psy_ui_component_init(&self->component, parent, view);	
+	psy_ui_component_init(&self->component, parent, NULL);	
 	psy_signal_init(&self->signal_resize);
-	trackbox_init(&self->trackbox, &self->component, view);	
+	trackbox_init(&self->trackbox, &self->component);	
 	psy_ui_component_setalign(&self->trackbox.component,
 		psy_ui_ALIGN_CLIENT);	
 	sequencetrackbox_vtable_init(self);
@@ -91,14 +91,13 @@ SequenceTrackBox* sequencetrackbox_alloc(void)
 }
 
 SequenceTrackBox* sequencetrackbox_allocinit(psy_ui_Component* parent,
-	psy_ui_Component* view, psy_audio_Sequence* sequence,
-	uintptr_t trackidx, Workspace* workspace)
+	psy_audio_Sequence* sequence, uintptr_t trackidx, Workspace* workspace)
 {
 	SequenceTrackBox* rv;	
 
 	rv = sequencetrackbox_alloc();
 	if (rv) {
-		sequencetrackbox_init(rv, parent, view, sequence, trackidx, workspace);
+		sequencetrackbox_init(rv, parent, sequence, trackidx, workspace);
 		psy_ui_component_deallocateafterdestroyed(sequencetrackbox_base(rv));
 	}
 	return rv;

@@ -1,7 +1,10 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
+
 
 #include "uiwinfontimp.h"
 
@@ -11,7 +14,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-// VTable Prototypes
+/* prototypes */
 static void psy_ui_win_font_imp_dispose(psy_ui_win_FontImp*);
 static void psy_ui_win_font_imp_copy(psy_ui_win_FontImp*, psy_ui_win_FontImp* other);
 static psy_ui_FontInfo dev_fontinfo(psy_ui_win_FontImp*);
@@ -19,7 +22,7 @@ static psy_ui_FontInfo dev_fontinfo(psy_ui_win_FontImp*);
 static LOGFONT logfont(psy_ui_FontInfo lf);
 static psy_ui_FontInfo psy_ui_fontinfo(LOGFONT);
 
-// VTable init
+/* vtable */
 static psy_ui_FontImpVTable imp_vtable;
 static int imp_vtable_initialized = 0;
 
@@ -49,7 +52,6 @@ void psy_ui_win_fontimp_init(psy_ui_win_FontImp* self, const psy_ui_FontInfo* fo
 	}
 }
 
-// win32 implementation method for psy_ui_Font
 void psy_ui_win_font_imp_dispose(psy_ui_win_FontImp* self)
 {	
 	if (self->hfont) {
@@ -76,17 +78,8 @@ psy_ui_FontInfo dev_fontinfo(psy_ui_win_FontImp* self)
 	ret = GetObject(self->hfont, sizeof(lf), &lf);
 	if (ret == 0) {
 		psy_ui_fontinfo_init(&rv, "", 0);
-	} else {
-		//HDC hdc;
-		rv = psy_ui_fontinfo(lf);
-		/*hdc = GetDC(NULL);
-		SaveDC(hdc);
-		rv.lfHeight = -MulDiv(rv.lfHeight / 10, GetDeviceCaps(hdc, LOGPIXELSY), 72);
-		rv.lfHeight = (double)rv.lfHeight / 72 * GetDeviceCaps(hdc, LOGPIXELSY);
-		 //MulDiv(-rv.lfHeight / 10, 72, GetDeviceCaps(hdc, LOGPIXELSY));
-
-		RestoreDC(hdc, -1);
-		ReleaseDC(NULL, hdc);		*/
+	} else {		
+		rv = psy_ui_fontinfo(lf);		
 	}
 	return rv;
 }

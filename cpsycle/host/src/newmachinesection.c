@@ -18,8 +18,8 @@ static void newmachinesection_onlabelclick(NewMachineSection*, psy_ui_Label* sen
 	psy_ui_MouseEvent*);
 static void newmachinesection_onmousedown(NewMachineSection*,
 	psy_ui_MouseEvent*);
-static void newmachinesection_oneditaccept(NewMachineSection*, psy_ui_Edit* sender);
-static void newmachinesection_oneditreject(NewMachineSection*, psy_ui_Edit* sender);
+static void newmachinesection_oneditaccept(NewMachineSection*, psy_ui_TextInput* sender);
+static void newmachinesection_oneditreject(NewMachineSection*, psy_ui_TextInput* sender);
 static void newmachinesection_ondragover(NewMachineSection*, psy_ui_DragEvent*);
 static void newmachinesection_ondrop(NewMachineSection*, psy_ui_DragEvent*);
 static void newmachinesection_onlanguagechanged(NewMachineSection*);
@@ -52,7 +52,7 @@ static void newmachinesection_vtable_init(NewMachineSection* self)
 }
 // implementation
 void newmachinesection_init(NewMachineSection* self, psy_ui_Component* parent,
-	psy_Property* section, psy_ui_Edit* edit, NewMachineFilter* filter,
+	psy_Property* section, psy_ui_TextInput* edit, NewMachineFilter* filter,
 	Workspace* workspace)
 {
 	psy_ui_component_init(&self->component, parent, NULL);
@@ -74,7 +74,7 @@ void newmachinesection_init(NewMachineSection* self, psy_ui_Component* parent,
 		STYLE_NEWMACHINE_SECTION_HEADER);
 	psy_ui_component_setdefaultalign(&self->header, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));	
-	psy_ui_label_init(&self->label, &self->header, NULL);
+	psy_ui_label_init(&self->label, &self->header);
 	psy_ui_label_preventtranslation(&self->label);
 	psy_ui_label_settext(&self->label, newmachinesection_name(self));
 	pluginsview_init(&self->pluginview, &self->component);
@@ -104,7 +104,7 @@ NewMachineSection* newmachinesection_alloc(void)
 }
 
 NewMachineSection* newmachinesection_allocinit(psy_ui_Component* parent,
-	psy_Property* property, psy_ui_Edit* edit, NewMachineFilter* filter,
+	psy_Property* property, psy_ui_TextInput* edit, NewMachineFilter* filter,
 	Workspace* workspace)
 {
 	NewMachineSection* rv;
@@ -171,8 +171,8 @@ void newmachinesection_onlabelclick(NewMachineSection* self, psy_ui_Label* sende
 {
 	if (self->edit) {		
 		self->preventedit = FALSE;		
-		psy_ui_edit_settext(self->edit, self->label.text);
-		psy_ui_edit_setsel(self->edit, 0, -1);
+		psy_ui_textinput_settext(self->edit, self->label.text);
+		psy_ui_textinput_setsel(self->edit, 0, -1);
 		newmachinesection_showedit(self);		
 	}
 }
@@ -189,7 +189,7 @@ void newmachinesection_showedit(NewMachineSection* self)
 		40.0 * tm->tmAveCharWidth;
 	screenposition = psy_ui_component_screenposition(
 		psy_ui_component_parent(&self->edit->component));	
-	psy_ui_component_setposition(psy_ui_edit_base(self->edit),
+	psy_ui_component_setposition(psy_ui_textinput_base(self->edit),
 		psy_ui_rectangle_make(
 			psy_ui_point_make(
 				psy_ui_value_make_px(colscreenposition.left - screenposition.left),
@@ -198,34 +198,34 @@ void newmachinesection_showedit(NewMachineSection* self)
 			psy_ui_size_make(
 				psy_ui_value_make_px(colscreenposition.right - colscreenposition.left),
 				psy_ui_value_make_eh(1.0))));
-	psy_ui_component_show(psy_ui_edit_base(self->edit));
-	psy_ui_component_invalidate(psy_ui_component_parent(psy_ui_edit_base(self->edit)));
-	psy_ui_component_setfocus(psy_ui_edit_base(self->edit));
+	psy_ui_component_show(psy_ui_textinput_base(self->edit));
+	psy_ui_component_invalidate(psy_ui_component_parent(psy_ui_textinput_base(self->edit)));
+	psy_ui_component_setfocus(psy_ui_textinput_base(self->edit));
 }
 
 
-void newmachinesection_oneditaccept(NewMachineSection* self, psy_ui_Edit* sender)
+void newmachinesection_oneditaccept(NewMachineSection* self, psy_ui_TextInput* sender)
 {
 	if (!self->preventedit) {
 		psy_Property* name;
 
 		self->preventedit = TRUE;
-		psy_ui_component_hide(psy_ui_edit_base(sender));
+		psy_ui_component_hide(psy_ui_textinput_base(sender));
 		name = psy_property_at(self->section, "name",
 			PSY_PROPERTY_TYPE_STRING);
 		if (name) {
-			psy_property_setitem_str(name, psy_ui_edit_text(sender));
-			psy_ui_label_settext(&self->label, psy_ui_edit_text(sender));
+			psy_property_setitem_str(name, psy_ui_textinput_text(sender));
+			psy_ui_label_settext(&self->label, psy_ui_textinput_text(sender));
 			psy_signal_emit(&self->signal_renamed, self, 0);
 		}				
 	}	
 }
 
-void newmachinesection_oneditreject(NewMachineSection* self, psy_ui_Edit* sender)
+void newmachinesection_oneditreject(NewMachineSection* self, psy_ui_TextInput* sender)
 {
 	if (!self->preventedit) {
 		self->preventedit = TRUE;
-		psy_ui_component_hide(psy_ui_edit_base(sender));
+		psy_ui_component_hide(psy_ui_textinput_base(sender));
 		psy_ui_component_invalidate(&self->component);
 	}
 }

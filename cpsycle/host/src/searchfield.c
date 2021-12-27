@@ -59,19 +59,19 @@ void searchfield_init(SearchField* self, psy_ui_Component* parent)
 		psy_ui_ALIGN_LEFT);
 	psy_ui_component_setmargin(psy_ui_image_base(&self->image),
 		psy_ui_margin_make_em(0.0, 1.0, 0.0, 1.0));	
-	psy_ui_edit_init(&self->edit, &self->component);
-	psy_ui_edit_setcharnumber(&self->edit, 42);
+	psy_ui_textinput_init(&self->edit, &self->component);
+	psy_ui_textinput_setcharnumber(&self->edit, 42);
 	searchfield_reset(self);
 	psy_signal_connect(&self->edit.component.signal_focus,
 		self, searchfield_oneditfocus);
 	psy_signal_connect(&self->edit.signal_change,
 		self, searchfield_oneditchange);
-	psy_ui_edit_enableinputfield(&self->edit);
+	psy_ui_textinput_enableinputfield(&self->edit);
 	psy_signal_connect(&self->edit.signal_accept,
 		self, searchfield_onaccept);
 	psy_signal_connect(&self->edit.signal_reject,
 		self, searchfield_onreject);
-	psy_ui_component_setalign(psy_ui_edit_base(&self->edit),
+	psy_ui_component_setalign(psy_ui_textinput_base(&self->edit),
 		psy_ui_ALIGN_CLIENT);	
 }
 
@@ -95,14 +95,14 @@ const char* searchfield_text(const SearchField* self)
 	if (self->hasdefaulttext) {
 		return "";
 	}
-	return psy_ui_edit_text(&self->edit);
+	return psy_ui_textinput_text(&self->edit);
 }
 
 void searchfield_oneditfocus(SearchField* self, psy_ui_Component* sender)
 {
 	psy_ui_component_addstylestate(&self->component, psy_ui_STYLESTATE_SELECT);
 	if (self->hasdefaulttext) {
-		psy_ui_edit_settext(&self->edit, "");
+		psy_ui_textinput_settext(&self->edit, "");
 	}
 }
 
@@ -115,7 +115,7 @@ void searchfield_oneditchange(SearchField* self, psy_ui_Component* sender)
 void searchfield_onaccept(SearchField* self,
 	psy_ui_Component* sender)
 {
-	if (psy_strlen(psy_ui_edit_text(&self->edit)) == 0) {
+	if (psy_strlen(psy_ui_textinput_text(&self->edit)) == 0) {
 		searchfield_reset(self);
 	}	
 }
@@ -145,7 +145,7 @@ void searchfield_checkdefault(SearchField* self)
 {
 	if (self->hasdefaulttext) {
 		psy_signal_preventall(&self->edit.signal_change);
-		psy_ui_edit_settext(&self->edit, psy_ui_translate(self->defaulttext));
+		psy_ui_textinput_settext(&self->edit, psy_ui_translate(self->defaulttext));
 		psy_signal_enableall(&self->edit.signal_change);		
 	}
 }

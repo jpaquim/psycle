@@ -33,9 +33,9 @@ static void seqeditorline_vtable_init(SeqEditorLine* self)
 }
 
 void seqeditorline_init(SeqEditorLine* self, psy_ui_Component* parent,
-	psy_ui_Component* view, SeqEditState* state)
+	SeqEditState* state)
 {
-	psy_ui_component_init(seqeditorline_base(self), parent, view);	
+	psy_ui_component_init(seqeditorline_base(self), parent, NULL);	
 	seqeditorline_vtable_init(self);
 	self->state = state;
 	psy_ui_component_setposition(seqeditorline_base(self),
@@ -47,15 +47,14 @@ SeqEditorLine* seqeditorline_alloc(void)
 	return (SeqEditorLine*)malloc(sizeof(SeqEditorLine));
 }
 
-SeqEditorLine* seqeditorline_allocinit(
-	psy_ui_Component* parent, psy_ui_Component* view,
+SeqEditorLine* seqeditorline_allocinit(psy_ui_Component* parent,
 	SeqEditState* state)
 {
 	SeqEditorLine* rv;
 
 	rv = seqeditorline_alloc();
 	if (rv) {
-		seqeditorline_init(rv, parent, view, state);
+		seqeditorline_init(rv, parent, state);
 		psy_ui_component_deallocateafterdestroyed(&rv->component);
 	}
 	return rv;
@@ -123,11 +122,12 @@ static void seqeditorplayline_vtable_init(SeqEditorPlayline* self)
 	seqeditorline_base(&self->seqeditorline)->vtable =
 		&seqeditorplayline_vtable;
 }
+
 /* implementation */
 void seqeditorplayline_init(SeqEditorPlayline* self, psy_ui_Component* parent,
-	psy_ui_Component* view, SeqEditState* state)
+	SeqEditState* state)
 {
-	seqeditorline_init(&self->seqeditorline, parent, view, state);	
+	seqeditorline_init(&self->seqeditorline, parent, state);	
 	seqeditorplayline_vtable_init(self);
 	psy_ui_component_setbackgroundcolour(
 		seqeditorline_base(&self->seqeditorline),
@@ -142,14 +142,13 @@ SeqEditorPlayline* seqeditorplayline_alloc(void)
 }
 
 SeqEditorPlayline* seqeditorplayline_allocinit(
-	psy_ui_Component* parent, psy_ui_Component* view,
-	SeqEditState* state)
+	psy_ui_Component* parent, SeqEditState* state)
 {
 	SeqEditorPlayline* rv;
 
 	rv = seqeditorplayline_alloc();
 	if (rv) {
-		seqeditorplayline_init(rv, parent, view, state);
+		seqeditorplayline_init(rv, parent, state);
 		psy_ui_component_deallocateafterdestroyed(
 			seqeditorline_base(&rv->seqeditorline));		
 	}

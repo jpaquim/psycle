@@ -36,13 +36,12 @@ static void greet_vtable_init(Greet* self)
 /* implementation */
 void greet_init(Greet* self, psy_ui_Component* parent)
 {
-	psy_ui_component_init(&self->component, parent, NULL);
-	psy_ui_component_doublebuffer(&self->component);
+	psy_ui_component_init(&self->component, parent, NULL);	
 	psy_ui_component_setstyletype(&self->component, STYLE_GREET);
-	greet_vtable_init(self);	
+	greet_vtable_init(self);
 	self->current = 1;
 	psy_ui_component_settitle(&self->component, "Greetings and info");	
-	psy_ui_label_init(&self->headerlabel, &self->component, NULL);
+	psy_ui_label_init(&self->headerlabel, &self->component);
 	psy_ui_component_setstyletype(psy_ui_label_base(&self->headerlabel),
 		STYLE_GREET_TOP);
 	psy_ui_label_settext(&self->headerlabel, "greetings.wantstothank");
@@ -51,7 +50,7 @@ void greet_init(Greet* self, psy_ui_Component* parent)
 	psy_ui_component_setspacing(psy_ui_label_base(&self->headerlabel),
 		psy_ui_margin_make_em(0.0, 0.0, 0.0, 2.0));
 	psy_ui_component_init(&self->header, &self->component, NULL);	
-	psy_ui_label_init_text(&self->thanks, &self->header, NULL, "greetings.thanks");	
+	psy_ui_label_init_text(&self->thanks, &self->header, "greetings.thanks");	
 	psy_ui_component_setmargin(psy_ui_label_base(&self->thanks),
 		psy_ui_margin_make_em(0.0, 0.0, 0.0, 2.0));
 	psy_ui_component_setalign(&self->thanks.component, psy_ui_ALIGN_LEFT);
@@ -64,7 +63,7 @@ void greet_init(Greet* self, psy_ui_Component* parent)
 		psy_ui_size_make_px(16, 14));
 	psy_ui_component_preventalign(&self->favicon.component);
 	psy_ui_listbox_init(&self->greetz, &self->component);		
-	psy_ui_button_init_connect(&self->original, &self->component, NULL,
+	psy_ui_button_init_connect(&self->original, &self->component,
 		self, greet_onoriginal);
 	psy_ui_button_settext(&self->original, "greetings.showargurus");
 	psy_ui_component_setalign(&self->original.component, psy_ui_ALIGN_BOTTOM);

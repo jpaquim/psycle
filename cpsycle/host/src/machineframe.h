@@ -17,7 +17,7 @@
 #include <uinotebook.h>
 #include <uibutton.h>
 #include <uieditor.h>
-#include <uiedit.h>
+#include <uitextinput.h>
 #include <uilabel.h>
 #include <uicombobox.h>
 #include <presets.h>
@@ -64,7 +64,7 @@ typedef struct MachineFrame {
 	ParameterListBox parameterbox;
 	ParamMap parammap;
 	psy_ui_Notebook notebook;
-	psy_ui_Editor help;
+	psy_ui_TextInputor help;
 	psy_ui_Component* view;
 	psy_ui_Component* machineview;	
 	psy_audio_Machine* machine;	

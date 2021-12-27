@@ -44,7 +44,8 @@ typedef struct GearButtons {
 	psy_ui_Button muteunmute;
 } GearButtons;
 
-void gearbuttons_init(GearButtons*, psy_ui_Component* parent, Workspace*);
+void gearbuttons_init(GearButtons*, psy_ui_Component* parent,
+	psy_ui_Component* view, Workspace*);
 
 INLINE psy_ui_Component* gearbuttons_base(GearButtons* self)
 {

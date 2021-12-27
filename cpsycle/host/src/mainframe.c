@@ -144,6 +144,7 @@ static void vtable_init(MainFrame* self)
 	}
 	psy_ui_component_setvtable(mainframe_base(self), &vtable);
 }
+
 /* implementation */
 void mainframe_init(MainFrame* self)
 {
@@ -194,11 +195,18 @@ void mainframe_init(MainFrame* self)
 void mainframe_initframe(MainFrame* self)
 {
 	psy_ui_frame_init_main(mainframe_base(self));
-	vtable_init(self);
+	vtable_init(self);	
+	psy_ui_component_setbackgroundmode(mainframe_base(self), psy_ui_NOBACKGROUND);
 	psy_ui_app_setmain(psy_ui_app(), mainframe_base(self));
 	psy_ui_component_seticonressource(mainframe_base(self), IDI_PSYCLEICON);
 	inithoststyles(&psy_ui_appdefaults()->styles, psy_ui_defaults()->styles.theme);
 	self->titlemodified = FALSE;
+	psy_ui_component_init(&self->view, mainframe_base(self), NULL);
+	psy_ui_component_doublebuffer(&self->view);
+	psy_ui_component_setbackgroundmode(&self->view, psy_ui_SETBACKGROUND);	
+	psy_ui_component_setalign(&self->view, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_init(&self->pane, &self->view, &self->view);
+	psy_ui_component_setalign(&self->pane, psy_ui_ALIGN_CLIENT);
 }
 
 void mainframe_ondestroyed(MainFrame* self)
@@ -235,14 +243,12 @@ void mainframe_initworkspace(MainFrame* self)
 
 void mainframe_initlayout(MainFrame* self)
 {
-	mainstatusbar_init(&self->statusbar, mainframe_base(self),
-		&self->workspace);
+	mainstatusbar_init(&self->statusbar, &self->component, &self->workspace);
 	psy_ui_component_setalign(mainstatusbar_base(&self->statusbar),
 		psy_ui_ALIGN_BOTTOM);
-	psy_ui_component_init_align(&self->client, mainframe_base(self), NULL,
-		psy_ui_ALIGN_CLIENT);
-	psy_ui_component_setbackgroundmode(&self->client, psy_ui_NOBACKGROUND);
-	psy_ui_component_init_align(&self->spacerleft, &self->component,
+	psy_ui_component_init_align(&self->client, &self->pane, NULL,
+		psy_ui_ALIGN_CLIENT);		
+	psy_ui_component_init_align(&self->spacerleft, &self->pane,
 		NULL, psy_ui_ALIGN_LEFT);
 	psy_ui_component_setpreferredsize(&self->spacerleft,
 		psy_ui_size_make_em(0.5, 0.0));
@@ -250,13 +256,12 @@ void mainframe_initlayout(MainFrame* self)
 		NULL, psy_ui_ALIGN_RIGHT);
 	psy_ui_component_setpreferredsize(&self->spacerright,
 		psy_ui_size_make_em(0.5, 0.0));
-	psy_ui_component_init_align(&self->top, mainframe_base(self),
-		NULL, psy_ui_ALIGN_TOP);
+	psy_ui_component_init_align(&self->top, &self->pane,
+		NULL, psy_ui_ALIGN_TOP);	
 	psy_ui_component_setdefaultalign(&self->top, psy_ui_ALIGN_TOP,
 		psy_ui_margin_zero());
 	psy_ui_component_init_align(&self->mainviews, &self->client, NULL,
-		psy_ui_ALIGN_CLIENT);
-	psy_ui_component_setbackgroundmode(&self->mainviews, psy_ui_NOBACKGROUND);
+		psy_ui_ALIGN_CLIENT);	
 	psy_ui_component_init_align(&self->right, &self->client, NULL,
 		psy_ui_ALIGN_RIGHT);
 	psy_ui_component_show(&self->statusbar.component);
@@ -269,7 +274,7 @@ void mainframe_initterminal(MainFrame* self)
 		psy_ui_ALIGN_BOTTOM);
 	psy_ui_component_setpreferredsize(psy_ui_terminal_base(&self->terminal),
 		psy_ui_size_zero());
-	psy_ui_splitter_init(&self->splitbarterminal, mainframe_base(self), NULL);
+	psy_ui_splitter_init(&self->splitbarterminal, mainframe_base(self));
 	psy_ui_component_setalign(psy_ui_splitter_base(&self->splitbarterminal),
 		psy_ui_ALIGN_BOTTOM);
 	workspace_connectterminal(&self->workspace, self,
@@ -280,7 +285,7 @@ void mainframe_initterminal(MainFrame* self)
 
 void mainframe_initkbdhelp(MainFrame* self)
 {
-	kbdhelp_init(&self->kbdhelp, mainframe_base(self), &self->workspace);
+	kbdhelp_init(&self->kbdhelp, &self->pane, &self->workspace);
 	psy_ui_component_setalign(kbdhelp_base(&self->kbdhelp),
 		psy_ui_ALIGN_BOTTOM);
 	psy_ui_component_hide(kbdhelp_base(&self->kbdhelp));
@@ -307,7 +312,8 @@ void mainframe_initviewstatusbars(MainFrame* self)
 		psy_ui_notebook_base(&self->statusbar.viewstatusbars),
 		&self->workspace);
 	patternviewbar_init(&self->patternbar,
-		psy_ui_notebook_base(&self->statusbar.viewstatusbars), &self->workspace);
+		psy_ui_notebook_base(&self->statusbar.viewstatusbars),
+		&self->patternview, &self->workspace);
 	sampleeditorbar_init(&self->samplesview.sampleeditor.sampleeditortbar,
 		psy_ui_notebook_base(&self->statusbar.viewstatusbars),
 		&self->samplesview.sampleeditor, &self->workspace);
@@ -395,18 +401,17 @@ void mainframe_initbars(MainFrame* self)
 
 void mainframe_inittabbars(MainFrame* self)
 {
-	mainviewbar_init(&self->mainviewbar, &self->mainviews, NULL,
-		&self->workspace);
+	mainviewbar_init(&self->mainviewbar, &self->mainviews, &self->pane, &self->workspace);
 	psy_ui_component_setalign(mainviewbar_base(&self->mainviewbar),
 		psy_ui_ALIGN_TOP);	
 	psy_ui_component_init(&self->tabspacer, &self->mainviews, NULL);
 	psy_ui_component_setalign(&self->tabspacer, psy_ui_ALIGN_TOP);
 	psy_ui_component_setpreferredsize(&self->tabspacer,
 		psy_ui_size_make_em(0.0, 0.4));
-	psy_ui_tabbar_init(&self->scripttabbar, &self->mainviews, NULL);
+	psy_ui_tabbar_init(&self->scripttabbar, &self->mainviews);
 	psy_ui_component_setalign(&self->scripttabbar.component, psy_ui_ALIGN_TOP);
 	psy_ui_component_hide(&self->scripttabbar.component);	
-	psy_ui_button_init_text_connect(&self->togglescripts, &self->mainviewbar.tabbars, NULL,
+	psy_ui_button_init_text_connect(&self->togglescripts, &self->mainviewbar.tabbars,
 		"main.scripts", self, mainframe_ontogglescripts);
 	psy_ui_component_setalign(psy_ui_button_base(&self->togglescripts),
 		psy_ui_ALIGN_LEFT);
@@ -414,21 +419,24 @@ void mainframe_inittabbars(MainFrame* self)
 
 void mainframe_initmainpane(MainFrame* self)
 {
-	psy_ui_component_init(&self->mainpane, &self->mainviews, NULL);
+	psy_ui_component_init(&self->mainpane, &self->mainviews, NULL);	
 	psy_ui_component_setalign(&self->mainpane, psy_ui_ALIGN_CLIENT);	
-	psy_ui_component_setbackgroundmode(&self->mainpane,
-		psy_ui_NOBACKGROUND);	
-	psy_ui_notebook_init(&self->notebook, &self->mainpane, NULL);
+	psy_ui_notebook_init(&self->notebook, &self->mainpane, NULL);	
 	psy_ui_component_setalign(psy_ui_notebook_base(&self->notebook),
 		psy_ui_ALIGN_CLIENT);	
 	psy_ui_notebook_connectcontroller(&self->notebook,
 		&self->mainviewbar.tabbar.signal_change);
-	machineview_init(&self->machineview, psy_ui_notebook_base(&self->notebook),
-		&self->mainviewbar.viewtabbars.component, &self->workspace);
-	patternview_init(&self->patternview, psy_ui_notebook_base(&self->notebook),
-		psy_ui_notebook_base(&self->mainviewbar.viewtabbars), &self->workspace);
-	samplesview_init(&self->samplesview, psy_ui_notebook_base(&self->notebook),
-		psy_ui_notebook_base(&self->mainviewbar.viewtabbars), &self->workspace);
+	machineview_init(&self->machineview,
+		psy_ui_notebook_base(&self->notebook),
+		psy_ui_notebook_base(&self->mainviewbar.viewtabbars),
+		&self->workspace);
+	patternview_init(&self->patternview,
+		psy_ui_notebook_base(&self->notebook),
+		psy_ui_notebook_base(&self->mainviewbar.viewtabbars),
+		&self->workspace);
+	samplesview_init(&self->samplesview, psy_ui_notebook_base(&self->notebook),		
+		psy_ui_notebook_base(&self->mainviewbar.viewtabbars),
+		&self->workspace);
 	instrumentview_init(&self->instrumentsview,
 		psy_ui_notebook_base(&self->notebook),
 		psy_ui_notebook_base(&self->mainviewbar.viewtabbars),
@@ -438,21 +446,26 @@ void mainframe_initmainpane(MainFrame* self)
 		psy_ui_notebook_base(&self->mainviewbar.viewtabbars),
 		&self->workspace);
 	propertiesview_init(&self->settingsview,
-		psy_ui_notebook_base(&self->notebook),
-		psy_ui_notebook_base(&self->notebook),
+		psy_ui_notebook_base(&self->notebook),		
 		psy_ui_notebook_base(&self->mainviewbar.viewtabbars),
 		&self->workspace.config.config, 3,
 		&self->workspace);
 	psy_signal_connect(&self->settingsview.signal_changed, self,
 		mainframe_onsettingsviewchanged);
-	helpview_init(&self->helpview, psy_ui_notebook_base(&self->notebook),
-		psy_ui_notebook_base(&self->mainviewbar.viewtabbars), &self->workspace);
-	renderview_init(&self->renderview, psy_ui_notebook_base(&self->notebook),
-		psy_ui_notebook_base(&self->mainviewbar.viewtabbars), &self->workspace);
+	helpview_init(&self->helpview,
+		psy_ui_notebook_base(&self->notebook),
+		psy_ui_notebook_base(&self->mainviewbar.viewtabbars),
+		&self->workspace);
+	renderview_init(&self->renderview,
+		psy_ui_notebook_base(&self->notebook),
+		psy_ui_notebook_base(&self->mainviewbar.viewtabbars),
+		&self->workspace);
 	psy_signal_connect(&self->filebar.renderbutton.signal_clicked, self,
 		mainframe_onrender);
-	exportview_init(&self->exportview, psy_ui_notebook_base(&self->notebook),
-		psy_ui_notebook_base(&self->mainviewbar.viewtabbars), &self->workspace);
+	exportview_init(&self->exportview,
+		psy_ui_notebook_base(&self->notebook),
+		psy_ui_notebook_base(&self->mainviewbar.viewtabbars),
+		&self->workspace);
 	psy_signal_connect(&self->filebar.exportbutton.signal_clicked, self,
 		mainframe_onexport);
 	psy_signal_connect(&self->workspace.signal_viewselected, self,
@@ -473,7 +486,7 @@ void mainframe_initgear(MainFrame* self)
 	gear_init(&self->gear, &self->client, &self->workspace);
 	psy_ui_component_hide(gear_base(&self->gear));
 	psy_ui_component_setalign(gear_base(&self->gear), psy_ui_ALIGN_RIGHT);
-	psy_ui_splitter_init(&self->gearsplitter, &self->client, NULL);
+	psy_ui_splitter_init(&self->gearsplitter, &self->client);
 	psy_ui_component_setalign(psy_ui_splitter_base(&self->gearsplitter),
 		psy_ui_ALIGN_RIGHT);
 	psy_ui_splitter_settoggle(&self->gearsplitter, gear_base(&self->gear));
@@ -488,7 +501,7 @@ void mainframe_initparamrack(MainFrame* self)
 	psy_ui_component_hide(paramrack_base(&self->paramrack));
 	psy_ui_component_setalign(&self->paramrack.component,
 		psy_ui_ALIGN_BOTTOM);
-	psy_ui_splitter_init(&self->splitbarparamrack, &self->client, NULL);
+	psy_ui_splitter_init(&self->splitbarparamrack, &self->client);
 	psy_ui_component_setalign(psy_ui_splitter_base(&self->splitbarparamrack),
 		psy_ui_ALIGN_BOTTOM);
 	psy_ui_splitter_settoggle(&self->splitbarparamrack,
@@ -503,7 +516,7 @@ void mainframe_initcpuview(MainFrame* self)
 	cpuview_init(&self->cpuview, &self->client, &self->workspace);
 	psy_ui_component_hide(cpuview_base(&self->cpuview));
 	psy_ui_component_setalign(cpuview_base(&self->cpuview), psy_ui_ALIGN_RIGHT);
-	psy_ui_splitter_init(&self->cpusplitter, &self->client, NULL);
+	psy_ui_splitter_init(&self->cpusplitter, &self->client);
 	psy_ui_component_setalign(psy_ui_splitter_base(&self->cpusplitter),
 		psy_ui_ALIGN_RIGHT);
 	psy_ui_splitter_settoggle(&self->cpusplitter,
@@ -518,7 +531,7 @@ void mainframe_initmidimonitor(MainFrame* self)
 	midimonitor_init(&self->midimonitor, &self->client, &self->workspace);
 	psy_ui_component_hide(midimonitor_base(&self->midimonitor));
 	psy_ui_component_setalign(midimonitor_base(&self->midimonitor), psy_ui_ALIGN_RIGHT);
-	psy_ui_splitter_init(&self->midisplitter, &self->client, NULL);
+	psy_ui_splitter_init(&self->midisplitter, &self->client);
 	psy_ui_component_setalign(psy_ui_splitter_base(&self->midisplitter),
 		psy_ui_ALIGN_RIGHT);
 	psy_ui_splitter_settoggle(&self->midisplitter,
@@ -547,7 +560,7 @@ void mainframe_initseqeditor(MainFrame* self)
 		psy_ui_ALIGN_BOTTOM);	
 	psy_ui_component_setmaximumsize(seqeditor_base(&self->seqeditor),
 		psy_ui_size_make(psy_ui_value_zero(), psy_ui_value_make_ph(0.7)));
-	psy_ui_splitter_init(&self->splitseqeditor, &self->mainpane, NULL);
+	psy_ui_splitter_init(&self->splitseqeditor, &self->mainpane);
 	psy_ui_component_setalign(psy_ui_splitter_base(&self->splitseqeditor),
 		psy_ui_ALIGN_BOTTOM);
 	if (!generalconfig_showsequenceedit(psycleconfig_general(
@@ -559,13 +572,13 @@ void mainframe_initseqeditor(MainFrame* self)
 
 void mainframe_initrecentview(MainFrame* self)
 {
-	playlistview_init(&self->playlist, mainframe_base(self),
+	playlistview_init(&self->playlist, &self->pane,
 		psy_ui_notebook_base(&self->mainviewbar.viewtabbars),
 		&self->workspace);
 	psy_ui_component_setalign(playlistview_base(&self->playlist),
 		psy_ui_ALIGN_LEFT);
-	psy_ui_splitter_init(&self->playlistsplitter, mainframe_base(self), NULL);
-	psy_ui_component_setalign(psy_ui_splitter_base(&self->playlistsplitter),
+	 psy_ui_splitter_init(&self->playlistsplitter, &self->pane);
+	 psy_ui_component_setalign(psy_ui_splitter_base(&self->playlistsplitter),
 		psy_ui_ALIGN_LEFT);
 	if (!generalconfig_showplaylist(&self->workspace.config.general)) {
 		psy_ui_component_hide(playlistview_base(&self->playlist));
@@ -578,7 +591,7 @@ void mainframe_initrecentview(MainFrame* self)
 void mainframe_initfileview(MainFrame* self)
 {	
 	/* ft2 style file load view */	
-	fileview_init(&self->fileview, mainframe_base(self));
+	fileview_init(&self->fileview, &self->pane);
 #if defined(DIVERSALIS__OS__MICROSOFT)	
 	fileview_setdirectory(&self->fileview,
 		dirconfig_songs(&self->workspace.config.directories));
@@ -599,18 +612,18 @@ void mainframe_initfileview(MainFrame* self)
 
 void mainframe_initsequenceview(MainFrame* self)
 {
-	psy_ui_component_init_align(&self->left, mainframe_base(self), NULL,
+	psy_ui_component_init_align(&self->left, &self->pane, NULL,
 		psy_ui_ALIGN_LEFT);
-	psy_ui_splitter_init(&self->splitbar, mainframe_base(self), NULL);
-	psy_ui_component_setbackgroundmode(&self->left, psy_ui_NOBACKGROUND);
-	seqview_init(&self->sequenceview, &self->left, &self->workspace);
+	psy_ui_splitter_init(&self->splitbar, &self->pane);
+	seqview_init(&self->sequenceview, &self->left, NULL, &self->workspace);
 	psy_ui_component_setalign(seqview_base(&self->sequenceview),
 		psy_ui_ALIGN_CLIENT);
 }
 
 void mainframe_initsequencerbar(MainFrame* self)
 {
-	sequencerbar_init(&self->sequencerbar, &self->left, &self->workspace);
+	sequencerbar_init(&self->sequencerbar, &self->left, NULL,
+		&self->workspace);
 	psy_ui_component_setalign(sequencerbar_base(&self->sequencerbar),
 		psy_ui_ALIGN_BOTTOM);
 }
@@ -623,7 +636,7 @@ void mainframe_initplugineditor(MainFrame* self)
 	psy_ui_component_hide(plugineditor_base(&self->plugineditor));
 	psy_signal_connect(&self->machinebar.editor.signal_clicked, self,
 		mainframe_onplugineditor);
-	psy_ui_splitter_init(&self->splitbarplugineditor, mainframe_base(self), NULL);
+	psy_ui_splitter_init(&self->splitbarplugineditor, mainframe_base(self));
 	psy_ui_component_setalign(psy_ui_splitter_base(&self->splitbarplugineditor),
 		psy_ui_ALIGN_LEFT);
 	psy_ui_component_hide(psy_ui_splitter_base(&self->splitbarplugineditor));
@@ -774,19 +787,20 @@ void mainframe_ontogglegearworkspace(MainFrame* self, Workspace* sender)
 
 void mainframe_onrecentsongs(MainFrame* self, psy_ui_Component* sender)
 {
-	if (psy_ui_component_visible(playlistview_base(&self->playlist))) {
+	psy_ui_component_togglevisibility(&self->playlist.component);
+	psy_ui_component_togglevisibility(&self->playlistsplitter.component);
+	/*if (psy_ui_component_visible(playlistview_base(&self->playlist))) {
 		psy_ui_button_seticon(&self->filebar.recentbutton, psy_ui_ICON_MORE);
 		psy_ui_component_hide(playlistview_base(&self->playlist));
-		psy_ui_component_hide_align(psy_ui_splitter_base(&self->playlistsplitter));
+		// psy_ui_component_hide_align(psy_ui_splitter_base(&self->playlistsplitter));
 	} else {
 		psy_ui_button_seticon(&self->filebar.recentbutton, psy_ui_ICON_LESS);
 		playlistview_base(&self->playlist)->visible = 1;
-		psy_ui_splitter_base(&self->playlistsplitter)->visible = 1;
-		psy_ui_component_align(&self->component);
-		psy_ui_component_show(playlistview_base(&self->playlist));
-		psy_ui_component_show(psy_ui_splitter_base(&self->playlistsplitter));
+		// psy_ui_splitter_base(&self->playlistsplitter)->visible = 1;
+		psy_ui_component_align(&self->component);		
+		// psy_ui_component_show(psy_ui_splitter_base(&self->playlistsplitter));
 	}
-	psy_ui_component_invalidate(mainframe_base(self));
+	psy_ui_component_invalidate(mainframe_base(self));*/
 	generalconfig_setplaylistshowstate(&self->workspace.config.general,
 		psy_ui_component_visible(playlistview_base(&self->playlist)));
 }
@@ -879,8 +893,15 @@ void mainframe_onexport(MainFrame* self, psy_ui_Component* sender)
 
 void mainframe_ontimer(MainFrame* self, uintptr_t timerid)
 {
+	vubar_idle(&self->vubar);
 	workspace_idle(&self->workspace);
 	mainstatusbar_idle(&self->statusbar);
+	trackscopeview_idle(&self->trackscopeview);
+	seqview_idle(&self->sequenceview);
+	playposbar_idle(&self->playposbar);
+	if (workspace_currview(&self->workspace).id == VIEW_ID_MACHINEVIEW) {
+		machineview_idle(&self->machineview);
+	}
 	if (self->titlemodified != workspace_songmodified(&self->workspace)) {
 		self->titlemodified = workspace_songmodified(&self->workspace);
 		mainframe_updatesongtitle(self);
@@ -952,7 +973,7 @@ void mainframe_ontabbarchanged(MainFrame* self, psy_ui_Component* sender,
 			tabindex, psy_ui_component_section(component), psy_INDEX_INVALID));
 		psy_ui_component_setfocus(component);
 	}
-	psy_ui_component_align(&self->component);
+	psy_ui_component_align(&self->component);		
 	psy_ui_component_invalidate(&self->mainviewbar.tabbars);
 }
 

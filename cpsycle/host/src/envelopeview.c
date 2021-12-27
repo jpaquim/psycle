@@ -552,12 +552,12 @@ void envelopebar_init(EnvelopeBar* self, psy_ui_Component* parent)
 	psy_ui_component_setmargin(psy_ui_checkbox_base(&self->enabled), tab);
 	psy_ui_checkbox_init_text(&self->carry, &self->component, "Carry (continue)");	
 	psy_ui_component_setmargin(psy_ui_checkbox_base(&self->carry), tab);
-	psy_ui_button_init_text_connect(&self->millisec, &self->component, NULL, "Millisecs",
+	psy_ui_button_init_text_connect(&self->millisec, &self->component, "Millisecs",
 		self, envelopebar_onmillisecs);	
-	psy_ui_button_init_text_connect(&self->ticks, &self->component, NULL, "Ticks",
+	psy_ui_button_init_text_connect(&self->ticks, &self->component, "Ticks",
 		self, envelopebar_onticks);
 	psy_ui_component_setmargin(&self->ticks.component, tab);
-	psy_ui_button_init_text(&self->adsr, &self->component, NULL, "ADSR");
+	psy_ui_button_init_text(&self->adsr, &self->component, "ADSR");
 	psy_ui_button_allowrightclick(&self->adsr);
 	envelopebar_enablemillisecs(self);
 }

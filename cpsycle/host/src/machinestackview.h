@@ -226,40 +226,39 @@ void machinestackvolumes_init(MachineStackVolumes*, psy_ui_Component* parent,
 void machinestackvolumes_build(MachineStackVolumes*);
 
 
-// MachineStackPaneTrackClient
+/* MachineStackPaneTrackClient */
 typedef struct MachineStackPaneTrackClient {
 	psy_ui_Component component;
-	// internal
+	/* internal */
 	uintptr_t column;
-	// references
+	/* references */
 	MachineStackState* state;
 } MachineStackPaneTrackClient;
 
 void machinestackpanetrackclient_init(MachineStackPaneTrackClient*,
-	psy_ui_Component* parent, psy_ui_Component* view, uintptr_t column,
+	psy_ui_Component* parent, uintptr_t column,
 	MachineStackState*);
 
-// MachineStackPaneTrack
+/* MachineStackPaneTrack */
 typedef struct MachineStackPaneTrack {
-	// inherits
+	/* inherits */
 	psy_ui_Component component;
+	/* internal */
 	MachineStackPaneTrackClient client;
-	psy_ui_Scroller scroller;
-	// internal
+	psy_ui_Scroller scroller;	
 	uintptr_t column;	
-	// References
-	MachineStackState* state;
-	// references
+	/* references */
+	MachineStackState* state;	
 	Workspace* workspace;	
 } MachineStackPaneTrack;
 
 void machinestackpanetrack_init(MachineStackPaneTrack*,
-	psy_ui_Component* parent, psy_ui_Component* view, uintptr_t column,
+	psy_ui_Component* parent, uintptr_t column,
 	MachineStackState*, Workspace*);
 
 MachineStackPaneTrack* machinestackpanetrack_alloc(void);
 MachineStackPaneTrack* machinestackpanetrack_allocinit(
-	psy_ui_Component* parent, psy_ui_Component* view, uintptr_t column,
+	psy_ui_Component* parent, uintptr_t column,
 	MachineStackState*, Workspace*);
 
 // MachineStackView

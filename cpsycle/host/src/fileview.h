@@ -9,10 +9,10 @@
 /* ui */
 #include <uibutton.h>
 #include <uicheckbox.h>
-#include <uiedit.h>
 #include <uilabel.h>
 #include "uilistbox.h"
 #include <uitabbar.h>
+#include <uitextinput.h>
 /* file */
 #include <dir.h>
 
@@ -88,7 +88,7 @@ typedef struct FileView {
 	psy_ui_Label dir;
 	psy_ui_Component filebar;
 	psy_ui_Label filedesc;
-	psy_ui_Edit filename;
+	psy_ui_TextInput filename;
 	psy_Table filenames;
 	psy_Path curr;	
 	psy_List* files;	

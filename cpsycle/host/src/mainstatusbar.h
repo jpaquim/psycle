@@ -37,6 +37,7 @@ typedef struct MainStatusBar {
 	/* inherits */
 	psy_ui_Component component;
 	/* internal */
+	psy_ui_Component pane;
 	psy_ui_ProgressBar progressbar;
 	psy_ui_Button toggleterminal;	
 	psy_ui_Button togglekbdhelp;
@@ -54,8 +55,7 @@ typedef struct MainStatusBar {
 	Workspace* workspace;
 } MainStatusBar;
 
-void mainstatusbar_init(MainStatusBar*, psy_ui_Component* parent,
-	Workspace*);
+void mainstatusbar_init(MainStatusBar*, psy_ui_Component* parent, Workspace*);
 
 void mainstatusbar_updateterminalbutton(MainStatusBar*);
 void mainstatusbar_setdefaultstatustext(MainStatusBar*, const char* text);

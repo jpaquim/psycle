@@ -10,7 +10,7 @@
 #include "trackbox.h"
 #include "workspace.h"
 /* ui */
-#include <uiedit.h>
+#include <uitextinput.h>
 /* audio */
 #include <sequence.h>
 
@@ -41,13 +41,11 @@ typedef struct SequenceTrackBox {
 } SequenceTrackBox;
 
 void sequencetrackbox_init(SequenceTrackBox*, psy_ui_Component* parent,
-	psy_ui_Component* view, psy_audio_Sequence*, uintptr_t trackidx,
-	Workspace* workspace);
+	psy_audio_Sequence*, uintptr_t trackidx, Workspace* workspace);
 
 SequenceTrackBox* sequencetrackbox_alloc(void);
 SequenceTrackBox* sequencetrackbox_allocinit(psy_ui_Component* parent,
-	psy_ui_Component* view, psy_audio_Sequence*, uintptr_t trackidx,
-	Workspace*);
+	psy_audio_Sequence*, uintptr_t trackidx, Workspace*);
 
 void sequencetrackbox_showtrackname(SequenceTrackBox*);
 

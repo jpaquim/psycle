@@ -55,7 +55,7 @@ typedef struct SequenceButtons {
 } SequenceButtons;
 
 void sequencebuttons_init(SequenceButtons*, psy_ui_Component* parent,
-	psy_ui_Component* view, SequenceCmds*);
+	SequenceCmds*);
 
 INLINE psy_ui_Component* sequencebuttons_base(SequenceButtons* self)
 {

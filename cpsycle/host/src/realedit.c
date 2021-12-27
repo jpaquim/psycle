@@ -23,9 +23,9 @@ static void realedit_oneditkeyup(RealEdit*, psy_ui_Component* sender,
 static void realedit_oneditfocuslost(RealEdit*, psy_ui_Component* sender,
 	psy_ui_KeyboardEvent*);
 
-// implementation
+/* implementation */
 void realedit_init(RealEdit* self, psy_ui_Component* parent,
-	psy_ui_Component* view, const char* desc, realedit_real_t value,
+	const char* desc, realedit_real_t value,
 	realedit_real_t minval, realedit_real_t maxval)
 {
 	psy_ui_component_init(realedit_base(self), parent, NULL);
@@ -35,14 +35,14 @@ void realedit_init(RealEdit* self, psy_ui_Component* parent,
 	self->minval = minval;
 	self->maxval = maxval;
 	self->restore = value;
-	psy_ui_label_init(&self->desc, realedit_base(self), NULL);
+	psy_ui_label_init(&self->desc, realedit_base(self));
 	psy_ui_label_settext(&self->desc, desc);
-	psy_ui_textinput_init(&self->edit, realedit_base(self), view);
+	psy_ui_textinput_init(&self->edit, realedit_base(self));
 	psy_ui_textinput_setcharnumber(&self->edit, 5);
-	psy_ui_button_init_connect(&self->less, realedit_base(self), NULL,
+	psy_ui_button_init_connect(&self->less, realedit_base(self),
 		self, realedit_onlessclicked);
 	psy_ui_button_seticon(&self->less, psy_ui_ICON_LESS);
-	psy_ui_button_init_connect(&self->more, realedit_base(self), NULL,
+	psy_ui_button_init_connect(&self->more, realedit_base(self),
 		self, realedit_onmoreclicked);
 	psy_ui_button_seticon(&self->more, psy_ui_ICON_MORE);
 	psy_signal_init(&self->signal_changed);
@@ -58,10 +58,10 @@ void realedit_init(RealEdit* self, psy_ui_Component* parent,
 }
 
 void realedit_init_connect(RealEdit* self, psy_ui_Component* parent,
-	psy_ui_Component* view, const char* desc, realedit_real_t value,
+	const char* desc, realedit_real_t value,
 	realedit_real_t minval, realedit_real_t maxval, void* context, void* fp)
 {
-	realedit_init(self, parent, view, desc, value, minval, maxval);
+	realedit_init(self, parent, desc, value, minval, maxval);
 	psy_signal_connect(&self->signal_changed, context, fp);
 }
 

@@ -15,28 +15,28 @@ extern "C" {
 
 /* Editor component (implementaion scintilla based) */
 
-typedef struct psy_ui_Editor {
+typedef struct psy_ui_TextInputor {
 	/* inherits */
 	psy_ui_Component component;
-} psy_ui_Editor;
+} psy_ui_TextInputor;
 
-void psy_ui_editor_init(psy_ui_Editor*, psy_ui_Component* parent);
-void psy_ui_editor_load(psy_ui_Editor*, const char* path);
-void psy_ui_editor_save(psy_ui_Editor*, const char* path);
-void psy_ui_editor_settext(psy_ui_Editor*, const char* text);
-void psy_ui_editor_addtext(psy_ui_Editor*, const char* text);
-char* psy_ui_editor_text(psy_ui_Editor*, uintptr_t maxlength, char* text);
-uintptr_t psy_ui_editor_length(psy_ui_Editor*);
-void psy_ui_editor_clear(psy_ui_Editor*);
-void psy_ui_editor_setcolour(psy_ui_Editor*, psy_ui_Colour);
-void psy_ui_editor_setbackgroundcolour(psy_ui_Editor*, psy_ui_Colour);
-void psy_ui_editor_enableedit(psy_ui_Editor*);
-void psy_ui_editor_preventedit(psy_ui_Editor*);
-void psy_ui_editor_enablewrap(psy_ui_Editor*);
-void psy_ui_editor_disablewrap(psy_ui_Editor*);
-void psy_ui_editor_gotoline(psy_ui_Editor*, uintptr_t line);
+void psy_ui_editor_init(psy_ui_TextInputor*, psy_ui_Component* parent);
+void psy_ui_editor_load(psy_ui_TextInputor*, const char* path);
+void psy_ui_editor_save(psy_ui_TextInputor*, const char* path);
+void psy_ui_editor_settext(psy_ui_TextInputor*, const char* text);
+void psy_ui_editor_addtext(psy_ui_TextInputor*, const char* text);
+char* psy_ui_editor_text(psy_ui_TextInputor*, uintptr_t maxlength, char* text);
+uintptr_t psy_ui_editor_length(psy_ui_TextInputor*);
+void psy_ui_editor_clear(psy_ui_TextInputor*);
+void psy_ui_editor_setcolour(psy_ui_TextInputor*, psy_ui_Colour);
+void psy_ui_editor_setbackgroundcolour(psy_ui_TextInputor*, psy_ui_Colour);
+void psy_ui_editor_enableedit(psy_ui_TextInputor*);
+void psy_ui_editor_preventedit(psy_ui_TextInputor*);
+void psy_ui_editor_enablewrap(psy_ui_TextInputor*);
+void psy_ui_editor_disablewrap(psy_ui_TextInputor*);
+void psy_ui_editor_gotoline(psy_ui_TextInputor*, uintptr_t line);
 
-INLINE psy_ui_Component* psy_ui_editor_base(psy_ui_Editor* self)
+INLINE psy_ui_Component* psy_ui_editor_base(psy_ui_TextInputor* self)
 {
 	return &self->component;
 }

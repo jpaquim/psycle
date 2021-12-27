@@ -37,8 +37,8 @@ void machinecombobox_init(MachineComboBox* self, psy_ui_Component* parent,
 	self->instruments = &workspace->song->instruments;	
 	psy_table_init(&self->comboboxslots);
 	psy_table_init(&self->slotscombobox);	
-	// Machine ComboBox
-	psy_ui_combobox_init(&self->machinebox, parent, NULL);
+	/* Machine ComboBox */
+	psy_ui_combobox_init(&self->machinebox, parent);
 	psy_ui_combobox_setcharnumber(&self->machinebox, 10);
 	psy_signal_connect(&self->machinebox.component.signal_destroy,
 		self, machinecombobox_ondestroy);

@@ -196,8 +196,7 @@ void pianogrid_init(Pianogrid* self, psy_ui_Component* parent,
 	psy_ui_component_setvtable(pianogrid_base(self),
 		pianogrid_vtable_init(self));
 	psy_ui_component_setbackgroundmode(pianogrid_base(self),
-		psy_ui_NOBACKGROUND);
-	psy_ui_component_doublebuffer(pianogrid_base(self));
+		psy_ui_NOBACKGROUND);	
 	psy_ui_component_setwheelscroll(pianogrid_base(self), 4);
 	self->workspace = workspace;
 	self->gridstate = gridstate;

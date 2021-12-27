@@ -63,8 +63,7 @@ void vuscope_init(VuScope* self, psy_ui_Component* parent, psy_audio_Wire wire,
 	Workspace* workspace)
 {					
 	psy_ui_component_init(&self->component, parent, NULL);
-	vtable_init(self);
-	psy_ui_component_doublebuffer(&self->component);
+	vtable_init(self);	
 	self->wire = wire;
 	self->workspace = workspace;
 	self->leftavg = 0;

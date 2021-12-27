@@ -7,7 +7,7 @@
 #include <uibutton.h>
 #include <uicheckbox.h>
 #include <uicombobox.h>
-#include <uiedit.h>
+#include <uitextinput.h>
 #include <uieditor.h>
 #include <uilabel.h>
 #include <uislider.h>
@@ -39,9 +39,9 @@ typedef struct {
 	psy_ui_Label visualrepresentationdesc;
 	psy_ui_ComboBox visualrepresentation;
 	psy_ui_Label selstartlabel;
-	psy_ui_Edit selstartedit;
+	psy_ui_TextInput selstartedit;
 	psy_ui_Label selendlabel;
-	psy_ui_Edit selendedit;
+	psy_ui_TextInput selendedit;
 	struct SampleEditor* editor;
 	Workspace* workspace;
 } SampleEditorBar;
@@ -80,8 +80,8 @@ void sampleeditoramplify_init(SampleEditorAmplify*, psy_ui_Component* parent,
 typedef struct {
 	psy_ui_Component component;
 	psy_ui_Label header;
-	psy_ui_Editor editor;
-	psy_ui_Editor console;
+	psy_ui_TextInputor editor;
+	psy_ui_TextInputor console;
 	Workspace* workspace;
 } SampleEditLuaProcessor;
 
@@ -105,7 +105,7 @@ typedef struct SampleEditorProcessView {
 	psy_ui_Component emptypage5;
 	psy_ui_Component emptypage6;
 	SampleEditorAmplify amplify;
-	SampleEditLuaProcessor luaprocessor;
+	/* SampleEditLuaProcessor luaprocessor; */
 } SampleEditorProcessView;
 
 void sampleprocessview_init(SampleEditorProcessView*, psy_ui_Component* parent,
@@ -145,6 +145,7 @@ void samplebox_drawlines(SampleBox*);
 void samplebox_drawbars(SampleBox*);
 void samplebox_setquality(SampleBox*, psy_dsp_ResamplerQuality);
 
+/* SampleEditor */
 typedef struct SampleEditor {	
 	psy_ui_Component component;
 	SampleEditorPlayBar playbar;
@@ -165,6 +166,7 @@ typedef struct SampleEditor {
 } SampleEditor;
 
 void sampleeditor_init(SampleEditor*, psy_ui_Component* parent, Workspace*);
+
 void sampleeditor_setsample(SampleEditor*, psy_audio_Sample*);
 void sampleeditor_showdoublecontloop(SampleEditor*);
 void sampleeditor_showsinglecontloop(SampleEditor*);

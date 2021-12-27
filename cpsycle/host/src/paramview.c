@@ -47,7 +47,6 @@ void paramview_init(ParamView* self, psy_ui_Component* parent,
 {	
 	psy_ui_component_init(&self->component, parent, NULL);
 	vtable_init(self);	
-	psy_ui_component_doublebuffer(&self->component);	
 	psy_ui_component_setalignexpand(&self->component,
 		psy_ui_HEXPAND);	
 	self->config = config;	

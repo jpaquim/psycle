@@ -15,12 +15,12 @@ void labeledit_init(LabelEdit* self, psy_ui_Component* parent,
 {
 	psy_ui_component_init(labeledit_base(self), parent, NULL);
 	psy_ui_component_setalignexpand(labeledit_base(self), psy_ui_HEXPAND);	
-	psy_ui_label_init_text(&self->desc, labeledit_base(self), NULL, desc);
+	psy_ui_label_init_text(&self->desc, labeledit_base(self), desc);
 	psy_ui_component_setalign(psy_ui_label_base(&self->desc), psy_ui_ALIGN_LEFT);
 	psy_ui_label_setcharnumber(&self->desc, 12.0);
-	psy_ui_edit_init(&self->edit, labeledit_base(self));
-	psy_ui_component_setalign(psy_ui_edit_base(&self->edit), psy_ui_ALIGN_CLIENT);	
-	psy_ui_edit_enableinputfield(&self->edit);		
+	psy_ui_textinput_init(&self->edit, labeledit_base(self));
+	psy_ui_component_setalign(psy_ui_textinput_base(&self->edit), psy_ui_ALIGN_CLIENT);	
+	psy_ui_textinput_enableinputfield(&self->edit);		
 }
 
 LabelEdit* labeledit_alloc(void)

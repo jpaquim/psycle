@@ -51,7 +51,6 @@ void oscilloscope_init(Oscilloscope* self, psy_ui_Component* parent, psy_audio_W
 {					
 	psy_ui_component_init(&self->component, parent, NULL);
 	vtable_init(self);	
-	psy_ui_component_doublebuffer(&self->component);
 	self->wire = wire;
 	self->invol = (psy_dsp_amp_t)1.0f;
 	self->mult = 1.0f;
@@ -271,22 +270,22 @@ void oscilloscopecontrols_init(OscilloscopeControls* self, psy_ui_Component* par
 	psy_ui_margin_init_em(&margin, 0.0, 0.5, 0.0, 0.0);		
 	psy_ui_component_init(&self->component, parent, NULL);
 	self->oscilloscope = oscilloscope;
-	psy_ui_label_init_text(&self->channellbl, &self->component, NULL,
+	psy_ui_label_init_text(&self->channellbl, &self->component,
 		"Channel");
 	psy_ui_component_setmargin(&self->channellbl.component, margin);
-	psy_ui_button_init(&self->channelmode, &self->component, NULL);
+	psy_ui_button_init(&self->channelmode, &self->component);
 	psy_ui_button_setcharnumber(&self->channelmode, 6);
 	psy_ui_margin_setright(&margin, psy_ui_value_make_ew(2.0));
 	psy_ui_component_setmargin(&self->channelmode.component, margin);
 	psy_signal_connect(&self->channelmode.signal_clicked, self,
 		oscilloscopecontrols_onchannelselect);
 	oscilloscopecontrols_updatechannelselect(self);
-	psy_ui_label_init(&self->amplbl, &self->component, NULL);
+	psy_ui_label_init(&self->amplbl, &self->component);
 	psy_ui_label_preventtranslation(&self->amplbl);
 	psy_ui_label_settext(&self->amplbl, "Amp");
 	psy_ui_margin_setright(&margin, psy_ui_value_make_ew(0.5));
 	psy_ui_component_setmargin(&self->amplbl.component, margin);
-	zoombox_init(&self->ampzoom, &self->component, NULL);
+	zoombox_init(&self->ampzoom, &self->component);
 	psy_signal_connect(&self->ampzoom.signal_changed, self,
 		oscilloscopecontrols_onampzoomchanged);	
 	psy_ui_component_setalign_children(&self->component, psy_ui_ALIGN_LEFT);		

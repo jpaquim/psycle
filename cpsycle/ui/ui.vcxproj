@@ -208,21 +208,15 @@
     </Bscmake>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\imps\natives\uinativecheckboximp.c" />
-    <ClCompile Include="src\imps\natives\uinativeeditimp.c" />
-    <ClCompile Include="src\imps\natives\uinativelistboximp.c" />
     <ClCompile Include="src\imps\win32\uiwinapp.c" />
     <ClCompile Include="src\imps\win32\uiwinbitmapimp.c" />
-    <ClCompile Include="src\imps\win32\uiwincheckboximp.c" />
     <ClCompile Include="src\imps\win32\uiwincolordialogimp.c" />
     <ClCompile Include="src\imps\win32\uiwincomponentimp.c" />
-    <ClCompile Include="src\imps\win32\uiwineditimp.c" />
     <ClCompile Include="src\imps\win32\uiwinfolderdialogimp.c" />
     <ClCompile Include="src\imps\win32\uiwinfontdialogimp.c" />
     <ClCompile Include="src\imps\win32\uiwinfontimp.c" />
     <ClCompile Include="src\imps\win32\uiwingraphicsimp.c" />
     <ClCompile Include="src\imps\win32\uiwinimpfactory.c" />
-    <ClCompile Include="src\imps\win32\uiwinlistboximp.c" />
     <ClCompile Include="src\imps\win32\uiwinopendialogimp.c" />
     <ClCompile Include="src\imps\win32\uiwinsavedialogimp.c" />
     <ClCompile Include="src\imps\x11\uix11app.c" />
@@ -257,7 +251,6 @@
     <ClCompile Include="src\uidef.c" />
     <ClCompile Include="src\uidefaults.c" />
     <ClCompile Include="src\uidropdownbox.c" />
-    <ClCompile Include="src\uiedit.c" />
     <ClCompile Include="src\uieditor.c" />
     <ClCompile Include="src\uieventdispatch.c" />
     <ClCompile Include="src\uievents.c" />
@@ -294,21 +287,15 @@
     <ClCompile Include="src\uiwintheme.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\imps\natives\uinativecheckboximp.h" />
-    <ClInclude Include="src\imps\natives\uinativeeditimp.h" />
-    <ClInclude Include="src\imps\natives\uinativelistboximp.h" />
     <ClInclude Include="src\imps\win32\uiwinapp.h" />
     <ClInclude Include="src\imps\win32\uiwinbitmapimp.h" />
-    <ClInclude Include="src\imps\win32\uiwincheckboximp.h" />
     <ClInclude Include="src\imps\win32\uiwincolordialogimp.h" />
     <ClInclude Include="src\imps\win32\uiwincomponentimp.h" />
-    <ClInclude Include="src\imps\win32\uiwineditimp.h" />
     <ClInclude Include="src\imps\win32\uiwinfolderdialogimp.h" />
     <ClInclude Include="src\imps\win32\uiwinfontdialogimp.h" />
     <ClInclude Include="src\imps\win32\uiwinfontimp.h" />
     <ClInclude Include="src\imps\win32\uiwingraphicsimp.h" />
     <ClInclude Include="src\imps\win32\uiwinimpfactory.h" />
-    <ClInclude Include="src\imps\win32\uiwinlistboximp.h" />
     <ClInclude Include="src\imps\win32\uiwinopendialogimp.h" />
     <ClInclude Include="src\imps\win32\uiwinsavedialogimp.h" />
     <ClInclude Include="src\imps\x11\uix11app.h" />
@@ -344,7 +331,6 @@
     <ClInclude Include="src\uidef.h" />
     <ClInclude Include="src\uidefaults.h" />
     <ClInclude Include="src\uidropdownbox.h" />
-    <ClInclude Include="src\uiedit.h" />
     <ClInclude Include="src\uieditor.h" />
     <ClInclude Include="src\uieventdispatch.h" />
     <ClInclude Include="src\uievents.h" />

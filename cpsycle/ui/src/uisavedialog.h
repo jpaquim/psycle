@@ -1,25 +1,29 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #ifndef psy_ui_SAVEDIALOG_H
 #define psy_ui_SAVEDIALOG_H
 
-// local
+/* local */
 #include "uicomponent.h"
-// file
+/* file */
 #include <dir.h>
 
-// SaveDialog Device Interface
-// Bridge
-// Aim: avoid coupling to one platform (win32, xt/motif, etc)
-// Abstraction/Refined  psy_ui_SaveDialog
-// Implementor			psy_ui_SaveDialogImp
-// Concrete Implementor	psy_ui_win_SaveDialogImp
-//
-// psy_ui_SaveDialog <>-------- psy_ui_SaveDialogImp
-//     imp->dev_execute                     ^
-//     ...                                  |
-//                             psy_ui_win_SaveDialogImp
+/*
+** SaveDialog Device Interface
+** Bridge
+** Aim: avoid coupling to one platform (win32, xt/motif, etc)
+** Abstraction/Refined  psy_ui_SaveDialog
+** Implementor			psy_ui_SaveDialogImp
+** Concrete Implementor	psy_ui_win_SaveDialogImp
+**
+** psy_ui_SaveDialog <>-------- psy_ui_SaveDialogImp
+**     imp->dev_execute                     ^
+**     ...                                  |
+**                             psy_ui_win_SaveDialogImp
+*/
 
 #ifdef __cplusplus
 extern "C" {

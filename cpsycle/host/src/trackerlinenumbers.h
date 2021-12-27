@@ -9,7 +9,6 @@
 /* host */
 #include "trackergridstate.h"
 #include "workspace.h"
-#include "zoombox.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -97,7 +96,8 @@ typedef struct TrackerLineNumbers {
 } TrackerLineNumbers;
 
 void trackerlinenumbers_init(TrackerLineNumbers*, psy_ui_Component* parent,
-	psy_ui_Component* view, TrackerState*, Workspace*);
+	TrackerState*, Workspace*);
+
 void trackerlinenumbers_invalidatecursor(TrackerLineNumbers*,
 	const psy_audio_SequenceCursor*);
 void trackerlinenumbers_invalidateline(TrackerLineNumbers*, intptr_t line);
@@ -118,8 +118,7 @@ typedef struct TrackerLineNumberBar {
 	/* internal */
 	TrackerLineNumbersLabel linenumberslabel;
 	psy_ui_Component linenumberpane;
-	TrackerLineNumbers linenumbers;
-	ZoomBox zoombox;	
+	TrackerLineNumbers linenumbers;	
 	int zoomheightbase;
 	/* references */
 	Workspace* workspace;

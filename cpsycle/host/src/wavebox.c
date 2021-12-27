@@ -269,8 +269,7 @@ void wavebox_init(WaveBox* self, psy_ui_Component* parent, Workspace* workspace)
 {			
 	psy_ui_component_init(&self->component, parent, NULL);
 	vtable_init(self);	
-	psy_ui_component_preventalign(&self->component);
-	psy_ui_component_doublebuffer(&self->component);	
+	psy_ui_component_preventalign(&self->component);	
 	self->nowavetext = strdup("");
 	self->context.loopviewmode = WAVEBOX_LOOPVIEW_CONT_SINGLE;
 	self->preventdrawonselect = FALSE;

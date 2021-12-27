@@ -38,8 +38,7 @@ void cpumoduleview_init(CPUModuleView* self, psy_ui_Component* parent,
 {
 	psy_ui_component_init(&self->component, parent, NULL);
 	cpumoduleview_vtable_init(self);		
-	self->workspace = workspace;
-	psy_ui_component_doublebuffer(&self->component);
+	self->workspace = workspace;	
 	psy_ui_component_setwheelscroll(&self->component, 4);
 	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_VSCROLL);
 }
@@ -160,7 +159,7 @@ void cpuview_inittitle(CPUView* self)
 
 void cpuview_initcoreinfo(CPUView* self)
 {
-	psy_ui_label_init_text(&self->coreinfo, &self->top, NULL, "Core Info");
+	psy_ui_label_init_text(&self->coreinfo, &self->top, "Core Info");
 	psy_ui_component_setalign(&self->coreinfo.component, psy_ui_ALIGN_TOP);
 }
 
@@ -170,7 +169,7 @@ void cpuview_initresources(CPUView* self)
 	psy_ui_component_setdefaultalign(&self->resources, psy_ui_ALIGN_TOP,
 		self->topmargin);
 	psy_ui_component_setalign(&self->resources, psy_ui_ALIGN_LEFT);
-	psy_ui_label_init_text(&self->resourcestitle, &self->resources, NULL,
+	psy_ui_label_init_text(&self->resourcestitle, &self->resources,
 		"Available Resources");		
 	labelpair_init(&self->resources_win, &self->resources, "cpu.resources", 25.0);
 	labelpair_init(&self->resources_mem, &self->resources, "cpu.ram", 25.0);
@@ -200,7 +199,7 @@ void cpuview_initmodules(CPUView* self, Workspace* workspace)
 
 	cpumoduleview_init(&self->modules, &self->component, workspace);
 	psy_ui_scroller_init(&self->scroller, &self->modules.component,
-		&self->component, NULL);
+		&self->component);
 	psy_ui_component_setalign(&self->scroller.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_margin_init_em(&margin, 1.0, 0.0, 0.0, 2.0);
 	psy_ui_component_setmargin(&self->scroller.component, margin);

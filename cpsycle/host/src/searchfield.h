@@ -5,7 +5,7 @@
 #define SEARCHFIELD_H
 
 // ui
-#include <uiedit.h>
+#include <uitextinput.h>
 #include <uiimage.h>
 
 #ifdef __cplusplus
@@ -23,7 +23,7 @@ typedef struct SearchField {
 	psy_Signal signal_changed;
 	// intern
 	psy_ui_Image image;
-	psy_ui_Edit edit;
+	psy_ui_TextInput edit;
 	bool hasdefaulttext;
 	char* defaulttext;	
 } SearchField;

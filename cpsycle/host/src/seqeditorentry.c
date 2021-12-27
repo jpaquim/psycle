@@ -46,15 +46,15 @@ static void seqeditentry_vtable_init(SeqEditEntry* self)
 	}
 	self->component.vtable = &seqeditentry_vtable;
 }
+
 /* implementation */
-void seqeditentry_init(SeqEditEntry* self,
-	psy_ui_Component* parent, psy_ui_Component* view,
+void seqeditentry_init(SeqEditEntry* self, psy_ui_Component* parent,
 	psy_audio_SequenceEntry* seqentry, psy_audio_OrderIndex seqpos,
 	SeqEditState* state)
 {
 	assert(seqentry);
 
-	psy_ui_component_init(&self->component, parent, view);
+	psy_ui_component_init(&self->component, parent, NULL);
 	seqeditentry_vtable_init(self);
 	self->seqentry = seqentry;
 	self->seqpos = seqpos;
@@ -193,15 +193,14 @@ static void seqeditpatternentry_vtable_init(SeqEditPatternEntry* self)
 	}
 	seqeditpatternentry_base(self)->vtable = &seqeditpatternentry_vtable;
 }
+
 /* implementation */
 void seqeditpatternentry_init(SeqEditPatternEntry* self,
-	psy_ui_Component* parent, psy_ui_Component* view,
-	psy_audio_SequencePatternEntry* entry,
-	psy_audio_OrderIndex seqpos,
-	SeqEditState* state)
+	psy_ui_Component* parent, psy_audio_SequencePatternEntry* entry,
+	psy_audio_OrderIndex seqpos, SeqEditState* state)
 {
-	seqeditentry_init(&self->seqeditorentry, parent, view,
-		&entry->entry, seqpos, state);
+	seqeditentry_init(&self->seqeditorentry, parent, &entry->entry, seqpos,
+		state);
 	seqeditpatternentry_vtable_init(self);
 	self->sequenceentry = entry;
 	psy_ui_component_setstyletypes(seqeditpatternentry_base(self),
@@ -215,15 +214,14 @@ SeqEditPatternEntry* seqeditpatternentry_alloc(void)
 }
 
 SeqEditPatternEntry* seqeditpatternentry_allocinit(
-	psy_ui_Component* parent, psy_ui_Component* view,
-	psy_audio_SequencePatternEntry* entry, psy_audio_OrderIndex seqpos,
-	SeqEditState* state)
+	psy_ui_Component* parent, psy_audio_SequencePatternEntry* entry,
+	psy_audio_OrderIndex seqpos, SeqEditState* state)
 {
 	SeqEditPatternEntry* rv;
 
 	rv = seqeditpatternentry_alloc();
 	if (rv) {
-		seqeditpatternentry_init(rv, parent, view, entry, seqpos, state);
+		seqeditpatternentry_init(rv, parent, entry, seqpos, state);
 		psy_ui_component_deallocateafterdestroyed(
 			seqeditpatternentry_base(rv));
 	}
@@ -358,16 +356,17 @@ static void seqeditsampleentry_vtable_init(
 	}
 	seqeditsampleentry_base(self)->vtable = &seqeditsampleentry_vtable;
 }
+
 /* implementation */
 void seqeditsampleentry_init(SeqEditSampleEntry* self,
-	psy_ui_Component* parent, psy_ui_Component* view,
+	psy_ui_Component* parent,
 	psy_audio_SequenceSampleEntry* entry,
 	psy_audio_OrderIndex seqpos,
 	SeqEditState* state)
 {
 	assert(entry);
 
-	seqeditentry_init(&self->seqeditorentry, parent, view,
+	seqeditentry_init(&self->seqeditorentry, parent,
 		&entry->entry, seqpos, state);
 	seqeditsampleentry_vtable_init(self);
 	self->seqeditorentry.preventresize = TRUE;	
@@ -378,7 +377,7 @@ void seqeditsampleentry_init(SeqEditSampleEntry* self,
 	wavebox_setnowavetext(&self->wavebox, "");
 	psy_ui_component_buffer(&self->wavebox.component);
 	psy_ui_component_setalign(&self->wavebox.component, psy_ui_ALIGN_CLIENT);
-	psy_ui_label_init(&self->label, seqeditsampleentry_base(self), NULL);
+	psy_ui_label_init(&self->label, seqeditsampleentry_base(self));
 	psy_ui_component_setalign(&self->label.component, psy_ui_ALIGN_TOP);
 	self->sequenceentry = entry;	
 	self->preventedit = TRUE;	
@@ -401,8 +400,7 @@ SeqEditSampleEntry* seqeditsampleentry_alloc(void)
 	return (SeqEditSampleEntry*)malloc(sizeof(SeqEditSampleEntry));
 }
 
-SeqEditSampleEntry* seqeditsampleentry_allocinit(
-	psy_ui_Component* parent, psy_ui_Component* view,
+SeqEditSampleEntry* seqeditsampleentry_allocinit(psy_ui_Component* parent,
 	psy_audio_SequenceSampleEntry* entry, psy_audio_OrderIndex seqpos,
 	SeqEditState* state)
 {
@@ -410,7 +408,7 @@ SeqEditSampleEntry* seqeditsampleentry_allocinit(
 
 	rv = seqeditsampleentry_alloc();
 	if (rv) {
-		seqeditsampleentry_init(rv, parent, view, entry, seqpos, state);
+		seqeditsampleentry_init(rv, parent, entry, seqpos, state);
 		psy_ui_component_deallocateafterdestroyed(
 			seqeditsampleentry_base(rv));
 	}
@@ -527,16 +525,16 @@ static void seqeditmarkerentry_vtable_init(SeqEditMarkerEntry* self)
 	}
 	seqeditmarkerentry_base(self)->vtable = &seqeditmarkerentry_vtable;
 }
+
 /* implementation */
 void seqeditmarkerentry_init(SeqEditMarkerEntry* self,
-	psy_ui_Component* parent, psy_ui_Component* view,
-	psy_audio_SequenceMarkerEntry* entry,
+	psy_ui_Component* parent, psy_audio_SequenceMarkerEntry* entry,
 	psy_audio_OrderIndex seqpos,
 	SeqEditState* state)
 {	
 	assert(entry);
 
-	seqeditentry_init(&self->seqeditorentry, parent, view, &entry->entry,
+	seqeditentry_init(&self->seqeditorentry, parent, &entry->entry,
 		seqpos, state);
 	seqeditmarkerentry_vtable_init(self);
 	psy_ui_component_setstyletypes(seqeditmarkerentry_base(self),
@@ -550,8 +548,7 @@ SeqEditMarkerEntry* seqeditmarkerentry_alloc(void)
 	return (SeqEditMarkerEntry*)malloc(sizeof(SeqEditMarkerEntry));
 }
 
-SeqEditMarkerEntry* seqeditmarkerentry_allocinit(
-	psy_ui_Component* parent, psy_ui_Component* view,
+SeqEditMarkerEntry* seqeditmarkerentry_allocinit(psy_ui_Component* parent,
 	psy_audio_SequenceMarkerEntry* entry, psy_audio_OrderIndex seqpos,
 	SeqEditState* state)
 {
@@ -559,7 +556,7 @@ SeqEditMarkerEntry* seqeditmarkerentry_allocinit(
 
 	rv = seqeditmarkerentry_alloc();
 	if (rv) {
-		seqeditmarkerentry_init(rv, parent, view, entry, seqpos, state);
+		seqeditmarkerentry_init(rv, parent, entry, seqpos, state);
 		psy_ui_component_deallocateafterdestroyed(
 			seqeditmarkerentry_base(rv));
 	}

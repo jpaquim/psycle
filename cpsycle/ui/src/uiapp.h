@@ -8,6 +8,7 @@
 /* local */
 #include "uieventdispatch.h"
 #include "uidefaults.h"
+#include "timers.h"
 /* container */
 #include <signal.h>
 /* file */
@@ -54,6 +55,7 @@ typedef struct psy_ui_App {
 	bool alignvalid;
 	bool mousetracking;
 	bool setpositioncacheonly;	
+	psy_Timers wintimers;
 	/* references */
 	struct psy_ui_Component* main;
 	struct psy_ui_Component* capture_;
@@ -63,6 +65,7 @@ typedef struct psy_ui_App {
 	int deltaperline;
 	int accumwheeldelta;
 	psy_ui_EventDispatch eventdispatch;
+	psy_Table components;
 } psy_ui_App;
 
 psy_ui_App* psy_ui_app(void);
@@ -90,6 +93,10 @@ const psy_ui_Style* psy_ui_app_style_const(const psy_ui_App*, uintptr_t styletyp
 void psy_ui_app_sethover(psy_ui_App*, struct psy_ui_Component* hover);
 void psy_ui_app_startdrag(psy_ui_App*);
 void psy_ui_app_stopdrag(psy_ui_App*);
+void psy_ui_app_starttimer(psy_ui_App*, struct psy_ui_Component*, uintptr_t id,
+	uintptr_t interval);
+void psy_ui_app_stoptimer(psy_ui_App*, struct psy_ui_Component*, uintptr_t id);
+
 
 INLINE struct psy_ui_Component* psy_ui_app_capture(psy_ui_App* self)
 {

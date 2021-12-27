@@ -469,8 +469,7 @@ void pluginsview_init(PluginsView* self, psy_ui_Component* parent)
 {
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_setstyletype(&self->component, STYLE_PLUGINVIEW);
-	pluginsview_vtable_init(self);
-	psy_ui_component_doublebuffer(&self->component);	
+	pluginsview_vtable_init(self);	
 	self->component.draggable = TRUE;
 	psy_signal_init(&self->signal_selected);
 	psy_signal_init(&self->signal_changed);	

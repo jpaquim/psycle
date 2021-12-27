@@ -1,28 +1,31 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "machineui.h"
-// host
+/* host */
 #include "skingraphics.h"
 #include "paramview.h"
 #include "wireview.h"
 #include "effectui.h"
 #include "generatorui.h"
 #include "masterui.h"
-// audio
+/* audio */
 #include <exclusivelock.h>
-// std
+/* std */
 #include <math.h>
-// platform
+/* platform */
 #include "../../detail/portable.h"
 #include "../../detail/trace.h"
 
 static void drawmachineline(psy_ui_Graphics*, psy_ui_RealPoint dir,
 	psy_ui_RealPoint edge);
 
-// VuValues
+/* VuValues*/
 void vuvalues_init(VuValues* self)
 {
 	self->volumedisplay = (psy_dsp_amp_t)0.f;
@@ -48,9 +51,8 @@ void vuvalues_tickcounter(VuValues* self)
 	}
 }
 
-// VuDisplay
-// prototypes
-
+/* VuDisplay */
+/* prototypes */
 static void vudisplay_drawdisplay(VuDisplay*, psy_ui_Graphics*);
 static void vudisplay_drawpeak(VuDisplay*, psy_ui_Graphics*);
 
@@ -109,18 +111,17 @@ void vudisplay_drawpeak(VuDisplay* self, psy_ui_Graphics* g)
 
 static bool vuupdate = FALSE;
 
-// MachineUiCommon
-// implementation
-void machineuicommon_init(MachineUiCommon* self,
-	uintptr_t slot, MachineViewSkin* skin,
-	psy_ui_Component* view, ParamViews* paramviews,
+/* MachineUiCommon */
+/* implementation */
+void machineuicommon_init(MachineUiCommon* self, psy_ui_Component* component,
+	uintptr_t slot, MachineViewSkin* skin, ParamViews* paramviews,
 	Workspace* workspace)
 {
+	self->component = component;
 	self->machines = &workspace->song->machines;
 	self->machine = psy_audio_machines_at(self->machines, slot);
 	self->paramviews = paramviews;
-	self->workspace = workspace;
-	self->view = view;
+	self->workspace = workspace;	
 	self->skin = skin;	
 	self->mode = psy_audio_machine_mode(self->machine);
 	self->coords = NULL;
@@ -139,15 +140,15 @@ void machineuicommon_move(MachineUiCommon* self, psy_ui_Point topleft)
 		psy_ui_RealPoint topleftpx;
 
 		topleftpx.x = psy_ui_value_px(&topleft.x,
-			psy_ui_component_textmetric(self->view), NULL);
+			psy_ui_component_textmetric(self->component), NULL);
 		topleftpx.y = psy_ui_value_px(&topleft.y,
-			psy_ui_component_textmetric(self->view), NULL);
+			psy_ui_component_textmetric(self->component), NULL);
 		psy_audio_machine_setposition(self->machine,
 			topleftpx.x, topleftpx.y);
 	}	
 }
 
-// static methods
+/* static methods */
 void machineui_beginvuupdate(void)
 {
 	vuupdate = TRUE;
@@ -176,7 +177,7 @@ psy_ui_Component* machineui_create(psy_audio_Machine* machine,
 
 		masterui = (MasterUi*)malloc(sizeof(MasterUi));
 		if (masterui) {
-			masterui_init(masterui, parent, skin, view, paramviews, workspace);
+			masterui_init(masterui, parent, skin, paramviews, workspace);
 			masterui->intern.machinepos = machinepos;
 			newui = &masterui->component;
 		}
@@ -185,7 +186,7 @@ psy_ui_Component* machineui_create(psy_audio_Machine* machine,
 
 		effectui = (EffectUi*)malloc(sizeof(EffectUi));
 		if (effectui) {
-			effectui_init(effectui, parent, slot, skin, view, paramviews, workspace);
+			effectui_init(effectui, parent, slot, skin, paramviews, workspace);
 			effectui->intern.machinepos = machinepos;
 			effectui_setdrawmode(effectui, drawmode);			
 			newui = &effectui->component;
@@ -195,7 +196,7 @@ psy_ui_Component* machineui_create(psy_audio_Machine* machine,
 
 		generatorui = (GeneratorUi*)malloc(sizeof(GeneratorUi));
 		if (generatorui) {
-			generatorui_init(generatorui, parent, slot, skin, view, paramviews, workspace);
+			generatorui_init(generatorui, parent, slot, skin, paramviews, workspace);
 			generatorui->intern.machinepos = machinepos;
 			generatorui->intern.drawmode = drawmode;
 			newui = &generatorui->component;

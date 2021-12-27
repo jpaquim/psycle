@@ -8,7 +8,6 @@
 #include <lualib.h>
 
 #include <uigeometry.h>
-// #include <psyclescript.h>
 #include <stdlib.h>
 
 

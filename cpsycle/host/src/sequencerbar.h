@@ -15,7 +15,7 @@
 /* ui */
 #include <uibutton.h>
 #include <uicheckbox.h>
-#include <uiedit.h>
+#include <uitextinput.h>
 #include <uilabel.h>
 #include <uinotebook.h>
 #include <uiscroller.h>
@@ -59,7 +59,7 @@ typedef struct SequencerBar {
 } SequencerBar;
 
 void sequencerbar_init(SequencerBar* self, psy_ui_Component* parent,
-	Workspace*);
+	psy_ui_Component* view, Workspace*);
 
 INLINE psy_ui_Component* sequencerbar_base(SequencerBar* self)
 {

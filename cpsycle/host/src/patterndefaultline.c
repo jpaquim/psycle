@@ -38,7 +38,7 @@ static void vtable_init(PatternDefaultLine* self)
 void patterndefaultline_init(PatternDefaultLine* self, psy_ui_Component* parent,
 	TrackConfig* trackconfig, Workspace* workspace)
 {
-	psy_ui_component_init(&self->component, parent, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	vtable_init(self);
 	psy_ui_component_setalign(&self->component, psy_ui_ALIGN_TOP);
 	/* states */

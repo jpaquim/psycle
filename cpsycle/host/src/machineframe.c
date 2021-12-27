@@ -48,7 +48,7 @@ void parameterbar_init(ParameterBar* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->row0, &self->component, NULL);
 	psy_ui_component_setalignexpand(&self->row0,
 		psy_ui_HEXPAND);	
-	zoombox_init(&self->zoombox, &self->row0, NULL);
+	zoombox_init(&self->zoombox, &self->row0);
 	psy_ui_component_setalign(zoombox_base(&self->zoombox), psy_ui_ALIGN_LEFT);
 	self->zoombox.zoomstep = 0.10;	
 	psy_ui_component_init(&self->buttons, &self->row0, NULL);
@@ -57,7 +57,7 @@ void parameterbar_init(ParameterBar* self, psy_ui_Component* parent,
 		psy_ui_HEXPAND);
 	psy_ui_component_setdefaultalign(&self->buttons, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
-	psy_ui_button_init(&self->power, &self->buttons, NULL);
+	psy_ui_button_init(&self->power, &self->buttons);
 	psy_ui_button_settext(&self->power, "machineframe.pwr");
 	margin = psy_ui_component_margin(&self->power.component);
 	margin.left = psy_ui_value_make_ew(1.0);
@@ -65,17 +65,17 @@ void parameterbar_init(ParameterBar* self, psy_ui_Component* parent,
 	psy_ui_bitmap_loadresource(&self->power.bitmapicon, IDB_POWER_DARK);
 	psy_ui_bitmap_settransparency(&self->power.bitmapicon,
 		psy_ui_colour_make(0x00FFFFFF));
-	psy_ui_button_init(&self->parameters, &self->buttons, NULL);
+	psy_ui_button_init(&self->parameters, &self->buttons);
 	psy_ui_button_settext(&self->parameters, "machineframe.parameters");
-	psy_ui_button_init(&self->parammap, &self->buttons, NULL);
+	psy_ui_button_init(&self->parammap, &self->buttons);
 	psy_ui_button_settext(&self->parammap, "machineframe.parammap");
-	psy_ui_button_init(&self->command, &self->buttons, NULL);
+	psy_ui_button_init(&self->command, &self->buttons);
 	psy_ui_button_settext(&self->command, "machineframe.command");
-	psy_ui_button_init(&self->help, &self->buttons, NULL);
+	psy_ui_button_init(&self->help, &self->buttons);
 	psy_ui_button_settext(&self->help, "machineframe.help");	
-	psy_ui_button_init(&self->isbus, &self->buttons, NULL);
+	psy_ui_button_init(&self->isbus, &self->buttons);
 	psy_ui_button_settext(&self->isbus, "machineframe.bus");	
-	psy_ui_button_init(&self->more, &self->row0, NULL);
+	psy_ui_button_init(&self->more, &self->row0);
 	psy_ui_button_preventtranslation(&self->more);
 	psy_ui_button_settext(&self->more, ". . .");
 	psy_ui_component_setalign(psy_ui_button_base(&self->more),
@@ -538,7 +538,7 @@ void machineframe_onmouseup(MachineFrame* self, psy_ui_Component* sender,
 				psy_ui_component_togglevisibility(&self->newval.component);
 				machineframe_resize(self);
 			}
-			psy_ui_component_setfocus(psy_ui_edit_base(&self->newval.edit));
+			psy_ui_component_setfocus(psy_ui_textinput_base(&self->newval.edit));
 		}
 	}*/
 }

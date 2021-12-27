@@ -65,12 +65,12 @@ static void seqedittrack_vtable_init(SeqEditTrack* self)
 	}
 	self->component.vtable = &seqedittrack_vtable;
 }
+
 /* implementation */
-void seqedittrack_init(SeqEditTrack* self,
-	psy_ui_Component* parent, psy_ui_Component* view,
+void seqedittrack_init(SeqEditTrack* self, psy_ui_Component* parent,
 	SeqEditState* state, Workspace* workspace)
 {
-	psy_ui_component_init(&self->component, parent, view);
+	psy_ui_component_init(&self->component, parent, NULL);
 	seqedittrack_vtable_init(self);	
 	psy_ui_component_setalignexpand(&self->component, psy_ui_HEXPAND);
 	psy_ui_component_setbackgroundmode(&self->component, psy_ui_NOBACKGROUND);
@@ -80,7 +80,7 @@ void seqedittrack_init(SeqEditTrack* self,
 	self->workspace = workspace;	
 	self->currtrack = NULL;
 	self->trackindex = 0;		
-	self->view = view;	
+	//self->view = view;	
 	self->entries = NULL;
 	if (seqeditstate_sequence(self->state)) {
 		psy_signal_connect(
@@ -117,15 +117,14 @@ SeqEditTrack* seqedittrack_alloc(void)
 	return (SeqEditTrack*)malloc(sizeof(SeqEditTrack));
 }
 
-SeqEditTrack* seqedittrack_allocinit(
-	psy_ui_Component* parent, psy_ui_Component* view,
+SeqEditTrack* seqedittrack_allocinit(psy_ui_Component* parent,	
 	SeqEditState* state, Workspace* workspace)
 {
 	SeqEditTrack* rv;
 
 	rv = seqedittrack_alloc();
 	if (rv) {
-		seqedittrack_init(rv, parent, view, state, workspace);
+		seqedittrack_init(rv, parent, state, workspace);
 		psy_ui_component_deallocateafterdestroyed(seqedittrack_base(rv));
 	}
 	return rv;
@@ -178,7 +177,7 @@ void seqedittrack_build(SeqEditTrack* self)
 					SeqEditPatternEntry* seqeditpatternentry;
 
 					seqeditpatternentry = seqeditpatternentry_allocinit(
-						&self->component, self->view, seqpatternentry,
+						&self->component, seqpatternentry,
 						psy_audio_orderindex_make(self->trackindex, c),
 						self->state);
 					if (seqeditpatternentry) {
@@ -195,7 +194,7 @@ void seqedittrack_build(SeqEditTrack* self)
 
 				seqsampleentry = (psy_audio_SequenceSampleEntry*)seqentry;
 				seqeditsampleentry = seqeditsampleentry_allocinit(
-					&self->component, self->view, seqsampleentry,
+					&self->component, seqsampleentry,
 					psy_audio_orderindex_make(self->trackindex, c),
 					self->state);
 				if (seqsampleentry) {
@@ -212,7 +211,7 @@ void seqedittrack_build(SeqEditTrack* self)
 
 				seqmarkerentry = (psy_audio_SequenceMarkerEntry*)seqentry;
 				seqeditmarkerentry = seqeditmarkerentry_allocinit(
-					&self->component, self->view, seqmarkerentry,
+					&self->component,seqmarkerentry,
 					psy_audio_orderindex_make(self->trackindex, c),
 					self->state);
 				if (seqeditmarkerentry) {

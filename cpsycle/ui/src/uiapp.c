@@ -96,6 +96,7 @@ void psy_ui_app_init(psy_ui_App* self, bool dark, uintptr_t instance)
 	self->hover = NULL;
 	self->setpositioncacheonly = FALSE;
 	self->focus = NULL;
+	psy_table_init(&self->components);
 	psy_ui_geometry_init();
 	psy_signal_init(&self->signal_dispose);	
 	psy_signal_init(&self->signal_mousehook);
@@ -115,6 +116,7 @@ void psy_ui_app_init(psy_ui_App* self, bool dark, uintptr_t instance)
 #ifdef DIVERSALIS__OS__MICROSOFT
 	psy_ui_eventdispatch_disable_handle_doubleclick(&self->eventdispatch);
 #endif
+	psy_timers_init(&self->wintimers);
 }
 
 void ui_app_initimpfactory(psy_ui_App* self)
@@ -179,6 +181,8 @@ void psy_ui_app_dispose(psy_ui_App* self)
 	psy_translator_dispose(&self->translator);
 	psy_ui_dragevent_dispose(&self->dragevent);
 	psy_ui_eventdispatch_dispose(&self->eventdispatch);
+	psy_table_dispose(&self->components);
+	psy_timers_dispose(&self->wintimers);
 }
 
 void psy_ui_app_setmain(psy_ui_App* self, psy_ui_Component* main)
@@ -484,6 +488,18 @@ void psy_ui_app_stopdrag(psy_ui_App* self)
 			self->dragevent.dataTransfer = NULL;
 		}
 	}
+}
+
+void psy_ui_app_starttimer(psy_ui_App* self, psy_ui_Component* component, uintptr_t id,
+	uintptr_t interval)
+{	
+	psy_timers_addtimer(&self->wintimers, (uintptr_t)component, component,
+		(psy_fp_timerwork)component->vtable->ontimer, id, interval);
+}
+
+void psy_ui_app_stoptimer(psy_ui_App* self, psy_ui_Component* component, uintptr_t id)
+{
+	psy_timers_removetimer(&self->wintimers, (uintptr_t)component, id);
 }
 
 /*
