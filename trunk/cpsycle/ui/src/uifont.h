@@ -54,8 +54,8 @@ void psy_ui_fontinfo_string(const psy_ui_FontInfo*, char* rv,
 struct psy_ui_FontImp;
 
 /* psy_ui_Font */
-typedef struct psy_ui_Font {
-	struct psy_ui_FontImp* imp;	
+typedef struct psy_ui_Font {    
+	struct psy_ui_FontImp* imp;    
 } psy_ui_Font;
 
 void psy_ui_font_init(psy_ui_Font*, const psy_ui_FontInfo*);

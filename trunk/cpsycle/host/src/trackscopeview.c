@@ -1,20 +1,23 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "trackscopeview.h"
-// host
+/* host */
 #include "styles.h"
-// ui
+/* ui */
 #include <uiapp.h>
-// std
+/* std */
 #include <math.h>
-// platform
+/* platform */
 #include "../../detail/trace.h"
 #include "../../detail/portable.h"
 
-// prototypes
+/* prototypes */
 static void trackscopes_ondraw(TrackScopes*, psy_ui_Graphics*);
 static void trackscopes_onmousedown(TrackScopes*, psy_ui_MouseEvent*);
 static void trackscopes_drawtrack(TrackScopes*, psy_ui_Graphics*,
@@ -27,7 +30,8 @@ static void trackscopes_onalign(TrackScopes*);
 static void trackscopes_onpreferredsize(TrackScopes*, psy_ui_Size* limit,
 	psy_ui_Size* rv);
 static uintptr_t trackscopes_numrows(const TrackScopes*);
-// vtable
+
+/* vtable */
 static psy_ui_ComponentVtable vtable;
 static bool vtable_initialized = FALSE;
 
@@ -51,11 +55,13 @@ static psy_ui_ComponentVtable* vtable_init(TrackScopes* self)
 	}
 	return &vtable;
 }
-// implementation
+
+/* implementation */
 void trackscopes_init(TrackScopes* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {	
 	psy_ui_component_init(&self->component, parent, NULL);	
+	self->component.id = 90;
 	psy_ui_component_setvtable(&self->component, vtable_init(self));
 	psy_ui_component_setstyletype(&self->component, STYLE_TRACKSCOPE);		
 	self->workspace = workspace;
@@ -325,6 +331,7 @@ void trackscopes_idle(TrackScopes* self)
 {
 	if (self->running) {
 		psy_ui_component_invalidate(&self->component);
+		psy_ui_component_update(&self->component);
 	}
 }
 
@@ -333,6 +340,8 @@ void trackscopeview_init(TrackScopeView* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {
 	psy_ui_component_init(&self->component, parent, NULL);
+	psy_ui_component_setbackgroundmode(&self->component,
+		psy_ui_NOBACKGROUND);
 	psy_ui_component_setstyletype(&self->component, STYLE_TRACKSCOPES);
 	trackscopes_init(&self->scopes, &self->component, workspace);
 	psy_ui_component_setalign(&self->scopes.component, psy_ui_ALIGN_CLIENT);

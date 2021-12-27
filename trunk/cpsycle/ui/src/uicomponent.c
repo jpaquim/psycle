@@ -81,25 +81,36 @@ static psy_ui_ComponentContainerAlign containeralign;
 static void enableinput_internal(psy_ui_Component*, int enable, int recursive);
 static void psy_ui_component_dispose_signals(psy_ui_Component*);
 
-const psy_ui_Font* psy_ui_component_font(const psy_ui_Component* self)
-{
-	const psy_ui_Font* rv;
-	const psy_ui_Style* common;	
-
-	common = psy_ui_style_const(psy_ui_STYLE_ROOT);
-	if (self->style.currstyle->use_font) {
-		rv = &self->style.currstyle->font;
-	} else {
-		rv = &psy_ui_style_const(psy_ui_STYLE_ROOT)->font;
-	}
-	return rv;
-}
-
 void psy_ui_component_setbackgroundcolour(psy_ui_Component* self,
 	psy_ui_Colour colour)
 {			
 	psy_ui_componentstyle_setbackgroundcolour(&self->style, colour);	
 	psy_ui_component_invalidate(self);
+}
+
+const psy_ui_Font* psy_ui_component_font(const psy_ui_Component* self)
+{
+	const psy_ui_Component* curr;
+	const psy_ui_Font* rv;
+
+	assert(self);
+
+	curr = self;
+	rv = NULL;
+	while (curr) {
+		psy_ui_Font* font;
+
+		font = &curr->style.currstyle->font;
+		if (font->imp) {
+			rv = font;
+			break;
+		}
+		curr = psy_ui_component_parent_const(curr);
+	}
+	if (!rv) {
+		rv = &psy_ui_style_const(psy_ui_STYLE_ROOT)->font;
+	}
+	return rv;
 }
 
 psy_ui_Colour psy_ui_component_backgroundcolour(psy_ui_Component* self)
@@ -599,28 +610,14 @@ void scrollto(psy_ui_Component* self, intptr_t dx, intptr_t dy)
 
 void setfont(psy_ui_Component* self, const psy_ui_Font* font)
 {
-	if (font) {
-		int dispose;
-
-		dispose = self->style.currstyle->use_font;
+	if (font) {				
 		self->imp->vtable->dev_setfont(self->imp, font);
-		if (dispose) {
-			psy_ui_font_dispose(&self->style.currstyle->font);
-		}
 		psy_ui_font_init(&self->style.currstyle->font, 0);
-		psy_ui_font_copy(&self->style.currstyle->font, font);
-		self->style.currstyle->use_font = 1;
+		psy_ui_font_copy(&self->style.currstyle->font, font);		
 	} else {
-		int dispose;
-
-		dispose = self->style.currstyle->use_font;
-		self->style.currstyle->use_font = 0;
-		psy_ui_component_updatefont(self);
-		self->imp->vtable->dev_setfont(self->imp, psy_ui_component_font(self));		
-		if (dispose) {
-			psy_ui_font_dispose(&self->style.currstyle->font);
-		}
+		psy_ui_font_dispose(&self->style.currstyle->font);		
 	}
+	self->imp->vtable->dev_setfont(self->imp, psy_ui_component_font(self));
 }
 
 psy_List* children(psy_ui_Component* self, int recursive)
@@ -2200,8 +2197,7 @@ void psy_ui_component_draw(psy_ui_Component* self, psy_ui_Graphics* g,
 			psy_ui_bitmap_dispose(&self->bufferbitmap);
 			size = psy_ui_component_scrollsize_px(self);
 			psy_ui_bitmap_init_size(&self->bufferbitmap, size);
-			psy_ui_graphics_init_bitmap(&bitmap_g, &self->bufferbitmap);
-			psy_ui_setfont(&bitmap_g, psy_ui_component_font(self));
+			psy_ui_graphics_init_bitmap(&bitmap_g, &self->bufferbitmap);			
 			temp_g = g;
 			g = &bitmap_g;
 		} else {			
@@ -2210,6 +2206,7 @@ void psy_ui_component_draw(psy_ui_Component* self, psy_ui_Graphics* g,
 			return;
 		}
 	}	
+	psy_ui_setfont(g, psy_ui_component_font(self));
 	/* draw background */
 	if (self->backgroundmode != psy_ui_NOBACKGROUND) {
 		psy_ui_component_drawbackground(self, g);

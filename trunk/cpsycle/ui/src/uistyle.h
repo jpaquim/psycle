@@ -45,8 +45,7 @@ typedef struct psy_ui_Style {
 	psy_ui_Margin margin;
 	bool marginset;
 	psy_ui_Margin padding;
-	bool paddingset;
-	bool use_font;
+	bool paddingset;	
 	int dbgflag;	
 } psy_ui_Style;
 

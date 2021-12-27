@@ -43,6 +43,7 @@ void psy_ui_style_init(psy_ui_Style* self)
 {
 	psy_ui_colour_init(&self->colour);
 	psy_ui_colour_init(&self->backgroundcolour);
+	psy_ui_font_init(&self->font, NULL);
 	self->backgroundid = psy_INDEX_INVALID;
 	self->backgroundpath = NULL;
 	self->backgroundrepeat = psy_ui_REPEAT;
@@ -53,8 +54,7 @@ void psy_ui_style_init(psy_ui_Style* self)
 	psy_ui_margin_init(&self->margin);
 	self->marginset = FALSE;
 	psy_ui_margin_init(&self->padding);
-	self->paddingset = FALSE;
-	self->use_font = 0;
+	self->paddingset = FALSE;	
 	self->dbgflag = 0;	
 }
 
@@ -66,7 +66,7 @@ void psy_ui_style_init_default(psy_ui_Style* self, uintptr_t styletype)
 void psy_ui_style_init_copy(psy_ui_Style* self, const psy_ui_Style* other)
 {	
 	psy_ui_border_init(&self->border);
-	self->use_font = 0;
+	psy_ui_font_copy(&self->font, &other->font);
 	psy_ui_style_copy(self, other);	
 }
 
@@ -75,6 +75,7 @@ void psy_ui_style_init_colours(psy_ui_Style* self, psy_ui_Colour colour,
 {
 	self->colour = colour;
 	self->backgroundcolour = background;
+	psy_ui_font_init(&self->font, NULL);
 	self->backgroundid = psy_INDEX_INVALID;
 	self->backgroundpath = NULL;
 	self->backgroundrepeat = psy_ui_REPEAT;
@@ -85,8 +86,7 @@ void psy_ui_style_init_colours(psy_ui_Style* self, psy_ui_Colour colour,
 	psy_ui_margin_init(&self->margin);
 	self->marginset = FALSE;
 	psy_ui_margin_init(&self->padding);
-	self->paddingset = FALSE;
-	self->use_font = 0;
+	self->paddingset = FALSE;	
 	self->dbgflag = 0;
 }
 
@@ -110,10 +110,8 @@ void psy_ui_styles_init_property(psy_ui_Style* self, psy_Property* style)
 
 
 void psy_ui_style_dispose(psy_ui_Style* self)
-{	
-	if (self->use_font) {
-		psy_ui_font_dispose(&self->font);
-	}	
+{		
+	psy_ui_font_dispose(&self->font);		
 	free(self->backgroundpath);
 }
 
@@ -131,14 +129,7 @@ void psy_ui_style_copy(psy_ui_Style* self, const psy_ui_Style* other)
 	self->marginset = other->marginset;
 	self->padding = other->padding;
 	self->paddingset = other->paddingset;
-	if (other->use_font) {
-		if (self->use_font) {
-			psy_ui_font_dispose(&self->font);
-		}
-		psy_ui_font_init(&self->font, NULL);
-		psy_ui_font_copy(&self->font, &other->font);
-		self->use_font = TRUE;
-	}	
+	psy_ui_font_copy(&self->font, &other->font);	
 }
 
 psy_ui_Style* psy_ui_style_alloc(void)
@@ -192,8 +183,7 @@ void psy_ui_style_deallocate(psy_ui_Style* self)
 void psy_ui_style_setfont(psy_ui_Style* self, const char* family, int size)
 {	
 	psy_ui_FontInfo fontinfo;
-
-	self->use_font = 1;
+	
 	psy_ui_fontinfo_init(&fontinfo, family, size);
 	psy_ui_font_init(&self->font, &fontinfo);
 }

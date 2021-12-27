@@ -143,6 +143,7 @@ void vumeter_idle(Vumeter* self)
 						psy_audio_buffer_rangefactor(memory,
 							PSY_DSP_AMP_RANGE_VST));
 					psy_ui_component_invalidate(&self->component);
+					psy_ui_component_update(&self->component);
 				}				
 			}
 		} else if (self->leftavg != 0.f || self->rightavg != 0.f) {
@@ -151,6 +152,7 @@ void vumeter_idle(Vumeter* self)
 			self->l_log = -10000.f;
 			self->r_log = -10000.f;
 			psy_ui_component_invalidate(&self->component);
+			psy_ui_component_update(&self->component);
 		}
-	}
+	}	
 }

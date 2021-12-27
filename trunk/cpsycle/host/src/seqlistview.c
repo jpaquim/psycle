@@ -489,7 +489,7 @@ void seqviewlist_init(SeqviewList* self, psy_ui_Component* parent,
 		psy_INDEX_INVALID, self,
 		(fp_inputhandler_input)
 		seqviewlist_oninput);
-	psy_ui_component_starttimer(&self->component, 0, 200);
+	// psy_ui_component_starttimer(&self->component, 0, 200);
 }
 
 void seqviewlist_build(SeqviewList* self)

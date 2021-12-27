@@ -108,8 +108,7 @@ void machineview_init(MachineView* self, psy_ui_Component* parent,
 	machineview_initnewmachine(self, tabbarparent);	
 	machineview_inittabbar(self, tabbarparent);
 	machineview_connectsignals(self);	
-	psy_ui_tabbar_select(&self->tabbar, SECTION_ID_MACHINEVIEW_WIRES);
-	psy_ui_component_starttimer(&self->component, 0, 50);
+	psy_ui_tabbar_select(&self->tabbar, SECTION_ID_MACHINEVIEW_WIRES);	
 }
 
 void machineview_ondestroy(MachineView* self)

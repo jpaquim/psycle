@@ -1,10 +1,12 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
 #include "paramview.h"
-// host
+/* host */
 #include "headerui.h"
 #include "labelui.h"
 #include "knobui.h"
@@ -14,20 +16,21 @@
 #include "resources/resource.h"
 #include "skingraphics.h"
 #include "machineui.h"
-// audio
+/* audio */
 #include <plugin_interface.h>
-// std
+/* std */
 #include <assert.h>
-// platform
+/* platform */
 #include "../../detail/portable.h"
 
-// ParamView
-// Prototypes
+/* paramview */
+/* prototypes */
 static void paramview_updateskin(ParamView*);
 static void paramview_ontimer(ParamView*, uintptr_t timerid);
 static uintptr_t paramview_numrows(const ParamView*);
 static void paramview_build(ParamView*);
-// vtable
+
+/* vtable */
 static psy_ui_ComponentVtable vtable;
 static bool vtable_initialized = FALSE;
 
@@ -35,13 +38,15 @@ static void vtable_init(ParamView* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.ontimer = (psy_ui_fp_component_ontimer)
+		vtable.ontimer =
+			(psy_ui_fp_component_ontimer)
 			paramview_ontimer;
 		vtable_initialized = TRUE;
 	}
 	self->component.vtable = &vtable;
 }
-// implementation
+
+/* implementation */
 void paramview_init(ParamView* self, psy_ui_Component* parent,
 	psy_audio_Machine* machine, MachineParamConfig* config)
 {	

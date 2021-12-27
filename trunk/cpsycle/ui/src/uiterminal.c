@@ -45,7 +45,7 @@ void psy_ui_terminal_init(psy_ui_Terminal* self, psy_ui_Component* parent)
 		psy_ui_size_make_em(20.0, 20.0));
 	psy_lock_init(&self->outputlock);
 	self->strbuffer = NULL;	
-	psy_ui_component_starttimer(&self->component, 0, 50);
+//	psy_ui_component_starttimer(&self->component, 0, 50);
 }
 
 void psy_ui_terminal_ondestroy(psy_ui_Terminal* self)

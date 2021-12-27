@@ -47,8 +47,7 @@ void psy_ui_appstyles_inittheme(psy_ui_Styles* self, psy_ui_ThemeMode theme,
 			material.surface);
 	if (keepfont) {		
 		psy_ui_font_init(&style->font, NULL);
-		psy_ui_font_copy(&style->font, &oldfont);
-		style->use_font = TRUE;
+		psy_ui_font_copy(&style->font, &oldfont);		
 	} else {
 		psy_ui_style_setfont(style, "Tahoma", -16);
 	}
@@ -268,8 +267,7 @@ void psy_ui_appstyles_initlighttheme(psy_ui_Styles* self,
 	psy_ui_style_setcolours(style, light.cl_font_1, light.cl_white_1);
 	if (keepfont) {
 		psy_ui_font_init(&style->font, NULL);
-		psy_ui_font_copy(&style->font, &oldfont);
-		style->use_font = TRUE;
+		psy_ui_font_copy(&style->font, &oldfont);		
 	} else {
 		psy_ui_style_setfont(style, "Tahoma", -16);
 	}
@@ -486,8 +484,7 @@ void psy_ui_appstyles_inittheme_win98(psy_ui_Styles* self, bool keepfont)
 	psy_ui_style_setcolours(style, win.cl_black, win.cl_silver);
 	if (keepfont) {
 		psy_ui_font_init(&style->font, NULL);
-		psy_ui_font_copy(&style->font, &oldfont);
-		style->use_font = TRUE;
+		psy_ui_font_copy(&style->font, &oldfont);		
 	} else {
 		psy_ui_style_setfont(style, "Tahoma", -16);
 	}

@@ -162,7 +162,7 @@ intptr_t psy_ui_listboxclient_addtext(psy_ui_ListBoxClient* self,
 		: "");
 	psy_ui_component_updateoverflow(&self->component);
 	psy_ui_component_invalidate(&self->component);
-	return psy_table_size(&self->items);
+	return psy_table_size(&self->items) - 1;
 }
 
 void psy_ui_listboxclient_setcursel(psy_ui_ListBoxClient* self, intptr_t index)

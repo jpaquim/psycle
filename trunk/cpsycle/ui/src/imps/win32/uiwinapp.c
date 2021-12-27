@@ -871,7 +871,7 @@ int psy_ui_winapp_run(psy_ui_WinApp* self)
 {
 	MSG msg;
 
-	SetTimer(NULL, 1, 5, (TIMERPROC)psy_ui_winapp_timerproc);
+	SetTimer(NULL, 1, 10, (TIMERPROC)psy_ui_winapp_timerproc);
 	while (GetMessage(&msg, NULL, 0, 0)) {
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);

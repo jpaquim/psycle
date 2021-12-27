@@ -618,8 +618,8 @@ void view_dev_invalidaterect(psy_ui_ViewComponentImp* self,
 			psy_ui_realrectangle_make(
 				psy_ui_realpoint_make(
 					position.left + r->left + translation.x + spacing.left,
-					position.top + r->top + translation.y + spacing.top),
-				psy_ui_realrectangle_size(r)));
+					position.top + r->top + translation.y + spacing.top),		
+				psy_ui_realrectangle_size(r)));		
 	}
 }
 
@@ -729,6 +729,9 @@ void view_dev_draw(psy_ui_ViewComponentImp* self, psy_ui_Graphics* g)
 		psy_ui_RealRectangle oldclip;
 		psy_ui_RealRectangle clip;
 
+		if (self->component->id == 90) {
+			self = self;
+		}
 		temp_g = NULL;
 		oldclip = psy_ui_cliprect(g);
 		if (self->component->drawtobuffer) {
@@ -738,8 +741,7 @@ void view_dev_draw(psy_ui_ViewComponentImp* self, psy_ui_Graphics* g)
 				psy_ui_bitmap_dispose(&self->component->bufferbitmap);
 				size = psy_ui_component_scrollsize_px(self->component);
 				psy_ui_bitmap_init_size(&self->component->bufferbitmap, size);
-				psy_ui_graphics_init_bitmap(&bitmap_g, &self->component->bufferbitmap);
-				psy_ui_setfont(&bitmap_g, psy_ui_component_font(self->component));
+				psy_ui_graphics_init_bitmap(&bitmap_g, &self->component->bufferbitmap);				
 				temp_g = g;
 				g = &bitmap_g;
 			} else {
@@ -747,7 +749,8 @@ void view_dev_draw(psy_ui_ViewComponentImp* self, psy_ui_Graphics* g)
 					psy_ui_realpoint_zero());
 				return;
 			}
-		}
+		}		
+		psy_ui_setfont(g, psy_ui_component_font(self->component));
 		clip = psy_ui_realrectangle_make(
 			psy_ui_realpoint_zero(),
 			psy_ui_component_scrollsize_px(self->component));
