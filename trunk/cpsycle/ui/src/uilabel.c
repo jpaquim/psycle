@@ -24,6 +24,7 @@ static psy_List* psy_ui_label_eols(psy_ui_Label*);
 static psy_List* psy_ui_label_wraps(psy_ui_Label*, const char* text, uintptr_t num,
 	double width);
 static void psy_ui_label_onupdatestyles(psy_ui_Label*);
+
 /* vtable */
 static psy_ui_ComponentVtable vtable;
 static psy_ui_ComponentVtable super_vtable;
@@ -57,15 +58,14 @@ static void vtable_init(psy_ui_Label* self)
 	}
 	psy_ui_component_setvtable(&self->component, &vtable);
 }
+
 /* implementation */
-void psy_ui_label_init(psy_ui_Label* self, psy_ui_Component* parent,
-	psy_ui_Component* view)
+void psy_ui_label_init(psy_ui_Label* self, psy_ui_Component* parent)
 {
 	assert(self);
 
-	psy_ui_component_init(&self->component, parent, view);	
-	vtable_init(self);
-	psy_ui_component_doublebuffer(&self->component);
+	psy_ui_component_init(&self->component, parent, NULL);
+	vtable_init(self);	
 	self->charnumber = 0;
 	self->linespacing = 1.0;
 	self->textalignment = psy_ui_ALIGNMENT_CENTER_VERTICAL |
@@ -83,11 +83,11 @@ void psy_ui_label_init(psy_ui_Label* self, psy_ui_Component* parent,
 }
 
 void psy_ui_label_init_text(psy_ui_Label* self, psy_ui_Component* parent,
-	psy_ui_Component* view, const char* text)
+	const char* text)
 {
 	assert(self);
 
-	psy_ui_label_init(self, parent, view);
+	psy_ui_label_init(self, parent);
 	psy_ui_label_settext(self, text);
 }
 
@@ -96,14 +96,13 @@ psy_ui_Label* psy_ui_label_alloc(void)
 	return (psy_ui_Label*)malloc(sizeof(psy_ui_Label));
 }
 
-psy_ui_Label* psy_ui_label_allocinit(psy_ui_Component* parent,
-	psy_ui_Component* view)
+psy_ui_Label* psy_ui_label_allocinit(psy_ui_Component* parent)
 {
 	psy_ui_Label* rv;
 
 	rv = psy_ui_label_alloc();
 	if (rv) {
-		psy_ui_label_init(rv, parent, view);
+		psy_ui_label_init(rv, parent);
 		psy_ui_component_deallocateafterdestroyed(&rv->component);
 	}
 	return rv;
@@ -179,7 +178,19 @@ void psy_ui_label_onpreferredsize(psy_ui_Label* self,
 	} else {
 		rv->width = psy_ui_value_make_px(tm->tmAveCharWidth * self->charnumber);
 	}
-	rv->height = psy_ui_value_make_px((tm->tmHeight * self->linespacing));
+	if (!self->preventwrap) {
+		psy_List* lines;
+
+		if (self->charnumber == 0 && limit) {
+			lines = psy_ui_label_lines(self, text, psy_ui_value_px(&limit->width, tm, limit));
+		} else {
+			lines = psy_ui_label_lines(self, text, self->charnumber * tm->tmAveCharWidth);
+		}
+		rv->height = psy_ui_value_make_px(psy_list_size(lines) *
+			(tm->tmHeight * self->linespacing));
+	} else {
+		rv->height = psy_ui_value_make_px((tm->tmHeight * self->linespacing));
+	}
 	rv->height = psy_ui_add_values(rv->height, psy_ui_margin_height(&spacing, tm, NULL), tm, NULL);
 	rv->width = psy_ui_add_values(rv->width, psy_ui_margin_width(&spacing, tm, NULL), tm, NULL);
 }

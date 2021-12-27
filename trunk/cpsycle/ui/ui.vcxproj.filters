@@ -29,9 +29,6 @@
     <Filter Include="aligner">
       <UniqueIdentifier>{a102b3ac-7317-418f-9243-580490031b94}</UniqueIdentifier>
     </Filter>
-    <Filter Include="imps\natives">
-      <UniqueIdentifier>{d3bf2daf-f870-47fb-8123-cdbe0c609149}</UniqueIdentifier>
-    </Filter>
     <Filter Include="imps\win32\graphics">
       <UniqueIdentifier>{a199075b-4b54-43b9-a309-fa3506b5a3f5}</UniqueIdentifier>
     </Filter>
@@ -58,9 +55,6 @@
     </Filter>
     <Filter Include="imps\x11\graphics">
       <UniqueIdentifier>{e2886743-3e29-41b0-9235-fb931b4cb99b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="imps\natives\comps">
-      <UniqueIdentifier>{75e9abb2-6a85-4ebb-98d5-37f82431c6ed}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -128,9 +122,6 @@
       <Filter>comps</Filter>
     </ClCompile>
     <ClCompile Include="src\uiframe.c">
-      <Filter>comps</Filter>
-    </ClCompile>
-    <ClCompile Include="src\uiedit.c">
       <Filter>comps</Filter>
     </ClCompile>
     <ClCompile Include="src\uidefaults.c">
@@ -205,16 +196,10 @@
     <ClCompile Include="src\imps\win32\uiwinbitmapimp.c">
       <Filter>imps\win32\graphics</Filter>
     </ClCompile>
-    <ClCompile Include="src\imps\win32\uiwincheckboximp.c">
-      <Filter>imps\win32\comps</Filter>
-    </ClCompile>
     <ClCompile Include="src\imps\win32\uiwincolordialogimp.c">
       <Filter>imps\win32\dialogs</Filter>
     </ClCompile>
     <ClCompile Include="src\imps\win32\uiwincomponentimp.c">
-      <Filter>imps\win32\comps</Filter>
-    </ClCompile>
-    <ClCompile Include="src\imps\win32\uiwineditimp.c">
       <Filter>imps\win32\comps</Filter>
     </ClCompile>
     <ClCompile Include="src\imps\win32\uiwinfolderdialogimp.c">
@@ -234,9 +219,6 @@
     </ClCompile>
     <ClCompile Include="src\imps\win32\uiwinimpfactory.c">
       <Filter>imps\win32\common</Filter>
-    </ClCompile>
-    <ClCompile Include="src\imps\win32\uiwinlistboximp.c">
-      <Filter>imps\win32\comps</Filter>
     </ClCompile>
     <ClCompile Include="src\imps\win32\uiwinsavedialogimp.c">
       <Filter>imps\win32\dialogs</Filter>
@@ -291,15 +273,6 @@
     </ClCompile>
     <ClCompile Include="src\imps\x11\uix11fontimp.c">
       <Filter>imps\x11\common</Filter>
-    </ClCompile>
-    <ClCompile Include="src\imps\natives\uinativecheckboximp.c">
-      <Filter>imps\natives\comps</Filter>
-    </ClCompile>
-    <ClCompile Include="src\imps\natives\uinativeeditimp.c">
-      <Filter>imps\natives\comps</Filter>
-    </ClCompile>
-    <ClCompile Include="src\imps\natives\uinativelistboximp.c">
-      <Filter>imps\natives\comps</Filter>
     </ClCompile>
     <ClCompile Include="src\uibmpreader.c">
       <Filter>graphics</Filter>
@@ -376,9 +349,6 @@
       <Filter>comps</Filter>
     </ClInclude>
     <ClInclude Include="src\uiterminal.h">
-      <Filter>comps</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uiedit.h">
       <Filter>comps</Filter>
     </ClInclude>
     <ClInclude Include="src\uiframe.h">
@@ -462,16 +432,10 @@
     <ClInclude Include="src\imps\win32\uiwinbitmapimp.h">
       <Filter>imps\win32\graphics</Filter>
     </ClInclude>
-    <ClInclude Include="src\imps\win32\uiwincheckboximp.h">
-      <Filter>imps\win32\comps</Filter>
-    </ClInclude>
     <ClInclude Include="src\imps\win32\uiwincolordialogimp.h">
       <Filter>imps\win32\dialogs</Filter>
     </ClInclude>
     <ClInclude Include="src\imps\win32\uiwincomponentimp.h">
-      <Filter>imps\win32\comps</Filter>
-    </ClInclude>
-    <ClInclude Include="src\imps\win32\uiwineditimp.h">
       <Filter>imps\win32\comps</Filter>
     </ClInclude>
     <ClInclude Include="src\imps\win32\uiwinfolderdialogimp.h">
@@ -491,9 +455,6 @@
     </ClInclude>
     <ClInclude Include="src\imps\win32\uiwinimpfactory.h">
       <Filter>imps\win32\common</Filter>
-    </ClInclude>
-    <ClInclude Include="src\imps\win32\uiwinlistboximp.h">
-      <Filter>imps\win32\comps</Filter>
     </ClInclude>
     <ClInclude Include="src\imps\win32\uiwinsavedialogimp.h">
       <Filter>imps\win32\dialogs</Filter>
@@ -548,15 +509,6 @@
     </ClInclude>
     <ClInclude Include="src\imps\x11\uix11fontimp.h">
       <Filter>imps\x11\common</Filter>
-    </ClInclude>
-    <ClInclude Include="src\imps\natives\uinativecheckboximp.h">
-      <Filter>imps\natives\comps</Filter>
-    </ClInclude>
-    <ClInclude Include="src\imps\natives\uinativeeditimp.h">
-      <Filter>imps\natives\comps</Filter>
-    </ClInclude>
-    <ClInclude Include="src\imps\natives\uinativelistboximp.h">
-      <Filter>imps\natives\comps</Filter>
     </ClInclude>
     <ClInclude Include="src\uibmpreader.h">
       <Filter>graphics</Filter>

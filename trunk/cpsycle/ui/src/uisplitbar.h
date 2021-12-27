@@ -43,8 +43,7 @@ typedef struct psy_ui_Splitter {
 	psy_ui_Button* button;
 } psy_ui_Splitter;
 
-void psy_ui_splitter_init(psy_ui_Splitter*, psy_ui_Component* parent,
-	psy_ui_Component* view);
+void psy_ui_splitter_init(psy_ui_Splitter*, psy_ui_Component* parent);
 
 INLINE bool psy_ui_splitter_isvertical(const psy_ui_Splitter* self)
 {

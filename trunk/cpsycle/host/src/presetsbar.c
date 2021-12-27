@@ -47,20 +47,20 @@ void presetsbar_init(PresetsBar* self, psy_ui_Component* parent,
 	self->machine = NULL;	
 	self->userpreset = FALSE;
 	psy_path_init(&self->presetpath, "");	
-	psy_ui_label_init_text(&self->bank, &self->component, NULL, "machineframe.bank");
-	psy_ui_combobox_init(&self->bankselector, &self->component, NULL);
+	psy_ui_label_init_text(&self->bank, &self->component, "machineframe.bank");
+	psy_ui_combobox_init(&self->bankselector, &self->component);
 	psy_ui_combobox_setcharnumber(&self->bankselector, 10);
-	psy_ui_button_init_text(&self->importpresets, &self->component, NULL,
+	psy_ui_button_init_text(&self->importpresets, &self->component,
 		"machineframe.import");
-	psy_ui_button_init_text(&self->exportpresets, &self->component, NULL,
+	psy_ui_button_init_text(&self->exportpresets, &self->component,
 		"machineframe.export");
-	psy_ui_label_init_text(&self->program, &self->component, NULL, "machineframe.program");
-	psy_ui_combobox_init(&self->programbox, &self->component, NULL);
+	psy_ui_label_init_text(&self->program, &self->component, "machineframe.program");
+	psy_ui_combobox_init(&self->programbox, &self->component);
 	psy_ui_combobox_setcharnumber(&self->programbox, 20);
-	psy_ui_button_init_text(&self->savepresets, &self->component, NULL,
+	psy_ui_button_init_text(&self->savepresets, &self->component,
 		"machineframe.saveas");
-	psy_ui_edit_init(&self->savename, &self->component);
-	psy_ui_edit_setcharnumber(&self->savename, 12);
+	psy_ui_textinput_init(&self->savename, &self->component);
+	psy_ui_textinput_setcharnumber(&self->savename, 12);
 	psy_ui_margin_init_em(&margin, 0.0, 1.0, 0.0, 0.0);
 	psy_list_free(psy_ui_components_setalign(
 		psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE),
@@ -248,7 +248,7 @@ void presetsbar_onsavepresets(PresetsBar* self, psy_ui_Component* sender)
 			psy_audio_machine_currentpreset(self->machine, preset);
 			index = psy_ui_combobox_cursel(&self->programbox);
 			psy_audio_preset_setname(preset,
-				psy_ui_edit_text(&self->savename));
+				psy_ui_textinput_text(&self->savename));
 			psy_audio_presets_insert(presets, index, preset);
 			if (!self->userpreset) {
 				psy_path_setprefix(&self->presetpath,
@@ -384,6 +384,6 @@ void presetsbar_updatesavename(PresetsBar* self)
 			psy_audio_machine_currbank(self->machine),
 			psy_audio_machine_currprogram(self->machine),
 			text);
-		psy_ui_edit_settext(&self->savename, text);
+		psy_ui_textinput_settext(&self->savename, text);
 	}
 }

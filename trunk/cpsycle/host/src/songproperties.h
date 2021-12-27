@@ -11,7 +11,7 @@
 #include "workspace.h"
 /* ui */
 #include <uibutton.h>
-#include <uiedit.h>
+#include <uitextinput.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -23,7 +23,8 @@ typedef struct SongPropertiesView {
 	/* inherits */
 	psy_ui_Component component;
 	/* internal */
-	psy_ui_Component tabbar;	
+	psy_ui_Component viewtabbar;
+	psy_ui_Component top;
 	psy_ui_Component title;
 	psy_ui_Label label_title;
 	psy_ui_TextInput edit_title;
@@ -46,7 +47,7 @@ typedef struct SongPropertiesView {
 	/* text */
 	psy_ui_Component comments;
 	psy_ui_Label label_comments;
-	psy_ui_Edit edit_comments;
+	psy_ui_TextInput edit_comments;
 	/* references */
 	psy_audio_Song* song;
 	Workspace* workspace;

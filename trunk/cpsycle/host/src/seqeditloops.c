@@ -404,7 +404,7 @@ void seqeditloops_init(SeqEditLoops* self, psy_ui_Component* parent,
 	assert(state->cmds);
 	assert(state->cmds->workspace);
 
-	psy_ui_component_init(&self->component, parent, parent);	
+	psy_ui_component_init(&self->component, parent, NULL);	
 	seqeditloops_vtable_init(self);		
 	self->state = state;	
 	self->entries = NULL;

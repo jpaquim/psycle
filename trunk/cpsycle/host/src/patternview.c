@@ -34,7 +34,6 @@ static void patternview_oncontextmenu(PatternView*, psy_ui_Component*);
 static void patternview_oncursorchanged(PatternView*, psy_audio_Sequence*);
 static void patternview_beforealign(PatternView*);
 static void patternview_ongridscroll(PatternView*, psy_ui_Component*);
-static void patternview_onzoomboxchanged(PatternView*, ZoomBox*);
 static void patternview_onappzoom(PatternView*, psy_ui_AppZoom*);
 static void patternview_ontimer(PatternView*, uintptr_t timerid);
 static void patternview_numtrackschanged(PatternView*, psy_audio_Pattern*,
@@ -45,7 +44,6 @@ static void patternview_oncolresize(PatternView*, TrackerGrid*);
 static void patternview_updatescrollstep(PatternView*);
 static void patternview_updatedefaultline(PatternView*);
 static void patternview_onshow(PatternView*);
-static void patternview_updatefont(PatternView*);
 /* vtable */
 static psy_ui_ComponentVtable vtable;
 static bool vtable_initialized = FALSE;
@@ -95,9 +93,9 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 	self->workspace = workspace;	
 	self->aligndisplay = TRUE;
 	self->updatealign = 0;
-	psy_ui_component_doublebuffer(&self->component);
+	self->zoom = 1.0;	
 	psy_ui_component_setstyletype(&self->component, STYLE_PATTERNVIEW);
-	psy_ui_notebook_init(&self->notebook, &self->component, &self->component);
+	psy_ui_notebook_init(&self->notebook, &self->component, NULL);
 	psy_ui_component_setalign(psy_ui_notebook_base(&self->notebook),
 		psy_ui_ALIGN_CLIENT);	
 	psy_ui_component_setbackgroundmode(psy_ui_notebook_base(&self->notebook),
@@ -108,8 +106,7 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 		psy_ui_NOBACKGROUND);
 	psy_ui_notebook_select(&self->editnotebook, 0);	
 	/* Pattern Properties */
-	patternproperties_init(&self->properties, &self->component, &self->component,
-		NULL, workspace);	
+	patternproperties_init(&self->properties, &self->component, NULL, workspace);	
 	/* Shared states */	
 	patterncmds_init(&self->cmds, workspace->song, &workspace->undoredo, NULL,
 		&workspace->config.directories);		
@@ -126,13 +123,11 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 		&psycleconfig_misc(workspace_conf(self->workspace))->signal_changed,
 		self, patternview_onmiscconfigure);
 	/* Linenumbers */
-	trackerlinenumberbar_init(&self->left, &self->component, &self->component,
+	trackerlinenumberbar_init(&self->left, &self->component, NULL,
 		&self->state, self->workspace);
-	psy_ui_component_setalign(&self->left.component, psy_ui_ALIGN_LEFT);
-	psy_signal_connect(&self->left.zoombox.signal_changed, self,
-		patternview_onzoomboxchanged);	
+	psy_ui_component_setalign(&self->left.component, psy_ui_ALIGN_LEFT);	
 	/* Header */
-	psy_ui_component_init(&self->headerpane, &self->component, &self->component);	
+	psy_ui_component_init(&self->headerpane, &self->component, NULL);	
 	psy_ui_component_setalign(&self->headerpane, psy_ui_ALIGN_TOP);
 	trackerheader_init(&self->header, &self->headerpane,
 		&self->trackconfig, &self->state, self->workspace);
@@ -155,14 +150,14 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 		patternview_onpatternpropertiesapply);
 	/* Blockmenu */
 	patternblockmenu_init(&self->blockmenu, patternview_base(self),
-		&self->component, &self->swingfillview, &self->transformpattern,
+		NULL, &self->swingfillview, &self->transformpattern,
 		&self->interpolatecurveview, &self->pvstate);
 	/* TransformPattern */
 	transformpatternview_init(&self->transformpattern, &self->component,
-		&self->component, workspace);
+		NULL, workspace);
 	/* SwingFill */
 	swingfillview_init(&self->swingfillview, &self->component,
-		&self->component, &self->pvstate);
+		NULL, &self->pvstate);
 	/* Interpolate */
 	interpolatecurveview_init(&self->interpolatecurveview, &self->component, 0,
 		0, 0, workspace);
@@ -507,13 +502,6 @@ void patternview_onparametertweak(PatternView* self, Workspace* sender,
 	trackergrid_tweak(&self->trackerview.grid, slot, tweak, normvalue);	
 }
 
-void patternview_onzoomboxchanged(PatternView* self, ZoomBox* sender)
-{
-	assert(self);
-
-	patternview_updatefont(self);
-}
-
 void patternview_onappzoom(PatternView* self, psy_ui_AppZoom* sender)
 {
 	assert(self);
@@ -529,8 +517,7 @@ void patternview_updatefont(PatternView* self)
 	
 	assert(self);
 
-	zoomrate = psy_ui_app_zoomrate(psy_ui_app()) *
-		zoombox_rate(&self->left.zoombox);
+	zoomrate = psy_ui_app_zoomrate(psy_ui_app()) * self->zoom;
 	fontinfo = patternviewconfig_readfont(self->pvstate.patconfig, zoomrate);
 	psy_ui_font_init(&font, &fontinfo);
 	psy_ui_component_setfont(&self->component, &font);

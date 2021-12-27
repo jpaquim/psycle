@@ -37,9 +37,9 @@ static void seqeditortoolbar_onconfigure(SeqEditToolBar*,
 static psy_audio_SequenceSampleEntry* seqeditortoolbar_sampleentry(
 	SeqEditToolBar* self);
 static void seqeditortoolbar_ontrackeditaccept(SeqEditToolBar*,
-	psy_ui_Edit* sender);
+	psy_ui_TextInput* sender);
 static void seqeditortoolbar_ontrackeditreject(SeqEditToolBar*,
-	psy_ui_Edit* sender);
+	psy_ui_TextInput* sender);
 /* implenentation */
 void seqedittoolbar_init(SeqEditToolBar* self, psy_ui_Component* parent,
 	SeqEditState* state)
@@ -51,36 +51,36 @@ void seqedittoolbar_init(SeqEditToolBar* self, psy_ui_Component* parent,
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_margin_make_em(0.0, 0.5, 0.0, 1.0));		
 	self->state = state;
-	psy_ui_label_init_text(&self->trackname, &self->component, NULL,
+	psy_ui_label_init_text(&self->trackname, &self->component,
 		"Track");
-	psy_ui_edit_init(&self->trackedit, &self->component);
-	psy_ui_edit_setcharnumber(&self->trackedit, 30);
-	psy_ui_edit_enableinputfield(&self->trackedit);	
+	psy_ui_textinput_init(&self->trackedit, &self->component);
+	psy_ui_textinput_setcharnumber(&self->trackedit, 30);
+	psy_ui_textinput_enableinputfield(&self->trackedit);	
 	psy_signal_connect(&self->trackedit.signal_accept,
 		self, seqeditortoolbar_ontrackeditaccept);
 	psy_signal_connect(&self->trackedit.signal_reject,
 		self, seqeditortoolbar_ontrackeditreject);
-	psy_ui_button_init_text(&self->move, &self->component, NULL,
+	psy_ui_button_init_text(&self->move, &self->component,
 		"seqedit.move");
-	psy_ui_button_init_text(&self->reorder, &self->component, NULL,
+	psy_ui_button_init_text(&self->reorder, &self->component,
 		"seqedit.reorder");
 	seqeditortoolbar_setdragtype(self, self->state->dragtype);
-	psy_ui_label_init_text(&self->desctype, seqedittoolbar_base(self), NULL,
+	psy_ui_label_init_text(&self->desctype, seqedittoolbar_base(self),
 		"Insert");	
-	psy_ui_combobox_init(&self->inserttype, seqedittoolbar_base(self), NULL);
+	psy_ui_combobox_init(&self->inserttype, seqedittoolbar_base(self));
 	psy_ui_combobox_setcharnumber(&self->inserttype, 12.0);
 	psy_ui_combobox_addtext(&self->inserttype, "Pattern");
 	psy_ui_combobox_addtext(&self->inserttype, "Marker");
 	psy_ui_combobox_addtext(&self->inserttype, "Sample");
 	psy_ui_combobox_setcursel(&self->inserttype, 0);
 	/* expand */
-	psy_ui_button_init(&self->expand, &self->component, NULL);
+	psy_ui_button_init(&self->expand, &self->component);
 	psy_ui_button_loadresource(&self->expand, IDB_EXPAND_LIGHT,
 		IDB_EXPAND_DARK, psy_ui_colour_white());
 	psy_ui_component_setalign(psy_ui_button_base(&self->expand),
 		psy_ui_ALIGN_RIGHT);	
 	/* configure */
-	psy_ui_button_init_connect(&self->configure, &self->component, NULL,
+	psy_ui_button_init_connect(&self->configure, &self->component,
 		self, seqeditortoolbar_onconfigure);
 	psy_ui_button_loadresource(&self->configure, IDB_SETTINGS_LIGHT,
 		IDB_SETTINGS_DARK, psy_ui_colour_white());
@@ -88,20 +88,20 @@ void seqedittoolbar_init(SeqEditToolBar* self, psy_ui_Component* parent,
 		psy_ui_ALIGN_RIGHT);
 	/* assign sample */
 	psy_ui_button_init_text_connect(&self->assignsample, &self->component,
-		NULL, "Assign Sample", self, seqeditortoolbar_onassignsample);
+		"Assign Sample", self, seqeditortoolbar_onassignsample);
 	psy_ui_component_hide(psy_ui_button_base(&self->assignsample));
 	psy_ui_checkbox_init_text(&self->usesamplerindex, &self->component, "Define Sampler");
 	psy_signal_connect(&self->usesamplerindex.signal_clicked, self,
 		seqeditortoolbar_onusesamplerindex);
-	intedit_init_connect(&self->samplerindex, &self->component, NULL, "Index",
+	intedit_init_connect(&self->samplerindex, &self->component, "Index",
 		0x3E, 0, 0x3F, self, seqeditortoolbar_onsamplerindexchange);	
 	psy_ui_component_hide(psy_ui_checkbox_base(&self->usesamplerindex));
 	psy_ui_component_hide(intedit_base(&self->samplerindex));	
 	/* timesig */
-	psy_ui_button_init_text(&self->timesig, &self->component, NULL, "Timesigs");
+	psy_ui_button_init_text(&self->timesig, &self->component, "Timesigs");
 	psy_ui_button_seticon(&self->timesig, psy_ui_ICON_MORE);
 	/* loop */
-	psy_ui_button_init_text(&self->loop, &self->component, NULL, "Repetitions");
+	psy_ui_button_init_text(&self->loop, &self->component, "Repetitions");
 	psy_ui_button_seticon(&self->timesig, psy_ui_ICON_MORE);
 	psy_signal_connect(&self->inserttype.signal_selchanged, self,
 		seqedittoolbar_oninserttypeselchange);
@@ -214,9 +214,9 @@ void seqeditortoolbar_updatetrackname(SeqEditToolBar* self)
 	editposition = seqeditstate_editposition(self->state);
 	track = psy_audio_sequence_track_at(sequence, editposition.track);
 	if (track) {
-		psy_ui_edit_settext(&self->trackedit, track->name);
+		psy_ui_textinput_settext(&self->trackedit, track->name);
 	} else {
-		psy_ui_edit_settext(&self->trackedit, "");
+		psy_ui_textinput_settext(&self->trackedit, "");
 	}
 }
 
@@ -301,7 +301,7 @@ psy_audio_SequenceSampleEntry* seqeditortoolbar_sampleentry(SeqEditToolBar* self
 }
 
 void seqeditortoolbar_ontrackeditaccept(SeqEditToolBar* self,
-	psy_ui_Edit* sender)
+	psy_ui_TextInput* sender)
 {
 	psy_audio_OrderIndex editposition;
 	psy_audio_SequenceTrack* track;
@@ -311,14 +311,14 @@ void seqeditortoolbar_ontrackeditaccept(SeqEditToolBar* self,
 	editposition = seqeditstate_editposition(self->state);
 	track = psy_audio_sequence_track_at(sequence, editposition.track);
 	if (track) {
-		psy_audio_sequencetrack_setname(track, psy_ui_edit_text(sender));
+		psy_audio_sequencetrack_setname(track, psy_ui_textinput_text(sender));
 		psy_signal_emit(&sequence->signal_clear, sequence, 0);
 	}
 	psy_ui_component_setfocus(self->state->view);
 }
 
 void seqeditortoolbar_ontrackeditreject(SeqEditToolBar* self,
-	psy_ui_Edit* sender)
+	psy_ui_TextInput* sender)
 {
 	psy_ui_component_setfocus(self->state->view);
 }

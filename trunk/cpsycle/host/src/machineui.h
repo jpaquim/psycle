@@ -11,7 +11,7 @@
 #include "paramviews.h"
 #include "workspace.h"
 // ui
-#include <uiedit.h>
+#include <uitextinput.h>
 #include <uinotebook.h>
 
 #ifdef __cplusplus
@@ -63,8 +63,9 @@ typedef enum MachineUiMode {
 	MACHINEUIMODE_BITMAP
 } MachineUiMode;
 
+/* MachineUiCommon */
 typedef struct MachineUiCommon {
-	// internal
+	/* internal */
 	int mode;
 	psy_ui_Colour font;
 	psy_ui_Colour bgcolour;
@@ -75,22 +76,22 @@ typedef struct MachineUiCommon {
 	MachineViewDragMode dragmode;
 	MachineUiMode drawmode;
 	double mx;
-	// references
+	/* references */
 	Workspace* workspace;
 	psy_audio_Machine* machine;
 	psy_audio_Machines* machines;
-	psy_ui_Component* view;	
+	psy_ui_Component* component;	
 	MachineCoords* coords;
 	MachineViewSkin* skin;
 	ParamViews* paramviews;
 } MachineUiCommon;
 
-void machineuicommon_init(MachineUiCommon*,  uintptr_t slot, MachineViewSkin*,
-	psy_ui_Component* view, ParamViews*, Workspace*);
+void machineuicommon_init(MachineUiCommon*, psy_ui_Component* component,
+	uintptr_t slot, MachineViewSkin*, ParamViews*, Workspace*);
 
 void machineuicommon_move(MachineUiCommon*, psy_ui_Point topleft);
 
-// global methods
+/* global methods */
 psy_ui_Component* machineui_create(psy_audio_Machine* machine,
 	uintptr_t slot, MachineViewSkin* skin,
 	psy_ui_Component* parent, psy_ui_Component* view,

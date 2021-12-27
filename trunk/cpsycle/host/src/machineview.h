@@ -1,10 +1,12 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #if !defined(MACHINEVIEW_H)
 #define MACHINEVIEW_H
 
-// host
+/* host */
 #include "machineframe.h"
 #include "machineeditorview.h" // vst view
 #include "machineviewskin.h"
@@ -17,8 +19,8 @@
 #include "paramviews.h"
 #include <uitabbar.h>
 #include "workspace.h"
-// ui
-#include <uiedit.h>
+/* ui */
+#include <uitextinput.h>
 #include <uinotebook.h>
 #include <uiscroller.h>
 
@@ -26,33 +28,31 @@
 extern "C" {
 #endif
 
-// MachineView
-//
-// Editor/Viewer for the machines, their connections and owner of the
-// wiremonitors. Composite of Wire-/Stackview and Newmachine.
-
-// MachineStackPane: displays stacks of the machines starting with their leafs
-// MachineWireView:  displays and edits machines with their wires
-// NewMachine:       displays available machines to select the new machine
-// MachineView:      tabbed view with MachineStack-/MachineWireView and
-//                   NewMachine
-// MachineViewBar:   Statusbar that displays actions in the wireview and adds
-//                   a selector for the mixer, if new wires are added to the
-//                   mixer inputs or sent/returns
-// Helper
-// MachineUi:        Draws a machine with its buttons and vumeter and reacts to
-//                   ui events to solo/mute/bypass or pan the machine
-// MachineUiMatrix:  Container of MachineUis for the MachineStackPane with
-//                   track and line as key and a MachineUi pointer as value
-
-// MachineView
-
-struct MiniView;
+/*
+** MachineView
+**
+** Editor/Viewer for the machines, their connections and owner of the
+** wiremonitors. Composite of Wire-/Stackview and Newmachine.
+**
+** MachineStackPane: displays stacks of the machines starting with their leafs
+** MachineWireView:  displays and edits machines with their wires
+** NewMachine:       displays available machines to select the new machine
+** MachineView:      tabbed view with MachineStack-/MachineWireView and
+**                   NewMachine
+** MachineViewBar:   Statusbar that displays actions in the wireview and adds
+**                   a selector for the mixer, if new wires are added to the
+**                   mixer inputs or sent/returns
+** Helper
+** MachineUi:        Draws a machine with its buttons and vumeter and reacts to
+**                   ui events to solo/mute/bypass or pan the machine
+** MachineUiMatrix:  Container of MachineUis for the MachineStackPane with
+**                   track and line as key and a MachineUi pointer as value
+*/
 
 typedef struct MachineView {
-	// inherits
+	/* inherits */
 	psy_ui_Component component;
-	// ui elements
+	/* internal */
 	psy_ui_TabBar tabbar;
 	MachineProperties properties;
 	psy_ui_Notebook notebook;	
@@ -63,12 +63,14 @@ typedef struct MachineView {
 	MachineViewSkin skin;	
 	bool shownewmachine;
 	ParamViews paramviews;
-	// references
+	/* references */
 	Workspace* workspace;	
 } MachineView;
 
 void machineview_init(MachineView*, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, Workspace*);
+
+void machineview_idle(MachineView*);
 
 INLINE void machineview_centermaster(MachineView* self)
 {

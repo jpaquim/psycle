@@ -1,17 +1,20 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "uiviewcomponentimp.h"
-// local
+/* local */
 #include "uiapp.h"
-// platform
+/* platform */
 #include "../../detail/portable.h"
 #include "../../detail/trace.h"
 
-// ViewComponentImp
-// prototypes
+/* ViewComponentImp */
+/* prototypes */
 static void view_dev_destroyed(psy_ui_ViewComponentImp*);
 static void view_dev_dispose(psy_ui_ViewComponentImp*);
 static void view_dev_destroy(psy_ui_ViewComponentImp*);
@@ -23,26 +26,29 @@ static int view_dev_visible(psy_ui_ViewComponentImp*);
 static int view_dev_drawvisible(psy_ui_ViewComponentImp*);
 static void view_dev_move(psy_ui_ViewComponentImp*, psy_ui_Point origin);
 static void view_dev_resize(psy_ui_ViewComponentImp*, psy_ui_Size);
-static void view_dev_clientresize(psy_ui_ViewComponentImp*, intptr_t width, intptr_t height);
+static void view_dev_clientresize(psy_ui_ViewComponentImp*, intptr_t width,
+	intptr_t height);
 static psy_ui_RealRectangle view_dev_position(psy_ui_ViewComponentImp*);
 static psy_ui_RealRectangle view_dev_screenposition(psy_ui_ViewComponentImp*);
-static void view_dev_setposition(psy_ui_ViewComponentImp*, psy_ui_Point topleft,
-	psy_ui_Size);
+static void view_dev_setposition(psy_ui_ViewComponentImp*,
+	psy_ui_Point topleft, psy_ui_Size);
 static psy_ui_Size view_dev_size(const psy_ui_ViewComponentImp*);
 static void view_dev_updatesize(psy_ui_ViewComponentImp*);
 static void view_dev_applyposition(psy_ui_ViewComponentImp* self) { }
 static psy_ui_Size view_dev_framesize(psy_ui_ViewComponentImp*);
-static void view_dev_scrollto(psy_ui_ViewComponentImp*, intptr_t dx, intptr_t dy);
+static void view_dev_scrollto(psy_ui_ViewComponentImp*, intptr_t dx,
+	intptr_t dy);
 static psy_ui_Component* view_dev_parent(psy_ui_ViewComponentImp*);
-static void view_dev_setparent(psy_ui_ViewComponentImp*, psy_ui_Component* parent);
-static void view_dev_insert(psy_ui_ViewComponentImp*, psy_ui_ViewComponentImp* child,
-	psy_ui_ViewComponentImp* insertafter);
+static void view_dev_setparent(psy_ui_ViewComponentImp*,
+	psy_ui_Component* parent);
+static void view_dev_insert(psy_ui_ViewComponentImp*,
+	psy_ui_ViewComponentImp* child, psy_ui_ViewComponentImp* insertafter);
 static void view_dev_remove(psy_ui_ViewComponentImp*,
 	psy_ui_ViewComponentImp* child);
 static void view_dev_erase(psy_ui_ViewComponentImp*,
 	psy_ui_ViewComponentImp* child);
-static void view_dev_setorder(psy_ui_ViewComponentImp*, psy_ui_ViewComponentImp*
-	insertafter);
+static void view_dev_setorder(psy_ui_ViewComponentImp*,
+	psy_ui_ViewComponentImp* insertafter);
 static void view_dev_capture(psy_ui_ViewComponentImp*);
 static void view_dev_releasecapture(psy_ui_ViewComponentImp*);
 static void view_dev_invalidate(psy_ui_ViewComponentImp*);
@@ -57,14 +63,14 @@ static void view_dev_enableinput(psy_ui_ViewComponentImp*);
 static void view_dev_preventinput(psy_ui_ViewComponentImp*);
 bool view_dev_inputprevented(const psy_ui_ViewComponentImp*);
 static void view_dev_setcursor(psy_ui_ViewComponentImp*, psy_ui_CursorStyle);
-static void view_dev_starttimer(psy_ui_ViewComponentImp*, uintptr_t id,
-	uintptr_t interval);
-static void view_dev_stoptimer(psy_ui_ViewComponentImp*, uintptr_t id);
-static void view_dev_seticonressource(psy_ui_ViewComponentImp*, int ressourceid);
-static const psy_ui_TextMetric* view_dev_textmetric(const psy_ui_ViewComponentImp*);
-static psy_ui_Size view_dev_textsize(psy_ui_ViewComponentImp*, const char* text,
-	psy_ui_Font*);
-static void view_dev_setbackgroundcolour(psy_ui_ViewComponentImp*, psy_ui_Colour);
+static void view_dev_seticonressource(psy_ui_ViewComponentImp*,
+	int ressourceid);
+static const psy_ui_TextMetric* view_dev_textmetric(
+	const psy_ui_ViewComponentImp*);
+static psy_ui_Size view_dev_textsize(psy_ui_ViewComponentImp*,
+	const char* text, psy_ui_Font*);
+static void view_dev_setbackgroundcolour(psy_ui_ViewComponentImp*,
+	psy_ui_Colour);
 static void view_dev_settitle(psy_ui_ViewComponentImp*, const char* title);
 static void view_dev_setfocus(psy_ui_ViewComponentImp*);
 static int view_dev_hasfocus(psy_ui_ViewComponentImp*);
@@ -73,13 +79,14 @@ static void view_dev_draw(psy_ui_ViewComponentImp*, psy_ui_Graphics*);
 static void view_dev_mousedown(psy_ui_ViewComponentImp*, psy_ui_MouseEvent*);
 static void view_dev_mouseup(psy_ui_ViewComponentImp*, psy_ui_MouseEvent*);
 static void view_dev_mousemove(psy_ui_ViewComponentImp*, psy_ui_MouseEvent*);
-static void view_dev_mousedoubleclick(psy_ui_ViewComponentImp*, psy_ui_MouseEvent*);
+static void view_dev_mousedoubleclick(psy_ui_ViewComponentImp*,
+	psy_ui_MouseEvent*);
 static void view_dev_mouseenter(psy_ui_ViewComponentImp*);
 static void view_dev_mouseleave(psy_ui_ViewComponentImp*);
-static psy_ui_RealPoint translatecoords(psy_ui_ViewComponentImp*, psy_ui_Component* src,
-	psy_ui_Component* dst);
+static psy_ui_RealPoint translatecoords(psy_ui_ViewComponentImp*,
+	psy_ui_Component* src, psy_ui_Component* dst);
 
-// VTable init
+/* vtable */
 static psy_ui_ComponentImpVTable view_imp_vtable;
 static bool view_imp_vtable_initialized = FALSE;
 
@@ -194,13 +201,7 @@ static void view_imp_vtable_init(psy_ui_ViewComponentImp* self)
 			view_dev_inputprevented;
 		view_imp_vtable.dev_setcursor =
 			(psy_ui_fp_componentimp_dev_setcursor)
-			view_dev_setcursor;
-		view_imp_vtable.dev_starttimer =
-			(psy_ui_fp_componentimp_dev_starttimer)
-			view_dev_starttimer;
-		view_imp_vtable.dev_stoptimer =
-			(psy_ui_fp_componentimp_dev_stoptimer)
-			view_dev_stoptimer;
+			view_dev_setcursor;		
 		view_imp_vtable.dev_seticonressource =
 			(psy_ui_fp_componentimp_dev_seticonressource)
 			view_dev_seticonressource;
@@ -250,6 +251,7 @@ static void view_imp_vtable_init(psy_ui_ViewComponentImp* self)
 	}
 }
 
+/* implementation */
 void psy_ui_viewcomponentimp_init(psy_ui_ViewComponentImp* self,
 	struct psy_ui_Component* component,
 	psy_ui_Component* parent,
@@ -259,7 +261,6 @@ void psy_ui_viewcomponentimp_init(psy_ui_ViewComponentImp* self,
 	uint32_t dwStyle,
 	int usecommand)
 {
-	// psy_ui_ViewComponentImp* parent_imp;
 	psy_ui_componentimp_init(&self->imp);
 	view_imp_vtable_init(self);
 	self->imp.vtable = &view_imp_vtable;
@@ -267,7 +268,7 @@ void psy_ui_viewcomponentimp_init(psy_ui_ViewComponentImp* self,
 	self->component = component;	
 	self->parent = parent;
 	self->visible = TRUE;
-	if (parent) {
+	if (parent && parent->imp) {
 		parent->imp->vtable->dev_insert(parent->imp, &self->imp, NULL);		
 	}
 	psy_ui_realrectangle_init_all(&self->position,
@@ -379,10 +380,7 @@ void view_dev_destroy(psy_ui_ViewComponentImp* self)
 }
 
 void view_dev_destroyed(psy_ui_ViewComponentImp* self)
-{
-	// restore default winproc					
-	psy_signal_emit(&self->component->signal_destroyed,
-			self->component, 0);
+{		
 	self->component->vtable->ondestroyed(self->component);	
 	psy_ui_component_dispose(self->component);	
 }
@@ -557,7 +555,7 @@ void view_dev_remove(psy_ui_ViewComponentImp* self, psy_ui_ViewComponentImp* chi
 		}
 	} else {
 		assert(0);
-		// todo
+		/* todo */
 	}
 }
 
@@ -573,7 +571,7 @@ void view_dev_erase(psy_ui_ViewComponentImp* self, psy_ui_ViewComponentImp* chil
 		}
 	} else {
 		assert(0);
-		// todo
+		/* todo */
 	}
 }
 
@@ -679,15 +677,6 @@ void view_dev_setcursor(psy_ui_ViewComponentImp* self, psy_ui_CursorStyle
 	psy_ui_component_setcursor(self->view, cursorstyle);
 }
 
-void view_dev_starttimer(psy_ui_ViewComponentImp* self, uintptr_t id,
-	uintptr_t interval)
-{
-}
-
-void view_dev_stoptimer(psy_ui_ViewComponentImp* self, uintptr_t id)
-{
-}
-
 void view_dev_seticonressource(psy_ui_ViewComponentImp* self, int ressourceid)
 {
 }
@@ -766,7 +755,7 @@ void view_dev_draw(psy_ui_ViewComponentImp* self, psy_ui_Graphics* g)
 			psy_ui_realrectangle_intersection(&clip, &oldclip);
 		}
 		psy_ui_setcliprect(g, clip);
-		// draw background		
+		/* draw background */
 		if (self->component->backgroundmode != psy_ui_NOBACKGROUND) {			
 			psy_ui_component_drawbackground(self->component, g);
 		}

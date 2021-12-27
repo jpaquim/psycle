@@ -24,16 +24,17 @@ static void sequencerbar_onmultichannelaudition(SequencerBar*,
 	psy_ui_Button* sender);
 static void sequencerbar_onconfigure(SequencerBar*, GeneralConfig*,
 	psy_Property*);
+
 /* implementation */
-void sequencerbar_init(SequencerBar* self,
-	psy_ui_Component* parent, Workspace* workspace)
+void sequencerbar_init(SequencerBar* self, psy_ui_Component* parent,
+	psy_ui_Component* view, Workspace* workspace)
 {
 	psy_ui_Margin margin;
 
 	assert(self);
 	assert(workspace);
 	
-	psy_ui_component_init(&self->component, parent, NULL);
+	psy_ui_component_init(&self->component, parent, view);
 	psy_ui_margin_init_em(&margin, 0.0, 0.0, 0.25, 0.0);
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_TOP,
 		margin);
@@ -56,14 +57,14 @@ void sequencerbar_init(SequencerBar* self,
 	psy_ui_checkbox_init_multiline(&self->allownotestoeffect, &self->component);
 	psy_ui_checkbox_settext(&self->allownotestoeffect,
 		"seqview.allow-notes-to_effect");						
-	psy_ui_button_init_text(&self->togglestepseq, &self->component, NULL,
+	psy_ui_button_init_text(&self->togglestepseq, &self->component,
 		"seqview.showstepsequencer");
 	psy_ui_button_seticon(&self->togglestepseq, psy_ui_ICON_MORE);
 	psy_ui_button_settextalignment(&self->togglestepseq,
 		(psy_ui_Alignment)(psy_ui_ALIGNMENT_LEFT | psy_ui_ALIGNMENT_CENTER_VERTICAL));
 	psy_ui_component_setalign(&self->togglestepseq.component,
 		psy_ui_ALIGN_BOTTOM);	
-	psy_ui_button_init_text(&self->toggleseqedit, &self->component, NULL,
+	psy_ui_button_init_text(&self->toggleseqedit, &self->component,
 		"seqview.showseqeditor");
 	psy_ui_component_setalign(&self->toggleseqedit.component,
 		psy_ui_ALIGN_BOTTOM);

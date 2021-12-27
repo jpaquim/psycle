@@ -48,6 +48,7 @@ static void instrumentgeneralview_ongeneralviewtweak(InstrumentGeneralView*,
 	psy_ui_Slider*, float value);
 static void instrumentgeneralview_ongeneralviewvalue(InstrumentGeneralView*,
 	psy_ui_Slider*, float* value);
+
 /* implementation */
 void instrumentgeneralview_init(InstrumentGeneralView* self,
 	psy_ui_Component* parent, psy_audio_Instruments* instruments,
@@ -68,52 +69,52 @@ void instrumentgeneralview_init(InstrumentGeneralView* self,
 	margin = psy_ui_defaults_vmargin(psy_ui_defaults());
 	margin.top = psy_ui_value_make_eh(1.0);
 	psy_ui_component_setmargin(&self->nna, margin);	
-	psy_ui_label_init_text(&self->nnaheader, &self->nna, NULL,
+	psy_ui_label_init_text(&self->nnaheader, &self->nna,
 		"instrumentview.new-note-action");
-	psy_ui_button_init_connect(&self->nnacut, &self->nna, NULL,
+	psy_ui_button_init_connect(&self->nnacut, &self->nna,
 		self, instrumentgeneralview_onnnacut);
 	psy_ui_button_settext(&self->nnacut, "instrumentview.note-cut");		
-	psy_ui_button_init_connect(&self->nnarelease, &self->nna, NULL,
+	psy_ui_button_init_connect(&self->nnarelease, &self->nna,
 		self, instrumentgeneralview_onnnarelease);
 	psy_ui_button_settext(&self->nnarelease, "instrumentview.note-release");
-	psy_ui_button_init_connect(&self->nnafadeout, &self->nna, NULL,
+	psy_ui_button_init_connect(&self->nnafadeout, &self->nna,
 		self, instrumentgeneralview_onnnafadeout);
 	psy_ui_button_settext(&self->nnafadeout, "instrumentview.note-fadeout");
-	psy_ui_button_init_connect(&self->nnanone, &self->nna, NULL,
+	psy_ui_button_init_connect(&self->nnanone, &self->nna,
 		self, instrumentgeneralview_onnnanone);	
 	psy_ui_button_settext(&self->nnanone, "instrumentview.none");
 	/* dct */
 	psy_ui_component_init(&self->dct, &self->component, NULL);
 	psy_ui_component_setdefaultalign(&self->dct, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));	
-	psy_ui_label_init_text(&self->dctheader, &self->dct, NULL,
+	psy_ui_label_init_text(&self->dctheader, &self->dct,
 		"instrumentview.same");
-	psy_ui_button_init_connect(&self->dctnone, &self->dct, NULL,
+	psy_ui_button_init_connect(&self->dctnone, &self->dct,
 		self, instrumentgeneralview_ondctnone);
 	psy_ui_button_settext(&self->dctnone, "instrumentview.none");
-	psy_ui_button_init_connect(&self->dctnote, &self->dct, NULL,
+	psy_ui_button_init_connect(&self->dctnote, &self->dct,
 		self, instrumentgeneralview_ondctnote);
 	psy_ui_button_settext(&self->dctnote, "Note");
-	psy_ui_button_init_connect(&self->dctsample, &self->dct, NULL,
+	psy_ui_button_init_connect(&self->dctsample, &self->dct,
 		self, instrumentgeneralview_ondctsample);
 	psy_ui_button_settext(&self->dctsample, "Sample");
-	psy_ui_button_init_connect(&self->dctinstrument, &self->dct, NULL,
+	psy_ui_button_init_connect(&self->dctinstrument, &self->dct,
 		self, instrumentgeneralview_ondctinstrument);
 	psy_ui_button_settext(&self->dctinstrument,
 		"instrumentview.instrument");
 	/* dca */
-	psy_ui_label_init_text(&self->dcaheader, &self->dct, NULL,
+	psy_ui_label_init_text(&self->dcaheader, &self->dct,
 		"instrumentview.do");
-	psy_ui_button_init_connect(&self->dcacut, &self->dct, NULL,
+	psy_ui_button_init_connect(&self->dcacut, &self->dct,
 		self, instrumentgeneralview_ondcacut);
 	psy_ui_button_settext(&self->dcacut, "instrumentview.note-cut");
-	psy_ui_button_init_connect(&self->dcarelease, &self->dct, NULL,
+	psy_ui_button_init_connect(&self->dcarelease, &self->dct,
 		self, instrumentgeneralview_ondcarelease);
 	psy_ui_button_settext(&self->dcarelease, "instrumentview.note-release");
-	psy_ui_button_init_connect(&self->dcafadeout, &self->dct, NULL,
+	psy_ui_button_init_connect(&self->dcafadeout, &self->dct,
 		self, instrumentgeneralview_ondcafadeout);
 	psy_ui_button_settext(&self->dcafadeout, "instrumentview.note-fadeout");
-	psy_ui_button_init_connect(&self->dcanone, &self->dct, NULL,
+	psy_ui_button_init_connect(&self->dcanone, &self->dct,
 		self, instrumentgeneralview_ondcanone);
 	psy_ui_button_settext(&self->dcanone, "instrumentview.none");	
 	/* fitrow */
@@ -126,11 +127,11 @@ void instrumentgeneralview_init(InstrumentGeneralView* self,
 	psy_ui_checkbox_init(&self->fitrowcheck, &self->fitrow);
 	psy_signal_connect(&self->fitrowcheck.signal_clicked, self,
 		instrumentgeneralview_onfitrow);
-	psy_ui_edit_init(&self->fitrowedit, &self->fitrow);
-	psy_ui_edit_setcharnumber(&self->fitrowedit, 4);
-	psy_ui_label_init_text(&self->fitrowlabel, &self->fitrow, NULL,
+	psy_ui_textinput_init(&self->fitrowedit, &self->fitrow);
+	psy_ui_textinput_setcharnumber(&self->fitrowedit, 4);
+	psy_ui_label_init_text(&self->fitrowlabel, &self->fitrow,
 		"instrumentview.pattern-rows");
-	psy_ui_slider_init(&self->globalvolume, &self->component, NULL);
+	psy_ui_slider_init(&self->globalvolume, &self->component);
 	psy_ui_slider_connect(&self->globalvolume, self,
 		(ui_slider_fpdescribe)instrumentgeneralview_ongeneralviewdescribe,
 		(ui_slider_fptweak)instrumentgeneralview_ongeneralviewtweak,
@@ -158,7 +159,7 @@ void instrumentgeneralview_setinstrument(InstrumentGeneralView* self,
 			psy_ui_checkbox_disablecheck(&self->fitrowcheck);
 		}
 		psy_snprintf(text, 128, "%d", (int)self->instrument->lines);
-		psy_ui_edit_settext(&self->fitrowedit, text);
+		psy_ui_textinput_settext(&self->fitrowedit, text);
 		switch (self->instrument->nna) {
 			case psy_audio_NNA_STOP:
 				instrumentgeneralview_nnahighlight(self, &self->nnacut);

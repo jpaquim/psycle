@@ -130,8 +130,7 @@ void trackergrid_init(TrackerGrid* self, psy_ui_Component* parent,
 	trackergrid_storecursor(self);
 	/* setup base component */
 	psy_ui_component_setbackgroundmode(&self->component,
-		psy_ui_NOBACKGROUND);
-	psy_ui_component_doublebuffer(&self->component);	
+		psy_ui_NOBACKGROUND);		
 	trackergrid_init_signals(self);
 	psy_ui_component_setalignexpand(&self->component,
 		psy_ui_HEXPAND);
@@ -1813,7 +1812,7 @@ void trackerview_init(TrackerView* self, psy_ui_Component* parent,
 	psy_ui_component_setwheelscroll(&self->grid.component, 4);
 	psy_ui_component_setoverflow(trackergrid_base(&self->grid),
 		psy_ui_OVERFLOW_SCROLL);
-	psy_ui_scroller_init(&self->scroller, &self->grid.component, parent, NULL);
+	psy_ui_scroller_init(&self->scroller, &self->grid.component, parent);
 	psy_signal_connect(&self->scroller.pane.signal_align, self,
 		trackerview_onscrollpanealign);
 	psy_ui_component_setbackgroundmode(&self->scroller.pane,

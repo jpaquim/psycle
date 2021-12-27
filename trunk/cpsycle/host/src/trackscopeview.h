@@ -1,31 +1,37 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #if !defined(TRACKSCOPEVIEW_H)
 #define TRACKSCOPEVIEW_H
 
-// host
+/* host */
 #include "workspace.h"
-// ui
+/* ui */
 #include <uicomponent.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// TrackScopes
-//
-// Displays scopes for each pattern track with the current machine buffer
+/*
+** TrackScopes
+**
+** Displays scopes for each pattern track with the current machine buffer
+*/
 
+/* TrackScopes */
 typedef struct TrackScopes {
-	// inherits
+	/* inherits */
 	psy_ui_Component component;
-	// internal data	
+	/* internal */
 	uintptr_t maxcolumns;
 	double trackwidth;
 	double trackheight;
 	double textheight;	
-	// references
+	bool running;
+	/* references */
 	Workspace* workspace;	
 } TrackScopes;
 
@@ -33,6 +39,7 @@ void trackscopes_init(TrackScopes*, psy_ui_Component* parent,
 	Workspace*);
 void trackscopes_start(TrackScopes*);
 void trackscopes_stop(TrackScopes*);
+void trackscopes_idle(TrackScopes*);
 
 INLINE psy_ui_Component* trackscopes_base(TrackScopes* self)
 {
@@ -41,16 +48,18 @@ INLINE psy_ui_Component* trackscopes_base(TrackScopes* self)
 	return &self->component;
 }
 
-// TrackScopeView
+/* TrackScopeView */
 typedef struct TrackScopeView {
-	// inherits
+	/* inherits */
 	psy_ui_Component component;
-	// internal data	
+	/* internal */
 	TrackScopes scopes;
 } TrackScopeView;
 
 void trackscopeview_init(TrackScopeView*, psy_ui_Component* parent,
 	Workspace*);
+
+void trackscopeview_idle(TrackScopeView*);
 
 INLINE psy_ui_Component* trackscopeview_base(TrackScopeView* self)
 {

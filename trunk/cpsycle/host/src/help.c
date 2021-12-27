@@ -15,6 +15,8 @@
 /* platform */
 #include "../../detail/portable.h"
 
+#define BLOCKSIZE 128 * 1024
+
 /* prototypes */
 static void help_ondestroy(Help*, psy_ui_Component* sender);
 static void help_registerfiles(Help*);
@@ -23,7 +25,9 @@ static void help_buildtabs(Help*);
 static void help_ontabbarchanged(Help*, psy_ui_Component* sender,
 	uintptr_t tabindex);
 static void help_loadpage(Help*, uintptr_t index);
+static void help_load(Help*, const char* path);
 static void help_onalign(Help*, psy_ui_Component* sender);
+
  /* implementation  */
 void help_init(Help* self, psy_ui_Component* parent, Workspace* workspace)
 {	
@@ -32,17 +36,32 @@ void help_init(Help* self, psy_ui_Component* parent, Workspace* workspace)
 
 	psy_ui_component_init(help_base(self), parent, NULL);
 	self->workspace = workspace;
-	psy_ui_tabbar_init(&self->tabbar, help_base(self), NULL);
+	psy_ui_tabbar_init(&self->tabbar, help_base(self));
 	self->lastalign = psy_ui_ALIGN_NONE;
 	psy_ui_component_setalign(psy_ui_tabbar_base(&self->tabbar), psy_ui_ALIGN_RIGHT);	
 	psy_ui_margin_init_em(&margin, 0.0, 1.0, 0.0, 1.5);
 	psy_ui_component_setmargin(psy_ui_tabbar_base(&self->tabbar), margin);	
 	psy_ui_margin_init_em(&leftmargin, 0.0, 0.0, 0.0, 3.0);		
-	psy_ui_editor_init(&self->editor, help_base(self));
-	psy_ui_component_setmargin(&self->editor.component, leftmargin);
-	psy_ui_editor_preventedit(&self->editor);
-	psy_ui_editor_enablewrap(&self->editor);
-	psy_ui_component_setalign(&self->editor.component, psy_ui_ALIGN_CLIENT);	
+	psy_ui_label_init(&self->text, help_base(self));
+	psy_ui_component_setmargin(&self->text.component, leftmargin);
+	//psy_ui_textinput_preventedit(&self->editor);
+	psy_ui_label_enablewrap(&self->text);
+	psy_ui_component_setalign(&self->text.component, psy_ui_ALIGN_CLIENT);	
+	psy_ui_label_preventtranslation(&self->text);
+	psy_ui_label_setcharnumber(&self->text, 120.0);
+	psy_ui_label_settextalignment(&self->text, psy_ui_ALIGNMENT_LEFT);
+	psy_ui_component_setscrollstep_height(
+		psy_ui_label_base(&self->text),
+		psy_ui_value_make_eh(1.0));
+	psy_ui_component_setwheelscroll(&self->text.component, 4);
+	psy_ui_component_setalign(psy_ui_label_base(&self->text),
+		psy_ui_ALIGN_FIXED);
+	psy_ui_component_setoverflow(&self->text.component,
+		psy_ui_OVERFLOW_SCROLL);
+	psy_ui_label_enablewrap(&self->text);
+	psy_ui_scroller_init(&self->scroller, &self->text.component,
+		&self->component);
+	psy_ui_component_setalign(&self->scroller.component, psy_ui_ALIGN_CLIENT);
 	psy_signal_connect(&self->tabbar.signal_change, self,
 		help_ontabbarchanged);
 	psy_table_init(&self->filenames);
@@ -108,9 +127,7 @@ void help_ontabbarchanged(Help* self, psy_ui_Component* sender,
 }
 
 void help_loadpage(Help* self, uintptr_t index)
-{
-	psy_ui_editor_enableedit(&self->editor);
-	psy_ui_editor_clear(&self->editor);
+{	
 	if (psy_table_at(&self->filenames, index) != NULL) {
 		psy_Path path;
 
@@ -119,10 +136,33 @@ void help_loadpage(Help* self, uintptr_t index)
 			&self->workspace->config.directories));
 		psy_path_setname(&path, (const char*)psy_table_at(&self->filenames,
 			index));
-		psy_ui_editor_load(&self->editor, psy_path_full(&path));
+		help_load(self, psy_path_full(&path));
 		psy_path_dispose(&path);
 	}
-	psy_ui_editor_preventedit(&self->editor);
+	psy_ui_component_align(&self->scroller.pane);
+}
+
+void help_load(Help* self, const char* path)
+{
+	FILE* fp;
+	char* text;
+	
+	text = psy_strdup("");
+	fp = fopen(path, "rb");
+	if (fp) {
+		char data[BLOCKSIZE];
+		uintptr_t lenfile;
+
+		memset(data, 0, BLOCKSIZE);
+		lenfile = fread(data, 1, sizeof(data), fp);
+		while (lenfile > 0) {
+			text = psy_strcat_realloc(text, (char*)data);			
+			lenfile = fread(data, 1, sizeof(data), fp);
+		}
+		fclose(fp);
+	}
+	psy_ui_label_settext(&self->text, text);
+	free(text);
 }
 
 void help_onalign(Help* self, psy_ui_Component* sender)

@@ -646,8 +646,7 @@ void psy_ui_component_init_signals(psy_ui_Component* self)
 	psy_signal_init(&self->signal_scroll);	
 	psy_signal_init(&self->signal_create);
 	psy_signal_init(&self->signal_close);
-	psy_signal_init(&self->signal_destroy);
-	psy_signal_init(&self->signal_destroyed);
+	psy_signal_init(&self->signal_destroy);	
 	psy_signal_init(&self->signal_show);
 	psy_signal_init(&self->signal_hide);	
 	psy_signal_init(&self->signal_focus);
@@ -664,6 +663,8 @@ void psy_ui_component_init_signals(psy_ui_Component* self)
 }
 
 void psy_ui_component_init_base(psy_ui_Component* self) {
+	psy_table_insert(&psy_ui_app()->components,
+		(uintptr_t)self, (void*)self);
 	if (!containeralign_initialized) {
 		psy_ui_componentcontaineralign_init(&containeralign);
 		containeralign_initialized = TRUE;
@@ -724,6 +725,7 @@ void psy_ui_component_dispose(psy_ui_Component* self)
 		self->containeralign = NULL;
 	}
 	psy_ui_bitmap_dispose(&self->bufferbitmap);
+	psy_table_remove(&psy_ui_app()->components, (uintptr_t)self);
 }
 
 void psy_ui_component_dispose_signals(psy_ui_Component* self)
@@ -744,8 +746,7 @@ void psy_ui_component_dispose_signals(psy_ui_Component* self)
 	psy_signal_dispose(&self->signal_scroll);	
 	psy_signal_dispose(&self->signal_create);
 	psy_signal_dispose(&self->signal_close);
-	psy_signal_dispose(&self->signal_destroy);
-	psy_signal_dispose(&self->signal_destroyed);
+	psy_signal_dispose(&self->signal_destroy);	
 	psy_signal_dispose(&self->signal_show);
 	psy_signal_dispose(&self->signal_hide);	
 	psy_signal_dispose(&self->signal_focus);
@@ -1436,8 +1437,6 @@ static void dev_enableinput(psy_ui_ComponentImp* self) { }
 static void dev_preventinput(psy_ui_ComponentImp* self) { }
 static bool dev_inputprevented(const psy_ui_ComponentImp* self) { return FALSE; }
 static void dev_setcursor(psy_ui_ComponentImp* self, psy_ui_CursorStyle cursorstyle) { }
-static void dev_starttimer(psy_ui_ComponentImp* self, uintptr_t id, uintptr_t interval) { }
-static void dev_stoptimer(psy_ui_ComponentImp* self, uintptr_t id) { }
 static void dev_seticonressource(psy_ui_ComponentImp* self, int ressourceid) { }
 static const psy_ui_TextMetric* dev_textmetric(const psy_ui_ComponentImp* self)
 {
@@ -1515,9 +1514,7 @@ static void imp_vtable_init(void)
 		imp_vtable.dev_enableinput = dev_enableinput;
 		imp_vtable.dev_preventinput = dev_preventinput;
 		imp_vtable.dev_inputprevented = dev_inputprevented;
-		imp_vtable.dev_setcursor = dev_setcursor;
-		imp_vtable.dev_starttimer = dev_starttimer;
-		imp_vtable.dev_stoptimer = dev_stoptimer;
+		imp_vtable.dev_setcursor = dev_setcursor;		
 		imp_vtable.dev_seticonressource = dev_seticonressource;
 		imp_vtable.dev_textmetric = dev_textmetric;
 		imp_vtable.dev_textsize = dev_textsize;
@@ -1717,7 +1714,7 @@ void psy_ui_component_updateoverflow(psy_ui_Component* self)
 				psy_ui_component_setscrolltop(self,
 					psy_ui_value_make_px((double)(curr * scrollstepy_px)));
 			}
-		} else {		
+		} else {			
 			psy_ui_component_setverticalscrollrange(self,
 				psy_ui_intpoint_make(0, (intptr_t)(scrollmax - visi)));
 			if (curr > scrollmax - visi) {
@@ -2269,7 +2266,10 @@ void psy_ui_component_drawchildren(psy_ui_Component* self, psy_ui_Graphics* g,
 		for (p = children; p != NULL; p = p->next) {
 			psy_ui_Component* component;
 
-			component = (psy_ui_Component*)psy_list_entry(p);			
+			component = (psy_ui_Component*)psy_list_entry(p);
+			if (!psy_ui_component_visible(component)) {
+				continue;
+			}
 			if ((component->imp->vtable->dev_flags(component->imp)
 				& psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN) ==
 				psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN) {
@@ -2293,7 +2293,7 @@ void psy_ui_component_drawchildren(psy_ui_Component* self, psy_ui_Graphics* g,
 					g->clip = intersection;
 					origin = psy_ui_origin(g);
 					psy_ui_setorigin(g, psy_ui_realpoint_make(-position.left + origin.x,
-						-position.top + origin.y));								
+						-position.top + origin.y));					
 					component->imp->vtable->dev_draw(component->imp, g);
 					psy_ui_setorigin(g, psy_ui_realpoint_make(origin.x, origin.y));
 					if ((self->alignsorted == psy_ui_ALIGN_TOP && position.top > clip.bottom) ||						
@@ -2574,4 +2574,15 @@ void* psy_ui_component_platform(psy_ui_Component* self)
 	assert(self->imp);
 
 	return (void*)self->imp->vtable->dev_platform_handle(self->imp);
+}
+
+void psy_ui_component_starttimer(psy_ui_Component* self, uintptr_t id,
+	uintptr_t interval)
+{
+	psy_ui_app_starttimer(psy_ui_app(), self, id, interval);
+}
+
+void psy_ui_component_stoptimer(psy_ui_Component* self, uintptr_t id)
+{
+	psy_ui_app_stoptimer(psy_ui_app(), self, id);
 }

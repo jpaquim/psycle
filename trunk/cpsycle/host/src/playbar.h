@@ -11,7 +11,7 @@
 /* ui */
 #include "uibutton.h"
 #include "uicombobox.h"
-#include "uiedit.h"
+#include "uitextinput.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -23,7 +23,7 @@ typedef struct PlayBar {
 	/* internal */
 	psy_ui_Button loop;
 	psy_ui_ComboBox playmode;	
-	psy_ui_Edit loopbeatsedit;	
+	psy_ui_TextInput loopbeatsedit;	
 	psy_ui_Button loopbeatsless;
 	psy_ui_Button loopbeatsmore;
 	psy_ui_Button recordnotes;

@@ -15,30 +15,30 @@
 /* GearButtons */
 /* implementation */
 void gearbuttons_init(GearButtons* self, psy_ui_Component* parent,
-	Workspace* workspace)
+	psy_ui_Component* view, Workspace* workspace)
 {
-	psy_ui_component_init(gearbuttons_base(self), parent, NULL);
+	psy_ui_component_init(gearbuttons_base(self), parent, view);
 	psy_ui_component_setstyletype(&self->component,
 		STYLE_RECENTVIEW_MAINSECTION);
 	psy_ui_component_setdefaultalign(gearbuttons_base(self), psy_ui_ALIGN_TOP,
 		psy_ui_defaults_vmargin(psy_ui_defaults()));	
-	psy_ui_button_init_text(&self->createreplace, gearbuttons_base(self), NULL,
+	psy_ui_button_init_text(&self->createreplace, gearbuttons_base(self),
 		"gear.create-replace");
-	psy_ui_button_init_text(&self->del, gearbuttons_base(self), NULL,
+	psy_ui_button_init_text(&self->del, gearbuttons_base(self),
 		"gear.delete");
-	psy_ui_button_init_text(&self->parameters, gearbuttons_base(self), NULL,
+	psy_ui_button_init_text(&self->parameters, gearbuttons_base(self),
 		"gear.parameters");
-	psy_ui_button_init_text(&self->properties, gearbuttons_base(self), NULL,
+	psy_ui_button_init_text(&self->properties, gearbuttons_base(self),
 		"gear.properties");
-	psy_ui_button_init_text(&self->exchange, gearbuttons_base(self), NULL,
+	psy_ui_button_init_text(&self->exchange, gearbuttons_base(self),
 		"gear.exchange");
-	psy_ui_button_init_text(&self->clone, gearbuttons_base(self), NULL,
+	psy_ui_button_init_text(&self->clone, gearbuttons_base(self),
 		"gear.clone");
-	psy_ui_button_init_text(&self->showmaster, gearbuttons_base(self), NULL,
+	psy_ui_button_init_text(&self->showmaster, gearbuttons_base(self),
 		"gear.show-master");
-	psy_ui_button_init_text(&self->connecttomaster, gearbuttons_base(self), NULL,
+	psy_ui_button_init_text(&self->connecttomaster, gearbuttons_base(self),
 		"gear.connecttomaster");
-	psy_ui_button_init_text(&self->muteunmute, gearbuttons_base(self), NULL,
+	psy_ui_button_init_text(&self->muteunmute, gearbuttons_base(self),
 		"gear.mute-unmute");
 }
 
@@ -66,14 +66,14 @@ static void gear_showeffects(Gear*);
 
 /* implementation */
 void gear_init(Gear* self, psy_ui_Component* parent, Workspace* workspace)
-{		
-	psy_signal_connect(&workspace->signal_songchanged, self,
-		gear_onsongchanged);
-	psy_ui_component_init(gear_base(self), parent, NULL);
-	psy_ui_component_setstyletype(&self->component,
+{			
+	psy_ui_component_init(gear_base(self), parent, NULL);	
+	psy_ui_component_setstyletype(gear_base(self),
 		STYLE_RECENTVIEW_MAINSECTION);
 	self->workspace = workspace;
 	self->machines = &workspace->song->machines;
+	psy_signal_connect(&workspace->signal_songchanged, self,
+		gear_onsongchanged);
 	/* client */
 	psy_ui_component_init(&self->client, gear_base(self), NULL);
 	psy_ui_component_setalign(&self->client, psy_ui_ALIGN_CLIENT);
@@ -82,7 +82,7 @@ void gear_init(Gear* self, psy_ui_Component* parent, Workspace* workspace)
 	/* titlebar */
 	gear_inittitle(self);	
 	/* client */
-	psy_ui_tabbar_init(&self->tabbar, &self->client, NULL);
+	psy_ui_tabbar_init(&self->tabbar, &self->client);
 	psy_ui_tabbar_append_tabs(&self->tabbar, "gear.generators", "gear.effects",
 		"gear.instruments", "gear.waves", NULL);
 	psy_ui_tabbar_select(&self->tabbar, 0);
@@ -103,7 +103,7 @@ void gear_init(Gear* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_ui_notebook_connectcontroller(&self->notebook,
 		&self->tabbar.signal_change);
 	psy_ui_tabbar_select(&self->tabbar, 0);
-	gearbuttons_init(&self->buttons, &self->client, workspace);
+	gearbuttons_init(&self->buttons, &self->client, NULL, workspace);
 	psy_ui_component_setalign(&self->buttons.component, psy_ui_ALIGN_RIGHT);
 	psy_signal_connect(&self->buttons.createreplace.signal_clicked, self,
 		gear_oncreate);
@@ -125,7 +125,8 @@ void gear_init(Gear* self, psy_ui_Component* parent, Workspace* workspace)
 
 void gear_inittitle(Gear* self)
 {	
-	titlebar_init(&self->titlebar, &self->component, NULL, "machinebar.gear");
+	titlebar_init(&self->titlebar, &self->component, gear_base(self),
+		"machinebar.gear");
 	titlebar_hideonclose(&self->titlebar);
 	titlebar_enabledrag(&self->titlebar, "gear");
 }

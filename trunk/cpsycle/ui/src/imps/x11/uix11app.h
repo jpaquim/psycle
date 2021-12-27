@@ -1,5 +1,7 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/psyconf.h"
 
@@ -10,7 +12,6 @@
 /* local */
 #include "../../uiapp.h"
 #include "../../detail/os.h"
-#include "../../timers.h"
 #include "uix11colours.h"
 /* container */
 #include <list.h>
@@ -44,8 +45,7 @@ typedef struct psy_ui_X11App {
 	bool dbe;
 	bool dograb;
 	Window grabwin;
-	psy_List* targetids;
-	psy_Timers wintimers;
+	psy_List* targetids;	
 	bool shiftstate;
 	bool controlstate;
 	bool altstate;	
@@ -56,10 +56,6 @@ typedef struct psy_ui_X11App {
 void psy_ui_x11app_init(psy_ui_X11App*, psy_ui_App*, void* instance);
 
 void psy_ui_x11app_onappdefaultschange(psy_ui_X11App*);
-
-void psy_ui_x11app_starttimer(psy_ui_X11App*, uintptr_t hwnd, uintptr_t id,
-	uintptr_t interval);
-void psy_ui_x11app_stoptimer(psy_ui_X11App*, uintptr_t hwnd, uintptr_t id);
 
 INLINE int psy_ui_x11app_colourindex(psy_ui_X11App* self, psy_ui_Colour colour)
 {

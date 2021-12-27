@@ -52,14 +52,16 @@ static void vtable_init(MainStatusBar* self)
 void mainstatusbar_init(MainStatusBar* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {	
-	psy_ui_component_init(&self->component, parent, NULL);
-	vtable_init(self);
+	psy_ui_component_init(&self->component, parent, NULL);	
+	vtable_init(self);	
+	psy_ui_component_init(&self->pane, &self->component, &self->component);
+	psy_ui_component_setalign(&self->pane, psy_ui_ALIGN_CLIENT);
 	self->workspace = workspace;
 	self->clockcounter = 20;
 	psy_lock_init(&self->outputlock);
 	self->strbuffer = NULL;
 	psy_ui_component_setstyletype(&self->component, STYLE_STATUSBAR);
-	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
+	psy_ui_component_setdefaultalign(&self->pane, psy_ui_ALIGN_LEFT,
 		psy_ui_margin_make_em(0.0, 1.0, 0.0, 0.0));
 	mainstatusbar_initzoombox(self);
 	mainstatusbar_initstatuslabel(self);
@@ -68,7 +70,7 @@ void mainstatusbar_init(MainStatusBar* self, psy_ui_Component* parent,
 	mainstatusbar_initclockbar(self);
 	mainstatusbar_initkbdhelpbutton(self);
 	mainstatusbar_initterminalbutton(self);
-	mainstatusbar_initprogressbar(self);	
+	mainstatusbar_initprogressbar(self);
 }
 
 void mainstatusbar_ondestroy(MainStatusBar* self)
@@ -79,24 +81,26 @@ void mainstatusbar_ondestroy(MainStatusBar* self)
 
 void mainstatusbar_initzoombox(MainStatusBar* self)
 {
-	zoombox_init(&self->zoombox, &self->component, NULL);
+	zoombox_init(&self->zoombox, &self->pane);
 	psy_signal_connect(&self->zoombox.signal_changed,
 		self, mainstatusbar_onzoomboxchanged);
 }
 
 void mainstatusbar_initstatuslabel(MainStatusBar* self)
 {
-	psy_ui_label_init(&self->statusbarlabel, &self->component, NULL);
+	psy_ui_label_init(&self->statusbarlabel, &self->pane);
 	psy_ui_label_preventtranslation(&self->statusbarlabel);
 	psy_ui_label_settext(&self->statusbarlabel, "Ready");	
-	psy_ui_label_setcharnumber(&self->statusbarlabel, 40.0);
+	psy_ui_label_setcharnumber(&self->statusbarlabel, 35.0);
 	workspace_connectstatus(self->workspace, self,
 		(fp_workspace_output)mainstatusbar_onstatus);
 }
 
 void mainstatusbar_initviewstatusbars(MainStatusBar* self)
 {
-	psy_ui_notebook_init(&self->viewstatusbars, &self->component, NULL);
+	psy_ui_notebook_init(&self->viewstatusbars, &self->pane, NULL);
+	psy_ui_component_setbackgroundmode(psy_ui_notebook_base(&self->viewstatusbars),
+		psy_ui_SETBACKGROUND);
 	psy_ui_component_setalign(psy_ui_notebook_base(&self->viewstatusbars),
 		psy_ui_ALIGN_CLIENT);	
 	psy_ui_component_setdefaultalign(
@@ -106,8 +110,7 @@ void mainstatusbar_initviewstatusbars(MainStatusBar* self)
 
 void mainstatusbar_initturnoffbutton(MainStatusBar* self)
 {
-	psy_ui_button_init_text(&self->turnoff, &self->component,
-		NULL, "main.exit");
+	psy_ui_button_init_text(&self->turnoff, &self->pane, "main.exit");
 	psy_ui_button_loadresource(&self->turnoff, IDB_EXIT_LIGHT,
 		IDB_EXIT_DARK, psy_ui_colour_white());
 	psy_ui_component_setalign(psy_ui_button_base(&self->turnoff),
@@ -116,7 +119,7 @@ void mainstatusbar_initturnoffbutton(MainStatusBar* self)
 
 void mainstatusbar_initclockbar(MainStatusBar* self)
 {
-	clockbar_init(&self->clockbar, &self->component, self->workspace);
+	clockbar_init(&self->clockbar, &self->pane, self->workspace);
 	psy_ui_component_setalign(clockbar_base(&self->clockbar),
 		psy_ui_ALIGN_RIGHT);		
 }
@@ -125,8 +128,7 @@ void mainstatusbar_initkbdhelpbutton(MainStatusBar* self)
 {	
 	psy_ui_Margin margin;
 
-	psy_ui_button_init_text(&self->togglekbdhelp, &self->component,
-		NULL, "main.kbd");
+	psy_ui_button_init_text(&self->togglekbdhelp, &self->pane, "main.kbd");
 	margin = psy_ui_component_margin(psy_ui_button_base(&self->togglekbdhelp));
 	psy_ui_margin_setright(&margin, psy_ui_value_make_ew(4.0));
 	psy_ui_component_setmargin(psy_ui_button_base(&self->togglekbdhelp),
@@ -140,8 +142,8 @@ void mainstatusbar_initkbdhelpbutton(MainStatusBar* self)
 void mainstatusbar_initterminalbutton(MainStatusBar* self)
 {	
 	self->terminalstyleid = STYLE_TERM_BUTTON;	
-	psy_ui_button_init_text(&self->toggleterminal, &self->component,
-		NULL, "Terminal");
+	psy_ui_button_init_text(&self->toggleterminal, &self->pane,
+		"Terminal");
 	psy_ui_component_setalign(psy_ui_button_base(&self->toggleterminal),
 		psy_ui_ALIGN_RIGHT);
 	psy_ui_button_loadresource(&self->toggleterminal, IDB_TERM, IDB_TERM,
@@ -151,7 +153,7 @@ void mainstatusbar_initterminalbutton(MainStatusBar* self)
 void mainstatusbar_initprogressbar(MainStatusBar* self)
 {
 	self->pluginscanprogress = -1;
-	psy_ui_progressbar_init(&self->progressbar, &self->component, NULL);
+	psy_ui_progressbar_init(&self->progressbar, &self->pane);
 	psy_ui_component_setalign(progressbar_base(&self->progressbar),
 		psy_ui_ALIGN_RIGHT);
 	workspace_connectloadprogress(self->workspace, self,

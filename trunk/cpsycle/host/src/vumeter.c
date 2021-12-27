@@ -16,7 +16,6 @@
 
 static void vumeter_ondestroy(Vumeter*);
 static void vumeter_ondraw(Vumeter*, psy_ui_Graphics*);
-static void vumeter_ontimer(Vumeter*, uintptr_t timerid);
 
 static VumeterSkin vumeterdefaultskin;
 static int vumeterdefaultskin_initialized = 0;
@@ -46,30 +45,25 @@ static void vumeter_vtable_init(Vumeter* self)
 		vumeter_vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
 			vumeter_ondraw;
-		vumeter_vtable.ontimer =
-			(psy_ui_fp_component_ontimer)
-			vumeter_ontimer;
 		vumeter_vtable_initialized = TRUE;
 	}
+	self->component.vtable = &vumeter_vtable;
 }
+
 /* implementation */
 void vumeter_init(Vumeter* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {					
 	psy_ui_component_init(&self->component, parent, NULL);
 	vumeter_vtable_init(self);
-	self->component.vtable = &vumeter_vtable;
-	psy_ui_component_preventalign(&self->component);
+	psy_ui_component_setpreferredsize(&self->component,
+		psy_ui_size_make_em(25.0, 1.0));
 	self->leftavg = 0;
 	self->rightavg = 0;
 	self->l_log = -10000;
 	self->r_log = -10000;
 	self->workspace = workspace;
-	vumeterskin_init(self);
-	psy_ui_component_setpreferredsize(&self->component,
-		psy_ui_size_make_em(25.0, 1.0));
-	psy_ui_component_doublebuffer(&self->component);	
-	psy_ui_component_starttimer(&self->component, 10, 50);
+	vumeterskin_init(self);	
 }
 
 void vumeter_ondestroy(Vumeter* self)
@@ -118,7 +112,7 @@ void vumeter_ondraw(Vumeter* self, psy_ui_Graphics* g)
 	psy_ui_drawsolidrectangle(g, right, self->skin.border);
 }
 
-void vumeter_ontimer(Vumeter* self, uintptr_t timerid)
+void vumeter_idle(Vumeter* self)
 {			
 	if (workspace_song(self->workspace)) {
 		psy_audio_Machine* master;

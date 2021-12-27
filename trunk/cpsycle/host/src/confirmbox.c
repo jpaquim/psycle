@@ -24,13 +24,13 @@ void confirmbox_init(ConfirmBox* self, psy_ui_Component* parent, Workspace* work
 		psy_ui_ALIGN_CENTER);
 	psy_ui_component_setdefaultalign(&self->view,
 		psy_ui_ALIGN_TOP, psy_ui_margin_zero());
-	psy_ui_label_init_text(&self->title, &self->view, NULL, "msg.psyreq");
-	psy_ui_label_init_text(&self->header, &self->view, NULL, "");
-	psy_ui_button_init_text_connect(&self->yes, &self->view, NULL, "msg.yes",
+	psy_ui_label_init_text(&self->title, &self->view, "msg.psyreq");
+	psy_ui_label_init_text(&self->header, &self->view, "");
+	psy_ui_button_init_text_connect(&self->yes, &self->view, "msg.yes",
 		self, confirmbox_onok);
-	psy_ui_button_init_text_connect(&self->no, &self->view, NULL, "msg.no",
+	psy_ui_button_init_text_connect(&self->no, &self->view, "msg.no",
 		self, confirmbox_onno);
-	psy_ui_button_init_text_connect(&self->cont, &self->view, NULL, "msg.cont",
+	psy_ui_button_init_text_connect(&self->cont, &self->view, "msg.cont",
 		self, confirmbox_oncontinue);	
 	psy_ui_margin_init_em(&spacing, 0.5, 0.0, 0.5, 0.0);
 	psy_ui_component_setpadding_children(&self->view, spacing);

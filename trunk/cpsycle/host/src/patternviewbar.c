@@ -7,6 +7,7 @@
 
 
 #include "patternviewbar.h"
+#include "patternview.h"
 /* audio */
 #include <patternio.h>
 #include <songio.h>
@@ -31,19 +32,27 @@ static void patternviewbar_onsongchanged(PatternViewBar*, Workspace* sender,
 static void patternviewbar_updatestatus(PatternViewBar*);
 static void patternviewbar_statustext(PatternViewBar*, uintptr_t maxcount,
 	char* rv);
+static void patternviewbar_onzoomboxchanged(PatternViewBar*, ZoomBox* sender);
 
 /* implementation */
 void patternviewbar_init(PatternViewBar* self, psy_ui_Component* parent,
-	Workspace* workspace)
+	PatternView* patternview, Workspace* workspace)
 {		
 	assert(self);
 	assert(workspace);
 
 	psy_ui_component_init(&self->component, parent, NULL);
 	self->workspace = workspace;
+	self->patternview = patternview;
 	psy_ui_component_setdefaultalign(patternviewbar_base(self),
 		psy_ui_ALIGN_LEFT, psy_ui_defaults_hmargin(psy_ui_defaults()));
-	patterncursorstepbox_init(&self->cursorstep, &self->component, workspace);
+	/* Zoom */
+	zoombox_init(&self->zoombox, patternviewbar_base(self));
+	psy_ui_component_setpreferredsize(&self->zoombox.component,
+		psy_ui_size_make_em(16.0, 1.0));
+	psy_signal_connect(&self->zoombox.signal_changed, self,
+		patternviewbar_onzoomboxchanged);	
+	patterncursorstepbox_init(&self->cursorstep, &self->component, workspace);	
 	/* Move cursor when paste */
 	psy_ui_checkbox_init(&self->movecursorwhenpaste, patternviewbar_base(self));
 	psy_ui_checkbox_settext(&self->movecursorwhenpaste,
@@ -60,7 +69,7 @@ void patternviewbar_init(PatternViewBar* self, psy_ui_Component* parent,
 	}
 	psy_signal_connect(&self->defaultentries.signal_clicked, self,
 		patternviewbar_ondefaultline);
-	// Single pattern display mode
+	/* Single pattern display mode */
 	psy_ui_checkbox_init(&self->displaysinglepattern, patternviewbar_base(self));
 	psy_ui_checkbox_settext(&self->displaysinglepattern,
 		"settingsview.pv.displaysinglepattern");
@@ -69,12 +78,12 @@ void patternviewbar_init(PatternViewBar* self, psy_ui_Component* parent,
 		psy_ui_checkbox_check(&self->displaysinglepattern);
 	}
 	psy_signal_connect(&self->displaysinglepattern.signal_clicked, self,
-		patternviewbar_ondisplaysinglepattern);
-	psy_ui_label_init(&self->status, patternviewbar_base(self), NULL);
+		patternviewbar_ondisplaysinglepattern);	
+	psy_ui_label_init(&self->status, patternviewbar_base(self));
 	psy_ui_label_preventtranslation(&self->status);	
-	psy_ui_label_setcharnumber(&self->status, 40.0);
+	psy_ui_label_setcharnumber(&self->status, 30.0);
 	psy_signal_connect(&psycleconfig_patview(
-			workspace_conf(workspace))->signal_changed, self,
+		workspace_conf(workspace))->signal_changed, self,
 		patternviewbar_onconfigure);	
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		patternviewbar_onsongchanged);
@@ -86,7 +95,7 @@ void patternviewbar_init(PatternViewBar* self, psy_ui_Component* parent,
 	}	
 	patternviewbar_updatestatus(self);
 	psy_signal_connect(&self->workspace->song->sequence.signal_cursorchanged, self,
-		patternviewbar_oncursorchanged);
+		patternviewbar_oncursorchanged);	
 }
 
 void patternviewbar_onmovecursorwhenpaste(PatternViewBar* self, psy_ui_Component* sender)
@@ -159,9 +168,9 @@ void patternviewbar_statustext(PatternViewBar* self, uintptr_t maxcount,
 			psy_audio_song_sequence(workspace_song(self->workspace)));
 	}
 	if (patternid == psy_INDEX_INVALID) {
-		psy_snprintf(rv, maxcount, "Pat --  Ln --  Trk --  Col --:-- Edit");
+		psy_snprintf(rv, maxcount, "Pat -- Ln -- Trk -- Col --:-- Edt");
 	} else {
-		psy_snprintf(rv, maxcount, "Pat %d  Ln %d  Trk %d  Col %d:%d Edit",
+		psy_snprintf(rv, maxcount, "Pat %d Ln %d Trk %d Col %d:%d Edt",
 			(int)patternid,
 			(int)psy_audio_sequencecursor_line(&cursor),
 			(int)psy_audio_sequencecursor_track(&cursor),
@@ -183,4 +192,12 @@ void patternviewbar_onconfigure(PatternViewBar* self, PatternViewConfig* config,
 	} else {
 		psy_ui_checkbox_disablecheck(&self->displaysinglepattern);
 	}
+}
+
+void patternviewbar_onzoomboxchanged(PatternViewBar* self, ZoomBox* sender)
+{
+	assert(self);
+
+	self->patternview->zoom = zoombox_rate(&self->zoombox);
+	patternview_updatefont(self->patternview);
 }

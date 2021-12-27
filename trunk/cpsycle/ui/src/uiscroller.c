@@ -97,33 +97,34 @@ static void vtable_init(psy_ui_Scroller* self)
 	}
 	self->component.vtable = &vtable;
 }
+
 /* implementation */
 void psy_ui_scroller_init(psy_ui_Scroller* self, psy_ui_Component* client,
-	psy_ui_Component* parent, psy_ui_Component* view)
+	psy_ui_Component* parent)
 {	
-	psy_ui_component_init(&self->component, parent, view);
+	psy_ui_component_init(&self->component, parent, NULL);
 	vtable_init(self);
 	psy_ui_component_setbackgroundmode(&self->component,
 		psy_ui_NOBACKGROUND);	
 	/* bottom */
-	psy_ui_component_init(&self->bottom, &self->component, view);
+	psy_ui_component_init(&self->bottom, &self->component, NULL);
 	psy_ui_component_setalign(&self->bottom, psy_ui_ALIGN_BOTTOM);
 	psy_ui_component_hide(&self->bottom);
 	/* spacer */
-	psy_ui_component_init(&self->spacer, &self->bottom, view);
+	psy_ui_component_init(&self->spacer, &self->bottom, NULL);
 	psy_ui_component_setalign(&self->spacer, psy_ui_ALIGN_RIGHT);
 	psy_ui_component_hide(&self->spacer);
 	psy_ui_component_setpreferredsize(&self->spacer,
 		psy_ui_size_make_em(2.5, 1.0));
 	psy_ui_component_preventalign(&self->spacer);
 	/* horizontal scrollbar */
-	psy_ui_scrollbar_init(&self->hscroll, &self->bottom, view);
+	psy_ui_scrollbar_init(&self->hscroll, &self->bottom);
 	psy_ui_scrollbar_setorientation(&self->hscroll, psy_ui_HORIZONTAL);	
 	psy_ui_component_setalign(&self->hscroll.component, psy_ui_ALIGN_CLIENT);	
 	psy_signal_connect(&self->hscroll.signal_clicked, self,
 		psy_ui_scroller_onscrollbarclicked);
 	/* vertical scrollbar */
-	psy_ui_scrollbar_init(&self->vscroll, &self->component, view);
+	psy_ui_scrollbar_init(&self->vscroll, &self->component);
 	psy_ui_scrollbar_setorientation(&self->vscroll, psy_ui_VERTICAL);
 	psy_ui_component_setalign(&self->vscroll.component, psy_ui_ALIGN_RIGHT);
 	psy_ui_component_hide(&self->vscroll.component);
@@ -131,7 +132,7 @@ void psy_ui_scroller_init(psy_ui_Scroller* self, psy_ui_Component* client,
 		psy_ui_scroller_onscrollbarclicked);	
 	self->thumbmove = FALSE;
 	/* pane */
-	psy_ui_component_init(&self->pane, &self->component, view);
+	psy_ui_component_init(&self->pane, &self->component, NULL);
 	psy_ui_component_setbackgroundmode(&self->pane, psy_ui_NOBACKGROUND);
 	psy_ui_component_setalign(&self->pane, psy_ui_ALIGN_CLIENT);
 	psy_signal_connect(&self->pane.signal_draw, self,
@@ -323,6 +324,9 @@ void psy_ui_scroller_scrollrangechanged(psy_ui_Scroller* self, psy_ui_Component*
 	if (orientation == psy_ui_VERTICAL) {
 		psy_ui_IntPoint vrange;		
 		
+		if (self->component.id == 50) {
+			self = self;
+		}
 		vrange = psy_ui_component_verticalscrollrange(sender);
 		psy_ui_scrollbar_setscrollrange(&self->vscroll,
 			psy_ui_component_verticalscrollrange(sender));

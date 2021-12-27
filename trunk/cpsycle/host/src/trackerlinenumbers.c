@@ -62,11 +62,12 @@ static void trackerlinenumbers_vtable_init(TrackerLineNumbers* self)
 		trackerlinenumbers_vtable_initialized = 1;
 	}
 }
+
 /* implementation */
 void trackerlinenumbers_init(TrackerLineNumbers* self, psy_ui_Component* parent,
-	psy_ui_Component* view, TrackerState* state, Workspace* workspace)
+	TrackerState* state, Workspace* workspace)
 {
-	psy_ui_component_init(&self->component, parent, view);
+	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_setbackgroundmode(&self->component,
 		psy_ui_NOBACKGROUND);
 	trackerlinenumbers_vtable_init(self);
@@ -529,18 +530,13 @@ void trackerlinenumberbar_init(TrackerLineNumberBar* self, psy_ui_Component* par
 	psy_ui_component_setalign(&self->linenumberslabel.component, psy_ui_ALIGN_TOP);
 	/* scrollpane */
 	psy_ui_component_init(&self->linenumberpane, &self->component, NULL);
-	psy_ui_component_setalign(&self->linenumberpane, psy_ui_ALIGN_CLIENT);
-	psy_ui_component_doublebuffer(&self->linenumberpane);
+	psy_ui_component_setalign(&self->linenumberpane, psy_ui_ALIGN_CLIENT);	
 	psy_ui_component_setbackgroundcolour(&self->component,
 		patternviewstate_skin(state->pv)->background);
 	/* linenumbers */
-	trackerlinenumbers_init(&self->linenumbers, &self->linenumberpane,
-		 &self->linenumberpane, state, workspace);
-	psy_ui_component_setalign(&self->linenumbers.component, psy_ui_ALIGN_FIXED);
-	zoombox_init(&self->zoombox, &self->component, NULL);
-	psy_ui_component_setpreferredsize(&self->zoombox.component,
-		psy_ui_size_make_em(0.0, 1.0));
-	psy_ui_component_setalign(&self->zoombox.component, psy_ui_ALIGN_BOTTOM);
+	trackerlinenumbers_init(&self->linenumbers, &self->linenumberpane, state,
+		workspace);
+	psy_ui_component_setalign(&self->linenumbers.component, psy_ui_ALIGN_FIXED);	
 	psy_signal_connect(&workspace->signal_playlinechanged, self,
 		trackerlinenumberbar_onplaylinechanged);
 	psy_signal_connect(&psycleconfig_patview(

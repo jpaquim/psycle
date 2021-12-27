@@ -16,6 +16,7 @@
 static void volslider_ondescribe(VolSlider*, psy_ui_Slider*, char* text);
 static void volslider_ontweak(VolSlider*, psy_ui_Slider*, float value);
 static void volslider_onvalue(VolSlider*, psy_ui_Slider*, float* value);
+
 /* implementation */
 void volslider_init(VolSlider* self, psy_ui_Component* parent,
 	Workspace* workspace)
@@ -25,7 +26,7 @@ void volslider_init(VolSlider* self, psy_ui_Component* parent,
 
 	self->workspace = workspace;
 	psy_ui_component_init(&self->component, parent, NULL);	
-	psy_ui_slider_init(&self->slider, &self->component, NULL);
+	psy_ui_slider_init(&self->slider, &self->component);
 	psy_ui_slider_settext(&self->slider, "VU");	
 	psy_ui_slider_setvaluecharnumber(&self->slider, 10.0);
 	psy_ui_slider_startpoll(&self->slider);	

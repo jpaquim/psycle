@@ -23,9 +23,10 @@ struct psy_ui_Component;
 
 typedef struct MinMaximize {	
 	psy_List* minmaximize;
+	struct psy_ui_Component* view;
 } MinMaximize;
 
-void minmaximize_init(MinMaximize*);
+void minmaximize_init(MinMaximize*, struct psy_ui_Component* view);
 void minmaximize_dispose(MinMaximize*);
 
 /* adds a component to hide at maximized */

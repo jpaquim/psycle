@@ -54,11 +54,11 @@ static void psy_ui_tab_vtable_init(psy_ui_Tab* self)
 }
 /* implementation */
 void psy_ui_tab_init(psy_ui_Tab* self, psy_ui_Component* parent,
-	psy_ui_Component* view, const char* text, uintptr_t index)
+	const char* text, uintptr_t index)
 {
 	assert(self);
 	
-	psy_ui_component_init(&self->component, parent, view);
+	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_tab_vtable_init(self);
 	psy_ui_component_setstyletypes(&self->component,
 		psy_ui_STYLE_TAB, psy_ui_STYLE_TAB_HOVER, psy_ui_STYLE_TAB_SELECT,
@@ -85,13 +85,13 @@ psy_ui_Tab* psy_ui_tab_alloc(void)
 }
 
 psy_ui_Tab* psy_ui_tab_allocinit(psy_ui_Component* parent,
-	psy_ui_Component* view, const char* text, uintptr_t index)
+	const char* text, uintptr_t index)
 {
 	psy_ui_Tab* rv;
 
 	rv = psy_ui_tab_alloc();
 	if (rv) {
-		psy_ui_tab_init(rv, parent, view, text, index);
+		psy_ui_tab_init(rv, parent, text, index);
 		psy_ui_component_deallocateafterdestroyed(&rv->component);
 	}
 	return rv;
@@ -289,15 +289,14 @@ static void vtable_init(psy_ui_TabBar* self)
 	}
 	self->component.vtable = &vtable;
 }
+
 /* implementation */
-void psy_ui_tabbar_init(psy_ui_TabBar* self, psy_ui_Component* parent,
-	psy_ui_Component* view)
+void psy_ui_tabbar_init(psy_ui_TabBar* self, psy_ui_Component* parent)
 {
 	assert(self);
 
-	psy_ui_component_init(psy_ui_tabbar_base(self), parent, view);
-	vtable_init(self);
-	psy_ui_component_doublebuffer(psy_ui_tabbar_base(self));	
+	psy_ui_component_init(psy_ui_tabbar_base(self), parent, NULL);
+	vtable_init(self);	
 	psy_ui_component_setstyletype(&self->component, psy_ui_STYLE_TABBAR);
 	psy_signal_init(&self->signal_change);
 	self->numtabs = 0;
@@ -390,8 +389,7 @@ psy_ui_Tab* psy_ui_tabbar_append(psy_ui_TabBar* self, const char* label,
 
 	assert(self);
 
-	tab = psy_ui_tab_allocinit(&self->component, &self->component,
-		label, self->numtabs);
+	tab = psy_ui_tab_allocinit(&self->component, label, self->numtabs);
 	if (self->preventtranslation) {
 		psy_ui_tab_preventtranslation(tab);
 	}

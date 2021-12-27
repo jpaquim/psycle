@@ -73,7 +73,7 @@ void seqeditruler_init(SeqEditRuler* self, psy_ui_Component* parent,
 	assert(self);
 	assert(state);	
 
-	psy_ui_component_init(&self->component, parent, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	seqeditruler_vtable_init(self);		
 	self->state = state;
 	psy_ui_component_setbackgroundmode(&self->component, psy_ui_NOBACKGROUND);

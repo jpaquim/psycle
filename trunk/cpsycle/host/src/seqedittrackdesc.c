@@ -61,8 +61,7 @@ void seqedittrackdesc_init(SeqEditTrackDesc* self, psy_ui_Component* parent,
 	seqedittrackdesc_vtable_init(self);
 	psy_signal_init(&self->signal_resize);
 	self->workspace = workspace;
-	self->state = state;
-	psy_ui_component_doublebuffer(&self->component);		
+	self->state = state;		
 	psy_ui_component_setdefaultalign(&self->component,
 		psy_ui_ALIGN_TOP, psy_ui_margin_zero());	
 	seqedittrackdesc_build(self);	
@@ -145,8 +144,7 @@ void seqedittrackdesc_build(SeqEditTrackDesc* self)
 			
 			track = (psy_audio_SequenceTrack*)t->entry;			
 			trackbox = sequencetrackbox_allocinit(&self->component,
-				&self->component, seqeditstate_sequence(self->state), c,
-				self->workspace);
+				seqeditstate_sequence(self->state), c, self->workspace);
 			if (trackbox) {				
 				psy_ui_component_show(&trackbox->trackbox.resize);
 				psy_ui_component_setminimumsize(
@@ -183,7 +181,7 @@ void seqedittrackdesc_build(SeqEditTrackDesc* self)
 					seqedittrackdesc_onresize);
 			}
 		}
-		newtrack = psy_ui_button_allocinit(&self->component, &self->component);
+		newtrack = psy_ui_button_allocinit(&self->component);
 		if (newtrack) {
 			psy_ui_button_settext(newtrack, "seqview.new-trk");
 			psy_ui_component_setminimumsize(psy_ui_button_base(newtrack),

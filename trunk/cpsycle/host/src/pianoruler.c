@@ -49,8 +49,7 @@ void pianoruler_init(PianoRuler* self, psy_ui_Component* parent,
 
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_setvtable(pianoruler_base(self),
-		pianoruler_vtable_init(self));
-	psy_ui_component_doublebuffer(pianoruler_base(self));
+		pianoruler_vtable_init(self));	
 	self->gridstate = gridstate;
 }
 

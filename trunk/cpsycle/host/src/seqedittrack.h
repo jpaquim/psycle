@@ -26,18 +26,16 @@ typedef struct SeqEditTrack {
 	uintptr_t trackindex;
 	SeqEditState* state;	
 	Workspace* workspace;	
-	psy_ui_Component* view;
+	//psy_ui_Component* view;
 	psy_List* entries;
 } SeqEditTrack;
 
-void seqedittrack_init(SeqEditTrack*,
-	psy_ui_Component* parent, psy_ui_Component* view,
+void seqedittrack_init(SeqEditTrack*, psy_ui_Component* parent,
 	SeqEditState*, Workspace*);
 void seqedittrack_dispose(SeqEditTrack*);
 
 SeqEditTrack* seqedittrack_alloc(void);
-SeqEditTrack* seqedittrack_allocinit(
-	psy_ui_Component* parent, psy_ui_Component* view,
+SeqEditTrack* seqedittrack_allocinit(psy_ui_Component* parent,
 	SeqEditState*, Workspace*);
 
 void seqedittrack_setsequencetrack(SeqEditTrack*,

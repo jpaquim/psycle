@@ -12,7 +12,7 @@
 ** Edit
 ** Bridge
 ** Aim: avoid coupling to one platform (win32, xt/motif, etc)
-** Abstraction/Refined  psy_ui_Edit
+** Abstraction/Refined  psy_ui_TextInput
 ** Implementor			psy_ui_ComponentImp
 ** Concrete Implementor	psy_ui_win_ComponentImp/psy_ui_x11_ComponentImp/
 **                      psy_ui_ViewComponentImp
@@ -46,7 +46,7 @@ typedef struct psy_ui_TextInput {
     ** - esc pressed
     */
     psy_Signal signal_reject;
-    // internal    
+    /* internal */
 	int charnumber;
 	int linenumber;
     bool isinputfield;
@@ -55,8 +55,7 @@ typedef struct psy_ui_TextInput {
     uintptr_t cp;
 } psy_ui_TextInput;
 
-void psy_ui_textinput_init(psy_ui_TextInput*, psy_ui_Component* parent,
-    psy_ui_Component* view);
+void psy_ui_textinput_init(psy_ui_TextInput*, psy_ui_Component* parent);
 
 void psy_ui_textinput_enableinputfield(psy_ui_TextInput*);
 void psy_ui_textinput_settext(psy_ui_TextInput*, const char* text);
@@ -65,7 +64,6 @@ void psy_ui_textinput_setcharnumber(psy_ui_TextInput*, int number);
 void psy_ui_textinput_setlinenumber(psy_ui_TextInput*, int number);
 void psy_ui_textinput_enableedit(psy_ui_TextInput*);
 void psy_ui_textinput_preventedit(psy_ui_TextInput*);
-void psy_ui_textinput_setstyle(psy_ui_TextInput*, int style);
 void psy_ui_textinput_setsel(psy_ui_TextInput* self, intptr_t cpmin, intptr_t cpmax);
 
 INLINE psy_ui_Component* psy_ui_textinput_base(psy_ui_TextInput* self)

@@ -40,14 +40,14 @@ static void vtable_init(MainViewBar* self)
 
 /* implementation */
 void mainviewbar_init(MainViewBar* self, psy_ui_Component* parent,
-	psy_ui_Component* view, Workspace* workspace)
+	psy_ui_Component* pane, Workspace* workspace)
 {
-	psy_ui_component_init(&self->component, parent, view);
+	psy_ui_component_init(&self->component, parent, NULL);
 	vtable_init(self);
 	psy_ui_component_setstyletype(&self->component, STYLE_MAINVIEWTOPBAR);
 	psy_ui_component_init_align(&self->tabbars, &self->component, NULL,
 		psy_ui_ALIGN_CLIENT);
-	psy_ui_button_init_connect(&self->maximizebtn, &self->component, NULL,
+	psy_ui_button_init_connect(&self->maximizebtn, &self->component,
 		self, mainviewbar_onmaxminimizeview);
 	psy_ui_component_setalign(psy_ui_button_base(&self->maximizebtn),
 		psy_ui_ALIGN_RIGHT);
@@ -62,7 +62,7 @@ void mainviewbar_init(MainViewBar* self, psy_ui_Component* parent,
 	mainviewbar_initmaintabbar(self);
 	mainviewbar_inithelpsettingstabbar(self);
 	mainviewbar_initviewtabbars(self);
-	minmaximize_init(&self->minmaximize);
+	minmaximize_init(&self->minmaximize, pane);
 }
 
 void mainviewbar_ondestroy(MainViewBar* self)
@@ -95,7 +95,7 @@ void mainviewbar_onmaxminimizeview(MainViewBar* self, psy_ui_Button* sender)
 
 void mainviewbar_initmaintabbar(MainViewBar* self)
 {
-	psy_ui_tabbar_init(&self->tabbar, &self->tabbars, NULL);
+	psy_ui_tabbar_init(&self->tabbar, &self->tabbars);
 	psy_ui_component_setalign(psy_ui_tabbar_base(&self->tabbar),
 		psy_ui_ALIGN_LEFT);
 	psy_ui_tabbar_append(&self->tabbar, "main.machines",
@@ -112,7 +112,7 @@ void mainviewbar_initmaintabbar(MainViewBar* self)
 
 void mainviewbar_inithelpsettingstabbar(MainViewBar* self)
 {
-	psy_ui_tabbar_init(&self->helpsettingstabbar, &self->tabbars, NULL);
+	psy_ui_tabbar_init(&self->helpsettingstabbar, &self->tabbars);
 	psy_ui_component_setalign(psy_ui_tabbar_base(&self->helpsettingstabbar),
 		psy_ui_ALIGN_LEFT);
 	psy_ui_component_setmargin(psy_ui_tabbar_base(&self->helpsettingstabbar),

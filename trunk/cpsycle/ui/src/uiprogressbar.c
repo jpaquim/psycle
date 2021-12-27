@@ -23,14 +23,14 @@ static void vtable_init(psy_ui_ProgressBar* self)
 	}
 	self->component.vtable = &vtable;
 }
+
 /* implementation */
 void psy_ui_progressbar_init(psy_ui_ProgressBar* self,
-	psy_ui_Component* parent, psy_ui_Component* view)
+	psy_ui_Component* parent)
 {	
-	psy_ui_component_init(&self->component, parent, view);	
+	psy_ui_component_init(&self->component, parent, NULL);	
 	vtable_init(self);
-	self->progress = 0.0;
-	psy_ui_component_doublebuffer(&self->component);
+	self->progress = 0.0;	
 	psy_ui_component_setstyletypes(&self->component,
 		psy_ui_STYLE_PROGRESSBAR,
 		psy_INDEX_INVALID, psy_INDEX_INVALID, psy_INDEX_INVALID);

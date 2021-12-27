@@ -65,6 +65,9 @@ void psy_ui_eventdispatch_send(psy_ui_EventDispatch* self,
 		psy_signal_emit(&component->signal_size, component, 0);
 		break;
 	case psy_ui_FOCUS:
+		if (component->imp) {
+			component->imp->vtable->dev_setfocus(component->imp);
+		}
 		component->vtable->onfocus(component);
 		psy_signal_emit(&component->signal_focus, component, 0);
 		break;

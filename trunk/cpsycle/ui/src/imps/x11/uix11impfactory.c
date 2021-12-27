@@ -11,7 +11,6 @@
 
 #if PSYCLE_USE_TK == PSYCLE_TK_X11
 
-
 /* local */
 #include "uiapp.h"
 #include "uix11app.h"
@@ -49,23 +48,6 @@ static struct psy_ui_ComponentImp* allocinit_toolframeimp(
 	struct psy_ui_Component* parent);
 static struct psy_ui_ComponentImp* allocinit_popupimp(psy_ui_x11_ImpFactory*,
 	struct psy_ui_Component* component, struct psy_ui_Component* parent);	
-static struct psy_ui_ComponentImp* allocinit_editimp(psy_ui_x11_ImpFactory*,
-	struct psy_ui_Component* component, struct psy_ui_Component* parent);
-static struct psy_ui_ComponentImp* allocinit_editimp_multiline(
-	psy_ui_x11_ImpFactory*, struct psy_ui_Component* component,
-	struct psy_ui_Component* parent);
-static struct psy_ui_ComponentImp* allocinit_listboximp(
-	psy_ui_x11_ImpFactory*, struct psy_ui_Component* component,
-	struct psy_ui_Component* parent);
-static struct psy_ui_ComponentImp* allocinit_listboximp_multiselect(
-	psy_ui_x11_ImpFactory*, struct psy_ui_Component* component,
-	struct psy_ui_Component* parent);
-static struct psy_ui_ComponentImp* allocinit_checkboximp(
-	psy_ui_x11_ImpFactory*, struct psy_ui_Component* component,
-	struct psy_ui_Component* parent);
-static struct psy_ui_ComponentImp* allocinit_checkboximp_multiline(
-	psy_ui_x11_ImpFactory*, struct psy_ui_Component* component,
-	struct psy_ui_Component* parent);
 static struct psy_ui_ColourDialogImp* allocinit_colourdialogimp(
 	psy_ui_x11_ImpFactory*, struct psy_ui_Component* parent);
 static struct psy_ui_OpenDialogImp* allocinit_opendialogimp(
@@ -93,9 +75,9 @@ static psy_ui_FolderDialogImp* allocinit_all_folderdialogimp(
 static struct psy_ui_FontDialogImp* allocinit_fontdialogimp(
 	psy_ui_x11_ImpFactory*, struct psy_ui_Component* parent);
 
-// VTable init
+/* vtable init */
 static psy_ui_ImpFactoryVTable vtable;
-static int vtable_initialized = 0;
+static int vtable_initialized = FALSE;
 
 static void vtable_init(psy_ui_x11_ImpFactory* self)
 {
@@ -127,25 +109,7 @@ static void vtable_init(psy_ui_x11_ImpFactory* self)
 			allocinit_toolframeimp;
 		vtable.allocinit_popupimp =
 			(psy_ui_fp_impfactory_allocinit_frameimp)
-			allocinit_popupimp;
-		vtable.allocinit_editimp =
-			(psy_ui_fp_impfactory_allocinit_editimp)
-			allocinit_editimp;
-		vtable.allocinit_editimp_multiline =
-			(psy_ui_fp_impfactory_allocinit_editimp_multiline)
-			allocinit_editimp_multiline;
-		vtable.allocinit_listboximp =
-			(psy_ui_fp_impfactory_allocinit_listboximp)
-			allocinit_listboximp;
-		vtable.allocinit_listboximp_multiselect =
-			(psy_ui_fp_impfactory_allocinit_listboximp_multiselect)
-			allocinit_listboximp_multiselect;
-		vtable.allocinit_checkboximp =
-			(psy_ui_fp_impfactory_allocinit_checkboximp)
-			allocinit_checkboximp;
-		vtable.allocinit_checkboximp_multiline =
-			(psy_ui_fp_impfactory_allocinit_checkboximp)
-			allocinit_checkboximp_multiline;		
+			allocinit_popupimp;		
 		vtable.allocinit_colourdialogimp =
 			(psy_ui_fp_impfactory_allocinit_colourdialogimp)
 			allocinit_colourdialogimp;
@@ -340,44 +304,6 @@ psy_ui_ComponentImp* allocinit_popupimp(psy_ui_x11_ImpFactory* self,
 		rv = 0;
 	}
 	return (psy_ui_ComponentImp*)rv;
-}
-
-psy_ui_ComponentImp* allocinit_editimp(psy_ui_x11_ImpFactory* self,
-	struct psy_ui_Component* component, struct psy_ui_Component* parent)
-{
-	return NULL;
-}
-
-psy_ui_ComponentImp* allocinit_editimp_multiline(psy_ui_x11_ImpFactory* self,
-	struct psy_ui_Component* component, struct psy_ui_Component* parent)
-{
-	return NULL;
-}
-
-psy_ui_ComponentImp* allocinit_listboximp(psy_ui_x11_ImpFactory* self,
-	struct psy_ui_Component* component, struct psy_ui_Component* parent)
-{
-	return NULL;	
-}
-
-psy_ui_ComponentImp* allocinit_listboximp_multiselect(
-	psy_ui_x11_ImpFactory* self, struct psy_ui_Component* component,
-		struct psy_ui_Component* parent)
-{
-	return NULL;	
-}
-
-psy_ui_ComponentImp* allocinit_checkboximp(psy_ui_x11_ImpFactory* self,
-	struct psy_ui_Component* component, struct psy_ui_Component* parent)
-{
-	return NULL;
-}
-
-psy_ui_ComponentImp* allocinit_checkboximp_multiline(
-	psy_ui_x11_ImpFactory* self, struct psy_ui_Component* component,
-	struct psy_ui_Component* parent)
-{
-	return NULL;
 }
 
 psy_ui_ColourDialogImp* allocinit_colordialogimp(psy_ui_x11_ImpFactory* self,

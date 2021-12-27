@@ -51,9 +51,9 @@ static void patterntrackbox_vtable_init(PatternTrackBox* self)
 
 /* implementation */
 void patterntrackbox_init(PatternTrackBox* self, psy_ui_Component* parent,
-	psy_ui_Component* view, uintptr_t index, TrackerState* state)
+	uintptr_t index, TrackerState* state)
 {
-	psy_ui_component_init(&self->component, parent, view);
+	psy_ui_component_init(&self->component, parent, NULL);
 	patterntrackbox_vtable_init(self);
 	self->state = state;
 	self->index = index;
@@ -66,13 +66,13 @@ PatternTrackBox* patterntrackbox_alloc(void)
 }
 
 PatternTrackBox* patterntrackbox_allocinit(psy_ui_Component* parent,
-	psy_ui_Component* view, uintptr_t index, TrackerState* state)
+	uintptr_t index, TrackerState* state)
 {
 	PatternTrackBox* rv;
 
 	rv = patterntrackbox_alloc();
 	if (rv) {
-		patterntrackbox_init(rv, parent, view, index, state);
+		patterntrackbox_init(rv, parent, index, state);
 		psy_ui_component_deallocateafterdestroyed(patterntrackbox_base(rv));
 	}
 	return rv;
@@ -308,7 +308,7 @@ void trackerheader_init(TrackerHeader* self, psy_ui_Component* parent,
 	TrackConfig* trackconfig, TrackerState* state,
 	Workspace* workspace)
 {
-	psy_ui_component_init(&self->component, parent, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_setbackgroundmode(&self->component, psy_ui_NOBACKGROUND);
 	trackerheader_vtable_init(self);
 	psy_ui_component_setalignexpand(&self->component,
@@ -340,8 +340,8 @@ void trackerheader_build(TrackerHeader* self)
 	for (track = 0; track < patternviewstate_numsongtracks(self->state->pv); ++track) {
 		PatternTrackBox* trackbox;
 
-		trackbox = patterntrackbox_allocinit(&self->component,
-			&self->component, track, self->state);
+		trackbox = patterntrackbox_allocinit(&self->component, track,
+			self->state);
 		psy_ui_component_setalign(patterntrackbox_base(trackbox),
 			psy_ui_ALIGN_LEFT);
 		psy_table_insert(&self->boxes, track, (void*)trackbox);

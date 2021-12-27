@@ -1,33 +1,34 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #if !defined(NEWVAL_H)
 #define NEWVAL_H
 
-// host
+/* host */
 #include "workspace.h"
-// ui
+/* ui */
 #include <uibutton.h>
-#include <uiedit.h>
 #include <uilabel.h>
+#include <uitextinput.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// parameter value window.
+/* parameter value window. */
 
 typedef struct NewValView {
-	// inherits
+	/* inherits */
 	psy_ui_Component component;
-	// ui elements
+	/* internal */
 	psy_ui_Label title;
 	psy_ui_Component editbar;
-	psy_ui_Edit	edit;
+	psy_ui_TextInput edit;
 	psy_ui_Label text;
 	psy_ui_Button apply;
-	psy_ui_Button cancel;
-	// internal data;
+	psy_ui_Button cancel;	
 	intptr_t value;
 	intptr_t v_min;
 	intptr_t v_max;
@@ -36,7 +37,7 @@ typedef struct NewValView {
 	char dlgtitle[256];
 	bool doapply;
 	bool docancel;	
-	// references
+	/* references */
 	Workspace* workspace;
 } NewValView;
 	

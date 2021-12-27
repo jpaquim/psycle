@@ -9,6 +9,7 @@
 /* host */
 #include "stepbox.h"
 #include "workspace.h"
+#include "zoombox.h"
 /* ui */
 #include <uicheckbox.h>
 #include <uilabel.h>
@@ -23,10 +24,13 @@ extern "C" {
 ** The bar displayed in the mainframe status bar, if the patternview is active
 */
 
+struct PatternView;
+
 typedef struct PatternViewBar {
 	/* inherits */
 	psy_ui_Component component;
 	/* internal */
+	ZoomBox zoombox;
 	PatternCursorStepBox cursorstep;
 	psy_ui_CheckBox movecursorwhenpaste;
 	psy_ui_CheckBox defaultentries;
@@ -34,10 +38,11 @@ typedef struct PatternViewBar {
 	psy_ui_Label status;
 	/* references */
 	Workspace* workspace;
+	struct PatternView* patternview;
 } PatternViewBar;
 
 void patternviewbar_init(PatternViewBar*, psy_ui_Component* parent,
-	Workspace*);
+	struct PatternView* patternview, Workspace*);
 
 INLINE psy_ui_Component* patternviewbar_base(PatternViewBar* self)
 {

@@ -47,12 +47,12 @@ void undoredobar_init(UndoRedoBar* self, psy_ui_Component* parent,
 	psy_ui_component_setstyletype(undoredobar_base(self), STYLE_UNDOBAR);		
 	psy_ui_component_setdefaultalign(undoredobar_base(self), psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));	
-	psy_ui_button_init_connect(&self->undobutton, undoredobar_base(self), NULL,
+	psy_ui_button_init_connect(&self->undobutton, undoredobar_base(self),
 		self, undoredobar_onundo);
 	psy_ui_button_settext(&self->undobutton, "undo.undo");
 	psy_ui_button_loadresource(&self->undobutton, IDB_UNDO_LIGHT,
 		IDB_UNDO_DARK, psy_ui_colour_white());
-	psy_ui_button_init_connect(&self->redobutton, undoredobar_base(self), NULL,
+	psy_ui_button_init_connect(&self->redobutton, undoredobar_base(self),
 		self, undoredobar_onredo);
 	psy_ui_button_settext(&self->redobutton,"undo.redo");
 	psy_ui_button_loadresource(&self->redobutton, IDB_REDO_LIGHT,

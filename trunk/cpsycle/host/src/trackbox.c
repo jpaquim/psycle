@@ -38,24 +38,23 @@ static void trackbox_vtableinit_init(TrackBox* self)
 	self->component.vtable = &trackbox_vtable;
 }
 
-// implementation
-void trackbox_init(TrackBox* self, psy_ui_Component* parent,
-	psy_ui_Component* view)
+/* implementation */
+void trackbox_init(TrackBox* self, psy_ui_Component* parent)
 {
 	psy_ui_Margin spacing;
 	
-	psy_ui_component_init(trackbox_base(self), parent, view);
+	psy_ui_component_init(trackbox_base(self), parent, NULL);
 	trackbox_vtableinit_init(self);
 	psy_ui_margin_init_em(&spacing, 0.0, 0.0, 0.0, 1.0);
 	psy_ui_component_setspacing(trackbox_base(self), spacing);
-	psy_ui_component_init(&self->client, &self->component, view);
+	psy_ui_component_init(&self->client, &self->component, NULL);
 	psy_ui_component_setalign(&self->client, psy_ui_ALIGN_TOP);
 	psy_ui_component_setdefaultalign(&self->client,
 		psy_ui_ALIGN_LEFT, psy_ui_defaults_hmargin(psy_ui_defaults()));
 	psy_ui_component_setalignexpand(&self->client,
 		psy_ui_HEXPAND);
 	/* resize bar */
-	psy_ui_component_init(&self->resize, &self->component, view);
+	psy_ui_component_init(&self->resize, &self->component, NULL);
 	psy_ui_component_hide(&self->resize);
 	psy_ui_component_setalign(&self->resize, psy_ui_ALIGN_BOTTOM);
 	psy_ui_component_setpreferredsize(&self->resize,
@@ -70,21 +69,21 @@ void trackbox_init(TrackBox* self, psy_ui_Component* parent,
 	self->baseheight = 0.0;
 	self->dragoffset = 0.0;
 	/* track number */
-	psy_ui_label_init(&self->track, &self->client, view);
+	psy_ui_label_init(&self->track, &self->client);
 	psy_ui_label_settextalignment(&self->track, psy_ui_ALIGNMENT_CENTER);
 	psy_ui_label_preventtranslation(&self->track);		
 	psy_ui_label_setcharnumber(&self->track, 5);
-	psy_ui_button_init(&self->solo, &self->client, view);
+	psy_ui_button_init(&self->solo, &self->client);
 	psy_ui_button_preventtranslation(&self->solo);
 	psy_ui_button_settext(&self->solo, "S");	
-	psy_ui_button_init(&self->mute, &self->client, view);
+	psy_ui_button_init(&self->mute, &self->client);
 	psy_ui_button_preventtranslation(&self->mute);
 	psy_ui_button_settext(&self->mute, "M");
-	psy_ui_label_init(&self->desc, &self->client, view);
+	psy_ui_label_init(&self->desc, &self->client);
 	psy_ui_label_preventtranslation(&self->desc);
 	psy_ui_component_setalign(psy_ui_label_base(&self->desc),
 		psy_ui_ALIGN_CLIENT);
-	psy_ui_button_init(&self->close, &self->client, view);
+	psy_ui_button_init(&self->close, &self->client);
 	psy_ui_button_preventtranslation(&self->close);
 	psy_ui_button_settext(&self->close, "X");
 	self->close.stoppropagation = FALSE;
@@ -115,14 +114,13 @@ TrackBox* trackbox_alloc(void)
 	return (TrackBox*)malloc(sizeof(TrackBox));
 }
 
-TrackBox* trackbox_allocinit(psy_ui_Component* parent,
-	psy_ui_Component* view)
+TrackBox* trackbox_allocinit(psy_ui_Component* parent)
 {
 	TrackBox* rv;
 
 	rv = trackbox_alloc();
 	if (rv) {
-		trackbox_init(rv, parent, view);
+		trackbox_init(rv, parent);
 		psy_ui_component_deallocateafterdestroyed(trackbox_base(rv));
 	}
 	return rv;

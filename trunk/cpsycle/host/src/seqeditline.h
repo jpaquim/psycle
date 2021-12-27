@@ -23,13 +23,11 @@ typedef struct SeqEditorLine {
 	SeqEditState* state;
 } SeqEditorLine;
 
-void seqeditorline_init(SeqEditorLine*,
-	psy_ui_Component* parent, psy_ui_Component* view,
+void seqeditorline_init(SeqEditorLine*, psy_ui_Component* parent,
 	SeqEditState*);
 
 SeqEditorLine* seqeditorline_alloc(void);
-SeqEditorLine* seqeditorline_allocinit(
-	psy_ui_Component* parent, psy_ui_Component* view,
+SeqEditorLine* seqeditorline_allocinit(psy_ui_Component* parent,
 	SeqEditState*);
 
 void seqeditorline_updateposition(SeqEditorLine*,
@@ -49,13 +47,11 @@ typedef struct SeqEditorPlayline {
 	double dragbase;	
 } SeqEditorPlayline;
 
-void seqeditorplayline_init(SeqEditorPlayline*,
-	psy_ui_Component* parent, psy_ui_Component* view,
+void seqeditorplayline_init(SeqEditorPlayline*, psy_ui_Component* parent,
 	SeqEditState*);
 
 SeqEditorPlayline* seqeditorplayline_alloc(void);
-SeqEditorPlayline* seqeditorplayline_allocinit(
-	psy_ui_Component* parent, psy_ui_Component* view,
+SeqEditorPlayline* seqeditorplayline_allocinit(psy_ui_Component* parent,
 	SeqEditState*);
 void seqeditorplayline_update(SeqEditorPlayline*);
 

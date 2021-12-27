@@ -65,7 +65,7 @@ void instrumentpanview_init(InstrumentPanView* self, psy_ui_Component* parent,
 		instrumentpanview_oninstpanenabled);
 	psy_ui_checkbox_settext(&self->instpanenabled, "Instrument Pan");
 	psy_ui_component_setminimumsize(&self->instpanenabled.component, psy_ui_size_make_em(22, 1.0));
-	psy_ui_slider_init(&self->instpanning, &self->instpan, NULL);
+	psy_ui_slider_init(&self->instpanning, &self->instpan);
 	psy_ui_slider_connect(&self->instpanning, self,
 		(ui_slider_fpdescribe)instrumentpanview_ondescribe,
 		(ui_slider_fptweak)instrumentpanview_ontweak,
@@ -74,13 +74,13 @@ void instrumentpanview_init(InstrumentPanView* self, psy_ui_Component* parent,
 		psy_ui_size_make_em(50.0, 1.0));
 	psy_ui_slider_showhorizontal(&self->instpanning);
 
-	psy_ui_slider_init(&self->randompanning, &self->top, NULL);
+	psy_ui_slider_init(&self->randompanning, &self->top);
 	psy_ui_slider_settext(&self->randompanning,
 		"Swing (Randomize)");
-	psy_ui_slider_init(&self->notemodcenternote, &self->top, NULL);
+	psy_ui_slider_init(&self->notemodcenternote, &self->top);
 	psy_ui_slider_settext(&self->notemodcenternote,
 		"Note Mod Center Note");
-	psy_ui_slider_init(&self->notemodamount, &self->top, NULL);
+	psy_ui_slider_init(&self->notemodamount, &self->top);
 	psy_ui_slider_settext(&self->notemodamount,
 		"Note Mod Amount");
 	envelopeview_init(&self->envelopeview, &self->component);

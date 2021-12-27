@@ -34,18 +34,18 @@ void adsrsliders_init(AdsrSliders* self, psy_ui_Component* parent)
 	};
 	self->envelope = NULL;	
 	psy_ui_component_init(&self->component, parent, NULL);
-	psy_signal_connect(&self->component.signal_destroyed, self,
+	psy_signal_connect(&self->component.signal_destroy, self,
 		adsrsliders_ondestroy);
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_TOP,
 		psy_ui_defaults_vmargin(psy_ui_defaults()));	
-	psy_ui_slider_init(&self->attack, &self->component, NULL);
+	psy_ui_slider_init(&self->attack, &self->component);
 	psy_ui_slider_settext(&self->attack, "instrumentview.attack");
-	psy_ui_slider_init(&self->decay, &self->component, NULL);
+	psy_ui_slider_init(&self->decay, &self->component);
 	psy_ui_slider_settext(&self->decay, "instrumentview.decay");
-	psy_ui_slider_init(&self->sustain, &self->component, NULL);
+	psy_ui_slider_init(&self->sustain, &self->component);
 	psy_ui_slider_settext(&self->sustain, "instrumentview.sustain-level");
 	psy_ui_slider_setdefaultvalue(&self->sustain, 1.0);
-	psy_ui_slider_init(&self->release, &self->component, NULL);
+	psy_ui_slider_init(&self->release, &self->component);
 	psy_ui_slider_settext(&self->release, "instrumentview.release");
 	psy_ui_slider_setdefaultvalue(&self->attack, 0.005 /
 		adsrsliders_maxtime(self));

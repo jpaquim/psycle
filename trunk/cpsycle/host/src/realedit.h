@@ -34,11 +34,12 @@ typedef struct RealEdit {
 	realedit_real_t restore;
 } RealEdit;
 
-void realedit_init(RealEdit*, psy_ui_Component* parent, psy_ui_Component* view,
+void realedit_init(RealEdit*, psy_ui_Component* parent,
 	const char* desc, realedit_real_t value, realedit_real_t minval, realedit_real_t maxval);
-void realedit_init_connect(RealEdit*, psy_ui_Component* parent, psy_ui_Component* view,
+void realedit_init_connect(RealEdit*, psy_ui_Component* parent,
 	const char* desc, realedit_real_t value, realedit_real_t minval, realedit_real_t maxval,
 	void* context, void* fp);
+
 realedit_real_t realedit_value(RealEdit*);
 void realedit_setvalue(RealEdit*, realedit_real_t value);
 void realedit_enableedit(RealEdit*);

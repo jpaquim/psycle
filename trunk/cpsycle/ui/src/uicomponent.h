@@ -186,7 +186,6 @@ typedef struct psy_ui_Component {
 	psy_Signal signal_create;
 	psy_Signal signal_close;
 	psy_Signal signal_destroy;
-	psy_Signal signal_destroyed;
 	psy_Signal signal_childenum;
 	psy_Signal signal_show;
 	psy_Signal signal_hide;	
@@ -281,7 +280,7 @@ INLINE void psy_ui_component_setverticalscrollrange(psy_ui_Component* self,
 
 INLINE void psy_ui_component_sethorizontalscrollrange(psy_ui_Component* self,
 	psy_ui_IntPoint range)
-{	
+{		
 	psy_ui_component_usescroll(self);
 	range.y = psy_max(range.x, range.y);
 	psy_ui_componentscroll_sethrange(self->scroll, range);
@@ -445,9 +444,6 @@ typedef void (*psy_ui_fp_componentimp_dev_enableinput)(struct psy_ui_ComponentIm
 typedef void (*psy_ui_fp_componentimp_dev_preventinput)(struct psy_ui_ComponentImp*);
 typedef bool (*psy_ui_fp_componentimp_dev_inputprevented)(const struct psy_ui_ComponentImp*);
 typedef void (*psy_ui_fp_componentimp_dev_setcursor)(struct psy_ui_ComponentImp*, psy_ui_CursorStyle);
-typedef void (*psy_ui_fp_componentimp_dev_starttimer)(struct psy_ui_ComponentImp*, uintptr_t id,
-	uintptr_t interval);
-typedef void (*psy_ui_fp_componentimp_dev_stoptimer)(struct psy_ui_ComponentImp*, uintptr_t id);
 typedef void (*psy_ui_fp_componentimp_dev_seticonressource)(struct psy_ui_ComponentImp*, int ressourceid);
 typedef const psy_ui_TextMetric* (*psy_ui_fp_componentimp_dev_textmetric)(const struct psy_ui_ComponentImp*);
 typedef psy_ui_Size (*psy_ui_fp_componentimp_dev_textsize)(const struct psy_ui_ComponentImp*,
@@ -504,9 +500,7 @@ typedef struct psy_ui_ComponentImpVTable {
 	psy_ui_fp_componentimp_dev_enableinput dev_enableinput;
 	psy_ui_fp_componentimp_dev_preventinput dev_preventinput;
 	psy_ui_fp_componentimp_dev_inputprevented dev_inputprevented;
-	psy_ui_fp_componentimp_dev_setcursor dev_setcursor;
-	psy_ui_fp_componentimp_dev_starttimer dev_starttimer;
-	psy_ui_fp_componentimp_dev_stoptimer dev_stoptimer;
+	psy_ui_fp_componentimp_dev_setcursor dev_setcursor;	
 	psy_ui_fp_componentimp_dev_seticonressource dev_seticonressource;
 	psy_ui_fp_componentimp_dev_textmetric dev_textmetric;
 	psy_ui_fp_componentimp_dev_textsize dev_textsize;
@@ -581,16 +575,9 @@ INLINE psy_ui_RealRectangle psy_ui_component_screenposition(const psy_ui_Compone
 
 psy_ui_RealRectangle psy_ui_component_scrolledposition(psy_ui_Component*);
 
-INLINE void psy_ui_component_starttimer(psy_ui_Component* self, uintptr_t id,
-	uintptr_t interval)
-{	
-	self->imp->vtable->dev_starttimer(self->imp, id, interval);
-}
-
-INLINE void psy_ui_component_stoptimer(psy_ui_Component* self, uintptr_t id)
-{
-	self->imp->vtable->dev_stoptimer(self->imp, id);
-}
+void psy_ui_component_starttimer(psy_ui_Component* self, uintptr_t id,
+	uintptr_t interval);
+void psy_ui_component_stoptimer(psy_ui_Component* self, uintptr_t id);
 
 INLINE const psy_ui_TextMetric* psy_ui_component_textmetric(const psy_ui_Component* self)
 {
@@ -645,7 +632,10 @@ INLINE uintptr_t psy_ui_component_section(const psy_ui_Component* self)
 
 INLINE psy_ui_Component* psy_ui_component_parent(psy_ui_Component* self)
 {
-	return self->imp->vtable->dev_parent(self->imp);
+	if (self->imp) {
+		return self->imp->vtable->dev_parent(self->imp);
+	}
+	return NULL;
 }
 
 INLINE const psy_ui_Component* psy_ui_component_parent_const(const psy_ui_Component* self)

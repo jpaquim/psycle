@@ -39,9 +39,9 @@ static void trackheaderview_vtable_init(SeqviewTrackHeaders* self)
 
 /* implemenetation */
 void seqviewtrackheaders_init(SeqviewTrackHeaders* self,
-	psy_ui_Component* parent, psy_ui_Component* view, SeqViewState* state)
+	psy_ui_Component* parent, SeqViewState* state)
 {
-	psy_ui_component_init(&self->component, parent, view);
+	psy_ui_component_init(&self->component, parent, NULL);
 	trackheaderview_vtable_init(self);
 	self->component.vtable = &trackheaderviews_vtable;
 	self->state = state;	
@@ -77,8 +77,7 @@ void seqviewtrackheaders_build(SeqviewTrackHeaders* self)
 			SequenceTrackBox* sequencetrackbox;
 			
 			sequencetrackbox = sequencetrackbox_allocinit(&self->client,
-				&self->component, self->state->cmds->sequence, c,
-				self->state->cmds->workspace);
+				self->state->cmds->sequence, c, self->state->cmds->workspace);
 			if (sequencetrackbox) {
 				psy_ui_component_setminimumsize(
 					sequencetrackbox_base(sequencetrackbox),
@@ -89,7 +88,7 @@ void seqviewtrackheaders_build(SeqviewTrackHeaders* self)
 					self, seqviewtrackheaders_ondeltrack);
 			}
 		}
-		newtrack = psy_ui_button_allocinit(&self->client, &self->component);
+		newtrack = psy_ui_button_allocinit(&self->client);
 		if (newtrack) {
 			psy_ui_button_settext(newtrack, "seqview.new-trk");
 			newtrack->stoppropagation = FALSE;

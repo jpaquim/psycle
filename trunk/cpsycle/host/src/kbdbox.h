@@ -84,6 +84,7 @@ typedef struct KbdBox {
 } KbdBox;
 
 void kbdbox_init(KbdBox*, psy_ui_Component* parent, Workspace*);
+
 void kbdbox_cleardescriptions(KbdBox*);
 void kbdbox_setdescription(KbdBox*, uint32_t keycode, const char* text);
 void kbdbox_presskey(KbdBox*, uint32_t keycode);

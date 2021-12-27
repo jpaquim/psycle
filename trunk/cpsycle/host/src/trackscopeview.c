@@ -23,7 +23,6 @@ static void trackscopes_drawtrackindex(TrackScopes*, psy_ui_Graphics*,
 	double x, double y, uintptr_t track);
 static void trackscopes_drawtrackmuted(TrackScopes*, psy_ui_Graphics*, double x,
 	double y, uintptr_t track);
-static void trackscopes_ontimer(TrackScopes*, uintptr_t timerid);
 static void trackscopes_onalign(TrackScopes*);
 static void trackscopes_onpreferredsize(TrackScopes*, psy_ui_Size* limit,
 	psy_ui_Size* rv);
@@ -35,10 +34,7 @@ static bool vtable_initialized = FALSE;
 static psy_ui_ComponentVtable* vtable_init(TrackScopes* self)
 {
 	if (!vtable_initialized) {
-		vtable = *(self->component.vtable);
-		vtable.ontimer =
-			(psy_ui_fp_component_ontimer)
-			trackscopes_ontimer;
+		vtable = *(self->component.vtable);		
 		vtable.onalign =
 			(psy_ui_fp_component_event)
 			trackscopes_onalign;
@@ -61,14 +57,13 @@ void trackscopes_init(TrackScopes* self, psy_ui_Component* parent,
 {	
 	psy_ui_component_init(&self->component, parent, NULL);	
 	psy_ui_component_setvtable(&self->component, vtable_init(self));
-	psy_ui_component_setstyletype(&self->component, STYLE_TRACKSCOPE);
-	psy_ui_component_doublebuffer(&self->component);	
+	psy_ui_component_setstyletype(&self->component, STYLE_TRACKSCOPE);		
 	self->workspace = workspace;
 	self->trackwidth = 90;
 	self->trackheight = 30;
 	self->textheight = 12;
 	self->maxcolumns = 16;
-	psy_ui_component_starttimer(&self->component, 0, 50);
+	self->running = TRUE;	
 }
 
 void trackscopes_ondraw(TrackScopes* self, psy_ui_Graphics* g)
@@ -235,11 +230,6 @@ void trackscopes_drawtrackmuted(TrackScopes* self, psy_ui_Graphics* g, double x,
 		psy_ui_realpoint_make(x + width - (int)(ident * 0.5), y + (int)(height * 0.25)));
 }
 
-void trackscopes_ontimer(TrackScopes* self, uintptr_t timerid)
-{
-	psy_ui_component_invalidate(&self->component);	
-}
-
 void trackscopes_onalign(TrackScopes* self)
 {
 	const psy_ui_TextMetric* tm;
@@ -323,16 +313,22 @@ void trackscopes_onmousedown(TrackScopes* self, psy_ui_MouseEvent* ev)
 
 void trackscopes_start(TrackScopes* self)
 {
-	psy_ui_component_starttimer(&self->component, 0, 50);
+	self->running = TRUE;
 }
 
 void trackscopes_stop(TrackScopes* self)
 {
-	psy_ui_component_stoptimer(&self->component, 0);
+	self->running = FALSE;	
 }
 
+void trackscopes_idle(TrackScopes* self)
+{
+	if (self->running) {
+		psy_ui_component_invalidate(&self->component);
+	}
+}
 
-// TrackScopeView
+/* TrackScopeView */
 void trackscopeview_init(TrackScopeView* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {
@@ -340,4 +336,9 @@ void trackscopeview_init(TrackScopeView* self, psy_ui_Component* parent,
 	psy_ui_component_setstyletype(&self->component, STYLE_TRACKSCOPES);
 	trackscopes_init(&self->scopes, &self->component, workspace);
 	psy_ui_component_setalign(&self->scopes.component, psy_ui_ALIGN_CLIENT);
+}
+
+void trackscopeview_idle(TrackScopeView* self)
+{
+	trackscopes_idle(&self->scopes);
 }

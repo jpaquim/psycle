@@ -37,7 +37,8 @@ typedef struct PatternProperties {
 } PatternProperties;
 
 void patternproperties_init(PatternProperties*, psy_ui_Component* parent,
-	psy_ui_Component* view, psy_audio_Pattern*, Workspace*);
+	psy_audio_Pattern*, Workspace*);
+
 void patternproperties_setpattern(PatternProperties*, psy_audio_Pattern*);
 
 #ifdef __cplusplus

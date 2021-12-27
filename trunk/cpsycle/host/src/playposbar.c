@@ -15,23 +15,8 @@
 #include "../../detail/portable.h"
 
 /* prototypes */
-static void playposbar_ontimer(PlayPosBar*, uintptr_t timerid);
 static void playposbar_updatelabel(PlayPosBar*);
-/* vtable */
-static psy_ui_ComponentVtable vtable;
-static bool vtable_initialized = FALSE;
 
-static void vtable_init(PlayPosBar* self)
-{
-	if (!vtable_initialized) {
-		vtable = *(self->component.vtable);
-		vtable.ontimer =
-			(psy_ui_fp_component_ontimer)
-			playposbar_ontimer;
-		vtable_initialized = TRUE;
-	}
-	psy_ui_component_setvtable(&self->component, &vtable);
-}
 /* implementation */
 void playposbar_init(PlayPosBar* self, psy_ui_Component* parent,
 	psy_audio_Player* player)
@@ -39,21 +24,18 @@ void playposbar_init(PlayPosBar* self, psy_ui_Component* parent,
 	assert(self);
 	assert(player);
 
-	psy_ui_component_init(&self->component, parent, NULL);
-	vtable_init(self);
-	psy_ui_component_setalignexpand(&self->component,
-		psy_ui_HEXPAND);
+	psy_ui_component_init(&self->component, parent, NULL);	
+	psy_ui_component_setalignexpand(&self->component, psy_ui_HEXPAND);
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	self->player = player;	
-	psy_ui_label_init(&self->position, &self->component, NULL);	
+	psy_ui_label_init(&self->position, &self->component);	
 	psy_ui_label_preventtranslation(&self->position);
 	psy_ui_label_setcharnumber(&self->position, 24);
-	playposbar_updatelabel(self);	
-	psy_ui_component_starttimer(&self->component, 0, 50);
+	playposbar_updatelabel(self);		
 }
 
-void playposbar_ontimer(PlayPosBar* self, uintptr_t timerid)
+void playposbar_idle(PlayPosBar* self)
 {	
 	playposbar_updatelabel(self);	
 }

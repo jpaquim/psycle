@@ -9,7 +9,7 @@
 #include <dir.h>
 #include <presets.h>
 #include <uibutton.h>
-#include <uiedit.h>
+#include <uitextinput.h>
 #include <uilabel.h>
 #include <uicombobox.h>
 #include <presets.h>
@@ -30,7 +30,7 @@ typedef struct PresetsBar {
 	psy_ui_Button importpresets;
 	psy_ui_Button exportpresets;
 	psy_ui_Button savepresets;
-	psy_ui_Edit savename;
+	psy_ui_TextInput savename;
 	psy_audio_Machine* machine;
 	bool userpreset;
 	psy_Path presetpath;	

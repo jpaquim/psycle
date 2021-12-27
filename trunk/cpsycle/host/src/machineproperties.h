@@ -6,7 +6,7 @@
 #define MACHINEPROPERTIES
 
 #include "uilabel.h"
-#include "uiedit.h"
+#include "uitextinput.h"
 #include "uibutton.h"
 #include "pattern.h"
 #include "workspace.h"
@@ -22,7 +22,7 @@ typedef struct {
 	psy_ui_Button issolobypass;
 	psy_ui_Button ismute;
 	psy_ui_Button isbus;	
-	psy_ui_Edit nameedit;	
+	psy_ui_TextInput nameedit;	
 	psy_ui_Button remove;
 	psy_ui_Button cancel;
 	uintptr_t macid;

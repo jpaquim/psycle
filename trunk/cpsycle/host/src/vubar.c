@@ -31,3 +31,8 @@ void vubar_reset(VuBar* self)
 
 	clipbox_deactivate(&self->clipbox);
 }
+
+void vubar_idle(VuBar* self)
+{
+	vumeter_idle(&self->vumeter);
+}

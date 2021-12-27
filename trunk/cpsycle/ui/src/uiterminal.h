@@ -22,7 +22,7 @@ typedef struct psy_ui_Terminal {
 	/* inherits */
 	psy_ui_Component component;
 	/* internal */
-	psy_ui_Editor output;
+	psy_ui_TextInputor output;
 	psy_List* strbuffer;
 	psy_Lock outputlock;	
 } psy_ui_Terminal;

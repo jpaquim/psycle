@@ -31,15 +31,15 @@ typedef struct IntEdit {
 	int restore;	
 } IntEdit;
 
-void intedit_init(IntEdit*, psy_ui_Component* parent, psy_ui_Component* view,
+void intedit_init(IntEdit*, psy_ui_Component* parent,
 	const char* desc, int value, int minval, int maxval);
 void intedit_init_connect(IntEdit*, psy_ui_Component* parent,
-	psy_ui_Component* view, const char* desc, int value, int minval,
+	const char* desc, int value, int minval,
 	int maxval, void* context, void* fp);
 
 IntEdit* intedit_alloc(void);
 IntEdit* intedit_allocinit(psy_ui_Component* parent,
-	psy_ui_Component* view, const char* desc, int value, int minval,
+	const char* desc, int value, int minval,
 	int maxval);
 
 int intedit_value(IntEdit*);

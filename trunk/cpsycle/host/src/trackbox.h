@@ -37,12 +37,10 @@ typedef struct TrackBox {
 	double baseheight;
 } TrackBox;
 
-void trackbox_init(TrackBox*, psy_ui_Component* parent,
-	psy_ui_Component* view);
+void trackbox_init(TrackBox*, psy_ui_Component* parent);
 
 TrackBox* trackbox_alloc(void);
-TrackBox* trackbox_allocinit(psy_ui_Component* parent,
-	psy_ui_Component* view);
+TrackBox* trackbox_allocinit(psy_ui_Component* parent);
 
 void trackbox_setdescription(TrackBox*, const char* text);
 void trackbox_setindex(TrackBox*, uintptr_t index);

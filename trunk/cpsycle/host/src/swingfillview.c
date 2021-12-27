@@ -39,28 +39,28 @@ void swingfillview_init(SwingFillView* self, psy_ui_Component* parent,
 		psy_ui_defaults_cmargin(psy_ui_defaults()));
 	psy_ui_component_setdefaultalign(&self->client, psy_ui_ALIGN_TOP,
 		psy_ui_defaults_vmargin(psy_ui_defaults()));
-	intedit_init(&self->tempo, &self->client, NULL, "swingfill.tempo", 125, 0, 0);
+	intedit_init(&self->tempo, &self->client, "swingfill.tempo", 125, 0, 0);
 	intedit_seteditcharnumber(&self->tempo, EDIT_CHARNUM);
 	intedit_setdesccharnumber(&self->tempo, DESC_CHARNUM);
 	psy_ui_component_init(&self->offsetrow, &self->client, NULL);
 	psy_ui_component_setdefaultalign(&self->offsetrow, psy_ui_ALIGN_RIGHT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
-	psy_ui_label_init_text(&self->offsetdesc, &self->offsetrow, NULL,
+	psy_ui_label_init_text(&self->offsetdesc, &self->offsetrow,
 		"swingfill.bpm");
-	psy_ui_button_init_text_connect(&self->center_bpm, &self->offsetrow, NULL,
+	psy_ui_button_init_text_connect(&self->center_bpm, &self->offsetrow,
 		"swingfill.center", self, swingfillview_oncenterbpm);
-	psy_ui_button_init_text_connect(&self->actual_bpm, &self->offsetrow, NULL,
+	psy_ui_button_init_text_connect(&self->actual_bpm, &self->offsetrow,
 		"swingfill.actual", self, swingfillview_onactualbpm);		
 	swingfillview_setoffset(self, TRUE);
-	intedit_init(&self->width, &self->client, NULL,
+	intedit_init(&self->width, &self->client,
 		"swingfill.cycle", 2, 0, 0);
 	intedit_seteditcharnumber(&self->width, EDIT_CHARNUM);
 	intedit_setdesccharnumber(&self->width, DESC_CHARNUM);	
-	realedit_init(&self->variance, &self->client, NULL,
+	realedit_init(&self->variance, &self->client,
 		"swingfill.variance", 13.f, 0, 100.0f);
 	realedit_seteditcharnumber(&self->variance, EDIT_CHARNUM);
 	realedit_setdesccharnumber(&self->variance, DESC_CHARNUM);
-	realedit_init(&self->phase, &self->client, NULL,
+	realedit_init(&self->phase, &self->client,
 		"swingfill.phase", -90.f, 0, 0);
 	realedit_seteditcharnumber(&self->phase, EDIT_CHARNUM);
 	realedit_setdesccharnumber(&self->phase, DESC_CHARNUM);		
@@ -80,9 +80,9 @@ void swingfillview_initactions(SwingFillView* self)
 	psy_ui_component_setmargin(&self->actions, margin);
 	psy_ui_component_setdefaultalign(&self->actions,
 		psy_ui_ALIGN_RIGHT, psy_ui_defaults_hmargin(psy_ui_defaults()));	
-	psy_ui_button_init_text_connect(&self->cancel, &self->actions, NULL,
+	psy_ui_button_init_text_connect(&self->cancel, &self->actions,
 		"swingfill.cancel", self, swingfillview_onhide);
-	psy_ui_button_init_text_connect(&self->apply, &self->actions, NULL,
+	psy_ui_button_init_text_connect(&self->apply, &self->actions,
 		"swingfill.apply", self, swingfillview_onapply);
 }
 

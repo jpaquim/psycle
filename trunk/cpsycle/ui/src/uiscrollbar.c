@@ -49,14 +49,14 @@ static void psy_ui_scrollbarthumb_vtableinit_init(psy_ui_ScrollBarThumb* self)
 	}
 	self->component.vtable = &psy_ui_scrollbarthumb_vtable;
 }
+
 /* implementation */
 void psy_ui_scrollbarthumb_init(psy_ui_ScrollBarThumb* self,
-	psy_ui_Component* parent, psy_ui_Component* view,
-	psy_ui_ScrollBarState* state)
+	psy_ui_Component* parent, psy_ui_ScrollBarState* state)
 {
 	assert(self);
 
-	psy_ui_component_init(&self->component, parent, view ? view : parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_scrollbarthumb_vtableinit_init(self);
 	self->state = state;
 	psy_ui_component_setstyletypes(psy_ui_scrollbarthumb_base(self),
@@ -127,22 +127,21 @@ static void psy_ui_scrollbarpane_vtable_init(psy_ui_ScrollBarPane* self)
 		psy_ui_scrollbarpane_vtable_initialized = TRUE;
 	}
 }
+
 /* implementation */
 void psy_ui_scrollbarpane_init(psy_ui_ScrollBarPane* self,
-	psy_ui_Component* parent, psy_ui_Component* view,
-	psy_ui_ScrollBarState* state)
+	psy_ui_Component* parent, psy_ui_ScrollBarState* state)
 {
 	assert(self);
 
-	psy_ui_component_init(&self->component, parent, view);
+	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_scrollbarpane_vtable_init(self);
 	self->component.vtable = &psy_ui_scrollbarpane_vtable;
-	psy_ui_component_preventalign(&self->component);
-	psy_ui_component_doublebuffer(&self->component);
+	psy_ui_component_preventalign(&self->component);	
 	psy_ui_component_setstyletypes(&self->component,
 		psy_ui_STYLE_SCROLLPANE, psy_INDEX_INVALID, psy_INDEX_INVALID,
 		psy_INDEX_INVALID);
-	psy_ui_scrollbarthumb_init(&self->thumb, &self->component, view, state);
+	psy_ui_scrollbarthumb_init(&self->thumb, &self->component, state);
 	self->pos = 0;
 	self->screenpos = 0;
 	self->orientation = psy_ui_VERTICAL;
@@ -390,20 +389,20 @@ static void psy_ui_scrollbar_onscrollpaneclicked(psy_ui_ScrollBar*,
 	psy_ui_ScrollBarPane* sender);
 /* static void psy_ui_scrollbar_onmousewheel(psy_ui_ScrollBar*,
 		psy_ui_Component* sender, psy_ui_MouseEvent*); */
+
 /* implementation */
-void psy_ui_scrollbar_init(psy_ui_ScrollBar* self, psy_ui_Component* parent,
-	psy_ui_Component* view)
+void psy_ui_scrollbar_init(psy_ui_ScrollBar* self, psy_ui_Component* parent)
 {
 	assert(self);
 
-	psy_ui_component_init(&self->component, parent, view);
+	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_setbackgroundmode(&self->component,
 		psy_ui_NOBACKGROUND);
 	psy_signal_connect(&self->component.signal_destroy, self,
 		psy_ui_scrollbar_ondestroy);
 	/* Less Button */
 	psy_ui_button_init_connect(&self->less,
-		&self->component, view, self, psy_ui_scrollbar_onless);
+		&self->component, self, psy_ui_scrollbar_onless);
 	psy_ui_button_seticon(&self->less, psy_ui_ICON_UP);
 	psy_ui_button_setcharnumber(&self->less, 2);
 	psy_ui_component_setalign(psy_ui_button_base(&self->less),
@@ -414,7 +413,7 @@ void psy_ui_scrollbar_init(psy_ui_ScrollBar* self, psy_ui_Component* parent,
 	psy_ui_component_setstyletype_active(psy_ui_button_base(&self->less),
 		psy_ui_STYLE_SCROLLBUTTON_ACTIVE);
 	/* More Button */
-	psy_ui_button_init_connect(&self->more, &self->component, view,
+	psy_ui_button_init_connect(&self->more, &self->component,
 		self, psy_ui_scrollbar_onmore);
 	psy_ui_button_seticon(&self->more, psy_ui_ICON_DOWN);
 	psy_ui_button_setcharnumber(&self->more, 2);
@@ -428,8 +427,7 @@ void psy_ui_scrollbar_init(psy_ui_ScrollBar* self, psy_ui_Component* parent,
 	/* state */
 	psy_ui_scrollbarstate_init(&self->state);
 	/* Pane */
-	psy_ui_scrollbarpane_init(&self->pane, &self->component, view,
-		&self->state);
+	psy_ui_scrollbarpane_init(&self->pane, &self->component, &self->state);
 	psy_ui_component_setalign(psy_ui_scrollbarpane_base(&self->pane),
 		psy_ui_ALIGN_CLIENT);
 	psy_ui_component_setpreferredsize(

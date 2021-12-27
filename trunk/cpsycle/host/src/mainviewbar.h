@@ -36,7 +36,7 @@ typedef struct MainViewBar {
 } MainViewBar;
 
 void mainviewbar_init(MainViewBar*, psy_ui_Component* parent,
-	psy_ui_Component* view, Workspace*);
+	psy_ui_Component* pane, Workspace*);
 
 void mainviewbar_add_minmaximze(MainViewBar*, psy_ui_Component*);
 void mainviewbar_toggle_minmaximze(MainViewBar*);

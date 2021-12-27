@@ -19,7 +19,6 @@
 #define _WIN32_WINNT 0x400
 
 #include <windows.h>
-
 #include "../../detail/stdint.h"
 #include "../../detail/os.h"
 
@@ -48,7 +47,7 @@ typedef struct psy_ui_WinApp {
 	psy_Table winidmap;
 	uintptr_t winid;
 	HBRUSH defaultbackgroundbrush;		
-	HHOOK mousehook;
+	HHOOK mousehook;	
 	/* references */
 	psy_ui_App* app;
 } psy_ui_WinApp;
@@ -56,6 +55,9 @@ typedef struct psy_ui_WinApp {
 void psy_ui_winapp_init(psy_ui_WinApp*, psy_ui_App* app, HINSTANCE instance);
 
 void psy_ui_winapp_onappdefaultschange(psy_ui_WinApp*);
+void psy_ui_winapp_starttimer(psy_ui_WinApp*, uintptr_t hwnd, uintptr_t id,
+	uintptr_t interval);
+void psy_ui_winapp_stoptimer(psy_ui_WinApp*, uintptr_t hwnd, uintptr_t id);
 
 #ifdef __cplusplus
 }

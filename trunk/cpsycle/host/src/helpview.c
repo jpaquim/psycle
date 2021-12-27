@@ -20,6 +20,7 @@ static void helpview_onselectsection(HelpView*, psy_ui_Component* sender,
 	uintptr_t section, uintptr_t options);
 static void helpview_onfocus(HelpView*, psy_ui_Component* sender);
 static void helpview_onfloatsection(HelpView*, psy_ui_Button* sender);
+
 /* implementation */
 void helpview_init(HelpView* self, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, Workspace* workspace)
@@ -35,6 +36,7 @@ void helpview_init(HelpView* self, psy_ui_Component* parent,
 void helpview_initbase(HelpView* self, psy_ui_Component* parent)
 {
 	psy_ui_component_init(helpview_base(self), parent, NULL);
+	psy_ui_component_doublebuffer(helpview_base(self));
 	psy_signal_connect(&helpview_base(self)->signal_focus, self,
 		helpview_onfocus);
 	psy_signal_connect(&helpview_base(self)->signal_selectsection, self,
@@ -46,13 +48,13 @@ void helpview_inittabbar(HelpView* self, psy_ui_Component* tabbarparent,
 {	
 	psy_ui_component_init_align(&self->bar, tabbarparent, NULL,
 		psy_ui_ALIGN_LEFT);
-	psy_ui_tabbar_init(&self->tabbar, &self->bar, NULL);
+	psy_ui_tabbar_init(&self->tabbar, &self->bar);
 	psy_ui_component_setalignexpand(&self->bar, psy_ui_HEXPAND);
 	psy_ui_component_setalign(psy_ui_tabbar_base(&self->tabbar),
 		psy_ui_ALIGN_LEFT);
 	psy_ui_tabbar_append_tabs(&self->tabbar, "help.help", "help.about",
 		"help.greetings", NULL);	
-	psy_ui_button_init_text_connect(&self->floatsection, &self->bar, NULL,
+	psy_ui_button_init_text_connect(&self->floatsection, &self->bar,
 		"help.extract", self, helpview_onfloatsection);		
 	psy_ui_button_loadresource(&self->floatsection,
 		IDB_VSPLIT_LIGHT, IDB_VSPLIT_DARK, psy_ui_colour_white());
@@ -78,7 +80,7 @@ void helpview_initsectionfloated(HelpView* self)
 {
 	psy_ui_component_init(&self->sectionfloated, helpview_base(self), NULL);
 	psy_ui_component_hide(&self->sectionfloated);
-	psy_ui_label_init(&self->floatdesc, &self->sectionfloated, NULL);		
+	psy_ui_label_init(&self->floatdesc, &self->sectionfloated);		
 	psy_ui_label_preventtranslation(&self->floatdesc);
 	psy_ui_label_settext(&self->floatdesc, "This view is floated.");
 	psy_ui_component_setalign(&self->floatdesc.component,
@@ -97,7 +99,7 @@ void helpview_onfocus(HelpView* self, psy_ui_Component* sender)
 
 	view = psy_ui_notebook_activepage(&self->notebook);
 	if (view) {
-		psy_ui_component_setfocus(view);
+		// psy_ui_component_setfocus(view);
 	}
 }
 
@@ -111,9 +113,9 @@ void helpview_float(HelpView* self, HelpViewSection section,
 		psy_ui_component_show(&self->sectionfloated);
 		psy_ui_component_insert(dest, &self->help.component, NULL);		
 		psy_ui_component_setalign(&self->help.component, psy_ui_ALIGN_CLIENT);
-		psy_ui_component_setpreferredsize(&self->help.editor.component,
+		psy_ui_component_setpreferredsize(&self->help.text.component,
 			psy_ui_size_make_em(120, 40));
-		psy_ui_component_preventalign(&self->help.editor.component);
+		psy_ui_component_preventalign(&self->help.text.component);
 		psy_ui_component_show_align(&self->help.component);
 		psy_ui_component_align(&self->help.component);
 		psy_ui_button_settext(&self->floatsection, "help.combine");		
@@ -130,7 +132,7 @@ void helpview_dock(HelpView* self, HelpViewSection section,
 		psy_ui_component_setparent(&self->sectionfloated, &self->component);		
 		psy_ui_component_insert(&self->notebook.component,
 			&self->help.component, NULL);
-		psy_ui_component_setcontaineralign(&self->help.editor.component,
+		psy_ui_component_setcontaineralign(&self->help.text.component,
 			psy_ui_CONTAINER_ALIGN_NONE);
 		psy_ui_component_setalign(&self->help.component, psy_ui_ALIGN_CLIENT);			
 		psy_ui_component_show_align(&self->help.component);

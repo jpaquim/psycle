@@ -5,6 +5,7 @@
 
 #include "../../detail/prefix.h"
 
+
 #include "effectui.h"
 /* host */
 #include "skingraphics.h"
@@ -87,23 +88,23 @@ static psy_ui_ComponentVtable* effectui_vtable_init(EffectUi* self)
 	}
 	return &effectui_vtable;
 }
+
 /* implementation */
 void effectui_init(EffectUi* self, psy_ui_Component* parent,
-	uintptr_t slot, MachineViewSkin* skin,
-	psy_ui_Component* view, ParamViews* paramviews, Workspace* workspace)
+	uintptr_t slot, MachineViewSkin* skin, ParamViews* paramviews,
+	Workspace* workspace)
 {
 	assert(self);
 	assert(workspace);
-	assert(workspace->song);
-	assert(view);
+	assert(workspace->song);	
 
-	psy_ui_component_init(&self->component, parent, view);	
+	psy_ui_component_init(&self->component, parent, NULL);	
 	effectui_vtable_init(self);
 	self->component.vtable = &effectui_vtable;
 	psy_ui_component_setbackgroundmode(&self->component,
 		psy_ui_NOBACKGROUND);
-	machineuicommon_init(&self->intern, slot, skin, view, paramviews,
-		workspace);
+	machineuicommon_init(&self->intern, &self->component, slot, skin,
+		paramviews, workspace);
 	self->intern.coords = &skin->effect;	
 	self->intern.font = skin->effect_fontcolour;
 	self->intern.bgcolour = psy_ui_colour_make(0x003E2f25);
@@ -395,7 +396,9 @@ void effectui_onmousedoubleclick(EffectUi* self, psy_ui_MouseEvent* ev)
 				&self->intern.skin->effect.mute) ||
 			effectui_hittestpan(self, ev->pt, &dragpt.x)) {
 		} else {
-			effectui_showparameters(self, self->intern.view);
+			if (self->component.view) {
+				effectui_showparameters(self, self->component.view);
+			}
 		}
 		psy_ui_mouseevent_stop_propagation(ev);
 	}
@@ -419,7 +422,9 @@ void effectui_onshowparameters(EffectUi* self, Workspace* sender,
 	uintptr_t slot)
 {
 	if (slot == self->intern.slot) {
-		effectui_showparameters(self, self->intern.view);
+		if (self->component.view) {
+			effectui_showparameters(self, self->component.view);
+		}
 	}
 }
 

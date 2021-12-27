@@ -55,41 +55,41 @@ void patternblockmenu_init(PatternBlockMenu* self, psy_ui_Component* parent,
 	self->pvstate = pvstate;
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_TOP,
 		psy_ui_margin_zero());	
-	psy_ui_button_init_text_connect(&self->cut, &self->component, NULL,
+	psy_ui_button_init_text_connect(&self->cut, &self->component,
 		"edit.cut", self, patternblockmenu_oncut);			
-	psy_ui_button_init_text_connect(&self->copy, &self->component, NULL,
+	psy_ui_button_init_text_connect(&self->copy, &self->component,
 		"edit.copy", self, patternblockmenu_oncopy);
-	psy_ui_button_init_text_connect(&self->paste, &self->component, NULL,
+	psy_ui_button_init_text_connect(&self->paste, &self->component,
 		"edit.paste", self, patternblockmenu_onpaste);
-	psy_ui_button_init_text_connect(&self->mixpaste, &self->component, NULL,
+	psy_ui_button_init_text_connect(&self->mixpaste, &self->component,
 		"edit.mixpaste", self, patternblockmenu_onmixpaste);	
-	psy_ui_button_init_text_connect(&self->del, &self->component, NULL,
+	psy_ui_button_init_text_connect(&self->del, &self->component,
 		"edit.delete", self, patternblockmenu_ondelete);
-	psy_ui_button_init_text_connect(&self->transform, &self->component, NULL,
+	psy_ui_button_init_text_connect(&self->transform, &self->component,
 		"edit.searchreplace", self, patternblockmenu_onreplace);
-	psy_ui_button_init_text_connect(&self->blockswingfill, &self->component, NULL,
+	psy_ui_button_init_text_connect(&self->blockswingfill, &self->component,
 		"edit.blockswingfill", self, patternblockmenu_onblockswingfill);
-	psy_ui_button_init_text_connect(&self->trackswingfill, &self->component, NULL,
+	psy_ui_button_init_text_connect(&self->trackswingfill, &self->component,
 		"edit.trackswingfill", self, patternblockmenu_ontrackswingfill);
-	psy_ui_button_init_text_connect(&self->interpolatelinear, &self->component, NULL,
+	psy_ui_button_init_text_connect(&self->interpolatelinear, &self->component,
 		"edit.blockinterpolate", self, patternblockmenu_oninterpolatelinear);
-	psy_ui_button_init_text_connect(&self->interpolatecurve, &self->component, NULL,
+	psy_ui_button_init_text_connect(&self->interpolatecurve, &self->component,
 		"edit.blockinterpolatecurve", self, patternblockmenu_oninterpolatecurve);
-	psy_ui_button_init_text_connect(&self->changegenerator, &self->component, NULL,
+	psy_ui_button_init_text_connect(&self->changegenerator, &self->component,
 		"edit.blocksetmachine", self, patternblockmenu_onchangegenerator);
-	psy_ui_button_init_text_connect(&self->changeinstrument, &self->component, NULL,
+	psy_ui_button_init_text_connect(&self->changeinstrument, &self->component,
 		"edit.blocksetinstr", self, patternblockmenu_onchangeinstrument);
-	psy_ui_button_init_text_connect(&self->blocktransposeup, &self->component, NULL,
+	psy_ui_button_init_text_connect(&self->blocktransposeup, &self->component,
 		"edit.transposeblockdec", self, patternblockmenu_onblocktransposedec);
-	psy_ui_button_init_text_connect(&self->blocktransposedown, &self->component, NULL,
+	psy_ui_button_init_text_connect(&self->blocktransposedown, &self->component,
 		"edit.transposeblockinc", self, patternblockmenu_onblocktransposeinc);
-	psy_ui_button_init_text_connect(&self->blocktransposeup12, &self->component, NULL,
+	psy_ui_button_init_text_connect(&self->blocktransposeup12, &self->component,
 		"edit.transposeblockdec12", self, patternblockmenu_onblocktransposedec12);
-	psy_ui_button_init_text_connect(&self->blocktransposedown12, &self->component, NULL,
+	psy_ui_button_init_text_connect(&self->blocktransposedown12, &self->component,
 		"edit.transposeblockinc12", self, patternblockmenu_onblocktransposeinc12);
-	psy_ui_button_init_text_connect(&self->importbtn, &self->component, NULL,
+	psy_ui_button_init_text_connect(&self->importbtn, &self->component,
 		"edit.importpsb", self, patternblockmenu_onimport);
-	psy_ui_button_init_text_connect(&self->exportbtn, &self->component, NULL,
+	psy_ui_button_init_text_connect(&self->exportbtn, &self->component,
 		"edit.exportpsb", self, patternblockmenu_onexport);		
 	psy_ui_component_setpadding_children(&self->component,
 		psy_ui_margin_make_em(0.25, 0.25, 0.25, 0.25));

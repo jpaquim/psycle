@@ -138,9 +138,9 @@ static psy_ui_ComponentVtable* patternproperties_vtable_init(PatternProperties* 
 }
 
 void patternproperties_init(PatternProperties* self, psy_ui_Component* parent,
-	psy_ui_Component* view, psy_audio_Pattern* pattern, Workspace* workspace)
+	psy_audio_Pattern* pattern, Workspace* workspace)
 {	
-	psy_ui_component_init(&self->component, parent, view);	
+	psy_ui_component_init(&self->component, parent, NULL);	
 	psy_ui_component_setvtable(&self->component,
 		patternproperties_vtable_init(self));
 	self->workspace = workspace;
@@ -148,22 +148,22 @@ void patternproperties_init(PatternProperties* self, psy_ui_Component* parent,
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_margin_make(psy_ui_value_make_px(0), psy_ui_value_make_ew(2.0),
 			psy_ui_value_make_eh(1.0), psy_ui_value_make_px(0)));	
-	psy_ui_label_init_text(&self->namelabel, &self->component, NULL,
+	psy_ui_label_init_text(&self->namelabel, &self->component,
 		"patternview.patname");
 	psy_ui_label_settextalignment(&self->namelabel, psy_ui_ALIGNMENT_LEFT);
-	psy_ui_textinput_init(&self->nameedit, &self->component, NULL);
+	psy_ui_textinput_init(&self->nameedit, &self->component);
 	psy_ui_textinput_settext(&self->nameedit, "patternview.nopattern");
 	psy_ui_textinput_setcharnumber(&self->nameedit, 40);
 	// psy_ui_textinput_enableinputfield(&self->nameedit);
-	psy_ui_label_init_text(&self->lengthlabel, &self->component, NULL,
+	psy_ui_label_init_text(&self->lengthlabel, &self->component,
 		"patternview.length");
 	psy_ui_label_settextalignment(&self->lengthlabel, psy_ui_ALIGNMENT_LEFT);
-	psy_ui_textinput_init(&self->lengthedit, &self->component, NULL);
+	psy_ui_textinput_init(&self->lengthedit, &self->component);
 	psy_ui_textinput_setcharnumber(&self->lengthedit, 20);
 	// psy_ui_textinput_enableinputfield(&self->lengthedit);
-	psy_ui_button_init_connect(&self->applybutton, &self->component, NULL, self,
+	psy_ui_button_init_connect(&self->applybutton, &self->component, self,
 		patternproperties_onapply);	
-	intedit_init(&self->timesig_numerator, &self->component, NULL,
+	intedit_init(&self->timesig_numerator, &self->component,
 		"Timesignature", 0, 0, 128);
 	psy_ui_component_setspacing(&self->timesig_numerator.less.component,
 		psy_ui_margin_make_em(0.0, 0.0, 0.0, 0.0));
@@ -171,7 +171,7 @@ void patternproperties_init(PatternProperties* self, psy_ui_Component* parent,
 		psy_ui_margin_make_em(0.0, 0.0, 0.0, 0.0));
 	psy_signal_connect(&self->timesig_numerator.signal_changed, self,
 		patternproperties_ontimesignominator);
-	intedit_init(&self->timesig_denominator, &self->component, NULL,
+	intedit_init(&self->timesig_denominator, &self->component,
 		"", 0, 0, 128);
 	psy_ui_component_setspacing(&self->timesig_denominator.less.component,
 		psy_ui_margin_make_em(0.0, 0.0, 0.0, 0.0));

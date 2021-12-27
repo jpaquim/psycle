@@ -30,6 +30,7 @@ static psy_ui_RealPoint splitter_hthumbcenter(const psy_ui_Splitter*);
 static void psy_ui_splitter_onbutton(psy_ui_Splitter*);
 static void psy_ui_splitter_onshowtoggle(psy_ui_Splitter*, psy_ui_Component* sender);
 static void psy_ui_splitter_onhidetoggle(psy_ui_Splitter*, psy_ui_Component* sender);
+
 /* vtable */
 static psy_ui_ComponentVtable vtable;
 static psy_ui_ComponentVtable super;
@@ -68,13 +69,12 @@ static void vtable_init(psy_ui_Splitter* self)
 	}
 	self->component.vtable = &vtable;
 }
+
 /* implementation */
-void psy_ui_splitter_init(psy_ui_Splitter* self, psy_ui_Component* parent,
-	psy_ui_Component* view)
+void psy_ui_splitter_init(psy_ui_Splitter* self, psy_ui_Component* parent)
 {
-	psy_ui_component_init(&self->component, parent, view);
-	vtable_init(self);
-	psy_ui_component_doublebuffer(&self->component);	
+	psy_ui_component_init(&self->component, parent, NULL);
+	vtable_init(self);	
 	self->resize = 0;
 	self->hasrestore = FALSE;
 	self->thumbsize = 35.0;

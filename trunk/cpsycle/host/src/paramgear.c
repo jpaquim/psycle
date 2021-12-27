@@ -40,8 +40,8 @@ void paramrackbox_init(ParamRackBox* self, psy_ui_Component* parent,
 		psy_ui_component_setcolour(&self->header, psy_ui_colour_make(
 			psy_property_at_colour(theme, "machineguititlefontcolour", 0x00B4B4B4)));
 	}
-	// title label
-	psy_ui_label_init(&self->title, &self->header, NULL);
+	/* title label */
+	psy_ui_label_init(&self->title, &self->header);
 	psy_ui_label_preventtranslation(&self->title);	
 	if (machine) {
 		psy_ui_label_settext(&self->title, psy_audio_machine_editname(machine));
@@ -51,14 +51,14 @@ void paramrackbox_init(ParamRackBox* self, psy_ui_Component* parent,
 		paramrackbox_onmousedoubleclick);	
 	psy_ui_margin_init_em(&margin, 0.0, 0.0, 0.5, 0.5);		
 	//psy_ui_component_setspacing(&self->title.component, &margin);
-	// Insert Effect
+	/* Insert Effect */
 	if (machine && slot != psy_audio_MASTER_INDEX) {
-		psy_ui_button_init_text(&self->inserteffect, &self->header, NULL, "+");
+		psy_ui_button_init_text(&self->inserteffect, &self->header, "+");
 		psy_ui_component_setalign(&self->inserteffect.component, psy_ui_ALIGN_RIGHT);
 		psy_signal_connect(&self->inserteffect.signal_clicked, self,
 			paramrackbox_onaddeffect);
 	}
-	// Parameter List
+	/* Parameter List */
 	parameterlistbox_init(&self->parameters, &self->component,
 		psy_audio_machines_at(&workspace->song->machines, slot),
 		psycleconfig_macparam(workspace_conf(workspace)));
@@ -507,19 +507,20 @@ void paramrackpane_onmachineselected(ParamRackPane* self,
 	}
 }
 
-// ParamRackBatchBar
+/* ParamRackBatchBar */
 void paramrackbatchbar_init(ParamRackBatchBar* self, psy_ui_Component* parent)
 {
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));	
-	psy_ui_button_init_text(&self->select, &self->component, NULL, "Select in Gear");
+	psy_ui_button_init_text(&self->select, &self->component, "Select in Gear");
 }
 
-// ParamRackModeBar
+/* ParamRackModeBar */
 static void paramrackmodebar_ondestroy(ParamRackModeBar*);
 static void paramrackmodebar_onmodeselect(ParamRackModeBar*, psy_ui_Button* sender);
-// vtable
+
+/* vtable */
 static psy_ui_ComponentVtable paramrackmodebar_vtable;
 static bool paramrackmodebar_vtable_initialized = FALSE;
 
@@ -542,17 +543,17 @@ void paramrackmodebar_init(ParamRackModeBar* self, psy_ui_Component* parent)
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	psy_signal_init(&self->signal_select);
-	psy_ui_button_init_text_connect(&self->all, &self->component, NULL,
+	psy_ui_button_init_text_connect(&self->all, &self->component,
 		"All", self, paramrackmodebar_onmodeselect);
-	psy_ui_button_init_text_connect(&self->inputs, &self->component, NULL,
+	psy_ui_button_init_text_connect(&self->inputs, &self->component,
 		"Inputs", self, paramrackmodebar_onmodeselect);
-	psy_ui_button_init_text_connect(&self->outputs, &self->component, NULL,
+	psy_ui_button_init_text_connect(&self->outputs, &self->component,
 		"Outputs", self, paramrackmodebar_onmodeselect);
-	psy_ui_button_init_text_connect(&self->inchain, &self->component, NULL,
+	psy_ui_button_init_text_connect(&self->inchain, &self->component,
 		"Inchain", self, paramrackmodebar_onmodeselect);
-	psy_ui_button_init_text_connect(&self->outchain, &self->component, NULL,
+	psy_ui_button_init_text_connect(&self->outchain, &self->component,
 		"Outchain", self, paramrackmodebar_onmodeselect);
-	psy_ui_button_init_text_connect(&self->level, &self->component, NULL,
+	psy_ui_button_init_text_connect(&self->level, &self->component,
 		"Level", self, paramrackmodebar_onmodeselect);
 }
 
@@ -628,7 +629,8 @@ static void paramrack_onmachineselected(ParamRack*,
 	psy_audio_Machines*, uintptr_t slot);
 static void paramrack_onsongchanged(ParamRack*, Workspace* sender, int flag);
 static void paramrack_connectsong(ParamRack*);
-// implementation
+
+/* implementation */
 void paramrack_init(ParamRack* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {
@@ -640,7 +642,7 @@ void paramrack_init(ParamRack* self, psy_ui_Component* parent,
 	psy_ui_component_init_align(&self->bottom, &self->component, NULL,
 		psy_ui_ALIGN_BOTTOM);	
 	// IntEdit
-	intedit_init(&self->leveledit, &self->bottom, NULL, "", 2, 0, INT32_MAX);
+	intedit_init(&self->leveledit, &self->bottom, "", 2, 0, INT32_MAX);
 	psy_ui_component_setalign(&self->leveledit.component, psy_ui_ALIGN_RIGHT);
 	psy_signal_connect(&self->leveledit.signal_changed, self, paramrack_onlevelchanged);
 	// ChainMode
@@ -654,13 +656,13 @@ void paramrack_init(ParamRack* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(&self->batchbar.component, psy_ui_ALIGN_RIGHT);
 	psy_signal_connect(&self->batchbar.select.signal_clicked, self,
 		paramrack_onselect);
-	// Pane
+	/* Pane */
 	paramrackpane_init(&self->pane, &self->component, workspace);	
 	psy_ui_component_setoverflow(&self->pane.component,
 		psy_ui_OVERFLOW_HSCROLL);	
-	// connect scrollbar
+	/* connect scrollbar */
 	psy_ui_scroller_init(&self->scroller, &self->pane.component,
-		&self->component, NULL);
+		&self->component);
 	psy_ui_component_setalign(&self->pane.component,
 		psy_ui_ALIGN_VCLIENT);
 	psy_ui_component_setalign(&self->scroller.component, psy_ui_ALIGN_CLIENT);

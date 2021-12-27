@@ -1,28 +1,32 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #if !defined(INTERPOLATECURVEVIEW_H)
 #define INTERPOLATECURVEVIEW_H
 
+/* host */
 #include "workspace.h"
-
+/* ui */
 #include <uibutton.h>
 #include <uicheckbox.h>
 #include <uicombobox.h>
-#include <uiedit.h>
-
-#include <list.h>
-
+/* audio */
 #include <pattern.h>
+/* container */
+#include <list.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// aim: specifies how the values of the parameters column will change from line
-//      to line. Clicking the 'Interpolate' Button fills the parameters column
-//      from the beginning to the end of a selection according to the curve in
-//      this view.
+/*
+** Specifies how the values of the parameters column will change from line
+** to line. Clicking the 'Interpolate' Button fills the parameters column
+** from the beginning to the end of a selection according to the curve in
+** this view.
+*/
 
 typedef enum {
 	INTERPOLATECURVETYPE_LINEAR,
@@ -30,15 +34,11 @@ typedef enum {
 } InterpolateCurveType;
 
 typedef struct InterpolateCurveBar {
-	// inherits
+	/* inherits */
 	psy_ui_Component component;
-	// ui elements
+	/* internal */
 	psy_ui_Button checktwk;
-	psy_ui_ComboBox combotwk;
-	psy_ui_Edit pos;
-	psy_ui_Edit value;
-	psy_ui_Edit min;
-	psy_ui_Edit max;
+	psy_ui_ComboBox combotwk;	
 	psy_ui_ComboBox curvetype;
 	psy_ui_Button ok;
 	psy_ui_Button cancel;	
@@ -68,8 +68,9 @@ KeyFrame* keyframe_allocinit(psy_dsp_big_beat_t offset, intptr_t value,
 struct InterpolateCurveView;
 
 typedef struct InterpolateCurveBox {
-	// inherits
+	/* inherits */
 	psy_ui_Component component;
+	/* internal */
 	psy_List* keyframes;
 	psy_dsp_big_beat_t range;
 	intptr_t valuerange;
@@ -112,4 +113,4 @@ INLINE psy_ui_Component* interpolatecurveview_base(InterpolateCurveView* self)
 }
 #endif
 
-#endif
+#endif /* INTERPOLATECURVEVIEW_H */

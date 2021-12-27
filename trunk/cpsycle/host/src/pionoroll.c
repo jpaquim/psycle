@@ -37,21 +37,21 @@ void pianobar_init(PianoBar* self, psy_ui_Component* parent,
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
 		margin);
 	self->workspace = workspace;
-	psy_ui_label_init_text(&self->keys, pianobar_base(self), NULL,
+	psy_ui_label_init_text(&self->keys, pianobar_base(self),
 		"Keyboard");
-	zoombox_init(&self->zoombox_keyheight, &self->component, NULL);	
-	psy_ui_combobox_init(&self->keytype, pianobar_base(self), NULL);
+	zoombox_init(&self->zoombox_keyheight, &self->component);	
+	psy_ui_combobox_init(&self->keytype, pianobar_base(self));
 	psy_ui_combobox_setcharnumber(&self->keytype, 8);	
 	psy_ui_combobox_addtext(&self->keytype, "Keys");	
 	psy_ui_combobox_addtext(&self->keytype, "Notes");
 	psy_ui_combobox_addtext(&self->keytype, "Drums");
 	psy_ui_combobox_setcursel(&self->keytype, 0);
-	psy_ui_label_init_text(&self->tracks, pianobar_base(self), NULL,
+	psy_ui_label_init_text(&self->tracks, pianobar_base(self),
 		"Show Tracks");
-	psy_ui_button_init_text(&self->tracks_all, pianobar_base(self), NULL, "All");
+	psy_ui_button_init_text(&self->tracks_all, pianobar_base(self), "All");
 	psy_ui_button_highlight(&self->tracks_all);
-	psy_ui_button_init_text(&self->track_curr, pianobar_base(self), NULL, "Current");
-	psy_ui_button_init_text(&self->tracks_active, pianobar_base(self), NULL, "Active");		
+	psy_ui_button_init_text(&self->track_curr, pianobar_base(self), "Current");
+	psy_ui_button_init_text(&self->tracks_active, pianobar_base(self), "Active");		
 }
 
 /* Pianoroll */
@@ -120,7 +120,7 @@ void pianoroll_init(Pianoroll* self, psy_ui_Component* parent,
 	/* left area (keyboardheader, keyboard) */
 	psy_ui_component_init(&self->left, &self->component, NULL);
 	psy_ui_component_setalign(&self->left, psy_ui_ALIGN_LEFT);
-	zoombox_init(&self->zoombox_beatwidth, &self->left, NULL);
+	zoombox_init(&self->zoombox_beatwidth, &self->left);
 	psy_ui_component_setpreferredheight(&self->zoombox_beatwidth.component,
 		psy_ui_value_make_eh(1.0));
 	psy_signal_connect(&self->zoombox_beatwidth.signal_changed, self,
@@ -143,7 +143,7 @@ void pianoroll_init(Pianoroll* self, psy_ui_Component* parent,
 	pianogrid_init(&self->grid, &self->component, &self->keyboardstate,
 		&self->gridstate, self->workspace);
 	psy_ui_scroller_init(&self->scroller, pianogrid_base(&self->grid),
-		&self->component, NULL);
+		&self->component);
 	psy_ui_component_setalign(&self->scroller.component, psy_ui_ALIGN_CLIENT);	
 	psy_ui_component_setalign(&self->grid.component, psy_ui_ALIGN_FIXED);
 	/* bar */
@@ -231,7 +231,7 @@ void pianoroll_ontimer(Pianoroll* self, uintptr_t timerid)
 		if (patternviewstate_pattern(self->gridstate.pv) &&
 				patternviewstate_pattern(self->gridstate.pv)->opcount != self->opcount &&
 				self->syncpattern) {
-			psy_ui_component_invalidate(pianogrid_base(&self->grid));
+			// psy_ui_component_invalidate(pianogrid_base(&self->grid));
 		}
 		self->opcount = patternviewstate_pattern(self->gridstate.pv)
 			? patternviewstate_pattern(self->gridstate.pv)->opcount

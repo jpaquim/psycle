@@ -9,7 +9,7 @@
 /* host */
 #include "sequencehostcmds.h"
 /* ui */
-#include <uiedit.h>
+#include <uitextinput.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -72,11 +72,11 @@ typedef struct SeqEditState {
 	psy_audio_SequenceEntry* seqentry;
 	Workspace* workspace;	
 	SequenceCmds* cmds;
-	psy_ui_Edit* edit;
+	psy_ui_TextInput* edit;
 	psy_ui_Component* view;
 } SeqEditState;
 
-void seqeditstate_init(SeqEditState*, SequenceCmds*, psy_ui_Edit*, psy_ui_Component* view);
+void seqeditstate_init(SeqEditState*, SequenceCmds*, psy_ui_TextInput*, psy_ui_Component* view);
 void seqeditstate_dispose(SeqEditState*);
 
 psy_audio_Sequence* seqeditstate_sequence(SeqEditState*);

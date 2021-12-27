@@ -30,6 +30,8 @@ typedef struct PlayPosBar {
 void playposbar_init(PlayPosBar*, psy_ui_Component* parent,
 	psy_audio_Player* player);
 
+void playposbar_idle(PlayPosBar*);
+
 INLINE psy_ui_Component* playposbar_base(PlayPosBar* self)
 {
 	return &self->component;

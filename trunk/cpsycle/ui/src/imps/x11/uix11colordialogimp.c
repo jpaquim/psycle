@@ -14,13 +14,13 @@
 #include <stdlib.h>
 #include "../../detail/portable.h"
 
-// VTable Prototypes
+/* prototypes */
 static void dev_dispose(psy_ui_x11_ColorDialogImp*);
 static int dev_execute(psy_ui_x11_ColorDialogImp*);
 static const char* dev_path(psy_ui_x11_ColorDialogImp*);
 psy_ui_Colour dev_color(psy_ui_x11_ColorDialogImp*);
 
-// VTable init
+/* vtable */
 static psy_ui_ColourDialogImpVTable imp_vtable;
 static int imp_vtable_initialized = 0;
 
@@ -45,7 +45,6 @@ void psy_ui_x11_colordialogimp_init(psy_ui_x11_ColorDialogImp* self)
 	self->color = psy_ui_colour_make(0x00000000);
 }
 
-// win32 implementation method for psy_ui_ColorDialog
 void dev_dispose(psy_ui_x11_ColorDialogImp* self)
 {
 }

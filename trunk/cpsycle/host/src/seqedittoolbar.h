@@ -13,7 +13,7 @@
 /* ui */
 #include <uicombobox.h>
 #include <uicheckbox.h>
-#include <uiedit.h>
+#include <uitextinput.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -35,7 +35,7 @@ typedef struct SeqEditToolBar {
 	psy_ui_Button timesig;
 	psy_ui_Button loop;
 	psy_ui_Label trackname;	
-	psy_ui_Edit trackedit;	
+	psy_ui_TextInput trackedit;	
 	/* references */	
 	SeqEditState* state;
 } SeqEditToolBar;

@@ -1,38 +1,41 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #if !defined(ZOOMBOX_H)
 #define ZOOMBOX_H
 
-// ui
+/* ui */
 #include <uibutton.h>
-#include <uiedit.h>
+#include <uitextinput.h>
 
-// ZoomBox
-//
-// Displays and sets a zoom factor with buttons or wheel scroll
+/*
+** ZoomBox
+**
+** Displays and sets a zoom factor with buttons or wheel scroll
+*/
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 typedef struct ZoomBox {
-	// inherits
+	/* inherits */
 	psy_ui_Component component;
-	// ui elements
+	/* internal */
 	psy_ui_Button zoomin;
-	psy_ui_Edit zoom;
-	psy_ui_Button zoomout;
-	// data members
+	psy_ui_TextInput zoom;
+	psy_ui_Button zoomout;	
 	double zoomrate;
 	double zoomstep;
 	double minrate;
 	double maxrate;
-	// Signal
+	/* Signal */
 	psy_Signal signal_changed;
 } ZoomBox;
 
-void zoombox_init(ZoomBox*, psy_ui_Component* parent, psy_ui_Component* view);
+void zoombox_init(ZoomBox*, psy_ui_Component* parent);
 void zoombox_init_connect(ZoomBox*, psy_ui_Component* parent,
 	void* context, void* fp);
 

@@ -22,7 +22,7 @@ void renderprogressview_init(RenderProgressView* self, psy_ui_Component* parent,
 {
 	psy_ui_component_init(&self->component, parent, NULL);
 	self->workspace = workspace;
-	psy_ui_label_init_text(&self->render, &self->component, NULL,
+	psy_ui_label_init_text(&self->render, &self->component,
 		"Rendering");
 	psy_ui_component_setalign(psy_ui_label_base(&self->render),
 		psy_ui_ALIGN_TOP);
@@ -30,7 +30,7 @@ void renderprogressview_init(RenderProgressView* self, psy_ui_Component* parent,
 	psy_ui_component_setmargin(&self->abortbar,
 		psy_ui_margin_make_em(2.0, 0.0, 0.0, 20.0));
 	psy_ui_component_setalign(&self->abortbar, psy_ui_ALIGN_TOP);
-	psy_ui_button_init_text_connect(&self->abort, &self->abortbar, NULL,
+	psy_ui_button_init_text_connect(&self->abort, &self->abortbar,
 		"newmachine.stop", self, renderprogressview_onabort);
 	psy_ui_component_setalign(psy_ui_button_base(&self->abort),
 		psy_ui_ALIGN_LEFT);

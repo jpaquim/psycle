@@ -20,16 +20,14 @@ void playlistbar_init(PlaylistBar* self, psy_ui_Component* parent)
 		psy_ui_margin_make_em(0.0, 0.0, 0.5, 0.0));
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
-	psy_ui_button_init(&self->up, &self->component, NULL);
+	psy_ui_button_init(&self->up, &self->component);
 	psy_ui_button_seticon(&self->up, psy_ui_ICON_UP);
-	psy_ui_button_init(&self->down, &self->component, NULL);
+	psy_ui_button_init(&self->down, &self->component);
 	psy_ui_button_seticon(&self->down, psy_ui_ICON_DOWN);
-	psy_ui_button_init_text(&self->play, &self->component, NULL, "playlist.play");
-	psy_ui_button_init_text(&self->stop, &self->component, NULL, "playlist.stop");
-	psy_ui_button_init_text(&self->del, &self->component, NULL,
-		"playlist.delete");
-	psy_ui_button_init_text(&self->clear, &self->component, NULL,
-		"playlist.clear");
+	psy_ui_button_init_text(&self->play, &self->component, "playlist.play");
+	psy_ui_button_init_text(&self->stop, &self->component, "playlist.stop");
+	psy_ui_button_init_text(&self->del, &self->component, "playlist.delete");
+	psy_ui_button_init_text(&self->clear, &self->component, "playlist.clear");
 }
 
 /* PlaylistView */
@@ -70,8 +68,8 @@ void playlistview_init(PlaylistView* self, psy_ui_Component* parent,
 {	
 	psy_ui_component_init(&self->component, parent, NULL);
 	vtable_init(self);	
-	psy_ui_component_setbackgroundmode(&self->component,
-		psy_ui_NOBACKGROUND);
+	// psy_ui_component_setbackgroundmode(&self->component,
+	//	psy_ui_NOBACKGROUND);
 	self->workspace = workspace;
 	playlistbar_init(&self->bar, &self->component);	
 	psy_ui_component_setalign(&self->bar.component, psy_ui_ALIGN_TOP);	
@@ -87,7 +85,7 @@ void playlistview_init(PlaylistView* self, psy_ui_Component* parent,
 		playlistview_onmoveup);
 	psy_signal_connect(&self->bar.down.signal_clicked, self,
 		playlistview_onmovedown);
-	propertiesview_init(&self->view, &self->component, &self->component,
+	propertiesview_init(&self->view, &self->component,
 		tabbarparent, workspace_recentsongs(workspace), 1, workspace);
 	propertiesview_enablemousepropagation(&self->view);
 	psy_ui_component_setbackgroundmode(&self->view.scroller.pane,

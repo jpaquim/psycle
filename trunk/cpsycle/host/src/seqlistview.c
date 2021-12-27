@@ -459,9 +459,9 @@ static void seqviewlist_vtable_init(SeqviewList* self)
 }
 /* implementation */
 void seqviewlist_init(SeqviewList* self, psy_ui_Component* parent,
-	psy_ui_Component* view, SeqViewState* state)
+	SeqViewState* state)
 {
-	psy_ui_component_init(&self->component, parent, view);
+	psy_ui_component_init(&self->component, parent, NULL);
 	seqviewlist_vtable_init(self);	
 	self->state = state;	
 	self->lastplayrow = psy_INDEX_INVALID;	

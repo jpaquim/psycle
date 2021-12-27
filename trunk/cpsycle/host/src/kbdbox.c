@@ -28,11 +28,12 @@ void kbdboxstate_clearmodifier(KbdBoxState* self)
 }
 
 /* KbdBoxKey */
+
 /* prototypes */
-static void kbdboxkey_initlabel(KbdBoxKey*, psy_ui_Component* view,
-	psy_ui_Label*, const char* text);
+static void kbdboxkey_initlabel(KbdBoxKey*, psy_ui_Label*, const char* text);
 static void kbdboxkey_initstyle(KbdBoxKey*);
 static void kbdboxkey_onmousedown(KbdBoxKey*, psy_ui_MouseEvent*);
+
 /* vtable */
 static psy_ui_ComponentVtable kbdboxkey_vtable;
 static bool kbdboxkey_vtable_initialized = FALSE;
@@ -48,6 +49,7 @@ static void kbdboxkey_vtable_init(KbdBoxKey* self)
 	}
 	self->component.vtable = &kbdboxkey_vtable;
 }
+
 /* implementation */
 void kbdboxkey_init_all(KbdBoxKey* self, psy_ui_Component* parent, psy_ui_Component* view, 
 	uintptr_t size, uint32_t keycode, const char* label, Workspace* workspace, KbdBoxState* state)
@@ -61,11 +63,11 @@ void kbdboxkey_init_all(KbdBoxKey* self, psy_ui_Component* parent, psy_ui_Compon
 	self->keycode = keycode;
 	self->state = state;
 	self->workspace = workspace;			
-	kbdboxkey_initlabel(self, view, &self->label, label);
-	kbdboxkey_initlabel(self, view, &self->desc0, "");
-	kbdboxkey_initlabel(self, view, &self->desc1, "");
-	kbdboxkey_initlabel(self, view, &self->desc2, "");
-	kbdboxkey_initlabel(self, view, &self->desc3, "");
+	kbdboxkey_initlabel(self, &self->label, label);
+	kbdboxkey_initlabel(self, &self->desc0, "");
+	kbdboxkey_initlabel(self, &self->desc1, "");
+	kbdboxkey_initlabel(self, &self->desc2, "");
+	kbdboxkey_initlabel(self, &self->desc3, "");
 	if (size != 5) { /* not empty */
 		kbdboxkey_initstyle(self);
 	}
@@ -89,10 +91,10 @@ KbdBoxKey* kbdboxkey_allocinit_all(psy_ui_Component* parent,
 	return rv;
 }
 
-void kbdboxkey_initlabel(KbdBoxKey* self, psy_ui_Component* view,
-	psy_ui_Label* label, const char* text)
+void kbdboxkey_initlabel(KbdBoxKey* self, psy_ui_Label* label,
+	const char* text)
 {
-	psy_ui_label_init(label, &self->component, view);
+	psy_ui_label_init(label, &self->component);
 	psy_ui_label_preventtranslation(label);
 	psy_ui_label_setcharnumber(label, 8.0);
 	psy_ui_label_settextalignment(label, psy_ui_ALIGNMENT_LEFT);
@@ -223,6 +225,7 @@ static void kbdbox_vtable_init(KbdBox* self)
 	}
 	self->component.vtable = &kbdbox_vtable;
 }
+
 /* implementation */
 void kbdbox_init(KbdBox* self, psy_ui_Component* parent, Workspace* workspace)
 {	
@@ -231,8 +234,7 @@ void kbdbox_init(KbdBox* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_ui_component_setdefaultalign(kbdbox_base(self), psy_ui_ALIGN_TOP,
 		psy_ui_margin_make_em(0.0, 0.0, 0.3, 0.0));
 	self->workspace = workspace;
-	kbdboxstate_init(&self->state);
-	psy_ui_component_doublebuffer(kbdbox_base(self));
+	kbdboxstate_init(&self->state);	
 	psy_table_init(&self->keys);	
 	kbdbox_initfont(self);
 	kbdbox_makekeys(self);	
@@ -404,8 +406,7 @@ void kbdbox_definekey(KbdBox* self, psy_Property* section,
 
 void kbdbox_addrow(KbdBox* self)
 {
-	self->currrow = psy_ui_component_allocinit(&self->component,
-		&self->component);
+	self->currrow = psy_ui_component_allocinit(&self->component, NULL);
 	if (self->currrow) {
 		psy_ui_component_setdefaultalign(self->currrow, psy_ui_ALIGN_LEFT,
 			psy_ui_margin_make_em(0.0, 0.3, 0.0, 0.0));
@@ -419,7 +420,7 @@ void kbdbox_addkey(KbdBox* self, uint32_t keycode, uintptr_t size,
 	if (self->currrow && !psy_table_exists(&self->keys, keycode)) {
 		KbdBoxKey* key;	
 
-		key = kbdboxkey_allocinit_all(self->currrow, &self->component, size,
+		key = kbdboxkey_allocinit_all(self->currrow, NULL, size,
 			keycode, label, self->workspace, &self->state);
 		if (key) {
 			psy_table_insert(&self->keys, keycode, key);																		

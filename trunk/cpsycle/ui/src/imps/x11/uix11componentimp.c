@@ -1,5 +1,7 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
@@ -71,9 +73,6 @@ static void dev_enableinput(psy_ui_x11_ComponentImp*);
 static void dev_preventinput(psy_ui_x11_ComponentImp*);
 static bool dev_inputprevented(const psy_ui_x11_ComponentImp* self);
 static void dev_setcursor(psy_ui_x11_ComponentImp*, psy_ui_CursorStyle);
-static void dev_starttimer(psy_ui_x11_ComponentImp*, uintptr_t id, uintptr_t
-	interval);
-static void dev_stoptimer(psy_ui_x11_ComponentImp*, uintptr_t id);
 static void dev_seticonressource(psy_ui_x11_ComponentImp*, int ressourceid);
 static const psy_ui_TextMetric* dev_textmetric(const psy_ui_x11_ComponentImp*);
 static psy_ui_Size dev_textsize(psy_ui_x11_ComponentImp*, const char* text,
@@ -203,12 +202,6 @@ static void xt_imp_vtable_init(psy_ui_x11_ComponentImp* self)
 		vtable.dev_setcursor =
 			(psy_ui_fp_componentimp_dev_setcursor)
 			dev_setcursor;
-		vtable.dev_starttimer =
-			(psy_ui_fp_componentimp_dev_starttimer)
-			dev_starttimer;
-		vtable.dev_stoptimer =
-			(psy_ui_fp_componentimp_dev_stoptimer)
-			dev_stoptimer;
 		vtable.dev_seticonressource =
 			(psy_ui_fp_componentimp_dev_seticonressource)
 			dev_seticonressource;
@@ -418,7 +411,7 @@ void dev_dispose(psy_ui_x11_ComponentImp* self)
 	psy_List* q;
 
     x11app = (psy_ui_X11App*)psy_ui_app()->imp;
-    psy_ui_x11app_stoptimer(x11app, self->hwnd, psy_INDEX_INVALID);
+	psy_ui_component_stoptimer(self->component, psy_INDEX_INVALID);    
 	psy_ui_componentimp_dispose(&self->imp);
 	psy_ui_graphics_dispose(&self->g);
 	for (p = self->viewcomponents; p != NULL; psy_list_next(&p)) {
@@ -1234,23 +1227,6 @@ void dev_setcursor(psy_ui_x11_ComponentImp* self, psy_ui_CursorStyle
 	//if (hc) {
 		//SetCursor(hc);
 	//}
-}
-
-void dev_starttimer(psy_ui_x11_ComponentImp* self, uintptr_t id,
-	uintptr_t interval)
-{
-	psy_ui_X11App* x11app;
-
-	x11app = (psy_ui_X11App*)psy_ui_app()->imp;
-	psy_ui_x11app_starttimer(x11app, self->hwnd, id, interval);
-}
-
-void dev_stoptimer(psy_ui_x11_ComponentImp* self, uintptr_t id)
-{
-	psy_ui_X11App* x11app;
-
-	x11app = (psy_ui_X11App*)psy_ui_app()->imp;
-	psy_ui_x11app_stoptimer(x11app, self->hwnd, id);
 }
 
 void dev_seticonressource(psy_ui_x11_ComponentImp* self, int ressourceid)

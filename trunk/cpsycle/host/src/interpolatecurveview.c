@@ -1,5 +1,7 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
@@ -65,7 +67,7 @@ void interpolatecurvebar_init(InterpolateCurveBar* self, psy_ui_Component* paren
 	psy_ui_Margin margin;
 	
 	psy_ui_component_init(&self->component, parent, NULL);
-	psy_ui_combobox_init(&self->curvetype, &self->component, NULL);
+	psy_ui_combobox_init(&self->curvetype, &self->component);
 	psy_ui_component_setalign(&self->curvetype.component, psy_ui_ALIGN_LEFT);
 	psy_ui_combobox_addtext(&self->curvetype, "Linear");
 	psy_ui_combobox_addtext(&self->curvetype, "Hermite Curve");
@@ -73,10 +75,10 @@ void interpolatecurvebar_init(InterpolateCurveBar* self, psy_ui_Component* paren
 	psy_ui_combobox_addtext(&self->curvetype, "All to Hermite");
 	psy_ui_combobox_setcursel(&self->curvetype, 0);
 	psy_ui_combobox_setcharnumber(&self->curvetype, 15);
-	psy_ui_button_init(&self->cancel, &self->component, NULL);
+	psy_ui_button_init(&self->cancel, &self->component);
 	psy_ui_button_settext(&self->cancel, "Cancel");
 	psy_ui_component_setalign(&self->cancel.component, psy_ui_ALIGN_RIGHT);
-	psy_ui_button_init(&self->ok, &self->component, NULL);
+	psy_ui_button_init(&self->ok, &self->component);
 	psy_ui_button_settext(&self->ok, "Interpolate");
 	psy_ui_component_setalign(&self->ok.component, psy_ui_ALIGN_RIGHT);
 	psy_ui_margin_init_em(&margin, 0.0, 2.0, 0.0, 0.0);		
@@ -121,8 +123,7 @@ void interpolatecurvebox_init(InterpolateCurveBox* self,
 	self->bpl = 0.25;
 	self->pattern = NULL;
 	psy_signal_connect(&self->component.signal_destroy, self,
-		interpolatecurvebox_ondestroy);
-	psy_ui_component_doublebuffer(&self->component);
+		interpolatecurvebox_ondestroy);	
 	psy_ui_component_preventalign(&self->component);
 	psy_ui_component_setpreferredsize(&self->component,
 		psy_ui_size_make_em(0.0, 10.0));

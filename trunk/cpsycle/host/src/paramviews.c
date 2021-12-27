@@ -7,10 +7,10 @@
 // platform
 #include "../../detail/portable.h"
 
-// prototypes
+/* prototypes */
 static void paramviews_onsongchanged(ParamViews*, Workspace*, int flag);
 static psy_audio_Machines* paramviews_machines(ParamViews*);
-// implementation
+/* implementation */
 void paramviews_init(ParamViews* self, psy_ui_Component* view,
 	Workspace* workspace)
 {	

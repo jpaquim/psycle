@@ -42,7 +42,7 @@ typedef struct psy_ui_ScrollBarThumb {
 } psy_ui_ScrollBarThumb;
 
 void psy_ui_scrollbarthumb_init(psy_ui_ScrollBarThumb*,
-    psy_ui_Component* parent, psy_ui_Component* view, psy_ui_ScrollBarState*);
+    psy_ui_Component* parent, psy_ui_ScrollBarState*);
 
 INLINE psy_ui_Component* psy_ui_scrollbarthumb_base(
     psy_ui_ScrollBarThumb* self)
@@ -73,7 +73,8 @@ typedef struct psy_ui_ScrollBarPane {
 } psy_ui_ScrollBarPane;
 
 void psy_ui_scrollbarpane_init(psy_ui_ScrollBarPane*,
-    psy_ui_Component* parent, psy_ui_Component* view, psy_ui_ScrollBarState*);
+    psy_ui_Component* parent, psy_ui_ScrollBarState*);
+
 void psy_ui_scrollbarpane_setorientation(psy_ui_ScrollBarPane*,
     psy_ui_Orientation);
 
@@ -97,8 +98,8 @@ typedef struct psy_ui_ScrollBar {
     psy_ui_ScrollBarState state;
 } psy_ui_ScrollBar;
 
-void psy_ui_scrollbar_init(psy_ui_ScrollBar*, psy_ui_Component* parent,
-    psy_ui_Component* view);
+void psy_ui_scrollbar_init(psy_ui_ScrollBar*, psy_ui_Component* parent);
+
 void psy_ui_scrollbar_setorientation(psy_ui_ScrollBar*, psy_ui_Orientation);
 double psy_ui_scrollbar_position(psy_ui_ScrollBar*);
 void psy_ui_scrollbar_setscrollrange(psy_ui_ScrollBar*, psy_ui_IntPoint range);

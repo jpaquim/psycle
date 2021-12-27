@@ -18,6 +18,7 @@
 /* prototypes */
 static void clockbar_updatelabel(ClockBar*);
 static void clockbar_onsongchanged(ClockBar*, Workspace*, int flag);
+
 /* implementation */
 void clockbar_init(ClockBar* self, psy_ui_Component* parent,
 	Workspace* workspace)
@@ -29,7 +30,7 @@ void clockbar_init(ClockBar* self, psy_ui_Component* parent,
 		psy_ui_HEXPAND);
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
-	psy_ui_label_init(&self->position, &self->component, NULL);	
+	psy_ui_label_init(&self->position, &self->component);	
 	psy_ui_label_preventtranslation(&self->position);
 	psy_ui_label_setcharnumber(&self->position, 6);	
 	clockbar_updatelabel(self);

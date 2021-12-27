@@ -1,10 +1,12 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #if !defined(INSTRUMENTVIEW_H)
 #define INSTRUMENTVIEW_H
 
-// host
+/* host */
 #include "envelopeview.h"
 #include "instrumentsbox.h"
 #include "instrumentampview.h"
@@ -12,26 +14,27 @@
 #include "instrumentgenview.h"
 #include "instrumentpanview.h"
 #include "instrumentpitchview.h"
-#include <uitabbar.h>
 #include "workspace.h"
+/* ui */
+#include <uitabbar.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// Instrument Editor
+/* Instrument Editor */
 
 struct InstrumentView;
 
 typedef struct VirtualGeneratorsBox {
-	// inherits
+	/* inherits */
 	psy_ui_Component component;
-	// ui elements
+	/* internal */
 	psy_ui_CheckBox active;
 	psy_ui_ComboBox generators;
 	psy_ui_Label on;
 	psy_ui_ComboBox samplers;
-	// references
+	/* references */
 	Workspace* workspace;
 } VirtualGeneratorsBox;
 
@@ -41,10 +44,11 @@ void virtualgeneratorbox_updatesamplers(VirtualGeneratorsBox*);
 void virtualgeneratorbox_updategenerators(VirtualGeneratorsBox*);
 void virtualgeneratorbox_update(VirtualGeneratorsBox*);
 
+/* InstrumentPredefsBar */
 typedef struct InstrumentPredefsBar {
-	// inherits
+	/* inherits */
 	psy_ui_Component component;
-	// ui elements
+	/* internal */
 	psy_ui_Label predefs;	
 	psy_ui_Button predef_1;
 	psy_ui_Button predef_2;
@@ -52,7 +56,7 @@ typedef struct InstrumentPredefsBar {
 	psy_ui_Button predef_4;
 	psy_ui_Button predef_5;
 	psy_ui_Button predef_6;
-	// references
+	/* references */
 	psy_audio_Instrument* instrument;
 	struct InstrumentView* view;
 	Workspace* workspace;
@@ -61,19 +65,20 @@ typedef struct InstrumentPredefsBar {
 void instrumentpredefsbar_init(InstrumentPredefsBar*, psy_ui_Component* parent,
 	psy_audio_Instrument* instrument, struct InstrumentView* view, Workspace*);
 
+/* InstrumentHeaderView */
 typedef struct InstrumentHeaderView {
-	// inherits
+	/* inherits */
 	psy_ui_Component component;
-	// ui elements
+	/* internal */
 	psy_ui_Label namelabel;
-	psy_ui_Edit nameedit;	
+	psy_ui_TextInput nameedit;	
 	psy_ui_Button prevbutton;
 	psy_ui_Button nextbutton;
 	psy_ui_Component more;
 	VirtualGeneratorsBox virtualgenerators;
 	InstrumentPredefsBar predefs;
-	// references
-	struct InstrumentView* view; // todo remove view reference
+	/* references */
+	struct InstrumentView* view; /* todo remove view reference */
 	psy_audio_Instrument* instrument;
 	psy_audio_Instruments* instruments;
 } InstrumentHeaderView;
@@ -97,13 +102,13 @@ typedef struct InstrumentViewButtons {
 void instrumentviewbuttons_init(InstrumentViewButtons*,
 	psy_ui_Component* parent, Workspace*);
 
-// InstrumentViewBar
+/* InstrumentViewBar */
 typedef struct InstrumentsViewBar {
-	// inherits
+	/* inherits */
 	psy_ui_Component component;
-	// ui elements	
+	/* internal */
 	psy_ui_Label status;
-	// references
+	/* references */
 	Workspace* workspace;
 } InstrumentsViewBar;
 

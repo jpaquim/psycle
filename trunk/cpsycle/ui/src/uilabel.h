@@ -40,14 +40,12 @@ typedef struct psy_ui_Label {
     uintptr_t fadeoutcounter;
 } psy_ui_Label;
 
-void psy_ui_label_init(psy_ui_Label*, psy_ui_Component* parent,
-    psy_ui_Component* view);
+void psy_ui_label_init(psy_ui_Label*, psy_ui_Component* parent);
 void psy_ui_label_init_text(psy_ui_Label*, psy_ui_Component* parent,
-    psy_ui_Component* view, const char* text);
+    const char* text);
 
 psy_ui_Label* psy_ui_label_alloc(void);
-psy_ui_Label* psy_ui_label_allocinit(psy_ui_Component* parent,
-    psy_ui_Component* view);
+psy_ui_Label* psy_ui_label_allocinit(psy_ui_Component* parent);
 
 void psy_ui_label_settext(psy_ui_Label*, const char* text);
 const char* psy_ui_label_text(const psy_ui_Label*);

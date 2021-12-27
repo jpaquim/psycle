@@ -1,23 +1,26 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "generatorui.h"
-// host
+/* host */
 #include "skingraphics.h"
 #include "paramview.h"
 #include "wireview.h"
 #include "masterui.h"
-// audio
+/* audio */
 #include <exclusivelock.h>
-// std
+/* std */
 #include <math.h>
-// platform
+/* platform */
 #include "../../detail/portable.h"
 #include "../../detail/trace.h"
 
-// GeneratorUi
+/* GeneratorUi */
 static void generatorui_dispose(GeneratorUi*);
 static void generatorui_initsize(GeneratorUi*);
 static int generatorui_hittestpan(GeneratorUi*, psy_ui_RealPoint, double* dx);
@@ -43,59 +46,65 @@ static void generatorui_onshowparameters(GeneratorUi*, Workspace* sender,
 static void generatorui_showparameters(GeneratorUi*, psy_ui_Component* parent);
 static void generatorui_onpreferredsize(GeneratorUi*, const psy_ui_Size* limit,
 	psy_ui_Size* rv);
-// vtable
+/* vtable */
 static psy_ui_ComponentVtable generatorui_vtable;
 static psy_ui_ComponentVtable generatorui_super_vtable;
 static bool generatorui_vtable_initialized = FALSE;
 
-static psy_ui_ComponentVtable* generatorui_vtable_init(GeneratorUi* self)
+static void generatorui_vtable_init(GeneratorUi* self)
 {
 	assert(self);
 
 	if (!generatorui_vtable_initialized) {
 		generatorui_vtable = *(self->component.vtable);
 		generatorui_super_vtable = generatorui_vtable;
-		generatorui_vtable.dispose = (psy_ui_fp_component_dispose)
+		generatorui_vtable.dispose =
+			(psy_ui_fp_component_dispose)
 			generatorui_dispose;
-		generatorui_vtable.ondraw = (psy_ui_fp_component_ondraw)
+		generatorui_vtable.ondraw =
+			(psy_ui_fp_component_ondraw)
 			generatorui_ondraw;
-		generatorui_vtable.onmousedown = (psy_ui_fp_component_onmouseevent)
+		generatorui_vtable.onmousedown =
+			(psy_ui_fp_component_onmouseevent)
 			generatorui_onmousedown;
-		generatorui_vtable.onmouseup = (psy_ui_fp_component_onmouseevent)
+		generatorui_vtable.onmouseup =
+			(psy_ui_fp_component_onmouseevent)
 			generatorui_onmouseup;
-		generatorui_vtable.onmousemove = (psy_ui_fp_component_onmouseevent)
+		generatorui_vtable.onmousemove =
+			(psy_ui_fp_component_onmouseevent)
 			generatorui_onmousemove;
 		generatorui_vtable.onmousedoubleclick =
 			(psy_ui_fp_component_onmouseevent)
 			generatorui_onmousedoubleclick;
-		generatorui_vtable.move = (psy_ui_fp_component_move)generatorui_move;
-		generatorui_vtable.invalidate = (psy_ui_fp_component_invalidate)
+		generatorui_vtable.move =
+			(psy_ui_fp_component_move)
+			generatorui_move;
+		generatorui_vtable.invalidate =
+			(psy_ui_fp_component_invalidate)
 			generatorui_invalidate;
 		generatorui_vtable.onpreferredsize =
 			(psy_ui_fp_component_onpreferredsize)
 			generatorui_onpreferredsize;
 		generatorui_vtable_initialized = TRUE;
 	}
-	return &generatorui_vtable;
+	self->component.vtable = &generatorui_vtable;	
 }
-// implementation
+
+/* implementation */
 void generatorui_init(GeneratorUi* self, psy_ui_Component* parent,
-	uintptr_t slot, MachineViewSkin* skin,
-	psy_ui_Component* view, ParamViews* paramviews, Workspace* workspace)
+	uintptr_t slot, MachineViewSkin* skin, ParamViews* paramviews,
+	Workspace* workspace)
 {
 	assert(self);
 	assert(workspace);
 	assert(workspace->song);
-	assert(skin);
-	assert(view);
+	assert(skin);	
 
-	psy_ui_component_init(&self->component, parent, view);	
-	generatorui_vtable_init(self);
-	self->component.vtable = &generatorui_vtable;
-	psy_ui_component_setbackgroundmode(&self->component,
-		psy_ui_NOBACKGROUND);
-	machineuicommon_init(&self->intern, slot, skin, view, paramviews,
-		workspace);
+	psy_ui_component_init(&self->component, parent, NULL);	
+	generatorui_vtable_init(self);	
+	psy_ui_component_setbackgroundmode(&self->component, psy_ui_NOBACKGROUND);
+	machineuicommon_init(&self->intern, &self->component, slot, skin,
+		paramviews, workspace);
 	self->intern.coords = &skin->generator;
 	self->intern.font = skin->generator_fontcolour;
 	self->intern.bgcolour = psy_ui_colour_make(0x002f3E25);
@@ -347,8 +356,10 @@ void generatorui_onmousedoubleclick(GeneratorUi* self, psy_ui_MouseEvent* ev)
 			generatorui_hittestcoord(self, ev->pt,
 				&self->intern.skin->effect.mute) ||
 			generatorui_hittestpan(self, ev->pt, &dragpt.x)) {
-		} else {
-			generatorui_showparameters(self, self->intern.view);
+		} else {			
+			if (self->component.view) {
+				generatorui_showparameters(self, self->component.view);
+			}
 		}
 		psy_ui_mouseevent_stop_propagation(ev);
 	}
@@ -371,8 +382,8 @@ void generatorui_invalidate(GeneratorUi* self)
 void generatorui_onshowparameters(GeneratorUi* self, Workspace* sender,
 	uintptr_t slot)
 {
-	if (slot == self->intern.slot) {
-		generatorui_showparameters(self, self->intern.view);
+	if (slot == self->intern.slot && (self->component.view)) {
+		generatorui_showparameters(self, self->component.view);		
 	}
 }
 

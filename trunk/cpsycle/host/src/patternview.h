@@ -69,6 +69,7 @@ typedef struct PatternView {
 	PatternCmds cmds;	
 	bool aligndisplay;
 	int updatealign;
+	double zoom;
 	/* references */
 	Workspace* workspace;
 } PatternView;
@@ -76,6 +77,7 @@ typedef struct PatternView {
 void patternview_init(PatternView*, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent,	Workspace*);
 void patternview_selectdisplay(PatternView*, PatternDisplayMode);
+void patternview_updatefont(PatternView*);
 
 INLINE psy_ui_Component* patternview_base(PatternView* self)
 {

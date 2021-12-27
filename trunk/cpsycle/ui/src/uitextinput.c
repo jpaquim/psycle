@@ -13,6 +13,7 @@
 /* platform */
 #include "../../detail/portable.h"
 
+/* prototypes */
 static void psy_ui_textinput_ondestroy(psy_ui_TextInput*);
 static void psy_ui_textinput_onpreferredsize(psy_ui_TextInput*, psy_ui_Size* limit, psy_ui_Size* rv);
 static void psy_ui_textinput_onkeydown(psy_ui_TextInput*, psy_ui_KeyboardEvent*);
@@ -29,7 +30,7 @@ static void removechar(psy_ui_TextInput*);
 static char_dyn_t* lefttext(psy_ui_TextInput*, uintptr_t split);
 static char_dyn_t* righttext(psy_ui_TextInput*, uintptr_t split);
 
-
+/* vtable */
 static psy_ui_ComponentVtable vtable;
 static psy_ui_ComponentVtable super_vtable;
 static bool vtable_initialized = FALSE;
@@ -65,12 +66,11 @@ static void vtable_init(psy_ui_TextInput* self)
 	self->component.vtable = &vtable;
 }
 
-void psy_ui_textinput_init(psy_ui_TextInput* self, psy_ui_Component* parent,
-	psy_ui_Component* view)
+/* implementation */
+void psy_ui_textinput_init(psy_ui_TextInput* self, psy_ui_Component* parent)
 { 
-	psy_ui_component_init(psy_ui_textinput_base(self), parent, view);
-	vtable_init(self);
-	psy_ui_component_doublebuffer(psy_ui_textinput_base(self));	
+	psy_ui_component_init(psy_ui_textinput_base(self), parent, NULL);
+	vtable_init(self);	
 	psy_signal_init(&self->signal_change);
 	psy_signal_init(&self->signal_accept);
 	psy_signal_init(&self->signal_reject);	
@@ -147,19 +147,14 @@ void psy_ui_textinput_onpreferredsize(psy_ui_TextInput* self,
 	}
 }
 
-void psy_ui_textinput_setstyle(psy_ui_TextInput* self, int style)
-{
-
-}
-
 void psy_ui_textinput_enableedit(psy_ui_TextInput* self)
 {
-
+	psy_ui_component_enableinput(&self->component, psy_ui_NONRECURSIVE);
 }
 
 void psy_ui_textinput_preventedit(psy_ui_TextInput* self)
 {
-
+	psy_ui_component_preventinput(&self->component, psy_ui_NONRECURSIVE);
 }
 
 void psy_ui_textinput_setsel(psy_ui_TextInput* self, intptr_t cpmin, intptr_t cpmax)
@@ -325,7 +320,6 @@ char_dyn_t* righttext(psy_ui_TextInput* self, uintptr_t split)
 	return rv;
 }
 
-
 void psy_ui_textinput_onfocus(psy_ui_TextInput* self)
 {	
 	super_vtable.onfocus(&self->component);
@@ -372,11 +366,15 @@ void psy_ui_textinput_ondraw(psy_ui_TextInput* self, psy_ui_Graphics* g)
 	const psy_ui_TextMetric* tm;
 	psy_ui_RealSize size;
 	psy_ui_RealRectangle r;
+	double y;
 
 	tm = psy_ui_component_textmetric(psy_ui_textinput_base(self));
 	size = psy_ui_component_size_px(psy_ui_textinput_base(self));
-	r = psy_ui_realrectangle_make(psy_ui_realpoint_zero(), size);
-	psy_ui_textoutrectangle(g, psy_ui_realpoint_make(0, 0),
+	y = (size.height - tm->tmHeight) / 2.0;
+	r = psy_ui_realrectangle_make(
+		psy_ui_realpoint_make(0.0, y),
+		psy_ui_realsize_make(size.width, tm->tmHeight));
+	psy_ui_textoutrectangle(g, psy_ui_realpoint_make(0.0, y),
 		psy_ui_ETO_CLIPPED, r, self->text, strlen(self->text));
 	psy_ui_textinput_drawcursor(self, g);
 }
@@ -386,6 +384,7 @@ void psy_ui_textinput_drawcursor(psy_ui_TextInput* self, psy_ui_Graphics* g)
 	if (psy_ui_component_hasfocus(&self->component)) {
 		psy_ui_Size textsize;
 		double x;
+		double y;
 		const psy_ui_TextMetric* tm;
 		psy_ui_RealSize size;
 
@@ -393,13 +392,15 @@ void psy_ui_textinput_drawcursor(psy_ui_TextInput* self, psy_ui_Graphics* g)
 		size = psy_ui_component_size_px(psy_ui_textinput_base(self));
 		textsize = psy_ui_textsize(g, self->text, self->cp);
 		x = psy_ui_value_px(&textsize.width, tm, NULL);
+		y = (size.height - tm->tmHeight) / 2.0;
 		psy_ui_drawline(g,
-			psy_ui_realpoint_make(x, 0),
-			psy_ui_realpoint_make(x, size.height));
+			psy_ui_realpoint_make(x, y),
+			psy_ui_realpoint_make(x, y + tm->tmHeight));
 	}
 }
 
 void psy_ui_textinput_onmousedown(psy_ui_TextInput* self, psy_ui_MouseEvent* ev)
 {
 	psy_ui_component_setfocus(&self->component);
+	psy_ui_mouseevent_stop_propagation(ev);
 }

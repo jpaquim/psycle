@@ -1,25 +1,31 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #if !defined(VUSCOPE_H)
 #define VUSCOPE_H
 
-// host
+/* host */
 #include "workspace.h"
-// ui
+/* ui */
 #include "uicomponent.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// VuScope
-//
-// Display a blue left and green right volumebar in decibels.
+/*
+** VuScope
+**
+** Display a blue left and green right volumebar in decibels.
+*/
 
+/* VuScope */
 typedef struct VuScope {
-	// inherits
+	/* inherits */
 	psy_ui_Component component;
+	/* internal */
 	psy_audio_Wire wire;
 	psy_dsp_amp_t leftavg;
 	psy_dsp_amp_t rightavg;
@@ -27,8 +33,7 @@ typedef struct VuScope {
 	float mult;
 	int scope_peak_rate;
 	int hold;
-	int running;
-	// memories for vu-meter
+	int running;	
 	psy_dsp_amp_t peakL, peakR;
 	int peakLifeL, peakLifeR;
 	Workspace* workspace;	

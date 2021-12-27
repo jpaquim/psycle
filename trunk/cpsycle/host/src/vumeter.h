@@ -32,20 +32,21 @@ typedef struct {
 } VumeterSkin;
 
 typedef struct Vumeter {
-	// inherits
+	/* inherits */
 	psy_ui_Component component;
-	// ui elements
-	VumeterSkin skin;
-	// internal data
+	/* internal */
+	VumeterSkin skin;	
 	psy_dsp_amp_t leftavg;
 	psy_dsp_amp_t rightavg;
 	psy_dsp_amp_t l_log;
 	psy_dsp_amp_t r_log;
-	// references
+	/* references */
 	Workspace* workspace;
 } Vumeter;
 
 void vumeter_init(Vumeter*, psy_ui_Component* parent, Workspace*);
+
+void vumeter_idle(Vumeter*);
 
 INLINE psy_ui_Component* vumeter_base(Vumeter* self)
 {
