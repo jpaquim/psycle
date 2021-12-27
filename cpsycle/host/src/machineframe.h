@@ -1,5 +1,7 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #if !defined(MACHINEFRAME_H)
 #define MACHINEFRAME_H
@@ -27,14 +29,14 @@
 extern "C" {
 #endif
 
-// aim: Wraps a Parameterview or Machineeditorview inside a frame. A Frame
-//      can be docked at the bottom of the Machineview or floated to
-//      a window.
+/*
+** MachineFrame
+*/
 
 typedef struct ParameterBar {
-	// inherits
+	/* inherits */
 	psy_ui_Component component;
-	// ui elements	
+	/* internal */
 	psy_ui_Component row0;
 	psy_ui_Component buttons;
 	ZoomBox zoombox;		
@@ -54,24 +56,24 @@ void parameterbar_init(ParameterBar*, psy_ui_Component* parent, Workspace*);
 
 struct ParamViews;
 
-// MachineFrame
+/* MachineFrame */
 typedef struct MachineFrame {
-	// inherits
+	/* inherits */
 	psy_ui_Component component;
-	// ui elements
+	/* internal */
 	ParameterBar parameterbar;
 	psy_ui_Component client;
 	ParameterListBox parameterbox;
 	ParamMap parammap;
 	psy_ui_Notebook notebook;
-	psy_ui_TextInputor help;
+	psy_ui_Label help;
 	psy_ui_Component* view;
 	psy_ui_Component* machineview;	
 	psy_audio_Machine* machine;	
 	NewValView newval;
 	bool showfullmenu;
 	uintptr_t macid;	
-	// references
+	/* references */
 	ParamView* paramview;
 	struct ParamViews* paramviews;
 } MachineFrame;
@@ -90,4 +92,4 @@ void machineframe_setparamview(MachineFrame*, ParamView*, psy_audio_Machine*);
 }
 #endif
 
-#endif
+#endif /* MACHINEFRAME_H */

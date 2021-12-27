@@ -206,6 +206,7 @@ void mainframe_initframe(MainFrame* self)
 	psy_ui_component_setbackgroundmode(&self->view, psy_ui_SETBACKGROUND);	
 	psy_ui_component_setalign(&self->view, psy_ui_ALIGN_CLIENT);
 	psy_ui_component_init(&self->pane, &self->view, &self->view);
+	psy_ui_component_setbackgroundmode(&self->pane, psy_ui_NOBACKGROUND);
 	psy_ui_component_setalign(&self->pane, psy_ui_ALIGN_CLIENT);
 }
 
@@ -898,7 +899,7 @@ void mainframe_ontimer(MainFrame* self, uintptr_t timerid)
 	mainstatusbar_idle(&self->statusbar);
 	trackscopeview_idle(&self->trackscopeview);
 	seqview_idle(&self->sequenceview);
-	playposbar_idle(&self->playposbar);
+ 	playposbar_idle(&self->playposbar);
 	if (workspace_currview(&self->workspace).id == VIEW_ID_MACHINEVIEW) {
 		machineview_idle(&self->machineview);
 	}

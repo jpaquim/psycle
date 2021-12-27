@@ -68,17 +68,13 @@ void psy_ui_defaults_loadtheme(psy_ui_Defaults* self, const char* dir, psy_ui_Th
 	styleconfig = psy_property_clone(
 		psy_ui_styles_configuration(&self->styles));
 	if (propertiesio_load(styleconfig, &path, 0) == PSY_OK) {	
-		self->styles.theme = theme;
-		psy_ui_styles_configure(&self->styles, styleconfig);
-		/* font */
-		psy_ui_defaults_style(self, psy_ui_STYLE_ROOT)->use_font = 1;
-		{
-			psy_ui_FontInfo fontinfo;
+		psy_ui_FontInfo fontinfo;
 
-			psy_ui_fontinfo_init(&fontinfo, "Tahoma", -16);
-			psy_ui_font_init(&psy_ui_defaults_style(self, psy_ui_STYLE_ROOT)->font,
-				&fontinfo);
-		}
+		self->styles.theme = theme;
+		psy_ui_styles_configure(&self->styles, styleconfig);				
+		psy_ui_fontinfo_init(&fontinfo, "Tahoma", -16);
+		psy_ui_font_init(&psy_ui_defaults_style(self, psy_ui_STYLE_ROOT)->font,
+			&fontinfo);		
 	}	
 	psy_property_deallocate(styleconfig);
 	psy_path_dispose(&path);	

@@ -58,32 +58,49 @@ void psy_ui_fontinfo_string(const psy_ui_FontInfo* self, char* rv,
 /* psy_ui_Font */
 void psy_ui_font_init(psy_ui_Font* self, const psy_ui_FontInfo* fontinfo)
 {	
-    self->imp = psy_ui_impfactory_allocinit_fontimp(
-		psy_ui_app_impfactory(psy_ui_app()), fontinfo);
-	assert(self->imp);
+	if (fontinfo) {
+		self->imp = psy_ui_impfactory_allocinit_fontimp(
+			psy_ui_app_impfactory(psy_ui_app()), fontinfo);
+		assert(self->imp);
+	} else {		
+		self->imp = NULL;
+	}
 }
 
 void psy_ui_font_dispose(psy_ui_Font* self)
 {	
-	assert(self->imp);
-
-	self->imp->vtable->dev_dispose(self->imp);
-	free(self->imp);
-	self->imp = 0;
+	if (self->imp) {
+		self->imp->vtable->dev_dispose(self->imp);
+		free(self->imp);
+		self->imp = NULL;
+	}	
 }
 
 void psy_ui_font_copy(psy_ui_Font* self, const psy_ui_Font* other)
 {
-	assert(self->imp);
+	if (!other->imp) {
+		psy_ui_font_dispose(self);
+	} else {
+		if (!self->imp) {
+			psy_ui_FontInfo fontinfo;
 
-	self->imp->vtable->dev_copy(self->imp, other->imp);
+			fontinfo = psy_ui_font_fontinfo(other);
+			self->imp = psy_ui_impfactory_allocinit_fontimp(
+				psy_ui_app_impfactory(psy_ui_app()), &fontinfo);
+		}
+		self->imp->vtable->dev_copy(self->imp, other->imp);
+	}	
 }
 
 psy_ui_FontInfo psy_ui_font_fontinfo(const psy_ui_Font* self)
 {
-	assert(self->imp);
+	psy_ui_FontInfo fontinfo;
 
-	return self->imp->vtable->dev_fontinfo(self->imp);
+	if (self->imp) {
+		return self->imp->vtable->dev_fontinfo(self->imp);
+	}
+	psy_ui_fontinfo_init(&fontinfo, "arial", 12);
+	return fontinfo;
 }
 
 /* psy_ui_FontImp */

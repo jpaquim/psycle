@@ -20,6 +20,8 @@ static void linesperbeatbar_onlessclicked(LinesPerBeatBar*,
 static void linesperbeatbar_onmoreclicked(LinesPerBeatBar*,
 	psy_ui_Component* sender);
 static void linesperbeatbar_ontimer(LinesPerBeatBar*, uintptr_t timerid);
+static void linesperbeatbar_update(LinesPerBeatBar*);
+
 /* vtable */
 static psy_ui_ComponentVtable vtable;
 static bool vtable_initialized = FALSE;
@@ -73,6 +75,7 @@ void linesperbeatbar_init(LinesPerBeatBar* self, psy_ui_Component* parent,
 	/* start lpb poll timer */
 	psy_ui_component_starttimer(linesperbeatbar_base(self), 0,
 		LPB_REFRESHRATE);
+	linesperbeatbar_update(self);
 }
 
 void linesperbeatbar_onlessclicked(LinesPerBeatBar* self, psy_ui_Component* sender)
@@ -98,11 +101,19 @@ void linesperbeatbar_ontimer(LinesPerBeatBar* self, uintptr_t timerid)
 {
 	assert(self);
 
+	linesperbeatbar_update(self);
+}
+
+void linesperbeatbar_update(LinesPerBeatBar* self)
+{
+	assert(self);
+
 	if (self->lpb != psy_audio_player_lpb(self->player)) {
 		char text[64];
 
 		self->lpb = psy_audio_player_lpb(self->player);
 		psy_snprintf(text, 64, "%d", (int)self->lpb);
-		psy_ui_label_settext(&self->number, text);		
+		psy_ui_label_settext(&self->number, text);
+		psy_ui_component_update(&self->number.component);
 	}
 }

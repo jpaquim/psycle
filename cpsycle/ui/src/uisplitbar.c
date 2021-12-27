@@ -262,10 +262,10 @@ void splitter_onmousemove(psy_ui_Splitter* self, psy_ui_MouseEvent* ev)
 			default:
 				break;
 		}
-		psy_ui_component_invalidate(&self->component);
-		psy_ui_component_update(&self->component);
+		psy_ui_component_invalidate(psy_ui_component_parent(&self->component));
+		psy_ui_component_update(psy_ui_component_parent(&self->component));
 	} else {
-		psy_ui_component_invalidate(&self->component);
+		psy_ui_component_invalidate(psy_ui_component_parent(&self->component));
 	}
 	splitter_setcursor(self);
 }

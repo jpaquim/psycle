@@ -158,6 +158,7 @@ void machinewireview_init(MachineWireView* self, psy_ui_Component* parent,
 	psy_table_init(&self->machineuis);	
 	psy_ui_component_setfont(&self->component, &self->skin->font);
 	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_SCROLL);	
+	self->component.id = 60;
 	self->dragslot = psy_INDEX_INVALID;
 	self->dragmode = MACHINEVIEW_DRAG_MACHINE;
 	self->selectedslot = psy_audio_MASTER_INDEX;	
@@ -1090,8 +1091,8 @@ void machinewireview_idle(MachineWireView* self)
 	updatevus = psy_ui_component_drawvisible(&self->component) &&
 		self->skin->drawvumeters;
 	if (updatevus) {
-		// self->vudrawupdate = TRUE;		
-		// machineui_beginvuupdate();
+		self->vudrawupdate = TRUE;		
+		machineui_beginvuupdate();
 		for (it = psy_table_begin(&self->machineuis);
 				!psy_tableiterator_equal(&it, psy_table_end());
 				psy_tableiterator_inc(&it)) {							
@@ -1099,8 +1100,8 @@ void machinewireview_idle(MachineWireView* self)
 				psy_tableiterator_value(&it));
 		}		
 		psy_ui_component_update(machinewireview_base(self));		
-		// machineui_endvuupdate();
-		// self->vudrawupdate = FALSE;
+		machineui_endvuupdate();
+		self->vudrawupdate = FALSE;
 	}
 	if (self->machines && self->opcount != self->machines->opcount) {
 		psy_ui_component_invalidate(&self->component);

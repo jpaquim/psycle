@@ -10,8 +10,8 @@
 /* host */
 #include "styles.h"
 
-static double keyheight = 4.5;
-static double keybasewidth = 20.0;
+static double keyheight = 3.0;
+static double keybasewidth = 10.0;
 static double keywidths[] = { 1.0, 1.5, 1.75, 2.27, 3.8, 0.25 };
 
 void kbdboxstate_init(KbdBoxState* self)
