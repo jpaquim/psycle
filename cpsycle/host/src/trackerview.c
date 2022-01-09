@@ -1796,7 +1796,7 @@ void trackergrid_onplaylinechanged(TrackerGrid* self, Workspace* sender)
 /* prototypes */
 static void trackerview_onscrollpanealign(TrackerView*,
 	psy_ui_Component* sender);
-static void trackerview_onsongchanged(TrackerView*, Workspace*, int flag);
+static void trackerview_onsongchanged(TrackerView*, Workspace* sender);
 static void trackerview_connectsong(TrackerView*);
 static void trackerview_oncursorchanged(TrackerView*, psy_audio_Sequence*
 	sender);
@@ -1836,8 +1836,7 @@ void trackerview_onscrollpanealign(TrackerView* self, psy_ui_Component* sender)
 		self->grid.state->lineheightpx);
 }
 
-void trackerview_onsongchanged(TrackerView* self, Workspace* workspace,
-	int flag)
+void trackerview_onsongchanged(TrackerView* self, Workspace* sender)
 {
 	trackerview_connectsong(self);
 }

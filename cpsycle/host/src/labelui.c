@@ -36,9 +36,9 @@ static psy_ui_ComponentVtable* labelui_vtable_init(LabelUi* self)
 	}
 	return &labelui_vtable;
 }
-// implementation
-void labelui_init(LabelUi* self, psy_ui_Component* parent,
-	psy_ui_Component* view,
+
+/* implementation */
+void labelui_init(LabelUi* self, psy_ui_Component* parent,	
 	psy_audio_Machine* machine, uintptr_t paramidx,
 	psy_audio_MachineParam* param,
 	ParamSkin* skin)
@@ -46,7 +46,7 @@ void labelui_init(LabelUi* self, psy_ui_Component* parent,
 	assert(self);	
 	assert(skin);	
 
-	psy_ui_component_init(&self->component, parent, view);
+	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_setvtable(&self->component, labelui_vtable_init(self));	
 	psy_ui_component_setbackgroundmode(&self->component,
 		psy_ui_NOBACKGROUND);	
@@ -61,7 +61,7 @@ LabelUi* labelui_alloc(void)
 	return (LabelUi*)malloc(sizeof(LabelUi));
 }
 
-LabelUi* labelui_allocinit(psy_ui_Component* parent, psy_ui_Component* view,
+LabelUi* labelui_allocinit(psy_ui_Component* parent,
 	psy_audio_Machine* machine, uintptr_t paramidx, psy_audio_MachineParam* param,
 	ParamSkin* paramskin)
 {
@@ -69,7 +69,7 @@ LabelUi* labelui_allocinit(psy_ui_Component* parent, psy_ui_Component* view,
 
 	rv = labelui_alloc();
 	if (rv) {
-		labelui_init(rv, parent, view, machine, paramidx, param, paramskin);
+		labelui_init(rv, parent, machine, paramidx, param, paramskin);
 		rv->component.deallocate = TRUE;
 	}
 	return rv;

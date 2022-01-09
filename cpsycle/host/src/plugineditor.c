@@ -62,12 +62,12 @@ void plugineditorcreatebar_init(PluginEditorCreateBar* self,
 	psy_ui_component_setalign(&self->create.component, psy_ui_ALIGN_RIGHT);	
 }
 
-// PluginEditor
-// prototypes
+/* PluginEditor */
+/* prototypes */
 static void plugineditor_inittitlebar(PluginEditor*);
 static void plugineditor_onmachineschangeslot(PluginEditor*,
 	psy_audio_Machines*, uintptr_t slot);
-static void plugineditor_onsongchanged(PluginEditor*, Workspace*, int flag);
+static void plugineditor_onsongchanged(PluginEditor*, Workspace* sender);
 static void plugineditor_connectmachinesignals(PluginEditor*, Workspace*);
 static void plugineditor_ondestroy(PluginEditor*, psy_ui_Component* sender);
 static void plugineditor_onnewplugin(PluginEditor*, psy_ui_Component* sender);
@@ -184,10 +184,9 @@ void plugineditor_onmachineschangeslot(PluginEditor* self,
 	}
 }
 
-void plugineditor_onsongchanged(PluginEditor* self, Workspace* workspace,
-	int flag)
+void plugineditor_onsongchanged(PluginEditor* self, Workspace* sender)
 {
-	plugineditor_connectmachinesignals(self, workspace);
+	plugineditor_connectmachinesignals(self, sender);
 }
 
 void plugineditor_connectmachinesignals(PluginEditor* self,

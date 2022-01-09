@@ -43,22 +43,20 @@ static psy_ui_ComponentVtable* checkui_vtable_init(CheckUi* self)
 	}
 	return &checkui_vtable;
 }
-// implementation
-void checkui_init(CheckUi* self, psy_ui_Component* parent,
-	psy_ui_Component* view,
+
+/* implementation */
+void checkui_init(CheckUi* self, psy_ui_Component* parent,	
 	psy_audio_Machine* machine, uintptr_t paramidx,
 	psy_audio_MachineParam* param, ParamSkin* paramskin)
 {
 	assert(self);	
-	assert(paramskin);	
-	assert(view);
+	assert(paramskin);		
 
-	psy_ui_component_init(&self->component, parent, view);
+	psy_ui_component_init(&self->component, parent, NULL);
 	checkui_vtable_init(self);
 	self->component.vtable = &checkui_vtable;
 	psy_ui_component_setbackgroundmode(&self->component,
-		psy_ui_NOBACKGROUND);
-	self->view = view;	
+		psy_ui_NOBACKGROUND);	
 	self->skin = paramskin;
 	self->machine = machine;
 	self->paramidx = paramidx;
@@ -71,8 +69,7 @@ CheckUi* checkui_alloc(void)
 	return (CheckUi*)malloc(sizeof(CheckUi));
 }
 
-CheckUi* checkui_allocinit(psy_ui_Component* parent,
-	psy_ui_Component* view,
+CheckUi* checkui_allocinit(psy_ui_Component* parent,	
 	psy_audio_Machine* machine, uintptr_t paramidx,
 	psy_audio_MachineParam* param, ParamSkin* skin)
 {
@@ -80,7 +77,7 @@ CheckUi* checkui_allocinit(psy_ui_Component* parent,
 
 	rv = checkui_alloc();
 	if (rv) {
-		checkui_init(rv, parent, view, machine, paramidx, param, skin);
+		checkui_init(rv, parent, machine, paramidx, param, skin);
 		rv->component.deallocate = TRUE;
 	}
 	return rv;

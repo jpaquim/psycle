@@ -37,21 +37,20 @@ static psy_ui_ComponentVtable* headerui_vtable_init(HeaderUi* self)
 	}
 	return &headerui_vtable;
 }
+
 // implementation
-void headerui_init(HeaderUi* self, psy_ui_Component* parent,
-	psy_ui_Component* view,
+void headerui_init(HeaderUi* self, psy_ui_Component* parent,	
 	psy_audio_Machine* machine, uintptr_t paramidx,
 	psy_audio_MachineParam* param, ParamSkin* skin)
 {
 	assert(self);	
 	assert(skin);	
 
-	psy_ui_component_init(&self->component, parent, view);
+	psy_ui_component_init(&self->component, parent, NULL);
 	headerui_vtable_init(self);
 	self->component.vtable = &headerui_vtable;
 	psy_ui_component_setbackgroundmode(&self->component,
-		psy_ui_NOBACKGROUND);
-	self->view = view;	
+		psy_ui_NOBACKGROUND);	
 	self->skin = skin;
 	self->machine = machine;
 	self->paramidx = paramidx,
@@ -63,7 +62,7 @@ HeaderUi* headerui_alloc(void)
 	return (HeaderUi*)malloc(sizeof(HeaderUi));
 }
 
-HeaderUi* headerui_allocinit(psy_ui_Component* parent, psy_ui_Component* view,
+HeaderUi* headerui_allocinit(psy_ui_Component* parent,
 	psy_audio_Machine* machine, uintptr_t paramidx,
 	psy_audio_MachineParam* param, ParamSkin* paramskin)
 {
@@ -71,7 +70,7 @@ HeaderUi* headerui_allocinit(psy_ui_Component* parent, psy_ui_Component* view,
 
 	rv = headerui_alloc();
 	if (rv) {
-		headerui_init(rv, parent, view, machine, paramidx, param, paramskin);
+		headerui_init(rv, parent, machine, paramidx, param, paramskin);
 		rv->component.deallocate = TRUE;
 	}
 	return rv;

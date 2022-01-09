@@ -18,7 +18,6 @@ static void masterui_drawbackground(MasterUi*, psy_ui_Graphics*);
 static void masterui_onmousedoubleclick(MasterUi*, psy_ui_MouseEvent*);
 static void masterui_drawhighlight(MasterUi*, psy_ui_Graphics*);
 static void masterui_move(MasterUi*, psy_ui_Point topleft);
-static void masterui_invalidate(MasterUi*);
 static void masterui_showparameters(MasterUi*, psy_ui_Component* parent);
 static void masterui_onpreferredsize(MasterUi*, const psy_ui_Size* limit,
 	psy_ui_Size* rv);
@@ -38,9 +37,7 @@ static psy_ui_ComponentVtable* masterui_vtable_init(MasterUi* self)
 		masterui_vtable.ondraw = (psy_ui_fp_component_ondraw)masterui_ondraw;		
 		masterui_vtable.onmousedoubleclick = (psy_ui_fp_component_onmouseevent)
 			masterui_onmousedoubleclick;
-		masterui_vtable.move = (psy_ui_fp_component_move)masterui_move;
-		masterui_vtable.invalidate = (psy_ui_fp_component_invalidate)
-			masterui_invalidate;
+		masterui_vtable.move = (psy_ui_fp_component_move)masterui_move;		
 		masterui_vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
 			masterui_onpreferredsize;
 		masterui_vtable_initialized = TRUE;
@@ -156,13 +153,6 @@ void masterui_onmousedoubleclick(MasterUi* self, psy_ui_MouseEvent* ev)
 			masterui_showparameters(self, self->component.view);
 		}
 		psy_ui_mouseevent_stop_propagation(ev);
-	}
-}
-
-void masterui_invalidate(MasterUi* self)
-{
-	if (!machineui_vuupdate()) {
-		masterui_super_vtable.invalidate(&self->component);
 	}
 }
 

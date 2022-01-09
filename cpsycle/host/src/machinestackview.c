@@ -41,17 +41,23 @@ static void outputrouteparam_vtable_init(OutputRouteParam* self)
 {
 	if (!outputrouteparam_vtable_initialized) {
 		outputrouteparam_vtable = *(self->machineparam.vtable);
-		outputrouteparam_vtable.normvalue = (fp_machineparam_normvalue)
+		outputrouteparam_vtable.normvalue =
+			(fp_machineparam_normvalue)
 			outputrouteparam_normvalue;
-		outputrouteparam_vtable.tweak = (fp_machineparam_tweak)
+		outputrouteparam_vtable.tweak =
+			(fp_machineparam_tweak)
 			outputrouteparam_tweak;
-		outputrouteparam_vtable.describe = (fp_machineparam_describe)
+		outputrouteparam_vtable.describe =
+			(fp_machineparam_describe)
 			outputrouteparam_describe;
-		outputrouteparam_vtable.type = (fp_machineparam_type)
+		outputrouteparam_vtable.type =
+			(fp_machineparam_type)
 			outputrouteparam_type;
-		outputrouteparam_vtable.range = (fp_machineparam_range)
+		outputrouteparam_vtable.range =
+			(fp_machineparam_range)
 			outputrouteparam_range;
-		outputrouteparam_vtable.name = (fp_machineparam_name)
+		outputrouteparam_vtable.name =
+			(fp_machineparam_name)
 			outputrouteparam_name;
 		outputrouteparam_vtable_initialized = TRUE;
 	}
@@ -252,7 +258,7 @@ psy_List* outputrouteparam_buses(OutputRouteParam* self)
 		uintptr_t input;
 		psy_List* p;
 
-		// avoid connnection to same bus
+		/* avoid connnection to same bus */
 		column = machinestackstate_column(self->state, self->column);
 		if (column) {
 			input = machinestackcolumn_at(column, 0);
@@ -1032,7 +1038,7 @@ void machinestackinputs_build(MachineStackInputs* self)
 			if (column && column->input != psy_INDEX_INVALID) {
 				component = machineui_create(
 					psy_audio_machines_at(self->state->machines, column->input),
-					column->input, self->skin, &self->component, &self->component,
+					column->input, self->skin, &self->component,
 					self->state->paramviews, FALSE, MACHINEUIMODE_BITMAP, self->workspace);
 			} else {
 				if (!column || column->offset != 0) {
@@ -1045,8 +1051,7 @@ void machinestackinputs_build(MachineStackInputs* self)
 					uintptr_t first;
 
 					first = machinestackcolumn_at(column, 0);
-					arrow = arrowui_allocinit(&self->component,
-						&self->component,
+					arrow = arrowui_allocinit(&self->component,						
 						psy_audio_wire_make(column->inputroute, first),
 						self->skin, self->workspace);
 					component = &arrow->component;
@@ -1067,10 +1072,8 @@ void machinestackinputs_onmouseenter(MachineStackInputs* self)
 
 void machinestackinputs_updatevus(MachineStackInputs* self)
 {	
-	psy_ui_component_setbackgroundmode(&self->component, psy_ui_NOBACKGROUND);
-	machineui_beginvuupdate();
-	psy_ui_component_invalidate(&self->component);
-	machineui_endvuupdate();
+	psy_ui_component_setbackgroundmode(&self->component, psy_ui_NOBACKGROUND);	
+	psy_ui_component_invalidate(&self->component);	
 	psy_ui_component_setbackgroundmode(&self->component, psy_ui_SETBACKGROUND);
 	psy_ui_component_update(&self->component);
 }
@@ -1081,11 +1084,14 @@ void machinestackinputs_onmousedoubleclick(MachineStackInputs* self,
 	self->state->insertmachinemode = NEWMACHINE_APPENDSTACK;	
 }
 
-// MachineStackOutputs
-// MachineStackOutputs
+/*
+** MachineStackOutputs
+** MachineStackOutputs
+*/
 static void machinestackoutputs_onmouseup(MachineStackOutputs*,
 	psy_ui_MouseEvent*);
-// vtable
+
+/* vtable */
 static psy_ui_ComponentVtable machinestackoutputs_vtable;
 static bool machinestackoutputs_vtable_initialized = FALSE;
 
@@ -1101,7 +1107,8 @@ static psy_ui_ComponentVtable* machinestackoutputs_vtable_init(
 	}
 	return &machinestackoutputs_vtable;
 }
-// implementation
+
+/* implementation */
 void machinestackoutputs_init(MachineStackOutputs* self,
 	psy_ui_Component* parent, MachineStackState* state,
 	ParamSkin* skin)
@@ -1129,7 +1136,7 @@ void machinestackoutputs_build(MachineStackOutputs* self)
 			KnobUi* knobui;
 
 			column = machinestackstate_column(self->state, i);			
-			knobui = knobui_allocinit(&self->component, &self->component,
+			knobui = knobui_allocinit(&self->component,
 				NULL, psy_INDEX_INVALID,
 				(column)
 				? &column->outputroute.machineparam
@@ -1370,7 +1377,7 @@ void machinestackpane_build(MachineStackPane* self)
 
 					first = machinestackcolumn_at(column, 0);
 					arrow = arrowui_allocinit(&trackpane->client.component,
-						&self->component, psy_audio_wire_make(column->inputroute, first),
+						psy_audio_wire_make(column->inputroute, first),
 						self->skin, self->workspace);
 					if (arrow) {
 						psy_ui_Margin levelmargin;
@@ -1428,7 +1435,7 @@ psy_ui_Component* machinestackpane_insert(MachineStackPane* self, uintptr_t slot
 	}
 	rv =  machineui_create(
 		psy_audio_machines_at(self->state->machines, slot), slot, self->skin,
-		trackpane, &self->component, self->state->paramviews,
+		trackpane, self->state->paramviews,
 		FALSE, drawmode, self->workspace);
 	if (rv) {
 		if (drawmode = MACHINEUIMODE_DRAWSMALL) {
@@ -1458,9 +1465,7 @@ void machinestackpane_updatevus(MachineStackPane* self)
 		restorebgmode = trackpane->backgroundmode;
 		psy_ui_component_setbackgroundmode(trackpane,
 			psy_ui_NOBACKGROUND);
-		machineui_beginvuupdate();
-		psy_ui_component_invalidate(trackpane);
-		machineui_endvuupdate();
+		psy_ui_component_invalidate(trackpane);		
 		psy_ui_component_setbackgroundmode(trackpane,
 			(psy_ui_BackgroundMode)restorebgmode);
 	}
@@ -1509,8 +1514,7 @@ void machinestackvolumes_build(MachineStackVolumes* self)
 		if (column && machinestackcolumn_wire(column)) {
 			SliderGroupUi* slidergroup;			
 
-			slidergroup = slidergroupui_allocinit(&self->component,
-				&self->component,
+			slidergroup = slidergroupui_allocinit(&self->component,				
 				NULL, psy_INDEX_INVALID,
 				&column->wirevolume->machineparam,
 				psy_INDEX_INVALID,
@@ -1520,15 +1524,14 @@ void machinestackvolumes_build(MachineStackVolumes* self)
 				CheckUi* mute;
 
 				component = &slidergroup->component;
-				mute = checkui_allocinit(&slidergroup->controls, &self->component,
+				mute = checkui_allocinit(&slidergroup->controls,
 					NULL, psy_INDEX_INVALID,
 					&column->mute_param.machineparam,
 					self->skin);
 				psy_ui_component_setalign(&mute->component, psy_ui_ALIGN_TOP);
 			}
 		} else {
-			component = psy_ui_component_allocinit(&self->component,
-				&self->component);
+			component = psy_ui_component_allocinit(&self->component, NULL);
 			psy_ui_component_setbackgroundmode(component, psy_ui_NOBACKGROUND);
 		}
 		if (component) {
@@ -1550,11 +1553,11 @@ void machinestackvolumes_build(MachineStackVolumes* self)
 	psy_ui_component_align(&self->component);
 }
 
-// MachineStackView
-// prototypes
+/* MachineStackView */
+/* prototypes */
 static void machinestackview_destroy(MachineStackView*);
-static void machinestackview_onsongchanged(MachineStackView*, Workspace*,
-	int flag);
+static void machinestackview_onsongchanged(MachineStackView*,
+	Workspace* sender);
 static void machinestackview_onbuschanged(MachineStackView*, Workspace*,
 	psy_audio_Machine*);
 static void machinestackview_build(MachineStackView*);
@@ -1645,8 +1648,7 @@ void machinestackview_destroy(MachineStackView* self)
 	machinestackstate_dispose(&self->state);
 }
 
-void machinestackview_onsongchanged(MachineStackView* self,
-	Workspace* sender, int flag)
+void machinestackview_onsongchanged(MachineStackView* self, Workspace* sender)
 {
 	machinestackview_setmachines(self,
 		(sender->song)
@@ -1704,10 +1706,14 @@ void machinestackview_ondisconnected(MachineStackView* self,
 
 void machinestackview_idle(MachineStackView* self)
 {
+	ViewHistoryEntry currview;
+
 	if (machinestackstate_rebuildingview(&self->state)) {
 		machinestackview_build(self);
 	}
-	if (psy_ui_component_drawvisible(&self->volumes.component)) {
+	currview = workspace_currview(self->workspace);
+	if (currview.id == VIEW_ID_MACHINEVIEW &&
+			currview.section == SECTION_ID_MACHINEVIEW_STACK) {
 		psy_ui_component_invalidate(&self->volumes.component);
 		psy_ui_component_invalidate(&self->outputs.component);
 		machinestackinputs_updatevus(&self->inputs);

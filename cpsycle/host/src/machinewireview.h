@@ -1,12 +1,14 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #if !defined(MACHINEWIREVIEW_H)
 #define MACHINEWIREVIEW_H
 
-// host
+/* host */
 #include "machineframe.h"
-#include "machineeditorview.h" // vst view
+#include "machineeditorview.h" /* vst view */
 #include "machineviewskin.h"
 #include "machineui.h"
 #include "machinestackview.h"
@@ -22,15 +24,38 @@
 extern "C" {
 #endif
 
-// MachineWireView
-//	
-// Displays and edits machines with their wires
+/*
+** MachineWireView
+**
+** Displays and edits machines with their wires
+*/
 
-typedef struct MachineWireView {
-	// inherits
-	psy_ui_Component component;
-	// internal data
+/* MachineWireViewUis */
+
+typedef struct MachineWireViewUis {
 	psy_Table machineuis;
+	psy_ui_Component* view;
+	psy_audio_Machines* machines;
+	MachineViewSkin* skin;
+	ParamViews* paramviews;
+	Workspace* workspace;
+} MachineWireViewUis;
+
+void machinewireviewuis_init(MachineWireViewUis*, psy_ui_Component*,
+	MachineViewSkin*, ParamViews*, Workspace*);
+void machinewireviewuis_dispose(MachineWireViewUis*);
+
+psy_ui_Component* machinewireviewwuis_at(MachineWireViewUis*,
+	uintptr_t slot);
+void machinewireviewuis_remove(MachineWireViewUis*, uintptr_t slot);
+void machinewireviewuis_redrawvus(MachineWireViewUis*);
+
+/* MachineWireView */
+typedef struct MachineWireView {
+	/* inherits */
+	psy_ui_Component component;
+	/* internal */
+	MachineWireViewUis machineuis;
 	psy_List* wireframes;
 	psy_ui_RealPoint dragpt;
 	uintptr_t dragslot;
@@ -43,12 +68,11 @@ typedef struct MachineWireView {
 	int randominsert;
 	int addeffect;
 	bool mousemoved;
-	bool showwirehover;
-	bool vudrawupdate;
+	bool showwirehover;	
 	bool drawvirtualgenerators;
 	uintptr_t opcount;
 	bool centermaster;
-	// references	
+	/* references */
 	psy_audio_Machines* machines;	
 	Workspace* workspace;	
 	MachineViewSkin* skin;
@@ -58,6 +82,7 @@ typedef struct MachineWireView {
 void machinewireview_init(MachineWireView*, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, MachineViewSkin*, ParamViews*,
 	Workspace*);
+
 void machinewireview_centermaster(MachineWireView*);
 void machinewireview_showvirtualgenerators(MachineWireView*);
 void machinewireview_hidevirtualgenerators(MachineWireView*);

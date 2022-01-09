@@ -269,8 +269,7 @@ void patterntrackbox_onpreferredsize(PatternTrackBox* self,
 /* TrackerHeader */
 /* prototypes */
 static void trackerheader_ondestroy(TrackerHeader*);
-static void trackerheader_onsongchanged(TrackerHeader*, Workspace* sender,
-	int flag);
+static void trackerheader_onsongchanged(TrackerHeader*, Workspace* sender);
 static void trackerheader_connectsong(TrackerHeader*);
 static void trackerheader_oncursorchanged(TrackerHeader*, psy_audio_Sequence*);
 static void trackerheader_ontimer(TrackerHeader*, uintptr_t timerid);
@@ -349,8 +348,7 @@ void trackerheader_build(TrackerHeader* self)
 	psy_ui_component_align(&self->component);
 }
 
-void trackerheader_onsongchanged(TrackerHeader* self, Workspace* workspace,
-	int flag)
+void trackerheader_onsongchanged(TrackerHeader* self, Workspace* sender)
 {
 	trackerheader_connectsong(self);
 }

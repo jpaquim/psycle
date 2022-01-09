@@ -65,23 +65,57 @@ static void vtable_init(psy_ui_win_ImpFactory* self)
 {
 	if (!vtable_initialized) {
 		vtable = *self->imp.vtable;
-		vtable.allocinit_appimp = (psy_ui_fp_impfactory_allocinit_appimp)allocinit_appimp;
-		vtable.allocinit_bitmapimp = (psy_ui_fp_impfactory_allocinit_bitmapimp)allocinit_bitmapimp;
-		vtable.allocinit_graphicsimp = (psy_ui_fp_impfactory_allocinit_graphicsimp)allocinit_graphicsimp;
-		vtable.allocinit_graphicsimp_bitmap = (psy_ui_fp_impfactory_allocinit_graphicsimp_bitmap)allocinit_graphicsimp_bitmap;
-		vtable.allocinit_fontimp = (psy_ui_fp_impfactory_allocinit_fontimp)allocinit_fontimp;
-		vtable.allocinit_componentimp = (psy_ui_fp_impfactory_allocinit_componentimp)allocinit_componentimp;
-		vtable.allocinit_frameimp = (psy_ui_fp_impfactory_allocinit_frameimp)allocinit_frameimp;
-		vtable.allocinit_toolframeimp = (psy_ui_fp_impfactory_allocinit_frameimp)allocinit_toolframeimp;
-		vtable.allocinit_popupimp = (psy_ui_fp_impfactory_allocinit_frameimp)allocinit_popupimp;		
-		vtable.allocinit_colourdialogimp = (psy_ui_fp_impfactory_allocinit_colourdialogimp)allocinit_colourdialogimp;
-		vtable.allocinit_opendialogimp = (psy_ui_fp_impfactory_allocinit_opendialogimp)allocinit_opendialogimp;
-		vtable.allocinit_all_opendialogimp = (psy_ui_fp_impfactory_allocinit_all_opendialogimp)allocinit_all_opendialogimp;
-		vtable.allocinit_savedialogimp = (psy_ui_fp_impfactory_allocinit_savedialogimp)allocinit_savedialogimp;
-		vtable.allocinit_all_savedialogimp = (psy_ui_fp_impfactory_allocinit_all_savedialogimp)allocinit_all_savedialogimp;
-		vtable.allocinit_folderdialogimp = (psy_ui_fp_impfactory_allocinit_folderdialogimp)allocinit_folderdialogimp;
-		vtable.allocinit_all_folderdialogimp = (psy_ui_fp_impfactory_allocinit_all_folderdialogimp)allocinit_all_folderdialogimp;
-		vtable.allocinit_fontdialogimp = (psy_ui_fp_impfactory_allocinit_fontdialogimp)allocinit_fontdialogimp;
+		vtable.allocinit_appimp =
+			(psy_ui_fp_impfactory_allocinit_appimp)
+			allocinit_appimp;
+		vtable.allocinit_bitmapimp =
+			(psy_ui_fp_impfactory_allocinit_bitmapimp)
+			allocinit_bitmapimp;
+		vtable.allocinit_graphicsimp =
+			(psy_ui_fp_impfactory_allocinit_graphicsimp)
+			allocinit_graphicsimp;
+		vtable.allocinit_graphicsimp_bitmap =
+			(psy_ui_fp_impfactory_allocinit_graphicsimp_bitmap)
+			allocinit_graphicsimp_bitmap;
+		vtable.allocinit_fontimp =
+			(psy_ui_fp_impfactory_allocinit_fontimp)
+			allocinit_fontimp;
+		vtable.allocinit_componentimp =
+			(psy_ui_fp_impfactory_allocinit_componentimp)
+			allocinit_componentimp;
+		vtable.allocinit_frameimp =
+			(psy_ui_fp_impfactory_allocinit_frameimp)
+			allocinit_frameimp;
+		vtable.allocinit_toolframeimp =
+			(psy_ui_fp_impfactory_allocinit_frameimp)
+			allocinit_toolframeimp;
+		vtable.allocinit_popupimp =
+			(psy_ui_fp_impfactory_allocinit_frameimp)
+			allocinit_popupimp;		
+		vtable.allocinit_colourdialogimp =
+			(psy_ui_fp_impfactory_allocinit_colourdialogimp)
+			allocinit_colourdialogimp;
+		vtable.allocinit_opendialogimp =
+			(psy_ui_fp_impfactory_allocinit_opendialogimp)
+			allocinit_opendialogimp;
+		vtable.allocinit_all_opendialogimp =
+			(psy_ui_fp_impfactory_allocinit_all_opendialogimp)
+			allocinit_all_opendialogimp;
+		vtable.allocinit_savedialogimp =
+			(psy_ui_fp_impfactory_allocinit_savedialogimp)
+			allocinit_savedialogimp;
+		vtable.allocinit_all_savedialogimp =
+			(psy_ui_fp_impfactory_allocinit_all_savedialogimp)
+			allocinit_all_savedialogimp;
+		vtable.allocinit_folderdialogimp =
+			(psy_ui_fp_impfactory_allocinit_folderdialogimp)
+			allocinit_folderdialogimp;
+		vtable.allocinit_all_folderdialogimp =
+			(psy_ui_fp_impfactory_allocinit_all_folderdialogimp)
+			allocinit_all_folderdialogimp;
+		vtable.allocinit_fontdialogimp =
+			(psy_ui_fp_impfactory_allocinit_fontdialogimp)
+			allocinit_fontdialogimp;
 		vtable_initialized = TRUE;
 	}
 	self->imp.vtable = &vtable;
@@ -184,7 +218,8 @@ psy_ui_ComponentImp* allocinit_componentimp(psy_ui_win_ImpFactory* self, struct 
 	return (psy_ui_ComponentImp*)rv;
 }
 
-psy_ui_ComponentImp* allocinit_frameimp(psy_ui_win_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent)
+psy_ui_ComponentImp* allocinit_frameimp(psy_ui_win_ImpFactory* self,
+	struct psy_ui_Component* component, struct psy_ui_Component* parent)
 {
 	psy_ui_win_ComponentImp* rv;
 	psy_ui_WinApp* winapp;

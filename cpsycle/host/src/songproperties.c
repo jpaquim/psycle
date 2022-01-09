@@ -18,8 +18,8 @@
 
 /* prototypes */
 static void songpropertiesview_read(SongPropertiesView*);
-static void songpropertiesview_onsongchanged(SongPropertiesView*, Workspace*,
-	int flag);
+static void songpropertiesview_onsongchanged(SongPropertiesView*,
+	Workspace* sender);
 static void songpropertiesview_onhide(SongPropertiesView*,
 	psy_ui_Component* sender);
 static void songpropertiesview_oneditaccept(SongPropertiesView*,
@@ -195,14 +195,14 @@ void songpropertiesview_read(SongPropertiesView* self)
 }
 
 void songpropertiesview_onsongchanged(SongPropertiesView* self,
-	Workspace* workspace, int flag)
+	Workspace* sender)
 {
-	if (flag == WORKSPACE_LOADSONG) {
+	if (sender->songhasfile) {
 		songpropertiesview_disableedit(self);
 	} else {
 		songpropertiesview_enableedit(self);
 	}
-	self->song = workspace->song;
+	self->song = sender->song;
 	songpropertiesview_read(self);
 }
 

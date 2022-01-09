@@ -1,25 +1,27 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "machineviewbar.h"
-// host
+/* host */
 #include "skingraphics.h"
 #include "wireview.h"
 #include "machinewireview.h"
-// audio
+/* audio */
 #include <exclusivelock.h>
-// std
+/* std */
 #include <math.h>
-// platform
+/* platform */
 #include "../../detail/portable.h"
 #include "../../detail/trace.h"
 
-// MachineViewBar
-static void machineviewbar_onsongchanged(MachineViewBar*, Workspace*,
-	int flag);
-void machineviewbar_setmachines(MachineViewBar*, psy_audio_Machines*);
+/* MachineViewBar */
+static void machineviewbar_onsongchanged(MachineViewBar*, Workspace* sender);
+static void machineviewbar_setmachines(MachineViewBar*, psy_audio_Machines*);
 static void machineviewbar_onmixerconnectmodeclick(MachineViewBar*,
 	psy_ui_Component* sender);
 static void machineviewbar_updateconnectasmixersend(MachineViewBar*);
@@ -73,8 +75,7 @@ void machineviewbar_updateconnectasmixersend(MachineViewBar* self)
 	}
 }
 
-void machineviewbar_onsongchanged(MachineViewBar* self, Workspace* sender,
-	int flag)
+void machineviewbar_onsongchanged(MachineViewBar* self, Workspace* sender)
 {		
 	if (sender->song) {
 		machineviewbar_setmachines(self, psy_audio_song_machines(sender->song));

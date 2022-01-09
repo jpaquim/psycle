@@ -159,6 +159,7 @@ typedef struct Workspace {
 	ViewHistoryEntry restoreview;	
 	int cursorstep;	
 	char* filename;
+	bool songhasfile;
 	int followsong;
 	int recordtweaks;	
 	psy_audio_SequencePaste sequencepaste;

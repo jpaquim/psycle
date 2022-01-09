@@ -161,8 +161,7 @@ static void paramrackpane_onconnected(ParamRackPane*,
 	psy_audio_Connections* con, uintptr_t outputslot, uintptr_t inputslot);
 static void paramrackpane_ondisconnected(ParamRackPane*,
 	psy_audio_Connections* con, uintptr_t outputslot, uintptr_t inputslot);
-static void paramrackpane_onsongchanged(ParamRackPane*, Workspace* sender,
-	int flag);
+static void paramrackpane_onsongchanged(ParamRackPane*, Workspace* sender);
 static void paramrackpane_onmachineselected(ParamRackPane*,
 	psy_audio_Machines* sender, uintptr_t slot);
 // vtable
@@ -255,8 +254,7 @@ void paramrackpane_build(ParamRackPane* self)
 	psy_ui_component_show(&self->component);
 }
 
-void paramrackpane_onsongchanged(ParamRackPane* self, Workspace* sender,
-	int flag)
+void paramrackpane_onsongchanged(ParamRackPane* self, Workspace* sender)
 {	
 	self->lastselected = psy_INDEX_INVALID;
 	paramrackpane_connectsong(self);
@@ -618,8 +616,8 @@ void paramrackmodebar_setmode(ParamRackModeBar* self, ParamRackMode mode)
 	}
 }
 
-// ParamRack
-// prototypes
+/* ParamRack */
+/* prototypes */
 static void paramrack_onmodeselected(ParamRack*, ParamRackModeBar* sender,
 	intptr_t index);
 static void paramrack_onalign(ParamRack*, psy_ui_Component* sender);
@@ -627,7 +625,7 @@ static void paramrack_onlevelchanged(ParamRack*, IntEdit* sender);
 static void paramrack_onselect(ParamRack*, psy_ui_Button* sender);
 static void paramrack_onmachineselected(ParamRack*,
 	psy_audio_Machines*, uintptr_t slot);
-static void paramrack_onsongchanged(ParamRack*, Workspace* sender, int flag);
+static void paramrack_onsongchanged(ParamRack*, Workspace* sender);
 static void paramrack_connectsong(ParamRack*);
 
 /* implementation */
@@ -726,7 +724,7 @@ void paramrack_onselect(ParamRack* self, psy_ui_Button* sender)
 	psy_list_free(slotlist);	
 }
 
-void paramrack_onsongchanged(ParamRack* self, Workspace* sender, int flag)
+void paramrack_onsongchanged(ParamRack* self, Workspace* sender)
 {		
 	paramrack_connectsong(self);		
 }

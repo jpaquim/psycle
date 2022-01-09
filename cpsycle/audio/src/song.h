@@ -198,7 +198,7 @@ typedef struct psy_audio_Song {
 	psy_audio_Patterns patterns;
 	psy_audio_Sequence sequence;
 	psy_audio_Samples samples;
-	psy_audio_Instruments instruments;	
+	psy_audio_Instruments instruments;
 	/* references */
 	struct psy_audio_MachineFactory* machinefactory;
 } psy_audio_Song;

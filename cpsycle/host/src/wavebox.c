@@ -881,8 +881,7 @@ static void wavebox_onmousedoubleclick(WaveBox* self, psy_ui_Component* sender,
 void wavebox_setzoom(WaveBox* self, double zoomleft, double zoomright)
 {
 	waveboxcontext_setzoom(&self->context, zoomleft, zoomright);		
-	psy_ui_component_invalidate(&self->component);
-	psy_ui_component_update(&self->component);	
+	psy_ui_component_invalidate(&self->component);	
 }
 
 void wavebox_setselection(WaveBox* self, uintptr_t selectionstart,

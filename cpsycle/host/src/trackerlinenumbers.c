@@ -33,8 +33,8 @@ static int testcursor(psy_audio_SequenceCursor cursor, TrackerState* state,
 static void trackerlinenumbers_ondraw(TrackerLineNumbers*, psy_ui_Graphics*);
 static void trackerlinenumbers_onpreferredsize(TrackerLineNumbers*, psy_ui_Size* limit,
 	psy_ui_Size* rv);
-static void trackerlinenumbers_onsongchanged(TrackerLineNumbers*, Workspace* sender,
-	int flag);
+static void trackerlinenumbers_onsongchanged(TrackerLineNumbers*,
+	Workspace* sender);
 static void trackerlinennumbers_oncursorchanged(TrackerLineNumbers*,
 	psy_audio_Sequence*);
 static void trackerlinenumbers_onscroll(TrackerLineNumbers*, psy_ui_Component* sender);
@@ -287,11 +287,11 @@ void trackerlinennumbers_drawtext(TrackerLineNumbers* self, psy_ui_Graphics* g,
 	}
 }
 
-void trackerlinenumbers_onsongchanged(TrackerLineNumbers* self, Workspace* workspace,
-	int flag)
+void trackerlinenumbers_onsongchanged(TrackerLineNumbers* self,
+	Workspace* sender)
 {
-	if (workspace->song) {
-		psy_signal_connect(&self->workspace->song->sequence.signal_cursorchanged, self,
+	if (sender->song) {
+		psy_signal_connect(&sender->song->sequence.signal_cursorchanged, self,
 			trackerlinennumbers_oncursorchanged);
 	}
 }
@@ -512,8 +512,8 @@ static void trackerlinenumberbar_onplaylinechanged(TrackerLineNumberBar*,
 	Workspace* sender);
 static void trackerlinenumberbar_onconfigurepatternview(TrackerLineNumberBar*,
 	PatternViewConfig*, psy_Property*);
-static void trackerlinenumberbar_onsongchanged(TrackerLineNumberBar*, Workspace*,
-	int flag);
+static void trackerlinenumberbar_onsongchanged(TrackerLineNumberBar*,
+	Workspace* sender);
 static void trackerlinenumberbar_connectsong(TrackerLineNumberBar*);
 static void trackerlinenumberbar_oncursorchanged(TrackerLineNumberBar*,
 	psy_audio_Sequence* sender);
@@ -588,8 +588,7 @@ void trackerlinenumberbar_onconfigurepatternview(TrackerLineNumberBar* self,
 	psy_ui_component_align(trackerlinenumberbar_base(self));
 }
 
-void trackerlinenumberbar_onsongchanged(TrackerLineNumberBar* self, Workspace* workspace,
-	int flag)
+void trackerlinenumberbar_onsongchanged(TrackerLineNumberBar* self, Workspace* sender)
 {
 	trackerlinenumberbar_connectsong(self);
 }

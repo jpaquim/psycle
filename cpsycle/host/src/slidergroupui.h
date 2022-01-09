@@ -29,7 +29,6 @@ typedef struct SliderGroupUi {
 } SliderGroupUi;
 
 void slidergroupui_init(SliderGroupUi*, psy_ui_Component* parent,
-	psy_ui_Component* view,
 	psy_audio_Machine* machine, uintptr_t volumeparamidx,
 	psy_audio_MachineParam* volume,
 	uintptr_t levelparamidx,
@@ -37,8 +36,7 @@ void slidergroupui_init(SliderGroupUi*, psy_ui_Component* parent,
 	ParamSkin*);
 
 SliderGroupUi* slidergroupui_alloc(void);
-SliderGroupUi* slidergroupui_allocinit(psy_ui_Component* parent,
-	psy_ui_Component* view,
+SliderGroupUi* slidergroupui_allocinit(psy_ui_Component* parent,	
 	psy_audio_Machine* machine,
 	uintptr_t volumeparamidx, psy_audio_MachineParam* volume,
 	uintptr_t levelparamidx, psy_audio_MachineParam* level, ParamSkin*);

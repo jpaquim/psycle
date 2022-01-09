@@ -46,22 +46,20 @@ static psy_ui_ComponentVtable* switchui_vtable_init(SwitchUi* self)
 	}
 	return &switchui_vtable;
 }
+
 // implementation
 void switchui_init(SwitchUi* self, psy_ui_Component* parent,
-	psy_ui_Component* view,
 	psy_audio_Machine* machine, uintptr_t paramidx,
 	psy_audio_MachineParam* param, ParamSkin* paramskin)
 {
 	assert(self);	
-	assert(paramskin);	
-	assert(view);
+	assert(paramskin);		
 
-	psy_ui_component_init(&self->component, parent, view);
+	psy_ui_component_init(&self->component, parent, NULL);
 	switchui_vtable_init(self);
 	self->component.vtable = &switchui_vtable;
 	psy_ui_component_setbackgroundmode(&self->component,
-		psy_ui_NOBACKGROUND);
-	self->view = view;	
+		psy_ui_NOBACKGROUND);	
 	self->skin = paramskin;
 	self->machine = machine;
 	self->paramidx = paramidx;
@@ -74,7 +72,7 @@ SwitchUi* switchui_alloc(void)
 	return (SwitchUi*)malloc(sizeof(SwitchUi));
 }
 
-SwitchUi* switchui_allocinit(psy_ui_Component* parent, psy_ui_Component* view,
+SwitchUi* switchui_allocinit(psy_ui_Component* parent,
 	psy_audio_Machine* machine, uintptr_t paramidx,
 	psy_audio_MachineParam* param, ParamSkin* paramskin)
 {
@@ -82,7 +80,7 @@ SwitchUi* switchui_allocinit(psy_ui_Component* parent, psy_ui_Component* view,
 
 	rv = switchui_alloc();
 	if (rv) {
-		switchui_init(rv, parent, view, machine, paramidx, param, paramskin);
+		switchui_init(rv, parent, machine, paramidx, param, paramskin);
 		rv->component.deallocate = TRUE;
 	}
 	return rv;

@@ -18,7 +18,7 @@ static void machinecombobox_onmachinesinsert(MachineComboBox*, psy_audio_Machine
 static int machinecombobox_insertmachine(MachineComboBox*, size_t slot, psy_audio_Machine*);
 static void machinecombobox_onmachinesremoved(MachineComboBox*, psy_audio_Machines* sender, uintptr_t slot);
 static void machinecombobox_onmachineselect(MachineComboBox*, psy_audio_Machines* sender, uintptr_t slot);
-static void machinecombobox_onsongchanged(MachineComboBox*, Workspace*, int flag);
+static void machinecombobox_onsongchanged(MachineComboBox*, Workspace* sender);
 static void machinecombobox_connectsongsignals(MachineComboBox*);
 static void machinecombobox_connectinstrumentsignals(MachineComboBox*);
 static void machinecombobox_clearmachinebox(MachineComboBox* self);
@@ -156,10 +156,10 @@ void machinecombobox_onmachineselect(MachineComboBox* self, psy_audio_Machines* 
 }
 
 
-void machinecombobox_onsongchanged(MachineComboBox* self, Workspace* workspace, int flag)
+void machinecombobox_onsongchanged(MachineComboBox* self, Workspace* sender)
 {	
-	self->machines = &workspace->song->machines;
-	self->instruments = &workspace->song->instruments;	
+	self->machines = &sender->song->machines;
+	self->instruments = &sender->song->instruments;
 	machinecombobox_connectsongsignals(self);
 	machinecombobox_buildmachinebox(self);
 }

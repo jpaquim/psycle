@@ -150,10 +150,10 @@ void generatorui_ondraw(GeneratorUi* self, psy_ui_Graphics* g)
 	assert(self);
 
 	generatorui_drawbackground(self, g);
-	if (!machineui_vuupdate()) {
+	// if (!machineui_vuupdate()) {
 		generatorui_draweditname(self, g);		
 		generatorui_drawpanning(self, g);		
-	}
+	// }
 	generatorui_drawmute(self, g);
 	generatorui_drawsoloed(self, g);
 	if (self->intern.skin->drawvumeters) {
@@ -367,16 +367,16 @@ void generatorui_onmousedoubleclick(GeneratorUi* self, psy_ui_MouseEvent* ev)
 
 void generatorui_invalidate(GeneratorUi* self)
 {
-	if (machineui_vuupdate()) {		
-		psy_ui_component_invalidaterect(&self->component,
-			self->intern.coords->vu0.dest);
-		psy_ui_component_invalidaterect(&self->component,
-			self->intern.coords->mute.dest);
-		psy_ui_component_invalidaterect(&self->component,
-			self->intern.coords->solo.dest);
-	} else {
+	// if (machineui_vuupdate()) {		
+	//	psy_ui_component_invalidaterect(&self->component,
+	//		self->intern.coords->vu0.dest);
+	//	psy_ui_component_invalidaterect(&self->component,
+	//		self->intern.coords->mute.dest);
+	//	psy_ui_component_invalidaterect(&self->component,
+	//		self->intern.coords->solo.dest);
+	//} else {
 		generatorui_super_vtable.invalidate(&self->component);
-	}
+	//}
 }
 
 void generatorui_onshowparameters(GeneratorUi* self, Workspace* sender,

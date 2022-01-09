@@ -1,20 +1,26 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "arrowui.h"
-// platform
+/* platform */
 #include "../../detail/portable.h"
 
-// ArrowUi
+/* ArrowUi */
+
+/* prototypes */
 static void arrowui_ondraw(ArrowUi*, psy_ui_Graphics*);
 static void arrowui_drawbackground(ArrowUi*, psy_ui_Graphics*);
 static void arrowui_onpreferredsize(ArrowUi*, const psy_ui_Size* limit,
 	psy_ui_Size* rv);
 static void arrowui_onmousedown(ArrowUi*, psy_ui_MouseEvent*);
 static bool arrowui_selected(const ArrowUi*);
-// vtable
+
+/* vtable */
 static psy_ui_ComponentVtable arrowui_vtable;
 static bool arrowui_vtable_initialized = FALSE;
 
@@ -33,18 +39,18 @@ static psy_ui_ComponentVtable* arrowui_vtable_init(ArrowUi* self)
 	}
 	return &arrowui_vtable;
 }
-// implementation
+
+/* implementation */
 void arrowui_init(ArrowUi* self, psy_ui_Component* parent,
-	psy_ui_Component* view, psy_audio_Wire wire, MachineViewSkin* skin,
+	psy_audio_Wire wire, MachineViewSkin* skin,
 	Workspace* workspace)
 {
 	assert(self);
 	assert(workspace);
 	assert(workspace->song);
-	assert(skin);
-	assert(view);
+	assert(skin);	
 
-	psy_ui_component_init(&self->component, parent, view);	
+	psy_ui_component_init(&self->component, parent, NULL);	
 	arrowui_vtable_init(self);
 	self->component.vtable = &arrowui_vtable;
 	psy_ui_component_setbackgroundmode(&self->component,
@@ -60,14 +66,14 @@ ArrowUi* arrowui_alloc(void)
 }
 
 ArrowUi* arrowui_allocinit(psy_ui_Component* parent,
-	psy_ui_Component* view, psy_audio_Wire wire, MachineViewSkin* skin,
+	psy_audio_Wire wire, MachineViewSkin* skin,
 	Workspace* workspace)
 {
 	ArrowUi* rv;
 
 	rv = arrowui_alloc();
 	if (rv) {
-		arrowui_init(rv, parent, view, wire, skin, workspace);
+		arrowui_init(rv, parent, wire, skin, workspace);
 		rv->component.deallocate = TRUE;
 	}
 	return rv;

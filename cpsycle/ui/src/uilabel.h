@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #ifndef psy_ui_LABEL_H
@@ -25,9 +25,9 @@ extern "C" {
 #endif
 
 typedef struct psy_ui_Label {
-    // inherits
+    /* inherits */
     psy_ui_Component component;
-    // internal
+    /* internal */
     double charnumber;
     double linespacing;
     psy_ui_Alignment textalignment;
@@ -47,7 +47,11 @@ void psy_ui_label_init_text(psy_ui_Label*, psy_ui_Component* parent,
 psy_ui_Label* psy_ui_label_alloc(void);
 psy_ui_Label* psy_ui_label_allocinit(psy_ui_Component* parent);
 
+/* copies the text to the label */
 void psy_ui_label_settext(psy_ui_Label*, const char* text);
+/* adds a copy of the text to the label */
+void psy_ui_label_addtext(psy_ui_Label*, const char* text);
+/* returns the text owned by the label */
 const char* psy_ui_label_text(const psy_ui_Label*);
 void psy_ui_label_setdefaulttext(psy_ui_Label*, const char* text);
 void psy_ui_label_setcharnumber(psy_ui_Label*, double number);

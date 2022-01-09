@@ -12,7 +12,7 @@
 
 /* prototypes */
 static void seqeditor_ondestroy(SeqEditor*);
-static void seqeditor_onsongchanged(SeqEditor*, Workspace*, int flag);
+static void seqeditor_onsongchanged(SeqEditor*, Workspace* sender);
 static void seqeditor_updatesong(SeqEditor*);
 static void seqeditor_build(SeqEditor*);
 static void seqeditor_ontracksscroll(SeqEditor*, psy_ui_Component* sender);
@@ -141,7 +141,7 @@ void seqeditor_ondestroy(SeqEditor* self)
 	seqeditstate_dispose(&self->state);
 }
 
-void seqeditor_onsongchanged(SeqEditor* self, Workspace* workspace, int flag)
+void seqeditor_onsongchanged(SeqEditor* self, Workspace* sender)
 {	
 	seqeditor_updatesong(self);
 }

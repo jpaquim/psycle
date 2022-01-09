@@ -331,7 +331,7 @@ static void sampleeditorplaybar_initalign(SampleEditorPlayBar*);
 static void sampleeditor_initsampler(SampleEditor*);
 static void sampleeditor_ondestroy(SampleEditor*, psy_ui_Component* sender);
 static void sampleeditor_onzoom(SampleEditor*, psy_ui_Component* sender);
-static void sampleeditor_onsongchanged(SampleEditor*, Workspace*, int flag);
+static void sampleeditor_onsongchanged(SampleEditor*, Workspace* sender);
 static void sampleeditor_connectmachinessignals(SampleEditor*, Workspace*);
 static void sampleeditor_onplay(SampleEditor*, psy_ui_Component* sender);
 static void sampleeditor_onstop(SampleEditor*, psy_ui_Component* sender);
@@ -775,10 +775,9 @@ void sampleeditor_onzoom(SampleEditor* self, psy_ui_Component* sender)
 	psy_ui_component_invalidate(&self->header.component);
 }
 
-void sampleeditor_onsongchanged(SampleEditor* self, Workspace* workspace,
-	int flag)
+void sampleeditor_onsongchanged(SampleEditor* self, Workspace* sender)
 {
-	sampleeditor_connectmachinessignals(self, workspace);
+	sampleeditor_connectmachinessignals(self, sender);
 	sampleeditorbar_clearselection(&self->sampleeditortbar);
 }
 
@@ -1179,11 +1178,9 @@ void sampleeditor_onselectionchanged(SampleEditor* self, SampleBox* sender,
 				}				
 			}
 		}
-		psy_ui_component_invalidate(&self->samplebox.component);
-		psy_ui_component_update(&self->samplebox.component);
+		psy_ui_component_invalidate(&self->samplebox.component);		
 	} else {		
-		psy_ui_component_invalidate(&sender->component);
-		psy_ui_component_update(&sender->component);
+		psy_ui_component_invalidate(&sender->component);		
 	}	
 }
 

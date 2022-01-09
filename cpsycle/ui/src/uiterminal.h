@@ -7,8 +7,8 @@
 #define psy_ui_TERMINAL_H
 
 /* local */
-#include "uicomponent.h"
-#include "uieditor.h"
+#include "uilabel.h"
+#include "uiscroller.h"
 /* thread */
 #include <lock.h>
 
@@ -17,12 +17,12 @@ extern "C" {
 #endif
 
 /* psy_ui_Terminal */
-
 typedef struct psy_ui_Terminal {
 	/* inherits */
 	psy_ui_Component component;
 	/* internal */
-	psy_ui_TextInputor output;
+	psy_ui_Scroller scroller;
+	psy_ui_Label output;
 	psy_List* strbuffer;
 	psy_Lock outputlock;	
 } psy_ui_Terminal;

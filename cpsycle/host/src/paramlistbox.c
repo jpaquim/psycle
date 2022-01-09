@@ -28,7 +28,7 @@ void parameterlistbox_init(ParameterListBox* self, psy_ui_Component* parent,
 	} else {
 		paramindex = psy_INDEX_INVALID;
 	}
-	knobui_init(&self->knob, &self->component, &self->component, machine, paramindex,
+	knobui_init(&self->knob, &self->component, machine, paramindex,
 		NULL, machineparamconfig_skin(config));
 	psy_ui_component_setalign(&self->knob.component, psy_ui_ALIGN_TOP);
 	psy_ui_listbox_init(&self->listbox, &self->component);	

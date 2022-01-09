@@ -12,12 +12,14 @@
 /* platform */
 #include "../../detail/portable.h"
 
+/* prototypes */
 static void octavebar_buildoctavebox(OctaveBar*);
 static void octavebar_onoctaveboxselchange(OctaveBar*,
 	psy_ui_Component* sender, intptr_t sel);
 static void octavebar_onoctavechanged(OctaveBar*, Workspace*,
 	intptr_t octave);
-static void octavebar_onsongchanged(OctaveBar*, Workspace*, int flag);
+static void octavebar_onsongchanged(OctaveBar*, Workspace* sender);
+
 /* implementation */
 void octavebar_init(OctaveBar* self, psy_ui_Component* parent,
 	Workspace* workspace)
@@ -69,9 +71,8 @@ void octavebar_onoctavechanged(OctaveBar* self, Workspace* workspace,
 		workspace_octave(self->workspace));
 }
 
-void octavebar_onsongchanged(OctaveBar* self, Workspace* workspace,
-	int flag)
+void octavebar_onsongchanged(OctaveBar* self, Workspace* sender)
 {	
 	psy_ui_combobox_setcursel(&self->octavebox,
-		workspace_octave(self->workspace));
+		workspace_octave(sender));
 }
