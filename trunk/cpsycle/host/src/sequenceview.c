@@ -15,7 +15,7 @@
 
 /* SeqView */
 /* prototypes */
-static void seqview_onsongchanged(SeqView*, Workspace*, int flag);
+static void seqview_onsongchanged(SeqView*, Workspace* sender);
 static void seqview_onsequenceselect(SeqView*,
 	psy_audio_SequenceSelection*, psy_audio_OrderIndex*);
 static void seqview_ontrackreposition(SeqView*,
@@ -99,7 +99,7 @@ void seqview_idle(SeqView* self)
 	seqviewduration_idle(&self->duration);
 }
 
-void seqview_onsongchanged(SeqView* self, Workspace* sender, int flag)
+void seqview_onsongchanged(SeqView* self, Workspace* sender)
 {
 	sequencecmds_update(&self->cmds);	
 	if (workspace_song(sender)) {		

@@ -160,7 +160,7 @@ void psy_ui_winapp_registerclasses(psy_ui_WinApp* self)
 	INITCOMMONCONTROLSEX icex;
 	int succ;
 		
-	wndclass.style         = CS_HREDRAW | CS_VREDRAW ;
+	wndclass.style         = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
     wndclass.lpfnWndProc   = self->winproc;
     wndclass.cbClsExtra    = 0;
     wndclass.cbWndExtra    = 0;
@@ -417,54 +417,89 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 
 			border = psy_ui_component_border(imp->component);
 			if (imp->component->vtable->ondraw ||
-					imp->component->signal_draw.slots ||
-					imp->component->backgroundmode != psy_ui_NOBACKGROUND ||
-					psy_ui_border_isset(border)) {
+				imp->component->signal_draw.slots ||
+				imp->component->backgroundmode != psy_ui_NOBACKGROUND ||
+				psy_ui_border_isset(border)) {
 				HDC hdc;
 				PAINTSTRUCT ps;
 				psy_ui_RealSize clipsize;
+				HRGN hrgn;
+				DWORD rectcount;
+				DWORD r;
+				const RECT* pRect;
+				RGNDATA* pRegion;
 
-				hdc = BeginPaint(hwnd, &ps);
-				/* store clip / repaint size of paint request */
-				clipsize = psy_ui_realsize_make(
-					(double)ps.rcPaint.right - (double)ps.rcPaint.left,
-					(double)ps.rcPaint.bottom - (double)ps.rcPaint.top);
-				/* anything to paint ? */				
-				if (clipsize.width > 0.0 && clipsize.height > 0.0) {
-					psy_ui_Graphics	g;					
-					psy_ui_Bitmap dblbuffer;
 
-					if (psy_ui_component_doublebuffered(component)) {
-						/*
-						** create a graphics context with back buffer bitmap
-						** with origin (0; 0) and size of the paint request
-						*/
-						psy_ui_bitmap_init_size(&dblbuffer, clipsize);							
-						psy_ui_graphics_init_bitmap(&g, &dblbuffer);						
-						/* translate paint request to buffer 0, 0 origin */
-						psy_ui_setorigin(&g, psy_ui_realpoint_make(
-							ps.rcPaint.left, ps.rcPaint.top));						
-					} else {
-						/* create graphics handle with the paint hdc */
-						psy_ui_graphics_init(&g, hdc);						
+				hrgn = CreateRectRgn(0, 0, 0, 0);
+				rectcount = 0;
+				pRegion = 0;
+				if (GetUpdateRgn(hwnd, hrgn, FALSE) != NULLREGION) {
+					DWORD size;
+
+					size = GetRegionData(
+						hrgn, /* handle to region */
+						0,    /* size of region data buffering a region. */
+						NULL  /* region data buffer */
+					);
+					if (size) {
+						pRegion = (RGNDATA*)malloc(size);
+						GetRegionData(hrgn, size, pRegion);
+						pRect = (const RECT*)&pRegion->Buffer;
+						rectcount = pRegion->rdh.nCount;						
 					}
-					/* update graphics font with component font */
-					psy_ui_setfont(&g, psy_ui_component_font(imp->component));
-					/* set clip */
-					psy_ui_setrectangle(&g.clip, ps.rcPaint.left,
-						ps.rcPaint.top, clipsize.width, clipsize.height);
-					/* draw */
-					imp->imp.vtable->dev_draw(&imp->imp, &g);
-					if (psy_ui_component_doublebuffered(component)) {
-						/* copy the double buffer bitmap to the paint hdc */						
-						BitBlt(hdc, ps.rcPaint.left, ps.rcPaint.top,
-							(int)clipsize.width, (int)clipsize.height,
-							(HDC)psy_ui_graphics_dev_gc(&g), 0, 0, SRCCOPY);
-						psy_ui_bitmap_dispose(&dblbuffer);
-					}
-					psy_ui_graphics_dispose(&g);
 				}
-				EndPaint(hwnd, &ps);
+				hdc = BeginPaint(hwnd, &ps);
+				for (r = 0; r < rectcount; ++r) {
+					RECT rcPaint;
+
+					rcPaint = pRect[r];
+					if (rectcount > 1) {
+						r = r;
+					}
+					/* store clip / repaint size of paint request */
+					clipsize = psy_ui_realsize_make(
+						(double)rcPaint.right - (double)rcPaint.left,
+						(double)rcPaint.bottom - (double)rcPaint.top);
+					/* anything to paint ? */
+					if (clipsize.width > 0.0 && clipsize.height > 0.0) {
+						psy_ui_Graphics	g;
+						psy_ui_Bitmap dblbuffer;
+
+						if (psy_ui_component_doublebuffered(component)) {
+							/*
+							** create a graphics context with back buffer bitmap
+							** with origin (0; 0) and size of the paint request
+							*/
+							psy_ui_bitmap_init_size(&dblbuffer, clipsize);
+							psy_ui_graphics_init_bitmap(&g, &dblbuffer);
+							/* translate paint request to buffer 0, 0 origin */
+							psy_ui_setorigin(&g, psy_ui_realpoint_make(
+								rcPaint.left, rcPaint.top));
+						} else {
+							/* create graphics handle with the paint hdc */
+							psy_ui_graphics_init(&g, hdc);
+						}
+						/* update graphics font with component font */
+						psy_ui_setfont(&g, psy_ui_component_font(imp->component));
+						/* set clip */
+						psy_ui_setrectangle(&g.clip, rcPaint.left,
+							rcPaint.top, clipsize.width, clipsize.height);
+						/* draw */
+						imp->imp.vtable->dev_draw(&imp->imp, &g);
+						if (psy_ui_component_doublebuffered(component)) {
+							/* copy the double buffer bitmap to the paint hdc */
+							BitBlt(hdc, rcPaint.left, rcPaint.top,
+								(int)clipsize.width, (int)clipsize.height,
+								(HDC)psy_ui_graphics_dev_gc(&g), 0, 0, SRCCOPY);
+							psy_ui_bitmap_dispose(&dblbuffer);
+						}
+						psy_ui_graphics_dispose(&g);
+					}					
+				}
+				if (pRegion) {
+					DeleteObject((HGDIOBJ)pRegion);
+				}
+				EndPaint(hwnd, &ps);				
 				return 0;
 			}
 			break; }
@@ -539,15 +574,15 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 		case WM_LBUTTONDBLCLK:
 		case WM_RBUTTONDBLCLK:
 		case WM_MBUTTONDBLCLK:
-		case WM_MOUSEMOVE:
+		case WM_MOUSEMOVE:			
+			if (message == WM_LBUTTONDBLCLK) {
+				component = component;
+			}
 			if (component) {
 				psy_ui_MouseEvent ev;
 
 				ev = mouseevent(message, wParam, lParam);
-				adjustcoordinates(component, &ev.pt);
-				if (component->id == 100) {
-					component = component;
-				}
+				adjustcoordinates(component, &ev.pt);				
 				psy_ui_eventdispatch_send(&winapp->app->eventdispatch,
 					component, psy_ui_mouseevent_base(&ev));
 				return 0;

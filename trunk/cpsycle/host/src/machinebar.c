@@ -37,7 +37,7 @@ static void machinebar_oninstrumentnamechanged(MachineBar*, psy_ui_Component* se
 static void machinebar_oninstrumentinsert(MachineBar*, psy_audio_Instruments* sender, uintptr_t slot);
 static void machinebar_oninstrumentslotchanged(MachineBar* self, psy_audio_Instrument* sender,
 	const psy_audio_InstrumentIndex* slot);
-static void machinebar_onsongchanged(MachineBar*, Workspace*, int flag);
+static void machinebar_onsongchanged(MachineBar*, Workspace* sender);
 static void machinebar_connectsongsignals(MachineBar*);
 static void machinebar_connectinstrumentsignals(MachineBar*);
 static void machinebar_clearmachinebox(MachineBar* self);
@@ -389,46 +389,59 @@ void machinebar_oninstparamboxselchange(MachineBar* self, psy_ui_Component* send
 	}	
 }
 
-void machinebar_onsongchanged(MachineBar* self, Workspace* workspace, int flag)
+void machinebar_onsongchanged(MachineBar* self, Workspace* sender)
 {	
-	self->machines = &workspace->song->machines;
-	self->instruments = &workspace->song->instruments;	
+	if (sender->song) {
+		self->machines = &sender->song->machines;
+		self->instruments = &sender->song->instruments;
+	} else {
+		self->machines = NULL;
+		self->instruments = NULL;
+	}
 	machinebar_connectsongsignals(self);
 	machinebar_buildmachinebox(self);
 	machinebar_buildinstrumentlist(self);
-	psy_ui_combobox_setcursel(&self->instparambox,
-		psy_audio_instruments_selected(&workspace->song->instruments).subslot);
+	if (self->instruments) {
+		psy_ui_combobox_setcursel(&self->instparambox,
+			psy_audio_instruments_selected(self->instruments).subslot);
+	} else {
+		psy_ui_combobox_setcursel(&self->instparambox, -1);
+	}
 }
 
 void machinebar_connectsongsignals(MachineBar* self)
 {
-	psy_signal_connect(&self->machines->signal_insert, self,
-		machinebar_onmachinesinsert);
-	psy_signal_connect(&self->machines->signal_removed, self,
-		machinebar_onmachinesremoved);
-	psy_signal_connect(&self->machines->signal_slotchange, self,
-		machinebar_onmachineselect);
-	psy_signal_connect(&self->instruments->signal_insert, self,
-		machinebar_oninstrumentinsert);
-	psy_signal_connect(&self->instruments->signal_slotchange, self,
-		machinebar_oninstrumentslotchanged);
-	psy_signal_connect(&self->machines->signal_paramselected, self,
-		machinebar_onparamselected);
-	machinebar_connectinstrumentsignals(self);
+	if (self->machines) {
+		psy_signal_connect(&self->machines->signal_insert, self,
+			machinebar_onmachinesinsert);
+		psy_signal_connect(&self->machines->signal_removed, self,
+			machinebar_onmachinesremoved);
+		psy_signal_connect(&self->machines->signal_slotchange, self,
+			machinebar_onmachineselect);
+		psy_signal_connect(&self->instruments->signal_insert, self,
+			machinebar_oninstrumentinsert);
+		psy_signal_connect(&self->instruments->signal_slotchange, self,
+			machinebar_oninstrumentslotchanged);
+		psy_signal_connect(&self->machines->signal_paramselected, self,
+			machinebar_onparamselected);
+		machinebar_connectinstrumentsignals(self);
+	}
 }
 
 void machinebar_connectinstrumentsignals(MachineBar* self)
 {
-	psy_TableIterator it;
+	if (self->instruments) {
+		psy_TableIterator it;
 
-	for (it = psy_audio_instruments_groupbegin(self->instruments, 0);
+		for (it = psy_audio_instruments_groupbegin(self->instruments, 0);
 			!psy_tableiterator_equal(&it, psy_table_end());
 			psy_tableiterator_inc(&it)) {
-		psy_audio_Instrument* instrument;
-		
-		instrument = (psy_audio_Instrument*)psy_tableiterator_value(&it);
-		psy_signal_connect(&instrument->signal_namechanged, self,
-			machinebar_oninstrumentnamechanged);
+			psy_audio_Instrument* instrument;
+
+			instrument = (psy_audio_Instrument*)psy_tableiterator_value(&it);
+			psy_signal_connect(&instrument->signal_namechanged, self,
+				machinebar_oninstrumentnamechanged);
+		}
 	}
 }
 

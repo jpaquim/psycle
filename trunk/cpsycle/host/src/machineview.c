@@ -37,9 +37,11 @@ static void machineview_initnewmachine(MachineView*,
 	psy_ui_Component* tabbarparent);
 static void machineview_inittabbar(MachineView*,
 	psy_ui_Component* tabbarparent);
+static void machineview_ontabbarchanged(MachineView*, psy_ui_TabBar* sender,
+	uintptr_t index);
 static void machineview_connectsignals(MachineView*);
 static uintptr_t machineview_section(const MachineView*);
-static void machineview_onsongchanged(MachineView*, Workspace*, int flag);
+static void machineview_onsongchanged(MachineView*, Workspace* sender);
 static void machineview_onmousedown(MachineView*, psy_ui_MouseEvent*);
 static void machineview_onmouseup(MachineView*, psy_ui_MouseEvent*);
 static void machineview_onmousedoubleclick(MachineView*, psy_ui_MouseEvent*);
@@ -198,6 +200,8 @@ void machineview_connectsignals(MachineView* self)
 		self, machineview_onconfigure);
 	psy_ui_notebook_connectcontroller(&self->notebook,
 		&self->tabbar.signal_change);
+	psy_signal_connect(&self->tabbar.signal_change, self,
+		machineview_ontabbarchanged);
 	psy_signal_connect(&self->workspace->signal_songchanged, self,
 		machineview_onsongchanged);
 }
@@ -281,6 +285,16 @@ void machineview_onfocus(MachineView* self)
 	}
 }
 
+void machineview_ontabbarchanged(MachineView* self, psy_ui_TabBar* sender, uintptr_t index)
+{
+	ViewHistoryEntry entry;
+
+	entry = workspace_currview(self->workspace);
+	if (entry.id != VIEW_ID_MACHINEVIEW || entry.section != index) {
+		workspace_onviewchanged(self->workspace, viewhistoryentry_make(
+			VIEW_ID_MACHINEVIEW, index, psy_INDEX_INVALID));
+	}
+}
 
 void machineview_selectsection(MachineView* self, psy_ui_Component* sender,
 	uintptr_t section, uintptr_t options)
@@ -309,8 +323,7 @@ void machineview_selectsection(MachineView* self, psy_ui_Component* sender,
 	psy_ui_tabbar_select(&self->tabbar, section);
 }
 
-void machineview_onsongchanged(MachineView* self, Workspace* workspace,
-	int flag)
+void machineview_onsongchanged(MachineView* self, Workspace* sender)
 {	
 	psy_ui_tabbar_select(&self->tabbar, SECTION_ID_MACHINEVIEW_WIRES);	
 }
@@ -420,11 +433,12 @@ uintptr_t machineview_section(const MachineView* self)
 
 void machineview_idle(MachineView* self)
 {	
-	if (workspace_currview(self->workspace).section ==
-			SECTION_ID_MACHINEVIEW_WIRES) {
+	ViewHistoryEntry currview;
+
+	currview = workspace_currview(self->workspace);
+	if (currview.section == SECTION_ID_MACHINEVIEW_WIRES) {
 		machinewireview_idle(&self->wireview);
-	} else if (workspace_currview(self->workspace).section ==
-			SECTION_ID_MACHINEVIEW_STACK) {
+	} else if (currview.section == SECTION_ID_MACHINEVIEW_STACK) {
 		machinestackview_idle(&self->stackview);
 	}
 	machineproperties_idle(&self->properties);

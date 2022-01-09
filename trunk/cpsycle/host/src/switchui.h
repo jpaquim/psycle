@@ -33,12 +33,11 @@ typedef struct SwitchUi {
 } SwitchUi;
 
 void switchui_init(SwitchUi*, psy_ui_Component* parent,
-	psy_ui_Component* view,
 	struct psy_audio_Machine*, uintptr_t paramidx,
 	struct psy_audio_MachineParam*, struct ParamSkin*);
 
 SwitchUi* switchui_alloc(void);
-SwitchUi* switchui_allocinit(psy_ui_Component* parent, psy_ui_Component* view,
+SwitchUi* switchui_allocinit(psy_ui_Component* parent,
 	struct psy_audio_Machine*, uintptr_t paramidx,
 	struct psy_audio_MachineParam*, struct ParamSkin*);
 

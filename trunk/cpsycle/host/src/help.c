@@ -44,7 +44,6 @@ void help_init(Help* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_ui_margin_init_em(&leftmargin, 0.0, 0.0, 0.0, 3.0);		
 	psy_ui_label_init(&self->text, help_base(self));
 	psy_ui_component_setmargin(&self->text.component, leftmargin);
-	//psy_ui_textinput_preventedit(&self->editor);
 	psy_ui_label_enablewrap(&self->text);
 	psy_ui_component_setalign(&self->text.component, psy_ui_ALIGN_CLIENT);	
 	psy_ui_label_preventtranslation(&self->text);
@@ -144,10 +143,9 @@ void help_loadpage(Help* self, uintptr_t index)
 
 void help_load(Help* self, const char* path)
 {
-	FILE* fp;
-	char* text;
+	FILE* fp;	
 	
-	text = psy_strdup("");
+	psy_ui_label_settext(&self->text, "");
 	fp = fopen(path, "rb");
 	if (fp) {
 		char data[BLOCKSIZE];
@@ -156,13 +154,12 @@ void help_load(Help* self, const char* path)
 		memset(data, 0, BLOCKSIZE);
 		lenfile = fread(data, 1, sizeof(data), fp);
 		while (lenfile > 0) {
-			text = psy_strcat_realloc(text, (char*)data);			
+			psy_ui_label_addtext(&self->text, (char*)data);			
 			lenfile = fread(data, 1, sizeof(data), fp);
 		}
 		fclose(fp);
-	}
-	psy_ui_label_settext(&self->text, text);
-	free(text);
+		psy_ui_component_invalidate(psy_ui_label_base(&self->text));
+	}	
 }
 
 void help_onalign(Help* self, psy_ui_Component* sender)

@@ -330,8 +330,7 @@ void trackscopes_stop(TrackScopes* self)
 void trackscopes_idle(TrackScopes* self)
 {
 	if (self->running) {
-		psy_ui_component_invalidate(&self->component);
-		psy_ui_component_update(&self->component);
+		psy_ui_component_invalidate(&self->component);		
 	}
 }
 

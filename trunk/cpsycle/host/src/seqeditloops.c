@@ -354,7 +354,7 @@ static psy_audio_PatternNode* seqeditloops_findloopstart(SeqEditLoops*,
 static psy_audio_PatternNode* seqeditloops_findloopend(SeqEditLoops*,
 	psy_audio_PatternNode* begin);
 static void seqeditloops_onalign(SeqEditLoops*);
-static void seqeditloops_onsongchanged(SeqEditLoops*, Workspace*, int flag);
+static void seqeditloops_onsongchanged(SeqEditLoops*, Workspace* sender);
 static SeqEditLoop* seqeditloops_loopcomponent(SeqEditLoops*,
 	psy_audio_PatternNode*);
 static void seqeditloops_remove(SeqEditLoops*, psy_audio_PatternNode*);
@@ -617,8 +617,7 @@ void seqeditloops_onalign(SeqEditLoops* self)
 	}
 }
 
-void seqeditloops_onsongchanged(SeqEditLoops* self, Workspace* sender,
-	int flag)
+void seqeditloops_onsongchanged(SeqEditLoops* self, Workspace* sender)
 {
 	seqeditloops_build(self);
 	psy_ui_component_invalidate(&self->component);

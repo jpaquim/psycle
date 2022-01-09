@@ -52,6 +52,5 @@ void playposbar_updatelabel(PlayPosBar* self)
 		(float)psy_audio_player_position(self->player),
 		(int)self->player->sequencer.seqtime.timesig_numerator,
 		(int)self->player->sequencer.seqtime.timesig_denominator);
-	psy_ui_label_settext(&self->position, text);
-	psy_ui_component_update(&self->position.component);
+	psy_ui_label_settext(&self->position, text);	
 }

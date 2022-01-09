@@ -109,8 +109,6 @@ void vudisplay_drawpeak(VuDisplay* self, psy_ui_Graphics* g)
 	}
 }
 
-static bool vuupdate = FALSE;
-
 /* MachineUiCommon */
 /* implementation */
 void machineuicommon_init(MachineUiCommon* self, psy_ui_Component* component,
@@ -148,25 +146,9 @@ void machineuicommon_move(MachineUiCommon* self, psy_ui_Point topleft)
 	}	
 }
 
-/* static methods */
-void machineui_beginvuupdate(void)
-{
-	vuupdate = TRUE;
-}
-
-void machineui_endvuupdate(void)
-{
-	vuupdate = FALSE;
-}
-
-bool machineui_vuupdate(void)
-{
-	return vuupdate;
-}
-
 psy_ui_Component* machineui_create(psy_audio_Machine* machine, 
 	uintptr_t slot, MachineViewSkin* skin, psy_ui_Component* parent,
-	psy_ui_Component* view, ParamViews* paramviews, bool machinepos,
+	ParamViews* paramviews, bool machinepos,
 	MachineUiMode drawmode, Workspace* workspace)
 {	
 	psy_ui_Component* newui;

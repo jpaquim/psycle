@@ -326,5 +326,7 @@ void psy_ui_listbox_text(psy_ui_ListBox* self, char* text,
 	itemtext = (char*)psy_table_at(&self->client.items, index);
 	if (itemtext) {
 		psy_snprintf(text, 256, "%s", itemtext);
+	} else {
+		psy_snprintf(text, 256, "%s", "");
 	}
 }

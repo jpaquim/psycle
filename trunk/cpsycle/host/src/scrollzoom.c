@@ -138,8 +138,7 @@ void scrollzoom_onmousemove(ScrollZoom* self, psy_ui_MouseEvent* ev)
 			self->start = 1.0;
 		}
 		if (zoomold != self->end) {
-			psy_ui_component_invalidate(&self->component);
-			psy_ui_component_update(&self->component);
+			psy_ui_component_invalidate(&self->component);			
 			psy_signal_emit(&self->signal_zoom, self, 0);
 		}
 	} else if (self->dragmode == SCROLLZOOM_DRAG_RIGHT) {

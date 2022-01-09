@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -67,7 +67,7 @@ static void mainframe_onsettingshelptabbarchanged(MainFrame*,
 	psy_ui_Component* sender, uintptr_t tabindex);
 static void mainframe_onscripttabbarchanged(MainFrame*, psy_ui_Component* sender,
 	uintptr_t tabindex);
-static void mainframe_onsongchanged(MainFrame*, Workspace* sender, int flag);
+static void mainframe_onsongchanged(MainFrame*, Workspace* sender);
 static void mainframe_onviewselected(MainFrame*, Workspace*, uintptr_t view,
 	uintptr_t section, int option);
 static void mainframe_onfocusview(MainFrame*, Workspace*);
@@ -196,17 +196,13 @@ void mainframe_initframe(MainFrame* self)
 {
 	psy_ui_frame_init_main(mainframe_base(self));
 	vtable_init(self);	
-	psy_ui_component_setbackgroundmode(mainframe_base(self), psy_ui_NOBACKGROUND);
+	psy_ui_component_setbackgroundmode(mainframe_base(self), psy_ui_SETBACKGROUND);
+	psy_ui_component_doublebuffer(mainframe_base(self));
 	psy_ui_app_setmain(psy_ui_app(), mainframe_base(self));
 	psy_ui_component_seticonressource(mainframe_base(self), IDI_PSYCLEICON);
 	inithoststyles(&psy_ui_appdefaults()->styles, psy_ui_defaults()->styles.theme);
-	self->titlemodified = FALSE;
-	psy_ui_component_init(&self->view, mainframe_base(self), NULL);
-	psy_ui_component_doublebuffer(&self->view);
-	psy_ui_component_setbackgroundmode(&self->view, psy_ui_SETBACKGROUND);	
-	psy_ui_component_setalign(&self->view, psy_ui_ALIGN_CLIENT);
-	psy_ui_component_init(&self->pane, &self->view, &self->view);
-	psy_ui_component_setbackgroundmode(&self->pane, psy_ui_NOBACKGROUND);
+	self->titlemodified = FALSE;	
+	psy_ui_component_init(&self->pane, mainframe_base(self), mainframe_base(self));	
 	psy_ui_component_setalign(&self->pane, psy_ui_ALIGN_CLIENT);
 }
 
@@ -244,7 +240,7 @@ void mainframe_initworkspace(MainFrame* self)
 
 void mainframe_initlayout(MainFrame* self)
 {
-	mainstatusbar_init(&self->statusbar, &self->component, &self->workspace);
+	mainstatusbar_init(&self->statusbar, &self->pane, &self->workspace);
 	psy_ui_component_setalign(mainstatusbar_base(&self->statusbar),
 		psy_ui_ALIGN_BOTTOM);
 	psy_ui_component_init_align(&self->client, &self->pane, NULL,
@@ -270,12 +266,12 @@ void mainframe_initlayout(MainFrame* self)
 
 void mainframe_initterminal(MainFrame* self)
 {
-	psy_ui_terminal_init(&self->terminal, mainframe_base(self));
+	psy_ui_terminal_init(&self->terminal, &self->pane);
 	psy_ui_component_setalign(psy_ui_terminal_base(&self->terminal),
 		psy_ui_ALIGN_BOTTOM);
 	psy_ui_component_setpreferredsize(psy_ui_terminal_base(&self->terminal),
 		psy_ui_size_zero());
-	psy_ui_splitter_init(&self->splitbarterminal, mainframe_base(self));
+	psy_ui_splitter_init(&self->splitbarterminal, &self->pane);
 	psy_ui_component_setalign(psy_ui_splitter_base(&self->splitbarterminal),
 		psy_ui_ALIGN_BOTTOM);
 	workspace_connectterminal(&self->workspace, self,
@@ -744,9 +740,9 @@ bool mainframe_onnotes(MainFrame* self, InputHandler* sender)
 	return 0;
 }
 
-void mainframe_onsongchanged(MainFrame* self, Workspace* sender, int flag)
+void mainframe_onsongchanged(MainFrame* self, Workspace* sender)
 {
-	if (flag == WORKSPACE_LOADSONG) {
+	if (sender->songhasfile) {
 		if (generalconfig_showsonginfoonload(psycleconfig_general(
 				workspace_conf(sender)))) {
 			psy_ui_tabbar_select(&self->mainviewbar.tabbar,
@@ -762,7 +758,7 @@ void mainframe_onsongchanged(MainFrame* self, Workspace* sender, int flag)
 	vubar_reset(&self->vubar);
 	psy_ui_component_align(&self->client);
 	psy_ui_component_align(mainframe_base(self));
-	if (flag == WORKSPACE_NEWSONG) {
+	if (!sender->songhasfile) {
 		machinewireview_centermaster(&self->machineview.wireview);
 	}
 }

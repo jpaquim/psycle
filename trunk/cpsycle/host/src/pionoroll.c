@@ -73,7 +73,7 @@ static void pianoroll_updatetrackdisplaybuttons(Pianoroll*);
 static void pianoroll_onthemechanged(Pianoroll*, PatternViewConfig*, psy_Property* theme);
 static void pianoroll_updatetheme(Pianoroll*);
 static void pianoroll_oncursorchanged(Pianoroll*, psy_audio_Sequence* sender);
-static void pianoroll_onsongchanged(Pianoroll*, Workspace* sender, int flag);
+static void pianoroll_onsongchanged(Pianoroll*, Workspace* sender);
 static bool pianoroll_onrollcmds(Pianoroll*, InputHandler* sender);
 static bool pianoroll_onnotecmds(Pianoroll*, InputHandler* sender);
 static void pianoroll_onconfigure(Pianoroll*, PatternViewConfig* config,
@@ -294,10 +294,11 @@ void pianoroll_oncursorchanged(Pianoroll* self, psy_audio_Sequence* sender)
 	pianogrid_setcursor(&self->grid, sender->cursor);	
 }
 
-void pianoroll_onsongchanged(Pianoroll* self, Workspace* workspace, int flag)
+void pianoroll_onsongchanged(Pianoroll* self, Workspace* workspace)
 {	
 	if (workspace->song) {
-		psy_signal_connect(&self->workspace->song->sequence.signal_cursorchanged, self,
+		psy_signal_connect(
+			&self->workspace->song->sequence.signal_cursorchanged, self,
 			pianoroll_oncursorchanged);
 	}	
 }

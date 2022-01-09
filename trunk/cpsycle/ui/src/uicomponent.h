@@ -947,6 +947,7 @@ void psy_ui_component_mousewheel(psy_ui_Component*, psy_ui_MouseEvent*,
 
 void psy_ui_component_buffer(psy_ui_Component*);
 void psy_ui_component_clearbuffer(psy_ui_Component*);
+psy_ui_RealRectangle psy_ui_component_bounds(psy_ui_Component*);
 
 #ifdef __cplusplus
 }

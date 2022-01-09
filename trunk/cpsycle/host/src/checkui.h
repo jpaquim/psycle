@@ -19,26 +19,25 @@ extern "C" {
 
 struct ParamSkin;
 
-// CheckUi
+/* CheckUi */
 typedef struct CheckUi {
-	// inherits
+	/* inherits */
 	psy_ui_Component component;
-	// internal
+	/* internal */
 	ParamTweak paramtweak;
 	uintptr_t paramidx;
-	// references
-	struct ParamSkin* skin;	
-	psy_ui_Component* view;
+	/* references */
+	struct ParamSkin* skin;		
 	struct psy_audio_Machine* machine;	
 	struct psy_audio_MachineParam* param;
 } CheckUi;
 
-void checkui_init(CheckUi*, psy_ui_Component* parent, psy_ui_Component* view,
+void checkui_init(CheckUi*, psy_ui_Component* parent,
 	struct psy_audio_Machine*, uintptr_t paramidx,
 	struct psy_audio_MachineParam*, struct ParamSkin*);
 
 CheckUi* checkui_alloc(void);
-CheckUi* checkui_allocinit(psy_ui_Component* parent, psy_ui_Component* view,
+CheckUi* checkui_allocinit(psy_ui_Component* parent,
 	struct psy_audio_Machine*, uintptr_t paramidx,
 	struct psy_audio_MachineParam*, struct ParamSkin*);
 

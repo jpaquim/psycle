@@ -179,10 +179,10 @@ void effectui_ondraw(EffectUi* self, psy_ui_Graphics* g)
 	assert(self);
 
 	effectui_drawbackground(self, g);
-	if (!machineui_vuupdate()) {
+	// if (!machineui_vuupdate()) {
 		effectui_draweditname(self, g);		
 		effectui_drawpanning(self, g);		
-	}
+	// }
 	effectui_drawmute(self, g);
 	effectui_drawbypassed(self, g);
 	if (self->intern.skin->drawvumeters) {
@@ -406,16 +406,16 @@ void effectui_onmousedoubleclick(EffectUi* self, psy_ui_MouseEvent* ev)
 
 void effectui_invalidate(EffectUi* self)
 {
-	if (machineui_vuupdate()) {		
-		psy_ui_component_invalidaterect(&self->component,
-			self->intern.coords->vu0.dest);
-		psy_ui_component_invalidaterect(&self->component,
-			self->intern.coords->bypass.dest);
-		psy_ui_component_invalidaterect(&self->component,
-			self->intern.coords->mute.dest);
-	} else {
+	// if (machineui_vuupdate()) {		
+		// psy_ui_component_invalidaterect(&self->component,
+		//	self->intern.coords->vu0.dest);
+		// psy_ui_component_invalidaterect(&self->component,
+		//	self->intern.coords->bypass.dest);
+		// psy_ui_component_invalidaterect(&self->component,
+		//	self->intern.coords->mute.dest);
+	//} else {
 		effectui_super_vtable.invalidate(&self->component);
-	}
+	//}
 }
 
 void effectui_onshowparameters(EffectUi* self, Workspace* sender,

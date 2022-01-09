@@ -18,7 +18,7 @@ static void patternview_ondestroy(PatternView*);
 static void patternview_rebuild(PatternView*);
 static void patternview_setpattern(PatternView*, psy_audio_Pattern*);
 static void patternview_ontoggleproperties(PatternView*, PatternViewTabBar*);
-static void patternview_onsongchanged(PatternView*, Workspace*, int flag);
+static void patternview_onsongchanged(PatternView*, Workspace* sender);
 static void patternview_connectsong(PatternView*);
 static void patternview_onconfigure(PatternView*, PatternViewConfig*,
 	psy_Property*);
@@ -220,8 +220,7 @@ void patternview_setpattern(PatternView* self, psy_audio_Pattern* pattern)
 	psy_ui_component_invalidate(&self->component);
 }
 
-void patternview_onsongchanged(PatternView* self, Workspace* workspace,
-	int flag)
+void patternview_onsongchanged(PatternView* self, Workspace* sender)
 {	
 	assert(self);
 

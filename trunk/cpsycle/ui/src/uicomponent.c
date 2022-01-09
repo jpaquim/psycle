@@ -2583,3 +2583,29 @@ void psy_ui_component_stoptimer(psy_ui_Component* self, uintptr_t id)
 {
 	psy_ui_app_stoptimer(psy_ui_app(), self, id);
 }
+
+psy_ui_RealRectangle psy_ui_component_bounds(psy_ui_Component* self)
+{
+	psy_ui_RealRectangle rv;	
+	psy_List* p;
+	psy_List* q;
+	
+	for (p = q = psy_ui_component_children(self, psy_ui_NONRECURSIVE);
+			p != NULL; p = p->next) {
+		psy_ui_Component* component;
+		psy_ui_RealRectangle r;
+
+		component = (psy_ui_Component*)p->entry;
+		if (p == q) {
+			rv = psy_ui_component_position(component);
+		} else {
+			r = psy_ui_component_position(component);
+			psy_ui_realrectangle_union(&rv, &r);
+		}
+	}
+	if (!q) {
+		return psy_ui_realrectangle_zero();
+	}
+	psy_list_free(q);	
+	return rv;
+}

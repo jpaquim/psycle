@@ -39,21 +39,20 @@ static psy_ui_ComponentVtable* levelui_vtable_init(LevelUi* self)
 	}
 	return &levelui_vtable;
 }
-// implementation
+
+/* implementation */
 void levelui_init(LevelUi* self, psy_ui_Component* parent,
-	psy_ui_Component* view, psy_audio_Machine* machine, uintptr_t paramidx,
-	psy_audio_MachineParam* param,
-	ParamSkin* skin)
+	psy_audio_Machine* machine, uintptr_t paramidx,
+	psy_audio_MachineParam* param, ParamSkin* skin)
 {
 	assert(self);	
 	assert(skin);	
 
-	psy_ui_component_init(&self->component, parent, view);
+	psy_ui_component_init(&self->component, parent, NULL);
 	levelui_vtable_init(self);
 	self->component.vtable = &levelui_vtable;
 	psy_ui_component_setbackgroundmode(&self->component,
-		psy_ui_NOBACKGROUND);
-	self->view = view;	
+		psy_ui_NOBACKGROUND);	
 	self->skin = skin;
 	self->machine = machine;
 	self->paramidx = paramidx;
@@ -65,7 +64,7 @@ LevelUi* levelui_alloc(void)
 	return (LevelUi*)malloc(sizeof(LevelUi));
 }
 
-LevelUi* levelui_allocinit(psy_ui_Component* parent, psy_ui_Component* view,
+LevelUi* levelui_allocinit(psy_ui_Component* parent,
 	psy_audio_Machine* machine, uintptr_t paramidx,
 	psy_audio_MachineParam* param, ParamSkin* paramskin)
 {
@@ -73,7 +72,7 @@ LevelUi* levelui_allocinit(psy_ui_Component* parent, psy_ui_Component* view,
 
 	rv = levelui_alloc();
 	if (rv) {
-		levelui_init(rv, parent, view, machine, paramidx, param, paramskin);
+		levelui_init(rv, parent, machine, paramidx, param, paramskin);
 		rv->component.deallocate = TRUE;
 	}
 	return rv;

@@ -1,20 +1,24 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "sliderui.h"
-// host
+/* host */
 #include "skingraphics.h"
 #include "machineparamconfig.h"
-// audio
+/* audio */
 #include <machine.h>
 #include <plugin_interface.h>
-// platform
+/* platform */
 #include "../../detail/portable.h"
 
-// SliderUi
-// prototypes
+/* SliderUi */
+
+/* prototypes */
 static void sliderui_ondraw(SliderUi*, psy_ui_Graphics*);
 static void sliderui_onpreferredsize(SliderUi*, const psy_ui_Size* limit,
 	psy_ui_Size* rv);
@@ -22,7 +26,8 @@ static void sliderui_onmousedown(SliderUi*, psy_ui_MouseEvent*);
 static void sliderui_onmouseup(SliderUi*, psy_ui_MouseEvent*);
 static void sliderui_onmousemove(SliderUi*, psy_ui_MouseEvent*);
 static void sliderui_updateparam(SliderUi*);
-// vtable
+
+/* vtable */
 static psy_ui_ComponentVtable sliderui_vtable;
 static bool sliderui_vtable_initialized = FALSE;
 
@@ -42,9 +47,9 @@ static psy_ui_ComponentVtable* sliderui_vtable_init(SliderUi* self)
 	}
 	return &sliderui_vtable;
 }
-// implementation
-void sliderui_init(SliderUi* self, psy_ui_Component* parent,
-	psy_ui_Component* view,
+
+/* implementation */
+void sliderui_init(SliderUi* self, psy_ui_Component* parent,	
 	psy_audio_Machine* machine, uintptr_t paramidx,
 	psy_audio_MachineParam* param,
 	ParamSkin* skin)
@@ -52,12 +57,11 @@ void sliderui_init(SliderUi* self, psy_ui_Component* parent,
 	assert(self);	
 	assert(skin);
 
-	psy_ui_component_init(&self->component, parent, view);
+	psy_ui_component_init(&self->component, parent, NULL);
 	sliderui_vtable_init(self);
 	self->component.vtable = &sliderui_vtable;
 	psy_ui_component_setbackgroundmode(&self->component,
-		psy_ui_NOBACKGROUND);
-	self->view = view;	
+		psy_ui_NOBACKGROUND);	
 	self->skin = skin;
 	self->machine = machine;
 	self->paramidx = paramidx;
@@ -70,7 +74,7 @@ SliderUi* sliderui_alloc(void)
 	return (SliderUi*)malloc(sizeof(SliderUi));
 }
 
-SliderUi* sliderui_allocinit(psy_ui_Component* parent, psy_ui_Component* view,
+SliderUi* sliderui_allocinit(psy_ui_Component* parent,
 	psy_audio_Machine* machine, uintptr_t paramidx,
 	psy_audio_MachineParam* param, ParamSkin* paramskin)
 {
@@ -78,7 +82,7 @@ SliderUi* sliderui_allocinit(psy_ui_Component* parent, psy_ui_Component* view,
 
 	rv = sliderui_alloc();
 	if (rv) {
-		sliderui_init(rv, parent, view, machine, paramidx, param, paramskin);
+		sliderui_init(rv, parent, machine, paramidx, param, paramskin);
 		rv->component.deallocate = TRUE;
 	}
 	return rv;
@@ -94,7 +98,7 @@ void sliderui_ondraw(SliderUi* self, psy_ui_Graphics* g)
 
 	sliderui_updateparam(self);
 	size = psy_ui_component_size_px(&self->component);
-	// todo: make the slider scalable	
+	/*  todo: make the slider scalable */
 	psy_ui_setrectangle(&r, 0, 0, size.width, size.height);
 	psy_ui_drawsolidrectangle(g, r, self->skin->bottomcolour);
 	skin_blitcoord(g, &self->skin->mixerbitmap,

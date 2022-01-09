@@ -54,7 +54,7 @@ void mainstatusbar_init(MainStatusBar* self, psy_ui_Component* parent,
 {	
 	psy_ui_component_init(&self->component, parent, NULL);	
 	vtable_init(self);	
-	psy_ui_component_init(&self->pane, &self->component, &self->component);
+	psy_ui_component_init(&self->pane, &self->component, NULL);
 	psy_ui_component_setalign(&self->pane, psy_ui_ALIGN_CLIENT);
 	self->workspace = workspace;
 	self->clockcounter = 20;

@@ -68,8 +68,7 @@ extern "C" {
 typedef struct MainFrame {
 	/* inherits */
 	psy_ui_Component component;
-	/* internal */
-	psy_ui_Component view;
+	/* internal */	
 	psy_ui_Component pane;
 	psy_ui_Component top;	
 	psy_ui_Component toprows;

@@ -26,18 +26,17 @@ typedef struct HeaderUi {
 	// internal	
 	uintptr_t paramidx;
 	// references
-	struct ParamSkin* skin;
-	psy_ui_Component* view;
+	struct ParamSkin* skin;	
 	struct psy_audio_Machine* machine;
 	struct psy_audio_MachineParam* param;
 } HeaderUi;
 
-void headerui_init(HeaderUi*, psy_ui_Component* parent, psy_ui_Component* view,
+void headerui_init(HeaderUi*, psy_ui_Component* parent,
 	struct psy_audio_Machine*, uintptr_t paramidx,
 	struct psy_audio_MachineParam*, struct ParamSkin*);
 
 HeaderUi* headerui_alloc(void);
-HeaderUi* headerui_allocinit(psy_ui_Component* parent, psy_ui_Component* view,
+HeaderUi* headerui_allocinit(psy_ui_Component* parent,
 	struct psy_audio_Machine*, uintptr_t paramidx,
 	struct psy_audio_MachineParam*, struct ParamSkin*);
 

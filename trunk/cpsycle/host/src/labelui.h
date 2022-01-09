@@ -19,24 +19,24 @@ extern "C" {
 
 struct ParamSkin;
 
-// LabelUi
+/* LabelUi */
 typedef struct LabelUi {
-	// inherits
+	/* inherits */
 	psy_ui_Component component;
-	// internal	
+	/* internal */
 	uintptr_t paramidx;
-	// references
+	/* references */
 	ParamSkin* skin;
 	struct psy_audio_Machine* machine;	
 	struct psy_audio_MachineParam* param;
 } LabelUi;
 
-void labelui_init(LabelUi*, psy_ui_Component* parent, psy_ui_Component* view,
+void labelui_init(LabelUi*, psy_ui_Component* parent,
 	struct psy_audio_Machine*, uintptr_t paramidx,
 	struct psy_audio_MachineParam*, ParamSkin*);
 
 LabelUi* labelui_alloc(void);
-LabelUi* labelui_allocinit(psy_ui_Component* parent, psy_ui_Component* view,
+LabelUi* labelui_allocinit(psy_ui_Component* parent,
 	struct psy_audio_Machine*, uintptr_t paramidx,
 	struct psy_audio_MachineParam*, struct ParamSkin*);
 

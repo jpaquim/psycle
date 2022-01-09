@@ -1,14 +1,17 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "paramviews.h"
-// platform
+/* platform */
 #include "../../detail/portable.h"
 
 /* prototypes */
-static void paramviews_onsongchanged(ParamViews*, Workspace*, int flag);
+static void paramviews_onsongchanged(ParamViews*, Workspace* sender);
 static psy_audio_Machines* paramviews_machines(ParamViews*);
 /* implementation */
 void paramviews_init(ParamViews* self, psy_ui_Component* view,
@@ -108,7 +111,7 @@ MachineFrame* paramviews_frame(ParamViews* self, uintptr_t macid)
 	return (MachineFrame*)psy_table_at(&self->frames, macid);
 }
 
-void paramviews_onsongchanged(ParamViews* self, Workspace* workspace, int flag)
+void paramviews_onsongchanged(ParamViews* self, Workspace* sender)
 {
 	paramviews_removeall(self);
 }

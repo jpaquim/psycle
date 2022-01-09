@@ -137,6 +137,15 @@ void psy_ui_label_settext(psy_ui_Label* self, const char* text)
 	psy_ui_component_invalidate(psy_ui_label_base(self));
 }
 
+void psy_ui_label_addtext(psy_ui_Label* self, const char* text)
+{
+	self->text = psy_strcat_realloc(self->text, text);
+	if (self->translate) {
+		self->translation = psy_strcat_realloc(self->translation,
+			psy_translator_translate(psy_ui_translator(), text));
+	}	
+}
+
 void psy_ui_label_setdefaulttext(psy_ui_Label* self, const char* text)
 {
 	assert(self);

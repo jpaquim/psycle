@@ -43,8 +43,7 @@ static void playlistview_onmoveup(PlaylistView*, psy_ui_Button* sender);
 static void playlistview_onmovedown(PlaylistView*, psy_ui_Button* sender);
 static void playlistview_ontimer(PlaylistView*, uintptr_t timerid);
 static void playlistview_onmousedown(PlaylistView*, psy_ui_MouseEvent*);
-static void playlistview_onsongchanged(PlaylistView*, Workspace* sender,
-	int flag);
+static void playlistview_onsongchanged(PlaylistView*, Workspace* sender);
 static void playlistview_onplaylistchanged(PlaylistView*, psy_Playlist* sender);
 /* vtable */
 static psy_ui_ComponentVtable vtable;
@@ -210,9 +209,9 @@ void playlistview_onmousedown(PlaylistView* self, psy_ui_MouseEvent* ev)
 	}
 }
 
-void playlistview_onsongchanged(PlaylistView* self, Workspace* sender, int flag)
+void playlistview_onsongchanged(PlaylistView* self, Workspace* sender)
 {
-	if (flag == WORKSPACE_NEWSONG) {
+	if (!sender->songhasfile) {
 		propertiesview_mark(&self->view, NULL);
 	}
 }

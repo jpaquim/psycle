@@ -1,17 +1,21 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "machineproperties.h"
-// host
+/* host */
 #include "machineviewskin.h"
 #include "styles.h"
-// platform
+/* platform */
 #include "../../detail/portable.h"
 
-static void machineproperties_onsongchanged(MachineProperties*, Workspace*,
-	int flag);
+/* prototypes */
+static void machineproperties_onsongchanged(MachineProperties*,
+	Workspace* sender);
 static void machineproperties_connectsongsignals(MachineProperties*);
 static void machineproperties_ontogglebus(MachineProperties*,
 	psy_ui_Component* sender);
@@ -189,10 +193,10 @@ void machineproperties_oneditreject(MachineProperties* self,
 	psy_ui_component_setfocus(psy_ui_component_parent(&self->component));
 }
 
-void machineproperties_onsongchanged(MachineProperties* self, Workspace* workspace, int flag)
+void machineproperties_onsongchanged(MachineProperties* self, Workspace* sender)
 {
-	self->machines = (workspace_song(workspace))
-		? &workspace_song(workspace)->machines
+	self->machines = (workspace_song(sender))
+		? &workspace_song(sender)->machines
 		: NULL;
 	machineproperties_setmachine(self, NULL);
 	machineproperties_connectsongsignals(self);

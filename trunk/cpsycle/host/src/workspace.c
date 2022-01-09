@@ -161,6 +161,7 @@ void workspace_init(Workspace* self, psy_ui_Component* main)
 	self->lastplayline = psy_INDEX_INVALID;	
 	self->currplayposition = 0.0;
 	self->lastplayposition = -1.0;
+	self->songhasfile = FALSE;
 	psy_thread_init(&self->driverconfigloadthread);
 	psy_thread_init(&self->pluginscanthread);
 	viewhistory_init(&self->viewhistory);
@@ -739,7 +740,7 @@ void workspace_newsong(Workspace* self)
 	assert(self);
 
 	song = psy_audio_song_allocinit(&self->machinefactory);
-	psy_strreset(&self->filename, "Untitled.psy");
+	psy_strreset(&self->filename, "Untitled.psy");	
 	workspace_setsong(self, song, WORKSPACE_NEWSONG);	
 	workspace_selectview(self, VIEW_ID_MACHINEVIEW, 0, 0);
 }
@@ -844,11 +845,14 @@ void workspace_setsong(Workspace* self, psy_audio_Song* song, int flag)
 		psy_audio_player_setsong(&self->player, self->song);
 		workspace_updatemetronome(self);				
 		if (flag == WORKSPACE_NEWSONG) {
+			self->songhasfile = FALSE;
 			psy_audio_player_setsamplerindex(&self->player,
 				seqeditconfig_machine(&self->config.seqedit));
-		}				
+		} else if (flag == WORKSPACE_LOADSONG) {
+			self->songhasfile = TRUE;
+		}
 		psy_audio_exclusivelock_leave();
-		psy_signal_emit(&self->signal_songchanged, self, 1, flag);
+		psy_signal_emit(&self->signal_songchanged, self, 0);
 		psy_signal_emit(&self->song->patterns.signal_numsongtrackschanged, self,
 			1, self->song->patterns.songtracks);
 		psy_audio_song_deallocate(oldsong);
@@ -1014,6 +1018,7 @@ void workspace_savesong(Workspace* self, const char* path)
 		workspace_outputerror(self, songfile.serr);
 	} else {
 		workspace_updatesavepoint(self);
+		self->songhasfile = TRUE;
 	}
 	psy_audio_songfile_dispose(&songfile);
 	workspace_output(self, "ready\n");
@@ -1022,7 +1027,7 @@ void workspace_savesong(Workspace* self, const char* path)
 void workspace_updatesavepoint(Workspace* self)
 {
 	self->undosavepoint = psy_list_size(self->undoredo.undo);
-	self->machines_undosavepoint = psy_list_size(self->undoredo.undo);
+	self->machines_undosavepoint = psy_list_size(self->undoredo.undo);	
 }
 
 psy_Playlist* workspace_playlist(Workspace* self)

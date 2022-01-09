@@ -19,25 +19,24 @@ extern "C" {
 
 struct ParamSkin;
 
-// LevelUi
+/* LevelUi */
 typedef struct LevelUi {
-	// inherits
+	/* inherits */
 	psy_ui_Component component;
-	// internal	
+	/* internal */
 	uintptr_t paramidx;
-	// references
+	/* references */
 	struct ParamSkin* skin;	
-	psy_ui_Component* view;
 	struct psy_audio_Machine* machine;	
 	struct psy_audio_MachineParam* param;	
 } LevelUi;
 
-void levelui_init(LevelUi*, psy_ui_Component* parent, psy_ui_Component* view,
+void levelui_init(LevelUi*, psy_ui_Component* parent,
 	struct psy_audio_Machine*, uintptr_t paramidx,
 	struct psy_audio_MachineParam*, struct ParamSkin*);
 
 LevelUi* levelui_alloc(void);
-LevelUi* levelui_allocinit(psy_ui_Component* parent, psy_ui_Component* view,
+LevelUi* levelui_allocinit(psy_ui_Component* parent,
 	struct psy_audio_Machine*, uintptr_t paramidx,
 	struct psy_audio_MachineParam*, struct ParamSkin*);
 

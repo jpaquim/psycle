@@ -1,20 +1,24 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "knobui.h"
-// host
+/* host */
 #include "skingraphics.h"
 #include "machineparamconfig.h"
-// audio
+/* audio */
 #include <machine.h>
 #include <plugin_interface.h>
-// platform
+/* platform */
 #include "../../detail/portable.h"
 
-// KnobUi
-// prototypes
+/* KnobUi */
+
+/* prototypes */
 static void knobui_ondraw(KnobUi*, psy_ui_Graphics*);
 static void knobui_onpreferredsize(KnobUi*, const psy_ui_Size* limit,
 	psy_ui_Size* rv);
@@ -22,7 +26,8 @@ static void knobui_updateparam(KnobUi*);
 static void knobui_onmousedown(KnobUi*, psy_ui_MouseEvent*);
 static void knobui_onmouseup(KnobUi*, psy_ui_MouseEvent*);
 static void knobui_onmousemove(KnobUi*, psy_ui_MouseEvent*);
-// vtable
+
+/* vtable */
 static psy_ui_ComponentVtable knobui_vtable;
 static bool knobui_vtable_initialized = FALSE;
 
@@ -32,22 +37,28 @@ static psy_ui_ComponentVtable* knobui_vtable_init(KnobUi* self)
 
 	if (!knobui_vtable_initialized) {
 		knobui_vtable = *(self->component.vtable);		
-		knobui_vtable.ondraw = (psy_ui_fp_component_ondraw)knobui_ondraw;		
-		knobui_vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
+		knobui_vtable.ondraw =
+			(psy_ui_fp_component_ondraw)
+			knobui_ondraw;		
+		knobui_vtable.onpreferredsize =
+			(psy_ui_fp_component_onpreferredsize)
 			knobui_onpreferredsize;
-		knobui_vtable.onmousedown = (psy_ui_fp_component_onmouseevent)
+		knobui_vtable.onmousedown =
+			(psy_ui_fp_component_onmouseevent)
 			knobui_onmousedown;
-		knobui_vtable.onmouseup = (psy_ui_fp_component_onmouseevent)
+		knobui_vtable.onmouseup =
+			(psy_ui_fp_component_onmouseevent)
 			knobui_onmouseup;
-		knobui_vtable.onmousemove = (psy_ui_fp_component_onmouseevent)
+		knobui_vtable.onmousemove =
+			(psy_ui_fp_component_onmouseevent)
 			knobui_onmousemove;
 		knobui_vtable_initialized = TRUE;
 	}
 	return &knobui_vtable;
 }
-// implementation
-void knobui_init(KnobUi* self, psy_ui_Component* parent,
-	psy_ui_Component* view,
+
+/* implementation */
+void knobui_init(KnobUi* self, psy_ui_Component* parent,	
 	psy_audio_Machine* machine, uintptr_t paramidx,
 	psy_audio_MachineParam* param,
 	ParamSkin* paramskin)
@@ -55,7 +66,7 @@ void knobui_init(KnobUi* self, psy_ui_Component* parent,
 	assert(self);	
 	assert(paramskin);	
 
-	psy_ui_component_init(&self->component, parent, view);
+	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_setvtable(&self->component,
 		knobui_vtable_init(self));	
 	psy_ui_component_setbackgroundmode(&self->component,
@@ -72,7 +83,7 @@ KnobUi* knobui_alloc(void)
 	return (KnobUi*)malloc(sizeof(KnobUi));
 }
 
-KnobUi* knobui_allocinit(psy_ui_Component* parent, psy_ui_Component* view,
+KnobUi* knobui_allocinit(psy_ui_Component* parent,
 	psy_audio_Machine* machine, uintptr_t paramidx,
 	psy_audio_MachineParam* param, ParamSkin* paramskin)
 {
@@ -80,7 +91,7 @@ KnobUi* knobui_allocinit(psy_ui_Component* parent, psy_ui_Component* view,
 
 	rv = knobui_alloc();
 	if (rv) {
-		knobui_init(rv, parent, view, machine, paramidx, param, paramskin);
+		knobui_init(rv, parent, machine, paramidx, param, paramskin);
 		rv->component.deallocate = TRUE;
 	}
 	return rv;
