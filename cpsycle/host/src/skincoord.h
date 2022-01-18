@@ -37,13 +37,12 @@ INLINE double skincoord_position(SkinCoord* coord, double value)
 	return value * coord->range;
 }
 
-INLINE bool skincoord_hittest(const SkinCoord* self, double x, double y)
+INLINE bool skincoord_hittest(const SkinCoord* self, psy_ui_RealPoint pt)
 {
 	psy_ui_RealRectangle destposition;
 
 	destposition = skincoord_destposition(self);	
-	return psy_ui_realrectangle_intersect(&destposition,
-		psy_ui_realpoint_make(x, y));
+	return psy_ui_realrectangle_intersect(&destposition, pt);
 }
 
 #ifdef __cplusplus

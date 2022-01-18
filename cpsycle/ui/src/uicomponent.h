@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #ifndef psy_ui_COMPONENT_H
@@ -350,7 +350,8 @@ void psy_ui_component_setborder(psy_ui_Component*, const psy_ui_Border*);
 uintptr_t psy_ui_component_backgroundimageid(const psy_ui_Component*);
 const char* psy_ui_component_backgroundimagepath(const psy_ui_Component*);
 
-void psy_ui_component_setalign(psy_ui_Component* self, psy_ui_AlignType);
+psy_ui_Component* psy_ui_component_setalign(psy_ui_Component*,
+	psy_ui_AlignType);
 
 INLINE void psy_ui_component_init_align(psy_ui_Component* self,
 	psy_ui_Component* parent, psy_ui_Component* view,
@@ -944,6 +945,12 @@ void psy_ui_component_mousedoubleclick(psy_ui_Component*, psy_ui_MouseEvent*,
 	psy_List* viewcomponents);
 void psy_ui_component_mousewheel(psy_ui_Component*, psy_ui_MouseEvent*,
 	intptr_t delta);
+
+INLINE void psy_ui_component_scrollto(psy_ui_Component* self,
+	intptr_t dx, intptr_t dy)
+{	
+	self->vtable->scrollto(self, dx, dy);
+}
 
 void psy_ui_component_buffer(psy_ui_Component*);
 void psy_ui_component_clearbuffer(psy_ui_Component*);

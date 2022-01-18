@@ -292,7 +292,7 @@ void about_init(About* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_ui_component_setstyletype(&self->component, STYLE_ABOUT);
 	self->workspace = workspace;	
 	about_initbuttons(self);
-	psy_ui_notebook_init(&self->notebook, &self->component, NULL);
+	psy_ui_notebook_init(&self->notebook, &self->component);
 	psy_ui_component_hide(psy_ui_notebook_base(&self->notebook));
 	psy_ui_component_setpreferredsize(psy_ui_notebook_base(&self->notebook),
 		psy_ui_size_make(psy_ui_value_make_pw(0.5), psy_ui_value_make_ph(0.5)));

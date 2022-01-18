@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -95,15 +95,11 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 	self->updatealign = 0;
 	self->zoom = 1.0;	
 	psy_ui_component_setstyletype(&self->component, STYLE_PATTERNVIEW);
-	psy_ui_notebook_init(&self->notebook, &self->component, NULL);
+	psy_ui_notebook_init(&self->notebook, &self->component);
 	psy_ui_component_setalign(psy_ui_notebook_base(&self->notebook),
-		psy_ui_ALIGN_CLIENT);	
-	psy_ui_component_setbackgroundmode(psy_ui_notebook_base(&self->notebook),
-		psy_ui_NOBACKGROUND);
+		psy_ui_ALIGN_CLIENT);		
 	psy_ui_notebook_init(&self->editnotebook, psy_ui_notebook_base(
-		&self->notebook), NULL);
-	psy_ui_component_setbackgroundmode(&self->editnotebook.component,
-		psy_ui_NOBACKGROUND);
+		&self->notebook));	
 	psy_ui_notebook_select(&self->editnotebook, 0);	
 	/* Pattern Properties */
 	patternproperties_init(&self->properties, &self->component, NULL, workspace);	
@@ -123,8 +119,8 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 		&psycleconfig_misc(workspace_conf(self->workspace))->signal_changed,
 		self, patternview_onmiscconfigure);
 	/* Linenumbers */
-	trackerlinenumberbar_init(&self->left, &self->component, NULL,
-		&self->state, self->workspace);
+	trackerlinenumberbar_init(&self->left, &self->component, &self->state,
+		self->workspace);
 	psy_ui_component_setalign(&self->left.component, psy_ui_ALIGN_LEFT);	
 	/* Header */
 	psy_ui_component_init(&self->headerpane, &self->component, NULL);	

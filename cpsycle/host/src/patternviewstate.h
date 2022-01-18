@@ -362,4 +362,7 @@ INLINE PatternViewSkin* patternviewstate_skin(PatternViewState* self)
 	return &self->patconfig->skin;
 }
 
+psy_audio_SequenceTrackIterator patternviewstate_sequencestart(PatternViewState*,
+	double startoffset);
+
 #endif /* PATTERNVIEWSTATE_H */

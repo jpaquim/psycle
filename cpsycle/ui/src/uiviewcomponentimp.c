@@ -1,6 +1,6 @@
 /*
 ** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -83,6 +83,8 @@ static void view_dev_mousedoubleclick(psy_ui_ViewComponentImp*,
 	psy_ui_MouseEvent*);
 static void view_dev_mouseenter(psy_ui_ViewComponentImp*);
 static void view_dev_mouseleave(psy_ui_ViewComponentImp*);
+static psy_ui_RealRectangle view_translation(psy_ui_ViewComponentImp*,
+	const psy_ui_RealRectangle*);
 static psy_ui_RealPoint translatecoords(psy_ui_ViewComponentImp*,
 	psy_ui_Component* src, psy_ui_Component* dst);
 
@@ -413,7 +415,7 @@ int view_dev_drawvisible(psy_ui_ViewComponentImp* self)
 void view_dev_move(psy_ui_ViewComponentImp* self, psy_ui_Point origin)
 {
 	const psy_ui_TextMetric* tm;	
-	
+		
 	tm = view_dev_textmetric(self);
 	psy_ui_realrectangle_settopleft(&self->position,
 		psy_ui_realpoint_make(
@@ -606,21 +608,27 @@ void view_dev_invalidate(psy_ui_ViewComponentImp* self)
 void view_dev_invalidaterect(psy_ui_ViewComponentImp* self,
 	const psy_ui_RealRectangle* r)
 {
-	if (psy_ui_component_drawvisible(self->view) && r) {
-		psy_ui_RealPoint translation;
-		psy_ui_RealRectangle position;
-		psy_ui_RealMargin spacing;
-		
-		translation = translatecoords(self, self->component, self->view);
-		position = psy_ui_component_position(self->component);
-		spacing = psy_ui_component_spacing_px(self->view);
+	if (psy_ui_component_drawvisible(self->view) && r) {		
 		psy_ui_component_invalidaterect(self->view,
-			psy_ui_realrectangle_make(
-				psy_ui_realpoint_make(
-					position.left + r->left + translation.x + spacing.left,
-					position.top + r->top + translation.y + spacing.top),		
-				psy_ui_realrectangle_size(r)));		
+			view_translation(self, r));
 	}
+}
+
+psy_ui_RealRectangle view_translation(psy_ui_ViewComponentImp* self, 
+	const psy_ui_RealRectangle* r)
+{
+	psy_ui_RealPoint translation;
+	psy_ui_RealRectangle position;
+	psy_ui_RealMargin spacing;
+
+	translation = translatecoords(self, self->component, self->view);
+	position = psy_ui_component_position(self->component);
+	spacing = psy_ui_component_spacing_px(self->view);
+	return psy_ui_realrectangle_make(
+			psy_ui_realpoint_make(
+				position.left + r->left + translation.x + spacing.left,
+				position.top + r->top + translation.y + spacing.top),
+			psy_ui_realrectangle_size(r));
 }
 
 psy_ui_RealPoint translatecoords(psy_ui_ViewComponentImp* self, psy_ui_Component* src,

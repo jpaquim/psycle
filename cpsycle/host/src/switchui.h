@@ -1,17 +1,21 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #if !defined(SWITCHUI_H)
 #define SWITCHUI_H
 
-// host
+/* host */
 #include "paramtweak.h"
-// ui
+/* ui */
 #include <uicomponent.h>
 
-// SwitchUi
-//
-// Switch to tweak a MachineParameter (MPF_SWITCH)
+/*
+** SwitchUi
+**
+** Switch to tweak a MachineParameter (MPF_SWITCH)
+*/
 
 #ifdef __cplusplus
 extern "C" {
@@ -20,14 +24,13 @@ extern "C" {
 struct ParamSkin;
 
 typedef struct SwitchUi {
-	// inherits
+	/* inherits */
 	psy_ui_Component component;
-	// internal
+	/* internal */
 	ParamTweak paramtweak;
 	uintptr_t paramidx;
-	// references
-	struct ParamSkin* skin;	
-	psy_ui_Component* view;	
+	/* references */
+	struct ParamSkin* skin;
 	struct psy_audio_Machine* machine;
 	struct psy_audio_MachineParam* param;
 } SwitchUi;

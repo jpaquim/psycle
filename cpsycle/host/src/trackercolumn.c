@@ -1,6 +1,6 @@
 /*
 ** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -133,9 +133,7 @@ void trackercolumn_drawtrackevents(TrackerColumn* self, psy_ui_Graphics* g)
 			p = p->next, ++line, cpy += self->state->lineheightpx,
 			offset += patternviewstate_bpl(self->state->pv)) {
 		trackercolumn_drawentry(self, g, (psy_audio_PatternEntry*)p->entry,
-			cpy, trackercolumn_columnflags(self,
-				line - patternviewstate_beattoline(self->state->pv,
-					self->state->trackevents.seqoffset), offset), trackdef);
+			cpy, trackercolumn_columnflags(self, line, offset), trackdef);
 	}	
 }
 
@@ -161,13 +159,15 @@ TrackerColumnFlags trackercolumn_columnflags(TrackerColumn* self,
 		rv.beat4 = 0;
 		rv.mid = 0;
 	}		
-	rv.cursor = (self->state->trackevents.currcursorline == line) &&
+	rv.cursor = (psy_audio_sequencecursor_line(&self->state->pv->cursor) == line) &&
 		(self->track == self->state->pv->cursor.track) && self->state->drawcursor;
-	rv.selection = psy_audio_blockselection_test(&self->state->pv->selection,
-		self->track, offset);
+	rv.selection = psy_audio_blockselection_test_line(&self->state->pv->selection,
+		self->track, line);
 	rv.playbar = psy_audio_player_playing(workspace_player(self->workspace)) &&
-		(self->workspace->currplayline == line + patternviewstate_seqstartline(
-			self->state->pv));
+		(self->workspace->currplayline == line + 
+			((self->state->pv->singlemode)
+			? patternviewstate_beattoline(self->state->pv, self->state->pv->cursor.seqoffset)
+			: 0));
 	rv.focus = TRUE;
 	return rv;
 }

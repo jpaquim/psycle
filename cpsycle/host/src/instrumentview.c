@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -473,7 +473,7 @@ void instrumentview_init(InstrumentView* self, psy_ui_Component* parent,
 		&self->instrumentsbox.groupheader, workspace);
 	psy_ui_component_setalign(&self->buttons.component, psy_ui_ALIGN_TOP);	
 	/* notebook */
-	psy_ui_notebook_init(&self->clientnotebook, &self->component, NULL);
+	psy_ui_notebook_init(&self->clientnotebook, &self->component);
 	psy_ui_component_setalign(psy_ui_notebook_base(&self->clientnotebook),
 		psy_ui_ALIGN_CLIENT);
 	{
@@ -499,7 +499,7 @@ void instrumentview_init(InstrumentView* self, psy_ui_Component* parent,
 	psy_ui_tabbar_append_tabs(&self->tabbar, "instrumentview.general",
 		"instrumentview.volume", "instrumentview.pan", "instrumentview.filter",
 		"instrumentview.pitch", NULL);
-	psy_ui_notebook_init(&self->notebook, &self->client, NULL);
+	psy_ui_notebook_init(&self->notebook, &self->client);
 	psy_ui_component_setalign(psy_ui_notebook_base(&self->notebook),
 		psy_ui_ALIGN_CLIENT);
 	instrumentgeneralview_init(&self->general,

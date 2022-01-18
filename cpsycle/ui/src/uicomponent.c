@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+**  copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -722,6 +722,7 @@ void psy_ui_component_dispose(psy_ui_Component* self)
 		self->containeralign = NULL;
 	}
 	psy_ui_bitmap_dispose(&self->bufferbitmap);
+	psy_ui_app_stoptimer(psy_ui_app(), self, psy_INDEX_INVALID);
 	psy_table_remove(&psy_ui_app()->components, (uintptr_t)self);
 }
 
@@ -1092,7 +1093,8 @@ void psy_ui_component_checksortedalign(psy_ui_Component* self,
 	}
 }
 
-void psy_ui_component_setalign(psy_ui_Component* self, psy_ui_AlignType align)
+psy_ui_Component* psy_ui_component_setalign(psy_ui_Component* self,
+	psy_ui_AlignType align)
 {
 	psy_ui_Component* parent;
 
@@ -1101,6 +1103,7 @@ void psy_ui_component_setalign(psy_ui_Component* self, psy_ui_AlignType align)
 		psy_ui_component_checksortedalign(parent, align);
 	}
 	self->vtable->setalign(self, align);
+	return self;
 }
 
 void psy_ui_component_setcontaineralign(psy_ui_Component* self, 

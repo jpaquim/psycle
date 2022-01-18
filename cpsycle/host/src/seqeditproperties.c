@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -16,6 +16,7 @@
 /* SeqEditEntryProperties */
 /* prototypes */
 static void seqeditentryproperties_update(SeqEditEntryProperties*);
+
 /* implementation */
 void seqeditentryproperties_init(SeqEditEntryProperties* self, psy_ui_Component* parent,
 	SeqEditState* state)
@@ -77,6 +78,7 @@ void seqeditentryproperties_update(SeqEditEntryProperties* self)
 }
 
 /* SeqEditLoopProperties */
+
 /* implementation */
 void seqeditemptyproperties_init(SeqEditEmptyProperties* self, psy_ui_Component* parent,
 	SeqEditState* state)
@@ -94,6 +96,7 @@ void seqeditemptyproperties_init(SeqEditEmptyProperties* self, psy_ui_Component*
 }
 
 /* SeqEditPatternProperties */
+
 /* implementation */
 void seqeditpatternproperties_init(SeqEditPatternProperties* self, psy_ui_Component* parent,
 	SeqEditState* state)
@@ -122,6 +125,7 @@ void seqeditpatternproperties_setorderindex(SeqEditPatternProperties* self,
 }
 
 /* SeqEditSampleProperties */
+
 /* implementation */
 void seqeditsampleproperties_init(SeqEditSampleProperties* self, psy_ui_Component* parent,
 	SeqEditState* state)
@@ -526,7 +530,7 @@ void seqeditproperties_init(SeqEditProperties* self, psy_ui_Component* parent,
 		psy_ui_size_make_em(30.0, 20.0));
 	psy_ui_component_setspacing(&self->component,
 		psy_ui_margin_make_em(0.0, 0.0, 0.0, 1.0));	
-	psy_ui_notebook_init(&self->notebook, &self->component, NULL);
+	psy_ui_notebook_init(&self->notebook, &self->component);
 	psy_ui_component_setalign(psy_ui_notebook_base(&self->notebook),
 		psy_ui_ALIGN_CLIENT);
 	seqeditemptyproperties_init(&self->empty, psy_ui_notebook_base(&self->notebook),

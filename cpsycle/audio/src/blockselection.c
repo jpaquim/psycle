@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -13,6 +13,7 @@
 #include "../../detail/portable.h"
 
 /* BlockSelection */
+
 /* implementation */
 void psy_audio_blockselection_init(psy_audio_BlockSelection* self)
 {
@@ -61,14 +62,16 @@ void psy_audio_blockselection_startdrag(psy_audio_BlockSelection* self,
 		self->bottomright.track = dragselectionbase.track;
 	}
 	if (cursor.offset >= dragselectionbase.offset) {
-		self->topleft.offset = dragselectionbase.offset;
-		self->bottomright.offset = cursor.offset + bpl;
+		psy_audio_sequencecursor_setoffset(&self->topleft,
+			dragselectionbase.offset);
+		psy_audio_sequencecursor_setoffset(&self->bottomright,
+			cursor.offset + bpl);
 	} else {
-		self->topleft.offset = cursor.offset;
-		self->bottomright.offset = dragselectionbase.offset +
-			bpl;
+		psy_audio_sequencecursor_setoffset(&self->topleft, cursor.offset);
+		psy_audio_sequencecursor_setoffset(&self->bottomright,
+			dragselectionbase.offset + bpl);
 	}
-	self->bottomright.track += 1;
+	self->bottomright.track += 1;	
 }
 
 void psy_audio_blockselection_drag(psy_audio_BlockSelection* self,
@@ -85,21 +88,24 @@ void psy_audio_blockselection_drag(psy_audio_BlockSelection* self,
 		self->bottomright.track = dragselectionbase.track + 1;
 	}
 	if (cursor.offset >= dragselectionbase.offset) {
-		self->topleft.offset = dragselectionbase.offset;
-		self->bottomright.offset = cursor.offset + bpl;
+		psy_audio_sequencecursor_setoffset(&self->topleft,
+			dragselectionbase.offset);
+		psy_audio_sequencecursor_setoffset(&self->bottomright,
+			cursor.offset + bpl);
 	} else {
-		self->topleft.offset = cursor.offset;
-		self->bottomright.offset = dragselectionbase.offset + bpl;
-	}
+		psy_audio_sequencecursor_setoffset(&self->topleft, cursor.offset);
+		psy_audio_sequencecursor_setoffset(&self->bottomright,
+			dragselectionbase.offset + bpl);
+	}	
 }
 
 void psy_audio_blockselection_select(psy_audio_BlockSelection* self,
 	uintptr_t track, uintptr_t numtracks,
 	psy_dsp_big_beat_t offset, psy_dsp_big_beat_t length)
 {	
-	self->topleft.offset = offset;
+	psy_audio_sequencecursor_setoffset(&self->topleft, offset);
 	self->topleft.track = track;
-	self->bottomright.offset = offset + length;
-	self->bottomright.track = track + numtracks;
+	psy_audio_sequencecursor_setoffset(&self->bottomright, offset + length);
+	self->bottomright.track = track + numtracks;	
 	psy_audio_blockselection_enable(self);	
 }

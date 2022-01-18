@@ -303,6 +303,7 @@ void psy_audio_sequence_settrackheight(psy_audio_Sequence*,
 	uintptr_t trackindex, double height);
 void psy_audio_sequence_setcursor(psy_audio_Sequence*,
 	psy_audio_SequenceCursor);
+
 void psy_audio_sequence_dec_seqpos(psy_audio_Sequence*);
 void psy_audio_sequence_inc_seqpos(psy_audio_Sequence*);
 

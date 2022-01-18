@@ -1,5 +1,7 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #if !defined(PATTERNVIEWSKIN_H)
 #define PATTERNVIEWSKIN_H
@@ -59,14 +61,14 @@ typedef struct PatternViewSkin {
 	psy_ui_Colour cursor2;
 	psy_ui_Colour midline;
 	psy_ui_Colour midline2;
-	// additional pianoroll colours {
+	/* pianoroll colours{ */
 	psy_ui_Colour keywhite;
 	psy_ui_Colour keyblack;
 	psy_ui_Colour keyseparator;
 	psy_ui_Colour event;
 	psy_ui_Colour eventhover;
 	psy_ui_Colour eventcurrchannel;
-	// }
+	/* } */
 	TrackerHeaderCoords headercoords;
 	psy_ui_Bitmap bitmap;
 	// colour/track cache with range of numtracks between two colours
@@ -92,6 +94,7 @@ typedef struct PatternViewSkin {
 
 void patternviewskin_init(PatternViewSkin*);
 void patternviewskin_dispose(PatternViewSkin*);
+
 void patternviewskin_clearcache(PatternViewSkin*);
 void patternviewskin_settheme(PatternViewSkin*, psy_Property*, const char* skindir);
 void patternviewskin_setclassicheadercoords(PatternViewSkin*);
@@ -113,7 +116,7 @@ psy_ui_Colour patternviewskin_selection4beatcolour(PatternViewSkin*, uintptr_t t
 psy_ui_Colour patternviewskin_playbarcolour(PatternViewSkin*, uintptr_t track, uintptr_t numtracks);
 psy_ui_Colour patternviewskin_cursorcolour(PatternViewSkin*, uintptr_t track, uintptr_t numtracks);
 psy_ui_Colour patternviewskin_midlinecolour(PatternViewSkin*, uintptr_t track, uintptr_t numtracks);
-// pianoroll
+/* pianoroll */
 psy_ui_Colour patternviewskin_keywhitecolour(PatternViewSkin*);
 psy_ui_Colour patternviewskin_keyblackcolour(PatternViewSkin*);
 psy_ui_Colour patternviewskin_keyseparatorcolour(PatternViewSkin*);

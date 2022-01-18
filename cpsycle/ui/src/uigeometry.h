@@ -322,6 +322,15 @@ INLINE psy_ui_Point psy_ui_point_make(psy_ui_Value x, psy_ui_Value y)
 	return rv;
 }
 
+INLINE psy_ui_Point psy_ui_point_make_em(double x, double y)
+{
+	psy_ui_Point rv;
+
+	rv.x = psy_ui_value_make_ew(x);
+	rv.y = psy_ui_value_make_eh(y);
+	return rv;
+}
+
 INLINE psy_ui_Point psy_ui_point_make_px(double x, double y)
 {
 	psy_ui_Point rv;

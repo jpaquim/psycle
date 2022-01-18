@@ -1,6 +1,6 @@
 /*
 ** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -8,7 +8,6 @@
 
 #include "machineproperties.h"
 /* host */
-#include "machineviewskin.h"
 #include "styles.h"
 /* platform */
 #include "../../detail/portable.h"
@@ -23,7 +22,6 @@ static void machineproperties_onremove(MachineProperties*,
 	psy_ui_Component* sender);
 static void machineproperties_onhide(MachineProperties*,
 	psy_ui_Component* sender);
-static void machineproperties_updateskin(MachineProperties*);
 static void machineproperties_onmachineselected(MachineProperties*,
 	psy_audio_Machines*, uintptr_t slot);
 static void machineproperties_onmachineremoved(MachineProperties*,
@@ -37,39 +35,37 @@ static void machineproperties_ontogglemute(MachineProperties*,
 static void machineproperties_onsolobypass(MachineProperties*,
 	psy_ui_Button* sender);
 
+/* vtable */
 static psy_ui_ComponentVtable machineproperties_vtable;
 static bool machineproperties_vtable_initialized = FALSE;
 
-static psy_ui_ComponentVtable* machineproperties_vtable_init(MachineProperties* self)
+static void machineproperties_vtable_init(MachineProperties* self)
 {
 	if (!machineproperties_vtable_initialized) {
 		machineproperties_vtable = *(self->component.vtable);
 		machineproperties_vtable_initialized = TRUE;
 	}
-	return &machineproperties_vtable;
+	psy_ui_component_setvtable(&self->component,
+		&machineproperties_vtable);
 }
 
+/* implementation */
 void machineproperties_init(MachineProperties* self, psy_ui_Component* parent,
-	psy_audio_Machine* machine, MachineViewSkin* skin,
 	Workspace* workspace)
 {
+	psy_ui_component_init(&self->component, parent, NULL);	
+	machineproperties_vtable_init(self);
 	self->workspace = workspace;
-	self->machine = machine;
+	self->machine = NULL;
 	self->machines =
 		(workspace_song(workspace))
 		? &workspace_song(workspace)->machines
-		: NULL;
-	self->skin = skin;
-	self->macid = psy_INDEX_INVALID;
-	psy_ui_component_init(&self->component, parent, NULL);
-	self->component.id = 40;
-	psy_ui_component_setvtable(&self->component,
-		machineproperties_vtable_init(self));
+		: NULL;	
+	self->macid = psy_INDEX_INVALID;			
 	psy_ui_component_setstyletype(&self->component,
 		STYLE_MACHINEVIEW_PROPERTIES);	
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
-		psy_ui_defaults_hmargin(psy_ui_defaults()));			
-	machineproperties_updateskin(self);
+		psy_ui_defaults_hmargin(psy_ui_defaults()));	
 	psy_ui_button_init_text_connect(&self->issolobypass, &self->component,
 		"machineview.pwr", self, machineproperties_onsolobypass);
 	psy_ui_button_init_text_connect(&self->ismute, &self->component,
@@ -210,12 +206,6 @@ void machineproperties_connectsongsignals(MachineProperties* self)
 		psy_signal_connect(&self->machines->signal_removed, self,
 			machineproperties_onmachineremoved);	
 	}
-}
-
-void machineproperties_updateskin(MachineProperties* self)
-{	
-	psy_ui_component_setcolour(&self->component,
-		self->skin->wirecolour);
 }
 
 void machineproperties_onmachineselected(MachineProperties* self,

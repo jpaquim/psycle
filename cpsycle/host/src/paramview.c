@@ -1,9 +1,10 @@
 /*
 ** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
+
 
 #include "paramview.h"
 /* host */
@@ -25,6 +26,7 @@
 
 /* paramview */
 /* prototypes */
+static void paramview_ondestroyed(ParamView*);
 static void paramview_updateskin(ParamView*);
 static void paramview_ontimer(ParamView*, uintptr_t timerid);
 static uintptr_t paramview_numrows(const ParamView*);
@@ -38,6 +40,9 @@ static void vtable_init(ParamView* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
+		vtable.ondestroyed =
+			(psy_ui_fp_component_event)
+			paramview_ondestroyed;
 		vtable.ontimer =
 			(psy_ui_fp_component_ontimer)
 			paramview_ontimer;
@@ -48,18 +53,27 @@ static void vtable_init(ParamView* self)
 
 /* implementation */
 void paramview_init(ParamView* self, psy_ui_Component* parent,
-	psy_audio_Machine* machine, MachineParamConfig* config)
+	psy_audio_Machine* machine, MachineParamConfig* config,
+	psy_ui_Component** frameview)
 {	
 	psy_ui_component_init(&self->component, parent, NULL);
-	vtable_init(self);	
-	psy_ui_component_setalignexpand(&self->component,
-		psy_ui_HEXPAND);	
+	vtable_init(self);
+	psy_ui_component_doublebuffer(&self->component);	
+	psy_ui_component_setalignexpand(&self->component, psy_ui_HEXPAND);
 	self->config = config;	
 	self->machine = machine;	
 	self->paramstrobe = 0;
 	self->sizechanged = 1;
+	self->frameview = frameview;
 	paramview_updateskin(self);
 	paramview_build(self);		
+}
+
+void paramview_ondestroyed(ParamView* self)
+{
+	if (self->frameview && *self->frameview) {
+		*self->frameview = NULL;
+	}	
 }
 
 ParamView* paramview_alloc(void)
@@ -68,13 +82,14 @@ ParamView* paramview_alloc(void)
 }
 
 ParamView* paramview_allocinit(psy_ui_Component* parent,
-	psy_audio_Machine* machine, MachineParamConfig* config)
+	psy_audio_Machine* machine, MachineParamConfig* config,
+	psy_ui_Component** frameview)
 {
 	ParamView* rv;
 
 	rv = paramview_alloc();
 	if (rv) {
-		paramview_init(rv, parent, machine, config);
+		paramview_init(rv, parent, machine, config, frameview);
 		psy_ui_component_deallocateafterdestroyed(&rv->component);
 	}
 	return rv;

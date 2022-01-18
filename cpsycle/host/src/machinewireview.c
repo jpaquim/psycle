@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -206,9 +206,11 @@ void machinewireview_init(MachineWireView* self, psy_ui_Component* parent,
 {
 	psy_ui_component_init(&self->component, parent, NULL);
 	vtable_init(self);
+	psy_ui_component_setbackgroundmode(&self->component,
+		psy_ui_NOBACKGROUND);	
 	psy_ui_component_setstyletype(&self->component, STYLE_MACHINEVIEW_WIRES);
-	machinewireviewuis_init(&self->machineuis, &self->component, skin, paramviews,
-		workspace);
+	machinewireviewuis_init(&self->machineuis, &self->component, skin,
+		paramviews, workspace);
 	self->opcount = 0;
 	self->centermaster = TRUE;
 	psy_ui_component_setscrollstep(&self->component,

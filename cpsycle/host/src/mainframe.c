@@ -418,7 +418,7 @@ void mainframe_initmainpane(MainFrame* self)
 {
 	psy_ui_component_init(&self->mainpane, &self->mainviews, NULL);	
 	psy_ui_component_setalign(&self->mainpane, psy_ui_ALIGN_CLIENT);	
-	psy_ui_notebook_init(&self->notebook, &self->mainpane, NULL);	
+	psy_ui_notebook_init(&self->notebook, &self->mainpane);	
 	psy_ui_component_setalign(psy_ui_notebook_base(&self->notebook),
 		psy_ui_ALIGN_CLIENT);	
 	psy_ui_notebook_connectcontroller(&self->notebook,

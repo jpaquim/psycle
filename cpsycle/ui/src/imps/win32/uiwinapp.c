@@ -1,6 +1,6 @@
 /*
 ** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -495,9 +495,10 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 						}
 						psy_ui_graphics_dispose(&g);
 					}					
-				}
-				if (pRegion) {
-					DeleteObject((HGDIOBJ)pRegion);
+				}				
+				free(pRegion);					
+				if (hrgn) {
+					DeleteObject((HGDIOBJ)hrgn);
 				}
 				EndPaint(hwnd, &ps);				
 				return 0;
@@ -509,6 +510,9 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 			deallocate = FALSE;
 			if (component) {
 				deallocate = component->deallocate;				
+			}
+			if (component->id == 30) {
+				component = component;
 			}
 			psy_ui_component_dispose(component);
 			psy_table_remove(&winapp->selfmap, (uintptr_t)hwnd);

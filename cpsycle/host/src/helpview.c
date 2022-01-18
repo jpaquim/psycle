@@ -1,6 +1,6 @@
 /*
 ** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -66,7 +66,7 @@ void helpview_inittabbar(HelpView* self, psy_ui_Component* tabbarparent,
 
 void helpview_initsections(HelpView* self, Workspace* workspace)
 {
-	psy_ui_notebook_init(&self->notebook, helpview_base(self), NULL);
+	psy_ui_notebook_init(&self->notebook, helpview_base(self));
 	psy_ui_component_setalign(psy_ui_notebook_base(&self->notebook),
 		psy_ui_ALIGN_CLIENT);
 	psy_ui_notebook_connectcontroller(&self->notebook,
