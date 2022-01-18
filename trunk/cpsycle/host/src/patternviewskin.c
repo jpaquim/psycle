@@ -1,19 +1,22 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "patternviewskin.h"
-// host
+/* host */
 #include "styles.h"
 #include "skinio.h"
 #include "resources/resource.h"
-// file
+/* file */
 #include <dir.h>
-// ui
+/* ui */
 #include <uiapp.h>
 #include <uicomponent.h>
-// platform
+/* platform */
 #include "../../detail/os.h"
 #include "../../detail/portable.h"
 
@@ -26,7 +29,7 @@
 static bool coords_default_classic_initialized = FALSE;
 static TrackerHeaderCoords coords_default_classic;
 
-// TrackerHeaderCoords
+/* TrackerHeaderCoords */
 
 void trackerheadercoords_init_classic(TrackerHeaderCoords* self)
 {
@@ -48,14 +51,16 @@ const TrackerHeaderCoords* trackerheadercoords_default_classic(void)
 	return &coords_default_classic;
 }
 
-// PatternViewSkin
-// prototypes
+/* PatternViewSkin */
+
+/* prototypes */
 static psy_ui_Colour patternviewskin_colour(psy_Table* table, uintptr_t track, uintptr_t numtracks,
 	psy_ui_Colour source1, psy_ui_Colour source2);
 static psy_ui_Colour patternviewskin_calculatetrackcolour(uintptr_t track, uintptr_t numtracks,
 	psy_ui_Colour source1, psy_ui_Colour source2);
 static void patternviewskin_filleventcolourstable(PatternViewSkin*);
-// implementation
+
+/* implementation */
 void patternviewskin_init(PatternViewSkin* self)
 {
 	psy_table_init_keysize(&self->trackseparatorcolours, HFN_KEYSIZE);
@@ -78,7 +83,7 @@ void patternviewskin_init(PatternViewSkin* self)
 	psy_ui_bitmap_init(&self->bitmap);
 	psy_ui_bitmap_loadresource(&self->bitmap, IDB_HEADERSKIN);
 	patternviewskin_setclassicheadercoords(self);
-	// pianoroll
+	/* pianoroll */
 	patternviewskin_filleventcolourstable(self);
 }
 
@@ -118,14 +123,14 @@ void patternviewskin_clearcache(PatternViewSkin* self)
 	psy_table_clear(&self->playbarcolours);
 	psy_table_clear(&self->cursorcolours);
 	psy_table_clear(&self->midlinecolours);
-	// psy_table_clear(&self->eventcolours);
+	/* psy_table_clear(&self->eventcolours); */
 	psy_table_clear(&self->eventhovercolours);
 	psy_table_clear(&self->eventcurrchannelcolours);
 }
 
 void patternviewskin_filleventcolourstable(PatternViewSkin* self)
 {
-	// pianoroll colours		
+	/* pianoroll colours */
 	psy_ui_Colour base;	
 	psy_ui_Colour overlay;
 	psy_ui_Colour colour;
@@ -403,12 +408,12 @@ void patternviewskin_settheme(PatternViewSkin* self, psy_Property* p, const char
 	self->cursor2 = psy_ui_colour_make(psy_property_at_colour(p, "pvc_cursor2", 0x009F7B00));
 	self->midline = psy_ui_colour_make(psy_property_at_colour(p, "pvc_midline", 0x007D6100));
 	self->midline2 = psy_ui_colour_make(psy_property_at_colour(p, "pvc_midline2", 0x007D6100));
-	// selection
+	/* selection */
 	self->selectionbeat = psy_ui_diffadd_colours(self->row, self->rowbeat, self->selection);
 	self->selectionbeat2 = psy_ui_diffadd_colours(self->row2, self->rowbeat2, self->selection2);
 	self->selection4beat = psy_ui_diffadd_colours(self->row, self->row4beat, self->selection);
 	self->selection4beat2 = psy_ui_diffadd_colours(self->row2, self->row4beat2, self->selection2);	
-	// colours not part of current skin format
+	/* colours not part of current skin format */
 	self->keyblack = psy_ui_colour_make(0x00595959);
 	self->keywhite = psy_ui_colour_make(0x00C0C0C0);	
 	self->keyseparator = psy_ui_colour_make(0x999999);	

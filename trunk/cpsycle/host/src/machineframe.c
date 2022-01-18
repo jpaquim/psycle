@@ -1,6 +1,6 @@
 /*
 ** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -44,6 +44,7 @@ void parameterbar_init(ParameterBar* self, psy_ui_Component* parent,
 	psy_ui_Margin margin;
 	
 	psy_ui_component_init(&self->component, parent, NULL);
+	psy_ui_component_doublebuffer(&self->component);
 	psy_ui_component_setvtable(&self->component, vtable_init(self));
 	psy_ui_margin_init_em(&margin, 0.0, 1.0, 0.0, 0.0);
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_TOP,
@@ -116,7 +117,7 @@ void parameterbar_onalign(ParameterBar* self)
 
 /* MachineFrame */
 /* prototypes */
-static void machineframe_ondestroy(MachineFrame*);
+static void machineframe_ondestroyed(MachineFrame*);
 static void machineframe_initparamview(MachineFrame*, Workspace*);
 static void machineframe_toggleparameterbox(MachineFrame*,
 	psy_ui_Component* sender);
@@ -151,9 +152,9 @@ static void machineframe_vtable_init(MachineFrame* self)
 {
 	if (!machineframe_vtable_initialized) {
 		machineframe_vtable = *(self->component.vtable);
-		machineframe_vtable.ondestroy =
+		machineframe_vtable.ondestroyed =
 			(psy_ui_fp_component_event)
-			machineframe_ondestroy;
+			machineframe_ondestroyed;
 		machineframe_vtable.ontimer =
 			(psy_ui_fp_component_ontimer)
 			machineframe_ontimer;
@@ -169,8 +170,7 @@ void machineframe_init(MachineFrame* self, psy_ui_Component* parent,
 	psy_ui_toolframe_init(&self->component, parent);
 	machineframe_vtable_init(self);
 	psy_ui_component_move(&self->component,
-		psy_ui_point_make(psy_ui_value_make_px(200),
-			psy_ui_value_make_px(150)));
+		psy_ui_point_make_em(20.0, 15.0));
 	psy_ui_component_seticonressource(&self->component, IDI_MACPARAM);	
 	self->view = NULL;
 	self->paramview = NULL;
@@ -180,16 +180,16 @@ void machineframe_init(MachineFrame* self, psy_ui_Component* parent,
 	self->showfullmenu = FALSE;
 	self->macid = psy_INDEX_INVALID;
 	self->machine = machine;	
+	self->component.id = 30;
 	parameterbar_init(&self->parameterbar, &self->component, workspace);
 	psy_ui_component_setalign(&self->parameterbar.component, psy_ui_ALIGN_TOP);
 	newvalview_init(&self->newval, &self->component, 0, 0, 0, 0, 0,
 		"new val", workspace);
 	psy_ui_component_setalign(&self->newval.component, psy_ui_ALIGN_TOP);
 	psy_ui_component_hide(&self->newval.component);	
-	psy_ui_component_init(&self->client, &self->component, NULL);
-	psy_ui_component_doublebuffer(&self->client);
+	psy_ui_component_init(&self->client, &self->component, NULL);	
 	psy_ui_component_setbackgroundmode(&self->client,
-		psy_ui_SETBACKGROUND);
+		psy_ui_NOBACKGROUND);
 	psy_ui_component_setalign(&self->client, psy_ui_ALIGN_CLIENT);
 	parammap_init(&self->parammap, &self->client, NULL,
 		psycleconfig_macparam(workspace_conf(workspace)));
@@ -199,7 +199,7 @@ void machineframe_init(MachineFrame* self, psy_ui_Component* parent,
 		psycleconfig_macparam(workspace_conf(workspace)));
 	psy_ui_component_setalign(&self->parameterbox.component,
 		psy_ui_ALIGN_RIGHT);
-	psy_ui_notebook_init(&self->notebook, &self->client, NULL);
+	psy_ui_notebook_init(&self->notebook, &self->client);
 	psy_ui_component_setalign(psy_ui_notebook_base(&self->notebook),
 		psy_ui_ALIGN_CLIENT);
 	psy_ui_label_init(&self->help, psy_ui_notebook_base(&self->notebook));
@@ -228,13 +228,14 @@ void machineframe_init(MachineFrame* self, psy_ui_Component* parent,
 	machineframe_updatepwr(self);
 }
 
-void machineframe_ondestroy(MachineFrame* self)
+void machineframe_ondestroyed(MachineFrame* self)
 {	
 	/*
 	** Paramview stores pointers of all machineframes
 	** erase the frame from paramviews
 	*/
 	self->machine = NULL;
+	self->view = NULL;
 	paramviews_erase(self->paramviews, self->macid);	
 }
 
@@ -275,8 +276,10 @@ void machineframe_initparamview(MachineFrame* self, Workspace* workspace)
 		ParamView* paramview;
 
 		paramview = paramview_allocinit(
-			psy_ui_notebook_base(&self->notebook), self->machine,
-			psycleconfig_macparam(workspace_conf(workspace)));
+			psy_ui_notebook_base(&self->notebook),
+			self->machine,
+			psycleconfig_macparam(workspace_conf(workspace)),
+			&self->view);
 		if (paramview) {
 			machineframe_setparamview(self, paramview, self->machine);
 		}

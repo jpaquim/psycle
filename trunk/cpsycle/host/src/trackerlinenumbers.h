@@ -31,15 +31,12 @@ typedef struct TrackerLineNumbersLabel {
 	double headerheight;
 	bool showdefaultline;
 	bool showbeatoffset;	
-	/* references */
-	struct TrackerView* view;
-	TrackerState* state;	
-	Workspace* workspace;
+	/* references */	
+	TrackerState* state;
 } TrackerLineNumbersLabel;
 
 void trackerlinenumberslabel_init(TrackerLineNumbersLabel*,
-	psy_ui_Component* parent, psy_ui_Component* view, 
-	TrackerState*, Workspace*);
+	psy_ui_Component* parent, TrackerState*);
 
 INLINE void trackerlinenumberslabel_setheaderheight(TrackerLineNumbersLabel* self,
 	double headerheight)
@@ -57,12 +54,12 @@ INLINE void trackerlinenumberslabel_hidedefaultline(TrackerLineNumbersLabel* sel
 	self->showdefaultline = FALSE;
 }
 
-INLINE void trackerlinenumberslabel_showbeatoffset(TrackerLineNumbersLabel* self)
+INLINE void trackerlinenumberslabel_showbeat(TrackerLineNumbersLabel* self)
 {
 	self->showbeatoffset = TRUE;
 }
 
-INLINE void trackerlinenumberslabel_hidebeatoffset(TrackerLineNumbersLabel* self)
+INLINE void trackerlinenumberslabel_hidebeat(TrackerLineNumbersLabel* self)
 {
 	self->showbeatoffset = FALSE;
 }
@@ -85,13 +82,14 @@ INLINE psy_ui_Component* trackerlinenumberslabel_base(TrackerLineNumbersLabel* s
 typedef struct TrackerLineNumbers {
 	/* inherits */
 	psy_ui_Component component;
-	/* internal */
-	psy_audio_SequenceCursor lastcursor;	
+	/* internal */	
 	bool showcursor;
 	bool shownumbersinhex;
 	bool showbeat;
+	const char* format;
+	const char* format_seqstart;
 	/* references */
-	TrackerState* state;	
+	TrackerState* state;
 	Workspace* workspace;
 } TrackerLineNumbers;
 
@@ -101,8 +99,23 @@ void trackerlinenumbers_init(TrackerLineNumbers*, psy_ui_Component* parent,
 void trackerlinenumbers_invalidatecursor(TrackerLineNumbers*,
 	const psy_audio_SequenceCursor*);
 void trackerlinenumbers_invalidateline(TrackerLineNumbers*, intptr_t line);
+void trackerlinenumbers_updateformat(TrackerLineNumbers*);
 void trackerlinenumbers_showlinenumbercursor(TrackerLineNumbers*, bool showstate);
 void trackerlinenumbers_showlinenumbersinhex(TrackerLineNumbers*, bool showstate);
+
+INLINE void trackerlinenumbers_showbeat(TrackerLineNumbers* self)
+{
+	self->showbeat = TRUE;
+	trackerlinenumbers_updateformat(self);
+}
+
+INLINE void trackerlinenumbers_hidebeat(TrackerLineNumbers* self)
+{
+	self->showbeat = FALSE;
+	trackerlinenumbers_updateformat(self);
+}
+
+void trackerlinenumbers_updatecursor(TrackerLineNumbers*);
 
 INLINE psy_ui_Component* trackerlinenumbers_base(TrackerLineNumbers* self)
 {
@@ -119,15 +132,13 @@ typedef struct TrackerLineNumberBar {
 	TrackerLineNumbersLabel linenumberslabel;
 	psy_ui_Component linenumberpane;
 	TrackerLineNumbers linenumbers;	
-	int zoomheightbase;
+	int zoomheightbase;		
 	/* references */
 	Workspace* workspace;
 } TrackerLineNumberBar;
 
-void trackerlinenumberbar_init(TrackerLineNumberBar*, psy_ui_Component*
-	parent, psy_ui_Component* view, TrackerState*, Workspace*);
-
-void trackerlinenumberbar_updatefollowsong(TrackerLineNumberBar*);
+void trackerlinenumberbar_init(TrackerLineNumberBar*, psy_ui_Component* parent,
+	TrackerState*, Workspace*);
 
 INLINE psy_ui_Component* trackerlinenumberbar_base(TrackerLineNumberBar* self)
 {

@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -56,11 +56,12 @@ static void machineview_onthemechanged(MachineView*, MachineViewConfig*,
 static void machineview_onnewmachineselected(MachineView*,
 	psy_ui_Component* sender, psy_Property*);
 static void machineview_onshow(MachineView*);
+
 /* vtable */
 static psy_ui_ComponentVtable machineview_vtable;
 static bool machineview_vtable_initialized = FALSE;
 
-static psy_ui_ComponentVtable* machineview_vtable_init(MachineView* self)
+static void machineview_vtable_init(MachineView* self)
 {
 	if (!machineview_vtable_initialized) {
 		machineview_vtable = *(self->component.vtable);
@@ -90,8 +91,10 @@ static psy_ui_ComponentVtable* machineview_vtable_init(MachineView* self)
 			machineview_onshow;
 		machineview_vtable_initialized = TRUE;
 	}
-	return &machineview_vtable;
+	psy_ui_component_setvtable(machineview_base(self),
+		&machineview_vtable);	
 }
+
 /* implementation */
 void machineview_init(MachineView* self, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, Workspace* workspace)
@@ -122,24 +125,22 @@ void machineview_ondestroy(MachineView* self)
 void machineview_initcomponent(MachineView* self, psy_ui_Component* parent)
 {
 	psy_ui_component_init(machineview_base(self), parent, NULL);
-	psy_ui_component_setvtable(machineview_base(self),
-		machineview_vtable_init(self));
-	psy_ui_component_setbackgroundmode(machineview_base(self),
-		psy_ui_NOBACKGROUND);
+	machineview_vtable_init(self);	
 	psy_ui_component_setstyletype(&self->component, STYLE_MACHINEVIEW);	
 }
 
 void machineview_initpropertiesview(MachineView* self)
 {
-	machineproperties_init(&self->properties, &self->component, NULL,
-		&self->skin, self->workspace);
-	psy_ui_component_setalign(&self->properties.component, psy_ui_ALIGN_TOP);
-	psy_ui_component_hide(&self->properties.component);
+	machineproperties_init(&self->properties, machineview_base(self),
+		self->workspace);
+	psy_ui_component_setalign(machineproperties_base(&self->properties),
+		psy_ui_ALIGN_TOP);
+	psy_ui_component_hide(machineproperties_base(&self->properties));
 }
 
 void machineview_initnotebook(MachineView* self, psy_ui_Component* tabbarparent)
 {
-	psy_ui_notebook_init(&self->notebook, &self->component, NULL);
+	psy_ui_notebook_init(&self->notebook, machineview_base(self));
 	psy_ui_component_setalign(psy_ui_notebook_base(&self->notebook),
 		psy_ui_ALIGN_CLIENT);
 }

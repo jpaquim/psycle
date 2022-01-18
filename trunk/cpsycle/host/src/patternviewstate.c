@@ -113,3 +113,46 @@ void patternviewstate_configure(PatternViewState* self)
 		patternviewstate_displaysequence(self);
 	}
 }
+
+psy_audio_SequenceTrackIterator patternviewstate_sequencestart(PatternViewState* self,
+	double startoffset)
+{
+	double offset;
+	double seqoffset;
+	double length;
+	psy_audio_SequenceTrackIterator rv;
+
+	assert(self);
+
+	rv.pattern = self->pattern;
+	rv.patternnode = NULL;
+	rv.patterns = patternviewstate_patterns(self);
+	seqoffset = 0.0;
+	length = rv.pattern->length;
+	offset = startoffset;
+	if (!self->singlemode && patternviewstate_sequence(self)) {
+		psy_audio_SequenceTrackNode* tracknode;
+		psy_audio_Sequence* sequence;
+
+		sequence = patternviewstate_sequence(self);
+		tracknode = psy_list_at(sequence->tracks,
+			self->cursor.orderindex.track);
+		if (!tracknode) {
+			tracknode = sequence->tracks;
+		}
+		rv = psy_audio_sequence_begin(sequence,
+			tracknode ? (psy_audio_SequenceTrack*)tracknode->entry : NULL,
+			offset);
+		if (rv.sequencentrynode) {
+			seqoffset = psy_audio_sequencetrackiterator_seqoffset(&rv);
+			if (rv.pattern) {
+				length = rv.pattern->length;
+			}
+		}
+	} else {
+		rv.sequencentrynode = NULL;
+		rv.patternnode = psy_audio_pattern_greaterequal(
+			patternviewstate_pattern(self), offset - seqoffset);
+	}	
+	return rv;
+}

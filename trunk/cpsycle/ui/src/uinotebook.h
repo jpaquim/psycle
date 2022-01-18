@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+**  copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #ifndef psy_ui_NOTEBOOK_H
@@ -23,8 +23,7 @@ typedef struct psy_ui_Notebook {
 	bool preventalign;
 } psy_ui_Notebook;
 
-void psy_ui_notebook_init(psy_ui_Notebook*, psy_ui_Component* parent,
-	psy_ui_Component* view);
+void psy_ui_notebook_init(psy_ui_Notebook*, psy_ui_Component* parent);
 
 void psy_ui_notebook_select(psy_ui_Notebook*, uintptr_t page);
 uintptr_t psy_ui_notebook_pageindex(psy_ui_Notebook*);
@@ -42,7 +41,6 @@ INLINE psy_ui_Component* psy_ui_notebook_base(psy_ui_Notebook* self)
 
 	return &self->component;
 }
-
 
 #ifdef __cplusplus
 }

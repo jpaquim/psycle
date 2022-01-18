@@ -1,20 +1,24 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "switchui.h"
-// host
+/* host */
 #include "skingraphics.h"
 #include "machineparamconfig.h"
-// audio
+/* audio */
 #include <machine.h>
 #include <plugin_interface.h>
-// platform
+/* platform */
 #include "../../detail/portable.h"
 
-// SwitchUi
-// prototypes
+/* SwitchUi */
+
+/* prototypes */
 static void switchui_ondraw(SwitchUi*, psy_ui_Graphics*);
 static void switchui_onpreferredsize(SwitchUi*, const psy_ui_Size* limit,
 	psy_ui_Size* rv);
@@ -23,7 +27,7 @@ static void switchui_onmouseup(SwitchUi*, psy_ui_MouseEvent*);
 static void switchui_onmousemove(SwitchUi*, psy_ui_MouseEvent*);
 static void switchui_updateparam(SwitchUi*);
 
-// vtable
+/* vtable */
 static psy_ui_ComponentVtable switchui_vtable;
 static bool switchui_vtable_initialized = FALSE;
 
@@ -33,21 +37,27 @@ static psy_ui_ComponentVtable* switchui_vtable_init(SwitchUi* self)
 
 	if (!switchui_vtable_initialized) {
 		switchui_vtable = *(self->component.vtable);
-		switchui_vtable.ondraw = (psy_ui_fp_component_ondraw)switchui_ondraw;		
-		switchui_vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
+		switchui_vtable.ondraw =
+			(psy_ui_fp_component_ondraw)
+			switchui_ondraw;
+		switchui_vtable.onpreferredsize =
+			(psy_ui_fp_component_onpreferredsize)
 			switchui_onpreferredsize;
-		switchui_vtable.onmousedown = (psy_ui_fp_component_onmouseevent)
+		switchui_vtable.onmousedown =
+			(psy_ui_fp_component_onmouseevent)
 			switchui_onmousedown;
-		switchui_vtable.onmouseup = (psy_ui_fp_component_onmouseevent)
+		switchui_vtable.onmouseup =
+			(psy_ui_fp_component_onmouseevent)
 			switchui_onmouseup;
-		switchui_vtable.onmousemove = (psy_ui_fp_component_onmouseevent)
+		switchui_vtable.onmousemove =
+			(psy_ui_fp_component_onmouseevent)
 			switchui_onmousemove;
 		switchui_vtable_initialized = TRUE;
 	}
 	return &switchui_vtable;
 }
 
-// implementation
+/* implementation */
 void switchui_init(SwitchUi* self, psy_ui_Component* parent,
 	psy_audio_Machine* machine, uintptr_t paramidx,
 	psy_audio_MachineParam* param, ParamSkin* paramskin)

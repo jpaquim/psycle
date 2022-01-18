@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -1436,17 +1436,8 @@ void workspace_idle(Workspace* self)
 */
 void workspace_notifynewline(Workspace* self)
 {
-	psy_audio_SequencerTime* seqtime;
-
-	seqtime = psy_audio_player_sequencertime(&self->player);
-	if (psy_audio_sequencertime_playing(seqtime)) {
-		if (seqtime->linecounter != self->lastplayline) {			
-			psy_signal_emit(&self->signal_playlinechanged, self, 0);			
-		}		
-	} else if (self->lastplayline != psy_INDEX_INVALID) {
-		self->lastplayline = psy_INDEX_INVALID;
-		psy_signal_emit(&self->signal_playlinechanged, self, 0);
-		self->lastplayposition = -1.0;
+	if (self->currplayline != self->lastplayline) {	
+		psy_signal_emit(&self->signal_playlinechanged, self, 0);	
 	}
 }
 

@@ -116,8 +116,7 @@ void trackconfig_resize(TrackConfig*, uintptr_t track, double width);
 
 /* TrackerEventTable */
 typedef struct TrackerEventTable {
-	psy_Table tracks;
-	double seqoffset;
+	psy_Table tracks;	
 	psy_audio_BlockSelection clip;
 	uintptr_t currcursorline;	
 } TrackerEventTable;

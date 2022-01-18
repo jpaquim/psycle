@@ -1,9 +1,10 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
+
 
 #include "wireview.h"
 /* local */
@@ -32,14 +33,15 @@ static const uint32_t linepenR = 0x0080c080;
 
 static psy_dsp_amp_t dB(psy_dsp_amp_t amplitude);
 
-// WireView
+/* WireView */
 enum {
 	WIREVIEW_TAB_VUMETER = 0,
 	WIREVIEW_TAB_OSCILLOSCOPE,
 	WIREVIEW_TAB_SPECTRUM,
 	WIREVIEW_TAB_PHASE
 };
-// prototypes
+
+/* prototypes */
 static void wireview_initvolumeslider(WireView*);
 static void wireview_inittabbar(WireView*);
 static void wireview_initrategroup(WireView*);
@@ -74,6 +76,7 @@ static void vtable_init(WireView* self)
 	}
 	self->component.vtable = &vtable;
 }
+
 /* implementation */
 void wireview_init(WireView* self, psy_ui_Component* parent, psy_audio_Wire wire,
 	Workspace* workspace)
@@ -90,7 +93,7 @@ void wireview_init(WireView* self, psy_ui_Component* parent, psy_audio_Wire wire
 	wireview_initbottomgroup(self);
 	wireview_initrategroup(self);
 	wireview_inittabbar(self);	
-	psy_ui_notebook_init(&self->notebook, wireview_base(self), NULL);
+	psy_ui_notebook_init(&self->notebook, wireview_base(self));
 	psy_ui_component_setalign(psy_ui_notebook_base(&self->notebook),
 		psy_ui_ALIGN_CLIENT);
 	/* Vuscope */
@@ -140,9 +143,7 @@ void wireview_initvolumeslider(WireView* self)
 	psy_ui_component_init(&self->slidergroup, wireview_base(self), NULL);	
 	psy_ui_component_setalign(&self->slidergroup, psy_ui_ALIGN_RIGHT);
 	psy_ui_component_setmargin(&self->slidergroup,
-		psy_ui_margin_make_em(0.0, 0.0, 0.0, 2.0));
-	//psy_ui_component_resize(&self->slidergroup, psy_ui_value_make_ew(2),
-		//psy_ui_value_make_px(0));
+		psy_ui_margin_make_em(0.0, 0.0, 0.0, 2.0));	
 	psy_ui_button_init(&self->percvol, &self->slidergroup);
 	psy_ui_button_settext(&self->percvol, "100%");
 	psy_ui_button_preventtranslation(&self->percvol);
@@ -358,10 +359,11 @@ uintptr_t wireview_currscope(WireView* self)
 	return psy_ui_tabbar_selected(&self->tabbar);
 }
 
-// WireFrame
-// prototypes
+/* WireFrame */
+/* prototypes */
 static void wireframe_updatetitle(WireFrame*, psy_audio_Machines*);
-// implementation
+
+/* implementation */
 void wireframe_init(WireFrame* self, psy_ui_Component* parent,
 	psy_audio_Wire wire, Workspace* workspace)
 {	
@@ -369,15 +371,19 @@ void wireframe_init(WireFrame* self, psy_ui_Component* parent,
 	assert(workspace->song);
 	assert(psy_audio_wire_valid(&wire));
 
-	psy_ui_frame_init(wireframe_base(self), parent);
+	psy_ui_frame_init(wireframe_base(self), (parent->view)
+		? parent->view : parent);
+	psy_ui_component_setbackgroundmode(wireframe_base(self),
+		psy_ui_SETBACKGROUND);
+	psy_ui_component_doublebuffer(wireframe_base(self));
 	psy_ui_component_seticonressource(wireframe_base(self), IDI_MACPARAM);
-	wireview_init(&self->wireview, &self->component, wire, workspace);
+	wireview_init(&self->wireview, wireframe_base(self), wire, workspace);
 	wireframe_updatetitle(self,
 		psy_audio_song_machines(workspace_song(workspace)));
 	psy_ui_component_setposition(wireframe_base(self),
 		psy_ui_rectangle_make(
-		psy_ui_point_make_px(200.0, 150.0),
-		psy_ui_size_make_em(80.0, 25.0)));
+			psy_ui_point_make_em(18.0, 15.0),
+			psy_ui_size_make_em(80.0, 25.0)));
 }
 
 void wireframe_updatetitle(WireFrame* self, psy_audio_Machines* machines)
@@ -427,7 +433,7 @@ void wireview_ondrawslidervu(WireView* self, psy_ui_Component* sender, psy_ui_Gr
 		return;
 	}
 	scopesamples = psy_audio_machine_buffermemorysize(machine);
-	//process the buffer that corresponds to the lapsed time. Also, force 16 bytes boundaries.
+	/* process the buffer that corresponds to the lapsed time.Also, force 16 bytes boundaries. */
 	scopesamples = psy_min(scopesamples, (int)(psy_audio_machine_samplerate(machine) *
 		self->vuscope.scope_peak_rate * 0.001)) & (~3);
 	pSamplesL = buffer->samples[0];
@@ -448,20 +454,20 @@ void wireview_ondrawslidervu(WireView* self, psy_ui_Component* sender, psy_ui_Gr
 	rmsL = (int)((psy_dsp_amp_t)(2 * step) - dB(self->vuscope.leftavg * multleft + 0.0000001f) * (psy_dsp_amp_t)step / 6.f);
 	rmsR = (int)((psy_dsp_amp_t)(2 * step) - dB(self->vuscope.rightavg * multright + 0.0000001f) * (psy_dsp_amp_t)step / 6.f);
 
-	if (maxL < self->vuscope.peakL) //  it is a cardinal value, so smaller means higher peak.
+	if (maxL < self->vuscope.peakL) /*  it is a cardinal value, so smaller means higher peak. */
 	{
 		if (maxL < 0) maxL = 0;
 		self->vuscope.peakL = maxL;
-		self->vuscope.peakLifeL = 2000 / self->vuscope.scope_peak_rate; //2 seconds
+		self->vuscope.peakLifeL = 2000 / self->vuscope.scope_peak_rate; /* 2 seconds */
 	}
 
-	if (maxR < self->vuscope.peakR)//  it is a cardinal value, so smaller means higher peak.
+	if (maxR < self->vuscope.peakR) /* it is a cardinal value, so smaller means higher peak. */
 	{
 		if (maxR < 0) maxR = 0;
-		self->vuscope.peakR = maxR;		self->vuscope.peakLifeR = 2000 / self->vuscope.scope_peak_rate; //2 seconds
+		self->vuscope.peakR = maxR;		self->vuscope.peakLifeR = 2000 / self->vuscope.scope_peak_rate; /* 2 seconds */
 	}
-	// now draw our scope
-	// LEFT CHANNEL		
+	/* now draw our scope */
+	/* LEFT CHANNEL */
 	rect.left = centerx - 60;
 	rect.right = rect.left + 24;
 	if (self->vuscope.peakL < 2 * step) {
@@ -488,7 +494,7 @@ void wireview_ondrawslidervu(WireView* self, psy_ui_Component* sender, psy_ui_Gr
 		rect.top = rect.bottom;
 	}
 	psy_ui_drawsolidrectangle(g, rect, psy_ui_colour_make(0xC08040));
-	// RIGHT CHANNEL 
+	/* RIGHT CHANNEL */
 	rect.left = centerx - 30;
 	rect.right = rect.left + 24;
 	if (self->vuscope.peakR < 2 * step) {
@@ -514,7 +520,7 @@ void wireview_ondrawslidervu(WireView* self, psy_ui_Component* sender, psy_ui_Gr
 		rect.top = rect.bottom;
 	}
 	psy_ui_drawsolidrectangle(g, rect, psy_ui_colour_make(0x90D040));
-	// update peak counter.
+	/* update peak counter. */
 	if (!self->vuscope.hold) {
 		if (self->vuscope.peakLifeL > 0 || self->vuscope.peakLifeR > 0) {
 			--self->vuscope.peakLifeL;
@@ -529,11 +535,11 @@ void wireview_ondrawslidervu(WireView* self, psy_ui_Component* sender, psy_ui_Gr
 	}	
 }
 
-/// linear -> deciBell
-/// amplitude normalized to 1.0f.
+/* linear -> deciBell */
+/* amplitude normalized to 1.0f. */
 psy_dsp_amp_t dB(psy_dsp_amp_t amplitude)
 {
-	///\todo merge with psycle::helpers::math::linear_to_deci_bell
+	/* todo merge with psycle::helpers::math::linear_to_deci_bell */
 	return (psy_dsp_amp_t)(20.0 * log10(amplitude));
 }
 

@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -833,7 +833,7 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 	self->currfilter = NULL;
 	newmachinesort_init(&self->sort);
 	/* Notebook	(switches scanprogress/pluginselectview) */
-	psy_ui_notebook_init(&self->notebook, &self->component, NULL);
+	psy_ui_notebook_init(&self->notebook, &self->component);
 	psy_ui_component_setalign(psy_ui_notebook_base(&self->notebook),
 		psy_ui_ALIGN_CLIENT);
 	/* client */

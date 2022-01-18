@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -698,7 +698,7 @@ psy_audio_SequenceCursor psy_audio_pattern_searchinpattern(psy_audio_Pattern*
 
 	psy_audio_sequencecursor_init(&cursor);
 	cursor.absolute = TRUE;
-	cursor.offset = -1.0;
+	psy_audio_sequencecursor_setoffset(&cursor, -1.0);
 	p = psy_audio_pattern_greaterequal(self, (psy_dsp_big_beat_t)selection.topleft.offset);
 	while (p != NULL) {
 		psy_audio_PatternEntry* entry;
@@ -713,7 +713,7 @@ psy_audio_SequenceCursor psy_audio_pattern_searchinpattern(psy_audio_Pattern*
 				if (notematcher(patternevent->note, notereference)
 					&& instmatcher(patternevent->inst, instreference)
 					&& machmatcher(patternevent->mach, machreference)) {
-					cursor.offset = entry->offset;
+					psy_audio_sequencecursor_setoffset(&cursor, entry->offset);
 					cursor.track = entry->track;
 					cursor.column = 0;
 					cursor.key = patternevent->note;
@@ -746,16 +746,20 @@ bool psy_audio_patterncursornavigator_advancelines(psy_audio_SequenceCursorNavig
 		int currlines;
 
 		currlines = cast_decimal(self->cursor->offset / self->bpl);
-		self->cursor->offset = (currlines + lines) * self->bpl;
+		psy_audio_sequencecursor_setoffset(self->cursor,
+			(currlines + lines) * self->bpl);
 		if (self->cursor->offset >= maxlength) {
 			if (self->wrap) {
-				self->cursor->offset = self->cursor->offset - maxlength;
+				psy_audio_sequencecursor_setoffset(self->cursor,
+					self->cursor->offset - maxlength);
 				if (self->cursor->offset > maxlength - self->bpl) {
-					self->cursor->offset = maxlength - self->bpl;
+					psy_audio_sequencecursor_setoffset(self->cursor,
+						maxlength - self->bpl);
 				}				
 				return FALSE;
 			} else {
-				self->cursor->offset = maxlength - self->bpl;
+				psy_audio_sequencecursor_setoffset(self->cursor,
+					maxlength - self->bpl);
 			}
 		}		
 	}
@@ -776,16 +780,18 @@ bool psy_audio_patterncursornavigator_prevlines(
 		int currlines;
 
 		currlines = cast_decimal(self->cursor->offset / self->bpl);
-		self->cursor->offset = (currlines - (intptr_t)lines) * self->bpl;
+		psy_audio_sequencecursor_setoffset(self->cursor,
+			(currlines - (intptr_t)lines) * self->bpl);
 		if (self->cursor->offset < 0.0) {
 			if (self->wrap) {
-				self->cursor->offset += maxlength;
+				psy_audio_sequencecursor_setoffset(self->cursor,
+					self->cursor->offset + maxlength);
 				if (self->cursor->offset < 0) {
-					self->cursor->offset = 0.0;
+					psy_audio_sequencecursor_setoffset(self->cursor, 0.0);					
 				}									
 				return TRUE;
 			} else {
-				self->cursor->offset = 0.0;
+				psy_audio_sequencecursor_setoffset(self->cursor, 0.0);				
 			}
 		}
 	}	

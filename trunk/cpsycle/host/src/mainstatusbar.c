@@ -1,6 +1,6 @@
 /*
 ** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -98,7 +98,7 @@ void mainstatusbar_initstatuslabel(MainStatusBar* self)
 
 void mainstatusbar_initviewstatusbars(MainStatusBar* self)
 {
-	psy_ui_notebook_init(&self->viewstatusbars, &self->pane, NULL);
+	psy_ui_notebook_init(&self->viewstatusbars, &self->pane);
 	psy_ui_component_setbackgroundmode(psy_ui_notebook_base(&self->viewstatusbars),
 		psy_ui_SETBACKGROUND);
 	psy_ui_component_setalign(psy_ui_notebook_base(&self->viewstatusbars),

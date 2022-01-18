@@ -1,20 +1,25 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #if !defined(PATTERNHEADER_H)
 #define PATTERNHEADER_H
 
-// host
+/* host */
 #include "trackergridstate.h"
 #include "workspace.h"
 
 
+/*
+** PatternTrackBox
+*/
 typedef struct PatternTrackBox {
-	// inherits
+	/* inherits */
 	psy_ui_Component component;
 	uintptr_t index;
 	bool playon;
-	// references
+	/* references */
 	TrackerState* state;
 } PatternTrackBox;
 
@@ -33,15 +38,15 @@ INLINE psy_ui_Component* patterntrackbox_base(PatternTrackBox* self)
 	return &self->component;
 }
 
-// TrackerHeader
-//
+/*
+** TrackerHeader
+*/
 typedef struct TrackerHeader {
-	// inherits
+	/* inherits */
 	psy_ui_Component component;
-	// internal
-	uintptr_t currtrack;		
+	/* internal */
 	psy_Table boxes;
-	// references
+	/* references */
 	TrackerState* state;
 	Workspace* workspace;
 } TrackerHeader;

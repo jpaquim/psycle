@@ -1,6 +1,6 @@
 /*
 ** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -810,6 +810,7 @@ psy_audio_SequenceCursor trackerstate_makecursor(TrackerState* self,
 		rv.digit = trackdef_numdigits(trackdef, rv.column) - 1;
 	}
 	self->pv->cursor.patternid = sequence->cursor.patternid;
+	psy_audio_sequencecursor_updatecache(&rv);
 	return rv;
 }
 

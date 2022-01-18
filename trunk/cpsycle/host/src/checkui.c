@@ -1,20 +1,25 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "checkui.h"
-// host
+
+/* host */
 #include "skingraphics.h"
 #include "machineparamconfig.h"
-// audio
+/* audio */
 #include <machine.h>
 #include <plugin_interface.h>
-// platform
+/* platform */
 #include "../../detail/portable.h"
 
-// CheckUi
-// prototypes
+/* CheckUi */
+
+/* prototypes */
 static void checkui_ondraw(CheckUi*, psy_ui_Graphics*);
 static void checkui_onpreferredsize(CheckUi*, const psy_ui_Size* limit,
 	psy_ui_Size* rv);
@@ -22,7 +27,7 @@ static void checkui_onmousedown(CheckUi*, psy_ui_MouseEvent*);
 static void checkui_onmouseup(CheckUi*, psy_ui_MouseEvent*);
 static void checkui_updateparam(CheckUi*);
 
-// vtable
+/* vtable */
 static psy_ui_ComponentVtable checkui_vtable;
 static bool checkui_vtable_initialized = FALSE;
 
@@ -32,12 +37,17 @@ static psy_ui_ComponentVtable* checkui_vtable_init(CheckUi* self)
 
 	if (!checkui_vtable_initialized) {
 		checkui_vtable = *(self->component.vtable);
-		checkui_vtable.ondraw = (psy_ui_fp_component_ondraw)checkui_ondraw;		
-		checkui_vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
+		checkui_vtable.ondraw =
+			(psy_ui_fp_component_ondraw)
+			checkui_ondraw;
+		checkui_vtable.onpreferredsize =
+			(psy_ui_fp_component_onpreferredsize)
 			checkui_onpreferredsize;
-		checkui_vtable.onmousedown = (psy_ui_fp_component_onmouseevent)
+		checkui_vtable.onmousedown =
+			(psy_ui_fp_component_onmouseevent)
 			checkui_onmousedown;
-		checkui_vtable.onmouseup = (psy_ui_fp_component_onmouseevent)
+		checkui_vtable.onmouseup =
+			(psy_ui_fp_component_onmouseevent)
 			checkui_onmouseup;
 		checkui_vtable_initialized = TRUE;
 	}

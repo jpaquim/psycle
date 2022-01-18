@@ -1,20 +1,21 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
-#include "sampleeditor.h"
 
+#include "sampleeditor.h"
+/* audio */
 #include <exclusivelock.h>
 #include <operations.h>
 #include <psyclescript.h>
-
 #include <songio.h>
-
+/* std */
 #include <assert.h>
 #include <math.h>
-#include <string.h>
-
+/* platform */
 #include "../../detail/portable.h"
 
 #define LUAPROCESSOR_DEFAULT \
@@ -282,7 +283,7 @@ void sampleprocessview_init(SampleEditorProcessView* self,
 	psy_ui_listbox_init(&self->processors, &self->client);
 	psy_ui_component_setalign(&self->processors.component, psy_ui_ALIGN_TOP);
 	psy_ui_component_setmargin(&self->processors.component, margin);	
-	psy_ui_notebook_init(&self->notebook, &self->client, NULL);
+	psy_ui_notebook_init(&self->notebook, &self->client);
 	psy_ui_component_setalign(&self->notebook.component, psy_ui_ALIGN_CLIENT);
 	sampleeditoramplify_init(&self->amplify, &self->notebook.component,
 		workspace);	

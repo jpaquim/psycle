@@ -13,10 +13,12 @@
 #include "../../detail/portable.h"
 
 /* SequenceCursor */
+
+/* implementation */
 void psy_audio_sequencecursor_init(psy_audio_SequenceCursor* self)
 {
 	self->orderindex = psy_audio_orderindex_make(0, 0);
-	self->seqoffset = (psy_dsp_big_beat_t)0.0;
+	self->seqoffset = (psy_dsp_big_beat_t)0.0;	
 	self->key = psy_audio_NOTECOMMANDS_MIDDLEC;
 	self->track = 0;
 	self->offset = 0.0;
@@ -26,6 +28,7 @@ void psy_audio_sequencecursor_init(psy_audio_SequenceCursor* self)
 	self->digit = 0;
 	self->patternid = 0;
 	self->noteindex = 0;
+	psy_audio_sequencecursor_updatecache(self);
 }
 
 void psy_audio_sequencecursor_init_all(psy_audio_SequenceCursor* self,
@@ -45,6 +48,7 @@ psy_audio_SequenceCursor psy_audio_sequencecursor_make_all(
 	rv.track = track;
 	rv.offset = offset;
 	rv.key = key;
+	psy_audio_sequencecursor_updatecache(&rv);
 	return rv;
 }
 
@@ -56,6 +60,7 @@ psy_audio_SequenceCursor psy_audio_sequencecursor_make(
 	psy_audio_sequencecursor_init(&rv);
 	rv.track = track;
 	rv.offset = offset;
+	psy_audio_sequencecursor_updatecache(&rv);
 	return rv;
 }
 
@@ -86,7 +91,7 @@ void psy_audio_sequencecursor_updateseqoffset(psy_audio_SequenceCursor* self,
 		self->seqoffset = psy_audio_sequenceentry_offset(entry);
 	} else {
 		self->seqoffset = 0.0;
-	}
+	}	
 }
 
 uintptr_t psy_audio_sequencecursor_patternid(
@@ -112,11 +117,6 @@ psy_dsp_big_beat_t psy_audio_sequencecursor_seqoffset(
 	return self->seqoffset;
 }
 
-uintptr_t psy_audio_sequencecursor_line(const psy_audio_SequenceCursor* self)
-{
-	return (uintptr_t)(self->offset * self->lpb);
-}
-
 uintptr_t psy_audio_sequencecursor_track(const psy_audio_SequenceCursor* self)
 {
 	return (self->track);
@@ -135,4 +135,10 @@ uintptr_t psy_audio_sequencecursor_digit(const psy_audio_SequenceCursor* self)
 uintptr_t psy_audio_sequencecursor_noteindex(const psy_audio_SequenceCursor* self)
 {
 	return (self->noteindex);
+}
+
+void psy_audio_sequencecursor_updatecache(const psy_audio_SequenceCursor* self)
+{	
+	((psy_audio_SequenceCursor*)self)->linecache = /* mutable */
+		cast_decimal(self->offset * self->lpb);
 }
