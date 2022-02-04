@@ -943,17 +943,17 @@ psy_Property* pluginsview_pluginbycursorposition(PluginsView* self, uintptr_t co
 void pluginsview_onmousedown(PluginsView* self, psy_ui_MouseEvent* ev)
 {	
 	self->multidrag = FALSE;
-	if (ev->button == 1) {		
+	if (psy_ui_mouseevent_button(ev) == 1) {
 		uintptr_t index;
 
-		index = pluginsview_hittest(self, ev->pt);
+		index = pluginsview_hittest(self, psy_ui_mouseevent_pt(ev));
 		if (index != psy_INDEX_INVALID) {			
-			if (ev->ctrl_key) {
+			if (psy_ui_mouseevent_ctrlkey(ev)) {
 				newmachineselection_toggle(&self->selection, index);
 			} else {
 				if (psy_list_size(self->selection.items) > 1 &&
 					newmachineselection_isselected(&self->selection, index)) {
-					self->dragpt = ev->pt;
+					self->dragpt = psy_ui_mouseevent_pt(ev);
 					self->multidrag = TRUE;
 					self->dragindex = index;
 				} else {
@@ -970,7 +970,10 @@ void pluginsview_onmousedown(PluginsView* self, psy_ui_MouseEvent* ev)
 
 void pluginsview_onmouseup(PluginsView* self, psy_ui_MouseEvent* ev)
 {
-	if (self->multidrag && psy_ui_realpoint_equal(&self->dragpt, &ev->pt)) {
+	psy_ui_RealPoint pt;
+
+	pt = psy_ui_mouseevent_pt(ev);
+	if (self->multidrag && psy_ui_realpoint_equal(&self->dragpt, &pt)) {
 		newmachineselection_singleselect(&self->selection, self->dragindex);
 		psy_ui_component_invalidate(&self->component);
 		psy_signal_emit(&self->signal_changed, self, 0);
@@ -993,9 +996,10 @@ uintptr_t pluginsview_hittest(PluginsView* self, psy_ui_RealPoint pt)
 		for (p = psy_property_begin(self->currplugins), cpx = 0, cpy = 0, i = 0;
 				p != NULL; psy_list_next(&p), ++i) {
 			psy_ui_RealRectangle r;
-
-			psy_ui_setrectangle(&r, cpx, cpy, self->columnwidth,
-				self->lineheight);
+			
+			r = psy_ui_realrectangle_make(
+					psy_ui_realpoint_make(cpx, cpy),
+					psy_ui_realsize_make(self->columnwidth, self->lineheight));
 			if (psy_ui_realrectangle_intersect(&r, pt)) {				
 				break;
 			}		

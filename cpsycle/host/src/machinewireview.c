@@ -479,13 +479,13 @@ void machinewireview_centermaster(MachineWireView* self)
 void machinewireview_onmousedoubleclick(MachineWireView* self,
 	psy_ui_MouseEvent* ev)
 {	
-	if (ev->button == 1) {		
-		self->dragpt = psy_ui_realpoint_make(ev->pt.x, ev->pt.y);
+	if (psy_ui_mouseevent_button(ev) == 1) {
+		self->dragpt = psy_ui_mouseevent_pt(ev);
 		self->dragslot = machinewireview_hittest(self);		
 		if (self->dragslot == psy_INDEX_INVALID) {
 			psy_audio_Wire selectedwire;
 			
-			selectedwire = machinewireview_hittestwire(self, ev->pt);
+			selectedwire = machinewireview_hittestwire(self, psy_ui_mouseevent_pt(ev));
 			if (psy_audio_wire_valid(&selectedwire)) {
 				psy_audio_machines_selectwire(self->machines, selectedwire);
 				machinewireview_showwireview(self, selectedwire);
@@ -508,12 +508,12 @@ void machinewireview_onmousedown(MachineWireView* self, psy_ui_MouseEvent* ev)
 	if (!psy_ui_component_hasfocus(&self->component)) {
 		psy_ui_component_setfocus(&self->component);
 	}
-	self->dragpt = ev->pt;
+	self->dragpt = psy_ui_mouseevent_pt(ev);
 	self->mousemoved = FALSE;		
 	self->dragmode = MACHINEVIEW_DRAG_NONE;
 	self->dragslot = machinewireview_hittest(self);
 	self->dragmachineui = machinewireviewuis_at(&self->machineuis, self->dragslot);
-	if (ev->button == 1) {
+	if (psy_ui_mouseevent_button(ev) == 1) {
 		if (self->dragslot != psy_audio_MASTER_INDEX) {			
 			psy_audio_machines_selectwire(self->machines, 
 				psy_audio_wire_make(psy_INDEX_INVALID, psy_INDEX_INVALID));
@@ -527,28 +527,28 @@ void machinewireview_onmousedown(MachineWireView* self, psy_ui_MouseEvent* ev)
 				position = psy_ui_component_position(self->dragmachineui);				
 				psy_ui_realpoint_floor(
 					psy_ui_realpoint_move(&self->dragpt,
-						ev->pt.x - position.left,
-						ev->pt.y - position.top));
+						psy_ui_mouseevent_pt(ev).x - position.left,
+						psy_ui_mouseevent_pt(ev).y - position.top));
 				psy_ui_component_capture(&self->component);				
 			}
 		} else {
 			psy_audio_Wire selectedwire;
 			
-			selectedwire = machinewireview_hittestwire(self, ev->pt);
+			selectedwire = machinewireview_hittestwire(self, psy_ui_mouseevent_pt(ev));
 			psy_audio_machines_selectwire(self->machines,
 				selectedwire);
-			if (psy_audio_wire_valid(&selectedwire) && ev->shift_key) {
+			if (psy_audio_wire_valid(&selectedwire) && psy_ui_mouseevent_shiftkey(ev)) {
 				self->dragmode = MACHINEVIEW_DRAG_LEFTCONNECTION;
 				self->dragslot = selectedwire.src;
 			}
-			if (psy_audio_wire_valid(&selectedwire) && ev->ctrl_key) {
+			if (psy_audio_wire_valid(&selectedwire) && psy_ui_mouseevent_ctrlkey(ev)) {
 				self->dragmode = MACHINEVIEW_DRAG_RIGHTCONNECTION;
 				self->dragslot = selectedwire.dst;
 			}
 			psy_ui_component_invalidate(&self->component);
 		}
 		psy_ui_mouseevent_stop_propagation(ev);
-	} else if (ev->button == 2) {
+	} else if (psy_ui_mouseevent_button(ev) == 2) {
 		psy_audio_Machine* machine;
 
 		machine = psy_audio_machines_at(self->machines, self->dragslot);
@@ -586,7 +586,10 @@ uintptr_t machinewireview_hittest(const MachineWireView* self)
 void machinewireview_onmousemove(MachineWireView* self, psy_ui_MouseEvent* ev)
 {		
 	if (!self->mousemoved) {
-		if (!psy_ui_realpoint_equal(&self->dragpt, &ev->pt)) {
+		psy_ui_RealPoint pt;
+
+		pt = psy_ui_mouseevent_pt(ev);
+		if (!psy_ui_realpoint_equal(&self->dragpt, &pt)) {
 			self->mousemoved = TRUE;
 		} else {
 			return;
@@ -598,18 +601,19 @@ void machinewireview_onmousemove(MachineWireView* self, psy_ui_MouseEvent* ev)
 		}		
 		if (machinewireview_dragging_machine(self)) {
 			if (!machinewireview_dragmachine(self, self->dragslot,
-					ev->pt.x - self->dragpt.x, ev->pt.y - self->dragpt.y)) {
+				psy_ui_mouseevent_pt(ev).x - self->dragpt.x,
+				psy_ui_mouseevent_pt(ev).y - self->dragpt.y)) {
 				self->dragmode = MACHINEVIEW_DRAG_NONE;
 			}			
 		} else if (machinewireview_dragging_connection(self)) {
-			self->dragpt = ev->pt;	
+			self->dragpt = psy_ui_mouseevent_pt(ev);
 			psy_ui_component_invalidate(&self->component);
 			++self->component.opcount;
 		}		
 	} else if (self->showwirehover) {
 		psy_audio_Wire hoverwire;
 		
-		hoverwire = machinewireview_hittestwire(self, ev->pt);
+		hoverwire = machinewireview_hittestwire(self, psy_ui_mouseevent_pt(ev));
 		if (psy_audio_wire_valid(&hoverwire)) {
 			psy_ui_Component* machineui;
 
@@ -619,7 +623,7 @@ void machinewireview_onmousemove(MachineWireView* self, psy_ui_MouseEvent* ev)
 				psy_ui_RealRectangle r;
 
 				r = psy_ui_component_position(machineui);
-				if (psy_ui_realrectangle_intersect(&r, ev->pt)) {
+				if (psy_ui_realrectangle_intersect(&r, psy_ui_mouseevent_pt(ev))) {
 					psy_audio_wire_invalidate(&self->hoverwire);
 					psy_ui_component_invalidate(&self->component);
 					++self->component.opcount;
@@ -632,7 +636,7 @@ void machinewireview_onmousemove(MachineWireView* self, psy_ui_MouseEvent* ev)
 				psy_ui_RealRectangle r;
 
 				r = psy_ui_component_position(machineui);
-				if (psy_ui_realrectangle_intersect(&r, ev->pt)) {
+				if (psy_ui_realrectangle_intersect(&r, psy_ui_mouseevent_pt(ev))) {
 					psy_audio_wire_invalidate(&self->hoverwire);
 					psy_ui_component_invalidate(&self->component);
 					++self->component.opcount;
@@ -764,7 +768,7 @@ void machinewireview_onmouseup(MachineWireView* self, psy_ui_MouseEvent* ev)
 					}
 				}
 				psy_ui_mouseevent_stop_propagation(ev);
-			} else if (ev->button == 2) {
+			} else if (psy_ui_mouseevent_button(ev) == 2) {
 				/* if (!self->workspace->gearvisible) {
 
 					workspace_togglegear(self->workspace);					
@@ -1029,8 +1033,9 @@ psy_audio_Wire machinewireview_hittestwire(MachineWireView* self, psy_ui_RealPoi
 						outposition = psy_ui_component_position(outmachineui);
 						out = psy_ui_component_scrollsize_px(outmachineui);
 						in = psy_ui_component_scrollsize_px(inmachineui);
-						psy_ui_setrectangle(&r, pt.x - d, pt.y - d, 2 * d,
-							2 * d);
+						r = psy_ui_realrectangle_make(
+							psy_ui_realpoint_make(pt.x - d, pt.y - d),
+							psy_ui_realsize_make(2 * d, 2 * d));
 						if (psy_ui_realrectangle_intersect_segment(&r,
 							outposition.left + out.width / 2, outposition.top + out.height / 2,
 							inposition.left + in.width / 2, inposition.top + in.height / 2)) {

@@ -199,7 +199,7 @@ void psy_ui_scroller_onpanesize(psy_ui_Scroller* self, psy_ui_Component* sender)
 		nPosY = floor(psy_ui_component_scrolltop_px(self->client) / scrollstepy_px);
 		psy_ui_scrollbar_setthumbposition(&self->vscroll, nPosY);
 		scrollstepx_px = scrollstepy_px = psy_ui_component_scrollstep_width_px(self->client);
-		nPosX = floor(psy_ui_component_scrollleftpx(self->client) / scrollstepx_px);
+		nPosX = floor(psy_ui_component_scrollleft_px(self->client) / scrollstepx_px);
 		psy_ui_scrollbar_setthumbposition(&self->hscroll, nPosX);
 	}
 }
@@ -217,7 +217,7 @@ void psy_ui_scroller_horizontal_onchanged(psy_ui_Scroller* self, psy_ui_ScrollBa
 
 	tm = psy_ui_component_textmetric(self->client);
 	scrollsteppx = psy_ui_component_scrollstep_width_px(self->client);
-	scrollleftpx = psy_ui_component_scrollleftpx(self->client);	
+	scrollleftpx = psy_ui_component_scrollleft_px(self->client);	
 	iPos = scrollleftpx / scrollsteppx;	
 	nPos = psy_ui_scrollbar_position(sender);
 	diff = -scrollsteppx * floor(iPos - nPos);	
@@ -233,9 +233,11 @@ void psy_ui_scroller_horizontal_onchanged(psy_ui_Scroller* self, psy_ui_ScrollBa
 		}
 	} else {	
 		self->thumbmove = TRUE;
+		self->client->blitscroll = TRUE;
 		psy_ui_component_setscrollleft(self->client,
 			psy_ui_value_make_px(
 				floor((scrollleftpx + diff) / scrollsteppx) * scrollsteppx));		
+		self->client->blitscroll = FALSE;
 		self->thumbmove = FALSE;
 	}
 }
@@ -274,9 +276,11 @@ void psy_ui_scroller_vertical_onchanged(psy_ui_Scroller* self,
 		}
 	} else {
 		self->thumbmove = TRUE;
+		self->client->blitscroll = TRUE;
 		psy_ui_component_setscrolltop(self->client,
 			psy_ui_value_make_px(
 				floor((scrolltoppx + diff) / scrollstepy_px) * scrollstepy_px));		
+		self->client->blitscroll = FALSE;
 		self->thumbmove = FALSE;
 	}
 }
@@ -312,7 +316,7 @@ void psy_ui_scroller_onscroll(psy_ui_Scroller* self, psy_ui_Component* sender)
 			psy_ui_component_scrollstep_height_px(self->client));
 		psy_ui_scrollbar_setthumbposition(&self->vscroll, pos);
 		/* horizontal */
-		pos = floor(psy_ui_component_scrollleftpx(self->client) /
+		pos = floor(psy_ui_component_scrollleft_px(self->client) /
 			psy_ui_component_scrollstep_width_px(self->client));
 		psy_ui_scrollbar_setthumbposition(&self->hscroll, pos);
 	}
@@ -323,10 +327,7 @@ void psy_ui_scroller_scrollrangechanged(psy_ui_Scroller* self, psy_ui_Component*
 {	
 	if (orientation == psy_ui_VERTICAL) {
 		psy_ui_IntPoint vrange;		
-		
-		if (self->component.id == 50) {
-			self = self;
-		}
+				
 		vrange = psy_ui_component_verticalscrollrange(sender);
 		psy_ui_scrollbar_setscrollrange(&self->vscroll,
 			psy_ui_component_verticalscrollrange(sender));

@@ -90,14 +90,18 @@ void headerui_ondraw(HeaderUi* self, psy_ui_Graphics* g)
 	quarter = half / 2;
 	psy_ui_realrectangle_init_all(&r, psy_ui_realpoint_zero(), size);
 	psy_ui_drawsolidrectangle(g, r, self->skin->topcolour);
-	psy_ui_setrectangle(&r, 0, half + quarter, size.width, quarter);
+	r = psy_ui_realrectangle_make(
+		psy_ui_realpoint_make(0, half + quarter),
+		psy_ui_realsize_make(size.width, quarter));
 	psy_ui_drawsolidrectangle(g, r, self->skin->bottomcolour);
 	if (!psy_audio_machineparam_name(self->param, str)) {
 		if (!psy_audio_machineparam_label(self->param, str)) {
 			psy_snprintf(str, 128, "%s", "");
 		}
 	}
-	psy_ui_setrectangle(&r, 0, quarter, size.width, half);
+	r = psy_ui_realrectangle_make(
+		psy_ui_realpoint_make(0, quarter),
+		psy_ui_realsize_make(size.width, half));
 	psy_ui_setbackgroundcolour(g, self->skin->titlecolour);
 	psy_ui_settextcolour(g, self->skin->fonttitlecolour);
 	// todo font_bold

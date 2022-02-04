@@ -35,8 +35,7 @@ void helpview_init(HelpView* self, psy_ui_Component* parent,
 
 void helpview_initbase(HelpView* self, psy_ui_Component* parent)
 {
-	psy_ui_component_init(helpview_base(self), parent, NULL);
-	psy_ui_component_doublebuffer(helpview_base(self));
+	psy_ui_component_init(helpview_base(self), parent, NULL);	
 	psy_signal_connect(&helpview_base(self)->signal_focus, self,
 		helpview_onfocus);
 	psy_signal_connect(&helpview_base(self)->signal_selectsection, self,
@@ -99,7 +98,7 @@ void helpview_onfocus(HelpView* self, psy_ui_Component* sender)
 
 	view = psy_ui_notebook_activepage(&self->notebook);
 	if (view) {
-		// psy_ui_component_setfocus(view);
+		/* psy_ui_component_setfocus(view); */
 	}
 }
 

@@ -388,7 +388,7 @@ void mainframe_initbars(MainFrame* self)
 		psy_ui_component_hide(trackscopeview_base(&self->trackscopeview));
 		trackscopes_stop(&self->trackscopeview.scopes);
 	}
-	psy_ui_component_init(&self->topspacer, &self->component, NULL);
+	psy_ui_component_init(&self->topspacer, &self->pane, NULL);
 	psy_ui_component_setalign(&self->topspacer, psy_ui_ALIGN_TOP);
 	psy_ui_component_preventalign(&self->topspacer);
 	psy_ui_component_setpreferredsize(&self->topspacer,
@@ -627,7 +627,7 @@ void mainframe_initsequencerbar(MainFrame* self)
 
 void mainframe_initplugineditor(MainFrame* self)
 {
-	plugineditor_init(&self->plugineditor, mainframe_base(self), &self->workspace);
+	/*plugineditor_init(&self->plugineditor, mainframe_base(self), &self->workspace);
 	psy_ui_component_setalign(plugineditor_base(&self->plugineditor),
 		psy_ui_ALIGN_LEFT);
 	psy_ui_component_hide(plugineditor_base(&self->plugineditor));
@@ -636,7 +636,7 @@ void mainframe_initplugineditor(MainFrame* self)
 	psy_ui_splitter_init(&self->splitbarplugineditor, mainframe_base(self));
 	psy_ui_component_setalign(psy_ui_splitter_base(&self->splitbarplugineditor),
 		psy_ui_ALIGN_LEFT);
-	psy_ui_component_hide(psy_ui_splitter_base(&self->splitbarplugineditor));
+	psy_ui_component_hide(psy_ui_splitter_base(&self->splitbarplugineditor));*/
 }
 
 void mainframe_connectworkspace(MainFrame* self)

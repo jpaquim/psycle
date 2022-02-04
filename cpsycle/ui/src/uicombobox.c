@@ -298,10 +298,11 @@ void psy_ui_combobox_onmousewheel(psy_ui_ComboBox* self, psy_ui_MouseEvent* ev)
 {
 	assert(self);
 
-	if (ev->delta != 0) {
+	if (psy_ui_mouseevent_delta(ev) != 0) {
 		intptr_t index;
 		
-		index = psy_ui_combobox_cursel(self) + psy_sgn(ev->delta);
+		index = psy_ui_combobox_cursel(self) +
+			psy_sgn(psy_ui_mouseevent_delta(ev));
 		if (index >= 0 && index < psy_ui_combobox_count(self)) {
 			psy_ui_combobox_setcursel(self, index);
 			psy_signal_emit(&self->signal_selchanged, self, 1, index);

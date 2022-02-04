@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-**  copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -38,6 +38,7 @@ static double lines(double pos, double size, double scrollsize, double step,
 	bool round, double* rv_max, double* rv_visi);
 static psy_ui_RealPoint mapcoords(psy_ui_Component* src,
 	psy_ui_Component* dst);
+static void psy_ui_component_drawchildren(psy_ui_Component*, psy_ui_Graphics*);
 
 void psy_ui_componentcontaineralign_init(psy_ui_ComponentContainerAlign* self)
 {
@@ -265,7 +266,8 @@ static void resize(psy_ui_Component*, psy_ui_Size);
 static void clientresize(psy_ui_Component*, psy_ui_Size);
 static void setposition(psy_ui_Component*, psy_ui_Point, psy_ui_Size);
 static psy_ui_Size framesize(psy_ui_Component*);
-static void scrollto(psy_ui_Component*, intptr_t dx, intptr_t dy);
+static void scrollto(psy_ui_Component*, intptr_t dx, intptr_t dy,
+	const psy_ui_RealRectangle*);
 static void setfont(psy_ui_Component*, const psy_ui_Font*);
 static psy_List* children(psy_ui_Component*, int recursive);
 static void enableinput(psy_ui_Component*);
@@ -358,7 +360,9 @@ static void ontimer(psy_ui_Component* self, uintptr_t timerid)
 		self->style.currstyle->backgroundanimation.enabled) {
 		self->bgframetimer++;
 		if (self->bgframetimer == self->style.currstyle->backgroundanimation.interval) {
+#ifndef PSYCLE_DEBUG_PREVENT_TIMER_DRAW
 			psy_ui_component_invalidate(self);			
+#endif
 			self->currbgframe++;
 			self->bgframetimer = 0;
 		}		
@@ -603,9 +607,10 @@ psy_ui_Size framesize(psy_ui_Component* self)
 	return self->imp->vtable->dev_framesize(self->imp);
 }
 
-void scrollto(psy_ui_Component* self, intptr_t dx, intptr_t dy)
+void scrollto(psy_ui_Component* self, intptr_t dx, intptr_t dy,
+	const psy_ui_RealRectangle* r)
 {
-	self->imp->vtable->dev_scrollto(self->imp, dx, dy);
+	self->imp->vtable->dev_scrollto(self->imp, dx, dy, r);
 }
 
 void setfont(psy_ui_Component* self, const psy_ui_Font* font)
@@ -693,6 +698,7 @@ void psy_ui_component_init_base(psy_ui_Component* self) {
 	self->bgframetimer = FALSE;
 	self->currbgframe = 0;
 	self->ncpaint = FALSE;
+	self->blitscroll = FALSE;
 	psy_ui_bitmap_init(&self->bufferbitmap);
 	self->drawtobuffer = FALSE;
 	psy_ui_component_updatefont(self);
@@ -800,7 +806,8 @@ void psy_ui_component_scrollstep(psy_ui_Component* self, double stepx,
 	if (stepy != 0 || stepx != 0) {		
 		self->vtable->scrollto(self,
 			(intptr_t)(psy_ui_component_scrollstep_width_px(self) * stepx),
-			(intptr_t)(psy_ui_component_scrollstep_height_px(self) * stepy));
+			(intptr_t)(psy_ui_component_scrollstep_height_px(self) * stepy),
+			NULL);
 	}
 }
 
@@ -1407,7 +1414,8 @@ static psy_ui_Size dev_preferredsize(psy_ui_ComponentImp* self, const psy_ui_Siz
 static void dev_updatesize(psy_ui_ComponentImp* self) { }
 static void dev_applyposition(psy_ui_ComponentImp* self) { }
 static psy_ui_Size dev_framesize(psy_ui_ComponentImp* self) { return psy_ui_size_zero(); }
-static void dev_scrollto(psy_ui_ComponentImp* self, intptr_t dx, intptr_t dy) { }
+static void dev_scrollto(psy_ui_ComponentImp* self, intptr_t dx, intptr_t dy,
+	const psy_ui_RealRectangle* r) { }
 static psy_ui_Component* dev_parent(psy_ui_ComponentImp* self) { return 0;  }
 static void dev_setparent(psy_ui_ComponentImp* self, psy_ui_Component* parent) { }
 static void dev_insert(psy_ui_ComponentImp* self, psy_ui_ComponentImp* child, psy_ui_ComponentImp* insertafter) { }
@@ -1463,13 +1471,6 @@ static void* dev_platform(psy_ui_ComponentImp* self) { return (void*) self; }
 static uintptr_t dev_platform_handle(psy_ui_ComponentImp* self) { return psy_INDEX_INVALID; }
 static uintptr_t dev_flags(const psy_ui_ComponentImp* self) { return 0; }
 static void dev_clear(psy_ui_ComponentImp* self) {  }
-static void dev_draw(psy_ui_ComponentImp* self, psy_ui_Graphics* g) { }
-static void dev_mousedown(psy_ui_ComponentImp* self, psy_ui_MouseEvent* ev) { }
-static void dev_mouseup(psy_ui_ComponentImp* self, psy_ui_MouseEvent* ev) { }
-static void dev_mousemove(psy_ui_ComponentImp* self, psy_ui_MouseEvent* ev) { }
-static void dev_mousedoubleclick(psy_ui_ComponentImp* self, psy_ui_MouseEvent* ev) { }
-static void dev_mouseenter(psy_ui_ComponentImp* self) { }
-static void dev_mouseleave(psy_ui_ComponentImp* self) { }
 static void dev_initialized(psy_ui_ComponentImp* self) { }
 
 static psy_ui_ComponentImpVTable imp_vtable;
@@ -1526,14 +1527,7 @@ static void imp_vtable_init(void)
 		imp_vtable.dev_platform = dev_platform;
 		imp_vtable.dev_platform_handle = dev_platform_handle;
 		imp_vtable.dev_flags = dev_flags;
-		imp_vtable.dev_clear = dev_clear;
-		imp_vtable.dev_draw = dev_draw;
-		imp_vtable.dev_mouseup = dev_mouseup;
-		imp_vtable.dev_mousedown = dev_mousedown;
-		imp_vtable.dev_mousemove = dev_mousemove;
-		imp_vtable.dev_mousedoubleclick = dev_mousedoubleclick;
-		imp_vtable.dev_mouseenter = dev_mouseenter;
-		imp_vtable.dev_mouseleave = dev_mouseleave;
+		imp_vtable.dev_clear = dev_clear;		
 		imp_vtable.dev_initialized = dev_initialized;
 		imp_vtable_initialized = TRUE;
 	}
@@ -1615,13 +1609,29 @@ void psy_ui_component_setscroll(psy_ui_Component* self,
 void psy_ui_component_setscrollleft(psy_ui_Component* self, psy_ui_Value left)
 {		
 	psy_ui_RealRectangle position;
+	double newleft;
 
 	position = psy_ui_component_position(self);
+	newleft = -psy_ui_value_px(&left, psy_ui_component_textmetric(self), NULL);
 	psy_ui_component_move(self,
 		psy_ui_point_make(
 			psy_ui_value_make_px(
 				-psy_ui_value_px(&left, psy_ui_component_textmetric(self), NULL)),
 			psy_ui_value_make_px(position.top)));
+	if (!self->blitscroll) {
+		psy_ui_component_invalidate(self);
+	} else {
+		psy_ui_RealRectangle r;
+		psy_ui_RealSize parentsize;		
+
+		parentsize = psy_ui_component_scrollsize_px(psy_ui_component_parent(self));
+		r = psy_ui_realrectangle_make(
+			psy_ui_realpoint_make(
+				psy_ui_component_scrollleft_px(self),
+				psy_ui_component_scrolltop_px(self)),
+			parentsize);
+		psy_ui_component_scrollto(self, newleft - position.left, 0.0, &r);
+	}	
 	psy_signal_emit(&self->signal_scroll, self, 0);	
 }
 
@@ -1631,7 +1641,8 @@ void psy_ui_component_setscrolltop(psy_ui_Component* self, psy_ui_Value top)
 	psy_ui_RealSize parentsize;
 	double newtop;
 
-	position = psy_ui_component_position(self);	
+	position = psy_ui_component_position(self);
+	parentsize = psy_ui_component_scrollsize_px(psy_ui_component_parent(self));
 	newtop = -psy_ui_value_px(&top, psy_ui_component_textmetric(self), NULL);
 	if ((psy_ui_component_overflow(self) & psy_ui_OVERFLOW_VSCROLL) ==
 			psy_ui_OVERFLOW_VSCROLL) {
@@ -1647,7 +1658,18 @@ void psy_ui_component_setscrolltop(psy_ui_Component* self, psy_ui_Value top)
 		}
 	}	
 	psy_ui_component_move(self, psy_ui_point_make_px(position.left, newtop));
-	parentsize = psy_ui_component_scrollsize_px(psy_ui_component_parent(self));
+	if (!self->blitscroll) {
+		psy_ui_component_invalidate(self);
+	} else {
+		psy_ui_RealRectangle r;
+
+		r = psy_ui_realrectangle_make(
+			psy_ui_realpoint_make(
+				psy_ui_component_scrollleft_px(self),
+				psy_ui_component_scrolltop_px(self)),
+			parentsize);
+		psy_ui_component_scrollto(self, 0.0, newtop - position.top, &r);
+	}
 	position = psy_ui_component_position(self);
 	if (parentsize.height > position.bottom) {
 		psy_ui_RealPoint translate;
@@ -1739,7 +1761,7 @@ void psy_ui_component_updateoverflow(psy_ui_Component* self)
 		scrollstepx_px = floor(psy_ui_component_scrollstep_width_px(self));
 		tm = psy_ui_component_textmetric(self);
 		currrow = lines(
-			psy_ui_component_scrollleftpx(self),
+			psy_ui_component_scrollleft_px(self),
 			psy_ui_value_px(&size.width, tm, NULL),
 			psy_ui_value_px(&scrollsize.width, tm, NULL),
 			scrollstepx_px,
@@ -1862,7 +1884,7 @@ void psy_ui_component_drawbackground(psy_ui_Component* self,
 				psy_ui_bitmap_load(&bitmap, path);
 				success = !psy_ui_bitmap_empty(&bitmap);
 				if (success && self->style.currstyle->backgroundrepeat == psy_ui_NOREPEAT) {
-					psy_ui_drawsolidrectangle(g, g->clip,
+					psy_ui_drawsolidrectangle(g, psy_ui_cliprect(g),
 						psy_ui_component_backgroundcolour(self));
 				}
 				psy_ui_component_drawbackgroundimage(self, g, &bitmap,
@@ -1876,7 +1898,7 @@ void psy_ui_component_drawbackground(psy_ui_Component* self,
 				psy_ui_bitmap_loadresource(&bitmap, image_id);
 				success = !psy_ui_bitmap_empty(&bitmap);
 				if (success && self->style.currstyle->backgroundrepeat == psy_ui_NOREPEAT) {
-					psy_ui_drawsolidrectangle(g, g->clip,
+					psy_ui_drawsolidrectangle(g, psy_ui_cliprect(g),
 						psy_ui_component_backgroundcolour(self));
 				}
 				psy_ui_component_drawbackgroundimage(self, g, &bitmap,
@@ -1885,8 +1907,8 @@ void psy_ui_component_drawbackground(psy_ui_Component* self,
 				psy_ui_bitmap_dispose(&bitmap);
 			}			
 			if (!success) {
-				psy_ui_drawsolidrectangle(g, g->clip,
-					psy_ui_component_backgroundcolour(self));
+				psy_ui_drawsolidrectangle(g, psy_ui_cliprect(g),
+					psy_ui_component_backgroundcolour(self));				
 			}
 		}
 	}
@@ -1938,7 +1960,7 @@ psy_ui_RealRectangle psy_ui_component_scrolledposition(psy_ui_Component* self)
 {	
 	return psy_ui_realrectangle_make(
 		psy_ui_realpoint_make(
-			psy_ui_component_scrollleftpx(self),
+			psy_ui_component_scrollleft_px(self),
 			psy_ui_component_scrolltop_px(self)),
 		psy_ui_component_scrollsize_px(self));
 }
@@ -2183,16 +2205,15 @@ void psy_ui_notifystyleupdate(psy_ui_Component* main)
 	psy_ui_component_invalidate(main);	
 }
 
-void psy_ui_component_draw(psy_ui_Component* self, psy_ui_Graphics* g,
-	psy_List* viewcomponents)
-{
-	psy_ui_RealMargin spacing;
-	psy_ui_RealPoint restoreorigin;
-	psy_ui_RealPoint origin;
+void psy_ui_component_draw(psy_ui_Component* self, psy_ui_Graphics* g)
+{	
 	psy_ui_Graphics bitmap_g;
-	psy_ui_Graphics* temp_g;
+	psy_ui_Graphics* temp_g;	
+	psy_ui_RealRectangle oldclip;
+	psy_ui_RealRectangle clip;
 
 	temp_g = NULL;
+	oldclip = psy_ui_cliprect(g);
 	if (self->drawtobuffer) {
 		if (psy_ui_bitmap_empty(&self->bufferbitmap)) {
 			psy_ui_RealSize size;
@@ -2210,200 +2231,104 @@ void psy_ui_component_draw(psy_ui_Component* self, psy_ui_Graphics* g,
 		}
 	}	
 	psy_ui_setfont(g, psy_ui_component_font(self));
+	clip = psy_ui_realrectangle_make(
+		psy_ui_realpoint_zero(),
+		psy_ui_component_scrollsize_px(self));
+	if ((oldclip.bottom - oldclip.top != 0.0)) {
+		psy_ui_realrectangle_intersection(&clip, &oldclip);
+	}
+	psy_ui_graphics_setcliprect(g, clip);
 	/* draw background */
 	if (self->backgroundmode != psy_ui_NOBACKGROUND) {
 		psy_ui_component_drawbackground(self, g);
 	}	
 	psy_ui_component_drawborder(self, g);
-	/*
-	** prepare a clip rect that can be used by a component
-	** to optimize the draw amount
-	*/
-	psy_ui_realrectangle_settopleft(&g->clip,
-		psy_ui_realpoint_make(g->clip.left, g->clip.top));
-	/*
-	** add scroll coords	
-	**  spacing
-	*/
-	restoreorigin = psy_ui_origin(g);
-	spacing = psy_ui_component_spacing_px(self);
-	if (!psy_ui_realmargin_iszero(&spacing)) {
-		origin = restoreorigin;
-		origin.x -= (int)spacing.left;
-		origin.y -= (int)spacing.top;
-		psy_ui_setorigin(g, origin);
-	}
 	/* prepare colours */
 	psy_ui_setcolour(g, psy_ui_component_colour(self));
 	psy_ui_settextcolour(g, psy_ui_component_colour(self));
 	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
-	/* call specialization methods (vtable, then signals) */
 	if (self->vtable->ondraw) {
+		psy_ui_Margin spacing;
+		const psy_ui_TextMetric* tm;
+		psy_ui_RealPoint origin;
+
+		origin = psy_ui_origin(g);
+		/* spacing */
+		spacing = psy_ui_component_spacing(self);
+		if (!psy_ui_margin_iszero(&spacing)) {
+			tm = psy_ui_component_textmetric(self);
+			psy_ui_setorigin(g, psy_ui_realpoint_make(
+				origin.x - (int)psy_ui_value_px(&spacing.left, tm, NULL),
+				origin.y - (int)psy_ui_value_px(&spacing.top, tm, NULL)));
+		}
 		self->vtable->ondraw(self, g);
-	}
-	psy_signal_emit(&self->signal_draw, self, 1, g);
-	psy_ui_component_drawchildren(self, g, viewcomponents);
-	psy_ui_setorigin(g, restoreorigin);
+		psy_signal_emit(&self->signal_draw, self, 1, g);
+		psy_ui_setorigin(g, origin);
+	}	
+	psy_ui_component_drawchildren(self, g);	
 	if (self->drawtobuffer && temp_g) {		
-		psy_ui_graphics_dispose(&bitmap_g);
+		psy_ui_graphics_dispose(&bitmap_g);	
+		g = temp_g;
 		if (!psy_ui_bitmap_empty(&self->bufferbitmap)) {
 			psy_ui_drawfullbitmap(g, &self->bufferbitmap,
 				psy_ui_realpoint_zero());
 		}
 	}
+	psy_ui_graphics_setcliprect(g, oldclip);
 }
 
-void psy_ui_component_drawchildren(psy_ui_Component* self, psy_ui_Graphics* g,
-	psy_List* children)
-{
-	if (children) {
-		psy_List* p;
-		psy_ui_RealRectangle clip;
-		psy_ui_RealPoint restoreorigin;
+void psy_ui_component_drawchildren(psy_ui_Component* self, psy_ui_Graphics* g)
+{		
+	psy_List* q;		
 
-		clip = g->clip;
-		restoreorigin = psy_ui_origin(g);
-		for (p = children; p != NULL; p = p->next) {
+	q = psy_ui_component_children(self, psy_ui_NONRECURSIVE);
+	if (q) {		
+		psy_ui_RealRectangle clip;
+		psy_ui_RealPoint origin;
+		psy_List* p;
+
+		clip = psy_ui_cliprect(g);
+		origin = psy_ui_origin(g);
+		for (p = q; p != NULL; p = p->next) {
 			psy_ui_Component* component;
 
-			component = (psy_ui_Component*)psy_list_entry(p);
-			if (!psy_ui_component_visible(component)) {
-				continue;
-			}
-			if ((component->imp->vtable->dev_flags(component->imp)
-				& psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN) ==
-				psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN) {
+			component = (psy_ui_Component*)psy_list_entry(p);			
+			if (psy_ui_component_visible(component) &&
+					psy_ui_component_islightweight(component)) {
 				psy_ui_RealRectangle position;
-				psy_ui_RealRectangle intersection;
+				psy_ui_RealRectangle intersection;				
 
-				position = psy_ui_component_position(component);				
+				position = psy_ui_component_position(component);
 				if ((self->alignsorted == psy_ui_ALIGN_TOP && position.bottom < clip.top) ||
 					(self->alignsorted == psy_ui_ALIGN_LEFT && position.right < clip.left)) {
 					continue;
 				}
-				intersection = clip;
+				intersection = clip;				
 				if (psy_ui_realrectangle_intersection(&intersection, &position)) {
-					psy_ui_RealPoint origin;
-
 					/* translate graphics clip and origin */
 					psy_ui_realrectangle_settopleft(&intersection,
 						psy_ui_realpoint_make(
 							intersection.left - position.left,
 							intersection.top - position.top));
-					g->clip = intersection;
-					origin = psy_ui_origin(g);
-					psy_ui_setorigin(g, psy_ui_realpoint_make(-position.left + origin.x,
-						-position.top + origin.y));					
-					component->imp->vtable->dev_draw(component->imp, g);
-					psy_ui_setorigin(g, psy_ui_realpoint_make(origin.x, origin.y));
-					if ((self->alignsorted == psy_ui_ALIGN_TOP && position.top > clip.bottom) ||						
-					    (self->alignsorted == psy_ui_ALIGN_LEFT && position.left > clip.right)) {
+					psy_ui_graphics_setcliprect(g, clip);
+					psy_ui_setorigin(g,
+						psy_ui_realpoint_make(
+							-position.left + origin.x,
+							-position.top + origin.y));
+					/* draw */
+					psy_ui_component_draw(component, g);
+					/* reset origin */
+					psy_ui_setorigin(g, origin);
+					/* terminate? */
+					if ((self->alignsorted == psy_ui_ALIGN_TOP && position.top > clip.bottom) ||
+						(self->alignsorted == psy_ui_ALIGN_LEFT && position.left > clip.right)) {
 						break;
 					}
 				}
 			}
 		}
-		g->clip = clip;		
-		psy_ui_setorigin(g, restoreorigin);
-	}
-}
-
-void psy_ui_component_mousedown(psy_ui_Component* self, psy_ui_MouseEvent* ev,
-	psy_List* viewcomponents)
-{
-	psy_List* p;
-
-	for (p = viewcomponents; p != NULL; psy_list_next(&p)) {
-		psy_ui_Component* child;
-		psy_ui_RealRectangle r;
-
-		child = (psy_ui_Component*)p->entry;
-		if (psy_ui_component_visible(child)) {
-			r = psy_ui_component_position(child);
-			if (psy_ui_realrectangle_intersect(&r, ev->pt)) {
-				ev->pt.x -= r.left;
-				ev->pt.y -= r.top;				
-				child->imp->vtable->dev_mousedown(child->imp, ev);
-				ev->pt.x += r.left;
-				ev->pt.y += r.top;
-				break;
-			}
-		}
-	}
-}
-
-void psy_ui_component_mouseup(psy_ui_Component* self, psy_ui_MouseEvent* ev,
-	psy_List* viewcomponents)
-{
-	if (psy_ui_app_capture(psy_ui_app())) {
-		psy_ui_RealPoint translation;
-		psy_ui_RealMargin spacing;
-		psy_ui_Component* capture;
-		
-		capture = psy_ui_app_capture(psy_ui_app());
-		do {
-			translation = mapcoords(capture, self);
-			spacing = psy_ui_component_spacing_px(capture);
-			psy_ui_realpoint_sub(&ev->pt, translation);
-			psy_ui_realpoint_sub(&ev->pt, psy_ui_realpoint_make(
-				spacing.left, spacing.top));
-			capture->vtable->onmouseup(capture, ev);
-			psy_signal_emit(&capture->signal_mouseup,
-				capture, 1, ev);
-			psy_ui_realpoint_add(&ev->pt, translation);
-			if (ev->event.bubbles) {
-				capture = psy_ui_component_parent(capture);
-			} else {
-				capture = NULL;
-			}
-		} while (capture);	
-		ev->event.bubbles = FALSE;
-	} else {
-		psy_List* p;
-
-		for (p = viewcomponents; p != NULL; psy_list_next(&p)) {
-			psy_ui_Component* child;
-			psy_ui_RealRectangle r;
-
-			child = (psy_ui_Component*)p->entry;
-			if (psy_ui_component_visible(child)) {
-				r = psy_ui_component_position(child);
-				if (psy_ui_realrectangle_intersect(&r, ev->pt)) {
-					ev->pt.x -= r.left;
-					ev->pt.y -= r.top;
-					child->imp->vtable->dev_mouseup(child->imp, ev);
-					ev->pt.x += r.left;
-					ev->pt.y += r.top;
-					break;
-				}
-			}
-		}
-	}
-	psy_ui_app()->mousetracking = FALSE;
-}
-
-void psy_ui_component_mousedoubleclick(psy_ui_Component* self,
-	psy_ui_MouseEvent* ev, psy_List* viewcomponents)
-{
-	psy_List* p;
-
-	for (p = viewcomponents; p != NULL; psy_list_next(&p)) {
-		psy_ui_Component* child;
-		psy_ui_RealRectangle r;
-
-		child = (psy_ui_Component*)p->entry;
-		if (psy_ui_component_visible(child)) {
-			r = psy_ui_component_position(child);
-			if (psy_ui_realrectangle_intersect(&r, ev->pt)) {
-				ev->pt.x -= r.left;
-				ev->pt.y -= r.top;				
-				child->imp->vtable->dev_mousedoubleclick(child->imp, ev);
-				ev->pt.x += r.left;
-				ev->pt.y += r.top;
-				break;
-			}
-		}
-	}
+		psy_list_free(q);		
+	}	
 }
 
 void psy_ui_component_mousewheel(psy_ui_Component* self, psy_ui_MouseEvent* ev,
@@ -2460,8 +2385,8 @@ void psy_ui_component_mousewheel(psy_ui_Component* self, psy_ui_MouseEvent* ev,
 	}
 }
 
-void psy_ui_component_traverse_int(psy_ui_Component* self,
-	psy_fp_int fp, uintptr_t value)
+void psy_ui_component_traverse_int(psy_ui_Component* self, psy_fp_int fp,
+	uintptr_t value)
 {
 	psy_List* p;
 	psy_List* q;
@@ -2473,8 +2398,8 @@ void psy_ui_component_traverse_int(psy_ui_Component* self,
 	psy_list_free(q);
 }
 
-void psy_ui_component_traverse_margin(psy_ui_Component* self,
-	psy_fp_margin fp, psy_ui_Margin value)
+void psy_ui_component_traverse_margin(psy_ui_Component* self, psy_fp_margin fp,
+	psy_ui_Margin value)
 {
 	psy_List* p;
 	psy_List* q;

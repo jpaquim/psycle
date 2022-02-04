@@ -51,6 +51,9 @@ extern "C" {
 #define psy_ui_STYLE_SWITCH_HOVER        40241
 #define psy_ui_STYLE_SWITCH_SELECT       40242
 #define psy_ui_STYLE_LISTBOX             40260
+#define psy_ui_STYLE_CHECKMARK           40280
+#define psy_ui_STYLE_CHECKMARK_HOVER     40281
+#define psy_ui_STYLE_CHECKMARK_SELECT    40282
 
 
 void psy_ui_appstyles_inittheme(psy_ui_Styles*, psy_ui_ThemeMode,

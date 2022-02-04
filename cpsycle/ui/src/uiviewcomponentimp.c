@@ -9,6 +9,7 @@
 #include "uiviewcomponentimp.h"
 /* local */
 #include "uiapp.h"
+#include "uicomponent.h"
 /* platform */
 #include "../../detail/portable.h"
 #include "../../detail/trace.h"
@@ -37,7 +38,7 @@ static void view_dev_updatesize(psy_ui_ViewComponentImp*);
 static void view_dev_applyposition(psy_ui_ViewComponentImp* self) { }
 static psy_ui_Size view_dev_framesize(psy_ui_ViewComponentImp*);
 static void view_dev_scrollto(psy_ui_ViewComponentImp*, intptr_t dx,
-	intptr_t dy);
+	intptr_t dy, const psy_ui_RealRectangle*);
 static psy_ui_Component* view_dev_parent(psy_ui_ViewComponentImp*);
 static void view_dev_setparent(psy_ui_ViewComponentImp*,
 	psy_ui_Component* parent);
@@ -75,14 +76,6 @@ static void view_dev_settitle(psy_ui_ViewComponentImp*, const char* title);
 static void view_dev_setfocus(psy_ui_ViewComponentImp*);
 static int view_dev_hasfocus(psy_ui_ViewComponentImp*);
 static uintptr_t view_dev_flags(const psy_ui_ComponentImp*);
-static void view_dev_draw(psy_ui_ViewComponentImp*, psy_ui_Graphics*);
-static void view_dev_mousedown(psy_ui_ViewComponentImp*, psy_ui_MouseEvent*);
-static void view_dev_mouseup(psy_ui_ViewComponentImp*, psy_ui_MouseEvent*);
-static void view_dev_mousemove(psy_ui_ViewComponentImp*, psy_ui_MouseEvent*);
-static void view_dev_mousedoubleclick(psy_ui_ViewComponentImp*,
-	psy_ui_MouseEvent*);
-static void view_dev_mouseenter(psy_ui_ViewComponentImp*);
-static void view_dev_mouseleave(psy_ui_ViewComponentImp*);
 static psy_ui_RealRectangle view_translation(psy_ui_ViewComponentImp*,
 	const psy_ui_RealRectangle*);
 static psy_ui_RealPoint translatecoords(psy_ui_ViewComponentImp*,
@@ -227,28 +220,7 @@ static void view_imp_vtable_init(psy_ui_ViewComponentImp* self)
 			view_dev_hasfocus;
 		view_imp_vtable.dev_flags =
 			(psy_ui_fp_componentimp_dev_flags)
-			view_dev_flags;
-		view_imp_vtable.dev_draw =
-			(psy_ui_fp_componentimp_dev_draw)
-			view_dev_draw;
-		view_imp_vtable.dev_mousedown =
-			(psy_ui_fp_componentimp_dev_mouseevent)
-			view_dev_mousedown;
-		view_imp_vtable.dev_mouseup =
-			(psy_ui_fp_componentimp_dev_mouseevent)
-			view_dev_mouseup;
-		view_imp_vtable.dev_mousemove =
-			(psy_ui_fp_componentimp_dev_mouseevent)
-			view_dev_mousemove;
-		view_imp_vtable.dev_mousedoubleclick =
-			(psy_ui_fp_componentimp_dev_mouseevent)
-			view_dev_mousedoubleclick;
-		view_imp_vtable.dev_mouseenter =
-			(psy_ui_fp_componentimp_dev_mouseenter)
-			view_dev_mouseenter;
-		view_imp_vtable.dev_mouseleave =
-			(psy_ui_fp_componentimp_dev_mouseleave)
-			view_dev_mouseleave;
+			view_dev_flags;		
 		view_imp_vtable_initialized = TRUE;
 	}
 }
@@ -421,7 +393,7 @@ void view_dev_move(psy_ui_ViewComponentImp* self, psy_ui_Point origin)
 		psy_ui_realpoint_make(
 			psy_ui_value_px(&origin.x, tm, NULL),
 			psy_ui_value_px(&origin.y, tm, NULL)));	
-	view_dev_invalidate(self);
+//	view_dev_invalidate(self);
 }
 
 void view_dev_resize(psy_ui_ViewComponentImp* self, psy_ui_Size size)
@@ -511,10 +483,6 @@ psy_ui_Size view_dev_framesize(psy_ui_ViewComponentImp* self)
 		self->position.bottom - self->position.top);
 }
 
-void view_dev_scrollto(psy_ui_ViewComponentImp* self, intptr_t dx, intptr_t dy)
-{
-}
-
 psy_ui_Component* view_dev_parent(psy_ui_ViewComponentImp* self)
 {
 	return self->parent;
@@ -593,6 +561,26 @@ void view_dev_releasecapture(psy_ui_ViewComponentImp* self)
 	self->view->imp->vtable->dev_releasecapture(self->view->imp);
 }
 
+
+void view_dev_scrollto(psy_ui_ViewComponentImp* self, intptr_t dx, intptr_t dy,
+	const psy_ui_RealRectangle* r)
+{
+	psy_ui_RealSize size;
+	psy_ui_RealRectangle rc;
+
+	size = psy_ui_component_scrollsize_px(self->component);
+	if (r) {
+		rc = view_translation(self, r);		
+	} else {
+		rc = psy_ui_realrectangle_make(
+			psy_ui_realpoint_zero(),
+			size);
+		rc = view_translation(self, &rc);
+	}
+	psy_ui_component_scrollto(self->view, dx, dy, &rc);
+}
+
+
 void view_dev_invalidate(psy_ui_ViewComponentImp* self)
 {	
 	psy_ui_RealSize size;
@@ -601,7 +589,7 @@ void view_dev_invalidate(psy_ui_ViewComponentImp* self)
 	size = psy_ui_component_scrollsize_px(self->component);
 	r = psy_ui_realrectangle_make(
 		psy_ui_realpoint_zero(),
-		size);	
+		size);
 	view_dev_invalidaterect(self, &r);
 }
 
@@ -729,84 +717,6 @@ uintptr_t view_dev_flags(const psy_ui_ComponentImp* self)
 	return psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN;
 }
 
-void view_dev_draw(psy_ui_ViewComponentImp* self, psy_ui_Graphics* g)
-{	
-	if (self->visible) {
-		psy_ui_Graphics bitmap_g;
-		psy_ui_Graphics* temp_g;
-		psy_ui_RealRectangle oldclip;
-		psy_ui_RealRectangle clip;
-
-		if (self->component->id == 90) {
-			self = self;
-		}
-		temp_g = NULL;
-		oldclip = psy_ui_cliprect(g);
-		if (self->component->drawtobuffer) {
-			if (psy_ui_bitmap_empty(&self->component->bufferbitmap)) {
-				psy_ui_RealSize size;
-
-				psy_ui_bitmap_dispose(&self->component->bufferbitmap);
-				size = psy_ui_component_scrollsize_px(self->component);
-				psy_ui_bitmap_init_size(&self->component->bufferbitmap, size);
-				psy_ui_graphics_init_bitmap(&bitmap_g, &self->component->bufferbitmap);				
-				temp_g = g;
-				g = &bitmap_g;
-			} else {
-				psy_ui_drawfullbitmap(g, &self->component->bufferbitmap,
-					psy_ui_realpoint_zero());
-				return;
-			}
-		}		
-		psy_ui_setfont(g, psy_ui_component_font(self->component));
-		clip = psy_ui_realrectangle_make(
-			psy_ui_realpoint_zero(),
-			psy_ui_component_scrollsize_px(self->component));
-		if ((oldclip.bottom - oldclip.top != 0.0)) {
-			psy_ui_realrectangle_intersection(&clip, &oldclip);
-		}
-		psy_ui_setcliprect(g, clip);
-		/* draw background */
-		if (self->component->backgroundmode != psy_ui_NOBACKGROUND) {			
-			psy_ui_component_drawbackground(self->component, g);
-		}
-		psy_ui_component_drawborder(self->component, g);
-		/* prepare colours */
-		psy_ui_setcolour(g, psy_ui_component_colour(
-			self->component));
-		psy_ui_settextcolour(g, psy_ui_component_colour(
-			self->component));
-		psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
-		if (self->component->vtable->ondraw) {
-			psy_ui_Margin spacing;
-			const psy_ui_TextMetric* tm;
-			psy_ui_RealPoint origin;
-
-			origin = psy_ui_origin(g);
-			/* spacing */
-			spacing = psy_ui_component_spacing(self->component);
-			if (!psy_ui_margin_iszero(&spacing)) {
-				tm = psy_ui_component_textmetric(self->component);							
-				psy_ui_setorigin(g, psy_ui_realpoint_make(
-					origin.x - (int)psy_ui_value_px(&spacing.left, tm, NULL),
-					origin.y - (int)psy_ui_value_px(&spacing.top, tm, NULL)));
-			}
-			self->component->vtable->ondraw(self->component, g);
-			psy_ui_setorigin(g, origin);
-		}
-		psy_ui_component_drawchildren(self->component, g, self->viewcomponents);		
-		if (self->component->drawtobuffer && temp_g) {
-			psy_ui_graphics_dispose(&bitmap_g);
-			g = temp_g;
-			if (!psy_ui_bitmap_empty(&self->component->bufferbitmap)) {
-				psy_ui_drawfullbitmap(g, &self->component->bufferbitmap,
-					psy_ui_realpoint_zero());
-			}
-		}
-		psy_ui_setcliprect(g, oldclip);
-	}	
-}
-
 psy_List* view_dev_children(psy_ui_ViewComponentImp* self, int recursive)
 {
 	psy_List* rv = 0;
@@ -826,153 +736,4 @@ psy_List* view_dev_children(psy_ui_ViewComponentImp* self, int recursive)
 		}
 	}
 	return rv;
-}
-
-void view_dev_mousedown(psy_ui_ViewComponentImp* self, psy_ui_MouseEvent* ev)
-{
-	psy_List* p;	
-
-	for (p = self->viewcomponents; p != NULL; psy_list_next(&p)) {
-		psy_ui_Component* child;
-		psy_ui_RealRectangle r;
-
-		child = (psy_ui_Component*)psy_list_entry(p);
-		if (psy_ui_component_visible(child)) {
-			r = psy_ui_component_position(child);
-			if (psy_ui_realrectangle_intersect(&r, ev->pt)) {
-				psy_ui_realpoint_sub(&ev->pt, psy_ui_realrectangle_topleft(&r));				
-				child->imp->vtable->dev_mousedown(child->imp, ev);
-				psy_ui_realpoint_add(&ev->pt, psy_ui_realrectangle_topleft(&r));
-				break;
-			}
-		}
-	}
-	if (ev->event.bubbles) {
-		if (!self->viewcomponents) {
-			ev->event.target = self->component;
-		}
-		ev->event.currenttarget = self->component;
-		self->component->vtable->onmousedown(self->component, ev);
-		psy_signal_emit(&self->component->signal_mousedown,
-			self->component, 1, ev);
-	}
-}
-
-void view_dev_mouseup(psy_ui_ViewComponentImp* self, psy_ui_MouseEvent* ev)
-{
-	psy_List* p;
-
-	for (p = self->viewcomponents; p != NULL; psy_list_next(&p)) {
-		psy_ui_Component* child;
-		psy_ui_RealRectangle r;
-
-		child = (psy_ui_Component*)psy_list_entry(p);
-		if (psy_ui_component_visible(child)) {
-			r = psy_ui_component_position(child);
-			if (psy_ui_realrectangle_intersect(&r, ev->pt)) {
-				psy_ui_realpoint_sub(&ev->pt, psy_ui_realrectangle_topleft(&r));
-				child->imp->vtable->dev_mouseup(child->imp, ev);
-				psy_ui_realpoint_add(&ev->pt, psy_ui_realrectangle_topleft(&r));
-				break;
-			}
-		}
-	}
-	if (ev->event.bubbles) {
-		ev->event.currenttarget = self->component;
-		self->component->vtable->onmouseup(self->component, ev);
-		psy_signal_emit(&self->component->signal_mouseup,
-			self->component, 1, ev);
-	}
-}
-
-void view_dev_mousemove(psy_ui_ViewComponentImp* self, psy_ui_MouseEvent* ev)
-{	
-	psy_List* p;
-	bool intersect;
-		
-	intersect = FALSE;
-	for (p = self->viewcomponents; p != NULL; psy_list_next(&p)) {
-		psy_ui_Component* child;
-		psy_ui_RealRectangle r;
-
-		child = (psy_ui_Component*)psy_list_entry(p);
-		if (psy_ui_component_visible(child)) {
-			r = psy_ui_component_position(child);
-			intersect = psy_ui_realrectangle_intersect(&r, ev->pt);
-			if (intersect) {
-				psy_ui_realpoint_sub(&ev->pt, psy_ui_realrectangle_topleft(&r));
-				child->imp->vtable->dev_mousemove(child->imp, ev);
-				psy_ui_realpoint_add(&ev->pt, psy_ui_realrectangle_topleft(&r));
-
-				break;
-			}
-		}
-	}
-	if (!intersect) {
-		if (psy_ui_app()->hover != self->component) {
-			psy_ui_Component* hover;
-
-			hover = psy_ui_app()->hover;
-			psy_ui_app_sethover(psy_ui_app(), self->component);
-			if (hover) {			
-				hover->vtable->onmouseleave(hover);
-				psy_signal_emit(&hover->signal_mouseleave,
-					self->component, 0);
-			}						
-			self->component->vtable->onmouseenter(self->component);
-			psy_signal_emit(&self->component->signal_mouseenter,
-				self->component, 0);			
-		}		
-	}
-	if (ev->event.bubbles) {
-		ev->event.currenttarget = self->component;
-		self->component->vtable->onmousemove(self->component, ev);
-		psy_signal_emit(&self->component->signal_mousemove,
-			self->component, 1, ev);
-	}
-}
-
-void view_dev_mousedoubleclick(psy_ui_ViewComponentImp* self, psy_ui_MouseEvent* ev)
-{
-	psy_List* p;
-
-	for (p = self->viewcomponents; p != NULL; psy_list_next(&p)) {
-		psy_ui_Component* child;
-		psy_ui_RealRectangle r;
-
-		child = (psy_ui_Component*)psy_list_entry(p);
-		if (psy_ui_component_visible(child)) {
-			r = psy_ui_component_position(child);
-			if (psy_ui_realrectangle_intersect(&r, ev->pt)) {
-				psy_ui_realpoint_sub(&ev->pt, psy_ui_realrectangle_topleft(&r));
-				child->imp->vtable->dev_mousedoubleclick(child->imp, ev);
-				psy_ui_realpoint_add(&ev->pt, psy_ui_realrectangle_topleft(&r));
-				break;
-			}
-		}
-	}
-	if (ev->event.bubbles) {
-		self->component->vtable->onmousedoubleclick(self->component, ev);
-		psy_signal_emit(&self->component->signal_mousedoubleclick,
-			self->component, 1, ev);
-	}
-}
-
-void view_dev_mouseenter(psy_ui_ViewComponentImp* self)
-{
-	if (psy_ui_app()->hover) {
-		psy_ui_app()->hover->vtable->onmouseleave(psy_ui_app()->hover);
-		psy_signal_emit(&psy_ui_app()->hover->signal_mouseleave,
-			self->component, 0);
-	}
-	psy_ui_app_sethover(psy_ui_app(), self->component);	
-	psy_signal_emit(&self->component->signal_mouseenter,
-		self->component, 0);
-}
-
-void view_dev_mouseleave(psy_ui_ViewComponentImp* self)
-{
-	psy_ui_app_sethover(psy_ui_app(), NULL);	
-	psy_signal_emit(&self->component->signal_mouseleave,
-		self->component, 0);
 }

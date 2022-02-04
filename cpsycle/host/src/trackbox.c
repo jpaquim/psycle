@@ -220,7 +220,7 @@ void trackbox_onresizemousemove(TrackBox* self, psy_ui_Component* sender,
 	if (self->doresize) {
 		double offset;
 
-		offset = ev->pt.y - self->dragoffset;
+		offset = psy_ui_mouseevent_pt(ev).y - self->dragoffset;
 		psy_signal_emit(&self->signal_resize, self, 1, &offset);		
 	}
 	psy_ui_component_setcursor(&self->component,

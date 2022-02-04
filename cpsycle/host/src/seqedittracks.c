@@ -251,7 +251,7 @@ void seqeditortracks_onmousemove(SeqEditorTracks* self,
 	psy_ui_MouseEvent* ev)
 {	
 	seqeditstate_setcursor(self->state, seqeditstate_quantize(self->state,
-		seqeditstate_pxtobeat(self->state, ev->pt.x)));
+		seqeditstate_pxtobeat(self->state, psy_ui_mouseevent_pt(ev).x)));
 	if (self->state->dragstatus && (self->state->dragtype & SEQEDIT_DRAGTYPE_MOVE)
 			== SEQEDIT_DRAGTYPE_MOVE) {
 		seqeditortracks_updateseqeditlineposition(self);

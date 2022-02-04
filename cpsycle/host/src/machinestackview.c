@@ -1289,10 +1289,10 @@ void machinestackpanetrack_onmousedoubleclick(MachineStackPaneTrack* self,
 
 			component = (psy_ui_Component*)psy_list_entry(p);
 			position = psy_ui_component_position(component);
-			if (position.bottom > ev->pt.y) {
+			if (position.bottom > psy_ui_mouseevent_pt(ev).y) {
 				break;
 			}
-			if (psy_ui_realrectangle_intersect(&position, ev->pt)) {
+			if (psy_ui_realrectangle_intersect(&position, psy_ui_mouseevent_pt(ev))) {
 				effect = c - column->offset;
 				break;
 			}
@@ -1300,8 +1300,8 @@ void machinestackpanetrack_onmousedoubleclick(MachineStackPaneTrack* self,
 		psy_list_free(q);
 		if (effect == psy_INDEX_INVALID) {
 			self->state->effectinsertpos = c - column->offset;
-			self->state->effectinsertright =
-				(ev->pt.x > psy_ui_value_px(&self->state->effectsize.width,
+			self->state->effectinsertright = (psy_ui_mouseevent_pt(ev).x >
+				psy_ui_value_px(&self->state->effectsize.width,
 					psy_ui_component_textmetric(&self->component), NULL));
 			self->state->selected = self->column;			
 		} else {

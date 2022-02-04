@@ -141,9 +141,11 @@ void instrumentkeyboardview_drawwhitekeys(InstrumentKeyboardView* self,
 			psy_ui_RealRectangle r;
 			psy_ui_Colour colour;
 
-			psy_ui_setrectangle(&r,
-				cp, 0,
-				(self->metrics.keysize + 1), size.height);
+			r = psy_ui_realrectangle_make(
+					psy_ui_realpoint_make(cp, 0),
+					psy_ui_realsize_make(
+						(self->metrics.keysize + 1),
+						size.height));
 			if (psy_audio_parameterrange_intersect(&self->entry.keyrange, key)) {
 				colour = psy_ui_colour_make(0x00FF2288);
 			} else {
@@ -181,7 +183,9 @@ void instrumentkeyboardview_drawblackkeys(InstrumentKeyboardView* self,
 
 			x = (int)cp - (int)(self->metrics.keysize * 0.68 / 2);
 			width = (int)(self->metrics.keysize * 0.68);
-			psy_ui_setrectangle(&r, x, 0, width, (int)(size.height * top));
+			r = psy_ui_realrectangle_make(
+					psy_ui_realpoint_make(x, 0),
+					psy_ui_realsize_make(width, (int)(size.height * top)));
 			if (psy_audio_parameterrange_intersect(&self->entry.keyrange,
 					key)) {
 				colour = psy_ui_colour_make(0x00FF2288);
@@ -352,7 +356,7 @@ void instrumententryview_ondraw(InstrumentEntryView* self, psy_ui_Graphics* g)
 			double scrollleft;
 			double scrolltop;
 
-			scrollleft = psy_ui_component_scrollleftpx(&self->component);
+			scrollleft = psy_ui_component_scrollleft_px(&self->component);
 			scrolltop = psy_ui_component_scrolltop_px(&self->component);
 			entry = self->state->selectedentry;
 			if (entry) {
@@ -376,9 +380,9 @@ void instrumententryview_ondraw(InstrumentEntryView* self, psy_ui_Graphics* g)
 					numwhitekeys * size.width) +
 					(int)(psy_dsp_isblack((uint8_t)entry->keyrange.high + 1)
 						? self->metrics.keysize / 2 : 0);
-				psy_ui_setrectangle(&r,
-					keylo_startx, scrolltop,
-					keyhi_endx - keylo_startx, scrolltop + size.height);
+				r = psy_ui_realrectangle_make(
+						psy_ui_realpoint_make(keylo_startx, scrolltop),
+						psy_ui_realsize_make(keyhi_endx - keylo_startx, scrolltop + size.height));
 				psy_ui_drawsolidrectangle(g, r, psy_ui_colour_make(0x00333333));				
 			}
 		}
@@ -485,7 +489,8 @@ void instrumententryview_onmousedown(InstrumentEntryView* self,
 		if (self->instrument) {
 			uintptr_t numentry;	
 
-			numentry = (uintptr_t)(ev->pt.y / (self->metrics.lineheight));
+			numentry = (uintptr_t)(psy_ui_mouseevent_pt(ev).y /
+				(self->metrics.lineheight));
 			if (numentry < psy_list_size(
 					psy_audio_instrument_entries(self->instrument))) {
 				entry = psy_audio_instrument_entryat(self->instrument,
@@ -498,13 +503,16 @@ void instrumententryview_onmousedown(InstrumentEntryView* self,
 			instrumententrystate_selectentry(self->state, NULL);
 		}
 		self->dragmode = 1;
-		self->currkey = screentokey(ev->pt.x, self->metrics.keysize);
+		self->currkey = screentokey(psy_ui_mouseevent_pt(ev).x,
+			self->metrics.keysize);
 		instrumententryview_outputstatus(self, (uint8_t)self->currkey);
 		entry = self->state->selectedentry;
 		if (entry) {			
-			if (abs((int)(entry->keyrange.low  - screentokey(ev->pt.x,
+			if (abs((int)(entry->keyrange.low  -
+					screentokey(psy_ui_mouseevent_pt(ev).x,
 					self->metrics.keysize))) <
-				abs((int)(entry->keyrange.high  - screentokey(ev->pt.x,
+				abs((int)(entry->keyrange.high  -
+					screentokey(psy_ui_mouseevent_pt(ev).x,
 					self->metrics.keysize)))) {
 				self->dragmode = INSTVIEW_DRAG_LEFT;
 				psy_ui_component_setcursor(&self->component,
@@ -550,12 +558,14 @@ void instrumententryview_onmousemove(InstrumentEntryView* self,
 	bool showresizecursor;
 
 	showresizecursor = FALSE;
-	self->currkey = screentokey(ev->pt.x, self->metrics.keysize);
+	self->currkey = screentokey(psy_ui_mouseevent_pt(ev).x,
+		self->metrics.keysize);
 	if (self->dragmode != INSTVIEW_DRAG_NONE && self->instrument) {
 		psy_audio_InstrumentEntry* entry;
 		uintptr_t screenkey;
 				
-		screenkey = screentokey(ev->pt.x, self->metrics.keysize);
+		screenkey = screentokey(psy_ui_mouseevent_pt(ev).x,
+			self->metrics.keysize);
 		entry = self->state->selectedentry;
 		if (entry) {			
 			if (self->dragmode == INSTVIEW_DRAG_LEFTRIGHT) {
@@ -1059,7 +1069,8 @@ void instrumententryrow_onmousedown(InstrumentEntryRow* self,
 	if (self->selected) {
 		uintptr_t column;
 
-		column = instrumententrystate_pxtocolumn(self->state, ev->pt.x,
+		column = instrumententrystate_pxtocolumn(self->state,
+			psy_ui_mouseevent_pt(ev).x,
 			psy_ui_component_textmetric(&self->component));
 		if (column) {
 			if (!self->state->curredit ||

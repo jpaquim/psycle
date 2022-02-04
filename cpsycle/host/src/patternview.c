@@ -338,8 +338,8 @@ void patternview_ongridscroll(PatternView* self, psy_ui_Component* sender)
 {
 	assert(self);
 
-	if (psy_ui_component_scrollleftpx(&self->trackerview.grid.component) !=
-		psy_ui_component_scrollleftpx(&self->header.component)) {
+	if (psy_ui_component_scrollleft_px(&self->trackerview.grid.component) !=
+		psy_ui_component_scrollleft_px(&self->header.component)) {
 		psy_ui_component_setscrollleft(&self->header.component,
 			psy_ui_component_scrollleft(&self->trackerview.grid.component));
 		psy_ui_component_invalidate(&self->headerpane);
@@ -433,7 +433,7 @@ void patternview_onmousedown(PatternView* self, psy_ui_MouseEvent* ev)
 {
 	assert(self);
 
-	if (ev->button == 2) {
+	if (psy_ui_mouseevent_button(ev) == 2) {
 		if (psy_ui_component_visible(interpolatecurveview_base(
 				&self->interpolatecurveview))) {
 			psy_ui_component_hide_align(interpolatecurveview_base(
@@ -450,7 +450,7 @@ void  patternview_onmouseup(PatternView* self, psy_ui_MouseEvent* ev)
 {
 	assert(self);
 
-	if (ev->button == 1 && self->trackerview.grid.state->pv->selection.valid) {
+	if (psy_ui_mouseevent_button(ev) == 1 && self->trackerview.grid.state->pv->selection.valid) {
 		interpolatecurveview_setpattern(&self->interpolatecurveview,
 			patternviewstate_pattern(self->state.pv));
 		interpolatecurveview_setselection(&self->interpolatecurveview,

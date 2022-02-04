@@ -20,15 +20,6 @@ void psy_ui_geometry_init(void)
 	psy_ui_realpoint_init(&psy_ui_internal_realpoint_zero);
 }
 
-void psy_ui_setrectangle(psy_ui_RealRectangle* self, double left, double top, double width,
-	double height)
-{
-   self->left = left;
-   self->top = top;
-   self->right = left + width;
-   self->bottom = top + height;   
-}
-
 int psy_ui_realrectangle_intersect_rectangle(const psy_ui_RealRectangle* self,
 	const psy_ui_RealRectangle* other)
 {
@@ -161,12 +152,12 @@ void psy_ui_realrectangle_expand(psy_ui_RealRectangle* self, double top, double 
 	self->left -= left;	
 }
 
-void psy_ui_realrectangle_move(psy_ui_RealRectangle* self, double dx, double dy)
+void psy_ui_realrectangle_move(psy_ui_RealRectangle* self, psy_ui_RealPoint pt)
 {
-	self->top += dy;
-	self->right += dx;
-	self->bottom += dy;
-	self->left += dx;
+	self->top += pt.y;
+	self->right += pt.x;
+	self->bottom += pt.y;
+	self->left += pt.x;
 }
 
 void psy_ui_realrectangle_settopleft(psy_ui_RealRectangle* self, psy_ui_RealPoint topleft)

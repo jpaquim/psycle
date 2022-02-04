@@ -283,7 +283,7 @@ void seqedittrack_onpreferredsize(SeqEditTrack* self,
 
 void seqedittrack_onmousedown(SeqEditTrack* self, psy_ui_MouseEvent* ev)
 {
-	if (ev->button == 1) {
+	if (psy_ui_mouseevent_button(ev) == 1) {
 		if (self->state->dragstatus == SEQEDIT_DRAG_NONE) {
 			psy_audio_OrderIndex seqpos;
 			
@@ -312,7 +312,7 @@ void seqedittrack_onmousemove(SeqEditTrack* self, psy_ui_MouseEvent* ev)
 		psy_dsp_big_beat_t dragposition;
 		psy_dsp_big_beat_t bpl;
 
-		dragposition = seqeditstate_pxtobeat(self->state, ev->pt.x) -
+		dragposition = seqeditstate_pxtobeat(self->state, psy_ui_mouseevent_pt(ev).x) -
 			psy_audio_sequenceentry_offset(self->state->seqentry);
 		bpl = (1.0 / (psy_dsp_big_beat_t)psy_audio_player_lpb(
 			workspace_player(self->workspace)));
@@ -327,7 +327,7 @@ void seqedittrack_onmousemove(SeqEditTrack* self, psy_ui_MouseEvent* ev)
 		psy_dsp_big_beat_t dragposition;
 			
 		dragposition = seqeditstate_quantize(self->state,
-			seqeditstate_pxtobeat(self->state, ev->pt.x));
+			seqeditstate_pxtobeat(self->state, psy_ui_mouseevent_pt(ev).x));
 		psy_audio_sequenceentry_setlength(self->state->seqentry,
 			psy_max(1.0, dragposition - psy_audio_sequenceentry_offset(
 				self->state->seqentry)));
@@ -338,7 +338,7 @@ void seqedittrack_onmousemove(SeqEditTrack* self, psy_ui_MouseEvent* ev)
 			SEQEDIT_DRAGTYPE_MOVE) {
 		psy_dsp_big_beat_t dragposition;
 
-		dragposition = seqeditstate_pxtobeat(self->state, ev->pt.x);
+		dragposition = seqeditstate_pxtobeat(self->state, psy_ui_mouseevent_pt(ev).x);
 		if (dragposition - (self->state->seqentry->offset -
 			self->state->seqentry->repositionoffset) >= 0) {
 			dragposition = seqeditstate_quantize(self->state,

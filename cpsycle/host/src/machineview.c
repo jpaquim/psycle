@@ -248,7 +248,7 @@ void machineview_onmouseup(MachineView* self, psy_ui_MouseEvent* ev)
 		}
 		self->shownewmachine = FALSE;
 		psy_ui_mouseevent_stop_propagation(ev);
-	}	else if (ev->button == 2) {
+	}	else if (psy_ui_mouseevent_button(ev) == 2) {
 		if (psy_ui_tabbar_selected(&self->tabbar) ==
 				SECTION_ID_MACHINEVIEW_NEWMACHINE) {
 			psy_ui_tabbar_select(&self->tabbar,

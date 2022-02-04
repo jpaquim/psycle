@@ -132,6 +132,12 @@ INLINE psy_ui_RealSize psy_ui_realsize_zero(void)
 	return psy_ui_realsize_make(0.0, 0.0);
 }
 
+INLINE bool psy_ui_realsize_equals(const psy_ui_RealSize* self,
+	psy_ui_RealSize other)
+{
+	return (self->height == other.height && self->width == other.width);
+}
+
 typedef struct psy_ui_RealRectangle {
 	double left;
 	double top;
@@ -249,9 +255,6 @@ INLINE psy_ui_RealSize psy_ui_realrectangle_size(const psy_ui_RealRectangle* sel
 		psy_ui_realrectangle_height(self));
 }
 
-void psy_ui_setrectangle(psy_ui_RealRectangle*,
-	double left, double top, double width, double height);
-
 INLINE bool psy_ui_realrectangle_intersect(const psy_ui_RealRectangle* self,
 	psy_ui_RealPoint pt)
 {
@@ -269,7 +272,7 @@ bool psy_ui_realrectangle_intersection(psy_ui_RealRectangle*,
 	const psy_ui_RealRectangle* other);
 void psy_ui_realrectangle_expand(psy_ui_RealRectangle*,
 	double top, double right, double bottom, double left);
-void psy_ui_realrectangle_move(psy_ui_RealRectangle*, double dx, double dy);
+void psy_ui_realrectangle_move(psy_ui_RealRectangle*, psy_ui_RealPoint);
 void psy_ui_realrectangle_settopleft(psy_ui_RealRectangle*,
 	psy_ui_RealPoint topleft);
 

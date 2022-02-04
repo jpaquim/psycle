@@ -18,12 +18,13 @@
 #endif
 
 void psy_timertask_init(psy_TimerTask* self, uintptr_t id,
-	void* context, psy_fp_timerwork timerwork, uintptr_t customid,
-	uintptr_t interval)
+	void* context, psy_fp_timerwork timerwork, psy_Signal* timersignal,
+	uintptr_t customid, uintptr_t interval)
 {
 	self->id = id;
 	self->context = context;
 	self->timerwork = timerwork;
+	self->timersignal = timersignal;
 	self->customid = customid;
 	self->interval = interval;
 	self->counter = 0;
@@ -35,14 +36,15 @@ psy_TimerTask* psy_timertask_alloc(void)
 }
 
 psy_TimerTask* psy_timertask_allocinit(uintptr_t id,
-	void* context, psy_fp_timerwork timerwork, uintptr_t customid,
-	uintptr_t interval)
+	void* context, psy_fp_timerwork timerwork, psy_Signal* timersignal,
+	uintptr_t customid, uintptr_t interval)
 {
 	psy_TimerTask* rv;
 	
 	rv = psy_timertask_alloc();
 	if (rv) {
-		psy_timertask_init(rv, id, context, timerwork, customid, interval);
+		psy_timertask_init(rv, id, context, timerwork, timersignal, customid,
+			interval);
 	}	
 	return rv;
 }
@@ -52,9 +54,14 @@ static void psy_timertask_tick(psy_TimerTask*);
 void psy_timertask_tick(psy_TimerTask* self)
 {		
 	self->counter += 10;
-	if (self->counter >= self->interval) {		
-		self->timerwork(self->context, self->customid);
+	if (self->counter >= self->interval) {
 		self->counter = 0;
+		if (self->timersignal) {
+			psy_signal_emit(self->timersignal, self->context, 1, self->customid);
+		}
+		if (self->timerwork) {
+			self->timerwork(self->context, self->customid);
+		}		
 	}
 }
 
@@ -73,7 +80,7 @@ void psy_timers_tick(psy_Timers* self)
 	psy_List* p;
 	psy_List* q;
 	
-	for (p = q = self->tasks; p != NULL; p = q) {
+	for (p = q = self->tasks; q != NULL; p = q) {
 		psy_TimerTask* task;
 		
 		q = p->next;
@@ -83,7 +90,8 @@ void psy_timers_tick(psy_Timers* self)
 }
 
 void psy_timers_addtimer(psy_Timers* self, uintptr_t id, void* context,
-	psy_fp_timerwork timerwork, uintptr_t customid, uintptr_t interval)
+	psy_fp_timerwork timerwork, psy_Signal* timersignal,
+	uintptr_t customid, uintptr_t interval)
 {
 	psy_TimerTask* task;
 	psy_List* p;	
@@ -96,7 +104,7 @@ void psy_timers_addtimer(psy_Timers* self, uintptr_t id, void* context,
 			return;			
 		}		
 	}
-	task = psy_timertask_allocinit(id, context, timerwork,
+	task = psy_timertask_allocinit(id, context, timerwork, timersignal,
 		customid, interval);
 	if (task) {
 		psy_list_append(&self->tasks, (void*)task);		
@@ -108,15 +116,15 @@ void psy_timers_removetimer(psy_Timers* self, uintptr_t id, uintptr_t customid)
 	psy_List* p;
 	psy_List* q;
 	
-	for (p = q = self->tasks; p != NULL; p = q) {
+	for (p = q = self->tasks; q != NULL; p = q) {
 		psy_TimerTask* task;
 		
 		q = p->next;
 		task = (psy_TimerTask*)p->entry;
 		if ((task->id == id) && 
-			(customid == psy_INDEX_INVALID || task->customid == customid)) {
-			free(task);
+			(customid == psy_INDEX_INVALID || task->customid == customid)) {			
 			psy_list_remove(&self->tasks, p);
+			free(task);
 		}		
 	}
 }

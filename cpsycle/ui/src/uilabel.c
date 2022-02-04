@@ -9,6 +9,7 @@
 #include "uilabel.h"
 /* local */
 #include "uiapp.h"
+#include "uitextformat.h"
 /* platform */
 #include "../../detail/portable.h"
 
@@ -19,10 +20,6 @@ static void psy_ui_label_onpreferredsize(psy_ui_Label*,
 	const psy_ui_Size* limit, psy_ui_Size* rv);
 static void psy_ui_label_onlanguagechanged(psy_ui_Label*);
 static void psy_ui_label_ontimer(psy_ui_Label*, uintptr_t timerid);
-static psy_List* psy_ui_label_lines(psy_ui_Label*, const char* text, double width);
-static psy_List* psy_ui_label_eols(psy_ui_Label*);
-static psy_List* psy_ui_label_wraps(psy_ui_Label*, const char* text, uintptr_t num,
-	double width);
 static void psy_ui_label_onupdatestyles(psy_ui_Label*);
 
 /* vtable */
@@ -167,6 +164,7 @@ void psy_ui_label_onpreferredsize(psy_ui_Label* self,
 	const psy_ui_TextMetric* tm;
 	char* text;
 	psy_ui_Margin spacing;
+	psy_ui_TextFormat format;
 
 	if (self->translate && self->translation) {
 		text = self->translation;
@@ -175,6 +173,7 @@ void psy_ui_label_onpreferredsize(psy_ui_Label* self,
 	}
 	tm = psy_ui_component_textmetric(psy_ui_label_base(self));
 	spacing = psy_ui_component_spacing(psy_ui_label_base(self));
+	psy_ui_textformat_init(&format, tm, !self->preventwrap);
 	if (self->charnumber == 0) {		
 		if (psy_strlen(text) == 0) {
 			rv->width = psy_ui_value_make_ew(0.0);
@@ -191,9 +190,9 @@ void psy_ui_label_onpreferredsize(psy_ui_Label* self,
 		psy_List* lines;
 
 		if (self->charnumber == 0 && limit) {
-			lines = psy_ui_label_lines(self, text, psy_ui_value_px(&limit->width, tm, limit));
+			lines = psy_ui_textformat_lines(&format, text, psy_ui_value_px(&limit->width, tm, limit));
 		} else {
-			lines = psy_ui_label_lines(self, text, self->charnumber * tm->tmAveCharWidth);
+			lines = psy_ui_textformat_lines(&format, text, self->charnumber * tm->tmAveCharWidth);
 		}
 		rv->height = psy_ui_value_make_px(psy_list_size(lines) *
 			(tm->tmHeight * self->linespacing));
@@ -216,6 +215,7 @@ void psy_ui_label_ondraw(psy_ui_Label* self, psy_ui_Graphics* g)
 	psy_List* p;
 	psy_List* lines;
 	uintptr_t linestart;
+	psy_ui_TextFormat format;
 
 	if (self->translate && self->translation) {
 		text = self->translation;
@@ -226,6 +226,7 @@ void psy_ui_label_ondraw(psy_ui_Label* self, psy_ui_Graphics* g)
 		return;
 	}
 	tm = psy_ui_component_textmetric(&self->component);
+	psy_ui_textformat_init(&format, tm, !self->preventwrap);
 	size = psy_ui_component_size_px(psy_ui_label_base(self));
 	centerx = 0.0;
 	if ((self->textalignment & psy_ui_ALIGNMENT_RIGHT) ==
@@ -237,7 +238,7 @@ void psy_ui_label_ondraw(psy_ui_Label* self, psy_ui_Graphics* g)
 		textsizepx = psy_ui_size_px(&textsize, tm, NULL);
 		centerx = (size.width - textsizepx.width);
 	}
-	lines = psy_ui_label_lines(self, text, size.width);
+	lines = psy_ui_textformat_lines(&format, text, size.width);
 	if (!lines) {
 		return;
 	}
@@ -270,121 +271,6 @@ void psy_ui_label_ondraw(psy_ui_Label* self, psy_ui_Graphics* g)
 	psy_list_free(lines);
 }
 
-psy_List* psy_ui_label_lines(psy_ui_Label* self, const char* text, double width)
-{
-	psy_List* rv;
-	psy_List* eols;	
-
-	rv = NULL;
-	if (!self->preventwrap) {
-		psy_List* p;
-		uintptr_t cp;		
-
-		eols = psy_ui_label_eols(self);
-		psy_list_append(&eols, (void*)psy_strlen(text));
-		cp = 0;
-		for (p = eols; p != NULL; p = p->next) {
-			uintptr_t eol;
-			uintptr_t numout;
-			psy_List* wraps;
-			psy_List* q;
-
-			eol = (uintptr_t)p->entry;
-			numout = eol - cp;
-			if (!self->preventwrap) {
-				uintptr_t wp;
-
-				wraps = psy_ui_label_wraps(self, text + cp, numout, width);
-				wp = 0;
-				for (q = wraps; q != NULL; q = q->next) {
-					uintptr_t wrap;
-
-					wrap = (uintptr_t)q->entry;
-					numout = wrap - wp;
-					psy_list_append(&rv, (void*)(cp + wp + numout));
-					wp = wrap + 1;
-				}
-				psy_list_free(wraps);
-			} else {
-				psy_list_append(&rv, (void*)(cp + numout));
-			}
-			cp = eol;
-		}
-		psy_list_free(eols);
-		eols = NULL;		
-	}
-	if (!rv) {
-		psy_list_append(&rv, (void*)psy_strlen(text));
-	}
-	return rv;
-}
-
-psy_List* psy_ui_label_eols(psy_ui_Label* self)
-{
-	psy_List* rv;
-	char* text;	
-	uintptr_t num;
-	uintptr_t cp;
-		
-	rv = NULL;
-	if (self->translate && self->translation) {
-		text = self->translation;
-	} else {
-		text = self->text;
-	}
-	num = psy_strlen(text);
-	if (num == 0) {
-		return NULL;
-	}
-	for (cp = 0; cp < num; ++cp) {
-		if (text[cp] == '\n') {
-			psy_list_append(&rv, (void*)cp);
-		}
-	}		
-	return rv;
-}
-
-psy_List* psy_ui_label_wraps(psy_ui_Label* self, const char* text,
-	uintptr_t num, double width)
-{
-	psy_List* rv;
-	const psy_ui_TextMetric* tm;
-	uintptr_t numavgchars;
-	uintptr_t cp;	
-
-	rv = NULL;
-	tm = psy_ui_component_textmetric(&self->component);
-	numavgchars = (uintptr_t)(width / (tm->tmAveCharWidth * 1.4));
-	if (numavgchars == 0) {
-		return rv;
-	}
-	cp = 0;		
-	while (cp < num) {
-		uintptr_t linestart;
-
-		linestart = cp;
-		cp += numavgchars;
-		if (cp > num - linestart) {
-			psy_list_append(&rv, (void*)num);
-			return rv;
-		}		
-		while (cp > linestart + 1) {
-			if (text[cp] == ' ') {				
-				break;
-			}
-			--cp;
-		}
-		if (cp > linestart + 1) {
-			psy_list_append(&rv, (void*)cp);
-		} else {
-			cp += numavgchars;
-			cp = psy_min(num, cp);
-			psy_list_append(&rv, (void*)cp);
-		}				
-	}
-	return rv;
-}
-
 void psy_ui_label_setcharnumber(psy_ui_Label* self, double number)
 {	
 	self->charnumber = psy_max(0.0, number);
@@ -395,7 +281,8 @@ void psy_ui_label_setlinespacing(psy_ui_Label* self, double spacing)
 	self->linespacing = spacing;
 }
 
-void psy_ui_label_settextalignment(psy_ui_Label* self, psy_ui_Alignment alignment)
+void psy_ui_label_settextalignment(psy_ui_Label* self,
+	psy_ui_Alignment alignment)
 {
 	self->textalignment = alignment;
 }
@@ -412,8 +299,7 @@ void psy_ui_label_enabletranslation(psy_ui_Label* self)
 }
 
 void psy_ui_label_fadeout(psy_ui_Label* self)
-{
-	self->fadeout = TRUE;
+{	
 	/*
 	** Keeps new message 5secs active (Timer interval(50ms) * 100). The counter
 	** is decremented each timer tick (ontimer). The first 20 ticks the colour 

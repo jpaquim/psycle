@@ -352,7 +352,8 @@ void inputdefiner_onmousehook(InputDefiner* self, psy_ui_App* sender,
 		psy_ui_RealRectangle position;
 
 		position = psy_ui_component_screenposition(&self->component);
-		if (!psy_ui_realrectangle_intersect(&position, ev->pt)) {
+		if (!psy_ui_realrectangle_intersect(&position,
+				psy_ui_mouseevent_pt(ev))) {
 			self->preventhook = TRUE;
 			psy_signal_emit(&self->signal_accept, self, 0);
 			psy_ui_app_stopmousehook(psy_ui_app());

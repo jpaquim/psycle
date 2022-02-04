@@ -108,12 +108,16 @@ void knobui_ondraw(KnobUi* self, psy_ui_Graphics* g)
 	size = psy_ui_component_size_px(&self->component);
 	knobui_updateparam(self);
 	if (self->param) {
-		psy_ui_setrectangle(&r_top,
-			psy_ui_realrectangle_width(&self->skin->knob.dest), 0,
-			size.width - psy_ui_realrectangle_width(&self->skin->knob.dest),
-			size.height / 2);
+		r_top = psy_ui_realrectangle_make(
+			psy_ui_realpoint_make(
+				psy_ui_realrectangle_width(&self->skin->knob.dest), 0),
+			psy_ui_realsize_make(
+				size.width - psy_ui_realrectangle_width(&self->skin->knob.dest),
+				size.height / 2));
 	} else {
-		psy_ui_setrectangle(&r_top, 0, 0, size.width, size.height / 2);
+		r_top = psy_ui_realrectangle_make(
+			psy_ui_realpoint_make(0, 0),
+			psy_ui_realsize_make(size.width, size.height / 2));
 	}
 	psy_ui_drawsolidrectangle(g, r_top, self->skin->topcolour);
 	r_bottom = r_top;
@@ -220,7 +224,7 @@ void knobui_onpreferredsize(KnobUi* self, const psy_ui_Size* limit,
 
 void knobui_onmousedown(KnobUi* self, psy_ui_MouseEvent* ev)
 {
-	if (ev->button == 1) {
+	if (psy_ui_mouseevent_button(ev) == 1) {
 		paramtweak_begin(&self->paramtweak, self->machine, self->paramidx,
 			self->param);		
 		paramtweak_onmousedown(&self->paramtweak, ev);		

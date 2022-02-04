@@ -86,7 +86,9 @@ void labelui_ondraw(LabelUi* self, psy_ui_Graphics* g)
 	labelui_updateparam(self);
 	size = psy_ui_component_scrollsize_px(&self->component);
 	half = size.height / 2;
-	psy_ui_setrectangle(&r, 0.0, 0.0, size.width, half);
+	r = psy_ui_realrectangle_make(
+		psy_ui_realpoint_make(0.0, 0.0),
+		psy_ui_realsize_make(size.width, half));
 	psy_ui_setbackgroundcolour(g, self->skin->titlecolour);
 	psy_ui_settextcolour(g, self->skin->fonttitlecolour);
 	if (self->param) {
@@ -104,7 +106,9 @@ void labelui_ondraw(LabelUi* self, psy_ui_Graphics* g)
 	}
 	psy_ui_setbackgroundcolour(g, self->skin->bottomcolour);
 	psy_ui_settextcolour(g, self->skin->fontbottomcolour);
-	psy_ui_setrectangle(&r, 0, half, size.width, half);
+	r = psy_ui_realrectangle_make(
+		psy_ui_realpoint_make(0, half),
+		psy_ui_realsize_make(size.width, half));
 	psy_ui_textoutrectangle(g, psy_ui_realpoint_make(0, half),
 		psy_ui_ETO_OPAQUE | psy_ui_ETO_CLIPPED,
 		r, str, psy_strlen(str));

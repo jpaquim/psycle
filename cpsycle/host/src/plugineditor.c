@@ -84,7 +84,7 @@ static void writetext(const char* path, const char* text);
 void plugineditor_init(PluginEditor* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {	
-	psy_ui_component_init(&self->component, parent, NULL);
+	psy_ui_component_init(&self->component, parent, NULL);	
 	psy_ui_component_setstyletype(&self->component,
 		STYLE_RECENTVIEW_MAINSECTION);
 	plugineditor_inittitlebar(self);

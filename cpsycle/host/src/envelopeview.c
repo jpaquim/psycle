@@ -167,12 +167,14 @@ void envelopebox_drawpoints(EnvelopeBox* self, psy_ui_Graphics* g)
 		psy_dsp_EnvelopePoint* pt;
 
 		pt = (psy_dsp_EnvelopePoint*)p->entry;
-		psy_ui_setrectangle(&r,
-			envelopebox_pxtime(self, pt->time) - psy_ui_value_px(&self->ptsize2.width, tm, NULL),
-			envelopebox_pxvalue(self, pt->value * self->modamount) -
-				psy_ui_value_px(&self->ptsize2.height, tm, NULL),
-			psy_ui_value_px(&self->ptsize.width, tm, NULL),
-			psy_ui_value_px(&self->ptsize.height, tm, NULL));
+		r = psy_ui_realrectangle_make(
+			psy_ui_realpoint_make(		
+				envelopebox_pxtime(self, pt->time) - psy_ui_value_px(&self->ptsize2.width, tm, NULL),
+				envelopebox_pxvalue(self, pt->value * self->modamount) -
+				psy_ui_value_px(&self->ptsize2.height, tm, NULL)),
+			psy_ui_realsize_make(
+				psy_ui_value_px(&self->ptsize.width, tm, NULL),
+				psy_ui_value_px(&self->ptsize.height, tm, NULL)));
 		psy_ui_drawsolidrectangle(g, r, self->pointcolour);
 		q = pt;
 	}
@@ -287,15 +289,16 @@ void envelopebox_onsize(EnvelopeBox* self)
 
 void envelopebox_onmousedown(EnvelopeBox* self, psy_ui_MouseEvent* ev)
 {	
-	self->dragpoint = envelopebox_hittestpoint(self, ev->pt);
+	self->dragpoint = envelopebox_hittestpoint(self, psy_ui_mouseevent_pt(ev));
 	self->dragpointindex = psy_INDEX_INVALID;
-	if (ev->button == 1) {
+	if (psy_ui_mouseevent_button(ev) == 1) {
 		if (!self->dragpoint && self->settings) {
 			psy_dsp_EnvelopePoint pt_new;
 			psy_dsp_EnvelopePoint* pt_insert;
 			psy_List* p;
 
-			pt_new = envelopebox_pxtopoint(self, ev->pt.x, ev->pt.y);
+			pt_new = envelopebox_pxtopoint(self,
+				psy_ui_mouseevent_pt(ev).x, psy_ui_mouseevent_pt(ev).y);
 			p = NULL;
 			if (self->settings->points) {
 				for (p = self->settings->points->tail; p != NULL; p = p->prev) {
@@ -380,9 +383,11 @@ void envelopebox_onmousemove(EnvelopeBox* self, psy_ui_MouseEvent* ev)
 
 		pt = (psy_dsp_EnvelopePoint*)self->dragpoint->entry;
 		oldtime = pt->time;
-		pt->value = (psy_dsp_amp_t)((1.0 - ((ev->pt.y - self->spacing.top.quantity) /
+		pt->value = (psy_dsp_amp_t)((1.0 - ((psy_ui_mouseevent_pt(ev).y -
+			self->spacing.top.quantity) /
 			self->cy)) / (double)(self->modamount));
-		pt->time = (psy_dsp_beat_t)envelopebox_pxtotime(self, ev->pt.x);
+		pt->time = (psy_dsp_beat_t)envelopebox_pxtotime(self,
+			psy_ui_mouseevent_pt(ev).x);
 		checkadjustpointrange(self->dragpoint);
 		envelopebox_shiftsuccessors(self, pt->time - oldtime);		
 		psy_ui_component_invalidate(&self->component);

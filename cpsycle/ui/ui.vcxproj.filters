@@ -11,9 +11,6 @@
     <Filter Include="imps\win32">
       <UniqueIdentifier>{e0e669fd-2fd7-4711-8664-695d8261b780}</UniqueIdentifier>
     </Filter>
-    <Filter Include="comps">
-      <UniqueIdentifier>{5713747d-7657-4e70-a30a-c189d855f15d}</UniqueIdentifier>
-    </Filter>
     <Filter Include="dialogs">
       <UniqueIdentifier>{37fc5767-a9af-41c1-b939-821f80b8766e}</UniqueIdentifier>
     </Filter>
@@ -56,22 +53,25 @@
     <Filter Include="imps\x11\graphics">
       <UniqueIdentifier>{e2886743-3e29-41b0-9235-fb931b4cb99b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="components">
+      <UniqueIdentifier>{5713747d-7657-4e70-a30a-c189d855f15d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\uibutton.c">
-      <Filter>comps</Filter>
+      <Filter>components</Filter>
     </ClCompile>
     <ClCompile Include="src\uicolordialog.c">
       <Filter>dialogs</Filter>
     </ClCompile>
     <ClCompile Include="src\uicheckbox.c">
-      <Filter>comps</Filter>
+      <Filter>components</Filter>
     </ClCompile>
     <ClCompile Include="src\uicombobox.c">
-      <Filter>comps</Filter>
+      <Filter>components</Filter>
     </ClCompile>
     <ClCompile Include="src\uicomponent.c">
-      <Filter>comps</Filter>
+      <Filter>components</Filter>
     </ClCompile>
     <ClCompile Include="src\uifolderdialog.c">
       <Filter>dialogs</Filter>
@@ -80,16 +80,16 @@
       <Filter>dialogs</Filter>
     </ClCompile>
     <ClCompile Include="src\uilistbox.c">
-      <Filter>comps</Filter>
+      <Filter>components</Filter>
     </ClCompile>
     <ClCompile Include="src\uilabel.c">
-      <Filter>comps</Filter>
+      <Filter>components</Filter>
     </ClCompile>
     <ClCompile Include="src\uiscrollbar.c">
-      <Filter>comps</Filter>
+      <Filter>components</Filter>
     </ClCompile>
     <ClCompile Include="src\uiprogressbar.c">
-      <Filter>comps</Filter>
+      <Filter>components</Filter>
     </ClCompile>
     <ClCompile Include="src\uisavedialog.c">
       <Filter>dialogs</Filter>
@@ -98,31 +98,31 @@
       <Filter>dialogs</Filter>
     </ClCompile>
     <ClCompile Include="src\uislider.c">
-      <Filter>comps</Filter>
+      <Filter>components</Filter>
     </ClCompile>
     <ClCompile Include="src\uiscroller.c">
-      <Filter>comps</Filter>
+      <Filter>components</Filter>
     </ClCompile>
     <ClCompile Include="src\uinotebook.c">
-      <Filter>comps</Filter>
+      <Filter>components</Filter>
     </ClCompile>
     <ClCompile Include="src\uiswitch.c">
-      <Filter>comps</Filter>
+      <Filter>components</Filter>
     </ClCompile>
     <ClCompile Include="src\uiterminal.c">
-      <Filter>comps</Filter>
+      <Filter>components</Filter>
     </ClCompile>
     <ClCompile Include="src\uisplitbar.c">
-      <Filter>comps</Filter>
+      <Filter>components</Filter>
     </ClCompile>
     <ClCompile Include="src\uieditor.c">
-      <Filter>comps</Filter>
+      <Filter>components</Filter>
     </ClCompile>
     <ClCompile Include="src\uiimage.c">
-      <Filter>comps</Filter>
+      <Filter>components</Filter>
     </ClCompile>
     <ClCompile Include="src\uiframe.c">
-      <Filter>comps</Filter>
+      <Filter>components</Filter>
     </ClCompile>
     <ClCompile Include="src\uidefaults.c">
       <Filter>configuration</Filter>
@@ -149,7 +149,7 @@
       <Filter>common</Filter>
     </ClCompile>
     <ClCompile Include="src\uiicondraw.c">
-      <Filter>comps</Filter>
+      <Filter>components</Filter>
     </ClCompile>
     <ClCompile Include="src\uicolour.c">
       <Filter>common</Filter>
@@ -164,19 +164,19 @@
       <Filter>common</Filter>
     </ClCompile>
     <ClCompile Include="src\uiviewcomponentimp.c">
-      <Filter>comps</Filter>
+      <Filter>components</Filter>
     </ClCompile>
     <ClCompile Include="src\uicomponentstyle.c">
-      <Filter>comps</Filter>
+      <Filter>components</Filter>
     </ClCompile>
     <ClCompile Include="src\uitabbar.c">
-      <Filter>comps</Filter>
+      <Filter>components</Filter>
     </ClCompile>
     <ClCompile Include="src\uicomponentscroll.c">
-      <Filter>comps</Filter>
+      <Filter>components</Filter>
     </ClCompile>
     <ClCompile Include="src\uicomponentsizehints.c">
-      <Filter>comps</Filter>
+      <Filter>components</Filter>
     </ClCompile>
     <ClCompile Include="src\uialigner.c">
       <Filter>aligner</Filter>
@@ -230,7 +230,7 @@
       <Filter>common</Filter>
     </ClCompile>
     <ClCompile Include="src\uidropdownbox.c">
-      <Filter>comps</Filter>
+      <Filter>components</Filter>
     </ClCompile>
     <ClCompile Include="src\uiwintheme.c">
       <Filter>common</Filter>
@@ -287,27 +287,33 @@
       <Filter>common</Filter>
     </ClCompile>
     <ClCompile Include="src\uitextinput.c">
-      <Filter>comps</Filter>
+      <Filter>components</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uitextarea.c">
+      <Filter>components</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uitextformat.c">
+      <Filter>common</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\uibutton.h">
-      <Filter>comps</Filter>
+      <Filter>components</Filter>
     </ClInclude>
     <ClInclude Include="src\uieditor.h">
-      <Filter>comps</Filter>
+      <Filter>components</Filter>
     </ClInclude>
     <ClInclude Include="src\uicolordialog.h">
       <Filter>dialogs</Filter>
     </ClInclude>
     <ClInclude Include="src\uicombobox.h">
-      <Filter>comps</Filter>
+      <Filter>components</Filter>
     </ClInclude>
     <ClInclude Include="src\uicomponent.h">
-      <Filter>comps</Filter>
+      <Filter>components</Filter>
     </ClInclude>
     <ClInclude Include="src\uicheckbox.h">
-      <Filter>comps</Filter>
+      <Filter>components</Filter>
     </ClInclude>
     <ClInclude Include="src\uifolderdialog.h">
       <Filter>dialogs</Filter>
@@ -316,43 +322,43 @@
       <Filter>dialogs</Filter>
     </ClInclude>
     <ClInclude Include="src\uilistbox.h">
-      <Filter>comps</Filter>
+      <Filter>components</Filter>
     </ClInclude>
     <ClInclude Include="src\uiopendialog.h">
       <Filter>dialogs</Filter>
     </ClInclude>
     <ClInclude Include="src\uiprogressbar.h">
-      <Filter>comps</Filter>
+      <Filter>components</Filter>
     </ClInclude>
     <ClInclude Include="src\uinotebook.h">
-      <Filter>comps</Filter>
+      <Filter>components</Filter>
     </ClInclude>
     <ClInclude Include="src\uiscrollbar.h">
-      <Filter>comps</Filter>
+      <Filter>components</Filter>
     </ClInclude>
     <ClInclude Include="src\uilabel.h">
-      <Filter>comps</Filter>
+      <Filter>components</Filter>
     </ClInclude>
     <ClInclude Include="src\uiscroller.h">
-      <Filter>comps</Filter>
+      <Filter>components</Filter>
     </ClInclude>
     <ClInclude Include="src\uisavedialog.h">
       <Filter>dialogs</Filter>
     </ClInclude>
     <ClInclude Include="src\uislider.h">
-      <Filter>comps</Filter>
+      <Filter>components</Filter>
     </ClInclude>
     <ClInclude Include="src\uisplitbar.h">
-      <Filter>comps</Filter>
+      <Filter>components</Filter>
     </ClInclude>
     <ClInclude Include="src\uiswitch.h">
-      <Filter>comps</Filter>
+      <Filter>components</Filter>
     </ClInclude>
     <ClInclude Include="src\uiterminal.h">
-      <Filter>comps</Filter>
+      <Filter>components</Filter>
     </ClInclude>
     <ClInclude Include="src\uiframe.h">
-      <Filter>comps</Filter>
+      <Filter>components</Filter>
     </ClInclude>
     <ClInclude Include="src\uidefaults.h">
       <Filter>configuration</Filter>
@@ -364,7 +370,7 @@
       <Filter>graphics</Filter>
     </ClInclude>
     <ClInclude Include="src\uiimage.h">
-      <Filter>comps</Filter>
+      <Filter>components</Filter>
     </ClInclude>
     <ClInclude Include="src\uiimpfactory.h">
       <Filter>configuration</Filter>
@@ -382,7 +388,7 @@
       <Filter>common</Filter>
     </ClInclude>
     <ClInclude Include="src\uiicondraw.h">
-      <Filter>comps</Filter>
+      <Filter>components</Filter>
     </ClInclude>
     <ClInclude Include="src\uicolour.h">
       <Filter>common</Filter>
@@ -397,22 +403,22 @@
       <Filter>common</Filter>
     </ClInclude>
     <ClInclude Include="src\uiviewcomponentimp.h">
-      <Filter>comps</Filter>
+      <Filter>components</Filter>
     </ClInclude>
     <ClInclude Include="src\uicomponentstyle.h">
-      <Filter>comps</Filter>
+      <Filter>components</Filter>
     </ClInclude>
     <ClInclude Include="src\uitabbar.h">
-      <Filter>comps</Filter>
+      <Filter>components</Filter>
     </ClInclude>
     <ClInclude Include="src\uicolours.h">
       <Filter>common</Filter>
     </ClInclude>
     <ClInclude Include="src\uicomponentscroll.h">
-      <Filter>comps</Filter>
+      <Filter>components</Filter>
     </ClInclude>
     <ClInclude Include="src\uicomponentsizehints.h">
-      <Filter>comps</Filter>
+      <Filter>components</Filter>
     </ClInclude>
     <ClInclude Include="src\uialigner.h">
       <Filter>aligner</Filter>
@@ -466,7 +472,7 @@
       <Filter>common</Filter>
     </ClInclude>
     <ClInclude Include="src\uidropdownbox.h">
-      <Filter>comps</Filter>
+      <Filter>components</Filter>
     </ClInclude>
     <ClInclude Include="src\uiwintheme.h">
       <Filter>common</Filter>
@@ -523,7 +529,13 @@
       <Filter>common</Filter>
     </ClInclude>
     <ClInclude Include="src\uitextinput.h">
-      <Filter>comps</Filter>
+      <Filter>components</Filter>
+    </ClInclude>
+    <ClInclude Include="src\uitextarea.h">
+      <Filter>components</Filter>
+    </ClInclude>
+    <ClInclude Include="src\uitextformat.h">
+      <Filter>common</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

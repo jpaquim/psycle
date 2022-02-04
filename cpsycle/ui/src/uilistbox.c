@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+**  copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -15,9 +15,8 @@
 #include "../../detail/trace.h"
 
 /* ListBoxClient */
-
-static void psy_ui_listboxclient_ondestroy(psy_ui_ListBoxClient*,
-	psy_ui_Component* sender);
+/* prototypes*/
+static void psy_ui_listboxclient_ondestroy(psy_ui_ListBoxClient*);
 static void psy_ui_listboxclient_ondraw(psy_ui_ListBoxClient*,
 	psy_ui_Graphics*);
 static void psy_ui_listboxclient_onpreferredsize(psy_ui_ListBoxClient*,
@@ -27,13 +26,17 @@ static void psy_ui_listboxclient_onmousedown(psy_ui_ListBoxClient*,
 static void psy_ui_listboxclient_onsize(psy_ui_ListBoxClient*);
 static intptr_t  psy_ui_listboxclient_count(const psy_ui_ListBoxClient* self);
 
+/* vtable */
 static psy_ui_ComponentVtable psy_ui_listboxclient_vtable;
-static int psy_ui_listboxclient_vtable_initialized = 0;
+static bool psy_ui_listboxclient_vtable_initialized = FALSE;
 
 static void psy_ui_listboxclient_vtable_init(psy_ui_ListBoxClient* self)
 {
 	if (!psy_ui_listboxclient_vtable_initialized) {
 		psy_ui_listboxclient_vtable = *(self->component.vtable);
+		psy_ui_listboxclient_vtable.ondestroy =
+			(psy_ui_fp_component_event)
+			psy_ui_listboxclient_ondestroy;
 		psy_ui_listboxclient_vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
 			psy_ui_listboxclient_ondraw;
@@ -46,18 +49,17 @@ static void psy_ui_listboxclient_vtable_init(psy_ui_ListBoxClient* self)
 		psy_ui_listboxclient_vtable.onsize =
 			(psy_ui_fp_component_event)
 			psy_ui_listboxclient_onsize;
-		psy_ui_listboxclient_vtable_initialized = 1;
+		psy_ui_listboxclient_vtable_initialized = TRUE;
 	}
+	psy_ui_component_setvtable(&self->component, &psy_ui_listboxclient_vtable);
 }
 
+/* implementation */
 void psy_ui_listboxclient_init(psy_ui_ListBoxClient* self, psy_ui_Component*
 	parent)
 {
 	psy_ui_component_init(&self->component, parent, NULL);
-	psy_ui_listboxclient_vtable_init(self);
-	self->component.vtable = &psy_ui_listboxclient_vtable;
-	psy_signal_connect(&self->component.signal_destroy, self,
-		psy_ui_listboxclient_ondestroy);
+	psy_ui_listboxclient_vtable_init(self);	
 	psy_table_init(&self->items);
 	self->selindex = -1;
 	self->charnumber = 0;
@@ -66,8 +68,7 @@ void psy_ui_listboxclient_init(psy_ui_ListBoxClient* self, psy_ui_Component*
 	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_VSCROLL);
 }
 
-void psy_ui_listboxclient_ondestroy(psy_ui_ListBoxClient* self,
-	psy_ui_Component* sender)
+void psy_ui_listboxclient_ondestroy(psy_ui_ListBoxClient* self)
 {
 	psy_signal_dispose(&self->signal_selchanged);
 	psy_table_disposeall(&self->items, NULL);
@@ -136,7 +137,7 @@ void psy_ui_listboxclient_onmousedown(psy_ui_ListBoxClient* self,
 	intptr_t index;
 
 	tm = psy_ui_component_textmetric(&self->component);
-	index = (intptr_t)(ev->pt.y / (intptr_t)(tm->tmHeight * 1.2));
+	index = (intptr_t)(psy_ui_mouseevent_pt(ev).y / (intptr_t)(tm->tmHeight * 1.2));
 	if (index < (intptr_t)psy_table_size(&self->items)) {
 		self->selindex = index;
 		psy_ui_component_invalidate(&self->component);
@@ -212,6 +213,7 @@ static void psy_ui_listbox_vtable_init(psy_ui_ListBox* self)
 	self->component.vtable = &psy_ui_listbox_vtable;
 }
 
+/* implementation */
 void psy_ui_listbox_init(psy_ui_ListBox* self, psy_ui_Component* parent)
 {  
 	psy_ui_component_init(&self->component, parent, NULL);	
@@ -219,8 +221,7 @@ void psy_ui_listbox_init(psy_ui_ListBox* self, psy_ui_Component* parent)
 	psy_ui_component_setstyletype(psy_ui_listbox_base(self),
 		psy_ui_STYLE_LISTBOX);
 	psy_signal_init(&self->signal_selchanged);
-	self->charnumber = 0;
-	self->component.id = 70;
+	self->charnumber = 0;	
 	psy_ui_listboxclient_init(&self->client, &self->component);
 	psy_ui_scroller_init(&self->scroller, &self->client.component,
 		&self->component);

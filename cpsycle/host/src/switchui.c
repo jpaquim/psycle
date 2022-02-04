@@ -104,7 +104,9 @@ void switchui_ondraw(SwitchUi* self, psy_ui_Graphics* g)
 	
 	switchui_updateparam(self);
 	size = psy_ui_component_scrollsize_px(&self->component);
-	psy_ui_setrectangle(&r, 0, 0, size.width, size.height);
+	r = psy_ui_realrectangle_make(
+		psy_ui_realpoint_make(0, 0),
+		psy_ui_realsize_make(size.width, size.height));
 	psy_ui_drawsolidrectangle(g, r, self->skin->bottomcolour);
 	
 	if (!self->param || psy_audio_machineparam_normvalue(self->param) == 0.f) {
@@ -122,10 +124,12 @@ void switchui_ondraw(SwitchUi* self, psy_ui_Graphics* g)
 	}
 	psy_ui_setbackgroundcolour(g, self->skin->topcolour);
 	psy_ui_settextcolour(g, self->skin->fonttopcolour);
-	psy_ui_setrectangle(&r,
-		psy_ui_realrectangle_width(&self->skin->switchon.dest), 0,
-		size.width - psy_ui_realrectangle_width(&self->skin->switchon.dest),
-		size.height / 2);
+	r = psy_ui_realrectangle_make(
+		psy_ui_realpoint_make(	
+			psy_ui_realrectangle_width(&self->skin->switchon.dest), 0),
+		psy_ui_realsize_make(
+			size.width - psy_ui_realrectangle_width(&self->skin->switchon.dest),
+			size.height / 2));
 	psy_ui_textoutrectangle(g,
 		psy_ui_realpoint_make(
 			psy_ui_realrectangle_width(&self->skin->switchon.dest), 0.0),
@@ -148,7 +152,7 @@ void switchui_onpreferredsize(SwitchUi* self, const psy_ui_Size* limit,
 
 void switchui_onmousedown(SwitchUi* self, psy_ui_MouseEvent* ev)
 {
-	if (ev->button == 1) {		
+	if (psy_ui_mouseevent_button(ev) == 1) {
 		paramtweak_begin(&self->paramtweak, NULL, psy_INDEX_INVALID, self->param);		
 		paramtweak_onmousedown(&self->paramtweak, ev);
 		psy_ui_component_capture(&self->component);		

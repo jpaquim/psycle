@@ -52,5 +52,7 @@ void playposbar_updatelabel(PlayPosBar* self)
 		(float)psy_audio_player_position(self->player),
 		(int)self->player->sequencer.seqtime.timesig_numerator,
 		(int)self->player->sequencer.seqtime.timesig_denominator);
+#ifndef PSYCLE_DEBUG_PREVENT_TIMER_DRAW
 	psy_ui_label_settext(&self->position, text);	
+#endif
 }

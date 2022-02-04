@@ -276,7 +276,9 @@ void spectrumanalyzer_drawspectrum(SpectrumAnalyzer* self, psy_ui_Graphics* g)
 #endif
 	// draw our bands
 	DCBar = -1; // fftSpec.getDCBars();
-	psy_ui_setrectangle(&rect, 0,0,SCOPE_BARS_WIDTH,0);
+	rect = psy_ui_realrectangle_make(
+		psy_ui_realpoint_make(0, 0),
+		psy_ui_realsize_make(SCOPE_BARS_WIDTH, 0));
 	for (i = 0; i < SCOPE_SPEC_BANDS;
 		i++, rect.left += SCOPE_BARS_WIDTH, rect.right += SCOPE_BARS_WIDTH)
 	{

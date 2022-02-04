@@ -180,7 +180,7 @@ void seqeditorplayline_onmousemove(SeqEditorPlayline* self,
 		psy_audio_player_setposition(
 			&self->seqeditorline.state->workspace->player,
 			psy_max(0.0, seqeditstate_pxtobeat(self->seqeditorline.state,
-				self->dragbase + ev->pt.x)));
+				self->dragbase + psy_ui_mouseevent_pt(ev).x)));
 		psy_audio_exclusivelock_leave();
 		seqeditorplayline_update(self);
 		self->dragbase = psy_ui_component_position(

@@ -629,7 +629,9 @@ char_dyn_t* psy_property_fullkey(const psy_Property* self)
 	rv = psy_property_sections(self);
 	if (psy_strlen(rv) > 0) {
 		rv = psy_strcat_realloc(rv, ".");
-		rv = psy_strcat_realloc(rv, psy_property_key(self));		
+		rv = psy_strcat_realloc(rv, psy_property_key(self));
+	} else {
+		rv = psy_strcat_realloc(rv, psy_property_key(self));
 	}
 	return rv;
 }

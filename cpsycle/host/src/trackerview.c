@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-**  copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -188,9 +188,11 @@ void trackergrid_dispose_signals(TrackerGrid* self)
 void trackergrid_ondraw(TrackerGrid* self, psy_ui_Graphics* g)
 {
 	psy_audio_BlockSelection clip;
+	psy_ui_RealRectangle g_clip;
 		
-	trackerstate_lineclip(self->state, &g->clip, &clip);
-	trackerstate_clip(self->state, &g->clip, &clip);
+	g_clip = psy_ui_cliprect(g);
+	trackerstate_lineclip(self->state, &g_clip, &clip);
+	trackerstate_clip(self->state, &g_clip, &clip);
 	trackergrid_drawbackground(self, g, &clip);
 	/* prepares entry draw done in trackergridcolumn */
 	if (patternviewstate_pattern(self->state->pv)) {
@@ -460,7 +462,7 @@ bool trackergrid_scrollleft(TrackerGrid* self, psy_audio_SequenceCursor cursor)
 	assert(self);
 	
 	column = psy_ui_component_intersect(trackergrid_base(self),
-		psy_ui_realpoint_make(psy_ui_component_scrollleftpx(&self->component),
+		psy_ui_realpoint_make(psy_ui_component_scrollleft_px(&self->component),
 			0.0), &index);
 	if (index != psy_INDEX_INVALID) {		
 		if (index > cursor.track) {
@@ -490,10 +492,10 @@ bool trackergrid_scrollright(TrackerGrid* self, psy_audio_SequenceCursor cursor)
 	size = psy_ui_component_clientsize_px(&self->component);
 	tm = psy_ui_component_textmetric(&self->component);	
 	trackleft = trackerstate_pxtotrack(self->state,
-		psy_ui_component_scrollleftpx(&self->component));
+		psy_ui_component_scrollleft_px(&self->component));
 	trackright = trackerstate_pxtotrack(self->state,
 		size.width +
-		psy_ui_component_scrollleftpx(&self->component));	
+		psy_ui_component_scrollleft_px(&self->component));
 	visitracks = trackright - trackleft;
 	tracks = cursor.track + 1;
 	if (tracks > trackleft + visitracks) {		
@@ -1135,7 +1137,7 @@ void trackergrid_invalidateline(TrackerGrid* self, intptr_t line)
 	psy_ui_component_invalidaterect(&self->component,
 		psy_ui_realrectangle_make(
 			psy_ui_realpoint_make(					
-				psy_ui_component_scrollleftpx(&self->component),
+				psy_ui_component_scrollleft_px(&self->component),
 				self->state->lineheightpx * (line - seqstartline)),					
 			psy_ui_realsize_make(size.width, self->state->lineheightpx)));
 	if (patternviewstate_pattern(self->state->pv)) {
@@ -1164,12 +1166,12 @@ void trackergrid_invalidatelines(TrackerGrid* self, intptr_t line1, intptr_t lin
 	size = psy_ui_component_scrollsize_px(&self->component);
 	r1 = psy_ui_realrectangle_make(
 		psy_ui_realpoint_make(
-			psy_ui_component_scrollleftpx(&self->component),
+			psy_ui_component_scrollleft_px(&self->component),
 			self->state->lineheightpx * (line1 - seqstartline)),
 		psy_ui_realsize_make(size.width, self->state->lineheightpx));
 	r2 = psy_ui_realrectangle_make(
 		psy_ui_realpoint_make(
-			psy_ui_component_scrollleftpx(&self->component),
+			psy_ui_component_scrollleft_px(&self->component),
 			self->state->lineheightpx * (line2 - seqstartline)),
 		psy_ui_realsize_make(size.width, self->state->lineheightpx));
 	psy_ui_realrectangle_union(&r1, &r2);
@@ -1201,7 +1203,7 @@ void trackergrid_clearmidline(TrackerGrid* self)
 	psy_ui_component_invalidaterect(&self->component,
 		psy_ui_realrectangle_make(
 			psy_ui_realpoint_make(
-				psy_ui_component_scrollleftpx(&self->component),
+				psy_ui_component_scrollleft_px(&self->component),
 				((self->state->visilines) / 2 - 1) * self->state->lineheightpx +
 					psy_ui_component_scrolltop_px(&self->component)),
 			psy_ui_realsize_make(size.width, self->state->lineheightpx)));
@@ -1210,7 +1212,7 @@ void trackergrid_clearmidline(TrackerGrid* self)
 	psy_ui_component_invalidaterect(&self->component,
 		psy_ui_realrectangle_make(
 			psy_ui_realpoint_make(
-				psy_ui_component_scrollleftpx(&self->component),
+				psy_ui_component_scrollleft_px(&self->component),
 				(self->state->visilines / 2 - 2) * self->state->lineheightpx +
 				psy_ui_component_scrolltop_px(&self->component)),
 			psy_ui_realsize_make(size.width, self->state->lineheightpx * 4)));		
@@ -1251,7 +1253,7 @@ void trackergrid_onmousedown(TrackerGrid* self, psy_ui_MouseEvent* ev)
 	
 	if (trackdrag_active(&self->state->trackconfig->resize)) {
 		psy_signal_emit(&self->signal_colresize, self, 0);
-	} else if (patternviewstate_pattern(self->state->pv) && ev->button == 1) {
+	} else if (patternviewstate_pattern(self->state->pv) && psy_ui_mouseevent_button(ev) == 1) {
 		if (!self->state->pv->singlemode) {
 			psy_audio_OrderIndex index;
 
@@ -1286,7 +1288,7 @@ void trackergrid_onmousemove(TrackerGrid* self, psy_ui_MouseEvent* ev)
 {	
 	assert(self);	
 	
-	if (ev->button != 1) {
+	if (psy_ui_mouseevent_button(ev) != 1) {
 		return;
 	}		
 	if (trackdrag_active(&self->state->trackconfig->resize)) {
@@ -1298,10 +1300,10 @@ void trackergrid_onmousemove(TrackerGrid* self, psy_ui_MouseEvent* ev)
 		uintptr_t index;
 
 		column = (TrackerColumn*)psy_ui_component_intersect(
-			&self->component, ev->pt, &index);
+			&self->component, psy_ui_mouseevent_pt(ev), &index);
 		if (column) {				
 			cursor = trackerstate_checkcursorbounds(self->state,
-				trackerstate_makecursor(self->state, ev->pt,
+				trackerstate_makecursor(self->state, psy_ui_mouseevent_pt(ev),
 					column->track));
 			if (!psy_audio_sequencecursor_equal(&cursor,
 					&self->lastdragcursor)) {					
@@ -1349,7 +1351,7 @@ void trackergrid_onmouseup(TrackerGrid* self, psy_ui_MouseEvent* ev)
 	assert(self);
 
 	psy_ui_component_releasecapture(&self->component);
-	if (ev->button != 1) {
+	if (psy_ui_mouseevent_button(ev) != 1) {
 		return;
 	}	
 	/* End track resize? */
@@ -1427,7 +1429,7 @@ void trackergrid_onmousedoubleclick(TrackerGrid* self, psy_ui_MouseEvent* ev)
 {
 	assert(self);
 
-	if (ev->button == 1) {
+	if (psy_ui_mouseevent_button(ev) == 1) {
 		patternviewstate_selectcol(self->state->pv);		
 	}
 }

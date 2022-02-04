@@ -278,7 +278,9 @@ void interpolatecurvebox_drawselector(InterpolateCurveBox* self,
 	double half = 2;
 	psy_ui_Colour colour;
 
-	psy_ui_setrectangle(&r, x - half, y - half, half * 2, half * 2);
+	r = psy_ui_realrectangle_make(
+		psy_ui_realpoint_make(x - half, y - half),
+		psy_ui_realsize_make(half * 2, half * 2));
 	if (self->selected == keyframe) {
 		colour = psy_ui_colour_make(0x000000FF);
 	} else {
@@ -292,8 +294,9 @@ void interpolatecurvebox_onmousedown(InterpolateCurveBox* self, psy_ui_MouseEven
 	psy_List* selected;
 	
 	self->dragkeyframe = 0;
-	selected = interpolatecurvebox_hittest(self, ev->pt.x, ev->pt.y);
-	if (ev->button == 1) {
+	selected = interpolatecurvebox_hittest(self, psy_ui_mouseevent_pt(ev).x,
+		psy_ui_mouseevent_pt(ev).y);
+	if (psy_ui_mouseevent_button(ev) == 1) {
 		if (selected) {
 			self->dragkeyframe = selected;
 			self->selected = selected;
@@ -301,10 +304,10 @@ void interpolatecurvebox_onmousedown(InterpolateCurveBox* self, psy_ui_MouseEven
 			psy_ui_component_invalidate(&self->component);
 			psy_ui_component_capture(&self->component);
 		} else {
-			interpolatecurvebox_insertkeyframe(self, ev->pt.x, ev->pt.y);
+			interpolatecurvebox_insertkeyframe(self, psy_ui_mouseevent_pt(ev).x,
+				psy_ui_mouseevent_pt(ev).y);
 		}
-	} else
-	if (ev->button == 2) {
+	} else if (psy_ui_mouseevent_button(ev) == 2) {
 		if (selected) {
 			if (self->selected == selected) {
 				self->selected = 0;
@@ -388,7 +391,8 @@ void interpolatecurvebox_onmousemove(InterpolateCurveBox* self, psy_ui_MouseEven
 		tm = psy_ui_component_textmetric(&self->component);
 		scaley = psy_ui_value_px(&size.height, tm, NULL) / (double)0xFF;
 		entry = (KeyFrame*)self->dragkeyframe->entry;
-		entry->value = (intptr_t)((psy_ui_value_px(&size.height, tm, NULL) - ev->pt.y) * 1 / scaley);
+		entry->value = (intptr_t)((psy_ui_value_px(&size.height, tm, NULL) -
+			psy_ui_mouseevent_pt(ev).y) * 1 / scaley);
 		if (entry->value < self->minval) {
 			entry->value = self->minval;
 		} else 

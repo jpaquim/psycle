@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -261,78 +261,65 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 		break;
 	case Expose: {
 		const psy_ui_Border* border;
-		psy_ui_RealRectangle r;
+		psy_ui_RealRectangle* r;
+		psy_ui_RealRectangle* rc;
+		psy_List* p;
 
 		border = psy_ui_component_border(imp->component);
-		r = psy_ui_realrectangle_make(
+				
+		rc = (psy_ui_RealRectangle*)malloc(sizeof(psy_ui_RealRectangle));
+		*rc = psy_ui_realrectangle_make(
 				psy_ui_realpoint_make(
 					event->xexpose.x,
 					event->xexpose.y),
 				psy_ui_realsize_make(
 					event->xexpose.width,
-					event->xexpose.height));
-		if (!imp->exposeareavalid) {
-			imp->exposearea = r;
-			imp->exposeareavalid = TRUE;
-		} else {
-			psy_ui_realrectangle_union(&imp->exposearea, &r);
-		}
+					event->xexpose.height));		
+		psy_list_append(&imp->expose_rectangles, rc);
 		if (event->xexpose.count > 0) {
 			return 0;
 		}
-		if (imp->component->vtable->ondraw ||
-				imp->component->signal_draw.slots ||
-				imp->component->backgroundmode != psy_ui_NOBACKGROUND ||
-				psy_ui_border_isset(border)) {
-			psy_ui_x11_GraphicsImp* gx11;
-			XRectangle rectangle;
-			psy_ui_RealMargin spacing;
-
-			if (!psy_ui_component_visible(imp->component)) {
-				return 0;
-			}
-
-			gx11 = (psy_ui_x11_GraphicsImp*)imp->g.imp;
-			/* reset scroll origin */
-			gx11->org.x = 0;
-			gx11->org.y = 0;
-			/*
-			** prepare a clip rect that can be used by a component to
-			** optimize the draw amount
-			*/
-			imp->g.clip = imp->exposearea;
-			/* set gc/xfd clip */
-			rectangle.x = (short)imp->exposearea.left;
-			rectangle.y = (short)imp->exposearea.top;
-			rectangle.width = (unsigned short)(imp->exposearea.right -
-				imp->exposearea.left);
-			rectangle.height = (unsigned short)(imp->exposearea.bottom -
-				imp->exposearea.top);
-			XUnionRectWithRegion(&rectangle, gx11->region, gx11->region);
-			XSetRegion(self->dpy, gx11->gc, gx11->region);
-			XftDrawSetClipRectangles(gx11->xfd,0,0,&rectangle, 1);
-			XDestroyRegion(gx11->region);
-			gx11->region = XCreateRegion();
-			/* draw */
-			imp->imp.vtable->dev_draw(&imp->imp, &imp->g);
-		}
-		if (self->dbe) {
-			int w;
-			int h;
-
-			w  = imp->exposearea.right - imp->exposearea.left;
-			h  = imp->exposearea.bottom - imp->exposearea.top;
-			if (w != 0 && h != 0) {
+		imp->exposeareavalid = TRUE;
+		for (p = imp->expose_rectangles; p != NULL; p = p->next) {
+			r = (psy_ui_RealRectangle*)p->entry;
+			if (imp->component->vtable->ondraw ||
+					imp->component->signal_draw.slots ||
+					imp->component->backgroundmode != psy_ui_NOBACKGROUND ||
+					psy_ui_border_isset(border)) {
 				psy_ui_x11_GraphicsImp* gx11;
+				XRectangle rectangle;
+				psy_ui_RealMargin spacing;
+				psy_ui_RealRectangle clip;
 
+				if (!psy_ui_component_visible(imp->component)) {
+					return 0;
+				}
 				gx11 = (psy_ui_x11_GraphicsImp*)imp->g.imp;
-				XCopyArea(self->dpy, imp->d_backBuf,
-					imp->hwnd, gx11->gc,
-					imp->exposearea.left, imp->exposearea.top,
-					w, h,
-					imp->exposearea.left, imp->exposearea.top);
+				/* reset scroll origin */
+				gx11->org.x = 0;
+				gx11->org.y = 0;							
+				psy_ui_graphics_setcliprect(&imp->g, *r);				
+				psy_ui_component_draw(imp->component, &imp->g);			
+			}
+			if (self->dbe) {
+				int w;
+				int h;
+
+				w  = r->right - r->left;
+				h  = r->bottom - r->top;
+				if (w != 0 && h != 0) {
+					psy_ui_x11_GraphicsImp* gx11;
+
+					gx11 = (psy_ui_x11_GraphicsImp*)imp->g.imp;
+					XCopyArea(self->dpy, imp->d_backBuf,
+						imp->hwnd, gx11->gc,
+						r->left, r->top,
+						w, h,
+						r->left, r->top);
+				}
 			}
 		}
+		psy_list_deallocate(&imp->expose_rectangles, NULL);
 		imp->exposeareavalid = FALSE;
 		break; }
 	case MapNotify:
@@ -358,6 +345,7 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 		if (xce.width != imp->prev_w || xce.height != imp->prev_h) {
 			imp->prev_w = xce.width;
 			imp->prev_h = xce.height;
+			psy_list_deallocate(&imp->expose_rectangles, NULL);
 			if (self->dbe) {
 				psy_ui_x11_GraphicsImp* gx11;
 
@@ -435,7 +423,7 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 		break;
     case ButtonPress: {		
 		psy_ui_MouseEvent ev;
-				
+						
 		if (self->dograb) {
 			psy_ui_Component* grab;
 			psy_ui_Component* curr;
@@ -457,13 +445,11 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 		}		
 		psy_ui_mouseevent_init_all(&ev,	
 				psy_ui_realpoint_make(event->xbutton.x, event->xbutton.y),
-				psy_ui_realpoint_make(event->xbutton.x, event->xbutton.y),
 				psy_ui_x11app_translate_x11button(event->xbutton.button),
 				0, 0, 0);
 		ev.event.timestamp = (uintptr_t)event->xbutton.time;		
 		ev.event.type = psy_ui_MOUSEDOWN;
-		psy_ui_x11app_update_mouseevent_mods(self, &ev);
-		psy_ui_x11app_adjustcoordinates(imp->component, &ev.pt);		
+		psy_ui_x11app_update_mouseevent_mods(self, &ev);		
 		psy_ui_eventdispatch_send(&self->app->eventdispatch,
 			imp->component, &ev.event);		
 		break; }
@@ -471,14 +457,12 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 		psy_ui_MouseEvent ev;							
 
 		psy_ui_mouseevent_init_all(&ev,	
-			psy_ui_realpoint_make(event->xbutton.x, event->xbutton.y),
-			psy_ui_realpoint_make(event->xbutton.x, event->xbutton.y),
+			psy_ui_realpoint_make(event->xbutton.x, event->xbutton.y),			
 			psy_ui_x11app_translate_x11button(event->xbutton.button),
 			0, 0, 0);
 		ev.event.timestamp = (uintptr_t)event->xbutton.time;			
 		ev.event.type = psy_ui_MOUSEUP;
-		psy_ui_x11app_update_mouseevent_mods(self, &ev);
-		psy_ui_x11app_adjustcoordinates(imp->component, &ev.pt);		
+		psy_ui_x11app_update_mouseevent_mods(self, &ev);		
 		psy_ui_eventdispatch_send(&self->app->eventdispatch,
 			imp->component, &ev.event);
 		return 0;		
@@ -497,18 +481,16 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 			button = 2;
 		}
 		psy_ui_mouseevent_init_all(&ev,
-			psy_ui_realpoint_make(xme.x, xme.y),
-			psy_ui_realpoint_make(xme.x, xme.y),
+			psy_ui_realpoint_make(xme.x, xme.y),			
 			button, 0, 0, 0);
 		ev.event.type = psy_ui_MOUSEMOVE;
-		psy_ui_x11app_update_mouseevent_mods(self, &ev);
-		psy_ui_x11app_adjustcoordinates(imp->component, &ev.pt);		
+		psy_ui_x11app_update_mouseevent_mods(self, &ev);		
 		ev.event.timestamp = (uintptr_t)event->xbutton.time;					
 		psy_ui_eventdispatch_send(&self->app->eventdispatch,
 			imp->component, &ev.event);		
 		return 0; }
 	case EnterNotify: {
-		imp->imp.vtable->dev_mouseenter(&imp->imp);
+		// imp->imp.vtable->dev_mouseenter(&imp->imp);
 		break; }
 	case LeaveNotify: {
 		if (imp->component) {
@@ -587,8 +569,8 @@ void psy_ui_x11app_update_keyevent_mods(psy_ui_X11App* self,
 void psy_ui_x11app_update_mouseevent_mods(psy_ui_X11App* self,
 	psy_ui_MouseEvent* ev)
 {
-	ev->shift_key = self->shiftstate;
-	ev->ctrl_key = self->controlstate;
+	ev->shift_key_ = self->shiftstate;
+	ev->ctrl_key_ = self->controlstate;
 	/* ev->alt_key = self->altstate; */
 }
 
@@ -626,11 +608,9 @@ void psy_ui_x11app_mousewheel(psy_ui_X11App* self,
 		delta = 0;
 	}
 	psy_ui_mouseevent_init_all(&ev,
-		psy_ui_realpoint_make(xe->xbutton.x, xe->xbutton.y),
-		psy_ui_realpoint_make(xe->xbutton.x, xe->xbutton.y),
+		psy_ui_realpoint_make(xe->xbutton.x, xe->xbutton.y),		
 		0, delta, 0, 0);
-	psy_ui_x11app_update_mouseevent_mods(self, &ev);
-	psy_ui_x11app_adjustcoordinates(imp->component, &ev.pt);
+	psy_ui_x11app_update_mouseevent_mods(self, &ev);	
 	psy_ui_component_mousewheel(imp->component, &ev, delta /* 120 or -120 */);
 }
 
@@ -722,8 +702,8 @@ void psy_ui_x11app_sendevent(psy_ui_X11App* self, psy_ui_Component* component,
 		xme.window = imp->hwnd;
 		xme.subwindow = None;		
 		xme.state = 0x00;
-		xme.x = mouseevent->pt.x;
-		xme.y = mouseevent->pt.y;
+		xme.x = psy_ui_mouseevent_offset(mouseevent).x;
+		xme.y = psy_ui_mouseevent_offset(mouseevent).y;
 		xme.x_root = 0;
 		xme.y_root = 0;	
 		xme.type = MotionNotify;			
@@ -764,12 +744,12 @@ XButtonEvent psy_ui_X11app_make_x11buttonevent(psy_ui_MouseEvent* ev,
 	rv.root         = DefaultRootWindow(dpy);
 	rv.time         = (Time)ev->event.timestamp;
 	rv.same_screen  = True;
-	rv.button       = psy_ui_x11app_make_x11button(ev->button);
+	rv.button       = psy_ui_x11app_make_x11button(psy_ui_mouseevent_button(ev));
 	rv.state        = 0;
-	rv.x            = ev->pt.x;
-	rv.y            = ev->pt.y;
-	rv.x_root       = ev->pt.x;;
-	rv.y_root       = ev->pt.y;
+	rv.x            = psy_ui_mouseevent_offset(ev).x;
+	rv.y            = psy_ui_mouseevent_offset(ev).y;
+	rv.x_root       = psy_ui_mouseevent_offset(ev).x;
+	rv.y_root       = psy_ui_mouseevent_offset(ev).y;
 	rv.window       = hwnd;   
 	if (ev->event.type == psy_ui_MOUSEUP) {
 		rv.type = ButtonRelease;

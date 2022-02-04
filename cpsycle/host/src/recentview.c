@@ -204,7 +204,7 @@ psy_Property* playlistview_next(PlaylistView* self)
 
 void playlistview_onmousedown(PlaylistView* self, psy_ui_MouseEvent* ev)
 {
-	if (ev->button == 2) {
+	if (psy_ui_mouseevent_button(ev) == 2) {
 		psy_ui_component_hide_align(&self->component);
 	}
 }

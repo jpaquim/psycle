@@ -148,7 +148,7 @@ void masterui_showparameters(MasterUi* self, psy_ui_Component* parent)
 
 void masterui_onmousedoubleclick(MasterUi* self, psy_ui_MouseEvent* ev)
 {
-	if (ev->button == 1) {				
+	if (psy_ui_mouseevent_button(ev) == 1) {
 		if (self->component.view) {
 			masterui_showparameters(self, self->component.view);
 		}

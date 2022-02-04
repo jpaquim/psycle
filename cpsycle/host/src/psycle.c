@@ -29,7 +29,7 @@ int psycle_run(uintptr_t instance, int options)
 	/* set env for scintilla module */
 	psy_insertpathenv(psy_workdir(workpath));
 	psy_ui_app_init(&app, psy_ui_DARKTHEME, instance);	
-	mainframe = mainframe_allocinit();
+	mainframe = mainframe_allocinit();	
 	if (mainframe) {	
 		if (mainframe_showmaximizedatstart(mainframe)) {
 			psy_ui_component_showmaximized(mainframe_base(mainframe));

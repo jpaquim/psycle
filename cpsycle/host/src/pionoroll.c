@@ -307,8 +307,8 @@ void pianoroll_ongridscroll(Pianoroll* self, psy_ui_Component* sender)
 {
 	assert(self);
 
-	if (psy_ui_component_scrollleftpx(pianogrid_base(&self->grid)) !=
-			psy_ui_component_scrollleftpx(pianoruler_base(&self->header))) {
+	if (psy_ui_component_scrollleft_px(pianogrid_base(&self->grid)) !=
+		psy_ui_component_scrollleft_px(pianoruler_base(&self->header))) {
 		psy_ui_component_setscrollleft(pianoruler_base(&self->header),
 			psy_ui_component_scrollleft(pianogrid_base(&self->grid)));		
 	}

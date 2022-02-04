@@ -296,16 +296,16 @@ void effectui_showparameters(EffectUi* self, psy_ui_Component* parent)
 
 void effectui_onmousedown(EffectUi* self, psy_ui_MouseEvent* ev)
 {	
-	if (ev->button == 1) {
+	if (psy_ui_mouseevent_button(ev) == 1) {
 		if (self->intern.slot != psy_audio_machines_selected(self->intern.machines)) {
-			if (ev->ctrl_key) {
+			if (psy_ui_mouseevent_ctrlkey(ev)) {
 				psy_audio_machineselection_select(&self->intern.machines->selection,
 					psy_audio_machineindex_make(self->intern.slot));
 			} else {
 				psy_audio_machines_select(self->intern.machines, self->intern.slot);
 			}
 		}
-		if (effectui_hittestcoord(self, ev->pt,
+		if (effectui_hittestcoord(self, psy_ui_mouseevent_pt(ev),
 			&self->intern.skin->effect.bypass)) {
 			if (psy_audio_machine_bypassed(self->intern.machine)) {
 				psy_audio_machine_unbypass(self->intern.machine);
@@ -313,9 +313,9 @@ void effectui_onmousedown(EffectUi* self, psy_ui_MouseEvent* ev)
 				psy_audio_machine_bypass(self->intern.machine);
 			}
 			psy_ui_mouseevent_stop_propagation(ev);
-		} else if (effectui_hittestcoord(self, ev->pt,
+		} else if (effectui_hittestcoord(self, psy_ui_mouseevent_pt(ev),
 			&self->intern.skin->generator.mute) ||
-			effectui_hittestcoord(self, ev->pt,
+			effectui_hittestcoord(self, psy_ui_mouseevent_pt(ev),
 				&self->intern.skin->effect.mute)) {
 			if (psy_audio_machine_muted(self->intern.machine)) {
 				psy_audio_machine_unmute(self->intern.machine);
@@ -323,7 +323,8 @@ void effectui_onmousedown(EffectUi* self, psy_ui_MouseEvent* ev)
 				psy_audio_machine_mute(self->intern.machine);
 			}
 			psy_ui_mouseevent_stop_propagation(ev);
-		} else if (effectui_hittestpan(self, ev->pt, &self->intern.mx)) {
+		} else if (effectui_hittestpan(self, psy_ui_mouseevent_pt(ev),
+				&self->intern.mx)) {
 			self->intern.dragmode = MACHINEVIEW_DRAG_PAN;
 			psy_ui_mouseevent_stop_propagation(ev);
 		}
@@ -345,7 +346,8 @@ void effectui_onmousemove(EffectUi* self, psy_ui_MouseEvent* ev)
 {
 	if (self->intern.dragmode == MACHINEVIEW_DRAG_PAN) {
 		psy_audio_machine_setpanning(self->intern.machine,
-			effectui_panvalue(self, ev->pt.x, self->intern.slot));
+			effectui_panvalue(self, psy_ui_mouseevent_pt(ev).x,
+			self->intern.slot));
 		psy_ui_component_invalidate(&self->component);
 	}
 }
@@ -358,7 +360,7 @@ int effectui_hittestpan(EffectUi* self, psy_ui_RealPoint pt, double* dx)
 	offset = psy_audio_machine_panning(self->intern.machine) *
 		self->intern.coords->pan.range;
 	r = skincoord_destposition(&self->intern.coords->pan);
-	psy_ui_realrectangle_move(&r, offset, 0);
+	psy_ui_realrectangle_move(&r, psy_ui_realpoint_make(offset, 0));
 	*dx = pt.x - r.left;
 	return psy_ui_realrectangle_intersect(&r, pt);			
 }
@@ -385,16 +387,16 @@ void effectui_onmouseup(EffectUi* self, psy_ui_MouseEvent* ev)
 
 void effectui_onmousedoubleclick(EffectUi* self, psy_ui_MouseEvent* ev)
 {
-	if (ev->button == 1) {
+	if (psy_ui_mouseevent_button(ev) == 1) {
 		psy_ui_RealPoint dragpt;
 
-		if (effectui_hittestcoord(self, ev->pt,
+		if (effectui_hittestcoord(self, psy_ui_mouseevent_pt(ev),
 				&self->intern.skin->effect.bypass) ||
-			effectui_hittestcoord(self, ev->pt,
+			effectui_hittestcoord(self, psy_ui_mouseevent_pt(ev),
 				 &self->intern.skin->generator.mute) ||
-			effectui_hittestcoord(self, ev->pt,
+			effectui_hittestcoord(self, psy_ui_mouseevent_pt(ev),
 				&self->intern.skin->effect.mute) ||
-			effectui_hittestpan(self, ev->pt, &dragpt.x)) {
+			effectui_hittestpan(self, psy_ui_mouseevent_pt(ev), &dragpt.x)) {
 		} else {
 			if (self->component.view) {
 				effectui_showparameters(self, self->component.view);

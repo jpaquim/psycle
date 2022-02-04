@@ -1,6 +1,6 @@
 /*
 ** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #if !defined(SONGPROPERTIES_H)
@@ -11,7 +11,7 @@
 #include "workspace.h"
 /* ui */
 #include <uibutton.h>
-#include <uitextinput.h>
+#include <uitextarea.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -47,7 +47,7 @@ typedef struct SongPropertiesView {
 	/* text */
 	psy_ui_Component comments;
 	psy_ui_Label label_comments;
-	psy_ui_TextInput edit_comments;
+	psy_ui_TextArea edit_comments;
 	/* references */
 	psy_audio_Song* song;
 	Workspace* workspace;

@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -249,10 +249,7 @@ void psy_ui_x11_graphicsimp_updatexft(psy_ui_x11_GraphicsImp* self)
 
 // xt implementation method for psy_ui_Graphics
 void psy_ui_x11_g_imp_dispose(psy_ui_x11_GraphicsImp* self)
-{	
-	if (self->bitmap) {
-		printf("destroy pixmap gc\n");
-	}
+{		
 	XDestroyRegion(self->region);	
 	XFreeGC(self->display, self->gc);	
 	XftColorFree(self->display,
@@ -608,37 +605,44 @@ uintptr_t psy_ui_x11_g_dev_gc(psy_ui_x11_GraphicsImp* self)
 	return (uintptr_t)self->gc;
 }
 
-void psy_ui_x11_g_dev_setcliprect(psy_ui_x11_GraphicsImp* self, psy_ui_RealRectangle clip)
-{
-	Region rgn;
-
-	self->clip = clip;
-	rgn = XCreateRegion();
+void psy_ui_x11_g_dev_setcliprect(psy_ui_x11_GraphicsImp* self,
+	psy_ui_RealRectangle clip)
+{		
+	self->clip = psy_ui_realrectangle_make(
+		psy_ui_realpoint_make(
+			clip.left - (int)(self->org.x),
+			clip.top - (int)(self->org.y)),
+		psy_ui_realsize_make(
+			clip.right - clip.left,
+			clip.bottom - clip.top));	
 	if ((((int)clip.right - (int)clip.left) == 0) ||
-			(((int)clip.bottom - (int)clip.top) == 0)) {		
+			(((int)clip.bottom - (int)clip.top) == 0)) {				
+		XSetClipRectangles(self->display, self->gc, 0, 0,
+			0, 0, Unsorted);
+		XftDrawSetClipRectangles(self->xfd, 0, 0, 0, 0);
+	} else {		
 		XRectangle r;
 				
-		r.x = 0;
-		r.y = 0;
-		r.width = 16384;
-		r.height = 16384;	
-		XUnionRectWithRegion(&r, rgn, rgn);		
-	} else {
-		XRectangle r;
-		
-		r.x = (int)clip.left - (int)(self->org.x);
-		r.y = (int)clip.top - (int)(self->org.y);
+		r.x = (int)self->clip.left;
+		r.y = (int)self->clip.top;
 		r.width = (int)clip.right - (int)clip.left;
-		r.height = (int)clip.bottom - (int)clip.top;
-		XUnionRectWithRegion(&r, rgn, rgn);		
-	}
-	XSetRegion(self->display, self->gc, rgn);
-	XDestroyRegion(rgn);
+		r.height = (int)clip.bottom - (int)clip.top;		
+		XSetClipRectangles(self->display, self->gc, 0, 0,
+			&r, 1, Unsorted);		
+		XftDrawSetClipRectangles(self->xfd, 0, 0, &r, 1);		
+	}	
 }
 
-psy_ui_RealRectangle psy_ui_x11_g_dev_cliprect(const psy_ui_x11_GraphicsImp* self)
+psy_ui_RealRectangle psy_ui_x11_g_dev_cliprect(
+	const psy_ui_x11_GraphicsImp* self)
 {
-	return self->clip;
+	return psy_ui_realrectangle_make(
+		psy_ui_realpoint_make(
+			self->clip.left + (int)(self->org.x),
+			self->clip.top + (int)(self->org.y)),
+		psy_ui_realsize_make(
+			self->clip.right - self->clip.left,
+			self->clip.bottom - self->clip.top));	
 }
 
 #endif /* PSYCLE_USE_TK == PSYCLE_TK_X11 */

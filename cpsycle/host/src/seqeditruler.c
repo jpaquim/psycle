@@ -123,7 +123,7 @@ void seqeditruler_drawruler(SeqEditRuler* self, psy_ui_Graphics* g,
 	size = psy_ui_component_size_px(&self->component);
 	tm = psy_ui_component_textmetric(&self->component);	
 	textline = baseline - tm->tmHeight - 2;
-	duration = (size.width + psy_ui_component_scrollleftpx(&self->component)) /
+	duration = (size.width + psy_ui_component_scrollleft_px(&self->component)) /
 		(psy_dsp_big_beat_t)self->state->pxperbeat;
 	/* psy_audio_sequence_duration(&workspace_song(
 	 * self->workspace)->sequence); */
@@ -268,7 +268,7 @@ void seqeditruler_onpreferredsize(SeqEditRuler* self,
 void seqeditruler_onmousemove(SeqEditRuler* self, psy_ui_MouseEvent* ev)
 {
 	seqeditstate_setcursor(self->state, seqeditstate_quantize(self->state,
-		seqeditstate_pxtobeat(self->state, ev->pt.x)));	
+		seqeditstate_pxtobeat(self->state, psy_ui_mouseevent_pt(ev).x)));
 }
 
 void seqeditruler_onmouseenter(SeqEditRuler* self)

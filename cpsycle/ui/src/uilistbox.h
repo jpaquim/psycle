@@ -12,31 +12,21 @@
 #include "uiscroller.h"
 #include <hashtbl.h>
 
-/* ListBox */
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /*
-** PSY_USE_PLATFORM_LISTBOX
-** Bridge
-** Aim: avoid coupling to one platform (win32, xt/motif, etc)
-** Abstraction/Refined  psy_ui_ListBox
-** Implementor			psy_ui_ComponentImp
-** Concrete Implementor	psy_ui_win_ComponentImp
+** psy_ui_ListBoxClient
 **
-** psy_ui_Component <>----<> psy_ui_ComponentImp <----- psy_ui_win_ComponentImp
-**      ^                               ^                         |
-**      |                               |                         |
-**      |                               |                        <>
-** psy_ui_ListBox             psy_ui_ComponentImp <------ psy_ui_WinListBoxImp
+** psy_ui_Component
+**      ^
+**      |
+** psy_ui_ListBox <>----<> psy_ui_ListBoxClient           
 */
 
-struct psy_ui_ComponentImp;
 
-struct psy_ui_Component;
-
+/* psy_ui_ListBoxClient */
 typedef struct psy_ui_ListBoxClient {
     /* inherits */
     psy_ui_Component component;
@@ -55,6 +45,7 @@ void psy_ui_listboxclient_setcursel(psy_ui_ListBoxClient*, intptr_t index);
 intptr_t psy_ui_listboxclient_cursel(const psy_ui_ListBoxClient*);
 void psy_ui_listboxclient_setcharnumber(psy_ui_ListBoxClient*, double num);
 
+/* psy_ui_ListBox */
 typedef struct psy_ui_ListBox  {
     /* inherits */
     psy_ui_Component component;
@@ -84,8 +75,7 @@ INLINE psy_ui_Component* psy_ui_listbox_base(psy_ui_ListBox* self)
     return &self->component;
 }
 
-void psy_ui_listbox_text(psy_ui_ListBox* self, char* text,
-    uintptr_t index);
+void psy_ui_listbox_text(psy_ui_ListBox* self, char* text, uintptr_t index);
 
 #ifdef __cplusplus
 }

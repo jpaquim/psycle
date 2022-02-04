@@ -1,6 +1,6 @@
 /*
 ** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
-** copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -50,7 +50,8 @@ static void dev_setposition(psy_ui_x11_ComponentImp*, psy_ui_Point topleft,
 static psy_ui_Size dev_size(const psy_ui_x11_ComponentImp*);
 static void dev_updatesize(psy_ui_x11_ComponentImp*);
 static psy_ui_Size dev_framesize(psy_ui_x11_ComponentImp*);
-static void dev_scrollto(psy_ui_x11_ComponentImp*, intptr_t dx, intptr_t dy);
+static void dev_scrollto(psy_ui_x11_ComponentImp*, intptr_t dx, intptr_t dy,
+	const psy_ui_RealRectangle*);
 static psy_ui_Component* dev_parent(psy_ui_x11_ComponentImp*);
 static void dev_setparent(psy_ui_x11_ComponentImp* self,
 	psy_ui_Component* parent);
@@ -82,13 +83,6 @@ static void dev_settitle(psy_ui_x11_ComponentImp*, const char* title);
 static void dev_setfocus(psy_ui_x11_ComponentImp*);
 static int dev_hasfocus(psy_ui_x11_ComponentImp*);
 static void dev_clear(psy_ui_x11_ComponentImp*);
-static void dev_draw(psy_ui_x11_ComponentImp*, psy_ui_Graphics*);
-static void dev_mousedown(psy_ui_x11_ComponentImp*, psy_ui_MouseEvent*);
-static void dev_mouseup(psy_ui_x11_ComponentImp*, psy_ui_MouseEvent*);
-static void dev_mousemove(psy_ui_x11_ComponentImp*, psy_ui_MouseEvent*);
-static void dev_mousedoubleclick(psy_ui_x11_ComponentImp*, psy_ui_MouseEvent*);
-static void dev_mouseenter(psy_ui_x11_ComponentImp*);
-static void dev_mouseleave(psy_ui_x11_ComponentImp*);
 static void dev_initialized(psy_ui_x11_ComponentImp* self) { }
 static psy_ui_RealPoint translatecoords(psy_ui_x11_ComponentImp*,
 	psy_ui_Component* src, psy_ui_Component* dst);
@@ -225,28 +219,7 @@ static void xt_imp_vtable_init(psy_ui_x11_ComponentImp* self)
 			dev_hasfocus;
 		vtable.dev_clear =
 			(psy_ui_fp_componentimp_dev_clear)
-			dev_clear;
-		vtable.dev_draw =
-			(psy_ui_fp_componentimp_dev_draw)
-			dev_draw;
-		vtable.dev_mousedown =
-			(psy_ui_fp_componentimp_dev_mouseevent)
-			dev_mousedown;
-		vtable.dev_mouseup =
-			(psy_ui_fp_componentimp_dev_mouseevent)
-			dev_mouseup;
-		vtable.dev_mousemove =
-			(psy_ui_fp_componentimp_dev_mouseevent)
-			dev_mousemove;
-		vtable.dev_mousedoubleclick =
-			(psy_ui_fp_componentimp_dev_mouseevent)
-			dev_mousedoubleclick;
-		vtable.dev_mouseenter =
-			(psy_ui_fp_componentimp_dev_mouseenter)
-			dev_mouseenter;
-		vtable.dev_mouseleave =
-			(psy_ui_fp_componentimp_dev_mouseleave)
-			dev_mouseleave;
+			dev_clear;		
 		vtable.dev_initialized =
 			(psy_ui_fp_componentimp_dev_initialized)
 			dev_initialized;
@@ -280,6 +253,7 @@ void psy_ui_x11_componentimp_init(psy_ui_x11_ComponentImp* self,
 	self->viewcomponents = NULL;
 	psy_ui_realrectangle_init(&self->exposearea);
 	self->exposeareavalid = FALSE;
+	self->expose_rectangles = NULL;
 	parent_imp = parent
 		? (psy_ui_x11_ComponentImp*)parent
 		: NULL;
@@ -319,6 +293,7 @@ void psy_ui_x11_component_create_window(psy_ui_x11_ComponentImp* self,
 				xattrmask, &xattr);
 		XSelectInput(x11app->dpy, self->hwnd,
 			ExposureMask | KeyPressMask | KeyReleaseMask |
+			ButtonPressMask | ButtonReleaseMask | PointerMotionMask |
 			StructureNotifyMask |
 			EnterWindowMask | LeaveWindowMask | FocusChangeMask);
 		self->mapped = FALSE;
@@ -338,6 +313,7 @@ void psy_ui_x11_component_create_window(psy_ui_x11_ComponentImp* self,
 				xattrmask, &xattr);
 		XSelectInput(x11app->dpy, self->hwnd,
 			ExposureMask | KeyPressMask | KeyReleaseMask |
+			ButtonPressMask | ButtonReleaseMask | PointerMotionMask |
 			StructureNotifyMask |
 			EnterWindowMask | LeaveWindowMask | FocusChangeMask);
 		self->mapped = FALSE;
@@ -429,6 +405,7 @@ void dev_dispose(psy_ui_x11_ComponentImp* self)
 	self->viewcomponents = NULL;
 	psy_list_free(self->children_nonrec_cache);
 	self->children_nonrec_cache = NULL;
+	psy_list_deallocate(&self->expose_rectangles, NULL);
 }
 
 void dev_clear(psy_ui_x11_ComponentImp* self)
@@ -772,7 +749,8 @@ psy_ui_Size dev_framesize(psy_ui_x11_ComponentImp* self)
 	return rv;
 }
 
-void dev_scrollto(psy_ui_x11_ComponentImp* self, intptr_t dx, intptr_t dy)
+void dev_scrollto(psy_ui_x11_ComponentImp* self, intptr_t dx, intptr_t dy,
+	const psy_ui_RealRectangle* r)
 {
 	if (dx != 0 || dy != 0) {
 		XWindowAttributes win_attr;
@@ -964,7 +942,7 @@ void dev_invalidate(psy_ui_x11_ComponentImp* self)
 
 void dev_invalidaterect(psy_ui_x11_ComponentImp* self,
 	const psy_ui_RealRectangle* r)
-{
+{	
 	psy_ui_X11App* x11app;
 	XExposeEvent xev;
 	XWindowAttributes win_attr;
@@ -973,11 +951,11 @@ void dev_invalidaterect(psy_ui_x11_ComponentImp* self,
 	xev.type = Expose;
 	xev.display = x11app->dpy;
 	xev.window = self->hwnd;
-	xev.count = 0;
+	xev.count = 0;			
 	xev.x = (int)r->left;
 	xev.y = (int)r->top;
 	xev.width = (int)r->right - (int)r->left;
-	xev.height = (int)r->bottom - (int)r->top;
+	xev.height = (int)r->bottom - (int)r->top;	
 	XSendEvent(x11app->dpy, self->hwnd, True, ExposureMask, (XEvent*)&xev);
 }
 
@@ -1343,21 +1321,6 @@ int windowexstyle(psy_ui_x11_ComponentImp* self)
 	return rv;
 }
 
-void dev_draw(psy_ui_x11_ComponentImp* self, psy_ui_Graphics* g)
-{
-	psy_ui_component_draw(self->component, g, self->viewcomponents);
-}
-
-void dev_mousedown(psy_ui_x11_ComponentImp* self, psy_ui_MouseEvent* ev)
-{
-	psy_ui_component_mousedown(self->component, ev, self->viewcomponents);
-}
-
-void dev_mouseup(psy_ui_x11_ComponentImp* self, psy_ui_MouseEvent* ev)
-{
-	psy_ui_component_mouseup(self->component, ev, self->viewcomponents);
-}
-
 psy_ui_RealPoint translatecoords(psy_ui_x11_ComponentImp* self,
 	psy_ui_Component* src,
 	psy_ui_Component* dst)
@@ -1391,115 +1354,6 @@ psy_ui_RealPoint mapcoords(psy_ui_x11_ComponentImp* self, psy_ui_Component* src,
 		curr = psy_ui_component_parent(curr);
 	}
 	return rv;
-}
-
-void dev_mousemove(psy_ui_x11_ComponentImp* self, psy_ui_MouseEvent* ev)
-{
-	psy_List* p;
-
-	if (!self->viewcomponents && psy_ui_app()->hover) {
-		psy_ui_app()->hover->vtable->onmouseleave(psy_ui_app()->hover);
-		psy_ui_app_sethover(psy_ui_app(), NULL);
-	}
-
-	if (!psy_ui_app()->mousetracking) {
-		/*TRACKMOUSEEVENT tme;
-
-		self->imp.vtable->dev_mouseenter(&self->imp);
-		tme.cbSize = sizeof(TRACKMOUSEEVENT);
-		tme.dwFlags = TME_LEAVE | TME_HOVER;
-		tme.dwHoverTime = 200;
-		tme.hwndTrack = self->hwnd;
-		if (_TrackMouseEvent(&tme)) {
-			psy_ui_app()->mousetracking = TRUE;
-		}*/
-	}
-	if (psy_ui_app_capture(psy_ui_app())) {
-		psy_ui_Component* capture;
-		psy_ui_RealPoint translation;
-		
-		capture = psy_ui_app_capture(psy_ui_app());
-		do {
-			translation = mapcoords(self, capture, self->component);
-			psy_ui_realpoint_sub(&ev->pt, translation);
-			capture->vtable->onmousemove(capture, ev);
-			psy_signal_emit(&capture->signal_mousemove,
-				capture, 1, ev);
-			psy_ui_realpoint_add(&ev->pt, translation);
-			if (ev->event.bubbles) {
-				capture = psy_ui_component_parent(capture);
-			} else {
-				capture = NULL;
-			}
-		} while (capture);
-		ev->event.bubbles = FALSE;
-	} else {
-		bool intersect;
-
-		intersect = FALSE;
-		for (p = self->viewcomponents; p != NULL; psy_list_next(&p)) {
-			psy_ui_Component* child;
-			psy_ui_RealRectangle r;
-
-			child = (psy_ui_Component*)p->entry;
-			if (psy_ui_component_visible(child)) {
-				r = psy_ui_component_position(child);
-				intersect = psy_ui_realrectangle_intersect(&r, ev->pt);
-				if (intersect) {
-					psy_ui_realpoint_sub(&ev->pt,
-						psy_ui_realrectangle_topleft(&r));
-					child->imp->vtable->dev_mousemove(child->imp, ev);
-					psy_ui_realpoint_add(&ev->pt,
-						psy_ui_realrectangle_topleft(&r));
-					break;
-				}
-			}
-		}
-		if (!intersect) {
-			if (psy_ui_app()->hover != self->component) {
-				psy_ui_Component* hover;
-
-				hover = psy_ui_app()->hover;
-				if (hover) {
-					hover->vtable->onmouseleave(hover);
-				}
-				self->component->vtable->onmouseenter(self->component);
-				psy_ui_app_sethover(psy_ui_app(), self->component);
-			}
-		}
-	}
-	if (ev->event.bubbles) {
-		self->component->vtable->onmousemove(self->component, ev);
-		psy_signal_emit(&self->component->signal_mousemove,
-			self->component, 1, ev);
-	}
-}
-
-void dev_mousedoubleclick(psy_ui_x11_ComponentImp* self, psy_ui_MouseEvent* ev)
-{
-	psy_ui_component_mousedoubleclick(self->component, ev, self->viewcomponents);
-}
-
-void dev_mouseenter(psy_ui_x11_ComponentImp* self)
-{
-	self->component->vtable->onmouseenter(self->component);
-	psy_signal_emit(&self->component->signal_mouseenter,
-		self->component, 0);
-}
-
-void dev_mouseleave(psy_ui_x11_ComponentImp* self)
-{
-	psy_ui_app()->mousetracking = FALSE;
-	if (psy_ui_app()->hover) {
-		psy_ui_Component* hover;
-
-		hover = psy_ui_app()->hover;
-		hover->vtable->onmouseleave(hover);
-		psy_signal_emit(&hover->signal_mouseleave, hover, 0);
-		psy_ui_app_sethover(psy_ui_app(), NULL);
-	}
-	self->component->vtable->onmouseleave(self->component);
-	psy_signal_emit(&self->component->signal_mouseleave, self->component, 0);
 }
 
 #endif

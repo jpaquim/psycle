@@ -102,8 +102,7 @@ void psy_ui_graphics_init_bitmap(psy_ui_Graphics* self, psy_ui_Bitmap* bitmap)
 	vtable_init();
 	self->vtable = &vtable;
 	self->imp = psy_ui_impfactory_allocinit_graphicsimp_bitmap(psy_ui_app_impfactory(psy_ui_app()), bitmap);
-	bpmsize = psy_ui_bitmap_size(bitmap);
-	self->clip = psy_ui_realrectangle_make(psy_ui_realpoint_zero(), bpmsize);
+	bpmsize = psy_ui_bitmap_size(bitmap);	
 }
 
 /* Delegation Methods to GraphicsImp */

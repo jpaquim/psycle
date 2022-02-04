@@ -94,7 +94,8 @@ void trackerlinenumbers_updateformat(TrackerLineNumbers* self)
 void trackerlinenumbers_ondraw(TrackerLineNumbers* self, psy_ui_Graphics* g)
 {
 	if (patternviewstate_sequence(self->state->pv)) {
-		psy_ui_RealSize size;		
+		psy_ui_RealSize size;
+		psy_ui_RealRectangle g_clip;
 		double cpy;
 		intptr_t line;
 		intptr_t seqline;
@@ -109,7 +110,8 @@ void trackerlinenumbers_ondraw(TrackerLineNumbers* self, psy_ui_Graphics* g)
 		assert(self);
 				
 		size = psy_ui_component_scrollsize_px(&self->component);
-		trackerstate_lineclip(self->state, &g->clip, &clip);
+		g_clip = psy_ui_cliprect(g);
+		trackerstate_lineclip(self->state, &g_clip, &clip);
 		offset = clip.topleft.offset;		
 		cpy = trackerstate_beattopx(self->state, offset);
 		ite = patternviewstate_sequencestart(self->state->pv, offset);		
@@ -395,7 +397,9 @@ void trackerlinenumberslabel_ondraw(TrackerLineNumbersLabel* self, psy_ui_Graphi
 	psy_ui_RealRectangle r;		
 	
 	size = psy_ui_component_scrollsize_px(&self->component);
-	psy_ui_setrectangle(&r, 0, 0, size.width, size.height);
+	r = psy_ui_realrectangle_make(
+		psy_ui_realpoint_make(0, 0),
+		psy_ui_realsize_make(size.width, size.height));
 	psy_ui_drawsolidrectangle(g, r, patternviewstate_skin(self->state->pv)->background);
 	psy_ui_setbackgroundcolour(g, patternviewstate_skin(self->state->pv)->background);
 	psy_ui_settextcolour(g, patternviewstate_skin(self->state->pv)->font);
