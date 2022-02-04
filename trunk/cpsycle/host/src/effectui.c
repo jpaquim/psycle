@@ -328,7 +328,7 @@ void effectui_onmousedown(EffectUi* self, psy_ui_MouseEvent* ev)
 			self->intern.dragmode = MACHINEVIEW_DRAG_PAN;
 			psy_ui_mouseevent_stop_propagation(ev);
 		}
-		if (!ev->event.bubbles) {
+		if (!psy_ui_event_bubbles(&ev->event)) {
 			psy_ui_component_invalidate(&self->component);
 		}
 	}

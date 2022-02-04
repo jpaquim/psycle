@@ -226,7 +226,7 @@ void propertiesrenderline_onmousedown(PropertiesRenderLine* self,
 	}
 	if (psy_ui_mouseevent_button(ev) == 1) {
 		self->state->dialogbutton = (self->dialogbutton &&
-			ev->event.target == &self->dialogbutton->component);
+			psy_ui_event_target(&ev->event) == &self->dialogbutton->component);
 		self->state->property = NULL;
 		self->state->selected = self->property;
 		if (self->state->selectedline) {
@@ -850,9 +850,9 @@ void propertiesrenderer_oneditkeydown(PropertiesRenderer* self,
 	psy_ui_Component* sender, psy_ui_KeyboardEvent* ev)
 {	
 	if (self->state.selected && psy_property_ishex(self->state.selected)) {
-		if ((ev->keycode >= psy_ui_KEY_DIGIT0 && ev->keycode <= psy_ui_KEY_DIGIT9) ||
-			(ev->keycode >= psy_ui_KEY_A && ev->keycode <= psy_ui_KEY_F) ||
-			(ev->keycode < psy_ui_KEY_HELP)) {
+		if ((psy_ui_keyboardevent_keycode(ev) >= psy_ui_KEY_DIGIT0 && psy_ui_keyboardevent_keycode(ev) <= psy_ui_KEY_DIGIT9) ||
+			(psy_ui_keyboardevent_keycode(ev) >= psy_ui_KEY_A && psy_ui_keyboardevent_keycode(ev) <= psy_ui_KEY_F) ||
+			(psy_ui_keyboardevent_keycode(ev) < psy_ui_KEY_HELP)) {
 			return;
 		}
 		psy_ui_keyboardevent_prevent_default(ev);		

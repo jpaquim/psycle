@@ -415,7 +415,7 @@ void machinesbox_setmachines(MachinesBox* self, psy_audio_Machines* machines)
 void machinesbox_onkeydown(MachinesBox* self, psy_ui_Component* sender, psy_ui_KeyboardEvent* ev)
 {
 	psy_ui_keyboardevent_stop_propagation(ev);
-	if (ev->keycode == psy_ui_KEY_ESCAPE) {
+	if (psy_ui_keyboardevent_keycode(ev) == psy_ui_KEY_ESCAPE) {
 		workspace_togglegear(self->workspace);		
 	}
 }

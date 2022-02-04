@@ -15,20 +15,21 @@ extern "C" {
 
 #define psy_ui_CURRENT_TIME 0
 
-typedef enum psy_ui_EventType {
-	psy_ui_UNKNOWNEVENT  = 1,
-	psy_ui_KEYDOWN       = 2,
-	psy_ui_KEYUP         = 3,
-	psy_ui_MOUSEDOWN     = 4,
-	psy_ui_MOUSEUP       = 5,
-	psy_ui_MOUSEMOVE     = 6,
-	psy_ui_DBLCLICK		 = 7,
-	psy_ui_MOUSEENTER	 = 8,
-	psy_ui_MOUSELEAVE    = 9,	
-	psy_ui_DRAG          = 10,
-	psy_ui_FOCUS         = 11,
-	psy_ui_FOCUSOUT      = 12,
-	psy_ui_RESIZE        = 13
+	typedef enum psy_ui_EventType {
+		psy_ui_UNKNOWNEVENT = 1,
+		psy_ui_KEYDOWN = 2,
+		psy_ui_KEYUP = 3,
+		psy_ui_MOUSEDOWN = 4,
+		psy_ui_MOUSEUP = 5,
+		psy_ui_MOUSEMOVE = 6,
+		psy_ui_DBLCLICK = 7,
+		psy_ui_MOUSEENTER = 8,
+		psy_ui_MOUSELEAVE = 9,
+		psy_ui_DRAG = 10,
+		psy_ui_FOCUS = 11,
+		psy_ui_FOCUSOUT = 12,
+		psy_ui_RESIZE = 13,
+		psy_ui_WHEEL = 14
 } psy_ui_EventType;
 
 /* Forward Handler for Event target */
@@ -39,47 +40,58 @@ struct psy_ui_Component;
 ** An event gives additional data to an event method triggered by the ui imp
 */
 typedef struct psy_ui_Event {
-	psy_ui_EventType type;
-	bool bubbles;
-	bool default_prevented;
-	struct psy_ui_Component* target;
-	struct psy_ui_Component* currenttarget;
-	uintptr_t timestamp;
+	psy_ui_EventType type_;
+	bool bubbles_;
+	bool default_prevented_;
+	struct psy_ui_Component* target_;
+	struct psy_ui_Component* currenttarget_;
+	uintptr_t timestamp_;
 } psy_ui_Event;
 
 void psy_ui_event_init(psy_ui_Event*, psy_ui_EventType);
 void psy_ui_event_init_stop_propagation(psy_ui_Event*, psy_ui_EventType);
 
+INLINE psy_ui_EventType psy_ui_event_type(const psy_ui_Event* self)
+{
+	return self->type_;
+}
+
+INLINE void psy_ui_event_settype(psy_ui_Event* self,
+	psy_ui_EventType type)
+{
+	self->type_ = type;
+}
+
 INLINE bool psy_ui_event_default_prevented(const psy_ui_Event* self)
 {
-	return self->default_prevented;
+	return self->default_prevented_;
 }
 
 INLINE void psy_ui_event_prevent_default(psy_ui_Event* self)
 {
-	self->default_prevented = TRUE;
+	self->default_prevented_ = TRUE;
 }
 
 INLINE bool psy_ui_event_bubbles(const psy_ui_Event* self)
 {
-	return self->bubbles;
+	return self->bubbles_;
 }
 
 INLINE void psy_ui_event_stop_propagation(psy_ui_Event* self)
 {
-	self->bubbles = FALSE;
+	self->bubbles_ = FALSE;
 }
 
 INLINE void psy_ui_event_settarget(psy_ui_Event* self,
 	struct psy_ui_Component* component)
 {
-	self->target = component;
+	self->target_ = component;
 }
 
 INLINE void psy_ui_event_setcurrenttarget(psy_ui_Event* self,
 	struct psy_ui_Component* component)
 {
-	self->currenttarget = component;
+	self->currenttarget_ = component;
 }
 
 /*
@@ -88,7 +100,7 @@ INLINE void psy_ui_event_setcurrenttarget(psy_ui_Event* self,
 */
 INLINE struct psy_ui_Component* psy_ui_event_target(psy_ui_Event* self)
 {
-	return self->target;
+	return self->target_;
 }
 
 /*
@@ -97,23 +109,36 @@ INLINE struct psy_ui_Component* psy_ui_event_target(psy_ui_Event* self)
 */
 INLINE struct psy_ui_Component* psy_ui_event_currenttarget(psy_ui_Event* self)
 {
-	return self->currenttarget;
+	return self->currenttarget_;
+}
+
+INLINE const struct psy_ui_Component* psy_ui_event_currenttarget_const(
+	const psy_ui_Event* self)
+{
+	return self->currenttarget_;
+}
+
+INLINE uintptr_t psy_ui_event_timestamp(const psy_ui_Event* self)
+{
+	return self->timestamp_;
 }
 
 /* psy_ui_KeyboardEvent */
 typedef struct psy_ui_KeyboardEvent {
+	/* inherits */
 	psy_ui_Event event;
-	uint32_t keycode;
-	intptr_t keydata;
-	bool shift_key;
-	bool ctrl_key;
-	bool alt_key;
-	bool repeat;	
+	/* internal */
+	uint32_t keycode_;
+	intptr_t keydata_;
+	bool shift_key_;
+	bool ctrl_key_;
+	bool alt_key_;
+	bool repeat_;
 } psy_ui_KeyboardEvent;
 
 void psy_ui_keyboardevent_init(psy_ui_KeyboardEvent*);
-void psy_ui_keyboardevent_init_all(psy_ui_KeyboardEvent*, uint32_t keycode, intptr_t keydata,
-	bool shift, bool ctrl, bool alt, bool repeat);
+void psy_ui_keyboardevent_init_all(psy_ui_KeyboardEvent*, uint32_t keycode,
+	intptr_t keydata, bool shift, bool ctrl, bool alt, bool repeat);
 
 INLINE void psy_ui_keyboardevent_prevent_default(psy_ui_KeyboardEvent* self)
 {
@@ -125,9 +150,49 @@ INLINE void psy_ui_keyboardevent_stop_propagation(psy_ui_KeyboardEvent* self)
 	psy_ui_event_stop_propagation(&self->event);
 }
 
-INLINE struct psy_ui_Component* psy_ui_keyboardevent_target(psy_ui_KeyboardEvent* self)
+INLINE struct psy_ui_Component* psy_ui_keyboardevent_target(
+	psy_ui_KeyboardEvent* self)
 {
 	return psy_ui_event_target(&self->event);
+}
+
+INLINE void psy_ui_keyboardevent_settype(psy_ui_KeyboardEvent* self,
+	psy_ui_EventType type)
+{
+	psy_ui_event_settype(&self->event, type);	
+}
+
+INLINE uint32_t psy_ui_keyboardevent_keycode(const psy_ui_KeyboardEvent* self)
+{
+	return self->keycode_;
+}
+
+INLINE intptr_t psy_ui_keyboardevent_keydata(const psy_ui_KeyboardEvent* self)
+{
+	return self->keydata_;
+}
+
+INLINE bool psy_ui_keyboardevent_repeat(const psy_ui_KeyboardEvent* self)
+{
+	return self->repeat_;
+}
+
+/* returns TRUE if the Ctrl key was pressed down when the event occurred. */
+INLINE bool psy_ui_keyboardevent_ctrlkey(const psy_ui_KeyboardEvent* self)
+{
+	return self->ctrl_key_;
+}
+
+/* returns TRUE if the Shift key was pressed down when the event occurred */
+INLINE bool psy_ui_keyboardevent_shiftkey(const psy_ui_KeyboardEvent* self)
+{
+	return self->shift_key_;
+}
+
+/* returns TRUE if the Shift key was pressed down when the event occurred */
+INLINE bool psy_ui_keyboardevent_altkey(const psy_ui_KeyboardEvent* self)
+{
+	return self->alt_key_;
 }
 
 INLINE psy_ui_Event* psy_ui_keyboardevent_base(psy_ui_KeyboardEvent* self)
@@ -135,11 +200,6 @@ INLINE psy_ui_Event* psy_ui_keyboardevent_base(psy_ui_KeyboardEvent* self)
 	return &self->event;
 }
 
-INLINE void psy_ui_keyboardevent_settype(psy_ui_KeyboardEvent* self,
-	psy_ui_EventType type)
-{
-	self->event.type = type;
-}
 
 /* psy_ui_MouseEvent */
 typedef struct psy_ui_MouseEvent {
@@ -168,9 +228,21 @@ INLINE void psy_ui_mouseevent_prevent_default(psy_ui_MouseEvent* self)
 	psy_ui_event_prevent_default(&self->event);
 }
 
-INLINE struct psy_ui_Component* psy_ui_mouseevent_target(psy_ui_MouseEvent* self)
+INLINE struct psy_ui_Component* psy_ui_mouseevent_target(
+	psy_ui_MouseEvent* self)
 {
 	return psy_ui_event_target(&self->event);
+}
+
+INLINE bool psy_ui_mouseevent_type(const psy_ui_MouseEvent* self)	
+{
+	return psy_ui_event_type(&self->event);
+}
+
+INLINE void psy_ui_mouseevent_settype(psy_ui_MouseEvent* self,
+	psy_ui_EventType type)
+{
+	psy_ui_event_settype(&self->event, type);
 }
 
 INLINE psy_ui_Event* psy_ui_mouseevent_base(psy_ui_MouseEvent* self)
@@ -178,11 +250,6 @@ INLINE psy_ui_Event* psy_ui_mouseevent_base(psy_ui_MouseEvent* self)
 	return &self->event;
 }
 
-INLINE void psy_ui_mouseevent_settype(psy_ui_MouseEvent* self,
-	psy_ui_EventType type)
-{
-	self->event.type = type;
-}
 
 /*
 ** X/Y offset coordinate of the mouse pointer relative to the padding edge of
@@ -204,7 +271,7 @@ INLINE uintptr_t psy_ui_mouseevent_button(const psy_ui_MouseEvent* self)
 	return self->button_;
 }
 
-INLINE uintptr_t psy_ui_mouseevent_delta(const psy_ui_MouseEvent* self)
+INLINE intptr_t psy_ui_mouseevent_delta(const psy_ui_MouseEvent* self)
 {
 	return self->delta_;
 }

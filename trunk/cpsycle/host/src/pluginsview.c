@@ -757,11 +757,11 @@ void pluginsview_onkeydown(PluginsView* self, psy_ui_KeyboardEvent* ev)
 {
 	psy_Property* selected;
 
-	if (ev->keycode == psy_ui_KEY_CONTROL) {
+	if (psy_ui_keyboardevent_keycode(ev) == psy_ui_KEY_CONTROL) {
 		psy_ui_keyboardevent_stop_propagation(ev);
 		return;
 	}
-	if (ev->ctrl_key && ev->keycode == psy_ui_KEY_A) {
+	if (psy_ui_keyboardevent_ctrlkey(ev) && psy_ui_keyboardevent_keycode(ev) == psy_ui_KEY_A) {
 		if (self->plugins) {
 			newmachineselection_selectall(&self->selection,
 				psy_property_size(self->currplugins));
@@ -781,7 +781,7 @@ void pluginsview_onkeydown(PluginsView* self, psy_ui_KeyboardEvent* ev)
 		row = 0;
 		plugin = NULL;
 		pluginsview_cursorposition(self, selected, &col, &row);
-		switch (ev->keycode) {
+		switch (psy_ui_keyboardevent_keycode(ev)) {
 			case psy_ui_KEY_RETURN:
 				if (selected) {
 					psy_signal_emit(&self->signal_selected, self, 0);
@@ -873,7 +873,7 @@ void pluginsview_onkeydown(PluginsView* self, psy_ui_KeyboardEvent* ev)
 			psy_ui_component_invalidate(&self->component);
 		}
 	} else
-	if (ev->keycode >= psy_ui_KEY_LEFT && ev->keycode <= psy_ui_KEY_DOWN) {
+	if (psy_ui_keyboardevent_keycode(ev) >= psy_ui_KEY_LEFT && psy_ui_keyboardevent_keycode(ev) <= psy_ui_KEY_DOWN) {
 		if (self->currplugins && !psy_property_empty(self->currplugins)) {
 			newmachineselection_singleselect(&self->selection, 0);			
 			psy_signal_emit(&self->signal_changed, self, 0);

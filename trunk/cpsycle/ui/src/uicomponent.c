@@ -294,7 +294,7 @@ static void onmousedown(psy_ui_Component* self, psy_ui_MouseEvent* ev)
 		psy_ui_DragEvent* dragevent;
 
 		dragevent = &psy_ui_app()->dragevent;
-		dragevent->mouse.event.target = self;
+		psy_ui_event_settarget(&dragevent->mouse.event, self);
 		dragevent->mouse = *ev;
 		psy_ui_app_startdrag(psy_ui_app());
 		self->vtable->ondragstart(self, dragevent);
@@ -310,10 +310,10 @@ static void onmousemove(psy_ui_Component* self, psy_ui_MouseEvent* ev)
 
 	dragevent = &psy_ui_app()->dragevent;
 	if (dragevent->active) {
-		dragevent->mouse.event.default_prevented = FALSE;
+		dragevent->mouse.event.default_prevented_ = FALSE;
 		dragevent->mouse = *ev;
 		self->vtable->ondragover(self, dragevent);
-		if (dragevent->mouse.event.default_prevented) {
+		if (psy_ui_event_default_prevented(&dragevent->mouse.event)) {
 			psy_ui_component_setcursor(self, psy_ui_CURSORSTYLE_GRAB);
 			psy_ui_mouseevent_stop_propagation(ev);
 		}
@@ -334,7 +334,7 @@ static void onmouseup(psy_ui_Component* self, psy_ui_MouseEvent* ev)
 	if (dragevent->active) {
 		dragevent->mouse = *ev;
 		self->vtable->ondrop(self, dragevent);
-		if (ev->event.default_prevented) {
+		if (psy_ui_event_default_prevented(&ev->event)) {
 			psy_ui_mouseevent_stop_propagation(ev);
 		}
 	}
@@ -2338,10 +2338,10 @@ void psy_ui_component_mousewheel(psy_ui_Component* self, psy_ui_MouseEvent* ev,
 
 	self->vtable->onmousewheel(self, ev);
 	psy_signal_emit(&self->signal_mousewheel, self, 1, ev);
-	preventdefault = ev->event.default_prevented;
+	preventdefault = psy_ui_event_default_prevented(&ev->event);
 	if (!preventdefault && psy_ui_component_wheelscroll(self) > 0) {
 		if (psy_ui_app()->deltaperline != 0) {
-			psy_ui_app()->accumwheeldelta += (short)delta; // 120 or -120
+			psy_ui_app()->accumwheeldelta += (short)delta; /* 120 or -120 */
 			while (psy_ui_app()->accumwheeldelta >= psy_ui_app()->deltaperline) {
 				double pos;
 				psy_ui_IntPoint scrollrange;

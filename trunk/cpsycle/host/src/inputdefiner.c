@@ -268,20 +268,21 @@ void inputdefiner_onkeydown(InputDefiner* self, psy_ui_KeyboardEvent* ev)
 
 	assert(self);
 
-	shift = ev->shift_key;
-	ctrl = ev->ctrl_key;
-	alt = ev->alt_key;
+	shift = psy_ui_keyboardevent_shiftkey(ev);
+	ctrl = psy_ui_keyboardevent_ctrlkey(ev);
+	alt = psy_ui_keyboardevent_altkey(ev);
 	up = 0;
-	if (ev->keycode == psy_ui_KEY_SHIFT || ev->keycode == psy_ui_KEY_CONTROL || 
-			ev->keycode == psy_ui_KEY_MENU) {
+	if (psy_ui_keyboardevent_keycode(ev) == psy_ui_KEY_SHIFT ||
+			psy_ui_keyboardevent_keycode(ev) == psy_ui_KEY_CONTROL ||
+			psy_ui_keyboardevent_keycode(ev) == psy_ui_KEY_MENU) {
 		if (self->regularkey == 0) {
 			self->input = psy_audio_encodeinput(0, shift, ctrl, alt, up);
 		} else {
 			self->input = psy_audio_encodeinput(self->regularkey, shift, ctrl, alt, up);
 		}
 	}
-	if (validkeycode(ev->keycode)) {
-		self->regularkey = ev->keycode;
+	if (validkeycode(psy_ui_keyboardevent_keycode(ev))) {
+		self->regularkey = psy_ui_keyboardevent_keycode(ev);
 		self->input = psy_audio_encodeinput(self->regularkey, shift, ctrl, alt, up);
 	}
 	psy_ui_component_invalidate(&self->component);
@@ -302,9 +303,9 @@ void inputdefiner_onkeyup(InputDefiner* self, psy_ui_KeyboardEvent* ev)
 
 	assert(self);
 
-	alt = ev->alt_key;
-    shift = ev->shift_key;
-    ctrl = ev->ctrl_key;
+	alt = psy_ui_keyboardevent_altkey(ev);
+    shift = psy_ui_keyboardevent_shiftkey(ev);
+    ctrl = psy_ui_keyboardevent_ctrlkey(ev);
 	up = 0;
 	psy_audio_decodeinput(self->input, &inputkeycode, &inputshift, &inputctrl, &inputalt, &inputup);
 	if (self->regularkey) {
@@ -314,7 +315,7 @@ void inputdefiner_onkeyup(InputDefiner* self, psy_ui_KeyboardEvent* ev)
 			self->input = psy_audio_encodeinput(inputkeycode, shift, ctrl, alt, inputup);
 		}
 	}
-	if (validkeycode(ev->keycode)) {
+	if (validkeycode(psy_ui_keyboardevent_keycode(ev))) {
 		self->regularkey = 0;
 	}
 	if (!validkeycode(inputkeycode)) {

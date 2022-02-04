@@ -176,7 +176,7 @@ void psy_ui_textareapane_onkeydown(psy_ui_TextAreaPane* self, psy_ui_KeyboardEve
 {
 	assert(self);
 	
-	switch (ev->keycode) {
+	switch (psy_ui_keyboardevent_keycode(ev)) {
 	case psy_ui_KEY_ESCAPE:
 		if (self->isinputfield) {
 			psy_ui_keyboardevent_prevent_default(ev);
@@ -228,12 +228,13 @@ void psy_ui_textareapane_onkeydown(psy_ui_TextAreaPane* self, psy_ui_KeyboardEve
 	case psy_ui_KEY_MENU:
 		break;
 	default:
-		if (ev->shift_key) {
-			insertchar(self, ev->keycode);
-		} else if (ev->keycode >= psy_ui_KEY_DIGIT0 && ev->keycode <= psy_ui_KEY_DIGIT9) {
-			insertchar(self, ev->keycode);
+		if (psy_ui_keyboardevent_shiftkey(ev)) {
+			insertchar(self, psy_ui_keyboardevent_keycode(ev));
+		} else if (psy_ui_keyboardevent_keycode(ev) >= psy_ui_KEY_DIGIT0
+			&& psy_ui_keyboardevent_keycode(ev) <= psy_ui_KEY_DIGIT9) {
+			insertchar(self, psy_ui_keyboardevent_keycode(ev));
 		} else {
-			insertchar(self, ev->keycode - 'A' + 'a');
+			insertchar(self, psy_ui_keyboardevent_keycode(ev) - 'A' + 'a');
 		}						
 		break;
 	}

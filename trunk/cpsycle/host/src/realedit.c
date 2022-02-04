@@ -122,12 +122,12 @@ void realedit_onmoreclicked(RealEdit* self, psy_ui_Component* sender)
 void realedit_oneditkeydown(RealEdit* self, psy_ui_Component* sender,
 	psy_ui_KeyboardEvent* ev)
 {
-	if (isalpha(ev->keycode) || ev->keycode == psy_ui_KEY_ESCAPE) {
+	if (isalpha(psy_ui_keyboardevent_keycode(ev)) || psy_ui_keyboardevent_keycode(ev) == psy_ui_KEY_ESCAPE) {
 		realedit_setvalue(self, self->restore);
 		psy_ui_keyboardevent_prevent_default(ev);
 		return;
 	}
-	if (ev->keycode == psy_ui_KEY_RETURN) {
+	if (psy_ui_keyboardevent_keycode(ev) == psy_ui_KEY_RETURN) {
 		realedit_real_t value;
 
 		psy_ui_component_setfocus(&self->component);

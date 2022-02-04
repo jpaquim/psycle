@@ -139,12 +139,13 @@ void intedit_onmoreclicked(IntEdit* self, psy_ui_Component* sender)
 void intedit_oneditkeydown(IntEdit* self, psy_ui_Component* sender,
 	psy_ui_KeyboardEvent* ev)
 {
-	if (isalpha(ev->keycode) || ev->keycode == psy_ui_KEY_ESCAPE) {
+	if (isalpha(psy_ui_keyboardevent_keycode(ev)) ||
+			psy_ui_keyboardevent_keycode(ev) == psy_ui_KEY_ESCAPE) {
 		intedit_setvalue(self, self->restore);
 		psy_ui_keyboardevent_prevent_default(ev);
 		return;
 	}
-	if (ev->keycode == psy_ui_KEY_RETURN) {
+	if (psy_ui_keyboardevent_keycode(ev) == psy_ui_KEY_RETURN) {
 		int value;
 
 		psy_ui_component_setfocus(&self->component);

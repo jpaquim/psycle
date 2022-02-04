@@ -268,11 +268,11 @@ void songpropertiesview_oneditreject(SongPropertiesView* self,
 void songpropertiesview_onfilterkeys(SongPropertiesView* self,
 	psy_ui_Component* sender, psy_ui_KeyboardEvent* ev)
 {
-	if (ev->keycode == psy_ui_KEY_RETURN && sender != &self->edit_comments.component) {
+	if (psy_ui_keyboardevent_keycode(ev) == psy_ui_KEY_RETURN && sender != &self->edit_comments.component) {
 		psy_ui_component_setfocus(&self->component);		
 		psy_ui_keyboardevent_prevent_default(ev);
 	} else
-	if (ev->keycode == psy_ui_KEY_ESCAPE) {
+	if (psy_ui_keyboardevent_keycode(ev) == psy_ui_KEY_ESCAPE) {
 		psy_ui_component_setfocus(&self->component);
 		psy_ui_keyboardevent_prevent_default(ev);
 	}	

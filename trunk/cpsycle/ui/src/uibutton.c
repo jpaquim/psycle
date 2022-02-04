@@ -438,7 +438,7 @@ void psy_ui_button_preventtranslation(psy_ui_Button* self)
 
 void button_onkeydown(psy_ui_Button* self, psy_ui_KeyboardEvent* ev)
 {
-	if (ev->keycode == psy_ui_KEY_RETURN &&
+	if (psy_ui_keyboardevent_keycode(ev) == psy_ui_KEY_RETURN &&
 			!psy_ui_component_inputprevented(&self->component)) {
 		psy_signal_emit(&self->signal_clicked, self, 0);
 		psy_ui_keyboardevent_stop_propagation(ev);

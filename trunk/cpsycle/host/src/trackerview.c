@@ -1794,6 +1794,7 @@ void trackerview_init(TrackerView* self, psy_ui_Component* parent,
 {
 	trackergrid_init(&self->grid, parent, state, workspace);
 	self->workspace = workspace;
+	self->grid.component.id = 200;
 	psy_ui_component_setwheelscroll(&self->grid.component, 4);
 	psy_ui_component_setoverflow(trackergrid_base(&self->grid),
 		psy_ui_OVERFLOW_SCROLL);
