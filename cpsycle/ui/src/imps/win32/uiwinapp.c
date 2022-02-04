@@ -247,10 +247,10 @@ LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 					wParam, lParam);
 				psy_ui_eventdispatch_send(&winapp->app->eventdispatch,
 					imp->component, psy_ui_keyboardevent_base(&keyevent));
-				if (keyevent.event.default_prevented) {
+				if (psy_ui_event_default_prevented(&keyevent.event)) {
 					imp->preventwmchar = 1;
 				}
-				preventdefault = keyevent.event.default_prevented;					
+				preventdefault = psy_ui_event_default_prevented(&keyevent.event);
 			}
 			break;			
 		case WM_KILLFOCUS:
@@ -347,7 +347,7 @@ LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 				component->vtable->onmousewheel(component, &ev);
 				psy_signal_emit(&component->signal_mousewheel, component, 1,
 					&ev);
-				preventdefault = ev.event.default_prevented;
+				preventdefault = psy_ui_event_default_prevented(&ev.event);
 			}
 			break; }			
 		default:
@@ -622,8 +622,9 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					psy_ui_realpoint_make(pt_client.x, pt_client.y),
 					(short)LOWORD(wParam), (short)HIWORD(wParam),
 					GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);				
-				psy_ui_component_mousewheel(component, &ev,
-					(short)HIWORD(wParam) /* 120 or -120 */);
+				psy_ui_mouseevent_settype(&ev, psy_ui_WHEEL);
+				psy_ui_eventdispatch_send(&winapp->app->eventdispatch,
+					component, psy_ui_mouseevent_base(&ev));				
 			}
 			break; }
 		case WM_MOUSEHOVER:
@@ -975,20 +976,22 @@ void psy_ui_winapp_sendevent(psy_ui_WinApp* self, psy_ui_Component* component,
 	if (!imp) {
 		return;
 	}
-	switch (ev->type) {
+	switch (psy_ui_event_type(ev)) {
 	case psy_ui_KEYDOWN: {
 		psy_ui_KeyboardEvent* keyevent;
 
 		keyevent = (psy_ui_KeyboardEvent*)ev;
-		SendMessage(imp->hwnd, (UINT)WM_KEYDOWN, (WPARAM)keyevent->keycode,
-			(LPARAM)keyevent->keydata);	
+		SendMessage(imp->hwnd, (UINT)WM_KEYDOWN,
+			(WPARAM)psy_ui_keyboardevent_keycode(keyevent),
+			(LPARAM)psy_ui_keyboardevent_keydata(keyevent));
 		break; }
 	case psy_ui_KEYUP: {
 		psy_ui_KeyboardEvent* keyevent;
 
 		keyevent = (psy_ui_KeyboardEvent*)ev;
-		SendMessage(imp->hwnd, (UINT)WM_KEYUP, (WPARAM)keyevent->keycode,
-			(LPARAM)keyevent->keydata);
+		SendMessage(imp->hwnd, (UINT)WM_KEYUP,
+			(WPARAM)psy_ui_keyboardevent_keycode(keyevent),
+			(LPARAM)psy_ui_keyboardevent_keydata(keyevent));
 		break; }
 	case psy_ui_MOUSEDOWN: {
 		psy_ui_MouseEvent* mouseevent;

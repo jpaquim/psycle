@@ -520,7 +520,7 @@ void machinewireview_onmousedown(MachineWireView* self, psy_ui_MouseEvent* ev)
 			self->selectedslot = self->dragslot;			
 		}
 		if (self->dragmachineui) {			
-			if (ev->event.bubbles) {
+			if (psy_ui_event_bubbles(&ev->event)) {
 				psy_ui_RealRectangle position;
 
 				self->dragmode = MACHINEVIEW_DRAG_MACHINE;
@@ -596,7 +596,7 @@ void machinewireview_onmousemove(MachineWireView* self, psy_ui_MouseEvent* ev)
 		}
 	}	
 	if (self->dragslot != psy_INDEX_INVALID) {		
-		if (!ev->event.bubbles) {
+		if (!psy_ui_event_bubbles(&ev->event)) {
 			return;
 		}		
 		if (machinewireview_dragging_machine(self)) {
@@ -786,10 +786,10 @@ void machinewireview_onkeydown(MachineWireView* self, psy_ui_KeyboardEvent* ev)
 	psy_audio_Wire selectedwire;
 
 	selectedwire = psy_audio_machines_selectedwire(self->machines);
-	if (ev->ctrl_key) {
-		if (ev->keycode == psy_ui_KEY_B) {
+	if (psy_ui_keyboardevent_ctrlkey(ev)) {
+		if (psy_ui_keyboardevent_keycode(ev) == psy_ui_KEY_B) {
 			self->dragwire.src = self->selectedslot;
-		} else if (ev->keycode == psy_ui_KEY_E) {
+		} else if (psy_ui_keyboardevent_keycode(ev) == psy_ui_KEY_E) {
 			if (self->dragwire.src != psy_INDEX_INVALID &&
 					self->selectedslot != psy_INDEX_INVALID) {
 				self->dragwire.dst = self->selectedslot;
@@ -802,8 +802,8 @@ void machinewireview_onkeydown(MachineWireView* self, psy_ui_KeyboardEvent* ev)
 				}
 			}
 		}
-	} else if (ev->keycode == psy_ui_KEY_UP) {
-		if (ev->shift_key) {
+	} else if (psy_ui_keyboardevent_keycode(ev) == psy_ui_KEY_UP) {
+		if (psy_ui_keyboardevent_shiftkey(ev)) {
 			machinewireview_movemachine(self, self->selectedslot, 0, -10);
 		} else {
 			uintptr_t index;
@@ -813,8 +813,8 @@ void machinewireview_onkeydown(MachineWireView* self, psy_ui_KeyboardEvent* ev)
 				psy_audio_machines_select(self->machines, index);
 			}
 		}
-	} else if (ev->keycode == psy_ui_KEY_DOWN) {
-		if (ev->shift_key) {
+	} else if (psy_ui_keyboardevent_keycode(ev) == psy_ui_KEY_DOWN) {
+		if (psy_ui_keyboardevent_shiftkey(ev)) {
 			machinewireview_movemachine(self, self->selectedslot, 0, 10);
 		} else {
 			uintptr_t index;
@@ -824,8 +824,8 @@ void machinewireview_onkeydown(MachineWireView* self, psy_ui_KeyboardEvent* ev)
 				psy_audio_machines_select(self->machines, index);
 			}
 		}
-	} else if (ev->keycode == psy_ui_KEY_LEFT) {
-		if (ev->shift_key) {
+	} else if (psy_ui_keyboardevent_keycode(ev) == psy_ui_KEY_LEFT) {
+		if (psy_ui_keyboardevent_shiftkey(ev)) {
 			machinewireview_movemachine(self, self->selectedslot, -10, 0);
 		} else {
 			uintptr_t index;
@@ -835,8 +835,8 @@ void machinewireview_onkeydown(MachineWireView* self, psy_ui_KeyboardEvent* ev)
 				psy_audio_machines_select(self->machines, index);
 			}
 		}
-	} else if (ev->keycode == psy_ui_KEY_RIGHT) {
-		if (ev->shift_key) {
+	} else if (psy_ui_keyboardevent_keycode(ev) == psy_ui_KEY_RIGHT) {
+		if (psy_ui_keyboardevent_shiftkey(ev)) {
 			machinewireview_movemachine(self, self->selectedslot, 10, 0);
 		} else {
 			uintptr_t index;
@@ -846,18 +846,18 @@ void machinewireview_onkeydown(MachineWireView* self, psy_ui_KeyboardEvent* ev)
 				psy_audio_machines_select(self->machines, index);
 			}
 		}
-	} else if (ev->keycode == psy_ui_KEY_DELETE &&
+	} else if (psy_ui_keyboardevent_keycode(ev) == psy_ui_KEY_DELETE &&
 			psy_audio_wire_valid(&selectedwire)) {
 		psy_audio_exclusivelock_enter();
 		psy_audio_machines_disconnect(self->machines, selectedwire);
 		psy_audio_exclusivelock_leave();
-	} else if (ev->keycode == psy_ui_KEY_DELETE && self->selectedslot != - 1 &&
+	} else if (psy_ui_keyboardevent_keycode(ev) == psy_ui_KEY_DELETE && self->selectedslot != - 1 &&
 			self->selectedslot != psy_audio_MASTER_INDEX) {
 		psy_audio_exclusivelock_enter();
 		psy_audio_machines_remove(self->machines, self->selectedslot, TRUE);		
 		self->selectedslot = psy_INDEX_INVALID;
 		psy_audio_exclusivelock_leave();
-	} else if (ev->repeat) {
+	} else if (psy_ui_keyboardevent_repeat(ev)) {
 		psy_ui_keyboardevent_stop_propagation(ev);
 	}
 }

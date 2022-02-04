@@ -1300,7 +1300,7 @@ void mainframe_onfileload(MainFrame* self, FileView* sender)
 void mainframe_onkeydown(MainFrame* self, psy_ui_KeyboardEvent* ev)
 {	
 	/* TODO add immediate mode */
-	if (ev->keycode == psy_ui_KEY_ESCAPE) {
+	if (psy_ui_keyboardevent_keycode(ev) == psy_ui_KEY_ESCAPE) {
 		if (psy_ui_component_hasfocus(&self->sequenceview.listview.component)) {
 			psy_ui_Component* currview;
 
@@ -1321,9 +1321,9 @@ void mainframe_checkplaystartwithrctrl(MainFrame* self, psy_ui_KeyboardEvent* ev
 {
 	if (keyboardmiscconfig_playstartwithrctrl(
 			&self->workspace.config.misc)) {
-		if (ev->keycode == psy_ui_KEY_CONTROL) {
+		if (psy_ui_keyboardevent_keycode(ev) == psy_ui_KEY_CONTROL) {
 			/* todo: this win32 detection only */
-			int extended = (ev->keydata & 0x01000000) != 0;
+			int extended = (psy_ui_keyboardevent_keydata(ev) & 0x01000000) != 0;
 			if (extended) {
 				/* right ctrl */
 				psy_audio_player_start_currseqpos(workspace_player(
@@ -1331,7 +1331,7 @@ void mainframe_checkplaystartwithrctrl(MainFrame* self, psy_ui_KeyboardEvent* ev
 				return;
 			}
 		} else if (psy_audio_player_playing(&self->workspace.player) &&
-			ev->keycode == psy_ui_KEY_SPACE) {
+				psy_ui_keyboardevent_keycode(ev) == psy_ui_KEY_SPACE) {
 			psy_audio_player_stop(&self->workspace.player);
 			return;
 		}
@@ -1340,7 +1340,7 @@ void mainframe_checkplaystartwithrctrl(MainFrame* self, psy_ui_KeyboardEvent* ev
 
 void mainframe_onkeyup(MainFrame* self, psy_ui_KeyboardEvent* ev)
 {
-	if (ev->keycode == psy_ui_KEY_ESCAPE) {
+	if (psy_ui_keyboardevent_keycode(ev) == psy_ui_KEY_ESCAPE) {
 		return;
 	}	
 	mainframe_delegatekeyboard(self, psy_EVENTDRIVER_RELEASE, ev);
@@ -1352,9 +1352,12 @@ void mainframe_delegatekeyboard(MainFrame* self, intptr_t message,
 {
 	psy_eventdriver_write(workspace_kbddriver(&self->workspace),
 		psy_eventdriverinput_make(message,
-			psy_audio_encodeinput(ev->keycode, ev->shift_key, ev->ctrl_key, ev->alt_key,
+			psy_audio_encodeinput(psy_ui_keyboardevent_keycode(ev),
+				psy_ui_keyboardevent_shiftkey(ev),
+				psy_ui_keyboardevent_ctrlkey(ev),
+				psy_ui_keyboardevent_altkey(ev),
 				message == psy_EVENTDRIVER_RELEASE),
-				ev->repeat, workspace_currview(&self->workspace).id));
+			psy_ui_keyboardevent_repeat(ev), workspace_currview(&self->workspace).id));
 }
 
 void mainframe_ongearselect(MainFrame* self, Workspace* sender,

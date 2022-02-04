@@ -15,12 +15,12 @@
 /* psy_ui_Event */
 void psy_ui_event_init(psy_ui_Event* self, psy_ui_EventType type)
 {
-	self->type = type;
-	self->bubbles = TRUE;
-	self->default_prevented = FALSE;
-	self->target = NULL;
-	self->currenttarget = NULL;
-	self->timestamp = 0;
+	self->type_ = type;
+	self->bubbles_ = TRUE;
+	self->default_prevented_ = FALSE;
+	self->target_ = NULL;
+	self->currenttarget_ = NULL;
+	self->timestamp_ = 0;
 }
 
 void psy_ui_event_init_stop_propagation(psy_ui_Event* self, psy_ui_EventType type)
@@ -39,12 +39,12 @@ void psy_ui_keyboardevent_init_all(psy_ui_KeyboardEvent* self, uint32_t keycode,
 	intptr_t keydata, bool shift, bool ctrl, bool alt, bool repeat)
 {
 	psy_ui_event_init(&self->event, psy_ui_KEYDOWN);
-	self->keycode = keycode;
-	self->keydata = keydata;
-	self->shift_key = shift;
-	self->ctrl_key = ctrl;
-	self->alt_key = alt;
-	self->repeat = repeat;	
+	self->keycode_ = keycode;
+	self->keydata_ = keydata;
+	self->shift_key_ = shift;
+	self->ctrl_key_ = ctrl;
+	self->alt_key_ = alt;
+	self->repeat_ = repeat;
 }
 
 /* psy_ui_MouseEvent */
@@ -70,10 +70,11 @@ psy_ui_RealPoint psy_ui_mouseevent_pt(const psy_ui_MouseEvent* self)
 	psy_ui_RealPoint rv;
 
 	rv = psy_ui_mouseevent_offset(self); /* relative padding edge */
-	if (self->event.target) {
+	if (psy_ui_event_currenttarget_const(&self->event)) {
 		psy_ui_RealMargin padding;
 
-		padding = psy_ui_component_spacing_px(self->event.currenttarget);
+		padding = psy_ui_component_spacing_px(psy_ui_event_currenttarget_const(
+			&self->event));
 		if (!psy_ui_realmargin_iszero(&padding)) {
 			/* subtract padding edge */
 			rv.x -= padding.left;
@@ -87,8 +88,8 @@ psy_ui_RealPoint psy_ui_mouseevent_pt(const psy_ui_MouseEvent* self)
 void psy_ui_dragevent_init(psy_ui_DragEvent* self)
 {
 	psy_ui_mouseevent_init(&self->mouse);
-	self->mouse.event.type = psy_ui_DRAG;
-	self->mouse.event.default_prevented = TRUE;	
+	psy_ui_mouseevent_settype(&self->mouse, psy_ui_DRAG);	
+	self->mouse.event.default_prevented_ = TRUE;
 	self->active = FALSE;	
 	self->dataTransfer = NULL;
 }

@@ -262,7 +262,7 @@ void machineview_onmouseup(MachineView* self, psy_ui_MouseEvent* ev)
 
 void machineview_onkeydown(MachineView* self, psy_ui_KeyboardEvent* ev)
 {
-	if (ev->keycode == psy_ui_KEY_ESCAPE) {
+	if (psy_ui_keyboardevent_keycode(ev) == psy_ui_KEY_ESCAPE) {
 		if (psy_ui_component_section(&self->component) ==
 				SECTION_ID_MACHINEVIEW_NEWMACHINE) {
 			psy_ui_tabbar_select(&self->tabbar,

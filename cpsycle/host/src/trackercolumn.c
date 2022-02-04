@@ -75,6 +75,7 @@ void trackercolumn_init(TrackerColumn* self, psy_ui_Component* parent,
 {
 	psy_ui_component_init(&self->component, parent, NULL);
 	trackercolumn_vtable_init(self);
+	self->component.id = 400;
 	psy_ui_component_setbackgroundmode(&self->component, psy_ui_NOBACKGROUND);	
 	psy_ui_component_setalign(trackercolumn_base(self), psy_ui_ALIGN_LEFT);
 	self->state = state;

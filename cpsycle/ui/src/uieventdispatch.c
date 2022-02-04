@@ -20,6 +20,8 @@ static void psy_ui_eventdispatch_handlemouseenter(psy_ui_EventDispatch*,
 	psy_ui_Component*);
 static void psy_ui_eventdispatch_handlemouseleave(psy_ui_EventDispatch*,
 	psy_ui_Component*);
+static void psy_ui_eventdispatch_handle_wheel(psy_ui_EventDispatch*,
+	psy_ui_Component*, psy_ui_MouseEvent*);
 static void psy_ui_eventdispatch_bubble(psy_ui_EventDispatch*,
 	psy_ui_Component* component, psy_ui_Event*);
 static psy_ui_Component* psy_ui_eventdispatch_target(psy_ui_EventDispatch*,
@@ -48,7 +50,7 @@ void psy_ui_eventdispatch_send(psy_ui_EventDispatch* self,
 
 	psy_ui_event_settarget(ev, component);
 	psy_ui_event_setcurrenttarget(ev, component);
-	switch (ev->type) {
+	switch (psy_ui_event_type(ev)) {
 	case psy_ui_RESIZE:
 		if (psy_ui_component_hasalign(component)) {
 			psy_ui_component_align(component);
@@ -71,6 +73,10 @@ void psy_ui_eventdispatch_send(psy_ui_EventDispatch* self,
 	case psy_ui_MOUSELEAVE:
 		psy_ui_eventdispatch_handlemouseleave(self, component);		
 		break;
+	case psy_ui_WHEEL:
+		psy_ui_eventdispatch_handle_wheel(self, component,
+			(psy_ui_MouseEvent*)ev);		
+		break;
 	default:
 		psy_ui_eventdispatch_bubble(self, component, ev);
 		break;
@@ -87,32 +93,32 @@ void psy_ui_eventdispatch_handlemouseevent(psy_ui_EventDispatch* self,
 	offset = psy_ui_mouseevent_offset(ev);
 	component = psy_ui_eventdispatch_target(self, component, &offset);
 	psy_ui_mouseevent_setoffset(ev, offset);
-	if (ev->event.type == psy_ui_MOUSEMOVE) {
+	if (psy_ui_event_type(&ev->event) == psy_ui_MOUSEMOVE) {
 		psy_ui_eventdispatch_handlemouseenter(self, component);
-	} else if (ev->event.type == psy_ui_MOUSEDOWN) {
-		if (ev->event.timestamp == psy_ui_CURRENT_TIME) {
+	} else if (psy_ui_event_type(&ev->event) == psy_ui_MOUSEDOWN) {
+		if (psy_ui_event_timestamp(psy_ui_mouseevent_base(ev)) == psy_ui_CURRENT_TIME) {
 			eventtime = self->lastbuttontimestamp;
 		} else {
-			eventtime = ev->event.timestamp;
+			eventtime = psy_ui_event_timestamp(psy_ui_mouseevent_base(ev));
 		}
 		if (self->handledoubleclick) {
 			if (self->lastbutton == psy_ui_mouseevent_button(ev) &&
 				(eventtime - self->lastbuttontimestamp) < 500) {
-				ev->event.type = psy_ui_DBLCLICK;
+				psy_ui_mouseevent_settype(ev, psy_ui_DBLCLICK);
 			} else {
 				self->lastbutton = psy_ui_mouseevent_button(ev);
 			}
 		}
 	}	
 	psy_ui_eventdispatch_bubble(self, component, &ev->event);
-	if (ev->event.type == psy_ui_MOUSEDOWN) {
+	if (psy_ui_event_type(&ev->event) == psy_ui_MOUSEDOWN) {
 		self->lastbuttontimestamp = eventtime;
-	} else if (ev->event.type == psy_ui_DBLCLICK) {
+	} else if (psy_ui_event_type(&ev->event) == psy_ui_DBLCLICK) {
 		self->lastbutton = 0;
 		self->lastbuttontimestamp = 0;
 	}
-	if (ev->event.type == psy_ui_DBLCLICK ||
-		ev->event.type == psy_ui_MOUSEUP) {
+	if (psy_ui_event_type(&ev->event) == psy_ui_DBLCLICK ||
+		psy_ui_event_type(&ev->event) == psy_ui_MOUSEUP) {
 		psy_ui_app()->mousetracking = FALSE;
 	}		
 }
@@ -149,6 +155,81 @@ void psy_ui_eventdispatch_handlemouseleave(psy_ui_EventDispatch* self,
 	psy_signal_emit(&component->signal_mouseleave, component, 0);
 }
 
+void psy_ui_eventdispatch_handle_wheel(psy_ui_EventDispatch* self,
+	psy_ui_Component* component, psy_ui_MouseEvent* ev)
+{
+	bool preventdefault;
+	intptr_t delta;
+	psy_ui_RealPoint offset;
+	psy_ui_Component* curr;
+
+	delta = psy_ui_mouseevent_delta(ev);
+	offset = psy_ui_mouseevent_offset(ev);
+	curr = component = psy_ui_eventdispatch_target(self, component, &offset);
+	psy_ui_mouseevent_setoffset(ev, offset);
+	while (curr) {		
+		psy_ui_RealRectangle r;
+
+		psy_ui_event_setcurrenttarget(psy_ui_mouseevent_base(ev),
+			curr);
+		curr->vtable->onmousewheel(curr, ev);
+		psy_signal_emit(&curr->signal_mousewheel, curr, 1, ev);
+		preventdefault = psy_ui_event_default_prevented(&ev->event);
+		if (!preventdefault && psy_ui_component_wheelscroll(curr) > 0) {
+			if (psy_ui_app()->deltaperline != 0) {
+				psy_ui_app()->accumwheeldelta += (short)delta; /* 120 or -120 */
+				while (psy_ui_app()->accumwheeldelta >= psy_ui_app()->deltaperline) {
+					double pos;
+					psy_ui_IntPoint scrollrange;
+					double scrolltoppx;
+					const psy_ui_TextMetric* tm;
+
+					tm = psy_ui_component_textmetric(curr);
+					scrollrange = psy_ui_component_verticalscrollrange(curr);
+					scrolltoppx = psy_ui_component_scrolltop_px(curr);
+					pos = (scrolltoppx / psy_ui_component_scrollstep_height_px(curr)) -
+						psy_ui_component_wheelscroll(curr);
+					if (pos < (double)scrollrange.x) {
+						pos = (double)scrollrange.x;
+					}
+					psy_ui_component_setscrolltop(curr,
+						psy_ui_mul_value_real(
+							psy_ui_component_scrollstep_height(curr), pos));
+					psy_ui_app()->accumwheeldelta -= psy_ui_app()->deltaperline;
+				}
+				while (psy_ui_app()->accumwheeldelta <= -psy_ui_app()->deltaperline)
+				{
+					double pos;
+					psy_ui_IntPoint scrollrange;
+					double scrolltoppx;
+					const psy_ui_TextMetric* tm;
+
+					tm = psy_ui_component_textmetric(curr);
+					scrollrange = psy_ui_component_verticalscrollrange(curr);
+					scrolltoppx = psy_ui_component_scrolltop_px(curr);
+					pos = (scrolltoppx / psy_ui_component_scrollstep_height_px(curr)) +
+						psy_ui_component_wheelscroll(curr);
+					if (pos > (double)scrollrange.y) {
+						pos = (double)scrollrange.y;
+					}
+					psy_ui_component_setscrolltop(curr,
+						psy_ui_mul_value_real(
+							psy_ui_component_scrollstep_height(curr), pos));
+					psy_ui_app()->accumwheeldelta += psy_ui_app()->deltaperline;
+				}
+			}
+		}
+		if (!psy_ui_event_bubbles(&ev->event)) {
+			break;
+		}
+		r = psy_ui_component_position(curr);
+		psy_ui_realpoint_add(&offset, psy_ui_realrectangle_topleft(&r));
+		psy_ui_mouseevent_setoffset(ev, offset);
+		curr = psy_ui_component_parent(curr);
+	}
+	psy_ui_event_stop_propagation(&ev->event);
+}
+
 void psy_ui_eventdispatch_bubble(psy_ui_EventDispatch* self,
 	psy_ui_Component* component, psy_ui_Event* ev)
 {
@@ -157,7 +238,8 @@ void psy_ui_eventdispatch_bubble(psy_ui_EventDispatch* self,
 	curr = component;
 	while (curr) {						
 		psy_ui_eventdispatch_notify(self, curr, ev);
-		if (ev->type >= psy_ui_MOUSEDOWN && ev->type <= psy_ui_DBLCLICK) {			
+		if (psy_ui_event_type(ev) >= psy_ui_MOUSEDOWN &&
+				psy_ui_event_type(ev) <= psy_ui_DBLCLICK) {
 			psy_ui_MouseEvent* mouse_event;
 			psy_ui_RealPoint offset;
 			psy_ui_RealRectangle r;
@@ -173,7 +255,7 @@ void psy_ui_eventdispatch_bubble(psy_ui_EventDispatch* self,
 		}
 		curr = psy_ui_component_parent(curr);
 	};
-	psy_ui_event_stop_propagation(ev);	
+	psy_ui_event_stop_propagation(ev);
 }
 
 psy_ui_Component* psy_ui_eventdispatch_target(psy_ui_EventDispatch* self,
@@ -213,7 +295,7 @@ void psy_ui_eventdispatch_notify(psy_ui_EventDispatch* self,
 	psy_ui_Component* component, psy_ui_Event* ev)
 {	
 	psy_ui_event_setcurrenttarget(ev, component);	
-	switch (ev->type) {
+	switch (psy_ui_event_type(ev)) {
 	case psy_ui_DBLCLICK:
 		component->vtable->onmousedoubleclick(component, (psy_ui_MouseEvent*)ev);
 		psy_signal_emit(&component->signal_mousedoubleclick,

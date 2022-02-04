@@ -129,8 +129,9 @@ void oncancel(NewValView* self, psy_ui_Button* sender)
 void oneditkeydown(NewValView* self, psy_ui_Component* sender,
 	psy_ui_KeyboardEvent* ev)
 {
-	if (isalpha(ev->keycode) || ev->keycode == psy_ui_KEY_ESCAPE ||
-			ev->keycode == psy_ui_KEY_RETURN) {
+	if (isalpha(psy_ui_keyboardevent_keycode(ev)) ||
+			psy_ui_keyboardevent_keycode(ev) == psy_ui_KEY_ESCAPE ||
+		psy_ui_keyboardevent_keycode(ev) == psy_ui_KEY_RETURN) {
 		psy_ui_keyboardevent_prevent_default(ev);
 		return;
 	}
@@ -140,7 +141,7 @@ void oneditkeyup(NewValView* self, psy_ui_Component* sender,
 	psy_ui_KeyboardEvent* ev)
 {
 	newvalview_updateedit(self);
-	if (ev->keycode == psy_ui_KEY_RETURN) {
+	if (psy_ui_keyboardevent_keycode(ev) == psy_ui_KEY_RETURN) {
 		self->doapply = TRUE;
 		psy_ui_keyboardevent_prevent_default(ev);
 		psy_ui_component_hide_align(newvalview_base(self));

@@ -231,10 +231,10 @@ void patternproperties_onapply(PatternProperties* self,
 
 void patternproperties_onkeydown(PatternProperties* self, psy_ui_KeyboardEvent* ev)
 {
-	if (ev->keycode == psy_ui_KEY_RETURN) {
+	if (psy_ui_keyboardevent_keycode(ev) == psy_ui_KEY_RETURN) {
 		patternproperties_onapply(self, &self->component);
 		psy_ui_keyboardevent_prevent_default(ev);
-	} else if (ev->keycode == psy_ui_KEY_ESCAPE) {
+	} else if (psy_ui_keyboardevent_keycode(ev) == psy_ui_KEY_ESCAPE) {
 		workspace_selectview(self->workspace, VIEW_ID_PATTERNVIEW, 0, 0);
 		psy_ui_keyboardevent_prevent_default(ev);
 	}

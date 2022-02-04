@@ -464,7 +464,7 @@ void patternview_onkeydown(PatternView* self, psy_ui_KeyboardEvent* ev)
 {
 	assert(self);
 
-	if (ev->keycode != psy_ui_KEY_ESCAPE) {
+	if (psy_ui_keyboardevent_keycode(ev) != psy_ui_KEY_ESCAPE) {
 		return;
 	}
 	if (psy_ui_component_visible(patternblockmenu_base(&self->blockmenu))) {

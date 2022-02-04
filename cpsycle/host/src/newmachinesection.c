@@ -267,7 +267,7 @@ void newmachinesection_ondragover(NewMachineSection* self, psy_ui_DragEvent* ev)
 			if (!psy_audio_pluginsections_pluginbyid(
 					&self->workspace->plugincatcher.sections, self->section,
 					psy_property_key(plugin))) {
-				ev->mouse.event.default_prevented = TRUE;
+				ev->mouse.event.default_prevented_ = TRUE;
 				break;
 			}
 		}
@@ -276,7 +276,7 @@ void newmachinesection_ondragover(NewMachineSection* self, psy_ui_DragEvent* ev)
 
 void newmachinesection_ondrop(NewMachineSection* self, psy_ui_DragEvent* ev)
 {	
-	ev->mouse.event.default_prevented = TRUE;
+	ev->mouse.event.default_prevented_ = TRUE;
 	if (ev->dataTransfer) {		
 		psy_List* p;
 		psy_audio_PluginSections* sections;
