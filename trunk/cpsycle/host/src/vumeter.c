@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -13,9 +13,6 @@
 #include <rms.h>
 /* std */
 #include <math.h>
-
-static void vumeter_ondestroy(Vumeter*);
-static void vumeter_ondraw(Vumeter*, psy_ui_Graphics*);
 
 static VumeterSkin vumeterdefaultskin;
 static int vumeterdefaultskin_initialized = 0;
@@ -31,6 +28,10 @@ static void vumeterskin_init(Vumeter* self)
 	}
 	self->skin = vumeterdefaultskin;
 }
+
+/* prototypes */
+static void vumeter_ondraw(Vumeter*, psy_ui_Graphics*);
+
 /* vtable */
 static psy_ui_ComponentVtable vumeter_vtable;
 static bool vumeter_vtable_initialized = FALSE;
@@ -39,15 +40,12 @@ static void vumeter_vtable_init(Vumeter* self)
 {
 	if (!vumeter_vtable_initialized) {
 		vumeter_vtable = *(self->component.vtable);
-		vumeter_vtable.ondestroy =
-			(psy_ui_fp_component_event)
-			vumeter_ondestroy;
 		vumeter_vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
 			vumeter_ondraw;
 		vumeter_vtable_initialized = TRUE;
 	}
-	self->component.vtable = &vumeter_vtable;
+	psy_ui_component_setvtable(&self->component, &vumeter_vtable);
 }
 
 /* implementation */
@@ -66,11 +64,6 @@ void vumeter_init(Vumeter* self, psy_ui_Component* parent,
 	vumeterskin_init(self);	
 }
 
-void vumeter_ondestroy(Vumeter* self)
-{	
-	psy_ui_component_stoptimer(&self->component, 0);
-}
-
 void vumeter_ondraw(Vumeter* self, psy_ui_Graphics* g)
 {	
 	psy_ui_RealRectangle left;
@@ -80,7 +73,9 @@ void vumeter_ondraw(Vumeter* self, psy_ui_Graphics* g)
 	double vuprevR;
 	
 	size = psy_ui_component_size_px(&self->component);
-	psy_ui_setrectangle(&left, 0, 5, size.width, 5);	
+	left = psy_ui_realrectangle_make(
+		psy_ui_realpoint_make(0, 5),
+		psy_ui_realsize_make(size.width, 5));
 	right = left;
 	right.top += 6;
 	right.bottom += 6;
@@ -104,10 +99,12 @@ void vumeter_ondraw(Vumeter* self, psy_ui_Graphics* g)
 		right.right = vuprevR;
 		psy_ui_drawsolidrectangle(g, right, self->skin.peak);
 	}
-	psy_ui_setrectangle(&left, left.right, left.top,
-		size.width - left.right, 5);
-	psy_ui_setrectangle(&right, right.right, right.top,
-		size.width - right.right, 5);
+	left = psy_ui_realrectangle_make(
+		psy_ui_realpoint_make(left.right, left.top),
+		psy_ui_realsize_make(size.width - left.right, 5));
+	right = psy_ui_realrectangle_make(
+		psy_ui_realpoint_make(right.right, right.top),
+		psy_ui_realsize_make(size.width - right.right, 5));
 	psy_ui_drawsolidrectangle(g, left, self->skin.border);
 	psy_ui_drawsolidrectangle(g, right, self->skin.border);
 }
@@ -142,7 +139,9 @@ void vumeter_idle(Vumeter* self)
 							memory->numsamples)) *
 						psy_audio_buffer_rangefactor(memory,
 							PSY_DSP_AMP_RANGE_VST));
-					psy_ui_component_invalidate(&self->component);					
+#ifndef PSYCLE_DEBUG_PREVENT_TIMER_DRAW
+					psy_ui_component_invalidate(&self->component);
+#endif
 				}				
 			}
 		} else if (self->leftavg != 0.f || self->rightavg != 0.f) {
@@ -150,7 +149,9 @@ void vumeter_idle(Vumeter* self)
 			self->rightavg = 0.f;
 			self->l_log = -10000.f;
 			self->r_log = -10000.f;
+#ifndef PSYCLE_DEBUG_PREVENT_TIMER_DRAW
 			psy_ui_component_invalidate(&self->component);			
+#endif
 		}
 	}	
 }

@@ -197,7 +197,7 @@ void patterntrackbox_onmousedown(PatternTrackBox* self, psy_ui_MouseEvent* ev)
 		psy_audio_Patterns* patterns;		
 		psy_ui_RealPoint pt;		
 		
-		pt = ev->pt;
+		pt = psy_ui_mouseevent_pt(ev);
 		pt.x -= patterntrackbox_center(self).x;
 		patterns = patternviewstate_patterns(self->state->pv);		
 		if (skincoord_hittest(&patterntrackbox_coords(self)->solo, pt)) {
@@ -382,7 +382,7 @@ void trackerheader_onmousewheel(TrackerHeader* self, psy_ui_MouseEvent* ev)
 {	
 	psy_audio_player_sendcmd(workspace_player(self->workspace), "tracker",
 		psy_eventdrivercmd_makeid(
-			(ev->delta > 0)
+			(psy_ui_mouseevent_delta(ev) > 0)
 			? CMD_COLUMNNEXT
 			: CMD_COLUMNPREV));
 }

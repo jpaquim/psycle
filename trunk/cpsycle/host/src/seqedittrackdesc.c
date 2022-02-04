@@ -237,7 +237,7 @@ void seqedittrackdesc_ondragdrop(SeqEditTrackDesc* self, psy_ui_DragEvent* ev)
 		if (trackid != -1) {
 			uintptr_t index;
 
-			psy_ui_component_intersect(&self->component, ev->mouse.pt, &index);			
+			psy_ui_component_intersect(&self->component, psy_ui_mouseevent_pt(&ev->mouse), &index);
 			if (index != trackid) {
 				psy_audio_sequence_swaptracks(
 					&self->state->workspace->song->sequence, trackid, index);

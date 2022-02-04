@@ -13,8 +13,7 @@
 extern "C" {
 #endif
 
-typedef struct psy_ui_MaterialTheme {
-	psy_ui_Style* style;
+typedef struct psy_ui_MaterialTheme {	
 	psy_ui_Colour surface;
 	psy_ui_Colour surface_overlay_5p;
 	psy_ui_Colour surface_overlay_6p;

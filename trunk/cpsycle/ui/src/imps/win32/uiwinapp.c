@@ -342,7 +342,6 @@ LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 				ScreenToClient(imp->hwnd, &pt_client);
 				psy_ui_mouseevent_init_all(&ev,
 					psy_ui_realpoint_make(pt_client.x, pt_client.y),
-					psy_ui_realpoint_make(pt_client.x, pt_client.y),
 					(short)LOWORD(wParam), (short)HIWORD(wParam),
 					GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);
 				component->vtable->onmousewheel(component, &ev);
@@ -429,7 +428,6 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				const RECT* pRect;
 				RGNDATA* pRegion;
 
-
 				hrgn = CreateRectRgn(0, 0, 0, 0);
 				rectcount = 0;
 				pRegion = 0;
@@ -452,16 +450,13 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				for (r = 0; r < rectcount; ++r) {
 					RECT rcPaint;
 
-					rcPaint = pRect[r];
-					if (rectcount > 1) {
-						r = r;
-					}
+					rcPaint = pRect[r];					
 					/* store clip / repaint size of paint request */
 					clipsize = psy_ui_realsize_make(
 						(double)rcPaint.right - (double)rcPaint.left,
 						(double)rcPaint.bottom - (double)rcPaint.top);
 					/* anything to paint ? */
-					if (clipsize.width > 0.0 && clipsize.height > 0.0) {
+					if (!psy_ui_realsize_equals(&clipsize, psy_ui_realsize_zero())) {
 						psy_ui_Graphics	g;
 						psy_ui_Bitmap dblbuffer;
 
@@ -478,14 +473,15 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 						} else {
 							/* create graphics handle with the paint hdc */
 							psy_ui_graphics_init(&g, hdc);
-						}
-						/* update graphics font with component font */
-						psy_ui_setfont(&g, psy_ui_component_font(imp->component));
-						/* set clip */
-						psy_ui_setrectangle(&g.clip, rcPaint.left,
-							rcPaint.top, clipsize.width, clipsize.height);
+						}						
+						/* set clip */						
+						psy_ui_graphics_setcliprect(&g,
+							psy_ui_realrectangle_make(
+								psy_ui_realpoint_make(rcPaint.left,
+									rcPaint.top),
+								clipsize));
 						/* draw */
-						imp->imp.vtable->dev_draw(&imp->imp, &g);
+						psy_ui_component_draw(component, &g);						
 						if (psy_ui_component_doublebuffered(component)) {
 							/* copy the double buffer bitmap to the paint hdc */
 							BitBlt(hdc, rcPaint.left, rcPaint.top,
@@ -496,7 +492,8 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 						psy_ui_graphics_dispose(&g);
 					}					
 				}				
-				free(pRegion);					
+				free(pRegion);
+				pRegion = NULL;
 				if (hrgn) {
 					DeleteObject((HGDIOBJ)hrgn);
 				}
@@ -510,10 +507,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 			deallocate = FALSE;
 			if (component) {
 				deallocate = component->deallocate;				
-			}
-			if (component->id == 30) {
-				component = component;
-			}
+			}			
 			psy_ui_component_dispose(component);
 			psy_table_remove(&winapp->selfmap, (uintptr_t)hwnd);
 			if (component) {				
@@ -579,14 +573,22 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 		case WM_RBUTTONDBLCLK:
 		case WM_MBUTTONDBLCLK:
 		case WM_MOUSEMOVE:			
-			if (message == WM_LBUTTONDBLCLK) {
-				component = component;
-			}
 			if (component) {
 				psy_ui_MouseEvent ev;
+				
+				ev = mouseevent(message, wParam, lParam);				
+				if (message == WM_MOUSEMOVE && !psy_ui_app()->mousetracking) {
+					TRACKMOUSEEVENT tme;
 
-				ev = mouseevent(message, wParam, lParam);
-				adjustcoordinates(component, &ev.pt);				
+					// component->imp->vtable->dev_mouseenter(component->imp);
+					tme.cbSize = sizeof(TRACKMOUSEEVENT);
+					tme.dwFlags = TME_LEAVE | TME_HOVER;
+					tme.dwHoverTime = 200;
+					tme.hwndTrack = hwnd;
+					if (_TrackMouseEvent(&tme)) {
+						psy_ui_app()->mousetracking = TRUE;
+					}
+				}
 				psy_ui_eventdispatch_send(&winapp->app->eventdispatch,
 					component, psy_ui_mouseevent_base(&ev));
 				return 0;
@@ -618,10 +620,8 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				ScreenToClient(imp->hwnd, &pt_client);
 				psy_ui_mouseevent_init_all(&ev,
 					psy_ui_realpoint_make(pt_client.x, pt_client.y),
-					psy_ui_realpoint_make(pt_client.x, pt_client.y),
 					(short)LOWORD(wParam), (short)HIWORD(wParam),
-					GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);
-				adjustcoordinates(component, &ev.pt);
+					GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);				
 				psy_ui_component_mousewheel(component, &ev,
 					(short)HIWORD(wParam) /* 120 or -120 */);
 			}
@@ -795,13 +795,9 @@ psy_ui_MouseEvent mouseevent(int msg, WPARAM wparam, LPARAM lparam)
 	psy_ui_MouseEvent rv;
 
 	psy_ui_mouseevent_init_all(&rv,
-		psy_ui_realpoint_make((SHORT)LOWORD(lparam), (SHORT)HIWORD(lparam)),
-		psy_ui_realpoint_make((SHORT)LOWORD(lparam), (SHORT)HIWORD(lparam)),
-		translate_win_button(msg), 0, GetKeyState(VK_SHIFT) < 0,
-		GetKeyState(VK_CONTROL) < 0);
-	if (msg == WM_MOUSEMOVE) {
-		rv.button = wparam;
-	}
+		psy_ui_realpoint_make((SHORT)LOWORD(lparam), (SHORT)HIWORD(lparam)),	
+		(msg == WM_MOUSEMOVE) ? wparam : translate_win_button(msg), 0,
+		GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);	
 	psy_ui_mouseevent_settype(&rv, translate_win_event_type(msg));
 	return rv;
 }
@@ -896,8 +892,7 @@ LRESULT CALLBACK MouseHookProc(int nCode, WPARAM wParam, LPARAM lParam) {
 		MOUSEHOOKSTRUCT* pMouseStruct = (MOUSEHOOKSTRUCT*)lParam;
 
 		psy_ui_mouseevent_init_all(&ev,
-			psy_ui_realpoint_make(pMouseStruct->pt.x, pMouseStruct->pt.y),
-			psy_ui_realpoint_make(pMouseStruct->pt.x, pMouseStruct->pt.y),
+			psy_ui_realpoint_make(pMouseStruct->pt.x, pMouseStruct->pt.y),			
 			(wParam == WM_LBUTTONDOWN) ? 0 : 1,
 			0, GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);
 		psy_signal_emit(&winapp->app->signal_mousehook, winapp->app,
@@ -1000,15 +995,15 @@ void psy_ui_winapp_sendevent(psy_ui_WinApp* self, psy_ui_Component* component,
 		UINT msg;
 
 		mouseevent = (psy_ui_MouseEvent*)ev;		
-		switch (mouseevent->button) {
+		switch (psy_ui_mouseevent_button(mouseevent)) {
 		case 1: msg = (UINT)WM_LBUTTONDOWN; break;
 		case 2: msg = (UINT)WM_RBUTTONDOWN; break;
 		case 3: msg = (UINT)WM_MBUTTONDOWN; break;
 		default: msg = 0; break;
 		}
 		if (msg != 0) {		
-			SendMessage(imp->hwnd, msg, (WPARAM)mouseevent->button,
-				psy_ui_winapp_pack_pt(mouseevent->pt));
+			SendMessage(imp->hwnd, msg, (WPARAM)psy_ui_mouseevent_button(mouseevent),
+				psy_ui_winapp_pack_pt(psy_ui_mouseevent_offset(mouseevent)));
 		}
 		break; }
 	case psy_ui_MOUSEUP: {
@@ -1016,15 +1011,15 @@ void psy_ui_winapp_sendevent(psy_ui_WinApp* self, psy_ui_Component* component,
 		UINT msg;
 
 		mouseevent = (psy_ui_MouseEvent*)ev;		
-		switch (mouseevent->button) {
+		switch (psy_ui_mouseevent_button(mouseevent)) {
 		case 1: msg = (UINT)WM_LBUTTONUP; break;
 		case 2: msg = (UINT)WM_RBUTTONUP; break;
 		case 3: msg = (UINT)WM_MBUTTONUP; break;
 		default: msg = 0; break;
 		}		
 		if (msg != 0) {
-			SendMessage(imp->hwnd, msg, (WPARAM)mouseevent->button,
-				psy_ui_winapp_pack_pt(mouseevent->pt));
+			SendMessage(imp->hwnd, msg, (WPARAM)psy_ui_mouseevent_button(mouseevent),
+				psy_ui_winapp_pack_pt(psy_ui_mouseevent_offset(mouseevent)));
 		}		
 		break; }
 	case psy_ui_DBLCLICK : {
@@ -1032,15 +1027,15 @@ void psy_ui_winapp_sendevent(psy_ui_WinApp* self, psy_ui_Component* component,
 		UINT msg;
 
 		mouseevent = (psy_ui_MouseEvent*)ev;
-		switch (mouseevent->button) {
+		switch (psy_ui_mouseevent_button(mouseevent)) {
 		case 1: msg = (UINT)WM_LBUTTONDBLCLK; break;
 		case 2: msg = (UINT)WM_RBUTTONDBLCLK; break;
 		case 3: msg = (UINT)WM_MBUTTONDBLCLK; break;
 		default: msg = 0; break;
 		}
 		if (msg != 0) {			
-			SendMessage(imp->hwnd, msg, (WPARAM)mouseevent->button,
-				psy_ui_winapp_pack_pt(mouseevent->pt));
+			SendMessage(imp->hwnd, msg, (WPARAM)psy_ui_mouseevent_button(mouseevent),
+				psy_ui_winapp_pack_pt(psy_ui_mouseevent_offset(mouseevent)));
 		}
 		break; }
 	case psy_ui_MOUSEMOVE: {
@@ -1048,8 +1043,8 @@ void psy_ui_winapp_sendevent(psy_ui_WinApp* self, psy_ui_Component* component,
 
 		mouseevent = (psy_ui_MouseEvent*)ev;		
 		SendMessage(imp->hwnd, (UINT)WM_MOUSEMOVE,
-			(WPARAM)mouseevent->button,
-			psy_ui_winapp_pack_pt(mouseevent->pt));
+			(WPARAM)psy_ui_mouseevent_button(mouseevent),
+			psy_ui_winapp_pack_pt(psy_ui_mouseevent_offset(mouseevent)));
 		break; }
 	default:
 		break;

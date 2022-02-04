@@ -108,6 +108,11 @@ INLINE void psy_ui_app_setcapture(psy_ui_App* self, struct psy_ui_Component* com
 	self->capture_ = component;
 }
 
+INLINE struct psy_ui_Component* psy_ui_app_hover(psy_ui_App* self)
+{
+	return self->hover;
+}
+
 INLINE struct psy_ui_ImpFactory* psy_ui_app_impfactory(psy_ui_App* self)
 {
 	assert(self);

@@ -77,7 +77,8 @@ typedef void (*psy_ui_fp_component_resize)(struct psy_ui_Component*, psy_ui_Size
 typedef void (*psy_ui_fp_component_clientresize)(struct psy_ui_Component*, psy_ui_Size);
 typedef void (*psy_ui_fp_component_setposition)(struct psy_ui_Component*, psy_ui_Point, psy_ui_Size);
 typedef psy_ui_Size (*psy_ui_fp_component_framesize)(struct psy_ui_Component*);
-typedef void (*psy_ui_fp_component_scrollto)(struct psy_ui_Component*, intptr_t dx, intptr_t dy);
+typedef void (*psy_ui_fp_component_scrollto)(struct psy_ui_Component*, intptr_t dx, intptr_t dy,
+	const psy_ui_RealRectangle*);
 typedef void (*psy_ui_fp_component_setfont)(struct psy_ui_Component*, const psy_ui_Font*);
 typedef void (*psy_ui_fp_component_sethorizontalscrollrange)(struct psy_ui_Component*, int min, int max);
 typedef void (*psy_ui_fp_component_horizontalscrollrange)(struct psy_ui_Component*, int* scrollmin,
@@ -220,7 +221,8 @@ typedef struct psy_ui_Component {
 	bool dropdown;
 	psy_ui_Bitmap bufferbitmap;
 	bool drawtobuffer;
-	bool ncpaint;	
+	bool ncpaint;
+	bool blitscroll;
 } psy_ui_Component;
 
 void psy_ui_replacedefaultfont(psy_ui_Component* main, psy_ui_Font*);
@@ -316,6 +318,13 @@ int psy_ui_component_drawvisible(psy_ui_Component*);
 void psy_ui_component_align(psy_ui_Component*);
 void psy_ui_component_align_full(psy_ui_Component*);
 void psy_ui_component_align_cached(psy_ui_Component*);
+
+INLINE bool psy_ui_component_hasalign(const psy_ui_Component* self)
+{
+	return (self->containeralign &&
+		self->containeralign->containeralign != psy_ui_CONTAINER_ALIGN_NONE);
+}
+
 psy_ui_Component* psy_ui_component_preferredsize_parent(psy_ui_Component*);
 psy_ui_Component* psy_ui_component_root(psy_ui_Component*);
 
@@ -427,7 +436,8 @@ typedef psy_ui_Size(*psy_ui_fp_componentimp_dev_preferredsize)(struct psy_ui_Com
 typedef psy_ui_Size (*psy_ui_fp_componentimp_dev_framesize)(struct psy_ui_ComponentImp*);
 typedef void (*psy_ui_fp_componentimp_dev_updatesize)(struct psy_ui_ComponentImp*);
 typedef void (*psy_ui_fp_componentimp_dev_applyposition)(struct psy_ui_ComponentImp*);
-typedef void (*psy_ui_fp_componentimp_dev_scrollto)(struct psy_ui_ComponentImp*, intptr_t dx, intptr_t dy);
+typedef void (*psy_ui_fp_componentimp_dev_scrollto)(struct psy_ui_ComponentImp*, intptr_t dx, intptr_t dy,
+	const psy_ui_RealRectangle*);
 typedef struct psy_ui_Component* (*psy_ui_fp_componentimp_dev_parent)(struct psy_ui_ComponentImp*);
 typedef void (*psy_ui_fp_componentimp_dev_setparent)(struct psy_ui_ComponentImp*, struct psy_ui_Component*);
 typedef void (*psy_ui_fp_componentimp_dev_insert)(struct psy_ui_ComponentImp*, struct psy_ui_ComponentImp*, struct psy_ui_ComponentImp*);
@@ -458,10 +468,7 @@ typedef bool (*psy_ui_fp_componentimp_dev_issystem)(struct psy_ui_ComponentImp*)
 typedef uintptr_t (*psy_ui_fp_componentimp_dev_platform_handle)(struct psy_ui_ComponentImp*);
 typedef uintptr_t (*psy_ui_fp_componentimp_dev_flags)(const struct psy_ui_ComponentImp*);
 typedef void (*psy_ui_fp_componentimp_dev_clear)(struct psy_ui_ComponentImp*);
-typedef void (*psy_ui_fp_componentimp_dev_draw)(struct psy_ui_ComponentImp*, psy_ui_Graphics*);
 typedef void (*psy_ui_fp_componentimp_dev_mouseevent)(struct psy_ui_ComponentImp*, psy_ui_MouseEvent*);
-typedef void (*psy_ui_fp_componentimp_dev_mouseenter)(struct psy_ui_ComponentImp*);
-typedef void (*psy_ui_fp_componentimp_dev_mouseleave)(struct psy_ui_ComponentImp*);
 typedef void (*psy_ui_fp_componentimp_dev_initialized)(struct psy_ui_ComponentImp*);
 
 typedef struct psy_ui_ComponentImpVTable {
@@ -513,14 +520,7 @@ typedef struct psy_ui_ComponentImpVTable {
 	psy_ui_fp_componentimp_dev_platform dev_platform;
 	psy_ui_fp_componentimp_dev_platform_handle dev_platform_handle;
 	psy_ui_fp_componentimp_dev_flags dev_flags;
-	psy_ui_fp_componentimp_dev_clear dev_clear;
-	psy_ui_fp_componentimp_dev_draw dev_draw;
-	psy_ui_fp_componentimp_dev_mouseevent dev_mousedown;
-	psy_ui_fp_componentimp_dev_mouseevent dev_mouseup;
-	psy_ui_fp_componentimp_dev_mouseevent dev_mousemove;
-	psy_ui_fp_componentimp_dev_mouseevent dev_mousedoubleclick;
-	psy_ui_fp_componentimp_dev_mouseenter dev_mouseenter;
-	psy_ui_fp_componentimp_dev_mouseleave dev_mouseleave;	
+	psy_ui_fp_componentimp_dev_clear dev_clear;	
 	psy_ui_fp_componentimp_dev_initialized dev_initialized;
 } psy_ui_ComponentImpVTable;
 
@@ -698,7 +698,7 @@ INLINE psy_ui_Value psy_ui_component_scrollleft(psy_ui_Component* self)
 	return psy_ui_value_make_px(-position.left);	
 }
 
-INLINE double psy_ui_component_scrollleftpx(psy_ui_Component* self)
+INLINE double psy_ui_component_scrollleft_px(psy_ui_Component* self)
 {		
 	psy_ui_RealRectangle position;
 
@@ -933,28 +933,25 @@ INLINE psy_ui_RealMargin psy_ui_component_spacing_px(const psy_ui_Component* sel
 	return rv;
 }
 
-void psy_ui_component_drawchildren(psy_ui_Component*, psy_ui_Graphics*,
-	psy_List* children);
-void psy_ui_component_draw(psy_ui_Component*, psy_ui_Graphics*,
-	psy_List* viewcomponents);
-void psy_ui_component_mousedown(psy_ui_Component*, psy_ui_MouseEvent*,
-	psy_List* viewcomponents);
-void psy_ui_component_mouseup(psy_ui_Component*, psy_ui_MouseEvent*,
-	psy_List* viewcomponents);
-void psy_ui_component_mousedoubleclick(psy_ui_Component*, psy_ui_MouseEvent*,
-	psy_List* viewcomponents);
+void psy_ui_component_draw(psy_ui_Component*, psy_ui_Graphics*);
 void psy_ui_component_mousewheel(psy_ui_Component*, psy_ui_MouseEvent*,
 	intptr_t delta);
 
 INLINE void psy_ui_component_scrollto(psy_ui_Component* self,
-	intptr_t dx, intptr_t dy)
+	intptr_t dx, intptr_t dy, const psy_ui_RealRectangle* r)
 {	
-	self->vtable->scrollto(self, dx, dy);
+	self->vtable->scrollto(self, dx, dy, r);
 }
 
 void psy_ui_component_buffer(psy_ui_Component*);
 void psy_ui_component_clearbuffer(psy_ui_Component*);
 psy_ui_RealRectangle psy_ui_component_bounds(psy_ui_Component*);
+
+INLINE bool psy_ui_component_islightweight(psy_ui_Component* self)
+{
+	return ((self->imp->vtable->dev_flags(self->imp)
+		& psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN));
+}
 
 #ifdef __cplusplus
 }

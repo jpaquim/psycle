@@ -458,7 +458,7 @@ void tabbar_onmousewheel(psy_ui_TabBar* self, psy_ui_MouseEvent* ev)
 
 	assert(self);
 
-	delta = ev->delta;
+	delta = psy_ui_mouseevent_delta(ev);
 	if (self->tabalignment == psy_ui_ALIGN_TOP ||
 		self->tabalignment == psy_ui_ALIGN_BOTTOM) {
 		delta *= -1;

@@ -130,15 +130,17 @@ void seqviewtrack_ondraw(SeqViewTrack* self, psy_ui_Graphics* g)
 	double lineheightpx;	
 	const psy_ui_TextMetric* tm;
 	psy_audio_OrderIndex editposition;	
+	psy_ui_RealRectangle clip;
 		
+	clip = psy_ui_cliprect(g);
 	tm = psy_ui_component_textmetric(&self->component);
 	lineheightpx = psy_max(1.0, floor(psy_ui_value_px(&self->state->lineheight,
 		tm, NULL)));
 	self->state->colwidth = floor(tm->tmAveCharWidth * 1.4);	
 	self->state->digitsize = psy_ui_realsize_make(self->state->colwidth,
 		lineheightpx);
-	startrow = (uintptr_t)floor(psy_max(0, (g->clip.top / lineheightpx)));
-	endrow = (uintptr_t)(floor(g->clip.bottom / lineheightpx + 0.5));		
+	startrow = (uintptr_t)floor(psy_max(0, (clip.top / lineheightpx)));
+	endrow = (uintptr_t)(floor(clip.bottom / lineheightpx + 0.5));		
 	psy_ui_settextcolour(g, psy_ui_style(STYLE_SEQLISTVIEW_ITEM)->colour);
 	psy_ui_realpoint_init_all(&cp, 0.0, lineheightpx * startrow);
 	p = psy_list_at(self->track->entries, startrow);
@@ -347,16 +349,18 @@ void seqviewtrack_onmousedown(SeqViewTrack* self, psy_ui_MouseEvent* ev)
 {
 	if (self->track) {		
 		if (self->track->entries) {
-			self->state->cmd_orderindex.order = psy_min((uintptr_t)((ev->pt.y) /
+			self->state->cmd_orderindex.order = psy_min(
+				(uintptr_t)((psy_ui_mouseevent_pt(ev).y) /
 				psy_ui_value_px(&self->state->lineheight,
 					psy_ui_component_textmetric(&self->component), NULL)),
 				psy_list_size(self->track->entries) - 1);
 			self->state->cmd_orderindex.track = self->trackindex;
 			if (self->state->active) {
-				self->state->col = (uintptr_t)(ev->pt.x / self->state->colwidth);
+				self->state->col = (uintptr_t)(
+					psy_ui_mouseevent_pt(ev).x / self->state->colwidth);
 				self->state->col = psy_min(self->state->col, COLMAX - 1);
 			}
-			if (ev->ctrl_key) {
+			if (psy_ui_mouseevent_ctrlkey(ev)) {
 				if (!psy_audio_sequenceselection_isselected(
 						&self->state->cmds->workspace->song->sequence.sequenceselection,
 						self->state->cmd_orderindex)) {
@@ -393,7 +397,8 @@ void seqviewtrack_onmousedoubleclick(SeqViewTrack* self, psy_ui_MouseEvent* ev)
 		psy_audio_SequenceCursor cursor;
 
 		cursor = self->state->cmds->workspace->song->sequence.cursor;		
-		self->state->cmd_orderindex.order = (uintptr_t)(ev->pt.y /
+		self->state->cmd_orderindex.order = (uintptr_t)(
+			psy_ui_mouseevent_pt(ev).y /
 			psy_ui_value_px(&self->state->lineheight,
 				psy_ui_component_textmetric(&self->component), NULL));
 		cursor.orderindex = self->state->cmd_orderindex;
@@ -455,8 +460,9 @@ static void seqviewlist_vtable_init(SeqviewList* self)
 			seqviewlist_onfocuslost;
 		seqviewlist_vtable_initialized = TRUE;
 	}
-	self->component.vtable = &seqviewlist_vtable;
+	psy_ui_component_setvtable(&self->component, &seqviewlist_vtable);
 }
+
 /* implementation */
 void seqviewlist_init(SeqviewList* self, psy_ui_Component* parent,
 	SeqViewState* state)

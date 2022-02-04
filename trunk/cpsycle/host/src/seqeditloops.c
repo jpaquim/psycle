@@ -245,10 +245,10 @@ void seqeditloop_onmousedown(SeqEditLoop* self, psy_ui_MouseEvent* ev)
 		return;
 	}
 	seqeditloopstate_startdrag(self->loopstate, self->node);
-	if (ev->button == 1) {
+	if (psy_ui_mouseevent_button(ev) == 1) {
 		seqeditloop_select(self);
 		psy_ui_component_capture(&self->component);
-	} else if (ev->button == 2) {
+	} else if (psy_ui_mouseevent_button(ev) == 2) {
 		seqeditloopstate_remove(self->loopstate, self->node);		
 	}
 }
@@ -265,7 +265,7 @@ void seqeditloop_onmousemove(SeqEditLoop* self, psy_ui_MouseEvent* ev)
 	e = *psy_audio_patternentry_front(seqeditloop_entry(self));	
 	position = psy_ui_component_position(&self->component);
 	offset = seqeditstate_quantize(self->state,
-		seqeditstate_pxtobeat(self->state, ev->pt.x + position.left));
+		seqeditstate_pxtobeat(self->state, psy_ui_mouseevent_pt(ev).x + position.left));
 	offset = psy_max(0.0, offset);
 	if ((seqeditloop_offset(self) != offset) && seqeditloop_boundsvalid(self,
 			offset)) {
@@ -426,7 +426,7 @@ void seqeditloops_ondestroy(SeqEditLoops* self)
 
 void seqeditloops_onmousedown(SeqEditLoops* self, psy_ui_MouseEvent* ev)
 {
-	if (ev->button == 2 && self->loopstate.remove) {
+	if (psy_ui_mouseevent_button(ev) == 2 && self->loopstate.remove) {
 		psy_signal_emit(&self->state->signal_itemselected, self->state, 3,
 			SEQEDITITEM_LOOP, psy_INDEX_INVALID, psy_INDEX_INVALID);
 		seqeditloops_remove(self, self->loopstate.start);
@@ -495,7 +495,8 @@ void seqeditloops_onmousedoubleclick(SeqEditLoops* self, psy_ui_MouseEvent* ev)
 			
 			/* insert loop start */
 			insertoffset = seqeditstate_quantize(self->state,
-				seqeditstate_pxtobeat(self->state, ev->pt.x));
+				seqeditstate_pxtobeat(self->state,
+					psy_ui_mouseevent_pt(ev).x));
 			node = psy_audio_pattern_findnode(pattern,
 				psy_audio_GLOBALPATTERN_LOOPTRACK,
 				insertoffset, 1.0, &prev);
@@ -543,7 +544,7 @@ void seqeditloops_onmousedoubleclick(SeqEditLoops* self, psy_ui_MouseEvent* ev)
 void seqeditloops_onmousemove(SeqEditLoops* self, psy_ui_MouseEvent* ev)
 {
 	seqeditstate_setcursor(self->state, seqeditstate_quantize(self->state,
-		seqeditstate_pxtobeat(self->state, ev->pt.x)));
+		seqeditstate_pxtobeat(self->state, psy_ui_mouseevent_pt(ev).x)));
 }
 
 void seqeditloops_onmouseenter(SeqEditLoops* self)

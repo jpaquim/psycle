@@ -269,6 +269,16 @@ INLINE psy_ui_Colour psy_ui_colour_blue(void)
 	return psy_ui_colour_make_argb(0x000000FF);
 }
 
+INLINE psy_ui_Colour psy_ui_colour_gray(void)
+{
+	return psy_ui_colour_make_argb(0x00808080);
+}
+
+INLINE psy_ui_Colour psy_ui_colour_lightgray(void)
+{
+	return psy_ui_colour_make_argb(0x00C0C0C0);
+}
+
 #ifdef __cplusplus
 }
 #endif

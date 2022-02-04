@@ -1,17 +1,15 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+**  copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
 
 
 #include "uisplitbar.h"
-/* local */
-#include "uiapp.h"
 /* platform */
-#include "../../detail/trace.h"
 #include "../../detail/portable.h"
+
 
 /* prototypes */
 static void splitter_setalign(psy_ui_Splitter*, psy_ui_AlignType);
@@ -133,7 +131,7 @@ psy_ui_RealPoint splitter_hthumbcenter(const psy_ui_Splitter* self)
 
 void splitter_onmousedown(psy_ui_Splitter* self, psy_ui_MouseEvent* ev)
 {	
-	if (ev->button == 2) {		
+	if (psy_ui_mouseevent_button(ev) == 2) {
 		psy_ui_Component* prev;
 
 		prev = splitter_prev(self);
@@ -182,9 +180,9 @@ void splitter_onmousedown(psy_ui_Splitter* self, psy_ui_MouseEvent* ev)
 		self->resize = 1;
 		if (self->component.align == psy_ui_ALIGN_LEFT ||
 			self->component.align == psy_ui_ALIGN_RIGHT) {
-			self->dragoffset = ev->pt.x;
+			self->dragoffset = psy_ui_mouseevent_pt(ev).x;
 		} else {
-			self->dragoffset = ev->pt.y;
+			self->dragoffset = psy_ui_mouseevent_pt(ev).y;
 		}		
 		splitter_setcursor(self);
 	}
@@ -198,6 +196,7 @@ void splitter_onmousemove(psy_ui_Splitter* self, psy_ui_MouseEvent* ev)
 {
 	if (self->resize == 1) {		
 		psy_ui_RealRectangle position;
+		psy_ui_RealRectangle newposition;
 		psy_ui_RealRectangle parentposition;
 		psy_ui_RealRectangle prevposition;
 		psy_ui_RealRectangle nextposition;
@@ -206,6 +205,7 @@ void splitter_onmousemove(psy_ui_Splitter* self, psy_ui_MouseEvent* ev)
 		psy_ui_Component* next;
 			
 		position = psy_ui_component_position(&self->component);
+		newposition = position;
 		parent = psy_ui_component_parent(&self->component);
 		if (parent) {
 			parentposition = psy_ui_component_position(parent);
@@ -228,51 +228,52 @@ void splitter_onmousemove(psy_ui_Splitter* self, psy_ui_MouseEvent* ev)
 		}
 		switch (self->component.align) {
 			case psy_ui_ALIGN_LEFT:
-				psy_ui_component_move(&self->component,
-					psy_ui_point_make_px(psy_max(prevposition.left, psy_min(
+				psy_ui_realrectangle_settopleft(&newposition,
+					psy_ui_realpoint_make(psy_max(prevposition.left, psy_min(
 							nextposition.right - (position.right - position.left),
-							position.left + ev->pt.x - self->dragoffset)),
+							position.left + psy_ui_mouseevent_pt(ev).x - self->dragoffset)),
 						position.top));
 				break;
 			case psy_ui_ALIGN_RIGHT:				
-				psy_ui_component_move(&self->component,
-					psy_ui_point_make_px(
+				psy_ui_realrectangle_settopleft(&newposition,
+					psy_ui_realpoint_make(
 							psy_max(nextposition.left,
 								psy_min(prevposition.right -
 										psy_ui_realrectangle_width(&position),
-									position.left + ev->pt.x -
+									position.left + psy_ui_mouseevent_pt(ev).x -
 										self->dragoffset)),
 						position.top));
 				break;
 			case psy_ui_ALIGN_TOP:
-				psy_ui_component_move(&self->component,
-					psy_ui_point_make_px(
+				psy_ui_realrectangle_settopleft(&newposition,
+					psy_ui_realpoint_make(
 						position.left, psy_max(prevposition.top, psy_min(
 							nextposition.bottom - (position.bottom - position.top),
-						position.top + ev->pt.y - self->dragoffset))));
+						position.top + psy_ui_mouseevent_pt(ev).y - self->dragoffset))));
 				break;
 			case psy_ui_ALIGN_BOTTOM:				
-				psy_ui_component_move(&self->component,
-					psy_ui_point_make_px(
+				psy_ui_realrectangle_settopleft(&newposition,
+					psy_ui_realpoint_make(
 						position.left,
 						psy_max(0.0, psy_min(prevposition.bottom -
 							psy_ui_realrectangle_height(&position),
-							position.top + ev->pt.y - self->dragoffset))));
+							position.top + psy_ui_mouseevent_pt(ev).y - self->dragoffset))));
 				break;
 			default:
 				break;
 		}
-		psy_ui_component_invalidate(psy_ui_component_parent(&self->component));
-		psy_ui_component_update(psy_ui_component_parent(&self->component));
-	} else {
-		psy_ui_component_invalidate(psy_ui_component_parent(&self->component));
+		psy_ui_component_move(&self->component,
+			psy_ui_point_make_px(newposition.left, newposition.top));
+		psy_ui_realrectangle_union(&newposition, &position);
+		psy_ui_component_invalidaterect(psy_ui_component_parent(&self->component),
+			newposition);		
 	}
 	splitter_setcursor(self);
 }
 
 void splitter_onmouseup(psy_ui_Splitter* self, psy_ui_MouseEvent* ev)
 {			
-	if (ev->button == 1) {
+	if (psy_ui_mouseevent_button(ev) == 1) {
 		psy_ui_RealRectangle position;
 		psy_ui_Component* prev;
 		psy_ui_Component* next;
@@ -412,7 +413,7 @@ psy_ui_Component* splitter_next(psy_ui_Splitter* self)
 
 void splitter_setcursor(psy_ui_Splitter* self)
 {	
-	psy_ui_component_setcursor(&self->component,
+	psy_ui_component_setcursor(psy_ui_splitter_base(self),
 		(psy_ui_splitter_isvertical(self))
 		? psy_ui_CURSORSTYLE_COL_RESIZE
 		: psy_ui_CURSORSTYLE_ROW_RESIZE);

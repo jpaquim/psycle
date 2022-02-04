@@ -1,6 +1,6 @@
 /*
 ** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -52,7 +52,9 @@ void clockbar_updatelabel(ClockBar* self)
 	currtime = time(NULL) - self->start;		
 	psy_snprintf(text, 40, "%02ld:%02ld",
 		(int)(currtime / 3600.0), (int)(currtime / 60.0) % 60);
+#ifndef PSYCLE_DEBUG_PREVENT_TIMER_DRAW
 	psy_ui_label_settext(&self->position, text);
+#endif
 }
 
 void clockbar_onsongchanged(ClockBar* self, Workspace* sender)

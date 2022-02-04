@@ -1,17 +1,22 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "newmachinedetail.h"
-// host
+/* host */
 #include "resources/resource.h"
 #include "styles.h"
-// platform
+/* platform */
 #include "../../detail/portable.h"
 
-// NewMachineDetail
-// prototypes
+
+/* NewMachineDetail */
+
+/* prototypes */
 static void newmachinedetail_onloadnewblitz(NewMachineDetail*,
 	psy_ui_Component* sender);
 static void newmachinedetail_oncategoryeditaccept(NewMachineDetail*,
@@ -19,7 +24,8 @@ static void newmachinedetail_oncategoryeditaccept(NewMachineDetail*,
 static void newmachinedetail_oncategoryeditreject(NewMachineDetail*,
 	psy_ui_Component* sender);
 static void newmachinedetail_ondestroy(NewMachineDetail*);
-// vtable
+
+/* vtable */
 static psy_ui_ComponentVtable newmachinedetail_vtable;
 static bool newmachinedetail_vtable_initialized = FALSE;
 
@@ -34,7 +40,8 @@ static void newmachinedetail_vtable_init(NewMachineDetail* self)
 	}
 	self->component.vtable = &newmachinedetail_vtable;
 }
-// implementation
+
+/* implementation */
 void newmachinedetail_init(NewMachineDetail* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {
@@ -42,7 +49,7 @@ void newmachinedetail_init(NewMachineDetail* self, psy_ui_Component* parent,
 	psy_ui_Margin spacing;
 	double numcol0;
 
-	// component
+	/* component */
 	psy_ui_component_init(&self->component, parent, NULL);
 	newmachinedetail_vtable_init(self);
 	psy_ui_component_setstyletype(&self->component,
@@ -75,10 +82,8 @@ void newmachinedetail_init(NewMachineDetail* self, psy_ui_Component* parent,
 	psy_ui_label_init_text(&self->compatlabel, &self->bottom,
 		"newmachine.song-loading-compatibility");
 	psy_ui_label_settextalignment(&self->compatlabel, psy_ui_ALIGNMENT_LEFT);
-	psy_ui_checkbox_init_multiline(&self->compatblitzgamefx, &self->bottom);
-	psy_ui_checkbox_settext(&self->compatblitzgamefx,
+	psy_ui_checkbox_init_text(&self->compatblitzgamefx, &self->bottom,	
 		"newmachine.jme-version-unknown");
-	self->compatblitzgamefx.multiline = TRUE;
 	if (compatconfig_loadnewblitz(psycleconfig_compat(
 			workspace_conf(self->workspace)))) {
 		psy_ui_checkbox_check(&self->compatblitzgamefx);
@@ -87,12 +92,12 @@ void newmachinedetail_init(NewMachineDetail* self, psy_ui_Component* parent,
 		newmachinedetail_onloadnewblitz);	
 	psy_ui_margin_init_em(&margin, 0.0, 0.0, 0.5, 0.0);
 	psy_ui_component_setmargin(psy_ui_label_base(&self->compatlabel), margin);	
-	// details	
+	/* details */
 	psy_ui_component_init(&self->details, &self->component, NULL);
 	psy_ui_component_setalign(&self->details, psy_ui_ALIGN_BOTTOM);
 	psy_ui_component_setdefaultalign(&self->details, psy_ui_ALIGN_TOP,
 		psy_ui_defaults_vmargin(psy_ui_defaults())); 
-	// category
+	/* category */
 	psy_ui_component_init(&self->category, &self->details, NULL);	
 	psy_ui_label_init_text(&self->categorydesc, &self->category,
 		"newmachine.category");

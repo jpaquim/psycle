@@ -494,7 +494,8 @@ void psy_ui_app_starttimer(psy_ui_App* self, psy_ui_Component* component, uintpt
 	uintptr_t interval)
 {	
 	psy_timers_addtimer(&self->wintimers, (uintptr_t)component, component,
-		(psy_fp_timerwork)component->vtable->ontimer, id, interval);
+		(psy_fp_timerwork)component->vtable->ontimer, 
+		&component->signal_timer, id, interval);
 }
 
 void psy_ui_app_stoptimer(psy_ui_App* self, psy_ui_Component* component, uintptr_t id)

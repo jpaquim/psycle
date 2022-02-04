@@ -69,7 +69,8 @@ void pianoruler_ondraw(PianoRuler* self, psy_ui_Graphics* g)
 {	
 	assert(self);
 
-	pianoruler_drawruler(self, g, pianoruler_clipselection(self, g->clip));
+	pianoruler_drawruler(self, g, pianoruler_clipselection(self,
+		psy_ui_cliprect(g)));
 }
 
 psy_audio_BlockSelection pianoruler_clipselection(PianoRuler* self,
@@ -111,7 +112,7 @@ void pianoruler_drawruler(PianoRuler* self, psy_ui_Graphics* g,
 	size = psy_ui_component_scrollsize_px(&self->component);	
 	baseline = size.height - 1;
 	baselinetop = baseline - tm->tmHeight / 3;
-	scrollleft = psy_ui_component_scrollleftpx(&self->component);
+	scrollleft = psy_ui_component_scrollleft_px(&self->component);
 	psy_ui_setcolour(g, patternviewskin_rowbeatcolour(patternviewstate_skin(self->gridstate->pv),
 		0, 0));
 	psy_ui_drawline(g, psy_ui_realpoint_make(scrollleft, baseline),

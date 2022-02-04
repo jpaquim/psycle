@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #ifndef psy_ui_EVENTS_H
@@ -13,16 +13,18 @@
 extern "C" {
 #endif
 
+#define psy_ui_CURRENT_TIME 0
+
 typedef enum psy_ui_EventType {
 	psy_ui_UNKNOWNEVENT  = 1,
 	psy_ui_KEYDOWN       = 2,
 	psy_ui_KEYUP         = 3,
 	psy_ui_MOUSEDOWN     = 4,
 	psy_ui_MOUSEUP       = 5,
-	psy_ui_MOUSEMOVE     = 6,	
-	psy_ui_MOUSEENTER	 = 7,
-	psy_ui_MOUSELEAVE    = 8,
-	psy_ui_DBLCLICK      = 9,
+	psy_ui_MOUSEMOVE     = 6,
+	psy_ui_DBLCLICK		 = 7,
+	psy_ui_MOUSEENTER	 = 8,
+	psy_ui_MOUSELEAVE    = 9,	
 	psy_ui_DRAG          = 10,
 	psy_ui_FOCUS         = 11,
 	psy_ui_FOCUSOUT      = 12,
@@ -66,6 +68,18 @@ INLINE bool psy_ui_event_bubbles(const psy_ui_Event* self)
 INLINE void psy_ui_event_stop_propagation(psy_ui_Event* self)
 {
 	self->bubbles = FALSE;
+}
+
+INLINE void psy_ui_event_settarget(psy_ui_Event* self,
+	struct psy_ui_Component* component)
+{
+	self->target = component;
+}
+
+INLINE void psy_ui_event_setcurrenttarget(psy_ui_Event* self,
+	struct psy_ui_Component* component)
+{
+	self->currenttarget = component;
 }
 
 /*
@@ -129,19 +143,19 @@ INLINE void psy_ui_keyboardevent_settype(psy_ui_KeyboardEvent* self,
 
 /* psy_ui_MouseEvent */
 typedef struct psy_ui_MouseEvent {
-	psy_ui_Event event;
-	psy_ui_RealPoint pt;
-	psy_ui_RealPoint offset;
-	uintptr_t button;
-	intptr_t delta;
-	bool shift_key;
-	bool ctrl_key;	
+	/* inherits */
+	psy_ui_Event event;	
+	/* internal */
+	psy_ui_RealPoint offset_;
+	uintptr_t button_;
+	intptr_t delta_;
+	bool shift_key_;
+	bool ctrl_key_;
 } psy_ui_MouseEvent;
-
 
 void psy_ui_mouseevent_init(psy_ui_MouseEvent*);
 void psy_ui_mouseevent_init_all(psy_ui_MouseEvent*, psy_ui_RealPoint,
-	psy_ui_RealPoint /* offset */, uintptr_t button, intptr_t delta,
+	uintptr_t button, intptr_t delta,
 	bool shift, bool ctrl);
 
 INLINE void psy_ui_mouseevent_stop_propagation(psy_ui_MouseEvent* self)
@@ -176,7 +190,41 @@ INLINE void psy_ui_mouseevent_settype(psy_ui_MouseEvent* self,
 */
 INLINE psy_ui_RealPoint psy_ui_mouseevent_offset(const psy_ui_MouseEvent* self)
 {
-	return self->offset;
+	return self->offset_;
+}
+
+INLINE void psy_ui_mouseevent_setoffset(psy_ui_MouseEvent* self,
+	psy_ui_RealPoint offset)
+{
+	self->offset_ = offset;
+}
+
+INLINE uintptr_t psy_ui_mouseevent_button(const psy_ui_MouseEvent* self)
+{
+	return self->button_;
+}
+
+INLINE uintptr_t psy_ui_mouseevent_delta(const psy_ui_MouseEvent* self)
+{
+	return self->delta_;
+}
+
+/*
+** X/Y offset coordinate of the mouse pointer relative to the content edge of
+** the current target
+*/
+psy_ui_RealPoint psy_ui_mouseevent_pt(const psy_ui_MouseEvent* self);
+
+/* returns TRUE if the Ctrl key was pressed down when the event occurred. */
+INLINE bool psy_ui_mouseevent_ctrlkey(const psy_ui_MouseEvent* self)
+{
+	return self->ctrl_key_;
+}
+
+/* returns TRUE if the Shift key was pressed down when the event occurred */
+INLINE bool psy_ui_mouseevent_shiftkey(const psy_ui_MouseEvent* self)
+{
+	return self->shift_key_;
 }
 
 /* Forward Handler for dataTransfer */

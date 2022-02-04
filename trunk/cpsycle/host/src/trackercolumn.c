@@ -326,39 +326,39 @@ void trackercolumn_onmousedown(TrackerColumn* self, psy_ui_MouseEvent* ev)
 	double notewidth;
 	TrackDef* trackdef;
 
-	if (ev->button != 1) {
+	if (psy_ui_mouseevent_button(ev) != 1) {
 		return;
 	}	
 	trackdef = trackerstate_trackdef(self->state, self->track);
 	notewidth = trackdef_columnwidth(trackdef, 0,
 		self->state->trackconfig->textwidth);
 	size = psy_ui_component_size_px(&self->component);
-	if (ev->pt.x > notewidth - 5 && ev->pt.x < notewidth) {
+	if (psy_ui_mouseevent_pt(ev).x > notewidth - 5 && psy_ui_mouseevent_pt(ev).x < notewidth) {
 		self->state->trackconfig->multicolumn = FALSE;
 		trackdrag_start(&self->state->trackconfig->resize, self->track,
 			size.width);
-	} else if (ev->pt.x > size.width - 5) {
+	} else if (psy_ui_mouseevent_pt(ev).x > size.width - 5) {
 		self->state->trackconfig->multicolumn = TRUE;
 		trackdrag_start(&self->state->trackconfig->resize, self->track,
-			size.width);
+			size.width);		
 	} else {
 		if (psy_audio_blockselection_valid(&self->state->pv->selection)) {
 			psy_audio_blockselection_disable(&self->state->pv->selection);
 			psy_ui_component_invalidate(psy_ui_component_parent(&self->component));
 		}
 		self->state->pv->dragselectionbase = trackerstate_makecursor(
-			self->state, ev->pt, self->track);
+			self->state, psy_ui_mouseevent_pt(ev), self->track);
 	}
-	if (trackdrag_active(&self->state->trackconfig->resize)) {
-		psy_ui_component_invalidate(&self->component);
+	if (trackdrag_active(&self->state->trackconfig->resize)) {		
 		psy_ui_component_capture(&self->component);
+		trackconfig_resize(self->state->trackconfig, self->track, size.width);
 	}	
 }
 
 void trackercolumn_onmousemove(TrackerColumn* self, psy_ui_MouseEvent* ev)
 {			
-	trackconfig_resize(self->state->trackconfig, self->track, ev->pt.x);		
-	trackercolumn_updatecursor(self, ev->pt.x);
+	trackconfig_resize(self->state->trackconfig, self->track, psy_ui_mouseevent_pt(ev).x);
+	trackercolumn_updatecursor(self, psy_ui_mouseevent_pt(ev).x);
 }
 
 void trackercolumn_updatecursor(TrackerColumn* self, double position)
@@ -387,7 +387,8 @@ bool trackercolumn_isovercolumn(const TrackerColumn* self, double position)
 void trackercolumn_onmouseup(TrackerColumn* self, psy_ui_MouseEvent* ev)
 {
 	psy_ui_component_releasecapture(&self->component);	
-	trackconfig_resize(self->state->trackconfig, self->track, ev->pt.x);
+	trackconfig_resize(self->state->trackconfig, self->track,
+		psy_ui_mouseevent_pt(ev).x);
 }
 
 void trackercolumn_onpreferredsize(TrackerColumn* self,

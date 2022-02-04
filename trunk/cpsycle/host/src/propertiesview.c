@@ -224,7 +224,7 @@ void propertiesrenderline_onmousedown(PropertiesRenderLine* self,
 		psy_ui_mouseevent_stop_propagation(ev);
 		return;
 	}
-	if (ev->button == 1) {
+	if (psy_ui_mouseevent_button(ev) == 1) {
 		self->state->dialogbutton = (self->dialogbutton &&
 			ev->event.target == &self->dialogbutton->component);
 		self->state->property = NULL;
@@ -691,7 +691,7 @@ void propertiesrenderer_onmousedown(PropertiesRenderer* self,
 {
 	psy_Property* selected;
 
-	if (ev->button != 1) {
+	if (psy_ui_mouseevent_button(ev) != 1) {
 		if (self->state.preventmousepropagation) {
 			psy_ui_mouseevent_stop_propagation(ev);
 		}

@@ -113,7 +113,8 @@ void linesperbeatbar_update(LinesPerBeatBar* self)
 
 		self->lpb = psy_audio_player_lpb(self->player);
 		psy_snprintf(text, 64, "%d", (int)self->lpb);
+#ifndef PSYCLE_DEBUG_PREVENT_TIMER_DRAW
 		psy_ui_label_settext(&self->number, text);
-		psy_ui_component_update(&self->number.component);
+#endif
 	}
 }

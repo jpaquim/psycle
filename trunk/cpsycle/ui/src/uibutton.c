@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -191,8 +191,7 @@ void psy_ui_button_ondraw(psy_ui_Button* self, psy_ui_Graphics* g)
 		psy_ui_RealSize destbpmsize;
 		double vcenter;		
 		double ratio;
-				
-		printf("%s\n", "draw bitmap");
+						
 		srcbpmsize = psy_ui_bitmap_size(&self->bitmapicon);		
 		ratio = (tm->tmAscent - tm->tmDescent) / srcbpmsize.height;
 		if (fabs(ratio - 1.0) < 0.15) {
@@ -200,8 +199,7 @@ void psy_ui_button_ondraw(psy_ui_Button* self, psy_ui_Graphics* g)
 		}		
 		destbpmsize.width = srcbpmsize.width * ratio;
 		destbpmsize.height = srcbpmsize.height * ratio;
-		vcenter = (size.height - destbpmsize.height) / 2.0;
-		
+		vcenter = (size.height - destbpmsize.height) / 2.0;		
 		
 #if defined(DIVERSALIS__OS__MICROSOFT)		
 		psy_ui_drawstretchedbitmap(g, &self->bitmapicon,
@@ -345,23 +343,16 @@ void psy_ui_button_onmouseup(psy_ui_Button* self, psy_ui_MouseEvent* ev)
 			psy_ui_mouseevent_stop_propagation(ev);
 			return;
 		}
-		self->buttonstate = ev->button;
-		if (self->allowrightclick || ev->button == 1) {
+		self->buttonstate = psy_ui_mouseevent_button(ev);
+		if (self->allowrightclick || psy_ui_mouseevent_button(ev) == 1) {
 			psy_ui_RealRectangle client_position;
-			psy_ui_RealSize size;
-			psy_ui_RealMargin spacing;
-			psy_ui_RealPoint pt;
-
-			size = psy_ui_component_scrollsize_px(psy_ui_button_base(self));
-			spacing = psy_ui_component_spacing_px(psy_ui_button_base(self));
-			pt = ev->pt;
-			pt.x += spacing.left;
-			pt.y += spacing.top;
-			client_position = psy_ui_realrectangle_make(
-				psy_ui_realpoint_zero(), size);
-			if (psy_ui_realrectangle_intersect(&client_position, pt)) {
-				self->shiftstate = ev->shift_key;
-				self->ctrlstate = ev->ctrl_key;
+						
+			client_position = psy_ui_realrectangle_make(psy_ui_realpoint_zero(),
+				psy_ui_component_scrollsize_px(psy_ui_button_base(self)));
+			if (psy_ui_realrectangle_intersect(&client_position,
+					psy_ui_mouseevent_offset(ev))) {
+				self->shiftstate = psy_ui_mouseevent_shiftkey(ev);
+				self->ctrlstate = psy_ui_mouseevent_ctrlkey(ev);
 				psy_signal_emit(&self->signal_clicked, self, 0);
 			}
 			if (self->stoppropagation) {

@@ -460,7 +460,7 @@ void newmachinecategorybar_ondragover(NewMachineCategoryBar* self, psy_ui_DragEv
 
 		component = (psy_ui_Component*)p->entry;
 		position = psy_ui_component_position(component);
-		if (psy_ui_realrectangle_intersect(&position, ev->mouse.pt)) {
+		if (psy_ui_realrectangle_intersect(&position, psy_ui_mouseevent_pt(&ev->mouse))) {
 			psy_ui_dragevent_prevent_default(ev);			
 			break;
 		}
@@ -482,7 +482,7 @@ void newmachinecategorybar_ondrop(NewMachineCategoryBar* self, psy_ui_DragEvent*
 
 		component = (psy_ui_Component*)p->entry;
 		position = psy_ui_component_position(component);
-		if (psy_ui_realrectangle_intersect(&position, ev->mouse.pt)) {
+		if (psy_ui_realrectangle_intersect(&position, psy_ui_mouseevent_pt(&ev->mouse))) {
 			/* todo avoid downcast */
 			button = (psy_ui_Button*)component;
 			break;

@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -11,26 +11,39 @@
 #include "uimaterial.h"
 #include "uiwintheme.h"
 
+
+/* prototypes */
+static void psy_ui_appstyles_initdarktheme(psy_ui_Styles*, bool keepfont);
 static void psy_ui_appstyles_initlighttheme(psy_ui_Styles*, bool keepfont);
 static void psy_ui_appstyles_inittheme_win98(psy_ui_Styles*, bool keepfont);
 
+/* implementation */
 void psy_ui_appstyles_inittheme(psy_ui_Styles* self, psy_ui_ThemeMode theme,
+	bool keepfont)
+{	
+	self->theme = theme;
+	switch (theme) {
+	case psy_ui_WIN98THEME:
+		psy_ui_appstyles_inittheme_win98(self, keepfont);
+		break;
+	case psy_ui_LIGHTTHEME:
+		psy_ui_appstyles_initlighttheme(self, keepfont);
+		break;
+	default:
+		psy_ui_appstyles_initdarktheme(self, keepfont);
+		break;
+	}	
+}
+
+/* DarkTheme */
+void psy_ui_appstyles_initdarktheme(psy_ui_Styles* self,
 	bool keepfont)
 {
 	psy_ui_Style* style;
 	psy_ui_MaterialTheme material;
-	psy_ui_Font oldfont;	
-
-	if (theme == psy_ui_WIN98THEME) {
-		psy_ui_appstyles_inittheme_win98(self, keepfont);
-		return;
-	}
-	if (theme == psy_ui_LIGHTTHEME) {
-		psy_ui_appstyles_initlighttheme(self, keepfont);
-		return;
-	}
-	self->theme = theme;
-	psy_ui_materialtheme_init(&material, theme);
+	psy_ui_Font oldfont;
+	
+	psy_ui_materialtheme_init(&material, self->theme);
 	/* root */
 	if (keepfont) {
 		style = psy_ui_styles_at(self, psy_ui_STYLE_ROOT);
@@ -42,19 +55,19 @@ void psy_ui_appstyles_inittheme(psy_ui_Styles* self, psy_ui_ThemeMode theme,
 		}
 	}
 	style = psy_ui_style_allocinit();
-	psy_ui_style_setcolours(style, 
+	psy_ui_style_setcolours(style,
 		psy_ui_colour_weighted(&material.onsurface, material.accent),
-			material.surface);
-	if (keepfont) {		
+		material.surface);
+	if (keepfont) {
 		psy_ui_font_init(&style->font, NULL);
-		psy_ui_font_copy(&style->font, &oldfont);		
+		psy_ui_font_copy(&style->font, &oldfont);
 	} else {
 		psy_ui_style_setfont(style, "Tahoma", -16);
 	}
 	if (keepfont) {
 		psy_ui_font_dispose(&oldfont);
 	}
-	psy_ui_styles_setstyle(self, psy_ui_STYLE_ROOT, style);	
+	psy_ui_styles_setstyle(self, psy_ui_STYLE_ROOT, style);
 	/* label */
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolour(style,
@@ -78,13 +91,13 @@ void psy_ui_appstyles_inittheme(psy_ui_Styles* self, psy_ui_ThemeMode theme,
 	psy_ui_styles_setstyle(self, psy_ui_STYLE_EDIT_FOCUS, style);
 	/* button */
 	style = psy_ui_style_allocinit();
-	psy_ui_style_setcolour(style, 
+	psy_ui_style_setcolour(style,
 		psy_ui_colour_weighted(&material.onsurface, material.medium));
 	psy_ui_style_setpadding_em(style, 0.25, 1.0, 0.25, 1.0);
-	psy_ui_styles_setstyle(self, psy_ui_STYLE_BUTTON, style);	
+	psy_ui_styles_setstyle(self, psy_ui_STYLE_BUTTON, style);
 	/* button::hover */
 	style = psy_ui_style_allocinit();
-	psy_ui_style_setcolours(style,		
+	psy_ui_style_setcolours(style,
 		psy_ui_colour_weighted(&material.onsurface, material.accent),
 		psy_ui_colour_make_overlay(4));
 	psy_ui_style_setpadding_em(style, 0.25, 1.0, 0.25, 1.0);
@@ -93,7 +106,7 @@ void psy_ui_appstyles_inittheme(psy_ui_Styles* self, psy_ui_ThemeMode theme,
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolour(style, material.secondary);
 	psy_ui_style_setpadding_em(style, 0.25, 1.0, 0.25, 1.0);
-	psy_ui_styles_setstyle(self, psy_ui_STYLE_BUTTON_SELECT, style);	
+	psy_ui_styles_setstyle(self, psy_ui_STYLE_BUTTON_SELECT, style);
 	/* button::active */
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolours(style,
@@ -111,7 +124,7 @@ void psy_ui_appstyles_inittheme(psy_ui_Styles* self, psy_ui_ThemeMode theme,
 	/* combobox */
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolour(style,
-		psy_ui_colour_weighted(&material.onprimary, material.medium));	
+		psy_ui_colour_weighted(&material.onprimary, material.medium));
 	psy_ui_styles_setstyle(self, psy_ui_STYLE_COMBOBOX, style);
 	/* combobox::hover */
 	style = psy_ui_style_allocinit();
@@ -128,8 +141,8 @@ void psy_ui_appstyles_inittheme(psy_ui_Styles* self, psy_ui_ThemeMode theme,
 		psy_ui_colour_weighted(&material.onprimary, material.medium));
 	psy_ui_styles_setstyle(self, psy_ui_STYLE_COMBOBOX_TEXT, style);
 	/* tabbar */
-	style = psy_ui_style_allocinit();	
-	psy_ui_styles_setstyle(self, psy_ui_STYLE_TABBAR, style);	
+	style = psy_ui_style_allocinit();
+	psy_ui_styles_setstyle(self, psy_ui_STYLE_TABBAR, style);
 	/* tab */
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolour(style,
@@ -145,7 +158,7 @@ void psy_ui_appstyles_inittheme(psy_ui_Styles* self, psy_ui_ThemeMode theme,
 	psy_ui_style_setmargin_em(style, 0.0, 0.3, 0.0, 0.0);
 	psy_ui_styles_setstyle(self, psy_ui_STYLE_TAB_HOVER, style);
 	/* tab::select */
-	style = psy_ui_style_allocinit();	
+	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolour(style, material.onprimary);
 	psy_ui_style_setpadding_em(style, 0.0, 1.9, 0.0, 1.0);
 	psy_ui_style_setmargin_em(style, 0.0, 0.3, 0.0, 0.0);
@@ -160,7 +173,7 @@ void psy_ui_appstyles_inittheme(psy_ui_Styles* self, psy_ui_ThemeMode theme,
 		psy_ui_colour_weighted(&material.primary, material.weak));
 	psy_ui_style_setpadding_em(style, 0.0, 1.9, 0.0, 1.0);
 	psy_ui_style_setmargin_em(style, 0.0, 0.3, 0.0, 0.0);
-	psy_ui_styles_setstyle(self, psy_ui_STYLE_TAB_LABEL, style);	
+	psy_ui_styles_setstyle(self, psy_ui_STYLE_TAB_LABEL, style);
 	/* scrollpane */
 	psy_ui_styles_setstyle(self, psy_ui_STYLE_SCROLLPANE,
 		psy_ui_style_allocinit_colours(
@@ -208,7 +221,7 @@ void psy_ui_appstyles_inittheme(psy_ui_Styles* self, psy_ui_ThemeMode theme,
 		psy_ui_colour_overlayed(&material.surface, &material.overlay, 0.05));
 	psy_ui_styles_setstyle(self, psy_ui_STYLE_SPLITTER, style);
 	/* splitter::hover */
-	style = psy_ui_style_allocinit();	
+	style = psy_ui_style_allocinit();
 	psy_ui_styles_setstyle(self, psy_ui_STYLE_SPLITTER_HOVER, style);
 	/* splitter::select */
 	style = psy_ui_style_allocinit();
@@ -239,6 +252,30 @@ void psy_ui_appstyles_inittheme(psy_ui_Styles* self, psy_ui_ThemeMode theme,
 	psy_ui_style_setcolour(style,
 		psy_ui_colour_weighted(&material.onprimary, material.medium));
 	psy_ui_styles_setstyle(self, psy_ui_STYLE_LISTBOX, style);
+	/* checkmark */
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolours(style,
+		psy_ui_colour_weighted(&material.onprimary, material.medium),
+		psy_ui_colour_make_overlay(8));
+	psy_ui_border_init_solid_radius(&style->border,
+		material.surface_overlay_8p, 6.0);
+	psy_ui_styles_setstyle(self, psy_ui_STYLE_CHECKMARK, style);
+	/* checkmark::hover */
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolours(style,
+		psy_ui_colour_weighted(&material.onprimary, material.medium),
+		psy_ui_colour_make_overlay(16));
+	psy_ui_border_init_solid_radius(&style->border,
+		material.surface_overlay_8p, 6.0);
+	psy_ui_styles_setstyle(self, psy_ui_STYLE_CHECKMARK_HOVER, style);
+	/* checkmark::select */
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolours(style,
+		psy_ui_colour_weighted(&material.onprimary, material.medium),
+		psy_ui_colour_weighted(&material.secondary, material.weak));
+	psy_ui_border_init_solid_radius(&style->border,
+		material.surface_overlay_8p, 6.0);
+	psy_ui_styles_setstyle(self, psy_ui_STYLE_CHECKMARK_SELECT, style);
 }
 
 /* LightTheme */
@@ -458,6 +495,10 @@ void psy_ui_appstyles_initlighttheme(psy_ui_Styles* self,
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolours(style, light.cl_font_1, light.cl_white);
 	psy_ui_styles_setstyle(self, psy_ui_STYLE_LISTBOX, style);
+	/* checkmark */
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolours(style, light.cl_font_1, light.cl_white);
+	psy_ui_styles_setstyle(self, psy_ui_STYLE_CHECKMARK, style);
 }
 
 
@@ -664,4 +705,8 @@ void psy_ui_appstyles_inittheme_win98(psy_ui_Styles* self, bool keepfont)
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolours(style, win.cl_black, win.cl_white);
 	psy_ui_styles_setstyle(self, psy_ui_STYLE_LISTBOX, style);
+	/* checkmark */
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolours(style, win.cl_black, win.cl_white);
+	psy_ui_styles_setstyle(self, psy_ui_STYLE_CHECKMARK, style);
 }

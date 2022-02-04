@@ -160,7 +160,7 @@ static void win_imp_vtable_init(psy_ui_win_GraphicsImp* self)
 void psy_ui_win_graphicsimp_init(psy_ui_win_GraphicsImp* self, HDC hdc)
 {
 	psy_ui_graphics_imp_init(&self->imp);
-	win_imp_vtable_init(self);	
+	win_imp_vtable_init(self);
 	self->hdc = hdc;
 	self->shareddc = TRUE;
 	self->pen = CreatePen(PS_SOLID, 1,
@@ -170,8 +170,8 @@ void psy_ui_win_graphicsimp_init(psy_ui_win_GraphicsImp* self, HDC hdc)
 	self->oldbmp = 0;
 	self->penprev = SelectObject(self->hdc, self->pen);
 	self->hFontPrev = SelectObject(self->hdc,
-		((psy_ui_win_FontImp*) psy_ui_style_const(psy_ui_STYLE_ROOT)->font.imp)->hfont);	
-	psy_ui_realpoint_init(&self->org);	
+		((psy_ui_win_FontImp*)psy_ui_style_const(psy_ui_STYLE_ROOT)->font.imp)->hfont);
+	psy_ui_realpoint_init(&self->org);
 	SetStretchBltMode(self->hdc, STRETCH_HALFTONE);
 }
 
@@ -182,7 +182,7 @@ void psy_ui_win_graphicsimp_init_bitmap(psy_ui_win_GraphicsImp* self, psy_ui_Bit
 
 	psy_ui_graphics_imp_init(&self->imp);
 	win_imp_vtable_init(self);
-	self->imp.vtable = &win_imp_vtable;	
+	self->imp.vtable = &win_imp_vtable;
 	hdc = GetDC(NULL);
 	SaveDC(hdc);
 	self->hdc = CreateCompatibleDC(hdc);
@@ -190,7 +190,7 @@ void psy_ui_win_graphicsimp_init_bitmap(psy_ui_win_GraphicsImp* self, psy_ui_Bit
 	RestoreDC(hdc, -1);
 	ReleaseDC(NULL, hdc);
 	imp = (psy_ui_win_BitmapImp*)bitmap->imp;
-	self->oldbmp = SelectObject(self->hdc, imp->bitmap);		
+	self->oldbmp = SelectObject(self->hdc, imp->bitmap);
 	self->pen = CreatePen(PS_SOLID, 1,
 		psy_ui_colour_colorref(&psy_ui_style_const(psy_ui_STYLE_ROOT)->colour));
 	self->brush = 0;
@@ -198,8 +198,8 @@ void psy_ui_win_graphicsimp_init_bitmap(psy_ui_win_GraphicsImp* self, psy_ui_Bit
 	self->penprev = SelectObject(self->hdc, self->pen);
 	self->hFontPrev = SelectObject(self->hdc,
 		((psy_ui_win_FontImp*)psy_ui_style_const(psy_ui_STYLE_ROOT)->font.imp)->hfont);
-	psy_ui_realpoint_init(&self->org);	
-	SetStretchBltMode(self->hdc, STRETCH_HALFTONE);	
+	psy_ui_realpoint_init(&self->org);
+	SetStretchBltMode(self->hdc, STRETCH_HALFTONE);
 }
 
 void psy_ui_win_g_imp_dispose(psy_ui_win_GraphicsImp* self)
@@ -210,7 +210,7 @@ void psy_ui_win_g_imp_dispose(psy_ui_win_GraphicsImp* self)
 		DeleteObject(self->pen);
 	}
 	if (self->oldbmp) {
-		SelectObject(self->hdc, self->oldbmp);		
+		SelectObject(self->hdc, self->oldbmp);
 	}
 	if (!self->shareddc) {
 		DeleteDC(self->hdc);
@@ -238,12 +238,12 @@ void psy_ui_win_g_imp_textoutrectangle(psy_ui_win_GraphicsImp* self, double x, d
 	if ((options & psy_ui_ETO_CLIPPED) == psy_ui_ETO_CLIPPED) {
 		woptions |= ETO_CLIPPED;
 	}
-    SetRect (&rect,
+	SetRect(&rect,
 		(int)r.left - (int)(self->org.x),
 		(int)r.top - (int)(self->org.y),
 		(int)r.right - (int)(self->org.x),
-		(int)r.bottom - (int)(self->org.y)) ;
-	ExtTextOut(self->hdc, 
+		(int)r.bottom - (int)(self->org.y));
+	ExtTextOut(self->hdc,
 		(int)x - (int)(self->org.x),
 		(int)y - (int)(self->org.y),
 		(UINT)woptions, &rect, text, (int)len, NULL);
@@ -255,7 +255,7 @@ psy_ui_Size psy_ui_win_g_imp_textsize(psy_ui_win_GraphicsImp* self, const char* 
 
 	if (text) {
 		SIZE size;
-						
+
 		GetTextExtentPoint(self->hdc, text, (int)count, &size);
 		rv.width = psy_ui_value_make_px(size.cx);
 		rv.height = psy_ui_value_make_px(size.cy);
@@ -272,8 +272,8 @@ void psy_ui_win_g_imp_drawrectangle(psy_ui_win_GraphicsImp* self,
 	HBRUSH hBrush;
 	HBRUSH hOldBrush;
 
-	hBrush = GetStockObject (NULL_BRUSH);
-	hOldBrush = SelectObject (self->hdc, hBrush);
+	hBrush = GetStockObject(NULL_BRUSH);
+	hOldBrush = SelectObject(self->hdc, hBrush);
 	Rectangle(self->hdc,
 		(int)r.left - (int)(self->org.x),
 		(int)r.top - (int)(self->org.y),
@@ -286,10 +286,10 @@ void psy_ui_win_g_imp_drawroundrectangle(psy_ui_win_GraphicsImp* self,
 	const psy_ui_RealRectangle r, psy_ui_RealSize cornersize)
 {
 	HBRUSH hBrush;
-	HBRUSH hOldBrush;	
-	
-	hBrush = GetStockObject (NULL_BRUSH);
-	hOldBrush = SelectObject(self->hdc, hBrush);	
+	HBRUSH hOldBrush;
+
+	hBrush = GetStockObject(NULL_BRUSH);
+	hOldBrush = SelectObject(self->hdc, hBrush);
 	RoundRect(self->hdc,
 		(int)r.left - (int)(self->org.x),
 		(int)r.top - (int)(self->org.y),
@@ -301,7 +301,7 @@ void psy_ui_win_g_imp_drawroundrectangle(psy_ui_win_GraphicsImp* self,
 
 void psy_ui_win_g_imp_drawsolidrectangle(psy_ui_win_GraphicsImp* self,
 	const psy_ui_RealRectangle r, psy_ui_Colour colour)
-{	
+{
 	HBRUSH hBrush;
 	RECT   rect;
 
@@ -327,7 +327,7 @@ void psy_ui_win_g_imp_drawsolidroundrectangle(psy_ui_win_GraphicsImp* self,
 	TEXTMETRIC win_tm;
 
 	hBrush = CreateSolidBrush(psy_ui_colour_colorref(&colour));
-	hOldBrush = SelectObject (self->hdc, hBrush);
+	hOldBrush = SelectObject(self->hdc, hBrush);
 	hPen = CreatePen(PS_SOLID, 1, psy_ui_colour_colorref(&colour));
 	hOldPen = SelectObject(self->hdc, hPen);
 	GetTextMetrics(self->hdc, &win_tm);
@@ -340,17 +340,17 @@ void psy_ui_win_g_imp_drawsolidroundrectangle(psy_ui_win_GraphicsImp* self,
 		(int)cornersize.width, (int)cornersize.height);
 	SelectObject(self->hdc, hOldBrush);
 	SelectObject(self->hdc, hOldPen);
-	DeleteObject(hBrush) ;
-	DeleteObject(hPen) ;
+	DeleteObject(hBrush);
+	DeleteObject(hPen);
 }
 
 void psy_ui_win_g_imp_drawsolidpolygon(psy_ui_win_GraphicsImp* self,
 	psy_ui_RealPoint* pts, uintptr_t numpoints, uint32_t inner,
 	uint32_t outter)
 {
-	HBRUSH hBrush;     
+	HBRUSH hBrush;
 	HBRUSH hBrushPrev;
-	HPEN hPen;     
+	HPEN hPen;
 	HPEN hPenPrev;
 	POINT* wpts;
 	uintptr_t i;
@@ -359,16 +359,16 @@ void psy_ui_win_g_imp_drawsolidpolygon(psy_ui_win_GraphicsImp* self,
 	for (i = 0; i < numpoints; ++i) {
 		wpts[i].x = (int)pts[i].x - (int)(self->org.x);
 		wpts[i].y = (int)pts[i].y - (int)(self->org.y);
-	}    
-    hBrush = CreateSolidBrush(inner);
+	}
+	hBrush = CreateSolidBrush(inner);
 	hBrushPrev = SelectObject(self->hdc, hBrush);
 	hPen = CreatePen(PS_SOLID, 1, outter);
-	hPenPrev = SelectObject(self->hdc, hPen);	
+	hPenPrev = SelectObject(self->hdc, hPen);
 	Polygon(self->hdc, wpts, (int)numpoints);
 	SelectObject(self->hdc, hBrushPrev);
 	SelectObject(self->hdc, hPenPrev);
-    DeleteObject (hBrush);
-	DeleteObject (hPen);
+	DeleteObject(hBrush);
+	DeleteObject(hPen);
 	free(wpts);
 }
 
@@ -383,7 +383,7 @@ void psy_ui_win_g_imp_drawfullbitmap(psy_ui_win_GraphicsImp* self,
 
 	hdcmem = CreateCompatibleDC(self->hdc);
 	wbitmap = ((psy_ui_win_BitmapImp*)bitmap->imp)->bitmap;
-	SelectObject (hdcmem, wbitmap);
+	SelectObject(hdcmem, wbitmap);
 	size = psy_ui_bitmap_size(bitmap);
 	GetTextMetrics(self->hdc, &win_tm);
 	tm = converttextmetric(&win_tm);
@@ -404,7 +404,7 @@ void psy_ui_win_g_imp_drawbitmap(psy_ui_win_GraphicsImp* self,
 	HBITMAP wbitmap;
 	psy_ui_win_BitmapImp* winimp;
 
-	winimp = (psy_ui_win_BitmapImp*)bitmap->imp;	
+	winimp = (psy_ui_win_BitmapImp*)bitmap->imp;
 	mask = winimp->mask;
 	wbitmap = winimp->bitmap;
 	hdcmem = CreateCompatibleDC(self->hdc);
@@ -459,7 +459,7 @@ void psy_ui_win_g_imp_drawstretchedbitmap(psy_ui_win_GraphicsImp* self,
 		restoretextcolour = GetTextColor(self->hdc);
 		SelectObject(hdcmem, winimp->mask);
 		SetTextColor(self->hdc, RGB(0, 0, 0));
-		SetBkColor(self->hdc, RGB(255, 255, 255));		
+		SetBkColor(self->hdc, RGB(255, 255, 255));
 		StretchBlt(self->hdc, (int)x - (int)(self->org.x), (int)y - (int)(self->org.y), (int)width, (int)height, hdcmem, (int)xsrc, (int)ysrc, (int)wsrc, (int)hsrc,
 			SRCAND);
 		SelectObject(hdcmem, wbitmap);
@@ -495,9 +495,9 @@ void psy_ui_win_g_imp_setbackgroundmode(psy_ui_win_GraphicsImp* self, uintptr_t 
 	if (mode == psy_ui_TRANSPARENT) {
 		SetBkMode(self->hdc, TRANSPARENT);
 	} else
-	if (mode == psy_ui_OPAQUE) {
-		SetBkMode(self->hdc, OPAQUE);
-	}
+		if (mode == psy_ui_OPAQUE) {
+			SetBkMode(self->hdc, OPAQUE);
+		}
 }
 
 void psy_ui_win_g_imp_setbackgroundcolour(psy_ui_win_GraphicsImp* self, psy_ui_Colour colour)
@@ -511,13 +511,13 @@ void psy_ui_win_g_imp_settextcolour(psy_ui_win_GraphicsImp* self, psy_ui_Colour 
 }
 
 void psy_ui_win_g_imp_settextalign(psy_ui_win_GraphicsImp* self, uintptr_t align)
-{	
+{
 	SetTextAlign(self->hdc, (UINT)align);
 }
 
 void psy_ui_win_g_imp_setfont(psy_ui_win_GraphicsImp* self, psy_ui_Font* font)
-{	
-	if (font && ((psy_ui_win_FontImp*)font->imp)->hfont) {		
+{
+	if (font && ((psy_ui_win_FontImp*)font->imp)->hfont) {
 		SelectObject(self->hdc, ((psy_ui_win_FontImp*)font->imp)->hfont);
 	}
 }
@@ -525,12 +525,12 @@ void psy_ui_win_g_imp_setfont(psy_ui_win_GraphicsImp* self, psy_ui_Font* font)
 void psy_ui_win_g_imp_drawline(psy_ui_win_GraphicsImp* self,
 	double x1, double y1, double x2, double y2)
 {
-	MoveToEx(self->hdc, (int)x1 - (int)(self->org.x), (int)y1 - (int)(self->org.y), NULL) ;
+	MoveToEx(self->hdc, (int)x1 - (int)(self->org.x), (int)y1 - (int)(self->org.y), NULL);
 	LineTo(self->hdc, (int)x2 - (int)(self->org.x), (int)y2 - (int)(self->org.y));
 }
 
 void psy_ui_win_g_imp_moveto(psy_ui_win_GraphicsImp* self, psy_ui_RealPoint pt)
-{	
+{
 	MoveToEx(self->hdc, (int)pt.x - (int)(self->org.x), (int)pt.y - (int)(self->org.y), NULL);
 }
 
@@ -539,14 +539,14 @@ void psy_ui_win_g_imp_devcurveto(psy_ui_win_GraphicsImp* self,
 	psy_ui_RealPoint p)
 {
 	POINT pts[3];
-   
+
 	pts[0].x = (int)control_p1.x - (int)(self->org.x);
 	pts[0].y = (int)control_p1.y - (int)(self->org.y);
-pts[1].x = (int)control_p2.x - (int)(self->org.x);
-pts[1].y = (int)control_p2.y - (int)(self->org.y);
-pts[2].x = (int)p.x;
-pts[2].y = (int)p.y;
-PolyBezierTo(self->hdc, pts, 3);
+	pts[1].x = (int)control_p2.x - (int)(self->org.x);
+	pts[1].y = (int)control_p2.y - (int)(self->org.y);
+	pts[2].x = (int)p.x;
+	pts[2].y = (int)p.y;
+	PolyBezierTo(self->hdc, pts, 3);
 }
 
 void psy_ui_win_g_imp_devdrawarc(psy_ui_win_GraphicsImp* self,
@@ -640,8 +640,15 @@ uintptr_t psy_ui_win_g_dev_gc(psy_ui_win_GraphicsImp* self)
 
 void psy_ui_win_g_dev_setcliprect(psy_ui_win_GraphicsImp* self, psy_ui_RealRectangle clip)
 {
+	self->clip = psy_ui_realrectangle_make(
+		psy_ui_realpoint_make(
+			clip.left - (int)(self->org.x),
+			clip.top - (int)(self->org.y)),
+		psy_ui_realsize_make(
+			clip.right - clip.left,
+			clip.bottom - clip.top));
 	if ((((int)clip.right - (int)clip.left) == 0) ||
-			(((int)clip.bottom - (int)clip.top) == 0)) {
+		(((int)clip.bottom - (int)clip.top) == 0)) {
 		SelectClipRgn(self->hdc, NULL);
 	} else {
 		HRGN rgn;
@@ -661,11 +668,20 @@ psy_ui_RealRectangle psy_ui_win_g_dev_cliprect(const psy_ui_win_GraphicsImp* sel
 	psy_ui_RealRectangle rv;
 	HRGN rgn;
 
+	rv = psy_ui_realrectangle_make(
+		psy_ui_realpoint_make(
+			self->clip.left + (int)(self->org.x),
+			self->clip.top + (int)(self->org.y)),
+		psy_ui_realsize_make(
+			self->clip.right - self->clip.left,
+			self->clip.bottom - self->clip.top));
+	return rv;
+
 	rgn = CreateRectRgn(0, 0, 0, 0);
 	if (GetClipRgn(self->hdc, rgn) != -1) {
 		RECT rc;
 
-		GetRgnBox(rgn, &rc);	
+		GetRgnBox(rgn, &rc);
 		rv = psy_ui_realrectangle_make(
 			psy_ui_realpoint_make(
 				rc.left + (int)(self->org.x),
@@ -673,6 +689,14 @@ psy_ui_RealRectangle psy_ui_win_g_dev_cliprect(const psy_ui_win_GraphicsImp* sel
 			psy_ui_realsize_make(
 				rc.right - rc.left,
 				rc.bottom - rc.top));
+		rv = psy_ui_realrectangle_make(
+			psy_ui_realpoint_make(
+				self->clip.left + (int)(self->org.x),
+				self->clip.top + (int)(self->org.y)),
+			psy_ui_realsize_make(
+				self->clip.right - self->clip.left,
+				self->clip.bottom - self->clip.top));
+		return rv;
 	} else {
 		rv = psy_ui_realrectangle_zero();
 	}

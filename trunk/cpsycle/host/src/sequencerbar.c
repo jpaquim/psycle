@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -39,23 +39,17 @@ void sequencerbar_init(SequencerBar* self, psy_ui_Component* parent,
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_TOP,
 		margin);
 	self->workspace = workspace;
-	psy_ui_checkbox_init_multiline(&self->followsong, &self->component);
-	psy_ui_checkbox_settext(&self->followsong,
+	psy_ui_checkbox_init_text(&self->followsong, &self->component,	
 		"seqview.follow-song");	
-	psy_ui_checkbox_init_multiline(&self->shownames, &self->component);	
-	psy_ui_checkbox_settext(&self->shownames,
+	psy_ui_checkbox_init_text(&self->shownames, &self->component,	
 		"seqview.show-pattern-names");			
-	psy_ui_checkbox_init_multiline(&self->recordnoteoff, &self->component);
-	psy_ui_checkbox_settext(&self->recordnoteoff,
+	psy_ui_checkbox_init_text(&self->recordnoteoff, &self->component,
 		"seqview.record-noteoff");	
-	psy_ui_checkbox_init_multiline(&self->recordtweak, &self->component);
-	psy_ui_checkbox_settext(&self->recordtweak,
+	psy_ui_checkbox_init_text(&self->recordtweak, &self->component,
 		"seqview.record-tweak");	
-	psy_ui_checkbox_init_multiline(&self->multichannelaudition, &self->component);
-	psy_ui_checkbox_settext(&self->multichannelaudition,
+	psy_ui_checkbox_init_text(&self->multichannelaudition, &self->component,
 		"seqview.multichannel-audition");			
-	psy_ui_checkbox_init_multiline(&self->allownotestoeffect, &self->component);
-	psy_ui_checkbox_settext(&self->allownotestoeffect,
+	psy_ui_checkbox_init_text(&self->allownotestoeffect, &self->component,
 		"seqview.allow-notes-to_effect");						
 	psy_ui_button_init_text(&self->togglestepseq, &self->component,
 		"seqview.showstepsequencer");

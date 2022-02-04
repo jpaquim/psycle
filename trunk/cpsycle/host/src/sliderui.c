@@ -99,7 +99,9 @@ void sliderui_ondraw(SliderUi* self, psy_ui_Graphics* g)
 	sliderui_updateparam(self);
 	size = psy_ui_component_size_px(&self->component);
 	/*  todo: make the slider scalable */
-	psy_ui_setrectangle(&r, 0, 0, size.width, size.height);
+	r = psy_ui_realrectangle_make(
+			psy_ui_realpoint_make(0, 0),
+			psy_ui_realsize_make(size.width, size.height));
 	psy_ui_drawsolidrectangle(g, r, self->skin->bottomcolour);
 	skin_blitcoord(g, &self->skin->mixerbitmap,
 		psy_ui_realpoint_zero(), &self->skin->slider);
@@ -132,7 +134,7 @@ void sliderui_onpreferredsize(SliderUi* self, const psy_ui_Size* limit,
 
 void sliderui_onmousedown(SliderUi* self, psy_ui_MouseEvent* ev)
 {
-	if (ev->button == 1) {		
+	if (psy_ui_mouseevent_button(ev) == 1) {
 		paramtweak_begin(&self->paramtweak, self->machine, self->paramidx,
 			self->param);		
 		paramtweak_onmousedown(&self->paramtweak, ev);

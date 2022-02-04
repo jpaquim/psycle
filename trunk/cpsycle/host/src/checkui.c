@@ -113,7 +113,9 @@ void checkui_ondraw(CheckUi* self, psy_ui_Graphics* g)
 		skin_blitcoord(g, &self->skin->mixerbitmap,
 			psy_ui_realpoint_make(0, centery), &self->skin->checkon);
 	}
-	psy_ui_setrectangle(&r, 20, 0, size.width - 20, size.height);
+	r = psy_ui_realrectangle_make(
+		psy_ui_realpoint_make(20, 0),
+		psy_ui_realsize_make(size.width - 20, size.height));
 	if (self->param && !psy_audio_machineparam_name(self->param, label)) {
 		if (!psy_audio_machineparam_label(self->param, label)) {
 			psy_snprintf(label, 128, "%s", "");
@@ -143,8 +145,9 @@ void checkui_onpreferredsize(CheckUi* self, const psy_ui_Size* limit,
 
 void checkui_onmousedown(CheckUi* self, psy_ui_MouseEvent* ev)
 {
-	if (ev->button == 1) {
-		paramtweak_begin(&self->paramtweak, self->machine, self->paramidx, self->param);		
+	if (psy_ui_mouseevent_button(ev) == 1) {
+		paramtweak_begin(&self->paramtweak, self->machine, self->paramidx,
+			self->param);		
 		paramtweak_onmousedown(&self->paramtweak, ev);		
 		psy_ui_component_capture(&self->component);		
 	}

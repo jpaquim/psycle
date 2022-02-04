@@ -87,20 +87,20 @@ void scrollzoom_onmousedown(ScrollZoom* self, psy_ui_MouseEvent* ev)
 	
 	size = psy_ui_component_scrollsize_px(&self->component);	
 	zoomrightpx = size.width * self->end;
-	if (ev->pt.x >= zoomrightpx - 5.0 && ev->pt.x < zoomrightpx + 5.0) {
+	if (psy_ui_mouseevent_pt(ev).x >= zoomrightpx - 5.0 && psy_ui_mouseevent_pt(ev).x < zoomrightpx + 5.0) {
 		psy_ui_component_setcursor(&self->component, psy_ui_CURSORSTYLE_COL_RESIZE);
 		self->dragmode = SCROLLZOOM_DRAG_RIGHT;
-		self->dragoffset = ev->pt.x - zoomrightpx;
+		self->dragoffset = psy_ui_mouseevent_pt(ev).x - zoomrightpx;
 	} else {	
 		zoomleftpx = size.width * self->start;
-		if (ev->pt.x >= zoomleftpx - 5.0 && ev->pt.x < zoomleftpx + 5.0) {
+		if (psy_ui_mouseevent_pt(ev).x >= zoomleftpx - 5.0 && psy_ui_mouseevent_pt(ev).x < zoomleftpx + 5.0) {
 			psy_ui_component_setcursor(&self->component, psy_ui_CURSORSTYLE_COL_RESIZE);
 			self->dragmode = SCROLLZOOM_DRAG_LEFT;
-			self->dragoffset = ev->pt.x - zoomleftpx;
+			self->dragoffset = psy_ui_mouseevent_pt(ev).x - zoomleftpx;
 		} else
-		if (ev->pt.x > zoomleftpx && ev->pt.x < zoomrightpx) {
+		if (psy_ui_mouseevent_pt(ev).x > zoomleftpx && psy_ui_mouseevent_pt(ev).x < zoomrightpx) {
 			self->dragmode = SCROLLZOOM_DRAG_MOVE;
-			self->dragoffset = ev->pt.x - zoomleftpx;
+			self->dragoffset = psy_ui_mouseevent_pt(ev).x - zoomleftpx;
 		}
 	}
 	psy_ui_component_capture(&self->component);
@@ -116,11 +116,11 @@ void scrollzoom_onmousemove(ScrollZoom* self, psy_ui_MouseEvent* ev)
 		double zoomrightpx;
 
 		zoomleftpx = size.width * self->start;
-		if (ev->pt.x >= zoomleftpx - 5 && ev->pt.x < zoomleftpx + 5) {
+		if (psy_ui_mouseevent_pt(ev).x >= zoomleftpx - 5 && psy_ui_mouseevent_pt(ev).x < zoomleftpx + 5) {
 			psy_ui_component_setcursor(&self->component, psy_ui_CURSORSTYLE_COL_RESIZE);
 		} else {
 			zoomrightpx = size.width * self->end;
-			if (ev->pt.x >= zoomrightpx - 5 && ev->pt.x < zoomrightpx + 5) {
+			if (psy_ui_mouseevent_pt(ev).x >= zoomrightpx - 5 && psy_ui_mouseevent_pt(ev).x < zoomrightpx + 5) {
 				psy_ui_component_setcursor(&self->component, psy_ui_CURSORSTYLE_COL_RESIZE);
 			}
 		}
@@ -129,7 +129,7 @@ void scrollzoom_onmousemove(ScrollZoom* self, psy_ui_MouseEvent* ev)
 
 		psy_ui_component_setcursor(&self->component, psy_ui_CURSORSTYLE_COL_RESIZE);
 		zoomold = self->start;
-		self->start = (ev->pt.x - self->dragoffset) / size.width;
+		self->start = (psy_ui_mouseevent_pt(ev).x - self->dragoffset) / size.width;
 		if (self->start > self->end) {
 			self->start = self->end;
 		} else if (self->start < 0.0) {
@@ -146,7 +146,7 @@ void scrollzoom_onmousemove(ScrollZoom* self, psy_ui_MouseEvent* ev)
 
 		psy_ui_component_setcursor(&self->component, psy_ui_CURSORSTYLE_COL_RESIZE);
 		zoomold = self->end;
-		self->end = (ev->pt.x - self->dragoffset) / size.width;
+		self->end = (psy_ui_mouseevent_pt(ev).x - self->dragoffset) / size.width;
 		if (self->end < self->start) {
 			self->end = self->start;
 		} else if (self->end < 0.0) {
@@ -165,7 +165,7 @@ void scrollzoom_onmousemove(ScrollZoom* self, psy_ui_MouseEvent* ev)
 		
 		zoomold = self->start;
 		length = self->end - self->start;
-		self->start = (ev->pt.x - self->dragoffset) / size.width;
+		self->start = (psy_ui_mouseevent_pt(ev).x - self->dragoffset) / size.width;
 		if (self->start < 0.0) {
 			self->start = 0.0;			
 		}

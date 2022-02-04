@@ -13,6 +13,7 @@
 /* platform */
 #include "../../detail/portable.h"
 
+
 /* Contrib*/
 
 /* implementation */
@@ -87,6 +88,8 @@ void contrib_init(Contrib* self, psy_ui_Component* parent)
 	psy_ui_label_settext(&self->steincopyright,
 		"VST Virtual Studio Technology v2.4 (c)1998-2006 Steinberg");	
 }
+
+/* Version */
 
 void version_init(Version* self, psy_ui_Component* parent)
 {

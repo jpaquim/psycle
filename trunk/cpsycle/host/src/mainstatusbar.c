@@ -227,8 +227,10 @@ void mainstatusbar_idle(MainStatusBar* self)
 
 		psy_lock_enter(&self->outputlock);
 		for (p = self->strbuffer; p != NULL; p = p->next) {
+#ifndef PSYCLE_DEBUG_PREVENT_TIMER_DRAW
 			psy_ui_label_settext(&self->statusbarlabel, (const char*)p->entry);
-			psy_ui_label_fadeout(&self->statusbarlabel);			
+			psy_ui_label_fadeout(&self->statusbarlabel);
+#endif
 		}
 		psy_list_deallocate(&self->strbuffer, NULL);
 		psy_lock_leave(&self->outputlock);

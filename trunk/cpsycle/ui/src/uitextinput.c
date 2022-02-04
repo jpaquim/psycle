@@ -351,7 +351,7 @@ void psy_ui_textinput_onmousehook(psy_ui_TextInput* self, psy_ui_App* sender,
 			psy_ui_RealRectangle position;
 
 			position = psy_ui_component_screenposition(&self->component);			
-			if (!psy_ui_realrectangle_intersect(&position, ev->pt)) {
+			if (!psy_ui_realrectangle_intersect(&position, psy_ui_mouseevent_pt(ev))) {
 				self->preventedit = TRUE;
 				psy_ui_app_stopmousehook(psy_ui_app());
 				psy_signal_emit(&self->signal_accept, self, 0);

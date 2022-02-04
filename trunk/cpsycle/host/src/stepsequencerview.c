@@ -340,7 +340,7 @@ void stepsequencerbar_onmousedown(StepsequencerBar* self,
 			psy_ui_component_textmetric(&self->component), NULL);
 		bpl = (psy_dsp_big_beat_t) 1 / psy_audio_player_lpb(workspace_player(
 			self->state->workspace));
-		step = (intptr_t)(ev->pt.x / stepwidth + self->state->editposition.steprow * self->state->numtiles);
+		step = (intptr_t)(psy_ui_mouseevent_pt(ev).x / stepwidth + self->state->editposition.steprow * self->state->numtiles);
 		cursor = self->state->workspace->song->sequence.cursor;
 		cursor.column = 0;	
 		cursor.offset = step / (psy_dsp_big_beat_t) psy_audio_player_lpb(
@@ -497,12 +497,14 @@ void stepsequencerbarbutton_ondraw(StepSequencerBarButton* self,
 
 	assert(self);
 	
-	size = psy_ui_component_size_px(&self->component);		
-	psy_ui_setrectangle(&r_inner,
-		size.width / 2 - (int)(size.width * 0.2),
-		size.height / 2 - (int)(size.height * 0.2),
-		(int)(size.width * 0.4),
-		(int)(size.height * 0.4));
+	size = psy_ui_component_size_px(&self->component);	
+	r_inner = psy_ui_realrectangle_make(
+		psy_ui_realpoint_make(	
+			size.width / 2 - (int)(size.width * 0.2),
+			size.height / 2 - (int)(size.height * 0.2)),
+		psy_ui_realsize_make(
+			(int)(size.width * 0.4),
+			(int)(size.height * 0.4)));
 	r_outter = r_inner;
 	r_outter.left -= 3;
 	r_outter.right += 3;

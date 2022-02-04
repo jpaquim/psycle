@@ -293,8 +293,8 @@ void trackscopes_onmousedown(TrackScopes* self, psy_ui_MouseEvent* ev)
 		size = psy_ui_component_scrollsize(&self->component);
 		tm = psy_ui_component_textmetric(&self->component);
 		trackwidth = psy_ui_value_px(&size.width, tm, NULL) / columns;
-		track = (uintptr_t)((ev->pt.x / trackwidth) + floor(ev->pt.y / self->trackheight) * columns);
-		if (ev->button == 1) {
+		track = (uintptr_t)((psy_ui_mouseevent_pt(ev).x / trackwidth) + floor(psy_ui_mouseevent_pt(ev).y / self->trackheight) * columns);
+		if (psy_ui_mouseevent_button(ev) == 1) {
 			if (!psy_audio_trackstate_istrackmuted(
 					&workspace_song(self->workspace)->patterns.trackstate, track)) {
 				psy_audio_trackstate_mutetrack(
@@ -303,7 +303,7 @@ void trackscopes_onmousedown(TrackScopes* self, psy_ui_MouseEvent* ev)
 				psy_audio_trackstate_unmutetrack(
 					&workspace_song(self->workspace)->patterns.trackstate, track);
 			}
-		} else if (ev->button == 2) {				
+		} else if (psy_ui_mouseevent_button(ev) == 2) {
 			if (psy_audio_patterns_istracksoloed(&workspace_song(self->workspace)->patterns,
 						track)) {
 				psy_audio_patterns_deactivatesolotrack(
@@ -330,7 +330,9 @@ void trackscopes_stop(TrackScopes* self)
 void trackscopes_idle(TrackScopes* self)
 {
 	if (self->running) {
+#ifndef PSYCLE_DEBUG_PREVENT_TIMER_DRAW
 		psy_ui_component_invalidate(&self->component);		
+#endif
 	}
 }
 

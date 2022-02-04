@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -10,6 +10,7 @@
 
 /* prototypes */
 static void ondraw(psy_ui_ProgressBar*, psy_ui_Graphics*);
+
 /* vtable */
 static psy_ui_ComponentVtable vtable;
 static bool vtable_initialized = FALSE;
@@ -18,10 +19,12 @@ static void vtable_init(psy_ui_ProgressBar* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.ondraw = (psy_ui_fp_component_ondraw)ondraw;		
+		vtable.ondraw =
+			(psy_ui_fp_component_ondraw)
+			ondraw;
 		vtable_initialized = TRUE;
 	}
-	self->component.vtable = &vtable;
+	psy_ui_component_setvtable(&self->component, &vtable);
 }
 
 /* implementation */

@@ -1,13 +1,13 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #ifndef psy_ui_CHECKBOX_H
 #define psy_ui_CHECKBOX_H
 
 /* local */
-#include "uicomponent.h"
+#include "uilabel.h"
 
 /* CheckBox */
 
@@ -19,10 +19,11 @@ extern "C" {
 ** psy_ui_CheckBox
 **
 ** psy_ui_Component <>----<> psy_ui_ComponentImp
-**      ^                                                       |
-**      |                                                       | 
-**      |                                                       <> 
-** psy_ui_CheckBox
+**         ^
+**         |
+**         |
+** psy_ui_CheckBox <>----- psy_ui_Component
+**                 <>----- psy_ui_Label
 */
 
 typedef struct psy_ui_CheckBox {
@@ -31,14 +32,11 @@ typedef struct psy_ui_CheckBox {
    /* signals */
    psy_Signal signal_clicked;
    /* internal */
-   char* text;
-   char* translation;
-   int multiline;   
-   int state;
+   psy_ui_Component checkmark;
+   psy_ui_Label text;               
 } psy_ui_CheckBox;
 
 void psy_ui_checkbox_init(psy_ui_CheckBox*, psy_ui_Component* parent);
-void psy_ui_checkbox_init_multiline(psy_ui_CheckBox*, psy_ui_Component* parent);
 void psy_ui_checkbox_init_text(psy_ui_CheckBox*, psy_ui_Component* parent,
     const char* text);
 
@@ -46,7 +44,9 @@ void psy_ui_checkbox_settext(psy_ui_CheckBox*, const char* text);
 const char* psy_ui_checkbox_text(psy_ui_CheckBox*);
 void psy_ui_checkbox_check(psy_ui_CheckBox*);
 void psy_ui_checkbox_disablecheck(psy_ui_CheckBox*);
-int psy_ui_checkbox_checked(psy_ui_CheckBox*);
+bool psy_ui_checkbox_checked(const psy_ui_CheckBox*);
+void psy_ui_checkbox_preventwrap(psy_ui_CheckBox*);
+void psy_ui_checkbox_enablewrap(psy_ui_CheckBox*);
 
 INLINE psy_ui_Component* psy_ui_checkbox_base(psy_ui_CheckBox* self)
 {

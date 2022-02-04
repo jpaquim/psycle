@@ -152,14 +152,14 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 		psy_ui_ALIGN_TOP);
 	psy_ui_component_setmargin(&self->label_comments.component,
 		psy_ui_margin_make_em(0.0, 2.0, 1.0, 3.0));
-	psy_ui_textinput_init(&self->edit_comments, &self->comments);
+	psy_ui_textarea_init(&self->edit_comments, &self->comments);
 	psy_ui_component_setstyletype(&self->edit_comments.component,
 		STYLE_SONGPROPERTIES_COMMENTS_EDIT);		
 	psy_ui_component_setalign(&self->edit_comments.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_component_setmargin(&self->edit_comments.component,
 		psy_ui_margin_make_em(0.0, 2.0, 1.0, 3.0));
 	psy_ui_component_setalign(&self->edit_comments.component, psy_ui_ALIGN_CLIENT);
-	psy_signal_connect(&self->edit_comments.signal_change, self,
+	psy_signal_connect(&self->edit_comments.pane.signal_change, self,
 		songpropertiesview_oncommentschanged);
 	psy_signal_connect(&self->edit_comments.component.signal_keydown, self,
 		songpropertiesview_onfilterkeys);
@@ -181,7 +181,7 @@ void songpropertiesview_read(SongPropertiesView* self)
 			self->song->properties.title);
 		psy_ui_textinput_settext(&self->edit_credits,
 			self->song->properties.credits);
-		psy_ui_textinput_settext(&self->edit_comments,
+		psy_ui_textarea_settext(&self->edit_comments,
 			self->song->properties.comments);
 		intedit_setvalue(&self->tempo, (int)self->song->properties.bpm);
 		intedit_setvalue(&self->lpb, (int)self->song->properties.lpb);
@@ -210,7 +210,7 @@ void songpropertiesview_enableedit(SongPropertiesView* self)
 {
 	psy_ui_textinput_enableedit(&self->edit_title);
 	psy_ui_textinput_enableedit(&self->edit_credits);
-	psy_ui_textinput_enableedit(&self->edit_comments);
+	psy_ui_textarea_enableedit(&self->edit_comments);
 	intedit_enableedit(&self->tpb);
 	intedit_enableedit(&self->etpb);	
 }
@@ -219,7 +219,7 @@ void songpropertiesview_disableedit(SongPropertiesView* self)
 {
 	psy_ui_textinput_preventedit(&self->edit_title);
 	psy_ui_textinput_preventedit(&self->edit_credits);
-	psy_ui_textinput_preventedit(&self->edit_comments);
+	psy_ui_textarea_preventedit(&self->edit_comments);
 	intedit_preventedit(&self->tpb);
 	intedit_preventedit(&self->etpb);	
 }
@@ -320,7 +320,7 @@ void songpropertiesview_oncommentschanged(SongPropertiesView* self,
 	psy_ui_Component* sender)
 {
 	psy_strreset(&self->song->properties.comments,
-		psy_ui_textinput_text(&self->edit_comments));
+		psy_ui_textarea_text(&self->edit_comments));
 }
 
 void songpropertiesview_onkeydown(SongPropertiesView* self,

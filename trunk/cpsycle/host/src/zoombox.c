@@ -135,8 +135,9 @@ void zoombox_onmousewheel(ZoomBox* self, psy_ui_MouseEvent* ev)
 {
 	assert(self);
 
-	if (ev->delta != 0) {
-		zoombox_setrate(self, self->zoomrate + psy_sgn(ev->delta) * self->zoomstep);
+	if (psy_ui_mouseevent_delta(ev) != 0) {
+		zoombox_setrate(self, self->zoomrate +
+			psy_sgn(psy_ui_mouseevent_delta(ev)) * self->zoomstep);
 	}
 	psy_ui_mouseevent_prevent_default(ev);
 }

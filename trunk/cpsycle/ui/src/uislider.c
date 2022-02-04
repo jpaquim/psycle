@@ -195,15 +195,15 @@ void psy_ui_sliderpane_onalign(psy_ui_SliderPane* self)
 
 void psy_ui_sliderpane_onmousedown(psy_ui_SliderPane* self, psy_ui_MouseEvent* ev)
 {
-	if (ev->button == 1) {
+	if (psy_ui_mouseevent_button(ev) == 1) {
 		psy_ui_RealSize size;
 
 		size = psy_ui_component_scrollsize_px(&self->component);
 		if (self->orientation == psy_ui_HORIZONTAL) {
-			self->tweakbase = (ev->pt.x) -
+			self->tweakbase = (psy_ui_mouseevent_pt(ev).x) -
 				self->value * (size.width - self->slidersizepx.width);
 		} else if (self->orientation == psy_ui_VERTICAL) {
-			self->tweakbase = ev->pt.y -
+			self->tweakbase = psy_ui_mouseevent_pt(ev).y -
 				((1.0 - self->value) * (size.height - self->slidersizepx.width));
 		}
 		if (self->poll) {
@@ -243,10 +243,12 @@ void psy_ui_sliderpane_onmousemove(psy_ui_SliderPane* self, psy_ui_MouseEvent* e
 		size = psy_ui_component_scrollsize_px(&self->component);
 		if (self->orientation == psy_ui_HORIZONTAL) {			
 			self->value = psy_max(0.0, psy_min(1.0,
-				(ev->pt.x - self->tweakbase) / (size.width - self->slidersizepx.width)));
+				(psy_ui_mouseevent_pt(ev).x - self->tweakbase) /
+				(size.width - self->slidersizepx.width)));
 		} else {			
 			self->value = psy_max(0.0, psy_min(1.0,
-				1.0 - (ev->pt.y - self->tweakbase) / (size.height - self->slidersizepx.width)));
+				1.0 - (psy_ui_mouseevent_pt(ev).y - self->tweakbase) /
+				(size.height - self->slidersizepx.width)));
 		}
 		if (self->slider) {
 			psy_signal_emit_float(&self->signal_tweakvalue,
@@ -281,8 +283,8 @@ void psy_ui_sliderpane_onmouseup(psy_ui_SliderPane* self, psy_ui_MouseEvent* ev)
 
 void psy_ui_sliderpane_onmousewheel(psy_ui_SliderPane* self, psy_ui_MouseEvent* ev)
 {
-	if (ev->delta != 0) {
-		if (ev->delta > 0) {
+	if (psy_ui_mouseevent_delta(ev) != 0) {
+		if (psy_ui_mouseevent_delta(ev) > 0) {
 			self->value += 0.1;
 		} else {
 			self->value -= 0.1;
@@ -347,7 +349,9 @@ void psy_ui_sliderpane_updatevalue(psy_ui_SliderPane* self)
 	}
 	if (self->value != value) {
 		self->value = value;
+#ifndef PSYCLE_DEBUG_PREVENT_TIMER_DRAW
 		psy_ui_component_invalidate(&self->component);
+#endif
 	}
 }
 
@@ -486,6 +490,7 @@ void psy_ui_slider_describevalue(psy_ui_Slider* self)
 void psy_ui_slider_startpoll(psy_ui_Slider* self)
 {
 	self->pane.poll = TRUE;
+	self->pane.component.id = 40;
 	psy_ui_component_starttimer(&self->pane.component, 0, 50);
 }
 

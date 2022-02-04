@@ -56,12 +56,12 @@ void paramtweak_onmousedown(ParamTweak* self, psy_ui_MouseEvent* ev)
 {		
 	assert(self);
 
-	if (ev->button == 1) {
+	if (psy_ui_mouseevent_button(ev) == 1) {
 		uintptr_t paramtype;
 		paramtweak_updateparam(self);
 		
 		if (self->param) {
-			self->tweakbase = (float)ev->pt.y;
+			self->tweakbase = (float)psy_ui_mouseevent_pt(ev).y;
 			if (self->machine) {
 				self->tweakval = psy_audio_machine_parameter_normvalue(
 					self->machine, self->param);
@@ -113,7 +113,7 @@ void paramtweak_onmousemove(ParamTweak* self, psy_ui_MouseEvent* ev)
 		}
 		if ((paramtype != MPF_CHECK) && (paramtype != MPF_SWITCH)) {
 			// todo add fine/ultrafine tweak
-			val = self->tweakval + (self->tweakbase - (float)ev->pt.y) / 200.f;
+			val = self->tweakval + (self->tweakbase - (float)psy_ui_mouseevent_pt(ev).y) / 200.f;
 			if (val > 1.f) {
 				val = 1.f;
 			} else if (val < 0.f) {

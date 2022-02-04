@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -213,9 +213,9 @@ void psy_ui_scrollbarpane_onmousedown(psy_ui_ScrollBarPane* self,
 	psy_ui_component_capture(&self->component);
 	if (self->state->dragthumb) {
 		if (self->orientation == psy_ui_HORIZONTAL) {
-			self->dragoffset = ev->pt.x - self->screenpos;
+			self->dragoffset = psy_ui_mouseevent_pt(ev).x - self->screenpos;
 		} else if (self->orientation == psy_ui_VERTICAL) {
-			self->dragoffset = ev->pt.y - self->screenpos;
+			self->dragoffset = psy_ui_mouseevent_pt(ev).y - self->screenpos;
 		}
 	} else {
 		psy_ui_RealRectangle thumbposition;
@@ -223,13 +223,13 @@ void psy_ui_scrollbarpane_onmousedown(psy_ui_ScrollBarPane* self,
 		thumbposition = psy_ui_component_position(
 			psy_ui_scrollbarthumb_base(&self->thumb));
 		if (self->orientation == psy_ui_HORIZONTAL) {
-			if (ev->pt.x > thumbposition.right) {
+			if (psy_ui_mouseevent_pt(ev).x > thumbposition.right) {
 				self->repeat = 1;
 			} else {
 				self->repeat = -1;
 			}
 		} else if (self->orientation == psy_ui_VERTICAL) {
-			if (ev->pt.y > thumbposition.bottom) {
+			if (psy_ui_mouseevent_pt(ev).y > thumbposition.bottom) {
 				self->repeat = 1;
 			} else {
 				self->repeat = -1;
@@ -275,10 +275,12 @@ void psy_ui_scrollbarpane_onmousemove(psy_ui_ScrollBarPane* self,
 		thumbsize = psy_ui_component_scrollsize_px(
 			psy_ui_scrollbarthumb_base(&self->thumb));
 		if (self->orientation == psy_ui_HORIZONTAL) {
-			self->screenpos = psy_max(0, psy_min(ev->pt.x - self->dragoffset,
+			self->screenpos = psy_max(0, psy_min(
+				psy_ui_mouseevent_pt(ev).x - self->dragoffset,
 				size.width - thumbsize.width));
 		} else {
-			self->screenpos = psy_max(0, psy_min(ev->pt.y - self->dragoffset,
+			self->screenpos = psy_max(0, psy_min(
+				psy_ui_mouseevent_pt(ev).y - self->dragoffset,
 				size.height - thumbsize.height));
 		}
 		psy_ui_scrollbarpane_updatethumbposition(self);		
@@ -295,6 +297,7 @@ void psy_ui_scrollbarpane_onmousemove(psy_ui_ScrollBarPane* self,
 			psy_signal_emit(&self->signal_changed, self, 0);
 		}
 	}
+	psy_ui_mouseevent_stop_propagation(ev);
 }
 
 void psy_ui_scrollbarpane_setthumbposition(psy_ui_ScrollBarPane* self,

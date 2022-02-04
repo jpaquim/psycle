@@ -15,9 +15,7 @@ extern "C" {
 
 struct psy_ui_Component;
 
-typedef struct psy_ui_EventDispatch {
-	psy_List* targetids;
-	struct psy_ui_Component* eventretarget;
+typedef struct psy_ui_EventDispatch {	
 	bool handledoubleclick;
 	uintptr_t lastbutton;
 	uintptr_t lastbuttontimestamp;		
@@ -39,8 +37,6 @@ INLINE void psy_ui_eventdispatch_disable_handle_doubleclick(
 
 void psy_ui_eventdispatch_send(psy_ui_EventDispatch*,
 	struct psy_ui_Component*, psy_ui_Event*);
-void psy_ui_eventdispatch_timer(psy_ui_EventDispatch*,
-	struct psy_ui_Component*, uintptr_t timerid);
 
 #ifdef __cplusplus
 }

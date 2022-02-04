@@ -196,10 +196,10 @@ void seqedittimesig_onmousedown(SeqEditTimeSig* self, psy_ui_MouseEvent* ev)
 		return;
 	}	
 	seqedittimesigstate_startdrag(self->timesigstate, self->node);	
-	if (ev->button == 1) {
+	if (psy_ui_mouseevent_button(ev) == 1) {
 		seqedittimesig_select(self);
 		psy_ui_component_capture(&self->component);		
-	} else if (ev->button == 2) {
+	} else if (psy_ui_mouseevent_button(ev) == 2) {
 		seqedittimesigstate_remove(self->timesigstate, self->node);		
 	}
 }
@@ -217,7 +217,8 @@ void seqedittimesig_onmousemove(SeqEditTimeSig* self, psy_ui_MouseEvent* ev)
 	e = *psy_audio_patternentry_front(seqedittimesig_entry(self));	
 	position = psy_ui_component_position(&self->component);
 	offset = seqeditstate_quantize(self->state,
-		seqeditstate_pxtobeat(self->state, ev->pt.x + position.left));
+		seqeditstate_pxtobeat(self->state,
+			psy_ui_mouseevent_pt(ev).x + position.left));
 	offset = psy_max(0.0, offset);
 	if ((seqedittimesig_offset(self) != offset)) {
 		psy_audio_PatternNode* oldnode;
@@ -361,7 +362,7 @@ void seqedittimesigs_ondestroy(SeqEditTimeSigs* self)
 
 void seqedittimesigs_onmousedown(SeqEditTimeSigs* self, psy_ui_MouseEvent* ev)
 {
-	if (ev->button == 2 && self->timesigstate.remove) {
+	if (psy_ui_mouseevent_button(ev) == 2 && self->timesigstate.remove) {
 		psy_signal_emit(&self->state->signal_itemselected, self->state, 3,
 			SEQEDITITEM_TIMESIG, psy_INDEX_INVALID, psy_INDEX_INVALID);
 		seqedittimesigs_remove(self, self->timesigstate.start);
@@ -415,12 +416,12 @@ void seqedittimesigs_onmousedoubleclick(SeqEditTimeSigs* self,
 	psy_audio_PatternNode* prev;
 	psy_audio_PatternEvent e;
 
-	node = seqeditstate_node(self->state, ev->pt, 0.0, 1.0, &prev);			
+	node = seqeditstate_node(self->state, psy_ui_mouseevent_pt(ev), 0.0, 1.0, &prev);
 	psy_audio_patternevent_init_all(&e,
 		psy_audio_NOTECOMMANDS_TIMESIG, 0, 0, 0, 4, 4);
 	node = psy_audio_pattern_insert(seqeditstate_globalpattern(self->state), prev,
 		0, seqeditstate_quantize(self->state,
-			seqeditstate_pxtobeat(self->state, ev->pt.x)), &e);
+			seqeditstate_pxtobeat(self->state, psy_ui_mouseevent_pt(ev).x)), &e);
 	seqedittimesigs_build(self);
 	seqedittimesig = seqedittimesigs_timesigcomponent(self, node);
 	if (seqedittimesig) {
@@ -432,7 +433,7 @@ void seqedittimesigs_onmousedoubleclick(SeqEditTimeSigs* self,
 void seqedittimesigs_onmousemove(SeqEditTimeSigs* self, psy_ui_MouseEvent* ev)
 {
 	seqeditstate_setcursor(self->state, seqeditstate_quantize(self->state,
-		seqeditstate_pxtobeat(self->state, ev->pt.x)));
+		seqeditstate_pxtobeat(self->state, psy_ui_mouseevent_pt(ev).x)));
 }
 
 void seqedittimesigs_onmouseenter(SeqEditTimeSigs* self)

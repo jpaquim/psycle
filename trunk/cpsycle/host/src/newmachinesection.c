@@ -233,7 +233,7 @@ void newmachinesection_oneditreject(NewMachineSection* self, psy_ui_TextInput* s
 void newmachinesection_onmousedown(NewMachineSection* self,
 	psy_ui_MouseEvent* ev)
 {
-	if (ev->button == 1) {
+	if (psy_ui_mouseevent_button(ev) == 1) {
 		newmachinesection_mark(self);
 		psy_signal_emit(&self->signal_selected, self, 0);
 	}
