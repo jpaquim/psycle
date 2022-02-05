@@ -193,7 +193,7 @@ XKeyEvent psy_ui_x11_xkeyevent_make(psy_ui_KeyboardEvent* e,
 	uint32_t keysym;
 	
 	
-	switch (e->keycode) {
+	switch (psy_ui_keyboardevent_keycode(e)) {
 	case psy_ui_KEY_CONTROL:
 		keysym = XK_Control_L;
 	break;
@@ -270,7 +270,7 @@ XKeyEvent psy_ui_x11_xkeyevent_make(psy_ui_KeyboardEvent* e,
 		keysym = XK_F12;
 		break;
 	default:
-		keysym = e->keycode;
+		keysym = psy_ui_keyboardevent_keycode(e);
 		break;	
 	}	
 	keycode = XKeysymToKeycode(dpy, keysym); 	
@@ -287,10 +287,10 @@ XKeyEvent psy_ui_x11_xkeyevent_make(psy_ui_KeyboardEvent* e,
     rv.same_screen = True;
     rv.keycode = keycode;
     rv.state = 0; /* modifiers */
-    if (e->shift_key != 0) {
+    if (psy_ui_keyboardevent_shiftkey(e) != FALSE) {
 		rv.state |= ShiftMask;
 	}
-	if (e->ctrl_key != 0) {
+	if (psy_ui_keyboardevent_ctrlkey(e) != 0) {
 		rv.state |= ControlMask;
 	}    
 	return rv;

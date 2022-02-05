@@ -33,8 +33,13 @@ static void psy_ui_scrollanimate_calcstep(psy_ui_ScrollAnimate* self,
 
 	diff = targetpx - startpx;	
 	self->targetpx = targetpx;
-	self->steppx = diff / fabs(diff) * self->speed;
-	self->counter = (uintptr_t)floor(fabs(diff) / fabs(self->steppx));
+	if (diff != 0.0) {
+		self->steppx = diff / fabs(diff) * self->speed;
+		self->counter = (uintptr_t)floor(fabs(diff) / fabs(self->steppx));
+	} else {
+		self->steppx = 0;
+		self->counter = 0;
+	}
 }
 
 static double psy_ui_scrollanimate_currposition(const psy_ui_ScrollAnimate* self)

@@ -103,6 +103,14 @@ psy_ui_FontInfo psy_ui_font_fontinfo(const psy_ui_Font* self)
 	return fontinfo;
 }
 
+psy_ui_TextMetric psy_ui_font_textmetric(const psy_ui_Font* self)
+{
+	assert(self->imp);
+
+	return self->imp->vtable->dev_textmetric(self->imp);	
+}
+
+
 /* psy_ui_FontImp */
 static void dev_dispose(psy_ui_FontImp* self) { }
 static void dev_copy(psy_ui_FontImp* self, const psy_ui_FontImp* other) { }
@@ -114,6 +122,13 @@ static const psy_ui_FontInfo dev_fontinfo(const psy_ui_FontImp* self)
     psy_ui_fontinfo_init(&rv, "tahoma", 8);
     return rv;
 }
+
+static psy_ui_TextMetric dev_textmetric(const psy_ui_FontImp* self)
+{
+	psy_ui_TextMetric rv;	
+	return rv;
+}
+
 /* vtable */
 static psy_ui_FontImpVTable imp_vtable;
 static bool imp_vtable_initialized = FALSE;
@@ -124,6 +139,7 @@ static void imp_vtable_init(psy_ui_FontImp* self)
 		imp_vtable.dev_dispose = dev_dispose;		
 		imp_vtable.dev_copy = dev_copy;
         imp_vtable.dev_fontinfo = dev_fontinfo;
+		imp_vtable.dev_textmetric = dev_textmetric;
 		imp_vtable_initialized = TRUE;
 	}
 	self->vtable = &imp_vtable;

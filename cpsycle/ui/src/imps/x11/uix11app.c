@@ -404,7 +404,7 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 			psy_ui_KeyboardEvent ev;
 
 			ev = psy_ui_x11_keyboardevent_make(&event->xkey);
-			ev.event.type = psy_ui_KEYDOWN;
+			psy_ui_event_settype(&ev.event, psy_ui_KEYDOWN);
 			psy_ui_eventdispatch_send(&self->app->eventdispatch,
 				imp->component, &ev.event);			
 			return 0;
@@ -415,7 +415,7 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 			psy_ui_KeyboardEvent ev;
 
 			ev = psy_ui_x11_keyboardevent_make(&event->xkey);			
-			ev.event.type = psy_ui_KEYUP;
+			psy_ui_event_settype(&ev.event, psy_ui_KEYUP);
 			psy_ui_eventdispatch_send(&self->app->eventdispatch,
 				imp->component, &ev.event);			
 			return 0;
@@ -447,8 +447,8 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 				psy_ui_realpoint_make(event->xbutton.x, event->xbutton.y),
 				psy_ui_x11app_translate_x11button(event->xbutton.button),
 				0, 0, 0);
-		ev.event.timestamp = (uintptr_t)event->xbutton.time;		
-		ev.event.type = psy_ui_MOUSEDOWN;
+		ev.event.timestamp_ = (uintptr_t)event->xbutton.time;
+		psy_ui_event_settype(&ev.event,	psy_ui_MOUSEDOWN);
 		psy_ui_x11app_update_mouseevent_mods(self, &ev);		
 		psy_ui_eventdispatch_send(&self->app->eventdispatch,
 			imp->component, &ev.event);		
@@ -460,8 +460,8 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 			psy_ui_realpoint_make(event->xbutton.x, event->xbutton.y),			
 			psy_ui_x11app_translate_x11button(event->xbutton.button),
 			0, 0, 0);
-		ev.event.timestamp = (uintptr_t)event->xbutton.time;			
-		ev.event.type = psy_ui_MOUSEUP;
+		ev.event.timestamp_ = (uintptr_t)event->xbutton.time;
+		psy_ui_event_settype(&ev.event, psy_ui_MOUSEUP);
 		psy_ui_x11app_update_mouseevent_mods(self, &ev);		
 		psy_ui_eventdispatch_send(&self->app->eventdispatch,
 			imp->component, &ev.event);
@@ -483,9 +483,9 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 		psy_ui_mouseevent_init_all(&ev,
 			psy_ui_realpoint_make(xme.x, xme.y),			
 			button, 0, 0, 0);
-		ev.event.type = psy_ui_MOUSEMOVE;
+		psy_ui_event_settype(&ev.event, psy_ui_MOUSEMOVE);
 		psy_ui_x11app_update_mouseevent_mods(self, &ev);		
-		ev.event.timestamp = (uintptr_t)event->xbutton.time;					
+		ev.event.timestamp_ = (uintptr_t)event->xbutton.time;					
 		psy_ui_eventdispatch_send(&self->app->eventdispatch,
 			imp->component, &ev.event);		
 		return 0; }
@@ -507,7 +507,7 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 			psy_ui_Event ev;
 
 			psy_ui_event_init(&ev, psy_ui_FOCUSOUT);
-			ev.bubbles = FALSE;
+			psy_ui_event_stop_propagation(&ev);
 			psy_ui_eventdispatch_send(&self->app->eventdispatch,
 				imp->component, &ev);					
 		}		
@@ -561,9 +561,9 @@ void psy_ui_x11app_adjustcoordinates(psy_ui_Component* component,
 void psy_ui_x11app_update_keyevent_mods(psy_ui_X11App* self,
 	psy_ui_KeyboardEvent* ev)
 {
-	ev->shift_key = self->shiftstate;
-	ev->ctrl_key = self->controlstate;
-	ev->alt_key = self->altstate;
+	ev->shift_key_ = self->shiftstate;
+	ev->ctrl_key_ = self->controlstate;
+	ev->alt_key_ = self->altstate;
 }
 
 void psy_ui_x11app_update_mouseevent_mods(psy_ui_X11App* self,
@@ -651,7 +651,7 @@ void psy_ui_x11app_sendevent(psy_ui_X11App* self, psy_ui_Component* component,
 	if (!imp) {
 		return;
 	}	
-	switch (ev->type) {
+	switch (psy_ui_event_type(ev)) {
 	case psy_ui_KEYDOWN: {
 		XKeyEvent xkey;
 				
@@ -742,7 +742,7 @@ XButtonEvent psy_ui_X11app_make_x11buttonevent(psy_ui_MouseEvent* ev,
 	
 	rv.display      = dpy;
 	rv.root         = DefaultRootWindow(dpy);
-	rv.time         = (Time)ev->event.timestamp;
+	rv.time         = (Time)ev->event.timestamp_;
 	rv.same_screen  = True;
 	rv.button       = psy_ui_x11app_make_x11button(psy_ui_mouseevent_button(ev));
 	rv.state        = 0;
@@ -751,7 +751,7 @@ XButtonEvent psy_ui_X11app_make_x11buttonevent(psy_ui_MouseEvent* ev,
 	rv.x_root       = psy_ui_mouseevent_offset(ev).x;
 	rv.y_root       = psy_ui_mouseevent_offset(ev).y;
 	rv.window       = hwnd;   
-	if (ev->event.type == psy_ui_MOUSEUP) {
+	if (psy_ui_event_type(&ev->event) == psy_ui_MOUSEUP) {
 		rv.type = ButtonRelease;
 	} else {
 		rv.type = ButtonPress;

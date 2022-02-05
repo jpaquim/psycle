@@ -92,6 +92,7 @@ void psy_ui_eventdispatch_handlemouseevent(psy_ui_EventDispatch* self,
 	eventtime = 0;	
 	offset = psy_ui_mouseevent_offset(ev);
 	component = psy_ui_eventdispatch_target(self, component, &offset);
+	psy_ui_event_settarget(psy_ui_mouseevent_base(ev), component);
 	psy_ui_mouseevent_setoffset(ev, offset);
 	if (psy_ui_event_type(&ev->event) == psy_ui_MOUSEMOVE) {
 		psy_ui_eventdispatch_handlemouseenter(self, component);
@@ -166,6 +167,7 @@ void psy_ui_eventdispatch_handle_wheel(psy_ui_EventDispatch* self,
 	delta = psy_ui_mouseevent_delta(ev);
 	offset = psy_ui_mouseevent_offset(ev);
 	curr = component = psy_ui_eventdispatch_target(self, component, &offset);
+	psy_ui_event_settarget(psy_ui_mouseevent_base(ev), component);
 	psy_ui_mouseevent_setoffset(ev, offset);
 	while (curr) {		
 		psy_ui_RealRectangle r;

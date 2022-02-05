@@ -1,15 +1,18 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #ifndef psy_ui_VIEWCOMPONENTIMP_H
 #define psy_ui_VIEWCOMPONENTIMP_H
 
 #include "uicomponent.h"
 
-// psy_ui_ViewComponentImp
+/* psy_ui_ViewComponentImp */
 typedef struct psy_ui_ViewComponentImp {
-	// inherits
+	/* inherits */
 	psy_ui_ComponentImp imp;
+	/* internal */
 	struct psy_ui_Component* component;	
 	uintptr_t winid;		
 	int preventwmchar;

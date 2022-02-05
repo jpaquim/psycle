@@ -52,6 +52,7 @@ static void psy_ui_x11_g_imp_devdrawarc(psy_ui_x11_GraphicsImp*,
 	psy_ui_RealRectangle, double angle_start, double angle_end);
 static void psy_ui_x11_g_devsetlinewidth(psy_ui_x11_GraphicsImp*, uintptr_t width);
 static unsigned int psy_ui_x11_g_devlinewidth(psy_ui_x11_GraphicsImp*);
+static psy_ui_TextMetric psy_ui_x11_g_textmetric(const psy_ui_x11_GraphicsImp*);
 static void psy_ui_x11_g_devsetorigin(psy_ui_x11_GraphicsImp*, double x, double y);
 static psy_ui_RealPoint psy_ui_x11_g_devorigin(const psy_ui_x11_GraphicsImp*);
 static int psy_ui_x11_g_imp_colourindex(psy_ui_x11_GraphicsImp*, psy_ui_Colour);
@@ -139,6 +140,9 @@ static void x11_imp_vtable_init(psy_ui_x11_GraphicsImp* self)
 		x11_imp_vtable.dev_linewidth =
 			(psy_ui_fp_graphicsimp_dev_linewidth)
 			psy_ui_x11_g_devlinewidth;
+		x11_imp_vtable.dev_textmetric =
+			(psy_ui_fp_graphicsimp_dev_textmetric)
+			psy_ui_x11_g_textmetric;
 		x11_imp_vtable.dev_setorigin =
 			(psy_ui_fp_graphicsimp_dev_setorigin)
 			psy_ui_x11_g_devsetorigin;
@@ -643,6 +647,20 @@ psy_ui_RealRectangle psy_ui_x11_g_dev_cliprect(
 		psy_ui_realsize_make(
 			self->clip.right - self->clip.left,
 			self->clip.bottom - self->clip.top));	
+}
+
+psy_ui_TextMetric psy_ui_x11_g_textmetric(const psy_ui_x11_GraphicsImp* self)
+{
+	psy_ui_TextMetric rv;	
+
+	rv.tmHeight = self->xftfont->height;
+	rv.tmAscent = self->xftfont->ascent;
+	rv.tmDescent = self->xftfont->descent;
+	rv.tmMaxCharWidth = self->xftfont->max_advance_width;
+	rv.tmAveCharWidth = self->xftfont->max_advance_width / 4;
+	rv.tmInternalLeading = 0;
+	rv.tmExternalLeading = 0;
+	return rv;
 }
 
 #endif /* PSYCLE_USE_TK == PSYCLE_TK_X11 */

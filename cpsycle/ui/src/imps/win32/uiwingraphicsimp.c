@@ -50,11 +50,13 @@ static void psy_ui_win_g_imp_devdrawarc(psy_ui_win_GraphicsImp*,
 	psy_ui_RealRectangle, double angle_start, double angle_end);
 static void psy_ui_win_g_devsetlinewidth(psy_ui_win_GraphicsImp*, uintptr_t width);
 static unsigned int psy_ui_win_g_devlinewidth(psy_ui_win_GraphicsImp*);
+static psy_ui_TextMetric psy_ui_win_g_textmetric(const psy_ui_win_GraphicsImp*);
 static void psy_ui_win_g_devsetorigin(psy_ui_win_GraphicsImp*, double x, double y);
 static psy_ui_RealPoint psy_ui_win_g_devorigin(const psy_ui_win_GraphicsImp*);
 static uintptr_t psy_ui_win_g_dev_gc(psy_ui_win_GraphicsImp*);
 static void psy_ui_win_g_dev_setcliprect(psy_ui_win_GraphicsImp*, psy_ui_RealRectangle);
 static psy_ui_RealRectangle psy_ui_win_g_dev_cliprect(const psy_ui_win_GraphicsImp*);
+static void psy_ui_win_g_imp_dispose(psy_ui_win_GraphicsImp*);
 
 static psy_ui_TextMetric converttextmetric(const TEXTMETRIC*);
 /* vtable */
@@ -137,6 +139,9 @@ static void win_imp_vtable_init(psy_ui_win_GraphicsImp* self)
 		win_imp_vtable.dev_linewidth =
 			(psy_ui_fp_graphicsimp_dev_linewidth)
 			psy_ui_win_g_devlinewidth;
+		win_imp_vtable.dev_textmetric =
+			(psy_ui_fp_graphicsimp_dev_textmetric)
+			psy_ui_win_g_textmetric;
 		win_imp_vtable.dev_setorigin =
 			(psy_ui_fp_graphicsimp_dev_setorigin)
 			psy_ui_win_g_devsetorigin;
@@ -593,6 +598,35 @@ unsigned int psy_ui_win_g_devlinewidth(psy_ui_win_GraphicsImp* self)
 
 	GetObject(self->pen, sizeof(LOGPEN), &currpen);
 	return currpen.lopnWidth.x;
+}
+
+psy_ui_TextMetric psy_ui_win_g_textmetric(const psy_ui_win_GraphicsImp* self)
+{
+	psy_ui_TextMetric rv;
+	TEXTMETRIC tm;
+		
+	GetTextMetrics(self->hdc, &tm);	
+	rv.tmHeight = tm.tmHeight;
+	rv.tmAscent = tm.tmAscent;
+	rv.tmDescent = tm.tmDescent;
+	rv.tmInternalLeading = tm.tmInternalLeading;
+	rv.tmExternalLeading = tm.tmExternalLeading;
+	rv.tmAveCharWidth = tm.tmAveCharWidth;
+	rv.tmMaxCharWidth = tm.tmMaxCharWidth;
+	rv.tmWeight = tm.tmWeight;
+	rv.tmOverhang = tm.tmOverhang;
+	rv.tmDigitizedAspectX = tm.tmDigitizedAspectX;
+	rv.tmDigitizedAspectY = tm.tmDigitizedAspectY;
+	rv.tmFirstChar = tm.tmFirstChar;
+	rv.tmLastChar = tm.tmLastChar;
+	rv.tmDefaultChar = tm.tmDefaultChar;
+	rv.tmBreakChar = tm.tmBreakChar;
+	rv.tmItalic = tm.tmItalic;
+	rv.tmUnderlined = tm.tmUnderlined;
+	rv.tmStruckOut = tm.tmStruckOut;
+	rv.tmPitchAndFamily = tm.tmPitchAndFamily;
+	rv.tmCharSet = tm.tmCharSet;
+	return rv;
 }
 
 psy_ui_TextMetric converttextmetric(const TEXTMETRIC* tm)
