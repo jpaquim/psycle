@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -196,13 +196,16 @@ void mainframe_initframe(MainFrame* self)
 {
 	psy_ui_frame_init_main(mainframe_base(self));
 	vtable_init(self);	
-	psy_ui_component_setbackgroundmode(mainframe_base(self), psy_ui_SETBACKGROUND);
+	psy_ui_component_setbackgroundmode(mainframe_base(self),
+		psy_ui_SETBACKGROUND);
 	psy_ui_component_doublebuffer(mainframe_base(self));
 	psy_ui_app_setmain(psy_ui_app(), mainframe_base(self));
 	psy_ui_component_seticonressource(mainframe_base(self), IDI_PSYCLEICON);
-	inithoststyles(&psy_ui_appdefaults()->styles, psy_ui_defaults()->styles.theme);
+	inithoststyles(&psy_ui_appdefaults()->styles,
+		psy_ui_defaults()->styles.theme);
 	self->titlemodified = FALSE;	
-	psy_ui_component_init(&self->pane, mainframe_base(self), mainframe_base(self));	
+	psy_ui_component_init(&self->pane, mainframe_base(self),
+		mainframe_base(self));	
 	psy_ui_component_setalign(&self->pane, psy_ui_ALIGN_CLIENT);
 }
 
@@ -708,6 +711,11 @@ bool mainframe_oninput(MainFrame* self, InputHandler* sender)
 	case CMD_IMM_TERMINAL:
 		mainframe_ontoggleterminal(self, mainframe_base(self));
 		return 1;
+	case CMD_IMM_FULLSCREEN:
+		psy_ui_component_togglefullscreen(mainframe_base(self));
+		workspace_focusview(&self->workspace);
+		return 1;
+		break;
 	case CMD_EDT_EDITQUANTIZEDEC:
 		workspace_editquantizechange(&self->workspace, -1);
 		patterncursorstepbox_update(&self->patternbar.cursorstep);

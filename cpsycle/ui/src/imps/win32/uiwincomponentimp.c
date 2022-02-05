@@ -17,6 +17,7 @@
 #include "../../uiapp.h"
 #include "uiwinapp.h"
 #include "uiwingraphicsimp.h"
+#include <tchar.h>
 /* common control header */
 #include <commctrl.h>
 /* details */
@@ -94,6 +95,9 @@ static void dev_clear(psy_ui_win_ComponentImp*);
 static void dev_initialized(psy_ui_win_ComponentImp* self) { }
 static uintptr_t dev_platform_handle(psy_ui_win_ComponentImp* self) { return (uintptr_t)self->hwnd; }
 static bool dev_issystem(psy_ui_win_ComponentImp* self) { return TRUE; }
+
+static void dev_setshowfullscreen(psy_ui_win_ComponentImp*, bool fullscreen);
+static void dev_showtaskbar(psy_ui_win_ComponentImp*, bool show);
 
 /* vtable */
 static psy_ui_ComponentImpVTable vtable;
@@ -267,6 +271,9 @@ void psy_ui_win_componentimp_init(psy_ui_win_ComponentImp* self,
 	self->dbg = 0;	
 	self->visible = parent ? TRUE : FALSE;
 	self->viewcomponents = NULL;
+	self->fullscreen = FALSE;
+	self->restore_style = 0;
+	self->restore_exstyle = 0;
 	parent_imp = (parent)
 		? (psy_ui_win_ComponentImp*)parent
 		: NULL;	
@@ -448,8 +455,62 @@ void dev_show(psy_ui_win_ComponentImp* self)
 void dev_showstate(psy_ui_win_ComponentImp* self, int state)
 {
 	self->visible = TRUE;
-	ShowWindow(self->hwnd, state);
-	UpdateWindow(self->hwnd);
+	if (state == 20) {
+		dev_setshowfullscreen(self, !self->fullscreen);
+	} else {
+		ShowWindow(self->hwnd, state);
+		UpdateWindow(self->hwnd);
+	}
+}
+
+void dev_setshowfullscreen(psy_ui_win_ComponentImp* self, bool fullscreen)	
+{
+	RECT fullrect = { 0 };	
+
+	dev_showtaskbar(self, !fullscreen);				
+	SetRect(&fullrect, 0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN));
+	if (fullscreen) {				
+		self->restore_style = windowstyle(self);
+		self->restore_exstyle = windowexstyle(self);		
+		SetWindowLong(self->hwnd, GWL_STYLE,
+			self->restore_style & ~(WS_CAPTION | WS_THICKFRAME));
+		SetWindowLong(self->hwnd, GWL_EXSTYLE,
+			self->restore_exstyle & ~(WS_EX_DLGMODALFRAME |
+				WS_EX_WINDOWEDGE | WS_EX_CLIENTEDGE | WS_EX_STATICEDGE));
+		SetWindowPos(self->hwnd, NULL, 0, 0,
+			GetSystemMetrics(SM_CXSCREEN),
+			GetSystemMetrics(SM_CYSCREEN),				
+			SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
+		ShowWindow(self->hwnd, SW_SHOW);
+		UpdateWindow(self->hwnd);
+	} else {
+		SetWindowLong(self->hwnd, GWL_STYLE, self->restore_style);
+		SetWindowLong(self->hwnd, GWL_EXSTYLE, self->restore_exstyle);
+		SetWindowPos(self->hwnd, NULL, 0, 0,
+			GetSystemMetrics(SM_CXSCREEN),
+			GetSystemMetrics(SM_CYSCREEN),
+			SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
+		UpdateWindow(self->hwnd);
+	}
+	self->fullscreen = fullscreen;
+	self->sizecachevalid = FALSE;
+	self->topleftcachevalid = FALSE;
+}
+
+void dev_showtaskbar(psy_ui_win_ComponentImp* self, bool show)
+{
+	HWND taskbar = FindWindow(_T("Shell_TrayWnd"), NULL);
+	HWND start = FindWindow(_T("Button"), NULL);
+
+	if (taskbar != NULL) {
+		ShowWindow(taskbar, show ? SW_SHOW : SW_HIDE);
+		UpdateWindow(taskbar);
+	}
+	if (start != NULL) {
+		/* Vista */
+		ShowWindow(start, show ? SW_SHOW : SW_HIDE);
+		UpdateWindow(start);
+	}
 }
 
 void dev_hide(psy_ui_win_ComponentImp* self)
@@ -819,6 +880,15 @@ void dev_setfont(psy_ui_win_ComponentImp* self, psy_ui_Font* source)
 		
 		hfont = ((psy_ui_win_FontImp*)(source->imp))->hfont;
 		SendMessage(self->hwnd, WM_SETFONT, (WPARAM)hfont, 0);
+		if (self->tmcachevalid) {
+			const psy_ui_Font* font;
+
+			font = psy_ui_component_font(self->component);
+			if (font) {
+				self->tmcachevalid = psy_ui_font_equal(font, source);
+				return;
+			}
+		}
 		self->tmcachevalid = FALSE;
 	}	
 }

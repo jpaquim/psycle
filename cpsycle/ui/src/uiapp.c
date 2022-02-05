@@ -109,9 +109,7 @@ void psy_ui_app_init(psy_ui_App* self, bool dark, uintptr_t instance)
 	psy_translator_init(&self->translator);
 	psy_signal_connect(&self->translator.signal_languagechanged, self,
 		psy_ui_app_onlanguagechanged);
-	psy_ui_dragevent_init(&self->dragevent);
-	self->deltaperline = 120;
-	self->accumwheeldelta = 0;
+	psy_ui_dragevent_init(&self->dragevent);		
 	psy_ui_eventdispatch_init(&self->eventdispatch);
 #ifdef DIVERSALIS__OS__MICROSOFT
 	psy_ui_eventdispatch_disable_handle_doubleclick(&self->eventdispatch);

@@ -61,9 +61,7 @@ typedef struct psy_ui_App {
 	struct psy_ui_Component* capture_;
 	struct psy_ui_Component* hover;
 	struct psy_ui_Component* focus;
-	psy_ui_DragEvent dragevent;
-	int deltaperline;
-	int accumwheeldelta;
+	psy_ui_DragEvent dragevent;	
 	psy_ui_EventDispatch eventdispatch;
 	psy_Table components;
 } psy_ui_App;

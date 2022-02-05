@@ -125,7 +125,7 @@ void make_translator_filebar(psy_Property* parent)
 	add("new", "New");
 	add("render", "Render");
 	add("loadsong", "Load Song");
-	add("savesong", "Save Song");
+	add("savesong", "Save Song");	
 	add("plugin-filesave", "Plugin File Load");
 	add("plugin-fileload", "Plugin File Save");
 	add("exit", "Exit");

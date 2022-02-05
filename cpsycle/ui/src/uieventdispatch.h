@@ -18,7 +18,9 @@ struct psy_ui_Component;
 typedef struct psy_ui_EventDispatch {	
 	bool handledoubleclick;
 	uintptr_t lastbutton;
-	uintptr_t lastbuttontimestamp;		
+	uintptr_t lastbuttontimestamp;
+	int accumwheeldelta;
+	int deltaperline;
 } psy_ui_EventDispatch;
 
 void psy_ui_eventdispatch_init(psy_ui_EventDispatch*);
@@ -37,6 +39,17 @@ INLINE void psy_ui_eventdispatch_disable_handle_doubleclick(
 
 void psy_ui_eventdispatch_send(psy_ui_EventDispatch*,
 	struct psy_ui_Component*, psy_ui_Event*);
+
+INLINE void psy_ui_eventdispatch_setwheeldeltaperline(psy_ui_EventDispatch* self,
+	int deltaperline)
+{
+	self->deltaperline = deltaperline;
+}
+
+INLINE int psy_ui_eventdispatch_wheeldeltaperline(const psy_ui_EventDispatch* self)
+{
+	return self->deltaperline;
+}
 
 #ifdef __cplusplus
 }

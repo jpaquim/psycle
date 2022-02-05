@@ -24,10 +24,6 @@ static psy_ui_WinApp* winapp = NULL;
 static psy_ui_KeyboardEvent keyboardevent(psy_ui_EventType, WPARAM, LPARAM);
 static psy_ui_MouseEvent mouseevent(int msg, WPARAM, LPARAM);
 static bool handle_ctlcolor(int msg, HWND, WPARAM, LPARAM, LRESULT* rv);
-static void handle_scroll(psy_ui_win_ComponentImp* imp, HWND hwnd, WPARAM,
-	LPARAM, int bar);
-static void handle_scrollparam(SCROLLINFO*, WPARAM);
-static void adjustcoordinates(psy_ui_Component*, psy_ui_RealPoint*);
 static void psy_ui_winapp_onappdefaultschange(psy_ui_WinApp*);
 static psy_ui_EventType translate_win_event_type(int message);
 static int translate_win_button(int message);
@@ -330,26 +326,7 @@ LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 				}
 				return 0;
 			}
-			break;
-		case WM_MOUSEWHEEL: {
-			if (component) {
-				int preventdefault = 0;
-				psy_ui_MouseEvent ev;
-				POINT pt_client;
-
-				pt_client.x = (SHORT)LOWORD(lParam);
-				pt_client.y = (SHORT)HIWORD(lParam);
-				ScreenToClient(imp->hwnd, &pt_client);
-				psy_ui_mouseevent_init_all(&ev,
-					psy_ui_realpoint_make(pt_client.x, pt_client.y),
-					(short)LOWORD(wParam), (short)HIWORD(wParam),
-					GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);
-				component->vtable->onmousewheel(component, &ev);
-				psy_signal_emit(&component->signal_mousewheel, component, 1,
-					&ev);
-				preventdefault = psy_ui_event_default_prevented(&ev.event);
-			}
-			break; }			
+			break;				
 		default:
 			break;
 		}
@@ -604,9 +581,11 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 			** WHEEL_DELTA equals 120, so deltaperline will be 40
 			*/
 			if (ulScrollLines) {
-				psy_ui_app()->deltaperline = WHEEL_DELTA / ulScrollLines;
+				psy_ui_eventdispatch_setwheeldeltaperline(
+					&winapp->app->eventdispatch, WHEEL_DELTA / ulScrollLines);
 			} else {
-				psy_ui_app()->deltaperline = 0;
+				psy_ui_eventdispatch_setwheeldeltaperline(
+					&winapp->app->eventdispatch, 0);				
 			}
 			return 0;
 			break; }
@@ -642,19 +621,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				psy_ui_eventdispatch_send(&winapp->app->eventdispatch,
 					component, &ev);				
 			}			
-			return 0;
-		case WM_VSCROLL:			
-			if (component) {
-				handle_scroll(imp, hwnd, wParam, lParam, SB_VERT);
-				return 0;
-			}
-			break;
-		case WM_HSCROLL:
-			if (component) {
-				handle_scroll(imp, hwnd, wParam, lParam, SB_HORZ);
-				return 0;
-			}
-			break;
+			return 0;		
 		case WM_KILLFOCUS:
 			if (component) {
 				psy_ui_Event ev;
@@ -801,89 +768,6 @@ psy_ui_MouseEvent mouseevent(int msg, WPARAM wparam, LPARAM lparam)
 		GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);	
 	psy_ui_mouseevent_settype(&rv, translate_win_event_type(msg));
 	return rv;
-}
-
-void adjustcoordinates(psy_ui_Component* component, psy_ui_RealPoint* pt)
-{	
-	psy_ui_RealMargin spacing;
-	
-	spacing = psy_ui_component_spacing_px(component);	
-	if (!psy_ui_realmargin_iszero(&spacing)) {				
-		pt->x -= spacing.left;
-		pt->y -= spacing.top;
-	}
-}
-
-void handle_scroll(psy_ui_win_ComponentImp* imp, HWND hwnd, WPARAM wParam,
-	LPARAM lParam, int bar)
-{
-	SCROLLINFO si;
-	int pos;	
-
-	si.cbSize = sizeof(si);
-	si.fMask = SIF_ALL;
-	GetScrollInfo(hwnd, bar, &si);
-	/* Save the position for comparison later on */
-	pos = si.nPos;
-	handle_scrollparam(&si, wParam);
-	/*
-	** Set the positionand then retrieve it. Due to adjustments
-	** by Windows it may not be the same as the value set.
-	*/
-	si.fMask = SIF_POS;
-	SetScrollInfo(hwnd, bar, &si, TRUE);
-	GetScrollInfo(hwnd, bar, &si);
-	/* If the position has changed, scroll the windowand update it */
-	if (si.nPos != pos) {
-		const psy_ui_TextMetric* tm;
-		psy_ui_Value scrollpos;		
-
-		tm = psy_ui_component_textmetric(imp->component);		
-		if (bar == SB_VERT) {
-			scrollpos = psy_ui_component_scrolltop(imp->component);
-			psy_ui_component_setscrolltop(imp->component,
-				psy_ui_value_make_px(
-					psy_ui_value_px(&scrollpos, tm, NULL) -
-					psy_ui_component_scrollstep_height_px(imp->component) *
-					(pos - si.nPos)));
-		} else {
-			scrollpos = psy_ui_component_scrollleft(imp->component);
-			psy_ui_component_setscrollleft(imp->component,
-				psy_ui_value_make_px(
-					psy_ui_value_px(&scrollpos, tm, NULL) -
-					psy_ui_component_scrollstep_width_px(imp->component) *
-					(pos - si.nPos)));
-		}
-	}
-}
-
-void handle_scrollparam(SCROLLINFO* si, WPARAM wparam)
-{
-	switch (LOWORD(wparam)) {
-	case SB_TOP:
-		si->nPos = si->nMin ;
-		break;
-	case SB_BOTTOM:
-		si->nPos = si->nMax ;
-		break;
-	case SB_LINEUP:
-		si->nPos -= 1 ;
-		break;
-	case SB_LINEDOWN:
-		si->nPos += 1 ;
-		break;
-	case SB_PAGEUP:
-		si->nPos -= si->nPage ;
-		break;
-	case SB_PAGEDOWN:
-		si->nPos += si->nPage ;
-		break;
-	case SB_THUMBTRACK:
-		si->nPos = (short)HIWORD(wparam);
-		break;
-	default:
-		break;   		
-	}	
 }
 
 LRESULT CALLBACK MouseHookProc(int nCode, WPARAM wParam, LPARAM lParam) {
