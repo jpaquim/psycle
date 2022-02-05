@@ -19,6 +19,7 @@ static void psy_ui_win_font_imp_dispose(psy_ui_win_FontImp*);
 static void psy_ui_win_font_imp_copy(psy_ui_win_FontImp*, psy_ui_win_FontImp* other);
 static psy_ui_FontInfo dev_fontinfo(psy_ui_win_FontImp*);
 static psy_ui_TextMetric dev_textmetric(const psy_ui_win_FontImp*);
+static bool dev_equal(const psy_ui_win_FontImp*, const psy_ui_win_FontImp* other);
 
 static LOGFONT logfont(psy_ui_FontInfo lf);
 static psy_ui_FontInfo psy_ui_fontinfo(LOGFONT);
@@ -43,6 +44,9 @@ static void imp_vtable_init(psy_ui_win_FontImp* self)
 		imp_vtable.dev_textmetric =
 			(psy_ui_font_imp_fp_dev_textmetric)
 			dev_textmetric;
+		imp_vtable.dev_equal =
+			(psy_ui_font_imp_fp_dev_equal)
+			dev_equal;
 		imp_vtable_initialized = TRUE;
 	}
 	self->imp.vtable = &imp_vtable;
@@ -180,6 +184,11 @@ psy_ui_FontInfo psy_ui_fontinfo(LOGFONT lf)
 	rv.lfPitchAndFamily = lf.lfPitchAndFamily;
 	memcpy(rv.lfFaceName, lf.lfFaceName, 32); // TODO UNICODE
 	return rv;
+}
+
+bool dev_equal(const psy_ui_win_FontImp* self, const psy_ui_win_FontImp* other)
+{
+	return self->hfont == other->hfont;
 }
 
 #endif

@@ -538,6 +538,10 @@ void cmdproperties_makegeneral(psy_Property* self)
 			psy_audio_encodeinput(psy_ui_KEY_S, 0, 1, 0, 0), 0, 0), CMD_IMM_SAVESONG),
 		"savesong"), "cmds.savesong");
 	psy_property_settext(psy_property_setshorttext(
+		psy_property_setid(psy_property_append_int(general, "cmd_fullscreen",
+			psy_audio_encodeinput(psy_ui_KEY_F11, 0, 0, 0, 0), 0, 0), CMD_IMM_FULLSCREEN),
+		"fullscreen"), "cmds.fullscreen");
+	psy_property_settext(psy_property_setshorttext(
 		psy_property_setid(psy_property_append_int(general, "cmd_editquantizedec",
 			psy_audio_encodeinput(219, 0, 0, 0, 0), 0, 0), CMD_EDT_EDITQUANTIZEDEC),
 		"lineskip-1"), "cmds.editquantizedec");

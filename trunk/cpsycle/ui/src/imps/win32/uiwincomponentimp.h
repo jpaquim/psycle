@@ -40,6 +40,9 @@ typedef struct psy_ui_win_ComponentImp {
 	bool tmcachevalid;
 	bool visible;	
 	psy_List* viewcomponents;
+	bool fullscreen;
+	int restore_style;
+	int restore_exstyle;
 } psy_ui_win_ComponentImp;
 
 void psy_ui_win_componentimp_init(psy_ui_win_ComponentImp* self,

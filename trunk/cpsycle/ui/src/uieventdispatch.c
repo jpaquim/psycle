@@ -35,6 +35,8 @@ void psy_ui_eventdispatch_init(psy_ui_EventDispatch* self)
 	self->lastbutton = 0;
 	self->lastbuttontimestamp = 0;
 	self->handledoubleclick = TRUE;
+	self->accumwheeldelta = 0;
+	self->deltaperline = 120;
 }
 
 void psy_ui_eventdispatch_dispose(psy_ui_EventDispatch* self)
@@ -159,7 +161,6 @@ void psy_ui_eventdispatch_handlemouseleave(psy_ui_EventDispatch* self,
 void psy_ui_eventdispatch_handle_wheel(psy_ui_EventDispatch* self,
 	psy_ui_Component* component, psy_ui_MouseEvent* ev)
 {
-	bool preventdefault;
 	intptr_t delta;
 	psy_ui_RealPoint offset;
 	psy_ui_Component* curr;
@@ -171,16 +172,13 @@ void psy_ui_eventdispatch_handle_wheel(psy_ui_EventDispatch* self,
 	psy_ui_mouseevent_setoffset(ev, offset);
 	while (curr) {		
 		psy_ui_RealRectangle r;
-
-		psy_ui_event_setcurrenttarget(psy_ui_mouseevent_base(ev),
-			curr);
-		curr->vtable->onmousewheel(curr, ev);
-		psy_signal_emit(&curr->signal_mousewheel, curr, 1, ev);
-		preventdefault = psy_ui_event_default_prevented(&ev->event);
-		if (!preventdefault && psy_ui_component_wheelscroll(curr) > 0) {
-			if (psy_ui_app()->deltaperline != 0) {
-				psy_ui_app()->accumwheeldelta += (short)delta; /* 120 or -120 */
-				while (psy_ui_app()->accumwheeldelta >= psy_ui_app()->deltaperline) {
+		
+		psy_ui_eventdispatch_notify(self, curr, psy_ui_mouseevent_base(ev));		
+		if (!psy_ui_event_default_prevented(&ev->event) &&
+				psy_ui_component_wheelscroll(curr) > 0) {
+			if (self->deltaperline != 0) {
+				self->accumwheeldelta += (short)delta; /* 120 or -120 */
+				while (self->accumwheeldelta >= self->deltaperline) {
 					double pos;
 					psy_ui_IntPoint scrollrange;
 					double scrolltoppx;
@@ -197,9 +195,9 @@ void psy_ui_eventdispatch_handle_wheel(psy_ui_EventDispatch* self,
 					psy_ui_component_setscrolltop(curr,
 						psy_ui_mul_value_real(
 							psy_ui_component_scrollstep_height(curr), pos));
-					psy_ui_app()->accumwheeldelta -= psy_ui_app()->deltaperline;
+					self->accumwheeldelta -= self->deltaperline;
 				}
-				while (psy_ui_app()->accumwheeldelta <= -psy_ui_app()->deltaperline)
+				while (self->accumwheeldelta <= -self->deltaperline)
 				{
 					double pos;
 					psy_ui_IntPoint scrollrange;
@@ -217,7 +215,7 @@ void psy_ui_eventdispatch_handle_wheel(psy_ui_EventDispatch* self,
 					psy_ui_component_setscrolltop(curr,
 						psy_ui_mul_value_real(
 							psy_ui_component_scrollstep_height(curr), pos));
-					psy_ui_app()->accumwheeldelta += psy_ui_app()->deltaperline;
+					self->accumwheeldelta += self->deltaperline;
 				}
 			}
 		}
@@ -314,6 +312,10 @@ void psy_ui_eventdispatch_notify(psy_ui_EventDispatch* self,
 	case psy_ui_MOUSEMOVE:
 		component->vtable->onmousemove(component, (psy_ui_MouseEvent*)ev);
 		psy_signal_emit(&component->signal_mousemove, component, 1, ev);
+		break;
+	case psy_ui_WHEEL:
+		component->vtable->onmousewheel(component, (psy_ui_MouseEvent*)ev);
+		psy_signal_emit(&component->signal_mousewheel, component, 1, ev);
 		break;
 	case psy_ui_KEYDOWN:
 		component->vtable->onkeydown(component, (psy_ui_KeyboardEvent*)ev);

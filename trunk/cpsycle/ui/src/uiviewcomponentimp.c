@@ -645,6 +645,15 @@ void view_dev_update(psy_ui_ViewComponentImp* self)
 
 void view_dev_setfont(psy_ui_ViewComponentImp* self, psy_ui_Font* source)
 {
+	if (source && self->tmcachevalid) {
+		const psy_ui_Font* font;
+
+		font = psy_ui_component_font(self->component);
+		if (font) {
+			self->tmcachevalid = psy_ui_font_equal(font, source);
+			return;
+		}
+	}
 	self->tmcachevalid = FALSE;
 }
 

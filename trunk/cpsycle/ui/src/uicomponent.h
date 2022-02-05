@@ -255,6 +255,7 @@ void psy_ui_component_hide(psy_ui_Component* self);
 void psy_ui_component_hide_align(psy_ui_Component* self);
 void psy_ui_component_showstate(psy_ui_Component*, int cmd);
 void psy_ui_component_showmaximized(psy_ui_Component*);
+void psy_ui_component_togglefullscreen(psy_ui_Component*);
 bool psy_ui_component_togglevisibility(psy_ui_Component*);
 
 void psy_ui_component_usescroll(psy_ui_Component*);
@@ -934,8 +935,6 @@ INLINE psy_ui_RealMargin psy_ui_component_spacing_px(const psy_ui_Component* sel
 }
 
 void psy_ui_component_draw(psy_ui_Component*, psy_ui_Graphics*);
-void psy_ui_component_mousewheel(psy_ui_Component*, psy_ui_MouseEvent*,
-	intptr_t delta);
 
 INLINE void psy_ui_component_scrollto(psy_ui_Component* self,
 	intptr_t dx, intptr_t dy, const psy_ui_RealRectangle* r)
