@@ -752,7 +752,13 @@ psy_ui_Size dev_framesize(psy_ui_x11_ComponentImp* self)
 void dev_scrollto(psy_ui_x11_ComponentImp* self, intptr_t dx, intptr_t dy,
 	const psy_ui_RealRectangle* r)
 {
-	if (dx != 0 || dy != 0) {
+	if (r) {
+		dev_invalidaterect(self, r);
+	} else {
+		dev_invalidate(self);
+	}
+	/* todo */
+	/* if (dx != 0 || dy != 0) {
 		XWindowAttributes win_attr;
 		psy_ui_x11_GraphicsImp* gx11;
 		XExposeEvent xev;
@@ -764,10 +770,17 @@ void dev_scrollto(psy_ui_x11_ComponentImp* self, intptr_t dx, intptr_t dy,
 		XGetWindowAttributes(x11app->dpy, self->hwnd, &win_attr);
 		gx11 = (psy_ui_x11_GraphicsImp*)self->g.imp;
 		region = XCreateRegion();
-		rectangle.x = 0;
-		rectangle.y = 0;
-		rectangle.width = (unsigned short) win_attr.width;
-		rectangle.height = (unsigned short) win_attr.height;
+		if (r == NULL) {
+			rectangle.x = 0;
+			rectangle.y = 0;
+			rectangle.width = (unsigned short) win_attr.width;
+			rectangle.height = (unsigned short) win_attr.height;
+		} else {
+			rectangle.x = r->left;
+			rectangle.y = r->top;
+			rectangle.width = r->right - r->left;
+			rectangle.height =  r->bottom - r->top;
+		}
 		XUnionRectWithRegion(&rectangle, region, region);
 		XSetRegion(x11app->dpy, gx11->gc, region);
 		XDestroyRegion(region);
@@ -795,11 +808,10 @@ void dev_scrollto(psy_ui_x11_ComponentImp* self, intptr_t dx, intptr_t dy,
 			xev.y = 0;
 			xev.width = win_attr.width;
 			xev.height = dy;
-		}
-		/* printf("scrollto: %d, %d, %d, %d\n", xev.x, xev.y, xev.width,
-			xev.height); */
+		}		
 		XSendEvent (x11app->dpy, self->hwnd, True, ExposureMask, (XEvent *)&xev);
 	}
+	*/
 }
 
 psy_ui_Component* dev_parent(psy_ui_x11_ComponentImp* self)

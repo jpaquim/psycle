@@ -291,6 +291,12 @@ static void dev_drawarc(psy_ui_GraphicsImp* self, psy_ui_RealRectangle r,
 }
 static void dev_setlinewidth(psy_ui_GraphicsImp* self, uintptr_t width) { }
 static unsigned int dev_linewidth(psy_ui_GraphicsImp* self) { return 1; }
+static psy_ui_TextMetric dev_textmetric(const psy_ui_GraphicsImp* self)
+{
+	psy_ui_TextMetric rv;
+
+	return rv;
+}
 static void dev_setorigin(psy_ui_GraphicsImp* self, double x, double y) { }
 static psy_ui_RealPoint dev_origin(psy_ui_GraphicsImp* self) { }
 static uintptr_t dev_gc(psy_ui_GraphicsImp* self) { return 0; }
@@ -328,6 +334,7 @@ static void imp_vtable_init(psy_ui_GraphicsImp* self)
 		imp_vtable.dev_drawarc = dev_drawarc;
 		imp_vtable.dev_setlinewidth = dev_setlinewidth;
 		imp_vtable.dev_linewidth = dev_linewidth;
+		imp_vtable.dev_textmetric = dev_textmetric;
 		imp_vtable.dev_setorigin = dev_setorigin;
 		imp_vtable.dev_gc = dev_gc;
 		imp_vtable.dev_setcliprect = dev_setcliprect;

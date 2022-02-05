@@ -242,6 +242,7 @@ void psy_ui_viewcomponentimp_init(psy_ui_ViewComponentImp* self,
 	self->component = component;	
 	self->parent = parent;
 	self->visible = TRUE;
+	self->tmcachevalid = FALSE;
 	if (parent && parent->imp) {
 		parent->imp->vtable->dev_insert(parent->imp, &self->imp, NULL);		
 	}
@@ -644,6 +645,7 @@ void view_dev_update(psy_ui_ViewComponentImp* self)
 
 void view_dev_setfont(psy_ui_ViewComponentImp* self, psy_ui_Font* source)
 {
+	self->tmcachevalid = FALSE;
 }
 
 void view_dev_enableinput(psy_ui_ViewComponentImp* self)
@@ -661,10 +663,15 @@ bool view_dev_inputprevented(const psy_ui_ViewComponentImp* self)
 
 const psy_ui_TextMetric* view_dev_textmetric(const psy_ui_ViewComponentImp* self)
 {	
-	if (self->view) {		
-		return psy_ui_component_textmetric(self->view);
+	if (self->component && !self->tmcachevalid) {			
+		const psy_ui_Font* font;
+
+		font = psy_ui_component_font(self->component);
+		/* mutable */
+		((psy_ui_ViewComponentImp*)self)->tm = psy_ui_font_textmetric(font);
+		((psy_ui_ViewComponentImp*)self)->tmcachevalid = TRUE;
 	}
-	return NULL;
+	return &self->tm;	
 }
 
 void view_dev_setcursor(psy_ui_ViewComponentImp* self, psy_ui_CursorStyle

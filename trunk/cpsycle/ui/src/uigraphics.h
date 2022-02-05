@@ -105,6 +105,8 @@ typedef void (*psy_ui_fp_graphicsimp_dev_setlinewidth)(
 	struct psy_ui_GraphicsImp*, uintptr_t width);
 typedef unsigned int (*psy_ui_fp_graphicsimp_dev_linewidth)(
 	struct psy_ui_GraphicsImp*);
+typedef psy_ui_TextMetric (*psy_ui_fp_graphicsimp_dev_textmetric)(
+	const struct psy_ui_GraphicsImp*);
 typedef void (*psy_ui_fp_graphicsimp_dev_setorigin)(struct psy_ui_GraphicsImp*,
 	double x, double y);
 typedef psy_ui_RealPoint(*psy_ui_fp_graphicsimp_dev_origin)(
@@ -141,6 +143,7 @@ typedef struct psy_ui_GraphicsImpVTable {
 	psy_ui_fp_graphicsimp_dev_drawarc dev_drawarc;
 	psy_ui_fp_graphicsimp_dev_setlinewidth dev_setlinewidth;
 	psy_ui_fp_graphicsimp_dev_linewidth dev_linewidth;
+	psy_ui_fp_graphicsimp_dev_textmetric dev_textmetric;
 	psy_ui_fp_graphicsimp_dev_setorigin dev_setorigin;
 	psy_ui_fp_graphicsimp_dev_origin dev_origin;
 	psy_ui_fp_graphicsimp_dev_gc dev_gc;
@@ -434,6 +437,11 @@ INLINE void psy_ui_graphics_setcliprect(psy_ui_Graphics* self,
 INLINE psy_ui_RealRectangle psy_ui_cliprect(const psy_ui_Graphics* self)
 {
 	return self->imp->vtable->dev_cliprect(self->imp);
+}
+
+INLINE psy_ui_TextMetric psy_ui_textmetric(const psy_ui_Graphics* self)
+{
+	return self->imp->vtable->dev_textmetric(self->imp);
 }
 
 void psy_ui_drawborder(psy_ui_Graphics* self, psy_ui_RealRectangle,
