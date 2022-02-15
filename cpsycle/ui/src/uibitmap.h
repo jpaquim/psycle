@@ -102,6 +102,8 @@ INLINE void psy_ui_bitmap_settransparency(psy_ui_Bitmap* self, psy_ui_Colour col
 	self->vtable->settransparency(self, colour);
 }
 
+void psy_ui_bitmap_copy(psy_ui_Bitmap*, const psy_ui_Bitmap* other);
+
 /* psy_ui_BitmapImp	*/
 typedef void (*psy_ui_bitmap_imp_fp_dispose)(struct psy_ui_BitmapImp*);
 typedef int (*psy_ui_bitmap_imp_fp_load)(struct psy_ui_BitmapImp*, struct psy_ui_Bitmap*, const char* path);
@@ -110,6 +112,8 @@ typedef psy_ui_RealSize (*psy_ui_bitmap_imp_fp_size)(const struct psy_ui_BitmapI
 typedef bool (*psy_ui_bitmap_imp_fp_empty)(const struct psy_ui_BitmapImp*);
 typedef void (*psy_ui_bitmap_imp_fp_settransparency)(struct psy_ui_BitmapImp*,
 	psy_ui_Colour);
+typedef void (*psy_ui_bitmap_imp_fp_copy)(struct psy_ui_BitmapImp*,
+	const struct psy_ui_BitmapImp*);
 
 typedef struct psy_ui_BitmapImpVTable {
 	psy_ui_bitmap_imp_fp_dispose dev_dispose;
@@ -118,6 +122,7 @@ typedef struct psy_ui_BitmapImpVTable {
 	psy_ui_bitmap_imp_fp_size dev_size;
 	psy_ui_bitmap_imp_fp_empty dev_empty;
 	psy_ui_bitmap_imp_fp_settransparency dev_settransparency;
+	psy_ui_bitmap_imp_fp_copy dev_copy;
 } psy_ui_BitmapImpVTable;
 
 typedef struct psy_ui_BitmapImp {

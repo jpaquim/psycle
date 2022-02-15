@@ -18,17 +18,16 @@ typedef struct ArrowUi {
 	/* inherits */
 	psy_ui_Component component;
 	/* internal */
-	psy_audio_Wire wire;
-	MachineViewSkin* skin;
+	psy_audio_Wire wire;	
 	Workspace* workspace;
 } ArrowUi;
 
 void arrowui_init(ArrowUi*, psy_ui_Component* parent,	
-	psy_audio_Wire, MachineViewSkin*, Workspace*);
+	psy_audio_Wire, Workspace*);
 
 ArrowUi* arrowui_alloc(void);
 ArrowUi* arrowui_allocinit(psy_ui_Component* parent,
-	psy_audio_Wire, MachineViewSkin*, Workspace*);
+	psy_audio_Wire, Workspace*);
 
 #ifdef __cplusplus
 }

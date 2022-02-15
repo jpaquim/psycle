@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -70,8 +70,6 @@ static void pianoroll_ondisplayalltracks(Pianoroll*, psy_ui_Button* sender);
 static void pianoroll_ondisplaycurrenttrack(Pianoroll*, psy_ui_Button* sender);
 static void pianoroll_ondisplayactivetracks(Pianoroll*, psy_ui_Button* sender);
 static void pianoroll_updatetrackdisplaybuttons(Pianoroll*);
-static void pianoroll_onthemechanged(Pianoroll*, PatternViewConfig*, psy_Property* theme);
-static void pianoroll_updatetheme(Pianoroll*);
 static void pianoroll_oncursorchanged(Pianoroll*, psy_audio_Sequence* sender);
 static void pianoroll_onsongchanged(Pianoroll*, Workspace* sender);
 static bool pianoroll_onrollcmds(Pianoroll*, InputHandler* sender);
@@ -115,7 +113,7 @@ void pianoroll_init(Pianoroll* self, psy_ui_Component* parent,
 	self->chordbegin = 0;
 	psy_ui_component_setbackgroundmode(&self->component, psy_ui_NOBACKGROUND);
 	/* shared states */
-	keyboardstate_init(&self->keyboardstate, patternviewstate_skin(pvstate));
+	keyboardstate_init(&self->keyboardstate); // , patternviewstate_skin(pvstate));
 	pianogridstate_init(&self->gridstate, pvstate);	
 	/* left area (keyboardheader, keyboard) */
 	psy_ui_component_init(&self->left, &self->component, NULL);
@@ -165,16 +163,12 @@ void pianoroll_init(Pianoroll* self, psy_ui_Component* parent,
 		pianoroll_ondisplaycurrenttrack);
 	psy_signal_connect(&self->bar.tracks_active.signal_clicked, self,
 		pianoroll_ondisplayactivetracks);	
-	psy_signal_connect(
-		&psycleconfig_patview(workspace_conf(workspace))->signal_themechanged,
-		self, pianoroll_onthemechanged);
 	psy_signal_connect(&self->workspace->song->sequence.signal_cursorchanged,
 		self, pianoroll_oncursorchanged);
 	psy_signal_connect(&self->workspace->signal_playlinechanged, self,
 		pianoroll_onplaylinechanged);
 	psy_signal_connect(&workspace->signal_songchanged, self,
-		pianoroll_onsongchanged);
-	pianoroll_updatetheme(self);
+		pianoroll_onsongchanged);	
 	inputhandler_connect(&workspace->inputhandler, INPUTHANDLER_FOCUS,
 		psy_EVENTDRIVER_CMD, "pianoroll", psy_INDEX_INVALID, 
 		self, (fp_inputhandler_input)pianoroll_onrollcmds);
@@ -701,21 +695,6 @@ void pianoroll_blockend(Pianoroll* self)
 {
 	pianogrid_dragselection(&self->grid, self->gridstate.pv->cursor);
 	psy_ui_component_invalidate(&self->component);
-}
-
-void pianoroll_onthemechanged(Pianoroll* self, PatternViewConfig* config,
-	psy_Property* theme)
-{
-	pianoroll_updatetheme(self);
-}
-
-void pianoroll_updatetheme(Pianoroll* self)
-{
-	assert(self);
-	
-	psy_ui_component_setbackgroundcolour(pianoruler_base(&self->header),
-		patternviewskin_backgroundcolour(patternviewstate_skin(
-			self->gridstate.pv), 0, 0));
 }
 
 void pianoroll_onconfigure(Pianoroll* self, PatternViewConfig* config,

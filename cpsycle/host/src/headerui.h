@@ -19,26 +19,25 @@ extern "C" {
 
 struct ParamSkin;
 
-// HeaderUi
+/* HeaderUi */
 typedef struct HeaderUi {
-	// inherits
+	/* inherits */
 	psy_ui_Component component;
-	// internal	
+	/* internal */
 	uintptr_t paramidx;
-	// references
-	struct ParamSkin* skin;	
+	/* references */
 	struct psy_audio_Machine* machine;
 	struct psy_audio_MachineParam* param;
 } HeaderUi;
 
 void headerui_init(HeaderUi*, psy_ui_Component* parent,
 	struct psy_audio_Machine*, uintptr_t paramidx,
-	struct psy_audio_MachineParam*, struct ParamSkin*);
+	struct psy_audio_MachineParam*);
 
 HeaderUi* headerui_alloc(void);
 HeaderUi* headerui_allocinit(psy_ui_Component* parent,
 	struct psy_audio_Machine*, uintptr_t paramidx,
-	struct psy_audio_MachineParam*, struct ParamSkin*);
+	struct psy_audio_MachineParam*);
 
 INLINE psy_ui_Component* headerui_base(HeaderUi* self)
 {

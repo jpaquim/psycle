@@ -7,6 +7,8 @@
 
 
 #include "trackerview.h"
+/* host */
+#include "styles.h"
 /* audio */
 #include <pattern.h>
 /* platform */
@@ -818,46 +820,46 @@ void trackerstate_columncolours(TrackerState* self,
 	TrackerColumnFlags flags, uintptr_t track,
 	psy_ui_Colour* bg, psy_ui_Colour* fore)
 {		
-	PatternViewSkin* skin;
-	uintptr_t numtracks;
+	// uintptr_t numtracks;
+	psy_ui_Style* style;
 
 	assert(bg);
 	assert(fore);
-
-	skin = &self->pv->patconfig->skin;
-	numtracks = patternviewstate_numsongtracks(self->pv);
+	
+	// numtracks = patternviewstate_numsongtracks(self->pv);
+	style = NULL;
 	if (flags.cursor != FALSE) {		
-		*bg = skin->cursor;
-		*fore = patternviewskin_fontcurcolour(skin, track, numtracks);
+		style = psy_ui_style(STYLE_PV_CURSOR);
 	} else if (flags.playbar) {
-		*bg = patternviewskin_playbarcolour(skin, track, numtracks);
-		*fore = patternviewskin_fontplaycolour(skin, track, numtracks);
+		style = psy_ui_style(STYLE_PV_PLAYBAR);		
 	} else if (flags.selection) {
 		if (flags.beat4) {
-			*bg = patternviewskin_selection4beatcolour(skin, track, numtracks);
+			style = psy_ui_style(STYLE_PV_ROW4BEAT_SELECT);			
 		} else if (flags.beat) {
-			*bg = patternviewskin_selectionbeatcolour(skin, track, numtracks);
+			style = psy_ui_style(STYLE_PV_ROWBEAT_SELECT);			
 		} else {
-			*bg = patternviewskin_selectioncolour(skin, track, numtracks);
-		}
-		*fore = patternviewskin_fontselcolour(skin, track, numtracks);
-	} else if (flags.mid) {
-		*bg = patternviewskin_midlinecolour(skin, track, numtracks);
+			style = psy_ui_style(STYLE_PV_ROW_SELECT);			
+		}		
+	} else if (flags.mid) {				
 		if (flags.cursor != FALSE) {
-			*fore = patternviewskin_fontcurcolour(skin, track, numtracks);
+			style = psy_ui_style(STYLE_PV_CURSOR);			
 		} else {
-			*fore = patternviewskin_fontcolour(skin, track, numtracks);
+			style = psy_ui_style(STYLE_PV_PLAYBAR);			
 		}
 	} else {
-		if (flags.beat4) {
-			*bg = patternviewskin_row4beatcolour(skin, track, numtracks);
-			*fore = skin->font;
+		if (flags.beat4) {			
+			style = psy_ui_style(STYLE_PV_ROW4BEAT);			
 		} else if (flags.beat) {
-			*bg = patternviewskin_rowbeatcolour(skin, track, numtracks);
-			*fore = patternviewskin_fontcolour(skin, track, numtracks);
+			style = psy_ui_style(STYLE_PV_ROWBEAT);			
 		} else {
-			*bg = patternviewskin_rowcolour(skin, track, numtracks);
-			*fore = patternviewskin_fontcolour(skin, track, numtracks);
+			style = psy_ui_style(STYLE_PV_ROW);				
 		}
 	}	
+	if (style) {
+		*bg = style->background.colour;
+		*fore = style->colour;
+	} else {
+		*bg = psy_ui_colour_black();
+		*fore = psy_ui_colour_white();
+	}
 }

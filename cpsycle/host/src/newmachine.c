@@ -113,6 +113,7 @@ void newmachinesectionbar_init(NewMachineSectionBar* self,
 }
 
 /* NewMachineSortBar */
+
 /* prototypes */
 static void newmachinesortbar_onsortbyfavorite(NewMachineSortBar*,
 	psy_ui_Component* sender);
@@ -122,6 +123,7 @@ static void newmachinesortbar_onsortbytype(NewMachineSortBar*,
 	psy_ui_Component* sender);
 static void newmachinesortbar_onsortbymode(NewMachineSortBar*,
 	psy_ui_Component* sender);
+
 /* implementation */
 void newmachinesortbar_init(NewMachineSortBar* self, psy_ui_Component* parent,
 	NewMachineSort* sort)
@@ -180,9 +182,11 @@ void newmachinesortbar_onsortbymode(NewMachineSortBar* self,
 }
 
 /* NewMachineFilterBar */
+
 /* prototypes */
 static void newmachinefilterbar_onclicked(NewMachineFilterBar* self,
 	psy_ui_Button* sender);
+
 /* implementation */
 void newmachinefilterbar_init(NewMachineFilterBar* self,
 	psy_ui_Component* parent, NewMachineFilter* filter)
@@ -338,6 +342,7 @@ static void newmachinecategorybar_vtable_init(NewMachineCategoryBar* self)
 	}
 	self->component.vtable = &newmachinecategorybar_vtable;
 }
+
 /* implementation */
 void newmachinecategorybar_init(NewMachineCategoryBar* self,
 	psy_ui_Component* parent, NewMachineFilter* filter,

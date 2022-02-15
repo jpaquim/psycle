@@ -8,8 +8,10 @@
 
 #include "switchui.h"
 /* host */
-#include "skingraphics.h"
+#include "styles.h"
 #include "machineparamconfig.h"
+/* ui */
+#include <uiapp.h>
 /* audio */
 #include <machine.h>
 #include <plugin_interface.h>
@@ -60,17 +62,14 @@ static psy_ui_ComponentVtable* switchui_vtable_init(SwitchUi* self)
 /* implementation */
 void switchui_init(SwitchUi* self, psy_ui_Component* parent,
 	psy_audio_Machine* machine, uintptr_t paramidx,
-	psy_audio_MachineParam* param, ParamSkin* paramskin)
+	psy_audio_MachineParam* param)
 {
 	assert(self);	
-	assert(paramskin);		
 
 	psy_ui_component_init(&self->component, parent, NULL);
 	switchui_vtable_init(self);
 	self->component.vtable = &switchui_vtable;
-	psy_ui_component_setbackgroundmode(&self->component,
-		psy_ui_NOBACKGROUND);	
-	self->skin = paramskin;
+	psy_ui_component_setbackgroundmode(&self->component, psy_ui_NOBACKGROUND);	
 	self->machine = machine;
 	self->paramidx = paramidx;
 	self->param = param;	
@@ -84,13 +83,13 @@ SwitchUi* switchui_alloc(void)
 
 SwitchUi* switchui_allocinit(psy_ui_Component* parent,
 	psy_audio_Machine* machine, uintptr_t paramidx,
-	psy_audio_MachineParam* param, ParamSkin* paramskin)
+	psy_audio_MachineParam* param)
 {
 	SwitchUi* rv;
 
 	rv = switchui_alloc();
 	if (rv) {
-		switchui_init(rv, parent, machine, paramidx, param, paramskin);
+		switchui_init(rv, parent, machine, paramidx, param);
 		rv->component.deallocate = TRUE;
 	}
 	return rv;
@@ -101,38 +100,42 @@ void switchui_ondraw(SwitchUi* self, psy_ui_Graphics* g)
 	psy_ui_RealSize size;				
 	psy_ui_RealRectangle r;
 	char label[128];
+	psy_ui_Style* top_style;
+	psy_ui_Style* bottom_style;	
+	psy_ui_Style* style;	
 	
+	top_style = psy_ui_style(STYLE_MACPARAM_TOP);
+	bottom_style = psy_ui_style(STYLE_MACPARAM_BOTTOM);		
+	if (!self->param || psy_audio_machineparam_normvalue(self->param) == 0.f) {
+		style = psy_ui_style(STYLE_MACPARAM_SWITCHOFF);
+	} else {
+		style = psy_ui_style(STYLE_MACPARAM_SWITCHON);
+	}
 	switchui_updateparam(self);
 	size = psy_ui_component_scrollsize_px(&self->component);
 	r = psy_ui_realrectangle_make(
 		psy_ui_realpoint_make(0, 0),
 		psy_ui_realsize_make(size.width, size.height));
-	psy_ui_drawsolidrectangle(g, r, self->skin->bottomcolour);
-	
-	if (!self->param || psy_audio_machineparam_normvalue(self->param) == 0.f) {
-		skin_blitcoord(g, &self->skin->mixerbitmap,
-			psy_ui_realpoint_zero(), &self->skin->switchoff);
-	} 	else {
-		skin_blitcoord(g, &self->skin->mixerbitmap,
-			psy_ui_realpoint_zero(), &self->skin->switchon);
-	}	
+	psy_ui_drawsolidrectangle(g, r, bottom_style->background.colour);		
+	psy_ui_component_drawbackground_style(&self->component,
+		g, style, psy_ui_realpoint_zero());	
 	psy_snprintf(label, 128, "%s", "");
 	if (self->param && !psy_audio_machineparam_name(self->param, label)) {
 		if (!psy_audio_machineparam_label(self->param, label)) {
 			psy_snprintf(label, 128, "%s", "");
 		}
 	}
-	psy_ui_setbackgroundcolour(g, self->skin->topcolour);
-	psy_ui_settextcolour(g, self->skin->fonttopcolour);
+	psy_ui_setbackgroundcolour(g, top_style->background.colour);
+	psy_ui_settextcolour(g, top_style->colour);
 	r = psy_ui_realrectangle_make(
 		psy_ui_realpoint_make(	
-			psy_ui_realrectangle_width(&self->skin->switchon.dest), 0),
+			style->background.size.width, 0),
 		psy_ui_realsize_make(
-			size.width - psy_ui_realrectangle_width(&self->skin->switchon.dest),
+			size.width - style->background.size.width,
 			size.height / 2));
 	psy_ui_textoutrectangle(g,
 		psy_ui_realpoint_make(
-			psy_ui_realrectangle_width(&self->skin->switchon.dest), 0.0),
+			style->background.size.width, 0.0),
 		psy_ui_ETO_OPAQUE | psy_ui_ETO_CLIPPED,
 		r, label, strlen(label));	
 }
@@ -143,11 +146,11 @@ void switchui_onpreferredsize(SwitchUi* self, const psy_ui_Size* limit,
 	switchui_updateparam(self);
 	if (self->param) {
 		if (psy_audio_machineparam_type(self->param) & MPF_SMALL) {
-			psy_ui_size_setem(rv, self->skin->paramwidth_small, 2.0);
+			psy_ui_size_setem(rv, PARAMWIDTH_SMALL, 2.0);
 			return;
 		}
 	}
-	psy_ui_size_setem(rv, self->skin->paramwidth, 2.0);
+	psy_ui_size_setem(rv, PARAMWIDTH, 2.0);
 }
 
 void switchui_onmousedown(SwitchUi* self, psy_ui_MouseEvent* ev)

@@ -94,7 +94,7 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 	self->aligndisplay = TRUE;
 	self->updatealign = 0;
 	self->zoom = 1.0;	
-	psy_ui_component_setstyletype(&self->component, STYLE_PATTERNVIEW);
+	psy_ui_component_setstyletype(&self->component, STYLE_PATTERNVIEW);	
 	psy_ui_notebook_init(&self->notebook, &self->component);
 	psy_ui_component_setalign(psy_ui_notebook_base(&self->notebook),
 		psy_ui_ALIGN_CLIENT);		
@@ -424,7 +424,7 @@ void patternview_rebuild(PatternView* self)
 	trackerheader_build(&self->header);	
 	trackergrid_build(&self->trackerview.grid);	
 	trackergrid_build(&self->defaultline.grid);
-	trackerheader_build(&self->header);	
+	trackerheader_build(&self->header);		
 	psy_ui_component_align_full(&self->trackerview.scroller.component);
 	psy_ui_component_invalidate(&self->component);	
 }

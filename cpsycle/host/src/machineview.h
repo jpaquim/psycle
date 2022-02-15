@@ -8,8 +8,7 @@
 
 /* host */
 #include "machineframe.h"
-#include "machineeditorview.h" // vst view
-#include "machineviewskin.h"
+#include "machineeditorview.h" /* vst view */
 #include "machineui.h"
 #include "machinestackview.h"
 #include "machinewireview.h"
@@ -59,8 +58,7 @@ typedef struct MachineView {
 	MachineWireView wireview;
 	psy_ui_Scroller scroller;
 	MachineStackView stackview;	
-	NewMachine newmachine;
-	MachineViewSkin skin;	
+	NewMachine newmachine;	
 	bool shownewmachine;
 	ParamViews paramviews;
 	/* references */

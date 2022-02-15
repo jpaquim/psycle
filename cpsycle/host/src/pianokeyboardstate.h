@@ -1,13 +1,11 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #if !defined(PIANOKEYBOARDSTATE_H)
 #define PIANOKEYBOARDSTATE_H
 
-/* host */
-#include "patternviewskin.h"
 /* audio */
 #include <pattern.h>
 /* ui */
@@ -27,12 +25,10 @@ typedef struct KeyboardState {
 	psy_ui_Value keyheight;
 	double keyheightpx;
 	double keyboardheightpx;
-	psy_ui_Value defaultkeyheight;
-	/* references */
-	PatternViewSkin* skin;
+	psy_ui_Value defaultkeyheight;	
 } KeyboardState;
 
-void keyboardstate_init(KeyboardState*, PatternViewSkin* skin);
+void keyboardstate_init(KeyboardState*);
 
 INLINE intptr_t keyboardstate_numkeys(KeyboardState* self)
 {

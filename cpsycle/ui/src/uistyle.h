@@ -30,22 +30,38 @@ typedef enum {
 	psy_ui_NOREPEAT	
 } psy_ui_BackgroundRepeat;
 
+typedef struct psy_ui_Background {
+	psy_ui_Colour colour;
+	psy_ui_Colour overlay;
+	uintptr_t image_id;
+	char* image_path;
+	psy_ui_Bitmap bitmap;
+	psy_ui_BackgroundRepeat repeat;
+	psy_ui_Alignment align;
+	psy_ui_BitmapAnimate animation;	
+	psy_ui_RealPoint position;
+	bool position_set;
+	psy_ui_RealSize size;
+	bool size_set;
+} psy_ui_Background;
+
+void psy_ui_background_init(psy_ui_Background*);
+void psy_ui_background_dispose(psy_ui_Background*);
+
+void psy_ui_background_copy(psy_ui_Background*,
+	const psy_ui_Background* other);
+
 /* psy_ui_Style */
 typedef struct psy_ui_Style {
-	psy_ui_Font font;
-	psy_ui_Colour colour;
-	psy_ui_Colour backgroundcolour;
-	uintptr_t backgroundid;
-	char* backgroundpath;
-	psy_ui_BackgroundRepeat backgroundrepeat;
-	psy_ui_Alignment backgroundposition;
-	psy_ui_BitmapAnimate backgroundanimation;
-	psy_ui_Colour overlaycolour;
+	psy_ui_Font font;	
+	psy_ui_Colour colour;	
+	psy_ui_Background background;	
 	psy_ui_Border border;
 	psy_ui_Margin margin;
 	bool marginset;
-	psy_ui_Margin padding;
-	bool paddingset;	
+	psy_ui_Margin padding;	
+	bool paddingset;
+	psy_ui_Rectangle position;
 	int dbgflag;	
 } psy_ui_Style;
 
@@ -74,31 +90,28 @@ INLINE void psy_ui_style_setcolour(psy_ui_Style* self, psy_ui_Colour colour)
 INLINE void psy_ui_style_setbackgroundcolour(psy_ui_Style* self,
 	psy_ui_Colour colour)
 {
-	self->backgroundcolour = colour;
+	self->background.colour = colour;
 }
 
 INLINE void psy_ui_style_setbackgroundoverlay(psy_ui_Style* self,
 	int overlay)
 {
-	self->backgroundcolour = psy_ui_colour_make_overlay(overlay);
+	self->background.colour = psy_ui_colour_make_overlay(overlay);
 }
 
-INLINE void psy_ui_style_setbackgroundid(psy_ui_Style* self,
-	uintptr_t id)
-{
-	self->backgroundid = id;
-}
+void psy_ui_style_setbackgroundid(psy_ui_Style* self,
+	uintptr_t id);
 
-void psy_ui_style_setbackgroundpath(psy_ui_Style* self,
+int psy_ui_style_setbackgroundpath(psy_ui_Style* self,
 	const char* path);
 
 INLINE void psy_ui_style_animatebackground(psy_ui_Style* self,
 	uintptr_t interval, psy_ui_RealSize framesize, bool horizontal)
 {
-	self->backgroundanimation.enabled = TRUE;
-	self->backgroundanimation.interval = interval;
-	self->backgroundanimation.framesize = framesize;
-	self->backgroundanimation.horizontal = horizontal;
+	self->background.animation.enabled = TRUE;
+	self->background.animation.interval = interval;
+	self->background.animation.framesize = framesize;
+	self->background.animation.horizontal = horizontal;
 }
 
 INLINE void psy_ui_style_setcolours(psy_ui_Style* self,
@@ -142,12 +155,40 @@ INLINE void psy_ui_style_setpadding_em(psy_ui_Style* self,
 		psy_ui_margin_make_em(top, right, bottom, left));	
 }
 
+INLINE void psy_ui_style_setpadding_px(psy_ui_Style* self,
+	double top, double right, double bottom, double left)
+{
+	psy_ui_style_setpadding(self,
+		psy_ui_margin_make_px(top, right, bottom, left));
+}
+
 INLINE psy_ui_Margin psy_ui_style_padding(const psy_ui_Style* self)
 {
 	return self->padding;
 }
 
-INLINE void psy_ui_style_setborder(psy_ui_Style* self, const psy_ui_Border* border)
+INLINE void psy_ui_style_set_position(psy_ui_Style* self,
+	psy_ui_Rectangle position)
+{
+	self->position = position;	
+}
+
+INLINE void psy_ui_style_setsize_px(psy_ui_Style* self,
+	double width, double height)
+{
+	self->background.size = psy_ui_realsize_make(width, height);
+	self->background.size_set = TRUE;
+}
+
+INLINE void psy_ui_style_set_background_position_px(psy_ui_Style* self,
+	double x, double y)
+{
+	self->background.position = psy_ui_realpoint_make(x, y);
+	self->background.position_set = TRUE;
+}
+
+INLINE void psy_ui_style_setborder(psy_ui_Style* self,
+	const psy_ui_Border* border)
 {
 	assert(border);
 

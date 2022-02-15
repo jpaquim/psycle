@@ -7,6 +7,9 @@
 
 
 #include "parammap.h"
+
+/* host */
+#include "styles.h"
 /* platform */
 #include "../../detail/portable.h"
 
@@ -17,8 +20,7 @@ void parammap_init(ParamMap* self, psy_ui_Component* parent,
 	assert(config);
 
 	psy_ui_component_init(&self->component, parent, NULL);
-	psy_ui_component_setbackgroundcolour(&self->component,
-		machineparamconfig_skin(config)->titlecolour);	
+	psy_ui_component_setstyletype(&self->component, STYLE_MACPARAM_TITLE);	
 	self->machine = machine;
 	parammap_setmachine(self, self->machine);
 	psy_ui_label_init_text(&self->construction, &self->component,

@@ -29,20 +29,19 @@ typedef struct KnobUi {
 	/* internal */
 	ParamTweak paramtweak;
 	uintptr_t paramidx;
-	/* references */
-	struct ParamSkin* skin;	
+	/* references */	
 	struct psy_audio_Machine* machine;
 	struct psy_audio_MachineParam* param;
 } KnobUi;
 
 void knobui_init(KnobUi*, psy_ui_Component* parent,	
 	struct psy_audio_Machine*, uintptr_t paramidx,
-	struct psy_audio_MachineParam*, struct ParamSkin*);
+	struct psy_audio_MachineParam*);
 
 KnobUi* knobui_alloc(void);
 KnobUi* knobui_allocinit(psy_ui_Component* parent,
 	struct psy_audio_Machine*, uintptr_t paramidx,
-	struct psy_audio_MachineParam*, struct ParamSkin*);
+	struct psy_audio_MachineParam*);
 
 INLINE psy_ui_Component* knobui_base(KnobUi* self)
 {

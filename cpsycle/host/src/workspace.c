@@ -13,6 +13,7 @@
 #include "sequencehostcmds.h"
 #include "styles.h"
 #include "trackergridstate.h"
+#include "paramviews.h"
 /* file */
 #include <dir.h>
 /* dsp */
@@ -162,6 +163,7 @@ void workspace_init(Workspace* self, psy_ui_Component* main)
 	self->currplayposition = 0.0;
 	self->lastplayposition = -1.0;
 	self->songhasfile = FALSE;
+	self->paramviews = NULL;
 	psy_thread_init(&self->driverconfigloadthread);
 	psy_thread_init(&self->pluginscanthread);
 	viewhistory_init(&self->viewhistory);
@@ -221,8 +223,7 @@ void workspace_initsignals(Workspace* self)
 
 	psy_signal_init(&self->signal_octavechanged);
 	psy_signal_init(&self->signal_songchanged);
-	psy_signal_init(&self->signal_configchanged);
-	psy_signal_init(&self->signal_changecontrolskin);
+	psy_signal_init(&self->signal_configchanged);	
 	psy_signal_init(&self->signal_playlinechanged);
 	psy_signal_init(&self->signal_gotocursor);	
 	psy_signal_init(&self->signal_loadprogress);
@@ -232,8 +233,7 @@ void workspace_initsignals(Workspace* self)
 	psy_signal_init(&self->signal_scanend);
 	psy_signal_init(&self->signal_scantaskstart);
 	psy_signal_init(&self->signal_plugincachechanged);
-	psy_signal_init(&self->signal_beforesavesong);
-	psy_signal_init(&self->signal_showparameters);
+	psy_signal_init(&self->signal_beforesavesong);	
 	psy_signal_init(&self->signal_viewselected);
 	psy_signal_init(&self->signal_focusview);
 	psy_signal_init(&self->signal_parametertweak);
@@ -305,8 +305,7 @@ void workspace_disposesignals(Workspace* self)
 
 	psy_signal_dispose(&self->signal_octavechanged);
 	psy_signal_dispose(&self->signal_songchanged);
-	psy_signal_dispose(&self->signal_configchanged);
-	psy_signal_dispose(&self->signal_changecontrolskin);	
+	psy_signal_dispose(&self->signal_configchanged);		
 	psy_signal_dispose(&self->signal_playlinechanged);
 	psy_signal_dispose(&self->signal_gotocursor);
 	psy_signal_dispose(&self->signal_loadprogress);
@@ -316,8 +315,7 @@ void workspace_disposesignals(Workspace* self)
 	psy_signal_dispose(&self->signal_scanend);
 	psy_signal_dispose(&self->signal_scantaskstart);
 	psy_signal_dispose(&self->signal_plugincachechanged);
-	psy_signal_dispose(&self->signal_beforesavesong);
-	psy_signal_dispose(&self->signal_showparameters);
+	psy_signal_dispose(&self->signal_beforesavesong);	
 	psy_signal_dispose(&self->signal_viewselected);
 	psy_signal_dispose(&self->signal_focusview);
 	psy_signal_dispose(&self->signal_parametertweak);
@@ -614,9 +612,7 @@ void workspace_onloadcontrolskin(Workspace* self)
 		dirconfig_skins(&self->config.directories));
 	if (psy_ui_opendialog_execute(&opendialog)) {
 		machineparamconfig_setdialbpm(psycleconfig_macparam(&self->config),
-			psy_path_full(psy_ui_opendialog_path(&opendialog)));
-		psy_signal_emit(&self->signal_changecontrolskin, self, 1,
-			psy_path_full(psy_ui_opendialog_path(&opendialog)));
+			psy_path_full(psy_ui_opendialog_path(&opendialog)));		
 	}
 	psy_ui_opendialog_dispose(&opendialog);
 }
@@ -718,8 +714,8 @@ void workspace_setapptheme(Workspace* self, psy_Property* property)
 		/* reset styles */		
 		psy_ui_defaults_inittheme(psy_ui_appdefaults(), theme, TRUE);
 		inithoststyles(&psy_ui_appdefaults()->styles, theme);
-		machineviewconfig_updatestyles(&self->config.macview,
-			&psy_ui_appdefaults()->styles);
+		machineviewconfig_write_styles(&self->config.macview);
+		patternviewconfig_updatestyles(&self->config.patview);
 		psy_ui_defaults_loadtheme(psy_ui_appdefaults(),
 			dirconfig_configdir(&self->config.directories),
 			theme);		
@@ -1510,9 +1506,9 @@ psy_audio_SequenceCursor workspace_playcursor(Workspace* self)
 
 void workspace_showparameters(Workspace* self, uintptr_t machineslot)
 {
-	assert(self);
-
-	psy_signal_emit(&self->signal_showparameters, self, 1, machineslot);
+	if (self->song) {
+		paramviews_show(self->paramviews, machineslot);
+	}
 }
 
 void workspace_saveview(Workspace* self)

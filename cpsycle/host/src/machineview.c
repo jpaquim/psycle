@@ -9,18 +9,10 @@
 #include "machineview.h"
 /* host */
 #include "resources/resource.h"
-#include "skingraphics.h"
 #include "styles.h"
 #include "wireview.h"
-/* ui */
-#include <uicolours.h>
 /* audio */
 #include <exclusivelock.h>
-/* std */
-#include <math.h>
-/* platform */
-#include "../../detail/portable.h"
-#include "../../detail/trace.h"
 
 /* MachineView */
 /* prototypes */
@@ -51,8 +43,6 @@ static void machineview_selectsection(MachineView*, psy_ui_Component* sender,
 	uintptr_t section, uintptr_t options);
 static void machineview_onconfigure(MachineView*, MachineViewConfig*,
 	psy_Property*);
-static void machineview_onthemechanged(MachineView*, MachineViewConfig*,
-	psy_Property* theme);
 static void machineview_onnewmachineselected(MachineView*,
 	psy_ui_Component* sender, psy_Property*);
 static void machineview_onshow(MachineView*);
@@ -103,9 +93,7 @@ void machineview_init(MachineView* self, psy_ui_Component* parent,
 	self->shownewmachine = FALSE;
 	self->workspace = workspace;
 	paramviews_init(&self->paramviews, self->component.view, workspace);	
-	machineviewskin_init(&self->skin,	
-		psycleconfig_macview(workspace_conf(self->workspace))->theme,
-		dirconfig_skins(&self->workspace->config.directories));	
+	workspace_setparamviews(workspace, &self->paramviews);
 	machineview_initnotebook(self, tabbarparent);
 	machineview_initpropertiesview(self);
 	machineview_initwireview(self, tabbarparent);
@@ -117,8 +105,7 @@ void machineview_init(MachineView* self, psy_ui_Component* parent,
 }
 
 void machineview_ondestroy(MachineView* self)
-{	
-	machineviewskin_dispose(&self->skin);
+{		
 	paramviews_dispose(&self->paramviews);
 }
 
@@ -126,7 +113,7 @@ void machineview_initcomponent(MachineView* self, psy_ui_Component* parent)
 {
 	psy_ui_component_init(machineview_base(self), parent, NULL);
 	machineview_vtable_init(self);	
-	psy_ui_component_setstyletype(&self->component, STYLE_MACHINEVIEW);	
+	psy_ui_component_setstyletype(&self->component, STYLE_MACHINEVIEW);
 }
 
 void machineview_initpropertiesview(MachineView* self)
@@ -148,7 +135,7 @@ void machineview_initnotebook(MachineView* self, psy_ui_Component* tabbarparent)
 void machineview_initwireview(MachineView* self, psy_ui_Component* tabbarparent)
 {
 	machinewireview_init(&self->wireview,
-		psy_ui_notebook_base(&self->notebook), tabbarparent, &self->skin,
+		psy_ui_notebook_base(&self->notebook), tabbarparent,
 		&self->paramviews, self->workspace);
 	psy_ui_scroller_init(&self->scroller, &self->wireview.component,
 		psy_ui_notebook_base(&self->notebook));
@@ -162,7 +149,7 @@ void machineview_initstackview(MachineView* self,
 {
 	machinestackview_init(&self->stackview,
 		psy_ui_notebook_base(&self->notebook), tabbarparent,
-		&self->skin, &self->paramviews, self->workspace);
+		&self->paramviews, self->workspace);
 }
 
 void machineview_initnewmachine(MachineView* self,
@@ -192,10 +179,7 @@ void machineview_connectsignals(MachineView* self)
 	psy_signal_connect(&self->component.signal_selectsection, self,
 		machineview_selectsection);
 	psy_signal_connect(&self->newmachine.signal_selected, self,
-		machineview_onnewmachineselected);
-	psy_signal_connect(
-		&psycleconfig_macview(workspace_conf(self->workspace))->signal_themechanged,
-		self, machineview_onthemechanged);
+		machineview_onnewmachineselected);	
 	psy_signal_connect(
 		&psycleconfig_macview(workspace_conf(self->workspace))->signal_changed,
 		self, machineview_onconfigure);
@@ -332,8 +316,16 @@ void machineview_onsongchanged(MachineView* self, Workspace* sender)
 void machineview_onconfigure(MachineView* self, MachineViewConfig* sender,
 	psy_Property* property)
 {
-	self->skin.drawvumeters = machineviewconfig_vumeters(sender);
-	self->skin.drawmachineindexes = machineviewconfig_machineindexes(sender);
+	if (machineviewconfig_vumeters(sender)) {
+		machineui_enable_vumeter();
+	} else {
+		machineui_prevent_vumeter();
+	}
+	if (machineviewconfig_machineindexes(sender)) {
+		machineui_enable_macindex();
+	} else {
+		machineui_prevent_macindex();
+	}
 	self->wireview.showwirehover = machineviewconfig_wirehover(sender);	
 	if (machineviewconfig_virtualgenerators(sender)) {
 		machinewireview_showvirtualgenerators(&self->wireview);
@@ -347,15 +339,6 @@ void machineview_onconfigure(MachineView* self, MachineViewConfig* sender,
 	} else {
 		machinestackview_drawfulleffects(&self->stackview);
 	}
-}
-
-void machineview_onthemechanged(MachineView* self, MachineViewConfig* sender,
-	psy_Property* theme)
-{
-	machineviewskin_settheme(&self->skin, theme,
-		dirconfig_skins(&self->workspace->config.directories));
-	machinewireview_updateskin(&self->wireview);	
-	psy_ui_component_invalidate(&self->component);
 }
 
 void machineview_onnewmachineselected(MachineView* self,

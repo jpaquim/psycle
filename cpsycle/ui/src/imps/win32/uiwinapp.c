@@ -23,7 +23,8 @@ static psy_ui_WinApp* winapp = NULL;
 /* prototypes */
 static psy_ui_KeyboardEvent keyboardevent(psy_ui_EventType, WPARAM, LPARAM);
 static psy_ui_MouseEvent mouseevent(int msg, WPARAM, LPARAM);
-static bool handle_ctlcolor(int msg, HWND, WPARAM, LPARAM, LRESULT* rv);
+static bool handle_ctlcolor(psy_ui_WinApp*, int msg, HWND, WPARAM, LPARAM,
+	LRESULT* rv);
 static void psy_ui_winapp_onappdefaultschange(psy_ui_WinApp*);
 static psy_ui_EventType translate_win_event_type(int message);
 static int translate_win_button(int message);
@@ -111,9 +112,8 @@ void psy_ui_winapp_init(psy_ui_WinApp* self, psy_ui_App* app, HINSTANCE instance
 	assert(self);
 
 	psy_ui_appimp_init(&self->imp);
-	imp_vtable_init(self);
-	/* init static winapp reference */
-	winapp = self;
+	imp_vtable_init(self);	
+	winapp = self; /* init static winapp reference */
 	self->app = app;
 	self->instance = instance;
 	self->appclass = szAppClass;
@@ -341,14 +341,16 @@ LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message, 
                                WPARAM wParam, LPARAM lParam)
 {    
+	psy_ui_WinApp* self;
 	psy_ui_win_ComponentImp* imp;
 	psy_ui_Component* component;	
 	LRESULT lres;
 
-	if (handle_ctlcolor(message, hwnd, wParam, lParam, &lres)) {
+	self = winapp;
+	if (handle_ctlcolor(self, message, hwnd, wParam, lParam, &lres)) {
 		return lres;
 	}	
-	imp = psy_ui_winapp_componentimp(winapp, (uintptr_t)hwnd);	
+	imp = psy_ui_winapp_componentimp(self, (uintptr_t)hwnd);	
 	if (imp) {
 		component = imp->component;
 		switch (message) {
@@ -368,14 +370,28 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				imp->sizecachevalid = FALSE;
 				psy_ui_event_init(&ev, psy_ui_RESIZE);
 				psy_ui_event_stop_propagation(&ev);				
-				psy_ui_eventdispatch_send(&winapp->app->eventdispatch,
+				psy_ui_eventdispatch_send(&self->app->eventdispatch,
 					component, &ev);
 			}
 			return 0;		
 		case WM_ERASEBKGND:
 			return 1;
+		case WM_SETTINGCHANGE: {
+			int scrolllines;
+
+			SystemParametersInfo(SPI_GETWHEELSCROLLLINES, 0,
+				&scrolllines, 0);
+			/*
+			** scrolllines usually equals 3 or 0 (for no scrolling)
+			** WHEEL_DELTA equals 120, so deltaperline will be 40
+			*/
+			psy_ui_eventdispatch_setwheeldeltaperline(
+				&self->app->eventdispatch, (scrolllines)
+				? WHEEL_DELTA / scrolllines
+				: 0);
+			return 0; }
 		case WM_COMMAND:
-			imp = psy_table_at(&winapp->winidmap, (uintptr_t)LOWORD(wParam));
+			imp = psy_table_at(&self->winidmap, (uintptr_t)LOWORD(wParam));
 			if (imp && imp->component &&
 				imp->component->signal_command.slots) {
 				psy_signal_emit(&imp->component->signal_command,
@@ -532,7 +548,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				if (psy_ui_app_focus(psy_ui_app())) {
 					component = psy_ui_app_focus(psy_ui_app());
 				}
-				psy_ui_eventdispatch_send(&winapp->app->eventdispatch,
+				psy_ui_eventdispatch_send(&self->app->eventdispatch,
 					component, psy_ui_keyboardevent_base(&keyevent));
 				if (psy_ui_event_default_prevented(&keyevent.event)) {
 					imp->preventwmchar = 1;
@@ -554,7 +570,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				psy_ui_MouseEvent ev;
 				
 				ev = mouseevent(message, wParam, lParam);				
-				if (message == WM_MOUSEMOVE && !psy_ui_app()->mousetracking) {
+				if (message == WM_MOUSEMOVE && !self->app->mousetracking) {
 					TRACKMOUSEEVENT tme;
 
 					// component->imp->vtable->dev_mouseenter(component->imp);
@@ -566,29 +582,11 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 						psy_ui_app()->mousetracking = TRUE;
 					}
 				}
-				psy_ui_eventdispatch_send(&winapp->app->eventdispatch,
+				psy_ui_eventdispatch_send(&self->app->eventdispatch,
 					component, psy_ui_mouseevent_base(&ev));
 				return 0;
 			}
-			break;
-		case WM_SETTINGCHANGE: {
-			int ulScrollLines;
-
-			SystemParametersInfo(SPI_GETWHEELSCROLLLINES, 0,
-				&ulScrollLines, 0);      
-			/*
-			** ulScrollLines usually equals 3 or 0 (for no scrolling)
-			** WHEEL_DELTA equals 120, so deltaperline will be 40
-			*/
-			if (ulScrollLines) {
-				psy_ui_eventdispatch_setwheeldeltaperline(
-					&winapp->app->eventdispatch, WHEEL_DELTA / ulScrollLines);
-			} else {
-				psy_ui_eventdispatch_setwheeldeltaperline(
-					&winapp->app->eventdispatch, 0);				
-			}
-			return 0;
-			break; }
+			break;		
 		case WM_MOUSEWHEEL:	{
 			if (component) {
 				psy_ui_MouseEvent ev;
@@ -602,7 +600,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					(short)LOWORD(wParam), (short)HIWORD(wParam),
 					GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);				
 				psy_ui_mouseevent_settype(&ev, psy_ui_WHEEL);
-				psy_ui_eventdispatch_send(&winapp->app->eventdispatch,
+				psy_ui_eventdispatch_send(&self->app->eventdispatch,
 					component, psy_ui_mouseevent_base(&ev));				
 			}
 			break; }
@@ -618,7 +616,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 
 				psy_ui_event_init(&ev, psy_ui_MOUSELEAVE);
 				psy_ui_event_stop_propagation(&ev);
-				psy_ui_eventdispatch_send(&winapp->app->eventdispatch,
+				psy_ui_eventdispatch_send(&self->app->eventdispatch,
 					component, &ev);				
 			}			
 			return 0;		
@@ -628,7 +626,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 
 				psy_ui_event_init(&ev, psy_ui_FOCUSOUT);
 				psy_ui_event_stop_propagation(&ev);
-				psy_ui_eventdispatch_send(&winapp->app->eventdispatch,
+				psy_ui_eventdispatch_send(&self->app->eventdispatch,
 					component, &ev);
 				return 0;
 			}							
@@ -674,8 +672,8 @@ psy_ui_EventType translate_win_event_type(int message)
 	}
 }
 
-bool handle_ctlcolor(int msg, HWND hwnd, WPARAM wparam, LPARAM lparam,
-	LRESULT* rv)
+bool handle_ctlcolor(psy_ui_WinApp* self, int msg, HWND hwnd, WPARAM wparam,
+	LPARAM lparam, LRESULT* rv)
 {
 	psy_ui_win_ComponentImp* imp;	
 
@@ -688,9 +686,9 @@ bool handle_ctlcolor(int msg, HWND hwnd, WPARAM wparam, LPARAM lparam,
 		uint32_t bgcolorref;
 		HBRUSH brush;
 
-		imp = psy_ui_winapp_componentimp(winapp, (uintptr_t)lparam);
+		imp = psy_ui_winapp_componentimp(self, (uintptr_t)lparam);
 		if (!imp) {
-			imp = psy_ui_winapp_componentimp(winapp, (uintptr_t)hwnd);
+			imp = psy_ui_winapp_componentimp(self, (uintptr_t)hwnd);
 		}
 		if (imp && imp->component) {
 			psy_ui_Colour colour;
@@ -712,8 +710,10 @@ bool handle_ctlcolor(int msg, HWND hwnd, WPARAM wparam, LPARAM lparam,
 				? psy_ui_win_component_details(imp->component)->background
 				: (HBRUSH)GetStockObject(NULL_BRUSH);
 		} else {
-			colorref = psy_ui_colour_colorref(&psy_ui_style_const(psy_ui_STYLE_ROOT)->colour);
-			bgcolorref = psy_ui_colour_colorref(&psy_ui_style_const(psy_ui_STYLE_ROOT)->backgroundcolour);
+			colorref = psy_ui_colour_colorref(
+				&psy_ui_style_const(psy_ui_STYLE_ROOT)->colour);
+			bgcolorref = psy_ui_colour_colorref(
+				&psy_ui_style_const(psy_ui_STYLE_ROOT)->background.colour);
 			brush = winapp->defaultbackgroundbrush;
 		}
 		SetTextColor((HDC)wparam, colorref);
@@ -844,7 +844,8 @@ void psy_ui_winapp_onappdefaultschange(psy_ui_WinApp* self)
 {
 	DeleteObject(self->defaultbackgroundbrush);
 	self->defaultbackgroundbrush = CreateSolidBrush(
-		psy_ui_colour_colorref(&psy_ui_style_const(psy_ui_STYLE_ROOT)->backgroundcolour));
+		psy_ui_colour_colorref(
+			&psy_ui_style_const(psy_ui_STYLE_ROOT)->background.colour));
 }
 
 void psy_ui_winapp_sendevent(psy_ui_WinApp* self, psy_ui_Component* component,

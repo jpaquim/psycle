@@ -9,8 +9,10 @@
 #include "checkui.h"
 
 /* host */
-#include "skingraphics.h"
+#include "styles.h"
 #include "machineparamconfig.h"
+/* ui */
+#include <uiapp.h>
 /* audio */
 #include <machine.h>
 #include <plugin_interface.h>
@@ -57,17 +59,14 @@ static psy_ui_ComponentVtable* checkui_vtable_init(CheckUi* self)
 /* implementation */
 void checkui_init(CheckUi* self, psy_ui_Component* parent,	
 	psy_audio_Machine* machine, uintptr_t paramidx,
-	psy_audio_MachineParam* param, ParamSkin* paramskin)
+	psy_audio_MachineParam* param)
 {
-	assert(self);	
-	assert(paramskin);		
+	assert(self);			
 
 	psy_ui_component_init(&self->component, parent, NULL);
 	checkui_vtable_init(self);
 	self->component.vtable = &checkui_vtable;
-	psy_ui_component_setbackgroundmode(&self->component,
-		psy_ui_NOBACKGROUND);	
-	self->skin = paramskin;
+	psy_ui_component_setbackgroundmode(&self->component, psy_ui_NOBACKGROUND);
 	self->machine = machine;
 	self->paramidx = paramidx;
 	self->param = param;
@@ -81,18 +80,17 @@ CheckUi* checkui_alloc(void)
 
 CheckUi* checkui_allocinit(psy_ui_Component* parent,	
 	psy_audio_Machine* machine, uintptr_t paramidx,
-	psy_audio_MachineParam* param, ParamSkin* skin)
+	psy_audio_MachineParam* param)
 {
 	CheckUi* rv;
 
 	rv = checkui_alloc();
 	if (rv) {
-		checkui_init(rv, parent, machine, paramidx, param, skin);
+		checkui_init(rv, parent, machine, paramidx, param);
 		rv->component.deallocate = TRUE;
 	}
 	return rv;
 }
-
 
 void checkui_ondraw(CheckUi* self, psy_ui_Graphics* g)
 {	
@@ -100,19 +98,20 @@ void checkui_ondraw(CheckUi* self, psy_ui_Graphics* g)
 	psy_ui_RealRectangle r;
 	char label[128];
 	const psy_ui_TextMetric* tm;
-	psy_ui_RealSize size;
+	psy_ui_RealSize size;	
+	psy_ui_Style* style;
 
+	if (!self->param || psy_audio_machineparam_normvalue(self->param) == 0.f) {
+		style = psy_ui_style(STYLE_MACPARAM_CHECKOFF);
+	} else {
+		style = psy_ui_style(STYLE_MACPARAM_CHECKON);
+	}	
 	label[0] = '\0';
 	checkui_updateparam(self);
 	size = psy_ui_component_scrollsize_px(&self->component);
-	centery = (size.height - psy_ui_realrectangle_height(&self->skin->checkoff.dest)) / 2;
-	if (!self->param || psy_audio_machineparam_normvalue(self->param) == 0.f) {
-		skin_blitcoord(g, &self->skin->mixerbitmap,
-			psy_ui_realpoint_make(0, centery), &self->skin->checkoff);
-	} else {
-		skin_blitcoord(g, &self->skin->mixerbitmap,
-			psy_ui_realpoint_make(0, centery), &self->skin->checkon);
-	}
+	centery = (size.height - style->background.size.height) / 2;	
+	psy_ui_component_drawbackground_style(&self->component,
+		g, style, psy_ui_realpoint_make(0.0, centery));	
 	r = psy_ui_realrectangle_make(
 		psy_ui_realpoint_make(20, 0),
 		psy_ui_realsize_make(size.width - 20, size.height));
@@ -136,11 +135,11 @@ void checkui_onpreferredsize(CheckUi* self, const psy_ui_Size* limit,
 	checkui_updateparam(self);
 	if (self->param) {
 		if (psy_audio_machineparam_type(self->param) & MPF_SMALL) {
-			psy_ui_size_setem(rv, self->skin->paramwidth_small, 1.0);
+			psy_ui_size_setem(rv, PARAMWIDTH_SMALL, 1.0);
 			return;
 		}
 	}
-	psy_ui_size_setem(rv, self->skin->paramwidth, 1.0);
+	psy_ui_size_setem(rv, PARAMWIDTH, 1.0);
 }
 
 void checkui_onmousedown(CheckUi* self, psy_ui_MouseEvent* ev)

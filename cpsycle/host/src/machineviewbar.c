@@ -8,7 +8,6 @@
 
 #include "machineviewbar.h"
 /* host */
-#include "skingraphics.h"
 #include "wireview.h"
 #include "machinewireview.h"
 /* audio */
@@ -41,8 +40,7 @@ void machineviewbar_init(MachineViewBar* self, psy_ui_Component* parent,
 	psy_ui_component_setalignexpand(&self->component, psy_ui_HEXPAND);
 	psy_ui_checkbox_init_text(&self->mixersend, machineviewbar_base(self),
 		"machineview.connect-to-mixer-send-return-input");
-	psy_ui_component_hide(psy_ui_checkbox_base(&self->mixersend));
-	self->mixersend.component.id = 20;
+	psy_ui_component_hide(psy_ui_checkbox_base(&self->mixersend));	
 	psy_signal_connect(&self->mixersend.signal_clicked, self,
 		machineviewbar_onmixerconnectmodeclick);	
 	psy_signal_connect(&workspace->signal_songchanged, self,

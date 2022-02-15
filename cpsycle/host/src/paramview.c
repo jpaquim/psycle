@@ -15,7 +15,6 @@
 #include "switchui.h"
 #include "checkui.h"
 #include "resources/resource.h"
-#include "skingraphics.h"
 #include "machineui.h"
 /* audio */
 #include <plugin_interface.h>
@@ -64,7 +63,7 @@ void paramview_init(ParamView* self, psy_ui_Component* parent,
 	self->machine = machine;	
 	self->paramstrobe = 0;
 	self->sizechanged = 1;
-	self->frameview = frameview;
+	self->frameview = frameview;	
 	paramview_updateskin(self);
 	paramview_build(self);		
 }
@@ -98,10 +97,7 @@ ParamView* paramview_allocinit(psy_ui_Component* parent,
 void paramview_updateskin(ParamView* self)
 {
 	self->fontinfo = machineparamconfig_fontinfo(self->config);
-	psy_ui_component_setfontinfo(&self->component, self->fontinfo);
-	self->skin = machineparamconfig_skin(self->config);
-	psy_ui_component_setbackgroundcolour(&self->component,
-		self->skin->bottomcolour);
+	psy_ui_component_setfontinfo(&self->component, self->fontinfo);	
 }
 
 void paramview_ontimer(ParamView* self, uintptr_t timerid)
@@ -151,7 +147,7 @@ void paramview_build(ParamView* self)
 					HeaderUi* header;
 
 					header = headerui_allocinit(currcolumn,						
-						self->machine, paramnum, machineparam, self->skin);
+						self->machine, paramnum, machineparam);
 					if (header) {
 						component = &header->component;
 					}
@@ -160,7 +156,7 @@ void paramview_build(ParamView* self)
 					LabelUi* label;
 
 					label = labelui_allocinit(currcolumn, self->machine,
-						paramnum, machineparam, self->skin);
+						paramnum, machineparam);
 					if (label) {
 						component = &label->component;
 					}
@@ -169,7 +165,7 @@ void paramview_build(ParamView* self)
 					KnobUi* knob;
 
 					knob = knobui_allocinit(currcolumn,	self->machine,
-						paramnum, machineparam, self->skin);
+						paramnum, machineparam);
 					if (knob) {
 						component = &knob->component;
 					}
@@ -177,7 +173,7 @@ void paramview_build(ParamView* self)
 				case MPF_SLIDER: {
 					currslider = slidergroupui_allocinit(currcolumn,
 						self->machine, paramnum, machineparam,
-						psy_INDEX_INVALID, NULL, self->skin);
+						psy_INDEX_INVALID, NULL);
 					if (currslider) {
 						component = &currslider->component;
 					}
@@ -192,11 +188,11 @@ void paramview_build(ParamView* self)
 
 					if (currslider && machineparam->isslidergroup) {
 						check = checkui_allocinit(&currslider->controls,
-							self->machine, paramnum, machineparam, self->skin);
+							self->machine, paramnum, machineparam);
 						checkinslidergroup = TRUE;
 					} else {
 						check = checkui_allocinit(currcolumn, self->machine,
-							paramnum, machineparam, self->skin);
+							paramnum, machineparam);
 					}
 					if (check) {
 						component = &check->component;
@@ -208,12 +204,12 @@ void paramview_build(ParamView* self)
 					if (currslider && machineparam->isslidergroup) {
 						switchui = switchui_allocinit(&currslider->controls,
 							self->machine, paramnum,
-							machineparam, self->skin);
+							machineparam);
 						checkinslidergroup = TRUE;
 					} else {
 						switchui = switchui_allocinit(currcolumn,
 							self->machine, paramnum,
-							machineparam, self->skin);							
+							machineparam);
 					}
 					if (switchui) {
 						component = &switchui->component;
@@ -224,7 +220,7 @@ void paramview_build(ParamView* self)
 				default: {
 					component = psy_ui_component_allocinit(currcolumn, NULL);
 					psy_ui_component_setpreferredsize(component,
-						psy_ui_size_make_em(self->skin->paramwidth_small, 2.0));
+						psy_ui_size_make_em(PARAMWIDTH_SMALL, 2.0));
 					psy_ui_component_preventalign(component);
 					break; }
 				}

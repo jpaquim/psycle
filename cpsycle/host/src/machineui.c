@@ -1,6 +1,6 @@
 /*
 ** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -8,19 +8,255 @@
 
 #include "machineui.h"
 /* host */
-#include "skingraphics.h"
 #include "paramview.h"
 #include "wireview.h"
 #include "effectui.h"
 #include "generatorui.h"
 #include "masterui.h"
-/* audio */
-#include <exclusivelock.h>
-/* std */
-#include <math.h>
+#include "styles.h"
+/* ui */
+#include <uiapp.h>
 /* platform */
 #include "../../detail/portable.h"
 #include "../../detail/trace.h"
+
+
+
+static void editnameui_update(EditnameUi*);
+static void editnameui_editname(EditnameUi*, char* rv, uintptr_t strlen);
+
+
+void editnameui_init(EditnameUi* self, psy_ui_Component* parent,
+	psy_audio_Machine* machine, uintptr_t style)
+{
+	psy_ui_label_init(&self->label, parent);
+	self->machine = machine;
+	psy_ui_label_preventtranslation(&self->label);
+	psy_ui_label_preventwrap(&self->label);		
+	psy_ui_component_setstyletype(psy_ui_label_base(&self->label), style);	
+	psy_ui_component_setbackgroundmode(&self->label.component,
+		psy_ui_NOBACKGROUND);
+	editnameui_update(self);	
+}
+
+void editnameui_update(EditnameUi* self)
+{
+	char editname[130];
+	
+	editnameui_editname(self, editname, 130);
+	psy_ui_label_settext(&self->label, editname);
+}
+
+void editnameui_editname(EditnameUi* self, char* rv, uintptr_t strlen)
+{
+	assert(self);
+
+	rv[0] = '\0';
+	if (self->machine && psy_audio_machine_editname(self->machine)) {
+		if (!machineui_maxindex_prevented()) {
+			psy_snprintf(rv, strlen, "%.2X:%s", (int)
+				psy_audio_machine_slot(self->machine),
+				psy_audio_machine_editname(self->machine));
+		} else {
+			psy_snprintf(rv, strlen, "%s",
+				psy_audio_machine_editname(self->machine));
+		}
+	}
+}
+
+/* prototypes */
+static void vuui_ondraw(VuUi*, psy_ui_Graphics*);
+static void vuui_drawdisplay(VuUi*, psy_ui_Graphics*);
+static void vuui_drawpeak(VuUi*, psy_ui_Graphics*);
+
+/* vtable */
+static psy_ui_ComponentVtable vuui_vtable;
+static bool vuui_vtable_initialized = FALSE;
+
+static void vuui_vtable_init(VuUi* self)
+{
+	assert(self);
+
+	if (!vuui_vtable_initialized) {
+		vuui_vtable = *(self->component.vtable);		
+		vuui_vtable.ondraw =
+			(psy_ui_fp_component_ondraw)
+			vuui_ondraw;		
+		vuui_vtable_initialized = TRUE;
+	}
+	psy_ui_component_setvtable(&self->component, &vuui_vtable);
+}
+
+void vuui_init(VuUi* self, psy_ui_Component* parent, psy_audio_Machine* machine,
+	uintptr_t vu_style, uintptr_t vu0_style, uintptr_t vupeak_style)
+{
+	psy_ui_component_init(&self->component, parent, NULL);
+	vuui_vtable_init(self);
+	psy_ui_component_setstyletype(&self->component, vu_style);
+	self->machine = machine;
+	self->vu0_style = vu0_style;
+	self->vupeak_style = vupeak_style;
+	vudisplay_init(&self->vu);
+}
+
+void vuui_ondraw(VuUi* self, psy_ui_Graphics* g)
+{
+	if (!machineui_vumeter_prevented()) {
+		vudisplay_update(&self->vu, psy_audio_machine_buffermemory(
+			self->machine));
+		vuui_drawdisplay(self, g);
+		vuui_drawpeak(self, g);
+	}
+}
+
+void vuui_drawdisplay(VuUi* self, psy_ui_Graphics* g)
+{
+	psy_ui_Style* style;
+	psy_ui_RealRectangle r;
+	const psy_ui_TextMetric* tm;
+
+	tm = psy_ui_component_textmetric(&self->component);
+	style = psy_ui_style(self->vu0_style);
+	r = psy_ui_realrectangle_make(
+		psy_ui_realpoint_make(
+			psy_ui_value_px(&style->padding.left, tm, 0),
+			psy_ui_value_px(&style->padding.top, tm, 0)),
+		psy_ui_realsize_make(
+			self->vu.vuvalues.volumedisplay * style->background.size.width,
+			style->background.size.height));
+	psy_ui_drawbitmap(g, &style->background.bitmap, r,
+		psy_ui_realpoint_make(
+			-style->background.position.x,
+			-style->background.position.y));
+}
+
+void vuui_drawpeak(VuUi* self, psy_ui_Graphics* g)
+{
+	if (self->vu.vuvalues.volumemaxdisplay > 0.01f) {
+		const psy_ui_TextMetric* tm;
+		psy_ui_Style* vu0_style;
+		psy_ui_Style* vupeak_style;
+
+		tm = psy_ui_component_textmetric(&self->component);
+		vu0_style = psy_ui_style(self->vu0_style);
+		vupeak_style = psy_ui_style(self->vupeak_style);
+		psy_ui_drawbitmap(g, &vu0_style->background.bitmap,
+			psy_ui_realrectangle_make(
+				psy_ui_realpoint_make(
+					psy_ui_value_px(&vu0_style->padding.left, tm, 0) +
+					self->vu.vuvalues.volumemaxdisplay * vu0_style->background.size.width,
+					psy_ui_value_px(&vu0_style->padding.top, tm, 0)),
+				vupeak_style->background.size),
+			psy_ui_realpoint_make(
+				-vupeak_style->background.position.x,
+				-vupeak_style->background.position.y));
+	}
+}
+
+static void panui_onmousedown(PanUi*, psy_ui_MouseEvent*);
+static void panui_onmouseup(PanUi*, psy_ui_MouseEvent*);
+static void panui_onmousemove(PanUi*, psy_ui_MouseEvent*);
+static void panui_onalign(PanUi*);
+
+/* vtable */
+static psy_ui_ComponentVtable panui_vtable;
+static psy_ui_ComponentVtable panui_super_vtable;
+static bool panui_vtable_initialized = FALSE;
+
+static void panui_vtable_init(PanUi* self)
+{
+	assert(self);
+
+	if (!panui_vtable_initialized) {
+		panui_vtable = *(self->component.vtable);
+		panui_super_vtable = panui_vtable;
+		panui_vtable.onalign =
+			(psy_ui_fp_component_event)
+			panui_onalign;
+		panui_vtable.onmousedown =
+			(psy_ui_fp_component_onmouseevent)
+			panui_onmousedown;
+		panui_vtable.onmouseup =
+			(psy_ui_fp_component_onmouseevent)
+			panui_onmouseup;
+		panui_vtable.onmousemove =
+			(psy_ui_fp_component_onmouseevent)
+			panui_onmousemove;
+
+		panui_vtable_initialized = TRUE;
+	}
+	psy_ui_component_setvtable(&self->component, &panui_vtable);
+}
+
+void panui_init(PanUi* self, psy_ui_Component* parent, psy_audio_Machine* machine,
+	uintptr_t pan_style, uintptr_t pan_slider_style)
+{
+	psy_ui_component_init(&self->component, parent, NULL);
+	panui_vtable_init(self);
+	self->machine = machine;
+	self->drag = FALSE;
+	self->dragoffset = 0;
+	psy_ui_component_setstyletype(&self->component, pan_style);
+	psy_ui_component_init(&self->slider, &self->component, NULL);
+	psy_ui_component_setstyletype(&self->slider, pan_slider_style);
+}
+
+void panui_onmousedown(PanUi* self, psy_ui_MouseEvent* ev)
+{
+	psy_ui_component_capture(&self->component);
+	self->drag = TRUE;
+	psy_ui_mouseevent_stop_propagation(ev);
+}
+
+void panui_onmouseup(PanUi* self, psy_ui_MouseEvent* ev)
+{
+	psy_ui_component_releasecapture(&self->component);
+	self->drag = FALSE;
+	psy_ui_mouseevent_stop_propagation(ev);
+}
+
+void panui_onmousemove(PanUi* self, psy_ui_MouseEvent* ev)
+{
+	if (self->drag) {
+		psy_ui_RealSize size;
+		psy_ui_RealSize slidersize;
+		psy_dsp_amp_t panvalue;
+
+		size = psy_ui_component_size_px(&self->component);
+		slidersize = psy_ui_component_size_px(&self->slider);
+		panvalue = (psy_dsp_amp_t)((ev->offset_.x) /
+			(((double)size.width - slidersize.width)));
+		psy_audio_machine_setpanning(self->machine, psy_min(panvalue,
+			(psy_dsp_amp_t)1.0));
+		psy_ui_component_align(&self->component);
+		psy_ui_component_invalidate(&self->component);
+		psy_ui_mouseevent_stop_propagation(ev);
+	}
+}
+
+void panui_onalign(PanUi* self)
+{
+	psy_ui_Style* style;
+
+	style = psy_ui_componentstyle_currstyle(&self->slider.style);
+	if (style) {		
+		psy_ui_Rectangle position;
+		psy_ui_RealSize size;
+		psy_ui_RealSize slidersize;
+
+		size = psy_ui_component_size_px(&self->component);
+		slidersize = psy_ui_component_size_px(&self->slider);
+		position = style->position;
+		position.topleft.x = psy_ui_value_make_px(
+			psy_audio_machine_panning(self->machine) *
+			((double)size.width - slidersize.width));
+		psy_ui_component_setposition(&self->slider, position);		
+	}
+}
+
+
+static bool vumeter_prevented = FALSE;
+static bool macindex_prevented = FALSE;
 
 static void drawmachineline(psy_ui_Graphics*, psy_ui_RealPoint dir,
 	psy_ui_RealPoint edge);
@@ -53,15 +289,13 @@ void vuvalues_tickcounter(VuValues* self)
 
 /* VuDisplay */
 /* prototypes */
-static void vudisplay_drawdisplay(VuDisplay*, psy_ui_Graphics*);
-static void vudisplay_drawpeak(VuDisplay*, psy_ui_Graphics*);
+static void vudisplay_drawdisplay(VuDisplay*, psy_ui_Graphics*, psy_ui_Style* vu);
+static void vudisplay_drawpeak(VuDisplay*, psy_ui_Graphics*, psy_ui_Style* vu,
+	psy_ui_Style* vupeak);
 
 // implementation
-void vudisplay_init(VuDisplay* self, MachineViewSkin* skin,
-	MachineCoords* coords)
-{
-	self->skin = skin;
-	self->coords = coords;	
+void vudisplay_init(VuDisplay* self)
+{	
 	vuvalues_init(&self->vuvalues);
 }
 
@@ -70,107 +304,84 @@ void vudisplay_update(VuDisplay* self, psy_audio_Buffer* buffer)
 	vuvalues_update(&self->vuvalues, buffer);
 }
 
-void vudisplay_draw(VuDisplay* self, psy_ui_Graphics* g)
+void vudisplay_draw(VuDisplay* self, psy_ui_Graphics* g, psy_ui_Style* vu, psy_ui_Style* vupeak)
 {
 	assert(self);
 	
-	vudisplay_drawdisplay(self, g);
-	vudisplay_drawpeak(self, g);	
+	vudisplay_drawdisplay(self, g, vu);
+	vudisplay_drawpeak(self, g, vu, vupeak);	
 }
 
-void vudisplay_drawdisplay(VuDisplay* self, psy_ui_Graphics* g)
-{		
-	psy_ui_drawbitmap(g, &self->skin->skinbmp,
-		psy_ui_realrectangle_make(
-			psy_ui_realrectangle_topleft(&self->coords->vu0.dest),
-			psy_ui_realsize_make(
-				self->vuvalues.volumedisplay *
-				psy_ui_realrectangle_width(&self->coords->vu0.dest),
-				psy_ui_realrectangle_height(&self->coords->vu0.dest))),
-		psy_ui_realrectangle_topleft(&self->coords->vu0.src));	
+void vudisplay_drawdisplay(VuDisplay* self, psy_ui_Graphics* g, 
+	psy_ui_Style* vu)
+{			
+	psy_ui_RealRectangle r;
+	const psy_ui_TextMetric* tm;	
+	tm = 0;
+	r = psy_ui_realrectangle_make(
+		psy_ui_realpoint_make(
+			psy_ui_value_px(&vu->padding.left, tm, 0),
+			psy_ui_value_px(&vu->padding.top, tm, 0)),
+		psy_ui_realsize_make(
+			self->vuvalues.volumedisplay * vu->background.size.width,
+			vu->background.size.height));		
+	psy_ui_drawbitmap(g, &vu->background.bitmap, r,
+		psy_ui_realpoint_make(
+			-vu->background.position.x,
+			-vu->background.position.y));
 }
 
-void vudisplay_drawpeak(VuDisplay* self, psy_ui_Graphics* g)
+void vudisplay_drawpeak(VuDisplay* self, psy_ui_Graphics* g,
+	psy_ui_Style* vu, psy_ui_Style* vupeak)
 {
-	if (self->vuvalues.volumemaxdisplay > 0.01f) {
-		SkinCoord* vupeak;
-		SkinCoord* vu;
-
-		vupeak = &self->coords->vupeak;
-		vu = &self->coords->vu0;
-		psy_ui_drawbitmap(g, &self->skin->skinbmp,
+	if (self->vuvalues.volumemaxdisplay > 0.01f) {		
+		const psy_ui_TextMetric* tm;
+		
+		tm = 0;		
+		psy_ui_drawbitmap(g, &vu->background.bitmap,
 			psy_ui_realrectangle_make(
 				psy_ui_realpoint_make(
-					vu->dest.left + self->vuvalues.volumemaxdisplay *
-					psy_ui_realrectangle_width(&vu->dest),
-					vu->dest.top),
-				psy_ui_realrectangle_size(&vupeak->src)),
-			psy_ui_realrectangle_topleft(&vupeak->src));
+					psy_ui_value_px(&vu->padding.left, tm, 0) +
+					self->vuvalues.volumemaxdisplay * vu->background.size.width,
+					psy_ui_value_px(&vu->padding.top, tm, 0)),
+				vupeak->background.size),
+			psy_ui_realpoint_make(
+				-vupeak->background.position.x,
+				-vupeak->background.position.y));
 	}
 }
 
-/* MachineUiCommon */
-/* implementation */
-void machineuicommon_init(MachineUiCommon* self, psy_ui_Component* component,
-	uintptr_t slot, MachineViewSkin* skin, ParamViews* paramviews,
-	Workspace* workspace)
-{
-	self->component = component;
-	self->machines = &workspace->song->machines;
-	self->machine = psy_audio_machines_at(self->machines, slot);
-	self->paramviews = paramviews;
-	self->workspace = workspace;	
-	self->skin = skin;	
-	self->mode = psy_audio_machine_mode(self->machine);
-	self->coords = NULL;
-	self->slot = slot;	
-	self->restorename = NULL;
-	self->machinepos = TRUE;
-	self->drawmode = MACHINEUIMODE_BITMAP;
-	self->dragmode = MACHINEVIEW_DRAG_NONE;	
-}
-
-void machineuicommon_move(MachineUiCommon* self, psy_ui_Point topleft)
-{
-	assert(self);
-	
-	if (self->machine && self->machinepos) {
-		psy_ui_RealPoint topleftpx;
-
-		topleftpx.x = psy_ui_value_px(&topleft.x,
-			psy_ui_component_textmetric(self->component), NULL);
-		topleftpx.y = psy_ui_value_px(&topleft.y,
-			psy_ui_component_textmetric(self->component), NULL);
-		psy_audio_machine_setposition(self->machine,
-			topleftpx.x, topleftpx.y);
-	}	
-}
-
 psy_ui_Component* machineui_create(psy_audio_Machine* machine, 
-	uintptr_t slot, MachineViewSkin* skin, psy_ui_Component* parent,
-	ParamViews* paramviews, bool machinepos,
-	MachineUiMode drawmode, Workspace* workspace)
+	psy_ui_Component* parent, ParamViews* paramviews, bool machinepos,
+	Workspace* workspace)
 {	
 	psy_ui_Component* newui;
-		
+	const psy_audio_MachineInfo* info;
+	assert(machine);
+
 	newui = NULL;
-	if (slot == psy_audio_MASTER_INDEX) {
+	info = psy_audio_machine_info(machine);
+	if (!info) {
+		return NULL;
+	}
+	if (psy_audio_machine_slot(machine) == psy_audio_MASTER_INDEX) {
 		MasterUi* masterui;
 
 		masterui = (MasterUi*)malloc(sizeof(MasterUi));
 		if (masterui) {
-			masterui_init(masterui, parent, skin, paramviews, workspace);
-			masterui->intern.machinepos = machinepos;
+			masterui_init(masterui, parent, paramviews, workspace);
+			masterui->preventmachinepos = !machinepos;
 			newui = &masterui->component;
 		}
-	} else if (slot >= 0x40 && slot <= 0x80) {
+	} else if (psy_audio_machine_slot(machine) >= 0x40 &&
+			psy_audio_machine_slot(machine) < 0x80) {
 		EffectUi* effectui;
 
 		effectui = (EffectUi*)malloc(sizeof(EffectUi));
 		if (effectui) {
-			effectui_init(effectui, parent, slot, skin, paramviews, workspace);
-			effectui->intern.machinepos = machinepos;
-			effectui_setdrawmode(effectui, drawmode);			
+			effectui_init(effectui, parent, psy_audio_machine_slot(machine),
+				paramviews, workspace);
+			effectui->preventmachinepos = !machinepos;
 			newui = &effectui->component;
 		}		
 	} else {
@@ -178,9 +389,9 @@ psy_ui_Component* machineui_create(psy_audio_Machine* machine,
 
 		generatorui = (GeneratorUi*)malloc(sizeof(GeneratorUi));
 		if (generatorui) {
-			generatorui_init(generatorui, parent, slot, skin, paramviews, workspace);
-			generatorui->intern.machinepos = machinepos;
-			generatorui->intern.drawmode = drawmode;
+			generatorui_init(generatorui, parent, psy_audio_machine_slot(machine),
+				paramviews, workspace);
+			generatorui->preventmachinepos = !machinepos;
 			newui = &generatorui->component;
 		}
 	}	
@@ -223,8 +434,6 @@ void machineui_drawhighlight(psy_ui_Graphics* g, psy_ui_RealRectangle position)
 	psy_ui_setorigin(g, origin);
 }
 
-
-
 void drawmachineline(psy_ui_Graphics* g, psy_ui_RealPoint dir,
 	psy_ui_RealPoint edge)
 {
@@ -232,4 +441,34 @@ void drawmachineline(psy_ui_Graphics* g, psy_ui_RealPoint dir,
 
 	psy_ui_drawline(g, edge, psy_ui_realpoint_make(
 		edge.x + dir.x * hlength, edge.y + dir.y * hlength));
+}
+
+void machineui_enable_vumeter(void)
+{
+	vumeter_prevented = FALSE;
+}
+
+void machineui_prevent_vumeter(void)
+{
+	vumeter_prevented = TRUE;
+}
+
+bool machineui_vumeter_prevented(void)
+{
+	return vumeter_prevented;
+}
+
+void machineui_enable_macindex(void)
+{
+	macindex_prevented = FALSE;
+}
+
+void machineui_prevent_macindex(void)
+{
+	macindex_prevented = TRUE;
+}
+
+bool machineui_maxindex_prevented(void)
+{
+	return macindex_prevented;
 }

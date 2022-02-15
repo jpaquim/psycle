@@ -1,11 +1,15 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
 #include "paramlistbox.h"
+#include "styles.h"
+/* ui */
 #include <uislider.h>
-// platform
+/* platform */
 #include "../../detail/portable.h"
 
 static void parameterlistbox_build(ParameterListBox*);
@@ -20,16 +24,14 @@ void parameterlistbox_init(ParameterListBox* self, psy_ui_Component* parent,
 	assert(config);
 
 	psy_ui_component_init(&self->component, parent, NULL);
-	psy_ui_component_setbackgroundcolour(&self->component,
-		machineparamconfig_skin(config)->titlecolour);	
+	psy_ui_component_setstyletype(&self->component, STYLE_MACPARAM_TITLE);	
 	self->machine = machine;
 	if (self->machine && psy_audio_machine_numtweakparameters(self->machine) > 0) {
 		paramindex = 0;
 	} else {
 		paramindex = psy_INDEX_INVALID;
 	}
-	knobui_init(&self->knob, &self->component, machine, paramindex,
-		NULL, machineparamconfig_skin(config));
+	knobui_init(&self->knob, &self->component, machine, paramindex, NULL);
 	psy_ui_component_setalign(&self->knob.component, psy_ui_ALIGN_TOP);
 	psy_ui_listbox_init(&self->listbox, &self->component);	
 	psy_ui_listbox_setcharnumber(&self->listbox, 10.0);

@@ -7,7 +7,6 @@
 #define PARAMVIEW_H
 
 /* host */
-#include "skincoord.h"
 #include "workspace.h"
 /* ui */
 #include <uicomponent.h>
@@ -26,8 +25,7 @@ typedef struct ParamView {
    MachineParamConfig* config;
    int sizechanged;
    uintptr_t paramstrobe;
-   psy_ui_FontInfo fontinfo; 
-   ParamSkin* skin;
+   psy_ui_FontInfo fontinfo;   
    psy_ui_Component** frameview;
 } ParamView;
 

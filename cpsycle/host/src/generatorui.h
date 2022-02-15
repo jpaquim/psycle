@@ -9,6 +9,8 @@
 /* host */
 #include "machineui.h"
 #include "paramviews.h"
+/* ui */
+#include <uilabel.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -17,13 +19,22 @@ extern "C" {
 /* GeneratorUi */
 typedef struct GeneratorUi {
 	/* inherits */
-	psy_ui_Component component;	
+	psy_ui_Component component;
 	/* internal */
-	MachineUiCommon intern;	
+	psy_ui_Component mute;
+	psy_ui_Component solo;
+	EditnameUi editname;
+	PanUi pan;
+	VuUi vu;
+	bool preventmachinepos;
+	/* references */
+	psy_audio_Machine* machine;
+	psy_audio_Machines* machines;
+	ParamViews* paramviews;
 } GeneratorUi;
 
 void generatorui_init(GeneratorUi*, psy_ui_Component* parent, uintptr_t slot,
-	MachineViewSkin*, ParamViews* paramviews, Workspace*);
+	ParamViews* paramviews, Workspace*);
 
 #ifdef __cplusplus
 }

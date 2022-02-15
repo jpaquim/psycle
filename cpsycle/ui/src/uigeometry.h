@@ -519,6 +519,36 @@ typedef struct psy_ui_Rectangle {
 	psy_ui_Size size;
 } psy_ui_Rectangle;
 
+INLINE void psy_ui_rectangle_init(psy_ui_Rectangle* self)
+{
+	psy_ui_point_init(&self->topleft);
+	psy_ui_size_init(&self->size);		
+}
+
+INLINE void psy_ui_rectangle_deactivate(psy_ui_Rectangle* self)
+{
+	self->topleft.x.set = FALSE;
+	self->topleft.y.set = FALSE;
+	self->size.width.set = FALSE;
+	self->size.height.set = FALSE;
+}
+
+INLINE void psy_ui_rectangle_activate(psy_ui_Rectangle* self)
+{
+	self->topleft.x.set = TRUE;
+	self->topleft.y.set = TRUE;
+	self->size.width.set = TRUE;
+	self->size.height.set = TRUE;
+}
+
+INLINE bool psy_ui_rectangle_is_active(const psy_ui_Rectangle* self)
+{
+	return (self->topleft.x.set ||
+		self->topleft.y.set ||
+		self->size.width.set ||
+		self->size.height.set);
+}
+
 INLINE psy_ui_Rectangle psy_ui_rectangle_make(psy_ui_Point topleft,
 	psy_ui_Size size)
 {

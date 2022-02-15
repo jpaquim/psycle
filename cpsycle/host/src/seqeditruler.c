@@ -138,11 +138,11 @@ void seqeditruler_drawruler(SeqEditRuler* self, psy_ui_Graphics* g,
 	linebeat4colour = psy_ui_colour_overlayed(&linecolour, &overlaycolour, 0.20);
 	psy_ui_drawsolidrectangle(g, psy_ui_realrectangle_make(
 		psy_ui_realpoint_zero(), psy_ui_realsize_make(size.width, baseline)),
-		psy_ui_style(STYLE_SEQEDT_RULER_TOP)->backgroundcolour);	
+		psy_ui_style(STYLE_SEQEDT_RULER_TOP)->background.colour);	
 	psy_ui_drawsolidrectangle(g, psy_ui_realrectangle_make(
 		psy_ui_realpoint_make(0, baseline),
 		psy_ui_realsize_make(size.width, size.height - baseline)),
-		psy_ui_style(STYLE_SEQEDT_RULER_BOTTOM)->backgroundcolour);
+		psy_ui_style(STYLE_SEQEDT_RULER_BOTTOM)->background.colour);
 	psy_ui_setcolour(g, linecolour);
 	psy_ui_drawline(g, psy_ui_realpoint_make(0, baseline),
 		psy_ui_realpoint_make(linewidth, baseline));

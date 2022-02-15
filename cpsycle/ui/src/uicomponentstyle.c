@@ -18,7 +18,7 @@ void psy_ui_componentstyle_init(psy_ui_ComponentStyle* self)
 
 	self->styles = NULL;	
 	psy_ui_style_init(&self->overridestyle);
-	self->currstyle = &self->overridestyle;	
+	self->currstyle = psy_INDEX_INVALID;
 	self->states = psy_ui_STYLESTATE_NONE;	
 	self->debugflag = 0;
 }
@@ -27,7 +27,7 @@ void psy_ui_componentstyle_dispose(psy_ui_ComponentStyle* self)
 {
 	assert(self);
 	
-	self->currstyle = NULL;	
+	self->currstyle = psy_INDEX_INVALID;
 	if (self->styles) {
 		psy_table_dispose(self->styles);
 		free(self->styles);
@@ -46,36 +46,28 @@ bool psy_ui_componentstyle_hasstyle(const psy_ui_ComponentStyle* self,
 	return psy_table_exists(self->styles, (uintptr_t)state);
 }
 
-psy_ui_Style* psy_ui_componentstyle_style(psy_ui_ComponentStyle* self,
+uintptr_t psy_ui_componentstyle_style_id(psy_ui_ComponentStyle* self,
 	psy_ui_StyleState state)
 {
-	uintptr_t styleid;
-	psy_ui_Style* rv;
+	uintptr_t styleid;	
 
 	assert(self);
-	
-	rv = NULL;
+		
 	if (!self->styles) {
-		return &self->overridestyle;
+		return psy_INDEX_INVALID;
 	}
 	styleid = psy_INDEX_INVALID;
 	if (psy_table_exists(self->styles, state)) {
 		styleid = (uintptr_t)psy_table_at_const(self->styles, (uintptr_t)state);
 	}
 	if (styleid != psy_INDEX_INVALID) {
-		rv = psy_ui_style(styleid);
-	}
-	if (!rv) {
-		if (psy_table_exists(self->styles, (uintptr_t)psy_ui_STYLESTATE_NONE)) {
-			styleid = (uintptr_t)psy_table_at_const(self->styles,
-				(uintptr_t)psy_ui_STYLESTATE_NONE);
-			rv = psy_ui_style(styleid);
-		}
-	}
-	if (!rv) {
-		rv = &self->overridestyle;	
+		return styleid;
 	}	
-	return rv;
+	if (psy_table_exists(self->styles, (uintptr_t)psy_ui_STYLESTATE_NONE)) {
+		return (uintptr_t)psy_table_at_const(self->styles,
+			(uintptr_t)psy_ui_STYLESTATE_NONE);		
+	}		
+	return psy_INDEX_INVALID;
 }
 
 bool psy_ui_componentstyle_hasstate(const psy_ui_ComponentStyle* self,
@@ -113,12 +105,12 @@ bool psy_ui_componentstyle_updatestate(psy_ui_ComponentStyle* self)
 bool psy_ui_componentstyle_setcurrstate(psy_ui_ComponentStyle* self,
 	psy_ui_StyleState state)
 {
-	psy_ui_Style* oldstyle;
+	uintptr_t oldstyle;
 
 	assert(self);
 
-	oldstyle = self->currstyle;	
-	self->currstyle = psy_ui_componentstyle_style(self, state);	
+	oldstyle = self->currstyle;
+	self->currstyle = psy_ui_componentstyle_style_id(self, state);	
 	return self->currstyle != oldstyle;
 }
 
@@ -169,16 +161,17 @@ bool psy_ui_componentstyle_removestate(psy_ui_ComponentStyle* self,
 	return FALSE;
 }
 
-uintptr_t psy_ui_componentstyle_currstyleid(const psy_ui_ComponentStyle* self)
+psy_ui_Style* psy_ui_componentstyle_currstyle(psy_ui_ComponentStyle* self)
+{	
+	if (self->currstyle == psy_INDEX_INVALID) {
+		return &self->overridestyle;
+	}
+	return psy_ui_style(self->currstyle);
+}
+
+const psy_ui_Style* psy_ui_componentstyle_currstyle_const(const psy_ui_ComponentStyle* self)
 {
-	/* todo works only if one state is set */
-	if (!self->styles) {
-		return psy_INDEX_INVALID;
-	}
-	if (psy_table_exists(self->styles, self->states)) {
-		return (uintptr_t)psy_table_at_const(self->styles, self->states);
-	}
-	return psy_INDEX_INVALID;
+	return psy_ui_componentstyle_currstyle((psy_ui_ComponentStyle*)self);
 }
 
 void psy_ui_componentstyle_updatecurrstate(psy_ui_ComponentStyle* self)

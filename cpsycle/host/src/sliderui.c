@@ -1,6 +1,6 @@
 /*
 ** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -8,8 +8,10 @@
 
 #include "sliderui.h"
 /* host */
-#include "skingraphics.h"
 #include "machineparamconfig.h"
+#include "styles.h"
+/* ui */
+#include <uiapp.h>
 /* audio */
 #include <machine.h>
 #include <plugin_interface.h>
@@ -51,18 +53,14 @@ static psy_ui_ComponentVtable* sliderui_vtable_init(SliderUi* self)
 /* implementation */
 void sliderui_init(SliderUi* self, psy_ui_Component* parent,	
 	psy_audio_Machine* machine, uintptr_t paramidx,
-	psy_audio_MachineParam* param,
-	ParamSkin* skin)
+	psy_audio_MachineParam* param)
 {
 	assert(self);	
-	assert(skin);
 
 	psy_ui_component_init(&self->component, parent, NULL);
 	sliderui_vtable_init(self);
 	self->component.vtable = &sliderui_vtable;
-	psy_ui_component_setbackgroundmode(&self->component,
-		psy_ui_NOBACKGROUND);	
-	self->skin = skin;
+	psy_ui_component_setbackgroundmode(&self->component, psy_ui_NOBACKGROUND);
 	self->machine = machine;
 	self->paramidx = paramidx;
 	self->param = param;
@@ -76,13 +74,13 @@ SliderUi* sliderui_alloc(void)
 
 SliderUi* sliderui_allocinit(psy_ui_Component* parent,
 	psy_audio_Machine* machine, uintptr_t paramidx,
-	psy_audio_MachineParam* param, ParamSkin* paramskin)
+	psy_audio_MachineParam* param)
 {
 	SliderUi* rv;
 
 	rv = sliderui_alloc();
 	if (rv) {
-		sliderui_init(rv, parent, machine, paramidx, param, paramskin);
+		sliderui_init(rv, parent, machine, paramidx, param);
 		rv->component.deallocate = TRUE;
 	}
 	return rv;
@@ -94,19 +92,24 @@ void sliderui_ondraw(SliderUi* self, psy_ui_Graphics* g)
 	double yoffset;
 	double value;
 	psy_ui_RealRectangle r;		
-	psy_ui_RealSize size;
-
+	psy_ui_RealSize size;	
+	psy_ui_Style* bottom_style;
+	psy_ui_Style* slider_style;
+	psy_ui_Style* sliderknob_style;
+	
+	bottom_style = psy_ui_style(STYLE_MACPARAM_BOTTOM);
+	slider_style = psy_ui_style(STYLE_MACPARAM_SLIDER);
+	sliderknob_style = psy_ui_style(STYLE_MACPARAM_SLIDERKNOB);	
 	sliderui_updateparam(self);
 	size = psy_ui_component_size_px(&self->component);
 	/*  todo: make the slider scalable */
 	r = psy_ui_realrectangle_make(
-			psy_ui_realpoint_make(0, 0),
+			psy_ui_realpoint_zero(),
 			psy_ui_realsize_make(size.width, size.height));
-	psy_ui_drawsolidrectangle(g, r, self->skin->bottomcolour);
-	skin_blitcoord(g, &self->skin->mixerbitmap,
-		psy_ui_realpoint_zero(), &self->skin->slider);
-	xoffset = (psy_ui_realrectangle_width(&self->skin->slider.dest) -
-		psy_ui_realrectangle_width(&self->skin->knob.dest)) / 2;
+	psy_ui_drawsolidrectangle(g, r, bottom_style->background.colour);
+	psy_ui_component_drawbackground_style(&self->component,
+		g, slider_style, psy_ui_realpoint_zero());	
+	xoffset = 0.0;
 	if (self->param) {
 		if (self->machine) {
 			value = psy_audio_machine_parameter_normvalue(self->machine,
@@ -118,18 +121,19 @@ void sliderui_ondraw(SliderUi* self, psy_ui_Graphics* g)
 		value = 0.f;
 	}
 	yoffset = ((1.0 - value) *
-		(psy_ui_realrectangle_height(&self->skin->slider.dest) -
-			psy_ui_realrectangle_height(&self->skin->sliderknob.dest)));
-	skin_blitcoord(g, &self->skin->mixerbitmap,
-		psy_ui_realpoint_make(xoffset, yoffset),
-		&self->skin->sliderknob);			
+		(slider_style->background.size.height -
+			sliderknob_style->background.size.height));	
+	psy_ui_component_drawbackground_style(&self->component,
+		g, sliderknob_style, psy_ui_realpoint_make(xoffset, yoffset));	
 }
 
 void sliderui_onpreferredsize(SliderUi* self, const psy_ui_Size* limit,
 	psy_ui_Size* rv)
-{		
-	psy_ui_size_setreal(rv, psy_ui_realrectangle_size(
-		&self->skin->slider.dest));
+{	
+	psy_ui_Style* style;
+
+	style = psy_ui_style(STYLE_MACPARAM_SLIDER);
+	psy_ui_size_setreal(rv, style->background.size);
 }
 
 void sliderui_onmousedown(SliderUi* self, psy_ui_MouseEvent* ev)

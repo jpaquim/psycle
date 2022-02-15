@@ -34,8 +34,8 @@ typedef enum psy_ui_StyleState {
 
 typedef struct psy_ui_ComponentStyle {	
 	psy_Table* styles;			/* StyleState X StyleId */	
-	psy_ui_Style* currstyle;	/* 
-								** Style for the current style state 
+	uintptr_t currstyle;	    /* 
+								** StyleId of the current style state 
 								** - if no state available points to the style
 								**   for STYLESTATE_NONE
 								** - if no style at all available points to
@@ -52,8 +52,8 @@ void psy_ui_componentstyle_dispose(psy_ui_ComponentStyle*);
 /* checks if a state has a style */
 bool psy_ui_componentstyle_hasstyle(const psy_ui_ComponentStyle*,
 	psy_ui_StyleState);
-/* returns the style belonging to a state (see todo) */
-psy_ui_Style* psy_ui_componentstyle_style(psy_ui_ComponentStyle*,
+/* returns the styleid belonging to a state */
+uintptr_t psy_ui_componentstyle_style_id(psy_ui_ComponentStyle*,
 	psy_ui_StyleState);
 /* assigns a style to a state */
 void psy_ui_componentstyle_setstyle(psy_ui_ComponentStyle*,
@@ -77,8 +77,8 @@ INLINE psy_ui_StyleState psy_ui_componentstyle_state(const psy_ui_ComponentStyle
 {
 	return self->states;
 }
-/* returns the style id belonging to the current state (see todo) */
-uintptr_t psy_ui_componentstyle_currstyleid(const psy_ui_ComponentStyle*);
+psy_ui_Style* psy_ui_componentstyle_currstyle(psy_ui_ComponentStyle*);
+const psy_ui_Style* psy_ui_componentstyle_currstyle_const(const psy_ui_ComponentStyle*);
 
 /*
 ** Properties
@@ -94,7 +94,7 @@ INLINE psy_ui_Margin psy_ui_componentstyle_margin(const psy_ui_ComponentStyle* s
 	if (self->overridestyle.marginset) {
 		return self->overridestyle.margin;
 	} 
-	return self->currstyle->margin;
+	return psy_ui_componentstyle_currstyle_const(self)->margin;
 }
 
 INLINE void psy_ui_componentstyle_setspacing(psy_ui_ComponentStyle* self, psy_ui_Margin spacing)
@@ -107,15 +107,15 @@ INLINE psy_ui_Margin psy_ui_componentstyle_spacing(const psy_ui_ComponentStyle *
 	if (self->overridestyle.paddingset) {
 		return self->overridestyle.padding;
 	}
-	return self->currstyle->padding;
+	return psy_ui_componentstyle_currstyle_const(self)->padding;
 }
 
 INLINE psy_ui_Colour psy_ui_componentstyle_colour(const psy_ui_ComponentStyle* self)
 {
 	if (self->overridestyle.colour.mode.set) {
-		return self->currstyle->colour;
+		return self->overridestyle.colour;
 	}
-	return self->currstyle->colour;
+	return psy_ui_componentstyle_currstyle_const(self)->colour;
 }
 
 INLINE void psy_ui_componentstyle_setcolour(psy_ui_ComponentStyle* self, psy_ui_Colour colour)
@@ -125,16 +125,16 @@ INLINE void psy_ui_componentstyle_setcolour(psy_ui_ComponentStyle* self, psy_ui_
 
 INLINE psy_ui_Colour psy_ui_componentstyle_backgroundcolour(const psy_ui_ComponentStyle* self)
 {
-	if (self->overridestyle.backgroundcolour.mode.set) {
-		return self->overridestyle.backgroundcolour;
+	if (self->overridestyle.background.colour.mode.set) {
+		return self->overridestyle.background.colour;
 	}
-	return self->currstyle->backgroundcolour;
+	return psy_ui_componentstyle_currstyle_const(self)->background.colour;
 }
 
 INLINE void psy_ui_componentstyle_setbackgroundcolour(psy_ui_ComponentStyle* self,
 	psy_ui_Colour colour)
 {
-	self->overridestyle.backgroundcolour = colour;
+	self->overridestyle.background.colour = colour;
 }
 
 INLINE const psy_ui_Border* psy_ui_componentstyle_border(const psy_ui_ComponentStyle* self)
@@ -142,7 +142,7 @@ INLINE const psy_ui_Border* psy_ui_componentstyle_border(const psy_ui_ComponentS
 	if (self->overridestyle.border.mode.set) {
 		return &self->overridestyle.border;
 	}
-	return &self->currstyle->border;
+	return &psy_ui_componentstyle_currstyle_const(self)->border;
 }
 
 INLINE void psy_ui_componentstyle_setborder(psy_ui_ComponentStyle* self, const psy_ui_Border* border)

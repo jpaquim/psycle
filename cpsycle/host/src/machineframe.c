@@ -225,7 +225,7 @@ void machineframe_init(MachineFrame* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->parameterbar.zoombox.signal_changed, self,
 		machineframe_onzoomboxchanged);	
 	machineframe_initparamview(self, workspace);
-	machineframe_updatepwr(self);
+	machineframe_updatepwr(self);	
 }
 
 void machineframe_ondestroyed(MachineFrame* self)
@@ -347,8 +347,8 @@ void machineframe_setview(MachineFrame* self, psy_ui_Component* view,
 		} else {			
 			psy_ui_button_disablehighlight(&self->parameterbar.isbus);			
 		}
-	}
-	machineframe_resize(self);	
+	}	
+	machineframe_resize(self);		
 	psy_ui_component_starttimer(&self->component, 0, 50);
 }
 
@@ -492,7 +492,7 @@ void machineframe_resize(MachineFrame* self)
 	bar = psy_ui_component_preferredsize(&self->parameterbar.component,
 		&viewsize);
 	viewsize.height = psy_ui_add_values(bar.height, viewsize.height, tm, NULL);
-	if (self->newval.component.visible) {
+	if (psy_ui_component_visible(&self->newval.component)) {
 		viewsize.height = psy_ui_add_values(newval.height, viewsize.height, tm, NULL);
 	}	
 	psy_ui_component_clientresize(&self->component, viewsize);	

@@ -1,16 +1,17 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #if !defined(MACHINEUI_H)
 #define MACHINEUI_H
 
-// host
+/* host */
 #include "machineeditorview.h" // vst view
 #include "machineframe.h"
-#include "machineviewskin.h"
 #include "paramviews.h"
 #include "workspace.h"
-// ui
+/* ui */
 #include <uitextinput.h>
 #include <uinotebook.h>
 
@@ -18,24 +19,36 @@
 extern "C" {
 #endif
 
-// Components to draw a machine with its buttons and vumeter and reacting to
-// ui events to solo/mute/bypass or pan the machine
+/*
+** Components to draw a machine with its buttonsand vumeterand reacting to
+** ui events to solo/mute/bypass or pan the machine
+*/
 
 typedef enum MachineViewDragMode {
 	MACHINEVIEW_DRAG_NONE,
 	MACHINEVIEW_DRAG_MACHINE,
 	MACHINEVIEW_DRAG_NEWCONNECTION,
 	MACHINEVIEW_DRAG_LEFTCONNECTION,
-	MACHINEVIEW_DRAG_RIGHTCONNECTION,
-	MACHINEVIEW_DRAG_PAN
+	MACHINEVIEW_DRAG_RIGHTCONNECTION	
 } MachineViewDragMode;
 
+typedef struct EditnameUi {
+	/* inherits */
+	psy_ui_Label label;
+	/* internal */
+	/* references */
+	psy_audio_Machine* machine;
+} EditnameUi;
+
+void editnameui_init(EditnameUi*, psy_ui_Component* parent, psy_audio_Machine*,
+	uintptr_t style);
+
 typedef struct VuValues {
-	/// output level for display (0 .. 1.f)	
+	/* output level for display(0 .. 1.f) */
 	psy_dsp_amp_t volumedisplay;
-	/// output peak level for display (0 .. 1.f)
+	/* output peak level for display (0 .. 1.f) */
 	psy_dsp_amp_t volumemaxdisplay;
-	/// output peak level display time (refreshrate * 60)
+	/* output peak level display time(refreshrate * 60) */
 	int volumemaxcounterlife;
 } VuValues;
 
@@ -44,61 +57,58 @@ void vuvalues_tickcounter(VuValues*);
 void vuvalues_update(VuValues*, psy_audio_Buffer*);
 
 typedef struct VuDisplay {
-	// internal	
 	VuValues vuvalues;
-	// references
-	MachineViewSkin* skin;
-	MachineCoords* coords;
 } VuDisplay;
 
-void vudisplay_init(VuDisplay*,
-	MachineViewSkin*, MachineCoords*);
+void vudisplay_init(VuDisplay*);
 
 void vudisplay_update(VuDisplay*, psy_audio_Buffer*);
-void vudisplay_draw(VuDisplay*, psy_ui_Graphics*);
+void vudisplay_draw(VuDisplay*, psy_ui_Graphics*,
+	psy_ui_Style* vu, psy_ui_Style* vupeak);
 
-typedef enum MachineUiMode {
-	MACHINEUIMODE_DRAW = 1,
-	MACHINEUIMODE_DRAWSMALL,
-	MACHINEUIMODE_BITMAP
-} MachineUiMode;
-
-/* MachineUiCommon */
-typedef struct MachineUiCommon {
+typedef struct VuUi {
+	/* inherits */
+	psy_ui_Component component;
 	/* internal */
-	int mode;
-	psy_ui_Colour font;
-	psy_ui_Colour bgcolour;
+	uintptr_t vu0_style;
+	uintptr_t vupeak_style;
 	VuDisplay vu;
-	uintptr_t slot;	
-	char* restorename;
-	bool machinepos;
-	MachineViewDragMode dragmode;
-	MachineUiMode drawmode;
-	double mx;
 	/* references */
-	Workspace* workspace;
 	psy_audio_Machine* machine;
-	psy_audio_Machines* machines;
-	psy_ui_Component* component;	
-	MachineCoords* coords;
-	MachineViewSkin* skin;
-	ParamViews* paramviews;
-} MachineUiCommon;
+} VuUi;
 
-void machineuicommon_init(MachineUiCommon*, psy_ui_Component* component,
-	uintptr_t slot, MachineViewSkin*, ParamViews*, Workspace*);
+void vuui_init(VuUi*, psy_ui_Component* parent, psy_audio_Machine*,
+	uintptr_t vu_style, uintptr_t vu0_style, uintptr_t vupeak_style);
 
-void machineuicommon_move(MachineUiCommon*, psy_ui_Point topleft);
+typedef struct PanUi {
+	/* inherits */
+	psy_ui_Component component;
+	/* internal */
+	psy_ui_Component slider;
+	bool drag;
+	double dragoffset;
+	/* references */
+	psy_audio_Machine* machine;
+} PanUi;
 
-/* global methods */
+void panui_init(PanUi*, psy_ui_Component* parent, psy_audio_Machine*,
+	uintptr_t pan_style, uintptr_t pan_slider_style);
+
+
+
 psy_ui_Component* machineui_create(psy_audio_Machine* machine,
-	uintptr_t slot, MachineViewSkin* skin,
 	psy_ui_Component* parent, ParamViews* paramviews,
-	bool machinepos, MachineUiMode drawmode,
-	Workspace* workspace);
+	bool machinepos, Workspace* workspace);
 
 void machineui_drawhighlight(psy_ui_Graphics* g, psy_ui_RealRectangle position);
+
+void machineui_enable_vumeter(void);
+void machineui_prevent_vumeter(void);
+bool machineui_vumeter_prevented(void);
+
+void machineui_enable_macindex(void);
+void machineui_prevent_macindex(void);
+bool machineui_maxindex_prevented(void);
 
 #ifdef __cplusplus
 }

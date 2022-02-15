@@ -1,17 +1,20 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #if !defined(LABELUI_H)
 #define LABELUI_H
 
-// host
+/* host */
 #include "paramview.h"
-// ui
+/* ui */
 #include <uicomponent.h>
 
-// LabelUi
-//
-// Label to display a MachineParameter (MPF_INFOLABEL)
+/* LabelUi
+**
+** Label to display a MachineParameter (MPF_INFOLABEL)
+*/
 
 #ifdef __cplusplus
 extern "C" {
@@ -25,20 +28,19 @@ typedef struct LabelUi {
 	psy_ui_Component component;
 	/* internal */
 	uintptr_t paramidx;
-	/* references */
-	ParamSkin* skin;
+	/* references */	
 	struct psy_audio_Machine* machine;	
 	struct psy_audio_MachineParam* param;
 } LabelUi;
 
 void labelui_init(LabelUi*, psy_ui_Component* parent,
 	struct psy_audio_Machine*, uintptr_t paramidx,
-	struct psy_audio_MachineParam*, ParamSkin*);
+	struct psy_audio_MachineParam*);
 
 LabelUi* labelui_alloc(void);
 LabelUi* labelui_allocinit(psy_ui_Component* parent,
 	struct psy_audio_Machine*, uintptr_t paramidx,
-	struct psy_audio_MachineParam*, struct ParamSkin*);
+	struct psy_audio_MachineParam*);
 
 INLINE psy_ui_Component* labelui_base(LabelUi* self)
 {

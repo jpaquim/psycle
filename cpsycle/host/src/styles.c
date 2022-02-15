@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -250,23 +250,7 @@ void inithoststyles(psy_ui_Styles* self, psy_ui_ThemeMode theme)
 	psy_ui_styles_setstyle(self, STYLE_ZOOMBOX, style);
 
 	style = psy_ui_style_clone(psy_ui_styles_at(self, psy_ui_STYLE_EDIT));
-	psy_ui_styles_setstyle(self, STYLE_ZOOMBOX_EDIT, style);
-	
-	style = psy_ui_style_allocinit();
-	psy_ui_style_setbackgroundcolour(style, material.surface_overlay_9p);
-	psy_ui_styles_setstyle(self, STYLE_MACHINEVIEW, style);
-
-	style = psy_ui_style_allocinit();
-	psy_ui_style_setbackgroundcolour(style, material.surface_overlay_9p);
-	psy_ui_styles_setstyle(self, STYLE_MACHINEVIEW_WIRES, style);
-
-	style = psy_ui_style_allocinit();
-	psy_ui_style_setbackgroundcolour(style, material.surface_overlay_9p);
-	psy_ui_styles_setstyle(self, STYLE_MACHINEVIEW_STACK, style);
-
-	style = psy_ui_style_allocinit();
-	psy_ui_style_setbackgroundcolour(style, material.surface_overlay_9p);
-	psy_ui_styles_setstyle(self, STYLE_PATTERNVIEW, style);
+	psy_ui_styles_setstyle(self, STYLE_ZOOMBOX_EDIT, style);		
 
 	style = psy_ui_style_allocinit();	
 	psy_ui_style_setpadding_em(style, 0.25, 0.5, 0.5, 0.5);
@@ -344,8 +328,8 @@ void inithoststyles(psy_ui_Styles* self, psy_ui_ThemeMode theme)
 		psy_ui_style_setbackgroundpath(style,
 			PSYCLE_RES_DIR psy_SLASHSTR "splash_screen.bmp");
 	}
-	style->backgroundrepeat = psy_ui_NOREPEAT;
-	style->backgroundposition = psy_ui_ALIGNMENT_CENTER;
+	style->background.repeat = psy_ui_NOREPEAT;
+	style->background.align = psy_ui_ALIGNMENT_CENTER;
 	psy_ui_styles_setstyle(self, STYLE_ABOUT, style);
 	
 	style = psy_ui_style_allocinit();
@@ -644,6 +628,8 @@ void inithoststyles(psy_ui_Styles* self, psy_ui_ThemeMode theme)
 
 	style = psy_ui_style_clone(psy_ui_styles_at(self, psy_ui_STYLE_LABEL));
 	psy_ui_styles_setstyle(self, STYLE_TIMEBAR_NUMLABEL, style);
+
+	init_psycletheme_styles(self);
 }
 
 /* LightTheme */
@@ -840,23 +826,7 @@ void initlighttheme(psy_ui_Styles* self)
 	psy_ui_styles_setstyle(self, STYLE_ZOOMBOX, style);
 
 	style = psy_ui_style_clone(psy_ui_styles_at(self, psy_ui_STYLE_EDIT));
-	psy_ui_styles_setstyle(self, STYLE_ZOOMBOX_EDIT, style);
-
-	style = psy_ui_style_allocinit();
-	psy_ui_style_setbackgroundcolour(style, material.surface_overlay_9p);
-	psy_ui_styles_setstyle(self, STYLE_MACHINEVIEW, style);
-
-	style = psy_ui_style_allocinit();
-	psy_ui_style_setbackgroundcolour(style, material.surface_overlay_9p);
-	psy_ui_styles_setstyle(self, STYLE_MACHINEVIEW_WIRES, style);
-
-	style = psy_ui_style_allocinit();
-	psy_ui_style_setbackgroundcolour(style, material.surface_overlay_9p);
-	psy_ui_styles_setstyle(self, STYLE_MACHINEVIEW_STACK, style);
-
-	style = psy_ui_style_allocinit();
-	psy_ui_style_setbackgroundcolour(style, material.surface_overlay_9p);
-	psy_ui_styles_setstyle(self, STYLE_PATTERNVIEW, style);
+	psy_ui_styles_setstyle(self, STYLE_ZOOMBOX_EDIT, style);	
 
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setpadding_em(style, 0.25, 0.5, 0.5, 0.5);
@@ -933,8 +903,8 @@ void initlighttheme(psy_ui_Styles* self)
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setbackgroundcolour(style, material.surface_overlay_5p);
 	psy_ui_style_setbackgroundid(style, IDB_ABOUT);
-	style->backgroundrepeat = psy_ui_NOREPEAT;
-	style->backgroundposition = psy_ui_ALIGNMENT_CENTER;
+	style->background.repeat = psy_ui_NOREPEAT;
+	style->background.align = psy_ui_ALIGNMENT_CENTER;
 	psy_ui_styles_setstyle(self, STYLE_ABOUT, style);
 
 	style = psy_ui_style_allocinit();
@@ -1233,6 +1203,8 @@ void initlighttheme(psy_ui_Styles* self)
 
 	style = psy_ui_style_clone(psy_ui_styles_at(self, psy_ui_STYLE_LABEL));
 	psy_ui_styles_setstyle(self, STYLE_TIMEBAR_NUMLABEL, style);
+
+	init_psycletheme_styles(self);
 }
 
 /* Win98Theme */
@@ -1396,23 +1368,7 @@ void initwin98theme(psy_ui_Styles* self)
 	psy_ui_styles_setstyle(self, STYLE_ZOOMBOX, style);
 
 	style = psy_ui_style_clone(psy_ui_styles_at(self, psy_ui_STYLE_EDIT));
-	psy_ui_styles_setstyle(self, STYLE_ZOOMBOX_EDIT, style);
-
-	style = psy_ui_style_allocinit();	
-	psy_ui_style_setborder(style, &win.lowered);
-	psy_ui_styles_setstyle(self, STYLE_MACHINEVIEW, style);
-
-	style = psy_ui_style_allocinit();
-	psy_ui_style_setborder(style, &win.lowered);
-	psy_ui_styles_setstyle(self, STYLE_MACHINEVIEW_WIRES, style);
-
-	style = psy_ui_style_allocinit();
-	psy_ui_style_setborder(style, &win.lowered);
-	psy_ui_styles_setstyle(self, STYLE_MACHINEVIEW_STACK, style);
-
-	style = psy_ui_style_allocinit();	
-	psy_ui_style_setborder(style, &win.lowered);
-	psy_ui_styles_setstyle(self, STYLE_PATTERNVIEW, style);
+	psy_ui_styles_setstyle(self, STYLE_ZOOMBOX_EDIT, style);		
 
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setpadding_em(style, 0.25, 0.5, 0.5, 0.5);
@@ -1488,8 +1444,8 @@ void initwin98theme(psy_ui_Styles* self)
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolours(style, win.cl_black, win.cl_silver);
 	psy_ui_style_setbackgroundid(style, IDB_ABOUT);
-	style->backgroundrepeat = psy_ui_NOREPEAT;
-	style->backgroundposition = psy_ui_ALIGNMENT_CENTER;
+	style->background.repeat = psy_ui_NOREPEAT;
+	style->background.align = psy_ui_ALIGNMENT_CENTER;
 	psy_ui_styles_setstyle(self, STYLE_ABOUT, style);
 
 	style = psy_ui_style_allocinit();
@@ -1773,4 +1729,487 @@ void initwin98theme(psy_ui_Styles* self)
 	psy_ui_style_setcolours(style, win.cl_black, win.cl_silver);
 	psy_ui_style_setborder(style, &win.lowered);
 	psy_ui_styles_setstyle(self, STYLE_TIMEBAR_NUMLABEL, style);
+	
+	init_psycletheme_styles(self);
+}
+
+void init_psycletheme_styles(psy_ui_Styles* self)
+{
+	init_machineview_styles(self);
+	init_machineparam_styles(self);
+	init_patternview_styles(self);
+}
+
+void init_machineview_styles(psy_ui_Styles* self)
+{
+	psy_ui_Style* style;	
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolours(style,
+		psy_ui_colour_make(0x005F5F5F),
+		psy_ui_colour_make(0x00232323));
+	psy_ui_styles_setstyle(self, STYLE_MACHINEVIEW, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolours(style,
+		psy_ui_colour_make(0x005F5F5F),
+		psy_ui_colour_make(0x00232323));
+	psy_ui_style_setfont(style, "Tahoma", 16);
+	psy_ui_styles_setstyle(self, STYLE_MACHINEVIEW_WIRES, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolours(style,
+		psy_ui_colour_make(0x005F5F5F),
+		psy_ui_colour_make(0x00232323));
+	psy_ui_style_setfont(style, "Tahoma", 16);
+	psy_ui_styles_setstyle(self, STYLE_MACHINEVIEW_STACK, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolour(style, psy_ui_colour_make(0x005F5F5F));	
+	psy_ui_styles_setstyle(self, STYLE_MV_WIRE, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolour(style, psy_ui_colour_make(0x007F7F7F));
+	psy_ui_styles_setstyle(self, STYLE_MV_WIRE_SELECT, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolour(style, psy_ui_colour_make(0x007F7F7F));
+	psy_ui_styles_setstyle(self, STYLE_MV_WIRE_HOVER, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolour(style, psy_ui_colour_make(0x005F5F5F));
+	style->background.size = psy_ui_realsize_make(5.0, 5.0);
+	style->background.size_set = TRUE;
+	psy_ui_styles_setstyle(self, STYLE_MV_WIRE_POLY, style);
+	
+	/* master */
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setbackgroundid(style, IDB_MACHINESKIN);
+	psy_ui_style_setsize_px(style, 138.0, 35.0);	
+	psy_ui_style_set_background_position_px(style, 0.0, -52.0);
+	psy_ui_style_setbackgroundcolour(style, psy_ui_colour_make(0x00333333));
+	psy_ui_styles_setstyle(self, STYLE_MV_MASTER, style);
+
+	/* master:name */
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setsize_px(style, 117.0, 15.0);
+	psy_ui_style_setpadding_px(style, 3.0, 0, 0.0, 20.0);
+	psy_ui_styles_setstyle(self, STYLE_MV_MASTER_NAME, style);
+
+	/* generator */
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolours(style,
+		psy_ui_colour_make(0x00B1C8B0),
+		psy_ui_colour_make(0x002f3E25));
+	psy_ui_style_setbackgroundid(style, IDB_MACHINESKIN);
+	psy_ui_style_setsize_px(style, 138.0, 52.0);
+	psy_ui_style_set_background_position_px(style, 0.0, -87.0);	
+	psy_ui_styles_setstyle(self, STYLE_MV_GENERATOR, style);	
+
+	/* generator:name */
+	style = psy_ui_style_allocinit();	
+	psy_ui_style_set_position(style,
+		psy_ui_rectangle_make(
+			psy_ui_point_make_px(20.0, 3.0),
+			psy_ui_size_make_px(117.0, 15.0)));	
+	psy_ui_styles_setstyle(self, STYLE_MV_GENERATOR_NAME, style);
+
+	/* generator:mute */
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setbackgroundid(style, IDB_MACHINESKIN);
+	psy_ui_style_set_background_position_px(style, -117.0, -87-31);
+	psy_ui_style_set_position(style, psy_ui_rectangle_make(
+		psy_ui_point_make_px(117.0, 31.0), psy_ui_size_make_px(17.0, 17.0)));
+	psy_ui_styles_setstyle(self, STYLE_MV_GENERATOR_MUTE, style);
+
+	/* generator:mute:select */
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setbackgroundid(style, IDB_MACHINESKIN);
+	psy_ui_style_set_background_position_px(style, -23.0, -139.0);
+	psy_ui_style_set_position(style, psy_ui_rectangle_make(
+		psy_ui_point_make_px(117.0, 31.0), psy_ui_size_make_px(17.0, 17.0)));	
+	psy_ui_styles_setstyle(self, STYLE_MV_GENERATOR_MUTE_SELECT, style);
+
+	/* generator:solo */
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setbackgroundid(style, IDB_MACHINESKIN);
+	psy_ui_style_setsize_px(style, 17, 17);	
+	psy_ui_style_set_background_position_px(style, -98.0, -87 - 31);
+	psy_ui_style_set_position(style, psy_ui_rectangle_make(
+		psy_ui_point_make_px(98.0, 31.0), psy_ui_size_make_px(17.0, 17.0)));	
+	psy_ui_styles_setstyle(self, STYLE_MV_GENERATOR_SOLO, style);
+
+	/* generator:solo:select */
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setbackgroundid(style, IDB_MACHINESKIN);
+	psy_ui_style_setsize_px(style, 17, 17);	
+	psy_ui_style_set_background_position_px(style, -6.0, -139.0);
+	psy_ui_style_set_position(style, psy_ui_rectangle_make(
+		psy_ui_point_make_px(98.0, 31.0), psy_ui_size_make_px(17.0, 17.0)));	
+	psy_ui_styles_setstyle(self, STYLE_MV_GENERATOR_SOLO_SELECT, style);
+
+	/* generator:vu */
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setbackgroundid(style, IDB_MACHINESKIN);
+	psy_ui_style_setsize_px(style, 129.0, 7.0);
+	psy_ui_style_set_background_position_px(style, -4.0, -87 -20.0);
+	psy_ui_style_set_position(style, psy_ui_rectangle_make(
+		psy_ui_point_make_px(4.0, 20.0), psy_ui_size_make_px(129.0, 7.0)));	
+	psy_ui_styles_setstyle(self, STYLE_MV_GENERATOR_VU, style);
+
+	/* generator:vu0 */
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setbackgroundid(style, IDB_MACHINESKIN);
+	psy_ui_style_setsize_px(style, 129.0, 7);	
+	psy_ui_style_set_background_position_px(style, 0.0, -156.0);
+	psy_ui_styles_setstyle(self, STYLE_MV_GENERATOR_VU0, style);
+
+	/* generator:vupeak */
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setbackgroundid(style, IDB_MACHINESKIN);
+	psy_ui_style_setsize_px(style, 1, 7);	
+	psy_ui_style_set_background_position_px(style, -108.0, -156.0);
+	psy_ui_styles_setstyle(self, STYLE_MV_GENERATOR_VUPEAK, style);
+
+	/* generator:pan */
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setbackgroundid(style, IDB_MACHINESKIN);
+	psy_ui_style_setsize_px(style, 82.0, 13.0);
+	psy_ui_style_set_background_position_px(style, -6.0, -87 -33.0);
+	psy_ui_style_set_position(style, psy_ui_rectangle_make(
+		psy_ui_point_make_px(6.0, 33.0), psy_ui_size_make_px(82.0, 13.0)));	
+	psy_ui_styles_setstyle(self, STYLE_MV_GENERATOR_PAN, style);
+
+	/* generator:pan:slider */
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setbackgroundid(style, IDB_MACHINESKIN);
+	psy_ui_style_setsize_px(style, 6.0, 13.0);
+	psy_ui_style_set_background_position_px(style, -0.0, -139.0);
+	psy_ui_style_set_position(style, psy_ui_rectangle_make(
+		psy_ui_point_make_px(0.0, 0.0), psy_ui_size_make_px(6.0, 13.0)));	
+	psy_ui_styles_setstyle(self, STYLE_MV_GENERATOR_PAN_SLIDER, style);
+
+	/* effect*/
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setbackgroundid(style, IDB_MACHINESKIN);
+	psy_ui_style_setsize_px(style, 138.0, 52.0);
+	psy_ui_style_setcolours(style, psy_ui_colour_make(0x00D1C5B6),
+		psy_ui_colour_make(0x003E2f25));
+	psy_ui_styles_setstyle(self, STYLE_MV_EFFECT, style);
+
+	/* effect:name */
+	style = psy_ui_style_allocinit();
+	psy_ui_style_set_position(style, psy_ui_rectangle_make(
+		psy_ui_point_make_px(20.0, 3.0), psy_ui_size_make_px(117.0, 15.0)));	
+	psy_ui_styles_setstyle(self, STYLE_MV_EFFECT_NAME, style);
+
+	/* effect:mute */
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setbackgroundid(style, IDB_MACHINESKIN);
+	psy_ui_style_set_background_position_px(style, -117.0, -31.0);
+	psy_ui_style_set_position(style, psy_ui_rectangle_make(
+		psy_ui_point_make_px(117.0, 31.0), psy_ui_size_make_px(17.0, 17.0)));	
+	psy_ui_styles_setstyle(self, STYLE_MV_EFFECT_MUTE, style);
+
+	/* effect:mute:select */
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setbackgroundid(style, IDB_MACHINESKIN);
+	psy_ui_style_set_background_position_px(style, -23.0, -139.0);
+	psy_ui_style_set_position(style, psy_ui_rectangle_make(
+		psy_ui_point_make_px(117.0, 31.0), psy_ui_size_make_px(17.0, 17.0)));	
+	psy_ui_styles_setstyle(self, STYLE_MV_EFFECT_MUTE_SELECT, style);
+
+	/* effect:bypass */
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setbackgroundid(style, IDB_MACHINESKIN);
+	psy_ui_style_setsize_px(style, 17, 17);
+	psy_ui_style_set_background_position_px(style, -98.0, -31.0);
+	psy_ui_style_set_position(style, psy_ui_rectangle_make(
+		psy_ui_point_make_px(98.0, 31.0), psy_ui_size_make_px(17.0, 17.0)));	
+	psy_ui_styles_setstyle(self, STYLE_MV_EFFECT_BYPASS, style);
+
+	/* effect:bypass:select */
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setbackgroundid(style, IDB_MACHINESKIN);
+	psy_ui_style_setsize_px(style, 17, 17);
+	psy_ui_style_set_background_position_px(style, -6.0, -139.0);
+	psy_ui_style_set_position(style, psy_ui_rectangle_make(
+		psy_ui_point_make_px(98.0, 31.0), psy_ui_size_make_px(17.0, 17.0)));	
+	psy_ui_styles_setstyle(self, STYLE_MV_EFFECT_BYPASS_SELECT, style);
+
+	/* effect:vu */
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setbackgroundid(style, IDB_MACHINESKIN);
+	psy_ui_style_setsize_px(style, 129.0, 7.0);
+	psy_ui_style_set_background_position_px(style, -4.0, -20.0);
+	psy_ui_style_set_position(style, psy_ui_rectangle_make(
+		psy_ui_point_make_px(4.0, 20.0), psy_ui_size_make_px(129.0, 7.0)));	
+	psy_ui_styles_setstyle(self, STYLE_MV_EFFECT_VU, style);
+
+	/* effect:vu0 */
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setbackgroundid(style, IDB_MACHINESKIN);
+	psy_ui_style_setsize_px(style, 129.0, 7.0);	
+	psy_ui_style_set_background_position_px(style, 0.0, -163.0);	
+	psy_ui_styles_setstyle(self, STYLE_MV_EFFECT_VU0, style);
+
+	/* effect:vupeak */
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setbackgroundid(style, IDB_MACHINESKIN);
+	psy_ui_style_setsize_px(style, 1.0, 7.0);	
+	psy_ui_style_set_background_position_px(style, -96.0, -144.0);	
+	psy_ui_styles_setstyle(self, STYLE_MV_EFFECT_VUPEAK, style);
+
+	/* effect:pan */
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setbackgroundid(style, IDB_MACHINESKIN);
+	psy_ui_style_setsize_px(style, 82.0, 13.0);
+	psy_ui_style_set_background_position_px(style, -6.0, -33.0);	
+	psy_ui_style_set_position(style, psy_ui_rectangle_make(
+		psy_ui_point_make_px(6.0, 33.0), psy_ui_size_make_px(82.0, 13.0)));
+	psy_ui_styles_setstyle(self, STYLE_MV_EFFECT_PAN, style);
+
+	/* effect:pan:slider */
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setbackgroundid(style, IDB_MACHINESKIN);
+	psy_ui_style_setsize_px(style, 6.0, 13.0);	
+	psy_ui_style_set_background_position_px(style, -57.0, -139.0);
+	psy_ui_style_set_position(style, psy_ui_rectangle_make(
+		psy_ui_point_make_px(0.0, 0.0), psy_ui_size_make_px(6.0, 13.0)));	
+	psy_ui_styles_setstyle(self, STYLE_MV_EFFECT_PAN_SLIDER, style);
+}
+
+void init_machineparam_styles(psy_ui_Styles* self)
+{
+	psy_ui_Style* style;
+	
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolours(style,
+		psy_ui_colour_make(0x00B4B4B4),
+		psy_ui_colour_make(0x00292929));
+	psy_ui_styles_setstyle(self, STYLE_MACPARAM_TITLE, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolours(style,
+		psy_ui_colour_make(0x00CDCDCD),
+		psy_ui_colour_make(0x00555555));
+	psy_ui_styles_setstyle(self, STYLE_MACPARAM_TOP, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolours(style,
+		psy_ui_colour_make(0x00E7BD18),
+		psy_ui_colour_make(0x00444444));
+	psy_ui_styles_setstyle(self, STYLE_MACPARAM_BOTTOM, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolours(style,
+		psy_ui_colour_make(0x00CDCDCD),
+		psy_ui_colour_make(0x00555555));
+	psy_ui_styles_setstyle(self, STYLE_MACPARAM_TOP_ACTIVE, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolours(style,
+		psy_ui_colour_make(0x00E7BD18),
+		psy_ui_colour_make(0x00292929));
+	psy_ui_styles_setstyle(self, STYLE_MACPARAM_BOTTOM_ACTIVE, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setbackgroundid(style, IDB_PARAMKNOB);
+	psy_ui_style_animatebackground(style, 0,
+		psy_ui_realsize_make(28.0, 28.0), TRUE);
+	psy_ui_styles_setstyle(self, STYLE_MACPARAM_KNOB, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setbackgroundid(style, IDB_MIXERSKIN);
+	psy_ui_style_setsize_px(style, 30.0, 182.0);
+	psy_ui_styles_setstyle(self, STYLE_MACPARAM_SLIDER, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setbackgroundid(style, IDB_MIXERSKIN);
+	psy_ui_style_setsize_px(style, 22.0, 10.0);
+	psy_ui_style_set_background_position_px(style, 0.0, -182.0);
+	psy_ui_styles_setstyle(self, STYLE_MACPARAM_SLIDERKNOB, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setbackgroundid(style, IDB_MIXERSKIN);
+	psy_ui_style_setsize_px(style, 28.0, 28.0);
+	psy_ui_style_set_background_position_px(style, -30.0, -118.0);
+	psy_ui_styles_setstyle(self, STYLE_MACPARAM_SWITCHON, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setbackgroundid(style, IDB_MIXERSKIN);
+	psy_ui_style_setsize_px(style, 28.0, 28.0);
+	psy_ui_style_set_background_position_px(style, -30.0, -90.0);
+	psy_ui_styles_setstyle(self, STYLE_MACPARAM_SWITCHOFF, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setbackgroundid(style, IDB_MIXERSKIN);
+	psy_ui_style_setsize_px(style, 13.0, 13.0);
+	psy_ui_style_set_background_position_px(style, -30.0, -159.0);
+	psy_ui_styles_setstyle(self, STYLE_MACPARAM_CHECKON, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setbackgroundid(style, IDB_MIXERSKIN);
+	psy_ui_style_setsize_px(style, 13.0, 13.0);
+	psy_ui_style_set_background_position_px(style, -30.0, -146.0);
+	psy_ui_styles_setstyle(self, STYLE_MACPARAM_CHECKOFF, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setbackgroundid(style, IDB_MIXERSKIN);
+	psy_ui_style_setsize_px(style, 16.0, 90.0);
+	psy_ui_style_set_background_position_px(style, -46.0, 0.0);
+	psy_ui_styles_setstyle(self, STYLE_MACPARAM_VUON, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setbackgroundid(style, IDB_MIXERSKIN);
+	psy_ui_style_setsize_px(style, 16.0, 90.0);
+	psy_ui_style_set_background_position_px(style, -30.0, 0.0);
+	psy_ui_styles_setstyle(self, STYLE_MACPARAM_VUOFF, style);	
+}
+
+void init_patternview_styles(psy_ui_Styles* self)
+{
+	psy_ui_Style* style;
+	
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setbackgroundcolour(style, psy_ui_colour_make(0x00232323));
+	psy_ui_styles_setstyle(self, STYLE_PATTERNVIEW, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setbackgroundid(style, IDB_HEADERSKIN);
+	psy_ui_style_setsize_px(style, 102.0, 23.0);
+	psy_ui_style_set_background_position_px(style, -2.0, -0.0);
+	psy_ui_styles_setstyle(self, STYLE_PV_TRACK_HEADER, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setbackgroundid(style, IDB_HEADERSKIN);
+	psy_ui_style_setsize_px(style, 9, 17);
+	psy_ui_style_set_background_position_px(style, 0.0, -23.0);
+	psy_ui_style_setpadding_px(style, 3.0, 0.0, 0.0, 15.0);
+	psy_ui_styles_setstyle(self, STYLE_PV_TRACK_HEADER_DIGITX0, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setbackgroundid(style, IDB_HEADERSKIN);
+	psy_ui_style_setsize_px(style, 9, 17);
+	psy_ui_style_set_background_position_px(style, 0.0, -23.0);
+	psy_ui_style_setpadding_px(style, 3.0, 0.0, 0.0, 22.0);
+	psy_ui_styles_setstyle(self, STYLE_PV_TRACK_HEADER_DIGIT0X, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setbackgroundid(style, IDB_HEADERSKIN);
+	psy_ui_style_setsize_px(style, 17.0, 17.0);
+	psy_ui_style_set_background_position_px(style, -66.0, -3.0);	
+	psy_ui_style_set_position(style, psy_ui_rectangle_make(
+		psy_ui_point_make_px(66.0, 3.0), psy_ui_size_make_px(17.0, 17.)));
+	psy_ui_styles_setstyle(self, STYLE_PV_TRACK_HEADER_MUTE, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setbackgroundid(style, IDB_HEADERSKIN);
+	psy_ui_style_setsize_px(style, 17.0, 17.0);
+	psy_ui_style_set_background_position_px(style, -79.0, -40.0);	
+	psy_ui_style_set_position(style, psy_ui_rectangle_make(
+		psy_ui_point_make_px(66.0, 3.0), psy_ui_size_make_px(17.0, 17.)));
+	psy_ui_styles_setstyle(self, STYLE_PV_TRACK_HEADER_MUTE_SELECT, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setbackgroundid(style, IDB_HEADERSKIN);
+	psy_ui_style_setsize_px(style, 17.0, 17.0);
+	psy_ui_style_set_background_position_px(style, -47, -3.0);	
+	psy_ui_style_set_position(style, psy_ui_rectangle_make(
+		psy_ui_point_make_px(47.0, 3.0), psy_ui_size_make_px(17.0, 17.)));
+	psy_ui_styles_setstyle(self, STYLE_PV_TRACK_HEADER_SOLO, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setbackgroundid(style, IDB_HEADERSKIN);
+	psy_ui_style_setsize_px(style, 17.0, 17.0);
+	psy_ui_style_set_background_position_px(style, -62, -40.0);
+	psy_ui_style_set_position(style, psy_ui_rectangle_make(
+		psy_ui_point_make_px(47.0, 3.0), psy_ui_size_make_px(17.0, 17.)));
+	psy_ui_styles_setstyle(self, STYLE_PV_TRACK_HEADER_SOLO_SELECT, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setbackgroundid(style, IDB_HEADERSKIN);
+	psy_ui_style_setsize_px(style, 17.0, 17.0);
+	psy_ui_style_set_background_position_px(style, -85.0, -3.0);	
+	psy_ui_style_set_position(style, psy_ui_rectangle_make(
+		psy_ui_point_make_px(85.0, 3.0), psy_ui_size_make_px(17.0, 17.)));
+	psy_ui_styles_setstyle(self, STYLE_PV_TRACK_HEADER_RECORD, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setbackgroundid(style, IDB_HEADERSKIN);
+	psy_ui_style_setsize_px(style, 17.0, 17.0);
+	psy_ui_style_set_background_position_px(style, -96.0, -40.0);	
+	psy_ui_style_set_position(style, psy_ui_rectangle_make(
+		psy_ui_point_make_px(85.0, 3.0), psy_ui_size_make_px(17.0, 17.)));
+	psy_ui_styles_setstyle(self, STYLE_PV_TRACK_HEADER_RECORD_SELECT, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setbackgroundid(style, IDB_HEADERSKIN);
+	psy_ui_style_setsize_px(style, 8, 17);
+	psy_ui_style_set_background_position_px(style, -5.0, -3.0);	
+	psy_ui_style_set_position(style, psy_ui_rectangle_make(
+		psy_ui_point_make_px(5.0, 3.0), psy_ui_size_make_px(7, 17)));
+	psy_ui_styles_setstyle(self, STYLE_PV_TRACK_HEADER_PLAY, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setbackgroundid(style, IDB_HEADERSKIN);
+	psy_ui_style_setsize_px(style, 8, 17);
+	psy_ui_style_set_background_position_px(style, 0.0, -40.0);	
+	psy_ui_style_set_position(style, psy_ui_rectangle_make(
+		psy_ui_point_make_px(3.0, 5.0), psy_ui_size_make_px(8, 17)));
+	psy_ui_styles_setstyle(self, STYLE_PV_TRACK_HEADER_PLAY_SELECT, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolours(style,
+		psy_ui_colour_make(0x00CACACA),
+		psy_ui_colour_make(0x003E3E3E));
+	psy_ui_styles_setstyle(self, STYLE_PV_ROW, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolours(style,
+		psy_ui_colour_make(0x00ffffff),
+		psy_ui_colour_make(0x009B7800));
+	psy_ui_styles_setstyle(self, STYLE_PV_ROW_SELECT, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolours(style,
+		psy_ui_colour_make(0x00CACACA),
+		psy_ui_colour_make(0x00363636));
+	psy_ui_styles_setstyle(self, STYLE_PV_ROWBEAT, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolours(style,
+		psy_ui_colour_make(0x00ffffff),
+		psy_ui_colour_make(0x009B7800));
+	psy_ui_styles_setstyle(self, STYLE_PV_ROWBEAT_SELECT, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolours(style,
+		psy_ui_colour_make(0x00CACACA),
+		psy_ui_colour_make(0x00595959));
+	psy_ui_styles_setstyle(self, STYLE_PV_ROW4BEAT, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolours(style,
+		psy_ui_colour_make(0x00ffffff),
+		psy_ui_colour_make(0x009B7800));
+	psy_ui_styles_setstyle(self, STYLE_PV_ROW4BEAT_SELECT, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolours(style,
+		psy_ui_colour_make(0x00ffffff),
+		psy_ui_colour_make(0x009F7B00));
+	psy_ui_styles_setstyle(self, STYLE_PV_CURSOR, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolours(style,
+		psy_ui_colour_make(0x00ffffff),
+		psy_ui_colour_make(0x009B7800));
+	psy_ui_styles_setstyle(self, STYLE_PV_CURSOR_SELECT, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolours(style,
+		psy_ui_colour_make(0x00ffffff),
+		psy_ui_colour_make(0x009F7B00));
+	psy_ui_styles_setstyle(self, STYLE_PV_PLAYBAR, style);
 }

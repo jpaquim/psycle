@@ -1,25 +1,33 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "labelui.h"
-// host
+/* host */
 #include "machineparamconfig.h"
-// audio
+#include "styles.h"
+/* ui */
+#include <uiapp.h>
+/* audio */
 #include <machine.h>
 #include <plugin_interface.h>
-// platform
+/* platform */
 #include "../../detail/portable.h"
 
-// LabelUi
-// prototypes
+
+/* LabelUi */
+/* prototypes */
 static void labelui_ondraw(LabelUi*, psy_ui_Graphics*);
 static void labelui_invalidate(LabelUi*);
 static void labelui_onpreferredsize(LabelUi*, const psy_ui_Size* limit,
 	psy_ui_Size* rv);
 static void labelui_updateparam(LabelUi*);
-// vtable
+
+/* vtable */
 static psy_ui_ComponentVtable labelui_vtable;
 static bool labelui_vtable_initialized = FALSE;
 
@@ -40,17 +48,13 @@ static psy_ui_ComponentVtable* labelui_vtable_init(LabelUi* self)
 /* implementation */
 void labelui_init(LabelUi* self, psy_ui_Component* parent,	
 	psy_audio_Machine* machine, uintptr_t paramidx,
-	psy_audio_MachineParam* param,
-	ParamSkin* skin)
+	psy_audio_MachineParam* param)
 {
 	assert(self);	
-	assert(skin);	
 
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_setvtable(&self->component, labelui_vtable_init(self));	
-	psy_ui_component_setbackgroundmode(&self->component,
-		psy_ui_NOBACKGROUND);	
-	self->skin = skin;
+	psy_ui_component_setbackgroundmode(&self->component, psy_ui_NOBACKGROUND);
 	self->param = param;
 	self->machine = machine;
 	self->paramidx = paramidx;
@@ -62,14 +66,14 @@ LabelUi* labelui_alloc(void)
 }
 
 LabelUi* labelui_allocinit(psy_ui_Component* parent,
-	psy_audio_Machine* machine, uintptr_t paramidx, psy_audio_MachineParam* param,
-	ParamSkin* paramskin)
+	psy_audio_Machine* machine, uintptr_t paramidx,
+	psy_audio_MachineParam* param)
 {
 	LabelUi* rv;
 
 	rv = labelui_alloc();
 	if (rv) {
-		labelui_init(rv, parent, machine, paramidx, param, paramskin);
+		labelui_init(rv, parent, machine, paramidx, param);
 		rv->component.deallocate = TRUE;
 	}
 	return rv;
@@ -81,7 +85,11 @@ void labelui_ondraw(LabelUi* self, psy_ui_Graphics* g)
 	psy_ui_RealRectangle r;
 	char str[128];
 	psy_ui_RealSize size;
+	psy_ui_Style* title_style;
+	psy_ui_Style* bottom_style;
 
+	title_style = psy_ui_style(STYLE_MACPARAM_TITLE);
+	bottom_style = psy_ui_style(STYLE_MACPARAM_BOTTOM);
 	str[0] = '\0';
 	labelui_updateparam(self);
 	size = psy_ui_component_scrollsize_px(&self->component);
@@ -89,8 +97,8 @@ void labelui_ondraw(LabelUi* self, psy_ui_Graphics* g)
 	r = psy_ui_realrectangle_make(
 		psy_ui_realpoint_make(0.0, 0.0),
 		psy_ui_realsize_make(size.width, half));
-	psy_ui_setbackgroundcolour(g, self->skin->titlecolour);
-	psy_ui_settextcolour(g, self->skin->fonttitlecolour);
+	psy_ui_setbackgroundcolour(g, title_style->background.colour);
+	psy_ui_settextcolour(g, title_style->colour);
 	if (self->param) {
 		if (!psy_audio_machineparam_name(self->param, str)) {
 			if (!psy_audio_machineparam_label(self->param, str)) {
@@ -104,8 +112,8 @@ void labelui_ondraw(LabelUi* self, psy_ui_Graphics* g)
 	if (self->param && psy_audio_machineparam_describe(self->param, str) == FALSE) {
 		psy_snprintf(str, 128, "%s", "");
 	}
-	psy_ui_setbackgroundcolour(g, self->skin->bottomcolour);
-	psy_ui_settextcolour(g, self->skin->fontbottomcolour);
+	psy_ui_setbackgroundcolour(g, bottom_style->background.colour);
+	psy_ui_settextcolour(g, bottom_style->colour);
 	r = psy_ui_realrectangle_make(
 		psy_ui_realpoint_make(0, half),
 		psy_ui_realsize_make(size.width, half));
@@ -120,11 +128,11 @@ void labelui_onpreferredsize(LabelUi* self, const psy_ui_Size* limit,
 	labelui_updateparam(self);
 	if (self->param) {
 		if (psy_audio_machineparam_type(self->param) & MPF_SMALL) {
-			psy_ui_size_setem(rv, self->skin->paramwidth_small, 2.0);
+			psy_ui_size_setem(rv, PARAMWIDTH_SMALL, 2.0);
 			return;
 		}
 	}
-	psy_ui_size_setem(rv, self->skin->paramwidth, 2.0);
+	psy_ui_size_setem(rv, PARAMWIDTH, 2.0);
 }
 
 void labelui_updateparam(LabelUi* self)

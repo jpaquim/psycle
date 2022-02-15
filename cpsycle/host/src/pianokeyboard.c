@@ -60,7 +60,7 @@ void pianokeyboard_setsharedkeyboardstate(PianoKeyboard* self,
 	if (keyboardstate) {
 		self->keyboardstate = keyboardstate;
 	} else {
-		keyboardstate_init(&self->defaultkeyboardstate, NULL);
+		keyboardstate_init(&self->defaultkeyboardstate);
 		self->keyboardstate = &self->defaultkeyboardstate;
 	}
 }
@@ -70,18 +70,24 @@ void pianokeyboard_ondraw(PianoKeyboard* self, psy_ui_Graphics* g)
 	uint8_t key;	
 	psy_ui_RealSize size;
 	const psy_ui_TextMetric* tm;
+	psy_ui_Colour keyseparator;
+	psy_ui_Colour keywhite;
+	psy_ui_Colour keyblack;
 
 	assert(self);
 
+	keyblack = psy_ui_colour_make(0x00595959);
+	keywhite = psy_ui_colour_make(0x00C0C0C0);
+	keyseparator = psy_ui_colour_make(0x999999);
 	size = psy_ui_component_scrollsize_px(pianokeyboard_base(self));
 	tm = psy_ui_component_textmetric(pianokeyboard_base(self));
 	self->keyboardstate->keyboardheightpx = keyboardstate_height(self->keyboardstate, tm);
 	self->keyboardstate->keyheightpx = psy_ui_value_px(&self->keyboardstate->keyheight, tm, NULL);
-	psy_ui_setcolour(g, patternviewskin_keyseparatorcolour(self->keyboardstate->skin));
+	psy_ui_setcolour(g, keyseparator);
 	if (self->keyboardstate->drawpianokeys) {
-		psy_ui_settextcolour(g, patternviewskin_keyseparatorcolour(self->keyboardstate->skin));
+		psy_ui_settextcolour(g, keyseparator);
 	} else {
-		psy_ui_settextcolour(g, patternviewskin_keywhitecolour(self->keyboardstate->skin));
+		psy_ui_settextcolour(g, keywhite);
 	}
 	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 	for (key = self->keyboardstate->keymin; key < self->keyboardstate->keymax; ++key) {
@@ -96,7 +102,7 @@ void pianokeyboard_ondraw(PianoKeyboard* self, psy_ui_Graphics* g)
 					psy_ui_realpoint_make(size.width * 0.75, cpy),
 					psy_ui_realsize_make(size.width * 0.25,
 						self->keyboardstate->keyheightpx)),
-					patternviewskin_keywhitecolour(self->keyboardstate->skin));
+					keywhite);
 				psy_ui_drawline(g,
 					psy_ui_realpoint_make(0, cpy + self->keyboardstate->keyheightpx / 2),
 					psy_ui_realpoint_make(size.width, cpy + self->keyboardstate->keyheightpx / 2));
@@ -104,15 +110,14 @@ void pianokeyboard_ondraw(PianoKeyboard* self, psy_ui_Graphics* g)
 					psy_ui_realrectangle_make(psy_ui_realpoint_make(0, cpy),
 						psy_ui_realsize_make(size.width * 0.75,
 							self->keyboardstate->keyheightpx)),
-					patternviewskin_keyblackcolour(self->keyboardstate->skin));
+					keyblack);
 			} else {
 				psy_ui_RealRectangle r;
 
 				r = psy_ui_realrectangle_make(psy_ui_realpoint_make(0.0, cpy),
 						psy_ui_realsize_make(size.width,
 							self->keyboardstate->keyheightpx));
-				psy_ui_drawsolidrectangle(g, r,
-					patternviewskin_keywhitecolour(self->keyboardstate->skin));
+				psy_ui_drawsolidrectangle(g, r, keywhite);
 				if (psy_dsp_iskey_c(key) || psy_dsp_iskey_e(key)) {
 					psy_ui_drawline(g,
 						psy_ui_realpoint_make(0, cpy + self->keyboardstate->keyheightpx),
@@ -155,11 +160,12 @@ void pianokeyboard_drawuncoveredbottombackground(PianoKeyboard* self, psy_ui_Gra
 	if (blankstart - psy_ui_component_scrolltop_px(&self->component) <
 			size.height) {
 		psy_ui_drawsolidrectangle(g, psy_ui_realrectangle_make(
-				psy_ui_realpoint_make(0, blankstart),
-				psy_ui_realsize_make(size.width,
-					size.height - (blankstart - psy_ui_component_scrolltop_px(
+			psy_ui_realpoint_make(0, blankstart),
+			psy_ui_realsize_make(size.width,
+				size.height - (blankstart - psy_ui_component_scrolltop_px(
 					pianokeyboard_base(self))))),
-			patternviewskin_separatorcolour(self->keyboardstate->skin, 1, 2));
+			psy_ui_component_backgroundcolour(&self->component));
+			//patternviewskin_separatorcolour(self->keyboardstate->skin, 1, 2));
 	}
 }
 

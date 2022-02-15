@@ -7,6 +7,8 @@
 
 
 #include "arrowui.h"
+/* host */
+#include "styles.h" 
 /* platform */
 #include "../../detail/portable.h"
 
@@ -24,7 +26,7 @@ static bool arrowui_selected(const ArrowUi*);
 static psy_ui_ComponentVtable arrowui_vtable;
 static bool arrowui_vtable_initialized = FALSE;
 
-static psy_ui_ComponentVtable* arrowui_vtable_init(ArrowUi* self)
+static void arrowui_vtable_init(ArrowUi* self)
 {
 	assert(self);
 
@@ -37,25 +39,20 @@ static psy_ui_ComponentVtable* arrowui_vtable_init(ArrowUi* self)
 			arrowui_onmousedown;
 		arrowui_vtable_initialized = TRUE;
 	}
-	return &arrowui_vtable;
+	self->component.vtable = &arrowui_vtable;	
 }
 
 /* implementation */
 void arrowui_init(ArrowUi* self, psy_ui_Component* parent,
-	psy_audio_Wire wire, MachineViewSkin* skin,
-	Workspace* workspace)
+	psy_audio_Wire wire, Workspace* workspace)
 {
 	assert(self);
 	assert(workspace);
-	assert(workspace->song);
-	assert(skin);	
+	assert(workspace->song);	
 
 	psy_ui_component_init(&self->component, parent, NULL);	
-	arrowui_vtable_init(self);
-	self->component.vtable = &arrowui_vtable;
-	psy_ui_component_setbackgroundmode(&self->component,
-		psy_ui_NOBACKGROUND);
-	self->skin = skin;
+	arrowui_vtable_init(self);	
+	psy_ui_component_setbackgroundmode(&self->component, psy_ui_NOBACKGROUND);
 	self->wire = wire;
 	self->workspace = workspace;	
 }
@@ -66,14 +63,13 @@ ArrowUi* arrowui_alloc(void)
 }
 
 ArrowUi* arrowui_allocinit(psy_ui_Component* parent,
-	psy_audio_Wire wire, MachineViewSkin* skin,
-	Workspace* workspace)
+	psy_audio_Wire wire, Workspace* workspace)
 {
 	ArrowUi* rv;
 
 	rv = arrowui_alloc();
 	if (rv) {
-		arrowui_init(rv, parent, wire, skin, workspace);
+		arrowui_init(rv, parent, wire, workspace);
 		rv->component.deallocate = TRUE;
 	}
 	return rv;
@@ -82,13 +78,16 @@ ArrowUi* arrowui_allocinit(psy_ui_Component* parent,
 void arrowui_ondraw(ArrowUi* self, psy_ui_Graphics* g)
 {
 	psy_ui_RealSize size;
+	psy_ui_Style* style;
+
 	assert(self);
 	
 	if (arrowui_selected(self)) {
-		psy_ui_setcolour(g, self->skin->selwirecolour);
+		style = psy_ui_style(STYLE_MV_WIRE_SELECT);		
 	} else {
-		psy_ui_setcolour(g, self->skin->wireaacolour2);
+		style = psy_ui_style(STYLE_MV_WIRE);		
 	}
+	psy_ui_setcolour(g, style->colour);
 	size = psy_ui_component_size_px(&self->component);
 	psy_ui_drawline(g, 
 		psy_ui_realpoint_make(0, size.height / 2),
@@ -115,9 +114,10 @@ bool arrowui_selected(const ArrowUi* self)
 void arrowui_onpreferredsize(ArrowUi* self, const psy_ui_Size* limit,
 	psy_ui_Size* rv)
 {	
-	psy_ui_size_setreal(rv, 		
-		psy_ui_realrectangle_size(&
-		self->skin->effect.background.dest));
+	psy_ui_Style* style;
+
+	style = psy_ui_style(STYLE_MV_EFFECT);
+	psy_ui_size_setreal(rv, style->background.size);		
 }
 
 void arrowui_onmousedown(ArrowUi* self, psy_ui_MouseEvent* ev)

@@ -10,7 +10,6 @@
 /* local */
 #include "cmdsnotes.h"
 #include "patterncmds.h"
-#include "skingraphics.h"
 /* platform */
 #include "../../detail/portable.h"
 #include "../../detail/trace.h"
@@ -224,8 +223,9 @@ void trackergrid_drawbackground(TrackerGrid* self, psy_ui_Graphics* g,
 				psy_ui_realsize_make(
 					columnposition.right - columnposition.left,
 					clientsize.height)),
-			patternviewskin_separatorcolour(patternviewstate_skin(self->state->pv), track,
-				patternviewstate_numsongtracks(self->state->pv)));
+			psy_ui_component_backgroundcolour(&self->component));
+			// patternviewskin_separatorcolour(patternviewstate_skin(self->state->pv), track,
+			//	patternviewstate_numsongtracks(self->state->pv))
 	}
 	psy_list_free(q);
 }
@@ -1793,8 +1793,7 @@ void trackerview_init(TrackerView* self, psy_ui_Component* parent,
 	TrackerState* state, Workspace* workspace)
 {
 	trackergrid_init(&self->grid, parent, state, workspace);
-	self->workspace = workspace;
-	self->grid.component.id = 200;
+	self->workspace = workspace;	
 	psy_ui_component_setwheelscroll(&self->grid.component, 4);
 	psy_ui_component_setoverflow(trackergrid_base(&self->grid),
 		psy_ui_OVERFLOW_SCROLL);

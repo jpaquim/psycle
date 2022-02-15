@@ -82,7 +82,7 @@ void psy_ui_gridaligner_align(psy_ui_GridAligner* self)
 		psy_ui_Component* component;
 			
 		component = (psy_ui_Component*)psy_list_entry(p);
-		if (component->visible) {
+		if (psy_ui_component_visible(component)) {
 			psy_ui_Size componentsize;			
 			psy_ui_Size limit;
 			psy_ui_Margin c_margin;			
@@ -169,7 +169,7 @@ void psy_ui_gridaligner_preferredsize(psy_ui_GridAligner* self,
 				psy_ui_Component* component;
 					
 				component = (psy_ui_Component*)psy_list_entry(p);				
-				if (component->visible) {
+				if (psy_ui_component_visible(component)) {
 					psy_ui_Size componentsize;
 					psy_ui_Size limit;
 					const psy_ui_TextMetric* c_tm;

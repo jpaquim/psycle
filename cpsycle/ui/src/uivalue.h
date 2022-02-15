@@ -56,10 +56,11 @@ typedef enum {
 
 struct psy_ui_Size;
 
-typedef struct {
+typedef struct psy_ui_Value {
 	double quantity;
 	psy_ui_Unit unit;
 	psy_ui_Round round;
+	bool set;
 } psy_ui_Value;
 
 void psy_ui_value_init(psy_ui_Value*);
@@ -99,6 +100,7 @@ INLINE psy_ui_Value psy_ui_value_make_px(double px)
 	rv.quantity = px;
 	rv.unit = psy_ui_UNIT_PX;
 	rv.round = psy_ui_ROUND_FLOOR;
+	rv.set = TRUE;
 	return rv;
 }
 
@@ -109,6 +111,7 @@ INLINE psy_ui_Value psy_ui_value_make_ew(double em)
 	rv.quantity = em;
 	rv.unit = psy_ui_UNIT_EW;
 	rv.round = psy_ui_ROUND_FLOOR;
+	rv.set = TRUE;
 	return rv;
 }
 
@@ -119,6 +122,7 @@ INLINE psy_ui_Value psy_ui_value_make_eh(double em)
 	rv.quantity = em;
 	rv.unit = psy_ui_UNIT_EH;
 	rv.round = psy_ui_ROUND_FLOOR;
+	rv.set = TRUE;
 	return rv;
 }
 
@@ -129,6 +133,7 @@ INLINE psy_ui_Value psy_ui_value_make_pw(double pw)
 	rv.quantity = pw;
 	rv.unit = psy_ui_UNIT_PW;
 	rv.round = psy_ui_ROUND_FLOOR;
+	rv.set = TRUE;
 	return rv;
 }
 
@@ -139,6 +144,7 @@ INLINE psy_ui_Value psy_ui_value_make_ph(double ph)
 	rv.quantity = ph;
 	rv.unit = psy_ui_UNIT_PH;
 	rv.round = psy_ui_ROUND_FLOOR;
+	rv.set = TRUE;
 	return rv;
 }
 

@@ -400,9 +400,9 @@ void trackerlinenumberslabel_ondraw(TrackerLineNumbersLabel* self, psy_ui_Graphi
 	r = psy_ui_realrectangle_make(
 		psy_ui_realpoint_make(0, 0),
 		psy_ui_realsize_make(size.width, size.height));
-	psy_ui_drawsolidrectangle(g, r, patternviewstate_skin(self->state->pv)->background);
-	psy_ui_setbackgroundcolour(g, patternviewstate_skin(self->state->pv)->background);
-	psy_ui_settextcolour(g, patternviewstate_skin(self->state->pv)->font);
+	// psy_ui_drawsolidrectangle(g, r, patternviewstate_skin(self->state->pv)->background);
+	// psy_ui_setbackgroundcolour(g, patternviewstate_skin(self->state->pv)->background);
+	// psy_ui_settextcolour(g, patternviewstate_skin(self->state->pv)->font);
 	psy_ui_textoutrectangle(g, psy_ui_realpoint_make(r.left, 0), 0, r,
 		self->linestr, psy_strlen(self->linestr));
 	if (self->showdefaultline) {		
@@ -454,8 +454,8 @@ void trackerlinenumberbar_init(TrackerLineNumberBar* self, psy_ui_Component* par
 	/* scrollpane */
 	psy_ui_component_init(&self->linenumberpane, &self->component, NULL);
 	psy_ui_component_setalign(&self->linenumberpane, psy_ui_ALIGN_CLIENT);	
-	psy_ui_component_setbackgroundcolour(&self->component,
-		patternviewstate_skin(state->pv)->background);
+	// psy_ui_component_setbackgroundcolour(&self->component,
+	//	patternviewstate_skin(state->pv)->background);
 	/* linenumbers */
 	trackerlinenumbers_init(&self->linenumbers, &self->linenumberpane, state,
 		workspace);

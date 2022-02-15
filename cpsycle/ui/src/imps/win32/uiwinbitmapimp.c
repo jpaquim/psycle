@@ -22,6 +22,7 @@ static psy_ui_RealSize dev_size(const psy_ui_win_BitmapImp*);
 static bool dev_empty(const psy_ui_win_BitmapImp*);
 static void dev_settransparency(psy_ui_win_BitmapImp*, psy_ui_Colour);
 static void dev_preparemask(psy_ui_win_BitmapImp*, psy_ui_Colour clrtrans);
+static void dev_copy(psy_ui_win_BitmapImp* self, const psy_ui_win_BitmapImp* other);
 /* vtable */
 static psy_ui_BitmapImpVTable imp_vtable;
 static bool imp_vtable_initialized = FALSE;
@@ -32,16 +33,28 @@ static void imp_vtable_init(psy_ui_win_BitmapImp* self)
 
 	if (!imp_vtable_initialized) {
 		imp_vtable = *self->imp.vtable;
-		imp_vtable.dev_dispose = (psy_ui_bitmap_imp_fp_dispose)dev_dispose;
-		imp_vtable.dev_load = (psy_ui_bitmap_imp_fp_load)dev_load;
-		imp_vtable.dev_loadresource = (psy_ui_bitmap_imp_fp_loadresource)
+		imp_vtable.dev_dispose =
+			(psy_ui_bitmap_imp_fp_dispose)
+			dev_dispose;
+		imp_vtable.dev_load =
+			(psy_ui_bitmap_imp_fp_load)
+			dev_load;
+		imp_vtable.dev_loadresource =
+			(psy_ui_bitmap_imp_fp_loadresource)
 			dev_loadresource;
-		imp_vtable.dev_size = (psy_ui_bitmap_imp_fp_size)dev_size;
-		imp_vtable.dev_empty = (psy_ui_bitmap_imp_fp_empty)dev_empty;
-		imp_vtable.dev_settransparency = (psy_ui_bitmap_imp_fp_settransparency)
+		imp_vtable.dev_size =
+			(psy_ui_bitmap_imp_fp_size)
+			dev_size;
+		imp_vtable.dev_empty =
+			(psy_ui_bitmap_imp_fp_empty)
+			dev_empty;
+		imp_vtable.dev_settransparency =
+			(psy_ui_bitmap_imp_fp_settransparency)
 			dev_settransparency;
+		imp_vtable.dev_copy = (psy_ui_bitmap_imp_fp_copy)dev_copy;
 		imp_vtable_initialized = TRUE;
 	}
+	self->imp.vtable = &imp_vtable;
 }
 /* implementation */
 void psy_ui_win_bitmapimp_init(psy_ui_win_BitmapImp* self, psy_ui_RealSize size)
@@ -49,8 +62,7 @@ void psy_ui_win_bitmapimp_init(psy_ui_win_BitmapImp* self, psy_ui_RealSize size)
 	assert(self);
 
 	psy_ui_bitmap_imp_init(&self->imp);
-	imp_vtable_init(self);
-	self->imp.vtable = &imp_vtable;
+	imp_vtable_init(self);	
 	self->mask = 0;
 	if (size.width == 0 && size.height == 0) {
 		self->bitmap = 0;
@@ -190,5 +202,11 @@ void dev_preparemask(psy_ui_win_BitmapImp* self, psy_ui_Colour clrtrans)
 	DeleteDC(hdcsrc);
 	DeleteDC(hdcdst);
 }	
+
+void dev_copy(psy_ui_win_BitmapImp* self, const psy_ui_win_BitmapImp* other)
+{
+	dev_dispose(self);
+	self->bitmap = (HBITMAP)CopyImage(other->bitmap, IMAGE_BITMAP, 0, 0, LR_DEFAULTSIZE);
+}
 
 #endif /* PSYCLE_TK_WIN32 */

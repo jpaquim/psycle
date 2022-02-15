@@ -45,7 +45,7 @@ void psy_ui_styles_setstyle(psy_ui_Styles* self, uintptr_t styletype, psy_ui_Sty
 	psy_ui_Style* currstyle;
 
 	assert(self);
-	assert(style);
+	assert(style);	
 	
 	if (currstyle = (psy_ui_Style*)psy_table_at(&self->styles, styletype)) {
 		psy_ui_style_deallocate(currstyle);
@@ -140,7 +140,7 @@ void psy_ui_styles_addstyletoconfig(psy_ui_Styles* self, psy_ui_Style* style,
 	section = psy_property_append_section(&self->config, key);
 	psy_ui_styles_addcolourtoconfig(self, section, "color", style->colour);
 	psy_ui_styles_addcolourtoconfig(self, section, "background-color",
-		style->backgroundcolour);	
+		style->background.colour);	
 }
 
 void psy_ui_styles_addcolourtoconfig(psy_ui_Styles* self, psy_Property* parent,
