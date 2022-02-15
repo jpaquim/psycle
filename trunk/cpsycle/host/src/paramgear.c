@@ -1,47 +1,43 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "paramgear.h"
-// platform
+
+/* host */
+#include "styles.h"
+/* platform */
 #include "../../detail/portable.h"
 
-// ParamRackBox
-// prototypes
-static void paramrackbox_ondestroy(ParamRackBox*, psy_ui_Component* sender);
+
+/* ParamRackBox */
+/* prototypes */
 static void paramrackbox_onmousedoubleclick(ParamRackBox*, psy_ui_Component* sender,
 	psy_ui_MouseEvent*);
-static void paramrackbox_onthemechanged(ParamRackBox*, MachineViewConfig*,
-	psy_Property* theme);
 static void paramrackbox_onaddeffect(ParamRackBox*, psy_ui_Button* sender);
-// implementation
+
+/* implementation */
 void paramrackbox_init(ParamRackBox* self, psy_ui_Component* parent,
 	uintptr_t slot, Workspace* workspace)
-{
-	psy_Property* theme;
+{	
 	psy_audio_Machine* machine;
 	psy_ui_Margin margin;
 
 	machine = psy_audio_machines_at(&workspace->song->machines, slot);
-	psy_ui_component_init(&self->component, parent, NULL);
-	psy_signal_connect(&self->component.signal_destroy, self,
-		paramrackbox_ondestroy);
+	psy_ui_component_init(&self->component, parent, NULL);	
+	psy_ui_component_setstyletype(&self->component, STYLE_MACPARAM_TITLE);	
 	self->workspace = workspace;
-	self->slot = slot;
-	theme = workspace->config.macparam.theme;
-	if (theme) {
-		psy_ui_component_setbackgroundcolour(&self->component, psy_ui_colour_make(
-			psy_property_at_colour(theme, "machineguititlecolour", 0x00292929)));		
-	}
-	psy_ui_component_init(&self->header, &self->component, NULL);
-	psy_ui_component_setalign(&self->header, psy_ui_ALIGN_TOP);
-	if (theme) {
-		psy_ui_component_setcolour(&self->header, psy_ui_colour_make(
-			psy_property_at_colour(theme, "machineguititlefontcolour", 0x00B4B4B4)));
-	}
+	self->slot = slot;	
+	psy_ui_component_init(&self->header, &self->component, NULL);	
+	psy_ui_component_setstyletype(&self->header, STYLE_MACPARAM_TITLE);
+	psy_ui_component_setalign(&self->header, psy_ui_ALIGN_TOP);	
 	/* title label */
-	psy_ui_label_init(&self->title, &self->header);
+	psy_ui_label_init(&self->title, &self->header);	
+	psy_ui_component_setstyletype(&self->title.component, STYLE_MACPARAM_TITLE);
 	psy_ui_label_preventtranslation(&self->title);	
 	if (machine) {
 		psy_ui_label_settext(&self->title, psy_audio_machine_editname(machine));
@@ -63,16 +59,7 @@ void paramrackbox_init(ParamRackBox* self, psy_ui_Component* parent,
 		psy_audio_machines_at(&workspace->song->machines, slot),
 		psycleconfig_macparam(workspace_conf(workspace)));
 	psy_ui_component_setalign(&self->parameters.component, psy_ui_ALIGN_CLIENT);
-	psy_signal_connect(
-		&psycleconfig_macview(workspace_conf(workspace))->signal_themechanged,
-		self, paramrackbox_onthemechanged);
-	self->nextbox = NULL;
-}
-
-void paramrackbox_ondestroy(ParamRackBox* self, psy_ui_Component* sender)
-{
-	psy_signal_disconnect_context(&psycleconfig_macview(
-		workspace_conf(self->workspace))->signal_themechanged, self);
+	self->nextbox = NULL;	
 }
 
 ParamRackBox* paramrackbox_alloc(void)
@@ -109,21 +96,6 @@ void paramrackbox_onmousedoubleclick(ParamRackBox* self, psy_ui_Component* sende
 	workspace_showparameters(self->workspace, self->slot);	
 }
 
-void paramrackbox_onthemechanged(ParamRackBox* self, MachineViewConfig* config,
-	psy_Property* theme)
-{
-	if (theme) {
-		psy_ui_component_setbackgroundcolour(&self->component, psy_ui_colour_make(
-			psy_property_at_colour(theme, "machineguititlecolour", 0x00292929)));	
-		psy_ui_component_setcolour(&self->header, psy_ui_colour_make(
-			psy_property_at_colour(theme, "machineguititlefontcolour", 0x00B4B4B4)));
-		psy_ui_component_setbackgroundcolour(&self->parameters.listbox.component,
-			psy_ui_colour_make(
-			psy_property_at_colour(theme, "machineguititlecolour", 0x00292929)));		
-	}
-	psy_ui_component_invalidate(&self->component);
-}
-
 void paramrackbox_onaddeffect(ParamRackBox* self, psy_ui_Button* sender)
 {
 	if (self->workspace && workspace_song(self->workspace)) {
@@ -139,8 +111,9 @@ void paramrackbox_onaddeffect(ParamRackBox* self, psy_ui_Button* sender)
 	}
 }
 
-// ParamRackPane
-// implementation
+/* ParamRackPane */
+
+/* implementation */
 static void paramrackpane_ondestroy(ParamRackPane*);
 static void paramrackpane_build(ParamRackPane*);
 static void paramrackpane_buildall(ParamRackPane*);
@@ -164,7 +137,8 @@ static void paramrackpane_ondisconnected(ParamRackPane*,
 static void paramrackpane_onsongchanged(ParamRackPane*, Workspace* sender);
 static void paramrackpane_onmachineselected(ParamRackPane*,
 	psy_audio_Machines* sender, uintptr_t slot);
-// vtable
+
+/* vtable */
 static psy_ui_ComponentVtable vtable;
 static bool vtable_initialized = FALSE;
 
@@ -179,7 +153,8 @@ static void vtable_init(ParamRackPane* self)
 	}
 	self->component.vtable = &vtable;
 }
-// implementation
+
+/* implementation */
 void paramrackpane_init(ParamRackPane* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {	
@@ -217,13 +192,12 @@ void paramrackpane_setmode(ParamRackPane* self, ParamRackMode mode)
 }
 
 void paramrackpane_build(ParamRackPane* self)
-{	
+{		
 	psy_ui_component_hide(&self->component);
 	paramrackpane_clear(self);
-	if (!self->machines) {
-		self->component.visible = 1;
-		psy_ui_component_align_full(psy_ui_component_parent(&self->component));
+	if (!self->machines) {	
 		psy_ui_component_show(&self->component);
+		psy_ui_component_align_full(psy_ui_component_parent(&self->component));		
 		return;
 	}	
 	self->lastselected = psy_audio_machines_selected(self->machines);
@@ -248,10 +222,9 @@ void paramrackpane_build(ParamRackPane* self)
 	default:			
 		paramrackpane_buildall(self);
 		break;
-	}
-	self->component.visible = 1;
-	psy_ui_component_align_full(psy_ui_component_parent(&self->component));
+	}	
 	psy_ui_component_show(&self->component);
+	psy_ui_component_align_full(psy_ui_component_parent(&self->component));	
 }
 
 void paramrackpane_onsongchanged(ParamRackPane* self, Workspace* sender)
@@ -632,7 +605,7 @@ static void paramrack_connectsong(ParamRack*);
 void paramrack_init(ParamRack* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {
-	psy_ui_component_init(&self->component, parent, NULL);
+	psy_ui_component_init(&self->component, parent, NULL);	
 	psy_ui_component_setpreferredsize(&self->component,
 		psy_ui_size_make_em(0.0, 10.0));		
 	self->workspace = workspace;	
@@ -670,7 +643,7 @@ void paramrack_init(ParamRack* self, psy_ui_Component* parent,
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		paramrack_onsongchanged);
 	paramrack_connectsong(self);
-	paramrackmodebar_setmode(&self->modebar, self->pane.mode);
+	paramrackmodebar_setmode(&self->modebar, self->pane.mode);	
 }
 
 void paramrack_onmodeselected(ParamRack* self, ParamRackModeBar* sender,

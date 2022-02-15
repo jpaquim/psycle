@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -10,6 +10,7 @@
 /* host */
 #include "defaultlang.h"
 #include "skinio.h"
+#include "styles.h"
 /* ui */
 #include <uicomponent.h> /* Translator */
 #include <uiapp.h> /* Styles */
@@ -87,6 +88,8 @@ void psycleconfig_initsections(PsycleConfig* self, psy_audio_Player* player,
 	predefsconfig_init(&self->predefs, &self->config);
 	metronomeconfig_init(&self->metronome, &self->config);
 	seqeditconfig_init(&self->seqedit, &self->config);
+	machineparamconfig_setdirectories(&self->macparam, &self->directories);
+	machineviewconfig_setdirectories(&self->macview, &self->directories);
 }
 
 void psycleconfig_makeglobal(PsycleConfig* self)
@@ -183,8 +186,7 @@ void psycleconfig_loadskin(PsycleConfig* self, const psy_Path* path)
 		}		
 	}
 	machineparamconfig_settheme(&self->macparam, &skin);
-	machineviewconfig_settheme(&self->macview, &skin);
-	machineviewconfig_updatestyles(&self->macview, &psy_ui_appdefaults()->styles);
+	machineviewconfig_settheme(&self->macview, &skin);	
 	patternviewconfig_settheme(&self->patview, &skin);
 	psy_property_dispose(&skin);
 }
@@ -194,8 +196,7 @@ void psycleconfig_resetskin(PsycleConfig* self)
 	assert(self);
 		
 	patternviewconfig_resettheme(&self->patview);
-	machineviewconfig_resettheme(&self->macview);
-	machineviewconfig_updatestyles(&self->macview, &psy_ui_appdefaults()->styles);
+	machineviewconfig_resettheme(&self->macview);	
 	machineparamconfig_resettheme(&self->macparam);
 }
 
@@ -278,11 +279,4 @@ void psycleconfig_notifyall_changed(PsycleConfig* self)
 	predefsconfig_onchanged(&self->predefs, &self->config);
 	metronomeconfig_onchanged(&self->metronome, &self->config);
 	seqeditconfig_onchanged(&self->seqedit, &self->config);
-}
-
-void psycleconfig_notify_skinchanged(PsycleConfig* self, psy_Property* property)
-{
-	patternviewconfig_onthemechanged(&self->patview, property);
-	machineviewconfig_onthemechanged(&self->macview, property);
-	machineparamconfig_onthemechanged(&self->macparam, property);
 }

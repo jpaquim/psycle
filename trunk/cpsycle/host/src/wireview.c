@@ -383,7 +383,7 @@ void wireframe_init(WireFrame* self, psy_ui_Component* parent,
 	psy_ui_component_setposition(wireframe_base(self),
 		psy_ui_rectangle_make(
 			psy_ui_point_make_em(18.0, 15.0),
-			psy_ui_size_make_em(80.0, 25.0)));
+			psy_ui_size_make_em(80.0, 25.0)));	
 }
 
 void wireframe_updatetitle(WireFrame* self, psy_audio_Machines* machines)

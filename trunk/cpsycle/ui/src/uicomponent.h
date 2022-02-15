@@ -208,10 +208,9 @@ typedef struct psy_ui_Component {
 	psy_ui_ComponentSizeHints* sizehints;
 	psy_ui_ComponentStyle style;
 	psy_ui_ComponentScroll* scroll;
-	bool visible;
 	psy_ui_AlignType align;
 	psy_ui_AlignType alignsorted;
-	psy_ui_ComponentContainerAlign* containeralign;
+	psy_ui_ComponentContainerAlign* containeralign;	
 	uintptr_t tabindex;
 	bool deallocate;
 	uintptr_t opcount;	
@@ -222,7 +221,7 @@ typedef struct psy_ui_Component {
 	psy_ui_Bitmap bufferbitmap;
 	bool drawtobuffer;
 	bool ncpaint;
-	bool blitscroll;
+	bool blitscroll;	
 } psy_ui_Component;
 
 void psy_ui_replacedefaultfont(psy_ui_Component* main, psy_ui_Font*);
@@ -540,9 +539,9 @@ psy_ui_Component* psy_ui_mainwindow(void);
 INLINE void psy_ui_component_invalidate(psy_ui_Component* self)
 {	
 #if PSYCLE_USE_TK == PSYCLE_TK_X11	
-	if (!psy_ui_mainwindow()->visible) {
-		return;
-	}
+	// if (!psy_ui_mainwindow()->visible) {
+	//	return;
+	//}
 #endif	
 	self->vtable->invalidate(self);	
 }
@@ -735,7 +734,9 @@ void psy_ui_component_updateoverflow(psy_ui_Component*);
 void psy_ui_component_drawborder(psy_ui_Component*, psy_ui_Graphics*);
 void psy_ui_component_drawbackground(psy_ui_Component*, psy_ui_Graphics*);
 void psy_ui_component_drawbackgroundimage(psy_ui_Component*, psy_ui_Graphics*,
-	psy_ui_Bitmap*, psy_ui_BackgroundRepeat, psy_ui_Alignment);
+	psy_ui_Style*);
+void psy_ui_component_drawbackground_style(psy_ui_Component*,
+	psy_ui_Graphics*, psy_ui_Style*, psy_ui_RealPoint offset);
 
 INLINE void psy_ui_component_setoverflow(psy_ui_Component* self, psy_ui_Overflow overflow)
 {
@@ -907,6 +908,7 @@ void psy_ui_component_addstylestate(psy_ui_Component*, psy_ui_StyleState);
 void psy_ui_component_removestylestate(psy_ui_Component*, psy_ui_StyleState);
 void psy_ui_component_addstylestate_children(psy_ui_Component*, psy_ui_StyleState);
 void psy_ui_component_removestylestate_children(psy_ui_Component*, psy_ui_StyleState);
+bool psy_ui_component_stylestate_active(const psy_ui_Component*, psy_ui_StyleState);
 
 INLINE psy_ui_RealMargin psy_ui_component_margin_px(const psy_ui_Component* self)
 {

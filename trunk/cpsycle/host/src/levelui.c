@@ -1,20 +1,26 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "levelui.h"
-// host
+/* host */
 #include "machineparamconfig.h"
-#include "skingraphics.h"
-// audio
+#include "styles.h"
+/* ui */
+#include <uiapp.h>
+/* audio */
 #include <machine.h>
 #include <plugin_interface.h>
-// platform
+/* platform */
 #include "../../detail/portable.h"
 
-// LevelUi
-// prototypes
+/* LevelUi */
+
+/* prototypes */
 static void levelui_ondraw(LevelUi*, psy_ui_Graphics*);
 static void levelui_onpreferredsize(LevelUi*, const psy_ui_Size* limit,
 	psy_ui_Size* rv);
@@ -22,7 +28,7 @@ static void levelui_vumeterdraw(LevelUi*, psy_ui_Graphics*,
 	psy_ui_RealPoint topleft, double value);
 static void levelui_updateparam(LevelUi*);
 
-// vtable
+/* vtable */
 static psy_ui_ComponentVtable levelui_vtable;
 static bool levelui_vtable_initialized = FALSE;
 
@@ -43,17 +49,15 @@ static psy_ui_ComponentVtable* levelui_vtable_init(LevelUi* self)
 /* implementation */
 void levelui_init(LevelUi* self, psy_ui_Component* parent,
 	psy_audio_Machine* machine, uintptr_t paramidx,
-	psy_audio_MachineParam* param, ParamSkin* skin)
+	psy_audio_MachineParam* param)
 {
-	assert(self);	
-	assert(skin);	
+	assert(self);		
 
 	psy_ui_component_init(&self->component, parent, NULL);
 	levelui_vtable_init(self);
 	self->component.vtable = &levelui_vtable;
 	psy_ui_component_setbackgroundmode(&self->component,
 		psy_ui_NOBACKGROUND);	
-	self->skin = skin;
 	self->machine = machine;
 	self->paramidx = paramidx;
 	self->param = param;	
@@ -66,13 +70,13 @@ LevelUi* levelui_alloc(void)
 
 LevelUi* levelui_allocinit(psy_ui_Component* parent,
 	psy_audio_Machine* machine, uintptr_t paramidx,
-	psy_audio_MachineParam* param, ParamSkin* paramskin)
+	psy_audio_MachineParam* param)
 {
 	LevelUi* rv;
 
 	rv = levelui_alloc();
 	if (rv) {
-		levelui_init(rv, parent, machine, paramidx, param, paramskin);
+		levelui_init(rv, parent, machine, paramidx, param);
 		rv->component.deallocate = TRUE;
 	}
 	return rv;
@@ -93,33 +97,39 @@ void levelui_vumeterdraw(LevelUi* self, psy_ui_Graphics* g,
 	psy_ui_RealPoint topleft, double value)
 {
 	double ypos;
-
+	psy_ui_Style* vuoff_style;	
+	
+	vuoff_style = psy_ui_style(STYLE_MACPARAM_VUOFF);
 	if (value < 0.0) value = 0.0;
 	if (value > 1.0) value = 1.0;
-	ypos = (1.0 - value) * psy_ui_realrectangle_height(&self->skin->vuoff.dest);
-	psy_ui_drawbitmap(g, &self->skin->mixerbitmap,
+	ypos = (1.0 - value) * vuoff_style->background.size.height;
+	psy_ui_drawbitmap(g, &vuoff_style->background.bitmap,
 		psy_ui_realrectangle_make(
 			topleft,
 			psy_ui_realsize_make(
-				psy_ui_realrectangle_width(&self->skin->vuoff.dest),
+				vuoff_style->background.size.width,
 				ypos)),
-		psy_ui_realrectangle_topleft(&self->skin->vuoff.src));
-	psy_ui_drawbitmap(g, &self->skin->mixerbitmap,
+		psy_ui_realpoint_make(
+			-vuoff_style->background.position.x,
+			-vuoff_style->background.position.y));		
+	psy_ui_drawbitmap(g, &vuoff_style->background.bitmap,
 		psy_ui_realrectangle_make(
 			psy_ui_realpoint_make(topleft.x, topleft.y + ypos),
 			psy_ui_realsize_make(
-				psy_ui_realrectangle_width(&self->skin->vuoff.dest),
-				psy_ui_realrectangle_height(&self->skin->vuoff.dest) - ypos)),
+				vuoff_style->background.size.width,
+				vuoff_style->background.size.height - ypos)),
 		psy_ui_realpoint_make(
-			self->skin->vuon.src.left,
-			self->skin->vuon.src.top + ypos));
+			-vuoff_style->background.position.x,
+			-vuoff_style->background.position.y + ypos));
 }
 
 void levelui_onpreferredsize(LevelUi* self, const psy_ui_Size* limit,
 	psy_ui_Size* rv)
 {
-	psy_ui_size_setreal(rv,
-		psy_ui_realrectangle_size(&self->skin->vuoff.dest));	
+	psy_ui_Style* vuoff_style;	
+
+	vuoff_style = psy_ui_style(STYLE_MACPARAM_VUOFF);
+	psy_ui_size_setreal(rv, vuoff_style->background.size);
 }
 
 void levelui_updateparam(LevelUi* self)

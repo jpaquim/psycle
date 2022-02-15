@@ -76,8 +76,8 @@ static psy_dsp_amp_range_t amprange(psy_audio_Master* self)
 static psy_audio_MachineInfo const MacInfo = {
 	MI_VERSION,
 	0x0250,
-	EFFECT | 32 | 64,
-	psy_audio_MACHMODE_FX,
+	psy_audio_MASTER | 32 | 64,
+	psy_audio_MACHMODE_MASTER,
 	"Master"
 		#ifndef NDEBUG
 		" (debug build)"

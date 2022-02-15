@@ -96,7 +96,7 @@ void psy_ui_editor_init(psy_ui_TextInputor* self, psy_ui_Component* parent)
 				psy_ui_editor_setcaretcolour(self,
 					psy_ui_style_const(psy_ui_STYLE_ROOT)->colour);
 				psy_ui_editor_setbackgroundcolour(self,
-					psy_ui_style_const(psy_ui_STYLE_ROOT)->backgroundcolour);
+					psy_ui_style_const(psy_ui_STYLE_ROOT)->background.colour);
 				psy_ui_editor_setfont(self, NULL);
 				sci(self, SCI_SETMARGINWIDTHN, 0, 0);
 				sci(self, SCI_SETMARGINWIDTHN, 1, 0);
@@ -354,7 +354,7 @@ void psy_ui_editor_onstylesupdate(psy_ui_TextInputor* self)
 	psy_ui_editor_setcaretcolour(self,
 		psy_ui_style_const(psy_ui_STYLE_ROOT)->colour);
 	psy_ui_editor_setbackgroundcolour(self,
-		psy_ui_style_const(psy_ui_STYLE_ROOT)->backgroundcolour);
+		psy_ui_style_const(psy_ui_STYLE_ROOT)->background.colour);
 	psy_ui_editor_setfont(self, NULL);
 }
 

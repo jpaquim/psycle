@@ -1,18 +1,56 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
 
 
-/* local */
 #include "uistyle.h"
+/* local */
 #include "uiapp.h"
 #include "uicolours.h"
 #include "uicomponent.h"
 /* platform */
 #include "../../detail/portable.h"
+
+
+/* psy_ui_Background */
+void psy_ui_background_init(psy_ui_Background* self)
+{
+	psy_ui_colour_init(&self->colour);
+	self->overlay = psy_ui_colour_make(psy_ui_RGB_WHITE);
+	self->image_id = psy_INDEX_INVALID;
+	self->image_path = NULL;
+	psy_ui_bitmap_init(&self->bitmap);
+	self->repeat = psy_ui_REPEAT;
+	self->align = psy_ui_ALIGNMENT_NONE;
+	psy_ui_bitmapanimate_init(&self->animation);
+	self->position = psy_ui_realpoint_zero();
+	self->position_set = FALSE;
+	self->size = psy_ui_realsize_zero();
+	self->size_set = FALSE;
+}
+
+void psy_ui_background_dispose(psy_ui_Background* self)
+{
+	free(self->image_path);
+	self->image_path = NULL;
+	psy_ui_bitmap_dispose(&self->bitmap);
+}
+
+void psy_ui_background_copy(psy_ui_Background* self, const psy_ui_Background* other)
+{
+	self->colour = other->colour;
+	self->image_id = other->image_id;
+	psy_strreset(&self->image_path, other->image_path);
+	psy_ui_bitmap_copy(&self->bitmap, &other->bitmap);
+	self->repeat = other->repeat;
+	self->align = other->align;
+	self->animation = other->animation;
+	self->position = other->position;
+	self->position_set = other->position_set;
+}
 
 /* Helper */
 static psy_ui_Colour readcolour(psy_Property* parent, const char* key)
@@ -41,20 +79,16 @@ static psy_ui_Colour readcolour(psy_Property* parent, const char* key)
 /* psy_ui_Style */
 void psy_ui_style_init(psy_ui_Style* self)
 {
-	psy_ui_colour_init(&self->colour);
-	psy_ui_colour_init(&self->backgroundcolour);
-	psy_ui_font_init(&self->font, NULL);
-	self->backgroundid = psy_INDEX_INVALID;
-	self->backgroundpath = NULL;
-	self->backgroundrepeat = psy_ui_REPEAT;
-	self->backgroundposition = psy_ui_ALIGNMENT_NONE;
-	self->overlaycolour = psy_ui_colour_make(psy_ui_RGB_WHITE);
-	psy_ui_bitmapanimate_init(&self->backgroundanimation);
+	psy_ui_colour_init(&self->colour);	
+	psy_ui_font_init(&self->font, NULL);	
+	psy_ui_background_init(&self->background);		
 	psy_ui_border_init(&self->border);
 	psy_ui_margin_init(&self->margin);
 	self->marginset = FALSE;
 	psy_ui_margin_init(&self->padding);
-	self->paddingset = FALSE;	
+	self->paddingset = FALSE;
+	psy_ui_rectangle_init(&self->position);
+	psy_ui_rectangle_deactivate(&self->position);	
 	self->dbgflag = 0;	
 }
 
@@ -66,27 +100,27 @@ void psy_ui_style_init_default(psy_ui_Style* self, uintptr_t styletype)
 void psy_ui_style_init_copy(psy_ui_Style* self, const psy_ui_Style* other)
 {	
 	psy_ui_border_init(&self->border);
+	psy_ui_font_init(&self->font, NULL);
 	psy_ui_font_copy(&self->font, &other->font);
-	psy_ui_style_copy(self, other);	
+	psy_ui_background_init(&self->background);	
+	psy_ui_background_copy(&self->background, &other->background);
+	psy_ui_style_copy(self, other);		
 }
 
 void psy_ui_style_init_colours(psy_ui_Style* self, psy_ui_Colour colour,
 	psy_ui_Colour background)
 {
-	self->colour = colour;
-	self->backgroundcolour = background;
+	self->colour = colour;	
 	psy_ui_font_init(&self->font, NULL);
-	self->backgroundid = psy_INDEX_INVALID;
-	self->backgroundpath = NULL;
-	self->backgroundrepeat = psy_ui_REPEAT;
-	self->backgroundposition = psy_ui_ALIGNMENT_NONE;
-	psy_ui_bitmapanimate_init(&self->backgroundanimation);
-	self->overlaycolour = psy_ui_colour_make(psy_ui_RGB_WHITE);
+	psy_ui_background_init(&self->background);
+	self->background.colour = background;	
 	psy_ui_border_init(&self->border);
 	psy_ui_margin_init(&self->margin);
 	self->marginset = FALSE;
 	psy_ui_margin_init(&self->padding);
-	self->paddingset = FALSE;	
+	self->paddingset = FALSE;
+	psy_ui_rectangle_init(&self->position);
+	psy_ui_rectangle_deactivate(&self->position);	
 	self->dbgflag = 0;
 }
 
@@ -104,31 +138,26 @@ void psy_ui_styles_init_property(psy_ui_Style* self, psy_Property* style)
 	}
 	colour = readcolour(style, "background-color");
 	if (colour.mode.set) {
-		self->backgroundcolour = colour;
+		self->background.colour = colour;
 	}	
 }
 
-
 void psy_ui_style_dispose(psy_ui_Style* self)
 {		
-	psy_ui_font_dispose(&self->font);		
-	free(self->backgroundpath);
+	psy_ui_font_dispose(&self->font);
+	psy_ui_background_dispose(&self->background);
 }
 
 void psy_ui_style_copy(psy_ui_Style* self, const psy_ui_Style* other)
 {
-	self->colour = other->colour;
-	self->backgroundcolour = other->backgroundcolour;
-	self->backgroundid = other->backgroundid;
-	psy_strreset(&self->backgroundpath, other->backgroundpath);
-	self->backgroundrepeat = other->backgroundrepeat;
-	self->backgroundposition = other->backgroundposition;
-	self->backgroundanimation = other->backgroundanimation;
+	self->colour = other->colour;	
+	psy_ui_background_copy(&self->background, &other->background);	
 	self->border = other->border;
 	self->margin = other->margin;
 	self->marginset = other->marginset;
 	self->padding = other->padding;
 	self->paddingset = other->paddingset;
+	self->position = other->position;	
 	psy_ui_font_copy(&self->font, &other->font);	
 }
 
@@ -184,12 +213,23 @@ void psy_ui_style_setfont(psy_ui_Style* self, const char* family, int size)
 {	
 	psy_ui_FontInfo fontinfo;
 	
+	psy_ui_font_dispose(&self->font);
 	psy_ui_fontinfo_init(&fontinfo, family, size);
 	psy_ui_font_init(&self->font, &fontinfo);
 }
 
-void psy_ui_style_setbackgroundpath(psy_ui_Style* self,
+void psy_ui_style_setbackgroundid(psy_ui_Style* self,
+	uintptr_t id)
+{	
+	free(self->background.image_path);
+	self->background.image_path = NULL;
+	self->background.image_id = id;
+	psy_ui_bitmap_loadresource(&self->background.bitmap, id);
+}
+
+int psy_ui_style_setbackgroundpath(psy_ui_Style* self,
 	const char* path)
-{
-		psy_strreset(&self->backgroundpath, path);
+{		
+	psy_strreset(&self->background.image_path, path);
+	return psy_ui_bitmap_load(&self->background.bitmap, path);
 }

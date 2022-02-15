@@ -293,6 +293,7 @@ void about_init(About* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_ui_component_init(&self->component, parent, NULL);	
 	about_vtable_init(self);
 	psy_ui_component_setstyletype(&self->component, STYLE_ABOUT);
+	self->component.id = 900;
 	self->workspace = workspace;	
 	about_initbuttons(self);
 	psy_ui_notebook_init(&self->notebook, &self->component);
@@ -312,7 +313,7 @@ void about_init(About* self, psy_ui_Component* parent, Workspace* workspace)
 void about_initbuttons(About* self)
 {	
 	psy_ui_component_init_align(&self->bottom, &self->component, NULL,
-		psy_ui_ALIGN_BOTTOM);	
+		psy_ui_ALIGN_BOTTOM);
 	psy_ui_component_setmargin(&self->bottom,
 		psy_ui_margin_make(psy_ui_value_zero(), psy_ui_value_zero(),
 			psy_ui_value_make_ph(0.15), psy_ui_value_zero()));
@@ -358,10 +359,10 @@ void about_selectinfobox(About* self, uintptr_t index)
 {
 	psy_ui_notebook_select(&self->notebook, index);
 	if (psy_ui_component_visible(psy_ui_notebook_base(&self->notebook))) {
-		psy_ui_style_setbackgroundid(self->component.style.currstyle, 
+		 psy_ui_style_setbackgroundid(psy_ui_componentstyle_currstyle(&self->component.style),
 			IDB_ABOUT);
 	} else {
-		psy_ui_style_setbackgroundid(self->component.style.currstyle,
+		 psy_ui_style_setbackgroundid(psy_ui_componentstyle_currstyle(&self->component.style),
 			psy_INDEX_INVALID);
 	}
 	psy_ui_component_togglevisibility(psy_ui_notebook_base(&self->notebook));

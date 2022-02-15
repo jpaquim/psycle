@@ -53,7 +53,7 @@ void psy_ui_eventdispatch_send(psy_ui_EventDispatch* self,
 	psy_ui_event_settarget(ev, component);
 	psy_ui_event_setcurrenttarget(ev, component);
 	switch (psy_ui_event_type(ev)) {
-	case psy_ui_RESIZE:
+	case psy_ui_RESIZE:		
 		if (psy_ui_component_hasalign(component)) {
 			psy_ui_component_align(component);
 		}

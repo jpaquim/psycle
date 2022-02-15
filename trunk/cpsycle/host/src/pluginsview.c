@@ -1,5 +1,7 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
@@ -7,9 +9,9 @@
 #include "pluginsview.h"
 /* host */
 #include "styles.h"
-// container
+/* container */
 #include <qsort.h>
-// platform
+/* platform */
 #include "../../detail/portable.h"
 #include "../../detail/strcasestr.h"
 
@@ -21,7 +23,7 @@ static void searchfilter(psy_Property* plugin, NewMachineFilter*,
 	psy_Property* parent);
 static int isplugin(int type);
 
-// Quicksort callbacks
+/* Quicksort callbacks */
 psy_Property* newmachine_sort(psy_Property* source, psy_fp_comp);
 static int newmachine_comp_favorite(psy_Property* p, psy_Property* q);
 static int newmachine_comp_name(psy_Property* p, psy_Property* q);
@@ -103,7 +105,7 @@ int newmachine_comp_mode(psy_Property* p, psy_Property* q)
 		(int)psy_property_at_int(q, "mode", 128);
 }
 
-// NewMachineSelection
+/* NewMachineSelection */
 void newmachineselection_init(NewMachineSelection* self)
 {
 	self->items = NULL;
@@ -180,7 +182,7 @@ uintptr_t newmachineselection_first(const NewMachineSelection* self)
 	return psy_INDEX_INVALID;
 }
 
-// NewMachineSort
+/* NewMachineSort */
 void newmachinesort_init(NewMachineSort* self)
 {
 	self->mode = NEWMACHINESORTMODE_NONE;
@@ -576,10 +578,10 @@ void pluginsview_ondraw(PluginsView* self, psy_ui_Graphics* g)
 		psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 		psy_ui_realpoint_init(&cp);
 		odd = FALSE;
-		if (!psy_ui_style(STYLE_PLUGINVIEW_ITEM)->backgroundcolour.mode.set) {
+		if (!psy_ui_style(STYLE_PLUGINVIEW_ITEM)->background.colour.mode.set) {
 			bgcolour = psy_ui_component_backgroundcolour(&self->component);
 		} else {
-			bgcolour = psy_ui_style(STYLE_PLUGINVIEW_ITEM)->backgroundcolour;
+			bgcolour = psy_ui_style(STYLE_PLUGINVIEW_ITEM)->background.colour;
 		}
 		if (psy_ui_style(STYLE_PLUGINVIEW_ITEM)->colour.mode.set) {
 			psy_ui_component_setcolour(&self->component,
@@ -624,17 +626,17 @@ void pluginsview_drawitem(PluginsView* self, psy_ui_Graphics* g,
 		itemstyle = psy_ui_style(STYLE_PLUGINVIEW_ITEM);
 	}
 
-	if (!itemstyle->backgroundcolour.mode.set) {
+	if (!itemstyle->background.colour.mode.set) {
 		bgcolour = psy_ui_component_backgroundcolour(&self->component);
 	} else {
-		bgcolour = itemstyle->backgroundcolour;
+		bgcolour = itemstyle->background.colour;
 	}
 	if (itemstyle->colour.mode.set) {
 		psy_ui_settextcolour(g, itemstyle->colour);
 	} else {
 		psy_ui_settextcolour(g, psy_ui_component_colour(&self->component));
 	}
-	if (itemstyle->backgroundcolour.mode.set) {
+	if (itemstyle->background.colour.mode.set) {
 		psy_ui_drawsolidrectangle(g,
 			psy_ui_realrectangle_make(
 				topleft,

@@ -114,8 +114,8 @@ void pianogriddraw_ondraw(PianoGridDraw* self, psy_ui_Graphics* g)
 	assert(self);
 
 	if (!patternviewstate_pattern(self->gridstate->pv)) {
-		psy_ui_drawsolidrectangle(g, psy_ui_cliprect(g),
-			patternviewstate_skin(self->gridstate->pv)->background);
+		// psy_ui_drawsolidrectangle(g, psy_ui_cliprect(g),
+		//	patternviewstate_skin(self->gridstate->pv)->background);
 		return;
 	}
 	pianogriddraw_updatekeystate(self);
@@ -234,8 +234,8 @@ void pianogrid_ondraw(Pianogrid* self, psy_ui_Graphics* g)
 	assert(self);
 
 	if (!patternviewstate_pattern(self->gridstate->pv)) {
-		psy_ui_drawsolidrectangle(g, psy_ui_cliprect(g),
-			patternviewstate_skin(self->gridstate->pv)->background);
+		// psy_ui_drawsolidrectangle(g, psy_ui_cliprect(g),
+		//	patternviewstate_skin(self->gridstate->pv)->background);
 		return;
 	}
 	pianogrid_updatekeystate(self);	
@@ -308,15 +308,16 @@ void pianogrid_drawuncoveredrightbackground(Pianogrid* self,
 	if (blankstart - psy_ui_component_scrollleft_px(&self->component) <
 			size.width) {
 		psy_ui_drawsolidrectangle(g, psy_ui_realrectangle_make(
-				psy_ui_realpoint_make(
-					blankstart,
-					psy_ui_component_scrolltop_px(&self->component)),
-				psy_ui_realsize_make(size.width -
-					(blankstart - psy_ui_component_scrollleft_px(
+			psy_ui_realpoint_make(
+				blankstart,
+				psy_ui_component_scrolltop_px(&self->component)),
+			psy_ui_realsize_make(size.width -
+				(blankstart - psy_ui_component_scrollleft_px(
 					pianogrid_base(self))),
-					size.height)),
-			patternviewskin_separatorcolour(patternviewstate_skin(
-				self->gridstate->pv), 1, 2));
+				size.height)),
+			psy_ui_component_backgroundcolour(&self->component));
+			// patternviewskin_separatorcolour(patternviewstate_skin(
+			//	self->gridstate->pv), 1, 2));
 	}
 }
 
@@ -332,14 +333,15 @@ void pianogrid_drawuncoveredbottombackground(Pianogrid* self,
 	if (blankstart - psy_ui_component_scrolltop_px(&self->component) <
 			size.height) {
 		psy_ui_drawsolidrectangle(g, psy_ui_realrectangle_make(
-				psy_ui_realpoint_make(
-					psy_ui_component_scrollleft_px(pianogrid_base(self)),
-					blankstart),
-				psy_ui_realsize_make(size.width,
-					size.height - (blankstart - psy_ui_component_scrolltop_px(
+			psy_ui_realpoint_make(
+				psy_ui_component_scrollleft_px(pianogrid_base(self)),
+				blankstart),
+			psy_ui_realsize_make(size.width,
+				size.height - (blankstart - psy_ui_component_scrolltop_px(
 					pianogrid_base(self))))),
-			patternviewskin_separatorcolour(patternviewstate_skin(
-				self->gridstate->pv), 1, 2));
+			psy_ui_component_backgroundcolour(&self->component));
+			// patternviewskin_separatorcolour(patternviewstate_skin(
+			//     self->gridstate->pv), 1, 2));
 	}
 }
 
@@ -384,26 +386,39 @@ void pianogriddraw_drawgridcells(PianoGridDraw* self, psy_ui_Graphics* g,
 psy_ui_Colour pianogriddraw_cellcolour(PianoGridDraw* self, uintptr_t step, uint8_t key, bool sel)
 {
 	psy_ui_Colour rv;
+	psy_ui_Style* style;
 
 	assert(self);
 
 	if ((step % (self->gridstate->pv->cursor.lpb * 4)) == 0) {
-		if (sel) {
-			rv = patternviewskin_selection4beatcolour(patternviewstate_skin(self->gridstate->pv), 0, 0);
+		if (sel) {		
+			style = psy_ui_style(STYLE_PV_ROW4BEAT_SELECT);
+			rv = style->background.colour;
+			// patternviewskin_selection4beatcolour(patternviewstate_skin(self->gridstate->pv), 0, 0);
 		} else {
-			rv = patternviewskin_row4beatcolour(patternviewstate_skin(self->gridstate->pv), 0, 0);
+			style = psy_ui_style(STYLE_PV_ROW4BEAT);
+			rv = style->background.colour;
+			// rv = patternviewskin_row4beatcolour(patternviewstate_skin(self->gridstate->pv), 0, 0);
 		}
 	} else if ((step % self->gridstate->pv->cursor.lpb) == 0) {
 		if (sel) {
-			rv = patternviewskin_selectionbeatcolour(patternviewstate_skin(self->gridstate->pv), 0, 0);
+			style = psy_ui_style(STYLE_PV_ROWBEAT_SELECT);
+			rv = style->background.colour;
+			// rv = patternviewskin_selectionbeatcolour(patternviewstate_skin(self->gridstate->pv), 0, 0);
 		} else {
-			rv = patternviewskin_rowbeatcolour(patternviewstate_skin(self->gridstate->pv), 0, 0);
+			style = psy_ui_style(STYLE_PV_ROWBEAT);
+			rv = style->background.colour;
+			//rv = patternviewskin_rowbeatcolour(patternviewstate_skin(self->gridstate->pv), 0, 0);
 		}
 	} else {
 		if (sel) {
-			rv = patternviewskin_selectioncolour(patternviewstate_skin(self->gridstate->pv), 0, 0);
+			style = psy_ui_style(STYLE_PV_ROW_SELECT);
+			rv = style->background.colour;
+			// rv = patternviewskin_selectioncolour(patternviewstate_skin(self->gridstate->pv), 0, 0);
 		} else {
-			rv = patternviewskin_rowcolour(patternviewstate_skin(self->gridstate->pv), 0, 0);
+			style = psy_ui_style(STYLE_PV_ROW);
+			rv = style->background.colour;
+			// rv = patternviewskin_rowcolour(patternviewstate_skin(self->gridstate->pv), 0, 0);
 		}
 	}
 	if (psy_dsp_isblack(key)) {
@@ -425,11 +440,12 @@ void pianogriddraw_drawstepseparators(PianoGridDraw* self, psy_ui_Graphics* g,
 	psy_audio_BlockSelection clip)
 {
 	psy_dsp_big_beat_t c;	
+	psy_ui_Style* style;
 
 	assert(self);
 		
-	psy_ui_setcolour(g, patternviewskin_separatorcolour(patternviewstate_skin(self->gridstate->pv),
-		0, 0));
+	style = psy_ui_style(STYLE_PATTERNVIEW);
+	psy_ui_setcolour(g, style->background.colour);		
 	for (c = clip.topleft.offset; c <= clip.bottomright.offset;
 			c += pianogridstate_step(self->gridstate)) {
 		double cpx;
@@ -449,8 +465,8 @@ void pianogriddraw_drawkeyseparators(PianoGridDraw* self, psy_ui_Graphics* g,
 
 	assert(self);
 
-	psy_ui_setcolour(g, patternviewskin_separatorcolour(patternviewstate_skin(self->gridstate->pv),
-		0, 0));	
+	// psy_ui_setcolour(g, patternviewskin_separatorcolour(patternviewstate_skin(self->gridstate->pv),
+	//	0, 0));	
 	for (key = clip.bottomright.key; key <= clip.topleft.key; ++key) {
 		if (psy_dsp_iskey_c(key + 1) || psy_dsp_iskey_e(key + 1)) {
 			double cpy;
@@ -474,6 +490,7 @@ void pianogriddraw_drawcursor(PianoGridDraw* self, psy_ui_Graphics* g, psy_audio
 	if (self->workspace->song && !self->cursorchanging && !self->cursoronnoterelease &&
 			!(psy_audio_player_playing(workspace_player(self->workspace)) &&
 			workspace_followingsong(self->workspace))) {
+		psy_ui_Style* style;
 		psy_audio_SequenceCursor cursor;		
 		intptr_t key;
 						
@@ -482,7 +499,8 @@ void pianogriddraw_drawcursor(PianoGridDraw* self, psy_ui_Graphics* g, psy_audio
 			key = cursor.key;
 		} else {
 			key = psy_audio_NOTECOMMANDS_MIDDLEC;
-		}						
+		}					
+		style = psy_ui_style(STYLE_PV_CURSOR);
 		psy_ui_drawsolidrectangle(g, psy_ui_realrectangle_make(
 			psy_ui_realpoint_make(
 				pianogridstate_beattopx(self->gridstate, cursor.offset),
@@ -490,8 +508,9 @@ void pianogriddraw_drawcursor(PianoGridDraw* self, psy_ui_Graphics* g, psy_audio
 			psy_ui_realsize_make(
 				pianogridstate_steppx(self->gridstate),
 				self->keyboardstate->keyheightpx)),
-			patternviewskin_cursorcolour(patternviewstate_skin(self->gridstate->pv),
-				0, 0));
+			style->background.colour);
+			// patternviewskin_cursorcolour(patternviewstate_skin(self->gridstate->pv),
+			//	0, 0));
 	}
 }
 
@@ -500,23 +519,27 @@ void pianogriddraw_drawplaybar(PianoGridDraw* self, psy_ui_Graphics* g, psy_audi
 	assert(self);
 
 	if (psy_audio_player_playing(workspace_player(self->workspace))) {
-		psy_dsp_big_beat_t offset;
+		psy_dsp_big_beat_t offset;		
 
 		offset = psy_audio_player_position(workspace_player(self->workspace)) -
 			self->sequenceentryoffset;
 		if (offset >= 0 && offset < psy_audio_pattern_length(
 				patternviewstate_pattern(self->gridstate->pv))) {
+			psy_ui_Style* style;
+
+			style = psy_ui_style(STYLE_PV_PLAYBAR);
 			psy_ui_drawsolidrectangle(g,
 				psy_ui_realrectangle_make(
 					psy_ui_realpoint_make(
 						pianogridstate_beattopx(self->gridstate,
 							pianogridstate_quantize(self->gridstate, offset)),
 						0.0),
-				psy_ui_realsize_make(
-					pianogridstate_steppx(self->gridstate),
-					self->keyboardstate->keyboardheightpx)),
-				patternviewskin_playbarcolour(patternviewstate_skin(self->gridstate->pv),
-					0, psy_audio_song_numsongtracks(workspace_song(self->workspace))));
+					psy_ui_realsize_make(
+						pianogridstate_steppx(self->gridstate),
+						self->keyboardstate->keyboardheightpx)),
+					style->background.colour);
+				// patternviewskin_playbarcolour(patternviewstate_skin(self->gridstate->pv),
+				//	0, psy_audio_song_numsongtracks(workspace_song(self->workspace))));
 		}
 	}
 }
@@ -671,7 +694,7 @@ void pianogriddraw_drawevent(PianoGridDraw* self, psy_ui_Graphics* g,
 		psy_ui_realsize_make(
 			width,
 			psy_max(1.0, self->keyboardstate->keyheightpx - 2)));
-	if (ev->hover) {
+	/* if (ev->hover) {
 		colour = patternviewskin_eventhovercolour(patternviewstate_skin(self->gridstate->pv), 0, 0);
 	} else if (ev->track == cursor.track) {
 		colour = patternviewskin_eventcurrchannelcolour(patternviewstate_skin(self->gridstate->pv),
@@ -679,16 +702,21 @@ void pianogriddraw_drawevent(PianoGridDraw* self, psy_ui_Graphics* g,
 	} else {		
 		colour = patternviewskin_eventcolour(patternviewstate_skin(self->gridstate->pv), ev->track,
 			psy_audio_patterns_numtracks(&self->workspace->song->patterns));
-	}
+	}*/
+	colour = psy_ui_colour_white();
 	if (!ev->noterelease) {
 		psy_ui_drawsolidroundrectangle(g, r, corner, colour);
 	} else {		
 		if (self->gridstate->pv->cursor.key == ev->note &&
 				self->gridstate->pv->cursor.offset ==
-			pianogridstate_quantize(self->gridstate, ev->offset)) {
+				pianogridstate_quantize(self->gridstate, ev->offset)) {
+			psy_ui_Style* style;
+
+			style = psy_ui_style(STYLE_PV_CURSOR);
 			self->cursoronnoterelease = TRUE;
-			colour = patternviewskin_cursorcolour(patternviewstate_skin(self->gridstate->pv),
-				0, 0);
+			colour = style->background.colour;
+			// patternviewskin_cursorcolour(patternviewstate_skin(self->gridstate->pv),
+			//	0, 0);
 		}
 		psy_ui_setcolour(g, colour);
 		psy_ui_drawroundrectangle(g, r, corner);		

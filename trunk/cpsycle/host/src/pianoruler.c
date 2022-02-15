@@ -102,6 +102,7 @@ void pianoruler_drawruler(PianoRuler* self, psy_ui_Graphics* g,
 	intptr_t currstep;
 	psy_dsp_big_beat_t c;
 	double scrollleft;	
+	psy_ui_Style* style;
 	
 	assert(self);
 
@@ -113,8 +114,10 @@ void pianoruler_drawruler(PianoRuler* self, psy_ui_Graphics* g,
 	baseline = size.height - 1;
 	baselinetop = baseline - tm->tmHeight / 3;
 	scrollleft = psy_ui_component_scrollleft_px(&self->component);
-	psy_ui_setcolour(g, patternviewskin_rowbeatcolour(patternviewstate_skin(self->gridstate->pv),
-		0, 0));
+	style = psy_ui_style(STYLE_PV_ROWBEAT);
+	psy_ui_setcolour(g, style->background.colour);
+	// patternviewskin_rowbeatcolour(patternviewstate_skin(self->gridstate->pv),
+	//	0, 0));
 	psy_ui_drawline(g, psy_ui_realpoint_make(scrollleft, baseline),
 		psy_ui_realpoint_make(size.width + scrollleft, baseline));
 	currstep = pianogridstate_beattosteps(self->gridstate, clip.topleft.offset);
@@ -136,20 +139,27 @@ void pianoruler_drawbeat(PianoRuler* self, psy_ui_Graphics* g, intptr_t beat,
 	double x, double baseline, double tmheight)
 {	
 	char txt[40];
+	psy_ui_Style* style;
 
 	assert(self);
-
+	
 	if ((beat % 4) == 0) {
-		psy_ui_settextcolour(g, patternviewskin_row4beatcolour(patternviewstate_skin(self->gridstate->pv),
-			0, 0));
+		style = psy_ui_style(STYLE_PV_ROW4BEAT);
+		psy_ui_settextcolour(g, style->background.colour);
+		// patternviewskin_row4beatcolour(patternviewstate_skin(self->gridstate->pv),
+		//	0, 0));
 	} else {
-		psy_ui_settextcolour(g, patternviewskin_rowbeatcolour(patternviewstate_skin(self->gridstate->pv),
-			0, 0));
+		style = psy_ui_style(STYLE_PV_ROWBEAT);
+		psy_ui_settextcolour(g, style->background.colour);
+		// psy_ui_settextcolour(g, patternviewskin_rowbeatcolour(patternviewstate_skin(self->gridstate->pv),
+		//	0, 0));
 	}
 	psy_ui_drawline(g, psy_ui_realpoint_make(x, baseline),
 		psy_ui_realpoint_make(x, baseline - tmheight / 2));
 	psy_snprintf(txt, 40, "%d", beat);
 	psy_ui_textout(g, x + 3, baseline - tmheight, txt, psy_strlen(txt));
-	psy_ui_setcolour(g, patternviewskin_rowbeatcolour(patternviewstate_skin(self->gridstate->pv),
-		0, 0));
+	style = psy_ui_style(STYLE_PV_ROWBEAT);
+	psy_ui_settextcolour(g, style->background.colour);
+	// psy_ui_setcolour(g, patternviewskin_rowbeatcolour(patternviewstate_skin(self->gridstate->pv),
+	//	0, 0));
 }

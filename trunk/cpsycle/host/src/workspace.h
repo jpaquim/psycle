@@ -115,6 +115,8 @@ typedef void (*fp_workspace_output)(void* context,
 typedef void (*fp_workspace_songloadprogress)(void* context,
 	struct Workspace* sender, intptr_t progress);
 
+struct ParamViews;
+
 typedef struct Workspace {
 	/* implements */
 	psy_audio_MachineCallback machinecallback;
@@ -122,7 +124,6 @@ typedef struct Workspace {
 	psy_Signal signal_octavechanged;
 	psy_Signal signal_songchanged;
 	psy_Signal signal_configchanged;	
-	psy_Signal signal_changecontrolskin;	
 	psy_Signal signal_playlinechanged;
 	psy_Signal signal_gotocursor;	
 	psy_Signal signal_loadprogress;
@@ -132,8 +133,7 @@ typedef struct Workspace {
 	psy_Signal signal_scanfile;
 	psy_Signal signal_scantaskstart;
 	psy_Signal signal_plugincachechanged;
-	psy_Signal signal_beforesavesong;
-	psy_Signal signal_showparameters;
+	psy_Signal signal_beforesavesong;	
 	psy_Signal signal_viewselected;
 	psy_Signal signal_focusview;
 	psy_Signal signal_parametertweak;
@@ -199,6 +199,7 @@ typedef struct Workspace {
 	InputHandler inputhandler;
 	psy_Thread driverconfigloadthread;
 	psy_Thread pluginscanthread;
+	struct ParamViews* paramviews;
 } Workspace;
 
 void workspace_init(Workspace*, psy_ui_Component* handle);
@@ -222,6 +223,11 @@ void workspace_exportmidifile(Workspace*, const char* path);
 void workspace_exportlyfile(Workspace*, const char* path);
 void workspace_scanplugins(Workspace*);
 void workspace_marksongmodified(Workspace*);
+
+INLINE void workspace_setparamviews(Workspace* self, struct ParamViews* paramviews)
+{
+	self->paramviews = paramviews;
+}
 
 INLINE PsycleConfig* workspace_conf(Workspace* self) { return &self->config; }
 

@@ -97,6 +97,15 @@ void settransparency(psy_ui_Bitmap* self, psy_ui_Colour colour)
 	self->imp->vtable->dev_settransparency(self->imp, colour);
 }
 
+void psy_ui_bitmap_copy(psy_ui_Bitmap* self, const psy_ui_Bitmap* other)
+{
+	if (!other->imp) {
+		psy_ui_bitmap_dispose(self);
+	} else {				
+		self->imp->vtable->dev_copy(self->imp, other->imp);
+	}
+}
+
 // psy_ui_BitmapImp
 static void psy_ui_bitmap_imp_dispose(psy_ui_BitmapImp* self) { }
 static int psy_ui_bitmap_imp_load(psy_ui_BitmapImp* self,
@@ -123,7 +132,12 @@ static bool psy_ui_bitmap_imp_empty(const psy_ui_BitmapImp* self)
 
 static void psy_ui_bitmap_imp_settransparency(psy_ui_BitmapImp* self,
 	psy_ui_Colour colour)
-{ }
+{
+}
+
+static void dev_copy(psy_ui_BitmapImp* self, const psy_ui_BitmapImp* other)
+{
+}
 
 /* psy_ui_BitmapImp */
 /* vtable */
@@ -139,6 +153,7 @@ static void imp_vtable_init(void)
 		imp_vtable.dev_size = psy_ui_bitmap_imp_size;
 		imp_vtable.dev_empty = psy_ui_bitmap_imp_empty;
 		imp_vtable.dev_settransparency = psy_ui_bitmap_imp_settransparency;
+		imp_vtable.dev_copy = dev_copy;
 		imp_vtable_initialized = TRUE;
 	}
 }

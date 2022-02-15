@@ -87,7 +87,7 @@ void psy_ui_lclaligner_align(psy_ui_LCLAligner* self)
 		psy_ui_Component* component;
 			
 		component = (psy_ui_Component*)psy_list_entry(p);		
-		if (component->visible) {
+		if (psy_ui_component_visible(component)) {
 			psy_ui_Size componentsize;
 			psy_ui_Size limit;
 			psy_ui_Margin c_margin;			
@@ -269,7 +269,7 @@ void psy_ui_lclaligner_alignclients(psy_ui_LCLAligner* self, psy_List* children,
 			psy_ui_Margin c_margin;			
 
 			component = (psy_ui_Component*)p->entry;			
-			if (component->visible) {
+			if (psy_ui_component_visible(component)) {
 				c_margin = psy_ui_component_margin(component);				
 				if (component->align == psy_ui_ALIGN_CLIENT) {
 					const psy_ui_TextMetric* c_tm;
@@ -358,7 +358,7 @@ uintptr_t psy_ui_lclaligner_numclients(psy_ui_LCLAligner* self)
 		psy_ui_Component* component;
 
 		component = (psy_ui_Component*)p->entry;
-		if (component->visible) {
+		if (psy_ui_component_visible(component)) {
 			if (component->align == psy_ui_ALIGN_CLIENT ||
 				component->align == psy_ui_ALIGN_VCLIENT ||
 				component->align == psy_ui_ALIGN_HCLIENT) {
@@ -411,7 +411,7 @@ void psy_ui_lclaligner_preferredsize(psy_ui_LCLAligner* self,
 			psy_ui_Component* component;
 					
 			component = (psy_ui_Component*)psy_list_entry(p);				
-			if (component->visible) {
+			if (psy_ui_component_visible(component)) {
 				psy_ui_Size componentsize;
 				psy_ui_Size limit;
 				const psy_ui_TextMetric* c_tm;

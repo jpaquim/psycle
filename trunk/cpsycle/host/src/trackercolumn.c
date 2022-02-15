@@ -74,8 +74,7 @@ void trackercolumn_init(TrackerColumn* self, psy_ui_Component* parent,
 	uintptr_t index, TrackerState* state, Workspace* workspace)
 {
 	psy_ui_component_init(&self->component, parent, NULL);
-	trackercolumn_vtable_init(self);
-	self->component.id = 400;
+	trackercolumn_vtable_init(self);	
 	psy_ui_component_setbackgroundmode(&self->component, psy_ui_NOBACKGROUND);	
 	psy_ui_component_setalign(trackercolumn_base(self), psy_ui_ALIGN_LEFT);
 	self->state = state;
@@ -181,14 +180,14 @@ void trackercolumn_drawentry(TrackerColumn* self, psy_ui_Graphics* g,
 	psy_ui_RealPoint cp;		
 	psy_List* curr;
 	char* emptystr;
-	psy_audio_PatternEvent emptyevent;
+	psy_audio_PatternEvent emptyevent;	
 
 	if (!entry) {
 		entry = &self->state->empty;
 	}		
 	cp = psy_ui_realpoint_make(0.0, y);
 	emptystr = (self->state->showemptydata) ? "." : "";
-	curr = entry->events;
+	curr = entry->events;	
 	psy_audio_patternevent_init(&emptyevent);
 	for (noteindex = 0; noteindex < trackdef_visinotes(trackdef); ++noteindex) {
 		psy_audio_PatternEvent* ev;

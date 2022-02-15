@@ -29,20 +29,19 @@ typedef struct SwitchUi {
 	/* internal */
 	ParamTweak paramtweak;
 	uintptr_t paramidx;
-	/* references */
-	struct ParamSkin* skin;
+	/* references */	
 	struct psy_audio_Machine* machine;
 	struct psy_audio_MachineParam* param;
 } SwitchUi;
 
 void switchui_init(SwitchUi*, psy_ui_Component* parent,
 	struct psy_audio_Machine*, uintptr_t paramidx,
-	struct psy_audio_MachineParam*, struct ParamSkin*);
+	struct psy_audio_MachineParam*);
 
 SwitchUi* switchui_alloc(void);
 SwitchUi* switchui_allocinit(psy_ui_Component* parent,
 	struct psy_audio_Machine*, uintptr_t paramidx,
-	struct psy_audio_MachineParam*, struct ParamSkin*);
+	struct psy_audio_MachineParam*);
 
 INLINE psy_ui_Component* switchui_base(SwitchUi* self)
 {

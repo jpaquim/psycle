@@ -8,28 +8,14 @@
 
 #include "patternheader.h"
 /* local */
-#include "patterncmds.h"
-#include "skingraphics.h"
+#include "styles.h"
 
 
 /* prototypes */
 static void patterntrackbox_ondraw(PatternTrackBox*, psy_ui_Graphics*);
-static void patterntrackbox_drawbackground(PatternTrackBox*, psy_ui_Graphics*);
-static void patterntrackbox_drawplayon(PatternTrackBox*, psy_ui_Graphics*);
 static void patterntrackbox_drawnumber(PatternTrackBox*, psy_ui_Graphics*);
-static void patterntrackbox_drawleds(PatternTrackBox*, psy_ui_Graphics*);
-static void patterntrackbox_drawledmute(PatternTrackBox*, psy_ui_Graphics*);
-static void patterntrackbox_drawledsoloed(PatternTrackBox*, psy_ui_Graphics*);
-static void patterntrackbox_drawledarmed(PatternTrackBox*, psy_ui_Graphics*);
 static void patterntrackbox_drawselection(PatternTrackBox*, psy_ui_Graphics*);
-static void patterntrackbox_blit(PatternTrackBox*, psy_ui_Graphics*,
-	const SkinCoord*);
 static void patterntrackbox_onmousedown(PatternTrackBox*, psy_ui_MouseEvent*);
-static void patterntrackbox_onmousedown(PatternTrackBox*, psy_ui_MouseEvent*);
-static psy_ui_RealPoint patterntrackbox_center(const PatternTrackBox*);
-static double patterntrackbox_skinwidth(const PatternTrackBox*);
-static const TrackerHeaderCoords* patterntrackbox_coords(
-	const PatternTrackBox*);
 static void patterntrackbox_onpreferredsize(PatternTrackBox*,
 	const psy_ui_Size* limit, psy_ui_Size* rv);
 
@@ -46,13 +32,13 @@ static void patterntrackbox_vtable_init(PatternTrackBox* self)
 			patterntrackbox_ondraw;
 		patterntrackbox_vtable.onmousedown =
 			(psy_ui_fp_component_onmouseevent)
-			patterntrackbox_onmousedown;
+			patterntrackbox_onmousedown;		
 		patterntrackbox_vtable.onpreferredsize =
 			(psy_ui_fp_component_onpreferredsize)
 			patterntrackbox_onpreferredsize;
 		patterntrackbox_vtable_initialized = TRUE;
 	}
-	self->component.vtable = &patterntrackbox_vtable;
+	psy_ui_component_setvtable(&self->component, &patterntrackbox_vtable);
 }
 
 /* implementation */
@@ -61,9 +47,31 @@ void patterntrackbox_init(PatternTrackBox* self, psy_ui_Component* parent,
 {
 	psy_ui_component_init(&self->component, parent, NULL);
 	patterntrackbox_vtable_init(self);
+	psy_ui_component_setstyletype(&self->component,
+		STYLE_PV_TRACK_HEADER);
 	self->state = state;
-	self->index = index;
-	self->playon = FALSE;
+	self->index = index;	
+	psy_ui_component_init(&self->solo, &self->component, NULL);
+	psy_ui_component_setstyletype(&self->solo,
+		STYLE_PV_TRACK_HEADER_SOLO);
+	psy_ui_component_setstyletype_select(&self->solo,
+		STYLE_PV_TRACK_HEADER_SOLO_SELECT);
+	psy_ui_component_init(&self->mute, &self->component, NULL);
+	psy_ui_component_setstyletype(&self->mute,
+		STYLE_PV_TRACK_HEADER_MUTE);
+	psy_ui_component_setstyletype_select(&self->mute,
+		STYLE_PV_TRACK_HEADER_MUTE_SELECT);
+	psy_ui_component_init(&self->record, &self->component, NULL);
+	psy_ui_component_setstyletype(&self->record,
+		STYLE_PV_TRACK_HEADER_RECORD);
+	psy_ui_component_setstyletype_select(&self->record,
+		STYLE_PV_TRACK_HEADER_RECORD_SELECT);
+	psy_ui_component_init(&self->play, &self->component, NULL);
+	psy_ui_component_setstyletype(&self->play,
+		STYLE_PV_TRACK_HEADER_PLAY);
+	psy_ui_component_setstyletype_select(&self->play,
+		STYLE_PV_TRACK_HEADER_PLAY_SELECT);
+	patterntrackbox_update(self);
 }
 
 PatternTrackBox* patterntrackbox_alloc(void)
@@ -85,110 +93,65 @@ PatternTrackBox* patterntrackbox_allocinit(psy_ui_Component* parent,
 }
 
 void patterntrackbox_playon(PatternTrackBox* self)
-{
-	if (!self->playon) {
-		self->playon = TRUE;
-		psy_ui_component_invalidate(&self->component);
-	}
+{		
+	psy_ui_component_addstylestate(&self->play, psy_ui_STYLESTATE_SELECT);
 }
 
 void patterntrackbox_playoff(PatternTrackBox* self)
-{
-	if (self->playon) {
-		self->playon = FALSE;
-		psy_ui_component_invalidate(&self->component);
-	}
+{	
+	psy_ui_component_removestylestate(&self->play, psy_ui_STYLESTATE_SELECT);
 }
 
 void patterntrackbox_ondraw(PatternTrackBox* self, psy_ui_Graphics* g)
 {
-	psy_ui_RealPoint origin;	
-	
-	origin = psy_ui_origin(g);	
-	origin.x -= patterntrackbox_center(self).x;
-	psy_ui_setorigin(g, origin);	
-	patterntrackbox_drawbackground(self, g);
-	patterntrackbox_drawplayon(self, g);
 	patterntrackbox_drawnumber(self, g);
-	patterntrackbox_drawleds(self, g);
 	patterntrackbox_drawselection(self, g);	
-}
-
-void patterntrackbox_drawbackground(PatternTrackBox* self, psy_ui_Graphics* g)
-{
-	patterntrackbox_blit(self, g, &patterntrackbox_coords(self)->background);
-}
-
-void patterntrackbox_drawplayon(PatternTrackBox* self, psy_ui_Graphics* g)
-{
-	if (self->playon) {
-		patterntrackbox_blit(self, g, &patterntrackbox_coords(self)->dplayon);	 	
-	}
 }
 
 void patterntrackbox_drawnumber(PatternTrackBox* self, psy_ui_Graphics* g)
 {	
-	SkinCoord digitx0;
-	SkinCoord digit0x;
+	psy_ui_Style* style_x0;
+	psy_ui_Style* style_0x;
+	psy_ui_RealRectangle r;
+	const psy_ui_TextMetric* tm;
+	double src_x0;
+	double src_0x;
 
-	digitx0 = patterntrackbox_coords(self)->digitx0;
-	digit0x = patterntrackbox_coords(self)->digit0x;
-	digitx0.src.left += (self->index / 10) * psy_ui_realrectangle_width(&digitx0.src);
-	digit0x.src.left += (self->index % 10) * psy_ui_realrectangle_width(&digit0x.src);
-	patterntrackbox_blit(self, g, &digitx0);
-	patterntrackbox_blit(self, g, &digit0x);	
-}
-
-void patterntrackbox_drawleds(PatternTrackBox* self, psy_ui_Graphics* g)
-{
-	if (patternviewstate_patterns(self->state->pv)) {
-		patterntrackbox_drawledmute(self, g);
-		patterntrackbox_drawledsoloed(self, g);
-		patterntrackbox_drawledarmed(self, g);
-	}
-}
-
-void patterntrackbox_drawledmute(PatternTrackBox* self, psy_ui_Graphics* g)
-{
-	if (psy_audio_patterns_istrackmuted(
-		patternviewstate_patterns(self->state->pv), self->index)) {
-		patterntrackbox_blit(self, g, &patterntrackbox_coords(self)->mute);
-	}
-}
-
-void patterntrackbox_drawledsoloed(PatternTrackBox* self,
-	psy_ui_Graphics* g)
-{
-	if (psy_audio_patterns_istracksoloed(
-		patternviewstate_patterns(self->state->pv), self->index)) {
-		patterntrackbox_blit(self, g, &patterntrackbox_coords(self)->solo);		
-	}
-}
-
-void patterntrackbox_drawledarmed(PatternTrackBox* self, psy_ui_Graphics* g)
-{
-	if (psy_audio_patterns_istrackarmed(
-			patternviewstate_patterns(self->state->pv), self->index)) {
-		patterntrackbox_blit(self, g, &patterntrackbox_coords(self)->record);
-	}
+	tm = psy_ui_component_textmetric(&self->component);
+	style_x0 = psy_ui_style(STYLE_PV_TRACK_HEADER_DIGITX0);
+	style_0x = psy_ui_style(STYLE_PV_TRACK_HEADER_DIGIT0X);
+	src_x0 = (self->index / 10) * style_x0->background.size.width;
+	src_0x = (self->index % 10) * style_0x->background.size.width;
+	r = psy_ui_realrectangle_make(
+		psy_ui_realpoint_make(
+			psy_ui_value_px(&style_x0->padding.left, tm, 0),
+			psy_ui_value_px(&style_x0->padding.top, tm, 0)),
+		style_x0->background.size);	
+	psy_ui_drawbitmap(g, &style_x0->background.bitmap, r,
+		psy_ui_realpoint_make(
+			-style_x0->background.position.x + src_x0,
+			-style_x0->background.position.y));
+	r = psy_ui_realrectangle_make(
+		psy_ui_realpoint_make(
+			psy_ui_value_px(&style_0x->padding.left, tm, 0),
+			psy_ui_value_px(&style_0x->padding.top, tm, 0)),
+		style_0x->background.size);
+	psy_ui_drawbitmap(g, &style_0x->background.bitmap, r,
+		psy_ui_realpoint_make(
+			-style_0x->background.position.x + src_0x,
+			-style_0x->background.position.y));	
 }
 
 void patterntrackbox_drawselection(PatternTrackBox* self, psy_ui_Graphics* g)
 {
 	if (self->index == psy_audio_sequencecursor_track(
 			&self->state->pv->cursor)) {
-		psy_ui_setcolour(g, patternviewstate_skin(self->state->pv)->font);
-		psy_ui_drawline(g, psy_ui_realpoint_zero(),
-			psy_ui_realpoint_make(psy_min(patterntrackbox_skinwidth(self),
-				trackerstate_trackwidth(self->state, self->index)), 0.0));
-	}
-}
+		psy_ui_RealSize size;
 
-void patterntrackbox_blit(PatternTrackBox* self, psy_ui_Graphics* g,
-	const SkinCoord* coord)
-{
-	skin_blitcoord(g, &patternviewstate_skin(self->state->pv)->bitmap,
-		psy_ui_realpoint_zero(), coord);
+		size = psy_ui_component_size_px(&self->component);		
+		psy_ui_drawline(g, psy_ui_realpoint_zero(),
+			psy_ui_realpoint_make(size.width, 0.0));
+	}
 }
 
 void patterntrackbox_onmousedown(PatternTrackBox* self, psy_ui_MouseEvent* ev)
@@ -197,22 +160,21 @@ void patterntrackbox_onmousedown(PatternTrackBox* self, psy_ui_MouseEvent* ev)
 		psy_audio_Patterns* patterns;		
 		psy_ui_RealPoint pt;		
 		
-		pt = psy_ui_mouseevent_pt(ev);
-		pt.x -= patterntrackbox_center(self).x;
+		pt = psy_ui_mouseevent_pt(ev);		
 		patterns = patternviewstate_patterns(self->state->pv);		
-		if (skincoord_hittest(&patterntrackbox_coords(self)->solo, pt)) {
+		if (psy_ui_mouseevent_target(ev) == &self->solo) {
 			if (psy_audio_patterns_istracksoloed(patterns, self->index)) {
 				psy_audio_patterns_deactivatesolotrack(patterns);
 			} else {
 				psy_audio_patterns_activatesolotrack(patterns, self->index);
 			}			
-		} else if (skincoord_hittest(&patterntrackbox_coords(self)->mute, pt)) {
+		} else if (psy_ui_mouseevent_target(ev) == &self->mute) {
 			if (psy_audio_patterns_istrackmuted(patterns, self->index)) {
 				psy_audio_patterns_unmutetrack(patterns, self->index);
 			} else {
 				psy_audio_patterns_mutetrack(patterns, self->index);
 			}			
-		} else if (skincoord_hittest(&patterntrackbox_coords(self)->record, pt)) {
+		} else if (psy_ui_mouseevent_target(ev) == &self->record) {
 			if (psy_audio_patterns_istrackarmed(patterns, self->index)) {
 				psy_audio_patterns_unarmtrack(patterns, self->index);
 			} else {
@@ -222,32 +184,105 @@ void patterntrackbox_onmousedown(PatternTrackBox* self, psy_ui_MouseEvent* ev)
 	}
 }
 
-psy_ui_RealPoint patterntrackbox_center(const PatternTrackBox* self)
-{
-	psy_ui_RealSize size;
-
-	size = psy_ui_component_size_px(&self->component);
-	return psy_ui_realpoint_make(
-		floor((size.width - patterntrackbox_skinwidth(self)) / 2.0), 0.0);
-}
-
-double patterntrackbox_skinwidth(const PatternTrackBox* self)
-{
-	return psy_ui_realrectangle_width(
-		&patterntrackbox_coords(self)->background.dest);
-}
-
-const TrackerHeaderCoords* patterntrackbox_coords(const PatternTrackBox* self)
-{
-	return &patternviewstate_skin(self->state->pv)->headercoords;
-}
-
 void patterntrackbox_onpreferredsize(PatternTrackBox* self,
 	const psy_ui_Size* limit, psy_ui_Size* rv)
 {	
-	psy_ui_size_init_px(rv, trackerstate_trackwidth(self->state, self->index),
-		psy_ui_realrectangle_height(
-			&patterntrackbox_coords(self)->background.dest));
+	psy_ui_Style* style;
+
+	style = psy_ui_style(STYLE_PV_TRACK_HEADER);
+	psy_ui_size_init_px(rv,
+		style->background.size.width,
+		style->background.size.height);
+}
+
+void patterntrackbox_update(PatternTrackBox* self)
+{
+	psy_audio_Patterns* patterns;
+	
+	patterns = patternviewstate_patterns(self->state->pv);
+	if (psy_audio_patterns_istracksoloed(patterns, self->index)) {
+		psy_ui_component_addstylestate(&self->solo,
+			psy_ui_STYLESTATE_SELECT);
+	} else {
+		psy_ui_component_removestylestate(&self->solo,
+			psy_ui_STYLESTATE_SELECT);
+	}
+	if (psy_audio_patterns_istrackmuted(patterns, self->index)) {
+		psy_ui_component_addstylestate(&self->mute,
+			psy_ui_STYLESTATE_SELECT);
+	} else {
+		psy_ui_component_removestylestate(&self->mute,
+			psy_ui_STYLESTATE_SELECT);
+	}
+	if (psy_audio_patterns_istrackarmed(patterns, self->index)) {
+		psy_ui_component_addstylestate(&self->record,
+			psy_ui_STYLESTATE_SELECT);
+	} else {
+		psy_ui_component_removestylestate(&self->record,
+			psy_ui_STYLESTATE_SELECT);
+	}
+}
+
+/* PatternTrack */
+
+/* prototypes */
+static void patterntrack_onpreferredsize(PatternTrack*,
+	const psy_ui_Size* limit, psy_ui_Size* rv);
+
+/* vtable */
+static psy_ui_ComponentVtable patterntrack_vtable;
+static bool patterntrack_vtable_initialized = FALSE;
+
+static void patterntrack_vtable_init(PatternTrack* self)
+{
+	if (!patterntrack_vtable_initialized) {
+		patterntrack_vtable = *(self->component.vtable);		
+		patterntrack_vtable.onpreferredsize =
+			(psy_ui_fp_component_onpreferredsize)
+			patterntrack_onpreferredsize;
+		patterntrack_vtable_initialized = TRUE;
+	}
+	self->component.vtable = &patterntrack_vtable;
+}
+
+/* implementation */
+void patterntrack_init(PatternTrack* self, psy_ui_Component* parent,
+	uintptr_t index, TrackerState* state)
+{
+	psy_ui_component_init(&self->component, parent, NULL);
+	patterntrack_vtable_init(self);
+	patterntrackbox_init(&self->trackbox, &self->component, index, state);
+	psy_ui_component_setalign(&self->trackbox.component, psy_ui_ALIGN_CENTER);
+}
+
+PatternTrack* patterntrack_alloc(void)
+{
+	return (PatternTrack*)malloc(sizeof(PatternTrack));
+}
+
+PatternTrack* patterntrack_allocinit(psy_ui_Component* parent,
+	uintptr_t index, TrackerState* state)
+{
+	PatternTrack* rv;
+
+	rv = patterntrack_alloc();
+	if (rv) {
+		patterntrack_init(rv, parent, index, state);
+		psy_ui_component_deallocateafterdestroyed(patterntrack_base(rv));
+	}
+	return rv;
+}
+
+void patterntrack_onpreferredsize(PatternTrack* self,
+	const psy_ui_Size* limit, psy_ui_Size* rv)
+{
+	psy_ui_Style* style;
+
+	style = psy_ui_style(STYLE_PV_TRACK_HEADER);
+		psy_ui_size_init_px(rv,
+			trackerstate_trackwidth(self->trackbox.state,
+				self->trackbox.index),
+			style->background.size.height);
 }
 
 /* TrackerHeader */
@@ -319,10 +354,10 @@ void trackerheader_build(TrackerHeader* self)
 	for (track = 0; track < numtracks; ++track) {		
 		psy_table_insert(&self->boxes, track,
 			psy_ui_component_setalign(
-				patterntrackbox_base(patterntrackbox_allocinit(
+				patterntrack_base(patterntrack_allocinit(
 					trackerheader_base(self), track, self->state)),
 				psy_ui_ALIGN_LEFT));
-	}
+	}	
 	psy_ui_component_align(trackerheader_base(self));
 }
 
@@ -366,14 +401,14 @@ void trackerheader_updateplayons(TrackerHeader* self)
 	for (it = psy_table_begin(&self->boxes);
 			!psy_tableiterator_equal(&it, psy_table_end());
 			psy_tableiterator_inc(&it)) {
-		PatternTrackBox* trackbox;
+		PatternTrack* track;
 
-		trackbox = (PatternTrackBox*)psy_tableiterator_value(&it);
+		track = (PatternTrack*)psy_tableiterator_value(&it);
 		if ((psy_audio_activechannels_playon(&self->workspace->player.playon,
 				psy_tableiterator_key(&it)))) {
-			patterntrackbox_playon(trackbox);
+			patterntrackbox_playon(&track->trackbox);
 		} else {
-			patterntrackbox_playoff(trackbox);
+			patterntrackbox_playoff(&track->trackbox);
 		}
 	}
 }
@@ -390,5 +425,17 @@ void trackerheader_onmousewheel(TrackerHeader* self, psy_ui_MouseEvent* ev)
 void trackerheader_ontrackstatechanged(TrackerHeader* self,
 	psy_audio_TrackState* sender)
 {
+	psy_TableIterator it;
+
+	assert(self);
+
+	for (it = psy_table_begin(&self->boxes);
+		!psy_tableiterator_equal(&it, psy_table_end());
+		psy_tableiterator_inc(&it)) {
+		PatternTrack* track;
+
+		track = (PatternTrack*)psy_tableiterator_value(&it);		
+		patterntrackbox_update(&track->trackbox);		
+	}
 	psy_ui_component_invalidate(&self->component);
 }

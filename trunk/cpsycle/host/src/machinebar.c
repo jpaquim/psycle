@@ -50,8 +50,7 @@ void machinebar_init(MachineBar* self, psy_ui_Component* parent, Workspace* work
 {		
 	psy_ui_Margin margin;
 
-	psy_ui_component_init(&self->component, parent, NULL);
-	self->component.id = 80;
+	psy_ui_component_init(&self->component, parent, NULL);	
 	self->workspace = workspace;
 	psy_ui_margin_init_em(&margin, 0.0, 2.0, 0.0, 0.0);			
 	self->selchange = 0;	

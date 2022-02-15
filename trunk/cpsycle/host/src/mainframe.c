@@ -95,8 +95,6 @@ static void mainframe_onterminalerror(MainFrame*, Workspace* sender,
 	const char* text);
 static void mainframe_onsongtrackschanged(MainFrame*, psy_audio_Patterns* sender,
 	uintptr_t numsongtracks);
-static void mainframe_onchangecontrolskin(MainFrame*, Workspace* sender,
-	const char* path);
 static void mainframe_onfloatsection(MainFrame*, Workspace* sender,
 	int view, uintptr_t section);
 static void mainframe_ondocksection(MainFrame*, Workspace* sender,
@@ -652,9 +650,7 @@ void mainframe_connectworkspace(MainFrame* self)
 		INPUTHANDLER_IMM, psy_EVENTDRIVER_CMD, "notes",
 		psy_INDEX_INVALID, self, (fp_inputhandler_input)mainframe_onnotes);
 	inputhandler_connecthost(&self->workspace.inputhandler,
-		self, (fp_inputhandler_hostcallback)mainframe_oninputhandlercallback);
-	psy_signal_connect(&self->workspace.signal_changecontrolskin, self,
-		mainframe_onchangecontrolskin);
+		self, (fp_inputhandler_hostcallback)mainframe_oninputhandlercallback);	
 	psy_signal_connect(&self->workspace.signal_togglegear, self,
 		mainframe_ontogglegearworkspace);
 	psy_signal_connect(&self->checkunsavedbox.signal_execute, self,
@@ -688,6 +684,12 @@ bool mainframe_oninput(MainFrame* self, InputHandler* sender)
 	case CMD_IMM_HELPSHORTCUT:
 		mainframe_ontogglekbdhelp(self, mainframe_base(self));
 		return 1;
+	case CMD_IMM_INFOMACHINE:
+		if (self->workspace.song) {
+			paramviews_show(&self->machineview.paramviews,
+				psy_audio_machines_selected(&self->workspace.song->machines));
+		}
+		break;
 	case CMD_IMM_INFOPATTERN:
 		if (workspace_currview(&self->workspace).id != VIEW_ID_PATTERNVIEW) {
 			workspace_selectview(&self->workspace, VIEW_ID_PATTERNVIEW, 0, 0);
@@ -1055,14 +1057,6 @@ void mainframe_onsongtrackschanged(MainFrame* self, psy_audio_Patterns* sender,
 	/* TrackScopes can change its height, realign mainframe */
 	psy_ui_component_align(trackscopeview_base(&self->trackscopeview));
 	psy_ui_component_align(mainframe_base(self));
-}
-
-void mainframe_onchangecontrolskin(MainFrame* self, Workspace* sender,
-	const char* path)
-{
-	machineparamconfig_releaseskin();
-	machineparamconfig_skin(psycleconfig_macparam(workspace_conf(
-		&self->workspace)));
 }
 
 void mainframe_onfloatsection(MainFrame* self, Workspace* sender,

@@ -11,14 +11,16 @@
 #include "workspace.h"
 
 
-/*
-** PatternTrackBox
-*/
+/* PatternTrackBox */
 typedef struct PatternTrackBox {
 	/* inherits */
 	psy_ui_Component component;
+	/* internal */
+	psy_ui_Component solo;
+	psy_ui_Component mute;
+	psy_ui_Component record;
+	psy_ui_Component play;
 	uintptr_t index;
-	bool playon;
 	/* references */
 	TrackerState* state;
 } PatternTrackBox;
@@ -32,12 +34,32 @@ PatternTrackBox* patterntrackbox_allocinit(psy_ui_Component* parent,
 
 void patterntrackbox_playon(PatternTrackBox*);
 void patterntrackbox_playoff(PatternTrackBox*);
+void patterntrackbox_update(PatternTrackBox*);
 
 INLINE psy_ui_Component* patterntrackbox_base(PatternTrackBox* self)
 {
 	return &self->component;
 }
 
+/* PatternTrack */
+typedef struct PatternTrack {
+	/* inherits */
+	psy_ui_Component component;
+	/* internal */
+	PatternTrackBox trackbox;
+} PatternTrack;
+
+void patterntrack_init(PatternTrack*, psy_ui_Component* parent,
+	uintptr_t index, TrackerState*);
+
+PatternTrack* patterntrack_alloc(void);
+PatternTrack* patterntrack_allocinit(psy_ui_Component* parent,
+	uintptr_t index, TrackerState*);
+
+INLINE psy_ui_Component* patterntrack_base(PatternTrack* self)
+{
+	return &self->component;
+}
 /*
 ** TrackerHeader
 */

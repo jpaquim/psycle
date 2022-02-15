@@ -9,15 +9,14 @@
 /* host */
 #include "machineframe.h"
 #include "machineeditorview.h" /* vst view */
-#include "machineviewskin.h"
 #include "machineui.h"
 #include "machinestackview.h"
 #include "newmachine.h"
 #include "paramview.h"
 #include "paramviews.h"
-#include <uitabbar.h>
 #include "workspace.h"
-// ui
+/* ui */
+#include <uitabbar.h>
 #include <uitextinput.h>
 
 #ifdef __cplusplus
@@ -35,14 +34,13 @@ extern "C" {
 typedef struct MachineWireViewUis {
 	psy_Table machineuis;
 	psy_ui_Component* view;
-	psy_audio_Machines* machines;
-	MachineViewSkin* skin;
+	psy_audio_Machines* machines;	
 	ParamViews* paramviews;
 	Workspace* workspace;
 } MachineWireViewUis;
 
 void machinewireviewuis_init(MachineWireViewUis*, psy_ui_Component*,
-	MachineViewSkin*, ParamViews*, Workspace*);
+	ParamViews*, Workspace*);
 void machinewireviewuis_dispose(MachineWireViewUis*);
 
 psy_ui_Component* machinewireviewwuis_at(MachineWireViewUis*,
@@ -71,22 +69,19 @@ typedef struct MachineWireView {
 	bool showwirehover;	
 	bool drawvirtualgenerators;
 	uintptr_t opcount;
-	bool centermaster;
+	bool centermaster;	
 	/* references */
 	psy_audio_Machines* machines;	
-	Workspace* workspace;	
-	MachineViewSkin* skin;
+	Workspace* workspace;		
 	ParamViews* paramviews;
 } MachineWireView;
 
 void machinewireview_init(MachineWireView*, psy_ui_Component* parent,
-	psy_ui_Component* tabbarparent, MachineViewSkin*, ParamViews*,
-	Workspace*);
+	psy_ui_Component* tabbarparent, ParamViews*, Workspace*);
 
 void machinewireview_centermaster(MachineWireView*);
 void machinewireview_showvirtualgenerators(MachineWireView*);
 void machinewireview_hidevirtualgenerators(MachineWireView*);
-void machinewireview_updateskin(MachineWireView*);
 void machinewireview_idle(MachineWireView*);
 
 INLINE psy_ui_Component* machinewireview_base(MachineWireView* self)

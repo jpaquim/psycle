@@ -1,14 +1,12 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-**  copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
 
 
 #include "uisplitbar.h"
-/* platform */
-#include "../../detail/portable.h"
 
 
 /* prototypes */
@@ -280,19 +278,7 @@ void splitter_onmouseup(psy_ui_Splitter* self, psy_ui_MouseEvent* ev)
 
 		psy_ui_component_releasecapture(&self->component);
 		prev = splitter_prev(self);
-		next = splitter_next(self);
-		if (prev) {
-			psy_signal_preventall(&prev->signal_hide);
-			psy_ui_component_hide(prev);
-			psy_signal_enableall(&prev->signal_hide);
-			prev->visible = 1;
-		}
-		if (next) {
-			psy_signal_preventall(&next->signal_hide);
-			psy_ui_component_hide(next);
-			psy_signal_enableall(&next->signal_hide);
-			next->visible = 1;
-		}
+		next = splitter_next(self);		
 		if (prev) {
 			position = psy_ui_component_position(&self->component);
 			if (prev->align == psy_ui_ALIGN_LEFT) {
@@ -330,13 +316,7 @@ void splitter_onmouseup(psy_ui_Splitter* self, psy_ui_MouseEvent* ev)
 			}
 			psy_ui_component_align(psy_ui_component_parent(&self->component));
 			psy_ui_component_invalidate(psy_ui_component_parent(&self->component));
-		}
-		if (prev) {
-			psy_ui_component_show(prev);
-		}
-		if (next) {
-			psy_ui_component_show(next);
-		}
+		}		
 		splitter_setcursor(self);		
 		if (prev) {
 			psy_ui_component_invalidate(prev);

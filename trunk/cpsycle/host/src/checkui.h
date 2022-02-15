@@ -38,12 +38,12 @@ typedef struct CheckUi {
 
 void checkui_init(CheckUi*, psy_ui_Component* parent,
 	struct psy_audio_Machine*, uintptr_t paramidx,
-	struct psy_audio_MachineParam*, struct ParamSkin*);
+	struct psy_audio_MachineParam*);
 
 CheckUi* checkui_alloc(void);
 CheckUi* checkui_allocinit(psy_ui_Component* parent,
 	struct psy_audio_Machine*, uintptr_t paramidx,
-	struct psy_audio_MachineParam*, struct ParamSkin*);
+	struct psy_audio_MachineParam*);
 
 INLINE psy_ui_Component* checkui_base(CheckUi* self)
 {

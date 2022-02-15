@@ -609,9 +609,11 @@ void psy_ui_x11app_mousewheel(psy_ui_X11App* self,
 	}
 	psy_ui_mouseevent_init_all(&ev,
 		psy_ui_realpoint_make(xe->xbutton.x, xe->xbutton.y),		
-		0, delta, 0, 0);
-	psy_ui_x11app_update_mouseevent_mods(self, &ev);	
-	psy_ui_component_mousewheel(imp->component, &ev, delta /* 120 or -120 */);
+		0, delta, 0, 0);		
+	psy_ui_x11app_update_mouseevent_mods(self, &ev);
+	psy_ui_mouseevent_settype(&ev, psy_ui_WHEEL);
+	psy_ui_eventdispatch_send(&self->app->eventdispatch,
+		imp->component, psy_ui_mouseevent_base(&ev));	
 }
 
 bool psy_ui_x11app_sendeventtoparent(psy_ui_X11App* self,

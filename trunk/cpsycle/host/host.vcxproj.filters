@@ -237,12 +237,6 @@
     <ClCompile Include="src\recentview.c">
       <Filter>file</Filter>
     </ClCompile>
-    <ClCompile Include="src\skincoord.c">
-      <Filter>uicontrols</Filter>
-    </ClCompile>
-    <ClCompile Include="src\skingraphics.c">
-      <Filter>uicontrols</Filter>
-    </ClCompile>
     <ClCompile Include="src\songproperties.c">
       <Filter>file</Filter>
     </ClCompile>
@@ -393,9 +387,6 @@
     <ClCompile Include="src\machineviewbar.c">
       <Filter>machine\machineview</Filter>
     </ClCompile>
-    <ClCompile Include="src\machineviewskin.c">
-      <Filter>machine\machineview</Filter>
-    </ClCompile>
     <ClCompile Include="src\machineview.c">
       <Filter>machine\machineview</Filter>
     </ClCompile>
@@ -499,9 +490,6 @@
       <Filter>pattern\common</Filter>
     </ClCompile>
     <ClCompile Include="src\patterncmds.c">
-      <Filter>pattern\common</Filter>
-    </ClCompile>
-    <ClCompile Include="src\patternviewskin.c">
       <Filter>pattern\common</Filter>
     </ClCompile>
     <ClCompile Include="src\patternviewbar.c">
@@ -788,12 +776,6 @@
     <ClInclude Include="src\recentview.h">
       <Filter>file</Filter>
     </ClInclude>
-    <ClInclude Include="src\skincoord.h">
-      <Filter>uicontrols</Filter>
-    </ClInclude>
-    <ClInclude Include="src\skingraphics.h">
-      <Filter>uicontrols</Filter>
-    </ClInclude>
     <ClInclude Include="src\songproperties.h">
       <Filter>file</Filter>
     </ClInclude>
@@ -944,9 +926,6 @@
     <ClInclude Include="src\machineviewbar.h">
       <Filter>machine\machineview</Filter>
     </ClInclude>
-    <ClInclude Include="src\machineviewskin.h">
-      <Filter>machine\machineview</Filter>
-    </ClInclude>
     <ClInclude Include="src\machineview.h">
       <Filter>machine\machineview</Filter>
     </ClInclude>
@@ -1053,9 +1032,6 @@
       <Filter>pattern\common</Filter>
     </ClInclude>
     <ClInclude Include="src\patterncmds.h">
-      <Filter>pattern\common</Filter>
-    </ClInclude>
-    <ClInclude Include="src\patternviewskin.h">
       <Filter>pattern\common</Filter>
     </ClInclude>
     <ClInclude Include="src\patternviewbar.h">

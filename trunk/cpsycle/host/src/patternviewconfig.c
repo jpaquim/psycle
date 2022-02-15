@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -28,22 +28,18 @@ void patternviewconfig_init(PatternViewConfig* self, psy_Property* parent,
 	assert(self && parent);
 
 	self->parent = parent;
-	self->skindir = psy_strdup(skindir);
-	patternviewskin_init(&self->skin);	
-	patternviewconfig_makeview(self, parent);
-	patternviewskin_settheme(&self->skin, self->theme, skindir);
-	psy_signal_init(&self->signal_changed);
-	psy_signal_init(&self->signal_themechanged);
+	self->skindir = psy_strdup(skindir);	
+	patternviewconfig_makeview(self, parent);	
+	psy_signal_init(&self->signal_changed);	
 }
 
 void patternviewconfig_dispose(PatternViewConfig* self)
 {
 	assert(self);
 		
-	psy_signal_dispose(&self->signal_changed);
-	psy_signal_dispose(&self->signal_themechanged);
-	patternviewskin_dispose(&self->skin);
+	psy_signal_dispose(&self->signal_changed);	
 	free(self->skindir);
+	self->skindir = NULL;
 }
 
 void patternviewconfig_makeview(PatternViewConfig* self, psy_Property* parent)
@@ -313,7 +309,7 @@ void patternviewconfig_resettheme(PatternViewConfig* self)
 		psy_property_remove(self->patternview, self->theme);
 	}
 	patternviewconfig_maketheme(self, self->patternview);
-	psy_signal_emit(&self->signal_themechanged, self, 1, self->theme);
+	init_patternview_styles(&psy_ui_appdefaults()->styles);	
 }
 
 void patternviewconfig_settheme(PatternViewConfig* self, psy_Property* skin)
@@ -322,7 +318,7 @@ void patternviewconfig_settheme(PatternViewConfig* self, psy_Property* skin)
 
 	if (self->theme) {
 		psy_property_sync(self->theme, skin);
-		psy_signal_emit(&self->signal_themechanged, self, 1, self->theme);
+		patternviewconfig_updatestyles(self);
 	}
 }
 
@@ -487,27 +483,10 @@ bool patternviewconfig_onchanged(PatternViewConfig* self, psy_Property* property
 	assert(self);
 
 	if (patternviewconfig_hasthemeproperty(self, property)) {
-		patternviewconfig_onthemechanged(self, property);		
+		patternviewconfig_updatestyles(self);
 	} else {
 		psy_signal_emit(&self->signal_changed, self, 1, property);
 	}
-	return TRUE;
-}
-
-bool patternviewconfig_onthemechanged(PatternViewConfig* self, psy_Property* property)
-{
-	psy_ui_Style* style;
-
-	assert(self);
-
-	patternviewskin_settheme(&self->skin, self->theme, self->skindir);
-	style = psy_ui_app_style(psy_ui_app(), STYLE_PATTERNVIEW);
-	if (style) {
-		psy_ui_style_setcolours(style,
-			patternviewskin_fontcolour(&self->skin, 0, 0),
-			patternviewskin_backgroundcolour(&self->skin, 0, 0));		
-	}
-	psy_signal_emit(&self->signal_themechanged, self, 1, self->theme);
 	return TRUE;
 }
 
@@ -549,4 +528,80 @@ psy_ui_FontInfo patternviewconfig_readfont(PatternViewConfig* self, double zoom)
 	fontinfo.lfHeight = (int32_t)((double)fontinfo.lfHeight * zoom);
 #endif		
 	return fontinfo;
+}
+
+void patternviewconfig_updatestyles(PatternViewConfig* self)
+{
+	if (self->theme) {
+		psy_ui_Style* style;
+		psy_ui_Colour bgcolour;
+		psy_ui_Colour fgcolour;
+
+		fgcolour = psy_ui_colour_make(psy_property_at_colour(self->theme, "pvc_font",
+			0x00CACACA));
+		bgcolour = psy_ui_colour_make(psy_property_at_colour(self->theme, "pvc_background",
+			0x00292929));
+		style = psy_ui_style(STYLE_PATTERNVIEW);
+		if (style) {
+			psy_ui_style_setcolours(style, fgcolour, bgcolour);
+		}
+		style = psy_ui_style(STYLE_PV_ROW);
+		if (style) {
+			psy_ui_style_setbackgroundcolour(style, psy_ui_colour_make(
+				psy_property_at_colour(self->theme, "pvc_row",
+					0x003E3E3E)));
+		}
+		style = psy_ui_style(STYLE_PV_ROWBEAT_SELECT);
+		if (style) {
+			psy_ui_style_setcolours(style,
+				psy_ui_colour_make(psy_property_at_colour(self->theme,
+					"pvc_fontsel", 0x00ffffff)),
+				psy_ui_colour_make(psy_property_at_colour(self->theme,
+					"pvc_selection", 0x009B7800)));
+		}
+		style = psy_ui_style(STYLE_PV_ROWBEAT);
+		if (style) {
+			psy_ui_style_setbackgroundcolour(style, psy_ui_colour_make(
+				psy_property_at_colour(self->theme, "pvc_rowbeat",
+					0x00363636)));
+		}
+		style = psy_ui_style(STYLE_PV_ROWBEAT_SELECT);
+		if (style) {
+			psy_ui_style_setcolours(style,
+				psy_ui_colour_make(psy_property_at_colour(self->theme,
+					"pvc_fontsel", 0x00ffffff)),
+				psy_ui_colour_make(psy_property_at_colour(self->theme,
+					"pvc_selection", 0x009B7800)));
+		}
+		style = psy_ui_style(STYLE_PV_ROW4BEAT);
+		if (style) {
+			psy_ui_style_setbackgroundcolour(style, psy_ui_colour_make(
+				psy_property_at_colour(self->theme, "pvc_row4beat",
+					0x00595959)));
+		}
+		style = psy_ui_style(STYLE_PV_ROW4BEAT_SELECT);
+		if (style) {
+			psy_ui_style_setcolours(style,
+				psy_ui_colour_make(psy_property_at_colour(self->theme,
+					"pvc_fontsel", 0x00ffffff)),
+				psy_ui_colour_make(psy_property_at_colour(self->theme,
+					"pvc_selection", 0x009B7800)));
+		}
+		style = psy_ui_style(STYLE_PV_CURSOR);
+		if (style) {
+			psy_ui_style_setcolours(style,
+				psy_ui_colour_make(psy_property_at_colour(self->theme,
+					"pvc_fontcur", 0x00ffffff)),
+				psy_ui_colour_make(psy_property_at_colour(self->theme,
+					"pvc_cursor", 0x00595959)));
+		}
+		style = psy_ui_style(STYLE_PV_CURSOR_SELECT);
+		if (style) {
+			psy_ui_style_setcolours(style,
+				psy_ui_colour_make(psy_property_at_colour(self->theme,
+					"pvc_fontsel", 0x00ffffff)),
+				psy_ui_colour_make(psy_property_at_colour(self->theme,
+					"pvc_selection", 0x009B7800)));
+		}
+	}
 }

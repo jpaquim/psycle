@@ -61,7 +61,6 @@ void trackscopes_init(TrackScopes* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {	
 	psy_ui_component_init(&self->component, parent, NULL);	
-	self->component.id = 90;
 	psy_ui_component_setvtable(&self->component, vtable_init(self));
 	psy_ui_component_setstyletype(&self->component, STYLE_TRACKSCOPE);		
 	self->workspace = workspace;

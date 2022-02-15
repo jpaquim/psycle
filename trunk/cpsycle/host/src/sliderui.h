@@ -31,20 +31,19 @@ typedef struct SliderUi {
 	/* internal */
 	ParamTweak paramtweak;
 	uintptr_t paramidx;
-	/* references */
-	struct ParamSkin* skin;	
+	/* references */	
 	struct psy_audio_Machine* machine;	
 	struct psy_audio_MachineParam* param;
 } SliderUi;
 
 void sliderui_init(SliderUi*, psy_ui_Component* parent,
 	struct psy_audio_Machine*, uintptr_t paramidx,
-	struct psy_audio_MachineParam*, struct ParamSkin*);
+	struct psy_audio_MachineParam*);
 
 SliderUi* sliderui_alloc(void);
 SliderUi* sliderui_allocinit(psy_ui_Component* parent,
 	struct psy_audio_Machine*, uintptr_t paramidx,
-	struct psy_audio_MachineParam*, struct ParamSkin*);
+	struct psy_audio_MachineParam*);
 
 INLINE psy_ui_Component* sliderui_base(SliderUi* self)
 {

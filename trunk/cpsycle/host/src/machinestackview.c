@@ -1,6 +1,6 @@
 /*
 ** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2023 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -990,8 +990,7 @@ static psy_ui_ComponentVtable* machinestackinputs_vtable_init(MachineStackInputs
 }
 // implementation
 void machinestackinputs_init(MachineStackInputs* self,
-	psy_ui_Component* parent, MachineStackState* state, MachineViewSkin* skin,
-	Workspace* workspace)
+	psy_ui_Component* parent, MachineStackState* state, Workspace* workspace)
 {
 	psy_ui_Margin margin;
 
@@ -1001,8 +1000,7 @@ void machinestackinputs_init(MachineStackInputs* self,
 		machinestackinputs_vtable_init(self));		
 	psy_ui_component_setalignexpand(&self->component, psy_ui_HEXPAND);
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
-		margin);	
-	self->skin = skin;
+		margin);		
 	self->workspace = workspace;
 	self->state = state;
 }
@@ -1038,8 +1036,8 @@ void machinestackinputs_build(MachineStackInputs* self)
 			if (column && column->input != psy_INDEX_INVALID) {
 				component = machineui_create(
 					psy_audio_machines_at(self->state->machines, column->input),
-					column->input, self->skin, &self->component,
-					self->state->paramviews, FALSE, MACHINEUIMODE_BITMAP, self->workspace);
+					&self->component, self->state->paramviews, FALSE,
+					self->workspace);
 			} else {
 				if (!column || column->offset != 0) {
 					component = psy_ui_component_allocinit(&self->component,
@@ -1053,7 +1051,7 @@ void machinestackinputs_build(MachineStackInputs* self)
 					first = machinestackcolumn_at(column, 0);
 					arrow = arrowui_allocinit(&self->component,						
 						psy_audio_wire_make(column->inputroute, first),
-						self->skin, self->workspace);
+						self->workspace);
 					component = &arrow->component;
 				}
 			}
@@ -1062,7 +1060,7 @@ void machinestackinputs_build(MachineStackInputs* self)
 					self->state->columnsize);
 			}
 		}		
-	}
+	}	
 	psy_ui_component_align(&self->component);
 }
 
@@ -1110,16 +1108,14 @@ static psy_ui_ComponentVtable* machinestackoutputs_vtable_init(
 
 /* implementation */
 void machinestackoutputs_init(MachineStackOutputs* self,
-	psy_ui_Component* parent, MachineStackState* state,
-	ParamSkin* skin)
+	psy_ui_Component* parent, MachineStackState* state)
 {
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_setvtable(&self->component,
 		machinestackoutputs_vtable_init(self));	
 	psy_ui_component_setalignexpand(&self->component, psy_ui_HEXPAND);
 	psy_ui_component_setminimumsize(&self->component,
-		psy_ui_size_make_em(10.0, 2.0));
-	self->skin = skin;	
+		psy_ui_size_make_em(10.0, 2.0));	
 	self->state = state;
 }
 
@@ -1140,8 +1136,7 @@ void machinestackoutputs_build(MachineStackOutputs* self)
 				NULL, psy_INDEX_INVALID,
 				(column)
 				? &column->outputroute.machineparam
-				: NULL,
-				self->skin);
+				: NULL);
 			if (knobui) {
 				psy_ui_component_setminimumsize(&knobui->component,
 					psy_ui_size_make(self->state->columnsize.width,
@@ -1336,16 +1331,14 @@ static psy_ui_ComponentVtable* machinestackpane_vtable_init(MachineStackPane* se
 }
 
 void machinestackpane_init(MachineStackPane* self, psy_ui_Component* parent,
-	MachineStackState* state, MachineViewSkin* skin,
-	Workspace* workspace)
+	MachineStackState* state, Workspace* workspace)
 {
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_setvtable(&self->component,
 		machinestackpane_vtable_init(self));	
 	psy_ui_component_setwheelscroll(&self->component, 4);
 	psy_ui_component_setalignexpand(&self->component, psy_ui_HEXPAND);	
-	self->workspace = workspace;
-	self->skin = skin;
+	self->workspace = workspace;	
 	self->state = state;	
 	self->vudrawupdate = FALSE;
 	self->opcount = 0;
@@ -1378,7 +1371,7 @@ void machinestackpane_build(MachineStackPane* self)
 					first = machinestackcolumn_at(column, 0);
 					arrow = arrowui_allocinit(&trackpane->client.component,
 						psy_audio_wire_make(column->inputroute, first),
-						self->skin, self->workspace);
+							self->workspace);
 					if (arrow) {
 						psy_ui_Margin levelmargin;
 
@@ -1426,19 +1419,12 @@ psy_ui_Component* machinestackpane_insert(MachineStackPane* self, uintptr_t slot
 	psy_ui_Component* trackpane)
 {	
 	psy_ui_Component* rv;
-	MachineUiMode drawmode;
-
-	if (self->state->drawsmalleffects) {
-		drawmode = MACHINEUIMODE_DRAWSMALL;
-	} else {
-		drawmode = MACHINEUIMODE_BITMAP;
-	}
+	
 	rv =  machineui_create(
-		psy_audio_machines_at(self->state->machines, slot), slot, self->skin,
-		trackpane, self->state->paramviews,
-		FALSE, drawmode, self->workspace);
+		psy_audio_machines_at(self->state->machines, slot),
+		trackpane, self->state->paramviews, FALSE, self->workspace);
 	if (rv) {
-		if (drawmode = MACHINEUIMODE_DRAWSMALL) {
+		if (self->state->drawsmalleffects) {
 			psy_ui_component_setminimumsize(rv, self->state->effectsizesmall);
 		} else {
 			psy_ui_component_setminimumsize(rv, self->state->effectsize);
@@ -1488,11 +1474,10 @@ void machinestackpane_onmousedoubleclick(MachineStackPane* self,
 /* MachineStackVolumes */
 /* prototypes */
 void machinestackvolumes_init(MachineStackVolumes* self, psy_ui_Component* parent,
-	MachineStackState* state, ParamSkin* skin)
+	MachineStackState* state)
 {
 	psy_ui_component_init(&self->component, parent, NULL);	
-	self->state = state;	
-	self->skin = skin;
+	self->state = state;
 	psy_ui_component_setalignexpand(&self->component, psy_ui_HEXPAND);
 }
 
@@ -1518,16 +1503,14 @@ void machinestackvolumes_build(MachineStackVolumes* self)
 				NULL, psy_INDEX_INVALID,
 				&column->wirevolume->machineparam,
 				psy_INDEX_INVALID,
-				&column->level_param.machineparam,
-				self->skin);
+				&column->level_param.machineparam);
 			if (slidergroup) {								
 				CheckUi* mute;
 
 				component = &slidergroup->component;
 				mute = checkui_allocinit(&slidergroup->controls,
 					NULL, psy_INDEX_INVALID,
-					&column->mute_param.machineparam,
-					self->skin);
+					&column->mute_param.machineparam);
 				psy_ui_component_setalign(&mute->component, psy_ui_ALIGN_TOP);
 			}
 		} else {
@@ -1590,7 +1573,7 @@ static void vtable_init(MachineStackView* self)
 }
 // implementation
 void machinestackview_init(MachineStackView* self, psy_ui_Component* parent,
-	psy_ui_Component* tabbarparent, MachineViewSkin* skin,
+	psy_ui_Component* tabbarparent,
 	ParamViews* paramviews, Workspace* workspace)
 {
 	assert(self);
@@ -1612,20 +1595,16 @@ void machinestackview_init(MachineStackView* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(&self->scroller_columns.component,
 		psy_ui_ALIGN_CLIENT);
 	machinestackinputs_init(&self->inputs, &self->columns,
-		&self->state, skin, workspace);
+		&self->state, workspace);
 	psy_ui_component_setalign(&self->inputs.component, psy_ui_ALIGN_TOP);
-	machinestackpane_init(&self->pane, &self->columns, &self->state, skin,
+	machinestackpane_init(&self->pane, &self->columns, &self->state,
 		workspace);	
 	psy_ui_component_setalign(&self->pane.component, psy_ui_ALIGN_CLIENT);	
-	machinestackvolumes_init(&self->volumes, &self->columns, &self->state,
-		machineparamconfig_skin(
-			psycleconfig_macparam(workspace_conf(workspace))));
+	machinestackvolumes_init(&self->volumes, &self->columns, &self->state);
 	psy_ui_component_setalign(&self->volumes.component, psy_ui_ALIGN_BOTTOM);
 	psy_ui_component_setminimumsize(&self->volumes.component,
 		psy_ui_size_make(self->state.columnsize.width, psy_ui_value_make_px(182.0)));
-	machinestackoutputs_init(&self->outputs, &self->columns, &self->state,
-		machineparamconfig_skin(
-			psycleconfig_macparam(workspace_conf(self->workspace))));
+	machinestackoutputs_init(&self->outputs, &self->columns, &self->state);
 	psy_ui_component_setalign(&self->outputs.component, psy_ui_ALIGN_BOTTOM);
 	// spacer
 	psy_ui_component_init(&self->spacer, &self->columns, NULL);
@@ -1637,10 +1616,7 @@ void machinestackview_init(MachineStackView* self, psy_ui_Component* parent,
 	psy_signal_connect(&workspace->signal_buschanged, self,
 		machinestackview_onbuschanged);
 	machinestackview_setmachines(self, workspace_song(workspace)
-		? &workspace_song(workspace)->machines : NULL);
-	psy_ui_component_setfont(&self->desc.component, &skin->font);
-	psy_ui_component_setfont(&self->inputs.component, &skin->font);	
-	psy_ui_component_setfont(&self->pane.component, &skin->font);	
+		? &workspace_song(workspace)->machines : NULL);	
 }
 
 void machinestackview_destroy(MachineStackView* self)
@@ -1731,7 +1707,7 @@ void machinestackview_build(MachineStackView* self)
 		machinestackoutputs_build(&self->outputs);
 		machinestackvolumes_build(&self->volumes);
 		psy_ui_component_setscrollstep_width(&self->columns,
-			self->state.columnsize.width);
+			self->state.columnsize.width);		
 		psy_ui_app()->alignvalid = FALSE;
 		psy_ui_component_align(&self->component);
 		// reset to normal align

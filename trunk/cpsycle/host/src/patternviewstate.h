@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #if !defined(PATTERNVIEWSTATE_H)
@@ -9,8 +9,11 @@
 /* host */
 #include "patternviewconfig.h"
 #include "patternhostcmds.h"
+#include "styles.h"
 #include "trackercmds.h"
 #include "workspace.h"
+/* ui */
+#include <uiapp.h>
 /* audio */
 #include <pattern.h>
 #include <sequence.h>
@@ -242,8 +245,10 @@ void patternviewstate_selectall(PatternViewState*);
 INLINE double patternviewstate_preferredtrackwidth(const
 	PatternViewState* self)
 {	
-	return self->patconfig->skin.headercoords.background.dest.right -
-		self->patconfig->skin.headercoords.background.dest.left;
+	psy_ui_Style* style;
+
+	style = psy_ui_style(STYLE_PV_TRACK_HEADER);
+	return style->background.size.width;
 }
 
 INLINE bool patternviewstate_cursorposition_valid(PatternViewState* self)
@@ -357,10 +362,10 @@ void patternviewstate_configure_keyboard(PatternViewState*,
 	KeyboardMiscConfig*);
 void patternviewstate_configure(PatternViewState*);
 
-INLINE PatternViewSkin* patternviewstate_skin(PatternViewState* self)
-{
-	return &self->patconfig->skin;
-}
+// INLINE PatternViewSkin* patternviewstate_skin(PatternViewState* self)
+// {
+//	return &self->patconfig->skin;
+// }
 
 psy_audio_SequenceTrackIterator patternviewstate_sequencestart(PatternViewState*,
 	double startoffset);

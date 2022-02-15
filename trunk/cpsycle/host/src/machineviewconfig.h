@@ -23,22 +23,27 @@ enum {
 	PROPERTY_ID_DRAWVIRTUALGENERATORS
 };
 
+struct DirConfig;
+
 typedef struct MachineViewConfig {
 	/* signals */
-	psy_Signal signal_changed;
-	psy_Signal signal_themechanged;
+	psy_Signal signal_changed;	
 	psy_Property* machineview;
 	psy_Property* stackview;
 	psy_Property* theme;	
 	/* references */
-	psy_Property* parent;	
+	psy_Property* parent;
+	struct DirConfig* dirconfig;
 } MachineViewConfig;
 
 void machineviewconfig_init(MachineViewConfig*, psy_Property* parent);
 void machineviewconfig_dispose(MachineViewConfig*);
+
+void machineviewconfig_setdirectories(MachineViewConfig*, struct DirConfig*);
 void machineviewconfig_resettheme(MachineViewConfig*);
-void machineviewconfig_settheme(MachineViewConfig*, psy_Property* skin);
-void machineviewconfig_updatestyles(MachineViewConfig* self, psy_ui_Styles*);
+void machineviewconfig_settheme(MachineViewConfig*, psy_Property*);
+void machineviewconfig_write_styles(MachineViewConfig*);
+void machineviewconfig_read_styles(MachineViewConfig*);
 bool machineviewconfig_hasthemeproperty(const MachineViewConfig*,
 	psy_Property*);
 bool machineviewconfig_hasproperty(const MachineViewConfig*, psy_Property*);
@@ -50,7 +55,6 @@ bool machineviewconfig_virtualgenerators(const MachineViewConfig*);
 bool machineviewconfig_stackview_drawsmalleffects(const MachineViewConfig*);
 
 bool machineviewconfig_onchanged(MachineViewConfig*, psy_Property*);
-bool machineviewconfig_onthemechanged(MachineViewConfig*, psy_Property*);
 
 
 #ifdef __cplusplus

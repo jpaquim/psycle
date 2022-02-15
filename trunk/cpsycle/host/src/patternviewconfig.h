@@ -1,13 +1,11 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #if !defined(PATTERNVIEWCONFIG_H)
 #define PATTERNVIEWCONFIG_H
 
-/* host */
-#include "patternviewskin.h"
 /* ui*/
 #include <uifont.h>
 /* dsp */
@@ -33,12 +31,11 @@ enum {
 
 typedef struct PatternViewConfig {
 	/* signals */
-	psy_Signal signal_changed;
-	psy_Signal signal_themechanged;
+	psy_Signal signal_changed;	
 	/* internal */
 	psy_Property* patternview;
 	psy_Property* theme;
-	PatternViewSkin skin;
+	// PatternViewSkin skin;
 	char* skindir;
 	/* references */
 	psy_Property* parent;
@@ -75,9 +72,9 @@ bool patternviewconfig_issmoothscrolling(const PatternViewConfig*);
 void patternviewconfig_setsmoothscrolling(PatternViewConfig*, bool on);
 int patternviewconfig_patterndisplay(const PatternViewConfig*);
 psy_ui_FontInfo patternviewconfig_readfont(PatternViewConfig*, double zoom);
+void patternviewconfig_updatestyles(PatternViewConfig*);
 /* events */
 bool patternviewconfig_onchanged(PatternViewConfig*, psy_Property*);
-bool patternviewconfig_onthemechanged(PatternViewConfig*, psy_Property*);
 
 #ifdef __cplusplus
 }

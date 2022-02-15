@@ -18,6 +18,7 @@ void psy_ui_value_init(psy_ui_Value* self)
 	assert(self);
 
 	*self = psy_ui_value_make_px(0.0);
+	self->set = TRUE;
 }
 
 void psy_ui_value_add(psy_ui_Value* self, const psy_ui_Value* other,

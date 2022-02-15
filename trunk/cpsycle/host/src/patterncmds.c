@@ -15,7 +15,6 @@
 #include <pattern.h>
 #include <patternio.h>
 #include "cmdsnotes.h"
-#include "skingraphics.h"
 #include <uiopendialog.h>
 #include <uisavedialog.h>
 

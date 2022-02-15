@@ -237,7 +237,7 @@ void seqviewtrack_drawentry(SeqViewTrack* self, psy_ui_Graphics* g,
 
 	if (sel) {
 		if (!rowplaying) {
-			bg = psy_ui_style(STYLE_SEQLISTVIEW_ITEM_SELECT)->backgroundcolour;
+			bg = psy_ui_style(STYLE_SEQLISTVIEW_ITEM_SELECT)->background.colour;
 		} else {
 			psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 		}
@@ -299,7 +299,7 @@ void seqviewtrack_textout_digit(SeqViewTrack* self,
 		digitstr[1] = '\n';
 		if (digit == cursorcol) {			
 			psy_ui_setbackgroundcolour(g,
-				psy_ui_style(STYLE_SEQLISTVIEW_ITEM_SELECT)->backgroundcolour);			
+				psy_ui_style(STYLE_SEQLISTVIEW_ITEM_SELECT)->background.colour);			
 			psy_ui_settextcolour(g,
 				psy_ui_style(STYLE_SEQLISTVIEW_ITEM_SELECT)->colour);
 			psy_ui_textoutrectangle(g,				
@@ -326,7 +326,7 @@ void seqviewtrack_drawprogressbar(SeqViewTrack* self, psy_ui_Graphics* g,
 				psy_ui_component_textmetric(&self->component), NULL),
 			psy_ui_value_px(&self->state->lineheight,
 				psy_ui_component_textmetric(&self->component), NULL))),
-		psy_ui_style_const(STYLE_SEQ_PROGRESS)->backgroundcolour);
+		psy_ui_style_const(STYLE_SEQ_PROGRESS)->background.colour);
 }
 
 void seqviewtrack_onpreferredsize(SeqViewTrack* self,
