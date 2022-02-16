@@ -166,7 +166,7 @@ static void machineframe_vtable_init(MachineFrame* self)
 /* implementation */
 void machineframe_init(MachineFrame* self, psy_ui_Component* parent,
 	psy_audio_Machine* machine, ParamViews* paramviews, Workspace* workspace)
-{
+{	
 	psy_ui_toolframe_init(&self->component, parent);
 	machineframe_vtable_init(self);
 	psy_ui_component_move(&self->component,
@@ -188,8 +188,6 @@ void machineframe_init(MachineFrame* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(&self->newval.component, psy_ui_ALIGN_TOP);
 	psy_ui_component_hide(&self->newval.component);	
 	psy_ui_component_init(&self->client, &self->component, NULL);	
-	psy_ui_component_setbackgroundmode(&self->client,
-		psy_ui_NOBACKGROUND);
 	psy_ui_component_setalign(&self->client, psy_ui_ALIGN_CLIENT);
 	parammap_init(&self->parammap, &self->client, NULL,
 		psycleconfig_macparam(workspace_conf(workspace)));

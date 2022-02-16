@@ -32,18 +32,21 @@ static void levelui_updateparam(LevelUi*);
 static psy_ui_ComponentVtable levelui_vtable;
 static bool levelui_vtable_initialized = FALSE;
 
-static psy_ui_ComponentVtable* levelui_vtable_init(LevelUi* self)
+static void levelui_vtable_init(LevelUi* self)
 {
 	assert(self);
 
 	if (!levelui_vtable_initialized) {
 		levelui_vtable = *(self->component.vtable);
-		levelui_vtable.ondraw = (psy_ui_fp_component_ondraw)levelui_ondraw;		
-		levelui_vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
+		levelui_vtable.ondraw =
+			(psy_ui_fp_component_ondraw)
+			levelui_ondraw;
+		levelui_vtable.onpreferredsize =
+			(psy_ui_fp_component_onpreferredsize)
 			levelui_onpreferredsize;		
 		levelui_vtable_initialized = TRUE;
 	}
-	return &levelui_vtable;
+	psy_ui_component_setvtable(&self->component, &levelui_vtable);
 }
 
 /* implementation */
@@ -54,10 +57,8 @@ void levelui_init(LevelUi* self, psy_ui_Component* parent,
 	assert(self);		
 
 	psy_ui_component_init(&self->component, parent, NULL);
-	levelui_vtable_init(self);
-	self->component.vtable = &levelui_vtable;
-	psy_ui_component_setbackgroundmode(&self->component,
-		psy_ui_NOBACKGROUND);	
+	levelui_vtable_init(self);	
+	psy_ui_component_setstyletype(&self->component, STYLE_MV_LEVEL);
 	self->machine = machine;
 	self->paramidx = paramidx;
 	self->param = param;	

@@ -19,7 +19,7 @@ struct psy_ui_ComponentImp;
 
 typedef struct psy_ui_DropDownBox {
     /* inherits */
-    psy_ui_Component component;        
+    psy_ui_Component component;    
 } psy_ui_DropDownBox;
 
 void psy_ui_dropdownbox_init(psy_ui_DropDownBox*, psy_ui_Component* parent);

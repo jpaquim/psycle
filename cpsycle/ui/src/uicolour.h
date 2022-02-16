@@ -16,8 +16,22 @@ extern "C" {
 #endif
 
 typedef struct psy_ui_ColourMode {
-	bool set;	
+	bool inherit;
+	bool transparent;	
 } psy_ui_ColourMode;
+
+
+INLINE void psy_ui_colourmode_init(psy_ui_ColourMode* self)
+{
+	self->inherit = TRUE;
+	self->transparent = FALSE;
+}
+
+INLINE void psy_ui_colourmode_init_all(psy_ui_ColourMode* self, bool inherit, bool transparent)
+{
+	self->inherit = inherit;
+	self->transparent = transparent;
+}
 
 typedef struct psy_ui_Colour
 {
@@ -31,19 +45,30 @@ typedef struct psy_ui_Colour
 
 INLINE void psy_ui_colour_init(psy_ui_Colour* self)
 {	
-	self->mode.set = FALSE;
+	psy_ui_colourmode_init_all(&self->mode, FALSE, TRUE);
 	self->overlay = 0;
-	self->r = self->g = self->b = self->a = 0;
+	self->r = self->g = self->b = 0;
+	self->a = 0xFF;
 }
 
 INLINE void psy_ui_colour_init_rgb(psy_ui_Colour* self, uint8_t r, uint8_t g, uint8_t b)
 {	
-	self->mode.set = TRUE;
+	psy_ui_colourmode_init_all(&self->mode, FALSE, FALSE);
 	self->overlay = 0;
-	self->a = 0;
+	self->a = 0xFF;
 	self->r = r;
 	self->g = g;
-	self->b = b;	
+	self->b = b;
+}
+
+INLINE void psy_ui_colour_init_rgba(psy_ui_Colour* self, uint8_t r, uint8_t g, uint8_t b, uint8_t a)
+{
+	psy_ui_colourmode_init_all(&self->mode, FALSE, FALSE);
+	self->overlay = 0;
+	self->a = a;
+	self->r = r;
+	self->g = g;
+	self->b = b;
 }
 
 void psy_ui_colour_init_str(psy_ui_Colour* self, const char* str);
@@ -71,9 +96,9 @@ INLINE psy_ui_Colour psy_ui_colour_make_overlay(uint8_t value)
 {
 	psy_ui_Colour rv;
 
-	rv.mode.set = TRUE;
+	psy_ui_colourmode_init_all(&rv.mode, FALSE, FALSE);
 	rv.overlay = value;
-	rv.r = rv.b = rv.g = 0;	
+	rv.r = rv.b = rv.g = rv.a = 0;
 	return rv;
 }
 
@@ -120,6 +145,14 @@ INLINE void psy_ui_colour_rgb(const psy_ui_Colour* self,
 	*b = self->b;
 }
 
+INLINE psy_ui_Colour psy_ui_colour_make_rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a)
+{
+	psy_ui_Colour rv;
+
+	psy_ui_colour_init_rgba(&rv, r, g, b, a);
+	return rv;
+}
+
 psy_ui_Colour* psy_ui_colour_add_rgb(psy_ui_Colour* self, float r, float g, float b);
 psy_ui_Colour* psy_ui_colour_mul_rgb(psy_ui_Colour* self, float r, float g, float b);
 psy_ui_Colour psy_ui_diffadd_colours(psy_ui_Colour base, psy_ui_Colour adjust,
@@ -127,7 +160,7 @@ psy_ui_Colour psy_ui_diffadd_colours(psy_ui_Colour base, psy_ui_Colour adjust,
 
 INLINE bool psy_ui_equal_colours(const psy_ui_Colour* lhs, const psy_ui_Colour* rhs)
 {
-	return lhs->mode.set && rhs->mode.set &&
+	return !lhs->mode.transparent && !rhs->mode.transparent &&
 		(lhs->r == rhs->r) &&
 		(lhs->g == rhs->g) &&
 		(lhs->b == rhs->b) &&		
@@ -246,37 +279,54 @@ INLINE psy_ui_Colour psy_ui_colour_weighted(const psy_ui_Colour* self, int weigh
 
 INLINE psy_ui_Colour psy_ui_colour_white(void)
 {
-	return psy_ui_colour_make_argb(0x00FFFFFF);
+	return psy_ui_colour_make_argb(0xFFFFFFFF);
 }
 
 INLINE psy_ui_Colour psy_ui_colour_black(void)
 {
-	return psy_ui_colour_make_argb(0x00000000);
+	return psy_ui_colour_make_argb(0xFF000000);
 }
 
 INLINE psy_ui_Colour psy_ui_colour_red(void)
 {
-	return psy_ui_colour_make_argb(0x00FF0000);
+	return psy_ui_colour_make_argb(0xFFFF0000);
 }
 
 INLINE psy_ui_Colour psy_ui_colour_green(void)
 {
-	return psy_ui_colour_make_argb(0x0000FF00);
+	return psy_ui_colour_make_argb(0xFF00FF00);
 }
 
 INLINE psy_ui_Colour psy_ui_colour_blue(void)
 {
-	return psy_ui_colour_make_argb(0x000000FF);
+	return psy_ui_colour_make_argb(0xFF0000FF);
 }
 
 INLINE psy_ui_Colour psy_ui_colour_gray(void)
 {
-	return psy_ui_colour_make_argb(0x00808080);
+	return psy_ui_colour_make_argb(0xFF808080);
 }
 
 INLINE psy_ui_Colour psy_ui_colour_lightgray(void)
 {
-	return psy_ui_colour_make_argb(0x00C0C0C0);
+	return psy_ui_colour_make_argb(0xFFC0C0C0);
+}
+
+INLINE psy_ui_Colour psy_ui_colour_transparent(void)
+{
+	psy_ui_Colour rv;
+
+	psy_ui_colour_init(&rv);
+	return rv;
+}
+
+INLINE psy_ui_Colour psy_ui_colour_inherit(void)
+{
+	psy_ui_Colour rv;
+
+	psy_ui_colour_init(&rv);
+	rv.mode.inherit = TRUE;
+	return rv;
 }
 
 #ifdef __cplusplus

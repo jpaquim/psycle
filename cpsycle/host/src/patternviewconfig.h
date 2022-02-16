@@ -39,6 +39,7 @@ typedef struct PatternViewConfig {
 	char* skindir;
 	/* references */
 	psy_Property* parent;
+	struct DirConfig* dirconfig;
 } PatternViewConfig;
 
 void patternviewconfig_init(PatternViewConfig*, psy_Property* parent,
@@ -72,7 +73,7 @@ bool patternviewconfig_issmoothscrolling(const PatternViewConfig*);
 void patternviewconfig_setsmoothscrolling(PatternViewConfig*, bool on);
 int patternviewconfig_patterndisplay(const PatternViewConfig*);
 psy_ui_FontInfo patternviewconfig_readfont(PatternViewConfig*, double zoom);
-void patternviewconfig_updatestyles(PatternViewConfig*);
+void patternviewconfig_write_styles(PatternViewConfig*);
 /* events */
 bool patternviewconfig_onchanged(PatternViewConfig*, psy_Property*);
 

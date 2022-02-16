@@ -201,8 +201,7 @@ void machinewireview_init(MachineWireView* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {
 	psy_ui_component_init(&self->component, parent, NULL);
-	vtable_init(self);
-	psy_ui_component_setbackgroundmode(&self->component, psy_ui_NOBACKGROUND);
+	vtable_init(self);	
 	psy_ui_component_setstyletype(&self->component, STYLE_MACHINEVIEW_WIRES);
 	machinewireviewuis_init(&self->machineuis, &self->component, paramviews,
 		workspace);
@@ -396,7 +395,7 @@ void machinewireview_drawwirearrow(MachineWireView* self, psy_ui_Graphics* g,
 	center.x = (p2.x - p1.x) / 2 + p1.x;
 	center.y = (p2.y - p1.y) / 2 + p1.y;
 	
-	polysize2 = style->background.size.width;
+	polysize2 = style->background.size.width / 2;
 	a.x = -polysize2;
 	a.y = polysize2;
 	b.x = polysize2;

@@ -43,6 +43,7 @@ typedef struct psy_ui_ComboBox {
     psy_Signal signal_selchanged;
     /* internal */
     psy_ui_DropDownBox dropdown;
+    psy_ui_Component pane;
     psy_ui_ListBox listbox;
     psy_ui_Button less;
     psy_ui_Button more;    

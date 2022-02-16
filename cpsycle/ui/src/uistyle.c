@@ -69,7 +69,7 @@ static psy_ui_Colour readcolour(psy_Property* parent, const char* key)
 		rv = psy_ui_colour_make(value);
 	} else {
 		rv = psy_ui_colour_make(0);
-		rv.mode.set = FALSE;
+		rv.mode.transparent = TRUE;
 	}
 	free(colourset);
 	colourset = NULL;
@@ -79,7 +79,8 @@ static psy_ui_Colour readcolour(psy_Property* parent, const char* key)
 /* psy_ui_Style */
 void psy_ui_style_init(psy_ui_Style* self)
 {
-	psy_ui_colour_init(&self->colour);	
+	psy_ui_colour_init(&self->colour);
+	self->colour.mode.inherit = TRUE;
 	psy_ui_font_init(&self->font, NULL);	
 	psy_ui_background_init(&self->background);		
 	psy_ui_border_init(&self->border);
@@ -111,6 +112,7 @@ void psy_ui_style_init_colours(psy_ui_Style* self, psy_ui_Colour colour,
 	psy_ui_Colour background)
 {
 	self->colour = colour;	
+	self->colour.mode.inherit = TRUE;
 	psy_ui_font_init(&self->font, NULL);
 	psy_ui_background_init(&self->background);
 	self->background.colour = background;	
@@ -133,11 +135,11 @@ void psy_ui_styles_init_property(psy_ui_Style* self, psy_Property* style)
 		return;
 	}
 	colour = readcolour(style, "color");
-	if (colour.mode.set) {
+	if (!colour.mode.transparent) {
 		self->colour = colour;
 	}
 	colour = readcolour(style, "background-color");
-	if (colour.mode.set) {
+	if (!colour.mode.transparent) {
 		self->background.colour = colour;
 	}	
 }

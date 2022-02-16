@@ -62,7 +62,6 @@ void generatorui_init(GeneratorUi* self, psy_ui_Component* parent,
 
 	psy_ui_component_init(&self->component, parent, NULL);
 	generatorui_vtable_init(self);	
-	self->component.id = 800;
 	self->paramviews = paramviews;
 	self->machines = &workspace->song->machines;
 	assert(self->machines);

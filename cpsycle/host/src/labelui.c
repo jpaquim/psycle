@@ -31,18 +31,21 @@ static void labelui_updateparam(LabelUi*);
 static psy_ui_ComponentVtable labelui_vtable;
 static bool labelui_vtable_initialized = FALSE;
 
-static psy_ui_ComponentVtable* labelui_vtable_init(LabelUi* self)
+static void labelui_vtable_init(LabelUi* self)
 {
 	assert(self);
 
 	if (!labelui_vtable_initialized) {
 		labelui_vtable = *(self->component.vtable);
-		labelui_vtable.ondraw = (psy_ui_fp_component_ondraw)labelui_ondraw;
-		labelui_vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
+		labelui_vtable.ondraw =
+			(psy_ui_fp_component_ondraw)
+			labelui_ondraw;
+		labelui_vtable.onpreferredsize =
+			(psy_ui_fp_component_onpreferredsize)
 			labelui_onpreferredsize;		
 		labelui_vtable_initialized = TRUE;
 	}
-	return &labelui_vtable;
+	psy_ui_component_setvtable(&self->component, &labelui_vtable);
 }
 
 /* implementation */
@@ -53,8 +56,8 @@ void labelui_init(LabelUi* self, psy_ui_Component* parent,
 	assert(self);	
 
 	psy_ui_component_init(&self->component, parent, NULL);
-	psy_ui_component_setvtable(&self->component, labelui_vtable_init(self));	
-	psy_ui_component_setbackgroundmode(&self->component, psy_ui_NOBACKGROUND);
+	labelui_vtable_init(self);
+	psy_ui_component_setstyletype(&self->component, STYLE_MV_LABEL);
 	self->param = param;
 	self->machine = machine;
 	self->paramidx = paramidx;

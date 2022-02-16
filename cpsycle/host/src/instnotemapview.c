@@ -971,8 +971,7 @@ void instrumententryrow_init(InstrumentEntryRow* self, psy_ui_Component* parent,
 	InstrumentEntryState* state)
 {
 	psy_ui_component_init(&self->component, parent, NULL);
-	instrumententryrow_vtableinit_init(self);
-	psy_ui_component_doublebuffer(&self->component);
+	instrumententryrow_vtableinit_init(self);	
 	psy_ui_component_setstyletypes(&self->component,
 		STYLE_TABLEROW, STYLE_TABLEROW_HOVER, STYLE_TABLEROW_SELECT,
 		psy_INDEX_INVALID);

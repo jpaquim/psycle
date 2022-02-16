@@ -461,7 +461,7 @@ void psy_ui_button_loadbitmaps(psy_ui_Button* self)
 			psy_ui_bitmap_loadresource(&self->bitmapicon, self->lightresourceid);
 		}
 	}
-	if (self->bitmaptransparency.mode.set) {
+	if (!self->bitmaptransparency.mode.transparent) {
 		psy_ui_bitmap_settransparency(&self->bitmapicon,
 			self->bitmaptransparency);
 	}

@@ -17,9 +17,7 @@ typedef struct psy_ui_ViewComponentImp {
 	uintptr_t winid;		
 	int preventwmchar;
 	psy_ui_RealRectangle position;
-	int dbg;
-	psy_ui_TextMetric tm;
-	bool tmcachevalid;
+	int dbg;	
 	bool visible;
 	psy_ui_Component* view;
 	psy_ui_Component* parent;

@@ -1797,7 +1797,7 @@ void trackerview_init(TrackerView* self, psy_ui_Component* parent,
 	psy_ui_component_setwheelscroll(&self->grid.component, 4);
 	psy_ui_component_setoverflow(trackergrid_base(&self->grid),
 		psy_ui_OVERFLOW_SCROLL);
-	psy_ui_scroller_init(&self->scroller, &self->grid.component, parent);
+	psy_ui_scroller_init(&self->scroller, &self->grid.component, parent);	
 	psy_signal_connect(&self->scroller.pane.signal_align, self,
 		trackerview_onscrollpanealign);
 	psy_ui_component_setbackgroundmode(&self->scroller.pane,

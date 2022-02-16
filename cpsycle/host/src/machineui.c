@@ -34,8 +34,6 @@ void editnameui_init(EditnameUi* self, psy_ui_Component* parent,
 	psy_ui_label_preventtranslation(&self->label);
 	psy_ui_label_preventwrap(&self->label);		
 	psy_ui_component_setstyletype(psy_ui_label_base(&self->label), style);	
-	psy_ui_component_setbackgroundmode(&self->label.component,
-		psy_ui_NOBACKGROUND);
 	editnameui_update(self);	
 }
 
@@ -160,7 +158,6 @@ static void panui_onalign(PanUi*);
 
 /* vtable */
 static psy_ui_ComponentVtable panui_vtable;
-static psy_ui_ComponentVtable panui_super_vtable;
 static bool panui_vtable_initialized = FALSE;
 
 static void panui_vtable_init(PanUi* self)
@@ -168,8 +165,7 @@ static void panui_vtable_init(PanUi* self)
 	assert(self);
 
 	if (!panui_vtable_initialized) {
-		panui_vtable = *(self->component.vtable);
-		panui_super_vtable = panui_vtable;
+		panui_vtable = *(self->component.vtable);		
 		panui_vtable.onalign =
 			(psy_ui_fp_component_event)
 			panui_onalign;
@@ -182,7 +178,6 @@ static void panui_vtable_init(PanUi* self)
 		panui_vtable.onmousemove =
 			(psy_ui_fp_component_onmouseevent)
 			panui_onmousemove;
-
 		panui_vtable_initialized = TRUE;
 	}
 	psy_ui_component_setvtable(&self->component, &panui_vtable);
@@ -203,16 +198,20 @@ void panui_init(PanUi* self, psy_ui_Component* parent, psy_audio_Machine* machin
 
 void panui_onmousedown(PanUi* self, psy_ui_MouseEvent* ev)
 {
-	psy_ui_component_capture(&self->component);
-	self->drag = TRUE;
-	psy_ui_mouseevent_stop_propagation(ev);
+	if (psy_ui_mouseevent_target(ev) == &self->slider) {
+		psy_ui_component_capture(&self->component);
+		self->drag = TRUE;
+		psy_ui_mouseevent_stop_propagation(ev);
+	}
 }
 
 void panui_onmouseup(PanUi* self, psy_ui_MouseEvent* ev)
 {
-	psy_ui_component_releasecapture(&self->component);
-	self->drag = FALSE;
-	psy_ui_mouseevent_stop_propagation(ev);
+	if (self->drag) {
+		psy_ui_component_releasecapture(&self->component);
+		self->drag = FALSE;
+		psy_ui_mouseevent_stop_propagation(ev);
+	}
 }
 
 void panui_onmousemove(PanUi* self, psy_ui_MouseEvent* ev)
@@ -225,7 +224,7 @@ void panui_onmousemove(PanUi* self, psy_ui_MouseEvent* ev)
 		size = psy_ui_component_size_px(&self->component);
 		slidersize = psy_ui_component_size_px(&self->slider);
 		panvalue = (psy_dsp_amp_t)((ev->offset_.x) /
-			(((double)size.width - slidersize.width)));
+			(((double)size.width)));
 		psy_audio_machine_setpanning(self->machine, psy_min(panvalue,
 			(psy_dsp_amp_t)1.0));
 		psy_ui_component_align(&self->component);
@@ -249,7 +248,7 @@ void panui_onalign(PanUi* self)
 		position = style->position;
 		position.topleft.x = psy_ui_value_make_px(
 			psy_audio_machine_panning(self->machine) *
-			((double)size.width - slidersize.width));
+			((double)size.width - (slidersize.width)));
 		psy_ui_component_setposition(&self->slider, position);		
 	}
 }

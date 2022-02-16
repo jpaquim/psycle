@@ -398,9 +398,7 @@ void psy_ui_scrollbar_init(psy_ui_ScrollBar* self, psy_ui_Component* parent)
 {
 	assert(self);
 
-	psy_ui_component_init(&self->component, parent, NULL);
-	psy_ui_component_setbackgroundmode(&self->component,
-		psy_ui_NOBACKGROUND);
+	psy_ui_component_init(&self->component, parent, NULL);		
 	psy_signal_connect(&self->component.signal_destroy, self,
 		psy_ui_scrollbar_ondestroy);
 	/* Less Button */

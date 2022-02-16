@@ -373,7 +373,7 @@ void psy_ui_drawborder(psy_ui_Graphics* self, psy_ui_RealRectangle r,
 		}
 		psy_ui_setlinewidth(self, restorelinewidth);
 	} else {
-		if (border->top.style != psy_ui_BORDER_NONE && border->top.colour.mode.set) {
+		if (border->top.style != psy_ui_BORDER_NONE && !border->top.colour.mode.transparent) {
 			psy_ui_setcolour(self, border->top.colour);			
 			psy_ui_drawline(self,
 				psy_ui_realpoint_make(
@@ -381,17 +381,17 @@ void psy_ui_drawborder(psy_ui_Graphics* self, psy_ui_RealRectangle r,
 					r.top),
 				psy_ui_realpoint_make(r.right - 1, r.top));
 		}
-		if (border->right.style != psy_ui_BORDER_NONE && border->right.colour.mode.set) {
+		if (border->right.style != psy_ui_BORDER_NONE && !border->right.colour.mode.transparent) {
 			psy_ui_setcolour(self, border->right.colour);
 			psy_ui_drawline(self, psy_ui_realpoint_make(r.right - 1, r.top),
 				psy_ui_realpoint_make(r.right - 1, r.bottom - 1));
 		}
-		if (border->bottom.style != psy_ui_BORDER_NONE && border->bottom.colour.mode.set) {
+		if (border->bottom.style != psy_ui_BORDER_NONE && !border->bottom.colour.mode.transparent) {
 			psy_ui_setcolour(self, border->bottom.colour);
 			psy_ui_drawline(self, psy_ui_realpoint_make(r.left, r.bottom - 1),
 				psy_ui_realpoint_make(r.right, r.bottom - 1));
 		}
-		if (border->left.style != psy_ui_BORDER_NONE && border->left.colour.mode.set) {
+		if (border->left.style != psy_ui_BORDER_NONE && !border->left.colour.mode.transparent) {
 			psy_ui_setcolour(self, border->left.colour);
 			psy_ui_drawline(self, psy_ui_realrectangle_topleft(&r),
 				psy_ui_realpoint_make(r.left, r.bottom - 1));

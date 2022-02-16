@@ -14,13 +14,13 @@
 #include "../../detail/portable.h"
 
 /* prototypes */
+static void envelopebox_ondestroy(EnvelopeBox*);
 static void envelopebox_ondraw(EnvelopeBox*, psy_ui_Graphics*);
 static void envelopebox_drawgrid(EnvelopeBox*, psy_ui_Graphics*);
 static void envelopebox_drawpoints(EnvelopeBox*, psy_ui_Graphics*);
 static void envelopebox_drawlines(EnvelopeBox*, psy_ui_Graphics*);
 static void envelopebox_drawruler(EnvelopeBox*, psy_ui_Graphics*);
 static void envelopebox_onsize(EnvelopeBox*);
-static void envelopebox_ondestroy(EnvelopeBox*, psy_ui_Component* sender);
 static void envelopebox_onmousedown(EnvelopeBox*, psy_ui_MouseEvent*);
 static void envelopebox_onmousemove(EnvelopeBox*, psy_ui_MouseEvent*);
 static void envelopebox_onmouseup(EnvelopeBox*, psy_ui_MouseEvent*);
@@ -41,6 +41,9 @@ static void envelopebox_vtable_init(EnvelopeBox* self)
 {
 	if (!envelopebox_vtable_initialized) {
 		envelopebox_vtable = *(self->component.vtable);
+		envelopebox_vtable.ondestroy =
+			(psy_ui_fp_component_event)
+			envelopebox_ondestroy;
 		envelopebox_vtable.onsize =
 			(psy_ui_fp_component_event)
 			envelopebox_onsize;
@@ -89,10 +92,7 @@ void envelopebox_init(EnvelopeBox* self, psy_ui_Component* parent)
 	self->sustaincolour = psy_ui_colour_make(0x00516850);
 	self->rulercolour = psy_ui_colour_make(0x00434343);
 	psy_ui_component_setpreferredsize(&self->component,
-		psy_ui_size_make_em(20.0, 15.0));
-	psy_ui_component_doublebuffer(&self->component);	
-	psy_signal_connect(&self->component.signal_destroy, self,
-		envelopebox_ondestroy);	
+		psy_ui_size_make_em(20.0, 15.0));	
 	psy_signal_init(&self->signal_tweaked);
 }
 
@@ -104,7 +104,7 @@ void envelopebox_setenvelope(EnvelopeBox* self,
 	psy_ui_component_invalidate(&self->component);
 }
 
-void envelopebox_ondestroy(EnvelopeBox* self, psy_ui_Component* sender)
+void envelopebox_ondestroy(EnvelopeBox* self)
 {
 	psy_signal_dispose(&self->signal_tweaked);
 }

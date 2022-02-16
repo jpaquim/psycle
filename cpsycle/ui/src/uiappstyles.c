@@ -57,7 +57,7 @@ void psy_ui_appstyles_initdarktheme(psy_ui_Styles* self,
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolours(style,
 		psy_ui_colour_weighted(&material.onsurface, material.accent),
-		material.surface);
+		material.surface);		
 	if (keepfont) {
 		psy_ui_font_init(&style->font, NULL);
 		psy_ui_font_copy(&style->font, &oldfont);
@@ -92,7 +92,7 @@ void psy_ui_appstyles_initdarktheme(psy_ui_Styles* self,
 	/* button */
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolour(style,
-		psy_ui_colour_weighted(&material.onsurface, material.medium));
+		psy_ui_colour_weighted(&material.onsurface, material.medium));		
 	psy_ui_style_setpadding_em(style, 0.25, 1.0, 0.25, 1.0);
 	psy_ui_styles_setstyle(self, psy_ui_STYLE_BUTTON, style);
 	/* button::hover */
@@ -249,8 +249,9 @@ void psy_ui_appstyles_initdarktheme(psy_ui_Styles* self,
 	psy_ui_styles_setstyle(self, psy_ui_STYLE_SWITCH_SELECT, style);
 	/* listbox */
 	style = psy_ui_style_allocinit();
-	psy_ui_style_setcolour(style,
-		psy_ui_colour_weighted(&material.onprimary, material.medium));
+	psy_ui_style_setcolours(style,
+		psy_ui_colour_weighted(&material.onprimary, material.medium),
+		psy_ui_colour_make_overlay(2));
 	psy_ui_styles_setstyle(self, psy_ui_STYLE_LISTBOX, style);
 	/* checkmark */
 	style = psy_ui_style_allocinit();
@@ -500,7 +501,6 @@ void psy_ui_appstyles_initlighttheme(psy_ui_Styles* self,
 	psy_ui_style_setcolours(style, light.cl_font_1, light.cl_white);
 	psy_ui_styles_setstyle(self, psy_ui_STYLE_CHECKMARK, style);
 }
-
 
 /* Windows 98 Theme */
 void psy_ui_appstyles_inittheme_win98(psy_ui_Styles* self, bool keepfont)

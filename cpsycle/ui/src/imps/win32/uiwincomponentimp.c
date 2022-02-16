@@ -266,8 +266,7 @@ void psy_ui_win_componentimp_init(psy_ui_win_ComponentImp* self,
 	self->wndproc = 0;	
 	self->preventwmchar = 0;
 	self->topleftcachevalid = FALSE;
-	self->sizecachevalid = FALSE;
-	self->tmcachevalid = FALSE;
+	self->sizecachevalid = FALSE;	
 	self->dbg = 0;	
 	self->visible = parent ? TRUE : FALSE;
 	self->viewcomponents = NULL;
@@ -647,8 +646,7 @@ void dev_setposition(psy_ui_win_ComponentImp* self, psy_ui_Point topleft,
 				/* SWP_NOREDRAW | SWP_NOZORDER); */
 				SWP_NOZORDER);
 		} else {
-			self->topleftcache = topleft;
-			self->tmcachevalid = TRUE;
+			self->topleftcache = topleft;			
 			self->sizecache = size;
 			self->sizecachevalid = TRUE;
 			return;
@@ -879,17 +877,7 @@ void dev_setfont(psy_ui_win_ComponentImp* self, psy_ui_Font* source)
 		HFONT hfont;
 		
 		hfont = ((psy_ui_win_FontImp*)(source->imp))->hfont;
-		SendMessage(self->hwnd, WM_SETFONT, (WPARAM)hfont, 0);
-		if (self->tmcachevalid) {
-			const psy_ui_Font* font;
-
-			font = psy_ui_component_font(self->component);
-			if (font) {
-				self->tmcachevalid = psy_ui_font_equal(font, source);
-				return;
-			}
-		}
-		self->tmcachevalid = FALSE;
+		SendMessage(self->hwnd, WM_SETFONT, (WPARAM)hfont, 0);		
 	}	
 }
 
@@ -981,58 +969,15 @@ bool dev_inputprevented(const psy_ui_win_ComponentImp* self)
 
 const psy_ui_TextMetric* dev_textmetric(const psy_ui_win_ComponentImp* self)
 {	
-	if (!self->tmcachevalid) {	
-		psy_ui_TextMetric rv;
-		TEXTMETRIC tm;
-		HDC hdc;
-		HFONT hPrevFont = 0;
-		HFONT hfont = 0;
-		const psy_ui_Font* font = NULL;
+	if (self->component) {
+		const psy_ui_Font* font;
 
-		hdc = GetDC(self->hwnd);
-		SaveDC(hdc);
-		if (self->component) {
-			font = psy_ui_component_font(self->component);
-		}
+		font = psy_ui_component_font(self->component);
 		if (font) {
-			hfont = ((psy_ui_win_FontImp*)font->imp)->hfont;
-			if (hfont) {
-				hPrevFont = SelectObject(hdc, hfont);
-			}
+			return psy_ui_font_textmetric(font);
 		}
-		GetTextMetrics(hdc, &tm);
-		if (font) {
-			if (hPrevFont) {
-				SelectObject(hdc, hPrevFont);
-			}
-		}
-		RestoreDC(hdc, -1);
-		ReleaseDC(self->hwnd, hdc);
-		rv.tmHeight = tm.tmHeight;
-		rv.tmAscent = tm.tmAscent;
-		rv.tmDescent = tm.tmDescent;
-		rv.tmInternalLeading = tm.tmInternalLeading;
-		rv.tmExternalLeading = tm.tmExternalLeading;
-		rv.tmAveCharWidth = tm.tmAveCharWidth;
-		rv.tmMaxCharWidth = tm.tmMaxCharWidth;
-		rv.tmWeight = tm.tmWeight;
-		rv.tmOverhang = tm.tmOverhang;
-		rv.tmDigitizedAspectX = tm.tmDigitizedAspectX;
-		rv.tmDigitizedAspectY = tm.tmDigitizedAspectY;
-		rv.tmFirstChar = tm.tmFirstChar;
-		rv.tmLastChar = tm.tmLastChar;
-		rv.tmDefaultChar = tm.tmDefaultChar;
-		rv.tmBreakChar = tm.tmBreakChar;
-		rv.tmItalic = tm.tmItalic;
-		rv.tmUnderlined = tm.tmUnderlined;
-		rv.tmStruckOut = tm.tmStruckOut;
-		rv.tmPitchAndFamily = tm.tmPitchAndFamily;
-		rv.tmCharSet = tm.tmCharSet;
-		/* mutable */
-		((psy_ui_win_ComponentImp*)(self))->tm = rv;
-		((psy_ui_win_ComponentImp*)(self))->tmcachevalid = TRUE;
 	}
-	return &self->tm;
+	return NULL;
 }
 
 void dev_setcursor(psy_ui_win_ComponentImp* self, psy_ui_CursorStyle

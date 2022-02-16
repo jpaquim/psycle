@@ -715,7 +715,7 @@ void workspace_setapptheme(Workspace* self, psy_Property* property)
 		psy_ui_defaults_inittheme(psy_ui_appdefaults(), theme, TRUE);
 		inithoststyles(&psy_ui_appdefaults()->styles, theme);
 		machineviewconfig_write_styles(&self->config.macview);
-		patternviewconfig_updatestyles(&self->config.patview);
+		patternviewconfig_write_styles(&self->config.patview);
 		psy_ui_defaults_loadtheme(psy_ui_appdefaults(),
 			dirconfig_configdir(&self->config.directories),
 			theme);		

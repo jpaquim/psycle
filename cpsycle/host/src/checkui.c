@@ -66,7 +66,7 @@ void checkui_init(CheckUi* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->component, parent, NULL);
 	checkui_vtable_init(self);
 	self->component.vtable = &checkui_vtable;
-	psy_ui_component_setbackgroundmode(&self->component, psy_ui_NOBACKGROUND);
+	psy_ui_component_setstyletype(&self->component, STYLE_MV_CHECK);
 	self->machine = machine;
 	self->paramidx = paramidx;
 	self->param = param;

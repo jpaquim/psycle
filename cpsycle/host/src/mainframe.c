@@ -193,9 +193,7 @@ void mainframe_init(MainFrame* self)
 void mainframe_initframe(MainFrame* self)
 {
 	psy_ui_frame_init_main(mainframe_base(self));
-	vtable_init(self);	
-	psy_ui_component_setbackgroundmode(mainframe_base(self),
-		psy_ui_SETBACKGROUND);
+	vtable_init(self);		
 	psy_ui_component_doublebuffer(mainframe_base(self));
 	psy_ui_app_setmain(psy_ui_app(), mainframe_base(self));
 	psy_ui_component_seticonressource(mainframe_base(self), IDI_PSYCLEICON);
@@ -204,7 +202,7 @@ void mainframe_initframe(MainFrame* self)
 	self->titlemodified = FALSE;	
 	psy_ui_component_init(&self->pane, mainframe_base(self),
 		mainframe_base(self));	
-	psy_ui_component_setalign(&self->pane, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_setalign(&self->pane, psy_ui_ALIGN_CLIENT);		
 }
 
 void mainframe_ondestroyed(MainFrame* self)
@@ -245,15 +243,7 @@ void mainframe_initlayout(MainFrame* self)
 	psy_ui_component_setalign(mainstatusbar_base(&self->statusbar),
 		psy_ui_ALIGN_BOTTOM);
 	psy_ui_component_init_align(&self->client, &self->pane, NULL,
-		psy_ui_ALIGN_CLIENT);		
-	psy_ui_component_init_align(&self->spacerleft, &self->pane,
-		NULL, psy_ui_ALIGN_LEFT);
-	psy_ui_component_setpreferredsize(&self->spacerleft,
-		psy_ui_size_make_em(0.5, 0.0));
-	psy_ui_component_init_align(&self->spacerright, &self->client,
-		NULL, psy_ui_ALIGN_RIGHT);
-	psy_ui_component_setpreferredsize(&self->spacerright,
-		psy_ui_size_make_em(0.5, 0.0));
+		psy_ui_ALIGN_CLIENT);	
 	psy_ui_component_init_align(&self->top, &self->pane,
 		NULL, psy_ui_ALIGN_TOP);	
 	psy_ui_component_setdefaultalign(&self->top, psy_ui_ALIGN_TOP,
@@ -298,8 +288,10 @@ void mainframe_initstatusbar(MainFrame* self)
 void mainframe_initminmaximize(MainFrame* self)
 {
 	mainviewbar_add_minmaximze(&self->mainviewbar, &self->left);
-	mainviewbar_add_minmaximze(&self->mainviewbar, &self->toprow1);
-	mainviewbar_add_minmaximze(&self->mainviewbar, &self->toprow2);
+	mainviewbar_add_minmaximze(&self->mainviewbar,
+		songbar_base(&self->songbar));
+	mainviewbar_add_minmaximze(&self->mainviewbar,
+		machinebar_base(&self->machinebar));
 	mainviewbar_add_minmaximze(&self->mainviewbar,
 		trackscopeview_base(&self->trackscopeview));
 }
@@ -339,10 +331,7 @@ void mainframe_initbars(MainFrame* self)
 
 	/* rows */
 	psy_ui_component_init_align(&self->toprows, &self->top, NULL,
-		psy_ui_ALIGN_TOP);
-	if (!patternviewconfig_showtrackscopes(psycleconfig_patview(
-		workspace_conf(&self->workspace)))) {
-	}
+		psy_ui_ALIGN_TOP);	
 	psy_ui_component_setstyletype(&self->toprows, STYLE_TOPROWS);
 	psy_ui_component_setdefaultalign(&self->toprows, psy_ui_ALIGN_TOP,
 		psy_ui_margin_zero());
@@ -370,18 +359,12 @@ void mainframe_initbars(MainFrame* self)
 	}
 	margin.right = psy_ui_value_make_px(0);
 	psy_ui_component_setmargin(metronomebar_base(&self->metronomebar), margin);
-	/* row1 */
-	psy_ui_component_init(&self->toprow1, &self->toprows, NULL);
-	psy_ui_component_setstyletype(&self->toprow1, STYLE_TOPROW1);
-	psy_ui_component_setdefaultalign(&self->toprow1, psy_ui_ALIGN_LEFT,
-		psy_ui_margin_zero());
-	songbar_init(&self->songbar, &self->toprow1, &self->workspace);
-	/* row2 */
-	psy_ui_component_init(&self->toprow2, &self->toprows, NULL);
-	psy_ui_component_setdefaultalign(&self->toprow2, psy_ui_ALIGN_LEFT,
-		psy_ui_margin_zero());
-	psy_ui_component_setstyletype(&self->toprow2, STYLE_TOPROW2);
-	machinebar_init(&self->machinebar, &self->toprow2, &self->workspace);
+	/* row1 */	
+	songbar_init(&self->songbar, &self->toprows, &self->workspace);
+	psy_ui_component_setstyletype(&self->songbar.component, STYLE_TOPROW1);
+	/* row2 */	
+	machinebar_init(&self->machinebar, &self->toprows, &self->workspace);
+	psy_ui_component_setstyletype(&self->machinebar.component, STYLE_TOPROW2);
 	/* scopebar */
 	trackscopeview_init(&self->trackscopeview, &self->top, &self->workspace);
 	if (!patternviewconfig_showtrackscopes(psycleconfig_patview(
@@ -390,8 +373,7 @@ void mainframe_initbars(MainFrame* self)
 		trackscopes_stop(&self->trackscopeview.scopes);
 	}
 	psy_ui_component_init(&self->topspacer, &self->pane, NULL);
-	psy_ui_component_setalign(&self->topspacer, psy_ui_ALIGN_TOP);
-	psy_ui_component_preventalign(&self->topspacer);
+	psy_ui_component_setalign(&self->topspacer, psy_ui_ALIGN_TOP);	
 	psy_ui_component_setpreferredsize(&self->topspacer,
 		psy_ui_size_make_em(0.0, 0.5));
 	psy_ui_component_setstyletype(&self->topspacer, STYLE_TOP);
@@ -401,11 +383,7 @@ void mainframe_inittabbars(MainFrame* self)
 {
 	mainviewbar_init(&self->mainviewbar, &self->mainviews, &self->pane, &self->workspace);
 	psy_ui_component_setalign(mainviewbar_base(&self->mainviewbar),
-		psy_ui_ALIGN_TOP);	
-	psy_ui_component_init(&self->tabspacer, &self->mainviews, NULL);
-	psy_ui_component_setalign(&self->tabspacer, psy_ui_ALIGN_TOP);
-	psy_ui_component_setpreferredsize(&self->tabspacer,
-		psy_ui_size_make_em(0.0, 0.4));
+		psy_ui_ALIGN_TOP);
 	psy_ui_tabbar_init(&self->scripttabbar, &self->mainviews);
 	psy_ui_component_setalign(&self->scripttabbar.component, psy_ui_ALIGN_TOP);
 	psy_ui_component_hide(&self->scripttabbar.component);	

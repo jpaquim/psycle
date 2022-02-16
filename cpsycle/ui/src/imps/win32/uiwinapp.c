@@ -267,7 +267,7 @@ LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 				psy_ui_Colour bgcolour;
 
 				bgcolour = psy_ui_component_backgroundcolour(imp->component);
-				if (bgcolour.mode.set) {
+				if (!bgcolour.mode.transparent) {
 					HDC hdc = GetDCEx(hwnd, 0, DCX_WINDOW | DCX_USESTYLE);
 					if (hdc) {
 						RECT rcclient;
@@ -406,10 +406,12 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 			return 0;			
 		case WM_PAINT: {
 			const psy_ui_Border* border;
+			psy_ui_Colour bgcolor;
 
 			border = psy_ui_component_border(imp->component);
+			bgcolor = psy_ui_component_backgroundcolour(imp->component);
 			if (imp->component->vtable->ondraw ||
-				imp->component->signal_draw.slots ||
+				imp->component->signal_draw.slots ||				
 				imp->component->backgroundmode != psy_ui_NOBACKGROUND ||
 				psy_ui_border_isset(border)) {
 				HDC hdc;
@@ -698,7 +700,7 @@ bool handle_ctlcolor(psy_ui_WinApp* self, int msg, HWND hwnd, WPARAM wparam,
 			colour = psy_ui_component_backgroundcolour(imp->component);
 			bgcolorref = psy_ui_colour_colorref(&colour);
 			if (((imp->component->backgroundmode & psy_ui_SETBACKGROUND)
-				== psy_ui_SETBACKGROUND) && colour.mode.set) {
+				== psy_ui_SETBACKGROUND) && !colour.mode.transparent) {
 				DeleteObject(psy_ui_win_component_details(imp->component)->background);
 				psy_ui_win_component_details(imp->component)->background =
 					CreateSolidBrush(RGB(colour.r, colour.g, colour.b));

@@ -33,7 +33,7 @@ static void knobui_onmousemove(KnobUi*, psy_ui_MouseEvent*);
 static psy_ui_ComponentVtable knobui_vtable;
 static bool knobui_vtable_initialized = FALSE;
 
-static psy_ui_ComponentVtable* knobui_vtable_init(KnobUi* self)
+static void knobui_vtable_init(KnobUi* self)
 {
 	assert(self);
 
@@ -56,7 +56,7 @@ static psy_ui_ComponentVtable* knobui_vtable_init(KnobUi* self)
 			knobui_onmousemove;
 		knobui_vtable_initialized = TRUE;
 	}
-	return &knobui_vtable;
+	psy_ui_component_setvtable(&self->component, &knobui_vtable);
 }
 
 /* implementation */
@@ -67,9 +67,8 @@ void knobui_init(KnobUi* self, psy_ui_Component* parent,
 	assert(self);	
 
 	psy_ui_component_init(&self->component, parent, NULL);
-	psy_ui_component_setvtable(&self->component,
-		knobui_vtable_init(self));	
-	psy_ui_component_setbackgroundmode(&self->component, psy_ui_NOBACKGROUND);
+	knobui_vtable_init(self);	
+	psy_ui_component_setstyletype(&self->component, STYLE_MV_CHECK);
 	self->param = param;
 	self->paramidx = paramidx;
 	self->machine = machine;

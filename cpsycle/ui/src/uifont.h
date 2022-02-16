@@ -64,7 +64,7 @@ void psy_ui_font_init(psy_ui_Font*, const psy_ui_FontInfo*);
 void psy_ui_font_dispose(psy_ui_Font*);
 void psy_ui_font_copy(psy_ui_Font*, const psy_ui_Font* other);
 psy_ui_FontInfo psy_ui_font_fontinfo(const psy_ui_Font*);
-psy_ui_TextMetric psy_ui_font_textmetric(const psy_ui_Font*);
+const psy_ui_TextMetric* psy_ui_font_textmetric(const psy_ui_Font*);
 bool psy_ui_font_equal(const psy_ui_Font*, const psy_ui_Font* other);
 
 /* psy_ui_FontImpVTable */
@@ -73,7 +73,7 @@ typedef void (*psy_ui_font_imp_fp_copy)(struct psy_ui_FontImp*,
     const struct psy_ui_FontImp*);
 typedef const psy_ui_FontInfo (*psy_ui_font_imp_fp_dev_fontinfo)
     (const struct psy_ui_FontImp*);
-typedef psy_ui_TextMetric (*psy_ui_font_imp_fp_dev_textmetric)(const struct psy_ui_FontImp*);
+typedef const psy_ui_TextMetric* (*psy_ui_font_imp_fp_dev_textmetric)(const struct psy_ui_FontImp*);
 typedef bool (*psy_ui_font_imp_fp_dev_equal)(const struct psy_ui_FontImp*,
     const struct psy_ui_FontImp*);
 

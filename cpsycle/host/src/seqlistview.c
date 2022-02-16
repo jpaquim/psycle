@@ -245,7 +245,7 @@ void seqviewtrack_drawentry(SeqViewTrack* self, psy_ui_Graphics* g,
 	} else {
 		psy_ui_settextcolour(g, psy_ui_style_const(STYLE_SEQLISTVIEW)->colour);
 	}
-	if (bg.mode.set && !drawcol) {
+	if (!bg.mode.transparent && !drawcol) {
 		psy_ui_drawsolidrectangle(g,
 			psy_ui_realrectangle_make(
 			cp,
@@ -468,7 +468,8 @@ void seqviewlist_init(SeqviewList* self, psy_ui_Component* parent,
 	SeqViewState* state)
 {
 	psy_ui_component_init(&self->component, parent, NULL);
-	seqviewlist_vtable_init(self);	
+	seqviewlist_vtable_init(self);
+	psy_ui_component_setstyletype(&self->component, STYLE_SEQLISTVIEW);
 	self->state = state;	
 	self->lastplayrow = psy_INDEX_INVALID;	
 	self->showpatternnames = generalconfig_showingpatternnames(
@@ -487,8 +488,7 @@ void seqviewlist_init(SeqviewList* self, psy_ui_Component* parent,
 		seqviewlist_onplaylinechanged);
 	psy_ui_component_setscrollstep(&self->component,
 		psy_ui_size_make(self->state->trackwidth, self->state->lineheight));
-	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_SCROLL);	
-	psy_ui_component_setstyletype(&self->component, STYLE_SEQLISTVIEW);	
+	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_SCROLL);		
 	seqviewlist_build(self);
 	inputhandler_connect(&self->state->cmds->workspace->inputhandler,
 		INPUTHANDLER_FOCUS, psy_EVENTDRIVER_CMD, "tracker",
