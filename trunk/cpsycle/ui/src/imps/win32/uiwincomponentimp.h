@@ -35,9 +35,7 @@ typedef struct psy_ui_win_ComponentImp {
 	bool topleftcachevalid;
 	psy_ui_Size sizecache;
 	bool sizecachevalid;
-	int dbg;
-	psy_ui_TextMetric tm;
-	bool tmcachevalid;
+	int dbg;	
 	bool visible;	
 	psy_List* viewcomponents;
 	bool fullscreen;

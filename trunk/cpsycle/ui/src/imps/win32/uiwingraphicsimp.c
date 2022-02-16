@@ -307,46 +307,52 @@ void psy_ui_win_g_imp_drawroundrectangle(psy_ui_win_GraphicsImp* self,
 void psy_ui_win_g_imp_drawsolidrectangle(psy_ui_win_GraphicsImp* self,
 	const psy_ui_RealRectangle r, psy_ui_Colour colour)
 {
-	HBRUSH hBrush;
-	RECT   rect;
+	if (!colour.mode.transparent) {
+		HBRUSH hBrush;
+		RECT   rect;
 
-	SetRect(&rect,
-		(int)r.left - (int)(self->org.x),
-		(int)r.top - (int)(self->org.y),
-		(int)r.right - (int)(self->org.x),
-		(int)r.bottom - (int)(self->org.y));
-	hBrush = CreateSolidBrush(psy_ui_colour_colorref(&colour));
-	FillRect(self->hdc, &rect, hBrush);
-	DeleteObject(hBrush);
+		SetRect(&rect,
+			(int)r.left - (int)(self->org.x),
+			(int)r.top - (int)(self->org.y),
+			(int)r.right - (int)(self->org.x),
+			(int)r.bottom - (int)(self->org.y));
+		hBrush = CreateSolidBrush(psy_ui_colour_colorref(&colour));
+		FillRect(self->hdc, &rect, hBrush);
+		DeleteObject(hBrush);
+	} else {
+		self = self;
+	}
 }
 
 void psy_ui_win_g_imp_drawsolidroundrectangle(psy_ui_win_GraphicsImp* self,
 	const psy_ui_RealRectangle r, psy_ui_RealSize cornersize,
 	psy_ui_Colour colour)
 {
-	HBRUSH hBrush;
-	HBRUSH hOldBrush;
-	HPEN hPen;
-	HPEN hOldPen;
-	psy_ui_TextMetric tm;
-	TEXTMETRIC win_tm;
+	if (!colour.mode.transparent) {
+		HBRUSH hBrush;
+		HBRUSH hOldBrush;
+		HPEN hPen;
+		HPEN hOldPen;
+		psy_ui_TextMetric tm;
+		TEXTMETRIC win_tm;
 
-	hBrush = CreateSolidBrush(psy_ui_colour_colorref(&colour));
-	hOldBrush = SelectObject(self->hdc, hBrush);
-	hPen = CreatePen(PS_SOLID, 1, psy_ui_colour_colorref(&colour));
-	hOldPen = SelectObject(self->hdc, hPen);
-	GetTextMetrics(self->hdc, &win_tm);
-	tm = converttextmetric(&win_tm);
-	RoundRect(self->hdc,
-		(int)r.left - (int)(self->org.x),
-		(int)r.top - (int)(self->org.y),
-		(int)r.right - (int)(self->org.x),
-		(int)r.bottom - (int)(self->org.y),
-		(int)cornersize.width, (int)cornersize.height);
-	SelectObject(self->hdc, hOldBrush);
-	SelectObject(self->hdc, hOldPen);
-	DeleteObject(hBrush);
-	DeleteObject(hPen);
+		hBrush = CreateSolidBrush(psy_ui_colour_colorref(&colour));
+		hOldBrush = SelectObject(self->hdc, hBrush);
+		hPen = CreatePen(PS_SOLID, 1, psy_ui_colour_colorref(&colour));
+		hOldPen = SelectObject(self->hdc, hPen);
+		GetTextMetrics(self->hdc, &win_tm);
+		tm = converttextmetric(&win_tm);
+		RoundRect(self->hdc,
+			(int)r.left - (int)(self->org.x),
+			(int)r.top - (int)(self->org.y),
+			(int)r.right - (int)(self->org.x),
+			(int)r.bottom - (int)(self->org.y),
+			(int)cornersize.width, (int)cornersize.height);
+		SelectObject(self->hdc, hOldBrush);
+		SelectObject(self->hdc, hOldPen);
+		DeleteObject(hBrush);
+		DeleteObject(hPen);
+	}
 }
 
 void psy_ui_win_g_imp_drawsolidpolygon(psy_ui_win_GraphicsImp* self,

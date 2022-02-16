@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #if !defined(MAINFRAME_H)
@@ -74,19 +74,14 @@ typedef struct MainFrame {
 	psy_ui_Component toprows;
 	psy_ui_Component toprow0;
 	psy_ui_Component toprow0_client;
-	psy_ui_Component toprow0_bars;
-	psy_ui_Component toprow1;
-	psy_ui_Component toprow2;
+	psy_ui_Component toprow0_bars;	
 	MainViewBar mainviewbar;		
 	psy_ui_Component topspacer;
-	psy_ui_Component tabspacer;
 	psy_ui_Component client;
 	/* includes tabbar */
 	psy_ui_Component mainviews;
 	/* excludes tabbar and includes bottom views */
-	psy_ui_Component mainpane;
-	psy_ui_Component spacerleft;
-	psy_ui_Component spacerright;
+	psy_ui_Component mainpane;	
 	psy_ui_Terminal terminal;
 	psy_ui_Splitter splitbar;
 	psy_ui_Splitter splitbarterminal;
@@ -135,7 +130,6 @@ typedef struct MainFrame {
 	psy_ui_Component left;
 	psy_ui_Component right;
 	Workspace workspace;
-	psy_ui_Label label;		
 	PatternViewBar patternbar;
 	MachineViewBar machineviewbar;
 	InstrumentsViewBar instrumentsviewbar;	

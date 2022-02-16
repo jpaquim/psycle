@@ -84,7 +84,7 @@ void psy_ui_style_deallocate(psy_ui_Style*);
 /* Properties */
 INLINE void psy_ui_style_setcolour(psy_ui_Style* self, psy_ui_Colour colour)
 {
-	self->colour = colour;
+	self->colour = colour;	
 }
 
 INLINE void psy_ui_style_setbackgroundcolour(psy_ui_Style* self,

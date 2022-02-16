@@ -18,7 +18,7 @@
 static void psy_ui_win_font_imp_dispose(psy_ui_win_FontImp*);
 static void psy_ui_win_font_imp_copy(psy_ui_win_FontImp*, psy_ui_win_FontImp* other);
 static psy_ui_FontInfo dev_fontinfo(psy_ui_win_FontImp*);
-static psy_ui_TextMetric dev_textmetric(const psy_ui_win_FontImp*);
+static const psy_ui_TextMetric* dev_textmetric(const psy_ui_win_FontImp*);
 static bool dev_equal(const psy_ui_win_FontImp*, const psy_ui_win_FontImp* other);
 
 static LOGFONT logfont(psy_ui_FontInfo lf);
@@ -55,15 +55,16 @@ static void imp_vtable_init(psy_ui_win_FontImp* self)
 void psy_ui_win_fontimp_init(psy_ui_win_FontImp* self, const psy_ui_FontInfo* fontinfo)
 {
 	psy_ui_font_imp_init(&self->imp);
-	imp_vtable_init(self);	
+	imp_vtable_init(self);
+	self->tmcachevalid = FALSE;
 	if (fontinfo) {		
 		LOGFONT lf;
 
 		lf = logfont(*fontinfo);
-		self->hfont = CreateFontIndirect(&lf);
+		self->hfont = CreateFontIndirect(&lf);		
 	} else {
 		self->hfont = 0;		
-	}
+	}	
 }
 
 void psy_ui_win_font_imp_dispose(psy_ui_win_FontImp* self)
@@ -80,7 +81,11 @@ void psy_ui_win_font_imp_copy(psy_ui_win_FontImp* self, psy_ui_win_FontImp* othe
 
 	psy_ui_win_font_imp_dispose(self);
 	GetObject(other->hfont, sizeof(LOGFONT), &lf);
-	self->hfont = CreateFontIndirect(&lf);	
+	self->hfont = CreateFontIndirect(&lf);
+	self->tmcachevalid = other->tmcachevalid;
+	if (other->tmcachevalid) {
+		self->tmcache = other->tmcache;
+	}	
 }
 
 psy_ui_FontInfo dev_fontinfo(psy_ui_win_FontImp* self)
@@ -98,50 +103,55 @@ psy_ui_FontInfo dev_fontinfo(psy_ui_win_FontImp* self)
 	return rv;
 }
 
-psy_ui_TextMetric dev_textmetric(const psy_ui_win_FontImp* self)
+const psy_ui_TextMetric* dev_textmetric(const psy_ui_win_FontImp* self)
 {
 	psy_ui_TextMetric rv;
-	TEXTMETRIC tm;
-	HDC hdc;
-	HFONT hPrevFont = 0;
-	HFONT hfont = 0;
-	const psy_ui_Font* font = NULL;
+	
+	if (!self->tmcachevalid) {
+		TEXTMETRIC tm;
+		HDC hdc;
+		HFONT hPrevFont = 0;
+		HFONT hfont = 0;
+		const psy_ui_Font* font = NULL;
 
-	hdc = GetDC(NULL);
-	SaveDC(hdc);	
-	hfont = self->hfont;
-	if (hfont) {
-		hPrevFont = SelectObject(hdc, hfont);	
-	}
-	GetTextMetrics(hdc, &tm);
-	if (font) {
-		if (hPrevFont) {
-			SelectObject(hdc, hPrevFont);
+		hdc = GetDC(NULL);
+		SaveDC(hdc);
+		hfont = self->hfont;
+		if (hfont) {
+			hPrevFont = SelectObject(hdc, hfont);
 		}
+		GetTextMetrics(hdc, &tm);
+		if (font) {
+			if (hPrevFont) {
+				SelectObject(hdc, hPrevFont);
+			}
+		}
+		RestoreDC(hdc, -1);
+		ReleaseDC(NULL, hdc);
+		rv.tmHeight = tm.tmHeight;
+		rv.tmAscent = tm.tmAscent;
+		rv.tmDescent = tm.tmDescent;
+		rv.tmInternalLeading = tm.tmInternalLeading;
+		rv.tmExternalLeading = tm.tmExternalLeading;
+		rv.tmAveCharWidth = tm.tmAveCharWidth;
+		rv.tmMaxCharWidth = tm.tmMaxCharWidth;
+		rv.tmWeight = tm.tmWeight;
+		rv.tmOverhang = tm.tmOverhang;
+		rv.tmDigitizedAspectX = tm.tmDigitizedAspectX;
+		rv.tmDigitizedAspectY = tm.tmDigitizedAspectY;
+		rv.tmFirstChar = tm.tmFirstChar;
+		rv.tmLastChar = tm.tmLastChar;
+		rv.tmDefaultChar = tm.tmDefaultChar;
+		rv.tmBreakChar = tm.tmBreakChar;
+		rv.tmItalic = tm.tmItalic;
+		rv.tmUnderlined = tm.tmUnderlined;
+		rv.tmStruckOut = tm.tmStruckOut;
+		rv.tmPitchAndFamily = tm.tmPitchAndFamily;
+		rv.tmCharSet = tm.tmCharSet;
+		((psy_ui_win_FontImp*)self)->tmcache = rv;
+		((psy_ui_win_FontImp*)self)->tmcachevalid = TRUE;		
 	}
-	RestoreDC(hdc, -1);
-	ReleaseDC(NULL, hdc);
-	rv.tmHeight = tm.tmHeight;
-	rv.tmAscent = tm.tmAscent;
-	rv.tmDescent = tm.tmDescent;
-	rv.tmInternalLeading = tm.tmInternalLeading;
-	rv.tmExternalLeading = tm.tmExternalLeading;
-	rv.tmAveCharWidth = tm.tmAveCharWidth;
-	rv.tmMaxCharWidth = tm.tmMaxCharWidth;
-	rv.tmWeight = tm.tmWeight;
-	rv.tmOverhang = tm.tmOverhang;
-	rv.tmDigitizedAspectX = tm.tmDigitizedAspectX;
-	rv.tmDigitizedAspectY = tm.tmDigitizedAspectY;
-	rv.tmFirstChar = tm.tmFirstChar;
-	rv.tmLastChar = tm.tmLastChar;
-	rv.tmDefaultChar = tm.tmDefaultChar;
-	rv.tmBreakChar = tm.tmBreakChar;
-	rv.tmItalic = tm.tmItalic;
-	rv.tmUnderlined = tm.tmUnderlined;
-	rv.tmStruckOut = tm.tmStruckOut;
-	rv.tmPitchAndFamily = tm.tmPitchAndFamily;
-	rv.tmCharSet = tm.tmCharSet;
-	return rv;
+	return &self->tmcache;
 }
 
 LOGFONT logfont(psy_ui_FontInfo lf)

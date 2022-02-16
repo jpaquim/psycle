@@ -22,7 +22,9 @@ extern "C" {
 
 typedef struct psy_ui_win_FontImp {
 	psy_ui_FontImp imp;
-	HFONT hfont;	
+	HFONT hfont;
+	psy_ui_TextMetric tmcache;
+	bool tmcachevalid;
 } psy_ui_win_FontImp;
 
 void psy_ui_win_fontimp_init(psy_ui_win_FontImp* self, const psy_ui_FontInfo*);

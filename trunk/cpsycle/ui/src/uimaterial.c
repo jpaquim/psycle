@@ -12,13 +12,13 @@ void psy_ui_materialtheme_init(psy_ui_MaterialTheme* self, psy_ui_ThemeMode mode
 {
 	self->mode = mode;
 	if (self->mode == psy_ui_DARKTHEME) {		
-		self->surface = psy_ui_colour_make_argb(0x00121212);
-		self->onsurface = psy_ui_colour_make_argb(0x00FFFFEE);
-		self->primary = psy_ui_colour_make_argb(0x00121212);
-		self->onprimary = psy_ui_colour_make(0x00EEFFFF);
-		self->secondary = psy_ui_colour_make(0x00FAD481);
-		self->onsecondary = psy_ui_colour_make_argb(0x00FFFFFF);
-		self->overlay = psy_ui_colour_make_argb(0x00FFFFFF);
+		self->surface = psy_ui_colour_make_argb(0xFF121212);
+		self->onsurface = psy_ui_colour_make_argb(0xFFFFFFEE);
+		self->primary = psy_ui_colour_make_argb(0xFF121212);
+		self->onprimary = psy_ui_colour_make(0xFFEEFFFF);
+		self->secondary = psy_ui_colour_make(0xFFFAD481);
+		self->onsecondary = psy_ui_colour_make_argb(0xFFFFFFFF);
+		self->overlay = psy_ui_colour_make_argb(0xFFFFFFFF);
 
 		self->strong = 50;
 		self->accent = 100;
@@ -28,13 +28,13 @@ void psy_ui_materialtheme_init(psy_ui_MaterialTheme* self, psy_ui_ThemeMode mode
 		self->pale = 800;
 		self->minima = 900;
 	} else {
-		self->surface = psy_ui_colour_make_argb(0x00FAFAFA);
-		self->onsurface = psy_ui_colour_make_argb(0x00000000);
-		self->primary = psy_ui_colour_make_argb(0x00FFFFFF);
-		self->onprimary = psy_ui_colour_make_argb(0x00000000);
-		self->secondary = psy_ui_colour_make(0x00EAC471);
+		self->surface = psy_ui_colour_make_argb(0xFFFAFAFA);
+		self->onsurface = psy_ui_colour_make_argb(0xFF000000);
+		self->primary = psy_ui_colour_make_argb(0xFFFFFFFF);
+		self->onprimary = psy_ui_colour_make_argb(0xFF000000);
+		self->secondary = psy_ui_colour_make(0xFFEAC471);
 		self->onsecondary = psy_ui_colour_make(0x1b8ff2);
-		self->overlay = psy_ui_colour_make_argb(0x00000000);
+		self->overlay = psy_ui_colour_make_argb(0xFF000000);
 		self->strong = 900;
 		self->accent = 800;
 		self->medium = 600;

@@ -149,7 +149,7 @@ void psy_ui_styles_addcolourtoconfig(psy_ui_Styles* self, psy_Property* parent,
 	psy_Property* p;
 	char_dyn_t* colourset;
 
-	if (colour.mode.set) {
+	if (!colour.mode.transparent) {
 		p = psy_property_append_int(parent, key, psy_ui_colour_colorref(&colour), 0, 0);
 	} else {
 		psy_property_preventsave(
@@ -159,7 +159,7 @@ void psy_ui_styles_addcolourtoconfig(psy_ui_Styles* self, psy_Property* parent,
 	colourset = psy_strdup(key);
 	colourset = psy_strcat_realloc(colourset, "-set");
 	psy_property_preventsave(
-		psy_property_append_bool(parent, colourset, colour.mode.set));
+		psy_property_append_bool(parent, colourset, !colour.mode.transparent));
 	free(colourset);
 	colourset = NULL;
 }

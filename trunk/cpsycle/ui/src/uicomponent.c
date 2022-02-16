@@ -118,34 +118,38 @@ psy_ui_Colour psy_ui_component_backgroundcolour(psy_ui_Component* self)
 {
 	psy_ui_Component* curr;
 	psy_ui_Colour base;
-
+	
 	assert(self);
 	
-	curr = self;		
+	curr = self;	
 	while (curr) {
 		psy_ui_Colour colour;
-		
-		colour = psy_ui_componentstyle_backgroundcolour(&curr->style);		
-		if (colour.mode.set) {
-			base = colour;
-			if (base.overlay != 0) {
-				uint8_t overlay;
-				psy_ui_Colour overlaycolour;
-				psy_ui_Component* parent;
 
-				if (psy_ui_app_hasdarktheme(psy_ui_app())) {
-					overlaycolour = psy_ui_colour_make(0xFFFFFF);
-				} else {
-					overlaycolour = psy_ui_colour_make(0x0000000);
-				}
-				overlay = base.overlay;
-				parent = psy_ui_component_parent(curr);
-				if (parent) {
-					base = psy_ui_component_backgroundcolour(parent);
-					base = psy_ui_colour_overlayed(&base, &overlaycolour,
-						overlay / 100.0);
-				}
+		colour = psy_ui_componentstyle_backgroundcolour(&curr->style);		
+		base = colour;
+		if (colour.overlay != 0) {
+			psy_ui_Colour overlaycolour;
+			uint8_t overlay;
+
+			if (psy_ui_app_hasdarktheme(psy_ui_app())) {
+				overlaycolour = psy_ui_colour_make(0xFFFFFF);
+			} else {
+				overlaycolour = psy_ui_colour_make(0x0000000);
 			}
+			overlay = 0;
+			while (curr && (colour.overlay != 0 || colour.mode.transparent)) {				
+				overlay += colour.overlay;
+				curr = psy_ui_component_parent(curr);
+				if (curr) {
+					colour = psy_ui_componentstyle_backgroundcolour(&curr->style);
+				}
+			}				
+			if (!curr) {				
+				colour = psy_ui_style_const(psy_ui_STYLE_ROOT)->background.colour;
+			}
+			return psy_ui_colour_overlayed(&colour, &overlaycolour,
+				overlay / 100.0);																
+		} else if (!colour.mode.inherit) {
 			break;
 		}
 		curr = psy_ui_component_parent(curr);
@@ -162,33 +166,41 @@ void psy_ui_component_setcolour(psy_ui_Component* self, psy_ui_Colour colour)
 }
 
 psy_ui_Colour psy_ui_component_colour(psy_ui_Component* self)
-{	
+{
 	psy_ui_Component* curr;
 	psy_ui_Colour base;
 
 	assert(self);
 
-	curr = self;
+	curr = self;	
 	while (curr) {
 		psy_ui_Colour colour;
 
 		colour = psy_ui_componentstyle_colour(&curr->style);
-		if (colour.mode.set) {
-			base = colour;
-			if (base.overlay != 0) {
-				uint8_t overlay;
-				psy_ui_Colour overlaycolour;
+		base = colour;
+		if (colour.overlay != 0) {
+			psy_ui_Colour overlaycolour;
+			uint8_t overlay;
 
-				if (psy_ui_app_hasdarktheme(psy_ui_app())) {
-					overlaycolour = psy_ui_colour_make(0xFFFFFF);
-				} else {
-					overlaycolour = psy_ui_colour_make(0x0000000);
-				}
-				overlay = base.overlay;
-				base = psy_ui_component_colour(
-					psy_ui_component_parent(curr));
-				base = psy_ui_colour_overlayed(&base, &overlaycolour, overlay / 100.0);
+			if (psy_ui_app_hasdarktheme(psy_ui_app())) {
+				overlaycolour = psy_ui_colour_make(0xFFFFFF);
+			} else {
+				overlaycolour = psy_ui_colour_make(0x0000000);
 			}
+			overlay = 0;
+			while (curr && (colour.overlay != 0 || colour.mode.transparent)) {
+				overlay += colour.overlay;
+				curr = psy_ui_component_parent(curr);
+				if (curr) {
+					colour = psy_ui_componentstyle_colour(&curr->style);
+				}
+			}
+			if (!curr) {
+				colour = psy_ui_style_const(psy_ui_STYLE_ROOT)->colour;
+			}
+			return psy_ui_colour_overlayed(&colour, &overlaycolour,
+				overlay / 100.0);
+		} else if (!colour.mode.inherit) {
 			break;
 		}
 		curr = psy_ui_component_parent(curr);
@@ -632,8 +644,7 @@ void scrollto(psy_ui_Component* self, intptr_t dx, intptr_t dy,
 
 void setfont(psy_ui_Component* self, const psy_ui_Font* font)
 {
-	if (font) {				
-		self->imp->vtable->dev_setfont(self->imp, font);
+	if (font) {		
 		psy_ui_font_init(&psy_ui_componentstyle_currstyle(&self->style)->font, 0);
 		psy_ui_font_copy(&psy_ui_componentstyle_currstyle(&self->style)->font, font);
 	} else {
@@ -2258,8 +2269,11 @@ void psy_ui_component_draw(psy_ui_Component* self, psy_ui_Graphics* g)
 	psy_ui_Graphics bitmap_g;
 	psy_ui_Graphics* temp_g;	
 	psy_ui_RealRectangle oldclip;
-	psy_ui_RealRectangle clip;
+	psy_ui_RealRectangle clip;	
 	
+	if (self->id == 10) {
+		self = self;
+	}
 	temp_g = NULL;	
 	oldclip = psy_ui_cliprect(g);
 	if (self->drawtobuffer) {
@@ -2277,7 +2291,7 @@ void psy_ui_component_draw(psy_ui_Component* self, psy_ui_Graphics* g)
 				psy_ui_realpoint_zero());			
 			return;
 		}
-	}	
+	}		
 	psy_ui_setfont(g, psy_ui_component_font(self));
 	clip = psy_ui_realrectangle_make(
 		psy_ui_realpoint_zero(),

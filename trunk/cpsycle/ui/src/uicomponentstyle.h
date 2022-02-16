@@ -112,7 +112,7 @@ INLINE psy_ui_Margin psy_ui_componentstyle_spacing(const psy_ui_ComponentStyle *
 
 INLINE psy_ui_Colour psy_ui_componentstyle_colour(const psy_ui_ComponentStyle* self)
 {
-	if (self->overridestyle.colour.mode.set) {
+	if (!self->overridestyle.colour.mode.transparent) {
 		return self->overridestyle.colour;
 	}
 	return psy_ui_componentstyle_currstyle_const(self)->colour;
@@ -125,7 +125,7 @@ INLINE void psy_ui_componentstyle_setcolour(psy_ui_ComponentStyle* self, psy_ui_
 
 INLINE psy_ui_Colour psy_ui_componentstyle_backgroundcolour(const psy_ui_ComponentStyle* self)
 {
-	if (self->overridestyle.background.colour.mode.set) {
+	if (!self->overridestyle.background.colour.mode.transparent) {
 		return self->overridestyle.background.colour;
 	}
 	return psy_ui_componentstyle_currstyle_const(self)->background.colour;

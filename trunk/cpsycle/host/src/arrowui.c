@@ -1,6 +1,6 @@
 /*
 ** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -9,14 +9,11 @@
 #include "arrowui.h"
 /* host */
 #include "styles.h" 
-/* platform */
-#include "../../detail/portable.h"
 
 /* ArrowUi */
 
 /* prototypes */
 static void arrowui_ondraw(ArrowUi*, psy_ui_Graphics*);
-static void arrowui_drawbackground(ArrowUi*, psy_ui_Graphics*);
 static void arrowui_onpreferredsize(ArrowUi*, const psy_ui_Size* limit,
 	psy_ui_Size* rv);
 static void arrowui_onmousedown(ArrowUi*, psy_ui_MouseEvent*);
@@ -32,14 +29,18 @@ static void arrowui_vtable_init(ArrowUi* self)
 
 	if (!arrowui_vtable_initialized) {
 		arrowui_vtable = *(self->component.vtable);		
-		arrowui_vtable.ondraw = (psy_ui_fp_component_ondraw)arrowui_ondraw;		
-		arrowui_vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
+		arrowui_vtable.ondraw =
+			(psy_ui_fp_component_ondraw)
+			arrowui_ondraw;
+		arrowui_vtable.onpreferredsize =
+			(psy_ui_fp_component_onpreferredsize)
 			arrowui_onpreferredsize;
-		arrowui_vtable.onmousedown = (psy_ui_fp_component_onmouseevent)
+		arrowui_vtable.onmousedown =
+			(psy_ui_fp_component_onmouseevent)
 			arrowui_onmousedown;
 		arrowui_vtable_initialized = TRUE;
 	}
-	self->component.vtable = &arrowui_vtable;	
+	psy_ui_component_setvtable(&self->component, &arrowui_vtable);
 }
 
 /* implementation */
@@ -52,7 +53,7 @@ void arrowui_init(ArrowUi* self, psy_ui_Component* parent,
 
 	psy_ui_component_init(&self->component, parent, NULL);	
 	arrowui_vtable_init(self);	
-	psy_ui_component_setbackgroundmode(&self->component, psy_ui_NOBACKGROUND);
+	psy_ui_component_setstyletype(&self->component, STYLE_MV_ARROW);
 	self->wire = wire;
 	self->workspace = workspace;	
 }
@@ -116,7 +117,7 @@ void arrowui_onpreferredsize(ArrowUi* self, const psy_ui_Size* limit,
 {	
 	psy_ui_Style* style;
 
-	style = psy_ui_style(STYLE_MV_EFFECT);
+	style = psy_ui_style(STYLE_MV_ARROW);
 	psy_ui_size_setreal(rv, style->background.size);		
 }
 

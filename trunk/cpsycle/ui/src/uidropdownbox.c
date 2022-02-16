@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -23,7 +23,8 @@ void psy_ui_dropdownbox_init(psy_ui_DropDownBox* self, psy_ui_Component* parent)
 	psy_ui_component_init_imp(&self->component, parent, NULL,
 		psy_ui_impfactory_allocinit_popupimp(
 			psy_ui_app_impfactory(psy_ui_app()), &self->component, view));	
-	self->component.dropdown = TRUE;	
+	self->component.dropdown = TRUE;
+	psy_ui_component_doublebuffer(&self->component);
 }
 
 void psy_ui_dropdownbox_show(psy_ui_DropDownBox* self, psy_ui_Component* field)

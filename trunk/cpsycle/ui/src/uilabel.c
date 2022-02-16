@@ -354,5 +354,5 @@ void psy_ui_label_enablewrap(psy_ui_Label* self)
 
 void psy_ui_label_onupdatestyles(psy_ui_Label* self)
 {	
-	self->component.style.overridestyle.colour.mode.set = FALSE;		
+	self->component.style.overridestyle.colour.mode.transparent = TRUE;		
 }

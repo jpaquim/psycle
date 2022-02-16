@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -31,18 +31,17 @@ static void seqview_oneditseqlist(SeqView*, psy_ui_Button* sender);
 void seqview_init(SeqView* self, psy_ui_Component* parent,
 	psy_ui_Component* view, Workspace* workspace)
 {	
-	psy_ui_component_init(&self->component, parent, view);	
+	psy_ui_component_init(&self->component, parent, view);
+	psy_ui_component_setstyletype(&self->component, STYLE_SEQVIEW);
 	sequencecmds_init(&self->cmds, workspace);
 	/* shared state */
 	seqviewstate_init(&self->state, &self->cmds);
 	/* sequence listview */
 	seqviewlist_init(&self->listview, &self->component, &self->state);
 	psy_ui_scroller_init(&self->scroller, &self->listview.component,
-		&self->component);
+		&self->component);	
 	psy_ui_component_setspacing(psy_ui_scroller_base(&self->scroller),
-		psy_ui_margin_make_em(0.5, 0.5, 0.0, 1.0));
-	psy_ui_scroller_setbackgroundmode(&self->scroller,
-		psy_ui_SETBACKGROUND, psy_ui_SETBACKGROUND);
+		psy_ui_margin_make_em(0.5, 0.5, 0.0, 1.0));	
 	psy_ui_component_setstyletype_select(&self->scroller.component,
 		STYLE_SEQLISTVIEW_FOCUS);
 	psy_ui_component_setalign(&self->scroller.component, psy_ui_ALIGN_CLIENT);

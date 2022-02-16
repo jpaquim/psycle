@@ -403,7 +403,7 @@ void searchfilter(psy_Property* plugin, NewMachineFilter* filter,
 	}	
 }
 
-// PluginsView
+/* PluginsView */
 static void pluginsview_ondestroy(PluginsView*);
 static void pluginsview_ondraw(PluginsView*, psy_ui_Graphics*);
 static void pluginsview_drawitem(PluginsView*, psy_ui_Graphics*, psy_Property*,
@@ -566,31 +566,14 @@ void pluginsview_ondraw(PluginsView* self, psy_ui_Graphics* g)
 		psy_ui_RealSize size;
 		psy_List* p;
 		psy_ui_RealPoint cp;
-		bool odd;		
-		psy_ui_Colour bgcolour;
-		psy_ui_Colour overlaycolour;
-		int overlay;
-		psy_ui_Colour oddlinebgcolour;
+		bool odd;				
 		uintptr_t i;
 		
 		size = psy_ui_component_size_px(&self->component);
 		pluginsview_computetextsizes(self, size.width);
 		psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 		psy_ui_realpoint_init(&cp);
-		odd = FALSE;
-		if (!psy_ui_style(STYLE_PLUGINVIEW_ITEM)->background.colour.mode.set) {
-			bgcolour = psy_ui_component_backgroundcolour(&self->component);
-		} else {
-			bgcolour = psy_ui_style(STYLE_PLUGINVIEW_ITEM)->background.colour;
-		}
-		if (psy_ui_style(STYLE_PLUGINVIEW_ITEM)->colour.mode.set) {
-			psy_ui_component_setcolour(&self->component,
-				psy_ui_style(STYLE_PLUGINVIEW_ITEM)->colour);
-		}
-		overlaycolour = psy_ui_colour_white();
-		overlay = 2;
-		oddlinebgcolour = psy_ui_colour_overlayed(&bgcolour, &overlaycolour,
-			overlay / 100.0);
+		odd = FALSE;				
 		for (p = psy_property_begin(self->currplugins), i = 0;
 				p != NULL; psy_list_next(&p), ++i) {			
 			pluginsview_drawitem(self, g, (psy_Property*)psy_list_entry(p),
@@ -603,10 +586,10 @@ void pluginsview_ondraw(PluginsView* self, psy_ui_Graphics* g)
 				if (odd && p->next) {
 					psy_ui_RealRectangle r;
 
-					psy_ui_realrectangle_init_all(&r,
-						psy_ui_realpoint_make(0, cp.y),
-						psy_ui_realsize_make(size.width, self->lineheight));
-					psy_ui_drawsolidrectangle(g, r, oddlinebgcolour);
+					// psy_ui_realrectangle_init_all(&r,
+					//	psy_ui_realpoint_make(0, cp.y),
+					//	psy_ui_realsize_make(size.width, self->lineheight));
+					// psy_ui_drawsolidrectangle(g, r, oddlinebgcolour);
 				}
 			}
 		}
@@ -626,17 +609,17 @@ void pluginsview_drawitem(PluginsView* self, psy_ui_Graphics* g,
 		itemstyle = psy_ui_style(STYLE_PLUGINVIEW_ITEM);
 	}
 
-	if (!itemstyle->background.colour.mode.set) {
+	if (itemstyle->background.colour.mode.transparent) {
 		bgcolour = psy_ui_component_backgroundcolour(&self->component);
 	} else {
 		bgcolour = itemstyle->background.colour;
 	}
-	if (itemstyle->colour.mode.set) {
+	if (!itemstyle->colour.mode.transparent) {
 		psy_ui_settextcolour(g, itemstyle->colour);
 	} else {
 		psy_ui_settextcolour(g, psy_ui_component_colour(&self->component));
 	}
-	if (itemstyle->background.colour.mode.set) {
+	if (!itemstyle->background.colour.mode.transparent) {
 		psy_ui_drawsolidrectangle(g,
 			psy_ui_realrectangle_make(
 				topleft,

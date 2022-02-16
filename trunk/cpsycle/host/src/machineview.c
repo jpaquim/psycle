@@ -114,6 +114,7 @@ void machineview_initcomponent(MachineView* self, psy_ui_Component* parent)
 	psy_ui_component_init(machineview_base(self), parent, NULL);
 	machineview_vtable_init(self);	
 	psy_ui_component_setstyletype(&self->component, STYLE_MACHINEVIEW);
+	self->component.id = 700;
 }
 
 void machineview_initpropertiesview(MachineView* self)

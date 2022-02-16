@@ -29,7 +29,7 @@ static void headerui_updateparam(HeaderUi*);
 static psy_ui_ComponentVtable headerui_vtable;
 static bool headerui_vtable_initialized = FALSE;
 
-static psy_ui_ComponentVtable* headerui_vtable_init(HeaderUi* self)
+static void headerui_vtable_init(HeaderUi* self)
 {
 	assert(self);
 
@@ -43,7 +43,7 @@ static psy_ui_ComponentVtable* headerui_vtable_init(HeaderUi* self)
 			headerui_onpreferredsize;		
 		headerui_vtable_initialized = TRUE;
 	}
-	return &headerui_vtable;
+	psy_ui_component_setvtable(&self->component, &headerui_vtable);	
 }
 
 /* implementation */
@@ -54,11 +54,10 @@ void headerui_init(HeaderUi* self, psy_ui_Component* parent,
 	assert(self);	
 
 	psy_ui_component_init(&self->component, parent, NULL);
-	headerui_vtable_init(self);
-	self->component.vtable = &headerui_vtable;
-	psy_ui_component_setbackgroundmode(&self->component, psy_ui_NOBACKGROUND);
+	headerui_vtable_init(self);	
+	psy_ui_component_setstyletype(&self->component, STYLE_MV_HEADER);
 	self->machine = machine;
-	self->paramidx = paramidx,
+	self->paramidx = paramidx;
 	self->param = param;	
 }
 
