@@ -89,7 +89,7 @@ void psycleconfig_initsections(PsycleConfig* self, psy_audio_Player* player,
 	metronomeconfig_init(&self->metronome, &self->config);
 	seqeditconfig_init(&self->seqedit, &self->config);
 	machineparamconfig_setdirectories(&self->macparam, &self->directories);
-	machineviewconfig_setdirectories(&self->macview, &self->directories);
+	machineviewconfig_setdirectories(&self->macview, &self->directories);	
 }
 
 void psycleconfig_makeglobal(PsycleConfig* self)
@@ -187,6 +187,46 @@ void psycleconfig_loadskin(PsycleConfig* self, const psy_Path* path)
 	}
 	machineparamconfig_settheme(&self->macparam, &skin);
 	machineviewconfig_settheme(&self->macview, &skin);	
+	patternviewconfig_settheme(&self->patview, &skin);
+	psy_property_dispose(&skin);
+}
+
+void psycleconfig_loadmachineskin(PsycleConfig* self, const psy_Path* path)
+{
+	psy_Property skin;
+	const char* machine_gui_bitmap;
+
+	assert(self);
+
+	psy_property_init(&skin);
+	skin_load(&skin, path);
+	machine_gui_bitmap = psy_property_at_str(&skin, "machineguibitmap", 0);
+	if (machine_gui_bitmap) {
+		char psc[_MAX_PATH];
+
+		psy_dir_findfile(dirconfig_skins(&self->directories),
+			machine_gui_bitmap, psc);
+		if (psc[0] != '\0') {
+			if (skin_loadpsc(&skin, psc) == PSY_OK) {
+				const char* bpm;
+
+				bpm = psy_property_at_str(&skin, "machinedialbmp", NULL);
+				if (bpm) {
+					psy_Path full;
+
+					psy_path_init(&full, psc);
+					psy_path_setname(&full, "");
+					psy_path_setext(&full, "");
+					psy_path_setname(&full, bpm);
+					psy_property_set_str(&skin, "machinedialbmp",
+						psy_path_full(&full));
+					psy_path_dispose(&full);
+				}
+			}
+		}
+	}
+	machineparamconfig_settheme(&self->macparam, &skin);
+	machineviewconfig_settheme(&self->macview, &skin);
 	patternviewconfig_settheme(&self->patview, &skin);
 	psy_property_dispose(&skin);
 }

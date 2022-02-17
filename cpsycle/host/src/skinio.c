@@ -190,9 +190,20 @@ int skin_load(psy_Property* properties, const psy_Path* path)
 				q+=2;
 				p = strrchr(q,34); // "
 				if (p)
-				{
+				{					
 					p[0]=0;					
-					psy_property_append_str(properties, "machine_background", q);
+
+					if (psy_strlen(q) > 1) {
+						psy_Path path;
+
+						psy_path_init(&path, q);
+						psy_property_append_str(properties, "machine_background",
+							psy_path_filename(&path));
+						psy_path_dispose(&path);
+					} else {
+						psy_property_append_str(properties, "machine_background", "");
+					}
+
 					// check for no \ in which case search for it?
 					//bBmpBkg = TRUE;
 				}
@@ -789,4 +800,23 @@ int skinio_loadproperties(FILE* hfile, psy_Property* props)
 		return PSY_ERRFILE;
 	}
 	return PSY_OK;
+}
+
+static int locate_machine_skin_enum_dir(psy_Property*, const char* path, int flag);
+
+void skin_locate_machine_skins(psy_Property* skins, const char* path)
+{
+	psy_dir_enumerate_recursive(skins, path, "*.psm", 0,
+		(psy_fp_findfile)locate_machine_skin_enum_dir);
+}
+
+int locate_machine_skin_enum_dir(psy_Property* self, const char* path, int type)
+{		
+	psy_Path skinpath;
+
+	psy_path_init(&skinpath, path);
+	psy_property_append_str(self,
+		psy_path_name(&skinpath), path);
+	psy_path_dispose(&skinpath);
+	return 1;
 }

@@ -29,6 +29,7 @@ typedef struct SwitchUi {
 	/* internal */
 	ParamTweak paramtweak;
 	uintptr_t paramidx;
+	double maxheight;
 	/* references */	
 	struct psy_audio_Machine* machine;
 	struct psy_audio_MachineParam* param;
@@ -36,12 +37,16 @@ typedef struct SwitchUi {
 
 void switchui_init(SwitchUi*, psy_ui_Component* parent,
 	struct psy_audio_Machine*, uintptr_t paramidx,
-	struct psy_audio_MachineParam*);
+	struct psy_audio_MachineParam*,
+	uintptr_t style, uintptr_t style_select);
 
 SwitchUi* switchui_alloc(void);
 SwitchUi* switchui_allocinit(psy_ui_Component* parent,
 	struct psy_audio_Machine*, uintptr_t paramidx,
-	struct psy_audio_MachineParam*);
+	struct psy_audio_MachineParam*,
+	uintptr_t style, uintptr_t style_select);
+
+bool switchui_checked(SwitchUi*);
 
 INLINE psy_ui_Component* switchui_base(SwitchUi* self)
 {

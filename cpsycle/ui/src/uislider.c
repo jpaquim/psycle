@@ -489,8 +489,7 @@ void psy_ui_slider_describevalue(psy_ui_Slider* self)
 
 void psy_ui_slider_startpoll(psy_ui_Slider* self)
 {
-	self->pane.poll = TRUE;
-	self->pane.component.id = 40;
+	self->pane.poll = TRUE;	
 	psy_ui_component_starttimer(&self->pane.component, 0, 50);
 }
 

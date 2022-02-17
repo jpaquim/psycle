@@ -16,6 +16,7 @@
 		Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #include "../detail/prefix.h"
+#include "../detail/portable.h"
 #include "blitz.h"
 #include <cstdio>
 
@@ -461,8 +462,8 @@ void mi::Command(){
 // or an about button
 char buffer[2048];
 
-sprintf(
-		buffer,"%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
+psy_snprintf(
+		buffer, 2048, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
 		"Pattern commands\n",
 		"\n0Cxx : Set Volume (new!)",
 		"\nC1xx : Slide Up",
@@ -531,73 +532,73 @@ bool mi::DescribeValue(char* txt,int const param, int const value){
 
 	// Glide, Stereo
 	if(param==4||param==5){
-		if (value == 0) sprintf(txt,"Off");
-		else sprintf(txt, "%3.2f%%", (float)value*100/256);
+		if (value == 0) psy_snprintf(txt, 64, "Off");
+		else psy_snprintf(txt, 64, "%3.2f%%", (float)value*100/256);
 		return true;
 	}
 
 	// ArpShuffle
 	if(param==9){
-		if (value == 0){ sprintf(txt,"Off"); return true;
+		if (value == 0){ psy_snprintf(txt, 64, "Off"); return true;
 		} else return false;
 	}
 
 	// Arp Pattern
 	if (param==7){
 		switch(value){
-			case 0:sprintf(txt,"1 oct Up");return true;break;
-			case 1:sprintf(txt,"2 oct Up");return true;break;
-			case 2:sprintf(txt,"3 oct Up");return true;break;
-			case 3:sprintf(txt,"1 oct Down");return true;break;
-			case 4:sprintf(txt,"2 oct Down");return true;break;
-			case 5:sprintf(txt,"3 oct Down");return true;break;
-			case 6:sprintf(txt,"1 oct Up&Down");return true;break;
-			case 7:sprintf(txt,"2 oct Up&Down");return true;break;
-			case 8:sprintf(txt,"3 oct Up&Down");return true;break;
-			case 9:sprintf(txt,"1 oct Down&Up");return true;break;
-			case 10:sprintf(txt,"2 oct Down&Up");return true;break;
-			case 11:sprintf(txt,"3 oct Down&Up");return true;break;
+			case 0:psy_snprintf(txt, 64, "1 oct Up");return true;break;
+			case 1:psy_snprintf(txt, 64, "2 oct Up");return true;break;
+			case 2:psy_snprintf(txt, 64, "3 oct Up");return true;break;
+			case 3:psy_snprintf(txt, 64, "1 oct Down");return true;break;
+			case 4:psy_snprintf(txt, 64, "2 oct Down");return true;break;
+			case 5:psy_snprintf(txt, 64, "3 oct Down");return true;break;
+			case 6:psy_snprintf(txt, 64, "1 oct Up&Down");return true;break;
+			case 7:psy_snprintf(txt, 64, "2 oct Up&Down");return true;break;
+			case 8:psy_snprintf(txt, 64, "3 oct Up&Down");return true;break;
+			case 9:psy_snprintf(txt, 64, "1 oct Down&Up");return true;break;
+			case 10:psy_snprintf(txt, 64, "2 oct Down&Up");return true;break;
+			case 11:psy_snprintf(txt, 64, "3 oct Down&Up");return true;break;
 		}
 	}
 	// Arp Retrig
 	if(param==10){
 		switch(value){
-			case 0:sprintf(txt,"Off"); return true;break;
-			case 1:sprintf(txt,"On");return true;break;
-			case 2:sprintf(txt,"Even");return true;break;
+			case 0:psy_snprintf(txt, 64, "Off"); return true;break;
+			case 1:psy_snprintf(txt, 64, "On");return true;break;
+			case 2:psy_snprintf(txt, 64, "Even");return true;break;
 		}
 	}
 
 	// Lfo Destinations
 	if(param==15){
 		switch(value){
-			case 0:sprintf(txt,"1 2 3 4"); return true;break;
-			case 1:sprintf(txt,"- 2 3 4");return true;break;
-			case 2:sprintf(txt,"- 2 3 -");return true;break;
-			case 3:sprintf(txt,"- 2 - 4");return true;break;
-			case 4:sprintf(txt,"- - 3 4");return true;break;
-			case 5:sprintf(txt,"- 2 - -");return true;break;
-			case 6:sprintf(txt,"- - 3 -");return true;break;
-			case 7:sprintf(txt,"- - - 4");return true;break;
+			case 0:psy_snprintf(txt, 64, "1 2 3 4"); return true;break;
+			case 1:psy_snprintf(txt, 64, "- 2 3 4");return true;break;
+			case 2:psy_snprintf(txt, 64, "- 2 3 -");return true;break;
+			case 3:psy_snprintf(txt, 64, "- 2 - 4");return true;break;
+			case 4:psy_snprintf(txt, 64, "- - 3 4");return true;break;
+			case 5:psy_snprintf(txt, 64, "- 2 - -");return true;break;
+			case 6:psy_snprintf(txt, 64, "- - 3 -");return true;break;
+			case 7:psy_snprintf(txt, 64, "- - - 4");return true;break;
 		}
 	}
 
 	// Volume
 	if(param==1||param==0x11||param==0x21||param==0x31||param==0x41||param==0x51||param==0x52){
-		if (value > 0) sprintf(txt, "%.02f dB", 20.0f * std::log10((float) value / 128.0f));
-		else sprintf(txt, "-inf dB");
+		if (value > 0) psy_snprintf(txt, 64, "%.02f dB", 20.0f * std::log10((float) value / 128.0f));
+		else psy_snprintf(txt, 64, "-inf dB");
 		return true;
 	}
 
 	// Semitones
 	if(param==2||param==0x12||param==0x22||param==0x32||param==0x42){
-		sprintf(txt, "%i Semitones", value);
+		psy_snprintf(txt, 64, "%i Semitones", value);
 		return true;
 	}
 
 	// Finetune
 	if(param==3||param==0x13||param==0x23||param==0x33||param==0x43){
-		sprintf(txt, "%3.2f Cent", (float)value*100/256);
+		psy_snprintf(txt, 64, "%3.2f Cent", (float)value*100/256);
 		return true;
 	}
 
@@ -605,65 +606,65 @@ bool mi::DescribeValue(char* txt,int const param, int const value){
 	// DCO base waveform descriptions
 	if(param==20||param==36||param==52||param==68){
 		switch(value){
-			case WAVE_SINE:sprintf(txt,"Sine"); return true;break;
-			case WAVE_ADLIB2:sprintf(txt,"Adlib 2");return true;break;
-			case WAVE_ADLIB3:sprintf(txt,"Adlib 3");return true;break;
-			case WAVE_ADLIB4:sprintf(txt,"Adlib 4");return true;break;
-			case WAVE_SINE12:sprintf(txt,"Sine 1&2");return true;break;
-			case WAVE_SINECOSINE:sprintf(txt,"Sine&back");return true;break;
-			case WAVE_HALFSINE:sprintf(txt,"Half Sine");return true;break;
-			case WAVE_TRIANGLE:sprintf(txt,"Triangle");return true;break;
-			case WAVE_UPDOWN:sprintf(txt,"Up&Down");return true;break;
-			case WAVE_UPDOWNX2:sprintf(txt,"Up&Down High");return true;break;
-			case WAVE_SAWTOOTH:sprintf(txt,"Sawtooth");return true;break;
-			case WAVE_SAWTOOTHX2:sprintf(txt,"Sawtooth High");return true;break;
-			case WAVE_EXPSAW:sprintf(txt,"Exp.Saw"); return true;break;
-			case WAVE_MIDSINE:sprintf(txt,"Mid Sine");return true;break;
-			case WAVE_STEPS:sprintf(txt,"Steps");return true;break;
-			case WAVE_SAWSQUARE:sprintf(txt,"Saw Square");return true;break;
-			case WAVE_SQUARE:sprintf(txt,"Square");return true;break;
-			case WAVE_SQUAREX2:sprintf(txt,"Square High");return true;break;
-			case WAVE_TRISTATE:sprintf(txt,"Tristate");return true;break;
-			case WAVE_POLYNEG:sprintf(txt,"Digital 1");return true;break;
-			case WAVE_POLYNEG2:sprintf(txt,"Digital 2");return true;break;
-			case WAVE_POLYNEG3:sprintf(txt,"Digital 3");return true;break;
-			case WAVE_FORMANT2:sprintf(txt,"Formant 2");return true;break;
-			case WAVE_FORMANT3:sprintf(txt,"Formant 3");return true;break;
-			case WAVE_FORMANT4:sprintf(txt,"Formant 4");return true;break;
-			case WAVE_FORMANT5:sprintf(txt,"Formant 5");return true;break;
-			case WAVE_FORMANT6:sprintf(txt,"Formant 6");return true;break;
-			case WAVE_FORMANT8:sprintf(txt,"Formant 8");return true;break;
-			case WAVE_FORMANT10:sprintf(txt,"Formant 10");return true;break;
-			case WAVE_RANDOM:sprintf(txt,"Random 1");return true;break;
-			case WAVE_RANDOM2:sprintf(txt,"Random 2");return true;break;
-			case WAVE_RANDOM3:sprintf(txt,"Random 3");return true;break;
-			case WAVE_RANDOM4:sprintf(txt,"Random 4");return true;break;
-			case WAVE_RANDOM5:sprintf(txt,"Random 5");return true;break;
+			case WAVE_SINE:psy_snprintf(txt, 64, "Sine"); return true;break;
+			case WAVE_ADLIB2:psy_snprintf(txt, 64, "Adlib 2");return true;break;
+			case WAVE_ADLIB3:psy_snprintf(txt, 64, "Adlib 3");return true;break;
+			case WAVE_ADLIB4:psy_snprintf(txt, 64, "Adlib 4");return true;break;
+			case WAVE_SINE12:psy_snprintf(txt, 64, "Sine 1&2");return true;break;
+			case WAVE_SINECOSINE:psy_snprintf(txt, 64, "Sine&back");return true;break;
+			case WAVE_HALFSINE:psy_snprintf(txt, 64, "Half Sine");return true;break;
+			case WAVE_TRIANGLE:psy_snprintf(txt, 64, "Triangle");return true;break;
+			case WAVE_UPDOWN:psy_snprintf(txt, 64, "Up&Down");return true;break;
+			case WAVE_UPDOWNX2:psy_snprintf(txt, 64, "Up&Down High");return true;break;
+			case WAVE_SAWTOOTH:psy_snprintf(txt, 64, "Sawtooth");return true;break;
+			case WAVE_SAWTOOTHX2:psy_snprintf(txt, 64, "Sawtooth High");return true;break;
+			case WAVE_EXPSAW:psy_snprintf(txt, 64, "Exp.Saw"); return true;break;
+			case WAVE_MIDSINE:psy_snprintf(txt, 64, "Mid Sine");return true;break;
+			case WAVE_STEPS:psy_snprintf(txt, 64, "Steps");return true;break;
+			case WAVE_SAWSQUARE:psy_snprintf(txt, 64, "Saw Square");return true;break;
+			case WAVE_SQUARE:psy_snprintf(txt, 64, "Square");return true;break;
+			case WAVE_SQUAREX2:psy_snprintf(txt, 64, "Square High");return true;break;
+			case WAVE_TRISTATE:psy_snprintf(txt, 64, "Tristate");return true;break;
+			case WAVE_POLYNEG:psy_snprintf(txt, 64, "Digital 1");return true;break;
+			case WAVE_POLYNEG2:psy_snprintf(txt, 64, "Digital 2");return true;break;
+			case WAVE_POLYNEG3:psy_snprintf(txt, 64, "Digital 3");return true;break;
+			case WAVE_FORMANT2:psy_snprintf(txt, 64, "Formant 2");return true;break;
+			case WAVE_FORMANT3:psy_snprintf(txt, 64, "Formant 3");return true;break;
+			case WAVE_FORMANT4:psy_snprintf(txt, 64, "Formant 4");return true;break;
+			case WAVE_FORMANT5:psy_snprintf(txt, 64, "Formant 5");return true;break;
+			case WAVE_FORMANT6:psy_snprintf(txt, 64, "Formant 6");return true;break;
+			case WAVE_FORMANT8:psy_snprintf(txt, 64, "Formant 8");return true;break;
+			case WAVE_FORMANT10:psy_snprintf(txt, 64, "Formant 10");return true;break;
+			case WAVE_RANDOM:psy_snprintf(txt, 64, "Random 1");return true;break;
+			case WAVE_RANDOM2:psy_snprintf(txt, 64, "Random 2");return true;break;
+			case WAVE_RANDOM3:psy_snprintf(txt, 64, "Random 3");return true;break;
+			case WAVE_RANDOM4:psy_snprintf(txt, 64, "Random 4");return true;break;
+			case WAVE_RANDOM5:psy_snprintf(txt, 64, "Random 5");return true;break;
 		}
 	}
 
 	// DCO feedback
 	if(param==21||param==37||param==53||param==69){
-		sprintf(txt,"%3.2f%%",(float)value*100/256);
+		psy_snprintf(txt, 64, "%3.2f%%",(float)value*100/256);
 		return true;
 	}
 
 	// DCO base waveform descriptions
 	if(param==22||param==38||param==54||param==70){
 		switch(value){
-			case 0:sprintf(txt,"Off");return true;break;
-			case 1:sprintf(txt,"Sync");return true;break;
-			case 2:sprintf(txt,"Arpless Sync");return true;break;
-			case 3:sprintf(txt,"Arp Note 1");return true;break;
-			case 4:sprintf(txt,"Arp Note 2");return true;break;
-			case 5:sprintf(txt,"Arp Note 3");return true;break;
-			case 6:sprintf(txt,"Arp Note 4");return true;break;
-			case 7:sprintf(txt,"No Track");return true;break;
-			case 8:sprintf(txt,"No Track + Sync");return true;break;
-			case 9:sprintf(txt,"Phase Reset");return true;break;
-			case 10:sprintf(txt,"LFO Oneshot (A/D)");return true;break;
-			case 11:sprintf(txt,"LFO Oneshot (A&D)");return true;break;
-			case 12:sprintf(txt,"Phase Reset All Osc");return true;break;
+			case 0:psy_snprintf(txt, 64, "Off");return true;break;
+			case 1:psy_snprintf(txt, 64, "Sync");return true;break;
+			case 2:psy_snprintf(txt, 64, "Arpless Sync");return true;break;
+			case 3:psy_snprintf(txt, 64, "Arp Note 1");return true;break;
+			case 4:psy_snprintf(txt, 64, "Arp Note 2");return true;break;
+			case 5:psy_snprintf(txt, 64, "Arp Note 3");return true;break;
+			case 6:psy_snprintf(txt, 64, "Arp Note 4");return true;break;
+			case 7:psy_snprintf(txt, 64, "No Track");return true;break;
+			case 8:psy_snprintf(txt, 64, "No Track + Sync");return true;break;
+			case 9:psy_snprintf(txt, 64, "Phase Reset");return true;break;
+			case 10:psy_snprintf(txt, 64, "LFO Oneshot (A/D)");return true;break;
+			case 11:psy_snprintf(txt, 64, "LFO Oneshot (A&D)");return true;break;
+			case 12:psy_snprintf(txt, 64, "Phase Reset All Osc");return true;break;
 		}
 	}
 
@@ -672,76 +673,76 @@ bool mi::DescribeValue(char* txt,int const param, int const value){
 	{
 		switch(value)
 		{
-		case 0:sprintf(txt,"Off");return true;break;
-		case 1:sprintf(txt,"Lowpass");return true;break;
-		case 2:sprintf(txt,"Hipass");return true;break;
-		case 3:sprintf(txt,"Bandpass");return true;break;
-		case 4:sprintf(txt,"Bandreject");return true;break;
-		case 5:sprintf(txt,"EQ1+");return true;break;
-		case 6:sprintf(txt,"EQ1-");return true;break;
-		case 7:sprintf(txt,"EQ2+");return true;break;
-		case 8:sprintf(txt,"EQ2-");return true;break;
-		case 9:sprintf(txt,"EQ3+");return true;break;
-		case 10:sprintf(txt,"EQ3-");return true;break;
+		case 0:psy_snprintf(txt, 64, "Off");return true;break;
+		case 1:psy_snprintf(txt, 64, "Lowpass");return true;break;
+		case 2:psy_snprintf(txt, 64, "Hipass");return true;break;
+		case 3:psy_snprintf(txt, 64, "Bandpass");return true;break;
+		case 4:psy_snprintf(txt, 64, "Bandreject");return true;break;
+		case 5:psy_snprintf(txt, 64, "EQ1+");return true;break;
+		case 6:psy_snprintf(txt, 64, "EQ1-");return true;break;
+		case 7:psy_snprintf(txt, 64, "EQ2+");return true;break;
+		case 8:psy_snprintf(txt, 64, "EQ2-");return true;break;
+		case 9:psy_snprintf(txt, 64, "EQ3+");return true;break;
+		case 10:psy_snprintf(txt, 64, "EQ3-");return true;break;
 		}
 	}
 
 	// DCO function descriptions
 	if(param==24||param==40||param==56||param==72){
 		switch(value){
-			case 0:sprintf(txt,"Off");return true;break;
-			case 1:sprintf(txt,"Pulsewidth");return true;break;
-			case 2:sprintf(txt,"Pulsewidth Medium");return true;break;
-			case 3:sprintf(txt,"Pulsewidth Light");return true;break;
-			case 4:sprintf(txt,"Dual Squash");return true;break;
-			case 5:sprintf(txt,"Muted Sync");return true;break;
-			case 6:sprintf(txt,"Sync Up");return true;break;
-			case 7:sprintf(txt,"Sync Down");return true;break;
-			case 8:sprintf(txt,"Negator");return true;break;
-			case 9:sprintf(txt,"Dual Negator");return true;break;
-			case 10:sprintf(txt,"Rect Negator");return true;break;
-			case 11:sprintf(txt,"Octaver");return true;break;
-			case 12:sprintf(txt,"Frequency Shift Keying");return true;break;
-			case 13:sprintf(txt,"Mixer");return true;break;
-			case 14:sprintf(txt,"Dual Mixer");return true;break;
-			case 15:sprintf(txt,"Feedback Mixer");return true;break;
-			case 16:sprintf(txt,"Invert Mixer");return true;break;
-			case 17:sprintf(txt,"Triangle Mixer");return true;break;
-			case 18:sprintf(txt,"Sawtooth Mixer");return true;break;
-			case 19:sprintf(txt,"Square Mixer");return true;break;
-			case 20:sprintf(txt,"Tremolo");return true;break;
-			case 21:sprintf(txt,"Sine PM 1");return true;break;
-			case 22:sprintf(txt,"Sine PM 2");return true;break;
-			case 23:sprintf(txt,"Sine PM 3");return true;break;
-			case 24:sprintf(txt,"Adlib2 PM 1");return true;break;
-			case 25:sprintf(txt,"Adlib2 PM 2");return true;break;
-			case 26:sprintf(txt,"Adlib2 PM 3");return true;break;
-			case 27:sprintf(txt,"Adlib3 PM 1");return true;break;
-			case 28:sprintf(txt,"Adlib3 PM 2");return true;break;
-			case 29:sprintf(txt,"Adlib3 PM 3");return true;break;
-			case 30:sprintf(txt,"Adlib4 PM 1");return true;break;
-			case 31:sprintf(txt,"Adlib4 PM 2");return true;break;
-			case 32:sprintf(txt,"Adlib4 PM 3");return true;break;
-			case 33:sprintf(txt,"Wave PM 1");return true;break;
-			case 34:sprintf(txt,"Wave PM 2");return true;break;
-			case 35:sprintf(txt,"Wave PM 3");return true;break;
-			case 36:sprintf(txt,"Dual Fix PM");return true;break;
-			case 37:sprintf(txt,"Multiply");return true;break;
-			case 38:sprintf(txt,"AND Gate");return true;break;
-			case 39:sprintf(txt,"XOR Gate");return true;break;
-			case 40:sprintf(txt,"Boost (Hard Clip)");return true;break;
-			case 41:sprintf(txt,"RM to AM (Upright)");return true;break;
-			case 42:sprintf(txt,"RM to AM (Flipped)");return true;break;
-			case 43:sprintf(txt,"Feedback Control");return true;break;
-			case 44:sprintf(txt,"FM next Oscillator (+)");return true;break;
-			case 45:sprintf(txt,"FM next Oscillator (-)");return true;break;
-			case 46:sprintf(txt,"Filter Modulation");return true;break;
-			case 47:sprintf(txt,"Master Saturation");return true;break;
-			case 48:sprintf(txt,"FM last Oscillator (+)");return true;break;
-			case 49:sprintf(txt,"FM last Oscillator (-)");return true;break;
-			case 50:sprintf(txt,"X Rotator");return true;break;
-			case 51:sprintf(txt,"Y Rotator");return true;break;
-			case 52:sprintf(txt,"Boost II (Wrap)");return true;break;
+			case 0:psy_snprintf(txt, 64, "Off");return true;break;
+			case 1:psy_snprintf(txt, 64, "Pulsewidth");return true;break;
+			case 2:psy_snprintf(txt, 64, "Pulsewidth Medium");return true;break;
+			case 3:psy_snprintf(txt, 64, "Pulsewidth Light");return true;break;
+			case 4:psy_snprintf(txt, 64, "Dual Squash");return true;break;
+			case 5:psy_snprintf(txt, 64, "Muted Sync");return true;break;
+			case 6:psy_snprintf(txt, 64, "Sync Up");return true;break;
+			case 7:psy_snprintf(txt, 64, "Sync Down");return true;break;
+			case 8:psy_snprintf(txt, 64, "Negator");return true;break;
+			case 9:psy_snprintf(txt, 64, "Dual Negator");return true;break;
+			case 10:psy_snprintf(txt, 64, "Rect Negator");return true;break;
+			case 11:psy_snprintf(txt, 64, "Octaver");return true;break;
+			case 12:psy_snprintf(txt, 64, "Frequency Shift Keying");return true;break;
+			case 13:psy_snprintf(txt, 64, "Mixer");return true;break;
+			case 14:psy_snprintf(txt, 64, "Dual Mixer");return true;break;
+			case 15:psy_snprintf(txt, 64, "Feedback Mixer");return true;break;
+			case 16:psy_snprintf(txt, 64, "Invert Mixer");return true;break;
+			case 17:psy_snprintf(txt, 64, "Triangle Mixer");return true;break;
+			case 18:psy_snprintf(txt, 64, "Sawtooth Mixer");return true;break;
+			case 19:psy_snprintf(txt, 64, "Square Mixer");return true;break;
+			case 20:psy_snprintf(txt, 64, "Tremolo");return true;break;
+			case 21:psy_snprintf(txt, 64, "Sine PM 1");return true;break;
+			case 22:psy_snprintf(txt, 64, "Sine PM 2");return true;break;
+			case 23:psy_snprintf(txt, 64, "Sine PM 3");return true;break;
+			case 24:psy_snprintf(txt, 64, "Adlib2 PM 1");return true;break;
+			case 25:psy_snprintf(txt, 64, "Adlib2 PM 2");return true;break;
+			case 26:psy_snprintf(txt, 64, "Adlib2 PM 3");return true;break;
+			case 27:psy_snprintf(txt, 64, "Adlib3 PM 1");return true;break;
+			case 28:psy_snprintf(txt, 64, "Adlib3 PM 2");return true;break;
+			case 29:psy_snprintf(txt, 64, "Adlib3 PM 3");return true;break;
+			case 30:psy_snprintf(txt, 64, "Adlib4 PM 1");return true;break;
+			case 31:psy_snprintf(txt, 64, "Adlib4 PM 2");return true;break;
+			case 32:psy_snprintf(txt, 64, "Adlib4 PM 3");return true;break;
+			case 33:psy_snprintf(txt, 64, "Wave PM 1");return true;break;
+			case 34:psy_snprintf(txt, 64, "Wave PM 2");return true;break;
+			case 35:psy_snprintf(txt, 64, "Wave PM 3");return true;break;
+			case 36:psy_snprintf(txt, 64, "Dual Fix PM");return true;break;
+			case 37:psy_snprintf(txt, 64, "Multiply");return true;break;
+			case 38:psy_snprintf(txt, 64, "AND Gate");return true;break;
+			case 39:psy_snprintf(txt, 64, "XOR Gate");return true;break;
+			case 40:psy_snprintf(txt, 64, "Boost (Hard Clip)");return true;break;
+			case 41:psy_snprintf(txt, 64, "RM to AM (Upright)");return true;break;
+			case 42:psy_snprintf(txt, 64, "RM to AM (Flipped)");return true;break;
+			case 43:psy_snprintf(txt, 64, "Feedback Control");return true;break;
+			case 44:psy_snprintf(txt, 64, "FM next Oscillator (+)");return true;break;
+			case 45:psy_snprintf(txt, 64, "FM next Oscillator (-)");return true;break;
+			case 46:psy_snprintf(txt, 64, "Filter Modulation");return true;break;
+			case 47:psy_snprintf(txt, 64, "Master Saturation");return true;break;
+			case 48:psy_snprintf(txt, 64, "FM last Oscillator (+)");return true;break;
+			case 49:psy_snprintf(txt, 64, "FM last Oscillator (-)");return true;break;
+			case 50:psy_snprintf(txt, 64, "X Rotator");return true;break;
+			case 51:psy_snprintf(txt, 64, "Y Rotator");return true;break;
+			case 52:psy_snprintf(txt, 64, "Boost II (Wrap)");return true;break;
 
 		}
 	}
@@ -750,25 +751,25 @@ bool mi::DescribeValue(char* txt,int const param, int const value){
 	if(param==25||param==41||param==57||param==73||param==27||param==43||param==59||param==75||param==30||param==46||param==62||param==78){
 		float fnord=(float)value;
 		if (fnord==1024.0f) fnord=1023.5f;
-		sprintf(txt,"%3.2f%%",(float)fnord*100/2047);
+		psy_snprintf(txt, 64, "%3.2f%%",(float)fnord*100/2047);
 		return true;
 	}
 
 	//pitchenv, ksc1, velo1, soften, reso, ksc2, velo2, fltenv
 	if(param==0x56||param==0x5d||param==0x5e||param==0x05f||param==0x63||param==0x6d||param==0x6e||param==0x6f){
-		sprintf(txt,"%3.2f%%",(float)value*100/256);
+		psy_snprintf(txt, 64, "%3.2f%%",(float)value*100/256);
 		return true;
 	}
 
 	//pitchLfo, fltLfo
 	if (param==0x0d || param==0x65){
-		sprintf(txt,"%3.2f%%",(float)value*100/999);
+		psy_snprintf(txt, 64, "%3.2f%%",(float)value*100/999);
 		return true;
 	}
 
 	//fltTrack
 	if (param==0x64){
-		sprintf(txt,"%3.2f%%",(float)value*100/64);
+		psy_snprintf(txt, 64, "%3.2f%%",(float)value*100/64);
 		return true;
 	}
 

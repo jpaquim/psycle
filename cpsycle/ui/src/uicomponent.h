@@ -583,7 +583,7 @@ void psy_ui_component_stoptimer(psy_ui_Component* self, uintptr_t id);
 INLINE const psy_ui_TextMetric* psy_ui_component_textmetric(const psy_ui_Component* self)
 {
 	assert(self->imp);
-
+	
 	return self->imp->vtable->dev_textmetric(self->imp);
 }
 
@@ -731,12 +731,7 @@ INLINE void psy_ui_component_setscrolltop_px(psy_ui_Component* self,
 }
 
 void psy_ui_component_updateoverflow(psy_ui_Component*);
-void psy_ui_component_drawborder(psy_ui_Component*, psy_ui_Graphics*);
-void psy_ui_component_drawbackground(psy_ui_Component*, psy_ui_Graphics*);
-void psy_ui_component_drawbackgroundimage(psy_ui_Component*, psy_ui_Graphics*,
-	psy_ui_Style*);
-void psy_ui_component_drawbackground_style(psy_ui_Component*,
-	psy_ui_Graphics*, psy_ui_Style*, psy_ui_RealPoint offset);
+
 
 INLINE void psy_ui_component_setoverflow(psy_ui_Component* self, psy_ui_Overflow overflow)
 {

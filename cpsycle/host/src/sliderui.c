@@ -60,7 +60,7 @@ void sliderui_init(SliderUi* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->component, parent, NULL);
 	sliderui_vtable_init(self);
 	self->component.vtable = &sliderui_vtable;
-	psy_ui_component_setbackgroundmode(&self->component, psy_ui_NOBACKGROUND);
+	psy_ui_component_setstyletype(&self->component, STYLE_MACPARAM_SLIDER);
 	self->machine = machine;
 	self->paramidx = paramidx;
 	self->param = param;
@@ -87,29 +87,17 @@ SliderUi* sliderui_allocinit(psy_ui_Component* parent,
 }
 
 void sliderui_ondraw(SliderUi* self, psy_ui_Graphics* g)
-{
-	double xoffset;
+{	
 	double yoffset;
-	double value;
-	psy_ui_RealRectangle r;		
-	psy_ui_RealSize size;	
-	psy_ui_Style* bottom_style;
+	double value;		
 	psy_ui_Style* slider_style;
 	psy_ui_Style* sliderknob_style;
+	psy_ui_Background* bg;
+	const psy_ui_TextMetric* tm;
 	
-	bottom_style = psy_ui_style(STYLE_MACPARAM_BOTTOM);
 	slider_style = psy_ui_style(STYLE_MACPARAM_SLIDER);
 	sliderknob_style = psy_ui_style(STYLE_MACPARAM_SLIDERKNOB);	
 	sliderui_updateparam(self);
-	size = psy_ui_component_size_px(&self->component);
-	/*  todo: make the slider scalable */
-	r = psy_ui_realrectangle_make(
-			psy_ui_realpoint_zero(),
-			psy_ui_realsize_make(size.width, size.height));
-	psy_ui_drawsolidrectangle(g, r, bottom_style->background.colour);
-	psy_ui_component_drawbackground_style(&self->component,
-		g, slider_style, psy_ui_realpoint_zero());	
-	xoffset = 0.0;
 	if (self->param) {
 		if (self->machine) {
 			value = psy_audio_machine_parameter_normvalue(self->machine,
@@ -122,9 +110,17 @@ void sliderui_ondraw(SliderUi* self, psy_ui_Graphics* g)
 	}
 	yoffset = ((1.0 - value) *
 		(slider_style->background.size.height -
-			sliderknob_style->background.size.height));	
-	psy_ui_component_drawbackground_style(&self->component,
-		g, sliderknob_style, psy_ui_realpoint_make(xoffset, yoffset));	
+			sliderknob_style->background.size.height));		
+	tm = psy_ui_component_textmetric(&self->component);
+	bg = &sliderknob_style->background;
+	psy_ui_drawbitmap(g, &bg->bitmap,
+		psy_ui_realrectangle_make(
+			psy_ui_realpoint_make(
+				psy_ui_value_px(&sliderknob_style->padding.left, tm, 0),
+				yoffset + psy_ui_value_px(
+					&sliderknob_style->padding.top, tm, 0)),
+			bg->size),
+		psy_ui_realpoint_make(-bg->position.x, -bg->position.y));	
 }
 
 void sliderui_onpreferredsize(SliderUi* self, const psy_ui_Size* limit,

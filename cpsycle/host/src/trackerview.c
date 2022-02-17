@@ -127,12 +127,9 @@ void trackergrid_init(TrackerGrid* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->workspace->signal_playlinechanged, self,
 		trackergrid_onplaylinechanged);	
 	trackergrid_storecursor(self);
-	/* setup base component */
-	psy_ui_component_setbackgroundmode(&self->component,
-		psy_ui_NOBACKGROUND);		
+	/* setup base component */			
 	trackergrid_init_signals(self);
-	psy_ui_component_setalignexpand(&self->component,
-		psy_ui_HEXPAND);
+	psy_ui_component_setalignexpand(&self->component, psy_ui_HEXPAND);
 	psy_ui_component_setscrollstep_height(trackergrid_base(self),
 		self->state->lineheight);
 	/* init internal */
@@ -1799,9 +1796,7 @@ void trackerview_init(TrackerView* self, psy_ui_Component* parent,
 		psy_ui_OVERFLOW_SCROLL);
 	psy_ui_scroller_init(&self->scroller, &self->grid.component, parent);	
 	psy_signal_connect(&self->scroller.pane.signal_align, self,
-		trackerview_onscrollpanealign);
-	psy_ui_component_setbackgroundmode(&self->scroller.pane,
-		psy_ui_NOBACKGROUND);
+		trackerview_onscrollpanealign);	
 	psy_ui_component_setalign(&self->scroller.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_component_setalign(&self->grid.component, psy_ui_ALIGN_FIXED);
 	psy_signal_connect(&workspace->signal_songchanged, self,
@@ -1816,7 +1811,7 @@ void trackerview_onscrollpanealign(TrackerView* self, psy_ui_Component* sender)
 {
 	psy_ui_RealSize size;
 
-	size = psy_ui_component_scrollsize_px(sender);
+	size = psy_ui_component_scrollsize_px(&self->scroller.pane);
 	self->grid.state->visilines = (intptr_t)(size.height /
 		self->grid.state->lineheightpx);
 }

@@ -20,7 +20,8 @@ extern "C" {
 
 enum {
 	PROPERTY_ID_DRAWVUMETERS = 50000,
-	PROPERTY_ID_DRAWVIRTUALGENERATORS
+	PROPERTY_ID_DRAWVIRTUALGENERATORS,
+	PROPERTY_ID_MACHINESKIN
 };
 
 struct DirConfig;
@@ -31,6 +32,7 @@ typedef struct MachineViewConfig {
 	psy_Property* machineview;
 	psy_Property* stackview;
 	psy_Property* theme;	
+	psy_Property* machineskins;
 	/* references */
 	psy_Property* parent;
 	struct DirConfig* dirconfig;
@@ -40,7 +42,10 @@ void machineviewconfig_init(MachineViewConfig*, psy_Property* parent);
 void machineviewconfig_dispose(MachineViewConfig*);
 
 void machineviewconfig_setdirectories(MachineViewConfig*, struct DirConfig*);
+void machineviewconfig_update_machine_skins(MachineViewConfig*);
 void machineviewconfig_resettheme(MachineViewConfig*);
+const char* machineviewconfig_machine_skin_name(MachineViewConfig* self);
+void machineviewconfig_loadbitmap(MachineViewConfig*);
 void machineviewconfig_settheme(MachineViewConfig*, psy_Property*);
 void machineviewconfig_write_styles(MachineViewConfig*);
 void machineviewconfig_read_styles(MachineViewConfig*);

@@ -158,7 +158,7 @@ psy_ui_BitmapImp* allocinit_bitmapimp(psy_ui_win_ImpFactory* self, psy_ui_RealSi
 {
 	psy_ui_BitmapImp* rv;
 
-	rv = (psy_ui_BitmapImp*) malloc(sizeof(psy_ui_win_BitmapImp));
+	rv = (psy_ui_BitmapImp*)malloc(sizeof(psy_ui_win_BitmapImp));
 	if (rv) {
 		psy_ui_win_bitmapimp_init((psy_ui_win_BitmapImp*)rv, size);
 	}

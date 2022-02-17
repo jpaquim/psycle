@@ -1034,7 +1034,8 @@ void mainframe_onsongtrackschanged(MainFrame* self, psy_audio_Patterns* sender,
 {
 	/* TrackScopes can change its height, realign mainframe */
 	psy_ui_component_align(trackscopeview_base(&self->trackscopeview));
-	psy_ui_component_align(mainframe_base(self));
+	psy_ui_component_align(&self->pane);
+	psy_ui_component_invalidate(&self->pane);
 }
 
 void mainframe_onfloatsection(MainFrame* self, Workspace* sender,

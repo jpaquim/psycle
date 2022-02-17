@@ -26,8 +26,8 @@ typedef enum psy_ui_ThemeMode {
 } psy_ui_ThemeMode;
 
 typedef enum {
-	psy_ui_REPEAT,
-	psy_ui_NOREPEAT	
+	psy_ui_NOREPEAT,
+	psy_ui_REPEAT,	
 } psy_ui_BackgroundRepeat;
 
 typedef struct psy_ui_Background {
@@ -173,7 +173,13 @@ INLINE void psy_ui_style_set_position(psy_ui_Style* self,
 	self->position = position;	
 }
 
-INLINE void psy_ui_style_setsize_px(psy_ui_Style* self,
+INLINE void psy_ui_style_set_background_repeat(psy_ui_Style* self,
+	psy_ui_BackgroundRepeat repeat)
+{
+	self->background.repeat = repeat;	
+}
+
+INLINE void psy_ui_style_set_background_size_px(psy_ui_Style* self,
 	double width, double height)
 {
 	self->background.size = psy_ui_realsize_make(width, height);

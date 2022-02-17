@@ -288,7 +288,6 @@
     <ClCompile Include="src\adsrsliders.c" />
     <ClCompile Include="src\arrowui.c" />
     <ClCompile Include="src\channelmappingview.c" />
-    <ClCompile Include="src\checkui.c" />
     <ClCompile Include="src\clipbox.c" />
     <ClCompile Include="src\clockbar.c" />
     <ClCompile Include="src\cmdproperties.c" />
@@ -476,7 +475,6 @@
     <ClInclude Include="src\adsrsliders.h" />
     <ClInclude Include="src\arrowui.h" />
     <ClInclude Include="src\channelmappingview.h" />
-    <ClInclude Include="src\checkui.h" />
     <ClInclude Include="src\clipbox.h" />
     <ClInclude Include="src\clockbar.h" />
     <ClInclude Include="src\cmdproperties.h" />

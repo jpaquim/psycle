@@ -334,6 +334,15 @@ INLINE psy_ui_Point psy_ui_point_make_em(double x, double y)
 	return rv;
 }
 
+INLINE psy_ui_Point psy_ui_point_make_real(psy_ui_RealPoint pt)
+{
+	psy_ui_Point rv;
+
+	rv.x = psy_ui_value_make_px(pt.x);
+	rv.y = psy_ui_value_make_px(pt.y);
+	return rv;
+}
+
 INLINE psy_ui_Point psy_ui_point_make_px(double x, double y)
 {
 	psy_ui_Point rv;
@@ -423,7 +432,7 @@ INLINE psy_ui_Size psy_ui_size_make_em(double width, double height)
 	return rv;
 }
 
-INLINE psy_ui_Size psy_ui_size_makereal(psy_ui_RealSize size)
+INLINE psy_ui_Size psy_ui_size_make_real(psy_ui_RealSize size)
 {
 	psy_ui_Size rv;
 

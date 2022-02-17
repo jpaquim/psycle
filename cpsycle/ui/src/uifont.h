@@ -57,7 +57,8 @@ struct psy_ui_FontImp;
 
 /* psy_ui_Font */
 typedef struct psy_ui_Font {    
-	struct psy_ui_FontImp* imp;    
+	struct psy_ui_FontImp* imp;
+    int dbg;
 } psy_ui_Font;
 
 void psy_ui_font_init(psy_ui_Font*, const psy_ui_FontInfo*);

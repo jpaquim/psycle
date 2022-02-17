@@ -9,7 +9,7 @@
 #include "machinestackview.h"
 /* host */
 #include "arrowui.h"
-#include "checkui.h"
+#include "switchui.h"
 #include "knobui.h"
 #include "resources/resource.h"
 #include "slidergroupui.h"
@@ -1505,12 +1505,13 @@ void machinestackvolumes_build(MachineStackVolumes* self)
 				psy_INDEX_INVALID,
 				&column->level_param.machineparam);
 			if (slidergroup) {								
-				CheckUi* mute;
+				SwitchUi* mute;
 
 				component = &slidergroup->component;
-				mute = checkui_allocinit(&slidergroup->controls,
+				mute = switchui_allocinit(&slidergroup->controls,
 					NULL, psy_INDEX_INVALID,
-					&column->mute_param.machineparam);
+					&column->mute_param.machineparam,
+					STYLE_MACPARAM_CHECKOFF, STYLE_MACPARAM_CHECKON);
 				psy_ui_component_setalign(&mute->component, psy_ui_ALIGN_TOP);
 			}
 		} else {

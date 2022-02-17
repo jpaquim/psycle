@@ -154,6 +154,8 @@ void psy_ui_textareapane_onpreferredsize(psy_ui_TextAreaPane* self,
 	}	
 	rv->height = psy_ui_value_make_px(psy_list_size(lines) *
 		(tm->tmHeight * 1.0));
+	psy_list_free(lines);
+	lines = NULL;
 }
 
 void psy_ui_textareapane_enableedit(psy_ui_TextAreaPane* self)

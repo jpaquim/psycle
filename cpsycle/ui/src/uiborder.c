@@ -53,7 +53,7 @@ psy_ui_Size psy_ui_border_size(const psy_ui_Border* self)
 	if (self->bottom.style == psy_ui_BORDER_SOLID) {
 		maxsize.height += psy_ui_value_px(&self->bottom.width, NULL, NULL);
 	}
-	return psy_ui_size_makereal(maxsize);	
+	return psy_ui_size_make_real(maxsize);	
 }
 
 psy_ui_Margin psy_ui_border_margin(const psy_ui_Border* self)

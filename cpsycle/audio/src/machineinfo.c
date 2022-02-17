@@ -16,20 +16,20 @@
 /* implementation */
 void machineinfo_init(psy_audio_MachineInfo* self)
 {
-	self->author = strdup("");
-	self->command = strdup("");
+	self->author = psy_strdup("");
+	self->command = psy_strdup("");
 	self->flags = 0;
 	self->mode = psy_audio_MACHMODE_FX;
-	self->name = strdup("");	
-	self->shortname = strdup("");
+	self->name = psy_strdup("");
+	self->shortname = psy_strdup("");
 	self->apiversion = 0;
 	self->plugversion = 0;
 	self->type = 0;	
-	self->modulepath = strdup("");
+	self->modulepath = psy_strdup("");
 	self->shellidx = 0;
-	self->helptext = strdup("");
-	self->desc = strdup("");
-	self->category = strdup("");	
+	self->helptext = psy_strdup("");
+	self->desc = psy_strdup("");
+	self->category = psy_strdup("");
 }
 
 void machineinfo_init_copy(psy_audio_MachineInfo* self,

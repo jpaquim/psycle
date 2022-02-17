@@ -26,8 +26,7 @@ void propertiesrenderstate_init(PropertiesRenderState* self, uintptr_t numcols,
 	self->selectedline = NULL;
 	self->edit = edit;
 	self->dialogbutton = FALSE;
-	self->numcols = numcols;
-	self->dummy = dummy;
+	self->numcols = numcols;	
 	self->preventmousepropagation = TRUE;
 	self->comboselect = FALSE;
 	psy_ui_size_init_em(&self->size_col0, 80.0, 1.3);
@@ -332,16 +331,16 @@ bool propertiesrenderline_updatefontlabel(PropertiesRenderLine* self)
 				
 		psy_ui_fontinfo_init_string(&fontinfo,
 			psy_property_item_str(self->property));
-		psy_ui_font_init(&font, &fontinfo);
-		psy_ui_component_setfont(self->state->dummy, &font);
-		tm = psy_ui_component_textmetric(self->state->dummy);
-		psy_ui_font_dispose(&font);
+		psy_ui_font_init(&font, &fontinfo);		
+		tm = psy_ui_font_textmetric(&font);		
 		if (fontinfo.lfHeight < 0) {
 			pt = ((tm->tmHeight - tm->tmInternalLeading) * 72) /
 				psy_ui_logpixelsy();
 		} else {
 			pt = tm->tmHeight;
 		}
+		psy_ui_font_dispose(&font);
+		tm = NULL;
 		psy_snprintf(str, 128, "%s %d pt", fontinfo.lfFaceName, (int)pt);
 		psy_ui_label_settext(self->label, str);
 		return TRUE;
@@ -633,7 +632,7 @@ int propertiesrenderer_onpropertiesbuild(PropertiesRenderer* self,
 			PropertiesRenderLine* line;
 						
 			line = propertiesrenderline_allocinit(self->curr,
-				&self->state, property, level + self->rebuild_level);
+				&self->state, property, level + self->rebuild_level);			
 			psy_ui_component_setstyletype(&line->key.component,
 				self->keystyle);
 			psy_ui_component_setstyletype_hover(&line->key.component,

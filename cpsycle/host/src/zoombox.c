@@ -45,7 +45,7 @@ void zoombox_init(ZoomBox* self, psy_ui_Component* parent)
 {
 	assert(self);
 	
-	psy_ui_component_init(&self->component, parent, NULL);
+	psy_ui_component_init(&self->component, parent, NULL);	
 	vtable_init(self);
 	psy_signal_init(&self->signal_changed);
 	self->zoomrate = 1.0;
