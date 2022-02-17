@@ -704,10 +704,7 @@ int psy2loader_read_machines(PSY2Loader* self)
 		
 	psyfile_read(self->fp, &self->_machineActive[0], sizeof(self->_machineActive));
 	memset(self->pMac, 0, sizeof(self->pMac));
-	for (i = 0; i < 128; ++i) {
-		if (i == 20) {
-			self = self;
-		}
+	for (i = 0; i < 128; ++i) {		
 		if (self->_machineActive[i]) {
 			int32_t type;
 			int32_t x;

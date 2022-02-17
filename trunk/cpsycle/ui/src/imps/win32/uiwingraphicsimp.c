@@ -319,8 +319,6 @@ void psy_ui_win_g_imp_drawsolidrectangle(psy_ui_win_GraphicsImp* self,
 		hBrush = CreateSolidBrush(psy_ui_colour_colorref(&colour));
 		FillRect(self->hdc, &rect, hBrush);
 		DeleteObject(hBrush);
-	} else {
-		self = self;
 	}
 }
 

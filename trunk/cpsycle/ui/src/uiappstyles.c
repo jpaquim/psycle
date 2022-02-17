@@ -194,8 +194,7 @@ void psy_ui_appstyles_initdarktheme(psy_ui_Styles* self,
 	style = psy_ui_style_clone(psy_ui_styles_at(self, psy_ui_STYLE_BUTTON_HOVER));
 	psy_ui_style_setpadding_em(style, 0.0, 0.0, 0.0, 0.0);
 	psy_ui_styles_setstyle(self, psy_ui_STYLE_SCROLLBUTTON_HOVER, style);
-	/* scrollbutton::active */
-	style = psy_ui_style_allocinit();
+	/* scrollbutton::active */	
 	style = psy_ui_style_clone(psy_ui_styles_at(self, psy_ui_STYLE_BUTTON_ACTIVE));
 	psy_ui_style_setpadding_em(style, 0.0, 0.0, 0.0, 0.0);
 	psy_ui_styles_setstyle(self, psy_ui_STYLE_SCROLLBUTTON_ACTIVE, style);

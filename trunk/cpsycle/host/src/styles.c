@@ -555,6 +555,17 @@ void inithoststyles(psy_ui_Styles* self, psy_ui_ThemeMode theme)
 	psy_ui_style_setpadding_em(style, 0.5, 0.0, 0.5, 1.0);
 	psy_ui_styles_setstyle(self, STYLE_RECENTVIEW_MAINSECTIONHEADER,
 		style);
+
+	style = psy_ui_style_allocinit();	
+	psy_ui_styles_setstyle(self, STYLE_RECENTVIEW_LINE, style);
+
+	style = psy_ui_style_allocinit();	
+	psy_ui_style_setbackgroundcolour(style, material.overlay_4p);
+	psy_ui_styles_setstyle(self, STYLE_RECENTVIEW_LINE_HOVER, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolour(style, material.secondary);	
+	psy_ui_styles_setstyle(self, STYLE_RECENTVIEW_LINE_SELECT, style);
 	
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolours(style, material.onprimary_weak,
@@ -1131,6 +1142,24 @@ void initlighttheme(psy_ui_Styles* self)
 	psy_ui_style_setpadding_em(style, 0.5, 0.0, 0.5, 1.0);
 	psy_ui_styles_setstyle(self, STYLE_RECENTVIEW_MAINSECTIONHEADER,
 		style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolours(style,
+		psy_ui_colour_blue(),
+		psy_ui_colour_blue());
+	psy_ui_styles_setstyle(self, STYLE_RECENTVIEW_LINE, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolours(style,
+		psy_ui_colour_blue(),
+		psy_ui_colour_blue());
+	psy_ui_styles_setstyle(self, STYLE_RECENTVIEW_LINE_HOVER, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolours(style,
+		psy_ui_colour_blue(),
+		psy_ui_colour_blue());
+	psy_ui_styles_setstyle(self, STYLE_RECENTVIEW_LINE_SELECT, style);
 
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolours(style, material.onprimary_weak,
@@ -1791,14 +1820,14 @@ void init_machineview_styles(psy_ui_Styles* self)
 	/* master */
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setbackgroundid(style, IDB_MACHINESKIN);
-	psy_ui_style_setsize_px(style, 138.0, 35.0);	
+	psy_ui_style_set_background_size_px(style, 138.0, 35.0);	
 	psy_ui_style_set_background_position_px(style, 0.0, -52.0);
 	psy_ui_style_setbackgroundcolour(style, psy_ui_colour_make(0x00333333));
 	psy_ui_styles_setstyle(self, STYLE_MV_MASTER, style);
 
 	/* master:name */
 	style = psy_ui_style_allocinit();
-	psy_ui_style_setsize_px(style, 117.0, 15.0);
+	psy_ui_style_set_background_size_px(style, 117.0, 15.0);
 	psy_ui_style_setpadding_px(style, 3.0, 0, 0.0, 20.0);
 	psy_ui_styles_setstyle(self, STYLE_MV_MASTER_NAME, style);
 
@@ -1808,7 +1837,7 @@ void init_machineview_styles(psy_ui_Styles* self)
 		psy_ui_colour_make(0x00B1C8B0),
 		psy_ui_colour_make(0x002f3E25));
 	psy_ui_style_setbackgroundid(style, IDB_MACHINESKIN);
-	psy_ui_style_setsize_px(style, 138.0, 52.0);
+	psy_ui_style_set_background_size_px(style, 138.0, 52.0);
 	psy_ui_style_set_background_position_px(style, 0.0, -87.0);	
 	psy_ui_styles_setstyle(self, STYLE_MV_GENERATOR, style);	
 
@@ -1849,7 +1878,7 @@ void init_machineview_styles(psy_ui_Styles* self)
 	/* generator:solo:select */
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setbackgroundid(style, IDB_MACHINESKIN);
-	psy_ui_style_setsize_px(style, 17, 17);	
+	psy_ui_style_set_background_size_px(style, 17, 17);	
 	psy_ui_style_set_background_position_px(style, -6.0, -139.0);
 	psy_ui_style_set_position(style, psy_ui_rectangle_make(
 		psy_ui_point_make_px(98.0, 31.0), psy_ui_size_make_px(17.0, 17.0)));	
@@ -1866,14 +1895,14 @@ void init_machineview_styles(psy_ui_Styles* self)
 	/* generator:vu0 */
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setbackgroundid(style, IDB_MACHINESKIN);
-	psy_ui_style_setsize_px(style, 129.0, 7);	
+	psy_ui_style_set_background_size_px(style, 129.0, 7);	
 	psy_ui_style_set_background_position_px(style, 0.0, -156.0);
 	psy_ui_styles_setstyle(self, STYLE_MV_GENERATOR_VU0, style);
 
 	/* generator:vupeak */
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setbackgroundid(style, IDB_MACHINESKIN);
-	psy_ui_style_setsize_px(style, 1, 7);	
+	psy_ui_style_set_background_size_px(style, 1, 7);	
 	psy_ui_style_set_background_position_px(style, -108.0, -156.0);
 	psy_ui_styles_setstyle(self, STYLE_MV_GENERATOR_VUPEAK, style);
 
@@ -1886,7 +1915,7 @@ void init_machineview_styles(psy_ui_Styles* self)
 	/* generator:pan:slider */
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setbackgroundid(style, IDB_MACHINESKIN);
-	psy_ui_style_setsize_px(style, 6.0, 13.0);
+	psy_ui_style_set_background_size_px(style, 6.0, 13.0);
 	psy_ui_style_set_background_position_px(style, -0.0, -139.0);
 	psy_ui_style_set_position(style, psy_ui_rectangle_make(
 		psy_ui_point_make_px(0.0, 0.0), psy_ui_size_make_px(6.0, 13.0)));	
@@ -1895,7 +1924,7 @@ void init_machineview_styles(psy_ui_Styles* self)
 	/* effect*/
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setbackgroundid(style, IDB_MACHINESKIN);
-	psy_ui_style_setsize_px(style, 138.0, 52.0);
+	psy_ui_style_set_background_size_px(style, 138.0, 52.0);
 	psy_ui_style_setcolours(style, psy_ui_colour_make(0x00D1C5B6),
 		psy_ui_colour_make(0x003E2f25));
 	psy_ui_styles_setstyle(self, STYLE_MV_EFFECT, style);
@@ -1935,7 +1964,7 @@ void init_machineview_styles(psy_ui_Styles* self)
 	/* effect:bypass:select */
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setbackgroundid(style, IDB_MACHINESKIN);
-	psy_ui_style_setsize_px(style, 17, 17);
+	psy_ui_style_set_background_size_px(style, 17, 17);
 	psy_ui_style_set_background_position_px(style, -6.0, -139.0);
 	psy_ui_style_set_position(style, psy_ui_rectangle_make(
 		psy_ui_point_make_px(98.0, 31.0), psy_ui_size_make_px(17.0, 17.0)));	
@@ -1952,14 +1981,14 @@ void init_machineview_styles(psy_ui_Styles* self)
 	/* effect:vu0 */
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setbackgroundid(style, IDB_MACHINESKIN);
-	psy_ui_style_setsize_px(style, 129.0, 7.0);	
+	psy_ui_style_set_background_size_px(style, 129.0, 7.0);	
 	psy_ui_style_set_background_position_px(style, 0.0, -163.0);	
 	psy_ui_styles_setstyle(self, STYLE_MV_EFFECT_VU0, style);
 
 	/* effect:vupeak */
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setbackgroundid(style, IDB_MACHINESKIN);
-	psy_ui_style_setsize_px(style, 1.0, 7.0);	
+	psy_ui_style_set_background_size_px(style, 1.0, 7.0);	
 	psy_ui_style_set_background_position_px(style, -96.0, -144.0);	
 	psy_ui_styles_setstyle(self, STYLE_MV_EFFECT_VUPEAK, style);
 
@@ -1972,7 +2001,7 @@ void init_machineview_styles(psy_ui_Styles* self)
 	/* effect:pan:slider */
 	style = psy_ui_style_allocinit();	
 	psy_ui_style_setbackgroundid(style, IDB_MACHINESKIN);
-	psy_ui_style_setsize_px(style, 6.0, 13.0);
+	psy_ui_style_set_background_size_px(style, 6.0, 13.0);
 	psy_ui_style_set_background_position_px(style, -0.0, -139.0);
 	psy_ui_style_set_position(style, psy_ui_rectangle_make(
 		psy_ui_point_make_px(0.0, 0.0), psy_ui_size_make_px(6.0, 13.0)));
@@ -1982,7 +2011,7 @@ void init_machineview_styles(psy_ui_Styles* self)
 	style = psy_ui_style_allocinit();	
 	psy_ui_style_setbackgroundcolour(style,		
 		psy_ui_colour_transparent());
-	psy_ui_style_setsize_px(style, 138.0, 52.0);
+	psy_ui_style_set_background_size_px(style, 138.0, 52.0);
 	psy_ui_styles_setstyle(self, STYLE_MV_ARROW, style);
 
 	/* check */
@@ -2058,48 +2087,68 @@ void init_machineparam_styles(psy_ui_Styles* self)
 
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setbackgroundid(style, IDB_MIXERSKIN);
-	psy_ui_style_setsize_px(style, 30.0, 182.0);
+	psy_ui_style_set_background_size_px(style, 30.0, 182.0);
+	psy_ui_style_set_background_repeat(style, psy_ui_NOREPEAT);
+	psy_ui_style_setcolours(style,
+		psy_ui_colour_make(0x00E7BD18),
+		psy_ui_colour_make(0x00292929));
 	psy_ui_styles_setstyle(self, STYLE_MACPARAM_SLIDER, style);
 
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setbackgroundid(style, IDB_MIXERSKIN);
-	psy_ui_style_setsize_px(style, 22.0, 10.0);
+	psy_ui_style_set_background_size_px(style, 22.0, 10.0);
 	psy_ui_style_set_background_position_px(style, 0.0, -182.0);
 	psy_ui_styles_setstyle(self, STYLE_MACPARAM_SLIDERKNOB, style);
 
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setbackgroundid(style, IDB_MIXERSKIN);
-	psy_ui_style_setsize_px(style, 28.0, 28.0);
+	psy_ui_style_set_background_size_px(style, 28.0, 28.0);
 	psy_ui_style_set_background_position_px(style, -30.0, -118.0);
+	psy_ui_style_set_background_repeat(style, psy_ui_NOREPEAT);
+	psy_ui_style_setcolours(style,
+		psy_ui_colour_make(0x00CDCDCD),
+		psy_ui_colour_make(0x00444444));
 	psy_ui_styles_setstyle(self, STYLE_MACPARAM_SWITCHON, style);
 
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setbackgroundid(style, IDB_MIXERSKIN);
-	psy_ui_style_setsize_px(style, 28.0, 28.0);
+	psy_ui_style_set_background_size_px(style, 28.0, 28.0);
 	psy_ui_style_set_background_position_px(style, -30.0, -90.0);
+	psy_ui_style_set_background_repeat(style, psy_ui_NOREPEAT);
+	psy_ui_style_setcolours(style,
+		psy_ui_colour_make(0x00CDCDCD),
+		psy_ui_colour_make(0x00444444));
 	psy_ui_styles_setstyle(self, STYLE_MACPARAM_SWITCHOFF, style);
 
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setbackgroundid(style, IDB_MIXERSKIN);
-	psy_ui_style_setsize_px(style, 13.0, 13.0);
+	psy_ui_style_set_background_size_px(style, 13.0, 13.0);
 	psy_ui_style_set_background_position_px(style, -30.0, -159.0);
+	psy_ui_style_set_background_repeat(style, psy_ui_NOREPEAT);
+	psy_ui_style_setcolours(style,
+		psy_ui_colour_make(0x00E7BD18),
+		psy_ui_colour_make(0x00444444));
 	psy_ui_styles_setstyle(self, STYLE_MACPARAM_CHECKON, style);
 
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setbackgroundid(style, IDB_MIXERSKIN);
-	psy_ui_style_setsize_px(style, 13.0, 13.0);
+	psy_ui_style_set_background_size_px(style, 13.0, 13.0);
 	psy_ui_style_set_background_position_px(style, -30.0, -146.0);
+	psy_ui_style_set_background_repeat(style, psy_ui_NOREPEAT);
+	psy_ui_style_setcolours(style,
+		psy_ui_colour_make(0x00CDCDCD),
+		psy_ui_colour_make(0x00444444));
 	psy_ui_styles_setstyle(self, STYLE_MACPARAM_CHECKOFF, style);
 
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setbackgroundid(style, IDB_MIXERSKIN);
-	psy_ui_style_setsize_px(style, 16.0, 90.0);
+	psy_ui_style_set_background_size_px(style, 16.0, 90.0);
 	psy_ui_style_set_background_position_px(style, -46.0, 0.0);
 	psy_ui_styles_setstyle(self, STYLE_MACPARAM_VUON, style);
 
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setbackgroundid(style, IDB_MIXERSKIN);
-	psy_ui_style_setsize_px(style, 16.0, 90.0);
+	psy_ui_style_set_background_size_px(style, 16.0, 90.0);
 	psy_ui_style_set_background_position_px(style, -30.0, 0.0);
 	psy_ui_styles_setstyle(self, STYLE_MACPARAM_VUOFF, style);	
 }
@@ -2109,25 +2158,27 @@ void init_patternview_styles(psy_ui_Styles* self)
 	psy_ui_Style* style;
 	
 	style = psy_ui_style_allocinit();
-	psy_ui_style_setbackgroundcolour(style, psy_ui_colour_make(0x00232323));
+	psy_ui_style_setcolours(style,
+		psy_ui_colour_make(0x00CACACA),
+		psy_ui_colour_make(0x00292929));
 	psy_ui_styles_setstyle(self, STYLE_PATTERNVIEW, style);
 
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setbackgroundid(style, IDB_HEADERSKIN);
-	psy_ui_style_setsize_px(style, 102.0, 23.0);
+	psy_ui_style_set_background_size_px(style, 102.0, 23.0);
 	psy_ui_style_set_background_position_px(style, -2.0, -0.0);
 	psy_ui_styles_setstyle(self, STYLE_PV_TRACK_HEADER, style);
 
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setbackgroundid(style, IDB_HEADERSKIN);
-	psy_ui_style_setsize_px(style, 9, 17);
+	psy_ui_style_set_background_size_px(style, 9, 17);
 	psy_ui_style_set_background_position_px(style, 0.0, -23.0);
 	psy_ui_style_setpadding_px(style, 3.0, 0.0, 0.0, 15.0);
 	psy_ui_styles_setstyle(self, STYLE_PV_TRACK_HEADER_DIGITX0, style);
 
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setbackgroundid(style, IDB_HEADERSKIN);
-	psy_ui_style_setsize_px(style, 9, 17);
+	psy_ui_style_set_background_size_px(style, 9, 17);
 	psy_ui_style_set_background_position_px(style, 0.0, -23.0);
 	psy_ui_style_setpadding_px(style, 3.0, 0.0, 0.0, 22.0);
 	psy_ui_styles_setstyle(self, STYLE_PV_TRACK_HEADER_DIGIT0X, style);
@@ -2139,7 +2190,7 @@ void init_patternview_styles(psy_ui_Styles* self)
 
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setbackgroundid(style, IDB_HEADERSKIN);
-	psy_ui_style_setsize_px(style, 17.0, 17.0);
+	psy_ui_style_set_background_size_px(style, 17.0, 17.0);
 	psy_ui_style_set_background_position_px(style, -79.0, -40.0);	
 	psy_ui_style_set_position(style, psy_ui_rectangle_make(
 		psy_ui_point_make_px(66.0, 3.0), psy_ui_size_make_px(17.0, 17.0)));
@@ -2152,7 +2203,7 @@ void init_patternview_styles(psy_ui_Styles* self)
 
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setbackgroundid(style, IDB_HEADERSKIN);
-	psy_ui_style_setsize_px(style, 17.0, 17.0);
+	psy_ui_style_set_background_size_px(style, 17.0, 17.0);
 	psy_ui_style_set_background_position_px(style, -62, -40.0);
 	psy_ui_style_set_position(style, psy_ui_rectangle_make(
 		psy_ui_point_make_px(47.0, 3.0), psy_ui_size_make_px(17.0, 17.)));
@@ -2165,7 +2216,7 @@ void init_patternview_styles(psy_ui_Styles* self)
 
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setbackgroundid(style, IDB_HEADERSKIN);
-	psy_ui_style_setsize_px(style, 17.0, 17.0);
+	psy_ui_style_set_background_size_px(style, 17.0, 17.0);
 	psy_ui_style_set_background_position_px(style, -96.0, -40.0);	
 	psy_ui_style_set_position(style, psy_ui_rectangle_make(
 		psy_ui_point_make_px(85.0, 3.0), psy_ui_size_make_px(17.0, 17.)));
@@ -2178,7 +2229,7 @@ void init_patternview_styles(psy_ui_Styles* self)
 
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setbackgroundid(style, IDB_HEADERSKIN);
-	psy_ui_style_setsize_px(style, 8, 17);
+	psy_ui_style_set_background_size_px(style, 8, 17);
 	psy_ui_style_set_background_position_px(style, 0.0, -40.0);	
 	psy_ui_style_set_position(style, psy_ui_rectangle_make(
 		psy_ui_point_make_px(3.0, 5.0), psy_ui_size_make_px(8, 17)));

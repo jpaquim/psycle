@@ -180,7 +180,6 @@ void machineframe_init(MachineFrame* self, psy_ui_Component* parent,
 	self->showfullmenu = FALSE;
 	self->macid = psy_INDEX_INVALID;
 	self->machine = machine;	
-	self->component.id = 30;
 	parameterbar_init(&self->parameterbar, &self->component, workspace);
 	psy_ui_component_setalign(&self->parameterbar.component, psy_ui_ALIGN_TOP);
 	newvalview_init(&self->newval, &self->component, 0, 0, 0, 0, 0,

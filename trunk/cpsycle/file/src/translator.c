@@ -42,6 +42,7 @@ void psy_translator_dispose(psy_Translator* self)
 	psy_table_disposeall(&self->container, NULL);
 	free(self->testid);
 	self->testid = NULL;
+	psy_signal_dispose(&self->signal_languagechanged);
 }
 
 void psy_translator_setdefault(psy_Translator* self, const psy_Property* lang)
@@ -149,8 +150,12 @@ int psy_translator_enum(psy_Translator* self, psy_Property* property, uintptr_t 
 {
 	if (psy_property_type(property) == PSY_PROPERTY_TYPE_STRING) {
 		char_dyn_t* key;
+		char_dyn_t* oldkey;
 
 		key = psy_property_fullkey(property);
+		if (oldkey = psy_table_at_strhash(&self->container, key)) {
+			free(oldkey);
+		}
 		psy_table_insert_strhash(&self->container, key,
 			psy_strdup(psy_property_item_str(property)));
 		free(key);
@@ -162,6 +167,7 @@ void psy_translator_onread(psy_Translator* self, psy_IniReader* sender,
 	const char* key, const char* value)
 {
 	char* fullkey;
+	char* curr;
 	uintptr_t len;
 
 	len = psy_strlen(sender->section) + psy_strlen(key) + 1;
@@ -171,7 +177,8 @@ void psy_translator_onread(psy_Translator* self, psy_IniReader* sender,
 	} else {
 		psy_snprintf(fullkey, len + 1, "%s", key);
 	}
-	if (psy_table_at_strhash(&self->container, fullkey)) {
+	if (curr = psy_table_at_strhash(&self->container, fullkey)) {
+		free(curr);
 		psy_table_insert_strhash(&self->container, fullkey, psy_strdup(value));
 	}
 	free(fullkey);

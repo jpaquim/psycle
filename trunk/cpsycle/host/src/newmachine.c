@@ -400,7 +400,7 @@ void newmachinecategorybar_build(NewMachineCategoryBar* self)
 			if (category) {
 				psy_ui_Button* button;
 
-				button = psy_ui_button_allocinit(&self->client);
+				button = psy_ui_button_allocinit(&self->client);				
 				psy_ui_button_preventtranslation(button);
 				psy_ui_button_settext(button, category);
 				button->stoppropagation = FALSE;

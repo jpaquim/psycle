@@ -106,7 +106,7 @@ psy_ui_FontInfo dev_fontinfo(psy_ui_win_FontImp* self)
 const psy_ui_TextMetric* dev_textmetric(const psy_ui_win_FontImp* self)
 {
 	psy_ui_TextMetric rv;
-	
+		
 	if (!self->tmcachevalid) {
 		TEXTMETRIC tm;
 		HDC hdc;

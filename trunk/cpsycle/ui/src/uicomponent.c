@@ -39,6 +39,10 @@ static double lines(double pos, double size, double scrollsize, double step,
 static psy_ui_RealPoint mapcoords(psy_ui_Component* src,
 	psy_ui_Component* dst);
 static void psy_ui_component_drawchildren(psy_ui_Component*, psy_ui_Graphics*);
+static void psy_ui_component_drawbackgroundimage(psy_ui_Component*, psy_ui_Graphics*,
+	psy_ui_Style*);
+static void psy_ui_component_drawbackground(psy_ui_Component*, psy_ui_Graphics*);
+static void psy_ui_component_drawborder(psy_ui_Component*, psy_ui_Graphics*);
 
 void psy_ui_componentcontaineralign_init(psy_ui_ComponentContainerAlign* self)
 {
@@ -645,7 +649,6 @@ void scrollto(psy_ui_Component* self, intptr_t dx, intptr_t dy,
 void setfont(psy_ui_Component* self, const psy_ui_Font* font)
 {
 	if (font) {		
-		psy_ui_font_init(&psy_ui_componentstyle_currstyle(&self->style)->font, 0);
 		psy_ui_font_copy(&psy_ui_componentstyle_currstyle(&self->style)->font, font);
 	} else {
 		psy_ui_font_dispose(&psy_ui_componentstyle_currstyle(&self->style)->font);
@@ -715,7 +718,6 @@ void psy_ui_component_init_base(psy_ui_Component* self) {
 	self->align = psy_ui_ALIGN_NONE;
 	self->alignsorted = psy_ui_ALIGN_NONE;
 	self->deallocate = FALSE;	
-	psy_ui_componentstyle_init(&self->style);	
 	self->doublebuffered = FALSE;	
 	self->backgroundmode = psy_ui_SETBACKGROUND;
 	self->tabindex = psy_INDEX_INVALID;
@@ -1952,23 +1954,6 @@ void psy_ui_component_drawbackground(psy_ui_Component* self,
 	}
 }
 
-void psy_ui_component_drawbackground_style(psy_ui_Component* self,
-	psy_ui_Graphics* g, psy_ui_Style* style, psy_ui_RealPoint offset)
-{
-	psy_ui_Background* bg;
-	const psy_ui_TextMetric* tm;
-		
-	tm = psy_ui_component_textmetric(self);
-	bg = &style->background;	
-	psy_ui_drawbitmap(g, &bg->bitmap,
-		psy_ui_realrectangle_make(
-			psy_ui_realpoint_make(
-				offset.x + psy_ui_value_px(&style->padding.left, tm, 0),
-				offset.y + psy_ui_value_px(&style->padding.top, tm, 0)),
-			bg->size),
-		psy_ui_realpoint_make(-bg->position.x, -bg->position.y));
-}
-
 void psy_ui_component_usescroll(psy_ui_Component* self)
 {
 	if (self->scroll == &componentscroll) {
@@ -2270,10 +2255,7 @@ void psy_ui_component_draw(psy_ui_Component* self, psy_ui_Graphics* g)
 	psy_ui_Graphics* temp_g;	
 	psy_ui_RealRectangle oldclip;
 	psy_ui_RealRectangle clip;	
-	
-	if (self->id == 10) {
-		self = self;
-	}
+		
 	temp_g = NULL;	
 	oldclip = psy_ui_cliprect(g);
 	if (self->drawtobuffer) {

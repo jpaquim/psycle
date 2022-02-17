@@ -67,8 +67,6 @@ void playlistview_init(PlaylistView* self, psy_ui_Component* parent,
 {	
 	psy_ui_component_init(&self->component, parent, NULL);
 	vtable_init(self);	
-	// psy_ui_component_setbackgroundmode(&self->component,
-	//	psy_ui_NOBACKGROUND);
 	self->workspace = workspace;
 	playlistbar_init(&self->bar, &self->component);	
 	psy_ui_component_setalign(&self->bar.component, psy_ui_ALIGN_TOP);	
@@ -86,15 +84,13 @@ void playlistview_init(PlaylistView* self, psy_ui_Component* parent,
 		playlistview_onmovedown);
 	propertiesview_init(&self->view, &self->component,
 		tabbarparent, workspace_recentsongs(workspace), 1, workspace);
-	propertiesview_enablemousepropagation(&self->view);
-	psy_ui_component_setbackgroundmode(&self->view.scroller.pane,
-		psy_ui_SETBACKGROUND);	
+	propertiesview_enablemousepropagation(&self->view);		
 	propertiesrenderer_setstyle(&self->view.renderer,
 		STYLE_RECENTVIEW_MAINSECTION,
 		STYLE_RECENTVIEW_MAINSECTIONHEADER,
-		psy_INDEX_INVALID,
-		psy_ui_STYLE_BUTTON_HOVER,
-		psy_ui_STYLE_BUTTON_SELECT);
+		STYLE_RECENTVIEW_LINE,
+		STYLE_RECENTVIEW_LINE_HOVER,
+		STYLE_RECENTVIEW_LINE_SELECT);
 	psy_ui_component_setpreferredsize(&self->view.component,
 		psy_ui_size_make_em(50.0, 0.0));
 	psy_ui_component_hide(&self->view.tabbar.component);	

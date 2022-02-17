@@ -94,7 +94,7 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 	self->aligndisplay = TRUE;
 	self->updatealign = 0;
 	self->zoom = 1.0;	
-	psy_ui_component_setstyletype(&self->component, STYLE_PATTERNVIEW);	
+	psy_ui_component_setstyletype(&self->component, STYLE_PATTERNVIEW);
 	psy_ui_notebook_init(&self->notebook, &self->component);
 	psy_ui_component_setalign(psy_ui_notebook_base(&self->notebook),
 		psy_ui_ALIGN_CLIENT);		
@@ -515,7 +515,7 @@ void patternview_updatefont(PatternView* self)
 	zoomrate = psy_ui_app_zoomrate(psy_ui_app()) * self->zoom;
 	fontinfo = patternviewconfig_readfont(self->pvstate.patconfig, zoomrate);
 	psy_ui_font_init(&font, &fontinfo);
-	psy_ui_component_setfont(&self->component, &font);
+	psy_ui_component_setfont(&self->component, &font);	
 	psy_ui_font_dispose(&font);	
 	trackerstate_updatemetric(&self->state,
 		psy_ui_component_textmetric(&self->component), zoomrate);
@@ -541,4 +541,6 @@ void patternview_updatescrollstep(PatternView* self)
 		step);
 	psy_ui_component_setscrollstep_width(trackerheader_base(&self->header),
 		step);
+	psy_ui_component_setscrollstep_height(trackergrid_base(
+		&self->trackerview.grid), self->state.lineheight);	
 }

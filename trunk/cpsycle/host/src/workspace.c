@@ -444,9 +444,11 @@ void workspace_configurationchanged(Workspace* self, psy_Property* property,
 		break;
 	case PROPERTY_ID_LOADSKIN:
 		workspace_onloadskin(self);
-		break;
+		*rebuild_level = 1;
+		break;	
 	case PROPERTY_ID_DEFAULTSKIN:
 		workspace_ondefaultskin(self);
+		*rebuild_level = 1;
 		break;
 	case PROPERTY_ID_LOADCONTROLSKIN:
 		workspace_onloadcontrolskin(self);
@@ -526,7 +528,10 @@ void workspace_configurationchanged(Workspace* self, psy_Property* property,
 			choice = (psy_property_ischoiceitem(property))
 				? psy_property_parent(property)
 				: NULL;
-			if (choice && psy_property_id(choice) == PROPERTY_ID_APPTHEME) {
+			if (choice && psy_property_id(choice) == PROPERTY_ID_MACHINESKIN) {				
+				machineviewconfig_loadbitmap(&self->config.macview);
+				worked = TRUE;
+			} else  if (choice && psy_property_id(choice) == PROPERTY_ID_APPTHEME) {
 				workspace_setapptheme(self, property);
 				worked = TRUE;
 			} else if (audioconfig_onpropertychanged(&self->config.audio,
@@ -1089,7 +1094,7 @@ void workspace_load_configuration(Workspace* self)
 	psy_audio_player_midiconfigure(&self->player, self->config.midi.controllers,
 		TRUE /* use controllerdata */);
 	midiviewconfig_makecontrollers(
-		psycleconfig_midi(&self->config));
+		psycleconfig_midi(&self->config));	
 	workspace_configvisual(self);
 	if (compatconfig_loadnewblitz(psycleconfig_compat(
 			workspace_conf(self)))) {
@@ -1100,7 +1105,7 @@ void workspace_load_configuration(Workspace* self)
 			&self->machinefactory);
 	}
 	workspace_setdefaultfont(self, self->config.defaultfont);
-	workspace_setapptheme(self, self->config.apptheme);
+	workspace_setapptheme(self, self->config.apptheme);	
 	psycleconfig_notifyall_changed(&self->config);
 	psy_path_dispose(&path);
 	self->patternsinglemode =

@@ -33,7 +33,7 @@ static void switchui_updateparam(SwitchUi*);
 static psy_ui_ComponentVtable switchui_vtable;
 static bool switchui_vtable_initialized = FALSE;
 
-static psy_ui_ComponentVtable* switchui_vtable_init(SwitchUi* self)
+static void switchui_vtable_init(SwitchUi* self)
 {
 	assert(self);
 
@@ -56,23 +56,25 @@ static psy_ui_ComponentVtable* switchui_vtable_init(SwitchUi* self)
 			switchui_onmousemove;
 		switchui_vtable_initialized = TRUE;
 	}
-	return &switchui_vtable;
+	psy_ui_component_setvtable(&self->component, &switchui_vtable);
 }
 
 /* implementation */
 void switchui_init(SwitchUi* self, psy_ui_Component* parent,
 	psy_audio_Machine* machine, uintptr_t paramidx,
-	psy_audio_MachineParam* param)
+	psy_audio_MachineParam* param,
+	uintptr_t style, uintptr_t style_select)
 {
 	assert(self);	
 
 	psy_ui_component_init(&self->component, parent, NULL);
-	switchui_vtable_init(self);
-	self->component.vtable = &switchui_vtable;
-	psy_ui_component_setbackgroundmode(&self->component, psy_ui_NOBACKGROUND);	
+	switchui_vtable_init(self);	
+	psy_ui_component_setstyletype(&self->component, style);
+	psy_ui_component_setstyletype_select(&self->component, style_select);
 	self->machine = machine;
 	self->paramidx = paramidx;
-	self->param = param;	
+	self->param = param;
+	self->maxheight = 1.0;
 	paramtweak_init(&self->paramtweak);
 }
 
@@ -83,61 +85,51 @@ SwitchUi* switchui_alloc(void)
 
 SwitchUi* switchui_allocinit(psy_ui_Component* parent,
 	psy_audio_Machine* machine, uintptr_t paramidx,
-	psy_audio_MachineParam* param)
+	psy_audio_MachineParam* param,
+	uintptr_t style, uintptr_t style_select)
 {
 	SwitchUi* rv;
 
 	rv = switchui_alloc();
 	if (rv) {
-		switchui_init(rv, parent, machine, paramidx, param);
-		rv->component.deallocate = TRUE;
+		switchui_init(rv, parent, machine, paramidx, param, style,
+			style_select);
+		psy_ui_component_deallocateafterdestroyed(&rv->component);
 	}
 	return rv;
 }
 
 void switchui_ondraw(SwitchUi* self, psy_ui_Graphics* g)
-{	
-	psy_ui_RealSize size;				
-	psy_ui_RealRectangle r;
+{			
 	char label[128];
-	psy_ui_Style* top_style;
-	psy_ui_Style* bottom_style;	
-	psy_ui_Style* style;	
+	psy_ui_Style* style;
+	psy_ui_RealSize size;
 	
-	top_style = psy_ui_style(STYLE_MACPARAM_TOP);
-	bottom_style = psy_ui_style(STYLE_MACPARAM_BOTTOM);		
-	if (!self->param || psy_audio_machineparam_normvalue(self->param) == 0.f) {
-		style = psy_ui_style(STYLE_MACPARAM_SWITCHOFF);
-	} else {
-		style = psy_ui_style(STYLE_MACPARAM_SWITCHON);
-	}
-	switchui_updateparam(self);
-	size = psy_ui_component_scrollsize_px(&self->component);
-	r = psy_ui_realrectangle_make(
-		psy_ui_realpoint_make(0, 0),
-		psy_ui_realsize_make(size.width, size.height));
-	psy_ui_drawsolidrectangle(g, r, bottom_style->background.colour);		
-	psy_ui_component_drawbackground_style(&self->component,
-		g, style, psy_ui_realpoint_zero());	
+	switchui_updateparam(self);	
+	if (!self->param) {
+		return;
+	}			
 	psy_snprintf(label, 128, "%s", "");
-	if (self->param && !psy_audio_machineparam_name(self->param, label)) {
+	if (!psy_audio_machineparam_name(self->param, label)) {
+		psy_snprintf(label, 128, "%s", "");
 		if (!psy_audio_machineparam_label(self->param, label)) {
 			psy_snprintf(label, 128, "%s", "");
 		}
 	}
-	psy_ui_setbackgroundcolour(g, top_style->background.colour);
-	psy_ui_settextcolour(g, top_style->colour);
-	r = psy_ui_realrectangle_make(
-		psy_ui_realpoint_make(	
-			style->background.size.width, 0),
-		psy_ui_realsize_make(
-			size.width - style->background.size.width,
-			size.height / 2));
+	size = psy_ui_component_scrollsize_px(&self->component);
+	style = psy_ui_componentstyle_currstyle(&self->component.style);
 	psy_ui_textoutrectangle(g,
-		psy_ui_realpoint_make(
-			style->background.size.width, 0.0),
-		psy_ui_ETO_OPAQUE | psy_ui_ETO_CLIPPED,
-		r, label, strlen(label));	
+		psy_ui_realpoint_make(style->background.size.width, 0.0), 0,
+		psy_ui_realrectangle_make(
+			psy_ui_realpoint_make(style->background.size.width, 0),
+			psy_ui_realsize_make(
+				size.width - style->background.size.width,
+				size.height / 2)), label, strlen(label));	
+}
+
+bool switchui_checked(SwitchUi* self)
+{
+	return (self->param && psy_audio_machineparam_normvalue(self->param) != 0.f);
 }
 
 void switchui_onpreferredsize(SwitchUi* self, const psy_ui_Size* limit,
@@ -146,11 +138,11 @@ void switchui_onpreferredsize(SwitchUi* self, const psy_ui_Size* limit,
 	switchui_updateparam(self);
 	if (self->param) {
 		if (psy_audio_machineparam_type(self->param) & MPF_SMALL) {
-			psy_ui_size_setem(rv, PARAMWIDTH_SMALL, 2.0);
+			psy_ui_size_setem(rv, PARAMWIDTH_SMALL, self->maxheight);
 			return;
 		}
 	}
-	psy_ui_size_setem(rv, PARAMWIDTH, 2.0);
+	psy_ui_size_setem(rv, PARAMWIDTH, self->maxheight);
 }
 
 void switchui_onmousedown(SwitchUi* self, psy_ui_MouseEvent* ev)
@@ -183,6 +175,10 @@ void switchui_updateparam(SwitchUi* self)
 {
 	if (self->machine && self->paramidx != psy_INDEX_INVALID) {
 		self->param = psy_audio_machine_parameter(self->machine,
-			self->paramidx);
-	}
+			self->paramidx);		
+	}	
+	psy_ui_component_setstylestate(&self->component,
+		(switchui_checked(self))
+		? psy_ui_STYLESTATE_SELECT
+		: psy_ui_STYLESTATE_NONE);
 }

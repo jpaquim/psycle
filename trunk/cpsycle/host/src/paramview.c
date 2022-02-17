@@ -12,9 +12,8 @@
 #include "labelui.h"
 #include "knobui.h"
 #include "slidergroupui.h"
+#include "styles.h"
 #include "switchui.h"
-#include "checkui.h"
-#include "resources/resource.h"
 #include "machineui.h"
 /* audio */
 #include <plugin_interface.h>
@@ -184,18 +183,22 @@ void paramview_build(ParamView* self)
 					}
 					break; }
 				case MPF_CHECK: {
-					CheckUi* check;
+					SwitchUi* switchui;
 
 					if (currslider && machineparam->isslidergroup) {
-						check = checkui_allocinit(&currslider->controls,
-							self->machine, paramnum, machineparam);
+						switchui = switchui_allocinit(&currslider->controls,
+							self->machine, paramnum, machineparam,
+							STYLE_MACPARAM_CHECKOFF,
+							STYLE_MACPARAM_CHECKON);
 						checkinslidergroup = TRUE;
 					} else {
-						check = checkui_allocinit(currcolumn, self->machine,
-							paramnum, machineparam);
+						switchui = switchui_allocinit(currcolumn,
+							self->machine, paramnum, machineparam,
+							STYLE_MACPARAM_CHECKON,
+							STYLE_MACPARAM_CHECKOFF);
 					}
-					if (check) {
-						component = &check->component;
+					if (switchui) {
+						component = &switchui->component;
 					}
 					break; }				
 				case MPF_SWITCH: {
@@ -203,15 +206,18 @@ void paramview_build(ParamView* self)
 
 					if (currslider && machineparam->isslidergroup) {
 						switchui = switchui_allocinit(&currslider->controls,
-							self->machine, paramnum,
-							machineparam);
+							self->machine, paramnum, machineparam,
+							STYLE_MACPARAM_SWITCHOFF,
+							STYLE_MACPARAM_SWITCHON);						
 						checkinslidergroup = TRUE;
 					} else {
 						switchui = switchui_allocinit(currcolumn,
-							self->machine, paramnum,
-							machineparam);
+							self->machine, paramnum, machineparam,
+							STYLE_MACPARAM_SWITCHOFF,
+							STYLE_MACPARAM_SWITCHON);
 					}
 					if (switchui) {
+						switchui->maxheight = 2.0;
 						component = &switchui->component;
 					}
 					break; }

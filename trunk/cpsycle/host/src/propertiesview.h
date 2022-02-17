@@ -36,8 +36,7 @@ typedef struct PropertiesRenderState {
 	psy_Property* property; /* event bubble target property */
 	psy_Property* selected; /* selected property*/
 	struct PropertiesRenderLine* selectedline;
-	psy_ui_TextInput* edit;
-	psy_ui_Component* dummy; /* used to calculate font pt size */
+	psy_ui_TextInput* edit;	
 	bool comboselect;
 } PropertiesRenderState;
 

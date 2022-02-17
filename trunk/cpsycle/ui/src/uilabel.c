@@ -196,6 +196,8 @@ void psy_ui_label_onpreferredsize(psy_ui_Label* self,
 		}
 		rv->height = psy_ui_value_make_px(psy_list_size(lines) *
 			(tm->tmHeight * self->linespacing));
+		psy_list_free(lines);
+		lines = NULL;
 	} else {
 		rv->height = psy_ui_value_make_px((tm->tmHeight * self->linespacing));
 	}

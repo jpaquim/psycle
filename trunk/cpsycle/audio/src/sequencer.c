@@ -1083,10 +1083,7 @@ void psy_audio_sequencer_addsequenceevent(psy_audio_Sequencer* self,
 
 	assert(self);	
 
-	ev = psy_audio_patternentry_front(patternentry);
-	if (ev->mach == 0) {
-		self = self;
-	}
+	ev = psy_audio_patternentry_front(patternentry);	
 	if (ev->note == psy_audio_NOTECOMMANDS_TWEAKSLIDE) {
 		psy_audio_sequencer_maketweakslideevents(self, patternentry,
 			track->channeloffset, offset);

@@ -65,6 +65,7 @@ void psy_ui_font_init(psy_ui_Font* self, const psy_ui_FontInfo* fontinfo)
 	} else {		
 		self->imp = NULL;
 	}
+	self->dbg = 0;
 }
 
 void psy_ui_font_dispose(psy_ui_Font* self)
@@ -80,15 +81,12 @@ void psy_ui_font_copy(psy_ui_Font* self, const psy_ui_Font* other)
 {
 	if (!other->imp) {
 		psy_ui_font_dispose(self);
+		return;
 	} else if (!self->imp) {
-		psy_ui_FontInfo fontinfo;
-
-		fontinfo = psy_ui_font_fontinfo(other);
 		self->imp = psy_ui_impfactory_allocinit_fontimp(
-			psy_ui_app_impfactory(psy_ui_app()), &fontinfo);
-	} else {
-		self->imp->vtable->dev_copy(self->imp, other->imp);
-	}	
+			psy_ui_app_impfactory(psy_ui_app()), 0);
+	}
+	self->imp->vtable->dev_copy(self->imp, other->imp);		
 }
 
 psy_ui_FontInfo psy_ui_font_fontinfo(const psy_ui_Font* self)
@@ -105,7 +103,7 @@ psy_ui_FontInfo psy_ui_font_fontinfo(const psy_ui_Font* self)
 const psy_ui_TextMetric* psy_ui_font_textmetric(const psy_ui_Font* self)
 {
 	assert(self->imp);
-
+	
 	return self->imp->vtable->dev_textmetric(self->imp);
 }
 

@@ -118,6 +118,6 @@ void masterui_onpreferredsize(MasterUi* self, const psy_ui_Size* limit,
 
 	style = psy_ui_style(STYLE_MV_MASTER);	
 	*rv = (style)
-		? psy_ui_size_makereal(style->background.size)
+		? psy_ui_size_make_real(style->background.size)
 		: psy_ui_size_make_px(138.0, 35.0);	
 }

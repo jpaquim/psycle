@@ -584,7 +584,7 @@ void pluginsview_ondraw(PluginsView* self, psy_ui_Graphics* g)
 				cp.y += self->lineheight;
 				odd = !odd;
 				if (odd && p->next) {
-					psy_ui_RealRectangle r;
+					// psy_ui_RealRectangle r;
 
 					// psy_ui_realrectangle_init_all(&r,
 					//	psy_ui_realpoint_make(0, cp.y),

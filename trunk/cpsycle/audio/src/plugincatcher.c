@@ -404,7 +404,7 @@ void psy_audio_plugincategories_update(psy_audio_PluginCategories* self,
 		psy_audio_machineinfo_from_property(q, &machineinfo);
 		if (psy_strlen(machineinfo.category) > 0) {
 			if (!psy_table_exists_strhash(&self->container,
-				machineinfo.category)) {
+					machineinfo.category)) {
 				psy_table_insert_strhash(&self->container,
 					machineinfo.category,
 					(void*)psy_strdup(machineinfo.category));

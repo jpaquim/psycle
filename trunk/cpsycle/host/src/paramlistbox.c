@@ -48,8 +48,7 @@ void parameterlistbox_build(ParameterListBox* self)
 		uintptr_t i = 0;
 		char label[256];
 		char text[256];		
-		
-		self = self;
+				
 		for (i = 0; i < psy_audio_machine_numtweakparameters(self->machine); ++i) {
 			psy_audio_MachineParam* param;
 			

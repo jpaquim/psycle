@@ -139,6 +139,8 @@ static void fileview_onhide(FileView*, psy_ui_Component* sender);
 void fileview_init(FileView* self, psy_ui_Component* parent)
 {		
 	psy_ui_component_init(fileview_base(self), parent, NULL);
+	psy_signal_connect(&self->component.signal_destroy, self,
+		fileview_ondestroy);
 	/* filename */
 	psy_ui_component_init(&self->bottom, &self->component, NULL);
 	psy_ui_component_setalign(&self->bottom, psy_ui_ALIGN_BOTTOM);
@@ -186,8 +188,7 @@ void fileview_init(FileView* self, psy_ui_Component* parent)
 	psy_ui_component_setalign(psy_ui_listbox_base(&self->filebox),
 		psy_ui_ALIGN_CLIENT);			
 	psy_ui_component_setalign(psy_ui_textinput_base(&self->filename),
-		psy_ui_ALIGN_TOP);
-	psy_path_init(&self->curr, "");	
+		psy_ui_ALIGN_TOP);	
 #if defined(DIVERSALIS__OS__MICROSOFT)
 	psy_path_init(&self->curr, "C:\\");	
 #else	
@@ -211,7 +212,7 @@ void fileview_init(FileView* self, psy_ui_Component* parent)
 void fileview_ondestroy(FileView* self, psy_ui_Component* sender)
 {
 	psy_path_dispose(&self->curr);	
-	psy_signal_dispose(&self->signal_selected);
+	psy_signal_dispose(&self->signal_selected);	
 	psy_list_deallocate(&self->files, NULL);
 }
 

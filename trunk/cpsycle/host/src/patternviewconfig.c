@@ -26,10 +26,13 @@ static void patternviewconfig_makeview(PatternViewConfig*, psy_Property*
 static void patternviewconfig_maketheme(PatternViewConfig*, psy_Property*
 	parent);
 static void patternviewconfig_loadbitmap(PatternViewConfig*);
-static void patternviewconfig_setsource(PatternViewConfig*, psy_ui_RealRectangle*,
-	intptr_t vals[4]);
+static void patternviewconfig_setsource(PatternViewConfig*,
+	psy_ui_RealRectangle*, intptr_t vals[4]);
 static void patternviewconfig_setdest(PatternViewConfig*, psy_ui_RealPoint*,
 	intptr_t vals[4], uintptr_t num);
+static void patternviewconfig_setstylecoords(PatternViewConfig*,
+	uintptr_t styleid, uintptr_t select_styleid, psy_ui_RealRectangle src,
+	psy_ui_RealPoint dst);
 
 /* implementation */
 void patternviewconfig_init(PatternViewConfig* self, psy_Property* parent,
@@ -217,32 +220,32 @@ void patternviewconfig_maketheme(PatternViewConfig* self, psy_Property* parent)
 		"settingsview.pv.theme.font2");
 	psy_property_settext(
 		psy_property_sethint(psy_property_append_int(self->theme,
-			"pvc_fontCur", 0x00FFFFFF, 0, 0),
+			"pvc_fontcur", 0x00FFFFFF, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
 		"settingsview.pv.theme.fontcur");
 	psy_property_settext(
 		psy_property_sethint(psy_property_append_int(self->theme,
-			"pvc_fontCur2", 0x00FFFFFF, 0, 0),
+			"pvc_fontcur2", 0x00FFFFFF, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
 		"settingsview.pv.theme.fontcur2");
 	psy_property_settext(
 		psy_property_sethint(psy_property_append_int(self->theme,
-			"pvc_fontSel", 0x00FFFFFF, 0, 0),
+			"pvc_fontsel", 0x00FFFFFF, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
 		"settingsview.pv.theme.fontsel");
 	psy_property_settext(
 		psy_property_sethint(psy_property_append_int(self->theme,
-			"pvc_fontSel2", 0x00FFFFFF, 0, 0),
+			"pvc_fontsel2", 0x00FFFFFF, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
 		"settingsview.pv.theme.fontsel2");
 	psy_property_settext(
 		psy_property_sethint(psy_property_append_int(self->theme,
-			"pvc_fontPlay", 0x00FFFFFF, 0, 0),
+			"pvc_fontplay", 0x00FFFFFF, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
 		"settingsview.pv.theme.fontplay");
 	psy_property_settext(
 		psy_property_sethint(psy_property_append_int(self->theme,
-			"pvc_fontPlay2", 0x00FFFFFF, 0, 0),
+			"pvc_fontplay2", 0x00FFFFFF, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
 		"settingsview.pv.theme.fontplay2");
 	psy_property_settext(
@@ -553,55 +556,68 @@ void patternviewconfig_write_styles(PatternViewConfig* self)
 		psy_ui_Colour bgcolour;
 		psy_ui_Colour fgcolour;		
 
-		fgcolour = psy_ui_colour_make(psy_property_at_colour(self->theme, "pvc_font",
-			0x00CACACA));
-		bgcolour = psy_ui_colour_make(psy_property_at_colour(self->theme, "pvc_background",
-			0x00292929));
+		fgcolour = psy_ui_colour_make(psy_property_at_colour(self->theme,
+			"pvc_font", 0x00CACACA));
+		bgcolour = psy_ui_colour_make(psy_property_at_colour(self->theme,
+			"pvc_background", 0x00292929));
 		style = psy_ui_style(STYLE_PATTERNVIEW);
 		if (style) {
 			psy_ui_style_setcolours(style, fgcolour, bgcolour);
 		}
 		style = psy_ui_style(STYLE_PV_ROW);
 		if (style) {
-			psy_ui_style_setbackgroundcolour(style, psy_ui_colour_make(
-				psy_property_at_colour(self->theme, "pvc_row",
-					0x003E3E3E)));
+			psy_ui_style_setcolours(style,
+				fgcolour,
+				psy_ui_colour_make(psy_property_at_colour(
+					self->theme, "pvc_row", 0x003E3E3E)));
 		}
-		style = psy_ui_style(STYLE_PV_ROWBEAT_SELECT);
+		style = psy_ui_style(STYLE_PV_ROW_SELECT);
 		if (style) {
 			psy_ui_style_setcolours(style,
 				psy_ui_colour_make(psy_property_at_colour(self->theme,
-					"pvc_fontsel", 0x00ffffff)),
+					"pvc_fontsel", 0x00ffffff)),				
 				psy_ui_colour_make(psy_property_at_colour(self->theme,
 					"pvc_selection", 0x009B7800)));
 		}
 		style = psy_ui_style(STYLE_PV_ROWBEAT);
 		if (style) {
-			psy_ui_style_setbackgroundcolour(style, psy_ui_colour_make(
-				psy_property_at_colour(self->theme, "pvc_rowbeat",
-					0x00363636)));
-		}
+			psy_ui_style_setcolours(style,
+				fgcolour,
+				psy_ui_colour_make(psy_property_at_colour(self->theme,
+					"pvc_rowbeat", 0x00363636)));
+		}		
 		style = psy_ui_style(STYLE_PV_ROWBEAT_SELECT);
 		if (style) {
 			psy_ui_style_setcolours(style,
 				psy_ui_colour_make(psy_property_at_colour(self->theme,
-					"pvc_fontsel", 0x00ffffff)),
-				psy_ui_colour_make(psy_property_at_colour(self->theme,
-					"pvc_selection", 0x009B7800)));
+					"pvc_fontsel", 0x00ffffff)),			
+					psy_ui_diffadd_colours(
+						psy_ui_colour_make(psy_property_at_colour(self->theme,
+							"pvc_row", 0x003E3E3E)),
+						psy_ui_colour_make(psy_property_at_colour(self->theme,
+							"pvc_rowbeat", 0x00363636)),
+						psy_ui_colour_make(psy_property_at_colour(self->theme,
+							"pvc_selection", 0x009B7800))));			
 		}
 		style = psy_ui_style(STYLE_PV_ROW4BEAT);
 		if (style) {
-			psy_ui_style_setbackgroundcolour(style, psy_ui_colour_make(
-				psy_property_at_colour(self->theme, "pvc_row4beat",
-					0x00595959)));
+			psy_ui_style_setcolours(style,
+				fgcolour,
+				psy_ui_colour_make(psy_property_at_colour(self->theme,
+					"pvc_row4beat", 0x00595959)));
 		}
 		style = psy_ui_style(STYLE_PV_ROW4BEAT_SELECT);
 		if (style) {
 			psy_ui_style_setcolours(style,
 				psy_ui_colour_make(psy_property_at_colour(self->theme,
 					"pvc_fontsel", 0x00ffffff)),
-				psy_ui_colour_make(psy_property_at_colour(self->theme,
-					"pvc_selection", 0x009B7800)));
+				psy_ui_diffadd_colours(
+					psy_ui_colour_make(psy_property_at_colour(self->theme,
+						"pvc_row", 0x003E3E3E)),
+					psy_ui_colour_make(psy_property_at_colour(self->theme,
+						"pvc_row4beat", 0x00363636)),
+					psy_ui_colour_make(psy_property_at_colour(self->theme,
+						"pvc_selection", 0x009B7800))));
 		}
 		style = psy_ui_style(STYLE_PV_CURSOR);
 		if (style) {
@@ -670,125 +686,92 @@ void patternviewconfig_loadbitmap(PatternViewConfig* self)
 		psy_dir_findfile(self->skindir, filename, path);
 		if (path[0] != '\0') {
 			psy_Property* coords;
-
 			coords = psy_property_allocinit_key(NULL);
-			skin_loadpsh(coords, path);
-			const char* s;
-			intptr_t vals[4];
-			psy_ui_RealRectangle src;
-			psy_ui_RealPoint dst;
-			psy_ui_Style* style;
-
-			src = psy_ui_realrectangle_zero();
-			dst = psy_ui_realpoint_zero();
-			if (s = psy_property_at_str(coords, "background_source", 0)) {
-				skin_psh_values(s, 4, vals);
-				patternviewconfig_setsource(self, &src, vals);
-				style = psy_ui_style(STYLE_PV_TRACK_HEADER);
-				psy_ui_style_setsize_px(style, src.right - src.left, src.bottom - src.top);
-				psy_ui_style_set_background_position_px(style, -src.left, -src.top);
-			}
-			if (s = psy_property_at_str(coords, "mute_on_source", 0)) {
-				skin_psh_values(s, 4, vals);
-				patternviewconfig_setsource(self, &src, vals);				
-			}
-			if (s = psy_property_at_str(coords, "mute_on_dest", 0)) {
-				skin_psh_values(s, 2, vals);
-				patternviewconfig_setdest(self, &dst, vals, 2);
-				style = psy_ui_style(STYLE_PV_TRACK_HEADER_MUTE);
-				psy_ui_style_set_position(style, psy_ui_rectangle_make(
-					psy_ui_point_make_px(dst.x, dst.y),
-					psy_ui_size_make_px(src.right - src.left,
-						src.bottom - src.top)));
-				style = psy_ui_style(STYLE_PV_TRACK_HEADER_MUTE_SELECT);
-				psy_ui_style_set_background_position_px(style, -src.left, -src.top);
-				psy_ui_style_setsize_px(style, src.right - src.left, src.bottom - src.top);
-				psy_ui_style_set_position(style, psy_ui_rectangle_make(
-					psy_ui_point_make_px(dst.x, dst.y),
-					psy_ui_size_make_px(src.right - src.left,
-						src.bottom - src.top)));
-			}
-			if (s = psy_property_at_str(coords, "solo_on_source", 0)) {
-				skin_psh_values(s, 4, vals);
-				patternviewconfig_setsource(self, &src, vals);
-			}
-			if (s = psy_property_at_str(coords, "solo_on_dest", 0)) {
-				skin_psh_values(s, 2, vals);
-				patternviewconfig_setdest(self, &dst, vals, 2);
-				style = psy_ui_style(STYLE_PV_TRACK_HEADER_SOLO);
-				psy_ui_style_set_position(style, psy_ui_rectangle_make(
-					psy_ui_point_make_px(dst.x, dst.y),
-					psy_ui_size_make_px(src.right - src.left,
-						src.bottom - src.top)));
-				style = psy_ui_style(STYLE_PV_TRACK_HEADER_SOLO_SELECT);
-				psy_ui_style_set_background_position_px(style, -src.left, -src.top);
-				psy_ui_style_setsize_px(style, src.right - src.left, src.bottom - src.top);
-				psy_ui_style_set_position(style, psy_ui_rectangle_make(
-					psy_ui_point_make_px(dst.x, dst.y),
-					psy_ui_size_make_px(src.right - src.left,
-						src.bottom - src.top)));
-			}
-			if (s = psy_property_at_str(coords, "record_on_source", 0)) {
-				skin_psh_values(s, 4, vals);
-				patternviewconfig_setsource(self, &src, vals);
-			}
-			if (s = psy_property_at_str(coords, "record_on_dest", 0)) {
-				skin_psh_values(s, 2, vals);
-				patternviewconfig_setdest(self, &dst, vals, 2);
-				style = psy_ui_style(STYLE_PV_TRACK_HEADER_RECORD);
-				psy_ui_style_set_position(style, psy_ui_rectangle_make(
-					psy_ui_point_make_px(dst.x, dst.y),
-					psy_ui_size_make_px(src.right - src.left,
-						src.bottom - src.top)));
-				style = psy_ui_style(STYLE_PV_TRACK_HEADER_RECORD_SELECT);
-				psy_ui_style_set_background_position_px(style, -src.left, -src.top);
-				psy_ui_style_setsize_px(style, src.right - src.left, src.bottom - src.top);
-				psy_ui_style_set_position(style, psy_ui_rectangle_make(
-					psy_ui_point_make_px(dst.x, dst.y),
-					psy_ui_size_make_px(src.right - src.left,
-						src.bottom - src.top)));
-			}
-			if (s = psy_property_at_str(coords, "number_0_source", 0)) {
-				skin_psh_values(s, 4, vals);
-				patternviewconfig_setsource(self, &src, vals);				
-			}			
-			if (s = psy_property_at_str(coords, "digit_x0_dest", 0)) {
-				skin_psh_values(s, 2, vals);
-				patternviewconfig_setdest(self, &dst, vals, 2);
-				style = psy_ui_style(STYLE_PV_TRACK_HEADER_DIGITX0);
-				psy_ui_style_setsize_px(style, src.right - src.left,
-					src.bottom - src.top);
-				psy_ui_style_set_background_position_px(style, -src.left, -src.top);
-				psy_ui_style_setpadding_px(style, dst.y, 0.0, 0.0, dst.x);				
-			}
-			if (s = psy_property_at_str(coords, "digit_0x_dest", 0)) {
-				skin_psh_values(s, 2, vals);
-				patternviewconfig_setdest(self, &dst, vals, 2);
-				style = psy_ui_style(STYLE_PV_TRACK_HEADER_DIGIT0X);
-				psy_ui_style_setsize_px(style, src.right - src.left,
-					src.bottom - src.top);
-				psy_ui_style_set_background_position_px(style, -src.left, -src.top);
-				psy_ui_style_setpadding_px(style, dst.y, 0.0, 0.0, dst.x);
-			}
-			if (s = psy_property_at_str(coords, "playing_on_source", 0)) {
-				skin_psh_values(s, 4, vals);
-				patternviewconfig_setsource(self, &src, vals);
-			}
-			if (s = psy_property_at_str(coords, "playing_on_dest", 0)) {
-				skin_psh_values(s, 2, vals);
-				patternviewconfig_setdest(self, &dst, vals, 2);
-				style = psy_ui_style(STYLE_PV_TRACK_HEADER_PLAY);
-				psy_ui_style_set_position(style, psy_ui_rectangle_make(
-					psy_ui_point_make_px(dst.x, dst.y),
-					psy_ui_size_make_px(src.right - src.left,
-						src.bottom - src.top)));
-				style = psy_ui_style(STYLE_PV_TRACK_HEADER_PLAY_SELECT);
-				psy_ui_style_set_background_position_px(style, -src.left, -src.top);
-				psy_ui_style_setsize_px(style, src.right - src.left, src.bottom - src.top);
-				psy_ui_style_set_position(style, psy_ui_rectangle_make(
-					psy_ui_point_make_px(dst.x, dst.y),
-					psy_ui_size_make_px(src.right - src.left,
-						src.bottom - src.top)));
+			if (skin_loadpsh(coords, path) == PSY_OK) {
+				const char* s;
+				intptr_t vals[4];
+				psy_ui_RealRectangle src;
+				psy_ui_RealPoint dst;
+				
+				src = psy_ui_realrectangle_zero();
+				dst = psy_ui_realpoint_zero();
+				if (s = psy_property_at_str(coords, "background_source", 0)) {
+					skin_psh_values(s, 4, vals);
+					patternviewconfig_setsource(self, &src, vals);
+					style = psy_ui_style(STYLE_PV_TRACK_HEADER);
+					psy_ui_style_set_background_size_px(style, src.right - src.left, src.bottom - src.top);
+					psy_ui_style_set_background_position_px(style, -src.left, -src.top);
+				}
+				if (s = psy_property_at_str(coords, "mute_on_source", 0)) {
+					skin_psh_values(s, 4, vals);
+					patternviewconfig_setsource(self, &src, vals);
+				}
+				if (s = psy_property_at_str(coords, "mute_on_dest", 0)) {
+					skin_psh_values(s, 2, vals);
+					patternviewconfig_setdest(self, &dst, vals, 2);
+					patternviewconfig_setstylecoords(self,
+						STYLE_PV_TRACK_HEADER_MUTE,
+						STYLE_PV_TRACK_HEADER_MUTE_SELECT,
+						src, dst);
+				}
+				if (s = psy_property_at_str(coords, "solo_on_source", 0)) {
+					skin_psh_values(s, 4, vals);
+					patternviewconfig_setsource(self, &src, vals);
+				}
+				if (s = psy_property_at_str(coords, "solo_on_dest", 0)) {
+					skin_psh_values(s, 2, vals);
+					patternviewconfig_setdest(self, &dst, vals, 2);
+					patternviewconfig_setstylecoords(self,
+						STYLE_PV_TRACK_HEADER_SOLO,
+						STYLE_PV_TRACK_HEADER_SOLO_SELECT,
+						src, dst);
+				}
+				if (s = psy_property_at_str(coords, "record_on_source", 0)) {
+					skin_psh_values(s, 4, vals);
+					patternviewconfig_setsource(self, &src, vals);
+				}
+				if (s = psy_property_at_str(coords, "record_on_dest", 0)) {
+					skin_psh_values(s, 2, vals);
+					patternviewconfig_setdest(self, &dst, vals, 2);
+					patternviewconfig_setstylecoords(self,
+						STYLE_PV_TRACK_HEADER_RECORD,
+						STYLE_PV_TRACK_HEADER_RECORD_SELECT,
+						src, dst);
+				}
+				if (s = psy_property_at_str(coords, "number_0_source", 0)) {
+					skin_psh_values(s, 4, vals);
+					patternviewconfig_setsource(self, &src, vals);
+				}
+				if (s = psy_property_at_str(coords, "digit_x0_dest", 0)) {
+					skin_psh_values(s, 2, vals);
+					patternviewconfig_setdest(self, &dst, vals, 2);
+					style = psy_ui_style(STYLE_PV_TRACK_HEADER_DIGITX0);
+					psy_ui_style_set_background_size_px(style, src.right - src.left,
+						src.bottom - src.top);
+					psy_ui_style_set_background_position_px(style, -src.left, -src.top);
+					psy_ui_style_setpadding_px(style, dst.y, 0.0, 0.0, dst.x);
+				}
+				if (s = psy_property_at_str(coords, "digit_0x_dest", 0)) {
+					skin_psh_values(s, 2, vals);
+					patternviewconfig_setdest(self, &dst, vals, 2);
+					style = psy_ui_style(STYLE_PV_TRACK_HEADER_DIGIT0X);
+					psy_ui_style_set_background_size_px(style, src.right - src.left,
+						src.bottom - src.top);
+					psy_ui_style_set_background_position_px(style, -src.left, -src.top);
+					psy_ui_style_setpadding_px(style, dst.y, 0.0, 0.0, dst.x);
+				}
+				if (s = psy_property_at_str(coords, "playing_on_source", 0)) {
+					skin_psh_values(s, 4, vals);
+					patternviewconfig_setsource(self, &src, vals);
+				}
+				if (s = psy_property_at_str(coords, "playing_on_dest", 0)) {
+					skin_psh_values(s, 2, vals);
+					patternviewconfig_setdest(self, &dst, vals, 2);
+					patternviewconfig_setstylecoords(self,
+						STYLE_PV_TRACK_HEADER_PLAY,
+						STYLE_PV_TRACK_HEADER_PLAY_SELECT,
+						src, dst);
+				}
 			}
 			psy_property_deallocate(coords);
 		}
@@ -809,4 +792,28 @@ void patternviewconfig_setdest(PatternViewConfig* self, psy_ui_RealPoint* pt,
 {
 	pt->x = (double)vals[0];
 	pt->y = (double)vals[1];
+}
+
+void patternviewconfig_setstylecoords(PatternViewConfig* self,
+	uintptr_t styleid, uintptr_t select_styleid, psy_ui_RealRectangle src,
+	psy_ui_RealPoint dst)
+{	
+	psy_ui_Style* style;
+	psy_ui_Point pt;
+	psy_ui_Size size;
+	
+	size = psy_ui_size_make_real(psy_ui_realrectangle_size(&src));		
+	pt = psy_ui_point_make_real(dst);
+	style = psy_ui_style(styleid);
+	if (style) {
+		psy_ui_style_set_position(style, psy_ui_rectangle_make(pt, size));
+	}
+	style = psy_ui_style(select_styleid);
+	if (style) {
+		psy_ui_style_set_background_position_px(style, -src.left, -src.top);
+		psy_ui_style_set_background_size_px(style, 
+			psy_ui_realrectangle_width(&src),
+			psy_ui_realrectangle_height(&src));
+		psy_ui_style_set_position(style, psy_ui_rectangle_make(pt, size));
+	}
 }
