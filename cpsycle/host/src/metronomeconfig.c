@@ -1,20 +1,26 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
 
 
+/* audio */
+#include <player.h>
+
 #include "metronomeconfig.h"
 
 static void metronomeconfig_make(MetronomeConfig*, psy_Property*);
+static void metronomeconfig_updatemetronome(MetronomeConfig*);
 
-void metronomeconfig_init(MetronomeConfig* self, psy_Property* parent)
+void metronomeconfig_init(MetronomeConfig* self, psy_Property* parent,
+	psy_audio_Player* player)
 {
-	assert(self && parent);
+	assert(self && parent && player);	
 
 	self->parent = parent;
+	self->player = player;
 	metronomeconfig_make(self, parent);
 	psy_signal_init(&self->signal_changed);
 }
@@ -67,11 +73,16 @@ bool metronomeconfig_showmetronomebar(const MetronomeConfig* self)
 }
 
 /* events */
-bool metronomeconfig_onchanged(MetronomeConfig* self, psy_Property*
+int metronomeconfig_onchanged(MetronomeConfig* self, psy_Property*
 	property)
 {
-	psy_signal_emit(&self->signal_changed, self, 1, property);
-	return TRUE;
+	int rebuild_level = 0;
+	
+	metronomeconfig_updatemetronome(self);
+	if (property) {
+		psy_signal_emit(&self->signal_changed, self, 1, property);
+	}
+	return rebuild_level;
 }
 
 bool metronomeconfig_hasproperty(const MetronomeConfig* self, psy_Property* property)
@@ -79,4 +90,13 @@ bool metronomeconfig_hasproperty(const MetronomeConfig* self, psy_Property* prop
 	assert(self && self->metronome);
 
 	return psy_property_insection(property, self->metronome);
+}
+
+void metronomeconfig_updatemetronome(MetronomeConfig* self)
+{
+	self->player->sequencer.metronome_event.note =
+		metronomeconfig_note(self);
+	self->player->sequencer.metronome_event.mach =
+		(uint8_t)
+		metronomeconfig_machine(self);
 }

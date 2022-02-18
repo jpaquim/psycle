@@ -637,19 +637,16 @@ void psy_audio_player_setsong(psy_audio_Player* self, psy_audio_Song* song)
 
 	self->song = song;
 	psy_audio_midiinput_setsong(&self->midiinput, song);
-	if (self->song) {
-		double restoreprecount;
-		bool restoremetronomeactive;
-
-		restoreprecount = self->sequencer.metronome.precount;
-		restoremetronomeactive = self->sequencer.metronome.active;
+	if (self->song) {		
+		psy_audio_SequencerMetronome restore_metronome;
+		
+		restore_metronome = self->sequencer.metronome;
 		psy_audio_sequencer_reset(&self->sequencer, &song->sequence,
 			&song->machines, psy_audiodriver_samplerate(self->driver));		
 		psy_audio_player_setbpm(self, psy_audio_song_bpm(self->song));
 		psy_audio_player_setlpb(self, psy_audio_song_lpb(self->song));
 		psy_audio_player_setoctave(self, psy_audio_song_octave(self->song));
-		self->sequencer.metronome.precount = restoreprecount;
-		self->sequencer.metronome.active = restoremetronomeactive;
+		self->sequencer.metronome = restore_metronome;		
 		psy_audio_player_setsamplerindex(self,
 			psy_audio_song_samplerindex(self->song));		
 	}

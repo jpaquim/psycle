@@ -321,9 +321,7 @@ void oscilloscopecontrols_onampzoomchanged(OscilloscopeControls* self, ZoomBox* 
 void oscilloscopeview_init(OscilloscopeView* self, psy_ui_Component* parent,
 	psy_audio_Wire wire, Workspace* workspace)
 {
-	psy_ui_component_init(&self->component, parent, NULL);
-	psy_ui_component_setbackgroundmode(&self->component,
-		psy_ui_NOBACKGROUND);
+	psy_ui_component_init(&self->component, parent, NULL);	
 	oscilloscope_init(&self->oscilloscope, &self->component, wire,
 		workspace);
 	psy_ui_component_setalign(&self->oscilloscope.component,

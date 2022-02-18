@@ -67,7 +67,8 @@ void psy_ui_defaults_loadtheme(psy_ui_Defaults* self, const char* dir, psy_ui_Th
 	}	
 	styleconfig = psy_property_clone(
 		psy_ui_styles_configuration(&self->styles));
-	if (propertiesio_load(styleconfig, &path, 0) == PSY_OK) {	
+	if (propertiesio_load(styleconfig, psy_path_full(&path), 0,
+			PROPERTIESIO_DEFAULT_COMMENT) == PSY_OK) {	
 		psy_ui_FontInfo fontinfo;
 
 		self->styles.theme = theme;

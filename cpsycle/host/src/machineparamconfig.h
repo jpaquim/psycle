@@ -60,7 +60,7 @@ void machineparamconfig_setdialbpm(MachineParamConfig*, const char* filename);
 
 psy_ui_FontInfo machineparamconfig_fontinfo(const MachineParamConfig*);
 
-bool machineparamconfig_onchanged(MachineParamConfig*, psy_Property*);
+int machineparamconfig_onchanged(MachineParamConfig*, psy_Property*);
 
 #ifdef __cplusplus
 }

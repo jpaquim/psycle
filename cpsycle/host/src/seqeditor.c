@@ -64,7 +64,6 @@ void seqeditor_init(SeqEditor* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->component, parent, NULL);
 	seqeditor_vtable_init(self);	
 	psy_ui_component_setstyletype(&self->component, STYLE_SEQEDT);	
-	psy_ui_component_setbackgroundmode(&self->component, psy_ui_NOBACKGROUND);
 	psy_ui_textinput_init(&self->edit, &self->component);
 	psy_ui_component_hide(psy_ui_textinput_base(&self->edit));
 	sequencecmds_init(&self->cmds, workspace);

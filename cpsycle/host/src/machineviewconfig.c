@@ -378,20 +378,24 @@ void machineviewconfig_loadbitmap(MachineViewConfig* self)
 		STYLE_MV_EFFECT_VU0,
 		STYLE_MV_EFFECT_VUPEAK,		
 		STYLE_MV_EFFECT_PAN_SLIDER,
-		0 };	
+		0 };
+	psy_ui_Style* style;
+
+	style = psy_ui_style(STYLE_MACHINEVIEW);
+	psy_ui_style_setbackgroundid(style, psy_INDEX_INVALID);
+	psy_ui_style_setbackgroundpath(style, "");
 	machine_skin_name = machineviewconfig_machine_skin_name(self);
-	if (self->dirconfig && machine_skin_name && psy_strlen(machine_skin_name)) {				
+	if (self->dirconfig && psy_strlen(machine_skin_name) > 0) {
 		const char* skindir;
 		psy_ui_Style* style;
 
 		skindir = dirconfig_skins(self->dirconfig);
-		if (skindir) {			
-			char path[_MAX_PATH];
-			char filename[_MAX_PATH];
+		if (skindir) {
+			psy_Path filename;
+			char path[_MAX_PATH];			
 			
-			strcpy(filename, machine_skin_name);
-			strcat(filename, ".bmp");
-			psy_dir_findfile(skindir, filename, path);
+			psy_path_init_all(&filename, "", machine_skin_name, "bmp");
+			psy_dir_findfile(skindir, psy_path_full(&filename), path);
 			if (path[0] != '\0') {				
 				int i;
 				
@@ -401,31 +405,124 @@ void machineviewconfig_loadbitmap(MachineViewConfig* self)
 						psy_ui_style_setbackgroundid(style, IDB_MACHINESKIN);
 					}
 				}				
+			} else { /* reset default machine bitmaps and coords */
+				int i;
+
+				for (i = 0; styles[i] != 0; ++i) {
+					style = psy_ui_style(styles[i]);					
+					psy_ui_style_setbackgroundid(style, IDB_MACHINESKIN);					
+				}
+				/* reset machine coordinates */
+				style = psy_ui_style(STYLE_MV_MASTER);
+				psy_ui_style_set_background_size_px(style, 138.0, 35.0);
+				psy_ui_style_set_background_position_px(style, 0.0, -52.0);								
+				style = psy_ui_style(STYLE_MV_MASTER_NAME);
+				psy_ui_style_set_background_size_px(style, 117.0, 15.0);
+				psy_ui_style_setpadding_px(style, 3.0, 0, 0.0, 20.0);			
+				style = psy_ui_style(STYLE_MV_GENERATOR);				
+				psy_ui_style_set_background_size_px(style, 138.0, 52.0);
+				psy_ui_style_set_background_position_px(style, 0.0, -87.0);				
+				style = psy_ui_style(STYLE_MV_GENERATOR_NAME);
+				psy_ui_style_set_position(style,
+					psy_ui_rectangle_make(
+						psy_ui_point_make_px(20.0, 3.0),
+						psy_ui_size_make_px(117.0, 15.0)));				
+				style = psy_ui_style(STYLE_MV_GENERATOR_MUTE);				
+				psy_ui_style_set_position(style, psy_ui_rectangle_make(
+					psy_ui_point_make_px(117.0, 31.0), psy_ui_size_make_px(17.0, 17.0)));
+				style = psy_ui_style(STYLE_MV_GENERATOR_MUTE_SELECT);				
+				psy_ui_style_set_background_position_px(style, -23.0, -139.0);
+				psy_ui_style_set_position(style, psy_ui_rectangle_make(
+					psy_ui_point_make_px(117.0, 31.0), psy_ui_size_make_px(17.0, 17.0)));				
+				style = psy_ui_style(STYLE_MV_GENERATOR_SOLO);		
+				psy_ui_style_set_position(style, psy_ui_rectangle_make(
+					psy_ui_point_make_px(98.0, 31.0), psy_ui_size_make_px(17.0, 17.0)));				
+				style = psy_ui_style(STYLE_MV_GENERATOR_SOLO_SELECT);
+				psy_ui_style_set_background_size_px(style, 17, 17);
+				psy_ui_style_set_background_position_px(style, -6.0, -139.0);
+				psy_ui_style_set_position(style, psy_ui_rectangle_make(
+					psy_ui_point_make_px(98.0, 31.0), psy_ui_size_make_px(17.0, 17.0)));				
+				style = psy_ui_style(STYLE_MV_GENERATOR_VU);
+				psy_ui_style_set_position(style, psy_ui_rectangle_make(
+					psy_ui_point_make_px(4.0, 20.0), psy_ui_size_make_px(129.0, 7.0)));				
+				style = psy_ui_style(STYLE_MV_GENERATOR_VU0);
+				psy_ui_style_setbackgroundid(style, IDB_MACHINESKIN);
+				psy_ui_style_set_background_size_px(style, 129.0, 7);
+				psy_ui_style_set_background_position_px(style, 0.0, -156.0);								
+				style = psy_ui_style(STYLE_MV_GENERATOR_VUPEAK);				
+				psy_ui_style_set_background_size_px(style, 1, 7);
+				psy_ui_style_set_background_position_px(style, -108.0, -156.0);								
+				style = psy_ui_style(STYLE_MV_GENERATOR_PAN);
+				psy_ui_style_set_position(style, psy_ui_rectangle_make(
+					psy_ui_point_make_px(6.0, 33.0), psy_ui_size_make_px(82.0 + 6.0, 13.0)));				
+				style = psy_ui_style(STYLE_MV_GENERATOR_PAN_SLIDER);				
+				psy_ui_style_set_background_size_px(style, 6.0, 13.0);
+				psy_ui_style_set_background_position_px(style, -0.0, -139.0);
+				psy_ui_style_set_position(style, psy_ui_rectangle_make(
+					psy_ui_point_make_px(0.0, 0.0), psy_ui_size_make_px(6.0, 13.0)));					
+				style = psy_ui_style(STYLE_MV_EFFECT);				
+				psy_ui_style_set_background_size_px(style, 138.0, 52.0);				
+				style = psy_ui_style(STYLE_MV_EFFECT_NAME);
+				psy_ui_style_set_position(style, psy_ui_rectangle_make(
+					psy_ui_point_make_px(20.0, 3.0), psy_ui_size_make_px(117.0, 15.0)));								
+				style = psy_ui_style(STYLE_MV_EFFECT_MUTE);				
+				psy_ui_style_set_position(style, psy_ui_rectangle_make(
+					psy_ui_point_make_px(117.0, 31.0), psy_ui_size_make_px(17.0, 17.0)));								
+				style = psy_ui_style(STYLE_MV_EFFECT_MUTE_SELECT);				
+				psy_ui_style_set_background_position_px(style, -23.0, -139.0);
+				psy_ui_style_set_position(style, psy_ui_rectangle_make(
+					psy_ui_point_make_px(117.0, 31.0), psy_ui_size_make_px(17.0, 17.0)));								
+				style = psy_ui_style(STYLE_MV_EFFECT_BYPASS);				
+				psy_ui_style_set_position(style, psy_ui_rectangle_make(
+					psy_ui_point_make_px(98.0, 31.0), psy_ui_size_make_px(17.0, 17.0)));								
+				style = psy_ui_style(STYLE_MV_EFFECT_BYPASS_SELECT);				
+				psy_ui_style_set_background_size_px(style, 17, 17);
+				psy_ui_style_set_background_position_px(style, -6.0, -139.0);
+				psy_ui_style_set_position(style, psy_ui_rectangle_make(
+					psy_ui_point_make_px(98.0, 31.0), psy_ui_size_make_px(17.0, 17.0)));								
+				style = psy_ui_style(STYLE_MV_EFFECT_VU);				
+				psy_ui_style_set_position(style, psy_ui_rectangle_make(
+					psy_ui_point_make_px(4.0, 20.0), psy_ui_size_make_px(129.0, 7.0)));								
+				style = psy_ui_style(STYLE_MV_EFFECT_VU0);				
+				psy_ui_style_set_background_size_px(style, 129.0, 7.0);
+				psy_ui_style_set_background_position_px(style, 0.0, -163.0);								
+				style = psy_ui_style(STYLE_MV_EFFECT_VUPEAK);				
+				psy_ui_style_set_background_size_px(style, 1.0, 7.0);
+				psy_ui_style_set_background_position_px(style, -96.0, -144.0);				
+				style = psy_ui_style(STYLE_MV_EFFECT_PAN);
+				psy_ui_style_set_position(style, psy_ui_rectangle_make(
+					psy_ui_point_make_px(6.0, 33.0), psy_ui_size_make_px(82.0 + 3.0, 13.0)));				
+				style = psy_ui_style(STYLE_MV_EFFECT_PAN_SLIDER);				
+				psy_ui_style_set_background_size_px(style, 6.0, 13.0);
+				psy_ui_style_set_background_position_px(style, -0.0, -139.0);
+				psy_ui_style_set_position(style, psy_ui_rectangle_make(
+					psy_ui_point_make_px(0.0, 0.0), psy_ui_size_make_px(6.0, 13.0)));				
 			}
-			strcpy(filename, machine_skin_name);
-			strcat(filename, ".psm");
-			psy_dir_findfile(skindir, filename, path);
-			if (path[0] != '\0') {
+			psy_path_setext(&filename, "psm");
+			psy_dir_findfile(skindir, psy_path_full(&filename), path);
+			psy_path_dispose(&filename);
+			if (psy_strlen(path) > 0) {
 				psy_Property* coords;
 				psy_Property* transparency;
 
 				coords = psy_property_allocinit_key(NULL);
-				skin_loadpsh(coords, path);
-				machineviewconfig_setcoords(self, coords);
-				transparency = psy_property_at(coords,
-					"transparency", PSY_PROPERTY_TYPE_NONE);				
-				if (transparency) {
-					psy_ui_Colour cltransparency;
+				if (skin_load_machine_skin(coords, path) == PSY_OK) {
+					machineviewconfig_setcoords(self, coords);
+					transparency = psy_property_at(coords,
+						"transparency", PSY_PROPERTY_TYPE_NONE);
+					if (transparency) {
+						psy_ui_Colour cltransparency;
 
-					cltransparency = psy_ui_colour_make(
-						strtol(psy_property_item_str(transparency), 0, 16));
-					int i;
+						cltransparency = psy_ui_colour_make(
+							strtol(psy_property_item_str(transparency), 0, 16));
+						int i;
 
-					for (i = 0; styles[i] != 0; ++i) {
-						style = psy_ui_style(styles[i]);
-						psy_ui_bitmap_settransparency(&style->background.bitmap,
-							cltransparency);
-					}					
+						for (i = 0; styles[i] != 0; ++i) {
+							style = psy_ui_style(styles[i]);
+							psy_ui_bitmap_settransparency(&style->background.bitmap,
+								cltransparency);
+						}
+					}
 				}
 				psy_property_deallocate(coords);
 			}
@@ -728,15 +825,36 @@ bool machineviewconfig_stackview_drawsmalleffects(const MachineViewConfig* self)
 }
 
 /* events */
-bool machineviewconfig_onchanged(MachineViewConfig* self, psy_Property*
+int machineviewconfig_onchanged(MachineViewConfig* self, psy_Property*
 	property)
 {
+	int rebuild_level;
+
 	assert(self);
 
+	rebuild_level = 0;
 	if (machineviewconfig_hasthemeproperty(self, property)) {
-		machineviewconfig_write_styles(self);
+		psy_Property* choice;
+		bool worked;
+
+		choice = (psy_property_ischoiceitem(property)) ? psy_property_parent(property) : NULL;
+		worked = FALSE;
+		if (choice) {
+			worked = TRUE;
+			switch (psy_property_id(choice)) {
+			case PROPERTY_ID_MACHINESKIN:
+				machineviewconfig_loadbitmap(self);
+				break;
+			default:
+				worked = FALSE;
+				break;
+			}
+		}
+		if (!worked) {
+			machineviewconfig_write_styles(self);
+		}
 	} else {
 		psy_signal_emit(&self->signal_changed, self, 1, property);
 	}
-	return TRUE;
+	return rebuild_level;
 }

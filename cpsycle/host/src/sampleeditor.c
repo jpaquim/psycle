@@ -545,14 +545,13 @@ static void samplebox_clearwaveboxes(SampleBox*);
 static void samplebox_buildwaveboxes(SampleBox*, psy_audio_Sample*,
 	WaveBoxLoopViewMode);
 static void samplebox_onselectionchanged(SampleBox*, WaveBox* sender);
+
 /* implementation */
 void samplebox_init(SampleBox* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {
 	psy_ui_component_init(&self->component, parent, NULL);
-	self->workspace = workspace;
-	psy_ui_component_setbackgroundmode(&self->component,
-		psy_ui_NOBACKGROUND);
+	self->workspace = workspace;	
 	psy_table_init(&self->waveboxes);
 	psy_signal_connect(&self->component.signal_destroy, self,
 		samplebox_ondestroy);	

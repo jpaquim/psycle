@@ -25,7 +25,10 @@ typedef struct psy_Path {
 } psy_Path;
 
 void psy_path_init(psy_Path*, const char* path);
+void psy_path_init_all(psy_Path*, const char* prefix, const char* name,
+	const char* ext);
 void psy_path_dispose(psy_Path*);
+
 void psy_path_setpath(psy_Path*, const char* path);
 void psy_path_setprefix(psy_Path*, const char* prefix);
 void psy_path_setname(psy_Path*, const char* name);
@@ -61,6 +64,8 @@ INLINE const char* psy_path_filename(const psy_Path* self)
 bool psy_path_hasprefix(psy_Path*);
 bool psy_path_hasext(psy_Path*);
 bool psy_path_hasname(psy_Path*);
+
+uintptr_t psy_path_max(void);
 
 typedef int (*psy_fp_findfile)(void* context, const char* path, int flag);
 

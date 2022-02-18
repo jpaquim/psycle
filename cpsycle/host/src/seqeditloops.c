@@ -133,8 +133,6 @@ void seqeditloop_init(SeqEditLoop* self, psy_ui_Component* parent,
 	self->state = state;
 	self->loopstate = loopstate;
 	self->node = node;	
-	psy_ui_component_setbackgroundmode(&self->component,
-		psy_ui_NOBACKGROUND);
 	psy_ui_component_setstyletype(&self->component,
 		STYLE_SEQEDT_LOOP);
 	psy_ui_component_setstyletype_hover(&self->component,
@@ -407,8 +405,7 @@ void seqeditloops_init(SeqEditLoops* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->component, parent, NULL);	
 	seqeditloops_vtable_init(self);		
 	self->state = state;	
-	self->entries = NULL;
-	psy_ui_component_setbackgroundmode(&self->component, psy_ui_NOBACKGROUND);
+	self->entries = NULL;	
 	seqeditloopstate_init(&self->loopstate);
 	psy_ui_component_setpreferredheight(&self->component,
 		psy_ui_value_make_eh(2.0));

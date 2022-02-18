@@ -72,8 +72,7 @@ void seqedittrack_init(SeqEditTrack* self, psy_ui_Component* parent,
 {
 	psy_ui_component_init(&self->component, parent, NULL);
 	seqedittrack_vtable_init(self);	
-	psy_ui_component_setalignexpand(&self->component, psy_ui_HEXPAND);
-	psy_ui_component_setbackgroundmode(&self->component, psy_ui_NOBACKGROUND);
+	psy_ui_component_setalignexpand(&self->component, psy_ui_HEXPAND);	
 	psy_ui_component_setminimumsize(&self->component,
 		psy_ui_size_make_em(0.0, 2.0));	
 	self->state = state;

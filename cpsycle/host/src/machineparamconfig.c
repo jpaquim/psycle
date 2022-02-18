@@ -12,6 +12,9 @@
 #include "paramview.h"
 #include "resources/resource.h"
 #include "styles.h"
+/* ui */
+#include <uiopendialog.h>
+#include <uisavedialog.h>
 /* audio */
 #include <plugin_interface.h>
 /* platform */
@@ -195,17 +198,35 @@ psy_ui_FontInfo machineparamconfig_fontinfo(const MachineParamConfig* self)
 }
 
 /* events */
-bool machineparamconfig_onchanged(MachineParamConfig* self, psy_Property*
+int machineparamconfig_onchanged(MachineParamConfig* self, psy_Property*
 	property)
 {
+	int rebuild_level;
+
 	assert(self);
 
+	rebuild_level = 0;
 	if (machineparamconfig_hasthemeproperty(self, property)) {
-		machineparamconfig_updatestyles(self);
+		psy_Property* choice;
+		bool worked;
+
+		choice = (psy_property_ischoiceitem(property)) ? psy_property_parent(property) : NULL;
+		worked = FALSE;
+		if (choice) {
+			worked = TRUE;
+			switch (psy_property_id(choice)) {				
+			default:
+				worked = FALSE;
+				break;
+			}
+		}
+		if (!worked) {
+			machineparamconfig_updatestyles(self);
+		}		
 	} else {
 		psy_signal_emit(&self->signal_changed, self, 1, property);
 	}
-	return TRUE;
+	return rebuild_level;
 }
 
 void machineparamconfig_updatestyles(MachineParamConfig* self)

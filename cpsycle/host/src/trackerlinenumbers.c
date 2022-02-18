@@ -47,8 +47,7 @@ void trackerlinenumbers_init(TrackerLineNumbers* self,
 	psy_ui_Component* parent, TrackerState* state, Workspace* workspace)
 {
 	psy_ui_component_init(&self->component, parent, NULL);
-	trackerlinenumbers_vtable_init(self);
-	psy_ui_component_setbackgroundmode(&self->component, psy_ui_NOBACKGROUND);	
+	trackerlinenumbers_vtable_init(self);	
 	self->state = state;
 	self->showcursor = TRUE;
 	self->shownumbersinhex = TRUE;
@@ -349,8 +348,7 @@ void trackerlinenumberslabel_init(TrackerLineNumbersLabel* self,
 	psy_ui_Component* parent, TrackerState* state)
 {
 	psy_ui_component_init(&self->component, parent, NULL);
-	trackerlinenumberslabel_vtable_init(self);
-	psy_ui_component_setbackgroundmode(&self->component, psy_ui_NOBACKGROUND);
+	trackerlinenumberslabel_vtable_init(self);	
 	self->state = state;
 	self->linestr = NULL;
 	self->defaultstr = NULL;	
@@ -446,8 +444,7 @@ void trackerlinenumberbar_init(TrackerLineNumberBar* self, psy_ui_Component* par
 	TrackerState* state, Workspace* workspace)
 {
 	psy_ui_component_init(&self->component, parent, NULL);
-	self->workspace = workspace;
-	psy_ui_component_setbackgroundmode(&self->component, psy_ui_NOBACKGROUND);	
+	self->workspace = workspace;	
 	trackerlinenumberslabel_init(&self->linenumberslabel, &self->component,
 		state);
 	psy_ui_component_setalign(&self->linenumberslabel.component, psy_ui_ALIGN_TOP);

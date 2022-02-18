@@ -1,14 +1,21 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
-#include "../../detail/psydef.h"
+
 #include "skinio.h"
-// platform
+/* file */
+#include <propertiesio.h>
+/* std */
+#include <assert.h>
+/* platform */
 #include "../../detail/portable.h"
 
 static int skinio_loadproperties(FILE* hfile, psy_Property* props);
+void skin_define_psm(psy_Property* psm);
 
 int _httoi(const char *value)
 {  
@@ -634,6 +641,65 @@ int skin_load(psy_Property* properties, const psy_Path* path)
 	return PSY_OK;
 }
 
+int skin_load_machine_skin(psy_Property* psm, const char* path)
+{	
+	int rv;	
+	char* p;
+
+	assert(psm);
+
+	skin_define_psm(psm);
+	rv = propertiesio_load(psm, path, 0, PROPERTIESIO_CPP_COMMENT);
+	/* skip the "dword:"  and "hex:" keywords */
+	p = strrchr(psy_property_at_str(psm, "transparency", ""), ':');
+	if (p) {
+		psy_property_set_str(psm, "transparency", p + 1);
+	}
+	return rv;
+}
+
+void skin_define_psm(psy_Property* psm)
+{
+	// source coords in bitmap
+	// x, y, width, height
+
+	// numbers must be fixed height and width - ie
+	// each number has the same dimensions - and they are
+	// laid out in the order 0123456789
+
+	// on indicators also designate clickable area
+	psy_property_append_str(psm, "master_source", "0, 54, 118, 53");
+	psy_property_append_str(psm, "generator_source", "0, 107, 118, 54");
+	psy_property_append_str(psm, "generator_vu0_source", "0, 170, 6, 2"); // should be the width of one chunk
+	psy_property_append_str(psm, "generator_vu_peak_source", "108, 170, 6, 2");
+	psy_property_append_str(psm, "generator_pan_source", "0, 161, 24, 8");
+	psy_property_append_str(psm, "generator_mute_source", "25, 161, 9, 7");
+	psy_property_append_str(psm, "generator_solo_source", "34, 161, 9, 7");
+
+	psy_property_append_str(psm, "effect_source", "0, 0, 118, 54");
+	psy_property_append_str(psm, "effect_vu0_source", "0, 170, 6, 2");
+	psy_property_append_str(psm, "effect_vu_peak_source", "108, 170, 6, 2");
+	psy_property_append_str(psm, "effect_pan_source", "0, 161, 24, 8");
+	psy_property_append_str(psm, "effect_mute_source", "25, 161, 9, 7");
+	psy_property_append_str(psm, "effect_bypass_source", "43, 161, 9, 7");
+	// destination coords to be rendered to
+	// destinations use 0,0 as top left of background
+	// x,y,width
+	psy_property_append_str(psm, "generator_vu_dest", "16, 15, 81");
+	psy_property_append_str(psm, "generator_pan_dest", "10, 40, 72");
+	psy_property_append_str(psm, "generator_mute_dest", "104, 30");
+	psy_property_append_str(psm, "generator_solo_dest", "104, 19");
+	psy_property_append_str(psm, "generator_name_dest", "18, 22");
+
+	psy_property_append_str(psm, "effect_vu_dest", "16, 15, 81");
+	psy_property_append_str(psm, "effect_pan_dest", "10, 40, 72");
+	psy_property_append_str(psm, "effect_mute_dest", "104, 30");
+	psy_property_append_str(psm, "effect_bypass_dest", "104, 19");
+	psy_property_append_str(psm, "effect_name_dest", "18, 22");
+
+	psy_property_append_str(psm, "transparency", "0000ff00");
+}
+
 int skin_loadpsh(psy_Property* properties, const char* path)
 {
 	char buf[1 << 10];
@@ -802,6 +868,27 @@ int skinio_loadproperties(FILE* hfile, psy_Property* props)
 	return PSY_OK;
 }
 
+/* locate psycle skins */
+static int locate_pattern_skin_enum_dir(psy_Property*, const char* path, int flag);
+
+void skin_locate_pattern_skins(psy_Property* skins, const char* path)
+{
+	psy_dir_enumerate_recursive(skins, path, "*.psh", 0,
+		(psy_fp_findfile)locate_pattern_skin_enum_dir);
+}
+
+int locate_pattern_skin_enum_dir(psy_Property* self, const char* path, int type)
+{
+	psy_Path skinpath;
+
+	psy_path_init(&skinpath, path);
+	psy_property_append_str(self,
+		psy_path_name(&skinpath), path);
+	psy_path_dispose(&skinpath);
+	return 1;
+}
+
+/* locate machine skins */
 static int locate_machine_skin_enum_dir(psy_Property*, const char* path, int flag);
 
 void skin_locate_machine_skins(psy_Property* skins, const char* path)

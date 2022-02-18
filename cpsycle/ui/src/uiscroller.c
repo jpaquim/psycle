@@ -74,7 +74,6 @@ static bool psy_ui_scrollanimate_tick(psy_ui_ScrollAnimate* self)
 /* psy_ui_Scroller */
 /* prototypes */
 static void psy_ui_scroller_onpanesize(psy_ui_Scroller*, psy_ui_Component* sender);
-static void psy_ui_scroller_onpanedraw(psy_ui_Scroller*, psy_ui_Component* sender, psy_ui_Graphics* g);
 static void psy_ui_scroller_onscroll(psy_ui_Scroller*, psy_ui_Component* sender);
 static void psy_ui_scroller_onscrollbarclicked(psy_ui_Scroller*, psy_ui_Component* sender);
 static void psy_ui_scroller_horizontal_onchanged(psy_ui_Scroller*, psy_ui_ScrollBar* sender);
@@ -127,18 +126,16 @@ void psy_ui_scroller_init(psy_ui_Scroller* self, psy_ui_Component* client,
 	psy_signal_connect(&self->hscroll.signal_clicked, self,
 		psy_ui_scroller_onscrollbarclicked);
 	/* vertical scrollbar */
-	psy_ui_scrollbar_init(&self->vscroll, &self->component);	
-	psy_ui_scrollbar_setorientation(&self->vscroll, psy_ui_VERTICAL);
-	psy_ui_component_setalign(&self->vscroll.component, psy_ui_ALIGN_RIGHT);
+	psy_ui_scrollbar_init(&self->vscroll, &self->component);
 	psy_ui_component_hide(&self->vscroll.component);
+	psy_ui_scrollbar_setorientation(&self->vscroll, psy_ui_VERTICAL);
+	psy_ui_component_setalign(&self->vscroll.component, psy_ui_ALIGN_RIGHT);	
 	psy_signal_connect(&self->hscroll.signal_clicked, self,
 		psy_ui_scroller_onscrollbarclicked);	
 	self->thumbmove = FALSE;
 	/* pane */
 	psy_ui_component_init(&self->pane, &self->component, NULL);	
-	psy_ui_component_setalign(&self->pane, psy_ui_ALIGN_CLIENT);
-	psy_signal_connect(&self->pane.signal_draw, self,
-		psy_ui_scroller_onpanedraw);
+	psy_ui_component_setalign(&self->pane, psy_ui_ALIGN_CLIENT);	
 	/* scroll animate */
 	self->smooth = FALSE;
 	psy_ui_scrollanimate_init(&self->hanimate);
@@ -402,34 +399,5 @@ void psy_ui_scroller_onupdatestyles(psy_ui_Scroller* self)
 		if (style) {
 			psy_ui_component_setborder(&self->component, &style->border);			
 		}
-	}
-}
-
-void psy_ui_scroller_onpanedraw(psy_ui_Scroller* self,
-	psy_ui_Component* sender, psy_ui_Graphics* g)
-{
-	if (self->client && self->pane.backgroundmode == psy_ui_NOBACKGROUND) {
-		psy_ui_RealRectangle r;
-		psy_ui_RealSize size;
-		psy_ui_RealRectangle client_position;				
-
-		size = psy_ui_component_scrollsize_px(sender);
-		client_position = psy_ui_component_position(self->client);
-		if (client_position.bottom < size.height) {
-			r = psy_ui_realrectangle_make(
-				psy_ui_realpoint_make(0.0, client_position.bottom),
-				psy_ui_realsize_make(
-					size.width,
-					psy_max(0.0, size.height - client_position.bottom)));
-			psy_ui_drawsolidrectangle(g, r, psy_ui_component_backgroundcolour(sender));
-		}
-		if (client_position.bottom < size.height) {
-			r = psy_ui_realrectangle_make(
-				psy_ui_realpoint_make(client_position.right, 0.0),
-				psy_ui_realsize_make(					
-					psy_max(size.width - client_position.right, 0.0),
-					size.height));
-			psy_ui_drawsolidrectangle(g, r, psy_ui_component_backgroundcolour(sender));
-		}		
 	}
 }

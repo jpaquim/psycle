@@ -1,17 +1,19 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
 #include "newmachinesection.h"
-// host
+/* host */
 #include "resources/resource.h"
 #include "styles.h"
-// platform
+/* platform */
 #include "../../detail/portable.h"
 
-// NewMachineSection
-// prototypes
+/* NewMachineSection */
+/* prototypes */
 static void newmachinesection_ondestroy(NewMachineSection*);
 static void newmachinesection_showedit(NewMachineSection*);
 static void newmachinesection_onlabelclick(NewMachineSection*, psy_ui_Label* sender,
@@ -71,7 +73,7 @@ void newmachinesection_init(NewMachineSection* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->header, &self->component, NULL);
 	psy_ui_component_setalign(&self->header, psy_ui_ALIGN_TOP);
 	psy_ui_component_setstyletype(&self->header,
-		STYLE_NEWMACHINE_SECTION_HEADER);
+		STYLE_NEWMACHINE_SECTION_HEADER);	
 	psy_ui_component_setdefaultalign(&self->header, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));	
 	psy_ui_label_init(&self->label, &self->header);

@@ -437,15 +437,14 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					if (size) {
 						pRegion = (RGNDATA*)malloc(size);
 						GetRegionData(hrgn, size, pRegion);
-						pRect = (const RECT*)&pRegion->Buffer;
+						pRect = (const RECT*)&pRegion->Buffer;						
 						rectcount = pRegion->rdh.nCount;						
 					}
 				}
-				hdc = BeginPaint(hwnd, &ps);
+				hdc = BeginPaint(hwnd, &ps);				
 				for (r = 0; r < rectcount; ++r) {
 					RECT rcPaint;
-
-					rcPaint = pRect[r];					
+					rcPaint = pRect[r];
 					/* store clip / repaint size of paint request */
 					clipsize = psy_ui_realsize_make(
 						(double)rcPaint.right - (double)rcPaint.left,
@@ -583,7 +582,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					if (_TrackMouseEvent(&tme)) {
 						psy_ui_app()->mousetracking = TRUE;
 					}
-				}
+				}				
 				psy_ui_eventdispatch_send(&self->app->eventdispatch,
 					component, psy_ui_mouseevent_base(&ev));
 				return 0;

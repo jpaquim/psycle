@@ -132,14 +132,12 @@ void psy_audio_pluginsections_clear(psy_audio_PluginSections* self)
 
 int psy_audio_pluginsections_load(psy_audio_PluginSections* self)
 {
-	int rv;
-	psy_Path path;
+	int rv;	
 
-	printf("pluginsection-ini: %s\n", self->inipath);
-	psy_path_init(&path, self->inipath);
+	printf("pluginsection-ini: %s\n", self->inipath);	
 	psy_audio_pluginsections_reset(self);
-	rv = propertiesio_load(self->sections, &path, 1);
-	psy_path_dispose(&path);
+	rv = propertiesio_load(self->sections, self->inipath, 1,
+		PROPERTIESIO_DEFAULT_COMMENT);
 	return rv;
 }
 

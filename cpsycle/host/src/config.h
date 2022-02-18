@@ -28,17 +28,17 @@ extern "C" {
 #include <audioconfig.h>
 
 enum {
-	PROPERTY_ID_REGENERATEPLUGINCACHE = 10000,
+	PROPERTY_ID_REGENERATEPLUGINCACHE = 10000,	
 	PROPERTY_ID_LOADSKIN,
 	PROPERTY_ID_DEFAULTSKIN,	
-	PROPERTY_ID_DEFAULTFONT,
-	PROPERTY_ID_APPTHEME	
+	PROPERTY_ID_DEFAULTFONT,	
+	PROPERTY_ID_APPTHEME
 };
 
 typedef struct PsycleConfig {
 	psy_Property config;
 	psy_Property* global;
-	psy_Property* visual;
+	psy_Property* visual;	
 	psy_Property* defaultfont;
 	psy_Property* apptheme;
 	GeneralConfig general;
@@ -130,7 +130,7 @@ bool psycleconfig_audioenabled(const PsycleConfig*);
 void psycleconfig_enableaudio(PsycleConfig*, bool on);
 
 void psycleconfig_notifyall_changed(PsycleConfig*);
-void psycleconfig_notify_changed(PsycleConfig*, psy_Property*);
+int psycleconfig_notify_changed(PsycleConfig*, psy_Property*);
 
 #ifdef __cplusplus
 }

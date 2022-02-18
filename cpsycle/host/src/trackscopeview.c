@@ -339,9 +339,7 @@ void trackscopes_idle(TrackScopes* self)
 void trackscopeview_init(TrackScopeView* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {
-	psy_ui_component_init(&self->component, parent, NULL);
-	psy_ui_component_setbackgroundmode(&self->component,
-		psy_ui_NOBACKGROUND);
+	psy_ui_component_init(&self->component, parent, NULL);	
 	psy_ui_component_setstyletype(&self->component, STYLE_TRACKSCOPES);
 	trackscopes_init(&self->scopes, &self->component, workspace);
 	psy_ui_component_setalign(&self->scopes.component, psy_ui_ALIGN_CLIENT);

@@ -90,11 +90,9 @@ void psy_playlist_clear(psy_Playlist* self)
 void psy_playlist_load(psy_Playlist* self)
 {
 	psy_List* p;
-	psy_Path path;
-
-	psy_path_init(&path, self->path);
-	propertiesio_load(self->recentsongs, &path, 1);
-	psy_path_dispose(&path);
+	
+	propertiesio_load(self->recentsongs, self->path, 1,
+		PROPERTIESIO_DEFAULT_COMMENT);
 	if (self->recentfiles) {
 		for (p = psy_property_begin(self->recentfiles); p != NULL;
 			psy_list_next(&p)) {

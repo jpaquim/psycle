@@ -20,12 +20,13 @@
 /* platform */
 #include "../../detail/portable.h"
 
+#define PSYCLE__PATH__DEFAULT_PATTERN_HEADER_SKIN "Psycle Default (internal)"
+
 /* prototypes*/
 static void patternviewconfig_makeview(PatternViewConfig*, psy_Property*
 	parent);
 static void patternviewconfig_maketheme(PatternViewConfig*, psy_Property*
 	parent);
-static void patternviewconfig_loadbitmap(PatternViewConfig*);
 static void patternviewconfig_setsource(PatternViewConfig*,
 	psy_ui_RealRectangle*, intptr_t vals[4]);
 static void patternviewconfig_setdest(PatternViewConfig*, psy_ui_RealPoint*,
@@ -42,6 +43,7 @@ void patternviewconfig_init(PatternViewConfig* self, psy_Property* parent,
 
 	self->parent = parent;
 	self->skindir = psy_strdup(skindir);	
+	self->dirconfig = NULL;
 	patternviewconfig_makeview(self, parent);	
 	psy_signal_init(&self->signal_changed);	
 }
@@ -58,7 +60,8 @@ void patternviewconfig_dispose(PatternViewConfig* self)
 void patternviewconfig_setdirectories(PatternViewConfig* self,
 	DirConfig* dirconfig)
 {
-	self->dirconfig = dirconfig;
+	self->dirconfig = dirconfig;	
+	patternviewconfig_update_header_skins(self);
 }
 
 void patternviewconfig_makeview(PatternViewConfig* self, psy_Property* parent)
@@ -184,10 +187,7 @@ void patternviewconfig_maketheme(PatternViewConfig* self, psy_Property* parent)
 	psy_property_settext(
 		psy_property_append_int(self->theme,
 			"pattern_font_y", 0x0000000B, 0, 0),
-		"settingsview.pv.theme.font_y");
-	psy_property_settext(
-		psy_property_append_str(self->theme, "pattern_header_skin", ""),
-		"settingsview.pv.theme.headerskin");
+		"settingsview.pv.theme.font_y");	
 	psy_property_settext(
 		psy_property_sethint(psy_property_append_int(self->theme,
 			"pvc_separator", 0x00292929, 0, 0),
@@ -318,7 +318,39 @@ void patternviewconfig_maketheme(PatternViewConfig* self, psy_Property* parent)
 			"pvc_midline2", 0x007D6100, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
 		"settingsview.pv.theme.midline2");
+	self->headerskins = psy_property_setid(
+		psy_property_sethint(psy_property_settext(
+			psy_property_append_choice(self->theme, "skins", 0),
+			"Skin"), PSY_PROPERTY_HINT_COMBO),
+		PROPERTY_ID_PATTERN_SKIN);
+	patternviewconfig_update_header_skins(self);
 }
+
+void patternviewconfig_update_header_skins(PatternViewConfig* self)
+{
+	psy_property_clear(self->headerskins);
+	psy_property_append_str(self->headerskins,
+		PSYCLE__PATH__DEFAULT_PATTERN_HEADER_SKIN,
+		PSYCLE__PATH__DEFAULT_PATTERN_HEADER_SKIN);
+	if (self->dirconfig) {
+		skin_locate_pattern_skins(self->headerskins,
+			dirconfig_skins(self->dirconfig));
+	}
+}
+
+const char* patternviewconfig_header_skin_name(PatternViewConfig* self)
+{
+	psy_Property* choice;
+
+	assert(self);
+
+	choice = psy_property_at_choice(self->headerskins);
+	if (choice && psy_strlen(psy_property_item_str(choice)) > 0) {
+		return psy_property_key(choice);
+	}
+	return "";
+}
+
 
 void patternviewconfig_resettheme(PatternViewConfig* self)
 {
@@ -328,15 +360,27 @@ void patternviewconfig_resettheme(PatternViewConfig* self)
 		psy_property_remove(self->patternview, self->theme);
 	}
 	patternviewconfig_maketheme(self, self->patternview);
+	psy_property_setitem_int(self->headerskins, 0);
 	init_patternview_styles(&psy_ui_appdefaults()->styles);	
 }
 
-void patternviewconfig_settheme(PatternViewConfig* self, psy_Property* skin)
+void patternviewconfig_settheme(PatternViewConfig* self, psy_Property* theme)
 {
 	assert(self);
 
 	if (self->theme) {
-		psy_property_sync(self->theme, skin);
+		psy_Property* header_skin;
+
+		header_skin = psy_property_at(self->headerskins,
+			psy_property_at_str(theme, "pattern_header_skin", ""),
+			PSY_PROPERTY_TYPE_STRING);
+		if (header_skin) {
+			psy_property_setitem_int(self->headerskins,
+				psy_property_index(header_skin));
+		} else {
+			psy_property_setitem_int(self->headerskins, 0);
+		}
+		psy_property_sync(self->theme, theme);
 		patternviewconfig_write_styles(self);
 	}
 }
@@ -497,16 +541,37 @@ bool patternviewconfig_showtrackscopes(const PatternViewConfig* self)
 }
 
 /* events */
-bool patternviewconfig_onchanged(PatternViewConfig* self, psy_Property* property)
+int patternviewconfig_onchanged(PatternViewConfig* self, psy_Property* property)
 {
+	int rebuild_level;
+
 	assert(self);
 
+	rebuild_level = 0;
 	if (patternviewconfig_hasthemeproperty(self, property)) {
-		patternviewconfig_write_styles(self);
+		psy_Property* choice;
+		bool worked;
+
+		choice = (psy_property_ischoiceitem(property)) ? psy_property_parent(property) : NULL;
+		worked = FALSE;
+		if (choice) {
+			worked = TRUE;
+			switch (psy_property_id(choice)) {
+			case PROPERTY_ID_PATTERN_SKIN:
+				patternviewconfig_loadbitmap(self);
+				break;
+			default:
+				worked = FALSE;
+				break;
+			}
+		}
+		if (!worked) {
+			patternviewconfig_write_styles(self);
+		}		
 	} else {
 		psy_signal_emit(&self->signal_changed, self, 1, property);
 	}
-	return TRUE;
+	return rebuild_level;
 }
 
 void patternviewconfig_togglepatdefaultline(PatternViewConfig* self)
@@ -556,7 +621,7 @@ void patternviewconfig_write_styles(PatternViewConfig* self)
 		psy_ui_Colour bgcolour;
 		psy_ui_Colour fgcolour;		
 
-		fgcolour = psy_ui_colour_make(psy_property_at_colour(self->theme,
+		fgcolour =  psy_ui_colour_make(psy_property_at_colour(self->theme,
 			"pvc_font", 0x00CACACA));
 		bgcolour = psy_ui_colour_make(psy_property_at_colour(self->theme,
 			"pvc_background", 0x00292929));
@@ -651,10 +716,9 @@ void patternviewconfig_loadbitmap(PatternViewConfig* self)
 		STYLE_PV_TRACK_HEADER_RECORD_SELECT,		
 		STYLE_PV_TRACK_HEADER_PLAY_SELECT
 	};
-
-	pattern_header_skin_name = psy_property_at_str(self->theme,
-		"pattern_header_skin", "");
-	if (strcmp(pattern_header_skin_name, "") == 0) {
+	
+	pattern_header_skin_name = patternviewconfig_header_skin_name(self);
+	if (psy_strlen(pattern_header_skin_name) == 0) {
 		int i;
 		psy_ui_Style* style;
 
@@ -663,28 +727,27 @@ void patternviewconfig_loadbitmap(PatternViewConfig* self)
 			psy_ui_style_setbackgroundid(style, IDB_HEADERSKIN);			
 		}
 	} else {
-		psy_ui_Style* style;
-
-		char path[_MAX_PATH];
-		char filename[_MAX_PATH];
-
-		strcpy(filename, pattern_header_skin_name);
-		strcat(filename, ".bmp");
-		psy_dir_findfile(self->skindir, filename, path);
+		psy_Path filename;
+		char path[_MAX_PATH];		
+		
+		psy_path_init_all(&filename, "", pattern_header_skin_name, "bmp");		
+		psy_dir_findfile(self->skindir, psy_path_full(&filename), path);
 		if (path[0] != '\0') {
 			int i;			
 
 			for (i = 0; styles[i] != 0; ++i) {
+				psy_ui_Style* style;
+
 				style = psy_ui_style(styles[i]);
 				if (psy_ui_style_setbackgroundpath(style, path) != PSY_OK) {
 					psy_ui_style_setbackgroundid(style, IDB_HEADERSKIN);
 				}
 			}			
 		}
-		strcpy(filename, pattern_header_skin_name);
-		strcat(filename, ".psh");
-		psy_dir_findfile(self->skindir, filename, path);
-		if (path[0] != '\0') {
+		psy_path_setext(&filename, "psh");		
+		psy_dir_findfile(self->skindir, psy_path_full(&filename), path);
+		psy_path_dispose(&filename);
+		if (psy_strlen(path) > 0) {		
 			psy_Property* coords;
 			coords = psy_property_allocinit_key(NULL);
 			if (skin_loadpsh(coords, path) == PSY_OK) {
@@ -692,6 +755,7 @@ void patternviewconfig_loadbitmap(PatternViewConfig* self)
 				intptr_t vals[4];
 				psy_ui_RealRectangle src;
 				psy_ui_RealPoint dst;
+				psy_ui_Style* style;
 				
 				src = psy_ui_realrectangle_zero();
 				dst = psy_ui_realpoint_zero();

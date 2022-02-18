@@ -14,6 +14,7 @@
 /* ui */
 #include <uicomponent.h> /* Translator */
 #include <uiapp.h> /* Styles */
+#include <uiopendialog.h>
 /* file */
 #include <dir.h>
 /* platform */
@@ -32,6 +33,8 @@ static void psycleconfig_makeglobal(PsycleConfig*);
 static void psycleconfig_makevisual(PsycleConfig*);
 static void psycleconfig_makemidiconfiguration(PsycleConfig*);
 static void psycleconfig_makemidicontrollers(PsycleConfig*);
+static void psycleconfig_onloadskin(PsycleConfig*);
+
 /* implementation */
 void psycleconfig_init(PsycleConfig* self, psy_audio_Player* player,
 	psy_audio_MachineFactory* machinefactory)
@@ -86,8 +89,9 @@ void psycleconfig_initsections(PsycleConfig* self, psy_audio_Player* player,
 	midiviewconfig_init(&self->midi, &self->config, player);	
 	compatconfig_init(&self->compat, &self->config, machinefactory);
 	predefsconfig_init(&self->predefs, &self->config);
-	metronomeconfig_init(&self->metronome, &self->config);
-	seqeditconfig_init(&self->seqedit, &self->config);
+	metronomeconfig_init(&self->metronome, &self->config, player);
+	seqeditconfig_init(&self->seqedit, &self->config);	
+	patternviewconfig_setdirectories(&self->patview, &self->directories);
 	machineparamconfig_setdirectories(&self->macparam, &self->directories);
 	machineviewconfig_setdirectories(&self->macview, &self->directories);	
 }
@@ -134,7 +138,7 @@ void psycleconfig_makevisual(PsycleConfig* self)
 		psy_property_append_choice(self->visual,
 			"apptheme", 1),
 		"settingsview.visual.apptheme"),
-		PROPERTY_ID_APPTHEME);
+		PROPERTY_ID_APPTHEME);	
 	psy_property_settext(
 		psy_property_append_int(self->apptheme, "light", psy_ui_LIGHTTHEME, 0, 2),
 		"settingsview.visual.light");
@@ -143,14 +147,13 @@ void psycleconfig_makevisual(PsycleConfig* self)
 		"settingsview.visual.dark");
 	psy_property_settext(
 		psy_property_append_int(self->apptheme, "win98", psy_ui_WIN98THEME, 0, 2),
-		"Windows 98");
+		"Windows 98");	
 	patternviewconfig_init(&self->patview, self->visual,		
 		PSYCLE_SKINS_DEFAULT_DIR);
 	machineviewconfig_init(&self->macview, self->visual);
 	machineparamconfig_init(&self->macparam, self->visual);
 }
 
-/* settings */
 void psycleconfig_loadskin(PsycleConfig* self, const psy_Path* path)
 {
 	psy_Property skin;
@@ -167,7 +170,13 @@ void psycleconfig_loadskin(PsycleConfig* self, const psy_Path* path)
 		psy_dir_findfile(dirconfig_skins(&self->directories),
 			machine_gui_bitmap, psc);
 		if (psc[0] != '\0') {
-			if (skin_loadpsc(&skin, psc) == PSY_OK) {
+			psy_Path path;
+
+			psy_path_init(&path, psc);
+			if (strcmp(psy_path_ext(&path), "bmp") == 0) {
+				psy_property_set_str(&skin, "machinedialbmp",
+					psy_path_full(&path));
+			} else if (skin_loadpsc(&skin, psc) == PSY_OK) {
 				const char* bpm;								
 
 				bpm = psy_property_at_str(&skin, "machinedialbmp", NULL);
@@ -270,14 +279,24 @@ void psycleconfig_enableaudio(PsycleConfig* self, bool on)
 	audioconfig_enableaudio(&self->audio, on);
 }
 
-void psycleconfig_notify_changed(PsycleConfig* self, psy_Property* property)
-{			
+int psycleconfig_notify_changed(PsycleConfig* self, psy_Property* property)
+{		
+	switch (psy_property_id(property)) {	
+	case PROPERTY_ID_DEFAULTSKIN:
+		psycleconfig_resetskin(self);
+		return 1;		
+	case PROPERTY_ID_LOADSKIN:
+		psycleconfig_onloadskin(self);
+		return 1;
+	default:
+		break;
+	}
 	if (machineviewconfig_hasproperty(&self->macview, property)) {
-		machineviewconfig_onchanged(&self->macview, property);
+		return machineviewconfig_onchanged(&self->macview, property);
 	} else if (patternviewconfig_hasproperty(&self->patview, property)) {
-		patternviewconfig_onchanged(&self->patview, property);
+		return patternviewconfig_onchanged(&self->patview, property);
 	} else if (machineparamconfig_hasproperty(&self->macparam, property)) {
-		machineparamconfig_onchanged(&self->macparam, property);
+		return machineparamconfig_onchanged(&self->macparam, property);
 	} else if (generalconfig_hasproperty(&self->general, property)) {
 		generalconfig_onchanged(&self->general, property);
 	} else if (audioconfig_hasproperty(&self->audio, property)) {
@@ -297,10 +316,11 @@ void psycleconfig_notify_changed(PsycleConfig* self, psy_Property* property)
 	} else if (predefsconfig_hasproperty(&self->predefs, property)) {
 		predefsconfig_onchanged(&self->predefs, property);
 	} else if (metronomeconfig_hasproperty(&self->metronome, property)) {
-		metronomeconfig_onchanged(&self->metronome, property);
+		return metronomeconfig_onchanged(&self->metronome, property);
 	} else if (seqeditconfig_hasproperty(&self->seqedit, property)) {
 		seqeditconfig_onchanged(&self->seqedit, property);
 	}
+	return 0;
 }
 
 void psycleconfig_notifyall_changed(PsycleConfig* self)
@@ -319,4 +339,17 @@ void psycleconfig_notifyall_changed(PsycleConfig* self)
 	predefsconfig_onchanged(&self->predefs, &self->config);
 	metronomeconfig_onchanged(&self->metronome, &self->config);
 	seqeditconfig_onchanged(&self->seqedit, &self->config);
+}
+
+void psycleconfig_onloadskin(PsycleConfig* self)
+{
+	psy_ui_OpenDialog opendialog;
+
+	psy_ui_opendialog_init_all(&opendialog, 0,
+		"Load Theme", "Psycle Display Presets|*.psv", "PSV",
+		dirconfig_skins(&self->directories));
+	if (psy_ui_opendialog_execute(&opendialog)) {
+		psycleconfig_loadskin(self, psy_ui_opendialog_path(&opendialog));
+	}
+	psy_ui_opendialog_dispose(&opendialog);
 }
