@@ -101,8 +101,6 @@ void seqedittimesig_init(SeqEditTimeSig* self, psy_ui_Component* parent,
 
 	psy_ui_component_init(&self->component, parent, view);
 	seqedittimesig_vtable_init(self);
-	psy_ui_component_setbackgroundmode(&self->component,
-		psy_ui_NOBACKGROUND);
 	psy_ui_component_setstyletype(&self->component,
 		STYLE_SEQEDT_LOOP);
 	psy_ui_component_setstyletype_hover(&self->component,

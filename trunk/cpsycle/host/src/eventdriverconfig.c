@@ -164,7 +164,8 @@ void eventdriverconfig_loadeventdriverconfiguration(EventDriverConfig* self)
 			psy_Property* local;
 
 			local = psy_property_clone(psy_eventdriver_configuration(eventdriver));
-			propertiesio_load(local, psy_ui_opendialog_path(&opendialog), FALSE);
+			propertiesio_load(local, psy_path_full(psy_ui_opendialog_path(
+				&opendialog)), FALSE, PROPERTIESIO_DEFAULT_COMMENT);
 			psy_eventdriver_configure(eventdriver, local);			
 			if (self->activedrivers) {
 				eventdriverconfig_showactiveeventdriverconfig(self,

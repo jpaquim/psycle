@@ -15,7 +15,11 @@
 extern "C" {
 #endif
 
-int propertiesio_load(psy_Property*, const psy_Path*, int allowappend);
+#define PROPERTIESIO_DEFAULT_COMMENT 0
+#define PROPERTIESIO_CPP_COMMENT 1
+
+int propertiesio_load(psy_Property*, const char* path, int allowappend,
+	bool cpp_comment);
 int propertiesio_save(const psy_Property*, const char* filename);
 
 #ifdef __cplusplus

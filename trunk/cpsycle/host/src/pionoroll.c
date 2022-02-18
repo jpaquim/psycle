@@ -110,8 +110,7 @@ void pianoroll_init(Pianoroll* self, psy_ui_Component* parent,
 	self->workspace = workspace;	
 	self->opcount = 0;
 	self->syncpattern = 1;
-	self->chordbegin = 0;
-	psy_ui_component_setbackgroundmode(&self->component, psy_ui_NOBACKGROUND);
+	self->chordbegin = 0;	
 	/* shared states */
 	keyboardstate_init(&self->keyboardstate); // , patternviewstate_skin(pvstate));
 	pianogridstate_init(&self->gridstate, pvstate);	

@@ -38,6 +38,19 @@
 static void psy_path_extract_path(psy_Path*);
 static void psy_path_update(psy_Path*);
 
+#if defined(DIVERSALIS__OS__MICROSOFT)
+#include <windows.h> /* MAX_PATH */
+#endif
+
+uintptr_t psy_path_max(void)
+{
+#if defined(DIVERSALIS__OS__MICROSOFT)
+	return _MAX_PATH;
+#else
+	return 4096;
+#endif
+}
+
 void psy_path_init(psy_Path* self, const char* path)
 {
 	self->path = strdup(path ? path : "");
@@ -46,6 +59,19 @@ void psy_path_init(psy_Path* self, const char* path)
 	self->ext = strdup("");
 	self->filename = strdup("");
 	psy_path_extract_path(self);
+}
+
+void psy_path_init_all(psy_Path* self, const char* prefix, const char* name,
+	const char* ext)
+{
+	assert(self);
+		
+	self->path = strdup("");
+	self->filename = strdup("");
+	self->prefix = strdup("");
+	self->name = strdup(name);	
+	self->ext = strdup(ext);	
+	psy_path_update(self);
 }
 
 void psy_path_dispose(psy_Path* self)
@@ -76,7 +102,7 @@ void psy_path_setname(psy_Path* self, const char* name)
 {
 	free(self->name);
 	self->name = strdup((name) ? name : "");	
-	psy_path_update(self);	
+	psy_path_update(self);
 }
 
 void psy_path_setprefix(psy_Path* self, const char* prefix)
@@ -166,17 +192,17 @@ void psy_path_update(psy_Path* self)
 
 bool psy_path_hasprefix(psy_Path* self)
 {
-	return strcmp(self->prefix, "") != 0;
+	return (psy_strlen(self->prefix) != 0);
 }
 
 bool psy_path_hasext(psy_Path* self)
 {
-	return strcmp(self->ext, "") != 0;
+	return (psy_strlen(self->ext) != 0);	
 }
 
 bool psy_path_hasname(psy_Path* self)
 {
-	return strcmp(self->name, "") != 0;
+	return (psy_strlen(self->name) != 0);	
 }
 
 void psy_path_extract_path(psy_Path* self)

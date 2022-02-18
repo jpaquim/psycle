@@ -283,6 +283,7 @@ void psy_ui_combobox_onexpand(psy_ui_ComboBox* self, psy_ui_Button* sender,
 {	
 	assert(self);
 
+	sender->component.vtable->onmouseup(&sender->component, ev);
 	psy_ui_combobox_expand(self);
 }
 
@@ -290,7 +291,7 @@ void psy_ui_combobox_expand(psy_ui_ComboBox* self)
 {	
 	assert(self);
 
-	if (!psy_ui_component_visible(&self->dropdown.component)) {			
+	if (!psy_ui_component_visible(&self->dropdown.component)) {		
 		psy_ui_dropdownbox_show(&self->dropdown, &self->component);		
 	}	
 }

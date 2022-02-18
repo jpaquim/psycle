@@ -23,7 +23,7 @@ typedef enum {
 	PROPERTIESIO_STATE_ADDPROPERTY = 2,
 	PROPERTIESIO_STATE_READSECTION = 3,
 	PROPERTIESIO_STATE_ADDSECTION = 4,
-	PROPERTIESIO_STATE_READCOMMENT = 5,
+	PROPERTIESIO_STATE_READCOMMENT = 5
 } PropertiesIOState;
 
 static int reallocstr(char** str, size_t size, size_t* cap);
@@ -50,11 +50,11 @@ static char_dyn_t* lastkey(const char* key)
 }
 
 
-int propertiesio_load(psy_Property* self, const psy_Path* path, int allowappend)
+int propertiesio_load(psy_Property* self, const char* path, int allowappend, bool cpp_comment)
 {
 	FILE* fp;
 				
-	fp = fopen(psy_path_full(path), "rb");
+	fp = fopen(path, "rb");
 	if (fp) {
 		int c;
 		uintptr_t cp = 0;
@@ -66,40 +66,47 @@ int propertiesio_load(psy_Property* self, const psy_Path* path, int allowappend)
 		psy_Property* curr;
 		psy_Property* choice;
 		int ischoice = 0;
+		bool testcppcomment;
 
 		curr = self;
 		choice = 0;
 		state = PROPERTIESIO_STATE_READKEY;
+		testcppcomment = FALSE;
 		reallocstr(&key, 256, &keycap);
 		reallocstr(&value, 256, &valcap);				
 		while ((c = fgetc(fp)) != EOF) {			
-			if (state == PROPERTIESIO_STATE_READKEY) {
+			if (state == PROPERTIESIO_STATE_READKEY) {				
 				if (c == '\r') {
-					state = PROPERTIESIO_STATE_READKEY;
-				} else
-				if (c == '\n') {
-					state = PROPERTIESIO_STATE_READKEY;
-				} else
-				if (c == ';') {
-					state = PROPERTIESIO_STATE_READCOMMENT;
-				} else
-				if (c == '[') {
+					state = PROPERTIESIO_STATE_READKEY;					
+				} else if (c == '\n') {
+					state = PROPERTIESIO_STATE_READKEY;					
+				} else if (c == ';') {
+					state = PROPERTIESIO_STATE_READCOMMENT;					
+				} else if (c == '[') {
 					state = PROPERTIESIO_STATE_READSECTION;
 					key[cp] = '\0';
-					cp = 0;
-				} else
-				if (c == '=') {
+					cp = 0;					
+				} else if (c == '=') {
 					state = PROPERTIESIO_STATE_READVAL;
 					key[cp] = '\0';
 					cp = 0;					
 				} else {
-					if (!reallocstr(&key, cp, &keycap)) {
+					if (testcppcomment && c == '/') {
+						--cp;
+						key[cp] = '\0';
+						state = PROPERTIESIO_STATE_READCOMMENT;
+						testcppcomment = FALSE;
+					} else if (cpp_comment && c == '/') {
+						testcppcomment = TRUE;
+					} 
+					if (state != PROPERTIESIO_STATE_READCOMMENT &&
+							c != '\"' &&
+							!reallocstr(&key, cp, &keycap)) {
 						key[cp] = c;
-					}
-					++cp;
+						++cp;						
+					}					
 				}
-			} else
-			if (state == PROPERTIESIO_STATE_READVAL) {				
+			} else if (state == PROPERTIESIO_STATE_READVAL) {				
 				if (c == '\n') {
 					state = PROPERTIESIO_STATE_ADDPROPERTY;
 					value[cp] = '\0';
@@ -109,8 +116,7 @@ int propertiesio_load(psy_Property* self, const psy_Path* path, int allowappend)
 					value[cp] = c;
 				}
 				++cp;
-			} else 
-			if (state == PROPERTIESIO_STATE_READSECTION) {
+			} else if (state == PROPERTIESIO_STATE_READSECTION) {
 				if (c == ']') {
 					state = PROPERTIESIO_STATE_ADDSECTION;
 					key[cp] = '\0';
@@ -120,15 +126,13 @@ int propertiesio_load(psy_Property* self, const psy_Path* path, int allowappend)
 					key[cp] = c;
 				}
 				++cp;
-			} else
-			if (state == PROPERTIESIO_STATE_READCOMMENT) {
+			} else if (state == PROPERTIESIO_STATE_READCOMMENT) {
 				if (c == '\r') {
 					state = PROPERTIESIO_STATE_READKEY;
-				} else
-					if (c == '\n') {
-						state = PROPERTIESIO_STATE_READKEY;
-					}
-			}			
+				} else if (c == '\n') {
+					state = PROPERTIESIO_STATE_READKEY;
+				}			
+			}
 			if (state == PROPERTIESIO_STATE_ADDPROPERTY) {
 				bool append;
 				psy_Property* p = psy_property_at(curr, key, PSY_PROPERTY_TYPE_NONE);
@@ -170,8 +174,7 @@ int propertiesio_load(psy_Property* self, const psy_Path* path, int allowappend)
 				}
 				cp = 0;
 				state = PROPERTIESIO_STATE_READKEY;
-			} else
-			if (state == PROPERTIESIO_STATE_ADDSECTION) {
+			} else if (state == PROPERTIESIO_STATE_ADDSECTION) {
 				psy_Property* p;				
 				psy_Property* prev = 0;				
 				
@@ -179,15 +182,12 @@ int propertiesio_load(psy_Property* self, const psy_Path* path, int allowappend)
 				if (p == self) {
 					curr = self;
 					ischoice = 0;
-				} else				
-				if (p && p->item.typ == PSY_PROPERTY_TYPE_SECTION) {
+				} else if (p && p->item.typ == PSY_PROPERTY_TYPE_SECTION) {
 					ischoice = 0;
 					curr = p;
-				} else
-				if (ischoice) {
+				} else if (ischoice) {
 					curr = choice;
-				} else
-				if ((strcmp(key, "root") != 0) && allowappend) {
+				} else if ((strcmp(key, "root") != 0) && allowappend) {
 					char_dyn_t* trimkey;
 
 					ischoice = 0;

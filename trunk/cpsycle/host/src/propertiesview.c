@@ -464,8 +464,7 @@ void propertiesrenderer_init(PropertiesRenderer* self,
 	self->linestyle_select = psy_INDEX_INVALID;
 	self->rebuild_level = 0;
 	psy_ui_component_init(&self->component, parent, NULL);
-	propertiesrenderer_vtable_init(self);
-	psy_ui_component_setbackgroundmode(&self->component, psy_ui_NOBACKGROUND);
+	propertiesrenderer_vtable_init(self);	
 	psy_ui_component_setwheelscroll(&self->component, 4);	
 	psy_ui_component_init(&self->client, &self->component, NULL);	
 	psy_ui_component_setalign(&self->client, psy_ui_ALIGN_CLIENT);

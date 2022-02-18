@@ -1041,9 +1041,7 @@ void machinestackinputs_build(MachineStackInputs* self)
 			} else {
 				if (!column || column->offset != 0) {
 					component = psy_ui_component_allocinit(&self->component,
-						&self->component);
-					psy_ui_component_setbackgroundmode(component,
-						psy_ui_NOBACKGROUND);
+						&self->component);					
 				} else {
 					ArrowUi* arrow;
 					uintptr_t first;
@@ -1070,10 +1068,7 @@ void machinestackinputs_onmouseenter(MachineStackInputs* self)
 
 void machinestackinputs_updatevus(MachineStackInputs* self)
 {	
-	psy_ui_component_setbackgroundmode(&self->component, psy_ui_NOBACKGROUND);	
 	psy_ui_component_invalidate(&self->component);	
-	psy_ui_component_setbackgroundmode(&self->component, psy_ui_SETBACKGROUND);
-	psy_ui_component_update(&self->component);
 }
 
 void machinestackinputs_onmousedoubleclick(MachineStackInputs* self,
@@ -1181,8 +1176,7 @@ void machinestackpanetrackclient_init(MachineStackPaneTrackClient* self,
 {
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_setvtable(&self->component,
-		machinestackpanetrackclient_vtable_init(self));
-	psy_ui_component_setbackgroundmode(&self->component, psy_ui_NOBACKGROUND);
+		machinestackpanetrackclient_vtable_init(self));	
 	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_VSCROLL);
 	psy_ui_component_setwheelscroll(&self->component, 1);
 	psy_ui_component_setscrollstep_height(&self->component,
@@ -1218,7 +1212,6 @@ void machinestackpanetrack_init(MachineStackPaneTrack* self,
 	psy_ui_component_init(&self->component, parent, NULL);	
 	psy_ui_component_setvtable(&self->component,
 		machinestackpanetrack_vtable_init(self));	
-	psy_ui_component_setbackgroundmode(&self->component, psy_ui_NOBACKGROUND);
 	psy_ui_component_setcolour(&self->component, psy_ui_colour_make(0x00CACACA));
 	psy_ui_component_setalignexpand(&self->component, psy_ui_HEXPAND);	
 	machinestackpanetrackclient_init(&self->client, &self->component,
@@ -1439,25 +1432,18 @@ void machinestackpane_updatevus(MachineStackPane* self)
 {						
 	psy_List* p;
 	psy_List* q;
-	
-	psy_ui_component_setbackgroundmode(&self->component,
-		psy_ui_NOBACKGROUND);
+		
 	q = psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE);
 	for (p = q; p != NULL; psy_list_next(&p)) {
 		psy_ui_Component* trackpane;
 		int restorebgmode;
 		
 		trackpane = (psy_ui_Component*)psy_list_entry(p);
-		restorebgmode = trackpane->backgroundmode;
-		psy_ui_component_setbackgroundmode(trackpane,
-			psy_ui_NOBACKGROUND);
+		restorebgmode = trackpane->backgroundmode;		
 		psy_ui_component_invalidate(trackpane);		
 		psy_ui_component_setbackgroundmode(trackpane,
 			(psy_ui_BackgroundMode)restorebgmode);
-	}
-	psy_ui_component_setbackgroundmode(&self->component,
-		psy_ui_SETBACKGROUND);
-	psy_ui_component_update(&self->component);	
+	}	
 }
 
 void machinestackpane_onmousedoubleclick(MachineStackPane* self,
@@ -1515,8 +1501,7 @@ void machinestackvolumes_build(MachineStackVolumes* self)
 				psy_ui_component_setalign(&mute->component, psy_ui_ALIGN_TOP);
 			}
 		} else {
-			component = psy_ui_component_allocinit(&self->component, NULL);
-			psy_ui_component_setbackgroundmode(component, psy_ui_NOBACKGROUND);
+			component = psy_ui_component_allocinit(&self->component, NULL);			
 		}
 		if (component) {
 			psy_ui_Margin margin;

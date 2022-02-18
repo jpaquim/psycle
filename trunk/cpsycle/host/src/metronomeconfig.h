@@ -20,22 +20,26 @@ enum {
 	PROPERTY_ID_SHOWMETRONOME
 };
 
+struct psy_audio_Player;
+
 typedef struct MetronomeConfig {
 	/* signals */
 	psy_Signal signal_changed;
 	psy_Property* metronome;
 	/* references */
-	psy_Property* parent;	
+	psy_Property* parent;
+	struct psy_audio_Player* player;
 } MetronomeConfig;
 
-void metronomeconfig_init(MetronomeConfig*, psy_Property* parent);
+void metronomeconfig_init(MetronomeConfig*, psy_Property* parent,
+	struct psy_audio_Player*);
 void metronomeconfig_dispose(MetronomeConfig*);
 
 bool metronomeconfig_showmetronomebar(const MetronomeConfig*);
 uint8_t metronomeconfig_note(const MetronomeConfig* self);
 uintptr_t metronomeconfig_machine(const MetronomeConfig*);
 
-bool metronomeconfig_onchanged(MetronomeConfig*, psy_Property*);
+int metronomeconfig_onchanged(MetronomeConfig*, psy_Property*);
 bool metronomeconfig_hasproperty(const MetronomeConfig*, psy_Property*);
 
 #ifdef __cplusplus

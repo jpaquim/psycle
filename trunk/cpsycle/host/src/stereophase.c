@@ -60,9 +60,7 @@ void stereophase_init(StereoPhase* self, psy_ui_Component* parent, psy_audio_Wir
 	Workspace* workspace)
 {					
 	psy_ui_component_init(&self->component, parent, NULL);
-	vtable_init(self);
-	psy_ui_component_setbackgroundmode(&self->component,
-		psy_ui_NOBACKGROUND);
+	vtable_init(self);	
 	psy_ui_component_setpreferredsize(&self->component,
 		psy_ui_size_make_px(256.0, 128.0));
 	self->wire = wire;	

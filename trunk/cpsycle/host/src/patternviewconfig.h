@@ -26,7 +26,8 @@ enum {
 	PROPERTY_ID_PATTERN_DISPLAYMODE_PIANOROLL,
 	PROPERTY_ID_PATTERN_DISPLAYMODE_TRACKER_PIANOROLL_VERTICAL,
 	PROPERTY_ID_PATTERN_DISPLAYMODE_TRACKER_PIANOROLL_HORIZONTAL,
-	PROPERTY_ID_TRACKSCOPES
+	PROPERTY_ID_TRACKSCOPES,
+	PROPERTY_ID_PATTERN_SKIN
 };
 
 typedef struct PatternViewConfig {
@@ -35,7 +36,7 @@ typedef struct PatternViewConfig {
 	/* internal */
 	psy_Property* patternview;
 	psy_Property* theme;
-	// PatternViewSkin skin;
+	psy_Property* headerskins;
 	char* skindir;
 	/* references */
 	psy_Property* parent;
@@ -46,11 +47,16 @@ void patternviewconfig_init(PatternViewConfig*, psy_Property* parent,
 	const char* skindir);
 void patternviewconfig_dispose(PatternViewConfig*);
 
+void patternviewconfig_setdirectories(PatternViewConfig*, struct DirConfig*);
+void patternviewconfig_update_header_skins(PatternViewConfig*);
+void patternviewconfig_loadbitmap(PatternViewConfig*);
 void patternviewconfig_resettheme(PatternViewConfig* self);
+const char* patternviewconfig_headerskinname(PatternViewConfig*);
 void patternviewconfig_settheme(PatternViewConfig*, psy_Property* skin);
 bool boolpatternviewconfig_hasthemeproperty(const PatternViewConfig*,
 	psy_Property*);
 bool patternviewconfig_hasproperty(const PatternViewConfig*, psy_Property*);
+
 
 bool patternviewconfig_linenumbers(const PatternViewConfig*);
 bool patternviewconfig_linenumberscursor(const PatternViewConfig*);
@@ -75,7 +81,7 @@ int patternviewconfig_patterndisplay(const PatternViewConfig*);
 psy_ui_FontInfo patternviewconfig_readfont(PatternViewConfig*, double zoom);
 void patternviewconfig_write_styles(PatternViewConfig*);
 /* events */
-bool patternviewconfig_onchanged(PatternViewConfig*, psy_Property*);
+int patternviewconfig_onchanged(PatternViewConfig*, psy_Property*);
 
 #ifdef __cplusplus
 }

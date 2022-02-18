@@ -610,8 +610,10 @@ void newmachinesectionspane_init(NewMachineSectionsPane* self, psy_ui_Component*
 	psy_ui_component_setoverflow(&self->sections, psy_ui_OVERFLOW_VSCROLL);
 	psy_ui_component_setscrollstep(&self->sections,
 		psy_ui_size_make_em(0.0, 1.0));
+	psy_ui_component_setwheelscroll(&self->sections, 4);
 	psy_ui_scroller_init(&self->scroller_sections, &self->sections,
 		&self->component);
+	self->sections.id = 200;
 	psy_ui_component_setalign(&self->sections, psy_ui_ALIGN_HCLIENT);
 	psy_ui_component_settabindex(&self->scroller_sections.component, 0);
 	psy_ui_component_setalign(&self->scroller_sections.component,

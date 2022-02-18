@@ -55,8 +55,6 @@ static void workspace_onscanprogress(Workspace*, psy_audio_PluginCatcher*,
 static void workspace_onpatternviewconfigurationchanged(Workspace*,
 	PatternViewConfig* sender);
 /* configure actions */
-static void workspace_onloadskin(Workspace*);
-static void workspace_ondefaultskin(Workspace*);
 static void workspace_ondefaultcontrolskin(Workspace*);
 static void workspace_onloadcontrolskin(Workspace*);
 static void workspace_onaddeventdriver(Workspace*);
@@ -64,7 +62,6 @@ static void workspace_onremoveeventdriver(Workspace*);
 static void workspace_onediteventdriverconfiguration(Workspace*);
 static void workspace_setdefaultfont(Workspace*, psy_Property*);
 static void workspace_setapptheme(Workspace*, psy_Property*);
-static void workspace_updatemetronome(Workspace*);
 static void workspace_updatesavepoint(Workspace*);
 /* machinecallback */
 static psy_audio_MachineFactory* onmachinefactory(Workspace*);
@@ -353,14 +350,14 @@ void workspace_initplayer(Workspace* self)
 		cmdproperties_create());
 	psy_audio_luabind_setplayer(&self->player);
 	workspace_initaudio(self);
+	metronomeconfig_onchanged(&self->config.metronome, NULL);
 }
 
 void workspace_initaudio(Workspace* self)
 {
 	audioconfig_driverconfigure_section(&self->config.audio);
 	eventdriverconfig_updateactiveeventdriverlist(&self->config.input);
-	eventdriverconfig_showactiveeventdriverconfig(&self->config.input, 0);
-	workspace_updatemetronome(self);	
+	eventdriverconfig_showactiveeventdriverconfig(&self->config.input, 0);	
 }
 
 void workspace_updatemetronome(Workspace* self)
@@ -441,15 +438,7 @@ void workspace_configurationchanged(Workspace* self, psy_Property* property,
 	switch (psy_property_id(property)) {
 	case PROPERTY_ID_REGENERATEPLUGINCACHE:
 		workspace_scanplugins(self);
-		break;
-	case PROPERTY_ID_LOADSKIN:
-		workspace_onloadskin(self);
-		*rebuild_level = 1;
 		break;	
-	case PROPERTY_ID_DEFAULTSKIN:
-		workspace_ondefaultskin(self);
-		*rebuild_level = 1;
-		break;
 	case PROPERTY_ID_LOADCONTROLSKIN:
 		workspace_onloadcontrolskin(self);
 		break;
@@ -528,10 +517,7 @@ void workspace_configurationchanged(Workspace* self, psy_Property* property,
 			choice = (psy_property_ischoiceitem(property))
 				? psy_property_parent(property)
 				: NULL;
-			if (choice && psy_property_id(choice) == PROPERTY_ID_MACHINESKIN) {				
-				machineviewconfig_loadbitmap(&self->config.macview);
-				worked = TRUE;
-			} else  if (choice && psy_property_id(choice) == PROPERTY_ID_APPTHEME) {
+			if (choice && psy_property_id(choice) == PROPERTY_ID_APPTHEME) {
 				workspace_setapptheme(self, property);
 				worked = TRUE;
 			} else if (audioconfig_onpropertychanged(&self->config.audio,
@@ -565,9 +551,6 @@ void workspace_configurationchanged(Workspace* self, psy_Property* property,
 				midiviewconfig_makecontrollersave(
 					psycleconfig_midi(&self->config));
 				*rebuild_level = 1;
-			} else if (psy_property_insection(property,
-				self->config.metronome.metronome)) {
-				workspace_updatemetronome(self);
 			} else {
 				worked = FALSE;
 			}
@@ -575,7 +558,7 @@ void workspace_configurationchanged(Workspace* self, psy_Property* property,
 		}
 	}
 	if (!worked) {
-		psycleconfig_notify_changed(&self->config, property);
+		*rebuild_level = psycleconfig_notify_changed(&self->config, property);
 		psy_signal_emit(&self->signal_configchanged, self, 1, property);
 	}
 }
@@ -585,26 +568,6 @@ void workspace_onpatternviewconfigurationchanged(Workspace* self,
 {
 	self->patternsinglemode = patternviewconfig_issinglepatterndisplay(
 		&self->config.patview);
-}
-
-void workspace_onloadskin(Workspace* self)
-{
-	psy_ui_OpenDialog opendialog;
-
-	psy_ui_opendialog_init_all(&opendialog, 0,
-		"Load Theme",
-		"Psycle Display Presets|*.psv", "PSV",
-		dirconfig_skins(&self->config.directories));
-	if (psy_ui_opendialog_execute(&opendialog)) {
-		psycleconfig_loadskin(&self->config,
-			psy_ui_opendialog_path(&opendialog));
-	}
-	psy_ui_opendialog_dispose(&opendialog);
-}
-
-void workspace_ondefaultskin(Workspace* self)
-{
-	psycleconfig_resetskin(&self->config);
 }
 
 void workspace_onloadcontrolskin(Workspace* self)
@@ -720,7 +683,8 @@ void workspace_setapptheme(Workspace* self, psy_Property* property)
 		psy_ui_defaults_inittheme(psy_ui_appdefaults(), theme, TRUE);
 		inithoststyles(&psy_ui_appdefaults()->styles, theme);
 		machineviewconfig_write_styles(&self->config.macview);
-		patternviewconfig_write_styles(&self->config.patview);
+		machineparamconfig_updatestyles(&self->config.macparam);
+		patternviewconfig_write_styles(&self->config.patview);		
 		psy_ui_defaults_loadtheme(psy_ui_appdefaults(),
 			dirconfig_configdir(&self->config.directories),
 			theme);		
@@ -843,8 +807,7 @@ void workspace_setsong(Workspace* self, psy_audio_Song* song, int flag)
 		psy_audio_exclusivelock_enter();
 		psy_audio_machinecallback_setsong(&self->machinecallback, song);
 		self->song = song;
-		psy_audio_player_setsong(&self->player, self->song);
-		workspace_updatemetronome(self);				
+		psy_audio_player_setsong(&self->player, self->song);					
 		if (flag == WORKSPACE_NEWSONG) {
 			self->songhasfile = FALSE;
 			psy_audio_player_setsamplerindex(&self->player,
@@ -1048,11 +1011,13 @@ void workspace_load_configuration(Workspace* self)
 	psy_path_init(&path, NULL);
 	psy_path_setprefix(&path, dirconfig_configdir(&self->config.directories));
 	psy_path_setname(&path, PSYCLE_INI);	
-	propertiesio_load(&self->config.config, &path, 0);	
+	propertiesio_load(&self->config.config, psy_path_full(&path), 0,
+		PROPERTIESIO_DEFAULT_COMMENT);
 	driverkey = audioconfig_driverkey(psycleconfig_audio(&self->config));
 	audioconfig_makeconfiguration_driverkey(psycleconfig_audio(&self->config),
 		driverkey);	
-	propertiesio_load(&self->config.config, &path, 0);
+	propertiesio_load(&self->config.config, psy_path_full(&path), 0,
+		PROPERTIESIO_DEFAULT_COMMENT);
 	if (keyboardmiscconfig_patdefaultlines(
 			&self->config.misc) > 0) {
 		psy_audio_pattern_setdefaultlines(keyboardmiscconfig_patdefaultlines(
@@ -1086,7 +1051,7 @@ void workspace_load_configuration(Workspace* self)
 	psy_audio_eventdrivers_restartall(&self->player.eventdrivers);
 	eventdriverconfig_updateactiveeventdriverlist(&self->config.input);
 	eventdriverconfig_makeeventdriverconfigurations(&self->config.input);
-	propertiesio_load(&self->config.config, &path, 0);
+	propertiesio_load(&self->config.config, psy_path_full(&path), 0, PROPERTIESIO_DEFAULT_COMMENT);
 	eventdriverconfig_readeventdriverconfigurations(&self->config.input);
 	psy_audio_eventdrivers_restartall(&self->player.eventdrivers);
 	eventdriverconfig_showactiveeventdriverconfig(&self->config.input,
@@ -1109,8 +1074,7 @@ void workspace_load_configuration(Workspace* self)
 	psycleconfig_notifyall_changed(&self->config);
 	psy_path_dispose(&path);
 	self->patternsinglemode =
-		patternviewconfig_issinglepatterndisplay(&self->config.patview);
-	workspace_updatemetronome(self);	
+		patternviewconfig_issinglepatterndisplay(&self->config.patview);		
 	workspace_postload_driverconfigurations(self);
 	psy_audio_player_setsamplerindex(&self->player,
 		seqeditconfig_machine(&self->config.seqedit));
@@ -1172,7 +1136,7 @@ static unsigned int driverconfigloadthread(void* context)
 	psy_path_setprefix(&path, dirconfig_configdir(&self->config.directories));
 	psy_path_setname(&path, PSYCLE_INI);	
 	audioconfig_makedriverconfigurations(psycleconfig_audio(&self->config), TRUE);
-	propertiesio_load(&self->config.config, &path, 0);
+	propertiesio_load(&self->config.config, psy_path_full(&path), 0, PROPERTIESIO_DEFAULT_COMMENT);
 	psy_path_dispose(&path);
 	self->driverconfigloading = FALSE;
 	if (psycleconfig_audioenabled(&self->config)) {

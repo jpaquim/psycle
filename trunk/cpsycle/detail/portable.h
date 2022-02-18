@@ -61,9 +61,12 @@ INLINE char* psy_strreset(char** dest, const char* text)
 
 	if (*dest == NULL) {
 		*dest = psy_strdup(text);
-	} else if (text != *dest) {
+	} else if (text != *dest) {		
+		char* temp;
+
+		temp = psy_strdup(text);
 		free(*dest);
-		*dest = psy_strdup(text);
+		*dest = temp;
 	}
 	return *dest;
 }

@@ -325,8 +325,7 @@ void trackerheader_init(TrackerHeader* self, psy_ui_Component* parent,
 	TrackConfig* trackconfig, TrackerState* state, Workspace* workspace)
 {
 	psy_ui_component_init(&self->component, parent, NULL);
-	trackerheader_vtable_init(self);
-	psy_ui_component_setbackgroundmode(&self->component, psy_ui_NOBACKGROUND);
+	trackerheader_vtable_init(self);	
 	psy_ui_component_setalignexpand(&self->component, psy_ui_HEXPAND);
 	self->state = state;	
 	self->workspace = workspace;	

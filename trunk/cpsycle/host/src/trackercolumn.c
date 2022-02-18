@@ -74,8 +74,7 @@ void trackercolumn_init(TrackerColumn* self, psy_ui_Component* parent,
 	uintptr_t index, TrackerState* state, Workspace* workspace)
 {
 	psy_ui_component_init(&self->component, parent, NULL);
-	trackercolumn_vtable_init(self);	
-	psy_ui_component_setbackgroundmode(&self->component, psy_ui_NOBACKGROUND);	
+	trackercolumn_vtable_init(self);		
 	psy_ui_component_setalign(trackercolumn_base(self), psy_ui_ALIGN_LEFT);
 	self->state = state;
 	self->workspace = workspace;	
@@ -264,6 +263,7 @@ void trackercolumn_drawentry(TrackerColumn* self, psy_ui_Graphics* g,
 				psy_ui_Colour bg;
 				psy_ui_Colour fore;
 
+				currcolumnflags = columnflags;
 				currcolumnflags.cursor = columnflags.cursor &&
 					(self->state->pv->cursor.column == column) &&
 					(self->state->pv->cursor.digit == digit) &&
