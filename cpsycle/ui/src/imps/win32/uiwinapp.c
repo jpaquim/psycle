@@ -412,7 +412,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 			bgcolor = psy_ui_component_backgroundcolour(imp->component);
 			if (imp->component->vtable->ondraw ||
 				imp->component->signal_draw.slots ||				
-				imp->component->backgroundmode != psy_ui_NOBACKGROUND ||
+				imp->component->componentbackground.backgroundmode != psy_ui_NOBACKGROUND ||
 				psy_ui_border_isset(border)) {
 				HDC hdc;
 				PAINTSTRUCT ps;
@@ -698,7 +698,7 @@ bool handle_ctlcolor(psy_ui_WinApp* self, int msg, HWND hwnd, WPARAM wparam,
 			colorref = psy_ui_colour_colorref(&colour);
 			colour = psy_ui_component_backgroundcolour(imp->component);
 			bgcolorref = psy_ui_colour_colorref(&colour);
-			if (((imp->component->backgroundmode & psy_ui_SETBACKGROUND)
+			if (((imp->component->componentbackground.backgroundmode & psy_ui_SETBACKGROUND)
 				== psy_ui_SETBACKGROUND) && !colour.mode.transparent) {
 				DeleteObject(psy_ui_win_component_details(imp->component)->background);
 				psy_ui_win_component_details(imp->component)->background =
@@ -706,7 +706,7 @@ bool handle_ctlcolor(psy_ui_WinApp* self, int msg, HWND hwnd, WPARAM wparam,
 			} else {
 				brush = (HBRUSH)GetStockObject(NULL_BRUSH);
 			}
-			brush = ((imp->component->backgroundmode & psy_ui_SETBACKGROUND)
+			brush = ((imp->component->componentbackground.backgroundmode & psy_ui_SETBACKGROUND)
 				== psy_ui_SETBACKGROUND)
 				? psy_ui_win_component_details(imp->component)->background
 				: (HBRUSH)GetStockObject(NULL_BRUSH);

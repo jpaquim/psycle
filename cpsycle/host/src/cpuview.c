@@ -151,7 +151,7 @@ void cpuview_init(CPUView* self, psy_ui_Component* parent,
 
 void cpuview_inittitle(CPUView* self)
 {	
-	titlebar_init(&self->titlebar, &self->component, NULL,
+	titlebar_init(&self->titlebar, &self->component,
 		"Psycle DSP/CPU Performance Monitor");		
 	titlebar_hideonclose(&self->titlebar);
 	titlebar_enabledrag(&self->titlebar, "cpu");

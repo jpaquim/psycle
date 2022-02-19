@@ -47,13 +47,12 @@ typedef struct SeqEditLoop {
 } SeqEditLoop;
 
 void seqeditloop_init(SeqEditLoop*, psy_ui_Component* parent,
-	psy_ui_Component* view, SeqEditLoopState*, SeqEditState*,
+	SeqEditLoopState*, SeqEditState*,
 	psy_audio_PatternNode*);
 
 SeqEditLoop* seqeditloop_alloc(void);
-SeqEditLoop* seqeditloop_allocinit(
-	psy_ui_Component* parent, psy_ui_Component* view,
-	SeqEditLoopState*, SeqEditState*, psy_audio_PatternNode*);
+SeqEditLoop* seqeditloop_allocinit(psy_ui_Component* parent, SeqEditLoopState*,
+	SeqEditState*, psy_audio_PatternNode*);
 
 void seqeditloop_updateposition(SeqEditLoop*);
 

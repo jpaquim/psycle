@@ -56,6 +56,7 @@ void psy_ui_defaults_loadtheme(psy_ui_Defaults* self, const char* dir, psy_ui_Th
 {
 	psy_Property* styleconfig;
 	psy_Path path;
+	psy_PropertyReader propertyreader;
 	
 	self->styles.theme = theme;
 	psy_path_init(&path, NULL);
@@ -67,8 +68,10 @@ void psy_ui_defaults_loadtheme(psy_ui_Defaults* self, const char* dir, psy_ui_Th
 	}	
 	styleconfig = psy_property_clone(
 		psy_ui_styles_configuration(&self->styles));
-	if (propertiesio_load(styleconfig, psy_path_full(&path), 0,
-			PROPERTIESIO_DEFAULT_COMMENT) == PSY_OK) {	
+	
+	psy_propertyreader_init(&propertyreader, styleconfig,
+		psy_path_full(&path));
+	if (psy_propertyreader_load(&propertyreader) == PSY_OK) {	
 		psy_ui_FontInfo fontinfo;
 
 		self->styles.theme = theme;
@@ -77,18 +80,23 @@ void psy_ui_defaults_loadtheme(psy_ui_Defaults* self, const char* dir, psy_ui_Th
 		psy_ui_font_init(&psy_ui_defaults_style(self, psy_ui_STYLE_ROOT)->font,
 			&fontinfo);		
 	}	
+	psy_propertyreader_dispose(&propertyreader);
 	psy_property_deallocate(styleconfig);
 	psy_path_dispose(&path);	
 }
 
-void psy_ui_defaults_savetheme(psy_ui_Defaults* self, const char* filename)
+void psy_ui_defaults_savetheme(psy_ui_Defaults* self, const char* path)
 {	
-	const psy_Property* styleconfig;
+	const psy_Property* styleconfig;	
 
 	assert(self);
 
-	styleconfig = psy_ui_styles_configuration(&self->styles);
+	styleconfig = psy_ui_styles_configuration(&self->styles);	
 	if (styleconfig && !psy_property_empty(styleconfig)) {	
-		propertiesio_save(styleconfig, filename);		
+		psy_PropertyWriter propertywriter;
+
+		psy_propertywriter_init(&propertywriter, styleconfig, path);
+		psy_propertywriter_save(&propertywriter);
+		psy_propertywriter_dispose(&propertywriter);
 	}	
 }

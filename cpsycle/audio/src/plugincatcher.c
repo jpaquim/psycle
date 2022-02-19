@@ -132,18 +132,28 @@ void psy_audio_pluginsections_clear(psy_audio_PluginSections* self)
 
 int psy_audio_pluginsections_load(psy_audio_PluginSections* self)
 {
-	int rv;	
+	int rv;
+	psy_PropertyReader propertyreader;
 
 	printf("pluginsection-ini: %s\n", self->inipath);	
 	psy_audio_pluginsections_reset(self);
-	rv = propertiesio_load(self->sections, self->inipath, 1,
-		PROPERTIESIO_DEFAULT_COMMENT);
+	psy_propertyreader_init(&propertyreader, self->sections,
+		self->inipath);
+	psy_propertyreader_allow_append(&propertyreader);	
+	rv = psy_propertyreader_load(&propertyreader);	
+	psy_propertyreader_dispose(&propertyreader);
 	return rv;
 }
 
 int psy_audio_pluginsections_save(psy_audio_PluginSections* self)
 {
-	return propertiesio_save(self->sections, self->inipath);
+	int rv;
+	psy_PropertyWriter propertywriter;
+	
+	psy_propertywriter_init(&propertywriter, self->sections, self->inipath);
+	rv = psy_propertywriter_save(&propertywriter);
+	psy_propertywriter_dispose(&propertywriter);
+	return rv;
 }
 
 psy_Property* psy_audio_pluginsections_addsection(psy_audio_PluginSections* self,

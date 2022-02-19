@@ -591,15 +591,14 @@ void mainframe_initsequenceview(MainFrame* self)
 	psy_ui_component_init_align(&self->left, &self->pane, NULL,
 		psy_ui_ALIGN_LEFT);
 	psy_ui_splitter_init(&self->splitbar, &self->pane);
-	seqview_init(&self->sequenceview, &self->left, NULL, &self->workspace);
+	seqview_init(&self->sequenceview, &self->left, &self->workspace);
 	psy_ui_component_setalign(seqview_base(&self->sequenceview),
 		psy_ui_ALIGN_CLIENT);
 }
 
 void mainframe_initsequencerbar(MainFrame* self)
 {
-	sequencerbar_init(&self->sequencerbar, &self->left, NULL,
-		&self->workspace);
+	sequencerbar_init(&self->sequencerbar, &self->left, &self->workspace);
 	psy_ui_component_setalign(sequencerbar_base(&self->sequencerbar),
 		psy_ui_ALIGN_BOTTOM);
 }
@@ -959,7 +958,7 @@ void mainframe_ontabbarchanged(MainFrame* self, psy_ui_Component* sender,
 		psy_ui_component_setfocus(component);
 	}
 	psy_ui_component_align(&self->component);		
-	psy_ui_component_invalidate(&self->mainviewbar.tabbars);
+	psy_ui_component_invalidate(&self->mainviews);
 }
 
 void mainframe_onsettingshelptabbarchanged(MainFrame* self, psy_ui_Component* sender,
@@ -990,7 +989,7 @@ void mainframe_onsettingshelptabbarchanged(MainFrame* self, psy_ui_Component* se
 		psy_ui_component_setfocus(component);
 	}
 	psy_ui_component_align(&self->component);
-	psy_ui_component_invalidate(&self->mainviewbar.tabbars);
+	psy_ui_component_invalidate(&self->mainviews);
 }
 
 void mainframe_onscripttabbarchanged(MainFrame* self, psy_ui_Component* sender,

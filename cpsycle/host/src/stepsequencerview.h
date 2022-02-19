@@ -81,11 +81,10 @@ typedef struct StepSequencerBarButton {
 } StepSequencerBarButton;
 
 void stepsequencerbarbutton_init(StepSequencerBarButton*, psy_ui_Component* parent,
-	psy_ui_Component* view, StepSequencerState*);
+	StepSequencerState*);
 StepSequencerBarButton* stepsequencerbarbutton_alloc(void);
 StepSequencerBarButton* stepsequencerbarbutton_allocinit(
-	psy_ui_Component* parent, psy_ui_Component* view,
-	StepSequencerState* state);
+	psy_ui_Component* parent, StepSequencerState* state);
 
 void stepsequencerbarbutton_turnoff(StepSequencerBarButton*);
 void stepsequencerbarbutton_play(StepSequencerBarButton*);

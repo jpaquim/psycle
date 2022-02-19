@@ -64,11 +64,11 @@ static void seqviewtrack_vtable_init(SeqViewTrack* self)
 	self->component.vtable = &seqviewtrack_vtable;
 }
 
+/* implementation */
 void seqviewtrack_init(SeqViewTrack* self, psy_ui_Component* parent,
-	psy_ui_Component* view, uintptr_t trackindex,
-	psy_audio_SequenceTrack* track, SeqViewState* state)
+	uintptr_t trackindex, psy_audio_SequenceTrack* track, SeqViewState* state)
 {
-	psy_ui_component_init(&self->component, parent, view);
+	psy_ui_component_init(&self->component, parent, NULL);
 	seqviewtrack_vtable_init(self);	
 	psy_ui_component_setstyletype(&self->component,
 		STYLE_SEQLISTVIEW_TRACK);
@@ -95,8 +95,7 @@ SeqViewTrack* seqviewtrack_alloc(void)
 	return (SeqViewTrack*)malloc(sizeof(SeqViewTrack));
 }
 
-SeqViewTrack* seqviewtrack_allocinit(
-	psy_ui_Component* parent, psy_ui_Component* view,
+SeqViewTrack* seqviewtrack_allocinit(psy_ui_Component* parent,
 	uintptr_t trackindex, psy_audio_SequenceTrack* track,
 	SeqViewState* state)
 {
@@ -104,7 +103,7 @@ SeqViewTrack* seqviewtrack_allocinit(
 
 	rv = seqviewtrack_alloc();
 	if (rv) {
-		seqviewtrack_init(rv, parent, view, trackindex, track, state);
+		seqviewtrack_init(rv, parent, trackindex, track, state);
 		psy_ui_component_deallocateafterdestroyed(&rv->component);
 	}
 	return rv;
@@ -508,7 +507,7 @@ void seqviewlist_build(SeqviewList* self)
 			++trackindex) {
 		SeqViewTrack* track;
 
-		track = seqviewtrack_allocinit(&self->component, NULL,
+		track = seqviewtrack_allocinit(&self->component,
 			trackindex, (psy_audio_SequenceTrack*)psy_list_entry(p),
 			self->state);		
 	}

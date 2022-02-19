@@ -56,11 +56,11 @@ typedef struct KbdBoxKey {
 } KbdBoxKey;
 
 void kbdboxkey_init_all(KbdBoxKey*, psy_ui_Component* parent,
-	psy_ui_Component* view, uintptr_t size, uint32_t keycode, const char* label,
+	uintptr_t size, uint32_t keycode, const char* label,
 	Workspace*, KbdBoxState* state);
 
 KbdBoxKey* kbdboxkey_allocinit_all(psy_ui_Component* parent,
-	psy_ui_Component* view, uintptr_t size, uint32_t keycode, const char* label,
+	uintptr_t size, uint32_t keycode, const char* label,
 	Workspace*, KbdBoxState* state);
 
 void kbdboxkey_cleardescriptions(KbdBoxKey*);

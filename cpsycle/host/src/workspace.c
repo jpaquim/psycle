@@ -1005,19 +1005,20 @@ void workspace_load_configuration(Workspace* self)
 {
 	psy_Path path;
 	const char* driverkey;
+	psy_PropertyReader propertyreader;
 
 	assert(self);
 
 	psy_path_init(&path, NULL);
 	psy_path_setprefix(&path, dirconfig_configdir(&self->config.directories));
-	psy_path_setname(&path, PSYCLE_INI);	
-	propertiesio_load(&self->config.config, psy_path_full(&path), 0,
-		PROPERTIESIO_DEFAULT_COMMENT);
+	psy_path_setname(&path, PSYCLE_INI);
+	psy_propertyreader_init(&propertyreader, &self->config.config,
+		psy_path_full(&path));
+	psy_propertyreader_load(&propertyreader);
 	driverkey = audioconfig_driverkey(psycleconfig_audio(&self->config));
 	audioconfig_makeconfiguration_driverkey(psycleconfig_audio(&self->config),
 		driverkey);	
-	propertiesio_load(&self->config.config, psy_path_full(&path), 0,
-		PROPERTIESIO_DEFAULT_COMMENT);
+	psy_propertyreader_load(&propertyreader);
 	if (keyboardmiscconfig_patdefaultlines(
 			&self->config.misc) > 0) {
 		psy_audio_pattern_setdefaultlines(keyboardmiscconfig_patdefaultlines(
@@ -1051,7 +1052,7 @@ void workspace_load_configuration(Workspace* self)
 	psy_audio_eventdrivers_restartall(&self->player.eventdrivers);
 	eventdriverconfig_updateactiveeventdriverlist(&self->config.input);
 	eventdriverconfig_makeeventdriverconfigurations(&self->config.input);
-	propertiesio_load(&self->config.config, psy_path_full(&path), 0, PROPERTIESIO_DEFAULT_COMMENT);
+	psy_propertyreader_load(&propertyreader);
 	eventdriverconfig_readeventdriverconfigurations(&self->config.input);
 	psy_audio_eventdrivers_restartall(&self->player.eventdrivers);
 	eventdriverconfig_showactiveeventdriverconfig(&self->config.input,
@@ -1073,6 +1074,7 @@ void workspace_load_configuration(Workspace* self)
 	workspace_setapptheme(self, self->config.apptheme);	
 	psycleconfig_notifyall_changed(&self->config);
 	psy_path_dispose(&path);
+	psy_propertyreader_load(&propertyreader);
 	self->patternsinglemode =
 		patternviewconfig_issinglepatterndisplay(&self->config.patview);		
 	workspace_postload_driverconfigurations(self);
@@ -1093,6 +1095,7 @@ void workspace_startaudio(Workspace* self)
 void workspace_save_configuration(Workspace* self)
 {
 	psy_Path path;
+	psy_PropertyWriter propertywriter;
 
 	assert(self);
 
@@ -1104,7 +1107,10 @@ void workspace_save_configuration(Workspace* self)
 	midiviewconfig_makecontrollersave(
 		psycleconfig_midi(&self->config));
 	printf("save psycle configuration: %s\n", psy_path_full(&path));
-	propertiesio_save(&self->config.config, psy_path_full(&path));
+	psy_propertywriter_init(&propertywriter, &self->config.config,
+		psy_path_full(&path));
+	psy_propertywriter_save(&propertywriter);
+	psy_propertywriter_dispose(&propertywriter);	
 	psy_path_dispose(&path);
 }
 
@@ -1127,7 +1133,8 @@ static unsigned int driverconfigloadthread(void* context)
 #endif
 {
 	Workspace* self;
-	psy_Path path;	
+	psy_Path path;
+	psy_PropertyReader propertyreader;
 
 	assert(context);
 	
@@ -1136,7 +1143,10 @@ static unsigned int driverconfigloadthread(void* context)
 	psy_path_setprefix(&path, dirconfig_configdir(&self->config.directories));
 	psy_path_setname(&path, PSYCLE_INI);	
 	audioconfig_makedriverconfigurations(psycleconfig_audio(&self->config), TRUE);
-	propertiesio_load(&self->config.config, psy_path_full(&path), 0, PROPERTIESIO_DEFAULT_COMMENT);
+	psy_propertyreader_init(&propertyreader, &self->config.config,
+		psy_path_full(&path));	
+	psy_propertyreader_load(&propertyreader);
+	psy_propertyreader_dispose(&propertyreader);	
 	psy_path_dispose(&path);
 	self->driverconfigloading = FALSE;
 	if (psycleconfig_audioenabled(&self->config)) {

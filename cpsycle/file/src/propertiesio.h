@@ -10,6 +10,8 @@
 #include "dir.h"
 /* container */
 #include "properties.h"
+/* std */
+#include <stdio.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -18,9 +20,50 @@ extern "C" {
 #define PROPERTIESIO_DEFAULT_COMMENT 0
 #define PROPERTIESIO_CPP_COMMENT 1
 
-int propertiesio_load(psy_Property*, const char* path, int allowappend,
-	bool cpp_comment);
-int propertiesio_save(const psy_Property*, const char* filename);
+typedef struct psy_PropertyReader {
+	char* path;
+	bool allowappend;
+	bool cpp_comment;
+	int ischoice;
+	psy_Property* root;
+	psy_Property* curr;
+	psy_Property* choice;	
+} psy_PropertyReader;
+
+void psy_propertyreader_init(psy_PropertyReader*, psy_Property* root,
+	const char* path);
+void psy_propertyreader_dispose(psy_PropertyReader*);
+
+int psy_propertyreader_load(psy_PropertyReader*);
+
+INLINE void psy_propertyreader_allow_cpp_comments(psy_PropertyReader* self)
+{
+	self->cpp_comment = TRUE;
+}
+
+INLINE void psy_propertyreader_allow_append(psy_PropertyReader* self)
+{
+	self->allowappend = TRUE;
+}
+
+typedef struct psy_PropertyWriter {
+	char* path;		
+	const psy_Property* root;
+	uintptr_t skip;
+	uintptr_t skiplevel;
+	uintptr_t choicelevel;
+	char* lastsection;
+	FILE* fp;
+} psy_PropertyWriter;
+
+void psy_propertywriter_init(psy_PropertyWriter*, const psy_Property* root,
+	const char* path);
+void psy_propertywriter_dispose(psy_PropertyWriter*);
+
+int psy_propertywriter_save(psy_PropertyWriter*);
+
+
+int propertiesio_save(psy_PropertyWriter*);
 
 #ifdef __cplusplus
 }

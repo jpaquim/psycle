@@ -35,8 +35,7 @@ typedef struct SeqView {
 	SequenceCmds cmds;		
 } SeqView;
 
-void seqview_init(SeqView*, psy_ui_Component* parent, psy_ui_Component* view,
-	Workspace*);
+void seqview_init(SeqView*, psy_ui_Component* parent, Workspace*);
 
 void seqview_clear(SeqView*);
 void seqview_idle(SeqView*);

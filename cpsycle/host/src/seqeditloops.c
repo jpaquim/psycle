@@ -122,13 +122,13 @@ static void seqeditloop_vtable_init(SeqEditLoop* self)
 }
 /* implementation */
 void seqeditloop_init(SeqEditLoop* self, psy_ui_Component* parent,
-	psy_ui_Component* view, SeqEditLoopState* loopstate, SeqEditState* state,
+	SeqEditLoopState* loopstate, SeqEditState* state,
 	psy_audio_PatternNode* node)
 {
 	assert(self);
 	assert(state);
 
-	psy_ui_component_init(&self->component, parent, view);
+	psy_ui_component_init(&self->component, parent, NULL);
 	seqeditloop_vtable_init(self);
 	self->state = state;
 	self->loopstate = loopstate;
@@ -148,15 +148,14 @@ SeqEditLoop* seqeditloop_alloc(void)
 }
 
 SeqEditLoop* seqeditloop_allocinit(
-	psy_ui_Component* parent, psy_ui_Component* view,
-	SeqEditLoopState* loopstate, SeqEditState* state,
+	psy_ui_Component* parent, SeqEditLoopState* loopstate, SeqEditState* state,
 	psy_audio_PatternNode* node)
 {
 	SeqEditLoop* rv;
 
 	rv = seqeditloop_alloc();
 	if (rv) {
-		seqeditloop_init(rv, parent, view, loopstate, state, node);
+		seqeditloop_init(rv, parent, loopstate, state, node);
 		psy_ui_component_deallocateafterdestroyed(&rv->component);
 	}
 	return rv;
@@ -595,7 +594,7 @@ void seqeditloops_build(SeqEditLoops* self)
 							SeqEditLoop* loop;
 
 							loop = seqeditloop_allocinit(&self->component,
-								NULL, &self->loopstate, self->state, node);
+								&self->loopstate, self->state, node);
 							psy_list_append(&self->entries, loop);
 						}
 					}

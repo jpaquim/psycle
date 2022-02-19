@@ -29,9 +29,9 @@ static void seqview_oneditseqlist(SeqView*, psy_ui_Button* sender);
 
 /* implementation */
 void seqview_init(SeqView* self, psy_ui_Component* parent,
-	psy_ui_Component* view, Workspace* workspace)
+	Workspace* workspace)
 {	
-	psy_ui_component_init(&self->component, parent, view);
+	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_setstyletype(&self->component, STYLE_SEQVIEW);
 	sequencecmds_init(&self->cmds, workspace);
 	/* shared state */

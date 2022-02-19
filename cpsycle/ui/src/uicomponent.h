@@ -10,6 +10,7 @@
 #include "uicomponentscroll.h"
 #include "uicomponentstyle.h"
 #include "uicomponentsizehints.h"
+#include "uicomponentbackground.h"
 #include "uidefaults.h"
 #include "uievents.h"
 #include "uigraphics.h"
@@ -42,12 +43,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-typedef enum {
-	psy_ui_NOBACKGROUND,
-	psy_ui_SETBACKGROUND,
-	psy_ui_BACKGROUND_PARENT,
-} psy_ui_BackgroundMode;
 
 struct psy_ui_Component;
 
@@ -203,8 +198,7 @@ typedef struct psy_ui_Component {
 	psy_Signal signal_styleupdate;
 	/* internal */
 	uintptr_t id;
-	bool doublebuffered;
-	psy_ui_BackgroundMode backgroundmode;		
+	bool doublebuffered;	
 	psy_ui_ComponentSizeHints* sizehints;
 	psy_ui_ComponentStyle style;
 	psy_ui_ComponentScroll* scroll;
@@ -214,14 +208,13 @@ typedef struct psy_ui_Component {
 	uintptr_t tabindex;
 	bool deallocate;
 	uintptr_t opcount;	
-	bool draggable;	
-	uintptr_t bgframetimer;
-	uintptr_t currbgframe;
+	bool draggable;		
 	bool dropdown;
 	psy_ui_Bitmap bufferbitmap;
 	bool drawtobuffer;
 	bool ncpaint;
-	bool blitscroll;	
+	bool blitscroll;
+	psy_ui_ComponentBackground componentbackground;
 } psy_ui_Component;
 
 void psy_ui_replacedefaultfont(psy_ui_Component* main, psy_ui_Font*);

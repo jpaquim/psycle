@@ -1,6 +1,6 @@
 /*
 ** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -13,11 +13,12 @@
 #include <songio.h>
 
 /* GearButtons */
+
 /* implementation */
 void gearbuttons_init(GearButtons* self, psy_ui_Component* parent,
-	psy_ui_Component* view, Workspace* workspace)
+	Workspace* workspace)
 {
-	psy_ui_component_init(gearbuttons_base(self), parent, view);
+	psy_ui_component_init(gearbuttons_base(self), parent, NULL);
 	psy_ui_component_setstyletype(&self->component,
 		STYLE_RECENTVIEW_MAINSECTION);
 	psy_ui_component_setdefaultalign(gearbuttons_base(self), psy_ui_ALIGN_TOP,
@@ -103,7 +104,7 @@ void gear_init(Gear* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_ui_notebook_connectcontroller(&self->notebook,
 		&self->tabbar.signal_change);
 	psy_ui_tabbar_select(&self->tabbar, 0);
-	gearbuttons_init(&self->buttons, &self->client, NULL, workspace);
+	gearbuttons_init(&self->buttons, &self->client, workspace);
 	psy_ui_component_setalign(&self->buttons.component, psy_ui_ALIGN_RIGHT);
 	psy_signal_connect(&self->buttons.createreplace.signal_clicked, self,
 		gear_oncreate);
@@ -125,8 +126,7 @@ void gear_init(Gear* self, psy_ui_Component* parent, Workspace* workspace)
 
 void gear_inittitle(Gear* self)
 {	
-	titlebar_init(&self->titlebar, &self->component, gear_base(self),
-		"machinebar.gear");
+	titlebar_init(&self->titlebar, gear_base(self), "machinebar.gear");
 	titlebar_hideonclose(&self->titlebar);
 	titlebar_enabledrag(&self->titlebar, "gear");
 }

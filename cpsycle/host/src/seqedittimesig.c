@@ -91,15 +91,16 @@ static void seqedittimesig_vtable_init(SeqEditTimeSig* self)
 	}
 	self->component.vtable = &seqedittimesig_vtable;	
 }
+
 /* implementation */
 void seqedittimesig_init(SeqEditTimeSig* self, psy_ui_Component* parent,
-	psy_ui_Component* view, SeqEditTimeSigState* timesigstate, SeqEditState* state,
+	SeqEditTimeSigState* timesigstate, SeqEditState* state,
 	psy_audio_PatternNode* node)
 {
 	assert(self);
 	assert(state);
 
-	psy_ui_component_init(&self->component, parent, view);
+	psy_ui_component_init(&self->component, parent, NULL);
 	seqedittimesig_vtable_init(self);
 	psy_ui_component_setstyletype(&self->component,
 		STYLE_SEQEDT_LOOP);
@@ -118,8 +119,7 @@ SeqEditTimeSig* seqedittimesig_alloc(void)
 	return (SeqEditTimeSig*)malloc(sizeof(SeqEditTimeSig));
 }
 
-SeqEditTimeSig* seqedittimesig_allocinit(
-	psy_ui_Component* parent, psy_ui_Component* view,
+SeqEditTimeSig* seqedittimesig_allocinit(psy_ui_Component* parent,
 	SeqEditTimeSigState* timesigstate, SeqEditState* state,
 	psy_audio_PatternNode* node)
 {
@@ -127,7 +127,7 @@ SeqEditTimeSig* seqedittimesig_allocinit(
 
 	rv = seqedittimesig_alloc();
 	if (rv) {
-		seqedittimesig_init(rv, parent, view, timesigstate, state, node);
+		seqedittimesig_init(rv, parent, timesigstate, state, node);
 		psy_ui_component_deallocateafterdestroyed(&rv->component);
 	}
 	return rv;
@@ -492,7 +492,7 @@ void seqedittimesigs_build(SeqEditTimeSigs* self)
 							SeqEditTimeSig* timesig;
 
 							timesig = seqedittimesig_allocinit(&self->component,
-								NULL, &self->timesigstate, self->state, node);
+								&self->timesigstate, self->state, node);
 							psy_list_append(&self->entries, timesig);
 						}
 					}

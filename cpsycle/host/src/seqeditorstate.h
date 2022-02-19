@@ -76,7 +76,8 @@ typedef struct SeqEditState {
 	psy_ui_Component* view;
 } SeqEditState;
 
-void seqeditstate_init(SeqEditState*, SequenceCmds*, psy_ui_TextInput*, psy_ui_Component* view);
+void seqeditstate_init(SeqEditState*, SequenceCmds*, psy_ui_TextInput*,
+	psy_ui_Component* view);
 void seqeditstate_dispose(SeqEditState*);
 
 psy_audio_Sequence* seqeditstate_sequence(SeqEditState*);

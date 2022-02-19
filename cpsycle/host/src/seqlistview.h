@@ -28,12 +28,10 @@ typedef struct SeqViewTrack {
 } SeqViewTrack;
 
 void seqviewtrack_init(SeqViewTrack*, psy_ui_Component* parent,
-	psy_ui_Component* view, uintptr_t trackindex, psy_audio_SequenceTrack*,
-	SeqViewState*);
+	uintptr_t trackindex, psy_audio_SequenceTrack*, SeqViewState*);
 
 SeqViewTrack* seqviewtrack_alloc(void);
-SeqViewTrack* seqviewtrack_allocinit(
-	psy_ui_Component* parent, psy_ui_Component* view,
+SeqViewTrack* seqviewtrack_allocinit(psy_ui_Component* parent,
 	uintptr_t trackindex, psy_audio_SequenceTrack*, SeqViewState*);
 
 /* SeqviewList */
