@@ -46,14 +46,11 @@ typedef struct SeqEditTimeSig {
 } SeqEditTimeSig;
 
 void seqedittimesig_init(SeqEditTimeSig*, psy_ui_Component* parent,
-	psy_ui_Component* view, SeqEditTimeSigState*, SeqEditState*,
-	psy_audio_PatternNode*);
+	SeqEditTimeSigState*, SeqEditState*, psy_audio_PatternNode*);
 
 SeqEditTimeSig* seqedittimesig_alloc(void);
-SeqEditTimeSig* seqedittimesig_allocinit(
-	psy_ui_Component* parent, psy_ui_Component* view,
-	SeqEditTimeSigState*, SeqEditState*,
-	psy_audio_PatternNode*);
+SeqEditTimeSig* seqedittimesig_allocinit(psy_ui_Component* parent,
+	SeqEditTimeSigState*, SeqEditState*, psy_audio_PatternNode*);
 
 void seqedittimesig_updateposition(SeqEditTimeSig*);
 void seqedittimesig_select(SeqEditTimeSig*);

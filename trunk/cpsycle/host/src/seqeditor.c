@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -273,6 +273,7 @@ void seqeditor_ontoggleexpand(SeqEditor* self, psy_ui_Button* sender)
 		psy_ui_size_make(psy_ui_value_zero(), psy_ui_value_make_ph(
 			(self->expanded) ? 0.75 : 0.3)));
 	psy_ui_component_align(psy_ui_component_parent(&self->component));
+	psy_ui_component_invalidate(psy_ui_component_parent(&self->component));
 }
 
 void seqeditor_ontrackresize(SeqEditor* self, psy_ui_Component* sender,
@@ -288,6 +289,7 @@ void seqeditor_ontrackresize(SeqEditor* self, psy_ui_Component* sender,
 			psy_ui_value_make_eh(*height));
 		psy_ui_component_align(&self->scroller.pane);		
 		psy_ui_component_align(&self->trackdescpane);
+		psy_ui_component_invalidate(&self->component);
 	}
 }
 
@@ -316,6 +318,7 @@ void seqeditor_ontoggletimesig(SeqEditor* self, psy_ui_Button* sender)
 		size.height);
 	psy_ui_component_align(&self->left);
 	psy_ui_component_align(&self->component);
+	psy_ui_component_invalidate(&self->component);
 }
 
 void seqeditor_ontoggleloop(SeqEditor* self, psy_ui_Button* sender)
@@ -341,5 +344,6 @@ void seqeditor_ontoggleloop(SeqEditor* self, psy_ui_Button* sender)
 		size.height);
 	psy_ui_component_align(&self->left);
 	psy_ui_component_align(&self->component);
+	psy_ui_component_invalidate(&self->component);
 }
 

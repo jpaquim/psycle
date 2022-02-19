@@ -645,11 +645,15 @@ int skin_load_machine_skin(psy_Property* psm, const char* path)
 {	
 	int rv;	
 	char* p;
+	psy_PropertyReader propertyreader;
 
 	assert(psm);
 
 	skin_define_psm(psm);
-	rv = propertiesio_load(psm, path, 0, PROPERTIESIO_CPP_COMMENT);
+	psy_propertyreader_init(&propertyreader, psm, path);	
+	psy_propertyreader_allow_cpp_comments(&propertyreader);
+	rv = psy_propertyreader_load(&propertyreader);
+	psy_propertyreader_dispose(&propertyreader);
 	/* skip the "dword:"  and "hex:" keywords */
 	p = strrchr(psy_property_at_str(psm, "transparency", ""), ':');
 	if (p) {

@@ -27,14 +27,14 @@ static void sequencerbar_onconfigure(SequencerBar*, GeneralConfig*,
 
 /* implementation */
 void sequencerbar_init(SequencerBar* self, psy_ui_Component* parent,
-	psy_ui_Component* view, Workspace* workspace)
+	Workspace* workspace)
 {
 	psy_ui_Margin margin;
 
 	assert(self);
 	assert(workspace);
 	
-	psy_ui_component_init(&self->component, parent, view);
+	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_setstyletype(&self->component, STYLE_SEQBAR);
 	psy_ui_margin_init_em(&margin, 0.0, 0.0, 0.25, 0.0);
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_TOP,

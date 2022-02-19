@@ -80,19 +80,26 @@ void psy_playlist_add(psy_Playlist* self, const char* filename)
 
 void psy_playlist_clear(psy_Playlist* self)
 {		
+	psy_PropertyWriter propertywriter;
+
 	assert(self);
 	
 	psy_property_clear(self->recentfiles);
-	propertiesio_save(self->recentsongs, self->path);
+	psy_propertywriter_init(&propertywriter, self->recentsongs, self->path);
+	psy_propertywriter_save(&propertywriter);
+	psy_propertywriter_dispose(&propertywriter);
 	psy_signal_emit(&self->signal_changed, self, 0);
 }
 
 void psy_playlist_load(psy_Playlist* self)
 {
 	psy_List* p;
-	
-	propertiesio_load(self->recentsongs, self->path, 1,
-		PROPERTIESIO_DEFAULT_COMMENT);
+	psy_PropertyReader propertyreader;
+		
+	psy_propertyreader_init(&propertyreader, self->recentsongs, self->path);
+	psy_propertyreader_allow_append(&propertyreader);
+	psy_propertyreader_load(&propertyreader);
+	psy_propertyreader_dispose(&propertyreader);
 	if (self->recentfiles) {
 		for (p = psy_property_begin(self->recentfiles); p != NULL;
 			psy_list_next(&p)) {
@@ -111,10 +118,14 @@ void psy_playlist_load(psy_Playlist* self)
 }
 
 void psy_playlist_save(psy_Playlist* self)
-{		
+{
+	psy_PropertyWriter propertywriter;
+
 	assert(self);
 	
-	propertiesio_save(self->recentsongs, self->path);
+	psy_propertywriter_init(&propertywriter, self->recentsongs, self->path);
+	psy_propertywriter_save(&propertywriter);
+	psy_propertywriter_dispose(&propertywriter);
 }
 
 void psy_playlist_setpath(psy_Playlist* self, const char* path)

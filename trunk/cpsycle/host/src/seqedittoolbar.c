@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -40,6 +40,7 @@ static void seqeditortoolbar_ontrackeditaccept(SeqEditToolBar*,
 	psy_ui_TextInput* sender);
 static void seqeditortoolbar_ontrackeditreject(SeqEditToolBar*,
 	psy_ui_TextInput* sender);
+
 /* implenentation */
 void seqedittoolbar_init(SeqEditToolBar* self, psy_ui_Component* parent,
 	SeqEditState* state)
@@ -51,8 +52,7 @@ void seqedittoolbar_init(SeqEditToolBar* self, psy_ui_Component* parent,
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_margin_make_em(0.0, 0.5, 0.0, 1.0));		
 	self->state = state;
-	psy_ui_label_init_text(&self->trackname, &self->component,
-		"Track");
+	psy_ui_label_init_text(&self->trackname, &self->component, "Track");
 	psy_ui_textinput_init(&self->trackedit, &self->component);
 	psy_ui_textinput_setcharnumber(&self->trackedit, 30);
 	psy_ui_textinput_enableinputfield(&self->trackedit);	

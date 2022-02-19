@@ -150,10 +150,10 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 		&self->interpolatecurveview, &self->pvstate);
 	/* TransformPattern */
 	transformpatternview_init(&self->transformpattern, &self->component,
-		NULL, workspace);
+		workspace);
 	/* SwingFill */
 	swingfillview_init(&self->swingfillview, &self->component,
-		NULL, &self->pvstate);
+		&self->pvstate);
 	/* Interpolate */
 	interpolatecurveview_init(&self->interpolatecurveview, &self->component, 0,
 		0, 0, workspace);

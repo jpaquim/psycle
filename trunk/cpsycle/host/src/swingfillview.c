@@ -25,12 +25,12 @@ static void swingfillview_onapply(SwingFillView*, psy_ui_Component* sender);
 
 /* implementation */
 void swingfillview_init(SwingFillView* self, psy_ui_Component* parent,
-	psy_ui_Component* view, PatternViewState* pvstate)
+	PatternViewState* pvstate)
 {
 	assert(self);
 	assert(pvstate);
 
-	psy_ui_component_init(swingfillview_base(self), parent, view);	
+	psy_ui_component_init(swingfillview_base(self), parent, NULL);	
 	self->pvstate = pvstate;
 	self->trackmodeswingfill = FALSE;
 	psy_ui_component_init(&self->client, swingfillview_base(self), NULL);

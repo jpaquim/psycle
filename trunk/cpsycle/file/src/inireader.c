@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -56,6 +56,7 @@ void psy_inireader_init(psy_IniReader* self)
 	psy_signal_init(&self->signal_read);
 	psy_signal_init(&self->signal_section);
 	self->section = NULL;
+	self->cpp_comment = FALSE;
 }
 
 void psy_inireader_dispose(psy_IniReader* self)
@@ -69,11 +70,11 @@ void psy_inireader_dispose(psy_IniReader* self)
 	self->section = NULL;
 }
 
-int inireader_load(psy_IniReader* self, const psy_Path* path)
+int inireader_load(psy_IniReader* self, const char* path)
 {
 	FILE* fp;
 				
-	fp = fopen(psy_path_full(path), "rb");
+	fp = fopen(path, "rb");
 	if (fp) {
 		int c;
 		uintptr_t cp = 0;
@@ -81,13 +82,15 @@ int inireader_load(psy_IniReader* self, const psy_Path* path)
 		char* key = 0;			
 		size_t keycap = 0;
 		char* value = 0;
-		size_t valcap = 0;		
+		size_t valcap = 0;
+		bool testcppcomment;
 
 		state = INIREADER_STATE_READKEY;
 		reallocstr(&key, 256, &keycap);
 		reallocstr(&value, 256, &valcap);
 		free(self->section);
 		self->section = NULL;
+		testcppcomment = FALSE;
 		while ((c = fgetc(fp)) != EOF) {	
 			switch (state) {
 				case INIREADER_STATE_READKEY:			
@@ -105,11 +108,21 @@ int inireader_load(psy_IniReader* self, const psy_Path* path)
 					state = INIREADER_STATE_READVAL;
 					key[cp] = '\0';
 					cp = 0;					
-				} else {
-					if (!reallocstr(&key, cp, &keycap)) {
-						key[cp] = c;
+				} else { /* read key*/
+					if (testcppcomment && c == '/') {
+						--cp;
+						key[cp] = '\0';
+						state = INIREADER_STATE_READCOMMENT;
+						testcppcomment = FALSE;
+					} else if (self->cpp_comment && c == '/') {
+						testcppcomment = TRUE;
 					}
-					++cp;
+					if (state != INIREADER_STATE_READCOMMENT &&
+						c != '\"' &&
+						!reallocstr(&key, cp, &keycap)) {
+						key[cp] = c;
+						++cp;
+					}
 				}
 				break;
 			case INIREADER_STATE_READVAL:
@@ -133,9 +146,7 @@ int inireader_load(psy_IniReader* self, const psy_Path* path)
 				++cp;
 				break;			
 			case INIREADER_STATE_READCOMMENT:
-				if (c == '\r') {
-					state = INIREADER_STATE_READKEY;
-				} else if (c == '\n') {
+				if (c == '\r' || c == '\n') {
 					state = INIREADER_STATE_READKEY;
 				}				
 			break;

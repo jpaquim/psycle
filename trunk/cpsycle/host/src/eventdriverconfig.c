@@ -162,10 +162,14 @@ void eventdriverconfig_loadeventdriverconfiguration(EventDriverConfig* self)
 			psy_dir_config());
 		if (psy_ui_opendialog_execute(&opendialog)) {			
 			psy_Property* local;
+			psy_PropertyReader propertyreader;
 
-			local = psy_property_clone(psy_eventdriver_configuration(eventdriver));
-			propertiesio_load(local, psy_path_full(psy_ui_opendialog_path(
-				&opendialog)), FALSE, PROPERTIESIO_DEFAULT_COMMENT);
+			local = psy_property_clone(psy_eventdriver_configuration(eventdriver));			
+			psy_propertyreader_init(&propertyreader, local,
+				psy_path_full(psy_ui_opendialog_path(
+					&opendialog)));
+			psy_propertyreader_load(&propertyreader);
+			psy_propertyreader_dispose(&propertyreader);
 			psy_eventdriver_configure(eventdriver, local);			
 			if (self->activedrivers) {
 				eventdriverconfig_showactiveeventdriverconfig(self,
@@ -194,9 +198,14 @@ void eventdriverconfig_saveeventdriverconfiguration(EventDriverConfig* self)
 			"Psycle Event Driver Configuration|*.psk", "PSK",
 			psy_dir_config());
 		success = psy_ui_savedialog_execute(&dialog);
-		if (success) {
-			propertiesio_save(psy_eventdriver_configuration(eventdriver),
+		if (success) {			
+			psy_PropertyWriter propertywriter;
+
+			psy_propertywriter_init(&propertywriter,
+				psy_eventdriver_configuration(eventdriver),
 				psy_path_full(psy_ui_savedialog_path(&dialog)));
+			psy_propertywriter_save(&propertywriter);
+			psy_propertywriter_dispose(&propertywriter);
 		}
 		psy_ui_savedialog_dispose(&dialog);
 	}

@@ -1435,15 +1435,13 @@ void machinestackpane_updatevus(MachineStackPane* self)
 		
 	q = psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE);
 	for (p = q; p != NULL; psy_list_next(&p)) {
-		psy_ui_Component* trackpane;
-		int restorebgmode;
+		psy_ui_Component* trackpane;		
 		
-		trackpane = (psy_ui_Component*)psy_list_entry(p);
-		restorebgmode = trackpane->backgroundmode;		
+		trackpane = (psy_ui_Component*)psy_list_entry(p);		
 		psy_ui_component_invalidate(trackpane);		
-		psy_ui_component_setbackgroundmode(trackpane,
-			(psy_ui_BackgroundMode)restorebgmode);
-	}	
+	}
+	psy_list_free(q);
+	q = NULL;
 }
 
 void machinestackpane_onmousedoubleclick(MachineStackPane* self,

@@ -65,43 +65,37 @@ void psy_translator_reset(psy_Translator* self)
 bool psy_translator_load(psy_Translator* self, const char* path)
 {	
 	int success;
-	psy_Path dicpath;	
 	psy_IniReader inireader;
 
 	assert(self);
-
-	psy_path_init(&dicpath, path);	
+	
 	psy_inireader_init(&inireader);
 	psy_signal_connect(&inireader.signal_read, self, 
 		psy_translator_onread);
-	success = inireader_load(&inireader, &dicpath);
-	psy_inireader_dispose(&inireader);
-	psy_path_dispose(&dicpath);
+	success = inireader_load(&inireader, path);
+	psy_inireader_dispose(&inireader);	
 	psy_signal_emit(&self->signal_languagechanged, self, 0);
 	return success;	
 }
 
 bool psy_translator_test(const psy_Translator* self, const char* path, char* id)
 {	
-	psy_Path dicpath;	
 	psy_IniReader inireader;
 
 	assert(self);
-
-	psy_path_init(&dicpath, path);	
+	
 	free(((psy_Translator*)self)->testid);
 	((psy_Translator*)self)->testid = NULL;
 	psy_inireader_init(&inireader);
 	psy_signal_connect(&inireader.signal_read, (psy_Translator*)self, 
 		psy_translator_ontest);
 	id[0] = '\0';
-	if (inireader_load(&inireader, &dicpath) == PSY_OK) {
+	if (inireader_load(&inireader, path) == PSY_OK) {
 		if (self->testid) {
 			psy_snprintf(id, 256, "%s", self->testid);
 		}
 	}
-	psy_inireader_dispose(&inireader);
-	psy_path_dispose(&dicpath);
+	psy_inireader_dispose(&inireader);	
 	return psy_strlen(id) != 0;	
 }
 

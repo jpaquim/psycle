@@ -154,8 +154,7 @@ void plugineditor_ondestroy(PluginEditor* self, psy_ui_Component* sender)
 
 void plugineditor_inittitlebar(PluginEditor* self)
 {
-	titlebar_init(&self->titlebar, &self->component, NULL,
-		"Plugin Editor");
+	titlebar_init(&self->titlebar, &self->component, "Plugin Editor");
 	titlebar_hideonclose(&self->titlebar);
 }
 

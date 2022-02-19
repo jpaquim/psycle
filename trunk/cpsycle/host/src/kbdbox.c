@@ -51,10 +51,10 @@ static void kbdboxkey_vtable_init(KbdBoxKey* self)
 }
 
 /* implementation */
-void kbdboxkey_init_all(KbdBoxKey* self, psy_ui_Component* parent, psy_ui_Component* view, 
+void kbdboxkey_init_all(KbdBoxKey* self, psy_ui_Component* parent, 
 	uintptr_t size, uint32_t keycode, const char* label, Workspace* workspace, KbdBoxState* state)
 {
-	psy_ui_component_init(&self->component, parent, view);
+	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_setspacing(&self->component,
 		psy_ui_margin_make_px(2.0, 0.0, 0.0, 2.0));
 	kbdboxkey_vtable_init(self);
@@ -77,14 +77,14 @@ void kbdboxkey_init_all(KbdBoxKey* self, psy_ui_Component* parent, psy_ui_Compon
 }
 
 KbdBoxKey* kbdboxkey_allocinit_all(psy_ui_Component* parent,
-	psy_ui_Component* view, uintptr_t size, uint32_t keycode, const char* label,
+	uintptr_t size, uint32_t keycode, const char* label,
 	Workspace* workspace, KbdBoxState* state)
 {
 	KbdBoxKey* rv;
 
 	rv = (KbdBoxKey*)malloc(sizeof(KbdBoxKey));
 	if (rv) {
-		kbdboxkey_init_all(rv, parent, view, size, keycode, label,
+		kbdboxkey_init_all(rv, parent, size, keycode, label,
 			workspace, state);
 		psy_ui_component_deallocateafterdestroyed(&rv->component);		
 	}
@@ -420,7 +420,7 @@ void kbdbox_addkey(KbdBox* self, uint32_t keycode, uintptr_t size,
 	if (self->currrow && !psy_table_exists(&self->keys, keycode)) {
 		KbdBoxKey* key;	
 
-		key = kbdboxkey_allocinit_all(self->currrow, NULL, size,
+		key = kbdboxkey_allocinit_all(self->currrow, size,
 			keycode, label, self->workspace, &self->state);
 		if (key) {
 			psy_table_insert(&self->keys, keycode, key);																		

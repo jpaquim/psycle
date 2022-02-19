@@ -39,7 +39,7 @@ static void titlebar_vtable_init(TitleBar* self)
 
 /* implementation */
 void titlebar_init(TitleBar* self, psy_ui_Component* parent,	
-	psy_ui_Component* view, const char* title)
+	const char* title)
 {
 	psy_ui_Margin margin;
 

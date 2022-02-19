@@ -451,11 +451,11 @@ static void stepsequencerbarbutton_vtable_init(StepSequencerBarButton* self)
 
 /* implementation */
 void stepsequencerbarbutton_init(StepSequencerBarButton* self, psy_ui_Component* parent,
-	psy_ui_Component* view, StepSequencerState* state)
+	StepSequencerState* state)
 {
 	assert(self);
 
-	psy_ui_component_init(&self->component, parent, view);
+	psy_ui_component_init(&self->component, parent, NULL);
 	stepsequencerbarbutton_vtable_init(self);
 	self->state = state;
 	psy_ui_component_setpreferredsize(&self->component,
@@ -468,14 +468,13 @@ StepSequencerBarButton* stepsequencerbarbutton_alloc(void)
 }
 
 StepSequencerBarButton* stepsequencerbarbutton_allocinit(
-	psy_ui_Component* parent, psy_ui_Component* view,
-	StepSequencerState* state)
+	psy_ui_Component* parent, StepSequencerState* state)
 {
 	StepSequencerBarButton* rv;
 
 	rv = stepsequencerbarbutton_alloc();
 	if (rv) {
-		stepsequencerbarbutton_init(rv, parent, view, state);
+		stepsequencerbarbutton_init(rv, parent, state);
 		psy_ui_component_deallocateafterdestroyed(
 			stepsequencerbarbutton_base(rv));
 	}
@@ -603,7 +602,7 @@ void stepsequencerbarselect_build(StepsequencerBarSelect* self)
 				psy_ui_margin_make_em(0.0, 1.0, 0.1, 0.0));
 		}
 		if (row) {
-			button = stepsequencerbarbutton_allocinit(row, NULL, self->state);
+			button = stepsequencerbarbutton_allocinit(row, self->state);
 			button->index = i;
 			psy_ui_component_setalign(&button->component, psy_ui_ALIGN_LEFT);
 			psy_table_insert(&self->buttons, i, (void*)button);

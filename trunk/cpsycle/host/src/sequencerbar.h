@@ -59,7 +59,7 @@ typedef struct SequencerBar {
 } SequencerBar;
 
 void sequencerbar_init(SequencerBar* self, psy_ui_Component* parent,
-	psy_ui_Component* view, Workspace*);
+	Workspace*);
 
 INLINE psy_ui_Component* sequencerbar_base(SequencerBar* self)
 {

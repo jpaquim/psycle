@@ -295,6 +295,9 @@
     <ClCompile Include="src\uitextformat.c">
       <Filter>common</Filter>
     </ClCompile>
+    <ClCompile Include="src\uicomponentbackground.c">
+      <Filter>graphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\uibutton.h">
@@ -536,6 +539,9 @@
     </ClInclude>
     <ClInclude Include="src\uitextformat.h">
       <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="src\uicomponentbackground.h">
+      <Filter>graphics</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

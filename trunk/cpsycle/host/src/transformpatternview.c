@@ -44,13 +44,13 @@ static psy_audio_PatternSearchReplaceMode setupsearchreplacemode(
 	int replnote, int replinst, int replmach, bool repltweak);
 static psy_audio_Pattern* transformpatternview_currpattern(TransformPatternView*);
 
-// implementation
+/* implementation */
 void transformpatternview_init(TransformPatternView* self, psy_ui_Component*
-	parent, psy_ui_Component* view, Workspace* workspace)
+	parent, Workspace* workspace)
 {
 	assert(self);
 
-	psy_ui_component_init(transformpatternview_base(self), parent, view);
+	psy_ui_component_init(transformpatternview_base(self), parent, NULL);
 	self->workspace = workspace;
 	self->applyto = 0;
 	psy_audio_blockselection_init(&self->patternselection);

@@ -70,7 +70,7 @@ typedef struct TransformPatternView {
 } TransformPatternView;
 
 void transformpatternview_init(TransformPatternView*, psy_ui_Component* parent,
-	psy_ui_Component* view, Workspace*);
+	Workspace*);
 
 void transformpatternview_setpatternselection(TransformPatternView*,
 	const psy_audio_BlockSelection*);

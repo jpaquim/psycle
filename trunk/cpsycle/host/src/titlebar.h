@@ -21,8 +21,7 @@ typedef struct TitleBar {
 	char* dragid;
 } TitleBar;
 
-void titlebar_init(TitleBar*, psy_ui_Component* parent, psy_ui_Component* view,
-	const char* title);
+void titlebar_init(TitleBar*, psy_ui_Component* parent, const char* title);
 
 void titlebar_hideonclose(TitleBar*);
 void titlebar_enabledrag(TitleBar*, const char* dragid);
