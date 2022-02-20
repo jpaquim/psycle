@@ -61,7 +61,7 @@ void psycleconfig_init(PsycleConfig*, psy_audio_Player*,
 	psy_audio_MachineFactory*);
 void psycleconfig_dispose(PsycleConfig*);
 
-void psycleconfig_loadskin(PsycleConfig*, const psy_Path*);
+void psycleconfig_loadskin(PsycleConfig*, const char* path);
 void psycleconfig_resetskin(PsycleConfig*);
 void psycleconfig_resetcontrolskin(PsycleConfig*);
 

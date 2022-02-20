@@ -74,9 +74,6 @@ void psy_ui_componentcontaineralign_deallocate(psy_ui_ComponentContainerAlign* s
 static bool componentscroll_initialized = FALSE;
 static psy_ui_ComponentScroll componentscroll;
 
-static bool sizehints_initialized = FALSE;
-static psy_ui_ComponentSizeHints sizehints;
-
 static bool containeralign_initialized = FALSE;
 static psy_ui_ComponentContainerAlign containeralign;
 
@@ -305,7 +302,7 @@ static void onalign(psy_ui_Component* self)
 
 		component = (psy_ui_Component*)p->entry;
 		style = psy_ui_componentstyle_currstyle(&component->style);
-		if (psy_ui_rectangle_is_active(&style->position)) {
+		if (psy_ui_rectangle_is_all_active(&style->position)) {
 			psy_ui_component_setposition(component, style->position);
 		}
 	}
@@ -402,6 +399,10 @@ static void onfocuslost(psy_ui_Component* self)
 	psy_ui_app()->focus = NULL;
 }
 
+static void onfocusin(psy_ui_Component* self, psy_ui_Event* ev)
+{
+}
+
 static void onupdatestyles(psy_ui_Component* self) { }
 static void ondragstart(psy_ui_Component* self, psy_ui_DragEvent* ev) { }
 static void ondragover(psy_ui_Component* self, psy_ui_DragEvent* ev) { }
@@ -456,6 +457,7 @@ static void vtable_init(void)
 		vtable.preventinput = preventinput;
 		vtable.onfocus = onfocus;
 		vtable.onfocuslost = onfocuslost;
+		vtable.onfocusin = onfocusin;
 		vtable.onupdatestyles = onupdatestyles;
 		vtable.invalidate = invalidate;
 		vtable.ondragstart = ondragstart;
@@ -694,12 +696,7 @@ void psy_ui_component_init_base(psy_ui_Component* self) {
 		psy_ui_componentscroll_init(&componentscroll);
 		componentscroll_initialized = TRUE;
 	}
-	self->scroll = &componentscroll;
-	if (!sizehints_initialized) {
-		psy_ui_componentsizehints_init(&sizehints);
-		sizehints_initialized = TRUE;
-	}		
-	self->sizehints = &sizehints;
+	self->scroll = &componentscroll;	
 	self->id = psy_INDEX_INVALID;
 	psy_ui_componentstyle_init(&self->style);
 	psy_ui_componentbackground_init(&self->componentbackground, self);
@@ -732,11 +729,7 @@ void psy_ui_component_dispose(psy_ui_Component* self)
 	if (self->scroll != &componentscroll) {		
 		free(self->scroll);
 		self->scroll = NULL;
-	}
-	if (self->sizehints != &sizehints) {
-		free(self->sizehints);
-		self->sizehints = NULL;
-	}
+	}	
 	if (self->containeralign != &containeralign) {
 		free(self->containeralign);
 		self->containeralign = NULL;
@@ -1264,35 +1257,37 @@ psy_List* psy_ui_components_setmargin(psy_List* list, psy_ui_Margin margin)
 
 void psy_ui_component_setpreferredsize(psy_ui_Component* self, psy_ui_Size size)
 {
-	psy_ui_component_usesizehints(self);
-	self->sizehints->preferredsize = size;
-	self->sizehints->preferredwidthset = TRUE;
-	self->sizehints->preferredheightset = TRUE;
+	psy_ui_componentstyle_setpreferredsize(&self->style, size);	
 }
 
 void psy_ui_component_setpreferredheight(psy_ui_Component* self, psy_ui_Value height)
 {
-	psy_ui_component_usesizehints(self);
-	self->sizehints->preferredsize.height = height;	
-	self->sizehints->preferredheightset = TRUE;
+	psy_ui_componentstyle_setpreferredheight(&self->style, height);	
+}
+
+void psy_ui_component_setpreferredwidth(psy_ui_Component* self, psy_ui_Value width)
+{
+	psy_ui_componentstyle_setpreferredwidth(&self->style, width);
 }
 
 psy_ui_Size psy_ui_component_preferredsize(psy_ui_Component* self,
 	const psy_ui_Size* limit)
 {		
 	psy_ui_Size rv;
-
-	rv = self->sizehints->preferredsize;
-	if (self->sizehints->preferredwidthset &&
-		self->sizehints->preferredheightset) {
-		return rv;
+	psy_ui_Size preferredsize;
+	
+	rv = preferredsize = psy_ui_componentstyle_preferredsize(&self->style);
+	if (preferredsize.width.set && preferredsize.height.set) {
+		return preferredsize;
 	}
+	rv.width.set = TRUE;
+	rv.height.set = TRUE;
 	self->vtable->onpreferredsize(self, limit, &rv);
-	if (self->sizehints->preferredwidthset) {
-		rv.width = self->sizehints->preferredsize.width;
+	if (preferredsize.width.set) {
+		rv.width = self->style.sizehints->preferredsize.width;
 	}
-	if (self->sizehints->preferredheightset) {
-		rv.height = self->sizehints->preferredsize.height;
+	if (preferredsize.height.set) {
+		rv.height = self->style.sizehints->preferredsize.height;
 	}
 	return rv;	
 }
@@ -1314,24 +1309,22 @@ psy_ui_RealSize psy_ui_component_preferredscrollsize_px(psy_ui_Component* self,
 
 void psy_ui_component_setmaximumsize(psy_ui_Component* self, psy_ui_Size size)
 {
-	psy_ui_component_usesizehints(self);
-	self->sizehints->maxsize = size;
+	psy_ui_componentstyle_setmaximumsize(&self->style, size);
 }
 
 const psy_ui_Size psy_ui_component_maximumsize(const psy_ui_Component* self)
 {
-	return self->sizehints->maxsize;
+	return psy_ui_componentstyle_maximumsize(&self->style);
 }
 
 void psy_ui_component_setminimumsize(psy_ui_Component* self, psy_ui_Size size)
 {
-	psy_ui_component_usesizehints(self);
-	self->sizehints->minsize = size;	
+	psy_ui_componentstyle_setminimumsize(&self->style, size);
 }
 
 const psy_ui_Size psy_ui_component_minimumsize(const psy_ui_Component* self)
 {
-	return self->sizehints->minsize;
+	return psy_ui_componentstyle_minimumsize(&self->style);
 }
 
 psy_ui_Size psy_ui_component_size(const psy_ui_Component* self)
@@ -1841,13 +1834,6 @@ void psy_ui_component_usescroll(psy_ui_Component* self)
 {
 	if (self->scroll == &componentscroll) {
 		self->scroll = psy_ui_componentscroll_allocinit();
-	}
-}
-
-void psy_ui_component_usesizehints(psy_ui_Component* self)
-{
-	if (self->sizehints == &sizehints) {
-		self->sizehints = psy_ui_componentsizehints_allocinit();
 	}
 }
 

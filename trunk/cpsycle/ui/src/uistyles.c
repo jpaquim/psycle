@@ -40,7 +40,7 @@ void psy_ui_styles_dispose(psy_ui_Styles* self)
 	psy_property_dispose(&self->config);
 }
 
-void psy_ui_styles_setstyle(psy_ui_Styles* self, uintptr_t styletype, psy_ui_Style* style)
+void psy_ui_styles_set_style(psy_ui_Styles* self, uintptr_t styletype, psy_ui_Style* style)
 {
 	psy_ui_Style* currstyle;
 
@@ -88,7 +88,7 @@ void psy_ui_styles_configure(psy_ui_Styles* self, psy_Property* config)
 
 		style = psy_ui_styles_readstyle(self, i);
 		if (style) {
-			psy_ui_styles_setstyle(self, i, style);
+			psy_ui_styles_set_style(self, i, style);
 		}
 	}
 }

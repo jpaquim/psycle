@@ -47,9 +47,8 @@ void pianokeyboard_init(PianoKeyboard* self, psy_ui_Component* parent,
 	psy_ui_component_setvtable(pianokeyboard_base(self),
 		pianokeyboard_vtable_init(self));
 	pianokeyboard_setsharedkeyboardstate(self, keyboardstate);	
-	psy_ui_component_setpreferredsize(pianokeyboard_base(self),
-		psy_ui_size_make_em(10.0, 0.0));
-	pianokeyboard_base(self)->sizehints->preferredheightset = FALSE;	
+	psy_ui_component_setpreferredwidth(pianokeyboard_base(self),
+		psy_ui_value_make_ew(10.0));
 }
 
 void pianokeyboard_setsharedkeyboardstate(PianoKeyboard* self,
@@ -199,9 +198,8 @@ void pianokeyboard_setkeyboardtype(PianoKeyboard* self, KeyboardType
 		default:
 			break;
 	}
-	psy_ui_component_setpreferredsize(pianokeyboard_base(self),
-		psy_ui_size_make_em(width_em, 0.0));
-	self->component.sizehints->preferredheightset = FALSE;
+	psy_ui_component_setpreferredwidth(pianokeyboard_base(self),
+		psy_ui_value_make_ew(width_em));	
 	psy_ui_component_invalidate(pianokeyboard_base(self));	
 }
 

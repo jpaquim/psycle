@@ -7,6 +7,8 @@
 
 
 #include "vumeter.h"
+/* host */
+#include "styles.h"
 /* dsp */
 #include <convert.h>
 #include <operations.h>
@@ -54,13 +56,10 @@ void vumeter_init(Vumeter* self, psy_ui_Component* parent,
 {					
 	psy_ui_component_init(&self->component, parent, NULL);
 	vumeter_vtable_init(self);
-	psy_ui_component_setpreferredsize(&self->component,
-		psy_ui_size_make_em(25.0, 1.0));
-	self->leftavg = 0;
-	self->rightavg = 0;
-	self->l_log = -10000;
-	self->r_log = -10000;
+	psy_ui_component_setstyletype(&self->component, STYLE_MAIN_VU);	
+	self->leftavg = self->rightavg = 0;
 	self->workspace = workspace;
+	self->l_log = self->r_log = -10000;
 	vumeterskin_init(self);	
 }
 

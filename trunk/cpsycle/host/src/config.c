@@ -154,7 +154,7 @@ void psycleconfig_makevisual(PsycleConfig* self)
 	machineparamconfig_init(&self->macparam, self->visual);
 }
 
-void psycleconfig_loadskin(PsycleConfig* self, const psy_Path* path)
+void psycleconfig_loadskin(PsycleConfig* self, const char* path)
 {
 	psy_Property skin;
 	const char* machine_gui_bitmap;
@@ -163,7 +163,7 @@ void psycleconfig_loadskin(PsycleConfig* self, const psy_Path* path)
 
 	psy_property_init(&skin);
 	skin_load(&skin, path);
-	machine_gui_bitmap = psy_property_at_str(&skin, "machineguibitmap", 0);
+	machine_gui_bitmap = psy_property_at_str(&skin, "machine_GUI_bitmap", 0);
 	if (machine_gui_bitmap) {
 		char psc[_MAX_PATH];		
 				
@@ -174,12 +174,12 @@ void psycleconfig_loadskin(PsycleConfig* self, const psy_Path* path)
 
 			psy_path_init(&path, psc);
 			if (strcmp(psy_path_ext(&path), "bmp") == 0) {
-				psy_property_set_str(&skin, "machinedialbmp",
+				psy_property_set_str(&skin, "machinedial_bmp",
 					psy_path_full(&path));
-			} else if (skin_loadpsc(&skin, psc) == PSY_OK) {
+			} else if (skin_load_psc(&skin, psc) == PSY_OK) {
 				const char* bpm;								
 
-				bpm = psy_property_at_str(&skin, "machinedialbmp", NULL);
+				bpm = psy_property_at_str(&skin, "machinedial_bmp", NULL);
 				if (bpm) {					
 					psy_Path full;
 
@@ -187,7 +187,7 @@ void psycleconfig_loadskin(PsycleConfig* self, const psy_Path* path)
 					psy_path_setname(&full, "");
 					psy_path_setext(&full, "");
 					psy_path_setname(&full, bpm);
-					psy_property_set_str(&skin, "machinedialbmp",
+					psy_property_set_str(&skin, "machinedial_bmp",
 						psy_path_full(&full));
 					psy_path_dispose(&full);
 				}
@@ -196,46 +196,6 @@ void psycleconfig_loadskin(PsycleConfig* self, const psy_Path* path)
 	}
 	machineparamconfig_settheme(&self->macparam, &skin);
 	machineviewconfig_settheme(&self->macview, &skin);	
-	patternviewconfig_settheme(&self->patview, &skin);
-	psy_property_dispose(&skin);
-}
-
-void psycleconfig_loadmachineskin(PsycleConfig* self, const psy_Path* path)
-{
-	psy_Property skin;
-	const char* machine_gui_bitmap;
-
-	assert(self);
-
-	psy_property_init(&skin);
-	skin_load(&skin, path);
-	machine_gui_bitmap = psy_property_at_str(&skin, "machineguibitmap", 0);
-	if (machine_gui_bitmap) {
-		char psc[_MAX_PATH];
-
-		psy_dir_findfile(dirconfig_skins(&self->directories),
-			machine_gui_bitmap, psc);
-		if (psc[0] != '\0') {
-			if (skin_loadpsc(&skin, psc) == PSY_OK) {
-				const char* bpm;
-
-				bpm = psy_property_at_str(&skin, "machinedialbmp", NULL);
-				if (bpm) {
-					psy_Path full;
-
-					psy_path_init(&full, psc);
-					psy_path_setname(&full, "");
-					psy_path_setext(&full, "");
-					psy_path_setname(&full, bpm);
-					psy_property_set_str(&skin, "machinedialbmp",
-						psy_path_full(&full));
-					psy_path_dispose(&full);
-				}
-			}
-		}
-	}
-	machineparamconfig_settheme(&self->macparam, &skin);
-	machineviewconfig_settheme(&self->macview, &skin);
 	patternviewconfig_settheme(&self->patview, &skin);
 	psy_property_dispose(&skin);
 }
@@ -349,7 +309,8 @@ void psycleconfig_onloadskin(PsycleConfig* self)
 		"Load Theme", "Psycle Display Presets|*.psv", "PSV",
 		dirconfig_skins(&self->directories));
 	if (psy_ui_opendialog_execute(&opendialog)) {
-		psycleconfig_loadskin(self, psy_ui_opendialog_path(&opendialog));
+		psycleconfig_loadskin(self, psy_path_full(psy_ui_opendialog_path(
+			&opendialog)));
 	}
 	psy_ui_opendialog_dispose(&opendialog);
 }

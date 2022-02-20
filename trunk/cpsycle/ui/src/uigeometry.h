@@ -550,11 +550,11 @@ INLINE void psy_ui_rectangle_activate(psy_ui_Rectangle* self)
 	self->size.height.set = TRUE;
 }
 
-INLINE bool psy_ui_rectangle_is_active(const psy_ui_Rectangle* self)
+INLINE bool psy_ui_rectangle_is_all_active(const psy_ui_Rectangle* self)
 {
-	return (self->topleft.x.set ||
-		self->topleft.y.set ||
-		self->size.width.set ||
+	return (self->topleft.x.set &&
+		self->topleft.y.set &&
+		self->size.width.set &&
 		self->size.height.set);
 }
 

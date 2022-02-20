@@ -248,7 +248,18 @@ LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 				}
 				preventdefault = psy_ui_event_default_prevented(&keyevent.event);
 			}
-			break;			
+			break;
+		case WM_SETFOCUS: {
+			psy_ui_Event ev;
+
+			psy_ui_event_init(&ev, psy_ui_FOCUS);
+			psy_ui_event_stop_propagation(&ev);
+			psy_ui_eventdispatch_send(&winapp->app->eventdispatch,
+				component, &ev);
+			psy_ui_event_init(&ev, psy_ui_FOCUSIN);			
+			psy_ui_eventdispatch_send(&winapp->app->eventdispatch,
+				component, &ev);
+			break; }
 		case WM_KILLFOCUS:
 			if (component) {
 				psy_ui_Event ev;
@@ -620,11 +631,22 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				psy_ui_eventdispatch_send(&self->app->eventdispatch,
 					component, &ev);				
 			}			
-			return 0;		
+			return 0;	
+		case WM_SETFOCUS: {
+			psy_ui_Event ev;
+		
+			psy_ui_event_init(&ev, psy_ui_FOCUS);
+			psy_ui_event_stop_propagation(&ev);
+			psy_ui_eventdispatch_send(&winapp->app->eventdispatch,
+				component, &ev);
+			psy_ui_event_init(&ev, psy_ui_FOCUSIN);
+			psy_ui_eventdispatch_send(&winapp->app->eventdispatch,
+				component, &ev);			
+			break; }
 		case WM_KILLFOCUS:
 			if (component) {
 				psy_ui_Event ev;
-
+				
 				psy_ui_event_init(&ev, psy_ui_FOCUSOUT);
 				psy_ui_event_stop_propagation(&ev);
 				psy_ui_eventdispatch_send(&self->app->eventdispatch,

@@ -9,7 +9,6 @@
 /* local */
 #include "uicomponentscroll.h"
 #include "uicomponentstyle.h"
-#include "uicomponentsizehints.h"
 #include "uicomponentbackground.h"
 #include "uidefaults.h"
 #include "uievents.h"
@@ -90,6 +89,7 @@ typedef void (*psy_ui_fp_component_invalidate)(struct psy_ui_Component*);
 typedef void (*psy_ui_fp_component_setalign)(struct psy_ui_Component*, psy_ui_AlignType);
 /* vtable events function pointers */
 typedef void (*psy_ui_fp_component_event)(struct psy_ui_Component*);
+typedef void (*psy_ui_fp_component_focusin)(struct psy_ui_Component*, psy_ui_Event*);
 typedef bool (*psy_ui_fp_component_onclose)(struct psy_ui_Component*);
 typedef void (*psy_ui_fp_component_onpreferredsize)(struct psy_ui_Component*,
 	const psy_ui_Size* limit, psy_ui_Size* rv);
@@ -149,6 +149,7 @@ typedef struct psy_ui_ComponentVTable {
 	psy_ui_fp_component_onlanguagechanged onlanguagechanged;
 	psy_ui_fp_component_event onfocus;
 	psy_ui_fp_component_event onfocuslost;
+	psy_ui_fp_component_focusin onfocusin;
 	psy_ui_fp_component_event onupdatestyles;
 	psy_ui_fp_component_ondragstart ondragstart;
 	psy_ui_fp_component_ondragover ondragover;
@@ -199,7 +200,6 @@ typedef struct psy_ui_Component {
 	/* internal */
 	uintptr_t id;
 	bool doublebuffered;	
-	psy_ui_ComponentSizeHints* sizehints;
 	psy_ui_ComponentStyle style;
 	psy_ui_ComponentScroll* scroll;
 	psy_ui_AlignType align;
@@ -251,7 +251,6 @@ void psy_ui_component_togglefullscreen(psy_ui_Component*);
 bool psy_ui_component_togglevisibility(psy_ui_Component*);
 
 void psy_ui_component_usescroll(psy_ui_Component*);
-void psy_ui_component_usesizehints(psy_ui_Component*);
 void psy_ui_component_usecontaineralign(psy_ui_Component*);
 
 INLINE psy_ui_IntPoint psy_ui_component_horizontalscrollrange(
@@ -373,6 +372,7 @@ bool psy_ui_component_inputprevented(const psy_ui_Component*);
 void psy_ui_component_setbackgroundmode(psy_ui_Component*, psy_ui_BackgroundMode);
 void psy_ui_component_setpreferredsize(psy_ui_Component*, psy_ui_Size);
 void psy_ui_component_setpreferredheight(psy_ui_Component*, psy_ui_Value);
+void psy_ui_component_setpreferredwidth(psy_ui_Component*, psy_ui_Value);
 psy_ui_Size psy_ui_component_preferredsize(psy_ui_Component*, const psy_ui_Size* limit);
 psy_ui_Size psy_ui_component_preferredscrollsize(psy_ui_Component*, const psy_ui_Size* limit);
 psy_ui_RealSize psy_ui_component_preferredscrollsize_px(psy_ui_Component*,

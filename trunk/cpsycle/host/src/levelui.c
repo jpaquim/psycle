@@ -8,22 +8,16 @@
 
 #include "levelui.h"
 /* host */
-#include "machineparamconfig.h"
 #include "styles.h"
 /* ui */
 #include <uiapp.h>
 /* audio */
 #include <machine.h>
-#include <plugin_interface.h>
-/* platform */
-#include "../../detail/portable.h"
 
 /* LevelUi */
 
 /* prototypes */
 static void levelui_ondraw(LevelUi*, psy_ui_Graphics*);
-static void levelui_onpreferredsize(LevelUi*, const psy_ui_Size* limit,
-	psy_ui_Size* rv);
 static void levelui_vumeterdraw(LevelUi*, psy_ui_Graphics*,
 	psy_ui_RealPoint topleft, double value);
 static void levelui_updateparam(LevelUi*);
@@ -41,9 +35,6 @@ static void levelui_vtable_init(LevelUi* self)
 		levelui_vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
 			levelui_ondraw;
-		levelui_vtable.onpreferredsize =
-			(psy_ui_fp_component_onpreferredsize)
-			levelui_onpreferredsize;		
 		levelui_vtable_initialized = TRUE;
 	}
 	psy_ui_component_setvtable(&self->component, &levelui_vtable);
@@ -99,8 +90,10 @@ void levelui_vumeterdraw(LevelUi* self, psy_ui_Graphics* g,
 {
 	double ypos;
 	psy_ui_Style* vuoff_style;	
+	psy_ui_Style* vuon_style;
 	
 	vuoff_style = psy_ui_style(STYLE_MACPARAM_VUOFF);
+	vuon_style = psy_ui_style(STYLE_MACPARAM_VUON);
 	if (value < 0.0) value = 0.0;
 	if (value > 1.0) value = 1.0;
 	ypos = (1.0 - value) * vuoff_style->background.size.height;
@@ -120,17 +113,8 @@ void levelui_vumeterdraw(LevelUi* self, psy_ui_Graphics* g,
 				vuoff_style->background.size.width,
 				vuoff_style->background.size.height - ypos)),
 		psy_ui_realpoint_make(
-			-vuoff_style->background.position.x,
-			-vuoff_style->background.position.y + ypos));
-}
-
-void levelui_onpreferredsize(LevelUi* self, const psy_ui_Size* limit,
-	psy_ui_Size* rv)
-{
-	psy_ui_Style* vuoff_style;	
-
-	vuoff_style = psy_ui_style(STYLE_MACPARAM_VUOFF);
-	psy_ui_size_setreal(rv, vuoff_style->background.size);
+			-vuon_style->background.position.x,
+			-vuon_style->background.position.y + ypos));
 }
 
 void levelui_updateparam(LevelUi* self)

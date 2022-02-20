@@ -7,6 +7,8 @@
 
 
 #include "envelopeview.h"
+/* host */
+#include "styles.h"
 /* ui */
 #include <uiapp.h>
 #include <math.h>
@@ -68,6 +70,7 @@ void envelopebox_init(EnvelopeBox* self, psy_ui_Component* parent)
 {				
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_preventalign(&self->component);
+	psy_ui_component_setstyletype(&self->component, STYLE_ENVELOPE);
 	envelopebox_vtable_init(self);	
 	self->zoomleft = 0.f;
 	self->zoomright = 1.f;
@@ -85,14 +88,7 @@ void envelopebox_init(EnvelopeBox* self, psy_ui_Component* parent)
 		psy_ui_value_make_px(5),
 		psy_ui_value_make_px(5));
 	psy_ui_size_init_px(&self->ptsize, 5.0, 5.0);
-	psy_ui_size_init_px(&self->ptsize2, 2.5, 2.5);
-	self->pointcolour = psy_ui_colour_make(0x00B1C8B0);
-	self->curvecolour = psy_ui_colour_make(0x00B1C8B0);
-	self->gridcolour = psy_ui_colour_make(0x00333333);
-	self->sustaincolour = psy_ui_colour_make(0x00516850);
-	self->rulercolour = psy_ui_colour_make(0x00434343);
-	psy_ui_component_setpreferredsize(&self->component,
-		psy_ui_size_make_em(20.0, 15.0));	
+	psy_ui_size_init_px(&self->ptsize2, 2.5, 2.5);		
 	psy_signal_init(&self->signal_tweaked);
 }
 
@@ -122,15 +118,17 @@ void envelopebox_drawgrid(EnvelopeBox* self, psy_ui_Graphics* g)
 	psy_dsp_big_seconds_t i;
 	psy_dsp_big_seconds_t smallstep;
 	psy_dsp_big_seconds_t step;
+	psy_ui_Style* style;
 
+	style = psy_ui_style(STYLE_ENVELOPE_GRID);
+	psy_ui_setcolour(g, style->colour);
 	if (self->settings && self->settings->timemode == psy_dsp_ENVELOPETIME_TICK) {
 		smallstep = 1;
 		step = 10;
 	} else {
 		smallstep = 0.1;
 		step = 0.5;
-	}	
-	psy_ui_setcolour(g, self->gridcolour);
+	}		
 	for (i = 0; i <= 1.0; i += smallstep ) {
 		double cpy;
 
@@ -151,16 +149,18 @@ void envelopebox_drawgrid(EnvelopeBox* self, psy_ui_Graphics* g)
 void envelopebox_drawpoints(EnvelopeBox* self, psy_ui_Graphics* g)
 {
 	psy_List* p;
-	const psy_ui_TextMetric* tm;
-	
+	const psy_ui_TextMetric* tm;	
 	psy_dsp_EnvelopePoint* q = 0;
 	psy_List* points;
+	psy_ui_Style* style;	
 
 	if (self->settings) {
 		points = self->settings->points;
 	} else {
 		return;
 	}
+	style = psy_ui_style(STYLE_ENVELOPE_POINT);
+	psy_ui_setcolour(g, style->colour);
 	tm = psy_ui_component_textmetric(&self->component);	
 	for (p = points; p != 0; p = p->next) {
 		psy_ui_RealRectangle r;
@@ -175,7 +175,7 @@ void envelopebox_drawpoints(EnvelopeBox* self, psy_ui_Graphics* g)
 			psy_ui_realsize_make(
 				psy_ui_value_px(&self->ptsize.width, tm, NULL),
 				psy_ui_value_px(&self->ptsize.height, tm, NULL)));
-		psy_ui_drawsolidrectangle(g, r, self->pointcolour);
+		psy_ui_drawsolidrectangle(g, r, style->colour);
 		q = pt;
 	}
 }
@@ -186,13 +186,17 @@ void envelopebox_drawlines(EnvelopeBox* self, psy_ui_Graphics* g)
 	psy_dsp_EnvelopePoint* q = 0;
 	uintptr_t count = 0;
 	psy_List* points;
+	psy_ui_Style* style;
+	psy_ui_Style* sustain_style;
 
 	if (self->settings) {
 		points = self->settings->points;
 	} else {
 		return;
 	}
-	psy_ui_setcolour(g, self->curvecolour);
+	style = psy_ui_style(STYLE_ENVELOPE_CURVE);
+	sustain_style = psy_ui_style(STYLE_ENVELOPE_SUSTAIN);
+	psy_ui_setcolour(g, style->colour);	
 	for (p = points; p !=0; p = p->next, ++count) {		
 		psy_dsp_EnvelopePoint* pt;
 
@@ -206,13 +210,13 @@ void envelopebox_drawlines(EnvelopeBox* self, psy_ui_Graphics* g)
 		}
 		q = pt;
 		if (count == self->sustainstage) {
-			psy_ui_setcolour(g, self->sustaincolour);
+			psy_ui_setcolour(g, sustain_style->colour);
 			psy_ui_drawline(g,
 				psy_ui_realpoint_make(envelopebox_pxtime(self, q->time),
 					self->spacing.top.quantity),
 				psy_ui_realpoint_make(envelopebox_pxtime(self, q->time),
 				self->spacing.top.quantity + self->cy));
-			psy_ui_setcolour(g, self->curvecolour);
+			psy_ui_setcolour(g, style->colour);
 		}
 	}	
 }
@@ -224,13 +228,16 @@ void envelopebox_drawruler(EnvelopeBox* self, psy_ui_Graphics* g)
 	const psy_ui_TextMetric* tm;
 	int step;
 	int numsteps;
+	psy_ui_Style* style;
 
+	style = psy_ui_style(STYLE_ENVELOPE_RULER);
+	psy_ui_setcolour(g, style->colour);
 	maxtime = envelopebox_displaymaxtime(self);
-	psy_ui_setcolour(g, self->rulercolour);
+	psy_ui_setcolour(g, style->colour);
 	psy_ui_drawline(g, psy_ui_realpoint_make(0, self->cy),
 		psy_ui_realpoint_make(self->cx, self->cy));
 	tm = psy_ui_component_textmetric(envelopebox_base(self));
-	psy_ui_settextcolour(g, self->rulercolour);
+	psy_ui_settextcolour(g, style->colour);
 	if (self->settings && self->settings->timemode == psy_dsp_ENVELOPETIME_TICK) {
 		numsteps = (int)(maxtime);
 	} else {

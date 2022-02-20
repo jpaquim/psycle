@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -70,7 +70,7 @@ void propertiesrenderline_init(PropertiesRenderLine* self,
 		psy_ui_component_setpreferredsize(&self->component, state->size_col0);
 	} else {
 		psy_ui_component_setpreferredsize(&self->component,
-		psy_ui_size_make_em(190.0, 1.3));
+			psy_ui_size_make_em(190.0, 1.5));
 	}
 	self->property = property;	
 	self->check = NULL;

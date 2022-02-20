@@ -211,7 +211,7 @@ void psy_ui_style_deallocate(psy_ui_Style* self)
 	free(self);
 }
 
-void psy_ui_style_setfont(psy_ui_Style* self, const char* family, int size)
+void psy_ui_style_set_font(psy_ui_Style* self, const char* family, int size)
 {	
 	psy_ui_FontInfo fontinfo;
 	
@@ -220,7 +220,7 @@ void psy_ui_style_setfont(psy_ui_Style* self, const char* family, int size)
 	psy_ui_font_init(&self->font, &fontinfo);
 }
 
-void psy_ui_style_setbackgroundid(psy_ui_Style* self,
+void psy_ui_style_set_background_id(psy_ui_Style* self,
 	uintptr_t id)
 {	
 	free(self->background.image_path);

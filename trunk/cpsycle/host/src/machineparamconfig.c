@@ -79,57 +79,57 @@ void machineparamconfig_maketheme(MachineParamConfig* self, psy_Property* parent
 		"settingsview.paramview.theme.theme");
 	psy_property_settext(
 		psy_property_sethint(psy_property_append_str(self->theme,
-			"machinedialbmp", ""),
+			"machinedial_bmp", ""),
 			PSY_PROPERTY_HINT_EDIT),
 		"settingsview.paramview.theme.machinedialbmp");
 	psy_property_settext(
 		psy_property_sethint(psy_property_append_int(self->theme,
-			"machineguititlecolour", 0x00292929, 0, 0),
+			"machineGUITitleColor", 0x00292929, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
 		"settingsview.paramview.theme.title-background");
 	psy_property_settext(
 		psy_property_sethint(psy_property_append_int(self->theme,
-			"machineguititlefontcolour", 0x00B4B4B4, 0, 0),
+			"machineGUITitleFontColor", 0x00B4B4B4, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
 		"settingsview.paramview.theme.title-font");
 	psy_property_settext(
 		psy_property_sethint(psy_property_append_int(self->theme,
-			"machineguitopcolour", 0x00555555, 0, 0),
+			"machineGUITopColor", 0x00555555, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
 		"settingsview.paramview.theme.param-background");
 	psy_property_settext(
 		psy_property_sethint(psy_property_append_int(self->theme,
-			"machineguifonttopcolour", 0x00CDCDCD, 0, 0),
+			"machineGUIFontTopColor", 0x00CDCDCD, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
 		"settingsview.paramview.theme.param-font");
 	psy_property_settext(
 		psy_property_sethint(psy_property_append_int(self->theme,
-			"machineguibottomcolour", 0x00444444, 0, 0),
+			"machineGUIBottomColor", 0x00444444, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
 		"settingsview.paramview.theme.value-background");
 	psy_property_settext(
 		psy_property_sethint(psy_property_append_int(self->theme,
-			"machineguifontbottomcolour", 0x00E7BD18, 0, 0),
+			"machineGUIFontBottomColor", 0x00E7BD18, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
 		"settingsview.paramview.theme.value-font");
 	psy_property_settext(
 		psy_property_sethint(psy_property_append_int(self->theme,
-			"machineguihtopcolour", 0x00555555, 0, 0),
+			"machineGUIHTopColor", 0x00555555, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
 		"settingsview.paramview.theme.selparam-background");
 	psy_property_settext(
 		psy_property_sethint(psy_property_append_int(self->theme,
-			"machineguihfonttopcolour", 0x00CDCDCD, 0, 0),
+			"machineGUIHFontTopColor", 0x00CDCDCD, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
 		"settingsview.paramview.theme.selparam-font");
 	psy_property_settext(
 		psy_property_sethint(psy_property_append_int(self->theme,
-			"machineguihbottomcolour", 0x00292929, 0, 0),
+			"machineGUIHBottomColor", 0x00292929, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
 		"settingsview.paramview.theme.selvalue-background");
 	psy_property_settext(
 		psy_property_sethint(psy_property_append_int(self->theme,
-			"machineguihfontbottomcolour", 0x00E7BD18, 0, 0),
+			"machineGUIHFontBottomColor", 0x00E7BD18, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
 		"settingsview.paramview.theme.selvalue-font");
 }
@@ -171,7 +171,7 @@ const char* machineparamconfig_dialbpm(const MachineParamConfig* self)
 {
 	assert(self);
 
-	return psy_property_at_str(self->theme, "machinedialbmp", "");
+	return psy_property_at_str(self->theme, "machinedial_bmp", "");
 }
 
 void machineparamconfig_setdialbpm(MachineParamConfig* self,
@@ -179,7 +179,7 @@ void machineparamconfig_setdialbpm(MachineParamConfig* self,
 {
 	assert(self);
 
-	psy_property_set_str(self->theme, "machinedialbmp", filename);
+	psy_property_set_str(self->theme, "machinedial_bmp", filename);
 	// machineparamconfig_releaseskin();
 	/* forces a reload of the dialbitmap */
 	// machineparamconfig_skin(self);
@@ -238,49 +238,49 @@ void machineparamconfig_updatestyles(MachineParamConfig* self)
 
 		style = psy_ui_style(STYLE_MACPARAM_TITLE);
 		if (style) {
-			psy_ui_style_setcolours(style,
+			psy_ui_style_set_colours(style,
 				psy_ui_colour_make(psy_property_at_colour(self->theme,
-					"machineguititlefontcolour", 0x00B4B4B4)),
+					"machineGUITitleFontColor", 0x00B4B4B4)),
 				psy_ui_colour_make(psy_property_at_colour(self->theme,
-					"machineguititlecolour", 0x00292929)));
+					"machineGUITitleColor", 0x00292929)));
 		}
 		style = psy_ui_style(STYLE_MACPARAM_TOP);
 		if (style) {
-			psy_ui_style_setcolours(style,
+			psy_ui_style_set_colours(style,
 				psy_ui_colour_make(psy_property_at_colour(self->theme,
-					"machineguifonttopcolour", 0x00CDCDCD)),
+					"machineGUIFontTopColor", 0x00CDCDCD)),
 				psy_ui_colour_make(psy_property_at_colour(self->theme,
-					"machineguitopcolour", 0x00555555)));
+					"machineGUITopColor", 0x00555555)));
 		}
 		style = psy_ui_style(STYLE_MACPARAM_BOTTOM);
 		if (style) {
-			psy_ui_style_setcolours(style,
+			psy_ui_style_set_colours(style,
 				psy_ui_colour_make(psy_property_at_colour(self->theme,
 					"machineguifontbottompcolour", 0x00E7BD18)),
 				psy_ui_colour_make(psy_property_at_colour(self->theme,
-					"machineguibottomcolour", 0x00444444)));
+					"machineGUIBottomColor", 0x00444444)));
 		}
 		style = psy_ui_style(STYLE_MACPARAM_TOP_ACTIVE);
 		if (style) {
-			psy_ui_style_setcolours(style,
+			psy_ui_style_set_colours(style,
 				psy_ui_colour_make(psy_property_at_colour(self->theme,
-					"machineguihfonttopcolour", 0x00CDCDCD)),
+					"machineGUIHFontTopColor", 0x00CDCDCD)),
 				psy_ui_colour_make(psy_property_at_colour(self->theme,
-					"machineguihtopcolour", 0x00555555)));
+					"machineGUIHTopColor", 0x00555555)));
 		}
 		style = psy_ui_style(STYLE_MACPARAM_BOTTOM_ACTIVE);
 		if (style) {
-			psy_ui_style_setcolours(style,
+			psy_ui_style_set_colours(style,
 				psy_ui_colour_make(psy_property_at_colour(self->theme,
-					"machineguihfontbottomcolour", 0x00E7BD18)),
+					"machineGUIHFontBottomColor", 0x00E7BD18)),
 				psy_ui_colour_make(psy_property_at_colour(self->theme,
-					"machineguihbottomcolour", 0x00292929)));
+					"machineGUIHBottomColor", 0x00292929)));
 		}
 		style = psy_ui_style(STYLE_MACPARAM_KNOB);		
 		if (psy_strlen(machineparamconfig_dialbpm(self)) == 0 ||
 			psy_ui_style_setbackgroundpath(style, 
 				machineparamconfig_dialbpm(self)) != PSY_OK) {
-			psy_ui_style_setbackgroundid(style, IDB_PARAMKNOB);
+			psy_ui_style_set_background_id(style, IDB_PARAMKNOB);
 		}				
 	}
 }

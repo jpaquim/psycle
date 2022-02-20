@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #if !defined(STYLES_H)
@@ -118,6 +118,7 @@ typedef enum {
 	STYLE_NAVBAR = 36420,
 	STYLE_CLIPBOX = 36440,
 	STYLE_CLIPBOX_SELECT = 36441,
+	STYLE_MAIN_VU = 36450,
 	STYLE_LABELPAIR = 36460,
 	STYLE_LABELPAIR_FIRST = 36461,
 	STYLE_LABELPAIR_SECOND = 36462,
@@ -201,14 +202,21 @@ typedef enum {
 	STYLE_PV_ROW4BEAT_SELECT = 37320,
 	STYLE_PV_CURSOR = 37340,
 	STYLE_PV_CURSOR_SELECT = 37360,
-	STYLE_PV_PLAYBAR = 37380
+	STYLE_PV_PLAYBAR = 37380,
+	STYLE_ENVELOPE = 37400,
+	STYLE_ENVELOPE_POINT = 37401,
+	STYLE_ENVELOPE_CURVE = 37402,
+	STYLE_ENVELOPE_GRID = 37403,
+	STYLE_ENVELOPE_SUSTAIN = 37404,
+	STYLE_ENVELOPE_RULER = 37405
 } HostStyles;
 
-void inithoststyles(psy_ui_Styles*, psy_ui_ThemeMode);
+void init_host_styles(psy_ui_Styles*, psy_ui_ThemeMode);
 void init_psycletheme_styles(psy_ui_Styles*);
 void init_machineview_styles(psy_ui_Styles*);
 void init_machineparam_styles(psy_ui_Styles*);
 void init_patternview_styles(psy_ui_Styles*);
+void init_envelope_styles(psy_ui_Styles*);
 
 #ifdef __cplusplus
 }

@@ -33,12 +33,8 @@ void psy_ui_progressbar_init(psy_ui_ProgressBar* self,
 {	
 	psy_ui_component_init(&self->component, parent, NULL);	
 	vtable_init(self);
-	self->progress = 0.0;	
-	psy_ui_component_setstyletypes(&self->component,
-		psy_ui_STYLE_PROGRESSBAR,
-		psy_INDEX_INVALID, psy_INDEX_INVALID, psy_INDEX_INVALID);
-	psy_ui_component_setpreferredsize(&self->component,
-		psy_ui_size_make_em(20.0, 0.0));	
+	psy_ui_component_setstyletype(&self->component, psy_ui_STYLE_PROGRESSBAR);
+	self->progress = 0.0;
 }
 
 void ondraw(psy_ui_ProgressBar* self, psy_ui_Graphics* g)

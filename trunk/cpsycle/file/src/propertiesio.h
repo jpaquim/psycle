@@ -24,6 +24,9 @@ typedef struct psy_PropertyReader {
 	char* path;
 	bool allowappend;
 	bool cpp_comment;
+	bool parse_types;
+	bool ignore_sections;
+	bool skip_double_quotes;
 	int ischoice;
 	psy_Property* root;
 	psy_Property* curr;
@@ -44,6 +47,21 @@ INLINE void psy_propertyreader_allow_cpp_comments(psy_PropertyReader* self)
 INLINE void psy_propertyreader_allow_append(psy_PropertyReader* self)
 {
 	self->allowappend = TRUE;
+}
+
+INLINE void psy_propertyreader_parse_types(psy_PropertyReader* self)
+{
+	self->parse_types = TRUE;
+}
+
+INLINE void psy_propertyreader_ignore_sections(psy_PropertyReader* self)
+{
+	self->ignore_sections = TRUE;
+}
+
+INLINE void psy_propertyreader_skip_double_quotes(psy_PropertyReader* self)
+{
+	self->skip_double_quotes = TRUE;
 }
 
 typedef struct psy_PropertyWriter {
