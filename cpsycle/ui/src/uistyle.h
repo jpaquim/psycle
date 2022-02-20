@@ -82,30 +82,30 @@ psy_ui_Style* psy_ui_style_clone(const psy_ui_Style* other);
 void psy_ui_style_deallocate(psy_ui_Style*);
 
 /* Properties */
-INLINE void psy_ui_style_setcolour(psy_ui_Style* self, psy_ui_Colour colour)
+INLINE void psy_ui_style_set_colour(psy_ui_Style* self, psy_ui_Colour colour)
 {
 	self->colour = colour;	
 }
 
-INLINE void psy_ui_style_setbackgroundcolour(psy_ui_Style* self,
+INLINE void psy_ui_style_set_background_colour(psy_ui_Style* self,
 	psy_ui_Colour colour)
 {
 	self->background.colour = colour;
 }
 
-INLINE void psy_ui_style_setbackgroundoverlay(psy_ui_Style* self,
+INLINE void psy_ui_style_set_background_overlay(psy_ui_Style* self,
 	int overlay)
 {
 	self->background.colour = psy_ui_colour_make_overlay(overlay);
 }
 
-void psy_ui_style_setbackgroundid(psy_ui_Style* self,
+void psy_ui_style_set_background_id(psy_ui_Style* self,
 	uintptr_t id);
 
 int psy_ui_style_setbackgroundpath(psy_ui_Style* self,
 	const char* path);
 
-INLINE void psy_ui_style_animatebackground(psy_ui_Style* self,
+INLINE void psy_ui_style_animate_background(psy_ui_Style* self,
 	uintptr_t interval, psy_ui_RealSize framesize, bool horizontal)
 {
 	self->background.animation.enabled = TRUE;
@@ -114,14 +114,14 @@ INLINE void psy_ui_style_animatebackground(psy_ui_Style* self,
 	self->background.animation.horizontal = horizontal;
 }
 
-INLINE void psy_ui_style_setcolours(psy_ui_Style* self,
+INLINE void psy_ui_style_set_colours(psy_ui_Style* self,
 	psy_ui_Colour colour, psy_ui_Colour background)
 {
-	psy_ui_style_setcolour(self, colour);
-	psy_ui_style_setbackgroundcolour(self, background);	
+	psy_ui_style_set_colour(self, colour);
+	psy_ui_style_set_background_colour(self, background);	
 }
 
-void psy_ui_style_setfont(psy_ui_Style*, const char* family, int size);
+void psy_ui_style_set_font(psy_ui_Style*, const char* family, int size);
 
 INLINE void psy_ui_style_setmargin(psy_ui_Style* self, psy_ui_Margin margin)
 {
@@ -134,7 +134,7 @@ INLINE psy_ui_Margin psy_ui_style_margin(const psy_ui_Style* self)
 	return self->margin;	
 }
 
-INLINE void psy_ui_style_setmargin_em(psy_ui_Style* self,
+INLINE void psy_ui_style_set_margin_em(psy_ui_Style* self,
 	double top, double right, double bottom, double left)
 {
 	psy_ui_style_setmargin(self,
@@ -148,14 +148,14 @@ INLINE void psy_ui_style_setpadding(psy_ui_Style* self,
 	self->paddingset = TRUE;
 }
 
-INLINE void psy_ui_style_setpadding_em(psy_ui_Style* self,
+INLINE void psy_ui_style_set_padding_em(psy_ui_Style* self,
 	double top, double right, double bottom, double left)
 {
 	psy_ui_style_setpadding(self,
 		psy_ui_margin_make_em(top, right, bottom, left));	
 }
 
-INLINE void psy_ui_style_setpadding_px(psy_ui_Style* self,
+INLINE void psy_ui_style_set_padding_px(psy_ui_Style* self,
 	double top, double right, double bottom, double left)
 {
 	psy_ui_style_setpadding(self,
@@ -171,6 +171,11 @@ INLINE void psy_ui_style_set_position(psy_ui_Style* self,
 	psy_ui_Rectangle position)
 {
 	self->position = position;	
+}
+
+INLINE void psy_ui_style_set_size(psy_ui_Style* self, psy_ui_Size size)
+{
+	self->position.size = size;
 }
 
 INLINE void psy_ui_style_set_background_repeat(psy_ui_Style* self,
@@ -193,7 +198,7 @@ INLINE void psy_ui_style_set_background_position_px(psy_ui_Style* self,
 	self->background.position_set = TRUE;
 }
 
-INLINE void psy_ui_style_setborder(psy_ui_Style* self,
+INLINE void psy_ui_style_set_border(psy_ui_Style* self,
 	const psy_ui_Border* border)
 {
 	assert(border);

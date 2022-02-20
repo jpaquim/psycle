@@ -362,6 +362,9 @@ const psy_ui_Style* psy_ui_style_const(uintptr_t styletype)
 
 void psy_ui_app_setfocus(psy_ui_App* self, psy_ui_Component* component)
 {
+	if (self->focus == component) {
+		return;
+	}
 	if (self->focus) {
 		psy_ui_Event ev;
 
@@ -372,8 +375,10 @@ void psy_ui_app_setfocus(psy_ui_App* self, psy_ui_Component* component)
 	if (self->focus) {
 		psy_ui_Event ev;
 
-		psy_ui_event_init_stop_propagation(&ev, psy_ui_FOCUS);		
-		psy_ui_eventdispatch_send(&self->eventdispatch, self->focus, &ev);
+		psy_ui_event_init_stop_propagation(&ev, psy_ui_FOCUS);
+		psy_ui_eventdispatch_send(&self->eventdispatch, component, &ev);
+		psy_ui_event_init(&ev, psy_ui_FOCUSIN);
+		psy_ui_eventdispatch_send(&self->eventdispatch, component, &ev);
 	}	
 }
 

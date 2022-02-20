@@ -17,8 +17,6 @@
 static void generatorui_onmousedown(GeneratorUi*, psy_ui_MouseEvent*);
 static void generatorui_onmousedoubleclick(GeneratorUi*, psy_ui_MouseEvent*);
 static void generatorui_move(GeneratorUi*, psy_ui_Point topleft);
-static void generatorui_onpreferredsize(GeneratorUi*, const psy_ui_Size* limit,
-	psy_ui_Size* rv);
 static void generatorui_ontimer(GeneratorUi*, uintptr_t timerid);
 /* vtable */
 static psy_ui_ComponentVtable generatorui_vtable;
@@ -43,10 +41,7 @@ static void generatorui_vtable_init(GeneratorUi* self)
 			generatorui_move;		
 		generatorui_vtable.ontimer =
 			(psy_ui_fp_component_ontimer)
-			generatorui_ontimer;
-		generatorui_vtable.onpreferredsize =
-			(psy_ui_fp_component_onpreferredsize)
-			generatorui_onpreferredsize;
+			generatorui_ontimer;		
 		generatorui_vtable_initialized = TRUE;
 	}
 	psy_ui_component_setvtable(&self->component, &generatorui_vtable);
@@ -135,17 +130,6 @@ void generatorui_onmousedoubleclick(GeneratorUi* self, psy_ui_MouseEvent* ev)
 			psy_audio_machine_slot(self->machine));
 	}
 	psy_ui_mouseevent_stop_propagation(ev);
-}
-
-void generatorui_onpreferredsize(GeneratorUi* self, const psy_ui_Size* limit,
-	psy_ui_Size* rv)
-{			
-	psy_ui_Style* style;
-
-	style = psy_ui_style(STYLE_MV_GENERATOR);
-	*rv = (style)
-		? psy_ui_size_make_real(style->background.size)
-		: psy_ui_size_make_px(138.0, 52.0);
 }
 
 void generatorui_ontimer(GeneratorUi* self, uintptr_t timerid)

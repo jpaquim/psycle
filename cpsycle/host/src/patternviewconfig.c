@@ -220,32 +220,32 @@ void patternviewconfig_maketheme(PatternViewConfig* self, psy_Property* parent)
 		"settingsview.pv.theme.font2");
 	psy_property_settext(
 		psy_property_sethint(psy_property_append_int(self->theme,
-			"pvc_fontcur", 0x00FFFFFF, 0, 0),
+			"pvc_fontCur", 0x00FFFFFF, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
 		"settingsview.pv.theme.fontcur");
 	psy_property_settext(
 		psy_property_sethint(psy_property_append_int(self->theme,
-			"pvc_fontcur2", 0x00FFFFFF, 0, 0),
+			"pvc_fontCur2", 0x00FFFFFF, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
 		"settingsview.pv.theme.fontcur2");
 	psy_property_settext(
 		psy_property_sethint(psy_property_append_int(self->theme,
-			"pvc_fontsel", 0x00FFFFFF, 0, 0),
+			"pvc_fontSel", 0x00FFFFFF, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
 		"settingsview.pv.theme.fontsel");
 	psy_property_settext(
 		psy_property_sethint(psy_property_append_int(self->theme,
-			"pvc_fontsel2", 0x00FFFFFF, 0, 0),
+			"pvc_fontSel2", 0x00FFFFFF, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
 		"settingsview.pv.theme.fontsel2");
 	psy_property_settext(
 		psy_property_sethint(psy_property_append_int(self->theme,
-			"pvc_fontplay", 0x00FFFFFF, 0, 0),
+			"pvc_fontPlay", 0x00FFFFFF, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
 		"settingsview.pv.theme.fontplay");
 	psy_property_settext(
 		psy_property_sethint(psy_property_append_int(self->theme,
-			"pvc_fontplay2", 0x00FFFFFF, 0, 0),
+			"pvc_fontPlay2", 0x00FFFFFF, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
 		"settingsview.pv.theme.fontplay2");
 	psy_property_settext(
@@ -627,35 +627,35 @@ void patternviewconfig_write_styles(PatternViewConfig* self)
 			"pvc_background", 0x00292929));
 		style = psy_ui_style(STYLE_PATTERNVIEW);
 		if (style) {
-			psy_ui_style_setcolours(style, fgcolour, bgcolour);
+			psy_ui_style_set_colours(style, fgcolour, bgcolour);
 		}
 		style = psy_ui_style(STYLE_PV_ROW);
 		if (style) {
-			psy_ui_style_setcolours(style,
+			psy_ui_style_set_colours(style,
 				fgcolour,
 				psy_ui_colour_make(psy_property_at_colour(
 					self->theme, "pvc_row", 0x003E3E3E)));
 		}
 		style = psy_ui_style(STYLE_PV_ROW_SELECT);
 		if (style) {
-			psy_ui_style_setcolours(style,
+			psy_ui_style_set_colours(style,
 				psy_ui_colour_make(psy_property_at_colour(self->theme,
-					"pvc_fontsel", 0x00ffffff)),				
+					"pvc_fontSel", 0x00ffffff)),				
 				psy_ui_colour_make(psy_property_at_colour(self->theme,
 					"pvc_selection", 0x009B7800)));
 		}
 		style = psy_ui_style(STYLE_PV_ROWBEAT);
 		if (style) {
-			psy_ui_style_setcolours(style,
+			psy_ui_style_set_colours(style,
 				fgcolour,
 				psy_ui_colour_make(psy_property_at_colour(self->theme,
 					"pvc_rowbeat", 0x00363636)));
 		}		
 		style = psy_ui_style(STYLE_PV_ROWBEAT_SELECT);
 		if (style) {
-			psy_ui_style_setcolours(style,
+			psy_ui_style_set_colours(style,
 				psy_ui_colour_make(psy_property_at_colour(self->theme,
-					"pvc_fontsel", 0x00ffffff)),			
+					"pvc_fontSel", 0x00ffffff)),			
 					psy_ui_diffadd_colours(
 						psy_ui_colour_make(psy_property_at_colour(self->theme,
 							"pvc_row", 0x003E3E3E)),
@@ -666,16 +666,16 @@ void patternviewconfig_write_styles(PatternViewConfig* self)
 		}
 		style = psy_ui_style(STYLE_PV_ROW4BEAT);
 		if (style) {
-			psy_ui_style_setcolours(style,
+			psy_ui_style_set_colours(style,
 				fgcolour,
 				psy_ui_colour_make(psy_property_at_colour(self->theme,
 					"pvc_row4beat", 0x00595959)));
 		}
 		style = psy_ui_style(STYLE_PV_ROW4BEAT_SELECT);
 		if (style) {
-			psy_ui_style_setcolours(style,
+			psy_ui_style_set_colours(style,
 				psy_ui_colour_make(psy_property_at_colour(self->theme,
-					"pvc_fontsel", 0x00ffffff)),
+					"pvc_fontSel", 0x00ffffff)),
 				psy_ui_diffadd_colours(
 					psy_ui_colour_make(psy_property_at_colour(self->theme,
 						"pvc_row", 0x003E3E3E)),
@@ -686,17 +686,17 @@ void patternviewconfig_write_styles(PatternViewConfig* self)
 		}
 		style = psy_ui_style(STYLE_PV_CURSOR);
 		if (style) {
-			psy_ui_style_setcolours(style,
+			psy_ui_style_set_colours(style,
 				psy_ui_colour_make(psy_property_at_colour(self->theme,
-					"pvc_fontcur", 0x00ffffff)),
+					"pvc_fontCur", 0x00ffffff)),
 				psy_ui_colour_make(psy_property_at_colour(self->theme,
 					"pvc_cursor", 0x00595959)));
 		}
 		style = psy_ui_style(STYLE_PV_CURSOR_SELECT);
 		if (style) {
-			psy_ui_style_setcolours(style,
+			psy_ui_style_set_colours(style,
 				psy_ui_colour_make(psy_property_at_colour(self->theme,
-					"pvc_fontsel", 0x00ffffff)),
+					"pvc_fontSel", 0x00ffffff)),
 				psy_ui_colour_make(psy_property_at_colour(self->theme,
 					"pvc_selection", 0x009B7800)));
 		}
@@ -724,7 +724,7 @@ void patternviewconfig_loadbitmap(PatternViewConfig* self)
 
 		for (i = 0; styles[i] != 0; ++i) {
 			style = psy_ui_style(styles[i]);			
-			psy_ui_style_setbackgroundid(style, IDB_HEADERSKIN);			
+			psy_ui_style_set_background_id(style, IDB_HEADERSKIN);			
 		}
 	} else {
 		psy_Path filename;
@@ -740,7 +740,7 @@ void patternviewconfig_loadbitmap(PatternViewConfig* self)
 
 				style = psy_ui_style(styles[i]);
 				if (psy_ui_style_setbackgroundpath(style, path) != PSY_OK) {
-					psy_ui_style_setbackgroundid(style, IDB_HEADERSKIN);
+					psy_ui_style_set_background_id(style, IDB_HEADERSKIN);
 				}
 			}			
 		}
@@ -750,7 +750,7 @@ void patternviewconfig_loadbitmap(PatternViewConfig* self)
 		if (psy_strlen(path) > 0) {		
 			psy_Property* coords;
 			coords = psy_property_allocinit_key(NULL);
-			if (skin_loadpsh(coords, path) == PSY_OK) {
+			if (skin_load_pattern_header(coords, path) == PSY_OK) {
 				const char* s;
 				intptr_t vals[4];
 				psy_ui_RealRectangle src;
@@ -813,7 +813,7 @@ void patternviewconfig_loadbitmap(PatternViewConfig* self)
 					psy_ui_style_set_background_size_px(style, src.right - src.left,
 						src.bottom - src.top);
 					psy_ui_style_set_background_position_px(style, -src.left, -src.top);
-					psy_ui_style_setpadding_px(style, dst.y, 0.0, 0.0, dst.x);
+					psy_ui_style_set_padding_px(style, dst.y, 0.0, 0.0, dst.x);
 				}
 				if (s = psy_property_at_str(coords, "digit_0x_dest", 0)) {
 					skin_psh_values(s, 2, vals);
@@ -822,7 +822,7 @@ void patternviewconfig_loadbitmap(PatternViewConfig* self)
 					psy_ui_style_set_background_size_px(style, src.right - src.left,
 						src.bottom - src.top);
 					psy_ui_style_set_background_position_px(style, -src.left, -src.top);
-					psy_ui_style_setpadding_px(style, dst.y, 0.0, 0.0, dst.x);
+					psy_ui_style_set_padding_px(style, dst.y, 0.0, 0.0, dst.x);
 				}
 				if (s = psy_property_at_str(coords, "playing_on_source", 0)) {
 					skin_psh_values(s, 4, vals);

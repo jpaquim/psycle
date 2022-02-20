@@ -1,6 +1,6 @@
 /*
 ** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
-** copyright 2000-2023 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -959,19 +959,21 @@ void machinestackdesc_configureeffects(MachineStackDesc* self,
 		VIEW_ID_SETTINGSVIEW, 2, 1);
 }
 
-// MachineStackInputs
-// prototypes
+/* MachineStackInputs */
+
+/* prototypes */
 static void machinestackinputs_onpreferredsize(MachineStackInputs*,
 	const psy_ui_Size* limit, psy_ui_Size* rv);
 static void machinestackinputs_ondraw(MachineStackInputs*, psy_ui_Graphics*);
 static void machinestackinputs_onmouseenter(MachineStackInputs*);	
 static void machinestackinputs_onmousedoubleclick(MachineStackInputs*,
 	psy_ui_MouseEvent*);
-// vtable
+
+/* vtable */
 static psy_ui_ComponentVtable machinestackinputs_vtable;
 static bool machinestackinputs_vtable_initialized = FALSE;
 
-static psy_ui_ComponentVtable* machinestackinputs_vtable_init(MachineStackInputs* self)
+static void machinestackinputs_vtable_init(MachineStackInputs* self)
 {
 	if (!machinestackinputs_vtable_initialized) {
 		machinestackinputs_vtable = *(self->component.vtable);		
@@ -985,22 +987,19 @@ static psy_ui_ComponentVtable* machinestackinputs_vtable_init(MachineStackInputs
 			(psy_ui_fp_component_onmouseevent)
 			machinestackinputs_onmousedoubleclick;
 		machinestackinputs_vtable_initialized = TRUE;
-	}
-	return &machinestackinputs_vtable;
+	}	
+	psy_ui_component_setvtable(&self->component, &machinestackinputs_vtable);
 }
-// implementation
+
+/* implementation */
 void machinestackinputs_init(MachineStackInputs* self,
 	psy_ui_Component* parent, MachineStackState* state, Workspace* workspace)
-{
-	psy_ui_Margin margin;
-
-	margin = psy_ui_margin_make_em(0.5, 0.0, 0.5, 0.0);		
-	psy_ui_component_init(&self->component, parent, NULL);	
-	psy_ui_component_setvtable(&self->component,
-		machinestackinputs_vtable_init(self));		
+{		
+	psy_ui_component_init(&self->component, parent, NULL);		
+	machinestackinputs_vtable_init(self);
 	psy_ui_component_setalignexpand(&self->component, psy_ui_HEXPAND);
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
-		margin);		
+		psy_ui_margin_make_em(0.5, 0.0, 0.5, 0.0));
 	self->workspace = workspace;
 	self->state = state;
 }
@@ -1009,13 +1008,15 @@ void machinestackinputs_onpreferredsize(MachineStackInputs* self,
 	const psy_ui_Size* limit, psy_ui_Size* rv)
 {
 	psy_ui_Value spacing;
+	psy_ui_Style* effect_style;
 	
-	rv->height = self->state->effectsize.height;
+	effect_style = psy_ui_style(STYLE_MV_EFFECT);
+	rv->height = effect_style->position.size.height;
 	spacing = psy_ui_value_make_eh(1.0);
 	psy_ui_value_add(&rv->height, &spacing,
 		psy_ui_component_textmetric(&self->component), NULL);
 	rv->width = self->state->columnsize.width;
-	// +1 : empty space to add new generator
+	/* + 1: empty space to add new generator */
 	psy_ui_value_mul_real(&rv->width, 
 		psy_max(1.0, machinestackstate_maxnumcolumns(self->state) + 1));
 }

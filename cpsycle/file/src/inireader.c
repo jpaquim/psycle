@@ -126,7 +126,7 @@ int inireader_load(psy_IniReader* self, const char* path)
 				}
 				break;
 			case INIREADER_STATE_READVAL:
-				if (c == '\n') {
+				if (c == '\n' || c == '\r') {
 					state = INIREADER_STATE_ADDVAL;
 					value[cp] = '\0';
 					cp = 0;

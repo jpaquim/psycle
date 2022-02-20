@@ -38,21 +38,32 @@ static char_dyn_t* lastkey(const char* key)
 	return rv;
 }
 
+static int _httoi(const char* value)
+{
+	return (int)strtol(value, 0, 16);
+}
+
+
 /* prototypes */
 static void psy_propertyreader_onreadkey(psy_PropertyReader*,
 	psy_IniReader* sender, const char* key, const char* valu);
 static void psy_propertyreader_onreadsection(psy_PropertyReader*,
 	psy_IniReader* sender, const char* key);
+static bool psy_propertyreader_extract_type(psy_PropertyReader*,
+	const char* text, const char** typestr, const char** valstr);
 
 /* implementation */
 void psy_propertyreader_init(psy_PropertyReader* self, psy_Property* root,
 	const char* path)
-{	
+{		
 	self->root = root;
 	self->path = psy_strdup(path);
 	self->curr = self->choice = NULL;
 	self->allowappend = FALSE;
 	self->cpp_comment = FALSE;
+	self->parse_types = FALSE;
+	self->ignore_sections = FALSE;
+	self->skip_double_quotes = FALSE;
 	self->ischoice = 0;
 }
 
@@ -91,21 +102,52 @@ void psy_propertyreader_onreadkey(psy_PropertyReader* self, psy_IniReader* sende
 
 	append = self->allowappend || (self->curr && self->curr->item.allowappend);
 	if (p) {
+		const char* valstr;
+		char* typestr;
+
+		typestr = NULL;
+		if (self->parse_types) {			
+			psy_propertyreader_extract_type(self, value, &typestr, &valstr);
+		} else {
+			valstr = value;			
+		}
 		switch (p->item.typ) {
 		case PSY_PROPERTY_TYPE_ROOT:
 			break;
 		case PSY_PROPERTY_TYPE_INTEGER:
-			psy_property_set_int(self->curr, key, atoi(value));
+			if (typestr && (strcmp(typestr, "dword:") == 0 || strcmp(typestr, "hex:") == 0)) {
+				psy_property_set_int(self->curr, key, _httoi(valstr));
+			} else {
+				psy_property_set_int(self->curr, key, atoi(valstr));
+			}
 			break;
 		case PSY_PROPERTY_TYPE_BOOL:
-			psy_property_set_bool(self->curr, key, atoi(value));
+			psy_property_set_bool(self->curr, key, atoi(valstr));
 			break;
 		case PSY_PROPERTY_TYPE_CHOICE:
-			self->choice = psy_property_set_choice(self->curr, key, atoi(value));
+			self->choice = psy_property_set_choice(self->curr, key, atoi(valstr));
 			self->ischoice = 1;
 			break;
 		case PSY_PROPERTY_TYPE_STRING:
-			psy_property_set_str(self->curr, key, value);
+			if (self->skip_double_quotes && value && value[0] == '\"') {
+				char* temp;
+
+				temp = psy_strdup(value + 1);
+				if (psy_strlen(temp) > 0) {
+					if (temp[psy_strlen(temp) - 1] == '\"') {
+						temp[psy_strlen(temp) - 1] = '\0';
+						psy_property_set_str(self->curr, key, temp);
+					} else {
+						psy_property_set_str(self->curr, key, value);
+					}
+					free(temp);
+					temp = NULL;
+				} else {
+					psy_property_set_str(self->curr, key, "");
+				}
+			} else {
+				psy_property_set_str(self->curr, key, value);
+			}
 			break;
 		case PSY_PROPERTY_TYPE_FONT:
 			psy_property_set_font(self->curr, key, value);
@@ -126,32 +168,58 @@ void psy_propertyreader_onreadkey(psy_PropertyReader* self, psy_IniReader* sende
 	}		
 }
 
+bool psy_propertyreader_extract_type(psy_PropertyReader* self,
+	const char* text, const char** typestr, const char** valstr)
+{
+	char* p;
+	static const char* dword = "dword:";
+	static const char* hex = "hex:";
+
+	p = strstr(text, dword);
+	if (p == text) {
+		*valstr = p + strlen(dword);
+		*typestr = dword;
+		return TRUE;
+	}
+	p = strstr(text, hex);
+	if (p == text) {
+		*valstr = p + strlen(dword);
+		*typestr = dword;
+		return TRUE;
+	}
+	*valstr = text;
+	*typestr = NULL;
+	return FALSE;
+}
+
 void psy_propertyreader_onreadsection(psy_PropertyReader* self, psy_IniReader* sender,
 	const char* key)
 {
-	psy_Property* p;
-	psy_Property* prev = 0;
+	if (!self->ignore_sections) {
+		psy_Property* p;
+		psy_Property* prev = 0;
 
-	p = psy_property_findsectionex(self->root, key, &prev);
-	if (p == self->root) {
-		self->curr = self->root;
-		self->ischoice = 0;
-	} else if (p && p->item.typ == PSY_PROPERTY_TYPE_SECTION) {
-		self->ischoice = 0;
-		self->curr = p;
-	} else if (self->ischoice) {
-		self->curr = self->choice;
-	} else if ((strcmp(key, "root") != 0) && self->allowappend) {
-		char_dyn_t* trimkey;
+		p = psy_property_findsectionex(self->root, key, &prev);
+		if (p == self->root) {
+			self->curr = self->root;
+			self->ischoice = 0;
+		} else if (p && p->item.typ == PSY_PROPERTY_TYPE_SECTION) {
+			self->ischoice = 0;
+			self->curr = p;
+		} else if (self->ischoice) {
+			self->curr = self->choice;
+		} else if ((strcmp(key, "root") != 0) && self->allowappend) {
+			char_dyn_t* trimkey;
 
-		self->ischoice = 0;
-		trimkey = lastkey(key);
-		self->curr = psy_property_append_section(prev, trimkey);
-		free(trimkey);
-	} else {
-		self->ischoice = 0;
-		self->curr = self->root;
-	}		
+			self->ischoice = 0;
+			trimkey = lastkey(key);
+			self->curr = psy_property_append_section(prev, trimkey);
+			free(trimkey);
+		} else {
+			self->ischoice = 0;
+			self->curr = self->root;
+		}
+	}
 }
 
 /* Property save */

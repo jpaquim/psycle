@@ -12,6 +12,8 @@
 #include "cmdsnotes.h"
 #include "resources/resource.h"
 #include "styles.h"
+/* file */
+#include <dir.h>
 /* platform */
 #include "../../detail/portable.h"
 
@@ -70,6 +72,7 @@ static void mainframe_onscripttabbarchanged(MainFrame*, psy_ui_Component* sender
 static void mainframe_onsongchanged(MainFrame*, Workspace* sender);
 static void mainframe_onviewselected(MainFrame*, Workspace*, uintptr_t view,
 	uintptr_t section, int option);
+static void mainframe_onfocus(MainFrame*);
 static void mainframe_onfocusview(MainFrame*, Workspace*);
 static void mainframe_onrender(MainFrame*, psy_ui_Component* sender);
 static void mainframe_onexport(MainFrame*, psy_ui_Component* sender);
@@ -135,6 +138,9 @@ static void vtable_init(MainFrame* self)
 		vtable.ondrop =
 			(psy_ui_fp_component_ondrop)
 			mainframe_ondrop;
+		vtable.onfocus =
+			(psy_ui_fp_component_event)
+			mainframe_onfocus;
 		vtable.ontimer =
 			(psy_ui_fp_component_ontimer)
 			mainframe_ontimer;		
@@ -197,7 +203,7 @@ void mainframe_initframe(MainFrame* self)
 	psy_ui_component_doublebuffer(mainframe_base(self));
 	psy_ui_app_setmain(psy_ui_app(), mainframe_base(self));
 	psy_ui_component_seticonressource(mainframe_base(self), IDI_PSYCLEICON);
-	inithoststyles(&psy_ui_appdefaults()->styles,
+	init_host_styles(&psy_ui_appdefaults()->styles,
 		psy_ui_defaults()->styles.theme);
 	self->titlemodified = FALSE;	
 	psy_ui_component_init(&self->pane, mainframe_base(self),
@@ -791,13 +797,11 @@ void mainframe_onrecentsongs(MainFrame* self, psy_ui_Component* sender)
 
 void mainframe_onfilesaveview(MainFrame* self, psy_ui_Component* sender)
 {
-	char fname[4096];
+	char path[4096];
 
-	psy_ui_component_show_align(&self->fileview.component);
-	fileview_filename(&self->fileview, fname, 4096);
-	if (psy_strlen(fname) > 0) {
-		workspace_savesong(&self->workspace, fname);
-	}
+	psy_ui_component_show_align(fileview_base(&self->fileview));
+	fileview_filename(&self->fileview, path, 4096);
+	workspace_savesong(&self->workspace, path);	
 }
 
 void mainframe_ondiskop(MainFrame* self, psy_ui_Component* sender)
@@ -934,8 +938,18 @@ void mainframe_onviewselected(MainFrame* self, Workspace* sender, uintptr_t inde
 
 void mainframe_onfocusview(MainFrame* self, Workspace* sender)
 {
-	if (psy_ui_notebook_activepage(&self->notebook)) {
-		psy_ui_component_setfocus(psy_ui_notebook_activepage(&self->notebook));
+	// if (psy_ui_notebook_activepage(&self->notebook)) {
+	//	psy_ui_component_setfocus(psy_ui_notebook_activepage(&self->notebook));
+	// }
+}
+
+void mainframe_onfocus(MainFrame* self)
+{
+	psy_ui_Component* currview;
+
+	currview = psy_ui_notebook_activepage(&self->notebook);
+	if (currview) {
+		psy_ui_component_setfocus(currview);
 	}
 }
 

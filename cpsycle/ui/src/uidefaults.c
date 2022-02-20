@@ -37,7 +37,7 @@ void psy_ui_defaults_setstyle(psy_ui_Defaults* self, uintptr_t styletype,
 	psy_ui_Style* style)
 {
 	if (style) {
-		psy_ui_styles_setstyle(&self->styles, styletype, style);
+		psy_ui_styles_set_style(&self->styles, styletype, style);
 	}
 }
 

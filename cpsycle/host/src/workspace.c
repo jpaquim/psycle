@@ -681,7 +681,7 @@ void workspace_setapptheme(Workspace* self, psy_Property* property)
 		theme = (psy_ui_ThemeMode)(psy_property_item_int(choice));		
 		/* reset styles */		
 		psy_ui_defaults_inittheme(psy_ui_appdefaults(), theme, TRUE);
-		inithoststyles(&psy_ui_appdefaults()->styles, theme);
+		init_host_styles(&psy_ui_appdefaults()->styles, theme);
 		machineviewconfig_write_styles(&self->config.macview);
 		machineparamconfig_updatestyles(&self->config.macparam);
 		patternviewconfig_write_styles(&self->config.patview);		
@@ -972,20 +972,22 @@ void workspace_exportlyfile(Workspace* self, const char* path)
 
 void workspace_savesong(Workspace* self, const char* path)
 {
-	psy_audio_SongFile songfile;
+	if (psy_strlen(path) > 0) {
+		psy_audio_SongFile songfile;
 
-	assert(self);
+		assert(self);
 
-	psy_audio_songfile_init_song(&songfile, self->song);	
-	psy_signal_emit(&self->signal_beforesavesong, self, 1, &songfile);
-	if (psy_audio_songfile_save(&songfile, path)) {
-		workspace_outputerror(self, songfile.serr);
-	} else {
-		workspace_updatesavepoint(self);
-		self->songhasfile = TRUE;
+		psy_audio_songfile_init_song(&songfile, self->song);
+		psy_signal_emit(&self->signal_beforesavesong, self, 1, &songfile);
+		if (psy_audio_songfile_save(&songfile, path)) {
+			workspace_outputerror(self, songfile.serr);
+		} else {
+			workspace_updatesavepoint(self);
+			self->songhasfile = TRUE;
+		}
+		psy_audio_songfile_dispose(&songfile);
+		workspace_output(self, "ready\n");
 	}
-	psy_audio_songfile_dispose(&songfile);
-	workspace_output(self, "ready\n");
 }
 
 void workspace_updatesavepoint(Workspace* self)

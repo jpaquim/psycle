@@ -335,7 +335,10 @@ void psy_ui_eventdispatch_notify(psy_ui_EventDispatch* self,
 	case psy_ui_FOCUSOUT:
 		component->vtable->onfocuslost(component);
 		psy_signal_emit(&component->signal_focuslost, component, 0);
-		break;	
+		break;
+	case psy_ui_FOCUSIN:
+		component->vtable->onfocusin(component, ev);		
+		break;
 	case psy_ui_MOUSEENTER:
 		component->vtable->onmouseenter(component);
 		psy_signal_emit(&component->signal_mouseenter, component, 0);

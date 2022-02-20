@@ -19,7 +19,7 @@ typedef struct psy_IniReader {
 	psy_Signal signal_comment;
 	psy_Signal signal_section;
 	char* section;
-	bool cpp_comment;
+	bool cpp_comment;	
 } psy_IniReader;
 
 void psy_inireader_init(psy_IniReader*);

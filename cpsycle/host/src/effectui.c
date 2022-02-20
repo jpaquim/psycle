@@ -18,8 +18,6 @@ static void effectui_onmousedown(EffectUi*, psy_ui_MouseEvent*);
 static void effectui_onmousedoubleclick(EffectUi*, psy_ui_MouseEvent*);
 static void effectui_move(EffectUi*, psy_ui_Point topleft);
 static void effectui_updatevolumedisplay(EffectUi*);
-static void effectui_onpreferredsize(EffectUi*, const psy_ui_Size* limit,
-	psy_ui_Size* rv);
 static void effectui_ontimer(EffectUi*, uintptr_t timerid);
 	
 /* vtable */
@@ -43,9 +41,6 @@ static void effectui_vtable_init(EffectUi* self)
 		effectui_vtable.move =
 			(psy_ui_fp_component_move)
 			effectui_move;		
-		effectui_vtable.onpreferredsize =
-			(psy_ui_fp_component_onpreferredsize)
-			effectui_onpreferredsize;		
 		effectui_vtable.ontimer =
 			(psy_ui_fp_component_ontimer)
 			effectui_ontimer;
@@ -136,17 +131,6 @@ void effectui_onmousedoubleclick(EffectUi* self, psy_ui_MouseEvent* ev)
 		paramviews_show(self->paramviews, psy_audio_machine_slot(self->machine));
 	}
 	psy_ui_mouseevent_stop_propagation(ev);
-}
-
-void effectui_onpreferredsize(EffectUi* self, const psy_ui_Size* limit,
-	psy_ui_Size* rv)
-{	
-	psy_ui_Style* style;
-
-	style = psy_ui_style(STYLE_MV_EFFECT);
-	*rv = (style)
-		? psy_ui_size_make_real(style->background.size)
-		: psy_ui_size_make_px(138.0, 52.0);
 }
 
 void effectui_ontimer(EffectUi* self, uintptr_t timerid)

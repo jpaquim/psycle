@@ -278,44 +278,44 @@ void machineviewconfig_write_styles(MachineViewConfig* self)
 					psy_dir_findfile(skindir, filename, path);
 					if (path[0] != '\0') {
 						if (psy_ui_style_setbackgroundpath(style, path) != PSY_OK) {
-							psy_ui_style_setbackgroundcolour(style, bgcolour);
+							psy_ui_style_set_background_colour(style, bgcolour);
 						}
 					}
 				} else {
-					psy_ui_style_setbackgroundcolour(style, bgcolour);
+					psy_ui_style_set_background_colour(style, bgcolour);
 				}
 			} else {
-				psy_ui_style_setbackgroundcolour(style, bgcolour);
+				psy_ui_style_set_background_colour(style, bgcolour);
 			}			
 		}
 		style = psy_ui_styles_at(styles, STYLE_MACHINEVIEW_STACK);
 		if (style) {						
-			psy_ui_style_setbackgroundcolour(style, bgcolour);
+			psy_ui_style_set_background_colour(style, bgcolour);
 		}
 		style = psy_ui_styles_at(styles, STYLE_MV_WIRE);
-		psy_ui_style_setcolour(style, psy_ui_colour_make(
+		psy_ui_style_set_colour(style, psy_ui_colour_make(
 			psy_property_at_colour(self->theme, "mv_wirecolour", 0x005F5F5F)));
 		style = psy_ui_styles_at(styles, STYLE_MV_WIRE_SELECT);
-		psy_ui_style_setcolour(style, psy_ui_colour_make(
+		psy_ui_style_set_colour(style, psy_ui_colour_make(
 			psy_property_at_colour(self->theme, "mv_selwirecolour", 0x007F7F7F)));
 		style = psy_ui_styles_at(styles, STYLE_MV_WIRE_HOVER);
-		psy_ui_style_setcolour(style, psy_ui_colour_make(
+		psy_ui_style_set_colour(style, psy_ui_colour_make(
 			psy_property_at_colour(self->theme, "mv_hoverwirecolour", 0x007F7F7F)));
 		style = psy_ui_styles_at(styles, STYLE_MV_WIRE_POLY);
-		psy_ui_style_setcolour(style, psy_ui_colour_make(
+		psy_ui_style_set_colour(style, psy_ui_colour_make(
 			psy_property_at_colour(self->theme, "mv_polycolour", 0x005F5F5F)));
 		psy_ui_style_set_background_size_px(style, (double)psy_property_at_int(
 			self->theme, "mv_triangle_size", 10), 0);		
 		style = psy_ui_styles_at(styles, STYLE_MV_GENERATOR);
-		psy_ui_style_setcolour(style, psy_ui_colour_make(
+		psy_ui_style_set_colour(style, psy_ui_colour_make(
 			psy_property_at_colour(self->theme, "mv_generator_fontcolour", 0x00B1C8B0)));
-		psy_ui_style_setfont(style,
+		psy_ui_style_set_font(style,
 			psy_property_at_str(self->theme, "generator_fontface", "Tahoma"),
 			psy_property_at_int(self->theme, "generator_font_point", 16) / 7);
 		style = psy_ui_styles_at(styles, STYLE_MV_EFFECT);
-		psy_ui_style_setcolour(style, psy_ui_colour_make(
+		psy_ui_style_set_colour(style, psy_ui_colour_make(
 			psy_property_at_colour(self->theme, "mv_effect_fontcolour", 0x00D1C5B6)));	
-		psy_ui_style_setfont(style,
+		psy_ui_style_set_font(style,
 			psy_property_at_str(self->theme, "effect_fontface", "Tahoma"),
 			psy_property_at_int(self->theme, "effect_font_point", 16) / 7);		
 		machineviewconfig_loadbitmap(self);
@@ -382,7 +382,7 @@ void machineviewconfig_loadbitmap(MachineViewConfig* self)
 	psy_ui_Style* style;
 
 	style = psy_ui_style(STYLE_MACHINEVIEW);
-	psy_ui_style_setbackgroundid(style, psy_INDEX_INVALID);
+	psy_ui_style_set_background_id(style, psy_INDEX_INVALID);
 	psy_ui_style_setbackgroundpath(style, "");
 	machine_skin_name = machineviewconfig_machine_skin_name(self);
 	if (self->dirconfig && psy_strlen(machine_skin_name) > 0) {
@@ -402,24 +402,28 @@ void machineviewconfig_loadbitmap(MachineViewConfig* self)
 				for (i = 0; styles[i] != 0; ++i) {
 					style = psy_ui_style(styles[i]);
 					if (psy_ui_style_setbackgroundpath(style, path) != PSY_OK) {
-						psy_ui_style_setbackgroundid(style, IDB_MACHINESKIN);
+						psy_ui_style_set_background_id(style, IDB_MACHINESKIN);
 					}
+					psy_ui_style_set_background_repeat(style, psy_ui_NOREPEAT);
 				}				
 			} else { /* reset default machine bitmaps and coords */
 				int i;
 
 				for (i = 0; styles[i] != 0; ++i) {
 					style = psy_ui_style(styles[i]);					
-					psy_ui_style_setbackgroundid(style, IDB_MACHINESKIN);					
+					psy_ui_style_set_background_id(style, IDB_MACHINESKIN);
+					psy_ui_style_set_background_repeat(style, psy_ui_NOREPEAT);
 				}
 				/* reset machine coordinates */
 				style = psy_ui_style(STYLE_MV_MASTER);
+				psy_ui_style_set_size(style, psy_ui_size_make_px(138.0, 35.0));		
 				psy_ui_style_set_background_size_px(style, 138.0, 35.0);
 				psy_ui_style_set_background_position_px(style, 0.0, -52.0);								
 				style = psy_ui_style(STYLE_MV_MASTER_NAME);
 				psy_ui_style_set_background_size_px(style, 117.0, 15.0);
-				psy_ui_style_setpadding_px(style, 3.0, 0, 0.0, 20.0);			
+				psy_ui_style_set_padding_px(style, 3.0, 0, 0.0, 20.0);			
 				style = psy_ui_style(STYLE_MV_GENERATOR);				
+				psy_ui_style_set_size(style, psy_ui_size_make_px(138.0, 52.0));
 				psy_ui_style_set_background_size_px(style, 138.0, 52.0);
 				psy_ui_style_set_background_position_px(style, 0.0, -87.0);				
 				style = psy_ui_style(STYLE_MV_GENERATOR_NAME);
@@ -446,7 +450,7 @@ void machineviewconfig_loadbitmap(MachineViewConfig* self)
 				psy_ui_style_set_position(style, psy_ui_rectangle_make(
 					psy_ui_point_make_px(4.0, 20.0), psy_ui_size_make_px(129.0, 7.0)));				
 				style = psy_ui_style(STYLE_MV_GENERATOR_VU0);
-				psy_ui_style_setbackgroundid(style, IDB_MACHINESKIN);
+				psy_ui_style_set_background_id(style, IDB_MACHINESKIN);
 				psy_ui_style_set_background_size_px(style, 129.0, 7);
 				psy_ui_style_set_background_position_px(style, 0.0, -156.0);								
 				style = psy_ui_style(STYLE_MV_GENERATOR_VUPEAK);				
@@ -461,7 +465,8 @@ void machineviewconfig_loadbitmap(MachineViewConfig* self)
 				psy_ui_style_set_position(style, psy_ui_rectangle_make(
 					psy_ui_point_make_px(0.0, 0.0), psy_ui_size_make_px(6.0, 13.0)));					
 				style = psy_ui_style(STYLE_MV_EFFECT);				
-				psy_ui_style_set_background_size_px(style, 138.0, 52.0);				
+				psy_ui_style_set_size(style, psy_ui_size_make_px(138.0, 52.0));
+				psy_ui_style_set_background_size_px(style, 138.0, 52.0);
 				style = psy_ui_style(STYLE_MV_EFFECT_NAME);
 				psy_ui_style_set_position(style, psy_ui_rectangle_make(
 					psy_ui_point_make_px(20.0, 3.0), psy_ui_size_make_px(117.0, 15.0)));								
@@ -506,7 +511,7 @@ void machineviewconfig_loadbitmap(MachineViewConfig* self)
 				psy_Property* transparency;
 
 				coords = psy_property_allocinit_key(NULL);
-				if (skin_load_machine_skin(coords, path) == PSY_OK) {
+				if (skin_load_machine(coords, path) == PSY_OK) {
 					machineviewconfig_setcoords(self, coords);
 					transparency = psy_property_at(coords,
 						"transparency", PSY_PROPERTY_TYPE_NONE);
@@ -546,7 +551,10 @@ void machineviewconfig_setcoords(MachineViewConfig* self, psy_Property* p)
 		style = psy_ui_style(STYLE_MV_MASTER);
 		skin_psh_values(s, 4, vals);
 		machineviewconfig_setsource(self, &src, vals);
-		psy_ui_style_set_background_size_px(style, src.right - src.left, src.bottom - src.top);
+		psy_ui_style_set_size(style, psy_ui_size_make_px(src.right - src.left,
+			src.bottom - src.top));
+		psy_ui_style_set_background_size_px(style, src.right - src.left,
+			src.bottom - src.top);
 		psy_ui_style_set_background_position_px(style, -src.left, -src.top);
 	}
 	/* generator */
@@ -554,7 +562,10 @@ void machineviewconfig_setcoords(MachineViewConfig* self, psy_Property* p)
 		skin_psh_values(s, 4, vals);
 		machineviewconfig_setsource(self, &srcmac, vals);
 		style = psy_ui_style(STYLE_MV_GENERATOR);
-		psy_ui_style_set_background_size_px(style, srcmac.right - srcmac.left, srcmac.bottom - srcmac.top);
+		psy_ui_style_set_size(style, psy_ui_size_make_px(srcmac.right - srcmac.left,
+			srcmac.bottom - srcmac.top));
+		psy_ui_style_set_background_size_px(style, srcmac.right - srcmac.left,
+			srcmac.bottom - srcmac.top);
 		psy_ui_style_set_background_position_px(style, -srcmac.left, -srcmac.top);
 	}
 	if (s = psy_property_at_str(p, "generator_mute_source", 0)) {		
@@ -650,6 +661,8 @@ void machineviewconfig_setcoords(MachineViewConfig* self, psy_Property* p)
 		skin_psh_values(s, 4, vals);
 		machineviewconfig_setsource(self, &srcmac, vals);
 		style = psy_ui_style(STYLE_MV_EFFECT);
+		psy_ui_style_set_size(style, psy_ui_size_make_px(srcmac.right - srcmac.left,
+			srcmac.bottom - srcmac.top));
 		psy_ui_style_set_background_size_px(style, srcmac.right - srcmac.left,
 			srcmac.bottom - srcmac.top);
 		psy_ui_style_set_background_position_px(style, -srcmac.left, -srcmac.top);

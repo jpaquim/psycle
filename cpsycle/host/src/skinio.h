@@ -8,22 +8,20 @@
 
 /* container */
 #include <properties.h>
-/* file */
-#include <dir.h>
-
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int skin_load(psy_Property*, const psy_Path* path);
-int skin_loadpsh(psy_Property*, const char* path);
-void skin_psh_values(const char* str, intptr_t maxcount, intptr_t* values);
-int skin_loadpsc(psy_Property*, const char* path);
 void skin_locate_pattern_skins(psy_Property*, const char* path);
 void skin_locate_machine_skins(psy_Property*, const char* path);
 
-int skin_load_machine_skin(psy_Property* psm, const char* path);
+int skin_load(psy_Property* psv, const char* path);
+int skin_load_machine(psy_Property* psm, const char* path);
+int skin_load_pattern_header(psy_Property* psh, const char* path);
+int skin_load_psc(psy_Property* psc, const char* path);
+
+void skin_psh_values(const char* str, intptr_t maxcount, intptr_t* values);
 
 #ifdef __cplusplus
 }

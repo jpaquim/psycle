@@ -13,19 +13,17 @@
 extern "C" {
 #endif
 
-typedef struct psy_ui_ComponentSizeHints {
-	psy_ui_Size preferredsize;
-	bool preferredwidthset;
-	bool preferredheightset;
+typedef struct psy_ui_SizeHints {
+	psy_ui_Size preferredsize;	
 	psy_ui_Size minsize;
 	psy_ui_Size maxsize;
-} psy_ui_ComponentSizeHints;
+} psy_ui_SizeHints;
 
-void psy_ui_componentsizehints_init(psy_ui_ComponentSizeHints*);
+void psy_ui_sizehints_init(psy_ui_SizeHints*);
 
-psy_ui_ComponentSizeHints* psy_ui_componentsizehints_alloc(void);
-psy_ui_ComponentSizeHints* psy_ui_componentsizehints_allocinit(void);
-void psy_ui_componentsizehints_deallocate(psy_ui_ComponentSizeHints*);
+psy_ui_SizeHints* psy_ui_sizehints_alloc(void);
+psy_ui_SizeHints* psy_ui_sizehints_allocinit(void);
+void psy_ui_sizehints_deallocate(psy_ui_SizeHints*);
 
 #ifdef __cplusplus
 }

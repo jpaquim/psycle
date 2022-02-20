@@ -39,12 +39,7 @@ typedef struct {
 	double zoomright;
 	psy_dsp_amp_t modamount;
 	psy_ui_Size ptsize;
-	psy_ui_Size ptsize2;
-	psy_ui_Colour pointcolour;
-	psy_ui_Colour curvecolour;
-	psy_ui_Colour gridcolour;
-	psy_ui_Colour sustaincolour;
-	psy_ui_Colour rulercolour;
+	psy_ui_Size ptsize2;	
 } EnvelopeBox;
 
 void envelopebox_init(EnvelopeBox*, psy_ui_Component* parent);

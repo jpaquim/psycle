@@ -1,21 +1,28 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "clipbox.h"
-// host
+/* host */
 #include "styles.h"
-// dsp
+/* dsp */
 #include <operations.h>
 
-static bool checkpeak(float peak);
+static bool check_peak(float peak)
+{
+	return (peak >= 32767.f || peak < -32768.f || peak >= 32767.f || peak < -32768.f);
+}
 
-// prototypes
+/* prototypes */
 static void clipbox_ontimer(ClipBox*, uintptr_t timerid);
 static void clipbox_onmousedown(ClipBox*, psy_ui_MouseEvent*);
 static bool clipbox_check(ClipBox*, psy_audio_Machine*);
-// vtable
+
+/* vtable */
 static psy_ui_ComponentVtable vtable;
 static bool vtable_initialized = FALSE;
 
@@ -31,9 +38,10 @@ static void vtable_init(ClipBox* self)
 			clipbox_ontimer;
 		vtable_initialized = TRUE;
 	}
-	self->component.vtable = &vtable;
+	psy_ui_component_setvtable(&self->component, &vtable);
 }
-// implementation
+
+/* implementation */
 void clipbox_init(ClipBox* self, psy_ui_Component* parent, Workspace* workspace)
 {
 	psy_ui_component_init(&self->component, parent, NULL);
@@ -42,8 +50,6 @@ void clipbox_init(ClipBox* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_ui_component_setstyletype_select(&self->component,
 		STYLE_CLIPBOX_SELECT);
 	self->workspace = workspace;	
-	psy_ui_component_setpreferredsize(&self->component,
-		psy_ui_size_make_em(2.0, 1.0));
 	psy_ui_component_starttimer(&self->component, 0, 100);
 }
 
@@ -67,20 +73,15 @@ bool clipbox_check(ClipBox* self, psy_audio_Machine* machine)
 	memory = psy_audio_machine_buffermemory(machine);
 	if (memory && memory->numsamples > 0) {
 		if (memory->numchannels > 0 &&
-			checkpeak(dsp.maxvol(memory->samples[0], memory->numsamples))) {
+			check_peak(dsp.maxvol(memory->samples[0], memory->numsamples))) {
 			return TRUE;
 		}
 		if (memory->numchannels > 1 &&
-			checkpeak(dsp.maxvol(memory->samples[1], memory->numsamples))) {
+			check_peak(dsp.maxvol(memory->samples[1], memory->numsamples))) {
 			return TRUE;
 		}
 	}
 	return FALSE;
-}
-
-bool checkpeak(float peak)
-{
-	return (peak >= 32767.f || peak < -32768.f || peak >= 32767.f || peak < -32768.f);
 }
 
 void clipbox_onmousedown(ClipBox* self, psy_ui_MouseEvent* ev)

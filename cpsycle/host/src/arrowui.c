@@ -14,8 +14,6 @@
 
 /* prototypes */
 static void arrowui_ondraw(ArrowUi*, psy_ui_Graphics*);
-static void arrowui_onpreferredsize(ArrowUi*, const psy_ui_Size* limit,
-	psy_ui_Size* rv);
 static void arrowui_onmousedown(ArrowUi*, psy_ui_MouseEvent*);
 static bool arrowui_selected(const ArrowUi*);
 
@@ -31,10 +29,7 @@ static void arrowui_vtable_init(ArrowUi* self)
 		arrowui_vtable = *(self->component.vtable);		
 		arrowui_vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
-			arrowui_ondraw;
-		arrowui_vtable.onpreferredsize =
-			(psy_ui_fp_component_onpreferredsize)
-			arrowui_onpreferredsize;
+			arrowui_ondraw;		
 		arrowui_vtable.onmousedown =
 			(psy_ui_fp_component_onmouseevent)
 			arrowui_onmousedown;
@@ -83,7 +78,7 @@ void arrowui_ondraw(ArrowUi* self, psy_ui_Graphics* g)
 
 	assert(self);
 	
-	if (arrowui_selected(self)) {
+	if (arrowui_selected(self)) {		
 		style = psy_ui_style(STYLE_MV_WIRE_SELECT);		
 	} else {
 		style = psy_ui_style(STYLE_MV_WIRE);		
@@ -110,15 +105,6 @@ bool arrowui_selected(const ArrowUi* self)
 		return psy_audio_wire_equal(&self->wire, &selectedwire);
 	}
 	return FALSE;
-}
-
-void arrowui_onpreferredsize(ArrowUi* self, const psy_ui_Size* limit,
-	psy_ui_Size* rv)
-{	
-	psy_ui_Style* style;
-
-	style = psy_ui_style(STYLE_MV_ARROW);
-	psy_ui_size_setreal(rv, style->background.size);		
 }
 
 void arrowui_onmousedown(ArrowUi* self, psy_ui_MouseEvent* ev)

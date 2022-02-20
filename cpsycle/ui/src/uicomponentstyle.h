@@ -7,6 +7,7 @@
 #define psy_ui_COMPONENTSTYLE_H
 
 #include "uistyles.h"
+#include "uicomponentsizehints.h"
 
 /*
 ** psy_ui_ComponentStyle
@@ -42,7 +43,8 @@ typedef struct psy_ui_ComponentStyle {
 								**   overridestyle
 								*/
 	psy_ui_Style overridestyle;	/* overrides currstyle for component setter */
-	psy_ui_StyleState states;	/* bit flag holding the activated states */
+	psy_ui_StyleState states;	/* bit flag holding the activated states */	
+	psy_ui_SizeHints* sizehints;
 	intptr_t debugflag;
 } psy_ui_ComponentStyle;
 
@@ -153,6 +155,17 @@ INLINE void psy_ui_componentstyle_setborder(psy_ui_ComponentStyle* self, const p
 	}
 	self->overridestyle.border = *border;
 }
+
+void psy_ui_componentstyle_usesizehints(psy_ui_ComponentStyle*);
+void psy_ui_componentstyle_setpreferredsize(psy_ui_ComponentStyle*, psy_ui_Size);
+psy_ui_Size psy_ui_componentstyle_preferredsize(const psy_ui_ComponentStyle*);
+void psy_ui_componentstyle_setpreferredheight(psy_ui_ComponentStyle*, psy_ui_Value);
+void psy_ui_componentstyle_setpreferredwidth(psy_ui_ComponentStyle*, psy_ui_Value);
+void psy_ui_componentstyle_setmaximumsize(psy_ui_ComponentStyle*, psy_ui_Size);
+const psy_ui_Size psy_ui_componentstyle_maximumsize(const psy_ui_ComponentStyle*);
+void psy_ui_componentstyle_setminimumsize(psy_ui_ComponentStyle*, psy_ui_Size);
+const psy_ui_Size psy_ui_componentstyle_minimumsize(const psy_ui_ComponentStyle*);
+
 
 #ifdef __cplusplus
 }

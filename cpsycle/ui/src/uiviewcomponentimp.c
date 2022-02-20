@@ -714,9 +714,6 @@ void view_dev_setfocus(psy_ui_ViewComponentImp* self)
 	
 	if (!psy_ui_component_hasfocus(self->view)) {
 		psy_ui_component_setfocus(self->view);
-	} else if (self->component) {
-		self->component->vtable->onfocus(self->component);
-		psy_signal_emit(&self->component->signal_focus, self, 0);		
 	}
 }
 

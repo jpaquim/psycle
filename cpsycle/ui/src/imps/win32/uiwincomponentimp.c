@@ -1112,7 +1112,9 @@ void dev_settitle(psy_ui_win_ComponentImp* self, const char* title)
 
 void dev_setfocus(psy_ui_win_ComponentImp* self)
 {
-	SetFocus(self->hwnd);	
+	if (self->hwnd != GetFocus()) {
+		SetFocus(self->hwnd);
+	}
 }
 
 int dev_hasfocus(psy_ui_win_ComponentImp* self)

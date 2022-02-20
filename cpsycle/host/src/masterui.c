@@ -20,8 +20,6 @@ static void masterui_ondraw(MasterUi*, psy_ui_Graphics*);
 static void masterui_onmousedoubleclick(MasterUi*, psy_ui_MouseEvent*);
 static void masterui_drawhighlight(MasterUi*, psy_ui_Graphics*);
 static void masterui_move(MasterUi*, psy_ui_Point topleft);
-static void masterui_onpreferredsize(MasterUi*, const psy_ui_Size* limit,
-	psy_ui_Size* rv);
 
 /* vtable */
 static psy_ui_ComponentVtable masterui_vtable;
@@ -43,10 +41,7 @@ static void masterui_vtable_init(MasterUi* self)
 			masterui_onmousedoubleclick;
 		masterui_vtable.move =
 			(psy_ui_fp_component_move)
-			masterui_move;
-		masterui_vtable.onpreferredsize =
-			(psy_ui_fp_component_onpreferredsize)
-			masterui_onpreferredsize;
+			masterui_move;		
 		masterui_vtable_initialized = TRUE;
 	}
 	psy_ui_component_setvtable(&self->component, &masterui_vtable);	
@@ -109,15 +104,4 @@ void masterui_onmousedoubleclick(MasterUi* self, psy_ui_MouseEvent* ev)
 		paramviews_show(self->paramviews, psy_audio_machine_slot(self->machine));		
 	}
 	psy_ui_mouseevent_stop_propagation(ev);
-}
-
-void masterui_onpreferredsize(MasterUi* self, const psy_ui_Size* limit,
-	psy_ui_Size* rv)
-{
-	psy_ui_Style* style;
-
-	style = psy_ui_style(STYLE_MV_MASTER);	
-	*rv = (style)
-		? psy_ui_size_make_real(style->background.size)
-		: psy_ui_size_make_px(138.0, 35.0);	
 }

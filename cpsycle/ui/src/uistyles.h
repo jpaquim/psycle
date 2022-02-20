@@ -23,7 +23,7 @@ typedef struct psy_ui_Styles {
 void psy_ui_styles_init(psy_ui_Styles*);
 void psy_ui_styles_dispose(psy_ui_Styles*);
 
-void psy_ui_styles_setstyle(psy_ui_Styles*, uintptr_t styletype, psy_ui_Style*);
+void psy_ui_styles_set_style(psy_ui_Styles*, uintptr_t styletype, psy_ui_Style*);
 psy_ui_Style* psy_ui_styles_at(psy_ui_Styles* self, uintptr_t styletype);
 const psy_ui_Style* psy_ui_styles_at_const(const psy_ui_Styles*,
 	uintptr_t styletype);

@@ -28,8 +28,9 @@ extern "C" {
 		psy_ui_DRAG = 10,
 		psy_ui_FOCUS = 11,
 		psy_ui_FOCUSOUT = 12,
-		psy_ui_RESIZE = 13,
-		psy_ui_WHEEL = 14
+		psy_ui_FOCUSIN = 13,
+		psy_ui_RESIZE = 14,
+		psy_ui_WHEEL = 15
 } psy_ui_EventType;
 
 /* Forward Handler for Event target */
