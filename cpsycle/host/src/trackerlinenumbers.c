@@ -92,7 +92,7 @@ void trackerlinenumbers_updateformat(TrackerLineNumbers* self)
 
 void trackerlinenumbers_ondraw(TrackerLineNumbers* self, psy_ui_Graphics* g)
 {
-	if (patternviewstate_sequence(self->state->pv)) {
+	if (patternviewstate_pattern(self->state->pv)) {
 		psy_ui_RealSize size;
 		psy_ui_RealRectangle g_clip;
 		double cpy;

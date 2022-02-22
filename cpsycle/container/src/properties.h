@@ -78,6 +78,7 @@ typedef struct psy_PropertyItem {
 	bool save;
 	bool translate;
 	intptr_t id;
+	bool marked;
 } psy_PropertyItem;
 
 void psy_propertyitem_init(psy_PropertyItem*);

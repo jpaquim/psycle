@@ -88,8 +88,7 @@ void psy_ui_style_init(psy_ui_Style* self)
 	self->marginset = FALSE;
 	psy_ui_margin_init(&self->padding);
 	self->paddingset = FALSE;
-	psy_ui_rectangle_init(&self->position);
-	psy_ui_rectangle_deactivate(&self->position);	
+	psy_ui_position_init(&self->position);	
 	self->dbgflag = 0;	
 }
 
@@ -121,8 +120,7 @@ void psy_ui_style_init_colours(psy_ui_Style* self, psy_ui_Colour colour,
 	self->marginset = FALSE;
 	psy_ui_margin_init(&self->padding);
 	self->paddingset = FALSE;
-	psy_ui_rectangle_init(&self->position);
-	psy_ui_rectangle_deactivate(&self->position);	
+	psy_ui_position_init(&self->position);	
 	self->dbgflag = 0;
 }
 
@@ -148,6 +146,7 @@ void psy_ui_style_dispose(psy_ui_Style* self)
 {		
 	psy_ui_font_dispose(&self->font);
 	psy_ui_background_dispose(&self->background);
+	psy_ui_position_dispose(&self->position);
 }
 
 void psy_ui_style_copy(psy_ui_Style* self, const psy_ui_Style* other)

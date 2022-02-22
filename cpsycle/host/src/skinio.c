@@ -119,6 +119,7 @@ void skin_define_psh(psy_Property* psh)
 	psy_property_append_str(psh, "record_on_source" ,"70, 18, 11, 11");
 	psy_property_append_str(psh, "mute_on_source", "81, 18, 11, 11");
 	psy_property_append_str(psh, "solo_on_source", "92, 18, 11, 11");
+	psy_property_append_str(psh, "playing_on_source", "4, 24, 18, 18");
 	// destination coords to be rendered to
 	// destinations use 0,0 as top left of background
 	psy_property_append_str(psh, "digit_x0_dest" , "24, 3");
@@ -126,6 +127,9 @@ void skin_define_psh(psy_Property* psh)
 	psy_property_append_str(psh, "record_on_dest" , "52, 3");
 	psy_property_append_str(psh, "mute_on_dest" , "75, 3");
 	psy_property_append_str(psh, "solo_on_dest" , "97, 3");
+	psy_property_append_str(psh, "playing_on_dest", "4, 2");
+
+	psy_property_append_int(psh, "transparency", 0x0000FF00, 0, 0);	
 }
 
 int skin_load(psy_Property* psv, const char* path)
@@ -133,6 +137,7 @@ int skin_load(psy_Property* psv, const char* path)
 	int rv;	
 	psy_PropertyReader propertyreader;
 	const char* machine_background;
+	intptr_t font_pt;
 
 	assert(psv);
 
@@ -153,6 +158,10 @@ int skin_load(psy_Property* psv, const char* path)
 			psy_path_filename(&path));
 		psy_path_dispose(&path);
 	}
+	font_pt = psy_property_at_int(psv, "generator_font_point", 80);
+	psy_property_set_int(psv, "generator_font_point", font_pt / 7);
+	font_pt = psy_property_at_int(psv, "effect_font_point", 80);
+	psy_property_set_int(psv, "effect_font_point", font_pt / 7);	
 	return rv;
 }
 

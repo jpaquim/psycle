@@ -258,13 +258,7 @@ void init_host_styles(psy_ui_Styles* self, psy_ui_ThemeMode theme)
 	psy_ui_styles_set_style(self, STYLE_ZOOMBOX, style);
 
 	style = psy_ui_style_clone(psy_ui_styles_at(self, psy_ui_STYLE_EDIT));
-	psy_ui_styles_set_style(self, STYLE_ZOOMBOX_EDIT, style);		
-
-	style = psy_ui_style_allocinit();	
-	psy_ui_style_set_padding_em(style, 0.25, 0.5, 0.5, 0.5);
-	psy_ui_border_init_bottom(&style->border, psy_ui_BORDER_SOLID,
-		material.surface_overlay_16p);
-	psy_ui_styles_set_style(self, STYLE_MACHINEVIEW_PROPERTIES, style);
+	psy_ui_styles_set_style(self, STYLE_ZOOMBOX_EDIT, style);			
 	
 	style = psy_ui_style_allocinit();
 	psy_ui_style_set_colours(style, material.primary,
@@ -852,13 +846,7 @@ void initlighttheme(psy_ui_Styles* self)
 	psy_ui_styles_set_style(self, STYLE_ZOOMBOX, style);
 
 	style = psy_ui_style_clone(psy_ui_styles_at(self, psy_ui_STYLE_EDIT));
-	psy_ui_styles_set_style(self, STYLE_ZOOMBOX_EDIT, style);	
-
-	style = psy_ui_style_allocinit();
-	psy_ui_style_set_padding_em(style, 0.25, 0.5, 0.5, 0.5);
-	psy_ui_border_init_bottom(&style->border, psy_ui_BORDER_SOLID,
-		material.surface_overlay_16p);
-	psy_ui_styles_set_style(self, STYLE_MACHINEVIEW_PROPERTIES, style);	
+	psy_ui_styles_set_style(self, STYLE_ZOOMBOX_EDIT, style);		
 
 	style = psy_ui_style_allocinit();
 	psy_ui_style_set_colours(style, material.primary,
@@ -1413,13 +1401,7 @@ void initwin98theme(psy_ui_Styles* self)
 	psy_ui_styles_set_style(self, STYLE_ZOOMBOX, style);
 
 	style = psy_ui_style_clone(psy_ui_styles_at(self, psy_ui_STYLE_EDIT));
-	psy_ui_styles_set_style(self, STYLE_ZOOMBOX_EDIT, style);		
-
-	style = psy_ui_style_allocinit();
-	psy_ui_style_set_padding_em(style, 0.25, 0.5, 0.5, 0.5);
-	psy_ui_border_init_bottom(&style->border, psy_ui_BORDER_SOLID,
-		win.cl_medgray);
-	psy_ui_styles_set_style(self, STYLE_MACHINEVIEW_PROPERTIES, style);
+	psy_ui_styles_set_style(self, STYLE_ZOOMBOX_EDIT, style);	
 
 	style = psy_ui_style_allocinit();
 	psy_ui_style_set_colours(style, win.cl_black, win.cl_silver);
@@ -1787,276 +1769,30 @@ void init_psycletheme_styles(psy_ui_Styles* self)
 }
 
 void init_machineview_styles(psy_ui_Styles* self)
-{
-	psy_ui_Style* style;	
+{	
+	uintptr_t styles[] = {
+		STYLE_MV, STYLE_MV_WIRES, STYLE_MV_STACK, STYLE_MV_PROPERTIES,
+		STYLE_MV_NEWMACHINE, STYLE_MV_WIRE, STYLE_MV_WIRE_SELECT,
+		STYLE_MV_WIRE_HOVER, STYLE_MV_WIRE_POLY, STYLE_MV_MASTER,
+		STYLE_MV_MASTER_NAME, STYLE_MV_GENERATOR, STYLE_MV_GENERATOR_NAME,
+		STYLE_MV_GENERATOR_MUTE, STYLE_MV_GENERATOR_MUTE_SELECT,
+		STYLE_MV_GENERATOR_SOLO, STYLE_MV_GENERATOR_SOLO_SELECT,
+		STYLE_MV_GENERATOR_VU, STYLE_MV_GENERATOR_VU0,
+		STYLE_MV_GENERATOR_VUPEAK, STYLE_MV_GENERATOR_PAN,
+		STYLE_MV_GENERATOR_PAN_SLIDER, STYLE_MV_EFFECT, STYLE_MV_EFFECT_NAME,
+		STYLE_MV_EFFECT_MUTE, STYLE_MV_EFFECT_MUTE_SELECT,
+		STYLE_MV_EFFECT_BYPASS, STYLE_MV_EFFECT_BYPASS_SELECT,
+		STYLE_MV_EFFECT_VU, STYLE_MV_EFFECT_VU0, STYLE_MV_EFFECT_VUPEAK,
+		STYLE_MV_EFFECT_PAN, STYLE_MV_EFFECT_PAN_SLIDER, STYLE_MV_ARROW,
+		STYLE_MV_CHECK, STYLE_MV_KNOB, STYLE_MV_LABEL, STYLE_MV_HEADER,
+		STYLE_MV_LEVEL, 0
+	};
+	int i;
 
-	style = psy_ui_style_allocinit();
-	psy_ui_style_set_colour(style,
-		psy_ui_colour_make(0x005F5F5F));
-	psy_ui_styles_set_style(self, STYLE_MACHINEVIEW, style);
-
-	style = psy_ui_style_allocinit();
-	psy_ui_style_set_colours(style,
-		psy_ui_colour_make(0x005F5F5F),
-		psy_ui_colour_make(0x00232323));
-	psy_ui_style_set_font(style, "Tahoma", 12);
-	psy_ui_styles_set_style(self, STYLE_MACHINEVIEW_WIRES, style);
-
-	style = psy_ui_style_allocinit();
-	psy_ui_style_set_colours(style,
-		psy_ui_colour_make(0x005F5F5F),
-		psy_ui_colour_make(0x00232323));
-	psy_ui_style_set_font(style, "Tahoma", 16);
-	psy_ui_styles_set_style(self, STYLE_MACHINEVIEW_STACK, style);
-
-	style = psy_ui_style_allocinit();
-	psy_ui_style_set_colour(style, psy_ui_colour_make(0x005F5F5F));	
-	psy_ui_styles_set_style(self, STYLE_MV_WIRE, style);
-
-	style = psy_ui_style_allocinit();
-	psy_ui_style_set_colour(style, psy_ui_colour_make(0x007F7F7F));
-	psy_ui_styles_set_style(self, STYLE_MV_WIRE_SELECT, style);
-
-	style = psy_ui_style_allocinit();
-	psy_ui_style_set_colour(style, psy_ui_colour_make(0x007F7F7F));
-	psy_ui_styles_set_style(self, STYLE_MV_WIRE_HOVER, style);
-
-	style = psy_ui_style_allocinit();
-	psy_ui_style_set_colour(style, psy_ui_colour_make(0x005F5F5F));
-	style->background.size = psy_ui_realsize_make(5.0, 5.0);
-	style->background.size_set = TRUE;
-	psy_ui_styles_set_style(self, STYLE_MV_WIRE_POLY, style);
-	
-	/* master */
-	style = psy_ui_style_allocinit();
-	psy_ui_style_set_size(style, psy_ui_size_make_px(138.0, 35.0));
-	psy_ui_style_set_background_id(style, IDB_MACHINESKIN);	
-	psy_ui_style_set_background_repeat(style, psy_ui_NOREPEAT);	
-	psy_ui_style_set_background_position_px(style, 0.0, -52.0);
-	psy_ui_style_set_background_size_px(style, 138.0, 35.0);
-	psy_ui_style_set_background_colour(style, psy_ui_colour_make(0x00333333));
-	psy_ui_styles_set_style(self, STYLE_MV_MASTER, style);
-
-	/* master:name */
-	style = psy_ui_style_allocinit();
-	psy_ui_style_set_background_size_px(style, 117.0, 15.0);
-	psy_ui_style_set_padding_px(style, 3.0, 0, 0.0, 20.0);
-	psy_ui_styles_set_style(self, STYLE_MV_MASTER_NAME, style);
-
-	/* generator */
-	style = psy_ui_style_allocinit();
-	psy_ui_style_set_colours(style,
-		psy_ui_colour_make(0x00B1C8B0),
-		psy_ui_colour_make(0x002f3E25));
-	psy_ui_style_set_size(style, psy_ui_size_make_px(138.0, 52.0));
-	psy_ui_style_set_background_id(style, IDB_MACHINESKIN);
-	psy_ui_style_set_background_repeat(style, psy_ui_NOREPEAT);	
-	psy_ui_style_set_background_position_px(style, 0.0, -87.0);
-	psy_ui_style_set_background_size_px(style, 138.0, 52.0);
-	psy_ui_styles_set_style(self, STYLE_MV_GENERATOR, style);	
-
-	/* generator:name */
-	style = psy_ui_style_allocinit();	
-	psy_ui_style_set_position(style,
-		psy_ui_rectangle_make(
-			psy_ui_point_make_px(20.0, 3.0),
-			psy_ui_size_make_px(117.0, 15.0)));	
-	psy_ui_style_set_background_colour(style,
-		psy_ui_colour_transparent());
-	psy_ui_styles_set_style(self, STYLE_MV_GENERATOR_NAME, style);
-
-	/* generator:mute */
-	style = psy_ui_style_allocinit();
-	psy_ui_style_set_background_colour(style,
-		psy_ui_colour_transparent());
-	psy_ui_style_set_position(style, psy_ui_rectangle_make(
-		psy_ui_point_make_px(117.0, 31.0), psy_ui_size_make_px(17.0, 17.0)));
-	psy_ui_styles_set_style(self, STYLE_MV_GENERATOR_MUTE, style);
-
-	/* generator:mute:select */
-	style = psy_ui_style_allocinit();
-	psy_ui_style_set_background_id(style, IDB_MACHINESKIN);
-	psy_ui_style_set_background_repeat(style, psy_ui_NOREPEAT);
-	psy_ui_style_set_background_position_px(style, -23.0, -139.0);
-	psy_ui_style_set_position(style, psy_ui_rectangle_make(
-		psy_ui_point_make_px(117.0, 31.0), psy_ui_size_make_px(17.0, 17.0)));	
-	psy_ui_styles_set_style(self, STYLE_MV_GENERATOR_MUTE_SELECT, style);
-
-	/* generator:solo */
-	style = psy_ui_style_allocinit();	
-	psy_ui_style_set_background_colour(style,
-		psy_ui_colour_transparent());
-	psy_ui_style_set_position(style, psy_ui_rectangle_make(
-		psy_ui_point_make_px(98.0, 31.0), psy_ui_size_make_px(17.0, 17.0)));	
-	psy_ui_styles_set_style(self, STYLE_MV_GENERATOR_SOLO, style);
-
-	/* generator:solo:select */
-	style = psy_ui_style_allocinit();
-	psy_ui_style_set_background_id(style, IDB_MACHINESKIN);
-	psy_ui_style_set_background_repeat(style, psy_ui_NOREPEAT);
-	psy_ui_style_set_background_size_px(style, 17, 17);	
-	psy_ui_style_set_background_position_px(style, -6.0, -139.0);
-	psy_ui_style_set_position(style, psy_ui_rectangle_make(
-		psy_ui_point_make_px(98.0, 31.0), psy_ui_size_make_px(17.0, 17.0)));	
-	psy_ui_styles_set_style(self, STYLE_MV_GENERATOR_SOLO_SELECT, style);
-
-	/* generator:vu */
-	style = psy_ui_style_allocinit();
-	psy_ui_style_set_background_colour(style,
-		psy_ui_colour_transparent());
-	psy_ui_style_set_position(style, psy_ui_rectangle_make(
-		psy_ui_point_make_px(4.0, 20.0), psy_ui_size_make_px(129.0, 7.0)));	
-	psy_ui_styles_set_style(self, STYLE_MV_GENERATOR_VU, style);
-
-	/* generator:vu0 */
-	style = psy_ui_style_allocinit();
-	psy_ui_style_set_background_id(style, IDB_MACHINESKIN);
-	psy_ui_style_set_background_repeat(style, psy_ui_NOREPEAT);
-	psy_ui_style_set_background_size_px(style, 129.0, 7);	
-	psy_ui_style_set_background_position_px(style, 0.0, -156.0);
-	psy_ui_styles_set_style(self, STYLE_MV_GENERATOR_VU0, style);
-
-	/* generator:vupeak */
-	style = psy_ui_style_allocinit();
-	psy_ui_style_set_background_id(style, IDB_MACHINESKIN);
-	psy_ui_style_set_background_repeat(style, psy_ui_NOREPEAT);
-	psy_ui_style_set_background_size_px(style, 1, 7);	
-	psy_ui_style_set_background_position_px(style, -108.0, -156.0);
-	psy_ui_styles_set_style(self, STYLE_MV_GENERATOR_VUPEAK, style);
-
-	/* generator:pan */
-	style = psy_ui_style_allocinit();		
-	psy_ui_style_set_position(style, psy_ui_rectangle_make(
-		psy_ui_point_make_px(6.0, 33.0), psy_ui_size_make_px(82.0 + 6.0, 13.0)));
-	psy_ui_styles_set_style(self, STYLE_MV_GENERATOR_PAN, style);
-
-	/* generator:pan:slider */
-	style = psy_ui_style_allocinit();
-	psy_ui_style_set_background_id(style, IDB_MACHINESKIN);
-	psy_ui_style_set_background_repeat(style, psy_ui_NOREPEAT);
-	psy_ui_style_set_background_size_px(style, 6.0, 13.0);
-	psy_ui_style_set_background_position_px(style, -0.0, -139.0);
-	psy_ui_style_set_position(style, psy_ui_rectangle_make(
-		psy_ui_point_make_px(0.0, 0.0), psy_ui_size_make_px(6.0, 13.0)));	
-	psy_ui_styles_set_style(self, STYLE_MV_GENERATOR_PAN_SLIDER, style);
-
-	/* effect*/
-	style = psy_ui_style_allocinit();
-	psy_ui_style_set_colours(style, psy_ui_colour_make(0x00D1C5B6),
-		psy_ui_colour_make(0x003E2f25));
-	psy_ui_style_set_size(style, psy_ui_size_make_px(138.0, 52.0));
-	psy_ui_style_set_background_id(style, IDB_MACHINESKIN);
-	psy_ui_style_set_background_repeat(style, psy_ui_NOREPEAT);
-	psy_ui_style_set_background_size_px(style, 138.0, 52.0);
-	psy_ui_styles_set_style(self, STYLE_MV_EFFECT, style);
-
-	/* effect:name */
-	style = psy_ui_style_allocinit();
-	psy_ui_style_set_position(style, psy_ui_rectangle_make(
-		psy_ui_point_make_px(20.0, 3.0), psy_ui_size_make_px(117.0, 15.0)));
-	psy_ui_style_set_background_colour(style,
-		psy_ui_colour_transparent());
-	psy_ui_styles_set_style(self, STYLE_MV_EFFECT_NAME, style);
-
-	/* effect:mute */
-	style = psy_ui_style_allocinit();
-	psy_ui_style_set_background_colour(style,
-		psy_ui_colour_transparent());
-	psy_ui_style_set_position(style, psy_ui_rectangle_make(
-		psy_ui_point_make_px(117.0, 31.0), psy_ui_size_make_px(17.0, 17.0)));	
-	psy_ui_styles_set_style(self, STYLE_MV_EFFECT_MUTE, style);
-
-	/* effect:mute:select */
-	style = psy_ui_style_allocinit();
-	psy_ui_style_set_background_id(style, IDB_MACHINESKIN);
-	psy_ui_style_set_background_repeat(style, psy_ui_NOREPEAT);
-	psy_ui_style_set_background_position_px(style, -23.0, -139.0);
-	psy_ui_style_set_position(style, psy_ui_rectangle_make(
-		psy_ui_point_make_px(117.0, 31.0), psy_ui_size_make_px(17.0, 17.0)));	
-	psy_ui_styles_set_style(self, STYLE_MV_EFFECT_MUTE_SELECT, style);
-
-	/* effect:bypass */
-	style = psy_ui_style_allocinit();
-	psy_ui_style_set_background_colour(style,
-		psy_ui_colour_transparent());
-	psy_ui_style_set_position(style, psy_ui_rectangle_make(
-		psy_ui_point_make_px(98.0, 31.0), psy_ui_size_make_px(17.0, 17.0)));	
-	psy_ui_styles_set_style(self, STYLE_MV_EFFECT_BYPASS, style);
-
-	/* effect:bypass:select */
-	style = psy_ui_style_allocinit();
-	psy_ui_style_set_background_id(style, IDB_MACHINESKIN);
-	psy_ui_style_set_background_repeat(style, psy_ui_NOREPEAT);
-	psy_ui_style_set_background_size_px(style, 17, 17);
-	psy_ui_style_set_background_position_px(style, -6.0, -139.0);
-	psy_ui_style_set_position(style, psy_ui_rectangle_make(
-		psy_ui_point_make_px(98.0, 31.0), psy_ui_size_make_px(17.0, 17.0)));	
-	psy_ui_styles_set_style(self, STYLE_MV_EFFECT_BYPASS_SELECT, style);
-
-	/* effect:vu */
-	style = psy_ui_style_allocinit();
-	psy_ui_style_set_background_colour(style,
-		psy_ui_colour_transparent());
-	psy_ui_style_set_position(style, psy_ui_rectangle_make(
-		psy_ui_point_make_px(4.0, 20.0), psy_ui_size_make_px(129.0, 7.0)));	
-	psy_ui_styles_set_style(self, STYLE_MV_EFFECT_VU, style);
-
-	/* effect:vu0 */
-	style = psy_ui_style_allocinit();
-	psy_ui_style_set_background_id(style, IDB_MACHINESKIN);
-	psy_ui_style_set_background_repeat(style, psy_ui_NOREPEAT);
-	psy_ui_style_set_background_size_px(style, 129.0, 7.0);	
-	psy_ui_style_set_background_position_px(style, 0.0, -163.0);	
-	psy_ui_styles_set_style(self, STYLE_MV_EFFECT_VU0, style);
-
-	/* effect:vupeak */
-	style = psy_ui_style_allocinit();
-	psy_ui_style_set_background_id(style, IDB_MACHINESKIN);
-	psy_ui_style_set_background_size_px(style, 1.0, 7.0);	
-	psy_ui_style_set_background_position_px(style, -96.0, -144.0);	
-	psy_ui_styles_set_style(self, STYLE_MV_EFFECT_VUPEAK, style);
-
-	/* effect:pan */
-	style = psy_ui_style_allocinit();	
-	psy_ui_style_set_position(style, psy_ui_rectangle_make(
-		psy_ui_point_make_px(6.0, 33.0), psy_ui_size_make_px(82.0 + 3.0, 13.0)));	
-	psy_ui_styles_set_style(self, STYLE_MV_EFFECT_PAN, style);
-
-	/* effect:pan:slider */
-	style = psy_ui_style_allocinit();	
-	psy_ui_style_set_background_id(style, IDB_MACHINESKIN);
-	psy_ui_style_set_background_repeat(style, psy_ui_NOREPEAT);
-	psy_ui_style_set_background_size_px(style, 6.0, 13.0);
-	psy_ui_style_set_background_position_px(style, -0.0, -139.0);
-	psy_ui_style_set_position(style, psy_ui_rectangle_make(
-		psy_ui_point_make_px(0.0, 0.0), psy_ui_size_make_px(6.0, 13.0)));
-	psy_ui_styles_set_style(self, STYLE_MV_EFFECT_PAN_SLIDER, style);	
-
-	/* arrow */
-	style = psy_ui_style_allocinit();	
-	psy_ui_style_set_size(style, psy_ui_size_make_px(138.0, 52.0));	
-	psy_ui_styles_set_style(self, STYLE_MV_ARROW, style);
-
-	/* check */
-	style = psy_ui_style_allocinit();	
-	psy_ui_styles_set_style(self, STYLE_MV_CHECK, style);
-
-	/* knob */
-	style = psy_ui_style_allocinit();	
-	psy_ui_styles_set_style(self, STYLE_MV_KNOB, style);
-
-	/* label */
-	style = psy_ui_style_allocinit();	
-	psy_ui_styles_set_style(self, STYLE_MV_LABEL, style);
-
-	/* header */
-	style = psy_ui_style_allocinit();	
-	psy_ui_styles_set_style(self, STYLE_MV_HEADER, style);
-
-	/* level */
-	style = psy_ui_style_allocinit();
-	psy_ui_style_set_size(style, psy_ui_size_make_px(16.0, 90.0));
-	psy_ui_styles_set_style(self, STYLE_MV_LEVEL, style);
+	for (i = 0; styles[i] != 0; ++i) {
+		psy_ui_styles_set_style(self, styles[i], psy_ui_style_allocinit());
+	}
+	/* style configuration in machineviewconfig */
 }
 
 void init_machineparam_styles(psy_ui_Styles* self)

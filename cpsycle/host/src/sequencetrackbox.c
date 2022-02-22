@@ -186,7 +186,7 @@ void sequencetrackbox_onlabelclick(SequenceTrackBox* self, psy_ui_Label* sender,
 	psy_audio_sequencecursor_init(&cursor);
 	cursor.orderindex = editposition;
 	if (self->workspace && workspace_song(self->workspace)) {
-		psy_audio_sequence_setcursor(
+		psy_audio_sequence_set_cursor(
 			psy_audio_song_sequence(workspace_song(self->workspace)),
 			cursor);
 	}	

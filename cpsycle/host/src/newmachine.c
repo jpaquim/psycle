@@ -829,6 +829,7 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 {	
 	psy_ui_component_init(&self->component, parent, NULL);
 	newmachine_vtable_init(self);	
+	psy_ui_component_setstyletype(&self->component, STYLE_MV_NEWMACHINE);
 	self->workspace = workspace;	
 	self->mode = NEWMACHINE_APPEND;
 	self->appendstack = FALSE;

@@ -93,6 +93,15 @@ INLINE void psy_audio_sequencecursor_setoffset(psy_audio_SequenceCursor* self,
 	psy_audio_sequencecursor_updatecache(self);
 }
 
+INLINE psy_dsp_big_beat_t psy_audio_sequencecursor_pattern_offset(
+	const psy_audio_SequenceCursor* self)
+{
+	return (self->absolute)
+		? psy_audio_sequencecursor_offset(self) -
+		psy_audio_sequencecursor_seqoffset(self)
+		: psy_audio_sequencecursor_offset(self);
+}
+
 INLINE psy_audio_OrderIndex psy_audio_sequencecursor_orderindex(
 	const psy_audio_SequenceCursor* self)
 {

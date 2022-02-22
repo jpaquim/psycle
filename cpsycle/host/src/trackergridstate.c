@@ -619,105 +619,6 @@ psy_audio_SequenceCursor trackerstate_checkcursorbounds(TrackerState* self,
 	return rv;
 }
 
-ScrollDir trackerstate_nextcol(TrackerState* self, bool wrap)
-{
-	assert(self);
-
-	if (self->pv->pattern) {
-		TrackDef* trackdef;
-		int invalidate = 1;		
-
-		trackdef = trackerstate_trackdef(self, self->pv->cursor.track);
-		if (self->pv->cursor.column == trackdef_numcolumns(trackdef) - 1 &&
-			self->pv->cursor.digit == trackdef_numdigits(trackdef,
-				self->pv->cursor.column) - 1) {
-			if (self->pv->cursor.noteindex + 1 < trackdef_visinotes(trackdef)) {
-				++self->pv->cursor.noteindex;
-				if (!self->trackconfig->multicolumn) {
-					self->pv->cursor.column = 0;
-				} else {
-					self->pv->cursor.column = PATTERNEVENT_COLUMN_CMD;
-				}
-				self->pv->cursor.digit = 0;
-			} else {
-				if (self->pv->cursor.track < patternviewstate_numsongtracks(self->pv) - 1) {
-					self->pv->cursor.column = 0;
-					self->pv->cursor.digit = 0;
-					self->pv->cursor.noteindex = 0;
-					++self->pv->cursor.track;
-					return SCROLL_DIR_RIGHT;
-				} else if (wrap) {
-					self->pv->cursor.column = 0;
-					self->pv->cursor.digit = 0;
-					self->pv->cursor.track = 0;
-					self->pv->cursor.noteindex = 0;
-					return SCROLL_DIR_LEFT;
-				}
-			}
-		} else {			
-			++self->pv->cursor.digit;
-			if (self->pv->cursor.digit >=
-				trackdef_numdigits(trackdef, self->pv->cursor.column)) {
-				++self->pv->cursor.column;
-				self->pv->cursor.digit = 0;
-			}			
-		}		
-	}
-	return SCROLL_DIR_NONE;
-}
-
-ScrollDir trackerstate_prevcol(TrackerState* self, bool wrap)
-{
-	int invalidate = 1;
-
-	assert(self);
-
-	if ((self->pv->cursor.column == 0) || (self->trackconfig->multicolumn &&
-				self->pv->cursor.noteindex > 0 &&
-				self->pv->cursor.column == PATTERNEVENT_COLUMN_CMD) &&
-			self->pv->cursor.digit == 0) {
-		if (self->pv->cursor.noteindex > 0) {
-			TrackDef* trackdef;
-
-			--self->pv->cursor.noteindex;											
-			trackdef = trackerstate_trackdef(self, self->pv->cursor.track);			
-			self->pv->cursor.column = trackdef_numcolumns(trackdef) - 1;
-			self->pv->cursor.digit = trackdef_numdigits(trackdef,
-			self->pv->cursor.column) - 1;			
-		} else if (self->pv->cursor.track > 0) {
-			TrackDef* trackdef;
-
-			--self->pv->cursor.track;
-			trackdef = trackerstate_trackdef(self, self->pv->cursor.track);
-			self->pv->cursor.noteindex = trackdef_visinotes(trackdef) - 1;
-			self->pv->cursor.column = trackdef_numcolumns(trackdef) - 1;
-			self->pv->cursor.digit = trackdef_numdigits(trackdef,
-				self->pv->cursor.column) - 1;
-			return SCROLL_DIR_LEFT;			
-		} else if (wrap) {
-			TrackDef* trackdef;
-
-			self->pv->cursor.track = patternviewstate_numsongtracks(self->pv) - 1;
-			trackdef = trackerstate_trackdef(self, self->pv->cursor.track);
-			self->pv->cursor.column = trackdef_numcolumns(trackdef) - 1;
-			self->pv->cursor.digit = trackdef_numdigits(trackdef,
-				self->pv->cursor.column) - 1;
-			return SCROLL_DIR_RIGHT;			
-		}
-	} else if (self->pv->cursor.digit > 0) {
-		--self->pv->cursor.digit;
-	} else {
-		TrackDef* trackdef;
-
-		trackdef = trackerstate_trackdef(self,
-			self->pv->cursor.track);
-		--self->pv->cursor.column;
-		self->pv->cursor.digit = trackdef_numdigits(trackdef,
-			self->pv->cursor.column) - 1;		
-	}
-	return SCROLL_DIR_NONE;
-}
-
 bool trackerstate_testplaybar(TrackerState* self,
 	psy_dsp_big_beat_t playposition, psy_dsp_big_beat_t offset)
 {
@@ -762,18 +663,21 @@ psy_audio_SequenceCursor trackerstate_makecursor(TrackerState* self,
 {
 	psy_audio_SequenceCursor rv;
 	TrackDef* trackdef;
-	double cpx;
-	psy_audio_Sequence* sequence;
+	double cpx;	
+	psy_audio_Sequence* sequence;	
 
 	rv = self->pv->cursor;
-	sequence = patternviewstate_sequence(self->pv);
-	if (sequence) {
-		psy_audio_sequencecursor_updateseqoffset(&rv,
-			sequence);
-	}
 	rv.absolute = !self->pv->singlemode;
 	rv.offset = trackerstate_pxtobeat(self, pt.y);
-	rv.lpb = patternviewstate_lpb(self->pv);
+	rv.lpb = patternviewstate_lpb(self->pv);	
+	sequence = patternviewstate_sequence(self->pv);
+	if (rv.absolute && sequence) {							
+		uintptr_t order;
+
+		order = psy_audio_sequence_order(sequence, rv.track, rv.offset);
+		rv.orderindex.order = order;
+		psy_audio_sequencecursor_updateseqoffset(&rv, sequence);			
+	}
 	if (patternviewstate_pattern(self->pv) &&
 		rv.offset >= psy_audio_pattern_length(patternviewstate_pattern(self->pv))) {
 		if (self->pv->singlemode) {

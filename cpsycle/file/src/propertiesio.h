@@ -20,13 +20,34 @@ extern "C" {
 #define PROPERTIESIO_DEFAULT_COMMENT 0
 #define PROPERTIESIO_CPP_COMMENT 1
 
-typedef struct psy_PropertyReader {
-	char* path;
+/* psy_PropertyReaderConfig */
+typedef struct psy_PropertyReaderConfig {
 	bool allowappend;
 	bool cpp_comment;
 	bool parse_types;
 	bool ignore_sections;
 	bool skip_double_quotes;
+} psy_PropertyReaderConfig;
+
+void psy_propertyreaderconfig_init(psy_PropertyReaderConfig*);
+
+INLINE psy_PropertyReaderConfig psy_propertyreaderconfig_make(bool allowappend,
+		bool cpp_comment, bool parse_types, bool ignore_sections,
+		bool skip_double_quotes) {
+	psy_PropertyReaderConfig rv;
+
+	rv.allowappend = allowappend;
+	rv.cpp_comment = cpp_comment;
+	rv.parse_types = parse_types;
+	rv.ignore_sections = ignore_sections;
+	rv.skip_double_quotes = skip_double_quotes;
+	return rv;
+}
+
+/* psy_PropertyReader */
+typedef struct psy_PropertyReader {
+	char* path;
+	psy_PropertyReaderConfig config;
 	int ischoice;
 	psy_Property* root;
 	psy_Property* curr;
@@ -35,33 +56,35 @@ typedef struct psy_PropertyReader {
 
 void psy_propertyreader_init(psy_PropertyReader*, psy_Property* root,
 	const char* path);
+void psy_propertyreader_init_config(psy_PropertyReader*, psy_Property* root,
+	const char* path, psy_PropertyReaderConfig);
 void psy_propertyreader_dispose(psy_PropertyReader*);
 
 int psy_propertyreader_load(psy_PropertyReader*);
 
 INLINE void psy_propertyreader_allow_cpp_comments(psy_PropertyReader* self)
 {
-	self->cpp_comment = TRUE;
+	self->config.cpp_comment = TRUE;
 }
 
 INLINE void psy_propertyreader_allow_append(psy_PropertyReader* self)
 {
-	self->allowappend = TRUE;
+	self->config.allowappend = TRUE;
 }
 
 INLINE void psy_propertyreader_parse_types(psy_PropertyReader* self)
 {
-	self->parse_types = TRUE;
+	self->config.parse_types = TRUE;
 }
 
 INLINE void psy_propertyreader_ignore_sections(psy_PropertyReader* self)
 {
-	self->ignore_sections = TRUE;
+	self->config.ignore_sections = TRUE;
 }
 
 INLINE void psy_propertyreader_skip_double_quotes(psy_PropertyReader* self)
 {
-	self->skip_double_quotes = TRUE;
+	self->config.skip_double_quotes = TRUE;
 }
 
 typedef struct psy_PropertyWriter {

@@ -127,10 +127,11 @@ typedef struct Pianogrid {
 
 void pianogrid_init(Pianogrid*, psy_ui_Component* parent, KeyboardState*,
 	PianoGridState*, Workspace*);
+
 void pianogrid_invalidateline(Pianogrid*, psy_dsp_big_beat_t offset);
 void pianogrid_invalidatecursor(Pianogrid*);
-void pianogrid_setcursor(Pianogrid*, psy_audio_SequenceCursor);
-void pianogrid_storecursor(Pianogrid*);
+void pianogrid_update_cursor(Pianogrid*, psy_audio_SequenceCursor);
+void pianogrid_set_cursor(Pianogrid*, psy_audio_SequenceCursor);
 void pianogrid_onpatternchange(Pianogrid*, psy_audio_Pattern*);
 void pianogrid_settrackdisplay(Pianogrid*, PianoTrackDisplay);
 

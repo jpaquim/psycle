@@ -36,7 +36,7 @@ typedef struct TrackerGrid {
 	psy_audio_SequenceCursor oldcursor;
 	psy_audio_SequenceCursor lastdragcursor;	
 	int chordmodestarting;
-	bool chordmode;
+	bool chord;
 	uintptr_t chordbegin;
 	uintptr_t dragtrack;
 	uintptr_t dragparamcol;
@@ -117,8 +117,6 @@ typedef struct TrackerView {
 
 void trackerview_init(TrackerView*, psy_ui_Component* parent, TrackerState*,
 	Workspace*);
-
-void trackerview_updatefollowsong(TrackerView*);
 
 #ifdef __cplusplus
 }

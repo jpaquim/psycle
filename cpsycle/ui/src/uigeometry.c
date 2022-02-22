@@ -8,6 +8,7 @@
 
 #include "uigeometry.h"
 /* std */
+#include <stdlib.h>
 #include <math.h>
 
 /* extern */
@@ -267,4 +268,60 @@ void psy_ui_realmargin_floor(psy_ui_RealMargin* self)
 	self->right = floor(self->right);
 	self->bottom = floor(self->bottom);
 	self->left = floor(self->left);
+}
+
+static void psy_ui_position_activate(psy_ui_Position*);
+
+static psy_ui_Rectangle default_rectangle;
+bool default_rectangle_initialized = FALSE;
+
+void psy_ui_position_init(psy_ui_Position* self)
+{
+	if (!default_rectangle_initialized) {
+		psy_ui_rectangle_init(&default_rectangle);
+		psy_ui_rectangle_deactivate(&default_rectangle);
+		default_rectangle_initialized = TRUE;
+	}
+	self->rectangle = &default_rectangle;
+}
+
+void psy_ui_position_dispose(psy_ui_Position* self)
+{
+	if (psy_ui_position_is_active(self)) {
+		free(self->rectangle);
+	}
+	self->rectangle = NULL;
+}
+
+void psy_ui_position_set_rectangle(psy_ui_Position* self, psy_ui_Rectangle r)
+{
+	psy_ui_position_activate(self);
+	*self->rectangle = r;
+}
+
+void psy_ui_position_set_topleft(psy_ui_Position* self, psy_ui_Point pt)
+{
+	psy_ui_position_activate(self);
+	self->rectangle->topleft = pt;
+}
+
+void psy_ui_position_set_size(psy_ui_Position* self, psy_ui_Size size)
+{
+	psy_ui_position_activate(self);
+	self->rectangle->size = size;
+}
+
+void psy_ui_position_activate(psy_ui_Position* self)
+{
+	if (psy_ui_position_is_active(self)) {
+		free(self->rectangle);
+	}
+	self->rectangle = (psy_ui_Rectangle*)malloc(sizeof(psy_ui_Rectangle));
+	psy_ui_rectangle_init(self->rectangle);
+	psy_ui_rectangle_deactivate(self->rectangle);
+}
+
+bool psy_ui_position_is_active(const psy_ui_Position* self)
+{
+	return (self->rectangle != &default_rectangle);
 }

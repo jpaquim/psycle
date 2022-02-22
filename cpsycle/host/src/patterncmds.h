@@ -25,11 +25,14 @@ typedef struct InsertCommand {
 	psy_audio_PatternEvent event;
 	psy_audio_PatternEvent oldevent;
 	bool insert;
-	Workspace* workspace;
+	/* references */
+	psy_audio_Sequence* sequence;
+	psy_audio_Player* player;
 } InsertCommand;
 
 InsertCommand* insertcommand_allocinit(psy_audio_Pattern*,
-	psy_audio_SequenceCursor, psy_audio_PatternEvent, Workspace*);
+	psy_audio_SequenceCursor, psy_audio_PatternEvent,
+	psy_audio_Sequence*, psy_audio_Player*);
 
 /* RemoveCommand */
 typedef struct RemoveCommand {
@@ -39,12 +42,14 @@ typedef struct RemoveCommand {
 	psy_audio_Pattern* pattern;
 	psy_audio_PatternEvent event;
 	psy_audio_PatternEvent oldevent;
-	int remove;
-	Workspace* workspace;
+	bool remove;
+	/* references */
+	psy_audio_Sequence* sequence;
+	psy_audio_Player* player;
 } RemoveCommand;
 
 RemoveCommand* removecommand_allocinit(psy_audio_Pattern*,
-	psy_audio_SequenceCursor, Workspace*);
+	psy_audio_SequenceCursor, psy_audio_Sequence*, psy_audio_Player*);
 
 /* BlockTranspose */
 typedef struct BlockTransposeCommand {

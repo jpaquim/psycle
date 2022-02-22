@@ -302,15 +302,18 @@ static void onalign(psy_ui_Component* self)
 
 		component = (psy_ui_Component*)p->entry;
 		style = psy_ui_componentstyle_currstyle(&component->style);
-		if (psy_ui_rectangle_is_all_active(&style->position)) {
-			psy_ui_component_setposition(component, style->position);
+		if (psy_ui_position_is_active(&style->position)) {
+			psy_ui_component_setposition(component, *style->position.rectangle);
 		}
 	}
 	psy_list_free(q);
 	q = NULL;
 }
-static void onpreferredsize(psy_ui_Component*, const psy_ui_Size* limit, psy_ui_Size* rv);
-static void onpreferredscrollsize(psy_ui_Component*, const psy_ui_Size* limit, psy_ui_Size* rv);
+
+static void onpreferredsize(psy_ui_Component*, const psy_ui_Size* limit,
+	psy_ui_Size* rv);
+static void onpreferredscrollsize(psy_ui_Component*, const psy_ui_Size* limit,
+	psy_ui_Size* rv);
 static bool onclose(psy_ui_Component* self) { return TRUE; }
 
 static void onmousedown(psy_ui_Component* self, psy_ui_MouseEvent* ev)
@@ -960,7 +963,7 @@ int psy_ui_component_visible(psy_ui_Component* self)
 	return self->vtable->visible(self);	
 }
 
-int psy_ui_component_drawvisible(psy_ui_Component* self)
+bool psy_ui_component_drawvisible(psy_ui_Component* self)
 {
 	return self->vtable->drawvisible(self);
 }

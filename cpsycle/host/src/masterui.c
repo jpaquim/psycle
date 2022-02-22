@@ -66,17 +66,14 @@ void masterui_init(MasterUi* self, psy_ui_Component* parent,
 }
 
 void masterui_move(MasterUi* self, psy_ui_Point topleft)
-{	
-	const psy_ui_TextMetric* tm;
-
+{
 	assert(self);
 
 	masterui_super_vtable.move(&self->component, topleft);
-	if (!self->preventmachinepos) {
-		tm = psy_ui_component_textmetric(&self->component);
+	if (!self->preventmachinepos) {		
 		psy_audio_machine_setposition(self->machine,
-			psy_ui_value_px(&topleft.x, tm, NULL),
-			psy_ui_value_px(&topleft.y, tm, NULL));
+			psy_ui_value_px(&topleft.x, NULL, NULL),
+			psy_ui_value_px(&topleft.y, NULL, NULL));
 	}
 }
 

@@ -579,6 +579,19 @@ INLINE psy_ui_Rectangle psy_ui_rectangle_make_px(const psy_ui_RealRectangle* r)
 	return rv;
 }
 
+typedef struct psy_ui_Position {
+	psy_ui_Rectangle* rectangle;	
+} psy_ui_Position;
+
+void psy_ui_position_init(psy_ui_Position*);
+void psy_ui_position_dispose(psy_ui_Position*);
+
+void psy_ui_position_set_rectangle(psy_ui_Position*, psy_ui_Rectangle);
+void psy_ui_position_set_topleft(psy_ui_Position*, psy_ui_Point);
+void psy_ui_position_set_size(psy_ui_Position*, psy_ui_Size);
+
+bool psy_ui_position_is_active(const psy_ui_Position*);
+
 typedef struct psy_ui_Margin {
 	psy_ui_Value top;
 	psy_ui_Value right;
@@ -691,6 +704,9 @@ INLINE bool psy_ui_realmargin_iszero(const psy_ui_RealMargin* self)
 		self->right == 0.0 &&
 		self->bottom == 0.0);
 }
+
+
+
 
 #ifdef __cplusplus
 }

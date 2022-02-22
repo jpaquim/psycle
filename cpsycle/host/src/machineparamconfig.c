@@ -179,10 +179,7 @@ void machineparamconfig_setdialbpm(MachineParamConfig* self,
 {
 	assert(self);
 
-	psy_property_set_str(self->theme, "machinedial_bmp", filename);
-	// machineparamconfig_releaseskin();
-	/* forces a reload of the dialbitmap */
-	// machineparamconfig_skin(self);
+	psy_property_set_str(self->theme, "machinedial_bmp", filename);	
 }
 
 psy_ui_FontInfo machineparamconfig_fontinfo(const MachineParamConfig* self)
@@ -284,71 +281,3 @@ void machineparamconfig_updatestyles(MachineParamConfig* self)
 		}				
 	}
 }
-
-psy_ui_RealSize mpfsize(const psy_ui_TextMetric* tm, uintptr_t paramtype,
-	bool issmall)
-{
-	static float SMALLDIV = 1.6f;
-	psy_ui_RealSize rv;
-	psy_ui_Style* style;
-
-	assert(tm);
-
-	switch (paramtype) {
-	case MPF_IGNORE:
-		rv.height = 0;
-		rv.width = 0;
-		break;
-	case MPF_CHECK: {
-		psy_ui_Style* checkoff_style;
-
-		checkoff_style = psy_ui_style(STYLE_MACPARAM_CHECKOFF);		
-		rv.height = psy_max(
-			checkoff_style->background.size.height,
-			tm->tmHeight);
-		rv.width = checkoff_style->background.size.width +
-			tm->tmAveCharWidth * 5;
-		break; }
-	case MPF_SLIDER: {
-		psy_ui_Style* checkoff_style;
-		psy_ui_Style* vuon_style;
-
-		checkoff_style = psy_ui_style(STYLE_MACPARAM_CHECKOFF);		
-		vuon_style = psy_ui_style(STYLE_MACPARAM_VUON);
-		rv = checkoff_style->background.size;
-		if (rv.width < tm->tmAveCharWidth * 30) {
-			rv.width = tm->tmAveCharWidth * 30;
-		}
-		if (issmall) {
-			rv.width = rv.width / SMALLDIV;
-		}
-		if (rv.width < vuon_style->background.size.width +
-			checkoff_style->background.size.width + 50 +
-			tm->tmAveCharWidth * 5) {
-			rv.width = vuon_style->background.size.width +
-				checkoff_style->background.size.width + 50 +
-				tm->tmAveCharWidth * 5;
-		}
-		break; }
-	case MPF_LEVEL: {
-		psy_ui_Style* vuon_style;
-
-		vuon_style = psy_ui_style(STYLE_MACPARAM_VUON);
-		rv.height = vuon_style->background.size.height;
-		style = psy_ui_style(STYLE_MACPARAM_SLIDER);
-		rv.width = style->background.size.width;
-		if (issmall) {
-			rv.width = rv.width / SMALLDIV;
-		}
-		break; }
-	default:
-		rv.width = tm->tmAveCharWidth * 30;
-		rv.height = tm->tmHeight * 2;
-		if (issmall) {
-			rv.width = rv.width / SMALLDIV;
-		}
-		break;
-	}
-	return rv;
-}
-

@@ -277,7 +277,7 @@ void seqeditpatternentry_onmousedown(SeqEditPatternEntry* self,
 					VIEW_ID_PATTERNVIEW) &&
 					psy_audio_orderindex_equal(&self->seqeditorentry.seqpos, seqeditpos)) {
 				if (self->seqeditorentry.state->workspace && workspace_song(self->seqeditorentry.state->workspace)) {
-					psy_audio_sequence_setcursor(
+					psy_audio_sequence_set_cursor(
 						psy_audio_song_sequence(workspace_song(self->seqeditorentry.state->workspace)),
 						cursor);
 				}				
@@ -286,7 +286,7 @@ void seqeditpatternentry_onmousedown(SeqEditPatternEntry* self,
 			} else {
 				cursor.offset = 0;
 				if (self->seqeditorentry.state->workspace && workspace_song(self->seqeditorentry.state->workspace)) {
-					psy_audio_sequence_setcursor(
+					psy_audio_sequence_set_cursor(
 						psy_audio_song_sequence(workspace_song(self->seqeditorentry.state->workspace)),
 						cursor);
 				}				

@@ -376,7 +376,7 @@ void seqviewtrack_onmousedown(SeqViewTrack* self, psy_ui_MouseEvent* ev)
 				
 				cursor = self->state->cmds->workspace->song->sequence.cursor;
 				cursor.orderindex = self->state->cmd_orderindex;
-				psy_audio_sequence_setcursor(
+				psy_audio_sequence_set_cursor(
 					&self->state->cmds->workspace->song->sequence, cursor);
 			}
 		} else {
@@ -401,7 +401,7 @@ void seqviewtrack_onmousedoubleclick(SeqViewTrack* self, psy_ui_MouseEvent* ev)
 			psy_ui_value_px(&self->state->lineheight,
 				psy_ui_component_textmetric(&self->component), NULL));
 		cursor.orderindex = self->state->cmd_orderindex;
-		psy_audio_sequence_setcursor(
+		psy_audio_sequence_set_cursor(
 			&self->state->cmds->workspace->song->sequence, cursor);		
 		sequencecmds_changeplayposition(self->state->cmds);		
 	}

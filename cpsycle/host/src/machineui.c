@@ -97,11 +97,15 @@ void vuui_init(VuUi* self, psy_ui_Component* parent, psy_audio_Machine* machine,
 	vudisplay_init(&self->vu);
 }
 
+bool vuui_update(VuUi* self)
+{
+	return vudisplay_update(&self->vu, psy_audio_machine_buffermemory(
+		self->machine));
+}
+
 void vuui_ondraw(VuUi* self, psy_ui_Graphics* g)
 {
-	if (!machineui_vumeter_prevented()) {
-		vudisplay_update(&self->vu, psy_audio_machine_buffermemory(
-			self->machine));
+	if (!machineui_vumeter_prevented()) {		
 		vuui_drawdisplay(self, g);
 		vuui_drawpeak(self, g);
 	}
@@ -245,7 +249,7 @@ void panui_onalign(PanUi* self)
 
 		size = psy_ui_component_size_px(&self->component);
 		slidersize = psy_ui_component_size_px(&self->slider);
-		position = style->position;
+		position = *style->position.rectangle;
 		position.topleft.x = psy_ui_value_make_px(
 			psy_audio_machine_panning(self->machine) *
 			((double)size.width - (slidersize.width)));
@@ -268,12 +272,16 @@ void vuvalues_init(VuValues* self)
 	self->volumemaxcounterlife = 0;
 }
 
-void vuvalues_update(VuValues* self, psy_audio_Buffer* buffer)
+bool vuvalues_update(VuValues* self, psy_audio_Buffer* buffer)
 {		
+	psy_dsp_amp_t temp;
+
+	temp = self->volumedisplay;
 	self->volumedisplay = (buffer)
 		? psy_audio_buffer_rmsdisplay(buffer)
 		: (psy_dsp_amp_t)0.f;
 	vuvalues_tickcounter(self);
+	return (fabs(temp - self->volumedisplay) >= 0.01);
 }
 
 void vuvalues_tickcounter(VuValues* self)
@@ -292,15 +300,15 @@ static void vudisplay_drawdisplay(VuDisplay*, psy_ui_Graphics*, psy_ui_Style* vu
 static void vudisplay_drawpeak(VuDisplay*, psy_ui_Graphics*, psy_ui_Style* vu,
 	psy_ui_Style* vupeak);
 
-// implementation
+/* implementation */
 void vudisplay_init(VuDisplay* self)
 {	
-	vuvalues_init(&self->vuvalues);
+	vuvalues_init(&self->vuvalues);	
 }
 
-void vudisplay_update(VuDisplay* self, psy_audio_Buffer* buffer)
+bool vudisplay_update(VuDisplay* self, psy_audio_Buffer* buffer)
 {
-	vuvalues_update(&self->vuvalues, buffer);
+	return vuvalues_update(&self->vuvalues, buffer);
 }
 
 void vudisplay_draw(VuDisplay* self, psy_ui_Graphics* g, psy_ui_Style* vu, psy_ui_Style* vupeak)

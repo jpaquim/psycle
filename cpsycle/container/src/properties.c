@@ -47,7 +47,8 @@ void psy_propertyitem_init(psy_PropertyItem* self)
 	self->allowappend = FALSE;
 	self->readonly = FALSE;
 	self->translate = TRUE;
-	self->id = -1;	
+	self->id = -1;
+	self->marked = FALSE;
 }
 
 void psy_propertyitem_dispose(psy_PropertyItem* self)
@@ -55,12 +56,17 @@ void psy_propertyitem_dispose(psy_PropertyItem* self)
 	assert(self);	
 
 	free(self->key);
+	self->key = NULL;
 	free(self->text);
-	free(self->shorttext);	
+	self->text = NULL;
+	free(self->shorttext);
+	self->shorttext = NULL;
 	free(self->comment);
+	self->comment = NULL;
 	if (self->typ == PSY_PROPERTY_TYPE_STRING ||
 		self->typ == PSY_PROPERTY_TYPE_FONT) {
 		free(self->value.s);
+		self->value.s = NULL;
 	}
 }
 
@@ -91,7 +97,8 @@ void psy_propertyitem_copy(psy_PropertyItem* self, const psy_PropertyItem*
 	self->save = source->save;
 	self->id = source->id;
 	self->readonly = source->readonly;
-	self->save = source->save;	
+	self->save = source->save;
+	self->marked = source->marked;
 }
 
 // psy_Property
@@ -161,7 +168,7 @@ psy_Property* psy_property_allocinit_key(const char* key)
 
 	rv = (psy_Property*)malloc(sizeof(psy_Property));
 	if (rv) {
-		psy_property_init_key(rv, key);		
+		psy_property_init_key(rv, key);
 	}
 	return rv;
 }

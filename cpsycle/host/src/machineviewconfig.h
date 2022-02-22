@@ -32,7 +32,7 @@ typedef struct MachineViewConfig {
 	psy_Property* machineview;
 	psy_Property* stackview;
 	psy_Property* theme;	
-	psy_Property* machineskins;
+	psy_Property* machineskins;	
 	/* references */
 	psy_Property* parent;
 	struct DirConfig* dirconfig;
@@ -45,10 +45,10 @@ void machineviewconfig_setdirectories(MachineViewConfig*, struct DirConfig*);
 void machineviewconfig_update_machine_skins(MachineViewConfig*);
 void machineviewconfig_resettheme(MachineViewConfig*);
 const char* machineviewconfig_machine_skin_name(MachineViewConfig* self);
-void machineviewconfig_loadbitmap(MachineViewConfig*);
 void machineviewconfig_settheme(MachineViewConfig*, psy_Property*);
-void machineviewconfig_write_styles(MachineViewConfig*);
-void machineviewconfig_read_styles(MachineViewConfig*);
+void machineviewconfig_load(MachineViewConfig*);
+void machineviewconfig_save(MachineViewConfig*);
+
 bool machineviewconfig_hasthemeproperty(const MachineViewConfig*,
 	psy_Property*);
 bool machineviewconfig_hasproperty(const MachineViewConfig*, psy_Property*);

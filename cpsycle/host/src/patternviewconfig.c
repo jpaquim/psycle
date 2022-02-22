@@ -749,6 +749,7 @@ void patternviewconfig_loadbitmap(PatternViewConfig* self)
 		psy_path_dispose(&filename);
 		if (psy_strlen(path) > 0) {		
 			psy_Property* coords;
+
 			coords = psy_property_allocinit_key(NULL);
 			if (skin_load_pattern_header(coords, path) == PSY_OK) {
 				const char* s;
@@ -756,6 +757,7 @@ void patternviewconfig_loadbitmap(PatternViewConfig* self)
 				psy_ui_RealRectangle src;
 				psy_ui_RealPoint dst;
 				psy_ui_Style* style;
+				psy_Property* transparency;
 				
 				src = psy_ui_realrectangle_zero();
 				dst = psy_ui_realpoint_zero();
@@ -829,12 +831,27 @@ void patternviewconfig_loadbitmap(PatternViewConfig* self)
 					patternviewconfig_setsource(self, &src, vals);
 				}
 				if (s = psy_property_at_str(coords, "playing_on_dest", 0)) {
-					skin_psh_values(s, 2, vals);
+						skin_psh_values(s, 2, vals);
 					patternviewconfig_setdest(self, &dst, vals, 2);
 					patternviewconfig_setstylecoords(self,
 						STYLE_PV_TRACK_HEADER_PLAY,
 						STYLE_PV_TRACK_HEADER_PLAY_SELECT,
 						src, dst);
+				}
+				if (transparency = psy_property_at(coords, "transparency",
+						PSY_PROPERTY_TYPE_NONE)) {
+					if (transparency->item.marked) {
+						psy_ui_Colour cltransparency;
+						int i;
+
+						cltransparency = psy_ui_colour_make(
+							strtol(psy_property_item_str(transparency), 0, 16));
+						for (i = 0; styles[i] != 0; ++i) {
+							style = psy_ui_style(styles[i]);
+							psy_ui_bitmap_settransparency(&style->background.bitmap,
+								cltransparency);
+						}
+					}										
 				}
 			}
 			psy_property_deallocate(coords);

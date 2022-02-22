@@ -381,7 +381,19 @@ int view_dev_visible(psy_ui_ViewComponentImp* self)
 
 int view_dev_drawvisible(psy_ui_ViewComponentImp* self)
 {
-	return self->visible;
+	psy_ui_Component* curr;
+	bool rv;
+
+	curr = self->component;
+	rv = TRUE;
+	while (curr) {
+		if (!psy_ui_component_visible(curr)) {
+			rv = FALSE;
+			break;
+		}
+		curr = psy_ui_component_parent(curr);
+	}
+	return rv;
 }
 
 void view_dev_move(psy_ui_ViewComponentImp* self, psy_ui_Point origin)
