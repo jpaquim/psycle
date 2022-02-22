@@ -54,15 +54,15 @@ typedef struct VuValues {
 
 void vuvalues_init(VuValues*);
 void vuvalues_tickcounter(VuValues*);
-void vuvalues_update(VuValues*, psy_audio_Buffer*);
+bool vuvalues_update(VuValues*, psy_audio_Buffer*);
 
 typedef struct VuDisplay {
-	VuValues vuvalues;
+	VuValues vuvalues;	
 } VuDisplay;
 
 void vudisplay_init(VuDisplay*);
 
-void vudisplay_update(VuDisplay*, psy_audio_Buffer*);
+bool vudisplay_update(VuDisplay*, psy_audio_Buffer*);
 void vudisplay_draw(VuDisplay*, psy_ui_Graphics*,
 	psy_ui_Style* vu, psy_ui_Style* vupeak);
 
@@ -79,6 +79,13 @@ typedef struct VuUi {
 
 void vuui_init(VuUi*, psy_ui_Component* parent, psy_audio_Machine*,
 	uintptr_t vu_style, uintptr_t vu0_style, uintptr_t vupeak_style);
+
+bool vuui_update(VuUi*);
+
+INLINE psy_ui_Component* vuui_base(VuUi* self)
+{
+	return &self->component;
+}
 
 typedef struct PanUi {
 	/* inherits */

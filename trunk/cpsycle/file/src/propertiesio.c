@@ -43,6 +43,19 @@ static int _httoi(const char* value)
 	return (int)strtol(value, 0, 16);
 }
 
+/* psy_PropertyReaderConfig */
+
+/* implementation */
+void psy_propertyreaderconfig_init(psy_PropertyReaderConfig* self)
+{
+	self->allowappend = FALSE;
+	self->cpp_comment = FALSE;
+	self->parse_types = FALSE;
+	self->ignore_sections = FALSE;
+	self->skip_double_quotes = FALSE;
+}
+
+/* psy_PropertyReader */
 
 /* prototypes */
 static void psy_propertyreader_onreadkey(psy_PropertyReader*,
@@ -59,11 +72,17 @@ void psy_propertyreader_init(psy_PropertyReader* self, psy_Property* root,
 	self->root = root;
 	self->path = psy_strdup(path);
 	self->curr = self->choice = NULL;
-	self->allowappend = FALSE;
-	self->cpp_comment = FALSE;
-	self->parse_types = FALSE;
-	self->ignore_sections = FALSE;
-	self->skip_double_quotes = FALSE;
+	psy_propertyreaderconfig_init(&self->config);
+	self->ischoice = 0;
+}
+
+void psy_propertyreader_init_config(psy_PropertyReader* self, psy_Property* root,
+	const char* path, psy_PropertyReaderConfig config)
+{
+	self->root = root;
+	self->path = psy_strdup(path);
+	self->curr = self->choice = NULL;
+	self->config = config;
 	self->ischoice = 0;
 }
 
@@ -84,7 +103,7 @@ int psy_propertyreader_load(psy_PropertyReader* self)
 	self->choice = NULL;
 	self->ischoice = 0;	
 	psy_inireader_init(&inireader);
-	inireader.cpp_comment = self->cpp_comment;
+	inireader.cpp_comment = self->config.cpp_comment;
 	psy_signal_connect(&inireader.signal_read, self,
 		psy_propertyreader_onreadkey);
 	psy_signal_connect(&inireader.signal_section, self,
@@ -100,13 +119,14 @@ void psy_propertyreader_onreadkey(psy_PropertyReader* self, psy_IniReader* sende
 	bool append;
 	psy_Property* p = psy_property_at(self->curr, key, PSY_PROPERTY_TYPE_NONE);
 
-	append = self->allowappend || (self->curr && self->curr->item.allowappend);
+	append = self->config.allowappend || (self->curr && self->curr->item.allowappend);
 	if (p) {
 		const char* valstr;
 		char* typestr;
 
 		typestr = NULL;
-		if (self->parse_types) {			
+		p->item.marked = TRUE;
+		if (self->config.parse_types) {
 			psy_propertyreader_extract_type(self, value, &typestr, &valstr);
 		} else {
 			valstr = value;			
@@ -129,7 +149,7 @@ void psy_propertyreader_onreadkey(psy_PropertyReader* self, psy_IniReader* sende
 			self->ischoice = 1;
 			break;
 		case PSY_PROPERTY_TYPE_STRING:
-			if (self->skip_double_quotes && value && value[0] == '\"') {
+			if (self->config.skip_double_quotes && value && value[0] == '\"') {
 				char* temp;
 
 				temp = psy_strdup(value + 1);
@@ -195,7 +215,7 @@ bool psy_propertyreader_extract_type(psy_PropertyReader* self,
 void psy_propertyreader_onreadsection(psy_PropertyReader* self, psy_IniReader* sender,
 	const char* key)
 {
-	if (!self->ignore_sections) {
+	if (!self->config.ignore_sections) {
 		psy_Property* p;
 		psy_Property* prev = 0;
 
@@ -208,7 +228,7 @@ void psy_propertyreader_onreadsection(psy_PropertyReader* self, psy_IniReader* s
 			self->curr = p;
 		} else if (self->ischoice) {
 			self->curr = self->choice;
-		} else if ((strcmp(key, "root") != 0) && self->allowappend) {
+		} else if ((strcmp(key, "root") != 0) && self->config.allowappend) {
 			char_dyn_t* trimkey;
 
 			self->ischoice = 0;

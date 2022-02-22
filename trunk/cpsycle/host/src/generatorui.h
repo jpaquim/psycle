@@ -31,6 +31,7 @@ typedef struct GeneratorUi {
 	psy_audio_Machine* machine;
 	psy_audio_Machines* machines;
 	ParamViews* paramviews;
+	Workspace* workspace;
 } GeneratorUi;
 
 void generatorui_init(GeneratorUi*, psy_ui_Component* parent, uintptr_t slot,

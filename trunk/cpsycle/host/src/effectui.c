@@ -77,7 +77,8 @@ void effectui_init(EffectUi* self, psy_ui_Component* parent,
 	panui_init(&self->pan, &self->component, self->machine,
 		STYLE_MV_EFFECT_PAN, STYLE_MV_EFFECT_PAN_SLIDER);
 	vuui_init(&self->vu, &self->component, self->machine,
-		STYLE_MV_EFFECT_VU, STYLE_MV_EFFECT_VU0, STYLE_MV_EFFECT_VUPEAK);	
+		STYLE_MV_EFFECT_VU, STYLE_MV_EFFECT_VU0, STYLE_MV_EFFECT_VUPEAK);
+	psy_ui_component_starttimer(&self->component, 0, 50);
 }
 
 void effectui_move(EffectUi* self, psy_ui_Point topleft)
@@ -85,33 +86,35 @@ void effectui_move(EffectUi* self, psy_ui_Point topleft)
 	assert(self);
 
 	effectui_super_vtable.move(&self->component, topleft);	
-	if (!self->preventmachinepos) {
+	if (!self->preventmachinepos) {		
 		psy_audio_machine_setposition(self->machine,
-			psy_ui_value_px(&topleft.x, psy_ui_component_textmetric(&self->component), NULL),
-			psy_ui_value_px(&topleft.y, psy_ui_component_textmetric(&self->component), NULL));
+			psy_ui_value_px(&topleft.x, NULL, NULL),
+			psy_ui_value_px(&topleft.y, NULL, NULL));
 	}
 }
 
 void effectui_onmousedown(EffectUi* self, psy_ui_MouseEvent* ev)
 {	
 	if (psy_ui_mouseevent_button(ev) == 1) {
-		if (psy_audio_machine_slot(self->machine) != psy_audio_machines_selected(self->machines)) {
+		if (psy_audio_machine_slot(self->machine) !=
+				psy_audio_machines_selected(self->machines)) {
 			if (psy_ui_mouseevent_ctrlkey(ev)) {
 				psy_audio_machineselection_select(&self->machines->selection,
-					psy_audio_machineindex_make(psy_audio_machine_slot(self->machine)));
+					psy_audio_machineindex_make(psy_audio_machine_slot(
+						self->machine)));
 			} else {
 				psy_audio_machines_select(self->machines,
 					psy_audio_machine_slot(self->machine));
 			}
 		}
-		if (ev->event.target_ == &self->bypass) {
+		if (psy_ui_mouseevent_target(ev) == &self->bypass) {
 			if (psy_audio_machine_bypassed(self->machine)) {
 				psy_audio_machine_unbypass(self->machine);
 			} else {
 				psy_audio_machine_bypass(self->machine);
 			}
 			psy_ui_mouseevent_stop_propagation(ev);
-		} else if (ev->event.target_ == &self->mute) {		
+		} else if (psy_ui_mouseevent_target(ev) == &self->mute) {
 			if (psy_audio_machine_muted(self->machine)) {
 				psy_audio_machine_unmute(self->machine);
 			} else {
@@ -142,12 +145,16 @@ void effectui_ontimer(EffectUi* self, uintptr_t timerid)
 		psy_ui_component_removestylestate(&self->mute,
 			psy_ui_STYLESTATE_SELECT);
 	}
-	if (psy_audio_machines_soloed(self->machines) ==
-			psy_audio_machine_slot(self->machine)) {
+	if (psy_audio_machine_bypassed(self->machine)) {
 		psy_ui_component_addstylestate(&self->bypass,
 			psy_ui_STYLESTATE_SELECT);
 	} else {
 		psy_ui_component_removestylestate(&self->bypass,
 			psy_ui_STYLESTATE_SELECT);
+	}
+	if (psy_ui_component_drawvisible(&self->component)) {
+		if (vuui_update(&self->vu)) {
+			psy_ui_component_invalidate(vuui_base(&self->vu));
+		}
 	}
 }

@@ -850,12 +850,14 @@ static int onenumfindfile(struct FileSearch* self, const char* path, int flag);
 void psy_dir_findfile(const char* searchpath, const char* wildcard,
 	char* filepath)
 {
-	struct FileSearch filesearch;
-
 	filepath[0] = '\0';
-	filesearch.filepath = filepath;
-	psy_dir_enumerate_recursive(&filesearch, searchpath, wildcard, 0,
-		(psy_fp_findfile)onenumfindfile);
+	if (psy_strlen(wildcard) > 0) {
+		struct FileSearch filesearch;
+		
+		filesearch.filepath = filepath;
+		psy_dir_enumerate_recursive(&filesearch, searchpath, wildcard, 0,
+			(psy_fp_findfile)onenumfindfile);
+	}
 }
 
 int onenumfindfile(struct FileSearch* self, const char* path, int flag)

@@ -61,7 +61,7 @@ typedef struct psy_ui_Style {
 	bool marginset;
 	psy_ui_Margin padding;	
 	bool paddingset;
-	psy_ui_Rectangle position;
+	psy_ui_Position position;
 	int dbgflag;	
 } psy_ui_Style;
 
@@ -170,12 +170,12 @@ INLINE psy_ui_Margin psy_ui_style_padding(const psy_ui_Style* self)
 INLINE void psy_ui_style_set_position(psy_ui_Style* self,
 	psy_ui_Rectangle position)
 {
-	self->position = position;	
+	psy_ui_position_set_rectangle(&self->position, position);
 }
 
 INLINE void psy_ui_style_set_size(psy_ui_Style* self, psy_ui_Size size)
 {
-	self->position.size = size;
+	psy_ui_position_set_size(&self->position, size);	
 }
 
 INLINE void psy_ui_style_set_background_repeat(psy_ui_Style* self,

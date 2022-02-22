@@ -281,7 +281,7 @@ INLINE bool patternviewstate_movecursorwhenpaste(PatternViewState* self)
 			cursor.offset = psy_audio_pattern_length(patternviewstate_pattern(self)) -
 				patternviewstate_bpl(self);
 		}				
-		psy_audio_sequence_setcursor(psy_audio_song_sequence(self->song),
+		psy_audio_sequence_set_cursor(psy_audio_song_sequence(self->song),
 			cursor);
 		return TRUE;
 	}

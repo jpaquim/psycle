@@ -182,8 +182,16 @@ psy_audio_PatternNode* psy_audio_pattern_greaterequal_track(psy_audio_Pattern*,
 /* \return the pattern node */
 psy_audio_PatternNode* psy_audio_pattern_findnode(psy_audio_Pattern* pattern, uintptr_t track,
 	psy_dsp_big_beat_t offset, psy_dsp_big_beat_t bpl, psy_audio_PatternNode** prev);
-psy_audio_PatternNode* psy_audio_pattern_findnode_cursor(psy_audio_Pattern* pattern,
-	psy_audio_SequenceCursor cursor, psy_audio_PatternNode** prev);
+psy_audio_PatternNode* psy_audio_pattern_findnode_cursor(psy_audio_Pattern*,
+	psy_audio_SequenceCursor, psy_audio_PatternNode** prev);
+
+INLINE const psy_audio_PatternNode* psy_audio_pattern_findnode_cursor_const(
+	const psy_audio_Pattern* self, psy_audio_SequenceCursor cursor,
+	psy_audio_PatternNode** prev)
+{
+	return psy_audio_pattern_findnode_cursor((psy_audio_Pattern*)self, cursor,
+		prev);
+}
 /* gets the first pattern */
 /* \return the first pattern node */
 INLINE psy_audio_PatternNode* psy_audio_pattern_begin(const psy_audio_Pattern* self)
@@ -237,6 +245,10 @@ void psy_audio_pattern_setevent(psy_audio_Pattern*, psy_audio_PatternNode*,
 /* \return gets the event or an empty event if node is 0 */
 psy_audio_PatternEvent psy_audio_pattern_event(psy_audio_Pattern*,
 	psy_audio_PatternNode*, uintptr_t index);
+/* \set the event at the cursor position */
+psy_audio_PatternNode* psy_audio_pattern_set_event_at_cursor(
+	psy_audio_Pattern*, psy_audio_SequenceCursor,
+	const psy_audio_PatternEvent*);
 /* \return gets the event or an empty event at the cursor position */
 psy_audio_PatternEvent psy_audio_pattern_event_at_cursor(
 	const psy_audio_Pattern*, psy_audio_SequenceCursor);
@@ -329,20 +341,10 @@ INLINE void psy_audio_patterncursornavigator_init(psy_audio_SequenceCursorNaviga
 	self->maxkeys = maxkeys;
 }
 
-bool psy_audio_patterncursornavigator_advancelines(
-	psy_audio_SequenceCursorNavigator*, uintptr_t lines);
-bool psy_audio_patterncursornavigator_prevlines(
-	psy_audio_SequenceCursorNavigator*, uintptr_t lines);
 bool psy_audio_patterncursornavigator_advancekeys(
 	psy_audio_SequenceCursorNavigator*, uint8_t lines);
 bool psy_audio_patterncursornavigator_prevkeys(
 	psy_audio_SequenceCursorNavigator*, uint8_t lines);
-bool psy_audio_patterncursornavigator_prevtrack(
-	psy_audio_SequenceCursorNavigator*,
-	uintptr_t numsongtracks);
-bool psy_audio_patterncursornavigator_nexttrack(
-	psy_audio_SequenceCursorNavigator*,
-	uintptr_t numsongtracks);
 
 #ifdef __cplusplus
 }

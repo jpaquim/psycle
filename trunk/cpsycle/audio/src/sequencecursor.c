@@ -70,12 +70,18 @@ bool psy_audio_sequencecursor_equal(psy_audio_SequenceCursor* lhs,
 	assert(lhs && rhs);
 
 	return
-		rhs->column == lhs->column &&
+		(rhs->column == lhs->column &&
 		rhs->digit == lhs->digit &&
 		rhs->track == lhs->track &&
 		rhs->offset == lhs->offset &&
 		rhs->patternid == lhs->patternid &&
-		rhs->noteindex == lhs->noteindex;
+		rhs->noteindex == lhs->noteindex &&
+		rhs->lpb == lhs->lpb &&
+		rhs->absolute == lhs->absolute &&
+		rhs->seqoffset == lhs->seqoffset &&
+		rhs->orderindex.order == lhs->orderindex.order &&
+		rhs->orderindex.track == lhs->orderindex.track &&
+		rhs->key == lhs->key);
 }
 
 void psy_audio_sequencecursor_updateseqoffset(psy_audio_SequenceCursor* self,

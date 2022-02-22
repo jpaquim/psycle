@@ -19,9 +19,6 @@ extern "C" {
 #define PARAMWIDTH 26.0
 #define PARAMWIDTH_SMALL 18.0
 
-psy_ui_RealSize mpfsize(const psy_ui_TextMetric* tm,
-	uintptr_t paramtype, bool issmall);
-
 /* MachineParamConfig */
 
 enum {

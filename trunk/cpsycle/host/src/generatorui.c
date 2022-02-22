@@ -62,6 +62,7 @@ void generatorui_init(GeneratorUi* self, psy_ui_Component* parent,
 	assert(self->machines);
 	self->machine = psy_audio_machines_at(self->machines, slot);
 	assert(self->machine);
+	self->workspace = workspace;
 	self->preventmachinepos = FALSE;
 	psy_ui_component_setstyletype(&self->component, STYLE_MV_GENERATOR);
 	psy_ui_component_init(&self->mute, &self->component, NULL);
@@ -88,13 +89,15 @@ void generatorui_move(GeneratorUi* self, psy_ui_Point topleft)
 	generatorui_super_vtable.move(&self->component, topleft);
 	if (!self->preventmachinepos) {
 		psy_audio_machine_setposition(self->machine,
-			psy_ui_value_px(&topleft.x, psy_ui_component_textmetric(&self->component), NULL),
-			psy_ui_value_px(&topleft.y, psy_ui_component_textmetric(&self->component), NULL));
+			psy_ui_value_px(&topleft.x, NULL, NULL),
+			psy_ui_value_px(&topleft.y, NULL, NULL));
 	}
 }
 
 void generatorui_onmousedown(GeneratorUi* self, psy_ui_MouseEvent* ev)
 {	
+	assert(self);
+
 	if (psy_ui_mouseevent_button(ev) == 1) {		
 		if (psy_audio_machine_slot(self->machine) != psy_audio_machines_selected(self->machines)) {			
 			if (psy_ui_mouseevent_ctrlkey(ev)) {
@@ -146,5 +149,10 @@ void generatorui_ontimer(GeneratorUi* self, uintptr_t timerid)
 	} else {
 		psy_ui_component_removestylestate(&self->solo,
 			psy_ui_STYLESTATE_SELECT);
+	}
+	if (psy_ui_component_drawvisible(&self->component)) {
+		if (vuui_update(&self->vu)) {
+			psy_ui_component_invalidate(vuui_base(&self->vu));
+		}
 	}
 }

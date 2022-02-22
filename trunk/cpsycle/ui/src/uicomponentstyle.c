@@ -194,19 +194,19 @@ void psy_ui_componentstyle_updatecurrstate(psy_ui_ComponentStyle* self)
 psy_ui_Size psy_ui_componentstyle_preferredsize(const psy_ui_ComponentStyle* self)
 {	
 	psy_ui_Size rv;	
-	psy_ui_Style* style;
+	const psy_ui_Style* style;
 
 	rv = self->sizehints->preferredsize;
 	if (rv.height.set && rv.width.set) {
 		return rv;
 	}
-	style = psy_ui_componentstyle_currstyle(self);
+	style = psy_ui_componentstyle_currstyle_const(self);
 	if (style) {
 		if (!rv.width.set) {
-			rv.width = style->position.size.width;
+			rv.width = style->position.rectangle->size.width;
 		}
 		if (!rv.height.set) {
-			rv.height = style->position.size.height;
+			rv.height = style->position.rectangle->size.height;
 		}
 	}
 	return rv;
@@ -215,23 +215,19 @@ psy_ui_Size psy_ui_componentstyle_preferredsize(const psy_ui_ComponentStyle* sel
 void psy_ui_componentstyle_setpreferredsize(psy_ui_ComponentStyle* self, psy_ui_Size size)
 {
 	psy_ui_componentstyle_usesizehints(self);
-	self->sizehints->preferredsize = size;
-	self->sizehints->preferredsize.width.set = TRUE;
-	self->sizehints->preferredsize.height.set = TRUE;
+	self->sizehints->preferredsize = size;	
 }
 
 void psy_ui_componentstyle_setpreferredheight(psy_ui_ComponentStyle* self, psy_ui_Value height)
 {
 	psy_ui_componentstyle_usesizehints(self);
-	self->sizehints->preferredsize.height = height;
-	self->sizehints->preferredsize.height.set = TRUE;
+	self->sizehints->preferredsize.height = height;	
 }
 
 void psy_ui_componentstyle_setpreferredwidth(psy_ui_ComponentStyle* self, psy_ui_Value width)
 {
 	psy_ui_componentstyle_usesizehints(self);
-	self->sizehints->preferredsize.width = width;
-	self->sizehints->preferredsize.width.set = TRUE;
+	self->sizehints->preferredsize.width = width;	
 }
 
 void psy_ui_componentstyle_setmaximumsize(psy_ui_ComponentStyle* self, psy_ui_Size size)

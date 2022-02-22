@@ -63,7 +63,7 @@ void machineproperties_init(MachineProperties* self, psy_ui_Component* parent,
 		: NULL;	
 	self->macid = psy_INDEX_INVALID;			
 	psy_ui_component_setstyletype(&self->component,
-		STYLE_MACHINEVIEW_PROPERTIES);	
+		STYLE_MV_PROPERTIES);	
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));	
 	psy_ui_button_init_text_connect(&self->issolobypass, &self->component,

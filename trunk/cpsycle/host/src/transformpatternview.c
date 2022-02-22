@@ -383,7 +383,7 @@ void transformpatternview_searchpattern(TransformPatternView* self,
 					psy_audio_pattern_length(currpattern))),
 			searchreplacemode);
 		if (cursor.patternid != psy_INDEX_INVALID) {
-			psy_audio_sequence_setcursor(&self->workspace->song->sequence,
+			psy_audio_sequence_set_cursor(&self->workspace->song->sequence,
 				cursor);			
 		}
 	}

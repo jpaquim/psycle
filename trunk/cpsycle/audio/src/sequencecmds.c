@@ -65,7 +65,7 @@ void psy_audio_sequenceinsertcommand_execute(psy_audio_SequenceInsertCommand* se
 		self->index.track, self->index.order + 1);	
 	cursor = self->sequence->cursor;
 	cursor.orderindex = self->index;
-	psy_audio_sequence_setcursor(self->sequence, cursor);
+	psy_audio_sequence_set_cursor(self->sequence, cursor);
 }
 
 void psy_audio_sequenceinsertcommand_revert(psy_audio_SequenceInsertCommand* self)
@@ -461,7 +461,7 @@ void psy_audio_sequencechangepatterncommand_execute(
 				*orderindex, seqpatternentry->patternslot + self->step);
 			cursor.patternid = psy_audio_sequence_patternindex(self->sequence,
 				cursor.orderindex);
-			psy_audio_sequence_setcursor(self->sequence, cursor);
+			psy_audio_sequence_set_cursor(self->sequence, cursor);
 			self->success = TRUE;
 		}
 	}	

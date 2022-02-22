@@ -306,7 +306,7 @@ const psy_ui_Font* psy_ui_component_font(const psy_ui_Component*);
 void psy_ui_component_init_base(psy_ui_Component*);
 void psy_ui_component_init_signals(psy_ui_Component*);
 int psy_ui_component_visible(psy_ui_Component*);
-int psy_ui_component_drawvisible(psy_ui_Component*);
+bool psy_ui_component_drawvisible(psy_ui_Component*);
 void psy_ui_component_align(psy_ui_Component*);
 void psy_ui_component_align_full(psy_ui_Component*);
 void psy_ui_component_align_cached(psy_ui_Component*);

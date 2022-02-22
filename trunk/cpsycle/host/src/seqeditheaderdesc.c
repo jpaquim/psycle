@@ -97,7 +97,7 @@ void seqeditorheaderdescbar_onmovetrackup(SeqEditorHeaderDescBar* self,
 			psy_audio_sequencecursor_init(&cursor);
 			cursor.orderindex = editpos;
 			if (self->state->workspace && workspace_song(self->state->workspace)) {
-				psy_audio_sequence_setcursor(
+				psy_audio_sequence_set_cursor(
 					psy_audio_song_sequence(workspace_song(self->state->workspace)),
 					cursor);
 			}			
@@ -123,7 +123,7 @@ void seqeditorheaderdescbar_onmovetrackdown(SeqEditorHeaderDescBar* self,
 			psy_audio_sequencecursor_init(&cursor);
 			cursor.orderindex = editpos;
 			if (self->state->workspace && workspace_song(self->state->workspace)) {
-				psy_audio_sequence_setcursor(
+				psy_audio_sequence_set_cursor(
 					psy_audio_song_sequence(workspace_song(self->state->workspace)),
 					cursor);
 			}

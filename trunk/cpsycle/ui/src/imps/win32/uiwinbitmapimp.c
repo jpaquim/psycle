@@ -94,36 +94,29 @@ void dev_dispose(psy_ui_win_BitmapImp* self)
 
 int dev_load(psy_ui_win_BitmapImp* self, struct psy_ui_Bitmap* bitmap, const char* path)
 {
-	HBITMAP win32_bitmap;
-
 	assert(self);
 
-	win32_bitmap = (HBITMAP)LoadImage(NULL,
+	dev_dispose(self);
+	self->mask = 0;
+	self->bitmap = (HBITMAP)LoadImage(NULL,
 		(LPCTSTR)path,
 		IMAGE_BITMAP,
 		0, 0,
-		LR_DEFAULTSIZE | LR_LOADFROMFILE);
-	if (win32_bitmap != NULL) {
-		dev_dispose(self);
-		self->bitmap = win32_bitmap;
-	}
-	return win32_bitmap == 0;
+		LR_DEFAULTSIZE | LR_LOADFROMFILE);	
+	return (self->bitmap == 0);
 }
 
 int dev_loadresource(psy_ui_win_BitmapImp* self, uintptr_t resourceid)
 {
-	psy_ui_WinApp* winapp;
-	HBITMAP bitmap;
+	psy_ui_WinApp* winapp;	
 
 	assert(self);
-
+	
+	dev_dispose(self);
+	self->mask = 0;
 	winapp = (psy_ui_WinApp*)psy_ui_app()->imp;
-	bitmap = LoadBitmap(winapp->instance, MAKEINTRESOURCE(resourceid));
-	if (bitmap != NULL) {
-		dev_dispose(self);
-		self->bitmap = bitmap;
-	}
-	return bitmap == 0;
+	self->bitmap = LoadBitmap(winapp->instance, MAKEINTRESOURCE(resourceid));
+	return (self->bitmap == 0);
 }
 
 psy_ui_RealSize dev_size(const psy_ui_win_BitmapImp* self)

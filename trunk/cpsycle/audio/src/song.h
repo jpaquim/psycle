@@ -333,7 +333,7 @@ INLINE void psy_audio_song_setlpb(psy_audio_Song* self, uintptr_t lpb)
 	psy_audio_songproperties_setlpb(&self->properties, lpb);
 	cursor = psy_audio_sequence_cursor(&self->sequence);			
 	psy_audio_sequencecursor_setlpb(&cursor, lpb);
-	psy_audio_sequence_setcursor(&self->sequence, cursor);
+	psy_audio_sequence_set_cursor(&self->sequence, cursor);
 }
 /* return song properties lpb */
 INLINE uintptr_t psy_audio_song_lpb(const psy_audio_Song* self)

@@ -351,7 +351,8 @@ void stepsequencerbar_onmousedown(StepsequencerBar* self,
 		if (node) {			
 			psy_undoredo_execute(&self->state->workspace->undoredo,
 				&removecommand_allocinit(self->state->pattern,
-					cursor, self->state->workspace)->command);
+					cursor, &self->state->workspace->song->sequence,
+					&self->state->workspace->player)->command);
 		} else {
 			psy_audio_PatternEvent event;
 
@@ -368,7 +369,8 @@ void stepsequencerbar_onmousedown(StepsequencerBar* self,
 				workspace_player(self->state->workspace)->patterndefaults, &event);
 			psy_undoredo_execute(&self->state->workspace->undoredo,
 				&insertcommand_allocinit(self->state->pattern,					
-					cursor, event, self->state->workspace)->command);			
+					cursor, event, &self->state->workspace->song->sequence,
+					&self->state->workspace->player)->command);			
 		}
 		psy_audio_exclusivelock_leave();		
 	}
@@ -578,14 +580,14 @@ void stepsequencerbarselect_ondestroy(StepsequencerBarSelect* self)
 void stepsequencerbarselect_build(StepsequencerBarSelect* self)
 {
 	uintptr_t i;
-	int numsteprows;
+	uintptr_t numsteprows;
 	psy_ui_Component* row;
 
 	assert(self);
 		
 	numsteprows = 4;
 	if (self->state->pattern) {
-		numsteprows = (int)(psy_audio_pattern_length(self->state->pattern) *
+		numsteprows = (uintptr_t)(psy_audio_pattern_length(self->state->pattern) *
 			psy_audio_player_lpb(workspace_player(self->state->workspace)) /
 			self->state->numtiles + 0.5f);
 	}	
@@ -626,7 +628,7 @@ void stepsequencerbarselect_onmousedown(StepsequencerBarSelect* self,
 			(double)self->state->editposition.seqentryline /
 			(double)cursor.lpb;
 		if (self->state->workspace && workspace_song(self->state->workspace)) {
-			psy_audio_sequence_setcursor(
+			psy_audio_sequence_set_cursor(
 				psy_audio_song_sequence(workspace_song(self->state->workspace)),
 				cursor);
 		}

@@ -202,7 +202,7 @@ void machinewireview_init(MachineWireView* self, psy_ui_Component* parent,
 {
 	psy_ui_component_init(&self->component, parent, NULL);
 	vtable_init(self);	
-	psy_ui_component_setstyletype(&self->component, STYLE_MACHINEVIEW_WIRES);
+	psy_ui_component_setstyletype(&self->component, STYLE_MV_WIRES);
 	machinewireviewuis_init(&self->machineuis, &self->component, paramviews,
 		workspace);
 	self->opcount = 0;
@@ -1167,9 +1167,7 @@ void machinewireview_onsongchanged(MachineWireView* self, Workspace* sender)
 void machinewireview_idle(MachineWireView* self)
 {				
 	machinewireview_destroywireframes(self);	
-	if (!machinewireview_redrawstate(self)) {
-		machinewireviewuis_redrawvus(&self->machineuis);		
-	}	
+	machinewireview_redrawstate(self);	
 }
 
 bool machinewireview_redrawstate(MachineWireView* self)

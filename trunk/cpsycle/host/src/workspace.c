@@ -682,7 +682,7 @@ void workspace_setapptheme(Workspace* self, psy_Property* property)
 		/* reset styles */		
 		psy_ui_defaults_inittheme(psy_ui_appdefaults(), theme, TRUE);
 		init_host_styles(&psy_ui_appdefaults()->styles, theme);
-		machineviewconfig_write_styles(&self->config.macview);
+		machineviewconfig_load(&self->config.macview);
 		machineparamconfig_updatestyles(&self->config.macparam);
 		patternviewconfig_write_styles(&self->config.patview);		
 		psy_ui_defaults_loadtheme(psy_ui_appdefaults(),
@@ -824,7 +824,7 @@ void workspace_setsong(Workspace* self, psy_audio_Song* song, int flag)
 		psy_audio_sequenceselection_select_first(&self->song->sequence.sequenceselection,
 			psy_audio_orderindex_make(0, 0));		
 		psy_audio_sequencecursor_init(&cursor);
-		psy_audio_sequence_setcursor(&self->song->sequence, cursor);
+		psy_audio_sequence_set_cursor(&self->song->sequence, cursor);
 	}
 }
 
@@ -1440,7 +1440,7 @@ void workspace_updateplaycursor(Workspace* self)
 				viewhistory_enable(&self->viewhistory);
 			}
 		}		
-		psy_audio_sequence_setcursor(psy_audio_song_sequence(self->song),
+		psy_audio_sequence_set_cursor(psy_audio_song_sequence(self->song),
 			currplaycursor);
 	}
 }
@@ -1452,6 +1452,7 @@ psy_audio_SequenceCursor workspace_playcursor(Workspace* self)
 	if (self->song) {
 		psy_audio_SequencerTrack* track;
 
+		
 		track = psy_audio_sequencer_currtrack(&self->player.sequencer,
 			self->song->sequence.cursor.orderindex.track);
 		if (track && track->iterator) {
@@ -1460,23 +1461,15 @@ psy_audio_SequenceCursor workspace_playcursor(Workspace* self)
 			seqentry = psy_audio_sequencetrackiterator_entry(track->iterator);
 			if (seqentry) {				
 				uintptr_t line;
-
-				psy_audio_sequencecursor_init_all(&rv,
-					psy_audio_orderindex_make(
-						self->song->sequence.cursor.orderindex.track,
-						seqentry->row));
-				rv.track = self->song->sequence.cursor.track;
-				rv.column = self->song->sequence.cursor.column;
-				rv.digit = self->song->sequence.cursor.digit;
-				rv.lpb = psy_audio_song_lpb(self->song);
-				rv.key = self->song->sequence.cursor.key;
+				
+				rv = self->song->sequence.cursor;				
+				rv.orderindex.order = seqentry->row;				
 				rv.patternid = 
 					psy_audio_sequencetrackiterator_patidx(track->iterator);
 				rv.seqoffset = psy_audio_sequenceentry_offset(seqentry);
-				line = (uintptr_t)((self->currplayposition - rv.seqoffset) *
-					rv.lpb);
+				line = (uintptr_t)((self->currplayposition - 
+					((rv.absolute) ? 0.0 : rv.seqoffset)) * rv.lpb);
 				rv.offset = line / (psy_dsp_big_beat_t)rv.lpb;
-				rv.absolute = !self->patternsinglemode;				
 				return rv;
 			}			
 		}
@@ -2089,7 +2082,7 @@ void workspace_oninput(Workspace* self, uintptr_t cmdid)
 		if (self->song && psy_audio_song_numsongtracks(self->song) >=
 				(uintptr_t)(cmdid - CMD_COLUMN_0)) {
 			self->song->sequence.cursor.track = (cmdid - CMD_COLUMN_0);			
-			psy_audio_sequence_setcursor(psy_audio_song_sequence(self->song),
+			psy_audio_sequence_set_cursor(psy_audio_song_sequence(self->song),
 				self->song->sequence.cursor);
 		}
 		break;

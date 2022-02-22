@@ -92,14 +92,14 @@ void psy_ui_appstyles_initdarktheme(psy_ui_Styles* self,
 	/* button */
 	style = psy_ui_style_allocinit();
 	psy_ui_style_set_colour(style,
-		psy_ui_colour_weighted(&material.onsurface, material.medium));		
+		psy_ui_colour_weighted(&material.onsurface, material.medium));	
 	psy_ui_style_set_padding_em(style, 0.25, 1.0, 0.25, 1.0);
 	psy_ui_styles_set_style(self, psy_ui_STYLE_BUTTON, style);
 	/* button::hover */
-	style = psy_ui_style_allocinit();
+	style = psy_ui_style_allocinit();	
 	psy_ui_style_set_colours(style,
 		psy_ui_colour_weighted(&material.onsurface, material.accent),
-		psy_ui_colour_make_overlay(4));
+		psy_ui_colour_make_overlay(4));	
 	psy_ui_style_set_padding_em(style, 0.25, 1.0, 0.25, 1.0);
 	psy_ui_styles_set_style(self, psy_ui_STYLE_BUTTON_HOVER, style);
 	/* button::select */

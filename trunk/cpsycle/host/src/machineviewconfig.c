@@ -37,13 +37,21 @@ static void machineviewconfig_setsource(MachineViewConfig*, psy_ui_RealRectangle
 	intptr_t vals[4]);
 static void machineviewconfig_setdest(MachineViewConfig*, psy_ui_RealPoint*,
 	intptr_t vals[4], uintptr_t num);
+static void machineviewconfig_load_background(MachineViewConfig*);
+static void machineviewconfig_load_colours(MachineViewConfig*);
+static void machineviewconfig_load_bitmap(MachineViewConfig*);
+static void read_colour(psy_Property* config, const char* key, psy_ui_Style*,
+	bool fore);
+static void machineviewconfig_set_style_default_settings(MachineViewConfig*);
+static void machineviewconfig_set_style_default_colours(MachineViewConfig*);
+static void machineviewconfig_set_style_default_skin(MachineViewConfig*);
 
 void machineviewconfig_init(MachineViewConfig* self, psy_Property* parent)
 {
 	assert(self && parent);
 
 	self->parent = parent;
-	self->dirconfig = NULL;
+	self->dirconfig = NULL;		
 	machineviewconfig_makeview(self, parent);
 	psy_signal_init(&self->signal_changed);	
 }
@@ -86,9 +94,10 @@ void machineviewconfig_makeview(MachineViewConfig* self, psy_Property* parent)
 		psy_property_append_bool(self->machineview,
 			"drawvirtualgenerators", FALSE),
 		"settingsview.mv.draw-virtualgenerators"),
-		PROPERTY_ID_DRAWVIRTUALGENERATORS);
+		PROPERTY_ID_DRAWVIRTUALGENERATORS);	
 	machineviewconfig_makestackview(self, self->machineview);
 	machineviewconfig_maketheme(self, self->machineview);
+	machineviewconfig_resettheme(self);
 }
 
 void machineviewconfig_makestackview(MachineViewConfig* self, psy_Property* parent)
@@ -103,9 +112,13 @@ void machineviewconfig_makestackview(MachineViewConfig* self, psy_Property* pare
 }
 
 void machineviewconfig_maketheme(MachineViewConfig* self, psy_Property* parent)
-{
+{	
+	intptr_t style_value = 0;
+	const char* style_str = "";
+
 	assert(self);
 	
+	/* define theme properties */	
 	self->theme = psy_property_settext(
 		psy_property_append_section(parent, "theme"),
 		"settingsview.mv.theme.theme");	
@@ -126,7 +139,7 @@ void machineviewconfig_maketheme(MachineViewConfig* self, psy_Property* parent)
 		"settingsview.mv.theme.onclip");
 	psy_property_settext(
 		psy_property_append_str(self->theme,
-			"generator_fontface", "Tahoma"),
+			"generator_fontface", style_str),
 		"settingsview.mv.theme.generators-font-face");
 	psy_property_settext(
 		psy_property_sethint(psy_property_append_int(self->theme,
@@ -139,7 +152,7 @@ void machineviewconfig_maketheme(MachineViewConfig* self, psy_Property* parent)
 		PSY_PROPERTY_HINT_EDITCOLOR),
 		"settingsview.mv.theme.generator_font_flags");
 	psy_property_settext(psy_property_append_str(self->theme,
-		"effect_fontface", "Tahoma"),
+		"effect_fontface", style_str),
 		"settingsview.mv.theme.effect-fontface");
 	psy_property_settext(
 		psy_property_sethint(psy_property_append_int(self->theme,
@@ -153,32 +166,32 @@ void machineviewconfig_maketheme(MachineViewConfig* self, psy_Property* parent)
 		"settingsview.mv.theme.effect-font-flags");	
 	psy_property_settext(
 		psy_property_sethint(psy_property_append_int(self->theme,
-			"mv_colour", 0x00232323,
+			"mv_colour", style_value,
 			0, 0), PSY_PROPERTY_HINT_EDITCOLOR),
 		"settingsview.mv.theme.background");
 	psy_property_settext(
 		psy_property_sethint(psy_property_append_int(self->theme,
-			"mv_wirecolour", 0x005F5F5F, 0, 0),
+			"mv_wirecolour", style_value, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
 		"settingsview.mv.theme.wirecolour");
 	psy_property_settext(
 		psy_property_sethint(psy_property_append_int(self->theme,
-			"mv_wirecolour2", 0x005F5F5F, 0, 0),
+			"mv_wirecolour2", style_value, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
 		"settingsview.mv.theme.wirecolour2");
 	psy_property_settext(
 		psy_property_sethint(psy_property_append_int(self->theme,
-			"mv_polycolour", 0x00B1C8B0, 0, 0),
+			"mv_polycolour", style_value, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
 		"settingsview.mv.theme.polygons");
 	psy_property_settext(
 		psy_property_sethint(psy_property_append_int(self->theme,
-			"mv_generator_fontcolour", 0x00B1C8B0, 0, 0),
+			"mv_generator_fontcolour", style_value, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
 		"settingsview.mv.theme.generators-font");
 	psy_property_settext(
 		psy_property_sethint(psy_property_append_int(self->theme,
-			"mv_effect_fontcolour", 0x00D1C5B6, 0, 0),
+			"mv_effect_fontcolour", style_value, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
 		"settingsview.mv.theme.effects-font");
 	psy_property_settext(
@@ -193,11 +206,11 @@ void machineviewconfig_maketheme(MachineViewConfig* self, psy_Property* parent)
 		"settingsview.mv.theme.antialias-halo");
 	psy_property_settext(
 		psy_property_append_str(self->theme,
-			"machine_background", ""),
+			"machine_background", style_str),
 		"settingsview.mv.theme.machine-background");
 	psy_property_settext(
 		psy_property_sethint(psy_property_append_int(self->theme,
-			"mv_triangle_size", 0x05, 0, 0),
+			"mv_triangle_size", style_value, 0, 0),
 			PSY_PROPERTY_HINT_EDIT),
 		"settingsview.mv.theme.polygon-size");	
 	self->machineskins = psy_property_setid(
@@ -205,7 +218,7 @@ void machineviewconfig_maketheme(MachineViewConfig* self, psy_Property* parent)
 		psy_property_append_choice(self->theme, "skins", 0),
 		"Skin"), PSY_PROPERTY_HINT_COMBO),
 		PROPERTY_ID_MACHINESKIN);
-	machineviewconfig_update_machine_skins(self);
+	machineviewconfig_update_machine_skins(self);	
 }
 
 void machineviewconfig_update_machine_skins(MachineViewConfig* self)
@@ -224,9 +237,9 @@ void machineviewconfig_resettheme(MachineViewConfig* self)
 {	
 	assert(self);
 	
-	init_machineview_styles(&psy_ui_app()->defaults.styles);
+	machineviewconfig_set_style_default_settings(self);
 	psy_property_setitem_int(self->machineskins, 0);
-	machineviewconfig_read_styles(self);
+	machineviewconfig_save(self);
 }
 
 void machineviewconfig_settheme(MachineViewConfig* self, psy_Property* theme)
@@ -239,129 +252,94 @@ void machineviewconfig_settheme(MachineViewConfig* self, psy_Property* theme)
 		machine_skin = psy_property_at(self->machineskins,
 			psy_property_at_str(theme, "machine_skin", ""),
 			PSY_PROPERTY_TYPE_STRING);
-		if (machine_skin) {
+		if (machine_skin) {			
 			psy_property_setitem_int(self->machineskins,
-				psy_property_index(machine_skin));			
+				psy_property_index(machine_skin));
 		} else {
 			psy_property_setitem_int(self->machineskins, 0);
 		}
 		psy_property_sync(self->theme, theme);
-		machineviewconfig_write_styles(self);
+		machineviewconfig_load(self);
 	}
 }
 
-void machineviewconfig_write_styles(MachineViewConfig* self)
+void machineviewconfig_load(MachineViewConfig* self)
 {
-	if (self->theme) {
-		psy_ui_Styles* styles;
-		psy_ui_Style* style;
-		psy_ui_Colour bgcolour;		
-
-		styles = &psy_ui_appdefaults()->styles;		
-		bgcolour = psy_ui_colour_make(psy_property_at_colour(self->theme,
-			"mv_colour", 0x00232323));		
-		style = psy_ui_styles_at(styles, STYLE_MACHINEVIEW_WIRES);
-		if (style) {
-			const char* machine_background;
-
-			machine_background = psy_property_at_str(self->theme,
-				"machine_background", "");
-			if (psy_strlen(machine_background) > 0) {
-				const char* skindir;				
-
-				skindir = dirconfig_skins(self->dirconfig);
-				if (skindir) {
-					char path[_MAX_PATH];
-					char filename[_MAX_PATH];
-
-					strcpy(filename, machine_background);
-					psy_dir_findfile(skindir, filename, path);
-					if (path[0] != '\0') {
-						if (psy_ui_style_setbackgroundpath(style, path) != PSY_OK) {
-							psy_ui_style_set_background_colour(style, bgcolour);
-						}
-					}
-				} else {
-					psy_ui_style_set_background_colour(style, bgcolour);
-				}
-			} else {
-				psy_ui_style_set_background_colour(style, bgcolour);
-			}			
-		}
-		style = psy_ui_styles_at(styles, STYLE_MACHINEVIEW_STACK);
-		if (style) {						
-			psy_ui_style_set_background_colour(style, bgcolour);
-		}
-		style = psy_ui_styles_at(styles, STYLE_MV_WIRE);
-		psy_ui_style_set_colour(style, psy_ui_colour_make(
-			psy_property_at_colour(self->theme, "mv_wirecolour", 0x005F5F5F)));
-		style = psy_ui_styles_at(styles, STYLE_MV_WIRE_SELECT);
-		psy_ui_style_set_colour(style, psy_ui_colour_make(
-			psy_property_at_colour(self->theme, "mv_selwirecolour", 0x007F7F7F)));
-		style = psy_ui_styles_at(styles, STYLE_MV_WIRE_HOVER);
-		psy_ui_style_set_colour(style, psy_ui_colour_make(
-			psy_property_at_colour(self->theme, "mv_hoverwirecolour", 0x007F7F7F)));
-		style = psy_ui_styles_at(styles, STYLE_MV_WIRE_POLY);
-		psy_ui_style_set_colour(style, psy_ui_colour_make(
-			psy_property_at_colour(self->theme, "mv_polycolour", 0x005F5F5F)));
-		psy_ui_style_set_background_size_px(style, (double)psy_property_at_int(
-			self->theme, "mv_triangle_size", 10), 0);		
-		style = psy_ui_styles_at(styles, STYLE_MV_GENERATOR);
-		psy_ui_style_set_colour(style, psy_ui_colour_make(
-			psy_property_at_colour(self->theme, "mv_generator_fontcolour", 0x00B1C8B0)));
-		psy_ui_style_set_font(style,
-			psy_property_at_str(self->theme, "generator_fontface", "Tahoma"),
-			psy_property_at_int(self->theme, "generator_font_point", 16) / 7);
-		style = psy_ui_styles_at(styles, STYLE_MV_EFFECT);
-		psy_ui_style_set_colour(style, psy_ui_colour_make(
-			psy_property_at_colour(self->theme, "mv_effect_fontcolour", 0x00D1C5B6)));	
-		psy_ui_style_set_font(style,
-			psy_property_at_str(self->theme, "effect_fontface", "Tahoma"),
-			psy_property_at_int(self->theme, "effect_font_point", 16) / 7);		
-		machineviewconfig_loadbitmap(self);
-	}
+	assert(self);
+	
+	machineviewconfig_load_background(self);	
+	machineviewconfig_load_colours(self);
+	machineviewconfig_load_bitmap(self);	
 }
 
-void machineviewconfig_read_styles(MachineViewConfig* self)
+void machineviewconfig_load_background(MachineViewConfig* self)
+{
+	char path[_MAX_PATH];
+	
+	psy_dir_findfile(dirconfig_skins(self->dirconfig), psy_property_at_str(
+		self->theme, "machine_background", ""), path);
+	psy_ui_style_setbackgroundpath(psy_ui_style(STYLE_MV_WIRES),
+		path);
+}
+
+void machineviewconfig_load_colours(MachineViewConfig* self)
 {
 	psy_ui_Style* style;
 
-	assert(self);
-	
-	psy_property_set_int(self->theme, "vu2", 0x00403731);
-	psy_property_set_int(self->theme, "vu1", 0x0080FF80);
-	psy_property_set_int(self->theme, "vu3", 0x00262bd7);				
-	psy_property_set_str(self->theme, "generator_fontface", "Tahoma");		
-	psy_property_set_int(self->theme, "generator_font_point", 0x00000050);
-	psy_property_set_int(self->theme, "generator_font_flags", 0x00000000);
-	psy_property_set_str(self->theme, "effect_fontface", "Tahoma");
-	psy_property_set_int(self->theme, "effect_font_point", 0x00000050);
-	psy_property_set_int(self->theme, "effect_font_flags", 0x00000000);
-	style = psy_ui_style(STYLE_MACHINEVIEW_WIRES);
-	psy_property_set_int(self->theme, "mv_colour",
-		psy_ui_colour_colorref(&style->background.colour));
+	style = psy_ui_style(STYLE_MV);
+	read_colour(self->theme, "mv_wirecolour", style, TRUE);
+	style = psy_ui_style(STYLE_MV_WIRES);
+	read_colour(self->theme, "mv_wirecolour", style, TRUE);
+	read_colour(self->theme, "mv_colour", style, FALSE);
+	style = psy_ui_style(STYLE_MV_STACK);
+	read_colour(self->theme, "mv_wirecolour", style, TRUE);
+	read_colour(self->theme, "mv_colour", style, FALSE);
+	style = psy_ui_style(STYLE_MV_PROPERTIES);
+	read_colour(self->theme, "mv_wirecolour", style, TRUE);
+	read_colour(self->theme, "mv_colour", style, FALSE);
+	style = psy_ui_style(STYLE_MV_NEWMACHINE);
+	read_colour(self->theme, "mv_wirecolour", style, TRUE);
+	read_colour(self->theme, "mv_colour", style, FALSE);
 	style = psy_ui_style(STYLE_MV_WIRE);
-	psy_property_set_int(self->theme, "mv_wirecolour",
-		psy_ui_colour_colorref(&style->colour));
-	psy_property_set_int(self->theme, "mv_wirecolour2",
-		psy_ui_colour_colorref(&style->colour));
+	read_colour(self->theme, "mv_wirecolour", style, TRUE);
+	style = psy_ui_style(STYLE_MV_WIRE_SELECT);
+	read_colour(self->theme, "mv_selwirecolour", style, TRUE);
+	style = psy_ui_style(STYLE_MV_WIRE_HOVER);
+	read_colour(self->theme, "mv_hoverwirecolour", style, TRUE);
 	style = psy_ui_style(STYLE_MV_WIRE_POLY);
-	psy_property_set_int(self->theme, "mv_polycolour",
-		psy_ui_colour_colorref(&style->colour));
-	psy_property_set_int(self->theme, "mv_triangle_size", 
-		(int)style->background.size.width);
+	read_colour(self->theme, "mv_polycolour", style, TRUE);
+	psy_ui_style_set_background_size_px(style, (double)psy_property_at_int(
+		self->theme, "mv_triangle_size", 10), 0);
+
+	style = psy_ui_style(STYLE_MV_MASTER);
 	style = psy_ui_style(STYLE_MV_GENERATOR);
-	psy_property_set_int(self->theme, "mv_generator_fontcolour",
-		psy_ui_colour_colorref(&style->colour));
+	read_colour(self->theme, "mv_generator_fontcolour", style, TRUE);
+	psy_ui_style_set_font(style,
+		psy_property_at_str(self->theme, "generator_fontface", "Tahoma"),
+		psy_property_at_int(self->theme, "generator_font_point", 16));
 	style = psy_ui_style(STYLE_MV_EFFECT);
-	psy_property_set_int(self->theme, "mv_effect_fontcolour",
-		psy_ui_colour_colorref(&style->colour));
-	psy_property_set_int(self->theme, "mv_wirewidth", 0x00000001);
-	psy_property_set_int(self->theme, "mv_wireaa", 0x01);
-	psy_property_set_str(self->theme, "machine_background", "");
+	read_colour(self->theme, "mv_effect_fontcolour", style, TRUE);
+	psy_ui_style_set_font(style,
+		psy_property_at_str(self->theme, "effect_fontface", "Tahoma"),
+		psy_property_at_int(self->theme, "effect_font_point", 16));
 }
 
-void machineviewconfig_loadbitmap(MachineViewConfig* self)
+void read_colour(psy_Property* config, const char* key, psy_ui_Style* style, bool fore)
+{
+	psy_Property* p;
+
+	if (p = psy_property_at(config, key, PSY_PROPERTY_TYPE_INTEGER)) {
+		if (fore) {
+			psy_ui_style_set_colour(style, psy_ui_colour_make(
+				psy_property_item_int(p)));
+		} else {
+			psy_ui_style_set_background_colour(style, psy_ui_colour_make(
+				psy_property_item_int(p)));
+		}
+	}
+}
+
+void machineviewconfig_load_bitmap(MachineViewConfig* self)
 {
 	const char* machine_skin_name;	
 	static int styles[] = {
@@ -381,7 +359,7 @@ void machineviewconfig_loadbitmap(MachineViewConfig* self)
 		0 };
 	psy_ui_Style* style;
 
-	style = psy_ui_style(STYLE_MACHINEVIEW);
+	style = psy_ui_style(STYLE_MV);
 	psy_ui_style_set_background_id(style, psy_INDEX_INVALID);
 	psy_ui_style_setbackgroundpath(style, "");
 	machine_skin_name = machineviewconfig_machine_skin_name(self);
@@ -406,122 +384,28 @@ void machineviewconfig_loadbitmap(MachineViewConfig* self)
 					}
 					psy_ui_style_set_background_repeat(style, psy_ui_NOREPEAT);
 				}				
-			} else { /* reset default machine bitmaps and coords */
-				int i;
-
-				for (i = 0; styles[i] != 0; ++i) {
-					style = psy_ui_style(styles[i]);					
-					psy_ui_style_set_background_id(style, IDB_MACHINESKIN);
-					psy_ui_style_set_background_repeat(style, psy_ui_NOREPEAT);
-				}
-				/* reset machine coordinates */
-				style = psy_ui_style(STYLE_MV_MASTER);
-				psy_ui_style_set_size(style, psy_ui_size_make_px(138.0, 35.0));		
-				psy_ui_style_set_background_size_px(style, 138.0, 35.0);
-				psy_ui_style_set_background_position_px(style, 0.0, -52.0);								
-				style = psy_ui_style(STYLE_MV_MASTER_NAME);
-				psy_ui_style_set_background_size_px(style, 117.0, 15.0);
-				psy_ui_style_set_padding_px(style, 3.0, 0, 0.0, 20.0);			
-				style = psy_ui_style(STYLE_MV_GENERATOR);				
-				psy_ui_style_set_size(style, psy_ui_size_make_px(138.0, 52.0));
-				psy_ui_style_set_background_size_px(style, 138.0, 52.0);
-				psy_ui_style_set_background_position_px(style, 0.0, -87.0);				
-				style = psy_ui_style(STYLE_MV_GENERATOR_NAME);
-				psy_ui_style_set_position(style,
-					psy_ui_rectangle_make(
-						psy_ui_point_make_px(20.0, 3.0),
-						psy_ui_size_make_px(117.0, 15.0)));				
-				style = psy_ui_style(STYLE_MV_GENERATOR_MUTE);				
-				psy_ui_style_set_position(style, psy_ui_rectangle_make(
-					psy_ui_point_make_px(117.0, 31.0), psy_ui_size_make_px(17.0, 17.0)));
-				style = psy_ui_style(STYLE_MV_GENERATOR_MUTE_SELECT);				
-				psy_ui_style_set_background_position_px(style, -23.0, -139.0);
-				psy_ui_style_set_position(style, psy_ui_rectangle_make(
-					psy_ui_point_make_px(117.0, 31.0), psy_ui_size_make_px(17.0, 17.0)));				
-				style = psy_ui_style(STYLE_MV_GENERATOR_SOLO);		
-				psy_ui_style_set_position(style, psy_ui_rectangle_make(
-					psy_ui_point_make_px(98.0, 31.0), psy_ui_size_make_px(17.0, 17.0)));				
-				style = psy_ui_style(STYLE_MV_GENERATOR_SOLO_SELECT);
-				psy_ui_style_set_background_size_px(style, 17, 17);
-				psy_ui_style_set_background_position_px(style, -6.0, -139.0);
-				psy_ui_style_set_position(style, psy_ui_rectangle_make(
-					psy_ui_point_make_px(98.0, 31.0), psy_ui_size_make_px(17.0, 17.0)));				
-				style = psy_ui_style(STYLE_MV_GENERATOR_VU);
-				psy_ui_style_set_position(style, psy_ui_rectangle_make(
-					psy_ui_point_make_px(4.0, 20.0), psy_ui_size_make_px(129.0, 7.0)));				
-				style = psy_ui_style(STYLE_MV_GENERATOR_VU0);
-				psy_ui_style_set_background_id(style, IDB_MACHINESKIN);
-				psy_ui_style_set_background_size_px(style, 129.0, 7);
-				psy_ui_style_set_background_position_px(style, 0.0, -156.0);								
-				style = psy_ui_style(STYLE_MV_GENERATOR_VUPEAK);				
-				psy_ui_style_set_background_size_px(style, 1, 7);
-				psy_ui_style_set_background_position_px(style, -108.0, -156.0);								
-				style = psy_ui_style(STYLE_MV_GENERATOR_PAN);
-				psy_ui_style_set_position(style, psy_ui_rectangle_make(
-					psy_ui_point_make_px(6.0, 33.0), psy_ui_size_make_px(82.0 + 6.0, 13.0)));				
-				style = psy_ui_style(STYLE_MV_GENERATOR_PAN_SLIDER);				
-				psy_ui_style_set_background_size_px(style, 6.0, 13.0);
-				psy_ui_style_set_background_position_px(style, -0.0, -139.0);
-				psy_ui_style_set_position(style, psy_ui_rectangle_make(
-					psy_ui_point_make_px(0.0, 0.0), psy_ui_size_make_px(6.0, 13.0)));					
-				style = psy_ui_style(STYLE_MV_EFFECT);				
-				psy_ui_style_set_size(style, psy_ui_size_make_px(138.0, 52.0));
-				psy_ui_style_set_background_size_px(style, 138.0, 52.0);
-				style = psy_ui_style(STYLE_MV_EFFECT_NAME);
-				psy_ui_style_set_position(style, psy_ui_rectangle_make(
-					psy_ui_point_make_px(20.0, 3.0), psy_ui_size_make_px(117.0, 15.0)));								
-				style = psy_ui_style(STYLE_MV_EFFECT_MUTE);				
-				psy_ui_style_set_position(style, psy_ui_rectangle_make(
-					psy_ui_point_make_px(117.0, 31.0), psy_ui_size_make_px(17.0, 17.0)));								
-				style = psy_ui_style(STYLE_MV_EFFECT_MUTE_SELECT);				
-				psy_ui_style_set_background_position_px(style, -23.0, -139.0);
-				psy_ui_style_set_position(style, psy_ui_rectangle_make(
-					psy_ui_point_make_px(117.0, 31.0), psy_ui_size_make_px(17.0, 17.0)));								
-				style = psy_ui_style(STYLE_MV_EFFECT_BYPASS);				
-				psy_ui_style_set_position(style, psy_ui_rectangle_make(
-					psy_ui_point_make_px(98.0, 31.0), psy_ui_size_make_px(17.0, 17.0)));								
-				style = psy_ui_style(STYLE_MV_EFFECT_BYPASS_SELECT);				
-				psy_ui_style_set_background_size_px(style, 17, 17);
-				psy_ui_style_set_background_position_px(style, -6.0, -139.0);
-				psy_ui_style_set_position(style, psy_ui_rectangle_make(
-					psy_ui_point_make_px(98.0, 31.0), psy_ui_size_make_px(17.0, 17.0)));								
-				style = psy_ui_style(STYLE_MV_EFFECT_VU);				
-				psy_ui_style_set_position(style, psy_ui_rectangle_make(
-					psy_ui_point_make_px(4.0, 20.0), psy_ui_size_make_px(129.0, 7.0)));								
-				style = psy_ui_style(STYLE_MV_EFFECT_VU0);				
-				psy_ui_style_set_background_size_px(style, 129.0, 7.0);
-				psy_ui_style_set_background_position_px(style, 0.0, -163.0);								
-				style = psy_ui_style(STYLE_MV_EFFECT_VUPEAK);				
-				psy_ui_style_set_background_size_px(style, 1.0, 7.0);
-				psy_ui_style_set_background_position_px(style, -96.0, -144.0);				
-				style = psy_ui_style(STYLE_MV_EFFECT_PAN);
-				psy_ui_style_set_position(style, psy_ui_rectangle_make(
-					psy_ui_point_make_px(6.0, 33.0), psy_ui_size_make_px(82.0 + 3.0, 13.0)));				
-				style = psy_ui_style(STYLE_MV_EFFECT_PAN_SLIDER);				
-				psy_ui_style_set_background_size_px(style, 6.0, 13.0);
-				psy_ui_style_set_background_position_px(style, -0.0, -139.0);
-				psy_ui_style_set_position(style, psy_ui_rectangle_make(
-					psy_ui_point_make_px(0.0, 0.0), psy_ui_size_make_px(6.0, 13.0)));				
+			} else {
+				machineviewconfig_set_style_default_skin(self);
 			}
 			psy_path_setext(&filename, "psm");
 			psy_dir_findfile(skindir, psy_path_full(&filename), path);
 			psy_path_dispose(&filename);
 			if (psy_strlen(path) > 0) {
-				psy_Property* coords;
+				psy_Property coords;
 				psy_Property* transparency;
 
-				coords = psy_property_allocinit_key(NULL);
-				if (skin_load_machine(coords, path) == PSY_OK) {
-					machineviewconfig_setcoords(self, coords);
-					transparency = psy_property_at(coords,
+				psy_property_init(&coords);
+				if (skin_load_machine(&coords, path) == PSY_OK) {
+					machineviewconfig_setcoords(self, &coords);
+					
+					transparency = psy_property_at(&coords,
 						"transparency", PSY_PROPERTY_TYPE_NONE);
-					if (transparency) {
+					if (transparency && transparency->item.marked) {
 						psy_ui_Colour cltransparency;
+						int i;
 
 						cltransparency = psy_ui_colour_make(
 							strtol(psy_property_item_str(transparency), 0, 16));
-						int i;
-
 						for (i = 0; styles[i] != 0; ++i) {
 							style = psy_ui_style(styles[i]);
 							psy_ui_bitmap_settransparency(&style->background.bitmap,
@@ -529,10 +413,60 @@ void machineviewconfig_loadbitmap(MachineViewConfig* self)
 						}
 					}
 				}
-				psy_property_deallocate(coords);
+				psy_property_dispose(&coords);
 			}
 		}
 	}
+}
+
+void machineviewconfig_save(MachineViewConfig* self)
+{
+	psy_ui_Style* style;
+	psy_ui_FontInfo fontinfo;
+
+	assert(self);	
+	
+	style = psy_ui_style(STYLE_MV_WIRES);
+	psy_property_set_int(self->theme, "mv_colour",
+		psy_ui_colour_colorref(&style->background.colour));
+	style = psy_ui_style(STYLE_MV_WIRE);
+	psy_property_set_int(self->theme, "mv_wirecolour",
+		psy_ui_colour_colorref(&style->colour));
+	psy_property_set_int(self->theme, "mv_wirecolour2",
+		psy_ui_colour_colorref(&style->colour));
+	style = psy_ui_style(STYLE_MV_WIRE_POLY);
+	psy_property_set_int(self->theme, "mv_polycolour",
+		psy_ui_colour_colorref(&style->colour));
+	psy_property_set_int(self->theme, "mv_triangle_size",
+		(int)style->background.size.width);
+	psy_property_set_int(self->theme, "mv_triangle_size",
+		(int)style->background.size.height);	
+	psy_property_set_int(self->theme, "mv_wirewidth", 0x00000001);
+	psy_property_set_int(self->theme, "mv_wireaa", 0x01);	
+
+	style = psy_ui_style(STYLE_MV_GENERATOR);
+	fontinfo = psy_ui_font_fontinfo(&style->font);
+	psy_property_set_int(self->theme, "mv_generator_fontcolour",
+		psy_ui_colour_colorref(&style->colour));
+	psy_property_set_str(self->theme, "generator_fontface",
+		fontinfo.lfFaceName);
+	psy_property_set_int(self->theme, "generator_font_point",
+		fontinfo.lfHeight);
+	psy_property_set_int(self->theme, "generator_font_flags",
+		0x00000000);
+	style = psy_ui_style(STYLE_MV_EFFECT);
+	fontinfo = psy_ui_font_fontinfo(&style->font);
+	psy_property_set_int(self->theme, "mv_effect_fontcolour",
+		psy_ui_colour_colorref(&style->colour));
+	psy_property_set_str(self->theme, "effect_fontface",
+		fontinfo.lfFaceName);
+	psy_property_set_int(self->theme, "effect_font_point",
+		fontinfo.lfHeight);
+	psy_property_set_int(self->theme, "effect_font_flags",
+		0x00000000);
+		
+	psy_property_set_str(self->theme, "machine_background",
+		style->background.image_path);	
 }
 
 void machineviewconfig_setcoords(MachineViewConfig* self, psy_Property* p)
@@ -850,13 +784,15 @@ int machineviewconfig_onchanged(MachineViewConfig* self, psy_Property*
 		psy_Property* choice;
 		bool worked;
 
-		choice = (psy_property_ischoiceitem(property)) ? psy_property_parent(property) : NULL;
+		choice = (psy_property_ischoiceitem(property))
+			? psy_property_parent(property)
+			: NULL;
 		worked = FALSE;
 		if (choice) {
 			worked = TRUE;
 			switch (psy_property_id(choice)) {
 			case PROPERTY_ID_MACHINESKIN:
-				machineviewconfig_loadbitmap(self);
+				machineviewconfig_load_bitmap(self);
 				break;
 			default:
 				worked = FALSE;
@@ -864,10 +800,220 @@ int machineviewconfig_onchanged(MachineViewConfig* self, psy_Property*
 			}
 		}
 		if (!worked) {
-			machineviewconfig_write_styles(self);
+			machineviewconfig_load(self);
 		}
 	} else {
 		psy_signal_emit(&self->signal_changed, self, 1, property);
 	}
 	return rebuild_level;
+}
+
+void machineviewconfig_set_style_default_settings(MachineViewConfig* self)
+{
+	machineviewconfig_set_style_default_colours(self);
+	machineviewconfig_set_style_default_skin(self);
+}
+
+void machineviewconfig_set_style_default_colours(MachineViewConfig* self)
+{
+	psy_ui_Style* style;
+
+	style = psy_ui_style(STYLE_MV);
+	psy_ui_style_set_colour(style,
+		psy_ui_colour_make(0x005F5F5F));
+	style = psy_ui_style(STYLE_MV_WIRES);
+	psy_ui_style_set_colours(style,
+		psy_ui_colour_make(0x005F5F5F),
+		psy_ui_colour_make(0x00232323));
+	style = psy_ui_style(STYLE_MV_STACK);
+	psy_ui_style_set_colours(style,
+		psy_ui_colour_make(0x005F5F5F),
+		psy_ui_colour_make(0x00232323));
+	style = psy_ui_style(STYLE_MV_PROPERTIES);
+	psy_ui_style_set_colours(style,
+		psy_ui_colour_make(0x005F5F5F),
+		psy_ui_colour_make(0x00232323));
+	style = psy_ui_style(STYLE_MV_NEWMACHINE);
+	psy_ui_style_set_colours(style,
+		psy_ui_colour_make(0x005F5F5F),
+		psy_ui_colour_make(0x00232323));
+	style = psy_ui_style(STYLE_MV_PROPERTIES);
+	psy_ui_style_set_padding_em(style, 0.25, 0.5, 0.5, 0.5);
+	psy_ui_border_init_bottom(&style->border, psy_ui_BORDER_SOLID,
+		psy_ui_colour_make(0x00333333));
+	style = psy_ui_style(STYLE_MV_WIRE);
+	psy_ui_style_set_colour(style, psy_ui_colour_make(0x005F5F5F));
+	style = psy_ui_style(STYLE_MV_WIRE_SELECT);
+	psy_ui_style_set_colour(style, psy_ui_colour_make(0x007F7F7F));
+	style = psy_ui_style(STYLE_MV_WIRE_HOVER);
+	psy_ui_style_set_colour(style, psy_ui_colour_make(0x007F7F7F));
+	style = psy_ui_style(STYLE_MV_WIRE_POLY);
+	psy_ui_style_set_colour(style, psy_ui_colour_make(0x005F5F5F));
+	psy_ui_style_set_background_size_px(style, 5.0, 5.0);
+
+	style = psy_ui_style(STYLE_MV_MASTER);
+	psy_ui_style_set_background_colour(style, psy_ui_colour_make(0x00333333));
+
+	style = psy_ui_style(STYLE_MV_GENERATOR);
+	psy_ui_style_set_font(style, "Tahoma", 12);
+	psy_ui_style_set_colours(style,
+		psy_ui_colour_make(0x00B1C8B0),
+		psy_ui_colour_make(0x002f3E25));
+
+	style = psy_ui_style(STYLE_MV_EFFECT);
+	psy_ui_style_set_font(style, "Tahoma", 12);
+	psy_ui_style_set_colours(style,
+		psy_ui_colour_make(0x00D1C5B6),
+		psy_ui_colour_make(0x003E2f25));
+}
+
+void machineviewconfig_set_style_default_skin(MachineViewConfig* self)
+{
+	psy_ui_Style* style;
+
+	style = psy_ui_style(STYLE_MV_WIRES);
+	psy_ui_style_set_background_id(style, psy_INDEX_INVALID);
+
+	style = psy_ui_style(STYLE_MV_MASTER);
+	psy_ui_style_set_size(style, psy_ui_size_make_px(138.0, 35.0));
+	psy_ui_style_set_background_id(style, IDB_MACHINESKIN);
+	psy_ui_style_set_background_repeat(style, psy_ui_NOREPEAT);
+	psy_ui_style_set_background_position_px(style, 0.0, -52.0);
+	psy_ui_style_set_background_size_px(style, 138.0, 35.0);
+
+	style = psy_ui_style(STYLE_MV_MASTER_NAME);
+	psy_ui_style_set_background_size_px(style, 117.0, 15.0);
+	psy_ui_style_set_padding_px(style, 3.0, 0, 0.0, 20.0);
+
+	style = psy_ui_style(STYLE_MV_GENERATOR);
+	psy_ui_style_set_size(style, psy_ui_size_make_px(138.0, 52.0));
+	psy_ui_style_set_background_id(style, IDB_MACHINESKIN);
+	psy_ui_style_set_background_repeat(style, psy_ui_NOREPEAT);
+	psy_ui_style_set_background_position_px(style, 0.0, -87.0);
+	psy_ui_style_set_background_size_px(style, 138.0, 52.0);
+
+	style = psy_ui_style(STYLE_MV_GENERATOR_NAME);
+	psy_ui_style_set_position(style,
+		psy_ui_rectangle_make(
+			psy_ui_point_make_px(20.0, 3.0),
+			psy_ui_size_make_px(117.0, 15.0)));
+
+	style = psy_ui_style(STYLE_MV_GENERATOR_MUTE);
+	psy_ui_style_set_position(style, psy_ui_rectangle_make(
+		psy_ui_point_make_px(117.0, 31.0), psy_ui_size_make_px(17.0, 17.0)));
+
+	style = psy_ui_style(STYLE_MV_GENERATOR_MUTE_SELECT);
+	psy_ui_style_set_background_id(style, IDB_MACHINESKIN);
+	psy_ui_style_set_background_repeat(style, psy_ui_NOREPEAT);
+	psy_ui_style_set_background_position_px(style, -23.0, -139.0);
+	psy_ui_style_set_position(style, psy_ui_rectangle_make(
+		psy_ui_point_make_px(117.0, 31.0), psy_ui_size_make_px(17.0, 17.0)));
+
+	style = psy_ui_style(STYLE_MV_GENERATOR_SOLO);
+	psy_ui_style_set_position(style, psy_ui_rectangle_make(
+		psy_ui_point_make_px(98.0, 31.0), psy_ui_size_make_px(17.0, 17.0)));
+
+	style = psy_ui_style(STYLE_MV_GENERATOR_SOLO_SELECT);
+	psy_ui_style_set_background_id(style, IDB_MACHINESKIN);
+	psy_ui_style_set_background_repeat(style, psy_ui_NOREPEAT);
+	psy_ui_style_set_background_size_px(style, 17, 17);
+	psy_ui_style_set_background_position_px(style, -6.0, -139.0);
+	psy_ui_style_set_position(style, psy_ui_rectangle_make(
+		psy_ui_point_make_px(98.0, 31.0), psy_ui_size_make_px(17.0, 17.0)));
+
+	style = psy_ui_style(STYLE_MV_GENERATOR_VU);
+	psy_ui_style_set_position(style, psy_ui_rectangle_make(
+		psy_ui_point_make_px(4.0, 20.0), psy_ui_size_make_px(129.0, 7.0)));
+
+	style = psy_ui_style(STYLE_MV_GENERATOR_VU0);
+	psy_ui_style_set_background_id(style, IDB_MACHINESKIN);
+	psy_ui_style_set_background_repeat(style, psy_ui_NOREPEAT);
+	psy_ui_style_set_background_size_px(style, 129.0, 7);
+	psy_ui_style_set_background_position_px(style, 0.0, -156.0);
+
+	style = psy_ui_style(STYLE_MV_GENERATOR_VUPEAK);
+	psy_ui_style_set_background_id(style, IDB_MACHINESKIN);
+	psy_ui_style_set_background_repeat(style, psy_ui_NOREPEAT);
+	psy_ui_style_set_background_size_px(style, 1, 7);
+	psy_ui_style_set_background_position_px(style, -108.0, -156.0);
+
+	style = psy_ui_style(STYLE_MV_GENERATOR_PAN);
+	psy_ui_style_set_position(style, psy_ui_rectangle_make(
+		psy_ui_point_make_px(6.0, 33.0), psy_ui_size_make_px(82.0 + 6.0, 13.0)));
+
+	style = psy_ui_style(STYLE_MV_GENERATOR_PAN_SLIDER);
+	psy_ui_style_set_background_id(style, IDB_MACHINESKIN);
+	psy_ui_style_set_background_repeat(style, psy_ui_NOREPEAT);
+	psy_ui_style_set_background_size_px(style, 6.0, 13.0);
+	psy_ui_style_set_background_position_px(style, -0.0, -139.0);
+	psy_ui_style_set_position(style, psy_ui_rectangle_make(
+		psy_ui_point_make_px(0.0, 0.0), psy_ui_size_make_px(6.0, 13.0)));
+
+	style = psy_ui_style(STYLE_MV_EFFECT);
+	psy_ui_style_set_size(style, psy_ui_size_make_px(138.0, 52.0));
+	psy_ui_style_set_background_id(style, IDB_MACHINESKIN);
+	psy_ui_style_set_background_repeat(style, psy_ui_NOREPEAT);
+	psy_ui_style_set_background_size_px(style, 138.0, 52.0);
+
+	style = psy_ui_style(STYLE_MV_EFFECT_NAME);
+	psy_ui_style_set_position(style, psy_ui_rectangle_make(
+		psy_ui_point_make_px(20.0, 3.0), psy_ui_size_make_px(117.0, 15.0)));
+
+	style = psy_ui_style(STYLE_MV_EFFECT_MUTE);
+	psy_ui_style_set_position(style, psy_ui_rectangle_make(
+		psy_ui_point_make_px(117.0, 31.0), psy_ui_size_make_px(17.0, 17.0)));
+
+	style = psy_ui_style(STYLE_MV_EFFECT_MUTE_SELECT);
+	psy_ui_style_set_background_id(style, IDB_MACHINESKIN);
+	psy_ui_style_set_background_repeat(style, psy_ui_NOREPEAT);
+	psy_ui_style_set_background_position_px(style, -23.0, -139.0);
+	psy_ui_style_set_position(style, psy_ui_rectangle_make(
+		psy_ui_point_make_px(117.0, 31.0), psy_ui_size_make_px(17.0, 17.0)));
+
+	style = psy_ui_style(STYLE_MV_EFFECT_BYPASS);
+	psy_ui_style_set_background_colour(style,
+		psy_ui_colour_transparent());
+	psy_ui_style_set_position(style, psy_ui_rectangle_make(
+		psy_ui_point_make_px(98.0, 31.0), psy_ui_size_make_px(17.0, 17.0)));
+
+	style = psy_ui_style(STYLE_MV_EFFECT_BYPASS_SELECT);
+	psy_ui_style_set_background_id(style, IDB_MACHINESKIN);
+	psy_ui_style_set_background_repeat(style, psy_ui_NOREPEAT);
+	psy_ui_style_set_background_size_px(style, 17, 17);
+	psy_ui_style_set_background_position_px(style, -6.0, -139.0);
+	psy_ui_style_set_position(style, psy_ui_rectangle_make(
+		psy_ui_point_make_px(98.0, 31.0), psy_ui_size_make_px(17.0, 17.0)));
+
+	style = psy_ui_style(STYLE_MV_EFFECT_VU);
+	psy_ui_style_set_position(style, psy_ui_rectangle_make(
+		psy_ui_point_make_px(4.0, 20.0), psy_ui_size_make_px(129.0, 7.0)));
+
+	style = psy_ui_style(STYLE_MV_EFFECT_VU0);
+	psy_ui_style_set_background_id(style, IDB_MACHINESKIN);
+	psy_ui_style_set_background_repeat(style, psy_ui_NOREPEAT);
+	psy_ui_style_set_background_size_px(style, 129.0, 7.0);
+	psy_ui_style_set_background_position_px(style, 0.0, -163.0);
+
+	style = psy_ui_style(STYLE_MV_EFFECT_VUPEAK);
+	psy_ui_style_set_background_id(style, IDB_MACHINESKIN);
+	psy_ui_style_set_background_repeat(style, psy_ui_NOREPEAT);
+	psy_ui_style_set_background_size_px(style, 1.0, 7.0);
+	psy_ui_style_set_background_position_px(style, -96.0, -144.0);
+
+	style = psy_ui_style(STYLE_MV_EFFECT_PAN);
+	psy_ui_style_set_position(style, psy_ui_rectangle_make(
+		psy_ui_point_make_px(6.0, 33.0), psy_ui_size_make_px(82.0 + 3.0, 13.0)));
+
+	style = psy_ui_style(STYLE_MV_EFFECT_PAN_SLIDER);
+	psy_ui_style_set_background_id(style, IDB_MACHINESKIN);
+	psy_ui_style_set_background_repeat(style, psy_ui_NOREPEAT);
+	psy_ui_style_set_background_size_px(style, 6.0, 13.0);
+	psy_ui_style_set_background_position_px(style, -0.0, -139.0);
+	psy_ui_style_set_position(style, psy_ui_rectangle_make(
+		psy_ui_point_make_px(0.0, 0.0), psy_ui_size_make_px(6.0, 13.0)));
+
+	style = psy_ui_style(STYLE_MV_ARROW);
+	psy_ui_style_set_size(style, psy_ui_size_make_px(138.0, 52.0));
+	style = psy_ui_style(STYLE_MV_LEVEL);
+	psy_ui_style_set_size(style, psy_ui_size_make_px(16.0, 90.0));
 }

@@ -15,12 +15,6 @@
 #include <sequence.h>
 
 
-typedef enum {
-	SCROLL_DIR_NONE,
-	SCROLL_DIR_LEFT,
-	SCROLL_DIR_RIGHT
-} ScrollDir;
-
 typedef struct TrackColumnDef {
 	uintptr_t numdigits;
 	uintptr_t numchars;
@@ -174,8 +168,6 @@ void trackerstate_dragselection(TrackerState*,
 	psy_audio_SequenceCursor, double bpl);
 psy_audio_SequenceCursor trackerstate_checkcursorbounds(TrackerState*,
 	psy_audio_SequenceCursor);
-ScrollDir trackerstate_nextcol(TrackerState*, bool wrap);
-ScrollDir trackerstate_prevcol(TrackerState*, bool wrap);
 bool trackerstate_testplaybar(TrackerState*,
 	psy_dsp_big_beat_t playposition,
 	psy_dsp_big_beat_t offset);

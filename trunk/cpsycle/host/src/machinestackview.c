@@ -1011,7 +1011,7 @@ void machinestackinputs_onpreferredsize(MachineStackInputs* self,
 	psy_ui_Style* effect_style;
 	
 	effect_style = psy_ui_style(STYLE_MV_EFFECT);
-	rv->height = effect_style->position.size.height;
+	rv->height = effect_style->position.rectangle->size.height;
 	spacing = psy_ui_value_make_eh(1.0);
 	psy_ui_value_add(&rv->height, &spacing,
 		psy_ui_component_textmetric(&self->component), NULL);
@@ -1565,7 +1565,7 @@ void machinestackview_init(MachineStackView* self, psy_ui_Component* parent,
 
 	psy_ui_component_init(&self->component, parent, NULL);
 	vtable_init(self);	
-	psy_ui_component_setstyletype(&self->component, STYLE_MACHINEVIEW_STACK);
+	psy_ui_component_setstyletype(&self->component, STYLE_MV_STACK);
 	self->paramviews = paramviews;
 	self->workspace = workspace;	
 	machinestackstate_init(&self->state, self->paramviews);
