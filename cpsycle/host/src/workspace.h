@@ -125,6 +125,7 @@ typedef struct Workspace {
 	psy_Signal signal_songchanged;
 	psy_Signal signal_configchanged;	
 	psy_Signal signal_playlinechanged;
+	psy_Signal signal_playstatuschanged;
 	psy_Signal signal_gotocursor;	
 	psy_Signal signal_loadprogress;
 	psy_Signal signal_scanprogress;
@@ -195,7 +196,9 @@ typedef struct Workspace {
 	psy_dsp_big_beat_t currplayposition;
 	psy_dsp_big_beat_t lastplayposition;	
 	uintptr_t lastplayline;	
-	uintptr_t currplayline;	
+	uintptr_t currplayline;
+	bool currplaying;
+	psy_audio_SequenceCursor currplaycursor;
 	InputHandler inputhandler;
 	psy_Thread driverconfigloadthread;
 	psy_Thread pluginscanthread;

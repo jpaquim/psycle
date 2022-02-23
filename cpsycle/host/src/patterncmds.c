@@ -53,7 +53,7 @@ static void insertcommand_vtable_init(InsertCommand* self)
 /* implementation */
 InsertCommand* insertcommand_allocinit(psy_audio_Pattern* pattern,
 	psy_audio_SequenceCursor cursor, psy_audio_PatternEvent event,
-	psy_audio_Sequence* sequence, psy_audio_Player* player)
+	psy_audio_Sequence* sequence)
 {
 	InsertCommand* rv;
 
@@ -65,8 +65,7 @@ InsertCommand* insertcommand_allocinit(psy_audio_Pattern* pattern,
 		rv->cursor = cursor;		
 		rv->event = event;		
 		rv->pattern = pattern;
-		rv->sequence = sequence;
-		rv->player = player;
+		rv->sequence = sequence;		
 	}
 	return rv;
 }
@@ -75,10 +74,12 @@ void insertcommand_dispose(InsertCommand* self) { }
 
 void insertcommand_execute(InsertCommand* self)
 {
+	psy_audio_exclusivelock_enter();
 	self->oldevent = psy_audio_pattern_event_at_cursor(self->pattern,
 		self->cursor);
 	self->insert = (psy_audio_pattern_set_event_at_cursor(self->pattern,
 		self->cursor, &self->event) != NULL);
+	psy_audio_exclusivelock_leave();
 	if (self->sequence) {
 		psy_audio_sequence_set_cursor(self->sequence, self->cursor);
 	}
@@ -94,11 +95,7 @@ void insertcommand_revert(InsertCommand* self)
 	} else {
 		node = psy_audio_pattern_set_event_at_cursor(self->pattern, self->cursor,
 			NULL);
-	}	
-	if (node && self->player) {
-		psy_audio_sequencer_checkiterators(&self->player->sequencer,
-			node);		
-	}
+	}		
 	if (self->sequence) {
 		psy_audio_sequence_set_cursor(self->sequence, self->cursor);			
 	}
@@ -125,10 +122,10 @@ static void removecommandcommand_vtable_init(RemoveCommand* self)
 	}
 	self->command.vtable = &removecommandcommand_vtable;
 }
+
 /* implementation */
 RemoveCommand* removecommand_allocinit(psy_audio_Pattern* pattern,
-	psy_audio_SequenceCursor cursor, psy_audio_Sequence* sequence,
-	psy_audio_Player* player)
+	psy_audio_SequenceCursor cursor, psy_audio_Sequence* sequence)
 {
 	RemoveCommand* rv;
 
@@ -139,8 +136,7 @@ RemoveCommand* removecommand_allocinit(psy_audio_Pattern* pattern,
 		rv->cursor = cursor;		
 		rv->remove = FALSE;
 		rv->pattern = pattern;
-		rv->sequence = sequence;
-		rv->player = player;
+		rv->sequence = sequence;		
 	}
 	return rv;
 }
@@ -150,15 +146,14 @@ void removecommand_dispose(RemoveCommand* self) { }
 void removecommand_execute(RemoveCommand* self)
 {
 	psy_audio_PatternNode* node;
-
+	
+	psy_audio_exclusivelock_enter();
 	self->oldevent = psy_audio_pattern_event_at_cursor(self->pattern,
 		self->cursor);
 	node = psy_audio_pattern_set_event_at_cursor(self->pattern,
 		self->cursor, NULL);
 	self->remove = node != NULL;
-	if (node && self->player) {
-		psy_audio_sequencer_checkiterators(&self->player->sequencer, node);
-	}	
+	psy_audio_exclusivelock_leave();
 	if (self->sequence) {
 		psy_audio_sequence_set_cursor(self->sequence, self->cursor);
 	}
@@ -170,10 +165,7 @@ void removecommand_revert(RemoveCommand* self)
 		psy_audio_PatternNode* node;
 
 		node = psy_audio_pattern_set_event_at_cursor(self->pattern,
-			self->cursor, &self->oldevent);	
-		if (node && self->player) {
-			psy_audio_sequencer_checkiterators(&self->player->sequencer, node);
-		}
+			self->cursor, &self->oldevent);		
 		self->remove = 0;
 	}
 	if (self->sequence) {
@@ -207,7 +199,7 @@ static void blocktransposecommandcommand_vtable_init(BlockTransposeCommand* self
 /* implementation */
 BlockTransposeCommand* blocktransposecommand_alloc(psy_audio_Pattern* pattern,
 	psy_audio_BlockSelection block, psy_audio_SequenceCursor cursor,
-	intptr_t transposeoffset, psy_audio_Song* song)
+	intptr_t transposeoffset, psy_audio_Sequence* sequence)
 {
 	BlockTransposeCommand* rv;
 
@@ -220,7 +212,7 @@ BlockTransposeCommand* blocktransposecommand_alloc(psy_audio_Pattern* pattern,
 		rv->block = block;
 		rv->cursor = cursor;
 		rv->transposeoffset = transposeoffset;		
-		rv->song = song;
+		rv->sequence = sequence;		
 	}
 	return rv;
 }
@@ -232,10 +224,8 @@ void BlockTransposeCommandDispose(BlockTransposeCommand* self)
 
 void BlockTransposeCommandExecute(BlockTransposeCommand* self)
 {
-	if (self->song) {
-		psy_audio_sequence_set_cursor(
-			psy_audio_song_sequence(self->song),
-			self->cursor);
+	if (self->sequence) {
+		psy_audio_sequence_set_cursor(self->sequence, self->cursor);
 	}
 	psy_audio_pattern_copy(&self->oldpattern, self->pattern);
 	psy_audio_pattern_blocktranspose(self->pattern,
@@ -245,9 +235,8 @@ void BlockTransposeCommandExecute(BlockTransposeCommand* self)
 
 void BlockTransposeCommandRevert(BlockTransposeCommand* self)
 {
-	if (self->pattern && self->song) {
-		psy_audio_sequence_set_cursor(psy_audio_song_sequence(self->song),
-			self->cursor);		
+	if (self->pattern && self->sequence) {
+		psy_audio_sequence_set_cursor(self->sequence, self->cursor);		
 		psy_audio_pattern_copy(self->pattern, &self->oldpattern);
 	}
 }
@@ -276,7 +265,7 @@ static void blockremovecommandcommand_vtable_init(BlockRemoveCommand* self)
 
 /* implementation */
 BlockRemoveCommand* blockremovecommand_alloc(psy_audio_Pattern* pattern,
-	psy_audio_BlockSelection selection, psy_audio_Song* song)
+	psy_audio_BlockSelection selection, psy_audio_Sequence* sequence)
 {
 	BlockRemoveCommand* rv;
 
@@ -288,7 +277,7 @@ BlockRemoveCommand* blockremovecommand_alloc(psy_audio_Pattern* pattern,
 		rv->selection = selection;
 		rv->remove = FALSE;
 		rv->pattern = pattern;
-		rv->song = song;
+		rv->sequence = sequence;
 	}
 	return rv;
 }

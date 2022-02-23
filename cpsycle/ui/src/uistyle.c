@@ -210,7 +210,7 @@ void psy_ui_style_deallocate(psy_ui_Style* self)
 	free(self);
 }
 
-void psy_ui_style_set_font(psy_ui_Style* self, const char* family, int size)
+void psy_ui_style_set_font(psy_ui_Style* self, const char* family, int32_t size)
 {	
 	psy_ui_FontInfo fontinfo;
 	

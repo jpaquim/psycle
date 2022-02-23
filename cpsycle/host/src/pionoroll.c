@@ -112,7 +112,7 @@ void pianoroll_init(Pianoroll* self, psy_ui_Component* parent,
 	self->syncpattern = 1;
 	self->chordbegin = 0;	
 	/* shared states */
-	keyboardstate_init(&self->keyboardstate); // , patternviewstate_skin(pvstate));
+	keyboardstate_init(&self->keyboardstate);
 	pianogridstate_init(&self->gridstate, pvstate);	
 	/* left area (keyboardheader, keyboard) */
 	psy_ui_component_init(&self->left, &self->component, NULL);
@@ -593,8 +593,7 @@ bool pianoroll_onnotecmds(Pianoroll* self, InputHandler* sender)
 		psy_undoredo_execute(&self->workspace->undoredo,
 			&insertcommand_allocinit(patternviewstate_pattern(self->gridstate.pv),				
 				self->gridstate.pv->cursor, ev,
-				&self->workspace->song->sequence,
-				&self->workspace->player)->command);
+				&self->workspace->song->sequence)->command);
 		if (chord != FALSE) {
 			++self->gridstate.pv->cursor.track;
 		} else {
@@ -663,8 +662,7 @@ void pianoroll_enter(Pianoroll* self)
 	psy_undoredo_execute(&self->workspace->undoredo,
 		&insertcommand_allocinit(patternviewstate_pattern(self->gridstate.pv),			
 			self->gridstate.pv->cursor, patternevent,
-			&self->workspace->song->sequence,
-			&self->workspace->player)->command);
+			&self->workspace->song->sequence)->command);
 	pianogrid_advanceline(&self->grid);
 }
 
@@ -672,8 +670,7 @@ void pianoroll_rowclear(Pianoroll* self)
 {
 	psy_undoredo_execute(&self->workspace->undoredo,
 		&removecommand_allocinit(self->gridstate.pv->pattern,
-			self->gridstate.pv->cursor, &self->workspace->song->sequence,
-			&self->workspace->player)->command);
+			self->gridstate.pv->cursor, &self->workspace->song->sequence)->command);
 	pianogrid_advanceline(&self->grid);
 }
 

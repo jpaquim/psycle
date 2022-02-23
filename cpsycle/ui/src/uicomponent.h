@@ -536,12 +536,16 @@ INLINE void psy_ui_component_invalidate(psy_ui_Component* self)
 	//	return;
 	//}
 #endif	
-	self->vtable->invalidate(self);	
+	if (psy_ui_component_drawvisible(self)) {
+		self->vtable->invalidate(self);
+	}
 }
 
 INLINE void psy_ui_component_invalidaterect(psy_ui_Component* self, psy_ui_RealRectangle r)
 {
-	self->imp->vtable->dev_invalidaterect(self->imp, &r);
+	if (psy_ui_component_drawvisible(self)) {
+		self->imp->vtable->dev_invalidaterect(self->imp, &r);
+	}
 }
 
 INLINE void psy_ui_component_update(psy_ui_Component* self)

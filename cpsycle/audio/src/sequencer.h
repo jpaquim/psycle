@@ -339,9 +339,6 @@ INLINE psy_dsp_big_beat_t psy_audio_sequencer_currbeatsperline(
 	return 1.0 / (self->lpb * psy_audio_sequencer_speed(self));
 }
 
-void psy_audio_sequencer_checkiterators(psy_audio_Sequencer*,
-	const psy_audio_PatternNode*);
-
 /* elapsed playtime in seconds */
 INLINE psy_dsp_seconds_t psy_audio_sequencer_currplaytime(
 	const psy_audio_Sequencer* self)

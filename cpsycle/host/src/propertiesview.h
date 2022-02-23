@@ -41,7 +41,7 @@ typedef struct PropertiesRenderState {
 } PropertiesRenderState;
 
 void propertiesrenderstate_init(PropertiesRenderState*, uintptr_t numcols,
-	psy_ui_TextInput* edit, psy_ui_Component* dummy);
+	psy_ui_TextInput* edit);
 
 /* PropertiesRenderLine */
 typedef struct PropertiesRenderLine {
@@ -82,8 +82,7 @@ typedef struct PropertiesRenderer {
 	/* signals */
 	psy_Signal signal_changed;
 	psy_Signal signal_selected;
-	/* internal */
-	psy_ui_Component dummy;	/* used to calculate font pt size */	
+	/* internal */	
 	psy_ui_TextInput edit;
 	InputDefiner inputdefiner;	
 	uintptr_t currlinestatecount;		

@@ -129,6 +129,15 @@ INLINE void psy_audio_sequencecursor_setlpb(psy_audio_SequenceCursor* self,
 	psy_audio_sequencecursor_updatecache(self);
 }
 
+INLINE bool psy_audio_sequencecursor_intersect_abs(const
+	psy_audio_SequenceCursor* self,
+	psy_dsp_big_beat_t position_absolute)
+{
+	return psy_dsp_testrange(position_absolute,
+		psy_audio_sequencecursor_offset_abs(self),
+		psy_audio_sequencecursor_bpl(self));
+}
+
 #ifdef __cplusplus
 }
 #endif

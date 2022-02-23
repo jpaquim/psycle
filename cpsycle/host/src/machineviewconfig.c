@@ -316,12 +316,12 @@ void machineviewconfig_load_colours(MachineViewConfig* self)
 	read_colour(self->theme, "mv_generator_fontcolour", style, TRUE);
 	psy_ui_style_set_font(style,
 		psy_property_at_str(self->theme, "generator_fontface", "Tahoma"),
-		psy_property_at_int(self->theme, "generator_font_point", 16));
+		(int32_t)psy_property_at_int(self->theme, "generator_font_point", 16));
 	style = psy_ui_style(STYLE_MV_EFFECT);
 	read_colour(self->theme, "mv_effect_fontcolour", style, TRUE);
 	psy_ui_style_set_font(style,
 		psy_property_at_str(self->theme, "effect_fontface", "Tahoma"),
-		psy_property_at_int(self->theme, "effect_font_point", 16));
+		(int32_t)psy_property_at_int(self->theme, "effect_font_point", 16));
 }
 
 void read_colour(psy_Property* config, const char* key, psy_ui_Style* style, bool fore)
@@ -331,10 +331,10 @@ void read_colour(psy_Property* config, const char* key, psy_ui_Style* style, boo
 	if (p = psy_property_at(config, key, PSY_PROPERTY_TYPE_INTEGER)) {
 		if (fore) {
 			psy_ui_style_set_colour(style, psy_ui_colour_make(
-				psy_property_item_int(p)));
+				(uint32_t)psy_property_item_int(p)));
 		} else {
 			psy_ui_style_set_background_colour(style, psy_ui_colour_make(
-				psy_property_item_int(p)));
+				(uint32_t)psy_property_item_int(p)));
 		}
 	}
 }

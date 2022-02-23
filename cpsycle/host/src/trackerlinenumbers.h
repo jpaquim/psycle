@@ -82,8 +82,9 @@ INLINE psy_ui_Component* trackerlinenumberslabel_base(TrackerLineNumbersLabel* s
 typedef struct TrackerLineNumbers {
 	/* inherits */
 	psy_ui_Component component;
-	/* internal */	
-	bool showcursor;
+	/* internal */
+	bool draw_linenumber_cursor;
+	bool prevent_cursor;
 	bool shownumbersinhex;
 	bool showbeat;
 	const char* format;

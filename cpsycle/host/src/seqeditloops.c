@@ -281,9 +281,7 @@ void seqeditloop_onmousemove(SeqEditLoop* self, psy_ui_MouseEvent* ev)
 		oldnode = self->node;
 		self->node = psy_audio_pattern_insert(self->pattern, prev,
 			psy_audio_GLOBALPATTERN_LOOPTRACK,
-			offset, &e);
-		psy_audio_sequencer_checkiterators(
-			&self->state->workspace->player.sequencer, oldnode);
+			offset, &e);		
 		psy_audio_exclusivelock_leave();
 		seqeditloop_updateposition(self);
 		seqeditloop_select(self);

@@ -138,17 +138,16 @@ typedef struct TrackerState {
 	TrackerEventTable trackevents;	
 	bool showemptydata;
 	bool midline;
-	bool drawbeathighlights;
-	bool synccursor;	
+	bool drawbeathighlights;	
+	bool draw_playbar;
+	bool prevent_cursor;	
 	psy_audio_PatternEntry empty;
 	psy_ui_Value lineheight;
 	psy_ui_Value defaultlineheight;
 	double lineheightpx;
 	double flatsize;	
-	bool drawcursor;		
 	/* precomputed */
-	intptr_t visilines;
-	bool cursorchanging;	
+	intptr_t visilines;	
 } TrackerState;
 
 void trackerstate_init(TrackerState*, TrackConfig*, PatternViewState* pvstate);
@@ -162,10 +161,8 @@ double trackerstate_basewidth(TrackerState*, uintptr_t track);
 void trackerstate_clip(TrackerState*, const psy_ui_RealRectangle* clip,
 	psy_audio_BlockSelection* rv);
 
-void trackerstate_startdragselection(TrackerState*,
-	psy_audio_SequenceCursor, double bpl);
-void trackerstate_dragselection(TrackerState*,
-	psy_audio_SequenceCursor, double bpl);
+void trackerstate_startdragselection(TrackerState*, psy_audio_SequenceCursor);
+void trackerstate_dragselection(TrackerState*, psy_audio_SequenceCursor);
 psy_audio_SequenceCursor trackerstate_checkcursorbounds(TrackerState*,
 	psy_audio_SequenceCursor);
 bool trackerstate_testplaybar(TrackerState*,

@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -218,8 +218,7 @@ void seqedittimesig_onmousemove(SeqEditTimeSig* self, psy_ui_MouseEvent* ev)
 		seqeditstate_pxtobeat(self->state,
 			psy_ui_mouseevent_pt(ev).x + position.left));
 	offset = psy_max(0.0, offset);
-	if ((seqedittimesig_offset(self) != offset)) {
-		psy_audio_PatternNode* oldnode;
+	if ((seqedittimesig_offset(self) != offset)) {		
 		psy_audio_PatternNode* node;
 		psy_audio_PatternNode* prev;
 
@@ -230,13 +229,10 @@ void seqedittimesig_onmousemove(SeqEditTimeSig* self, psy_ui_MouseEvent* ev)
 			&prev);
 		if (!node) {
 			node = prev;
-		}
-		oldnode = self->node;
+		}		
 		self->node = psy_audio_pattern_insert(self->pattern, prev,
 			psy_audio_GLOBALPATTERN_TIMESIGTRACK,
-			offset, &e);
-		psy_audio_sequencer_checkiterators(
-			&self->state->workspace->player.sequencer, oldnode);
+			offset, &e);		
 		psy_audio_exclusivelock_leave();
 		seqedittimesig_updateposition(self);
 		psy_ui_component_invalidate(psy_ui_component_parent(&self->component));

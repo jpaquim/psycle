@@ -43,7 +43,6 @@ static void patternview_onparametertweak(PatternView*, Workspace*,
 	int slot, uintptr_t tweak, float normvalue);
 static void patternview_oncolresize(PatternView*, TrackerGrid*);
 static void patternview_updatescrollstep(PatternView*);
-static void patternview_updatedefaultline(PatternView*);
 static void patternview_onshow(PatternView*);
 /* vtable */
 static psy_ui_ComponentVtable vtable;
@@ -107,13 +106,17 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 	/* Pattern Properties */
 	patternproperties_init(&self->properties, &self->component, NULL, workspace);	
 	/* Shared states */	
-	patterncmds_init(&self->cmds, workspace->song, &workspace->undoredo, NULL,
+	patterncmds_init(&self->cmds,
+		(workspace->song) ? &workspace->song->sequence : NULL,
+		&workspace->player, &workspace->undoredo, NULL,
 		&workspace->config.directories);		
 	trackconfig_init(&self->trackconfig,
 		patternviewconfig_showwideinstcolumn(
 			psycleconfig_patview(workspace_conf(workspace))));
 	patternviewstate_init(&self->pvstate, &workspace->config.patview,
-		workspace_song(workspace), &self->cmds);
+		(workspace->song) ? &workspace->song->sequence : NULL,
+		(workspace->song) ? &workspace->song->patterns : NULL,
+		&self->cmds);
 	trackerstate_init(&self->state, &self->trackconfig, &self->pvstate);
 	if (workspace->song) {
 		psy_signal_connect(&workspace->song->sequence.signal_cursorchanged, self,
@@ -239,9 +242,10 @@ void patternview_connectsong(PatternView* self)
 
 	assert(self);
 
-	song = workspace_song(self->workspace);	
-	patternviewstate_setsong(self->state.pv, song);
-	patternviewstate_setsong(self->defaultline.grid.state->pv, song);
+	song = workspace_song(self->workspace);
+	/* grid */
+	patternviewstate_setsequence(self->state.pv, song ? &song->sequence : NULL);
+	patternviewstate_setpatterns(self->state.pv, song ? &song->patterns : NULL);	
 	if (song) {		
 		psy_signal_connect(&song->sequence.signal_cursorchanged, self,
 			patternview_oncursorchanged);

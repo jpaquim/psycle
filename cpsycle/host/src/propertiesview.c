@@ -20,7 +20,7 @@
 
 /* PropertiesRenderState */
 void propertiesrenderstate_init(PropertiesRenderState* self, uintptr_t numcols,
-	psy_ui_TextInput* edit, psy_ui_Component* dummy)
+	psy_ui_TextInput* edit)
 {	
 	self->property = self->selected = NULL;
 	self->selectedline = NULL;
@@ -52,7 +52,7 @@ static void propertiesrenderline_vtable_init(PropertiesRenderLine* self)
 			propertiesrenderline_onmousedown;
 		propertiesrenderline_vtable_initialized = TRUE;
 	}
-	self->component.vtable = &propertiesrenderline_vtable;
+	psy_ui_component_setvtable(&self->component, &propertiesrenderline_vtable);
 }
 
 /* implementation */
@@ -469,11 +469,8 @@ void propertiesrenderer_init(PropertiesRenderer* self,
 	psy_ui_component_init(&self->client, &self->component, NULL);	
 	psy_ui_component_setalign(&self->client, psy_ui_ALIGN_CLIENT);
 	psy_ui_component_setdefaultalign(&self->client,
-		psy_ui_ALIGN_TOP, psy_ui_margin_make_em(0.0, 0.0, 0.5, 0.0));
-	psy_ui_component_init(&self->dummy, &self->component, NULL);
-	psy_ui_component_hide(&self->dummy);
-	propertiesrenderstate_init(&self->state, numcols, &self->edit,
-		&self->dummy);	
+		psy_ui_ALIGN_TOP, psy_ui_margin_make_em(0.0, 0.0, 0.5, 0.0));	
+	propertiesrenderstate_init(&self->state, numcols, &self->edit);	
 	psy_ui_textinput_init(&self->edit, &self->component);
 	psy_ui_textinput_enableinputfield(&self->edit);
 	psy_signal_connect(&self->edit.component.signal_keydown, self,
@@ -949,14 +946,18 @@ void propertiesview_init(PropertiesView* self, psy_ui_Component* parent,
 		numcols);
 	psy_ui_scroller_init(&self->scroller, &self->renderer.component,
 		&self->component);
-	psy_ui_component_setalign(&self->scroller.component, psy_ui_ALIGN_CLIENT);	
+	psy_ui_component_setalign(&self->scroller.component, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_setmargin(&self->scroller.pane,
+		psy_ui_margin_make_em(0.0, 1.0, 0.0, 0.0));
+	psy_ui_component_setmargin(&self->scroller.component,
+		psy_ui_margin_make_em(0.0, 1.0, 0.0, 0.0));
 	psy_ui_component_setalign(&self->renderer.component, psy_ui_ALIGN_HCLIENT);
 	psy_signal_connect(&self->component.signal_selectsection, self,
 		propertiesview_selectsection);	
 	psy_ui_tabbar_init(&self->tabbar, &self->component);	
 	psy_ui_tabbar_settabalign(&self->tabbar, psy_ui_ALIGN_TOP);
 	psy_ui_component_setalign(psy_ui_tabbar_base(&self->tabbar),
-		psy_ui_ALIGN_RIGHT);
+		psy_ui_ALIGN_RIGHT);	
 	propertiesview_updatetabbarsections(self);
 	psy_signal_connect(&self->renderer.signal_changed, self,
 		propertiesview_onpropertiesrendererchanged);

@@ -86,16 +86,22 @@ INLINE const char* psy_audio_sequencetrack_name(const psy_audio_SequenceTrack* s
 **
 ** Iterator the player uses to advance through the track and pattern
 */
-typedef struct {
+typedef struct psy_audio_SequenceTrackIterator {
 	psy_audio_Patterns* patterns;	
 	psy_audio_SequenceEntryNode* sequencentrynode;
-	psy_audio_PatternNode* patternnode;	
+	psy_audio_PatternNode* patternnode;
 	psy_audio_Pattern* pattern;	
 } psy_audio_SequenceTrackIterator;
+
+void psy_audio_sequencetrackiterator_init(psy_audio_SequenceTrackIterator*);
+void psy_audio_sequencetrackiterator_dispose(psy_audio_SequenceTrackIterator*);
 
 void psy_audio_sequencetrackiterator_inc(psy_audio_SequenceTrackIterator*);
 void psy_audio_sequencetrackiterator_inc_entry(psy_audio_SequenceTrackIterator*);
 void psy_audio_sequencetrackiterator_dec_entry(psy_audio_SequenceTrackIterator*);
+
+void psy_audio_sequencetrackiterator_set_pattern(psy_audio_SequenceTrackIterator*,
+	psy_audio_Pattern*);
 
 INLINE psy_audio_PatternNode* psy_audio_sequencetrackiterator_patternnode(
 	psy_audio_SequenceTrackIterator* self)
@@ -169,6 +175,8 @@ typedef struct {
 } psy_audio_SequencePosition;
 
 void psy_audio_sequenceposition_init(psy_audio_SequencePosition*);
+void psy_audio_sequenceposition_dispose(psy_audio_SequencePosition*);
+
 psy_audio_SequenceEntry* psy_audio_sequenceposition_entry(
 	psy_audio_SequencePosition*);
 
@@ -270,12 +278,13 @@ void psy_audio_sequence_setplayselection(psy_audio_Sequence*,
 	struct psy_audio_SequenceSelection*);
 void psy_audio_sequence_clearplayselection(psy_audio_Sequence*);
 /* methods for the sequencer */
-psy_audio_SequenceTrackIterator psy_audio_sequence_begin(psy_audio_Sequence*,
-	psy_audio_SequenceTrack*, psy_dsp_big_beat_t position);
-psy_audio_SequencePosition psy_audio_sequence_at(psy_audio_Sequence*,
-	uintptr_t trackindex, uintptr_t position);
-psy_audio_SequencePosition psy_audio_sequence_makeposition(psy_audio_Sequence*,
-	psy_audio_SequenceTrackNode*, psy_List* entries);
+void psy_audio_sequence_begin(psy_audio_Sequence*, psy_audio_SequenceTrack*,
+	psy_dsp_big_beat_t position, psy_audio_SequenceTrackIterator* rv);
+void psy_audio_sequence_at(psy_audio_Sequence*, uintptr_t trackindex,
+	uintptr_t position, psy_audio_SequencePosition* rv);
+void psy_audio_sequence_make_position(psy_audio_Sequence*,
+	psy_audio_SequenceTrackNode*, psy_List* entries,
+	psy_audio_SequencePosition* rv);
 psy_audio_SequenceEntryNode* psy_audio_sequence_node(psy_audio_Sequence* self,
 	psy_audio_OrderIndex index, psy_audio_SequenceTrack** rv);
 /* calcduration */

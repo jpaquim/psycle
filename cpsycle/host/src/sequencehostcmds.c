@@ -303,7 +303,8 @@ void sequencecmds_deltrack(SequenceCmds* self, uintptr_t trackindex)
 		psy_audio_SequencePosition position;
 
 		sequencecmds_update(self);
-		position = psy_audio_sequence_at(self->sequence, trackindex, 0);
+		psy_audio_sequenceposition_init(&position);
+		psy_audio_sequence_at(self->sequence, trackindex, 0, &position);
 		if (position.tracknode) {
 			psy_audio_exclusivelock_enter();
 			psy_audio_sequence_removetrack(self->sequence, position.tracknode);
@@ -312,6 +313,7 @@ void sequencecmds_deltrack(SequenceCmds* self, uintptr_t trackindex)
 				&self->workspace->song->sequence.sequenceselection,
 				psy_audio_orderindex_make(trackindex, 0));			
 		}
+		psy_audio_sequenceposition_dispose(&position);
 	}
 }
 

@@ -130,8 +130,8 @@ void psy_ui_label_settext(psy_ui_Label* self, const char* text)
 	if (self->translate) {
 		psy_strreset(&self->translation, psy_translator_translate(
 			psy_ui_translator(), text));
-	}	
-	psy_ui_component_invalidate(psy_ui_label_base(self));
+	}		
+	psy_ui_component_invalidate(psy_ui_label_base(self));	
 }
 
 void psy_ui_label_addtext(psy_ui_Label* self, const char* text)

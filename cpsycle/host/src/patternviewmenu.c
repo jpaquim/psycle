@@ -217,11 +217,11 @@ void patternblockmenu_toggleswingfill(PatternBlockMenu* self)
 {
 	assert(self);
 
-	if (!psy_ui_component_visible(swingfillview_base(self->swingfill)) &&
+	/*if (!psy_ui_component_visible(swingfillview_base(self->swingfill)) &&
 			(self->pvstate->song)) {
 		swingfillview_reset(self->swingfill,
 			(int)self->pvstate->song->properties.bpm);
-	}
+	}*/
 	psy_ui_component_togglevisibility(swingfillview_base(self->swingfill));	
 }
 

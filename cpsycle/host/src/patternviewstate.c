@@ -20,14 +20,16 @@
 
 /* implementation */
 void patternviewstate_init(PatternViewState* self,
-	PatternViewConfig* patconfig, psy_audio_Song* song, PatternCmds* cmds)
+	PatternViewConfig* patconfig, psy_audio_Sequence* sequence,
+	psy_audio_Patterns* patterns, PatternCmds* cmds)
 {
 	psy_audio_sequencecursor_init(&self->cursor);
 	psy_audio_blockselection_init(&self->selection);	
 	self->pgupdownstepmode = PATTERNCURSOR_STEP_BEAT;
 	self->pgupdownstep = 4;	
 	self->singlemode = TRUE;
-	self->song = song;
+	self->sequence = sequence;
+	self->patterns = patterns;	
 	self->pattern = NULL;	
 	self->patconfig = patconfig;
 	self->display = PROPERTY_ID_PATTERN_DISPLAYMODE_TRACKER;
@@ -114,21 +116,20 @@ void patternviewstate_configure(PatternViewState* self)
 	}
 }
 
-psy_audio_SequenceTrackIterator patternviewstate_sequencestart(PatternViewState* self,
-	double startoffset)
+void patternviewstate_sequencestart(PatternViewState* self,
+	double startoffset, psy_audio_SequenceTrackIterator* rv)
 {
 	double offset;
 	double seqoffset;
-	double length;
-	psy_audio_SequenceTrackIterator rv;
+	double length;	
 
 	assert(self);
-
-	rv.pattern = self->pattern;
-	rv.patternnode = NULL;
-	rv.patterns = patternviewstate_patterns(self);
+	
+	rv->pattern = self->pattern;
+	rv->patternnode = NULL;
+	rv->patterns = patternviewstate_patterns(self);
 	seqoffset = 0.0;
-	length = rv.pattern->length;
+	length = rv->pattern->length;
 	offset = startoffset;
 	if (!self->singlemode && patternviewstate_sequence(self)) {
 		psy_audio_SequenceTrackNode* tracknode;
@@ -140,19 +141,18 @@ psy_audio_SequenceTrackIterator patternviewstate_sequencestart(PatternViewState*
 		if (!tracknode) {
 			tracknode = sequence->tracks;
 		}
-		rv = psy_audio_sequence_begin(sequence,
+		psy_audio_sequence_begin(sequence,
 			tracknode ? (psy_audio_SequenceTrack*)tracknode->entry : NULL,
-			offset);
-		if (rv.sequencentrynode) {
-			seqoffset = psy_audio_sequencetrackiterator_seqoffset(&rv);
-			if (rv.pattern) {
-				length = rv.pattern->length;
+			offset, rv);
+		if (rv->sequencentrynode) {
+			seqoffset = psy_audio_sequencetrackiterator_seqoffset(rv);
+			if (rv->pattern) {
+				length = rv->pattern->length;
 			}
 		}
 	} else {
-		rv.sequencentrynode = NULL;
-		rv.patternnode = psy_audio_pattern_greaterequal(
+		rv->sequencentrynode = NULL;
+		rv->patternnode = psy_audio_pattern_greaterequal(
 			patternviewstate_pattern(self), offset - seqoffset);
 	}	
-	return rv;
 }

@@ -41,6 +41,15 @@ typedef struct psy_audio_MachineWork {
 	uintptr_t slot;
 } psy_audio_MachineWork;
 
+typedef struct psy_audio_PatternDefaults {
+	psy_audio_Pattern* pattern;
+	psy_audio_Patterns patterns;
+	psy_audio_Sequence sequence;
+} psy_audio_PatternDefaults;
+
+void psy_audio_patterndefaults_init(psy_audio_PatternDefaults*);
+void psy_audio_patterndefaults_dispose(psy_audio_PatternDefaults*);
+
 typedef struct psy_audio_Player {
 	psy_AudioDriver* driver;
 	psy_audio_Song* song;
@@ -63,9 +72,7 @@ typedef struct psy_audio_Player {
 	psy_Table notestotracks;
 	psy_Table trackstonotes;
 	psy_Table worked;
-	psy_audio_Pattern* patterndefaults;
-	psy_audio_Patterns defaultpatterns;
-	psy_audio_Sequence defaultsequence;
+	psy_audio_PatternDefaults patterndefaults;	
 	psy_dsp_Dither dither;
 	bool dodither;
 	uint8_t octave;

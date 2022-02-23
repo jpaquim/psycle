@@ -43,6 +43,7 @@ typedef struct TrackerGrid {
 	bool syncpattern;	
 	bool effcursoralwaysdown;	
 	bool preventscrolltop;
+	bool prevent_cursor;
 	psy_Table columns;
 	bool preventeventdriver;	
 	/* references */
@@ -56,6 +57,7 @@ void trackergrid_init(TrackerGrid*, psy_ui_Component* parent,
 void trackergrid_build(TrackerGrid*);
 void trackergrid_setpattern(TrackerGrid*, psy_audio_Pattern*);
 void trackergrid_showemptydata(TrackerGrid*, int showstate);
+void trackergrid_invalidate_playbar(TrackerGrid*);
 void trackergrid_invalidateline(TrackerGrid*, intptr_t line);
 void trackergrid_invalidatelines(TrackerGrid*, intptr_t line1, intptr_t line2);
 void trackergrid_invalidatecursor(TrackerGrid*);
@@ -117,6 +119,13 @@ typedef struct TrackerView {
 
 void trackerview_init(TrackerView*, psy_ui_Component* parent, TrackerState*,
 	Workspace*);
+
+INLINE psy_ui_Component* trackerview_base(TrackerView* self)
+{
+	assert(self);
+
+	return &self->scroller.component;
+}
 
 #ifdef __cplusplus
 }

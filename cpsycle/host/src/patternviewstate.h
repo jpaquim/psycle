@@ -42,13 +42,15 @@ typedef struct PatternViewState {
 	psy_audio_Pattern patternpaste;
 	/* references */
 	psy_audio_Pattern* pattern;
-	psy_audio_Song* song;	
+	psy_audio_Patterns* patterns;
+	psy_audio_Sequence* sequence;	
 	PatternCmds* cmds;
 	PatternViewConfig* patconfig;
 } PatternViewState;
 
 void patternviewstate_init(PatternViewState*, PatternViewConfig*,
-	psy_audio_Song*, PatternCmds* cmds);
+	psy_audio_Sequence* sequence, psy_audio_Patterns* patterns,
+	PatternCmds* cmds);
 void patternviewstate_dispose(PatternViewState*);
 
 INLINE intptr_t patternviewstate_currpgupdownstep(const PatternViewState* self)
@@ -79,14 +81,27 @@ INLINE void patternviewstate_setcursor(PatternViewState* self,
 	self->cursor = cursor;
 }
 
-INLINE void patternviewstate_setsong(PatternViewState* self, psy_audio_Song* song)
+INLINE psy_audio_SequenceCursor patternviewstate_cursor(const
+	PatternViewState* self)
+{
+	return self->cursor;
+}
+
+INLINE void patternviewstate_setsequence(PatternViewState* self, psy_audio_Sequence* sequence)
+{
+	assert(self);
+	
+	self->sequence = sequence;
+	if (self->cmds) {
+		patterncmds_setsequence(self->cmds, self->sequence);
+	}
+}
+
+INLINE void patternviewstate_setpatterns(PatternViewState* self, psy_audio_Patterns* patterns)
 {
 	assert(self);
 
-	self->song = song;
-	if (self->cmds) {
-		patterncmds_setsong(self->cmds, song);
-	}
+	self->patterns = patterns;	
 }
 
 INLINE void patternviewstate_setpattern(PatternViewState* self, psy_audio_Pattern* pattern)
@@ -127,40 +142,28 @@ INLINE psy_audio_Sequence* patternviewstate_sequence(PatternViewState* self)
 {
 	assert(self);
 
-	if (self->song) {
-		return &self->song->sequence;
-	}
-	return NULL;
+	return self->sequence;
 }
 
 INLINE psy_audio_Sequence* patternviewstate_sequence_const(const PatternViewState* self)
 {
 	assert(self);
 
-	if (self->song) {
-		return &self->song->sequence;
-	}
-	return NULL;
+	return self->sequence;
 }
 
 INLINE psy_audio_Patterns* patternviewstate_patterns(PatternViewState* self)
 {
 	assert(self);
 
-	if (self->song) {
-		return &self->song->patterns;
-	}
-	return NULL;
+	return self->patterns;
 }
 
 INLINE psy_audio_Patterns* patternviewstate_patterns_const(const PatternViewState* self)
 {
 	assert(self);
 
-	if (self->song) {
-		return &self->song->patterns;
-	}
-	return NULL;
+	return self->patterns;
 }
 
 
@@ -271,7 +274,7 @@ INLINE bool patternviewstate_movecursorwhenpaste(PatternViewState* self)
 {
 	assert(self);
 
-	if (self->movecursorwhenpaste && self->song) {
+	if (self->movecursorwhenpaste && self->sequence) {
 		psy_audio_SequenceCursor cursor;		
 				
 		cursor = self->cursor;
@@ -281,8 +284,7 @@ INLINE bool patternviewstate_movecursorwhenpaste(PatternViewState* self)
 			cursor.offset = psy_audio_pattern_length(patternviewstate_pattern(self)) -
 				patternviewstate_bpl(self);
 		}				
-		psy_audio_sequence_set_cursor(psy_audio_song_sequence(self->song),
-			cursor);
+		psy_audio_sequence_set_cursor(self->sequence, cursor);
 		return TRUE;
 	}
 	return FALSE;
@@ -362,12 +364,7 @@ void patternviewstate_configure_keyboard(PatternViewState*,
 	KeyboardMiscConfig*);
 void patternviewstate_configure(PatternViewState*);
 
-// INLINE PatternViewSkin* patternviewstate_skin(PatternViewState* self)
-// {
-//	return &self->patconfig->skin;
-// }
-
-psy_audio_SequenceTrackIterator patternviewstate_sequencestart(PatternViewState*,
-	double startoffset);
+void patternviewstate_sequencestart(PatternViewState*,
+	double startoffset, psy_audio_SequenceTrackIterator* rv);
 
 #endif /* PATTERNVIEWSTATE_H */

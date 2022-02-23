@@ -517,18 +517,17 @@ void init_host_styles(psy_ui_Styles* self, psy_ui_ThemeMode theme)
 	
 	style = psy_ui_style_allocinit();
 	psy_ui_border_init_solid(&style->border,
-		material.surface_overlay_7p);
+		material.surface_overlay_16p);
 	psy_ui_border_setradius_px(&style->border, 6.0);
 	psy_ui_style_set_colour(style, material.onprimary_medium);
-	psy_ui_style_set_background_overlay(style, 4);	
-	psy_ui_styles_set_style(self, STYLE_PROPERTYVIEW_MAINSECTION,
-		style);	
+	psy_ui_style_set_background_colour(style, material.surface_overlay_9p);	
+	psy_ui_styles_set_style(self, STYLE_PROPERTYVIEW_MAINSECTION, style);
 	
 	style = psy_ui_style_allocinit();
 	psy_ui_style_set_colour(style, material.onprimary_weak);
-	psy_ui_style_set_background_overlay(style, 1);
+	psy_ui_style_set_background_colour(style, material.surface_overlay_7p);
 	psy_ui_border_init_bottom(&style->border, psy_ui_BORDER_SOLID,
-		material.surface_overlay_7p);
+		material.surface_overlay_16p);
 	psy_ui_style_set_margin_em(style, 0.0, 0.0, 0.5, 0.0);
 	psy_ui_style_set_padding_em(style, 0.5, 0.0, 0.5, 1.0);
 	psy_ui_styles_set_style(self, STYLE_PROPERTYVIEW_MAINSECTIONHEADER,
