@@ -1,7 +1,7 @@
 /*
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #ifndef psy_audio_PATTERN_H
@@ -122,6 +122,9 @@ void psy_audio_timesig_init_all(psy_audio_TimeSig*,
 	uintptr_t numerator, uintptr_t denominator);
 
 /* psy_audio_Pattern */
+
+struct psy_audio_SequenceTrackIterator;
+
 typedef struct psy_audio_Pattern {
 	/* public */
 	psy_Signal signal_namechanged;
@@ -138,6 +141,8 @@ typedef struct psy_audio_Pattern {
 	uintptr_t maxsongtracks;
 	char* name;
 	psy_audio_TimeSig timesig;	
+	/* references */
+	psy_List* seqiterators;
 } psy_audio_Pattern;
 
 /* initializes a pattern */
@@ -320,6 +325,10 @@ psy_audio_PatternNode* psy_audio_pattern_timesig_at(psy_audio_Pattern*, uintptr_
 /* return loop index */
 uintptr_t psy_audio_pattern_timesig_index(psy_audio_Pattern*, psy_audio_PatternNode*,
 	uintptr_t track);
+void psy_audio_pattern_add_seqiterator(psy_audio_Pattern*,	
+	struct psy_audio_SequenceTrackIterator*);
+void psy_audio_pattern_remove_seqiterator(psy_audio_Pattern*,
+	struct psy_audio_SequenceTrackIterator*);
 
 /* psy_audio_SequenceCursorNavigator */
 typedef struct {

@@ -13,9 +13,11 @@
 typedef struct PatternLineNavigator {
 	PatternViewState* state;
 	bool wrap;
+	bool wraparound;	
 } PatternLineNavigator;
 
-void patternlinennavigator_init(PatternLineNavigator*, PatternViewState*);
+void patternlinennavigator_init(PatternLineNavigator*, PatternViewState*,
+	bool wraparound);
 
 psy_audio_SequenceCursor patternlinennavigator_up(PatternLineNavigator*,
 	uintptr_t lines, psy_audio_SequenceCursor);

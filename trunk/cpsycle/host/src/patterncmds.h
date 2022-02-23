@@ -26,13 +26,12 @@ typedef struct InsertCommand {
 	psy_audio_PatternEvent oldevent;
 	bool insert;
 	/* references */
-	psy_audio_Sequence* sequence;
-	psy_audio_Player* player;
+	psy_audio_Sequence* sequence;	
 } InsertCommand;
 
 InsertCommand* insertcommand_allocinit(psy_audio_Pattern*,
 	psy_audio_SequenceCursor, psy_audio_PatternEvent,
-	psy_audio_Sequence*, psy_audio_Player*);
+	psy_audio_Sequence*);
 
 /* RemoveCommand */
 typedef struct RemoveCommand {
@@ -44,12 +43,11 @@ typedef struct RemoveCommand {
 	psy_audio_PatternEvent oldevent;
 	bool remove;
 	/* references */
-	psy_audio_Sequence* sequence;
-	psy_audio_Player* player;
+	psy_audio_Sequence* sequence;	
 } RemoveCommand;
 
 RemoveCommand* removecommand_allocinit(psy_audio_Pattern*,
-	psy_audio_SequenceCursor, psy_audio_Sequence*, psy_audio_Player*);
+	psy_audio_SequenceCursor, psy_audio_Sequence*);
 
 /* BlockTranspose */
 typedef struct BlockTransposeCommand {
@@ -59,14 +57,14 @@ typedef struct BlockTransposeCommand {
 	psy_audio_Pattern oldpattern;
 	psy_audio_SequenceCursor cursor;
 	psy_audio_BlockSelection block;
-	intptr_t transposeoffset;
-	Workspace* workspace;
-	psy_audio_Song* song;
+	intptr_t transposeoffset;	
+	/* references */
+	psy_audio_Sequence* sequence;	
 } BlockTransposeCommand;
 
 BlockTransposeCommand* blocktransposecommand_alloc(psy_audio_Pattern* pattern,
 	psy_audio_BlockSelection block, psy_audio_SequenceCursor, intptr_t transposeoffset,
-	psy_audio_Song*);
+	psy_audio_Sequence*);
 
 typedef struct BlockRemoveCommand {
 	/* inherits */
@@ -75,11 +73,12 @@ typedef struct BlockRemoveCommand {
 	psy_audio_Pattern* pattern;
 	psy_audio_Pattern oldpattern;
 	bool remove;
-	psy_audio_Song* song;	
+	/* references */
+	psy_audio_Sequence* sequence;	
 } BlockRemoveCommand;
 
 BlockRemoveCommand* blockremovecommand_alloc(psy_audio_Pattern*,
-	psy_audio_BlockSelection, psy_audio_Song*);
+	psy_audio_BlockSelection, psy_audio_Sequence*);
 
 typedef struct BlockPasteCommand {
 	/* inherits */

@@ -432,6 +432,7 @@ void mainframe_initmainpane(MainFrame* self)
 		psy_ui_notebook_base(&self->mainviewbar.viewtabbars),
 		&self->workspace.config.config, 3,
 		&self->workspace);
+	
 	psy_signal_connect(&self->settingsview.signal_changed, self,
 		mainframe_onsettingsviewchanged);
 	helpview_init(&self->helpview,

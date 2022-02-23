@@ -16,10 +16,11 @@ static void patternlinenavigator_update_order(PatternLineNavigator*,
 
 /* implementation */
 void patternlinennavigator_init(PatternLineNavigator* self, PatternViewState*
-	state)
+	state, bool wraparound)
 {
 	self->state = state;
 	self->wrap = FALSE;
+	self->wraparound = wraparound;	
 }
 
 psy_audio_SequenceCursor patternlinennavigator_up(PatternLineNavigator* self,
@@ -43,7 +44,7 @@ psy_audio_SequenceCursor patternlinennavigator_up(PatternLineNavigator* self,
 		psy_audio_sequencecursor_setoffset(&rv,
 			(currlines - (intptr_t)lines) * bpl);
 		if (rv.offset < 0.0) {
-			if (self->state->wraparound) {
+			if (self->wraparound) {
 				psy_audio_sequencecursor_setoffset(&rv,
 					rv.offset + maxlength);
 				if (rv.offset < 0) {
@@ -81,7 +82,7 @@ psy_audio_SequenceCursor patternlinennavigator_down(
 		psy_audio_sequencecursor_setoffset(&rv,
 			(currlines + lines) * bpl);
 		if (rv.offset >= maxlength) {
-			if (self->state->wraparound) {
+			if (self->wraparound) {
 				psy_audio_sequencecursor_setoffset(&rv,
 					rv.offset - maxlength);
 				if (rv.offset > maxlength - bpl) {

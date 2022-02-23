@@ -159,8 +159,10 @@ void workspace_init(Workspace* self, psy_ui_Component* main)
 	self->lastplayline = psy_INDEX_INVALID;	
 	self->currplayposition = 0.0;
 	self->lastplayposition = -1.0;
+	self->currplaying = FALSE;
 	self->songhasfile = FALSE;
 	self->paramviews = NULL;
+	psy_audio_sequencecursor_init(&self->currplaycursor);
 	psy_thread_init(&self->driverconfigloadthread);
 	psy_thread_init(&self->pluginscanthread);
 	viewhistory_init(&self->viewhistory);
@@ -222,6 +224,7 @@ void workspace_initsignals(Workspace* self)
 	psy_signal_init(&self->signal_songchanged);
 	psy_signal_init(&self->signal_configchanged);	
 	psy_signal_init(&self->signal_playlinechanged);
+	psy_signal_init(&self->signal_playstatuschanged);
 	psy_signal_init(&self->signal_gotocursor);	
 	psy_signal_init(&self->signal_loadprogress);
 	psy_signal_init(&self->signal_scanprogress);
@@ -304,6 +307,7 @@ void workspace_disposesignals(Workspace* self)
 	psy_signal_dispose(&self->signal_songchanged);
 	psy_signal_dispose(&self->signal_configchanged);		
 	psy_signal_dispose(&self->signal_playlinechanged);
+	psy_signal_dispose(&self->signal_playstatuschanged);
 	psy_signal_dispose(&self->signal_gotocursor);
 	psy_signal_dispose(&self->signal_loadprogress);
 	psy_signal_dispose(&self->signal_scanprogress);
@@ -1346,9 +1350,15 @@ void workspace_idle(Workspace* self)
 	assert(self);
 		
 	self->currplayline = self->player.sequencer.seqtime.linecounter;
-	self->currplayposition = self->currplayline / (double)self->player.sequencer.lpb;		
-	workspace_updateplaycursor(self);	
-	workspace_notifynewline(self);
+	self->currplayposition = self->currplayline / (double)self->player.sequencer.lpb;
+	if (self->currplaying != psy_audio_player_playing(&self->player)) {
+		self->currplaying = psy_audio_player_playing(&self->player);
+		if (self->currplaying) {
+			self->lastplayline = psy_INDEX_INVALID;
+		}
+		psy_signal_emit(&self->signal_playstatuschanged, self, 0);
+	}
+	workspace_notifynewline(self);	
 	self->lastplayposition = self->currplayposition;
 	self->lastplayline = self->currplayline;
 	if (self->scanstart) {
@@ -1413,7 +1423,8 @@ void workspace_idle(Workspace* self)
 */
 void workspace_notifynewline(Workspace* self)
 {
-	if (self->currplayline != self->lastplayline) {	
+	if (self->currplaying && self->currplayline != self->lastplayline) {
+		workspace_updateplaycursor(self);
 		psy_signal_emit(&self->signal_playlinechanged, self, 0);	
 	}
 }
@@ -1424,25 +1435,26 @@ void workspace_notifynewline(Workspace* self)
 */
 void workspace_updateplaycursor(Workspace* self)
 {
-	if (self->song && self->followsong && psy_audio_player_playing(&self->player)) {
-		psy_audio_SequenceCursor currplaycursor;
+	if (psy_audio_player_playing(&self->player)) {
+		self->currplaycursor = workspace_playcursor(self);
+	}
+	if (self->song && self->followsong) {
+		bool prevented;
 
-		currplaycursor = workspace_playcursor(self);
-		if (currplaycursor.orderindex.order != self->song->sequence.cursor.orderindex.order) {
-			bool prevented;
-
+		if (self->currplaycursor.orderindex.order != self->song->sequence.cursor.orderindex.order) {
 			prevented = viewhistory_prevented(&self->viewhistory);
 			viewhistory_prevent(&self->viewhistory);
 			psy_audio_sequenceselection_clear(&self->song->sequence.sequenceselection);
 			psy_audio_sequenceselection_select_first(
-				&self->song->sequence.sequenceselection, currplaycursor.orderindex);
+				&self->song->sequence.sequenceselection,
+				self->currplaycursor.orderindex);
 			if (!prevented) {
 				viewhistory_enable(&self->viewhistory);
 			}
-		}		
+		}
 		psy_audio_sequence_set_cursor(psy_audio_song_sequence(self->song),
-			currplaycursor);
-	}
+			self->currplaycursor);
+	}	
 }
 
 psy_audio_SequenceCursor workspace_playcursor(Workspace* self)
@@ -1469,7 +1481,7 @@ psy_audio_SequenceCursor workspace_playcursor(Workspace* self)
 				rv.seqoffset = psy_audio_sequenceentry_offset(seqentry);
 				line = (uintptr_t)((self->currplayposition - 
 					((rv.absolute) ? 0.0 : rv.seqoffset)) * rv.lpb);
-				rv.offset = line / (psy_dsp_big_beat_t)rv.lpb;
+				rv.offset = line / (psy_dsp_big_beat_t)rv.lpb;				
 				return rv;
 			}			
 		}

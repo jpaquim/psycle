@@ -884,8 +884,7 @@ void pianogrid_onmouseup(Pianogrid* self, psy_ui_MouseEvent* ev)
 			psy_undoredo_execute(&self->workspace->undoredo,
 				&insertcommand_allocinit(
 					patternviewstate_pattern(self->gridstate->pv),					
-					cursor, patternevent, &self->workspace->song->sequence,
-					&self->workspace->player)->command);
+					cursor, patternevent, &self->workspace->song->sequence)->command);
 			if (self->workspace && workspace_song(self->workspace)) {
 				psy_audio_sequence_set_cursor(
 					psy_audio_song_sequence(workspace_song(self->workspace)),
@@ -927,8 +926,7 @@ void pianogrid_onmouseup(Pianogrid* self, psy_ui_MouseEvent* ev)
 					}
 					psy_undoredo_execute(&self->workspace->undoredo,
 						&removecommand_allocinit(self->gridstate->pv->pattern,							
-							cursor, &self->workspace->song->sequence,
-							&self->workspace->player)->command);
+							cursor, &self->workspace->song->sequence)->command);
 					if (next) {
 						psy_audio_PatternEntry* nextentry;
 
@@ -941,8 +939,7 @@ void pianogrid_onmouseup(Pianogrid* self, psy_ui_MouseEvent* ev)
 							cursor.offset = nextentry->offset;
 							psy_undoredo_execute(&self->workspace->undoredo,
 								&removecommand_allocinit(self->gridstate->pv->pattern,									
-									cursor, &self->workspace->song->sequence,
-									&self->workspace->player)->command);
+									cursor, &self->workspace->song->sequence)->command);
 						}
 					}
 					if (self->workspace && workspace_song(self->workspace)) {
@@ -973,16 +970,14 @@ void pianogrid_onmouseup(Pianogrid* self, psy_ui_MouseEvent* ev)
 								release.offset = nextentry->offset;
 								psy_undoredo_execute(&self->workspace->undoredo,
 									&removecommand_allocinit(self->gridstate->pv->pattern,										
-										release, &self->workspace->song->sequence,
-										&self->workspace->player)->command);
+										release, &self->workspace->song->sequence)->command);
 							}
 						}						
 						psy_audio_patternevent_clear(&release);
 						release.note = psy_audio_NOTECOMMANDS_RELEASE;
 						psy_undoredo_execute(&self->workspace->undoredo,
 							&insertcommand_allocinit(patternviewstate_pattern(self->gridstate->pv),								
-								cursor, release, &self->workspace->song->sequence,
-								&self->workspace->player)->command);
+								cursor, release, &self->workspace->song->sequence)->command);
 						cursor.key = psy_audio_patternentry_front(patternentry)->note;
 						if (self->workspace && workspace_song(self->workspace)) {
 							psy_audio_sequence_set_cursor(psy_audio_song_sequence(
@@ -1099,7 +1094,7 @@ void pianogrid_prevlines(Pianogrid* self, uintptr_t lines, bool wrap)
 		PatternLineNavigator navigator;
 		psy_audio_SequenceCursor cursor;
 
-		patternlinennavigator_init(&navigator, self->gridstate->pv);
+		patternlinennavigator_init(&navigator, self->gridstate->pv, wrap);
 		cursor = patternlinennavigator_up(&navigator, lines,
 			self->gridstate->pv->cursor);
 		if (!patternlinennavigator_wrap(&navigator)) {
@@ -1151,7 +1146,7 @@ void pianogrid_advancelines(Pianogrid* self, uintptr_t lines, bool wrap)
 		PatternLineNavigator navigator;
 		psy_audio_SequenceCursor cursor;
 
-		patternlinennavigator_init(&navigator, self->gridstate->pv);
+		patternlinennavigator_init(&navigator, self->gridstate->pv, wrap);
 		cursor = patternlinennavigator_down(&navigator, lines,
 			self->gridstate->pv->cursor);
 		if (patternlinennavigator_wrap(&navigator)) {

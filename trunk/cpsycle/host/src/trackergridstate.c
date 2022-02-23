@@ -304,19 +304,18 @@ void trackerstate_init(TrackerState* self, TrackConfig* trackconfig,
 {			
 	self->trackconfig = trackconfig;
 	self->pv = pvstate;
-	self->drawbeathighlights = TRUE;
-	self->synccursor = TRUE;	
+	self->drawbeathighlights = TRUE;	
+	self->draw_playbar = TRUE;
 	self->showemptydata = FALSE;
 	self->midline = FALSE;
+	self->prevent_cursor = FALSE;
 	trackereventtable_init(&self->trackevents);
 	psy_audio_patternentry_init(&self->empty);
 	self->defaultlineheight = psy_ui_value_make_eh(1.0);
 	self->lineheight = self->defaultlineheight;
 	self->lineheightpx = 19.0;
-	self->flatsize = 8;			
-	self->drawcursor = TRUE;
-	self->visilines = 25;
-	self->cursorchanging = FALSE;	
+	self->flatsize = 8;	
+	self->visilines = 25;	
 }
 
 void trackerstate_dispose(TrackerState* self)
@@ -577,21 +576,21 @@ void trackerstate_clip(TrackerState* self, const psy_ui_RealRectangle* clip,
 }
 
 void trackerstate_startdragselection(TrackerState* self,
-	psy_audio_SequenceCursor cursor, double bpl)
+	psy_audio_SequenceCursor cursor)
 {
 	assert(self);
 
 	psy_audio_blockselection_startdrag(&self->pv->selection,
-		self->pv->dragselectionbase, cursor, bpl);
+		self->pv->dragselectionbase, cursor);
 }
 
-void trackerstate_dragselection(TrackerState* self, psy_audio_SequenceCursor cursor,
-	double bpl)
+void trackerstate_dragselection(TrackerState* self, psy_audio_SequenceCursor
+	cursor)
 {
 	assert(self);
 
 	psy_audio_blockselection_drag(&self->pv->selection,
-		self->pv->dragselectionbase, cursor, bpl);
+		self->pv->dragselectionbase, cursor);
 }
 
 psy_audio_SequenceCursor trackerstate_checkcursorbounds(TrackerState* self,
@@ -604,8 +603,8 @@ psy_audio_SequenceCursor trackerstate_checkcursorbounds(TrackerState* self,
 		rv.offset = 0;
 	} else {
 		if (self->pv->pattern) {
-			if (rv.offset >= psy_audio_pattern_length(self->pv->pattern)) {
-				rv.offset = psy_audio_pattern_length(self->pv->pattern);
+			if (rv.offset >= patternviewstate_length(self->pv)) {
+				rv.offset = patternviewstate_length(self->pv);
 			}
 		} else {
 			rv.offset = 0;
@@ -674,7 +673,8 @@ psy_audio_SequenceCursor trackerstate_makecursor(TrackerState* self,
 	if (rv.absolute && sequence) {							
 		uintptr_t order;
 
-		order = psy_audio_sequence_order(sequence, rv.track, rv.offset);
+		order = psy_audio_sequence_order(sequence,
+			self->pv->cursor.orderindex.track, rv.offset);
 		rv.orderindex.order = order;
 		psy_audio_sequencecursor_updateseqoffset(&rv, sequence);			
 	}
@@ -686,8 +686,7 @@ psy_audio_SequenceCursor trackerstate_makecursor(TrackerState* self,
 		}
 	}
 	rv.track = index;
-	rv.column = 0;
-	rv.digit = 0;
+	rv.column = rv.digit = 0;
 	if (sequence) {
 		rv.key = sequence->cursor.key;
 	} else {
@@ -717,7 +716,7 @@ psy_audio_SequenceCursor trackerstate_makecursor(TrackerState* self,
 	}
 	self->pv->cursor.patternid = sequence->cursor.patternid;
 	psy_audio_sequencecursor_updatecache(&rv);
-	return rv;
+	return trackerstate_checkcursorbounds(self, rv);
 }
 
 void trackerstate_columncolours(TrackerState* self,

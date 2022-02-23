@@ -383,7 +383,10 @@ void psy_audio_sequencer_clearcurrtracks(psy_audio_Sequencer* self)
 		psy_audio_SequencerTrack* track;
 
 		track = (psy_audio_SequencerTrack*) p->entry;
-		free(track->iterator);
+		if (track->iterator) {
+			psy_audio_sequencetrackiterator_dispose(track->iterator);
+			free(track->iterator);
+		}
 		free(track);
 	}
 	psy_list_free(self->currtracks);
@@ -410,7 +413,9 @@ void psy_audio_sequencer_makecurrtracks(psy_audio_Sequencer* self,
 			track->iterator = (psy_audio_SequenceTrackIterator*)
 				malloc(sizeof(psy_audio_SequenceTrackIterator));
 			if (track->iterator) {
-				*track->iterator = psy_audio_sequence_begin(self->sequence, track->track, offset);
+				psy_audio_sequencetrackiterator_init(track->iterator);
+				psy_audio_sequence_begin(self->sequence, track->track, offset,
+					track->iterator);
 				track->state.retriggeroffset = 0;
 				track->state.retriggerstep = 0;
 				psy_list_append(&self->currtracks, track);
@@ -426,9 +431,10 @@ void psy_audio_sequencer_makecurrtracks(psy_audio_Sequencer* self,
 			track->channeloffset = 0;
 			track->iterator = (psy_audio_SequenceTrackIterator*)
 				malloc(sizeof(psy_audio_SequenceTrackIterator));
+			psy_audio_sequencetrackiterator_init(track->iterator);
 			if (track->iterator) {
-				*track->iterator = psy_audio_sequence_begin(self->sequence,
-					track->track, offset);
+				psy_audio_sequence_begin(self->sequence,
+					track->track, offset, track->iterator);
 				track->state.retriggeroffset = 0;
 				track->state.retriggerstep = 0;
 				psy_list_append(&self->currtracks, track);
@@ -1026,7 +1032,9 @@ void psy_audio_sequencer_jumptoorder(psy_audio_Sequencer* self,
 
 	assert(self);
 
-	position = psy_audio_sequence_at(self->sequence, 0, ev->parameter);
+	psy_audio_sequenceposition_init(&position);
+	psy_audio_sequence_at(self->sequence, 0, ev->parameter,
+		&position);
 	if (position.trackposition.sequencentrynode) {
 		psy_audio_SequencePatternEntry* orderentry;
 
@@ -1034,6 +1042,7 @@ void psy_audio_sequencer_jumptoorder(psy_audio_Sequencer* self,
 			position.trackposition.sequencentrynode->entry;
 		psy_audio_sequencer_jumpto(self, orderentry->entry.offset);
 	}
+	psy_audio_sequenceposition_dispose(&position);
 }
 
 void psy_audio_sequencer_breaktoline(psy_audio_Sequencer* self,
@@ -1507,14 +1516,15 @@ void psy_audio_sequencer_recordinputevent(psy_audio_Sequencer* self,
 	if (!self->sequence->tracks) {
 		return;
 	}
-	it = psy_audio_sequence_begin(self->sequence,
+	psy_audio_sequencetrackiterator_init(&it);
+	psy_audio_sequence_begin(self->sequence,
 		(psy_audio_SequenceTrack*)self->sequence->tracks->entry,
-		playposition);
+		playposition, &it);
 	if (it.sequencentrynode) {
 		psy_audio_SequencePatternEntry* entry;
 		psy_audio_Pattern* pattern;		
 		
-		entry = (psy_audio_SequencePatternEntry*) it.sequencentrynode->entry;
+		entry = (psy_audio_SequencePatternEntry*)it.sequencentrynode->entry;
 		pattern = psy_audio_patterns_at(self->sequence->patterns,
 			entry->patternslot);
 		if (pattern) {			
@@ -1534,6 +1544,7 @@ void psy_audio_sequencer_recordinputevent(psy_audio_Sequencer* self,
 			}
 		}
 	}
+	psy_audio_sequencetrackiterator_dispose(&it);
 }
 
 void psy_audio_sequencer_checkiterators(psy_audio_Sequencer* self,

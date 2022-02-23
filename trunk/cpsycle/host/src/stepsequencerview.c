@@ -351,8 +351,7 @@ void stepsequencerbar_onmousedown(StepsequencerBar* self,
 		if (node) {			
 			psy_undoredo_execute(&self->state->workspace->undoredo,
 				&removecommand_allocinit(self->state->pattern,
-					cursor, &self->state->workspace->song->sequence,
-					&self->state->workspace->player)->command);
+					cursor, &self->state->workspace->song->sequence)->command);
 		} else {
 			psy_audio_PatternEvent event;
 
@@ -366,11 +365,10 @@ void stepsequencerbar_onmousedown(StepsequencerBar* self,
 			   event.parameter = 0x80; */
 			stepsequencerbar_setdefaultevent(self,
 				cursor.track,
-				workspace_player(self->state->workspace)->patterndefaults, &event);
+				workspace_player(self->state->workspace)->patterndefaults.pattern, &event);
 			psy_undoredo_execute(&self->state->workspace->undoredo,
 				&insertcommand_allocinit(self->state->pattern,					
-					cursor, event, &self->state->workspace->song->sequence,
-					&self->state->workspace->player)->command);			
+					cursor, event, &self->state->workspace->song->sequence)->command);			
 		}
 		psy_audio_exclusivelock_leave();		
 	}

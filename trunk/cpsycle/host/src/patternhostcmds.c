@@ -22,23 +22,24 @@
 static char patternfilter[] = "Pattern (*.psb)" "|*.psb";
 
 /* implementation */
-void patterncmds_init(PatternCmds* self, psy_audio_Song* song,
-	psy_UndoRedo* undoredo, psy_audio_Pattern* patternpaste,
-	DirConfig* dirconfig)
+void patterncmds_init(PatternCmds* self, psy_audio_Sequence* sequence,
+	psy_audio_Player* player, psy_UndoRedo* undoredo,
+	psy_audio_Pattern* patternpaste, DirConfig* dirconfig)
 {
 	assert(self);
 	assert(undoredo);	
 	
 	self->pattern = NULL;
-	self->song = song;
+	self->sequence = sequence;
+	self->player = player;
 	self->undoredo = undoredo;
 	self->patternpaste = patternpaste;
 	self->dirconfig = dirconfig;
 }
 
-void patterncmds_setsong(PatternCmds* self, psy_audio_Song* song)
+void patterncmds_setsequence(PatternCmds* self, psy_audio_Sequence* sequence)
 {
-	self->song = song;
+	self->sequence = sequence;
 }
 
 void patterncmds_setpattern(PatternCmds* self, psy_audio_Pattern* pattern)
@@ -53,7 +54,7 @@ void patterncmds_blocktranspose(PatternCmds* self,
 	if (self->pattern && psy_audio_blockselection_valid(&selection)) {
 		psy_undoredo_execute(self->undoredo,
 			&blocktransposecommand_alloc(self->pattern,
-				selection, cursor, offset, self->song)->command);
+				selection, cursor, offset, self->sequence)->command);
 	}
 }
 
@@ -65,7 +66,7 @@ void patterncmds_blockdelete(PatternCmds* self, psy_audio_BlockSelection
 	if (self->pattern && psy_audio_blockselection_valid(&selection)) {
 		psy_undoredo_execute(self->undoredo,
 			&blockremovecommand_alloc(self->pattern,
-				selection, self->song)->command);
+				selection, self->sequence)->command);
 	}
 }
 
@@ -99,11 +100,11 @@ void patterncmds_changeinstrument(PatternCmds* self,
 {
 	assert(self);
 
-	if (self->pattern && self->song) {
+/*	if (self->pattern && self->sequence) {
 		psy_audio_pattern_changeinstrument(self->pattern,
 			selection.topleft, selection.bottomright,
 			psy_audio_instruments_selected(&self->song->instruments).subslot);
-	}
+	}*/
 }
 
 void patterncmds_changemachine(PatternCmds* self,
@@ -111,11 +112,11 @@ void patterncmds_changemachine(PatternCmds* self,
 {
 	assert(self);
 
-	if (self->pattern && self->song) {
+/*	if (self->pattern && self->song) {
 		psy_audio_pattern_changemachine(self->pattern,
 			selection.topleft, selection.bottomright,
 			psy_audio_machines_selected(&self->song->machines));
-	}
+	}*/
 }
 
 void patterncmds_importpattern(PatternCmds* self, psy_dsp_big_beat_t bpl)

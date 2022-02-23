@@ -48,10 +48,11 @@ void trackerlinenumbers_init(TrackerLineNumbers* self,
 {
 	psy_ui_component_init(&self->component, parent, NULL);
 	trackerlinenumbers_vtable_init(self);	
-	self->state = state;
-	self->showcursor = TRUE;
+	self->state = state;	
 	self->shownumbersinhex = TRUE;
 	self->showbeat = FALSE;
+	self->draw_linenumber_cursor = TRUE;
+	self->prevent_cursor = FALSE;
 	trackerlinenumbers_updateformat(self);	
 	self->state = state;
 	self->workspace = workspace;
@@ -113,7 +114,8 @@ void trackerlinenumbers_ondraw(TrackerLineNumbers* self, psy_ui_Graphics* g)
 		trackerstate_lineclip(self->state, &g_clip, &clip);
 		offset = clip.topleft.offset;		
 		cpy = trackerstate_beattopx(self->state, offset);
-		ite = patternviewstate_sequencestart(self->state->pv, offset);		
+		psy_audio_sequencetrackiterator_init(&ite);
+		patternviewstate_sequencestart(self->state->pv, offset, &ite);		
 		if (ite.pattern) {
 			length = ite.pattern->length;
 		} else {
@@ -162,19 +164,20 @@ void trackerlinenumbers_ondraw(TrackerLineNumbers* self, psy_ui_Graphics* g)
 			}
 			++line;
 		}
+		psy_audio_sequencetrackiterator_dispose(&ite);
 	}
 }
 
 TrackerColumnFlags trackerlinennumbers_columnflags(TrackerLineNumbers* self,
 	psy_dsp_big_beat_t offset, intptr_t line, intptr_t seqline)
 {
-	TrackerColumnFlags rv;
-
-	rv.playbar = psy_audio_player_playing(workspace_player(self->workspace)) &&
+	TrackerColumnFlags rv;	
+	rv.playbar =
+		psy_audio_player_playing(workspace_player(self->workspace)) &&
 		trackerstate_testplaybar(self->state,
 			self->workspace->currplayposition, offset);
 	rv.mid = 0;
-	rv.cursor = self->showcursor && self->state->drawcursor &&
+	rv.cursor = self->draw_linenumber_cursor && !self->prevent_cursor &&
 		(psy_audio_sequencecursor_line(&self->state->pv->cursor) == line);
 	if (!self->state->pv->singlemode) {
 		line -= seqline;
@@ -277,8 +280,8 @@ void trackerlinenumbers_onpreferredsize(TrackerLineNumbers* self,
 
 void trackerlinenumbers_showlinenumbercursor(TrackerLineNumbers* self,
 	bool showstate)
-{
-	self->showcursor = showstate;
+{	
+	self->draw_linenumber_cursor = showstate;
 	psy_ui_component_invalidate(&self->component);
 }
 
@@ -433,6 +436,8 @@ static void trackerlinenumberbar_onconfigurepatternview(TrackerLineNumberBar*,
 	PatternViewConfig*, psy_Property*);
 static void trackerlinenumberbar_onplaylinechanged(TrackerLineNumberBar*,
 	Workspace* sender);
+static void trackerlinenumberbar_onplaystatuschanged(TrackerLineNumberBar*,
+	Workspace* sender);
 static void trackerlinenumberbar_oncursorchanged(TrackerLineNumberBar*,
 	psy_audio_Sequence* sender);
 static void trackerlinenumberbar_onsongchanged(TrackerLineNumberBar*,
@@ -459,6 +464,8 @@ void trackerlinenumberbar_init(TrackerLineNumberBar* self, psy_ui_Component* par
 	psy_ui_component_setalign(&self->linenumbers.component, psy_ui_ALIGN_FIXED);	
 	psy_signal_connect(&workspace->signal_playlinechanged, self,
 		trackerlinenumberbar_onplaylinechanged);
+	psy_signal_connect(&workspace->signal_playstatuschanged, self,
+		trackerlinenumberbar_onplaystatuschanged);
 	psy_signal_connect(&psycleconfig_patview(
 		workspace_conf(workspace))->signal_changed,
 		self, trackerlinenumberbar_onconfigurepatternview);
@@ -521,6 +528,17 @@ void trackerlinenumberbar_onplaylinechanged(TrackerLineNumberBar* self,
 		trackerlinenumbers_invalidateline(&self->linenumbers,
 			sender->currplayline);
 	}
+}
+
+void trackerlinenumberbar_onplaystatuschanged(TrackerLineNumberBar* self,
+	Workspace* sender)
+{
+	self->linenumbers.prevent_cursor = (workspace_followingsong(self->workspace) &&
+		psy_audio_player_playing(workspace_player(self->workspace)));
+	trackerlinenumbers_invalidateline(&self->linenumbers,
+		sender->lastplayline);
+	trackerlinenumbers_invalidateline(&self->linenumbers,
+		sender->currplayline);	
 }
 
 void trackerlinenumberbar_oncursorchanged(TrackerLineNumberBar* self,

@@ -7,6 +7,7 @@
 
 
 #include "trackercolumn.h"
+#include <exclusivelock.h>
 /* platform */
 #include "../../detail/portable.h"
 
@@ -26,7 +27,7 @@ static const char* notetostr(psy_audio_PatternEvent ev,
 static void trackercolumn_ondraw(TrackerColumn*, psy_ui_Graphics*);
 static void trackercolumn_drawtrackevents(TrackerColumn*, psy_ui_Graphics*);
 static  TrackerColumnFlags trackercolumn_columnflags(TrackerColumn*,
-	uintptr_t line, psy_dsp_big_beat_t offset);
+	uintptr_t line);
 static void trackercolumn_drawentry(TrackerColumn*, psy_ui_Graphics*,
 	psy_audio_PatternEntry*, double y, TrackerColumnFlags, TrackDef*);
 static void trackercolumn_drawdigit(TrackerColumn*, psy_ui_Graphics*,
@@ -100,8 +101,8 @@ TrackerColumn* trackercolumn_allocinit(psy_ui_Component* parent,
 }
 
 void trackercolumn_ondraw(TrackerColumn* self, psy_ui_Graphics* g)
-{	
-	trackercolumn_drawtrackevents(self, g);
+{		
+	trackercolumn_drawtrackevents(self, g);	
 	if (trackdrag_trackactive(&self->state->trackconfig->resize,
 			self->track)) {
 		trackercolumn_drawresizebar(self, g);
@@ -123,21 +124,20 @@ void trackercolumn_drawtrackevents(TrackerColumn* self, psy_ui_Graphics* g)
 	self->digitsize = psy_ui_realsize_make(
 		self->state->trackconfig->textwidth,
 		self->state->lineheightpx - 1);
-	for (p = *events,
-			offset = self->state->trackevents.clip.topleft.offset,
+	offset = self->state->trackevents.clip.topleft.offset;
+	for (p = *events,			
 			cpy = trackerstate_beattopx(self->state, offset),
 			line = (uintptr_t)(self->state->trackevents.clip.topleft.offset *
 				self->state->trackevents.clip.topleft.lpb);
 			p != NULL;
-			p = p->next, ++line, cpy += self->state->lineheightpx,
-			offset += patternviewstate_bpl(self->state->pv)) {
+			p = p->next, ++line, cpy += self->state->lineheightpx) {
 		trackercolumn_drawentry(self, g, (psy_audio_PatternEntry*)p->entry,
-			cpy, trackercolumn_columnflags(self, line, offset), trackdef);
+			cpy, trackercolumn_columnflags(self, line), trackdef);
 	}	
 }
 
 TrackerColumnFlags trackercolumn_columnflags(TrackerColumn* self,
-	uintptr_t line, psy_dsp_big_beat_t offset)
+	uintptr_t line)
 {
 	TrackerColumnFlags rv;	
 
@@ -157,16 +157,18 @@ TrackerColumnFlags trackercolumn_columnflags(TrackerColumn* self,
 		rv.beat = 0;
 		rv.beat4 = 0;
 		rv.mid = 0;
-	}		
-	rv.cursor = (psy_audio_sequencecursor_line(&self->state->pv->cursor) == line) &&
-		(self->track == self->state->pv->cursor.track) && self->state->drawcursor;
+	}		 
+	rv.cursor = !self->state->prevent_cursor &&
+		(psy_audio_sequencecursor_line(&self->state->pv->cursor) == line) &&
+		(self->track == self->state->pv->cursor.track);
 	rv.selection = psy_audio_blockselection_test_line(&self->state->pv->selection,
-		self->track, line);
-	rv.playbar = psy_audio_player_playing(workspace_player(self->workspace)) &&
-		(self->workspace->currplayline == line + 
+		self->track, line);	
+	rv.playbar = self->state->draw_playbar &&
+		psy_audio_player_playing(workspace_player(self->workspace)) &&
+		(self->workspace->currplayline == line +
 			((self->state->pv->singlemode)
-			? patternviewstate_beattoline(self->state->pv, self->state->pv->cursor.seqoffset)
-			: 0));
+				? patternviewstate_beattoline(self->state->pv, self->state->pv->cursor.seqoffset)
+				: 0));	
 	rv.focus = TRUE;
 	return rv;
 }

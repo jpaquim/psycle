@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -17,6 +17,8 @@
 static void patterndefaultline_ondestroy(PatternDefaultLine*);
 static void patterndefaultline_onconfigure(PatternDefaultLine*,
 	PatternViewConfig*, psy_Property*);
+static void patterndefaultline_oncursorchanged(PatternDefaultLine*,
+	psy_audio_Sequence* sender);
 
 /* vtable */
 static psy_ui_ComponentVtable vtable;
@@ -43,7 +45,8 @@ void patterndefaultline_init(PatternDefaultLine* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(&self->component, psy_ui_ALIGN_TOP);
 	/* states */
 	patternviewstate_init(&self->pvstate, &workspace->config.patview,
-		workspace_song(workspace), NULL);
+		&workspace->player.patterndefaults.sequence,
+		&workspace->player.patterndefaults.patterns, NULL);	
 	trackerstate_init(&self->state, trackconfig, &self->pvstate);
 	/* grid */
 	trackergrid_init(&self->grid, &self->component, &self->state, workspace);
@@ -51,13 +54,15 @@ void patterndefaultline_init(PatternDefaultLine* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(&self->grid.component, psy_ui_ALIGN_FIXED);
 	self->grid.state->drawbeathighlights = FALSE;
 	self->grid.preventeventdriver = TRUE;
-	self->grid.state->synccursor = FALSE;	
+	self->grid.state->draw_playbar = FALSE;	
 	trackergrid_setpattern(&self->grid,
-		workspace_player(workspace)->patterndefaults);
+		workspace_player(workspace)->patterndefaults.pattern);
 	trackergrid_build(&self->grid);
+	psy_signal_connect(&workspace->player.patterndefaults.sequence.signal_cursorchanged,
+		self, patterndefaultline_oncursorchanged);
 	/* configuration */
 	psy_signal_connect(&workspace->config.patview.signal_changed, self,
-		patterndefaultline_onconfigure);
+		patterndefaultline_onconfigure);	
 }
 
 void patterndefaultline_ondestroy(PatternDefaultLine* self)
@@ -78,4 +83,11 @@ void patterndefaultline_onconfigure(PatternDefaultLine* self,
 		}
 	}
 	self->grid.notestabmode = patternviewconfig_notetabmode(config);
+}
+
+void patterndefaultline_oncursorchanged(PatternDefaultLine* self,
+	psy_audio_Sequence* sender)
+{
+	self->state.pv->cursor = self->grid.workspace->player.patterndefaults.sequence.cursor;
+	trackergrid_invalidatecursor(&self->grid);
 }
