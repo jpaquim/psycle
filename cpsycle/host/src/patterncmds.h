@@ -69,30 +69,31 @@ BlockTransposeCommand* blocktransposecommand_alloc(psy_audio_Pattern* pattern,
 typedef struct BlockRemoveCommand {
 	/* inherits */
 	psy_Command command;
-	psy_audio_BlockSelection selection;
-	psy_audio_Pattern* pattern;
-	psy_audio_Pattern oldpattern;
+	psy_audio_BlockSelection selection;	
+	psy_audio_Patterns oldpatterns;
 	bool remove;
 	/* references */
 	psy_audio_Sequence* sequence;	
 } BlockRemoveCommand;
 
-BlockRemoveCommand* blockremovecommand_alloc(psy_audio_Pattern*,
-	psy_audio_BlockSelection, psy_audio_Sequence*);
+BlockRemoveCommand* blockremovecommand_alloc(psy_audio_Sequence*,
+	psy_audio_BlockSelection);
 
 typedef struct BlockPasteCommand {
 	/* inherits */
 	psy_Command command;
-	psy_audio_SequenceCursor destcursor;
-	psy_audio_Pattern* pattern;
-	psy_audio_Pattern source;
-	psy_audio_Pattern oldpattern;
+	psy_audio_SequenceCursor destcursor;	
+	psy_audio_Patterns oldpatterns;
 	psy_dsp_big_beat_t bpl;
 	bool paste;
-	bool mix;	
+	bool mix;
+	psy_audio_BlockSelection selection;
+	/* references */
+	psy_audio_Sequence* sequence;
+	psy_audio_Pattern* source;
 } BlockPasteCommand;
 
-BlockPasteCommand* blockpastecommand_alloc(psy_audio_Pattern*,
+BlockPasteCommand* blockpastecommand_alloc(psy_audio_Sequence*,
 	psy_audio_Pattern* source, psy_audio_SequenceCursor,
 	psy_dsp_big_beat_t bpl, bool mix);
 

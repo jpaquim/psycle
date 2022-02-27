@@ -15,6 +15,7 @@
 /* audio */
 #include <exclusivelock.h>
 #include <patternio.h>
+#include <sequence.h>
 /* platform */
 #include "../../detail/portable.h"
 #include "../../detail/trace.h"
@@ -63,10 +64,9 @@ void patterncmds_blockdelete(PatternCmds* self, psy_audio_BlockSelection
 {
 	assert(self);
 
-	if (self->pattern && psy_audio_blockselection_valid(&selection)) {
+	if (psy_audio_blockselection_valid(&selection)) {
 		psy_undoredo_execute(self->undoredo,
-			&blockremovecommand_alloc(self->pattern,
-				selection, self->sequence)->command);
+			&blockremovecommand_alloc(self->sequence, selection)->command);
 	}
 }
 
@@ -74,10 +74,14 @@ void patterncmds_blockcopy(PatternCmds* self, psy_audio_BlockSelection selection
 {
 	assert(self);
 
-	if (self->pattern && psy_audio_blockselection_valid(&selection)) {
+	if (psy_audio_blockselection_valid(&selection)) {
+		psy_audio_sequence_blockcopypattern(self->sequence, 
+			selection, self->patternpaste);
+	}
+	/* if (self->pattern && psy_audio_blockselection_valid(&selection)) {
 		psy_audio_pattern_blockcopy(self->patternpaste,
 			self->pattern, selection);
-	}
+	} */
 }
 
 
@@ -86,10 +90,10 @@ void patterncmds_blockpaste(PatternCmds* self, psy_audio_SequenceCursor cursor,
 {
 	assert(self);
 
-	if (self->pattern && !psy_audio_pattern_empty(
+	if (self->sequence && !psy_audio_pattern_empty(
 			self->patternpaste)) {
 		psy_undoredo_execute(self->undoredo,
-			&blockpastecommand_alloc(self->pattern,
+			&blockpastecommand_alloc(self->sequence,
 				self->patternpaste, cursor,
 				1.0 / (double)cursor.lpb, mix)->command);		
 	}

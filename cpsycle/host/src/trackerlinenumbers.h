@@ -89,6 +89,7 @@ typedef struct TrackerLineNumbers {
 	bool showbeat;
 	const char* format;
 	const char* format_seqstart;
+	psy_audio_SequenceCursor oldcursor;
 	/* references */
 	TrackerState* state;
 	Workspace* workspace;

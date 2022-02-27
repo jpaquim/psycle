@@ -200,8 +200,8 @@ void patternviewbar_status_text(PatternViewBar* self, uintptr_t maxcount,
 		psy_snprintf(rv, maxcount, "Pat -- Ln -- Trk -- Col --:-- Edt");
 	} else if (psy_audio_player_playing(&self->workspace->player)) {		
 		psy_snprintf(rv, maxcount, "Pat %d Ln %d Trk %d Col %d:%d Edt",
-			(int)self->workspace->currplaycursor.patternid,
-			(int)self->workspace->currplayline,
+			(int)self->workspace->host_sequencer_time.currplaycursor.patternid,
+			(int)self->workspace->host_sequencer_time.currplayline,
 			(int)psy_audio_sequencecursor_track(&cursor),
 			(int)psy_audio_sequencecursor_column(&cursor),
 			(int)psy_audio_sequencecursor_digit(&cursor));		

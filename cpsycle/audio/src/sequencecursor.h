@@ -49,6 +49,7 @@ psy_audio_SequenceCursor psy_audio_sequencecursor_make(
 bool psy_audio_sequencecursor_equal(psy_audio_SequenceCursor* lhs,
 	psy_audio_SequenceCursor* rhs);
 
+void psy_audio_sequencecursor_set_mode(psy_audio_SequenceCursor*, bool absolute);
 void psy_audio_sequencecursor_updatecache(const psy_audio_SequenceCursor*);
 void psy_audio_sequencecursor_updateseqoffset(psy_audio_SequenceCursor*,
 	const struct psy_audio_Sequence*);

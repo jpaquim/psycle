@@ -166,6 +166,8 @@ psy_audio_Pattern* psy_audio_pattern_allocinit(void);
 ** \return allocates a new pattern with a copy of all events
 */
 psy_audio_Pattern* psy_audio_pattern_clone(psy_audio_Pattern*);
+
+void psy_audio_pattern_clear(psy_audio_Pattern*);
 /*
 ** inserts an event by copy
 ** \return the pattern node containing the inserted event
@@ -266,9 +268,6 @@ INLINE uintptr_t psy_audio_pattern_opcount(const psy_audio_Pattern* self)
 }
 /* multiplies all entry offsets with the given factor */
 void psy_audio_pattern_scale(psy_audio_Pattern*, float factor);
-/* erases all entries of the block */
-void psy_audio_pattern_blockremove(psy_audio_Pattern*,
-	psy_audio_SequenceCursor begin, psy_audio_SequenceCursor end);
 /* erases the pattern and copies the block from a source pattern */
 void psy_audio_pattern_blockcopy(psy_audio_Pattern* self,
 	psy_audio_Pattern* source, psy_audio_BlockSelection selection);

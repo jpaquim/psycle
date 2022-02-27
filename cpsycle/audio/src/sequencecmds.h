@@ -111,6 +111,43 @@ psy_audio_SequenceChangePatternCommand* psy_audio_sequencechangepatterncommand_a
 	intptr_t step);
 
 
+/* psy_audio_PatternEntryRemoveCommand */
+typedef struct psy_audio_PatternEntryRemoveCommand {
+	/* inherits */
+	psy_Command command;	
+} psy_audio_PatternEntryRemoveCommand;
+
+void psy_audio_patternentryremovecommand_init(
+	psy_audio_PatternEntryRemoveCommand*);
+
+/* psy_audio_PatternEntryTransposeCommand */
+typedef struct psy_audio_PatternEntryTransposeCommand {
+	/* inherits */
+	psy_Command command;
+	psy_Table nodemark;
+	intptr_t offset;
+} psy_audio_PatternEntryTransposeCommand;
+
+void psy_audio_patternentrytransposecommand_init(
+	psy_audio_PatternEntryTransposeCommand*,
+	intptr_t offset);
+
+/* psy_audio_PatternEntryCopyCommand */
+typedef struct psy_audio_PatternEntryCopyCommand {
+	/* inherits */
+	psy_Command command;
+	psy_audio_Pattern* dest;
+	psy_audio_PatternNode* prev;
+	psy_dsp_big_beat_t offset;
+	intptr_t trackoffset;
+} psy_audio_PatternEntryCopyCommand;
+
+void psy_audio_patternentrycopycommand_init(
+	psy_audio_PatternEntryCopyCommand*,
+	psy_audio_Pattern* dest,
+	psy_dsp_big_beat_t offset,
+	intptr_t trackoffset);
+
 #ifdef __cplusplus
 }
 #endif

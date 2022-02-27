@@ -53,6 +53,7 @@ void trackerlinenumbers_init(TrackerLineNumbers* self,
 	self->showbeat = FALSE;
 	self->draw_linenumber_cursor = TRUE;
 	self->prevent_cursor = FALSE;
+	psy_audio_sequencecursor_init(&self->oldcursor);
 	trackerlinenumbers_updateformat(self);	
 	self->state = state;
 	self->workspace = workspace;
@@ -175,7 +176,7 @@ TrackerColumnFlags trackerlinennumbers_columnflags(TrackerLineNumbers* self,
 	rv.playbar =
 		psy_audio_player_playing(workspace_player(self->workspace)) &&
 		trackerstate_testplaybar(self->state,
-			self->workspace->currplayposition, offset);
+			self->workspace->host_sequencer_time.currplayposition, offset);
 	rv.mid = 0;
 	rv.cursor = self->draw_linenumber_cursor && !self->prevent_cursor &&
 		(psy_audio_sequencecursor_line(&self->state->pv->cursor) == line);
@@ -244,6 +245,7 @@ void trackerlinenumbers_invalidatecursor(TrackerLineNumbers* self,
 		psy_ui_realrectangle_make(
 			psy_ui_realpoint_make(0.0, self->state->lineheightpx * line),
 			psy_ui_realsize_make(size.width, self->state->lineheightpx)));
+	self->oldcursor = *cursor;
 }
 
 void trackerlinenumbers_invalidateline(TrackerLineNumbers* self, intptr_t line)
@@ -303,6 +305,7 @@ void trackerlinenumbers_updatecursor(TrackerLineNumbers* self)
 			psy_audio_sequencecursor_line_abs(&sequence->lastcursor));
 		trackerlinenumbers_invalidateline(self,
 			psy_audio_sequencecursor_line_abs(&sequence->cursor));
+		self->oldcursor = sequence->cursor;
 	}
 }
 
@@ -524,9 +527,9 @@ void trackerlinenumberbar_onplaylinechanged(TrackerLineNumberBar* self,
 	if (!workspace_followingsong(sender) && psy_ui_component_drawvisible(
 			&self->component)) {
 		trackerlinenumbers_invalidateline(&self->linenumbers,
-			sender->lastplayline);
+			sender->host_sequencer_time.lastplayline);
 		trackerlinenumbers_invalidateline(&self->linenumbers,
-			sender->currplayline);
+			sender->host_sequencer_time.currplayline);
 	}
 }
 
@@ -536,9 +539,9 @@ void trackerlinenumberbar_onplaystatuschanged(TrackerLineNumberBar* self,
 	self->linenumbers.prevent_cursor = (workspace_followingsong(self->workspace) &&
 		psy_audio_player_playing(workspace_player(self->workspace)));
 	trackerlinenumbers_invalidateline(&self->linenumbers,
-		sender->lastplayline);
+		sender->host_sequencer_time.lastplayline);
 	trackerlinenumbers_invalidateline(&self->linenumbers,
-		sender->currplayline);	
+		sender->host_sequencer_time.currplayline);
 }
 
 void trackerlinenumberbar_oncursorchanged(TrackerLineNumberBar* self,

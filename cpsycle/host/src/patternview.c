@@ -358,10 +358,11 @@ void patternview_ongridscroll(PatternView* self, psy_ui_Component* sender)
 			psy_ui_component_scrollleft(&self->trackerview.grid.component));
 	}
 	if (psy_ui_component_scrolltop_px(&self->trackerview.grid.component) !=
-			psy_ui_component_scrolltop_px(&self->left.linenumbers.component)) {
+			psy_ui_component_scrolltop_px(&self->left.linenumbers.component)) {		
+		// self->left.linenumbers.component.blitscroll = TRUE;
 		psy_ui_component_setscrolltop(&self->left.linenumbers.component,
 			psy_ui_component_scrolltop(&self->trackerview.grid.component));
-		psy_ui_component_invalidate(&self->left.linenumberpane);
+		// self->left.linenumbers.component.blitscroll = FALSE;		
 	}
 }
 
@@ -373,6 +374,8 @@ void patternview_oncursorchanged(PatternView* self, psy_audio_Sequence* sender)
 void patternview_update_cursor(PatternView* self)
 {	
 	self->state.pv->cursor = self->workspace->song->sequence.cursor;
+	psy_audio_sequencecursor_set_mode(&self->state.pv->cursor,
+		!self->state.pv->singlemode);
 	if (!workspace_song(self->workspace)) {
 		self->updatealign = 1;
 		patternview_setpattern(self, NULL);

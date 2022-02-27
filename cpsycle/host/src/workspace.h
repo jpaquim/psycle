@@ -108,6 +108,18 @@ enum {
 	WORKSPACE_LOADSONG
 };
 
+typedef struct HostSequencerTime {
+	psy_dsp_big_beat_t currplayposition;
+	psy_dsp_big_beat_t lastplayposition;
+	uintptr_t lastplayline;
+	uintptr_t currplayline;
+	bool currplaying;
+	psy_audio_SequenceCursor lastplaycursor;
+	psy_audio_SequenceCursor currplaycursor;
+} HostSequencerTime;
+
+void hostsequencertime_init(HostSequencerTime*);
+
 struct Workspace;
 
 typedef void (*fp_workspace_output)(void* context,
@@ -192,13 +204,8 @@ typedef struct Workspace {
 	bool restoreloop;
 	bool startpage;	
 	bool driverconfigloading;
-	bool seqviewactive;		
-	psy_dsp_big_beat_t currplayposition;
-	psy_dsp_big_beat_t lastplayposition;	
-	uintptr_t lastplayline;	
-	uintptr_t currplayline;
-	bool currplaying;
-	psy_audio_SequenceCursor currplaycursor;
+	bool seqviewactive;	
+	HostSequencerTime host_sequencer_time;	
 	InputHandler inputhandler;
 	psy_Thread driverconfigloadthread;
 	psy_Thread pluginscanthread;
@@ -322,6 +329,12 @@ void workspace_apptitle(Workspace*, char* rv_title, uintptr_t max_len);
 const char* workspace_songtitle(const Workspace*);
 void workspace_setstartpage(Workspace*);
 void workspace_oninput(Workspace*, uintptr_t cmd);
+
+INLINE const HostSequencerTime* workspace_host_sequencer_time(
+	const Workspace* self)
+{
+	return &self->host_sequencer_time;
+}
 
 #ifdef __cplusplus
 }

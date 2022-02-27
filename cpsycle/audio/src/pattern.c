@@ -141,6 +141,14 @@ psy_audio_Pattern* psy_audio_pattern_clone(psy_audio_Pattern* self)
 	return rv;
 }
 
+void psy_audio_pattern_clear(psy_audio_Pattern* self)
+{
+	assert(self);
+
+	psy_audio_pattern_dispose(self);
+	psy_audio_pattern_init(self);
+}
+
 void psy_audio_pattern_remove(psy_audio_Pattern* self, psy_audio_PatternNode* node)
 {
 	assert(self);
@@ -449,32 +457,6 @@ void psy_audio_pattern_scale(psy_audio_Pattern* self, float factor)
 		psy_audio_PatternEntry* entry = (psy_audio_PatternEntry*)psy_list_entry(p);
 
 		entry->offset *= factor;
-	}
-}
-
-void psy_audio_pattern_blockremove(psy_audio_Pattern* self,
-	psy_audio_SequenceCursor begin,
-	psy_audio_SequenceCursor end)
-{	
-	psy_audio_PatternNode* p;
-	psy_audio_PatternNode* q;
-
-	assert(self);
-
-	p = psy_audio_pattern_greaterequal(self, (psy_dsp_big_beat_t)begin.offset);
-	while (p != NULL) {			
-		psy_audio_PatternEntry* entry;
-		q = p->next;
-
-		entry = (psy_audio_PatternEntry*)psy_list_entry(p);
-		if (entry->offset < end.offset) {
-			if (entry->track >= begin.track && entry->track < end.track) {
-				psy_audio_pattern_remove(self, p);
-			}
-		} else {
-			break;
-		}
-		p = q;
 	}
 }
 
@@ -879,7 +861,7 @@ void psy_audio_pattern_blockpaste(psy_audio_Pattern* self,
 	psy_audio_Pattern* source, psy_audio_SequenceCursor destcursor,
 	psy_dsp_big_beat_t bpl)
 {
-	psy_audio_PatternNode* p;
+	/*psy_audio_PatternNode* p;
 	psy_audio_PatternNode* prev = 0;
 	psy_dsp_big_beat_t offset;
 	intptr_t trackoffset;
@@ -898,11 +880,7 @@ void psy_audio_pattern_blockpaste(psy_audio_Pattern* self,
 	if (end.offset >= psy_audio_pattern_length(self)) {
 		end.offset = psy_audio_pattern_length(self);
 	}
-	psy_audio_pattern_blockremove(self, begin, end);
-	/*
-	** sequencer_checkiterators(&workspace_player(self->workspace).sequencer,
-	**  	node);
-	*/
+	psy_audio_pattern_blockremove(self, begin, end);	
 	while (p != NULL) {
 		psy_audio_PatternEntry* pasteentry;
 		psy_audio_PatternNode* node;
@@ -927,7 +905,7 @@ void psy_audio_pattern_blockpaste(psy_audio_Pattern* self,
 				psy_audio_patternentry_front(pasteentry));
 		}
 		p = p->next;
-	}	
+	}	*/
 }
 
 void psy_audio_pattern_blockmixpaste(psy_audio_Pattern* self,

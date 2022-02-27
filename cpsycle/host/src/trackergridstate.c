@@ -674,7 +674,8 @@ psy_audio_SequenceCursor trackerstate_makecursor(TrackerState* self,
 		uintptr_t order;
 
 		order = psy_audio_sequence_order(sequence,
-			self->pv->cursor.orderindex.track, rv.offset);
+			self->pv->cursor.orderindex.track, 
+			psy_audio_sequencecursor_offset_abs(&rv));
 		rv.orderindex.order = order;
 		psy_audio_sequencecursor_updateseqoffset(&rv, sequence);			
 	}
@@ -714,8 +715,8 @@ psy_audio_SequenceCursor trackerstate_makecursor(TrackerState* self,
 	if (rv.digit >= trackdef_numdigits(trackdef, rv.column)) {
 		rv.digit = trackdef_numdigits(trackdef, rv.column) - 1;
 	}
-	self->pv->cursor.patternid = sequence->cursor.patternid;
-	psy_audio_sequencecursor_updatecache(&rv);
+	self->pv->cursor.patternid = sequence->cursor.patternid;	
+	psy_audio_sequencecursor_updatecache(&rv);	
 	return trackerstate_checkcursorbounds(self, rv);
 }
 
@@ -765,4 +766,99 @@ void trackerstate_columncolours(TrackerState* self,
 		*bg = psy_ui_colour_black();
 		*fore = psy_ui_colour_white();
 	}
+}
+
+void trackerstate_update_clip_events(TrackerState* self,
+	const psy_audio_BlockSelection* clip)
+{
+	uintptr_t track;
+	uintptr_t maxlines;
+	double offset;
+	double seqoffset;
+	double length;
+	psy_audio_SequenceTrackIterator ite;
+	uintptr_t line;
+
+	assert(self);
+
+	if (!patternviewstate_pattern(self->pv)) {
+		return;
+	}
+	trackereventtable_clearevents(&self->trackevents);
+	offset = clip->topleft.offset;
+	psy_audio_sequencetrackiterator_init(&ite);
+	patternviewstate_sequencestart(self->pv, offset, &ite);
+	length = 0.0;
+	if (ite.pattern) {
+		length = ite.pattern->length;
+	}
+	seqoffset = psy_audio_sequencetrackiterator_seqoffset(&ite);
+	line = patternviewstate_beattoline(self->pv, offset);
+	maxlines = patternviewstate_numlines(self->pv);
+	while (offset <= clip->bottomright.offset && line < maxlines) {
+		bool fill;
+
+		fill = !(offset >= seqoffset && offset < seqoffset + length) || !ite.patternnode;
+		/* draw trackline */
+		for (track = clip->topleft.track; track < clip->bottomright.track;
+			++track) {
+			bool hasevent = FALSE;
+
+			while (!fill && ite.patternnode &&
+				psy_audio_sequencetrackiterator_patternentry(&ite)->track <= track &&
+				psy_dsp_testrange_e(
+					psy_audio_sequencetrackiterator_offset(&ite),
+					offset,
+					patternviewstate_bpl(self->pv))) {
+				psy_audio_PatternEntry* entry;
+
+				entry = psy_audio_sequencetrackiterator_patternentry(&ite);
+				if (entry->track == track) {
+					psy_List** trackevents;
+
+					trackevents = trackereventtable_track(&self->trackevents, entry->track);
+					psy_list_append(trackevents, entry);
+					psy_list_next(&ite.patternnode);
+					hasevent = TRUE;
+					break;
+				}
+				psy_list_next(&ite.patternnode);
+			}
+			if (!hasevent) {
+				psy_List** trackevents;
+
+				trackevents = trackereventtable_track(&self->trackevents, track);
+				psy_list_append(trackevents, NULL);
+			} else if (ite.patternnode && ((psy_audio_PatternEntry*)(ite.patternnode->entry))->track <= track) {
+				fill = TRUE;
+			}
+		}
+		/* skip remaining events of the line */
+		while (ite.patternnode && (offset < seqoffset + length) &&
+			(psy_audio_sequencetrackiterator_offset(&ite) + psy_dsp_epsilon * 2 <
+				offset + patternviewstate_bpl(self->pv))) {
+			psy_list_next(&ite.patternnode);
+		}
+		offset += patternviewstate_bpl(self->pv);
+		if (offset >= seqoffset + length) {
+			/* go to next seqentry or end draw */
+			if (ite.sequencentrynode && ite.sequencentrynode->next) {
+				psy_audio_sequencetrackiterator_inc_entry(&ite);
+				seqoffset = psy_audio_sequencetrackiterator_seqoffset(&ite);
+				offset = seqoffset;
+				if (ite.pattern) {
+					length = ite.pattern->length;
+				} else {
+					break;
+				}
+			} else {
+				break;
+			}
+		}
+	}
+	self->trackevents.clip = *clip;
+	self->trackevents.currcursorline =
+		patternviewstate_beattoline(self->pv,
+			psy_audio_sequencecursor_offset(&self->pv->cursor));
+	psy_audio_sequencetrackiterator_dispose(&ite);
 }

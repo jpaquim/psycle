@@ -98,10 +98,12 @@ void psy_audio_blockselection_drag(psy_audio_BlockSelection* self,
 			dragselectionbase.offset);
 		psy_audio_sequencecursor_setoffset(&self->bottomright,
 			cursor.offset + bpl);
+		self->bottomright.orderindex = cursor.orderindex;
 	} else {
 		psy_audio_sequencecursor_setoffset(&self->topleft, cursor.offset);
 		psy_audio_sequencecursor_setoffset(&self->bottomright,
-			dragselectionbase.offset + bpl);
+			dragselectionbase.offset + bpl);		
+		self->topleft.orderindex = cursor.orderindex;
 	}	
 }
 

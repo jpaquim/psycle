@@ -1,14 +1,17 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
 
 
 #include "sequence.h"
-/* platform */
+/* local */
 #include "sequencer.h" /* calculate duration */
+#include "sequencecmds.h"
+/* container */
+#include <properties.h>
 /* platform */
 #include "../../detail/portable.h"
 
@@ -196,7 +199,7 @@ void psy_audio_sequence_init(psy_audio_Sequence* self,
 	self->lastcursor = self->cursor;
 	psy_audio_sequenceselection_init(&self->sequenceselection);
 	psy_audio_sequenceselection_select(&self->sequenceselection,
-		psy_audio_orderindex_make(0, 0));
+		psy_audio_orderindex_make(0, 0));	
 }
 
 void psy_audio_sequence_initglobaltrack(psy_audio_Sequence* self)
@@ -239,7 +242,7 @@ void psy_audio_sequence_dispose(psy_audio_Sequence* self)
 		free(self->sequencerduration);
 		self->sequencerduration = NULL;
 	}
-	psy_audio_sequenceselection_dispose(&self->sequenceselection);
+	psy_audio_sequenceselection_dispose(&self->sequenceselection);	
 }
 
 void psy_audio_sequence_disposesignals(psy_audio_Sequence* self)
@@ -1585,4 +1588,119 @@ void psy_audio_sequence_fillpatterns(psy_audio_Sequence* self)
 			}
 		}
 	}
+}
+
+void psy_audio_sequence_blockremove(psy_audio_Sequence* self,
+	psy_audio_BlockSelection selection)
+{
+	psy_audio_PatternEntryRemoveCommand command;
+
+	psy_audio_patternentryremovecommand_init(&command);
+	psy_audio_sequence_block_traverse(self, selection, &command.command);
+	psy_command_dispose(&command.command);
+}
+
+void psy_audio_sequence_blocktranspose(psy_audio_Sequence* self,
+	psy_audio_BlockSelection selection, intptr_t offset)
+{
+	psy_audio_PatternEntryTransposeCommand command;
+
+	psy_audio_patternentrytransposecommand_init(&command, offset);
+	psy_audio_sequence_block_traverse(self, selection, &command.command);
+	psy_command_dispose(&command.command);
+}
+
+void psy_audio_sequence_blockcopypattern(psy_audio_Sequence* self,
+	psy_audio_BlockSelection selection,
+	psy_audio_Pattern* dest)
+{
+	psy_audio_PatternEntryCopyCommand command;
+
+	assert(dest);
+	
+	psy_audio_patternentrycopycommand_init(&command, dest,
+		selection.topleft.offset, selection.topleft.track);
+	psy_audio_pattern_clear(dest);
+	psy_audio_pattern_setmaxsongtracks(dest,
+		selection.bottomright.track -
+		selection.topleft.track);
+	psy_audio_pattern_setlength(dest,
+		(psy_dsp_big_beat_t)(selection.bottomright.offset -
+			selection.topleft.offset));
+	psy_audio_sequence_block_traverse(self, selection, &command.command);
+	psy_command_dispose(&command.command);	
+}
+
+void psy_audio_sequence_blockpastepattern(psy_audio_Sequence* self,
+	psy_audio_BlockSelection selection,
+	psy_audio_Pattern* source)
+{
+	
+}
+
+void psy_audio_sequence_block_traverse(psy_audio_Sequence* self,
+	psy_audio_BlockSelection selection, psy_Command* command)
+{
+	psy_List* iters;
+	psy_audio_SequenceTrackNode* p;
+	uintptr_t trackindex;
+	psy_audio_SequenceCursor begin;
+	psy_audio_SequenceCursor end;
+
+	assert(self);
+	assert(command);
+
+	begin = selection.topleft;
+	end = selection.bottomright;
+	trackindex = 0;
+	iters = NULL;	
+	for (p = self->tracks; p != NULL; psy_list_next(&p), ++trackindex) {
+		if (trackindex >= begin.orderindex.track && trackindex <= end.orderindex.track) {
+			psy_audio_SequenceTrackIterator* ite;
+
+			ite = malloc(sizeof(psy_audio_SequenceTrackIterator));
+			if (ite) {
+				psy_audio_SequenceTrack* track;
+
+				track = (psy_audio_SequenceTrack*)p->entry;
+				psy_audio_sequencetrackiterator_init(ite);
+				psy_audio_sequence_begin(self, track,
+					psy_audio_sequencecursor_offset_abs(&begin), ite);
+				psy_list_append(&iters, ite);
+			}
+		}
+	}
+	for (p = iters; p != NULL; psy_list_next(&p)) {
+		psy_audio_SequenceTrackIterator* ite;
+		psy_audio_SequenceEntry* seqentry;
+
+		ite = (psy_audio_SequenceTrackIterator*)p->entry;
+		seqentry = psy_audio_sequencetrackiterator_entry(ite);
+		while (ite->patternnode &&
+			psy_audio_sequencetrackiterator_offset(ite) <
+			psy_audio_sequencecursor_offset_abs(&end)) {
+			psy_audio_PatternEntry* entry;
+
+			entry = (psy_audio_PatternEntry*)psy_list_entry(ite->patternnode);
+			if (entry->track >= begin.track && entry->track < end.track) {
+				psy_audio_PatternNode* node;
+				psy_audio_Pattern* pattern;
+				psy_Property params;
+
+				node = ite->patternnode;
+				pattern = ite->pattern;
+				psy_property_init(&params);
+				psy_property_append_int(&params, "node",(intptr_t)node, 0, 0);
+				psy_property_append_int(&params, "pattern", (intptr_t)pattern, 0, 0);
+				psy_audio_sequencetrackiterator_inc(ite);
+				psy_command_execute(command, &params);				
+				psy_property_dispose(&params);
+			} else {
+				psy_audio_sequencetrackiterator_inc(ite);
+			}
+		}
+	}
+	psy_list_deallocate(&iters, (psy_fp_disposefunc)
+		psy_audio_sequencetrackiterator_dispose);
+	iters = NULL;
 }

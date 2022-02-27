@@ -25,7 +25,7 @@ typedef struct {
 static void patternpropertiesapplycommand_dispose(
 	PatternPropertiesApplyCommand*);
 static void patternpropertiesapplycommand_execute(
-	PatternPropertiesApplyCommand*);
+	PatternPropertiesApplyCommand*, psy_Property*);
 static void patternpropertiesapplycommand_revert(
 	PatternPropertiesApplyCommand*);
 
@@ -41,7 +41,7 @@ static void patternpropertiesapplycommand_vtable_init(PatternPropertiesApplyComm
 			(psy_fp_command)
 			patternpropertiesapplycommand_dispose;
 		patternpropertiesapplycommand_vtable.execute =
-			(psy_fp_command)
+			(psy_fp_command_params)
 			patternpropertiesapplycommand_execute;
 		patternpropertiesapplycommand_vtable.revert =
 			(psy_fp_command)
@@ -77,7 +77,8 @@ void patternpropertiesapplycommand_dispose(PatternPropertiesApplyCommand* self)
 	self->oldname = 0;
 }
 
-void patternpropertiesapplycommand_execute(PatternPropertiesApplyCommand* self)
+void patternpropertiesapplycommand_execute(PatternPropertiesApplyCommand* self,
+	psy_Property* param)
 {
 	self->oldname = strdup(psy_audio_pattern_name(self->pattern));
 	psy_audio_pattern_setname(self->pattern, self->newname);
