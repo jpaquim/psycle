@@ -319,9 +319,11 @@ INLINE void patternviewstate_blockcopy(PatternViewState* self)
 INLINE void patternviewstate_blockdelete(PatternViewState* self)
 {
 	assert(self);
-
-	patterncmds_blockdelete(self->cmds, self->selection);
-	patternviewstate_invalidate(self);
+	
+	if (psy_audio_blockselection_valid(&self->selection)) {
+		patterncmds_blockdelete(self->cmds, self->selection);
+		patternviewstate_invalidate(self);
+	}
 }
 
 INLINE void patternviewstate_blockcut(PatternViewState* self)
@@ -355,8 +357,12 @@ INLINE void patternviewstate_blocktranspose(PatternViewState* self, intptr_t off
 {
 	assert(self);
 
-	patterncmds_blocktranspose(self->cmds, self->selection, self->cursor,
-		offset);
+//	patterncmds_blocktranspose(self->cmds, self->selection, self->cursor,
+//		offset);
+	if (psy_audio_blockselection_valid(&self->selection)) {
+		psy_audio_sequence_blocktranspose(self->sequence, self->selection,
+			offset);
+	}
 	patternviewstate_invalidate(self);
 }
 

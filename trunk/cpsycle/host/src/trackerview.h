@@ -63,6 +63,7 @@ void trackergrid_invalidatelines(TrackerGrid*, intptr_t line1, intptr_t line2);
 void trackergrid_invalidatecursor(TrackerGrid*);
 void trackergrid_invalidateinternalcursor(TrackerGrid*,
 	psy_audio_SequenceCursor);
+void trackergrid_update_follow_song(TrackerGrid*);
 void trackergrid_centeroncursor(TrackerGrid*);
 void trackergrid_setcentermode(TrackerGrid*, int mode);
 void trackergrid_tweak(TrackerGrid*, int slot, uintptr_t tweak,

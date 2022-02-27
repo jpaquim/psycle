@@ -190,7 +190,7 @@ typedef struct psy_audio_Sequence {
 	psy_Signal signal_insert;
 	psy_Signal signal_remove;
 	psy_Signal signal_reorder;
-	psy_Signal signal_trackinsert;	
+	psy_Signal signal_trackinsert;
 	psy_Signal signal_trackremove;
 	psy_Signal signal_trackswap;
 	psy_Signal signal_trackreposition;
@@ -213,7 +213,7 @@ typedef struct psy_audio_Sequence {
 	psy_dsp_big_seconds_t durationms;
 	/* references */
 	psy_audio_Patterns* patterns;
-	psy_audio_Samples* samples;
+	psy_audio_Samples* samples;	
 } psy_audio_Sequence;
 
 void psy_audio_sequence_init(psy_audio_Sequence*, psy_audio_Patterns*,
@@ -321,6 +321,20 @@ INLINE psy_audio_SequenceCursor psy_audio_sequence_cursor(
 {
 	return self->cursor;
 }
+
+void psy_audio_sequence_blockremove(psy_audio_Sequence*,
+	psy_audio_BlockSelection selection);
+void psy_audio_sequence_blocktranspose(psy_audio_Sequence*,
+	psy_audio_BlockSelection selection, intptr_t offset);
+void psy_audio_sequence_blockcopypattern(psy_audio_Sequence*,
+	psy_audio_BlockSelection selection,
+	psy_audio_Pattern* dest);
+void psy_audio_sequence_blockpastepattern(psy_audio_Sequence*,
+	psy_audio_BlockSelection selection,
+	psy_audio_Pattern* source);
+
+void psy_audio_sequence_block_traverse(psy_audio_Sequence* self,
+	psy_audio_BlockSelection selection, psy_Command*);
 
 #ifdef __cplusplus
 }

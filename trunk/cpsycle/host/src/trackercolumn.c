@@ -163,12 +163,11 @@ TrackerColumnFlags trackercolumn_columnflags(TrackerColumn* self,
 		(self->track == self->state->pv->cursor.track);
 	rv.selection = psy_audio_blockselection_test_line(&self->state->pv->selection,
 		self->track, line);	
-	rv.playbar = self->state->draw_playbar &&
-		psy_audio_player_playing(workspace_player(self->workspace)) &&
-		(self->workspace->currplayline == line +
+	rv.playbar = self->state->draw_playbar && self->workspace->host_sequencer_time.currplaying &&
+		(self->workspace->host_sequencer_time.currplayline == (line +
 			((self->state->pv->singlemode)
 				? patternviewstate_beattoline(self->state->pv, self->state->pv->cursor.seqoffset)
-				: 0));	
+				: 0)));	
 	rv.focus = TRUE;
 	return rv;
 }

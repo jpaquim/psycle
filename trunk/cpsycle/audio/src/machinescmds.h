@@ -1,6 +1,6 @@
 /*
 ** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #ifndef psy_audio_MACHINESCMDS_H
@@ -15,7 +15,11 @@
 extern "C" {
 #endif
 
-typedef struct {
+struct psy_Property;
+
+/* InsertMachineCommand */
+
+typedef struct InsertMachineCommand {
 	psy_Command command;
 	psy_audio_Machines* machines;
 	psy_audio_Machine* machine;
@@ -29,7 +33,7 @@ void insertmachinecommand_dispose(InsertMachineCommand*);
 InsertMachineCommand* insertmachinecommand_allocinit(psy_audio_Machines*,
 	uintptr_t slot, psy_audio_Machine*);
 
-void insertmachinecommand_execute(InsertMachineCommand*);
+void insertmachinecommand_execute(InsertMachineCommand*, struct psy_Property*);
 void insertmachinecommand_revert(InsertMachineCommand*);
 
 typedef struct {
@@ -45,10 +49,13 @@ void deletemachinecommand_dispose(DeleteMachineCommand*);
 DeleteMachineCommand* deletemachinecommand_allocinit(psy_audio_Machines*,
 	uintptr_t slot);
 
-void deletemachinecommand_execute(DeleteMachineCommand*);
+void deletemachinecommand_execute(DeleteMachineCommand*, struct psy_Property*);
 void deletemachinecommand_revert(DeleteMachineCommand*);
 
-typedef struct {
+
+/* ConnectMachineCommand */
+
+typedef struct ConnectMachineCommand {
 	psy_Command command;
 	psy_audio_Machines* machines;
 	psy_audio_Wire wire;
@@ -62,10 +69,14 @@ void connectmachinecommand_dispose(ConnectMachineCommand*);
 ConnectMachineCommand* connectmachinecommand_allocinit(psy_audio_Machines*,
 	psy_audio_Wire);
 
-void connectmachinecommand_execute(ConnectMachineCommand*);
+void connectmachinecommand_execute(ConnectMachineCommand*,
+	struct psy_Property*);
 void connectmachinecommand_revert(ConnectMachineCommand*);
 
-typedef struct {
+
+/* DisconnectMachineCommand */
+
+typedef struct DisconnectMachineCommand {
 	psy_Command command;
 	psy_audio_Machines* machines;
 	psy_audio_Wire wire;
@@ -78,7 +89,8 @@ void disconnectmachinecommand_dispose(DisconnectMachineCommand*);
 DisconnectMachineCommand* disconnectmachinecommand_allocinit(psy_audio_Machines*,
 	psy_audio_Wire);
 
-void disconnectmachinecommand_execute(DisconnectMachineCommand*);
+void disconnectmachinecommand_execute(DisconnectMachineCommand*,
+	struct psy_Property*);
 void disconnectmachinecommand_revert(DisconnectMachineCommand*);
 
 

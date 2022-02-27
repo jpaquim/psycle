@@ -13,7 +13,7 @@
 typedef struct PatternLineNavigator {
 	PatternViewState* state;
 	bool wrap;
-	bool wraparound;	
+	bool wraparound;
 } PatternLineNavigator;
 
 void patternlinennavigator_init(PatternLineNavigator*, PatternViewState*,
@@ -36,9 +36,10 @@ INLINE bool patternlinennavigator_wrap(const PatternLineNavigator* self)
 typedef struct PatternColNavigator {
 	TrackerState* state;
 	bool wrap;
+	bool wraparound;
 } PatternColNavigator;
 
-void patterncolnavigator_init(PatternColNavigator*, TrackerState*);
+void patterncolnavigator_init(PatternColNavigator*, TrackerState*, bool wraparound);
 
 psy_audio_SequenceCursor patterncolnavigator_prev_track(PatternColNavigator*,
 	psy_audio_SequenceCursor);
@@ -47,6 +48,10 @@ psy_audio_SequenceCursor patterncolnavigator_next_track(PatternColNavigator*,
 psy_audio_SequenceCursor patterncolnavigator_prev_col(PatternColNavigator*,
 	psy_audio_SequenceCursor);
 psy_audio_SequenceCursor patterncolnavigator_next_col(PatternColNavigator*,
+	psy_audio_SequenceCursor);
+psy_audio_SequenceCursor patterncolnavigator_home(PatternColNavigator*,
+	psy_audio_SequenceCursor);
+psy_audio_SequenceCursor patterncolnavigator_end(PatternColNavigator*,
 	psy_audio_SequenceCursor);
 
 

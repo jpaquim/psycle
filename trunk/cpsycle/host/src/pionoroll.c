@@ -201,7 +201,7 @@ void pianoroll_onplaylinechanged(Pianoroll* self, Workspace* sender)
 		return;
 	}
 	if (patternviewstate_pattern(self->gridstate.pv)) {
-		if (sender->lastplayline != psy_INDEX_INVALID) {
+		if (sender->host_sequencer_time.lastplayline != psy_INDEX_INVALID) {
 			pianogrid_invalidateline(&self->grid,
 				self->grid.lastplayposition - self->gridstate.pv->cursor.seqoffset);
 			self->grid.lastplayposition =

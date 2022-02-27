@@ -160,6 +160,8 @@ double trackerstate_basewidth(TrackerState*, uintptr_t track);
 
 void trackerstate_clip(TrackerState*, const psy_ui_RealRectangle* clip,
 	psy_audio_BlockSelection* rv);
+void trackerstate_update_clip_events(TrackerState*,
+	const psy_audio_BlockSelection* clip);
 
 void trackerstate_startdragselection(TrackerState*, psy_audio_SequenceCursor);
 void trackerstate_dragselection(TrackerState*, psy_audio_SequenceCursor);

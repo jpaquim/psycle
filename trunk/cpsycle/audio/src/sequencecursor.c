@@ -148,3 +148,16 @@ void psy_audio_sequencecursor_updatecache(const psy_audio_SequenceCursor* self)
 	((psy_audio_SequenceCursor*)self)->linecache = /* mutable */
 		cast_decimal(self->offset * self->lpb);
 }
+
+void psy_audio_sequencecursor_set_mode(psy_audio_SequenceCursor* self, bool absolute)
+{
+	if (self->absolute != absolute) {
+		self->absolute = absolute;
+		if (absolute) {
+			self->offset += self->seqoffset;
+		} else {
+			self->offset -= self->seqoffset;
+		}
+		psy_audio_sequencecursor_updatecache(self);
+	}
+}

@@ -52,7 +52,7 @@ void psy_undoredo_redo(psy_UndoRedo* self)
 
 	command = psy_undoredo_swap(&self->redo, &self->undo);
 	if (command) {
-		psy_command_execute(command);
+		psy_command_execute(command, NULL);
 	}	
 }
 
@@ -81,7 +81,7 @@ void psy_undoredo_execute(psy_UndoRedo* self, psy_Command* command)
 	assert(self);
 
 	psy_list_append(&self->undo, command);	
-	psy_command_execute(command);
+	psy_command_execute(command, NULL);
 	psy_undoredo_clear_redo(self);
 }
 

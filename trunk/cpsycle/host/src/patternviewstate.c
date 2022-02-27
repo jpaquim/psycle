@@ -108,7 +108,7 @@ void patternviewstate_configure(PatternViewState* self)
 {
 	self->movecursorwhenpaste = patternviewconfig_ismovecursorwhenpaste(
 		self->patconfig);
-	self->wraparound = patternviewconfig_wraparound(self->patconfig);
+	self->wraparound = patternviewconfig_wraparound(self->patconfig);	
 	if (patternviewconfig_issinglepatterndisplay(self->patconfig)) {
 		patternviewstate_displaypattern(self);
 	} else {

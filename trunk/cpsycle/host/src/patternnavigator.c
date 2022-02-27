@@ -50,8 +50,8 @@ psy_audio_SequenceCursor patternlinennavigator_up(PatternLineNavigator* self,
 				if (rv.offset < 0) {
 					psy_audio_sequencecursor_setoffset(&rv, 0.0);
 				}
-				self->wrap = TRUE;				
-			} else {
+				self->wrap = TRUE;
+			} else {				
 				psy_audio_sequencecursor_setoffset(&rv, 0.0);
 			}
 		}		
@@ -138,11 +138,8 @@ void patternlinenavigator_update_order(PatternLineNavigator* self,
 
 		sequence = patternviewstate_sequence(self->state);
 		if (sequence) {
-			uintptr_t order;
-
-			order = psy_audio_sequence_order(sequence, cursor->track,
-				cursor->offset);
-			cursor->orderindex.order = order;
+			cursor->orderindex.order = psy_audio_sequence_order(sequence,
+				cursor->orderindex.track, cursor->offset);			 
 			psy_audio_sequencecursor_updateseqoffset(cursor, sequence);
 		}
 	}
@@ -152,10 +149,11 @@ void patternlinenavigator_update_order(PatternLineNavigator* self,
 /* PatternColNavigator */
 
 /* implementation */
-void patterncolnavigator_init(PatternColNavigator* self, TrackerState* state)
+void patterncolnavigator_init(PatternColNavigator* self, TrackerState* state, bool wraparound)
 {
 	self->state = state;
 	self->wrap = FALSE;
+	self->wraparound = wraparound;
 }
 
 psy_audio_SequenceCursor patterncolnavigator_prev_track(PatternColNavigator* self,
@@ -171,7 +169,7 @@ psy_audio_SequenceCursor patterncolnavigator_prev_track(PatternColNavigator* sel
 	rv.column = rv.digit = 0;	
 	if (rv.track > 0) {
 		--rv.track;		
-	} else if (self->state->pv->wraparound) {
+	} else if (self->wraparound) {
 		rv.track = patternviewstate_numsongtracks(self->state->pv) - 1;
 		self->wrap = TRUE;
 	}
@@ -191,7 +189,7 @@ psy_audio_SequenceCursor patterncolnavigator_next_track(PatternColNavigator* sel
 	rv.column = rv.digit = 0;
 	if (rv.track < patternviewstate_numsongtracks(self->state->pv) - 1) {
 		++rv.track;
-	} else if (self->state->pv->wraparound) {
+	} else if (self->wraparound) {
 		rv.track = 0;
 		self->wrap = TRUE;
 	}
@@ -225,15 +223,10 @@ psy_audio_SequenceCursor patterncolnavigator_next_col(PatternColNavigator* self,
 			rv.digit = 0;
 		} else {
 			if (rv.track < patternviewstate_numsongtracks(self->state->pv) - 1) {
-				rv.column = 0;
-				rv.digit = 0;
-				rv.noteindex = 0;
+				rv.column = rv.digit = rv.noteindex = 0;
 				++rv.track;					
-			} else if (self->state->pv->wraparound) {
-				rv.column = 0;
-				rv.digit = 0;
-				rv.track = 0;
-				rv.noteindex = 0;
+			} else if (self->wraparound) {
+				rv.column = rv.digit = rv.track = rv.noteindex = 0;
 				self->wrap = TRUE;
 			}
 		}
@@ -258,9 +251,7 @@ psy_audio_SequenceCursor patterncolnavigator_prev_col(PatternColNavigator* self,
 		return cursor;
 	}
 	rv = cursor;
-	self->wrap = FALSE;
-
-	assert(self);
+	self->wrap = FALSE;	
 
 	if ((rv.column == 0) || (self->state->trackconfig->multicolumn &&
 		rv.noteindex > 0 &&
@@ -283,7 +274,7 @@ psy_audio_SequenceCursor patterncolnavigator_prev_col(PatternColNavigator* self,
 			rv.column = trackdef_numcolumns(trackdef) - 1;
 			rv.digit = trackdef_numdigits(trackdef,
 				rv.column) - 1;			
-		} else if (self->state->pv->wraparound) {
+		} else if (self->wraparound) {
 			TrackDef* trackdef;
 
 			rv.track = patternviewstate_numsongtracks(self->state->pv) - 1;
@@ -303,6 +294,61 @@ psy_audio_SequenceCursor patterncolnavigator_prev_col(PatternColNavigator* self,
 		--rv.column;
 		rv.digit = trackdef_numdigits(trackdef,
 			rv.column) - 1;
+	}
+	return rv;
+}
+
+psy_audio_SequenceCursor patterncolnavigator_home(PatternColNavigator* self,
+	psy_audio_SequenceCursor cursor)
+{
+	psy_audio_SequenceCursor rv;
+
+	if (!self->state->pv->pattern) {
+		return cursor;
+	}
+	rv = cursor;
+	self->wrap = FALSE;
+
+	if (rv.column != 0) {
+		rv.column = 0;
+	} else {
+		rv.track = 0;
+		rv.column = 0;
+	}
+	return rv;
+}
+
+psy_audio_SequenceCursor patterncolnavigator_end(PatternColNavigator* self,
+	psy_audio_SequenceCursor cursor)
+{
+	psy_audio_SequenceCursor rv;
+	TrackDef* trackdef;
+	TrackColumnDef* columndef;
+
+	if (!self->state->pv->pattern) {
+		return cursor;
+	}
+	rv = cursor;
+	self->wrap = FALSE;
+
+	trackdef = trackerstate_trackdef(self->state, rv.track);
+	columndef = trackdef_columndef(trackdef, rv.column);
+	if (rv.track != patternviewstate_numsongtracks(self->state->pv) - 1 ||
+		rv.digit != columndef->numdigits - 1 ||
+		rv.column != PATTERNEVENT_COLUMN_PARAM) {
+		if (rv.column == PATTERNEVENT_COLUMN_PARAM &&
+			rv.digit == columndef->numdigits - 1) {
+			rv.track = patternviewstate_numsongtracks(self->state->pv) - 1;
+			trackdef = trackerstate_trackdef(self->state, rv.track);
+			columndef = trackdef_columndef(trackdef, PATTERNEVENT_COLUMN_PARAM);
+			rv.column = PATTERNEVENT_COLUMN_PARAM;
+			rv.digit = columndef->numdigits - 1;			
+		} else {
+			trackdef = trackerstate_trackdef(self->state, rv.track);
+			columndef = trackdef_columndef(trackdef, PATTERNEVENT_COLUMN_PARAM);
+			rv.column = PATTERNEVENT_COLUMN_PARAM;
+			rv.digit = columndef->numdigits - 1;
+		}		
 	}
 	return rv;
 }
