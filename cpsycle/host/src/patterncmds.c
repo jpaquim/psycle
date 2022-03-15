@@ -449,7 +449,7 @@ void BlockPasteCommandExecute(BlockPasteCommand* self, psy_Property* params)
 
 	self->selection.topleft = self->destcursor;
 	self->selection.bottomright = self->destcursor;
-	self->selection.bottomright.offset = self->destcursor.offset +
+	self->selection.bottomright.absoffset = self->destcursor.absoffset +
 		psy_audio_pattern_length(self->source);
 	order = psy_audio_sequence_order(self->sequence,
 		self->selection.bottomright.orderindex.track,

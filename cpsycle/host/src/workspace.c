@@ -1490,9 +1490,8 @@ psy_audio_SequenceCursor workspace_playcursor(Workspace* self)
 				rv.patternid = 
 					psy_audio_sequencetrackiterator_patidx(track->iterator);
 				rv.seqoffset = psy_audio_sequenceentry_offset(seqentry);
-				line = (uintptr_t)((self->host_sequencer_time.currplayposition -
-					((rv.absolute) ? 0.0 : rv.seqoffset)) * rv.lpb);
-				rv.offset = line / (psy_dsp_big_beat_t)rv.lpb;				
+				line = (uintptr_t)((self->host_sequencer_time.currplayposition) * rv.lpb);
+				rv.absoffset = line / (psy_dsp_big_beat_t)rv.lpb;
 				return rv;
 			}			
 		}

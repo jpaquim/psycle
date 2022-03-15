@@ -21,8 +21,7 @@ void psy_audio_sequencecursor_init(psy_audio_SequenceCursor* self)
 	self->seqoffset = (psy_dsp_big_beat_t)0.0;	
 	self->key = psy_audio_NOTECOMMANDS_MIDDLEC;
 	self->track = 0;
-	self->offset = 0.0;
-	self->absolute = FALSE;
+	self->absoffset = 0.0;	
 	self->lpb = 4;
 	self->column = 0;
 	self->digit = 0;
@@ -40,26 +39,26 @@ void psy_audio_sequencecursor_init_all(psy_audio_SequenceCursor* self,
 }
 
 psy_audio_SequenceCursor psy_audio_sequencecursor_make_all(
-	uintptr_t track, psy_dsp_big_beat_t offset, uint8_t key)
+	uintptr_t track, psy_dsp_big_beat_t absoffset, uint8_t key)
 {
 	psy_audio_SequenceCursor rv;
 	
 	psy_audio_sequencecursor_init(&rv);
 	rv.track = track;
-	rv.offset = offset;
+	rv.absoffset = absoffset;
 	rv.key = key;
 	psy_audio_sequencecursor_updatecache(&rv);
 	return rv;
 }
 
 psy_audio_SequenceCursor psy_audio_sequencecursor_make(
-	uintptr_t track, psy_dsp_big_beat_t offset)
+	uintptr_t track, psy_dsp_big_beat_t absoffset)
 {
 	psy_audio_SequenceCursor rv;
 
 	psy_audio_sequencecursor_init(&rv);
 	rv.track = track;
-	rv.offset = offset;
+	rv.absoffset = absoffset;
 	psy_audio_sequencecursor_updatecache(&rv);
 	return rv;
 }
@@ -73,11 +72,10 @@ bool psy_audio_sequencecursor_equal(psy_audio_SequenceCursor* lhs,
 		(rhs->column == lhs->column &&
 		rhs->digit == lhs->digit &&
 		rhs->track == lhs->track &&
-		rhs->offset == lhs->offset &&
+		rhs->absoffset == lhs->absoffset &&
 		rhs->patternid == lhs->patternid &&
 		rhs->noteindex == lhs->noteindex &&
-		rhs->lpb == lhs->lpb &&
-		rhs->absolute == lhs->absolute &&
+		rhs->lpb == lhs->lpb &&		
 		rhs->seqoffset == lhs->seqoffset &&
 		rhs->orderindex.order == lhs->orderindex.order &&
 		rhs->orderindex.track == lhs->orderindex.track &&
@@ -99,6 +97,19 @@ void psy_audio_sequencecursor_updateseqoffset(psy_audio_SequenceCursor* self,
 		self->seqoffset = 0.0;
 	}	
 }
+
+void psy_audio_sequencecursor_update_order(psy_audio_SequenceCursor* self,
+	const psy_audio_Sequence* sequence)
+{
+	assert(self);
+	assert(sequence);
+
+	self->orderindex.order = psy_audio_sequence_order(sequence,
+		self->orderindex.track,
+		psy_audio_sequencecursor_offset_abs(self));	
+	psy_audio_sequencecursor_updateseqoffset(self, sequence);	
+}
+
 
 uintptr_t psy_audio_sequencecursor_patternid(
 	const psy_audio_SequenceCursor* self,
@@ -146,18 +157,5 @@ uintptr_t psy_audio_sequencecursor_noteindex(const psy_audio_SequenceCursor* sel
 void psy_audio_sequencecursor_updatecache(const psy_audio_SequenceCursor* self)
 {	
 	((psy_audio_SequenceCursor*)self)->linecache = /* mutable */
-		cast_decimal(self->offset * self->lpb);
-}
-
-void psy_audio_sequencecursor_set_mode(psy_audio_SequenceCursor* self, bool absolute)
-{
-	if (self->absolute != absolute) {
-		self->absolute = absolute;
-		if (absolute) {
-			self->offset += self->seqoffset;
-		} else {
-			self->offset -= self->seqoffset;
-		}
-		psy_audio_sequencecursor_updatecache(self);
-	}
+		cast_decimal(self->absoffset * self->lpb);
 }

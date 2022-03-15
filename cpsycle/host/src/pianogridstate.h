@@ -117,13 +117,22 @@ INLINE void pianogridstate_clip(PianoGridState* self,
 	assert(rv_left && rv_right);
 
 	*rv_left = pianogridstate_quantize(self,
-		pianogridstate_pxtobeat(self, clip_left_px));
+		pianogridstate_pxtobeat(self, clip_left_px) +
+		((self->pv->singlemode)
+		? self->pv->cursor.seqoffset
+		: 0.0));
 	if (patternviewstate_pattern(self->pv)) {
-		*rv_right = psy_min(
-			psy_audio_pattern_length(patternviewstate_pattern(self->pv)),
-			pianogridstate_pxtobeat(self, clip_right_px));
+		*rv_right = psy_min(			
+			patternviewstate_length(self->pv) +
+			((self->pv->singlemode)
+				? self->pv->cursor.seqoffset
+				: 0.0),
+			pianogridstate_pxtobeat(self, clip_right_px) +
+			((self->pv->singlemode)
+			? self->pv->cursor.seqoffset
+			: 0.0));
 	} else {
-		*rv_right = 0;
+		*rv_right = 0.0;
 	}
 }
 

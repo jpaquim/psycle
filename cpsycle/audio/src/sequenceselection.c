@@ -86,7 +86,7 @@ psy_audio_OrderIndex psy_audio_sequenceselection_first(
 		return *first;
 
 	}
-	return psy_audio_orderindex_zero();
+	return psy_audio_orderindex_make_invalid();
 }
 
 void psy_audio_sequenceselection_select(psy_audio_SequenceSelection* self,

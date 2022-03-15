@@ -30,7 +30,7 @@ void patternviewstate_init(PatternViewState* self,
 	self->singlemode = TRUE;
 	self->sequence = sequence;
 	self->patterns = patterns;	
-	self->pattern = NULL;	
+	// self->pattern = NULL;	
 	self->patconfig = patconfig;
 	self->display = PROPERTY_ID_PATTERN_DISPLAYMODE_TRACKER;
 	self->cmds = cmds;
@@ -69,10 +69,10 @@ void patternviewstate_selectbar(PatternViewState* self)
 	if (patternviewstate_pattern(self)) {
 		psy_audio_blockselection_select(&self->selection,
 			self->cursor.track, 1,
-			self->cursor.offset,
+			self->cursor.absoffset,
 			4.0);
-		if (self->cursor.offset > patternviewstate_pattern(self)->length) {
-			self->cursor.offset = patternviewstate_pattern(self)->length;
+		if (self->cursor.absoffset > patternviewstate_pattern(self)->length) {
+			self->cursor.absoffset = patternviewstate_pattern(self)->length;
 		}
 		patternviewstate_invalidate(self);
 	}
@@ -125,7 +125,7 @@ void patternviewstate_sequencestart(PatternViewState* self,
 
 	assert(self);
 	
-	rv->pattern = self->pattern;
+	rv->pattern = patternviewstate_pattern(self);
 	rv->patternnode = NULL;
 	rv->patterns = patternviewstate_patterns(self);
 	seqoffset = 0.0;

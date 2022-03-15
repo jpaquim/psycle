@@ -57,13 +57,13 @@ INLINE void psy_audio_blockselection_disable(
 }
 
 INLINE bool psy_audio_blockselection_test(psy_audio_BlockSelection* self,
-	uintptr_t track, psy_dsp_big_beat_t offset)
+	uintptr_t track, psy_dsp_big_beat_t absoffset)
 {
 	return psy_audio_blockselection_valid(self) &&
 		track >= self->topleft.track &&
 		track < self->bottomright.track&&
-		offset >= self->topleft.offset /* + self->topleft.seqoffset */ &&
-		offset < self->bottomright.offset /* + self->bottomright.seqoffset */;
+		absoffset >= self->topleft.absoffset /* + self->topleft.seqoffset */ &&
+		absoffset < self->bottomright.absoffset /* + self->bottomright.seqoffset */;
 }
 
 INLINE bool psy_audio_blockselection_test_line(const psy_audio_BlockSelection* self,

@@ -450,8 +450,6 @@ typedef bool (*psy_ui_fp_componentimp_dev_inputprevented)(const struct psy_ui_Co
 typedef void (*psy_ui_fp_componentimp_dev_setcursor)(struct psy_ui_ComponentImp*, psy_ui_CursorStyle);
 typedef void (*psy_ui_fp_componentimp_dev_seticonressource)(struct psy_ui_ComponentImp*, int ressourceid);
 typedef const psy_ui_TextMetric* (*psy_ui_fp_componentimp_dev_textmetric)(const struct psy_ui_ComponentImp*);
-typedef psy_ui_Size (*psy_ui_fp_componentimp_dev_textsize)(const struct psy_ui_ComponentImp*,
-	const char* text, const psy_ui_Font*);
 typedef void (*psy_ui_fp_componentimp_dev_setbackgroundcolour)(struct psy_ui_ComponentImp*, psy_ui_Colour);
 typedef void (*psy_ui_fp_componentimp_dev_settitle)(struct psy_ui_ComponentImp*, const char* title);
 typedef void (*psy_ui_fp_componentimp_dev_setfocus)(struct psy_ui_ComponentImp*);
@@ -503,8 +501,7 @@ typedef struct psy_ui_ComponentImpVTable {
 	psy_ui_fp_componentimp_dev_inputprevented dev_inputprevented;
 	psy_ui_fp_componentimp_dev_setcursor dev_setcursor;	
 	psy_ui_fp_componentimp_dev_seticonressource dev_seticonressource;
-	psy_ui_fp_componentimp_dev_textmetric dev_textmetric;
-	psy_ui_fp_componentimp_dev_textsize dev_textsize;
+	psy_ui_fp_componentimp_dev_textmetric dev_textmetric;	
 	psy_ui_fp_componentimp_dev_setbackgroundcolour dev_setbackgroundcolour;
 	psy_ui_fp_componentimp_dev_settitle dev_settitle;
 	psy_ui_fp_componentimp_dev_setfocus dev_setfocus;
@@ -582,12 +579,6 @@ INLINE const psy_ui_TextMetric* psy_ui_component_textmetric(const psy_ui_Compone
 	assert(self->imp);
 	
 	return self->imp->vtable->dev_textmetric(self->imp);
-}
-
-INLINE psy_ui_Size psy_ui_component_textsize(const psy_ui_Component* self, const char* text)
-{
-	return self->imp->vtable->dev_textsize(self->imp, text,
-		psy_ui_component_font(self));
 }
 
 /* returns the content's size(excludes padding and border) */

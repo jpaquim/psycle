@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -26,8 +26,8 @@ static void envelopebox_onsize(EnvelopeBox*);
 static void envelopebox_onmousedown(EnvelopeBox*, psy_ui_MouseEvent*);
 static void envelopebox_onmousemove(EnvelopeBox*, psy_ui_MouseEvent*);
 static void envelopebox_onmouseup(EnvelopeBox*, psy_ui_MouseEvent*);
-static psy_List* envelopebox_hittestpoint(EnvelopeBox* self, psy_ui_RealPoint);
-static void envelopebox_shiftsuccessors(EnvelopeBox* self, double timeshift);
+static psy_List* envelopebox_hittestpoint(EnvelopeBox*, psy_ui_RealPoint);
+static void envelopebox_shiftsuccessors(EnvelopeBox*, double timeshift);
 static double envelopebox_pxvalue(EnvelopeBox*, double value);
 static double envelopebox_pxtime(EnvelopeBox*, psy_dsp_big_seconds_t t);
 static psy_dsp_big_seconds_t envelopebox_pxtotime(EnvelopeBox*, double px);
@@ -68,7 +68,7 @@ static void envelopebox_vtable_init(EnvelopeBox* self)
 /* implementation */
 void envelopebox_init(EnvelopeBox* self, psy_ui_Component* parent)
 {				
-	psy_ui_component_init(&self->component, parent, NULL);
+	psy_ui_component_init(&self->component, parent, NULL);	
 	psy_ui_component_preventalign(&self->component);
 	psy_ui_component_setstyletype(&self->component, STYLE_ENVELOPE);
 	envelopebox_vtable_init(self);	
@@ -631,6 +631,7 @@ void envelopeview_init(EnvelopeView* self, psy_ui_Component* parent)
 	psy_ui_component_init(envelopeview_base(self), parent, NULL);
 	psy_ui_component_setvtable(envelopeview_base(self),
 		envelopeview_vtable_init(self));	
+	self->component.id = 400;
 	envelopebar_init(&self->bar, envelopeview_base(self));
 	psy_ui_component_setalign(envelopebar_base(&self->bar), psy_ui_ALIGN_TOP);
 	psy_ui_component_setmargin(envelopebar_base(&self->bar),

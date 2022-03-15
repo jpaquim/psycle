@@ -16,11 +16,13 @@
 /* prototypes */
 static void psy_ui_label_ondestroy(psy_ui_Label*);
 static void psy_ui_label_ondraw(psy_ui_Label*, psy_ui_Graphics*);
+static void psy_ui_label_draw_single_line(psy_ui_Label*, psy_ui_Graphics*);
 static void psy_ui_label_onpreferredsize(psy_ui_Label*,
 	const psy_ui_Size* limit, psy_ui_Size* rv);
 static void psy_ui_label_onlanguagechanged(psy_ui_Label*);
 static void psy_ui_label_ontimer(psy_ui_Label*, uintptr_t timerid);
 static void psy_ui_label_onupdatestyles(psy_ui_Label*);
+static const char* psy_ui_label_text_internal(const psy_ui_Label*);
 
 /* vtable */
 static psy_ui_ComponentVtable vtable;
@@ -162,47 +164,47 @@ void psy_ui_label_onpreferredsize(psy_ui_Label* self,
 	const psy_ui_Size* limit, psy_ui_Size* rv)
 {
 	const psy_ui_TextMetric* tm;
-	char* text;
-	psy_ui_Margin spacing;
+	const char* text;
 	psy_ui_TextFormat format;
 
-	if (self->translate && self->translation) {
-		text = self->translation;
-	} else {
-		text = self->text;
-	}
+	text = psy_ui_label_text_internal(self);
 	tm = psy_ui_component_textmetric(psy_ui_label_base(self));
-	spacing = psy_ui_component_spacing(psy_ui_label_base(self));
-	psy_ui_textformat_init(&format, tm, !self->preventwrap);
-	if (self->charnumber == 0) {		
-		if (psy_strlen(text) == 0) {
-			rv->width = psy_ui_value_make_ew(0.0);
-		} else {
+	if (psy_strlen(text) == 0) {		
+		rv->width = psy_ui_value_make_ew(self->charnumber);		
+		rv->height = psy_ui_value_make_px((tm->tmHeight * self->linespacing));		
+		return;
+	} else {
+		psy_ui_textformat_init(&format, tm, !self->preventwrap);
+		if (self->charnumber == 0) {			
 			psy_ui_Size size;
-			
-			size = psy_ui_component_textsize(psy_ui_label_base(self), text);						
-			rv->width = psy_ui_value_make_px(psy_ui_value_px(&size.width, tm, NULL));
-		}		
-	} else {
-		rv->width = psy_ui_value_make_px(tm->tmAveCharWidth * self->charnumber);
-	}
-	if (!self->preventwrap) {
-		psy_List* lines;
+			const psy_ui_Font* font;
 
-		if (self->charnumber == 0 && limit) {
-			lines = psy_ui_textformat_lines(&format, text, psy_ui_value_px(&limit->width, tm, limit));
+			font = psy_ui_component_font(&self->component);
+			if (font) {
+				size = psy_ui_font_textsize(font, text, psy_strlen(text));
+			} else {
+				size = psy_ui_size_zero();
+			}
+			rv->width = psy_ui_value_make_px(psy_ui_value_px(&size.width, tm, NULL));			
 		} else {
-			lines = psy_ui_textformat_lines(&format, text, self->charnumber * tm->tmAveCharWidth);
+			rv->width = psy_ui_value_make_px(tm->tmAveCharWidth * self->charnumber);
 		}
-		rv->height = psy_ui_value_make_px(psy_list_size(lines) *
-			(tm->tmHeight * self->linespacing));
-		psy_list_free(lines);
-		lines = NULL;
-	} else {
-		rv->height = psy_ui_value_make_px((tm->tmHeight * self->linespacing));
-	}
-	rv->height = psy_ui_add_values(rv->height, psy_ui_margin_height(&spacing, tm, NULL), tm, NULL);
-	rv->width = psy_ui_add_values(rv->width, psy_ui_margin_width(&spacing, tm, NULL), tm, NULL);
+		if (!self->preventwrap) {
+			psy_List* lines;
+
+			if (self->charnumber == 0 && limit) {
+				lines = psy_ui_textformat_lines(&format, text, psy_ui_value_px(&limit->width, tm, limit));
+			} else {
+				lines = psy_ui_textformat_lines(&format, text, self->charnumber * tm->tmAveCharWidth);
+			}
+			rv->height = psy_ui_value_make_px(psy_list_size(lines) *
+				(tm->tmHeight * self->linespacing));
+			psy_list_free(lines);
+			lines = NULL;
+		} else {
+			rv->height = psy_ui_value_make_px((tm->tmHeight * self->linespacing));
+		}
+	}	
 }
 
 void psy_ui_label_ondraw(psy_ui_Label* self, psy_ui_Graphics* g)
@@ -212,18 +214,18 @@ void psy_ui_label_ondraw(psy_ui_Label* self, psy_ui_Graphics* g)
 	double centerx;
 	double centery;	
 	double cpy;
-	char* text;
+	const char* text;
 	uintptr_t cp;
 	psy_List* p;
 	psy_List* lines;
 	uintptr_t linestart;
 	psy_ui_TextFormat format;
 
-	if (self->translate && self->translation) {
-		text = self->translation;
-	} else {
-		text = self->text;
+	if (self->preventwrap) {
+		psy_ui_label_draw_single_line(self, g);
+		return;
 	}
+	text = psy_ui_label_text_internal(self);	
 	if (psy_strlen(text) == 0) {
 		return;
 	}
@@ -271,6 +273,40 @@ void psy_ui_label_ondraw(psy_ui_Label* self, psy_ui_Graphics* g)
 		cpy += tm->tmHeight;
 	}
 	psy_list_free(lines);
+}
+
+void psy_ui_label_draw_single_line(psy_ui_Label* self, psy_ui_Graphics* g)
+{
+	psy_ui_RealSize size;
+	const psy_ui_TextMetric* tm;
+	double centerx;
+	double centery;
+	double cpy;
+	const char* text;		
+
+	tm = psy_ui_component_textmetric(&self->component);
+	size = psy_ui_component_size_px(psy_ui_label_base(self));
+	text = psy_ui_label_text_internal(self);
+	if (psy_strlen(text) == 0) {
+		return;
+	}
+	centerx = 0.0;
+	if ((self->textalignment & psy_ui_ALIGNMENT_RIGHT) ==
+		psy_ui_ALIGNMENT_RIGHT) {
+		psy_ui_Size textsize;
+		psy_ui_RealSize textsizepx;
+
+		textsize = psy_ui_textsize(g, text, psy_strlen(text));
+		textsizepx = psy_ui_size_px(&textsize, tm, NULL);
+		centerx = (size.width - textsizepx.width);
+	}
+	centery = 0.0;
+	if ((self->textalignment & psy_ui_ALIGNMENT_CENTER_VERTICAL) ==
+		psy_ui_ALIGNMENT_CENTER_VERTICAL) {
+		centery = (size.height - tm->tmHeight) / 2;
+	}
+	cpy = centery;
+	psy_ui_textout(g, centerx, cpy, text, psy_strlen(text));
 }
 
 void psy_ui_label_setcharnumber(psy_ui_Label* self, double number)
@@ -357,4 +393,12 @@ void psy_ui_label_enablewrap(psy_ui_Label* self)
 void psy_ui_label_onupdatestyles(psy_ui_Label* self)
 {	
 	self->component.style.overridestyle.colour.mode.transparent = TRUE;		
+}
+
+const char* psy_ui_label_text_internal(const psy_ui_Label* self)
+{
+	if (self->translate && self->translation) {
+		return self->translation;
+	}
+	return self->text;
 }

@@ -23,7 +23,7 @@ void seqeditentryproperties_init(SeqEditEntryProperties* self, psy_ui_Component*
 {
 	psy_ui_component_init(&self->component, parent, NULL);
 	self->state = state;
-	self->orderindex = psy_audio_orderindex_zero();
+	self->orderindex = psy_audio_orderindex_make_invalid();
 	/* position */
 	labelpair_init(&self->offset, &self->component, "Position", 12.0);
 	psy_ui_component_setalign(psy_ui_label_base(&self->offset.second),

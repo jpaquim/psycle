@@ -7,6 +7,7 @@
 #define INTERPOLATECURVEVIEW_H
 
 /* host */
+#include "patternviewstate.h"
 #include "workspace.h"
 /* ui */
 #include <uibutton.h>
@@ -75,17 +76,18 @@ typedef struct InterpolateCurveBox {
 	psy_dsp_big_beat_t range;
 	intptr_t valuerange;
 	intptr_t minval;
-	intptr_t maxval;
-	psy_audio_Pattern* pattern;
+	intptr_t maxval;	
 	psy_audio_BlockSelection selection;
 	psy_List* dragkeyframe;
 	psy_List* selected;
 	psy_dsp_big_beat_t bpl;
 	struct InterpolateCurveView* view;
+	/* references */
+	PatternViewState* state;
 } InterpolateCurveBox;
 
 void interpolatecurvebox_init(InterpolateCurveBox*, psy_ui_Component* parent,
-	struct InterpolateCurveView*, Workspace*);
+	struct InterpolateCurveView*, PatternViewState*, Workspace*);
 void interpolatecurvebox_setpattern(InterpolateCurveBox*, psy_audio_Pattern*);
 
 typedef struct InterpolateCurveView {
@@ -93,10 +95,13 @@ typedef struct InterpolateCurveView {
 	InterpolateCurveBox box;
 	InterpolateCurveBar bar;
 	psy_Signal signal_cancel;
+	/* references */
+	PatternViewState* state;
 } InterpolateCurveView;
 
 void interpolatecurveview_init(InterpolateCurveView*, psy_ui_Component* parent,
-	intptr_t startsel, intptr_t endsel, uintptr_t lpb, Workspace*);
+	intptr_t startsel, intptr_t endsel, uintptr_t lpb,
+	PatternViewState* state, Workspace*);
 void interpolatecurveview_setselection(InterpolateCurveView*,
 	const psy_audio_BlockSelection*);
 void interpolatecurveview_setpattern(InterpolateCurveView*,

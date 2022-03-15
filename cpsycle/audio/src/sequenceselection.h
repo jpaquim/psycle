@@ -38,10 +38,9 @@ INLINE psy_audio_OrderIndex psy_audio_orderindex_make(
 
 psy_audio_OrderIndex* psy_audio_orderindex_alloc(void);
 
-INLINE psy_audio_OrderIndex psy_audio_orderindex_zero(void)
+INLINE psy_audio_OrderIndex psy_audio_orderindex_make_invalid(void)
 {
-	return psy_audio_orderindex_make(psy_INDEX_INVALID,
-		psy_INDEX_INVALID);
+	return psy_audio_orderindex_make(psy_INDEX_INVALID, psy_INDEX_INVALID);
 }
 
 INLINE bool psy_audio_orderindex_valid(const psy_audio_OrderIndex* self)

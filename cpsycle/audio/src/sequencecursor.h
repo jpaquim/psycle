@@ -23,11 +23,10 @@ extern "C" {
 
 typedef struct psy_audio_SequenceCursor {	
 	psy_audio_OrderIndex orderindex;
+	psy_dsp_big_beat_t absoffset;
 	psy_dsp_big_beat_t seqoffset;
-	uintptr_t track;
-	psy_dsp_big_beat_t offset;
-	/* mutable */ uintptr_t linecache;	
-	bool absolute;
+	uintptr_t track;	
+	/* mutable */ uintptr_t linecache;
 	uintptr_t lpb;
 	uintptr_t column;
 	uintptr_t digit;
@@ -49,9 +48,10 @@ psy_audio_SequenceCursor psy_audio_sequencecursor_make(
 bool psy_audio_sequencecursor_equal(psy_audio_SequenceCursor* lhs,
 	psy_audio_SequenceCursor* rhs);
 
-void psy_audio_sequencecursor_set_mode(psy_audio_SequenceCursor*, bool absolute);
 void psy_audio_sequencecursor_updatecache(const psy_audio_SequenceCursor*);
 void psy_audio_sequencecursor_updateseqoffset(psy_audio_SequenceCursor*,
+	const struct psy_audio_Sequence*);
+void psy_audio_sequencecursor_update_order(psy_audio_SequenceCursor*,
 	const struct psy_audio_Sequence*);
 uintptr_t psy_audio_sequencecursor_patternid(const psy_audio_SequenceCursor*,
 	const struct psy_audio_Sequence*);
@@ -63,6 +63,11 @@ INLINE uintptr_t psy_audio_sequencecursor_line(const psy_audio_SequenceCursor* s
 	return self->linecache;
 }
 
+INLINE uintptr_t psy_audio_sequencecursor_seqline(const psy_audio_SequenceCursor* self)
+{
+	return (uintptr_t)(psy_audio_sequencecursor_seqoffset(self) * (psy_dsp_big_beat_t)self->lpb);
+}
+
 uintptr_t psy_audio_sequencecursor_track(const psy_audio_SequenceCursor*);
 uintptr_t psy_audio_sequencecursor_column(const psy_audio_SequenceCursor*);
 uintptr_t psy_audio_sequencecursor_digit(const psy_audio_SequenceCursor*);
@@ -70,10 +75,13 @@ uintptr_t psy_audio_sequencecursor_noteindex(const psy_audio_SequenceCursor*);
 
 INLINE psy_dsp_big_beat_t psy_audio_sequencecursor_offset_abs(const psy_audio_SequenceCursor* self)
 {
-	return self->offset + (
-		(self->absolute)
-		? 0.0
-		: self->seqoffset);
+	return self->absoffset;
+}
+
+INLINE psy_dsp_big_beat_t psy_audio_sequencecursor_pattern_offset(
+	const psy_audio_SequenceCursor* self)
+{
+	return self->absoffset - self->seqoffset;
 }
 
 INLINE uintptr_t psy_audio_sequencecursor_line_abs(const psy_audio_SequenceCursor* self)
@@ -81,26 +89,29 @@ INLINE uintptr_t psy_audio_sequencecursor_line_abs(const psy_audio_SequenceCurso
 	return cast_decimal(psy_audio_sequencecursor_offset_abs(self) * self->lpb);
 }
 
-INLINE psy_dsp_big_beat_t psy_audio_sequencecursor_offset(
-	const psy_audio_SequenceCursor* self)
+INLINE uintptr_t psy_audio_sequencecursor_line_pattern(const psy_audio_SequenceCursor* self)
 {
-	return self->offset;
+	return cast_decimal(psy_audio_sequencecursor_pattern_offset(self) * self->lpb);
 }
 
-INLINE void psy_audio_sequencecursor_setoffset(psy_audio_SequenceCursor* self,
-	psy_dsp_big_beat_t offset)
+INLINE void psy_audio_sequencecursor_setabsoffset(psy_audio_SequenceCursor* self,
+	psy_dsp_big_beat_t absoffset)
 {
-	self->offset = offset;
+	self->absoffset = absoffset;
 	psy_audio_sequencecursor_updatecache(self);
 }
 
-INLINE psy_dsp_big_beat_t psy_audio_sequencecursor_pattern_offset(
-	const psy_audio_SequenceCursor* self)
+INLINE void psy_audio_sequencecursor_setseqoffset(psy_audio_SequenceCursor* self,
+	psy_dsp_big_beat_t seqoffset)
 {
-	return (self->absolute)
-		? psy_audio_sequencecursor_offset(self) -
-		psy_audio_sequencecursor_seqoffset(self)
-		: psy_audio_sequencecursor_offset(self);
+	self->seqoffset = seqoffset;
+	psy_audio_sequencecursor_updatecache(self);
+}
+
+INLINE void psy_audio_sequencecursor_setorderindex(psy_audio_SequenceCursor* self,
+	psy_audio_OrderIndex index)
+{
+	self->orderindex = index;
 }
 
 INLINE psy_audio_OrderIndex psy_audio_sequencecursor_orderindex(

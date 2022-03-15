@@ -20,6 +20,8 @@ static void psy_ui_win_font_imp_copy(psy_ui_win_FontImp*, psy_ui_win_FontImp* ot
 static psy_ui_FontInfo dev_fontinfo(psy_ui_win_FontImp*);
 static const psy_ui_TextMetric* dev_textmetric(const psy_ui_win_FontImp*);
 static bool dev_equal(const psy_ui_win_FontImp*, const psy_ui_win_FontImp* other);
+static psy_ui_Size dev_textsize(const psy_ui_win_FontImp*,
+	const char* text, uintptr_t count);
 
 static LOGFONT logfont(psy_ui_FontInfo lf);
 static psy_ui_FontInfo psy_ui_fontinfo(LOGFONT);
@@ -44,6 +46,9 @@ static void imp_vtable_init(psy_ui_win_FontImp* self)
 		imp_vtable.dev_textmetric =
 			(psy_ui_font_imp_fp_dev_textmetric)
 			dev_textmetric;
+		imp_vtable.dev_textsize =
+			(psy_ui_font_imp_fp_dev_textsize)
+			dev_textsize;
 		imp_vtable.dev_equal =
 			(psy_ui_font_imp_fp_dev_equal)
 			dev_equal;
@@ -153,6 +158,43 @@ const psy_ui_TextMetric* dev_textmetric(const psy_ui_win_FontImp* self)
 	}
 	return &self->tmcache;
 }
+
+psy_ui_Size dev_textsize(const psy_ui_win_FontImp* self,
+	const char* text, uintptr_t count)
+{	
+	HDC hdc;
+	HFONT hPrevFont = 0;
+	HFONT hfont = 0;
+	const psy_ui_Font* font = NULL;
+
+	hdc = GetDC(NULL);
+	SaveDC(hdc);
+	hfont = self->hfont;
+	if (hfont) {
+		hPrevFont = SelectObject(hdc, hfont);
+	}
+	psy_ui_Size	rv;
+
+	if (text) {
+		SIZE size;
+
+		GetTextExtentPoint(hdc, text, (int)count, &size);
+		rv.width = psy_ui_value_make_px(size.cx);
+		rv.height = psy_ui_value_make_px(size.cy);
+	} else {
+		rv.width = psy_ui_value_make_px(0);
+		rv.height = psy_ui_value_make_px(0);
+	}	
+	if (font) {
+		if (hPrevFont) {
+			SelectObject(hdc, hPrevFont);
+		}
+	}
+	RestoreDC(hdc, -1);
+	ReleaseDC(NULL, hdc);
+	return rv;
+}
+
 
 LOGFONT logfont(psy_ui_FontInfo lf)
 {

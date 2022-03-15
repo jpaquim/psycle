@@ -68,8 +68,6 @@ static void view_dev_seticonressource(psy_ui_ViewComponentImp*,
 	int ressourceid);
 static const psy_ui_TextMetric* view_dev_textmetric(
 	const psy_ui_ViewComponentImp*);
-static psy_ui_Size view_dev_textsize(psy_ui_ViewComponentImp*,
-	const char* text, psy_ui_Font*);
 static void view_dev_setbackgroundcolour(psy_ui_ViewComponentImp*,
 	psy_ui_Colour);
 static void view_dev_settitle(psy_ui_ViewComponentImp*, const char* title);
@@ -202,10 +200,7 @@ static void view_imp_vtable_init(psy_ui_ViewComponentImp* self)
 			view_dev_seticonressource;
 		view_imp_vtable.dev_textmetric =
 			(psy_ui_fp_componentimp_dev_textmetric)
-			view_dev_textmetric;
-		view_imp_vtable.dev_textsize =
-			(psy_ui_fp_componentimp_dev_textsize)
-			view_dev_textsize;
+			view_dev_textmetric;		
 		view_imp_vtable.dev_setbackgroundcolour =
 			(psy_ui_fp_componentimp_dev_setbackgroundcolour)
 			view_dev_setbackgroundcolour;
@@ -700,15 +695,6 @@ void view_dev_setcursor(psy_ui_ViewComponentImp* self, psy_ui_CursorStyle
 
 void view_dev_seticonressource(psy_ui_ViewComponentImp* self, int ressourceid)
 {
-}
-
-psy_ui_Size view_dev_textsize(psy_ui_ViewComponentImp* self, const char* text,
-	psy_ui_Font* font)
-{
-	if (self->view) {
-		return psy_ui_component_textsize(self->view, text);
-	}	
-	return psy_ui_size_make_em(1.0 * psy_strlen(text), 1.0);
 }
 
 void view_dev_setbackgroundcolour(psy_ui_ViewComponentImp* self, psy_ui_Colour colour)

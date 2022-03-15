@@ -61,14 +61,56 @@ void psy_audio_patterndefaults_init(psy_audio_PatternDefaults* self)
 	self->pattern = psy_audio_pattern_allocinit();
 	psy_audio_pattern_setlength(self->pattern, (psy_dsp_big_beat_t)0.25);
 	psy_audio_patterns_init(&self->patterns);
-	psy_audio_sequence_init(&self->sequence, &self->patterns, NULL);
 	psy_audio_patterns_insert(&self->patterns, 0, self->pattern);
+	psy_audio_sequence_init(&self->sequence, &self->patterns, NULL);
+	psy_audio_sequence_appendtrack(&self->sequence,
+		psy_audio_sequencetrack_allocinit());
+	psy_audio_sequence_insert(&self->sequence,
+		psy_audio_orderindex_make(0, 0), 0);
 }
 
 void psy_audio_patterndefaults_dispose(psy_audio_PatternDefaults* self)
 {
 	psy_audio_sequence_dispose(&self->sequence);
 	psy_audio_patterns_dispose(&self->patterns);
+}
+
+psy_audio_PatternEvent psy_audio_patterndefaults_event(const
+	psy_audio_PatternDefaults* self, uintptr_t track)
+{	
+	return psy_audio_sequence_pattern_event_at_cursor(&self->sequence,
+		psy_audio_sequencecursor_make(track, 0.0));
+}
+
+psy_audio_PatternEvent psy_audio_patterndefaults_fill_event(const
+	psy_audio_PatternDefaults* self, uintptr_t track,
+	psy_audio_PatternEvent src)
+{
+	psy_audio_PatternEvent rv;
+	psy_audio_PatternEvent defaultevent;
+
+	rv = src;
+	defaultevent = psy_audio_sequence_pattern_event_at_cursor(&self->sequence,
+		psy_audio_sequencecursor_make(track, 0.0));
+	if (defaultevent.note != psy_audio_NOTECOMMANDS_EMPTY) {
+		rv.note = defaultevent.note;
+	}
+	if (defaultevent.inst != psy_audio_NOTECOMMANDS_INST_EMPTY) {
+		rv.inst = defaultevent.inst;
+	}
+	if (defaultevent.mach != psy_audio_NOTECOMMANDS_psy_audio_EMPTY) {
+		rv.mach = defaultevent.mach;
+	}
+	if (defaultevent.vol != psy_audio_NOTECOMMANDS_VOL_EMPTY) {
+		rv.vol = defaultevent.vol;
+	}
+	if (defaultevent.cmd != 0) {
+		rv.cmd = defaultevent.cmd;
+	}
+	if (defaultevent.parameter != 0) {
+		rv.parameter = defaultevent.parameter;
+	}	
+	return rv;
 }
 
 /* psy_audio_Player */

@@ -50,6 +50,12 @@ typedef struct psy_audio_PatternDefaults {
 void psy_audio_patterndefaults_init(psy_audio_PatternDefaults*);
 void psy_audio_patterndefaults_dispose(psy_audio_PatternDefaults*);
 
+psy_audio_PatternEvent psy_audio_patterndefaults_event(const
+	psy_audio_PatternDefaults*, uintptr_t);
+psy_audio_PatternEvent psy_audio_patterndefaults_fill_event(const
+	psy_audio_PatternDefaults*, uintptr_t track,
+	psy_audio_PatternEvent src);
+
 typedef struct psy_audio_Player {
 	psy_AudioDriver* driver;
 	psy_audio_Song* song;

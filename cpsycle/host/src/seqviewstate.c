@@ -19,7 +19,7 @@ void seqviewstate_init(SeqViewState* self, SequenceCmds* cmds)
 	self->lineheight = psy_ui_value_make_eh(1.2);	
 	self->colwidth = 10.0;
 	self->cmd = SEQLVCMD_NONE;
-	self->cmd_orderindex = psy_audio_orderindex_zero();	
+	self->cmd_orderindex = psy_audio_orderindex_make_invalid();
 	self->col = 0;
 	self->active = FALSE;
 	self->showpatternnames = FALSE;

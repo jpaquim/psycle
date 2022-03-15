@@ -105,6 +105,9 @@ TrackDef* trackerconfig_trackdef_const(const TrackConfig*, uintptr_t track);
 void trackconfig_settrack(TrackConfig*, uintptr_t track,
 	uintptr_t numnotes);
 void trackconfig_resize(TrackConfig*, uintptr_t track, double width);
+void trackconfig_track_position(TrackConfig*, uintptr_t track,
+	double x, uintptr_t* rv_column, uintptr_t* rv_digit,
+	uintptr_t* rv_noteindex);
 
 
 /* TrackerEventTable */
@@ -154,7 +157,6 @@ void trackerstate_init(TrackerState*, TrackConfig*, PatternViewState* pvstate);
 void trackerstate_dispose(TrackerState*);
 
 double trackerstate_trackwidth(const TrackerState*, uintptr_t track);
-TrackDef* trackerstate_trackdef(TrackerState*, uintptr_t track);
 uintptr_t trackerstate_pxtotrack(const TrackerState*, double x);
 double trackerstate_basewidth(TrackerState*, uintptr_t track);
 
@@ -228,7 +230,7 @@ INLINE uintptr_t trackerstate_midline(const TrackerState* self,
 void trackerstate_updatemetric(TrackerState*, const psy_ui_TextMetric*,
 	double lineheight);
 
-psy_audio_SequenceCursor trackerstate_makecursor(TrackerState*,
+psy_audio_SequenceCursor trackerstate_make_cursor(TrackerState*,
 	psy_ui_RealPoint pt, uintptr_t index);
 void trackerstate_columncolours(TrackerState*, TrackerColumnFlags,
 	uintptr_t track, psy_ui_Colour* bg, psy_ui_Colour* fore);
