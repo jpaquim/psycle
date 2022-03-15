@@ -120,14 +120,17 @@ void trackercolumn_drawtrackevents(TrackerColumn* self, psy_ui_Graphics* g)
 	
 	events = trackereventtable_track(&self->state->trackevents,
 		self->track);
-	trackdef = trackerstate_trackdef(self->state, self->track);
+	trackdef = trackerconfig_trackdef(self->state->trackconfig, self->track);
 	self->digitsize = psy_ui_realsize_make(
 		self->state->trackconfig->textwidth,
 		self->state->lineheightpx - 1);
-	offset = self->state->trackevents.clip.topleft.offset;
+	offset = self->state->trackevents.clip.topleft.absoffset;
+	if (self->state->pv->singlemode) {
+		offset -= self->state->trackevents.clip.topleft.seqoffset;
+	}
 	for (p = *events,			
 			cpy = trackerstate_beattopx(self->state, offset),
-			line = (uintptr_t)(self->state->trackevents.clip.topleft.offset *
+			line = (uintptr_t)(self->state->trackevents.clip.topleft.absoffset *
 				self->state->trackevents.clip.topleft.lpb);
 			p != NULL;
 			p = p->next, ++line, cpy += self->state->lineheightpx) {
@@ -310,7 +313,7 @@ void trackercolumn_drawresizebar(TrackerColumn* self, psy_ui_Graphics* g)
 		double notewidth;
 		TrackDef* trackdef;
 
-		trackdef = trackerstate_trackdef(self->state, self->track);
+		trackdef = trackerconfig_trackdef(self->state->trackconfig, self->track);
 		notewidth = trackdef_columnwidth(trackdef, 0,
 			self->state->trackconfig->textwidth);
 		psy_ui_drawsolidrectangle(g,
@@ -330,7 +333,7 @@ void trackercolumn_onmousedown(TrackerColumn* self, psy_ui_MouseEvent* ev)
 	if (psy_ui_mouseevent_button(ev) != 1) {
 		return;
 	}	
-	trackdef = trackerstate_trackdef(self->state, self->track);
+	trackdef = trackerconfig_trackdef(self->state->trackconfig, self->track);
 	notewidth = trackdef_columnwidth(trackdef, 0,
 		self->state->trackconfig->textwidth);
 	size = psy_ui_component_size_px(&self->component);
@@ -347,7 +350,7 @@ void trackercolumn_onmousedown(TrackerColumn* self, psy_ui_MouseEvent* ev)
 			psy_audio_blockselection_disable(&self->state->pv->selection);
 			psy_ui_component_invalidate(psy_ui_component_parent(&self->component));
 		}
-		self->state->pv->dragselectionbase = trackerstate_makecursor(
+		self->state->pv->dragselectionbase = trackerstate_make_cursor(
 			self->state, psy_ui_mouseevent_pt(ev), self->track);
 	}
 	if (trackdrag_active(&self->state->trackconfig->resize)) {		
@@ -395,6 +398,9 @@ void trackercolumn_onmouseup(TrackerColumn* self, psy_ui_MouseEvent* ev)
 void trackercolumn_onpreferredsize(TrackerColumn* self,
 	const psy_ui_Size* limit, psy_ui_Size* rv)
 {	
+	psy_ui_Component* parent;
+
+	parent = psy_ui_component_parent(&self->component);
 	psy_ui_size_setpx(rv, trackerstate_trackwidth(self->state, self->track),
 		patternviewstate_numlines(self->state->pv) *
 		self->state->lineheightpx);

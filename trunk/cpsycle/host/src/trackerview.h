@@ -55,7 +55,7 @@ void trackergrid_init(TrackerGrid*, psy_ui_Component* parent,
 	TrackerState*, Workspace*);
 
 void trackergrid_build(TrackerGrid*);
-void trackergrid_setpattern(TrackerGrid*, psy_audio_Pattern*);
+void trackergrid_scroll_to_order(TrackerGrid*);
 void trackergrid_showemptydata(TrackerGrid*, int showstate);
 void trackergrid_invalidate_playbar(TrackerGrid*);
 void trackergrid_invalidateline(TrackerGrid*, intptr_t line);
@@ -96,11 +96,14 @@ INLINE psy_ui_Component* trackergrid_base(TrackerGrid* self)
 
 INLINE bool trackergrid_checkupdate(const TrackerGrid* self)
 {
-	if (self->state->pv->pattern) {
+	const psy_audio_Pattern* pattern;
+
+	pattern = patternviewstate_pattern_const(self->state->pv);
+	if (pattern) {
 		bool rv;
 		uintptr_t opcount;
 
-		opcount = self->state->pv->pattern->opcount;
+		opcount = pattern->opcount;
 		rv = (opcount != self->component.opcount);
 		((TrackerGrid*)self)->component.opcount = opcount;
 		return rv;

@@ -28,9 +28,7 @@ extern "C" {
 **      |
 ** StepsequencerView <>-- StepSequencerState ----------------------------------
 **                           <>---- Workspace (player, sequence)              |
-**                           <>---- Pattern                                   |
-**                           <>---- StepSequencerPosition (editposition)      | 
-**                           <>---- StepSequencerPosition (playposition)      |
+**                           <>---- Pattern                                   |                          
 **                                                  psy_ui_Component          |
 **                                                         ^                  | 
 **                                                         |                  | 
@@ -45,31 +43,17 @@ extern "C" {
 **                   <>-- StepsequencerBar <>- StepSequencerTile <>-----------|
 */
 
-/* StepSequencerPosition */
-typedef struct StepSequencerPosition {
-	uintptr_t line;
-	uintptr_t steprow;
-	uintptr_t seqentryline;
-} StepSequencerPosition;
-
-void stepsequencerposition_init(StepSequencerPosition*);
-StepSequencerPosition stepsequencerposition_make(uintptr_t line,
-	uintptr_t seqentryline, uintptr_t numtiles);
-
 /* StepSequencerState */
-typedef struct StepSequencerState {
-	StepSequencerPosition editposition;	
-	StepSequencerPosition playposition;
+typedef struct StepSequencerState {	
 	uintptr_t numtiles;
 	uintptr_t barbuttonindex;	
 	/* references */
-	Workspace* workspace;
-	psy_audio_Pattern* pattern;
+	Workspace* workspace;	
 } StepSequencerState;
 
 void stepsequencerstate_init(StepSequencerState*, Workspace*);
 
-bool stepsequencerstate_update_positions(StepSequencerState*);
+psy_audio_Pattern* stepsequencerstate_pattern(StepSequencerState*);
 
 /* StepSequencerBarButton */
 typedef struct StepSequencerBarButton {

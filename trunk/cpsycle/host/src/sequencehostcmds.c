@@ -238,29 +238,28 @@ void sequencecmds_paste(SequenceCmds* self)
 
 void sequencecmds_clear(SequenceCmds* self)
 {
-	if (workspace_song(self->workspace)) {
-		bool playing;
+	if (self->sequence) {		
+		psy_audio_Song* restore_song;		
+		
 		sequencecmds_update(self);
-
-		playing = psy_audio_player_playing(&self->workspace->player);
+		assert(self->sequence);
 		psy_audio_player_stop(&self->workspace->player);
 		psy_audio_exclusivelock_enter();
+		restore_song = psy_audio_player_song(&self->workspace->player);
+		psy_audio_player_setemptysong(&self->workspace->player);
 		workspace_clearsequencepaste(self->workspace);
-		// no undo/redo
-		psy_audio_patterns_clear(&workspace_song(self->workspace)->patterns);
-		psy_audio_patterns_insert(&workspace_song(self->workspace)->patterns, 0,
+		/* no undo / redo */
+		psy_audio_patterns_clear(self->sequence->patterns);
+		psy_audio_patterns_insert(self->sequence->patterns, 0,
 			psy_audio_pattern_allocinit());
-		// order can be restored but not patterndata
-		// psycle mfc behaviour
+		/*
+		** order can be restored but not patterndata
+		** psycle mfc behaviour
+		*/
 		psy_undoredo_execute(&self->workspace->undoredo,
 			&psy_audio_sequenceclearcommand_alloc(self->sequence,
-				&self->workspace->song->sequence.sequenceselection)->command);
-		psy_audio_exclusivelock_leave();
-		psy_audio_sequenceselection_select_first(
-			&self->workspace->song->sequence.sequenceselection,
-			psy_audio_orderindex_make(0, 0));		
-		psy_audio_exclusivelock_enter();
-		psy_audio_player_setposition(&self->workspace->player, 0.0);		
+				&self->sequence->sequenceselection)->command);
+		psy_audio_player_setsong(&self->workspace->player, restore_song);		
 		psy_audio_exclusivelock_leave();		
 	}
 }

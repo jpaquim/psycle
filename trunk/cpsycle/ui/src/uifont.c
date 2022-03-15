@@ -107,6 +107,14 @@ const psy_ui_TextMetric* psy_ui_font_textmetric(const psy_ui_Font* self)
 	return self->imp->vtable->dev_textmetric(self->imp);
 }
 
+psy_ui_Size psy_ui_font_textsize(const psy_ui_Font* self, const char* text,
+	uintptr_t count)
+{
+	assert(self->imp);
+
+	return self->imp->vtable->dev_textsize(self->imp, text, count);
+}
+
 bool psy_ui_font_equal(const psy_ui_Font* self, const psy_ui_Font* other)
 {
 	assert(self->imp);
@@ -134,6 +142,12 @@ static const psy_ui_TextMetric* dev_textmetric(const psy_ui_FontImp* self)
 	return NULL;
 }
 
+static psy_ui_Size dev_textsize(const struct psy_ui_FontImp* self,
+	const char* text, uintptr_t count)
+{
+	return psy_ui_size_make_em(0.0, 0.0);
+}
+
 bool dev_equal(const psy_ui_FontImp* self, const psy_ui_FontImp* other)
 {
 	return TRUE;
@@ -150,6 +164,7 @@ static void imp_vtable_init(psy_ui_FontImp* self)
 		imp_vtable.dev_copy = dev_copy;
         imp_vtable.dev_fontinfo = dev_fontinfo;
 		imp_vtable.dev_textmetric = dev_textmetric;
+		imp_vtable.dev_textsize = dev_textsize;
 		imp_vtable.dev_equal = dev_equal;
 		imp_vtable_initialized = TRUE;
 	}

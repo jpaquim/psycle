@@ -39,9 +39,9 @@ typedef struct PatternViewState {
 	bool ft2home;
 	bool ft2delete;
 	bool wraparound;
-	psy_audio_Pattern patternpaste;
+	psy_audio_Pattern patternpaste;	
 	/* references */
-	psy_audio_Pattern* pattern;
+	// psy_audio_Pattern* pattern;
 	psy_audio_Patterns* patterns;
 	psy_audio_Sequence* sequence;	
 	PatternCmds* cmds;
@@ -104,29 +104,12 @@ INLINE void patternviewstate_setpatterns(PatternViewState* self, psy_audio_Patte
 	self->patterns = patterns;	
 }
 
-INLINE void patternviewstate_setpattern(PatternViewState* self, psy_audio_Pattern* pattern)
-{
-	assert(self);
+// INLINE void patternviewstate_setpattern(PatternViewState* self, psy_audio_Pattern* pattern)
+// {
+//	assert(self);
 
-	self->pattern = pattern;
-	if (self->cmds) {
-		patterncmds_setpattern(self->cmds, pattern);
-	}
-}
-
-INLINE psy_audio_Pattern* patternviewstate_pattern(PatternViewState* self)
-{
-	assert(self);
-
-	return self->pattern;
-}
-
-INLINE const psy_audio_Pattern* patternviewstate_pattern_const(const PatternViewState* self)
-{
-	assert(self);
-
-	return self->pattern;
-}
+	// self->pattern = pattern;	
+// }
 
 INLINE void patternviewstate_displaypattern(PatternViewState* self)
 {
@@ -152,6 +135,25 @@ INLINE psy_audio_Sequence* patternviewstate_sequence_const(const PatternViewStat
 	return self->sequence;
 }
 
+INLINE psy_audio_Pattern* patternviewstate_pattern(PatternViewState* self)
+{
+	assert(self);	
+
+	if (!self->sequence) {
+		return NULL;
+	}
+	return psy_audio_sequence_pattern(
+		self->sequence,
+		self->cursor.orderindex);
+}
+
+INLINE const psy_audio_Pattern* patternviewstate_pattern_const(const PatternViewState* self)
+{
+	assert(self);
+
+	return patternviewstate_pattern((PatternViewState*)self);
+}
+
 INLINE psy_audio_Patterns* patternviewstate_patterns(PatternViewState* self)
 {
 	assert(self);
@@ -172,8 +174,11 @@ INLINE psy_dsp_big_beat_t patternviewstate_length(const PatternViewState* self)
 	assert(self);
 
 	if (self->singlemode) {
-		if (self->pattern) {
-			return psy_audio_pattern_length(self->pattern);
+		const psy_audio_Pattern* pattern;
+
+		pattern = patternviewstate_pattern_const(self);
+		if (pattern) {
+			return psy_audio_pattern_length(pattern);
 		}
 	} else if (patternviewstate_sequence_const(self)) {
 		psy_audio_SequenceTrack* track;
@@ -254,15 +259,6 @@ INLINE double patternviewstate_preferredtrackwidth(const
 	return style->background.size.width;
 }
 
-INLINE bool patternviewstate_cursorposition_valid(PatternViewState* self)
-{
-	if (patternviewstate_pattern(self)) {
-		return psy_audio_sequencecursor_offset(&self->cursor) <
-			psy_audio_pattern_length(patternviewstate_pattern(self));
-	}
-	return psy_audio_sequencecursor_offset(&self->cursor) != 0.0;
-}
-
 INLINE void patternviewstate_invalidate(PatternViewState* self)
 {
 	if (patternviewstate_pattern(self)) {
@@ -279,9 +275,9 @@ INLINE bool patternviewstate_movecursorwhenpaste(PatternViewState* self)
 				
 		cursor = self->cursor;
 		cursor.track += self->patternpaste.maxsongtracks;
-		cursor.offset += self->patternpaste.length;		
-		if (cursor.offset >= psy_audio_pattern_length(patternviewstate_pattern(self))) {
-			cursor.offset = psy_audio_pattern_length(patternviewstate_pattern(self)) -
+		cursor.absoffset += self->patternpaste.length;		
+		if (cursor.absoffset >= psy_audio_pattern_length(patternviewstate_pattern(self))) {
+			cursor.absoffset = psy_audio_pattern_length(patternviewstate_pattern(self)) -
 				patternviewstate_bpl(self);
 		}				
 		psy_audio_sequence_set_cursor(self->sequence, cursor);

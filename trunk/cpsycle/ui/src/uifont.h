@@ -8,7 +8,7 @@
 
 #include "../../detail/psydef.h"
 /* local */
-#include "uivalue.h"
+#include "uigeometry.h"
 
 /*
 ** Graphics Font Interface
@@ -66,6 +66,7 @@ void psy_ui_font_dispose(psy_ui_Font*);
 void psy_ui_font_copy(psy_ui_Font*, const psy_ui_Font* other);
 psy_ui_FontInfo psy_ui_font_fontinfo(const psy_ui_Font*);
 const psy_ui_TextMetric* psy_ui_font_textmetric(const psy_ui_Font*);
+psy_ui_Size psy_ui_font_textsize(const psy_ui_Font*, const char* text, uintptr_t count);
 bool psy_ui_font_equal(const psy_ui_Font*, const psy_ui_Font* other);
 
 /* psy_ui_FontImpVTable */
@@ -77,12 +78,15 @@ typedef const psy_ui_FontInfo (*psy_ui_font_imp_fp_dev_fontinfo)
 typedef const psy_ui_TextMetric* (*psy_ui_font_imp_fp_dev_textmetric)(const struct psy_ui_FontImp*);
 typedef bool (*psy_ui_font_imp_fp_dev_equal)(const struct psy_ui_FontImp*,
     const struct psy_ui_FontImp*);
+typedef psy_ui_Size(*psy_ui_font_imp_fp_dev_textsize)(const struct psy_ui_FontImp*,
+    const char* text, uintptr_t count);
 
 typedef struct psy_ui_FontImpVTable {
 	psy_ui_font_imp_fp_dispose dev_dispose;	
 	psy_ui_font_imp_fp_copy dev_copy;
     psy_ui_font_imp_fp_dev_fontinfo dev_fontinfo;
     psy_ui_font_imp_fp_dev_textmetric dev_textmetric;
+    psy_ui_font_imp_fp_dev_textsize dev_textsize;
     psy_ui_font_imp_fp_dev_equal dev_equal;
 } psy_ui_FontImpVTable;
 

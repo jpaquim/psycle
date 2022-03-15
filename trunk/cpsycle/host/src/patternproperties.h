@@ -32,14 +32,16 @@ typedef struct PatternProperties {
 	IntEdit timesig_numerator;
 	IntEdit timesig_denominator;
 	/* references */
-	psy_audio_Pattern* pattern;
-	Workspace* workspace;	
+	psy_audio_Patterns* patterns;
+	uintptr_t pattern_index;	
 } PatternProperties;
 
 void patternproperties_init(PatternProperties*, psy_ui_Component* parent,
 	psy_audio_Pattern*, Workspace*);
 
-void patternproperties_setpattern(PatternProperties*, psy_audio_Pattern*);
+void patternproperties_set_patterns(PatternProperties*, psy_audio_Patterns*);
+void patternproperties_select(PatternProperties*, uintptr_t pattern_index);
+
 
 #ifdef __cplusplus
 }

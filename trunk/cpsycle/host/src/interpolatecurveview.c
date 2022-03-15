@@ -106,22 +106,21 @@ static void interpolatecurvebox_vtable_init(InterpolateCurveBox* self)
 
 void interpolatecurvebox_init(InterpolateCurveBox* self,
 	psy_ui_Component* parent, InterpolateCurveView* view,
-	Workspace* workspace)
+	PatternViewState* state, Workspace* workspace)
 {
 	psy_ui_component_init(&self->component, parent, NULL);
 	interpolatecurvebox_vtable_init(self);
 	self->view = view;
+	self->state = state;
 	self->component.vtable = &interpolatecurvebox_vtable;
 	self->keyframes = 0;
 	self->range = (psy_dsp_amp_t)0.f;
 	self->valuerange = 0xFF;
 	self->minval = 0;
-	self->maxval = 0xFF;
-	self->pattern = 0;
+	self->maxval = 0xFF;	
 	self->dragkeyframe = 0;
 	self->selected = 0;
-	self->bpl = 0.25;
-	self->pattern = NULL;
+	self->bpl = 0.25;	
 	psy_signal_connect(&self->component.signal_destroy, self,
 		interpolatecurvebox_ondestroy);	
 	psy_ui_component_preventalign(&self->component);
@@ -138,7 +137,7 @@ void interpolatecurvebox_ondestroy(InterpolateCurveBox* self,
 void interpolatecurvebox_setpattern(InterpolateCurveBox* self,
 	psy_audio_Pattern* pattern)
 {
-	self->pattern = pattern;
+	
 }
 
 void interpolatecurvebox_ondraw(InterpolateCurveBox* self,
@@ -449,15 +448,20 @@ void interpolatecurvebox_clear(InterpolateCurveBox* self)
 	self->keyframes = 0;
 }
 
-// InterpolateCurveView
-// implementation
+/*
+** InterpolateCurveView
+** implementation
+*/
 void interpolatecurveview_init(InterpolateCurveView* self, psy_ui_Component*
-	parent, intptr_t startsel, intptr_t endsel, uintptr_t lpb, Workspace* workspace)
-{
+	parent, intptr_t startsel, intptr_t endsel, uintptr_t lpb, PatternViewState* state,
+	Workspace* workspace)
+{	
 	psy_ui_component_init(&self->component, parent, NULL);
+	self->state = state;
 	interpolatecurvebar_init(&self->bar, &self->component, workspace);
 	psy_ui_component_setalign(&self->bar.component, psy_ui_ALIGN_BOTTOM);
-	interpolatecurvebox_init(&self->box, &self->component, self, workspace);
+	interpolatecurvebox_init(&self->box, &self->component, self, state,
+		workspace);
 	psy_ui_component_setalign(&self->box.component, psy_ui_ALIGN_CLIENT);	
 	psy_signal_init(&self->signal_cancel);
 	psy_signal_connect(&self->component.signal_destroy, self,
@@ -481,8 +485,8 @@ void interpolatecurveview_setselection(InterpolateCurveView* self,
 {
 	assert(selection);
 
-	self->box.range = selection->bottomright.offset -
-		selection->topleft.offset;
+	self->box.range = selection->bottomright.absoffset -
+		selection->topleft.absoffset;
 	self->box.selection = *selection;
 	interpolatecurvebox_buildkeyframes(&self->box);
 	if (self->box.keyframes) {
@@ -504,20 +508,23 @@ void interpolatecurveview_setselection(InterpolateCurveView* self,
 }
 
 void interpolatecurvebox_buildkeyframes(InterpolateCurveBox* self)
-{
+{	
+	psy_audio_Pattern* pattern;
+
 	interpolatecurvebox_clear(self);
-	if (self->pattern) {
+	pattern = patternviewstate_pattern(self->state);
+	if (pattern) {
 		psy_audio_PatternNode* p;
 		psy_audio_PatternNode* q;
 		intptr_t insertlast = 1;
 
-		p = psy_audio_pattern_greaterequal(self->pattern,
-			(psy_dsp_beat_t)self->selection.topleft.offset);
+		p = psy_audio_pattern_greaterequal(pattern,
+			(psy_dsp_beat_t)self->selection.topleft.absoffset);
 		if (p) {
 			psy_audio_PatternEntry* entry;
 
 			entry = psy_audio_patternnode_entry(p);
-			if (entry->offset > self->selection.topleft.offset) {
+			if (entry->offset > self->selection.topleft.absoffset) {
 				KeyFrame* keyframe;
 
 				keyframe = keyframe_allocinit(0.f, 0,
@@ -532,17 +539,17 @@ void interpolatecurvebox_buildkeyframes(InterpolateCurveBox* self)
 			q = p->next;
 
 			entry = psy_audio_patternnode_entry(p);
-			if (entry->offset < self->selection.bottomright.offset) {
+			if (entry->offset < self->selection.bottomright.absoffset) {
 				if (entry->track == self->selection.topleft.track) {
 					KeyFrame* keyframe;
 
 					keyframe = keyframe_allocinit(
-						entry->offset - self->selection.topleft.offset,
+						entry->offset - self->selection.topleft.absoffset,
 						psy_audio_patternentry_front(entry)->parameter,
 						INTERPOLATECURVETYPE_LINEAR);
 					if (keyframe) {
 						psy_list_append(&self->keyframes, keyframe);
-						if (entry->offset == self->selection.bottomright.offset - 0.25f) {
+						if (entry->offset == self->selection.bottomright.absoffset - 0.25f) {
 							insertlast = 0;
 							break;
 						}
@@ -557,7 +564,7 @@ void interpolatecurvebox_buildkeyframes(InterpolateCurveBox* self)
 			KeyFrame* keyframe;
 
 			keyframe = keyframe_allocinit(
-				self->selection.bottomright.offset - self->selection.topleft.offset - 0.25f,
+				self->selection.bottomright.absoffset - self->selection.topleft.absoffset - 0.25f,
 				0,
 				INTERPOLATECURVETYPE_LINEAR);
 			if (keyframe) {
@@ -576,7 +583,14 @@ void interpolatecurveview_setpattern(InterpolateCurveView* self,
 void interpolatecurveview_oninterpolate(InterpolateCurveView* self,
 	psy_ui_Component* sender)
 {
-	if (self->box.pattern && self->box.keyframes && self->box.keyframes->next) {
+	psy_audio_Pattern* pattern;
+
+	interpolatecurvebox_clear(&self->box);
+	pattern = patternviewstate_pattern(self->state);
+	if (!pattern) {
+		return;
+	}
+	if (self->box.keyframes && self->box.keyframes->next) {
 		psy_List* kf;
 		psy_dsp_big_beat_t lastoffset;
 		intptr_t lastvalue;
@@ -586,7 +600,7 @@ void interpolatecurveview_oninterpolate(InterpolateCurveView* self,
 
 		entry = (KeyFrame*) self->box.keyframes->entry;
 		lastentry = entry;
-		lastoffset = entry->offset + self->box.selection.topleft.offset;
+		lastoffset = entry->offset + self->box.selection.topleft.absoffset;
 		lastvalue = entry->value;
 		for (kf = self->box.keyframes->next; kf != 0; kf = kf->next) {
 			KeyFrame* entry;
@@ -595,19 +609,19 @@ void interpolatecurveview_oninterpolate(InterpolateCurveView* self,
 
 			psy_audio_sequencecursor_init(&start);
 			psy_audio_sequencecursor_init(&end);
-			start.offset = lastoffset;			
+			start.absoffset = lastoffset;
 			entry = (KeyFrame*)kf->entry;
-			end.offset = (entry->offset + self->box.selection.topleft.offset);
+			end.absoffset = (entry->offset + self->box.selection.topleft.absoffset);
 			if (lastentry->curve == INTERPOLATECURVETYPE_LINEAR) {
-				psy_audio_pattern_blockinterpolaterange(self->box.pattern,
+				psy_audio_pattern_blockinterpolaterange(pattern,
 					start, end,
 					bpl, lastvalue, entry->value);
 			} else if (lastentry->curve == INTERPOLATECURVETYPE_HERMITE) {
-				psy_audio_pattern_blockinterpolaterangehermite(self->box.pattern,
+				psy_audio_pattern_blockinterpolaterangehermite(pattern,
 					start, end,
 					bpl, lastvalue, entry->value);
 			}
-			lastoffset = entry->offset + self->box.selection.topleft.offset;
+			lastoffset = entry->offset + self->box.selection.topleft.absoffset;
 			lastvalue = entry->value;
 			lastentry = entry;
 		}

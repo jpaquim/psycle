@@ -95,21 +95,6 @@ void psy_ui_aligner_addborder(psy_ui_Component* component,
 		psy_ui_margin_height_px(&bordermargin, tm, NULL));
 }
 
-void psy_ui_aligner_addspacing(psy_ui_Component* component,
-	psy_ui_Size* rv)
-{
-	const psy_ui_TextMetric* tm;	
-	psy_ui_RealMargin spacing;
-
-	tm = psy_ui_component_textmetric(component);
-	spacing = psy_ui_component_spacing_px(component);	
-	psy_ui_size_setpx(rv,
-		psy_ui_value_px(&rv->width, tm, NULL) +
-		psy_ui_realmargin_width(&spacing),
-		psy_ui_value_px(&rv->height, tm, NULL) +
-		psy_ui_realmargin_height(&spacing));
-}
-
 void psy_ui_aligner_addspacingandborder(psy_ui_Component* component,
 	psy_ui_Size* rv)
 {

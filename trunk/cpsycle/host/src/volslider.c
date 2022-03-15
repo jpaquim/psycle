@@ -23,9 +23,9 @@ void volslider_init(VolSlider* self, psy_ui_Component* parent,
 {	
 	assert(self);
 	assert(workspace);
-
+	
+	psy_ui_component_init(&self->component, parent, NULL);
 	self->workspace = workspace;
-	psy_ui_component_init(&self->component, parent, NULL);	
 	psy_ui_slider_init(&self->slider, &self->component);
 	psy_ui_slider_settext(&self->slider, "VU");	
 	psy_ui_slider_setvaluecharnumber(&self->slider, 10.0);

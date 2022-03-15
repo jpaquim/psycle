@@ -34,7 +34,7 @@ void seqeditstate_init(SeqEditState* self, SequenceCmds* cmds,
 	self->drawcursor = TRUE;
 	self->drawpatternevents = TRUE;		
 	self->dragposition = 0.0;	
-	self->dragseqpos = psy_audio_orderindex_zero();
+	self->dragseqpos = psy_audio_orderindex_make_invalid();
 	self->dragtype = SEQEDIT_DRAGTYPE_MOVE;
 	self->dragstatus = SEQEDIT_DRAG_NONE;
 	self->updatecursorposition = TRUE;

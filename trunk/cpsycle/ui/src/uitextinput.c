@@ -134,9 +134,15 @@ void psy_ui_textinput_onpreferredsize(psy_ui_TextInput* self,
 		tm = psy_ui_component_textmetric(&self->component);			
 		if (self->charnumber == 0) {
 			psy_ui_Size size;
-			
-			size = psy_ui_component_textsize(&self->component,
-				psy_ui_textinput_text(self));
+			const psy_ui_Font* font;
+
+			font = psy_ui_component_font(&self->component);
+			if (font) {
+				size = psy_ui_font_textsize(font, psy_ui_textinput_text(self),
+					psy_strlen(psy_ui_textinput_text(self)));
+			} else {
+				size = psy_ui_size_zero();
+			}			
 			rv->width = psy_ui_value_make_px(psy_ui_value_px(&size.width,
 				psy_ui_component_textmetric(&self->component), NULL) + 2);
 			rv->height = psy_ui_value_make_px((int)(tm->tmHeight * self->linenumber));

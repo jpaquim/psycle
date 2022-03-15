@@ -268,8 +268,14 @@ double psy_ui_button_width(psy_ui_Button* self)
 	
 	if (psy_strlen(text) > 0) {
 		psy_ui_Size size;
+		const psy_ui_Font* font;
 
-		size = psy_ui_component_textsize(psy_ui_button_base(self), text);
+		font = psy_ui_component_font(&self->component);
+		if (font) {
+			size = psy_ui_font_textsize(font, text, psy_strlen(text));
+		} else {
+			size = psy_ui_size_zero();
+		}
 		rv += psy_ui_value_px(&size.width, tm, NULL);
 	}
 	if (self->icon != psy_ui_ICON_NONE) {
@@ -318,12 +324,12 @@ void psy_ui_button_onpreferredsize(psy_ui_Button* self, psy_ui_Size* limit,
 		rv->width = psy_ui_value_make_ew(self->charnumber);
 	}	
 	/* add spacing */
-	spacing = psy_ui_component_spacing(psy_ui_button_base(self));
+	// spacing = psy_ui_component_spacing(psy_ui_button_base(self));
 	rv->height = psy_ui_value_make_eh(self->linespacing);	
-	rv->height = psy_ui_add_values(rv->height,
-		psy_ui_margin_height(&spacing, tm, NULL), tm, NULL);	
-	rv->width = psy_ui_add_values(rv->width,
-		psy_ui_margin_width(&spacing, tm, NULL), tm, NULL);
+	// rv->height = psy_ui_add_values(rv->height,
+	//	psy_ui_margin_height(&spacing, tm, NULL), tm, NULL);	
+	//rv->width = psy_ui_add_values(rv->width,
+	//	psy_ui_margin_width(&spacing, tm, NULL), tm, NULL);
 }
 
 void psy_ui_button_onmousedown(psy_ui_Button* self, psy_ui_MouseEvent* ev)

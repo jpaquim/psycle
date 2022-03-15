@@ -374,8 +374,13 @@ void seqviewtrack_onmousedown(SeqViewTrack* self, psy_ui_MouseEvent* ev)
 			} else {
 				psy_audio_SequenceCursor cursor;
 				
-				cursor = self->state->cmds->workspace->song->sequence.cursor;
+				cursor = self->state->cmds->workspace->song->sequence.cursor;				
 				cursor.orderindex = self->state->cmd_orderindex;
+				cursor.absoffset -= cursor.seqoffset;
+				cursor.seqoffset = psy_audio_sequence_seqoffset(
+					&self->state->cmds->workspace->song->sequence,
+					cursor.orderindex);
+				cursor.absoffset += cursor.seqoffset;
 				psy_audio_sequence_set_cursor(
 					&self->state->cmds->workspace->song->sequence, cursor);
 			}

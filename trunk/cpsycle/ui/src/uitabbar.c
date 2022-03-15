@@ -192,17 +192,22 @@ void psy_ui_tab_ondraw(psy_ui_Tab* self, psy_ui_Graphics* g)
 
 void psy_ui_tab_onpreferredsize(psy_ui_Tab* self, const psy_ui_Size* limit,
 	psy_ui_Size* rv)
-{	
-	psy_ui_Margin spacing;
+{		
 	const psy_ui_TextMetric* tm;
 	char* text;	
+	const psy_ui_Font* font;	
 	
 	if (self->translation) {
 		text = self->translation;
 	} else {
 		text = self->text;
+	}
+	font = psy_ui_component_font(&self->component);
+	if (font) {
+		*rv = psy_ui_font_textsize(font, text, psy_strlen(text));
+	} else {
+		*rv = psy_ui_size_zero();
 	}	
-	*rv = psy_ui_component_textsize(&self->component, text);
 	rv->height = psy_ui_value_make_eh(1.8);
 	tm = psy_ui_component_textmetric(psy_ui_tab_base(self));
 	if (!psy_ui_bitmap_empty(&self->bitmapicon)) {
@@ -214,9 +219,6 @@ void psy_ui_tab_onpreferredsize(psy_ui_Tab* self, const psy_ui_Size* limit,
 		rv->width = psy_ui_value_make_px(textsizepx.width + bpmsize.width
 			+ tm->tmAveCharWidth * self->bitmapident);
 	}	
-	spacing = psy_ui_component_spacing(psy_ui_tab_base(self));
-	rv->height = psy_ui_add_values(rv->height, psy_ui_margin_height(&spacing, tm, NULL), tm, NULL);
-	rv->width = psy_ui_add_values(rv->width, psy_ui_margin_width(&spacing, tm, NULL), tm, NULL);
 }
 
 void psy_ui_tab_onmousedown(psy_ui_Tab* self, psy_ui_MouseEvent* ev)

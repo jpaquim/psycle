@@ -40,7 +40,7 @@ typedef enum {
 /* PianogridTrackEvent */
 typedef struct PianogridTrackEvent {
 	uint8_t note;
-	psy_dsp_big_beat_t offset;
+	psy_dsp_big_beat_t offset;	
 	uintptr_t track;
 	/* draw hover */
 	bool hover;

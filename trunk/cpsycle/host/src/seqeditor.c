@@ -35,6 +35,7 @@ static void seqeditor_ontrackresize(SeqEditor*, psy_ui_Component* sender,
 	uintptr_t trackid, double* height);
 static void seqeditor_ontoggletimesig(SeqEditor*, psy_ui_Button* sender);
 static void seqeditor_ontoggleloop(SeqEditor*, psy_ui_Button* sender);
+static void seqeditor_oncursorchanged(SeqEditor*, psy_audio_Sequence* sender);
 /* vtable */
 static psy_ui_ComponentVtable seqeditor_vtable;
 static bool seqeditor_vtable_initialized = FALSE;
@@ -165,6 +166,8 @@ void seqeditor_updatesong(SeqEditor* self)
 			seqeditor_ontrackswap);
 		psy_signal_connect(&song->sequence.signal_trackremove, self,
 			seqeditor_ontrackremove);
+		psy_signal_connect(&song->sequence.signal_cursorchanged, self,
+			seqeditor_oncursorchanged);
 	}
 }
 
@@ -345,3 +348,9 @@ void seqeditor_ontoggleloop(SeqEditor* self, psy_ui_Button* sender)
 	psy_ui_component_invalidate(&self->component);
 }
 
+void seqeditor_oncursorchanged(SeqEditor* self, psy_audio_Sequence* sender)
+{
+	if (!psy_audio_orderindex_equal(&sender->cursor.orderindex,
+			sender->lastcursor.orderindex)) {		
+	}
+}

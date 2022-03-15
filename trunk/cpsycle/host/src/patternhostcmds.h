@@ -23,8 +23,7 @@ typedef struct PatternCmds {
 	psy_UndoRedo* undoredo;
 	psy_audio_Pattern* patternpaste;
 	DirConfig* dirconfig;
-	/* references */
-	psy_audio_Pattern* pattern;
+	/* references */	
 	psy_audio_Sequence* sequence;	
 	psy_audio_Player* player;
 } PatternCmds;
@@ -33,9 +32,6 @@ void patterncmds_init(PatternCmds*, psy_audio_Sequence*, psy_audio_Player*,
 	psy_UndoRedo*, psy_audio_Pattern* patternpaste, DirConfig*);
 
 void patterncmds_setsequence(PatternCmds*, psy_audio_Sequence*);
-void patterncmds_setpattern(PatternCmds*, psy_audio_Pattern*);
-void patterncmds_blocktranspose(PatternCmds*, psy_audio_BlockSelection,
-	psy_audio_SequenceCursor, intptr_t offset);
 void patterncmds_blockdelete(PatternCmds*, psy_audio_BlockSelection);
 void patterncmds_blockpaste(PatternCmds*, psy_audio_SequenceCursor, bool mix);
 void patterncmds_blockcopy(PatternCmds*, psy_audio_BlockSelection);

@@ -1,10 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{2cb34266-6e9e-446c-bf8a-4d2ba0c05efe}</UniqueIdentifier>
-      <Extensions>cpp;c;cxx;rc;def;r;odl;idl;hpj;bat</Extensions>
-    </Filter>
     <Filter Include="file">
       <UniqueIdentifier>{38b5d67c-aaa1-4bce-8c62-793b7e62ba2b}</UniqueIdentifier>
     </Filter>
@@ -38,11 +34,11 @@
     <Filter Include="configuration">
       <UniqueIdentifier>{b967568f-9381-4f89-bc77-c33933cf5cc4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="common">
+      <UniqueIdentifier>{be461cd4-a728-43fb-b338-daa183829159}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\song.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\library.c">
       <Filter>file</Filter>
     </ClCompile>
@@ -340,6 +336,9 @@
     <ClCompile Include="src\sequencecursor.c">
       <Filter>sequence</Filter>
     </ClCompile>
+    <ClCompile Include="src\song.c">
+      <Filter>common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\library.h">
@@ -564,12 +563,6 @@
     <ClInclude Include="src\plugin_interface.h">
       <Filter>machine\plugins</Filter>
     </ClInclude>
-    <ClInclude Include="src\constants.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\song.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\virtualgenerator.h">
       <Filter>machine\internal\sampler</Filter>
     </ClInclude>
@@ -650,6 +643,12 @@
     </ClInclude>
     <ClInclude Include="src\sequencecursor.h">
       <Filter>sequence</Filter>
+    </ClInclude>
+    <ClInclude Include="src\song.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="src\constants.h">
+      <Filter>common</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

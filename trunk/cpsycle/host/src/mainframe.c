@@ -343,7 +343,7 @@ void mainframe_initbars(MainFrame* self)
 		psy_ui_margin_zero());
 	/* row0 */
 	psy_ui_component_init(&self->toprow0, &self->toprows, NULL);
-	/* Vugroup */
+	/* vugroup */
 	vubar_init(&self->vubar, &self->toprow0, &self->workspace);	
 	psy_ui_component_setalign(&self->vubar.component, psy_ui_ALIGN_RIGHT);
 	psy_ui_component_setstyletype(&self->toprow0, STYLE_TOPROW0);
@@ -351,6 +351,7 @@ void mainframe_initbars(MainFrame* self)
 	psy_ui_component_setalign(&self->toprow0_client, psy_ui_ALIGN_TOP);
 	psy_ui_component_init(&self->toprow0_bars, &self->toprow0_client, NULL);
 	psy_ui_component_setalign(&self->toprow0_bars, psy_ui_ALIGN_TOP);
+	psy_ui_component_setstyletype(&self->toprow0_bars, STYLE_TOPROW0_BARS);
 	psy_ui_margin_init_em(&margin, 0.0, 2.0, 0.0, 0.0);
 	psy_ui_component_setdefaultalign(&self->toprow0_bars, psy_ui_ALIGN_LEFT,
 		margin);

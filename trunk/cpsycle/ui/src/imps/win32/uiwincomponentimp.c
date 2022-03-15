@@ -84,8 +84,6 @@ static bool dev_inputprevented(const psy_ui_win_ComponentImp* self);
 static void dev_setcursor(psy_ui_win_ComponentImp*, psy_ui_CursorStyle);
 static void dev_seticonressource(psy_ui_win_ComponentImp*, int ressourceid);
 static const psy_ui_TextMetric* dev_textmetric(const psy_ui_win_ComponentImp*);
-static psy_ui_Size dev_textsize(psy_ui_win_ComponentImp*, const char* text,
-	psy_ui_Font*);
 static void dev_setbackgroundcolour(psy_ui_win_ComponentImp*, psy_ui_Colour);
 static void dev_settitle(psy_ui_win_ComponentImp*, const char* title);
 static void dev_setfocus(psy_ui_win_ComponentImp*);
@@ -214,10 +212,7 @@ static void win_imp_vtable_init(psy_ui_win_ComponentImp* self)
 			dev_seticonressource;
 		vtable.dev_textmetric =
 			(psy_ui_fp_componentimp_dev_textmetric)
-			dev_textmetric;
-		vtable.dev_textsize =
-			(psy_ui_fp_componentimp_dev_textsize)
-			dev_textsize;
+			dev_textmetric;		
 		vtable.dev_setbackgroundcolour =
 			(psy_ui_fp_componentimp_dev_setbackgroundcolour)
 			dev_setbackgroundcolour;
@@ -1077,24 +1072,6 @@ void dev_seticonressource(psy_ui_win_ComponentImp* self, int ressourceid)
 	winapp = (psy_ui_WinApp*)psy_ui_app()->imp;
 	hicon = (intptr_t)LoadIcon(winapp->instance, MAKEINTRESOURCE(ressourceid));
 	SendMessage(self->hwnd, WM_SETICON, ICON_SMALL, (LPARAM)hicon);	
-}
-
-psy_ui_Size dev_textsize(psy_ui_win_ComponentImp* self, const char* text,
-	psy_ui_Font* font)
-{
-	psy_ui_Size rv;
-	psy_ui_Graphics g;
-	HDC hdc;
-
-	hdc = GetDC(self->hwnd);
-	SaveDC(hdc);
-	psy_ui_graphics_init(&g, hdc);
-	psy_ui_setfont(&g, font);
-	rv = psy_ui_textsize(&g, text, psy_strlen(text));
-	psy_ui_graphics_dispose(&g);
-	RestoreDC(hdc, -1);
-	ReleaseDC(self->hwnd, hdc);
-	return rv;
 }
 
 void dev_setbackgroundcolour(psy_ui_win_ComponentImp* self, psy_ui_Colour colour)

@@ -668,8 +668,16 @@ void pianoroll_enter(Pianoroll* self)
 
 void pianoroll_rowclear(Pianoroll* self)
 {
+	psy_audio_Pattern* pattern;
+
+	assert(self);
+
+	pattern = patternviewstate_pattern(self->gridstate.pv);
+	if (!pattern) {
+		return;
+	}
 	psy_undoredo_execute(&self->workspace->undoredo,
-		&removecommand_allocinit(self->gridstate.pv->pattern,
+		&removecommand_allocinit(pattern,
 			self->gridstate.pv->cursor, &self->workspace->song->sequence)->command);
 	pianogrid_advanceline(&self->grid);
 }

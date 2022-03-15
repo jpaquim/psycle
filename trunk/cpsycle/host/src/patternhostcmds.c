@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -30,7 +30,6 @@ void patterncmds_init(PatternCmds* self, psy_audio_Sequence* sequence,
 	assert(self);
 	assert(undoredo);	
 	
-	self->pattern = NULL;
 	self->sequence = sequence;
 	self->player = player;
 	self->undoredo = undoredo;
@@ -41,22 +40,6 @@ void patterncmds_init(PatternCmds* self, psy_audio_Sequence* sequence,
 void patterncmds_setsequence(PatternCmds* self, psy_audio_Sequence* sequence)
 {
 	self->sequence = sequence;
-}
-
-void patterncmds_setpattern(PatternCmds* self, psy_audio_Pattern* pattern)
-{	
-	self->pattern = pattern;
-}
-
-void patterncmds_blocktranspose(PatternCmds* self,
-	psy_audio_BlockSelection selection,
-	psy_audio_SequenceCursor cursor, intptr_t offset)
-{	
-	if (self->pattern && psy_audio_blockselection_valid(&selection)) {
-		psy_undoredo_execute(self->undoredo,
-			&blocktransposecommand_alloc(self->pattern,
-				selection, cursor, offset, self->sequence)->command);
-	}
 }
 
 void patterncmds_blockdelete(PatternCmds* self, psy_audio_BlockSelection
@@ -77,13 +60,8 @@ void patterncmds_blockcopy(PatternCmds* self, psy_audio_BlockSelection selection
 	if (psy_audio_blockselection_valid(&selection)) {
 		psy_audio_sequence_blockcopypattern(self->sequence, 
 			selection, self->patternpaste);
-	}
-	/* if (self->pattern && psy_audio_blockselection_valid(&selection)) {
-		psy_audio_pattern_blockcopy(self->patternpaste,
-			self->pattern, selection);
-	} */
+	}	
 }
-
 
 void patterncmds_blockpaste(PatternCmds* self, psy_audio_SequenceCursor cursor,
 	bool mix)
@@ -125,7 +103,7 @@ void patterncmds_changemachine(PatternCmds* self,
 
 void patterncmds_importpattern(PatternCmds* self, psy_dsp_big_beat_t bpl)
 {
-	if (self->pattern) {
+	/*if (self->pattern) {
 		psy_ui_OpenDialog dialog;
 
 		psy_ui_opendialog_init_all(&dialog, 0, "Import Pattern", patternfilter,
@@ -135,13 +113,13 @@ void patterncmds_importpattern(PatternCmds* self, psy_dsp_big_beat_t bpl)
 				psy_ui_opendialog_path(&dialog), bpl);
 		}
 		psy_ui_opendialog_dispose(&dialog);
-	}
+	}*/
 }
 
 void patterncmds_exportpattern(PatternCmds* self, psy_dsp_big_beat_t bpl,
 	uintptr_t numtracks)
 {
-	if (self->pattern) {
+	/*if (self->pattern) {
 		psy_ui_SaveDialog dialog;
 
 		psy_ui_savedialog_init_all(&dialog, 0, "Export Pattern", patternfilter,
@@ -152,5 +130,5 @@ void patterncmds_exportpattern(PatternCmds* self, psy_dsp_big_beat_t bpl,
 				numtracks);				
 		}
 		psy_ui_savedialog_dispose(&dialog);
-	}
+	}*/
 }

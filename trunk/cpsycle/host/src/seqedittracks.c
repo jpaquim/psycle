@@ -264,7 +264,7 @@ void seqeditortracks_onmouseup(SeqEditorTracks* self,
 	psy_ui_component_releasecapture(&self->component);	
 	self->state->cmd = SEQEDTCMD_NONE;
 	self->state->seqentry = NULL;
-	self->state->dragseqpos = psy_audio_orderindex_zero();
+	self->state->dragseqpos = psy_audio_orderindex_make_invalid();
 	self->state->dragstatus = SEQEDIT_DRAG_NONE;
 	psy_ui_mouseevent_stop_propagation(ev);
 }

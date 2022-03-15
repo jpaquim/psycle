@@ -301,9 +301,11 @@ static void onalign(psy_ui_Component* self)
 		psy_ui_Style* style;
 
 		component = (psy_ui_Component*)p->entry;
-		style = psy_ui_componentstyle_currstyle(&component->style);
-		if (psy_ui_position_is_active(&style->position)) {
-			psy_ui_component_setposition(component, *style->position.rectangle);
+		if (component->align == psy_ui_ALIGN_NONE) {
+			style = psy_ui_componentstyle_currstyle(&component->style);
+			if (psy_ui_position_is_active(&style->position)) {
+				psy_ui_component_setposition(component, *style->position.rectangle);
+			}
 		}
 	}
 	psy_list_free(q);
@@ -1278,20 +1280,36 @@ psy_ui_Size psy_ui_component_preferredsize(psy_ui_Component* self,
 {		
 	psy_ui_Size rv;
 	psy_ui_Size preferredsize;
+	psy_ui_Size parentsize;
+	psy_ui_Size* pparentsize;
+	psy_ui_Margin padding;
+	const psy_ui_TextMetric* tm;
 	
 	rv = preferredsize = psy_ui_componentstyle_preferredsize(&self->style);
+	padding = psy_ui_component_spacing(self);
+	tm = psy_ui_component_textmetric(self);
 	if (preferredsize.width.set && preferredsize.height.set) {
-		return preferredsize;
+		rv = preferredsize;
+	} else {
+		rv.width.set = TRUE;
+		rv.height.set = TRUE;
+		self->vtable->onpreferredsize(self, limit, &rv);
+		if (preferredsize.width.set) {
+			rv.width = self->style.sizehints->preferredsize.width;
+		}
+		if (preferredsize.height.set) {
+			rv.height = self->style.sizehints->preferredsize.height;
+		}
 	}
-	rv.width.set = TRUE;
-	rv.height.set = TRUE;
-	self->vtable->onpreferredsize(self, limit, &rv);
-	if (preferredsize.width.set) {
-		rv.width = self->style.sizehints->preferredsize.width;
+	if (rv.height.unit == psy_ui_UNIT_PH ||
+		rv.width.unit == psy_ui_UNIT_PW) {
+		parentsize = psy_ui_component_parentsize(self);
+		pparentsize = &parentsize;
+	} else {
+		pparentsize = NULL;
 	}
-	if (preferredsize.height.set) {
-		rv.height = self->style.sizehints->preferredsize.height;
-	}
+	rv.height = psy_ui_add_values(rv.height, psy_ui_margin_height(&padding, tm, pparentsize), tm, pparentsize);
+	rv.width = psy_ui_add_values(rv.width, psy_ui_margin_width(&padding, tm, pparentsize), tm, pparentsize);
 	return rv;	
 }
 
@@ -1493,11 +1511,6 @@ static const psy_ui_TextMetric* dev_textmetric(const psy_ui_ComponentImp* self)
 	}
 	return &default_tm;
 }
-static psy_ui_Size dev_textsize(const psy_ui_ComponentImp* self, const char* text,
-	const psy_ui_Font* font)
-{
-	psy_ui_Size rv = { 0, 0 }; return rv;
-}
 
 static void dev_setbackgroundcolour(psy_ui_ComponentImp* self, psy_ui_Colour colour) { }
 static void dev_settitle(psy_ui_ComponentImp* self, const char* title) { }
@@ -1554,8 +1567,7 @@ static void imp_vtable_init(void)
 		imp_vtable.dev_inputprevented = dev_inputprevented;
 		imp_vtable.dev_setcursor = dev_setcursor;		
 		imp_vtable.dev_seticonressource = dev_seticonressource;
-		imp_vtable.dev_textmetric = dev_textmetric;
-		imp_vtable.dev_textsize = dev_textsize;
+		imp_vtable.dev_textmetric = dev_textmetric;		
 		imp_vtable.dev_setbackgroundcolour = dev_setbackgroundcolour;
 		imp_vtable.dev_settitle = dev_settitle;
 		imp_vtable.dev_setfocus = dev_setfocus;

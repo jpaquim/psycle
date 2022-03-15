@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #ifndef psy_audio_SEQUENCE_H
@@ -241,7 +241,7 @@ psy_audio_OrderIndex psy_audio_sequence_reorder(psy_audio_Sequence*,
 void psy_audio_sequence_resetpatterns(psy_audio_Sequence*);
 void psy_audio_sequence_fillpatterns(psy_audio_Sequence*);
 void psy_audio_reposition(psy_audio_Sequence*);
-uintptr_t psy_audio_sequence_order(psy_audio_Sequence*,
+uintptr_t psy_audio_sequence_order(const psy_audio_Sequence*,
 	uintptr_t trackidx, psy_dsp_big_beat_t position);
 psy_audio_Pattern* psy_audio_sequence_pattern(psy_audio_Sequence*,
 	psy_audio_OrderIndex);	
@@ -312,7 +312,8 @@ void psy_audio_sequence_settrackheight(psy_audio_Sequence*,
 	uintptr_t trackindex, double height);
 void psy_audio_sequence_set_cursor(psy_audio_Sequence*,
 	psy_audio_SequenceCursor);
-
+double psy_audio_sequence_seqoffset(const psy_audio_Sequence*,
+	psy_audio_OrderIndex);
 void psy_audio_sequence_dec_seqpos(psy_audio_Sequence*);
 void psy_audio_sequence_inc_seqpos(psy_audio_Sequence*);
 
@@ -333,8 +334,16 @@ void psy_audio_sequence_blockpastepattern(psy_audio_Sequence*,
 	psy_audio_BlockSelection selection,
 	psy_audio_Pattern* source);
 
-void psy_audio_sequence_block_traverse(psy_audio_Sequence* self,
+void psy_audio_sequence_block_traverse(psy_audio_Sequence*,
 	psy_audio_BlockSelection selection, psy_Command*);
+void psy_audio_sequence_block_traverse_lines(psy_audio_Sequence*,
+	psy_audio_BlockSelection selection, psy_Command*);
+
+psy_audio_PatternEvent psy_audio_sequence_pattern_event_at_cursor(
+	const psy_audio_Sequence*, psy_audio_SequenceCursor);
+
+const psy_audio_Pattern* psy_audio_sequence_pattern_const(
+	const psy_audio_Sequence*, psy_audio_OrderIndex);
 
 #ifdef __cplusplus
 }
