@@ -72,10 +72,10 @@ static bool psy_ui_scrollanimate_tick(psy_ui_ScrollAnimate* self)
 }
 
 /* psy_ui_Scroller */
+
 /* prototypes */
 static void psy_ui_scroller_onpanesize(psy_ui_Scroller*, psy_ui_Component* sender);
 static void psy_ui_scroller_onscroll(psy_ui_Scroller*, psy_ui_Component* sender);
-static void psy_ui_scroller_onscrollbarclicked(psy_ui_Scroller*, psy_ui_Component* sender);
 static void psy_ui_scroller_horizontal_onchanged(psy_ui_Scroller*, psy_ui_ScrollBar* sender);
 static void psy_ui_scroller_vertical_onchanged(psy_ui_Scroller*, psy_ui_ScrollBar* sender);
 static void psy_ui_scroller_scrollrangechanged(psy_ui_Scroller*, psy_ui_Component* sender,
@@ -83,6 +83,7 @@ static void psy_ui_scroller_scrollrangechanged(psy_ui_Scroller*, psy_ui_Componen
 static void psy_ui_scroller_onfocusin(psy_ui_Scroller*, psy_ui_Event*);
 static void psy_ui_scroller_ontimer(psy_ui_Scroller*, uintptr_t timerid);
 static void psy_ui_scroller_onupdatestyles(psy_ui_Scroller*);
+
 /* vtable */
 static psy_ui_ComponentVtable vtable;
 static bool vtable_initialized = FALSE;
@@ -102,7 +103,7 @@ static void vtable_init(psy_ui_Scroller* self)
 			psy_ui_scroller_onfocusin;
 		vtable_initialized = TRUE;
 	}
-	self->component.vtable = &vtable;
+	psy_ui_component_setvtable(psy_ui_scroller_base(self), &vtable);
 }
 
 /* implementation */
@@ -170,13 +171,6 @@ void psy_ui_scroller_connectclient(psy_ui_Scroller* self)
 	psy_signal_connect(&self->client->signal_scroll, self,
 		psy_ui_scroller_onscroll);		
 	psy_ui_component_setalign(self->client, psy_ui_ALIGN_FIXED);	
-}
-
-void psy_ui_scroller_setbackgroundmode(psy_ui_Scroller* self,
-	psy_ui_BackgroundMode scroller, psy_ui_BackgroundMode pane)
-{
-	psy_ui_component_setbackgroundmode(&self->component, scroller);
-	psy_ui_component_setbackgroundmode(&self->pane, pane);
 }
 
 void psy_ui_scroller_onpanesize(psy_ui_Scroller* self, psy_ui_Component* sender)
@@ -334,6 +328,7 @@ void psy_ui_scroller_scrollrangechanged(psy_ui_Scroller* self, psy_ui_Component*
 				psy_ui_component_hide(&self->spacer);
 				psy_ui_component_align(&self->component);
 				psy_ui_component_align(&self->bottom);
+				psy_ui_component_invalidate(&self->component);
 			}
 		} else if (!psy_ui_component_visible(&self->vscroll.component)) {
 			psy_ui_component_show(&self->vscroll.component);
@@ -342,6 +337,7 @@ void psy_ui_scroller_scrollrangechanged(psy_ui_Scroller* self, psy_ui_Component*
 			}
 			psy_ui_component_align(&self->component);
 			psy_ui_component_align(&self->bottom);
+			psy_ui_component_invalidate(&self->component);
 		}
 	} else if (orientation == psy_ui_HORIZONTAL) {
 		psy_ui_IntPoint hrange;
@@ -354,7 +350,8 @@ void psy_ui_scroller_scrollrangechanged(psy_ui_Scroller* self, psy_ui_Component*
 			if (psy_ui_component_visible(&self->bottom)) {
 				psy_ui_component_hide(&self->bottom);
 				psy_ui_component_hide(&self->spacer);
-				psy_ui_component_align(&self->component);				
+				psy_ui_component_align(&self->component);
+				psy_ui_component_invalidate(&self->component);
 			}
 		} else if (!psy_ui_component_visible(&self->bottom)) {
 			psy_ui_component_show(&self->bottom);
@@ -363,11 +360,13 @@ void psy_ui_scroller_scrollrangechanged(psy_ui_Scroller* self, psy_ui_Component*
 			}
 			psy_ui_component_align(&self->component);
 			psy_ui_component_align(&self->bottom);
+			psy_ui_component_invalidate(&self->component);
 		} else if (psy_ui_component_visible(&self->vscroll.component)
 				&& psy_ui_component_visible(&self->bottom) &&
 				!psy_ui_component_visible(&self->spacer)) {
 			psy_ui_component_show(&self->spacer);
 			psy_ui_component_align(&self->bottom);
+			psy_ui_component_invalidate(&self->component);
 		}
 	}
 }

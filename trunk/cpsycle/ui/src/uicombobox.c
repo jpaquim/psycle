@@ -276,6 +276,7 @@ void psy_ui_combobox_ontextfield(psy_ui_ComboBox* self, psy_ui_Label* sender,
 	assert(self);
 
 	psy_ui_combobox_expand(self);
+	psy_ui_mouseevent_stop_propagation(ev);
 }
 
 void psy_ui_combobox_onexpand(psy_ui_ComboBox* self, psy_ui_Button* sender,

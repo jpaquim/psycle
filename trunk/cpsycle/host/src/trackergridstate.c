@@ -15,6 +15,7 @@
 #include "../../detail/portable.h"
 
 /* TrackerConfig */
+
 /* implementation */
 void trackdrag_init(TrackDrag* self)
 {	

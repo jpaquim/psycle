@@ -16,7 +16,7 @@
 void playlistbar_init(PlaylistBar* self, psy_ui_Component* parent)
 {
 	psy_ui_component_init(&self->component, parent, NULL);
-	psy_ui_component_setspacing(&self->component,
+	psy_ui_component_set_padding(&self->component,
 		psy_ui_margin_make_em(0.0, 0.0, 0.5, 0.0));
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));

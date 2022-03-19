@@ -136,6 +136,15 @@ INLINE void pianogridstate_clip(PianoGridState* self,
 	}
 }
 
+INLINE bool pianogridstate_testselection(PianoGridState* self, uint8_t key, double offset)
+{
+	return self->pv->selection.valid &&
+		key >= self->pv->selection.topleft.key &&
+		key < self->pv->selection.bottomright.key&&
+		offset >= self->pv->selection.topleft.absoffset &&
+		offset < self->pv->selection.bottomright.absoffset;
+}
+
 #ifdef __cplusplus
 }
 #endif

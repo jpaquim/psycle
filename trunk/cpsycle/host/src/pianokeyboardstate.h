@@ -76,6 +76,15 @@ INLINE void pianokeyboardstate_clip(KeyboardState* self,
 		self->keyheightpx)));	
 }
 
+INLINE void keyboardstate_update_metrics(KeyboardState* self,
+	const psy_ui_TextMetric* tm)
+{
+	assert(self);
+
+	self->keyheightpx = psy_ui_value_px(
+		&self->keyheight, tm, NULL);
+	self->keyboardheightpx = keyboardstate_height(self, tm);
+}
 
 #ifdef __cplusplus
 }

@@ -56,8 +56,6 @@ INLINE psy_ui_Component* psy_ui_scroller_base(psy_ui_Scroller* self)
 
 void psy_ui_scroller_connectclient(psy_ui_Scroller*);
 
-void psy_ui_scroller_setbackgroundmode(psy_ui_Scroller*,
-	psy_ui_BackgroundMode scroller, psy_ui_BackgroundMode pane);	
 
 #ifdef __cplusplus
 }

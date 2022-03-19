@@ -61,13 +61,13 @@ void instrumentfilterview_init(InstrumentFilterView* self,
 	psy_ui_component_init(&self->filter, &self->top, NULL);
 	margin = psy_ui_defaults_vmargin(psy_ui_defaults());
 	margin.top = psy_ui_value_make_eh(1.0);
-	psy_ui_component_setmargin(&self->filter, margin);
+	psy_ui_component_set_margin(&self->filter, margin);
 	psy_ui_label_init_text(&self->filtertypeheader, &self->filter,
 		"instrumentview.filter-type");	
 	psy_ui_component_setalign(&self->filtertypeheader.component,
 		psy_ui_ALIGN_LEFT);
 	psy_ui_margin_init_em(&margin, 0.0, 2.0, 0.0, 0.0);		
-	psy_ui_component_setmargin(&self->filtertypeheader.component, margin);
+	psy_ui_component_set_margin(&self->filtertypeheader.component, margin);
 	psy_ui_combobox_init(&self->filtertype, &self->filter);
 	psy_ui_combobox_setcharnumber(&self->filtertype, 20);
 	psy_ui_component_setalign(&self->filtertype.component, psy_ui_ALIGN_LEFT);
@@ -91,7 +91,7 @@ void instrumentfilterview_init(InstrumentFilterView* self,
 	psy_ui_component_setalign(&self->bottom, psy_ui_ALIGN_BOTTOM);
 	margin = psy_ui_defaults_vmargin(psy_ui_defaults());
 	margin.top = psy_ui_value_make_eh(1.0);
-	psy_ui_component_setmargin(&self->bottom, margin);
+	psy_ui_component_set_margin(&self->bottom, margin);
 	psy_ui_component_setdefaultalign(&self->bottom, psy_ui_ALIGN_TOP,
 		psy_ui_defaults_vmargin(psy_ui_defaults()));
 	adsrsliders_init(&self->adsrsliders, &self->bottom);	

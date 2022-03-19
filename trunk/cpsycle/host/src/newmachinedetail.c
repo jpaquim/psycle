@@ -66,7 +66,7 @@ void newmachinedetail_init(NewMachineDetail* self, psy_ui_Component* parent,
 		psy_ui_ALIGN_CLIENT);
 	psy_ui_component_setalign(&self->plugname.component, psy_ui_ALIGN_TOP);
 	psy_ui_margin_init_em(&margin, 0.0, 0.0, 1.0, 0.0);
-	psy_ui_component_setmargin(&self->plugname.component, margin);
+	psy_ui_component_set_margin(&self->plugname.component, margin);
 	/* description */
 	psy_ui_label_init(&self->desclabel, &self->component);
 	psy_ui_label_settextalignment(&self->desclabel, psy_ui_ALIGNMENT_TOP);
@@ -76,7 +76,7 @@ void newmachinedetail_init(NewMachineDetail* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->bottom, &self->component, NULL);
 	psy_ui_component_setalign(&self->bottom, psy_ui_ALIGN_BOTTOM);
 	psy_ui_margin_init_em(&spacing, 0.5, 1.0, 0.5, 0.0);
-	psy_ui_component_setspacing(&self->bottom, spacing);
+	psy_ui_component_set_padding(&self->bottom, spacing);
 	psy_ui_component_setdefaultalign(&self->bottom,
 		psy_ui_ALIGN_TOP, psy_ui_defaults_vmargin(psy_ui_defaults()));
 	psy_ui_label_init_text(&self->compatlabel, &self->bottom,
@@ -91,7 +91,7 @@ void newmachinedetail_init(NewMachineDetail* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->compatblitzgamefx.signal_clicked, self,
 		newmachinedetail_onloadnewblitz);	
 	psy_ui_margin_init_em(&margin, 0.0, 0.0, 0.5, 0.0);
-	psy_ui_component_setmargin(psy_ui_label_base(&self->compatlabel), margin);	
+	psy_ui_component_set_margin(psy_ui_label_base(&self->compatlabel), margin);	
 	/* details */
 	psy_ui_component_init(&self->details, &self->component, NULL);
 	psy_ui_component_setalign(&self->details, psy_ui_ALIGN_BOTTOM);
@@ -109,7 +109,7 @@ void newmachinedetail_init(NewMachineDetail* self, psy_ui_Component* parent,
 	psy_ui_textinput_init(& self->categoryedit, &self->category);
 	psy_ui_textinput_enableinputfield(&self->categoryedit);	
 	psy_ui_margin_init_em(&margin, 0.0, 0.0, 0.0, 1.5);
-	psy_ui_component_setmargin(psy_ui_textinput_base(&self->categoryedit), margin);
+	psy_ui_component_set_margin(psy_ui_textinput_base(&self->categoryedit), margin);
 	psy_ui_component_setalign(psy_ui_textinput_base(&self->categoryedit),
 		psy_ui_ALIGN_CLIENT);
 	psy_signal_connect(&self->categoryedit.signal_accept,

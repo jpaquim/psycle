@@ -61,7 +61,7 @@ void samplessongimportview_init(SamplesSongImportView* self, psy_ui_Component* p
 	psy_ui_component_setalign(&self->header, psy_ui_ALIGN_TOP);
 	psy_ui_component_setdefaultalign(&self->header, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
-	psy_ui_component_setspacing(&self->header,
+	psy_ui_component_set_padding(&self->header,
 		psy_ui_margin_make_em(0.5, 0.0, 0.5, 0.0));
 	psy_ui_label_init_text(&self->label, &self->header, "Source");
 	psy_ui_label_init_text(&self->songname, &self->header,
@@ -338,7 +338,7 @@ void samplesgeneralview_init(SamplesGeneralView* self, psy_ui_Component* parent,
 	self->sample = NULL;	
 	self->notestabmode = workspace_notetabmode(workspace);
 	psy_ui_component_init(&self->component, parent, NULL);
-	psy_ui_component_setspacing(&self->component,
+	psy_ui_component_set_padding(&self->component,
 		psy_ui_margin_make_em(1.0, 0.0, 0.0, 0.0));
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_TOP,
 		psy_ui_defaults_vmargin(psy_ui_defaults()));
@@ -531,7 +531,7 @@ void samplesvibratoview_init(SamplesVibratoView* self, psy_ui_Component* parent,
 	};
 
 	psy_ui_component_init(&self->component, parent, NULL);
-	psy_ui_component_setspacing(&self->component,
+	psy_ui_component_set_padding(&self->component,
 		psy_ui_margin_make_em(1.0, 0.0, 0.0, 0.0));
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_TOP,
 		psy_ui_defaults_vmargin(psy_ui_defaults()));
@@ -548,7 +548,7 @@ void samplesvibratoview_init(SamplesVibratoView* self, psy_ui_Component* parent,
 		psy_ui_label_settext(&self->waveformheaderlabel, "Waveform");
 		psy_ui_component_setalign(&self->waveformheaderlabel.component,
 			psy_ui_ALIGN_LEFT);
-		psy_ui_component_setmargin(&self->waveformheaderlabel.component,
+		psy_ui_component_set_margin(&self->waveformheaderlabel.component,
 			header_margin);
 		psy_ui_combobox_init(&self->waveformbox, &self->header);
 		psy_ui_combobox_setcharnumber(&self->waveformbox, 15);
@@ -732,7 +732,7 @@ void samplesloopview_init(SamplesLoopView* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->cont, &self->component, NULL);
 	psy_ui_component_setdefaultalign(&self->cont, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
-	psy_ui_component_setspacing(&self->cont,
+	psy_ui_component_set_padding(&self->cont,
 		psy_ui_margin_make_em(0.25, 0.0, 0.25, 0.0));
 	psy_ui_label_init_text(&self->loopheaderlabel, &self->cont,
 		"samplesview.cont-loop");	
@@ -758,7 +758,7 @@ void samplesloopview_init(SamplesLoopView* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->sustain, &self->component, NULL);
 	psy_ui_component_setdefaultalign(&self->sustain, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
-	psy_ui_component_setspacing(&self->sustain,
+	psy_ui_component_set_padding(&self->sustain,
 		psy_ui_margin_make_em(0.25, 0.0, 0.25, 0.0));
 	psy_ui_label_init(&self->sustainloopheaderlabel, &self->sustain);
 	psy_ui_label_settext(&self->sustainloopheaderlabel, "samplesview.sustain-loop");
@@ -1031,7 +1031,7 @@ void samplesview_init(SamplesView* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->right, &self->component, NULL);
 	psy_ui_component_setalign(&self->right, psy_ui_ALIGN_CLIENT);
 	psy_ui_margin_init_em(&margin, 0.0, 0.0, 0.0, 2.0);
-	psy_ui_component_setmargin(&self->right, margin);
+	psy_ui_component_set_margin(&self->right, margin);
 	psy_ui_notebook_init(&self->clientnotebook, &self->right);
 	psy_ui_component_setalign(&self->clientnotebook.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_component_init(&self->client, &self->clientnotebook.component, NULL);
@@ -1042,7 +1042,7 @@ void samplesview_init(SamplesView* self, psy_ui_Component* parent,
 	psy_ui_tabbar_append(&self->tabbar, "Vibrato",
 		psy_INDEX_INVALID, psy_INDEX_INVALID, psy_ui_colour_white());
 	psy_ui_notebook_init(&self->notebook, &self->client);
-	psy_ui_component_setmargin(psy_ui_notebook_base(&self->notebook),
+	psy_ui_component_set_margin(psy_ui_notebook_base(&self->notebook),
 		psy_ui_margin_make_em(0.0, 0.0, 0.0, 0.5));
 	psy_ui_component_setalign(psy_ui_notebook_base(&self->notebook),
 		psy_ui_ALIGN_TOP);
@@ -1061,11 +1061,11 @@ void samplesview_init(SamplesView* self, psy_ui_Component* parent,
 	psy_ui_notebook_select(&self->notebook, 0);
 	wavebox_init(&self->wavebox, &self->client, workspace);
 	psy_ui_component_setalign(&self->wavebox.component, psy_ui_ALIGN_CLIENT);
-	psy_ui_component_setmargin(&self->wavebox.component, waveboxmargin);
+	psy_ui_component_set_margin(&self->wavebox.component, waveboxmargin);
 	/* LoopView */
 	samplesloopview_init(&self->waveloop, &self->right, self);
 	psy_ui_component_setalign(&self->waveloop.component, psy_ui_ALIGN_BOTTOM);
-	psy_ui_component_setmargin(&self->waveloop.component,
+	psy_ui_component_set_margin(&self->waveloop.component,
 		psy_ui_margin_make_em(0.0, 0.0, 0.0, 0.5));
 	psy_signal_connect(&self->samplesbox.signal_changed, self,
 		samplesview_onsamplesboxchanged);

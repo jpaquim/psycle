@@ -597,8 +597,8 @@ void channelmappingview_init(ChannelMappingView* self, psy_ui_Component* parent,
 	pinedit_init(&self->pinedit, &self->component, wire, workspace);
 	psy_ui_component_setalign(&self->pinedit.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_margin_init_em(&margin, 0.0, 0.5, 0.0, 2.0);
-	psy_ui_component_setmargin(&self->pinedit.component, margin);
-	psy_ui_component_setmargin(&self->help.component, margin);	
+	psy_ui_component_set_margin(&self->pinedit.component, margin);
+	psy_ui_component_set_margin(&self->help.component, margin);	
 }
 
 void channelmappingview_onautowire(ChannelMappingView* self,

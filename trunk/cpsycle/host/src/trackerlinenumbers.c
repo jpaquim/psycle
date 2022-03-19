@@ -313,15 +313,17 @@ void trackerlinenumbers_showlinenumbersinhex(TrackerLineNumbers* self,
 
 void trackerlinenumbers_updatecursor(TrackerLineNumbers* self)
 {
-	psy_audio_Sequence* sequence;
+	if (!self->workspace->followsong || !self->workspace->host_sequencer_time.currplaying) {
+		psy_audio_Sequence* sequence;
 
-	sequence = patternviewstate_sequence(self->state->pv);
-	if (sequence) {
-		trackerlinenumbers_invalidateline(self,
-			psy_audio_sequencecursor_line_abs(&sequence->lastcursor));
-		trackerlinenumbers_invalidateline(self,
-			psy_audio_sequencecursor_line_abs(&sequence->cursor));
-		self->oldcursor = sequence->cursor;
+		sequence = patternviewstate_sequence(self->state->pv);
+		if (sequence) {
+			trackerlinenumbers_invalidateline(self,
+				psy_audio_sequencecursor_line_abs(&sequence->lastcursor));
+			trackerlinenumbers_invalidateline(self,
+				psy_audio_sequencecursor_line_abs(&sequence->cursor));
+			self->oldcursor = sequence->cursor;
+		}
 	}
 }
 

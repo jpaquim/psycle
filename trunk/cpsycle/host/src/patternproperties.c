@@ -72,22 +72,22 @@ void patternproperties_init(PatternProperties* self, psy_ui_Component* parent,
 		patternproperties_onapply);	
 	intedit_init(&self->timesig_numerator, &self->component,
 		"Timesignature", 0, 0, 128);
-	psy_ui_component_setspacing(&self->timesig_numerator.less.component,
+	psy_ui_component_set_padding(&self->timesig_numerator.less.component,
 		psy_ui_margin_make_em(0.0, 0.0, 0.0, 0.0));
-	psy_ui_component_setspacing(&self->timesig_numerator.more.component,
+	psy_ui_component_set_padding(&self->timesig_numerator.more.component,
 		psy_ui_margin_make_em(0.0, 0.0, 0.0, 0.0));
 	psy_signal_connect(&self->timesig_numerator.signal_changed, self,
 		patternproperties_ontimesignominator);
 	intedit_init(&self->timesig_denominator, &self->component,
 		"", 0, 0, 128);
-	psy_ui_component_setspacing(&self->timesig_denominator.less.component,
+	psy_ui_component_set_padding(&self->timesig_denominator.less.component,
 		psy_ui_margin_make_em(0.0, 0.0, 0.0, 0.0));
-	psy_ui_component_setspacing(&self->timesig_denominator.more.component,
+	psy_ui_component_set_padding(&self->timesig_denominator.more.component,
 		psy_ui_margin_make_em(0.0, 0.0, 0.0, 0.0));	
 	psy_signal_connect(&self->timesig_denominator.signal_changed, self,
 		patternproperties_ontimesigdenominator);	
 	psy_ui_button_settext(&self->applybutton, "patternview.apply");
-	psy_ui_component_setspacing(&self->applybutton.component,
+	psy_ui_component_set_padding(&self->applybutton.component,
 		psy_ui_margin_make_em(0.0, 0.0, 0.0, 0.0));
 	psy_ui_button_settextalignment(&self->applybutton, psy_ui_ALIGNMENT_LEFT);	
 	psy_ui_component_setalign(&self->component, psy_ui_ALIGN_TOP);

@@ -138,7 +138,7 @@ void cpuview_init(CPUView* self, psy_ui_Component* parent,
 	psy_ui_margin_init(&self->topmargin);		
 	psy_ui_component_init_align(&self->top, &self->component, NULL,
 		psy_ui_ALIGN_BOTTOM);
-	psy_ui_component_setmargin(&self->top, margin);
+	psy_ui_component_set_margin(&self->top, margin);
 	cpuview_inittitle(self);
 	cpuview_initcoreinfo(self);	
 	cpuview_initresources(self);
@@ -202,7 +202,7 @@ void cpuview_initmodules(CPUView* self, Workspace* workspace)
 		&self->component);
 	psy_ui_component_setalign(&self->scroller.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_margin_init_em(&margin, 1.0, 0.0, 0.0, 2.0);
-	psy_ui_component_setmargin(&self->scroller.component, margin);
+	psy_ui_component_set_margin(&self->scroller.component, margin);
 }
 
 void cpuview_ontimer(CPUView* self, psy_ui_Component* sender,

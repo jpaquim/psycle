@@ -119,7 +119,7 @@ void psy_ui_aligner_adjustspacing(psy_ui_Component* component,
 {
 	psy_ui_Margin spacing;
 
-	spacing = psy_ui_component_spacing(component);
+	spacing = psy_ui_component_padding(component);
 	cp_topleft->x += psy_ui_value_px(&spacing.left,
 		psy_ui_component_textmetric(component), NULL);
 	cp_topleft->y += psy_ui_value_px(&spacing.top,

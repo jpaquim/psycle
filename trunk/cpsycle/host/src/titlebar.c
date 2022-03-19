@@ -56,7 +56,7 @@ void titlebar_init(TitleBar* self, psy_ui_Component* parent,
 	psy_ui_button_settext(&self->hide, "X");	
 	psy_ui_component_setalign(&self->hide.component, psy_ui_ALIGN_RIGHT);
 	psy_ui_margin_init_em(&margin, 0.0, 2.0, 0.0, 0.0);
-	psy_ui_component_setmargin(&self->hide.component, margin);
+	psy_ui_component_set_margin(&self->hide.component, margin);
 	self->component.draggable = TRUE;
 	self->dragid = NULL;
 }

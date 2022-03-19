@@ -1362,13 +1362,13 @@ void instrumentnotemapview_init(InstrumentNoteMapView* self,
 	psy_ui_component_setalign(&self->label.component, psy_ui_ALIGN_TOP);
 	samplesbox_init(&self->samplesbox, &self->component, NULL, workspace);
 	psy_ui_margin_init_em(&margin, 0.0, 2.0, 0.0, 0.0);
-	psy_ui_component_setmargin(&self->samplesbox.component, margin);
+	psy_ui_component_set_margin(&self->samplesbox.component, margin);
 	psy_ui_component_setalign(&self->samplesbox.component, psy_ui_ALIGN_LEFT);	
 	psy_ui_margin_init_em(&margin, 0.0, 0.0, 1.5, 0.0);
-	psy_ui_component_setmargin(&self->label.component, margin);
+	psy_ui_component_set_margin(&self->label.component, margin);
 	instrumentnotemapbuttons_init(&self->buttons, &self->component);
 	psy_ui_component_setalign(&self->buttons.component, psy_ui_ALIGN_TOP);
-	psy_ui_component_setmargin(&self->buttons.component, margin);
+	psy_ui_component_set_margin(&self->buttons.component, margin);
 	instrumentnotemapview_initentries(self, workspace);	
 	instrumentnotemapview_inittable(self, workspace);
 	psy_ui_splitter_init(&self->splitter, &self->component);
@@ -1411,12 +1411,12 @@ void instrumentnotemapview_initentries(InstrumentNoteMapView* self, Workspace* w
 	psy_ui_component_setalign(&self->scroller.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_component_setalign(&self->entryview.component, psy_ui_ALIGN_FIXED);
 	psy_ui_margin_init_em(&margin, 0.0, 2.0, 0.0, 0.0);
-	psy_ui_component_setmargin(&self->entryview.component, margin);	
+	psy_ui_component_set_margin(&self->entryview.component, margin);	
 	instrumentkeyboardview_init(&self->keyboard, &self->entries);
 	psy_ui_component_setalign(&self->keyboard.component, psy_ui_ALIGN_BOTTOM);
-	psy_ui_component_setmargin(&self->keyboard.component, margin);
+	psy_ui_component_set_margin(&self->keyboard.component, margin);
 	psy_ui_margin_init_em(&margin, 0.0, 2.0, 0.0, 0.0);
-	psy_ui_component_setmargin(&self->keyboard.component, margin);
+	psy_ui_component_set_margin(&self->keyboard.component, margin);
 }
 
 void instrumentnotemapview_inittable(InstrumentNoteMapView* self, Workspace* workspace)

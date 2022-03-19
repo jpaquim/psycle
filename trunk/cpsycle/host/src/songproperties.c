@@ -74,11 +74,11 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 	psy_ui_label_settext(&self->label_title, "songproperties.title");
 	psy_ui_label_setcharnumber(&self->label_title, charnum);
 	psy_ui_component_setalign(&self->label_title.component, psy_ui_ALIGN_LEFT);
-	psy_ui_component_setmargin(&self->label_title.component, margin);
+	psy_ui_component_set_margin(&self->label_title.component, margin);
 	psy_ui_textinput_init(&self->edit_title, &self->title);
 	psy_ui_textinput_enableinputfield(&self->edit_title);
 	psy_ui_component_setalign(&self->edit_title.component, psy_ui_ALIGN_CLIENT);
-	psy_ui_component_setmargin(&self->edit_title.component, margin);
+	psy_ui_component_set_margin(&self->edit_title.component, margin);
 	psy_signal_connect(&self->edit_title.signal_accept, self,
 		songpropertiesview_oneditaccept);
 	psy_signal_connect(&self->edit_title.signal_reject, self,
@@ -91,12 +91,12 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 		"songproperties.credits");
 	psy_ui_label_setcharnumber(&self->label_credits, charnum);
 	psy_ui_component_setalign(&self->label_credits.component, psy_ui_ALIGN_LEFT);
-	psy_ui_component_setmargin(&self->label_credits.component, margin);
+	psy_ui_component_set_margin(&self->label_credits.component, margin);
 	psy_ui_label_settextalignment(&self->label_credits, psy_ui_ALIGNMENT_RIGHT);
 	psy_ui_textinput_init(&self->edit_credits, &self->credits);
 	psy_ui_textinput_enableinputfield(&self->edit_credits);
 	psy_ui_component_setalign(&self->edit_credits.component, psy_ui_ALIGN_CLIENT);
-	psy_ui_component_setmargin(&self->edit_credits.component, margin);
+	psy_ui_component_set_margin(&self->edit_credits.component, margin);
 	psy_signal_connect(&self->edit_credits.signal_accept, self,
 		songpropertiesview_oneditaccept);
 	psy_signal_connect(&self->edit_credits.signal_reject, self,
@@ -138,7 +138,7 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 		"songproperties.realtpb");	
 	psy_ui_label_init(&self->realticksperbeat, &self->speedbar);
 	psy_ui_label_setcharnumber(&self->realticksperbeat, 8);			
-	psy_ui_component_setmargin(&self->samplerindex.component, margin);
+	psy_ui_component_set_margin(&self->samplerindex.component, margin);
 	/* Comments */
 	psy_ui_component_init(&self->comments, &self->component, NULL);
 	psy_ui_component_setstyletype(&self->comments,
@@ -150,13 +150,13 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 		psy_ui_ALIGNMENT_TOP);	
 	psy_ui_component_setalign(&self->label_comments.component,
 		psy_ui_ALIGN_TOP);
-	psy_ui_component_setmargin(&self->label_comments.component,
+	psy_ui_component_set_margin(&self->label_comments.component,
 		psy_ui_margin_make_em(0.0, 2.0, 1.0, 3.0));
 	psy_ui_textarea_init(&self->edit_comments, &self->comments);
 	psy_ui_component_setstyletype(&self->edit_comments.component,
 		STYLE_SONGPROPERTIES_COMMENTS_EDIT);		
 	psy_ui_component_setalign(&self->edit_comments.component, psy_ui_ALIGN_CLIENT);
-	psy_ui_component_setmargin(&self->edit_comments.component,
+	psy_ui_component_set_margin(&self->edit_comments.component,
 		psy_ui_margin_make_em(0.0, 2.0, 1.0, 3.0));
 	psy_ui_component_setalign(&self->edit_comments.component, psy_ui_ALIGN_CLIENT);
 	psy_signal_connect(&self->edit_comments.pane.signal_change, self,

@@ -1373,7 +1373,7 @@ void machinestackpane_build(MachineStackPane* self)
 							psy_ui_value_make_px((column->offset - 1) *
 								(psy_ui_value_px(&self->state->columnsize.height, NULL, NULL) + 20.0) + 20.0),
 							psy_ui_value_zero(), psy_ui_value_zero(), psy_ui_value_zero());						
-						psy_ui_component_setmargin(&arrow->component, levelmargin);
+						psy_ui_component_set_margin(&arrow->component, levelmargin);
 						psy_ui_component_setalign(&trackpane->component, psy_ui_ALIGN_TOP);
 					}
 				}				
@@ -1515,7 +1515,7 @@ void machinestackvolumes_build(MachineStackVolumes* self)
 			margin = psy_ui_margin_make(
 				psy_ui_value_make_eh(0.0), psy_ui_value_make_px(1.0),
 				psy_ui_value_make_eh(0.0), psy_ui_value_make_ew(0.0));
-			psy_ui_component_setmargin(component, margin);	
+			psy_ui_component_set_margin(component, margin);	
 		}
 	}
 	psy_ui_component_align(&self->component);

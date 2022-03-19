@@ -53,12 +53,10 @@ typedef struct PianogridTrackEvent {
 /* PianoGridDraw */
 typedef struct PianoGridDraw {
 	const psy_ui_TextMetric* tm;
-	psy_ui_RealSize size;
-	bool cursorchanging;
+	psy_ui_RealSize size;	
 	bool cursoronnoterelease;
 	psy_dsp_big_beat_t sequenceentryoffset;	
 	PianoTrackDisplay trackdisplay;	
-	psy_audio_BlockSelection selection;
 	/* references */
 	KeyboardState* keyboardstate;
 	PianoGridState* gridstate;
@@ -67,8 +65,7 @@ typedef struct PianoGridDraw {
 	bool drawgrid;
 	bool drawentries;
 	bool drawcursor;
-	bool drawplaybar;
-	bool clip;
+	bool drawplaybar;	
 } PianoGridDraw;
 
 void pianogriddraw_init(PianoGridDraw*,
@@ -76,15 +73,10 @@ void pianogriddraw_init(PianoGridDraw*,
 	psy_dsp_big_beat_t sequenceentryoffset,
 	psy_audio_PatternEntry* hoverpatternentry,	
 	PianoTrackDisplay,
-	bool cursorchanging, bool cursoronnoterelease,
-	psy_audio_BlockSelection selection,
-	psy_ui_RealSize, const psy_ui_TextMetric*, Workspace*);
-void pianogriddraw_ondraw(PianoGridDraw*, psy_ui_Graphics*);
+	bool cursoronnoterelease,	
+	psy_ui_RealSize, Workspace*);
 
-INLINE void pianogriddraw_preventclip(PianoGridDraw* self)
-{
-	self->clip = FALSE;
-}
+void pianogriddraw_ondraw(PianoGridDraw*, psy_ui_Graphics*);
 
 INLINE void pianogriddraw_preventgrid(PianoGridDraw* self)
 {
@@ -112,13 +104,14 @@ typedef struct Pianogrid {
 	psy_ui_Component component;
 	/* internal */	
 	psy_audio_PatternEntry* hoverpatternentry;	
-	psy_dsp_big_beat_t lastplayposition;
 	psy_audio_SequenceCursor oldcursor;
 	psy_audio_SequenceCursor dragcursor;
 	bool cursoronnoterelease;
 	PianoTrackDisplay trackdisplay;
-	bool cursorchanging;	
-	psy_audio_SequenceCursor lastdragcursor;	
+	psy_audio_SequenceCursor lastdragcursor;
+	bool prevent_context_menu;
+	bool edit_mode;
+	bool preventscrollleft;
 	/* references */
 	KeyboardState* keyboardstate;
 	PianoGridState* gridstate;
@@ -128,11 +121,12 @@ typedef struct Pianogrid {
 void pianogrid_init(Pianogrid*, psy_ui_Component* parent, KeyboardState*,
 	PianoGridState*, Workspace*);
 
-void pianogrid_invalidateline(Pianogrid*, psy_dsp_big_beat_t offset);
-void pianogrid_invalidatecursor(Pianogrid*);
+void pianogrid_invalidate_line(Pianogrid*, intptr_t line);
+void pianogrid_invalidate_lines(Pianogrid*, intptr_t line1, intptr_t line2);
+void pianogrid_invalidate_cursor(Pianogrid*);
 void pianogrid_update_cursor(Pianogrid*, psy_audio_SequenceCursor);
 void pianogrid_set_cursor(Pianogrid*, psy_audio_SequenceCursor);
-void pianogrid_onpatternchange(Pianogrid*, psy_audio_Pattern*);
+void pianogrid_onpatternchange(Pianogrid*);
 void pianogrid_settrackdisplay(Pianogrid*, PianoTrackDisplay);
 
 INLINE PianoTrackDisplay pianogrid_trackdisplay(const Pianogrid* self)
@@ -170,7 +164,6 @@ void pianogrid_prevkeys(Pianogrid*, uint8_t lines, bool wrap);
 void pianogrid_advanceline(Pianogrid*);
 void pianogrid_advancelines(Pianogrid*, uintptr_t lines, bool wrap);
 void pianogrid_advancekeys(Pianogrid*, uint8_t lines, bool wrap);
-void pianogrid_updatekeystate(Pianogrid*);
 
 #ifdef __cplusplus
 }

@@ -88,7 +88,6 @@ typedef struct InterpolateCurveBox {
 
 void interpolatecurvebox_init(InterpolateCurveBox*, psy_ui_Component* parent,
 	struct InterpolateCurveView*, PatternViewState*, Workspace*);
-void interpolatecurvebox_setpattern(InterpolateCurveBox*, psy_audio_Pattern*);
 
 typedef struct InterpolateCurveView {
 	psy_ui_Component component;	
@@ -104,8 +103,6 @@ void interpolatecurveview_init(InterpolateCurveView*, psy_ui_Component* parent,
 	PatternViewState* state, Workspace*);
 void interpolatecurveview_setselection(InterpolateCurveView*,
 	const psy_audio_BlockSelection*);
-void interpolatecurveview_setpattern(InterpolateCurveView*,
-	psy_audio_Pattern*);
 
 INLINE psy_ui_Component* interpolatecurveview_base(InterpolateCurveView* self)
 {

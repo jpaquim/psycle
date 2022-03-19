@@ -46,7 +46,7 @@ void trackbox_init(TrackBox* self, psy_ui_Component* parent)
 	psy_ui_component_init(trackbox_base(self), parent, NULL);
 	trackbox_vtableinit_init(self);
 	psy_ui_margin_init_em(&spacing, 0.0, 0.0, 0.0, 1.0);
-	psy_ui_component_setspacing(trackbox_base(self), spacing);
+	psy_ui_component_set_padding(trackbox_base(self), spacing);
 	psy_ui_component_init(&self->client, &self->component, NULL);
 	psy_ui_component_setalign(&self->client, psy_ui_ALIGN_TOP);
 	psy_ui_component_setdefaultalign(&self->client,

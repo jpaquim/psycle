@@ -262,7 +262,7 @@ void licence_setlanguage(Licence* self)
 /* About */
 
 /* prototypes */
-static void about_initbuttons(About*);
+static void about_init_buttons(About*);
 static void about_onbutton(About*, psy_ui_Button* sender);
 static void about_selectinfobox(About*, uintptr_t index);
 static void about_onmousedoubleclick(About*, psy_ui_MouseEvent*);
@@ -284,7 +284,7 @@ static void about_vtable_init(About* self)
 			about_onfocus;
 		about_vtable_initialized = TRUE;
 	}
-	self->component.vtable = &about_vtable;
+	psy_ui_component_setvtable(about_base(self), &about_vtable);
 }
 
 /* implementation */
@@ -294,7 +294,7 @@ void about_init(About* self, psy_ui_Component* parent, Workspace* workspace)
 	about_vtable_init(self);
 	psy_ui_component_setstyletype(&self->component, STYLE_ABOUT);	
 	self->workspace = workspace;	
-	about_initbuttons(self);
+	about_init_buttons(self);
 	psy_ui_notebook_init(&self->notebook, &self->component);
 	psy_ui_component_hide(psy_ui_notebook_base(&self->notebook));
 	psy_ui_component_setpreferredsize(psy_ui_notebook_base(&self->notebook),
@@ -309,11 +309,11 @@ void about_init(About* self, psy_ui_Component* parent, Workspace* workspace)
 		about_onfocus);
 }
 
-void about_initbuttons(About* self)
+void about_init_buttons(About* self)
 {	
 	psy_ui_component_init_align(&self->bottom, &self->component, NULL,
 		psy_ui_ALIGN_BOTTOM);
-	psy_ui_component_setmargin(&self->bottom,
+	psy_ui_component_set_margin(&self->bottom,
 		psy_ui_margin_make(psy_ui_value_zero(), psy_ui_value_zero(),
 			psy_ui_value_make_ph(0.15), psy_ui_value_zero()));
 	psy_ui_component_init_align(&self->buttons, &self->bottom, NULL,
@@ -331,7 +331,7 @@ void about_initbuttons(About* self)
 		"help.licence", self, about_onbutton);
 	psy_ui_button_init_text_connect(&self->okbutton, &self->buttons,
 		"help.ok", self, about_onbutton);
-	psy_ui_component_setmargin(psy_ui_button_base(&self->okbutton),
+	psy_ui_component_set_margin(psy_ui_button_base(&self->okbutton),
 		psy_ui_margin_zero());
 }
 
@@ -372,4 +372,5 @@ void about_onmousedoubleclick(About* self, psy_ui_MouseEvent* ev)
 {
 	workspace_selectview(self->workspace, VIEW_ID_MACHINEVIEW,
 		psy_INDEX_INVALID, 0);
+	psy_ui_mouseevent_stop_propagation(ev);
 }

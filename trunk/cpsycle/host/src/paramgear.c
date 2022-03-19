@@ -46,7 +46,7 @@ void paramrackbox_init(ParamRackBox* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->title.component.signal_mousedoubleclick, self,
 		paramrackbox_onmousedoubleclick);	
 	psy_ui_margin_init_em(&margin, 0.0, 0.0, 0.5, 0.5);		
-	//psy_ui_component_setspacing(&self->title.component, &margin);
+	//psy_ui_component_set_padding(&self->title.component, &margin);
 	/* Insert Effect */
 	if (machine && slot != psy_audio_MASTER_INDEX) {
 		psy_ui_button_init_text(&self->inserteffect, &self->header, "+");

@@ -66,7 +66,7 @@ void parameterbar_init(ParameterBar* self, psy_ui_Component* parent,
 	psy_ui_button_settext(&self->power, "machineframe.pwr");
 	margin = psy_ui_component_margin(&self->power.component);
 	margin.left = psy_ui_value_make_ew(1.0);
-	psy_ui_component_setmargin(&self->power.component, margin);
+	psy_ui_component_set_margin(&self->power.component, margin);
 	psy_ui_bitmap_loadresource(&self->power.bitmapicon, IDB_POWER_DARK);
 	psy_ui_bitmap_settransparency(&self->power.bitmapicon,
 		psy_ui_colour_make(0x00FFFFFF));
@@ -85,7 +85,7 @@ void parameterbar_init(ParameterBar* self, psy_ui_Component* parent,
 	psy_ui_button_settext(&self->more, ". . .");
 	psy_ui_component_setalign(psy_ui_button_base(&self->more),
 		psy_ui_ALIGN_RIGHT);
-	psy_ui_component_setmargin(psy_ui_button_base(&self->more),
+	psy_ui_component_set_margin(psy_ui_button_base(&self->more),
 		psy_ui_margin_zero());	
 	/* row1 */
 	presetsbar_init(&self->presetsbar, &self->component, workspace);

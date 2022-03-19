@@ -48,7 +48,7 @@ void seqeditorheaderdescbar_init(SeqEditorHeaderDescBar* self,
 		IDB_SEQ_DEL_TRACK, psy_ui_colour_white());	
 	margin = psy_ui_defaults_hmargin(psy_ui_defaults());
 	psy_ui_margin_setright(&margin, psy_ui_value_make_ew(3.0));
-	psy_ui_component_setmargin(psy_ui_button_base(&self->del), margin);
+	psy_ui_component_set_margin(psy_ui_button_base(&self->del), margin);
 	psy_ui_button_init_connect(&self->up, &self->top, self,
 		seqeditorheaderdescbar_onmovetrackup);
 	psy_ui_button_loadresource(&self->up, IDB_ARROW_UP_DARK,
@@ -57,7 +57,7 @@ void seqeditorheaderdescbar_init(SeqEditorHeaderDescBar* self,
 		seqeditorheaderdescbar_onmovetrackdown);
 	psy_ui_button_loadresource(&self->down, IDB_ARROW_DOWN_DARK,
 		IDB_ARROW_DOWN_DARK, psy_ui_colour_white());
-	psy_ui_component_setmargin(psy_ui_button_base(&self->down), margin);
+	psy_ui_component_set_margin(psy_ui_button_base(&self->down), margin);
 	zoombox_init(&self->hzoom, &self->top);
 }
 

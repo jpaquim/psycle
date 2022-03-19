@@ -55,7 +55,7 @@ void kbdboxkey_init_all(KbdBoxKey* self, psy_ui_Component* parent,
 	uintptr_t size, uint32_t keycode, const char* label, Workspace* workspace, KbdBoxState* state)
 {
 	psy_ui_component_init(&self->component, parent, NULL);
-	psy_ui_component_setspacing(&self->component,
+	psy_ui_component_set_padding(&self->component,
 		psy_ui_margin_make_px(2.0, 0.0, 0.0, 2.0));
 	kbdboxkey_vtable_init(self);
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_TOP,

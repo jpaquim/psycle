@@ -365,7 +365,7 @@ void mainframe_initbars(MainFrame* self)
 		psy_ui_component_hide(metronomebar_base(&self->metronomebar));
 	}
 	margin.right = psy_ui_value_make_px(0);
-	psy_ui_component_setmargin(metronomebar_base(&self->metronomebar), margin);
+	psy_ui_component_set_margin(metronomebar_base(&self->metronomebar), margin);
 	/* row1 */	
 	songbar_init(&self->songbar, &self->toprows, &self->workspace);
 	psy_ui_component_setstyletype(&self->songbar.component, STYLE_TOPROW1);
