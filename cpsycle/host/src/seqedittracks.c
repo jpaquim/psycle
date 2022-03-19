@@ -122,7 +122,7 @@ void seqeditortracks_build(SeqEditorTracks* self)
 	if (self->playline) {
 		psy_ui_component_setalign(&self->playline->seqeditorline.component,
 			psy_ui_ALIGN_NONE);
-		psy_ui_component_setmargin(&self->playline->seqeditorline.component,
+		psy_ui_component_set_margin(&self->playline->seqeditorline.component,
 			psy_ui_margin_zero());
 		psy_ui_component_setbackgroundcolour(
 			&self->playline->seqeditorline.component, cursorcolour);
@@ -132,7 +132,7 @@ void seqeditortracks_build(SeqEditorTracks* self)
 	if (self->cursorline) {
 		psy_ui_component_setalign(&self->cursorline->component,
 			psy_ui_ALIGN_NONE);
-		psy_ui_component_setmargin(&self->cursorline->component,
+		psy_ui_component_set_margin(&self->cursorline->component,
 			psy_ui_margin_zero());
 		psy_ui_component_hide(&self->cursorline->component);
 		psy_ui_component_setbackgroundcolour(&self->cursorline->component,
@@ -143,7 +143,7 @@ void seqeditortracks_build(SeqEditorTracks* self)
 	if (self->seqeditposline) {
 		psy_ui_component_setalign(&self->seqeditposline->component,
 			psy_ui_ALIGN_NONE);
-		psy_ui_component_setmargin(&self->seqeditposline->component,
+		psy_ui_component_set_margin(&self->seqeditposline->component,
 			psy_ui_margin_zero());
 		psy_ui_component_setbackgroundcolour(&self->seqeditposline->component,
 			cursorcolour);

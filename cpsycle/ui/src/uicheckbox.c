@@ -51,7 +51,7 @@ void psy_ui_checkbox_init(psy_ui_CheckBox* self, psy_ui_Component* parent)
 	psy_ui_component_setpreferredsize(&self->checkmark,
 		psy_ui_size_make_em(2.0, 1.0));
 	psy_ui_label_init(&self->text, psy_ui_checkbox_base(self));
-	psy_ui_component_setmargin(&self->text.component,
+	psy_ui_component_set_margin(&self->text.component,
 		psy_ui_margin_make_em(0.0, 0.0, 0.0, 1.0));
 	psy_ui_label_preventwrap(&self->text);
 	psy_ui_component_setalign(&self->text.component, psy_ui_ALIGN_LEFT);

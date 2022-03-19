@@ -35,7 +35,7 @@ void swingfillview_init(SwingFillView* self, psy_ui_Component* parent,
 	self->trackmodeswingfill = FALSE;
 	psy_ui_component_init(&self->client, swingfillview_base(self), NULL);
 	psy_ui_component_setalign(&self->client, psy_ui_ALIGN_CLIENT);
-	psy_ui_component_setmargin(&self->client,
+	psy_ui_component_set_margin(&self->client,
 		psy_ui_defaults_cmargin(psy_ui_defaults()));
 	psy_ui_component_setdefaultalign(&self->client, psy_ui_ALIGN_TOP,
 		psy_ui_defaults_vmargin(psy_ui_defaults()));
@@ -77,7 +77,7 @@ void swingfillview_initactions(SwingFillView* self)
 
 	psy_ui_component_init(&self->actions, &self->client, NULL);
 	psy_ui_margin_init_em(&margin, 1.0, 0.0, 0.0, 0.0);		
-	psy_ui_component_setmargin(&self->actions, margin);
+	psy_ui_component_set_margin(&self->actions, margin);
 	psy_ui_component_setdefaultalign(&self->actions,
 		psy_ui_ALIGN_RIGHT, psy_ui_defaults_hmargin(psy_ui_defaults()));	
 	psy_ui_button_init_text_connect(&self->cancel, &self->actions,

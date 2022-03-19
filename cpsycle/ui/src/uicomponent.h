@@ -320,7 +320,7 @@ INLINE bool psy_ui_component_hasalign(const psy_ui_Component* self)
 psy_ui_Component* psy_ui_component_preferredsize_parent(psy_ui_Component*);
 psy_ui_Component* psy_ui_component_root(psy_ui_Component*);
 
-INLINE void psy_ui_component_setmargin(psy_ui_Component* self, psy_ui_Margin margin)
+INLINE void psy_ui_component_set_margin(psy_ui_Component* self, psy_ui_Margin margin)
 {	
 	psy_ui_componentstyle_setmargin(&self->style, margin);	
 }
@@ -333,12 +333,13 @@ INLINE psy_ui_Margin psy_ui_component_margin(const psy_ui_Component* self)
 void psy_ui_component_setmargin_children(psy_ui_Component*,
 	psy_ui_Margin);
 
-INLINE void psy_ui_component_setspacing(psy_ui_Component* self, psy_ui_Margin spacing)
+INLINE void psy_ui_component_set_padding(psy_ui_Component* self,
+	psy_ui_Margin padding)
 {	
-	psy_ui_componentstyle_setspacing(&self->style, spacing);	
+	psy_ui_componentstyle_set_padding(&self->style, padding);	
 }
 
-INLINE psy_ui_Margin psy_ui_component_spacing(const psy_ui_Component* self)
+INLINE psy_ui_Margin psy_ui_component_padding(const psy_ui_Component* self)
 {	
 	return psy_ui_componentstyle_spacing(&self->style);
 }
@@ -912,7 +913,7 @@ INLINE psy_ui_RealMargin psy_ui_component_spacing_px(const psy_ui_Component* sel
 	psy_ui_Margin margin;
 	psy_ui_Size parentsize;
 	
-	margin = psy_ui_component_spacing(self);
+	margin = psy_ui_component_padding(self);
 	parentsize = psy_ui_component_parentsize(self);
 	psy_ui_realmargin_init_margin(&rv, &margin,
 		psy_ui_component_textmetric(self), &parentsize);

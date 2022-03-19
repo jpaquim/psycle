@@ -228,9 +228,7 @@ void patternblockmenu_toggleswingfill(PatternBlockMenu* self)
 void patternblockmenu_toggleinterpolatecurve(PatternBlockMenu* self)
 {
 	assert(self);
-
-	interpolatecurveview_setpattern(self->interpolatecurveview,
-		patternviewstate_pattern(self->pvstate));
+	
 	interpolatecurveview_setselection(self->interpolatecurveview,
 		&self->pvstate->selection);
 	psy_ui_component_togglevisibility(interpolatecurveview_base(

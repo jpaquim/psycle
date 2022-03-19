@@ -87,7 +87,7 @@ void seqeditemptyproperties_init(SeqEditEmptyProperties* self, psy_ui_Component*
 	self->state = state;		
 	psy_ui_component_setpreferredsize(&self->component,
 		psy_ui_size_make_em(40.0, 20.0));
-	psy_ui_component_setspacing(&self->component,
+	psy_ui_component_set_padding(&self->component,
 		psy_ui_margin_make_em(0.0, 0.0, 0.0, 1.0));
 	psy_ui_label_init(&self->caption, &self->component);
 	psy_ui_label_settext(&self->caption, "No Item selected");
@@ -105,7 +105,7 @@ void seqeditpatternproperties_init(SeqEditPatternProperties* self, psy_ui_Compon
 	self->state = state;		
 	psy_ui_component_setpreferredsize(&self->component,
 		psy_ui_size_make_em(40.0, 20.0));
-	psy_ui_component_setspacing(&self->component,
+	psy_ui_component_set_padding(&self->component,
 		psy_ui_margin_make_em(0.0, 0.0, 0.0, 1.0));
 	psy_ui_label_init(&self->caption, &self->component);
 	psy_ui_label_settext(&self->caption, "Pattern Item selected");
@@ -114,7 +114,7 @@ void seqeditpatternproperties_init(SeqEditPatternProperties* self, psy_ui_Compon
 	/* seqentry properties */
 	seqeditentryproperties_init(&self->entry, &self->component, self->state);
 	psy_ui_component_setalign(&self->entry.component, psy_ui_ALIGN_TOP);
-	psy_ui_component_setmargin(&self->entry.component,
+	psy_ui_component_set_margin(&self->entry.component,
 		psy_ui_margin_make_em(0.5, 0.0, 0.0, 0.0));
 }
 
@@ -134,7 +134,7 @@ void seqeditsampleproperties_init(SeqEditSampleProperties* self, psy_ui_Componen
 	self->state = state;		
 	psy_ui_component_setpreferredsize(&self->component,
 		psy_ui_size_make_em(40.0, 20.0));
-	psy_ui_component_setspacing(&self->component,
+	psy_ui_component_set_padding(&self->component,
 		psy_ui_margin_make_em(0.0, 0.0, 0.0, 1.0));
 	psy_ui_label_init(&self->caption, &self->component);
 	psy_ui_label_settext(&self->caption, "Sample Item selected");
@@ -143,7 +143,7 @@ void seqeditsampleproperties_init(SeqEditSampleProperties* self, psy_ui_Componen
 	/* seqentry properties */
 	seqeditentryproperties_init(&self->entry, &self->component, self->state);
 	psy_ui_component_setalign(&self->entry.component, psy_ui_ALIGN_TOP);
-	psy_ui_component_setmargin(&self->entry.component,
+	psy_ui_component_set_margin(&self->entry.component,
 		psy_ui_margin_make_em(0.5, 0.0, 0.0, 0.0));
 }
 
@@ -169,21 +169,21 @@ void seqeditmarkerproperties_init(SeqEditMarkerProperties* self, psy_ui_Componen
 	self->state = state;			
 	psy_ui_component_setpreferredsize(&self->component,
 		psy_ui_size_make_em(40.0, 20.0));
-	psy_ui_component_setspacing(&self->component,
+	psy_ui_component_set_padding(&self->component,
 		psy_ui_margin_make_em(0.0, 0.0, 0.0, 1.0));
 	psy_ui_label_init(&self->caption, &self->component);
 	psy_ui_label_settext(&self->caption, "Marker Item selected");
 	psy_ui_component_setalign(psy_ui_label_base(&self->caption),
 		psy_ui_ALIGN_TOP);
 	labeledit_init(&self->name, &self->component, "Name");
-	psy_ui_component_setmargin(&self->name.component,
+	psy_ui_component_set_margin(&self->name.component,
 		psy_ui_margin_make_em(0.5, 0.0, 0.0, 0.0));	
 	psy_ui_component_setalign(labeledit_base(&self->name),
 		psy_ui_ALIGN_TOP);
 	/* seqentry properties */
 	seqeditentryproperties_init(&self->entry, &self->component, self->state);
 	psy_ui_component_setalign(&self->entry.component, psy_ui_ALIGN_TOP);
-	psy_ui_component_setmargin(&self->entry.component,
+	psy_ui_component_set_margin(&self->entry.component,
 		psy_ui_margin_make_em(0.5, 0.0, 0.0, 0.0));
 	/* connect */
 	psy_signal_connect(&self->name.edit.signal_accept,
@@ -249,7 +249,7 @@ void seqedittimesigproperties_init(SeqEditTimesigProperties* self, psy_ui_Compon
 	self->timesigindex = psy_INDEX_INVALID;		
 	psy_ui_component_setpreferredsize(&self->component,
 		psy_ui_size_make_em(40.0, 20.0));
-	psy_ui_component_setspacing(&self->component,
+	psy_ui_component_set_padding(&self->component,
 		psy_ui_margin_make_em(0.0, 0.0, 0.0, 1.0));
 	psy_ui_label_init(&self->caption, &self->component);
 	psy_ui_label_settext(&self->caption, "Timesig Item selected");
@@ -260,7 +260,7 @@ void seqedittimesigproperties_init(SeqEditTimesigProperties* self, psy_ui_Compon
 	psy_ui_component_setalign(intedit_base(&self->nominator),
 		psy_ui_ALIGN_TOP);
 	psy_ui_label_setcharnumber(&self->nominator.desc, 14.0);
-	psy_ui_component_setmargin(&self->nominator.component,
+	psy_ui_component_set_margin(&self->nominator.component,
 		psy_ui_margin_make_em(0.5, 0.0, 0.0, 0.0));	
 	/* denominator */
 	intedit_init(&self->denominator, &self->component, "Denominator", 1, 1, 0xF);
@@ -270,7 +270,7 @@ void seqedittimesigproperties_init(SeqEditTimesigProperties* self, psy_ui_Compon
 	/* position */	
 	labelpair_init(&self->offset, &self->component, "Position", 12.0);
 	psy_ui_component_setalign(labelpair_base(&self->offset), psy_ui_ALIGN_TOP);	
-	psy_ui_component_setmargin(labelpair_base(&self->offset), psy_ui_margin_make_em(
+	psy_ui_component_set_margin(labelpair_base(&self->offset), psy_ui_margin_make_em(
 		0.5, 0.0, 0.0, 0.0));
 	/* connect signals */
 	psy_signal_connect(&self->nominator.signal_changed, self,
@@ -375,7 +375,7 @@ void seqeditloopproperties_init(SeqEditLoopProperties* self, psy_ui_Component* p
 	self->state = state;		
 	psy_ui_component_setpreferredsize(&self->component,
 		psy_ui_size_make_em(40.0, 20.0));
-	psy_ui_component_setspacing(&self->component,
+	psy_ui_component_set_padding(&self->component,
 		psy_ui_margin_make_em(0.0, 0.0, 0.0, 1.0));
 	psy_ui_label_init(&self->caption, &self->component);
 	psy_ui_label_settext(&self->caption, "Loop Item selected");
@@ -385,7 +385,7 @@ void seqeditloopproperties_init(SeqEditLoopProperties* self, psy_ui_Component* p
 	psy_ui_component_setalign(intedit_base(&self->numloops),
 		psy_ui_ALIGN_TOP);
 	psy_ui_label_setcharnumber(&self->numloops.desc, 12.0);
-	psy_ui_component_setmargin(&self->numloops.component,
+	psy_ui_component_set_margin(&self->numloops.component,
 		psy_ui_margin_make_em(0.5, 0.0, 0.0, 0.0));	
 	/* position */
 	labelpair_init(&self->offset, &self->component, "Position", 12.0);
@@ -528,7 +528,7 @@ void seqeditproperties_init(SeqEditProperties* self, psy_ui_Component* parent,
 	self->param2 = 0;		
 	psy_ui_component_setpreferredsize(&self->component,
 		psy_ui_size_make_em(30.0, 20.0));
-	psy_ui_component_setspacing(&self->component,
+	psy_ui_component_set_padding(&self->component,
 		psy_ui_margin_make_em(0.0, 0.0, 0.0, 1.0));	
 	psy_ui_notebook_init(&self->notebook, &self->component);
 	psy_ui_component_setalign(psy_ui_notebook_base(&self->notebook),

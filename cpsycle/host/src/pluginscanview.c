@@ -20,17 +20,17 @@ void pluginscanview_init(PluginScanView* self, psy_ui_Component* parent,
 {
 	psy_ui_component_init(&self->component, parent, NULL);
 	self->workspace = workspace;
-	psy_ui_component_setspacing(&self->component,
+	psy_ui_component_set_padding(&self->component,
 		psy_ui_margin_make_em(0.5, 0.5, 0.0, 0.0));
 	psy_ui_label_init_text(&self->scan, &self->component,
 		"newmachine.scanning");
 	psy_ui_component_setalign(psy_ui_label_base(&self->scan),
 		psy_ui_ALIGN_TOP);
-	psy_ui_component_setmargin(psy_ui_label_base(&self->scan),
+	psy_ui_component_set_margin(psy_ui_label_base(&self->scan),
 		psy_ui_margin_make_em(2.0, 0.0, 2.0, 0.0));
 	psy_ui_component_init_align(&self->left, &self->component, NULL,
 		psy_ui_ALIGN_LEFT);	
-	psy_ui_component_setspacing(&self->left,
+	psy_ui_component_set_padding(&self->left,
 		psy_ui_margin_make_em(0.0, 4.0, 0.0, 4.0));
 	psy_ui_component_init_align(&self->right, &self->component, NULL,
 		psy_ui_ALIGN_RIGHT);
@@ -41,10 +41,10 @@ void pluginscanview_init(PluginScanView* self, psy_ui_Component* parent,
 	psy_ui_label_preventtranslation(&self->scanfile);	
 	psy_ui_component_setalign(psy_ui_label_base(&self->scanfile),
 		psy_ui_ALIGN_TOP);
-	psy_ui_component_setmargin(psy_ui_label_base(&self->scanfile),
+	psy_ui_component_set_margin(psy_ui_label_base(&self->scanfile),
 		psy_ui_margin_make_em(0.0, 0.0, 0.0, 0.0));
 	psy_ui_component_init(&self->abortbar, &self->client, NULL);
-	psy_ui_component_setmargin(&self->abortbar,
+	psy_ui_component_set_margin(&self->abortbar,
 		psy_ui_margin_make_em(2.0, 0.0, 0.0, 20.0));
 	psy_ui_component_setalign(&self->abortbar, psy_ui_ALIGN_TOP);
 	psy_ui_button_init_text_connect(&self->abort, &self->abortbar,
@@ -68,7 +68,7 @@ void pluginscanview_inittasklist(PluginScanView* self)
 		psy_ui_label_settext(label, task->label);
 		psy_ui_component_setstyletype_select(&label->component,
 			psy_ui_STYLE_BUTTON_SELECT);
-		psy_ui_component_setmargin(psy_ui_label_base(label),
+		psy_ui_component_set_margin(psy_ui_label_base(label),
 			psy_ui_margin_make_em(0.0, 0.0, 1.0, 0.0));
 		psy_ui_component_setalign(&label->component, psy_ui_ALIGN_TOP);
 	}

@@ -784,10 +784,24 @@ psy_ui_KeyboardEvent keyboardevent(psy_ui_EventType type, WPARAM wparam, LPARAM 
 psy_ui_MouseEvent mouseevent(int msg, WPARAM wparam, LPARAM lparam)
 {
 	psy_ui_MouseEvent rv;
+	uintptr_t button;
 
+	if (msg == WM_MOUSEMOVE) {
+		if (wparam & MK_LBUTTON) {
+			button = 1;
+		} else if (wparam & MK_RBUTTON) {
+			button = 2;
+		} else if (wparam & MK_MBUTTON) {
+			button = 3;
+		} else {
+			button = 0;
+		}
+	} else {
+		button = translate_win_button(msg);
+	}
 	psy_ui_mouseevent_init_all(&rv,
 		psy_ui_realpoint_make((SHORT)LOWORD(lparam), (SHORT)HIWORD(lparam)),	
-		(msg == WM_MOUSEMOVE) ? wparam : translate_win_button(msg), 0,
+		button, 0,
 		GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);	
 	psy_ui_mouseevent_settype(&rv, translate_win_event_type(msg));
 	return rv;

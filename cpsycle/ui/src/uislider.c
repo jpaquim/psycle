@@ -440,7 +440,7 @@ void psy_ui_slider_showvertical(psy_ui_Slider* self)
 		psy_ui_ALIGN_BOTTOM);
 	psy_ui_component_setalign(psy_ui_label_base(&self->value),
 		psy_ui_ALIGN_BOTTOM);	
-	psy_ui_component_setmargin(psy_ui_sliderpane_base(&self->pane),
+	psy_ui_component_set_margin(psy_ui_sliderpane_base(&self->pane),
 		psy_ui_margin_make_em(0.0, 2.0, 0.0, 2.0));		
 }
 
@@ -451,7 +451,7 @@ void psy_ui_slider_showhorizontal(psy_ui_Slider* self)
 		psy_ui_ALIGN_LEFT);
 	psy_ui_component_setalign(psy_ui_label_base(&self->value),
 		psy_ui_ALIGN_RIGHT);	
-	psy_ui_component_setmargin(psy_ui_sliderpane_base(&self->pane),
+	psy_ui_component_set_margin(psy_ui_sliderpane_base(&self->pane),
 		psy_ui_margin_make_em(0.0, 2.0, 0.0, 2.0));		
 }
 

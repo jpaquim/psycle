@@ -40,10 +40,10 @@ void help_init(Help* self, psy_ui_Component* parent, Workspace* workspace)
 	self->lastalign = psy_ui_ALIGN_NONE;
 	psy_ui_component_setalign(psy_ui_tabbar_base(&self->tabbar), psy_ui_ALIGN_RIGHT);	
 	psy_ui_margin_init_em(&margin, 0.0, 1.0, 0.0, 1.5);
-	psy_ui_component_setmargin(psy_ui_tabbar_base(&self->tabbar), margin);	
+	psy_ui_component_set_margin(psy_ui_tabbar_base(&self->tabbar), margin);	
 	psy_ui_margin_init_em(&leftmargin, 0.0, 0.0, 0.0, 3.0);		
 	psy_ui_label_init(&self->text, help_base(self));
-	psy_ui_component_setmargin(&self->text.component, leftmargin);
+	psy_ui_component_set_margin(&self->text.component, leftmargin);
 	psy_ui_label_enablewrap(&self->text);
 	psy_ui_component_setalign(&self->text.component, psy_ui_ALIGN_CLIENT);	
 	psy_ui_label_preventtranslation(&self->text);

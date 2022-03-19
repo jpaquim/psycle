@@ -246,6 +246,15 @@ INLINE psy_dsp_big_beat_t patternviewstate_quantize(const PatternViewState*
 		((psy_dsp_big_beat_t)1.0 / patternviewstate_lpb(self));
 }
 
+
+INLINE psy_dsp_big_beat_t patternviewstate_draw_offset(const PatternViewState*
+	self, psy_dsp_big_beat_t absoffset)
+{
+	return absoffset - ((self->singlemode)
+		? self->cursor.seqoffset
+		: 0.0);
+}
+
 void patternviewstate_selectcol(PatternViewState*);
 void patternviewstate_selectbar(PatternViewState*);
 void patternviewstate_selectall(PatternViewState*);

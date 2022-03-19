@@ -16,7 +16,7 @@
 /* prototypes */
 static void patternview_ondestroy(PatternView*);
 static void patternview_rebuild(PatternView*);
-static void patternview_setpattern(PatternView*, psy_audio_Pattern*);
+static void patternview_scroll_to_order(PatternView*);
 static void patternview_ontoggleproperties(PatternView*, PatternViewTabBar*);
 static void patternview_onsongchanged(PatternView*, Workspace* sender);
 static void patternview_connectsong(PatternView*);
@@ -26,7 +26,7 @@ static void patternview_onmiscconfigure(PatternView*, KeyboardMiscConfig*,
 	psy_Property*);
 static void patternview_onfocus(PatternView*);
 static void patternview_onmousedown(PatternView*, psy_ui_MouseEvent*);
-static void  patternview_onmouseup(PatternView*, psy_ui_MouseEvent*);
+static void patternview_onmouseup(PatternView*, psy_ui_MouseEvent*);
 static void patternview_onkeydown(PatternView*, psy_ui_KeyboardEvent*);
 static void patternview_oncontextmenu(PatternView*, psy_ui_Component*);
 static void patternview_oncursorchanged(PatternView*, psy_audio_Sequence*);
@@ -182,8 +182,7 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 		patternview_onparametertweak);
 	patternview_connectsong(self);
 	psy_signal_connect(&psy_ui_app_zoom(psy_ui_app())->signal_zoom, self,
-		patternview_onappzoom);	
-	patternview_setpattern(self, NULL);
+		patternview_onappzoom);
 	patternview_rebuild(self);
 	patternview_update_cursor(self);
 	psy_ui_component_starttimer(&self->component, 0, 50);	
@@ -207,17 +206,13 @@ void patternview_ontoggleproperties(PatternView* self,
 	psy_ui_component_invalidate(&self->component);	
 }
 
-void patternview_setpattern(PatternView* self, psy_audio_Pattern* pattern)
+void patternview_scroll_to_order(PatternView* self)
 {	
 	assert(self);
-	
-	interpolatecurveview_setpattern(&self->interpolatecurveview, pattern);
-	trackergrid_scroll_to_order(&self->trackerview.grid);
-	trackergrid_build(&self->defaultline.grid);
-	pianoroll_setpattern(&self->pianoroll, pattern);	
-	interpolatecurveview_setpattern(&self->interpolatecurveview,
-		patternviewstate_pattern(self->state.pv));
-	psy_ui_component_align(&self->left.linenumberpane);	
+		
+	trackergrid_scroll_to_order(&self->trackerview.grid);	
+	pianoroll_scroll_to_order(&self->pianoroll);
+	psy_ui_component_align(&self->left.linenumberpane);
 	psy_ui_component_invalidate(&self->component);	
 }
 
@@ -360,23 +355,22 @@ void patternview_oncursorchanged(PatternView* self, psy_audio_Sequence* sender)
 }
 
 void patternview_update_cursor(PatternView* self)
-{	
+{
 	const psy_audio_Pattern* pattern;
 
-	self->state.pv->cursor = self->workspace->song->sequence.cursor;	
+	self->state.pv->cursor = self->workspace->song->sequence.cursor;
 	pattern = patternviewstate_pattern_const(self->state.pv);
 	if (!pattern) {
 		self->updatealign = 1;
-		patternview_setpattern(self, NULL);
+		patternview_scroll_to_order(self);
 		patternproperties_select(&self->properties, psy_INDEX_INVALID);
 	} else if (!pattern || self->workspace->song->sequence.cursor.patternid !=
 		self->workspace->song->sequence.lastcursor.patternid) {
 		self->updatealign = 1;
-		patternview_setpattern(self, psy_audio_sequence_pattern(
-			psy_audio_song_sequence(workspace_song(self->workspace)),
-			self->workspace->song->sequence.cursor.orderindex));		
+		patternview_scroll_to_order(self);
 	}
 	patternproperties_select(&self->properties, self->state.pv->cursor.patternid);
+
 }
 
 void patternview_onshow(PatternView* self)
@@ -456,9 +450,7 @@ void  patternview_onmouseup(PatternView* self, psy_ui_MouseEvent* ev)
 	assert(self);
 
 	if (psy_ui_mouseevent_button(ev) == 1) {
-		if (psy_audio_blockselection_valid(&self->trackerview.grid.state->pv->selection)) {
-			interpolatecurveview_setpattern(&self->interpolatecurveview,
-				patternviewstate_pattern(self->state.pv));
+		if (psy_audio_blockselection_valid(&self->trackerview.grid.state->pv->selection)) {			
 			interpolatecurveview_setselection(&self->interpolatecurveview,
 				trackergrid_selection(&self->trackerview.grid));
 			transformpatternview_setpatternselection(&self->transformpattern,
@@ -526,11 +518,13 @@ void patternview_updatefont(PatternView* self)
 	fontinfo = patternviewconfig_readfont(self->pvstate.patconfig, zoomrate);
 	psy_ui_font_init(&font, &fontinfo);
 	psy_ui_component_setfont(&self->component, &font);	
-	psy_ui_font_dispose(&font);	
+	psy_ui_font_dispose(&font);		
 	trackerstate_updatemetric(&self->state,
 		psy_ui_component_textmetric(&self->component), zoomrate);
 	trackerstate_updatemetric(self->defaultline.grid.state,
 		psy_ui_component_textmetric(&self->component), zoomrate);
+	keyboardstate_update_metrics(&self->pianoroll.keyboardstate,
+		psy_ui_component_textmetric(&self->component));
 	patternview_updatescrollstep(self);
 	if (psy_ui_component_visible(&self->component)) {
 		psy_ui_component_align_full(&self->component);

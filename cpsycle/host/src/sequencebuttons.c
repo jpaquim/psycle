@@ -62,7 +62,7 @@ void sequencebuttons_init(SequenceButtons* self, psy_ui_Component* parent,
 	psy_ui_component_setdefaultalign(&self->row0, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	psy_ui_margin_init_em(&rowmargin, 0.0, 0.0, 0.5, 0.0);
-	psy_ui_component_setmargin(&self->row0, rowmargin);
+	psy_ui_component_set_margin(&self->row0, rowmargin);
 	psy_ui_button_init(&self->incpattern, &self->row0);
 	psy_ui_button_preventtranslation(&self->incpattern);
 	psy_ui_button_settext(&self->incpattern, "+");
@@ -72,7 +72,7 @@ void sequencebuttons_init(SequenceButtons* self, psy_ui_Component* parent,
 	psy_ui_button_preventtranslation(&self->decpattern);
 	psy_ui_button_settext(&self->decpattern, "-");
 	psy_ui_component_init(&self->row1, &self->standard, NULL);
-	psy_ui_component_setmargin(&self->row1, rowmargin);
+	psy_ui_component_set_margin(&self->row1, rowmargin);
 	psy_ui_component_setalign(&self->row1, psy_ui_ALIGN_TOP);
 	psy_ui_component_setdefaultalign(&self->row1, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
@@ -84,7 +84,7 @@ void sequencebuttons_init(SequenceButtons* self, psy_ui_Component* parent,
 		"seqview.del");	
 	/* more/less */
 	psy_ui_component_init(&self->rowmore, &self->standard, NULL);
-	psy_ui_component_setmargin(&self->rowmore, rowmargin);
+	psy_ui_component_set_margin(&self->rowmore, rowmargin);
 	psy_ui_component_setalign(&self->rowmore, psy_ui_ALIGN_TOP);
 	psy_ui_component_setdefaultalign(&self->rowmore, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
@@ -94,11 +94,11 @@ void sequencebuttons_init(SequenceButtons* self, psy_ui_Component* parent,
 	/* more block */
 	psy_ui_component_init(&self->block, &self->component, NULL);
 	psy_ui_component_setalign(&self->block, psy_ui_ALIGN_TOP);
-	psy_ui_component_setspacing(&self->block,
+	psy_ui_component_set_padding(&self->block,
 		psy_ui_margin_make_em(0.0, 0.0, 0.5, 0.0));
 	psy_ui_component_init(&self->row2, &self->block, NULL);
 	psy_ui_margin_init_em(&rowmargin, 0.5, 0.0, 0.5, 0.0);
-	psy_ui_component_setmargin(&self->row2, rowmargin);
+	psy_ui_component_set_margin(&self->row2, rowmargin);
 	psy_ui_component_setalign(&self->row2, psy_ui_ALIGN_TOP);
 	psy_ui_component_setdefaultalign(&self->row2, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));	
@@ -108,7 +108,7 @@ void sequencebuttons_init(SequenceButtons* self, psy_ui_Component* parent,
 	/* rename edit */
 	psy_ui_textinput_init(&self->edit, &self->component);
 	psy_ui_margin_init_em(&rowmargin, 0.5, 0.0, 1.0, 0.0);
-	psy_ui_component_setmargin(psy_ui_textinput_base(&self->edit), rowmargin);
+	psy_ui_component_set_margin(psy_ui_textinput_base(&self->edit), rowmargin);
 	psy_ui_component_setalign(psy_ui_textinput_base(&self->edit),
 		psy_ui_ALIGN_TOP);
 	psy_ui_component_hide(psy_ui_textinput_base(&self->edit));

@@ -113,8 +113,7 @@ void trackercolumn_drawtrackevents(TrackerColumn* self, psy_ui_Graphics* g)
 {	
 	psy_List** events;
 	psy_List* p;
-	double cpy;
-	double offset;
+	double cpy;	
 	uintptr_t line;
 	TrackDef* trackdef;
 	
@@ -123,13 +122,11 @@ void trackercolumn_drawtrackevents(TrackerColumn* self, psy_ui_Graphics* g)
 	trackdef = trackerconfig_trackdef(self->state->trackconfig, self->track);
 	self->digitsize = psy_ui_realsize_make(
 		self->state->trackconfig->textwidth,
-		self->state->lineheightpx - 1);
-	offset = self->state->trackevents.clip.topleft.absoffset;
-	if (self->state->pv->singlemode) {
-		offset -= self->state->trackevents.clip.topleft.seqoffset;
-	}
+		self->state->lineheightpx - 1);	
 	for (p = *events,			
-			cpy = trackerstate_beattopx(self->state, offset),
+			cpy = trackerstate_beattopx(self->state,
+				patternviewstate_draw_offset(self->state->pv,
+					self->state->trackevents.clip.topleft.absoffset)),
 			line = (uintptr_t)(self->state->trackevents.clip.topleft.absoffset *
 				self->state->trackevents.clip.topleft.lpb);
 			p != NULL;

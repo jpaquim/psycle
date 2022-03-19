@@ -78,7 +78,7 @@ void gear_init(Gear* self, psy_ui_Component* parent, Workspace* workspace)
 	/* client */
 	psy_ui_component_init(&self->client, gear_base(self), NULL);
 	psy_ui_component_setalign(&self->client, psy_ui_ALIGN_CLIENT);
-	psy_ui_component_setmargin(&self->client,
+	psy_ui_component_set_margin(&self->client,
 		psy_ui_defaults_cmargin(psy_ui_defaults()));
 	/* titlebar */
 	gear_inittitle(self);	
@@ -98,7 +98,7 @@ void gear_init(Gear* self, psy_ui_Component* parent, Workspace* workspace)
 	instrumentsbox_init(&self->instrumentsbox,
 		psy_ui_notebook_base(&self->notebook), 
 		&workspace->song->instruments, workspace);
-	psy_ui_component_setmargin(&self->instrumentsbox.groupheader, psy_ui_margin_zero());
+	psy_ui_component_set_margin(&self->instrumentsbox.groupheader, psy_ui_margin_zero());
 	samplesbox_init(&self->samplesbox, psy_ui_notebook_base(&self->notebook),
 		&workspace->song->samples, workspace);
 	psy_ui_notebook_connectcontroller(&self->notebook,

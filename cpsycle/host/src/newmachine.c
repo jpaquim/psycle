@@ -66,12 +66,12 @@ void newmachinerescanbar_init(NewMachineRescanBar* self,
 	psy_ui_button_init_text(&self->rescan, &self->component,
 		"newmachine.rescan");
 	psy_ui_margin_init_em(&spacing, 0.2, 0.2, 0.2, 0.2);
-	psy_ui_component_setspacing(psy_ui_button_base(&self->rescan), spacing);
+	psy_ui_component_set_padding(psy_ui_button_base(&self->rescan), spacing);
 	psy_ui_label_init_text(&self->desc, &self->component, "newmachine.in");
-	psy_ui_component_setspacing(psy_ui_label_base(&self->desc), spacing);
+	psy_ui_component_set_padding(psy_ui_label_base(&self->desc), spacing);
 	psy_ui_button_init_text(&self->selectdirectories, &self->component,
 		"newmachine.plugin-directories");
-	psy_ui_component_setspacing(psy_ui_button_base(&self->selectdirectories),
+	psy_ui_component_set_padding(psy_ui_button_base(&self->selectdirectories),
 		spacing);
 	psy_ui_button_loadresource(&self->selectdirectories, IDB_SETTINGS_DARK,
 		IDB_SETTINGS_DARK, psy_ui_colour_white());

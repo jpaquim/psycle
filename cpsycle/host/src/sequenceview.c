@@ -40,7 +40,7 @@ void seqview_init(SeqView* self, psy_ui_Component* parent,
 	seqviewlist_init(&self->listview, &self->component, &self->state);
 	psy_ui_scroller_init(&self->scroller, &self->listview.component,
 		&self->component);	
-	psy_ui_component_setspacing(psy_ui_scroller_base(&self->scroller),
+	psy_ui_component_set_padding(psy_ui_scroller_base(&self->scroller),
 		psy_ui_margin_make_em(0.5, 0.5, 0.0, 1.0));	
 	psy_ui_component_setstyletype_select(&self->scroller.component,
 		STYLE_SEQLISTVIEW_FOCUS);

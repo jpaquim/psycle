@@ -99,7 +99,7 @@ INLINE psy_ui_Margin psy_ui_componentstyle_margin(const psy_ui_ComponentStyle* s
 	return psy_ui_componentstyle_currstyle_const(self)->margin;
 }
 
-INLINE void psy_ui_componentstyle_setspacing(psy_ui_ComponentStyle* self, psy_ui_Margin spacing)
+INLINE void psy_ui_componentstyle_set_padding(psy_ui_ComponentStyle* self, psy_ui_Margin spacing)
 {
 	psy_ui_style_setpadding(&self->overridestyle, spacing);
 }

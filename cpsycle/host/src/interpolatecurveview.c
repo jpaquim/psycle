@@ -134,12 +134,6 @@ void interpolatecurvebox_ondestroy(InterpolateCurveBox* self,
 	interpolatecurvebox_clear(self);
 }
 
-void interpolatecurvebox_setpattern(InterpolateCurveBox* self,
-	psy_audio_Pattern* pattern)
-{
-	
-}
-
 void interpolatecurvebox_ondraw(InterpolateCurveBox* self,
 	psy_ui_Graphics* g)
 {
@@ -572,12 +566,6 @@ void interpolatecurvebox_buildkeyframes(InterpolateCurveBox* self)
 			}
 		}
 	}	
-}
-
-void interpolatecurveview_setpattern(InterpolateCurveView* self,
-	psy_audio_Pattern* pattern)
-{
-	interpolatecurvebox_setpattern(&self->box, pattern);
 }
 
 void interpolatecurveview_oninterpolate(InterpolateCurveView* self,

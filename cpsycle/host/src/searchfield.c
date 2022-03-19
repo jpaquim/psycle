@@ -57,7 +57,7 @@ void searchfield_init(SearchField* self, psy_ui_Component* parent)
 		IDB_SEARCH_DARK, psy_ui_colour_white());	
 	psy_ui_component_setalign(psy_ui_image_base(&self->image),
 		psy_ui_ALIGN_LEFT);
-	psy_ui_component_setmargin(psy_ui_image_base(&self->image),
+	psy_ui_component_set_margin(psy_ui_image_base(&self->image),
 		psy_ui_margin_make_em(0.0, 1.0, 0.0, 1.0));	
 	psy_ui_textinput_init(&self->edit, &self->component);
 	psy_ui_textinput_setcharnumber(&self->edit, 42);

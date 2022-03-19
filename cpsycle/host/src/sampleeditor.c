@@ -272,17 +272,17 @@ void sampleprocessview_init(SampleEditorProcessView* self,
 	psy_ui_component_init(&self->client, &self->component, NULL);
 	psy_ui_component_setalign(&self->client, psy_ui_ALIGN_CLIENT);
 	psy_ui_margin_init_em(&margin, 0.0, 0.0, 0.0, 1.0);		
-	psy_ui_component_setmargin(&self->client, margin);
+	psy_ui_component_set_margin(&self->client, margin);
 	sampleeditoroperations_init(&self->copypaste, &self->client, workspace);
 	psy_ui_component_setalign(&self->copypaste.component, psy_ui_ALIGN_TOP);
 	psy_ui_button_init(&self->process, &self->client);
 	psy_ui_button_settext(&self->process, "samplesview.process");
 	psy_ui_component_setalign(&self->process.component, psy_ui_ALIGN_TOP);
 	psy_ui_margin_init_em(&margin, 1.5, 0.0, 0.5, 0.0);		
-	psy_ui_component_setmargin(&self->process.component, margin);
+	psy_ui_component_set_margin(&self->process.component, margin);
 	psy_ui_listbox_init(&self->processors, &self->client);
 	psy_ui_component_setalign(&self->processors.component, psy_ui_ALIGN_TOP);
-	psy_ui_component_setmargin(&self->processors.component, margin);	
+	psy_ui_component_set_margin(&self->processors.component, margin);	
 	psy_ui_notebook_init(&self->notebook, &self->client);
 	psy_ui_component_setalign(&self->notebook.component, psy_ui_ALIGN_CLIENT);
 	sampleeditoramplify_init(&self->amplify, &self->notebook.component,
@@ -367,7 +367,7 @@ void sampleeditorplaybar_init(SampleEditorPlayBar* self,
 {
 	self->workspace = workspace;
 	psy_ui_component_init(&self->component, parent, NULL);
-	psy_ui_component_setspacing(&self->component,
+	psy_ui_component_set_padding(&self->component,
 		psy_ui_margin_make_em(0.5, 0.0, 0.5, 0.0));
 	// psy_ui_button_init(&self->loop, &self->component);
 	// psy_ui_button_settext(&self->loop, "Loop");	
@@ -686,7 +686,7 @@ void sampleeditor_init(SampleEditor* self, psy_ui_Component* parent,
 		sampleeditor_ondestroy);	
 	sampleprocessview_init(&self->processview, &self->component, workspace);
 	psy_ui_component_setalign(&self->processview.component, psy_ui_ALIGN_RIGHT);
-	//psy_ui_component_setmargin(&self->processview.component, &margin);
+	//psy_ui_component_set_margin(&self->processview.component, &margin);
 	psy_signal_connect(&self->processview.process.signal_clicked, self,
 		sampleeditor_onprocess);
 	psy_signal_connect(&self->processview.copypaste.crop.signal_clicked, self,

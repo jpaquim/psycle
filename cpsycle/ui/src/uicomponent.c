@@ -492,7 +492,7 @@ void psy_ui_component_init_imp(psy_ui_Component* self, psy_ui_Component* parent,
 	psy_ui_component_init_signals(self);
 	if (parent && parent->containeralign->insertaligntype != psy_ui_ALIGN_NONE) {
 		psy_ui_component_setalign(self, parent->containeralign->insertaligntype);
-		psy_ui_component_setmargin(self, parent->containeralign->insertmargin);
+		psy_ui_component_set_margin(self, parent->containeralign->insertmargin);
 	}	
 }
 
@@ -523,7 +523,7 @@ void psy_ui_component_init(psy_ui_Component* self, psy_ui_Component* parent, psy
 	psy_ui_component_init_signals(self);
 	if (parent && parent->containeralign->insertaligntype != psy_ui_ALIGN_NONE) {
 		psy_ui_component_setalign(self, parent->containeralign->insertaligntype);
-		psy_ui_component_setmargin(self, parent->containeralign->insertmargin);
+		psy_ui_component_set_margin(self, parent->containeralign->insertmargin);
 	}
 	self->imp->vtable->dev_initialized(self->imp);
 }
@@ -1075,14 +1075,14 @@ void psy_ui_component_setmargin_children(psy_ui_Component* self,
 	psy_ui_Margin margin)
 {
 	psy_ui_component_traverse_margin(self,
-		(psy_fp_margin)psy_ui_component_setmargin, margin);
+		(psy_fp_margin)psy_ui_component_set_margin, margin);
 }
 
 void psy_ui_component_setpadding_children(psy_ui_Component* self,
 	psy_ui_Margin spacing)
 {
 	psy_ui_component_traverse_margin(self,
-		(psy_fp_margin)psy_ui_component_setspacing, spacing);	
+		(psy_fp_margin)psy_ui_component_set_padding, spacing);	
 }
 
 uintptr_t psy_ui_component_index(psy_ui_Component* self)
@@ -1245,7 +1245,7 @@ psy_List* psy_ui_components_setalign(psy_List* list, psy_ui_AlignType align,
 
 	for (p = list; p != NULL; p = p->next) {
 		psy_ui_component_setalign((psy_ui_Component*) p->entry, align);		
-		psy_ui_component_setmargin((psy_ui_Component*) p->entry, margin);		
+		psy_ui_component_set_margin((psy_ui_Component*) p->entry, margin);		
 	}
 	return list;
 }
@@ -1255,7 +1255,7 @@ psy_List* psy_ui_components_setmargin(psy_List* list, psy_ui_Margin margin)
 	psy_List* p;
 
 	for (p = list; p != NULL; p = p->next) {
-		psy_ui_component_setmargin((psy_ui_Component*)p->entry, margin);
+		psy_ui_component_set_margin((psy_ui_Component*)p->entry, margin);
 	}
 	return list;
 }
@@ -1286,7 +1286,7 @@ psy_ui_Size psy_ui_component_preferredsize(psy_ui_Component* self,
 	const psy_ui_TextMetric* tm;
 	
 	rv = preferredsize = psy_ui_componentstyle_preferredsize(&self->style);
-	padding = psy_ui_component_spacing(self);
+	padding = psy_ui_component_padding(self);
 	tm = psy_ui_component_textmetric(self);
 	if (preferredsize.width.set && preferredsize.height.set) {
 		rv = preferredsize;
@@ -1358,7 +1358,7 @@ psy_ui_Size psy_ui_component_size(const psy_ui_Component* self)
 
 
 	rv = psy_ui_component_scrollsize(self);
-	spacing = psy_ui_component_spacing(self);
+	spacing = psy_ui_component_padding(self);
 	tm = psy_ui_component_textmetric(self);
 	spacing_width = psy_ui_margin_width(&spacing, tm, NULL);
 	psy_ui_value_sub(&rv.width, &spacing_width, tm, NULL);
@@ -1718,36 +1718,7 @@ void psy_ui_component_setscrolltop(psy_ui_Component* self, psy_ui_Value top)
 				psy_ui_component_scrolltop_px(self)),
 			parentsize);
 		psy_ui_component_scrollto(self, 0.0, newtop - position.top, &r);
-	}
-	position = psy_ui_component_position(self);
-	if (parentsize.height > position.bottom) {
-		psy_ui_RealPoint translate;
-		psy_ui_Component* bgcomponent;
-
-		bgcomponent = psy_ui_component_parent(self);
-		psy_ui_realpoint_init(&translate);
-		while (bgcomponent && bgcomponent->componentbackground.backgroundmode == psy_ui_NOBACKGROUND) {
-			bgcomponent = psy_ui_component_parent(bgcomponent);
-			if (bgcomponent) {
-				psy_ui_RealRectangle position;
-
-				position = psy_ui_component_position(bgcomponent);
-				translate.x += position.left;
-				translate.y += position.top;
-			}
-		}
-		if (bgcomponent) {			
-			psy_ui_component_invalidaterect(
-				bgcomponent,
-				psy_ui_realrectangle_make(
-					psy_ui_realpoint_make(
-						position.left + translate.x,
-						position.bottom + translate.y),
-					psy_ui_realsize_make(
-						position.right - position.left,
-						parentsize.height - position.bottom)));
-		}
-	}
+	}		
 	psy_signal_emit(&self->signal_scroll, self, 0);	
 }
 
@@ -2180,7 +2151,7 @@ void psy_ui_component_draw(psy_ui_Component* self, psy_ui_Graphics* g)
 
 		origin = psy_ui_origin(g);
 		/* spacing */
-		spacing = psy_ui_component_spacing(self);
+		spacing = psy_ui_component_padding(self);
 		if (!psy_ui_margin_iszero(&spacing)) {
 			tm = psy_ui_component_textmetric(self);
 			psy_ui_setorigin(g, psy_ui_realpoint_make(

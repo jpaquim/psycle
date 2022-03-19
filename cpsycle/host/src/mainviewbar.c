@@ -115,7 +115,7 @@ void mainviewbar_inithelpsettingstabbar(MainViewBar* self)
 	psy_ui_tabbar_init(&self->helpsettingstabbar, &self->tabbars);
 	psy_ui_component_setalign(psy_ui_tabbar_base(&self->helpsettingstabbar),
 		psy_ui_ALIGN_LEFT);
-	psy_ui_component_setmargin(psy_ui_tabbar_base(&self->helpsettingstabbar),
+	psy_ui_component_set_margin(psy_ui_tabbar_base(&self->helpsettingstabbar),
 		psy_ui_margin_make_em(0.0, 4.0, 0.0, 4.0));
 	psy_ui_tabbar_append(&self->helpsettingstabbar, "main.settings",
 		IDB_SETTINGS_LIGHT, IDB_SETTINGS_DARK, psy_ui_colour_white());

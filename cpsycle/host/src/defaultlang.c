@@ -705,6 +705,12 @@ void make_translator_patternview(psy_Property* parent)
 	add("vert", "Vertical");
 	add("split", "Split");
 	add("properties", "Properties");
+	add("beats", "Beats");
+	add("keyboard", "Keyboard");
+	add("showtracks", "Show Tracks");
+	add("all", "All");
+	add("current", "Current");
+	add("active", "Active");
 }
 
 void make_translator_transformpattern(psy_Property* parent)

@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #if !defined(PIANOROLL_H)
@@ -36,18 +36,19 @@ extern "C" {
 typedef struct PianoBar {
 	/* inherits */
 	psy_ui_Component component;
+	ZoomBox zoombox_beatwidth;
 	ZoomBox zoombox_keyheight;
-	psy_ui_Label keys;
-	psy_ui_ComboBox keytype;
+	psy_ui_Label beats;
+	psy_ui_Label keys;	
 	psy_ui_Label tracks;
 	psy_ui_Button tracks_all;
 	psy_ui_Button track_curr;
-	psy_ui_Button tracks_active;	
-	/* references */
-	Workspace* workspace;
+	psy_ui_Button tracks_active;
+	psy_ui_Button edit_mode;
+	psy_ui_Button select_mode;
 } PianoBar;
 
-void pianobar_init(PianoBar*, psy_ui_Component* parent, Workspace*);
+void pianobar_init(PianoBar*, psy_ui_Component* parent);
 
 INLINE psy_ui_Component* pianobar_base(PianoBar* self)
 {
@@ -64,7 +65,7 @@ typedef struct Pianoroll {
 	psy_ui_Component top;
 	PianoRuler header;
 	psy_ui_Component left;
-	ZoomBox zoombox_beatwidth;   
+	psy_ui_ComboBox keytype;
 	Pianogrid grid;
 	psy_ui_Scroller scroller;
 	PianoBar bar;	
@@ -81,7 +82,7 @@ typedef struct Pianoroll {
 
 void pianoroll_init(Pianoroll*, psy_ui_Component* parent, PatternViewState*,
 	Workspace*);
-void pianoroll_setpattern(Pianoroll*, psy_audio_Pattern*);
+void pianoroll_scroll_to_order(Pianoroll*);
 void pianoroll_updatescroll(Pianoroll*);
 void pianoroll_makecmds(psy_Property* parent);
 bool pianoroll_handlecommand(Pianoroll*, uintptr_t cmd);

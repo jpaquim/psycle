@@ -32,7 +32,7 @@ void samplesbox_init(SamplesBox* self, psy_ui_Component* parent,
 	psy_ui_label_init(&self->header, &self->component);
 	psy_ui_label_settext(&self->header, "samplesview.groupsfirstsample");
 	psy_ui_label_setcharnumber(&self->header, 25);
-	psy_ui_component_setmargin(&self->header.component, margin);		
+	psy_ui_component_set_margin(&self->header.component, margin);		
 	psy_ui_component_setalign(&self->header.component, psy_ui_ALIGN_TOP);	
 	psy_ui_listbox_init(&self->samplelist, &self->component);	
 	psy_ui_component_setalign(&self->samplelist.component, psy_ui_ALIGN_CLIENT);	
@@ -45,11 +45,11 @@ void samplesbox_init(SamplesBox* self, psy_ui_Component* parent,
 	psy_ui_label_init_text(&self->group, &self->component,
 		"samplesview.groupsamples");
 	psy_ui_component_setalign(&self->group.component, psy_ui_ALIGN_BOTTOM);
-	psy_ui_component_setmargin(&self->group.component, margin);	
+	psy_ui_component_set_margin(&self->group.component, margin);	
 	psy_signal_init(&self->signal_changed);
 	psy_signal_connect(&self->component.signal_destroy, self,
 		samplesbox_ondestroy);
-	psy_ui_component_setmargin(&self->samplelist.component, margin);
+	psy_ui_component_set_margin(&self->samplelist.component, margin);
 	samplesbox_setsamples(self, samples);	
 	psy_signal_connect(&self->samplelist.signal_selchanged, self,
 		samplesbox_onsamplelistchanged);

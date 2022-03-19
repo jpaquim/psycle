@@ -131,7 +131,7 @@ void mainstatusbar_initkbdhelpbutton(MainStatusBar* self)
 	psy_ui_button_init_text(&self->togglekbdhelp, &self->pane, "main.kbd");
 	margin = psy_ui_component_margin(psy_ui_button_base(&self->togglekbdhelp));
 	psy_ui_margin_setright(&margin, psy_ui_value_make_ew(4.0));
-	psy_ui_component_setmargin(psy_ui_button_base(&self->togglekbdhelp),
+	psy_ui_component_set_margin(psy_ui_button_base(&self->togglekbdhelp),
 		 margin);
 	psy_ui_component_setalign(psy_ui_button_base(&self->togglekbdhelp),
 		psy_ui_ALIGN_RIGHT);	

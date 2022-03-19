@@ -19,7 +19,7 @@ void kbdhelp_init(KbdHelp* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {	
 	psy_ui_component_init(kbdhelp_base(self), parent, NULL);	
-	psy_ui_component_setspacing(&self->component,
+	psy_ui_component_set_padding(&self->component,
 		psy_ui_margin_make_em(0.5, 0.0, 0.0, 0.0));	
 	self->workspace = workspace;
 	kbdbox_init(&self->kbdbox, kbdhelp_base(self), workspace);

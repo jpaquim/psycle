@@ -324,7 +324,7 @@ void psy_ui_button_onpreferredsize(psy_ui_Button* self, psy_ui_Size* limit,
 		rv->width = psy_ui_value_make_ew(self->charnumber);
 	}	
 	/* add spacing */
-	// spacing = psy_ui_component_spacing(psy_ui_button_base(self));
+	// spacing = psy_ui_component_padding(psy_ui_button_base(self));
 	rv->height = psy_ui_value_make_eh(self->linespacing);	
 	// rv->height = psy_ui_add_values(rv->height,
 	//	psy_ui_margin_height(&spacing, tm, NULL), tm, NULL);	
