@@ -78,8 +78,8 @@ void psy_ui_splitter_init(psy_ui_Splitter* self, psy_ui_Component* parent)
 	self->toggle = NULL;
 	self->button = NULL;
 	psy_ui_size_init(&self->restoresize);
-	psy_ui_component_setalign(&self->component, psy_ui_ALIGN_LEFT);
-	psy_ui_component_setstyletypes(&self->component,
+	psy_ui_component_set_align(&self->component, psy_ui_ALIGN_LEFT);
+	psy_ui_component_set_style_types(&self->component,
 		psy_ui_STYLE_SPLITTER, psy_ui_STYLE_SPLITTER_HOVER,
 		psy_ui_STYLE_SPLITTER_SELECT, psy_INDEX_INVALID);	
 }
@@ -139,12 +139,12 @@ void splitter_onmousedown(psy_ui_Splitter* self, psy_ui_MouseEvent* ev)
 				if (!self->hasrestore) {
 					self->restoresize = psy_ui_component_scrollsize(prev);
 					self->hasrestore = TRUE;
-					psy_ui_component_setpreferredsize(prev,
+					psy_ui_component_set_preferred_size(prev,
 						psy_ui_size_make(psy_ui_value_make_ew(0),
 							psy_ui_component_scrollsize(prev).height));
 				} else {
 					self->hasrestore = FALSE;
-					psy_ui_component_setpreferredsize(prev,
+					psy_ui_component_set_preferred_size(prev,
 						psy_ui_size_make(self->restoresize.width,
 						psy_ui_component_scrollsize(prev).height));
 				}
@@ -154,13 +154,13 @@ void splitter_onmousedown(psy_ui_Splitter* self, psy_ui_MouseEvent* ev)
 				if (!self->hasrestore) {
 					self->hasrestore = TRUE;
 					self->restoresize = psy_ui_component_scrollsize(prev);					
-					psy_ui_component_setpreferredsize(prev,
+					psy_ui_component_set_preferred_size(prev,
 						psy_ui_size_make(
 							psy_ui_component_scrollsize(prev).width,
 							psy_ui_value_make_px(0)));
 				} else {
 					self->hasrestore = FALSE;
-					psy_ui_component_setpreferredsize(prev,
+					psy_ui_component_set_preferred_size(prev,
 						psy_ui_size_make(
 							psy_ui_component_scrollsize(prev).width,
 							self->restoresize.height));
@@ -285,7 +285,7 @@ void splitter_onmouseup(psy_ui_Splitter* self, psy_ui_MouseEvent* ev)
 				psy_ui_RealRectangle prev_position;
 
 				prev_position = psy_ui_component_position(prev);
-				psy_ui_component_setpreferredsize(prev,
+				psy_ui_component_set_preferred_size(prev,
 					psy_ui_size_make(
 						psy_ui_value_make_px(position.left -
 							prev_position.left),
@@ -294,13 +294,13 @@ void splitter_onmouseup(psy_ui_Splitter* self, psy_ui_MouseEvent* ev)
 				psy_ui_RealRectangle prev_position;
 
 				prev_position = psy_ui_component_position(prev);
-				psy_ui_component_setpreferredsize(prev,
+				psy_ui_component_set_preferred_size(prev,
 					psy_ui_size_make(
 						psy_ui_value_make_px(
 							prev_position.right - position.right),
 						psy_ui_component_scrollsize(prev).height));
 			} else if (prev->align == psy_ui_ALIGN_TOP) {				
-				psy_ui_component_setpreferredsize(prev,
+				psy_ui_component_set_preferred_size(prev,
 					psy_ui_size_make(
 						psy_ui_component_scrollsize(prev).width,
 						psy_ui_value_make_px(position.top)));
@@ -308,7 +308,7 @@ void splitter_onmouseup(psy_ui_Splitter* self, psy_ui_MouseEvent* ev)
 				psy_ui_RealRectangle prev_position;
 				
 				prev_position = psy_ui_component_position(prev);				
-				psy_ui_component_setpreferredsize(prev,
+				psy_ui_component_set_preferred_size(prev,
 					psy_ui_size_make(
 						psy_ui_component_scrollsize(prev).width,
 						psy_ui_value_make_px(prev_position.bottom -
@@ -403,7 +403,7 @@ void splitter_setalign(psy_ui_Splitter* self, psy_ui_AlignType align)
 {	
 	self->isvertical = (self->component.align == psy_ui_ALIGN_LEFT ||
 		self->component.align == psy_ui_ALIGN_RIGHT);
-	psy_ui_component_setpreferredsize(&self->component,
+	psy_ui_component_set_preferred_size(&self->component,
 		(psy_ui_splitter_isvertical(self))
 		? psy_ui_size_make_em(1.3, 1.5)
 		: psy_ui_size_make_em(1.5, 0.5));

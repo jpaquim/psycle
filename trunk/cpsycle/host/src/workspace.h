@@ -283,7 +283,7 @@ void workspace_followsong(Workspace*);
 void workspace_stopfollowsong(Workspace*);
 void workspace_idle(Workspace*);
 void workspace_showparameters(Workspace*, uintptr_t machineslot);
-void workspace_selectview(Workspace*, uintptr_t view, uintptr_t section,
+void workspace_select_view(Workspace*, uintptr_t view, uintptr_t section,
 	uintptr_t option);
 void workspace_focusview(Workspace*);
 void workspace_saveview(Workspace*);
@@ -327,7 +327,7 @@ void workspace_connectloadprogress(Workspace*, void* context,
 	fp_workspace_songloadprogress);
 void workspace_apptitle(Workspace*, char* rv_title, uintptr_t max_len);
 const char* workspace_songtitle(const Workspace*);
-void workspace_setstartpage(Workspace*);
+void workspace_set_start_page(Workspace*);
 void workspace_oninput(Workspace*, uintptr_t cmd);
 
 INLINE const HostSequencerTime* workspace_host_sequencer_time(

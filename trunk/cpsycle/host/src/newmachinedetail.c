@@ -52,9 +52,9 @@ void newmachinedetail_init(NewMachineDetail* self, psy_ui_Component* parent,
 	/* component */
 	psy_ui_component_init(&self->component, parent, NULL);
 	newmachinedetail_vtable_init(self);
-	psy_ui_component_setstyletype(&self->component,
+	psy_ui_component_set_style_type(&self->component,
 		STYLE_NEWMACHINE_DETAIL);
-	psy_ui_component_setpreferredsize(&self->component,
+	psy_ui_component_set_preferred_size(&self->component,
 		psy_ui_size_make_em(40.0, 0.0));
 	psy_signal_init(&self->signal_categorychanged);	
 	self->plugin = NULL;
@@ -62,26 +62,26 @@ void newmachinedetail_init(NewMachineDetail* self, psy_ui_Component* parent,
 	numcol0 = 12;
 	/* plugin name */
 	labelpair_init(&self->plugname, &self->component, "newmachine.name", numcol0);
-	psy_ui_component_setalign(&self->plugname.second.component,
+	psy_ui_component_set_align(&self->plugname.second.component,
 		psy_ui_ALIGN_CLIENT);
-	psy_ui_component_setalign(&self->plugname.component, psy_ui_ALIGN_TOP);
+	psy_ui_component_set_align(&self->plugname.component, psy_ui_ALIGN_TOP);
 	psy_ui_margin_init_em(&margin, 0.0, 0.0, 1.0, 0.0);
 	psy_ui_component_set_margin(&self->plugname.component, margin);
 	/* description */
 	psy_ui_label_init(&self->desclabel, &self->component);
-	psy_ui_label_settextalignment(&self->desclabel, psy_ui_ALIGNMENT_TOP);
-	psy_ui_label_enablewrap(&self->desclabel);
-	psy_ui_component_setalign(&self->desclabel.component, psy_ui_ALIGN_CLIENT);
+	psy_ui_label_set_textalignment(&self->desclabel, psy_ui_ALIGNMENT_TOP);
+	psy_ui_label_enable_wrap(&self->desclabel);
+	psy_ui_component_set_align(&self->desclabel.component, psy_ui_ALIGN_CLIENT);
 	/* bottom */
 	psy_ui_component_init(&self->bottom, &self->component, NULL);
-	psy_ui_component_setalign(&self->bottom, psy_ui_ALIGN_BOTTOM);
+	psy_ui_component_set_align(&self->bottom, psy_ui_ALIGN_BOTTOM);
 	psy_ui_margin_init_em(&spacing, 0.5, 1.0, 0.5, 0.0);
 	psy_ui_component_set_padding(&self->bottom, spacing);
-	psy_ui_component_setdefaultalign(&self->bottom,
+	psy_ui_component_set_defaultalign(&self->bottom,
 		psy_ui_ALIGN_TOP, psy_ui_defaults_vmargin(psy_ui_defaults()));
 	psy_ui_label_init_text(&self->compatlabel, &self->bottom,
 		"newmachine.song-loading-compatibility");
-	psy_ui_label_settextalignment(&self->compatlabel, psy_ui_ALIGNMENT_LEFT);
+	psy_ui_label_set_textalignment(&self->compatlabel, psy_ui_ALIGNMENT_LEFT);
 	psy_ui_checkbox_init_text(&self->compatblitzgamefx, &self->bottom,	
 		"newmachine.jme-version-unknown");
 	if (compatconfig_loadnewblitz(psycleconfig_compat(
@@ -94,23 +94,23 @@ void newmachinedetail_init(NewMachineDetail* self, psy_ui_Component* parent,
 	psy_ui_component_set_margin(psy_ui_label_base(&self->compatlabel), margin);	
 	/* details */
 	psy_ui_component_init(&self->details, &self->component, NULL);
-	psy_ui_component_setalign(&self->details, psy_ui_ALIGN_BOTTOM);
-	psy_ui_component_setdefaultalign(&self->details, psy_ui_ALIGN_TOP,
+	psy_ui_component_set_align(&self->details, psy_ui_ALIGN_BOTTOM);
+	psy_ui_component_set_defaultalign(&self->details, psy_ui_ALIGN_TOP,
 		psy_ui_defaults_vmargin(psy_ui_defaults())); 
 	/* category */
 	psy_ui_component_init(&self->category, &self->details, NULL);	
 	psy_ui_label_init_text(&self->categorydesc, &self->category,
 		"newmachine.category");
-	psy_ui_label_settextalignment(&self->categorydesc,
+	psy_ui_label_set_textalignment(&self->categorydesc,
 		psy_ui_ALIGNMENT_RIGHT);
-	psy_ui_label_setcharnumber(&self->categorydesc, numcol0);
-	psy_ui_component_setalign(psy_ui_label_base(&self->categorydesc),
+	psy_ui_label_set_charnumber(&self->categorydesc, numcol0);
+	psy_ui_component_set_align(psy_ui_label_base(&self->categorydesc),
 		psy_ui_ALIGN_LEFT);
-	psy_ui_textinput_init(& self->categoryedit, &self->category);
-	psy_ui_textinput_enableinputfield(&self->categoryedit);	
+	psy_ui_textarea_init_single_line(& self->categoryedit, &self->category);	
+	psy_ui_textarea_enableinputfield(&self->categoryedit);	
 	psy_ui_margin_init_em(&margin, 0.0, 0.0, 0.0, 1.5);
-	psy_ui_component_set_margin(psy_ui_textinput_base(&self->categoryedit), margin);
-	psy_ui_component_setalign(psy_ui_textinput_base(&self->categoryedit),
+	psy_ui_component_set_margin(psy_ui_textarea_base(&self->categoryedit), margin);
+	psy_ui_component_set_align(psy_ui_textarea_base(&self->categoryedit),
 		psy_ui_ALIGN_CLIENT);
 	psy_signal_connect(&self->categoryedit.signal_accept,
 		self, newmachinedetail_oncategoryeditaccept);
@@ -129,8 +129,8 @@ void newmachinedetail_ondestroy(NewMachineDetail* self)
 
 void newmachinedetail_reset(NewMachineDetail* self)
 {
-	psy_ui_label_enabletranslation(&self->desclabel);
-	psy_ui_label_settext(&self->desclabel, psy_ui_translate(
+	psy_ui_label_enable_translation(&self->desclabel);
+	psy_ui_label_set_text(&self->desclabel, psy_ui_translate(
 		"newmachine.select-plugin-to-view-description"));
 	newmachinedetail_setplugname(self, "");
 	newmachinedetail_setdllname(self, "");
@@ -174,23 +174,23 @@ void newmachinedetail_onloadnewblitz(NewMachineDetail* self, psy_ui_Component* s
 
 void newmachinedetail_setdescription(NewMachineDetail* self, const char* text)
 {
-	psy_ui_label_preventtranslation(&self->desclabel);
-	psy_ui_label_settext(&self->desclabel, text);
+	psy_ui_label_prevent_translation(&self->desclabel);
+	psy_ui_label_set_text(&self->desclabel, text);
 }
 
 void newmachinedetail_setplugname(NewMachineDetail* self, const char* text)
 {
-	psy_ui_label_settext(&self->plugname.second, text);
+	psy_ui_label_set_text(&self->plugname.second, text);
 }
 
 void newmachinedetail_setdllname(NewMachineDetail* self, const char* text)
 {	
-	psy_ui_label_settext(&self->dllname.second, text);
+	psy_ui_label_set_text(&self->dllname.second, text);
 }
 
 void newmachinedetail_setcategoryname(NewMachineDetail* self, const char* text)
 {	
-	psy_ui_textinput_settext(&self->categoryedit, text);	
+	psy_ui_textarea_settext(&self->categoryedit, text);	
 }
 
 void newmachinedetail_setplugversion(NewMachineDetail* self, int16_t version)
@@ -198,7 +198,7 @@ void newmachinedetail_setplugversion(NewMachineDetail* self, int16_t version)
 	char valstr[64];
 
 	psy_snprintf(valstr, 64, "%d", (int)version);	
-	psy_ui_label_settext(&self->version.second, valstr);
+	psy_ui_label_set_text(&self->version.second, valstr);
 }
 
 void newmachinedetail_setapiversion(NewMachineDetail* self, int16_t apiversion)
@@ -206,7 +206,7 @@ void newmachinedetail_setapiversion(NewMachineDetail* self, int16_t apiversion)
 	char valstr[64];
 
 	psy_snprintf(valstr, 64, "%d", (int)apiversion);
-	psy_ui_label_settext(&self->apiversion.second, valstr);
+	psy_ui_label_set_text(&self->apiversion.second, valstr);
 }
 
 void newmachinedetail_oncategoryeditaccept(NewMachineDetail* self,
@@ -215,11 +215,11 @@ void newmachinedetail_oncategoryeditaccept(NewMachineDetail* self,
 	if (self->plugin) {		
 		psy_signal_emit(&self->signal_categorychanged, self, 0);	
 	}
-	psy_ui_component_setfocus(psy_ui_component_parent(&self->component));
+	psy_ui_component_set_focus(psy_ui_component_parent(&self->component));
 }
 
 void newmachinedetail_oncategoryeditreject(NewMachineDetail* self,
 	psy_ui_Component* sender)
 {
-	psy_ui_component_setfocus(psy_ui_component_parent(&self->component));
+	psy_ui_component_set_focus(psy_ui_component_parent(&self->component));
 }

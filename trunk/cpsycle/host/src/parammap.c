@@ -20,12 +20,12 @@ void parammap_init(ParamMap* self, psy_ui_Component* parent,
 	assert(config);
 
 	psy_ui_component_init(&self->component, parent, NULL);
-	psy_ui_component_setstyletype(&self->component, STYLE_MACPARAM_TITLE);	
+	psy_ui_component_set_style_type(&self->component, STYLE_MACPARAM_TITLE);	
 	self->machine = machine;
 	parammap_setmachine(self, self->machine);
 	psy_ui_label_init_text(&self->construction, &self->component,
 		"under construction");
-	psy_ui_component_setalign(psy_ui_label_base(&self->construction),
+	psy_ui_component_set_align(psy_ui_label_base(&self->construction),
 		psy_ui_ALIGN_TOP);
 }
 

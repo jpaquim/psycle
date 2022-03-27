@@ -27,10 +27,10 @@ typedef struct SongPropertiesView {
 	psy_ui_Component top;
 	psy_ui_Component title;
 	psy_ui_Label label_title;
-	psy_ui_TextInput edit_title;
+	psy_ui_TextArea edit_title;
 	psy_ui_Component credits;
 	psy_ui_Label label_credits;
-	psy_ui_TextInput edit_credits;
+	psy_ui_TextArea edit_credits;
 	/* speed */
 	psy_ui_Component speed;
 	psy_ui_Label label_speed;

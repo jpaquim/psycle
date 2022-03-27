@@ -283,8 +283,8 @@
     <ClCompile Include="src\uitabbar.c" />
     <ClCompile Include="src\uiterminal.c" />
     <ClCompile Include="src\uitextarea.c" />
+    <ClCompile Include="src\uitextdraw.c" />
     <ClCompile Include="src\uitextformat.c" />
-    <ClCompile Include="src\uitextinput.c" />
     <ClCompile Include="src\uivalue.c" />
     <ClCompile Include="src\uiviewcomponentimp.c" />
     <ClCompile Include="src\uiwintheme.c" />
@@ -366,8 +366,8 @@
     <ClInclude Include="src\uitabbar.h" />
     <ClInclude Include="src\uiterminal.h" />
     <ClInclude Include="src\uitextarea.h" />
+    <ClInclude Include="src\uitextdraw.h" />
     <ClInclude Include="src\uitextformat.h" />
-    <ClInclude Include="src\uitextinput.h" />
     <ClInclude Include="src\uivalue.h" />
     <ClInclude Include="src\uiviewcomponentimp.h" />
     <ClInclude Include="src\uiwintheme.h" />

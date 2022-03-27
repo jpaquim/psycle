@@ -124,7 +124,8 @@ void pinedit_drawpinoutput(PinEdit* self, psy_ui_Graphics* g, uintptr_t pin)
 	pinwidth = (int)(tm->tmAveCharWidth * 1.5);
 	pinheight = (int)(tm->tmHeight * 0.75);
 	psy_snprintf(text, 40, "Out %.02d", (int)pin);
-	psy_ui_textout(g, 0, cpy + centery, text, psy_strlen(text));
+	psy_ui_textout(g, psy_ui_realpoint_make(
+		0, cpy + centery), text, psy_strlen(text));
 	r = psy_ui_realrectangle_make(
 		psy_ui_realpoint_make(
 			pinwidth + tm->tmAveCharWidth * numchars,
@@ -157,8 +158,10 @@ void pinedit_drawpininput(PinEdit* self, psy_ui_Graphics* g, uintptr_t pin)
 	pinwidth = (int)(tm->tmAveCharWidth * 1.5);
 	pinheight = (int)(tm->tmHeight * 0.75);
 	psy_snprintf(text, 40, "In %.02d", (int)pin);
-	psy_ui_textout(g, psy_ui_value_px(&size.width, tm, NULL) - tm->tmAveCharWidth * 8,
-		cpy + centery, text, psy_strlen(text));
+	psy_ui_textout(g, 
+		psy_ui_realpoint_make(
+			psy_ui_value_px(&size.width, tm, NULL) - tm->tmAveCharWidth * 8,
+			cpy + centery), text, psy_strlen(text));
 	r = psy_ui_realrectangle_make(
 		psy_ui_realpoint_make(
 			psy_ui_value_px(&size.width, tm, NULL) -
@@ -579,23 +582,23 @@ void channelmappingview_init(ChannelMappingView* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->component, parent, NULL);
 	self->workspace = workspace;
 	psy_ui_component_init(&self->buttongroup, &self->component, NULL);
-	psy_ui_component_setdefaultalign(&self->buttongroup, psy_ui_ALIGN_TOP,
+	psy_ui_component_set_defaultalign(&self->buttongroup, psy_ui_ALIGN_TOP,
 		psy_ui_defaults_vmargin(psy_ui_defaults()));
 	psy_ui_label_init_text(&self->help, &self->component,
 		"channelmapping.remove-connection-with-right-click");
-	psy_ui_label_settextalignment(&self->help, psy_ui_ALIGNMENT_LEFT);
-	psy_ui_component_setalign(&self->help.component, psy_ui_ALIGN_BOTTOM);		
-	psy_ui_component_setalign(&self->buttongroup, psy_ui_ALIGN_RIGHT);
+	psy_ui_label_set_textalignment(&self->help, psy_ui_ALIGNMENT_LEFT);
+	psy_ui_component_set_align(&self->help.component, psy_ui_ALIGN_BOTTOM);		
+	psy_ui_component_set_align(&self->buttongroup, psy_ui_ALIGN_RIGHT);
 	psy_ui_button_init_connect(&self->autowire, &self->buttongroup,
 		self, channelmappingview_onautowire);
-	psy_ui_button_settext(&self->autowire, "channelmapping.autowire");
+	psy_ui_button_set_text(&self->autowire, "channelmapping.autowire");
 	psy_ui_button_settextalignment(&self->autowire, psy_ui_ALIGNMENT_LEFT);
 	psy_ui_button_init_connect(&self->unselectall, &self->buttongroup,
 		self, channelmappingview_unselectall);
-	psy_ui_button_settext(&self->unselectall, "channelmapping.unselect-all");
+	psy_ui_button_set_text(&self->unselectall, "channelmapping.unselect-all");
 	psy_ui_button_settextalignment(&self->unselectall, psy_ui_ALIGNMENT_LEFT);	
 	pinedit_init(&self->pinedit, &self->component, wire, workspace);
-	psy_ui_component_setalign(&self->pinedit.component, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_set_align(&self->pinedit.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_margin_init_em(&margin, 0.0, 0.5, 0.0, 2.0);
 	psy_ui_component_set_margin(&self->pinedit.component, margin);
 	psy_ui_component_set_margin(&self->help.component, margin);	

@@ -98,22 +98,22 @@ void psy_ui_scrollbarpane_setorientation(psy_ui_ScrollBarPane* self,
 
 	self->orientation = orientation;
 	if (self->orientation == psy_ui_HORIZONTAL) {
-		psy_ui_component_setstyletype(&self->component, psy_ui_STYLE_HSCROLLPANE);		
-		psy_ui_component_setstyletype(&self->thumb, psy_ui_STYLE_HSCROLLTHUMB);
-		psy_ui_component_setstyletype_hover(&self->thumb,
+		psy_ui_component_set_style_type(&self->component, psy_ui_STYLE_HSCROLLPANE);		
+		psy_ui_component_set_style_type(&self->thumb, psy_ui_STYLE_HSCROLLTHUMB);
+		psy_ui_component_set_style_type_hover(&self->thumb,
 			psy_ui_STYLE_HSCROLLTHUMB_HOVER);
-		psy_ui_component_setstyletype_active(&self->thumb,
+		psy_ui_component_set_style_type_active(&self->thumb,
 			psy_ui_STYLE_HSCROLLTHUMB_HOVER);
-		psy_ui_component_setpreferredsize(&self->thumb,
+		psy_ui_component_set_preferred_size(&self->thumb,
 			psy_ui_size_make_em(1.0, 1.0));
 	} else {
-		psy_ui_component_setstyletype(&self->component, psy_ui_STYLE_VSCROLLPANE);
-		psy_ui_component_setstyletype(&self->thumb, psy_ui_STYLE_VSCROLLTHUMB);
-		psy_ui_component_setstyletype_hover(&self->thumb,
+		psy_ui_component_set_style_type(&self->component, psy_ui_STYLE_VSCROLLPANE);
+		psy_ui_component_set_style_type(&self->thumb, psy_ui_STYLE_VSCROLLTHUMB);
+		psy_ui_component_set_style_type_hover(&self->thumb,
 			psy_ui_STYLE_VSCROLLTHUMB_HOVER);
-		psy_ui_component_setstyletype_active(&self->thumb,
+		psy_ui_component_set_style_type_active(&self->thumb,
 			psy_ui_STYLE_VSCROLLTHUMB_HOVER);
-		psy_ui_component_setpreferredsize(&self->thumb,
+		psy_ui_component_set_preferred_size(&self->thumb,
 			psy_ui_size_make_em(1.0, 1.0));
 	}
 	psy_ui_scrollbarpane_updatethumbposition(self);
@@ -155,7 +155,7 @@ void psy_ui_scrollbarpane_onmousedown(psy_ui_ScrollBarPane* self,
 {
 	assert(self);
 	
-	psy_ui_component_setfocus(&self->component);
+	psy_ui_component_set_focus(&self->component);
 	if (psy_ui_mouseevent_target(ev) == &self->thumb) {
 		psy_ui_component_capture(&self->thumb);
 		if (self->orientation == psy_ui_HORIZONTAL) {
@@ -184,7 +184,7 @@ void psy_ui_scrollbarpane_onmousedown(psy_ui_ScrollBarPane* self,
 			self->position + self->repeat);
 		psy_signal_emit(&self->signal_changed, self, 0);
 		self->repeatdelaycounter = REPEAT_DELAYCOUNT;
-		psy_ui_component_starttimer(&self->component, 0,
+		psy_ui_component_start_timer(&self->component, 0,
 			REPEAT_TIMEINTERVAL);
 	}
 }
@@ -349,18 +349,18 @@ void psy_ui_scrollbar_init(psy_ui_ScrollBar* self, psy_ui_Component* parent)
 		self, psy_ui_scrollbar_onless);
 	psy_ui_button_seticon(&self->less, psy_ui_ICON_UP);
 	psy_ui_button_setcharnumber(&self->less, 2);
-	psy_ui_component_setalign(psy_ui_button_base(&self->less),
+	psy_ui_component_set_align(psy_ui_button_base(&self->less),
 		psy_ui_ALIGN_TOP);	
 	/* More Button */
 	psy_ui_button_init_connect(&self->more, &self->component,
 		self, psy_ui_scrollbar_onmore);
 	psy_ui_button_seticon(&self->more, psy_ui_ICON_DOWN);
 	psy_ui_button_setcharnumber(&self->more, 2);
-	psy_ui_component_setalign(psy_ui_button_base(&self->more),
+	psy_ui_component_set_align(psy_ui_button_base(&self->more),
 		psy_ui_ALIGN_BOTTOM);	
 	/* Scrollpane */
 	psy_ui_scrollbarpane_init(&self->pane, &self->component);
-	psy_ui_component_setalign(psy_ui_scrollbarpane_base(&self->pane),
+	psy_ui_component_set_align(psy_ui_scrollbarpane_base(&self->pane),
 		psy_ui_ALIGN_CLIENT);
 	/* Orientation */
 	psy_ui_scrollbar_setorientation(self, psy_ui_VERTICAL);
@@ -378,38 +378,38 @@ void psy_ui_scrollbar_setorientation(psy_ui_ScrollBar* self,
 	
 	if (orientation == psy_ui_HORIZONTAL) {
 		psy_ui_button_seticon(&self->less, psy_ui_ICON_LESS);
-		psy_ui_component_setalign(psy_ui_button_base(&self->less),
+		psy_ui_component_set_align(psy_ui_button_base(&self->less),
 			psy_ui_ALIGN_LEFT);
-		psy_ui_component_setstyletypes(psy_ui_button_base(&self->less),
+		psy_ui_component_set_style_types(psy_ui_button_base(&self->less),
 			psy_ui_STYLE_HSCROLLBUTTON, psy_ui_STYLE_HSCROLLBUTTON_HOVER,
 			psy_INDEX_INVALID, psy_INDEX_INVALID);
-		psy_ui_component_setstyletype_active(psy_ui_button_base(&self->less),
+		psy_ui_component_set_style_type_active(psy_ui_button_base(&self->less),
 			psy_ui_STYLE_HSCROLLBUTTON_ACTIVE);		
 		psy_ui_button_seticon(&self->more, psy_ui_ICON_MORE);		
-		psy_ui_component_setalign(psy_ui_button_base(&self->more),
+		psy_ui_component_set_align(psy_ui_button_base(&self->more),
 			psy_ui_ALIGN_RIGHT);		
-		psy_ui_component_setstyletypes(psy_ui_button_base(&self->more),
+		psy_ui_component_set_style_types(psy_ui_button_base(&self->more),
 			psy_ui_STYLE_HSCROLLBUTTON, psy_ui_STYLE_HSCROLLBUTTON_HOVER,
 			psy_INDEX_INVALID, psy_INDEX_INVALID);
-		psy_ui_component_setstyletype_active(psy_ui_button_base(&self->more),
+		psy_ui_component_set_style_type_active(psy_ui_button_base(&self->more),
 			psy_ui_STYLE_HSCROLLBUTTON_ACTIVE);
 		psy_ui_scrollbarpane_updatethumbposition(&self->pane);
 	} else if (orientation == psy_ui_VERTICAL) {
 		psy_ui_button_seticon(&self->less, psy_ui_ICON_UP);
-		psy_ui_component_setalign(psy_ui_button_base(&self->less),
+		psy_ui_component_set_align(psy_ui_button_base(&self->less),
 			psy_ui_ALIGN_TOP);
-		psy_ui_component_setstyletypes(psy_ui_button_base(&self->less),
+		psy_ui_component_set_style_types(psy_ui_button_base(&self->less),
 			psy_ui_STYLE_VSCROLLBUTTON, psy_ui_STYLE_VSCROLLBUTTON_HOVER,
 			psy_INDEX_INVALID, psy_INDEX_INVALID);
-		psy_ui_component_setstyletype_active(psy_ui_button_base(&self->less),
+		psy_ui_component_set_style_type_active(psy_ui_button_base(&self->less),
 			psy_ui_STYLE_VSCROLLBUTTON_ACTIVE);		
 		psy_ui_button_seticon(&self->more, psy_ui_ICON_DOWN);
-		psy_ui_component_setalign(psy_ui_button_base(&self->more),
+		psy_ui_component_set_align(psy_ui_button_base(&self->more),
 			psy_ui_ALIGN_BOTTOM);		
-		psy_ui_component_setstyletypes(psy_ui_button_base(&self->more),
+		psy_ui_component_set_style_types(psy_ui_button_base(&self->more),
 			psy_ui_STYLE_VSCROLLBUTTON, psy_ui_STYLE_VSCROLLBUTTON_HOVER,
 			psy_INDEX_INVALID, psy_INDEX_INVALID);
-		psy_ui_component_setstyletype_active(psy_ui_button_base(&self->more),
+		psy_ui_component_set_style_type_active(psy_ui_button_base(&self->more),
 			psy_ui_STYLE_VSCROLLBUTTON_ACTIVE);
 	}
 	psy_ui_scrollbarpane_setorientation(&self->pane, orientation);

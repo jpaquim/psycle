@@ -47,29 +47,29 @@ void patterntrackbox_init(PatternTrackBox* self, psy_ui_Component* parent,
 {
 	psy_ui_component_init(&self->component, parent, NULL);
 	patterntrackbox_vtable_init(self);
-	psy_ui_component_setstyletype(&self->component,
+	psy_ui_component_set_style_type(&self->component,
 		STYLE_PV_TRACK_HEADER);
 	self->state = state;
 	self->index = index;	
 	psy_ui_component_init(&self->solo, &self->component, NULL);
-	psy_ui_component_setstyletype(&self->solo,
+	psy_ui_component_set_style_type(&self->solo,
 		STYLE_PV_TRACK_HEADER_SOLO);
-	psy_ui_component_setstyletype_select(&self->solo,
+	psy_ui_component_set_style_type_select(&self->solo,
 		STYLE_PV_TRACK_HEADER_SOLO_SELECT);
 	psy_ui_component_init(&self->mute, &self->component, NULL);
-	psy_ui_component_setstyletype(&self->mute,
+	psy_ui_component_set_style_type(&self->mute,
 		STYLE_PV_TRACK_HEADER_MUTE);
-	psy_ui_component_setstyletype_select(&self->mute,
+	psy_ui_component_set_style_type_select(&self->mute,
 		STYLE_PV_TRACK_HEADER_MUTE_SELECT);
 	psy_ui_component_init(&self->record, &self->component, NULL);
-	psy_ui_component_setstyletype(&self->record,
+	psy_ui_component_set_style_type(&self->record,
 		STYLE_PV_TRACK_HEADER_RECORD);
-	psy_ui_component_setstyletype_select(&self->record,
+	psy_ui_component_set_style_type_select(&self->record,
 		STYLE_PV_TRACK_HEADER_RECORD_SELECT);
 	psy_ui_component_init(&self->play, &self->component, NULL);
-	psy_ui_component_setstyletype(&self->play,
+	psy_ui_component_set_style_type(&self->play,
 		STYLE_PV_TRACK_HEADER_PLAY);
-	psy_ui_component_setstyletype_select(&self->play,
+	psy_ui_component_set_style_type_select(&self->play,
 		STYLE_PV_TRACK_HEADER_PLAY_SELECT);
 	patterntrackbox_update(self);
 }
@@ -87,7 +87,7 @@ PatternTrackBox* patterntrackbox_allocinit(psy_ui_Component* parent,
 	rv = patterntrackbox_alloc();
 	if (rv) {
 		patterntrackbox_init(rv, parent, index, state);
-		psy_ui_component_deallocateafterdestroyed(patterntrackbox_base(rv));
+		psy_ui_component_deallocate_after_destroyed(patterntrackbox_base(rv));
 	}
 	return rv;
 }
@@ -252,7 +252,7 @@ void patterntrack_init(PatternTrack* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->component, parent, NULL);
 	patterntrack_vtable_init(self);
 	patterntrackbox_init(&self->trackbox, &self->component, index, state);
-	psy_ui_component_setalign(&self->trackbox.component, psy_ui_ALIGN_CENTER);
+	psy_ui_component_set_align(&self->trackbox.component, psy_ui_ALIGN_CENTER);
 }
 
 PatternTrack* patterntrack_alloc(void)
@@ -268,7 +268,7 @@ PatternTrack* patterntrack_allocinit(psy_ui_Component* parent,
 	rv = patterntrack_alloc();
 	if (rv) {
 		patterntrack_init(rv, parent, index, state);
-		psy_ui_component_deallocateafterdestroyed(patterntrack_base(rv));
+		psy_ui_component_deallocate_after_destroyed(patterntrack_base(rv));
 	}
 	return rv;
 }
@@ -334,7 +334,7 @@ void trackerheader_init(TrackerHeader* self, psy_ui_Component* parent,
 		trackerheader_onsongchanged);
 	trackerheader_connectsong(self);	
 	trackerheader_build(self);	
-	psy_ui_component_starttimer(&self->component, 0, 50);
+	psy_ui_component_start_timer(&self->component, 0, 50);
 }
 
 void trackerheader_ondestroy(TrackerHeader* self)
@@ -352,7 +352,7 @@ void trackerheader_build(TrackerHeader* self)
 	numtracks = patternviewstate_numsongtracks(self->state->pv);
 	for (track = 0; track < numtracks; ++track) {		
 		psy_table_insert(&self->boxes, track,
-			psy_ui_component_setalign(
+			psy_ui_component_set_align(
 				patterntrack_base(patterntrack_allocinit(
 					trackerheader_base(self), track, self->state)),
 				psy_ui_ALIGN_LEFT));

@@ -190,9 +190,25 @@ psy_List* psy_list_at(psy_List* self, uintptr_t numentry)
 	return p;
 }
 
-const psy_List* psy_list_at_const(psy_List* self, uintptr_t numentry)
+const psy_List* psy_list_at_const(const psy_List* self, uintptr_t numentry)
 {
 	return psy_list_at((psy_List*)self, numentry);
+}
+
+void* psy_list_entry_at(psy_List* self, uintptr_t numentry)
+{
+	psy_List* p;
+	
+	p = psy_list_at(self, numentry);
+	if (p) {
+		return p->entry;
+	}
+	return NULL;
+}
+
+const void* psy_list_entry_at_const(const psy_List* self, uintptr_t numentry)
+{
+	return psy_list_entry_at((psy_List*)self, numentry);
 }
 
 void psy_list_deallocate(psy_List** self, psy_fp_disposefunc disposefunc)

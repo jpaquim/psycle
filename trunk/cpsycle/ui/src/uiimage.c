@@ -31,7 +31,7 @@ void psy_ui_image_init_resource(psy_ui_Image* self, psy_ui_Component* parent,
 		psy_ui_RealSize size;
 
 		size = psy_ui_bitmap_size(&self->bitmap);
-		psy_ui_component_setpreferredsize(&self->component,
+		psy_ui_component_set_preferred_size(&self->component,
 			psy_ui_size_make_px(size.width, size.height));
 	}
 }

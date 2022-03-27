@@ -16,7 +16,7 @@
 #include <uicombobox.h>
 #include <uilabel.h>
 #include <uislider.h>
-#include <uitextinput.h>
+#include <uitextarea.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -49,7 +49,7 @@ typedef struct InstrumentGeneralView {
 	psy_ui_Button dcanone;
 	psy_ui_Component fitrow;
 	psy_ui_CheckBox fitrowcheck;
-	psy_ui_TextInput fitrowedit;
+	psy_ui_TextArea fitrowedit;
 	psy_ui_Label fitrowlabel;
 	psy_ui_Component left;
 	psy_ui_Slider globalvolume;	

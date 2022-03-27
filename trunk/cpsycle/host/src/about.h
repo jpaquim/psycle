@@ -97,7 +97,7 @@ typedef struct About {
 	psy_ui_Button contribbutton;
 	psy_ui_Button versionbutton;
 	psy_ui_Button licencebutton;
-	psy_ui_Button okbutton;
+	psy_ui_Button ok_button;
 	/* references */
 	Workspace* workspace;
 } About;

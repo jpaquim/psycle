@@ -23,7 +23,7 @@ void metronomebar_init(MetronomeBar* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {				
 	psy_ui_component_init(metronomebar_base(self), parent, NULL);
-	psy_ui_component_setdefaultalign(metronomebar_base(self),
+	psy_ui_component_set_defaultalign(metronomebar_base(self),
 		psy_ui_ALIGN_LEFT, psy_ui_defaults_hmargin(psy_ui_defaults()));
 	self->workspace = workspace;
 	self->player = &workspace->player;
@@ -72,7 +72,7 @@ void metronomebar_ontogglemetronomestate(MetronomeBar* self)
 
 void metronomebar_onconfigure(MetronomeBar* self, psy_ui_Button* sender)
 {
-	workspace_selectview(self->workspace, VIEW_ID_SETTINGSVIEW, 10, 0);
+	workspace_select_view(self->workspace, VIEW_ID_SETTINGSVIEW, 10, 0);
 }
 
 void metronomebar_onprecountchanged(MetronomeBar* self,

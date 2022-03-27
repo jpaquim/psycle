@@ -49,7 +49,7 @@ void helpview_inittabbar(HelpView* self, psy_ui_Component* tabbarparent,
 		psy_ui_ALIGN_LEFT);
 	psy_ui_tabbar_init(&self->tabbar, &self->bar);
 	psy_ui_component_setalignexpand(&self->bar, psy_ui_HEXPAND);
-	psy_ui_component_setalign(psy_ui_tabbar_base(&self->tabbar),
+	psy_ui_component_set_align(psy_ui_tabbar_base(&self->tabbar),
 		psy_ui_ALIGN_LEFT);
 	psy_ui_tabbar_append_tabs(&self->tabbar, "help.help", "help.about",
 		"help.greetings", NULL);	
@@ -59,18 +59,19 @@ void helpview_inittabbar(HelpView* self, psy_ui_Component* tabbarparent,
 		IDB_VSPLIT_LIGHT, IDB_VSPLIT_DARK, psy_ui_colour_white());
 	psy_ui_button_settextalignment(&self->floatsection,
 		psy_ui_ALIGNMENT_CENTER_VERTICAL);
-	psy_ui_component_setalign(psy_ui_button_base(&self->floatsection),
+	psy_ui_component_set_align(psy_ui_button_base(&self->floatsection),
 		psy_ui_ALIGN_LEFT);	
 }
 
 void helpview_initsections(HelpView* self, Workspace* workspace)
 {
 	psy_ui_notebook_init(&self->notebook, helpview_base(self));
-	psy_ui_component_setalign(psy_ui_notebook_base(&self->notebook),
+	psy_ui_component_set_align(psy_ui_notebook_base(&self->notebook),
 		psy_ui_ALIGN_CLIENT);
 	psy_ui_notebook_connectcontroller(&self->notebook,
 		&self->tabbar.signal_change);
-	help_init(&self->help, psy_ui_notebook_base(&self->notebook), workspace);
+	help_init(&self->help, psy_ui_notebook_base(&self->notebook),
+		&workspace->config.directories);
 	about_init(&self->about, psy_ui_notebook_base(&self->notebook), workspace);
 	greet_init(&self->greet, psy_ui_notebook_base(&self->notebook));	
 }
@@ -80,9 +81,9 @@ void helpview_initsectionfloated(HelpView* self)
 	psy_ui_component_init(&self->sectionfloated, helpview_base(self), NULL);
 	psy_ui_component_hide(&self->sectionfloated);
 	psy_ui_label_init(&self->floatdesc, &self->sectionfloated);		
-	psy_ui_label_preventtranslation(&self->floatdesc);
-	psy_ui_label_settext(&self->floatdesc, "This view is floated.");
-	psy_ui_component_setalign(&self->floatdesc.component,
+	psy_ui_label_prevent_translation(&self->floatdesc);
+	psy_ui_label_set_text(&self->floatdesc, "This view is floated.");
+	psy_ui_component_set_align(&self->floatdesc.component,
 		psy_ui_ALIGN_CENTER);
 }
 
@@ -98,7 +99,7 @@ void helpview_onfocus(HelpView* self, psy_ui_Component* sender)
 
 	view = psy_ui_notebook_activepage(&self->notebook);
 	if (view) {
-		/* psy_ui_component_setfocus(view); */
+		/* psy_ui_component_set_focus(view); */
 	}
 }
 
@@ -111,13 +112,13 @@ void helpview_float(HelpView* self, HelpViewSection section,
 			&self->sectionfloated, NULL);
 		psy_ui_component_show(&self->sectionfloated);
 		psy_ui_component_insert(dest, &self->help.component, NULL);		
-		psy_ui_component_setalign(&self->help.component, psy_ui_ALIGN_CLIENT);
-		psy_ui_component_setpreferredsize(&self->help.text.component,
+		psy_ui_component_set_align(&self->help.component, psy_ui_ALIGN_CLIENT);
+		psy_ui_component_set_preferred_size(&self->help.text.component,
 			psy_ui_size_make_em(120, 40));
 		psy_ui_component_preventalign(&self->help.text.component);
 		psy_ui_component_show_align(&self->help.component);
 		psy_ui_component_align(&self->help.component);
-		psy_ui_button_settext(&self->floatsection, "help.combine");		
+		psy_ui_button_set_text(&self->floatsection, "help.combine");		
 		psy_ui_component_align(psy_ui_component_parent(
 			psy_ui_component_parent(&self->bar)));		
 	}
@@ -133,10 +134,10 @@ void helpview_dock(HelpView* self, HelpViewSection section,
 			&self->help.component, NULL);
 		psy_ui_component_setcontaineralign(&self->help.text.component,
 			psy_ui_CONTAINER_ALIGN_NONE);
-		psy_ui_component_setalign(&self->help.component, psy_ui_ALIGN_CLIENT);			
+		psy_ui_component_set_align(&self->help.component, psy_ui_ALIGN_CLIENT);			
 		psy_ui_component_show_align(&self->help.component);
 		psy_ui_component_align(&self->help.component);
-		psy_ui_button_settext(&self->floatsection, "help.extract");
+		psy_ui_button_set_text(&self->floatsection, "help.extract");
 		psy_ui_component_align(psy_ui_component_parent(
 			psy_ui_component_parent(&self->bar)));
 	}

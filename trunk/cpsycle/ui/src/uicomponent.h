@@ -233,7 +233,7 @@ void psy_ui_component_deallocate(psy_ui_Component*);
 psy_ui_Component* psy_ui_component_alloc(void);
 psy_ui_Component* psy_ui_component_allocinit(psy_ui_Component* parent,
 	psy_ui_Component* view);
-void psy_ui_component_deallocateafterdestroyed(psy_ui_Component*);
+void psy_ui_component_deallocate_after_destroyed(psy_ui_Component*);
 
 INLINE void psy_ui_component_setvtable(psy_ui_Component* self,
 	psy_ui_ComponentVtable* vtable)
@@ -248,7 +248,7 @@ void psy_ui_component_hide_align(psy_ui_Component* self);
 void psy_ui_component_showstate(psy_ui_Component*, int cmd);
 void psy_ui_component_showmaximized(psy_ui_Component*);
 void psy_ui_component_togglefullscreen(psy_ui_Component*);
-bool psy_ui_component_togglevisibility(psy_ui_Component*);
+bool psy_ui_component_toggle_visibility(psy_ui_Component*);
 
 void psy_ui_component_usescroll(psy_ui_Component*);
 void psy_ui_component_usecontaineralign(psy_ui_Component*);
@@ -352,7 +352,7 @@ void psy_ui_component_setborder(psy_ui_Component*, const psy_ui_Border*);
 uintptr_t psy_ui_component_backgroundimageid(const psy_ui_Component*);
 const char* psy_ui_component_backgroundimagepath(const psy_ui_Component*);
 
-psy_ui_Component* psy_ui_component_setalign(psy_ui_Component*,
+psy_ui_Component* psy_ui_component_set_align(psy_ui_Component*,
 	psy_ui_AlignType);
 
 INLINE void psy_ui_component_init_align(psy_ui_Component* self,
@@ -360,7 +360,7 @@ INLINE void psy_ui_component_init_align(psy_ui_Component* self,
 	psy_ui_AlignType aligntype)
 {
 	psy_ui_component_init(self, parent, view);
-	psy_ui_component_setalign(self, aligntype);
+	psy_ui_component_set_align(self, aligntype);
 }
 
 void psy_ui_component_setcontaineralign(psy_ui_Component*,
@@ -371,7 +371,7 @@ void psy_ui_component_enableinput(psy_ui_Component*, int recursive);
 void psy_ui_component_preventinput(psy_ui_Component*, int recursive);
 bool psy_ui_component_inputprevented(const psy_ui_Component*);
 void psy_ui_component_setbackgroundmode(psy_ui_Component*, psy_ui_BackgroundMode);
-void psy_ui_component_setpreferredsize(psy_ui_Component*, psy_ui_Size);
+void psy_ui_component_set_preferred_size(psy_ui_Component*, psy_ui_Size);
 void psy_ui_component_setpreferredheight(psy_ui_Component*, psy_ui_Value);
 void psy_ui_component_setpreferredwidth(psy_ui_Component*, psy_ui_Value);
 psy_ui_Size psy_ui_component_preferredsize(psy_ui_Component*, const psy_ui_Size* limit);
@@ -571,7 +571,7 @@ INLINE psy_ui_RealRectangle psy_ui_component_screenposition(const psy_ui_Compone
 
 psy_ui_RealRectangle psy_ui_component_scrolledposition(psy_ui_Component*);
 
-void psy_ui_component_starttimer(psy_ui_Component* self, uintptr_t id,
+void psy_ui_component_start_timer(psy_ui_Component* self, uintptr_t id,
 	uintptr_t interval);
 void psy_ui_component_stoptimer(psy_ui_Component* self, uintptr_t id);
 
@@ -599,7 +599,7 @@ psy_ui_Colour psy_ui_component_colour(psy_ui_Component*);
 void psy_ui_component_setbackgroundcolour(psy_ui_Component*, psy_ui_Colour);
 psy_ui_Colour psy_ui_component_backgroundcolour(psy_ui_Component*);
 
-INLINE void psy_ui_component_settitle(psy_ui_Component* self, const char* text)
+INLINE void psy_ui_component_set_title(psy_ui_Component* self, const char* text)
 {	
 	self->imp->vtable->dev_settitle(self->imp, text);
 }
@@ -607,7 +607,7 @@ INLINE void psy_ui_component_settitle(psy_ui_Component* self, const char* text)
 void psy_ui_component_capture(psy_ui_Component* self);
 void psy_ui_component_releasecapture(psy_ui_Component* self);
 
-void psy_ui_component_setfocus(psy_ui_Component*);
+void psy_ui_component_set_focus(psy_ui_Component*);
 INLINE int psy_ui_component_hasfocus(psy_ui_Component* self)
 {
 	return self->imp->vtable->dev_hasfocus(self->imp);
@@ -660,7 +660,7 @@ INLINE void psy_ui_component_setorder(psy_ui_Component* self, psy_ui_Component* 
 	self->imp->vtable->dev_setorder(self->imp, insertafter->imp);
 }
 
-INLINE void psy_ui_component_setwheelscroll(psy_ui_Component* self, int lines)
+INLINE void psy_ui_component_set_wheel_scroll(psy_ui_Component* self, int lines)
 {
 	psy_ui_component_usescroll(self);
 	psy_ui_componentscroll_setwheel(self->scroll, lines);	
@@ -780,7 +780,7 @@ INLINE double psy_ui_component_scrollstep_height_px(const psy_ui_Component* self
 		psy_ui_component_textmetric(self), NULL);
 }
 
-INLINE void psy_ui_component_setscrollstep_height(psy_ui_Component* self,
+INLINE void psy_ui_component_set_scrollstep_height(psy_ui_Component* self,
 	psy_ui_Value step)
 {
 	assert(self);
@@ -873,21 +873,22 @@ INLINE psy_ui_RealSize psy_ui_component_size_px(const psy_ui_Component* self)
 
 
 int psy_ui_component_level(const psy_ui_Component*);
-void psy_ui_component_setdefaultalign(psy_ui_Component*,
+void psy_ui_component_set_defaultalign(psy_ui_Component*,
 	psy_ui_AlignType, psy_ui_Margin);
 
 void psy_ui_component_updatelanguage(psy_ui_Component*);
 psy_Translator* psy_ui_translator(void);
 const char* psy_ui_translate(const char* key);
 
-void psy_ui_component_setstyletypes(psy_ui_Component*,
+void psy_ui_component_set_style_types(psy_ui_Component*,
 	uintptr_t standard, uintptr_t hover, uintptr_t select, uintptr_t disabled);
-void psy_ui_component_setstyletype(psy_ui_Component*, uintptr_t standard);
-void psy_ui_component_setstyletype_hover(psy_ui_Component*, uintptr_t hover);
-void psy_ui_component_setstyletype_focus(psy_ui_Component*, uintptr_t focus);
-void psy_ui_component_setstyletype_active(psy_ui_Component*, uintptr_t active);
-void psy_ui_component_setstyletype_select(psy_ui_Component*, uintptr_t select);
-void psy_ui_component_setstylestate(psy_ui_Component*, psy_ui_StyleState);
+void psy_ui_component_set_style_type(psy_ui_Component*, uintptr_t standard);
+void psy_ui_component_set_style_type_hover(psy_ui_Component*, uintptr_t hover);
+void psy_ui_component_set_style_type_focus(psy_ui_Component*, uintptr_t focus);
+void psy_ui_component_set_style_type_active(psy_ui_Component*, uintptr_t active);
+void psy_ui_component_set_style_type_select(psy_ui_Component*, uintptr_t select);
+void psy_ui_component_set_style_type_disabled(psy_ui_Component*, uintptr_t disabled);
+void psy_ui_component_set_style_state(psy_ui_Component*, psy_ui_StyleState);
 void psy_ui_component_addstylestate(psy_ui_Component*, psy_ui_StyleState);
 void psy_ui_component_removestylestate(psy_ui_Component*, psy_ui_StyleState);
 void psy_ui_component_addstylestate_children(psy_ui_Component*, psy_ui_StyleState);

@@ -49,8 +49,8 @@ void seqviewtrackheaders_init(SeqviewTrackHeaders* self,
 		psy_ui_size_make_em(0.0, 2.0));	
 	psy_signal_init(&self->signal_trackselected);
 	psy_ui_component_init(&self->client, &self->component, NULL);
-	psy_ui_component_setalign(&self->client, psy_ui_ALIGN_FIXED);
-	psy_ui_component_setdefaultalign(&self->client,
+	psy_ui_component_set_align(&self->client, psy_ui_ALIGN_FIXED);
+	psy_ui_component_set_defaultalign(&self->client,
 		psy_ui_ALIGN_LEFT, psy_ui_margin_zero());
 	psy_ui_component_setalignexpand(&self->client, psy_ui_HEXPAND);
 	psy_ui_component_setscrollstep(&self->client,
@@ -90,7 +90,7 @@ void seqviewtrackheaders_build(SeqviewTrackHeaders* self)
 		}
 		newtrack = psy_ui_button_allocinit(&self->client);
 		if (newtrack) {
-			psy_ui_button_settext(newtrack, "seqview.new-trk");
+			psy_ui_button_set_text(newtrack, "seqview.new-trk");
 			newtrack->stoppropagation = FALSE;
 			psy_signal_connect(&newtrack->signal_clicked, self,
 				seqviewtrackheaders_onnewtrack);

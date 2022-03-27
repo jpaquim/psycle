@@ -30,21 +30,21 @@ void samplesbox_init(SamplesBox* self, psy_ui_Component* parent,
 	psy_ui_margin_init_em(&margin, 0.0, 0.0, 1.0, 0.0);	
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_label_init(&self->header, &self->component);
-	psy_ui_label_settext(&self->header, "samplesview.groupsfirstsample");
-	psy_ui_label_setcharnumber(&self->header, 25);
+	psy_ui_label_set_text(&self->header, "samplesview.groupsfirstsample");
+	psy_ui_label_set_charnumber(&self->header, 25);
 	psy_ui_component_set_margin(&self->header.component, margin);		
-	psy_ui_component_setalign(&self->header.component, psy_ui_ALIGN_TOP);	
+	psy_ui_component_set_align(&self->header.component, psy_ui_ALIGN_TOP);	
 	psy_ui_listbox_init(&self->samplelist, &self->component);	
-	psy_ui_component_setalign(&self->samplelist.component, psy_ui_ALIGN_CLIENT);	
+	psy_ui_component_set_align(&self->samplelist.component, psy_ui_ALIGN_CLIENT);	
 	psy_ui_listbox_init(&self->subsamplelist, &self->component);
 	psy_ui_component_setmaximumsize(&self->subsamplelist.component,
 		psy_ui_size_make_em(0.0, 10.0));
 	psy_ui_component_setminimumsize(&self->subsamplelist.component,
 		psy_ui_size_make_em(0.0, 10.0));
-	psy_ui_component_setalign(&self->subsamplelist.component, psy_ui_ALIGN_BOTTOM);
+	psy_ui_component_set_align(&self->subsamplelist.component, psy_ui_ALIGN_BOTTOM);
 	psy_ui_label_init_text(&self->group, &self->component,
 		"samplesview.groupsamples");
-	psy_ui_component_setalign(&self->group.component, psy_ui_ALIGN_BOTTOM);
+	psy_ui_component_set_align(&self->group.component, psy_ui_ALIGN_BOTTOM);
 	psy_ui_component_set_margin(&self->group.component, margin);	
 	psy_signal_init(&self->signal_changed);
 	psy_signal_connect(&self->component.signal_destroy, self,
@@ -79,7 +79,7 @@ void samplesbox_buildsamplelist(SamplesBox* self)
 		} else {
 			psy_snprintf(text, 20, "%02X:%s", slot, "");
 		}
-		psy_ui_listbox_addtext(&self->samplelist, text);
+		psy_ui_listbox_add_text(&self->samplelist, text);
 	}	
 }
 
@@ -105,7 +105,7 @@ void samplesbox_buildsubsamplelist(SamplesBox* self, uintptr_t slot, bool create
 			psy_snprintf(text, 20, "%02X:%s", subslot, "");
 		}
 		if (create) {
-			psy_ui_listbox_addtext(&self->subsamplelist, text);
+			psy_ui_listbox_add_text(&self->subsamplelist, text);
 		} else {
 			psy_ui_listbox_settext(&self->subsamplelist, text, subslot);
 		}

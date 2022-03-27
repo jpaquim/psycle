@@ -11,6 +11,7 @@
 #include "uiapp.h"
 #include "uiimpfactory.h"
 #include "uitextformat.h"
+#include "uitextdraw.h"
 /* platform */
 #include "../../detail/portable.h"
 
@@ -24,14 +25,16 @@ static void psy_ui_textareapane_onfocuslost(psy_ui_TextAreaPane*);
 static void psy_ui_textareapane_onmousehook(psy_ui_TextAreaPane*, psy_ui_App* sender,
 	psy_ui_MouseEvent*);
 static void psy_ui_textareapane_ondraw(psy_ui_TextAreaPane*, psy_ui_Graphics*);
-static void psy_ui_textareapane_drawcursor(psy_ui_TextAreaPane*, psy_ui_Graphics*,
-	double cpy, uintptr_t linestart);
 static void psy_ui_textareapane_onmousedown(psy_ui_TextAreaPane*, psy_ui_MouseEvent*);
 static void insertchar(psy_ui_TextAreaPane*, char c);
 static void deletechar(psy_ui_TextAreaPane*);
 static void removechar(psy_ui_TextAreaPane*);
 static char_dyn_t* lefttext(psy_ui_TextAreaPane*, uintptr_t split);
 static char_dyn_t* righttext(psy_ui_TextAreaPane*, uintptr_t split);
+static void psy_ui_textarea_oneditaccept(psy_ui_TextArea*,
+	psy_ui_TextAreaPane* sender);
+static void psy_ui_textarea_oneditreject(psy_ui_TextArea*,
+	psy_ui_TextAreaPane* sender);
 
 /* vtable */
 static psy_ui_ComponentVtable vtable;
@@ -80,19 +83,21 @@ void psy_ui_textareapane_init(psy_ui_TextAreaPane* self, psy_ui_Component* paren
 	self->preventedit = TRUE;
 	self->text = psy_strdup("textinput");
 	self->cp = 0;
+	psy_ui_textformat_init(&self->format);
 	psy_signal_init(&self->signal_change);
 	psy_signal_init(&self->signal_accept);
 	psy_signal_init(&self->signal_reject);	
-	psy_ui_component_setstyletypes(&self->component,
+	psy_ui_component_set_style_types(&self->component,
 		psy_ui_STYLE_EDIT, psy_INDEX_INVALID, psy_INDEX_INVALID,
 		psy_INDEX_INVALID);
-	psy_ui_component_setstyletype_focus(&self->component,
+	psy_ui_component_set_style_type_focus(&self->component,
 		psy_ui_STYLE_EDIT_FOCUS);
-	psy_ui_component_setscrollstep_height(
+	psy_ui_component_set_scrollstep_height(
 		psy_ui_textareapane_base(self),
 		psy_ui_value_make_eh(1.0));
-	psy_ui_component_setwheelscroll(&self->component, 4);
-	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_VSCROLL);	
+	psy_ui_component_set_wheel_scroll(&self->component, 4);
+	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_VSCROLL);
+
 }
 
 void psy_ui_textareapane_ondestroy(psy_ui_TextAreaPane* self)
@@ -103,6 +108,7 @@ void psy_ui_textareapane_ondestroy(psy_ui_TextAreaPane* self)
 	psy_signal_disconnect(&psy_ui_app()->signal_mousehook, self,
 		psy_ui_textareapane_onmousehook);
 	free(self->text);
+	psy_ui_textformat_dispose(&self->format);
 }
 
 void psy_ui_textareapane_enableinputfield(psy_ui_TextAreaPane* self)
@@ -117,6 +123,7 @@ void psy_ui_textareapane_enableinputfield(psy_ui_TextAreaPane* self)
 void psy_ui_textareapane_settext(psy_ui_TextAreaPane* self, const char* text)
 {	
 	psy_strreset(&self->text, text);
+	psy_ui_textformat_clear(&self->format);
 	psy_ui_component_invalidate(&self->component);
 }
 
@@ -128,6 +135,7 @@ void psy_ui_textareapane_settext(psy_ui_TextAreaPane* self, const char* text)
 void psy_ui_textareapane_setcharnumber(psy_ui_TextAreaPane* self, double number)
 {
 	self->charnumber = number;
+	psy_ui_textformat_clear(&self->format);
 }
 
 void psy_ui_textareapane_setlinenumber(psy_ui_TextAreaPane* self, int number)
@@ -138,24 +146,16 @@ void psy_ui_textareapane_setlinenumber(psy_ui_TextAreaPane* self, int number)
 void psy_ui_textareapane_onpreferredsize(psy_ui_TextAreaPane* self,
 	psy_ui_Size* limit, psy_ui_Size* rv)
 {			
-	const psy_ui_TextMetric* tm;
-	psy_List* lines;
-	psy_ui_TextFormat format;
-
-	tm = psy_ui_component_textmetric(psy_ui_textareapane_base(self));
-	psy_ui_textformat_init(&format, tm, TRUE);
-	if (self->charnumber == 0 && limit) {
-		lines = psy_ui_textformat_lines(&format, self->text,
-			psy_ui_value_px(&limit->width, tm, limit));
-	} else {
-		lines = psy_ui_textformat_lines(&format, self->text,
-			self->charnumber * tm->tmAveCharWidth);
-		rv->width = psy_ui_value_make_px(tm->tmAveCharWidth * self->charnumber);
-	}	
-	rv->height = psy_ui_value_make_px(psy_list_size(lines) *
-		(tm->tmHeight * 1.0));
-	psy_list_free(lines);
-	lines = NULL;
+	const psy_ui_TextMetric* tm;	
+	double width;
+	
+	tm = psy_ui_component_textmetric(psy_ui_textareapane_base(self));	
+	width = (self->charnumber == 0 && limit)
+		? psy_ui_value_px(&limit->width, tm, limit)
+		: self->charnumber * tm->tmAveCharWidth;	
+	psy_ui_textformat_update(&self->format, self->text, width, tm);
+	*rv = psy_ui_size_make_px(width,
+		psy_ui_textformat_numlines(&self->format) * (tm->tmHeight * 1.0));	
 }
 
 void psy_ui_textareapane_enableedit(psy_ui_TextAreaPane* self)
@@ -187,15 +187,7 @@ void psy_ui_textareapane_onkeydown(psy_ui_TextAreaPane* self, psy_ui_KeyboardEve
 			psy_signal_emit(&self->signal_reject, self, 0);
 			psy_ui_keyboardevent_prevent_default(ev);
 		}
-		break;
-	case psy_ui_KEY_RETURN:
-		if (self->isinputfield) {
-			self->preventedit = TRUE;
-			psy_ui_app_stopmousehook(psy_ui_app());
-			psy_signal_emit(&self->signal_accept, self, 0);
-			psy_ui_keyboardevent_prevent_default(ev);
-		}
-		break;			
+		break;	
 	case psy_ui_KEY_LEFT:
 		if (self->cp > 0) {
 			--self->cp;
@@ -232,6 +224,9 @@ void psy_ui_textareapane_onkeydown(psy_ui_TextAreaPane* self, psy_ui_KeyboardEve
 	default:
 		if (psy_ui_keyboardevent_shiftkey(ev)) {
 			insertchar(self, psy_ui_keyboardevent_keycode(ev));
+		} else if (psy_ui_keyboardevent_keycode(ev) == psy_ui_KEY_RETURN) {
+			insertchar(self, '\n');
+			psy_ui_component_align(psy_ui_component_parent(&self->component));
 		} else if (psy_ui_keyboardevent_keycode(ev) >= psy_ui_KEY_DIGIT0
 			&& psy_ui_keyboardevent_keycode(ev) <= psy_ui_KEY_DIGIT9) {
 			insertchar(self, psy_ui_keyboardevent_keycode(ev));
@@ -264,6 +259,7 @@ void insertchar(psy_ui_TextAreaPane* self, char c)
 	free(right);
 	right = NULL;
 	++self->cp;
+	psy_ui_textformat_clear(&self->format);
 }
 
 void deletechar(psy_ui_TextAreaPane* self)
@@ -284,6 +280,7 @@ void deletechar(psy_ui_TextAreaPane* self)
 	if (self->cp > 0) {
 		--self->cp;
 	}
+	psy_ui_textformat_clear(&self->format);
 }
 
 void removechar(psy_ui_TextAreaPane* self)
@@ -301,6 +298,7 @@ void removechar(psy_ui_TextAreaPane* self)
 	left = NULL;
 	free(right);
 	right = NULL;
+	psy_ui_textformat_clear(&self->format);
 }
 
 char_dyn_t* lefttext(psy_ui_TextAreaPane* self, uintptr_t split)
@@ -374,78 +372,99 @@ void psy_ui_textareapane_onmousehook(psy_ui_TextAreaPane* self, psy_ui_App* send
 }
 
 void psy_ui_textareapane_ondraw(psy_ui_TextAreaPane* self, psy_ui_Graphics* g)
-{
-	psy_ui_RealSize size;
-	const psy_ui_TextMetric* tm;
-	double centerx;
-	double centery;
-	double cpy;
-	char* text;
-	uintptr_t cp;
-	psy_List* p;
-	psy_List* lines;
-	uintptr_t linestart;
-	psy_ui_TextFormat format;
-	
-	text = self->text;
-	centery = 0.0;
-	if (psy_strlen(text) == 0) {
-		psy_ui_textareapane_drawcursor(self, g, centery, 0);
-		return;
-	}
-	tm = psy_ui_component_textmetric(&self->component);
-	psy_ui_textformat_init(&format, tm, TRUE);
-	size = psy_ui_component_size_px(psy_ui_textareapane_base(self));
-	centerx = 0.0;	
-	lines = psy_ui_textformat_lines(&format, text, size.width);
-	if (!lines) {
-		return;
-	}	
-	cpy = centery;
-	linestart = 0;
-	for (p = lines; p != NULL; p = p->next) {
-		cp = (uintptr_t)p->entry;		
-		psy_ui_textout(g, centerx, cpy, text + linestart, cp - linestart);
-		if (self->cp >= linestart && self->cp < cp + 1) {
-			psy_ui_textareapane_drawcursor(self, g, cpy, linestart);
-		}
-		linestart = cp + 1;
-		cpy += tm->tmHeight;
-	}
-	psy_list_free(lines);
-}
-
-void psy_ui_textareapane_drawcursor(psy_ui_TextAreaPane* self, psy_ui_Graphics* g,
-	double cpy, uintptr_t linestart)
-{
-	if (psy_ui_component_hasfocus(&self->component)) {
-		psy_ui_Size textsize;
-		double x;		
-		const psy_ui_TextMetric* tm;
-		psy_ui_RealSize size;
-
-		tm = psy_ui_component_textmetric(psy_ui_textareapane_base(self));
-		size = psy_ui_component_size_px(psy_ui_textareapane_base(self));
-		textsize = psy_ui_textsize(g, self->text + linestart, self->cp - linestart);
-		x = psy_ui_value_px(&textsize.width, tm, NULL);		
-		psy_ui_drawline(g,
-			psy_ui_realpoint_make(x, cpy),
-			psy_ui_realpoint_make(x, cpy + tm->tmHeight));
-	}
+{		
+	psy_ui_TextDraw textdraw;
+			
+	psy_ui_textdraw_init(&textdraw, &self->format, psy_ui_component_size_px(
+		psy_ui_textareapane_base(self)), self->text);
+	psy_ui_textdraw_draw(&textdraw, g, psy_ui_component_font(&self->component),
+		psy_ui_component_textmetric(&self->component),
+		(psy_ui_component_hasfocus(&self->component))
+		? self->cp
+		: psy_INDEX_INVALID);	
+	psy_ui_textdraw_dispose(&textdraw);
 }
 
 void psy_ui_textareapane_onmousedown(psy_ui_TextAreaPane* self, psy_ui_MouseEvent* ev)
-{
-	psy_ui_component_setfocus(&self->component);
-	psy_ui_mouseevent_stop_propagation(ev);
+{	
+	self->cp = psy_ui_textformat_cursor_position(&self->format,
+		self->text,
+		psy_ui_mouseevent_offset(ev),
+		psy_ui_component_textmetric(&self->component),
+		psy_ui_component_font(&self->component));
+	psy_ui_mouseevent_stop_propagation(ev);	
+	psy_ui_component_set_focus(&self->component);
+	psy_ui_component_invalidate(&self->component);
 }
 
 /* psy_ui_TextArea */
+
+/* prototypes */
+static void psy_ui_textarea_ondestroy(psy_ui_TextArea*, psy_ui_Component* parent);
+static void psy_ui_textarea_oneditaccept(psy_ui_TextArea*,
+	psy_ui_TextAreaPane* sender);
+static void psy_ui_textarea_oneditreject(psy_ui_TextArea*,
+	psy_ui_TextAreaPane* sender);
+static void psy_ui_textarea_oneditchange(psy_ui_TextArea*,
+	psy_ui_TextAreaPane* sender);
+
+/* implementation */
 void psy_ui_textarea_init(psy_ui_TextArea* self, psy_ui_Component* parent)
 {
 	psy_ui_component_init(psy_ui_textarea_base(self), parent, NULL);
 	psy_ui_textareapane_init(&self->pane, psy_ui_textarea_base(self));
 	psy_ui_scroller_init(&self->scroller, &self->pane.component,
 		psy_ui_textarea_base(self));
-	psy_ui_component_setalign(&self->scroller.component, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_set_align(&self->scroller.component, psy_ui_ALIGN_CLIENT);
+	psy_signal_init(&self->signal_change);
+	psy_signal_init(&self->signal_accept);
+	psy_signal_init(&self->signal_reject);
+	psy_signal_connect(&self->component.signal_destroy, self,
+		psy_ui_textarea_ondestroy);
+	psy_signal_connect(&self->pane.signal_accept, self,
+		psy_ui_textarea_oneditaccept);
+	psy_signal_connect(&self->pane.signal_reject, self,
+		psy_ui_textarea_oneditreject);
+	psy_signal_connect(&self->pane.signal_change, self,
+		psy_ui_textarea_oneditchange);
+}
+
+void psy_ui_textarea_init_single_line(psy_ui_TextArea* self, psy_ui_Component* parent)
+{
+	psy_ui_textarea_init(self, parent);
+	psy_ui_textarea_prevent_wrap(self);
+	psy_ui_textformat_set_alignment(&self->pane.format, psy_ui_textalignment_make(
+		psy_ui_ALIGNMENT_LEFT | psy_ui_ALIGNMENT_CENTER_VERTICAL));
+	psy_ui_component_set_align(&self->pane.component, psy_ui_ALIGN_CLIENT);
+}
+
+void psy_ui_textarea_ondestroy(psy_ui_TextArea* self, psy_ui_Component* parent)
+{
+	psy_signal_dispose(&self->signal_change);
+	psy_signal_dispose(&self->signal_accept);
+	psy_signal_dispose(&self->signal_reject);
+}
+
+
+void psy_ui_textarea_prevent_wrap(psy_ui_TextArea* self)
+{
+	psy_ui_textformat_prevent_wrap(&self->pane.format);
+}
+
+void psy_ui_textarea_oneditaccept(psy_ui_TextArea* self,
+	psy_ui_TextAreaPane* sender)
+{	
+	psy_signal_emit(&self->signal_accept, self, 0);
+}
+
+void psy_ui_textarea_oneditreject(psy_ui_TextArea* self,
+	psy_ui_TextAreaPane* sender)
+{
+	psy_signal_emit(&self->signal_reject, self, 0);
+}
+
+void psy_ui_textarea_oneditchange(psy_ui_TextArea* self,
+	psy_ui_TextAreaPane* sender)
+{
+	psy_signal_emit(&self->signal_change, self, 0);
 }

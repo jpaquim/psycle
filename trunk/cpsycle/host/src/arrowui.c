@@ -48,7 +48,7 @@ void arrowui_init(ArrowUi* self, psy_ui_Component* parent,
 
 	psy_ui_component_init(&self->component, parent, NULL);	
 	arrowui_vtable_init(self);	
-	psy_ui_component_setstyletype(&self->component, STYLE_MV_ARROW);
+	psy_ui_component_set_style_type(&self->component, STYLE_MV_ARROW);
 	self->wire = wire;
 	self->workspace = workspace;	
 }

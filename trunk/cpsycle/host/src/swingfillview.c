@@ -34,16 +34,16 @@ void swingfillview_init(SwingFillView* self, psy_ui_Component* parent,
 	self->pvstate = pvstate;
 	self->trackmodeswingfill = FALSE;
 	psy_ui_component_init(&self->client, swingfillview_base(self), NULL);
-	psy_ui_component_setalign(&self->client, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_set_align(&self->client, psy_ui_ALIGN_CLIENT);
 	psy_ui_component_set_margin(&self->client,
 		psy_ui_defaults_cmargin(psy_ui_defaults()));
-	psy_ui_component_setdefaultalign(&self->client, psy_ui_ALIGN_TOP,
+	psy_ui_component_set_defaultalign(&self->client, psy_ui_ALIGN_TOP,
 		psy_ui_defaults_vmargin(psy_ui_defaults()));
 	intedit_init(&self->tempo, &self->client, "swingfill.tempo", 125, 0, 0);
 	intedit_seteditcharnumber(&self->tempo, EDIT_CHARNUM);
 	intedit_setdesccharnumber(&self->tempo, DESC_CHARNUM);
 	psy_ui_component_init(&self->offsetrow, &self->client, NULL);
-	psy_ui_component_setdefaultalign(&self->offsetrow, psy_ui_ALIGN_RIGHT,
+	psy_ui_component_set_defaultalign(&self->offsetrow, psy_ui_ALIGN_RIGHT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	psy_ui_label_init_text(&self->offsetdesc, &self->offsetrow,
 		"swingfill.bpm");
@@ -65,7 +65,7 @@ void swingfillview_init(SwingFillView* self, psy_ui_Component* parent,
 	realedit_seteditcharnumber(&self->phase, EDIT_CHARNUM);
 	realedit_setdesccharnumber(&self->phase, DESC_CHARNUM);		
 	swingfillview_initactions(self);
-	psy_ui_component_setalign(swingfillview_base(self), psy_ui_ALIGN_RIGHT);
+	psy_ui_component_set_align(swingfillview_base(self), psy_ui_ALIGN_RIGHT);
 	psy_ui_component_hide(swingfillview_base(self));
 }
 
@@ -78,7 +78,7 @@ void swingfillview_initactions(SwingFillView* self)
 	psy_ui_component_init(&self->actions, &self->client, NULL);
 	psy_ui_margin_init_em(&margin, 1.0, 0.0, 0.0, 0.0);		
 	psy_ui_component_set_margin(&self->actions, margin);
-	psy_ui_component_setdefaultalign(&self->actions,
+	psy_ui_component_set_defaultalign(&self->actions,
 		psy_ui_ALIGN_RIGHT, psy_ui_defaults_hmargin(psy_ui_defaults()));	
 	psy_ui_button_init_text_connect(&self->cancel, &self->actions,
 		"swingfill.cancel", self, swingfillview_onhide);

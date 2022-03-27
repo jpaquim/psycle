@@ -22,7 +22,7 @@ void confirmbox_init(ConfirmBox* self, psy_ui_Component* parent, Workspace* work
 	self->mode = CONFIRM_CLOSE;	
 	psy_ui_component_init_align(&self->view, confirmbox_base(self), NULL,
 		psy_ui_ALIGN_CENTER);
-	psy_ui_component_setdefaultalign(&self->view,
+	psy_ui_component_set_defaultalign(&self->view,
 		psy_ui_ALIGN_TOP, psy_ui_margin_zero());
 	psy_ui_label_init_text(&self->title, &self->view, "msg.psyreq");
 	psy_ui_label_init_text(&self->header, &self->view, "");
@@ -47,11 +47,11 @@ void checkunsavedbox_ondestroy(ConfirmBox* self, psy_ui_Component* sender)
 void confirmbox_setlabels(ConfirmBox* self, const char* title,
 	const char* yesstr, const char* nostr)
 {		
-	psy_ui_label_settext(&self->title, title); 
-	psy_ui_label_settext(&self->header, "");
-	psy_ui_button_settext(&self->yes, yesstr);
-	psy_ui_button_settext(&self->no, nostr);
-	psy_ui_button_settext(&self->cont, "msg.cont");
+	psy_ui_label_set_text(&self->title, title); 
+	psy_ui_label_set_text(&self->header, "");
+	psy_ui_button_set_text(&self->yes, yesstr);
+	psy_ui_button_set_text(&self->no, nostr);
+	psy_ui_button_set_text(&self->cont, "msg.cont");
 	psy_ui_component_align(&self->component);
 }
 

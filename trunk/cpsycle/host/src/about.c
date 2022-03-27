@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -10,9 +10,6 @@
 /* host */
 #include "resources/resource.h"
 #include "styles.h"
-/* platform */
-#include "../../detail/portable.h"
-
 
 /* Contrib*/
 
@@ -21,19 +18,17 @@ void contrib_init(Contrib* self, psy_ui_Component* parent)
 {	
 	psy_ui_component_init(contrib_base(self), parent, NULL);	
 	psy_ui_label_init(&self->contrib, contrib_base(self));
-	psy_ui_label_preventtranslation(&self->contrib);
-	psy_ui_label_setcharnumber(&self->contrib, 120.0);
-	psy_ui_label_settextalignment(&self->contrib, psy_ui_ALIGNMENT_LEFT);
-	psy_ui_component_setscrollstep_height(
-		psy_ui_label_base(&self->contrib),
+	psy_ui_label_prevent_translation(&self->contrib);
+	psy_ui_label_set_charnumber(&self->contrib, 120.0);	
+	psy_ui_component_set_scrollstep_height(psy_ui_label_base(&self->contrib),
 		psy_ui_value_make_eh(1.0));
-	psy_ui_component_setwheelscroll(&self->contrib.component, 4);
-	psy_ui_component_setalign(psy_ui_label_base(&self->contrib),
-		psy_ui_ALIGN_FIXED);	
-	psy_ui_component_setoverflow(&self->contrib.component,
+	psy_ui_component_set_wheel_scroll(&self->contrib.component, 4);
+	psy_ui_component_set_align(psy_ui_label_base(&self->contrib),
+		psy_ui_ALIGN_FIXED);
+	psy_ui_component_setoverflow(psy_ui_label_base(&self->contrib),
 		psy_ui_OVERFLOW_SCROLL);
-	psy_ui_label_enablewrap(&self->contrib);	
-	psy_ui_label_settext(&self->contrib,						
+	psy_ui_label_enable_wrap(&self->contrib);
+	psy_ui_label_set_text(&self->contrib,						
 		"Josep Mª Antolín. [JAZ]/JosepMa\tDeveloper since release 1.5" "\r\n"
 		"Johan Boulé [bohan]\t\tDeveloper since release 1.7.3" "\r\n"
 		"Stefan Nattkemper\t\t\tDeveloper of the LUA host in release 1.12" "\r\n"
@@ -43,7 +38,7 @@ void contrib_init(Contrib* self, psy_ui_Component* parent)
 		"Daniel Arena\t\t\tDeveloper in release 1.5 & 1.6" "\r\n"
 		"Marcin Kowalski [FideLoop]\t\tDeveloper in release 1.6" "\r\n"
 		"Mark McCormack\t\t\tMIDI (in) Support in release 1.6" "\r\n"
-		"Mats Höjlund\t\t\tMain Developer until release 1.5" "\r\n" // (Internal Recoding) .. doesn't fit in the small box :/
+		"Mats Höjlund\t\t\tMain Developer until release 1.5" "\r\n" /* (Internal Recoding) .. doesn't fit in the small box :*/
 		"Juan Antonio Arguelles [Arguru] (RIP)\tOriginal Developer and maintainer until 1.0" "\r\n"
 		"Satoshi Fujiwara\t\t\tBase code for the Sampulse machine\r\n"
 		"Hermann Seib\t\t\tBase code for the new VST Host in 1.8.5\r\n"
@@ -72,20 +67,20 @@ void contrib_init(Contrib* self, psy_ui_Component* parent)
 	);	
 	psy_ui_scroller_init(&self->scroller, &self->contrib.component,
 		&self->component);
-	psy_ui_component_setalign(&self->scroller.component, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_set_align(&self->scroller.component, psy_ui_ALIGN_CLIENT);
 	/* bottom */
 	psy_ui_component_init(&self->bottom, &self->component, NULL);
-	psy_ui_component_setdefaultalign(&self->bottom, psy_ui_ALIGN_TOP,
+	psy_ui_component_set_defaultalign(&self->bottom, psy_ui_ALIGN_TOP,
 		psy_ui_defaults_vmargin(psy_ui_defaults()));
-	psy_ui_component_setalign(&self->bottom, psy_ui_ALIGN_BOTTOM);
+	psy_ui_component_set_align(&self->bottom, psy_ui_ALIGN_BOTTOM);
 	psy_ui_label_init(&self->psycledelics, &self->bottom);
-	psy_ui_label_preventtranslation(&self->psycledelics);	
-	psy_ui_label_settext(&self->psycledelics, "http://psycle.pastnotecut.org");
+	psy_ui_label_prevent_translation(&self->psycledelics);	
+	psy_ui_label_set_text(&self->psycledelics, "http://psycle.pastnotecut.org");
 	psy_ui_label_init(&self->sourceforge, &self->bottom);	
-	psy_ui_label_settext(&self->sourceforge, "http://psycle.sourceforge.net");
+	psy_ui_label_set_text(&self->sourceforge, "http://psycle.sourceforge.net");
 	psy_ui_label_init(&self->steincopyright, &self->bottom);
-	psy_ui_label_preventtranslation(&self->steincopyright);
-	psy_ui_label_settext(&self->steincopyright,
+	psy_ui_label_prevent_translation(&self->steincopyright);
+	psy_ui_label_set_text(&self->steincopyright,
 		"VST Virtual Studio Technology v2.4 (c)1998-2006 Steinberg");	
 }
 
@@ -95,13 +90,13 @@ void version_init(Version* self, psy_ui_Component* parent)
 {
 	psy_ui_component_init(version_base(self), parent, NULL);
 	psy_ui_label_init(&self->versioninfo, version_base(self));
-	psy_ui_label_enablewrap(&self->versioninfo);
-	psy_ui_component_setalign(psy_ui_label_base(&self->versioninfo),
+	psy_ui_label_enable_wrap(&self->versioninfo);
+	psy_ui_component_set_align(psy_ui_label_base(&self->versioninfo),
 		psy_ui_ALIGN_CLIENT);
-	psy_ui_label_preventtranslation(&self->versioninfo);
-	psy_ui_label_settextalignment(&self->versioninfo,
+	psy_ui_label_prevent_translation(&self->versioninfo);
+	psy_ui_label_set_textalignment(&self->versioninfo,
 		psy_ui_ALIGNMENT_CENTER_HORIZONTAL);
-	psy_ui_label_settext(&self->versioninfo, PSYCLE__BUILD__IDENTIFIER("\r\n"));
+	psy_ui_label_set_text(&self->versioninfo, PSYCLE__BUILD__IDENTIFIER("\r\n"));
 }
 
 /* Version */
@@ -119,27 +114,27 @@ void licence_init(Licence* self, psy_ui_Component* parent)
 	psy_signal_connect(&psy_ui_app()->translator.signal_languagechanged,
 		self, licence_onlanguagechanged);	
 	psy_ui_label_init(&self->licenceinfo, &self->component);
-	psy_ui_label_setcharnumber(&self->licenceinfo, 120.0);
-	psy_ui_component_setwheelscroll(&self->licenceinfo.component, 4);
-	psy_ui_component_setalign(psy_ui_label_base(&self->licenceinfo),
+	self->licenceinfo.component.id = 400;
+	psy_ui_label_set_charnumber(&self->licenceinfo, 120.0);
+	psy_ui_component_set_wheel_scroll(&self->licenceinfo.component, 4);
+	psy_ui_component_set_align(psy_ui_label_base(&self->licenceinfo),
 		psy_ui_ALIGN_FIXED);
-	psy_ui_label_preventtranslation(&self->licenceinfo);
+	psy_ui_label_prevent_translation(&self->licenceinfo);
 	psy_ui_component_setoverflow(&self->licenceinfo.component,
 		psy_ui_OVERFLOW_SCROLL);
-	psy_ui_label_enablewrap(&self->licenceinfo);
-	psy_ui_component_setscrollstep_height(
+	psy_ui_label_enable_wrap(&self->licenceinfo);
+	psy_ui_component_set_scrollstep_height(
 		psy_ui_label_base(&self->licenceinfo),
 		psy_ui_value_make_eh(1.0));	
-	psy_ui_label_settextalignment(&self->licenceinfo, psy_ui_ALIGNMENT_LEFT);
 	psy_ui_scroller_init(&self->scroller, &self->licenceinfo.component,
 		&self->component);
-	psy_ui_component_setalign(&self->scroller.component, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_set_align(&self->scroller.component, psy_ui_ALIGN_CLIENT);
 	licence_setlanguage(self);		
 }
 
 void licence_set_en(Licence* self)
 {
-	psy_ui_label_settext(&self->licenceinfo,
+	psy_ui_label_set_text(&self->licenceinfo,
 		"Psycle is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version."
 		"copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net\r\n\r\n"
 		"GNU GENERAL PUBLIC LICENSE\r\n"
@@ -192,7 +187,7 @@ void licence_set_en(Licence* self)
 
 void licence_set_es(Licence* self)
 {	
-	psy_ui_label_settext(&self->licenceinfo,
+	psy_ui_label_set_text(&self->licenceinfo,
 		"Psycle es software libre; puede redistribuirla o modificarla bajo los términos de la Licencia Pública General GNU publicada por la «Free Software Foundation» ; bien de la versión 2 de dicha Licencia o bien (según su elección) de cualquier versión posterior."
 		"copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net\r\n\r\n"
 		"GNU GENERAL PUBLIC LICENSE\r\n"
@@ -263,10 +258,10 @@ void licence_setlanguage(Licence* self)
 
 /* prototypes */
 static void about_init_buttons(About*);
-static void about_onbutton(About*, psy_ui_Button* sender);
-static void about_selectinfobox(About*, uintptr_t index);
-static void about_onmousedoubleclick(About*, psy_ui_MouseEvent*);
-static void about_onfocus(About*);
+static void about_on_button(About*, psy_ui_Button* sender);
+static void about_select_infobox(About*, uintptr_t index);
+static void about_on_mouse_doubleclick(About*, psy_ui_MouseEvent*);
+static void about_on_focus(About*);
 
 /* vtable */
 static psy_ui_ComponentVtable about_vtable;
@@ -278,10 +273,10 @@ static void about_vtable_init(About* self)
 		about_vtable = *(self->component.vtable);		
 		about_vtable.onmousedoubleclick =
 			(psy_ui_fp_component_onmouseevent)
-			about_onmousedoubleclick;
+			about_on_mouse_doubleclick;
 		about_vtable.onfocus =
 			(psy_ui_fp_component_event)
-			about_onfocus;
+			about_on_focus;
 		about_vtable_initialized = TRUE;
 	}
 	psy_ui_component_setvtable(about_base(self), &about_vtable);
@@ -290,23 +285,22 @@ static void about_vtable_init(About* self)
 /* implementation */
 void about_init(About* self, psy_ui_Component* parent, Workspace* workspace)
 {				
-	psy_ui_component_init(&self->component, parent, NULL);	
+	psy_ui_component_init(about_base(self), parent, NULL);	
 	about_vtable_init(self);
-	psy_ui_component_setstyletype(&self->component, STYLE_ABOUT);	
+	psy_ui_component_set_style_type(about_base(self), STYLE_ABOUT);
 	self->workspace = workspace;	
 	about_init_buttons(self);
-	psy_ui_notebook_init(&self->notebook, &self->component);
+	psy_ui_notebook_init(&self->notebook, about_base(self));
 	psy_ui_component_hide(psy_ui_notebook_base(&self->notebook));
-	psy_ui_component_setpreferredsize(psy_ui_notebook_base(&self->notebook),
-		psy_ui_size_make(psy_ui_value_make_pw(0.5), psy_ui_value_make_ph(0.5)));
-	psy_ui_component_setalign(psy_ui_notebook_base(&self->notebook),
+	psy_ui_component_set_preferred_size(psy_ui_notebook_base(&self->notebook),
+		psy_ui_size_make_perc(0.5, 0.5));
+	psy_ui_component_set_align(psy_ui_notebook_base(&self->notebook),
 		psy_ui_ALIGN_CENTER);	
 	contrib_init(&self->contrib, psy_ui_notebook_base(&self->notebook));
 	version_init(&self->version, psy_ui_notebook_base(&self->notebook));
 	licence_init(&self->licence, psy_ui_notebook_base(&self->notebook));	
 	psy_ui_notebook_select(&self->notebook, 0);
-	psy_signal_connect(&self->component.signal_focus, self,
-		about_onfocus);
+	psy_signal_connect(&about_base(self)->signal_focus, self, about_on_focus);
 }
 
 void about_init_buttons(About* self)
@@ -318,59 +312,57 @@ void about_init_buttons(About* self)
 			psy_ui_value_make_ph(0.15), psy_ui_value_zero()));
 	psy_ui_component_init_align(&self->buttons, &self->bottom, NULL,
 		psy_ui_ALIGN_CENTER);
-	psy_ui_component_setdefaultalign(&self->buttons, psy_ui_ALIGN_LEFT,
-		psy_ui_margin_make(psy_ui_value_zero(), psy_ui_value_make_ew(20.0),
-			psy_ui_value_zero(), psy_ui_value_zero()));
+	psy_ui_component_set_defaultalign(&self->buttons, psy_ui_ALIGN_LEFT,
+		psy_ui_margin_make_em(0.0, 20.0, 0.0, 0.0));			
 	psy_ui_button_init_text_connect(&self->contribbutton, &self->buttons,
-		"help.contributors-credits", self, about_onbutton);
+		"help.contributors-credits", self, about_on_button);
 	psy_ui_button_init_connect(&self->versionbutton, &self->buttons,
-		self, about_onbutton);
-	psy_ui_button_preventtranslation(&self->versionbutton);
-	psy_ui_button_settext(&self->versionbutton, PSYCLE__VERSION);
+		self, about_on_button);
+	psy_ui_button_prevent_translation(&self->versionbutton);
+	psy_ui_button_set_text(&self->versionbutton, PSYCLE__VERSION);
 	psy_ui_button_init_text_connect(&self->licencebutton, &self->buttons,
-		"help.licence", self, about_onbutton);
-	psy_ui_button_init_text_connect(&self->okbutton, &self->buttons,
-		"help.ok", self, about_onbutton);
-	psy_ui_component_set_margin(psy_ui_button_base(&self->okbutton),
+		"help.licence", self, about_on_button);
+	psy_ui_button_init_text_connect(&self->ok_button, &self->buttons,
+		"help.ok", self, about_on_button);
+	psy_ui_component_set_margin(psy_ui_button_base(&self->ok_button),
 		psy_ui_margin_zero());
 }
 
-void about_onfocus(About* self)
+void about_on_focus(About* self)
 {
-	psy_ui_component_setfocus(psy_ui_button_base(&self->okbutton));
+	psy_ui_component_set_focus(psy_ui_button_base(&self->ok_button));
 }
 
-void about_onbutton(About* self, psy_ui_Button* sender) 
+void about_on_button(About* self, psy_ui_Button* sender)
 {		
 	if (sender == &self->contribbutton) {
-		about_selectinfobox(self, 0);
+		about_select_infobox(self, 0);
 	} else if (sender == &self->versionbutton) {
-		about_selectinfobox(self, 1);
+		about_select_infobox(self, 1);
 	} else if (sender == &self->licencebutton) {
-		about_selectinfobox(self, 2);
+		about_select_infobox(self, 2);
 	} else {
-		workspace_selectview(self->workspace, VIEW_ID_MACHINEVIEW,
+		workspace_select_view(self->workspace, VIEW_ID_MACHINEVIEW,
 			psy_INDEX_INVALID, 0);
 	}	
 }
 
-void about_selectinfobox(About* self, uintptr_t index)
+void about_select_infobox(About* self, uintptr_t index)
 {
 	psy_ui_notebook_select(&self->notebook, index);
 	if (psy_ui_component_visible(psy_ui_notebook_base(&self->notebook))) {
-		 psy_ui_style_set_background_id(psy_ui_componentstyle_currstyle(&self->component.style),
-			IDB_ABOUT);
+		 psy_ui_style_set_background_id(psy_ui_componentstyle_currstyle(
+			 &self->component.style), IDB_ABOUT);
 	} else {
-		 psy_ui_style_set_background_id(psy_ui_componentstyle_currstyle(&self->component.style),
-			psy_INDEX_INVALID);
+		 psy_ui_style_set_background_id(psy_ui_componentstyle_currstyle(
+			 &self->component.style), psy_INDEX_INVALID);
 	}
-	psy_ui_component_togglevisibility(psy_ui_notebook_base(&self->notebook));
-	psy_ui_component_invalidate(&self->component);
+	psy_ui_component_toggle_visibility(psy_ui_notebook_base(&self->notebook));	
 }
 
-void about_onmousedoubleclick(About* self, psy_ui_MouseEvent* ev)
+void about_on_mouse_doubleclick(About* self, psy_ui_MouseEvent* ev)
 {
-	workspace_selectview(self->workspace, VIEW_ID_MACHINEVIEW,
+	workspace_select_view(self->workspace, VIEW_ID_MACHINEVIEW,
 		psy_INDEX_INVALID, 0);
 	psy_ui_mouseevent_stop_propagation(ev);
 }

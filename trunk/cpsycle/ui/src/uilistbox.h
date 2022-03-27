@@ -59,7 +59,7 @@ typedef struct psy_ui_ListBox  {
 
 void psy_ui_listbox_init(psy_ui_ListBox*, psy_ui_Component* parent);
 void psy_ui_listbox_init_multiselect(psy_ui_ListBox*, psy_ui_Component* parent);
-intptr_t psy_ui_listbox_addtext(psy_ui_ListBox*, const char* text);
+intptr_t psy_ui_listbox_add_text(psy_ui_ListBox*, const char* text);
 void psy_ui_listbox_settext(psy_ui_ListBox*, const char* text, intptr_t index);
 void psy_ui_listbox_clear(psy_ui_ListBox*);
 void psy_ui_listbox_setcursel(psy_ui_ListBox*, intptr_t index);

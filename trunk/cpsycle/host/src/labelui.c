@@ -57,7 +57,7 @@ void labelui_init(LabelUi* self, psy_ui_Component* parent,
 
 	psy_ui_component_init(&self->component, parent, NULL);
 	labelui_vtable_init(self);
-	psy_ui_component_setstyletype(&self->component, STYLE_MV_LABEL);
+	psy_ui_component_set_style_type(&self->component, STYLE_MV_LABEL);
 	self->param = param;
 	self->machine = machine;
 	self->paramidx = paramidx;

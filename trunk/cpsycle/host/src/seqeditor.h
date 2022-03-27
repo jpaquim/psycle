@@ -38,7 +38,7 @@ typedef struct SeqEditor {
 	SeqEditState state;
 	SequenceCmds cmds;	
 	bool expanded;
-	psy_ui_TextInput edit;
+	psy_ui_TextArea edit;
 } SeqEditor;
 
 void seqeditor_init(SeqEditor*, psy_ui_Component* parent, Workspace*);

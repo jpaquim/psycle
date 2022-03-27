@@ -933,7 +933,7 @@ void machinestackdesc_onpreferredsize(MachineStackDesc* self,
 void machinestackdesc_ontoggleoutputs(MachineStackDesc* self,
 	psy_ui_Button* sender)
 {
-	psy_ui_component_togglevisibility(&self->view->outputs.component);
+	psy_ui_component_toggle_visibility(&self->view->outputs.component);
 	if (psy_ui_component_visible(&self->view->outputs.component)) {
 		psy_ui_button_seticon(&self->outputs, psy_ui_ICON_LESS);
 	} else {
@@ -944,7 +944,7 @@ void machinestackdesc_ontoggleoutputs(MachineStackDesc* self,
 void machinestackdesc_ontogglevolumes(MachineStackDesc* self,
 	psy_ui_Button* sender)
 {
-	psy_ui_component_togglevisibility(&self->view->volumes.component);
+	psy_ui_component_toggle_visibility(&self->view->volumes.component);
 	if (psy_ui_component_visible(&self->view->volumes.component)) {
 		psy_ui_button_seticon(&self->volumes, psy_ui_ICON_LESS);
 	} else {
@@ -955,7 +955,7 @@ void machinestackdesc_ontogglevolumes(MachineStackDesc* self,
 void machinestackdesc_configureeffects(MachineStackDesc* self,
 	psy_ui_Button* sender)
 {
-	workspace_selectview(self->view->workspace,
+	workspace_select_view(self->view->workspace,
 		VIEW_ID_SETTINGSVIEW, 2, 1);
 }
 
@@ -998,7 +998,7 @@ void machinestackinputs_init(MachineStackInputs* self,
 	psy_ui_component_init(&self->component, parent, NULL);		
 	machinestackinputs_vtable_init(self);
 	psy_ui_component_setalignexpand(&self->component, psy_ui_HEXPAND);
-	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
+	psy_ui_component_set_defaultalign(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_margin_make_em(0.5, 0.0, 0.5, 0.0));
 	self->workspace = workspace;
 	self->state = state;
@@ -1137,7 +1137,7 @@ void machinestackoutputs_build(MachineStackOutputs* self)
 				psy_ui_component_setminimumsize(&knobui->component,
 					psy_ui_size_make(self->state->columnsize.width,
 						psy_ui_value_make_eh(1.0)));
-				psy_ui_component_setalign(&knobui->component,
+				psy_ui_component_set_align(&knobui->component,
 					psy_ui_ALIGN_LEFT);
 			}
 		}		
@@ -1179,8 +1179,8 @@ void machinestackpanetrackclient_init(MachineStackPaneTrackClient* self,
 	psy_ui_component_setvtable(&self->component,
 		machinestackpanetrackclient_vtable_init(self));	
 	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_VSCROLL);
-	psy_ui_component_setwheelscroll(&self->component, 1);
-	psy_ui_component_setscrollstep_height(&self->component,
+	psy_ui_component_set_wheel_scroll(&self->component, 1);
+	psy_ui_component_set_scrollstep_height(&self->component,
 		state->effectsize.height);
 	self->state = state;
 	self->column = column;
@@ -1217,16 +1217,16 @@ void machinestackpanetrack_init(MachineStackPaneTrack* self,
 	psy_ui_component_setalignexpand(&self->component, psy_ui_HEXPAND);	
 	machinestackpanetrackclient_init(&self->client, &self->component,
 		column, state);	
-	psy_ui_component_setwheelscroll(&self->client.component, 4);
-	psy_ui_component_setalign(&self->client.component, psy_ui_ALIGN_CLIENT);
-	psy_ui_component_setdefaultalign(&self->client.component,
+	psy_ui_component_set_wheel_scroll(&self->client.component, 4);
+	psy_ui_component_set_align(&self->client.component, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_set_defaultalign(&self->client.component,
 		psy_ui_ALIGN_TOP,
 		psy_ui_margin_make(
 			psy_ui_value_make_px(20.0), psy_ui_value_make_px(20.0),
 			psy_ui_value_make_px(0.0), psy_ui_value_make_px(0.0)));	
 	psy_ui_scroller_init(&self->scroller, &self->client.component, &self->component);
-	psy_ui_component_setalign(&self->scroller.component, psy_ui_ALIGN_CLIENT);
-	psy_ui_component_setalign(&self->client.component, psy_ui_ALIGN_FIXED);
+	psy_ui_component_set_align(&self->scroller.component, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_set_align(&self->client.component, psy_ui_ALIGN_FIXED);
 	// psy_ui_component_setbackgroundmode(&self->scroller.component,
 	//	psy_ui_SETBACKGROUND);
 	// psy_ui_component_setbackgroundcolour(&self->scroller.component,
@@ -1251,7 +1251,7 @@ MachineStackPaneTrack* machinestackpanetrack_allocinit(
 	rv = machinestackpanetrack_alloc();
 	if (rv) {
 		machinestackpanetrack_init(rv, parent, column, state, workspace);
-		psy_ui_component_deallocateafterdestroyed(&rv->component);
+		psy_ui_component_deallocate_after_destroyed(&rv->component);
 	}
 	return rv;
 }
@@ -1330,7 +1330,7 @@ void machinestackpane_init(MachineStackPane* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_setvtable(&self->component,
 		machinestackpane_vtable_init(self));	
-	psy_ui_component_setwheelscroll(&self->component, 4);
+	psy_ui_component_set_wheel_scroll(&self->component, 4);
 	psy_ui_component_setalignexpand(&self->component, psy_ui_HEXPAND);	
 	self->workspace = workspace;	
 	self->state = state;	
@@ -1374,10 +1374,10 @@ void machinestackpane_build(MachineStackPane* self)
 								(psy_ui_value_px(&self->state->columnsize.height, NULL, NULL) + 20.0) + 20.0),
 							psy_ui_value_zero(), psy_ui_value_zero(), psy_ui_value_zero());						
 						psy_ui_component_set_margin(&arrow->component, levelmargin);
-						psy_ui_component_setalign(&trackpane->component, psy_ui_ALIGN_TOP);
+						psy_ui_component_set_align(&trackpane->component, psy_ui_ALIGN_TOP);
 					}
 				}				
-				psy_ui_component_setalign(&trackpane->component, psy_ui_ALIGN_LEFT);				
+				psy_ui_component_set_align(&trackpane->component, psy_ui_ALIGN_LEFT);				
 				if (column) {
 					psy_List* p;
 					
@@ -1399,7 +1399,7 @@ void machinestackpane_build(MachineStackPane* self)
 				if (!insert) {
 					psy_ui_component_setminimumsize(&trackpane->component,
 						self->state->columnsize);
-					psy_ui_component_setalign(&trackpane->component,
+					psy_ui_component_set_align(&trackpane->component,
 						psy_ui_ALIGN_LEFT);
 				}					
 				psy_ui_component_align(&trackpane->component);
@@ -1497,7 +1497,7 @@ void machinestackvolumes_build(MachineStackVolumes* self)
 					NULL, psy_INDEX_INVALID,
 					&column->mute_param.machineparam,
 					STYLE_MACPARAM_CHECKOFF, STYLE_MACPARAM_CHECKON);
-				psy_ui_component_setalign(&mute->component, psy_ui_ALIGN_TOP);
+				psy_ui_component_set_align(&mute->component, psy_ui_ALIGN_TOP);
 			}
 		} else {
 			component = psy_ui_component_allocinit(&self->component, NULL);			
@@ -1505,7 +1505,7 @@ void machinestackvolumes_build(MachineStackVolumes* self)
 		if (component) {
 			psy_ui_Margin margin;
 
-			psy_ui_component_setalign(component, psy_ui_ALIGN_LEFT);
+			psy_ui_component_set_align(component, psy_ui_ALIGN_LEFT);
 			psy_ui_component_setminimumsize(component, psy_ui_size_make(
 				psy_ui_value_make_px(138.0 + 19),
 				psy_ui_value_make_px(182.0)));
@@ -1565,37 +1565,37 @@ void machinestackview_init(MachineStackView* self, psy_ui_Component* parent,
 
 	psy_ui_component_init(&self->component, parent, NULL);
 	vtable_init(self);	
-	psy_ui_component_setstyletype(&self->component, STYLE_MV_STACK);
+	psy_ui_component_set_style_type(&self->component, STYLE_MV_STACK);
 	self->paramviews = paramviews;
 	self->workspace = workspace;	
 	machinestackstate_init(&self->state, self->paramviews);
 	machinestackdesc_init(&self->desc, &self->component, self);
-	psy_ui_component_setalign(&self->desc.component, psy_ui_ALIGN_LEFT);
+	psy_ui_component_set_align(&self->desc.component, psy_ui_ALIGN_LEFT);
 	psy_ui_component_init(&self->columns, &self->component, NULL);
-	psy_ui_component_setalign(&self->columns, psy_ui_ALIGN_VCLIENT);
+	psy_ui_component_set_align(&self->columns, psy_ui_ALIGN_VCLIENT);
 	psy_ui_component_setoverflow(&self->columns, psy_ui_OVERFLOW_HSCROLL);	
 	psy_ui_scroller_init(&self->scroller_columns, &self->columns,
 		&self->component);
-	psy_ui_component_setalign(&self->columns, psy_ui_ALIGN_VCLIENT);
-	psy_ui_component_setalign(&self->scroller_columns.component,
+	psy_ui_component_set_align(&self->columns, psy_ui_ALIGN_VCLIENT);
+	psy_ui_component_set_align(&self->scroller_columns.component,
 		psy_ui_ALIGN_CLIENT);
 	machinestackinputs_init(&self->inputs, &self->columns,
 		&self->state, workspace);
-	psy_ui_component_setalign(&self->inputs.component, psy_ui_ALIGN_TOP);
+	psy_ui_component_set_align(&self->inputs.component, psy_ui_ALIGN_TOP);
 	machinestackpane_init(&self->pane, &self->columns, &self->state,
 		workspace);	
-	psy_ui_component_setalign(&self->pane.component, psy_ui_ALIGN_CLIENT);	
+	psy_ui_component_set_align(&self->pane.component, psy_ui_ALIGN_CLIENT);	
 	machinestackvolumes_init(&self->volumes, &self->columns, &self->state);
-	psy_ui_component_setalign(&self->volumes.component, psy_ui_ALIGN_BOTTOM);
+	psy_ui_component_set_align(&self->volumes.component, psy_ui_ALIGN_BOTTOM);
 	psy_ui_component_setminimumsize(&self->volumes.component,
 		psy_ui_size_make(self->state.columnsize.width, psy_ui_value_make_px(182.0)));
 	machinestackoutputs_init(&self->outputs, &self->columns, &self->state);
-	psy_ui_component_setalign(&self->outputs.component, psy_ui_ALIGN_BOTTOM);
+	psy_ui_component_set_align(&self->outputs.component, psy_ui_ALIGN_BOTTOM);
 	// spacer
 	psy_ui_component_init(&self->spacer, &self->columns, NULL);
-	psy_ui_component_setpreferredsize(&self->spacer, psy_ui_size_make_em(0.0, 0.5));
+	psy_ui_component_set_preferred_size(&self->spacer, psy_ui_size_make_em(0.0, 0.5));
 	psy_ui_component_preventalign(&self->spacer);
-	psy_ui_component_setalign(&self->spacer, psy_ui_ALIGN_BOTTOM);	
+	psy_ui_component_set_align(&self->spacer, psy_ui_ALIGN_BOTTOM);	
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		machinestackview_onsongchanged);	
 	psy_signal_connect(&workspace->signal_buschanged, self,

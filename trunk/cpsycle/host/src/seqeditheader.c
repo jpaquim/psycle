@@ -25,18 +25,18 @@ void seqeditheader_init(SeqEditHeader* self, psy_ui_Component* parent,
 {
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_init(&self->pane, &self->component, NULL);	
-	psy_ui_component_setalign(&self->pane, psy_ui_ALIGN_FIXED);
+	psy_ui_component_set_align(&self->pane, psy_ui_ALIGN_FIXED);
 	/* timesig */
 	seqedittimesigs_init(&self->timesig, &self->pane, state);
 	psy_ui_component_hide(&self->timesig.component);
-	psy_ui_component_setalign(&self->timesig.component, psy_ui_ALIGN_TOP);
+	psy_ui_component_set_align(&self->timesig.component, psy_ui_ALIGN_TOP);
 	/* loops */
 	seqeditloops_init(&self->loops, &self->pane, state);
 	psy_ui_component_hide(&self->loops.component);
-	psy_ui_component_setalign(&self->loops.component, psy_ui_ALIGN_TOP);
+	psy_ui_component_set_align(&self->loops.component, psy_ui_ALIGN_TOP);
 	/* ruler */
 	seqeditruler_init(&self->ruler, &self->pane, state);
-	psy_ui_component_setalign(&self->ruler.component, psy_ui_ALIGN_TOP);
+	psy_ui_component_set_align(&self->ruler.component, psy_ui_ALIGN_TOP);
 }
 
 void seqeditheader_hidetimesig(SeqEditHeader* self)

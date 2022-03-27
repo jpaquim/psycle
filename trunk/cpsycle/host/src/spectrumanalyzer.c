@@ -59,7 +59,7 @@ void spectrumanalyzer_init(SpectrumAnalyzer* self, psy_ui_Component* parent,
 {	
 	psy_ui_component_init(&self->component, parent, NULL);
 	vtable_init(self);	
-	psy_ui_component_setpreferredsize(&self->component,
+	psy_ui_component_set_preferred_size(&self->component,
 		psy_ui_size_make_px(256.0, 128.0));
 	self->wire = wire;	
 	self->invol = 1.0f;
@@ -129,16 +129,16 @@ void spectrumanalyzer_drawbackground(SpectrumAnalyzer* self, psy_ui_Graphics* g)
 	rect.left = 0;
 	rect.right = 256;
 	psy_snprintf(buf, sizeof(buf), "db");
-	psy_ui_textout(g, 3, 0, buf, psy_strlen(buf));
-	psy_ui_textout(g, 256 - 13, 0, buf, psy_strlen(buf));
+	psy_ui_textout(g, psy_ui_realpoint_make(3, 0), buf, psy_strlen(buf));
+	psy_ui_textout(g, psy_ui_realpoint_make(256 - 13, 0), buf, psy_strlen(buf));
 	for (i = 1; i < 6; i++) {
 		rect.top = 20 * i;
 		rect.bottom = rect.top + 1;
 		psy_ui_drawsolidrectangle(g, rect, psy_ui_colour_make(0x00505050));
 
 		psy_snprintf(buf, sizeof(buf), "-%d0", i);
-		psy_ui_textout(g, 0, rect.top - 10, buf, psy_strlen(buf));
-		psy_ui_textout(g, 256 - 16, rect.top - 10, buf, psy_strlen(buf));
+		psy_ui_textout(g, psy_ui_realpoint_make(0, rect.top - 10), buf, psy_strlen(buf));
+		psy_ui_textout(g, psy_ui_realpoint_make(256 - 16, rect.top - 10), buf, psy_strlen(buf));
 	}
 	rect.left = 128;
 	rect.right = 256;
@@ -147,7 +147,7 @@ void spectrumanalyzer_drawbackground(SpectrumAnalyzer* self, psy_ui_Graphics* g)
 	psy_ui_drawsolidrectangle(g, rect, psy_ui_colour_make(0x00505050));
 
 	psy_snprintf(buf, sizeof(buf), "-60");
-	psy_ui_textout(g, 256 - 16, rect.top - 10, buf, psy_strlen(buf));
+	psy_ui_textout(g, psy_ui_realpoint_make(256 - 16, rect.top - 10), buf, psy_strlen(buf));
 
 	rect.top = 0;
 	rect.bottom = 128;
@@ -159,8 +159,8 @@ void spectrumanalyzer_drawbackground(SpectrumAnalyzer* self, psy_ui_Graphics* g)
 	rect.right = rect.left + 1;
 	psy_ui_drawsolidrectangle(g, rect, psy_ui_colour_make(0x00606060));
 	psy_snprintf(buf, sizeof(buf), "440");
-	psy_ui_textout(g, rect.left, 0, buf, psy_strlen(buf));
-	psy_ui_textout(g, rect.left, 128 - 12, buf, psy_strlen(buf));
+	psy_ui_textout(g, psy_ui_realpoint_make(rect.left, 0), buf, psy_strlen(buf));
+	psy_ui_textout(g, psy_ui_realpoint_make(rect.left, 128 - 12), buf, psy_strlen(buf));
 
 	thebar = 7000 * 2.f * 256.f / (float)psy_audio_player_samplerate(workspace_player(self->workspace));
 	if (self->scope_spec_mode == 1) rect.left = (int) thebar;
@@ -169,8 +169,8 @@ void spectrumanalyzer_drawbackground(SpectrumAnalyzer* self, psy_ui_Graphics* g)
 	rect.right = rect.left + 1;
 	psy_ui_drawsolidrectangle(g, rect, psy_ui_colour_make(0x00606060));
 	psy_snprintf(buf, sizeof(buf), "7K");
-	psy_ui_textout(g, rect.left, 0, buf, psy_strlen(buf));
-	psy_ui_textout(g, rect.left, 128 - 12, buf, psy_strlen(buf));
+	psy_ui_textout(g, psy_ui_realpoint_make(rect.left, 0), buf, psy_strlen(buf));
+	psy_ui_textout(g, psy_ui_realpoint_make(rect.left, 128 - 12), buf, psy_strlen(buf));
 
 	thebar = 16000 * 2.f * 256.f / (float)psy_audio_player_samplerate(workspace_player(self->workspace));
 	if (self->scope_spec_mode == 1) rect.left = (int) thebar;
@@ -179,14 +179,14 @@ void spectrumanalyzer_drawbackground(SpectrumAnalyzer* self, psy_ui_Graphics* g)
 	rect.right = rect.left + 1;
 	psy_ui_drawsolidrectangle(g, rect, psy_ui_colour_make(0x00606060));
 	sprintf(buf, "16K");
-	psy_ui_textout(g, rect.left, 0, buf, psy_strlen(buf));
-	psy_ui_textout(g, rect.left, 128 - 12, buf, psy_strlen(buf));
+	psy_ui_textout(g, psy_ui_realpoint_make(rect.left, 0), buf, psy_strlen(buf));
+	psy_ui_textout(g, psy_ui_realpoint_make(rect.left, 128 - 12), buf, psy_strlen(buf));
 	psy_snprintf(buf, sizeof(buf), "%d Samples Refresh %.2fhz",
 		self->scope_spec_samples, 1000.0f / self->scope_spec_rate);
 	//sprintf(buf,"%d Samples Refresh %.2fhz Window %d",scope_spec_samples,1000.0f/scope_spec_rate, FFTMethod);
 	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 	psy_ui_settextcolour(g, psy_ui_colour_make(0x505050));
-	psy_ui_textout(g, 4, 128 - 14, buf, psy_strlen(buf));
+	psy_ui_textout(g, psy_ui_realpoint_make(4, 128 - 14), buf, psy_strlen(buf));
 }
 
 void spectrumanalyzer_drawspectrum(SpectrumAnalyzer* self, psy_ui_Graphics* g)

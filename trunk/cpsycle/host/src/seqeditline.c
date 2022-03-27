@@ -55,7 +55,7 @@ SeqEditorLine* seqeditorline_allocinit(psy_ui_Component* parent,
 	rv = seqeditorline_alloc();
 	if (rv) {
 		seqeditorline_init(rv, parent, state);
-		psy_ui_component_deallocateafterdestroyed(&rv->component);
+		psy_ui_component_deallocate_after_destroyed(&rv->component);
 	}
 	return rv;
 }
@@ -149,7 +149,7 @@ SeqEditorPlayline* seqeditorplayline_allocinit(
 	rv = seqeditorplayline_alloc();
 	if (rv) {
 		seqeditorplayline_init(rv, parent, state);
-		psy_ui_component_deallocateafterdestroyed(
+		psy_ui_component_deallocate_after_destroyed(
 			seqeditorline_base(&rv->seqeditorline));		
 	}
 	return rv;

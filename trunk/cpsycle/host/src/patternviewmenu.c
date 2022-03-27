@@ -53,7 +53,7 @@ void patternblockmenu_init(PatternBlockMenu* self, psy_ui_Component* parent,
 	self->transformpattern = transformpattern;
 	self->interpolatecurveview = interpolatecurveview;
 	self->pvstate = pvstate;
-	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_TOP,
+	psy_ui_component_set_defaultalign(&self->component, psy_ui_ALIGN_TOP,
 		psy_ui_margin_zero());	
 	psy_ui_button_init_text_connect(&self->cut, &self->component,
 		"edit.cut", self, patternblockmenu_oncut);			
@@ -93,7 +93,7 @@ void patternblockmenu_init(PatternBlockMenu* self, psy_ui_Component* parent,
 		"edit.exportpsb", self, patternblockmenu_onexport);		
 	psy_ui_component_setpadding_children(&self->component,
 		psy_ui_margin_make_em(0.25, 0.25, 0.25, 0.25));
-	psy_ui_component_setalign(patternblockmenu_base(self),
+	psy_ui_component_set_align(patternblockmenu_base(self),
 		psy_ui_ALIGN_RIGHT);
 	psy_ui_component_hide(patternblockmenu_base(self));
 }
@@ -222,7 +222,7 @@ void patternblockmenu_toggleswingfill(PatternBlockMenu* self)
 		swingfillview_reset(self->swingfill,
 			(int)self->pvstate->song->properties.bpm);
 	}*/
-	psy_ui_component_togglevisibility(swingfillview_base(self->swingfill));	
+	psy_ui_component_toggle_visibility(swingfillview_base(self->swingfill));	
 }
 
 void patternblockmenu_toggleinterpolatecurve(PatternBlockMenu* self)
@@ -231,7 +231,7 @@ void patternblockmenu_toggleinterpolatecurve(PatternBlockMenu* self)
 	
 	interpolatecurveview_setselection(self->interpolatecurveview,
 		&self->pvstate->selection);
-	psy_ui_component_togglevisibility(interpolatecurveview_base(
+	psy_ui_component_toggle_visibility(interpolatecurveview_base(
 		self->interpolatecurveview));
 }
 
@@ -239,6 +239,6 @@ void patternblockmenu_toggletransformpattern(PatternBlockMenu* self)
 {
 	assert(self);
 
-	psy_ui_component_togglevisibility(transformpatternview_base(
+	psy_ui_component_toggle_visibility(transformpatternview_base(
 		self->transformpattern));
 }

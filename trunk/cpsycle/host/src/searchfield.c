@@ -50,28 +50,28 @@ void searchfield_init(SearchField* self, psy_ui_Component* parent)
 	searchfield_vtable_init(self);
 	psy_signal_init(&self->signal_changed);
 	self->defaulttext = strdup("Search");
-	psy_ui_component_setstyletype(&self->component, STYLE_SEARCHFIELD);
-	psy_ui_component_setstyletype_select(&self->component,
+	psy_ui_component_set_style_type(&self->component, STYLE_SEARCHFIELD);
+	psy_ui_component_set_style_type_select(&self->component,
 		STYLE_SEARCHFIELD_SELECT);	
 	psy_ui_image_init_resource_transparency(&self->image, &self->component,
 		IDB_SEARCH_DARK, psy_ui_colour_white());	
-	psy_ui_component_setalign(psy_ui_image_base(&self->image),
+	psy_ui_component_set_align(psy_ui_image_base(&self->image),
 		psy_ui_ALIGN_LEFT);
 	psy_ui_component_set_margin(psy_ui_image_base(&self->image),
 		psy_ui_margin_make_em(0.0, 1.0, 0.0, 1.0));	
-	psy_ui_textinput_init(&self->edit, &self->component);
-	psy_ui_textinput_setcharnumber(&self->edit, 42);
+	psy_ui_textarea_init_single_line(&self->edit, &self->component);	
+	psy_ui_textarea_setcharnumber(&self->edit, 42);
 	searchfield_reset(self);
 	psy_signal_connect(&self->edit.component.signal_focus,
 		self, searchfield_oneditfocus);
 	psy_signal_connect(&self->edit.signal_change,
 		self, searchfield_oneditchange);
-	psy_ui_textinput_enableinputfield(&self->edit);
+	psy_ui_textarea_enableinputfield(&self->edit);
 	psy_signal_connect(&self->edit.signal_accept,
 		self, searchfield_onaccept);
 	psy_signal_connect(&self->edit.signal_reject,
 		self, searchfield_onreject);
-	psy_ui_component_setalign(psy_ui_textinput_base(&self->edit),
+	psy_ui_component_set_align(psy_ui_textarea_base(&self->edit),
 		psy_ui_ALIGN_CLIENT);	
 }
 
@@ -95,14 +95,14 @@ const char* searchfield_text(const SearchField* self)
 	if (self->hasdefaulttext) {
 		return "";
 	}
-	return psy_ui_textinput_text(&self->edit);
+	return psy_ui_textarea_text(&self->edit);
 }
 
 void searchfield_oneditfocus(SearchField* self, psy_ui_Component* sender)
 {
 	psy_ui_component_addstylestate(&self->component, psy_ui_STYLESTATE_SELECT);
 	if (self->hasdefaulttext) {
-		psy_ui_textinput_settext(&self->edit, "");
+		psy_ui_textarea_settext(&self->edit, "");
 	}
 }
 
@@ -115,7 +115,7 @@ void searchfield_oneditchange(SearchField* self, psy_ui_Component* sender)
 void searchfield_onaccept(SearchField* self,
 	psy_ui_Component* sender)
 {
-	if (psy_strlen(psy_ui_textinput_text(&self->edit)) == 0) {
+	if (psy_strlen(psy_ui_textarea_text(&self->edit)) == 0) {
 		searchfield_reset(self);
 	}	
 }
@@ -133,7 +133,7 @@ void searchfield_reset(SearchField* self)
 	psy_signal_emit(&self->signal_changed, self, 0);	
 	psy_ui_component_removestylestate(&self->component,
 		psy_ui_STYLESTATE_SELECT);
-	psy_ui_component_setfocus(psy_ui_component_parent(&self->component));	
+	psy_ui_component_set_focus(psy_ui_component_parent(&self->component));	
 }
 
 void searchfield_onlanguagechanged(SearchField* self)
@@ -145,7 +145,7 @@ void searchfield_checkdefault(SearchField* self)
 {
 	if (self->hasdefaulttext) {
 		psy_signal_preventall(&self->edit.signal_change);
-		psy_ui_textinput_settext(&self->edit, psy_ui_translate(self->defaulttext));
+		psy_ui_textarea_settext(&self->edit, psy_ui_translate(self->defaulttext));
 		psy_signal_enableall(&self->edit.signal_change);		
 	}
 }

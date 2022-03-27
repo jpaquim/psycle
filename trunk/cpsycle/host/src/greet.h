@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #if !defined(GREET_H)
@@ -10,7 +10,6 @@
 #include <uibutton.h>
 #include <uilabel.h>
 #include <uilistbox.h>
-#include <uiimage.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -34,9 +33,8 @@ typedef struct Greet {
 	psy_ui_Label thanks;
 	psy_ui_Component view;
 	psy_ui_ListBox greetz;
-	psy_ui_Button original;
-	psy_ui_Image favicon;		
-	int current;
+	psy_ui_Button original;	
+	bool current_greets;
 } Greet;
 
 void greet_init(Greet* greet, psy_ui_Component* parent);

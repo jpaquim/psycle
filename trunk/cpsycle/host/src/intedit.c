@@ -1,9 +1,10 @@
 /*
 ** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
+
 
 #include "intedit.h"
 /* audio */
@@ -14,6 +15,7 @@
 #include "../../detail/portable.h"
 
 /* IntEdit */
+
 /* prototypes */
 static void intedit_ondestroy(IntEdit*, psy_ui_Component* sender);
 static void intedit_onlessclicked(IntEdit*, psy_ui_Component* sender);
@@ -31,14 +33,14 @@ void intedit_init(IntEdit* self, psy_ui_Component* parent,
 {	
 	psy_ui_component_init(intedit_base(self), parent, NULL);
 	psy_ui_component_setalignexpand(intedit_base(self), psy_ui_HEXPAND);
-	psy_ui_component_setdefaultalign(intedit_base(self), psy_ui_ALIGN_LEFT,
+	psy_ui_component_set_defaultalign(intedit_base(self), psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	self->minval = minval;
 	self->maxval = maxval;
 	self->restore = value;
 	psy_ui_label_init_text(&self->desc, intedit_base(self), desc);
-	psy_ui_textinput_init(&self->input, intedit_base(self));
-	psy_ui_textinput_setcharnumber(&self->input, 5);	
+	psy_ui_textarea_init_single_line(&self->input, intedit_base(self));	
+	psy_ui_textarea_setcharnumber(&self->input, 5);	
 	psy_ui_button_init_connect(&self->less, intedit_base(self),
 		self, intedit_onlessclicked);
 	psy_ui_button_seticon(&self->less, psy_ui_ICON_LESS);
@@ -78,7 +80,7 @@ IntEdit* intedit_allocinit(psy_ui_Component* parent,
 	rv = intedit_alloc();
 	if (rv) {
 		intedit_init(rv, parent, desc, value, minval, maxval);
-		psy_ui_component_deallocateafterdestroyed(&rv->component);
+		psy_ui_component_deallocate_after_destroyed(&rv->component);
 	}
 	return rv;
 }
@@ -90,7 +92,7 @@ void intedit_ondestroy(IntEdit* self, psy_ui_Component* sender)
 
 int intedit_value(IntEdit* self)
 {
-	return atoi(psy_ui_textinput_text(&self->input));
+	return atoi(psy_ui_textarea_text(&self->input));
 }
 
 void intedit_setvalue(IntEdit* self, int value)
@@ -101,29 +103,29 @@ void intedit_setvalue(IntEdit* self, int value)
 		value = psy_min(psy_max(value, self->minval), self->maxval);
 	}
 	psy_snprintf(text, 128, "%d", value);
-	psy_ui_textinput_settext(&self->input, text);
+	psy_ui_textarea_settext(&self->input, text);
 	psy_signal_emit(&self->signal_changed, self, 0);
 	self->restore = value;
 }
 
 void intedit_enableedit(IntEdit* self)
 {
-	psy_ui_textinput_enableedit(&self->input);
+	psy_ui_textarea_enableedit(&self->input);
 }
 
 void intedit_preventedit(IntEdit* self)
 {
-	psy_ui_textinput_preventedit(&self->input);
+	psy_ui_textarea_preventedit(&self->input);
 }
 
 void intedit_seteditcharnumber(IntEdit* self, int charnumber)
 {
-	psy_ui_textinput_setcharnumber(&self->input, charnumber);
+	psy_ui_textarea_setcharnumber(&self->input, charnumber);
 }
 
 void intedit_setdesccharnumber(IntEdit* self, int charnumber)
 {
-	psy_ui_label_setcharnumber(&self->desc, charnumber);
+	psy_ui_label_set_charnumber(&self->desc, charnumber);
 }
 
 void intedit_onlessclicked(IntEdit* self, psy_ui_Component* sender)
@@ -148,7 +150,7 @@ void intedit_oneditkeydown(IntEdit* self, psy_ui_Component* sender,
 	if (psy_ui_keyboardevent_keycode(ev) == psy_ui_KEY_RETURN) {
 		int value;
 
-		psy_ui_component_setfocus(&self->component);
+		psy_ui_component_set_focus(&self->component);
 		psy_ui_keyboardevent_prevent_default(ev);
 		value = intedit_value(self);
 		if (self->maxval != 0 && self->minval != 0) {

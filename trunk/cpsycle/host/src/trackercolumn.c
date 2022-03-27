@@ -76,7 +76,7 @@ void trackercolumn_init(TrackerColumn* self, psy_ui_Component* parent,
 {
 	psy_ui_component_init(&self->component, parent, NULL);
 	trackercolumn_vtable_init(self);		
-	psy_ui_component_setalign(trackercolumn_base(self), psy_ui_ALIGN_LEFT);
+	psy_ui_component_set_align(trackercolumn_base(self), psy_ui_ALIGN_LEFT);
 	self->state = state;
 	self->workspace = workspace;	
 	self->track = index;
@@ -95,7 +95,7 @@ TrackerColumn* trackercolumn_allocinit(psy_ui_Component* parent,
 	rv = trackercolumn_alloc();
 	if (rv) {
 		trackercolumn_init(rv, parent, index, state, workspace);
-		psy_ui_component_deallocateafterdestroyed(trackercolumn_base(rv));
+		psy_ui_component_deallocate_after_destroyed(trackercolumn_base(rv));
 	}
 	return rv;
 }

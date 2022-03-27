@@ -80,7 +80,7 @@ MachineEditorView* machineeditorview_allocinit(psy_ui_Component* parent,
 	rv = machineeditorview_alloc();
 	if (rv) {
 		machineeditorview_init(rv, parent, machine, workspace);
-		psy_ui_component_deallocateafterdestroyed(&rv->component);
+		psy_ui_component_deallocate_after_destroyed(&rv->component);
 	}
 	return rv;	
 }
@@ -109,7 +109,7 @@ void machineeditorview_onmachineeditresize(MachineEditorView* self, Workspace* s
 	if (self->machine && psy_audio_machine_slot(machine) ==
 			psy_audio_machine_slot(self->machine)) {
 		// change preferred size
-		psy_ui_component_setpreferredsize(machineeditorview_base(self),
+		psy_ui_component_set_preferred_size(machineeditorview_base(self),
 			psy_ui_size_make_px((double)width, (double)height));
 		// signal will be catched by machineframe to resize the frame
 		psy_signal_emit(&self->component.signal_preferredsizechanged, self, 0);

@@ -21,18 +21,18 @@ void slidergroupui_init(SliderGroupUi* self, psy_ui_Component* parent,
 	
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_setalignexpand(&self->component, psy_ui_HEXPAND);
-	psy_ui_component_setstyletype(&self->component, STYLE_MACPARAM_BOTTOM);		
+	psy_ui_component_set_style_type(&self->component, STYLE_MACPARAM_BOTTOM);		
 	sliderui_init(&self->slider, &self->component, machine, volumeparamidx,
 		volume);
-	psy_ui_component_setalign(&self->slider.component, psy_ui_ALIGN_LEFT);
+	psy_ui_component_set_align(&self->slider.component, psy_ui_ALIGN_LEFT);
 	levelui_init(&self->level, &self->component, machine, levelparamidx,
 		level);
-	psy_ui_component_setalign(&self->level.component, psy_ui_ALIGN_LEFT);
+	psy_ui_component_set_align(&self->level.component, psy_ui_ALIGN_LEFT);
 	labelui_init(&self->label, &self->component, machine, volumeparamidx,
 		volume);
-	psy_ui_component_setalign(&self->label.component, psy_ui_ALIGN_BOTTOM);
+	psy_ui_component_set_align(&self->label.component, psy_ui_ALIGN_BOTTOM);
 	psy_ui_component_init(&self->controls, &self->component, NULL);	
-	psy_ui_component_setalign(&self->controls, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_set_align(&self->controls, psy_ui_ALIGN_CLIENT);
 }
 
 SliderGroupUi* slidergroupui_alloc(void)

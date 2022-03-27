@@ -114,28 +114,28 @@ void psy_ui_scroller_init(psy_ui_Scroller* self, psy_ui_Component* client,
 	vtable_init(self);	
 	/* bottom */
 	psy_ui_component_init(&self->bottom, &self->component, NULL);
-	psy_ui_component_setalign(&self->bottom, psy_ui_ALIGN_BOTTOM);
+	psy_ui_component_set_align(&self->bottom, psy_ui_ALIGN_BOTTOM);
 	psy_ui_component_hide(&self->bottom);
 	/* spacer */
 	psy_ui_component_init(&self->spacer, &self->bottom, NULL);
-	psy_ui_component_setalign(&self->spacer, psy_ui_ALIGN_RIGHT);
+	psy_ui_component_set_align(&self->spacer, psy_ui_ALIGN_RIGHT);
 	psy_ui_component_hide(&self->spacer);
-	psy_ui_component_setpreferredsize(&self->spacer,
+	psy_ui_component_set_preferred_size(&self->spacer,
 		psy_ui_size_make_em(2.5, 1.0));
 	psy_ui_component_preventalign(&self->spacer);
 	/* horizontal scrollbar */
 	psy_ui_scrollbar_init(&self->hscroll, &self->bottom);
 	psy_ui_scrollbar_setorientation(&self->hscroll, psy_ui_HORIZONTAL);	
-	psy_ui_component_setalign(&self->hscroll.component, psy_ui_ALIGN_CLIENT);		
+	psy_ui_component_set_align(&self->hscroll.component, psy_ui_ALIGN_CLIENT);		
 	/* vertical scrollbar */
 	psy_ui_scrollbar_init(&self->vscroll, &self->component);	
 	psy_ui_component_hide(&self->vscroll.component);
 	psy_ui_scrollbar_setorientation(&self->vscroll, psy_ui_VERTICAL);
-	psy_ui_component_setalign(&self->vscroll.component, psy_ui_ALIGN_RIGHT);	
+	psy_ui_component_set_align(&self->vscroll.component, psy_ui_ALIGN_RIGHT);	
 	self->thumbmove = FALSE;
 	/* pane */
 	psy_ui_component_init(&self->pane, &self->component, NULL);	
-	psy_ui_component_setalign(&self->pane, psy_ui_ALIGN_CLIENT);	
+	psy_ui_component_set_align(&self->pane, psy_ui_ALIGN_CLIENT);	
 	/* scroll animate */
 	self->smooth = FALSE;
 	psy_ui_scrollanimate_init(&self->hanimate);
@@ -146,7 +146,7 @@ void psy_ui_scroller_init(psy_ui_Scroller* self, psy_ui_Component* client,
 		const psy_ui_Style* style;
 
 		psy_ui_component_setparent(client, &self->pane);		
-		psy_ui_component_setalign(client, psy_ui_ALIGN_FIXED);
+		psy_ui_component_set_align(client, psy_ui_ALIGN_FIXED);
 		style = psy_ui_componentstyle_currstyle(&self->client->style);
 		if (style) {
 			psy_ui_component_setborder(&self->component, &style->border);
@@ -170,7 +170,7 @@ void psy_ui_scroller_connectclient(psy_ui_Scroller* self)
 		psy_ui_scroller_onpanesize);
 	psy_signal_connect(&self->client->signal_scroll, self,
 		psy_ui_scroller_onscroll);		
-	psy_ui_component_setalign(self->client, psy_ui_ALIGN_FIXED);	
+	psy_ui_component_set_align(self->client, psy_ui_ALIGN_FIXED);	
 }
 
 void psy_ui_scroller_onpanesize(psy_ui_Scroller* self, psy_ui_Component* sender)
@@ -215,7 +215,7 @@ void psy_ui_scroller_horizontal_onchanged(psy_ui_Scroller* self, psy_ui_ScrollBa
 			psy_ui_scrollanimate_reset(&self->hanimate);
 			psy_ui_scrollanimate_calcstep(&self->hanimate, scrollleftpx,
 				floor((scrollleftpx + diff) / scrollsteppx) * scrollsteppx);
-			psy_ui_component_starttimer(psy_ui_scroller_base(self), 0, 50);
+			psy_ui_component_start_timer(psy_ui_scroller_base(self), 0, 50);
 		} else {
 			self->hanimate.targetpx =
 				floor((scrollleftpx + diff) / scrollsteppx) * scrollsteppx;			
@@ -258,7 +258,7 @@ void psy_ui_scroller_vertical_onchanged(psy_ui_Scroller* self,
 			psy_ui_scrollanimate_reset(&self->vanimate);
 			psy_ui_scrollanimate_calcstep(&self->vanimate, scrolltoppx,
 				floor((scrolltoppx + diff) / scrollstepy_px) * scrollstepy_px);
-			psy_ui_component_starttimer(psy_ui_scroller_base(self), 1, 50);
+			psy_ui_component_start_timer(psy_ui_scroller_base(self), 1, 50);
 		} else {
 			self->vanimate.targetpx =
 				floor((scrolltoppx + diff) / scrollstepy_px) * scrollstepy_px;
@@ -374,7 +374,7 @@ void psy_ui_scroller_scrollrangechanged(psy_ui_Scroller* self, psy_ui_Component*
 void psy_ui_scroller_onfocusin(psy_ui_Scroller* self, psy_ui_Event* ev)
 {
 	if (self->client) {		
-		psy_ui_component_setfocus(self->client);
+		psy_ui_component_set_focus(self->client);
 	}
 	psy_ui_event_stop_propagation(ev);
 }

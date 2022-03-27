@@ -7,7 +7,7 @@
 #define HELP_H
 
 /* host */
-#include "workspace.h"
+#include "dirconfig.h"
 /* ui */
 #include <uilabel.h>
 #include <uiscroller.h>
@@ -20,8 +20,8 @@ extern "C" {
 /*
 ** Help
 **
-** Integrated textfile viewer to show the psycle help files inside the psycle
-** doc directory. Configure the used files with PSYCLE_HELPFILES in psyconf.h.
+** Shows the psycle help files inside the psycle doc directory.
+** Configure the used files with PSYCLE_HELPFILES in psyconf.h.
 */
 
 typedef struct Help {
@@ -34,10 +34,10 @@ typedef struct Help {
 	psy_Table filenames;
 	psy_ui_AlignType lastalign;
 	/* references */
-	Workspace* workspace;
+	DirConfig* dir_config;
 } Help;
 
-void help_init(Help*, psy_ui_Component* parent, Workspace*);
+void help_init(Help*, psy_ui_Component* parent, DirConfig*);
 
 INLINE psy_ui_Component* help_base(Help* self)
 {

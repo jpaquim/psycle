@@ -26,12 +26,12 @@ void playposbar_init(PlayPosBar* self, psy_ui_Component* parent,
 
 	psy_ui_component_init(&self->component, parent, NULL);	
 	psy_ui_component_setalignexpand(&self->component, psy_ui_HEXPAND);
-	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
+	psy_ui_component_set_defaultalign(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	self->player = player;	
 	psy_ui_label_init(&self->position, &self->component);	
-	psy_ui_label_preventtranslation(&self->position);
-	psy_ui_label_setcharnumber(&self->position, 24.0);
+	psy_ui_label_prevent_translation(&self->position);
+	psy_ui_label_set_charnumber(&self->position, 24.0);
 	playposbar_updatelabel(self);		
 }
 
@@ -53,6 +53,6 @@ void playposbar_updatelabel(PlayPosBar* self)
 		(int)self->player->sequencer.seqtime.timesig_numerator,
 		(int)self->player->sequencer.seqtime.timesig_denominator);
 #ifndef PSYCLE_DEBUG_PREVENT_TIMER_DRAW
-	psy_ui_label_settext(&self->position, text);	
+	psy_ui_label_set_text(&self->position, text);	
 #endif
 }

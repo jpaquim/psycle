@@ -180,7 +180,7 @@ void inputdefiner_init(InputDefiner* self, psy_ui_Component* parent)
 
 	psy_ui_component_init(&self->component, parent, NULL);
 	vtable_init(self);
-	psy_ui_component_setstyletype_focus(&self->component,
+	psy_ui_component_set_style_type_focus(&self->component,
 		STYLE_INPUTDEFINER_FOCUS);		
 	psy_signal_init(&self->signal_accept);
 	keynames_init();
@@ -255,7 +255,7 @@ void inputdefiner_ondraw(InputDefiner* self, psy_ui_Graphics* g)
 	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 	inputdefiner_text(self, text);
 	if (psy_strlen(text) > 0) {
-		psy_ui_textout(g, 0, 0, text, psy_strlen(text));
+		psy_ui_textout(g, psy_ui_realpoint_zero(), text, psy_strlen(text));
 	}
 }
 

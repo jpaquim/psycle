@@ -44,11 +44,11 @@ void patternviewbar_init(PatternViewBar* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->component, parent, NULL);
 	self->workspace = workspace;
 	self->patternview = patternview;	
-	psy_ui_component_setdefaultalign(patternviewbar_base(self),
+	psy_ui_component_set_defaultalign(patternviewbar_base(self),
 		psy_ui_ALIGN_LEFT, psy_ui_defaults_hmargin(psy_ui_defaults()));
 	/* Zoom */
 	zoombox_init(&self->zoombox, patternviewbar_base(self));
-	psy_ui_component_setpreferredsize(&self->zoombox.component,
+	psy_ui_component_set_preferred_size(&self->zoombox.component,
 		psy_ui_size_make_em(16.0, 1.0));
 	psy_signal_connect(&self->zoombox.signal_changed, self,
 		patternviewbar_on_zoombox_changed);
@@ -81,8 +81,8 @@ void patternviewbar_init(PatternViewBar* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->displaysinglepattern.signal_clicked, self,
 		patternviewbar_on_display_single_pattern);
 	psy_ui_label_init(&self->status, patternviewbar_base(self));
-	psy_ui_label_preventtranslation(&self->status);	
-	psy_ui_label_setcharnumber(&self->status, 30.0);
+	psy_ui_label_prevent_translation(&self->status);	
+	psy_ui_label_set_charnumber(&self->status, 30.0);
 	psy_signal_connect(&psycleconfig_patview(
 		workspace_conf(workspace))->signal_changed, self,
 		patternviewbar_on_configure);
@@ -178,7 +178,7 @@ void patternviewbar_update_status(PatternViewBar* self)
 	assert(self);
 
 	patternviewbar_status_text(self, 256, text);
-	psy_ui_label_settext(&self->status, text);
+	psy_ui_label_set_text(&self->status, text);
 }
 
 void patternviewbar_status_text(PatternViewBar* self, uintptr_t maxcount,

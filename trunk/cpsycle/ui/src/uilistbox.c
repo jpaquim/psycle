@@ -64,7 +64,7 @@ void psy_ui_listboxclient_init(psy_ui_ListBoxClient* self, psy_ui_Component*
 	self->selindex = -1;
 	self->charnumber = 0;
 	psy_signal_init(&self->signal_selchanged);
-	psy_ui_component_setwheelscroll(&self->component, 4);
+	psy_ui_component_set_wheel_scroll(&self->component, 4);
 	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_VSCROLL);
 }
 
@@ -81,7 +81,7 @@ void psy_ui_listboxclient_onsize(psy_ui_ListBoxClient* self)
 
 	tm = psy_ui_component_textmetric(&self->component);
 	lineheight = (int)(tm->tmHeight * 1.2);
-	psy_ui_component_setscrollstep_height(&self->component,
+	psy_ui_component_set_scrollstep_height(&self->component,
 		psy_ui_value_make_px(lineheight));
 }
 
@@ -90,13 +90,13 @@ void psy_ui_listboxclient_ondraw(psy_ui_ListBoxClient* self, psy_ui_Graphics* g)
 	psy_TableIterator it;
 	const psy_ui_TextMetric* tm;
 	psy_ui_RealSize size;
-	int cpx = 0;
-	int cpy = 0;
-	int lineheight;
+	psy_ui_RealPoint cp;	
+	double lineheight;
 
 	tm = psy_ui_component_textmetric(&self->component);
 	size = psy_ui_component_scrollsize_px(&self->component);
-	lineheight = (int)(tm->tmHeight * 1.2);
+	lineheight = floor(tm->tmHeight * 1.2);
+	cp = psy_ui_realpoint_zero();
 	for (it = psy_table_begin(&self->items);
 		!psy_tableiterator_equal(&it, psy_table_end());
 		psy_tableiterator_inc(&it)) {
@@ -104,16 +104,14 @@ void psy_ui_listboxclient_ondraw(psy_ui_ListBoxClient* self, psy_ui_Graphics* g)
 
 		itemtext = (char*)psy_tableiterator_value(&it);
 		if (self->selindex != -1 && self->selindex == (intptr_t)
-			psy_tableiterator_key(&it)) {
-			psy_ui_RealRectangle r;
-
-			r = psy_ui_realrectangle_make(
-				psy_ui_realpoint_make(0, cpy),
-				psy_ui_realsize_make(size.width, lineheight));
-			psy_ui_drawsolidrectangle(g, r, psy_ui_colour_make(0x009B7800));
+				psy_tableiterator_key(&it)) {			
+			psy_ui_drawsolidrectangle(g,
+				psy_ui_realrectangle_make(cp,
+					psy_ui_realsize_make(size.width, lineheight)),
+				psy_ui_colour_make(0x009B7800));
 		}
-		psy_ui_textout(g, cpx, cpy, itemtext, psy_strlen(itemtext));
-		cpy += lineheight;
+		psy_ui_textout(g, cp, itemtext, psy_strlen(itemtext));
+		cp.y += lineheight;
 	}
 }
 
@@ -218,14 +216,14 @@ void psy_ui_listbox_init(psy_ui_ListBox* self, psy_ui_Component* parent)
 {  
 	psy_ui_component_init(&self->component, parent, NULL);	
 	psy_ui_listbox_vtable_init(self);
-	psy_ui_component_setstyletype(psy_ui_listbox_base(self),
+	psy_ui_component_set_style_type(psy_ui_listbox_base(self),
 		psy_ui_STYLE_LISTBOX);
 	psy_signal_init(&self->signal_selchanged);
-	self->charnumber = 0;	
+	self->charnumber = 0.0;	
 	psy_ui_listboxclient_init(&self->client, &self->component);
 	psy_ui_scroller_init(&self->scroller, &self->client.component,
 		&self->component);
-	psy_ui_component_setalign(&self->scroller.component, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_set_align(&self->scroller.component, psy_ui_ALIGN_CLIENT);
 	psy_signal_connect(&self->client.signal_selchanged, self,
 		psy_ui_listbox_onselchanged);
 }
@@ -241,7 +239,7 @@ void psy_ui_listbox_ondestroy(psy_ui_ListBox* self)
 	psy_signal_dispose(&self->signal_selchanged);
 }
 
-intptr_t psy_ui_listbox_addtext(psy_ui_ListBox* self, const char* text)
+intptr_t psy_ui_listbox_add_text(psy_ui_ListBox* self, const char* text)
 {	
 	return psy_ui_listboxclient_addtext(&self->client, text);
 }
@@ -253,7 +251,7 @@ void psy_ui_listbox_settext(psy_ui_ListBox* self, const char* text,
 		intptr_t i;
 
 		for (i = psy_ui_listbox_count(self); i <= index; ++i) {
-			psy_ui_listbox_addtext(self, "");
+			psy_ui_listbox_add_text(self, "");
 		}
 	}	
 }

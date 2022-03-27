@@ -14,7 +14,7 @@
 #include "../../detail/portable.h"
 
 void seqeditstate_init(SeqEditState* self, SequenceCmds* cmds,
-	psy_ui_TextInput* edit, psy_ui_Component* view)
+	psy_ui_TextArea* edit, psy_ui_Component* view)
 {	
 	psy_signal_init(&self->signal_cursorchanged);
 	psy_signal_init(&self->signal_itemselected);
@@ -117,10 +117,10 @@ void seqeditstate_edit(SeqEditState* self, psy_ui_Component* parent, psy_ui_Real
 				psy_ui_size_make_px(
 					tm->tmAveCharWidth * width,
 					tm->tmHeight)));
-		psy_ui_textinput_settext(self->edit, text);
-		psy_ui_textinput_enableinputfield(self->edit);
+		psy_ui_textarea_settext(self->edit, text);
+		psy_ui_textarea_enableinputfield(self->edit);
 		psy_ui_component_show(&self->edit->component);
-		psy_ui_component_setfocus(&self->edit->component);
+		psy_ui_component_set_focus(&self->edit->component);
 	}
 }
 

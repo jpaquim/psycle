@@ -61,9 +61,9 @@ void renderview_init(RenderView* self, psy_ui_Component* parent,
 	propertiesview_prevent_maximize_mainsections(&self->view);	
 	psy_signal_connect(&self->view.signal_changed, self,
 		renderview_onsettingsviewchanged);
-	psy_ui_component_setalign(&self->view.component, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_set_align(&self->view.component, psy_ui_ALIGN_CLIENT);
 	renderprogressview_init(&self->progressview, &self->component, workspace);
-	psy_ui_component_setalign(&self->progressview.component,
+	psy_ui_component_set_align(&self->progressview.component,
 		psy_ui_ALIGN_CLIENT);
 	psy_ui_component_hide(&self->progressview.component);
 }
@@ -254,7 +254,7 @@ void renderview_onstoprendering(RenderView* self, psy_AudioDriver* sender)
 
 void renderview_onfocus(RenderView* self)
 {
-	psy_ui_component_setfocus(&self->view.component);
+	psy_ui_component_set_focus(&self->view.component);
 }
 
 psy_audio_SequencerPlayMode renderview_recordmode(const RenderView* self)

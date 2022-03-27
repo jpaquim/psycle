@@ -46,7 +46,7 @@ void sequencetrackbox_init(SequenceTrackBox* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->component, parent, NULL);	
 	psy_signal_init(&self->signal_resize);
 	trackbox_init(&self->trackbox, &self->component);	
-	psy_ui_component_setalign(&self->trackbox.component,
+	psy_ui_component_set_align(&self->trackbox.component,
 		psy_ui_ALIGN_CLIENT);	
 	sequencetrackbox_vtable_init(self);
 	psy_signal_connect(&self->trackbox.signal_resize, self,
@@ -98,7 +98,7 @@ SequenceTrackBox* sequencetrackbox_allocinit(psy_ui_Component* parent,
 	rv = sequencetrackbox_alloc();
 	if (rv) {
 		sequencetrackbox_init(rv, parent, sequence, trackidx, workspace);
-		psy_ui_component_deallocateafterdestroyed(sequencetrackbox_base(rv));
+		psy_ui_component_deallocate_after_destroyed(sequencetrackbox_base(rv));
 	}
 	return rv;
 }

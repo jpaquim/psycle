@@ -59,7 +59,7 @@ void effectui_init(EffectUi* self, psy_ui_Component* parent,
 
 	psy_ui_component_init(&self->component, parent, NULL);	
 	effectui_vtable_init(self);	
-	psy_ui_component_setstyletype(&self->component, STYLE_MV_EFFECT);
+	psy_ui_component_set_style_type(&self->component, STYLE_MV_EFFECT);
 	self->paramviews = paramviews;
 	self->machines = &workspace->song->machines;
 	assert(self->machines);
@@ -67,18 +67,18 @@ void effectui_init(EffectUi* self, psy_ui_Component* parent,
 	assert(self->machine);
 	self->preventmachinepos = FALSE;
 	psy_ui_component_init(&self->mute, &self->component, NULL);
-	psy_ui_component_setstyletype(&self->mute, STYLE_MV_EFFECT_MUTE);
-	psy_ui_component_setstyletype_select(&self->mute, STYLE_MV_EFFECT_MUTE_SELECT);
+	psy_ui_component_set_style_type(&self->mute, STYLE_MV_EFFECT_MUTE);
+	psy_ui_component_set_style_type_select(&self->mute, STYLE_MV_EFFECT_MUTE_SELECT);
 	psy_ui_component_init(&self->bypass, &self->component, NULL);
-	psy_ui_component_setstyletype(&self->bypass, STYLE_MV_EFFECT_BYPASS);
-	psy_ui_component_setstyletype_select(&self->bypass, STYLE_MV_EFFECT_BYPASS_SELECT);
+	psy_ui_component_set_style_type(&self->bypass, STYLE_MV_EFFECT_BYPASS);
+	psy_ui_component_set_style_type_select(&self->bypass, STYLE_MV_EFFECT_BYPASS_SELECT);
 	editnameui_init(&self->editname, &self->component, self->machine,
 		STYLE_MV_EFFECT_NAME);
 	panui_init(&self->pan, &self->component, self->machine,
 		STYLE_MV_EFFECT_PAN, STYLE_MV_EFFECT_PAN_SLIDER);
 	vuui_init(&self->vu, &self->component, self->machine,
 		STYLE_MV_EFFECT_VU, STYLE_MV_EFFECT_VU0, STYLE_MV_EFFECT_VUPEAK);
-	psy_ui_component_starttimer(&self->component, 0, 50);
+	psy_ui_component_start_timer(&self->component, 0, 50);
 }
 
 void effectui_move(EffectUi* self, psy_ui_Point topleft)

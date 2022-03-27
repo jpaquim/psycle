@@ -24,7 +24,7 @@ void parameterlistbox_init(ParameterListBox* self, psy_ui_Component* parent,
 	assert(config);
 
 	psy_ui_component_init(&self->component, parent, NULL);
-	psy_ui_component_setstyletype(&self->component, STYLE_MACPARAM_TITLE);	
+	psy_ui_component_set_style_type(&self->component, STYLE_MACPARAM_TITLE);	
 	self->machine = machine;
 	if (self->machine && psy_audio_machine_numtweakparameters(self->machine) > 0) {
 		paramindex = 0;
@@ -32,12 +32,12 @@ void parameterlistbox_init(ParameterListBox* self, psy_ui_Component* parent,
 		paramindex = psy_INDEX_INVALID;
 	}
 	knobui_init(&self->knob, &self->component, machine, paramindex, NULL);
-	psy_ui_component_setalign(&self->knob.component, psy_ui_ALIGN_TOP);
+	psy_ui_component_set_align(&self->knob.component, psy_ui_ALIGN_TOP);
 	psy_ui_listbox_init(&self->listbox, &self->component);	
 	psy_ui_listbox_setcharnumber(&self->listbox, 10.0);
 	psy_signal_connect(&self->listbox.signal_selchanged, self,
 		parameterlistbox_onlistboxselected);		
-	psy_ui_component_setalign(&self->listbox.component, psy_ui_ALIGN_CLIENT);	
+	psy_ui_component_set_align(&self->listbox.component, psy_ui_ALIGN_CLIENT);	
 	parameterlistbox_setmachine(self, self->machine);	
 }
 
@@ -62,10 +62,10 @@ void parameterlistbox_build(ParameterListBox* self)
 					} else {
 						psy_snprintf(text, 256, "%02X: Parameter", (int)i);
 					}
-				psy_ui_listbox_addtext(&self->listbox, text);
+				psy_ui_listbox_add_text(&self->listbox, text);
 			} else {
 				psy_snprintf(text, 256, "%s", "--------");
-				psy_ui_listbox_addtext(&self->listbox, text);
+				psy_ui_listbox_add_text(&self->listbox, text);
 			}
 		}
 	}

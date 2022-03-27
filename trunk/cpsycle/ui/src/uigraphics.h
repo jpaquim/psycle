@@ -246,8 +246,7 @@ struct psy_ui_GraphicsImp;
 
 typedef struct psy_ui_Graphics {
 	psy_ui_GraphicsVTable* vtable;
-	struct psy_ui_GraphicsImp* imp;
-	// psy_ui_RealRectangle clip;
+	struct psy_ui_GraphicsImp* imp;	
 } psy_ui_Graphics;
 
 void psy_ui_graphics_init(psy_ui_Graphics*, void* hdc);
@@ -264,10 +263,10 @@ INLINE void psy_ui_setcolour(psy_ui_Graphics* self, psy_ui_Colour colour)
 	self->vtable->setcolour(self, colour);
 }
 
-INLINE void psy_ui_textout(psy_ui_Graphics* self, double x, double y,
+INLINE void psy_ui_textout(psy_ui_Graphics* self, psy_ui_RealPoint pt,
 	const char* text, uintptr_t len)
 {		
-	self->vtable->textout(self, x, y, text, len);
+	self->vtable->textout(self, pt.x, pt.y, text, len);
 }
 
 INLINE void psy_ui_textoutrectangle(psy_ui_Graphics* self,
@@ -434,7 +433,7 @@ INLINE void psy_ui_graphics_setcliprect(psy_ui_Graphics* self,
 	self->imp->vtable->dev_setcliprect(self->imp, clip);
 }
 
-INLINE psy_ui_RealRectangle psy_ui_cliprect(const psy_ui_Graphics* self)
+INLINE psy_ui_RealRectangle psy_ui_graphics_cliprect(const psy_ui_Graphics* self)
 {
 	return self->imp->vtable->dev_cliprect(self->imp);
 }

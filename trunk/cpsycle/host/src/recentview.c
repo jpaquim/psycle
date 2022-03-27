@@ -18,7 +18,7 @@ void playlistbar_init(PlaylistBar* self, psy_ui_Component* parent)
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_set_padding(&self->component,
 		psy_ui_margin_make_em(0.0, 0.0, 0.5, 0.0));
-	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
+	psy_ui_component_set_defaultalign(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	psy_ui_button_init(&self->up, &self->component);
 	psy_ui_button_seticon(&self->up, psy_ui_ICON_UP);
@@ -69,7 +69,7 @@ void playlistview_init(PlaylistView* self, psy_ui_Component* parent,
 	vtable_init(self);	
 	self->workspace = workspace;
 	playlistbar_init(&self->bar, &self->component);	
-	psy_ui_component_setalign(&self->bar.component, psy_ui_ALIGN_TOP);	
+	psy_ui_component_set_align(&self->bar.component, psy_ui_ALIGN_TOP);	
 	psy_signal_connect(&self->bar.clear.signal_clicked, self,
 		playlistview_onclear);
 	psy_signal_connect(&self->bar.play.signal_clicked, self,
@@ -91,10 +91,10 @@ void playlistview_init(PlaylistView* self, psy_ui_Component* parent,
 		STYLE_RECENTVIEW_LINE,
 		STYLE_RECENTVIEW_LINE_HOVER,
 		STYLE_RECENTVIEW_LINE_SELECT);
-	psy_ui_component_setpreferredsize(&self->view.component,
+	psy_ui_component_set_preferred_size(&self->view.component,
 		psy_ui_size_make_em(50.0, 0.0));
 	psy_ui_component_hide(&self->view.tabbar.component);	
-	psy_ui_component_setalign(&self->view.component, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_set_align(&self->view.component, psy_ui_ALIGN_CLIENT);
 	psy_signal_connect(&self->view.signal_selected, self,
 		playlistview_onselected);
 	self->starting = FALSE;
@@ -152,7 +152,7 @@ void playlistview_onplay(PlaylistView* self, psy_ui_Button* sender)
 {
 	psy_audio_player_stop(workspace_player(self->workspace));
 	self->starting = TRUE;	
-	psy_ui_component_starttimer(&self->component, 0, 50);
+	psy_ui_component_start_timer(&self->component, 0, 50);
 }
 
 void playlistview_onstop(PlaylistView* self, psy_ui_Button* sender)

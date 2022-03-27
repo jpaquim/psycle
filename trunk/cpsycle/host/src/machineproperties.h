@@ -11,7 +11,7 @@
 /* ui */
 #include "uibutton.h"
 #include "uilabel.h"
-#include "uitextinput.h"
+#include "uitextarea.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -25,7 +25,7 @@ typedef struct MachineProperties {
 	psy_ui_Button issolobypass;
 	psy_ui_Button ismute;
 	psy_ui_Button isbus;	
-	psy_ui_TextInput nameedit;	
+	psy_ui_TextArea nameedit;	
 	psy_ui_Button remove;
 	psy_ui_Button cancel;
 	uintptr_t macid;

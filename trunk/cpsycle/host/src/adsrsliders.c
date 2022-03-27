@@ -36,7 +36,7 @@ void adsrsliders_init(AdsrSliders* self, psy_ui_Component* parent)
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_signal_connect(&self->component.signal_destroy, self,
 		adsrsliders_ondestroy);
-	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_TOP,
+	psy_ui_component_set_defaultalign(&self->component, psy_ui_ALIGN_TOP,
 		psy_ui_defaults_vmargin(psy_ui_defaults()));	
 	psy_ui_slider_init(&self->attack, &self->component);
 	psy_ui_slider_settext(&self->attack, "instrumentview.attack");

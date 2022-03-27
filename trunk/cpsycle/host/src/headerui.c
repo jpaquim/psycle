@@ -55,7 +55,7 @@ void headerui_init(HeaderUi* self, psy_ui_Component* parent,
 
 	psy_ui_component_init(&self->component, parent, NULL);
 	headerui_vtable_init(self);	
-	psy_ui_component_setstyletype(&self->component, STYLE_MV_HEADER);
+	psy_ui_component_set_style_type(&self->component, STYLE_MV_HEADER);
 	self->machine = machine;
 	self->paramidx = paramidx;
 	self->param = param;	

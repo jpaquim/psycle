@@ -113,7 +113,7 @@ void trackergrid_init(TrackerGrid* self, psy_ui_Component* parent,
 	/* setup base component */			
 	trackergrid_init_signals(self);
 	psy_ui_component_setalignexpand(&self->component, psy_ui_HEXPAND);
-	psy_ui_component_setscrollstep_height(trackergrid_base(self),
+	psy_ui_component_set_scrollstep_height(trackergrid_base(self),
 		self->state->lineheight);
 	/* init internal */
 	self->chord = FALSE;
@@ -169,7 +169,7 @@ void trackergrid_on_draw(TrackerGrid* self, psy_ui_Graphics* g)
 	psy_audio_BlockSelection clip;
 	psy_ui_RealRectangle g_clip;
 		
-	g_clip = psy_ui_cliprect(g);
+	g_clip = psy_ui_graphics_cliprect(g);
 	trackerstate_lineclip(self->state, &g_clip, &clip);
 	trackerstate_clip(self->state, &g_clip, &clip);
 	/* prepares entry draw done in trackergridcolumn */	
@@ -999,7 +999,7 @@ void trackergrid_on_mouse_down(TrackerGrid* self, psy_ui_MouseEvent* ev)
 			self->state->pv->dragselectionbase, self->state->pv->dragselectionbase);
 		psy_audio_blockselection_disable(&self->state->pv->selection);
 		if (!psy_ui_component_hasfocus(&self->component)) {
-			psy_ui_component_setfocus(&self->component);
+			psy_ui_component_set_focus(&self->component);
 		}
 		psy_ui_component_capture(&self->component);		
 	}
@@ -1332,7 +1332,7 @@ bool trackergrid_handlecommand(TrackerGrid* self, intptr_t cmd)
 		return TRUE;
 	case CMD_SELECTMACHINE:
 		trackergrid_select_machine(self);
-		psy_ui_component_setfocus(&self->component);
+		psy_ui_component_set_focus(&self->component);
 		return TRUE;
 	case CMD_UNDO:
 		workspace_undo(self->workspace);
@@ -1515,14 +1515,14 @@ void trackerview_init(TrackerView* self, psy_ui_Component* parent,
 {
 	trackergrid_init(&self->grid, parent, state, workspace);
 	self->workspace = workspace;	
-	psy_ui_component_setwheelscroll(&self->grid.component, 4);
+	psy_ui_component_set_wheel_scroll(&self->grid.component, 4);
 	psy_ui_component_setoverflow(trackergrid_base(&self->grid),
 		psy_ui_OVERFLOW_SCROLL);
 	psy_ui_scroller_init(&self->scroller, &self->grid.component, parent);	
 	psy_signal_connect(&self->scroller.pane.signal_align, self,
 		trackerview_onscrollpanealign);	
-	psy_ui_component_setalign(&self->scroller.component, psy_ui_ALIGN_CLIENT);
-	psy_ui_component_setalign(&self->grid.component, psy_ui_ALIGN_FIXED);
+	psy_ui_component_set_align(&self->scroller.component, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_set_align(&self->grid.component, psy_ui_ALIGN_FIXED);
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		trackerview_onsongchanged);
 	trackerview_connectsong(self);

@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #if !defined(LABELEDIT_H)
@@ -10,7 +10,7 @@
 #include "workspace.h"
 /* ui */
 #include <uilabel.h>
-#include <uitextinput.h>
+#include <uitextarea.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -21,7 +21,7 @@ typedef struct LabelEdit {
 	psy_ui_Component component;
 	/* internal */
 	psy_ui_Label desc;
-	psy_ui_TextInput edit;	
+	psy_ui_TextArea edit;	
 } LabelEdit;
 
 void labeledit_init(LabelEdit*, psy_ui_Component* parent,

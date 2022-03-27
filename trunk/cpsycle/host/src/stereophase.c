@@ -61,7 +61,7 @@ void stereophase_init(StereoPhase* self, psy_ui_Component* parent, psy_audio_Wir
 {					
 	psy_ui_component_init(&self->component, parent, NULL);
 	vtable_init(self);	
-	psy_ui_component_setpreferredsize(&self->component,
+	psy_ui_component_set_preferred_size(&self->component,
 		psy_ui_size_make_px(256.0, 128.0));
 	self->wire = wire;	
 	self->invol = 1.0f;
@@ -159,7 +159,7 @@ void stereophase_drawbackground(StereoPhase* self, psy_ui_Graphics* g)
 	// bufDC.SetTextColour(0x505050);
 	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 	psy_ui_settextcolour(g, psy_ui_colour_make(0x606060));
-	psy_ui_textout(g, 4, 128 - 14, buf, psy_strlen(buf));
+	psy_ui_textout(g, psy_ui_realpoint_make(4, 128 - 14), buf, psy_strlen(buf));
 	// bufDC.TextOut(4, 128 - 14, buf);
 	// bufDC.SelectObject(oldFont);
 }

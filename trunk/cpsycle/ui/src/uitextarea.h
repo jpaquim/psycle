@@ -6,7 +6,9 @@
 #ifndef psy_ui_TEXTAREA_H
 #define psy_ui_TEXTAREA_H
 
+/* local */
 #include "uiscroller.h"
+#include "uitextformat.h"
 
 /*
 ** Edit
@@ -52,7 +54,8 @@ typedef struct psy_ui_TextAreaPane {
     bool isinputfield;
     bool preventedit;
     char* text;
-    uintptr_t cp;
+    psy_ui_TextFormat format;
+    uintptr_t cp;    
 } psy_ui_TextAreaPane;
 
 void psy_ui_textareapane_init(psy_ui_TextAreaPane*, psy_ui_Component* parent);
@@ -74,12 +77,29 @@ INLINE psy_ui_Component* psy_ui_textareapane_base(psy_ui_TextAreaPane* self)
 
 /* psy_ui_TextArea */
 typedef struct psy_ui_TextArea {
+    /* inherits */
     psy_ui_Component component;
+    /* signals */
+    psy_Signal signal_change;
+    /*
+    ** emits if edit is inputfield and
+    ** - return pressed or
+    ** - focus lost or
+    ** - clicked outside
+    */
+    psy_Signal signal_accept;
+    /*
+    ** emits if edit is inputfield and
+    ** - esc pressed
+    */
+    psy_Signal signal_reject;
+    /* internal */
     psy_ui_Scroller scroller;
     psy_ui_TextAreaPane pane;
 } psy_ui_TextArea;
 
 void psy_ui_textarea_init(psy_ui_TextArea*, psy_ui_Component* parent);
+void psy_ui_textarea_init_single_line(psy_ui_TextArea*, psy_ui_Component* parent);
 
 INLINE void psy_ui_textarea_enableinputfield(psy_ui_TextArea* self)
 {
@@ -121,6 +141,8 @@ INLINE void psy_ui_textarea_setsel(psy_ui_TextArea* self,
 {
     psy_ui_textareapane_setsel(&self->pane, cpmin, cpmax);
 }
+
+void psy_ui_textarea_prevent_wrap(psy_ui_TextArea*);
 
 INLINE psy_ui_Component* psy_ui_textarea_base(psy_ui_TextArea* self)
 {

@@ -93,6 +93,18 @@ INLINE void psy_ui_value_seteh(psy_ui_Value* self, double value)
 	self->quantity = value;	
 }
 
+INLINE void psy_ui_value_setpw(psy_ui_Value* self, double value)
+{
+	self->unit = psy_ui_UNIT_PW;
+	self->quantity = value;
+}
+
+INLINE void psy_ui_value_setph(psy_ui_Value* self, double value)
+{
+	self->unit = psy_ui_UNIT_PH;
+	self->quantity = value;
+}
+
 INLINE psy_ui_Value psy_ui_value_make_px(double px)
 {
 	psy_ui_Value rv;

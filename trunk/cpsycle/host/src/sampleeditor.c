@@ -52,12 +52,12 @@ void sampleeditorbar_init(SampleEditorBar* self, psy_ui_Component* parent,
 	psy_ui_checkbox_check(&self->selecttogether);
 	psy_ui_label_init_text(&self->selstartlabel, &self->component,
 		"samplesview.selstart");
-	psy_ui_textinput_init(&self->selstartedit, &self->component);
-	psy_ui_textinput_setcharnumber(&self->selstartedit, 10);			
+	psy_ui_textarea_init_single_line(&self->selstartedit, &self->component);	
+	psy_ui_textarea_setcharnumber(&self->selstartedit, 10);			
 	psy_ui_label_init_text(&self->selendlabel, &self->component,
 		"samplesview.selend");
-	psy_ui_textinput_init(&self->selendedit, &self->component);
-	psy_ui_textinput_setcharnumber(&self->selendedit, 10);
+	psy_ui_textarea_init_single_line(&self->selendedit, &self->component);	
+	psy_ui_textarea_setcharnumber(&self->selendedit, 10);
 	psy_ui_label_init_text(&self->visualrepresentationdesc, &self->component,
 		"samplesview.visual");
 	psy_ui_checkbox_init(&self->doublecontloop, &self->component);
@@ -100,20 +100,20 @@ void sampleeditorbar_setselection(SampleEditorBar* self,
 {
 	char text[128];
 
-	psy_ui_textinput_enableedit(&self->selstartedit);
-	psy_ui_textinput_enableedit(&self->selendedit);
+	psy_ui_textarea_enableedit(&self->selstartedit);
+	psy_ui_textarea_enableedit(&self->selendedit);
 	psy_snprintf(text, 128, "%u", (unsigned int)selectionstart);
-	psy_ui_textinput_settext(&self->selstartedit, text);
+	psy_ui_textarea_settext(&self->selstartedit, text);
 	psy_snprintf(text, 128, "%u", (unsigned int)selectionend);
-	psy_ui_textinput_settext(&self->selendedit, text);
+	psy_ui_textarea_settext(&self->selendedit, text);
 }
 
 void sampleeditorbar_clearselection(SampleEditorBar* self)
 {
-	psy_ui_textinput_preventedit(&self->selstartedit);
-	psy_ui_textinput_preventedit(&self->selendedit);
-	psy_ui_textinput_settext(&self->selstartedit, "");
-	psy_ui_textinput_settext(&self->selendedit, "");
+	psy_ui_textarea_preventedit(&self->selstartedit);
+	psy_ui_textarea_preventedit(&self->selendedit);
+	psy_ui_textarea_settext(&self->selstartedit, "");
+	psy_ui_textarea_settext(&self->selendedit, "");
 }
 
 void sampleeditorbar_ondoublecontloop(SampleEditorBar* self,
@@ -155,15 +155,15 @@ void sampleeditoroperations_init(SampleEditorOperations* self,
 {
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_button_init(&self->cut, &self->component);
-	psy_ui_button_settext(&self->cut, "edit.cut");
+	psy_ui_button_set_text(&self->cut, "edit.cut");
 	psy_ui_button_init(&self->crop, &self->component);
-	psy_ui_button_settext(&self->crop, "edit.crop");
+	psy_ui_button_set_text(&self->crop, "edit.crop");
 	psy_ui_button_init(&self->copy, &self->component);
-	psy_ui_button_settext(&self->copy, "edit.copy");
+	psy_ui_button_set_text(&self->copy, "edit.copy");
 	psy_ui_button_init(&self->paste, &self->component);
-	psy_ui_button_settext(&self->paste, "edit.paste");
+	psy_ui_button_set_text(&self->paste, "edit.paste");
 	psy_ui_button_init(&self->del, &self->component);
-	psy_ui_button_settext(&self->del, "edit.delete");
+	psy_ui_button_set_text(&self->del, "edit.delete");
 	sampleeditoroperations_initalign(self);
 }
 
@@ -193,7 +193,7 @@ void sampleeditoramplify_init(SampleEditorAmplify* self,
 	self->gainvalue = (psy_dsp_amp_t) 2/3.f;
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_label_init_text(&self->header, &self->component, "Adjust Volume");
-	psy_ui_component_setalign(&self->header.component, psy_ui_ALIGN_TOP);
+	psy_ui_component_set_align(&self->header.component, psy_ui_ALIGN_TOP);
 	psy_ui_slider_init(&self->gain, &self->component);
 	psy_ui_slider_showvertical(&self->gain);
 	psy_ui_slider_setcharnumber(&self->gain, 4);
@@ -201,12 +201,12 @@ void sampleeditoramplify_init(SampleEditorAmplify* self,
 		(ui_slider_fpdescribe)sampleeditoramplify_ondescribe,
 		(ui_slider_fptweak)sampleeditoramplify_ontweak,
 		(ui_slider_fpvalue)sampleeditoramplify_onvalue);
-	psy_ui_component_setalign(&self->gain.component, psy_ui_ALIGN_LEFT);
+	psy_ui_component_set_align(&self->gain.component, psy_ui_ALIGN_LEFT);
 	psy_ui_label_init(&self->dbdisplay, &self->component);
-	psy_ui_label_preventtranslation(&self->dbdisplay);
+	psy_ui_label_prevent_translation(&self->dbdisplay);
 	sampleeditoramplify_ondescribe(self, 0, text);
-	psy_ui_label_settext(&self->dbdisplay, text);
-	psy_ui_component_setalign(&self->dbdisplay.component, psy_ui_ALIGN_BOTTOM);
+	psy_ui_label_set_text(&self->dbdisplay, text);
+	psy_ui_component_set_align(&self->dbdisplay.component, psy_ui_ALIGN_BOTTOM);
 }
 
 void sampleeditoramplify_ontweak(SampleEditorAmplify* self,
@@ -216,7 +216,7 @@ void sampleeditoramplify_ontweak(SampleEditorAmplify* self,
 
 	self->gainvalue = (intptr_t)(value * 288) / 288.f;
 	sampleeditoramplify_ondescribe(self, 0, text);
-	psy_ui_label_settext(&self->dbdisplay, text);
+	psy_ui_label_set_text(&self->dbdisplay, text);
 }
 
 void sampleeditoramplify_onvalue(SampleEditorAmplify* self,
@@ -243,13 +243,13 @@ void sampleeditluaprocessor_init(SampleEditLuaProcessor* self,
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_label_init_text(&self->header, &self->component,
 		"Lua Processor");
-	psy_ui_component_setalign(&self->header.component, psy_ui_ALIGN_TOP);
+	psy_ui_component_set_align(&self->header.component, psy_ui_ALIGN_TOP);
 	psy_ui_editor_init(&self->editor, &self->component);
 	psy_ui_editor_settext(&self->editor, LUAPROCESSOR_DEFAULT);
-	psy_ui_component_setalign(&self->editor.component, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_set_align(&self->editor.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_editor_init(&self->console, &self->component);	
-	psy_ui_component_setalign(&self->console.component, psy_ui_ALIGN_BOTTOM);
-	psy_ui_component_setpreferredsize(&self->console.component,
+	psy_ui_component_set_align(&self->console.component, psy_ui_ALIGN_BOTTOM);
+	psy_ui_component_set_preferred_size(&self->console.component,
 		psy_ui_size_make_em(0.0, 10.0));
 }
 
@@ -270,21 +270,21 @@ void sampleprocessview_init(SampleEditorProcessView* self,
 	psy_ui_component_init(&self->component, parent, NULL);
 	self->workspace = workspace;
 	psy_ui_component_init(&self->client, &self->component, NULL);
-	psy_ui_component_setalign(&self->client, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_set_align(&self->client, psy_ui_ALIGN_CLIENT);
 	psy_ui_margin_init_em(&margin, 0.0, 0.0, 0.0, 1.0);		
 	psy_ui_component_set_margin(&self->client, margin);
 	sampleeditoroperations_init(&self->copypaste, &self->client, workspace);
-	psy_ui_component_setalign(&self->copypaste.component, psy_ui_ALIGN_TOP);
+	psy_ui_component_set_align(&self->copypaste.component, psy_ui_ALIGN_TOP);
 	psy_ui_button_init(&self->process, &self->client);
-	psy_ui_button_settext(&self->process, "samplesview.process");
-	psy_ui_component_setalign(&self->process.component, psy_ui_ALIGN_TOP);
+	psy_ui_button_set_text(&self->process, "samplesview.process");
+	psy_ui_component_set_align(&self->process.component, psy_ui_ALIGN_TOP);
 	psy_ui_margin_init_em(&margin, 1.5, 0.0, 0.5, 0.0);		
 	psy_ui_component_set_margin(&self->process.component, margin);
 	psy_ui_listbox_init(&self->processors, &self->client);
-	psy_ui_component_setalign(&self->processors.component, psy_ui_ALIGN_TOP);
+	psy_ui_component_set_align(&self->processors.component, psy_ui_ALIGN_TOP);
 	psy_ui_component_set_margin(&self->processors.component, margin);	
 	psy_ui_notebook_init(&self->notebook, &self->client);
-	psy_ui_component_setalign(&self->notebook.component, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_set_align(&self->notebook.component, psy_ui_ALIGN_CLIENT);
 	sampleeditoramplify_init(&self->amplify, &self->notebook.component,
 		workspace);	
 	sampleprocessview_buildprocessorlist(self);
@@ -312,14 +312,14 @@ void sampleprocessview_init(SampleEditorProcessView* self,
 void sampleprocessview_buildprocessorlist(SampleEditorProcessView* self)
 {
 	psy_ui_listbox_clear(&self->processors);
-	psy_ui_listbox_addtext(&self->processors, "Amplify");
-	psy_ui_listbox_addtext(&self->processors, "Fade In");
-	psy_ui_listbox_addtext(&self->processors, "Fade Out");
-	psy_ui_listbox_addtext(&self->processors, "Insert Silence");
-	psy_ui_listbox_addtext(&self->processors, "Normalize");
-	psy_ui_listbox_addtext(&self->processors, "Remove DC");
-	psy_ui_listbox_addtext(&self->processors, "Reverse");
-	/* psy_ui_listbox_addtext(&self->processors, "Lua"); */
+	psy_ui_listbox_add_text(&self->processors, "Amplify");
+	psy_ui_listbox_add_text(&self->processors, "Fade In");
+	psy_ui_listbox_add_text(&self->processors, "Fade Out");
+	psy_ui_listbox_add_text(&self->processors, "Insert Silence");
+	psy_ui_listbox_add_text(&self->processors, "Normalize");
+	psy_ui_listbox_add_text(&self->processors, "Remove DC");
+	psy_ui_listbox_add_text(&self->processors, "Reverse");
+	/* psy_ui_listbox_add_text(&self->processors, "Lua"); */
 }
 
 void sampleeditorprocessview_onprocessorselected(SampleEditorProcessView* self,
@@ -370,12 +370,12 @@ void sampleeditorplaybar_init(SampleEditorPlayBar* self,
 	psy_ui_component_set_padding(&self->component,
 		psy_ui_margin_make_em(0.5, 0.0, 0.5, 0.0));
 	// psy_ui_button_init(&self->loop, &self->component);
-	// psy_ui_button_settext(&self->loop, "Loop");	
+	// psy_ui_button_set_text(&self->loop, "Loop");	
 	// psy_signal_connect(&self->loop.signal_clicked, self, onloopclicked);	
 	psy_ui_button_init(&self->play, &self->component);
-	psy_ui_button_settext(&self->play, "samplesview.play");	
+	psy_ui_button_set_text(&self->play, "samplesview.play");	
 	psy_ui_button_init(&self->stop, &self->component);
-	psy_ui_button_settext(&self->stop, "samplesview.stop");
+	psy_ui_button_set_text(&self->stop, "samplesview.stop");
 	// psy_signal_connect(&self->stop.signal_clicked, self, onstopclicked);	
 	sampleeditorplaybar_initalign(self);	
 }
@@ -482,8 +482,8 @@ void sampleeditorheader_drawruler(SampleEditorHeader* self, psy_ui_Graphics* g)
 					psy_ui_realpoint_make(cpx, baseline - tm->tmHeight / 3));
 				psy_snprintf(txt, 40, "%d", (int)waveboxcontext_realframe(
 					self->metric, frame));
-				psy_ui_textout(g, (int)cpx + (int)(tm->tmAveCharWidth * 0.75),
-					baseline - tm->tmHeight - tm->tmHeight / 6, txt,
+				psy_ui_textout(g, psy_ui_realpoint_make((int)cpx + (int)(tm->tmAveCharWidth * 0.75),
+					baseline - tm->tmHeight - tm->tmHeight / 6), txt,
 					psy_strlen(txt));
 			}
 		}
@@ -509,9 +509,9 @@ void sampleeditor_onscrollzoom_customdraw(SampleEditor* self,
 			
 			psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 			psy_ui_settextcolour(g, psy_ui_colour_make(0x00D1C5B6));
-			psy_ui_textout(g,
+			psy_ui_textout(g, psy_ui_realpoint_make(
 				(size.width - tm->tmAveCharWidth * psy_strlen(txt)) / 2,
-				(size.height - tm->tmHeight) / 2,
+				(size.height - tm->tmHeight) / 2),
 				txt, psy_strlen(txt));
 		} else {
 			double x;
@@ -585,7 +585,7 @@ void samplebox_buildwaveboxes(SampleBox* self, psy_audio_Sample* sample,
 			wavebox_setloopviewmode(wavebox, loopviewmode);
 			wavebox->preventdrawonselect = TRUE;
 			wavebox_setsample(wavebox, sample, channel);
-			psy_ui_component_setalign(&wavebox->component, psy_ui_ALIGN_CLIENT);
+			psy_ui_component_set_align(&wavebox->component, psy_ui_ALIGN_CLIENT);
 			psy_signal_connect(&wavebox->selectionchanged, self,
 				samplebox_onselectionchanged);
 			psy_table_insert(&self->waveboxes, channel, (void*)wavebox);
@@ -685,7 +685,7 @@ void sampleeditor_init(SampleEditor* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->component.signal_destroy, self,
 		sampleeditor_ondestroy);	
 	sampleprocessview_init(&self->processview, &self->component, workspace);
-	psy_ui_component_setalign(&self->processview.component, psy_ui_ALIGN_RIGHT);
+	psy_ui_component_set_align(&self->processview.component, psy_ui_ALIGN_RIGHT);
 	//psy_ui_component_set_margin(&self->processview.component, &margin);
 	psy_signal_connect(&self->processview.process.signal_clicked, self,
 		sampleeditor_onprocess);
@@ -694,24 +694,24 @@ void sampleeditor_init(SampleEditor* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->processview.copypaste.del.signal_clicked, self,
 		sampleeditor_ondelete);
 	psy_ui_splitter_init(&self->splitbar, &self->component);
-	psy_ui_component_setalign(&self->splitbar.component, psy_ui_ALIGN_RIGHT);
+	psy_ui_component_set_align(&self->splitbar.component, psy_ui_ALIGN_RIGHT);
 	sampleeditorplaybar_init(&self->playbar, &self->component, workspace);
 	psy_signal_connect(&self->playbar.play.signal_clicked, self,
 		sampleeditor_onplay);
 	psy_signal_connect(&self->playbar.stop.signal_clicked, self,
 		sampleeditor_onstop);
-	psy_ui_component_setalign(&self->playbar.component, psy_ui_ALIGN_TOP);	
+	psy_ui_component_set_align(&self->playbar.component, psy_ui_ALIGN_TOP);	
 	sampleeditorheader_init(&self->header, &self->component);
-	psy_ui_component_setalign(&self->header.component, psy_ui_ALIGN_TOP);		
+	psy_ui_component_set_align(&self->header.component, psy_ui_ALIGN_TOP);		
 	samplebox_init(&self->samplebox, &self->component, workspace);	
-	psy_ui_component_setalign(&self->samplebox.component, psy_ui_ALIGN_CLIENT);	
+	psy_ui_component_set_align(&self->samplebox.component, psy_ui_ALIGN_CLIENT);	
 	psy_signal_connect(&self->samplebox.signal_selectionchanged, self,
 		sampleeditor_onselectionchanged);
 	scrollzoom_init(&self->zoom, &self->component);
 	psy_signal_connect(&self->zoom.signal_customdraw, self,
 		sampleeditor_onscrollzoom_customdraw);
-	psy_ui_component_setalign(&self->zoom.component, psy_ui_ALIGN_BOTTOM);
-	psy_ui_component_setpreferredsize(&self->zoom.component,
+	psy_ui_component_set_align(&self->zoom.component, psy_ui_ALIGN_BOTTOM);
+	psy_ui_component_set_preferred_size(&self->zoom.component,
 		psy_ui_size_make_em(0.0, 2.0));	
 	psy_signal_connect(&self->zoom.signal_zoom, self, sampleeditor_onzoom);
 	psy_signal_connect(&workspace->signal_songchanged, self,

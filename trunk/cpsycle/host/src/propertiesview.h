@@ -12,7 +12,7 @@
 #include "workspace.h"
 /* ui */
 #include <uicombobox.h>
-#include <uitextinput.h>
+#include <uitextarea.h>
 #include <uilabel.h>
 #include <uiswitch.h>
 #include <uiscroller.h>
@@ -36,12 +36,12 @@ typedef struct PropertiesRenderState {
 	psy_Property* property; /* event bubble target property */
 	psy_Property* selected; /* selected property*/
 	struct PropertiesRenderLine* selectedline;
-	psy_ui_TextInput* edit;	
+	psy_ui_TextArea* edit;	
 	bool comboselect;
 } PropertiesRenderState;
 
 void propertiesrenderstate_init(PropertiesRenderState*, uintptr_t numcols,
-	psy_ui_TextInput* edit);
+	psy_ui_TextArea* edit);
 
 /* PropertiesRenderLine */
 typedef struct PropertiesRenderLine {
@@ -83,7 +83,7 @@ typedef struct PropertiesRenderer {
 	psy_Signal signal_changed;
 	psy_Signal signal_selected;
 	/* internal */	
-	psy_ui_TextInput edit;
+	psy_ui_TextArea edit;
 	InputDefiner inputdefiner;	
 	uintptr_t currlinestatecount;		
 	psy_ui_Component* curr;	

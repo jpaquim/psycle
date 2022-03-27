@@ -10,7 +10,7 @@
 // ui
 #include <uibutton.h>
 #include <uicheckbox.h>
-#include <uitextinput.h>
+#include <uitextarea.h>
 #include <uilabel.h>
 
 #ifdef __cplusplus

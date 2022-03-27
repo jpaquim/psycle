@@ -40,7 +40,7 @@ void virtualgeneratorbox_init(VirtualGeneratorsBox* self, psy_ui_Component* pare
 {	
 	psy_ui_component_init(&self->component, parent, NULL);
 	self->workspace = workspace;
-	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
+	psy_ui_component_set_defaultalign(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	psy_ui_checkbox_init(&self->active, &self->component);
 	psy_ui_checkbox_settext(&self->active, "Virtual generator");
@@ -195,13 +195,13 @@ void instrumentpredefsbar_init(InstrumentPredefsBar* self, psy_ui_Component* par
 	self->instrument = instrument;
 	self->workspace = workspace;
 	self->view = view;
-	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
+	psy_ui_component_set_defaultalign(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	psy_ui_component_setalignexpand(&self->component,
 		psy_ui_HEXPAND);
 	psy_ui_label_init(&self->predefs, &self->component);	
-	psy_ui_label_preventtranslation(&self->predefs);
-	psy_ui_label_settext(&self->predefs, "Predef.");	
+	psy_ui_label_prevent_translation(&self->predefs);
+	psy_ui_label_set_text(&self->predefs, "Predef.");	
 	for (c = 0; buttons[c] != NULL; ++c) {
 		char text[2];
 
@@ -242,8 +242,8 @@ void instrumentpredefsbar_onpredefs(InstrumentPredefsBar* self, psy_ui_Button* s
 /* prototypes */
 static void instrumentheaderview_onprevinstrument(InstrumentHeaderView*, psy_ui_Component* sender);
 static void instrumentheaderview_onnextinstrument(InstrumentHeaderView*, psy_ui_Component* sender);
-static void instrumentheaderview_oneditaccept(InstrumentHeaderView*, psy_ui_TextInput* sender);
-static void instrumentheaderview_oneditreject(InstrumentHeaderView*, psy_ui_TextInput* sender);
+static void instrumentheaderview_oneditaccept(InstrumentHeaderView*, psy_ui_TextArea* sender);
+static void instrumentheaderview_oneditreject(InstrumentHeaderView*, psy_ui_TextArea* sender);
 
 /* implementation */
 void instrumentheaderview_init(InstrumentHeaderView* self, psy_ui_Component* parent,
@@ -254,17 +254,17 @@ void instrumentheaderview_init(InstrumentHeaderView* self, psy_ui_Component* par
 	self->instrument = NULL;
 	self->instruments = instruments;
 	psy_ui_component_init(&self->component, parent, NULL);
-	psy_ui_component_setstyletype(&self->component, STYLE_INSTRVIEW_HEADER);
-	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
+	psy_ui_component_set_style_type(&self->component, STYLE_INSTRVIEW_HEADER);
+	psy_ui_component_set_defaultalign(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	psy_ui_label_init_text(&self->namelabel, &self->component,
 		"instrumentview.instrument-name");
-	psy_ui_textinput_init(&self->nameedit, &self->component);
-	psy_ui_textinput_enableinputfield(&self->nameedit);
-	psy_ui_textinput_setcharnumber(&self->nameedit, 20);
-	psy_signal_connect(&self->nameedit.signal_accept, self,
+	psy_ui_textarea_init_single_line(&self->nameedit, &self->component);
+	psy_ui_textarea_enableinputfield(&self->nameedit);
+	psy_ui_textarea_setcharnumber(&self->nameedit, 20);
+	psy_signal_connect(&self->nameedit.pane.signal_accept, self,
 		instrumentheaderview_oneditaccept);	
-	psy_signal_connect(&self->nameedit.signal_reject, self,
+	psy_signal_connect(&self->nameedit.pane.signal_reject, self,
 		instrumentheaderview_oneditreject);
 	psy_ui_button_init_connect(&self->prevbutton, &self->component,
 		self, instrumentheaderview_onprevinstrument);
@@ -273,7 +273,7 @@ void instrumentheaderview_init(InstrumentHeaderView* self, psy_ui_Component* par
 		self, instrumentheaderview_onnextinstrument);
 	psy_ui_button_seticon(&self->nextbutton, psy_ui_ICON_MORE);
 	psy_ui_component_init(&self->more, &self->component, NULL);
-	psy_ui_component_setdefaultalign(&self->more, psy_ui_ALIGN_LEFT,
+	psy_ui_component_set_defaultalign(&self->more, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	virtualgeneratorbox_init(&self->virtualgenerators, &self->more,
 		workspace);
@@ -290,7 +290,7 @@ void instrumentheaderview_setinstrument(InstrumentHeaderView* self,
 {
 	self->instrument = instrument;
 	self->predefs.instrument = instrument;	
-	psy_ui_textinput_settext(&self->nameedit,
+	psy_ui_textarea_settext(&self->nameedit,
 		(instrument)
 		? instrument->name
 		: "");	
@@ -302,29 +302,29 @@ void instrumentheaderview_setinstrument(InstrumentHeaderView* self,
 }
 
 void instrumentheaderview_oneditaccept(InstrumentHeaderView* self,
-	psy_ui_TextInput* sender)
+	psy_ui_TextArea* sender)
 {
 	if (self->instrument) {
 		char text[40];
 		psy_audio_InstrumentIndex index;
 		
 		index = instrumentsbox_selected(&self->view->instrumentsbox);
-		if (psy_strlen(psy_ui_textinput_text(sender)) == 0) {
-			psy_ui_textinput_settext(sender, "Untitled");
+		if (psy_strlen(psy_ui_textarea_text(sender)) == 0) {
+			psy_ui_textarea_settext(sender, "Untitled");
 		}
-		psy_audio_instrument_setname(self->instrument, psy_ui_textinput_text(sender));
+		psy_audio_instrument_setname(self->instrument, psy_ui_textarea_text(sender));
 		psy_snprintf(text, 20, "%02X:%s", 
 			(int)index.subslot, psy_audio_instrument_name(self->instrument));
 		psy_ui_listbox_settext(&self->view->instrumentsbox.instrumentlist, text,
 			index.subslot);		
-	} else if (psy_strlen(psy_ui_textinput_text(sender)) > 0) {
+	} else if (psy_strlen(psy_ui_textarea_text(sender)) > 0) {
 		if (workspace_song(self->view->workspace)) {
 			psy_audio_Instrument* instrument;
 			psy_audio_InstrumentIndex selected;
 
 			selected = instrumentsbox_selected(&self->view->instrumentsbox);
 			instrument = psy_audio_instrument_allocinit();
-			psy_audio_instrument_setname(instrument, psy_ui_textinput_text(sender));
+			psy_audio_instrument_setname(instrument, psy_ui_textarea_text(sender));
 			psy_audio_instrument_setindex(instrument, selected.subslot);
 			psy_audio_exclusivelock_enter();
 			psy_audio_instruments_insert(&workspace_song(self->view->workspace)->instruments, instrument,
@@ -333,19 +333,19 @@ void instrumentheaderview_oneditaccept(InstrumentHeaderView* self,
 			psy_audio_exclusivelock_leave();
 		}
 	}
-	psy_ui_component_setfocus(psy_ui_component_parent(&self->component));
+	psy_ui_component_set_focus(psy_ui_component_parent(&self->component));
 }
 
 void instrumentheaderview_oneditreject(InstrumentHeaderView* self,
-	psy_ui_TextInput* sender)
+	psy_ui_TextArea* sender)
 {
 	if (self->instrument) {
-		psy_ui_textinput_settext(&self->nameedit,
+		psy_ui_textarea_settext(&self->nameedit,
 			(self->instrument)
 			? self->instrument->name
 			: "");
 	}
-	psy_ui_component_setfocus(psy_ui_component_parent(&self->component));
+	psy_ui_component_set_focus(psy_ui_component_parent(&self->component));
 }
 
 void instrumentheaderview_onprevinstrument(InstrumentHeaderView* self, psy_ui_Component* sender)
@@ -377,9 +377,9 @@ void instrumentviewbuttons_init(InstrumentViewButtons* self,
 	psy_ui_Component* parent, Workspace* workspace)
 {
 	psy_ui_component_init(&self->component, parent, NULL);
-	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
+	psy_ui_component_set_defaultalign(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
-	psy_ui_component_setstyletype(&self->component, STYLE_INSTRVIEW_BUTTONS);	
+	psy_ui_component_set_style_type(&self->component, STYLE_INSTRVIEW_BUTTONS);	
 	psy_ui_button_init_text(&self->create, &self->component, "file.new");
 	psy_ui_button_init_text(&self->load, &self->component, "file.load");
 	psy_ui_button_init_text(&self->save, &self->component, "file.save");
@@ -396,20 +396,20 @@ void instrumentsviewbar_init(InstrumentsViewBar* self, psy_ui_Component* parent,
 {
 	psy_ui_component_init(instrumentsviewbar_base(self), parent, NULL);
 	self->workspace = workspace;
-	psy_ui_component_setdefaultalign(instrumentsviewbar_base(self),
+	psy_ui_component_set_defaultalign(instrumentsviewbar_base(self),
 		psy_ui_ALIGN_LEFT, psy_ui_margin_make(
 			psy_ui_value_make_px(0), psy_ui_value_make_ew(4),
 			psy_ui_value_make_px(0), psy_ui_value_make_px(0)));		
 	psy_ui_label_init(&self->status, instrumentsviewbar_base(self));
-	psy_ui_label_preventtranslation(&self->status);
-	psy_ui_label_setcharnumber(&self->status, 44);		
+	psy_ui_label_prevent_translation(&self->status);
+	psy_ui_label_set_charnumber(&self->status, 44);		
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		instrumentsviewbar_onsongchanged);
 }
 
 void instrumentsviewbar_settext(InstrumentsViewBar* self, const char* text)
 {
-	psy_ui_label_settext(&self->status, text);
+	psy_ui_label_set_text(&self->status, text);
 }
 
 void instrumentsviewbar_onsongchanged(InstrumentsViewBar* self,
@@ -452,7 +452,7 @@ void instrumentview_init(InstrumentView* self, psy_ui_Component* parent,
 	psy_ui_Margin margin;	
 
 	psy_ui_component_init(&self->component, parent, NULL);	
-	psy_ui_component_setstyletype(&self->component, STYLE_INSTRVIEW);	
+	psy_ui_component_set_style_type(&self->component, STYLE_INSTRVIEW);	
 	psy_ui_component_init(&self->viewtabbar, tabbarparent, NULL);
 	self->statusbar = NULL;
 	self->player = &workspace->player;
@@ -461,20 +461,20 @@ void instrumentview_init(InstrumentView* self, psy_ui_Component* parent,
 	/* header */
 	instrumentheaderview_init(&self->header, &self->component,
 		&workspace->song->instruments, self, workspace);	
-	psy_ui_component_setalign(&self->header.component, psy_ui_ALIGN_TOP);
+	psy_ui_component_set_align(&self->header.component, psy_ui_ALIGN_TOP);
 	/* left */
 	psy_ui_component_init(&self->left, &self->component, NULL);
-	psy_ui_component_setalign(&self->left, psy_ui_ALIGN_LEFT);	
+	psy_ui_component_set_align(&self->left, psy_ui_ALIGN_LEFT);	
 	instrumentsbox_init(&self->instrumentsbox, &self->left,
 		&workspace->song->instruments, workspace);
-	psy_ui_component_setalign(&self->instrumentsbox.component,
+	psy_ui_component_set_align(&self->instrumentsbox.component,
 		psy_ui_ALIGN_CLIENT);	
 	instrumentviewbuttons_init(&self->buttons,
 		&self->instrumentsbox.groupheader, workspace);
-	psy_ui_component_setalign(&self->buttons.component, psy_ui_ALIGN_TOP);	
+	psy_ui_component_set_align(&self->buttons.component, psy_ui_ALIGN_TOP);	
 	/* notebook */
 	psy_ui_notebook_init(&self->clientnotebook, &self->component);
-	psy_ui_component_setalign(psy_ui_notebook_base(&self->clientnotebook),
+	psy_ui_component_set_align(psy_ui_notebook_base(&self->clientnotebook),
 		psy_ui_ALIGN_CLIENT);
 	{
 		psy_ui_Margin margin;
@@ -486,21 +486,21 @@ void instrumentview_init(InstrumentView* self, psy_ui_Component* parent,
 	/* empty */
 	psy_ui_label_init_text(&self->empty,
 		psy_ui_notebook_base(&self->clientnotebook), "No Instrument");
-	psy_ui_label_settextalignment(&self->empty,
+	psy_ui_label_set_textalignment(&self->empty,
 		(psy_ui_Alignment)(psy_ui_ALIGNMENT_CENTER_HORIZONTAL | psy_ui_ALIGNMENT_CENTER_VERTICAL));	
 	/* client */
 	psy_ui_component_init(&self->client, psy_ui_notebook_base(
 		&self->clientnotebook), NULL);
 	psy_ui_margin_init_em(&margin, 0.0, 0.0, 0.0, 2.0);
 	psy_ui_component_set_margin(&self->client, margin);
-	psy_ui_component_setalign(&self->client, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_set_align(&self->client, psy_ui_ALIGN_CLIENT);
 	psy_ui_tabbar_init(&self->tabbar, &self->client);
-	psy_ui_component_setalign(psy_ui_tabbar_base(&self->tabbar), psy_ui_ALIGN_TOP);	
+	psy_ui_component_set_align(psy_ui_tabbar_base(&self->tabbar), psy_ui_ALIGN_TOP);	
 	psy_ui_tabbar_append_tabs(&self->tabbar, "instrumentview.general",
 		"instrumentview.volume", "instrumentview.pan", "instrumentview.filter",
 		"instrumentview.pitch", NULL);
 	psy_ui_notebook_init(&self->notebook, &self->client);
-	psy_ui_component_setalign(psy_ui_notebook_base(&self->notebook),
+	psy_ui_component_set_align(psy_ui_notebook_base(&self->notebook),
 		psy_ui_ALIGN_CLIENT);
 	instrumentgeneralview_init(&self->general,
 		psy_ui_notebook_base(&self->notebook), &workspace->song->instruments,

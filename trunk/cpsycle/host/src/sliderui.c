@@ -60,7 +60,7 @@ void sliderui_init(SliderUi* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->component, parent, NULL);
 	sliderui_vtable_init(self);
 	self->component.vtable = &sliderui_vtable;
-	psy_ui_component_setstyletype(&self->component, STYLE_MACPARAM_SLIDER);
+	psy_ui_component_set_style_type(&self->component, STYLE_MACPARAM_SLIDER);
 	self->machine = machine;
 	self->paramidx = paramidx;
 	self->param = param;

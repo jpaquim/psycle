@@ -78,23 +78,24 @@ static void vtable_init(WireView* self)
 }
 
 /* implementation */
-void wireview_init(WireView* self, psy_ui_Component* parent, psy_audio_Wire wire,
+void wireview_init(WireView* self, psy_ui_Component* parent,
+	psy_ui_Component* view, psy_audio_Wire wire,
 	Workspace* workspace)
 {						
-	psy_ui_component_init(wireview_base(self), parent, NULL);
+	psy_ui_component_init(wireview_base(self), parent, view);
 	vtable_init(self);
 	self->wire = wire;
 	self->workspace = workspace;
 	self->scope_spec_mode = 0.2f;
 	self->scope_spec_rate = 0.f;	
-	psy_ui_component_setalign(wireview_base(self),
+	psy_ui_component_set_align(wireview_base(self),
 		psy_ui_ALIGN_CLIENT);	
 	wireview_initvolumeslider(self);
 	wireview_initbottomgroup(self);
 	wireview_initrategroup(self);
 	wireview_inittabbar(self);	
 	psy_ui_notebook_init(&self->notebook, wireview_base(self));
-	psy_ui_component_setalign(psy_ui_notebook_base(&self->notebook),
+	psy_ui_component_set_align(psy_ui_notebook_base(&self->notebook),
 		psy_ui_ALIGN_CLIENT);
 	/* Vuscope */
 	vuscope_init(&self->vuscope, psy_ui_notebook_base(&self->notebook), wire,
@@ -108,14 +109,14 @@ void wireview_init(WireView* self, psy_ui_Component* parent, psy_audio_Wire wire
 		psy_ui_notebook_base(&self->notebook), NULL);
 	spectrumanalyzer_init(&self->spectrumanalyzer, &self->spectrumpane,
 		wire, workspace);
-	psy_ui_component_setalign(&self->spectrumanalyzer.component,
+	psy_ui_component_set_align(&self->spectrumanalyzer.component,
 		psy_ui_ALIGN_CENTER);
 	/* Stereophase */
 	psy_ui_component_init(&self->stereophasepane,
 		psy_ui_notebook_base(&self->notebook), NULL);	
 	stereophase_init(&self->stereophase, &self->stereophasepane, wire,
 		workspace);
-	psy_ui_component_setalign(&self->stereophase.component,
+	psy_ui_component_set_align(&self->stereophase.component,
 		psy_ui_ALIGN_CENTER);
 	/* Channel Mapping */
 	channelmappingview_init(&self->channelmappingview,
@@ -124,42 +125,42 @@ void wireview_init(WireView* self, psy_ui_Component* parent, psy_audio_Wire wire
 		&self->tabbar.signal_change);
 	psy_ui_tabbar_select(&self->tabbar, WIREVIEW_TAB_VUMETER);
 	psy_signal_connect(&self->component.signal_timer, self, wireview_ontimer);
-	psy_ui_component_starttimer(&self->component, 0, 50);
+	psy_ui_component_start_timer(&self->component, 0, 50);
 }
 
 void wireview_inittabbar(WireView* self)
 {
 	psy_ui_component_init(&self->top, &self->component, NULL);
-	psy_ui_component_setalign(&self->top, psy_ui_ALIGN_TOP);
+	psy_ui_component_set_align(&self->top, psy_ui_ALIGN_TOP);
 	psy_ui_component_setalignexpand(&self->top, psy_ui_HEXPAND);	
 	psy_ui_tabbar_init(&self->tabbar, &self->top);
 	psy_ui_tabbar_append_tabs(&self->tabbar, "Vu", "Osc", "Spectrum", "Stereo Phase",
 		"Channel Mapping", NULL);
-	psy_ui_component_setalign(psy_ui_tabbar_base(&self->tabbar), psy_ui_ALIGN_LEFT);	
+	psy_ui_component_set_align(psy_ui_tabbar_base(&self->tabbar), psy_ui_ALIGN_LEFT);	
 }
 
 void wireview_initvolumeslider(WireView* self)
 {
 	psy_ui_component_init(&self->slidergroup, wireview_base(self), NULL);	
-	psy_ui_component_setalign(&self->slidergroup, psy_ui_ALIGN_RIGHT);
+	psy_ui_component_set_align(&self->slidergroup, psy_ui_ALIGN_RIGHT);
 	psy_ui_component_set_margin(&self->slidergroup,
 		psy_ui_margin_make_em(0.0, 0.0, 0.0, 2.0));	
 	psy_ui_button_init(&self->percvol, &self->slidergroup);
-	psy_ui_button_settext(&self->percvol, "100%");
-	psy_ui_button_preventtranslation(&self->percvol);
+	psy_ui_button_set_text(&self->percvol, "100%");
+	psy_ui_button_prevent_translation(&self->percvol);
 	psy_ui_button_setcharnumber(&self->percvol, 10);	
-	psy_ui_component_setalign(&self->percvol.component, psy_ui_ALIGN_BOTTOM);
+	psy_ui_component_set_align(&self->percvol.component, psy_ui_ALIGN_BOTTOM);
 	psy_ui_button_init(&self->dbvol, &self->slidergroup);	
-	psy_ui_button_settext(&self->dbvol, "db 100");
-	psy_ui_button_preventtranslation(&self->dbvol);
+	psy_ui_button_set_text(&self->dbvol, "db 100");
+	psy_ui_button_prevent_translation(&self->dbvol);
 	psy_ui_button_setcharnumber(&self->dbvol, 10);	
-	psy_ui_component_setalign(&self->dbvol.component, psy_ui_ALIGN_BOTTOM);
+	psy_ui_component_set_align(&self->dbvol.component, psy_ui_ALIGN_BOTTOM);
 	psy_ui_slider_init(&self->volslider, &self->slidergroup);
 	psy_ui_slider_setcharnumber(&self->volslider, 4);
 	psy_ui_slider_showvertical(&self->volslider);
 	psy_ui_component_resize(&self->volslider.component,
 		psy_ui_size_make_em(2.0, 0.0));
-	psy_ui_component_setalign(&self->volslider.component, psy_ui_ALIGN_CLIENT);	
+	psy_ui_component_set_align(&self->volslider.component, psy_ui_ALIGN_CLIENT);	
 	psy_ui_slider_connect(&self->volslider, self,
 		(ui_slider_fpdescribe)wireview_ondescribevolume,
 		(ui_slider_fptweak)wireview_ontweakvolume,
@@ -175,18 +176,18 @@ void wireview_initrategroup(WireView* self)
 
 	psy_ui_margin_init_em(&margin, 0.5, 0.0, 0.5, 0.0);
 	psy_ui_component_init(&self->rategroup, wireview_base(self), NULL);
-	psy_ui_component_setalign(&self->rategroup, psy_ui_ALIGN_BOTTOM);
+	psy_ui_component_set_align(&self->rategroup, psy_ui_ALIGN_BOTTOM);
 	psy_ui_component_set_margin(&self->rategroup, margin);
 	psy_ui_button_init_connect(&self->hold, &self->rategroup,
 		self, wireview_onhold);
-	psy_ui_button_settext(&self->hold, "Hold");
-	psy_ui_component_setalign(&self->hold.component, psy_ui_ALIGN_RIGHT);
+	psy_ui_button_set_text(&self->hold, "Hold");
+	psy_ui_component_set_align(&self->hold.component, psy_ui_ALIGN_RIGHT);
 	psy_ui_slider_init(&self->modeslider, &self->rategroup);
 	psy_ui_slider_setdefaultvalue(&self->modeslider, 0.2);
 	psy_ui_slider_showhorizontal(&self->modeslider);
 	psy_ui_slider_hidevaluelabel(&self->modeslider);
 	psy_ui_component_set_margin(&self->modeslider.component, margin);
-	psy_ui_component_setalign(&self->modeslider.component, psy_ui_ALIGN_TOP);
+	psy_ui_component_set_align(&self->modeslider.component, psy_ui_ALIGN_TOP);
 	psy_ui_slider_connect(&self->modeslider, self,
 		(ui_slider_fpdescribe)NULL,
 		(ui_slider_fptweak)wireview_ontweakmode,
@@ -196,7 +197,7 @@ void wireview_initrategroup(WireView* self)
 	psy_ui_slider_showhorizontal(&self->rateslider);	
 	psy_ui_slider_showhorizontal(&self->rateslider);
 	psy_ui_slider_hidevaluelabel(&self->rateslider);
-	psy_ui_component_setalign(&self->rateslider.component, psy_ui_ALIGN_TOP);
+	psy_ui_component_set_align(&self->rateslider.component, psy_ui_ALIGN_TOP);
 	psy_ui_slider_connect(&self->rateslider, self,
 		(ui_slider_fpdescribe)NULL,		
 		(ui_slider_fptweak)wireview_ontweakrate,
@@ -208,15 +209,15 @@ void wireview_initrategroup(WireView* self)
 void wireview_initbottomgroup(WireView* self)
 {
 	psy_ui_component_init(&self->bottomgroup, wireview_base(self), NULL);
-	psy_ui_component_setalign(&self->bottomgroup, psy_ui_ALIGN_BOTTOM);
-	psy_ui_component_setdefaultalign(&self->bottomgroup, psy_ui_ALIGN_LEFT,
+	psy_ui_component_set_align(&self->bottomgroup, psy_ui_ALIGN_BOTTOM);
+	psy_ui_component_set_defaultalign(&self->bottomgroup, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	psy_ui_button_init_connect(&self->deletewire, &self->bottomgroup,
 		self, wireview_ondeleteconnection);
-	psy_ui_button_settext(&self->deletewire, "Delete Connection");
+	psy_ui_button_set_text(&self->deletewire, "Delete Connection");
 	psy_ui_button_init_connect(&self->addeffect, &self->bottomgroup,
 		self, wireview_onaddeffect);	
-	psy_ui_button_settext(&self->addeffect, "Add Effect");
+	psy_ui_button_set_text(&self->addeffect, "Add Effect");
 }
 
 void wireview_ondescribevolume(WireView* self, psy_ui_Slider* slider, char* txt)
@@ -228,9 +229,9 @@ void wireview_ondescribevolume(WireView* self, psy_ui_Slider* slider, char* txt)
 	connections = &workspace_song(self->workspace)->machines.connections;
 	volume = psy_audio_connections_wirevolume(connections, self->wire);	
 	psy_snprintf(text, 128, "%.1f dB",20.0f * log10(volume));
-	psy_ui_button_settext(&self->dbvol, text);
+	psy_ui_button_set_text(&self->dbvol, text);
 	psy_snprintf(text, 128, "%.2f %%", (float)(volume * 100.0));
-	psy_ui_button_settext(&self->percvol, text);	
+	psy_ui_button_set_text(&self->percvol, text);	
 }
 
 void wireview_ontweakvolume(WireView* self, psy_ui_Slider* slider, float value)
@@ -317,7 +318,7 @@ void wireview_ondeleteconnection(WireView* self, psy_ui_Component* sender)
 void wireview_onaddeffect(WireView* self, psy_ui_Component* sender)
 {
 	if (self->workspace && workspace_song(self->workspace)) {
-		workspace_selectview(self->workspace, VIEW_ID_MACHINEVIEW,
+		workspace_select_view(self->workspace, VIEW_ID_MACHINEVIEW,
 			SECTION_ID_MACHINEVIEW_NEWMACHINE, NEWMACHINE_ADDEFFECT);
 	}
 }
@@ -377,7 +378,8 @@ void wireframe_init(WireFrame* self, psy_ui_Component* parent,
 		psy_ui_SETBACKGROUND);
 	psy_ui_component_doublebuffer(wireframe_base(self));
 	psy_ui_component_seticonressource(wireframe_base(self), IDI_MACPARAM);
-	wireview_init(&self->wireview, wireframe_base(self), wire, workspace);
+	wireview_init(&self->wireview, wireframe_base(self),
+		&self->component, wire, workspace);
 	wireframe_updatetitle(self,
 		psy_audio_song_machines(workspace_song(workspace)));
 	psy_ui_component_setposition(wireframe_base(self),
@@ -399,7 +401,7 @@ void wireframe_updatetitle(WireFrame* self, psy_audio_Machines* machines)
 			self->wireview.wire),
 		(srcmachine) ? psy_audio_machine_editname(srcmachine) : "ERR",
 		(dstmachine) ? psy_audio_machine_editname(dstmachine) : "ERR");
-	psy_ui_component_settitle(wireframe_base(self), title);
+	psy_ui_component_set_title(wireframe_base(self), title);
 }
 
 void wireview_ondrawslidervu(WireView* self, psy_ui_Component* sender, psy_ui_Graphics* g)
@@ -464,7 +466,8 @@ void wireview_ondrawslidervu(WireView* self, psy_ui_Component* sender, psy_ui_Gr
 	if (maxR < self->vuscope.peakR) /* it is a cardinal value, so smaller means higher peak. */
 	{
 		if (maxR < 0) maxR = 0;
-		self->vuscope.peakR = maxR;		self->vuscope.peakLifeR = 2000 / self->vuscope.scope_peak_rate; /* 2 seconds */
+		self->vuscope.peakR = maxR;
+		self->vuscope.peakLifeR = 2000 / self->vuscope.scope_peak_rate; /* 2 seconds */
 	}
 	/* now draw our scope */
 	/* LEFT CHANNEL */

@@ -29,10 +29,10 @@ void songtrackbar_init(SongTrackBar* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->component, parent, NULL);
 	self->workspace = workspace;
 	psy_ui_component_setalignexpand(songtrackbar_base(self), psy_ui_HEXPAND);
-	psy_ui_component_setdefaultalign(songtrackbar_base(self),
+	psy_ui_component_set_defaultalign(songtrackbar_base(self),
 		psy_ui_ALIGN_LEFT, psy_ui_defaults_hmargin(psy_ui_defaults()));
 	psy_ui_label_init(&self->desc, songtrackbar_base(self));
-	psy_ui_label_settext(&self->desc, "trackbar.tracks");
+	psy_ui_label_set_text(&self->desc, "trackbar.tracks");
 	psy_ui_combobox_init(&self->tracknumbers, songtrackbar_base(self));
 	psy_ui_combobox_setcharnumber(&self->tracknumbers, 3.0);
 	songtrackbar_build(self);	

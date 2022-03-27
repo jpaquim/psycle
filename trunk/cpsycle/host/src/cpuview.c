@@ -39,7 +39,7 @@ void cpumoduleview_init(CPUModuleView* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->component, parent, NULL);
 	cpumoduleview_vtable_init(self);		
 	self->workspace = workspace;	
-	psy_ui_component_setwheelscroll(&self->component, 4);
+	psy_ui_component_set_wheel_scroll(&self->component, 4);
 	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_VSCROLL);
 }
 
@@ -73,19 +73,20 @@ void cpumoduleview_ondraw(CPUModuleView* self, psy_ui_Graphics* g)
 					info = psy_audio_machine_info(machine);
 					if (info) {						
 						psy_snprintf(text, 20, "%d", (int)slot);
-						psy_ui_textout(g, 0, cpy, text, psy_strlen(text));
-						psy_ui_textout(g, tm->tmAveCharWidth * 5, cpy,
+						psy_ui_textout(g, psy_ui_realpoint_make(0, cpy), text,
+							psy_strlen(text));
+						psy_ui_textout(g, psy_ui_realpoint_make(tm->tmAveCharWidth * 5, cpy),
 							psy_audio_machine_editname(machine),
 							psy_min(psy_strlen(psy_audio_machine_editname(machine)), 14));
-						psy_ui_textout(g, tm->tmAveCharWidth * 21, cpy,
+						psy_ui_textout(g, psy_ui_realpoint_make(tm->tmAveCharWidth * 21, cpy),
 							info->name, psy_strlen(info->name));
 						if (psy_audio_player_measuring_cpu_usage(workspace_player(self->workspace))) {
 							psy_snprintf(text, 40, "%.1f%%", 100.0f * psy_audio_machine_cpu_time(machine).perc);						
 						} else {
 							psy_snprintf(text, 40, "N/A");
 						}
-						psy_ui_textout(g, tm->tmAveCharWidth * 60, cpy, text,
-							psy_strlen(text));
+						psy_ui_textout(g, psy_ui_realpoint_make(tm->tmAveCharWidth * 60, cpy),
+							text, psy_strlen(text));
 					}
 					if ((cpy - psy_ui_value_px(&scrolltop, tm, NULL)) > size.height) {
 						break;
@@ -132,7 +133,7 @@ void cpuview_init(CPUView* self, psy_ui_Component* parent,
 
 	psy_ui_margin_init_em(&margin, 0.0, 0.0, 0.5, 2.0);		
 	psy_ui_component_init(&self->component, parent, NULL);
-	psy_ui_component_setstyletype(&self->component,
+	psy_ui_component_set_style_type(&self->component,
 		STYLE_RECENTVIEW_MAINSECTION);
 	self->workspace = workspace;
 	psy_ui_margin_init(&self->topmargin);		
@@ -146,7 +147,7 @@ void cpuview_init(CPUView* self, psy_ui_Component* parent,
 	cpuview_initmodules(self, workspace);
 	psy_signal_connect(&self->component.signal_timer, self,
 		cpuview_ontimer);
-	psy_ui_component_starttimer(&self->component, 0, 200);
+	psy_ui_component_start_timer(&self->component, 0, 200);
 }
 
 void cpuview_inittitle(CPUView* self)
@@ -160,15 +161,15 @@ void cpuview_inittitle(CPUView* self)
 void cpuview_initcoreinfo(CPUView* self)
 {
 	psy_ui_label_init_text(&self->coreinfo, &self->top, "Core Info");
-	psy_ui_component_setalign(&self->coreinfo.component, psy_ui_ALIGN_TOP);
+	psy_ui_component_set_align(&self->coreinfo.component, psy_ui_ALIGN_TOP);
 }
 
 void cpuview_initresources(CPUView* self)
 {	
 	psy_ui_component_init(&self->resources, &self->top, NULL);
-	psy_ui_component_setdefaultalign(&self->resources, psy_ui_ALIGN_TOP,
+	psy_ui_component_set_defaultalign(&self->resources, psy_ui_ALIGN_TOP,
 		self->topmargin);
-	psy_ui_component_setalign(&self->resources, psy_ui_ALIGN_LEFT);
+	psy_ui_component_set_align(&self->resources, psy_ui_ALIGN_LEFT);
 	psy_ui_label_init_text(&self->resourcestitle, &self->resources,
 		"Available Resources");		
 	labelpair_init(&self->resources_win, &self->resources, "cpu.resources", 25.0);
@@ -181,7 +182,7 @@ void cpuview_initperformance(CPUView* self)
 {	
 	psy_ui_component_init_align(&self->performance, &self->top, NULL,
 		psy_ui_ALIGN_LEFT);
-	psy_ui_component_setdefaultalign(&self->performance, psy_ui_ALIGN_TOP,
+	psy_ui_component_set_defaultalign(&self->performance, psy_ui_ALIGN_TOP,
 		self->topmargin);	
 	psy_ui_checkbox_init_text(&self->cpucheck, &self->performance,
 		"cpu.performance");
@@ -200,7 +201,7 @@ void cpuview_initmodules(CPUView* self, Workspace* workspace)
 	cpumoduleview_init(&self->modules, &self->component, workspace);
 	psy_ui_scroller_init(&self->scroller, &self->modules.component,
 		&self->component);
-	psy_ui_component_setalign(&self->scroller.component, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_set_align(&self->scroller.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_margin_init_em(&margin, 1.0, 0.0, 0.0, 2.0);
 	psy_ui_component_set_margin(&self->scroller.component, margin);
 }
@@ -220,17 +221,17 @@ void cpuview_ontimer(CPUView* self, psy_ui_Component* sender,
 	GlobalMemoryStatusEx(&lpBuffer);
 
 	psy_snprintf(buffer, 128, "%d%%", 100 - lpBuffer.dwMemoryLoad);
-	psy_ui_label_settext(&self->resources_win.second, buffer);
+	psy_ui_label_set_text(&self->resources_win.second, buffer);
 
 	psy_snprintf(buffer, 128, "%.0fM (of %.0fM)",
 		lpBuffer.ullAvailPhys / (float)(1 << 20),
 		lpBuffer.ullTotalPhys / (float)(1 << 20));
-	psy_ui_label_settext(&self->resources_mem.second, buffer);
+	psy_ui_label_set_text(&self->resources_mem.second, buffer);
 
 	psy_snprintf(buffer, 128, "%.0fM (of %.0fM)",
 		(lpBuffer.ullAvailPageFile / (float)(1 << 20)),
 		(lpBuffer.ullTotalPageFile / (float)(1 << 20)));
-	psy_ui_label_settext(&self->resources_swap.second, buffer);
+	psy_ui_label_set_text(&self->resources_swap.second, buffer);
 #if defined _WIN64
 	psy_snprintf(buffer, 128, "%.0fG (of %.0fG)",
 		(lpBuffer.ullAvailVirtual / (float)(1 << 30)),
@@ -240,7 +241,7 @@ void cpuview_ontimer(CPUView* self, psy_ui_Component* sender,
 		(lpBuffer.ullAvailVirtual / (float)(1 << 20)),
 		(lpBuffer.ullTotalVirtual / (float)(1 << 20)));
 #endif
-	psy_ui_label_settext(&self->resources_vmem.second, buffer);
+	psy_ui_label_set_text(&self->resources_vmem.second, buffer);
 #endif
 	if (workspace_song(self->workspace)) {
 		nummachines = psy_audio_machines_size(&workspace_song(self->workspace)->machines);

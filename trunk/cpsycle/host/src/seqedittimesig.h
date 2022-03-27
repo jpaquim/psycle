@@ -10,7 +10,7 @@
 #include "seqeditorstate.h"
 #include "workspace.h"
 /* ui */
-#include <uitextinput.h>
+#include <uitextarea.h>
 
 #ifdef __cplusplus
 extern "C" {

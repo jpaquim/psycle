@@ -52,13 +52,13 @@ void timebar_init(TimeBar* self, psy_ui_Component* parent,
 	psy_ui_component_init(timebar_base(self), parent, NULL);
 	vtable_init(self);
 	psy_ui_component_setalignexpand(timebar_base(self), psy_ui_HEXPAND);
-	psy_ui_component_setdefaultalign(timebar_base(self), psy_ui_ALIGN_LEFT,
+	psy_ui_component_set_defaultalign(timebar_base(self), psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	self->player = player;
 	self->bpm = self->realbpm = (psy_dsp_big_beat_t)0.0;
 	/* bpm description label */
 	psy_ui_label_init(&self->desc, timebar_base(self));
-	psy_ui_label_settext(&self->desc, "timebar.tempo");
+	psy_ui_label_set_text(&self->desc, "timebar.tempo");
 #ifdef PSYCLE_TIMEBAR_OLD
 	/* bpm - 10 */
 	psy_ui_button_init_connect(&self->lessless, timebar_base(self),
@@ -71,11 +71,11 @@ void timebar_init(TimeBar* self, psy_ui_Component* parent,
 	psy_ui_button_seticon(&self->less, psy_ui_ICON_LESS);
 	/* bpm (realbpm) number label */
 	psy_ui_label_init(&self->bpmlabel, timebar_base(self));
-	psy_ui_component_setstyletype(psy_ui_label_base(&self->bpmlabel),
+	psy_ui_component_set_style_type(psy_ui_label_base(&self->bpmlabel),
 		STYLE_TIMEBAR_NUMLABEL);
-	psy_ui_label_preventtranslation(&self->bpmlabel);
-	psy_ui_label_setcharnumber(&self->bpmlabel, 14.5);
-	psy_ui_label_settextalignment(&self->bpmlabel, psy_ui_ALIGNMENT_CENTER);
+	psy_ui_label_prevent_translation(&self->bpmlabel);
+	psy_ui_label_set_charnumber(&self->bpmlabel, 14.5);
+	psy_ui_label_set_textalignment(&self->bpmlabel, psy_ui_ALIGNMENT_CENTER);
 	timebar_updatebpmlabel(self);
 	/* bpm +1 */
 	psy_ui_button_init_connect(&self->more, timebar_base(self),
@@ -87,7 +87,7 @@ void timebar_init(TimeBar* self, psy_ui_Component* parent,
 		self, timebar_onmoremoreclicked);
 	psy_ui_button_seticon(&self->moremore, psy_ui_ICON_MOREMORE);
 #endif		
-	psy_ui_component_starttimer(timebar_base(self), 0, TIMEBAR_REFRESHRATE);
+	psy_ui_component_start_timer(timebar_base(self), 0, TIMEBAR_REFRESHRATE);
 }
 
 void timebar_onlesslessclicked(TimeBar* self, psy_ui_Button* sender)
@@ -145,5 +145,5 @@ void timebar_updatebpmlabel(TimeBar* self)
 	self->bpm = psy_audio_player_bpm(self->player);
 	self->realbpm = psy_audio_player_realbpm(self->player);
 	psy_snprintf(txt, 64, "%d (%.2f)", (int)self->bpm, self->realbpm);
-	psy_ui_label_settext(&self->bpmlabel, txt);
+	psy_ui_label_set_text(&self->bpmlabel, txt);
 }

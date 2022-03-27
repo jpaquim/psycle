@@ -48,7 +48,7 @@ void patternviewtabbar_init(PatternViewTabBar* self, psy_ui_Component* parent,
 	self->workspace = workspace;
 	psy_signal_init(&self->signal_toggle_properties);
 	psy_ui_tabbar_init(&self->tabbar, &self->component);
-	psy_ui_component_setalign(psy_ui_tabbar_base(&self->tabbar),
+	psy_ui_component_set_align(psy_ui_tabbar_base(&self->tabbar),
 		psy_ui_ALIGN_LEFT);
 	psy_ui_tabbar_append_tabs(&self->tabbar, "patternview.tracker",
 		"patternview.roll", "patternview.split", "patternview.vert",
@@ -72,7 +72,7 @@ void patternviewtabbar_init(PatternViewTabBar* self, psy_ui_Component* parent,
 	psy_ui_tabbar_select(&self->tabbar, 0);
 	psy_ui_button_init(&self->contextbutton, &self->component);
 	psy_ui_button_seticon(&self->contextbutton, psy_ui_ICON_MORE);
-	psy_ui_component_setalign(psy_ui_button_base(&self->contextbutton),
+	psy_ui_component_set_align(psy_ui_button_base(&self->contextbutton),
 		psy_ui_ALIGN_RIGHT);
 	psy_signal_connect(&self->tabbar.signal_change, self,
 		patternviewtabbar_ontabbarchange);

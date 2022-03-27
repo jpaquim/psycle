@@ -470,7 +470,7 @@ static void pluginsview_vtable_init(PluginsView* self)
 void pluginsview_init(PluginsView* self, psy_ui_Component* parent)
 {
 	psy_ui_component_init(&self->component, parent, NULL);
-	psy_ui_component_setstyletype(&self->component, STYLE_PLUGINVIEW);
+	psy_ui_component_set_style_type(&self->component, STYLE_PLUGINVIEW);
 	pluginsview_vtable_init(self);	
 	self->component.draggable = TRUE;
 	psy_signal_init(&self->signal_selected);
@@ -632,17 +632,17 @@ void pluginsview_drawitem(PluginsView* self, psy_ui_Graphics* g,
 		psy_ui_settextcolour(g, psy_ui_colour_make(0x00666666));
 	}*/		
 	plugindisplayname(property, text);	
-	psy_ui_textout(g, topleft.x, topleft.y + 2, text, psy_strlen(text));
+	psy_ui_textout(g, psy_ui_realpoint_make(topleft.x, topleft.y + 2), text, psy_strlen(text));
 	plugintype(property, text);
-	psy_ui_textout(g, topleft.x + self->columnwidth - self->avgcharwidth * 7,
-		topleft.y + 2, text, psy_strlen(text));
+	psy_ui_textout(g, psy_ui_realpoint_make(topleft.x + self->columnwidth - self->avgcharwidth * 7,
+		topleft.y + 2), text, psy_strlen(text));
 	if (pluginmode(property, text) == psy_audio_MACHMODE_FX) {
 		psy_ui_settextcolour(g, psy_ui_colour_make(0x00B1C8B0));
 	} else {		
 		psy_ui_settextcolour(g, psy_ui_colour_make(0x00D1C5B6));
 	}
-	psy_ui_textout(g, topleft.x + self->columnwidth - 10 * self->avgcharwidth,
-		topleft.y + 2, text, psy_strlen(text));
+	psy_ui_textout(g, psy_ui_realpoint_make(topleft.x + self->columnwidth - 10 * self->avgcharwidth,
+		topleft.y + 2), text, psy_strlen(text));
 }
 
 void pluginsview_computetextsizes(PluginsView* self, double width)
@@ -656,7 +656,7 @@ void pluginsview_computetextsizes(PluginsView* self, double width)
 	self->identwidth = tm->tmAveCharWidth * 4;	
 	self->numparametercols = (uintptr_t)psy_max(1, width /
 		self->columnwidth);	
-	psy_ui_component_setscrollstep_height(&self->component,
+	psy_ui_component_set_scrollstep_height(&self->component,
 		psy_ui_value_make_px(self->lineheight));
 }
 
@@ -947,7 +947,7 @@ void pluginsview_onmousedown(PluginsView* self, psy_ui_MouseEvent* ev)
 			}
 			psy_ui_component_invalidate(&self->component);
 			psy_signal_emit(&self->signal_changed, self, 0);
-			psy_ui_component_setfocus(&self->component);
+			psy_ui_component_set_focus(&self->component);
 		}
 	}
 	pluginsview_super_vtable.onmousedown(&self->component, ev);
@@ -962,7 +962,7 @@ void pluginsview_onmouseup(PluginsView* self, psy_ui_MouseEvent* ev)
 		newmachineselection_singleselect(&self->selection, self->dragindex);
 		psy_ui_component_invalidate(&self->component);
 		psy_signal_emit(&self->signal_changed, self, 0);
-		psy_ui_component_setfocus(&self->component);
+		psy_ui_component_set_focus(&self->component);
 	}
 }
 
@@ -1005,7 +1005,7 @@ void pluginsview_onmousedoubleclick(PluginsView* self, psy_ui_MouseEvent* ev)
 {
 	if (newmachineselection_first(&self->selection) != psy_INDEX_INVALID) {		
 		psy_signal_emit(&self->signal_selected, self, 0);
-//		workspace_selectview(self->workspace, VIEW_ID_MACHINEVIEW,
+//		workspace_select_view(self->workspace, VIEW_ID_MACHINEVIEW,
 //			SECTION_ID_MACHINEVIEW_WIRES, 0);
 		psy_ui_mouseevent_stop_propagation(ev);		
 	}	

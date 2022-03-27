@@ -38,12 +38,12 @@ void seqviewduration_init(SeqviewDuration* self, psy_ui_Component* parent,
 		"seqview.duration");
 	psy_ui_component_set_padding(&self->desc.component,
 		psy_ui_margin_make_em(0.0, 1.0, 0.0, 0.0));	
-	psy_ui_component_setalign(&self->desc.component, psy_ui_ALIGN_LEFT);
+	psy_ui_component_set_align(&self->desc.component, psy_ui_ALIGN_LEFT);
 	psy_ui_label_init(&self->duration, &self->component);	
-	psy_ui_component_setalign(&self->duration.component, psy_ui_ALIGN_LEFT);	
-	psy_ui_label_setcharnumber(&self->duration, 18.0);
-	psy_ui_label_preventtranslation(&self->duration);
-	psy_ui_component_setstyletype(psy_ui_label_base(&self->duration),
+	psy_ui_component_set_align(&self->duration.component, psy_ui_ALIGN_LEFT);	
+	psy_ui_label_set_charnumber(&self->duration, 18.0);
+	psy_ui_label_prevent_translation(&self->duration);
+	psy_ui_component_set_style_type(psy_ui_label_base(&self->duration),
 		STYLE_DURATION_TIME);		
 	psy_signal_connect(&self->component.signal_destroy, self,
 		seqviewduration_ondestroy);	
@@ -88,7 +88,7 @@ void seqviewduration_update(SeqviewDuration* self, bool force)
 				seqviewduration_idle(self);
 			}
 			psy_snprintf(text, 64, "--m--s %.2fb", (float)self->duration_bts);
-			psy_ui_label_settext(&self->duration, text);
+			psy_ui_label_set_text(&self->duration, text);
 		}
 	}
 }
@@ -108,7 +108,7 @@ void seqviewduration_idle(SeqviewDuration* self)
 				psy_snprintf(text, 64, " %02dm%02ds %.2fb",
 					(int)(self->duration_ms / 60), ((int)self->duration_ms % 60),
 					(float)self->duration_bts);
-				psy_ui_label_settext(&self->duration, text);
+				psy_ui_label_set_text(&self->duration, text);
 				self->calcduration = FALSE;
 				break;
 			}

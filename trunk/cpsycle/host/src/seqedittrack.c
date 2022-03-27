@@ -124,7 +124,7 @@ SeqEditTrack* seqedittrack_allocinit(psy_ui_Component* parent,
 	rv = seqedittrack_alloc();
 	if (rv) {
 		seqedittrack_init(rv, parent, state, workspace);
-		psy_ui_component_deallocateafterdestroyed(seqedittrack_base(rv));
+		psy_ui_component_deallocate_after_destroyed(seqedittrack_base(rv));
 	}
 	return rv;
 }
@@ -180,7 +180,7 @@ void seqedittrack_build(SeqEditTrack* self)
 						psy_audio_orderindex_make(self->trackindex, c),
 						self->state);
 					if (seqeditpatternentry) {
-						psy_ui_component_setalign(
+						psy_ui_component_set_align(
 							seqeditpatternentry_base(seqeditpatternentry),
 								psy_ui_ALIGN_LEFT);
 						psy_list_append(&self->entries, seqeditpatternentry);
@@ -197,7 +197,7 @@ void seqedittrack_build(SeqEditTrack* self)
 					psy_audio_orderindex_make(self->trackindex, c),
 					self->state);
 				if (seqsampleentry) {
-					psy_ui_component_setalign(
+					psy_ui_component_set_align(
 						seqeditsampleentry_base(seqeditsampleentry),
 						psy_ui_ALIGN_LEFT);
 					psy_list_append(&self->entries, seqeditsampleentry);							
@@ -214,7 +214,7 @@ void seqedittrack_build(SeqEditTrack* self)
 					psy_audio_orderindex_make(self->trackindex, c),
 					self->state);
 				if (seqeditmarkerentry) {
-					psy_ui_component_setalign(seqeditmarkerentry_base(seqeditmarkerentry),
+					psy_ui_component_set_align(seqeditmarkerentry_base(seqeditmarkerentry),
 						psy_ui_ALIGN_LEFT);
 					psy_list_append(&self->entries, seqeditmarkerentry);					
 				}

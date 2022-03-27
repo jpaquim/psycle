@@ -1,28 +1,30 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #if !defined(INTEDIT_H)
 #define INTEDIT_H
 
-// host
+/* host */
 #include "workspace.h"
-// ui
+/* ui */
 #include <uibutton.h>
 #include <uilabel.h>
-#include <uitextinput.h>
+#include <uitextarea.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 typedef struct IntEdit {
-	// inherits
+	/* inherits */
 	psy_ui_Component component;
-	// signals
+	/* signals */
 	psy_Signal signal_changed;
-	// ui elements
+	/* internal */
 	psy_ui_Label desc;
-	psy_ui_TextInput input;
+	psy_ui_TextArea input;
 	psy_ui_Button less;
 	psy_ui_Button more;
 	// internal data

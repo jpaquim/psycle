@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -8,66 +8,96 @@
 
 #include "greet.h"
 /* host */
-#include "resources/resource.h"
 #include "styles.h"
 
 /* prototypes */
-static void greet_ondestroy(Greet*);
-static void greet_onalign(Greet*);
-static void greet_addstring(Greet*, const char* text);
+static void greet_add_string(Greet*, const char* text);
 static void greet_build(Greet*);
-static void greet_buildoriginal(Greet*);
-static void greet_onoriginal(Greet*, psy_ui_Component* sender);
-/* vtable */
-static psy_ui_ComponentVtable greet_vtable;
-static bool greet_vtable_initialized = FALSE;
+static void greet_build_original(Greet*);
+static void greet_on_current_original(Greet*, psy_ui_Component* sender);
 
-static void greet_vtable_init(Greet* self)
-{
-	if (!greet_vtable_initialized) {
-		greet_vtable = *(self->component.vtable);		
-		greet_vtable.onalign =
-			(psy_ui_fp_component_event)
-			greet_onalign;		
-		greet_vtable_initialized = TRUE;
-	}
-	self->component.vtable = &greet_vtable;
-}
 /* implementation */
 void greet_init(Greet* self, psy_ui_Component* parent)
 {
-	psy_ui_component_init(&self->component, parent, NULL);	
-	psy_ui_component_setstyletype(&self->component, STYLE_GREET);
-	greet_vtable_init(self);
-	self->current = 1;
-	psy_ui_component_settitle(&self->component, "Greetings and info");	
-	psy_ui_label_init(&self->headerlabel, &self->component);
-	psy_ui_component_setstyletype(psy_ui_label_base(&self->headerlabel),
+	psy_ui_component_init(greet_base(self), parent, NULL);
+	psy_ui_component_set_style_type(greet_base(self), STYLE_GREET);
+	self->current_greets = TRUE;
+	psy_ui_component_set_title(greet_base(self), "Greetings and info");
+	psy_ui_label_init(&self->headerlabel, greet_base(self));	
+	psy_ui_component_set_align(psy_ui_label_base(&self->headerlabel),
+		psy_ui_ALIGN_TOP);
+	psy_ui_component_set_margin(psy_ui_label_base(&self->headerlabel),
+		psy_ui_margin_make_perc(0.05, 0.2, 0.025, 0.2));	
+	psy_ui_component_set_style_type(psy_ui_label_base(&self->headerlabel),
 		STYLE_GREET_TOP);
-	psy_ui_label_settext(&self->headerlabel, "greetings.wantstothank");
-	psy_ui_label_enablewrap(&self->headerlabel);
-	psy_ui_label_settextalignment(&self->headerlabel, psy_ui_ALIGNMENT_CENTER);
+	psy_ui_label_set_text(&self->headerlabel, "greetings.wantstothank");
+	psy_ui_label_enable_wrap(&self->headerlabel);
+	psy_ui_label_set_textalignment(&self->headerlabel,
+		psy_ui_ALIGNMENT_CENTER);
+	self->headerlabel.component.id = 500;
 	psy_ui_component_set_padding(psy_ui_label_base(&self->headerlabel),
-		psy_ui_margin_make_em(0.0, 0.0, 0.0, 2.0));
-	psy_ui_component_init(&self->header, &self->component, NULL);	
-	psy_ui_label_init_text(&self->thanks, &self->header, "greetings.thanks");	
-	psy_ui_component_set_margin(psy_ui_label_base(&self->thanks),
-		psy_ui_margin_make_em(0.0, 0.0, 0.0, 2.0));
-	psy_ui_component_setalign(&self->thanks.component, psy_ui_ALIGN_LEFT);
-	psy_ui_image_init(&self->favicon, &self->header);
-	psy_ui_component_setalign(&self->favicon.component, psy_ui_ALIGN_LEFT);
-	psy_ui_bitmap_loadresource(&self->favicon.bitmap, IDB_HEART_FULL_DARK);
-	psy_ui_bitmap_settransparency(&self->favicon.bitmap, psy_ui_colour_make(0x00FFFFFF));
-	psy_ui_image_setbitmapalignment(&self->favicon, psy_ui_ALIGNMENT_CENTER_VERTICAL);
-	psy_ui_component_setpreferredsize(&self->favicon.component,
-		psy_ui_size_make_px(16, 14));
-	psy_ui_component_preventalign(&self->favicon.component);
-	psy_ui_listbox_init(&self->greetz, &self->component);		
-	psy_ui_button_init_connect(&self->original, &self->component,
-		self, greet_onoriginal);
-	psy_ui_button_settext(&self->original, "greetings.showargurus");
-	psy_ui_component_setalign(&self->original.component, psy_ui_ALIGN_BOTTOM);
-/*
+		psy_ui_margin_make_em(1.0, 0.0, 1.0, 2.0));
+	psy_ui_component_init_align(&self->header, greet_base(self), NULL,
+		psy_ui_ALIGN_TOP);
+	psy_ui_component_set_margin(&self->header,
+		psy_ui_margin_make_perc(0.0, 0.2, 0.0, 0.2));	
+	psy_ui_label_init_text(&self->thanks, &self->header, "greetings.thanks");		
+	psy_ui_component_set_align(psy_ui_label_base(&self->thanks),
+		psy_ui_ALIGN_LEFT);	
+	psy_ui_listbox_init(&self->greetz, greet_base(self));
+	psy_ui_component_set_margin(psy_ui_listbox_base(&self->greetz),
+		psy_ui_margin_make_perc(0.025, 0.2, 0.05, 0.2));
+	psy_ui_component_set_align(psy_ui_listbox_base(&self->greetz),
+		psy_ui_ALIGN_CLIENT);
+	psy_ui_button_init_connect(&self->original, greet_base(self),
+		self, greet_on_current_original);
+	psy_ui_button_set_text(&self->original, "greetings.showargurus");
+	psy_ui_component_set_align(psy_ui_button_base(&self->original),
+		psy_ui_ALIGN_BOTTOM);
+	greet_build(self);
+}
+
+void greet_build(Greet* self)
+{
+	greet_add_string(self, "All the people in the Forums");
+	greet_add_string(self, "All at #psycle [EFnet]");
+
+	greet_add_string(self, "Alk [Extreme testing + Coding]");
+/*	greet_add_string(self, "BigTick [for his excellent VSTs]"); */
+	greet_add_string(self, "bohan");
+	greet_add_string(self, "Byte");
+	greet_add_string(self, "CyanPhase [for porting VibraSynth]");
+	greet_add_string(self, "dazld");
+	greet_add_string(self, "dj_d [Beta testing]");
+	greet_add_string(self, "DJMirage");
+/*	greet_add_string(self, "Drax_D [for asking to be here ;D]"); */
+	greet_add_string(self, "Druttis [psy_audio_Machines]");
+	greet_add_string(self, "Erodix");
+/*	greet_add_string(self, "Felix Kaplan / Spirit Of India"); */
+/*	greet_add_string(self, "Felix Petrescu 'WakaX'"); */
+/*	greet_add_string(self, "Gerwin / FreeH2o"); */
+/*	greet_add_string(self, "Imagineer"); */
+	greet_add_string(self, "Arguru/Guru R.I.P. [We follow your steps]");
+/*	greet_add_string(self, "KooPer"); */
+/*	greet_add_string(self, "Krzysztof Foltman / fsm [Coding help]"); */
+/*	greet_add_string(self, "krokpitr"); */
+	greet_add_string(self, "ksn [Psycledelics WebMaster]");
+	greet_add_string(self, "lastfuture");
+	greet_add_string(self, "LegoStar [asio]");
+/*	greet_add_string(self, "Loby [for being away]"); */
+	greet_add_string(self, "Pikari");
+	greet_add_string(self, "pooplog [psy_audio_Machines + Coding]");
+	greet_add_string(self, "sampler");
+	greet_add_string(self, "[SAS] SOLARiS");
+	greet_add_string(self, "hugo Vinagre [Extreme testing]");
+	greet_add_string(self, "TAo-AAS");
+	greet_add_string(self, "TimEr [Site Graphics and more]");
+/*	greet_add_string(self, "Vir|us"); */
+}
+
+void greet_build_original(Greet* self)
+{	
+	/*
 	//Original Arguru's Greetings.
 	m_greetz.AddString("Hamarr Heylen 'Hymax' [Logo design]");
 	m_greetz.AddString("Raul Reales 'DJLaser'");
@@ -91,126 +121,45 @@ void greet_init(Greet* self, psy_ui_Component* parent)
 	m_greetz.AddString("Krzysztof Foltman [FSM]");
 
 	m_greetz.AddString("All #track at Irc-Hispano");
+	*/
+	greet_add_string(self, "Hamarr Heylen 'Hymax' [Logo design]");
+	greet_add_string(self, "Raul Reales 'DJLaser'");
+	greet_add_string(self, "Fco. Portillo 'Titan3_4'");
+	greet_add_string(self, "Juliole");
+	greet_add_string(self, "Sergio 'Zuprimo'");
+	greet_add_string(self, "Oskari Tammelin [buzz creator]");
+	greet_add_string(self, "Amir Geva 'Photon'");
+	greet_add_string(self, "WhiteNoize");
+	greet_add_string(self, "Zephod");
+	greet_add_string(self, "Felix Petrescu 'WakaX'");
+	greet_add_string(self, "Spiril at #goa [EFNET]");
+	greet_add_string(self, "Joselex 'Americano'");
+	greet_add_string(self, "Lach-ST2");
+	greet_add_string(self, "DrDestral");
+	greet_add_string(self, "Ic3man");
+	greet_add_string(self, "Osirix");
+	greet_add_string(self, "Mulder3");
+	greet_add_string(self, "HexDump");
+	greet_add_string(self, "Robotico");
+	greet_add_string(self, "Krzysztof Foltman [FSM]");
 
-*/
-	greet_build(self);
+	greet_add_string(self, "All #track at Irc-Hispano");
 }
 
-void greet_build(Greet* self)
+void greet_add_string(Greet* self, const char* text)
 {
-	greet_addstring(self, "All the people in the Forums");
-	greet_addstring(self, "All at #psycle [EFnet]");
-
-	greet_addstring(self, "Alk [Extreme testing + Coding]");
-/*	greet_addstring(self, "BigTick [for his excellent VSTs]"); */
-	greet_addstring(self, "bohan");
-	greet_addstring(self, "Byte");
-	greet_addstring(self, "CyanPhase [for porting VibraSynth]");
-	greet_addstring(self, "dazld");
-	greet_addstring(self, "dj_d [Beta testing]");
-	greet_addstring(self, "DJMirage");
-/*	greet_addstring(self, "Drax_D [for asking to be here ;D]"); */
-	greet_addstring(self, "Druttis [psy_audio_Machines]");
-	greet_addstring(self, "Erodix");
-/*	greet_addstring(self, "Felix Kaplan / Spirit Of India"); */
-/*	greet_addstring(self, "Felix Petrescu 'WakaX'"); */
-/*	greet_addstring(self, "Gerwin / FreeH2o"); */
-/*	greet_addstring(self, "Imagineer"); */
-	greet_addstring(self, "Arguru/Guru R.I.P. [We follow your steps]");
-/*	greet_addstring(self, "KooPer"); */
-/*	greet_addstring(self, "Krzysztof Foltman / fsm [Coding help]"); */
-/*	greet_addstring(self, "krokpitr"); */
-	greet_addstring(self, "ksn [Psycledelics WebMaster]");
-	greet_addstring(self, "lastfuture");
-	greet_addstring(self, "LegoStar [asio]");
-/*	greet_addstring(self, "Loby [for being away]"); */
-	greet_addstring(self, "Pikari");
-	greet_addstring(self, "pooplog [psy_audio_Machines + Coding]");
-	greet_addstring(self, "sampler");
-	greet_addstring(self, "[SAS] SOLARiS");
-	greet_addstring(self, "hugo Vinagre [Extreme testing]");
-	greet_addstring(self, "TAo-AAS");
-	greet_addstring(self, "TimEr [Site Graphics and more]");
-/*	greet_addstring(self, "Vir|us"); */
+	psy_ui_listbox_add_text(&self->greetz, text);
 }
 
-void greet_buildoriginal(Greet* self)
+void greet_on_current_original(Greet* self, psy_ui_Component* sender)
 {
-	//Original Arguru's Greetings.
-	greet_addstring(self, "Hamarr Heylen 'Hymax' [Logo design]");
-	greet_addstring(self, "Raul Reales 'DJLaser'");
-	greet_addstring(self, "Fco. Portillo 'Titan3_4'");
-	greet_addstring(self, "Juliole");
-	greet_addstring(self, "Sergio 'Zuprimo'");
-	greet_addstring(self, "Oskari Tammelin [buzz creator]");
-	greet_addstring(self, "Amir Geva 'Photon'");
-	greet_addstring(self, "WhiteNoize");
-	greet_addstring(self, "Zephod");
-	greet_addstring(self, "Felix Petrescu 'WakaX'");
-	greet_addstring(self, "Spiril at #goa [EFNET]");
-	greet_addstring(self, "Joselex 'Americano'");
-	greet_addstring(self, "Lach-ST2");
-	greet_addstring(self, "DrDestral");
-	greet_addstring(self, "Ic3man");
-	greet_addstring(self, "Osirix");
-	greet_addstring(self, "Mulder3");
-	greet_addstring(self, "HexDump");
-	greet_addstring(self, "Robotico");
-	greet_addstring(self, "Krzysztof Foltman [FSM]");
-
-	greet_addstring(self, "All #track at Irc-Hispano");
-}
-
-void greet_addstring(Greet* self, const char* text)
-{
-	psy_ui_listbox_addtext(&self->greetz, text);
-}
-
-void greet_onoriginal(Greet* self, psy_ui_Component* sender)
-{
-	psy_ui_listbox_clear(&self->greetz);
-	self->current = self->current == 0;
-	if (self->current) {
+	self->current_greets = !self->current_greets;
+	psy_ui_listbox_clear(&self->greetz);	
+	if (self->current_greets) {
 		greet_build(self);
-		psy_ui_button_settext(&self->original, "greetings.showargurus");
+		psy_ui_button_set_text(&self->original, "greetings.showargurus");
 	} else {
-		greet_buildoriginal(self);
-		psy_ui_button_settext(&self->original, "greetings.showcurrent");
+		greet_build_original(self);
+		psy_ui_button_set_text(&self->original, "greetings.showcurrent");
 	}	
-}
-
-void greet_onalign(Greet* self)
-{
-	psy_ui_RealSize size;	
-	psy_ui_RealSize lvsize;
-	psy_ui_RealRectangle hlbl_position;
-	psy_ui_RealRectangle lv_position;	
-	psy_ui_RealRectangle h_position;
-	double marginwidth;
-	double marginheight;	
-	const psy_ui_TextMetric* tm;
-
-	size = psy_ui_component_size_px(&self->component);
-	tm = psy_ui_component_textmetric(&self->component);
-	lvsize.width = floor(size.width * 0.5);
-	lvsize.height = floor(size.height * 0.5);
-	marginwidth = floor((size.width - lvsize.width) / 2.0);
-	marginheight = floor((size.height - lvsize.height + tm->tmHeight * 7) / 2.0);
-	lv_position = psy_ui_realrectangle_make(
-		psy_ui_realpoint_make(marginwidth, marginheight),
-		lvsize);
-	psy_ui_component_setposition(psy_ui_listbox_base(&self->greetz),
-		psy_ui_rectangle_make_px(&lv_position));			
-	hlbl_position = psy_ui_realrectangle_make(
-		psy_ui_realpoint_make(marginwidth, lv_position.top -
-			psy_max(128.0, tm->tmHeight * 10.0)),
-		psy_ui_realsize_make(lvsize.width, psy_max(128.0, tm->tmHeight * 4.0)));
-	psy_ui_component_setposition(&self->headerlabel.component,
-		psy_ui_rectangle_make_px(&hlbl_position));
-	h_position = psy_ui_realrectangle_make(
-		psy_ui_realpoint_make(marginwidth,
-			lv_position.top - tm->tmHeight * 2.5),
-		psy_ui_realsize_make(lvsize.width, tm->tmHeight * 2.0));
-	psy_ui_component_setposition(&self->header,
-		psy_ui_rectangle_make_px(&h_position));
 }

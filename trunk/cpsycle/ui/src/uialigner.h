@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #ifndef psy_ui_ALIGNER_H
@@ -72,6 +72,9 @@ void psy_ui_aligner_adjustspacing(struct psy_ui_Component*,
 	psy_ui_RealPoint* cp_topleft, psy_ui_RealPoint* cp_bottomright);
 void psy_ui_aligner_adjustborder(struct psy_ui_Component*,
 	psy_ui_RealPoint* cp_topleft, psy_ui_RealPoint* cp_bottomright);
+void psy_ui_aligner_adjust_margin_size(struct psy_ui_Component* component,
+	const psy_ui_Size* parentsize,
+	psy_ui_Size* rv);
 
 #ifdef __cplusplus
 }

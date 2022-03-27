@@ -57,7 +57,7 @@ void trackerlinenumbers_init(TrackerLineNumbers* self,
 	trackerlinenumbers_updateformat(self);	
 	self->state = state;
 	self->workspace = workspace;
-	psy_ui_component_setscrollstep_height(&self->component,
+	psy_ui_component_set_scrollstep_height(&self->component,
 		state->lineheight);
 }
 
@@ -112,7 +112,7 @@ void trackerlinenumbers_ondraw(TrackerLineNumbers* self, psy_ui_Graphics* g)
 		assert(self);
 				
 		size = psy_ui_component_scrollsize_px(&self->component);
-		g_clip = psy_ui_cliprect(g);
+		g_clip = psy_ui_graphics_cliprect(g);
 		trackerstate_lineclip(self->state, &g_clip, &clip);
 		offset = clip.topleft.absoffset;
 		psy_audio_sequencetrackiterator_init(&ite);
@@ -473,16 +473,16 @@ void trackerlinenumberbar_init(TrackerLineNumberBar* self, psy_ui_Component* par
 	self->workspace = workspace;	
 	trackerlinenumberslabel_init(&self->linenumberslabel, &self->component,
 		state);
-	psy_ui_component_setalign(&self->linenumberslabel.component, psy_ui_ALIGN_TOP);
+	psy_ui_component_set_align(&self->linenumberslabel.component, psy_ui_ALIGN_TOP);
 	/* scrollpane */
 	psy_ui_component_init(&self->linenumberpane, &self->component, NULL);
-	psy_ui_component_setalign(&self->linenumberpane, psy_ui_ALIGN_CLIENT);	
+	psy_ui_component_set_align(&self->linenumberpane, psy_ui_ALIGN_CLIENT);	
 	// psy_ui_component_setbackgroundcolour(&self->component,
 	//	patternviewstate_skin(state->pv)->background);
 	/* linenumbers */
 	trackerlinenumbers_init(&self->linenumbers, &self->linenumberpane, state,
 		workspace);
-	psy_ui_component_setalign(&self->linenumbers.component, psy_ui_ALIGN_FIXED);	
+	psy_ui_component_set_align(&self->linenumbers.component, psy_ui_ALIGN_FIXED);	
 	psy_signal_connect(&workspace->signal_playlinechanged, self,
 		trackerlinenumberbar_onplaylinechanged);
 	psy_signal_connect(&workspace->signal_playstatuschanged, self,

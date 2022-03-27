@@ -29,38 +29,38 @@ static void help_load(Help*, const char* path);
 static void help_onalign(Help*, psy_ui_Component* sender);
 
  /* implementation  */
-void help_init(Help* self, psy_ui_Component* parent, Workspace* workspace)
+void help_init(Help* self, psy_ui_Component* parent, DirConfig* dir_config)
 {	
 	psy_ui_Margin margin;
 	psy_ui_Margin leftmargin;
 
 	psy_ui_component_init(help_base(self), parent, NULL);
-	self->workspace = workspace;
+	self->dir_config = dir_config;
 	psy_ui_tabbar_init(&self->tabbar, help_base(self));
 	self->lastalign = psy_ui_ALIGN_NONE;
-	psy_ui_component_setalign(psy_ui_tabbar_base(&self->tabbar), psy_ui_ALIGN_RIGHT);	
+	psy_ui_component_set_align(psy_ui_tabbar_base(&self->tabbar), psy_ui_ALIGN_RIGHT);	
 	psy_ui_margin_init_em(&margin, 0.0, 1.0, 0.0, 1.5);
 	psy_ui_component_set_margin(psy_ui_tabbar_base(&self->tabbar), margin);	
 	psy_ui_margin_init_em(&leftmargin, 0.0, 0.0, 0.0, 3.0);		
 	psy_ui_label_init(&self->text, help_base(self));
 	psy_ui_component_set_margin(&self->text.component, leftmargin);
-	psy_ui_label_enablewrap(&self->text);
-	psy_ui_component_setalign(&self->text.component, psy_ui_ALIGN_CLIENT);	
-	psy_ui_label_preventtranslation(&self->text);
-	psy_ui_label_setcharnumber(&self->text, 120.0);
-	psy_ui_label_settextalignment(&self->text, psy_ui_ALIGNMENT_LEFT);
-	psy_ui_component_setscrollstep_height(
+	psy_ui_label_enable_wrap(&self->text);
+	psy_ui_component_set_align(&self->text.component, psy_ui_ALIGN_CLIENT);	
+	psy_ui_label_prevent_translation(&self->text);
+	psy_ui_label_set_charnumber(&self->text, 120.0);
+	psy_ui_label_set_textalignment(&self->text, psy_ui_ALIGNMENT_LEFT);
+	psy_ui_component_set_scrollstep_height(
 		psy_ui_label_base(&self->text),
 		psy_ui_value_make_eh(1.0));
-	psy_ui_component_setwheelscroll(&self->text.component, 4);
-	psy_ui_component_setalign(psy_ui_label_base(&self->text),
+	psy_ui_component_set_wheel_scroll(&self->text.component, 4);
+	psy_ui_component_set_align(psy_ui_label_base(&self->text),
 		psy_ui_ALIGN_FIXED);
 	psy_ui_component_setoverflow(&self->text.component,
 		psy_ui_OVERFLOW_SCROLL);
-	psy_ui_label_enablewrap(&self->text);
+	psy_ui_label_enable_wrap(&self->text);
 	psy_ui_scroller_init(&self->scroller, &self->text.component,
 		&self->component);
-	psy_ui_component_setalign(&self->scroller.component, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_set_align(&self->scroller.component, psy_ui_ALIGN_CLIENT);
 	psy_signal_connect(&self->tabbar.signal_change, self,
 		help_ontabbarchanged);
 	psy_table_init(&self->filenames);
@@ -127,12 +127,11 @@ void help_ontabbarchanged(Help* self, psy_ui_Component* sender,
 
 void help_loadpage(Help* self, uintptr_t index)
 {	
-	if (psy_table_at(&self->filenames, index) != NULL) {
+	if (self->dir_config && psy_table_at(&self->filenames, index) != NULL) {
 		psy_Path path;
 
 		psy_path_init(&path, NULL);
-		psy_path_setprefix(&path, dirconfig_doc(
-			&self->workspace->config.directories));
+		psy_path_setprefix(&path, dirconfig_doc(self->dir_config));
 		psy_path_setname(&path, (const char*)psy_table_at(&self->filenames,
 			index));
 		help_load(self, psy_path_full(&path));
@@ -145,7 +144,7 @@ void help_load(Help* self, const char* path)
 {
 	FILE* fp;	
 	
-	psy_ui_label_settext(&self->text, "");
+	psy_ui_label_set_text(&self->text, "");
 	fp = fopen(path, "rb");
 	if (fp) {
 		char data[BLOCKSIZE];
@@ -154,7 +153,7 @@ void help_load(Help* self, const char* path)
 		memset(data, 0, BLOCKSIZE);
 		lenfile = fread(data, 1, sizeof(data), fp);
 		while (lenfile > 0) {
-			psy_ui_label_addtext(&self->text, (char*)data);			
+			psy_ui_label_add_text(&self->text, (char*)data);			
 			lenfile = fread(data, 1, sizeof(data), fp);
 		}
 		fclose(fp);
@@ -166,11 +165,11 @@ void help_onalign(Help* self, psy_ui_Component* sender)
 {
 	if (self->lastalign != psy_ui_component_parent(sender)->align) {
 		if (psy_ui_component_parent(sender)->align == psy_ui_ALIGN_RIGHT) {
-			psy_ui_component_setalign(&self->tabbar.component,
+			psy_ui_component_set_align(&self->tabbar.component,
 				psy_ui_ALIGN_TOP);
 			psy_ui_tabbar_settabalign(&self->tabbar, psy_ui_ALIGN_RIGHT);
 		} else {
-			psy_ui_component_setalign(psy_ui_tabbar_base(&self->tabbar),
+			psy_ui_component_set_align(psy_ui_tabbar_base(&self->tabbar),
 				psy_ui_ALIGN_RIGHT);
 			psy_ui_tabbar_settabalign(&self->tabbar, psy_ui_ALIGN_TOP);
 		}

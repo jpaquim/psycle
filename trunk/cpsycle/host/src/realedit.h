@@ -11,7 +11,7 @@
 /* ui */
 #include <uibutton.h>
 #include <uilabel.h>
-#include <uitextinput.h>
+#include <uitextarea.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -26,7 +26,7 @@ typedef struct RealEdit {
 	psy_Signal signal_changed;
 	/* internal */
 	psy_ui_Label desc;
-	psy_ui_TextInput edit;
+	psy_ui_TextArea edit;
 	psy_ui_Button less;
 	psy_ui_Button more;	
 	realedit_real_t minval;

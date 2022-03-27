@@ -96,7 +96,7 @@ void pianogriddraw_ondraw(PianoGridDraw* self, psy_ui_Graphics* g)
 	if (!patternviewstate_sequence(self->gridstate->pv)) {		
 		return;
 	}
-	clip = pianogriddraw_clipselection(self, psy_ui_cliprect(g));
+	clip = pianogriddraw_clipselection(self, psy_ui_graphics_cliprect(g));
 	/* self->cursoronnoterelease = FALSE; */
 	if (self->drawgrid) {
 		pianogriddraw_drawgrid(self, g, clip);
@@ -577,7 +577,7 @@ void pianogrid_init(Pianogrid* self, psy_ui_Component* parent,
 
 	psy_ui_component_init(pianogrid_base(self), parent, NULL);	
 	pianogrid_vtable_init(self);
-	psy_ui_component_setwheelscroll(pianogrid_base(self), 4);
+	psy_ui_component_set_wheel_scroll(pianogrid_base(self), 4);
 	self->workspace = workspace;
 	self->gridstate = gridstate;
 	self->keyboardstate = keyboardstate;
@@ -618,7 +618,7 @@ void pianogrid_ondraw(Pianogrid* self, psy_ui_Graphics* g)
 		return;
 	}	
 	pianogrid_drawbackground(self, g, 
-		pianogrid_clipselection(self, psy_ui_cliprect(g)));
+		pianogrid_clipselection(self, psy_ui_graphics_cliprect(g)));
 	pianogriddraw_init(&griddraw,
 		self->keyboardstate, self->gridstate,
 		self->gridstate->pv->cursor.seqoffset,

@@ -68,7 +68,7 @@ void knobui_init(KnobUi* self, psy_ui_Component* parent,
 
 	psy_ui_component_init(&self->component, parent, NULL);
 	knobui_vtable_init(self);	
-	psy_ui_component_setstyletype(&self->component, STYLE_MV_CHECK);
+	psy_ui_component_set_style_type(&self->component, STYLE_MV_CHECK);
 	self->param = param;
 	self->paramidx = paramidx;
 	self->machine = machine;
@@ -116,30 +116,23 @@ void knobui_ondraw(KnobUi* self, psy_ui_Graphics* g)
 		return;
 	}
 	size = psy_ui_component_size_px(&self->component);
-	knobui_updateparam(self);
-	if (self->param) {
-		r_top = psy_ui_realrectangle_make(
-			psy_ui_realpoint_make(
-				knob_style->background.animation.framesize.width, 0),
-			psy_ui_realsize_make(
-				size.width - knob_style->background.animation.framesize.width,
-				size.height / 2));
-	} else {		
-		r_top = psy_ui_realrectangle_make(
-			psy_ui_realpoint_make(0, 0),
-			psy_ui_realsize_make(size.width, size.height / 2));
-	}
-		
+	knobui_updateparam(self);	
+	r_top = psy_ui_realrectangle_make(
+		psy_ui_realpoint_make(0.0, 0.0),
+		psy_ui_realsize_make(knob_style->background.animation.framesize.width,
+			size.height));
+	psy_ui_drawsolidrectangle(g, r_top, bottom_style->background.colour);
+	r_top = psy_ui_realrectangle_make(
+		psy_ui_realpoint_make(knob_style->background.animation.framesize.width, 0.0),
+		psy_ui_realsize_make(size.width -
+			knob_style->background.animation.framesize.width, size.height / 2));
 	psy_ui_drawsolidrectangle(g, r_top, top_style->background.colour);
 	r_bottom = r_top;
 	psy_ui_realrectangle_settopleft(&r_bottom,
-		psy_ui_realpoint_make(r_top.left,
+		psy_ui_realpoint_make(
+			r_top.left,
 			r_top.top + psy_ui_realrectangle_height(&r_top)));
-	psy_ui_drawsolidrectangle(g,
-		psy_ui_realrectangle_make(
-			psy_ui_realpoint_make(0.0, size.height / 2),
-			psy_ui_realsize_make(size.width, size.height / 2)),
-		bottom_style->background.colour);
+	psy_ui_drawsolidrectangle(g, r_bottom, bottom_style->background.colour);
 	if (self->param) {
 		if (self->machine) {
 			if (!psy_audio_machine_parameter_name(self->machine, self->param, label)) {
@@ -171,10 +164,14 @@ void knobui_ondraw(KnobUi* self, psy_ui_Graphics* g)
 		}
 		psy_ui_textoutrectangle(g, psy_ui_realrectangle_topleft(&r_top),
 			psy_ui_ETO_OPAQUE, r_top, label, psy_strlen(label));
-		psy_ui_setbackgroundcolour(g, (paramtweak_active(&self->paramtweak))
-			? hbottom_style->background.colour : bottom_style->background.colour);
-		psy_ui_settextcolour(g, (paramtweak_active(&self->paramtweak))
-			? hbottom_style->colour : bottom_style->colour);
+		psy_ui_setbackgroundcolour(g,
+			(paramtweak_active(&self->paramtweak))
+			? hbottom_style->background.colour
+			: bottom_style->background.colour);
+		psy_ui_settextcolour(g,
+			(paramtweak_active(&self->paramtweak))
+			? hbottom_style->colour
+			: bottom_style->colour);
 		psy_ui_textoutrectangle(g, psy_ui_realrectangle_topleft(&r_bottom),
 			psy_ui_ETO_OPAQUE, r_bottom, str, psy_strlen(str));
 		if (!psy_ui_bitmap_empty(&knob_style->background.bitmap)) {
