@@ -59,8 +59,8 @@ void presetsbar_init(PresetsBar* self, psy_ui_Component* parent,
 	psy_ui_combobox_setcharnumber(&self->programbox, 20);
 	psy_ui_button_init_text(&self->savepresets, &self->component,
 		"machineframe.saveas");
-	psy_ui_textinput_init(&self->savename, &self->component);
-	psy_ui_textinput_setcharnumber(&self->savename, 12);
+	psy_ui_textarea_init_single_line(&self->savename, &self->component);	
+	psy_ui_textarea_setcharnumber(&self->savename, 12);
 	psy_ui_margin_init_em(&margin, 0.0, 1.0, 0.0, 0.0);
 	psy_list_free(psy_ui_components_setalign(
 		psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE),
@@ -248,7 +248,7 @@ void presetsbar_onsavepresets(PresetsBar* self, psy_ui_Component* sender)
 			psy_audio_machine_currentpreset(self->machine, preset);
 			index = psy_ui_combobox_cursel(&self->programbox);
 			psy_audio_preset_setname(preset,
-				psy_ui_textinput_text(&self->savename));
+				psy_ui_textarea_text(&self->savename));
 			psy_audio_presets_insert(presets, index, preset);
 			if (!self->userpreset) {
 				psy_path_setprefix(&self->presetpath,
@@ -263,7 +263,7 @@ void presetsbar_onsavepresets(PresetsBar* self, psy_ui_Component* sender)
 				workspace_outputerror(self->workspace,
 					psy_audio_presetsio_statusstr(status));
 			}
-			psy_ui_component_setfocus(&self->component);
+			psy_ui_component_set_focus(&self->component);
 		}
 	}
 }
@@ -278,11 +278,11 @@ void presetsbar_onsavenameeditkeydown(PresetsBar* self,
 		index = psy_ui_combobox_cursel(&self->programbox);
 		presetsbar_buildprograms(self);
 		psy_ui_combobox_setcursel(&self->programbox, index);		
-		psy_ui_component_setfocus(&self->component);		
+		psy_ui_component_set_focus(&self->component);		
 		psy_ui_keyboardevent_prevent_default(ev);
 	} else if (psy_ui_keyboardevent_keycode(ev) == psy_ui_KEY_ESCAPE) {
 		presetsbar_updatesavename(self);
-		psy_ui_component_setfocus(&self->component);
+		psy_ui_component_set_focus(&self->component);
 		psy_ui_keyboardevent_prevent_default(ev);
 	}
 }
@@ -384,6 +384,6 @@ void presetsbar_updatesavename(PresetsBar* self)
 			psy_audio_machine_currbank(self->machine),
 			psy_audio_machine_currprogram(self->machine),
 			text);
-		psy_ui_textinput_settext(&self->savename, text);
+		psy_ui_textarea_settext(&self->savename, text);
 	}
 }

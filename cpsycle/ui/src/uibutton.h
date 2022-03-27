@@ -33,8 +33,8 @@ extern "C" {
 **    - onbuttonclick: functionpointer
 ** or
 ** 1b: psy_ui_button_init(&example.button);
-**    psy_ui_button_preventtranslation(&example.button);
-**    psy_ui_button_settext(&example.button, "ok");
+**    psy_ui_button_prevent_translation(&example.button);
+**    psy_ui_button_set_text(&example.button, "ok");
 **	  psy_ui_button_allowrightclick(&example.button);
 **    psy_signal_connect(&example.button.signal_clicked, self, onbuttonclick);
 **
@@ -85,7 +85,7 @@ void psy_ui_button_init_text_connect(psy_ui_Button*, psy_ui_Component* parent,
 psy_ui_Button* psy_ui_button_alloc(void);
 psy_ui_Button* psy_ui_button_allocinit(psy_ui_Component* parent);
 
-void psy_ui_button_settext(psy_ui_Button*, const char* text);
+void psy_ui_button_set_text(psy_ui_Button*, const char* text);
 const char* psy_ui_button_text(const psy_ui_Button*);
 void psy_ui_button_seticon(psy_ui_Button*, psy_ui_ButtonIcon);
 void psy_ui_button_loadresource(psy_ui_Button*, uintptr_t lightresourceid,
@@ -97,7 +97,7 @@ void psy_ui_button_settextcolour(psy_ui_Button*, psy_ui_Colour);
 void psy_ui_button_setcharnumber(psy_ui_Button*, double number);
 void psy_ui_button_setlinespacing(psy_ui_Button*, double spacing);
 void psy_ui_button_settextalignment(psy_ui_Button*, psy_ui_Alignment);
-void psy_ui_button_preventtranslation(psy_ui_Button*);
+void psy_ui_button_prevent_translation(psy_ui_Button*);
 
 
 INLINE bool psy_ui_button_hasctrl(const psy_ui_Button* self)

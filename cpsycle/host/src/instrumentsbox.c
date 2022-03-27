@@ -35,28 +35,28 @@ void instrumentsbox_init(InstrumentsBox* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {		
 	psy_ui_component_init(&self->component, parent, NULL);
-	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_TOP,
+	psy_ui_component_set_defaultalign(&self->component, psy_ui_ALIGN_TOP,
 		psy_ui_defaults_vmargin(psy_ui_defaults()));
 	// Groups
 	psy_ui_component_init(&self->groupheader, &self->component, NULL);
-	psy_ui_component_setalign(&self->groupheader, psy_ui_ALIGN_TOP);	
+	psy_ui_component_set_align(&self->groupheader, psy_ui_ALIGN_TOP);	
 	psy_ui_label_init_text(&self->header, &self->component,
 		"instrumentsbox.instrument-groups");
-	psy_ui_component_setalign(&self->header.component, psy_ui_ALIGN_TOP);	
+	psy_ui_component_set_align(&self->header.component, psy_ui_ALIGN_TOP);	
 	psy_ui_listbox_init(&self->grouplist, &self->component);
 	psy_ui_component_setmaximumsize(&self->grouplist.component,
 		psy_ui_size_make_em(0.0, 10.0));
 	psy_ui_component_setminimumsize(&self->grouplist.component,
 		psy_ui_size_make_em(0.0, 10.0));
-	psy_ui_component_setalign(&self->grouplist.component, psy_ui_ALIGN_TOP);
+	psy_ui_component_set_align(&self->grouplist.component, psy_ui_ALIGN_TOP);
 	/* Instruments */
 	psy_ui_component_init(&self->instheader, &self->component, NULL);
-	psy_ui_component_setalign(&self->instheader, psy_ui_ALIGN_TOP);
+	psy_ui_component_set_align(&self->instheader, psy_ui_ALIGN_TOP);
 	psy_ui_label_init_text(&self->group, &self->component,
 		"instrumentsbox.group-instruments");
-	psy_ui_component_setalign(&self->group.component, psy_ui_ALIGN_TOP);
+	psy_ui_component_set_align(&self->group.component, psy_ui_ALIGN_TOP);
 	psy_ui_listbox_init(&self->instrumentlist, &self->component);	
-	psy_ui_component_setalign(&self->instrumentlist.component,
+	psy_ui_component_set_align(&self->instrumentlist.component,
 		psy_ui_ALIGN_CLIENT);
 	instrumentsbox_setinstruments(self, instruments);
 	psy_signal_connect(&self->grouplist.signal_selchanged, self,
@@ -80,7 +80,7 @@ void instrumentsbox_buildgroup(InstrumentsBox* self)
 				psy_snprintf(text, 20, "%02X:%s", slot,
 					instrumentsbox_groupname(self, slot));
 			}
-			psy_ui_listbox_addtext(&self->grouplist, text);
+			psy_ui_listbox_add_text(&self->grouplist, text);
 		}
 	}
 }
@@ -111,7 +111,7 @@ void instrumentsbox_buildlist(InstrumentsBox* self)
 
 void instrumentsbox_addstring(InstrumentsBox* self, const char* text)
 {
-	psy_ui_listbox_addtext(&self->instrumentlist, text);
+	psy_ui_listbox_add_text(&self->instrumentlist, text);
 }
 
 void instrumentsbox_ongrouplistchanged(InstrumentsBox* self, psy_ui_Component*

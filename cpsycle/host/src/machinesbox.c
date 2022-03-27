@@ -29,7 +29,7 @@ void machinesbox_init(MachinesBox* self, psy_ui_Component* parent,
 	psy_audio_Machines* machines, MachineBoxMode mode, Workspace* workspace)
 {	
 	psy_ui_component_init(&self->component, parent, NULL);
-	psy_ui_component_setstyletypes(&self->component, STYLE_MACHINEBOX,
+	psy_ui_component_set_style_types(&self->component, STYLE_MACHINEBOX,
 		psy_INDEX_INVALID, psy_INDEX_INVALID, psy_INDEX_INVALID);
 	self->workspace = workspace;
 	self->mode = mode;
@@ -37,7 +37,7 @@ void machinesbox_init(MachinesBox* self, psy_ui_Component* parent,
 	psy_table_init(&self->listboxslots);
 	psy_table_init(&self->slotslistbox);
 	psy_ui_listbox_init_multiselect(&self->listbox, &self->component);
-	psy_ui_component_setalign(&self->listbox.component, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_set_align(&self->listbox.component, psy_ui_ALIGN_CLIENT);
 	machinesbox_setmachines(self, machines);
 	psy_signal_connect(&self->listbox.signal_selchanged, self,
 		machinesbox_onlistboxselected);
@@ -94,7 +94,7 @@ void machinesbox_insertslot(MachinesBox* self, uintptr_t slot, psy_audio_Machine
 		} else {
 			strcat(buffer, ""); 
 		}
-		listboxindex = psy_ui_listbox_addtext(&self->listbox, buffer);
+		listboxindex = psy_ui_listbox_add_text(&self->listbox, buffer);
 		psy_table_insert(&self->listboxslots, listboxindex, (void*)slot);
 		psy_table_insert(&self->slotslistbox, slot, (void*) listboxindex);
 }

@@ -13,7 +13,7 @@
 #include <pattern.h>
 /* ui */
 #include <uilabel.h>
-#include <uitextinput.h>
+#include <uitextarea.h>
 #include <uibutton.h>
 
 #ifdef __cplusplus
@@ -26,8 +26,8 @@ typedef struct PatternProperties {
 	/* internal */
 	psy_ui_Label namelabel;
 	psy_ui_Label lengthlabel;
-	psy_ui_TextInput nameedit;
-	psy_ui_TextInput lengthedit;
+	psy_ui_TextArea nameedit;
+	psy_ui_TextArea lengthedit;
 	psy_ui_Button applybutton;
 	IntEdit timesig_numerator;
 	IntEdit timesig_denominator;

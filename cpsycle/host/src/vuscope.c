@@ -110,9 +110,9 @@ void vuscope_drawscale(VuScope* self, psy_ui_Graphics* g)
 	rect.top = 2;
 	rect.bottom = rect.top + 1;
 	psy_snprintf(buf, 128, "%s", "Peak");
-	psy_ui_textout(g, centerx - 42, rect.top, buf, psy_strlen(buf));
+	psy_ui_textout(g, psy_ui_realpoint_make(centerx - 42, rect.top), buf, psy_strlen(buf));
 	psy_snprintf(buf, 128, "%s", "RMS");
-	psy_ui_textout(g, centerx + 25, rect.top, buf, psy_strlen(buf));
+	psy_ui_textout(g, psy_ui_realpoint_make(centerx + 25, rect.top), buf, psy_strlen(buf));
 	
 	rect.top = 2 * step;
 	rect.bottom = rect.top + 1;
@@ -155,14 +155,14 @@ void vuscope_drawscale(VuScope* self, psy_ui_Graphics* g)
 	psy_snprintf(buf, 64, "Refresh %.2fhz", 1000.0f / self->scope_peak_rate);	
 	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 	psy_ui_settextcolour(g, psy_ui_colour_make(0x505050));
-	psy_ui_textout(g, tm->tmAveCharWidth, psy_ui_value_px(&size.height, tm,
-		NULL) - tm->tmHeight, buf, psy_strlen(buf));
+	psy_ui_textout(g, psy_ui_realpoint_make(tm->tmAveCharWidth, psy_ui_value_px(&size.height, tm,
+		NULL) - tm->tmHeight), buf, psy_strlen(buf));
 }
 
 void vuscope_drawlabel(VuScope* self, psy_ui_Graphics* g, const char* text,
 	double x, double y, double width, double height)
 {	
-	psy_ui_textout(g, x, y - height / 2, text, psy_strlen(text));
+	psy_ui_textout(g, psy_ui_realpoint_make(x, y - height / 2), text, psy_strlen(text));
 }
 
 void vuscope_drawlabel_right(VuScope* self, psy_ui_Graphics* g, const char* text,
@@ -173,8 +173,8 @@ void vuscope_drawlabel_right(VuScope* self, psy_ui_Graphics* g, const char* text
 
 	size = psy_ui_textsize(g, text, psy_strlen(text));
 	tm = psy_ui_component_textmetric(&self->component);
-	psy_ui_textout(g, x + (width - psy_ui_value_px(&size.width, tm, NULL)),
-		y - height / 2,text, psy_strlen(text));
+	psy_ui_textout(g, psy_ui_realpoint_make(x + (width - psy_ui_value_px(&size.width, tm, NULL)),
+		y - height / 2),text, psy_strlen(text));
 }
 
 void vuscope_drawbars(VuScope* self, psy_ui_Graphics* g)

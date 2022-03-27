@@ -243,7 +243,7 @@ void psy_ui_replacedefaultfont(psy_ui_Component* main, psy_ui_Font* font)
 	}
 }
 
-void psy_ui_component_setfocus(psy_ui_Component* self)
+void psy_ui_component_set_focus(psy_ui_Component* self)
 {	
 	psy_ui_app_setfocus(psy_ui_app(), self);		
 }
@@ -491,7 +491,7 @@ void psy_ui_component_init_imp(psy_ui_Component* self, psy_ui_Component* parent,
 	psy_ui_component_init_base(self);
 	psy_ui_component_init_signals(self);
 	if (parent && parent->containeralign->insertaligntype != psy_ui_ALIGN_NONE) {
-		psy_ui_component_setalign(self, parent->containeralign->insertaligntype);
+		psy_ui_component_set_align(self, parent->containeralign->insertaligntype);
 		psy_ui_component_set_margin(self, parent->containeralign->insertmargin);
 	}	
 }
@@ -522,7 +522,7 @@ void psy_ui_component_init(psy_ui_Component* self, psy_ui_Component* parent, psy
 	psy_ui_component_init_base(self);
 	psy_ui_component_init_signals(self);
 	if (parent && parent->containeralign->insertaligntype != psy_ui_ALIGN_NONE) {
-		psy_ui_component_setalign(self, parent->containeralign->insertaligntype);
+		psy_ui_component_set_align(self, parent->containeralign->insertaligntype);
 		psy_ui_component_set_margin(self, parent->containeralign->insertmargin);
 	}
 	self->imp->vtable->dev_initialized(self->imp);
@@ -789,7 +789,7 @@ void psy_ui_component_deallocate(psy_ui_Component* self)
 	free(self);
 }
 
-void psy_ui_component_deallocateafterdestroyed(psy_ui_Component* self)
+void psy_ui_component_deallocate_after_destroyed(psy_ui_Component* self)
 {
 	self->deallocate = TRUE;
 }
@@ -807,7 +807,7 @@ psy_ui_Component* psy_ui_component_allocinit(psy_ui_Component* parent,
 	rv = psy_ui_component_alloc();
 	if (rv) {
 		psy_ui_component_init(rv, parent, view);
-		psy_ui_component_deallocateafterdestroyed(rv);		
+		psy_ui_component_deallocate_after_destroyed(rv);		
 	}
 	return rv;
 }
@@ -1112,7 +1112,7 @@ void psy_ui_component_setalign_children(psy_ui_Component* self,
 	psy_ui_AlignType align)
 {
 	psy_ui_component_traverse_int(self,
-		(psy_fp_int)psy_ui_component_setalign, align);	
+		(psy_fp_int)psy_ui_component_set_align, align);	
 }
 
 void psy_ui_component_checksortedalign(psy_ui_Component* self,
@@ -1139,7 +1139,7 @@ void psy_ui_component_checksortedalign(psy_ui_Component* self,
 	}
 }
 
-psy_ui_Component* psy_ui_component_setalign(psy_ui_Component* self,
+psy_ui_Component* psy_ui_component_set_align(psy_ui_Component* self,
 	psy_ui_AlignType align)
 {
 	psy_ui_Component* parent;
@@ -1244,7 +1244,7 @@ psy_List* psy_ui_components_setalign(psy_List* list, psy_ui_AlignType align,
 	psy_List* p;
 
 	for (p = list; p != NULL; p = p->next) {
-		psy_ui_component_setalign((psy_ui_Component*) p->entry, align);		
+		psy_ui_component_set_align((psy_ui_Component*) p->entry, align);		
 		psy_ui_component_set_margin((psy_ui_Component*) p->entry, margin);		
 	}
 	return list;
@@ -1260,7 +1260,7 @@ psy_List* psy_ui_components_setmargin(psy_List* list, psy_ui_Margin margin)
 	return list;
 }
 
-void psy_ui_component_setpreferredsize(psy_ui_Component* self, psy_ui_Size size)
+void psy_ui_component_set_preferred_size(psy_ui_Component* self, psy_ui_Size size)
 {
 	psy_ui_componentstyle_setpreferredsize(&self->style, size);	
 }
@@ -1830,7 +1830,7 @@ void psy_ui_component_usecontaineralign(psy_ui_Component* self)
 	}
 }
 
-bool psy_ui_component_togglevisibility(psy_ui_Component* self)
+bool psy_ui_component_toggle_visibility(psy_ui_Component* self)
 {
 	assert(self);
 	if (psy_ui_component_parent(self)) {
@@ -1884,7 +1884,7 @@ void psy_ui_component_focus_next(psy_ui_Component* self)
 			}
 			psy_list_free(q);
 			if (focus) {
-				psy_ui_component_setfocus(focus);
+				psy_ui_component_set_focus(focus);
 			}
 		}
 	}
@@ -1917,7 +1917,7 @@ void psy_ui_component_focus_prev(psy_ui_Component* self)
 			}
 			psy_list_free(q);
 			if (focus) {
-				psy_ui_component_setfocus(focus);
+				psy_ui_component_set_focus(focus);
 			}
 		}
 	}
@@ -1937,7 +1937,7 @@ int psy_ui_component_level(const psy_ui_Component* self)
 	return rv;
 }
 
-void psy_ui_component_setdefaultalign(psy_ui_Component* self,
+void psy_ui_component_set_defaultalign(psy_ui_Component* self,
 	psy_ui_AlignType aligntype, psy_ui_Margin margin)
 {
 	psy_ui_component_usecontaineralign(self);
@@ -1963,7 +1963,7 @@ const char* psy_ui_translate(const char* key)
 	return psy_translator_translate(psy_ui_translator(), key);
 }
 
-void psy_ui_component_setstyletypes(psy_ui_Component* self,
+void psy_ui_component_set_style_types(psy_ui_Component* self,
 	uintptr_t standard, uintptr_t hover, uintptr_t select,
 	uintptr_t disabled)
 {
@@ -1981,13 +1981,13 @@ void psy_ui_component_setstyletypes(psy_ui_Component* self,
 void psy_ui_component_checkbackgroundanimation(psy_ui_Component* self)
 {	
 	if (psy_ui_componentstyle_currstyle_const(&self->style)->background.animation.enabled) {
-		psy_ui_component_starttimer(self, 65535, 50);
+		psy_ui_component_start_timer(self, 65535, 50);
 	} else {		
 		psy_ui_component_stoptimer(self, 65535);
 	}
 }
 
-void psy_ui_component_setstyletype(psy_ui_Component* self,
+void psy_ui_component_set_style_type(psy_ui_Component* self,
 	uintptr_t standard)
 {
 	psy_ui_componentstyle_setstyle(&self->style,
@@ -1995,7 +1995,7 @@ void psy_ui_component_setstyletype(psy_ui_Component* self,
 	psy_ui_component_checkbackgroundanimation(self);
 }
 
-void psy_ui_component_setstyletype_hover(psy_ui_Component* self,
+void psy_ui_component_set_style_type_hover(psy_ui_Component* self,
 	uintptr_t hover)
 {
 	psy_ui_componentstyle_setstyle(&self->style,
@@ -2003,7 +2003,7 @@ void psy_ui_component_setstyletype_hover(psy_ui_Component* self,
 	psy_ui_component_checkbackgroundanimation(self);
 }
 
-void psy_ui_component_setstyletype_focus(psy_ui_Component* self,
+void psy_ui_component_set_style_type_focus(psy_ui_Component* self,
 	uintptr_t focus)
 {
 	psy_ui_componentstyle_setstyle(&self->style,
@@ -2011,7 +2011,7 @@ void psy_ui_component_setstyletype_focus(psy_ui_Component* self,
 	psy_ui_component_checkbackgroundanimation(self);
 }
 
-void psy_ui_component_setstyletype_active(psy_ui_Component* self,
+void psy_ui_component_set_style_type_active(psy_ui_Component* self,
 	uintptr_t active)
 {
 	psy_ui_componentstyle_setstyle(&self->style,
@@ -2019,7 +2019,7 @@ void psy_ui_component_setstyletype_active(psy_ui_Component* self,
 	psy_ui_component_checkbackgroundanimation(self);
 }
 
-void psy_ui_component_setstyletype_select(psy_ui_Component* self,
+void psy_ui_component_set_style_type_select(psy_ui_Component* self,
 	uintptr_t select)
 {
 	psy_ui_componentstyle_setstyle(&self->style,
@@ -2027,7 +2027,15 @@ void psy_ui_component_setstyletype_select(psy_ui_Component* self,
 	psy_ui_component_checkbackgroundanimation(self);
 }
 
-void psy_ui_component_setstylestate(psy_ui_Component* self,
+void psy_ui_component_set_style_type_disabled(psy_ui_Component* self,
+	uintptr_t disabled)
+{
+	psy_ui_componentstyle_setstyle(&self->style,
+		psy_ui_STYLESTATE_DISABLED, disabled);
+	psy_ui_component_checkbackgroundanimation(self);
+}
+
+void psy_ui_component_set_style_state(psy_ui_Component* self,
 	psy_ui_StyleState state)
 {		
 	if (psy_ui_componentstyle_setcurrstate(&self->style, state)) {
@@ -2112,7 +2120,7 @@ void psy_ui_component_draw(psy_ui_Component* self, psy_ui_Graphics* g)
 	psy_ui_RealRectangle clip;	
 		
 	temp_g = NULL;	
-	oldclip = psy_ui_cliprect(g);
+	oldclip = psy_ui_graphics_cliprect(g);
 	if (self->drawtobuffer) {
 		if (psy_ui_bitmap_empty(&self->bufferbitmap)) {
 			psy_ui_RealSize size;
@@ -2153,10 +2161,23 @@ void psy_ui_component_draw(psy_ui_Component* self, psy_ui_Graphics* g)
 		/* spacing */
 		spacing = psy_ui_component_padding(self);
 		if (!psy_ui_margin_iszero(&spacing)) {
+			psy_ui_RealSize size;
+
 			tm = psy_ui_component_textmetric(self);
+			size = psy_ui_component_scrollsize_px(self);
+			clip = psy_ui_realrectangle_make(
+				psy_ui_realpoint_make(
+					psy_ui_value_px(&spacing.left, tm, NULL),
+					psy_ui_value_px(&spacing.top, tm, NULL)),
+				psy_ui_realsize_make(
+					size.width - psy_ui_value_px(&spacing.left, tm, NULL) -
+					psy_ui_value_px(&spacing.right, tm, NULL),
+					size.height - psy_ui_value_px(&spacing.top, tm, NULL) -
+					psy_ui_value_px(&spacing.bottom, tm, NULL)));
+			psy_ui_graphics_setcliprect(g, clip);
 			psy_ui_setorigin(g, psy_ui_realpoint_make(
 				origin.x - (int)psy_ui_value_px(&spacing.left, tm, NULL),
-				origin.y - (int)psy_ui_value_px(&spacing.top, tm, NULL)));
+				origin.y - (int)psy_ui_value_px(&spacing.top, tm, NULL)));			
 		}
 		self->vtable->ondraw(self, g);
 		psy_signal_emit(&self->signal_draw, self, 1, g);
@@ -2184,7 +2205,7 @@ void psy_ui_component_drawchildren(psy_ui_Component* self, psy_ui_Graphics* g)
 		psy_ui_RealPoint origin;
 		psy_List* p;
 
-		clip = psy_ui_cliprect(g);
+		clip = psy_ui_graphics_cliprect(g);
 		origin = psy_ui_origin(g);
 		for (p = q; p != NULL; p = p->next) {
 			psy_ui_Component* component;
@@ -2344,7 +2365,7 @@ void* psy_ui_component_platform(psy_ui_Component* self)
 	return (void*)self->imp->vtable->dev_platform_handle(self->imp);
 }
 
-void psy_ui_component_starttimer(psy_ui_Component* self, uintptr_t id,
+void psy_ui_component_start_timer(psy_ui_Component* self, uintptr_t id,
 	uintptr_t interval)
 {
 	psy_ui_app_starttimer(psy_ui_app(), self, id, interval);

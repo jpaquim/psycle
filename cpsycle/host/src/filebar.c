@@ -26,8 +26,8 @@ void filebar_init(FileBar* self, psy_ui_Component* parent, Workspace* workspace)
 {	
 	psy_ui_component_init(filebar_base(self), parent, NULL);	
 	self->workspace = workspace;
-	psy_ui_component_setstyletype(filebar_base(self), STYLE_FILEBAR);
-	psy_ui_component_setdefaultalign(filebar_base(self), psy_ui_ALIGN_LEFT,
+	psy_ui_component_set_style_type(filebar_base(self), STYLE_FILEBAR);
+	psy_ui_component_set_defaultalign(filebar_base(self), psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	psy_ui_button_init(&self->recentbutton, filebar_base(self));
 	psy_ui_button_seticon(&self->recentbutton, psy_ui_ICON_MORE);	
@@ -94,7 +94,7 @@ void filebar_onnewsong(FileBar* self, psy_ui_Component* sender)
 {
 	if (keyboardmiscconfig_savereminder(&self->workspace->config.misc) &&
 			workspace_songmodified(self->workspace)) {
-		workspace_selectview(self->workspace, VIEW_ID_CHECKUNSAVED, 0,
+		workspace_select_view(self->workspace, VIEW_ID_CHECKUNSAVED, 0,
 			CONFIRM_NEW);
 	} else {
 		workspace_newsong(self->workspace);
@@ -112,7 +112,7 @@ void filebar_onloadsong(FileBar* self, psy_ui_Component* sender)
 		workspace_conf(self->workspace)))) {
 		if (keyboardmiscconfig_savereminder(&self->workspace->config.misc) &&
 			workspace_songmodified(self->workspace)) {
-			workspace_selectview(self->workspace, VIEW_ID_CHECKUNSAVED, 0,
+			workspace_select_view(self->workspace, VIEW_ID_CHECKUNSAVED, 0,
 				CONFIRM_LOAD);
 		} else {
 			workspace_loadsong_fileselect(self->workspace);

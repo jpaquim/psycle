@@ -67,24 +67,8 @@ typedef struct WireView {
 	Workspace* workspace;
 } WireView;
 
-void wireview_init(WireView*, psy_ui_Component* parent, psy_audio_Wire, Workspace*);
-
-INLINE WireView* wireview_alloc(void)
-{
-	return (WireView*)malloc(sizeof(WireView));
-}
-
-INLINE WireView* wireview_allocinit(psy_ui_Component* parent, psy_audio_Wire wire,
-	Workspace* workspace)
-{
-	WireView* rv;	
-	
-	rv = wireview_alloc();
-	if (rv) {
-		wireview_init(rv, parent, wire, workspace);
-	}
-	return rv;
-}
+void wireview_init(WireView*, psy_ui_Component* parent, psy_ui_Component* view,
+	psy_audio_Wire, Workspace*);
 
 bool wireview_wireexists(const WireView*);
 

@@ -11,7 +11,7 @@
 /* ui */
 #include <uibutton.h>
 #include <uilabel.h>
-#include <uitextinput.h>
+#include <uitextarea.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -25,7 +25,7 @@ typedef struct NewValView {
 	/* internal */
 	psy_ui_Label title;
 	psy_ui_Component editbar;
-	psy_ui_TextInput edit;
+	psy_ui_TextArea edit;
 	psy_ui_Label text;
 	psy_ui_Button apply;
 	psy_ui_Button cancel;	

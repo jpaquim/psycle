@@ -58,7 +58,7 @@ void masterui_init(MasterUi* self, psy_ui_Component* parent,
 
 	psy_ui_component_init(&self->component, parent, NULL);	
 	masterui_vtable_init(self);	
-	psy_ui_component_setstyletype(&self->component, STYLE_MV_MASTER);
+	psy_ui_component_set_style_type(&self->component, STYLE_MV_MASTER);
 	self->paramviews = paramviews;
 	self->machine = psy_audio_machines_master(&workspace->song->machines);
 	assert(self->machine);

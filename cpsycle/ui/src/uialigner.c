@@ -155,3 +155,22 @@ void psy_ui_aligner_adjustborder(psy_ui_Component* component,
 		cp_bottomright->y -= psy_ui_value_px(&bordermargin.bottom, tm, NULL);
 	}
 }
+
+void psy_ui_aligner_adjust_margin_size(psy_ui_Component* component,
+	const psy_ui_Size* parentsize,
+	psy_ui_Size* rv)
+{
+	psy_ui_Margin margin;
+
+	assert(rv);
+
+	margin = psy_ui_component_margin(component);	
+	rv->width = psy_ui_value_make_px(
+		psy_ui_value_px(&rv->width, psy_ui_component_textmetric(component), parentsize) -
+		psy_ui_value_px(&margin.left, psy_ui_component_textmetric(component), parentsize) -
+		psy_ui_value_px(&margin.right, psy_ui_component_textmetric(component), parentsize));
+	rv->height = psy_ui_value_make_px(
+		psy_ui_value_px(&rv->height, psy_ui_component_textmetric(component), parentsize) -
+		psy_ui_value_px(&margin.top, psy_ui_component_textmetric(component), parentsize) -
+		psy_ui_value_px(&margin.bottom, psy_ui_component_textmetric(component), parentsize));
+}

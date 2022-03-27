@@ -19,7 +19,7 @@ void psy_ui_frame_init(psy_ui_Frame* self, psy_ui_Component* parent)
 	imp = psy_ui_impfactory_allocinit_frameimp(
 		psy_ui_app_impfactory(psy_ui_app()), self, parent);
 	psy_ui_component_init_imp(self, parent, NULL, imp);	
-	psy_ui_component_setstyletype(self, psy_ui_STYLE_ROOT);
+	psy_ui_component_set_style_type(self, psy_ui_STYLE_ROOT);
 }
 
 void psy_ui_toolframe_init(psy_ui_Frame* self, psy_ui_Component* parent)
@@ -29,7 +29,7 @@ void psy_ui_toolframe_init(psy_ui_Frame* self, psy_ui_Component* parent)
 	imp = psy_ui_impfactory_allocinit_toolframeimp(
 		psy_ui_app_impfactory(psy_ui_app()), self, parent);
 	psy_ui_component_init_imp(self, parent, NULL, imp);	
-	psy_ui_component_setstyletype(self, psy_ui_STYLE_ROOT);
+	psy_ui_component_set_style_type(self, psy_ui_STYLE_ROOT);
 }
 
 void psy_ui_frame_init_main(psy_ui_Frame* self)

@@ -53,10 +53,10 @@ void instrumentfilterview_init(InstrumentFilterView* self,
 	psy_signal_connect(&self->component.signal_destroy, self,
 		instrumentfilterview_ondestroy);
 	psy_signal_init(&self->signal_status);
-	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_TOP,
+	psy_ui_component_set_defaultalign(&self->component, psy_ui_ALIGN_TOP,
 		psy_ui_defaults_vmargin(psy_ui_defaults()));
 	psy_ui_component_init(&self->top, &self->component, NULL);
-	psy_ui_component_setdefaultalign(&self->top, psy_ui_ALIGN_TOP,
+	psy_ui_component_set_defaultalign(&self->top, psy_ui_ALIGN_TOP,
 		psy_ui_defaults_vmargin(psy_ui_defaults()));
 	psy_ui_component_init(&self->filter, &self->top, NULL);
 	margin = psy_ui_defaults_vmargin(psy_ui_defaults());
@@ -64,13 +64,13 @@ void instrumentfilterview_init(InstrumentFilterView* self,
 	psy_ui_component_set_margin(&self->filter, margin);
 	psy_ui_label_init_text(&self->filtertypeheader, &self->filter,
 		"instrumentview.filter-type");	
-	psy_ui_component_setalign(&self->filtertypeheader.component,
+	psy_ui_component_set_align(&self->filtertypeheader.component,
 		psy_ui_ALIGN_LEFT);
 	psy_ui_margin_init_em(&margin, 0.0, 2.0, 0.0, 0.0);		
 	psy_ui_component_set_margin(&self->filtertypeheader.component, margin);
 	psy_ui_combobox_init(&self->filtertype, &self->filter);
 	psy_ui_combobox_setcharnumber(&self->filtertype, 20);
-	psy_ui_component_setalign(&self->filtertype.component, psy_ui_ALIGN_LEFT);
+	psy_ui_component_set_align(&self->filtertype.component, psy_ui_ALIGN_LEFT);
 	instrumentfilterview_fillfiltercombobox(self);
 	psy_ui_combobox_setcursel(&self->filtertype, (int)F_NONE);
 	psy_signal_connect(&self->filtertype.signal_selchanged, self,
@@ -82,17 +82,17 @@ void instrumentfilterview_init(InstrumentFilterView* self,
 	psy_ui_slider_setdefaultvalue(&self->randomresonance, 0.0);
 	psy_ui_slider_settext(&self->randomresonance, "Random Res");
 	envelopeview_init(&self->envelopeview, &self->component);
-	psy_ui_component_setalign(&self->envelopeview.component,
+	psy_ui_component_set_align(&self->envelopeview.component,
 		psy_ui_ALIGN_CLIENT);
 	envelopeview_settext(&self->envelopeview, "instrumentview.filter-envelope");
 	margin = psy_ui_defaults_vmargin(psy_ui_defaults());
 	margin.top = psy_ui_value_make_eh(1.0);
 	psy_ui_component_init(&self->bottom, &self->component, NULL);
-	psy_ui_component_setalign(&self->bottom, psy_ui_ALIGN_BOTTOM);
+	psy_ui_component_set_align(&self->bottom, psy_ui_ALIGN_BOTTOM);
 	margin = psy_ui_defaults_vmargin(psy_ui_defaults());
 	margin.top = psy_ui_value_make_eh(1.0);
 	psy_ui_component_set_margin(&self->bottom, margin);
-	psy_ui_component_setdefaultalign(&self->bottom, psy_ui_ALIGN_TOP,
+	psy_ui_component_set_defaultalign(&self->bottom, psy_ui_ALIGN_TOP,
 		psy_ui_defaults_vmargin(psy_ui_defaults()));
 	adsrsliders_init(&self->adsrsliders, &self->bottom);	
 	psy_ui_slider_setdefaultvalue(&self->adsrsliders.decay, 0.370 /

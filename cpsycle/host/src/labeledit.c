@@ -16,11 +16,11 @@ void labeledit_init(LabelEdit* self, psy_ui_Component* parent,
 	psy_ui_component_init(labeledit_base(self), parent, NULL);
 	psy_ui_component_setalignexpand(labeledit_base(self), psy_ui_HEXPAND);	
 	psy_ui_label_init_text(&self->desc, labeledit_base(self), desc);
-	psy_ui_component_setalign(psy_ui_label_base(&self->desc), psy_ui_ALIGN_LEFT);
-	psy_ui_label_setcharnumber(&self->desc, 12.0);
-	psy_ui_textinput_init(&self->edit, labeledit_base(self));
-	psy_ui_component_setalign(psy_ui_textinput_base(&self->edit), psy_ui_ALIGN_CLIENT);	
-	psy_ui_textinput_enableinputfield(&self->edit);		
+	psy_ui_component_set_align(psy_ui_label_base(&self->desc), psy_ui_ALIGN_LEFT);
+	psy_ui_label_set_charnumber(&self->desc, 12.0);
+	psy_ui_textarea_init_single_line(&self->edit, labeledit_base(self));	
+	psy_ui_component_set_align(psy_ui_textarea_base(&self->edit), psy_ui_ALIGN_CLIENT);	
+	psy_ui_textarea_enableinputfield(&self->edit);		
 }
 
 LabelEdit* labeledit_alloc(void)
@@ -35,7 +35,7 @@ LabelEdit* labeledit_allocinit(psy_ui_Component* parent, const char* desc)
 	rv = labeledit_alloc();
 	if (rv) {
 		labeledit_init(rv, parent, desc);
-		psy_ui_component_deallocateafterdestroyed(&rv->component);
+		psy_ui_component_deallocate_after_destroyed(&rv->component);
 	}
 	return rv;
 }

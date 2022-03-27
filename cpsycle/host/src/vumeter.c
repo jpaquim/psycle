@@ -56,7 +56,7 @@ void vumeter_init(Vumeter* self, psy_ui_Component* parent,
 {					
 	psy_ui_component_init(&self->component, parent, NULL);
 	vumeter_vtable_init(self);
-	psy_ui_component_setstyletype(&self->component, STYLE_MAIN_VU);	
+	psy_ui_component_set_style_type(&self->component, STYLE_MAIN_VU);	
 	self->leftavg = self->rightavg = 0;
 	self->workspace = workspace;
 	self->l_log = self->r_log = -10000;

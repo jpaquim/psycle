@@ -38,30 +38,30 @@ void newvalview_init(NewValView* self, psy_ui_Component* parent,
 	/* title */
 	psy_snprintf(self->dlgtitle, 256, "%s", title);
 	psy_ui_label_init(&self->title, newvalview_base(self));
-	psy_ui_label_preventtranslation(&self->title);
-	psy_ui_label_settext(&self->title, self->dlgtitle);	
-	psy_ui_component_setalign(psy_ui_label_base(&self->title),
+	psy_ui_label_prevent_translation(&self->title);
+	psy_ui_label_set_text(&self->title, self->dlgtitle);	
+	psy_ui_component_set_align(psy_ui_label_base(&self->title),
 		psy_ui_ALIGN_TOP);
 	/* init edit */
 	psy_ui_component_init_align(&self->editbar, newvalview_base(self), NULL,
 		psy_ui_ALIGN_TOP);
 	psy_ui_component_setalignexpand(&self->editbar, psy_ui_HEXPAND);
-	psy_ui_component_setdefaultalign(&self->editbar, psy_ui_ALIGN_LEFT,
+	psy_ui_component_set_defaultalign(&self->editbar, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
-	psy_ui_textinput_init(&self->edit, &self->editbar);
-	psy_ui_textinput_setcharnumber(&self->edit, 40);
-	psy_ui_component_setalign(psy_ui_textinput_base(&self->edit),
+	psy_ui_textarea_init_single_line(&self->edit, &self->editbar);	
+	psy_ui_textarea_setcharnumber(&self->edit, 40);
+	psy_ui_component_set_align(psy_ui_textarea_base(&self->edit),
 		psy_ui_ALIGN_LEFT);
 	psy_ui_button_init_text_connect(&self->apply, &self->editbar,
 		"Apply", self, onapply);
-	psy_ui_component_setalign(psy_ui_button_base(&self->apply),
+	psy_ui_component_set_align(psy_ui_button_base(&self->apply),
 		psy_ui_ALIGN_LEFT);
 	psy_ui_button_init_text_connect(&self->cancel, &self->editbar,
 		"Cancel", self, oncancel);
-	psy_ui_component_setalign(psy_ui_button_base(&self->cancel),
+	psy_ui_component_set_align(psy_ui_button_base(&self->cancel),
 		psy_ui_ALIGN_LEFT);	
 	psy_snprintf(buf, 32, "%d", vval);
-	psy_ui_textinput_settext(&self->edit, buf);
+	psy_ui_textarea_settext(&self->edit, buf);
 	psy_signal_connect(&self->edit.component.signal_keydown, self,
 		oneditkeydown);
 	psy_signal_connect(&self->edit.component.signal_keyup, self,
@@ -69,8 +69,8 @@ void newvalview_init(NewValView* self, psy_ui_Component* parent,
 	//m_value.SetSel(-1, -1, false);
 	/* init label */
 	psy_ui_label_init(&self->text, newvalview_base(self));
-	psy_ui_label_preventtranslation(&self->text);
-	psy_ui_component_setalign(psy_ui_label_base(&self->text),
+	psy_ui_label_prevent_translation(&self->text);
+	psy_ui_component_set_align(psy_ui_label_base(&self->text),
 		psy_ui_ALIGN_TOP);
 	newvalview_updateedit(self);
 }
@@ -86,9 +86,9 @@ void newvalview_reset(NewValView* self, uintptr_t mindex, uintptr_t pindex, intp
 	self->v_min = vmin;
 	self->v_max = vmax;
 	psy_snprintf(self->dlgtitle, 256, "%s", title);
-	psy_ui_label_settext(&self->title, self->dlgtitle);
+	psy_ui_label_set_text(&self->title, self->dlgtitle);
 	psy_snprintf(buf, 32, "%d", vval);
-	psy_ui_textinput_settext(&self->edit, buf);
+	psy_ui_textarea_settext(&self->edit, buf);
 	newvalview_updateedit(self);
 }
 				
@@ -96,7 +96,7 @@ void newvalview_updateedit(NewValView* self)
 {
 	char buffer[256];
 
-	psy_snprintf(buffer, 256, "%s", psy_ui_textinput_text(&self->edit));	
+	psy_snprintf(buffer, 256, "%s", psy_ui_textarea_text(&self->edit));	
 	self->value = atoi(buffer);
 	if (self->value < self->v_min) {
 		self->value = self->v_min;
@@ -110,7 +110,7 @@ void newvalview_updateedit(NewValView* self)
 		psy_snprintf(buffer, 256, "Use this HEX value: twk %.2X %.2X %.4X",
 			self->paramindex, self->macindex, self->value - self->v_min);
 	}
-	psy_ui_label_settext(&self->text, buffer);
+	psy_ui_label_set_text(&self->text, buffer);
 }
 
 void onapply(NewValView* self, psy_ui_Button* sender)

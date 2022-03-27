@@ -57,7 +57,7 @@ typedef struct MainStatusBar {
 
 void mainstatusbar_init(MainStatusBar*, psy_ui_Component* parent, Workspace*);
 
-void mainstatusbar_updateterminalbutton(MainStatusBar*);
+void mainstatusbar_update_terminal_button(MainStatusBar*);
 void mainstatusbar_setdefaultstatustext(MainStatusBar*, const char* text);
 void mainstatusbar_idle(MainStatusBar*);
 

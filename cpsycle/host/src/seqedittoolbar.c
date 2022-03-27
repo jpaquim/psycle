@@ -37,9 +37,9 @@ static void seqeditortoolbar_onconfigure(SeqEditToolBar*,
 static psy_audio_SequenceSampleEntry* seqeditortoolbar_sampleentry(
 	SeqEditToolBar* self);
 static void seqeditortoolbar_ontrackeditaccept(SeqEditToolBar*,
-	psy_ui_TextInput* sender);
+	psy_ui_TextArea* sender);
 static void seqeditortoolbar_ontrackeditreject(SeqEditToolBar*,
-	psy_ui_TextInput* sender);
+	psy_ui_TextArea* sender);
 
 /* implenentation */
 void seqedittoolbar_init(SeqEditToolBar* self, psy_ui_Component* parent,
@@ -48,14 +48,14 @@ void seqedittoolbar_init(SeqEditToolBar* self, psy_ui_Component* parent,
 	assert(self);
 
 	psy_ui_component_init(&self->component, parent, NULL);
-	psy_ui_component_setstyletype(&self->component, STYLE_SEQEDT_TOOLBAR);		
-	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
+	psy_ui_component_set_style_type(&self->component, STYLE_SEQEDT_TOOLBAR);		
+	psy_ui_component_set_defaultalign(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_margin_make_em(0.0, 0.5, 0.0, 1.0));		
 	self->state = state;
 	psy_ui_label_init_text(&self->trackname, &self->component, "Track");
-	psy_ui_textinput_init(&self->trackedit, &self->component);
-	psy_ui_textinput_setcharnumber(&self->trackedit, 30);
-	psy_ui_textinput_enableinputfield(&self->trackedit);	
+	psy_ui_textarea_init_single_line(&self->trackedit, &self->component);	
+	psy_ui_textarea_setcharnumber(&self->trackedit, 30);
+	psy_ui_textarea_enableinputfield(&self->trackedit);	
 	psy_signal_connect(&self->trackedit.signal_accept,
 		self, seqeditortoolbar_ontrackeditaccept);
 	psy_signal_connect(&self->trackedit.signal_reject,
@@ -77,14 +77,14 @@ void seqedittoolbar_init(SeqEditToolBar* self, psy_ui_Component* parent,
 	psy_ui_button_init(&self->expand, &self->component);
 	psy_ui_button_loadresource(&self->expand, IDB_EXPAND_LIGHT,
 		IDB_EXPAND_DARK, psy_ui_colour_white());
-	psy_ui_component_setalign(psy_ui_button_base(&self->expand),
+	psy_ui_component_set_align(psy_ui_button_base(&self->expand),
 		psy_ui_ALIGN_RIGHT);	
 	/* configure */
 	psy_ui_button_init_connect(&self->configure, &self->component,
 		self, seqeditortoolbar_onconfigure);
 	psy_ui_button_loadresource(&self->configure, IDB_SETTINGS_LIGHT,
 		IDB_SETTINGS_DARK, psy_ui_colour_white());
-	psy_ui_component_setalign(psy_ui_button_base(&self->configure),
+	psy_ui_component_set_align(psy_ui_button_base(&self->configure),
 		psy_ui_ALIGN_RIGHT);
 	/* assign sample */
 	psy_ui_button_init_text_connect(&self->assignsample, &self->component,
@@ -214,9 +214,9 @@ void seqeditortoolbar_updatetrackname(SeqEditToolBar* self)
 	editposition = seqeditstate_editposition(self->state);
 	track = psy_audio_sequence_track_at(sequence, editposition.track);
 	if (track) {
-		psy_ui_textinput_settext(&self->trackedit, track->name);
+		psy_ui_textarea_settext(&self->trackedit, track->name);
 	} else {
-		psy_ui_textinput_settext(&self->trackedit, "");
+		psy_ui_textarea_settext(&self->trackedit, "");
 	}
 }
 
@@ -280,7 +280,7 @@ void seqeditortoolbar_onsamplerindexchange(SeqEditToolBar* self,
 
 void seqeditortoolbar_onconfigure(SeqEditToolBar* self, psy_ui_Button* sender)
 {
-	workspace_selectview(self->state->workspace, VIEW_ID_SETTINGSVIEW, 11, 0);
+	workspace_select_view(self->state->workspace, VIEW_ID_SETTINGSVIEW, 11, 0);
 }
 
 psy_audio_SequenceSampleEntry* seqeditortoolbar_sampleentry(SeqEditToolBar* self)
@@ -301,7 +301,7 @@ psy_audio_SequenceSampleEntry* seqeditortoolbar_sampleentry(SeqEditToolBar* self
 }
 
 void seqeditortoolbar_ontrackeditaccept(SeqEditToolBar* self,
-	psy_ui_TextInput* sender)
+	psy_ui_TextArea* sender)
 {
 	psy_audio_OrderIndex editposition;
 	psy_audio_SequenceTrack* track;
@@ -311,14 +311,14 @@ void seqeditortoolbar_ontrackeditaccept(SeqEditToolBar* self,
 	editposition = seqeditstate_editposition(self->state);
 	track = psy_audio_sequence_track_at(sequence, editposition.track);
 	if (track) {
-		psy_audio_sequencetrack_setname(track, psy_ui_textinput_text(sender));
+		psy_audio_sequencetrack_setname(track, psy_ui_textarea_text(sender));
 		psy_signal_emit(&sequence->signal_clear, sequence, 0);
 	}
-	psy_ui_component_setfocus(self->state->view);
+	psy_ui_component_set_focus(self->state->view);
 }
 
 void seqeditortoolbar_ontrackeditreject(SeqEditToolBar* self,
-	psy_ui_TextInput* sender)
+	psy_ui_TextArea* sender)
 {
-	psy_ui_component_setfocus(self->state->view);
+	psy_ui_component_set_focus(self->state->view);
 }

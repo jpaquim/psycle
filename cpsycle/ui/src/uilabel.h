@@ -6,7 +6,9 @@
 #ifndef psy_ui_LABEL_H
 #define psy_ui_LABEL_H
 
+/* local */
 #include "uicomponent.h"
+#include "uitextformat.h"
 
 /*
 ** psy_ui_Label
@@ -15,8 +17,7 @@
 **
 **  psy_ui_Component <>----<> psy_ui_ComponentImp
 **      ^
-**       |
-**       |
+**      |
 **  psy_ui_Label
 */
 
@@ -28,16 +29,14 @@ typedef struct psy_ui_Label {
     /* inherits */
     psy_ui_Component component;
     /* internal */
-    double charnumber;
-    double linespacing;
-    psy_ui_Alignment textalignment;
+    double charnumber;    
     char* text;
     char* defaulttext;
     char* translation;    
     bool translate;
-    bool fadeout;
-    bool preventwrap;
+    bool fadeout;    
     uintptr_t fadeoutcounter;
+    psy_ui_TextFormat format;
 } psy_ui_Label;
 
 void psy_ui_label_init(psy_ui_Label*, psy_ui_Component* parent);
@@ -48,20 +47,20 @@ psy_ui_Label* psy_ui_label_alloc(void);
 psy_ui_Label* psy_ui_label_allocinit(psy_ui_Component* parent);
 
 /* copies the text to the label */
-void psy_ui_label_settext(psy_ui_Label*, const char* text);
+void psy_ui_label_set_text(psy_ui_Label*, const char* text);
 /* adds a copy of the text to the label */
-void psy_ui_label_addtext(psy_ui_Label*, const char* text);
+void psy_ui_label_add_text(psy_ui_Label*, const char* text);
 /* returns the text owned by the label */
 const char* psy_ui_label_text(const psy_ui_Label*);
-void psy_ui_label_setdefaulttext(psy_ui_Label*, const char* text);
-void psy_ui_label_setcharnumber(psy_ui_Label*, double number);
-void psy_ui_label_setlinespacing(psy_ui_Label*, double spacing);
-void psy_ui_label_settextalignment(psy_ui_Label*, psy_ui_Alignment alignment);
-void psy_ui_label_preventtranslation(psy_ui_Label*);
-void psy_ui_label_enabletranslation(psy_ui_Label*);
+void psy_ui_label_set_default_text(psy_ui_Label*, const char* text);
+void psy_ui_label_set_charnumber(psy_ui_Label*, double number);
+void psy_ui_label_set_line_spacing(psy_ui_Label*, double spacing);
+void psy_ui_label_set_textalignment(psy_ui_Label*, psy_ui_Alignment);
+void psy_ui_label_prevent_translation(psy_ui_Label*);
+void psy_ui_label_enable_translation(psy_ui_Label*);
 void psy_ui_label_fadeout(psy_ui_Label*);
-void psy_ui_label_preventwrap(psy_ui_Label*);
-void psy_ui_label_enablewrap(psy_ui_Label*);
+void psy_ui_label_prevent_wrap(psy_ui_Label*);
+void psy_ui_label_enable_wrap(psy_ui_Label*);
 
 INLINE psy_ui_Component* psy_ui_label_base(psy_ui_Label* self)
 {

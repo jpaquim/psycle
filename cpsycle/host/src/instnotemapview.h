@@ -12,7 +12,7 @@
 #include "workspace.h"
 
 #include <uibutton.h>
-#include <uitextinput.h>
+#include <uitextarea.h>
 #include <uilabel.h>
 #include <uinotebook.h>
 #include <uislider.h>

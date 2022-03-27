@@ -28,11 +28,11 @@ void clockbar_init(ClockBar* self, psy_ui_Component* parent,
 	self->start = time(NULL);
 	psy_ui_component_setalignexpand(&self->component,
 		psy_ui_HEXPAND);
-	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
+	psy_ui_component_set_defaultalign(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	psy_ui_label_init(&self->position, &self->component);	
-	psy_ui_label_preventtranslation(&self->position);
-	psy_ui_label_setcharnumber(&self->position, 6);	
+	psy_ui_label_prevent_translation(&self->position);
+	psy_ui_label_set_charnumber(&self->position, 6);	
 	clockbar_updatelabel(self);
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		clockbar_onsongchanged);
@@ -53,7 +53,7 @@ void clockbar_updatelabel(ClockBar* self)
 	psy_snprintf(text, 40, "%02ld:%02ld",
 		(int)(currtime / 3600.0), (int)(currtime / 60.0) % 60);
 #ifndef PSYCLE_DEBUG_PREVENT_TIMER_DRAW
-	psy_ui_label_settext(&self->position, text);
+	psy_ui_label_set_text(&self->position, text);
 #endif
 }
 

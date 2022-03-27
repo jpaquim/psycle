@@ -82,6 +82,36 @@ typedef enum psy_ui_Alignment {
 		psy_ui_ALIGNMENT_CENTER_VERTICAL
 } psy_ui_Alignment;
 
+typedef struct psy_ui_TextAlignment {
+	psy_ui_Alignment alignment;
+} psy_ui_TextAlignment;
+
+INLINE psy_ui_TextAlignment psy_ui_textalignment_make(psy_ui_Alignment alignment)
+{
+	psy_ui_TextAlignment rv;
+
+	rv.alignment = alignment;
+	return rv;
+}
+
+INLINE bool psy_ui_textalignment_vertical_centered(const psy_ui_TextAlignment* self)
+{
+	return  ((self->alignment & psy_ui_ALIGNMENT_CENTER_VERTICAL) ==
+		psy_ui_ALIGNMENT_CENTER_VERTICAL);
+}
+
+INLINE bool psy_ui_textalignment_horizontal_centered(const psy_ui_TextAlignment* self)
+{
+	return  ((self->alignment & psy_ui_ALIGNMENT_CENTER_HORIZONTAL) ==
+		psy_ui_ALIGNMENT_CENTER_HORIZONTAL);
+}
+
+INLINE bool psy_ui_textalignment_right(const psy_ui_TextAlignment* self)
+{
+	return ((self->alignment & psy_ui_ALIGNMENT_RIGHT) ==
+		psy_ui_ALIGNMENT_RIGHT);
+}
+
 typedef enum psy_ui_CursorStyle {
 	psy_ui_CURSORSTYLE_AUTO,
 	psy_ui_CURSORSTYLE_MOVE,

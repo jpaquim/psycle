@@ -72,7 +72,7 @@ void pianoruler_ondraw(PianoRuler* self, psy_ui_Graphics* g)
 	assert(self);
 
 	pianoruler_drawruler(self, g, pianoruler_clipselection(self,
-		psy_ui_cliprect(g)));
+		psy_ui_graphics_cliprect(g)));
 }
 
 psy_audio_BlockSelection pianoruler_clipselection(PianoRuler* self,
@@ -157,7 +157,7 @@ void pianoruler_drawbeat(PianoRuler* self, psy_ui_Graphics* g, intptr_t beat,
 	psy_ui_drawline(g, psy_ui_realpoint_make(x, baseline),
 		psy_ui_realpoint_make(x, baseline - tmheight / 2));
 	psy_snprintf(txt, 40, "%d", beat);
-	psy_ui_textout(g, x + 3, baseline - tmheight, txt, psy_strlen(txt));
+	psy_ui_textout(g, psy_ui_realpoint_make(x + 3, baseline - tmheight), txt, psy_strlen(txt));
 	style = psy_ui_style(STYLE_PV_ROWBEAT);
 	psy_ui_settextcolour(g, style->background.colour);
 	// psy_ui_setcolour(g, patternviewskin_rowbeatcolour(patternviewstate_skin(self->gridstate->pv),

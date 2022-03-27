@@ -49,16 +49,16 @@ void instrumentpanview_init(InstrumentPanView* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->component.signal_destroy, self,
 		instrumentpanview_ondestroy);
 	psy_signal_init(&self->signal_status);
-	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_TOP,
+	psy_ui_component_set_defaultalign(&self->component, psy_ui_ALIGN_TOP,
 		psy_ui_defaults_vmargin(psy_ui_defaults()));
 	psy_ui_component_init(&self->top, &self->component, NULL);
-	psy_ui_component_setdefaultalign(&self->top, psy_ui_ALIGN_TOP,
+	psy_ui_component_set_defaultalign(&self->top, psy_ui_ALIGN_TOP,
 		psy_ui_defaults_vmargin(psy_ui_defaults()));
 	psy_ui_component_init(&self->instpan, &self->top, NULL);
 	margin = psy_ui_defaults_vmargin(psy_ui_defaults());
 	margin.top = psy_ui_value_make_eh(1.0);
 	psy_ui_component_set_margin(&self->instpan, margin);
-	psy_ui_component_setdefaultalign(&self->instpan, psy_ui_ALIGN_LEFT,
+	psy_ui_component_set_defaultalign(&self->instpan, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	psy_ui_checkbox_init(&self->instpanenabled, &self->instpan);
 	psy_signal_connect(&self->instpanenabled.signal_clicked, self,
@@ -86,12 +86,12 @@ void instrumentpanview_init(InstrumentPanView* self, psy_ui_Component* parent,
 	envelopeview_init(&self->envelopeview, &self->component);
 	envelopeview_settext(&self->envelopeview,
 		psy_ui_translate("instrumentview.pan-envelope"));
-	psy_ui_component_setalign(&self->envelopeview.component,
+	psy_ui_component_set_align(&self->envelopeview.component,
 		psy_ui_ALIGN_CLIENT);
 	margin = psy_ui_defaults_vmargin(psy_ui_defaults());
 	margin.top = psy_ui_value_make_eh(1.0);
 	adsrsliders_init(&self->adsrsliders, &self->component);	
-	psy_ui_component_setalign(&self->adsrsliders.component, psy_ui_ALIGN_BOTTOM);
+	psy_ui_component_set_align(&self->adsrsliders.component, psy_ui_ALIGN_BOTTOM);
 	psy_ui_component_set_margin(&self->adsrsliders.component, margin);
 	psy_signal_connect(&self->adsrsliders.signal_tweaked, self,
 		instrumentpanview_ontweaked);

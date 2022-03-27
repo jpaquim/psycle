@@ -7,7 +7,7 @@
 #include <uibutton.h>
 #include <uicheckbox.h>
 #include <uicombobox.h>
-#include <uitextinput.h>
+#include <uitextarea.h>
 #include <uieditor.h>
 #include <uilabel.h>
 #include <uislider.h>
@@ -39,9 +39,9 @@ typedef struct {
 	psy_ui_Label visualrepresentationdesc;
 	psy_ui_ComboBox visualrepresentation;
 	psy_ui_Label selstartlabel;
-	psy_ui_TextInput selstartedit;
+	psy_ui_TextArea selstartedit;
 	psy_ui_Label selendlabel;
-	psy_ui_TextInput selendedit;
+	psy_ui_TextArea selendedit;
 	struct SampleEditor* editor;
 	Workspace* workspace;
 } SampleEditorBar;

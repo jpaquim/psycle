@@ -69,8 +69,8 @@ void switchui_init(SwitchUi* self, psy_ui_Component* parent,
 
 	psy_ui_component_init(&self->component, parent, NULL);
 	switchui_vtable_init(self);	
-	psy_ui_component_setstyletype(&self->component, style);
-	psy_ui_component_setstyletype_select(&self->component, style_select);
+	psy_ui_component_set_style_type(&self->component, style);
+	psy_ui_component_set_style_type_select(&self->component, style_select);
 	self->machine = machine;
 	self->paramidx = paramidx;
 	self->param = param;
@@ -94,7 +94,7 @@ SwitchUi* switchui_allocinit(psy_ui_Component* parent,
 	if (rv) {
 		switchui_init(rv, parent, machine, paramidx, param, style,
 			style_select);
-		psy_ui_component_deallocateafterdestroyed(&rv->component);
+		psy_ui_component_deallocate_after_destroyed(&rv->component);
 	}
 	return rv;
 }
@@ -177,7 +177,7 @@ void switchui_updateparam(SwitchUi* self)
 		self->param = psy_audio_machine_parameter(self->machine,
 			self->paramidx);		
 	}	
-	psy_ui_component_setstylestate(&self->component,
+	psy_ui_component_set_style_state(&self->component,
 		(switchui_checked(self))
 		? psy_ui_STYLESTATE_SELECT
 		: psy_ui_STYLESTATE_NONE);

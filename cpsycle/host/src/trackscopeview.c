@@ -62,7 +62,7 @@ void trackscopes_init(TrackScopes* self, psy_ui_Component* parent,
 {	
 	psy_ui_component_init(&self->component, parent, NULL);	
 	psy_ui_component_setvtable(&self->component, vtable_init(self));
-	psy_ui_component_setstyletype(&self->component, STYLE_TRACKSCOPE);		
+	psy_ui_component_set_style_type(&self->component, STYLE_TRACKSCOPE);		
 	self->workspace = workspace;
 	self->trackwidth = 90;
 	self->trackheight = 30;
@@ -109,7 +109,7 @@ void trackscopes_drawtrackindex(TrackScopes* self, psy_ui_Graphics* g,
 	char text[40];
 		
 	psy_snprintf(text, 40, "%X", (int)track);
-	psy_ui_textout(g, x + 3, y + 2, text, strlen(text));
+	psy_ui_textout(g, psy_ui_realpoint_make(x + 3, y + 2), text, strlen(text));
 }
 
 
@@ -130,7 +130,7 @@ void trackscopes_drawtrack(TrackScopes* self, psy_ui_Graphics* g,
 			psy_table_at(&workspace_player(self->workspace)->sequencer.lastmachine,
 				track);
 		psy_snprintf(text, 40, "%X", lastmachine);
-		psy_ui_textout(g, x + width - 10, y + height - self->textheight, text,
+		psy_ui_textout(g, psy_ui_realpoint_make(x + width - 10, y + height - self->textheight), text,
 			strlen(text));
 	} else {
 		lastmachine = psy_INDEX_INVALID;
@@ -340,9 +340,9 @@ void trackscopeview_init(TrackScopeView* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {
 	psy_ui_component_init(&self->component, parent, NULL);	
-	psy_ui_component_setstyletype(&self->component, STYLE_TRACKSCOPES);
+	psy_ui_component_set_style_type(&self->component, STYLE_TRACKSCOPES);
 	trackscopes_init(&self->scopes, &self->component, workspace);
-	psy_ui_component_setalign(&self->scopes.component, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_set_align(&self->scopes.component, psy_ui_ALIGN_CLIENT);
 }
 
 void trackscopeview_idle(TrackScopeView* self)

@@ -24,7 +24,7 @@ void pluginscanview_init(PluginScanView* self, psy_ui_Component* parent,
 		psy_ui_margin_make_em(0.5, 0.5, 0.0, 0.0));
 	psy_ui_label_init_text(&self->scan, &self->component,
 		"newmachine.scanning");
-	psy_ui_component_setalign(psy_ui_label_base(&self->scan),
+	psy_ui_component_set_align(psy_ui_label_base(&self->scan),
 		psy_ui_ALIGN_TOP);
 	psy_ui_component_set_margin(psy_ui_label_base(&self->scan),
 		psy_ui_margin_make_em(2.0, 0.0, 2.0, 0.0));
@@ -38,18 +38,18 @@ void pluginscanview_init(PluginScanView* self, psy_ui_Component* parent,
 		psy_ui_ALIGN_CLIENT);	
 	// filename
 	psy_ui_label_init(&self->scanfile, &self->client);
-	psy_ui_label_preventtranslation(&self->scanfile);	
-	psy_ui_component_setalign(psy_ui_label_base(&self->scanfile),
+	psy_ui_label_prevent_translation(&self->scanfile);	
+	psy_ui_component_set_align(psy_ui_label_base(&self->scanfile),
 		psy_ui_ALIGN_TOP);
 	psy_ui_component_set_margin(psy_ui_label_base(&self->scanfile),
 		psy_ui_margin_make_em(0.0, 0.0, 0.0, 0.0));
 	psy_ui_component_init(&self->abortbar, &self->client, NULL);
 	psy_ui_component_set_margin(&self->abortbar,
 		psy_ui_margin_make_em(2.0, 0.0, 0.0, 20.0));
-	psy_ui_component_setalign(&self->abortbar, psy_ui_ALIGN_TOP);
+	psy_ui_component_set_align(&self->abortbar, psy_ui_ALIGN_TOP);
 	psy_ui_button_init_text_connect(&self->abort, &self->abortbar,
 		"newmachine.stop", self, pluginscanview_onabort);
-	psy_ui_component_setalign(psy_ui_button_base(&self->abort),
+	psy_ui_component_set_align(psy_ui_button_base(&self->abort),
 		psy_ui_ALIGN_LEFT);	
 	pluginscanview_inittasklist(self);
 }
@@ -64,19 +64,19 @@ void pluginscanview_inittasklist(PluginScanView* self)
 		
 		task = (psy_audio_PluginScanTask*)p->entry;
 		label = psy_ui_label_allocinit(&self->left);
-		psy_ui_label_preventtranslation(label);
-		psy_ui_label_settext(label, task->label);
-		psy_ui_component_setstyletype_select(&label->component,
+		psy_ui_label_prevent_translation(label);
+		psy_ui_label_set_text(label, task->label);
+		psy_ui_component_set_style_type_select(&label->component,
 			psy_ui_STYLE_BUTTON_SELECT);
 		psy_ui_component_set_margin(psy_ui_label_base(label),
 			psy_ui_margin_make_em(0.0, 0.0, 1.0, 0.0));
-		psy_ui_component_setalign(&label->component, psy_ui_ALIGN_TOP);
+		psy_ui_component_set_align(&label->component, psy_ui_ALIGN_TOP);
 	}
 }
 
 void pluginscanview_onabort(PluginScanView* self, psy_ui_Button* sender)
 {
-	psy_ui_button_settext(&self->abort, "newmachine.stopping");
+	psy_ui_button_set_text(&self->abort, "newmachine.stopping");
 	psy_ui_component_align_full(&self->client);	
 	psy_audio_plugincatcher_abort(workspace_plugincatcher(self->workspace));
 }
@@ -110,5 +110,5 @@ void pluginscanview_selecttask(PluginScanView* self, psy_audio_PluginScanTask* t
 
 void pluginscanview_reset(PluginScanView* self)
 {
-	psy_ui_button_settext(&self->abort, "newmachine.stop");
+	psy_ui_button_set_text(&self->abort, "newmachine.stop");
 }

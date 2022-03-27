@@ -202,7 +202,7 @@ void machinewireview_init(MachineWireView* self, psy_ui_Component* parent,
 {
 	psy_ui_component_init(&self->component, parent, NULL);
 	vtable_init(self);	
-	psy_ui_component_setstyletype(&self->component, STYLE_MV_WIRES);
+	psy_ui_component_set_style_type(&self->component, STYLE_MV_WIRES);
 	machinewireviewuis_init(&self->machineuis, &self->component, paramviews,
 		workspace);
 	self->opcount = 0;
@@ -222,7 +222,7 @@ void machinewireview_init(MachineWireView* self, psy_ui_Component* parent,
 	self->dragmode = MACHINEVIEW_DRAG_MACHINE;
 	self->selectedslot = psy_audio_MASTER_INDEX;
 	psy_audio_wire_init(&self->dragwire);	
-	psy_ui_component_setwheelscroll(&self->component, 4);	
+	psy_ui_component_set_wheel_scroll(&self->component, 4);	
 	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_SCROLL);	
 	psy_audio_wire_init(&self->hoverwire);
 	psy_signal_connect(&workspace->signal_songchanged, self,
@@ -505,7 +505,7 @@ void machinewireview_onmousedoubleclick(MachineWireView* self,
 void machinewireview_onmousedown(MachineWireView* self, psy_ui_MouseEvent* ev)
 {	
 	if (!psy_ui_component_hasfocus(&self->component)) {
-		psy_ui_component_setfocus(&self->component);
+		psy_ui_component_set_focus(&self->component);
 	}
 	self->dragpt = psy_ui_mouseevent_pt(ev);
 	self->mousemoved = FALSE;		
@@ -1058,7 +1058,7 @@ void machinewireview_onmachineselected(MachineWireView* self,
 	psy_audio_machines_selectwire(self->machines,
 		psy_audio_wire_make(psy_INDEX_INVALID, psy_INDEX_INVALID));	
 	psy_ui_component_invalidate(&self->component);
-	psy_ui_component_setfocus(&self->component);
+	psy_ui_component_set_focus(&self->component);
 }
 
 void machinewireview_onwireselected(MachineWireView* self,

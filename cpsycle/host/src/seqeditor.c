@@ -64,47 +64,47 @@ void seqeditor_init(SeqEditor* self, psy_ui_Component* parent,
 {	
 	psy_ui_component_init(&self->component, parent, NULL);
 	seqeditor_vtable_init(self);	
-	psy_ui_component_setstyletype(&self->component, STYLE_SEQEDT);	
-	psy_ui_textinput_init(&self->edit, &self->component);
-	psy_ui_component_hide(psy_ui_textinput_base(&self->edit));
+	psy_ui_component_set_style_type(&self->component, STYLE_SEQEDT);	
+	psy_ui_textarea_init_single_line(&self->edit, &self->component);	
+	psy_ui_component_hide(psy_ui_textarea_base(&self->edit));
 	sequencecmds_init(&self->cmds, workspace);
 	seqeditstate_init(&self->state, &self->cmds, &self->edit, &self->component);	
 	/* toolbar */
 	seqedittoolbar_init(&self->toolbar, &self->component, &self->state);
-	psy_ui_component_setalign(&self->toolbar.component, psy_ui_ALIGN_TOP);	
+	psy_ui_component_set_align(&self->toolbar.component, psy_ui_ALIGN_TOP);	
 	/* spacer */
 	psy_ui_component_init_align(&self->spacer, &self->component, NULL,
 		psy_ui_ALIGN_TOP);
-	psy_ui_component_setstyletype(&self->spacer, STYLE_SEQEDT_SPACER);	
+	psy_ui_component_set_style_type(&self->spacer, STYLE_SEQEDT_SPACER);	
 	/* properties */
 	seqeditproperties_init(&self->properties, &self->component, &self->state);
-	psy_ui_component_setalign(&self->properties.component, psy_ui_ALIGN_RIGHT);
+	psy_ui_component_set_align(&self->properties.component, psy_ui_ALIGN_RIGHT);
 	/* left */
 	psy_ui_component_init(&self->left, &self->component, NULL);
-	psy_ui_component_setalign(&self->left, psy_ui_ALIGN_LEFT);	
-	psy_ui_component_setstyletype(&self->left, STYLE_SEQEDT_LEFT);
+	psy_ui_component_set_align(&self->left, psy_ui_ALIGN_LEFT);	
+	psy_ui_component_set_style_type(&self->left, STYLE_SEQEDT_LEFT);
 	/* SeqEditorHeaderBar */
 	seqeditorheaderdescbar_init(&self->headerdescbar, &self->left,
 		&self->state);
-	psy_ui_component_setalign(&self->headerdescbar.component,
+	psy_ui_component_set_align(&self->headerdescbar.component,
 		psy_ui_ALIGN_TOP);
 	psy_signal_connect(&self->headerdescbar.hzoom.signal_changed, self,
 		seqeditor_onhzoom);
 	/* track description */
 	psy_ui_component_init(&self->trackdescpane, &self->left, NULL);
-	psy_ui_component_setalign(&self->trackdescpane, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_set_align(&self->trackdescpane, psy_ui_ALIGN_CLIENT);
 	seqedittrackdesc_init(&self->trackdesc, &self->trackdescpane,
 		&self->state, workspace);
 	psy_signal_connect(&self->trackdesc.signal_resize, self,
 		seqeditor_ontrackresize);
-	psy_ui_component_setalign(&self->trackdesc.component,
+	psy_ui_component_set_align(&self->trackdesc.component,
 		psy_ui_ALIGN_HCLIENT);	
 	zoombox_init(&self->vzoom, &self->left);
-	psy_ui_component_setalign(&self->vzoom.component, psy_ui_ALIGN_BOTTOM);
+	psy_ui_component_set_align(&self->vzoom.component, psy_ui_ALIGN_BOTTOM);
 	psy_signal_connect(&self->vzoom.signal_changed, self, seqeditor_onvzoom);	
 	/* header */
 	seqeditheader_init(&self->header, &self->component, &self->state);
-	psy_ui_component_setalign(&self->header.component, psy_ui_ALIGN_TOP);
+	psy_ui_component_set_align(&self->header.component, psy_ui_ALIGN_TOP);
 	/* connect expand */
 	psy_signal_connect(&self->toolbar.expand.signal_clicked, self,
 		seqeditor_ontoggleexpand);
@@ -114,9 +114,9 @@ void seqeditor_init(SeqEditor* self, psy_ui_Component* parent,
 		workspace);
 	psy_ui_scroller_init(&self->scroller, &self->tracks.component,
 		&self->component);	
-	psy_ui_component_setalign(&self->tracks.component, psy_ui_ALIGN_FIXED);
-	psy_ui_component_setalign(&self->scroller.component, psy_ui_ALIGN_CLIENT);	
-	psy_ui_component_setpreferredsize(&self->component, psy_ui_size_make(
+	psy_ui_component_set_align(&self->tracks.component, psy_ui_ALIGN_FIXED);
+	psy_ui_component_set_align(&self->scroller.component, psy_ui_ALIGN_CLIENT);	
+	psy_ui_component_set_preferred_size(&self->component, psy_ui_size_make(
 		psy_ui_value_make_ew(20.0), psy_ui_value_make_ph(0.30)));
 	seqeditor_updatesong(self);	
 	/* connect signals */
@@ -173,9 +173,9 @@ void seqeditor_updatesong(SeqEditor* self)
 
 void seqeditor_updatescrollstep(SeqEditor* self)
 {		
-	psy_ui_component_setscrollstep_height(&self->tracks.component,
+	psy_ui_component_set_scrollstep_height(&self->tracks.component,
 		seqeditstate_lineheight(&self->state));
-	psy_ui_component_setscrollstep_height(&self->trackdesc.component,
+	psy_ui_component_set_scrollstep_height(&self->trackdesc.component,
 		seqeditstate_lineheight(&self->state));
 }
 
@@ -270,7 +270,7 @@ void seqeditor_onmouseup(SeqEditor* self, psy_ui_MouseEvent* ev)
 void seqeditor_ontoggleexpand(SeqEditor* self, psy_ui_Button* sender)
 {	
 	self->expanded = !self->expanded;	
-	psy_ui_component_setpreferredsize(&self->component,
+	psy_ui_component_set_preferred_size(&self->component,
 		psy_ui_size_make(psy_ui_value_zero(), psy_ui_value_make_ph(
 			(self->expanded) ? 0.75 : 0.3)));
 	psy_ui_component_align(psy_ui_component_parent(&self->component));

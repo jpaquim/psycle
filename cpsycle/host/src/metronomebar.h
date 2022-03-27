@@ -11,7 +11,7 @@
 /* ui */
 #include "uibutton.h"
 #include "uicombobox.h"
-#include "uitextinput.h"
+#include "uitextarea.h"
 #include "uilabel.h"
 
 #ifdef __cplusplus

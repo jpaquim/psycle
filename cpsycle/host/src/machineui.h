@@ -12,7 +12,7 @@
 #include "paramviews.h"
 #include "workspace.h"
 /* ui */
-#include <uitextinput.h>
+#include <uitextarea.h>
 #include <uinotebook.h>
 
 #ifdef __cplusplus

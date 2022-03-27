@@ -96,7 +96,7 @@ void psy_ui_sliderpane_init(psy_ui_SliderPane* self, psy_ui_Component* parent,
 		psy_ui_sliderpane_ondestroy);	
 	psy_signal_connect(&self->component.signal_timer, self,
 		psy_ui_sliderpane_ontimer);
-	psy_ui_component_setstyletypes(&self->component,
+	psy_ui_component_set_style_types(&self->component,
 		psy_ui_STYLE_SLIDERPANE, psy_INDEX_INVALID, psy_INDEX_INVALID,
 		psy_INDEX_INVALID);
 }
@@ -276,7 +276,7 @@ void psy_ui_sliderpane_onmouseup(psy_ui_SliderPane* self, psy_ui_MouseEvent* ev)
 		self->tweakbase = -1;
 		psy_ui_component_releasecapture(&self->component);
 		if (self->poll) {
-			psy_ui_component_starttimer(&self->component, 0, 50);
+			psy_ui_component_start_timer(&self->component, 0, 50);
 		}
 	}
 }
@@ -396,10 +396,10 @@ void psy_ui_slider_init(psy_ui_Slider* self, psy_ui_Component* parent)
 	psy_ui_label_init(&self->desc, &self->component);	
 	psy_ui_sliderpane_init(&self->pane, &self->component, NULL);
 	self->pane.slider = self;	
-	psy_ui_component_setalign(psy_ui_sliderpane_base(&self->pane),
+	psy_ui_component_set_align(psy_ui_sliderpane_base(&self->pane),
 		psy_ui_ALIGN_CLIENT);
 	psy_ui_label_init(&self->value, &self->component);
-	psy_ui_label_preventtranslation(&self->value);	
+	psy_ui_label_prevent_translation(&self->value);	
 	psy_ui_slider_showhorizontal(self);
 }
 
@@ -420,25 +420,25 @@ void psy_ui_slider_connect(psy_ui_Slider* self, void* context,
 
 void psy_ui_slider_settext(psy_ui_Slider* self, const char* text)
 {
-	psy_ui_label_settext(&self->desc, text);
+	psy_ui_label_set_text(&self->desc, text);
 }
 
 void psy_ui_slider_setcharnumber(psy_ui_Slider* self, double number)
 {
-	psy_ui_label_setcharnumber(&self->desc, number);
+	psy_ui_label_set_charnumber(&self->desc, number);
 }
 
 void psy_ui_slider_setvaluecharnumber(psy_ui_Slider* self, double number)
 {
-	psy_ui_label_setcharnumber(&self->value, number);
+	psy_ui_label_set_charnumber(&self->value, number);
 }
 
 void psy_ui_slider_showvertical(psy_ui_Slider* self)
 {
 	psy_ui_sliderpane_showvertical(&self->pane);
-	psy_ui_component_setalign(psy_ui_label_base(&self->desc),
+	psy_ui_component_set_align(psy_ui_label_base(&self->desc),
 		psy_ui_ALIGN_BOTTOM);
-	psy_ui_component_setalign(psy_ui_label_base(&self->value),
+	psy_ui_component_set_align(psy_ui_label_base(&self->value),
 		psy_ui_ALIGN_BOTTOM);	
 	psy_ui_component_set_margin(psy_ui_sliderpane_base(&self->pane),
 		psy_ui_margin_make_em(0.0, 2.0, 0.0, 2.0));		
@@ -447,9 +447,9 @@ void psy_ui_slider_showvertical(psy_ui_Slider* self)
 void psy_ui_slider_showhorizontal(psy_ui_Slider* self)
 {
 	psy_ui_sliderpane_showhorizontal(&self->pane);
-	psy_ui_component_setalign(psy_ui_label_base(&self->desc),
+	psy_ui_component_set_align(psy_ui_label_base(&self->desc),
 		psy_ui_ALIGN_LEFT);
-	psy_ui_component_setalign(psy_ui_label_base(&self->value),
+	psy_ui_component_set_align(psy_ui_label_base(&self->value),
 		psy_ui_ALIGN_RIGHT);	
 	psy_ui_component_set_margin(psy_ui_sliderpane_base(&self->pane),
 		psy_ui_margin_make_em(0.0, 2.0, 0.0, 2.0));		
@@ -484,13 +484,13 @@ void psy_ui_slider_describevalue(psy_ui_Slider* self)
 	if (text == '\0') {
 		psy_snprintf(text, 256, "%f", (float)self->pane.value);
 	}
-	psy_ui_label_settext(&self->value, text);	
+	psy_ui_label_set_text(&self->value, text);	
 }
 
 void psy_ui_slider_startpoll(psy_ui_Slider* self)
 {
 	self->pane.poll = TRUE;	
-	psy_ui_component_starttimer(&self->pane.component, 0, 50);
+	psy_ui_component_start_timer(&self->pane.component, 0, 50);
 }
 
 void psy_ui_slider_stoppoll(psy_ui_Slider* self)

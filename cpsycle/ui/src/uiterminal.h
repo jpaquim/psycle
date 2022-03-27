@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #ifndef psy_ui_TERMINAL_H
@@ -24,7 +24,7 @@ typedef struct psy_ui_Terminal {
 	psy_ui_Scroller scroller;
 	psy_ui_Label output;
 	psy_List* strbuffer;
-	psy_Lock outputlock;	
+	psy_Lock lock;	
 } psy_ui_Terminal;
 
 void psy_ui_terminal_init(psy_ui_Terminal*, psy_ui_Component* parent);

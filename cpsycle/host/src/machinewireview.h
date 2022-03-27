@@ -17,7 +17,7 @@
 #include "workspace.h"
 /* ui */
 #include <uitabbar.h>
-#include <uitextinput.h>
+#include <uitextarea.h>
 
 #ifdef __cplusplus
 extern "C" {

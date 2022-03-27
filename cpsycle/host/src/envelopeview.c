@@ -70,7 +70,7 @@ void envelopebox_init(EnvelopeBox* self, psy_ui_Component* parent)
 {				
 	psy_ui_component_init(&self->component, parent, NULL);	
 	psy_ui_component_preventalign(&self->component);
-	psy_ui_component_setstyletype(&self->component, STYLE_ENVELOPE);
+	psy_ui_component_set_style_type(&self->component, STYLE_ENVELOPE);
 	envelopebox_vtable_init(self);	
 	self->zoomleft = 0.f;
 	self->zoomright = 1.f;
@@ -267,11 +267,12 @@ void envelopebox_drawruler(EnvelopeBox* self, psy_ui_Graphics* g)
 				psy_snprintf(text, 64, "%ds", (int)t);
 			}
 			if (step < numsteps) {
-				psy_ui_textout(g, cpx + 4, self->cy - (tm->tmHeight * 1.5),
+				psy_ui_textout(g, psy_ui_realpoint_make(cpx + 4, self->cy - (tm->tmHeight * 1.5)),
 					text, psy_strlen(text));
 			} else {
 				psy_ui_textout(g,
-					cpx - 3.5 * (double)tm->tmAveCharWidth, self->cy - (tm->tmHeight * 1.5),
+					psy_ui_realpoint_make(cpx - 3.5 * (double)tm->tmAveCharWidth,
+						self->cy - (tm->tmHeight * 1.5)),
 					text, psy_strlen(text));
 			}			
 			psy_ui_drawline(g,
@@ -558,7 +559,7 @@ void envelopebar_init(EnvelopeBar* self, psy_ui_Component* parent)
 	tab = psy_ui_defaults_hmargin(psy_ui_defaults());
 	tab.right = psy_ui_value_make_ew(4.0);
 	psy_ui_component_init(&self->component, parent, NULL);
-	psy_ui_component_setdefaultalign(envelopebar_base(self), psy_ui_ALIGN_LEFT,
+	psy_ui_component_set_defaultalign(envelopebar_base(self), psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	psy_ui_checkbox_init_text(&self->enabled, &self->component, "Envelope");	
 	psy_ui_component_set_margin(psy_ui_checkbox_base(&self->enabled), tab);
@@ -633,15 +634,15 @@ void envelopeview_init(EnvelopeView* self, psy_ui_Component* parent)
 		envelopeview_vtable_init(self));	
 	self->component.id = 400;
 	envelopebar_init(&self->bar, envelopeview_base(self));
-	psy_ui_component_setalign(envelopebar_base(&self->bar), psy_ui_ALIGN_TOP);
+	psy_ui_component_set_align(envelopebar_base(&self->bar), psy_ui_ALIGN_TOP);
 	psy_ui_component_set_margin(envelopebar_base(&self->bar),
 		psy_ui_defaults_vmargin(psy_ui_defaults()));
 	envelopebox_init(&self->envelopebox, envelopeview_base(self));
-	psy_ui_component_setalign(envelopebox_base(&self->envelopebox),
+	psy_ui_component_set_align(envelopebox_base(&self->envelopebox),
 		psy_ui_ALIGN_CLIENT);
 	scrollzoom_init(&self->zoom, envelopeview_base(self));
-	psy_ui_component_setalign(scrollzoom_base(&self->zoom), psy_ui_ALIGN_BOTTOM);
-	psy_ui_component_setpreferredsize(scrollzoom_base(&self->zoom),
+	psy_ui_component_set_align(scrollzoom_base(&self->zoom), psy_ui_ALIGN_BOTTOM);
+	psy_ui_component_set_preferred_size(scrollzoom_base(&self->zoom),
 		psy_ui_size_make(psy_ui_value_make_px(0),
 		psy_ui_value_make_eh(1)));
 	psy_signal_connect(&self->zoom.signal_zoom, self,

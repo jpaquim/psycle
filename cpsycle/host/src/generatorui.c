@@ -64,14 +64,14 @@ void generatorui_init(GeneratorUi* self, psy_ui_Component* parent,
 	assert(self->machine);
 	self->workspace = workspace;
 	self->preventmachinepos = FALSE;
-	psy_ui_component_setstyletype(&self->component, STYLE_MV_GENERATOR);
+	psy_ui_component_set_style_type(&self->component, STYLE_MV_GENERATOR);
 	psy_ui_component_init(&self->mute, &self->component, NULL);
-	psy_ui_component_setstyletype(&self->mute, STYLE_MV_GENERATOR_MUTE);
-	psy_ui_component_setstyletype_select(&self->mute,
+	psy_ui_component_set_style_type(&self->mute, STYLE_MV_GENERATOR_MUTE);
+	psy_ui_component_set_style_type_select(&self->mute,
 		STYLE_MV_GENERATOR_MUTE_SELECT);
 	psy_ui_component_init(&self->solo, &self->component, NULL);	
-	psy_ui_component_setstyletype(&self->solo, STYLE_MV_GENERATOR_SOLO);
-	psy_ui_component_setstyletype_select(&self->solo,
+	psy_ui_component_set_style_type(&self->solo, STYLE_MV_GENERATOR_SOLO);
+	psy_ui_component_set_style_type_select(&self->solo,
 		STYLE_MV_GENERATOR_SOLO_SELECT);
 	editnameui_init(&self->editname, &self->component, self->machine,
 		STYLE_MV_GENERATOR_NAME);
@@ -79,7 +79,7 @@ void generatorui_init(GeneratorUi* self, psy_ui_Component* parent,
 		STYLE_MV_GENERATOR_PAN, STYLE_MV_GENERATOR_PAN_SLIDER);
 	vuui_init(&self->vu, &self->component, self->machine,
 		STYLE_MV_GENERATOR_VU, STYLE_MV_GENERATOR_VU0, STYLE_MV_GENERATOR_VUPEAK);
-	psy_ui_component_starttimer(&self->component, 0, 50);
+	psy_ui_component_start_timer(&self->component, 0, 50);
 }
 
 void generatorui_move(GeneratorUi* self, psy_ui_Point topleft)

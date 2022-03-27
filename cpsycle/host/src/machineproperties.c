@@ -27,9 +27,9 @@ static void machineproperties_onmachineselected(MachineProperties*,
 static void machineproperties_onmachineremoved(MachineProperties*,
 	psy_audio_Machines*, uintptr_t slot);
 static void machineproperties_oneditaccept(MachineProperties*,
-	psy_ui_TextInput* sender);
+	psy_ui_TextArea* sender);
 static void machineproperties_oneditreject(MachineProperties*,
-	psy_ui_TextInput* sender);
+	psy_ui_TextArea* sender);
 static void machineproperties_ontogglemute(MachineProperties*,
 	psy_ui_Button* sender);
 static void machineproperties_onsolobypass(MachineProperties*,
@@ -62,9 +62,9 @@ void machineproperties_init(MachineProperties* self, psy_ui_Component* parent,
 		? &workspace_song(workspace)->machines
 		: NULL;	
 	self->macid = psy_INDEX_INVALID;			
-	psy_ui_component_setstyletype(&self->component,
+	psy_ui_component_set_style_type(&self->component,
 		STYLE_MV_PROPERTIES);	
-	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
+	psy_ui_component_set_defaultalign(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));	
 	psy_ui_button_init_text_connect(&self->issolobypass, &self->component,
 		"machineview.pwr", self, machineproperties_onsolobypass);
@@ -72,10 +72,10 @@ void machineproperties_init(MachineProperties* self, psy_ui_Component* parent,
 		"machineview.mute", self, machineproperties_ontogglemute);
 	psy_ui_button_init_text_connect(&self->isbus, &self->component,
 		"Bus", self, machineproperties_ontogglebus);	
-	psy_ui_textinput_init(&self->nameedit, &self->component);
-	psy_ui_textinput_settext(&self->nameedit, psy_ui_translate("machineview.editname"));
-	psy_ui_textinput_setcharnumber(&self->nameedit, 40);	
-	psy_ui_textinput_enableinputfield(&self->nameedit);
+	psy_ui_textarea_init_single_line(&self->nameedit, &self->component);	
+	psy_ui_textarea_settext(&self->nameedit, psy_ui_translate("machineview.editname"));
+	psy_ui_textarea_setcharnumber(&self->nameedit, 40);	
+	psy_ui_textarea_enableinputfield(&self->nameedit);
 	psy_signal_connect(&self->nameedit.signal_accept, self,
 		machineproperties_oneditaccept);
 	psy_signal_connect(&self->nameedit.signal_reject, self,
@@ -84,8 +84,8 @@ void machineproperties_init(MachineProperties* self, psy_ui_Component* parent,
 		"machineview.delete", self, machineproperties_onremove);
 	psy_ui_button_init_connect(&self->cancel, &self->component, self,
 		machineproperties_onhide);
-	psy_ui_button_preventtranslation(&self->cancel);
-	psy_ui_button_settext(&self->cancel, "X");
+	psy_ui_button_prevent_translation(&self->cancel);
+	psy_ui_button_set_text(&self->cancel, "X");
 	psy_signal_connect(&self->workspace->signal_songchanged, self,
 		machineproperties_onsongchanged);
 	machineproperties_connectsongsignals(self);
@@ -102,7 +102,7 @@ void machineproperties_setmachine(MachineProperties* self,
 	if (self->machine) {
 		psy_ui_component_preventinput(&self->component, psy_ui_RECURSIVE);
 		psy_ui_component_enableinput(&self->component, psy_ui_RECURSIVE);
-		psy_ui_textinput_settext(&self->nameedit,
+		psy_ui_textarea_settext(&self->nameedit,
 			psy_audio_machine_editname(machine));
 		if (psy_audio_machine_mode(machine) == psy_audio_MACHMODE_GENERATOR) {
 			psy_ui_component_hide_align(psy_ui_button_base(&self->isbus));
@@ -112,7 +112,7 @@ void machineproperties_setmachine(MachineProperties* self,
 		psy_ui_component_invalidate(psy_ui_component_parent(&self->component));
 	} else {
 		self->macid = psy_INDEX_INVALID;
-		psy_ui_textinput_settext(&self->nameedit, psy_ui_translate("machineview.editname"));
+		psy_ui_textarea_settext(&self->nameedit, psy_ui_translate("machineview.editname"));
 		psy_ui_component_hide_align(psy_ui_button_base(&self->isbus));
 		psy_ui_button_disablehighlight(&self->issolobypass);
 		psy_ui_button_disablehighlight(&self->isbus);
@@ -163,30 +163,30 @@ void machineproperties_onmachinenamechanged(MachineProperties* self,
 
 	machine = psy_audio_machines_at(machines, slot);
 	if (machine && machine == self->machine) {
-		psy_ui_textinput_settext(&self->nameedit,
+		psy_ui_textarea_settext(&self->nameedit,
 			psy_audio_machine_editname(machine));
 	}
 }
 
 void machineproperties_oneditaccept(MachineProperties* self,
-	psy_ui_TextInput* sender)
+	psy_ui_TextArea* sender)
 {
 	if (workspace_song(self->workspace) && self->machine) {
 		psy_audio_machine_seteditname(self->machine,
-			psy_ui_textinput_text(&self->nameedit));
+			psy_ui_textarea_text(&self->nameedit));
 	}
 	psy_ui_component_invalidate(psy_ui_component_parent(&self->component));
-	psy_ui_component_setfocus(psy_ui_component_parent(&self->component));
+	psy_ui_component_set_focus(psy_ui_component_parent(&self->component));
 }
 
 void machineproperties_oneditreject(MachineProperties* self,
-	psy_ui_TextInput* sender)
+	psy_ui_TextArea* sender)
 {
 	if (self->machine) {
-		psy_ui_textinput_settext(&self->nameedit,
+		psy_ui_textarea_settext(&self->nameedit,
 			psy_audio_machine_editname(self->machine));
 	}	
-	psy_ui_component_setfocus(psy_ui_component_parent(&self->component));
+	psy_ui_component_set_focus(psy_ui_component_parent(&self->component));
 }
 
 void machineproperties_onsongchanged(MachineProperties* self, Workspace* sender)

@@ -11,7 +11,7 @@
 // ui
 #include <uibutton.h>
 #include <uicheckbox.h>
-#include <uitextinput.h>
+#include <uitextarea.h>
 #include <uilabel.h>
 
 #ifdef __cplusplus
@@ -33,7 +33,7 @@ typedef struct NewMachineDetail {
 	LabelPair apiversion;
 	psy_ui_Component category;
 	psy_ui_Label categorydesc;
-	psy_ui_TextInput categoryedit;
+	psy_ui_TextArea categoryedit;
 	psy_ui_Component bottom;
     psy_ui_Label compatlabel;
     psy_ui_CheckBox compatblitzgamefx;

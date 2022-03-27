@@ -721,7 +721,7 @@ void workspace_newsong(Workspace* self)
 	song = psy_audio_song_allocinit(&self->machinefactory);
 	psy_strreset(&self->filename, "Untitled.psy");	
 	workspace_setsong(self, song, WORKSPACE_NEWSONG);	
-	workspace_selectview(self, VIEW_ID_MACHINEVIEW, 0, 0);
+	workspace_select_view(self, VIEW_ID_MACHINEVIEW, 0, 0);
 }
 
 void workspace_loadsong_fileselect(Workspace* self)
@@ -1518,11 +1518,11 @@ void workspace_restoreview(Workspace* self)
 {
 	assert(self);
 
-	workspace_selectview(self, self->restoreview.id,
+	workspace_select_view(self, self->restoreview.id,
 		self->restoreview.section, 0);
 }
 
-void workspace_selectview(Workspace* self, uintptr_t view, uintptr_t section,
+void workspace_select_view(Workspace* self, uintptr_t view, uintptr_t section,
 	uintptr_t option)
 {
 	assert(self);
@@ -1617,7 +1617,7 @@ void workspace_updatecurrview(Workspace* self)
 	view = viewhistory_currview(&self->viewhistory);
 	prevented = viewhistory_prevented(&self->viewhistory);
 	viewhistory_prevent(&self->viewhistory);
-	workspace_selectview(self, view.id, 0, 0);
+	workspace_select_view(self, view.id, 0, 0);
 	/* if (view.seqpos != -1 &&
 		self->sequenceselection.editposition.trackposition.sequencentrynode) {
 		psy_audio_SequencePosition position;
@@ -1925,38 +1925,38 @@ void workspace_oninput(Workspace* self, uintptr_t cmdid)
 {
 	switch (cmdid) {
 	case CMD_IMM_ADDMACHINE:
-		workspace_selectview(self, VIEW_ID_MACHINEVIEW,
+		workspace_select_view(self, VIEW_ID_MACHINEVIEW,
 			SECTION_ID_MACHINEVIEW_NEWMACHINE, NEWMACHINE_APPEND);
 		break;
 	case CMD_IMM_EDITMACHINE:
 		if (workspace_currview(self).id != VIEW_ID_MACHINEVIEW) {
-			workspace_selectview(self, VIEW_ID_MACHINEVIEW, psy_INDEX_INVALID,
+			workspace_select_view(self, VIEW_ID_MACHINEVIEW, psy_INDEX_INVALID,
 				0);
 		} else {
 			if (workspace_currview(self).section == SECTION_ID_MACHINEVIEW_WIRES) {
-				workspace_selectview(self, VIEW_ID_MACHINEVIEW,
+				workspace_select_view(self, VIEW_ID_MACHINEVIEW,
 					SECTION_ID_MACHINEVIEW_STACK, 0);
 			} else {
-				workspace_selectview(self, VIEW_ID_MACHINEVIEW,
+				workspace_select_view(self, VIEW_ID_MACHINEVIEW,
 					SECTION_ID_MACHINEVIEW_WIRES, 0);
 			}
 		}
 		break;
 	case CMD_IMM_HELP:
-		workspace_selectview(self, VIEW_ID_HELPVIEW, 0, 0);
+		workspace_select_view(self, VIEW_ID_HELPVIEW, 0, 0);
 		break;
 	case CMD_IMM_EDITPATTERN:
-		workspace_selectview(self, VIEW_ID_PATTERNVIEW, psy_INDEX_INVALID,
+		workspace_select_view(self, VIEW_ID_PATTERNVIEW, psy_INDEX_INVALID,
 			psy_INDEX_INVALID);
 		break;
 	case CMD_IMM_EDITINSTR:
-		workspace_selectview(self, VIEW_ID_INSTRUMENTSVIEW, 0, 0);
+		workspace_select_view(self, VIEW_ID_INSTRUMENTSVIEW, 0, 0);
 		break;
 	case CMD_IMM_EDITSAMPLE:
-		workspace_selectview(self, VIEW_ID_SAMPLESVIEW, 0, 0);
+		workspace_select_view(self, VIEW_ID_SAMPLESVIEW, 0, 0);
 		break;
 	case CMD_IMM_EDITWAVE:
-		workspace_selectview(self, VIEW_ID_SAMPLESVIEW, 2, 0);
+		workspace_select_view(self, VIEW_ID_SAMPLESVIEW, 2, 0);
 		break;
 	case CMD_IMM_INSTRDEC:
 		if (self->song) {
@@ -1973,12 +1973,12 @@ void workspace_oninput(Workspace* self, uintptr_t cmdid)
 			!psycleconfig_audioenabled(&self->config));
 		break;
 	case CMD_IMM_SETTINGS:
-		workspace_selectview(self, VIEW_ID_SETTINGSVIEW, 0, 0);
+		workspace_select_view(self, VIEW_ID_SETTINGSVIEW, 0, 0);
 		break;
 	case CMD_IMM_LOADSONG:
 		if (keyboardmiscconfig_savereminder(&self->config.misc) &&
 				workspace_songmodified(self)) {
-			workspace_selectview(self, VIEW_ID_CHECKUNSAVED, 0, CONFIRM_LOAD);
+			workspace_select_view(self, VIEW_ID_CHECKUNSAVED, 0, CONFIRM_LOAD);
 		} else {
 			workspace_loadsong_fileselect(self);
 		}
@@ -2109,31 +2109,31 @@ void workspace_oninput(Workspace* self, uintptr_t cmdid)
 		}
 		break;
 	case CMD_IMM_TAB1:
-		workspace_selectview(self, 0, psy_INDEX_INVALID, psy_INDEX_INVALID);
+		workspace_select_view(self, 0, psy_INDEX_INVALID, psy_INDEX_INVALID);
 		break;
 	case CMD_IMM_TAB2:
-		workspace_selectview(self, 1, psy_INDEX_INVALID, psy_INDEX_INVALID);
+		workspace_select_view(self, 1, psy_INDEX_INVALID, psy_INDEX_INVALID);
 		break;
 	case CMD_IMM_TAB3:
-		workspace_selectview(self, 2, psy_INDEX_INVALID, psy_INDEX_INVALID);
+		workspace_select_view(self, 2, psy_INDEX_INVALID, psy_INDEX_INVALID);
 		break;
 	case CMD_IMM_TAB4:
-		workspace_selectview(self, 3, psy_INDEX_INVALID, psy_INDEX_INVALID);
+		workspace_select_view(self, 3, psy_INDEX_INVALID, psy_INDEX_INVALID);
 		break;
 	case CMD_IMM_TAB5:
-		workspace_selectview(self, 4, psy_INDEX_INVALID, psy_INDEX_INVALID);
+		workspace_select_view(self, 4, psy_INDEX_INVALID, psy_INDEX_INVALID);
 		break;
 	case CMD_IMM_TAB6:
-		workspace_selectview(self, psy_INDEX_INVALID, 0, psy_INDEX_INVALID);
+		workspace_select_view(self, psy_INDEX_INVALID, 0, psy_INDEX_INVALID);
 		break;
 	case CMD_IMM_TAB7:
-		workspace_selectview(self, psy_INDEX_INVALID, 1, psy_INDEX_INVALID);
+		workspace_select_view(self, psy_INDEX_INVALID, 1, psy_INDEX_INVALID);
 		break;
 	case CMD_IMM_TAB8:
-		workspace_selectview(self, psy_INDEX_INVALID, 2, psy_INDEX_INVALID);
+		workspace_select_view(self, psy_INDEX_INVALID, 2, psy_INDEX_INVALID);
 		break;
 	case CMD_IMM_TAB9:
-		workspace_selectview(self, psy_INDEX_INVALID, 3, psy_INDEX_INVALID);
+		workspace_select_view(self, psy_INDEX_INVALID, 3, psy_INDEX_INVALID);
 		break;
 	default:
 		break;
@@ -2214,15 +2214,15 @@ const char* workspace_songtitle(const Workspace* self)
 	return "";
 }
 
-void workspace_setstartpage(Workspace* self)
+void workspace_set_start_page(Workspace* self)
 {
-	workspace_selectview(self, VIEW_ID_MACHINEVIEW, 0, 0);
+	workspace_select_view(self, VIEW_ID_MACHINEVIEW, 0, 0);
 
 	if (generalconfig_showaboutatstart(psycleconfig_general(
 			workspace_conf(self)))) {
-		workspace_selectview(self, VIEW_ID_HELPVIEW, 1, 0);
+		workspace_select_view(self, VIEW_ID_HELPVIEW, 1, 0);
 	} else {
-		workspace_selectview(self, VIEW_ID_MACHINEVIEW, 0, 0);
+		workspace_select_view(self, VIEW_ID_MACHINEVIEW, 0, 0);
 	}
 	self->startpage = TRUE;
 }

@@ -102,11 +102,11 @@ void seqedittimesig_init(SeqEditTimeSig* self, psy_ui_Component* parent,
 
 	psy_ui_component_init(&self->component, parent, NULL);
 	seqedittimesig_vtable_init(self);
-	psy_ui_component_setstyletype(&self->component,
+	psy_ui_component_set_style_type(&self->component,
 		STYLE_SEQEDT_LOOP);
-	psy_ui_component_setstyletype_hover(&self->component,
+	psy_ui_component_set_style_type_hover(&self->component,
 		STYLE_SEQEDT_LOOP_HOVER);
-	psy_ui_component_setstyletype_active(&self->component,
+	psy_ui_component_set_style_type_active(&self->component,
 		STYLE_SEQEDT_LOOP_ACTIVE);	
 	self->state = state;
 	self->timesigstate = timesigstate;
@@ -128,7 +128,7 @@ SeqEditTimeSig* seqedittimesig_allocinit(psy_ui_Component* parent,
 	rv = seqedittimesig_alloc();
 	if (rv) {
 		seqedittimesig_init(rv, parent, timesigstate, state, node);
-		psy_ui_component_deallocateafterdestroyed(&rv->component);
+		psy_ui_component_deallocate_after_destroyed(&rv->component);
 	}
 	return rv;
 }
@@ -180,9 +180,10 @@ void seqedittimesig_ondraw(SeqEditTimeSig* self, psy_ui_Graphics* g)
 			cpx = 0.0;
 			tm = psy_ui_component_textmetric(&self->component);			
 			psy_snprintf(text, 64, "%d", (int)(nominator));
-			psy_ui_textout(g, cpx, 0, text, psy_strlen(text));
+			psy_ui_textout(g, psy_ui_realpoint_make(cpx, 0.0), text, psy_strlen(text));
 			psy_snprintf(text, 64, "%d", (int)(denominator));
-			psy_ui_textout(g, cpx, tm->tmHeight, text, psy_strlen(text));
+			psy_ui_textout(g, psy_ui_realpoint_make(cpx, tm->tmHeight), text,
+				psy_strlen(text));
 		}
 	}
 }

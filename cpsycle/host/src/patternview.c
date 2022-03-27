@@ -93,9 +93,9 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 	self->aligndisplay = TRUE;
 	self->updatealign = 0;
 	self->zoom = 1.0;	
-	psy_ui_component_setstyletype(&self->component, STYLE_PATTERNVIEW);
+	psy_ui_component_set_style_type(&self->component, STYLE_PATTERNVIEW);
 	psy_ui_notebook_init(&self->notebook, &self->component);
-	psy_ui_component_setalign(psy_ui_notebook_base(&self->notebook),
+	psy_ui_component_set_align(psy_ui_notebook_base(&self->notebook),
 		psy_ui_ALIGN_CLIENT);		
 	psy_ui_notebook_init(&self->editnotebook, psy_ui_notebook_base(
 		&self->notebook));	
@@ -130,13 +130,13 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 	/* Linenumbers */
 	trackerlinenumberbar_init(&self->left, &self->component, &self->state,
 		self->workspace);
-	psy_ui_component_setalign(&self->left.component, psy_ui_ALIGN_LEFT);	
+	psy_ui_component_set_align(&self->left.component, psy_ui_ALIGN_LEFT);	
 	/* Header */
 	psy_ui_component_init(&self->headerpane, &self->component, NULL);	
-	psy_ui_component_setalign(&self->headerpane, psy_ui_ALIGN_TOP);
+	psy_ui_component_set_align(&self->headerpane, psy_ui_ALIGN_TOP);
 	trackerheader_init(&self->header, &self->headerpane,
 		&self->trackconfig, &self->state, self->workspace);
-	psy_ui_component_setalign(&self->header.component,
+	psy_ui_component_set_align(&self->header.component,
 		psy_ui_ALIGN_FIXED);
 	/* Defaultline */
 	patterndefaultline_init(&self->defaultline, &self->component,
@@ -165,7 +165,7 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 	/* Interpolate */
 	interpolatecurveview_init(&self->interpolatecurveview, &self->component, 0,
 		0, 0, &self->pvstate, workspace);
-	psy_ui_component_setalign(&self->interpolatecurveview.component,
+	psy_ui_component_set_align(&self->interpolatecurveview.component,
 		psy_ui_ALIGN_BOTTOM);
 	psy_ui_component_hide(&self->interpolatecurveview.component);	
 	/* Tabbar */
@@ -185,7 +185,7 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 		patternview_onappzoom);
 	patternview_rebuild(self);
 	patternview_update_cursor(self);
-	psy_ui_component_starttimer(&self->component, 0, 50);	
+	psy_ui_component_start_timer(&self->component, 0, 50);	
 }
 
 void patternview_ondestroy(PatternView* self)
@@ -202,7 +202,7 @@ void patternview_ontoggleproperties(PatternView* self,
 {		
 	assert(self);
 	
-	psy_ui_component_togglevisibility(&self->properties.component);
+	psy_ui_component_toggle_visibility(&self->properties.component);
 	psy_ui_component_invalidate(&self->component);	
 }
 
@@ -250,9 +250,9 @@ void patternview_onfocus(PatternView* self)
 	assert(self);
 
 	if (psy_ui_tabbar_selected(&self->tabbar.tabbar) == 1) { /* Pianoroll */
-		psy_ui_component_setfocus(&self->pianoroll.grid.component);		
+		psy_ui_component_set_focus(&self->pianoroll.grid.component);		
 	} else {
-		psy_ui_component_setfocus(&self->trackerview.grid.component);
+		psy_ui_component_set_focus(&self->trackerview.grid.component);
 	}
 }
 
@@ -260,7 +260,7 @@ void patternview_oncontextmenu(PatternView* self, psy_ui_Component* sender)
 {
 	assert(self);
 
-	psy_ui_component_togglevisibility(patternblockmenu_base(&self->blockmenu));
+	psy_ui_component_toggle_visibility(patternblockmenu_base(&self->blockmenu));
 	psy_ui_component_invalidate(&self->component);
 }
 
@@ -457,7 +457,7 @@ void  patternview_onmouseup(PatternView* self, psy_ui_MouseEvent* ev)
 				trackergrid_selection(&self->trackerview.grid));
 		}
 	} else if (psy_ui_mouseevent_button(ev) == 2) {
-		 psy_ui_component_togglevisibility(patternblockmenu_base(
+		 psy_ui_component_toggle_visibility(patternblockmenu_base(
 			 &self->blockmenu));		
 	}
 }
@@ -545,6 +545,6 @@ void patternview_updatescrollstep(PatternView* self)
 		step);
 	psy_ui_component_setscrollstep_width(trackerheader_base(&self->header),
 		step);
-	psy_ui_component_setscrollstep_height(trackergrid_base(
+	psy_ui_component_set_scrollstep_height(trackergrid_base(
 		&self->trackerview.grid), self->state.lineheight);	
 }

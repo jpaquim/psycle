@@ -18,7 +18,7 @@ extern "C" {
 **
 **  The psy_ui_LCLAligner works pretty much like in Lazarus/Delphi and can be
 **  used to quickly fill an area and is the default aligner in psycle. Use
-**  psy_ui_component_setalign to control the placement.
+**  psy_ui_component_set_align to control the placement.
 **  (see: https://wiki.freepascal.org/Autosize_/_Layout#Align)
 */
 

@@ -153,7 +153,7 @@ typedef struct NewMachineSectionsPane {
 	NewMachineSectionsHeader sectionsheader;
 	psy_ui_TabBar navsections;
 	psy_ui_Component sections;	
-	psy_ui_TextInput edit;
+	psy_ui_TextArea edit;
 	psy_ui_Scroller scroller_sections;
 	Workspace* workspace;
 	psy_Table newmachinesections;

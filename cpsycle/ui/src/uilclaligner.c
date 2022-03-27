@@ -95,9 +95,9 @@ void psy_ui_lclaligner_align(psy_ui_LCLAligner* self)
 				
 			psy_ui_size_init_px(&limit,
 				cp_bottomright.x - cp_topleft.x,
-				cp_bottomright.y - cp_topleft.y);			
-			componentsize = psy_ui_component_preferredsize(component,
-				&limit);			
+				cp_bottomright.y - cp_topleft.y);
+			psy_ui_aligner_adjust_margin_size(component, &size, &limit);
+			componentsize = psy_ui_component_preferredsize(component, &limit);
 			psy_ui_aligner_adjustminmaxsize(component, tm, &componentsize,
 				&size);
 			c_tm = psy_ui_component_textmetric(component);
@@ -112,9 +112,7 @@ void psy_ui_lclaligner_align(psy_ui_LCLAligner* self)
 				position = psy_ui_component_position(component);
 				psy_ui_component_setposition(component,
 					psy_ui_rectangle_make(
-						psy_ui_point_make(
-							psy_ui_value_make_px(position.left),
-							psy_ui_value_make_px(position.top)),
+						psy_ui_point_make_px(position.left, position.top),
 						componentsize));	
 			} else if (component->align == psy_ui_ALIGN_CENTER) {
 				psy_ui_RealPoint center;				

@@ -44,17 +44,17 @@ void psy_ui_checkbox_init(psy_ui_CheckBox* self, psy_ui_Component* parent)
 	psy_ui_component_init(psy_ui_checkbox_base(self), parent, NULL);
 	vtable_init(self);
 	psy_ui_component_init(&self->checkmark, psy_ui_checkbox_base(self), NULL);
-	psy_ui_component_setalign(&self->checkmark, psy_ui_ALIGN_LEFT);
-	psy_ui_component_setstyletypes(&self->checkmark,
+	psy_ui_component_set_align(&self->checkmark, psy_ui_ALIGN_LEFT);
+	psy_ui_component_set_style_types(&self->checkmark,
 		psy_ui_STYLE_CHECKMARK, psy_ui_STYLE_CHECKMARK_HOVER,
 		psy_ui_STYLE_CHECKMARK_SELECT, psy_INDEX_INVALID);	
-	psy_ui_component_setpreferredsize(&self->checkmark,
+	psy_ui_component_set_preferred_size(&self->checkmark,
 		psy_ui_size_make_em(2.0, 1.0));
 	psy_ui_label_init(&self->text, psy_ui_checkbox_base(self));
 	psy_ui_component_set_margin(&self->text.component,
 		psy_ui_margin_make_em(0.0, 0.0, 0.0, 1.0));
-	psy_ui_label_preventwrap(&self->text);
-	psy_ui_component_setalign(&self->text.component, psy_ui_ALIGN_LEFT);
+	psy_ui_label_prevent_wrap(&self->text);
+	psy_ui_component_set_align(&self->text.component, psy_ui_ALIGN_LEFT);
 	psy_ui_component_setalignexpand(&self->text.component, psy_ui_HEXPAND);	
 	psy_signal_init(&self->signal_clicked);	
 }
@@ -79,7 +79,7 @@ void psy_ui_checkbox_settext(psy_ui_CheckBox* self, const char* text)
 {
 	assert(self);
 
-	psy_ui_label_settext(&self->text, text);	
+	psy_ui_label_set_text(&self->text, text);	
 }
 
 const char* psy_ui_checkbox_text(psy_ui_CheckBox* self)
@@ -121,14 +121,14 @@ void psy_ui_checkbox_preventwrap(psy_ui_CheckBox* self)
 {
 	assert(self);
 
-	psy_ui_label_preventwrap(&self->text);
+	psy_ui_label_prevent_wrap(&self->text);
 }
 
 void psy_ui_checkbox_enablewrap(psy_ui_CheckBox* self)
 {
 	assert(self);
 
-	psy_ui_label_enablewrap(&self->text);
+	psy_ui_label_enable_wrap(&self->text);
 }
 
 void psy_ui_checkbox_onmousedown(psy_ui_CheckBox* self, psy_ui_MouseEvent* ev)

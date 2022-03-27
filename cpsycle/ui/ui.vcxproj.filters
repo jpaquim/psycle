@@ -286,9 +286,6 @@
     <ClCompile Include="src\uistyles.c">
       <Filter>common</Filter>
     </ClCompile>
-    <ClCompile Include="src\uitextinput.c">
-      <Filter>components</Filter>
-    </ClCompile>
     <ClCompile Include="src\uitextarea.c">
       <Filter>components</Filter>
     </ClCompile>
@@ -297,6 +294,9 @@
     </ClCompile>
     <ClCompile Include="src\uicomponentbackground.c">
       <Filter>graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uitextdraw.c">
+      <Filter>components</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -531,9 +531,6 @@
     <ClInclude Include="src\uistyles.h">
       <Filter>common</Filter>
     </ClInclude>
-    <ClInclude Include="src\uitextinput.h">
-      <Filter>components</Filter>
-    </ClInclude>
     <ClInclude Include="src\uitextarea.h">
       <Filter>components</Filter>
     </ClInclude>
@@ -542,6 +539,9 @@
     </ClInclude>
     <ClInclude Include="src\uicomponentbackground.h">
       <Filter>graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\uitextdraw.h">
+      <Filter>components</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

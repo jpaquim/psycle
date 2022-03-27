@@ -17,7 +17,7 @@
 /* ui */
 #include <uibutton.h>
 #include <uicombobox.h>
-#include <uitextinput.h>
+#include <uitextarea.h>
 #include <uilabel.h>
 #include <uinotebook.h>
 #include <uislider.h>
@@ -36,11 +36,11 @@ typedef struct SamplesHeaderView {
 	psy_ui_Component component;
 	/* internal */
 	psy_ui_Label namelabel;
-	psy_ui_TextInput nameedit;
+	psy_ui_TextArea nameedit;
 	psy_ui_Button prevbutton;
 	psy_ui_Button nextbutton;
 	psy_ui_Label srlabel;
-	psy_ui_TextInput sredit;
+	psy_ui_TextArea sredit;
 	psy_ui_Label numsamplesheaderlabel;
 	psy_ui_Label numsampleslabel;
 	psy_ui_Label channellabel;
@@ -118,16 +118,16 @@ typedef struct SamplesLoopView {
 	psy_ui_Label loopheaderlabel;
 	psy_ui_ComboBox loopdir;
 	psy_ui_Label loopstartlabel;
-	psy_ui_TextInput loopstartedit;
+	psy_ui_TextArea loopstartedit;
 	psy_ui_Label loopendlabel;
-	psy_ui_TextInput loopendedit;
+	psy_ui_TextArea loopendedit;
 	psy_ui_Component sustain;
 	psy_ui_Label sustainloopheaderlabel;
 	psy_ui_ComboBox sustainloopdir;
 	psy_ui_Label sustainloopstartlabel;
-	psy_ui_TextInput sustainloopstartedit;
+	psy_ui_TextArea sustainloopstartedit;
 	psy_ui_Label sustainloopendlabel;
-	psy_ui_TextInput sustainloopendedit;	
+	psy_ui_TextArea sustainloopendedit;	
 	psy_audio_SampleLoop currloop;
 	psy_audio_SampleLoop currsustainloop;
 	/* references */

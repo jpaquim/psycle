@@ -19,7 +19,7 @@
 #include <uinotebook.h>
 #include <uibutton.h>
 #include <uieditor.h>
-#include <uitextinput.h>
+#include <uitextarea.h>
 #include <uilabel.h>
 #include <uicombobox.h>
 #include <presets.h>

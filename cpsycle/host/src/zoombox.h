@@ -8,7 +8,7 @@
 
 /* ui */
 #include <uibutton.h>
-#include <uitextinput.h>
+#include <uitextarea.h>
 
 /*
 ** ZoomBox
@@ -25,7 +25,7 @@ typedef struct ZoomBox {
 	psy_ui_Component component;
 	/* internal */
 	psy_ui_Button zoomin;
-	psy_ui_TextInput zoom;
+	psy_ui_TextArea zoom;
 	psy_ui_Button zoomout;	
 	double zoomrate;
 	double zoomstep;

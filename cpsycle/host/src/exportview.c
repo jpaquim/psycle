@@ -37,7 +37,7 @@ void exportview_init(ExportView* self, psy_ui_Component* parent,
 		tabbarparent, self->properties, 3, workspace);
 	psy_signal_connect(&self->view.signal_changed, self,
 		exportview_onsettingsviewchanged);
-	psy_ui_component_setalign(&self->view.component, psy_ui_ALIGN_CLIENT);	
+	psy_ui_component_set_align(&self->view.component, psy_ui_ALIGN_CLIENT);	
 }
 
 void exportview_ondestroy(ExportView* self, psy_ui_Component* sender)
@@ -96,5 +96,5 @@ void exportview_exportlyfile(ExportView* self)
 
 void exportview_onfocus(ExportView* self, psy_ui_Component* sender)
 {
-	psy_ui_component_setfocus(&self->view.component);
+	psy_ui_component_set_focus(&self->view.component);
 }

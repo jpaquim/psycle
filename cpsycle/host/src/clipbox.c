@@ -46,11 +46,11 @@ void clipbox_init(ClipBox* self, psy_ui_Component* parent, Workspace* workspace)
 {
 	psy_ui_component_init(&self->component, parent, NULL);
 	vtable_init(self);
-	psy_ui_component_setstyletype(&self->component, STYLE_CLIPBOX);
-	psy_ui_component_setstyletype_select(&self->component,
+	psy_ui_component_set_style_type(&self->component, STYLE_CLIPBOX);
+	psy_ui_component_set_style_type_select(&self->component,
 		STYLE_CLIPBOX_SELECT);
 	self->workspace = workspace;	
-	psy_ui_component_starttimer(&self->component, 0, 100);
+	psy_ui_component_start_timer(&self->component, 0, 100);
 }
 
 void clipbox_ontimer(ClipBox* self, uintptr_t timerid)

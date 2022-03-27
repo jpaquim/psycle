@@ -62,7 +62,7 @@ void seqedittrackdesc_init(SeqEditTrackDesc* self, psy_ui_Component* parent,
 	psy_signal_init(&self->signal_resize);
 	self->workspace = workspace;
 	self->state = state;		
-	psy_ui_component_setdefaultalign(&self->component,
+	psy_ui_component_set_defaultalign(&self->component,
 		psy_ui_ALIGN_TOP, psy_ui_margin_zero());	
 	seqedittrackdesc_build(self);	
 	psy_signal_connect(&workspace->song->sequence.sequenceselection.signal_select, self,
@@ -157,13 +157,13 @@ void seqedittrackdesc_build(SeqEditTrackDesc* self)
 				sequencetrackbox_showtrackname(trackbox);
 			}
 			if (trackbox) {				
-				/* psy_ui_component_setstyletype_hover(
+				/* psy_ui_component_set_style_type_hover(
 					&trackbox->trackbox.component,
 					STYLE_SEQEDT_DESCITEM_HOVER); */
-				psy_ui_component_setstyletype_select(
+				psy_ui_component_set_style_type_select(
 					&trackbox->trackbox.component,
 					STYLE_SEQEDT_DESCITEM_SELECTED);
-				psy_ui_component_setstyletype(
+				psy_ui_component_set_style_type(
 					&trackbox->trackbox.track.component,
 					STYLE_SEQEDT_TRACK_NUMBER);				
 				psy_signal_connect(&trackbox->trackbox.signal_close, self,
@@ -183,7 +183,7 @@ void seqedittrackdesc_build(SeqEditTrackDesc* self)
 		}
 		newtrack = psy_ui_button_allocinit(&self->component);
 		if (newtrack) {
-			psy_ui_button_settext(newtrack, "seqview.new-trk");
+			psy_ui_button_set_text(newtrack, "seqview.new-trk");
 			psy_ui_component_setminimumsize(psy_ui_button_base(newtrack),
 				psy_ui_size_make_em(0.0, 2.0));
 			newtrack->stoppropagation = FALSE;

@@ -42,7 +42,7 @@ void patterndefaultline_init(PatternDefaultLine* self, psy_ui_Component* parent,
 {
 	psy_ui_component_init(&self->component, parent, NULL);
 	vtable_init(self);
-	psy_ui_component_setalign(&self->component, psy_ui_ALIGN_TOP);
+	psy_ui_component_set_align(&self->component, psy_ui_ALIGN_TOP);
 	/* states */
 	patternviewstate_init(&self->pvstate, &workspace->config.patview,
 		&workspace->player.patterndefaults.sequence,
@@ -50,8 +50,8 @@ void patterndefaultline_init(PatternDefaultLine* self, psy_ui_Component* parent,
 	trackerstate_init(&self->state, trackconfig, &self->pvstate);
 	/* grid */
 	trackergrid_init(&self->grid, &self->component, &self->state, workspace);
-	psy_ui_component_setwheelscroll(trackergrid_base(&self->grid), 0);
-	psy_ui_component_setalign(&self->grid.component, psy_ui_ALIGN_FIXED);
+	psy_ui_component_set_wheel_scroll(trackergrid_base(&self->grid), 0);
+	psy_ui_component_set_align(&self->grid.component, psy_ui_ALIGN_FIXED);
 	self->grid.state->drawbeathighlights = FALSE;
 	self->grid.preventeventdriver = TRUE;
 	self->grid.state->draw_playbar = FALSE;	

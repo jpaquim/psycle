@@ -133,11 +133,11 @@ void seqeditloop_init(SeqEditLoop* self, psy_ui_Component* parent,
 	self->state = state;
 	self->loopstate = loopstate;
 	self->node = node;	
-	psy_ui_component_setstyletype(&self->component,
+	psy_ui_component_set_style_type(&self->component,
 		STYLE_SEQEDT_LOOP);
-	psy_ui_component_setstyletype_hover(&self->component,
+	psy_ui_component_set_style_type_hover(&self->component,
 		STYLE_SEQEDT_LOOP_HOVER);
-	psy_ui_component_setstyletype_active(&self->component,
+	psy_ui_component_set_style_type_active(&self->component,
 		STYLE_SEQEDT_LOOP_ACTIVE);		
 	seqeditloop_updatepattern(self);
 }
@@ -156,7 +156,7 @@ SeqEditLoop* seqeditloop_allocinit(
 	rv = seqeditloop_alloc();
 	if (rv) {
 		seqeditloop_init(rv, parent, loopstate, state, node);
-		psy_ui_component_deallocateafterdestroyed(&rv->component);
+		psy_ui_component_deallocate_after_destroyed(&rv->component);
 	}
 	return rv;
 }
@@ -199,7 +199,7 @@ void seqeditloop_ondraw(SeqEditLoop* self, psy_ui_Graphics* g)
 			psy_ui_realsize_make(1, tm->tmHeight));
 		psy_ui_drawsolidrectangle(g, r1, psy_ui_component_colour(&self->component));
 		psy_ui_drawsolidrectangle(g, r2, psy_ui_component_colour(&self->component));
-		psy_ui_textout(g, r2.right + 2, tm->tmHeight, ":", 1);
+		psy_ui_textout(g, psy_ui_realpoint_make(r2.right + 2, tm->tmHeight), ":", 1);
 	} else {
 		psy_ui_RealRectangle r1;
 		psy_ui_RealRectangle r2;		
@@ -213,12 +213,12 @@ void seqeditloop_ondraw(SeqEditLoop* self, psy_ui_Graphics* g)
 			psy_ui_realsize_make(1, + tm->tmHeight));
 		psy_ui_drawsolidrectangle(g, r1, psy_ui_component_colour(&self->component));
 		psy_ui_drawsolidrectangle(g, r2, psy_ui_component_colour(&self->component));
-		psy_ui_textout(g, r2.left - tm->tmAveCharWidth, tm->tmHeight, ":", 1);
+		psy_ui_textout(g, psy_ui_realpoint_make(r2.left - tm->tmAveCharWidth, tm->tmHeight), ":", 1);
 		if (repeat > 1) {
 			char text[64];
 
 			psy_snprintf(text, 64, "%dx", (int)repeat);
-			psy_ui_textout(g, cpx - tm->tmAveCharWidth, 0, text, strlen(text));
+			psy_ui_textout(g, psy_ui_realpoint_make(cpx - tm->tmAveCharWidth, 0.0), text, strlen(text));
 		}
 	}	
 }

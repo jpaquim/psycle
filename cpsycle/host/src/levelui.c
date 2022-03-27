@@ -49,7 +49,7 @@ void levelui_init(LevelUi* self, psy_ui_Component* parent,
 
 	psy_ui_component_init(&self->component, parent, NULL);
 	levelui_vtable_init(self);	
-	psy_ui_component_setstyletype(&self->component, STYLE_MV_LEVEL);
+	psy_ui_component_set_style_type(&self->component, STYLE_MV_LEVEL);
 	self->machine = machine;
 	self->paramidx = paramidx;
 	self->param = param;	

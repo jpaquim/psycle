@@ -71,7 +71,7 @@ typedef struct InstrumentHeaderView {
 	psy_ui_Component component;
 	/* internal */
 	psy_ui_Label namelabel;
-	psy_ui_TextInput nameedit;	
+	psy_ui_TextArea nameedit;	
 	psy_ui_Button prevbutton;
 	psy_ui_Button nextbutton;
 	psy_ui_Component more;

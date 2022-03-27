@@ -8,7 +8,7 @@
 #include "pluginsview.h"
 #include "workspace.h"
 // ui
-#include <uitextinput.h>
+#include <uitextarea.h>
 #include <uilabel.h>
 
 #ifdef __cplusplus
@@ -31,17 +31,17 @@ typedef struct NewMachineSection {
 	bool preventedit;
 	// references
 	psy_Property* section;
-	psy_ui_TextInput* edit;
+	psy_ui_TextArea* edit;
 	Workspace* workspace;
 	NewMachineFilter* filter;
 } NewMachineSection;
 
 void newmachinesection_init(NewMachineSection* self, psy_ui_Component* parent,
-	psy_Property* section, psy_ui_TextInput*, NewMachineFilter* filter, Workspace*);
+	psy_Property* section, psy_ui_TextArea*, NewMachineFilter* filter, Workspace*);
 
 NewMachineSection* newmachinesection_alloc(void);
 NewMachineSection* newmachinesection_allocinit(psy_ui_Component* parent,
-	psy_Property* section, psy_ui_TextInput*, NewMachineFilter* filter, Workspace*);
+	psy_Property* section, psy_ui_TextArea*, NewMachineFilter* filter, Workspace*);
 
 void newmachinesection_findplugins(NewMachineSection*);
 const char* newmachinesection_key(const NewMachineSection*);

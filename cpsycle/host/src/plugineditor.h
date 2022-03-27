@@ -10,7 +10,7 @@
 // ui
 #include <uibutton.h>
 #include <uicombobox.h>
-#include <uitextinput.h>
+#include <uitextarea.h>
 #include <uieditor.h>
 #include <uilabel.h>
 
@@ -27,7 +27,7 @@ typedef struct PluginEditorCreateBar {
 	psy_ui_Component component;
 	// internal	
 	psy_ui_Label desc;
-	psy_ui_TextInput name;
+	psy_ui_TextArea name;
 	psy_ui_Button create;
 	// references
 	Workspace* workspace;

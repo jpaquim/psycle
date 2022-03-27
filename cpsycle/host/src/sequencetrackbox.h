@@ -10,7 +10,7 @@
 #include "trackbox.h"
 #include "workspace.h"
 /* ui */
-#include <uitextinput.h>
+#include <uitextarea.h>
 /* audio */
 #include <sequence.h>
 

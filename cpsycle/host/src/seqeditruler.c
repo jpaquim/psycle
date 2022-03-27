@@ -189,7 +189,7 @@ void seqeditruler_drawruler(SeqEditRuler* self, psy_ui_Graphics* g,
 			}
 		}
 		psy_snprintf(txt, 64, "%d", (int)(currbeat));
-		psy_ui_textout(g, cpx, textline, txt, psy_strlen(txt));
+		psy_ui_textout(g, psy_ui_realpoint_make(cpx, textline), txt, psy_strlen(txt));
 	}
 	if (self->state->drawcursor && self->state->cursoractive) {
 		psy_ui_RealPoint cp;

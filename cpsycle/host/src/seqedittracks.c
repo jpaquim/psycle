@@ -72,9 +72,9 @@ void seqeditortracks_init(SeqEditorTracks* self, psy_ui_Component* parent,
 	seqeditortracks_vtable_init(self);		
 	psy_ui_component_setscrollstep(&self->component,
 		psy_ui_size_make_em(8.0, 0.0));	
-	psy_ui_component_setwheelscroll(&self->component, 1);	
+	psy_ui_component_set_wheel_scroll(&self->component, 1);	
 	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_SCROLL);	
-	psy_ui_component_setdefaultalign(&self->component,
+	psy_ui_component_set_defaultalign(&self->component,
 		psy_ui_ALIGN_TOP, psy_ui_margin_zero());
 	psy_signal_connect(&workspace->song->sequence.sequenceselection.signal_select, self,
 		seqeditortracks_onsequenceselectionselect);
@@ -83,7 +83,7 @@ void seqeditortracks_init(SeqEditorTracks* self, psy_ui_Component* parent,
 	seqeditortracks_build(self);
 	psy_signal_connect(&self->state->signal_cursorchanged, self,
 		seqeditortracks_oncursorchanged);
-	psy_ui_component_starttimer(&self->component, 0, 50);
+	psy_ui_component_start_timer(&self->component, 0, 50);
 }
 
 void seqeditortracks_build(SeqEditorTracks* self)
@@ -120,7 +120,7 @@ void seqeditortracks_build(SeqEditorTracks* self)
 	self->playline = seqeditorplayline_allocinit(&self->component,
 		self->state);
 	if (self->playline) {
-		psy_ui_component_setalign(&self->playline->seqeditorline.component,
+		psy_ui_component_set_align(&self->playline->seqeditorline.component,
 			psy_ui_ALIGN_NONE);
 		psy_ui_component_set_margin(&self->playline->seqeditorline.component,
 			psy_ui_margin_zero());
@@ -130,7 +130,7 @@ void seqeditortracks_build(SeqEditorTracks* self)
 	}
 	self->cursorline = seqeditorline_allocinit(&self->component, self->state);
 	if (self->cursorline) {
-		psy_ui_component_setalign(&self->cursorline->component,
+		psy_ui_component_set_align(&self->cursorline->component,
 			psy_ui_ALIGN_NONE);
 		psy_ui_component_set_margin(&self->cursorline->component,
 			psy_ui_margin_zero());
@@ -141,7 +141,7 @@ void seqeditortracks_build(SeqEditorTracks* self)
 	self->seqeditposline = seqeditorline_allocinit(&self->component,
 		self->state);
 	if (self->seqeditposline) {
-		psy_ui_component_setalign(&self->seqeditposline->component,
+		psy_ui_component_set_align(&self->seqeditposline->component,
 			psy_ui_ALIGN_NONE);
 		psy_ui_component_set_margin(&self->seqeditposline->component,
 			psy_ui_margin_zero());

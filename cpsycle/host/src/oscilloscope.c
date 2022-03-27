@@ -281,8 +281,8 @@ void oscilloscopecontrols_init(OscilloscopeControls* self, psy_ui_Component* par
 		oscilloscopecontrols_onchannelselect);
 	oscilloscopecontrols_updatechannelselect(self);
 	psy_ui_label_init(&self->amplbl, &self->component);
-	psy_ui_label_preventtranslation(&self->amplbl);
-	psy_ui_label_settext(&self->amplbl, "Amp");
+	psy_ui_label_prevent_translation(&self->amplbl);
+	psy_ui_label_set_text(&self->amplbl, "Amp");
 	psy_ui_margin_setright(&margin, psy_ui_value_make_ew(0.5));
 	psy_ui_component_set_margin(&self->amplbl.component, margin);
 	zoombox_init(&self->ampzoom, &self->component);
@@ -305,10 +305,10 @@ void oscilloscopecontrols_onchannelselect(OscilloscopeControls* self,
 void oscilloscopecontrols_updatechannelselect(OscilloscopeControls* self)
 {
 	if (self->oscilloscope->channelmode == OSCILLOSCOPE_CHMODE_LEFT) {
-		psy_ui_button_settext(&self->channelmode, "Left");
+		psy_ui_button_set_text(&self->channelmode, "Left");
 	} else
 	if (self->oscilloscope->channelmode == OSCILLOSCOPE_CHMODE_RIGHT) {
-		psy_ui_button_settext(&self->channelmode, "Right");
+		psy_ui_button_set_text(&self->channelmode, "Right");
 	}
 	psy_ui_component_align(&self->component);
 }
@@ -324,11 +324,11 @@ void oscilloscopeview_init(OscilloscopeView* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->component, parent, NULL);	
 	oscilloscope_init(&self->oscilloscope, &self->component, wire,
 		workspace);
-	psy_ui_component_setalign(&self->oscilloscope.component,
+	psy_ui_component_set_align(&self->oscilloscope.component,
 		psy_ui_ALIGN_CLIENT);
 	oscilloscopecontrols_init(&self->oscilloscopecontrols, &self->component,
 		&self->oscilloscope);
-	psy_ui_component_setalign(&self->oscilloscopecontrols.component,
+	psy_ui_component_set_align(&self->oscilloscopecontrols.component,
 		psy_ui_ALIGN_TOP);
 }
 

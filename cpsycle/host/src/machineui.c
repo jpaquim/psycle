@@ -31,9 +31,9 @@ void editnameui_init(EditnameUi* self, psy_ui_Component* parent,
 {
 	psy_ui_label_init(&self->label, parent);
 	self->machine = machine;
-	psy_ui_label_preventtranslation(&self->label);
-	psy_ui_label_preventwrap(&self->label);		
-	psy_ui_component_setstyletype(psy_ui_label_base(&self->label), style);	
+	psy_ui_label_prevent_translation(&self->label);
+	psy_ui_label_prevent_wrap(&self->label);		
+	psy_ui_component_set_style_type(psy_ui_label_base(&self->label), style);	
 	editnameui_update(self);	
 }
 
@@ -42,7 +42,7 @@ void editnameui_update(EditnameUi* self)
 	char editname[130];
 	
 	editnameui_editname(self, editname, 130);
-	psy_ui_label_settext(&self->label, editname);
+	psy_ui_label_set_text(&self->label, editname);
 }
 
 void editnameui_editname(EditnameUi* self, char* rv, uintptr_t strlen)
@@ -90,7 +90,7 @@ void vuui_init(VuUi* self, psy_ui_Component* parent, psy_audio_Machine* machine,
 {
 	psy_ui_component_init(&self->component, parent, NULL);
 	vuui_vtable_init(self);
-	psy_ui_component_setstyletype(&self->component, vu_style);
+	psy_ui_component_set_style_type(&self->component, vu_style);
 	self->machine = machine;
 	self->vu0_style = vu0_style;
 	self->vupeak_style = vupeak_style;
@@ -195,9 +195,9 @@ void panui_init(PanUi* self, psy_ui_Component* parent, psy_audio_Machine* machin
 	self->machine = machine;
 	self->drag = FALSE;
 	self->dragoffset = 0;
-	psy_ui_component_setstyletype(&self->component, pan_style);
+	psy_ui_component_set_style_type(&self->component, pan_style);
 	psy_ui_component_init(&self->slider, &self->component, NULL);
-	psy_ui_component_setstyletype(&self->slider, pan_slider_style);
+	psy_ui_component_set_style_type(&self->slider, pan_slider_style);
 }
 
 void panui_onmousedown(PanUi* self, psy_ui_MouseEvent* ev)

@@ -107,7 +107,9 @@ psy_List* psy_list_findentry(psy_List*, void* entry);
 uintptr_t psy_list_entry_index(const psy_List*, const void* entry);
 /* returns the node at numentry position */
 psy_List* psy_list_at(psy_List*, uintptr_t numentry);
-const psy_List* psy_list_at_const(psy_List*, uintptr_t numentry);
+const psy_List* psy_list_at_const(const psy_List*, uintptr_t numentry);
+void* psy_list_entry_at(psy_List*, uintptr_t numentry);
+const void* psy_list_entry_at_const(const psy_List*, uintptr_t numentry);
 /* swap entries */
 void psy_list_swap_entries(psy_List* i, psy_List* j);
 #ifdef __cplusplus

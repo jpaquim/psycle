@@ -43,10 +43,10 @@ void psy_ui_switch_init(psy_ui_Switch* self, psy_ui_Component* parent,
 	vtable_init(self);
 	psy_signal_init(&self->signal_clicked);
 	self->state = FALSE;
-	psy_ui_component_setstyletypes(psy_ui_switch_base(self),
+	psy_ui_component_set_style_types(psy_ui_switch_base(self),
 		psy_ui_STYLE_SWITCH, psy_ui_STYLE_SWITCH_HOVER,
 		psy_ui_STYLE_SWITCH_SELECT, psy_INDEX_INVALID);
-	psy_ui_component_setpreferredsize(psy_ui_switch_base(self),
+	psy_ui_component_set_preferred_size(psy_ui_switch_base(self),
 		psy_ui_size_make_em(4.0, 1.5));
 }
 
@@ -68,7 +68,7 @@ psy_ui_Switch* psy_ui_switch_allocinit(psy_ui_Component* parent,
 	rv = psy_ui_switch_alloc();
 	if (rv) {
 		psy_ui_switch_init(rv, parent, view);
-		psy_ui_component_deallocateafterdestroyed(&rv->component);		
+		psy_ui_component_deallocate_after_destroyed(&rv->component);		
 	}
 	return rv;
 }

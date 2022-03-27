@@ -68,7 +68,7 @@ void interpolatecurvebar_init(InterpolateCurveBar* self, psy_ui_Component* paren
 	
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_combobox_init(&self->curvetype, &self->component);
-	psy_ui_component_setalign(&self->curvetype.component, psy_ui_ALIGN_LEFT);
+	psy_ui_component_set_align(&self->curvetype.component, psy_ui_ALIGN_LEFT);
 	psy_ui_combobox_addtext(&self->curvetype, "Linear");
 	psy_ui_combobox_addtext(&self->curvetype, "Hermite Curve");
 	psy_ui_combobox_addtext(&self->curvetype, "All to Linear");
@@ -76,11 +76,11 @@ void interpolatecurvebar_init(InterpolateCurveBar* self, psy_ui_Component* paren
 	psy_ui_combobox_setcursel(&self->curvetype, 0);
 	psy_ui_combobox_setcharnumber(&self->curvetype, 15);
 	psy_ui_button_init(&self->cancel, &self->component);
-	psy_ui_button_settext(&self->cancel, "Cancel");
-	psy_ui_component_setalign(&self->cancel.component, psy_ui_ALIGN_RIGHT);
+	psy_ui_button_set_text(&self->cancel, "Cancel");
+	psy_ui_component_set_align(&self->cancel.component, psy_ui_ALIGN_RIGHT);
 	psy_ui_button_init(&self->ok, &self->component);
-	psy_ui_button_settext(&self->ok, "Interpolate");
-	psy_ui_component_setalign(&self->ok.component, psy_ui_ALIGN_RIGHT);
+	psy_ui_button_set_text(&self->ok, "Interpolate");
+	psy_ui_component_set_align(&self->ok.component, psy_ui_ALIGN_RIGHT);
 	psy_ui_margin_init_em(&margin, 0.0, 2.0, 0.0, 0.0);		
 	psy_ui_component_setmargin_children(&self->component, margin);
 }
@@ -124,7 +124,7 @@ void interpolatecurvebox_init(InterpolateCurveBox* self,
 	psy_signal_connect(&self->component.signal_destroy, self,
 		interpolatecurvebox_ondestroy);	
 	psy_ui_component_preventalign(&self->component);
-	psy_ui_component_setpreferredsize(&self->component,
+	psy_ui_component_set_preferred_size(&self->component,
 		psy_ui_size_make_em(0.0, 10.0));
 }
 
@@ -453,10 +453,10 @@ void interpolatecurveview_init(InterpolateCurveView* self, psy_ui_Component*
 	psy_ui_component_init(&self->component, parent, NULL);
 	self->state = state;
 	interpolatecurvebar_init(&self->bar, &self->component, workspace);
-	psy_ui_component_setalign(&self->bar.component, psy_ui_ALIGN_BOTTOM);
+	psy_ui_component_set_align(&self->bar.component, psy_ui_ALIGN_BOTTOM);
 	interpolatecurvebox_init(&self->box, &self->component, self, state,
 		workspace);
-	psy_ui_component_setalign(&self->box.component, psy_ui_ALIGN_CLIENT);	
+	psy_ui_component_set_align(&self->box.component, psy_ui_ALIGN_CLIENT);	
 	psy_signal_init(&self->signal_cancel);
 	psy_signal_connect(&self->component.signal_destroy, self,
 		interpolatecurveview_ondestroy);

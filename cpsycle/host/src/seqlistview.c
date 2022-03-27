@@ -70,9 +70,9 @@ void seqviewtrack_init(SeqViewTrack* self, psy_ui_Component* parent,
 {
 	psy_ui_component_init(&self->component, parent, NULL);
 	seqviewtrack_vtable_init(self);	
-	psy_ui_component_setstyletype(&self->component,
+	psy_ui_component_set_style_type(&self->component,
 		STYLE_SEQLISTVIEW_TRACK);
-	psy_ui_component_setstyletype_select(&self->component,		
+	psy_ui_component_set_style_type_select(&self->component,		
 		STYLE_SEQLISTVIEW_TRACK_SELECT);	
 	self->state = state;
 	self->trackindex = trackindex;
@@ -104,7 +104,7 @@ SeqViewTrack* seqviewtrack_allocinit(psy_ui_Component* parent,
 	rv = seqviewtrack_alloc();
 	if (rv) {
 		seqviewtrack_init(rv, parent, trackindex, track, state);
-		psy_ui_component_deallocateafterdestroyed(&rv->component);
+		psy_ui_component_deallocate_after_destroyed(&rv->component);
 	}
 	return rv;
 }
@@ -131,7 +131,7 @@ void seqviewtrack_ondraw(SeqViewTrack* self, psy_ui_Graphics* g)
 	psy_audio_OrderIndex editposition;	
 	psy_ui_RealRectangle clip;
 		
-	clip = psy_ui_cliprect(g);
+	clip = psy_ui_graphics_cliprect(g);
 	tm = psy_ui_component_textmetric(&self->component);
 	lineheightpx = psy_max(1.0, floor(psy_ui_value_px(&self->state->lineheight,
 		tm, NULL)));
@@ -308,7 +308,7 @@ void seqviewtrack_textout_digit(SeqViewTrack* self,
 			psy_ui_settextcolour(g,
 				psy_ui_style(STYLE_SEQLISTVIEW_ITEM)->colour);
 		} else {			
-			psy_ui_textout(g, cp.x, cp.y, digitstr, 1);
+			psy_ui_textout(g, cp, digitstr, 1);
 		}
 		cp.x += self->state->colwidth;
 	}
@@ -473,13 +473,13 @@ void seqviewlist_init(SeqviewList* self, psy_ui_Component* parent,
 {
 	psy_ui_component_init(&self->component, parent, NULL);
 	seqviewlist_vtable_init(self);
-	psy_ui_component_setstyletype(&self->component, STYLE_SEQLISTVIEW);
+	psy_ui_component_set_style_type(&self->component, STYLE_SEQLISTVIEW);
 	self->state = state;	
 	self->lastplayrow = psy_INDEX_INVALID;	
 	self->showpatternnames = generalconfig_showingpatternnames(
 		psycleconfig_general(workspace_conf(self->state->cmds->workspace)));	
-	psy_ui_component_setwheelscroll(&self->component, 1);	
-	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
+	psy_ui_component_set_wheel_scroll(&self->component, 1);	
+	psy_ui_component_set_defaultalign(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_margin_zero());
 	psy_ui_component_setalignexpand(&self->component, psy_ui_HEXPAND);
 	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_SCROLL);	
@@ -499,7 +499,7 @@ void seqviewlist_init(SeqviewList* self, psy_ui_Component* parent,
 		psy_INDEX_INVALID, self,
 		(fp_inputhandler_input)
 		seqviewlist_oninput);
-	// psy_ui_component_starttimer(&self->component, 0, 200);
+	// psy_ui_component_start_timer(&self->component, 0, 200);
 }
 
 void seqviewlist_build(SeqviewList* self)

@@ -400,6 +400,13 @@ INLINE void psy_ui_size_init_em(psy_ui_Size* self, double width, double height)
 	psy_ui_size_setroundmode(self, psy_ui_ROUND_FLOOR);
 }
 
+INLINE void psy_ui_size_init_perc(psy_ui_Size* self, double width, double height)
+{
+	self->width = psy_ui_value_make_pw(width);
+	self->height = psy_ui_value_make_ph(height);
+	psy_ui_size_setroundmode(self, psy_ui_ROUND_FLOOR);
+}
+
 INLINE void psy_ui_size_init_px(psy_ui_Size* self, double width, double height)
 {
 	self->width = psy_ui_value_make_px(width);
@@ -429,6 +436,14 @@ INLINE psy_ui_Size psy_ui_size_make_em(double width, double height)
 	psy_ui_Size rv;
 
 	psy_ui_size_init_em(&rv, width, height);
+	return rv;
+}
+
+INLINE psy_ui_Size psy_ui_size_make_perc(double width, double height)
+{
+	psy_ui_Size rv;
+
+	psy_ui_size_init_perc(&rv, width, height);
 	return rv;
 }
 
@@ -606,6 +621,8 @@ void psy_ui_margin_init_em(psy_ui_Margin*, double top,
 	double right, double bottom, double left);
 void psy_ui_margin_init_px(psy_ui_Margin*, double top,
 	double right, double bottom, double left);
+void psy_ui_margin_init_perc(psy_ui_Margin*, double top,
+	double right, double bottom, double left);
 void psy_ui_margin_settop(psy_ui_Margin*, psy_ui_Value value);
 void psy_ui_margin_setright(psy_ui_Margin*, psy_ui_Value value);
 void psy_ui_margin_setbottom(psy_ui_Margin*, psy_ui_Value value);
@@ -648,6 +665,15 @@ INLINE psy_ui_Margin psy_ui_margin_make_px(double top,
 	psy_ui_Margin rv;
 
 	psy_ui_margin_init_px(&rv, top, right, bottom, left);
+	return rv;
+}
+
+INLINE psy_ui_Margin psy_ui_margin_make_perc(double top,
+	double right, double bottom, double left)
+{
+	psy_ui_Margin rv;
+
+	psy_ui_margin_init_perc(&rv, top, right, bottom, left);
 	return rv;
 }
 

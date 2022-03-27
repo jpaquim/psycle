@@ -46,15 +46,15 @@ void titlebar_init(TitleBar* self, psy_ui_Component* parent,
 	psy_ui_component_init_align(&self->component, parent, NULL,
 		psy_ui_ALIGN_TOP);
 	titlebar_vtable_init(self);
-	psy_ui_component_setstyletype(&self->component, STYLE_HEADER);
+	psy_ui_component_set_style_type(&self->component, STYLE_HEADER);
 	psy_ui_component_init_align(&self->client, &self->component, NULL,
 		psy_ui_ALIGN_CLIENT);
 	psy_ui_label_init_text(&self->title, &self->client, title);
-	psy_ui_component_setalign(&self->title.component, psy_ui_ALIGN_LEFT);
+	psy_ui_component_set_align(&self->title.component, psy_ui_ALIGN_LEFT);
 	psy_ui_button_init(&self->hide, &self->component);
-	psy_ui_button_preventtranslation(&self->hide);
-	psy_ui_button_settext(&self->hide, "X");	
-	psy_ui_component_setalign(&self->hide.component, psy_ui_ALIGN_RIGHT);
+	psy_ui_button_prevent_translation(&self->hide);
+	psy_ui_button_set_text(&self->hide, "X");	
+	psy_ui_component_set_align(&self->hide.component, psy_ui_ALIGN_RIGHT);
 	psy_ui_margin_init_em(&margin, 0.0, 2.0, 0.0, 0.0);
 	psy_ui_component_set_margin(&self->hide.component, margin);
 	self->component.draggable = TRUE;

@@ -122,11 +122,11 @@ void psy_ui_componentbackground_draw(psy_ui_ComponentBackground* self,
 
 			style = psy_ui_componentstyle_currstyle_const(&self->component->style);
 			if (psy_ui_bitmap_empty(&style->background.bitmap)) {
-				psy_ui_drawsolidrectangle(g, psy_ui_cliprect(g),
+				psy_ui_drawsolidrectangle(g, psy_ui_graphics_cliprect(g),
 					psy_ui_component_backgroundcolour(self->component));
 			} else {
 				if (&style->background.repeat == psy_ui_NOREPEAT) {
-					psy_ui_drawsolidrectangle(g, psy_ui_cliprect(g),
+					psy_ui_drawsolidrectangle(g, psy_ui_graphics_cliprect(g),
 						psy_ui_component_backgroundcolour(self->component));
 				}
 				psy_ui_componentbackground_draw_image(self, g, style);

@@ -47,7 +47,7 @@ void fileviewfilter_init(FileViewFilter* self, psy_ui_Component* parent)
 {
 	psy_ui_component_init(fileviewfilter_base(self), parent, NULL);
 	fileviewfilter_vtable_init(self);
-	psy_ui_component_setdefaultalign(fileviewfilter_base(self), psy_ui_ALIGN_TOP,
+	psy_ui_component_set_defaultalign(fileviewfilter_base(self), psy_ui_ALIGN_TOP,
 		psy_ui_defaults_vmargin(psy_ui_appdefaults()));
 	psy_ui_label_init_text(&self->desc, fileviewfilter_base(self), "Item:");
 	psy_ui_checkbox_init_text(&self->psy, fileviewfilter_base(self),
@@ -109,7 +109,7 @@ void fileviewfilter_clear(FileViewFilter* self)
 void fileviewsavefilter_init(FileViewSaveFilter* self, psy_ui_Component* parent)
 {
 	psy_ui_component_init(fileviewsavefilter_base(self), parent, NULL);
-	psy_ui_component_setdefaultalign(fileviewsavefilter_base(self), psy_ui_ALIGN_TOP,
+	psy_ui_component_set_defaultalign(fileviewsavefilter_base(self), psy_ui_ALIGN_TOP,
 		psy_ui_defaults_vmargin(psy_ui_appdefaults()));
 	psy_ui_label_init_text(&self->desc, fileviewsavefilter_base(self),
 		"Save as:");
@@ -143,51 +143,51 @@ void fileview_init(FileView* self, psy_ui_Component* parent)
 		fileview_ondestroy);
 	/* filename */
 	psy_ui_component_init(&self->bottom, &self->component, NULL);
-	psy_ui_component_setalign(&self->bottom, psy_ui_ALIGN_BOTTOM);
+	psy_ui_component_set_align(&self->bottom, psy_ui_ALIGN_BOTTOM);
 	psy_ui_label_init(&self->dir, &self->bottom);
-	psy_ui_component_setalign(psy_ui_label_base(&self->dir),
+	psy_ui_component_set_align(psy_ui_label_base(&self->dir),
 		psy_ui_ALIGN_TOP);
 	psy_ui_component_init_align(&self->filebar, &self->bottom, NULL,
 		psy_ui_ALIGN_TOP);
 	psy_ui_label_init_text(&self->filedesc, &self->filebar, "file.file");
-	psy_ui_component_setalign(&self->filedesc.component,
+	psy_ui_component_set_align(&self->filedesc.component,
 		psy_ui_ALIGN_LEFT);
-	psy_ui_textinput_init(&self->filename, &self->filebar);
-	psy_ui_component_setalign(&self->filename.component,
+	psy_ui_textarea_init_single_line(&self->filename, &self->filebar);	
+	psy_ui_component_set_align(&self->filename.component,
 		psy_ui_ALIGN_CLIENT);
 	/* filter panel */
 	psy_ui_component_init(&self->filters, fileview_base(self), NULL);
-	psy_ui_component_setalign(&self->filters, psy_ui_ALIGN_LEFT);
+	psy_ui_component_set_align(&self->filters, psy_ui_ALIGN_LEFT);
 	fileviewfilter_init(&self->dirfilter, &self->filters);
-	psy_ui_component_setalign(&self->dirfilter.component, psy_ui_ALIGN_TOP);
+	psy_ui_component_set_align(&self->dirfilter.component, psy_ui_ALIGN_TOP);
 	fileviewsavefilter_init(&self->savefilter, &self->filters);
-	psy_ui_component_setalign(&self->savefilter.component, psy_ui_ALIGN_TOP);	
+	psy_ui_component_set_align(&self->savefilter.component, psy_ui_ALIGN_TOP);	
 	/* buttons */
 	psy_ui_component_init_align(&self->buttons, fileview_base(self), NULL,			
 		psy_ui_ALIGN_LEFT);
 	psy_ui_button_init_text(&self->save, &self->buttons,
 		"file.save");
-	psy_ui_component_setalign(&self->save.component, psy_ui_ALIGN_TOP);
+	psy_ui_component_set_align(&self->save.component, psy_ui_ALIGN_TOP);
 	psy_ui_button_init_text_connect(&self->refresh, &self->buttons,
 		"file.refresh", self, fileview_ondirfilter);
-	psy_ui_component_setalign(&self->refresh.component, psy_ui_ALIGN_TOP);
+	psy_ui_component_set_align(&self->refresh.component, psy_ui_ALIGN_TOP);
 	psy_ui_button_init_text_connect(&self->showall, &self->buttons,
 		"file.showall", self, fileview_ondirfilter);
-	psy_ui_component_setalign(&self->showall.component, psy_ui_ALIGN_TOP);	
+	psy_ui_component_set_align(&self->showall.component, psy_ui_ALIGN_TOP);	
 	psy_ui_button_init_text_connect(&self->exit, &self->buttons,
 		"file.exit", self, fileview_onhide);
-	psy_ui_component_setalign(&self->exit.component, psy_ui_ALIGN_TOP);
+	psy_ui_component_set_align(&self->exit.component, psy_ui_ALIGN_TOP);
 	/* drives */
 	psy_ui_tabbar_init(&self->drives, fileview_base(self));
 	psy_ui_tabbar_settabalign(&self->drives, psy_ui_ALIGN_TOP);
-	psy_ui_component_setalign(psy_ui_tabbar_base(&self->drives),
+	psy_ui_component_set_align(psy_ui_tabbar_base(&self->drives),
 		psy_ui_ALIGN_LEFT);
 	/* directory */
 	psy_ui_listbox_init(&self->filebox, &self->component);
 	psy_ui_listbox_setcharnumber(&self->filebox, 80.0);
-	psy_ui_component_setalign(psy_ui_listbox_base(&self->filebox),
+	psy_ui_component_set_align(psy_ui_listbox_base(&self->filebox),
 		psy_ui_ALIGN_CLIENT);			
-	psy_ui_component_setalign(psy_ui_textinput_base(&self->filename),
+	psy_ui_component_set_align(psy_ui_textarea_base(&self->filename),
 		psy_ui_ALIGN_TOP);	
 #if defined(DIVERSALIS__OS__MICROSOFT)
 	psy_path_init(&self->curr, "C:\\");	
@@ -268,7 +268,7 @@ void fileview_build(FileView* self)
 					psy_snprintf(itemstr, 512, "%s", (const char*)p->entry);
 				}
 				psy_path_dispose(&path);
-				psy_ui_listbox_addtext(&self->filebox, itemstr);				
+				psy_ui_listbox_add_text(&self->filebox, itemstr);				
 			}
 		}		
 	}
@@ -350,10 +350,10 @@ void fileview_updatepath(FileView* self)
 {
 	char fname[256];
 	
-	psy_ui_label_settext(&self->dir,
+	psy_ui_label_set_text(&self->dir,
 		psy_path_full(&self->curr));
 	fileview_currfile(self, fname, 256);
-	psy_ui_textinput_settext(&self->filename, fname);
+	psy_ui_textarea_settext(&self->filename, fname);
 }
 
 const char* fileview_path(FileView* self)
@@ -371,9 +371,9 @@ const char* fileview_path(FileView* self)
 void fileview_filename(FileView* self, char* filename, uintptr_t maxsize)
 {
 	filename[0] = '\0';
-	if (psy_strlen(psy_ui_textinput_text(&self->filename)) > 0) {	
+	if (psy_strlen(psy_ui_textarea_text(&self->filename)) > 0) {	
 		psy_snprintf(filename, maxsize, "%s%s%s", psy_path_prefix(&self->curr),
-			psy_SLASHSTR, psy_ui_textinput_text(&self->filename));
+			psy_SLASHSTR, psy_ui_textarea_text(&self->filename));
 	}	
 }
 

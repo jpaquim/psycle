@@ -322,7 +322,7 @@ WaveBox* wavebox_allocinit(psy_ui_Component* parent, Workspace* workspace)
 	rv = wavebox_alloc();
 	if (rv) {
 		wavebox_init(rv, parent, workspace);
-		psy_ui_component_deallocateafterdestroyed(&rv->component);
+		psy_ui_component_deallocate_after_destroyed(&rv->component);
 	}
 	return rv;
 }
@@ -359,9 +359,9 @@ void wavebox_ondraw(WaveBox* self, psy_ui_Graphics* g)
 	if (!self->context.sample) {		
 		psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 		psy_ui_settextcolour(g, psy_ui_colour_make(0x00D1C5B6));
-		psy_ui_textout(g,
+		psy_ui_textout(g, psy_ui_realpoint_make(
 			(size.width - tm->tmAveCharWidth * psy_strlen(self->nowavetext)) / 2,
-			(size.height - tm->tmHeight) / 2,
+			(size.height - tm->tmHeight) / 2),
 			self->nowavetext, psy_strlen(self->nowavetext));
 	} else {
 		double scaley;		
@@ -374,7 +374,7 @@ void wavebox_ondraw(WaveBox* self, psy_ui_Graphics* g)
 		bool firstselstart = TRUE;
 		psy_ui_RealRectangle clip;
 
-		clip = psy_ui_cliprect(g);
+		clip = psy_ui_graphics_cliprect(g);
 		if (self->context.sample->loop.type != psy_audio_SAMPLE_LOOP_DO_NOT) {
 			cont_loop_rc = wavebox_framerangetoscreen(self,
 				self->context.sample->loop.start,

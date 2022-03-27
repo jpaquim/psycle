@@ -216,7 +216,7 @@ void seqeditpatternentry_init(SeqEditPatternEntry* self,
 		state);
 	seqeditpatternentry_vtable_init(self);
 	self->sequenceentry = entry;
-	psy_ui_component_setstyletypes(seqeditpatternentry_base(self),
+	psy_ui_component_set_style_types(seqeditpatternentry_base(self),
 		STYLE_SEQEDT_ITEM, STYLE_SEQEDT_ITEM_HOVER,
 		STYLE_SEQEDT_ITEM_SELECTED, psy_INDEX_INVALID);	
 }
@@ -235,7 +235,7 @@ SeqEditPatternEntry* seqeditpatternentry_allocinit(
 	rv = seqeditpatternentry_alloc();
 	if (rv) {
 		seqeditpatternentry_init(rv, parent, entry, seqpos, state);
-		psy_ui_component_deallocateafterdestroyed(
+		psy_ui_component_deallocate_after_destroyed(
 			seqeditpatternentry_base(rv));
 	}
 	return rv;
@@ -314,7 +314,7 @@ void seqeditpatternentry_onmousedown(SeqEditPatternEntry* self,
 			}
 			if (workspace_currview(self->seqeditorentry.state->workspace).id !=
 				VIEW_ID_PATTERNVIEW) {
-				workspace_selectview(self->seqeditorentry.state->workspace,
+				workspace_select_view(self->seqeditorentry.state->workspace,
 					VIEW_ID_PATTERNVIEW,
 					workspace_currview(self->seqeditorentry.state->workspace).section,
 					0);
@@ -388,15 +388,15 @@ void seqeditsampleentry_init(SeqEditSampleEntry* self,
 		&entry->entry, seqpos, state);
 	seqeditsampleentry_vtable_init(self);
 	self->seqeditorentry.preventresize = TRUE;	
-	psy_ui_component_setstyletypes(seqeditsampleentry_base(self),
+	psy_ui_component_set_style_types(seqeditsampleentry_base(self),
 		STYLE_SEQEDT_SAMPLE, STYLE_SEQEDT_SAMPLE_HOVER,
 		STYLE_SEQEDT_SAMPLE_SELECTED, psy_INDEX_INVALID);
 	wavebox_init(&self->wavebox, seqeditsampleentry_base(self), state->workspace);
 	wavebox_setnowavetext(&self->wavebox, "");
 	psy_ui_component_buffer(&self->wavebox.component);
-	psy_ui_component_setalign(&self->wavebox.component, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_set_align(&self->wavebox.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_label_init(&self->label, seqeditsampleentry_base(self));
-	psy_ui_component_setalign(&self->label.component, psy_ui_ALIGN_TOP);
+	psy_ui_component_set_align(&self->label.component, psy_ui_ALIGN_TOP);
 	self->sequenceentry = entry;	
 	self->preventedit = TRUE;	
 	seqeditsampleentry_updatesample(self);
@@ -427,7 +427,7 @@ SeqEditSampleEntry* seqeditsampleentry_allocinit(psy_ui_Component* parent,
 	rv = seqeditsampleentry_alloc();
 	if (rv) {
 		seqeditsampleentry_init(rv, parent, entry, seqpos, state);
-		psy_ui_component_deallocateafterdestroyed(
+		psy_ui_component_deallocate_after_destroyed(
 			seqeditsampleentry_base(rv));
 	}
 	return rv;
@@ -474,7 +474,7 @@ void seqeditsampleentry_updatetext(SeqEditSampleEntry* self)
 				(int)psy_audio_sequencesampleentry_samplerindex(
 					self->sequenceentry));
 		}
-		psy_ui_label_settext(&self->label, text);
+		psy_ui_label_set_text(&self->label, text);
 	}
 }
 
@@ -487,7 +487,7 @@ void seqeditsampleentry_onmousedown(SeqEditSampleEntry* self,
 			self->seqeditorentry.state->dragstatus = SEQEDIT_DRAG_START;
 			if (workspace_currview(self->seqeditorentry.state->workspace).id !=
 					VIEW_ID_SAMPLESVIEW) {
-				workspace_selectview(self->seqeditorentry.state->workspace,
+				workspace_select_view(self->seqeditorentry.state->workspace,
 					VIEW_ID_SAMPLESVIEW,
 					workspace_currview(self->seqeditorentry.state->workspace).section,
 					0);
@@ -555,7 +555,7 @@ void seqeditmarkerentry_init(SeqEditMarkerEntry* self,
 	seqeditentry_init(&self->seqeditorentry, parent, &entry->entry,
 		seqpos, state);
 	seqeditmarkerentry_vtable_init(self);
-	psy_ui_component_setstyletypes(seqeditmarkerentry_base(self),
+	psy_ui_component_set_style_types(seqeditmarkerentry_base(self),
 		STYLE_SEQEDT_MARKER, STYLE_SEQEDT_MARKER_HOVER,
 		STYLE_SEQEDT_MARKER_SELECTED, psy_INDEX_INVALID);	
 	self->sequenceentry = entry;
@@ -575,7 +575,7 @@ SeqEditMarkerEntry* seqeditmarkerentry_allocinit(psy_ui_Component* parent,
 	rv = seqeditmarkerentry_alloc();
 	if (rv) {
 		seqeditmarkerentry_init(rv, parent, entry, seqpos, state);
-		psy_ui_component_deallocateafterdestroyed(
+		psy_ui_component_deallocate_after_destroyed(
 			seqeditmarkerentry_base(rv));
 	}
 	return rv;

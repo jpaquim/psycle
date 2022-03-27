@@ -60,7 +60,7 @@ void psy_ui_tab_init(psy_ui_Tab* self, psy_ui_Component* parent,
 	
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_tab_vtable_init(self);
-	psy_ui_component_setstyletypes(&self->component,
+	psy_ui_component_set_style_types(&self->component,
 		psy_ui_STYLE_TAB, psy_ui_STYLE_TAB_HOVER, psy_ui_STYLE_TAB_SELECT,
 		psy_INDEX_INVALID);
 	psy_signal_init(&self->signal_clicked);
@@ -92,7 +92,7 @@ psy_ui_Tab* psy_ui_tab_allocinit(psy_ui_Component* parent,
 	rv = psy_ui_tab_alloc();
 	if (rv) {
 		psy_ui_tab_init(rv, parent, text, index);
-		psy_ui_component_deallocateafterdestroyed(&rv->component);
+		psy_ui_component_deallocate_after_destroyed(&rv->component);
 	}
 	return rv;
 }
@@ -126,11 +126,11 @@ void psy_ui_tab_setmode(psy_ui_Tab* self, TabMode mode)
 {
 	self->mode = mode;	
 	if (mode == psy_ui_TABMODE_LABEL) {
-		psy_ui_component_setstyletypes(&self->component,
+		psy_ui_component_set_style_types(&self->component,
 			psy_ui_STYLE_TAB_LABEL, psy_INDEX_INVALID, psy_INDEX_INVALID,
 			psy_INDEX_INVALID);		
 	} else {
-		psy_ui_component_setstyletypes(&self->component,
+		psy_ui_component_set_style_types(&self->component,
 			psy_ui_STYLE_TAB, psy_ui_STYLE_TAB_HOVER, psy_ui_STYLE_TAB_SELECT,
 			psy_INDEX_INVALID);
 	}
@@ -157,15 +157,16 @@ void psy_ui_tab_ondraw(psy_ui_Tab* self, psy_ui_Graphics* g)
 {
 	char* text;
 	psy_ui_RealSize size;
-	const psy_ui_TextMetric* tm;	
-	double centery;
+	const psy_ui_TextMetric* tm;
+	psy_ui_RealPoint center;	
 	double textident;
 
 	assert(self);	
 		
-	textident = 0.0;	
+	textident = 0.0;
 	tm = psy_ui_component_textmetric(&self->component);
-	size = psy_ui_component_scrollsize_px(&self->component);	
+	size = psy_ui_component_scrollsize_px(&self->component);
+	center = psy_ui_realpoint_make(textident, 0.0);
 	if (!psy_ui_bitmap_empty(&self->bitmapicon)) {
 		psy_ui_RealSize bpmsize;
 		double vcenter;
@@ -185,8 +186,9 @@ void psy_ui_tab_ondraw(psy_ui_Tab* self, psy_ui_Graphics* g)
 		text = self->text;
 	}
 	if (psy_strlen(text) > 0) {
-		centery = (size.height - tm->tmHeight) / 2.0;
-		psy_ui_textout(g, textident, centery, text, psy_strlen(text));
+		center.x = textident;
+		center.y = (size.height - tm->tmHeight) / 2.0;
+		psy_ui_textout(g, center, text, psy_strlen(text));
 	}
 }
 
@@ -299,13 +301,13 @@ void psy_ui_tabbar_init(psy_ui_TabBar* self, psy_ui_Component* parent)
 
 	psy_ui_component_init(psy_ui_tabbar_base(self), parent, NULL);
 	vtable_init(self);	
-	psy_ui_component_setstyletype(&self->component, psy_ui_STYLE_TABBAR);
+	psy_ui_component_set_style_type(&self->component, psy_ui_STYLE_TABBAR);
 	psy_signal_init(&self->signal_change);
 	self->numtabs = 0;
 	self->selected = 0;
 	self->preventtranslation = FALSE;
 	self->tabalignment = psy_ui_ALIGN_LEFT;
-	psy_ui_component_setdefaultalign(&self->component, self->tabalignment,
+	psy_ui_component_set_defaultalign(&self->component, self->tabalignment,
 		psy_ui_margin_zero());	
 }
 
@@ -324,12 +326,12 @@ void psy_ui_tabbar_settabalign(psy_ui_TabBar* self, psy_ui_AlignType align)
 	assert(self);
 	
 	self->tabalignment = align;
-	psy_ui_component_setdefaultalign(&self->component, align,
+	psy_ui_component_set_defaultalign(&self->component, align,
 		self->component.containeralign->insertmargin);
 	q = psy_ui_component_children(psy_ui_tabbar_base(self),
 		psy_ui_NONRECURSIVE);
 	for (p = q; p != NULL; p = p->next) {
-		psy_ui_component_setalign((psy_ui_Component*)psy_list_entry(p),
+		psy_ui_component_set_align((psy_ui_Component*)psy_list_entry(p),
 			align);
 	}
 	psy_list_free(q);	

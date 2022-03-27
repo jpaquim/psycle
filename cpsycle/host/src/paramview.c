@@ -88,7 +88,7 @@ ParamView* paramview_allocinit(psy_ui_Component* parent,
 	rv = paramview_alloc();
 	if (rv) {
 		paramview_init(rv, parent, machine, config, frameview);
-		psy_ui_component_deallocateafterdestroyed(&rv->component);
+		psy_ui_component_deallocate_after_destroyed(&rv->component);
 	}
 	return rv;
 }
@@ -130,7 +130,7 @@ void paramview_build(ParamView* self)
 
 			if (row == 0) {
 				currcolumn = psy_ui_component_allocinit(&self->component, &self->component);
-				psy_ui_component_setalign(currcolumn, psy_ui_ALIGN_LEFT);
+				psy_ui_component_set_align(currcolumn, psy_ui_ALIGN_LEFT);
 			}
 			machineparam = psy_audio_machine_parameter(self->machine, paramnum);
 			if (machineparam) {
@@ -225,7 +225,7 @@ void paramview_build(ParamView* self)
 					break;
 				default: {
 					component = psy_ui_component_allocinit(currcolumn, NULL);
-					psy_ui_component_setpreferredsize(component,
+					psy_ui_component_set_preferred_size(component,
 						psy_ui_size_make_em(PARAMWIDTH_SMALL, 2.0));
 					psy_ui_component_preventalign(component);
 					break; }
@@ -233,9 +233,9 @@ void paramview_build(ParamView* self)
 				if (component) {
 					if ((psy_audio_machine_parameter_type(self->machine, machineparam) &
 							MPF_BOTTOM) == MPF_BOTTOM) {						
-						psy_ui_component_setalign(component, psy_ui_ALIGN_BOTTOM);						
+						psy_ui_component_set_align(component, psy_ui_ALIGN_BOTTOM);						
 					} else {
-						psy_ui_component_setalign(component, psy_ui_ALIGN_TOP);
+						psy_ui_component_set_align(component, psy_ui_ALIGN_TOP);
 					}
 					if (slider) {
 						psy_ui_component_setminimumsize(component,

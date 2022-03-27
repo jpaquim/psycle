@@ -67,12 +67,12 @@ void stepsequencertile_init(StepSequencerTile* self, psy_ui_Component* parent)
 	assert(self);
 
 	psy_ui_component_init(&self->component, parent, NULL);	
-	psy_ui_component_setstyletype(&self->component, STYLE_STEPSEQUENCER_TILE);
-	psy_ui_component_setstyletype_select(&self->component,
+	psy_ui_component_set_style_type(&self->component, STYLE_STEPSEQUENCER_TILE);
+	psy_ui_component_set_style_type_select(&self->component,
 		STYLE_STEPSEQUENCER_TILE_SELECT);		
-	psy_ui_component_setstyletype_active(&self->component,
+	psy_ui_component_set_style_type_active(&self->component,
 		STYLE_STEPSEQUENCER_TILE_ACTIVE);
-	psy_ui_component_setpreferredsize(&self->component,
+	psy_ui_component_set_preferred_size(&self->component,
 		psy_ui_size_make_em(3.0, 2.0));	
 }
 
@@ -88,7 +88,7 @@ StepSequencerTile* stepsequencertile_allocinit(psy_ui_Component* parent)
 	rv = stepsequencertile_alloc();
 	if (rv) {
 		stepsequencertile_init(rv, parent);
-		psy_ui_component_deallocateafterdestroyed(
+		psy_ui_component_deallocate_after_destroyed(
 			stepsequencertile_base(rv));		
 	}
 	return rv;
@@ -164,7 +164,7 @@ void stepsequencerbar_init(StepsequencerBar* self, psy_ui_Component* parent,
 	self->state = state;	
 	psy_ui_component_init(&self->component, parent, NULL);
 	vtable_init(self);	
-	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
+	psy_ui_component_set_defaultalign(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_margin_make_em(0.0, 1.0, 0.0, 0.0));
 	psy_ui_component_setalignexpand(&self->component, psy_ui_HEXPAND);
 	psy_signal_connect(&workspace_player(state->workspace)->signal_lpbchanged,
@@ -392,7 +392,7 @@ void stepsequencerbarbutton_init(StepSequencerBarButton* self, psy_ui_Component*
 	psy_ui_component_init(&self->component, parent, NULL);
 	stepsequencerbarbutton_vtable_init(self);
 	self->state = state;
-	psy_ui_component_setpreferredsize(&self->component,
+	psy_ui_component_set_preferred_size(&self->component,
 		psy_ui_size_make_em(3.0, 1.0));
 }
 
@@ -409,7 +409,7 @@ StepSequencerBarButton* stepsequencerbarbutton_allocinit(
 	rv = stepsequencerbarbutton_alloc();
 	if (rv) {
 		stepsequencerbarbutton_init(rv, parent, state);
-		psy_ui_component_deallocateafterdestroyed(
+		psy_ui_component_deallocate_after_destroyed(
 			stepsequencerbarbutton_base(rv));
 	}
 	return rv;
@@ -501,7 +501,7 @@ void stepsequencerbarselect_init(StepsequencerBarSelect* self,
 	stepsequencerbarselect_vtable_init(self);
 	self->state = state;	
 	psy_ui_component_setalignexpand(&self->component, psy_ui_HEXPAND);
-	 psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_TOP,
+	 psy_ui_component_set_defaultalign(&self->component, psy_ui_ALIGN_TOP,
 		psy_ui_margin_zero());	
 	psy_table_init(&self->buttons);
 	stepsequencerbarselect_build(self);
@@ -542,13 +542,13 @@ void stepsequencerbarselect_build(StepsequencerBarSelect* self)
 		if ((i % 4) == 0) {
 			row = psy_ui_component_allocinit(&self->component, NULL);
 			psy_ui_component_setalignexpand(row, psy_ui_HEXPAND);
-			psy_ui_component_setdefaultalign(row, psy_ui_ALIGN_LEFT,
+			psy_ui_component_set_defaultalign(row, psy_ui_ALIGN_LEFT,
 				psy_ui_margin_make_em(0.0, 1.0, 0.1, 0.0));
 		}
 		if (row) {
 			button = stepsequencerbarbutton_allocinit(row, self->state);
 			button->index = i;
-			psy_ui_component_setalign(&button->component, psy_ui_ALIGN_LEFT);
+			psy_ui_component_set_align(&button->component, psy_ui_ALIGN_LEFT);
 			psy_table_insert(&self->buttons, i, (void*)button);
 		}
 	}
@@ -601,15 +601,15 @@ void stepsequencerview_init(StepsequencerView* self, psy_ui_Component* parent,
 	assert(workspace);
 
 	psy_ui_component_init(&self->component, parent, NULL);		
-	psy_ui_component_setstyletype(&self->component, STYLE_STEPSEQUENCER);	
-	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
+	psy_ui_component_set_style_type(&self->component, STYLE_STEPSEQUENCER);	
+	psy_ui_component_set_defaultalign(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_margin_make_em(0.5, 0.0, 0.5, 2.0));
 	stepsequencerstate_init(&self->state, workspace);
 	stepsequencerbarselect_init(&self->stepsequencerbarselect,
 		&self->component, &self->state);	
 	psy_ui_component_init(&self->tilerow, &self->component, NULL);
 	stepsequencerbar_init(&self->stepsequencerbar, &self->tilerow, &self->state);
-	psy_ui_component_setalign(&self->stepsequencerbar.component,
+	psy_ui_component_set_align(&self->stepsequencerbar.component,
 		psy_ui_ALIGN_TOP);
 	stepsequencerview_connectworkspace(self, workspace);
 	stepsequencerview_connectpattern(self);

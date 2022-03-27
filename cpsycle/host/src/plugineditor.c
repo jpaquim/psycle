@@ -54,12 +54,12 @@ void plugineditorcreatebar_init(PluginEditorCreateBar* self,
 	self->workspace = workspace;
 	psy_ui_label_init_text(&self->desc, &self->component,
 		"Plugin Name");
-	psy_ui_component_setalign(&self->desc.component, psy_ui_ALIGN_LEFT);
-	psy_ui_textinput_init(&self->name, &self->component);
-	psy_ui_component_setalign(&self->name.component, psy_ui_ALIGN_CLIENT);
-	psy_ui_textinput_settext(&self->name, "newplugin");
+	psy_ui_component_set_align(&self->desc.component, psy_ui_ALIGN_LEFT);
+	psy_ui_textarea_init_single_line(&self->name, &self->component);	
+	psy_ui_component_set_align(&self->name.component, psy_ui_ALIGN_CLIENT);
+	psy_ui_textarea_settext(&self->name, "newplugin");
 	psy_ui_button_init_text(&self->create, &self->component, "Create");
-	psy_ui_component_setalign(&self->create.component, psy_ui_ALIGN_RIGHT);	
+	psy_ui_component_set_align(&self->create.component, psy_ui_ALIGN_RIGHT);	
 }
 
 /* PluginEditor */
@@ -85,53 +85,53 @@ void plugineditor_init(PluginEditor* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {	
 	psy_ui_component_init(&self->component, parent, NULL);	
-	psy_ui_component_setstyletype(&self->component,
+	psy_ui_component_set_style_type(&self->component,
 		STYLE_RECENTVIEW_MAINSECTION);
 	plugineditor_inittitlebar(self);
 	self->workspace = workspace;
 	self->basepath = 0;	
 	self->instanceidx = psy_INDEX_INVALID;	
 	psy_ui_component_init(&self->bar, &self->component, NULL);
-	psy_ui_component_setalign(&self->bar, psy_ui_ALIGN_TOP);
+	psy_ui_component_set_align(&self->bar, psy_ui_ALIGN_TOP);
 	psy_ui_button_init(&self->reload, &self->bar);
-	psy_ui_component_setalign(&self->reload.component, psy_ui_ALIGN_LEFT);
+	psy_ui_component_set_align(&self->reload.component, psy_ui_ALIGN_LEFT);
 	psy_ui_button_init(&self->newplugin, &self->bar);
-	psy_ui_button_settext(&self->newplugin, "New Plugin");
-	psy_ui_component_setalign(&self->newplugin.component, psy_ui_ALIGN_LEFT);
+	psy_ui_button_set_text(&self->newplugin, "New Plugin");
+	psy_ui_component_set_align(&self->newplugin.component, psy_ui_ALIGN_LEFT);
 	psy_signal_connect(&self->newplugin.signal_clicked, self,
 		&plugineditor_onnewplugin);
-	psy_ui_button_settext(&self->reload, "Reload");
+	psy_ui_button_set_text(&self->reload, "Reload");
 	psy_signal_connect(&self->reload.signal_clicked, self,
 		&plugineditor_onreload);
 	psy_ui_button_init(&self->save, &self->bar);
-	psy_ui_component_setalign(&self->save.component, psy_ui_ALIGN_LEFT);
-	psy_ui_button_settext(&self->save, "Save");
+	psy_ui_component_set_align(&self->save.component, psy_ui_ALIGN_LEFT);
+	psy_ui_button_set_text(&self->save, "Save");
 	psy_signal_connect(&self->save.signal_clicked, self,
 		&plugineditor_onsave);	
 	/* Plugin select */
 	psy_ui_component_init(&self->row0, &self->component, NULL);
-	psy_ui_component_setalign(&self->row0, psy_ui_ALIGN_TOP);
+	psy_ui_component_set_align(&self->row0, psy_ui_ALIGN_TOP);
 	psy_ui_label_init_text(&self->plugindesc, &self->row0,
 		"Plugin");
-	psy_ui_component_setalign(&self->plugindesc.component, psy_ui_ALIGN_LEFT);
+	psy_ui_component_set_align(&self->plugindesc.component, psy_ui_ALIGN_LEFT);
 	psy_ui_combobox_init(&self->pluginselector, &self->row0);
 	//psy_ui_combobox_setcharnumber(&self->pluginselector, 32);
-	psy_ui_component_setalign(&self->pluginselector.component, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_set_align(&self->pluginselector.component, psy_ui_ALIGN_CLIENT);
 	/* File Select */
 	psy_ui_component_init(&self->row1, &self->component, NULL);
-	psy_ui_component_setalign(&self->row1, psy_ui_ALIGN_TOP);
+	psy_ui_component_set_align(&self->row1, psy_ui_ALIGN_TOP);
 	psy_ui_label_init_text(&self->filedesc, &self->row1, "File");
-	psy_ui_component_setalign(&self->filedesc.component, psy_ui_ALIGN_LEFT);
+	psy_ui_component_set_align(&self->filedesc.component, psy_ui_ALIGN_LEFT);
 	psy_ui_combobox_init(&self->fileselector, &self->row1);
 	//psy_ui_combobox_setcharnumber(&self->fileselector, 32);
-	psy_ui_component_setalign(&self->fileselector.component, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_set_align(&self->fileselector.component, psy_ui_ALIGN_CLIENT);
 	plugineditorcreatebar_init(&self->createbar, &self->component, workspace);
 	psy_signal_connect(&self->createbar.create.signal_clicked, self,
 		plugineditor_oncreatenewplugin);
-	psy_ui_component_setalign(&self->createbar.component, psy_ui_ALIGN_TOP);
+	psy_ui_component_set_align(&self->createbar.component, psy_ui_ALIGN_TOP);
 	psy_ui_component_hide(&self->createbar.component);
 	psy_ui_editor_init(&self->editor, &self->component);
-	psy_ui_component_setalign(&self->editor.component, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_set_align(&self->editor.component, psy_ui_ALIGN_CLIENT);
 	psy_signal_connect(&self->component.signal_destroy, self,
 		plugineditor_ondestroy);
 	psy_signal_connect(&workspace->signal_songchanged, self,
@@ -140,7 +140,7 @@ void plugineditor_init(PluginEditor* self, psy_ui_Component* parent,
 		plugineditor_onpluginselected);
 	psy_signal_connect(&self->fileselector.signal_selchanged, self,
 		plugineditor_onfileselected);
-	psy_ui_component_setpreferredsize(&self->component,
+	psy_ui_component_set_preferred_size(&self->component,
 		psy_ui_size_make_em(80.0, 0.0));		
 	psy_table_init(&self->pluginmappping);
 	plugineditor_buildpluginlist(self);
