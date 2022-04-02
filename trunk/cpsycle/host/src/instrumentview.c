@@ -451,7 +451,8 @@ void instrumentview_init(InstrumentView* self, psy_ui_Component* parent,
 {
 	psy_ui_Margin margin;	
 
-	psy_ui_component_init(&self->component, parent, NULL);	
+	psy_ui_component_init(&self->component, parent, NULL);
+	psy_ui_component_set_id(instrumentview_base(self), VIEW_ID_INSTRUMENTSVIEW);
 	psy_ui_component_set_style_type(&self->component, STYLE_INSTRVIEW);	
 	psy_ui_component_init(&self->viewtabbar, tabbarparent, NULL);
 	self->statusbar = NULL;

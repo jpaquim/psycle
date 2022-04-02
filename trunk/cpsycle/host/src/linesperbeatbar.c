@@ -19,7 +19,7 @@ static void linesperbeatbar_onlessclicked(LinesPerBeatBar*,
 	psy_ui_Component* sender);
 static void linesperbeatbar_onmoreclicked(LinesPerBeatBar*,
 	psy_ui_Component* sender);
-static void linesperbeatbar_ontimer(LinesPerBeatBar*, uintptr_t timerid);
+static void linesperbeatbar_on_timer(LinesPerBeatBar*, uintptr_t timerid);
 static void linesperbeatbar_update(LinesPerBeatBar*);
 
 /* vtable */
@@ -30,9 +30,9 @@ static void vtable_init(LinesPerBeatBar* self)
 {
 	if (!vtable_initialized) {		
 		vtable = *(linesperbeatbar_base(self)->vtable);		
-		vtable.ontimer =
-			(psy_ui_fp_component_ontimer)
-			linesperbeatbar_ontimer;		
+		vtable.on_timer =
+			(psy_ui_fp_component_on_timer)
+			linesperbeatbar_on_timer;		
 		vtable_initialized = TRUE;
 	}	
 	psy_ui_component_setvtable(linesperbeatbar_base(self), &vtable);
@@ -97,7 +97,7 @@ void linesperbeatbar_onmoreclicked(LinesPerBeatBar* self,
 		psy_audio_player_lpb(self->player) + 1);
 }
 
-void linesperbeatbar_ontimer(LinesPerBeatBar* self, uintptr_t timerid)
+void linesperbeatbar_on_timer(LinesPerBeatBar* self, uintptr_t timerid)
 {
 	assert(self);
 

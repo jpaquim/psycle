@@ -1,6 +1,6 @@
 /*
 ** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -18,7 +18,7 @@
 #define BLOCKSIZE 128 * 1024
 
 /* prototypes */
-static void help_ondestroy(Help*, psy_ui_Component* sender);
+static void help_on_destroy(Help*, psy_ui_Component* sender);
 static void help_registerfiles(Help*);
 static void help_clearfilenames(Help*);
 static void help_buildtabs(Help*);
@@ -30,49 +30,45 @@ static void help_onalign(Help*, psy_ui_Component* sender);
 
  /* implementation  */
 void help_init(Help* self, psy_ui_Component* parent, DirConfig* dir_config)
-{	
-	psy_ui_Margin margin;
-	psy_ui_Margin leftmargin;
-
+{
 	psy_ui_component_init(help_base(self), parent, NULL);
 	self->dir_config = dir_config;
 	psy_ui_tabbar_init(&self->tabbar, help_base(self));
 	self->lastalign = psy_ui_ALIGN_NONE;
-	psy_ui_component_set_align(psy_ui_tabbar_base(&self->tabbar), psy_ui_ALIGN_RIGHT);	
-	psy_ui_margin_init_em(&margin, 0.0, 1.0, 0.0, 1.5);
-	psy_ui_component_set_margin(psy_ui_tabbar_base(&self->tabbar), margin);	
-	psy_ui_margin_init_em(&leftmargin, 0.0, 0.0, 0.0, 3.0);		
+	psy_ui_component_set_align(psy_ui_tabbar_base(&self->tabbar),
+		psy_ui_ALIGN_RIGHT);	
+	psy_ui_component_set_margin(psy_ui_tabbar_base(&self->tabbar),
+		psy_ui_margin_make_em(0.0, 1.0, 0.0, 1.5));	
 	psy_ui_label_init(&self->text, help_base(self));
-	psy_ui_component_set_margin(&self->text.component, leftmargin);
+	psy_ui_component_set_margin(&self->text.component,
+		psy_ui_margin_make_em(0.0, 0.0, 0.0, 3.0));
 	psy_ui_label_enable_wrap(&self->text);
 	psy_ui_component_set_align(&self->text.component, psy_ui_ALIGN_CLIENT);	
-	psy_ui_label_prevent_translation(&self->text);
-	psy_ui_label_set_charnumber(&self->text, 120.0);
+	psy_ui_label_prevent_translation(&self->text);	
 	psy_ui_label_set_textalignment(&self->text, psy_ui_ALIGNMENT_LEFT);
-	psy_ui_component_set_scrollstep_height(
-		psy_ui_label_base(&self->text),
-		psy_ui_value_make_eh(1.0));
+	psy_ui_component_set_scrollstep_height(psy_ui_label_base(&self->text),
+		psy_ui_value_make_eh(1.0));		
 	psy_ui_component_set_wheel_scroll(&self->text.component, 4);
 	psy_ui_component_set_align(psy_ui_label_base(&self->text),
 		psy_ui_ALIGN_FIXED);
 	psy_ui_component_setoverflow(&self->text.component,
 		psy_ui_OVERFLOW_SCROLL);
 	psy_ui_label_enable_wrap(&self->text);
-	psy_ui_scroller_init(&self->scroller, &self->text.component,
-		&self->component);
+	psy_ui_scroller_init(&self->scroller, &self->component, NULL, NULL);
+	psy_ui_scroller_set_client(&self->scroller, &self->text.component);
 	psy_ui_component_set_align(&self->scroller.component, psy_ui_ALIGN_CLIENT);
 	psy_signal_connect(&self->tabbar.signal_change, self,
 		help_ontabbarchanged);
 	psy_table_init(&self->filenames);
 	psy_signal_connect(&self->component.signal_destroy, self,
-		help_ondestroy);
+		help_on_destroy);
 	psy_signal_connect(&self->component.signal_align, self,
 		help_onalign);
 	help_registerfiles(self);
 	help_loadpage(self, 0);
 }
 
-void help_ondestroy(Help* self, psy_ui_Component* sender)
+void help_on_destroy(Help* self, psy_ui_Component* sender)
 {
 	psy_table_disposeall(&self->filenames, (psy_fp_disposefunc)NULL);
 }
@@ -108,7 +104,8 @@ void help_buildtabs(Help* self)
 
 		psy_path_init(&path, (char*)psy_tableiterator_value(&it));		
 		psy_ui_tabbar_append(&self->tabbar, psy_path_name(&path),
-			psy_INDEX_INVALID, psy_INDEX_INVALID, psy_ui_colour_white());
+			psy_INDEX_INVALID, psy_INDEX_INVALID, psy_INDEX_INVALID,
+			psy_ui_colour_white());
 		psy_path_dispose(&path);
 	}
 }
@@ -158,7 +155,7 @@ void help_load(Help* self, const char* path)
 		}
 		fclose(fp);
 		psy_ui_component_invalidate(psy_ui_label_base(&self->text));
-	}	
+	}
 }
 
 void help_onalign(Help* self, psy_ui_Component* sender)

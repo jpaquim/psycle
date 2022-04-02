@@ -43,6 +43,7 @@ static void psy_ui_win_g_imp_settextcolour(psy_ui_win_GraphicsImp*, psy_ui_Colou
 static void psy_ui_win_g_imp_settextalign(psy_ui_win_GraphicsImp*, uintptr_t align);
 static void psy_ui_win_g_imp_setcolour(psy_ui_win_GraphicsImp*, psy_ui_Colour colour);
 static void psy_ui_win_g_imp_setfont(psy_ui_win_GraphicsImp*, psy_ui_Font* font);
+static const psy_ui_Font* psy_ui_win_g_imp_font(const psy_ui_win_GraphicsImp*);
 static void psy_ui_win_g_imp_moveto(psy_ui_win_GraphicsImp*, psy_ui_RealPoint pt);
 static void psy_ui_win_g_imp_devcurveto(psy_ui_win_GraphicsImp*, psy_ui_RealPoint control_p1,
 	psy_ui_RealPoint control_p2, psy_ui_RealPoint p);
@@ -124,6 +125,9 @@ static void win_imp_vtable_init(psy_ui_win_GraphicsImp* self)
 		win_imp_vtable.dev_setfont =
 			(psy_ui_fp_graphicsimp_dev_setfont)
 			psy_ui_win_g_imp_setfont;
+		win_imp_vtable.dev_font =
+			(psy_ui_fp_graphicsimp_dev_font)
+			psy_ui_win_g_imp_font;
 		win_imp_vtable.dev_moveto =
 			(psy_ui_fp_graphicsimp_dev_moveto)
 			psy_ui_win_g_imp_moveto;
@@ -178,6 +182,7 @@ void psy_ui_win_graphicsimp_init(psy_ui_win_GraphicsImp* self, HDC hdc)
 		((psy_ui_win_FontImp*)psy_ui_style_const(psy_ui_STYLE_ROOT)->font.imp)->hfont);
 	psy_ui_realpoint_init(&self->org);
 	SetStretchBltMode(self->hdc, STRETCH_HALFTONE);
+	self->font = NULL;
 }
 
 void psy_ui_win_graphicsimp_init_bitmap(psy_ui_win_GraphicsImp* self, psy_ui_Bitmap* bitmap)
@@ -357,28 +362,32 @@ void psy_ui_win_g_imp_drawsolidpolygon(psy_ui_win_GraphicsImp* self,
 	psy_ui_RealPoint* pts, uintptr_t numpoints, uint32_t inner,
 	uint32_t outter)
 {
-	HBRUSH hBrush;
-	HBRUSH hBrushPrev;
-	HPEN hPen;
-	HPEN hPenPrev;
-	POINT* wpts;
-	uintptr_t i;
+	if (numpoints > 0) {
+		HBRUSH hBrush;
+		HBRUSH hBrushPrev;
+		HPEN hPen;
+		HPEN hPenPrev;
+		POINT* wpts;
+		uintptr_t i;
 
-	wpts = (POINT*)malloc(sizeof(POINT) * numpoints);
-	for (i = 0; i < numpoints; ++i) {
-		wpts[i].x = (int)pts[i].x - (int)(self->org.x);
-		wpts[i].y = (int)pts[i].y - (int)(self->org.y);
+		wpts = (POINT*)malloc(sizeof(POINT) * numpoints);
+		if (wpts) {
+			for (i = 0; i < numpoints; ++i) {
+				wpts[i].x = (int)pts[i].x - (int)(self->org.x);
+				wpts[i].y = (int)pts[i].y - (int)(self->org.y);
+			}
+			hBrush = CreateSolidBrush(inner);
+			hBrushPrev = SelectObject(self->hdc, hBrush);
+			hPen = CreatePen(PS_SOLID, 1, outter);
+			hPenPrev = SelectObject(self->hdc, hPen);
+			Polygon(self->hdc, wpts, (int)numpoints);
+			SelectObject(self->hdc, hBrushPrev);
+			SelectObject(self->hdc, hPenPrev);
+			DeleteObject(hBrush);
+			DeleteObject(hPen);
+			free(wpts);
+		}
 	}
-	hBrush = CreateSolidBrush(inner);
-	hBrushPrev = SelectObject(self->hdc, hBrush);
-	hPen = CreatePen(PS_SOLID, 1, outter);
-	hPenPrev = SelectObject(self->hdc, hPen);
-	Polygon(self->hdc, wpts, (int)numpoints);
-	SelectObject(self->hdc, hBrushPrev);
-	SelectObject(self->hdc, hPenPrev);
-	DeleteObject(hBrush);
-	DeleteObject(hPen);
-	free(wpts);
 }
 
 void psy_ui_win_g_imp_drawfullbitmap(psy_ui_win_GraphicsImp* self,
@@ -526,9 +535,15 @@ void psy_ui_win_g_imp_settextalign(psy_ui_win_GraphicsImp* self, uintptr_t align
 
 void psy_ui_win_g_imp_setfont(psy_ui_win_GraphicsImp* self, psy_ui_Font* font)
 {
+	self->font = font;
 	if (font && ((psy_ui_win_FontImp*)font->imp)->hfont) {
 		SelectObject(self->hdc, ((psy_ui_win_FontImp*)font->imp)->hfont);
 	}
+}
+
+const psy_ui_Font* psy_ui_win_g_imp_font(const psy_ui_win_GraphicsImp* self)
+{
+	return self->font;
 }
 
 void psy_ui_win_g_imp_drawline(psy_ui_win_GraphicsImp* self,

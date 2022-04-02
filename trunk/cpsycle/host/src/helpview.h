@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #if !defined(HELPVIEW_H)
@@ -10,11 +10,11 @@
 #include "about.h"
 #include "greet.h"
 #include "help.h"
-#include <uitabbar.h>
 /* ui */
 #include <uibutton.h>
 #include <uilabel.h>
 #include <uinotebook.h>
+#include <uitabbar.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -38,25 +38,17 @@ typedef struct HelpView {
 	/* ui elements */
 	psy_ui_Notebook notebook;
 	psy_ui_Component bar;
-	psy_ui_TabBar tabbar;
-	psy_ui_Button floatsection;
+	psy_ui_TabBar tabbar;	
 	/* sections */
 	Help help;
 	About about;
-	Greet greet;
-	psy_ui_Component sectionfloated;
-	psy_ui_Label floatdesc;
+	Greet greet;	
 	/* references */
 	Workspace* workspace;
 } HelpView;
 
 void helpview_init(HelpView*, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, Workspace*);
-
-/* float side bar */
-void helpview_float(HelpView*, HelpViewSection section, psy_ui_Component* dest);
-/* dock side bar */
-void helpview_dock(HelpView*, HelpViewSection section, psy_ui_Component* src);
 
 INLINE psy_ui_Component* helpview_base(HelpView* self)
 {

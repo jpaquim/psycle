@@ -14,7 +14,7 @@
 #include "../../detail/portable.h"
 
 /* prototypes */
-static void titlebar_ondestroy(TitleBar*);
+static void titlebar_on_destroy(TitleBar*);
 static void titlebar_onhide(TitleBar*);
 static void titlebar_ondragstart(TitleBar*, psy_ui_DragEvent*);
 
@@ -26,9 +26,9 @@ static void titlebar_vtable_init(TitleBar* self)
 {
 	if (!titlebar_vtable_initialized) {
 		titlebar_vtable = *(self->component.vtable);		
-		titlebar_vtable.ondestroy =
+		titlebar_vtable.on_destroy =
 			(psy_ui_fp_component_event)
-			titlebar_ondestroy;
+			titlebar_on_destroy;
 		titlebar_vtable.ondragstart =
 			(psy_ui_fp_component_ondragstart)
 			titlebar_ondragstart;
@@ -61,7 +61,7 @@ void titlebar_init(TitleBar* self, psy_ui_Component* parent,
 	self->dragid = NULL;
 }
 
-void titlebar_ondestroy(TitleBar* self)
+void titlebar_on_destroy(TitleBar* self)
 {
 	free(self->dragid);
 	self->dragid = NULL;

@@ -60,7 +60,7 @@ static void wireview_onaddeffect(WireView*, psy_ui_Component* sender);
 static psy_ui_Component* wireview_scope(WireView*, int index);
 static uintptr_t wireview_currscope(WireView*);
 static void wireview_ondrawslidervu(WireView*, psy_ui_Component* sender, psy_ui_Graphics*);
-static void wireview_ontimer(WireView*, uintptr_t timerid);
+static void wireview_on_timer(WireView*, uintptr_t timerid);
 /* vtable */
 static psy_ui_ComponentVtable vtable;
 static bool vtable_initialized = FALSE;
@@ -69,9 +69,9 @@ static void vtable_init(WireView* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.ontimer =
-			(psy_ui_fp_component_ontimer)
-			wireview_ontimer;
+		vtable.on_timer =
+			(psy_ui_fp_component_on_timer)
+			wireview_on_timer;
 		vtable_initialized = TRUE;
 	}
 	self->component.vtable = &vtable;
@@ -124,7 +124,7 @@ void wireview_init(WireView* self, psy_ui_Component* parent,
 	psy_ui_notebook_connectcontroller(&self->notebook,
 		&self->tabbar.signal_change);
 	psy_ui_tabbar_select(&self->tabbar, WIREVIEW_TAB_VUMETER);
-	psy_signal_connect(&self->component.signal_timer, self, wireview_ontimer);
+	psy_signal_connect(&self->component.signal_timer, self, wireview_on_timer);
 	psy_ui_component_start_timer(&self->component, 0, 50);
 }
 
@@ -546,7 +546,7 @@ psy_dsp_amp_t dB(psy_dsp_amp_t amplitude)
 	return (psy_dsp_amp_t)(20.0 * log10(amplitude));
 }
 
-void wireview_ontimer(WireView* self, uintptr_t timerid)
+void wireview_on_timer(WireView* self, uintptr_t timerid)
 {	
 	switch (psy_ui_notebook_pageindex(&self->notebook)) {
 	case 0:		

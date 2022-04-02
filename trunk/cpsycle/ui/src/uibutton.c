@@ -14,14 +14,14 @@
 #include "../../detail/portable.h"
 
 /* prototypes */
-static void psy_ui_button_ondestroy(psy_ui_Button*);
+static void psy_ui_button_on_destroy(psy_ui_Button*);
 static void psy_ui_button_onlanguagechanged(psy_ui_Button*);
 static void psy_ui_button_ondraw(psy_ui_Button*, psy_ui_Graphics*);
-static void psy_ui_button_onmousedown(psy_ui_Button*, psy_ui_MouseEvent*);
-static void psy_ui_button_onmouseup(psy_ui_Button*, psy_ui_MouseEvent*);
+static void psy_ui_button_on_mouse_down(psy_ui_Button*, psy_ui_MouseEvent*);
+static void psy_ui_button_on_mouse_up(psy_ui_Button*, psy_ui_MouseEvent*);
 static void psy_ui_button_onpreferredsize(psy_ui_Button*, psy_ui_Size* limit,
 	psy_ui_Size* rv);
-static void button_onkeydown(psy_ui_Button*, psy_ui_KeyboardEvent*);
+static void button_on_key_down(psy_ui_Button*, psy_ui_KeyboardEvent*);
 static double psy_ui_button_width(psy_ui_Button*);
 static void psy_ui_button_onupdatestyles(psy_ui_Button*);
 static void psy_ui_button_loadbitmaps(psy_ui_Button*);
@@ -35,24 +35,24 @@ static void vtable_init(psy_ui_Button* self)
 	if (!vtable_initialized) {
 		vtable = *(psy_ui_button_base(self)->vtable);
 		super_vtable = *(psy_ui_button_base(self)->vtable);
-		vtable.ondestroy =
+		vtable.on_destroy =
 			(psy_ui_fp_component_event)
-			psy_ui_button_ondestroy;
+			psy_ui_button_on_destroy;
 		vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
 			psy_ui_button_ondraw;
 		vtable.onpreferredsize =
 			(psy_ui_fp_component_onpreferredsize)
 			psy_ui_button_onpreferredsize;
-		vtable.onmousedown =
-			(psy_ui_fp_component_onmouseevent)
-			psy_ui_button_onmousedown;
-		vtable.onmouseup =
-			(psy_ui_fp_component_onmouseevent)
-			psy_ui_button_onmouseup;
-		vtable.onkeydown =
-			(psy_ui_fp_component_onkeyevent)
-			button_onkeydown;
+		vtable.on_mouse_down =
+			(psy_ui_fp_component_on_mouse_event)
+			psy_ui_button_on_mouse_down;
+		vtable.on_mouse_up =
+			(psy_ui_fp_component_on_mouse_event)
+			psy_ui_button_on_mouse_up;
+		vtable.on_key_down =
+			(psy_ui_fp_component_on_key_event)
+			button_on_key_down;
 		vtable.onlanguagechanged =
 			(psy_ui_fp_component_onlanguagechanged)
 			psy_ui_button_onlanguagechanged;
@@ -141,7 +141,7 @@ psy_ui_Button* psy_ui_button_allocinit(psy_ui_Component* parent)
 	return rv;
 }
 
-void psy_ui_button_ondestroy(psy_ui_Button* self)
+void psy_ui_button_on_destroy(psy_ui_Button* self)
 {	
 	assert(self);
 
@@ -325,17 +325,17 @@ void psy_ui_button_onpreferredsize(psy_ui_Button* self, psy_ui_Size* limit,
 	rv->height = psy_ui_value_make_eh(self->linespacing);	
 }
 
-void psy_ui_button_onmousedown(psy_ui_Button* self, psy_ui_MouseEvent* ev)
+void psy_ui_button_on_mouse_down(psy_ui_Button* self, psy_ui_MouseEvent* ev)
 {
-	super_vtable.onmousedown(psy_ui_button_base(self), ev);
+	super_vtable.on_mouse_down(psy_ui_button_base(self), ev);
 	if (!psy_ui_component_inputprevented(&self->component)) {
 		psy_ui_component_capture(psy_ui_button_base(self));
 	}
 }
 
-void psy_ui_button_onmouseup(psy_ui_Button* self, psy_ui_MouseEvent* ev)
+void psy_ui_button_on_mouse_up(psy_ui_Button* self, psy_ui_MouseEvent* ev)
 {	
-	super_vtable.onmouseup(psy_ui_button_base(self), ev);
+	super_vtable.on_mouse_up(psy_ui_button_base(self), ev);
 	if (!psy_ui_component_inputprevented(&self->component)) {
 		psy_ui_component_releasecapture(psy_ui_button_base(self));
 		if (psy_ui_component_inputprevented(&self->component)) {
@@ -435,7 +435,7 @@ void psy_ui_button_prevent_translation(psy_ui_Button* self)
 	}
 }
 
-void button_onkeydown(psy_ui_Button* self, psy_ui_KeyboardEvent* ev)
+void button_on_key_down(psy_ui_Button* self, psy_ui_KeyboardEvent* ev)
 {
 	if (psy_ui_keyboardevent_keycode(ev) == psy_ui_KEY_RETURN &&
 			!psy_ui_component_inputprevented(&self->component)) {

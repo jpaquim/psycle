@@ -16,9 +16,9 @@ static void patternproperties_onpatternlengthchanged(PatternProperties*,
 	psy_audio_Pattern* sender);
 static void patternproperties_onapply(PatternProperties*,
 	psy_ui_Component* sender);
-static void patternproperties_onkeydown(PatternProperties*, psy_ui_KeyboardEvent*);
+static void patternproperties_on_key_down(PatternProperties*, psy_ui_KeyboardEvent*);
 static void patternproperties_onkeyup(PatternProperties*, psy_ui_KeyboardEvent*);
-static void patternproperties_onfocus(PatternProperties*);
+static void patternproperties_on_focus(PatternProperties*);
 static void patternproperties_ontimesignominator(PatternProperties*, IntEdit* sender);
 static void patternproperties_ontimesigdenominator(PatternProperties*, IntEdit* sender);
 static psy_audio_Pattern* patternproperties_pattern(PatternProperties*);
@@ -30,15 +30,15 @@ static psy_ui_ComponentVtable* patternproperties_vtable_init(PatternProperties* 
 {
 	if (!patternproperties_vtable_initialized) {
 		patternproperties_vtable = *(self->component.vtable);
-		patternproperties_vtable.onkeydown =
-			(psy_ui_fp_component_onkeyevent)
-			patternproperties_onkeydown;
+		patternproperties_vtable.on_key_down =
+			(psy_ui_fp_component_on_key_event)
+			patternproperties_on_key_down;
 		patternproperties_vtable.onkeyup =
-			(psy_ui_fp_component_onkeyevent)
+			(psy_ui_fp_component_on_key_event)
 			patternproperties_onkeyup;
-		patternproperties_vtable.onfocus =
+		patternproperties_vtable.on_focus =
 			(psy_ui_fp_component_event)
-			patternproperties_onfocus;
+			patternproperties_on_focus;
 		patternproperties_vtable_initialized = TRUE;
 	}
 	return &patternproperties_vtable;
@@ -107,7 +107,7 @@ void patternproperties_onapply(PatternProperties* self,
 	}
 }
 
-void patternproperties_onkeydown(PatternProperties* self, psy_ui_KeyboardEvent* ev)
+void patternproperties_on_key_down(PatternProperties* self, psy_ui_KeyboardEvent* ev)
 {
 	if (psy_ui_keyboardevent_keycode(ev) == psy_ui_KEY_RETURN) {
 		patternproperties_onapply(self, &self->component);
@@ -121,7 +121,7 @@ void patternproperties_onkeyup(PatternProperties* self, psy_ui_KeyboardEvent* ev
 	psy_ui_keyboardevent_stop_propagation(ev);
 }
 
-void patternproperties_onfocus(PatternProperties* self)
+void patternproperties_on_focus(PatternProperties* self)
 {
 	psy_ui_component_set_focus(psy_ui_textarea_base(&self->lengthedit));
 }

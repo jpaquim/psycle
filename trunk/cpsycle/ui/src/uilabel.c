@@ -34,7 +34,7 @@ static void vtable_init(psy_ui_Label* self)
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
 		super_vtable = *(self->component.vtable);
-		vtable.ondestroy =
+		vtable.on_destroy =
 			(psy_ui_fp_component_event)
 			psy_ui_label_on_destroy;
 		vtable.ondraw =
@@ -46,8 +46,8 @@ static void vtable_init(psy_ui_Label* self)
 		vtable.onlanguagechanged =
 			(psy_ui_fp_component_onlanguagechanged)
 			psy_ui_label_on_language_changed;		
-		vtable.ontimer =
-			(psy_ui_fp_component_ontimer)
+		vtable.on_timer =
+			(psy_ui_fp_component_on_timer)
 			psy_ui_label_on_timer;		
 		vtable_initialized = TRUE;
 	}
@@ -61,7 +61,7 @@ void psy_ui_label_init(psy_ui_Label* self, psy_ui_Component* parent)
 
 	psy_ui_component_init(&self->component, parent, NULL);
 	vtable_init(self);	
-	self->charnumber = 0;	
+	self->charnumber = 0.0;	
 	self->text = NULL;
 	self->defaulttext = NULL;
 	self->translation = NULL;
@@ -74,6 +74,8 @@ void psy_ui_label_init(psy_ui_Label* self, psy_ui_Component* parent)
 	psy_ui_textformat_prevent_wrap(&self->format);
 	psy_ui_component_set_style_type_disabled(psy_ui_label_base(self),		
 		psy_ui_STYLE_LABEL_DISABLED);
+	psy_ui_component_set_style_type_select(psy_ui_label_base(self),
+		psy_ui_STYLE_LABEL_SELECT);
 }
 
 void psy_ui_label_init_text(psy_ui_Label* self, psy_ui_Component* parent,
@@ -163,40 +165,46 @@ void psy_ui_label_on_preferred_size(psy_ui_Label* self,
 	const psy_ui_Size* limit, psy_ui_Size* rv)
 {
 	const psy_ui_TextMetric* tm;
-	const char* text;	
-
+	const char* text;
+	const psy_ui_Font* font;
+	
 	text = psy_ui_label_text_internal(self);
 	tm = psy_ui_component_textmetric(psy_ui_label_base(self));
+	font = psy_ui_component_font(psy_ui_label_base(self));
 	if (psy_strlen(text) == 0) {		
 		rv->width = psy_ui_value_make_ew(self->charnumber);		
 		rv->height = psy_ui_value_make_px((tm->tmHeight * self->format.linespacing));
 		return;
 	} else {		
-		if (self->charnumber == 0) {			
-			psy_ui_Size size;
-			const psy_ui_Font* font;
-
-			font = psy_ui_component_font(&self->component);
-			if (font) {
-				size = psy_ui_font_textsize(font, text, psy_strlen(text));
-			} else {
-				size = psy_ui_size_zero();
-			}
-			rv->width = psy_ui_value_make_px(psy_ui_value_px(&size.width, tm, NULL));			
-		} else {
-			rv->width = psy_ui_value_make_px(tm->tmAveCharWidth * self->charnumber);
-		}
-		if (self->format.wrap) {						
+		if (psy_ui_textformat_has_word_wrap(&self->format)) {
 			if (self->charnumber == 0 && limit) {
-				psy_ui_textformat_update(&self->format, text, psy_ui_value_px(&limit->width, tm, limit),
-					tm);
+				psy_ui_textformat_update(&self->format, text,
+					psy_ui_value_px(&limit->width, tm, limit),
+					font, tm);
+				rv->width = psy_ui_value_make_px(psy_ui_value_px(&limit->width, tm, NULL));
 			} else {
-				psy_ui_textformat_update(&self->format, text, self->charnumber * tm->tmAveCharWidth,
-					tm);
+				rv->width = psy_ui_value_make_px(tm->tmAveCharWidth * self->charnumber);
+				psy_ui_textformat_update(&self->format, text,
+					self->charnumber * tm->tmAveCharWidth, font, tm);
 			}			
-			rv->height = psy_ui_value_make_px(psy_ui_textformat_numlines(&self->format) *
-				(tm->tmHeight * self->format.linespacing));			
+			rv->height = psy_ui_value_make_px(
+				psy_ui_textformat_numlines(&self->format) *
+				(tm->tmHeight * self->format.linespacing));
 		} else {
+			if (self->charnumber == 0) {
+				psy_ui_Size size;
+				const psy_ui_Font* font;
+
+				font = psy_ui_component_font(&self->component);
+				if (font) {
+					size = psy_ui_font_textsize(font, text, psy_strlen(text));
+				} else {
+					size = psy_ui_size_zero();
+				}
+				rv->width = psy_ui_value_make_px(psy_ui_value_px(&size.width, tm, NULL));				
+			} else {
+				rv->width = psy_ui_value_make_px(tm->tmAveCharWidth * self->charnumber);
+			}
 			rv->height = psy_ui_value_make_px((tm->tmHeight * self->format.linespacing));
 		}
 	}	
@@ -205,12 +213,11 @@ void psy_ui_label_on_preferred_size(psy_ui_Label* self,
 void psy_ui_label_on_draw(psy_ui_Label* self, psy_ui_Graphics* g)
 {
 	psy_ui_TextDraw textdraw;
-	
+			
 	psy_ui_textdraw_init(&textdraw, &self->format,
 		psy_ui_component_size_px(psy_ui_label_base(self)),
 		psy_ui_label_text_internal(self));
-	psy_ui_textdraw_draw(&textdraw, g, psy_ui_component_font(&self->component),
-		psy_ui_component_textmetric(&self->component), psy_INDEX_INVALID);
+	psy_ui_textdraw_draw(&textdraw, g, psy_INDEX_INVALID);
 	psy_ui_textdraw_dispose(&textdraw);
 }
 
@@ -246,7 +253,7 @@ void psy_ui_label_fadeout(psy_ui_Label* self)
 {	
 	/*
 	** Keeps new message 5secs active (Timer interval(50ms) * 100). The counter
-	** is decremented each timer tick (ontimer). The first 20 ticks the colour 
+	** is decremented each timer tick (on_timer). The first 20 ticks the colour 
 	** stays full and then starts to fadeout. At zero the label text is reset
 	** to the default text
 	*/
@@ -258,7 +265,7 @@ void psy_ui_label_fadeout(psy_ui_Label* self)
 
 void psy_ui_label_on_timer(psy_ui_Label* self, uintptr_t timerid)
 {
-	super_vtable.ontimer(&self->component, timerid);
+	super_vtable.on_timer(&self->component, timerid);
 	if (self->fadeoutcounter > 0) {
 		psy_ui_Colour colour;
 		psy_ui_Colour bgcolour;
@@ -281,19 +288,20 @@ void psy_ui_label_on_timer(psy_ui_Label* self, uintptr_t timerid)
 			psy_ui_label_set_text(self, self->defaulttext);
 			psy_ui_component_setcolour(psy_ui_label_base(self),
 				psy_ui_style_const(psy_ui_STYLE_ROOT)->colour);
-			psy_ui_component_stoptimer(&self->component, 0);
+			psy_ui_component_stop_timer(&self->component, 0);
 		}
 	}
 }
 
 void psy_ui_label_prevent_wrap(psy_ui_Label* self)
 {
-	psy_ui_textformat_prevent_wrap(&self->format);	
+	psy_ui_textformat_prevent_wrap(&self->format);
 }
 
 void psy_ui_label_enable_wrap(psy_ui_Label* self)
 {
-	psy_ui_textformat_wrap(&self->format);
+	psy_ui_textformat_line_wrap(&self->format);
+	psy_ui_textformat_word_wrap(&self->format);
 }
 
 const char* psy_ui_label_text_internal(const psy_ui_Label* self)

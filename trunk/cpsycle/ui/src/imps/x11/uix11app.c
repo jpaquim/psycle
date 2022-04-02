@@ -534,7 +534,7 @@ void psy_ui_x11app_destroy_window(psy_ui_X11App* self, Window window)
             deallocate = imp->component->deallocate;
             psy_signal_emit(&imp->component->signal_destroy,
 					imp->component, 0);
-			imp->component->vtable->ondestroy(imp->component);    
+			imp->component->vtable->on_destroy(imp->component);    
 			psy_ui_component_dispose(imp->component);
 		} else {
 			imp->imp.vtable->dev_dispose(&imp->imp);

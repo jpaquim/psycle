@@ -325,11 +325,11 @@ void view_dev_destroy(psy_ui_ViewComponentImp* self)
 	parent = psy_ui_component_parent(component);
 	psy_signal_emit(&component->signal_destroy,
 		self->component, 0);
-	component->vtable->ondestroy(component);	
+	component->vtable->on_destroy(component);	
 	if (parent) {
 		psy_ui_component_erase(parent, component);
 	}
-	c = psy_ui_component_children(self->component, psy_ui_NONRECURSIVE);
+	c = psy_ui_component_children(self->component, psy_ui_NONE_RECURSIVE);
 	for (p = c; p != NULL; p = q) {
 		psy_ui_Component* component;
 		bool deallocate;
@@ -350,7 +350,7 @@ void view_dev_destroy(psy_ui_ViewComponentImp* self)
 
 void view_dev_destroyed(psy_ui_ViewComponentImp* self)
 {		
-	self->component->vtable->ondestroyed(self->component);	
+	self->component->vtable->on_destroyed(self->component);	
 	psy_ui_component_dispose(self->component);	
 }
 

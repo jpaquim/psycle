@@ -41,8 +41,8 @@ static void playlistview_onplay(PlaylistView*, psy_ui_Button* sender);
 static void playlistview_onstop(PlaylistView*, psy_ui_Button* sender);
 static void playlistview_onmoveup(PlaylistView*, psy_ui_Button* sender);
 static void playlistview_onmovedown(PlaylistView*, psy_ui_Button* sender);
-static void playlistview_ontimer(PlaylistView*, uintptr_t timerid);
-static void playlistview_onmousedown(PlaylistView*, psy_ui_MouseEvent*);
+static void playlistview_on_timer(PlaylistView*, uintptr_t timerid);
+static void playlistview_on_mouse_down(PlaylistView*, psy_ui_MouseEvent*);
 static void playlistview_onsongchanged(PlaylistView*, Workspace* sender);
 static void playlistview_onplaylistchanged(PlaylistView*, psy_Playlist* sender);
 /* vtable */
@@ -53,10 +53,10 @@ static void vtable_init(PlaylistView* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);		
-		vtable.onmousedown = (psy_ui_fp_component_onmouseevent)
-			playlistview_onmousedown;
-		vtable.ontimer = (psy_ui_fp_component_ontimer)
-			playlistview_ontimer;
+		vtable.on_mouse_down = (psy_ui_fp_component_on_mouse_event)
+			playlistview_on_mouse_down;
+		vtable.on_timer = (psy_ui_fp_component_on_timer)
+			playlistview_on_timer;
 		vtable_initialized = TRUE;
 	}
 	self->component.vtable = &vtable;
@@ -157,14 +157,14 @@ void playlistview_onplay(PlaylistView* self, psy_ui_Button* sender)
 
 void playlistview_onstop(PlaylistView* self, psy_ui_Button* sender)
 {
-	psy_ui_component_stoptimer(&self->component, 0);
+	psy_ui_component_stop_timer(&self->component, 0);
 	self->starting = FALSE;
 	self->running = FALSE;
 	psy_ui_button_disablehighlight(&self->bar.play);
 	psy_audio_player_stop(workspace_player(self->workspace));
 }
 
-void playlistview_ontimer(PlaylistView* self, uintptr_t timerid)
+void playlistview_on_timer(PlaylistView* self, uintptr_t timerid)
 {
 	if (!psy_audio_player_playing(workspace_player(self->workspace))) {
 		psy_Property* next;
@@ -175,7 +175,7 @@ void playlistview_ontimer(PlaylistView* self, uintptr_t timerid)
 			self->starting = FALSE;			
 		} else {
 			psy_audio_player_stop(workspace_player(self->workspace));
-			psy_ui_component_stoptimer(&self->component, 0);
+			psy_ui_component_stop_timer(&self->component, 0);
 			self->running = FALSE;			
 		}	
 	}
@@ -198,7 +198,7 @@ psy_Property* playlistview_next(PlaylistView* self)
 	return NULL;
 }
 
-void playlistview_onmousedown(PlaylistView* self, psy_ui_MouseEvent* ev)
+void playlistview_on_mouse_down(PlaylistView* self, psy_ui_MouseEvent* ev)
 {
 	if (psy_ui_mouseevent_button(ev) == 2) {
 		psy_ui_component_hide_align(&self->component);

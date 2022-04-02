@@ -14,7 +14,7 @@
 #include "../../detail/portable.h"
 
 /* prototypes */
-static void mainstatusbar_ondestroy(MainStatusBar*);
+static void mainstatusbar_on_destroy(MainStatusBar*);
 static void psy_ui_terminal_on_destroy(MainStatusBar*);
 static void mainstatusbar_initzoombox(MainStatusBar*);
 static void mainstatusbar_initviewstatusbars(MainStatusBar*);
@@ -40,9 +40,9 @@ static void vtable_init(MainStatusBar* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.ondestroy =
+		vtable.on_destroy =
 			(psy_ui_fp_component_event)
-			mainstatusbar_ondestroy;		
+			mainstatusbar_on_destroy;		
 		vtable_initialized = TRUE;
 	}
 	self->component.vtable = &vtable;
@@ -73,7 +73,7 @@ void mainstatusbar_init(MainStatusBar* self, psy_ui_Component* parent,
 	mainstatusbar_initprogressbar(self);
 }
 
-void mainstatusbar_ondestroy(MainStatusBar* self)
+void mainstatusbar_on_destroy(MainStatusBar* self)
 {
 	psy_list_deallocate(&self->strbuffer, NULL);
 	psy_lock_dispose(&self->outputlock);
@@ -119,7 +119,7 @@ void mainstatusbar_initturnoffbutton(MainStatusBar* self)
 
 void mainstatusbar_initclockbar(MainStatusBar* self)
 {
-	clockbar_init(&self->clockbar, &self->pane, self->workspace);
+	clockbar_init(&self->clockbar, &self->pane);
 	psy_ui_component_set_align(clockbar_base(&self->clockbar),
 		psy_ui_ALIGN_RIGHT);		
 }

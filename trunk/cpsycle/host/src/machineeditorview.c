@@ -10,10 +10,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-static void machineeditorview_ondestroy(MachineEditorView*, psy_ui_Component* sender);
+static void machineeditorview_on_destroy(MachineEditorView*, psy_ui_Component* sender);
 static void machineeditorview_onpreferredsize(MachineEditorView*,
 	psy_ui_Size* limit, psy_ui_Size* rv);
-static void machineeditorview_ontimer(MachineEditorView*, uintptr_t id);
+static void machineeditorview_on_timer(MachineEditorView*, uintptr_t id);
 static void machineeditorview_onmachineeditresize(MachineEditorView*,
 	Workspace* sender, psy_audio_Machine*, intptr_t w, intptr_t h);
 
@@ -34,9 +34,9 @@ static void machineeditorview_vtable_init(MachineEditorView* self)
 		machineeditorview_vtable.onpreferredsize =
 			(psy_ui_fp_component_onpreferredsize)
 			machineeditorview_onpreferredsize;
-		machineeditorview_vtable.ontimer =
-			(psy_ui_fp_component_ontimer)
-			machineeditorview_ontimer;
+		machineeditorview_vtable.on_timer =
+			(psy_ui_fp_component_on_timer)
+			machineeditorview_on_timer;
 		machineeditorview_vtable_initialized = TRUE;
 	}
 	self->component.vtable = &machineeditorview_vtable;
@@ -54,12 +54,12 @@ void machineeditorview_init(MachineEditorView* self, psy_ui_Component* parent,
 		(void*) psy_ui_win_component_details(&self->component)->hwnd);
 #endif
 	psy_signal_connect(&self->component.signal_destroy, self,
-		machineeditorview_ondestroy);
+		machineeditorview_on_destroy);
 	psy_signal_connect(&workspace->signal_machineeditresize, self,
 		machineeditorview_onmachineeditresize);	
 }
 
-void machineeditorview_ondestroy(MachineEditorView* self, psy_ui_Component* sender)
+void machineeditorview_on_destroy(MachineEditorView* self, psy_ui_Component* sender)
 {
 	if (self->machine) {
 		psy_audio_machine_seteditorhandle(self->machine, NULL);
@@ -85,7 +85,7 @@ MachineEditorView* machineeditorview_allocinit(psy_ui_Component* parent,
 	return rv;	
 }
 
-void machineeditorview_ontimer(MachineEditorView* self, uintptr_t timerid)
+void machineeditorview_on_timer(MachineEditorView* self, uintptr_t timerid)
 {	
 	psy_audio_machine_editoridle(self->machine);
 }

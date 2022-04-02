@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -13,7 +13,7 @@
 #include <stdlib.h>
 
 /* prototypes */
-static void psy_ui_combobox_ondestroy(psy_ui_ComboBox*);
+static void psy_ui_combobox_on_destroy(psy_ui_ComboBox*);
 static bool psy_ui_combobox_haspreventry(const psy_ui_ComboBox*);
 static bool psy_ui_combobox_hasnextentry(const psy_ui_ComboBox*);
 static void psy_ui_combobox_onselchange(psy_ui_ComboBox*,
@@ -34,11 +34,11 @@ static void vtable_init(psy_ui_ComboBox* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.ondestroy =
+		vtable.on_destroy =
 			(psy_ui_fp_component_event)
-			psy_ui_combobox_ondestroy;
+			psy_ui_combobox_on_destroy;
 		vtable.onmousewheel =
-			(psy_ui_fp_component_onmouseevent)
+			(psy_ui_fp_component_on_mouse_event)
 			psy_ui_combobox_onmousewheel;
 		vtable_initialized = TRUE;
 	}
@@ -98,7 +98,7 @@ void psy_ui_combobox_init(psy_ui_ComboBox* self, psy_ui_Component* parent)
 	psy_ui_button_seticon(&self->expand, psy_ui_ICON_DOWN);	
 }
 
-void psy_ui_combobox_ondestroy(psy_ui_ComboBox* self)
+void psy_ui_combobox_on_destroy(psy_ui_ComboBox* self)
 {
 	assert(self);
 
@@ -284,7 +284,7 @@ void psy_ui_combobox_onexpand(psy_ui_ComboBox* self, psy_ui_Button* sender,
 {	
 	assert(self);
 
-	sender->component.vtable->onmouseup(&sender->component, ev);
+	sender->component.vtable->on_mouse_up(&sender->component, ev);
 	psy_ui_combobox_expand(self);
 }
 

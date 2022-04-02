@@ -60,6 +60,7 @@ extern "C" {
 #define psy_ui_STYLE_CHECKMARK           40280
 #define psy_ui_STYLE_CHECKMARK_HOVER     40281
 #define psy_ui_STYLE_CHECKMARK_SELECT    40282
+#define psy_ui_STYLE_EDITOR              40300
 
 
 void psy_ui_appstyles_inittheme(psy_ui_Styles*, psy_ui_ThemeMode,

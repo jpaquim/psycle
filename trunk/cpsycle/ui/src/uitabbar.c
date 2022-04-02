@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -14,8 +14,8 @@
 
 /* psy_ui_Tab */
 /* protoypes */
-static void psy_ui_tab_ondestroy(psy_ui_Tab*);
-static void psy_ui_tab_onmousedown(psy_ui_Tab*, psy_ui_MouseEvent*);
+static void psy_ui_tab_on_destroy(psy_ui_Tab*);
+static void psy_ui_tab_on_mouse_down(psy_ui_Tab*, psy_ui_MouseEvent*);
 static void psy_ui_tab_ondraw(psy_ui_Tab*, psy_ui_Graphics*);
 static void psy_ui_tab_onpreferredsize(psy_ui_Tab*,
 	const psy_ui_Size* limit, psy_ui_Size* rv);
@@ -30,12 +30,12 @@ static void psy_ui_tab_vtable_init(psy_ui_Tab* self)
 {
 	if (!psy_ui_tab_vtable_initialized) {
 		psy_ui_tab_vtable = *(self->component.vtable);
-		psy_ui_tab_vtable.ondestroy =
+		psy_ui_tab_vtable.on_destroy =
 			(psy_ui_fp_component_event)
-			psy_ui_tab_ondestroy;
-		psy_ui_tab_vtable.onmousedown =
-			(psy_ui_fp_component_onmouseevent)
-			psy_ui_tab_onmousedown;
+			psy_ui_tab_on_destroy;
+		psy_ui_tab_vtable.on_mouse_down =
+			(psy_ui_fp_component_on_mouse_event)
+			psy_ui_tab_on_mouse_down;
 		psy_ui_tab_vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
 			psy_ui_tab_ondraw;
@@ -67,12 +67,13 @@ void psy_ui_tab_init(psy_ui_Tab* self, psy_ui_Component* parent,
 	psy_ui_bitmap_init(&self->bitmapicon);
 	self->text = psy_strdup(text);
 	self->translation = NULL;
-	self->preventtranslation = FALSE;
+	self->prevent_translation = FALSE;
 	psy_strreset(&self->translation, psy_ui_translate(text));
 	self->istoggle = FALSE;
 	self->mode = psy_ui_TABMODE_SINGLESEL;
 	self->checkstate = 0;	
-	self->index = index;	
+	self->index = index;
+	self->target_id = psy_INDEX_INVALID;
 	self->bitmapident = 1.0;
 	self->lightresourceid = psy_INDEX_INVALID;
 	self->darkresourceid = psy_INDEX_INVALID;
@@ -97,7 +98,7 @@ psy_ui_Tab* psy_ui_tab_allocinit(psy_ui_Component* parent,
 	return rv;
 }
 
-void psy_ui_tab_ondestroy(psy_ui_Tab* self)
+void psy_ui_tab_on_destroy(psy_ui_Tab* self)
 {
 	assert(self);
 
@@ -114,7 +115,7 @@ void psy_ui_tab_settext(psy_ui_Tab* self, const char* text)
 	assert(self);
 
 	psy_strreset(&self->text, text);	
-	if (self->preventtranslation) {
+	if (self->prevent_translation) {
 		free(self->translation);
 		self->translation = NULL;
 	} else {
@@ -138,12 +139,12 @@ void psy_ui_tab_setmode(psy_ui_Tab* self, TabMode mode)
 
 void psy_ui_tab_preventtranslation(psy_ui_Tab* self)
 {
-	self->preventtranslation = TRUE;
+	self->prevent_translation = TRUE;
 	free(self->translation);
 	self->translation = NULL;
 }
 
-void psy_ui_tab_loadresource(psy_ui_Tab* self,
+void psy_ui_tab_load_resource(psy_ui_Tab* self,
 	uintptr_t lightresourceid, uintptr_t darkresourceid,
 	psy_ui_Colour transparency)
 {
@@ -223,9 +224,8 @@ void psy_ui_tab_onpreferredsize(psy_ui_Tab* self, const psy_ui_Size* limit,
 	}	
 }
 
-void psy_ui_tab_onmousedown(psy_ui_Tab* self, psy_ui_MouseEvent* ev)
-{
-	printf("tab pressed\n");
+void psy_ui_tab_on_mouse_down(psy_ui_Tab* self, psy_ui_MouseEvent* ev)
+{	
 	if (self->mode != psy_ui_TABMODE_LABEL) {
 		if (self->istoggle) {
 			if (self->checkstate != TABCHECKSTATE_OFF) {
@@ -272,8 +272,8 @@ void psy_ui_tab_loadbitmaps(psy_ui_Tab* self)
 
 /* psy_ui_TabBar */
 /* prototypes */
-static void tabbar_ondestroy(psy_ui_TabBar*);
-static void tabbar_ontabclicked(psy_ui_TabBar*, psy_ui_Tab* sender);
+static void tabbar_on_destroy(psy_ui_TabBar*);
+static void tabbar_on_tab_clicked(psy_ui_TabBar*, psy_ui_Tab* sender);
 static void tabbar_onmousewheel(psy_ui_TabBar*, psy_ui_MouseEvent*);
 /* vtable */
 static psy_ui_ComponentVtable vtable;
@@ -283,11 +283,11 @@ static void vtable_init(psy_ui_TabBar* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.ondestroy =
+		vtable.on_destroy =
 			(psy_ui_fp_component_event)
-			tabbar_ondestroy;
+			tabbar_on_destroy;
 		vtable.onmousewheel =
-			(psy_ui_fp_component_onmouseevent)
+			(psy_ui_fp_component_on_mouse_event)
 			tabbar_onmousewheel;
 		vtable_initialized = TRUE;
 	}
@@ -303,15 +303,15 @@ void psy_ui_tabbar_init(psy_ui_TabBar* self, psy_ui_Component* parent)
 	vtable_init(self);	
 	psy_ui_component_set_style_type(&self->component, psy_ui_STYLE_TABBAR);
 	psy_signal_init(&self->signal_change);
-	self->numtabs = 0;
+	self->num_tabs = 0;
 	self->selected = 0;
-	self->preventtranslation = FALSE;
-	self->tabalignment = psy_ui_ALIGN_LEFT;
-	psy_ui_component_set_defaultalign(&self->component, self->tabalignment,
+	self->prevent_translation = FALSE;
+	self->tab_alignment = psy_ui_ALIGN_LEFT;
+	psy_ui_component_set_defaultalign(&self->component, self->tab_alignment,
 		psy_ui_margin_zero());	
 }
 
-void tabbar_ondestroy(psy_ui_TabBar* self)
+void tabbar_on_destroy(psy_ui_TabBar* self)
 {	
 	assert(self);
 	
@@ -325,11 +325,11 @@ void psy_ui_tabbar_settabalign(psy_ui_TabBar* self, psy_ui_AlignType align)
 
 	assert(self);
 	
-	self->tabalignment = align;
+	self->tab_alignment = align;
 	psy_ui_component_set_defaultalign(&self->component, align,
 		self->component.containeralign->insertmargin);
 	q = psy_ui_component_children(psy_ui_tabbar_base(self),
-		psy_ui_NONRECURSIVE);
+		psy_ui_NONE_RECURSIVE);
 	for (p = q; p != NULL; p = p->next) {
 		psy_ui_component_set_align((psy_ui_Component*)psy_list_entry(p),
 			align);
@@ -339,10 +339,10 @@ void psy_ui_tabbar_settabalign(psy_ui_TabBar* self, psy_ui_AlignType align)
 
 void psy_ui_tabbar_preventtranslation(psy_ui_TabBar* self)
 {
-	self->preventtranslation = TRUE;
+	self->prevent_translation = TRUE;
 }
 
-void tabbar_ontabclicked(psy_ui_TabBar* self, psy_ui_Tab* sender)
+void tabbar_on_tab_clicked(psy_ui_TabBar* self, psy_ui_Tab* sender)
 {	
 	psy_ui_tabbar_select(self, sender->index);	
 }
@@ -386,22 +386,25 @@ void psy_ui_tabbar_select(psy_ui_TabBar* self, uintptr_t tabindex)
 }
 
 psy_ui_Tab* psy_ui_tabbar_append(psy_ui_TabBar* self, const char* label,
-	uintptr_t lightresourceid, uintptr_t darkresourceid,
+	uintptr_t target_id, uintptr_t lightresourceid, uintptr_t darkresourceid,
 	psy_ui_Colour transparency)
 {
-	psy_ui_Tab* tab;
+	psy_ui_Tab* rv;
 
 	assert(self);
 
-	tab = psy_ui_tab_allocinit(&self->component, label, self->numtabs);
-	if (self->preventtranslation) {
-		psy_ui_tab_preventtranslation(tab);
+	rv = psy_ui_tab_allocinit(&self->component, label, self->num_tabs);
+	if (rv) {
+		psy_ui_tab_set_target_id(rv, target_id);
+		if (self->prevent_translation) {
+			psy_ui_tab_preventtranslation(rv);
+		}
+		psy_ui_tab_load_resource(rv, lightresourceid, darkresourceid,
+			transparency);
+		++self->num_tabs;
+		psy_signal_connect(&rv->signal_clicked, self, tabbar_on_tab_clicked);
 	}
-	psy_ui_tab_loadresource(tab, lightresourceid, darkresourceid, transparency);
-	++self->numtabs;
-	psy_signal_connect(&tab->signal_clicked, self,
-		tabbar_ontabclicked);	
-	return tab;
+	return rv;
 }
 
 void psy_ui_tabbar_append_tabs(psy_ui_TabBar* self, const char* label, ...)
@@ -414,7 +417,7 @@ void psy_ui_tabbar_append_tabs(psy_ui_TabBar* self, const char* label, ...)
 	va_start(ap, label);
 	for (curr = label; curr != NULL; curr = va_arg(ap, const char*)) {
 		psy_ui_tabbar_append(self, curr, psy_INDEX_INVALID, psy_INDEX_INVALID,
-			psy_ui_colour_white());
+			psy_INDEX_INVALID, psy_ui_colour_white());
 	}
 	va_end(ap);
 }
@@ -425,7 +428,7 @@ void psy_ui_tabbar_clear(psy_ui_TabBar* self)
 
 	self->selected = 0;	
 	psy_ui_component_clear(&self->component);
-	self->numtabs = 0;
+	self->num_tabs = 0;
 }
 
 void psy_ui_tabbar_settabmode(psy_ui_TabBar* self, uintptr_t tabindex,
@@ -463,12 +466,12 @@ void tabbar_onmousewheel(psy_ui_TabBar* self, psy_ui_MouseEvent* ev)
 	assert(self);
 
 	delta = psy_ui_mouseevent_delta(ev);
-	if (self->tabalignment == psy_ui_ALIGN_TOP ||
-		self->tabalignment == psy_ui_ALIGN_BOTTOM) {
+	if (self->tab_alignment == psy_ui_ALIGN_TOP ||
+		self->tab_alignment == psy_ui_ALIGN_BOTTOM) {
 		delta *= -1;
 	}
 	if (delta > 0) {
-		if (self->selected + 1 < self->numtabs) {
+		if (self->selected + 1 < self->num_tabs) {
 			psy_ui_tabbar_select(self, self->selected + 1);
 		}
 	} else if (delta < 0) {

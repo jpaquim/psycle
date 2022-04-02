@@ -15,7 +15,11 @@
 /* prototypes */
 static psy_List* psy_ui_textformat_eols(psy_ui_TextFormat*, const char* text);
 static psy_List* psy_ui_textformat_wraps(psy_ui_TextFormat*, const char* text,
-	uintptr_t num, double width, const psy_ui_TextMetric*);
+	uintptr_t num, double width, const psy_ui_Font* font,
+	const psy_ui_TextMetric*);
+static uintptr_t psy_ui_textformat_numchars(const psy_ui_TextFormat*,
+	const char* text, double width, const psy_ui_Font* font,
+	const psy_ui_TextMetric* tm);
 
 /* implementation */
 void psy_ui_textformat_init(psy_ui_TextFormat* self)
@@ -23,12 +27,15 @@ void psy_ui_textformat_init(psy_ui_TextFormat* self)
 	assert(self);
 		
 	psy_table_init(&self->lines);
-	self->wrap = TRUE;
+	self->word_wrap = TRUE;
+	self->line_wrap = TRUE;
 	self->width = 0.0;
 	self->avgcharwidth = 0.0;
+	self->nummaxchars = 0;
 	self->textheight = 19;
 	self->linespacing = 1.0;	
 	self->textalignment = psy_ui_textalignment_make(psy_ui_ALIGNMENT_LEFT);
+	self->numavgchars = 0;
 }
 
 void psy_ui_textformat_dispose(psy_ui_TextFormat* self)
@@ -40,10 +47,11 @@ void psy_ui_textformat_dispose(psy_ui_TextFormat* self)
 void psy_ui_textformat_clear(psy_ui_TextFormat* self)
 {
 	psy_table_clear(&self->lines);	
+	self->numavgchars = 0;
 }
 
 void psy_ui_textformat_update(psy_ui_TextFormat* self, const char* text,
-	double width, const psy_ui_TextMetric* tm)
+	double width, const psy_ui_Font* font, const psy_ui_TextMetric* tm)
 {
 	if (psy_table_size(&self->lines) > 0 && (self->width != width ||
 			self->avgcharwidth != tm->tmAveCharWidth)) {
@@ -53,9 +61,8 @@ void psy_ui_textformat_update(psy_ui_TextFormat* self, const char* text,
 	self->textheight = tm->tmHeight;	
 	self->avgcharwidth = tm->tmAveCharWidth;	
 	if (psy_table_size(&self->lines) == 0) {		
-		psy_List* eols;
-		
-		if (self->wrap) {
+		if (self->line_wrap || self->word_wrap) {
+			psy_List* eols;
 			psy_List* p;
 			uintptr_t cp;
 			uintptr_t line;
@@ -63,41 +70,46 @@ void psy_ui_textformat_update(psy_ui_TextFormat* self, const char* text,
 			eols = psy_ui_textformat_eols(self, text);
 			psy_list_append(&eols, (void*)psy_strlen(text));
 			cp = 0;
-			for (p = eols, line = 0; p != NULL; p = p->next) {
-				uintptr_t eol;
-				uintptr_t numout;
-				psy_List* wraps;
-				psy_List* q;
+			self->nummaxchars = 0;
+			if (self->line_wrap) {
+				for (p = eols, line = 0; p != NULL; p = p->next) {
+					uintptr_t eol;
+					uintptr_t numout;
 
-				eol = (uintptr_t)p->entry;
-				numout = eol - cp;
-				if (self->wrap) {
-					uintptr_t wp;
+					eol = (uintptr_t)p->entry;
+					numout = eol - cp;
+					self->nummaxchars = psy_max(self->nummaxchars, numout);
+					if (self->word_wrap) {
+						psy_List* wraps;
+						psy_List* q;
+						uintptr_t wp;
 
-					wraps = psy_ui_textformat_wraps(self, text + cp, numout, width, tm);
-					wp = 0;
-					for (q = wraps; q != NULL; q = q->next) {
-						uintptr_t wrap;
+						wraps = psy_ui_textformat_wraps(self, text + cp, numout,
+							width, font, tm);
+						for (q = wraps, wp = 0; q != NULL; q = q->next) {
+							uintptr_t word_wrap;
 
-						wrap = (uintptr_t)q->entry;
-						numout = wrap - wp;
+							word_wrap = (uintptr_t)q->entry;
+							numout = word_wrap - wp;
+							psy_table_insert(&self->lines, line,
+								(void*)(cp + wp + numout));
+							++line;
+							wp = word_wrap;
+						}
+						psy_list_free(wraps);
+						wraps = NULL;
+					} else {
 						psy_table_insert(&self->lines, line,
-							(void*)(cp + wp + numout));
+							(void*)(cp + numout));
 						++line;
-						wp = wrap;
 					}
-					psy_list_free(wraps);
-				} else {
-					psy_table_insert(&self->lines, line,
-						(void*)(cp + numout));
-					++line;
+					cp = eol;
 				}
-				cp = eol;
+				psy_list_free(eols);
+				eols = NULL;
 			}
-			psy_list_free(eols);
-			eols = NULL;
 		}
-		if (psy_table_size(&self->lines) == 0) {
+		if (psy_ui_textformat_numlines(self) == 0) {
 			psy_table_insert(&self->lines, 0, (void*)psy_strlen(text));
 		}		
 	}	
@@ -105,7 +117,7 @@ void psy_ui_textformat_update(psy_ui_TextFormat* self, const char* text,
 
 psy_List* psy_ui_textformat_eols(psy_ui_TextFormat* self, const char* text)
 {
-	psy_List* rv;	
+	psy_List* rv;
 	uintptr_t num;
 	uintptr_t cp;
 		
@@ -123,38 +135,38 @@ psy_List* psy_ui_textformat_eols(psy_ui_TextFormat* self, const char* text)
 }
 
 psy_List* psy_ui_textformat_wraps(psy_ui_TextFormat* self, const char* text,
-	uintptr_t num, double width, const psy_ui_TextMetric* tm)
+	uintptr_t num, double width, const psy_ui_Font* font, const psy_ui_TextMetric* tm)
 {
 	psy_List* rv;	
-	uintptr_t numavgchars;
 	uintptr_t cp;	
 
 	rv = NULL;	
-	numavgchars = (uintptr_t)(width / (tm->tmAveCharWidth * 1.4));
-	if (numavgchars == 0) {
-		return rv;
-	}
 	cp = 0;		
 	while (cp < num) {
 		uintptr_t linestart;
-
+		uintptr_t numchars;
 		linestart = cp;
-		cp += numavgchars;
-		if (cp > num - linestart) {
+
+		numchars = psy_ui_textformat_numchars(self, text + linestart, width, font, tm);
+		if (numchars == 0) {
+			return rv;
+		}
+		cp += numchars;
+		if (cp >= num) {
 			psy_list_append(&rv, (void*)num);
 			return rv;
 		}		
 		while (cp > linestart + 1) {
 			char c;
 
-			c = text[cp];
-			if (c == ' ') {				
+			c = text[cp];		
+			if (c == ' ') {		
 				break;
 			}
 			--cp;
 		}
 		if (cp < linestart) {
-			cp += numavgchars;
+			cp += numchars;
 			cp = psy_min(num, cp);						
 		}
 		psy_list_append(&rv, (void*)(cp));
@@ -174,6 +186,21 @@ uintptr_t psy_ui_textformat_line_at(const psy_ui_TextFormat* self,
 uintptr_t psy_ui_textformat_numlines(const psy_ui_TextFormat* self)
 {
 	return psy_table_size(&self->lines);
+}
+
+
+uintptr_t psy_ui_textformat_numchars(const psy_ui_TextFormat* self,
+	const char* text, double width, const psy_ui_Font* font,
+	const psy_ui_TextMetric* tm)
+{	
+	if (self->numavgchars == 0) {
+		uintptr_t len;
+
+		len = psy_strlen(text);
+		((psy_ui_TextFormat*)self)->numavgchars = psy_min(
+			(uintptr_t)(width / (tm->tmAveCharWidth * 1.3)), len);
+	}
+	return self->numavgchars;
 }
 
 uintptr_t psy_ui_textformat_cursor_position(const psy_ui_TextFormat* self,
@@ -208,4 +235,16 @@ uintptr_t psy_ui_textformat_cursor_position(const psy_ui_TextFormat* self,
 		++cp;
 	}
 	return cp;
+}
+
+double psy_ui_textformat_screen_offset(const psy_ui_TextFormat* self,
+	const char* text, uintptr_t count, const psy_ui_Font* font,
+	const psy_ui_TextMetric* tm)
+{	
+	psy_ui_Size textsize;
+	psy_ui_RealSize textsizepx;
+
+	textsize = psy_ui_font_textsize(font, text, count);
+	textsizepx = psy_ui_size_px(&textsize, tm, NULL);
+	return textsizepx.width;
 }

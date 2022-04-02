@@ -13,6 +13,31 @@
 #include <assert.h>
 #include <math.h>
 
+
+void psy_ui_textmetric_init(psy_ui_TextMetric* self)
+{
+	self->tmHeight = 0;
+	self->tmAscent = 0;
+	self->tmDescent = 0;
+	self->tmInternalLeading = 0;
+	self->tmExternalLeading = 0;
+	self->tmAveCharWidth = 0;
+	self->tmMaxCharWidth = 0;
+	self->tmWeight = 0;
+	self->tmOverhang = 0;
+	self->tmDigitizedAspectX = 0;
+	self->tmDigitizedAspectY = 0;
+	self->tmFirstChar = 0;
+	self->tmLastChar = 0;
+	self->tmDefaultChar = 0;
+	self->tmBreakChar = 0;
+	self->tmItalic = 0;
+	self->tmUnderlined = 0;
+	self->tmStruckOut = 0;
+	self->tmPitchAndFamily = 0;
+	self->tmCharSet = 0;
+}
+
 void psy_ui_value_init(psy_ui_Value* self)
 {
 	assert(self);

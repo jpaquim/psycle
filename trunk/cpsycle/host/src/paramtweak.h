@@ -42,7 +42,7 @@ void paramtweak_begin(ParamTweak*, struct psy_audio_Machine*,
 // deactivate tweak
 void paramtweak_end(ParamTweak*);
 // called by the uis to delegate the mouse events
-void paramtweak_onmousedown(ParamTweak*, struct psy_ui_MouseEvent*);
+void paramtweak_on_mouse_down(ParamTweak*, struct psy_ui_MouseEvent*);
 void paramtweak_onmousemove(ParamTweak*, struct psy_ui_MouseEvent*);
 //\ return tweak status
 INLINE bool paramtweak_active(const ParamTweak* self)

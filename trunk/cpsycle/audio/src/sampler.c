@@ -260,8 +260,8 @@ static void psy_audio_sampler_newline(psy_audio_Sampler*);
 static void psy_audio_sampler_clearmulticmdmem(psy_audio_Sampler*);
 static uintptr_t psy_audio_sampler_getfreevoice(psy_audio_Sampler*);
 static void psy_audio_sampler_generateaudio(psy_audio_Sampler*, psy_audio_BufferContext*);
-static void psy_audio_sampler_ontimertick(psy_audio_Sampler*);
-static void psy_audio_sampler_ontimerwork(psy_audio_Sampler*,
+static void psy_audio_sampler_on_timertick(psy_audio_Sampler*);
+static void psy_audio_sampler_on_timerwork(psy_audio_Sampler*,
 	psy_audio_BufferContext*);
 static psy_List* psy_audio_sampler_sequencerinsert(psy_audio_Sampler*, psy_List* events);
 static void psy_audio_sampler_tick(psy_audio_Sampler*, uintptr_t channel,
@@ -411,8 +411,8 @@ void psy_audio_sampler_init(psy_audio_Sampler* self,
 	psy_audio_sampler_initparameters(self);
 	psy_audio_ticktimer_init(&self->ticktimer,
 		self, /* ticktimer callback context (self of sampler) */
-		(fp_samplerticktimer_ontick)psy_audio_sampler_ontimertick,
-		(fp_samplerticktimer_onwork)psy_audio_sampler_ontimerwork);
+		(fp_samplerticktimer_ontick)psy_audio_sampler_on_timertick,
+		(fp_samplerticktimer_onwork)psy_audio_sampler_on_timerwork);
 	psy_audio_sampler_setsamplerate(self,
 		psy_audio_machine_samplerate(psy_audio_sampler_base(self)));
 }
@@ -1101,7 +1101,7 @@ void psy_audio_sampler_generateaudio(psy_audio_Sampler* self, psy_audio_BufferCo
 	psy_audio_ticktimer_update(&self->ticktimer, bc->numsamples, bc);
 }
 
-void psy_audio_sampler_ontimertick(psy_audio_Sampler* self)
+void psy_audio_sampler_on_timertick(psy_audio_Sampler* self)
 {
 	assert(self);
 	if (self->linearslide) {
@@ -1115,7 +1115,7 @@ void psy_audio_sampler_ontimertick(psy_audio_Sampler* self)
 	}
 }
 
-void psy_audio_sampler_ontimerwork(psy_audio_Sampler* self,
+void psy_audio_sampler_on_timerwork(psy_audio_Sampler* self,
 	psy_audio_BufferContext* bc)
 {
 	uintptr_t voice;

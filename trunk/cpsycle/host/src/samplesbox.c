@@ -10,7 +10,7 @@
 /* platform */
 #include "../../detail/portable.h"
 
-static void samplesbox_ondestroy(SamplesBox*);
+static void samplesbox_on_destroy(SamplesBox*);
 static void samplesbox_buildsamplelist(SamplesBox*);
 static void samplesbox_buildsubsamplelist(SamplesBox*, uintptr_t slot, bool create);
 static void samplesbox_onsampleinsert(SamplesBox*, psy_ui_Component* sender,
@@ -48,7 +48,7 @@ void samplesbox_init(SamplesBox* self, psy_ui_Component* parent,
 	psy_ui_component_set_margin(&self->group.component, margin);	
 	psy_signal_init(&self->signal_changed);
 	psy_signal_connect(&self->component.signal_destroy, self,
-		samplesbox_ondestroy);
+		samplesbox_on_destroy);
 	psy_ui_component_set_margin(&self->samplelist.component, margin);
 	samplesbox_setsamples(self, samples);	
 	psy_signal_connect(&self->samplelist.signal_selchanged, self,
@@ -57,7 +57,7 @@ void samplesbox_init(SamplesBox* self, psy_ui_Component* parent,
 		samplesbox_onsubsamplelistchanged);	
 }
 
-void samplesbox_ondestroy(SamplesBox* self)
+void samplesbox_on_destroy(SamplesBox* self)
 {
 	psy_signal_dispose(&self->signal_changed);
 }

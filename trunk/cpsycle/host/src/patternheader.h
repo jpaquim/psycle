@@ -9,7 +9,8 @@
 /* host */
 #include "trackergridstate.h"
 #include "workspace.h"
-
+/* ui */
+#include <uilabel.h>
 
 /* PatternTrackBox */
 typedef struct PatternTrackBox {
@@ -81,5 +82,18 @@ INLINE psy_ui_Component* trackerheader_base(TrackerHeader* self)
 {
 	return &self->component;
 }
+
+typedef struct TrackerHeaderView {
+	/* inherits */
+	psy_ui_Component component;
+	/* internal */
+	psy_ui_Component pane;
+	psy_ui_Label desc;
+	TrackerHeader header;
+} TrackerHeaderView;
+
+void trackerheaderview_init(TrackerHeaderView*, psy_ui_Component* parent,
+	TrackConfig*, TrackerState*, Workspace*);
+
 
 #endif /* PATTERNHEADER_H */

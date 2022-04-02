@@ -492,7 +492,7 @@ void seqeditloopproperties_setloopindex(SeqEditLoopProperties* self, uintptr_t l
 
 /* SeqEditProperties */
 /* prototypes */
-static void seqeditproperties_ondestroy(SeqEditProperties*);
+static void seqeditproperties_on_destroy(SeqEditProperties*);
 static void seqeditproperties_onitemselected(SeqEditProperties*,
 	SeqEditState* sender, uintptr_t itemtype, uintptr_t param, uintptr_t param1);
 static void seqeditproperties_onsequencetrackreposition(SeqEditProperties*,
@@ -509,9 +509,9 @@ static void seqeditproperties_vtable_init(SeqEditProperties* self)
 {
 	if (!seqeditproperties_vtable_initialized) {
 		seqeditproperties_vtable = *(self->component.vtable);		
-		seqeditproperties_vtable.ondestroy =
+		seqeditproperties_vtable.on_destroy =
 			(psy_ui_fp_component_event)
-			seqeditproperties_ondestroy;
+			seqeditproperties_on_destroy;
 		seqeditproperties_vtable_initialized = TRUE;
 	}
 	self->component.vtable = &seqeditproperties_vtable;
@@ -553,7 +553,7 @@ void seqeditproperties_init(SeqEditProperties* self, psy_ui_Component* parent,
 	seqeditproperties_connectsong(self);
 }
 
-void seqeditproperties_ondestroy(SeqEditProperties* self)
+void seqeditproperties_on_destroy(SeqEditProperties* self)
 {
 
 }

@@ -94,7 +94,7 @@ void machinewireviewuis_redrawvus(MachineWireViewUis* self)
 
 /* MachineWireView */
 /* prototypes */
-static void machinewireview_ondestroy(MachineWireView*);
+static void machinewireview_on_destroy(MachineWireView*);
 static void machinewireview_setmachines(MachineWireView*, psy_audio_Machines*);
 static void machinewireview_ondraw(MachineWireView*, psy_ui_Graphics*);
 static void machinewireview_drawdragwire(MachineWireView*, psy_ui_Graphics*);
@@ -106,14 +106,14 @@ static void machinewireview_drawwirearrow(MachineWireView*, psy_ui_Graphics*,
 	psy_ui_RealPoint p1, psy_ui_RealPoint p2);
 static psy_ui_RealPoint rotate_point(psy_ui_RealPoint, double phi);
 static psy_ui_RealPoint move_point(psy_ui_RealPoint pt, psy_ui_RealPoint d);
-static void machinewireview_onmousedown(MachineWireView*, psy_ui_MouseEvent*);
-static void machinewireview_onmouseup(MachineWireView*, psy_ui_MouseEvent*);
+static void machinewireview_on_mouse_down(MachineWireView*, psy_ui_MouseEvent*);
+static void machinewireview_on_mouse_up(MachineWireView*, psy_ui_MouseEvent*);
 static void machinewireview_onmousemove(MachineWireView*, psy_ui_MouseEvent*);
 static bool machinewireview_movemachine(MachineWireView*, uintptr_t slot,
 	double dx, double dy);
 static void machinewireview_onmousedoubleclick(MachineWireView*,
 	psy_ui_MouseEvent*);
-static void machinewireview_onkeydown(MachineWireView*, psy_ui_KeyboardEvent*);
+static void machinewireview_on_key_down(MachineWireView*, psy_ui_KeyboardEvent*);
 static uintptr_t machinewireview_machineleft(MachineWireView*, uintptr_t src);
 static uintptr_t machinewireview_machineright(MachineWireView*, uintptr_t src);
 static uintptr_t machinewireview_machineup(MachineWireView*, uintptr_t src);
@@ -163,27 +163,27 @@ static void vtable_init(MachineWireView* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.ondestroy =
+		vtable.on_destroy =
 			(psy_ui_fp_component_event)
-			machinewireview_ondestroy;
+			machinewireview_on_destroy;
 		vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
 			machinewireview_ondraw;
-		vtable.onmousedown =
-			(psy_ui_fp_component_onmouseevent)
-			machinewireview_onmousedown;
-		vtable.onmouseup =
-			(psy_ui_fp_component_onmouseevent)
-			machinewireview_onmouseup;
+		vtable.on_mouse_down =
+			(psy_ui_fp_component_on_mouse_event)
+			machinewireview_on_mouse_down;
+		vtable.on_mouse_up =
+			(psy_ui_fp_component_on_mouse_event)
+			machinewireview_on_mouse_up;
 		vtable.onmousemove =
-			(psy_ui_fp_component_onmouseevent)
+			(psy_ui_fp_component_on_mouse_event)
 			machinewireview_onmousemove;
 		vtable.onmousedoubleclick =
-			(psy_ui_fp_component_onmouseevent)
+			(psy_ui_fp_component_on_mouse_event)
 			machinewireview_onmousedoubleclick;
-		vtable.onkeydown =
-			(psy_ui_fp_component_onkeyevent)
-			machinewireview_onkeydown;
+		vtable.on_key_down =
+			(psy_ui_fp_component_on_key_event)
+			machinewireview_on_key_down;
 		vtable.onpreferredsize =
 			(psy_ui_fp_component_onpreferredsize)
 			machinewireview_onpreferredsize;
@@ -257,7 +257,7 @@ void machinewireview_setmachines(MachineWireView* self,
 	machinewireview_build(self);
 }
 
-void machinewireview_ondestroy(MachineWireView* self)
+void machinewireview_on_destroy(MachineWireView* self)
 {	
 	if (self->machines) {
 		psy_signal_disconnect_context(
@@ -502,7 +502,7 @@ void machinewireview_onmousedoubleclick(MachineWireView* self,
 	}
 }
 
-void machinewireview_onmousedown(MachineWireView* self, psy_ui_MouseEvent* ev)
+void machinewireview_on_mouse_down(MachineWireView* self, psy_ui_MouseEvent* ev)
 {	
 	if (!psy_ui_component_hasfocus(&self->component)) {
 		psy_ui_component_set_focus(&self->component);
@@ -734,7 +734,7 @@ void machinewireview_setdragstatus(MachineWireView* self, uintptr_t slot)
 	}
 }
 
-void machinewireview_onmouseup(MachineWireView* self, psy_ui_MouseEvent* ev)
+void machinewireview_on_mouse_up(MachineWireView* self, psy_ui_MouseEvent* ev)
 {	
 	psy_ui_component_releasecapture(&self->component);
 	if (self->dragslot != psy_INDEX_INVALID) {
@@ -780,7 +780,7 @@ void machinewireview_onmouseup(MachineWireView* self, psy_ui_MouseEvent* ev)
 	psy_ui_component_invalidate(&self->component);
 }
 
-void machinewireview_onkeydown(MachineWireView* self, psy_ui_KeyboardEvent* ev)
+void machinewireview_on_key_down(MachineWireView* self, psy_ui_KeyboardEvent* ev)
 {		
 	psy_audio_Wire selectedwire;
 

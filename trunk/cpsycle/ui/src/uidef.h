@@ -16,7 +16,7 @@
 extern "C" {
 #endif
 
-#define	psy_ui_NONRECURSIVE 0
+#define	psy_ui_NONE_RECURSIVE 0
 #define	psy_ui_RECURSIVE 1
 
 #define psy_ui_ETO_OPAQUE	0x0002

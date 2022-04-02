@@ -90,7 +90,7 @@ void sampleeditorbar_init(SampleEditorBar* self, psy_ui_Component* parent,
 	sampleeditorbar_clearselection(self);
 	psy_ui_margin_init_em(&margin, 0.0, 2.0, 0.0, 0.0);
 	psy_list_free(psy_ui_components_setalign(
-		psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE),
+		psy_ui_component_children(&self->component, psy_ui_NONE_RECURSIVE),
 		psy_ui_ALIGN_LEFT,
 		margin));
 }
@@ -173,7 +173,7 @@ void sampleeditoroperations_initalign(SampleEditorOperations* self)
 
 	psy_ui_margin_init_em(&margin, 0.0, 0.5, 0.0, 0.5);		
 	psy_list_free(psy_ui_components_setalign(
-		psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE),
+		psy_ui_component_children(&self->component, psy_ui_NONE_RECURSIVE),
 		psy_ui_ALIGN_LEFT, margin));
 }
 
@@ -237,20 +237,14 @@ void sampleeditoramplify_ondescribe(SampleEditorAmplify* self,
 }
 
 void sampleeditluaprocessor_init(SampleEditLuaProcessor* self,
-	psy_ui_Component* parent, Workspace* workspace)
-{
-	self->workspace = workspace;
+	psy_ui_Component* parent)
+{	
 	psy_ui_component_init(&self->component, parent, NULL);
-	psy_ui_label_init_text(&self->header, &self->component,
-		"Lua Processor");
+	psy_ui_label_init_text(&self->header, &self->component, "Lua Processor");
 	psy_ui_component_set_align(&self->header.component, psy_ui_ALIGN_TOP);
 	psy_ui_editor_init(&self->editor, &self->component);
 	psy_ui_editor_settext(&self->editor, LUAPROCESSOR_DEFAULT);
-	psy_ui_component_set_align(&self->editor.component, psy_ui_ALIGN_CLIENT);
-	psy_ui_editor_init(&self->console, &self->component);	
-	psy_ui_component_set_align(&self->console.component, psy_ui_ALIGN_BOTTOM);
-	psy_ui_component_set_preferred_size(&self->console.component,
-		psy_ui_size_make_em(0.0, 10.0));
+	psy_ui_component_set_align(&self->editor.component, psy_ui_ALIGN_CLIENT);	
 }
 
 /* SampleEditorProcessView */
@@ -300,9 +294,8 @@ void sampleprocessview_init(SampleEditorProcessView* self,
 		psy_ui_notebook_base(&self->notebook), NULL);
 	psy_ui_component_init(&self->emptypage6,
 		psy_ui_notebook_base(&self->notebook), NULL);
-/*	sampleeditluaprocessor_init(&self->luaprocessor,
-		psy_ui_notebook_base(&self->notebook),
-		workspace);	*/
+	sampleeditluaprocessor_init(&self->luaprocessor,
+		psy_ui_notebook_base(&self->notebook));
 	psy_ui_listbox_setcursel(&self->processors, 0);
 	psy_ui_notebook_select(&self->notebook, 0);
 	psy_signal_connect(&self->processors.signal_selchanged, self,
@@ -319,7 +312,7 @@ void sampleprocessview_buildprocessorlist(SampleEditorProcessView* self)
 	psy_ui_listbox_add_text(&self->processors, "Normalize");
 	psy_ui_listbox_add_text(&self->processors, "Remove DC");
 	psy_ui_listbox_add_text(&self->processors, "Reverse");
-	/* psy_ui_listbox_add_text(&self->processors, "Lua"); */
+	psy_ui_listbox_add_text(&self->processors, "Lua");
 }
 
 void sampleeditorprocessview_onprocessorselected(SampleEditorProcessView* self,
@@ -330,7 +323,7 @@ void sampleeditorprocessview_onprocessorselected(SampleEditorProcessView* self,
 
 static void sampleeditorplaybar_initalign(SampleEditorPlayBar*);
 static void sampleeditor_initsampler(SampleEditor*);
-static void sampleeditor_ondestroy(SampleEditor*, psy_ui_Component* sender);
+static void sampleeditor_on_destroy(SampleEditor*, psy_ui_Component* sender);
 static void sampleeditor_onzoom(SampleEditor*, psy_ui_Component* sender);
 static void sampleeditor_onsongchanged(SampleEditor*, Workspace* sender);
 static void sampleeditor_connectmachinessignals(SampleEditor*, Workspace*);
@@ -388,7 +381,7 @@ void sampleeditorplaybar_initalign(SampleEditorPlayBar* self)
 	psy_ui_component_setalignexpand(&self->component,
 		psy_ui_HEXPAND);
 	psy_list_free(psy_ui_components_setalign(
-		psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE),
+		psy_ui_component_children(&self->component, psy_ui_NONE_RECURSIVE),
 		psy_ui_ALIGN_LEFT, margin));
 }
 
@@ -540,7 +533,7 @@ void sampleeditor_onscrollzoom_customdraw(SampleEditor* self,
 }
 
 /* prototypes */
-static void samplebox_ondestroy(SampleBox*, psy_ui_Component* sender);
+static void samplebox_on_destroy(SampleBox*, psy_ui_Component* sender);
 static void samplebox_clearwaveboxes(SampleBox*);
 static void samplebox_buildwaveboxes(SampleBox*, psy_audio_Sample*,
 	WaveBoxLoopViewMode);
@@ -554,11 +547,11 @@ void samplebox_init(SampleBox* self, psy_ui_Component* parent,
 	self->workspace = workspace;	
 	psy_table_init(&self->waveboxes);
 	psy_signal_connect(&self->component.signal_destroy, self,
-		samplebox_ondestroy);	
+		samplebox_on_destroy);	
 	psy_signal_init(&self->signal_selectionchanged);
 }
 
-void samplebox_ondestroy(SampleBox* self, psy_ui_Component* sender)
+void samplebox_on_destroy(SampleBox* self, psy_ui_Component* sender)
 {		
 	psy_signal_dispose(&self->signal_selectionchanged);
 	psy_table_dispose(&self->waveboxes);
@@ -683,7 +676,7 @@ void sampleeditor_init(SampleEditor* self, psy_ui_Component* parent,
 	self->loopviewmode = WAVEBOX_LOOPVIEW_CONT_SINGLE;
 	psy_ui_component_init(&self->component, parent, NULL);	
 	psy_signal_connect(&self->component.signal_destroy, self,
-		sampleeditor_ondestroy);	
+		sampleeditor_on_destroy);	
 	sampleprocessview_init(&self->processview, &self->component, workspace);
 	psy_ui_component_set_align(&self->processview.component, psy_ui_ALIGN_RIGHT);
 	//psy_ui_component_set_margin(&self->processview.component, &margin);
@@ -732,7 +725,7 @@ void sampleeditor_initsampler(SampleEditor* self)
 		psy_audio_MAX_STREAM_SIZE);
 }
 
-void sampleeditor_ondestroy(SampleEditor* self, psy_ui_Component* sender)
+void sampleeditor_on_destroy(SampleEditor* self, psy_ui_Component* sender)
 {		
 	psy_audio_machine_dispose(&self->sampler.custommachine.machine);	
 	psy_audio_buffer_dispose(&self->samplerbuffer);	

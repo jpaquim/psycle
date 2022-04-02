@@ -636,6 +636,12 @@
     <ClCompile Include="src\patternnavigator.c">
       <Filter>pattern\common</Filter>
     </ClCompile>
+    <ClCompile Include="src\plugineditorbar.c">
+      <Filter>machine\plugineditor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mainviews.c">
+      <Filter>app</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\languageconfig.h">
@@ -1174,6 +1180,12 @@
     </ClInclude>
     <ClInclude Include="src\patternnavigator.h">
       <Filter>pattern\common</Filter>
+    </ClInclude>
+    <ClInclude Include="src\plugineditorbar.h">
+      <Filter>machine\plugineditor</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mainviews.h">
+      <Filter>app</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

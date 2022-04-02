@@ -38,12 +38,11 @@ void seqview_init(SeqView* self, psy_ui_Component* parent,
 	seqviewstate_init(&self->state, &self->cmds);
 	/* sequence listview */
 	seqviewlist_init(&self->listview, &self->component, &self->state);
-	psy_ui_scroller_init(&self->scroller, &self->listview.component,
-		&self->component);	
+	psy_ui_scroller_init(&self->scroller, &self->component, NULL, NULL);
+	psy_ui_scroller_set_client(&self->scroller, &self->listview.component);
+	psy_ui_component_set_style_type(&self->scroller.component, STYLE_SEQLISTVIEW);
 	psy_ui_component_set_padding(psy_ui_scroller_base(&self->scroller),
 		psy_ui_margin_make_em(0.5, 0.5, 0.0, 1.0));	
-	psy_ui_component_set_style_type_select(&self->scroller.component,
-		STYLE_SEQLISTVIEW_FOCUS);
 	psy_ui_component_set_align(&self->scroller.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_component_set_align(&self->listview.component,
 		psy_ui_ALIGN_FIXED);

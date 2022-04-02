@@ -152,8 +152,8 @@ static int loadspecificchunk(psy_audio_XMSampler*, psy_audio_SongFile*,
 	uintptr_t slot);
 static int savespecificchunk(psy_audio_XMSampler*, psy_audio_SongFile*,
 	uintptr_t slot);
-static void psy_audio_xmsampler_ontimertick(psy_audio_XMSampler*);
-static void psy_audio_xmsampler_ontimerwork(psy_audio_XMSampler*,
+static void psy_audio_xmsampler_on_timertick(psy_audio_XMSampler*);
+static void psy_audio_xmsampler_on_timerwork(psy_audio_XMSampler*,
 	psy_audio_BufferContext*);
 static void generateaudio(psy_audio_XMSampler*, psy_audio_BufferContext*);
 static void psy_audio_xmsampler_stop(psy_audio_XMSampler*);
@@ -256,8 +256,8 @@ void psy_audio_xmsampler_init(psy_audio_XMSampler* self,
 
 	psy_audio_ticktimer_init(&self->ticktimer,
 		self, // callback context (sampler)
-		(fp_samplerticktimer_ontick)psy_audio_xmsampler_ontimertick,
-		(fp_samplerticktimer_onwork)psy_audio_xmsampler_ontimerwork);
+		(fp_samplerticktimer_ontick)psy_audio_xmsampler_on_timertick,
+		(fp_samplerticktimer_onwork)psy_audio_xmsampler_on_timerwork);
 	
 	psy_audio_xmsampler_initparameters(self);
 }
@@ -308,7 +308,7 @@ void psy_audio_xmsampler_setsamplerate(psy_audio_XMSampler* self,
 	}
 }
 
-void psy_audio_xmsampler_ontimertick(psy_audio_XMSampler* self)
+void psy_audio_xmsampler_on_timertick(psy_audio_XMSampler* self)
 {			
 	int channel;
 
@@ -326,7 +326,7 @@ void generateaudio(psy_audio_XMSampler* self, psy_audio_BufferContext* bc)
 	psy_audio_ticktimer_update(&self->ticktimer, bc->numsamples, bc);
 }
 
-void psy_audio_xmsampler_ontimerwork(psy_audio_XMSampler* self,
+void psy_audio_xmsampler_on_timerwork(psy_audio_XMSampler* self,
 	psy_audio_BufferContext* bc)
 {
 	float multip;

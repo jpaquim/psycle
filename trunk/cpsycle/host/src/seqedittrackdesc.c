@@ -15,7 +15,7 @@
 
 /* SeqEditTrackDesc */
 /* prototypes */
-static void seqedittrackdesc_ondestroy(SeqEditTrackDesc*);
+static void seqedittrackdesc_on_destroy(SeqEditTrackDesc*);
 static void seqedittrackdesc_onsequenceselectionselect(SeqEditTrackDesc*,
 	psy_audio_SequenceSelection*, psy_audio_OrderIndex*);
 static void seqedittrackdesc_onsequenceselectiondeselect(SeqEditTrackDesc*,
@@ -40,9 +40,9 @@ static void seqedittrackdesc_vtable_init(SeqEditTrackDesc* self)
 {
 	if (!seqedittrackdesc_vtable_initialized) {
 		seqedittrackdesc_vtable = *(self->component.vtable);		
-		seqedittrackdesc_vtable.ondestroy =
+		seqedittrackdesc_vtable.on_destroy =
 			(psy_ui_fp_component_event)
-			seqedittrackdesc_ondestroy;		
+			seqedittrackdesc_on_destroy;		
 		seqedittrackdesc_vtable.ondragover =
 			(psy_ui_fp_component_ondragover)
 			seqedittrackdesc_ondragover;
@@ -71,7 +71,7 @@ void seqedittrackdesc_init(SeqEditTrackDesc* self, psy_ui_Component* parent,
 		seqedittrackdesc_onsequenceselectiondeselect);	
 }
 
-void seqedittrackdesc_ondestroy(SeqEditTrackDesc* self)
+void seqedittrackdesc_on_destroy(SeqEditTrackDesc* self)
 {
 	psy_signal_dispose(&self->signal_resize);
 }

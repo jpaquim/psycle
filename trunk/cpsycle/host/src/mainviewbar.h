@@ -26,11 +26,11 @@ typedef struct MainViewBar {
 	/* inherits */
 	psy_ui_Component component;
 	/* internal */
+	psy_ui_Button extract;
 	psy_ui_Button maximizebtn;
 	psy_ui_Component tabbars;
-	psy_ui_TabBar tabbar;
 	Navigation navigation;
-	psy_ui_TabBar helpsettingstabbar;
+	psy_ui_TabBar tabbar;	
 	MinMaximize minmaximize;
 	psy_ui_Notebook viewtabbars;
 } MainViewBar;

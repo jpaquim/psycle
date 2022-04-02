@@ -29,13 +29,7 @@ void psy_ui_textdraw_init(psy_ui_TextDraw*, psy_ui_TextFormat*,
 void psy_ui_textdraw_dispose(psy_ui_TextDraw*);
 
 void psy_ui_textdraw_draw(psy_ui_TextDraw*, psy_ui_Graphics*,
-    const psy_ui_Font*, const psy_ui_TextMetric*, uintptr_t cursorpos);
-double psy_ui_textdraw_center_x(const psy_ui_TextDraw*,
-    double width, const char* text, uintptr_t count, const psy_ui_Font*,
-    const psy_ui_TextMetric*);
-double psy_ui_textdraw_center_y(const psy_ui_TextDraw*,
-    double height, uintptr_t numlines, const psy_ui_Font*,
-    const psy_ui_TextMetric*);
+    uintptr_t cursorpos);
 
 #ifdef __cplusplus
 }

@@ -52,7 +52,7 @@ void paramtweak_end(ParamTweak* self)
 	self->active = FALSE;
 }
 
-void paramtweak_onmousedown(ParamTweak* self, psy_ui_MouseEvent* ev)
+void paramtweak_on_mouse_down(ParamTweak* self, psy_ui_MouseEvent* ev)
 {		
 	assert(self);
 

@@ -14,7 +14,7 @@
 
 /* PatternDefaultLine */
 /* prototypes */
-static void patterndefaultline_ondestroy(PatternDefaultLine*);
+static void patterndefaultline_on_destroy(PatternDefaultLine*);
 static void patterndefaultline_onconfigure(PatternDefaultLine*,
 	PatternViewConfig*, psy_Property*);
 static void patterndefaultline_oncursorchanged(PatternDefaultLine*,
@@ -28,9 +28,9 @@ static void vtable_init(PatternDefaultLine* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.ondestroy =
+		vtable.on_destroy =
 			(psy_ui_fp_component_event)
-			patterndefaultline_ondestroy;
+			patterndefaultline_on_destroy;
 		vtable_initialized = TRUE;
 	}
 	self->component.vtable = &vtable;
@@ -48,8 +48,17 @@ void patterndefaultline_init(PatternDefaultLine* self, psy_ui_Component* parent,
 		&workspace->player.patterndefaults.sequence,
 		&workspace->player.patterndefaults.patterns, NULL);	
 	trackerstate_init(&self->state, trackconfig, &self->pvstate);
+	/* label */
+	psy_ui_label_init(&self->desc, &self->component);
+	psy_ui_label_set_text(&self->desc, "Def");
+	psy_ui_component_set_align(&self->desc.component, psy_ui_ALIGN_LEFT);
+	psy_ui_component_set_preferred_size(&self->desc.component,
+		psy_ui_size_make_em(8.0, 1.0));
+	/* scroller */
+	psy_ui_component_init(&self->pane, &self->component, NULL);
+	psy_ui_component_set_align(&self->pane, psy_ui_ALIGN_CLIENT);
 	/* grid */
-	trackergrid_init(&self->grid, &self->component, &self->state, workspace);
+	trackergrid_init(&self->grid, &self->pane, &self->state, workspace);
 	psy_ui_component_set_wheel_scroll(trackergrid_base(&self->grid), 0);
 	psy_ui_component_set_align(&self->grid.component, psy_ui_ALIGN_FIXED);
 	self->grid.state->drawbeathighlights = FALSE;
@@ -64,7 +73,7 @@ void patterndefaultline_init(PatternDefaultLine* self, psy_ui_Component* parent,
 		patterndefaultline_onconfigure);	
 }
 
-void patterndefaultline_ondestroy(PatternDefaultLine* self)
+void patterndefaultline_on_destroy(PatternDefaultLine* self)
 {	
 	trackerstate_dispose(&self->state);
 	patternviewstate_dispose(&self->pvstate);

@@ -19,9 +19,9 @@ static void pinedit_drawpinoutput(PinEdit*, psy_ui_Graphics*, uintptr_t pin);
 static void pinedit_drawpininput(PinEdit*, psy_ui_Graphics*, uintptr_t pin);
 static psy_ui_RealRectangle pinedit_pinposition_output(PinEdit*, uintptr_t pin);
 static psy_ui_RealRectangle pinedit_pinposition_input(PinEdit*, uintptr_t pin);
-static void pinedit_onmousedown(PinEdit*, psy_ui_MouseEvent*);
+static void pinedit_on_mouse_down(PinEdit*, psy_ui_MouseEvent*);
 static void pinedit_onmousemove(PinEdit*, psy_ui_MouseEvent*);
-static void pinedit_onmouseup(PinEdit*, psy_ui_MouseEvent*);
+static void pinedit_on_mouse_up(PinEdit*, psy_ui_MouseEvent*);
 static psy_List* pinedit_hittest_wire(PinEdit*, psy_ui_RealPoint);
 static bool pinedit_screentopin(PinEdit*, double x, double y, uintptr_t* pin, bool* isout);
 static psy_audio_PinMapping* pinedit_mapping(PinEdit*);
@@ -38,15 +38,15 @@ static void vtable_init(PinEdit* self)
 		vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
 			pinedit_ondraw;
-		vtable.onmousedown =
-			(psy_ui_fp_component_onmouseevent)
-			pinedit_onmousedown;
+		vtable.on_mouse_down =
+			(psy_ui_fp_component_on_mouse_event)
+			pinedit_on_mouse_down;
 		vtable.onmousemove =
-			(psy_ui_fp_component_onmouseevent)
+			(psy_ui_fp_component_on_mouse_event)
 			pinedit_onmousemove;
-		vtable.onmouseup =
-			(psy_ui_fp_component_onmouseevent)
-			pinedit_onmouseup;
+		vtable.on_mouse_up =
+			(psy_ui_fp_component_on_mouse_event)
+			pinedit_on_mouse_up;
 		vtable_initialized = TRUE;
 	}
 	self->component.vtable = &vtable;
@@ -286,7 +286,7 @@ void pinedit_drawdrag(PinEdit* self, psy_ui_Graphics* g)
 	}
 }
 
-void pinedit_onmousedown(PinEdit* self, psy_ui_MouseEvent* ev)
+void pinedit_on_mouse_down(PinEdit* self, psy_ui_MouseEvent* ev)
 {
 	if (psy_ui_mouseevent_button(ev) == 2) {
 		psy_List* pinpair;
@@ -422,7 +422,7 @@ void pinedit_onmousemove(PinEdit* self, psy_ui_MouseEvent* ev)
 	}
 }
 
-void pinedit_onmouseup(PinEdit* self, psy_ui_MouseEvent* ev)
+void pinedit_on_mouse_up(PinEdit* self, psy_ui_MouseEvent* ev)
 {
 	if (self->dragmode != PINEDIT_DRAG_NONE) {
 		uintptr_t newpin;

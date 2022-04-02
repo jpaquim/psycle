@@ -11,13 +11,13 @@
 static void confirmbox_onok(ConfirmBox*, psy_ui_Component* sender);
 static void confirmbox_onno(ConfirmBox*, psy_ui_Component* sender);
 static void confirmbox_oncontinue(ConfirmBox*, psy_ui_Component* sender);
-static void checkunsavedbox_ondestroy(ConfirmBox*, psy_ui_Component* sender);
+static void checkunsavedbox_on_destroy(ConfirmBox*, psy_ui_Component* sender);
 
 void confirmbox_init(ConfirmBox* self, psy_ui_Component* parent, Workspace* workspace)
 {	
 	psy_ui_Margin spacing;
 	
-	psy_ui_component_init(confirmbox_base(self), parent, NULL);
+	psy_ui_component_init(confirmbox_base(self), parent, NULL);	
 	self->workspace = workspace;
 	self->mode = CONFIRM_CLOSE;	
 	psy_ui_component_init_align(&self->view, confirmbox_base(self), NULL,
@@ -36,10 +36,10 @@ void confirmbox_init(ConfirmBox* self, psy_ui_Component* parent, Workspace* work
 	psy_ui_component_setpadding_children(&self->view, spacing);
 	psy_signal_init(&self->signal_execute);
 	psy_signal_connect(&self->component.signal_destroy, self,
-		checkunsavedbox_ondestroy);
+		checkunsavedbox_on_destroy);
 }
 
-void checkunsavedbox_ondestroy(ConfirmBox* self, psy_ui_Component* sender)
+void checkunsavedbox_on_destroy(ConfirmBox* self, psy_ui_Component* sender)
 {
 	psy_signal_dispose(&self->signal_execute);	
 }

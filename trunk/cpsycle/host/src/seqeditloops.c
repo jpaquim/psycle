@@ -80,9 +80,9 @@ void seqeditloopstate_reset(SeqEditLoopState* self)
 /* prototypes */
 static void seqeditloop_ondraw(SeqEditLoop*, psy_ui_Graphics*);
 static void seqeditloop_updatepattern(SeqEditLoop*);
-static void seqeditloop_onmousedown(SeqEditLoop*, psy_ui_MouseEvent*);
+static void seqeditloop_on_mouse_down(SeqEditLoop*, psy_ui_MouseEvent*);
 static void seqeditloop_onmousemove(SeqEditLoop*, psy_ui_MouseEvent*);
-static void seqeditloop_onmouseup(SeqEditLoop*, psy_ui_MouseEvent*);
+static void seqeditloop_on_mouse_up(SeqEditLoop*, psy_ui_MouseEvent*);
 static void seqeditloop_onmouseenter(SeqEditLoop*);
 static void seqeditloop_onmouseleave(SeqEditLoop*);
 static bool seqeditloop_boundsvalid(const SeqEditLoop*,
@@ -101,15 +101,15 @@ static void seqeditloop_vtable_init(SeqEditLoop* self)
 		seqeditloop_vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
 			seqeditloop_ondraw;
-		seqeditloop_vtable.onmousedown =
-			(psy_ui_fp_component_onmouseevent)
-			seqeditloop_onmousedown;
+		seqeditloop_vtable.on_mouse_down =
+			(psy_ui_fp_component_on_mouse_event)
+			seqeditloop_on_mouse_down;
 		seqeditloop_vtable.onmousemove =
-			(psy_ui_fp_component_onmouseevent)
+			(psy_ui_fp_component_on_mouse_event)
 			seqeditloop_onmousemove;
-		seqeditloop_vtable.onmouseup =
-			(psy_ui_fp_component_onmouseevent)
-			seqeditloop_onmouseup;
+		seqeditloop_vtable.on_mouse_up =
+			(psy_ui_fp_component_on_mouse_event)
+			seqeditloop_on_mouse_up;
 		seqeditloop_vtable.onmouseenter =
 			(psy_ui_fp_component_event)
 			seqeditloop_onmouseenter;
@@ -235,7 +235,7 @@ void seqeditloop_updateposition(SeqEditLoop* self)
 				psy_ui_value_make_eh(2.0))));
 }
 
-void seqeditloop_onmousedown(SeqEditLoop* self, psy_ui_MouseEvent* ev)
+void seqeditloop_on_mouse_down(SeqEditLoop* self, psy_ui_MouseEvent* ev)
 {
 	if (!self->pattern && !self->node) {
 		psy_ui_mouseevent_stop_propagation(ev);
@@ -301,7 +301,7 @@ bool seqeditloop_boundsvalid(const SeqEditLoop* self,
 		offset > seqeditloop_prevoffset(self)));		
 }
 
-void seqeditloop_onmouseup(SeqEditLoop* self, psy_ui_MouseEvent* ev)
+void seqeditloop_on_mouse_up(SeqEditLoop* self, psy_ui_MouseEvent* ev)
 {	
 	psy_ui_component_releasecapture(&self->component);
 	seqeditloopstate_reset(self->loopstate);
@@ -335,10 +335,10 @@ void seqeditloop_select(SeqEditLoop* self)
 
 /* SeqEditLoops*/
 /* prototypes */
-static void seqeditloops_ondestroy(SeqEditLoops*);
-static void seqeditloops_onmousedown(SeqEditLoops*, psy_ui_MouseEvent*);
+static void seqeditloops_on_destroy(SeqEditLoops*);
+static void seqeditloops_on_mouse_down(SeqEditLoops*, psy_ui_MouseEvent*);
 static void seqeditloops_onmousemove(SeqEditLoops*, psy_ui_MouseEvent*);
-static void seqeditloops_onmouseup(SeqEditLoops*, psy_ui_MouseEvent*);
+static void seqeditloops_on_mouse_up(SeqEditLoops*, psy_ui_MouseEvent*);
 static void seqeditloops_onmouseenter(SeqEditLoops*);
 static void seqeditloops_onmouseleave(SeqEditLoops*);
 static void seqeditloops_onmousedoubleclick(SeqEditLoops*, psy_ui_MouseEvent*);
@@ -362,17 +362,17 @@ static void seqeditloops_vtable_init(SeqEditLoops* self)
 {
 	if (!seqeditloops_vtable_initialized) {
 		seqeditloops_vtable = *(self->component.vtable);
-		seqeditloops_vtable.ondestroy =
+		seqeditloops_vtable.on_destroy =
 			(psy_ui_fp_component_event)
-			seqeditloops_ondestroy;
+			seqeditloops_on_destroy;
 		seqeditloops_vtable.onpreferredsize =
 			(psy_ui_fp_component_onpreferredsize)
 			seqeditloops_onpreferredsize;
-		seqeditloops_vtable.onmousedown =
-			(psy_ui_fp_component_onmouseevent)
-			seqeditloops_onmousedown;
+		seqeditloops_vtable.on_mouse_down =
+			(psy_ui_fp_component_on_mouse_event)
+			seqeditloops_on_mouse_down;
 		seqeditloops_vtable.onmousemove =
-			(psy_ui_fp_component_onmouseevent)
+			(psy_ui_fp_component_on_mouse_event)
 			seqeditloops_onmousemove;
 		seqeditloops_vtable.onmouseenter =
 			(psy_ui_fp_component_event)
@@ -381,7 +381,7 @@ static void seqeditloops_vtable_init(SeqEditLoops* self)
 			(psy_ui_fp_component_event)
 			seqeditloops_onmouseleave;
 		seqeditloops_vtable.onmousedoubleclick =
-			(psy_ui_fp_component_onmouseevent)
+			(psy_ui_fp_component_on_mouse_event)
 			seqeditloops_onmousedoubleclick;
 		seqeditloops_vtable.onalign =
 			(psy_ui_fp_component_event)
@@ -412,13 +412,13 @@ void seqeditloops_init(SeqEditLoops* self, psy_ui_Component* parent,
 		seqeditloops_onloopchanged);
 }
 
-void seqeditloops_ondestroy(SeqEditLoops* self)
+void seqeditloops_on_destroy(SeqEditLoops* self)
 {	
 	psy_list_free(self->entries);
 	self->entries = NULL;
 }
 
-void seqeditloops_onmousedown(SeqEditLoops* self, psy_ui_MouseEvent* ev)
+void seqeditloops_on_mouse_down(SeqEditLoops* self, psy_ui_MouseEvent* ev)
 {
 	if (psy_ui_mouseevent_button(ev) == 2 && self->loopstate.remove) {
 		psy_signal_emit(&self->state->signal_itemselected, self->state, 3,

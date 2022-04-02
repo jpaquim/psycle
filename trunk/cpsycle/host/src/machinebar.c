@@ -14,7 +14,7 @@
 #include "../../detail/portable.h"
 
 /* prototypes */
-static void machinebar_ondestroy(MachineBar*, psy_ui_Component* component);
+static void machinebar_on_destroy(MachineBar*, psy_ui_Component* component);
 static MachineBarInstParamMode machinebar_mode(MachineBar*);
 static void machinebar_updatemode(MachineBar*);
 static void machinebar_onmachineboxselchange(MachineBar*,
@@ -61,7 +61,7 @@ void machinebar_init(MachineBar* self, psy_ui_Component* parent, Workspace* work
 	psy_ui_component_set_defaultalign(machinebar_base(self), psy_ui_ALIGN_LEFT,
 		margin);
 	psy_signal_connect(&self->component.signal_destroy, self,
-		machinebar_ondestroy);
+		machinebar_on_destroy);
 	/* Machine ComboBox */
 	psy_ui_combobox_init(&self->machinebox, &self->component);
 	psy_ui_combobox_setcharnumber(&self->machinebox, 30);
@@ -100,7 +100,7 @@ void machinebar_init(MachineBar* self, psy_ui_Component* parent, Workspace* work
 	machinebar_connectsongsignals(self);		
 }
 
-void machinebar_ondestroy(MachineBar* self, psy_ui_Component* component)
+void machinebar_on_destroy(MachineBar* self, psy_ui_Component* component)
 {
 	psy_table_dispose(&self->comboboxslots);
 	psy_table_dispose(&self->slotscombobox);

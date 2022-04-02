@@ -65,8 +65,8 @@ void contrib_init(Contrib* self, psy_ui_Component* parent)
 		"Argu\t\t( http://www.aodix.com/ )" "\r\n"
 		"Oatmeal by Fuzzpilz\t( http://bicycle-for-slugs.org/ )"
 	);	
-	psy_ui_scroller_init(&self->scroller, &self->contrib.component,
-		&self->component);
+	psy_ui_scroller_init(&self->scroller, &self->component, NULL, NULL);
+	psy_ui_scroller_set_client(&self->scroller, &self->contrib.component);
 	psy_ui_component_set_align(&self->scroller.component, psy_ui_ALIGN_CLIENT);
 	/* bottom */
 	psy_ui_component_init(&self->bottom, &self->component, NULL);
@@ -114,20 +114,20 @@ void licence_init(Licence* self, psy_ui_Component* parent)
 	psy_signal_connect(&psy_ui_app()->translator.signal_languagechanged,
 		self, licence_onlanguagechanged);	
 	psy_ui_label_init(&self->licenceinfo, &self->component);
-	self->licenceinfo.component.id = 400;
-	psy_ui_label_set_charnumber(&self->licenceinfo, 120.0);
+	self->licenceinfo.component.id = 100;
+	psy_ui_label_prevent_translation(&self->licenceinfo);
+	// psy_ui_label_set_charnumber(&self->licenceinfo, 0.0);
 	psy_ui_component_set_wheel_scroll(&self->licenceinfo.component, 4);
 	psy_ui_component_set_align(psy_ui_label_base(&self->licenceinfo),
-		psy_ui_ALIGN_FIXED);
-	psy_ui_label_prevent_translation(&self->licenceinfo);
+		psy_ui_ALIGN_FIXED);	
 	psy_ui_component_setoverflow(&self->licenceinfo.component,
 		psy_ui_OVERFLOW_SCROLL);
 	psy_ui_label_enable_wrap(&self->licenceinfo);
 	psy_ui_component_set_scrollstep_height(
 		psy_ui_label_base(&self->licenceinfo),
 		psy_ui_value_make_eh(1.0));	
-	psy_ui_scroller_init(&self->scroller, &self->licenceinfo.component,
-		&self->component);
+	psy_ui_scroller_init(&self->scroller, &self->component, NULL, NULL);
+	psy_ui_scroller_set_client(&self->scroller, &self->licenceinfo.component);
 	psy_ui_component_set_align(&self->scroller.component, psy_ui_ALIGN_CLIENT);
 	licence_setlanguage(self);		
 }
@@ -135,8 +135,8 @@ void licence_init(Licence* self, psy_ui_Component* parent)
 void licence_set_en(Licence* self)
 {
 	psy_ui_label_set_text(&self->licenceinfo,
-		"Psycle is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version."
-		"copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net\r\n\r\n"
+		"Psycle is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version. "
+		"copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net\r\n\r\n"
 		"GNU GENERAL PUBLIC LICENSE\r\n"
 		"Version 2, June 1991\r\n"
 		"Copyright(C) 1989, 1991 Free Software Foundation, Inc. 51 Franklin Street, Fifth Floor, Boston, MA 02110 - 1301, USA Everyone is permitted to copy and distribute verbatim copies of this license document, but changing it is not allowed.\r\n"
@@ -188,8 +188,8 @@ void licence_set_en(Licence* self)
 void licence_set_es(Licence* self)
 {	
 	psy_ui_label_set_text(&self->licenceinfo,
-		"Psycle es software libre; puede redistribuirla o modificarla bajo los términos de la Licencia Pública General GNU publicada por la «Free Software Foundation» ; bien de la versión 2 de dicha Licencia o bien (según su elección) de cualquier versión posterior."
-		"copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net\r\n\r\n"
+		"Psycle es software libre; puede redistribuirla o modificarla bajo los términos de la Licencia Pública General GNU publicada por la «Free Software Foundation» ; bien de la versión 2 de dicha Licencia o bien (según su elección) de cualquier versión posterior. "
+		"copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net\r\n\r\n"
 		"GNU GENERAL PUBLIC LICENSE\r\n"
 		"Version 2, June 1991\r\n"
 		"Copyright(C) 1989, 1991 Free Software Foundation, Inc. 51 Franklin Street, Fifth Floor, Boston, MA 02110 - 1301, USA Everyone is permitted to copy and distribute verbatim copies of this license document, but changing it is not allowed.\r\n"
@@ -272,9 +272,9 @@ static void about_vtable_init(About* self)
 	if (!about_vtable_initialized) {
 		about_vtable = *(self->component.vtable);		
 		about_vtable.onmousedoubleclick =
-			(psy_ui_fp_component_onmouseevent)
+			(psy_ui_fp_component_on_mouse_event)
 			about_on_mouse_doubleclick;
-		about_vtable.onfocus =
+		about_vtable.on_focus =
 			(psy_ui_fp_component_event)
 			about_on_focus;
 		about_vtable_initialized = TRUE;

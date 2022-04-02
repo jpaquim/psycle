@@ -81,43 +81,45 @@ HeaderUi* headerui_allocinit(psy_ui_Component* parent,
 }
 
 void headerui_ondraw(HeaderUi* self, psy_ui_Graphics* g)
-{		
-	double half;
-	double quarter;
-	psy_ui_RealRectangle r;
-	char str[128];
-	psy_ui_RealSize size;
-	psy_ui_Style* top_style;
-	psy_ui_Style* bottom_style;	
-	psy_ui_Style* title_style;
+{			
+	if (self->param) {
+		double half;
+		double quarter;
+		psy_ui_RealRectangle r;
+		char str[128];
+		psy_ui_RealSize size;
+		psy_ui_Style* top_style;
+		psy_ui_Style* bottom_style;
+		psy_ui_Style* title_style;
 
-	top_style = psy_ui_style(STYLE_MACPARAM_TOP);
-	bottom_style = psy_ui_style(STYLE_MACPARAM_BOTTOM);	
-	title_style = psy_ui_style(STYLE_MACPARAM_TITLE);
-	headerui_updateparam(self);
-	size = psy_ui_component_size_px(&self->component);
-	half = size.height / 2;
-	quarter = half / 2;
-	psy_ui_realrectangle_init_all(&r, psy_ui_realpoint_zero(), size);
-	psy_ui_drawsolidrectangle(g, r, top_style->background.colour);
-	r = psy_ui_realrectangle_make(
-		psy_ui_realpoint_make(0, half + quarter),
-		psy_ui_realsize_make(size.width, quarter));
-	psy_ui_drawsolidrectangle(g, r, bottom_style->background.colour);
-	if (!psy_audio_machineparam_name(self->param, str)) {
-		if (!psy_audio_machineparam_label(self->param, str)) {
-			psy_snprintf(str, 128, "%s", "");
+		top_style = psy_ui_style(STYLE_MACPARAM_TOP);
+		bottom_style = psy_ui_style(STYLE_MACPARAM_BOTTOM);
+		title_style = psy_ui_style(STYLE_MACPARAM_TITLE);
+		headerui_updateparam(self);
+		size = psy_ui_component_size_px(&self->component);
+		half = size.height / 2;
+		quarter = half / 2;
+		psy_ui_realrectangle_init_all(&r, psy_ui_realpoint_zero(), size);
+		psy_ui_drawsolidrectangle(g, r, top_style->background.colour);
+		r = psy_ui_realrectangle_make(
+			psy_ui_realpoint_make(0, half + quarter),
+			psy_ui_realsize_make(size.width, quarter));
+		psy_ui_drawsolidrectangle(g, r, bottom_style->background.colour);
+		if (!psy_audio_machineparam_name(self->param, str)) {
+			if (!psy_audio_machineparam_label(self->param, str)) {
+				psy_snprintf(str, 128, "%s", "");
+			}
 		}
+		r = psy_ui_realrectangle_make(
+			psy_ui_realpoint_make(0, quarter),
+			psy_ui_realsize_make(size.width, half));
+		psy_ui_setbackgroundcolour(g, title_style->background.colour);
+		psy_ui_settextcolour(g, title_style->colour);
+		/* todo font_bold */
+		psy_ui_textoutrectangle(g, psy_ui_realpoint_make(0, quarter),
+			psy_ui_ETO_OPAQUE | psy_ui_ETO_CLIPPED, r, str,
+			psy_strlen(str));
 	}
-	r = psy_ui_realrectangle_make(
-		psy_ui_realpoint_make(0, quarter),
-		psy_ui_realsize_make(size.width, half));
-	psy_ui_setbackgroundcolour(g, title_style->background.colour);
-	psy_ui_settextcolour(g, title_style->colour);
-	/* todo font_bold */
-	psy_ui_textoutrectangle(g, psy_ui_realpoint_make(0, quarter),
-		psy_ui_ETO_OPAQUE | psy_ui_ETO_CLIPPED, r, str,
-		psy_strlen(str));
 }
 
 void headerui_onpreferredsize(HeaderUi* self, const psy_ui_Size* limit,

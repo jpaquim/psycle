@@ -234,6 +234,8 @@ void patternviewbar_on_zoombox_changed(PatternViewBar* self, ZoomBox* sender)
 {
 	assert(self);
 
-	self->patternview->zoom = zoombox_rate(&self->zoombox);
-	patternview_updatefont(self->patternview);
+	if (self->patternview) {
+		self->patternview->zoom = zoombox_rate(&self->zoombox);
+		patternview_updatefont(self->patternview);
+	}
 }

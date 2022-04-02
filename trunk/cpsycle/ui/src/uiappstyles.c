@@ -78,6 +78,9 @@ void psy_ui_appstyles_initdarktheme(psy_ui_Styles* self,
 	psy_ui_style_set_colour(style,
 		psy_ui_colour_weighted(&material.onsurface, material.weak));
 	psy_ui_styles_set_style(self, psy_ui_STYLE_LABEL_DISABLED, style);
+	style = psy_ui_style_allocinit();
+	psy_ui_style_set_colour(style, material.secondary);	
+	psy_ui_styles_set_style(self, psy_ui_STYLE_LABEL_SELECT, style);
 	/* edit */
 	style = psy_ui_style_allocinit();
 	psy_ui_style_set_colour(style,
@@ -309,6 +312,10 @@ void psy_ui_appstyles_initdarktheme(psy_ui_Styles* self,
 	psy_ui_border_init_solid_radius(&style->border,
 		material.surface_overlay_8p, 6.0);
 	psy_ui_styles_set_style(self, psy_ui_STYLE_CHECKMARK_SELECT, style);
+	/* editor */
+	style = psy_ui_style_allocinit();
+	psy_ui_style_set_font(style, "Consolas", -16);
+	psy_ui_styles_set_style(self, psy_ui_STYLE_EDITOR, style);
 }
 
 /* LightTheme */
@@ -355,6 +362,10 @@ void psy_ui_appstyles_initlighttheme(psy_ui_Styles* self,
 	psy_ui_style_set_colour(style,
 		psy_ui_colour_weighted(&material.onsurface, material.weak));
 	psy_ui_styles_set_style(self, psy_ui_STYLE_LABEL_DISABLED, style);
+	/* label::select */
+	style = psy_ui_style_allocinit();
+	psy_ui_style_set_colour(style, material.secondary);	
+	psy_ui_styles_set_style(self, psy_ui_STYLE_LABEL_SELECT, style);
 	/* edit */
 	style = psy_ui_style_allocinit();
 	psy_ui_style_set_colour(style,
@@ -532,6 +543,10 @@ void psy_ui_appstyles_initlighttheme(psy_ui_Styles* self,
 	style = psy_ui_style_allocinit();
 	psy_ui_style_set_colours(style, light.cl_font_1, light.cl_white);
 	psy_ui_styles_set_style(self, psy_ui_STYLE_CHECKMARK, style);
+	/* editor */
+	style = psy_ui_style_allocinit();
+	psy_ui_style_set_font(style, "Consolas", -16);
+	psy_ui_styles_set_style(self, psy_ui_STYLE_EDITOR, style);
 }
 
 /* Windows 98 Theme */
@@ -573,6 +588,10 @@ void psy_ui_appstyles_inittheme_win98(psy_ui_Styles* self, bool keepfont)
 	style = psy_ui_style_allocinit();
 	psy_ui_style_set_colours(style, win.cl_gray, win.cl_silver);
 	psy_ui_styles_set_style(self, psy_ui_STYLE_LABEL_DISABLED, style);
+	/* label::select */
+	style = psy_ui_style_allocinit();
+	psy_ui_style_set_colour(style, win.cl_navy);
+	psy_ui_styles_set_style(self, psy_ui_STYLE_LABEL_SELECT, style);
 	/* edit */
 	style = psy_ui_style_allocinit();
 	psy_ui_style_set_colours(style, win.cl_black, win.cl_white);
@@ -741,4 +760,8 @@ void psy_ui_appstyles_inittheme_win98(psy_ui_Styles* self, bool keepfont)
 	style = psy_ui_style_allocinit();
 	psy_ui_style_set_colours(style, win.cl_black, win.cl_white);
 	psy_ui_styles_set_style(self, psy_ui_STYLE_CHECKMARK, style);
+	/* editor */
+	style = psy_ui_style_allocinit();
+	psy_ui_style_set_font(style, "Consolas", -16);
+	psy_ui_styles_set_style(self, psy_ui_STYLE_EDITOR, style);
 }

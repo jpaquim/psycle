@@ -207,7 +207,7 @@ LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 		case WM_NCDESTROY:
 			/* restore default winproc */
 			if (component) {				
-				component->vtable->ondestroyed(component);					
+				component->vtable->on_destroyed(component);					
 			}
 #if defined(_WIN64)		
 			SetWindowLongPtr(imp->hwnd, GWLP_WNDPROC, (LONG_PTR)
@@ -225,7 +225,7 @@ LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 		case WM_DESTROY:
 			if (component) {					
 				psy_signal_emit(&component->signal_destroy, component, 0);
-				component->vtable->ondestroy(component);
+				component->vtable->on_destroy(component);
 			}								
 			break;		
 		case WM_CHAR:
@@ -516,7 +516,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 			psy_ui_component_dispose(component);
 			psy_table_remove(&winapp->selfmap, (uintptr_t)hwnd);
 			if (component) {				
-				component->vtable->ondestroyed(component);
+				component->vtable->on_destroyed(component);
 			}
 			if (deallocate) {
 				free(component);
@@ -526,7 +526,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 		case WM_DESTROY:
 			if (component) {
 				psy_signal_emit(&component->signal_destroy, component, 0);
-				component->vtable->ondestroy(component);			
+				component->vtable->on_destroy(component);			
 				return 0;
 			}
 			break;

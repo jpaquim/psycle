@@ -96,9 +96,9 @@ typedef void (*psy_ui_fp_component_onpreferredsize)(struct psy_ui_Component*,
 typedef void (*psy_ui_fp_component_onpreferredscrollsize)(struct psy_ui_Component*,
 	const psy_ui_Size* limit, psy_ui_Size* rv);
 typedef void (*psy_ui_fp_component_ondraw)(struct psy_ui_Component*, psy_ui_Graphics*);
-typedef void (*psy_ui_fp_component_onmouseevent)(struct psy_ui_Component*, psy_ui_MouseEvent*);
-typedef void (*psy_ui_fp_component_onkeyevent)(struct psy_ui_Component*, psy_ui_KeyboardEvent*);
-typedef void (*psy_ui_fp_component_ontimer)(struct psy_ui_Component*, uintptr_t);
+typedef void (*psy_ui_fp_component_on_mouse_event)(struct psy_ui_Component*, psy_ui_MouseEvent*);
+typedef void (*psy_ui_fp_component_on_key_event)(struct psy_ui_Component*, psy_ui_KeyboardEvent*);
+typedef void (*psy_ui_fp_component_on_timer)(struct psy_ui_Component*, uintptr_t);
 typedef void (*psy_ui_fp_component_onlanguagechanged)(struct psy_ui_Component*);
 typedef uintptr_t (*psy_ui_fp_component_section)(const struct psy_ui_Component*);
 typedef void (*psy_ui_fp_component_ondragstart)(struct psy_ui_Component*, psy_ui_DragEvent*);
@@ -127,8 +127,8 @@ typedef struct psy_ui_ComponentVTable {
 	psy_ui_fp_component_section section;
 	psy_ui_fp_component_setalign setalign;
 	/* events */
-	psy_ui_fp_component_event ondestroy;
-	psy_ui_fp_component_event ondestroyed;
+	psy_ui_fp_component_event on_destroy;
+	psy_ui_fp_component_event on_destroyed;
 	psy_ui_fp_component_ondraw ondraw;
 	psy_ui_fp_component_event onsize;
 	psy_ui_fp_component_onclose onclose;
@@ -136,20 +136,20 @@ typedef struct psy_ui_ComponentVTable {
 	psy_ui_fp_component_event onalign;
 	psy_ui_fp_component_onpreferredsize onpreferredsize;
 	psy_ui_fp_component_onpreferredscrollsize onpreferredscrollsize;
-	psy_ui_fp_component_onmouseevent onmousedown;
-	psy_ui_fp_component_onmouseevent onmousemove;
-	psy_ui_fp_component_onmouseevent onmousewheel;
-	psy_ui_fp_component_onmouseevent onmouseup;
-	psy_ui_fp_component_onmouseevent onmousedoubleclick;
+	psy_ui_fp_component_on_mouse_event on_mouse_down;
+	psy_ui_fp_component_on_mouse_event onmousemove;
+	psy_ui_fp_component_on_mouse_event onmousewheel;
+	psy_ui_fp_component_on_mouse_event on_mouse_up;
+	psy_ui_fp_component_on_mouse_event onmousedoubleclick;
 	psy_ui_fp_component_event onmouseenter;
 	psy_ui_fp_component_event onmouseleave;
-	psy_ui_fp_component_onkeyevent onkeydown;
-	psy_ui_fp_component_onkeyevent onkeyup;
-	psy_ui_fp_component_ontimer ontimer;
+	psy_ui_fp_component_on_key_event on_key_down;
+	psy_ui_fp_component_on_key_event onkeyup;
+	psy_ui_fp_component_on_timer on_timer;
 	psy_ui_fp_component_onlanguagechanged onlanguagechanged;
-	psy_ui_fp_component_event onfocus;
-	psy_ui_fp_component_event onfocuslost;
-	psy_ui_fp_component_focusin onfocusin;
+	psy_ui_fp_component_event on_focus;
+	psy_ui_fp_component_event on_focuslost;
+	psy_ui_fp_component_focusin on_focusin;
 	psy_ui_fp_component_event onupdatestyles;
 	psy_ui_fp_component_ondragstart ondragstart;
 	psy_ui_fp_component_ondragover ondragover;
@@ -397,9 +397,9 @@ psy_List* psy_ui_components_setalign(psy_List*, psy_ui_AlignType,
 psy_List* psy_ui_components_setmargin(psy_List*, psy_ui_Margin);
 void psy_ui_component_close(psy_ui_Component*);
 
-void psy_ui_component_setid(psy_ui_Component*, uintptr_t id);
+void psy_ui_component_set_id(psy_ui_Component*, uintptr_t id);
 uintptr_t psy_ui_component_id(const psy_ui_Component*);
-psy_ui_Component* psy_ui_component_byid(psy_ui_Component*, uintptr_t id);
+psy_ui_Component* psy_ui_component_by_id(psy_ui_Component*, uintptr_t id, int recursive);
 
 void* psy_ui_component_platform(psy_ui_Component*);
 
@@ -573,7 +573,7 @@ psy_ui_RealRectangle psy_ui_component_scrolledposition(psy_ui_Component*);
 
 void psy_ui_component_start_timer(psy_ui_Component* self, uintptr_t id,
 	uintptr_t interval);
-void psy_ui_component_stoptimer(psy_ui_Component* self, uintptr_t id);
+void psy_ui_component_stop_timer(psy_ui_Component* self, uintptr_t id);
 
 INLINE const psy_ui_TextMetric* psy_ui_component_textmetric(const psy_ui_Component* self)
 {
@@ -596,7 +596,7 @@ psy_ui_Size psy_ui_component_scrollsize(const psy_ui_Component*);
 
 void psy_ui_component_setcolour(psy_ui_Component*, psy_ui_Colour);
 psy_ui_Colour psy_ui_component_colour(psy_ui_Component*);
-void psy_ui_component_setbackgroundcolour(psy_ui_Component*, psy_ui_Colour);
+void psy_ui_component_set_background_colour(psy_ui_Component*, psy_ui_Colour);
 psy_ui_Colour psy_ui_component_backgroundcolour(psy_ui_Component*);
 
 INLINE void psy_ui_component_set_title(psy_ui_Component* self, const char* text)
@@ -671,7 +671,7 @@ INLINE int psy_ui_component_wheelscroll(const psy_ui_Component* self)
 	return psy_ui_componentscroll_wheel(self->scroll);
 }
 
-INLINE void psy_ui_component_selectsection(psy_ui_Component* self, uintptr_t section, uintptr_t options)
+INLINE void psy_ui_component_select_section(psy_ui_Component* self, uintptr_t section, uintptr_t options)
 {
 	psy_signal_emit(&self->signal_selectsection, self, 2, section, options);
 }
@@ -794,6 +794,15 @@ INLINE psy_ui_Value psy_ui_component_scrollstep_height(const psy_ui_Component* s
 	assert(self);
 
 	return self->scroll->step.height;
+}
+
+INLINE void psy_ui_component_set_scrollstep_width(psy_ui_Component* self,
+	psy_ui_Value step)
+{
+	assert(self);
+
+	psy_ui_component_usescroll(self);
+	self->scroll->step.width = step;
 }
 
 INLINE void psy_ui_component_settabindex(psy_ui_Component* self, uintptr_t index)

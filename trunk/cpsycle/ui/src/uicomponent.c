@@ -80,7 +80,7 @@ static psy_ui_ComponentContainerAlign containeralign;
 static void enableinput_internal(psy_ui_Component*, int enable, int recursive);
 static void psy_ui_component_dispose_signals(psy_ui_Component*);
 
-void psy_ui_component_setbackgroundcolour(psy_ui_Component* self,
+void psy_ui_component_set_background_colour(psy_ui_Component* self,
 	psy_ui_Colour colour)
 {			
 	psy_ui_componentstyle_setbackgroundcolour(&self->style, colour);	
@@ -286,8 +286,8 @@ static void invalidate(psy_ui_Component*);
 static uintptr_t section(const psy_ui_Component* self) { return 0; }
 static void setalign(psy_ui_Component* self, psy_ui_AlignType align) {  }
 /* events */
-static void ondestroy(psy_ui_Component* self) {	}
-static void ondestroyed(psy_ui_Component* self) { }
+static void on_destroy(psy_ui_Component* self) {	}
+static void on_destroyed(psy_ui_Component* self) { }
 static void onsize(psy_ui_Component* self) { }
 static void beforealign(psy_ui_Component* self) { }
 static void onalign(psy_ui_Component* self)
@@ -295,7 +295,7 @@ static void onalign(psy_ui_Component* self)
 	psy_List* p;
 	psy_List* q;
 	
-	q = psy_ui_component_children(self, psy_ui_NONRECURSIVE);
+	q = psy_ui_component_children(self, psy_ui_NONE_RECURSIVE);
 	for (p = q; p != NULL; p = p->next) {
 		psy_ui_Component* component;
 		psy_ui_Style* style;
@@ -318,7 +318,7 @@ static void onpreferredscrollsize(psy_ui_Component*, const psy_ui_Size* limit,
 	psy_ui_Size* rv);
 static bool onclose(psy_ui_Component* self) { return TRUE; }
 
-static void onmousedown(psy_ui_Component* self, psy_ui_MouseEvent* ev)
+static void on_mouse_down(psy_ui_Component* self, psy_ui_MouseEvent* ev)
 {
 	assert(ev);
 
@@ -355,7 +355,7 @@ static void onmousemove(psy_ui_Component* self, psy_ui_MouseEvent* ev)
 
 static void onmousewheel(psy_ui_Component* self, psy_ui_MouseEvent* ev) { }
 
-static void onmouseup(psy_ui_Component* self, psy_ui_MouseEvent* ev)
+static void on_mouse_up(psy_ui_Component* self, psy_ui_MouseEvent* ev)
 {
 	psy_ui_DragEvent* dragevent;
 
@@ -385,26 +385,26 @@ static void onmouseleave(psy_ui_Component* self)
 	psy_ui_component_removestylestate(self, psy_ui_STYLESTATE_HOVER);
 }
 
-static void onkeydown(psy_ui_Component* self, psy_ui_KeyboardEvent* ev) { }
+static void on_key_down(psy_ui_Component* self, psy_ui_KeyboardEvent* ev) { }
 static void onkeyup(psy_ui_Component* self, psy_ui_KeyboardEvent* ev) { }
-static void ontimer(psy_ui_Component* self, uintptr_t timerid)
+static void on_timer(psy_ui_Component* self, uintptr_t timerid)
 {	
 	psy_ui_componentbackground_idle(&self->componentbackground);
 }
 static void onlanguagechanged(psy_ui_Component* self) { }
 
-static void onfocus(psy_ui_Component* self)
+static void on_focus(psy_ui_Component* self)
 {
 	psy_ui_component_addstylestate(self, psy_ui_STYLESTATE_FOCUS);
 }
 
-static void onfocuslost(psy_ui_Component* self)
+static void on_focuslost(psy_ui_Component* self)
 {
 	psy_ui_component_removestylestate(self, psy_ui_STYLESTATE_FOCUS);
 	psy_ui_app()->focus = NULL;
 }
 
-static void onfocusin(psy_ui_Component* self, psy_ui_Event* ev)
+static void on_focusin(psy_ui_Component* self, psy_ui_Event* ev)
 {
 }
 
@@ -437,8 +437,8 @@ static void vtable_init(void)
 		vtable.section = section;
 		vtable.setalign = setalign;
 		/* events */
-		vtable.ondestroy = ondestroy;
-		vtable.ondestroyed = ondestroyed;
+		vtable.on_destroy = on_destroy;
+		vtable.on_destroyed = on_destroyed;
 		vtable.ondraw = NULL;
 		vtable.beforealign = beforealign;
 		vtable.onalign = onalign;
@@ -446,23 +446,23 @@ static void vtable_init(void)
 		vtable.onpreferredscrollsize = onpreferredscrollsize;
 		vtable.onsize = onsize;
 		vtable.onclose = onclose;
-		vtable.onmousedown = onmousedown;
+		vtable.on_mouse_down = on_mouse_down;
 		vtable.onmousemove = onmousemove;
 		vtable.onmousewheel = onmousewheel;
-		vtable.onmouseup = onmouseup;
+		vtable.on_mouse_up = on_mouse_up;
 		vtable.onmousedoubleclick = onmousedoubleclick;
 		vtable.onmouseenter = onmouseenter;
 		vtable.onmouseleave = onmouseleave;
 		vtable.onkeyup = onkeyup;
-		vtable.onkeydown = onkeydown;
-		vtable.onkeydown = onkeyup;
-		vtable.ontimer = ontimer;
+		vtable.on_key_down = on_key_down;
+		vtable.on_key_down = onkeyup;
+		vtable.on_timer = on_timer;
 		vtable.onlanguagechanged = onlanguagechanged;
 		vtable.enableinput = enableinput;
 		vtable.preventinput = preventinput;
-		vtable.onfocus = onfocus;
-		vtable.onfocuslost = onfocuslost;
-		vtable.onfocusin = onfocusin;
+		vtable.on_focus = on_focus;
+		vtable.on_focuslost = on_focuslost;
+		vtable.on_focusin = on_focusin;
 		vtable.onupdatestyles = onupdatestyles;
 		vtable.invalidate = invalidate;
 		vtable.ondragstart = ondragstart;
@@ -823,7 +823,7 @@ void psy_ui_component_activate_resize(psy_ui_Component* self, int recursive)
 			psy_ui_Component* curr;
 
 			curr = (psy_ui_Component*)p->entry;
-			psy_ui_component_activate_resize(curr, psy_ui_NONRECURSIVE);
+			psy_ui_component_activate_resize(curr, psy_ui_NONE_RECURSIVE);
 		}
 		psy_list_free(q);
 		q = NULL;
@@ -1094,7 +1094,7 @@ uintptr_t psy_ui_component_index(psy_ui_Component* self)
 
 	rv = psy_INDEX_INVALID;
 	q = psy_ui_component_children(psy_ui_component_parent(self),
-		psy_ui_NONRECURSIVE);
+		psy_ui_NONE_RECURSIVE);
 	for (i = 0, p = q; p != NULL; p = p->next, ++i) {
 		psy_ui_Component* component;
 
@@ -1122,7 +1122,7 @@ void psy_ui_component_checksortedalign(psy_ui_Component* self,
 		psy_List* p;
 		psy_List* q;
 
-		q = psy_ui_component_children(self, psy_ui_NONRECURSIVE);
+		q = psy_ui_component_children(self, psy_ui_NONE_RECURSIVE);
 		for (p = q; p != NULL; p = p->next) {
 			psy_ui_Component* component;
 
@@ -1142,13 +1142,15 @@ void psy_ui_component_checksortedalign(psy_ui_Component* self,
 psy_ui_Component* psy_ui_component_set_align(psy_ui_Component* self,
 	psy_ui_AlignType align)
 {
-	psy_ui_Component* parent;
+	if (self->align != align) {
+		psy_ui_Component* parent;
 
-	self->align = align;
-	if (parent = psy_ui_component_parent(self)) {
-		psy_ui_component_checksortedalign(parent, align);
+		self->align = align;
+		if (parent = psy_ui_component_parent(self)) {
+			psy_ui_component_checksortedalign(parent, align);
+		}
+		self->vtable->setalign(self, align);
 	}
-	self->vtable->setalign(self, align);
 	return self;
 }
 
@@ -1983,7 +1985,7 @@ void psy_ui_component_checkbackgroundanimation(psy_ui_Component* self)
 	if (psy_ui_componentstyle_currstyle_const(&self->style)->background.animation.enabled) {
 		psy_ui_component_start_timer(self, 65535, 50);
 	} else {		
-		psy_ui_component_stoptimer(self, 65535);
+		psy_ui_component_stop_timer(self, 65535);
 	}
 }
 
@@ -2199,7 +2201,7 @@ void psy_ui_component_drawchildren(psy_ui_Component* self, psy_ui_Graphics* g)
 {		
 	psy_List* q;		
 
-	q = psy_ui_component_children(self, psy_ui_NONRECURSIVE);
+	q = psy_ui_component_children(self, psy_ui_NONE_RECURSIVE);
 	if (q) {		
 		psy_ui_RealRectangle clip;
 		psy_ui_RealPoint origin;
@@ -2255,7 +2257,7 @@ void psy_ui_component_traverse_int(psy_ui_Component* self, psy_fp_int fp,
 	psy_List* p;
 	psy_List* q;
 	
-	for (p = q = psy_ui_component_children(self, psy_ui_NONRECURSIVE);
+	for (p = q = psy_ui_component_children(self, psy_ui_NONE_RECURSIVE);
 			p != NULL; p = p->next) {
 		fp((psy_ui_Component*)p->entry, value);
 	}
@@ -2268,7 +2270,7 @@ void psy_ui_component_traverse_margin(psy_ui_Component* self, psy_fp_margin fp,
 	psy_List* p;
 	psy_List* q;
 
-	for (p = q = psy_ui_component_children(self, psy_ui_NONRECURSIVE);
+	for (p = q = psy_ui_component_children(self, psy_ui_NONE_RECURSIVE);
 		p != NULL; p = p->next) {
 		fp((psy_ui_Component*)p->entry, value);
 	}
@@ -2296,7 +2298,7 @@ psy_ui_Component* psy_ui_mainwindow(void)
 	return psy_ui_app()->main;
 }
 
-void psy_ui_component_setid(psy_ui_Component* self, uintptr_t id)
+void psy_ui_component_set_id(psy_ui_Component* self, uintptr_t id)
 {
 	self->id = id;
 }
@@ -2306,7 +2308,7 @@ uintptr_t psy_ui_component_id(const psy_ui_Component* self)
 	return self->id;
 }
 
-psy_ui_Component* psy_ui_component_byid(psy_ui_Component* self, uintptr_t id)
+psy_ui_Component* psy_ui_component_by_id(psy_ui_Component* self, uintptr_t id, int recursive)
 {
 	psy_ui_Component* rv;
 	psy_List* p;
@@ -2318,7 +2320,7 @@ psy_ui_Component* psy_ui_component_byid(psy_ui_Component* self, uintptr_t id)
 		return self;		
 	}
 	/* is id from direct children */
-	for (p = q = psy_ui_component_children(self, psy_ui_NONRECURSIVE); p != NULL; p = p->next) {
+	for (p = q = psy_ui_component_children(self, psy_ui_NONE_RECURSIVE); p != NULL; p = p->next) {
 		psy_ui_Component* component;
 		
 		component = (psy_ui_Component*)p->entry;
@@ -2330,13 +2332,13 @@ psy_ui_Component* psy_ui_component_byid(psy_ui_Component* self, uintptr_t id)
 			break;
 		}
 	}	
-	if (rv == NULL) {
+	if (rv == NULL && recursive) {
 		/* search recursive */
 		for (p = q; p != NULL; p = p->next) {
 			psy_ui_Component* component;
 
 			component = (psy_ui_Component*)p->entry;
-			rv = psy_ui_component_byid(component, id);
+			rv = psy_ui_component_by_id(component, id, recursive);
 			if (rv) {
 				break;
 			}			
@@ -2371,7 +2373,7 @@ void psy_ui_component_start_timer(psy_ui_Component* self, uintptr_t id,
 	psy_ui_app_starttimer(psy_ui_app(), self, id, interval);
 }
 
-void psy_ui_component_stoptimer(psy_ui_Component* self, uintptr_t id)
+void psy_ui_component_stop_timer(psy_ui_Component* self, uintptr_t id)
 {
 	psy_ui_app_stoptimer(psy_ui_app(), self, id);
 }
@@ -2382,7 +2384,7 @@ psy_ui_RealRectangle psy_ui_component_bounds(psy_ui_Component* self)
 	psy_List* p;
 	psy_List* q;
 	
-	for (p = q = psy_ui_component_children(self, psy_ui_NONRECURSIVE);
+	for (p = q = psy_ui_component_children(self, psy_ui_NONE_RECURSIVE);
 			p != NULL; p = p->next) {
 		psy_ui_Component* component;
 		psy_ui_RealRectangle r;

@@ -18,7 +18,7 @@
 
 /* SeqEditorEntry */
 /* prototypes */
-static void seqeditentry_ondestroy(SeqEditEntry*);
+static void seqeditentry_on_destroy(SeqEditEntry*);
 static void seqeditentry_onpreferredsize(SeqEditEntry*,
 	const psy_ui_Size* limit, psy_ui_Size* rv);
 static void seqeditentry_onmousemove(SeqEditEntry*, psy_ui_MouseEvent*);
@@ -34,14 +34,14 @@ static void seqeditentry_vtable_init(SeqEditEntry* self)
 {
 	if (!seqeditentry_vtable_initialized) {
 		seqeditentry_vtable = *(self->component.vtable);
-		seqeditentry_vtable.ondestroy =
+		seqeditentry_vtable.on_destroy =
 			(psy_ui_fp_component_event)
-			seqeditentry_ondestroy;
+			seqeditentry_on_destroy;
 		seqeditentry_vtable.onpreferredsize =
 			(psy_ui_fp_component_onpreferredsize)
 			seqeditentry_onpreferredsize;
 		seqeditentry_vtable.onmousemove =
-			(psy_ui_fp_component_onmouseevent)
+			(psy_ui_fp_component_on_mouse_event)
 			seqeditentry_onmousemove;
 	}
 	self->component.vtable = &seqeditentry_vtable;
@@ -71,7 +71,7 @@ void seqeditentry_init(SeqEditEntry* self, psy_ui_Component* parent,
 	}
 }
 
-void seqeditentry_ondestroy(SeqEditEntry* self)
+void seqeditentry_on_destroy(SeqEditEntry* self)
 {
 	psy_signal_disconnect(
 		&self->state->workspace->song->sequence.sequenceselection.signal_select,
@@ -182,7 +182,7 @@ void seqeditentry_onsequenceselectiondeselect(SeqEditEntry* self,
 /* SeqEditorPatternEntry */
 /* prototypes */
 static void seqeditpatternentry_ondraw(SeqEditPatternEntry*, psy_ui_Graphics*);
-static void seqeditpatternentry_onmousedown(SeqEditPatternEntry*,
+static void seqeditpatternentry_on_mouse_down(SeqEditPatternEntry*,
 	psy_ui_MouseEvent*);
 static void seqeditpatternentry_onmousedoubleclick(SeqEditPatternEntry*,
 	psy_ui_MouseEvent*);	
@@ -197,11 +197,11 @@ static void seqeditpatternentry_vtable_init(SeqEditPatternEntry* self)
 		seqeditpatternentry_vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
 			seqeditpatternentry_ondraw;
-		seqeditpatternentry_vtable.onmousedown =
-			(psy_ui_fp_component_onmouseevent)
-			seqeditpatternentry_onmousedown;		
+		seqeditpatternentry_vtable.on_mouse_down =
+			(psy_ui_fp_component_on_mouse_event)
+			seqeditpatternentry_on_mouse_down;		
 		seqeditpatternentry_vtable.onmousedoubleclick =
-			(psy_ui_fp_component_onmouseevent)
+			(psy_ui_fp_component_on_mouse_event)
 			seqeditpatternentry_onmousedoubleclick;
 	}
 	seqeditpatternentry_base(self)->vtable = &seqeditpatternentry_vtable;
@@ -274,7 +274,7 @@ void seqeditpatternentry_ondraw(SeqEditPatternEntry* self, psy_ui_Graphics* g)
 	}
 }
 
-void seqeditpatternentry_onmousedown(SeqEditPatternEntry* self,
+void seqeditpatternentry_on_mouse_down(SeqEditPatternEntry* self,
 	psy_ui_MouseEvent* ev)
 {
 	if (self->sequenceentry) {		
@@ -338,12 +338,12 @@ void seqeditpatternentry_onmousedoubleclick(SeqEditPatternEntry* self,
 
 /* SeqEditSampleEntry */
 /* prototypes */
-static void seqeditsampleentry_ondestroy(SeqEditSampleEntry*);
+static void seqeditsampleentry_on_destroy(SeqEditSampleEntry*);
 static void seqeditsampleentry_onsamplechanged(SeqEditSampleEntry*,
 	psy_audio_SequenceSampleEntry* sender);
 static void seqeditsampleentry_onsampleentrydestroy(SeqEditSampleEntry*,
 	psy_audio_SequenceSampleEntry* sender);
-static void seqeditsampleentry_onmousedown(SeqEditSampleEntry*,
+static void seqeditsampleentry_on_mouse_down(SeqEditSampleEntry*,
 	psy_ui_MouseEvent*);
 static void seqeditsampleentry_onmousedoubleclick(SeqEditSampleEntry*,
 	psy_ui_MouseEvent*);
@@ -359,17 +359,17 @@ static void seqeditsampleentry_vtable_init(
 {
 	if (!seqeditsampleentry_vtable_initialized) {
 		seqeditsampleentry_vtable = *(seqeditsampleentry_base(self)->vtable);
-		seqeditsampleentry_vtable.ondestroy =
+		seqeditsampleentry_vtable.on_destroy =
 			(psy_ui_fp_component_event)
-			seqeditsampleentry_ondestroy;
+			seqeditsampleentry_on_destroy;
 		seqeditsampleentry_vtable.onalign =
 			(psy_ui_fp_component_event)
 			seqeditsampleentry_onalign;
-		seqeditsampleentry_vtable.onmousedown =
-			(psy_ui_fp_component_onmouseevent)
-			seqeditsampleentry_onmousedown;
+		seqeditsampleentry_vtable.on_mouse_down =
+			(psy_ui_fp_component_on_mouse_event)
+			seqeditsampleentry_on_mouse_down;
 		seqeditsampleentry_vtable.onmousedoubleclick =
-			(psy_ui_fp_component_onmouseevent)
+			(psy_ui_fp_component_on_mouse_event)
 			seqeditsampleentry_onmousedoubleclick;
 	}
 	seqeditsampleentry_base(self)->vtable = &seqeditsampleentry_vtable;
@@ -403,7 +403,7 @@ void seqeditsampleentry_init(SeqEditSampleEntry* self,
 	seqeditsampleentry_updatetext(self);	
 }
 
-void seqeditsampleentry_ondestroy(SeqEditSampleEntry* self)
+void seqeditsampleentry_on_destroy(SeqEditSampleEntry* self)
 {
 }
 
@@ -478,7 +478,7 @@ void seqeditsampleentry_updatetext(SeqEditSampleEntry* self)
 	}
 }
 
-void seqeditsampleentry_onmousedown(SeqEditSampleEntry* self,
+void seqeditsampleentry_on_mouse_down(SeqEditSampleEntry* self,
 	psy_ui_MouseEvent* ev)
 {
 	if (self->sequenceentry) {
@@ -524,7 +524,7 @@ void seqeditsampleentry_onalign(SeqEditSampleEntry* self)
 /* prototypes */
 static void seqeditmarkerentry_ondraw(SeqEditMarkerEntry*,
 	psy_ui_Graphics*);
-static void seqeditmarkerentry_onmousedown(SeqEditMarkerEntry*,
+static void seqeditmarkerentry_on_mouse_down(SeqEditMarkerEntry*,
 	psy_ui_MouseEvent*);
 /* vtable */
 static psy_ui_ComponentVtable seqeditmarkerentry_vtable;
@@ -537,9 +537,9 @@ static void seqeditmarkerentry_vtable_init(SeqEditMarkerEntry* self)
 		seqeditmarkerentry_vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
 			seqeditmarkerentry_ondraw;
-		seqeditmarkerentry_vtable.onmousedown =
-			(psy_ui_fp_component_onmouseevent)
-			seqeditmarkerentry_onmousedown;		
+		seqeditmarkerentry_vtable.on_mouse_down =
+			(psy_ui_fp_component_on_mouse_event)
+			seqeditmarkerentry_on_mouse_down;		
 	}
 	seqeditmarkerentry_base(self)->vtable = &seqeditmarkerentry_vtable;
 }
@@ -601,7 +601,7 @@ void seqeditmarkerentry_ondraw(SeqEditMarkerEntry* self, psy_ui_Graphics* g)
 	}
 }
 
-void seqeditmarkerentry_onmousedown(SeqEditMarkerEntry* self,
+void seqeditmarkerentry_on_mouse_down(SeqEditMarkerEntry* self,
 	psy_ui_MouseEvent* ev)
 {	
 	seqeditentry_startdrag(&self->seqeditorentry, ev);	

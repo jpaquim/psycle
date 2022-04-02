@@ -17,7 +17,7 @@
 /* IntEdit */
 
 /* prototypes */
-static void intedit_ondestroy(IntEdit*, psy_ui_Component* sender);
+static void intedit_on_destroy(IntEdit*, psy_ui_Component* sender);
 static void intedit_onlessclicked(IntEdit*, psy_ui_Component* sender);
 static void intedit_onmoreclicked(IntEdit*, psy_ui_Component* sender);
 static void intedit_oneditkeydown(IntEdit*, psy_ui_Component* sender,
@@ -56,7 +56,7 @@ void intedit_init(IntEdit* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->input.component.signal_focuslost, self,
 		intedit_oneditfocuslost);
 	psy_signal_connect(&self->component.signal_destroy, self,
-		intedit_ondestroy);
+		intedit_on_destroy);
 }
 
 void intedit_init_connect(IntEdit* self, psy_ui_Component* parent,
@@ -85,7 +85,7 @@ IntEdit* intedit_allocinit(psy_ui_Component* parent,
 	return rv;
 }
 
-void intedit_ondestroy(IntEdit* self, psy_ui_Component* sender)
+void intedit_on_destroy(IntEdit* self, psy_ui_Component* sender)
 {
 	psy_signal_dispose(&self->signal_changed);
 }

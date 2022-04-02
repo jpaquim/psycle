@@ -22,6 +22,8 @@ typedef struct PatternDefaultLine {
 	/* inherits */
 	psy_ui_Component component;
 	/* internal */
+	psy_ui_Label desc;
+	psy_ui_Component pane;
 	TrackerGrid grid;
 	PatternViewState pvstate;
 	TrackerState state;

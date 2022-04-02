@@ -14,21 +14,21 @@ psy_ui_RealSize psy_ui_buttonicon_size(psy_ui_ButtonIcon icon)
 {	
 	switch (icon) {
 	case psy_ui_ICON_NONE:
-		return psy_ui_realsize_make(4, 8);
+		return psy_ui_realsize_make(5, 9);
 	case psy_ui_ICON_LESS:
-		return psy_ui_realsize_make(4, 8);
+		return psy_ui_realsize_make(5, 9);
 	case psy_ui_ICON_MORE:
-		return psy_ui_realsize_make(4, 8);
+		return psy_ui_realsize_make(5, 9);
 	case psy_ui_ICON_MOREMORE:
-		return psy_ui_realsize_make(4, 8);
+		return psy_ui_realsize_make(5, 9);
 	case psy_ui_ICON_LESSLESS:
-		return psy_ui_realsize_make(4, 8);
+		return psy_ui_realsize_make(5, 9);
 	case psy_ui_ICON_UP:
-		return psy_ui_realsize_make(8, 4);
+		return psy_ui_realsize_make(9, 5);
 	case psy_ui_ICON_DOWN:
-		return psy_ui_realsize_make(8, 4);
+		return psy_ui_realsize_make(9, 5);
 	default:
-		return psy_ui_realsize_make(4, 8);
+		return psy_ui_realsize_make(5, 9);
 	}
 }
 
@@ -74,7 +74,7 @@ void psy_ui_icondraw_drawarrow(psy_ui_IconDraw* self, psy_ui_RealPoint* arrow, p
 void makearrow(psy_ui_RealPoint* arrow, psy_ui_ButtonIcon icon, double x, double y)
 {
 	switch (icon) {
-	case psy_ui_ICON_LESS:
+	case psy_ui_ICON_LESS:	
 		arrow[0].x = 4 + x;
 		arrow[0].y = 0 + y;
 		arrow[1].x = 4 + x;
@@ -83,7 +83,7 @@ void makearrow(psy_ui_RealPoint* arrow, psy_ui_ButtonIcon icon, double x, double
 		arrow[2].y = 4 + y;
 		arrow[3] = arrow[0];
 		break;
-	case psy_ui_ICON_MORE:
+	case psy_ui_ICON_MORE:		
 		arrow[0].x = 0 + x;
 		arrow[0].y = 0 + y;
 		arrow[1].x = 0 + x;

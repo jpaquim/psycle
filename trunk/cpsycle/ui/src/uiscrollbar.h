@@ -93,7 +93,8 @@ typedef struct psy_ui_ScrollBar {
     /* internal */    
     psy_ui_Button less;
     psy_ui_Button more;
-    psy_ui_ScrollBarPane pane;    
+    psy_ui_ScrollBarPane pane;
+    bool visible_state_change;
 } psy_ui_ScrollBar;
 
 void psy_ui_scrollbar_init(psy_ui_ScrollBar*, psy_ui_Component* parent);

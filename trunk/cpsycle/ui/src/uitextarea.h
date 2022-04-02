@@ -62,6 +62,7 @@ void psy_ui_textareapane_init(psy_ui_TextAreaPane*, psy_ui_Component* parent);
 
 void psy_ui_textareapane_enableinputfield(psy_ui_TextAreaPane*);
 void psy_ui_textareapane_settext(psy_ui_TextAreaPane*, const char* text);
+void psy_ui_textareapane_addtext(psy_ui_TextAreaPane*, const char* text);
 const char* psy_ui_textareapane_text(const psy_ui_TextAreaPane* self);
 void psy_ui_textareapane_setcharnumber(psy_ui_TextAreaPane*, double number);
 void psy_ui_textareapane_setlinenumber(psy_ui_TextAreaPane*, int number);
@@ -69,6 +70,8 @@ void psy_ui_textareapane_enableedit(psy_ui_TextAreaPane*);
 void psy_ui_textareapane_preventedit(psy_ui_TextAreaPane*);
 void psy_ui_textareapane_setsel(psy_ui_TextAreaPane*, uintptr_t cpmin,
     uintptr_t cpmax);
+uintptr_t psy_ui_textareapane_cursor_line(const psy_ui_TextAreaPane*);
+uintptr_t psy_ui_textareapane_cursor_column(const psy_ui_TextAreaPane*);
 
 INLINE psy_ui_Component* psy_ui_textareapane_base(psy_ui_TextAreaPane* self)
 {
@@ -111,10 +114,18 @@ INLINE void psy_ui_textarea_settext(psy_ui_TextArea* self, const char* text)
     psy_ui_textareapane_settext(&self->pane, text);
 }
 
-INLINE  const char* psy_ui_textarea_text(const psy_ui_TextArea* self)
+INLINE void psy_ui_textarea_addtext(psy_ui_TextArea* self, const char* text)
+{
+    psy_ui_textareapane_addtext(&self->pane, text);
+}
+
+INLINE const char* psy_ui_textarea_text(const psy_ui_TextArea* self)
 {
     return psy_ui_textareapane_text(&self->pane);
 }
+
+uintptr_t psy_ui_textarea_length(const psy_ui_TextArea*);
+void psy_ui_textarea_range(psy_ui_TextArea*, intptr_t start, intptr_t end, char* text);
 
 INLINE void psy_ui_textarea_setcharnumber(psy_ui_TextArea* self, int number)
 {
@@ -143,6 +154,10 @@ INLINE void psy_ui_textarea_setsel(psy_ui_TextArea* self,
 }
 
 void psy_ui_textarea_prevent_wrap(psy_ui_TextArea*);
+void psy_ui_textarea_word_wrap(psy_ui_TextArea*);
+void psy_ui_textarea_line_wrap(psy_ui_TextArea*);
+uintptr_t psy_ui_textarea_cursor_line(const psy_ui_TextArea*);
+uintptr_t psy_ui_textarea_cursor_column(const psy_ui_TextArea*);
 
 INLINE psy_ui_Component* psy_ui_textarea_base(psy_ui_TextArea* self)
 {

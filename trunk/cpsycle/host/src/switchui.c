@@ -24,8 +24,8 @@
 static void switchui_ondraw(SwitchUi*, psy_ui_Graphics*);
 static void switchui_onpreferredsize(SwitchUi*, const psy_ui_Size* limit,
 	psy_ui_Size* rv);
-static void switchui_onmousedown(SwitchUi*, psy_ui_MouseEvent*);
-static void switchui_onmouseup(SwitchUi*, psy_ui_MouseEvent*);
+static void switchui_on_mouse_down(SwitchUi*, psy_ui_MouseEvent*);
+static void switchui_on_mouse_up(SwitchUi*, psy_ui_MouseEvent*);
 static void switchui_onmousemove(SwitchUi*, psy_ui_MouseEvent*);
 static void switchui_updateparam(SwitchUi*);
 
@@ -45,14 +45,14 @@ static void switchui_vtable_init(SwitchUi* self)
 		switchui_vtable.onpreferredsize =
 			(psy_ui_fp_component_onpreferredsize)
 			switchui_onpreferredsize;
-		switchui_vtable.onmousedown =
-			(psy_ui_fp_component_onmouseevent)
-			switchui_onmousedown;
-		switchui_vtable.onmouseup =
-			(psy_ui_fp_component_onmouseevent)
-			switchui_onmouseup;
+		switchui_vtable.on_mouse_down =
+			(psy_ui_fp_component_on_mouse_event)
+			switchui_on_mouse_down;
+		switchui_vtable.on_mouse_up =
+			(psy_ui_fp_component_on_mouse_event)
+			switchui_on_mouse_up;
 		switchui_vtable.onmousemove =
-			(psy_ui_fp_component_onmouseevent)
+			(psy_ui_fp_component_on_mouse_event)
 			switchui_onmousemove;
 		switchui_vtable_initialized = TRUE;
 	}
@@ -145,11 +145,11 @@ void switchui_onpreferredsize(SwitchUi* self, const psy_ui_Size* limit,
 	psy_ui_size_setem(rv, PARAMWIDTH, self->maxheight);
 }
 
-void switchui_onmousedown(SwitchUi* self, psy_ui_MouseEvent* ev)
+void switchui_on_mouse_down(SwitchUi* self, psy_ui_MouseEvent* ev)
 {
 	if (psy_ui_mouseevent_button(ev) == 1) {
 		paramtweak_begin(&self->paramtweak, NULL, psy_INDEX_INVALID, self->param);		
-		paramtweak_onmousedown(&self->paramtweak, ev);
+		paramtweak_on_mouse_down(&self->paramtweak, ev);
 		psy_ui_component_capture(&self->component);		
 	}
 }
@@ -162,7 +162,7 @@ void switchui_onmousemove(SwitchUi* self, psy_ui_MouseEvent* ev)
 	}
 }
 
-void switchui_onmouseup(SwitchUi* self, psy_ui_MouseEvent* ev)
+void switchui_on_mouse_up(SwitchUi* self, psy_ui_MouseEvent* ev)
 {
 	psy_ui_component_releasecapture(&self->component);
 	if ((paramtweak_active(&self->paramtweak))) {

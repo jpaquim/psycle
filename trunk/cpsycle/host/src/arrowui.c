@@ -14,7 +14,7 @@
 
 /* prototypes */
 static void arrowui_ondraw(ArrowUi*, psy_ui_Graphics*);
-static void arrowui_onmousedown(ArrowUi*, psy_ui_MouseEvent*);
+static void arrowui_on_mouse_down(ArrowUi*, psy_ui_MouseEvent*);
 static bool arrowui_selected(const ArrowUi*);
 
 /* vtable */
@@ -30,9 +30,9 @@ static void arrowui_vtable_init(ArrowUi* self)
 		arrowui_vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
 			arrowui_ondraw;		
-		arrowui_vtable.onmousedown =
-			(psy_ui_fp_component_onmouseevent)
-			arrowui_onmousedown;
+		arrowui_vtable.on_mouse_down =
+			(psy_ui_fp_component_on_mouse_event)
+			arrowui_on_mouse_down;
 		arrowui_vtable_initialized = TRUE;
 	}
 	psy_ui_component_setvtable(&self->component, &arrowui_vtable);
@@ -107,7 +107,7 @@ bool arrowui_selected(const ArrowUi* self)
 	return FALSE;
 }
 
-void arrowui_onmousedown(ArrowUi* self, psy_ui_MouseEvent* ev)
+void arrowui_on_mouse_down(ArrowUi* self, psy_ui_MouseEvent* ev)
 {
 	if (workspace_song(self->workspace)) {
 		psy_audio_Machines* machines;

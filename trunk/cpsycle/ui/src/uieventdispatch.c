@@ -302,11 +302,11 @@ void psy_ui_eventdispatch_notify(psy_ui_EventDispatch* self,
 			component, 1, ev);
 		break;
 	case psy_ui_MOUSEDOWN:
-		component->vtable->onmousedown(component, (psy_ui_MouseEvent*)ev);
+		component->vtable->on_mouse_down(component, (psy_ui_MouseEvent*)ev);
 		psy_signal_emit(&component->signal_mousedown, component, 1, ev);
 		break;
 	case psy_ui_MOUSEUP:
-		component->vtable->onmouseup(component, (psy_ui_MouseEvent*)ev);
+		component->vtable->on_mouse_up(component, (psy_ui_MouseEvent*)ev);
 		psy_signal_emit(&component->signal_mouseup, component, 1, ev);
 		break;
 	case psy_ui_MOUSEMOVE:
@@ -318,7 +318,7 @@ void psy_ui_eventdispatch_notify(psy_ui_EventDispatch* self,
 		psy_signal_emit(&component->signal_mousewheel, component, 1, ev);
 		break;
 	case psy_ui_KEYDOWN:
-		component->vtable->onkeydown(component, (psy_ui_KeyboardEvent*)ev);
+		component->vtable->on_key_down(component, (psy_ui_KeyboardEvent*)ev);
 		psy_signal_emit(&component->signal_keydown, component, 1, ev);
 		break;
 	case psy_ui_KEYUP:
@@ -329,15 +329,15 @@ void psy_ui_eventdispatch_notify(psy_ui_EventDispatch* self,
 		if (component->imp) {
 			component->imp->vtable->dev_setfocus(component->imp);
 		}
-		component->vtable->onfocus(component);
+		component->vtable->on_focus(component);
 		psy_signal_emit(&component->signal_focus, component, 0);
 		break;
 	case psy_ui_FOCUSOUT:
-		component->vtable->onfocuslost(component);
+		component->vtable->on_focuslost(component);
 		psy_signal_emit(&component->signal_focuslost, component, 0);
 		break;
 	case psy_ui_FOCUSIN:
-		component->vtable->onfocusin(component, ev);		
+		component->vtable->on_focusin(component, ev);		
 		break;
 	case psy_ui_MOUSEENTER:
 		component->vtable->onmouseenter(component);

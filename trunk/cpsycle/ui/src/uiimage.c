@@ -9,7 +9,7 @@
 #include "uiimage.h"
 
 /* prototypes */
-static void ondestroy(psy_ui_Image*);
+static void on_destroy(psy_ui_Image*);
 static void ondraw(psy_ui_Image*, psy_ui_Component* sender, psy_ui_Graphics* g);
 static int checkalignment(psy_ui_Image*, psy_ui_Alignment alignment);
 /* implementation */
@@ -18,7 +18,7 @@ void psy_ui_image_init(psy_ui_Image* self, psy_ui_Component* parent)
     psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_bitmap_init(&self->bitmap);
 	psy_signal_connect(&self->component.signal_draw, self, ondraw);
-	psy_signal_connect(&self->component.signal_destroy, self, ondestroy);
+	psy_signal_connect(&self->component.signal_destroy, self, on_destroy);
 	self->alignment = psy_ui_ALIGNMENT_CENTER_VERTICAL;
 }
 
@@ -43,7 +43,7 @@ void psy_ui_image_init_resource_transparency(psy_ui_Image* self,
 	psy_ui_bitmap_settransparency(&self->bitmap, transparency);	
 }
 
-void ondestroy(psy_ui_Image* self)
+void on_destroy(psy_ui_Image* self)
 {
 	psy_ui_bitmap_dispose(&self->bitmap);
 }

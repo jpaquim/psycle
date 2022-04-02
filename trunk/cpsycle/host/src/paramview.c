@@ -24,9 +24,9 @@
 
 /* paramview */
 /* prototypes */
-static void paramview_ondestroyed(ParamView*);
+static void paramview_on_destroyed(ParamView*);
 static void paramview_updateskin(ParamView*);
-static void paramview_ontimer(ParamView*, uintptr_t timerid);
+static void paramview_on_timer(ParamView*, uintptr_t timerid);
 static uintptr_t paramview_numrows(const ParamView*);
 static void paramview_build(ParamView*);
 
@@ -38,12 +38,12 @@ static void vtable_init(ParamView* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.ondestroyed =
+		vtable.on_destroyed =
 			(psy_ui_fp_component_event)
-			paramview_ondestroyed;
-		vtable.ontimer =
-			(psy_ui_fp_component_ontimer)
-			paramview_ontimer;
+			paramview_on_destroyed;
+		vtable.on_timer =
+			(psy_ui_fp_component_on_timer)
+			paramview_on_timer;
 		vtable_initialized = TRUE;
 	}
 	self->component.vtable = &vtable;
@@ -67,7 +67,7 @@ void paramview_init(ParamView* self, psy_ui_Component* parent,
 	paramview_build(self);		
 }
 
-void paramview_ondestroyed(ParamView* self)
+void paramview_on_destroyed(ParamView* self)
 {
 	if (self->frameview && *self->frameview) {
 		*self->frameview = NULL;
@@ -99,7 +99,7 @@ void paramview_updateskin(ParamView* self)
 	psy_ui_component_setfontinfo(&self->component, self->fontinfo);	
 }
 
-void paramview_ontimer(ParamView* self, uintptr_t timerid)
+void paramview_on_timer(ParamView* self, uintptr_t timerid)
 {
 	if (self->machine && psy_audio_machine_paramstrobe(self->machine)
 			!= self->paramstrobe) {
@@ -125,7 +125,7 @@ void paramview_build(ParamView* self)
 		currcolumn = NULL;
 		currslider = NULL;
 		for (paramnum = 0; paramnum < psy_audio_machine_numparameters(self->machine);
-			++paramnum) {			
+				++paramnum) {			
 			psy_audio_MachineParam* machineparam;
 
 			if (row == 0) {
@@ -221,7 +221,7 @@ void paramview_build(ParamView* self)
 						component = &switchui->component;
 					}
 					break; }
-				case MPF_IGNORE:
+				case MPF_IGNORE:					
 					break;
 				default: {
 					component = psy_ui_component_allocinit(currcolumn, NULL);

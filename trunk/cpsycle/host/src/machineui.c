@@ -155,8 +155,8 @@ void vuui_drawpeak(VuUi* self, psy_ui_Graphics* g)
 	}
 }
 
-static void panui_onmousedown(PanUi*, psy_ui_MouseEvent*);
-static void panui_onmouseup(PanUi*, psy_ui_MouseEvent*);
+static void panui_on_mouse_down(PanUi*, psy_ui_MouseEvent*);
+static void panui_on_mouse_up(PanUi*, psy_ui_MouseEvent*);
 static void panui_onmousemove(PanUi*, psy_ui_MouseEvent*);
 static void panui_onalign(PanUi*);
 
@@ -173,14 +173,14 @@ static void panui_vtable_init(PanUi* self)
 		panui_vtable.onalign =
 			(psy_ui_fp_component_event)
 			panui_onalign;
-		panui_vtable.onmousedown =
-			(psy_ui_fp_component_onmouseevent)
-			panui_onmousedown;
-		panui_vtable.onmouseup =
-			(psy_ui_fp_component_onmouseevent)
-			panui_onmouseup;
+		panui_vtable.on_mouse_down =
+			(psy_ui_fp_component_on_mouse_event)
+			panui_on_mouse_down;
+		panui_vtable.on_mouse_up =
+			(psy_ui_fp_component_on_mouse_event)
+			panui_on_mouse_up;
 		panui_vtable.onmousemove =
-			(psy_ui_fp_component_onmouseevent)
+			(psy_ui_fp_component_on_mouse_event)
 			panui_onmousemove;
 		panui_vtable_initialized = TRUE;
 	}
@@ -200,7 +200,7 @@ void panui_init(PanUi* self, psy_ui_Component* parent, psy_audio_Machine* machin
 	psy_ui_component_set_style_type(&self->slider, pan_slider_style);
 }
 
-void panui_onmousedown(PanUi* self, psy_ui_MouseEvent* ev)
+void panui_on_mouse_down(PanUi* self, psy_ui_MouseEvent* ev)
 {
 	if (psy_ui_mouseevent_target(ev) == &self->slider) {
 		psy_ui_component_capture(&self->component);
@@ -209,7 +209,7 @@ void panui_onmousedown(PanUi* self, psy_ui_MouseEvent* ev)
 	}
 }
 
-void panui_onmouseup(PanUi* self, psy_ui_MouseEvent* ev)
+void panui_on_mouse_up(PanUi* self, psy_ui_MouseEvent* ev)
 {
 	if (self->drag) {
 		psy_ui_component_releasecapture(&self->component);

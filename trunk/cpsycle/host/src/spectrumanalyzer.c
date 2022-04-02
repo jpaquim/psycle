@@ -27,7 +27,7 @@ static const uint32_t CLRIGHT = 0x60C060;
 static const uint32_t CLBOTH = 0xC0C060;
 
 static void spectrumanalyzer_initbackground(SpectrumAnalyzer*);
-static void spectrumanalyzer_ondestroy(SpectrumAnalyzer*);
+static void spectrumanalyzer_on_destroy(SpectrumAnalyzer*);
 static void spectrumanalyzer_ondraw(SpectrumAnalyzer*, psy_ui_Graphics*);
 static void spectrumanalyzer_drawbackground(SpectrumAnalyzer*, psy_ui_Graphics*);
 static void spectrumanalyzer_drawspectrum(SpectrumAnalyzer*, psy_ui_Graphics*);	
@@ -43,9 +43,9 @@ static void vtable_init(SpectrumAnalyzer* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.ondestroy =
+		vtable.on_destroy =
 			(psy_ui_fp_component_event)
-			spectrumanalyzer_ondestroy;
+			spectrumanalyzer_on_destroy;
 		vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
 			spectrumanalyzer_ondraw;		
@@ -83,7 +83,7 @@ void spectrumanalyzer_init(SpectrumAnalyzer* self, psy_ui_Component* parent,
 	psy_dsp_noopt_init(&self->dsp_noopt);	
 }
 
-void spectrumanalyzer_ondestroy(SpectrumAnalyzer* self)
+void spectrumanalyzer_on_destroy(SpectrumAnalyzer* self)
 {	
 	fftclass_dispose(&self->fftSpec);
 	psy_ui_bitmap_dispose(&self->bg);

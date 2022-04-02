@@ -41,7 +41,7 @@ typedef struct PluginEditor {
 	psy_ui_Component component;
 	// internal
 	TitleBar titlebar;
-	psy_ui_TextInputor editor;
+	psy_ui_Editor editor;
 	psy_ui_Component bar;
 	psy_ui_Button newplugin;
 	psy_ui_Button reload;
@@ -57,11 +57,14 @@ typedef struct PluginEditor {
 	const char* basepath;	
 	uintptr_t instanceidx;
 	psy_Table pluginmappping;
+	double zoom;
 	// referneces
 	Workspace* workspace;
 } PluginEditor;
 
 void plugineditor_init(PluginEditor*, psy_ui_Component* parent, Workspace*);
+
+void plugineditor_updatefont(PluginEditor*);
 
 INLINE psy_ui_Component* plugineditor_base(PluginEditor* self)
 {

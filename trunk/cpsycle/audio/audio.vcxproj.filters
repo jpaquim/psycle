@@ -339,6 +339,12 @@
     <ClCompile Include="src\song.c">
       <Filter>common</Filter>
     </ClCompile>
+    <ClCompile Include="src\luaresampler.c">
+      <Filter>machine\plugins\lua</Filter>
+    </ClCompile>
+    <ClCompile Include="src\luawavedata.c">
+      <Filter>machine\plugins\lua</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\library.h">
@@ -649,6 +655,12 @@
     </ClInclude>
     <ClInclude Include="src\constants.h">
       <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="src\luaresampler.h">
+      <Filter>machine\plugins\lua</Filter>
+    </ClInclude>
+    <ClInclude Include="src\luawavedata.h">
+      <Filter>machine\plugins\lua</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

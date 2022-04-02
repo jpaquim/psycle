@@ -22,7 +22,7 @@ static void timebar_onlesslessclicked(TimeBar*, psy_ui_Button* sender);
 static void timebar_onlessclicked(TimeBar*, psy_ui_Button* sender);
 static void timebar_onmoreclicked(TimeBar*, psy_ui_Button* sender);
 static void timebar_onmoremoreclicked(TimeBar*, psy_ui_Button* sender);
-static void timebar_ontimer(TimeBar*, uintptr_t timerid);
+static void timebar_on_timer(TimeBar*, uintptr_t timerid);
 static void timebar_offsetbpm(TimeBar*, psy_dsp_big_beat_t bpm);
 static void timebar_updatebpmlabel(TimeBar*);
 /* vtable */
@@ -35,9 +35,9 @@ static void vtable_init(TimeBar* self)
 
 	if (!vtable_initialized) {
 		vtable = *(timebar_base(self)->vtable);
-		vtable.ontimer =
-			(psy_ui_fp_component_ontimer)
-			timebar_ontimer;
+		vtable.on_timer =
+			(psy_ui_fp_component_on_timer)
+			timebar_on_timer;
 		vtable_initialized = TRUE;
 	}
 	psy_ui_component_setvtable(timebar_base(self), &vtable);
@@ -126,7 +126,7 @@ void timebar_offsetbpm(TimeBar* self, psy_dsp_big_beat_t delta)
 		psy_audio_player_bpm(self->player) + delta);
 }
 
-void timebar_ontimer(TimeBar* self, uintptr_t timerid)
+void timebar_on_timer(TimeBar* self, uintptr_t timerid)
 {
 	assert(self);	
 

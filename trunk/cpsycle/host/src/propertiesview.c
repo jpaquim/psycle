@@ -35,7 +35,7 @@ void propertiesrenderstate_init(PropertiesRenderState* self, uintptr_t numcols,
 
 /* PropertiesRenderLine */
 /* prototypes */
-static void propertiesrenderline_onmousedown(PropertiesRenderLine*,
+static void propertiesrenderline_on_mouse_down(PropertiesRenderLine*,
 	psy_ui_MouseEvent*);
 static void propertiesrenderline_oncomboselect(PropertiesRenderLine*,
 	psy_ui_Component* sender, intptr_t selidx);
@@ -47,9 +47,9 @@ static void propertiesrenderline_vtable_init(PropertiesRenderLine* self)
 {
 	if (!propertiesrenderline_vtable_initialized) {
 		propertiesrenderline_vtable = *(self->component.vtable);
-		propertiesrenderline_vtable.onmousedown =
-			(psy_ui_fp_component_onmouseevent)
-			propertiesrenderline_onmousedown;
+		propertiesrenderline_vtable.on_mouse_down =
+			(psy_ui_fp_component_on_mouse_event)
+			propertiesrenderline_on_mouse_down;
 		propertiesrenderline_vtable_initialized = TRUE;
 	}
 	psy_ui_component_setvtable(&self->component, &propertiesrenderline_vtable);
@@ -212,7 +212,7 @@ PropertiesRenderLine* propertiesrenderline_allocinit(
 	return rv;
 }
 
-void propertiesrenderline_onmousedown(PropertiesRenderLine* self,
+void propertiesrenderline_on_mouse_down(PropertiesRenderLine* self,
 	psy_ui_MouseEvent* ev)
 {
 	self->state->property = NULL;	
@@ -237,7 +237,7 @@ void propertiesrenderline_onmousedown(PropertiesRenderLine* self,
 		psy_ui_component_addstylestate(&self->component,
 			psy_ui_STYLESTATE_SELECT);
 		if (psy_property_readonly(self->property)) {
-			/* bubble to propertiesrenderer_onmousedown */
+			/* bubble to propertiesrenderer_on_mouse_down */
 			return;
 		}
 		self->state->property = self->property;
@@ -249,7 +249,7 @@ void propertiesrenderline_onmousedown(PropertiesRenderLine* self,
 				!psy_property_item_bool(self->property));			
 			propertiesrenderline_updatecheck(self);
 		}
-		/* bubble to propertiesrenderer_onmousedown */
+		/* bubble to propertiesrenderer_on_mouse_down */
 		return;
 	}
 	if (self->state->preventmousepropagation) {
@@ -370,7 +370,7 @@ bool propertiesrenderline_updatecolour(PropertiesRenderLine* self)
 		
 		psy_snprintf(str, 64, "0x%d", psy_property_item_int(self->property));
 		psy_ui_label_set_text(self->label, str);		
-		psy_ui_component_setbackgroundcolour(self->colour,
+		psy_ui_component_set_background_colour(self->colour,
 			psy_ui_colour_make((uint32_t)psy_property_item_int(
 				self->property)));
 		return TRUE;
@@ -405,13 +405,13 @@ void propertiesrenderline_update(PropertiesRenderLine* self)
 
 /* PropertiesRenderer */
 /* prototypes */
-static void propertiesrenderer_ondestroy(PropertiesRenderer*);
-static void propertiesrenderer_ontimer(PropertiesRenderer*, uintptr_t timerid);
+static void propertiesrenderer_on_destroy(PropertiesRenderer*);
+static void propertiesrenderer_on_timer(PropertiesRenderer*, uintptr_t timerid);
 static int propertiesrenderer_onpropertiesbuild(PropertiesRenderer*,
 	psy_Property*, uintptr_t level);
 static void propertiesrenderer_buildmainsection(PropertiesRenderer*,
 	psy_Property* section);
-static void propertiesrenderer_onmousedown(PropertiesRenderer*,
+static void propertiesrenderer_on_mouse_down(PropertiesRenderer*,
 	psy_ui_MouseEvent*);
 static void propertiesrenderer_oninputdefineraccept(PropertiesRenderer*,
 	InputDefiner* sender);
@@ -436,15 +436,15 @@ static void propertiesrenderer_vtable_init(PropertiesRenderer* self)
 {
 	if (!propertiesrenderer_vtable_initialized) {
 		propertiesrenderer_vtable = *(self->component.vtable);
-		propertiesrenderer_vtable.ondestroy =
+		propertiesrenderer_vtable.on_destroy =
 			(psy_ui_fp_component_event)
-			propertiesrenderer_ondestroy;
-		propertiesrenderer_vtable.onmousedown =
-			(psy_ui_fp_component_onmouseevent)
-			propertiesrenderer_onmousedown;
-		propertiesrenderer_vtable.ontimer =
-			(psy_ui_fp_component_ontimer)
-			propertiesrenderer_ontimer;			
+			propertiesrenderer_on_destroy;
+		propertiesrenderer_vtable.on_mouse_down =
+			(psy_ui_fp_component_on_mouse_event)
+			propertiesrenderer_on_mouse_down;
+		propertiesrenderer_vtable.on_timer =
+			(psy_ui_fp_component_on_timer)
+			propertiesrenderer_on_timer;			
 		propertiesrenderer_vtable_initialized = TRUE;
 	}
 	self->component.vtable = &propertiesrenderer_vtable;
@@ -494,7 +494,7 @@ void propertiesrenderer_init(PropertiesRenderer* self,
 	psy_ui_component_start_timer(&self->component, 0, 100);
 }
 
-void propertiesrenderer_ondestroy(PropertiesRenderer* self)
+void propertiesrenderer_on_destroy(PropertiesRenderer* self)
 {
 	psy_signal_dispose(&self->signal_changed);
 	psy_signal_dispose(&self->signal_selected);
@@ -582,7 +582,7 @@ void propertiesrenderer_updateline(PropertiesRenderer* self,
 
 		lines = psy_ui_component_parent(&line->component);
 		if (lines) {
-			q = psy_ui_component_children(lines, psy_ui_NONRECURSIVE);
+			q = psy_ui_component_children(lines, psy_ui_NONE_RECURSIVE);
 			for (p = q; p != NULL; p = p->next) {
 				propertiesrenderline_update((PropertiesRenderLine*)p->entry);
 			}
@@ -673,7 +673,7 @@ void propertiesrenderer_buildmainsection(PropertiesRenderer* self,
 	}
 }
 
-void propertiesrenderer_ontimer(PropertiesRenderer* self, uintptr_t timerid)
+void propertiesrenderer_on_timer(PropertiesRenderer* self, uintptr_t timerid)
 {
 	if (self->state.comboselect) {
 		psy_signal_emit(&self->signal_changed, self, 1, self->state.selected);
@@ -681,7 +681,7 @@ void propertiesrenderer_ontimer(PropertiesRenderer* self, uintptr_t timerid)
 	}
 }
 
-void propertiesrenderer_onmousedown(PropertiesRenderer* self,
+void propertiesrenderer_on_mouse_down(PropertiesRenderer* self,
 	psy_ui_MouseEvent* ev)
 {
 	psy_Property* selected;
@@ -894,7 +894,7 @@ void propertiesrenderer_oninputdefineraccept(PropertiesRenderer* self,
 
 /* PropertiesView */
 /* prototypes */
-static void propertiesview_ondestroy(PropertiesView*);
+static void propertiesview_on_destroy(PropertiesView*);
 static void propertiesview_selectsection(PropertiesView*,
 	psy_ui_Component* sender, uintptr_t section, uintptr_t options);
 static void propertiesview_updatetabbarsections(PropertiesView*);
@@ -906,8 +906,8 @@ static void propertiesview_onpropertiesrendererselected(PropertiesView*,
 	PropertiesRenderer* sender, psy_Property*);
 static bool propertiesview_oninput(PropertiesView*, InputHandler* sender);
 static double propertiesview_checkrange(PropertiesView*, double position);
-static void propertiesview_onmousedown(PropertiesView*, psy_ui_MouseEvent*);
-static void propertiesview_onmouseup(PropertiesView*, psy_ui_MouseEvent*);
+static void propertiesview_on_mouse_down(PropertiesView*, psy_ui_MouseEvent*);
+static void propertiesview_on_mouse_up(PropertiesView*, psy_ui_MouseEvent*);
 static void propertiesview_onscrollpanealign(PropertiesView*,
 	psy_ui_Component* sender);
 /* vtable */
@@ -918,15 +918,15 @@ static void propertiesview_vtable_init(PropertiesView* self)
 {
 	if (!propertiesview_vtable_initialized) {
 		propertiesview_vtable = *(self->component.vtable);
-		propertiesview_vtable.ondestroy =
+		propertiesview_vtable.on_destroy =
 			(psy_ui_fp_component_event)
-			propertiesview_ondestroy;
-		propertiesview_vtable.onmousedown =
-			(psy_ui_fp_component_onmouseevent)
-			propertiesview_onmouseup;
-		propertiesview_vtable.onmouseup =
-			(psy_ui_fp_component_onmouseevent)
-			propertiesview_onmouseup;
+			propertiesview_on_destroy;
+		propertiesview_vtable.on_mouse_down =
+			(psy_ui_fp_component_on_mouse_event)
+			propertiesview_on_mouse_up;
+		propertiesview_vtable.on_mouse_up =
+			(psy_ui_fp_component_on_mouse_event)
+			propertiesview_on_mouse_up;
 	}
 	self->component.vtable = &propertiesview_vtable;
 }
@@ -937,6 +937,7 @@ void propertiesview_init(PropertiesView* self, psy_ui_Component* parent,
 	psy_Property* properties, uintptr_t numcols, Workspace* workspace)
 {		
 	psy_ui_component_init(&self->component, parent, NULL);
+	psy_ui_component_set_id(&self->component, VIEW_ID_SONGPROPERTIES);
 	propertiesview_vtable_init(self);
 	self->maximizemainsections = TRUE;
 	psy_signal_init(&self->signal_changed);
@@ -944,8 +945,8 @@ void propertiesview_init(PropertiesView* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->viewtabbar, tabbarparent, NULL);	
 	propertiesrenderer_init(&self->renderer, &self->component, properties,
 		numcols);
-	psy_ui_scroller_init(&self->scroller, &self->renderer.component,
-		&self->component);
+	psy_ui_scroller_init(&self->scroller, &self->component, NULL, NULL);
+	psy_ui_scroller_set_client(&self->scroller, &self->renderer.component);
 	psy_ui_component_set_align(&self->scroller.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_component_set_margin(&self->scroller.pane,
 		psy_ui_margin_make_em(0.0, 1.0, 0.0, 0.0));
@@ -972,7 +973,7 @@ void propertiesview_init(PropertiesView* self, psy_ui_Component* parent,
 		propertiesview_onscrollpanealign);
 }
 
-void propertiesview_ondestroy(PropertiesView* self)
+void propertiesview_on_destroy(PropertiesView* self)
 {
 	psy_signal_dispose(&self->signal_changed);
 	psy_signal_dispose(&self->signal_selected);
@@ -998,7 +999,9 @@ void propertiesview_updatetabbarsections(PropertiesView* self)
 			if (psy_property_issection(property)) {
 				psy_ui_tabbar_append(&self->tabbar,
 					psy_property_text(property),
-				psy_INDEX_INVALID, psy_INDEX_INVALID, psy_ui_colour_white());
+				psy_INDEX_INVALID,
+				psy_INDEX_INVALID, psy_INDEX_INVALID,
+					psy_ui_colour_white());
 			}
 		}
 	}	
@@ -1183,7 +1186,7 @@ double propertiesview_checkrange(PropertiesView* self, double position)
 	return (double)(steps * scrollstepypx);
 }
 
-void propertiesview_onmousedown(PropertiesView* self, psy_ui_MouseEvent* ev)
+void propertiesview_on_mouse_down(PropertiesView* self, psy_ui_MouseEvent* ev)
 {	
 	psy_ui_component_set_focus(&self->component);
 	if (self->renderer.state.preventmousepropagation) {		
@@ -1191,7 +1194,7 @@ void propertiesview_onmousedown(PropertiesView* self, psy_ui_MouseEvent* ev)
 	}
 }
 
-void propertiesview_onmouseup(PropertiesView* self, psy_ui_MouseEvent* ev)
+void propertiesview_on_mouse_up(PropertiesView* self, psy_ui_MouseEvent* ev)
 {
 	if (self->renderer.state.preventmousepropagation) {
 		psy_ui_mouseevent_stop_propagation(ev);

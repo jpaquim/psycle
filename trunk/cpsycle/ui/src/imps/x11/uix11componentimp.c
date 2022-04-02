@@ -387,7 +387,7 @@ void dev_dispose(psy_ui_x11_ComponentImp* self)
 	psy_List* q;
 
     x11app = (psy_ui_X11App*)psy_ui_app()->imp;
-	psy_ui_component_stoptimer(self->component, psy_INDEX_INVALID);    
+	psy_ui_component_stop_timer(self->component, psy_INDEX_INVALID);    
 	psy_ui_componentimp_dispose(&self->imp);
 	psy_ui_graphics_dispose(&self->g);
 	for (p = self->viewcomponents; p != NULL; psy_list_next(&p)) {
@@ -432,7 +432,7 @@ void dev_clear(psy_ui_x11_ComponentImp* self)
 	if (self->component) {
 		psy_List* c;
 		
-		c = psy_ui_component_children(self->component, psy_ui_NONRECURSIVE);
+		c = psy_ui_component_children(self->component, psy_ui_NONE_RECURSIVE);
 		for (p = c; p != NULL; p = q) {
 			psy_ui_Component* component;
 
@@ -1286,7 +1286,7 @@ void dev_setfocus(psy_ui_x11_ComponentImp* self)
 			XSync(x11app->dpy, FALSE);
 			XSetInputFocus(x11app->dpy, self->hwnd, RevertToNone, CurrentTime);
 			if (self->component) {
-				self->component->vtable->onfocus(self->component);
+				self->component->vtable->on_focus(self->component);
 				psy_signal_emit(&self->component->signal_focus, self, 0);
 			}
 		}

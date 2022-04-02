@@ -18,11 +18,14 @@ extern "C" {
 
 typedef struct psy_ui_TextFormat {
     psy_Table lines;
-    bool wrap;
+    bool word_wrap;
+    bool line_wrap;
     double width;
     double avgcharwidth;
     double textheight;
     double linespacing;
+    uintptr_t numavgchars;
+    uintptr_t nummaxchars;
     psy_ui_TextAlignment textalignment;
 } psy_ui_TextFormat;
 
@@ -31,7 +34,7 @@ void psy_ui_textformat_dispose(psy_ui_TextFormat*);
 
 void psy_ui_textformat_clear(psy_ui_TextFormat*);
 void psy_ui_textformat_update(psy_ui_TextFormat*, const char* text,
-    double width, const psy_ui_TextMetric*);
+    double width, const psy_ui_Font*, const psy_ui_TextMetric*);
 uintptr_t psy_ui_textformat_line_at(const psy_ui_TextFormat*,
     uintptr_t index);
 uintptr_t psy_ui_textformat_numlines(const psy_ui_TextFormat*);
@@ -48,21 +51,58 @@ INLINE void psy_ui_textformat_set_line_spacing(psy_ui_TextFormat* self,
     self->linespacing = line_spacing;
 }
 
-INLINE void psy_ui_textformat_wrap(psy_ui_TextFormat* self)
+INLINE void psy_ui_textformat_word_wrap(psy_ui_TextFormat* self)
 {
-    self->wrap = TRUE;
+    self->word_wrap = TRUE;
     psy_ui_textformat_clear(self);
+}
+
+INLINE void psy_ui_textformat_prevent_word_wrap(psy_ui_TextFormat* self)
+{
+    self->word_wrap = FALSE;
+    psy_ui_textformat_clear(self);
+}
+
+INLINE bool psy_ui_textformat_has_word_wrap(const psy_ui_TextFormat* self)
+{
+    return self->word_wrap;
 }
 
 INLINE void psy_ui_textformat_prevent_wrap(psy_ui_TextFormat* self)
 {
-    self->wrap = FALSE;
+    self->line_wrap = FALSE;
+    self->word_wrap = FALSE;
     psy_ui_textformat_clear(self);
+}
+
+INLINE bool psy_ui_textformat_has_wrap(const psy_ui_TextFormat* self)
+{
+    return self->word_wrap || self->line_wrap;
+}
+
+INLINE void psy_ui_textformat_line_wrap(psy_ui_TextFormat* self)
+{
+    self->line_wrap = TRUE;
+    psy_ui_textformat_clear(self);
+}
+
+INLINE void psy_ui_textformat_prevent_line_wrap(psy_ui_TextFormat* self)
+{
+    self->line_wrap = FALSE;
+    psy_ui_textformat_clear(self);
+}
+
+INLINE bool psy_ui_textformat_has_line_wrap(const psy_ui_TextFormat* self)
+{
+    return self->line_wrap;
 }
 
 uintptr_t psy_ui_textformat_cursor_position(const psy_ui_TextFormat*,
     const char* text, psy_ui_RealPoint, const psy_ui_TextMetric*,
     const psy_ui_Font*);
+double psy_ui_textformat_screen_offset(const psy_ui_TextFormat*,
+    const char* text, uintptr_t count, const psy_ui_Font*,
+    const psy_ui_TextMetric*);
 
 #ifdef __cplusplus
 }

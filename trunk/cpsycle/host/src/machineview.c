@@ -16,7 +16,7 @@
 
 /* MachineView */
 /* prototypes */
-static void machineview_ondestroy(MachineView*);
+static void machineview_on_destroy(MachineView*);
 static void machineview_initcomponent(MachineView*, psy_ui_Component* parent);
 static void machineview_initpropertiesview(MachineView*);
 static void machineview_initnotebook(MachineView*,
@@ -27,18 +27,18 @@ static void machineview_initstackview(MachineView*,
 	psy_ui_Component* tabbarparent);
 static void machineview_initnewmachine(MachineView*,
 	psy_ui_Component* tabbarparent);
-static void machineview_inittabbar(MachineView*,
+static void machineview_init_tabbar(MachineView*,
 	psy_ui_Component* tabbarparent);
 static void machineview_ontabbarchanged(MachineView*, psy_ui_TabBar* sender,
 	uintptr_t index);
 static void machineview_connectsignals(MachineView*);
 static uintptr_t machineview_section(const MachineView*);
 static void machineview_onsongchanged(MachineView*, Workspace* sender);
-static void machineview_onmousedown(MachineView*, psy_ui_MouseEvent*);
-static void machineview_onmouseup(MachineView*, psy_ui_MouseEvent*);
+static void machineview_on_mouse_down(MachineView*, psy_ui_MouseEvent*);
+static void machineview_on_mouse_up(MachineView*, psy_ui_MouseEvent*);
 static void machineview_onmousedoubleclick(MachineView*, psy_ui_MouseEvent*);
-static void machineview_onkeydown(MachineView*, psy_ui_KeyboardEvent*);
-static void machineview_onfocus(MachineView*);
+static void machineview_on_key_down(MachineView*, psy_ui_KeyboardEvent*);
+static void machineview_on_focus(MachineView*);
 static void machineview_selectsection(MachineView*, psy_ui_Component* sender,
 	uintptr_t section, uintptr_t options);
 static void machineview_onconfigure(MachineView*, MachineViewConfig*,
@@ -55,27 +55,27 @@ static void machineview_vtable_init(MachineView* self)
 {
 	if (!machineview_vtable_initialized) {
 		machineview_vtable = *(self->component.vtable);
-		machineview_vtable.ondestroy =
+		machineview_vtable.on_destroy =
 			(psy_ui_fp_component_event)
-			machineview_ondestroy;
-		machineview_vtable.onmousedown =
-			(psy_ui_fp_component_onmouseevent)
-			machineview_onmousedown;
-		machineview_vtable.onmouseup =
-			(psy_ui_fp_component_onmouseevent)
-			machineview_onmouseup;
+			machineview_on_destroy;
+		machineview_vtable.on_mouse_down =
+			(psy_ui_fp_component_on_mouse_event)
+			machineview_on_mouse_down;
+		machineview_vtable.on_mouse_up =
+			(psy_ui_fp_component_on_mouse_event)
+			machineview_on_mouse_up;
 		machineview_vtable.onmousedoubleclick =
-			(psy_ui_fp_component_onmouseevent)
+			(psy_ui_fp_component_on_mouse_event)
 			machineview_onmousedoubleclick;
-		machineview_vtable.onkeydown =
-			(psy_ui_fp_component_onkeyevent)
-			machineview_onkeydown;
+		machineview_vtable.on_key_down =
+			(psy_ui_fp_component_on_key_event)
+			machineview_on_key_down;
 		machineview_vtable.section =
 			(psy_ui_fp_component_section)
 			machineview_section;		
-		machineview_vtable.onfocus =
+		machineview_vtable.on_focus =
 			(psy_ui_fp_component_event)
-			machineview_onfocus;
+			machineview_on_focus;
 		machineview_vtable.show =
 			(psy_ui_fp_component_show)
 			machineview_onshow;
@@ -99,12 +99,12 @@ void machineview_init(MachineView* self, psy_ui_Component* parent,
 	machineview_initwireview(self, tabbarparent);
 	machineview_initstackview(self, tabbarparent);	
 	machineview_initnewmachine(self, tabbarparent);	
-	machineview_inittabbar(self, tabbarparent);
+	machineview_init_tabbar(self, tabbarparent);
 	machineview_connectsignals(self);	
 	psy_ui_tabbar_select(&self->tabbar, SECTION_ID_MACHINEVIEW_WIRES);	
 }
 
-void machineview_ondestroy(MachineView* self)
+void machineview_on_destroy(MachineView* self)
 {		
 	paramviews_dispose(&self->paramviews);
 }
@@ -113,7 +113,8 @@ void machineview_initcomponent(MachineView* self, psy_ui_Component* parent)
 {
 	psy_ui_component_init(machineview_base(self), parent, NULL);
 	machineview_vtable_init(self);	
-	psy_ui_component_set_style_type(&self->component, STYLE_MV);	
+	psy_ui_component_set_style_type(&self->component, STYLE_MV);
+	psy_ui_component_set_id(machineview_base(self), VIEW_ID_MACHINEVIEW);
 }
 
 void machineview_initpropertiesview(MachineView* self)
@@ -137,8 +138,9 @@ void machineview_initwireview(MachineView* self, psy_ui_Component* tabbarparent)
 	machinewireview_init(&self->wireview,
 		psy_ui_notebook_base(&self->notebook), tabbarparent,
 		&self->paramviews, self->workspace);
-	psy_ui_scroller_init(&self->scroller, &self->wireview.component,
-		psy_ui_notebook_base(&self->notebook));
+	psy_ui_scroller_init(&self->scroller, psy_ui_notebook_base(
+		&self->notebook), NULL, NULL);
+	psy_ui_scroller_set_client(&self->scroller, &self->wireview.component);
 	psy_ui_component_set_align(&self->wireview.component,
 		psy_ui_ALIGN_FIXED);
 	psy_ui_component_set_align(&self->scroller.component, psy_ui_ALIGN_CLIENT);
@@ -161,17 +163,20 @@ void machineview_initnewmachine(MachineView* self,
 		psy_ui_ALIGN_CLIENT);
 }
 
-void machineview_inittabbar(MachineView* self, psy_ui_Component* tabbarparent)
+void machineview_init_tabbar(MachineView* self, psy_ui_Component* tabbarparent)
 {
 	psy_ui_tabbar_init(&self->tabbar, tabbarparent);
 	psy_ui_component_set_align(psy_ui_tabbar_base(&self->tabbar),
 		psy_ui_ALIGN_LEFT);	
 	psy_ui_tabbar_append(&self->tabbar, "machineview.wires",
-		IDB_WIRES_LIGHT, IDB_WIRES_DARK, psy_ui_colour_white());
+		psy_INDEX_INVALID, IDB_WIRES_LIGHT, IDB_WIRES_DARK,
+		psy_ui_colour_white());
 	psy_ui_tabbar_append(&self->tabbar, "machineview.stack",
-		IDB_MATRIX_LIGHT, IDB_MATRIX_DARK, psy_ui_colour_white());	
+		psy_INDEX_INVALID, IDB_MATRIX_LIGHT, IDB_MATRIX_DARK,
+		psy_ui_colour_white());
 	psy_ui_tabbar_append(&self->tabbar, "machineview.new-machine",
-		IDB_NEWMACHINE_LIGHT, IDB_NEWMACHINE_DARK, psy_ui_colour_white());
+		psy_INDEX_INVALID, IDB_NEWMACHINE_LIGHT, IDB_NEWMACHINE_DARK,
+		psy_ui_colour_white());
 }
 
 void machineview_connectsignals(MachineView* self)
@@ -205,12 +210,12 @@ void machineview_onmousedoubleclick(MachineView* self, psy_ui_MouseEvent* ev)
 	psy_ui_mouseevent_stop_propagation(ev);
 }
 
-void machineview_onmousedown(MachineView* self, psy_ui_MouseEvent* ev)
+void machineview_on_mouse_down(MachineView* self, psy_ui_MouseEvent* ev)
 {	
 	psy_ui_mouseevent_stop_propagation(ev);
 }
 
-void machineview_onmouseup(MachineView* self, psy_ui_MouseEvent* ev)
+void machineview_on_mouse_up(MachineView* self, psy_ui_MouseEvent* ev)
 {
 	if (self->shownewmachine) {
 		if (psy_ui_component_section(&self->component) ==
@@ -226,7 +231,7 @@ void machineview_onmouseup(MachineView* self, psy_ui_MouseEvent* ev)
 					SECTION_ID_MACHINEVIEW_NEWMACHINE, NEWMACHINE_APPENDSTACK);
 			}
 		} else {
-			psy_ui_component_selectsection(machineview_base(self),
+			psy_ui_component_select_section(machineview_base(self),
 				SECTION_ID_MACHINEVIEW_NEWMACHINE,
 				NEWMACHINE_APPEND);
 		}
@@ -244,16 +249,16 @@ void machineview_onmouseup(MachineView* self, psy_ui_MouseEvent* ev)
 	}
 }
 
-void machineview_onkeydown(MachineView* self, psy_ui_KeyboardEvent* ev)
+void machineview_on_key_down(MachineView* self, psy_ui_KeyboardEvent* ev)
 {
 	if (psy_ui_keyboardevent_keycode(ev) == psy_ui_KEY_ESCAPE) {
 		if (psy_ui_component_section(&self->component) ==
 				SECTION_ID_MACHINEVIEW_NEWMACHINE) {
 			psy_ui_tabbar_select(&self->tabbar,
 				self->newmachine.restoresection);
-			if (psy_ui_notebook_activepage(&self->notebook)) {
+			if (psy_ui_notebook_active_page(&self->notebook)) {
 				psy_ui_component_set_focus(
-					psy_ui_notebook_activepage(&self->notebook));
+					psy_ui_notebook_active_page(&self->notebook));
 			}
 		} else if (self->workspace->gearvisible) {
 			workspace_togglegear(self->workspace);
@@ -262,11 +267,11 @@ void machineview_onkeydown(MachineView* self, psy_ui_KeyboardEvent* ev)
 	} 
 }
 
-void machineview_onfocus(MachineView* self)
+void machineview_on_focus(MachineView* self)
 {
-	if (psy_ui_notebook_activepage(&self->notebook)) {
+	if (psy_ui_notebook_active_page(&self->notebook)) {
 		psy_ui_component_set_focus(
-			psy_ui_notebook_activepage(&self->notebook));
+			psy_ui_notebook_active_page(&self->notebook));
 	}
 }
 

@@ -1,5 +1,9 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2007-2020 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2007-2022 members of the psycle project http://psycle.sourceforge.net
+*/
+#include "../../detail/prefix.h"
+
 
 #include "luawaveosc.h"
 
@@ -101,7 +105,7 @@ int luawaveosc_create(lua_State* L)
 		} else {
 			f = 440;
 		}
-		osc = (psy_audio_WaveOsc*) malloc(sizeof(psy_audio_WaveOsc));
+		osc = (psy_audio_WaveOsc*)malloc(sizeof(psy_audio_WaveOsc));
 		psy_audio_waveosc_init(osc, (psy_audio_WaveShape) shape, f);
 		psyclescript_createuserdata(L, 1, luawaveosc_meta, osc);
 		return 1;
@@ -130,7 +134,7 @@ int luawaveosc_work(lua_State* L)
 		float* env = 0;
 
 		self = psyclescript_checkself(L, 1, luawaveosc_meta);
-		buffer = *(psy_audio_Array**)luaL_checkudata(L, 2, luaarraybind_meta);		
+		buffer = *(psy_audio_Array**)luaL_checkudata(L, 2, luaarraybind_meta);
 		// float* pwm = 0;
 		if (n > 2 && (!lua_isnil(L, 3))) {
 			psy_audio_Array* arr = *(psy_audio_Array**)luaL_checkudata(L, 3, luaarraybind_meta);
@@ -138,7 +142,9 @@ int luawaveosc_work(lua_State* L)
 			psy_audio_waveosc_setfm(self, fm);
 		}
 		if (n > 3 && (!lua_isnil(L, 4))) {
-			psy_audio_Array* arr = *(psy_audio_Array**)luaL_checkudata(L, 4, luaarraybind_meta);
+			psy_audio_Array* arr;
+			
+			arr = *(psy_audio_Array**)luaL_checkudata(L, 4, luaarraybind_meta);
 			env = psy_audio_array_data(arr); 
 			psy_audio_waveosc_setam(self, env);
 		}

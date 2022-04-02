@@ -533,9 +533,9 @@ static void pianogrid_drawuncoveredbottombackground(Pianogrid*,
 	psy_ui_Graphics*, psy_ui_RealSize);
 static void pianogrid_onpreferredsize(Pianogrid* self, const psy_ui_Size* limit,
 	psy_ui_Size* rv);
-static void pianogrid_onmousedown(Pianogrid*, psy_ui_MouseEvent*);
+static void pianogrid_on_mouse_down(Pianogrid*, psy_ui_MouseEvent*);
 static void pianogrid_onmousemove(Pianogrid*, psy_ui_MouseEvent*);
-static void pianogrid_onmouseup(Pianogrid*, psy_ui_MouseEvent*);
+static void pianogrid_on_mouse_up(Pianogrid*, psy_ui_MouseEvent*);
 static psy_audio_SequenceCursor pianogrid_makecursor(Pianogrid* self, double x, double y);
 
 /* vtable */
@@ -551,14 +551,14 @@ static void pianogrid_vtable_init(Pianogrid* self)
 		pianogrid_vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
 			pianogrid_ondraw;
-		pianogrid_vtable.onmousedown =
-			(psy_ui_fp_component_onmouseevent)
-			pianogrid_onmousedown;
-		pianogrid_vtable.onmouseup =
-			(psy_ui_fp_component_onmouseevent)
-			pianogrid_onmouseup;
+		pianogrid_vtable.on_mouse_down =
+			(psy_ui_fp_component_on_mouse_event)
+			pianogrid_on_mouse_down;
+		pianogrid_vtable.on_mouse_up =
+			(psy_ui_fp_component_on_mouse_event)
+			pianogrid_on_mouse_up;
 		pianogrid_vtable.onmousemove =
-			(psy_ui_fp_component_onmouseevent)
+			(psy_ui_fp_component_on_mouse_event)
 			pianogrid_onmousemove;
 		pianogrid_vtable.onpreferredsize =
 			(psy_ui_fp_component_onpreferredsize)
@@ -716,7 +716,7 @@ void pianogrid_onpreferredsize(Pianogrid* self, const psy_ui_Size* limit,
 		patternviewstate_length(self->gridstate->pv)));		
 }
 
-void pianogrid_onmousedown(Pianogrid* self, psy_ui_MouseEvent* ev)
+void pianogrid_on_mouse_down(Pianogrid* self, psy_ui_MouseEvent* ev)
 {
 	self->dragcursor = pianogrid_makecursor(self, psy_ui_mouseevent_pt(ev).x,
 		psy_ui_mouseevent_pt(ev).y);	
@@ -979,7 +979,7 @@ void pianogrid_dragselection(Pianogrid* self, psy_audio_SequenceCursor cursor)
 }
 
 
-void pianogrid_onmouseup(Pianogrid* self, psy_ui_MouseEvent* ev)
+void pianogrid_on_mouse_up(Pianogrid* self, psy_ui_MouseEvent* ev)
 {
 	assert(self);
 		

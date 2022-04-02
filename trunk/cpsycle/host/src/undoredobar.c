@@ -18,7 +18,7 @@
 /* prototypes */
 static void undoredobar_onundo(UndoRedoBar*, psy_ui_Component* sender);
 static void undoredobar_onredo(UndoRedoBar*, psy_ui_Component* sender);
-static void undoredobar_ontimer(UndoRedoBar*, uintptr_t timerid);
+static void undoredobar_on_timer(UndoRedoBar*, uintptr_t timerid);
 /* vtable */
 static psy_ui_ComponentVtable vtable;
 static bool vtable_initialized = FALSE;
@@ -27,9 +27,9 @@ static void vtable_init(UndoRedoBar* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.ontimer =
-			(psy_ui_fp_component_ontimer)
-			undoredobar_ontimer;
+		vtable.on_timer =
+			(psy_ui_fp_component_on_timer)
+			undoredobar_on_timer;
 		vtable_initialized = TRUE;
 	}
 	psy_ui_component_setvtable(undoredobar_base(self), &vtable);
@@ -75,24 +75,24 @@ void undoredobar_onredo(UndoRedoBar* self, psy_ui_Component* sender)
 	workspace_redo(self->workspace);
 }
 
-void undoredobar_ontimer(UndoRedoBar* self, uintptr_t timerid)
+void undoredobar_on_timer(UndoRedoBar* self, uintptr_t timerid)
 {
 	assert(self);
 
 #ifndef PSYCLE_DEBUG_PREVENT_TIMER_DRAW
 	if (workspace_currview_hasundo(self->workspace)) {
 		psy_ui_component_enableinput(psy_ui_button_base(&self->undobutton),
-			psy_ui_NONRECURSIVE);
+			psy_ui_NONE_RECURSIVE);
 	} else {
 		psy_ui_component_preventinput(psy_ui_button_base(&self->undobutton),
-			psy_ui_NONRECURSIVE);
+			psy_ui_NONE_RECURSIVE);
 	}
 	if (workspace_currview_hasredo(self->workspace)) {
 		psy_ui_component_enableinput(psy_ui_button_base(&self->redobutton),
-			psy_ui_NONRECURSIVE);
+			psy_ui_NONE_RECURSIVE);
 	} else {
 		psy_ui_component_preventinput(psy_ui_button_base(&self->redobutton),
-			psy_ui_NONRECURSIVE);
+			psy_ui_NONE_RECURSIVE);
 	}
 #endif
 }

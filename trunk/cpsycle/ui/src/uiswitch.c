@@ -11,9 +11,9 @@
 #include <stdlib.h>
 
 /* prototypes */
-static void psy_ui_switch_ondestroy(psy_ui_Switch*);
+static void psy_ui_switch_on_destroy(psy_ui_Switch*);
 static void psy_ui_switch_ondraw(psy_ui_Switch*, psy_ui_Graphics*);
-static void psy_ui_switch_onmousedown(psy_ui_Switch*, psy_ui_MouseEvent*);
+static void psy_ui_switch_on_mouse_down(psy_ui_Switch*, psy_ui_MouseEvent*);
 /* vtable */
 static psy_ui_ComponentVtable vtable;
 static int vtable_initialized = FALSE;
@@ -22,15 +22,15 @@ static void vtable_init(psy_ui_Switch* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.ondestroy =
+		vtable.on_destroy =
 			(psy_ui_fp_component_event)
-			psy_ui_switch_ondestroy;
+			psy_ui_switch_on_destroy;
 		vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
 			psy_ui_switch_ondraw;
-		vtable.onmousedown =
-			(psy_ui_fp_component_onmouseevent)
-			psy_ui_switch_onmousedown;
+		vtable.on_mouse_down =
+			(psy_ui_fp_component_on_mouse_event)
+			psy_ui_switch_on_mouse_down;
 		vtable_initialized = TRUE;
 	}
 	self->component.vtable = &vtable;
@@ -50,7 +50,7 @@ void psy_ui_switch_init(psy_ui_Switch* self, psy_ui_Component* parent,
 		psy_ui_size_make_em(4.0, 1.5));
 }
 
-void psy_ui_switch_ondestroy(psy_ui_Switch* self)
+void psy_ui_switch_on_destroy(psy_ui_Switch* self)
 {	
 	psy_signal_dispose(&self->signal_clicked);	
 }
@@ -112,7 +112,7 @@ void psy_ui_switch_ondraw(psy_ui_Switch* self, psy_ui_Graphics* g)
 	}
 }
 
-void psy_ui_switch_onmousedown(psy_ui_Switch* self, psy_ui_MouseEvent* ev)
+void psy_ui_switch_on_mouse_down(psy_ui_Switch* self, psy_ui_MouseEvent* ev)
 {
 	psy_signal_emit(&self->signal_clicked, self, psy_SIGNAL_NOPARAMS);
 }

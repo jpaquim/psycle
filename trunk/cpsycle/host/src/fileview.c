@@ -20,7 +20,7 @@
 /* FileViewFilter */
 
 /* prototypes */
-static void fileviewfilter_ondestroy(FileViewFilter*);
+static void fileviewfilter_on_destroy(FileViewFilter*);
 static void fileviewfilter_update(FileViewFilter*);
 static void fileviewfilter_oncheckbox(FileViewFilter*,
 	psy_ui_CheckBox* sender);
@@ -34,9 +34,9 @@ static void fileviewfilter_vtable_init(FileViewFilter* self)
 {
 	if (!fileviewfilter_vtable_initialized) {
 		fileviewfilter_vtable = *(self->component.vtable);
-		fileviewfilter_vtable.ondestroy =
+		fileviewfilter_vtable.on_destroy =
 			(psy_ui_fp_component_event)
-			fileviewfilter_ondestroy;
+			fileviewfilter_on_destroy;
 		fileviewfilter_vtable_initialized = TRUE;
 	}
 	self->component.vtable = &fileviewfilter_vtable;
@@ -64,7 +64,7 @@ void fileviewfilter_init(FileViewFilter* self, psy_ui_Component* parent)
 	psy_signal_init(&self->signal_changed);
 }
 
-void fileviewfilter_ondestroy(FileViewFilter* self)
+void fileviewfilter_on_destroy(FileViewFilter* self)
 {
 	psy_signal_dispose(&self->signal_changed);
 }
@@ -119,7 +119,7 @@ void fileviewsavefilter_init(FileViewSaveFilter* self, psy_ui_Component* parent)
 }
 
 /* prototypes */
-static void fileview_ondestroy(FileView*, psy_ui_Component* sender);
+static void fileview_on_destroy(FileView*, psy_ui_Component* sender);
 static void fileview_build(FileView*);
 static void fileview_builddrives(FileView*);
 static void fileview_builddirectories(FileView*);
@@ -140,7 +140,7 @@ void fileview_init(FileView* self, psy_ui_Component* parent)
 {		
 	psy_ui_component_init(fileview_base(self), parent, NULL);
 	psy_signal_connect(&self->component.signal_destroy, self,
-		fileview_ondestroy);
+		fileview_on_destroy);
 	/* filename */
 	psy_ui_component_init(&self->bottom, &self->component, NULL);
 	psy_ui_component_set_align(&self->bottom, psy_ui_ALIGN_BOTTOM);
@@ -209,7 +209,7 @@ void fileview_init(FileView* self, psy_ui_Component* parent)
 		fileview_ondirfilter);
 }
 
-void fileview_ondestroy(FileView* self, psy_ui_Component* sender)
+void fileview_on_destroy(FileView* self, psy_ui_Component* sender)
 {
 	psy_path_dispose(&self->curr);	
 	psy_signal_dispose(&self->signal_selected);	
@@ -311,7 +311,7 @@ void fileview_builddrives(FileView* self)
 	psy_ui_tabbar_clear(&self->drives);
 	for (q = p = psy_drives(); p != NULL; psy_list_next(&p)) {		
 		psy_ui_tabbar_append(&self->drives, (char*)psy_list_entry(p),
-			psy_INDEX_INVALID, psy_INDEX_INVALID, psy_ui_colour_white());
+			psy_INDEX_INVALID, psy_INDEX_INVALID, psy_INDEX_INVALID, psy_ui_colour_white());
 	}
 	psy_list_deallocate(&q, NULL);
 }

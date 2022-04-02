@@ -11,8 +11,8 @@
 /* SeqviewTrackHeaders */
 
 /* prototypes */
-static void seqviewtrackheaders_ondestroy(SeqviewTrackHeaders*);
-static void seqviewtrackheaders_onmouseup(SeqviewTrackHeaders*,
+static void seqviewtrackheaders_on_destroy(SeqviewTrackHeaders*);
+static void seqviewtrackheaders_on_mouse_up(SeqviewTrackHeaders*,
 	psy_ui_MouseEvent*);
 static void seqviewtrackheaders_onnewtrack(SeqviewTrackHeaders*,
 	psy_ui_Button* sender);
@@ -27,12 +27,12 @@ static void trackheaderview_vtable_init(SeqviewTrackHeaders* self)
 {
 	if (!trackheaderviews_vtable_initialized) {
 		trackheaderviews_vtable = *(self->component.vtable);
-		trackheaderviews_vtable.ondestroy =
+		trackheaderviews_vtable.on_destroy =
 			(psy_ui_fp_component_event)
-			seqviewtrackheaders_ondestroy;		
-		trackheaderviews_vtable.onmouseup =
-			(psy_ui_fp_component_onmouseevent)
-			seqviewtrackheaders_onmouseup;
+			seqviewtrackheaders_on_destroy;		
+		trackheaderviews_vtable.on_mouse_up =
+			(psy_ui_fp_component_on_mouse_event)
+			seqviewtrackheaders_on_mouse_up;
 		trackheaderviews_vtable_initialized = TRUE;
 	}
 }
@@ -59,7 +59,7 @@ void seqviewtrackheaders_init(SeqviewTrackHeaders* self,
 	seqviewtrackheaders_build(self);
 }
 
-void seqviewtrackheaders_ondestroy(SeqviewTrackHeaders* self)
+void seqviewtrackheaders_on_destroy(SeqviewTrackHeaders* self)
 {	
 	psy_signal_dispose(&self->signal_trackselected);
 }
@@ -100,7 +100,7 @@ void seqviewtrackheaders_build(SeqviewTrackHeaders* self)
 	psy_ui_component_align(&self->component);	
 }
 
-void seqviewtrackheaders_onmouseup(SeqviewTrackHeaders* self,
+void seqviewtrackheaders_on_mouse_up(SeqviewTrackHeaders* self,
 	psy_ui_MouseEvent* ev)
 {	
 	if (self->state->cmd == SEQLVCMD_NEWTRACK) {

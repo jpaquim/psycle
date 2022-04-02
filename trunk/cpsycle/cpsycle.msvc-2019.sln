@@ -87,8 +87,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "doc", "doc", "{6D6F16D8-A80
 		doc\uicomponent-vtable.txt = doc\uicomponent-vtable.txt
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "scintilla", "scintilla\scintilla.vcxproj", "{31CC2C4E-2CB0-4E41-9AE2-8BD2F22B3CFA}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zlib", "zlib\zlib.vcxproj", "{27FB78D1-279A-4003-97A0-518FF0772BFA}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "alk_muter", "plugins\alk_muter\alk_muter.vcxproj", "{C2A7826B-7A3D-411E-93F7-77268D30E4A2}"
@@ -435,18 +433,6 @@ Global
 		{F7B06178-15A8-4CA9-8BEC-E7AC2D60CE2C}.unpack|Win32.Build.0 = Release|Win32
 		{F7B06178-15A8-4CA9-8BEC-E7AC2D60CE2C}.unpack|x64.ActiveCfg = Release|x64
 		{F7B06178-15A8-4CA9-8BEC-E7AC2D60CE2C}.unpack|x64.Build.0 = Release|x64
-		{31CC2C4E-2CB0-4E41-9AE2-8BD2F22B3CFA}.Debug|Win32.ActiveCfg = Debug|Win32
-		{31CC2C4E-2CB0-4E41-9AE2-8BD2F22B3CFA}.Debug|Win32.Build.0 = Debug|Win32
-		{31CC2C4E-2CB0-4E41-9AE2-8BD2F22B3CFA}.Debug|x64.ActiveCfg = Debug|x64
-		{31CC2C4E-2CB0-4E41-9AE2-8BD2F22B3CFA}.Debug|x64.Build.0 = Debug|x64
-		{31CC2C4E-2CB0-4E41-9AE2-8BD2F22B3CFA}.Release|Win32.ActiveCfg = Release|Win32
-		{31CC2C4E-2CB0-4E41-9AE2-8BD2F22B3CFA}.Release|Win32.Build.0 = Release|Win32
-		{31CC2C4E-2CB0-4E41-9AE2-8BD2F22B3CFA}.Release|x64.ActiveCfg = Release|x64
-		{31CC2C4E-2CB0-4E41-9AE2-8BD2F22B3CFA}.Release|x64.Build.0 = Release|x64
-		{31CC2C4E-2CB0-4E41-9AE2-8BD2F22B3CFA}.unpack|Win32.ActiveCfg = Release|Win32
-		{31CC2C4E-2CB0-4E41-9AE2-8BD2F22B3CFA}.unpack|Win32.Build.0 = Release|Win32
-		{31CC2C4E-2CB0-4E41-9AE2-8BD2F22B3CFA}.unpack|x64.ActiveCfg = Release|x64
-		{31CC2C4E-2CB0-4E41-9AE2-8BD2F22B3CFA}.unpack|x64.Build.0 = Release|x64
 		{27FB78D1-279A-4003-97A0-518FF0772BFA}.Debug|Win32.ActiveCfg = Debug|Win32
 		{27FB78D1-279A-4003-97A0-518FF0772BFA}.Debug|Win32.Build.0 = Debug|Win32
 		{27FB78D1-279A-4003-97A0-518FF0772BFA}.Debug|x64.ActiveCfg = Debug|x64

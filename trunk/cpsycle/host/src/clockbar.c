@@ -17,14 +17,30 @@
 
 /* prototypes */
 static void clockbar_updatelabel(ClockBar*);
-static void clockbar_onsongchanged(ClockBar*, Workspace* sender);
+static void clockbar_on_timer(ClockBar*, uintptr_t timer_id);
+
+/* vtable */
+static psy_ui_ComponentVtable vtable;
+static bool vtable_initialized = FALSE;
+
+static void vtable_init(ClockBar* self)
+{
+	if (!vtable_initialized) {
+		vtable = *(self->component.vtable);		
+		vtable.on_timer =
+			(psy_ui_fp_component_on_timer)
+			clockbar_on_timer;
+		vtable_initialized = TRUE;
+	}
+	self->component.vtable = &vtable;
+}
 
 /* implementation */
-void clockbar_init(ClockBar* self, psy_ui_Component* parent,
-	Workspace* workspace)
+void clockbar_init(ClockBar* self, psy_ui_Component* parent)
 {		
-	psy_ui_component_init(&self->component, parent, NULL);
-	self->workspace = workspace;
+	psy_ui_component_init(&self->component, parent, NULL);	
+	vtable_init(self);
+	self->display_minutes = FALSE;
 	self->start = time(NULL);
 	psy_ui_component_setalignexpand(&self->component,
 		psy_ui_HEXPAND);
@@ -32,10 +48,8 @@ void clockbar_init(ClockBar* self, psy_ui_Component* parent,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	psy_ui_label_init(&self->position, &self->component);	
 	psy_ui_label_prevent_translation(&self->position);
-	psy_ui_label_set_charnumber(&self->position, 6);	
+	psy_ui_label_set_charnumber(&self->position, 10.0);
 	clockbar_updatelabel(self);
-	psy_signal_connect(&workspace->signal_songchanged, self,
-		clockbar_onsongchanged);
 }
 
 void clockbar_idle(ClockBar* self)
@@ -45,20 +59,39 @@ void clockbar_idle(ClockBar* self)
 
 void clockbar_updatelabel(ClockBar* self)
 {
-
 	time_t currtime;
 	char text[80];
 
-	currtime = time(NULL) - self->start;		
-	psy_snprintf(text, 40, "%02ld:%02ld",
-		(int)(currtime / 3600.0), (int)(currtime / 60.0) % 60);
+	currtime = time(NULL) - self->start;
+	if (self->display_minutes) {
+		psy_snprintf(text, 40, "%02ldm %02lds",
+			(int)(currtime / 60.0), (int)(currtime) % 60);
+	} else {
+		psy_snprintf(text, 40, "%02ld:%02ld",
+			(int)(currtime / 3600.0), (int)(currtime / 60.0) % 60);
+	}
 #ifndef PSYCLE_DEBUG_PREVENT_TIMER_DRAW
 	psy_ui_label_set_text(&self->position, text);
 #endif
 }
 
-void clockbar_onsongchanged(ClockBar* self, Workspace* sender)
+void clockbar_reset(ClockBar* self)
 {
 	self->start = time(NULL);
 	clockbar_updatelabel(self);
+}
+
+void clockbar_start(ClockBar* self)
+{
+	psy_ui_component_start_timer(&self->component, 0, 50);
+}
+
+void clockbar_stop(ClockBar* self)
+{
+	psy_ui_component_stop_timer(&self->component, 0);
+}
+
+void clockbar_on_timer(ClockBar* self, uintptr_t timer_id)
+{
+	clockbar_idle(self);
 }

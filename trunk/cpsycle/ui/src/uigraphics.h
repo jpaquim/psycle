@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #ifndef psy_ui_GRAPHICS_H
@@ -94,6 +94,7 @@ typedef void (*psy_ui_fp_graphicsimp_dev_setcolour)(struct psy_ui_GraphicsImp*,
 	psy_ui_Colour);
 typedef void (*psy_ui_fp_graphicsimp_dev_setfont)(struct psy_ui_GraphicsImp*,
 	const psy_ui_Font*);
+typedef const psy_ui_Font* (*psy_ui_fp_graphicsimp_dev_font)(const struct psy_ui_GraphicsImp*);
 typedef void (*psy_ui_fp_graphicsimp_dev_moveto)(struct psy_ui_GraphicsImp*,
 	psy_ui_RealPoint);
 typedef void (*psy_ui_fp_graphicsimp_dev_curveto)(struct psy_ui_GraphicsImp*,
@@ -138,6 +139,7 @@ typedef struct psy_ui_GraphicsImpVTable {
 	psy_ui_fp_graphicsimp_dev_settextalign dev_settextalign;
 	psy_ui_fp_graphicsimp_dev_setcolour dev_setcolour;
 	psy_ui_fp_graphicsimp_dev_setfont dev_setfont;
+	psy_ui_fp_graphicsimp_dev_font dev_font;
 	psy_ui_fp_graphicsimp_dev_moveto dev_moveto;
 	psy_ui_fp_graphicsimp_dev_curveto dev_curveto;
 	psy_ui_fp_graphicsimp_dev_drawarc dev_drawarc;
@@ -378,6 +380,8 @@ INLINE void psy_ui_setfont(psy_ui_Graphics* self, const psy_ui_Font* font)
 {		
 	self->vtable->setfont(self, font);
 }
+
+const psy_ui_Font* psy_ui_font(const psy_ui_Graphics*);
 
 INLINE void psy_ui_drawline(psy_ui_Graphics* self, psy_ui_RealPoint pt1,
 	psy_ui_RealPoint pt2)

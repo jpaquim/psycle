@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -282,6 +282,7 @@ static void dev_settextcolour(psy_ui_GraphicsImp* self, psy_ui_Colour colour) { 
 static void dev_settextalign(psy_ui_GraphicsImp* self, uintptr_t align) { }
 static void dev_setcolour(psy_ui_GraphicsImp* self, psy_ui_Colour colour) { }
 static void dev_setfont(psy_ui_GraphicsImp* self, const psy_ui_Font* font) { }
+static const psy_ui_Font* dev_font(const psy_ui_GraphicsImp* self) { return NULL; }
 static void dev_moveto(psy_ui_GraphicsImp* self, psy_ui_RealPoint pt) { }
 static void dev_curveto(psy_ui_GraphicsImp* self, psy_ui_RealPoint control_p1,
 	psy_ui_RealPoint control_p2, psy_ui_RealPoint p) { }
@@ -295,13 +296,18 @@ static psy_ui_TextMetric dev_textmetric(const psy_ui_GraphicsImp* self)
 {
 	psy_ui_TextMetric rv;
 
+	psy_ui_textmetric_init(&rv);
 	return rv;
 }
 static void dev_setorigin(psy_ui_GraphicsImp* self, double x, double y) { }
 static psy_ui_RealPoint dev_origin(psy_ui_GraphicsImp* self) { }
 static uintptr_t dev_gc(psy_ui_GraphicsImp* self) { return 0; }
 static void dev_setcliprect(psy_ui_GraphicsImp* self, psy_ui_RealRectangle r) { }
-static psy_ui_RealRectangle dev_cliprect(const psy_ui_GraphicsImp* self) { return psy_ui_realrectangle_zero(); }
+
+static psy_ui_RealRectangle dev_cliprect(const psy_ui_GraphicsImp* self)
+{
+	return psy_ui_realrectangle_zero();
+}
 
 /* vtable */
 static psy_ui_GraphicsImpVTable imp_vtable;
@@ -329,6 +335,7 @@ static void imp_vtable_init(psy_ui_GraphicsImp* self)
 		imp_vtable.dev_settextalign = dev_settextalign;
 		imp_vtable.dev_setcolour = dev_setcolour;
 		imp_vtable.dev_setfont = dev_setfont;
+		imp_vtable.dev_font = dev_font;
 		imp_vtable.dev_moveto = dev_moveto;
 		imp_vtable.dev_curveto = dev_curveto;
 		imp_vtable.dev_drawarc = dev_drawarc;
@@ -397,4 +404,12 @@ void psy_ui_drawborder(psy_ui_Graphics* self, psy_ui_RealRectangle r,
 				psy_ui_realpoint_make(r.left, r.bottom - 1));
 		}
 	}
+}
+
+const psy_ui_Font* psy_ui_font(const psy_ui_Graphics* self)
+{
+	if (self->imp) {
+		return self->imp->vtable->dev_font(self->imp);
+	}
+	return NULL;
 }

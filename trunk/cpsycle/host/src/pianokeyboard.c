@@ -17,7 +17,7 @@
 static void pianokeyboard_ondraw(PianoKeyboard*, psy_ui_Graphics*);
 static void pianokeyboard_drawuncoveredbottombackground(PianoKeyboard*,
 	psy_ui_Graphics*, psy_ui_RealSize);
-static void pianokeyboard_onmousedown(PianoKeyboard*, psy_ui_MouseEvent*);
+static void pianokeyboard_on_mouse_down(PianoKeyboard*, psy_ui_MouseEvent*);
 static void pianokeyboard_onpreferredsize(PianoKeyboard*, const psy_ui_Size* limit,
 	psy_ui_Size* rv);
 
@@ -34,9 +34,9 @@ static void pianokeyboard_vtable_init(PianoKeyboard* self)
 		pianokeyboard_vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
 			pianokeyboard_ondraw;
-		pianokeyboard_vtable.onmousedown =
-			(psy_ui_fp_component_onmouseevent)
-			pianokeyboard_onmousedown;
+		pianokeyboard_vtable.on_mouse_down =
+			(psy_ui_fp_component_on_mouse_event)
+			pianokeyboard_on_mouse_down;
 		pianokeyboard_vtable.onpreferredsize =
 			(psy_ui_fp_component_onpreferredsize)
 			pianokeyboard_onpreferredsize;
@@ -200,7 +200,7 @@ void pianokeyboard_drawuncoveredbottombackground(PianoKeyboard* self, psy_ui_Gra
 	}
 }
 
-void pianokeyboard_onmousedown(PianoKeyboard* self, psy_ui_MouseEvent* ev)
+void pianokeyboard_on_mouse_down(PianoKeyboard* self, psy_ui_MouseEvent* ev)
 {	
 	assert(self);
 

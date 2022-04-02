@@ -21,7 +21,7 @@ static void trackbox_onresizemousemove(TrackBox*, psy_ui_Component* sender,
 static void trackbox_onresizemouseup(TrackBox*, psy_ui_Component* sender,
 	psy_ui_MouseEvent* ev);
 // prototypes
-static void trackbox_ondestroy(TrackBox*);
+static void trackbox_on_destroy(TrackBox*);
 // vtable
 static psy_ui_ComponentVtable trackbox_vtable;
 static bool trackbox_vtable_initialized = FALSE;
@@ -30,9 +30,9 @@ static void trackbox_vtableinit_init(TrackBox* self)
 {
 	if (!trackbox_vtable_initialized) {
 		trackbox_vtable = *(self->component.vtable);
-		trackbox_vtable.ondestroy =
+		trackbox_vtable.on_destroy =
 			(psy_ui_fp_component_event)
-			trackbox_ondestroy;
+			trackbox_on_destroy;
 		trackbox_vtable_initialized = TRUE;
 	}
 	self->component.vtable = &trackbox_vtable;
@@ -101,7 +101,7 @@ void trackbox_init(TrackBox* self, psy_ui_Component* parent)
 	trackbox_updatetrack(self);
 }
 
-void trackbox_ondestroy(TrackBox* self)
+void trackbox_on_destroy(TrackBox* self)
 {
 	psy_signal_dispose(&self->signal_mute);
 	psy_signal_dispose(&self->signal_solo);

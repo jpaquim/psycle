@@ -10,7 +10,7 @@
 // 
 #include "../../detail/portable.h"
 
-static void machinecombobox_ondestroy(MachineComboBox*, psy_ui_Component* component);
+static void machinecombobox_on_destroy(MachineComboBox*, psy_ui_Component* component);
 static void machinecombobox_onmachineboxselchange(MachineComboBox*,
 	psy_ui_Component* sender, int sel);
 static void machinecombobox_buildmachinebox(MachineComboBox*);
@@ -41,7 +41,7 @@ void machinecombobox_init(MachineComboBox* self, psy_ui_Component* parent,
 	psy_ui_combobox_init(&self->machinebox, parent);
 	psy_ui_combobox_setcharnumber(&self->machinebox, 10);
 	psy_signal_connect(&self->machinebox.component.signal_destroy,
-		self, machinecombobox_ondestroy);
+		self, machinecombobox_on_destroy);
 	psy_signal_connect(&self->machinebox.signal_selchanged, self,
 		machinecombobox_onmachineboxselchange);
 	machinecombobox_buildmachinebox(self);	
@@ -51,7 +51,7 @@ void machinecombobox_init(MachineComboBox* self, psy_ui_Component* parent,
 	psy_signal_init(&self->signal_selected);
 }
 
-void machinecombobox_ondestroy(MachineComboBox* self, psy_ui_Component* component)
+void machinecombobox_on_destroy(MachineComboBox* self, psy_ui_Component* component)
 {
 	psy_table_dispose(&self->comboboxslots);
 	psy_table_dispose(&self->slotscombobox);

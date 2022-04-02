@@ -121,7 +121,7 @@ static void cpuview_inittitle(CPUView*);
 static void cpuview_initresources(CPUView*);
 static void cpuview_initperformance(CPUView*);
 static void cpuview_initmodules(CPUView*, Workspace* workspace);
-static void cpuview_ontimer(CPUView*, psy_ui_Component* sender,
+static void cpuview_on_timer(CPUView*, psy_ui_Component* sender,
 	uintptr_t timerid);
 static void cpuview_onhide(CPUView*);
 static void cpuview_oncpuperf(CPUView*, psy_ui_CheckBox* sender);
@@ -146,7 +146,7 @@ void cpuview_init(CPUView* self, psy_ui_Component* parent,
 	cpuview_initperformance(self);
 	cpuview_initmodules(self, workspace);
 	psy_signal_connect(&self->component.signal_timer, self,
-		cpuview_ontimer);
+		cpuview_on_timer);
 	psy_ui_component_start_timer(&self->component, 0, 200);
 }
 
@@ -199,14 +199,14 @@ void cpuview_initmodules(CPUView* self, Workspace* workspace)
 	psy_ui_Margin margin;
 
 	cpumoduleview_init(&self->modules, &self->component, workspace);
-	psy_ui_scroller_init(&self->scroller, &self->modules.component,
-		&self->component);
+	psy_ui_scroller_init(&self->scroller, &self->component, NULL, NULL);
+	psy_ui_scroller_set_client(&self->scroller, &self->modules.component);
 	psy_ui_component_set_align(&self->scroller.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_margin_init_em(&margin, 1.0, 0.0, 0.0, 2.0);
 	psy_ui_component_set_margin(&self->scroller.component, margin);
 }
 
-void cpuview_ontimer(CPUView* self, psy_ui_Component* sender,
+void cpuview_on_timer(CPUView* self, psy_ui_Component* sender,
 	uintptr_t timerid)
 {
 	uintptr_t nummachines;

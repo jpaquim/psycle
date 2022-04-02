@@ -57,10 +57,11 @@ typedef struct psy_ui_Tab {
 	psy_ui_Bitmap bitmapicon;
 	double bitmapident;
 	uintptr_t index;
-	bool preventtranslation;
+	bool prevent_translation;
 	uintptr_t lightresourceid;
 	uintptr_t darkresourceid;
 	psy_ui_Colour bitmaptransparency;
+	uintptr_t target_id;
 } psy_ui_Tab;
 
 void psy_ui_tab_init(psy_ui_Tab*, psy_ui_Component* parent,
@@ -73,8 +74,18 @@ psy_ui_Tab* psy_ui_tab_allocinit(psy_ui_Component* parent,
 void psy_ui_tab_settext(psy_ui_Tab*, const char* text);
 void psy_ui_tab_setmode(psy_ui_Tab*, TabMode);
 void psy_ui_tab_preventtranslation(psy_ui_Tab*);
-void psy_ui_tab_loadresource(psy_ui_Tab*, uintptr_t lightresourceid,
+void psy_ui_tab_load_resource(psy_ui_Tab*, uintptr_t lightresourceid,
 	uintptr_t darkresourceid, psy_ui_Colour);
+
+INLINE void psy_ui_tab_set_target_id(psy_ui_Tab* self, uintptr_t target_id)
+{
+	self->target_id = target_id;
+}
+
+INLINE uintptr_t psy_ui_tab_target_id(const psy_ui_Tab* self)
+{
+	return self->target_id;
+}
 
 INLINE psy_ui_Component* psy_ui_tab_base(psy_ui_Tab* self)
 {
@@ -89,15 +100,15 @@ typedef struct psy_ui_TabBar {
 	psy_Signal signal_change;
 	/* internal	*/
 	uintptr_t selected;	
-	uintptr_t numtabs;
-	bool preventtranslation;
-	psy_ui_AlignType tabalignment;
+	uintptr_t num_tabs;
+	bool prevent_translation;
+	psy_ui_AlignType tab_alignment;	
 } psy_ui_TabBar;
 
 void psy_ui_tabbar_init(psy_ui_TabBar*, psy_ui_Component* parent);
 
 psy_ui_Tab* psy_ui_tabbar_append(psy_ui_TabBar*, const char* label,
-	uintptr_t lightresourceid, uintptr_t darkresourceid,
+	uintptr_t target_id, uintptr_t lightresourceid, uintptr_t darkresourceid,
 	psy_ui_Colour transparency);
 void psy_ui_tabbar_append_tabs(psy_ui_TabBar*, const char* label, ...);
 void psy_ui_tabbar_clear(psy_ui_TabBar*);
