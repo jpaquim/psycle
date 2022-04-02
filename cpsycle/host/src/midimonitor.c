@@ -332,7 +332,7 @@ static void midimonitor_initchannelmapping(MidiMonitor*);
 static void midimonitor_onsongchanged(MidiMonitor*, Workspace* sender);
 static void midimonitor_onmachineslotchange(MidiMonitor* self,
 	psy_audio_Machines* sender, uintptr_t slot);
-static void midimonitor_ontimer(MidiMonitor*, uintptr_t timerid);
+static void midimonitor_on_timer(MidiMonitor*, uintptr_t timerid);
 static void midimonitor_updatechannelmap(MidiMonitor*);
 static void midimonitor_onhide(MidiMonitor*);
 static void midimonitor_onconfigure(MidiMonitor*);
@@ -345,8 +345,8 @@ static psy_ui_ComponentVtable* midimonitor_vtable_init(MidiMonitor* self)
 {
 	if (!midimonitor_vtable_initialized) {
 		midimonitor_vtable = *(self->component.vtable);		
-		midimonitor_vtable.ontimer = (psy_ui_fp_component_ontimer)
-			midimonitor_ontimer;	
+		midimonitor_vtable.on_timer = (psy_ui_fp_component_on_timer)
+			midimonitor_on_timer;	
 		midimonitor_vtable_initialized = TRUE;
 	}
 	return &midimonitor_vtable;
@@ -410,7 +410,7 @@ void midimonitor_initcorestatusleft(MidiMonitor* self)
 	labelpair_init(&self->resources_swap, &self->resources, "Events lost", 25.0);
 	labelpair_init(&self->resources_vmem, &self->resources, "MIDI headroom (ms)", 25.0);
 	psy_list_free(psy_ui_components_setalign(
-		psy_ui_component_children(&self->resources, psy_ui_NONRECURSIVE),
+		psy_ui_component_children(&self->resources, psy_ui_NONE_RECURSIVE),
 		psy_ui_ALIGN_TOP,
 		self->topmargin));
 }
@@ -426,7 +426,7 @@ void midimonitor_initcorestatusright(MidiMonitor* self)
 	labelpair_init(&self->machines, &self->performance, "Audio latency (sampl.)", 25.0);
 	labelpair_init(&self->routing, &self->performance, "Sync Offset (ms)", 25.0);
 	psy_list_free(psy_ui_components_setalign(
-		psy_ui_component_children(&self->performance, psy_ui_NONRECURSIVE),
+		psy_ui_component_children(&self->performance, psy_ui_NONE_RECURSIVE),
 		psy_ui_ALIGN_TOP,
 		self->topmargin));
 }
@@ -463,8 +463,8 @@ void midimonitor_initchannelmapping(MidiMonitor* self)
 		self->workspace);
 	psy_ui_component_setoverflow(&self->channelmapping.component,
 		psy_ui_OVERFLOW_VSCROLL);
-	psy_ui_scroller_init(&self->scroller, &self->channelmapping.component,
-		&self->client);
+	psy_ui_scroller_init(&self->scroller, &self->client, NULL, NULL);
+	psy_ui_scroller_set_client(&self->scroller, &self->channelmapping.component);
 	psy_ui_component_set_align(&self->scroller.component, psy_ui_ALIGN_CLIENT);
 	psy_signal_connect(&self->workspace->signal_songchanged, self,
 		midimonitor_onsongchanged);	
@@ -484,7 +484,7 @@ void midimonitor_onsongchanged(MidiMonitor* self, Workspace* sender)
 	}
 }
 
-void midimonitor_ontimer(MidiMonitor* self, uintptr_t timerid)
+void midimonitor_on_timer(MidiMonitor* self, uintptr_t timerid)
 {
 	if (psy_ui_component_visible(&self->component)) {
 		if (self->channelstatcounter > 0) {

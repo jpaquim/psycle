@@ -90,9 +90,9 @@ void machineproperties_init(MachineProperties* self, psy_ui_Component* parent,
 		machineproperties_onsongchanged);
 	machineproperties_connectsongsignals(self);
 	psy_ui_component_preventinput(&self->component, psy_ui_RECURSIVE);
-	psy_ui_component_enableinput(&self->component, psy_ui_NONRECURSIVE);
+	psy_ui_component_enableinput(&self->component, psy_ui_NONE_RECURSIVE);
 	psy_ui_component_enableinput(psy_ui_button_base(&self->cancel),
-		psy_ui_NONRECURSIVE);
+		psy_ui_NONE_RECURSIVE);
 }
 
 void machineproperties_setmachine(MachineProperties* self,
@@ -119,8 +119,8 @@ void machineproperties_setmachine(MachineProperties* self,
 		psy_ui_button_disablehighlight(&self->ismute);		
 		psy_ui_component_preventinput(&self->component, psy_ui_RECURSIVE);
 		psy_ui_component_enableinput(psy_ui_button_base(&self->cancel),
-			psy_ui_NONRECURSIVE);
-		psy_ui_component_enableinput(&self->component, psy_ui_NONRECURSIVE);
+			psy_ui_NONE_RECURSIVE);
+		psy_ui_component_enableinput(&self->component, psy_ui_NONE_RECURSIVE);
 		psy_ui_component_align(&self->component);
 		psy_ui_component_invalidate(psy_ui_component_parent(&self->component));
 	}	

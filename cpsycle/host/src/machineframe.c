@@ -54,8 +54,7 @@ void parameterbar_init(ParameterBar* self, psy_ui_Component* parent,
 	psy_ui_component_setalignexpand(&self->row0,
 		psy_ui_HEXPAND);	
 	zoombox_init(&self->zoombox, &self->row0);
-	psy_ui_component_set_align(zoombox_base(&self->zoombox), psy_ui_ALIGN_LEFT);
-	self->zoombox.zoomstep = 0.10;	
+	psy_ui_component_set_align(zoombox_base(&self->zoombox), psy_ui_ALIGN_LEFT);	
 	psy_ui_component_init(&self->buttons, &self->row0, NULL);
 	psy_ui_component_set_align(&self->buttons, psy_ui_ALIGN_CLIENT);
 	psy_ui_component_setalignexpand(&self->buttons,
@@ -117,7 +116,7 @@ void parameterbar_onalign(ParameterBar* self)
 
 /* MachineFrame */
 /* prototypes */
-static void machineframe_ondestroyed(MachineFrame*);
+static void machineframe_on_destroyed(MachineFrame*);
 static void machineframe_initparamview(MachineFrame*, Workspace*);
 static void machineframe_toggleparameterbox(MachineFrame*,
 	psy_ui_Component* sender);
@@ -140,9 +139,9 @@ static void machineframe_preferredviewsizechanged(MachineFrame*,
 	psy_ui_Component* sender);
 static void ondefaultfontchanged(MachineFrame*, Workspace* sender);
 static void machineframe_onzoomboxchanged(MachineFrame*, ZoomBox* sender);
-static void machineframe_onmouseup(MachineFrame*, psy_ui_Component* sender,
+static void machineframe_on_mouse_up(MachineFrame*, psy_ui_Component* sender,
 	psy_ui_MouseEvent*);
-static void machineframe_ontimer(MachineFrame* self, uintptr_t timerid);
+static void machineframe_on_timer(MachineFrame* self, uintptr_t timerid);
 
 /* vtable */
 static psy_ui_ComponentVtable machineframe_vtable;
@@ -152,12 +151,12 @@ static void machineframe_vtable_init(MachineFrame* self)
 {
 	if (!machineframe_vtable_initialized) {
 		machineframe_vtable = *(self->component.vtable);
-		machineframe_vtable.ondestroyed =
+		machineframe_vtable.on_destroyed =
 			(psy_ui_fp_component_event)
-			machineframe_ondestroyed;
-		machineframe_vtable.ontimer =
-			(psy_ui_fp_component_ontimer)
-			machineframe_ontimer;
+			machineframe_on_destroyed;
+		machineframe_vtable.on_timer =
+			(psy_ui_fp_component_on_timer)
+			machineframe_on_timer;
 		machineframe_vtable_initialized = TRUE;
 	}
 	self->component.vtable = &machineframe_vtable;
@@ -215,7 +214,7 @@ void machineframe_init(MachineFrame* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->parameterbar.more.signal_clicked, self,
 		machineframe_toggleshowfullmenu);
 	psy_signal_connect(&self->component.signal_mouseup, self,
-		machineframe_onmouseup);
+		machineframe_on_mouse_up);
 	psy_signal_connect(&self->component.signal_align, self,
 		machineframe_onalign);	
 	psy_signal_connect(&self->parameterbar.zoombox.signal_changed, self,
@@ -224,7 +223,7 @@ void machineframe_init(MachineFrame* self, psy_ui_Component* parent,
 	machineframe_updatepwr(self);	
 }
 
-void machineframe_ondestroyed(MachineFrame* self)
+void machineframe_on_destroyed(MachineFrame* self)
 {	
 	/*
 	** Paramview stores pointers of all machineframes
@@ -513,7 +512,7 @@ void machineframe_onzoomboxchanged(MachineFrame* self, ZoomBox* sender)
 	}
 }
 
-void machineframe_onmouseup(MachineFrame* self, psy_ui_Component* sender,
+void machineframe_on_mouse_up(MachineFrame* self, psy_ui_Component* sender,
 	psy_ui_MouseEvent* ev)
 {
 	/*if (ev->button == 2 && self->paramview && ev->target ==
@@ -571,10 +570,10 @@ void machineframe_onalign(MachineFrame* self, psy_ui_Component* sender)
 	}
 }
 
-void machineframe_ontimer(MachineFrame* self, uintptr_t timerid)
+void machineframe_on_timer(MachineFrame* self, uintptr_t timerid)
 {
 	if (self->view) {
-		self->view->vtable->ontimer(self->view, 0);
+		self->view->vtable->on_timer(self->view, 0);
 	}
 	machineframe_updatepwr(self);
 	if (psy_ui_component_visible(&self->parameterbox.component)) {

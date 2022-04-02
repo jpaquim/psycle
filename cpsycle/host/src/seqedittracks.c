@@ -12,9 +12,9 @@
 
 /* SeqEditorTracks */
 /* prototypes */
-static void seqeditortracks_onmousedown(SeqEditorTracks*, psy_ui_MouseEvent*);
+static void seqeditortracks_on_mouse_down(SeqEditorTracks*, psy_ui_MouseEvent*);
 static void seqeditortracks_onmousemove(SeqEditorTracks*, psy_ui_MouseEvent*);
-static void seqeditortracks_onmouseup(SeqEditorTracks*, psy_ui_MouseEvent*);
+static void seqeditortracks_on_mouse_up(SeqEditorTracks*, psy_ui_MouseEvent*);
 static void seqeditortracks_onmouseenter(SeqEditorTracks*);
 static void seqeditortracks_onmouseleave(SeqEditorTracks*);
 static void seqeditortracks_onsequenceselectionselect(SeqEditorTracks*,
@@ -22,7 +22,7 @@ static void seqeditortracks_onsequenceselectionselect(SeqEditorTracks*,
 static void seqeditortracks_onsequenceselectiondeselect(SeqEditorTracks*,
 	psy_audio_SequenceSelection*, psy_audio_OrderIndex*);
 static void seqeditortracks_onalign(SeqEditorTracks*);
-static void seqeditortracks_ontimer(SeqEditorTracks*, uintptr_t timerid);
+static void seqeditortracks_on_timer(SeqEditorTracks*, uintptr_t timerid);
 static void seqeditortracks_oncursorchanged(SeqEditorTracks*, SeqEditState*);
 static void seqeditortracks_updatecursorlineposition(SeqEditorTracks*);
 static void seqeditortracks_updateseqeditlineposition(SeqEditorTracks*);
@@ -37,17 +37,17 @@ static void seqeditortracks_vtable_init(SeqEditorTracks* self)
 		seqeditortracks_vtable.onalign =
 			(psy_ui_fp_component_event)
 			seqeditortracks_onalign;
-		seqeditortracks_vtable.ontimer =
-			(psy_ui_fp_component_ontimer)
-			seqeditortracks_ontimer;
-		seqeditortracks_vtable.onmousedown =
-			(psy_ui_fp_component_onmouseevent)
-			seqeditortracks_onmousedown;
-		seqeditortracks_vtable.onmouseup =
-			(psy_ui_fp_component_onmouseevent)
-			seqeditortracks_onmouseup;
+		seqeditortracks_vtable.on_timer =
+			(psy_ui_fp_component_on_timer)
+			seqeditortracks_on_timer;
+		seqeditortracks_vtable.on_mouse_down =
+			(psy_ui_fp_component_on_mouse_event)
+			seqeditortracks_on_mouse_down;
+		seqeditortracks_vtable.on_mouse_up =
+			(psy_ui_fp_component_on_mouse_event)
+			seqeditortracks_on_mouse_up;
 		seqeditortracks_vtable.onmousemove =
-			(psy_ui_fp_component_onmouseevent)
+			(psy_ui_fp_component_on_mouse_event)
 			seqeditortracks_onmousemove;
 		seqeditortracks_vtable.onmouseenter =
 			(psy_ui_fp_component_event)
@@ -124,7 +124,7 @@ void seqeditortracks_build(SeqEditorTracks* self)
 			psy_ui_ALIGN_NONE);
 		psy_ui_component_set_margin(&self->playline->seqeditorline.component,
 			psy_ui_margin_zero());
-		psy_ui_component_setbackgroundcolour(
+		psy_ui_component_set_background_colour(
 			&self->playline->seqeditorline.component, cursorcolour);
 		seqeditorplayline_update(self->playline);
 	}
@@ -135,7 +135,7 @@ void seqeditortracks_build(SeqEditorTracks* self)
 		psy_ui_component_set_margin(&self->cursorline->component,
 			psy_ui_margin_zero());
 		psy_ui_component_hide(&self->cursorline->component);
-		psy_ui_component_setbackgroundcolour(&self->cursorline->component,
+		psy_ui_component_set_background_colour(&self->cursorline->component,
 			cursorcolour);
 	}
 	self->seqeditposline = seqeditorline_allocinit(&self->component,
@@ -145,7 +145,7 @@ void seqeditortracks_build(SeqEditorTracks* self)
 			psy_ui_ALIGN_NONE);
 		psy_ui_component_set_margin(&self->seqeditposline->component,
 			psy_ui_margin_zero());
-		psy_ui_component_setbackgroundcolour(&self->seqeditposline->component,
+		psy_ui_component_set_background_colour(&self->seqeditposline->component,
 			cursorcolour);
 		seqeditortracks_updateseqeditlineposition(self);
 	}
@@ -223,7 +223,7 @@ void seqeditortracks_updateseqeditlineposition(SeqEditorTracks* self)
 	}
 }
 
-void seqeditortracks_ontimer(SeqEditorTracks* self, uintptr_t timerid)
+void seqeditortracks_on_timer(SeqEditorTracks* self, uintptr_t timerid)
 {		
 	if (psy_audio_player_playing(workspace_player(
 			self->workspace))) {
@@ -231,7 +231,7 @@ void seqeditortracks_ontimer(SeqEditorTracks* self, uintptr_t timerid)
 	}
 }
 
-void seqeditortracks_onmousedown(SeqEditorTracks* self,
+void seqeditortracks_on_mouse_down(SeqEditorTracks* self,
 	psy_ui_MouseEvent* ev)
 {
 	if (self->state->dragstatus == SEQEDIT_DRAG_REMOVE) {
@@ -258,7 +258,7 @@ void seqeditortracks_onmousemove(SeqEditorTracks* self,
 	}
 }
 
-void seqeditortracks_onmouseup(SeqEditorTracks* self,
+void seqeditortracks_on_mouse_up(SeqEditorTracks* self,
 	psy_ui_MouseEvent* ev)
 {
 	psy_ui_component_releasecapture(&self->component);	

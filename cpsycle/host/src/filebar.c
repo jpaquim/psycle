@@ -29,9 +29,10 @@ void filebar_init(FileBar* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_ui_component_set_style_type(filebar_base(self), STYLE_FILEBAR);
 	psy_ui_component_set_defaultalign(filebar_base(self), psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
-	psy_ui_button_init(&self->recentbutton, filebar_base(self));
+	psy_ui_button_init(&self->recentbutton, filebar_base(self));	
 	psy_ui_button_seticon(&self->recentbutton, psy_ui_ICON_MORE);	
 	psy_ui_label_init_text(&self->header, filebar_base(self), "file.song");
+	self->header.component.id = 300;
 	psy_ui_button_init_text_connect(&self->newbutton, filebar_base(self),
 		"file.new", self, filebar_onnewsong);
 	psy_ui_bitmap_loadresource(&self->newbutton.bitmapicon, IDB_NEW_DARK);

@@ -22,11 +22,11 @@ static void vtable_init(psy_ui_Terminal* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);		
-		vtable.ondestroy =
+		vtable.on_destroy =
 			(psy_ui_fp_component_event)
 			psy_ui_terminal_on_destroy;
-		vtable.ontimer =
-			(psy_ui_fp_component_ontimer)
+		vtable.on_timer =
+			(psy_ui_fp_component_on_timer)
 			psy_ui_terminal_on_timer;
 		vtable_initialized = TRUE;
 	}
@@ -51,8 +51,8 @@ void psy_ui_terminal_init(psy_ui_Terminal* self, psy_ui_Component* parent)
 		psy_ui_ALIGN_FIXED);
 	psy_ui_component_setoverflow(&self->output.component,
 		psy_ui_OVERFLOW_SCROLL);
-	psy_ui_scroller_init(&self->scroller, &self->output.component,
-		&self->component);
+	psy_ui_scroller_init(&self->scroller, &self->component, NULL, NULL);
+	psy_ui_scroller_set_client(&self->scroller, &self->output.component);
 	psy_ui_component_set_align(&self->scroller.component, psy_ui_ALIGN_CLIENT);	
 	psy_ui_component_set_preferred_size(&self->component,
 		psy_ui_size_make_em(20.0, 20.0));

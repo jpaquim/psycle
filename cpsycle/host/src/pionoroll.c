@@ -57,12 +57,12 @@ void pianobar_init(PianoBar* self, psy_ui_Component* parent)
 
 /* Pianoroll */
 /* protoypes */
-static void pianoroll_ontimer(Pianoroll*, uintptr_t timerid);
+static void pianoroll_on_timer(Pianoroll*, uintptr_t timerid);
 static void pianoroll_onplaylinechanged(Pianoroll*, Workspace* sender);
 static void pianoroll_onlpbchanged(Pianoroll*, psy_audio_Player*,
 	uintptr_t lpb);
 static void pianoroll_onalign(Pianoroll*);
-static void pianoroll_onmousedown(Pianoroll*, psy_ui_MouseEvent*);
+static void pianoroll_on_mouse_down(Pianoroll*, psy_ui_MouseEvent*);
 static void pianoroll_ongridscroll(Pianoroll*, psy_ui_Component* sender);
 static void pianoroll_onbeatwidthchanged(Pianoroll*, ZoomBox* sender);
 static void pianoroll_onkeyheightchanged(Pianoroll*, ZoomBox* sender);
@@ -92,12 +92,12 @@ static psy_ui_ComponentVtable* pianoroll_vtable_init(Pianoroll* self)
 		pianoroll_vtable.onalign =
 			(psy_ui_fp_component_event)
 			pianoroll_onalign;
-		pianoroll_vtable.onmousedown =
-			(psy_ui_fp_component_onmouseevent)
-			pianoroll_onmousedown;		
-		pianoroll_vtable.ontimer =
-			(psy_ui_fp_component_ontimer)
-			pianoroll_ontimer;
+		pianoroll_vtable.on_mouse_down =
+			(psy_ui_fp_component_on_mouse_event)
+			pianoroll_on_mouse_down;		
+		pianoroll_vtable.on_timer =
+			(psy_ui_fp_component_on_timer)
+			pianoroll_on_timer;
 		pianoroll_vtable_initialized = TRUE;
 	}
 	return &pianoroll_vtable;
@@ -149,8 +149,8 @@ void pianoroll_init(Pianoroll* self, psy_ui_Component* parent,
 	/* client area (event grid) */
 	pianogrid_init(&self->grid, &self->component, &self->keyboardstate,
 		&self->gridstate, self->workspace);
-	psy_ui_scroller_init(&self->scroller, pianogrid_base(&self->grid),
-		&self->component);
+	psy_ui_scroller_init(&self->scroller, &self->component, NULL, NULL);
+	psy_ui_scroller_set_client(&self->scroller, pianogrid_base(&self->grid));
 	psy_ui_component_set_align(&self->scroller.component, psy_ui_ALIGN_CLIENT);	
 	psy_ui_component_set_align(&self->grid.component, psy_ui_ALIGN_FIXED);
 	/* bar */
@@ -225,7 +225,7 @@ void pianoroll_onplaylinechanged(Pianoroll* self, Workspace* sender)
 		self->workspace->host_sequencer_time.currplayline);	
 }
 
-void pianoroll_ontimer(Pianoroll* self, uintptr_t timerid)
+void pianoroll_on_timer(Pianoroll* self, uintptr_t timerid)
 {
 	assert(self);
 
@@ -248,7 +248,7 @@ void pianoroll_onalign(Pianoroll* self)
 	pianoroll_updatescroll(self);
 }
 
-void pianoroll_onmousedown(Pianoroll* self, psy_ui_MouseEvent* ev)
+void pianoroll_on_mouse_down(Pianoroll* self, psy_ui_MouseEvent* ev)
 {
 	assert(self);
 

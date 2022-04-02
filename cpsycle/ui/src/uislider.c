@@ -21,14 +21,14 @@ static void psy_ui_sliderpane_disposesignals(psy_ui_SliderPane*);
 static void psy_ui_sliderpane_ondraw(psy_ui_SliderPane*, psy_ui_Graphics*);
 static void psy_ui_sliderpane_drawverticalruler(psy_ui_SliderPane*, psy_ui_Graphics*);
 static void psy_ui_sliderpane_onalign(psy_ui_SliderPane*);
-static void psy_ui_sliderpane_onmousedown(psy_ui_SliderPane*, psy_ui_MouseEvent*);
-static void psy_ui_sliderpane_onmouseup(psy_ui_SliderPane*, psy_ui_MouseEvent*);
+static void psy_ui_sliderpane_on_mouse_down(psy_ui_SliderPane*, psy_ui_MouseEvent*);
+static void psy_ui_sliderpane_on_mouse_up(psy_ui_SliderPane*, psy_ui_MouseEvent*);
 static void psy_ui_sliderpane_onmousemove(psy_ui_SliderPane*, psy_ui_MouseEvent*);
 static void psy_ui_sliderpane_onmousewheel(psy_ui_SliderPane*, psy_ui_MouseEvent*);
 static void psy_ui_sliderpane_onmouseenter(psy_ui_SliderPane*);
 static void psy_ui_sliderpane_onmouseleave(psy_ui_SliderPane*);
-static void psy_ui_sliderpane_ondestroy(psy_ui_SliderPane*, psy_ui_Component* sender);
-static void psy_ui_sliderpane_ontimer(psy_ui_SliderPane*, psy_ui_Component* sender,
+static void psy_ui_sliderpane_on_destroy(psy_ui_SliderPane*, psy_ui_Component* sender);
+static void psy_ui_sliderpane_on_timer(psy_ui_SliderPane*, psy_ui_Component* sender,
 	uintptr_t timerid);
 static void psy_ui_sliderpane_updatevalue(psy_ui_SliderPane*);
 static void psy_ui_sliderpane_describevalue(psy_ui_SliderPane*);
@@ -49,21 +49,21 @@ static void vtable_init(psy_ui_SliderPane* self)
 		vtable.onpreferredsize =
 			(psy_ui_fp_component_onpreferredsize)
 			psy_ui_sliderpane_onpreferredsize;
-		vtable.onmousedown =
-			(psy_ui_fp_component_onmouseevent)
-			psy_ui_sliderpane_onmousedown;
+		vtable.on_mouse_down =
+			(psy_ui_fp_component_on_mouse_event)
+			psy_ui_sliderpane_on_mouse_down;
 		vtable.onalign =
 			(psy_ui_fp_component_event)
 			psy_ui_sliderpane_onalign;
 		vtable.onmousemove =
-			(psy_ui_fp_component_onmouseevent)
+			(psy_ui_fp_component_on_mouse_event)
 			psy_ui_sliderpane_onmousemove;
 		vtable.onmousewheel =
-			(psy_ui_fp_component_onmouseevent)
+			(psy_ui_fp_component_on_mouse_event)
 			psy_ui_sliderpane_onmousewheel;
-		vtable.onmouseup =
-			(psy_ui_fp_component_onmouseevent)
-			psy_ui_sliderpane_onmouseup;
+		vtable.on_mouse_up =
+			(psy_ui_fp_component_on_mouse_event)
+			psy_ui_sliderpane_on_mouse_up;
 		vtable.onmouseenter =
 			(psy_ui_fp_component_event)
 			psy_ui_sliderpane_onmouseenter;
@@ -93,9 +93,9 @@ void psy_ui_sliderpane_init(psy_ui_SliderPane* self, psy_ui_Component* parent,
 	self->hover = FALSE;
 	psy_ui_sliderpane_initsignals(self);	
 	psy_signal_connect(&self->component.signal_destroy, self, 
-		psy_ui_sliderpane_ondestroy);	
+		psy_ui_sliderpane_on_destroy);	
 	psy_signal_connect(&self->component.signal_timer, self,
-		psy_ui_sliderpane_ontimer);
+		psy_ui_sliderpane_on_timer);
 	psy_ui_component_set_style_types(&self->component,
 		psy_ui_STYLE_SLIDERPANE, psy_INDEX_INVALID, psy_INDEX_INVALID,
 		psy_INDEX_INVALID);
@@ -111,7 +111,7 @@ void psy_ui_sliderpane_initsignals(psy_ui_SliderPane* self)
 	psy_signal_init(&self->signal_customdraw);
 }
 
-void psy_ui_sliderpane_ondestroy(psy_ui_SliderPane* self, psy_ui_Component* sender)
+void psy_ui_sliderpane_on_destroy(psy_ui_SliderPane* self, psy_ui_Component* sender)
 {	
 	psy_ui_sliderpane_disposesignals(self);
 }
@@ -193,7 +193,7 @@ void psy_ui_sliderpane_onalign(psy_ui_SliderPane* self)
 		psy_ui_component_textmetric(psy_ui_sliderpane_base(self)), NULL);
 }
 
-void psy_ui_sliderpane_onmousedown(psy_ui_SliderPane* self, psy_ui_MouseEvent* ev)
+void psy_ui_sliderpane_on_mouse_down(psy_ui_SliderPane* self, psy_ui_MouseEvent* ev)
 {
 	if (psy_ui_mouseevent_button(ev) == 1) {
 		psy_ui_RealSize size;
@@ -207,7 +207,7 @@ void psy_ui_sliderpane_onmousedown(psy_ui_SliderPane* self, psy_ui_MouseEvent* e
 				((1.0 - self->value) * (size.height - self->slidersizepx.width));
 		}
 		if (self->poll) {
-			psy_ui_component_stoptimer(&self->component, 0);
+			psy_ui_component_stop_timer(&self->component, 0);
 		}
 		psy_ui_component_capture(&self->component);
 	} else {
@@ -270,7 +270,7 @@ void psy_ui_sliderpane_onmousemove(psy_ui_SliderPane* self, psy_ui_MouseEvent* e
 	}
 }
 
-void psy_ui_sliderpane_onmouseup(psy_ui_SliderPane* self, psy_ui_MouseEvent* ev)
+void psy_ui_sliderpane_on_mouse_up(psy_ui_SliderPane* self, psy_ui_MouseEvent* ev)
 {
 	if (self->tweakbase != -1) {
 		self->tweakbase = -1;
@@ -329,7 +329,7 @@ psy_ui_Orientation psy_ui_sliderpane_orientation(psy_ui_SliderPane* self)
 	return self->orientation;
 }
 
-void psy_ui_sliderpane_ontimer(psy_ui_SliderPane* self, psy_ui_Component* sender,
+void psy_ui_sliderpane_on_timer(psy_ui_SliderPane* self, psy_ui_Component* sender,
 	uintptr_t timerid)
 {	
 	if (psy_ui_component_drawvisible(psy_ui_sliderpane_base(self))) {
@@ -496,7 +496,7 @@ void psy_ui_slider_startpoll(psy_ui_Slider* self)
 void psy_ui_slider_stoppoll(psy_ui_Slider* self)
 {
 	self->pane.poll = FALSE;
-	psy_ui_component_stoptimer(&self->pane.component, 0);
+	psy_ui_component_stop_timer(&self->pane.component, 0);
 }
 
 void psy_ui_slider_update(psy_ui_Slider* self)

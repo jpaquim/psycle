@@ -253,8 +253,6 @@ void workspace_initsignals(Workspace* self)
 	psy_signal_init(&self->signal_status_out);
 	psy_signal_init(&self->signal_followsongchanged);
 	psy_signal_init(&self->signal_togglegear);
-	psy_signal_init(&self->signal_floatsection);
-	psy_signal_init(&self->signal_docksection);
 	psy_signal_init(&self->signal_machineeditresize);
 	psy_signal_init(&self->signal_buschanged);
 	psy_signal_init(&self->signal_gearselect);
@@ -336,8 +334,6 @@ void workspace_disposesignals(Workspace* self)
 	psy_signal_dispose(&self->signal_status_out);
 	psy_signal_dispose(&self->signal_followsongchanged);
 	psy_signal_dispose(&self->signal_togglegear);
-	psy_signal_dispose(&self->signal_floatsection);
-	psy_signal_dispose(&self->signal_docksection);
 	psy_signal_dispose(&self->signal_machineeditresize);
 	psy_signal_dispose(&self->signal_buschanged);
 	psy_signal_dispose(&self->signal_gearselect);
@@ -1800,20 +1796,6 @@ void workspace_selectpatterndisplay(Workspace* self, PatternDisplayMode
 		psy_property_setitem_int(patterndisplay, display);
 	}
 	patternviewconfig_onchanged(&self->config.patview, patterndisplay);
-}
-
-void workspace_floatsection(Workspace* self, int view, uintptr_t section)
-{
-	assert(self);
-
-	psy_signal_emit(&self->signal_floatsection, self, 2, view, section);
-}
-
-void workspace_docksection(Workspace* self, int view, uintptr_t section)
-{
-	assert(self);
-
-	psy_signal_emit(&self->signal_docksection, self, 2, view, section);
 }
 
 /* Host specialization of machine callbacks */

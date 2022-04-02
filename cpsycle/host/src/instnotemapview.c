@@ -228,16 +228,16 @@ void instrumentkeyboardview_updatemetrics(InstrumentKeyboardView* self)
 
 /* InstrumentEntryView */
 /* prototypes */
-static void instrumententryview_ondestroy(InstrumentEntryView*);
+static void instrumententryview_on_destroy(InstrumentEntryView*);
 static void instrumententryview_onpreferredsize(InstrumentEntryView*,
 	psy_ui_Size* limit, psy_ui_Size* rv);
 static void instrumententryview_ondraw(InstrumentEntryView*, psy_ui_Graphics*);
 static void instrumententryview_onsize(InstrumentEntryView*);
-static void instrumententryview_onmousedown(InstrumentEntryView*,
+static void instrumententryview_on_mouse_down(InstrumentEntryView*,
 	psy_ui_MouseEvent*);
 static void instrumententryview_onmousemove(InstrumentEntryView*,
 	psy_ui_MouseEvent*);
-static void instrumententryview_onmouseup(InstrumentEntryView*,
+static void instrumententryview_on_mouse_up(InstrumentEntryView*,
 	psy_ui_MouseEvent*);
 static double instrumententryview_keysize(InstrumentEntryView*);
 static void instrumententryview_updatemetrics(InstrumentEntryView*);
@@ -257,21 +257,21 @@ static void instrumententryview_vtable_init(InstrumentEntryView* self)
 {
 	if (!instrumententryview_vtable_initialized) {
 		instrumententryview_vtable = *(self->component.vtable);
-		instrumententryview_vtable.ondestroy =
+		instrumententryview_vtable.on_destroy =
 			(psy_ui_fp_component_event)
-			instrumententryview_ondestroy;
+			instrumententryview_on_destroy;
 		instrumententryview_vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
 			instrumententryview_ondraw;
-		instrumententryview_vtable.onmousedown =
-			(psy_ui_fp_component_onmouseevent)
-			instrumententryview_onmousedown;
+		instrumententryview_vtable.on_mouse_down =
+			(psy_ui_fp_component_on_mouse_event)
+			instrumententryview_on_mouse_down;
 		instrumententryview_vtable.onmousemove =
-			(psy_ui_fp_component_onmouseevent)
+			(psy_ui_fp_component_on_mouse_event)
 			instrumententryview_onmousemove;
-		instrumententryview_vtable.onmouseup =
-			(psy_ui_fp_component_onmouseevent)
-			instrumententryview_onmouseup;
+		instrumententryview_vtable.on_mouse_up =
+			(psy_ui_fp_component_on_mouse_event)
+			instrumententryview_on_mouse_up;
 		instrumententryview_vtable.onsize =
 			(psy_ui_fp_component_event)
 			instrumententryview_onsize;
@@ -306,7 +306,7 @@ void instrumententryview_init(InstrumentEntryView* self,
 	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_VSCROLL);
 }
 
-void instrumententryview_ondestroy(InstrumentEntryView* self)
+void instrumententryview_on_destroy(InstrumentEntryView* self)
 {	
 	psy_signal_disconnect(&self->state->signal_select, self,
 		instrumententryview_onentryselected);
@@ -481,7 +481,7 @@ void instrumententryview_updatemetrics(InstrumentEntryView* self)
 		psy_ui_value_make_px(self->metrics.lineheight * 3));
 }
 
-void instrumententryview_onmousedown(InstrumentEntryView* self,
+void instrumententryview_on_mouse_down(InstrumentEntryView* self,
 	psy_ui_MouseEvent* ev)
 {
 	if (self->instrument) {		
@@ -609,7 +609,7 @@ void instrumententryview_onmousemove(InstrumentEntryView* self,
 	}
 }
 
-void instrumententryview_onmouseup(InstrumentEntryView* self,
+void instrumententryview_on_mouse_up(InstrumentEntryView* self,
 	psy_ui_MouseEvent* ev)
 {
 	if (self->instrument) {
@@ -917,11 +917,11 @@ void instrumententrytableviewheader_onpreferredsize(InstrumentEntryTableViewHead
 
 /* InstrumentEntryRow */
 /* prototypes */
-static void instrumententryrow_ondestroy(InstrumentEntryRow*);
+static void instrumententryrow_on_destroy(InstrumentEntryRow*);
 static void instrumententryrow_ondraw(InstrumentEntryRow*, psy_ui_Graphics*);
 static void instrumententryrow_onpreferredsize(InstrumentEntryRow*,
 		const psy_ui_Size* limit, psy_ui_Size* rv);
-static void instrumententryrow_onmousedown(InstrumentEntryRow*,
+static void instrumententryrow_on_mouse_down(InstrumentEntryRow*,
 	psy_ui_MouseEvent*);
 static void instrumententryrow_onmouseleave(InstrumentEntryRow*,
 	psy_ui_MouseEvent*);
@@ -945,18 +945,18 @@ static void instrumententryrow_vtableinit_init(InstrumentEntryRow* self)
 {
 	if (!instrumententryrow_vtable_initialized) {
 		instrumententryrow_vtable = *(self->component.vtable);
-		instrumententryrow_vtable.ondestroy =
+		instrumententryrow_vtable.on_destroy =
 			(psy_ui_fp_component_event)
-			instrumententryrow_ondestroy;
+			instrumententryrow_on_destroy;
 		instrumententryrow_vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
 			instrumententryrow_ondraw;
 		instrumententryrow_vtable.onpreferredsize =
 			(psy_ui_fp_component_onpreferredsize)
 			instrumententryrow_onpreferredsize;
-		instrumententryrow_vtable.onmousedown =
-			(psy_ui_fp_component_onmouseevent)
-			instrumententryrow_onmousedown;
+		instrumententryrow_vtable.on_mouse_down =
+			(psy_ui_fp_component_on_mouse_event)
+			instrumententryrow_on_mouse_down;
 		instrumententryrow_vtable.onmouseenter =
 			(psy_ui_fp_component_event)
 			instrumententryrow_onmouseenter;
@@ -1007,7 +1007,7 @@ InstrumentEntryRow* instrumententryrow_allocinit(
 	return rv;
 }
 
-void instrumententryrow_ondestroy(InstrumentEntryRow* self)
+void instrumententryrow_on_destroy(InstrumentEntryRow* self)
 {	
 	self->state->curredit = NULL;
 	psy_signal_disconnect(&self->state->signal_select, self,
@@ -1062,7 +1062,7 @@ void instrumententryrow_ondraw(InstrumentEntryRow* self, psy_ui_Graphics* g)
 	}
 }
 
-void instrumententryrow_onmousedown(InstrumentEntryRow* self,
+void instrumententryrow_on_mouse_down(InstrumentEntryRow* self,
 	psy_ui_MouseEvent* ev)
 {	
 	if (self->selected) {
@@ -1205,7 +1205,7 @@ void instrumententryrow_updatestyles(InstrumentEntryRow* self)
 
 /* InstrumentEntryTableView */
 /* prototypes */
-static void instrumententrytableview_ondestroy(InstrumentEntryTableView*);
+static void instrumententrytableview_on_destroy(InstrumentEntryTableView*);
 static void instrumententrytableview_onpreferredsize(InstrumentEntryTableView*,
 	const psy_ui_Size* limit, psy_ui_Size* rv);
 static void instrumententrytableview_ondraw(InstrumentEntryTableView*,
@@ -1218,9 +1218,9 @@ static void instrumententrytableview_vtable_init(InstrumentEntryTableView* self)
 {
 	if (!instrumententrytableview_vtable_initialized) {
 		instrumententrytableview_vtable = *(self->component.vtable);
-		instrumententryview_vtable.ondestroy =
+		instrumententryview_vtable.on_destroy =
 			(psy_ui_fp_component_event)
-			instrumententrytableview_ondestroy;
+			instrumententrytableview_on_destroy;
 		instrumententrytableview_vtable.onpreferredsize =
 			(psy_ui_fp_component_onpreferredsize)
 			instrumententrytableview_onpreferredsize;		
@@ -1248,7 +1248,7 @@ void instrumententrytableview_init(InstrumentEntryTableView* self,
 	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_VSCROLL);
 }
 
-void instrumententrytableview_ondestroy(InstrumentEntryTableView* self)
+void instrumententrytableview_on_destroy(InstrumentEntryTableView* self)
 {	
 }
 
@@ -1310,7 +1310,7 @@ void instrumentnotemapbuttons_init(InstrumentNoteMapButtons* self,
 
 /* InstrumentNoteMapView */
 /* prototypes */
-static void instrumentnotemapview_ondestroy(InstrumentNoteMapView*);	
+static void instrumentnotemapview_on_destroy(InstrumentNoteMapView*);	
 static void instrumentnotemapview_initentries(InstrumentNoteMapView*,
 	Workspace*);
 static void instrumentnotemapview_inittable(InstrumentNoteMapView*,
@@ -1335,9 +1335,9 @@ static void instrumentnotemapview_vtable_init(InstrumentNoteMapView* self)
 {
 	if (!instrumentnotemapview_vtable_initialized) {
 		instrumentnotemapview_vtable = *(self->component.vtable);
-		instrumentnotemapview_vtable.ondestroy =
+		instrumentnotemapview_vtable.on_destroy =
 			(psy_ui_fp_component_event)
-			instrumentnotemapview_ondestroy;
+			instrumentnotemapview_on_destroy;
 		instrumentnotemapview_vtable.onlanguagechanged =
 			(psy_ui_fp_component_onlanguagechanged)
 			instrumentnotemapview_onlanguagechanged;
@@ -1387,7 +1387,7 @@ void instrumentnotemapview_init(InstrumentNoteMapView* self,
 		instrumentnotemapview_onentryupdate);
 }
 
-void instrumentnotemapview_ondestroy(InstrumentNoteMapView* self)
+void instrumentnotemapview_on_destroy(InstrumentNoteMapView* self)
 {
 	instrumententrystate_dispose(&self->state);
 }
@@ -1406,8 +1406,8 @@ void instrumentnotemapview_initentries(InstrumentNoteMapView* self, Workspace* w
 	psy_ui_component_set_align(&self->entries, psy_ui_ALIGN_CLIENT);
 	psy_ui_margin_init_em(&margin, 0.0, 0.0, 0.0, 2.0);
 	instrumententryview_init(&self->entryview, &self->entries, &self->state);
-	psy_ui_scroller_init(&self->scroller, &self->entryview.component,
-		&self->entries);
+	psy_ui_scroller_init(&self->scroller, &self->entries, NULL, NULL);
+	psy_ui_scroller_set_client(&self->scroller, &self->entryview.component);
 	psy_ui_component_set_align(&self->scroller.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_component_set_align(&self->entryview.component, psy_ui_ALIGN_FIXED);
 	psy_ui_margin_init_em(&margin, 0.0, 2.0, 0.0, 0.0);
@@ -1430,8 +1430,8 @@ void instrumentnotemapview_inittable(InstrumentNoteMapView* self, Workspace* wor
 	psy_ui_component_set_align(&self->tableheader.component, psy_ui_ALIGN_TOP);
 	instrumententrytableview_init(&self->tableview,
 		&self->table, &self->state);
-	psy_ui_scroller_init(&self->scroller_table, &self->tableview.component,
-		&self->table);
+	psy_ui_scroller_init(&self->scroller_table, &self->table, NULL, NULL);
+	psy_ui_scroller_set_client(&self->scroller, &self->tableview.component);
 	psy_ui_component_set_align(&self->scroller_table.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_component_set_align(&self->tableview.component, psy_ui_ALIGN_FIXED);
 	psy_ui_component_setbackgroundmode(&self->scroller_table.pane, psy_ui_SETBACKGROUND);

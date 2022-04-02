@@ -15,7 +15,7 @@
 static void patterntrackbox_ondraw(PatternTrackBox*, psy_ui_Graphics*);
 static void patterntrackbox_drawnumber(PatternTrackBox*, psy_ui_Graphics*);
 static void patterntrackbox_drawselection(PatternTrackBox*, psy_ui_Graphics*);
-static void patterntrackbox_onmousedown(PatternTrackBox*, psy_ui_MouseEvent*);
+static void patterntrackbox_on_mouse_down(PatternTrackBox*, psy_ui_MouseEvent*);
 static void patterntrackbox_onpreferredsize(PatternTrackBox*,
 	const psy_ui_Size* limit, psy_ui_Size* rv);
 
@@ -30,9 +30,9 @@ static void patterntrackbox_vtable_init(PatternTrackBox* self)
 		patterntrackbox_vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
 			patterntrackbox_ondraw;
-		patterntrackbox_vtable.onmousedown =
-			(psy_ui_fp_component_onmouseevent)
-			patterntrackbox_onmousedown;		
+		patterntrackbox_vtable.on_mouse_down =
+			(psy_ui_fp_component_on_mouse_event)
+			patterntrackbox_on_mouse_down;		
 		patterntrackbox_vtable.onpreferredsize =
 			(psy_ui_fp_component_onpreferredsize)
 			patterntrackbox_onpreferredsize;
@@ -154,7 +154,7 @@ void patterntrackbox_drawselection(PatternTrackBox* self, psy_ui_Graphics* g)
 	}
 }
 
-void patterntrackbox_onmousedown(PatternTrackBox* self, psy_ui_MouseEvent* ev)
+void patterntrackbox_on_mouse_down(PatternTrackBox* self, psy_ui_MouseEvent* ev)
 {
 	if (patternviewstate_patterns(self->state->pv)) {
 		psy_audio_Patterns* patterns;		
@@ -288,11 +288,11 @@ void patterntrack_onpreferredsize(PatternTrack* self,
 /* TrackerHeader */
 
 /* prototypes */
-static void trackerheader_ondestroy(TrackerHeader*);
+static void trackerheader_on_destroy(TrackerHeader*);
 static void trackerheader_onsongchanged(TrackerHeader*, Workspace* sender);
 static void trackerheader_connectsong(TrackerHeader*);
 static void trackerheader_oncursorchanged(TrackerHeader*, psy_audio_Sequence*);
-static void trackerheader_ontimer(TrackerHeader*, uintptr_t timerid);
+static void trackerheader_on_timer(TrackerHeader*, uintptr_t timerid);
 static void trackerheader_updateplayons(TrackerHeader*);
 static void trackerheader_onmousewheel(TrackerHeader*, psy_ui_MouseEvent*);
 static void trackerheader_ontrackstatechanged(TrackerHeader*,
@@ -306,14 +306,14 @@ static void trackerheader_vtable_init(TrackerHeader* self)
 {
 	if (!trackerheader_vtable_initialized) {
 		trackerheader_vtable = *(self->component.vtable);
-		trackerheader_vtable.ondestroy =
+		trackerheader_vtable.on_destroy =
 			(psy_ui_fp_component_event)
-			trackerheader_ondestroy;
-		trackerheader_vtable.ontimer =
-			(psy_ui_fp_component_ontimer)
-			trackerheader_ontimer;
+			trackerheader_on_destroy;
+		trackerheader_vtable.on_timer =
+			(psy_ui_fp_component_on_timer)
+			trackerheader_on_timer;
 		trackerheader_vtable.onmousewheel =
-			(psy_ui_fp_component_onmouseevent)
+			(psy_ui_fp_component_on_mouse_event)
 			trackerheader_onmousewheel;
 		trackerheader_vtable_initialized = TRUE;
 	}
@@ -337,7 +337,7 @@ void trackerheader_init(TrackerHeader* self, psy_ui_Component* parent,
 	psy_ui_component_start_timer(&self->component, 0, 50);
 }
 
-void trackerheader_ondestroy(TrackerHeader* self)
+void trackerheader_on_destroy(TrackerHeader* self)
 {
 	psy_table_dispose(&self->boxes);
 }
@@ -386,7 +386,7 @@ void trackerheader_oncursorchanged(TrackerHeader* self,
 	}		
 }
 
-void trackerheader_ontimer(TrackerHeader* self, uintptr_t timerid)
+void trackerheader_on_timer(TrackerHeader* self, uintptr_t timerid)
 {	
 	trackerheader_updateplayons(self);
 }
@@ -437,4 +437,22 @@ void trackerheader_ontrackstatechanged(TrackerHeader* self,
 		patterntrackbox_update(&track->trackbox);		
 	}
 	psy_ui_component_invalidate(&self->component);
+}
+
+/* TrackerHeaderView */
+void trackerheaderview_init(TrackerHeaderView* self, psy_ui_Component* parent, TrackConfig* config,
+	TrackerState* state, Workspace* workspace)
+{
+	psy_ui_component_init(&self->component, parent, NULL);
+	/* desc */
+	psy_ui_label_init(&self->desc, &self->component);
+	psy_ui_label_set_text(&self->desc, "Line");
+	psy_ui_component_set_align(&self->desc.component, psy_ui_ALIGN_LEFT);
+	psy_ui_component_set_preferred_size(&self->desc.component,
+		psy_ui_size_make_em(8.0, 1.0));
+	/* tracks */
+	psy_ui_component_init(&self->pane, &self->component, NULL);
+	psy_ui_component_set_align(&self->pane, psy_ui_ALIGN_CLIENT);
+	trackerheader_init(&self->header, &self->pane, config, state, workspace);
+	psy_ui_component_set_align(&self->header.component, psy_ui_ALIGN_FIXED);
 }

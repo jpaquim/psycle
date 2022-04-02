@@ -114,7 +114,7 @@ void paramrackbox_onaddeffect(ParamRackBox* self, psy_ui_Button* sender)
 /* ParamRackPane */
 
 /* implementation */
-static void paramrackpane_ondestroy(ParamRackPane*);
+static void paramrackpane_on_destroy(ParamRackPane*);
 static void paramrackpane_build(ParamRackPane*);
 static void paramrackpane_buildall(ParamRackPane*);
 static void paramrackpane_buildinputs(ParamRackPane*);
@@ -146,9 +146,9 @@ static void vtable_init(ParamRackPane* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.ondestroy =
+		vtable.on_destroy =
 			(psy_ui_fp_component_event)
-			paramrackpane_ondestroy;		
+			paramrackpane_on_destroy;		
 		vtable_initialized = TRUE;
 	}
 	self->component.vtable = &vtable;
@@ -178,7 +178,7 @@ void paramrackpane_init(ParamRackPane* self, psy_ui_Component* parent,
 		paramrackpane_onsongchanged);
 }
 
-void paramrackpane_ondestroy(ParamRackPane* self)
+void paramrackpane_on_destroy(ParamRackPane* self)
 {
 	psy_table_dispose(&self->boxes);
 }
@@ -488,7 +488,7 @@ void paramrackbatchbar_init(ParamRackBatchBar* self, psy_ui_Component* parent)
 }
 
 /* ParamRackModeBar */
-static void paramrackmodebar_ondestroy(ParamRackModeBar*);
+static void paramrackmodebar_on_destroy(ParamRackModeBar*);
 static void paramrackmodebar_onmodeselect(ParamRackModeBar*, psy_ui_Button* sender);
 
 /* vtable */
@@ -499,9 +499,9 @@ static void paramrackmodebar_vtable_init(ParamRackModeBar* self)
 {
 	if (!paramrackmodebar_vtable_initialized) {
 		paramrackmodebar_vtable = *(self->component.vtable);
-		paramrackmodebar_vtable.ondestroy =
+		paramrackmodebar_vtable.on_destroy =
 			(psy_ui_fp_component_event)
-			paramrackmodebar_ondestroy;
+			paramrackmodebar_on_destroy;
 		paramrackmodebar_vtable_initialized = TRUE;
 	}
 	self->component.vtable = &paramrackmodebar_vtable;
@@ -528,7 +528,7 @@ void paramrackmodebar_init(ParamRackModeBar* self, psy_ui_Component* parent)
 		"Level", self, paramrackmodebar_onmodeselect);
 }
 
-void paramrackmodebar_ondestroy(ParamRackModeBar* self)
+void paramrackmodebar_on_destroy(ParamRackModeBar* self)
 {
 	psy_signal_dispose(&self->signal_select);
 }
@@ -632,8 +632,8 @@ void paramrack_init(ParamRack* self, psy_ui_Component* parent,
 	psy_ui_component_setoverflow(&self->pane.component,
 		psy_ui_OVERFLOW_HSCROLL);	
 	/* connect scrollbar */
-	psy_ui_scroller_init(&self->scroller, &self->pane.component,
-		&self->component);
+	psy_ui_scroller_init(&self->scroller, &self->component, NULL, NULL);
+	psy_ui_scroller_set_client(&self->scroller, &self->pane.component);
 	psy_ui_component_set_align(&self->pane.component,
 		psy_ui_ALIGN_VCLIENT);
 	psy_ui_component_set_align(&self->scroller.component, psy_ui_ALIGN_CLIENT);

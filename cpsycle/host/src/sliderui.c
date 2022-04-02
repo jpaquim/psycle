@@ -24,8 +24,8 @@
 static void sliderui_ondraw(SliderUi*, psy_ui_Graphics*);
 static void sliderui_onpreferredsize(SliderUi*, const psy_ui_Size* limit,
 	psy_ui_Size* rv);
-static void sliderui_onmousedown(SliderUi*, psy_ui_MouseEvent*);
-static void sliderui_onmouseup(SliderUi*, psy_ui_MouseEvent*);
+static void sliderui_on_mouse_down(SliderUi*, psy_ui_MouseEvent*);
+static void sliderui_on_mouse_up(SliderUi*, psy_ui_MouseEvent*);
 static void sliderui_onmousemove(SliderUi*, psy_ui_MouseEvent*);
 static void sliderui_updateparam(SliderUi*);
 
@@ -42,9 +42,9 @@ static psy_ui_ComponentVtable* sliderui_vtable_init(SliderUi* self)
 		sliderui_vtable.ondraw = (psy_ui_fp_component_ondraw)sliderui_ondraw;				
 		sliderui_vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
 			sliderui_onpreferredsize;
-		sliderui_vtable.onmousedown = (psy_ui_fp_component_onmouseevent)sliderui_onmousedown;
-		sliderui_vtable.onmouseup = (psy_ui_fp_component_onmouseevent)sliderui_onmouseup;
-		sliderui_vtable.onmousemove = (psy_ui_fp_component_onmouseevent)sliderui_onmousemove;
+		sliderui_vtable.on_mouse_down = (psy_ui_fp_component_on_mouse_event)sliderui_on_mouse_down;
+		sliderui_vtable.on_mouse_up = (psy_ui_fp_component_on_mouse_event)sliderui_on_mouse_up;
+		sliderui_vtable.onmousemove = (psy_ui_fp_component_on_mouse_event)sliderui_onmousemove;
 		sliderui_vtable_initialized = TRUE;
 	}
 	return &sliderui_vtable;
@@ -132,12 +132,12 @@ void sliderui_onpreferredsize(SliderUi* self, const psy_ui_Size* limit,
 	psy_ui_size_setreal(rv, style->background.size);
 }
 
-void sliderui_onmousedown(SliderUi* self, psy_ui_MouseEvent* ev)
+void sliderui_on_mouse_down(SliderUi* self, psy_ui_MouseEvent* ev)
 {
 	if (psy_ui_mouseevent_button(ev) == 1) {
 		paramtweak_begin(&self->paramtweak, self->machine, self->paramidx,
 			self->param);		
-		paramtweak_onmousedown(&self->paramtweak, ev);
+		paramtweak_on_mouse_down(&self->paramtweak, ev);
 		psy_ui_component_capture(&self->component);		
 	}
 }
@@ -150,7 +150,7 @@ void sliderui_onmousemove(SliderUi* self, psy_ui_MouseEvent* ev)
 	}
 }
 
-void sliderui_onmouseup(SliderUi* self, psy_ui_MouseEvent* ev)
+void sliderui_on_mouse_up(SliderUi* self, psy_ui_MouseEvent* ev)
 {
 	psy_ui_component_releasecapture(&self->component);
 	if ((paramtweak_active(&self->paramtweak))) {

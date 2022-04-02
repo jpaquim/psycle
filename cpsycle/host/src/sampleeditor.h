@@ -1,5 +1,7 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #if !defined(SAMPLEEDITOR_H)
 #define SAMPLEEDITOR_H
@@ -26,7 +28,11 @@
 extern "C" {
 #endif
 
-// aim: Wave editor and loop point definer.
+/* 
+** SampleEditor
+**
+** Wave editor and loop point definer.
+*/
 
 struct SampleEditor;
 
@@ -77,21 +83,20 @@ typedef struct {
 void sampleeditoramplify_init(SampleEditorAmplify*, psy_ui_Component* parent,
 	Workspace* workspace);
 
-typedef struct {
+typedef struct SampleEditLuaProcessor {
+	/* inherits */
 	psy_ui_Component component;
+	/* internal */
 	psy_ui_Label header;
-	psy_ui_TextInputor editor;
-	psy_ui_TextInputor console;
-	Workspace* workspace;
+	psy_ui_Editor editor;	
 } SampleEditLuaProcessor;
 
-void sampleeditluaprocessor_init(SampleEditLuaProcessor*, psy_ui_Component* parent,
-	Workspace* workspace);
+void sampleeditluaprocessor_init(SampleEditLuaProcessor*, psy_ui_Component* parent);
 
 typedef struct SampleEditorProcessView {
-	// inherits
+	/* inherits */
 	psy_ui_Component component;
-	// internal
+	/* internal */
 	psy_ui_Component client;
 	SampleEditorOperations copypaste;
 	psy_ui_Button process;
@@ -105,7 +110,7 @@ typedef struct SampleEditorProcessView {
 	psy_ui_Component emptypage5;
 	psy_ui_Component emptypage6;
 	SampleEditorAmplify amplify;
-	/* SampleEditLuaProcessor luaprocessor; */
+	SampleEditLuaProcessor luaprocessor;
 } SampleEditorProcessView;
 
 void sampleprocessview_init(SampleEditorProcessView*, psy_ui_Component* parent,
@@ -180,4 +185,4 @@ void sampleeditor_setquality(SampleEditor*, psy_dsp_ResamplerQuality);
 }
 #endif
 
-#endif
+#endif /* SAMPLEEDITOR_H */

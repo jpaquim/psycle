@@ -879,7 +879,7 @@ void machinestackdesc_onalign(MachineStackDesc* self)
 	tm = psy_ui_component_textmetric(&self->component);
 	size = psy_ui_component_scrollsize(&self->component);
 	sizepx = psy_ui_component_scrollsize_px(&self->component);
-	if (psy_ui_component_visible(&self->view->scroller_columns.bottom)) {
+	if (psy_ui_component_visible(&self->view->scroller_columns.hscroll->component)) {
 		sizepx.height -= tm->tmHeight * 1.5;
 	}
 	insize = psy_ui_component_preferredsize(&self->view->inputs.component,
@@ -984,7 +984,7 @@ static void machinestackinputs_vtable_init(MachineStackInputs* self)
 			(psy_ui_fp_component_event)
 			machinestackinputs_onmouseenter;
 		machinestackinputs_vtable.onmousedoubleclick =
-			(psy_ui_fp_component_onmouseevent)
+			(psy_ui_fp_component_on_mouse_event)
 			machinestackinputs_onmousedoubleclick;
 		machinestackinputs_vtable_initialized = TRUE;
 	}	
@@ -1082,7 +1082,7 @@ void machinestackinputs_onmousedoubleclick(MachineStackInputs* self,
 ** MachineStackOutputs
 ** MachineStackOutputs
 */
-static void machinestackoutputs_onmouseup(MachineStackOutputs*,
+static void machinestackoutputs_on_mouse_up(MachineStackOutputs*,
 	psy_ui_MouseEvent*);
 
 /* vtable */
@@ -1094,9 +1094,9 @@ static psy_ui_ComponentVtable* machinestackoutputs_vtable_init(
 {
 	if (!machinestackoutputs_vtable_initialized) {
 		machinestackoutputs_vtable = *(self->component.vtable);
-		machinestackoutputs_vtable.onmouseup =
-			(psy_ui_fp_component_onmouseevent)
-			machinestackoutputs_onmouseup;
+		machinestackoutputs_vtable.on_mouse_up =
+			(psy_ui_fp_component_on_mouse_event)
+			machinestackoutputs_on_mouse_up;
 		machinestackoutputs_vtable_initialized = TRUE;
 	}
 	return &machinestackoutputs_vtable;
@@ -1144,7 +1144,7 @@ void machinestackoutputs_build(MachineStackOutputs* self)
 	}	
 }
 
-void machinestackoutputs_onmouseup(MachineStackOutputs* self,
+void machinestackoutputs_on_mouse_up(MachineStackOutputs* self,
 	psy_ui_MouseEvent* ev)
 {
 	if (self->state->rewire) {		
@@ -1199,7 +1199,7 @@ static psy_ui_ComponentVtable* machinestackpanetrack_vtable_init(
 	if (!machinestackpanetrack_vtable_initialized) {
 		machinestackpanetrack_vtable = *(self->component.vtable);		
 		machinestackpanetrack_vtable.onmousedoubleclick =
-			(psy_ui_fp_component_onmouseevent)
+			(psy_ui_fp_component_on_mouse_event)
 			machinestackpanetrack_onmousedoubleclick;
 		machinestackpanetrack_vtable_initialized = TRUE;
 	}
@@ -1223,13 +1223,14 @@ void machinestackpanetrack_init(MachineStackPaneTrack* self,
 		psy_ui_ALIGN_TOP,
 		psy_ui_margin_make(
 			psy_ui_value_make_px(20.0), psy_ui_value_make_px(20.0),
-			psy_ui_value_make_px(0.0), psy_ui_value_make_px(0.0)));	
-	psy_ui_scroller_init(&self->scroller, &self->client.component, &self->component);
+			psy_ui_value_make_px(0.0), psy_ui_value_make_px(0.0)));
+	psy_ui_scroller_init(&self->scroller, &self->component, NULL, NULL);
+	psy_ui_scroller_set_client(&self->scroller, &self->client.component);
 	psy_ui_component_set_align(&self->scroller.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_component_set_align(&self->client.component, psy_ui_ALIGN_FIXED);
 	// psy_ui_component_setbackgroundmode(&self->scroller.component,
 	//	psy_ui_SETBACKGROUND);
-	// psy_ui_component_setbackgroundcolour(&self->scroller.component,
+	// psy_ui_component_set_background_colour(&self->scroller.component,
 	//	psy_ui_colour_make(0x00CACACA));
 	
 	self->column = column;
@@ -1270,7 +1271,7 @@ void machinestackpanetrack_onmousedoubleclick(MachineStackPaneTrack* self,
 		uintptr_t effect;
 		uintptr_t c;
 
-		q = psy_ui_component_children(&self->client.component, psy_ui_NONRECURSIVE);
+		q = psy_ui_component_children(&self->client.component, psy_ui_NONE_RECURSIVE);
 		effect = psy_INDEX_INVALID;
 		for (p = q, c = 0; p != NULL; psy_list_next(&p), ++c) {
 			psy_ui_Component* component;
@@ -1317,7 +1318,7 @@ static psy_ui_ComponentVtable* machinestackpane_vtable_init(MachineStackPane* se
 	if (!machinestackpane_vtable_initialized) {
 		machinestackpane_vtable = *(self->component.vtable);
 		machinestackpane_vtable.onmousedoubleclick =			
-			(psy_ui_fp_component_onmouseevent)
+			(psy_ui_fp_component_on_mouse_event)
 			machinestackpane_onmousedoubleclick;
 		machinestackpane_vtable_initialized = TRUE;
 	}
@@ -1434,7 +1435,7 @@ void machinestackpane_updatevus(MachineStackPane* self)
 	psy_List* p;
 	psy_List* q;
 		
-	q = psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE);
+	q = psy_ui_component_children(&self->component, psy_ui_NONE_RECURSIVE);
 	for (p = q; p != NULL; psy_list_next(&p)) {
 		psy_ui_Component* trackpane;		
 		
@@ -1549,7 +1550,7 @@ static void vtable_init(MachineStackView* self)
 
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);		
-		vtable.ondestroy =
+		vtable.on_destroy =
 			(psy_ui_fp_component_event)
 			machinestackview_destroy;
 		vtable_initialized = TRUE;
@@ -1574,8 +1575,8 @@ void machinestackview_init(MachineStackView* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->columns, &self->component, NULL);
 	psy_ui_component_set_align(&self->columns, psy_ui_ALIGN_VCLIENT);
 	psy_ui_component_setoverflow(&self->columns, psy_ui_OVERFLOW_HSCROLL);	
-	psy_ui_scroller_init(&self->scroller_columns, &self->columns,
-		&self->component);
+	psy_ui_scroller_init(&self->scroller_columns, &self->component, NULL, NULL);
+	psy_ui_scroller_set_client(&self->scroller_columns, &self->columns);
 	psy_ui_component_set_align(&self->columns, psy_ui_ALIGN_VCLIENT);
 	psy_ui_component_set_align(&self->scroller_columns.component,
 		psy_ui_ALIGN_CLIENT);

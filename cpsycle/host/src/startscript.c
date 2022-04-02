@@ -148,8 +148,10 @@ int startscript_addmenu(lua_State* L)
 		luaL_checkstring(L, -3),
 		(int)luaL_checkinteger(L, -2),
 		(int)luaL_checkinteger(L, -1));
-	psy_ui_tabbar_append(&self->mainframe->scripttabbar, link.label_, psy_INDEX_INVALID,
-		psy_INDEX_INVALID, psy_ui_colour_white());
+	psy_ui_tabbar_append(&self->mainframe->scripttabbar, link.label_,
+		psy_INDEX_INVALID,
+		psy_INDEX_INVALID, psy_INDEX_INVALID,
+		psy_ui_colour_white());
 	link_dispose(&link);
 	return 0;
 }

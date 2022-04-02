@@ -14,10 +14,10 @@
 #include <uiapp.h>
 
 /* GeneratorUi */
-static void generatorui_onmousedown(GeneratorUi*, psy_ui_MouseEvent*);
+static void generatorui_on_mouse_down(GeneratorUi*, psy_ui_MouseEvent*);
 static void generatorui_onmousedoubleclick(GeneratorUi*, psy_ui_MouseEvent*);
 static void generatorui_move(GeneratorUi*, psy_ui_Point topleft);
-static void generatorui_ontimer(GeneratorUi*, uintptr_t timerid);
+static void generatorui_on_timer(GeneratorUi*, uintptr_t timerid);
 /* vtable */
 static psy_ui_ComponentVtable generatorui_vtable;
 static psy_ui_ComponentVtable generatorui_super_vtable;
@@ -30,18 +30,18 @@ static void generatorui_vtable_init(GeneratorUi* self)
 	if (!generatorui_vtable_initialized) {
 		generatorui_vtable = *(self->component.vtable);
 		generatorui_super_vtable = generatorui_vtable;		
-		generatorui_vtable.onmousedown =
-			(psy_ui_fp_component_onmouseevent)
-			generatorui_onmousedown;
+		generatorui_vtable.on_mouse_down =
+			(psy_ui_fp_component_on_mouse_event)
+			generatorui_on_mouse_down;
 		generatorui_vtable.onmousedoubleclick =
-			(psy_ui_fp_component_onmouseevent)
+			(psy_ui_fp_component_on_mouse_event)
 			generatorui_onmousedoubleclick;
 		generatorui_vtable.move =
 			(psy_ui_fp_component_move)
 			generatorui_move;		
-		generatorui_vtable.ontimer =
-			(psy_ui_fp_component_ontimer)
-			generatorui_ontimer;		
+		generatorui_vtable.on_timer =
+			(psy_ui_fp_component_on_timer)
+			generatorui_on_timer;		
 		generatorui_vtable_initialized = TRUE;
 	}
 	psy_ui_component_setvtable(&self->component, &generatorui_vtable);
@@ -94,7 +94,7 @@ void generatorui_move(GeneratorUi* self, psy_ui_Point topleft)
 	}
 }
 
-void generatorui_onmousedown(GeneratorUi* self, psy_ui_MouseEvent* ev)
+void generatorui_on_mouse_down(GeneratorUi* self, psy_ui_MouseEvent* ev)
 {	
 	assert(self);
 
@@ -135,7 +135,7 @@ void generatorui_onmousedoubleclick(GeneratorUi* self, psy_ui_MouseEvent* ev)
 	psy_ui_mouseevent_stop_propagation(ev);
 }
 
-void generatorui_ontimer(GeneratorUi* self, uintptr_t timerid)
+void generatorui_on_timer(GeneratorUi* self, uintptr_t timerid)
 {
 	if (psy_audio_machine_muted(self->machine)) {
 		psy_ui_component_addstylestate(&self->mute, psy_ui_STYLESTATE_SELECT);

@@ -16,13 +16,13 @@
 
 /* SeqEditTrack */
 /* prototypes */
-static void seqedittrack_ondestroy(SeqEditTrack*);
+static void seqedittrack_on_destroy(SeqEditTrack*);
 static void seqedittrack_onpreferredsize(SeqEditTrack*,
 	const psy_ui_Size* limit, psy_ui_Size* rv);
 static void seqedittrack_onalign(SeqEditTrack*);
-static void seqedittrack_onmousedown(SeqEditTrack*, psy_ui_MouseEvent*);
+static void seqedittrack_on_mouse_down(SeqEditTrack*, psy_ui_MouseEvent*);
 static void seqedittrack_onmousemove(SeqEditTrack*, psy_ui_MouseEvent*);
-static void seqedittrack_onmouseup(SeqEditTrack*, psy_ui_MouseEvent*);
+static void seqedittrack_on_mouse_up(SeqEditTrack*, psy_ui_MouseEvent*);
 static void seqedittrack_onmousedoubleclick(SeqEditTrack*,
 	psy_ui_MouseEvent*);
 static void seqedittrack_build(SeqEditTrack* self);
@@ -40,26 +40,26 @@ static void seqedittrack_vtable_init(SeqEditTrack* self)
 {
 	if (!seqedittrack_vtable_initialized) {
 		seqedittrack_vtable = *(self->component.vtable);
-		seqedittrack_vtable.ondestroy =
+		seqedittrack_vtable.on_destroy =
 			(psy_ui_fp_component_event)
-			seqedittrack_ondestroy;
+			seqedittrack_on_destroy;
 		seqedittrack_vtable.onalign =
 			(psy_ui_fp_component_event)
 			seqedittrack_onalign;
 		seqedittrack_vtable.onpreferredsize =
 			(psy_ui_fp_component_onpreferredsize)
 			seqedittrack_onpreferredsize;
-		seqedittrack_vtable.onmousedown =
-			(psy_ui_fp_component_onmouseevent)
-			seqedittrack_onmousedown;
+		seqedittrack_vtable.on_mouse_down =
+			(psy_ui_fp_component_on_mouse_event)
+			seqedittrack_on_mouse_down;
 		seqedittrack_vtable.onmousemove =
-			(psy_ui_fp_component_onmouseevent)
+			(psy_ui_fp_component_on_mouse_event)
 			seqedittrack_onmousemove;
-		seqedittrack_vtable.onmouseup =
-			(psy_ui_fp_component_onmouseevent)
-			seqedittrack_onmouseup;
+		seqedittrack_vtable.on_mouse_up =
+			(psy_ui_fp_component_on_mouse_event)
+			seqedittrack_on_mouse_up;
 		seqedittrack_vtable.onmousedoubleclick =
-			(psy_ui_fp_component_onmouseevent)
+			(psy_ui_fp_component_on_mouse_event)
 			seqedittrack_onmousedoubleclick;
 		seqedittrack_vtable_initialized = TRUE;
 	}
@@ -94,7 +94,7 @@ void seqedittrack_init(SeqEditTrack* self, psy_ui_Component* parent,
 	}
 }
 
-void seqedittrack_ondestroy(SeqEditTrack* self)
+void seqedittrack_on_destroy(SeqEditTrack* self)
 {
 	if (seqeditstate_sequence(self->state)) {
 		psy_signal_disconnect(
@@ -280,7 +280,7 @@ void seqedittrack_onpreferredsize(SeqEditTrack* self,
 	rv->height = self->state->lineheight;
 }
 
-void seqedittrack_onmousedown(SeqEditTrack* self, psy_ui_MouseEvent* ev)
+void seqedittrack_on_mouse_down(SeqEditTrack* self, psy_ui_MouseEvent* ev)
 {
 	if (psy_ui_mouseevent_button(ev) == 1) {
 		if (self->state->dragstatus == SEQEDIT_DRAG_NONE) {
@@ -355,7 +355,7 @@ void seqedittrack_onmousemove(SeqEditTrack* self, psy_ui_MouseEvent* ev)
 	}	
 }
 
-void seqedittrack_onmouseup(SeqEditTrack* self, psy_ui_MouseEvent* ev)
+void seqedittrack_on_mouse_up(SeqEditTrack* self, psy_ui_MouseEvent* ev)
 {
 	psy_ui_component_releasecapture(&self->component);	
 	if (self->state->dragstatus == SEQEDIT_DRAG_REORDER) {

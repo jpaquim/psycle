@@ -9,12 +9,12 @@
 */
 
 /* prototypes */
-static void name_ondestroy(class*);
+static void name_on_destroy(class*);
 static void name_onpreferredsize(class*,
 	const psy_ui_Size* limit, psy_ui_Size* rv);
 static void name_ondraw(class*, psy_ui_Graphics*);
 static void name_onalign(class*);
-static void name_onmousedown(class*, psy_ui_MouseEvent*);
+static void name_on_mouse_down(class*, psy_ui_MouseEvent*);
 /* vtable */
 static psy_ui_ComponentVtable name_vtable;
 static bool name_vtable_initialized = FALSE;
@@ -29,9 +29,9 @@ static void name_vtable_init(class* self)
 }
 
 /* methods */
-name_vtable.ondestroy =
-	(psy_ui_fp_component_ondestroy)
-	name_ondestroy;
+name_vtable.on_destroy =
+	(psy_ui_fp_component_on_destroy)
+	name_on_destroy;
 name_vtable.onalign =
 	(psy_ui_fp_component_onalign)
 	name_onalign;
@@ -41,15 +41,15 @@ name_vtable.onpreferredsize =
 name_vtable.ondraw =
 	(psy_ui_fp_component_ondraw)
 	name_ondraw;
-name_vtable.onmousedown =
-	(psy_ui_fp_component_onmouseevent)
-	name_onmousedown;
+name_vtable.on_mouse_down =
+	(psy_ui_fp_component_on_mouse_event)
+	name_on_mouse_down;
 name_vtable.onmousemove =
-	(psy_ui_fp_component_onmouseevent)
+	(psy_ui_fp_component_on_mouse_event)
 	name_onmousemove;
-name_vtable.onmouseup =
-	(psy_ui_fp_component_onmouseevent)
-	name_onmouseup;
-name_vtable.ontimer =
-(psy_ui_fp_component_ontimer)
-name_ontimer;
+name_vtable.on_mouse_up =
+	(psy_ui_fp_component_on_mouse_event)
+	name_on_mouse_up;
+name_vtable.on_timer =
+(psy_ui_fp_component_on_timer)
+name_on_timer;

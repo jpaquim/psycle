@@ -88,7 +88,7 @@ typedef struct psy_audio_PluginCatcher {
 	psy_Signal signal_scanstart;
 	psy_Signal signal_scanend;
 	psy_Signal signal_scanprogress;
-	psy_Signal signal_scanfile;
+	psy_Signal signal_scanfile;	
 	psy_Signal signal_taskstart;
 	bool saveafterscan;
 	bool hasplugincache;

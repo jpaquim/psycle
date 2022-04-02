@@ -12,7 +12,7 @@
 
 #include "../../detail/portable.h"
 
-static void interpolatecurvebox_ondestroy(InterpolateCurveBox*,
+static void interpolatecurvebox_on_destroy(InterpolateCurveBox*,
 	psy_ui_Component* sender);
 static void interpolatecurvebox_ondraw(InterpolateCurveBox*, psy_ui_Graphics*);
 static void interpolatecurvebox_drawgrid(InterpolateCurveBox*,
@@ -22,14 +22,14 @@ static void interpolatecurvebox_drawkeyframes(InterpolateCurveBox*,
 static void interpolatecurvebox_drawselector(InterpolateCurveBox*,
 	psy_ui_Graphics*, double x, double y, psy_List* kf);
 static void interpolatecurvebox_buildkeyframes(InterpolateCurveBox*);
-static void interpolatecurvebox_onmousedown(InterpolateCurveBox*, psy_ui_MouseEvent*);
+static void interpolatecurvebox_on_mouse_down(InterpolateCurveBox*, psy_ui_MouseEvent*);
 static void interpolatecurvebox_onmousemove(InterpolateCurveBox*, psy_ui_MouseEvent*);
-static void interpolatecurvebox_onmouseup(InterpolateCurveBox*, psy_ui_MouseEvent*);
+static void interpolatecurvebox_on_mouse_up(InterpolateCurveBox*, psy_ui_MouseEvent*);
 static psy_List* interpolatecurvebox_hittest(InterpolateCurveBox*, double x, double y);
 static void interpolatecurvebox_clear(InterpolateCurveBox*);
 static void interpolatecurvebox_insertkeyframe(InterpolateCurveBox* self, double x, double y);
 
-static void interpolatecurveview_ondestroy(InterpolateCurveView*,
+static void interpolatecurveview_on_destroy(InterpolateCurveView*,
 	psy_ui_Component* sender);
 static void interpolatecurveview_oninterpolate(InterpolateCurveView*,
 	psy_ui_Component* sender);
@@ -94,12 +94,12 @@ static void interpolatecurvebox_vtable_init(InterpolateCurveBox* self)
 		interpolatecurvebox_vtable = *(self->component.vtable);
 		interpolatecurvebox_vtable.ondraw =
 			(psy_ui_fp_component_ondraw) interpolatecurvebox_ondraw;
-		interpolatecurvebox_vtable.onmousedown = (psy_ui_fp_component_onmouseevent)
-			interpolatecurvebox_onmousedown;
-		interpolatecurvebox_vtable.onmousemove = (psy_ui_fp_component_onmouseevent)
+		interpolatecurvebox_vtable.on_mouse_down = (psy_ui_fp_component_on_mouse_event)
+			interpolatecurvebox_on_mouse_down;
+		interpolatecurvebox_vtable.onmousemove = (psy_ui_fp_component_on_mouse_event)
 			interpolatecurvebox_onmousemove;
-		interpolatecurvebox_vtable.onmouseup = (psy_ui_fp_component_onmouseevent)
-			interpolatecurvebox_onmouseup;		
+		interpolatecurvebox_vtable.on_mouse_up = (psy_ui_fp_component_on_mouse_event)
+			interpolatecurvebox_on_mouse_up;		
 		interpolatecurvebox_vtable_initialized = TRUE;
 	}
 }
@@ -122,13 +122,13 @@ void interpolatecurvebox_init(InterpolateCurveBox* self,
 	self->selected = 0;
 	self->bpl = 0.25;	
 	psy_signal_connect(&self->component.signal_destroy, self,
-		interpolatecurvebox_ondestroy);	
+		interpolatecurvebox_on_destroy);	
 	psy_ui_component_preventalign(&self->component);
 	psy_ui_component_set_preferred_size(&self->component,
 		psy_ui_size_make_em(0.0, 10.0));
 }
 
-void interpolatecurvebox_ondestroy(InterpolateCurveBox* self,
+void interpolatecurvebox_on_destroy(InterpolateCurveBox* self,
 	psy_ui_Component* sender)
 {
 	interpolatecurvebox_clear(self);
@@ -282,7 +282,7 @@ void interpolatecurvebox_drawselector(InterpolateCurveBox* self,
 	psy_ui_drawsolidrectangle(g, r, colour);
 }
 
-void interpolatecurvebox_onmousedown(InterpolateCurveBox* self, psy_ui_MouseEvent* ev)
+void interpolatecurvebox_on_mouse_down(InterpolateCurveBox* self, psy_ui_MouseEvent* ev)
 {
 	psy_List* selected;
 	
@@ -396,7 +396,7 @@ void interpolatecurvebox_onmousemove(InterpolateCurveBox* self, psy_ui_MouseEven
 	}
 }
 
-void interpolatecurvebox_onmouseup(InterpolateCurveBox* self, psy_ui_MouseEvent* ev)
+void interpolatecurvebox_on_mouse_up(InterpolateCurveBox* self, psy_ui_MouseEvent* ev)
 {
 	psy_ui_component_releasecapture(&self->component);
 	self->dragkeyframe = 0;
@@ -459,7 +459,7 @@ void interpolatecurveview_init(InterpolateCurveView* self, psy_ui_Component*
 	psy_ui_component_set_align(&self->box.component, psy_ui_ALIGN_CLIENT);	
 	psy_signal_init(&self->signal_cancel);
 	psy_signal_connect(&self->component.signal_destroy, self,
-		interpolatecurveview_ondestroy);
+		interpolatecurveview_on_destroy);
 	psy_signal_connect(&self->bar.cancel.signal_clicked, self,
 		interpolatecurveview_oncancel);
 	psy_signal_connect(&self->bar.ok.signal_clicked, self,
@@ -468,7 +468,7 @@ void interpolatecurveview_init(InterpolateCurveView* self, psy_ui_Component*
 		interpolatecurveview_oncurvetypechanged);	
 }
 
-void interpolatecurveview_ondestroy(InterpolateCurveView* self,
+void interpolatecurveview_on_destroy(InterpolateCurveView* self,
 	psy_ui_Component* sender)
 {
 	psy_signal_dispose(&self->signal_cancel);

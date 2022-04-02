@@ -49,11 +49,9 @@ typedef struct PatternView {
 	/* inherits */
 	psy_ui_Component component;
 	/* internal */	
-	PatternViewTabBar tabbar;	
-	TrackerLineNumberBar left;
+	PatternViewTabBar tabbar;		
 	PatternDefaultLine defaultline;	
-	psy_ui_Component headerpane;
-	TrackerHeader header;
+	TrackerHeaderView header;
 	psy_ui_Notebook notebook;
 	psy_ui_Notebook editnotebook;	
 	TrackerView trackerview;

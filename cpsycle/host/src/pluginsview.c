@@ -257,10 +257,19 @@ void newmachinefilter_setalltypes(NewMachineFilter* self)
 	self->ladspa = TRUE;
 }
 
-void newmachinefilter_cleartypes(NewMachineFilter* self)
+void newmachinefilter_clear_all(NewMachineFilter* self)
 {
 	self->effect = FALSE;
 	self->gen = FALSE;
+	self->intern = FALSE;
+	self->native = FALSE;
+	self->vst = FALSE;
+	self->lua = FALSE;
+	self->ladspa = FALSE;
+}
+
+void newmachinefilter_clear_types(NewMachineFilter* self)
+{	
 	self->intern = FALSE;
 	self->native = FALSE;
 	self->vst = FALSE;
@@ -404,19 +413,19 @@ void searchfilter(psy_Property* plugin, NewMachineFilter* filter,
 }
 
 /* PluginsView */
-static void pluginsview_ondestroy(PluginsView*);
+static void pluginsview_on_destroy(PluginsView*);
 static void pluginsview_ondraw(PluginsView*, psy_ui_Graphics*);
 static void pluginsview_drawitem(PluginsView*, psy_ui_Graphics*, psy_Property*,
 	psy_ui_RealPoint topleft, bool sel);
 static void pluginsview_onpreferredscrollsize(PluginsView*, const psy_ui_Size* limit,
 	psy_ui_Size* rv);
-static void pluginsview_onkeydown(PluginsView*, psy_ui_KeyboardEvent*);
+static void pluginsview_on_key_down(PluginsView*, psy_ui_KeyboardEvent*);
 static void pluginsview_cursorposition(PluginsView*, psy_Property* plugin,
 	uintptr_t* col, uintptr_t* row);
 static psy_Property* pluginsview_pluginbycursorposition(PluginsView*,
 	uintptr_t col, uintptr_t row);
-static void pluginsview_onmousedown(PluginsView*, psy_ui_MouseEvent*);
-static void pluginsview_onmouseup(PluginsView*, psy_ui_MouseEvent*);
+static void pluginsview_on_mouse_down(PluginsView*, psy_ui_MouseEvent*);
+static void pluginsview_on_mouse_up(PluginsView*, psy_ui_MouseEvent*);
 static void pluginsview_onmousedoubleclick(PluginsView*, psy_ui_MouseEvent*);
 static uintptr_t pluginsview_hittest(PluginsView*, psy_ui_RealPoint);
 static void pluginsview_computetextsizes(PluginsView*, double width);
@@ -438,23 +447,23 @@ static void pluginsview_vtable_init(PluginsView* self)
 	if (!pluginsview_vtable_initialized) {
 		pluginsview_vtable = *(self->component.vtable);
 		pluginsview_super_vtable = pluginsview_vtable;
-		pluginsview_vtable.ondestroy =
+		pluginsview_vtable.on_destroy =
 			(psy_ui_fp_component_event)
-			pluginsview_ondestroy;
+			pluginsview_on_destroy;
 		pluginsview_vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
 			pluginsview_ondraw;
-		pluginsview_vtable.onkeydown =
-			(psy_ui_fp_component_onkeyevent)
-			pluginsview_onkeydown;
-		pluginsview_vtable.onmousedown =
-			(psy_ui_fp_component_onmouseevent)
-			pluginsview_onmousedown;
-		pluginsview_vtable.onmouseup =
-			(psy_ui_fp_component_onmouseevent)
-			pluginsview_onmouseup;
+		pluginsview_vtable.on_key_down =
+			(psy_ui_fp_component_on_key_event)
+			pluginsview_on_key_down;
+		pluginsview_vtable.on_mouse_down =
+			(psy_ui_fp_component_on_mouse_event)
+			pluginsview_on_mouse_down;
+		pluginsview_vtable.on_mouse_up =
+			(psy_ui_fp_component_on_mouse_event)
+			pluginsview_on_mouse_up;
 		pluginsview_vtable.onmousedoubleclick =
-			(psy_ui_fp_component_onmouseevent)
+			(psy_ui_fp_component_on_mouse_event)
 			pluginsview_onmousedoubleclick;
 		pluginsview_vtable.onpreferredsize =
 			(psy_ui_fp_component_onpreferredscrollsize)
@@ -487,7 +496,7 @@ void pluginsview_init(PluginsView* self, psy_ui_Component* parent)
 	pluginsview_computetextsizes(self, 1024.0);
 }
 
-void pluginsview_ondestroy(PluginsView* self)
+void pluginsview_on_destroy(PluginsView* self)
 {	
 	psy_signal_dispose(&self->signal_selected);
 	psy_signal_dispose(&self->signal_changed);
@@ -738,7 +747,7 @@ void pluginsview_onpreferredscrollsize(PluginsView* self, const psy_ui_Size* lim
 	}
 }
 
-void pluginsview_onkeydown(PluginsView* self, psy_ui_KeyboardEvent* ev)
+void pluginsview_on_key_down(PluginsView* self, psy_ui_KeyboardEvent* ev)
 {
 	psy_Property* selected;
 
@@ -925,7 +934,7 @@ psy_Property* pluginsview_pluginbycursorposition(PluginsView* self, uintptr_t co
 	return NULL;
 }
 
-void pluginsview_onmousedown(PluginsView* self, psy_ui_MouseEvent* ev)
+void pluginsview_on_mouse_down(PluginsView* self, psy_ui_MouseEvent* ev)
 {	
 	self->multidrag = FALSE;
 	if (psy_ui_mouseevent_button(ev) == 1) {
@@ -950,10 +959,10 @@ void pluginsview_onmousedown(PluginsView* self, psy_ui_MouseEvent* ev)
 			psy_ui_component_set_focus(&self->component);
 		}
 	}
-	pluginsview_super_vtable.onmousedown(&self->component, ev);
+	pluginsview_super_vtable.on_mouse_down(&self->component, ev);
 }
 
-void pluginsview_onmouseup(PluginsView* self, psy_ui_MouseEvent* ev)
+void pluginsview_on_mouse_up(PluginsView* self, psy_ui_MouseEvent* ev)
 {
 	psy_ui_RealPoint pt;
 

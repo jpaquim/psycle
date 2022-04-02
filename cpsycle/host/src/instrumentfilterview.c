@@ -15,7 +15,7 @@
 #include "../../detail/portable.h"
 
 /* prototypes */
-static void instrumentfilterview_ondestroy(InstrumentFilterView*,
+static void instrumentfilterview_on_destroy(InstrumentFilterView*,
 	psy_ui_Component* sender);
 static void instrumentfilterview_updateslider(InstrumentFilterView*);
 static void instrumentfilterview_fillfiltercombobox(InstrumentFilterView*);
@@ -51,7 +51,7 @@ void instrumentfilterview_init(InstrumentFilterView* self,
 	self->instrument = NULL;
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_signal_connect(&self->component.signal_destroy, self,
-		instrumentfilterview_ondestroy);
+		instrumentfilterview_on_destroy);
 	psy_signal_init(&self->signal_status);
 	psy_ui_component_set_defaultalign(&self->component, psy_ui_ALIGN_TOP,
 		psy_ui_defaults_vmargin(psy_ui_defaults()));
@@ -126,7 +126,7 @@ void instrumentfilterview_init(InstrumentFilterView* self,
 		instrumentfilterview_onenvelopeviewtweaked);
 }
 
-void instrumentfilterview_ondestroy(InstrumentFilterView* self,
+void instrumentfilterview_on_destroy(InstrumentFilterView* self,
 	psy_ui_Component* sender)
 {
 	psy_signal_dispose(&self->signal_status);

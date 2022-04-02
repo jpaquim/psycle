@@ -18,8 +18,8 @@ static bool check_peak(float peak)
 }
 
 /* prototypes */
-static void clipbox_ontimer(ClipBox*, uintptr_t timerid);
-static void clipbox_onmousedown(ClipBox*, psy_ui_MouseEvent*);
+static void clipbox_on_timer(ClipBox*, uintptr_t timerid);
+static void clipbox_on_mouse_down(ClipBox*, psy_ui_MouseEvent*);
 static bool clipbox_check(ClipBox*, psy_audio_Machine*);
 
 /* vtable */
@@ -30,12 +30,12 @@ static void vtable_init(ClipBox* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);		
-		vtable.onmousedown =
-			(psy_ui_fp_component_onmouseevent)
-			clipbox_onmousedown;
-		vtable.ontimer =
-			(psy_ui_fp_component_ontimer)
-			clipbox_ontimer;
+		vtable.on_mouse_down =
+			(psy_ui_fp_component_on_mouse_event)
+			clipbox_on_mouse_down;
+		vtable.on_timer =
+			(psy_ui_fp_component_on_timer)
+			clipbox_on_timer;
 		vtable_initialized = TRUE;
 	}
 	psy_ui_component_setvtable(&self->component, &vtable);
@@ -53,7 +53,7 @@ void clipbox_init(ClipBox* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_ui_component_start_timer(&self->component, 0, 100);
 }
 
-void clipbox_ontimer(ClipBox* self, uintptr_t timerid)
+void clipbox_on_timer(ClipBox* self, uintptr_t timerid)
 {	
 	if (!clipbox_ison(self) && workspace_song(self->workspace)) {
 		psy_audio_Machine* master;
@@ -84,7 +84,7 @@ bool clipbox_check(ClipBox* self, psy_audio_Machine* machine)
 	return FALSE;
 }
 
-void clipbox_onmousedown(ClipBox* self, psy_ui_MouseEvent* ev)
+void clipbox_on_mouse_down(ClipBox* self, psy_ui_MouseEvent* ev)
 {
 	clipbox_deactivate(self);	
 }

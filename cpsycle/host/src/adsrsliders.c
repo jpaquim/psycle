@@ -15,7 +15,7 @@
 #include "../../detail/portable.h"
 
 /* prototypes */
-static void adsrsliders_ondestroy(AdsrSliders*, psy_ui_Component* sender);
+static void adsrsliders_on_destroy(AdsrSliders*, psy_ui_Component* sender);
 static void adsrsliders_onvolumeviewdescribe(AdsrSliders*,
 	psy_ui_Slider*, char* txt);
 static void adsrsliders_onvolumeviewtweak(AdsrSliders*,
@@ -35,7 +35,7 @@ void adsrsliders_init(AdsrSliders* self, psy_ui_Component* parent)
 	self->envelope = NULL;	
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_signal_connect(&self->component.signal_destroy, self,
-		adsrsliders_ondestroy);
+		adsrsliders_on_destroy);
 	psy_ui_component_set_defaultalign(&self->component, psy_ui_ALIGN_TOP,
 		psy_ui_defaults_vmargin(psy_ui_defaults()));	
 	psy_ui_slider_init(&self->attack, &self->component);
@@ -65,7 +65,7 @@ void adsrsliders_init(AdsrSliders* self, psy_ui_Component* parent)
 	psy_signal_init(&self->signal_tweaked);
 }
 
-void adsrsliders_ondestroy(AdsrSliders* self, psy_ui_Component* sender)
+void adsrsliders_on_destroy(AdsrSliders* self, psy_ui_Component* sender)
 {
 	psy_signal_dispose(&self->signal_tweaked);
 }

@@ -39,6 +39,8 @@ typedef struct psy_ui_TextMetric
 	uint8_t tmCharSet;
 } psy_ui_TextMetric;
 
+void psy_ui_textmetric_init(psy_ui_TextMetric*);
+
 typedef enum {
 	psy_ui_ROUND_NONE,
 	psy_ui_ROUND,

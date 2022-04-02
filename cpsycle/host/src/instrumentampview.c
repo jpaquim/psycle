@@ -15,7 +15,7 @@
 #include "../../detail/portable.h"
 
 /* prototypes */
-static void instrumentvolumeview_ondestroy(InstrumentVolumeView*,
+static void instrumentvolumeview_on_destroy(InstrumentVolumeView*,
 	psy_ui_Component* sender);
 static void instrumentvolumeview_updatesliders(InstrumentVolumeView*);
 static void instrumentvolumeview_ondescribe(InstrumentVolumeView*,
@@ -44,7 +44,7 @@ void instrumentvolumeview_init(InstrumentVolumeView* self,
 	self->instrument = 0;
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_signal_connect(&self->component.signal_destroy, self,
-		instrumentvolumeview_ondestroy);
+		instrumentvolumeview_on_destroy);
 	psy_signal_init(&self->signal_status);
 	psy_ui_component_set_defaultalign(&self->component, psy_ui_ALIGN_TOP,
 		psy_ui_defaults_vmargin(psy_ui_defaults()));
@@ -76,7 +76,7 @@ void instrumentvolumeview_init(InstrumentVolumeView* self,
 	instrumentvolumeview_updatesliders(self);
 }
 
-void instrumentvolumeview_ondestroy(InstrumentVolumeView* self,
+void instrumentvolumeview_on_destroy(InstrumentVolumeView* self,
 	psy_ui_Component* sender)
 {
 	psy_signal_dispose(&self->signal_status);

@@ -11,7 +11,7 @@
 #include "styles.h"
 
 /* prototypes */
-static void seqeditor_ondestroy(SeqEditor*);
+static void seqeditor_on_destroy(SeqEditor*);
 static void seqeditor_onsongchanged(SeqEditor*, Workspace* sender);
 static void seqeditor_updatesong(SeqEditor*);
 static void seqeditor_build(SeqEditor*);
@@ -29,7 +29,7 @@ static void seqeditor_ontrackremove(SeqEditor*, psy_audio_Sequence*,
 static void seqeditor_ontrackswap(SeqEditor*,
 	psy_audio_Sequence* sender, uintptr_t first, uintptr_t second);
 static void seqeditor_onmousemove(SeqEditor*, psy_ui_MouseEvent*);
-static void seqeditor_onmouseup(SeqEditor*, psy_ui_MouseEvent*);
+static void seqeditor_on_mouse_up(SeqEditor*, psy_ui_MouseEvent*);
 static void seqeditor_ontoggleexpand(SeqEditor*, psy_ui_Button* sender);
 static void seqeditor_ontrackresize(SeqEditor*, psy_ui_Component* sender,
 	uintptr_t trackid, double* height);
@@ -44,15 +44,15 @@ static void seqeditor_vtable_init(SeqEditor* self)
 {
 	if (!seqeditor_vtable_initialized) {
 		seqeditor_vtable = *(self->component.vtable);
-		seqeditor_vtable.ondestroy =
+		seqeditor_vtable.on_destroy =
 			(psy_ui_fp_component_event)
-			seqeditor_ondestroy;
+			seqeditor_on_destroy;
 		seqeditor_vtable.onmousemove =
-			(psy_ui_fp_component_onmouseevent)
+			(psy_ui_fp_component_on_mouse_event)
 			seqeditor_onmousemove;
-		seqeditor_vtable.onmouseup =
-			(psy_ui_fp_component_onmouseevent)
-			seqeditor_onmouseup;
+		seqeditor_vtable.on_mouse_up =
+			(psy_ui_fp_component_on_mouse_event)
+			seqeditor_on_mouse_up;
 
 		seqeditor_vtable_initialized = TRUE;
 	}
@@ -112,8 +112,8 @@ void seqeditor_init(SeqEditor* self, psy_ui_Component* parent,
 	/* tracks */
 	seqeditortracks_init(&self->tracks, &self->component, &self->state,
 		workspace);
-	psy_ui_scroller_init(&self->scroller, &self->tracks.component,
-		&self->component);	
+	psy_ui_scroller_init(&self->scroller, &self->component, NULL, NULL);
+	psy_ui_scroller_set_client(&self->scroller, &self->tracks.component);
 	psy_ui_component_set_align(&self->tracks.component, psy_ui_ALIGN_FIXED);
 	psy_ui_component_set_align(&self->scroller.component, psy_ui_ALIGN_CLIENT);	
 	psy_ui_component_set_preferred_size(&self->component, psy_ui_size_make(
@@ -134,7 +134,7 @@ void seqeditor_init(SeqEditor* self, psy_ui_Component* parent,
 	seqeditor_updatescrollstep(self);
 }
 
-void seqeditor_ondestroy(SeqEditor* self)
+void seqeditor_on_destroy(SeqEditor* self)
 {
 	seqeditstate_dispose(&self->state);
 }
@@ -257,7 +257,7 @@ void seqeditor_onmousemove(SeqEditor* self, psy_ui_MouseEvent* ev)
 	}
 }
 
-void seqeditor_onmouseup(SeqEditor* self, psy_ui_MouseEvent* ev)
+void seqeditor_on_mouse_up(SeqEditor* self, psy_ui_MouseEvent* ev)
 {	
 	if (self->state.cmd == SEQEDTCMD_NEWTRACK) {
 		sequencecmds_appendtrack(self->state.cmds);

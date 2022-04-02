@@ -25,8 +25,8 @@ static void knobui_ondraw(KnobUi*, psy_ui_Graphics*);
 static void knobui_onpreferredsize(KnobUi*, const psy_ui_Size* limit,
 	psy_ui_Size* rv);
 static void knobui_updateparam(KnobUi*);
-static void knobui_onmousedown(KnobUi*, psy_ui_MouseEvent*);
-static void knobui_onmouseup(KnobUi*, psy_ui_MouseEvent*);
+static void knobui_on_mouse_down(KnobUi*, psy_ui_MouseEvent*);
+static void knobui_on_mouse_up(KnobUi*, psy_ui_MouseEvent*);
 static void knobui_onmousemove(KnobUi*, psy_ui_MouseEvent*);
 
 /* vtable */
@@ -45,14 +45,14 @@ static void knobui_vtable_init(KnobUi* self)
 		knobui_vtable.onpreferredsize =
 			(psy_ui_fp_component_onpreferredsize)
 			knobui_onpreferredsize;
-		knobui_vtable.onmousedown =
-			(psy_ui_fp_component_onmouseevent)
-			knobui_onmousedown;
-		knobui_vtable.onmouseup =
-			(psy_ui_fp_component_onmouseevent)
-			knobui_onmouseup;
+		knobui_vtable.on_mouse_down =
+			(psy_ui_fp_component_on_mouse_event)
+			knobui_on_mouse_down;
+		knobui_vtable.on_mouse_up =
+			(psy_ui_fp_component_on_mouse_event)
+			knobui_on_mouse_up;
 		knobui_vtable.onmousemove =
-			(psy_ui_fp_component_onmouseevent)
+			(psy_ui_fp_component_on_mouse_event)
 			knobui_onmousemove;
 		knobui_vtable_initialized = TRUE;
 	}
@@ -233,12 +233,12 @@ void knobui_onpreferredsize(KnobUi* self, const psy_ui_Size* limit,
 	psy_ui_size_setem(rv, PARAMWIDTH, 2.0);
 }
 
-void knobui_onmousedown(KnobUi* self, psy_ui_MouseEvent* ev)
+void knobui_on_mouse_down(KnobUi* self, psy_ui_MouseEvent* ev)
 {
 	if (psy_ui_mouseevent_button(ev) == 1) {
 		paramtweak_begin(&self->paramtweak, self->machine, self->paramidx,
 			self->param);		
-		paramtweak_onmousedown(&self->paramtweak, ev);		
+		paramtweak_on_mouse_down(&self->paramtweak, ev);		
 		psy_ui_component_capture(&self->component);
 	}
 }
@@ -251,7 +251,7 @@ void knobui_onmousemove(KnobUi* self, psy_ui_MouseEvent* ev)
 	}
 }
 
-void knobui_onmouseup(KnobUi* self, psy_ui_MouseEvent* ev)
+void knobui_on_mouse_up(KnobUi* self, psy_ui_MouseEvent* ev)
 {
 	psy_ui_component_releasecapture(&self->component);
 	if (paramtweak_active(&self->paramtweak)) {

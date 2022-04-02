@@ -40,7 +40,7 @@ void psy_ui_notebook_init(psy_ui_Notebook* self, psy_ui_Component* parent)
 {  
     psy_ui_component_init(psy_ui_notebook_base(self), parent, NULL);
 	vtable_init(self);
-	psy_ui_component_setbackgroundcolour(psy_ui_notebook_base(self),
+	psy_ui_component_set_background_colour(psy_ui_notebook_base(self),
 		psy_ui_colour_transparent());
 	self->pageindex = 0;
 	self->split = 0;
@@ -105,6 +105,27 @@ void psy_ui_notebook_select(psy_ui_Notebook* self, uintptr_t pageindex)
 			}
 		}
 	}	
+}
+
+void psy_ui_notebook_select_by_component_id(psy_ui_Notebook* self,
+	uintptr_t component_id)
+{	
+	uintptr_t page;
+	psy_List* p;
+	psy_List* q;
+
+	q = psy_ui_component_children(psy_ui_notebook_base(self),
+		psy_ui_NONE_RECURSIVE);
+	for (p = q, page = 0; p != NULL; psy_list_next(&p), ++page) {
+		psy_ui_Component* component;
+
+		component = (psy_ui_Component*)p->entry;
+		if (component->id == component_id) {
+			psy_ui_notebook_select(self, page);
+			break;
+		}		
+	}
+	psy_list_free(q);
 }
 
 uintptr_t psy_ui_notebook_pageindex(psy_ui_Notebook* self)
@@ -217,7 +238,7 @@ void psy_ui_notebook_full(psy_ui_Notebook* self)
 	}
 }
 
-psy_ui_Component* psy_ui_notebook_activepage(psy_ui_Notebook* self)
+psy_ui_Component* psy_ui_notebook_active_page(psy_ui_Notebook* self)
 {	
 	return psy_ui_component_at(psy_ui_notebook_base(self), self->pageindex);
 }

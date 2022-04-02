@@ -20,14 +20,16 @@ typedef struct psy_ui_Notebook {
 	psy_ui_Splitter splitbar;	
 	uintptr_t pageindex;
 	int split;
-	bool preventalign;
+	bool preventalign;	
 } psy_ui_Notebook;
 
 void psy_ui_notebook_init(psy_ui_Notebook*, psy_ui_Component* parent);
 
 void psy_ui_notebook_select(psy_ui_Notebook*, uintptr_t page);
+void psy_ui_notebook_select_by_component_id(psy_ui_Notebook*,
+	uintptr_t component_id);
 uintptr_t psy_ui_notebook_pageindex(psy_ui_Notebook*);
-psy_ui_Component* psy_ui_notebook_activepage(psy_ui_Notebook*);
+psy_ui_Component* psy_ui_notebook_active_page(psy_ui_Notebook*);
 psy_ui_Component* psy_ui_notebook_page(psy_ui_Notebook*, uintptr_t pageindex);
 void psy_ui_notebook_split(psy_ui_Notebook*, psy_ui_Orientation);
 int psy_ui_notebook_splitactivated(psy_ui_Notebook*);

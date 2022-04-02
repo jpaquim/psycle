@@ -13,7 +13,7 @@
 
 // RealEdit
 // prototypes
-static void realedit_ondestroy(RealEdit*, psy_ui_Component* sender);
+static void realedit_on_destroy(RealEdit*, psy_ui_Component* sender);
 static void realedit_onlessclicked(RealEdit*, psy_ui_Component* sender);
 static void realedit_onmoreclicked(RealEdit*, psy_ui_Component* sender);
 static void realedit_oneditkeydown(RealEdit*, psy_ui_Component* sender,
@@ -54,7 +54,7 @@ void realedit_init(RealEdit* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->edit.component.signal_focuslost, self,
 		realedit_oneditfocuslost);
 	psy_signal_connect(&self->component.signal_destroy, self,
-		realedit_ondestroy);
+		realedit_on_destroy);
 }
 
 void realedit_init_connect(RealEdit* self, psy_ui_Component* parent,
@@ -65,7 +65,7 @@ void realedit_init_connect(RealEdit* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->signal_changed, context, fp);
 }
 
-void realedit_ondestroy(RealEdit* self, psy_ui_Component* sender)
+void realedit_on_destroy(RealEdit* self, psy_ui_Component* sender)
 {
 	psy_signal_dispose(&self->signal_changed);
 }

@@ -15,13 +15,13 @@
 #include "../../detail/portable.h"
 
 /* prototypes */
-static void renderview_ondestroy(RenderView*);
+static void renderview_on_destroy(RenderView*);
 static void renderview_build(RenderView*);
 static void renderview_onsettingsviewchanged(RenderView*,
 	PropertiesView* sender, psy_Property*, uintptr_t* rebuild);
 static void renderview_render(RenderView*);
 static void renderview_onstoprendering(RenderView*, psy_AudioDriver* sender);
-static void renderview_onfocus(RenderView*);
+static void renderview_on_focus(RenderView*);
 static void renderview_configure_setdefaultoutputpath(RenderView*);
 static void renderview_configure_player_dither(RenderView*);
 static void renderview_configure_player_record(RenderView*);
@@ -36,12 +36,12 @@ static void renderview_vtable_init(RenderView* self)
 {
 	if (!renderview_vtable_initialized) {
 		renderview_vtable = *(self->component.vtable);
-		renderview_vtable.ondestroy =
+		renderview_vtable.on_destroy =
 			(psy_ui_fp_component_event)
-			renderview_ondestroy;
-		renderview_vtable.onfocus =
+			renderview_on_destroy;
+		renderview_vtable.on_focus =
 			(psy_ui_fp_component_event)
-			renderview_onfocus;
+			renderview_on_focus;
 		renderview_vtable_initialized = TRUE;
 	}
 	self->component.vtable = &renderview_vtable;
@@ -53,6 +53,7 @@ void renderview_init(RenderView* self, psy_ui_Component* parent,
 {		
 	psy_ui_component_init(&self->component, parent, NULL);
 	renderview_vtable_init(self);
+	psy_ui_component_set_id(&self->component, VIEW_ID_RENDERVIEW);
 	self->workspace = workspace;
 	self->fileoutdriver = psy_audio_create_fileout_driver();
 	renderview_build(self);
@@ -68,7 +69,7 @@ void renderview_init(RenderView* self, psy_ui_Component* parent,
 	psy_ui_component_hide(&self->progressview.component);
 }
 
-void renderview_ondestroy(RenderView* self)
+void renderview_on_destroy(RenderView* self)
 {
 	psy_property_deallocate(self->properties);	
 	psy_audiodriver_deallocate(self->fileoutdriver);
@@ -252,7 +253,7 @@ void renderview_onstoprendering(RenderView* self, psy_AudioDriver* sender)
 	psy_ui_component_show_align(&self->view.component);
 }
 
-void renderview_onfocus(RenderView* self)
+void renderview_on_focus(RenderView* self)
 {
 	psy_ui_component_set_focus(&self->view.component);
 }

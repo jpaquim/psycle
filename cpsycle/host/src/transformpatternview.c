@@ -20,7 +20,7 @@ static const char* tws = "tws";
 static const char* mcm = "mcm";
 
 // prototypes
-static void transformpatternview_ondestroy(TransformPatternView*);
+static void transformpatternview_on_destroy(TransformPatternView*);
 static void transformpatternview_init_search(TransformPatternView*);
 static void transformpatternview_init_replace(TransformPatternView*);
 static void transformpatternview_init_searchon(TransformPatternView*);
@@ -28,7 +28,7 @@ static void transformpatternview_init_actions(TransformPatternView*);
 static void transformpatternview_initselection(TransformPatternView*);
 static void transformpatternview_applyto(TransformPatternView*,
 	int index);
-static void transformpatternview_onsearchonmousedown(TransformPatternView*,
+static void transformpatternview_onsearchon_mouse_down(TransformPatternView*,
 	psy_ui_Component* sender, psy_ui_MouseEvent*);
 static void transformpatternview_onsearch(TransformPatternView*);
 static void transformpatternview_searchentiresong(TransformPatternView*,
@@ -65,13 +65,13 @@ void transformpatternview_init(TransformPatternView* self, psy_ui_Component*
 	transformpatternview_init_actions(self);
 	transformpatternview_initselection(self);
 	psy_signal_connect(&self->component.signal_destroy, self,
-		transformpatternview_ondestroy);
+		transformpatternview_on_destroy);
 	psy_ui_component_set_align(transformpatternview_base(self),
 		psy_ui_ALIGN_RIGHT);
 	psy_ui_component_hide(transformpatternview_base(self));
 }
 
-void transformpatternview_ondestroy(TransformPatternView* self)
+void transformpatternview_on_destroy(TransformPatternView* self)
 {
 }
 
@@ -146,7 +146,7 @@ void transformpatternview_init_searchon(TransformPatternView* self)
 		"transformpattern.searchon");
 	psy_ui_component_init(&self->searchonchoice, &self->searchon, NULL);
 	psy_signal_connect(&self->searchonchoice.signal_mousedown, self,
-		transformpatternview_onsearchonmousedown);
+		transformpatternview_onsearchon_mouse_down);
 	psy_ui_component_set_defaultalign(&self->searchonchoice,
 		psy_ui_ALIGN_TOP, self->sectionmargin);
 	psy_ui_label_init_text(&self->entire, &self->searchonchoice,
@@ -156,7 +156,7 @@ void transformpatternview_init_searchon(TransformPatternView* self)
 	psy_ui_label_init_text(&self->currselection, &self->searchonchoice,
 		"transformpattern.currentselection");
 	psy_ui_component_preventinput(psy_ui_label_base(&self->currselection),
-		psy_ui_NONRECURSIVE);
+		psy_ui_NONE_RECURSIVE);
 	transformpatternview_applyto(self, 1);
 }
 
@@ -254,12 +254,12 @@ void transformpatternview_initselection(TransformPatternView* self)
 	psy_ui_combobox_setcursel(&self->replacemach, 0);
 }
 
-void transformpatternview_onsearchonmousedown(TransformPatternView* self,
+void transformpatternview_onsearchon_mouse_down(TransformPatternView* self,
 	psy_ui_Component* sender, psy_ui_MouseEvent* ev)
 {
 	psy_List* q;
 
-	q = psy_ui_component_children(&self->searchonchoice, psy_ui_NONRECURSIVE);
+	q = psy_ui_component_children(&self->searchonchoice, psy_ui_NONE_RECURSIVE);
 	transformpatternview_applyto(self, (int)psy_list_entry_index(q,
 		psy_ui_event_target(&ev->event)));
 	psy_list_free(q);
@@ -275,7 +275,7 @@ void transformpatternview_applyto(TransformPatternView* self, int index)
 		self->applyto = index;
 	}	
 	c = 0;
-	for (p = q = psy_ui_component_children(&self->searchonchoice, psy_ui_NONRECURSIVE); p != NULL;
+	for (p = q = psy_ui_component_children(&self->searchonchoice, psy_ui_NONE_RECURSIVE); p != NULL;
 		psy_list_next(&p), ++c) {
 		psy_ui_Component* component;
 
@@ -418,11 +418,11 @@ void transformpatternview_setpatternselection(TransformPatternView* self,
 		self->patternselection = *selection;
 		if (selection->valid) {
 			psy_ui_component_enableinput(psy_ui_label_base(&self->currselection),
-				psy_ui_NONRECURSIVE);
+				psy_ui_NONE_RECURSIVE);
 			transformpatternview_applyto(self, 2);
 		} else {
 			psy_ui_component_preventinput(psy_ui_label_base(&self->currselection),
-				psy_ui_NONRECURSIVE);
+				psy_ui_NONE_RECURSIVE);
 			if (self->applyto == 2) {
 				transformpatternview_applyto(self, 1);
 			}

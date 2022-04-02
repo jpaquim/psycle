@@ -35,7 +35,7 @@ static void playbar_onnumplaybeatsmore(PlayBar*, psy_ui_Button* sender);
 static void playbar_onplayclicked(PlayBar*, psy_ui_Component* sender);
 static void playbar_startplay(PlayBar*);
 static void playbar_onstopclicked(PlayBar*, psy_ui_Component* sender);
-static void playbar_ontimer(PlayBar*, uintptr_t timerid);
+static void playbar_on_timer(PlayBar*, uintptr_t timerid);
 static void playbar_onlanguagechanged(PlayBar*);
 static psy_audio_SequencerPlayMode playbar_comboboxplaymode(const PlayBar*);
 /* vtable */
@@ -46,9 +46,9 @@ static void vtable_init(PlayBar* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.ontimer =
-			(psy_ui_fp_component_ontimer)
-			playbar_ontimer;
+		vtable.on_timer =
+			(psy_ui_fp_component_on_timer)
+			playbar_on_timer;
 		vtable.onlanguagechanged =
 			(psy_ui_fp_component_onlanguagechanged)
 			playbar_onlanguagechanged;
@@ -229,7 +229,7 @@ void playbar_onrecordnotesclicked(PlayBar* self, psy_ui_Component* sender)
 	}
 }
 
-void playbar_ontimer(PlayBar* self, uintptr_t timerid)
+void playbar_on_timer(PlayBar* self, uintptr_t timerid)
 {	
 	if (psy_audio_player_playing(self->player)) {
 		psy_ui_button_highlight(&self->play);

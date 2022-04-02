@@ -13,11 +13,16 @@
 #include "../../detail/portable.h"
 
 /* prototypes */
-static void psy_ui_textdraw_draw_single_line(psy_ui_TextDraw*, psy_ui_Graphics*, const psy_ui_Font*,
+static void psy_ui_textdraw_draw_single_line(psy_ui_TextDraw*, psy_ui_Graphics*,
 	const psy_ui_TextMetric* tm);
 static void psy_ui_textdraw_drawcursor(psy_ui_TextDraw*, psy_ui_Graphics*,
 	const psy_ui_TextMetric*, double cpy, uintptr_t linestart, uintptr_t cp);
-
+static double psy_ui_textdraw_center_x(const psy_ui_TextDraw*,
+	double width, const char* text, uintptr_t count, const psy_ui_Font*,
+	const psy_ui_TextMetric*);
+static double psy_ui_textdraw_center_y(const psy_ui_TextDraw*,
+	double height, uintptr_t numlines, const psy_ui_Font*,
+	const psy_ui_TextMetric*);
 
 /* implementation */
 void psy_ui_textdraw_init(psy_ui_TextDraw* self, psy_ui_TextFormat* format, psy_ui_RealSize size,
@@ -33,7 +38,7 @@ void psy_ui_textdraw_dispose(psy_ui_TextDraw* self)
 }
 
 void psy_ui_textdraw_draw(psy_ui_TextDraw* self, psy_ui_Graphics* g,
-	const psy_ui_Font* font, const psy_ui_TextMetric* tm, uintptr_t cursorpos)
+	uintptr_t cursorpos)
 {		
 	psy_ui_RealPoint center;		
 	uintptr_t cp;	
@@ -41,13 +46,15 @@ void psy_ui_textdraw_draw(psy_ui_TextDraw* self, psy_ui_Graphics* g,
 	uintptr_t numlines;
 	uintptr_t linestart;
 	double lineheight;
-	psy_ui_RealRectangle clip;
+	psy_ui_RealRectangle clip;	
+	const psy_ui_TextMetric* tm;
 
-	if (!self->format->wrap) {
-		psy_ui_textdraw_draw_single_line(self, g, font, tm);
-		if (cursorpos >= 0 && cursorpos <= psy_strlen(self->text)) {
+	tm = psy_ui_font_textmetric(psy_ui_font(g));
+	if (!psy_ui_textformat_has_wrap(self->format)) {
+		psy_ui_textdraw_draw_single_line(self, g, tm);
+		if (cursorpos >= 0 && cursorpos <= psy_strlen(self->text)) {			
 			psy_ui_textdraw_drawcursor(self, g, tm,
-				psy_ui_textdraw_center_y(self, self->size.height, 1, font, tm),
+				psy_ui_textdraw_center_y(self, self->size.height, 1, psy_ui_font(g), tm),
 				0, cursorpos);
 		}
 		return;
@@ -55,12 +62,12 @@ void psy_ui_textdraw_draw(psy_ui_TextDraw* self, psy_ui_Graphics* g,
 	if (psy_strlen(self->text) == 0) {
 		return;
 	}		
-	psy_ui_textformat_update(self->format, self->text, self->size.width, tm);
+	psy_ui_textformat_update(self->format, self->text, self->size.width, psy_ui_font(g), tm);
 	numlines = psy_ui_textformat_numlines(self->format);
 	if (numlines == 0) {
 		return;
 	}	
-	center.y = psy_ui_textdraw_center_y(self, self->size.height, numlines, font, tm);
+	center.y = psy_ui_textdraw_center_y(self, self->size.height, numlines, psy_ui_font(g), tm);
 	clip = psy_ui_graphics_cliprect(g);
 	lineheight = (self->format->linespacing * tm->tmHeight);
 	line = (intptr_t)(clip.top / lineheight);
@@ -75,7 +82,7 @@ void psy_ui_textdraw_draw(psy_ui_TextDraw* self, psy_ui_Graphics* g,
 		if (line >= 0) {
 			cp = psy_ui_textformat_line_at(self->format, line);
 			center.x = psy_ui_textdraw_center_x(self, self->size.width,
-				self->text + linestart, cp - linestart, font, tm);
+				self->text + linestart, cp - linestart, psy_ui_font(g), tm);
 			psy_ui_textout(g, center, self->text + linestart, cp - linestart);
 			if (cursorpos >= linestart && cursorpos <= cp) {
 				psy_ui_textdraw_drawcursor(self, g, tm, center.y, linestart, cursorpos);				
@@ -101,14 +108,19 @@ void psy_ui_textdraw_drawcursor(psy_ui_TextDraw* self, psy_ui_Graphics* g,
 
 
 void psy_ui_textdraw_draw_single_line(psy_ui_TextDraw* self, psy_ui_Graphics* g,
-	const psy_ui_Font* font, const psy_ui_TextMetric* tm)
+	const psy_ui_TextMetric* tm)
 {	
-	uintptr_t numchars;	
+	uintptr_t numchars;
+	const psy_ui_Font* font;
 	
 	numchars = psy_strlen(self->text);
 	if (numchars == 0) {
 		return;
 	}	
+	font = psy_ui_font(g);
+	if (!font) {
+		return;
+	}
 	psy_ui_textout(g, psy_ui_realpoint_make(
 		psy_ui_textdraw_center_x(self, self->size.width, self->text, numchars, font, tm),
 		psy_ui_textdraw_center_y(self, self->size.height, 1, font, tm)),

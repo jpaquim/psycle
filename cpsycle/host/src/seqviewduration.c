@@ -20,7 +20,7 @@
 /* SeqviewDuration */
 
 /* prototypes */
-static void seqviewduration_ondestroy(SeqviewDuration* self,
+static void seqviewduration_on_destroy(SeqviewDuration* self,
 	psy_ui_Component* sender);	
 
 /* implementation */
@@ -46,11 +46,11 @@ void seqviewduration_init(SeqviewDuration* self, psy_ui_Component* parent,
 	psy_ui_component_set_style_type(psy_ui_label_base(&self->duration),
 		STYLE_DURATION_TIME);		
 	psy_signal_connect(&self->component.signal_destroy, self,
-		seqviewduration_ondestroy);	
+		seqviewduration_on_destroy);	
 	seqviewduration_update(self, FALSE);
 }
 
-void seqviewduration_ondestroy(SeqviewDuration* self, psy_ui_Component* sender)
+void seqviewduration_on_destroy(SeqviewDuration* self, psy_ui_Component* sender)
 {		
 	seqviewduration_stopdurationcalc(self);
 }

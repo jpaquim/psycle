@@ -40,7 +40,7 @@ static void songpropertiesview_onsamplerindexchange(SongPropertiesView*,
 	IntEdit* sender);
 static void songpropertiesview_oncommentschanged(SongPropertiesView*,
 	psy_ui_Component* sender);
-static void songpropertiesview_onkeydown(SongPropertiesView*,
+static void songpropertiesview_on_key_down(SongPropertiesView*,
 	psy_ui_Component* sender, psy_ui_KeyboardEvent*);
 static void songpropertiesview_onkeyup(SongPropertiesView*,
 	psy_ui_Component* sender, psy_ui_KeyboardEvent*);
@@ -61,6 +61,7 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 	self->song = workspace->song;
 	self->workspace = workspace;
 	psy_ui_component_init(&self->component, parent, NULL);
+	psy_ui_component_set_id(songpropertiesview_base(self), VIEW_ID_SONGPROPERTIES);
 	psy_ui_component_set_style_type(&self->component, STYLE_SONGPROPERTIES);
 	psy_ui_component_init(&self->viewtabbar, tabbarparent, NULL);
 	psy_ui_component_init(&self->top, &self->component, NULL);
@@ -169,7 +170,7 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->component.signal_hide, self,
 		songpropertiesview_onhide);
 	psy_signal_connect(&self->component.signal_keydown, self,
-		songpropertiesview_onkeydown);
+		songpropertiesview_on_key_down);
 	psy_signal_connect(&self->component.signal_keyup, self,
 		songpropertiesview_onkeyup);	
 }
@@ -323,7 +324,7 @@ void songpropertiesview_oncommentschanged(SongPropertiesView* self,
 		psy_ui_textarea_text(&self->edit_comments));
 }
 
-void songpropertiesview_onkeydown(SongPropertiesView* self,
+void songpropertiesview_on_key_down(SongPropertiesView* self,
 	psy_ui_Component* sender, psy_ui_KeyboardEvent* ev)
 {
 	if (songpropertiesview_haseditfocus(self)) {		

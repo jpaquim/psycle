@@ -15,7 +15,7 @@
 #include "../../detail/portable.h"
 
 /* prototypes */
-static void instrumentpanview_ondestroy(InstrumentPanView*,
+static void instrumentpanview_on_destroy(InstrumentPanView*,
 	psy_ui_Component* sender);
 static void instrumentpanview_oninstpanenabled(InstrumentPanView*,
 	psy_ui_CheckBox* sender);
@@ -47,7 +47,7 @@ void instrumentpanview_init(InstrumentPanView* self, psy_ui_Component* parent,
 	self->workspace = workspace;
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_signal_connect(&self->component.signal_destroy, self,
-		instrumentpanview_ondestroy);
+		instrumentpanview_on_destroy);
 	psy_signal_init(&self->signal_status);
 	psy_ui_component_set_defaultalign(&self->component, psy_ui_ALIGN_TOP,
 		psy_ui_defaults_vmargin(psy_ui_defaults()));
@@ -110,7 +110,7 @@ void instrumentpanview_init(InstrumentPanView* self, psy_ui_Component* parent,
 	instrumentpanview_updatesliders(self);
 }
 
-void instrumentpanview_ondestroy(InstrumentPanView* self,
+void instrumentpanview_on_destroy(InstrumentPanView* self,
 	psy_ui_Component* sender)
 {
 	psy_signal_dispose(&self->signal_status);

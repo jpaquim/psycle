@@ -33,9 +33,9 @@ static void trackercolumn_drawentry(TrackerColumn*, psy_ui_Graphics*,
 static void trackercolumn_drawdigit(TrackerColumn*, psy_ui_Graphics*,
 	psy_ui_RealPoint cp, const char* str);
 static void trackercolumn_drawresizebar(TrackerColumn*, psy_ui_Graphics*);
-static void trackercolumn_onmousedown(TrackerColumn*, psy_ui_MouseEvent*);
+static void trackercolumn_on_mouse_down(TrackerColumn*, psy_ui_MouseEvent*);
 static void trackercolumn_onmousemove(TrackerColumn*, psy_ui_MouseEvent*);
-static void trackercolumn_onmouseup(TrackerColumn*, psy_ui_MouseEvent*);
+static void trackercolumn_on_mouse_up(TrackerColumn*, psy_ui_MouseEvent*);
 static void trackercolumn_onpreferredsize(TrackerColumn*,
 	const psy_ui_Size* limit, psy_ui_Size* rv);
 static void trackercolumn_updatecursor(TrackerColumn*, double position);
@@ -56,15 +56,15 @@ static void trackercolumn_vtable_init(TrackerColumn* self)
 		trackercolumn_vtable.onpreferredsize =
 			(psy_ui_fp_component_onpreferredsize)
 			trackercolumn_onpreferredsize;
-		trackercolumn_vtable.onmousedown =
-			(psy_ui_fp_component_onmouseevent)
-			trackercolumn_onmousedown;
+		trackercolumn_vtable.on_mouse_down =
+			(psy_ui_fp_component_on_mouse_event)
+			trackercolumn_on_mouse_down;
 		trackercolumn_vtable.onmousemove =
-			(psy_ui_fp_component_onmouseevent)
+			(psy_ui_fp_component_on_mouse_event)
 			trackercolumn_onmousemove;
-		trackercolumn_vtable.onmouseup =
-			(psy_ui_fp_component_onmouseevent)
-			trackercolumn_onmouseup;
+		trackercolumn_vtable.on_mouse_up =
+			(psy_ui_fp_component_on_mouse_event)
+			trackercolumn_on_mouse_up;
 		trackercolumn_vtable_initialized = TRUE;
 	}
 	self->component.vtable = &trackercolumn_vtable;
@@ -321,7 +321,7 @@ void trackercolumn_drawresizebar(TrackerColumn* self, psy_ui_Graphics* g)
 	}
 }
 
-void trackercolumn_onmousedown(TrackerColumn* self, psy_ui_MouseEvent* ev)
+void trackercolumn_on_mouse_down(TrackerColumn* self, psy_ui_MouseEvent* ev)
 {
 	psy_ui_RealSize size;
 	double notewidth;
@@ -385,7 +385,7 @@ bool trackercolumn_isovercolumn(const TrackerColumn* self, double position)
 		position < self->state->trackconfig->textwidth * 3);
 }
 
-void trackercolumn_onmouseup(TrackerColumn* self, psy_ui_MouseEvent* ev)
+void trackercolumn_on_mouse_up(TrackerColumn* self, psy_ui_MouseEvent* ev)
 {
 	psy_ui_component_releasecapture(&self->component);	
 	trackconfig_resize(self->state->trackconfig, self->track,

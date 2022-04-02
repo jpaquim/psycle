@@ -11,7 +11,7 @@
 #include "../../detail/portable.h"
 
 /* prototypes */
-static void instrumentpitchview_ondestroy(InstrumentPitchView*,
+static void instrumentpitchview_on_destroy(InstrumentPitchView*,
 	psy_ui_Component* sender);
 static void instrumentpitchview_ontweaked(InstrumentPitchView*,
 	psy_ui_Component*, int pointindex);
@@ -28,7 +28,7 @@ void instrumentpitchview_init(InstrumentPitchView* self,
 	self->instrument = 0;
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_signal_connect(&self->component.signal_destroy, self,
-		instrumentpitchview_ondestroy);
+		instrumentpitchview_on_destroy);
 	psy_signal_init(&self->signal_status);
 	psy_ui_component_set_defaultalign(&self->component, psy_ui_ALIGN_TOP,
 		psy_ui_defaults_vmargin(psy_ui_defaults()));	
@@ -46,7 +46,7 @@ void instrumentpitchview_init(InstrumentPitchView* self,
 		instrumentpitchview_onenvelopeviewtweaked);
 }
 
-void instrumentpitchview_ondestroy(InstrumentPitchView* self,
+void instrumentpitchview_on_destroy(InstrumentPitchView* self,
 	psy_ui_Component* sender)
 {
 	psy_signal_dispose(&self->signal_status);

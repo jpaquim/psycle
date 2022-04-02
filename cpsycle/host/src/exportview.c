@@ -14,24 +14,25 @@
 
 #include "../../detail/trace.h"
 
-static void exportview_ondestroy(ExportView*, psy_ui_Component* sender);
+static void exportview_on_destroy(ExportView*, psy_ui_Component* sender);
 static void exportview_makeproperties(ExportView*);
 static void exportview_onsettingsviewchanged(ExportView*, PropertiesView* sender,
 	psy_Property*, uintptr_t* rebuild);
 static void exportview_exportmodule(ExportView*);
 static void exportview_exportmidifile(ExportView*);
 static void exportview_exportlyfile(ExportView*);
-static void exportview_onfocus(ExportView*, psy_ui_Component* sender);
+static void exportview_on_focus(ExportView*, psy_ui_Component* sender);
 
 void exportview_init(ExportView* self, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, Workspace* workspace)
-{	
-	self->workspace = workspace;
+{		
 	psy_ui_component_init(&self->component, parent, NULL);
+	psy_ui_component_set_id(&self->component, VIEW_ID_EXPORTVIEW);
+	self->workspace = workspace;
 	psy_signal_connect(&self->component.signal_destroy, self,
-		exportview_ondestroy);
+		exportview_on_destroy);
 	psy_signal_connect(&self->component.signal_focus,
-		self, exportview_onfocus);
+		self, exportview_on_focus);
 	exportview_makeproperties(self);
 	propertiesview_init(&self->view, &self->component,
 		tabbarparent, self->properties, 3, workspace);
@@ -40,7 +41,7 @@ void exportview_init(ExportView* self, psy_ui_Component* parent,
 	psy_ui_component_set_align(&self->view.component, psy_ui_ALIGN_CLIENT);	
 }
 
-void exportview_ondestroy(ExportView* self, psy_ui_Component* sender)
+void exportview_on_destroy(ExportView* self, psy_ui_Component* sender)
 {
 	psy_property_deallocate(self->properties);	
 }
@@ -94,7 +95,7 @@ void exportview_exportlyfile(ExportView* self)
 }
 
 
-void exportview_onfocus(ExportView* self, psy_ui_Component* sender)
+void exportview_on_focus(ExportView* self, psy_ui_Component* sender)
 {
 	psy_ui_component_set_focus(&self->view.component);
 }

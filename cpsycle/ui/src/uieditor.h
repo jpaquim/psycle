@@ -1,13 +1,13 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+**  copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #ifndef psy_ui_EDITOR_H
 #define psy_ui_EDITOR_H
 
 /* local */
-#include "uicomponent.h"
+#include "uitextarea.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -15,28 +15,30 @@ extern "C" {
 
 /* Editor component (implementaion scintilla based) */
 
-typedef struct psy_ui_TextInputor {
+typedef struct psy_ui_Editor {
 	/* inherits */
 	psy_ui_Component component;
-} psy_ui_TextInputor;
+	psy_ui_TextArea textarea;
+} psy_ui_Editor;
 
-void psy_ui_editor_init(psy_ui_TextInputor*, psy_ui_Component* parent);
-void psy_ui_editor_load(psy_ui_TextInputor*, const char* path);
-void psy_ui_editor_save(psy_ui_TextInputor*, const char* path);
-void psy_ui_editor_settext(psy_ui_TextInputor*, const char* text);
-void psy_ui_editor_addtext(psy_ui_TextInputor*, const char* text);
-char* psy_ui_editor_text(psy_ui_TextInputor*, uintptr_t maxlength, char* text);
-uintptr_t psy_ui_editor_length(psy_ui_TextInputor*);
-void psy_ui_editor_clear(psy_ui_TextInputor*);
-void psy_ui_editor_setcolour(psy_ui_TextInputor*, psy_ui_Colour);
-void psy_ui_editor_setbackgroundcolour(psy_ui_TextInputor*, psy_ui_Colour);
-void psy_ui_editor_enableedit(psy_ui_TextInputor*);
-void psy_ui_editor_preventedit(psy_ui_TextInputor*);
-void psy_ui_editor_enablewrap(psy_ui_TextInputor*);
-void psy_ui_editor_disablewrap(psy_ui_TextInputor*);
-void psy_ui_editor_gotoline(psy_ui_TextInputor*, uintptr_t line);
+void psy_ui_editor_init(psy_ui_Editor*, psy_ui_Component* parent);
+void psy_ui_editor_load(psy_ui_Editor*, const char* path);
+void psy_ui_editor_save(psy_ui_Editor*, const char* path);
+void psy_ui_editor_settext(psy_ui_Editor*, const char* text);
+void psy_ui_editor_addtext(psy_ui_Editor*, const char* text);
+char* psy_ui_editor_text(psy_ui_Editor*, uintptr_t maxlength, char* text);
+uintptr_t psy_ui_editor_length(psy_ui_Editor*);
+void psy_ui_editor_clear(psy_ui_Editor*);
+void psy_ui_editor_setcolour(psy_ui_Editor*, psy_ui_Colour);
+void psy_ui_editor_setbackgroundcolour(psy_ui_Editor*, psy_ui_Colour);
+void psy_ui_editor_enableedit(psy_ui_Editor*);
+void psy_ui_editor_preventedit(psy_ui_Editor*);
+void psy_ui_editor_wrap(psy_ui_Editor*);
+void psy_ui_editor_prevent_wrap(psy_ui_Editor*);
+void psy_ui_editor_gotoline(psy_ui_Editor*, uintptr_t line);
+uintptr_t psy_ui_editor_cursor_line(const psy_ui_Editor*);
 
-INLINE psy_ui_Component* psy_ui_editor_base(psy_ui_TextInputor* self)
+INLINE psy_ui_Component* psy_ui_editor_base(psy_ui_Editor* self)
 {
 	return &self->component;
 }

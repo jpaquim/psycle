@@ -1,22 +1,25 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
-#define BLOCKSIZE 128 * 1024
 
 #include "plugineditor.h"
 
-// host
+/* host */
 #include "styles.h"
-// file
+/* file */
 #include <dir.h>
-// audio
+/* audio */
 #include <luaplugin.h>
 #include <exclusivelock.h>
 #include <songio.h>
-// platform
+/* platform */
 #include "../../detail/portable.h"
+
+#define BLOCKSIZE 128 * 1024
 
 static const char* pluginsource =
 "function psycle.info()""\n"
@@ -69,7 +72,7 @@ static void plugineditor_onmachineschangeslot(PluginEditor*,
 	psy_audio_Machines*, uintptr_t slot);
 static void plugineditor_onsongchanged(PluginEditor*, Workspace* sender);
 static void plugineditor_connectmachinesignals(PluginEditor*, Workspace*);
-static void plugineditor_ondestroy(PluginEditor*, psy_ui_Component* sender);
+static void plugineditor_on_destroy(PluginEditor*, psy_ui_Component* sender);
 static void plugineditor_onnewplugin(PluginEditor*, psy_ui_Component* sender);
 static void plugineditor_onreload(PluginEditor*, psy_ui_Component* sender);
 static void plugineditor_onsave(PluginEditor*, psy_ui_Component* sender);
@@ -81,6 +84,7 @@ static int plugineditor_onenumdir(PluginEditor*, const char* path, int flag);
 static void plugineditor_oncreatenewplugin(PluginEditor*, psy_ui_Component* sender);
 static void writetext(const char* path, const char* text);
 
+/* implementation */
 void plugineditor_init(PluginEditor* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {	
@@ -90,7 +94,8 @@ void plugineditor_init(PluginEditor* self, psy_ui_Component* parent,
 	plugineditor_inittitlebar(self);
 	self->workspace = workspace;
 	self->basepath = 0;	
-	self->instanceidx = psy_INDEX_INVALID;	
+	self->instanceidx = psy_INDEX_INVALID;
+	self->zoom = 1.0;
 	psy_ui_component_init(&self->bar, &self->component, NULL);
 	psy_ui_component_set_align(&self->bar, psy_ui_ALIGN_TOP);
 	psy_ui_button_init(&self->reload, &self->bar);
@@ -130,10 +135,12 @@ void plugineditor_init(PluginEditor* self, psy_ui_Component* parent,
 		plugineditor_oncreatenewplugin);
 	psy_ui_component_set_align(&self->createbar.component, psy_ui_ALIGN_TOP);
 	psy_ui_component_hide(&self->createbar.component);
+	/* editor */
 	psy_ui_editor_init(&self->editor, &self->component);
-	psy_ui_component_set_align(&self->editor.component, psy_ui_ALIGN_CLIENT);
+	self->editor.textarea.pane.component.id = 100;
+	psy_ui_component_set_align(&self->editor.component, psy_ui_ALIGN_CLIENT);	
 	psy_signal_connect(&self->component.signal_destroy, self,
-		plugineditor_ondestroy);
+		plugineditor_on_destroy);
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		plugineditor_onsongchanged);
 	psy_signal_connect(&self->pluginselector.signal_selchanged, self,
@@ -147,7 +154,7 @@ void plugineditor_init(PluginEditor* self, psy_ui_Component* parent,
 	plugineditor_connectmachinesignals(self, workspace);
 }
 
-void plugineditor_ondestroy(PluginEditor* self, psy_ui_Component* sender)
+void plugineditor_on_destroy(PluginEditor* self, psy_ui_Component* sender)
 {
 	psy_table_dispose(&self->pluginmappping);
 }
@@ -353,5 +360,30 @@ void writetext(const char* path, const char* text)
 			fwrite(&text[i], grabsize, 1, fp);
 		}
 		fclose(fp);
+	}
+}
+
+void plugineditor_on_focus(PluginEditor* self, psy_ui_Component* sender)
+{
+	
+}
+
+void plugineditor_updatefont(PluginEditor* self)
+{	
+	psy_ui_FontInfo fontinfo;
+	psy_ui_Font font;
+	double zoomrate;
+
+	assert(self);
+
+	zoomrate = psy_ui_app_zoomrate(psy_ui_app()) * self->zoom;	
+	psy_ui_fontinfo_init(&fontinfo, "Consolas", -16);
+	fontinfo.lfHeight = (int32_t)((double)fontinfo.lfHeight * zoomrate);
+	psy_ui_font_init(&font, &fontinfo);
+	psy_ui_component_setfont(&self->editor.textarea.pane.component, &font);
+	psy_ui_font_dispose(&font);	
+	if (psy_ui_component_visible(&self->component)) {
+		psy_ui_component_align_full(&self->component);
+		psy_ui_component_invalidate(&self->component);
 	}
 }

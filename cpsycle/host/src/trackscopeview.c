@@ -19,7 +19,7 @@
 
 /* prototypes */
 static void trackscopes_ondraw(TrackScopes*, psy_ui_Graphics*);
-static void trackscopes_onmousedown(TrackScopes*, psy_ui_MouseEvent*);
+static void trackscopes_on_mouse_down(TrackScopes*, psy_ui_MouseEvent*);
 static void trackscopes_drawtrack(TrackScopes*, psy_ui_Graphics*,
 	double x, double y, uintptr_t track);
 static void trackscopes_drawtrackindex(TrackScopes*, psy_ui_Graphics*,
@@ -48,9 +48,9 @@ static psy_ui_ComponentVtable* vtable_init(TrackScopes* self)
 		vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
 			trackscopes_ondraw;
-		vtable.onmousedown =
-			(psy_ui_fp_component_onmouseevent)
-			trackscopes_onmousedown;
+		vtable.on_mouse_down =
+			(psy_ui_fp_component_on_mouse_event)
+			trackscopes_on_mouse_down;
 		vtable_initialized = TRUE;
 	}
 	return &vtable;
@@ -277,7 +277,7 @@ uintptr_t trackscopes_numrows(const TrackScopes* self)
 	return 1;
 }
 
-void trackscopes_onmousedown(TrackScopes* self, psy_ui_MouseEvent* ev)
+void trackscopes_on_mouse_down(TrackScopes* self, psy_ui_MouseEvent* ev)
 {
 	if (workspace_song(self->workspace)) {
 		intptr_t columns;

@@ -7,14 +7,15 @@
 
 
 #include "uisplitbar.h"
-
+/* std */
+#include <stdlib.h>
 
 /* prototypes */
 static void splitter_setalign(psy_ui_Splitter*, psy_ui_AlignType);
 static void splitter_ondraw(psy_ui_Splitter*, psy_ui_Graphics*);
-static void splitter_onmousedown(psy_ui_Splitter*, psy_ui_MouseEvent*);
+static void splitter_on_mouse_down(psy_ui_Splitter*, psy_ui_MouseEvent*);
 static void splitter_onmousemove(psy_ui_Splitter*, psy_ui_MouseEvent*);
-static void splitter_onmouseup(psy_ui_Splitter*, psy_ui_MouseEvent*);
+static void splitter_on_mouse_up(psy_ui_Splitter*, psy_ui_MouseEvent*);
 static void splitter_onmouseenter(psy_ui_Splitter*);
 static void splitter_onhide(psy_ui_Splitter*);
 static void splitter_onshow(psy_ui_Splitter*);
@@ -43,15 +44,15 @@ static void vtable_init(psy_ui_Splitter* self)
 		vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
 			splitter_ondraw;
-		vtable.onmousedown =
-			(psy_ui_fp_component_onmouseevent)
-			splitter_onmousedown;
+		vtable.on_mouse_down =
+			(psy_ui_fp_component_on_mouse_event)
+			splitter_on_mouse_down;
 		vtable.onmousemove =
-			(psy_ui_fp_component_onmouseevent)
+			(psy_ui_fp_component_on_mouse_event)
 			splitter_onmousemove;
-		vtable.onmouseup =
-			(psy_ui_fp_component_onmouseevent)
-			splitter_onmouseup;
+		vtable.on_mouse_up =
+			(psy_ui_fp_component_on_mouse_event)
+			splitter_on_mouse_up;
 		vtable.onmouseenter =
 			(psy_ui_fp_component_event)
 			splitter_onmouseenter;
@@ -82,6 +83,23 @@ void psy_ui_splitter_init(psy_ui_Splitter* self, psy_ui_Component* parent)
 	psy_ui_component_set_style_types(&self->component,
 		psy_ui_STYLE_SPLITTER, psy_ui_STYLE_SPLITTER_HOVER,
 		psy_ui_STYLE_SPLITTER_SELECT, psy_INDEX_INVALID);	
+}
+
+psy_ui_Splitter* psy_ui_splitter_alloc(void)
+{
+	return (psy_ui_Splitter*)malloc(sizeof(psy_ui_Splitter));
+}
+
+psy_ui_Splitter* psy_ui_splitter_allocinit(psy_ui_Component* parent)
+{
+	psy_ui_Splitter* rv;
+
+	rv = psy_ui_splitter_alloc();
+	if (rv) {
+		psy_ui_splitter_init(rv, parent);
+		psy_ui_component_deallocate_after_destroyed(&rv->component);
+	}
+	return rv;
 }
 
 void splitter_ondraw(psy_ui_Splitter* self, psy_ui_Graphics* g)
@@ -127,7 +145,7 @@ psy_ui_RealPoint splitter_hthumbcenter(const psy_ui_Splitter* self)
 		size.height / 2);
 }
 
-void splitter_onmousedown(psy_ui_Splitter* self, psy_ui_MouseEvent* ev)
+void splitter_on_mouse_down(psy_ui_Splitter* self, psy_ui_MouseEvent* ev)
 {	
 	if (psy_ui_mouseevent_button(ev) == 2) {
 		psy_ui_Component* prev;
@@ -269,7 +287,7 @@ void splitter_onmousemove(psy_ui_Splitter* self, psy_ui_MouseEvent* ev)
 	splitter_setcursor(self);
 }
 
-void splitter_onmouseup(psy_ui_Splitter* self, psy_ui_MouseEvent* ev)
+void splitter_on_mouse_up(psy_ui_Splitter* self, psy_ui_MouseEvent* ev)
 {			
 	if (psy_ui_mouseevent_button(ev) == 1) {
 		psy_ui_RealRectangle position;
@@ -344,7 +362,7 @@ psy_ui_Component* splitter_prev(psy_ui_Splitter* self)
 
 	rv = NULL;
 	c = psy_ui_component_children(psy_ui_component_parent(&self->component),
-			psy_ui_NONRECURSIVE);
+			psy_ui_NONE_RECURSIVE);
 	while (c) {
 		if (c->entry == &self->component) {
 			c = c->prev;
@@ -371,7 +389,7 @@ psy_ui_Component* splitter_next(psy_ui_Splitter* self)
 
 	rv = NULL;
 	c = psy_ui_component_children(psy_ui_component_parent(&self->component),
-			psy_ui_NONRECURSIVE);
+			psy_ui_NONE_RECURSIVE);
 	while (c) {
 		if (c->entry == &self->component) {
 			c = c->next;

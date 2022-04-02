@@ -14,11 +14,11 @@
 
 /* NewMachineSection */
 /* prototypes */
-static void newmachinesection_ondestroy(NewMachineSection*);
+static void newmachinesection_on_destroy(NewMachineSection*);
 static void newmachinesection_showedit(NewMachineSection*);
 static void newmachinesection_onlabelclick(NewMachineSection*, psy_ui_Label* sender,
 	psy_ui_MouseEvent*);
-static void newmachinesection_onmousedown(NewMachineSection*,
+static void newmachinesection_on_mouse_down(NewMachineSection*,
 	psy_ui_MouseEvent*);
 static void newmachinesection_oneditaccept(NewMachineSection*, psy_ui_TextArea* sender);
 static void newmachinesection_oneditreject(NewMachineSection*, psy_ui_TextArea* sender);
@@ -33,12 +33,12 @@ static void newmachinesection_vtable_init(NewMachineSection* self)
 {
 	if (!newmachinesection_vtable_initialized) {
 		newmachinesection_vtable = *(self->component.vtable);
-		newmachinesection_vtable.ondestroy =
+		newmachinesection_vtable.on_destroy =
 			(psy_ui_fp_component_event)
-			newmachinesection_ondestroy;
-		newmachinesection_vtable.onmousedown =
-			(psy_ui_fp_component_onmouseevent)
-			newmachinesection_onmousedown;
+			newmachinesection_on_destroy;
+		newmachinesection_vtable.on_mouse_down =
+			(psy_ui_fp_component_on_mouse_event)
+			newmachinesection_on_mouse_down;
 		newmachinesection_vtable.ondragover =
 			(psy_ui_fp_component_ondragover)
 			newmachinesection_ondragover;
@@ -93,7 +93,7 @@ void newmachinesection_init(NewMachineSection* self, psy_ui_Component* parent,
 	}
 }
 
-void newmachinesection_ondestroy(NewMachineSection* self)
+void newmachinesection_on_destroy(NewMachineSection* self)
 {
 	psy_signal_dispose(&self->signal_selected);
 	psy_signal_dispose(&self->signal_changed);
@@ -232,7 +232,7 @@ void newmachinesection_oneditreject(NewMachineSection* self, psy_ui_TextArea* se
 	}
 }
 
-void newmachinesection_onmousedown(NewMachineSection* self,
+void newmachinesection_on_mouse_down(NewMachineSection* self,
 	psy_ui_MouseEvent* ev)
 {
 	if (psy_ui_mouseevent_button(ev) == 1) {

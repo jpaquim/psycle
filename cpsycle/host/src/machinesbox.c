@@ -10,7 +10,7 @@
 // platform
 #include "../../detail/portable.h"
 
-static void machinesbox_ondestroy(MachinesBox*, psy_ui_Component*);
+static void machinesbox_on_destroy(MachinesBox*, psy_ui_Component*);
 static void machinesbox_clearmachinebox(MachinesBox*);
 static void machinesbox_buildmachineslist(MachinesBox*);
 static void machinesbox_insertslot(MachinesBox*, uintptr_t slot, psy_audio_Machine*);
@@ -21,7 +21,7 @@ static void machinesbox_onmachinesinsert(MachinesBox*, psy_audio_Machines* sende
 static void machinesbox_onmachinesremoved(MachinesBox*, psy_audio_Machines* machines, uintptr_t slot);
 static void machinesbox_onlistboxselected(MachinesBox*, psy_ui_Component* sender,
 	intptr_t slot);
-static void machinesbox_onkeydown(MachinesBox*, psy_ui_Component*, psy_ui_KeyboardEvent*);
+static void machinesbox_on_key_down(MachinesBox*, psy_ui_Component*, psy_ui_KeyboardEvent*);
 static void machinesbox_onkeyup(MachinesBox*, psy_ui_Component*, psy_ui_KeyboardEvent*);
 static bool machinesbox_testmachinemode(const MachinesBox*, uintptr_t index);
 
@@ -42,14 +42,14 @@ void machinesbox_init(MachinesBox* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->listbox.signal_selchanged, self,
 		machinesbox_onlistboxselected);
 	psy_signal_connect(&self->listbox.component.signal_destroy, self,
-		machinesbox_ondestroy);
+		machinesbox_on_destroy);
 	psy_signal_connect(&self->listbox.component.signal_keydown, self,
-		machinesbox_onkeydown);
+		machinesbox_on_key_down);
 	psy_signal_connect(&self->listbox.component.signal_keyup, self,
 		machinesbox_onkeyup);
 }
 
-void machinesbox_ondestroy(MachinesBox* self, psy_ui_Component* component)
+void machinesbox_on_destroy(MachinesBox* self, psy_ui_Component* component)
 {
 	psy_table_dispose(&self->listboxslots);
 	psy_table_dispose(&self->slotslistbox);
@@ -412,7 +412,7 @@ void machinesbox_setmachines(MachinesBox* self, psy_audio_Machines* machines)
 		machinesbox_onmachineselected);
 }
 
-void machinesbox_onkeydown(MachinesBox* self, psy_ui_Component* sender, psy_ui_KeyboardEvent* ev)
+void machinesbox_on_key_down(MachinesBox* self, psy_ui_Component* sender, psy_ui_KeyboardEvent* ev)
 {
 	psy_ui_keyboardevent_stop_propagation(ev);
 	if (psy_ui_keyboardevent_keycode(ev) == psy_ui_KEY_ESCAPE) {

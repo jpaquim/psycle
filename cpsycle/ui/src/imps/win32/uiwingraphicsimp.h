@@ -33,6 +33,8 @@ typedef struct psy_ui_win_GraphicsImp {
 	bool shareddc;
 	psy_ui_RealPoint org;
 	psy_ui_RealRectangle clip;
+	/* reference */
+	const psy_ui_Font* font;
 } psy_ui_win_GraphicsImp;
 
 void psy_ui_win_graphicsimp_init(psy_ui_win_GraphicsImp* self, HDC hdc);

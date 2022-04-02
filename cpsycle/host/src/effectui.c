@@ -14,11 +14,11 @@
 #include <uiapp.h>
 
 /* prototypes */
-static void effectui_onmousedown(EffectUi*, psy_ui_MouseEvent*);
+static void effectui_on_mouse_down(EffectUi*, psy_ui_MouseEvent*);
 static void effectui_onmousedoubleclick(EffectUi*, psy_ui_MouseEvent*);
 static void effectui_move(EffectUi*, psy_ui_Point topleft);
 static void effectui_updatevolumedisplay(EffectUi*);
-static void effectui_ontimer(EffectUi*, uintptr_t timerid);
+static void effectui_on_timer(EffectUi*, uintptr_t timerid);
 	
 /* vtable */
 static psy_ui_ComponentVtable effectui_vtable;
@@ -32,18 +32,18 @@ static void effectui_vtable_init(EffectUi* self)
 	if (!effectui_vtable_initialized) {
 		effectui_vtable = *(self->component.vtable);
 		effectui_super_vtable = effectui_vtable;
-		effectui_vtable.onmousedown =
-			(psy_ui_fp_component_onmouseevent)
-			effectui_onmousedown;
+		effectui_vtable.on_mouse_down =
+			(psy_ui_fp_component_on_mouse_event)
+			effectui_on_mouse_down;
 		effectui_vtable.onmousedoubleclick =
-			(psy_ui_fp_component_onmouseevent)
+			(psy_ui_fp_component_on_mouse_event)
 			effectui_onmousedoubleclick;
 		effectui_vtable.move =
 			(psy_ui_fp_component_move)
 			effectui_move;		
-		effectui_vtable.ontimer =
-			(psy_ui_fp_component_ontimer)
-			effectui_ontimer;
+		effectui_vtable.on_timer =
+			(psy_ui_fp_component_on_timer)
+			effectui_on_timer;
 		effectui_vtable_initialized = TRUE;	
 	}
 	psy_ui_component_setvtable(&self->component, &effectui_vtable);	
@@ -93,7 +93,7 @@ void effectui_move(EffectUi* self, psy_ui_Point topleft)
 	}
 }
 
-void effectui_onmousedown(EffectUi* self, psy_ui_MouseEvent* ev)
+void effectui_on_mouse_down(EffectUi* self, psy_ui_MouseEvent* ev)
 {	
 	if (psy_ui_mouseevent_button(ev) == 1) {
 		if (psy_audio_machine_slot(self->machine) !=
@@ -136,7 +136,7 @@ void effectui_onmousedoubleclick(EffectUi* self, psy_ui_MouseEvent* ev)
 	psy_ui_mouseevent_stop_propagation(ev);
 }
 
-void effectui_ontimer(EffectUi* self, uintptr_t timerid)
+void effectui_on_timer(EffectUi* self, uintptr_t timerid)
 {
 	if (psy_audio_machine_muted(self->machine)) {
 		psy_ui_component_addstylestate(&self->mute,

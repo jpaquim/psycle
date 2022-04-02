@@ -32,7 +32,7 @@ void kbdboxstate_clearmodifier(KbdBoxState* self)
 /* prototypes */
 static void kbdboxkey_initlabel(KbdBoxKey*, psy_ui_Label*, const char* text);
 static void kbdboxkey_initstyle(KbdBoxKey*);
-static void kbdboxkey_onmousedown(KbdBoxKey*, psy_ui_MouseEvent*);
+static void kbdboxkey_on_mouse_down(KbdBoxKey*, psy_ui_MouseEvent*);
 
 /* vtable */
 static psy_ui_ComponentVtable kbdboxkey_vtable;
@@ -42,9 +42,9 @@ static void kbdboxkey_vtable_init(KbdBoxKey* self)
 {
 	if (!kbdboxkey_vtable_initialized) {
 		kbdboxkey_vtable = *(self->component.vtable);		
-		kbdboxkey_vtable.onmousedown =
-			(psy_ui_fp_component_onmouseevent)
-			kbdboxkey_onmousedown;
+		kbdboxkey_vtable.on_mouse_down =
+			(psy_ui_fp_component_on_mouse_event)
+			kbdboxkey_on_mouse_down;
 		kbdboxkey_vtable_initialized = TRUE;
 	}
 	self->component.vtable = &kbdboxkey_vtable;
@@ -151,7 +151,7 @@ void kbdboxkey_setdescription(KbdBoxKey* self, uint32_t keycode,
 	}	
 }
 
-void kbdboxkey_onmousedown(KbdBoxKey* self, psy_ui_MouseEvent* ev)
+void kbdboxkey_on_mouse_down(KbdBoxKey* self, psy_ui_MouseEvent* ev)
 {
 	self->state->pressedkey = self->keycode;
 	if (self->keycode == psy_ui_KEY_SHIFT) {
@@ -191,9 +191,9 @@ void kbdboxkey_onmousedown(KbdBoxKey* self, psy_ui_MouseEvent* ev)
 }
 
 /* KbdBox */
-static void kbdbox_ondestroy(KbdBox*);
-static void kbdbox_onmousedown(KbdBox*, psy_ui_MouseEvent*);
-static void kbdbox_onmouseup(KbdBox*, psy_ui_MouseEvent*);
+static void kbdbox_on_destroy(KbdBox*);
+static void kbdbox_on_mouse_down(KbdBox*, psy_ui_MouseEvent*);
+static void kbdbox_on_mouse_up(KbdBox*, psy_ui_MouseEvent*);
 static void kbdbox_initfont(KbdBox*);
 static void kbdbox_makekeys(KbdBox*);
 static psy_Property* kbdbox_definekeys(KbdBox*);
@@ -212,15 +212,15 @@ static void kbdbox_vtable_init(KbdBox* self)
 {
 	if (!kbdbox_vtable_initialized) {
 		kbdbox_vtable = *(self->component.vtable);
-		kbdbox_vtable.ondestroy =
+		kbdbox_vtable.on_destroy =
 			(psy_ui_fp_component_event)
-			kbdbox_ondestroy;
-		kbdbox_vtable.onmousedown =
-			(psy_ui_fp_component_onmouseevent)
-			kbdbox_onmousedown;
-		kbdbox_vtable.onmouseup =
-			(psy_ui_fp_component_onmouseevent)
-			kbdbox_onmouseup;
+			kbdbox_on_destroy;
+		kbdbox_vtable.on_mouse_down =
+			(psy_ui_fp_component_on_mouse_event)
+			kbdbox_on_mouse_down;
+		kbdbox_vtable.on_mouse_up =
+			(psy_ui_fp_component_on_mouse_event)
+			kbdbox_on_mouse_up;
 		kbdbox_vtable_initialized = TRUE;
 	}
 	self->component.vtable = &kbdbox_vtable;
@@ -242,7 +242,7 @@ void kbdbox_init(KbdBox* self, psy_ui_Component* parent, Workspace* workspace)
 		self, kbdbox_oninput);
 }
 
-void kbdbox_ondestroy(KbdBox* self)
+void kbdbox_on_destroy(KbdBox* self)
 {
 	psy_table_dispose(&self->keys);
 }
@@ -455,7 +455,7 @@ void kbdbox_setdescription(KbdBox* self, uint32_t keycode, const char* text)
 	}
 }
 
-void kbdbox_onmousedown(KbdBox* self, psy_ui_MouseEvent* ev)
+void kbdbox_on_mouse_down(KbdBox* self, psy_ui_MouseEvent* ev)
 {
 	if (self->state.pressedkey != 0) {
 		psy_EventDriverInput input;
@@ -469,7 +469,7 @@ void kbdbox_onmousedown(KbdBox* self, psy_ui_MouseEvent* ev)
 	}
 }
 
-void kbdbox_onmouseup(KbdBox* self, psy_ui_MouseEvent* ev)
+void kbdbox_on_mouse_up(KbdBox* self, psy_ui_MouseEvent* ev)
 {
 	bool ismod;
 

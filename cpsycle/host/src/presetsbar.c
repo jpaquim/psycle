@@ -18,7 +18,7 @@
 #include "../../detail/portable.h"
 
 static bool presetsbar_userpresetpath(PresetsBar*, psy_Path*);
-static void presetsbar_ondestroy(PresetsBar*, psy_ui_Component* sender);
+static void presetsbar_on_destroy(PresetsBar*, psy_ui_Component* sender);
 static void presetsbar_setpresets(PresetsBar*, psy_audio_Presets*,
 	bool setfirstprog);
 static void presetsbar_setprogram(PresetsBar*, uintptr_t prog);
@@ -63,14 +63,14 @@ void presetsbar_init(PresetsBar* self, psy_ui_Component* parent,
 	psy_ui_textarea_setcharnumber(&self->savename, 12);
 	psy_ui_margin_init_em(&margin, 0.0, 1.0, 0.0, 0.0);
 	psy_list_free(psy_ui_components_setalign(
-		psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE),
+		psy_ui_component_children(&self->component, psy_ui_NONE_RECURSIVE),
 		psy_ui_ALIGN_LEFT, margin));
 	psy_signal_connect(&self->bankselector.signal_selchanged, self,
 		presetsbar_onbankselected);
 	psy_signal_connect(&self->programbox.signal_selchanged, self,
 		presetsbar_onprogramselected);
 	psy_signal_connect(&self->component.signal_destroy, self,
-		presetsbar_ondestroy);
+		presetsbar_on_destroy);
 	psy_signal_connect(&self->importpresets.signal_clicked, self,
 		presetsbar_onimport);
 	psy_signal_connect(&self->exportpresets.signal_clicked, self,
@@ -81,7 +81,7 @@ void presetsbar_init(PresetsBar* self, psy_ui_Component* parent,
 		presetsbar_onsavenameeditkeydown);
 }
 
-void presetsbar_ondestroy(PresetsBar* self, psy_ui_Component* sender)
+void presetsbar_on_destroy(PresetsBar* self, psy_ui_Component* sender)
 {
 	psy_path_dispose(&self->presetpath);
 }

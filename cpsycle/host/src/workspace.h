@@ -156,8 +156,6 @@ typedef struct Workspace {
 	psy_Signal signal_status_out;
 	psy_Signal signal_followsongchanged;	
 	psy_Signal signal_togglegear;
-	psy_Signal signal_floatsection;
-	psy_Signal signal_docksection;
 	psy_Signal signal_machineeditresize;
 	psy_Signal signal_buschanged;
 	psy_Signal signal_gearselect;	
@@ -288,8 +286,6 @@ void workspace_select_view(Workspace*, uintptr_t view, uintptr_t section,
 void workspace_focusview(Workspace*);
 void workspace_saveview(Workspace*);
 void workspace_restoreview(Workspace*);
-void workspace_floatsection(Workspace*, int view, uintptr_t section);
-void workspace_docksection(Workspace*, int view, uintptr_t section);
 void workspace_parametertweak(Workspace*, int slot, uintptr_t tweak, float value);
 void workspace_recordtweaks(Workspace*);
 void workspace_stoprecordtweaks(Workspace*);

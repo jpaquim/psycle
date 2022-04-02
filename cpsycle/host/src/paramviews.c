@@ -98,7 +98,7 @@ void paramviews_removeall(ParamViews* self)
 	// destroy frames	
 	for (p = frames; p != NULL; p = p->next) {
 		// a frame will erase themself from paramviews (calling paramviews_erase)
-		// in ondestroy
+		// in on_destroy
 		psy_ui_component_destroy((psy_ui_Component*)psy_list_entry(p));
 	}
 	psy_list_free(frames);

@@ -1,11 +1,16 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "luaplugin.h"
+/* lua */
 #include "lauxlib.h"
 #include "lualib.h"
+/* local */
 #include "luaimport.h"
 #include "luaplayer.h"
 #include "array.h"
@@ -13,7 +18,9 @@
 #include "luaenvelope.h"
 #include "luafilter.h"
 #include "luadspmath.h"
+#include "luawavedata.h"
 #include "luawaveosc.h"
+#include "luaresampler.h"
 #include "luamidinotes.h"
 #include "songio.h"
 #include "custommachine.h"
@@ -389,8 +396,8 @@ static psy_dsp_amp_range_t amprange(psy_audio_LuaPlugin* self)
 	return PSY_DSP_AMP_RANGE_VST;
 }
 
-int luascript_setmachine(lua_State*);
-int luascript_terminal_output(lua_State*);
+static int luascript_setmachine(lua_State*);
+static int luascript_terminal_output(lua_State*);
 
 static const char* luamachine_meta = "psypluginmeta";
 
@@ -565,10 +572,14 @@ int psy_audio_plugin_luascript_exportcmodules(psy_PsycleScript* self)
 		psy_audio_luabind_filter_open);
 	psyclescript_require(self, "psycle.dsp.math",
 		psy_audio_luabind_dspmath_open);
+	psyclescript_require(self, "psycle.dsp.resampler",
+		psy_audio_luabind_resampler_open);
+	psyclescript_require(self, "psycle.dsp.wavedata",
+		psy_audio_luabind_wavedata_open);	
 	psyclescript_require(self, "psycle.midi",
 		psy_audio_luabind_midinotes_open);
 	psyclescript_require(self, "psycle.osc",
-		psy_audio_luabind_waveosc_open);
+		psy_audio_luabind_waveosc_open);	
 	psyclescript_require(self, "psycle.player",
 		psy_audio_luabind_player_open);
 	// ui
@@ -689,26 +700,25 @@ uintptr_t numoutputs(psy_audio_LuaPlugin* self)
 	}
 }
 
-// global psycle methods
+/* global psycle methods */
 int luascript_setmachine(lua_State* L)
 {
 	psy_audio_LuaPlugin* proxy;
-	psy_audio_LuaMachine** ud;
+	psy_audio_LuaMachine** ud;	
 
 	lua_getglobal(L, "psycle");
 	lua_getfield(L, -1, "__self");
 	proxy = *(psy_audio_LuaPlugin**)luaL_checkudata(L, -1, "psyhostmeta");
-	luaL_checktype(L, 1, LUA_TTABLE);
+	luaL_checktype(L, 1, LUA_TTABLE);	
 	lua_getfield(L, 1, "__self");	
 	ud = (psy_audio_LuaMachine**)luaL_checkudata(L, -1, "psypluginmeta");	
 	if (*ud && proxy) {
 		proxy->client = *ud;
 	}
-	lua_getglobal(L, "psycle");	
+	lua_pushvalue(L, 1);
 	if (proxy) {
 		psyclescript_register_weakuserdata(L, proxy->client);
-	}	
-	lua_setfield(L, 2, "proxy");
+	}
 	return 0;
 }
 

@@ -391,7 +391,7 @@ void dev_clear(psy_ui_win_ComponentImp* self)
 	if (self->component) {
 		psy_List* c;
 		
-		c = psy_ui_component_children(self->component, psy_ui_NONRECURSIVE);
+		c = psy_ui_component_children(self->component, psy_ui_NONE_RECURSIVE);
 		for (p = c; p != NULL; p = q) {
 			psy_ui_Component* component;			
 

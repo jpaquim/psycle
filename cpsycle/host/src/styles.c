@@ -74,13 +74,11 @@ void init_host_styles(psy_ui_Styles* self, psy_ui_ThemeMode theme)
 	psy_ui_styles_set_style(self, STYLE_SEQVIEW, style);
 
 	style = psy_ui_style_allocinit();
-	psy_ui_style_set_colours(style, material.onprimary_medium, material.surface_overlay_5p);
+	psy_ui_style_set_colour(style, material.onprimary_medium);
 	psy_ui_border_init_solid_radius(&style->border, material.surface_overlay_7p, 6.0);
 	psy_ui_styles_set_style(self, STYLE_SEQLISTVIEW, style);
 
 	style = psy_ui_style_allocinit();	
-	psy_ui_border_init_solid_radius(&style->border,
-		psy_ui_colour_weighted(&material.secondary, 900), 6.0);
 	psy_ui_styles_set_style(self, STYLE_SEQLISTVIEW_FOCUS, style);
 	
 	style = psy_ui_style_allocinit();
@@ -650,6 +648,33 @@ void init_host_styles(psy_ui_Styles* self, psy_ui_ThemeMode theme)
 
 	style = psy_ui_style_clone(psy_ui_styles_at(self, psy_ui_STYLE_LABEL));
 	psy_ui_styles_set_style(self, STYLE_TIMEBAR_NUMLABEL, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_set_colours(style, material.onprimary_medium,
+		material.overlay_4p);
+	psy_ui_border_init_solid_radius(&style->border,
+		material.surface_overlay_7p, 6.0);
+	psy_ui_style_set_padding_em(style, 0.25, 1.0, 0.25, 1.0);
+	psy_ui_styles_set_style(self, STYLE_DIALOG_BUTTON, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_set_colours(style, material.onprimary_medium,
+		material.overlay_12p);
+	psy_ui_border_init_solid_radius(&style->border, material.surface_overlay_11p, 6.0);
+	psy_ui_style_set_padding_em(style, 0.25, 1.0, 0.25, 1.0);
+	psy_ui_styles_set_style(self, STYLE_DIALOG_BUTTON_HOVER, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_set_colours(style, material.onsecondary,
+		material.overlay_12p);
+	psy_ui_border_init_solid_radius(&style->border, material.surface_overlay_16p, 6.0);
+	psy_ui_style_set_padding_em(style, 0.25, 1.0, 0.25, 1.0);
+	psy_ui_styles_set_style(self, STYLE_DIALOG_BUTTON_SELECT, style);
+
+	style = psy_ui_style_allocinit();	
+	psy_ui_border_init_right(&style->border, psy_ui_BORDER_SOLID,
+		material.surface_overlay_12p);
+	psy_ui_styles_set_style(self, STYLE_SCANTASK, style);
 
 	init_envelope_styles(self);
 	init_psycletheme_styles(self);
@@ -1240,6 +1265,24 @@ void initlighttheme(psy_ui_Styles* self)
 	style = psy_ui_style_clone(psy_ui_styles_at(self, psy_ui_STYLE_LABEL));
 	psy_ui_styles_set_style(self, STYLE_TIMEBAR_NUMLABEL, style);
 
+	style = psy_ui_style_allocinit();
+	psy_ui_style_set_colour(style, material.onprimary_medium);
+	psy_ui_border_init_solid_radius(&style->border, material.surface_overlay_7p, 6.0);
+	psy_ui_style_set_padding_em(style, 0.25, 1.0, 0.25, 1.0);
+	psy_ui_styles_set_style(self, STYLE_DIALOG_BUTTON, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_set_background_overlay(style, 4);
+	psy_ui_border_init_solid_radius(&style->border, material.surface_overlay_11p, 6.0);
+	psy_ui_style_set_padding_em(style, 0.25, 1.0, 0.25, 1.0);
+	psy_ui_styles_set_style(self, STYLE_DIALOG_BUTTON_HOVER, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_set_colours(style, material.onsecondary, material.overlay_4p);
+	psy_ui_border_init_solid_radius(&style->border, material.surface_overlay_16p, 6.0);
+	psy_ui_style_set_padding_em(style, 0.25, 1.0, 0.25, 1.0);
+	psy_ui_styles_set_style(self, STYLE_DIALOG_BUTTON_SELECT, style);
+
 	init_envelope_styles(self);
 	init_psycletheme_styles(self);
 }
@@ -1760,6 +1803,17 @@ void initwin98theme(psy_ui_Styles* self)
 	psy_ui_style_set_colours(style, win.cl_black, win.cl_silver);
 	psy_ui_style_set_border(style, &win.lowered);
 	psy_ui_styles_set_style(self, STYLE_TIMEBAR_NUMLABEL, style);
+
+	style = psy_ui_style_clone(psy_ui_styles_at(self, psy_ui_STYLE_BUTTON));
+	psy_ui_styles_set_style(self, STYLE_DIALOG_BUTTON, style);
+
+	style = psy_ui_style_clone(psy_ui_styles_at(self,
+		psy_ui_STYLE_BUTTON_HOVER));
+	psy_ui_styles_set_style(self, STYLE_DIALOG_BUTTON_HOVER, style);
+
+	style = psy_ui_style_clone(psy_ui_styles_at(self,
+		psy_ui_STYLE_BUTTON_SELECT));
+	psy_ui_styles_set_style(self, STYLE_DIALOG_BUTTON_SELECT, style);
 	
 	init_envelope_styles(self);
 	init_psycletheme_styles(self);

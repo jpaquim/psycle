@@ -127,11 +127,11 @@ void stepsequencertile_resetplay(StepSequencerTile* self)
 /* StepsequencerBar */
 
 /* prototypes */
-static void stepsequencerbar_ondestroy(StepsequencerBar*);
+static void stepsequencerbar_on_destroy(StepsequencerBar*);
 static void stepsequencerbar_build(StepsequencerBar*);
 static void stepsequencerbar_update(StepsequencerBar*);
 static void stepsequencerbar_update_playline(StepsequencerBar* self);
-static void stepsequencerbar_onmousedown(StepsequencerBar*,
+static void stepsequencerbar_on_mouse_down(StepsequencerBar*,
 psy_ui_MouseEvent*);
 static void stepsequencerbar_onlpbchanged(StepsequencerBar*,
 	psy_audio_Player* sender, uintptr_t lpb);
@@ -144,12 +144,12 @@ static void vtable_init(StepsequencerBar* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.ondestroy =
+		vtable.on_destroy =
 			(psy_ui_fp_component_event)
-			stepsequencerbar_ondestroy;
-		vtable.onmousedown =
-			(psy_ui_fp_component_onmouseevent)
-			stepsequencerbar_onmousedown;
+			stepsequencerbar_on_destroy;
+		vtable.on_mouse_down =
+			(psy_ui_fp_component_on_mouse_event)
+			stepsequencerbar_on_mouse_down;
 		vtable_initialized = TRUE;
 	}
 	self->component.vtable = &vtable;
@@ -173,7 +173,7 @@ void stepsequencerbar_init(StepsequencerBar* self, psy_ui_Component* parent,
 	stepsequencerbar_build(self);
 }
 
-void stepsequencerbar_ondestroy(StepsequencerBar* self)
+void stepsequencerbar_on_destroy(StepsequencerBar* self)
 {
 	assert(self);
 
@@ -294,7 +294,7 @@ void stepsequencerbar_update_playline(StepsequencerBar* self)
 	}
 }
 
-void stepsequencerbar_onmousedown(StepsequencerBar* self,
+void stepsequencerbar_on_mouse_down(StepsequencerBar* self,
 	psy_ui_MouseEvent* ev)
 {	
 	psy_audio_Song* song;
@@ -359,7 +359,7 @@ void stepsequencerbar_onlpbchanged(StepsequencerBar* self,
 
 /* prototypes */
 
-static void stepsequencerbarbutton_onmousedown(StepSequencerBarButton*,
+static void stepsequencerbarbutton_on_mouse_down(StepSequencerBarButton*,
 	psy_ui_MouseEvent*);
 static void stepsequencerbarbutton_ondraw(StepSequencerBarButton*,
 	psy_ui_Graphics*);
@@ -372,9 +372,9 @@ static void stepsequencerbarbutton_vtable_init(StepSequencerBarButton* self)
 {
 	if (!stepsequencerbarbutton_vtable_initialized) {
 		stepsequencerbarbutton_vtable = *self->component.vtable;
-		stepsequencerbarbutton_vtable.onmousedown =
-			(psy_ui_fp_component_onmouseevent)
-			stepsequencerbarbutton_onmousedown;
+		stepsequencerbarbutton_vtable.on_mouse_down =
+			(psy_ui_fp_component_on_mouse_event)
+			stepsequencerbarbutton_on_mouse_down;
 		stepsequencerbarbutton_vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
 			stepsequencerbarbutton_ondraw;
@@ -415,7 +415,7 @@ StepSequencerBarButton* stepsequencerbarbutton_allocinit(
 	return rv;
 }
 
-void stepsequencerbarbutton_onmousedown(StepSequencerBarButton* self,
+void stepsequencerbarbutton_on_mouse_down(StepSequencerBarButton* self,
 	psy_ui_MouseEvent* ev)
 {
 	self->state->barbuttonindex = self->index;
@@ -467,8 +467,8 @@ void stepsequencerbarbutton_ondraw(StepSequencerBarButton* self,
 
 /* StepsequencerBarSelect */
 /* prototypes */
-static void stepsequencerbarselect_ondestroy(StepsequencerBarSelect*);
-static void stepsequencerbarselect_onmousedown(StepsequencerBarSelect*,
+static void stepsequencerbarselect_on_destroy(StepsequencerBarSelect*);
+static void stepsequencerbarselect_on_mouse_down(StepsequencerBarSelect*,
 	psy_ui_MouseEvent*);
 static void stepsequencerbarselect_build(StepsequencerBarSelect*);
 
@@ -480,12 +480,12 @@ static void stepsequencerbarselect_vtable_init(StepsequencerBarSelect* self)
 {
 	if (!stepsequencerbarselect_vtable_initialized) {
 		stepsequencerbarselect_vtable = *(self->component.vtable);
-		stepsequencerbarselect_vtable.ondestroy =
+		stepsequencerbarselect_vtable.on_destroy =
 			(psy_ui_fp_component_event)
-			stepsequencerbarselect_ondestroy;
-		stepsequencerbarselect_vtable.onmousedown =
-			(psy_ui_fp_component_onmouseevent)
-			stepsequencerbarselect_onmousedown;
+			stepsequencerbarselect_on_destroy;
+		stepsequencerbarselect_vtable.on_mouse_down =
+			(psy_ui_fp_component_on_mouse_event)
+			stepsequencerbarselect_on_mouse_down;
 		stepsequencerbarselect_vtable_initialized = TRUE;
 	}
 	self->component.vtable = &stepsequencerbarselect_vtable;
@@ -507,7 +507,7 @@ void stepsequencerbarselect_init(StepsequencerBarSelect* self,
 	stepsequencerbarselect_build(self);
 }
 
-void stepsequencerbarselect_ondestroy(StepsequencerBarSelect* self)
+void stepsequencerbarselect_on_destroy(StepsequencerBarSelect* self)
 {
 	assert(self);
 
@@ -555,7 +555,7 @@ void stepsequencerbarselect_build(StepsequencerBarSelect* self)
 	psy_ui_component_align(&self->component);	
 }
 
-void stepsequencerbarselect_onmousedown(StepsequencerBarSelect* self,
+void stepsequencerbarselect_on_mouse_down(StepsequencerBarSelect* self,
 	psy_ui_MouseEvent* ev)
 {	
 	assert(self);

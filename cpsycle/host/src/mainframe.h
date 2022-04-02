@@ -7,7 +7,7 @@
 #define MAINFRAME_H
 
 /* host */
-#include "mainviewbar.h"
+#include "mainviews.h"
 #include "mainstatusbar.h"
 #include "confirmbox.h"
 #include "cpuview.h"
@@ -28,6 +28,7 @@
 #include "playbar.h"
 #include "playposbar.h"
 #include "plugineditor.h"
+#include "plugineditorbar.h"
 #include "patternview.h"
 #include "recentview.h"
 #include "renderview.h"
@@ -75,20 +76,18 @@ typedef struct MainFrame {
 	psy_ui_Component toprow0;
 	psy_ui_Component toprow0_client;
 	psy_ui_Component toprow0_bars;	
-	MainViewBar mainviewbar;		
 	psy_ui_Component topspacer;
 	psy_ui_Component client;
 	/* includes tabbar */
-	psy_ui_Component mainviews;
+	MainViews mainviews;
 	/* excludes tabbar and includes bottom views */
-	psy_ui_Component mainpane;	
+	//psy_ui_Component mainpane;	
 	psy_ui_Terminal terminal;
 	psy_ui_Splitter splitbar;
 	psy_ui_Splitter splitbarterminal;
 	StartScript startscript;	
 	psy_ui_TabBar scripttabbar;
-	psy_ui_Button togglescripts;	
-	psy_ui_Notebook notebook;
+	psy_ui_Button togglescripts;
 	FileBar filebar;
 	UndoRedoBar undoredobar;
 	MachineBar machinebar;
@@ -118,6 +117,7 @@ typedef struct MainFrame {
 	psy_ui_Splitter gearsplitter;
 	PluginEditor plugineditor;
 	psy_ui_Splitter splitbarplugineditor;
+	PluginEditorBar plugineditorbar;
 	VuBar vubar;
 	CPUView cpuview;
 	psy_ui_Splitter cpusplitter;

@@ -349,6 +349,7 @@
     <ClCompile Include="src\mainframe.c" />
     <ClCompile Include="src\mainstatusbar.c" />
     <ClCompile Include="src\mainviewbar.c" />
+    <ClCompile Include="src\mainviews.c" />
     <ClCompile Include="src\masterui.c" />
     <ClCompile Include="src\metronomebar.c" />
     <ClCompile Include="src\metronomeconfig.c" />
@@ -389,6 +390,7 @@
     <ClCompile Include="src\playbar.c" />
     <ClCompile Include="src\playposbar.c" />
     <ClCompile Include="src\plugineditor.c" />
+    <ClCompile Include="src\plugineditorbar.c" />
     <ClCompile Include="src\pluginscanview.c" />
     <ClCompile Include="src\pluginsview.c" />
     <ClCompile Include="src\predefsconfig.c" />
@@ -538,6 +540,7 @@
     <ClInclude Include="src\mainframe.h" />
     <ClInclude Include="src\mainstatusbar.h" />
     <ClInclude Include="src\mainviewbar.h" />
+    <ClInclude Include="src\mainviews.h" />
     <ClInclude Include="src\masterui.h" />
     <ClInclude Include="src\metronomebar.h" />
     <ClInclude Include="src\metronomeconfig.h" />
@@ -578,6 +581,7 @@
     <ClInclude Include="src\playbar.h" />
     <ClInclude Include="src\playposbar.h" />
     <ClInclude Include="src\plugineditor.h" />
+    <ClInclude Include="src\plugineditorbar.h" />
     <ClInclude Include="src\pluginscanview.h" />
     <ClInclude Include="src\pluginsview.h" />
     <ClInclude Include="src\predefsconfig.h" />

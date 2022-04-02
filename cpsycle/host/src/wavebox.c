@@ -228,12 +228,12 @@ psy_dsp_amp_t waveboxcontext_frame_at(WaveBoxContext* self, float frame)
 static void wavebox_updatetext(WaveBox*);
 static void wavebox_onlanguagechanged(WaveBox*, psy_ui_Component* sender);
 static void wavebox_ondraw(WaveBox*, psy_ui_Graphics*);
-static void wavebox_ondestroy(WaveBox*, psy_ui_Component* sender);
-static void wavebox_onmousedown(WaveBox*, psy_ui_Component* sender,
+static void wavebox_on_destroy(WaveBox*, psy_ui_Component* sender);
+static void wavebox_on_mouse_down(WaveBox*, psy_ui_Component* sender,
 	psy_ui_MouseEvent*);
 static void wavebox_onmousemove(WaveBox*, psy_ui_Component* sender,
 	psy_ui_MouseEvent*);
-static void wavebox_onmouseup(WaveBox*, psy_ui_Component* sender,
+static void wavebox_on_mouse_up(WaveBox*, psy_ui_Component* sender,
 	psy_ui_MouseEvent*);
 static void wavebox_onmousedoubleclick(WaveBox*, psy_ui_Component* sender,
 	psy_ui_MouseEvent*);
@@ -277,13 +277,13 @@ void wavebox_init(WaveBox* self, psy_ui_Component* parent, Workspace* workspace)
 	self->drawline = FALSE;
 	waveboxcontext_init(&self->context, &self->component);
 	psy_signal_init(&self->selectionchanged);
-	psy_signal_connect(&self->component.signal_destroy, self, wavebox_ondestroy);
+	psy_signal_connect(&self->component.signal_destroy, self, wavebox_on_destroy);
 	psy_signal_connect(&self->component.signal_mousedown, self,
-		wavebox_onmousedown);
+		wavebox_on_mouse_down);
 	psy_signal_connect(&self->component.signal_mousemove, self,
 		wavebox_onmousemove);
 	psy_signal_connect(&self->component.signal_mouseup, self,
-		wavebox_onmouseup);
+		wavebox_on_mouse_up);
 	psy_signal_connect(&self->component.signal_mousedoubleclick, self,
 		wavebox_onmousedoubleclick);
 	psy_signal_connect(&self->component.signal_languagechanged, self,
@@ -292,7 +292,7 @@ void wavebox_init(WaveBox* self, psy_ui_Component* parent, Workspace* workspace)
 	self->preventselection = FALSE;
 }
 
-void wavebox_ondestroy(WaveBox* self, psy_ui_Component* sender)
+void wavebox_on_destroy(WaveBox* self, psy_ui_Component* sender)
 {	
 	waveboxcontext_dispose(&self->context);
 	psy_signal_dispose(&self->selectionchanged);
@@ -518,7 +518,7 @@ psy_ui_RealRectangle wavebox_framerangetoscreen(WaveBox* self, uintptr_t framebe
 		psy_ui_realsize_make(endx - startx, size.height));
 }
 
-void wavebox_onmousedown(WaveBox* self, psy_ui_Component* sender,
+void wavebox_on_mouse_down(WaveBox* self, psy_ui_Component* sender,
 	psy_ui_MouseEvent* ev)
 {	
 	if (self->preventselection) {
@@ -848,7 +848,7 @@ static psy_dsp_amp_t wavebox_amp(WaveBox* self, float frame)
 	return 0.f;
 }
 
-void wavebox_onmouseup(WaveBox* self, psy_ui_Component* sender,
+void wavebox_on_mouse_up(WaveBox* self, psy_ui_Component* sender,
 	psy_ui_MouseEvent* ev)
 {
 	if (self->preventselection) {

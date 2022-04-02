@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #if !defined(TRACKERVIEW)
@@ -10,6 +10,7 @@
 #include "trackercolumn.h"
 #include "trackergridstate.h"
 #include "patternhostcmds.h"
+#include "trackerlinenumbers.h"
 /* ui */
 #include <uibutton.h>
 #include <uilabel.h>
@@ -115,8 +116,12 @@ INLINE bool trackergrid_checkupdate(const TrackerGrid* self)
 
 typedef struct TrackerView {
 	/* inherits */
+	psy_ui_Component component;
+	/* internal */
 	psy_ui_Scroller scroller;
 	TrackerGrid grid;
+	TrackerLineNumberView lines;	
+	psy_ui_ScrollBar hscroll;
 	/* references */
 	Workspace* workspace;
 } TrackerView;

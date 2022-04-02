@@ -21,7 +21,7 @@
 
 /* SeqEditRuler */
 /* prototypes */
-static void seqeditruler_ondestroy(SeqEditRuler*);
+static void seqeditruler_on_destroy(SeqEditRuler*);
 static void seqeditruler_ondraw(SeqEditRuler*, psy_ui_Graphics*);
 static void seqeditruler_drawruler(SeqEditRuler*, psy_ui_Graphics*,
 	double baseline);
@@ -44,9 +44,9 @@ static void seqeditruler_vtable_init(SeqEditRuler* self)
 {
 	if (!seqeditruler_vtable_initialized) {
 		seqeditruler_vtable = *(self->component.vtable);
-		seqeditruler_vtable.ondestroy =
+		seqeditruler_vtable.on_destroy =
 			(psy_ui_fp_component_event)
-			seqeditruler_ondestroy;
+			seqeditruler_on_destroy;
 		seqeditruler_vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
 			seqeditruler_ondraw;
@@ -54,7 +54,7 @@ static void seqeditruler_vtable_init(SeqEditRuler* self)
 			(psy_ui_fp_component_onpreferredsize)
 			seqeditruler_onpreferredsize;
 		seqeditruler_vtable.onmousemove =
-			(psy_ui_fp_component_onmouseevent)
+			(psy_ui_fp_component_on_mouse_event)
 			seqeditruler_onmousemove;
 		seqeditruler_vtable.onmouseenter =
 			(psy_ui_fp_component_event)
@@ -82,7 +82,7 @@ void seqeditruler_init(SeqEditRuler* self, psy_ui_Component* parent,
 		seqeditruler_oncursorchanged);		
 }
 
-void seqeditruler_ondestroy(SeqEditRuler* self)
+void seqeditruler_on_destroy(SeqEditRuler* self)
 {
 	psy_signal_disconnect(
 		&self->state->workspace->song->sequence.sequenceselection.signal_select,

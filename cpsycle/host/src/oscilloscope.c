@@ -22,7 +22,7 @@ static const uint32_t CLRIGHT = 0x60C060;
 static const uint32_t CLBOTH = 0xC0C060;
 
 static void oscilloscope_init_memory(Oscilloscope*);
-static void oscilloscope_ondestroy(Oscilloscope*);
+static void oscilloscope_on_destroy(Oscilloscope*);
 static void oscilloscope_ondraw(Oscilloscope*, psy_ui_Graphics*);
 static psy_audio_Buffer* oscilloscope_buffer(Oscilloscope*,
 	uintptr_t* numsamples);
@@ -35,9 +35,9 @@ static void vtable_init(Oscilloscope* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.ondestroy =
+		vtable.on_destroy =
 			(psy_ui_fp_component_event)
-			oscilloscope_ondestroy;
+			oscilloscope_on_destroy;
 		vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
 			oscilloscope_ondraw;
@@ -84,7 +84,7 @@ void oscilloscope_init_memory(Oscilloscope* self)
 	}
 }
 
-void oscilloscope_ondestroy(Oscilloscope* self)
+void oscilloscope_on_destroy(Oscilloscope* self)
 {
 	psy_signal_disconnect_context(&self->workspace->signal_songchanged, self);	
 	if (self->hold_buffer) {

@@ -13,7 +13,7 @@
 #include "../../detail/portable.h"
 
 /* prototypes */
-static void zoombox_ondestroy(ZoomBox*);
+static void zoombox_on_destroy(ZoomBox*);
 static void zoombox_onzoomin(ZoomBox*, psy_ui_Component* sender);
 static void zoombox_onzoomout(ZoomBox*, psy_ui_Component* sender);
 static void zoombox_onmousewheel(ZoomBox*, psy_ui_MouseEvent*);
@@ -29,11 +29,11 @@ static void vtable_init(ZoomBox* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.ondestroy =
+		vtable.on_destroy =
 			(psy_ui_fp_component_event)
-			zoombox_ondestroy;
+			zoombox_on_destroy;
 		vtable.onmousewheel =
-			(psy_ui_fp_component_onmouseevent)
+			(psy_ui_fp_component_on_mouse_event)
 			zoombox_onmousewheel;		
 		vtable_initialized = TRUE;
 	}
@@ -90,7 +90,7 @@ void zoombox_init_connect(ZoomBox* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->signal_changed, context, fp);
 }
 
-void zoombox_ondestroy(ZoomBox* self)
+void zoombox_on_destroy(ZoomBox* self)
 {
 	assert(self);
 
@@ -140,6 +140,7 @@ void zoombox_onmousewheel(ZoomBox* self, psy_ui_MouseEvent* ev)
 			psy_sgn(psy_ui_mouseevent_delta(ev)) * self->zoomstep);
 	}
 	psy_ui_mouseevent_prevent_default(ev);
+	psy_ui_mouseevent_stop_propagation(ev);
 }
 
 void zoombox_oneditaccept(ZoomBox* self, psy_ui_TextArea* sender)

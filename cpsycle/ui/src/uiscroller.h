@@ -24,20 +24,24 @@ typedef struct psy_ui_Scroller {
 	/* inherits */
 	psy_ui_Component component;	
 	/* internal */
-	psy_ui_ScrollBar vscroll;
-	psy_ui_Component bottom;
-	psy_ui_ScrollBar hscroll;
-	psy_ui_Component spacer;
+	psy_ui_ScrollBar vscroll_intern;
+	psy_ui_ScrollBar* vscroll;	
+	psy_ui_ScrollBar hscroll_intern;
+	psy_ui_ScrollBar* hscroll;	
 	psy_ui_Component pane;
 	psy_ui_Component* client;	
 	psy_ui_ScrollAnimate hanimate;
 	psy_ui_ScrollAnimate vanimate;
 	bool smooth;
-	bool thumbmove;
+	bool thumbmove;	
+	bool vscroll_autohide;
+	bool hscroll_autohide;
 } psy_ui_Scroller;
 
-void psy_ui_scroller_init(psy_ui_Scroller*, psy_ui_Component* client,
-	psy_ui_Component* parent);
+void psy_ui_scroller_init(psy_ui_Scroller*, psy_ui_Component* parent,
+	psy_ui_ScrollBar* hscroll, psy_ui_ScrollBar* vscroll);
+
+void psy_ui_scroller_set_client(psy_ui_Scroller*, psy_ui_Component*);
 
 INLINE void psy_ui_scroller_scrollsmooth(psy_ui_Scroller* self)
 {
@@ -49,13 +53,15 @@ INLINE void psy_ui_scroller_scrollfast(psy_ui_Scroller* self)
 	self->smooth = FALSE;
 }
 
+INLINE psy_ui_Component* psy_ui_scroller_pane(psy_ui_Scroller* self)
+{
+	return &self->pane;
+}
+
 INLINE psy_ui_Component* psy_ui_scroller_base(psy_ui_Scroller* self)
 {
 	return &self->component;
 }
-
-void psy_ui_scroller_connectclient(psy_ui_Scroller*);
-
 
 #ifdef __cplusplus
 }

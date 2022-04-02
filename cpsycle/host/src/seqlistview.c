@@ -18,7 +18,7 @@
 
 /* SeqViewTrack */
 /* prototypes */
-static void seqviewtrack_ondestroy(SeqViewTrack*);
+static void seqviewtrack_on_destroy(SeqViewTrack*);
 static void seqviewtrack_onpreferredsize(SeqViewTrack*,
 	const psy_ui_Size* limit, psy_ui_Size* rv);
 static void seqviewtrack_ondraw(SeqViewTrack*, psy_ui_Graphics*);
@@ -30,7 +30,7 @@ static void seqviewtrack_textout_digit(SeqViewTrack*,
 	uintptr_t cursorcol);
 static void seqviewtrack_drawprogressbar(SeqViewTrack*,
 	psy_ui_Graphics*, psy_ui_RealPoint);
-void seqviewtrack_onmousedown(SeqViewTrack*, psy_ui_MouseEvent*);
+void seqviewtrack_on_mouse_down(SeqViewTrack*, psy_ui_MouseEvent*);
 void seqviewtrack_onmousedoubleclick(SeqViewTrack*, psy_ui_MouseEvent*);
 static void seqviewtrack_onsequenceselect(SeqViewTrack*,
 	psy_audio_SequenceSelection*, psy_audio_OrderIndex*);
@@ -44,20 +44,20 @@ static void seqviewtrack_vtable_init(SeqViewTrack* self)
 {
 	if (!seqviewtrack_vtable_initialized) {
 		seqviewtrack_vtable = *(self->component.vtable);
-		seqviewtrack_vtable.ondestroy =
+		seqviewtrack_vtable.on_destroy =
 			(psy_ui_fp_component_event)
-			seqviewtrack_ondestroy;
+			seqviewtrack_on_destroy;
 		seqviewtrack_vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
 			seqviewtrack_ondraw;
 		seqviewtrack_vtable.onpreferredsize =
 			(psy_ui_fp_component_onpreferredsize)
 			seqviewtrack_onpreferredsize;
-		seqviewtrack_vtable.onmousedown =
-			(psy_ui_fp_component_onmouseevent)
-			seqviewtrack_onmousedown;
+		seqviewtrack_vtable.on_mouse_down =
+			(psy_ui_fp_component_on_mouse_event)
+			seqviewtrack_on_mouse_down;
 		seqviewtrack_vtable.onmousedoubleclick =
-			(psy_ui_fp_component_onmouseevent)
+			(psy_ui_fp_component_on_mouse_event)
 			seqviewtrack_onmousedoubleclick;		
 		seqviewtrack_vtable_initialized = TRUE;
 	}
@@ -109,7 +109,7 @@ SeqViewTrack* seqviewtrack_allocinit(psy_ui_Component* parent,
 	return rv;
 }
 
-void seqviewtrack_ondestroy(SeqViewTrack* self)
+void seqviewtrack_on_destroy(SeqViewTrack* self)
 {
 	psy_signal_disconnect(
 		&self->state->cmds->workspace->song->sequence.sequenceselection.signal_select,
@@ -344,7 +344,7 @@ void seqviewtrack_onpreferredsize(SeqViewTrack* self,
 	}			
 }
 
-void seqviewtrack_onmousedown(SeqViewTrack* self, psy_ui_MouseEvent* ev)
+void seqviewtrack_on_mouse_down(SeqViewTrack* self, psy_ui_MouseEvent* ev)
 {
 	if (self->track) {		
 		if (self->track->entries) {
@@ -440,8 +440,8 @@ static psy_ui_RealRectangle seqviewlist_rowrectangle(SeqviewList*,
 static void seqviewlist_invalidaterow(SeqviewList*, uintptr_t row);
 static void seqviewlist_changeplayposition(SeqviewList*);
 static bool seqviewlist_oninput(SeqviewList*, InputHandler*);
-static void seqviewlist_onfocus(SeqviewList*);
-static void seqviewlist_onfocuslost(SeqviewList*);
+static void seqviewlist_on_focus(SeqviewList*);
+static void seqviewlist_on_focuslost(SeqviewList*);
 static void seqviewlist_inputdigit(SeqviewList*, uint8_t value);
 /* vtable */
 static psy_ui_ComponentVtable seqviewlist_vtable;
@@ -456,12 +456,12 @@ static void seqviewlist_vtable_init(SeqviewList* self)
 		seqviewlist_vtable.onpreferredsize =
 			(psy_ui_fp_component_onpreferredsize)
 			seqviewlist_onpreferredsize;		
-		seqviewlist_vtable.onfocus =
+		seqviewlist_vtable.on_focus =
 			(psy_ui_fp_component_event)
-			seqviewlist_onfocus;
-		seqviewlist_vtable.onfocuslost =
+			seqviewlist_on_focus;
+		seqviewlist_vtable.on_focuslost =
 			(psy_ui_fp_component_event)
-			seqviewlist_onfocuslost;
+			seqviewlist_on_focuslost;
 		seqviewlist_vtable_initialized = TRUE;
 	}
 	psy_ui_component_setvtable(&self->component, &seqviewlist_vtable);
@@ -472,8 +472,7 @@ void seqviewlist_init(SeqviewList* self, psy_ui_Component* parent,
 	SeqViewState* state)
 {
 	psy_ui_component_init(&self->component, parent, NULL);
-	seqviewlist_vtable_init(self);
-	psy_ui_component_set_style_type(&self->component, STYLE_SEQLISTVIEW);
+	seqviewlist_vtable_init(self);	
 	self->state = state;	
 	self->lastplayrow = psy_INDEX_INVALID;	
 	self->showpatternnames = generalconfig_showingpatternnames(
@@ -721,11 +720,11 @@ void seqviewlist_inputdigit(SeqviewList* self, uint8_t digit)
 	}
 }
 
-void seqviewlist_onfocus(SeqviewList* self)
+void seqviewlist_on_focus(SeqviewList* self)
 {
 	psy_audio_OrderIndex editposition;
 	
-	seqviewlist_super_vtable.onfocus(&self->component);
+	seqviewlist_super_vtable.on_focus(&self->component);
 	editposition = psy_audio_sequenceselection_first(
 		&self->state->cmds->workspace->song->sequence.sequenceselection);
 	self->state->active = TRUE;
@@ -739,11 +738,11 @@ void seqviewlist_onfocus(SeqviewList* self)
 	self->state->cmds->workspace->seqviewactive = TRUE;
 }
 
-void seqviewlist_onfocuslost(SeqviewList* self)
+void seqviewlist_on_focuslost(SeqviewList* self)
 {
 	psy_audio_OrderIndex editposition;
 
-	seqviewlist_super_vtable.onfocuslost(&self->component);
+	seqviewlist_super_vtable.on_focuslost(&self->component);
 	editposition = psy_audio_sequenceselection_first(
 		&self->state->cmds->workspace->song->sequence.sequenceselection);
 	self->state->active = FALSE;

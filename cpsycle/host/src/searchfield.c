@@ -17,7 +17,7 @@
 ** SearchField
 ** prototypes
 */
-static void searchfield_ondestroy(SearchField*);
+static void searchfield_on_destroy(SearchField*);
 static void searchfield_oneditfocus(SearchField*, psy_ui_Component* sender);
 static void searchfield_oneditchange(SearchField*, psy_ui_Component* sender);
 static void searchfield_onaccept(SearchField*, psy_ui_Component* sender);
@@ -33,9 +33,9 @@ static void searchfield_vtable_init(SearchField* self)
 {
 	if (!searchfield_vtable_initialized) {
 		searchfield_vtable = *(self->component.vtable);
-		searchfield_vtable.ondestroy =
+		searchfield_vtable.on_destroy =
 			(psy_ui_fp_component_event)
-			searchfield_ondestroy;
+			searchfield_on_destroy;
 		searchfield_vtable.onlanguagechanged =
 			(psy_ui_fp_component_onlanguagechanged)
 			searchfield_onlanguagechanged;
@@ -75,7 +75,7 @@ void searchfield_init(SearchField* self, psy_ui_Component* parent)
 		psy_ui_ALIGN_CLIENT);	
 }
 
-void searchfield_ondestroy(SearchField* self)
+void searchfield_on_destroy(SearchField* self)
 {
 	psy_signal_dispose(&self->signal_changed);
 	free(self->defaulttext);
