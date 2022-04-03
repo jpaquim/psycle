@@ -637,7 +637,7 @@ void newmachinesectionspane_ontabbarchanged(NewMachineSectionsPane* self, psy_ui
 		psy_ui_RealRectangle position;
 
 		position = psy_ui_component_position(&section->component);
-		psy_ui_component_setscrolltop(&self->sections,
+		psy_ui_component_set_scroll_top(&self->sections,
 			psy_ui_value_make_px(position.top));
 		self->newmachine->selectedsection = section;
 		newmachinesection_mark(section);

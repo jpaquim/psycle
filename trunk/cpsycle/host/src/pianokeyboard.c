@@ -42,7 +42,7 @@ static void pianokeyboard_vtable_init(PianoKeyboard* self)
 			pianokeyboard_onpreferredsize;
 		pianokeyboard_vtable_initialized = TRUE;
 	}
-	psy_ui_component_setvtable(pianokeyboard_base(self),
+	psy_ui_component_set_vtable(pianokeyboard_base(self),
 		&pianokeyboard_vtable);	
 }
 

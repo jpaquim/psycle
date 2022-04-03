@@ -82,7 +82,7 @@ static void vuui_vtable_init(VuUi* self)
 			vuui_ondraw;		
 		vuui_vtable_initialized = TRUE;
 	}
-	psy_ui_component_setvtable(&self->component, &vuui_vtable);
+	psy_ui_component_set_vtable(&self->component, &vuui_vtable);
 }
 
 void vuui_init(VuUi* self, psy_ui_Component* parent, psy_audio_Machine* machine,
@@ -184,7 +184,7 @@ static void panui_vtable_init(PanUi* self)
 			panui_onmousemove;
 		panui_vtable_initialized = TRUE;
 	}
-	psy_ui_component_setvtable(&self->component, &panui_vtable);
+	psy_ui_component_set_vtable(&self->component, &panui_vtable);
 }
 
 void panui_init(PanUi* self, psy_ui_Component* parent, psy_audio_Machine* machine,

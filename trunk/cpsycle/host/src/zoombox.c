@@ -37,7 +37,7 @@ static void vtable_init(ZoomBox* self)
 			zoombox_onmousewheel;		
 		vtable_initialized = TRUE;
 	}
-	psy_ui_component_setvtable(zoombox_base(self), &vtable);
+	psy_ui_component_set_vtable(zoombox_base(self), &vtable);
 }
 
 /* implementation */

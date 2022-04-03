@@ -136,8 +136,7 @@ void plugineditor_init(PluginEditor* self, psy_ui_Component* parent,
 	psy_ui_component_set_align(&self->createbar.component, psy_ui_ALIGN_TOP);
 	psy_ui_component_hide(&self->createbar.component);
 	/* editor */
-	psy_ui_editor_init(&self->editor, &self->component);
-	self->editor.textarea.pane.component.id = 100;
+	psy_ui_editor_init(&self->editor, &self->component);	
 	psy_ui_component_set_align(&self->editor.component, psy_ui_ALIGN_CLIENT);	
 	psy_signal_connect(&self->component.signal_destroy, self,
 		plugineditor_on_destroy);

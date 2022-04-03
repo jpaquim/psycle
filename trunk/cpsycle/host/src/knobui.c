@@ -56,7 +56,7 @@ static void knobui_vtable_init(KnobUi* self)
 			knobui_onmousemove;
 		knobui_vtable_initialized = TRUE;
 	}
-	psy_ui_component_setvtable(&self->component, &knobui_vtable);
+	psy_ui_component_set_vtable(&self->component, &knobui_vtable);
 }
 
 /* implementation */

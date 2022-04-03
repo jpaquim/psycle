@@ -29,12 +29,12 @@ static void patternview_on_mousedown(PatternView*, psy_ui_MouseEvent*);
 static void patternview_on_mouseup(PatternView*, psy_ui_MouseEvent*);
 static void patternview_on_keydown(PatternView*, psy_ui_KeyboardEvent*);
 static void patternview_on_contextmenu(PatternView*, psy_ui_Component*);
-static void patternview_on_cursorchanged(PatternView*, psy_audio_Sequence*);
+static void patternview_on_cursor_changed(PatternView*, psy_audio_Sequence*);
 static void patternview_update_cursor(PatternView*);
 static void patternview_on_grid_scroll(PatternView*, psy_ui_Component*);
 static void patternview_on_appzoom(PatternView*, psy_ui_AppZoom*);
 static void patternview_on_timer(PatternView*, uintptr_t timerid);
-static void patternview_numtrackschanged(PatternView*, psy_audio_Pattern*,
+static void patternview_num_tracks_changed(PatternView*, psy_audio_Pattern*,
 	uintptr_t numsongtracks);
 static void patternview_on_parametertweak(PatternView*, Workspace*,
 	int slot, uintptr_t tweak, float normvalue);
@@ -116,14 +116,8 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 	trackerstate_init(&self->state, &self->trackconfig, &self->pvstate);
 	if (workspace->song) {
 		psy_signal_connect(&workspace->song->sequence.signal_cursorchanged, self,
-			patternview_on_cursorchanged);
-	}
-	/* Configuration */
-	psy_signal_connect(&self->pvstate.patconfig->signal_changed, self,
-		patternview_on_configure);
-	psy_signal_connect(
-		&psycleconfig_misc(workspace_conf(self->workspace))->signal_changed,
-		self, patternview_on_miscconfigure);	
+			patternview_on_cursor_changed);
+	}	
 	/* Header */
 	trackerheaderview_init(&self->header, &self->component, 
 		&self->trackconfig, &self->state, self->workspace);	
@@ -131,7 +125,6 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 	/* Defaultline */
 	patterndefaultline_init(&self->defaultline, &self->component,
 		&self->trackconfig, workspace);	
-	self->defaultline.grid.component.id = 10;
 	psy_signal_connect(&self->defaultline.grid.signal_colresize, self,
 		patternview_on_colresize);
 	/* Tracker */
@@ -140,8 +133,8 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->trackerview.grid.signal_colresize, self,
 		patternview_on_colresize);
 	/* Pianoroll */
-	pianoroll_init(&self->pianoroll, &self->editnotebook.component, &self->pvstate,
-		workspace);	
+	pianoroll_init(&self->pianoroll, &self->editnotebook.component,
+		&self->pvstate, workspace);	
 	/* Blockmenu */
 	patternblockmenu_init(&self->blockmenu, patternview_base(self),
 		NULL, &self->swingfillview, &self->transformpattern,
@@ -166,13 +159,19 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->tabbar.contextbutton.signal_clicked, self,
 		patternview_on_contextmenu);
 	/* Connect */	
-	psy_signal_connect(&self->trackerview.grid.component.signal_scroll, self,
+	psy_signal_connect(&self->trackerview.grid.component.signal_scrolled, self,
 		patternview_on_grid_scroll);	
 	psy_signal_connect(&self->workspace->signal_parametertweak, self,
 		patternview_on_parametertweak);
 	patternview_connectsong(self);
 	psy_signal_connect(&psy_ui_app_zoom(psy_ui_app())->signal_zoom, self,
 		patternview_on_appzoom);
+	/* Configuration */
+	psy_signal_connect(&self->pvstate.patconfig->signal_changed, self,
+		patternview_on_configure);
+	psy_signal_connect(
+		&psycleconfig_misc(workspace_conf(self->workspace))->signal_changed,
+		self, patternview_on_miscconfigure);
 	patternview_rebuild(self);
 	patternview_update_cursor(self);
 	psy_ui_component_start_timer(&self->component, 0, 50);	
@@ -229,9 +228,9 @@ void patternview_connectsong(PatternView* self)
 	patternproperties_set_patterns(&self->properties, song ? &song->patterns : NULL);
 	if (song) {		
 		psy_signal_connect(&song->sequence.signal_cursorchanged, self,
-			patternview_on_cursorchanged);
+			patternview_on_cursor_changed);
 		psy_signal_connect(&song->patterns.signal_numsongtrackschanged, self,
-			patternview_numtrackschanged);		
+			patternview_num_tracks_changed);		
 	}
 }
 
@@ -319,15 +318,15 @@ void patternview_on_grid_scroll(PatternView* self, psy_ui_Component* sender)
 
 	if (psy_ui_component_scrollleft_px(&self->trackerview.grid.component) !=
 		psy_ui_component_scrollleft_px(&self->header.header.component)) {
-		psy_ui_component_setscrollleft(&self->header.header.component,
+		psy_ui_component_set_scroll_left(&self->header.header.component,
 			psy_ui_component_scrollleft(&self->trackerview.grid.component));
 		psy_ui_component_invalidate(&self->header.pane);
-		psy_ui_component_setscrollleft(&self->defaultline.grid.component,
+		psy_ui_component_set_scroll_left(&self->defaultline.grid.component,
 			psy_ui_component_scrollleft(&self->trackerview.grid.component));
 	}	
 }
 
-void patternview_on_cursorchanged(PatternView* self, psy_audio_Sequence* sender)
+void patternview_on_cursor_changed(PatternView* self, psy_audio_Sequence* sender)
 {
 	patternview_update_cursor(self);	
 }
@@ -389,7 +388,7 @@ void patternview_on_timer(PatternView* self, uintptr_t timerid)
 	}
 }
 
-void patternview_numtrackschanged(PatternView* self, psy_audio_Pattern* sender,
+void patternview_num_tracks_changed(PatternView* self, psy_audio_Pattern* sender,
 	uintptr_t numsongtracks)
 {
 	assert(self);

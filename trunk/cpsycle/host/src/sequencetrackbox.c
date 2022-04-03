@@ -32,7 +32,7 @@ static void sequencetrackbox_vtable_init(SequenceTrackBox* self)
 			sequencetrackbox_on_destroy;		
 		sequencetrackbox_vtable_initialized = TRUE;
 	}
-	psy_ui_component_setvtable(sequencetrackbox_base(self),
+	psy_ui_component_set_vtable(sequencetrackbox_base(self),
 		&sequencetrackbox_vtable);
 }
 

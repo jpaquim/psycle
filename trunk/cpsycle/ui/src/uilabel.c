@@ -51,7 +51,7 @@ static void vtable_init(psy_ui_Label* self)
 			psy_ui_label_on_timer;		
 		vtable_initialized = TRUE;
 	}
-	psy_ui_component_setvtable(&self->component, &vtable);
+	psy_ui_component_set_vtable(&self->component, &vtable);
 }
 
 /* implementation */

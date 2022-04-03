@@ -630,9 +630,8 @@ static psy_ui_ComponentVtable* envelopeview_vtable_init(EnvelopeView* self)
 void envelopeview_init(EnvelopeView* self, psy_ui_Component* parent)
 {	
 	psy_ui_component_init(envelopeview_base(self), parent, NULL);
-	psy_ui_component_setvtable(envelopeview_base(self),
+	psy_ui_component_set_vtable(envelopeview_base(self),
 		envelopeview_vtable_init(self));	
-	self->component.id = 400;
 	envelopebar_init(&self->bar, envelopeview_base(self));
 	psy_ui_component_set_align(envelopebar_base(&self->bar), psy_ui_ALIGN_TOP);
 	psy_ui_component_set_margin(envelopebar_base(&self->bar),

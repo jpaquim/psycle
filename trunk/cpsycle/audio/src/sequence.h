@@ -323,6 +323,14 @@ INLINE psy_audio_SequenceCursor psy_audio_sequence_cursor(
 	return self->cursor;
 }
 
+INLINE bool psy_audio_sequence_lpb_changed(const psy_audio_Sequence* self)
+{
+	assert(self);
+
+	return (psy_audio_sequencecursor_lpb(&self->cursor) !=
+		psy_audio_sequencecursor_lpb(&self->lastcursor));
+}
+
 void psy_audio_sequence_blockremove(psy_audio_Sequence*,
 	psy_audio_BlockSelection selection);
 void psy_audio_sequence_blocktranspose(psy_audio_Sequence*,

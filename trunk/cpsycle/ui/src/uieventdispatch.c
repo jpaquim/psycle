@@ -192,7 +192,7 @@ void psy_ui_eventdispatch_handle_wheel(psy_ui_EventDispatch* self,
 					if (pos < (double)scrollrange.x) {
 						pos = (double)scrollrange.x;
 					}
-					psy_ui_component_setscrolltop(curr,
+					psy_ui_component_set_scroll_top(curr,
 						psy_ui_mul_value_real(
 							psy_ui_component_scrollstep_height(curr), pos));
 					self->accumwheeldelta -= self->deltaperline;
@@ -212,7 +212,7 @@ void psy_ui_eventdispatch_handle_wheel(psy_ui_EventDispatch* self,
 					if (pos > (double)scrollrange.y) {
 						pos = (double)scrollrange.y;
 					}
-					psy_ui_component_setscrolltop(curr,
+					psy_ui_component_set_scroll_top(curr,
 						psy_ui_mul_value_real(
 							psy_ui_component_scrollstep_height(curr), pos));
 					self->accumwheeldelta += self->deltaperline;

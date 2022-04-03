@@ -38,6 +38,7 @@ typedef struct PatternViewConfig {
 	psy_Property* theme;
 	psy_Property* headerskins;
 	char* skindir;
+	bool has_classic_header;
 	/* references */
 	psy_Property* parent;
 	struct DirConfig* dirconfig;
@@ -57,15 +58,19 @@ bool boolpatternviewconfig_hasthemeproperty(const PatternViewConfig*,
 	psy_Property*);
 bool patternviewconfig_hasproperty(const PatternViewConfig*, psy_Property*);
 
+void patternviewconfig_switch_header(PatternViewConfig*);
+void patternviewconfig_switch_to_classic(PatternViewConfig*);
+void patternviewconfig_switch_to_text(PatternViewConfig*);
 
 bool patternviewconfig_linenumbers(const PatternViewConfig*);
-bool patternviewconfig_linenumberscursor(const PatternViewConfig*);
 bool patternviewconfig_linenumbersinhex(const PatternViewConfig*);
+bool patternviewconfig_showbeatoffset(const PatternViewConfig*);
+double patternviewconfig_linenumber_width(const PatternViewConfig*);
+bool patternviewconfig_linenumberscursor(const PatternViewConfig*);
 bool patternviewconfig_defaultline(const PatternViewConfig*);
 bool patternviewconfig_wraparound(const PatternViewConfig*);
 bool patternviewconfig_drawemptydata(const PatternViewConfig*);
-bool patternviewconfig_centercursoronscreen(const PatternViewConfig*);
-bool patternviewconfig_showbeatoffset(const PatternViewConfig*);
+bool patternviewconfig_center_cursor_on_screen(const PatternViewConfig*);
 bool patternviewconfig_showwideinstcolumn(const PatternViewConfig*);
 psy_dsp_NotesTabMode patternviewconfig_notetabmode(const PatternViewConfig*);
 bool patternviewconfig_ismovecursorwhenpaste(const PatternViewConfig*);

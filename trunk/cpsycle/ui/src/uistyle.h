@@ -173,6 +173,11 @@ INLINE void psy_ui_style_set_position(psy_ui_Style* self,
 	psy_ui_position_set_rectangle(&self->position, position);
 }
 
+INLINE psy_ui_Rectangle psy_ui_style_position(const psy_ui_Style* self)
+{
+	return psy_ui_position_rectangle(&self->position);
+}
+
 INLINE void psy_ui_style_set_size(psy_ui_Style* self, psy_ui_Size size)
 {
 	psy_ui_position_set_size(&self->position, size);	

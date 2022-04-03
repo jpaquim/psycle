@@ -40,7 +40,7 @@ static void vtable_init(TimeBar* self)
 			timebar_on_timer;
 		vtable_initialized = TRUE;
 	}
-	psy_ui_component_setvtable(timebar_base(self), &vtable);
+	psy_ui_component_set_vtable(timebar_base(self), &vtable);
 }
 /* implementation */
 void timebar_init(TimeBar* self, psy_ui_Component* parent,

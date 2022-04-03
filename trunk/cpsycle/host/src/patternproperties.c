@@ -48,7 +48,7 @@ void patternproperties_init(PatternProperties* self, psy_ui_Component* parent,
 	psy_audio_Pattern* pattern, Workspace* workspace)
 {	
 	psy_ui_component_init(&self->component, parent, NULL);	
-	psy_ui_component_setvtable(&self->component,
+	psy_ui_component_set_vtable(&self->component,
 		patternproperties_vtable_init(self));	
 	self->patterns = NULL;
 	self->pattern_index = psy_INDEX_INVALID;
@@ -57,7 +57,6 @@ void patternproperties_init(PatternProperties* self, psy_ui_Component* parent,
 			psy_ui_value_make_eh(1.0), psy_ui_value_make_px(0)));	
 	psy_ui_label_init_text(&self->namelabel, &self->component,
 		"patternview.patname");	
-	self->namelabel.component.id = 300;
 	psy_ui_textarea_init_single_line(&self->nameedit, &self->component);	
 	psy_ui_textarea_settext(&self->nameedit, "patternview.nopattern");
 	psy_ui_textarea_setcharnumber(&self->nameedit, 40);

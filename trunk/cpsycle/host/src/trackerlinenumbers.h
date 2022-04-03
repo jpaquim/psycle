@@ -1,10 +1,10 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
-#if !defined(TRACKERLINENUMBERS)
-#define TRACKERLINENUMBERS
+#if !defined(TRACKERLINENUMBERS_H)
+#define TRACKERLINENUMBERS_H
 
 /* host */
 #include "trackergridstate.h"
@@ -20,76 +20,20 @@ extern "C" {
 ** Draws the tracker linenumbers
 */
 
-struct TrackerView;
-
-typedef struct TrackerLineNumbersLabel {
-	/* inherits */
-	psy_ui_Component component;	
-	/* internal data */
-	char_dyn_t* linestr;
-	char_dyn_t* defaultstr;
-	double headerheight;
-	bool showdefaultline;
-	bool showbeatoffset;	
-	/* references */	
-	TrackerState* state;
-} TrackerLineNumbersLabel;
-
-void trackerlinenumberslabel_init(TrackerLineNumbersLabel*,
-	psy_ui_Component* parent, TrackerState*);
-
-INLINE void trackerlinenumberslabel_setheaderheight(TrackerLineNumbersLabel* self,
-	double headerheight)
-{
-	self->headerheight = headerheight;
-}
-
-INLINE void trackerlinenumberslabel_showdefaultline(TrackerLineNumbersLabel* self)
-{
-	self->showdefaultline = TRUE;
-}
-
-INLINE void trackerlinenumberslabel_hidedefaultline(TrackerLineNumbersLabel* self)
-{
-	self->showdefaultline = FALSE;
-}
-
-INLINE void trackerlinenumberslabel_showbeat(TrackerLineNumbersLabel* self)
-{
-	self->showbeatoffset = TRUE;
-}
-
-INLINE void trackerlinenumberslabel_hidebeat(TrackerLineNumbersLabel* self)
-{
-	self->showbeatoffset = FALSE;
-}
-
-INLINE psy_ui_Component* TrackerLineNumbersLabel_base(TrackerLineNumbersLabel* self)
-{
-	assert(self);
-
-	return &self->component;
-}
-
-INLINE psy_ui_Component* trackerlinenumberslabel_base(TrackerLineNumbersLabel* self)
-{
-	assert(self);
-
-	return &self->component;
-}
-
 /* TrackerLineNumbers*/
 typedef struct TrackerLineNumbers {
 	/* inherits */
 	psy_ui_Component component;
 	/* internal */
-	bool draw_linenumber_cursor;
-	bool prevent_cursor;
-	bool shownumbersinhex;
-	bool showbeat;
+	bool draw_cursor;	
+	bool show_in_hex;
+	bool show_beat;
 	const char* format;
 	const char* format_seqstart;
-	psy_audio_SequenceCursor oldcursor;
+	psy_audio_SequenceCursor old_cursor;
+	psy_ui_RealSize size;
+	psy_ui_RealSize line_size;
+	double flat_size;
 	/* references */
 	TrackerState* state;
 	Workspace* workspace;
@@ -98,25 +42,28 @@ typedef struct TrackerLineNumbers {
 void trackerlinenumbers_init(TrackerLineNumbers*, psy_ui_Component* parent,
 	TrackerState*, Workspace*);
 
-void trackerlinenumbers_invalidatecursor(TrackerLineNumbers*);
-void trackerlinenumbers_invalidateline(TrackerLineNumbers*, intptr_t line);
-void trackerlinenumbers_updateformat(TrackerLineNumbers*);
-void trackerlinenumbers_showlinenumbercursor(TrackerLineNumbers*, bool showstate);
-void trackerlinenumbers_showlinenumbersinhex(TrackerLineNumbers*, bool showstate);
+void trackerlinenumbers_invalidate_cursor(TrackerLineNumbers*);
+void trackerlinenumbers_invalidate_line(TrackerLineNumbers*, intptr_t line);
+void trackerlinenumbers_invalidate_playbar(TrackerLineNumbers*);
+void trackerlinenumbers_update_format(TrackerLineNumbers*);
+void trackerlinenumbers_show_cursor(TrackerLineNumbers*);
+void trackerlinenumbers_hide_cursor(TrackerLineNumbers*);
+void trackerlinenumbers_show_in_hex(TrackerLineNumbers*);
+void trackerlinenumbers_show_in_decimal(TrackerLineNumbers*);
 
-INLINE void trackerlinenumbers_showbeat(TrackerLineNumbers* self)
+INLINE void trackerlinenumbers_show_beat(TrackerLineNumbers* self)
 {
-	self->showbeat = TRUE;
-	trackerlinenumbers_updateformat(self);
+	self->show_beat = TRUE;
+	trackerlinenumbers_update_format(self);
 }
 
-INLINE void trackerlinenumbers_hidebeat(TrackerLineNumbers* self)
+INLINE void trackerlinenumbers_hide_beat(TrackerLineNumbers* self)
 {
-	self->showbeat = FALSE;
-	trackerlinenumbers_updateformat(self);
+	self->show_beat = FALSE;
+	trackerlinenumbers_update_format(self);
 }
 
-void trackerlinenumbers_updatecursor(TrackerLineNumbers*);
+void trackerlinenumbers_update_cursor(TrackerLineNumbers*);
 
 INLINE psy_ui_Component* trackerlinenumbers_base(TrackerLineNumbers* self)
 {
@@ -125,8 +72,11 @@ INLINE psy_ui_Component* trackerlinenumbers_base(TrackerLineNumbers* self)
 	return &self->component;
 }
 
+/* TrackerLineNumberView */
 typedef struct TrackerLineNumberView {
+	/* inherits */
 	psy_ui_Component component;
+	/* internal */
 	psy_ui_Component pane;
 	TrackerLineNumbers linenumbers;
 } TrackerLineNumberView;
@@ -138,4 +88,4 @@ void trackerlinenumberview_init(TrackerLineNumberView*,
 }
 #endif
 
-#endif /* TRACKERLINENUMBERS */
+#endif /* TRACKERLINENUMBERS_H */

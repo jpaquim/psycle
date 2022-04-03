@@ -47,7 +47,7 @@ static void vumeter_vtable_init(Vumeter* self)
 			vumeter_ondraw;
 		vumeter_vtable_initialized = TRUE;
 	}
-	psy_ui_component_setvtable(&self->component, &vumeter_vtable);
+	psy_ui_component_set_vtable(&self->component, &vumeter_vtable);
 }
 
 /* implementation */

@@ -44,8 +44,9 @@ void patternviewconfig_init(PatternViewConfig* self, psy_Property* parent,
 	self->parent = parent;
 	self->skindir = psy_strdup(skindir);	
 	self->dirconfig = NULL;
+	self->has_classic_header = TRUE;
 	patternviewconfig_makeview(self, parent);	
-	psy_signal_init(&self->signal_changed);	
+	psy_signal_init(&self->signal_changed);
 }
 
 void patternviewconfig_dispose(PatternViewConfig* self)
@@ -442,7 +443,7 @@ bool patternviewconfig_drawemptydata(const PatternViewConfig* self)
 	return psy_property_at_bool(self->patternview, "drawemptydata", TRUE);
 }
 
-bool patternviewconfig_centercursoronscreen(const PatternViewConfig* self)
+bool patternviewconfig_center_cursor_on_screen(const PatternViewConfig* self)
 {
 	assert(self);
 
@@ -454,6 +455,27 @@ bool patternviewconfig_showbeatoffset(const PatternViewConfig* self)
 	assert(self);
 
 	return psy_property_at_bool(self->patternview, "beatoffset", TRUE);
+}
+
+double patternviewconfig_linenumber_width(const PatternViewConfig* self)
+{
+	double rv;
+
+	assert(self);
+
+	rv = 0.0;
+	if (patternviewconfig_linenumbers(self)) {
+		rv += 5.0;
+		if (patternviewconfig_linenumbersinhex(self)) {
+		}
+		if (patternviewconfig_showbeatoffset(self)) {
+			rv += 5.0;
+		}
+		if (!patternviewconfig_issinglepatterndisplay(self)) {
+			rv += 3.0;
+		}
+	}
+	return rv;
 }
 
 bool patternviewconfig_showwideinstcolumn(const PatternViewConfig* self)
@@ -857,6 +879,105 @@ void patternviewconfig_loadbitmap(PatternViewConfig* self)
 			psy_property_deallocate(coords);
 		}
 	}
+}
+
+void patternviewconfig_switch_header(PatternViewConfig* self)
+{
+	if (self->has_classic_header) {
+		patternviewconfig_switch_to_text(self);
+	} else {
+		patternviewconfig_switch_to_classic(self);
+	}
+}
+
+void patternviewconfig_switch_to_text(PatternViewConfig* self)
+{
+	psy_ui_Styles* styles;
+	psy_ui_Style* style;	
+
+	self->has_classic_header = FALSE;
+	styles = &psy_ui_appdefaults()->styles;
+
+	style = psy_ui_style_clone(psy_ui_style(STYLE_PV_TRACK_TEXT_HEADER));
+	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER, style);
+
+	style = psy_ui_style_clone(psy_ui_style(STYLE_PV_TRACK_TEXT_HEADER_DIGITX0));
+	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER_DIGITX0, style);
+
+	style = psy_ui_style_clone(psy_ui_style(STYLE_PV_TRACK_TEXT_HEADER_DIGIT0X));
+	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER_DIGIT0X, style);
+
+	style = psy_ui_style_clone(psy_ui_style(STYLE_PV_TRACK_TEXT_HEADER_MUTE));
+	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER_MUTE, style);
+
+	style = psy_ui_style_clone(psy_ui_style(STYLE_PV_TRACK_TEXT_HEADER_MUTE_SELECT));
+	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER_MUTE_SELECT, style);
+
+	style = psy_ui_style_clone(psy_ui_style(STYLE_PV_TRACK_TEXT_HEADER_SOLO));
+	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER_SOLO, style);
+
+	style = psy_ui_style_clone(psy_ui_style(STYLE_PV_TRACK_TEXT_HEADER_SOLO_SELECT));
+	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER_SOLO_SELECT, style);
+
+	style = psy_ui_style_clone(psy_ui_style(STYLE_PV_TRACK_TEXT_HEADER_RECORD));
+	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER_RECORD, style);
+
+	style = psy_ui_style_clone(psy_ui_style(STYLE_PV_TRACK_TEXT_HEADER_RECORD_SELECT));
+	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER_RECORD_SELECT, style);
+
+	/* style = psy_ui_style_clone(psy_ui_style(STYLE_PV_TRACK_TEXT_HEADER_PLAY));
+	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER_PLAY, style);
+
+	style = psy_ui_style_clone(psy_ui_style(STYLE_PV_TRACK_TEXT_HEADER_PLAY_SELECT));
+	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER_PLAY_SELECT, style); */
+
+	style = psy_ui_style_clone(psy_ui_style(STYLE_PV_TRACK_TEXT_HEADER_TEXT));
+	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER_TEXT, style);
+}
+
+void patternviewconfig_switch_to_classic(PatternViewConfig* self)
+{
+	psy_ui_Styles* styles;
+	psy_ui_Style* style;
+
+	self->has_classic_header = TRUE;
+	styles = &psy_ui_appdefaults()->styles;
+
+	style = psy_ui_style_clone(psy_ui_style(STYLE_PV_TRACK_CLASSIC_HEADER));
+	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER, style);
+
+	style = psy_ui_style_clone(psy_ui_style(STYLE_PV_TRACK_CLASSIC_HEADER_DIGITX0));
+	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER_DIGITX0, style);
+
+	style = psy_ui_style_clone(psy_ui_style(STYLE_PV_TRACK_CLASSIC_HEADER_DIGIT0X));
+	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER_DIGIT0X, style);
+
+	style = psy_ui_style_clone(psy_ui_style(STYLE_PV_TRACK_CLASSIC_HEADER_MUTE));
+	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER_MUTE, style);
+
+	style = psy_ui_style_clone(psy_ui_style(STYLE_PV_TRACK_CLASSIC_HEADER_MUTE_SELECT));
+	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER_MUTE_SELECT, style);
+
+	style = psy_ui_style_clone(psy_ui_style(STYLE_PV_TRACK_CLASSIC_HEADER_SOLO));
+	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER_SOLO, style);
+
+	style = psy_ui_style_clone(psy_ui_style(STYLE_PV_TRACK_CLASSIC_HEADER_SOLO_SELECT));
+	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER_SOLO_SELECT, style);
+
+	style = psy_ui_style_clone(psy_ui_style(STYLE_PV_TRACK_CLASSIC_HEADER_RECORD));
+	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER_RECORD, style);
+
+	style = psy_ui_style_clone(psy_ui_style(STYLE_PV_TRACK_CLASSIC_HEADER_RECORD_SELECT));
+	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER_RECORD_SELECT, style);
+
+	style = psy_ui_style_clone(psy_ui_style(STYLE_PV_TRACK_CLASSIC_HEADER_PLAY));
+	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER_PLAY, style);
+
+	style = psy_ui_style_clone(psy_ui_style(STYLE_PV_TRACK_CLASSIC_HEADER_PLAY_SELECT));
+	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER_PLAY_SELECT, style);
+
+	style = psy_ui_style_clone(psy_ui_style(STYLE_PV_TRACK_CLASSIC_HEADER_TEXT));
+	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER_TEXT, style);
 }
 
 void patternviewconfig_setsource(PatternViewConfig* self, psy_ui_RealRectangle* r,

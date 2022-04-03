@@ -464,7 +464,7 @@ static void seqviewlist_vtable_init(SeqviewList* self)
 			seqviewlist_on_focuslost;
 		seqviewlist_vtable_initialized = TRUE;
 	}
-	psy_ui_component_setvtable(&self->component, &seqviewlist_vtable);
+	psy_ui_component_set_vtable(&self->component, &seqviewlist_vtable);
 }
 
 /* implementation */

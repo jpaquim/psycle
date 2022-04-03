@@ -43,7 +43,7 @@ static void headerui_vtable_init(HeaderUi* self)
 			headerui_onpreferredsize;		
 		headerui_vtable_initialized = TRUE;
 	}
-	psy_ui_component_setvtable(&self->component, &headerui_vtable);	
+	psy_ui_component_set_vtable(&self->component, &headerui_vtable);	
 }
 
 /* implementation */

@@ -605,6 +605,11 @@ void psy_ui_position_set_rectangle(psy_ui_Position*, psy_ui_Rectangle);
 void psy_ui_position_set_topleft(psy_ui_Position*, psy_ui_Point);
 void psy_ui_position_set_size(psy_ui_Position*, psy_ui_Size);
 
+INLINE psy_ui_Rectangle psy_ui_position_rectangle(const psy_ui_Position* self)
+{
+	return *self->rectangle;
+}
+
 bool psy_ui_position_is_active(const psy_ui_Position*);
 
 typedef struct psy_ui_Margin {

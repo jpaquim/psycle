@@ -9,12 +9,14 @@
 #include "patternheader.h"
 /* local */
 #include "styles.h"
-
+/* portable */
+#include "../../detail/portable.h"
 
 /* prototypes */
 static void patterntrackbox_ondraw(PatternTrackBox*, psy_ui_Graphics*);
 static void patterntrackbox_drawnumber(PatternTrackBox*, psy_ui_Graphics*);
 static void patterntrackbox_drawselection(PatternTrackBox*, psy_ui_Graphics*);
+static void patterntrackbox_drawtext(PatternTrackBox*, psy_ui_Graphics*);
 static void patterntrackbox_on_mouse_down(PatternTrackBox*, psy_ui_MouseEvent*);
 static void patterntrackbox_onpreferredsize(PatternTrackBox*,
 	const psy_ui_Size* limit, psy_ui_Size* rv);
@@ -38,7 +40,7 @@ static void patterntrackbox_vtable_init(PatternTrackBox* self)
 			patterntrackbox_onpreferredsize;
 		patterntrackbox_vtable_initialized = TRUE;
 	}
-	psy_ui_component_setvtable(&self->component, &patterntrackbox_vtable);
+	psy_ui_component_set_vtable(&self->component, &patterntrackbox_vtable);
 }
 
 /* implementation */
@@ -93,23 +95,24 @@ PatternTrackBox* patterntrackbox_allocinit(psy_ui_Component* parent,
 }
 
 void patterntrackbox_playon(PatternTrackBox* self)
-{		
+{
 	psy_ui_component_addstylestate(&self->play, psy_ui_STYLESTATE_SELECT);
 }
 
 void patterntrackbox_playoff(PatternTrackBox* self)
-{	
+{
 	psy_ui_component_removestylestate(&self->play, psy_ui_STYLESTATE_SELECT);
 }
 
 void patterntrackbox_ondraw(PatternTrackBox* self, psy_ui_Graphics* g)
 {
 	patterntrackbox_drawnumber(self, g);
-	patterntrackbox_drawselection(self, g);	
+	patterntrackbox_drawselection(self, g);
+	patterntrackbox_drawtext(self, g);
 }
 
 void patterntrackbox_drawnumber(PatternTrackBox* self, psy_ui_Graphics* g)
-{	
+{
 	psy_ui_Style* style_x0;
 	psy_ui_Style* style_0x;
 	psy_ui_RealRectangle r;
@@ -126,7 +129,7 @@ void patterntrackbox_drawnumber(PatternTrackBox* self, psy_ui_Graphics* g)
 		psy_ui_realpoint_make(
 			psy_ui_value_px(&style_x0->padding.left, tm, 0),
 			psy_ui_value_px(&style_x0->padding.top, tm, 0)),
-		style_x0->background.size);	
+		style_x0->background.size);
 	psy_ui_drawbitmap(g, &style_x0->background.bitmap, r,
 		psy_ui_realpoint_make(
 			-style_x0->background.position.x + src_x0,
@@ -139,18 +142,48 @@ void patterntrackbox_drawnumber(PatternTrackBox* self, psy_ui_Graphics* g)
 	psy_ui_drawbitmap(g, &style_0x->background.bitmap, r,
 		psy_ui_realpoint_make(
 			-style_0x->background.position.x + src_0x,
-			-style_0x->background.position.y));	
+			-style_0x->background.position.y));
 }
 
 void patterntrackbox_drawselection(PatternTrackBox* self, psy_ui_Graphics* g)
 {
 	if (self->index == psy_audio_sequencecursor_track(
-			&self->state->pv->cursor)) {
+		&self->state->pv->cursor)) {
 		psy_ui_RealSize size;
 
-		size = psy_ui_component_size_px(&self->component);		
+		size = psy_ui_component_size_px(&self->component);
 		psy_ui_drawline(g, psy_ui_realpoint_zero(),
 			psy_ui_realpoint_make(size.width, 0.0));
+	}
+}
+
+void patterntrackbox_drawtext(PatternTrackBox* self, psy_ui_Graphics* g)
+{
+	psy_ui_Style* style_text;
+
+	style_text = psy_ui_style(STYLE_PV_TRACK_HEADER_TEXT);
+	if (psy_ui_position_is_active(&style_text->position)) {
+		psy_ui_Rectangle r;
+		const psy_ui_TextMetric* tm;
+		static const char* text = "";
+
+		r = psy_ui_style_position(style_text);		
+		tm = psy_ui_component_textmetric(&self->component);		
+		psy_ui_setfont(g, &style_text->font);
+		psy_ui_textoutrectangle(g,
+			psy_ui_realpoint_make(
+				psy_ui_value_px(&r.topleft.x, tm, NULL),
+				psy_ui_value_px(&r.topleft.y, tm, NULL)),
+			psy_ui_ETO_CLIPPED,
+			psy_ui_realrectangle_make(
+				psy_ui_realpoint_make(
+					psy_ui_value_px(&r.topleft.x, tm, NULL),
+					psy_ui_value_px(&r.topleft.y, tm, NULL)),
+				psy_ui_realsize_make(
+					psy_ui_value_px(&r.size.width, tm, NULL),
+					psy_ui_value_px(&r.size.height, tm, NULL))),
+			text,
+			psy_strlen(text));		
 	}
 }
 
@@ -317,7 +350,7 @@ static void trackerheader_vtable_init(TrackerHeader* self)
 			trackerheader_onmousewheel;
 		trackerheader_vtable_initialized = TRUE;
 	}
-	psy_ui_component_setvtable(&self->component, &trackerheader_vtable);	
+	psy_ui_component_set_vtable(&self->component, &trackerheader_vtable);	
 }
 
 /* implementation */
@@ -440,13 +473,24 @@ void trackerheader_ontrackstatechanged(TrackerHeader* self,
 }
 
 /* TrackerHeaderView */
+
+/* prototypes*/
+void trackerheaderview_on_configure(TrackerHeaderView*, PatternViewConfig*,
+	psy_Property*);
+void trackerheaderview_on_header_line(TrackerHeaderView*, psy_ui_Component* sender);
+
+/* implementation */
 void trackerheaderview_init(TrackerHeaderView* self, psy_ui_Component* parent, TrackConfig* config,
 	TrackerState* state, Workspace* workspace)
 {
 	psy_ui_component_init(&self->component, parent, NULL);
 	/* desc */
-	psy_ui_label_init(&self->desc, &self->component);
-	psy_ui_label_set_text(&self->desc, "Line");
+	psy_ui_button_init_connect(&self->desc, &self->component,
+		self, trackerheaderview_on_header_line);
+	psy_ui_component_set_style_types(&self->desc.component,
+		psy_ui_STYLE_LABEL, psy_INDEX_INVALID, psy_INDEX_INVALID,
+		psy_INDEX_INVALID);
+	psy_ui_button_set_text(&self->desc, "Line");
 	psy_ui_component_set_align(&self->desc.component, psy_ui_ALIGN_LEFT);
 	psy_ui_component_set_preferred_size(&self->desc.component,
 		psy_ui_size_make_em(8.0, 1.0));
@@ -455,4 +499,28 @@ void trackerheaderview_init(TrackerHeaderView* self, psy_ui_Component* parent, T
 	psy_ui_component_set_align(&self->pane, psy_ui_ALIGN_CLIENT);
 	trackerheader_init(&self->header, &self->pane, config, state, workspace);
 	psy_ui_component_set_align(&self->header.component, psy_ui_ALIGN_FIXED);
+	/* configuration */
+	psy_signal_connect(&workspace->config.patview.signal_changed, self,
+		trackerheaderview_on_configure);
+}
+
+void trackerheaderview_on_configure(TrackerHeaderView* self, PatternViewConfig* config,
+	psy_Property* property)
+{	
+	if (patternviewconfig_linenumber_width(config) == 0.0) {
+		psy_ui_component_hide(&self->desc.component);
+	} else {
+		psy_ui_component_set_preferred_size(&self->desc.component,
+			psy_ui_size_make_em(
+				patternviewconfig_linenumber_width(config) * self->header.state->flatsize,
+				1.0));
+		psy_ui_component_show(&self->desc.component);
+	}	
+}
+
+void trackerheaderview_on_header_line(TrackerHeaderView* self, psy_ui_Component* sender)
+{
+	patternviewconfig_switch_header(&self->header.workspace->config.patview);
+	psy_ui_component_align(&self->header.component);
+	psy_ui_component_invalidate(&self->header.component);
 }

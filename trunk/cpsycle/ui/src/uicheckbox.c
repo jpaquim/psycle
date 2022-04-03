@@ -33,7 +33,7 @@ static void vtable_init(psy_ui_CheckBox* self)
 			psy_ui_checkbox_on_mouse_down;
 		vtable_initialized = TRUE;
 	}
-	psy_ui_component_setvtable(&self->component, &vtable);
+	psy_ui_component_set_vtable(&self->component, &vtable);
 }
 
 /* implementation */

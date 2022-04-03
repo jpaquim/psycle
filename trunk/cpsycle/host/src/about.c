@@ -113,8 +113,7 @@ void licence_init(Licence* self, psy_ui_Component* parent)
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_signal_connect(&psy_ui_app()->translator.signal_languagechanged,
 		self, licence_onlanguagechanged);	
-	psy_ui_label_init(&self->licenceinfo, &self->component);
-	self->licenceinfo.component.id = 100;
+	psy_ui_label_init(&self->licenceinfo, &self->component);	
 	psy_ui_label_prevent_translation(&self->licenceinfo);
 	// psy_ui_label_set_charnumber(&self->licenceinfo, 0.0);
 	psy_ui_component_set_wheel_scroll(&self->licenceinfo.component, 4);
@@ -279,7 +278,7 @@ static void about_vtable_init(About* self)
 			about_on_focus;
 		about_vtable_initialized = TRUE;
 	}
-	psy_ui_component_setvtable(about_base(self), &about_vtable);
+	psy_ui_component_set_vtable(about_base(self), &about_vtable);
 }
 
 /* implementation */

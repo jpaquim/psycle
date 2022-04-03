@@ -10,6 +10,7 @@
 #include "trackergridstate.h"
 #include "workspace.h"
 /* ui */
+#include <uibutton.h>
 #include <uilabel.h>
 
 /* PatternTrackBox */
@@ -88,7 +89,7 @@ typedef struct TrackerHeaderView {
 	psy_ui_Component component;
 	/* internal */
 	psy_ui_Component pane;
-	psy_ui_Label desc;
+	psy_ui_Button desc;
 	TrackerHeader header;
 } TrackerHeaderView;
 

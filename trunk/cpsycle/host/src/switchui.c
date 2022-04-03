@@ -56,7 +56,7 @@ static void switchui_vtable_init(SwitchUi* self)
 			switchui_onmousemove;
 		switchui_vtable_initialized = TRUE;
 	}
-	psy_ui_component_setvtable(&self->component, &switchui_vtable);
+	psy_ui_component_set_vtable(&self->component, &switchui_vtable);
 }
 
 /* implementation */

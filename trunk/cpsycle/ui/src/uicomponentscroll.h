@@ -67,6 +67,27 @@ INLINE int psy_ui_componentscroll_wheel(
 	return self->wheel;
 }
 
+INLINE bool psy_ui_componentscroll_has_vertical_overflow(
+	const psy_ui_ComponentScroll* self)
+{
+	return ((self->overflow & psy_ui_OVERFLOW_VSCROLL) ==
+			psy_ui_OVERFLOW_VSCROLL);
+}
+
+INLINE bool psy_ui_componentscroll_has_vertical_center_overflow(
+	const psy_ui_ComponentScroll* self)
+{
+	return ((self->overflow & psy_ui_OVERFLOW_VSCROLLCENTER) ==
+		psy_ui_OVERFLOW_VSCROLLCENTER);
+}
+
+INLINE bool psy_ui_componentscroll_has_horizontal_overflow(
+	const psy_ui_ComponentScroll* self)
+{
+	return ((self->overflow & psy_ui_OVERFLOW_HSCROLL) ==
+		psy_ui_OVERFLOW_HSCROLL);
+}
+
 #ifdef __cplusplus
 }
 #endif

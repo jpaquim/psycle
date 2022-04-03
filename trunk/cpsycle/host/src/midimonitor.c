@@ -357,7 +357,7 @@ void midimonitor_init(MidiMonitor* self, psy_ui_Component* parent, Workspace*
 {	
 	psy_ui_component_init(&self->component, parent, NULL);
 	midimonitor_vtable_init(self);
-	psy_ui_component_setvtable(midimonitor_base(self), midimonitor_vtable_init(self));
+	psy_ui_component_set_vtable(midimonitor_base(self), midimonitor_vtable_init(self));
 	psy_ui_component_set_style_type(&self->component,
 		STYLE_RECENTVIEW_MAINSECTION);
 	midimonitor_inittitlebar(self);

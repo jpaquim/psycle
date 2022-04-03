@@ -122,7 +122,7 @@ void seqeditor_init(SeqEditor* self, psy_ui_Component* parent,
 	/* connect signals */
 	psy_signal_connect(&self->state.workspace->signal_songchanged, self,
 		seqeditor_onsongchanged);
-	psy_signal_connect(&self->tracks.component.signal_scroll, self,
+	psy_signal_connect(&self->tracks.component.signal_scrolled, self,
 		seqeditor_ontracksscroll);	
 	psy_signal_connect(
 		&psycleconfig_general(workspace_conf(workspace))->signal_changed,
@@ -220,9 +220,9 @@ void seqeditor_build(SeqEditor* self)
 
 void seqeditor_ontracksscroll(SeqEditor* self, psy_ui_Component* sender)
 {	
-	psy_ui_component_setscrolltop(&self->trackdesc.component,
+	psy_ui_component_set_scroll_top(&self->trackdesc.component,
 		psy_ui_component_scrolltop(&self->tracks.component));
-	psy_ui_component_setscrollleft(&self->header.pane,
+	psy_ui_component_set_scroll_left(&self->header.pane,
 		psy_ui_component_scrollleft(&self->tracks.component));
 }
 

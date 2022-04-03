@@ -47,9 +47,12 @@ void psy_ui_background_copy(psy_ui_Background* self, const psy_ui_Background* ot
 	psy_ui_bitmap_copy(&self->bitmap, &other->bitmap);
 	self->repeat = other->repeat;
 	self->align = other->align;
-	self->animation = other->animation;
+	self->animation = other->animation;	
 	self->position = other->position;
 	self->position_set = other->position_set;
+	self->size = other->size;
+	self->size_set = other->size_set;
+	self->overlay = other->overlay;	
 }
 
 /* Helper */
@@ -158,7 +161,12 @@ void psy_ui_style_copy(psy_ui_Style* self, const psy_ui_Style* other)
 	self->marginset = other->marginset;
 	self->padding = other->padding;
 	self->paddingset = other->paddingset;
-	self->position = other->position;	
+	psy_ui_position_dispose(&self->position);
+	psy_ui_position_init(&self->position);
+	if (psy_ui_position_is_active(&other->position)) {
+		psy_ui_position_set_rectangle(&self->position,
+			*other->position.rectangle);
+	}	
 	psy_ui_font_copy(&self->font, &other->font);	
 }
 

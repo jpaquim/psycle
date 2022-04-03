@@ -340,14 +340,13 @@ void trackerstate_init(TrackerState* self, TrackConfig* trackconfig,
 	self->drawbeathighlights = TRUE;	
 	self->draw_playbar = TRUE;
 	self->showemptydata = FALSE;
-	self->midline = FALSE;
-	self->prevent_cursor = FALSE;
+	self->midline = FALSE;	
 	trackereventtable_init(&self->trackevents);
 	psy_audio_patternentry_init(&self->empty);
 	self->defaultlineheight = psy_ui_value_make_eh(1.0);
 	self->lineheight = self->defaultlineheight;
 	self->lineheightpx = 19.0;
-	self->flatsize = 8;	
+	self->flatsize = 1.2;	
 	self->visilines = 25;	
 }
 
@@ -637,19 +636,6 @@ psy_audio_SequenceCursor trackerstate_checkcursorbounds(TrackerState* self,
 	return rv;
 }
 
-bool trackerstate_testplaybar(TrackerState* self,
-	psy_dsp_big_beat_t playposition, psy_dsp_big_beat_t offset)
-{
-	assert(self);
-
-	return psy_dsp_testrange(
-		playposition -
-			((self->pv->singlemode)
-			? self->pv->cursor.seqoffset
-			: 0.0),
-		offset, patternviewstate_bpl(self->pv));
-}
-
 void trackerstate_lineclip(TrackerState* self, const psy_ui_RealRectangle* clip,
 	psy_audio_BlockSelection* rv)
 {	
@@ -689,8 +675,7 @@ void trackerstate_updatemetric(TrackerState* self, const psy_ui_TextMetric* tm,
 	self->lineheight = psy_ui_value_make_eh(lineheight);
 	self->lineheightpx = psy_max(1.0, psy_ui_value_px(&self->lineheight, tm,
 		NULL));	
-	self->trackconfig->textwidth = (int)((double)tm->tmAveCharWidth * 1.5) + 2;
-	self->flatsize = (double)(tm->tmAveCharWidth) + 2.0;
+	self->trackconfig->textwidth = (int)((double)tm->tmAveCharWidth * 1.5) + 2;	
 }
 
 psy_audio_SequenceCursor trackerstate_make_cursor(TrackerState* self,
@@ -727,7 +712,7 @@ void trackerstate_columncolours(TrackerState* self,
 	TrackerColumnFlags flags, uintptr_t track,
 	psy_ui_Colour* bg, psy_ui_Colour* fore)
 {		
-	// uintptr_t numtracks;
+	/* uintptr_t numtracks; */
 	psy_ui_Style* style;
 
 	assert(bg);

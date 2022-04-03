@@ -318,7 +318,7 @@ void instrumententryview_setinstrument(InstrumentEntryView* self,
 	psy_audio_Instrument* instrument)
 {
 	self->instrument = instrument;
-	psy_ui_component_setscrolltop(&self->component, psy_ui_value_zero());	
+	psy_ui_component_set_scroll_top(&self->component, psy_ui_value_zero());	
 	psy_ui_component_updateoverflow(&self->component);	
 	psy_ui_component_invalidate(&self->component);	
 }

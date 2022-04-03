@@ -179,7 +179,8 @@ typedef struct psy_ui_Component {
 	psy_Signal signal_mouseenter;
 	psy_Signal signal_mousehover;
 	psy_Signal signal_mouseleave;
-	psy_Signal signal_scroll;	
+	psy_Signal signal_scroll;
+	psy_Signal signal_scrolled;
 	psy_Signal signal_create;
 	psy_Signal signal_close;
 	psy_Signal signal_destroy;
@@ -235,7 +236,7 @@ psy_ui_Component* psy_ui_component_allocinit(psy_ui_Component* parent,
 	psy_ui_Component* view);
 void psy_ui_component_deallocate_after_destroyed(psy_ui_Component*);
 
-INLINE void psy_ui_component_setvtable(psy_ui_Component* self,
+INLINE void psy_ui_component_set_vtable(psy_ui_Component* self,
 	psy_ui_ComponentVtable* vtable)
 {
 	self->vtable = vtable;
@@ -375,7 +376,7 @@ void psy_ui_component_set_preferred_size(psy_ui_Component*, psy_ui_Size);
 void psy_ui_component_setpreferredheight(psy_ui_Component*, psy_ui_Value);
 void psy_ui_component_setpreferredwidth(psy_ui_Component*, psy_ui_Value);
 psy_ui_Size psy_ui_component_preferredsize(psy_ui_Component*, const psy_ui_Size* limit);
-psy_ui_Size psy_ui_component_preferredscrollsize(psy_ui_Component*, const psy_ui_Size* limit);
+psy_ui_Size psy_ui_component_preferred_scrollsize(psy_ui_Component*, const psy_ui_Size* limit);
 psy_ui_RealSize psy_ui_component_preferredscrollsize_px(psy_ui_Component*,
 	const psy_ui_Size* limit);
 void psy_ui_component_setmaximumsize(psy_ui_Component*, psy_ui_Size);
@@ -676,8 +677,8 @@ INLINE void psy_ui_component_select_section(psy_ui_Component* self, uintptr_t se
 	psy_signal_emit(&self->signal_selectsection, self, 2, section, options);
 }
 
-void psy_ui_component_setscroll(psy_ui_Component*, psy_ui_Point);
-void psy_ui_component_setscrollleft(psy_ui_Component*, psy_ui_Value left);
+void psy_ui_component_set_scroll(psy_ui_Component*, psy_ui_Point);
+void psy_ui_component_set_scroll_left(psy_ui_Component*, psy_ui_Value left);
 
 INLINE psy_ui_Value psy_ui_component_scrollleft(psy_ui_Component* self)
 {	
@@ -695,7 +696,7 @@ INLINE double psy_ui_component_scrollleft_px(psy_ui_Component* self)
 	return -floor(position.left);
 }
 
-void psy_ui_component_setscrolltop(psy_ui_Component*, psy_ui_Value top);
+void psy_ui_component_set_scroll_top(psy_ui_Component*, psy_ui_Value top);
 
 INLINE psy_ui_Value psy_ui_component_scrolltop(psy_ui_Component* self)
 {		
@@ -716,7 +717,7 @@ INLINE double psy_ui_component_scrolltop_px(psy_ui_Component* self)
 INLINE void psy_ui_component_setscrolltop_px(psy_ui_Component* self,
 	double top)
 {
-	psy_ui_component_setscrolltop(self, psy_ui_value_make_px(top));
+	psy_ui_component_set_scroll_top(self, psy_ui_value_make_px(top));
 }
 
 void psy_ui_component_updateoverflow(psy_ui_Component*);

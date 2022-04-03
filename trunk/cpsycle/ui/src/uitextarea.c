@@ -568,10 +568,7 @@ void psy_ui_textareapane_onmousehook(psy_ui_TextAreaPane* self, psy_ui_App* send
 void psy_ui_textareapane_ondraw(psy_ui_TextAreaPane* self, psy_ui_Graphics* g)
 {		
 	psy_ui_TextDraw textdraw;
-			
-	if (self->component.id == 10) {
-		self = self;
-	}
+	
 	psy_ui_textdraw_init(&textdraw, &self->format, psy_ui_component_size_px(
 		psy_ui_textareapane_base(self)), self->text);
 	psy_ui_textdraw_draw(&textdraw, g,
@@ -755,7 +752,7 @@ void psy_ui_textareapane_scroll_left(psy_ui_TextAreaPane* self)
 		intptr_t chars;
 		
 		chars = (intptr_t)(screen_offset / tm->tmAveCharWidth);
-		psy_ui_component_setscrollleft(&self->component,
+		psy_ui_component_set_scroll_left(&self->component,
 			psy_ui_value_make_px((double)(chars * (intptr_t)tm->tmAveCharWidth)));
 	}
 }
@@ -783,7 +780,7 @@ void psy_ui_textareapane_scroll_right(psy_ui_TextAreaPane* self)
 		psy_ui_component_font(&self->component),
 		tm);	
 	if (screen_offset > psy_ui_component_scrollleft_px(&self->component) + client_size.width) {				
-		psy_ui_component_setscrollleft(&self->component,
+		psy_ui_component_set_scroll_left(&self->component,
 			psy_ui_value_make_px(psy_ui_component_scrollleft_px(&self->component) + tm->tmAveCharWidth));
 	}
 }
