@@ -145,7 +145,7 @@ static void vtable_init(MainFrame* self)
 			mainframe_on_timer;		
 		vtable_initialized = TRUE;
 	}
-	psy_ui_component_setvtable(mainframe_base(self), &vtable);
+	psy_ui_component_set_vtable(mainframe_base(self), &vtable);
 }
 
 /* implementation */

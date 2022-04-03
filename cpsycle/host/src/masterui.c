@@ -44,7 +44,7 @@ static void masterui_vtable_init(MasterUi* self)
 			masterui_move;		
 		masterui_vtable_initialized = TRUE;
 	}
-	psy_ui_component_setvtable(&self->component, &masterui_vtable);	
+	psy_ui_component_set_vtable(&self->component, &masterui_vtable);	
 }
 
 /* implementation */

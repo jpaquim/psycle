@@ -380,7 +380,7 @@ static void stepsequencerbarbutton_vtable_init(StepSequencerBarButton* self)
 			stepsequencerbarbutton_ondraw;
 		stepsequencerbarbutton_vtable_initialized = TRUE;
 	}
-	psy_ui_component_setvtable(&self->component, &stepsequencerbarbutton_vtable);
+	psy_ui_component_set_vtable(&self->component, &stepsequencerbarbutton_vtable);
 }
 
 /* implementation */

@@ -20,9 +20,11 @@ extern "C" {
 typedef struct TrackerColumn {
 	/* inherits */
 	psy_ui_Component component;
-	uintptr_t track;
-	psy_ui_RealSize digitsize;	
 	/* internal */
+	uintptr_t track;
+	psy_ui_RealSize digitsize;		
+	psy_ui_RealSize size;
+	psy_ui_RealSize line_size;
 	/* references */
 	TrackerState* state;	
 	Workspace* workspace;

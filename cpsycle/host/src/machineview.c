@@ -81,7 +81,7 @@ static void machineview_vtable_init(MachineView* self)
 			machineview_onshow;
 		machineview_vtable_initialized = TRUE;
 	}
-	psy_ui_component_setvtable(machineview_base(self),
+	psy_ui_component_set_vtable(machineview_base(self),
 		&machineview_vtable);	
 }
 

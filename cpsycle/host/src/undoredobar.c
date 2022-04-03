@@ -32,7 +32,7 @@ static void vtable_init(UndoRedoBar* self)
 			undoredobar_on_timer;
 		vtable_initialized = TRUE;
 	}
-	psy_ui_component_setvtable(undoredobar_base(self), &vtable);
+	psy_ui_component_set_vtable(undoredobar_base(self), &vtable);
 }
 /* implementation */
 void undoredobar_init(UndoRedoBar* self, psy_ui_Component* parent,

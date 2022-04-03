@@ -62,7 +62,7 @@ static void psy_ui_scrollbarpane_vtable_init(psy_ui_ScrollBarPane* self)
 			psy_ui_scrollbarpane_on_timer;
 		psy_ui_scrollbarpane_vtable_initialized = TRUE;
 	}
-	psy_ui_component_setvtable(&self->component, &psy_ui_scrollbarpane_vtable);
+	psy_ui_component_set_vtable(&self->component, &psy_ui_scrollbarpane_vtable);
 }
 
 /* implementation */
@@ -334,7 +334,7 @@ static void psy_ui_scrollbar_vtable_init(psy_ui_ScrollBar* self)
 			psy_ui_scrollbar_onwheel;		
 		psy_ui_scrollbar_vtable_initialized = TRUE;
 	}
-	psy_ui_component_setvtable(&self->component, &psy_ui_scrollbar_vtable);
+	psy_ui_component_set_vtable(&self->component, &psy_ui_scrollbar_vtable);
 }
 
 /* implementation */

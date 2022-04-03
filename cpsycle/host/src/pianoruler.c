@@ -40,7 +40,7 @@ static void pianoruler_vtable_init(PianoRuler* self)
 			pianoruler_onpreferredsize;
 		pianoruler_vtable_initialized = TRUE;
 	}
-	psy_ui_component_setvtable(pianoruler_base(self),
+	psy_ui_component_set_vtable(pianoruler_base(self),
 		&pianoruler_vtable);
 }
 

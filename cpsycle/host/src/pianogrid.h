@@ -104,7 +104,7 @@ typedef struct Pianogrid {
 	psy_ui_Component component;
 	/* internal */	
 	psy_audio_PatternEntry* hoverpatternentry;	
-	psy_audio_SequenceCursor oldcursor;
+	psy_audio_SequenceCursor old_cursor;
 	psy_audio_SequenceCursor dragcursor;
 	bool cursoronnoterelease;
 	PianoTrackDisplay trackdisplay;

@@ -61,7 +61,7 @@ void trackscopes_init(TrackScopes* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {	
 	psy_ui_component_init(&self->component, parent, NULL);	
-	psy_ui_component_setvtable(&self->component, vtable_init(self));
+	psy_ui_component_set_vtable(&self->component, vtable_init(self));
 	psy_ui_component_set_style_type(&self->component, STYLE_TRACKSCOPE);		
 	self->workspace = workspace;
 	self->trackwidth = 90;

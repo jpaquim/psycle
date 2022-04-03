@@ -142,8 +142,7 @@ typedef struct TrackerState {
 	bool showemptydata;
 	bool midline;
 	bool drawbeathighlights;	
-	bool draw_playbar;
-	bool prevent_cursor;	
+	bool draw_playbar;	
 	psy_audio_PatternEntry empty;
 	psy_ui_Value lineheight;
 	psy_ui_Value defaultlineheight;
@@ -169,9 +168,6 @@ void trackerstate_startdragselection(TrackerState*, psy_audio_SequenceCursor);
 void trackerstate_dragselection(TrackerState*, psy_audio_SequenceCursor);
 psy_audio_SequenceCursor trackerstate_checkcursorbounds(TrackerState*,
 	psy_audio_SequenceCursor);
-bool trackerstate_testplaybar(TrackerState*,
-	psy_dsp_big_beat_t playposition,
-	psy_dsp_big_beat_t offset);
 
 /* quantized */
 INLINE double trackerstate_beattopx(TrackerState* self,

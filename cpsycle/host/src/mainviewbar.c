@@ -35,7 +35,7 @@ static void vtable_init(MainViewBar* self)
 			mainviewbar_on_destroy;
 		vtable_initialized = TRUE;
 	}
-	psy_ui_component_setvtable(mainviewbar_base(self), &vtable);
+	psy_ui_component_set_vtable(mainviewbar_base(self), &vtable);
 }
 
 /* implementation */

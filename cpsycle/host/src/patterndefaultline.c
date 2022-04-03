@@ -15,7 +15,7 @@
 /* PatternDefaultLine */
 /* prototypes */
 static void patterndefaultline_on_destroy(PatternDefaultLine*);
-static void patterndefaultline_onconfigure(PatternDefaultLine*,
+static void patterndefaultline_on_configure(PatternDefaultLine*,
 	PatternViewConfig*, psy_Property*);
 static void patterndefaultline_oncursorchanged(PatternDefaultLine*,
 	psy_audio_Sequence* sender);
@@ -70,7 +70,7 @@ void patterndefaultline_init(PatternDefaultLine* self, psy_ui_Component* parent,
 		self, patterndefaultline_oncursorchanged);
 	/* configuration */
 	psy_signal_connect(&workspace->config.patview.signal_changed, self,
-		patterndefaultline_onconfigure);	
+		patterndefaultline_on_configure);	
 }
 
 void patterndefaultline_on_destroy(PatternDefaultLine* self)
@@ -79,7 +79,7 @@ void patterndefaultline_on_destroy(PatternDefaultLine* self)
 	patternviewstate_dispose(&self->pvstate);
 }
 
-void patterndefaultline_onconfigure(PatternDefaultLine* self,
+void patterndefaultline_on_configure(PatternDefaultLine* self,
 	PatternViewConfig* config, psy_Property* property)
 {
 	if (psy_ui_component_visible(&self->component) !=
@@ -90,6 +90,15 @@ void patterndefaultline_onconfigure(PatternDefaultLine* self,
 			psy_ui_component_hide_align(&self->component);
 		}
 	}
+	if (patternviewconfig_linenumber_width(config) == 0.0) {
+		psy_ui_component_hide(&self->desc.component);
+	} else {
+		psy_ui_component_set_preferred_size(&self->desc.component,
+			psy_ui_size_make_em(
+				patternviewconfig_linenumber_width(config) * self->state.flatsize,
+				1.0));
+		psy_ui_component_show(&self->desc.component);
+	}
 	self->grid.notestabmode = patternviewconfig_notetabmode(config);
 }
 
@@ -97,5 +106,5 @@ void patterndefaultline_oncursorchanged(PatternDefaultLine* self,
 	psy_audio_Sequence* sender)
 {
 	self->state.pv->cursor = self->grid.workspace->player.patterndefaults.sequence.cursor;
-	trackergrid_invalidatecursor(&self->grid);
+	trackergrid_invalidate_cursor(&self->grid);
 }

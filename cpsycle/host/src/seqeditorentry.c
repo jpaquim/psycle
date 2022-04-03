@@ -279,19 +279,19 @@ void seqeditpatternentry_on_mouse_down(SeqEditPatternEntry* self,
 {
 	if (self->sequenceentry) {		
 		psy_audio_Sequence* sequence;
-		psy_audio_SequenceCursor oldcursor;
+		psy_audio_SequenceCursor old_cursor;
 		
 		sequence = &self->seqeditorentry.state->workspace->song->sequence;
 		if (!sequence) {
 			return;
 		}
-		oldcursor = sequence->cursor;
+		old_cursor = sequence->cursor;
 		seqeditentry_startdrag(&self->seqeditorentry, ev);		
 		if (psy_ui_mouseevent_button(ev) == 1 && self->seqeditorentry.state->dragstatus == SEQEDIT_DRAG_START) {
 			if ((workspace_currview(self->seqeditorentry.state->workspace).id ==
 					VIEW_ID_PATTERNVIEW) &&
 					psy_audio_orderindex_equal(&self->seqeditorentry.seqpos,
-						oldcursor.orderindex)) {
+						old_cursor.orderindex)) {
 				psy_audio_SequenceCursor cursor;
 
 				cursor = sequence->cursor;

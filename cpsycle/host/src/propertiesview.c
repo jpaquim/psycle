@@ -52,7 +52,7 @@ static void propertiesrenderline_vtable_init(PropertiesRenderLine* self)
 			propertiesrenderline_on_mouse_down;
 		propertiesrenderline_vtable_initialized = TRUE;
 	}
-	psy_ui_component_setvtable(&self->component, &propertiesrenderline_vtable);
+	psy_ui_component_set_vtable(&self->component, &propertiesrenderline_vtable);
 }
 
 /* implementation */
@@ -1023,7 +1023,7 @@ void propertiesview_gotosection(PropertiesView* self, uintptr_t index)
 		psy_ui_RealRectangle position;
 		
 		position = psy_ui_component_position(section);
-		psy_ui_component_setscrolltop(&self->renderer.component,
+		psy_ui_component_set_scroll_top(&self->renderer.component,
 			psy_ui_value_make_px(position.top));
 	}
 }
@@ -1165,7 +1165,7 @@ bool propertiesview_oninput(PropertiesView* self, InputHandler* sender)
 		break;
 	}
 	if (newtop != -1.0) {
-		psy_ui_component_setscrolltop(&self->renderer.component,
+		psy_ui_component_set_scroll_top(&self->renderer.component,
 			psy_ui_value_make_px(psy_max(0.0, newtop)));
 	}	
 	return 1;

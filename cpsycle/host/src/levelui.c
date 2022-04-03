@@ -37,7 +37,7 @@ static void levelui_vtable_init(LevelUi* self)
 			levelui_ondraw;		
 		levelui_vtable_initialized = TRUE;
 	}
-	psy_ui_component_setvtable(&self->component, &levelui_vtable);
+	psy_ui_component_set_vtable(&self->component, &levelui_vtable);
 }
 
 /* implementation */

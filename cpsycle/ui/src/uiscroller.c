@@ -104,7 +104,7 @@ static void vtable_init(psy_ui_Scroller* self)
 			psy_ui_scroller_on_focus_in;
 		vtable_initialized = TRUE;
 	}
-	psy_ui_component_setvtable(psy_ui_scroller_base(self), &vtable);
+	psy_ui_component_set_vtable(psy_ui_scroller_base(self), &vtable);
 }
 
 /* implementation */
@@ -173,7 +173,7 @@ void psy_ui_scroller_connect_client(psy_ui_Scroller* self)
 		self, psy_ui_scroller_scroll_range_changed);		
 	psy_signal_connect(&self->pane.signal_size,
 		self, psy_ui_scroller_on_pane_size);
-	psy_signal_connect(&self->client->signal_scroll,
+	psy_signal_connect(&self->client->signal_scrolled,
 		self, psy_ui_scroller_on_scroll);		
 	psy_ui_component_set_align(self->client, psy_ui_ALIGN_FIXED);
 }
@@ -221,7 +221,7 @@ void psy_ui_scroller_horizontal_onchanged(psy_ui_Scroller* self, psy_ui_ScrollBa
 	} else {	
 		self->thumbmove = TRUE;
 		self->client->blitscroll = TRUE;
-		psy_ui_component_setscrollleft(self->client,
+		psy_ui_component_set_scroll_left(self->client,
 			psy_ui_value_make_px(
 				floor((scrollleftpx + diff) / scrollsteppx) * scrollsteppx));		
 		self->client->blitscroll = FALSE;
@@ -247,7 +247,7 @@ void psy_ui_scroller_vertical_onchanged(psy_ui_Scroller* self,
 	iPos = scrolltoppx / scrollstepy_px;	
 	nPos = psy_ui_scrollbar_position(sender);
 	if (self->vanimate.counter > 0 && self->vanimate.steppx / (iPos - nPos) > 0) {
-		psy_ui_component_setscrolltop(self->client,
+		psy_ui_component_set_scroll_top(self->client,
 			psy_ui_value_make_px(self->vanimate.targetpx));
 	}
 	diff = -scrollstepy_px * floor(iPos - nPos);
@@ -264,7 +264,7 @@ void psy_ui_scroller_vertical_onchanged(psy_ui_Scroller* self,
 	} else {
 		self->thumbmove = TRUE;
 		self->client->blitscroll = TRUE;
-		psy_ui_component_setscrolltop(self->client,
+		psy_ui_component_set_scroll_top(self->client,
 			psy_ui_value_make_px(
 				floor((scrolltoppx + diff) / scrollstepy_px) * scrollstepy_px));		
 		self->client->blitscroll = FALSE;
@@ -278,14 +278,14 @@ void psy_ui_scroller_on_timer(psy_ui_Scroller* self, uintptr_t timerid)
 		if (psy_ui_scrollanimate_tick(&self->hanimate)) {
 			psy_ui_component_stop_timer(psy_ui_scroller_base(self), 0);
 		}
-		psy_ui_component_setscrollleft(self->client,
+		psy_ui_component_set_scroll_left(self->client,
 			psy_ui_value_make_px(psy_ui_scrollanimate_currposition(
 				&self->hanimate)));
 	} else if (timerid == 1) {
 		if (psy_ui_scrollanimate_tick(&self->vanimate)) {
 			psy_ui_component_stop_timer(psy_ui_scroller_base(self), 1);
 		}
-		psy_ui_component_setscrolltop(self->client,
+		psy_ui_component_set_scroll_top(self->client,
 			psy_ui_value_make_px(psy_ui_scrollanimate_currposition(
 				&self->vanimate)));
 	}

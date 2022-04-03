@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -117,17 +117,17 @@ void psy_ui_aligner_addspacingandborder(psy_ui_Component* component,
 void psy_ui_aligner_adjustspacing(psy_ui_Component* component,
 	psy_ui_RealPoint* cp_topleft, psy_ui_RealPoint* cp_bottomright)
 {
-	psy_ui_Margin spacing;
+	psy_ui_Margin padding;
 
-	spacing = psy_ui_component_padding(component);
-	cp_topleft->x += psy_ui_value_px(&spacing.left,
+	padding = psy_ui_component_padding(component);
+	cp_topleft->x += psy_ui_value_px(&padding.left,
 		psy_ui_component_textmetric(component), NULL);
-	cp_topleft->y += psy_ui_value_px(&spacing.top,
+	cp_topleft->y += psy_ui_value_px(&padding.top,
 		psy_ui_component_textmetric(component), NULL);
-	cp_bottomright->x -= psy_ui_value_px(&spacing.right,
+	cp_bottomright->x -= psy_ui_value_px(&padding.right,
 		psy_ui_component_textmetric(component), NULL);
 	cp_bottomright->x = psy_max(0.0, cp_bottomright->x);
-	cp_bottomright->y -= psy_ui_value_px(&spacing.bottom,
+	cp_bottomright->y -= psy_ui_value_px(&padding.bottom,
 		psy_ui_component_textmetric(component), NULL);
 	cp_bottomright->y = psy_max(0.0, cp_bottomright->y);
 }

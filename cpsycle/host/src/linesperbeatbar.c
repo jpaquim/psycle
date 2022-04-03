@@ -35,7 +35,7 @@ static void vtable_init(LinesPerBeatBar* self)
 			linesperbeatbar_on_timer;		
 		vtable_initialized = TRUE;
 	}	
-	psy_ui_component_setvtable(linesperbeatbar_base(self), &vtable);
+	psy_ui_component_set_vtable(linesperbeatbar_base(self), &vtable);
 }
 
 /* implementation */

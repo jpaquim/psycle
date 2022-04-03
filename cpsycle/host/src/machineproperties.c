@@ -45,7 +45,7 @@ static void machineproperties_vtable_init(MachineProperties* self)
 		machineproperties_vtable = *(self->component.vtable);
 		machineproperties_vtable_initialized = TRUE;
 	}
-	psy_ui_component_setvtable(&self->component,
+	psy_ui_component_set_vtable(&self->component,
 		&machineproperties_vtable);
 }
 

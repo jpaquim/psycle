@@ -51,7 +51,7 @@ static void psy_ui_listboxclient_vtable_init(psy_ui_ListBoxClient* self)
 			psy_ui_listboxclient_onsize;
 		psy_ui_listboxclient_vtable_initialized = TRUE;
 	}
-	psy_ui_component_setvtable(&self->component, &psy_ui_listboxclient_vtable);
+	psy_ui_component_set_vtable(&self->component, &psy_ui_listboxclient_vtable);
 }
 
 /* implementation */

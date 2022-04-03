@@ -58,7 +58,7 @@ void seqview_init(SeqView* self, psy_ui_Component* parent,
 	seqviewtrackheaders_init(&self->trackheader, seqview_base(self),
 		&self->state);
 	psy_ui_component_set_align(&self->trackheader.component, psy_ui_ALIGN_TOP);
-	psy_signal_connect(&self->listview.component.signal_scroll, self,
+	psy_signal_connect(&self->listview.component.signal_scrolled, self,
 		seqview_onscroll);	
 	/* duration*/
 	seqviewduration_init(&self->duration, seqview_base(self), workspace);
@@ -83,7 +83,7 @@ void seqview_init(SeqView* self, psy_ui_Component* parent,
 
 void seqview_onscroll(SeqView* self, psy_ui_Component* sender)
 {	
-	psy_ui_component_setscrollleft(&self->trackheader.client,
+	psy_ui_component_set_scroll_left(&self->trackheader.client,
 		psy_ui_component_scrollleft(seqviewlist_base(&self->listview)));
 }
 
@@ -149,12 +149,12 @@ void seqview_onsequenceselect(SeqView* self,
 		psy_ui_value_px(&self->state.lineheight,
 			psy_ui_component_textmetric(&self->component), NULL);
 	if ((double)c < listviewtop) {
-		psy_ui_component_setscrolltop(&self->listview.component,
+		psy_ui_component_set_scroll_top(&self->listview.component,
 			psy_ui_value_make_px(c *
 				psy_ui_value_px(&self->state.lineheight,
 					psy_ui_component_textmetric(&self->component), NULL)));				
 	} else if ((double)c > listviewtop + visilines - 1) {
-		psy_ui_component_setscrolltop(&self->listview.component,
+		psy_ui_component_set_scroll_top(&self->listview.component,
 			psy_ui_value_make_px((c - visilines + 1) * 
 				psy_ui_value_px(&self->state.lineheight,
 					psy_ui_component_textmetric(&self->component), NULL)));
@@ -166,8 +166,6 @@ void seqview_onsequenceselect(SeqView* self,
 void seqview_onsequencechanged(SeqView* self,
 	psy_audio_Sequence* sender)
 {			
-	psy_ui_component_set_preferred_size(&self->component,
-		psy_ui_component_scrollsize(&self->component));
 	seqviewduration_stopdurationcalc(&self->duration);
 	seqviewtrackheaders_build(&self->trackheader);
 	seqviewlist_build(&self->listview);

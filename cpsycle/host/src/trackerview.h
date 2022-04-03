@@ -34,7 +34,7 @@ typedef struct TrackerGrid {
 	psy_Signal signal_colresize;
 	/* internal */	
 	psy_dsp_NotesTabMode notestabmode;   
-	psy_audio_SequenceCursor oldcursor;
+	psy_audio_SequenceCursor old_cursor;
 	psy_audio_SequenceCursor lastdragcursor;	
 	int chordmodestarting;
 	bool chord;
@@ -46,7 +46,9 @@ typedef struct TrackerGrid {
 	bool preventscrolltop;
 	bool prevent_cursor;
 	psy_Table columns;
-	bool preventeventdriver;	
+	bool preventeventdriver;
+	psy_ui_RealSize size;
+	psy_ui_RealSize line_size;
 	/* references */
 	TrackerState* state;	
 	Workspace* workspace;
@@ -61,7 +63,7 @@ void trackergrid_showemptydata(TrackerGrid*, int showstate);
 void trackergrid_invalidate_playbar(TrackerGrid*);
 void trackergrid_invalidateline(TrackerGrid*, intptr_t line);
 void trackergrid_invalidatelines(TrackerGrid*, intptr_t line1, intptr_t line2);
-void trackergrid_invalidatecursor(TrackerGrid*);
+void trackergrid_invalidate_cursor(TrackerGrid*);
 void trackergrid_invalidateinternalcursor(TrackerGrid*,
 	psy_audio_SequenceCursor);
 void trackergrid_update_follow_song(TrackerGrid*);

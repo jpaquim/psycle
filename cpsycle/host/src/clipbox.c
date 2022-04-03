@@ -38,7 +38,7 @@ static void vtable_init(ClipBox* self)
 			clipbox_on_timer;
 		vtable_initialized = TRUE;
 	}
-	psy_ui_component_setvtable(&self->component, &vtable);
+	psy_ui_component_set_vtable(&self->component, &vtable);
 }
 
 /* implementation */

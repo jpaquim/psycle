@@ -45,7 +45,7 @@ static void labelui_vtable_init(LabelUi* self)
 			labelui_onpreferredsize;		
 		labelui_vtable_initialized = TRUE;
 	}
-	psy_ui_component_setvtable(&self->component, &labelui_vtable);
+	psy_ui_component_set_vtable(&self->component, &labelui_vtable);
 }
 
 /* implementation */

@@ -32,7 +32,7 @@ static void vtable_init(psy_ui_Notebook* self)
 			psy_ui_notebook_onalign;
 		vtable_initialized = TRUE;
 	}
-	psy_ui_component_setvtable(&self->component, &vtable);
+	psy_ui_component_set_vtable(&self->component, &vtable);
 }
 
 /* implementation */

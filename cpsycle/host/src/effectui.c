@@ -46,7 +46,7 @@ static void effectui_vtable_init(EffectUi* self)
 			effectui_on_timer;
 		effectui_vtable_initialized = TRUE;	
 	}
-	psy_ui_component_setvtable(&self->component, &effectui_vtable);	
+	psy_ui_component_set_vtable(&self->component, &effectui_vtable);	
 }
 
 /* implementation */

@@ -44,7 +44,7 @@ static void generatorui_vtable_init(GeneratorUi* self)
 			generatorui_on_timer;		
 		generatorui_vtable_initialized = TRUE;
 	}
-	psy_ui_component_setvtable(&self->component, &generatorui_vtable);
+	psy_ui_component_set_vtable(&self->component, &generatorui_vtable);
 }
 
 /* implementation */

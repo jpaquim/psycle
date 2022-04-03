@@ -54,7 +54,7 @@ static void vtable_init(PlayBar* self)
 			playbar_onlanguagechanged;
 		vtable_initialized = TRUE;
 	}
-	psy_ui_component_setvtable(playbar_base(self), &vtable);	
+	psy_ui_component_set_vtable(playbar_base(self), &vtable);	
 }
 /* implementation */
 void playbar_init(PlayBar* self, psy_ui_Component* parent, Workspace* workspace)

@@ -61,7 +61,7 @@ static void vtable_init(psy_ui_Button* self)
 			psy_ui_button_onupdatestyles;
 		vtable_initialized = TRUE;
 	}
-	psy_ui_component_setvtable(psy_ui_button_base(self), &vtable);
+	psy_ui_component_set_vtable(psy_ui_button_base(self), &vtable);
 }
 
 /* implementation */

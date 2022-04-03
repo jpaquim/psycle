@@ -35,7 +35,7 @@ static void arrowui_vtable_init(ArrowUi* self)
 			arrowui_on_mouse_down;
 		arrowui_vtable_initialized = TRUE;
 	}
-	psy_ui_component_setvtable(&self->component, &arrowui_vtable);
+	psy_ui_component_set_vtable(&self->component, &arrowui_vtable);
 }
 
 /* implementation */

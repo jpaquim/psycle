@@ -840,7 +840,7 @@ void machinestackdesc_init(MachineStackDesc* self, psy_ui_Component* parent,
 	MachineStackView* view)
 {
 	psy_ui_component_init(&self->component, parent, NULL);
-	psy_ui_component_setvtable(&self->component,
+	psy_ui_component_set_vtable(&self->component,
 		machinestackdesc_vtable_init(self));
 	self->view = view;
 	psy_ui_component_setcolour(&self->component,
@@ -988,7 +988,7 @@ static void machinestackinputs_vtable_init(MachineStackInputs* self)
 			machinestackinputs_onmousedoubleclick;
 		machinestackinputs_vtable_initialized = TRUE;
 	}	
-	psy_ui_component_setvtable(&self->component, &machinestackinputs_vtable);
+	psy_ui_component_set_vtable(&self->component, &machinestackinputs_vtable);
 }
 
 /* implementation */
@@ -1107,7 +1107,7 @@ void machinestackoutputs_init(MachineStackOutputs* self,
 	psy_ui_Component* parent, MachineStackState* state)
 {
 	psy_ui_component_init(&self->component, parent, NULL);
-	psy_ui_component_setvtable(&self->component,
+	psy_ui_component_set_vtable(&self->component,
 		machinestackoutputs_vtable_init(self));	
 	psy_ui_component_setalignexpand(&self->component, psy_ui_HEXPAND);
 	psy_ui_component_setminimumsize(&self->component,
@@ -1176,7 +1176,7 @@ void machinestackpanetrackclient_init(MachineStackPaneTrackClient* self,
 	MachineStackState* state)
 {
 	psy_ui_component_init(&self->component, parent, NULL);
-	psy_ui_component_setvtable(&self->component,
+	psy_ui_component_set_vtable(&self->component,
 		machinestackpanetrackclient_vtable_init(self));	
 	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_VSCROLL);
 	psy_ui_component_set_wheel_scroll(&self->component, 1);
@@ -1211,7 +1211,7 @@ void machinestackpanetrack_init(MachineStackPaneTrack* self,
 	MachineStackState* state, Workspace* workspace)
 {
 	psy_ui_component_init(&self->component, parent, NULL);	
-	psy_ui_component_setvtable(&self->component,
+	psy_ui_component_set_vtable(&self->component,
 		machinestackpanetrack_vtable_init(self));	
 	psy_ui_component_setcolour(&self->component, psy_ui_colour_make(0x00CACACA));
 	psy_ui_component_setalignexpand(&self->component, psy_ui_HEXPAND);	
@@ -1329,7 +1329,7 @@ void machinestackpane_init(MachineStackPane* self, psy_ui_Component* parent,
 	MachineStackState* state, Workspace* workspace)
 {
 	psy_ui_component_init(&self->component, parent, NULL);
-	psy_ui_component_setvtable(&self->component,
+	psy_ui_component_set_vtable(&self->component,
 		machinestackpane_vtable_init(self));	
 	psy_ui_component_set_wheel_scroll(&self->component, 4);
 	psy_ui_component_setalignexpand(&self->component, psy_ui_HEXPAND);	
@@ -1555,7 +1555,7 @@ static void vtable_init(MachineStackView* self)
 			machinestackview_destroy;
 		vtable_initialized = TRUE;
 	}
-	psy_ui_component_setvtable(&self->component, &vtable);
+	psy_ui_component_set_vtable(&self->component, &vtable);
 }
 // implementation
 void machinestackview_init(MachineStackView* self, psy_ui_Component* parent,

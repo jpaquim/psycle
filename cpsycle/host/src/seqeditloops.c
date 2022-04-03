@@ -118,7 +118,7 @@ static void seqeditloop_vtable_init(SeqEditLoop* self)
 			seqeditloop_onmouseleave;
 		seqeditloop_vtable_initialized = TRUE;
 	}
-	psy_ui_component_setvtable(&self->component, &seqeditloop_vtable);	
+	psy_ui_component_set_vtable(&self->component, &seqeditloop_vtable);	
 }
 /* implementation */
 void seqeditloop_init(SeqEditLoop* self, psy_ui_Component* parent,

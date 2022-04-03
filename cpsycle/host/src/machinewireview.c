@@ -192,7 +192,7 @@ static void vtable_init(MachineWireView* self)
 			machinewireview_onalign;
 		vtable_initialized = TRUE;
 	}
-	psy_ui_component_setvtable(&self->component, &vtable);	
+	psy_ui_component_set_vtable(&self->component, &vtable);	
 }
 
 /* implementation */
@@ -1154,7 +1154,7 @@ void machinewireview_onsongchanged(MachineWireView* self, Workspace* sender)
 	} else {		
 		machinewireview_setmachines(self, NULL);
 	}	
-	psy_ui_component_setscroll(&self->component, psy_ui_point_zero());
+	psy_ui_component_set_scroll(&self->component, psy_ui_point_zero());
 	self->centermaster = !sender->songhasfile;
 	if (psy_ui_component_drawvisible(&self->component)) {		
 		psy_ui_component_invalidate(&self->component);
