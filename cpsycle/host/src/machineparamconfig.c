@@ -207,7 +207,7 @@ int machineparamconfig_onchanged(MachineParamConfig* self, psy_Property*
 		psy_Property* choice;
 		bool worked;
 
-		choice = (psy_property_ischoiceitem(property)) ? psy_property_parent(property) : NULL;
+		choice = (psy_property_is_choice_item(property)) ? psy_property_parent(property) : NULL;
 		worked = FALSE;
 		if (choice) {
 			worked = TRUE;

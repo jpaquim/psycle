@@ -11,7 +11,6 @@
 #include "patternheader.h"
 #include "patternproperties.h"
 #include "patternviewmenu.h"
-#include "patternviewbar.h"
 #include "patternviewtabbar.h"
 #include "pianoroll.h"
 #include "stepbox.h"
@@ -65,17 +64,13 @@ typedef struct PatternView {
 	PatternViewState pvstate;
 	TrackerState state;
 	PatternCmds cmds;	
-	bool aligndisplay;
-	int updatealign;
-	double zoom;
+	PatternDisplayMode display;
 	/* references */
 	Workspace* workspace;
 } PatternView;
 
 void patternview_init(PatternView*, psy_ui_Component* parent,
-	psy_ui_Component* tabbarparent,	Workspace*);
-void patternview_selectdisplay(PatternView*, PatternDisplayMode);
-void patternview_updatefont(PatternView*);
+	psy_ui_Component* tabbarparent, Workspace*);
 
 INLINE psy_ui_Component* patternview_base(PatternView* self)
 {

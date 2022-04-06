@@ -72,7 +72,7 @@ typedef struct TransformPatternView {
 void transformpatternview_init(TransformPatternView*, psy_ui_Component* parent,
 	Workspace*);
 
-void transformpatternview_setpatternselection(TransformPatternView*,
+void transformpatternview_set_pattern_selection(TransformPatternView*,
 	const psy_audio_BlockSelection*);
 
 INLINE psy_ui_Component* transformpatternview_base(TransformPatternView* self)

@@ -51,7 +51,7 @@ void timebar_init(TimeBar* self, psy_ui_Component* parent,
 
 	psy_ui_component_init(timebar_base(self), parent, NULL);
 	vtable_init(self);
-	psy_ui_component_setalignexpand(timebar_base(self), psy_ui_HEXPAND);
+	psy_ui_component_set_align_expand(timebar_base(self), psy_ui_HEXPAND);
 	psy_ui_component_set_defaultalign(timebar_base(self), psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	self->player = player;

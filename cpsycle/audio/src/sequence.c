@@ -107,7 +107,7 @@ psy_audio_SequenceTrack* psy_audio_sequencetrack_clone(
 }
 
 psy_dsp_big_beat_t psy_audio_sequencetrack_duration(const psy_audio_SequenceTrack* self,
-	psy_audio_Patterns* patterns)
+	const psy_audio_Patterns* patterns)
 {
 	psy_dsp_big_beat_t rv;
 	const psy_List* p;
@@ -796,7 +796,7 @@ void psy_audio_sequence_startcalcdurationinms(psy_audio_Sequence* self)
 		return;
 	}
 	psy_audio_sequencer_init(self->sequencerduration, self, NULL);
-	psy_audio_sequencer_stoploop(self->sequencerduration);
+	psy_audio_sequencer_stop_loop(self->sequencerduration);
 	psy_audio_sequencer_start(self->sequencerduration);
 	self->sequencerduration->calcduration = TRUE;
 }
@@ -806,7 +806,7 @@ psy_dsp_big_seconds_t psy_audio_sequence_endcalcdurationinmsresult(psy_audio_Seq
 	if (self->sequencerduration) {
 		psy_dsp_big_seconds_t rv;
 
-		rv = psy_audio_sequencer_currplaytime(self->sequencerduration);
+		rv = psy_audio_sequencer_curr_play_time(self->sequencerduration);
 		psy_audio_sequencer_dispose(self->sequencerduration);
 		free(self->sequencerduration);
 		self->sequencerduration = NULL;
@@ -832,7 +832,7 @@ bool psy_audio_sequence_calcdurationinms(psy_audio_Sequence* self)
 			amount = numsamplex;
 		}
 		if (self->sequencerduration->linetickcount <=
-			psy_audio_sequencer_frametooffset(self->sequencerduration, amount)) {
+			psy_audio_sequencer_frame_to_offset(self->sequencerduration, amount)) {
 			if (self->sequencerduration->linetickcount > 0) {
 				uintptr_t pre;
 
@@ -841,11 +841,11 @@ bool psy_audio_sequence_calcdurationinms(psy_audio_Sequence* self)
 				if (pre) {
 					pre--;
 					if (pre) {
-						psy_audio_sequencer_frametick(self->sequencerduration, pre);
+						psy_audio_sequencer_frame_tick(self->sequencerduration, pre);
 						numsamplex -= pre;
 						amount -= pre;
 						self->sequencerduration->linetickcount -=
-							psy_audio_sequencer_frametooffset(
+							psy_audio_sequencer_frame_to_offset(
 								self->sequencerduration, pre);
 					}
 				}
@@ -853,10 +853,10 @@ bool psy_audio_sequence_calcdurationinms(psy_audio_Sequence* self)
 			psy_audio_sequencer_onnewline(self->sequencerduration);
 		}			
 		if (amount > 0) {
-			psy_audio_sequencer_frametick(self->sequencerduration, amount);
+			psy_audio_sequencer_frame_tick(self->sequencerduration, amount);
 			numsamplex -= amount;
 			self->sequencerduration->linetickcount -=
-				psy_audio_sequencer_frametooffset(self->sequencerduration,
+				psy_audio_sequencer_frame_to_offset(self->sequencerduration,
 					amount);
 		}
 	} while (numsamplex > 0);

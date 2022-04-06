@@ -51,7 +51,7 @@ void trackbox_init(TrackBox* self, psy_ui_Component* parent)
 	psy_ui_component_set_align(&self->client, psy_ui_ALIGN_TOP);
 	psy_ui_component_set_defaultalign(&self->client,
 		psy_ui_ALIGN_LEFT, psy_ui_defaults_hmargin(psy_ui_defaults()));
-	psy_ui_component_setalignexpand(&self->client,
+	psy_ui_component_set_align_expand(&self->client,
 		psy_ui_HEXPAND);
 	/* resize bar */
 	psy_ui_component_init(&self->resize, &self->component, NULL);
@@ -230,6 +230,6 @@ void trackbox_onresizemousemove(TrackBox* self, psy_ui_Component* sender,
 void trackbox_onresizemouseup(TrackBox* self, psy_ui_Component* sender,
 	psy_ui_MouseEvent* ev)
 {
-	psy_ui_component_releasecapture(&self->resize);
+	psy_ui_component_release_capture(&self->resize);
 	self->doresize = FALSE;
 }

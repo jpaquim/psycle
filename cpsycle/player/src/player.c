@@ -402,7 +402,7 @@ void cmdplayer_run(CmdPlayer* self)
 	int progress;
 	
 	cmdplayer_restartdriver(self);
-	psy_audio_sequencer_stoploop(&self->player.sequencer);
+	psy_audio_sequencer_stop_loop(&self->player.sequencer);
 	psy_audio_player_setposition(&self->player, (psy_dsp_big_beat_t)0.0);
 	psy_audio_player_start(&self->player);
 	c = '\0';

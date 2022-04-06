@@ -23,26 +23,26 @@
 static char patternfilter[] = "Pattern (*.psb)" "|*.psb";
 
 /* implementation */
-void patterncmds_init(PatternCmds* self, psy_audio_Sequence* sequence,
+void patterncmds_init(PatternCmds* self,
 	psy_audio_Player* player, psy_UndoRedo* undoredo,
-	psy_audio_Pattern* patternpaste, DirConfig* dirconfig)
+	DirConfig* dirconfig)
 {
 	assert(self);
 	assert(undoredo);	
 	
-	self->sequence = sequence;
+	self->sequence = NULL;
 	self->player = player;
 	self->undoredo = undoredo;
-	self->patternpaste = patternpaste;
+	self->patternpaste = NULL;
 	self->dirconfig = dirconfig;
 }
 
-void patterncmds_setsequence(PatternCmds* self, psy_audio_Sequence* sequence)
+void patterncmds_set_sequence(PatternCmds* self, psy_audio_Sequence* sequence)
 {
 	self->sequence = sequence;
 }
 
-void patterncmds_blockdelete(PatternCmds* self, psy_audio_BlockSelection
+void patterncmds_block_delete(PatternCmds* self, psy_audio_BlockSelection
 	selection)
 {
 	assert(self);
@@ -53,7 +53,7 @@ void patterncmds_blockdelete(PatternCmds* self, psy_audio_BlockSelection
 	}
 }
 
-void patterncmds_blockcopy(PatternCmds* self, psy_audio_BlockSelection selection)
+void patterncmds_block_copy(PatternCmds* self, psy_audio_BlockSelection selection)
 {
 	assert(self);
 
@@ -63,7 +63,7 @@ void patterncmds_blockcopy(PatternCmds* self, psy_audio_BlockSelection selection
 	}	
 }
 
-void patterncmds_blockpaste(PatternCmds* self, psy_audio_SequenceCursor cursor,
+void patterncmds_block_paste(PatternCmds* self, psy_audio_SequenceCursor cursor,
 	bool mix)
 {
 	assert(self);
@@ -77,7 +77,7 @@ void patterncmds_blockpaste(PatternCmds* self, psy_audio_SequenceCursor cursor,
 	}
 }
 
-void patterncmds_changeinstrument(PatternCmds* self,
+void patterncmds_change_instrument(PatternCmds* self,
 	psy_audio_BlockSelection selection)
 {
 	assert(self);
@@ -89,7 +89,7 @@ void patterncmds_changeinstrument(PatternCmds* self,
 	}*/
 }
 
-void patterncmds_changemachine(PatternCmds* self,
+void patterncmds_change_machine(PatternCmds* self,
 	psy_audio_BlockSelection selection)
 {
 	assert(self);
@@ -101,7 +101,7 @@ void patterncmds_changemachine(PatternCmds* self,
 	}*/
 }
 
-void patterncmds_importpattern(PatternCmds* self, psy_dsp_big_beat_t bpl)
+void patterncmds_import_pattern(PatternCmds* self, psy_dsp_big_beat_t bpl)
 {
 	/*if (self->pattern) {
 		psy_ui_OpenDialog dialog;
@@ -116,7 +116,7 @@ void patterncmds_importpattern(PatternCmds* self, psy_dsp_big_beat_t bpl)
 	}*/
 }
 
-void patterncmds_exportpattern(PatternCmds* self, psy_dsp_big_beat_t bpl,
+void patterncmds_export_pattern(PatternCmds* self, psy_dsp_big_beat_t bpl,
 	uintptr_t numtracks)
 {
 	/*if (self->pattern) {

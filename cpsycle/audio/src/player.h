@@ -173,7 +173,7 @@ psy_dsp_big_beat_t psy_audio_player_realbpm(const psy_audio_Player*);
 INLINE void psy_audio_player_setticksperbeat(psy_audio_Player* self,
 	uintptr_t ticks)
 {
-	psy_audio_sequencer_setextraticksperbeat(&self->sequencer, ticks);
+	psy_audio_sequencer_set_extra_ticks_per_beat(&self->sequencer, ticks);
 	if (self->song) {
 		self->song->properties.tpb = ticks;
 	}
@@ -187,7 +187,7 @@ INLINE psy_dsp_big_beat_t psy_audio_player_ticksperbeat(psy_audio_Player* self)
 INLINE void psy_audio_player_setextraticksperbeat(psy_audio_Player* self,
 	uintptr_t ticks)
 {
-	psy_audio_sequencer_setextraticksperbeat(&self->sequencer, ticks);
+	psy_audio_sequencer_set_extra_ticks_per_beat(&self->sequencer, ticks);
 	if (self->song) {
 		self->song->properties.extraticksperbeat = ticks;
 	}
@@ -225,13 +225,13 @@ INLINE psy_dsp_big_beat_t psy_audio_player_bpl(psy_audio_Player* self)
 
 INLINE psy_dsp_big_beat_t psy_audio_player_samplerate(psy_audio_Player* self)
 {
-	return psy_audio_sequencer_samplerate(&self->sequencer);
+	return psy_audio_sequencer_sample_rate(&self->sequencer);
 }
 
 INLINE psy_dsp_percent_t psy_audio_player_rowprogress(
 	psy_audio_Player* self, uintptr_t track)
 {
-	return psy_audio_sequencer_rowprogress(&self->sequencer, track);
+	return psy_audio_sequencer_row_progress(&self->sequencer, track);
 }
 
 /* cpu measure */
@@ -268,7 +268,7 @@ void psy_audio_player_inputpatternevent(psy_audio_Player*,
 	const psy_audio_PatternEvent*);
 void psy_audio_player_playevent(psy_audio_Player*,
 	const psy_audio_PatternEvent* ev);
-psy_audio_PatternEvent psy_audio_player_patternevent(psy_audio_Player*,
+psy_audio_PatternEvent psy_audio_player_pattern_event(psy_audio_Player*,
 	uint8_t note);
 
 INLINE void psy_audio_player_recordnoteoff(psy_audio_Player* self)
@@ -281,7 +281,7 @@ INLINE void psy_audio_player_preventrecordnoteoff(psy_audio_Player* self)
 	self->recordnoteoff = FALSE;
 }
 
-INLINE bool psy_audio_player_recordingnoteoff(const psy_audio_Player* self)
+INLINE bool psy_audio_player_recording_noteoff(const psy_audio_Player* self)
 {
 	return self->recordnoteoff;
 }

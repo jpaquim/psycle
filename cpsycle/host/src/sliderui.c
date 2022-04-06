@@ -152,7 +152,7 @@ void sliderui_onmousemove(SliderUi* self, psy_ui_MouseEvent* ev)
 
 void sliderui_on_mouse_up(SliderUi* self, psy_ui_MouseEvent* ev)
 {
-	psy_ui_component_releasecapture(&self->component);
+	psy_ui_component_release_capture(&self->component);
 	if ((paramtweak_active(&self->paramtweak))) {
 		paramtweak_end(&self->paramtweak);		
 		psy_ui_component_invalidate(&self->component);

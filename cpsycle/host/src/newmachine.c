@@ -131,7 +131,7 @@ void newmachinesortbar_init(NewMachineSortBar* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_set_style_type(&self->component,
 		STYLE_NEWMACHINE_SORTBAR);
-	psy_ui_component_setalignexpand(&self->component,
+	psy_ui_component_set_align_expand(&self->component,
 		psy_ui_HEXPAND);	
 	psy_ui_component_set_defaultalign(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));	
@@ -607,7 +607,7 @@ void newmachinesectionspane_init(NewMachineSectionsPane* self, psy_ui_Component*
 	psy_ui_textarea_enableinputfield(&self->edit);
 	psy_ui_component_hide(&self->edit.component);
 	/* section scroll */
-	psy_ui_component_setoverflow(&self->sections, psy_ui_OVERFLOW_VSCROLL);
+	psy_ui_component_set_overflow(&self->sections, psy_ui_OVERFLOW_VSCROLL);
 	psy_ui_component_setscrollstep(&self->sections,
 		psy_ui_size_make_em(0.0, 1.0));
 	psy_ui_component_set_wheel_scroll(&self->sections, 4);

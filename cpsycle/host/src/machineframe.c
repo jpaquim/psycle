@@ -51,13 +51,13 @@ void parameterbar_init(ParameterBar* self, psy_ui_Component* parent,
 		psy_ui_defaults_vmargin(psy_ui_defaults()));
 	/* row0 */
 	psy_ui_component_init(&self->row0, &self->component, NULL);
-	psy_ui_component_setalignexpand(&self->row0,
+	psy_ui_component_set_align_expand(&self->row0,
 		psy_ui_HEXPAND);	
 	zoombox_init(&self->zoombox, &self->row0);
 	psy_ui_component_set_align(zoombox_base(&self->zoombox), psy_ui_ALIGN_LEFT);	
 	psy_ui_component_init(&self->buttons, &self->row0, NULL);
 	psy_ui_component_set_align(&self->buttons, psy_ui_ALIGN_CLIENT);
-	psy_ui_component_setalignexpand(&self->buttons,
+	psy_ui_component_set_align_expand(&self->buttons,
 		psy_ui_HEXPAND);
 	psy_ui_component_set_defaultalign(&self->buttons, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
@@ -101,7 +101,7 @@ void parameterbar_onalign(ParameterBar* self)
 	preferredsize = psy_ui_component_preferredsize(&self->component, NULL);
 	preferredsize_more = psy_ui_component_preferredsize(
 		psy_ui_button_base(&self->more), NULL);
-	size = psy_ui_component_scrollsize_px(&self->component);
+	size = psy_ui_component_scroll_size_px(&self->component);
 	tm = psy_ui_component_textmetric(&self->component);
 	if (size.width < psy_ui_value_px(&preferredsize.width, tm, NULL)) {
 		if (!psy_ui_component_visible(psy_ui_button_base(&self->more))) {

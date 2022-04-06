@@ -378,7 +378,7 @@ void sampleeditorplaybar_initalign(SampleEditorPlayBar* self)
 	psy_ui_Margin margin;
 
 	psy_ui_margin_init_em(&margin, 0.0, 0.5, 0.0, 0.0);		
-	psy_ui_component_setalignexpand(&self->component,
+	psy_ui_component_set_align_expand(&self->component,
 		psy_ui_HEXPAND);
 	psy_list_free(psy_ui_components_setalign(
 		psy_ui_component_children(&self->component, psy_ui_NONE_RECURSIVE),

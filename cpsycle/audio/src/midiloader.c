@@ -429,7 +429,7 @@ int midiloader_readcontroller(MidiLoader* self)
     ev.mach = self->currtrack.channel;
     ev.cmd = controller;
     ev.parameter = value;            
-    node = psy_audio_pattern_findnode(self->currtrack.pattern, 0,
+    node = psy_audio_pattern_find_node(self->currtrack.pattern, 0,
         self->currtrack.position, 0.01, &prev);
     if (node) {
         psy_audio_PatternEntry* entry;
@@ -869,7 +869,7 @@ void midiloader_writepatternevent(MidiLoader* self, psy_audio_PatternEvent ev)
                         psy_audio_patternevent_init(&noteoff);
                         noteoff.note = psy_audio_NOTECOMMANDS_RELEASE;
                         noteoff.mach = self->currtrack.channel;
-                        node = psy_audio_pattern_findnode(self->currtrack.pattern,
+                        node = psy_audio_pattern_find_node(self->currtrack.pattern,
                             voice, self->currtrack.channels[voice].time - self->currtrack.patternoffset, 0.05,
                             &prev);
                         if (!node) {

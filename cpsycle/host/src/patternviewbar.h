@@ -19,30 +19,61 @@ extern "C" {
 #endif
 
 /*
+** PatternViewStatus
+**
+** Displays the pattern cursor position.
+*/
+
+typedef struct PatternViewStatus {
+	/* inherits */
+	psy_ui_Component component;
+	/* internal */
+	psy_ui_Label pat_desc;
+	psy_ui_Label pat;
+	psy_ui_Label ln_desc;
+	psy_ui_Label ln;
+	psy_ui_Label trk_desc;
+	psy_ui_Label trk;
+	psy_ui_Label col_desc;
+	psy_ui_Label col;	
+	psy_ui_Label mode;
+	/* references */
+	Workspace* workspace;
+} PatternViewStatus;
+
+void patternviewstatus_init(PatternViewStatus* self, psy_ui_Component* parent,
+	Workspace*);
+
+void patternviewstatus_update(PatternViewStatus*);
+
+/*
 ** PatternViewBar
 **
 ** The bar displayed in the mainframe status bar, if the patternview is active
 */
 
-struct PatternView;
-
 typedef struct PatternViewBar {
 	/* inherits */
-	psy_ui_Component component;
+	psy_ui_Component component;	
 	/* internal */
 	ZoomBox zoombox;
 	PatternCursorStepBox cursorstep;
 	psy_ui_CheckBox movecursorwhenpaste;
 	psy_ui_CheckBox defaultentries;
 	psy_ui_CheckBox displaysinglepattern;
-	psy_ui_Label status;	
+	PatternViewStatus status;	
 	/* references */
-	Workspace* workspace;
-	struct PatternView* patternview;
+	PatternViewConfig* patconfig;
+	Workspace* workspace;	
 } PatternViewBar;
 
 void patternviewbar_init(PatternViewBar*, psy_ui_Component* parent,
-	struct PatternView* patternview, Workspace*);
+	PatternViewConfig*, Workspace*);
+
+INLINE double patternviewbar_zoom(const PatternViewBar* self)
+{
+	return zoombox_rate(&self->zoombox);
+}
 
 INLINE psy_ui_Component* patternviewbar_base(PatternViewBar* self)
 {

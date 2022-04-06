@@ -36,8 +36,7 @@ typedef struct PatternProperties {
 	uintptr_t pattern_index;	
 } PatternProperties;
 
-void patternproperties_init(PatternProperties*, psy_ui_Component* parent,
-	psy_audio_Pattern*, Workspace*);
+void patternproperties_init(PatternProperties*, psy_ui_Component* parent);
 
 void patternproperties_set_patterns(PatternProperties*, psy_audio_Patterns*);
 void patternproperties_select(PatternProperties*, uintptr_t pattern_index);

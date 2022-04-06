@@ -73,7 +73,7 @@ void seqeditortracks_init(SeqEditorTracks* self, psy_ui_Component* parent,
 	psy_ui_component_setscrollstep(&self->component,
 		psy_ui_size_make_em(8.0, 0.0));	
 	psy_ui_component_set_wheel_scroll(&self->component, 1);	
-	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_SCROLL);	
+	psy_ui_component_set_overflow(&self->component, psy_ui_OVERFLOW_SCROLL);	
 	psy_ui_component_set_defaultalign(&self->component,
 		psy_ui_ALIGN_TOP, psy_ui_margin_zero());
 	psy_signal_connect(&workspace->song->sequence.sequenceselection.signal_select, self,
@@ -261,7 +261,7 @@ void seqeditortracks_onmousemove(SeqEditorTracks* self,
 void seqeditortracks_on_mouse_up(SeqEditorTracks* self,
 	psy_ui_MouseEvent* ev)
 {
-	psy_ui_component_releasecapture(&self->component);	
+	psy_ui_component_release_capture(&self->component);	
 	self->state->cmd = SEQEDTCMD_NONE;
 	self->state->seqentry = NULL;
 	self->state->dragseqpos = psy_audio_orderindex_make_invalid();

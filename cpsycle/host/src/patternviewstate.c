@@ -1,6 +1,6 @@
 /*
 ** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -20,25 +20,15 @@
 
 /* implementation */
 void patternviewstate_init(PatternViewState* self,
-	PatternViewConfig* patconfig, psy_audio_Sequence* sequence,
-	psy_audio_Patterns* patterns, PatternCmds* cmds)
+	PatternViewConfig* patconfig, KeyboardMiscConfig* keymiscconfig,
+	psy_audio_Sequence* sequence, PatternCmds* cmds)
 {
 	psy_audio_sequencecursor_init(&self->cursor);
 	psy_audio_blockselection_init(&self->selection);	
-	self->pgupdownstepmode = PATTERNCURSOR_STEP_BEAT;
-	self->pgupdownstep = 4;	
-	self->singlemode = TRUE;
-	self->sequence = sequence;
-	self->patterns = patterns;	
-	// self->pattern = NULL;	
+	self->sequence = sequence;	
 	self->patconfig = patconfig;
-	self->display = PROPERTY_ID_PATTERN_DISPLAYMODE_TRACKER;
-	self->cmds = cmds;
-	self->ft2home = TRUE;
-	self->ft2delete = TRUE;
-	self->movecursorwhenpaste = TRUE;
-	self->movecursoronestep = FALSE;
-	self->wraparound = TRUE;
+	self->keymiscconfig = keymiscconfig;	
+	self->cmds = cmds;	
 	psy_audio_pattern_init(&self->patternpaste);	
 	if (cmds) {
 		cmds->patternpaste = &self->patternpaste;
@@ -50,7 +40,7 @@ void patternviewstate_dispose(PatternViewState* self)
 	psy_audio_pattern_dispose(&self->patternpaste);
 }
 
-void patternviewstate_selectcol(PatternViewState* self)
+void patternviewstate_select_col(PatternViewState* self)
 {
 	assert(self);
 
@@ -62,7 +52,7 @@ void patternviewstate_selectcol(PatternViewState* self)
 	}
 }
 
-void patternviewstate_selectbar(PatternViewState* self)
+void patternviewstate_select_bar(PatternViewState* self)
 {
 	assert(self);
 
@@ -78,7 +68,7 @@ void patternviewstate_selectbar(PatternViewState* self)
 	}
 }
 
-void patternviewstate_selectall(PatternViewState* self)
+void patternviewstate_select_all(PatternViewState* self)
 {
 	assert(self);
 
@@ -93,22 +83,8 @@ void patternviewstate_selectall(PatternViewState* self)
 	}
 }
 
-void patternviewstate_configure_keyboard(PatternViewState* self,
-	KeyboardMiscConfig* config)
-{
-	self->ft2home = keyboardmiscconfig_ft2home(config);
-	self->ft2delete = keyboardmiscconfig_ft2delete(config);
-	self->movecursoronestep = keyboardmiscconfig_movecursoronestep(config);
-	patternviewstate_setpgupdown(self,
-		(PatternCursorStepMode)keyboardmiscconfig_pgupdowntype(config),
-		keyboardmiscconfig_pgupdownstep(config));
-}
-
 void patternviewstate_configure(PatternViewState* self)
-{
-	self->movecursorwhenpaste = patternviewconfig_ismovecursorwhenpaste(
-		self->patconfig);
-	self->wraparound = patternviewconfig_wraparound(self->patconfig);	
+{	
 	if (patternviewconfig_issinglepatterndisplay(self->patconfig)) {
 		patternviewstate_displaypattern(self);
 	} else {
@@ -130,8 +106,9 @@ void patternviewstate_sequencestart(PatternViewState* self,
 	rv->patterns = patternviewstate_patterns(self);
 	seqoffset = 0.0;
 	length = rv->pattern->length;
-	offset = startoffset;
-	if (!self->singlemode && patternviewstate_sequence(self)) {
+	offset = startoffset;	
+	if (!patternviewstate_single_mode(self) &&
+			patternviewstate_sequence(self)) {
 		psy_audio_SequenceTrackNode* tracknode;
 		psy_audio_Sequence* sequence;
 
@@ -155,4 +132,12 @@ void patternviewstate_sequencestart(PatternViewState* self,
 		rv->patternnode = psy_audio_pattern_greaterequal(
 			patternviewstate_pattern(self), offset - seqoffset);
 	}	
+}
+
+void patternviewstate_sync_cursor_to_sequence(PatternViewState* self)
+{
+	if (patternviewstate_sequence(self)) {
+		patternviewstate_set_cursor(self,
+			patternviewstate_sequence(self)->cursor);
+	}
 }

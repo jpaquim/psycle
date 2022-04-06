@@ -272,7 +272,7 @@ void seqeditloop_onmousemove(SeqEditLoop* self, psy_ui_MouseEvent* ev)
 
 		psy_audio_exclusivelock_enter();
 		psy_audio_pattern_remove(self->pattern, self->node);
-		node = psy_audio_pattern_findnode(self->pattern,
+		node = psy_audio_pattern_find_node(self->pattern,
 			psy_audio_GLOBALPATTERN_LOOPTRACK, offset, 1.0,
 			&prev);
 		if (!node) {
@@ -303,7 +303,7 @@ bool seqeditloop_boundsvalid(const SeqEditLoop* self,
 
 void seqeditloop_on_mouse_up(SeqEditLoop* self, psy_ui_MouseEvent* ev)
 {	
-	psy_ui_component_releasecapture(&self->component);
+	psy_ui_component_release_capture(&self->component);
 	seqeditloopstate_reset(self->loopstate);
 	psy_ui_component_removestylestate(&self->component,
 			psy_ui_STYLESTATE_ACTIVE);
@@ -491,7 +491,7 @@ void seqeditloops_onmousedoubleclick(SeqEditLoops* self, psy_ui_MouseEvent* ev)
 			insertoffset = seqeditstate_quantize(self->state,
 				seqeditstate_pxtobeat(self->state,
 					psy_ui_mouseevent_pt(ev).x));
-			node = psy_audio_pattern_findnode(pattern,
+			node = psy_audio_pattern_find_node(pattern,
 				psy_audio_GLOBALPATTERN_LOOPTRACK,
 				insertoffset, 1.0, &prev);
 			if (!node) {

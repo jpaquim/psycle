@@ -70,7 +70,7 @@ void plugineditorbar_idle(PluginEditorBar* self)
 
 void plugineditorbar_update_line(PluginEditorBar* self)
 {
-	if (self->editor && psy_ui_component_drawvisible(&self->component)) {
+	if (self->editor && psy_ui_component_draw_visible(&self->component)) {
 		char text[64];
 
 		psy_snprintf(text, 64, "%d", (int)psy_ui_textarea_cursor_line(

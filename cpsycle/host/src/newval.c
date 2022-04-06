@@ -45,7 +45,7 @@ void newvalview_init(NewValView* self, psy_ui_Component* parent,
 	/* init edit */
 	psy_ui_component_init_align(&self->editbar, newvalview_base(self), NULL,
 		psy_ui_ALIGN_TOP);
-	psy_ui_component_setalignexpand(&self->editbar, psy_ui_HEXPAND);
+	psy_ui_component_set_align_expand(&self->editbar, psy_ui_HEXPAND);
 	psy_ui_component_set_defaultalign(&self->editbar, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	psy_ui_textarea_init_single_line(&self->edit, &self->editbar);	

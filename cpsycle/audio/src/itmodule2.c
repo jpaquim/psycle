@@ -1410,7 +1410,7 @@ bool itmodule_writepatternentry(ITModule2* self,
 		}		
 
 		if (!append) {
-			insert = psy_audio_pattern_findnode(pattern, col,
+			insert = psy_audio_pattern_find_node(pattern, col,
 				(psy_dsp_beat_t)(row * 1.0 / self->songfile->song->properties.lpb),
 				1.0 / self->songfile->song->properties.lpb,
 				&prev);

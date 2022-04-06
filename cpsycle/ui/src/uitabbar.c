@@ -166,7 +166,7 @@ void psy_ui_tab_ondraw(psy_ui_Tab* self, psy_ui_Graphics* g)
 		
 	textident = 0.0;
 	tm = psy_ui_component_textmetric(&self->component);
-	size = psy_ui_component_scrollsize_px(&self->component);
+	size = psy_ui_component_scroll_size_px(&self->component);
 	center = psy_ui_realpoint_make(textident, 0.0);
 	if (!psy_ui_bitmap_empty(&self->bitmapicon)) {
 		psy_ui_RealSize bpmsize;

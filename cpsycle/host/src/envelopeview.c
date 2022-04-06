@@ -287,7 +287,7 @@ void envelopebox_onsize(EnvelopeBox* self)
 	psy_ui_RealSize size;
 	const psy_ui_TextMetric* tm;
 
-	size = psy_ui_component_scrollsize_px(&self->component);
+	size = psy_ui_component_scroll_size_px(&self->component);
 	tm = psy_ui_component_textmetric(&self->component);
 	self->cx = size.width - psy_ui_value_px(&self->spacing.left, tm, NULL) -
 		psy_ui_value_px(&self->spacing.right, tm, NULL);
@@ -446,7 +446,7 @@ void checkadjustpointrange(psy_List* p)
 
 void envelopebox_on_mouse_up(EnvelopeBox* self, psy_ui_MouseEvent* ev)
 {	
-	psy_ui_component_releasecapture(&self->component);
+	psy_ui_component_release_capture(&self->component);
 	self->dragpoint = NULL;	
 }
 

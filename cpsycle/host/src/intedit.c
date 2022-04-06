@@ -32,7 +32,7 @@ void intedit_init(IntEdit* self, psy_ui_Component* parent,
 	int maxval)
 {	
 	psy_ui_component_init(intedit_base(self), parent, NULL);
-	psy_ui_component_setalignexpand(intedit_base(self), psy_ui_HEXPAND);
+	psy_ui_component_set_align_expand(intedit_base(self), psy_ui_HEXPAND);
 	psy_ui_component_set_defaultalign(intedit_base(self), psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	self->minval = minval;

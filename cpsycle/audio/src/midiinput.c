@@ -57,7 +57,7 @@ void psy_audio_midiinput_setsong(psy_audio_MidiInput* self, psy_audio_Song* song
 	self->song = song;
 }
 
-bool psy_audio_midiinput_workinput(psy_audio_MidiInput* self,
+bool psy_audio_midiinput_work_input(psy_audio_MidiInput* self,
 	psy_EventDriverMidiData mididata, psy_audio_Machines* machines,
 	psy_audio_PatternEvent* rv)
 {
@@ -382,7 +382,7 @@ bool psy_audio_midiinput_workinput(psy_audio_MidiInput* self,
 				self->stats.flags |= FSTAT_FCSTOP;
 
 				// stop the song play (in effect, stops all sound)
-				// handled by psy_audio_sequencer_clockstop
+				// handled by psy_audio_sequencer_clock_stop
 				break; }
 					 // do nothing (apart from exit) if not recognised
 			default:		

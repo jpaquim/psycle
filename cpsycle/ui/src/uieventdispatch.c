@@ -186,8 +186,8 @@ void psy_ui_eventdispatch_handle_wheel(psy_ui_EventDispatch* self,
 
 					tm = psy_ui_component_textmetric(curr);
 					scrollrange = psy_ui_component_verticalscrollrange(curr);
-					scrolltoppx = psy_ui_component_scrolltop_px(curr);
-					pos = (scrolltoppx / psy_ui_component_scrollstep_height_px(curr)) -
+					scrolltoppx = psy_ui_component_scroll_top_px(curr);
+					pos = (scrolltoppx / psy_ui_component_scroll_step_height_px(curr)) -
 						psy_ui_component_wheelscroll(curr);
 					if (pos < (double)scrollrange.x) {
 						pos = (double)scrollrange.x;
@@ -206,8 +206,8 @@ void psy_ui_eventdispatch_handle_wheel(psy_ui_EventDispatch* self,
 
 					tm = psy_ui_component_textmetric(curr);
 					scrollrange = psy_ui_component_verticalscrollrange(curr);
-					scrolltoppx = psy_ui_component_scrolltop_px(curr);
-					pos = (scrolltoppx / psy_ui_component_scrollstep_height_px(curr)) +
+					scrolltoppx = psy_ui_component_scroll_top_px(curr);
+					pos = (scrolltoppx / psy_ui_component_scroll_step_height_px(curr)) +
 						psy_ui_component_wheelscroll(curr);
 					if (pos > (double)scrollrange.y) {
 						pos = (double)scrollrange.y;

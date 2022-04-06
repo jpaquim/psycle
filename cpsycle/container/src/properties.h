@@ -178,7 +178,7 @@ const char* psy_property_at_str(const psy_Property*, const char* key, const char
 psy_Property* psy_property_set_font(psy_Property*, const char* key, const char* value);
 psy_Property* psy_property_set_choice(psy_Property*, const char* key, intptr_t value);
 psy_Property* psy_property_at_choice(psy_Property*);
-bool psy_property_ischoiceitem(const psy_Property*);
+bool psy_property_is_choice_item(const psy_Property*);
 intptr_t psy_property_choiceitem_index(const psy_Property*);
 /* Appends a property. If source typ is root, it changes to section. */
 psy_Property* psy_property_append_property(psy_Property*, psy_Property*);

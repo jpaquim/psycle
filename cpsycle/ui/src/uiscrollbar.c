@@ -129,7 +129,7 @@ void psy_ui_scrollbarpane_updatethumbposition(psy_ui_ScrollBarPane* self)
 
 	assert(self);
 
-	size = psy_ui_component_scrollsize_px(&self->component);
+	size = psy_ui_component_scroll_size_px(&self->component);
 	tm = psy_ui_component_textmetric(&self->component);
 	if (self->orientation == psy_ui_HORIZONTAL) {
 		thumbsize = psy_ui_realsize_make(tm->tmAveCharWidth * 2.5,
@@ -147,7 +147,7 @@ void psy_ui_scrollbarpane_updatethumbposition(psy_ui_ScrollBarPane* self)
 	psy_ui_component_setposition(&self->thumb,
 		psy_ui_rectangle_make_px(&newposition));
 	psy_ui_realrectangle_union(&updateposition, &newposition);
-	psy_ui_component_invalidaterect(&self->component, updateposition);
+	psy_ui_component_invalidate_rect(&self->component, updateposition);
 }
 
 void psy_ui_scrollbarpane_on_mouse_down(psy_ui_ScrollBarPane* self,
@@ -194,7 +194,7 @@ void psy_ui_scrollbarpane_on_mouse_up(psy_ui_ScrollBarPane* self,
 {
 	assert(self);
 
-	psy_ui_component_releasecapture(&self->thumb);
+	psy_ui_component_release_capture(&self->thumb);
 	if (psy_ui_mouseevent_target(ev) == &self->thumb) {
 		psy_ui_scrollbarpane_setthumbposition(self, self->position);
 	}
@@ -215,8 +215,8 @@ void psy_ui_scrollbarpane_onmousemove(psy_ui_ScrollBarPane* self,
 		psy_ui_RealSize size;
 		psy_ui_RealSize thumbsize;
 
-		size = psy_ui_component_scrollsize_px(&self->component);
-		thumbsize = psy_ui_component_scrollsize_px(&self->thumb);
+		size = psy_ui_component_scroll_size_px(&self->component);
+		thumbsize = psy_ui_component_scroll_size_px(&self->thumb);
 		if (self->orientation == psy_ui_HORIZONTAL) {
 			self->screenpos = psy_max(0, psy_min(
 				psy_ui_mouseevent_pt(ev).x - self->dragoffset,
@@ -276,8 +276,8 @@ double psy_ui_scrollbarpane_step(psy_ui_ScrollBarPane* self)
 
 	assert(self);
 
-	panesize = psy_ui_component_scrollsize_px(&self->component);
-	size = psy_ui_component_scrollsize_px(&self->thumb);
+	panesize = psy_ui_component_scroll_size_px(&self->component);
+	size = psy_ui_component_scroll_size_px(&self->thumb);
 	if (self->orientation == psy_ui_HORIZONTAL) {
 		rv = (self->scrollrange.y - self->scrollrange.x) /
 			(panesize.width - size.width);

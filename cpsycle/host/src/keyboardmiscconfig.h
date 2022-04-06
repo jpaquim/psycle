@@ -29,6 +29,7 @@ typedef struct KeyboardMiscConfig {
 	/* internal*/
 	psy_Property* keyboard;
 	psy_Property* keyboard_misc;
+	int cursorstep;
 	/* references */
 	psy_Property* parent;	
 } KeyboardMiscConfig;
@@ -48,6 +49,8 @@ bool keyboardmiscconfig_recordtweaksastws(const KeyboardMiscConfig*);
 bool keyboardmiscconfig_advancelineonrecordtweak(const KeyboardMiscConfig*);
 uintptr_t keyboardmiscconfig_pgupdowntype(const KeyboardMiscConfig*);
 intptr_t keyboardmiscconfig_pgupdownstep(const KeyboardMiscConfig*);
+void keyboardmiscconfig_setcursorstep(KeyboardMiscConfig*, int step);
+int keyboardmiscconfig_cursor_step(const KeyboardMiscConfig*);
 bool keyboardmiscconfig_ft2fileexplorer(const KeyboardMiscConfig*);
 
 void keyboardmiscconfig_onchanged(KeyboardMiscConfig*, psy_Property*);

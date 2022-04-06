@@ -187,7 +187,7 @@ psy_audio_PatternNode* psy_audio_pattern_greaterequal_track(psy_audio_Pattern*,
 	uintptr_t track, psy_dsp_big_beat_t offset);
 /* finds a pattern node */
 /* \return the pattern node */
-psy_audio_PatternNode* psy_audio_pattern_findnode(psy_audio_Pattern* pattern, uintptr_t track,
+psy_audio_PatternNode* psy_audio_pattern_find_node(psy_audio_Pattern* pattern, uintptr_t track,
 	psy_dsp_big_beat_t offset, psy_dsp_big_beat_t bpl, psy_audio_PatternNode** prev);
 psy_audio_PatternNode* psy_audio_pattern_findnode_cursor(psy_audio_Pattern*,
 	psy_audio_SequenceCursor, psy_audio_PatternNode** prev);

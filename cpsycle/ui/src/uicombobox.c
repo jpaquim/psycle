@@ -55,7 +55,7 @@ void psy_ui_combobox_init(psy_ui_ComboBox* self, psy_ui_Component* parent)
 	psy_signal_init(&self->signal_selchanged);	
 	psy_table_init(&self->itemdata);	
 	psy_ui_component_set_style_type(&self->component, psy_ui_STYLE_COMBOBOX);
-	psy_ui_component_setalignexpand(psy_ui_combobox_base(self),
+	psy_ui_component_set_align_expand(psy_ui_combobox_base(self),
 		psy_ui_HEXPAND);
 	/* dropdown */
 	psy_ui_dropdownbox_init(&self->dropdown, self->component.view);

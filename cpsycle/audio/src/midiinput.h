@@ -64,7 +64,7 @@ void psy_audio_midiinput_setsong(psy_audio_MidiInput*, psy_audio_Song* song);
 
 void psy_audio_midiinput_configure(psy_audio_MidiInput*, psy_Property*
 	configuration, bool datastr);
-bool psy_audio_midiinput_workinput(psy_audio_MidiInput*,
+bool psy_audio_midiinput_work_input(psy_audio_MidiInput*,
 	psy_EventDriverMidiData mididata, psy_audio_Machines*,
 	psy_audio_PatternEvent* rv);
 void psy_audio_midiinput_setinstmap(psy_audio_MidiInput*, uintptr_t channel,

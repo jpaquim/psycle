@@ -30,6 +30,7 @@
 #include "plugineditor.h"
 #include "plugineditorbar.h"
 #include "patternview.h"
+#include "patternviewbar.h"
 #include "recentview.h"
 #include "renderview.h"
 #include "sequencerbar.h"
@@ -130,7 +131,7 @@ typedef struct MainFrame {
 	psy_ui_Component left;
 	psy_ui_Component right;
 	Workspace workspace;
-	PatternViewBar patternbar;
+	PatternViewBar patternviewbar;
 	MachineViewBar machineviewbar;
 	InstrumentsViewBar instrumentsviewbar;	
 	ConfirmBox checkunsavedbox;		

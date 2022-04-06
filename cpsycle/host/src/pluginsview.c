@@ -665,7 +665,7 @@ void pluginsview_computetextsizes(PluginsView* self, double width)
 	self->identwidth = tm->tmAveCharWidth * 4;	
 	self->numparametercols = (uintptr_t)psy_max(1, width /
 		self->columnwidth);	
-	psy_ui_component_set_scrollstep_height(&self->component,
+	psy_ui_component_set_scroll_step_height(&self->component,
 		psy_ui_value_make_px(self->lineheight));
 }
 
@@ -886,7 +886,7 @@ uintptr_t pluginsview_visilines(PluginsView* self)
 
 uintptr_t pluginsview_topline(PluginsView* self)
 {
-	return (uintptr_t)(psy_ui_component_scrolltop_px(&self->component)
+	return (uintptr_t)(psy_ui_component_scroll_top_px(&self->component)
 		/ self->lineheight);
 }
 

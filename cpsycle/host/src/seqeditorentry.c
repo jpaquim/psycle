@@ -256,7 +256,7 @@ void seqeditpatternentry_ondraw(SeqEditPatternEntry* self, psy_ui_Graphics* g)
 			char text[64];
 
 			tm = psy_ui_component_textmetric(seqeditpatternentry_base(self));
-			size = psy_ui_component_scrollsize_px(seqeditpatternentry_base(self));
+			size = psy_ui_component_scroll_size_px(seqeditpatternentry_base(self));
 			size.width -= 4;
 			clip = psy_ui_realrectangle_make(psy_ui_realpoint_zero(), size);
 			topleft = psy_ui_realpoint_make(4, 2);
@@ -513,7 +513,7 @@ void seqeditsampleentry_onalign(SeqEditSampleEntry* self)
 	psy_ui_RealSize waveboxsize;
 
 	bpmsize = psy_ui_bitmap_size(&self->wavebox.component.bufferbitmap);
-	waveboxsize = psy_ui_component_scrollsize_px(&self->wavebox.component);
+	waveboxsize = psy_ui_component_scroll_size_px(&self->wavebox.component);
 	if (waveboxsize.width != bpmsize.width ||
 			waveboxsize.height != bpmsize.height) {	
 		psy_ui_component_clearbuffer(&self->wavebox.component);
@@ -591,7 +591,7 @@ void seqeditmarkerentry_ondraw(SeqEditMarkerEntry* self, psy_ui_Graphics* g)
 		char text[64];
 
 		tm = psy_ui_component_textmetric(seqeditmarkerentry_base(self));
-		size = psy_ui_component_scrollsize_px(seqeditmarkerentry_base(self));
+		size = psy_ui_component_scroll_size_px(seqeditmarkerentry_base(self));
 		size.width -= 4;
 		clip = psy_ui_realrectangle_make(psy_ui_realpoint_zero(), size);
 		topleft = psy_ui_realpoint_make(4, 2);

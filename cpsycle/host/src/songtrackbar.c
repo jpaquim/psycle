@@ -28,7 +28,7 @@ void songtrackbar_init(SongTrackBar* self, psy_ui_Component* parent,
 {		
 	psy_ui_component_init(&self->component, parent, NULL);
 	self->workspace = workspace;
-	psy_ui_component_setalignexpand(songtrackbar_base(self), psy_ui_HEXPAND);
+	psy_ui_component_set_align_expand(songtrackbar_base(self), psy_ui_HEXPAND);
 	psy_ui_component_set_defaultalign(songtrackbar_base(self),
 		psy_ui_ALIGN_LEFT, psy_ui_defaults_hmargin(psy_ui_defaults()));
 	psy_ui_label_init(&self->desc, songtrackbar_base(self));

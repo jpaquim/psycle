@@ -77,7 +77,7 @@ void seqeditorline_updateposition(SeqEditorLine* self,
 
 	position_px = seqeditstate_beattopx(self->state, position);
 	updateposition = psy_ui_component_position(&self->component);
-	parentsize = psy_ui_component_scrollsize_px(
+	parentsize = psy_ui_component_scroll_size_px(
 		psy_ui_component_parent(&self->component));
 	if (parentsize.height != psy_ui_realrectangle_height(&updateposition) ||
 			position_px != updateposition.left) {		
@@ -87,7 +87,7 @@ void seqeditorline_updateposition(SeqEditorLine* self,
 		psy_ui_component_setposition(&self->component,
 			psy_ui_rectangle_make_px(&newposition));
 		psy_ui_realrectangle_union(&updateposition, &newposition);
-		psy_ui_component_invalidaterect(
+		psy_ui_component_invalidate_rect(
 			psy_ui_component_parent(&self->component),
 			updateposition);
 	}
@@ -193,7 +193,7 @@ void seqeditorplayline_on_mouse_up(SeqEditorPlayline* self, psy_ui_MouseEvent* e
 {
 	self->drag = FALSE;
 	self->dragbase = 0.0;
-	psy_ui_component_releasecapture(seqeditorline_base(&self->seqeditorline));
+	psy_ui_component_release_capture(seqeditorline_base(&self->seqeditorline));
 	psy_ui_mouseevent_stop_propagation(ev);
 }
 

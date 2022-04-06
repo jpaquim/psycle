@@ -409,7 +409,7 @@ void transformpatternview_searchcurrentselection(TransformPatternView* self,
 	}	
 }
 
-void transformpatternview_setpatternselection(TransformPatternView* self,
+void transformpatternview_set_pattern_selection(TransformPatternView* self,
 	const psy_audio_BlockSelection* selection)
 {
 	assert(self && selection);

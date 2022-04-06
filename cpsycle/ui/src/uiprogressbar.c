@@ -34,6 +34,8 @@ void psy_ui_progressbar_init(psy_ui_ProgressBar* self,
 	psy_ui_component_init(&self->component, parent, NULL);	
 	vtable_init(self);
 	psy_ui_component_set_style_type(&self->component, psy_ui_STYLE_PROGRESSBAR);
+	psy_ui_component_set_preferred_size(&self->component,
+		psy_ui_size_make_em(10.0, 0.0));
 	self->progress = 0.0;
 }
 

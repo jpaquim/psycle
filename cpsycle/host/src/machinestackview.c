@@ -878,7 +878,7 @@ void machinestackdesc_onalign(MachineStackDesc* self)
 	margin_left = 8.0;
 	tm = psy_ui_component_textmetric(&self->component);
 	size = psy_ui_component_scrollsize(&self->component);
-	sizepx = psy_ui_component_scrollsize_px(&self->component);
+	sizepx = psy_ui_component_scroll_size_px(&self->component);
 	if (psy_ui_component_visible(&self->view->scroller_columns.hscroll->component)) {
 		sizepx.height -= tm->tmHeight * 1.5;
 	}
@@ -997,7 +997,7 @@ void machinestackinputs_init(MachineStackInputs* self,
 {		
 	psy_ui_component_init(&self->component, parent, NULL);		
 	machinestackinputs_vtable_init(self);
-	psy_ui_component_setalignexpand(&self->component, psy_ui_HEXPAND);
+	psy_ui_component_set_align_expand(&self->component, psy_ui_HEXPAND);
 	psy_ui_component_set_defaultalign(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_margin_make_em(0.5, 0.0, 0.5, 0.0));
 	self->workspace = workspace;
@@ -1109,7 +1109,7 @@ void machinestackoutputs_init(MachineStackOutputs* self,
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_set_vtable(&self->component,
 		machinestackoutputs_vtable_init(self));	
-	psy_ui_component_setalignexpand(&self->component, psy_ui_HEXPAND);
+	psy_ui_component_set_align_expand(&self->component, psy_ui_HEXPAND);
 	psy_ui_component_setminimumsize(&self->component,
 		psy_ui_size_make_em(10.0, 2.0));	
 	self->state = state;
@@ -1178,9 +1178,9 @@ void machinestackpanetrackclient_init(MachineStackPaneTrackClient* self,
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_set_vtable(&self->component,
 		machinestackpanetrackclient_vtable_init(self));	
-	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_VSCROLL);
+	psy_ui_component_set_overflow(&self->component, psy_ui_OVERFLOW_VSCROLL);
 	psy_ui_component_set_wheel_scroll(&self->component, 1);
-	psy_ui_component_set_scrollstep_height(&self->component,
+	psy_ui_component_set_scroll_step_height(&self->component,
 		state->effectsize.height);
 	self->state = state;
 	self->column = column;
@@ -1214,7 +1214,7 @@ void machinestackpanetrack_init(MachineStackPaneTrack* self,
 	psy_ui_component_set_vtable(&self->component,
 		machinestackpanetrack_vtable_init(self));	
 	psy_ui_component_setcolour(&self->component, psy_ui_colour_make(0x00CACACA));
-	psy_ui_component_setalignexpand(&self->component, psy_ui_HEXPAND);	
+	psy_ui_component_set_align_expand(&self->component, psy_ui_HEXPAND);	
 	machinestackpanetrackclient_init(&self->client, &self->component,
 		column, state);	
 	psy_ui_component_set_wheel_scroll(&self->client.component, 4);
@@ -1332,7 +1332,7 @@ void machinestackpane_init(MachineStackPane* self, psy_ui_Component* parent,
 	psy_ui_component_set_vtable(&self->component,
 		machinestackpane_vtable_init(self));	
 	psy_ui_component_set_wheel_scroll(&self->component, 4);
-	psy_ui_component_setalignexpand(&self->component, psy_ui_HEXPAND);	
+	psy_ui_component_set_align_expand(&self->component, psy_ui_HEXPAND);	
 	self->workspace = workspace;	
 	self->state = state;	
 	self->vudrawupdate = FALSE;
@@ -1464,7 +1464,7 @@ void machinestackvolumes_init(MachineStackVolumes* self, psy_ui_Component* paren
 {
 	psy_ui_component_init(&self->component, parent, NULL);	
 	self->state = state;
-	psy_ui_component_setalignexpand(&self->component, psy_ui_HEXPAND);
+	psy_ui_component_set_align_expand(&self->component, psy_ui_HEXPAND);
 }
 
 void machinestackvolumes_build(MachineStackVolumes* self)
@@ -1574,7 +1574,7 @@ void machinestackview_init(MachineStackView* self, psy_ui_Component* parent,
 	psy_ui_component_set_align(&self->desc.component, psy_ui_ALIGN_LEFT);
 	psy_ui_component_init(&self->columns, &self->component, NULL);
 	psy_ui_component_set_align(&self->columns, psy_ui_ALIGN_VCLIENT);
-	psy_ui_component_setoverflow(&self->columns, psy_ui_OVERFLOW_HSCROLL);	
+	psy_ui_component_set_overflow(&self->columns, psy_ui_OVERFLOW_HSCROLL);	
 	psy_ui_scroller_init(&self->scroller_columns, &self->component, NULL, NULL);
 	psy_ui_scroller_set_client(&self->scroller_columns, &self->columns);
 	psy_ui_component_set_align(&self->columns, psy_ui_ALIGN_VCLIENT);
@@ -1692,7 +1692,7 @@ void machinestackview_build(MachineStackView* self)
 		machinestackinputs_build(&self->inputs);
 		machinestackoutputs_build(&self->outputs);
 		machinestackvolumes_build(&self->volumes);
-		psy_ui_component_setscrollstep_width(&self->columns,
+		psy_ui_component_set_scroll_step_width(&self->columns,
 			self->state.columnsize.width);		
 		psy_ui_app()->alignvalid = FALSE;
 		psy_ui_component_align(&self->component);

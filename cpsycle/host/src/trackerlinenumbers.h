@@ -84,6 +84,9 @@ typedef struct TrackerLineNumberView {
 void trackerlinenumberview_init(TrackerLineNumberView*,
 	psy_ui_Component* parent, TrackerState*, Workspace*);
 
+void trackerlinenumberview_set_scroll_top(TrackerLineNumberView*,
+	psy_ui_Value top);
+
 #ifdef __cplusplus
 }
 #endif

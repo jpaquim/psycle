@@ -334,10 +334,10 @@ void songpropertiesview_on_key_down(SongPropertiesView* self,
 
 bool songpropertiesview_haseditfocus(SongPropertiesView* self)
 {
-	return (psy_ui_component_hasfocus(&self->edit_comments.component) ||
-		psy_ui_component_hasfocus(&self->edit_credits.component) ||
-		psy_ui_component_hasfocus(&self->edit_title.component));
-		/* psy_ui_component_hasfocus(&self->edit_tpb.component)); */		
+	return (psy_ui_component_has_focus(&self->edit_comments.component) ||
+		psy_ui_component_has_focus(&self->edit_credits.component) ||
+		psy_ui_component_has_focus(&self->edit_title.component));
+		/* psy_ui_component_has_focus(&self->edit_tpb.component)); */		
 }
 
 void songpropertiesview_onkeyup(SongPropertiesView* self,

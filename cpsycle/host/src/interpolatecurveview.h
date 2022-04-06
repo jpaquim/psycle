@@ -101,7 +101,7 @@ typedef struct InterpolateCurveView {
 void interpolatecurveview_init(InterpolateCurveView*, psy_ui_Component* parent,
 	intptr_t startsel, intptr_t endsel, uintptr_t lpb,
 	PatternViewState* state, Workspace*);
-void interpolatecurveview_setselection(InterpolateCurveView*,
+void interpolatecurveview_set_selection(InterpolateCurveView*,
 	const psy_audio_BlockSelection*);
 
 INLINE psy_ui_Component* interpolatecurveview_base(InterpolateCurveView* self)

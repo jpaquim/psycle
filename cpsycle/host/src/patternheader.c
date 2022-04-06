@@ -18,7 +18,7 @@ static void patterntrackbox_drawnumber(PatternTrackBox*, psy_ui_Graphics*);
 static void patterntrackbox_drawselection(PatternTrackBox*, psy_ui_Graphics*);
 static void patterntrackbox_drawtext(PatternTrackBox*, psy_ui_Graphics*);
 static void patterntrackbox_on_mouse_down(PatternTrackBox*, psy_ui_MouseEvent*);
-static void patterntrackbox_onpreferredsize(PatternTrackBox*,
+static void patterntrackbox_on_preferred_size(PatternTrackBox*,
 	const psy_ui_Size* limit, psy_ui_Size* rv);
 
 /* vtable */
@@ -37,7 +37,7 @@ static void patterntrackbox_vtable_init(PatternTrackBox* self)
 			patterntrackbox_on_mouse_down;		
 		patterntrackbox_vtable.onpreferredsize =
 			(psy_ui_fp_component_onpreferredsize)
-			patterntrackbox_onpreferredsize;
+			patterntrackbox_on_preferred_size;
 		patterntrackbox_vtable_initialized = TRUE;
 	}
 	psy_ui_component_set_vtable(&self->component, &patterntrackbox_vtable);
@@ -217,7 +217,7 @@ void patterntrackbox_on_mouse_down(PatternTrackBox* self, psy_ui_MouseEvent* ev)
 	}
 }
 
-void patterntrackbox_onpreferredsize(PatternTrackBox* self,
+void patterntrackbox_on_preferred_size(PatternTrackBox* self,
 	const psy_ui_Size* limit, psy_ui_Size* rv)
 {	
 	psy_ui_Style* style;
@@ -359,7 +359,8 @@ void trackerheader_init(TrackerHeader* self, psy_ui_Component* parent,
 {
 	psy_ui_component_init(&self->component, parent, NULL);
 	trackerheader_vtable_init(self);	
-	psy_ui_component_setalignexpand(&self->component, psy_ui_HEXPAND);
+	psy_ui_component_set_align_expand(&self->component, psy_ui_HEXPAND);
+	self->component.blitscroll = TRUE;
 	self->state = state;	
 	self->workspace = workspace;	
 	psy_table_init(&self->boxes);	

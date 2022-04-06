@@ -87,7 +87,7 @@ void sequencerbar_init(SequencerBar* self, psy_ui_Component* parent,
 
 void sequencerbar_onfollowsong(SequencerBar* self, psy_ui_Button* sender)
 {
-	if (workspace_followingsong(self->workspace)) {
+	if (workspace_following_song(self->workspace)) {
 		workspace_stopfollowsong(self->workspace);
 	} else {
 		workspace_followsong(self->workspace);
@@ -96,7 +96,7 @@ void sequencerbar_onfollowsong(SequencerBar* self, psy_ui_Button* sender)
 
 void sequencerbar_onfollowsongchanged(SequencerBar* self, Workspace* sender)
 {
-	if (workspace_followingsong(sender)) {		
+	if (workspace_following_song(sender)) {		
 		psy_ui_checkbox_check(&self->followsong);
 	} else {
 		psy_ui_checkbox_disablecheck(&self->followsong);
@@ -125,7 +125,7 @@ void sequencerbar_onrecordtweak(SequencerBar* self, psy_ui_Button* sender)
 
 void sequencerbar_onrecordnoteoff(SequencerBar* self, psy_ui_Button* sender)
 {
-	if (psy_audio_player_recordingnoteoff(workspace_player(self->workspace))) {
+	if (psy_audio_player_recording_noteoff(workspace_player(self->workspace))) {
 		psy_audio_player_preventrecordnoteoff(workspace_player(self->workspace));
 	} else {
 		psy_audio_player_recordnoteoff(workspace_player(self->workspace));

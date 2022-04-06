@@ -736,13 +736,13 @@ void wavebox_onmousemove(WaveBox* self, psy_ui_Component* sender,
 						rnew = wavebox_framerangetoscreen(self,
 							self->context.oldselection.end,
 							self->context.selection.end);
-						psy_ui_component_invalidaterect(&self->component, rnew);
+						psy_ui_component_invalidate_rect(&self->component, rnew);
 					} else {
 						rnew = wavebox_framerangetoscreen(self,
 							self->context.selection.end,
 							self->context.oldselection.end);
 						psy_ui_realrectangle_expand(&rnew, 0, 2, 0, 2);
-						psy_ui_component_invalidaterect(&self->component, rnew);
+						psy_ui_component_invalidate_rect(&self->component, rnew);
 					}												
 				} else
 				if (olddragmode == WAVEBOX_DRAG_LEFT &&
@@ -751,13 +751,13 @@ void wavebox_onmousemove(WaveBox* self, psy_ui_Component* sender,
 						rnew = wavebox_framerangetoscreen(self,
 							self->context.oldselection.start,
 							self->context.selection.start);
-						psy_ui_component_invalidaterect(&self->component, rnew);
+						psy_ui_component_invalidate_rect(&self->component, rnew);
 					} else {
 						rnew = wavebox_framerangetoscreen(self,
 							self->context.selection.start,
 							self->context.oldselection.start);
 						psy_ui_realrectangle_expand(&rnew, 0, 2, 0, 2);
-						psy_ui_component_invalidaterect(&self->component, rnew);
+						psy_ui_component_invalidate_rect(&self->component, rnew);
 					}
 				} else {
 					rold = wavebox_framerangetoscreen(self,
@@ -768,7 +768,7 @@ void wavebox_onmousemove(WaveBox* self, psy_ui_Component* sender,
 						self->context.selection.end);
 					psy_ui_realrectangle_expand(&rold, 0, 2, 0, 2);					
 					psy_ui_realrectangle_union(&rnew, &rold);
-					psy_ui_component_invalidaterect(&self->component, rnew);
+					psy_ui_component_invalidate_rect(&self->component, rnew);
 				}
 			}
 			psy_signal_emit(&self->selectionchanged, self, 0);
@@ -854,7 +854,7 @@ void wavebox_on_mouse_up(WaveBox* self, psy_ui_Component* sender,
 	if (self->preventselection) {
 		return;
 	}
-	psy_ui_component_releasecapture(&self->component);
+	psy_ui_component_release_capture(&self->component);
 	if (waveboxcontext_sample(&self->context) && waveboxcontext_numframes(&self->context) > 0) {		
 		self->dragmode = WAVEBOX_DRAG_NONE;
 		if (self->dragstarted != FALSE) {

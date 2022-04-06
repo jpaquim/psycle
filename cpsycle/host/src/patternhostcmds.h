@@ -28,17 +28,17 @@ typedef struct PatternCmds {
 	psy_audio_Player* player;
 } PatternCmds;
 
-void patterncmds_init(PatternCmds*, psy_audio_Sequence*, psy_audio_Player*,
-	psy_UndoRedo*, psy_audio_Pattern* patternpaste, DirConfig*);
+void patterncmds_init(PatternCmds*, psy_audio_Player*,
+	psy_UndoRedo*, DirConfig*);
 
-void patterncmds_setsequence(PatternCmds*, psy_audio_Sequence*);
-void patterncmds_blockdelete(PatternCmds*, psy_audio_BlockSelection);
-void patterncmds_blockpaste(PatternCmds*, psy_audio_SequenceCursor, bool mix);
-void patterncmds_blockcopy(PatternCmds*, psy_audio_BlockSelection);
-void patterncmds_changeinstrument(PatternCmds*, psy_audio_BlockSelection);
-void patterncmds_changemachine(PatternCmds*, psy_audio_BlockSelection);
-void patterncmds_importpattern(PatternCmds*, psy_dsp_big_beat_t bpl);
-void patterncmds_exportpattern(PatternCmds*, psy_dsp_big_beat_t bpl,
+void patterncmds_set_sequence(PatternCmds*, psy_audio_Sequence*);
+void patterncmds_block_delete(PatternCmds*, psy_audio_BlockSelection);
+void patterncmds_block_paste(PatternCmds*, psy_audio_SequenceCursor, bool mix);
+void patterncmds_block_copy(PatternCmds*, psy_audio_BlockSelection);
+void patterncmds_change_instrument(PatternCmds*, psy_audio_BlockSelection);
+void patterncmds_change_machine(PatternCmds*, psy_audio_BlockSelection);
+void patterncmds_import_pattern(PatternCmds*, psy_dsp_big_beat_t bpl);
+void patterncmds_export_pattern(PatternCmds*, psy_dsp_big_beat_t bpl,
 	uintptr_t numtracks);
 
 #ifdef __cplusplus

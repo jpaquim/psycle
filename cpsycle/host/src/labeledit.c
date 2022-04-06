@@ -14,7 +14,7 @@ void labeledit_init(LabelEdit* self, psy_ui_Component* parent,
 	const char* desc)
 {
 	psy_ui_component_init(labeledit_base(self), parent, NULL);
-	psy_ui_component_setalignexpand(labeledit_base(self), psy_ui_HEXPAND);	
+	psy_ui_component_set_align_expand(labeledit_base(self), psy_ui_HEXPAND);	
 	psy_ui_label_init_text(&self->desc, labeledit_base(self), desc);
 	psy_ui_component_set_align(psy_ui_label_base(&self->desc), psy_ui_ALIGN_LEFT);
 	psy_ui_label_set_charnumber(&self->desc, 12.0);

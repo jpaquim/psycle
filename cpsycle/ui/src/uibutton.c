@@ -337,7 +337,7 @@ void psy_ui_button_on_mouse_up(psy_ui_Button* self, psy_ui_MouseEvent* ev)
 {	
 	super_vtable.on_mouse_up(psy_ui_button_base(self), ev);
 	if (!psy_ui_component_inputprevented(&self->component)) {
-		psy_ui_component_releasecapture(psy_ui_button_base(self));
+		psy_ui_component_release_capture(psy_ui_button_base(self));
 		if (psy_ui_component_inputprevented(&self->component)) {
 			psy_ui_mouseevent_stop_propagation(ev);
 			return;
@@ -347,7 +347,7 @@ void psy_ui_button_on_mouse_up(psy_ui_Button* self, psy_ui_MouseEvent* ev)
 			psy_ui_RealRectangle client_position;
 						
 			client_position = psy_ui_realrectangle_make(psy_ui_realpoint_zero(),
-				psy_ui_component_scrollsize_px(psy_ui_button_base(self)));
+				psy_ui_component_scroll_size_px(psy_ui_button_base(self)));
 			if (psy_ui_realrectangle_intersect(&client_position,
 					psy_ui_mouseevent_offset(ev))) {
 				self->shiftstate = psy_ui_mouseevent_shiftkey(ev);

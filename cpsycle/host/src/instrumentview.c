@@ -197,7 +197,7 @@ void instrumentpredefsbar_init(InstrumentPredefsBar* self, psy_ui_Component* par
 	self->view = view;
 	psy_ui_component_set_defaultalign(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
-	psy_ui_component_setalignexpand(&self->component,
+	psy_ui_component_set_align_expand(&self->component,
 		psy_ui_HEXPAND);
 	psy_ui_label_init(&self->predefs, &self->component);	
 	psy_ui_label_prevent_translation(&self->predefs);

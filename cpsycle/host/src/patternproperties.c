@@ -44,8 +44,7 @@ static psy_ui_ComponentVtable* patternproperties_vtable_init(PatternProperties* 
 	return &patternproperties_vtable;
 }
 
-void patternproperties_init(PatternProperties* self, psy_ui_Component* parent,
-	psy_audio_Pattern* pattern, Workspace* workspace)
+void patternproperties_init(PatternProperties* self, psy_ui_Component* parent)
 {	
 	psy_ui_component_init(&self->component, parent, NULL);	
 	psy_ui_component_set_vtable(&self->component,

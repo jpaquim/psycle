@@ -519,7 +519,7 @@ void BlockPasteCommandExecute(BlockPasteCommand* self, psy_Property* params)
 			break;
 		}		
 		dest = it.pattern;
-		node = psy_audio_pattern_findnode(dest,
+		node = psy_audio_pattern_find_node(dest,
 			pasteentry->track + trackoffset,
 			pattern_dest_offset,
 			(psy_dsp_big_beat_t)self->bpl,

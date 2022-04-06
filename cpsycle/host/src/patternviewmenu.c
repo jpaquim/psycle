@@ -101,31 +101,31 @@ void patternblockmenu_init(PatternBlockMenu* self, psy_ui_Component* parent,
 void patternblockmenu_oncut(PatternBlockMenu* self,
 	psy_ui_Component* sender)
 {		
-	patternviewstate_blockcut(self->pvstate);	
+	patternviewstate_block_cut(self->pvstate);	
 }
 
 void patternblockmenu_oncopy(PatternBlockMenu* self,
 	psy_ui_Component* sender)
 {	
-	patternviewstate_blockcopy(self->pvstate);	
+	patternviewstate_block_copy(self->pvstate);	
 }
 
 void patternblockmenu_onpaste(PatternBlockMenu* self,
 	psy_ui_Component* sender)
 {	
-	patternviewstate_blockpaste(self->pvstate);	
+	patternviewstate_block_paste(self->pvstate);	
 }
 
 void patternblockmenu_onmixpaste(PatternBlockMenu* self,
 	psy_ui_Component* sender)
 {	
-	patternviewstate_blockmixpaste(self->pvstate);	
+	patternviewstate_block_mixpaste(self->pvstate);	
 }
 
 void patternblockmenu_ondelete(PatternBlockMenu* self,
 	psy_ui_Component* sender)
 {
-	patternviewstate_blockdelete(self->pvstate);	
+	patternviewstate_block_delete(self->pvstate);	
 }
 
 void patternblockmenu_oninterpolatelinear(PatternBlockMenu* self,
@@ -137,52 +137,52 @@ void patternblockmenu_oninterpolatelinear(PatternBlockMenu* self,
 void patternblockmenu_onchangegenerator(PatternBlockMenu* self,
 	psy_ui_Component* sender)
 {
-	patterncmds_changemachine(self->pvstate->cmds,
+	patterncmds_change_machine(self->pvstate->cmds,
 		self->pvstate->selection);
 }
 
 void patternblockmenu_onchangeinstrument(PatternBlockMenu* self,
 	psy_ui_Component* sender)
 {
-	patterncmds_changeinstrument(self->pvstate->cmds,
+	patterncmds_change_instrument(self->pvstate->cmds,
 		self->pvstate->selection);	
 }
 
 void patternblockmenu_onblocktransposedec(PatternBlockMenu* self,
 	psy_ui_Component* sender)
 {	
-	patternviewstate_blocktranspose(self->pvstate, -1);	
+	patternviewstate_block_transpose(self->pvstate, -1);	
 }
 
 void patternblockmenu_onblocktransposeinc(PatternBlockMenu* self,
 	psy_ui_Component* sender)
 {	
-	patternviewstate_blocktranspose(self->pvstate, 1);
+	patternviewstate_block_transpose(self->pvstate, 1);
 }
 
 void patternblockmenu_onblocktransposedec12(PatternBlockMenu* self,
 	psy_ui_Component* sender)
 {	
-	patternviewstate_blocktranspose(self->pvstate, -12);
+	patternviewstate_block_transpose(self->pvstate, -12);
 }
 
 void patternblockmenu_onblocktransposeinc12(PatternBlockMenu* self,
 	psy_ui_Component* sender)
 {	
-	patternviewstate_blocktranspose(self->pvstate, 12);
+	patternviewstate_block_transpose(self->pvstate, 12);
 }
 
 void patternblockmenu_onimport(PatternBlockMenu* self,
 	psy_ui_Component* sender)
 {
-	patterncmds_importpattern(self->pvstate->cmds,
+	patterncmds_import_pattern(self->pvstate->cmds,
 		patternviewstate_bpl(self->pvstate));
 }
 
 void patternblockmenu_onexport(PatternBlockMenu* self,
 	psy_ui_Component* sender)
 {
-	patterncmds_exportpattern(self->pvstate->cmds,		
+	patterncmds_export_pattern(self->pvstate->cmds,		
 		patternviewstate_bpl(self->pvstate),
 		patternviewstate_numsongtracks(self->pvstate));
 }
@@ -229,7 +229,7 @@ void patternblockmenu_toggleinterpolatecurve(PatternBlockMenu* self)
 {
 	assert(self);
 	
-	interpolatecurveview_setselection(self->interpolatecurveview,
+	interpolatecurveview_set_selection(self->interpolatecurveview,
 		&self->pvstate->selection);
 	psy_ui_component_toggle_visibility(interpolatecurveview_base(
 		self->interpolatecurveview));

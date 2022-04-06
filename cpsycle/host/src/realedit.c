@@ -29,7 +29,7 @@ void realedit_init(RealEdit* self, psy_ui_Component* parent,
 	realedit_real_t minval, realedit_real_t maxval)
 {
 	psy_ui_component_init(realedit_base(self), parent, NULL);
-	psy_ui_component_setalignexpand(realedit_base(self), psy_ui_HEXPAND);
+	psy_ui_component_set_align_expand(realedit_base(self), psy_ui_HEXPAND);
 	psy_ui_component_set_defaultalign(realedit_base(self), psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	self->minval = minval;

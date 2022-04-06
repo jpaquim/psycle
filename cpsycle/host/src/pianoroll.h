@@ -74,8 +74,8 @@ typedef struct Pianoroll {
 	PianoKeyboard keyboard;	
 	PianoGridState gridstate;	
 	uintptr_t opcount;
-	bool syncpattern;	
-	uintptr_t chordbegin;
+	bool sync_pattern;	
+	uintptr_t chord_begin;
 	/* references */
 	Workspace* workspace;
 } Pianoroll;

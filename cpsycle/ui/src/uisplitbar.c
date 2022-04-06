@@ -281,7 +281,7 @@ void splitter_onmousemove(psy_ui_Splitter* self, psy_ui_MouseEvent* ev)
 		psy_ui_component_move(&self->component,
 			psy_ui_point_make_px(newposition.left, newposition.top));
 		psy_ui_realrectangle_union(&newposition, &position);
-		psy_ui_component_invalidaterect(psy_ui_component_parent(&self->component),
+		psy_ui_component_invalidate_rect(psy_ui_component_parent(&self->component),
 			newposition);		
 	}
 	splitter_setcursor(self);
@@ -294,7 +294,7 @@ void splitter_on_mouse_up(psy_ui_Splitter* self, psy_ui_MouseEvent* ev)
 		psy_ui_Component* prev;
 		psy_ui_Component* next;
 
-		psy_ui_component_releasecapture(&self->component);
+		psy_ui_component_release_capture(&self->component);
 		prev = splitter_prev(self);
 		next = splitter_next(self);		
 		if (prev) {
