@@ -64,7 +64,7 @@ void propertiesrenderline_init(PropertiesRenderLine* self,
 	psy_ui_component_init(&self->component, parent, NULL);	
 	propertiesrenderline_vtable_init(self);
 	psy_ui_component_set_align(&self->component, psy_ui_ALIGN_TOP);	
-	psy_ui_component_setalignexpand(&self->component,
+	psy_ui_component_set_align_expand(&self->component,
 		psy_ui_HEXPAND);
 	if (state->numcols == 1) {
 		psy_ui_component_set_preferred_size(&self->component, state->size_col0);
@@ -105,7 +105,7 @@ void propertiesrenderline_init(PropertiesRenderLine* self,
 				propertiesrenderline_oncomboselect);
 			psy_ui_combobox_setcharnumber(self->combo, 50.0);
 			psy_ui_component_set_align(&self->combo->component, psy_ui_ALIGN_LEFT);			
-		} else if (psy_property_isbool(self->property) || psy_property_ischoiceitem(
+		} else if (psy_property_isbool(self->property) || psy_property_is_choice_item(
 				self->property)) {
 			self->check = psy_ui_switch_allocinit(&self->component, NULL);
 		} else if (psy_property_isaction(self->property)) {
@@ -119,7 +119,7 @@ void propertiesrenderline_init(PropertiesRenderLine* self,
 
 			col1 = psy_ui_component_allocinit(&self->component, NULL);
 			psy_ui_component_set_align(col1, psy_ui_ALIGN_CLIENT);
-			psy_ui_component_setalignexpand(col1, psy_ui_HEXPAND);
+			psy_ui_component_set_align_expand(col1, psy_ui_HEXPAND);
 			self->label = psy_ui_label_allocinit(col1);
 			psy_ui_component_set_align(psy_ui_label_base(self->label),
 				psy_ui_ALIGN_LEFT);			
@@ -241,7 +241,7 @@ void propertiesrenderline_on_mouse_down(PropertiesRenderLine* self,
 			return;
 		}
 		self->state->property = self->property;
-		if (psy_property_ischoiceitem(self->property)) {
+		if (psy_property_is_choice_item(self->property)) {
 			psy_property_setitem_int(psy_property_parent(self->property),
 				psy_property_choiceitem_index(self->property));
 		} else if (psy_property_isbool(self->property)) {
@@ -277,7 +277,7 @@ bool propertiesrenderline_updatecheck(PropertiesRenderLine* self)
 	}
 	if (psy_property_isbool(self->property)) {
 		checked = psy_property_item_bool(self->property);
-	} else if (psy_property_ischoiceitem(self->property)) {
+	} else if (psy_property_is_choice_item(self->property)) {
 		checked = (psy_property_at_choice(psy_property_parent(self->property))
 			== self->property);
 	} else {
@@ -486,7 +486,7 @@ void propertiesrenderer_init(PropertiesRenderer* self,
 		propertiesrenderer_oninputdefineraccept);	
 	psy_signal_init(&self->signal_changed);
 	psy_signal_init(&self->signal_selected);	
-	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_VSCROLL);	
+	psy_ui_component_set_overflow(&self->component, psy_ui_OVERFLOW_VSCROLL);	
 	psy_ui_component_setscrollstep(&self->component,
 		psy_ui_size_make_em(0.0, 4.0));
 	psy_table_init(&self->sections);
@@ -575,7 +575,7 @@ void propertiesrenderer_updateline(PropertiesRenderer* self,
 	if (!line) {
 		return;
 	}
-	if (psy_property_ischoiceitem(line->property)) {
+	if (psy_property_is_choice_item(line->property)) {
 		psy_ui_Component* lines;
 		psy_List* q;
 		psy_List* p;
@@ -707,7 +707,7 @@ void propertiesrenderer_on_mouse_down(PropertiesRenderer* self,
 		return;
 	}
 	if (psy_property_isaction(selected) || psy_property_isbool(selected) ||
-			psy_property_ischoiceitem(selected)) {
+			psy_property_is_choice_item(selected)) {
 		psy_signal_emit(&self->signal_changed, self, 1, selected);
 		if (self->state.preventmousepropagation) {
 			psy_ui_mouseevent_stop_propagation(ev);
@@ -1138,9 +1138,9 @@ bool propertiesview_oninput(PropertiesView* self, InputHandler* sender)
 	if (cmd.id == -1) {
 		return 0;
 	}					
-	step = psy_ui_component_scrollstep_height_px(
+	step = psy_ui_component_scroll_step_height_px(
 		&self->renderer.component);
-	top = psy_ui_component_scrolltop_px(&self->renderer.component);
+	top = psy_ui_component_scroll_top_px(&self->renderer.component);
 	newtop = -1.0;	
 	switch (cmd.id) {
 	case CMD_NAVTOP:
@@ -1179,7 +1179,7 @@ double propertiesview_checkrange(PropertiesView* self, double position)
 	
 	scrollrange = psy_ui_component_verticalscrollrange(
 		&self->renderer.component);
-	scrollstepypx = psy_ui_component_scrollstep_height_px(
+	scrollstepypx = psy_ui_component_scroll_step_height_px(
 		&self->renderer.component);
 	steps = (intptr_t)(position / scrollstepypx);
 	steps = psy_min(scrollrange.y, steps);

@@ -132,7 +132,7 @@ void wireview_inittabbar(WireView* self)
 {
 	psy_ui_component_init(&self->top, &self->component, NULL);
 	psy_ui_component_set_align(&self->top, psy_ui_ALIGN_TOP);
-	psy_ui_component_setalignexpand(&self->top, psy_ui_HEXPAND);	
+	psy_ui_component_set_align_expand(&self->top, psy_ui_HEXPAND);	
 	psy_ui_tabbar_init(&self->tabbar, &self->top);
 	psy_ui_tabbar_append_tabs(&self->tabbar, "Vu", "Osc", "Spectrum", "Stereo Phase",
 		"Channel Mapping", NULL);

@@ -150,7 +150,7 @@ void interpolatecurvebox_drawgrid(InterpolateCurveBox* self,
 		double scalex;
 		uintptr_t i;
 		
-		size = psy_ui_component_scrollsize_px(&self->component);
+		size = psy_ui_component_scroll_size_px(&self->component);
 		lines = (uintptr_t)(self->range / self->bpl);
 		scalex = size.width / self->range;
 		psy_ui_setcolour(g, psy_ui_colour_make(0x00333333));
@@ -194,7 +194,7 @@ void interpolatecurvebox_drawkeyframes(InterpolateCurveBox* self,
 	val3 = entry->value;
 	lastcurveval = (double)entry->value;
 	lastoffset = entry->offset;
-	size = psy_ui_component_scrollsize_px(&self->component);
+	size = psy_ui_component_scroll_size_px(&self->component);
 	lines = (uintptr_t)(self->range / self->bpl);
 	scalex = size.width / self->range;
 	scaley = size.height / 0xFF;
@@ -398,7 +398,7 @@ void interpolatecurvebox_onmousemove(InterpolateCurveBox* self, psy_ui_MouseEven
 
 void interpolatecurvebox_on_mouse_up(InterpolateCurveBox* self, psy_ui_MouseEvent* ev)
 {
-	psy_ui_component_releasecapture(&self->component);
+	psy_ui_component_release_capture(&self->component);
 	self->dragkeyframe = 0;
 }
 
@@ -474,7 +474,7 @@ void interpolatecurveview_on_destroy(InterpolateCurveView* self,
 	psy_signal_dispose(&self->signal_cancel);
 }
 
-void interpolatecurveview_setselection(InterpolateCurveView* self,
+void interpolatecurveview_set_selection(InterpolateCurveView* self,
 	const psy_audio_BlockSelection* selection)
 {
 	assert(selection);

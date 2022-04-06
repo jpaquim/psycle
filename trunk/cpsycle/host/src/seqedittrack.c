@@ -72,7 +72,7 @@ void seqedittrack_init(SeqEditTrack* self, psy_ui_Component* parent,
 {
 	psy_ui_component_init(&self->component, parent, NULL);
 	seqedittrack_vtable_init(self);	
-	psy_ui_component_setalignexpand(&self->component, psy_ui_HEXPAND);	
+	psy_ui_component_set_align_expand(&self->component, psy_ui_HEXPAND);	
 	psy_ui_component_setminimumsize(&self->component,
 		psy_ui_size_make_em(0.0, 2.0));	
 	self->state = state;
@@ -357,7 +357,7 @@ void seqedittrack_onmousemove(SeqEditTrack* self, psy_ui_MouseEvent* ev)
 
 void seqedittrack_on_mouse_up(SeqEditTrack* self, psy_ui_MouseEvent* ev)
 {
-	psy_ui_component_releasecapture(&self->component);	
+	psy_ui_component_release_capture(&self->component);	
 	if (self->state->dragstatus == SEQEDIT_DRAG_REORDER) {
 		psy_audio_exclusivelock_enter();
 		psy_audio_sequence_reorder(seqeditstate_sequence(self->state),

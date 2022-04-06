@@ -54,13 +54,13 @@ void mainstatusbar_init(MainStatusBar* self, psy_ui_Component* parent,
 {	
 	psy_ui_component_init(&self->component, parent, NULL);	
 	vtable_init(self);	
+	psy_ui_component_set_style_type(&self->component, STYLE_STATUSBAR);
 	psy_ui_component_init(&self->pane, &self->component, NULL);
 	psy_ui_component_set_align(&self->pane, psy_ui_ALIGN_CLIENT);
 	self->workspace = workspace;
 	self->clockcounter = 20;
 	psy_lock_init(&self->outputlock);
-	self->strbuffer = NULL;
-	psy_ui_component_set_style_type(&self->component, STYLE_STATUSBAR);
+	self->strbuffer = NULL;	
 	psy_ui_component_set_defaultalign(&self->pane, psy_ui_ALIGN_LEFT,
 		psy_ui_margin_make_em(0.0, 1.0, 0.0, 0.0));
 	mainstatusbar_initzoombox(self);
@@ -98,9 +98,7 @@ void mainstatusbar_initstatuslabel(MainStatusBar* self)
 
 void mainstatusbar_initviewstatusbars(MainStatusBar* self)
 {
-	psy_ui_notebook_init(&self->viewstatusbars, &self->pane);
-	psy_ui_component_setbackgroundmode(psy_ui_notebook_base(&self->viewstatusbars),
-		psy_ui_SETBACKGROUND);
+	psy_ui_notebook_init(&self->viewstatusbars, &self->pane);	
 	psy_ui_component_set_align(psy_ui_notebook_base(&self->viewstatusbars),
 		psy_ui_ALIGN_CLIENT);	
 	psy_ui_component_set_defaultalign(

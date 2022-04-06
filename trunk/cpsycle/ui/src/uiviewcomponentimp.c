@@ -249,7 +249,7 @@ void psy_ui_viewcomponentimp_init(psy_ui_ViewComponentImp* self,
 void view_dev_dispose(psy_ui_ViewComponentImp* self)
 {	
 	if (self->component == psy_ui_app_capture(psy_ui_app())) {
-		psy_ui_component_releasecapture(self->view);		
+		psy_ui_component_release_capture(self->view);		
 	}
 	psy_ui_componentimp_dispose(&self->imp);
 	self->parent = NULL;
@@ -581,16 +581,15 @@ void view_dev_releasecapture(psy_ui_ViewComponentImp* self)
 void view_dev_scrollto(psy_ui_ViewComponentImp* self, intptr_t dx, intptr_t dy,
 	const psy_ui_RealRectangle* r)
 {
-	psy_ui_RealSize size;
+	
 	psy_ui_RealRectangle rc;
-
-	size = psy_ui_component_scrollsize_px(self->component);
+	
 	if (r) {
 		rc = view_translation(self, r);		
 	} else {
 		rc = psy_ui_realrectangle_make(
 			psy_ui_realpoint_zero(),
-			size);
+			psy_ui_component_scroll_size_px(self->component));
 		rc = view_translation(self, &rc);
 	}
 	psy_ui_component_scrollto(self->view, dx, dy, &rc);
@@ -602,7 +601,7 @@ void view_dev_invalidate(psy_ui_ViewComponentImp* self)
 	psy_ui_RealSize size;
 	psy_ui_RealRectangle r;
 
-	size = psy_ui_component_scrollsize_px(self->component);
+	size = psy_ui_component_scroll_size_px(self->component);
 	r = psy_ui_realrectangle_make(
 		psy_ui_realpoint_zero(),
 		size);
@@ -612,8 +611,8 @@ void view_dev_invalidate(psy_ui_ViewComponentImp* self)
 void view_dev_invalidaterect(psy_ui_ViewComponentImp* self,
 	const psy_ui_RealRectangle* r)
 {
-	if (psy_ui_component_drawvisible(self->view) && r) {		
-		psy_ui_component_invalidaterect(self->view,
+	if (psy_ui_component_draw_visible(self->view) && r) {		
+		psy_ui_component_invalidate_rect(self->view,
 			view_translation(self, r));
 	}
 }
@@ -710,7 +709,7 @@ void view_dev_setfocus(psy_ui_ViewComponentImp* self)
 	assert(self);
 	assert(self->view);
 	
-	if (!psy_ui_component_hasfocus(self->view)) {
+	if (!psy_ui_component_has_focus(self->view)) {
 		psy_ui_component_set_focus(self->view);
 	}
 }

@@ -84,9 +84,9 @@ void machinewireviewuis_removeall(MachineWireViewUis* self)
 
 void machinewireviewuis_redrawvus(MachineWireViewUis* self)
 {
-	if (psy_ui_component_drawvisible(self->view) &&
+	if (psy_ui_component_draw_visible(self->view) &&
 			!machineui_vumeter_prevented()) {
-		psy_ui_component_invalidaterect(self->view, 
+		psy_ui_component_invalidate_rect(self->view, 
 			psy_ui_component_bounds(self->view));
 		psy_ui_component_update(self->view);		
 	}
@@ -223,7 +223,7 @@ void machinewireview_init(MachineWireView* self, psy_ui_Component* parent,
 	self->selectedslot = psy_audio_MASTER_INDEX;
 	psy_audio_wire_init(&self->dragwire);	
 	psy_ui_component_set_wheel_scroll(&self->component, 4);	
-	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_SCROLL);	
+	psy_ui_component_set_overflow(&self->component, psy_ui_OVERFLOW_SCROLL);	
 	psy_audio_wire_init(&self->hoverwire);
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		machinewireview_onsongchanged);	
@@ -465,8 +465,8 @@ void machinewireview_centermaster(MachineWireView* self)
 		psy_ui_RealSize machinesize;
 		psy_ui_RealSize size;
 						
-		size = psy_ui_component_scrollsize_px(psy_ui_component_parent(&self->component));
-		machinesize = psy_ui_component_scrollsize_px(machineui);
+		size = psy_ui_component_scroll_size_px(psy_ui_component_parent(&self->component));
+		machinesize = psy_ui_component_scroll_size_px(machineui);
 		psy_ui_component_move(machineui,
 			psy_ui_point_make(
 				psy_ui_value_make_px((size.width - machinesize.width) / 2),
@@ -504,7 +504,7 @@ void machinewireview_onmousedoubleclick(MachineWireView* self,
 
 void machinewireview_on_mouse_down(MachineWireView* self, psy_ui_MouseEvent* ev)
 {	
-	if (!psy_ui_component_hasfocus(&self->component)) {
+	if (!psy_ui_component_has_focus(&self->component)) {
 		psy_ui_component_set_focus(&self->component);
 	}
 	self->dragpt = psy_ui_mouseevent_pt(ev);
@@ -702,7 +702,7 @@ bool machinewireview_dragmachine(MachineWireView* self, uintptr_t slot,
 		r_new = machinewireview_updaterect(self, self->dragslot);
 		psy_ui_realrectangle_union(&r_new, &r_old);
 		psy_ui_realrectangle_expand(&r_new, 10.0, 10.0, 10.0, 10.0);
-		psy_ui_component_invalidaterect(&self->component, r_new);
+		psy_ui_component_invalidate_rect(&self->component, r_new);
 		return TRUE;
 	}
 	return FALSE;
@@ -736,7 +736,7 @@ void machinewireview_setdragstatus(MachineWireView* self, uintptr_t slot)
 
 void machinewireview_on_mouse_up(MachineWireView* self, psy_ui_MouseEvent* ev)
 {	
-	psy_ui_component_releasecapture(&self->component);
+	psy_ui_component_release_capture(&self->component);
 	if (self->dragslot != psy_INDEX_INVALID) {
 		if (machinewireview_dragging_machine(self)) {
 			psy_ui_component_updateoverflow(&self->component);
@@ -1030,8 +1030,8 @@ psy_audio_Wire machinewireview_hittestwire(MachineWireView* self, psy_ui_RealPoi
 
 						inposition = psy_ui_component_position(inmachineui);
 						outposition = psy_ui_component_position(outmachineui);
-						out = psy_ui_component_scrollsize_px(outmachineui);
-						in = psy_ui_component_scrollsize_px(inmachineui);
+						out = psy_ui_component_scroll_size_px(outmachineui);
+						in = psy_ui_component_scroll_size_px(inmachineui);
 						r = psy_ui_realrectangle_make(
 							psy_ui_realpoint_make(pt.x - d, pt.y - d),
 							psy_ui_realsize_make(2 * d, 2 * d));
@@ -1083,7 +1083,7 @@ void machinewireview_onmachineinsert(MachineWireView* self,
 		if (machineui && !self->randominsert) {
 			psy_ui_RealSize size;			
 
-			size = psy_ui_component_scrollsize_px(machineui);
+			size = psy_ui_component_scroll_size_px(machineui);
 			psy_ui_component_move(machineui,
 				psy_ui_point_make(
 					psy_ui_value_make_px(psy_max(0.0, self->dragpt.x - size.width / 2)),
@@ -1156,7 +1156,7 @@ void machinewireview_onsongchanged(MachineWireView* self, Workspace* sender)
 	}	
 	psy_ui_component_set_scroll(&self->component, psy_ui_point_zero());
 	self->centermaster = !sender->songhasfile;
-	if (psy_ui_component_drawvisible(&self->component)) {		
+	if (psy_ui_component_draw_visible(&self->component)) {		
 		psy_ui_component_invalidate(&self->component);
 	}	
 	psy_ui_component_align(&self->component);

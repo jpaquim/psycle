@@ -12,6 +12,93 @@
 /* platform */
 #include "../../detail/portable.h"
 
+void patternviewstatus_init(PatternViewStatus* self, psy_ui_Component* parent,
+	Workspace* workspace)
+{	
+	psy_ui_component_init(&self->component, parent, NULL);
+	self->workspace = workspace;
+	psy_ui_component_set_defaultalign(&self->component, psy_ui_ALIGN_LEFT,
+		psy_ui_margin_make_em(0.0, 1.0, 0.0, 0.0));
+	/* pattern index */
+	psy_ui_label_init(&self->pat_desc, &self->component);
+	psy_ui_label_prevent_translation(&self->pat_desc);
+	psy_ui_label_set_text(&self->pat_desc, "Pat");
+	psy_ui_label_init(&self->pat, &self->component);
+	psy_ui_label_prevent_translation(&self->pat);
+	psy_ui_label_set_charnumber(&self->pat, 3.0);
+	/* line */
+	psy_ui_label_init(&self->ln_desc, &self->component);
+	psy_ui_label_prevent_translation(&self->ln_desc);
+	psy_ui_label_set_text(&self->ln_desc, "Ln");
+	psy_ui_label_init(&self->ln, &self->component);
+	psy_ui_label_prevent_translation(&self->ln);
+	psy_ui_label_set_charnumber(&self->ln, 3.0);
+	/* track */
+	psy_ui_label_init(&self->trk_desc, &self->component);
+	psy_ui_label_prevent_translation(&self->trk_desc);
+	psy_ui_label_set_text(&self->trk_desc, "Trk");
+	psy_ui_label_init(&self->trk, &self->component);
+	psy_ui_label_prevent_translation(&self->trk);
+	psy_ui_label_set_charnumber(&self->trk, 2.0);
+	/* col */
+	psy_ui_label_init(&self->col_desc, &self->component);
+	psy_ui_label_prevent_translation(&self->col_desc);
+	psy_ui_label_set_text(&self->col_desc, "Col");
+	psy_ui_label_init(&self->col, &self->component);
+	psy_ui_label_prevent_translation(&self->col);
+	psy_ui_label_set_charnumber(&self->col, 4.0);
+	/* edit mode */	
+	psy_ui_label_init(&self->mode, &self->component);
+	psy_ui_label_prevent_translation(&self->mode);
+	psy_ui_label_set_charnumber(&self->mode, 4.0);
+}
+
+void patternviewstatus_update(PatternViewStatus* self)
+{
+	psy_audio_SequenceCursor cursor;
+	uintptr_t patternid;
+
+	assert(self);
+	assert(self->workspace);
+
+	patternid = psy_INDEX_INVALID;
+	if (workspace_song(self->workspace)) {
+		cursor = self->workspace->song->sequence.cursor;
+		patternid = psy_audio_sequencecursor_patternid(&cursor,
+			psy_audio_song_sequence(workspace_song(self->workspace)));
+	}
+	if (patternid == psy_INDEX_INVALID || !workspace_song(self->workspace)) {
+		psy_ui_label_set_text(&self->pat, "--");
+		psy_ui_label_set_text(&self->ln, "--");
+		psy_ui_label_set_text(&self->trk, "--");
+		psy_ui_label_set_text(&self->col, "--");
+		psy_ui_label_set_text(&self->mode, "Edt");		
+	} else {
+		char text[256];
+		uintptr_t line;
+
+		if (psy_audio_player_playing(&self->workspace->player)) {
+			patternid = psy_audio_sequencecursor_patternid(
+				&self->workspace->host_sequencer_time.currplaycursor,
+				psy_audio_song_sequence(workspace_song(self->workspace)));
+			line = self->workspace->host_sequencer_time.currplayline;
+		} else {
+			line = psy_audio_sequencecursor_line(&cursor);
+		}
+		itoa((int)patternid, text, 10);
+		psy_ui_label_set_text(&self->pat, text);
+		itoa((int)line, text, 10);
+		psy_ui_label_set_text(&self->ln, text);
+		itoa((int)psy_audio_sequencecursor_track(&cursor), text, 10);
+		psy_ui_label_set_text(&self->trk, text);
+		psy_snprintf(text, 256, "%d: %d",
+			(int)psy_audio_sequencecursor_column(&cursor),
+			(int)psy_audio_sequencecursor_digit(&cursor));
+		psy_ui_label_set_text(&self->col, text);
+		psy_ui_label_set_text(&self->mode, "Edt");		
+	}
+}
+
 /* prototypes */
 static void patternviewbar_on_move_cursor_when_paste(PatternViewBar*,
 	psy_ui_Component* sender);
@@ -28,24 +115,26 @@ static void patternviewbar_on_playstatus_changed(PatternViewBar*, Workspace*
 static void patternviewbar_on_song_changed(PatternViewBar*, Workspace* sender);
 static void patternviewbar_connect_song(PatternViewBar*);
 static void patternviewbar_update_status(PatternViewBar*);
-static void patternviewbar_status_text(PatternViewBar*, uintptr_t maxcount,
-	char* rv);
 static void patternviewbar_on_zoombox_changed(PatternViewBar*, ZoomBox* sender);
 static void patternviewbar_on_configure(PatternViewBar*, PatternViewConfig*,
 	psy_Property*);
 
+
+/* PatternViewBar */
+
 /* implementation */
 void patternviewbar_init(PatternViewBar* self, psy_ui_Component* parent,
-	PatternView* patternview, Workspace* workspace)
+	PatternViewConfig* patconfig, Workspace* workspace)
 {		
 	assert(self);
+	assert(patconfig);
 	assert(workspace);
 
-	psy_ui_component_init(&self->component, parent, NULL);
-	self->workspace = workspace;
-	self->patternview = patternview;	
+	psy_ui_component_init(&self->component, parent, NULL);	
+	self->patconfig = patconfig;
+	self->workspace = workspace;	
 	psy_ui_component_set_defaultalign(patternviewbar_base(self),
-		psy_ui_ALIGN_LEFT, psy_ui_defaults_hmargin(psy_ui_defaults()));
+		psy_ui_ALIGN_LEFT, psy_ui_defaults_hmargin(psy_ui_defaults()));	
 	/* Zoom */
 	zoombox_init(&self->zoombox, patternviewbar_base(self));
 	psy_ui_component_set_preferred_size(&self->zoombox.component,
@@ -80,9 +169,7 @@ void patternviewbar_init(PatternViewBar* self, psy_ui_Component* parent,
 	}
 	psy_signal_connect(&self->displaysinglepattern.signal_clicked, self,
 		patternviewbar_on_display_single_pattern);
-	psy_ui_label_init(&self->status, patternviewbar_base(self));
-	psy_ui_label_prevent_translation(&self->status);	
-	psy_ui_label_set_charnumber(&self->status, 30.0);
+	patternviewstatus_init(&self->status, patternviewbar_base(self), workspace);	
 	psy_signal_connect(&psycleconfig_patview(
 		workspace_conf(workspace))->signal_changed, self,
 		patternviewbar_on_configure);
@@ -107,8 +194,7 @@ void patternviewbar_on_move_cursor_when_paste(PatternViewBar* self,
 {
 	assert(self);
 
-	patternviewconfig_setmovecursorwhenpaste(
-		psycleconfig_patview(workspace_conf(self->workspace)),
+	patternviewconfig_setmovecursorwhenpaste(self->patconfig,
 		psy_ui_checkbox_checked(&self->movecursorwhenpaste));
 }
 
@@ -117,8 +203,7 @@ void patternviewbar_on_default_line(PatternViewBar* self, psy_ui_CheckBox*
 {	
 	assert(self);
 
-	patternviewconfig_togglepatdefaultline(
-		psycleconfig_patview(workspace_conf(self->workspace)));
+	patternviewconfig_toggle_pattern_defaultline(self->patconfig);
 }
 
 void patternviewbar_on_display_single_pattern(PatternViewBar* self,
@@ -126,8 +211,7 @@ void patternviewbar_on_display_single_pattern(PatternViewBar* self,
 {
 	assert(self);
 
-	patternviewconfig_setdisplaysinglepattern(
-		psycleconfig_patview(workspace_conf(self->workspace)),
+	patternviewconfig_setdisplaysinglepattern(self->patconfig,
 		psy_ui_checkbox_checked(&self->displaysinglepattern));
 }
 
@@ -161,7 +245,7 @@ void patternviewbar_on_cursor_changed(PatternViewBar* self,
 
 void patternviewbar_on_playline_changed(PatternViewBar* self, Workspace* sender)
 {		
-	if (!workspace_followingsong(sender)) {
+	if (!workspace_following_song(sender)) {
 		patternviewbar_update_status(self);
 	}
 }
@@ -172,47 +256,10 @@ void patternviewbar_on_playstatus_changed(PatternViewBar* self, Workspace* sende
 }
 
 void patternviewbar_update_status(PatternViewBar* self)
-{	
-	char text[256];
-
+{
 	assert(self);
-
-	patternviewbar_status_text(self, 256, text);
-	psy_ui_label_set_text(&self->status, text);
-}
-
-void patternviewbar_status_text(PatternViewBar* self, uintptr_t maxcount,
-	char* rv)
-{	
-	psy_audio_SequenceCursor cursor;
-	uintptr_t patternid;
-
-	assert(self);
-	assert(self->workspace);
 	
-	patternid = psy_INDEX_INVALID;
-	if (workspace_song(self->workspace)) {
-		cursor = self->workspace->song->sequence.cursor;
-		patternid = psy_audio_sequencecursor_patternid(&cursor,
-			psy_audio_song_sequence(workspace_song(self->workspace)));
-	}
-	if (patternid == psy_INDEX_INVALID || !workspace_song(self->workspace)) {
-		psy_snprintf(rv, maxcount, "Pat -- Ln -- Trk -- Col --:-- Edt");
-	} else if (psy_audio_player_playing(&self->workspace->player)) {		
-		psy_snprintf(rv, maxcount, "Pat %d Ln %d Trk %d Col %d:%d Edt",
-			(int)self->workspace->host_sequencer_time.currplaycursor.patternid,
-			(int)self->workspace->host_sequencer_time.currplayline,
-			(int)psy_audio_sequencecursor_track(&cursor),
-			(int)psy_audio_sequencecursor_column(&cursor),
-			(int)psy_audio_sequencecursor_digit(&cursor));		
-	} else {
-		psy_snprintf(rv, maxcount, "Pat %d Ln %d Trk %d Col %d:%d Edt",
-			(int)patternid,
-			(int)psy_audio_sequencecursor_line(&cursor),
-			(int)psy_audio_sequencecursor_track(&cursor),
-			(int)psy_audio_sequencecursor_column(&cursor),
-			(int)psy_audio_sequencecursor_digit(&cursor));
-	}
+	patternviewstatus_update(&self->status);
 }
 
 void patternviewbar_on_configure(PatternViewBar* self, PatternViewConfig* config,
@@ -234,8 +281,5 @@ void patternviewbar_on_zoombox_changed(PatternViewBar* self, ZoomBox* sender)
 {
 	assert(self);
 
-	if (self->patternview) {
-		self->patternview->zoom = zoombox_rate(&self->zoombox);
-		patternview_updatefont(self->patternview);
-	}
+	patternviewconfig_set_zoom(self->patconfig, zoombox_rate(sender));
 }

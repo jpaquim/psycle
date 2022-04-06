@@ -20,7 +20,7 @@ void slidergroupui_init(SliderGroupUi* self, psy_ui_Component* parent,
 	assert(self);	
 	
 	psy_ui_component_init(&self->component, parent, NULL);
-	psy_ui_component_setalignexpand(&self->component, psy_ui_HEXPAND);
+	psy_ui_component_set_align_expand(&self->component, psy_ui_HEXPAND);
 	psy_ui_component_set_style_type(&self->component, STYLE_MACPARAM_BOTTOM);		
 	sliderui_init(&self->slider, &self->component, machine, volumeparamidx,
 		volume);

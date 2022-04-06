@@ -461,7 +461,7 @@ void midimonitor_initchannelmapping(MidiMonitor* self)
 	psy_ui_component_set_align(&self->mapconfigure.component, psy_ui_ALIGN_LEFT);
 	midichannelmappingview_init(&self->channelmapping, &self->client,
 		self->workspace);
-	psy_ui_component_setoverflow(&self->channelmapping.component,
+	psy_ui_component_set_overflow(&self->channelmapping.component,
 		psy_ui_OVERFLOW_VSCROLL);
 	psy_ui_scroller_init(&self->scroller, &self->client, NULL, NULL);
 	psy_ui_scroller_set_client(&self->scroller, &self->channelmapping.component);

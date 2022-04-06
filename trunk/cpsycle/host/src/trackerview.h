@@ -33,20 +33,15 @@ typedef struct TrackerGrid {
 	/* signals */
 	psy_Signal signal_colresize;
 	/* internal */	
-	psy_dsp_NotesTabMode notestabmode;   
 	psy_audio_SequenceCursor old_cursor;
-	psy_audio_SequenceCursor lastdragcursor;	
-	int chordmodestarting;
+	psy_audio_SequenceCursor last_drag_cursor;
 	bool chord;
-	uintptr_t chordbegin;
-	uintptr_t dragtrack;
-	uintptr_t dragparamcol;
-	bool syncpattern;	
-	bool effcursoralwaysdown;	
-	bool preventscrolltop;
+	uintptr_t chord_begin;	
+	bool effcursor_always_down;	
+	bool prevent_scroll_top;
 	bool prevent_cursor;
 	psy_Table columns;
-	bool preventeventdriver;
+	bool prevent_event_driver;
 	psy_ui_RealSize size;
 	psy_ui_RealSize line_size;
 	/* references */
@@ -55,20 +50,19 @@ typedef struct TrackerGrid {
 } TrackerGrid;
 
 void trackergrid_init(TrackerGrid*, psy_ui_Component* parent,
-	TrackerState*, Workspace*);
+	TrackerState*, InputHandler*, Workspace*);
 
 void trackergrid_build(TrackerGrid*);
-void trackergrid_scroll_to_order(TrackerGrid*);
-void trackergrid_showemptydata(TrackerGrid*, int showstate);
+bool trackergrid_scroll_to_order(TrackerGrid*);
+void trackergrid_show_empty_data(TrackerGrid*, int showstate);
 void trackergrid_invalidate_playbar(TrackerGrid*);
-void trackergrid_invalidateline(TrackerGrid*, intptr_t line);
-void trackergrid_invalidatelines(TrackerGrid*, intptr_t line1, intptr_t line2);
+void trackergrid_invalidate_line(TrackerGrid*, intptr_t line);
+void trackergrid_invalidate_lines(TrackerGrid*, intptr_t line1, intptr_t line2);
 void trackergrid_invalidate_cursor(TrackerGrid*);
-void trackergrid_invalidateinternalcursor(TrackerGrid*,
+void trackergrid_invalidate_internal_cursor(TrackerGrid*,
 	psy_audio_SequenceCursor);
-void trackergrid_update_follow_song(TrackerGrid*);
-void trackergrid_centeroncursor(TrackerGrid*);
-void trackergrid_setcentermode(TrackerGrid*, int mode);
+void trackergrid_center_on_cursor(TrackerGrid*);
+void trackergrid_set_center_mode(TrackerGrid*, int mode);
 void trackergrid_tweak(TrackerGrid*, int slot, uintptr_t tweak,
 	float normvalue);
 
@@ -78,12 +72,12 @@ INLINE const psy_audio_BlockSelection* trackergrid_selection(
 	return &self->state->pv->selection;
 }
 
-bool trackergrid_handlecommand(TrackerGrid*, intptr_t cmd);
+bool trackergrid_handle_command(TrackerGrid*, intptr_t cmd);
 /* block menu */
 void trackergrid_changegenerator(TrackerGrid*);
 void trackergrid_changeinstrument(TrackerGrid*);
-void trackergrid_blockstart(TrackerGrid*);
-void trackergrid_blockend(TrackerGrid*);
+void trackergrid_block_start(TrackerGrid*);
+void trackergrid_block_end(TrackerGrid*);
 
 INLINE bool trackergrid_midline(TrackerGrid* self)
 {
@@ -97,7 +91,7 @@ INLINE psy_ui_Component* trackergrid_base(TrackerGrid* self)
 	return &self->component;
 }
 
-INLINE bool trackergrid_checkupdate(const TrackerGrid* self)
+INLINE bool trackergrid_check_update(const TrackerGrid* self)
 {
 	const psy_audio_Pattern* pattern;
 

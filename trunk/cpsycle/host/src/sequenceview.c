@@ -84,7 +84,7 @@ void seqview_init(SeqView* self, psy_ui_Component* parent,
 void seqview_onscroll(SeqView* self, psy_ui_Component* sender)
 {	
 	psy_ui_component_set_scroll_left(&self->trackheader.client,
-		psy_ui_component_scrollleft(seqviewlist_base(&self->listview)));
+		psy_ui_component_scroll_left(seqviewlist_base(&self->listview)));
 }
 
 void seqview_clear(SeqView* self)
@@ -145,7 +145,7 @@ void seqview_onsequenceselect(SeqView* self,
 	visilines = (clientsize.height) /
 		psy_ui_value_px(&self->state.lineheight,
 			psy_ui_component_textmetric(&self->component), NULL);
-	listviewtop = psy_ui_component_scrolltop_px(&self->listview.component) /
+	listviewtop = psy_ui_component_scroll_top_px(&self->listview.component) /
 		psy_ui_value_px(&self->state.lineheight,
 			psy_ui_component_textmetric(&self->component), NULL);
 	if ((double)c < listviewtop) {

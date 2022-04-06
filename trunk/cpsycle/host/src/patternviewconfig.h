@@ -39,6 +39,8 @@ typedef struct PatternViewConfig {
 	psy_Property* headerskins;
 	char* skindir;
 	bool has_classic_header;
+	double zoom;
+	bool singlemode;
 	/* references */
 	psy_Property* parent;
 	struct DirConfig* dirconfig;
@@ -48,43 +50,49 @@ void patternviewconfig_init(PatternViewConfig*, psy_Property* parent,
 	const char* skindir);
 void patternviewconfig_dispose(PatternViewConfig*);
 
-void patternviewconfig_setdirectories(PatternViewConfig*, struct DirConfig*);
+void patternviewconfig_set_directories(PatternViewConfig*, struct DirConfig*);
 void patternviewconfig_update_header_skins(PatternViewConfig*);
-void patternviewconfig_loadbitmap(PatternViewConfig*);
-void patternviewconfig_resettheme(PatternViewConfig* self);
+void patternviewconfig_load_bitmap(PatternViewConfig*);
+void patternviewconfig_reset_theme(PatternViewConfig* self);
 const char* patternviewconfig_headerskinname(PatternViewConfig*);
-void patternviewconfig_settheme(PatternViewConfig*, psy_Property* skin);
+void patternviewconfig_set_theme(PatternViewConfig*, psy_Property* skin);
 bool boolpatternviewconfig_hasthemeproperty(const PatternViewConfig*,
 	psy_Property*);
-bool patternviewconfig_hasproperty(const PatternViewConfig*, psy_Property*);
+bool patternviewconfig_has_property(const PatternViewConfig*, psy_Property*);
 
 void patternviewconfig_switch_header(PatternViewConfig*);
 void patternviewconfig_switch_to_classic(PatternViewConfig*);
 void patternviewconfig_switch_to_text(PatternViewConfig*);
 
-bool patternviewconfig_linenumbers(const PatternViewConfig*);
+bool patternviewconfig_line_numbers(const PatternViewConfig*);
 bool patternviewconfig_linenumbersinhex(const PatternViewConfig*);
 bool patternviewconfig_showbeatoffset(const PatternViewConfig*);
 double patternviewconfig_linenumber_width(const PatternViewConfig*);
 bool patternviewconfig_linenumberscursor(const PatternViewConfig*);
 bool patternviewconfig_defaultline(const PatternViewConfig*);
-bool patternviewconfig_wraparound(const PatternViewConfig*);
-bool patternviewconfig_drawemptydata(const PatternViewConfig*);
+bool patternviewconfig_wrap_around(const PatternViewConfig*);
+bool patternviewconfig_draw_empty_data(const PatternViewConfig*);
 bool patternviewconfig_center_cursor_on_screen(const PatternViewConfig*);
-bool patternviewconfig_showwideinstcolumn(const PatternViewConfig*);
+bool patternviewconfig_show_wide_inst_column(const PatternViewConfig*);
 psy_dsp_NotesTabMode patternviewconfig_notetabmode(const PatternViewConfig*);
 bool patternviewconfig_ismovecursorwhenpaste(const PatternViewConfig*);
 void patternviewconfig_setmovecursorwhenpaste(PatternViewConfig*, bool on);
 void patternviewconfig_setdisplaysinglepattern(PatternViewConfig*, bool on);
 bool patternviewconfig_issinglepatterndisplay(const PatternViewConfig*);
 bool patternviewconfig_useheaderbitmap(const PatternViewConfig*);
-bool patternviewconfig_showtrackscopes(const PatternViewConfig*);
-void patternviewconfig_togglepatdefaultline(PatternViewConfig*);
-bool patternviewconfig_issmoothscrolling(const PatternViewConfig*);
+bool patternviewconfig_show_trackscopes(const PatternViewConfig*);
+void patternviewconfig_toggle_pattern_defaultline(PatternViewConfig*);
+bool patternviewconfig_is_smooth_scrolling(const PatternViewConfig*);
 void patternviewconfig_setsmoothscrolling(PatternViewConfig*, bool on);
-int patternviewconfig_patterndisplay(const PatternViewConfig*);
-psy_ui_FontInfo patternviewconfig_readfont(PatternViewConfig*, double zoom);
+int patternviewconfig_pattern_display(const PatternViewConfig*);
+psy_ui_FontInfo patternviewconfig_fontinfo(PatternViewConfig*, double zoom);
 void patternviewconfig_write_styles(PatternViewConfig*);
+void patternviewconfig_set_zoom(PatternViewConfig*, double zoom);
+double patternviewconfig_zoom(const PatternViewConfig*);
+void patternviewconfig_display_single_pattern(PatternViewConfig*);
+void patternviewconfig_display_sequence(PatternViewConfig*);
+bool patternviewconfig_singlemode(const PatternViewConfig*);
+
 /* events */
 int patternviewconfig_onchanged(PatternViewConfig*, psy_Property*);
 

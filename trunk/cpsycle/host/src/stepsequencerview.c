@@ -166,7 +166,7 @@ void stepsequencerbar_init(StepsequencerBar* self, psy_ui_Component* parent,
 	vtable_init(self);	
 	psy_ui_component_set_defaultalign(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_margin_make_em(0.0, 1.0, 0.0, 0.0));
-	psy_ui_component_setalignexpand(&self->component, psy_ui_HEXPAND);
+	psy_ui_component_set_align_expand(&self->component, psy_ui_HEXPAND);
 	psy_signal_connect(&workspace_player(state->workspace)->signal_lpbchanged,
 		self, stepsequencerbar_onlpbchanged);
 	psy_table_init(&self->tiles);
@@ -500,7 +500,7 @@ void stepsequencerbarselect_init(StepsequencerBarSelect* self,
 	psy_ui_component_init(&self->component, parent, NULL);	
 	stepsequencerbarselect_vtable_init(self);
 	self->state = state;	
-	psy_ui_component_setalignexpand(&self->component, psy_ui_HEXPAND);
+	psy_ui_component_set_align_expand(&self->component, psy_ui_HEXPAND);
 	 psy_ui_component_set_defaultalign(&self->component, psy_ui_ALIGN_TOP,
 		psy_ui_margin_zero());	
 	psy_table_init(&self->buttons);
@@ -541,7 +541,7 @@ void stepsequencerbarselect_build(StepsequencerBarSelect* self)
 		
 		if ((i % 4) == 0) {
 			row = psy_ui_component_allocinit(&self->component, NULL);
-			psy_ui_component_setalignexpand(row, psy_ui_HEXPAND);
+			psy_ui_component_set_align_expand(row, psy_ui_HEXPAND);
 			psy_ui_component_set_defaultalign(row, psy_ui_ALIGN_LEFT,
 				psy_ui_margin_make_em(0.0, 1.0, 0.1, 0.0));
 		}

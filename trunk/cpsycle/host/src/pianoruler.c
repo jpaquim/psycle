@@ -105,10 +105,10 @@ void pianoruler_drawruler(PianoRuler* self, psy_ui_Graphics* g,
 		return;
 	}
 	tm = psy_ui_component_textmetric(&self->component);
-	size = psy_ui_component_scrollsize_px(&self->component);	
+	size = psy_ui_component_scroll_size_px(&self->component);	
 	baseline = size.height - 1;
 	baselinetop = baseline - tm->tmHeight / 3;
-	scrollleft = psy_ui_component_scrollleft_px(&self->component);
+	scrollleft = psy_ui_component_scroll_left_px(&self->component);
 	style = psy_ui_style(STYLE_PV_ROWBEAT);
 	psy_ui_setcolour(g, style->background.colour);
 	// patternviewskin_rowbeatcolour(patternviewstate_skin(self->gridstate->pv),

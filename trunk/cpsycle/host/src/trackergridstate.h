@@ -95,7 +95,7 @@ typedef struct TrackConfig {
 void trackconfig_init(TrackConfig*, bool wideinst);
 void trackconfig_dispose(TrackConfig*);
 
-void trackconfig_initcolumns(TrackConfig*, bool wideinst);
+void trackconfig_init_columns(TrackConfig*, bool wideinst);
 double trackconfig_width(const TrackConfig*, uintptr_t track);
 double trackconfig_width_cmdparam(const TrackConfig* self);
 TrackDef* trackconfig_insert_trackdef(TrackConfig*, uintptr_t track,
@@ -156,7 +156,7 @@ void trackerstate_init(TrackerState*, TrackConfig*, PatternViewState* pvstate);
 void trackerstate_dispose(TrackerState*);
 
 double trackerstate_trackwidth(const TrackerState*, uintptr_t track);
-uintptr_t trackerstate_pxtotrack(const TrackerState*, double x);
+uintptr_t trackerstate_px_to_track(const TrackerState*, double x);
 double trackerstate_basewidth(TrackerState*, uintptr_t track);
 
 void trackerstate_clip(TrackerState*, const psy_ui_RealRectangle* clip,
@@ -164,18 +164,18 @@ void trackerstate_clip(TrackerState*, const psy_ui_RealRectangle* clip,
 void trackerstate_update_clip_events(TrackerState*,
 	const psy_audio_BlockSelection* clip);
 
-void trackerstate_startdragselection(TrackerState*, psy_audio_SequenceCursor);
-void trackerstate_dragselection(TrackerState*, psy_audio_SequenceCursor);
+void trackerstate_start_drag_selection(TrackerState*, psy_audio_SequenceCursor);
+void trackerstate_drag_selection(TrackerState*, psy_audio_SequenceCursor);
 psy_audio_SequenceCursor trackerstate_checkcursorbounds(TrackerState*,
 	psy_audio_SequenceCursor);
 
 /* quantized */
-INLINE double trackerstate_beattopx(TrackerState* self,
+INLINE double trackerstate_beat_to_px(TrackerState* self,
 	psy_dsp_big_beat_t position)
 {
 	assert(self);
 
-	return self->lineheightpx * patternviewstate_beattoline(self->pv,
+	return self->lineheightpx * patternviewstate_beat_to_line(self->pv,
 		position);
 }
 
@@ -213,17 +213,17 @@ INLINE psy_dsp_big_beat_t trackerstate_pxtobeatnotquantized(
 	return (px / self->lineheightpx) * patternviewstate_bpl(self->pv);
 }
 
-void trackerstate_lineclip(TrackerState*, const psy_ui_RealRectangle* clip,
+void trackerstate_line_clip(TrackerState*, const psy_ui_RealRectangle* clip,
 	psy_audio_BlockSelection* rv);
 
 INLINE uintptr_t trackerstate_midline(const TrackerState* self,
 	double scrolltop_px)
 {
-	return patternviewstate_beattoline(self->pv, trackerstate_pxtobeat(
+	return patternviewstate_beat_to_line(self->pv, trackerstate_pxtobeat(
 		self, scrolltop_px) + self->visilines / 2);
 }
 
-void trackerstate_updatemetric(TrackerState*, const psy_ui_TextMetric*,
+void trackerstate_update_metric(TrackerState*, const psy_ui_TextMetric*,
 	double lineheight);
 
 psy_audio_SequenceCursor trackerstate_make_cursor(TrackerState*,

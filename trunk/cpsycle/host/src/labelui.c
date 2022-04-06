@@ -95,7 +95,7 @@ void labelui_ondraw(LabelUi* self, psy_ui_Graphics* g)
 	bottom_style = psy_ui_style(STYLE_MACPARAM_BOTTOM);
 	str[0] = '\0';
 	labelui_updateparam(self);
-	size = psy_ui_component_scrollsize_px(&self->component);
+	size = psy_ui_component_scroll_size_px(&self->component);
 	half = size.height / 2;
 	r = psy_ui_realrectangle_make(
 		psy_ui_realpoint_make(0.0, 0.0),

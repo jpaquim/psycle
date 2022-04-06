@@ -106,7 +106,7 @@ void psy_ui_textareapane_init(psy_ui_TextAreaPane* self, psy_ui_Component* paren
 	psy_ui_component_setscrollstep(psy_ui_textareapane_base(self),
 		psy_ui_size_make_em(1.0, 1.0));		
 	psy_ui_component_set_wheel_scroll(&self->component, 4);
-	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_SCROLL);
+	psy_ui_component_set_overflow(&self->component, psy_ui_OVERFLOW_SCROLL);
 
 }
 
@@ -572,7 +572,7 @@ void psy_ui_textareapane_ondraw(psy_ui_TextAreaPane* self, psy_ui_Graphics* g)
 	psy_ui_textdraw_init(&textdraw, &self->format, psy_ui_component_size_px(
 		psy_ui_textareapane_base(self)), self->text);
 	psy_ui_textdraw_draw(&textdraw, g,
-		(psy_ui_component_hasfocus(&self->component))
+		(psy_ui_component_has_focus(&self->component))
 		? self->cp
 		: psy_INDEX_INVALID);	
 	psy_ui_textdraw_dispose(&textdraw);
@@ -687,15 +687,15 @@ void psy_ui_textareapane_scroll_up(psy_ui_TextAreaPane* self)
 	lineheight = tm->tmHeight * self->format.linespacing;
 	top = lineheight * line;
 	topline = 0;	
-	if (psy_ui_component_scrolltop_px(&self->component) +
+	if (psy_ui_component_scroll_top_px(&self->component) +
 			topline * lineheight > top) {
 		intptr_t dlines;
 
-		dlines = (intptr_t)((psy_ui_component_scrolltop_px(&self->component) +
+		dlines = (intptr_t)((psy_ui_component_scroll_top_px(&self->component) +
 			topline * lineheight - top) / (lineheight));
-		psy_ui_component_setscrolltop_px(&self->component,
-			psy_ui_component_scrolltop_px(&self->component) -
-			psy_ui_component_scrollstep_height_px(&self->component) * dlines);
+		psy_ui_component_set_scroll_top_px(&self->component,
+			psy_ui_component_scroll_top_px(&self->component) -
+			psy_ui_component_scroll_step_height_px(&self->component) * dlines);
 	}
 }
 
@@ -712,17 +712,17 @@ void psy_ui_textareapane_scroll_down(psy_ui_TextAreaPane* self)
 	lineheight = tm->tmHeight * self->format.linespacing;
 	clientsize = psy_ui_component_clientsize_px(&self->component);
 	visilines = (uintptr_t)(clientsize.height / lineheight);		
-	if (visilines < line - psy_ui_component_scrolltop_px(&self->component) /
+	if (visilines < line - psy_ui_component_scroll_top_px(&self->component) /
 		lineheight) {
 		intptr_t dlines;
 
 		dlines = (intptr_t)
-			(line - psy_ui_component_scrolltop_px(&self->component) /
+			(line - psy_ui_component_scroll_top_px(&self->component) /
 				lineheight - visilines);
 		self->component.blitscroll = TRUE;
-		psy_ui_component_setscrolltop_px(&self->component,
-			psy_ui_component_scrolltop_px(&self->component) +
-			psy_ui_component_scrollstep_height_px(&self->component) * dlines);
+		psy_ui_component_set_scroll_top_px(&self->component,
+			psy_ui_component_scroll_top_px(&self->component) +
+			psy_ui_component_scroll_step_height_px(&self->component) * dlines);
 		self->component.blitscroll = FALSE;
 	}
 }
@@ -748,7 +748,7 @@ void psy_ui_textareapane_scroll_left(psy_ui_TextAreaPane* self)
 		psy_ui_component_font(&self->component),
 		tm);	
 			
-	if (psy_ui_component_scrollleft_px(&self->component) > screen_offset) {
+	if (psy_ui_component_scroll_left_px(&self->component) > screen_offset) {
 		intptr_t chars;
 		
 		chars = (intptr_t)(screen_offset / tm->tmAveCharWidth);
@@ -779,9 +779,9 @@ void psy_ui_textareapane_scroll_right(psy_ui_TextAreaPane* self)
 		self->text + linestart, psy_max(0, column),
 		psy_ui_component_font(&self->component),
 		tm);	
-	if (screen_offset > psy_ui_component_scrollleft_px(&self->component) + client_size.width) {				
+	if (screen_offset > psy_ui_component_scroll_left_px(&self->component) + client_size.width) {				
 		psy_ui_component_set_scroll_left(&self->component,
-			psy_ui_value_make_px(psy_ui_component_scrollleft_px(&self->component) + tm->tmAveCharWidth));
+			psy_ui_value_make_px(psy_ui_component_scroll_left_px(&self->component) + tm->tmAveCharWidth));
 	}
 }
 

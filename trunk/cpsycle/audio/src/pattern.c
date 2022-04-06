@@ -325,13 +325,13 @@ psy_audio_PatternNode* psy_audio_pattern_greaterequal_track(psy_audio_Pattern* s
 psy_audio_PatternNode* psy_audio_pattern_findnode_cursor(psy_audio_Pattern* self,
 	psy_audio_SequenceCursor cursor, psy_audio_PatternNode** prev)
 {
-	return psy_audio_pattern_findnode(self,
+	return psy_audio_pattern_find_node(self,
 		psy_audio_sequencecursor_track(&cursor),
 		psy_audio_sequencecursor_pattern_offset(&cursor),
 		psy_audio_sequencecursor_bpl(&cursor), prev);
 }
 
-psy_audio_PatternNode* psy_audio_pattern_findnode(psy_audio_Pattern* self, uintptr_t track,
+psy_audio_PatternNode* psy_audio_pattern_find_node(psy_audio_Pattern* self, uintptr_t track,
 	psy_dsp_big_beat_t offset, psy_dsp_big_beat_t bpl, psy_audio_PatternNode** prev)
 {
 	psy_audio_PatternNode* node;
@@ -478,12 +478,12 @@ void psy_audio_pattern_blockinterpolatelinear(psy_audio_Pattern* self,
 	end = selection->bottomright;
 	beginline = (uintptr_t)(psy_audio_sequencecursor_pattern_offset(&begin) * begin.lpb);
 	endline = (uintptr_t)(psy_audio_sequencecursor_pattern_offset(&end) * end.lpb);
-	node = psy_audio_pattern_findnode(self, begin.track, beginline * 1.0 / begin.lpb,
+	node = psy_audio_pattern_find_node(self, begin.track, beginline * 1.0 / begin.lpb,
 		1.0 / begin.lpb, &prev);
 	startval = (node)
 		? psy_audio_patternevent_tweakvalue(psy_audio_patternentry_front(node->entry))
 		: 0;
-	node = psy_audio_pattern_findnode(self, begin.track, (endline - 1) * 1.0 / begin.lpb,
+	node = psy_audio_pattern_find_node(self, begin.track, (endline - 1) * 1.0 / begin.lpb,
 		1.0 / begin.lpb, &prev);
 	endval = (node)
 		? psy_audio_patternevent_tweakvalue(psy_audio_patternentry_front(node->entry))
@@ -515,7 +515,7 @@ void psy_audio_pattern_blockinterpolaterange(psy_audio_Pattern* self,
 
 		offset = line * bpl;
 		value = (int)((step * (line - beginline) + startval));
-		node = psy_audio_pattern_findnode(self, begin.track, offset, bpl, &prev);
+		node = psy_audio_pattern_find_node(self, begin.track, offset, bpl, &prev);
 		if (node) {
 			psy_audio_patternevent_settweakvalue(psy_audio_patternentry_front(
 				node->entry), value);
@@ -561,7 +561,7 @@ void psy_audio_pattern_blockinterpolaterangehermite(psy_audio_Pattern* self,
 		psy_dsp_big_beat_t offset;
 
 		offset = line * bpl;
-		node = psy_audio_pattern_findnode(self, begin.track, offset, bpl, &prev);
+		node = psy_audio_pattern_find_node(self, begin.track, offset, bpl, &prev);
 		if (node) {
 			double curveval;
 			
@@ -891,7 +891,7 @@ void psy_audio_pattern_blockpaste(psy_audio_Pattern* self,
 		psy_audio_PatternNode* node;
 
 		pasteentry = psy_audio_patternnode_entry(p);
-		node = psy_audio_pattern_findnode(self,
+		node = psy_audio_pattern_find_node(self,
 			pasteentry->track + trackoffset,
 			pasteentry->offset + offset,
 			(psy_dsp_big_beat_t)bpl,
@@ -939,7 +939,7 @@ void psy_audio_pattern_blockmixpaste(psy_audio_Pattern* self,
 		psy_audio_PatternEntry* pasteentry;
 
 		pasteentry = psy_audio_patternnode_entry(p);
-		if (!psy_audio_pattern_findnode(self,
+		if (!psy_audio_pattern_find_node(self,
 			pasteentry->track + trackoffset,
 			pasteentry->offset + offset,
 			(psy_dsp_big_beat_t)bpl,
@@ -1021,7 +1021,7 @@ void psy_audio_pattern_swingfill(psy_audio_Pattern* self,
 			val = 255;
 		}
 		index += step;
-		node = psy_audio_pattern_findnode(self, begin.track, offset, bpl,
+		node = psy_audio_pattern_find_node(self, begin.track, offset, bpl,
 			&prev);				
 		if (node) {
 			psy_audio_PatternEntry* entry;

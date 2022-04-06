@@ -173,9 +173,9 @@ void seqeditor_updatesong(SeqEditor* self)
 
 void seqeditor_updatescrollstep(SeqEditor* self)
 {		
-	psy_ui_component_set_scrollstep_height(&self->tracks.component,
+	psy_ui_component_set_scroll_step_height(&self->tracks.component,
 		seqeditstate_lineheight(&self->state));
-	psy_ui_component_set_scrollstep_height(&self->trackdesc.component,
+	psy_ui_component_set_scroll_step_height(&self->trackdesc.component,
 		seqeditstate_lineheight(&self->state));
 }
 
@@ -223,7 +223,7 @@ void seqeditor_ontracksscroll(SeqEditor* self, psy_ui_Component* sender)
 	psy_ui_component_set_scroll_top(&self->trackdesc.component,
 		psy_ui_component_scrolltop(&self->tracks.component));
 	psy_ui_component_set_scroll_left(&self->header.pane,
-		psy_ui_component_scrollleft(&self->tracks.component));
+		psy_ui_component_scroll_left(&self->tracks.component));
 }
 
 void seqeditor_onconfigure(SeqEditor* self, GeneralConfig* sender,

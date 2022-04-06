@@ -55,7 +55,7 @@ void psy_ui_checkbox_init(psy_ui_CheckBox* self, psy_ui_Component* parent)
 		psy_ui_margin_make_em(0.0, 0.0, 0.0, 1.0));
 	psy_ui_label_prevent_wrap(&self->text);
 	psy_ui_component_set_align(&self->text.component, psy_ui_ALIGN_LEFT);
-	psy_ui_component_setalignexpand(&self->text.component, psy_ui_HEXPAND);	
+	psy_ui_component_set_align_expand(&self->text.component, psy_ui_HEXPAND);	
 	psy_signal_init(&self->signal_clicked);	
 }
 

@@ -43,12 +43,12 @@ void psy_ui_scroller_init(psy_ui_Scroller*, psy_ui_Component* parent,
 
 void psy_ui_scroller_set_client(psy_ui_Scroller*, psy_ui_Component*);
 
-INLINE void psy_ui_scroller_scrollsmooth(psy_ui_Scroller* self)
+INLINE void psy_ui_scroller_scroll_smooth(psy_ui_Scroller* self)
 {
 	self->smooth = TRUE;
 }
 
-INLINE void psy_ui_scroller_scrollfast(psy_ui_Scroller* self)
+INLINE void psy_ui_scroller_scroll_fast(psy_ui_Scroller* self)
 {
 	self->smooth = FALSE;
 }

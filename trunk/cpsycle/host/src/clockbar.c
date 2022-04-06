@@ -42,7 +42,7 @@ void clockbar_init(ClockBar* self, psy_ui_Component* parent)
 	vtable_init(self);
 	self->display_minutes = FALSE;
 	self->start = time(NULL);
-	psy_ui_component_setalignexpand(&self->component,
+	psy_ui_component_set_align_expand(&self->component,
 		psy_ui_HEXPAND);
 	psy_ui_component_set_defaultalign(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));

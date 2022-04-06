@@ -112,8 +112,8 @@ void pianoroll_init(Pianoroll* self, psy_ui_Component* parent,
 	psy_ui_component_set_vtable(&self->component, pianoroll_vtable_init(self));
 	self->workspace = workspace;	
 	self->opcount = 0;
-	self->syncpattern = 1;
-	self->chordbegin = 0;	
+	self->sync_pattern = 1;
+	self->chord_begin = 0;	
 	/* shared states */
 	keyboardstate_init(&self->keyboardstate);
 	pianogridstate_init(&self->gridstate, pvstate);	
@@ -217,7 +217,7 @@ void pianoroll_onplaylinechanged(Pianoroll* self, Workspace* sender)
 {
 	assert(self);
 
-	if (!psy_ui_component_drawvisible(pianoroll_base(self))) {
+	if (!psy_ui_component_draw_visible(pianoroll_base(self))) {
 		return;
 	}	
 	pianogrid_invalidate_lines(&self->grid,
@@ -232,7 +232,7 @@ void pianoroll_on_timer(Pianoroll* self, uintptr_t timerid)
 	if (patternviewstate_pattern(self->gridstate.pv)) {
 		if (patternviewstate_pattern(self->gridstate.pv) &&
 				patternviewstate_pattern(self->gridstate.pv)->opcount != self->opcount &&
-				self->syncpattern) {
+				self->sync_pattern) {
 			// psy_ui_component_invalidate(pianogrid_base(&self->grid));
 		}
 		self->opcount = patternviewstate_pattern(self->gridstate.pv)
@@ -263,9 +263,9 @@ void pianoroll_updatescroll(Pianoroll* self)
 		psy_ui_size_make_px(
 			pianogridstate_steppx(&self->gridstate),
 			self->keyboardstate.keyheightpx));
-	psy_ui_component_set_scrollstep_height(pianokeyboard_base(&self->keyboard),
+	psy_ui_component_set_scroll_step_height(pianokeyboard_base(&self->keyboard),
 		psy_ui_value_make_px(self->keyboardstate.keyheightpx));
-	psy_ui_component_setscrollstep_width(pianoruler_base(&self->header),
+	psy_ui_component_set_scroll_step_width(pianoruler_base(&self->header),
 		psy_ui_value_make_px(pianogridstate_steppx(&self->gridstate)));
 	psy_ui_component_updateoverflow(pianogrid_base(&self->grid));
 	psy_ui_component_invalidate(pianogrid_base(&self->grid));
@@ -278,11 +278,11 @@ void pianoroll_onlpbchanged(Pianoroll* self, psy_audio_Player* sender,
 {
 	assert(self);
 	
-	psy_ui_component_setscrollstep_width(pianogrid_base(&self->grid),
+	psy_ui_component_set_scroll_step_width(pianogrid_base(&self->grid),
 		psy_ui_value_make_px(pianogridstate_steppx(&self->gridstate)));
 	psy_ui_component_updateoverflow(pianogrid_base(&self->grid));
 	psy_ui_component_set_scroll_left(pianoruler_base(&self->header),
-		psy_ui_component_scrollleft(pianogrid_base(&self->grid)));
+		psy_ui_component_scroll_left(pianogrid_base(&self->grid)));
 	psy_ui_component_invalidate(pianoruler_base(&self->header));	
 	psy_ui_component_invalidate(pianogrid_base(&self->grid));
 }
@@ -291,6 +291,7 @@ void pianoroll_oncursorchanged(Pianoroll* self, psy_audio_Sequence* sender)
 {	
 	assert(self);
 	
+	pianoroll_scroll_to_order(self);
 	pianogrid_update_cursor(&self->grid, sender->cursor);	
 }
 
@@ -308,13 +309,13 @@ void pianoroll_ongridscroll(Pianoroll* self, psy_ui_Component* sender)
 {
 	assert(self);
 
-	if (psy_ui_component_scrollleft_px(pianogrid_base(&self->grid)) !=
-		psy_ui_component_scrollleft_px(pianoruler_base(&self->header))) {
+	if (psy_ui_component_scroll_left_px(pianogrid_base(&self->grid)) !=
+		psy_ui_component_scroll_left_px(pianoruler_base(&self->header))) {
 		psy_ui_component_set_scroll_left(pianoruler_base(&self->header),
-			psy_ui_component_scrollleft(pianogrid_base(&self->grid)));		
+			psy_ui_component_scroll_left(pianogrid_base(&self->grid)));		
 	}
-	if (psy_ui_component_scrolltop_px(pianogrid_base(&self->grid)) !=
-			psy_ui_component_scrolltop_px(&self->keyboard.component)) {
+	if (psy_ui_component_scroll_top_px(pianogrid_base(&self->grid)) !=
+			psy_ui_component_scroll_top_px(&self->keyboard.component)) {
 		psy_ui_component_set_scroll_top(&self->keyboard.component,
 			psy_ui_component_scrolltop(pianogrid_base(&self->grid)));		
 	}
@@ -325,11 +326,11 @@ void pianoroll_onbeatwidthchanged(Pianoroll* self, ZoomBox* sender)
 	assert(self);
 
 	pianogridstate_setzoom(&self->gridstate, zoombox_rate(sender));
-	psy_ui_component_setscrollstep_width(pianogrid_base(&self->grid),
+	psy_ui_component_set_scroll_step_width(pianogrid_base(&self->grid),
 		psy_ui_value_make_px(pianogridstate_steppx(&self->gridstate)));
 	psy_ui_component_updateoverflow(pianogrid_base(&self->grid));
 	psy_ui_component_set_scroll_left(pianoruler_base(&self->header),
-		psy_ui_component_scrollleft(pianogrid_base(&self->grid)));
+		psy_ui_component_scroll_left(pianogrid_base(&self->grid)));
 	psy_ui_component_align(&self->top);
 	psy_ui_component_invalidate(pianoruler_base(&self->header));
 	psy_ui_component_update(pianoruler_base(&self->header));
@@ -345,9 +346,9 @@ void pianoroll_onkeyheightchanged(Pianoroll* self, ZoomBox* sender)
 		self->keyboardstate.defaultkeyheight, zoombox_rate(sender));
 	keyboardstate_update_metrics(&self->keyboardstate,
 		psy_ui_component_textmetric(&self->component));
-	psy_ui_component_set_scrollstep_height(pianogrid_base(&self->grid),
+	psy_ui_component_set_scroll_step_height(pianogrid_base(&self->grid),
 		psy_ui_value_make_px(self->keyboardstate.keyheightpx));
-	psy_ui_component_set_scrollstep_height(pianokeyboard_base(&self->keyboard),
+	psy_ui_component_set_scroll_step_height(pianokeyboard_base(&self->keyboard),
 		psy_ui_value_make_px(self->keyboardstate.keyheightpx));
 	psy_ui_component_updateoverflow(pianogrid_base(&self->grid));
 	psy_ui_component_set_scroll_top(&self->keyboard.component,
@@ -529,7 +530,8 @@ bool pianoroll_handlecommand(Pianoroll* self, uintptr_t cmd)
 			pianoroll_navup(self);
 			break;
 		case CMD_NAVPAGEUP:
-			pianogrid_prevlines(&self->grid, self->gridstate.pv->pgupdownstep, 0);
+			pianogrid_prevlines(&self->grid,
+				patternviewstate_curr_pgup_down_step(self->gridstate.pv), 0);
 			break;
 		case CMD_NAVPAGEUPKEYBOARD:
 			pianogrid_advancekeys(&self->grid, 12, 0);
@@ -538,7 +540,8 @@ bool pianoroll_handlecommand(Pianoroll* self, uintptr_t cmd)
 			pianoroll_navdown(self);
 			break;
 		case CMD_NAVPAGEDOWN:
-			pianogrid_advancelines(&self->grid, self->gridstate.pv->pgupdownstep, 0);
+			pianogrid_advancelines(&self->grid,
+				patternviewstate_curr_pgup_down_step(self->gridstate.pv), 0);
 			break;
 		case CMD_NAVPAGEDOWNKEYBOARD:
 			pianogrid_prevkeys(&self->grid, 12, 0);			
@@ -562,25 +565,25 @@ bool pianoroll_handlecommand(Pianoroll* self, uintptr_t cmd)
 			pianoroll_rowclear(self);
 			break;
 		case CMD_BLOCKPASTE:			
-			patternviewstate_blockpaste(self->gridstate.pv);
+			patternviewstate_block_paste(self->gridstate.pv);
 			break;
 		case CMD_BLOCKCOPY:			
-			patternviewstate_blockcopy(self->gridstate.pv);
+			patternviewstate_block_copy(self->gridstate.pv);
 			break;
 		case CMD_BLOCKCUT:			
-			patternviewstate_blockcut(self->gridstate.pv);
+			patternviewstate_block_cut(self->gridstate.pv);
 			break;
 		case CMD_BLOCKDELETE:
-			patternviewstate_blockdelete(self->gridstate.pv);
+			patternviewstate_block_delete(self->gridstate.pv);
 			break;
 		case CMD_SELECTALL:			
-			patternviewstate_selectall(self->gridstate.pv);
+			patternviewstate_select_all(self->gridstate.pv);
 			break;
 		case CMD_SELECTBAR:
-			patternviewstate_selectbar(self->gridstate.pv);
+			patternviewstate_select_bar(self->gridstate.pv);
 			break;
 		case CMD_BLOCKUNMARK:
-			patternviewstate_blockunmark(self->gridstate.pv);
+			patternviewstate_block_unmark(self->gridstate.pv);
 			break;			
 		default:
 			handled = FALSE;
@@ -602,20 +605,20 @@ bool pianoroll_onnotecmds(Pianoroll* self, InputHandler* sender)
 		
 		chord = FALSE;
 		if (cmd.id >= CMD_NOTE_OFF_C_0 && cmd.id < 255) {
-			ev = psy_audio_player_patternevent(&self->workspace->player, (uint8_t)cmd.id);
+			ev = psy_audio_player_pattern_event(&self->workspace->player, (uint8_t)cmd.id);
 			ev.note = CMD_NOTE_STOP;
 			psy_audio_player_playevent(&self->workspace->player, &ev);
 			return 1;
 		} else if (cmd.id == CMD_NOTE_CHORD_END) {
-			self->gridstate.pv->cursor.track = self->chordbegin;
+			self->gridstate.pv->cursor.track = self->chord_begin;
 			return 1;
 		} else if (cmd.id >= CMD_NOTE_CHORD_C_0 && cmd.id < CMD_NOTE_STOP) {
 			chord = TRUE;
-			ev = psy_audio_player_patternevent(&self->workspace->player,
+			ev = psy_audio_player_pattern_event(&self->workspace->player,
 				(uint8_t)cmd.id - (uint8_t)CMD_NOTE_CHORD_C_0);
 		} else if (cmd.id < 256) {
 			chord = FALSE;
-			ev = psy_audio_player_patternevent(&self->workspace->player, (uint8_t)cmd.id);
+			ev = psy_audio_player_pattern_event(&self->workspace->player, (uint8_t)cmd.id);
 		}
 		psy_undoredo_execute(&self->workspace->undoredo,
 			&insertcommand_allocinit(patternviewstate_pattern(self->gridstate.pv),				
@@ -624,7 +627,7 @@ bool pianoroll_onnotecmds(Pianoroll* self, InputHandler* sender)
 		if (chord != FALSE) {
 			++self->gridstate.pv->cursor.track;
 		} else {
-			self->gridstate.pv->cursor.track = self->chordbegin;
+			self->gridstate.pv->cursor.track = self->chord_begin;
 		}
 		if (ev.note < psy_audio_NOTECOMMANDS_RELEASE) {
 			self->gridstate.pv->cursor.key = ev.note;
@@ -725,9 +728,9 @@ void pianoroll_blockend(Pianoroll* self)
 void pianoroll_onconfigure(Pianoroll* self, PatternViewConfig* config,
 	psy_Property* property)
 {
-	if (patternviewconfig_issmoothscrolling(config)) {
-		psy_ui_scroller_scrollsmooth(&self->scroller);
+	if (patternviewconfig_is_smooth_scrolling(config)) {
+		psy_ui_scroller_scroll_smooth(&self->scroller);
 	} else {
-		psy_ui_scroller_scrollfast(&self->scroller);
+		psy_ui_scroller_scroll_fast(&self->scroller);
 	}
 }

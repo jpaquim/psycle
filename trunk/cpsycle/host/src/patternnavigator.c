@@ -40,7 +40,7 @@ psy_audio_SequenceCursor patternlinennavigator_up(PatternLineNavigator* self,
 		psy_dsp_big_beat_t maxabsoffset;
 
 		maxabsoffset = patternviewstate_length(self->state);
-		if (self->state->singlemode) {
+		if (patternviewstate_single_mode(self->state)) {
 			minabsoffset = cursor.seqoffset;
 			maxabsoffset += cursor.seqoffset;			
 		} else {
@@ -85,7 +85,7 @@ psy_audio_SequenceCursor patternlinennavigator_down(
 		psy_dsp_big_beat_t maxabsoffset;		
 
 		maxabsoffset = patternviewstate_length(self->state);
-		if (self->state->singlemode) {
+		if (patternviewstate_single_mode(self->state)) {
 			minabsoffset = cursor.seqoffset;
 			maxabsoffset += cursor.seqoffset;
 		} else {
@@ -124,7 +124,7 @@ psy_audio_SequenceCursor patternlinennavigator_home(PatternLineNavigator* self,
 
 	rv = cursor;
 	self->wrap = FALSE;
-	if (self->state->singlemode) {
+	if (patternviewstate_single_mode(self->state)) {
 		minabsoffset = cursor.seqoffset;
 	} else {
 		minabsoffset = 0.0;
@@ -145,7 +145,7 @@ psy_audio_SequenceCursor patternlinennavigator_end(PatternLineNavigator* self,
 	rv = cursor;
 	self->wrap = FALSE;
 	maxabsoffset = patternviewstate_length(self->state);
-	if (self->state->singlemode) {		
+	if (patternviewstate_single_mode(self->state)) {
 		maxabsoffset += cursor.seqoffset;
 	}
 	psy_audio_sequencecursor_setabsoffset(&rv, maxabsoffset -
@@ -157,7 +157,7 @@ psy_audio_SequenceCursor patternlinennavigator_end(PatternLineNavigator* self,
 void patternlinenavigator_update_order(PatternLineNavigator* self,
 	psy_audio_SequenceCursor* cursor)
 {
-	if (!self->state->singlemode) {
+	if (!patternviewstate_single_mode(self->state)) {
 		psy_audio_Sequence* sequence;
 
 		sequence = patternviewstate_sequence(self->state);

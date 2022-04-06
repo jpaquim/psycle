@@ -44,9 +44,11 @@ void patterndefaultline_init(PatternDefaultLine* self, psy_ui_Component* parent,
 	vtable_init(self);
 	psy_ui_component_set_align(&self->component, psy_ui_ALIGN_TOP);
 	/* states */
-	patternviewstate_init(&self->pvstate, &workspace->config.patview,
+	patternviewstate_init(&self->pvstate,
+		&workspace->config.patview,
+		&workspace->config.misc,
 		&workspace->player.patterndefaults.sequence,
-		&workspace->player.patterndefaults.patterns, NULL);	
+		NULL);	
 	trackerstate_init(&self->state, trackconfig, &self->pvstate);
 	/* label */
 	psy_ui_label_init(&self->desc, &self->component);
@@ -58,11 +60,12 @@ void patterndefaultline_init(PatternDefaultLine* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->pane, &self->component, NULL);
 	psy_ui_component_set_align(&self->pane, psy_ui_ALIGN_CLIENT);
 	/* grid */
-	trackergrid_init(&self->grid, &self->pane, &self->state, workspace);
+	trackergrid_init(&self->grid, &self->pane, &self->state,
+		&workspace->inputhandler, workspace);
 	psy_ui_component_set_wheel_scroll(trackergrid_base(&self->grid), 0);
 	psy_ui_component_set_align(&self->grid.component, psy_ui_ALIGN_FIXED);
 	self->grid.state->drawbeathighlights = FALSE;
-	self->grid.preventeventdriver = TRUE;
+	self->grid.prevent_event_driver = TRUE;
 	self->grid.state->draw_playbar = FALSE;	
 	trackergrid_scroll_to_order(&self->grid);
 	trackergrid_build(&self->grid);
@@ -99,7 +102,6 @@ void patterndefaultline_on_configure(PatternDefaultLine* self,
 				1.0));
 		psy_ui_component_show(&self->desc.component);
 	}
-	self->grid.notestabmode = patternviewconfig_notetabmode(config);
 }
 
 void patterndefaultline_oncursorchanged(PatternDefaultLine* self,

@@ -116,7 +116,7 @@ void switchui_ondraw(SwitchUi* self, psy_ui_Graphics* g)
 			psy_snprintf(label, 128, "%s", "");
 		}
 	}
-	size = psy_ui_component_scrollsize_px(&self->component);
+	size = psy_ui_component_scroll_size_px(&self->component);
 	style = psy_ui_componentstyle_currstyle(&self->component.style);
 	psy_ui_textoutrectangle(g,
 		psy_ui_realpoint_make(style->background.size.width, 0.0), 0,
@@ -164,7 +164,7 @@ void switchui_onmousemove(SwitchUi* self, psy_ui_MouseEvent* ev)
 
 void switchui_on_mouse_up(SwitchUi* self, psy_ui_MouseEvent* ev)
 {
-	psy_ui_component_releasecapture(&self->component);
+	psy_ui_component_release_capture(&self->component);
 	if ((paramtweak_active(&self->paramtweak))) {
 		paramtweak_end(&self->paramtweak);
 		psy_ui_component_invalidate(&self->component);

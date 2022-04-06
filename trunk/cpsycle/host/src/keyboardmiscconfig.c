@@ -15,6 +15,7 @@ void keyboardmiscconfig_init(KeyboardMiscConfig* self, psy_Property* parent)
 	assert(self && parent);
 
 	self->parent = parent;
+	self->cursorstep = 1;
 	keyboardmiscconfig_makekeyboardandmisc(self, parent);
 	psy_signal_init(&self->signal_changed);
 }
@@ -198,6 +199,21 @@ intptr_t keyboardmiscconfig_pgupdownstep(const KeyboardMiscConfig* self)
 
 	return psy_property_at_int(self->keyboard, "pgupdownstep", 4);
 }
+
+void keyboardmiscconfig_setcursorstep(KeyboardMiscConfig* self, int step)
+{
+	assert(self);
+
+	self->cursorstep = step;
+}
+
+int keyboardmiscconfig_cursor_step(const KeyboardMiscConfig* self)
+{
+	assert(self);
+
+	return self->cursorstep;
+}
+
 
 bool keyboardmiscconfig_ft2fileexplorer(const KeyboardMiscConfig* self)
 {

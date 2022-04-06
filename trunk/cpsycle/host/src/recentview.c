@@ -115,7 +115,7 @@ void playlistview_onselected(PlaylistView* self, PropertiesView* sender,
 				generalconfig_playsongafterload(psycleconfig_general(
 					workspace_conf(self->workspace))));			
 			psy_audio_exclusivelock_enter();
-			psy_audio_sequencer_stoploop(&workspace_player(self->workspace)->sequencer);
+			psy_audio_sequencer_stop_loop(&workspace_player(self->workspace)->sequencer);
 			psy_audio_player_setposition(workspace_player(self->workspace), 0);
 			psy_audio_player_start(workspace_player(self->workspace));
 			self->running = TRUE;

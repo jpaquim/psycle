@@ -20,12 +20,12 @@ void contrib_init(Contrib* self, psy_ui_Component* parent)
 	psy_ui_label_init(&self->contrib, contrib_base(self));
 	psy_ui_label_prevent_translation(&self->contrib);
 	psy_ui_label_set_charnumber(&self->contrib, 120.0);	
-	psy_ui_component_set_scrollstep_height(psy_ui_label_base(&self->contrib),
+	psy_ui_component_set_scroll_step_height(psy_ui_label_base(&self->contrib),
 		psy_ui_value_make_eh(1.0));
 	psy_ui_component_set_wheel_scroll(&self->contrib.component, 4);
 	psy_ui_component_set_align(psy_ui_label_base(&self->contrib),
 		psy_ui_ALIGN_FIXED);
-	psy_ui_component_setoverflow(psy_ui_label_base(&self->contrib),
+	psy_ui_component_set_overflow(psy_ui_label_base(&self->contrib),
 		psy_ui_OVERFLOW_SCROLL);
 	psy_ui_label_enable_wrap(&self->contrib);
 	psy_ui_label_set_text(&self->contrib,						
@@ -119,10 +119,10 @@ void licence_init(Licence* self, psy_ui_Component* parent)
 	psy_ui_component_set_wheel_scroll(&self->licenceinfo.component, 4);
 	psy_ui_component_set_align(psy_ui_label_base(&self->licenceinfo),
 		psy_ui_ALIGN_FIXED);	
-	psy_ui_component_setoverflow(&self->licenceinfo.component,
+	psy_ui_component_set_overflow(&self->licenceinfo.component,
 		psy_ui_OVERFLOW_SCROLL);
 	psy_ui_label_enable_wrap(&self->licenceinfo);
-	psy_ui_component_set_scrollstep_height(
+	psy_ui_component_set_scroll_step_height(
 		psy_ui_label_base(&self->licenceinfo),
 		psy_ui_value_make_eh(1.0));	
 	psy_ui_scroller_init(&self->scroller, &self->component, NULL, NULL);

@@ -198,7 +198,7 @@ void psy_ui_sliderpane_on_mouse_down(psy_ui_SliderPane* self, psy_ui_MouseEvent*
 	if (psy_ui_mouseevent_button(ev) == 1) {
 		psy_ui_RealSize size;
 
-		size = psy_ui_component_scrollsize_px(&self->component);
+		size = psy_ui_component_scroll_size_px(&self->component);
 		if (self->orientation == psy_ui_HORIZONTAL) {
 			self->tweakbase = (psy_ui_mouseevent_pt(ev).x) -
 				self->value * (size.width - self->slidersizepx.width);
@@ -240,7 +240,7 @@ void psy_ui_sliderpane_onmousemove(psy_ui_SliderPane* self, psy_ui_MouseEvent* e
 		float value;
 		float* pvalue;		
 		
-		size = psy_ui_component_scrollsize_px(&self->component);
+		size = psy_ui_component_scroll_size_px(&self->component);
 		if (self->orientation == psy_ui_HORIZONTAL) {			
 			self->value = psy_max(0.0, psy_min(1.0,
 				(psy_ui_mouseevent_pt(ev).x - self->tweakbase) /
@@ -274,7 +274,7 @@ void psy_ui_sliderpane_on_mouse_up(psy_ui_SliderPane* self, psy_ui_MouseEvent* e
 {
 	if (self->tweakbase != -1) {
 		self->tweakbase = -1;
-		psy_ui_component_releasecapture(&self->component);
+		psy_ui_component_release_capture(&self->component);
 		if (self->poll) {
 			psy_ui_component_start_timer(&self->component, 0, 50);
 		}
@@ -332,7 +332,7 @@ psy_ui_Orientation psy_ui_sliderpane_orientation(psy_ui_SliderPane* self)
 void psy_ui_sliderpane_on_timer(psy_ui_SliderPane* self, psy_ui_Component* sender,
 	uintptr_t timerid)
 {	
-	if (psy_ui_component_drawvisible(psy_ui_sliderpane_base(self))) {
+	if (psy_ui_component_draw_visible(psy_ui_sliderpane_base(self))) {
 		psy_ui_sliderpane_updatevalue(self);
 		psy_ui_sliderpane_describevalue(self);
 	}
@@ -514,7 +514,7 @@ psy_ui_RealRectangle psy_ui_sliderpane_sliderposition(const psy_ui_SliderPane* s
 {
 	psy_ui_RealSize size;
 
-	size = psy_ui_component_scrollsize_px(&self->component);
+	size = psy_ui_component_scroll_size_px(&self->component);
 	if (self->orientation == psy_ui_HORIZONTAL) {
 		return psy_ui_realrectangle_make(psy_ui_realpoint_make(
 			floor((size.width - self->slidersizepx.width) * self->value), 2.0),

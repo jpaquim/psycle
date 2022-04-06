@@ -27,7 +27,7 @@ void octavebar_init(OctaveBar* self, psy_ui_Component* parent,
 	psy_ui_component_init(octavebar_base(self), parent, NULL);
 	psy_ui_component_set_defaultalign(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
-	psy_ui_component_setalignexpand(octavebar_base(self),
+	psy_ui_component_set_align_expand(octavebar_base(self),
 		psy_ui_HEXPAND);
 	self->workspace = workspace;
 	psy_ui_label_init_text(&self->headerlabel, octavebar_base(self),

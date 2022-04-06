@@ -136,7 +136,7 @@ psy_audio_PatternNode* seqeditstate_node(SeqEditState* self,
 
 		offset = seqeditstate_quantize(self,
 			seqeditstate_pxtobeat(self, pt.x));
-		return psy_audio_pattern_findnode(pattern, 0, offset + d1, -d1 + d2,
+		return psy_audio_pattern_find_node(pattern, 0, offset + d1, -d1 + d2,
 			prev);
 	}
 	return NULL;

@@ -168,7 +168,6 @@ typedef struct Workspace {
 	psy_ui_Component* main;	
 	ViewHistory viewhistory;
 	ViewHistoryEntry restoreview;	
-	int cursorstep;	
 	char* filename;
 	bool songhasfile;
 	int followsong;
@@ -270,13 +269,11 @@ void workspace_configurationchanged(Workspace*, psy_Property*,
 void workspace_onconfigurationchanged(Workspace*, psy_Property*);
 void workspace_undo(Workspace*);
 void workspace_redo(Workspace*);
-void workspace_setcursorstep(Workspace*, int step);
-int workspace_cursorstep(Workspace*);
 void workspace_editquantizechange(Workspace*, int diff);
 int workspace_hasplugincache(const Workspace*);
 psy_audio_PluginCatcher* workspace_plugincatcher(Workspace*);
 psy_EventDriver* workspace_kbddriver(Workspace*);
-bool workspace_followingsong(const Workspace*);
+bool workspace_following_song(const Workspace*);
 void workspace_followsong(Workspace*);
 void workspace_stopfollowsong(Workspace*);
 void workspace_idle(Workspace*);

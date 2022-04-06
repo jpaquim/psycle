@@ -57,14 +57,14 @@ static psy_dsp_beat_t machinecallback_beatspertick(psy_audio_MachineCallback* se
 static psy_dsp_beat_t machinecallback_beatspersample(psy_audio_MachineCallback* self)
 {
 	return (self->player)
-		? (psy_dsp_beat_t)psy_audio_sequencer_beatspersample(&self->player->sequencer)
+		? (psy_dsp_beat_t)psy_audio_sequencer_beats_per_sample(&self->player->sequencer)
 		: 512.f;
 }
 
 static psy_dsp_beat_t machinecallback_currbeatsperline(psy_audio_MachineCallback* self)
 {
 	return (self->player && self->player->driver)
-		? (psy_dsp_beat_t)psy_audio_sequencer_currbeatsperline(&self->player->sequencer)
+		? (psy_dsp_beat_t)psy_audio_sequencer_curr_beats_per_line(&self->player->sequencer)
 		: 4096;
 }
 

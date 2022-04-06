@@ -40,7 +40,7 @@ void cpumoduleview_init(CPUModuleView* self, psy_ui_Component* parent,
 	cpumoduleview_vtable_init(self);		
 	self->workspace = workspace;	
 	psy_ui_component_set_wheel_scroll(&self->component, 4);
-	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_VSCROLL);
+	psy_ui_component_set_overflow(&self->component, psy_ui_OVERFLOW_VSCROLL);
 }
 
 void cpumoduleview_ondraw(CPUModuleView* self, psy_ui_Graphics* g)

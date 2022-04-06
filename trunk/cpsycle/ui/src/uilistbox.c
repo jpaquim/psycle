@@ -65,7 +65,7 @@ void psy_ui_listboxclient_init(psy_ui_ListBoxClient* self, psy_ui_Component*
 	self->charnumber = 0;
 	psy_signal_init(&self->signal_selchanged);
 	psy_ui_component_set_wheel_scroll(&self->component, 4);
-	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_VSCROLL);
+	psy_ui_component_set_overflow(&self->component, psy_ui_OVERFLOW_VSCROLL);
 }
 
 void psy_ui_listboxclient_on_destroy(psy_ui_ListBoxClient* self)
@@ -81,7 +81,7 @@ void psy_ui_listboxclient_onsize(psy_ui_ListBoxClient* self)
 
 	tm = psy_ui_component_textmetric(&self->component);
 	lineheight = (int)(tm->tmHeight * 1.2);
-	psy_ui_component_set_scrollstep_height(&self->component,
+	psy_ui_component_set_scroll_step_height(&self->component,
 		psy_ui_value_make_px(lineheight));
 }
 
@@ -94,7 +94,7 @@ void psy_ui_listboxclient_ondraw(psy_ui_ListBoxClient* self, psy_ui_Graphics* g)
 	double lineheight;
 
 	tm = psy_ui_component_textmetric(&self->component);
-	size = psy_ui_component_scrollsize_px(&self->component);
+	size = psy_ui_component_scroll_size_px(&self->component);
 	lineheight = floor(tm->tmHeight * 1.2);
 	cp = psy_ui_realpoint_zero();
 	for (it = psy_table_begin(&self->items);

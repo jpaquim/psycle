@@ -11,12 +11,12 @@
 #include "../../detail/portable.h"
 
 static const char* notetostr(psy_audio_PatternEvent ev,
-	psy_dsp_NotesTabMode notestabmode, bool showemptydate)
+	psy_dsp_NotesTabMode notes_tab_mode, bool showemptydate)
 {
 	static const char* emptynotestr = "- - -";
 
 	if (ev.note != psy_audio_NOTECOMMANDS_EMPTY || !showemptydate) {
-		return psy_dsp_notetostr(ev.note, notestabmode);
+		return psy_dsp_notetostr(ev.note, notes_tab_mode);
 	}
 	return emptynotestr;
 }
@@ -129,7 +129,7 @@ void trackercolumn_draw_track_events(TrackerColumn* self, psy_ui_Graphics* g)
 		self->state->trackconfig->textwidth,
 		self->line_size.height - 1);		
 	for (p = *events,			
-			cpy = trackerstate_beattopx(self->state,
+			cpy = trackerstate_beat_to_px(self->state,
 				patternviewstate_draw_offset(self->state->pv,
 					self->state->trackevents.clip.topleft.absoffset)),
 			line = (uintptr_t)(self->state->trackevents.clip.topleft.absoffset *
@@ -156,7 +156,7 @@ TrackerColumnFlags trackercolumn_columnflags(TrackerColumn* self,
 		rv.beat4 = (line % (lpb * 4)) == 0;		
 		rv.mid = self->state->midline &&
 			(line == trackerstate_midline(self->state,
-			psy_ui_component_scrolltop_px(psy_ui_component_parent(
+			psy_ui_component_scroll_top_px(psy_ui_component_parent(
 				&self->component))));
 	} else {
 		rv.beat = rv.beat4 = rv.mid = FALSE;
@@ -382,7 +382,7 @@ bool trackercolumn_is_over_column(const TrackerColumn* self, double position)
 
 void trackercolumn_on_mouse_up(TrackerColumn* self, psy_ui_MouseEvent* ev)
 {
-	psy_ui_component_releasecapture(&self->component);	
+	psy_ui_component_release_capture(&self->component);	
 	trackconfig_resize(self->state->trackconfig, self->track,
 		psy_ui_mouseevent_pt(ev).x);
 }
@@ -403,7 +403,7 @@ void trackercolumn_on_preferred_size(TrackerColumn* self,
 
 void trackercolumn_update_size(TrackerColumn* self)
 {
-	self->size = psy_ui_component_scrollsize_px(&self->component);
+	self->size = psy_ui_component_scroll_size_px(&self->component);
 	self->line_size = psy_ui_realsize_make(self->size.width,
 		psy_ui_value_px(&self->state->lineheight,
 			psy_ui_component_textmetric(&self->component), NULL));

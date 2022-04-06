@@ -150,7 +150,7 @@ void generatorui_on_timer(GeneratorUi* self, uintptr_t timerid)
 		psy_ui_component_removestylestate(&self->solo,
 			psy_ui_STYLESTATE_SELECT);
 	}
-	if (psy_ui_component_drawvisible(&self->component)) {
+	if (psy_ui_component_draw_visible(&self->component)) {
 		if (vuui_update(&self->vu)) {
 			psy_ui_component_invalidate(vuui_base(&self->vu));
 		}

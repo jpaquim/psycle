@@ -222,7 +222,7 @@ void instrumentkeyboardview_updatemetrics(InstrumentKeyboardView* self)
 	size = psy_ui_intsize_init_size(
 		psy_ui_component_scrollsize(&self->component), tm, NULL);
 	self->metrics.keysize = size.width / (double)numwhitekeys;
-	psy_ui_component_set_scrollstep_height(&self->component,
+	psy_ui_component_set_scroll_step_height(&self->component,
 		psy_ui_value_make_px(self->metrics.lineheight * 3));
 }
 
@@ -296,14 +296,14 @@ void instrumententryview_init(InstrumentEntryView* self,
 	self->metrics.lineheight = 15;
 	self->dragmode = 0;	
 	self->state = state;
-	psy_ui_component_set_scrollstep_height(&self->component,
+	psy_ui_component_set_scroll_step_height(&self->component,
 		psy_ui_value_make_px(45));
 	instrumententryview_updatemetrics(self);	
 	psy_signal_connect(&self->state->signal_select, self,
 		instrumententryview_onentryselected);
 	psy_signal_connect(&self->state->signal_entrychanged, self,
 		instrumententryview_onentryupdate);
-	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_VSCROLL);
+	psy_ui_component_set_overflow(&self->component, psy_ui_OVERFLOW_VSCROLL);
 }
 
 void instrumententryview_on_destroy(InstrumentEntryView* self)
@@ -356,8 +356,8 @@ void instrumententryview_ondraw(InstrumentEntryView* self, psy_ui_Graphics* g)
 			double scrollleft;
 			double scrolltop;
 
-			scrollleft = psy_ui_component_scrollleft_px(&self->component);
-			scrolltop = psy_ui_component_scrolltop_px(&self->component);
+			scrollleft = psy_ui_component_scroll_left_px(&self->component);
+			scrolltop = psy_ui_component_scroll_top_px(&self->component);
 			entry = self->state->selectedentry;
 			if (entry) {
 				keylo_startx = (int)(
@@ -477,7 +477,7 @@ void instrumententryview_updatemetrics(InstrumentEntryView* self)
 	size = psy_ui_intsize_init_size(
 		psy_ui_component_scrollsize(&self->component), tm, NULL);
 	self->metrics.keysize = size.width / (double)numwhitekeys;
-	psy_ui_component_set_scrollstep_height(&self->component,
+	psy_ui_component_set_scroll_step_height(&self->component,
 		psy_ui_value_make_px(self->metrics.lineheight * 3));
 }
 
@@ -614,7 +614,7 @@ void instrumententryview_on_mouse_up(InstrumentEntryView* self,
 {
 	if (self->instrument) {
 		self->dragmode = 0;		
-		psy_ui_component_releasecapture(&self->component);	
+		psy_ui_component_release_capture(&self->component);	
 	}
 }
 
@@ -1245,7 +1245,7 @@ void instrumententrytableview_init(InstrumentEntryTableView* self,
 	psy_ui_component_set_wheel_scroll(&self->component, 4);
 	psy_ui_component_setscrollstep(&self->component,
 		psy_ui_size_make_em(0.0, 1.0));
-	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_VSCROLL);
+	psy_ui_component_set_overflow(&self->component, psy_ui_OVERFLOW_VSCROLL);
 }
 
 void instrumententrytableview_on_destroy(InstrumentEntryTableView* self)

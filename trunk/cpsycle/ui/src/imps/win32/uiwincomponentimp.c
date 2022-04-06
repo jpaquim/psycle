@@ -605,7 +605,7 @@ psy_ui_RealRectangle dev_screenposition(const psy_ui_win_ComponentImp* self)
 	ClientToScreen(self->hwnd, &pt);
 	return psy_ui_realrectangle_make(
 		psy_ui_realpoint_make(pt.x, pt.y),
-		psy_ui_component_scrollsize_px(self->component));
+		psy_ui_component_scroll_size_px(self->component));
 }
 
 void dev_setposition(psy_ui_win_ComponentImp* self, psy_ui_Point topleft,
@@ -711,8 +711,7 @@ void dev_scrollto(psy_ui_win_ComponentImp* self, intptr_t dx, intptr_t dy,
 		rc.bottom = (int)(r->bottom);
 		prc = &rc;
 	}
-	ScrollWindow(self->hwnd, (int)dx, (int)dy, prc, prc);
-	UpdateWindow(self->hwnd);
+	ScrollWindow(self->hwnd, (int)dx, (int)dy, prc, prc);	
 }
 
 psy_ui_Component* dev_parent(psy_ui_win_ComponentImp* self)

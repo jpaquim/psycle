@@ -480,8 +480,8 @@ void seqviewlist_init(SeqviewList* self, psy_ui_Component* parent,
 	psy_ui_component_set_wheel_scroll(&self->component, 1);	
 	psy_ui_component_set_defaultalign(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_margin_zero());
-	psy_ui_component_setalignexpand(&self->component, psy_ui_HEXPAND);
-	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_SCROLL);	
+	psy_ui_component_set_align_expand(&self->component, psy_ui_HEXPAND);
+	psy_ui_component_set_overflow(&self->component, psy_ui_OVERFLOW_SCROLL);	
 	if (self->state->cmds->sequence && self->state->cmds->sequence->patterns) {
 		psy_signal_connect(
 			&self->state->cmds->sequence->patterns->signal_namechanged,
@@ -491,7 +491,7 @@ void seqviewlist_init(SeqviewList* self, psy_ui_Component* parent,
 		seqviewlist_onplaylinechanged);
 	psy_ui_component_setscrollstep(&self->component,
 		psy_ui_size_make(self->state->trackwidth, self->state->lineheight));
-	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_SCROLL);		
+	psy_ui_component_set_overflow(&self->component, psy_ui_OVERFLOW_SCROLL);		
 	seqviewlist_build(self);
 	inputhandler_connect(&self->state->cmds->workspace->inputhandler,
 		INPUTHANDLER_FOCUS, psy_EVENTDRIVER_CMD, "tracker",
@@ -561,7 +561,7 @@ void seqviewlist_onpatternnamechanged(SeqviewList* self,
 void seqviewlist_invalidaterow(SeqviewList* self, uintptr_t row)
 {
 	if (row != psy_INDEX_INVALID) {
-		psy_ui_component_invalidaterect(&self->component,
+		psy_ui_component_invalidate_rect(&self->component,
 			seqviewlist_rowrectangle(self, row));
 	}
 }

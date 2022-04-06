@@ -122,7 +122,7 @@ void seqeditruler_drawruler(SeqEditRuler* self, psy_ui_Graphics* g,
 	size = psy_ui_component_size_px(&self->component);
 	tm = psy_ui_component_textmetric(&self->component);	
 	textline = baseline - tm->tmHeight - 2;
-	duration = (size.width + psy_ui_component_scrollleft_px(&self->component)) /
+	duration = (size.width + psy_ui_component_scroll_left_px(&self->component)) /
 		(psy_dsp_big_beat_t)self->state->pxperbeat;
 	/* psy_audio_sequence_duration(&workspace_song(
 	 * self->workspace)->sequence); */

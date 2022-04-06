@@ -35,7 +35,7 @@ void seqeditorheaderdescbar_init(SeqEditorHeaderDescBar* self,
 		psy_ui_size_make_em(40.0, 2.0));	
 	psy_ui_component_init(&self->top, &self->component, NULL);
 	psy_ui_component_set_align(&self->top, psy_ui_ALIGN_TOP);
-	psy_ui_component_setalignexpand(&self->top, psy_ui_HEXPAND);
+	psy_ui_component_set_align_expand(&self->top, psy_ui_HEXPAND);
 	psy_ui_component_set_defaultalign(&self->top, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));		
 	psy_ui_button_init_connect(&self->insert, &self->top, self,

@@ -116,7 +116,7 @@ void playbar_onplaymodeselchanged(PlayBar* self, psy_ui_ComboBox* sender, int se
 {
 	psy_audio_exclusivelock_enter();
 	psy_audio_player_stop(self->player);
-	psy_audio_sequencer_setplaymode(&self->player->sequencer,
+	psy_audio_sequencer_set_play_mode(&self->player->sequencer,
 		playbar_comboboxplaymode(self));
 	playbar_startplay(self);	
 	psy_audio_exclusivelock_leave();
@@ -131,7 +131,7 @@ void playbar_onnumplaybeatsless(PlayBar* self, psy_ui_Button* sender)
 	if (playbeats > 1) {
 		playbeats -= 1;
 	}
-	psy_audio_sequencer_setnumplaybeats(&self->player->sequencer, playbeats);
+	psy_audio_sequencer_set_num_play_beats(&self->player->sequencer, playbeats);
 	psy_snprintf(text, 40, "%f", (double) playbeats);
 	psy_ui_textarea_settext(&self->loopbeatsedit, text);
 }
@@ -143,14 +143,14 @@ void playbar_onnumplaybeatsmore(PlayBar* self, psy_ui_Button* sender)
 	
 	playbeats = (psy_dsp_big_beat_t) atof(psy_ui_textarea_text(&self->loopbeatsedit));
 	playbeats += 1;		
-	psy_audio_sequencer_setnumplaybeats(&self->player->sequencer, playbeats);
+	psy_audio_sequencer_set_num_play_beats(&self->player->sequencer, playbeats);
 	psy_snprintf(text, 40, "%f", (double) playbeats);
 	psy_ui_textarea_settext(&self->loopbeatsedit, text);
 }
 
 void playbar_onplayclicked(PlayBar* self, psy_ui_Component* sender)
 {
-	psy_audio_sequencer_setplaymode(&self->player->sequencer,
+	psy_audio_sequencer_set_play_mode(&self->player->sequencer,
 		playbar_comboboxplaymode(self));	
 	playbar_startplay(self);	
 }
@@ -186,7 +186,7 @@ void playbar_startplay(PlayBar* self)
 		psy_audio_sequence_setplayselection(sequence,
 			&self->workspace->song->sequence.sequenceselection);
 		startposition = psy_audio_sequenceentry_offset(entry);
-		if (psy_audio_sequencer_playmode(&self->player->sequencer)
+		if (psy_audio_sequencer_play_mode(&self->player->sequencer)
 				== psy_audio_SEQUENCERPLAYMODE_PLAYNUMBEATS) {
 			psy_audio_SequenceCursor editposition;
 
@@ -210,7 +210,7 @@ void playbar_onstopclicked(PlayBar* self, psy_ui_Component* sender)
 void playbar_onloopclicked(PlayBar* self, psy_ui_Component* sender)
 {
 	if (psy_audio_sequencer_looping(&self->player->sequencer)) {
-		psy_audio_sequencer_stoploop(&self->player->sequencer);
+		psy_audio_sequencer_stop_loop(&self->player->sequencer);
 		psy_ui_button_disablehighlight(&self->loop);
 	} else {
 		psy_audio_sequencer_loop(&self->player->sequencer);

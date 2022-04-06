@@ -410,7 +410,7 @@ void kbdbox_addrow(KbdBox* self)
 	if (self->currrow) {
 		psy_ui_component_set_defaultalign(self->currrow, psy_ui_ALIGN_LEFT,
 			psy_ui_margin_make_em(0.0, 0.3, 0.0, 0.0));
-		psy_ui_component_setalignexpand(self->currrow, psy_ui_HEXPAND);
+		psy_ui_component_set_align_expand(self->currrow, psy_ui_HEXPAND);
 	}
 }
 
@@ -511,7 +511,7 @@ void kbdbox_oninput(KbdBox* self, psy_EventDriver* sender)
 	if (sender != workspace_kbddriver(self->workspace)) {
 		return;
 	}
-	if (psy_ui_component_drawvisible(&self->component)) {
+	if (psy_ui_component_draw_visible(&self->component)) {
 		psy_EventDriverInput input;
 
 		input = psy_eventdriver_input(sender);

@@ -68,7 +68,7 @@ typedef struct psy_ui_Style {
 void psy_ui_style_init(psy_ui_Style*);
 void psy_ui_style_init_default(psy_ui_Style*, uintptr_t styletype);
 void psy_ui_style_init_copy(psy_ui_Style*, const psy_ui_Style* other);
-void psy_ui_style_init_colours(psy_ui_Style*, psy_ui_Colour,
+void psy_ui_style_init_colours(psy_ui_Style*, psy_ui_Colour foreground,
 	psy_ui_Colour background);
 void psy_ui_styles_init_property(psy_ui_Style*, psy_Property* style);
 void psy_ui_style_dispose(psy_ui_Style*);
@@ -190,9 +190,9 @@ INLINE void psy_ui_style_set_background_repeat(psy_ui_Style* self,
 }
 
 INLINE void psy_ui_style_set_background_size_px(psy_ui_Style* self,
-	double width, double height)
+	psy_ui_RealSize size)	
 {
-	self->background.size = psy_ui_realsize_make(width, height);
+	self->background.size = size;
 	self->background.size_set = TRUE;
 }
 

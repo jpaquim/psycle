@@ -50,7 +50,7 @@ void linesperbeatbar_init(LinesPerBeatBar* self, psy_ui_Component* parent,
 	self->lpb = 0;
 	self->player = player;
 	/* prevent line wrap */
-	psy_ui_component_setalignexpand(linesperbeatbar_base(self),
+	psy_ui_component_set_align_expand(linesperbeatbar_base(self),
 		psy_ui_HEXPAND);
 	psy_ui_component_set_defaultalign(linesperbeatbar_base(self),
 		psy_ui_ALIGN_LEFT, psy_ui_defaults_hmargin(psy_ui_defaults()));

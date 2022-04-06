@@ -24,7 +24,7 @@ void navigation_init(Navigation* self, psy_ui_Component* parent,
 	psy_ui_component_set_style_type(&self->component, STYLE_NAVBAR);
 	psy_ui_component_set_defaultalign(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_margin_make_em(0.0, 0.5, 0.0, 0.0));	
-	psy_ui_component_setalignexpand(&self->component, psy_ui_HEXPAND);
+	psy_ui_component_set_align_expand(&self->component, psy_ui_HEXPAND);
 	psy_ui_button_init_connect(&self->prev, &self->component,
 		self, navigation_onprev);		
 	psy_ui_button_loadresource(&self->prev, IDB_ARROW_BACK_LIGHT,

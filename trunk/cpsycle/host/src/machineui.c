@@ -212,7 +212,7 @@ void panui_on_mouse_down(PanUi* self, psy_ui_MouseEvent* ev)
 void panui_on_mouse_up(PanUi* self, psy_ui_MouseEvent* ev)
 {
 	if (self->drag) {
-		psy_ui_component_releasecapture(&self->component);
+		psy_ui_component_release_capture(&self->component);
 		self->drag = FALSE;
 		psy_ui_mouseevent_stop_propagation(ev);
 	}

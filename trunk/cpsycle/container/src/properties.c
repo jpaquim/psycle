@@ -1055,7 +1055,7 @@ psy_Property* psy_property_at_choice(psy_Property* self)
 	return psy_property_at_index(self, psy_property_item_int(self));
 }
 
-bool psy_property_ischoiceitem(const psy_Property* self)
+bool psy_property_is_choice_item(const psy_Property* self)
 {
 	assert(self);
 
@@ -1534,7 +1534,7 @@ psy_Property* psy_property_item_choice_parent(psy_Property* self)
 {
 	assert(self);
 
-	return (psy_property_ischoiceitem(self))
+	return (psy_property_is_choice_item(self))
 		? psy_property_parent(self)
 		: NULL;
 }

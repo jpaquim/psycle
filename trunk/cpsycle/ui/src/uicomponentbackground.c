@@ -107,7 +107,7 @@ void psy_ui_componentbackground_draw(psy_ui_ComponentBackground* self,
 
 			r = psy_ui_realrectangle_make(
 				psy_ui_realpoint_zero(),
-				psy_ui_component_scrollsize_px(self->component));
+				psy_ui_component_scroll_size_px(self->component));
 			tm = psy_ui_component_textmetric(self->component);
 			psy_ui_drawsolidrectangle(g, r,
 				psy_ui_component_backgroundcolour(

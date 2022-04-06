@@ -91,7 +91,7 @@ void psycleconfig_initsections(PsycleConfig* self, psy_audio_Player* player,
 	predefsconfig_init(&self->predefs, &self->config);
 	metronomeconfig_init(&self->metronome, &self->config, player);
 	seqeditconfig_init(&self->seqedit, &self->config);	
-	patternviewconfig_setdirectories(&self->patview, &self->directories);
+	patternviewconfig_set_directories(&self->patview, &self->directories);
 	machineparamconfig_setdirectories(&self->macparam, &self->directories);
 	machineviewconfig_setdirectories(&self->macview, &self->directories);	
 }
@@ -196,7 +196,7 @@ void psycleconfig_loadskin(PsycleConfig* self, const char* path)
 	}
 	machineparamconfig_settheme(&self->macparam, &skin);
 	machineviewconfig_settheme(&self->macview, &skin);	
-	patternviewconfig_settheme(&self->patview, &skin);
+	patternviewconfig_set_theme(&self->patview, &skin);
 	psy_property_dispose(&skin);
 }
 
@@ -204,7 +204,7 @@ void psycleconfig_resetskin(PsycleConfig* self)
 {	
 	assert(self);
 		
-	patternviewconfig_resettheme(&self->patview);
+	patternviewconfig_reset_theme(&self->patview);
 	machineviewconfig_resettheme(&self->macview);	
 	machineparamconfig_resettheme(&self->macparam);
 }
@@ -253,7 +253,7 @@ int psycleconfig_notify_changed(PsycleConfig* self, psy_Property* property)
 	}
 	if (machineviewconfig_hasproperty(&self->macview, property)) {
 		return machineviewconfig_onchanged(&self->macview, property);
-	} else if (patternviewconfig_hasproperty(&self->patview, property)) {
+	} else if (patternviewconfig_has_property(&self->patview, property)) {
 		return patternviewconfig_onchanged(&self->patview, property);
 	} else if (machineparamconfig_hasproperty(&self->macparam, property)) {
 		return machineparamconfig_onchanged(&self->macparam, property);

@@ -118,17 +118,17 @@ INLINE void pianogridstate_clip(PianoGridState* self,
 
 	*rv_left = pianogridstate_quantize(self,
 		pianogridstate_pxtobeat(self, clip_left_px) +
-		((self->pv->singlemode)
+		((patternviewstate_single_mode(self->pv))
 		? self->pv->cursor.seqoffset
 		: 0.0));
 	if (patternviewstate_pattern(self->pv)) {
 		*rv_right = psy_min(			
 			patternviewstate_length(self->pv) +
-			((self->pv->singlemode)
+			((patternviewstate_single_mode(self->pv))
 				? self->pv->cursor.seqoffset
 				: 0.0),
 			pianogridstate_pxtobeat(self, clip_right_px) +
-			((self->pv->singlemode)
+			((patternviewstate_single_mode(self->pv))
 			? self->pv->cursor.seqoffset
 			: 0.0));
 	} else {

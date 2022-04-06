@@ -70,7 +70,7 @@ typedef struct SamplesGeneralView {
 	psy_ui_Slider panposition;
 	psy_ui_Slider samplednote; 
 	psy_ui_Slider pitchfinetune;	
-	psy_dsp_NotesTabMode notestabmode;
+	psy_dsp_NotesTabMode notes_tab_mode;
 	/* references */
 	psy_audio_Sample* sample;
 } SamplesGeneralView;

@@ -307,9 +307,10 @@ void mainframe_init_view_statusbars(MainFrame* self)
 	machineviewbar_init(&self->machineviewbar,
 		psy_ui_notebook_base(&self->statusbar.viewstatusbars),
 		&self->workspace);
-	patternviewbar_init(&self->patternbar,
+	patternviewbar_init(&self->patternviewbar,
 		psy_ui_notebook_base(&self->statusbar.viewstatusbars),
-		&self->patternview, &self->workspace);
+		&self->workspace.config.patview,
+		&self->workspace);	
 	sampleeditorbar_init(&self->samplesview.sampleeditor.sampleeditortbar,
 		psy_ui_notebook_base(&self->statusbar.viewstatusbars),
 		&self->samplesview.sampleeditor, &self->workspace);
@@ -378,7 +379,7 @@ void mainframe_init_bars(MainFrame* self)
 	psy_ui_component_set_style_type(&self->machinebar.component, STYLE_TOPROW2);
 	/* scopebar */
 	trackscopeview_init(&self->trackscopeview, &self->top, &self->workspace);
-	if (!patternviewconfig_showtrackscopes(psycleconfig_patview(
+	if (!patternviewconfig_show_trackscopes(psycleconfig_patview(
 		workspace_conf(&self->workspace)))) {
 		psy_ui_component_hide(trackscopeview_base(&self->trackscopeview));
 		trackscopes_stop(&self->trackscopeview.scopes);
@@ -695,11 +696,11 @@ bool mainframe_on_input(MainFrame* self, InputHandler* sender)
 		break;
 	case CMD_EDT_EDITQUANTIZEDEC:
 		workspace_editquantizechange(&self->workspace, -1);
-		patterncursorstepbox_update(&self->patternbar.cursorstep);
+		patterncursorstepbox_update(&self->patternviewbar.cursorstep);
 		return 1;
 	case CMD_EDT_EDITQUANTIZEINC:
 		workspace_editquantizechange(&self->workspace, 1);
-		patterncursorstepbox_update(&self->patternbar.cursorstep);
+		patterncursorstepbox_update(&self->patternviewbar.cursorstep);
 		return 1;
 	}
 	workspace_oninput(&self->workspace, cmd.id);
@@ -714,10 +715,10 @@ bool mainframe_on_notes(MainFrame* self, InputHandler* sender)
 	cmd = inputhandler_cmd(sender);
 	if (cmd.id != -1) {
 		if (cmd.id >= CMD_NOTE_OFF_C_0 && cmd.id < 255) {
-			ev = psy_audio_player_patternevent(&self->workspace.player, (uint8_t)cmd.id);
+			ev = psy_audio_player_pattern_event(&self->workspace.player, (uint8_t)cmd.id);
 			ev.note = CMD_NOTE_STOP;			
 		} else {
-			ev = psy_audio_player_patternevent(&self->workspace.player, (uint8_t)cmd.id);
+			ev = psy_audio_player_pattern_event(&self->workspace.player, (uint8_t)cmd.id);
 		}
 		psy_audio_player_playevent(&self->workspace.player, &ev);
 		return 1;
@@ -1250,7 +1251,7 @@ void mainframe_on_key_down(MainFrame* self, psy_ui_KeyboardEvent* ev)
 {	
 	/* TODO add immediate mode */
 	if (psy_ui_keyboardevent_keycode(ev) == psy_ui_KEY_ESCAPE) {
-		if (psy_ui_component_hasfocus(&self->sequenceview.listview.component)) {
+		if (psy_ui_component_has_focus(&self->sequenceview.listview.component)) {
 			psy_ui_Component* currview;
 
 			currview = psy_ui_notebook_active_page(&self->mainviews.notebook);
@@ -1378,7 +1379,7 @@ bool mainframe_on_input_handler_callback(MainFrame* self, int message,
 {
 	switch (message) {
 	case INPUTHANDLER_HASFOCUS:
-		return (psy_ui_component_hasfocus((psy_ui_Component*)param1));
+		return (psy_ui_component_has_focus((psy_ui_Component*)param1));
 	case INPUTHANDLER_HASVIEW:
 		return (workspace_currview(&self->workspace).id == (uintptr_t)param1);
 	default:

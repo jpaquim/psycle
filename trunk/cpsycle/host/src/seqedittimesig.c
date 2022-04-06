@@ -225,7 +225,7 @@ void seqedittimesig_onmousemove(SeqEditTimeSig* self, psy_ui_MouseEvent* ev)
 
 		psy_audio_exclusivelock_enter();
 		psy_audio_pattern_remove(self->pattern, self->node);
-		node = psy_audio_pattern_findnode(self->pattern,
+		node = psy_audio_pattern_find_node(self->pattern,
 			psy_audio_GLOBALPATTERN_TIMESIGTRACK, offset, 1.0,
 			&prev);
 		if (!node) {
@@ -245,7 +245,7 @@ void seqedittimesig_onmousemove(SeqEditTimeSig* self, psy_ui_MouseEvent* ev)
 
 void seqedittimesig_on_mouse_up(SeqEditTimeSig* self, psy_ui_MouseEvent* ev)
 {
-	psy_ui_component_releasecapture(&self->component);
+	psy_ui_component_release_capture(&self->component);
 	seqedittimesigstate_reset(self->timesigstate);
 	psy_ui_component_removestylestate(&self->component,
 		psy_ui_STYLESTATE_ACTIVE);

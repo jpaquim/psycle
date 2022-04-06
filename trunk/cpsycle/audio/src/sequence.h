@@ -70,7 +70,7 @@ psy_audio_SequenceTrack* psy_audio_sequencetrack_clone(psy_audio_SequenceTrack* 
 void psy_audio_sequencetrack_deallocate(psy_audio_SequenceTrack*);
 
 psy_dsp_big_beat_t psy_audio_sequencetrack_duration(
-	const psy_audio_SequenceTrack*, psy_audio_Patterns*);
+	const psy_audio_SequenceTrack*, const psy_audio_Patterns*);
 
 void psy_audio_sequencetrack_setname(psy_audio_SequenceTrack* self, const char* name);
 
@@ -285,8 +285,8 @@ void psy_audio_sequence_at(psy_audio_Sequence*, uintptr_t trackindex,
 void psy_audio_sequence_make_position(psy_audio_Sequence*,
 	psy_audio_SequenceTrackNode*, psy_List* entries,
 	psy_audio_SequencePosition* rv);
-psy_audio_SequenceEntryNode* psy_audio_sequence_node(psy_audio_Sequence* self,
-	psy_audio_OrderIndex index, psy_audio_SequenceTrack** rv);
+psy_audio_SequenceEntryNode* psy_audio_sequence_node(psy_audio_Sequence*,
+	psy_audio_OrderIndex, psy_audio_SequenceTrack** rv);
 /* calcduration */
 psy_dsp_big_beat_t psy_audio_sequence_duration(const psy_audio_Sequence*);
 void psy_audio_sequence_startcalcdurationinms(psy_audio_Sequence*);
@@ -316,6 +316,18 @@ double psy_audio_sequence_seqoffset(const psy_audio_Sequence*,
 	psy_audio_OrderIndex);
 void psy_audio_sequence_dec_seqpos(psy_audio_Sequence*);
 void psy_audio_sequence_inc_seqpos(psy_audio_Sequence*);
+
+INLINE psy_audio_Patterns* psy_audio_sequence_patterns(
+	psy_audio_Sequence* self)
+{
+	return self->patterns;
+}
+
+INLINE const psy_audio_Patterns* psy_audio_sequence_patterns_const(
+	const psy_audio_Sequence* self)
+{
+	return self->patterns;
+}
 
 INLINE psy_audio_SequenceCursor psy_audio_sequence_cursor(
 	const psy_audio_Sequence* self)

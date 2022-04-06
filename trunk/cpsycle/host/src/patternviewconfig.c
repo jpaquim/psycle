@@ -23,15 +23,15 @@
 #define PSYCLE__PATH__DEFAULT_PATTERN_HEADER_SKIN "Psycle Default (internal)"
 
 /* prototypes*/
-static void patternviewconfig_makeview(PatternViewConfig*, psy_Property*
+static void patternviewconfig_make_view(PatternViewConfig*, psy_Property*
 	parent);
-static void patternviewconfig_maketheme(PatternViewConfig*, psy_Property*
+static void patternviewconfig_make_theme(PatternViewConfig*, psy_Property*
 	parent);
-static void patternviewconfig_setsource(PatternViewConfig*,
+static void patternviewconfig_set_source(PatternViewConfig*,
 	psy_ui_RealRectangle*, intptr_t vals[4]);
-static void patternviewconfig_setdest(PatternViewConfig*, psy_ui_RealPoint*,
+static void patternviewconfig_set_dest(PatternViewConfig*, psy_ui_RealPoint*,
 	intptr_t vals[4], uintptr_t num);
-static void patternviewconfig_setstylecoords(PatternViewConfig*,
+static void patternviewconfig_set_style_coords(PatternViewConfig*,
 	uintptr_t styleid, uintptr_t select_styleid, psy_ui_RealRectangle src,
 	psy_ui_RealPoint dst);
 
@@ -45,7 +45,9 @@ void patternviewconfig_init(PatternViewConfig* self, psy_Property* parent,
 	self->skindir = psy_strdup(skindir);	
 	self->dirconfig = NULL;
 	self->has_classic_header = TRUE;
-	patternviewconfig_makeview(self, parent);	
+	self->zoom = 1.0;
+	self->singlemode = TRUE;
+	patternviewconfig_make_view(self, parent);	
 	psy_signal_init(&self->signal_changed);
 }
 
@@ -58,14 +60,14 @@ void patternviewconfig_dispose(PatternViewConfig* self)
 	self->skindir = NULL;
 }
 
-void patternviewconfig_setdirectories(PatternViewConfig* self,
+void patternviewconfig_set_directories(PatternViewConfig* self,
 	DirConfig* dirconfig)
 {
 	self->dirconfig = dirconfig;	
 	patternviewconfig_update_header_skins(self);
 }
 
-void patternviewconfig_makeview(PatternViewConfig* self, psy_Property* parent)
+void patternviewconfig_make_view(PatternViewConfig* self, psy_Property* parent)
 {
 	psy_Property* pvc;
 	psy_Property* choice;
@@ -159,10 +161,10 @@ void patternviewconfig_makeview(PatternViewConfig* self, psy_Property* parent)
 			0, 0, 0),
 		"settingsview.pv.splithorizontal"),
 		PROPERTY_ID_PATTERN_DISPLAYMODE_TRACKER_PIANOROLL_HORIZONTAL);
-	patternviewconfig_maketheme(self, pvc);
+	patternviewconfig_make_theme(self, pvc);
 }
 
-void patternviewconfig_maketheme(PatternViewConfig* self, psy_Property* parent)
+void patternviewconfig_make_theme(PatternViewConfig* self, psy_Property* parent)
 {
 	assert(self);
 
@@ -353,19 +355,19 @@ const char* patternviewconfig_header_skin_name(PatternViewConfig* self)
 }
 
 
-void patternviewconfig_resettheme(PatternViewConfig* self)
+void patternviewconfig_reset_theme(PatternViewConfig* self)
 {
 	assert(self);
 
 	if (self->theme) {
 		psy_property_remove(self->patternview, self->theme);
 	}
-	patternviewconfig_maketheme(self, self->patternview);
+	patternviewconfig_make_theme(self, self->patternview);
 	psy_property_setitem_int(self->headerskins, 0);
 	init_patternview_styles(&psy_ui_appdefaults()->styles);	
 }
 
-void patternviewconfig_settheme(PatternViewConfig* self, psy_Property* theme)
+void patternviewconfig_set_theme(PatternViewConfig* self, psy_Property* theme)
 {
 	assert(self);
 
@@ -386,13 +388,13 @@ void patternviewconfig_settheme(PatternViewConfig* self, psy_Property* theme)
 	}
 }
 
-bool patternviewconfig_hasthemeproperty(const PatternViewConfig* self,
+bool patternviewconfig_has_theme_property(const PatternViewConfig* self,
 	psy_Property* property)
 {
 	return (self->theme && psy_property_insection(property, self->theme));
 }
 
-bool patternviewconfig_hasproperty(const PatternViewConfig* self,
+bool patternviewconfig_has_property(const PatternViewConfig* self,
 	psy_Property* property)
 {
 	assert(self &&  self->patternview);
@@ -401,7 +403,7 @@ bool patternviewconfig_hasproperty(const PatternViewConfig* self,
 }
 
 /* getter */
-bool patternviewconfig_linenumbers(const PatternViewConfig* self)
+bool patternviewconfig_line_numbers(const PatternViewConfig* self)
 {
 	assert(self);
 	
@@ -429,14 +431,14 @@ bool patternviewconfig_defaultline(const PatternViewConfig* self)
 	return psy_property_at_bool(self->patternview, "griddefaults", TRUE);
 }
 
-bool patternviewconfig_wraparound(const PatternViewConfig* self)
+bool patternviewconfig_wrap_around(const PatternViewConfig* self)
 {
 	assert(self);
 
 	return psy_property_at_bool(self->patternview, "wraparound", TRUE);
 }
 
-bool patternviewconfig_drawemptydata(const PatternViewConfig* self)
+bool patternviewconfig_draw_empty_data(const PatternViewConfig* self)
 {
 	assert(self);
 
@@ -464,7 +466,7 @@ double patternviewconfig_linenumber_width(const PatternViewConfig* self)
 	assert(self);
 
 	rv = 0.0;
-	if (patternviewconfig_linenumbers(self)) {
+	if (patternviewconfig_line_numbers(self)) {
 		rv += 5.0;
 		if (patternviewconfig_linenumbersinhex(self)) {
 		}
@@ -478,7 +480,7 @@ double patternviewconfig_linenumber_width(const PatternViewConfig* self)
 	return rv;
 }
 
-bool patternviewconfig_showwideinstcolumn(const PatternViewConfig* self)
+bool patternviewconfig_show_wide_inst_column(const PatternViewConfig* self)
 {
 	assert(self);
 
@@ -510,7 +512,7 @@ void patternviewconfig_setmovecursorwhenpaste(PatternViewConfig* self, bool on)
 	psy_property_set_bool(self->patternview, "movecursorwhenpaste", on);
 }
 
-bool patternviewconfig_issmoothscrolling(const PatternViewConfig* self)
+bool patternviewconfig_is_smooth_scrolling(const PatternViewConfig* self)
 {
 	assert(self);
 
@@ -534,6 +536,7 @@ void patternviewconfig_setdisplaysinglepattern(PatternViewConfig* self, bool on)
 
 	property = psy_property_set_bool(self->patternview, "displaysinglepattern",
 		on);
+	self->singlemode = on;
 	if (property) {
 		psy_signal_emit(&self->signal_changed, self, 1, property);
 	}
@@ -543,7 +546,8 @@ bool patternviewconfig_issinglepatterndisplay(const PatternViewConfig* self)
 {
 	assert(self);
 
-	return psy_property_at_bool(self->patternview, "displaysinglepattern", TRUE);
+	return psy_property_at_bool(self->patternview, "displaysinglepattern",
+		TRUE);
 }
 
 bool patternviewconfig_useheaderbitmap(const PatternViewConfig* self)
@@ -555,7 +559,7 @@ bool patternviewconfig_useheaderbitmap(const PatternViewConfig* self)
 
 
 
-bool patternviewconfig_showtrackscopes(const PatternViewConfig* self)
+bool patternviewconfig_show_trackscopes(const PatternViewConfig* self)
 {
 	assert(self);
 
@@ -570,17 +574,19 @@ int patternviewconfig_onchanged(PatternViewConfig* self, psy_Property* property)
 	assert(self);
 
 	rebuild_level = 0;
-	if (patternviewconfig_hasthemeproperty(self, property)) {
+	if (patternviewconfig_has_theme_property(self, property)) {
 		psy_Property* choice;
 		bool worked;
 
-		choice = (psy_property_ischoiceitem(property)) ? psy_property_parent(property) : NULL;
+		choice = (psy_property_is_choice_item(property))
+			? psy_property_parent(property)
+			: NULL;
 		worked = FALSE;
 		if (choice) {
 			worked = TRUE;
 			switch (psy_property_id(choice)) {
 			case PROPERTY_ID_PATTERN_SKIN:
-				patternviewconfig_loadbitmap(self);
+				patternviewconfig_load_bitmap(self);
 				break;
 			default:
 				worked = FALSE;
@@ -596,7 +602,7 @@ int patternviewconfig_onchanged(PatternViewConfig* self, psy_Property* property)
 	return rebuild_level;
 }
 
-void patternviewconfig_togglepatdefaultline(PatternViewConfig* self)
+void patternviewconfig_toggle_pattern_defaultline(PatternViewConfig* self)
 {			
 	psy_Property* property;
 
@@ -610,7 +616,42 @@ void patternviewconfig_togglepatdefaultline(PatternViewConfig* self)
 	}
 }
 
-int patternviewconfig_patterndisplay(const PatternViewConfig* self)
+void patternviewconfig_set_zoom(PatternViewConfig* self, double zoom)
+{
+	psy_Property property;
+
+	assert(self);
+
+	psy_property_init(&property);
+	psy_property_append_double(&property, "zoom", zoom, 0.0, 0.0);
+	self->zoom = zoom;
+	psy_signal_emit(&self->signal_changed, self, 1, property);
+	psy_property_dispose(&property);
+}
+
+double patternviewconfig_zoom(const PatternViewConfig* self)
+{
+	assert(self);
+
+	return self->zoom;
+}
+
+void patternviewconfig_display_single_pattern(PatternViewConfig* self)
+{
+	self->singlemode = TRUE;
+}
+
+void patternviewconfig_display_sequence(PatternViewConfig* self)
+{
+	self->singlemode = FALSE;
+}
+
+bool patternviewconfig_singlemode(const PatternViewConfig* self)
+{
+	return self->singlemode;
+}
+
+int patternviewconfig_pattern_display(const PatternViewConfig* self)
 {
 	psy_Property* property;
 
@@ -622,7 +663,7 @@ int patternviewconfig_patterndisplay(const PatternViewConfig* self)
 	return PROPERTY_ID_PATTERN_DISPLAYMODE_TRACKER;		
 }
 
-psy_ui_FontInfo patternviewconfig_readfont(PatternViewConfig* self, double zoom)
+psy_ui_FontInfo patternviewconfig_fontinfo(PatternViewConfig* self, double zoom)
 {
 	psy_ui_FontInfo fontinfo;
 	
@@ -723,10 +764,10 @@ void patternviewconfig_write_styles(PatternViewConfig* self)
 					"pvc_selection", 0x009B7800)));
 		}
 	}
-	patternviewconfig_loadbitmap(self);
+	patternviewconfig_load_bitmap(self);
 }
 
-void patternviewconfig_loadbitmap(PatternViewConfig* self)
+void patternviewconfig_load_bitmap(PatternViewConfig* self)
 {
 	const char* pattern_header_skin_name;
 	static int styles[] = {
@@ -785,77 +826,80 @@ void patternviewconfig_loadbitmap(PatternViewConfig* self)
 				dst = psy_ui_realpoint_zero();
 				if (s = psy_property_at_str(coords, "background_source", 0)) {
 					skin_psh_values(s, 4, vals);
-					patternviewconfig_setsource(self, &src, vals);
+					patternviewconfig_set_source(self, &src, vals);
 					style = psy_ui_style(STYLE_PV_TRACK_HEADER);
-					psy_ui_style_set_background_size_px(style, src.right - src.left, src.bottom - src.top);
+					psy_ui_style_set_background_size_px(style,
+						psy_ui_realsize_make(
+							src.right - src.left,
+							src.bottom - src.top));
 					psy_ui_style_set_background_position_px(style, -src.left, -src.top);
 				}
 				if (s = psy_property_at_str(coords, "mute_on_source", 0)) {
 					skin_psh_values(s, 4, vals);
-					patternviewconfig_setsource(self, &src, vals);
+					patternviewconfig_set_source(self, &src, vals);
 				}
 				if (s = psy_property_at_str(coords, "mute_on_dest", 0)) {
 					skin_psh_values(s, 2, vals);
-					patternviewconfig_setdest(self, &dst, vals, 2);
-					patternviewconfig_setstylecoords(self,
+					patternviewconfig_set_dest(self, &dst, vals, 2);
+					patternviewconfig_set_style_coords(self,
 						STYLE_PV_TRACK_HEADER_MUTE,
 						STYLE_PV_TRACK_HEADER_MUTE_SELECT,
 						src, dst);
 				}
 				if (s = psy_property_at_str(coords, "solo_on_source", 0)) {
 					skin_psh_values(s, 4, vals);
-					patternviewconfig_setsource(self, &src, vals);
+					patternviewconfig_set_source(self, &src, vals);
 				}
 				if (s = psy_property_at_str(coords, "solo_on_dest", 0)) {
 					skin_psh_values(s, 2, vals);
-					patternviewconfig_setdest(self, &dst, vals, 2);
-					patternviewconfig_setstylecoords(self,
+					patternviewconfig_set_dest(self, &dst, vals, 2);
+					patternviewconfig_set_style_coords(self,
 						STYLE_PV_TRACK_HEADER_SOLO,
 						STYLE_PV_TRACK_HEADER_SOLO_SELECT,
 						src, dst);
 				}
 				if (s = psy_property_at_str(coords, "record_on_source", 0)) {
 					skin_psh_values(s, 4, vals);
-					patternviewconfig_setsource(self, &src, vals);
+					patternviewconfig_set_source(self, &src, vals);
 				}
 				if (s = psy_property_at_str(coords, "record_on_dest", 0)) {
 					skin_psh_values(s, 2, vals);
-					patternviewconfig_setdest(self, &dst, vals, 2);
-					patternviewconfig_setstylecoords(self,
+					patternviewconfig_set_dest(self, &dst, vals, 2);
+					patternviewconfig_set_style_coords(self,
 						STYLE_PV_TRACK_HEADER_RECORD,
 						STYLE_PV_TRACK_HEADER_RECORD_SELECT,
 						src, dst);
 				}
 				if (s = psy_property_at_str(coords, "number_0_source", 0)) {
 					skin_psh_values(s, 4, vals);
-					patternviewconfig_setsource(self, &src, vals);
+					patternviewconfig_set_source(self, &src, vals);
 				}
 				if (s = psy_property_at_str(coords, "digit_x0_dest", 0)) {
 					skin_psh_values(s, 2, vals);
-					patternviewconfig_setdest(self, &dst, vals, 2);
+					patternviewconfig_set_dest(self, &dst, vals, 2);
 					style = psy_ui_style(STYLE_PV_TRACK_HEADER_DIGITX0);
-					psy_ui_style_set_background_size_px(style, src.right - src.left,
-						src.bottom - src.top);
+					psy_ui_style_set_background_size_px(style, 
+						psy_ui_realrectangle_size(&src));
 					psy_ui_style_set_background_position_px(style, -src.left, -src.top);
 					psy_ui_style_set_padding_px(style, dst.y, 0.0, 0.0, dst.x);
 				}
 				if (s = psy_property_at_str(coords, "digit_0x_dest", 0)) {
 					skin_psh_values(s, 2, vals);
-					patternviewconfig_setdest(self, &dst, vals, 2);
+					patternviewconfig_set_dest(self, &dst, vals, 2);
 					style = psy_ui_style(STYLE_PV_TRACK_HEADER_DIGIT0X);
-					psy_ui_style_set_background_size_px(style, src.right - src.left,
-						src.bottom - src.top);
+					psy_ui_style_set_background_size_px(style,
+						psy_ui_realrectangle_size(&src));
 					psy_ui_style_set_background_position_px(style, -src.left, -src.top);
 					psy_ui_style_set_padding_px(style, dst.y, 0.0, 0.0, dst.x);
 				}
 				if (s = psy_property_at_str(coords, "playing_on_source", 0)) {
 					skin_psh_values(s, 4, vals);
-					patternviewconfig_setsource(self, &src, vals);
+					patternviewconfig_set_source(self, &src, vals);
 				}
 				if (s = psy_property_at_str(coords, "playing_on_dest", 0)) {
 						skin_psh_values(s, 2, vals);
-					patternviewconfig_setdest(self, &dst, vals, 2);
-					patternviewconfig_setstylecoords(self,
+					patternviewconfig_set_dest(self, &dst, vals, 2);
+					patternviewconfig_set_style_coords(self,
 						STYLE_PV_TRACK_HEADER_PLAY,
 						STYLE_PV_TRACK_HEADER_PLAY_SELECT,
 						src, dst);
@@ -980,7 +1024,7 @@ void patternviewconfig_switch_to_classic(PatternViewConfig* self)
 	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER_TEXT, style);
 }
 
-void patternviewconfig_setsource(PatternViewConfig* self, psy_ui_RealRectangle* r,
+void patternviewconfig_set_source(PatternViewConfig* self, psy_ui_RealRectangle* r,
 	intptr_t vals[4])
 {
 	r->left = (double)vals[0];
@@ -989,14 +1033,14 @@ void patternviewconfig_setsource(PatternViewConfig* self, psy_ui_RealRectangle* 
 	r->bottom = (double)vals[1] + (double)vals[3];
 }
 
-void patternviewconfig_setdest(PatternViewConfig* self, psy_ui_RealPoint* pt,
+void patternviewconfig_set_dest(PatternViewConfig* self, psy_ui_RealPoint* pt,
 	intptr_t vals[4], uintptr_t num)
 {
 	pt->x = (double)vals[0];
 	pt->y = (double)vals[1];
 }
 
-void patternviewconfig_setstylecoords(PatternViewConfig* self,
+void patternviewconfig_set_style_coords(PatternViewConfig* self,
 	uintptr_t styleid, uintptr_t select_styleid, psy_ui_RealRectangle src,
 	psy_ui_RealPoint dst)
 {	
@@ -1014,8 +1058,7 @@ void patternviewconfig_setstylecoords(PatternViewConfig* self,
 	if (style) {
 		psy_ui_style_set_background_position_px(style, -src.left, -src.top);
 		psy_ui_style_set_background_size_px(style, 
-			psy_ui_realrectangle_width(&src),
-			psy_ui_realrectangle_height(&src));
+			psy_ui_realrectangle_size(&src));
 		psy_ui_style_set_position(style, psy_ui_rectangle_make(pt, size));
 	}
 }

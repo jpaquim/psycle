@@ -108,7 +108,7 @@ typedef struct Pianogrid {
 	psy_audio_SequenceCursor dragcursor;
 	bool cursoronnoterelease;
 	PianoTrackDisplay trackdisplay;
-	psy_audio_SequenceCursor lastdragcursor;
+	psy_audio_SequenceCursor last_drag_cursor;
 	bool prevent_context_menu;
 	bool edit_mode;
 	bool preventscrollleft;

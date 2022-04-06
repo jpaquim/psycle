@@ -336,7 +336,7 @@ void samplesgeneralview_init(SamplesGeneralView* self, psy_ui_Component* parent,
 	int i;
 		
 	self->sample = NULL;	
-	self->notestabmode = workspace_notetabmode(workspace);
+	self->notes_tab_mode = workspace_notetabmode(workspace);
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_set_padding(&self->component,
 		psy_ui_margin_make_em(1.0, 0.0, 0.0, 0.0));
@@ -469,8 +469,8 @@ void generalview_ondescribe(SamplesGeneralView* self, psy_ui_Slider* slider, cha
 	if (slider == &self->samplednote) {			
 		psy_snprintf(txt, 10, "%s", self->sample
 			? psy_dsp_notetostr((psy_dsp_note_t)(self->sample->zone.tune + 60),
-				self->notestabmode)
-			: psy_dsp_notetostr(60, self->notestabmode));
+				self->notes_tab_mode)
+			: psy_dsp_notetostr(60, self->notes_tab_mode));
 	} else
 	if (slider == &self->pitchfinetune) {
 		psy_snprintf(txt, 10, "%d ct.", self->sample
@@ -1097,7 +1097,7 @@ void samplesview_init(SamplesView* self, psy_ui_Component* parent,
 void samplesview_onconfigure(SamplesView* self, Workspace* sender,
 	psy_Property* property)
 {
-	self->general.notestabmode = workspace_notetabmode(sender);
+	self->general.notes_tab_mode = workspace_notetabmode(sender);
 }
 
 void samplesview_onsamplesboxchanged(SamplesView* self, psy_ui_Component* sender)

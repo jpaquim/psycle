@@ -22,7 +22,7 @@ void patterncursorstepbox_init(PatternCursorStepBox* self, psy_ui_Component*
 	self->workspace = workspace;
 	psy_ui_component_set_defaultalign(patterncursorstepbox_base(self),
 		psy_ui_ALIGN_LEFT, psy_ui_defaults_hmargin(psy_ui_defaults()));
-	psy_ui_component_setalignexpand(patterncursorstepbox_base(self),
+	psy_ui_component_set_align_expand(patterncursorstepbox_base(self),
 		psy_ui_HEXPAND);
 	psy_ui_label_init(&self->header, patterncursorstepbox_base(self));
 	psy_ui_label_set_text(&self->header, "patternview.step");
@@ -51,12 +51,12 @@ void patterncursorstepbox_onselectionchanged(PatternCursorStepBox* self,
 	psy_ui_Component* sender, int index)
 {		
 	if (index >= 0) {
-		workspace_setcursorstep(self->workspace, index);
+		keyboardmiscconfig_setcursorstep(&self->workspace->config.misc, index);
 	}
 }
 
 void patterncursorstepbox_update(PatternCursorStepBox* self)
 {
 	psy_ui_combobox_setcursel(&self->combobox,
-		workspace_cursorstep(self->workspace));
+		keyboardmiscconfig_cursor_step(&self->workspace->config.misc));
 }

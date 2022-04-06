@@ -43,13 +43,13 @@ void psy_ui_terminal_init(psy_ui_Terminal* self, psy_ui_Component* parent)
 	psy_ui_label_set_charnumber(&self->output, 120.0);
 	psy_ui_label_prevent_translation(&self->output);
 	psy_ui_label_set_textalignment(&self->output, psy_ui_ALIGNMENT_LEFT);
-	psy_ui_component_set_scrollstep_height(
+	psy_ui_component_set_scroll_step_height(
 		psy_ui_label_base(&self->output),
 		psy_ui_value_make_eh(1.0));
 	psy_ui_component_set_wheel_scroll(&self->output.component, 4);
 	psy_ui_component_set_align(psy_ui_label_base(&self->output),
 		psy_ui_ALIGN_FIXED);
-	psy_ui_component_setoverflow(&self->output.component,
+	psy_ui_component_set_overflow(&self->output.component,
 		psy_ui_OVERFLOW_SCROLL);
 	psy_ui_scroller_init(&self->scroller, &self->component, NULL, NULL);
 	psy_ui_scroller_set_client(&self->scroller, &self->output.component);

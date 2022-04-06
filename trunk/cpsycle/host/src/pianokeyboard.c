@@ -82,7 +82,7 @@ void pianokeyboard_ondraw(PianoKeyboard* self, psy_ui_Graphics* g)
 	keyblack = psy_ui_colour_make(0x00595959);
 	keywhite = psy_ui_colour_make(0x00C0C0C0);
 	keyseparator = psy_ui_colour_make(0x999999);
-	size = psy_ui_component_scrollsize_px(pianokeyboard_base(self));
+	size = psy_ui_component_scroll_size_px(pianokeyboard_base(self));
 	tm = psy_ui_component_textmetric(pianokeyboard_base(self));
 	self->keyboardstate->keyboardheightpx = keyboardstate_height(self->keyboardstate, tm);
 	self->keyboardstate->keyheightpx = psy_ui_value_px(&self->keyboardstate->keyheight, tm, NULL);
@@ -188,12 +188,12 @@ void pianokeyboard_drawuncoveredbottombackground(PianoKeyboard* self, psy_ui_Gra
 
 	blankstart = self->keyboardstate->keyboardheightpx;
 	scrolltop = psy_ui_component_scrolltop(&self->component);
-	if (blankstart - psy_ui_component_scrolltop_px(&self->component) <
+	if (blankstart - psy_ui_component_scroll_top_px(&self->component) <
 			size.height) {
 		psy_ui_drawsolidrectangle(g, psy_ui_realrectangle_make(
 			psy_ui_realpoint_make(0, blankstart),
 			psy_ui_realsize_make(size.width,
-				size.height - (blankstart - psy_ui_component_scrolltop_px(
+				size.height - (blankstart - psy_ui_component_scroll_top_px(
 					pianokeyboard_base(self))))),
 			psy_ui_component_backgroundcolour(&self->component));
 			//patternviewskin_separatorcolour(self->keyboardstate->skin, 1, 2));
