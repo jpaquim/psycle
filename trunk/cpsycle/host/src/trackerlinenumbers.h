@@ -32,8 +32,7 @@ typedef struct TrackerLineNumbers {
 	const char* format_seqstart;
 	psy_audio_SequenceCursor old_cursor;
 	psy_ui_RealSize size;
-	psy_ui_RealSize line_size;
-	double flat_size;
+	psy_ui_RealSize line_size;	
 	/* references */
 	TrackerState* state;
 	Workspace* workspace;

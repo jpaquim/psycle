@@ -36,6 +36,7 @@ static void seqviewtrack_onsequenceselect(SeqViewTrack*,
 	psy_audio_SequenceSelection*, psy_audio_OrderIndex*);
 static void seqviewtrack_onsequencedeselect(SeqViewTrack*,
 	psy_audio_SequenceSelection*, psy_audio_OrderIndex*);
+
 /* vtable */
 static psy_ui_ComponentVtable seqviewtrack_vtable;
 static bool seqviewtrack_vtable_initialized = FALSE;
@@ -133,7 +134,7 @@ void seqviewtrack_ondraw(SeqViewTrack* self, psy_ui_Graphics* g)
 		
 	clip = psy_ui_graphics_cliprect(g);
 	tm = psy_ui_component_textmetric(&self->component);
-	lineheightpx = psy_max(1.0, floor(psy_ui_value_px(&self->state->lineheight,
+	lineheightpx = psy_max(1.0, floor(psy_ui_value_px(&self->state->line_height,
 		tm, NULL)));
 	self->state->colwidth = floor(tm->tmAveCharWidth * 1.4);	
 	self->state->digitsize = psy_ui_realsize_make(self->state->colwidth,
@@ -251,7 +252,7 @@ void seqviewtrack_drawentry(SeqViewTrack* self, psy_ui_Graphics* g,
 			psy_ui_realsize_make(
 				psy_ui_value_px(&self->state->trackwidth,
 					psy_ui_component_textmetric(&self->component), NULL),
-				psy_ui_value_px(&self->state->lineheight,
+				psy_ui_value_px(&self->state->line_height,
 					psy_ui_component_textmetric(&self->component), NULL))),
 			bg);
 	}
@@ -323,7 +324,7 @@ void seqviewtrack_drawprogressbar(SeqViewTrack* self, psy_ui_Graphics* g,
 				self->state->cmds->player, self->trackindex) *
 				psy_ui_value_px(&self->state->trackwidth,
 				psy_ui_component_textmetric(&self->component), NULL),
-			psy_ui_value_px(&self->state->lineheight,
+			psy_ui_value_px(&self->state->line_height,
 				psy_ui_component_textmetric(&self->component), NULL))),
 		psy_ui_style_const(STYLE_SEQ_PROGRESS)->background.colour);
 }
@@ -337,7 +338,7 @@ void seqviewtrack_onpreferredsize(SeqViewTrack* self,
 
 		tm = psy_ui_component_textmetric(&self->component);
 		rv->height = psy_ui_value_make_px(
-			psy_ui_value_px(&self->state->lineheight, tm, NULL) *
+			psy_ui_value_px(&self->state->line_height, tm, NULL) *
 				(double)psy_list_size(self->track->entries));		
 	} else {
 		rv->height = psy_ui_value_zero();		
@@ -350,7 +351,7 @@ void seqviewtrack_on_mouse_down(SeqViewTrack* self, psy_ui_MouseEvent* ev)
 		if (self->track->entries) {
 			self->state->cmd_orderindex.order = psy_min(
 				(uintptr_t)((psy_ui_mouseevent_pt(ev).y) /
-				psy_ui_value_px(&self->state->lineheight,
+				psy_ui_value_px(&self->state->line_height,
 					psy_ui_component_textmetric(&self->component), NULL)),
 				psy_list_size(self->track->entries) - 1);
 			self->state->cmd_orderindex.track = self->trackindex;
@@ -403,7 +404,7 @@ void seqviewtrack_onmousedoubleclick(SeqViewTrack* self, psy_ui_MouseEvent* ev)
 		cursor = self->state->cmds->workspace->song->sequence.cursor;		
 		self->state->cmd_orderindex.order = (uintptr_t)(
 			psy_ui_mouseevent_pt(ev).y /
-			psy_ui_value_px(&self->state->lineheight,
+			psy_ui_value_px(&self->state->line_height,
 				psy_ui_component_textmetric(&self->component), NULL));
 		cursor.orderindex = self->state->cmd_orderindex;
 		psy_audio_sequence_set_cursor(
@@ -435,6 +436,7 @@ void seqviewtrack_onsequencedeselect(SeqViewTrack* self,
 static void seqviewlist_onpreferredsize(SeqviewList*,
 	const psy_ui_Size* limit, psy_ui_Size* rv);
 static void seqviewlist_onplaylinechanged(SeqviewList*, Workspace* sender);
+static void seqviewlist_onplaystatuschanged(SeqviewList*, Workspace* sender);
 static psy_ui_RealRectangle seqviewlist_rowrectangle(SeqviewList*,
 	uintptr_t row);
 static void seqviewlist_invalidaterow(SeqviewList*, uintptr_t row);
@@ -489,8 +491,10 @@ void seqviewlist_init(SeqviewList* self, psy_ui_Component* parent,
 	}
 	psy_signal_connect(&self->state->cmds->workspace->signal_playlinechanged, self,
 		seqviewlist_onplaylinechanged);
+	psy_signal_connect(&self->state->cmds->workspace->signal_playstatuschanged, self,
+		seqviewlist_onplaystatuschanged);
 	psy_ui_component_setscrollstep(&self->component,
-		psy_ui_size_make(self->state->trackwidth, self->state->lineheight));
+		psy_ui_size_make(self->state->trackwidth, self->state->line_height));
 	psy_ui_component_set_overflow(&self->component, psy_ui_OVERFLOW_SCROLL);		
 	seqviewlist_build(self);
 	inputhandler_connect(&self->state->cmds->workspace->inputhandler,
@@ -550,6 +554,11 @@ void seqviewlist_onplaylinechanged(SeqviewList* self, Workspace* sender)
 		self->lastplayrow = row;
 	}	
 	seqviewlist_invalidaterow(self, self->lastplayrow);	
+}
+
+void seqviewlist_onplaystatuschanged(SeqviewList* self, Workspace* sender)
+{
+	psy_ui_component_invalidate(&self->component);
 }
 
 void seqviewlist_onpatternnamechanged(SeqviewList* self,
@@ -763,7 +772,7 @@ psy_ui_RealRectangle seqviewlist_rowrectangle(SeqviewList* self,
 	double lineheightpx;
 	
 	size = psy_ui_component_size_px(&self->component);
-	lineheightpx = psy_ui_value_px(&self->state->lineheight,
+	lineheightpx = psy_ui_value_px(&self->state->line_height,
 		psy_ui_component_textmetric(&self->component), NULL);
 	return psy_ui_realrectangle_make(
 		psy_ui_realpoint_make(0.0, lineheightpx * row),		

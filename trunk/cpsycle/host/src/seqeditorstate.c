@@ -28,7 +28,7 @@ void seqeditstate_init(SeqEditState* self, SequenceCmds* cmds,
 	self->defaultpxperbeat = 10;
 	self->pxperbeat = self->defaultpxperbeat;	
 	self->defaultlineheight = psy_ui_value_make_eh(2.0);	
-	self->lineheight = self->defaultlineheight;	
+	self->line_height = self->defaultlineheight;	
 	self->cursorposition = 0.0;
 	self->cursoractive = FALSE;
 	self->drawcursor = TRUE;
@@ -82,7 +82,7 @@ void seqeditstate_outputstatusposition(SeqEditState* self)
 
 	psy_snprintf(text, 256, "Sequence Position %.3fb",
 		(float)self->cursorposition);
-	workspace_outputstatus(self->workspace, text);
+	workspace_output_status(self->workspace, text);
 }
 
 void seqeditstate_edit(SeqEditState* self, psy_ui_Component* parent, psy_ui_RealPoint cp,

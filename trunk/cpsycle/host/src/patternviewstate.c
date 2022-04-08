@@ -76,7 +76,7 @@ void patternviewstate_select_all(PatternViewState* self)
 		psy_audio_blockselection_init(&self->selection);
 		self->selection.topleft.key = psy_audio_NOTECOMMANDS_B9;
 		psy_audio_blockselection_select(&self->selection,
-			0, patternviewstate_numsongtracks(self),
+			0, patternviewstate_num_song_tracks(self),
 			0.0, psy_audio_pattern_length(
 				patternviewstate_pattern(self)));
 		patternviewstate_invalidate(self);

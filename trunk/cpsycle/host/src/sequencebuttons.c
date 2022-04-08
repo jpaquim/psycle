@@ -220,8 +220,11 @@ void sequencebuttons_onpaste(SequenceButtons* self, psy_ui_Button* sender)
 void sequencebuttons_onclear(SequenceButtons* self, psy_ui_Button* sender)
 {
 	if (workspace_song(self->cmds->workspace)) {
-		workspace_select_view(self->cmds->workspace, VIEW_ID_CHECKUNSAVED, 0,
-			CONFIRM_SEQUENCECLEAR);
+		workspace_select_view(self->cmds->workspace,
+			viewindex_make(
+				VIEW_ID_CHECKUNSAVED, 0,
+				CONFIRM_SEQUENCECLEAR,
+				psy_INDEX_INVALID));
 	}
 }
 
@@ -242,7 +245,7 @@ void sequencebuttons_onrename(SequenceButtons* self, psy_ui_Button* sender)
 			psy_ui_component_invalidate(psy_ui_component_parent(&self->component));
 			psy_ui_component_set_focus(psy_ui_textarea_base(&self->edit));
 		} else {
-			workspace_outputstatus(self->cmds->workspace,
+			workspace_output_status(self->cmds->workspace,
 				"No SequenceEntry selected");
 		}
 	}

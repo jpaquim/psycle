@@ -82,7 +82,8 @@ void newmachinerescanbar_init(NewMachineRescanBar* self,
 void newmachinerescanbar_onselectdirectories(NewMachineRescanBar* self,
 	psy_ui_Component* sender)
 {
-	workspace_select_view(self->workspace, VIEW_ID_SETTINGSVIEW, 4, 0);
+	workspace_select_view(self->workspace, viewindex_make(
+		VIEW_ID_SETTINGSVIEW, 4, 0, psy_INDEX_INVALID));
 }
 
 /* NewMachineSectionBar */
@@ -1313,7 +1314,7 @@ void newmachine_onclearsection(NewMachine* self, psy_ui_Component* sender)
 bool newmachine_checksection(NewMachine* self)
 {
 	if (!self->selectedsection || !self->selectedsection->section) {
-		workspace_outputstatus(self->workspace, psy_ui_translate(
+		workspace_output_status(self->workspace, psy_ui_translate(
 			"newmachine.select-first-section"));
 		return FALSE;
 	}
@@ -1326,7 +1327,7 @@ bool newmachine_checkplugin(NewMachine* self)
 		return FALSE;
 	}
 	if (!self->selectedplugin) {
-		workspace_outputstatus(self->workspace, psy_ui_translate(
+		workspace_output_status(self->workspace, psy_ui_translate(
 			"newmachine.select-first-plugin"));
 		return FALSE;
 	}

@@ -54,12 +54,12 @@ void midiactivechannelbox_ondraw(MidiActiveChannelBox* self,
 	psy_ui_Value colew;
 	double headercolw_px;
 	double colw_px;
-	double lineheight;
+	double line_height;
 	
 	tm = psy_ui_component_textmetric(&self->component);
 	colew = psy_ui_value_make_ew(4);
 	headercolw_px = psy_ui_value_px(&colew, tm, NULL);
-	lineheight = (int)(tm->tmHeight * 1.2);
+	line_height = (int)(tm->tmHeight * 1.2);
 	psy_ui_textout(g, psy_ui_realpoint_zero(), "Ch:", psy_strlen("Ch:"));
 	colew = psy_ui_value_make_ew(3.5);
 	colw_px = psy_ui_value_px(&colew, tm, NULL);
@@ -72,7 +72,7 @@ void midiactivechannelbox_ondraw(MidiActiveChannelBox* self,
 		psy_ui_textout(g, psy_ui_realpoint_make(cpx, 0.0), text, psy_strlen(text));
 		active = (*self->channelmap) & (0x01 << ch);
 		if (active) {
-			psy_ui_textout(g, psy_ui_realpoint_make(cpx, lineheight), ".", psy_strlen("."));
+			psy_ui_textout(g, psy_ui_realpoint_make(cpx, line_height), ".", psy_strlen("."));
 		}
 	}
 }
@@ -121,25 +121,25 @@ void midiactiveclockbox_ondraw(MidiActiveClockBox* self,
 	psy_ui_Value colew;
 	double headercolw_px;
 	double colw_px;
-	double lineheight;
+	double line_height;
 
 	tm = psy_ui_component_textmetric(&self->component);
 	colew = psy_ui_value_make_ew(20);
 	headercolw_px = psy_ui_value_px(&colew, tm, NULL);
 	colew = psy_ui_value_make_ew(3.5);
 	colw_px = psy_ui_value_px(&colew, tm, NULL);
-	lineheight = (int)(tm->tmHeight * 1.2);
+	line_height = (int)(tm->tmHeight * 1.2);
 	psy_ui_textout(g, psy_ui_realpoint_zero(),     "MIDI Sync: START", psy_strlen("MIDI Sync: START"));
-	psy_ui_textout(g, psy_ui_realpoint_make(0.0, lineheight), "MIDI Sync: CLOCK", psy_strlen("MIDI Sync: CLOCK"));
-	psy_ui_textout(g, psy_ui_realpoint_make(0, lineheight * 2), "MIDI Sync: STOP", psy_strlen("MIDI Sync: STOP"));
+	psy_ui_textout(g, psy_ui_realpoint_make(0.0, line_height), "MIDI Sync: CLOCK", psy_strlen("MIDI Sync: CLOCK"));
+	psy_ui_textout(g, psy_ui_realpoint_make(0, line_height * 2), "MIDI Sync: STOP", psy_strlen("MIDI Sync: STOP"));
 	if ((*self->flags & FSTAT_FASTART) == FSTAT_FASTART) {
 		psy_ui_textout(g, psy_ui_realpoint_make(headercolw_px, 0.0), ".", psy_strlen("."));
 	}
 	if ((*self->flags & FSTAT_F8CLOCK) == FSTAT_F8CLOCK) {
-		psy_ui_textout(g, psy_ui_realpoint_make(headercolw_px, lineheight), ".", psy_strlen("."));
+		psy_ui_textout(g, psy_ui_realpoint_make(headercolw_px, line_height), ".", psy_strlen("."));
 	}
 	if ((*self->flags & FSTAT_FCSTOP) == FSTAT_FCSTOP) {
-		psy_ui_textout(g, psy_ui_realpoint_make(headercolw_px, lineheight * 2), ".", psy_strlen("."));
+		psy_ui_textout(g, psy_ui_realpoint_make(headercolw_px, line_height * 2), ".", psy_strlen("."));
 	}
 }
 
@@ -210,17 +210,17 @@ void midichannelmappingview_ondraw(MidiChannelMappingView* self, psy_ui_Graphics
 	double colx_px[4];
 	const psy_ui_TextMetric* tm;
 	intptr_t i;
-	double lineheight;
+	double line_height;
 
 	tm = psy_ui_component_textmetric(&self->component);
 	for (i = 0; i < 4; ++i) {
 		colx_px[i] = psy_ui_value_px(&self->colx[i], tm, NULL);
 	}
-	lineheight = (int)(tm->tmHeight * 1.2);
+	line_height = (int)(tm->tmHeight * 1.2);
 	midichannelmappingview_drawheader(self, g, colx_px, 0);
 	midiinput = &workspace_player(self->workspace)->midiinput;
-	for (ch = 0, cpy = lineheight; ch < psy_audio_MAX_MIDI_CHANNELS; ++ch,
-			cpy += lineheight) {
+	for (ch = 0, cpy = line_height; ch < psy_audio_MAX_MIDI_CHANNELS; ++ch,
+			cpy += line_height) {
 		char text[256];
 		uintptr_t selidx;
 		int inst;
@@ -538,10 +538,12 @@ void midimonitor_onhide(MidiMonitor* self)
 
 void midimonitor_onconfigure(MidiMonitor* self)
 {	
-	workspace_select_view(self->workspace, VIEW_ID_SETTINGSVIEW, 6, 0);
+	workspace_select_view(self->workspace,
+		viewindex_make(VIEW_ID_SETTINGSVIEW, 6, 0, psy_INDEX_INVALID));
 }
 
 void midimonitor_onmapconfigure(MidiMonitor* self)
 {
-	workspace_select_view(self->workspace, VIEW_ID_SETTINGSVIEW, 7, 0);
+	workspace_select_view(self->workspace, viewindex_make(
+		VIEW_ID_SETTINGSVIEW, 7, 0, psy_INDEX_INVALID));
 }

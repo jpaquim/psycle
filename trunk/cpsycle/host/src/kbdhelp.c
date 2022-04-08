@@ -93,7 +93,7 @@ const psy_Property* kbdhelp_cmds(const KbdHelp* self)
 {
 	psy_EventDriver* kbd;
 
-	kbd = workspace_kbddriver(self->workspace);
+	kbd = workspace_kbd_driver(self->workspace);
 	if (kbd && psy_eventdriver_configuration(kbd)) {
 		return psy_property_at_section_const(
 			psy_eventdriver_configuration(kbd), "cmds");

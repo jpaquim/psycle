@@ -194,7 +194,7 @@ psy_audio_SequenceCursor patterncolnavigator_prev_track(PatternColNavigator* sel
 	if (rv.track > 0) {
 		--rv.track;		
 	} else if (self->wraparound) {
-		rv.track = patternviewstate_numsongtracks(self->state->pv) - 1;
+		rv.track = patternviewstate_num_song_tracks(self->state->pv) - 1;
 		self->wrap = TRUE;
 	}
 	return rv;
@@ -211,7 +211,7 @@ psy_audio_SequenceCursor patterncolnavigator_next_track(PatternColNavigator* sel
 	self->wrap = FALSE;
 	rv = cursor;
 	rv.column = rv.digit = 0;
-	if (rv.track < patternviewstate_numsongtracks(self->state->pv) - 1) {
+	if (rv.track < patternviewstate_num_song_tracks(self->state->pv) - 1) {
 		++rv.track;
 	} else if (self->wraparound) {
 		rv.track = 0;
@@ -236,19 +236,19 @@ psy_audio_SequenceCursor patterncolnavigator_next_col(PatternColNavigator* self,
 	}
 	rv = cursor;
 	self->wrap = FALSE;
-	trackdef = trackerconfig_trackdef(self->state->trackconfig, rv.track);
-	if (rv.column == trackdef_numcolumns(trackdef) - 1 &&
-			rv.digit == trackdef_numdigits(trackdef, rv.column) - 1) {
+	trackdef = trackerconfig_trackdef(self->state->track_config, rv.track);
+	if (rv.column == trackdef_num_columns(trackdef) - 1 &&
+			rv.digit == trackdef_num_digits(trackdef, rv.column) - 1) {
 		if (rv.noteindex + 1 < trackdef_visinotes(trackdef)) {
 			++rv.noteindex;
-			if (!self->state->trackconfig->multicolumn) {
+			if (!self->state->track_config->multicolumn) {
 				rv.column = 0;
 			} else {
 				rv.column = PATTERNEVENT_COLUMN_CMD;
 			}
 			rv.digit = 0;
 		} else {
-			if (rv.track < patternviewstate_numsongtracks(self->state->pv) - 1) {
+			if (rv.track < patternviewstate_num_song_tracks(self->state->pv) - 1) {
 				rv.column = rv.digit = rv.noteindex = 0;
 				++rv.track;					
 			} else if (self->wraparound) {
@@ -258,7 +258,7 @@ psy_audio_SequenceCursor patterncolnavigator_next_col(PatternColNavigator* self,
 		}
 	} else {
 		++rv.digit;
-		if (rv.digit >= trackdef_numdigits(trackdef, rv.column)) {
+		if (rv.digit >= trackdef_num_digits(trackdef, rv.column)) {
 			++rv.column;
 			rv.digit = 0;
 		}
@@ -282,7 +282,7 @@ psy_audio_SequenceCursor patterncolnavigator_prev_col(PatternColNavigator* self,
 	}
 	rv = cursor;
 	self->wrap = FALSE;
-	if ((rv.column == 0) || (self->state->trackconfig->multicolumn &&
+	if ((rv.column == 0) || (self->state->track_config->multicolumn &&
 		rv.noteindex > 0 &&
 		rv.column == PATTERNEVENT_COLUMN_CMD) &&
 		rv.digit == 0) {
@@ -290,26 +290,26 @@ psy_audio_SequenceCursor patterncolnavigator_prev_col(PatternColNavigator* self,
 			TrackDef* trackdef;
 
 			--rv.noteindex;
-			trackdef = trackerconfig_trackdef(self->state->trackconfig, rv.track);
-			rv.column = trackdef_numcolumns(trackdef) - 1;
-			rv.digit = trackdef_numdigits(trackdef,
+			trackdef = trackerconfig_trackdef(self->state->track_config, rv.track);
+			rv.column = trackdef_num_columns(trackdef) - 1;
+			rv.digit = trackdef_num_digits(trackdef,
 				rv.column) - 1;
 		} else if (rv.track > 0) {
 			TrackDef* trackdef;
 
 			--rv.track;
-			trackdef = trackerconfig_trackdef(self->state->trackconfig, rv.track);
+			trackdef = trackerconfig_trackdef(self->state->track_config, rv.track);
 			rv.noteindex = trackdef_visinotes(trackdef) - 1;
-			rv.column = trackdef_numcolumns(trackdef) - 1;
-			rv.digit = trackdef_numdigits(trackdef,
+			rv.column = trackdef_num_columns(trackdef) - 1;
+			rv.digit = trackdef_num_digits(trackdef,
 				rv.column) - 1;			
 		} else if (self->wraparound) {
 			TrackDef* trackdef;
 
-			rv.track = patternviewstate_numsongtracks(self->state->pv) - 1;
-			trackdef = trackerconfig_trackdef(self->state->trackconfig, rv.track);
-			rv.column = trackdef_numcolumns(trackdef) - 1;
-			rv.digit = trackdef_numdigits(trackdef,
+			rv.track = patternviewstate_num_song_tracks(self->state->pv) - 1;
+			trackdef = trackerconfig_trackdef(self->state->track_config, rv.track);
+			rv.column = trackdef_num_columns(trackdef) - 1;
+			rv.digit = trackdef_num_digits(trackdef,
 				rv.column) - 1;
 			self->wrap = TRUE;
 		}
@@ -318,10 +318,10 @@ psy_audio_SequenceCursor patterncolnavigator_prev_col(PatternColNavigator* self,
 	} else {
 		TrackDef* trackdef;
 
-		trackdef = trackerconfig_trackdef(self->state->trackconfig,
+		trackdef = trackerconfig_trackdef(self->state->track_config,
 			rv.track);
 		--rv.column;
-		rv.digit = trackdef_numdigits(trackdef,
+		rv.digit = trackdef_num_digits(trackdef,
 			rv.column) - 1;
 	}
 	return rv;
@@ -368,21 +368,21 @@ psy_audio_SequenceCursor patterncolnavigator_end(PatternColNavigator* self,
 	rv = cursor;
 	self->wrap = FALSE;
 
-	trackdef = trackerconfig_trackdef(self->state->trackconfig, rv.track);
-	columndef = trackdef_columndef(trackdef, rv.column);
-	if (rv.track != patternviewstate_numsongtracks(self->state->pv) - 1 ||
+	trackdef = trackerconfig_trackdef(self->state->track_config, rv.track);
+	columndef = trackdef_column_def(trackdef, rv.column);
+	if (rv.track != patternviewstate_num_song_tracks(self->state->pv) - 1 ||
 		rv.digit != columndef->numdigits - 1 ||
 		rv.column != PATTERNEVENT_COLUMN_PARAM) {
 		if (rv.column == PATTERNEVENT_COLUMN_PARAM &&
 			rv.digit == columndef->numdigits - 1) {
-			rv.track = patternviewstate_numsongtracks(self->state->pv) - 1;
-			trackdef = trackerconfig_trackdef(self->state->trackconfig, rv.track);
-			columndef = trackdef_columndef(trackdef, PATTERNEVENT_COLUMN_PARAM);
+			rv.track = patternviewstate_num_song_tracks(self->state->pv) - 1;
+			trackdef = trackerconfig_trackdef(self->state->track_config, rv.track);
+			columndef = trackdef_column_def(trackdef, PATTERNEVENT_COLUMN_PARAM);
 			rv.column = PATTERNEVENT_COLUMN_PARAM;
 			rv.digit = columndef->numdigits - 1;			
 		} else {
-			trackdef = trackerconfig_trackdef(self->state->trackconfig, rv.track);
-			columndef = trackdef_columndef(trackdef, PATTERNEVENT_COLUMN_PARAM);
+			trackdef = trackerconfig_trackdef(self->state->track_config, rv.track);
+			columndef = trackdef_column_def(trackdef, PATTERNEVENT_COLUMN_PARAM);
 			rv.column = PATTERNEVENT_COLUMN_PARAM;
 			rv.digit = columndef->numdigits - 1;
 		}		

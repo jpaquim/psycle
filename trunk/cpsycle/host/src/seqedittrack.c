@@ -277,7 +277,7 @@ void seqedittrack_onpreferredsize(SeqEditTrack* self,
 	trackduration += 400.0;
 	rv->width = psy_ui_value_make_px(self->state->pxperbeat *
 		trackduration);
-	rv->height = self->state->lineheight;
+	rv->height = self->state->line_height;
 }
 
 void seqedittrack_on_mouse_down(SeqEditTrack* self, psy_ui_MouseEvent* ev)

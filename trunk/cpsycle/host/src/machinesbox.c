@@ -367,7 +367,7 @@ void machinesbox_showparameters(MachinesBox* self)
 				slot = (uintptr_t)psy_table_at(&self->listboxslots, selection[i]);
 				machine = psy_audio_machines_at(self->machines, slot);
 				if (machine) {					
-					workspace_showparameters(self->workspace, slot);
+					workspace_show_parameters(self->workspace, slot);
 				}
 			}
 		}
@@ -416,7 +416,7 @@ void machinesbox_on_key_down(MachinesBox* self, psy_ui_Component* sender, psy_ui
 {
 	psy_ui_keyboardevent_stop_propagation(ev);
 	if (psy_ui_keyboardevent_keycode(ev) == psy_ui_KEY_ESCAPE) {
-		workspace_togglegear(self->workspace);		
+		workspace_toggle_gear(self->workspace);		
 	}
 }
 

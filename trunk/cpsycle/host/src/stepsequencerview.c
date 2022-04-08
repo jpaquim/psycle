@@ -220,7 +220,7 @@ void stepsequencerbar_update(StepsequencerBar* self)
 
 			tile = (StepSequencerTile*)psy_table_at(&self->tiles, i);
 			if (tile) {
-				if (host_time.currplaying && line == host_time.currplayline) {
+				if (host_time.currplaying && line == host_time.currplaycursor.linecache) {
 					stepsequencertile_play(tile);
 				} else {
 					stepsequencertile_resetplay(tile);
@@ -278,14 +278,14 @@ void stepsequencerbar_update_playline(StepsequencerBar* self)
 		steprow = psy_audio_sequencecursor_line_pattern(&cursor) / self->state->numtiles;
 		linestart = steprow * self->state->numtiles;
 		tile = (StepSequencerTile*)psy_table_at(&self->tiles,
-			host_time.currplayline -
+			host_time.currplaycursor.linecache -
 			psy_audio_sequencecursor_seqline(&song->sequence.cursor) -
 			linestart);
 		if (tile) {
 			stepsequencertile_play(tile);
 		}
 		tile = (StepSequencerTile*)psy_table_at(&self->tiles,
-			host_time.lastplayline -
+			host_time.lastplaycursor.linecache -
 			psy_audio_sequencecursor_seqline(&song->sequence.cursor) -
 			linestart);
 		if (tile) {

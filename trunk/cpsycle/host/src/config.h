@@ -126,7 +126,7 @@ INLINE PredefsConfig* psycleconfig_predefs(PsycleConfig* self)
 }
 
 const char* psycleconfig_defaultfontstr(const PsycleConfig* self);
-bool psycleconfig_audioenabled(const PsycleConfig*);
+bool psycleconfig_audio_enabled(const PsycleConfig*);
 void psycleconfig_enableaudio(PsycleConfig*, bool on);
 
 void psycleconfig_notifyall_changed(PsycleConfig*);

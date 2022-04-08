@@ -35,7 +35,7 @@ const char* dirconfig_vsts64(const DirConfig*);
 const char* dirconfig_ladspas(const DirConfig*);
 const char* dirconfig_skins(const DirConfig*);
 const char* dirconfig_doc(const DirConfig*);
-const char* dirconfig_configdir(const DirConfig*);
+const char* dirconfig_config_dir(const DirConfig*);
 const char* dirconfig_userpresets(const DirConfig*);
 
 bool dirconfig_onchanged(DirConfig*, psy_Property*);

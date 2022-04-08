@@ -64,7 +64,7 @@ int psy_audio_presetsio_load(const psy_Path* path, psy_audio_Presets* presets,
 		psy_Path rootpath;
 
 		psy_path_init(&rootpath, psy_path_full(path));
-		psy_path_setprefix(&rootpath, pluginroot);
+		psy_path_set_prefix(&rootpath, pluginroot);
 		fp = fopen(psy_path_full(&rootpath), "rb");
 		psy_path_dispose(&rootpath);
 	}
@@ -76,7 +76,7 @@ int psy_audio_presetsio_load(const psy_Path* path, psy_audio_Presets* presets,
 		psy_path_init(&underscorepath, psy_path_full(path));
 		name = strdup(psy_path_name(&underscorepath));
 		psy_replacechar(name, '-', '_');
-		psy_path_setname(&underscorepath, name);
+		psy_path_set_name(&underscorepath, name);
 		free(name);
 		fp = fopen(psy_path_full(&underscorepath), "rb");
 		psy_path_dispose(&underscorepath);

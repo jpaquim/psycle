@@ -133,12 +133,14 @@ void gear_inittitle(Gear* self)
 
 void gear_oncreate(Gear* self, psy_ui_Component* sender)
 {	
-	workspace_select_view(self->workspace, VIEW_ID_MACHINEVIEW,
+	workspace_select_view(self->workspace,
+		viewindex_make(VIEW_ID_MACHINEVIEW,
 		SECTION_ID_MACHINEVIEW_NEWMACHINE,
 		(psy_audio_machines_selected(&self->workspace->song->machines)
 			!= psy_INDEX_INVALID)
 		? NEWMACHINE_INSERT
-		: NEWMACHINE_APPEND);
+		: NEWMACHINE_APPEND,
+		psy_INDEX_INVALID));
 }
 
 void gear_ondelete(Gear* self, psy_ui_Component* sender)
@@ -248,7 +250,7 @@ void gear_onparameters(Gear* self, psy_ui_Component* sender)
 
 void gear_onmaster(Gear* self, psy_ui_Component* sender)
 {
-	workspace_showparameters(self->workspace, psy_audio_MASTER_INDEX);
+	workspace_show_parameters(self->workspace, psy_audio_MASTER_INDEX);
 }
 
 void gear_onhide(Gear* self)

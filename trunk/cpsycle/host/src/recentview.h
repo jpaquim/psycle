@@ -36,16 +36,18 @@ INLINE psy_ui_Component* playlistbar_base(PlaylistBar* self)
 	return &self->component;
 }
 
-// PlaylistView
+/* PlaylistView */
 typedef struct PlaylistView {
-	// inherits
+	/* inherits */
 	psy_ui_Component component;
-	// internal
+	/* internal */
 	PlaylistBar bar;	
-	PropertiesView view;
-	Workspace* workspace;
+	PropertiesView view;	
 	bool starting;
 	bool running;
+	/* references */
+	psy_Playlist* playlist;
+	Workspace* workspace;
 } PlaylistView;
 
 void playlistview_init(PlaylistView*, psy_ui_Component* parent,

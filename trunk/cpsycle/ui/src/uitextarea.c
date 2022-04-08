@@ -679,20 +679,20 @@ void psy_ui_textareapane_scroll_up(psy_ui_TextAreaPane* self)
 	intptr_t line;
 	intptr_t topline;
 	double top;
-	double lineheight;
+	double line_height;
 	const psy_ui_TextMetric* tm;
 
 	line = psy_ui_textareapane_cursor_line(self);
 	tm = psy_ui_component_textmetric(&self->component);
-	lineheight = tm->tmHeight * self->format.linespacing;
-	top = lineheight * line;
+	line_height = tm->tmHeight * self->format.linespacing;
+	top = line_height * line;
 	topline = 0;	
 	if (psy_ui_component_scroll_top_px(&self->component) +
-			topline * lineheight > top) {
+			topline * line_height > top) {
 		intptr_t dlines;
 
 		dlines = (intptr_t)((psy_ui_component_scroll_top_px(&self->component) +
-			topline * lineheight - top) / (lineheight));
+			topline * line_height - top) / (line_height));
 		psy_ui_component_set_scroll_top_px(&self->component,
 			psy_ui_component_scroll_top_px(&self->component) -
 			psy_ui_component_scroll_step_height_px(&self->component) * dlines);
@@ -704,21 +704,21 @@ void psy_ui_textareapane_scroll_down(psy_ui_TextAreaPane* self)
 	intptr_t line;
 	intptr_t visilines;
 	psy_ui_RealSize clientsize;
-	double lineheight;
+	double line_height;
 	const psy_ui_TextMetric* tm;
 
 	line = psy_ui_textareapane_cursor_line(self);
 	tm = psy_ui_component_textmetric(&self->component);
-	lineheight = tm->tmHeight * self->format.linespacing;
+	line_height = tm->tmHeight * self->format.linespacing;
 	clientsize = psy_ui_component_clientsize_px(&self->component);
-	visilines = (uintptr_t)(clientsize.height / lineheight);		
+	visilines = (uintptr_t)(clientsize.height / line_height);		
 	if (visilines < line - psy_ui_component_scroll_top_px(&self->component) /
-		lineheight) {
+		line_height) {
 		intptr_t dlines;
 
 		dlines = (intptr_t)
 			(line - psy_ui_component_scroll_top_px(&self->component) /
-				lineheight - visilines);
+				line_height - visilines);
 		self->component.blitscroll = TRUE;
 		psy_ui_component_set_scroll_top_px(&self->component,
 			psy_ui_component_scroll_top_px(&self->component) +

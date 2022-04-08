@@ -37,10 +37,10 @@ void mainviews_init(MainViews* self, psy_ui_Component* parent, psy_ui_Component*
 
 void mainviews_onextract(MainViews* self, psy_ui_Button* sender)
 {
-	ViewHistoryEntry view;
+	ViewIndex view;
 	psy_ui_Component* page;
 
-	view = workspace_currview(self->workspace);
+	view = workspace_current_view(self->workspace);
 	page = psy_ui_component_by_id(&self->component, view.id,
 		psy_ui_NONE_RECURSIVE);
 	if (page) {

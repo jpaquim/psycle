@@ -23,7 +23,7 @@ typedef enum {
 typedef struct SeqViewState {
 	/* public */
 	psy_ui_Value trackwidth;
-	psy_ui_Value lineheight;
+	psy_ui_Value line_height;
 	psy_ui_RealSize digitsize;
 	double colwidth;
 	SeqLVCmd cmd;	

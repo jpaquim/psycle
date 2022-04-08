@@ -40,8 +40,8 @@ void playlist_initpath(psy_Playlist* self)
 	assert(self);
 
 	psy_path_init(&path, NULL);
-	psy_path_setprefix(&path, psy_dir_config());
-	psy_path_setname(&path, PSYCLE_RECENT_SONG_INI);
+	psy_path_set_prefix(&path, psy_dir_config());
+	psy_path_set_name(&path, PSYCLE_RECENT_SONG_INI);
 	self->path = psy_strdup(psy_path_full(&path));
 	psy_path_dispose(&path);	
 }

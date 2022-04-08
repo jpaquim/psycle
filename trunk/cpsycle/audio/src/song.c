@@ -171,8 +171,8 @@ void psy_audio_song_dispose(psy_audio_Song* self)
 
 	psy_audio_songproperties_dispose(&self->properties);
 	psy_audio_machines_dispose(&self->machines);
-	psy_audio_patterns_dispose(&self->patterns);
-	psy_audio_sequence_dispose(&self->sequence);		
+	psy_audio_sequence_dispose(&self->sequence);
+	psy_audio_patterns_dispose(&self->patterns);	
 	psy_audio_samples_dispose(&self->samples);
 	psy_audio_instruments_dispose(&self->instruments);
 	song_disposesignals(self);

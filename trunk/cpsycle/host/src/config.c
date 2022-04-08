@@ -184,9 +184,9 @@ void psycleconfig_loadskin(PsycleConfig* self, const char* path)
 					psy_Path full;
 
 					psy_path_init(&full, psc);
-					psy_path_setname(&full, "");
+					psy_path_set_name(&full, "");
 					psy_path_setext(&full, "");
-					psy_path_setname(&full, bpm);
+					psy_path_set_name(&full, bpm);
 					psy_property_set_str(&skin, "machinedial_bmp",
 						psy_path_full(&full));
 					psy_path_dispose(&full);
@@ -224,7 +224,7 @@ const char* psycleconfig_defaultfontstr(const PsycleConfig* self)
 		PSYCLE_DEFAULT_FONT);
 }
 
-bool psycleconfig_audioenabled(const PsycleConfig* self)
+bool psycleconfig_audio_enabled(const PsycleConfig* self)
 {
 	assert(self);
 

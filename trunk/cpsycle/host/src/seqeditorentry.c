@@ -88,7 +88,7 @@ void seqeditentry_onpreferredsize(SeqEditEntry* self,
 	
 	rv->width = psy_ui_value_make_px(seqeditstate_beattopx(self->state,
 		psy_audio_sequenceentry_length(self->seqentry)));
-	rv->height = self->state->lineheight;
+	rv->height = self->state->line_height;
 }
 
 void seqeditentry_startdrag(SeqEditEntry* self, psy_ui_MouseEvent* ev)
@@ -288,7 +288,7 @@ void seqeditpatternentry_on_mouse_down(SeqEditPatternEntry* self,
 		old_cursor = sequence->cursor;
 		seqeditentry_startdrag(&self->seqeditorentry, ev);		
 		if (psy_ui_mouseevent_button(ev) == 1 && self->seqeditorentry.state->dragstatus == SEQEDIT_DRAG_START) {
-			if ((workspace_currview(self->seqeditorentry.state->workspace).id ==
+			if ((workspace_current_view(self->seqeditorentry.state->workspace).id ==
 					VIEW_ID_PATTERNVIEW) &&
 					psy_audio_orderindex_equal(&self->seqeditorentry.seqpos,
 						old_cursor.orderindex)) {
@@ -300,7 +300,7 @@ void seqeditpatternentry_on_mouse_down(SeqEditPatternEntry* self,
 					self->seqeditorentry.seqpos);
 				cursor.absoffset = self->seqeditorentry.state->dragposition + cursor.seqoffset;
 				psy_audio_sequence_set_cursor(sequence, cursor);				
-				workspace_gotocursor(self->seqeditorentry.state->workspace, cursor);
+				workspace_goto_cursor(self->seqeditorentry.state->workspace, cursor);
 			} else {
 				psy_audio_SequenceCursor cursor;
 
@@ -310,14 +310,14 @@ void seqeditpatternentry_on_mouse_down(SeqEditPatternEntry* self,
 					self->seqeditorentry.seqpos);
 				cursor.absoffset = cursor.seqoffset;				
 				psy_audio_sequence_set_cursor(sequence, cursor);								
-				workspace_gotocursor(self->seqeditorentry.state->workspace, cursor);
+				workspace_goto_cursor(self->seqeditorentry.state->workspace, cursor);
 			}
-			if (workspace_currview(self->seqeditorentry.state->workspace).id !=
+			if (workspace_current_view(self->seqeditorentry.state->workspace).id !=
 				VIEW_ID_PATTERNVIEW) {
 				workspace_select_view(self->seqeditorentry.state->workspace,
-					VIEW_ID_PATTERNVIEW,
-					workspace_currview(self->seqeditorentry.state->workspace).section,
-					0);
+					viewindex_make(VIEW_ID_PATTERNVIEW,
+						workspace_current_view(self->seqeditorentry.state->workspace).section,
+						0, psy_INDEX_INVALID));
 			}
 			psy_signal_emit(&self->seqeditorentry.state->signal_itemselected,
 				self->seqeditorentry.state, 3, SEQEDITITEM_PATTERN,			
@@ -485,12 +485,13 @@ void seqeditsampleentry_on_mouse_down(SeqEditSampleEntry* self,
 		seqeditentry_startdrag(&self->seqeditorentry, ev);
 		if (psy_ui_mouseevent_button(ev) == 1 && self->seqeditorentry.state->dragstatus == SEQEDIT_DRAG_START) {
 			self->seqeditorentry.state->dragstatus = SEQEDIT_DRAG_START;
-			if (workspace_currview(self->seqeditorentry.state->workspace).id !=
+			if (workspace_current_view(self->seqeditorentry.state->workspace).id !=
 					VIEW_ID_SAMPLESVIEW) {
 				workspace_select_view(self->seqeditorentry.state->workspace,
-					VIEW_ID_SAMPLESVIEW,
-					workspace_currview(self->seqeditorentry.state->workspace).section,
-					0);
+					viewindex_make(
+						VIEW_ID_SAMPLESVIEW,
+						workspace_current_view(self->seqeditorentry.state->workspace).section,
+						0, psy_INDEX_INVALID));
 			}
 			psy_signal_emit(&self->seqeditorentry.state->signal_itemselected,
 				self->seqeditorentry.state, 3,

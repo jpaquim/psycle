@@ -171,10 +171,10 @@ INLINE psy_dsp_big_beat_t patternviewstate_length(const PatternViewState* self)
 	return 0.0;
 }
 
-INLINE uintptr_t patternviewstate_numsongtracks(const PatternViewState* self)
+INLINE uintptr_t patternviewstate_num_song_tracks(const PatternViewState* self)
 {
 	if (patternviewstate_patterns_const(self)) {
-		return psy_audio_patterns_numtracks(
+		return psy_audio_patterns_num_tracks(
 			patternviewstate_patterns_const(self));
 	}
 	return 0;

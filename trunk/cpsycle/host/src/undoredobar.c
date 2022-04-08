@@ -80,14 +80,14 @@ void undoredobar_on_timer(UndoRedoBar* self, uintptr_t timerid)
 	assert(self);
 
 #ifndef PSYCLE_DEBUG_PREVENT_TIMER_DRAW
-	if (workspace_currview_hasundo(self->workspace)) {
+	if (workspace_currview_has_undo(self->workspace)) {
 		psy_ui_component_enableinput(psy_ui_button_base(&self->undobutton),
 			psy_ui_NONE_RECURSIVE);
 	} else {
 		psy_ui_component_preventinput(psy_ui_button_base(&self->undobutton),
 			psy_ui_NONE_RECURSIVE);
 	}
-	if (workspace_currview_hasredo(self->workspace)) {
+	if (workspace_currview_has_redo(self->workspace)) {
 		psy_ui_component_enableinput(psy_ui_button_base(&self->redobutton),
 			psy_ui_NONE_RECURSIVE);
 	} else {

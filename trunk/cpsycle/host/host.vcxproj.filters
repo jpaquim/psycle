@@ -642,6 +642,9 @@
     <ClCompile Include="src\mainviews.c">
       <Filter>app</Filter>
     </ClCompile>
+    <ClCompile Include="src\viewindex.c">
+      <Filter>app</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\languageconfig.h">
@@ -1185,6 +1188,9 @@
       <Filter>machine\plugineditor</Filter>
     </ClInclude>
     <ClInclude Include="src\mainviews.h">
+      <Filter>app</Filter>
+    </ClInclude>
+    <ClInclude Include="src\viewindex.h">
       <Filter>app</Filter>
     </ClInclude>
   </ItemGroup>

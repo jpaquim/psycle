@@ -94,7 +94,7 @@ void patternviewtabbar_ontabbarchange(PatternViewTabBar* self,
 			PATTERN_DISPLAYMODE_NUM,
 			PATTERN_DISPLAYMODE_TRACKER_PIANOROLL_VERTICAL,
 			PATTERN_DISPLAYMODE_TRACKER_PIANOROLL_HORIZONTAL };
-		workspace_selectpatterndisplay(self->workspace, display[tabindex]);
+		workspace_select_pattern_display(self->workspace, display[tabindex]);
 	} else if (tabindex == 5) {
 		psy_signal_emit(&self->signal_toggle_properties, self, 0);		
 	}

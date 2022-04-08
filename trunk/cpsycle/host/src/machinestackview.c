@@ -956,7 +956,7 @@ void machinestackdesc_configureeffects(MachineStackDesc* self,
 	psy_ui_Button* sender)
 {
 	workspace_select_view(self->view->workspace,
-		VIEW_ID_SETTINGSVIEW, 2, 1);
+		viewindex_make(VIEW_ID_SETTINGSVIEW, 2, 1, psy_INDEX_INVALID));
 }
 
 /* MachineStackInputs */
@@ -1450,7 +1450,7 @@ void machinestackpane_onmousedoubleclick(MachineStackPane* self,
 	psy_ui_MouseEvent* ev)
 {
 	if (!self->state->columnselected) {
-		workspace_outputstatus(self->workspace,
+		workspace_output_status(self->workspace,
 			"Add first input (Double click in Inputs)");
 		psy_ui_mouseevent_stop_propagation(ev);
 	}	
@@ -1668,12 +1668,12 @@ void machinestackview_ondisconnected(MachineStackView* self,
 
 void machinestackview_idle(MachineStackView* self)
 {
-	ViewHistoryEntry currview;
+	ViewIndex currview;
 
 	if (machinestackstate_rebuildingview(&self->state)) {
 		machinestackview_build(self);
 	}
-	currview = workspace_currview(self->workspace);
+	currview = workspace_current_view(self->workspace);
 	if (currview.id == VIEW_ID_MACHINEVIEW &&
 			currview.section == SECTION_ID_MACHINEVIEW_STACK) {
 		psy_ui_component_invalidate(&self->volumes.component);

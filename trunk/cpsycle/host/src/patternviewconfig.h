@@ -67,7 +67,7 @@ void patternviewconfig_switch_to_text(PatternViewConfig*);
 bool patternviewconfig_line_numbers(const PatternViewConfig*);
 bool patternviewconfig_linenumbersinhex(const PatternViewConfig*);
 bool patternviewconfig_showbeatoffset(const PatternViewConfig*);
-double patternviewconfig_linenumber_width(const PatternViewConfig*);
+double patternviewconfig_linenumber_num_digits(const PatternViewConfig*);
 bool patternviewconfig_linenumberscursor(const PatternViewConfig*);
 bool patternviewconfig_defaultline(const PatternViewConfig*);
 bool patternviewconfig_wrap_around(const PatternViewConfig*);

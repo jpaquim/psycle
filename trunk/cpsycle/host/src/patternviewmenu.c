@@ -184,7 +184,7 @@ void patternblockmenu_onexport(PatternBlockMenu* self,
 {
 	patterncmds_export_pattern(self->pvstate->cmds,		
 		patternviewstate_bpl(self->pvstate),
-		patternviewstate_numsongtracks(self->pvstate));
+		patternviewstate_num_song_tracks(self->pvstate));
 }
 
 void patternblockmenu_onreplace(PatternBlockMenu* self,

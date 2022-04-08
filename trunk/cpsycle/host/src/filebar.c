@@ -93,9 +93,10 @@ void filebar_usenativefileexplorer(FileBar* self)
 void filebar_onnewsong(FileBar* self, psy_ui_Component* sender)
 {
 	if (keyboardmiscconfig_savereminder(&self->workspace->config.misc) &&
-			workspace_songmodified(self->workspace)) {
-		workspace_select_view(self->workspace, VIEW_ID_CHECKUNSAVED, 0,
-			CONFIRM_NEW);
+			workspace_song_modified(self->workspace)) {
+		workspace_select_view(self->workspace,
+			viewindex_make(VIEW_ID_CHECKUNSAVED, 0,
+			CONFIRM_NEW, psy_INDEX_INVALID));
 	} else {
 		workspace_newsong(self->workspace);
 	}
@@ -111,9 +112,10 @@ void filebar_onloadsong(FileBar* self, psy_ui_Component* sender)
 	if (!keyboardmiscconfig_ft2fileexplorer(psycleconfig_misc(
 		workspace_conf(self->workspace)))) {
 		if (keyboardmiscconfig_savereminder(&self->workspace->config.misc) &&
-			workspace_songmodified(self->workspace)) {
-			workspace_select_view(self->workspace, VIEW_ID_CHECKUNSAVED, 0,
-				CONFIRM_LOAD);
+			workspace_song_modified(self->workspace)) {
+			workspace_select_view(self->workspace,
+				viewindex_make(VIEW_ID_CHECKUNSAVED, 0,
+				CONFIRM_LOAD, psy_INDEX_INVALID));
 		} else {
 			workspace_loadsong_fileselect(self->workspace);
 		}

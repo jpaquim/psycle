@@ -1,11 +1,13 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #if !defined(GENERALCONFIG_H)
 #define GENERALCONFIG_H
 
+/* host*/
+#include "viewindex.h"
 /* container */
 #include <properties.h>
 #include <signal.h>
@@ -36,6 +38,7 @@ void generalconfig_dispose(GeneralConfig*);
 
 bool generalconfig_showsonginfoonload(const GeneralConfig*);
 bool generalconfig_showaboutatstart(const GeneralConfig*);
+ViewIndex generalconfig_start_view(const GeneralConfig*);
 bool generalconfig_showmaximizedatstart(const GeneralConfig*);
 bool generalconfig_saverecentsongs(const GeneralConfig*);
 bool generalconfig_playsongafterload(const GeneralConfig*);

@@ -93,7 +93,7 @@ void paramrackbox_deselect(ParamRackBox* self)
 void paramrackbox_onmousedoubleclick(ParamRackBox* self, psy_ui_Component* sender,
 	psy_ui_MouseEvent* ev)
 {	
-	workspace_showparameters(self->workspace, self->slot);	
+	workspace_show_parameters(self->workspace, self->slot);	
 }
 
 void paramrackbox_onaddeffect(ParamRackBox* self, psy_ui_Button* sender)
@@ -102,11 +102,15 @@ void paramrackbox_onaddeffect(ParamRackBox* self, psy_ui_Button* sender)
 		if (self->nextbox) {
 			psy_audio_machines_selectwire(&self->workspace->song->machines,
 				psy_audio_wire_make(self->slot, self->nextbox->slot));
-			workspace_select_view(self->workspace, VIEW_ID_MACHINEVIEW,
-				SECTION_ID_MACHINEVIEW_NEWMACHINE, NEWMACHINE_ADDEFFECT);
+			workspace_select_view(self->workspace,
+				viewindex_make(VIEW_ID_MACHINEVIEW,
+				SECTION_ID_MACHINEVIEW_NEWMACHINE, NEWMACHINE_ADDEFFECT,
+					psy_INDEX_INVALID));
 		} else {
-			workspace_select_view(self->workspace, VIEW_ID_MACHINEVIEW,
-				SECTION_ID_MACHINEVIEW_NEWMACHINE, NEWMACHINE_APPEND);
+			workspace_select_view(self->workspace,
+				viewindex_make(VIEW_ID_MACHINEVIEW,
+					SECTION_ID_MACHINEVIEW_NEWMACHINE, NEWMACHINE_APPEND,
+					psy_INDEX_INVALID));
 		}
 	}
 }
@@ -681,8 +685,8 @@ void paramrack_onselect(ParamRack* self, psy_ui_Button* sender)
 	psy_TableIterator it;
 	psy_List* slotlist;	
 
-	if (!workspace_gearvisible(self->workspace)) {
-		workspace_togglegear(self->workspace);
+	if (!workspace_gear_visible(self->workspace)) {
+		workspace_toggle_gear(self->workspace);
 	}
 	slotlist = NULL;		
 	for (it = psy_table_begin(&self->pane.boxes);
@@ -693,7 +697,7 @@ void paramrack_onselect(ParamRack* self, psy_ui_Button* sender)
 		box = (ParamRackBox*)psy_tableiterator_value(&it);
 		psy_list_append(&slotlist, (void*)box->slot);
 	}
-	workspace_multiselectgear(self->workspace, slotlist);
+	workspace_multi_select_gear(self->workspace, slotlist);
 	psy_list_free(slotlist);	
 }
 

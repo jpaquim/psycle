@@ -51,42 +51,6 @@
 extern "C" {
 #endif
 
-/*
-** The view id belongs to a component of the client notebook of the mainframe
-** view_id = component insert order
-*/
-
-#define	VIEW_ID_MACHINEVIEW		0
-#define	VIEW_ID_PATTERNVIEW		1
-#define	VIEW_ID_SAMPLESVIEW		2
-#define VIEW_ID_INSTRUMENTSVIEW	3
-#define	VIEW_ID_SONGPROPERTIES	4
-#define	VIEW_ID_SETTINGSVIEW	5
-#define	VIEW_ID_HELPVIEW		6
-#define	VIEW_ID_RENDERVIEW		7
-#define	VIEW_ID_EXPORTVIEW		8
-#define	VIEW_ID_CHECKUNSAVED	9
-#define	VIEW_ID_CONFIRM			10
-#define	VIEW_NUM				11
-#define	VIEW_ID_SCRIPTS			12
-
-#define SECTION_ID_MACHINEVIEW_WIRES		0
-#define	SECTION_ID_MACHINEVIEW_STACK		1
-#define	SECTION_ID_MACHINEVIEW_NEWMACHINE	2
-
-#define SECTION_ID_FILESELECT 0
-#define SECTION_ID_FILEVIEW 1
-
-typedef enum {
-	GENERATORS_ENABLED = 1,
-	EFFECTS_ENABLED = 2,
-	NEWMACHINE_INSERT = 4,
-	NEWMACHINE_APPEND = 8,
-	NEWMACHINE_ADDEFFECT = 16,
-	NEWMACHINE_APPENDSTACK = 32,
-	NEWMACHINE_ADDEFFECTSTACK = 64,
-} NewMachineBarOptions;
-
 /* The patternview display modes */
 typedef enum {
 	PATTERN_DISPLAYMODE_TRACKER,					/* only tracker visible */
@@ -96,29 +60,32 @@ typedef enum {
 	PATTERN_DISPLAYMODE_NUM
 } PatternDisplayMode;
 
-typedef enum {
-	CONFIRM_CLOSE,
-	CONFIRM_LOAD,
-	CONFIRM_NEW,
-	CONFIRM_SEQUENCECLEAR
-} ConfirmBoxAction;
-
 enum {
 	WORKSPACE_NEWSONG,
 	WORKSPACE_LOADSONG
 };
 
-typedef struct HostSequencerTime {
-	psy_dsp_big_beat_t currplayposition;
-	psy_dsp_big_beat_t lastplayposition;
-	uintptr_t lastplayline;
-	uintptr_t currplayline;
+typedef struct HostSequencerTime {	
 	bool currplaying;
 	psy_audio_SequenceCursor lastplaycursor;
 	psy_audio_SequenceCursor currplaycursor;
 } HostSequencerTime;
 
 void hostsequencertime_init(HostSequencerTime*);
+
+void hostsequencertime_set_play_cursor(HostSequencerTime*, 
+	psy_audio_SequenceCursor);
+void hostsequencertime_update_last_play_cursor(HostSequencerTime*);
+
+INLINE bool hostsequencertime_playing(const HostSequencerTime* self)
+{
+	return (self->currplaying);
+}
+
+INLINE bool hostsequencertime_play_line_changed(const HostSequencerTime* self)
+{
+	return (self->currplaycursor.linecache != self->lastplaycursor.linecache);
+}
 
 struct Workspace;
 
@@ -167,7 +134,7 @@ typedef struct Workspace {
 	psy_Playlist playlist;	
 	psy_ui_Component* main;	
 	ViewHistory viewhistory;
-	ViewHistoryEntry restoreview;	
+	ViewIndex restoreview;	
 	char* filename;
 	bool songhasfile;
 	int followsong;
@@ -202,7 +169,7 @@ typedef struct Workspace {
 	bool startpage;	
 	bool driverconfigloading;
 	bool seqviewactive;	
-	HostSequencerTime host_sequencer_time;	
+	HostSequencerTime host_sequencer_time;
 	InputHandler inputhandler;
 	psy_Thread driverconfigloadthread;
 	psy_Thread pluginscanthread;
@@ -212,8 +179,8 @@ typedef struct Workspace {
 void workspace_init(Workspace*, psy_ui_Component* handle);
 void workspace_dispose(Workspace*);
 void workspace_load_configuration(Workspace*);
-void workspace_postload_driverconfigurations(Workspace*);
-void workspace_startaudio(Workspace*);
+void workspace_postload_driver_configurations(Workspace*);
+void workspace_start_audio(Workspace*);
 void workspace_save_configuration(Workspace*);
 void workspace_clearsequencepaste(Workspace*);
 void workspace_save_styleconfiguration(Workspace*);
@@ -221,7 +188,7 @@ void workspace_newsong(Workspace*);
 void workspace_loadsong_fileselect(Workspace*);
 void workspace_loadsong(Workspace*, const char*, bool play);
 bool workspace_savesong_fileselect(Workspace*);
-void workspace_savesong(Workspace*, const char*);
+void workspace_save_song(Workspace*, const char*);
 bool workspace_exportsong(Workspace*);
 void workspace_exportmodule(Workspace*, const char* path);
 bool workspace_exportmidifile_fileselect(Workspace*);
@@ -229,7 +196,7 @@ bool workspace_exportlyfile_fileselect(Workspace*);
 void workspace_exportmidifile(Workspace*, const char* path);
 void workspace_exportlyfile(Workspace*, const char* path);
 void workspace_scanplugins(Workspace*);
-void workspace_marksongmodified(Workspace*);
+void workspace_mark_song_modified(Workspace*);
 
 INLINE void workspace_setparamviews(Workspace* self, struct ParamViews* paramviews)
 {
@@ -260,68 +227,65 @@ INLINE psy_audio_Player* workspace_player(Workspace* self)
 psy_Property* workspace_recentsongs(Workspace*);
 psy_Playlist* workspace_playlist(Workspace*);
 void workspace_load_recentsongs(Workspace*);
-void workspace_save_recentsongs(Workspace*);
-void workspace_clearrecentsongs(Workspace*);
-void workspace_setoctave(Workspace*, uint8_t octave);
+void workspace_set_octave(Workspace*, uint8_t octave);
 uint8_t workspace_octave(Workspace*);
 void workspace_configurationchanged(Workspace*, psy_Property*,
 	uintptr_t* rebuild_level);
 void workspace_onconfigurationchanged(Workspace*, psy_Property*);
 void workspace_undo(Workspace*);
 void workspace_redo(Workspace*);
-void workspace_editquantizechange(Workspace*, int diff);
+void workspace_edit_quantize_change(Workspace*, int diff);
 int workspace_hasplugincache(const Workspace*);
 psy_audio_PluginCatcher* workspace_plugincatcher(Workspace*);
-psy_EventDriver* workspace_kbddriver(Workspace*);
+psy_EventDriver* workspace_kbd_driver(Workspace*);
 bool workspace_following_song(const Workspace*);
-void workspace_followsong(Workspace*);
-void workspace_stopfollowsong(Workspace*);
+void workspace_follow_song(Workspace*);
+void workspace_stop_follow_song(Workspace*);
 void workspace_idle(Workspace*);
-void workspace_showparameters(Workspace*, uintptr_t machineslot);
-void workspace_select_view(Workspace*, uintptr_t view, uintptr_t section,
-	uintptr_t option);
-void workspace_focusview(Workspace*);
-void workspace_saveview(Workspace*);
-void workspace_restoreview(Workspace*);
-void workspace_parametertweak(Workspace*, int slot, uintptr_t tweak, float value);
-void workspace_recordtweaks(Workspace*);
-void workspace_stoprecordtweaks(Workspace*);
-int workspace_recordingtweaks(Workspace*);
-void workspace_onviewchanged(Workspace*, ViewHistoryEntry);
+void workspace_show_parameters(Workspace*, uintptr_t machineslot);
+void workspace_select_view(Workspace*, ViewIndex view_index);
+void workspace_focus_view(Workspace*);
+void workspace_save_view(Workspace*);
+void workspace_restore_view(Workspace*);
+void workspace_parameter_tweak(Workspace*, int slot, uintptr_t tweak, float value);
+void workspace_record_tweaks(Workspace*);
+void workspace_stop_record_tweaks(Workspace*);
+int workspace_recording_tweaks(Workspace*);
+void workspace_on_view_changed(Workspace*, ViewIndex);
 void workspace_back(Workspace*);
 void workspace_forward(Workspace*);
-void workspace_updatecurrview(Workspace*);
-ViewHistoryEntry workspace_currview(Workspace*);
+void workspace_update_currview(Workspace*);
+ViewIndex workspace_current_view(Workspace*);
 void workspace_addhistory(Workspace*);
-void workspace_connectasmixersend(Workspace*);
-void workspace_connectasmixerinput(Workspace*);
-bool workspace_isconnectasmixersend(const Workspace*);
-void workspace_togglegear(Workspace*);
-bool workspace_gearvisible(const Workspace* self);
-bool workspace_songmodified(const Workspace*);
-bool workspace_currview_hasundo(Workspace*);
-bool workspace_currview_hasredo(Workspace*);
+void workspace_connect_as_mixersend(Workspace*);
+void workspace_connect_as_mixer_input(Workspace*);
+bool workspace_is_connect_as_mixersend(const Workspace*);
+void workspace_toggle_gear(Workspace*);
+bool workspace_gear_visible(const Workspace* self);
+bool workspace_song_modified(const Workspace*);
+bool workspace_currview_has_undo(Workspace*);
+bool workspace_currview_has_redo(Workspace*);
 void workspace_clearundo(Workspace*);
 psy_dsp_NotesTabMode workspace_notetabmode(Workspace*);
-void workspace_outputwarning(Workspace*, const char* text);
-void workspace_outputerror(Workspace*, const char* text);
+void workspace_output_warning(Workspace*, const char* text);
+void workspace_output_error(Workspace*, const char* text);
 void workspace_output(Workspace*, const char* text);
-void workspace_outputstatus(Workspace*, const char* text);
-void workspace_gotocursor(Workspace*, psy_audio_SequenceCursor);
-PatternDisplayMode workspace_patterndisplaytype(Workspace*);
-void workspace_selectpatterndisplay(Workspace*, PatternDisplayMode);
-void workspace_multiselectgear(Workspace*, psy_List* slotlist);
-void workspace_connectterminal(Workspace*, void* context,
+void workspace_output_status(Workspace*, const char* text);
+void workspace_goto_cursor(Workspace*, psy_audio_SequenceCursor);
+PatternDisplayMode workspace_pattern_display_type(Workspace*);
+void workspace_select_pattern_display(Workspace*, PatternDisplayMode);
+void workspace_multi_select_gear(Workspace*, psy_List* slotlist);
+void workspace_connect_terminal(Workspace*, void* context,
 	fp_workspace_output out,
 	fp_workspace_output warning,
 	fp_workspace_output error);
-void workspace_connectstatus(Workspace*, void* context, fp_workspace_output);
-void workspace_connectloadprogress(Workspace*, void* context,
+void workspace_connect_status(Workspace*, void* context, fp_workspace_output);
+void workspace_connect_load_progress(Workspace*, void* context,
 	fp_workspace_songloadprogress);
-void workspace_apptitle(Workspace*, char* rv_title, uintptr_t max_len);
-const char* workspace_songtitle(const Workspace*);
+void workspace_app_title(Workspace*, char* rv_title, uintptr_t max_len);
+const char* workspace_song_title(const Workspace*);
 void workspace_set_start_page(Workspace*);
-void workspace_oninput(Workspace*, uintptr_t cmd);
+void workspace_on_input(Workspace*, uintptr_t cmd);
 
 INLINE const HostSequencerTime* workspace_host_sequencer_time(
 	const Workspace* self)

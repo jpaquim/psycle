@@ -292,7 +292,7 @@ uintptr_t psy_audio_psy_audio_patterns_trackarmedcount(const
 	return psy_audio_trackstate_trackarmedcount(&self->trackstate);
 }
 
-void psy_audio_patterns_setnumtracks(psy_audio_Patterns* self,
+void psy_audio_patterns_set_num_tracks(psy_audio_Patterns* self,
 	uintptr_t numtracks)
 {
 	assert(self);
@@ -302,7 +302,7 @@ void psy_audio_patterns_setnumtracks(psy_audio_Patterns* self,
 		numtracks);
 }
 
-uintptr_t psy_audio_patterns_numtracks(const psy_audio_Patterns* self)
+uintptr_t psy_audio_patterns_num_tracks(const psy_audio_Patterns* self)
 {
 	assert(self);
 

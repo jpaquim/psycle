@@ -223,12 +223,17 @@ void machineview_on_mouse_up(MachineView* self, psy_ui_MouseEvent* ev)
 			self->newmachine.restoresection = SECTION_ID_MACHINEVIEW_STACK;
 			if (self->stackview.state.insertmachinemode ==
 					NEWMACHINE_ADDEFFECTSTACK) {
-				workspace_select_view(self->workspace, VIEW_ID_MACHINEVIEW,
+				workspace_select_view(self->workspace,
+					viewindex_make(
+					VIEW_ID_MACHINEVIEW,
 					SECTION_ID_MACHINEVIEW_NEWMACHINE,
-					NEWMACHINE_ADDEFFECTSTACK);
+					NEWMACHINE_ADDEFFECTSTACK,
+					psy_INDEX_INVALID));
 			} else {
-				workspace_select_view(self->workspace, VIEW_ID_MACHINEVIEW,
-					SECTION_ID_MACHINEVIEW_NEWMACHINE, NEWMACHINE_APPENDSTACK);
+				workspace_select_view(self->workspace,
+					viewindex_make(VIEW_ID_MACHINEVIEW,
+					SECTION_ID_MACHINEVIEW_NEWMACHINE, NEWMACHINE_APPENDSTACK,
+					psy_INDEX_INVALID));
 			}
 		} else {
 			psy_ui_component_select_section(machineview_base(self),
@@ -261,7 +266,7 @@ void machineview_on_key_down(MachineView* self, psy_ui_KeyboardEvent* ev)
 					psy_ui_notebook_active_page(&self->notebook));
 			}
 		} else if (self->workspace->gearvisible) {
-			workspace_togglegear(self->workspace);
+			workspace_toggle_gear(self->workspace);
 		}
 		psy_ui_keyboardevent_stop_propagation(ev);
 	} 
@@ -277,12 +282,13 @@ void machineview_on_focus(MachineView* self)
 
 void machineview_ontabbarchanged(MachineView* self, psy_ui_TabBar* sender, uintptr_t index)
 {
-	ViewHistoryEntry entry;
+	ViewIndex entry;
 
-	entry = workspace_currview(self->workspace);
+	entry = workspace_current_view(self->workspace);
 	if (entry.id != VIEW_ID_MACHINEVIEW || entry.section != index) {
-		workspace_onviewchanged(self->workspace, viewhistoryentry_make(
-			VIEW_ID_MACHINEVIEW, index, psy_INDEX_INVALID));
+		workspace_on_view_changed(self->workspace, viewindex_make(
+			VIEW_ID_MACHINEVIEW, index, psy_INDEX_INVALID,
+			psy_INDEX_INVALID));
 	}
 }
 
@@ -400,7 +406,7 @@ void machineview_onnewmachineselected(MachineView* self,
 		}
 		
 	} else {
-		workspace_outputerror(self->workspace,
+		workspace_output_error(self->workspace,
 			self->workspace->machinefactory.errstr);
 	}	
 	self->newmachine.appendstack = FALSE;
@@ -422,9 +428,9 @@ uintptr_t machineview_section(const MachineView* self)
 
 void machineview_idle(MachineView* self)
 {	
-	ViewHistoryEntry currview;
+	ViewIndex currview;
 
-	currview = workspace_currview(self->workspace);
+	currview = workspace_current_view(self->workspace);
 	if (currview.section == SECTION_ID_MACHINEVIEW_WIRES) {
 		machinewireview_idle(&self->wireview);
 	} else if (currview.section == SECTION_ID_MACHINEVIEW_STACK) {

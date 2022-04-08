@@ -60,7 +60,7 @@ typedef struct PatternView {
 	TransformPatternView transformpattern;
 	InterpolateCurveView interpolatecurveview;
 	SwingFillView swingfillview;	
-	TrackConfig trackconfig;
+	TrackConfig track_config;
 	PatternViewState pvstate;
 	TrackerState state;
 	PatternCmds cmds;	

@@ -143,20 +143,20 @@ void seqview_onsequenceselect(SeqView* self,
 	}
 	clientsize = psy_ui_component_clientsize_px(&self->listview.component);
 	visilines = (clientsize.height) /
-		psy_ui_value_px(&self->state.lineheight,
+		psy_ui_value_px(&self->state.line_height,
 			psy_ui_component_textmetric(&self->component), NULL);
 	listviewtop = psy_ui_component_scroll_top_px(&self->listview.component) /
-		psy_ui_value_px(&self->state.lineheight,
+		psy_ui_value_px(&self->state.line_height,
 			psy_ui_component_textmetric(&self->component), NULL);
 	if ((double)c < listviewtop) {
 		psy_ui_component_set_scroll_top(&self->listview.component,
 			psy_ui_value_make_px(c *
-				psy_ui_value_px(&self->state.lineheight,
+				psy_ui_value_px(&self->state.line_height,
 					psy_ui_component_textmetric(&self->component), NULL)));				
 	} else if ((double)c > listviewtop + visilines - 1) {
 		psy_ui_component_set_scroll_top(&self->listview.component,
 			psy_ui_value_make_px((c - visilines + 1) * 
-				psy_ui_value_px(&self->state.lineheight,
+				psy_ui_value_px(&self->state.line_height,
 					psy_ui_component_textmetric(&self->component), NULL)));
 	}	
 	psy_ui_component_invalidate(&self->listview.component);

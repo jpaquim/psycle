@@ -43,10 +43,10 @@ void audioconfig_makesection(AudioConfig* self, psy_Property* parent)
 		psy_property_append_section(self->inputoutput, "configure"),
 		"settingsview.configure");
 	self->driverconfigure->item.save = 0;	
-	audioconfig_makedriverconfigurations(self, FALSE /* full*/ );
+	audioconfig_make_driver_configurations(self, FALSE /* full*/ );
 }
 
-void audioconfig_makedriverconfigurations(AudioConfig* self, bool full)
+void audioconfig_make_driver_configurations(AudioConfig* self, bool full)
 {
 	psy_Property* drivers;
 	psy_Property* driverconfigurations;

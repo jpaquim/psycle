@@ -1774,3 +1774,35 @@ psy_audio_SequenceEntry* psy_audio_sequencer_curr_seq_entry(psy_audio_Sequencer*
 	}
 	return rv;
 }
+
+psy_audio_SequenceCursor psy_audio_sequencer_play_cursor(
+	const psy_audio_Sequencer* self)
+{
+	psy_audio_SequenceCursor rv;
+
+	if (self->sequence) {
+		psy_audio_SequenceEntry* seqentry;
+
+		seqentry = psy_audio_sequencer_curr_seq_entry(
+			(psy_audio_Sequencer*)self,
+			self->sequence->cursor.orderindex.track);
+		if (seqentry) {
+			rv = self->sequence->cursor;
+			rv.orderindex.order = seqentry->row;
+			if (seqentry->type == psy_audio_SEQUENCEENTRY_PATTERN) {
+				psy_audio_SequencePatternEntry* pat_entry;
+
+				pat_entry = (psy_audio_SequencePatternEntry*)seqentry;
+				rv.patternid = pat_entry->patternslot;
+			} else {
+				rv.patternid = 0;
+			}
+			rv.linecache = self->seqtime.linecounter;
+			rv.seqoffset = psy_audio_sequenceentry_offset(seqentry);
+			rv.absoffset = rv.linecache / (double)self->lpb;
+			return rv;
+		}
+	}
+	psy_audio_sequencecursor_init(&rv);
+	return rv;
+}

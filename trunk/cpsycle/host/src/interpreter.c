@@ -20,7 +20,7 @@ int interpreter_start(Interpreter* self)
     workspace_output(self->workspace, "\n");
     workspace_output(self->workspace, "ready.\n");
 #if !defined(PSYCLE_USE_MACHINEPROXY)
-    workspace_outputwarning(self->workspace, "NO MACHINEPROXY PROTECTION\n");
+    workspace_output_warning(self->workspace, "NO MACHINEPROXY PROTECTION\n");
 #endif
     return 0;
 }

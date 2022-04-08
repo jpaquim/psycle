@@ -341,8 +341,9 @@ void about_on_button(About* self, psy_ui_Button* sender)
 	} else if (sender == &self->licencebutton) {
 		about_select_infobox(self, 2);
 	} else {
-		workspace_select_view(self->workspace, VIEW_ID_MACHINEVIEW,
-			psy_INDEX_INVALID, 0);
+		workspace_select_view(self->workspace,
+			viewindex_make(VIEW_ID_MACHINEVIEW,
+			psy_INDEX_INVALID, psy_INDEX_INVALID, psy_INDEX_INVALID));
 	}	
 }
 
@@ -361,7 +362,8 @@ void about_select_infobox(About* self, uintptr_t index)
 
 void about_on_mouse_doubleclick(About* self, psy_ui_MouseEvent* ev)
 {
-	workspace_select_view(self->workspace, VIEW_ID_MACHINEVIEW,
-		psy_INDEX_INVALID, 0);
+	workspace_select_view(self->workspace,
+		viewindex_make(VIEW_ID_MACHINEVIEW, psy_INDEX_INVALID,
+			psy_INDEX_INVALID, psy_INDEX_INVALID));
 	psy_ui_mouseevent_stop_propagation(ev);
 }

@@ -94,7 +94,7 @@ void dirconfig_makedefaultuserpresets(DirConfig* self)
 	assert(self);
 
 	psy_path_init(&defaultuserpresetpath, psy_dir_home());
-	psy_path_setname(&defaultuserpresetpath, "Presets");
+	psy_path_set_name(&defaultuserpresetpath, "Presets");
 	dirconfig_append(self, "presets", "User Presets directory",
 		psy_path_full(&defaultuserpresetpath));
 	psy_path_dispose(&defaultuserpresetpath);
@@ -205,7 +205,7 @@ const char* dirconfig_doc(const DirConfig* self)
 		PSYCLE_DOC_DEFAULT_DIR);
 }
 
-const char* dirconfig_configdir(const DirConfig* self)
+const char* dirconfig_config_dir(const DirConfig* self)
 {
 	assert(self);
 

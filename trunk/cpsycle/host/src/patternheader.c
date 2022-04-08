@@ -313,8 +313,8 @@ void patterntrack_onpreferredsize(PatternTrack* self,
 
 	style = psy_ui_style(STYLE_PV_TRACK_HEADER);
 		psy_ui_size_init_px(rv,
-			trackerstate_trackwidth(self->trackbox.state,
-				self->trackbox.index),
+			trackerstate_trackwidth(self->trackbox.state, self->trackbox.index,
+				psy_ui_component_textmetric(&self->component)),
 			style->background.size.height);
 }
 
@@ -355,7 +355,7 @@ static void trackerheader_vtable_init(TrackerHeader* self)
 
 /* implementation */
 void trackerheader_init(TrackerHeader* self, psy_ui_Component* parent,
-	TrackConfig* trackconfig, TrackerState* state, Workspace* workspace)
+	TrackConfig* track_config, TrackerState* state, Workspace* workspace)
 {
 	psy_ui_component_init(&self->component, parent, NULL);
 	trackerheader_vtable_init(self);	
@@ -383,7 +383,7 @@ void trackerheader_build(TrackerHeader* self)
 
 	psy_ui_component_clear(&self->component);
 	psy_table_clear(&self->boxes);
-	numtracks = patternviewstate_numsongtracks(self->state->pv);
+	numtracks = patternviewstate_num_song_tracks(self->state->pv);
 	for (track = 0; track < numtracks; ++track) {		
 		psy_table_insert(&self->boxes, track,
 			psy_ui_component_set_align(
@@ -508,13 +508,17 @@ void trackerheaderview_init(TrackerHeaderView* self, psy_ui_Component* parent, T
 void trackerheaderview_on_configure(TrackerHeaderView* self, PatternViewConfig* config,
 	psy_Property* property)
 {	
-	if (patternviewconfig_linenumber_width(config) == 0.0) {
+	if (patternviewconfig_linenumber_num_digits(config) == 0.0) {
 		psy_ui_component_hide(&self->desc.component);
 	} else {
 		psy_ui_component_set_preferred_size(&self->desc.component,
-			psy_ui_size_make_em(
-				patternviewconfig_linenumber_width(config) * self->header.state->flatsize,
-				1.0));
+			psy_ui_size_make(
+				psy_ui_mul_values(
+					psy_ui_value_make_ew(patternviewconfig_linenumber_num_digits(config)),
+					self->header.state->track_config->flatsize,
+					psy_ui_component_textmetric(&self->component),
+					NULL),				
+				psy_ui_value_make_eh(1.0)));
 		psy_ui_component_show(&self->desc.component);
 	}	
 }

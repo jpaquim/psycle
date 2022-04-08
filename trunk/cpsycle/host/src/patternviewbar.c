@@ -81,7 +81,7 @@ void patternviewstatus_update(PatternViewStatus* self)
 			patternid = psy_audio_sequencecursor_patternid(
 				&self->workspace->host_sequencer_time.currplaycursor,
 				psy_audio_song_sequence(workspace_song(self->workspace)));
-			line = self->workspace->host_sequencer_time.currplayline;
+			line = psy_audio_sequencecursor_line(&self->workspace->host_sequencer_time.currplaycursor);
 		} else {
 			line = psy_audio_sequencecursor_line(&cursor);
 		}

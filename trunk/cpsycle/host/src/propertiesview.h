@@ -144,8 +144,8 @@ typedef struct PropertiesView {
 } PropertiesView;
 
 void propertiesview_init(PropertiesView*, psy_ui_Component* parent,
-	psy_ui_Component* tabbarparent, psy_Property*,
-	uintptr_t numcols, Workspace*);
+	psy_ui_Component* tabbarparent, psy_Property*, uintptr_t numcols,
+	InputHandler*);
 
 void propertiesview_reload(PropertiesView*);
 void propertiesview_mark(PropertiesView*, psy_Property*);

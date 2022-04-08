@@ -16,7 +16,7 @@ void seqviewstate_init(SeqViewState* self, SequenceCmds* cmds)
 
 	self->cmds = cmds;
 	self->trackwidth = psy_ui_value_make_ew(16.0);	
-	self->lineheight = psy_ui_value_make_eh(1.2);	
+	self->line_height = psy_ui_value_make_eh(1.2);	
 	self->colwidth = 10.0;
 	self->cmd = SEQLVCMD_NONE;
 	self->cmd_orderindex = psy_audio_orderindex_make_invalid();

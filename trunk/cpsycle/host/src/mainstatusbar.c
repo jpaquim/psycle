@@ -92,7 +92,7 @@ void mainstatusbar_initstatuslabel(MainStatusBar* self)
 	psy_ui_label_prevent_translation(&self->statusbarlabel);
 	psy_ui_label_set_text(&self->statusbarlabel, "Ready");	
 	psy_ui_label_set_charnumber(&self->statusbarlabel, 35.0);
-	workspace_connectstatus(self->workspace, self,
+	workspace_connect_status(self->workspace, self,
 		(fp_workspace_output)mainstatusbar_onstatus);
 }
 
@@ -154,7 +154,7 @@ void mainstatusbar_initprogressbar(MainStatusBar* self)
 	psy_ui_progressbar_init(&self->progressbar, &self->pane);
 	psy_ui_component_set_align(progressbar_base(&self->progressbar),
 		psy_ui_ALIGN_RIGHT);
-	workspace_connectloadprogress(self->workspace, self,
+	workspace_connect_load_progress(self->workspace, self,
 		(fp_workspace_songloadprogress)mainstatusbar_onsongloadprogress);
 	psy_signal_connect(&self->workspace->signal_scanprogress, self,
 		mainstatusbar_onpluginscanprogress);

@@ -45,7 +45,7 @@ void audioconfig_init(AudioConfig*, psy_Property* parent, psy_audio_Player*);
 void audioconfig_dispose(AudioConfig*);
 void audioconfig_enableaudio(AudioConfig*, bool enable);
 void audioconfig_driverconfigure_section(AudioConfig*);
-void audioconfig_makedriverconfigurations(AudioConfig* self, bool full);
+void audioconfig_make_driver_configurations(AudioConfig* self, bool full);
 void audioconfig_makeconfiguration_driverkey(AudioConfig* self, const char* key);
 void audioconfig_onaudiodriverselect(AudioConfig*, bool enabled);
 void audioconfig_oneditaudiodriverconfiguration(AudioConfig*, bool enabled);
