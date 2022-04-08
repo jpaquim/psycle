@@ -28,7 +28,7 @@ extern "C" {
 #endif
 
 /* psy_ui_ScrollBarPane */
-/* todo combine with sliderpane */
+
 typedef struct psy_ui_ScrollBarPane {
     /* inherits */
     psy_ui_Component component;
@@ -40,15 +40,15 @@ typedef struct psy_ui_ScrollBarPane {
     double screenpos;    
     psy_ui_IntPoint scrollrange;
     double dragoffset;    
-    int repeat;
-    int repeatdelaycounter;
+    intptr_t repeat;
+    intptr_t repeat_delay_counter;
     psy_ui_Orientation orientation;     
 } psy_ui_ScrollBarPane;
 
 void psy_ui_scrollbarpane_init(psy_ui_ScrollBarPane*,
     psy_ui_Component* parent);
 
-void psy_ui_scrollbarpane_setorientation(psy_ui_ScrollBarPane*,
+void psy_ui_scrollbarpane_set_orientation(psy_ui_ScrollBarPane*,
     psy_ui_Orientation);
 
 INLINE double psy_ui_scrollbarpane_position(const

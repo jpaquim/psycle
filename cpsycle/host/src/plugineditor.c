@@ -321,20 +321,20 @@ void plugineditor_oncreatenewplugin(PluginEditor* self, psy_ui_Component* sender
 	
 	dir = dirconfig_luascripts(&self->workspace->config.directories);
 	psy_path_init(&path, "");
-	psy_path_setprefix(&path, dir);
-	psy_path_setname(&path, "newplugin.lua");
+	psy_path_set_prefix(&path, dir);
+	psy_path_set_name(&path, "newplugin.lua");
 	writetext(psy_path_full(&path), pluginsource);
 	psy_path_dispose(&path);
 	psy_path_init(&plugindir, "");
-	psy_path_setprefix(&plugindir, dir);
-	psy_path_setname(&plugindir, "newplugin");
+	psy_path_set_prefix(&plugindir, dir);
+	psy_path_set_name(&plugindir, "newplugin");
 	if (!psy_direxists(psy_path_full(&plugindir))) {
 		psy_mkdir(psy_path_full(&plugindir));
 	}
 	psy_path_init(&path, "");
-	psy_path_setprefix(&path, psy_path_full(&plugindir));
+	psy_path_set_prefix(&path, psy_path_full(&plugindir));
 	psy_path_dispose(&plugindir);	
-	psy_path_setname(&path, "machine.lua");
+	psy_path_set_name(&path, "machine.lua");
 	writetext(psy_path_full(&path), machinesource);
 	psy_path_dispose(&path);
 }

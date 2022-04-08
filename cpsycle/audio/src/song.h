@@ -362,14 +362,14 @@ INLINE void psy_audio_song_setnumsongtracks(psy_audio_Song* self,
 {
 	assert(self);
 
-	psy_audio_patterns_setnumtracks(&self->patterns, numtracks);
+	psy_audio_patterns_set_num_tracks(&self->patterns, numtracks);
 }
 /* return song numtracks (pattern channels) */
 INLINE uintptr_t psy_audio_song_numsongtracks(const psy_audio_Song* self)
 {
 	assert(self);
 
-	return psy_audio_patterns_numtracks(&self->patterns);
+	return psy_audio_patterns_num_tracks(&self->patterns);
 }
 /* return song properties tpb */
 INLINE uintptr_t psy_audio_song_tpb(const psy_audio_Song* self)

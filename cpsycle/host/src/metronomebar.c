@@ -72,7 +72,8 @@ void metronomebar_ontogglemetronomestate(MetronomeBar* self)
 
 void metronomebar_onconfigure(MetronomeBar* self, psy_ui_Button* sender)
 {
-	workspace_select_view(self->workspace, VIEW_ID_SETTINGSVIEW, 10, 0);
+	workspace_select_view(self->workspace,
+		viewindex_make(VIEW_ID_SETTINGSVIEW, 10, 0, psy_INDEX_INVALID));
 }
 
 void metronomebar_onprecountchanged(MetronomeBar* self,

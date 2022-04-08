@@ -108,7 +108,7 @@ TrackerColumn* trackercolumn_allocinit(psy_ui_Component* parent,
 void trackercolumn_on_draw(TrackerColumn* self, psy_ui_Graphics* g)
 {		
 	trackercolumn_draw_track_events(self, g);	
-	if (trackdrag_trackactive(&self->state->trackconfig->resize,
+	if (trackdrag_trackactive(&self->state->track_config->resize,
 			self->track)) {
 		trackercolumn_draw_resize_bar(self, g);
 	}
@@ -122,18 +122,20 @@ void trackercolumn_draw_track_events(TrackerColumn* self, psy_ui_Graphics* g)
 	uintptr_t line;
 	TrackDef* trackdef;
 	
-	events = trackereventtable_track(&self->state->trackevents,
+	events = trackereventtable_track(&self->state->track_events,
 		self->track);
-	trackdef = trackerconfig_trackdef(self->state->trackconfig, self->track);
+	trackdef = trackerconfig_trackdef(self->state->track_config, self->track);
 	self->digitsize = psy_ui_realsize_make(
-		self->state->trackconfig->textwidth,
+		psy_ui_value_px(&self->state->track_config->flatsize,
+			psy_ui_component_textmetric(&self->component), NULL),
 		self->line_size.height - 1);		
 	for (p = *events,			
 			cpy = trackerstate_beat_to_px(self->state,
 				patternviewstate_draw_offset(self->state->pv,
-					self->state->trackevents.clip.topleft.absoffset)),
-			line = (uintptr_t)(self->state->trackevents.clip.topleft.absoffset *
-				self->state->trackevents.clip.topleft.lpb);
+					self->state->track_events.clip.topleft.absoffset),
+				self->line_size.height),
+			line = (uintptr_t)(self->state->track_events.clip.topleft.absoffset *
+				self->state->track_events.clip.topleft.lpb);
 			p != NULL;
 			p = p->next, ++line, cpy += self->line_size.height) {
 		trackercolumn_draw_entry(self, g, (psy_audio_PatternEntry*)p->entry,
@@ -148,7 +150,7 @@ TrackerColumnFlags trackercolumn_columnflags(TrackerColumn* self,
 
 	assert(self);
 	
-	if (self->state->drawbeathighlights) {
+	if (self->state->draw_beat_highlights) {
 		uintptr_t lpb;
 
 		lpb = patternviewstate_lpb(self->state->pv);
@@ -157,7 +159,9 @@ TrackerColumnFlags trackercolumn_columnflags(TrackerColumn* self,
 		rv.mid = self->state->midline &&
 			(line == trackerstate_midline(self->state,
 			psy_ui_component_scroll_top_px(psy_ui_component_parent(
-				&self->component))));
+				&self->component)),
+				self->size.height,
+				self->line_size.height));
 	} else {
 		rv.beat = rv.beat4 = rv.mid = FALSE;
 	}		 
@@ -167,7 +171,7 @@ TrackerColumnFlags trackercolumn_columnflags(TrackerColumn* self,
 		&self->state->pv->selection, self->track, line);
 	rv.playbar = self->state->draw_playbar &&
 		self->workspace->host_sequencer_time.currplaying &&
-		(self->workspace->host_sequencer_time.currplayline == line);
+		(self->workspace->host_sequencer_time.currplaycursor.linecache == line);
 	rv.focus = TRUE;
 	return rv;
 }
@@ -186,7 +190,7 @@ void trackercolumn_draw_entry(TrackerColumn* self, psy_ui_Graphics* g,
 		entry = &self->state->empty;
 	}		
 	cp = psy_ui_realpoint_make(0.0, y);
-	emptystr = (self->state->showemptydata) ? "." : "";
+	emptystr = (self->state->show_empty_data) ? "." : "";
 	curr = entry->events;	
 	psy_audio_patternevent_init(&emptyevent);
 	for (noteindex = 0; noteindex < trackdef_visinotes(trackdef); ++noteindex) {
@@ -203,9 +207,9 @@ void trackercolumn_draw_entry(TrackerColumn* self, psy_ui_Graphics* g,
 			ev = &emptyevent;
 		}		
 		cp_leftedge = cp;
-		cp_leftedge.x += self->state->trackconfig->textleftedge;
+		cp_leftedge.x += self->state->track_config->textleftedge;
 		/* draw note */
-		if (!self->state->trackconfig->multicolumn || noteindex == 0) {
+		if (!self->state->track_config->multicolumn || noteindex == 0) {
 			psy_ui_Colour bg;
 			psy_ui_Colour fore;
 
@@ -226,15 +230,15 @@ void trackercolumn_draw_entry(TrackerColumn* self, psy_ui_Graphics* g,
 				psy_ui_realrectangle_make(cp, psy_ui_realsize_make(
 					self->digitsize.width * 3.0, self->digitsize.height)),
 				notestr, psy_strlen(notestr));
-			cp.x += trackdef_columnwidth(trackdef, 0, self->digitsize.width);
+			cp.x += trackdef_column_width(trackdef, 0, self->digitsize.width);
 		}
 		/* draw digit columns */
-		if (self->state->trackconfig->multicolumn && noteindex > 0) {
+		if (self->state->track_config->multicolumn && noteindex > 0) {
 			column = PATTERNEVENT_COLUMN_CMD;
 		} else {
 			column = 1;
 		}
-		for (; column < trackdef_numcolumns(trackdef); ++column) {
+		for (; column < trackdef_num_columns(trackdef); ++column) {
 			TrackColumnDef* coldef;
 			uintptr_t digit;
 			uintptr_t value;
@@ -242,7 +246,7 @@ void trackercolumn_draw_entry(TrackerColumn* self, psy_ui_Graphics* g,
 			uintptr_t num;
 			const char* digitstr = NULL;
 
-			coldef = trackdef_columndef(trackdef, column);
+			coldef = trackdef_column_def(trackdef, column);
 			if (!coldef) {
 				continue;
 			}			
@@ -288,7 +292,7 @@ void trackercolumn_draw_digit(TrackerColumn* self, psy_ui_Graphics* g,
 	psy_ui_RealPoint cp_leftedge;
 
 	cp_leftedge = cp;
-	cp_leftedge.x += self->state->trackconfig->textleftedge;
+	cp_leftedge.x += self->state->track_config->textleftedge;
 	psy_ui_textoutrectangle(g, cp_leftedge,
 		psy_ui_ETO_OPAQUE | psy_ui_ETO_CLIPPED, psy_ui_realrectangle_make(
 			cp, self->digitsize), str, psy_strlen(str));
@@ -296,7 +300,7 @@ void trackercolumn_draw_digit(TrackerColumn* self, psy_ui_Graphics* g,
 
 void trackercolumn_draw_resize_bar(TrackerColumn* self, psy_ui_Graphics* g)
 {
-	if (self->state->trackconfig->multicolumn) {
+	if (self->state->track_config->multicolumn) {
 		psy_ui_drawsolidrectangle(g,
 			psy_ui_realrectangle_make(
 				psy_ui_realpoint_make(self->size.width - 3, 0),
@@ -306,10 +310,11 @@ void trackercolumn_draw_resize_bar(TrackerColumn* self, psy_ui_Graphics* g)
 		double notewidth;
 		TrackDef* trackdef;
 
-		trackdef = trackerconfig_trackdef(self->state->trackconfig,
+		trackdef = trackerconfig_trackdef(self->state->track_config,
 			self->track);
-		notewidth = trackdef_columnwidth(trackdef, 0,
-			self->state->trackconfig->textwidth);
+		notewidth = trackdef_column_width(trackdef, 0,
+			psy_ui_value_px(&self->state->track_config->flatsize,
+				psy_ui_component_textmetric(&self->component), NULL));
 		psy_ui_drawsolidrectangle(g,
 			psy_ui_realrectangle_make(
 				psy_ui_realpoint_make(notewidth - 3, 0),
@@ -326,17 +331,18 @@ void trackercolumn_on_mouse_down(TrackerColumn* self, psy_ui_MouseEvent* ev)
 	if (psy_ui_mouseevent_button(ev) != 1) {
 		return;
 	}	
-	trackdef = trackerconfig_trackdef(self->state->trackconfig, self->track);
-	notewidth = trackdef_columnwidth(trackdef, 0,
-		self->state->trackconfig->textwidth);	
+	trackdef = trackerconfig_trackdef(self->state->track_config, self->track);
+	notewidth = trackdef_column_width(trackdef, 0,
+		psy_ui_value_px(&self->state->track_config->flatsize,
+			psy_ui_component_textmetric(&self->component), NULL));	
 	if (psy_ui_mouseevent_pt(ev).x > notewidth - 5 &&
 			psy_ui_mouseevent_pt(ev).x < notewidth) {
-		self->state->trackconfig->multicolumn = FALSE;
-		trackdrag_start(&self->state->trackconfig->resize, self->track,
+		self->state->track_config->multicolumn = FALSE;
+		trackdrag_start(&self->state->track_config->resize, self->track,
 			self->size.width);
 	} else if (psy_ui_mouseevent_pt(ev).x > self->size.width - 5) {
-		self->state->trackconfig->multicolumn = TRUE;
-		trackdrag_start(&self->state->trackconfig->resize, self->track,
+		self->state->track_config->multicolumn = TRUE;
+		trackdrag_start(&self->state->track_config->resize, self->track,
 			self->size.width);		
 	} else {
 		if (psy_audio_blockselection_valid(&self->state->pv->selection)) {
@@ -344,19 +350,22 @@ void trackercolumn_on_mouse_down(TrackerColumn* self, psy_ui_MouseEvent* ev)
 			psy_ui_component_invalidate(psy_ui_component_parent(&self->component));
 		}
 		self->state->pv->dragselectionbase = trackerstate_make_cursor(
-			self->state, psy_ui_mouseevent_pt(ev), self->track);
+			self->state, psy_ui_mouseevent_pt(ev), self->track,
+			self->line_size.height,
+			psy_ui_component_textmetric(&self->component));
 	}
-	if (trackdrag_active(&self->state->trackconfig->resize)) {		
+	if (trackdrag_active(&self->state->track_config->resize)) {		
 		psy_ui_component_capture(&self->component);
-		trackconfig_resize(self->state->trackconfig, self->track,
-			self->size.width);
+		trackconfig_resize(self->state->track_config, self->track,
+			self->size.width, psy_ui_component_textmetric(&self->component));
 	}	
 }
 
 void trackercolumn_on_mouse_move(TrackerColumn* self, psy_ui_MouseEvent* ev)
 {			
-	trackconfig_resize(self->state->trackconfig, self->track,
-		psy_ui_mouseevent_pt(ev).x);
+	trackconfig_resize(self->state->track_config, self->track,
+		psy_ui_mouseevent_pt(ev).x,
+		psy_ui_component_textmetric(&self->component));
 	trackercolumn_update_cursor(self, psy_ui_mouseevent_pt(ev).x);
 }
 
@@ -376,15 +385,20 @@ bool trackercolumn_is_over_note(const TrackerColumn* self, double position)
 
 bool trackercolumn_is_over_column(const TrackerColumn* self, double position)
 {
-	return (position >= self->state->trackconfig->textwidth * 3 - 5 &&
-		position < self->state->trackconfig->textwidth * 3);
+	double flatsize;
+
+	flatsize = psy_ui_value_px(&self->state->track_config->flatsize,
+		psy_ui_component_textmetric(&self->component), NULL);
+	return (position >= flatsize * 3 - 5 &&
+		position < flatsize * 3);
 }
 
 void trackercolumn_on_mouse_up(TrackerColumn* self, psy_ui_MouseEvent* ev)
 {
 	psy_ui_component_release_capture(&self->component);	
-	trackconfig_resize(self->state->trackconfig, self->track,
-		psy_ui_mouseevent_pt(ev).x);
+	trackconfig_resize(self->state->track_config, self->track,
+		psy_ui_mouseevent_pt(ev).x,
+		psy_ui_component_textmetric(&self->component));
 }
 
 void trackercolumn_on_align(TrackerColumn* self)
@@ -396,7 +410,8 @@ void trackercolumn_on_preferred_size(TrackerColumn* self,
 	const psy_ui_Size* limit, psy_ui_Size* rv)
 {
 	trackercolumn_update_size(self);
-	psy_ui_size_setpx(rv, trackerstate_trackwidth(self->state, self->track),
+	psy_ui_size_setpx(rv, trackerstate_trackwidth(self->state, self->track,
+		psy_ui_component_textmetric(&self->component)),
 		patternviewstate_numlines(self->state->pv) *
 		self->line_size.height);
 }
@@ -405,6 +420,6 @@ void trackercolumn_update_size(TrackerColumn* self)
 {
 	self->size = psy_ui_component_scroll_size_px(&self->component);
 	self->line_size = psy_ui_realsize_make(self->size.width,
-		psy_ui_value_px(&self->state->lineheight,
+		psy_ui_value_px(&self->state->line_height,
 			psy_ui_component_textmetric(&self->component), NULL));
 }

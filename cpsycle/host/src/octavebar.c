@@ -60,7 +60,7 @@ void octavebar_onoctaveboxselchange(OctaveBar* self, psy_ui_Component* sender,
 	intptr_t sel)
 {	
 	if (self >= 0 && sel <= 8) {
-		workspace_setoctave(self->workspace, (uint8_t)sel);
+		workspace_set_octave(self->workspace, (uint8_t)sel);
 	}
 }
 

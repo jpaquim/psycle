@@ -730,7 +730,7 @@ void machinewireview_setdragstatus(MachineWireView* self, uintptr_t slot)
 		} else {
 			psy_snprintf(txt, 128, "(-, -)");
 		}
-		workspace_outputstatus(self->workspace, txt);
+		workspace_output_status(self->workspace, txt);
 	}
 }
 
@@ -740,7 +740,7 @@ void machinewireview_on_mouse_up(MachineWireView* self, psy_ui_MouseEvent* ev)
 	if (self->dragslot != psy_INDEX_INVALID) {
 		if (machinewireview_dragging_machine(self)) {
 			psy_ui_component_updateoverflow(&self->component);
-			workspace_marksongmodified(self->workspace);
+			workspace_mark_song_modified(self->workspace);
 			psy_ui_mouseevent_stop_propagation(ev);
 		} else if (machinewireview_dragging_connection(self)) {
 			if (self->mousemoved) {
@@ -770,7 +770,7 @@ void machinewireview_on_mouse_up(MachineWireView* self, psy_ui_MouseEvent* ev)
 			} else if (psy_ui_mouseevent_button(ev) == 2) {
 				/* if (!self->workspace->gearvisible) {
 
-					workspace_togglegear(self->workspace);					
+					workspace_toggle_gear(self->workspace);					
 				}
 				psy_ui_mouseevent_stop_propagation(ev); */
 			}			

@@ -25,12 +25,16 @@ typedef struct PatternDefaultLine {
 	psy_ui_Label desc;
 	psy_ui_Component pane;
 	TrackerGrid grid;
-	PatternViewState pvstate;
+	PatternViewState pvstate_default_line;
 	TrackerState state;
+	/* references */
+	Workspace* workspace;
 } PatternDefaultLine;
 
 void patterndefaultline_init(PatternDefaultLine*, psy_ui_Component* parent,
 	TrackConfig*, Workspace*);
+
+void patterndefaultline_update_song_tracks(PatternDefaultLine*);
 
 INLINE psy_ui_Component* patterndefaultline_base(PatternDefaultLine* self)
 {

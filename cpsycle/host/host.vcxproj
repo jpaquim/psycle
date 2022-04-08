@@ -456,6 +456,7 @@
     <ClCompile Include="src\transformpatternview.c" />
     <ClCompile Include="src\undoredobar.c" />
     <ClCompile Include="src\viewhistory.c" />
+    <ClCompile Include="src\viewindex.c" />
     <ClCompile Include="src\volslider.c" />
     <ClCompile Include="src\vubar.c" />
     <ClCompile Include="src\vumeter.c" />
@@ -647,6 +648,7 @@
     <ClInclude Include="src\transformpatternview.h" />
     <ClInclude Include="src\undoredobar.h" />
     <ClInclude Include="src\viewhistory.h" />
+    <ClInclude Include="src\viewindex.h" />
     <ClInclude Include="src\volslider.h" />
     <ClInclude Include="src\vubar.h" />
     <ClInclude Include="src\vumeter.h" />

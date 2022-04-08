@@ -504,7 +504,7 @@ void seqeditloops_onmousedoubleclick(SeqEditLoops* self, psy_ui_MouseEvent* ev)
 				entry = (psy_audio_PatternEntry*)(node->entry); 
 				e = *psy_audio_patternentry_front(entry);
 				if ((e.parameter & 0x0F) == 0) {
-					workspace_outputstatus(self->state->cmds->workspace,
+					workspace_output_status(self->state->cmds->workspace,
 						"Can't insert inside a loop");
 					return;					
 				}

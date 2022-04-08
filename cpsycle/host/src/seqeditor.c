@@ -242,7 +242,7 @@ void seqeditor_onhzoom(SeqEditor* self, ZoomBox* sender)
 
 void seqeditor_onvzoom(SeqEditor* self, ZoomBox* sender)
 {
-	self->state.lineheight = psy_ui_mul_value_real(
+	self->state.line_height = psy_ui_mul_value_real(
 		self->state.defaultlineheight, zoombox_rate(sender));
 	seqeditor_updatescrollstep(self);
 	psy_ui_component_align(&self->scroller.pane);	

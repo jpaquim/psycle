@@ -933,16 +933,16 @@ static void propertiesview_vtable_init(PropertiesView* self)
 
 /* implementation */
 void propertiesview_init(PropertiesView* self, psy_ui_Component* parent,
-	psy_ui_Component* tabbarparent,
-	psy_Property* properties, uintptr_t numcols, Workspace* workspace)
-{		
+	psy_ui_Component* tabbarparent, psy_Property* properties,
+	uintptr_t numcols, InputHandler* input_handler)
+{
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_set_id(&self->component, VIEW_ID_SONGPROPERTIES);
 	propertiesview_vtable_init(self);
 	self->maximizemainsections = TRUE;
 	psy_signal_init(&self->signal_changed);
 	psy_signal_init(&self->signal_selected);
-	psy_ui_component_init(&self->viewtabbar, tabbarparent, NULL);	
+	psy_ui_component_init(&self->viewtabbar, tabbarparent, NULL);
 	propertiesrenderer_init(&self->renderer, &self->component, properties,
 		numcols);
 	psy_ui_scroller_init(&self->scroller, &self->component, NULL, NULL);
@@ -954,19 +954,21 @@ void propertiesview_init(PropertiesView* self, psy_ui_Component* parent,
 		psy_ui_margin_make_em(0.0, 1.0, 0.0, 0.0));
 	psy_ui_component_set_align(&self->renderer.component, psy_ui_ALIGN_HCLIENT);
 	psy_signal_connect(&self->component.signal_selectsection, self,
-		propertiesview_selectsection);	
-	psy_ui_tabbar_init(&self->tabbar, &self->component);	
+		propertiesview_selectsection);
+	psy_ui_tabbar_init(&self->tabbar, &self->component);
 	psy_ui_tabbar_settabalign(&self->tabbar, psy_ui_ALIGN_TOP);
 	psy_ui_component_set_align(psy_ui_tabbar_base(&self->tabbar),
-		psy_ui_ALIGN_RIGHT);	
+		psy_ui_ALIGN_RIGHT);
 	propertiesview_updatetabbarsections(self);
 	psy_signal_connect(&self->renderer.signal_changed, self,
 		propertiesview_onpropertiesrendererchanged);
 	psy_signal_connect(&self->renderer.signal_selected, self,
-		propertiesview_onpropertiesrendererselected);	
-	inputhandler_connect(&workspace->inputhandler, INPUTHANDLER_FOCUS,
-		psy_EVENTDRIVER_CMD, "tracker", psy_INDEX_INVALID,
-		self, (fp_inputhandler_input) propertiesview_oninput);
+		propertiesview_onpropertiesrendererselected);
+	if (input_handler) {
+		inputhandler_connect(input_handler, INPUTHANDLER_FOCUS,
+			psy_EVENTDRIVER_CMD, "tracker", psy_INDEX_INVALID,
+			self, (fp_inputhandler_input)propertiesview_oninput);
+	}
 	psy_signal_connect(&self->tabbar.signal_change, self,
 		propertiesview_ontabbarchange);
 	psy_signal_connect(&self->scroller.pane.signal_beforealign, self,

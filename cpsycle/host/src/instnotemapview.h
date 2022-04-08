@@ -37,7 +37,7 @@ extern "C" {
 
 typedef struct InstrumentNoteMapMetrics {
 	double keysize;
-	int lineheight;
+	int line_height;
 } InstrumentNoteMapMetrics;
 
 typedef struct InstrumentKeyboardView {

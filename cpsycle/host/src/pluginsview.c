@@ -590,14 +590,14 @@ void pluginsview_ondraw(PluginsView* self, psy_ui_Graphics* g)
 			cp.x += self->columnwidth;
 			if (cp.x >= self->numparametercols * self->columnwidth) {
 				cp.x = 0.0;
-				cp.y += self->lineheight;
+				cp.y += self->line_height;
 				odd = !odd;
 				if (odd && p->next) {
 					// psy_ui_RealRectangle r;
 
 					// psy_ui_realrectangle_init_all(&r,
 					//	psy_ui_realpoint_make(0, cp.y),
-					//	psy_ui_realsize_make(size.width, self->lineheight));
+					//	psy_ui_realsize_make(size.width, self->line_height));
 					// psy_ui_drawsolidrectangle(g, r, oddlinebgcolour);
 				}
 			}
@@ -632,7 +632,7 @@ void pluginsview_drawitem(PluginsView* self, psy_ui_Graphics* g,
 		psy_ui_drawsolidrectangle(g,
 			psy_ui_realrectangle_make(
 				topleft,
-				psy_ui_realsize_make(self->columnwidth - 5, self->lineheight)),
+				psy_ui_realsize_make(self->columnwidth - 5, self->line_height)),
 			bgcolour);
 	}			
 	/* if (pluginenabled(self, property)) {
@@ -660,13 +660,13 @@ void pluginsview_computetextsizes(PluginsView* self, double width)
 	
 	tm = psy_ui_component_textmetric(&self->component);
 	self->avgcharwidth = tm->tmAveCharWidth;
-	self->lineheight = floor(tm->tmHeight * 1.5);
+	self->line_height = floor(tm->tmHeight * 1.5);
 	self->columnwidth = tm->tmAveCharWidth * 45;
 	self->identwidth = tm->tmAveCharWidth * 4;	
 	self->numparametercols = (uintptr_t)psy_max(1, width /
 		self->columnwidth);	
 	psy_ui_component_set_scroll_step_height(&self->component,
-		psy_ui_value_make_px(self->lineheight));
+		psy_ui_value_make_px(self->line_height));
 }
 
 void plugindisplayname(psy_Property* property, char* text)
@@ -742,7 +742,7 @@ void pluginsview_onpreferredscrollsize(PluginsView* self, const psy_ui_Size* lim
 		}
 		pluginsview_computetextsizes(self, psy_ui_value_px(&rv->width,
 			psy_ui_component_textmetric(&self->component), NULL));
-		rv->height = psy_ui_value_make_px(self->lineheight *
+		rv->height = psy_ui_value_make_px(self->line_height *
 			pluginsview_numlines(self));
 	}
 }
@@ -881,13 +881,13 @@ uintptr_t pluginsview_visilines(PluginsView* self)
 	psy_ui_RealSize size;
 
 	size = psy_ui_component_size_px(&self->component);
-	return (uintptr_t)(size.height / self->lineheight);
+	return (uintptr_t)(size.height / self->line_height);
 }
 
 uintptr_t pluginsview_topline(PluginsView* self)
 {
 	return (uintptr_t)(psy_ui_component_scroll_top_px(&self->component)
-		/ self->lineheight);
+		/ self->line_height);
 }
 
 uintptr_t pluginsview_numlines(const PluginsView* self)
@@ -900,7 +900,7 @@ void pluginsview_settopline(PluginsView* self, intptr_t line)
 {
 	
 	psy_ui_component_set_scroll_top(&self->component,
-		psy_ui_value_make_px(line * self->lineheight));
+		psy_ui_value_make_px(line * self->line_height));
 }
 
 void pluginsview_cursorposition(PluginsView* self, psy_Property* plugin,
@@ -993,14 +993,14 @@ uintptr_t pluginsview_hittest(PluginsView* self, psy_ui_RealPoint pt)
 			
 			r = psy_ui_realrectangle_make(
 					psy_ui_realpoint_make(cpx, cpy),
-					psy_ui_realsize_make(self->columnwidth, self->lineheight));
+					psy_ui_realsize_make(self->columnwidth, self->line_height));
 			if (psy_ui_realrectangle_intersect(&r, pt)) {				
 				break;
 			}		
 			cpx += self->columnwidth;
 			if (cpx >= self->numparametercols * self->columnwidth) {
 				cpx = 0;
-				cpy += self->lineheight;
+				cpy += self->line_height;
 			}
 		}
 		if (p) {

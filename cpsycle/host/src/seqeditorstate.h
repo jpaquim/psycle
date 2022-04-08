@@ -53,7 +53,7 @@ typedef struct SeqEditState {
 	psy_Signal signal_loopchanged;	
 	double pxperbeat;
 	double defaultpxperbeat;
-	psy_ui_Value lineheight;
+	psy_ui_Value line_height;
 	psy_ui_Value defaultlineheight;	
 	psy_dsp_big_beat_t cursorposition;
 	bool updatecursorposition;
@@ -135,7 +135,7 @@ psy_dsp_big_beat_t seqeditstate_quantize(const SeqEditState*,
 
 INLINE psy_ui_Value seqeditstate_lineheight(const SeqEditState* self)
 {
-	return self->lineheight;
+	return self->line_height;
 }
 
 psy_audio_PatternNode* seqeditstate_node(SeqEditState*, psy_ui_RealPoint,

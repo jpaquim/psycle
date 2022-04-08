@@ -30,8 +30,8 @@ void psy_path_init_all(psy_Path*, const char* prefix, const char* name,
 void psy_path_dispose(psy_Path*);
 
 void psy_path_setpath(psy_Path*, const char* path);
-void psy_path_setprefix(psy_Path*, const char* prefix);
-void psy_path_setname(psy_Path*, const char* name);
+void psy_path_set_prefix(psy_Path*, const char* prefix);
+void psy_path_set_name(psy_Path*, const char* name);
 void psy_path_setext(psy_Path*, const char* name);
 void psy_path_append_dir(psy_Path*, const char* dir);
 bool psy_path_remove_dir(psy_Path*);

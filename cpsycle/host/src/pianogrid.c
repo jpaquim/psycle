@@ -289,7 +289,7 @@ void pianogriddraw_drawplaybar(PianoGridDraw* self, psy_ui_Graphics* g, psy_audi
 	if (self->workspace->host_sequencer_time.currplaying) {
 		psy_dsp_big_beat_t offset;
 
-		offset = self->workspace->host_sequencer_time.currplayposition;
+		offset = self->workspace->host_sequencer_time.currplaycursor.absoffset;
 		if (offset >= 0 && offset < patternviewstate_length(self->gridstate->pv)) {
 			psy_ui_Style* style;
 
@@ -496,7 +496,7 @@ void pianogriddraw_drawevent(PianoGridDraw* self, psy_ui_Graphics* g,
 			0, 0);
 	} else {
 		colour = patternviewskin_eventcolour(patternviewstate_skin(self->gridstate->pv), ev->track,
-			psy_audio_patterns_numtracks(&self->workspace->song->patterns));
+			psy_audio_patterns_num_tracks(&self->workspace->song->patterns));
 	}*/
 	colour = psy_ui_colour_white();
 	if (!ev->noterelease) {

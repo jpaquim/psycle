@@ -271,7 +271,7 @@ void mainframe_init_terminal(MainFrame* self)
 	psy_ui_splitter_init(&self->splitbarterminal, &self->pane);
 	psy_ui_component_set_align(psy_ui_splitter_base(&self->splitbarterminal),
 		psy_ui_ALIGN_BOTTOM);
-	workspace_connectterminal(&self->workspace, self,
+	workspace_connect_terminal(&self->workspace, self,
 		(fp_workspace_output)mainframe_on_terminal_output,
 		(fp_workspace_output)mainframe_on_terminal_warning,
 		(fp_workspace_output)mainframe_on_terminal_error);
@@ -427,7 +427,7 @@ void mainframe_init_main_pane(MainFrame* self)
 		psy_ui_notebook_base(&self->mainviews.notebook),
 		psy_ui_notebook_base(&self->mainviews.mainviewbar.viewtabbars),
 		&self->workspace.config.config, 3,
-		&self->workspace);	
+		&self->workspace.inputhandler);	
 	psy_ui_component_set_id(&self->settingsview.component,
 		VIEW_ID_SETTINGSVIEW);
 	psy_signal_connect(&self->settingsview.signal_changed, self,
@@ -553,7 +553,7 @@ void mainframe_init_seq_editor(MainFrame* self)
 void mainframe_init_recent_view(MainFrame* self)
 {
 	playlistview_init(&self->playlist, &self->pane,
-		psy_ui_notebook_base(&self->mainviews.mainviewbar.viewtabbars),
+		psy_ui_notebook_base(&self->mainviews.mainviewbar.viewtabbars),		
 		&self->workspace);
 	psy_ui_component_set_align(playlistview_base(&self->playlist),
 		psy_ui_ALIGN_LEFT);
@@ -667,8 +667,9 @@ bool mainframe_on_input(MainFrame* self, InputHandler* sender)
 		}
 		break;
 	case CMD_IMM_INFOPATTERN:
-		if (workspace_currview(&self->workspace).id != VIEW_ID_PATTERNVIEW) {
-			workspace_select_view(&self->workspace, VIEW_ID_PATTERNVIEW, 0, 0);
+		if (workspace_current_view(&self->workspace).id != VIEW_ID_PATTERNVIEW) {
+			workspace_select_view(&self->workspace,
+				viewindex_make(VIEW_ID_PATTERNVIEW, 0, 0, psy_INDEX_INVALID));
 		}
 		if (!psy_ui_component_visible(&self->patternview.properties.component)) {
 			psy_ui_Tab* tab;
@@ -691,19 +692,19 @@ bool mainframe_on_input(MainFrame* self, InputHandler* sender)
 		return 1;
 	case CMD_IMM_FULLSCREEN:
 		psy_ui_component_togglefullscreen(mainframe_base(self));
-		workspace_focusview(&self->workspace);
+		workspace_focus_view(&self->workspace);
 		return 1;
 		break;
 	case CMD_EDT_EDITQUANTIZEDEC:
-		workspace_editquantizechange(&self->workspace, -1);
+		workspace_edit_quantize_change(&self->workspace, -1);
 		patterncursorstepbox_update(&self->patternviewbar.cursorstep);
 		return 1;
 	case CMD_EDT_EDITQUANTIZEINC:
-		workspace_editquantizechange(&self->workspace, 1);
+		workspace_edit_quantize_change(&self->workspace, 1);
 		patterncursorstepbox_update(&self->patternviewbar.cursorstep);
 		return 1;
 	}
-	workspace_oninput(&self->workspace, cmd.id);
+	workspace_on_input(&self->workspace, cmd.id);
 	return 0;
 }
 
@@ -759,10 +760,10 @@ void mainframe_update_songtitle(MainFrame* self)
 {
 	char title[512];
 
-	workspace_apptitle(&self->workspace, title, 512);
+	workspace_app_title(&self->workspace, title, 512);
 	psy_ui_component_set_title(mainframe_base(self), title);
 	mainstatusbar_setdefaultstatustext(&self->statusbar,
-		workspace_songtitle(&self->workspace));
+		workspace_song_title(&self->workspace));
 }
 
 void mainframe_on_toggle_gear(MainFrame* self, Workspace* sender)
@@ -800,7 +801,7 @@ void mainframe_on_file_save_view(MainFrame* self, psy_ui_Component* sender)
 
 	psy_ui_component_show_align(fileview_base(&self->fileview));
 	fileview_filename(&self->fileview, path, 4096);
-	workspace_savesong(&self->workspace, path);	
+	workspace_save_song(&self->workspace, path);	
 }
 
 void mainframe_ondiskop(MainFrame* self, psy_ui_Component* sender)
@@ -870,12 +871,14 @@ void updateshowstate(psy_Property* property, psy_ui_Component* component)
 
 void mainframe_on_render(MainFrame* self, psy_ui_Component* sender)
 {
-	workspace_select_view(&self->workspace, VIEW_ID_RENDERVIEW, 0, 0);
+	workspace_select_view(&self->workspace, viewindex_make(
+		VIEW_ID_RENDERVIEW, 0, psy_INDEX_INVALID, psy_INDEX_INVALID));
 }
 
 void mainframe_on_export(MainFrame* self, psy_ui_Component* sender)
 {
-	workspace_select_view(&self->workspace, VIEW_ID_EXPORTVIEW, 0, 0);
+	workspace_select_view(&self->workspace, viewindex_make(
+		VIEW_ID_EXPORTVIEW, 0, psy_INDEX_INVALID, psy_INDEX_INVALID));
 }
 
 void mainframe_on_timer(MainFrame* self, uintptr_t timerid)
@@ -887,11 +890,11 @@ void mainframe_on_timer(MainFrame* self, uintptr_t timerid)
 	seqview_idle(&self->sequenceview);
 	plugineditorbar_idle(&self->plugineditorbar);
  	playposbar_idle(&self->playposbar);
-	if (workspace_currview(&self->workspace).id == VIEW_ID_MACHINEVIEW) {
+	if (workspace_current_view(&self->workspace).id == VIEW_ID_MACHINEVIEW) {
 		machineview_idle(&self->machineview);
 	}
-	if (self->titlemodified != workspace_songmodified(&self->workspace)) {
-		self->titlemodified = workspace_songmodified(&self->workspace);
+	if (self->titlemodified != workspace_song_modified(&self->workspace)) {
+		self->titlemodified = workspace_song_modified(&self->workspace);
 		mainframe_update_songtitle(self);
 	}
 }
@@ -974,8 +977,9 @@ void mainframe_on_tabbar_changed(MainFrame* self, psy_ui_TabBar* sender,
 	psy_ui_notebook_select(&self->mainviews.mainviewbar.viewtabbars, tabindex);
 	component = psy_ui_notebook_active_page(&self->mainviews.notebook);
 	if (component) {
-		workspace_onviewchanged(&self->workspace, viewhistoryentry_make(
-			tabindex, psy_ui_component_section(component), psy_INDEX_INVALID));
+		workspace_on_view_changed(&self->workspace, viewindex_make(
+			tabindex, psy_ui_component_section(component), psy_INDEX_INVALID,
+			psy_INDEX_INVALID));
 		psy_ui_component_set_focus(component);
 	}
 	psy_ui_component_align(&self->component);		
@@ -1038,7 +1042,7 @@ void mainframe_on_check_unsaved(MainFrame* self, ConfirmBox* sender,
 	switch (option) {
 	case CONFIRM_YES:
 		if (mode == CONFIRM_SEQUENCECLEAR) {
-			workspace_restoreview(&self->workspace);
+			workspace_restore_view(&self->workspace);
 			seqview_clear(&self->sequenceview);
 		} else if (workspace_savesong_fileselect(&self->workspace)) {
 			if (mode == CONFIRM_CLOSE) {
@@ -1062,7 +1066,7 @@ void mainframe_on_check_unsaved(MainFrame* self, ConfirmBox* sender,
 		break;
 	case CONFIRM_NO: {
 		if (mode == CONFIRM_SEQUENCECLEAR) {
-			workspace_restoreview(&self->workspace);
+			workspace_restore_view(&self->workspace);
 		} else {
 			self->workspace.modified_without_undo = FALSE;
 			self->workspace.undosavepoint = psy_list_size(
@@ -1090,7 +1094,7 @@ void mainframe_on_check_unsaved(MainFrame* self, ConfirmBox* sender,
 		}
 		break; }
 	case CONFIRM_CONTINUE:
-		workspace_restoreview(&self->workspace);
+		workspace_restore_view(&self->workspace);
 		break;
 	default:
 		break;
@@ -1106,9 +1110,10 @@ bool mainframe_on_close(MainFrame* self)
 {
 	workspace_save_configuration(&self->workspace);
 	if (keyboardmiscconfig_savereminder(&self->workspace.config.misc) &&
-			workspace_songmodified(&self->workspace)) {
-		workspace_select_view(&self->workspace, VIEW_ID_CHECKUNSAVED, 0,
-			CONFIRM_CLOSE);
+			workspace_song_modified(&self->workspace)) {
+		workspace_select_view(&self->workspace,
+			viewindex_make(VIEW_ID_CHECKUNSAVED, 0,
+			CONFIRM_CLOSE, psy_INDEX_INVALID));
 		return FALSE;
 	}
 	psy_ui_component_stop_timer(mainframe_base(self), 0);
@@ -1236,9 +1241,10 @@ void mainframe_on_file_load(MainFrame* self, FileView* sender)
 		return;
 	}
 	if (keyboardmiscconfig_savereminder(&self->workspace.config.misc) &&
-			workspace_songmodified(&self->workspace)) {
-		workspace_select_view(&self->workspace, VIEW_ID_CHECKUNSAVED, SECTION_ID_FILEVIEW,
-			CONFIRM_LOAD);
+			workspace_song_modified(&self->workspace)) {
+		workspace_select_view(&self->workspace,
+			viewindex_make(VIEW_ID_CHECKUNSAVED, SECTION_ID_FILEVIEW,
+			CONFIRM_LOAD, psy_INDEX_INVALID));
 	} else {
 		workspace_loadsong(&self->workspace,
 			path,
@@ -1300,7 +1306,7 @@ void mainframe_on_key_up(MainFrame* self, psy_ui_KeyboardEvent* ev)
 void mainframe_delegate_keyboard(MainFrame* self, intptr_t message,
 	psy_ui_KeyboardEvent* ev)
 {
-	psy_eventdriver_write(workspace_kbddriver(&self->workspace),
+	psy_eventdriver_write(workspace_kbd_driver(&self->workspace),
 		psy_eventdriverinput_make(message,
 			psy_audio_encodeinput(psy_ui_keyboardevent_keycode(ev),
 				psy_ui_keyboardevent_shiftkey(ev),
@@ -1308,7 +1314,7 @@ void mainframe_delegate_keyboard(MainFrame* self, intptr_t message,
 				psy_ui_keyboardevent_altkey(ev),
 				message == psy_EVENTDRIVER_RELEASE),
 			psy_ui_keyboardevent_repeat(ev),
-			workspace_currview(&self->workspace).id));
+			workspace_current_view(&self->workspace).id));
 
 }
 
@@ -1381,7 +1387,7 @@ bool mainframe_on_input_handler_callback(MainFrame* self, int message,
 	case INPUTHANDLER_HASFOCUS:
 		return (psy_ui_component_has_focus((psy_ui_Component*)param1));
 	case INPUTHANDLER_HASVIEW:
-		return (workspace_currview(&self->workspace).id == (uintptr_t)param1);
+		return (workspace_current_view(&self->workspace).id == (uintptr_t)param1);
 	default:
 		return FALSE;
 	}

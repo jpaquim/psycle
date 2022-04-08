@@ -83,6 +83,16 @@ bool generalconfig_showaboutatstart(const GeneralConfig* self)
 	return psy_property_at_bool(self->general, "showaboutatstart", TRUE);
 }
 
+ViewIndex generalconfig_start_view(const GeneralConfig* self)
+{
+	if (generalconfig_showaboutatstart(self)) {
+		return viewindex_make(VIEW_ID_HELPVIEW,
+			SECTION_ID_HELPVIEW_ABOUT, 0, psy_INDEX_INVALID);
+	}
+	return viewindex_make(VIEW_ID_MACHINEVIEW,
+		SECTION_ID_MACHINEVIEW_WIRES, 0, psy_INDEX_INVALID);
+}
+
 bool generalconfig_showmaximizedatstart(const GeneralConfig* self)
 {
 	assert(self);

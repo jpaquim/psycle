@@ -94,22 +94,22 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 	patterncmds_init(&self->cmds,		
 		&workspace->player, &workspace->undoredo,
 		&workspace->config.directories);		
-	trackconfig_init(&self->trackconfig,
+	trackconfig_init(&self->track_config,
 		patternviewconfig_show_wide_inst_column(
 			psycleconfig_patview(workspace_conf(workspace))));
 	patternviewstate_init(&self->pvstate,
 		&workspace->config.patview,
 		&workspace->config.misc,
 		NULL, &self->cmds);
-	trackerstate_init(&self->state, &self->trackconfig, &self->pvstate);
+	trackerstate_init(&self->state, &self->track_config, &self->pvstate);
 	patternview_connect_song(self);
 	/* Header */
 	trackerheaderview_init(&self->header, &self->component, 
-		&self->trackconfig, &self->state, self->workspace);	
+		&self->track_config, &self->state, self->workspace);	
 	psy_ui_component_set_align(&self->header.component, psy_ui_ALIGN_TOP);	
 	/* Defaultline */
 	patterndefaultline_init(&self->defaultline, &self->component,
-		&self->trackconfig, workspace);	
+		&self->track_config, workspace);	
 	psy_signal_connect(&self->defaultline.grid.signal_colresize, self,
 		patternview_on_column_resize);
 	/* Tracker */
@@ -164,7 +164,7 @@ void patternview_on_destroy(PatternView* self)
 	assert(self);
 
 	trackerstate_dispose(&self->state);
-	trackconfig_dispose(&self->trackconfig);
+	trackconfig_dispose(&self->track_config);
 	patternviewstate_dispose(&self->pvstate);
 }
 
@@ -261,7 +261,7 @@ void patternview_on_configure(PatternView* self, PatternViewConfig* config,
 
 	patternview_update_font(self);
 	patternviewstate_configure(&self->pvstate);		
-	trackconfig_init_columns(&self->trackconfig,
+	trackconfig_init_columns(&self->track_config,
 		patternviewconfig_show_wide_inst_column(config));
 	patternview_select_display(self, (PatternDisplayMode)
 		patternviewconfig_pattern_display(config));
@@ -300,7 +300,7 @@ void patternview_num_tracks_changed(PatternView* self,
 	psy_audio_Pattern* sender, uintptr_t numsongtracks)
 {
 	assert(self);
-
+		
 	patternview_rebuild(self);	
 }
 
@@ -308,6 +308,7 @@ void patternview_rebuild(PatternView* self)
 {
 	assert(self);
 
+	patterndefaultline_update_song_tracks(&self->defaultline);
 	trackerheader_build(&self->header.header);	
 	trackergrid_build(&self->trackerview.grid);	
 	trackergrid_build(&self->defaultline.grid);
@@ -372,7 +373,7 @@ void patternview_on_column_resize(PatternView* self, TrackerGrid* sender)
 	assert(self);
 
 	psy_ui_component_align(&self->trackerview.scroller.pane);
-	psy_ui_component_align(patterndefaultline_base(&self->defaultline));
+	psy_ui_component_align(&self->defaultline.pane);
 	psy_ui_component_align(&self->header.pane);
 	psy_ui_component_invalidate(&self->component);
 }
@@ -408,10 +409,6 @@ void patternview_update_font(PatternView* self)
 	psy_ui_font_init(&font, &fontinfo);
 	psy_ui_component_setfont(&self->component, &font);	
 	psy_ui_font_dispose(&font);		
-	trackerstate_update_metric(&self->state,
-		psy_ui_component_textmetric(&self->component), zoomrate);
-	trackerstate_update_metric(self->defaultline.grid.state,
-		psy_ui_component_textmetric(&self->component), zoomrate);
 	keyboardstate_update_metrics(&self->pianoroll.keyboardstate,
 		psy_ui_component_textmetric(&self->component));
 	patternview_update_scroll_step(self);
@@ -428,7 +425,7 @@ void patternview_update_scroll_step(PatternView* self)
 	assert(self);
 
 	step = psy_ui_value_make_px(trackerstate_trackwidth(&self->state,
-		psy_INDEX_INVALID));
+		psy_INDEX_INVALID, psy_ui_component_textmetric(&self->component)));
 	psy_ui_component_set_scroll_step_width(trackergrid_base(
 		&self->trackerview.grid), step);
 	psy_ui_component_set_scroll_step_width(trackergrid_base(
@@ -436,5 +433,5 @@ void patternview_update_scroll_step(PatternView* self)
 	psy_ui_component_set_scroll_step_width(trackerheader_base(
 		&self->header.header), step);
 	psy_ui_component_set_scroll_step_height(trackergrid_base(
-		&self->trackerview.grid), self->state.lineheight);	
+		&self->trackerview.grid), self->state.line_height);	
 }

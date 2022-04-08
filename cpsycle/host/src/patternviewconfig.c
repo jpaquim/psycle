@@ -459,7 +459,7 @@ bool patternviewconfig_showbeatoffset(const PatternViewConfig* self)
 	return psy_property_at_bool(self->patternview, "beatoffset", TRUE);
 }
 
-double patternviewconfig_linenumber_width(const PatternViewConfig* self)
+double patternviewconfig_linenumber_num_digits(const PatternViewConfig* self)
 {
 	double rv;
 
@@ -468,8 +468,6 @@ double patternviewconfig_linenumber_width(const PatternViewConfig* self)
 	rv = 0.0;
 	if (patternviewconfig_line_numbers(self)) {
 		rv += 5.0;
-		if (patternviewconfig_linenumbersinhex(self)) {
-		}
 		if (patternviewconfig_showbeatoffset(self)) {
 			rv += 5.0;
 		}

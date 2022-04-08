@@ -45,7 +45,7 @@ void psy_ui_textdraw_draw(psy_ui_TextDraw* self, psy_ui_Graphics* g,
 	intptr_t line;
 	uintptr_t numlines;
 	uintptr_t linestart;
-	double lineheight;
+	double line_height;
 	psy_ui_RealRectangle clip;	
 	const psy_ui_TextMetric* tm;
 
@@ -69,15 +69,15 @@ void psy_ui_textdraw_draw(psy_ui_TextDraw* self, psy_ui_Graphics* g,
 	}	
 	center.y = psy_ui_textdraw_center_y(self, self->size.height, numlines, psy_ui_font(g), tm);
 	clip = psy_ui_graphics_cliprect(g);
-	lineheight = (self->format->linespacing * tm->tmHeight);
-	line = (intptr_t)(clip.top / lineheight);
+	line_height = (self->format->linespacing * tm->tmHeight);
+	line = (intptr_t)(clip.top / line_height);
 	if (line > 0 && line < (intptr_t)numlines) {
 		linestart = psy_ui_textformat_line_at(self->format, line - 1) + 1;		
 	} else {
 		linestart = 0;		
 	}
-	center.y += (line * lineheight);
-	numlines = psy_min(numlines, ((uintptr_t)(floor(clip.bottom) / lineheight)) + 1);
+	center.y += (line * line_height);
+	numlines = psy_min(numlines, ((uintptr_t)(floor(clip.bottom) / line_height)) + 1);
 	for (; line < (intptr_t)numlines; ++line) {
 		if (line >= 0) {
 			cp = psy_ui_textformat_line_at(self->format, line);
@@ -89,7 +89,7 @@ void psy_ui_textdraw_draw(psy_ui_TextDraw* self, psy_ui_Graphics* g,
 			}
 			linestart = cp + 1;
 		}
-		center.y += lineheight;		
+		center.y += line_height;		
 	}	
 }
 

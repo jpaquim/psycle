@@ -95,7 +95,7 @@ typedef struct PluginsView {
 	psy_Signal signal_selected;	
 	psy_Signal signal_changed;
 	// internal	
-	double lineheight;
+	double line_height;
 	double columnwidth;
 	double identwidth;
 	intptr_t numparametercols;

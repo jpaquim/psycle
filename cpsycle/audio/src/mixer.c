@@ -1272,7 +1272,7 @@ void onconnected(psy_audio_Mixer* self, psy_audio_Connections* connections,
 			machine = psy_audio_machines_at(machines, outputslot);
 			if (machine) {
 				if (psy_audio_machine_mode(machine) == psy_audio_MACHMODE_GENERATOR ||
-					!psy_audio_machines_isconnectasmixersend(machines)) {
+					!psy_audio_machines_is_connect_as_mixersend(machines)) {
 					uintptr_t inputnum;
 
 					inputnum = freeinputchannel(self);

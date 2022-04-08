@@ -60,11 +60,11 @@ void psy_ui_defaults_loadtheme(psy_ui_Defaults* self, const char* dir, psy_ui_Th
 	
 	self->styles.theme = theme;
 	psy_path_init(&path, NULL);
-	psy_path_setprefix(&path, dir);
+	psy_path_set_prefix(&path, dir);
 	if (theme == psy_ui_DARKTHEME) {
-		psy_path_setname(&path, PSYCLE_DARKSTYLES_INI);		
+		psy_path_set_name(&path, PSYCLE_DARKSTYLES_INI);		
 	} else {
-		psy_path_setname(&path, PSYCLE_LIGHTSTYLES_INI);
+		psy_path_set_name(&path, PSYCLE_LIGHTSTYLES_INI);
 	}	
 	styleconfig = psy_property_clone(
 		psy_ui_styles_configuration(&self->styles));

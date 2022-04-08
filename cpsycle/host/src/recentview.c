@@ -68,6 +68,7 @@ void playlistview_init(PlaylistView* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->component, parent, NULL);
 	vtable_init(self);	
 	self->workspace = workspace;
+	self->playlist = &workspace->playlist;
 	playlistbar_init(&self->bar, &self->component);	
 	psy_ui_component_set_align(&self->bar.component, psy_ui_ALIGN_TOP);	
 	psy_signal_connect(&self->bar.clear.signal_clicked, self,
@@ -83,7 +84,8 @@ void playlistview_init(PlaylistView* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->bar.down.signal_clicked, self,
 		playlistview_onmovedown);
 	propertiesview_init(&self->view, &self->component,
-		tabbarparent, workspace_recentsongs(workspace), 1, workspace);
+		tabbarparent, workspace_recentsongs(workspace), 1,
+		&workspace->inputhandler);
 	propertiesview_enablemousepropagation(&self->view);		
 	propertiesrenderer_setstyle(&self->view.renderer,
 		STYLE_RECENTVIEW_MAINSECTION,
@@ -126,7 +128,10 @@ void playlistview_onselected(PlaylistView* self, PropertiesView* sender,
 
 psy_Property* playlistview_currfiles(PlaylistView* self)
 {
-	return workspace_playlist(self->workspace)->recentfiles;
+	if (self->playlist) {
+		return self->playlist->recentfiles;
+	}
+	return NULL;
 }
 
 void playlistview_ondelete(PlaylistView* self, psy_ui_Button* sender)
@@ -144,8 +149,10 @@ void playlistview_ondelete(PlaylistView* self, psy_ui_Button* sender)
 
 void playlistview_onclear(PlaylistView* self, psy_ui_Button* sender)
 {	
-	workspace_clearrecentsongs(self->workspace);
-	propertiesview_reload(&self->view);
+	if (self->playlist) {
+		psy_playlist_clear(self->playlist);
+		propertiesview_reload(&self->view);
+	}
 }
 
 void playlistview_onplay(PlaylistView* self, psy_ui_Button* sender)

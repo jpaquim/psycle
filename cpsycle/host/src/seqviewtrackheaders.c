@@ -54,7 +54,7 @@ void seqviewtrackheaders_init(SeqviewTrackHeaders* self,
 		psy_ui_ALIGN_LEFT, psy_ui_margin_zero());
 	psy_ui_component_set_align_expand(&self->client, psy_ui_HEXPAND);
 	psy_ui_component_setscrollstep(&self->client,
-		psy_ui_size_make(self->state->trackwidth, self->state->lineheight));
+		psy_ui_size_make(self->state->trackwidth, self->state->line_height));
 	psy_ui_component_set_overflow(&self->client, psy_ui_OVERFLOW_HSCROLL);
 	seqviewtrackheaders_build(self);
 }

@@ -118,7 +118,7 @@ void presetsbar_setmachine(PresetsBar* self, psy_audio_Machine* machine)
 				presets = NULL;
 			}
 			if (status && status != psy_audio_PRESETIO_ERROR_OPEN) {
-				workspace_outputerror(self->workspace,
+				workspace_output_error(self->workspace,
 					psy_audio_presetsio_statusstr(status));
 			}
 			presetsbar_setpresets(self, presets, FALSE);
@@ -141,7 +141,7 @@ bool presetsbar_userpresetpath(PresetsBar* self, psy_Path* path)
 		char* name;
 
 		psy_path_setpath(path, info->modulepath);
-		psy_path_setprefix(path,
+		psy_path_set_prefix(path,
 			dirconfig_userpresets(&self->workspace->config.directories));
 		psy_path_setext(path, "prs");
 		if (psy_filereadable(psy_path_full(path))) {
@@ -149,7 +149,7 @@ bool presetsbar_userpresetpath(PresetsBar* self, psy_Path* path)
 		}
 		name = strdup(psy_path_name(path));
 		psy_replacechar(name, '-', '_');
-		psy_path_setname(path, name);
+		psy_path_set_name(path, name);
 		free(name);
 		if (psy_filereadable(psy_path_full(path))) {
 			return TRUE;
@@ -176,7 +176,7 @@ void presetsbar_onimport(PresetsBar* self, psy_ui_Component* sender)
 			psy_audio_machine_datasize(self->machine),
 			dirconfig_pluginscurrplatform(&self->workspace->config.directories));
 		if (status) {
-			workspace_outputerror(self->workspace,
+			workspace_output_error(self->workspace,
 				psy_audio_presetsio_statusstr(status));
 			psy_audio_presets_dispose(presets);
 			free(presets);
@@ -202,7 +202,7 @@ void presetsbar_onexport(PresetsBar* self, psy_ui_Component* sender)
 				psy_ui_savedialog_path(&dialog),
 				psy_audio_machine_presets(self->machine));
 			if (status) {
-				workspace_outputerror(self->workspace,
+				workspace_output_error(self->workspace,
 					psy_audio_presetsio_statusstr(status));
 			}
 		}
@@ -236,7 +236,7 @@ void presetsbar_onsavepresets(PresetsBar* self, psy_ui_Component* sender)
 					psy_ui_savedialog_path(&dialog),
 					preset);
 				if (status) {
-					workspace_outputerror(self->workspace,
+					workspace_output_error(self->workspace,
 						psy_audio_presetsio_statusstr(status));
 				}
 				psy_audio_preset_dispose(preset);
@@ -251,7 +251,7 @@ void presetsbar_onsavepresets(PresetsBar* self, psy_ui_Component* sender)
 				psy_ui_textarea_text(&self->savename));
 			psy_audio_presets_insert(presets, index, preset);
 			if (!self->userpreset) {
-				psy_path_setprefix(&self->presetpath,
+				psy_path_set_prefix(&self->presetpath,
 					dirconfig_userpresets(&self->workspace->config.directories));
 				if (!psy_direxists(psy_path_prefix(&self->presetpath))) {
 					psy_mkdir(psy_path_prefix(&self->presetpath));
@@ -260,7 +260,7 @@ void presetsbar_onsavepresets(PresetsBar* self, psy_ui_Component* sender)
 			}
 			status = psy_audio_presetsio_save(&self->presetpath, presets);
 			if (status) {
-				workspace_outputerror(self->workspace,
+				workspace_output_error(self->workspace,
 					psy_audio_presetsio_statusstr(status));
 			}
 			psy_ui_component_set_focus(&self->component);

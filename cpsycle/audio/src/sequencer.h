@@ -354,6 +354,8 @@ psy_audio_SequencerTrack* psy_audio_sequencer_curr_track(psy_audio_Sequencer*,
 	uintptr_t track);
 psy_audio_SequenceEntry* psy_audio_sequencer_curr_seq_entry(
 	psy_audio_Sequencer*, uintptr_t track_index);
+psy_audio_SequenceCursor psy_audio_sequencer_play_cursor(
+	const psy_audio_Sequencer*);
 
 #ifdef __cplusplus
 }

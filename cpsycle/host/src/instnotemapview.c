@@ -105,7 +105,7 @@ void instrumentkeyboardview_init(InstrumentKeyboardView* self,
 	psy_ui_component_init(&self->component, parent, NULL);
 	instrumentkeyboardview_vtable_init(self);	
 	self->metrics.keysize = 6;
-	self->metrics.lineheight = 15;
+	self->metrics.line_height = 15;
 	psy_audio_instrumententry_init(&self->entry);
 	self->entry.keyrange.low = 255;
 	self->entry.keyrange.high = 255;
@@ -223,7 +223,7 @@ void instrumentkeyboardview_updatemetrics(InstrumentKeyboardView* self)
 		psy_ui_component_scrollsize(&self->component), tm, NULL);
 	self->metrics.keysize = size.width / (double)numwhitekeys;
 	psy_ui_component_set_scroll_step_height(&self->component,
-		psy_ui_value_make_px(self->metrics.lineheight * 3));
+		psy_ui_value_make_px(self->metrics.line_height * 3));
 }
 
 /* InstrumentEntryView */
@@ -293,7 +293,7 @@ void instrumententryview_init(InstrumentEntryView* self,
 		psy_ui_size_make_em(0.0, 1.0));
 	self->instrument = 0;
 	self->metrics.keysize = 8;
-	self->metrics.lineheight = 15;
+	self->metrics.line_height = 15;
 	self->dragmode = 0;	
 	self->state = state;
 	psy_ui_component_set_scroll_step_height(&self->component,
@@ -414,7 +414,7 @@ void instrumententryview_ondraw(InstrumentEntryView* self, psy_ui_Graphics* g)
 				psy_ui_realpoint_make(startx, cpy),
 				psy_ui_realsize_make(endx - startx, 5));
 			psy_ui_drawsolidrectangle(g, r, colour);			
-			cpy += self->metrics.lineheight;
+			cpy += self->metrics.line_height;
 		}		
 		if (!self->instrument->entries) {
 			static const char* nomapping = "No Instrument Mapping";
@@ -452,7 +452,7 @@ void instrumententryview_onpreferredsize(InstrumentEntryView* self, psy_ui_Size*
 			rv->width = limit->width;
 		}
 		rv->height = psy_ui_value_make_px(
-			(self->metrics.lineheight) * (double)psy_list_size(self->instrument->entries));
+			(self->metrics.line_height) * (double)psy_list_size(self->instrument->entries));
 	} else {
 		*rv = psy_ui_size_zero();
 	}
@@ -478,7 +478,7 @@ void instrumententryview_updatemetrics(InstrumentEntryView* self)
 		psy_ui_component_scrollsize(&self->component), tm, NULL);
 	self->metrics.keysize = size.width / (double)numwhitekeys;
 	psy_ui_component_set_scroll_step_height(&self->component,
-		psy_ui_value_make_px(self->metrics.lineheight * 3));
+		psy_ui_value_make_px(self->metrics.line_height * 3));
 }
 
 void instrumententryview_on_mouse_down(InstrumentEntryView* self,
@@ -491,7 +491,7 @@ void instrumententryview_on_mouse_down(InstrumentEntryView* self,
 			uintptr_t numentry;	
 
 			numentry = (uintptr_t)(psy_ui_mouseevent_pt(ev).y /
-				(self->metrics.lineheight));
+				(self->metrics.line_height));
 			if (numentry < psy_list_size(
 					psy_audio_instrument_entries(self->instrument))) {
 				entry = psy_audio_instrument_entryat(self->instrument,
@@ -676,7 +676,7 @@ void instrumententryview_outputstatus(InstrumentEntryView* self, uint8_t key)
 	} else {
 		psy_snprintf(text, 64, "%s %d", keydesc, (int)key);
 	}
-	workspace_outputstatus(self->state->workspace, text);
+	workspace_output_status(self->state->workspace, text);
 }
 
 /* Table */
@@ -1354,7 +1354,7 @@ void instrumentnotemapview_init(InstrumentNoteMapView* self,
 	psy_ui_component_init(&self->component, parent, NULL);
 	instrumentnotemapview_vtable_init(self);	
 	self->metrics.keysize = 8;
-	self->metrics.lineheight = 15;
+	self->metrics.line_height = 15;
 	instrumententrystate_init(&self->state, workspace);
 	instrumententrystate_translate(&self->state, psy_ui_translator());
 	psy_ui_label_init_text(&self->label, &self->component,

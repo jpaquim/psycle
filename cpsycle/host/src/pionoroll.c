@@ -221,8 +221,8 @@ void pianoroll_onplaylinechanged(Pianoroll* self, Workspace* sender)
 		return;
 	}	
 	pianogrid_invalidate_lines(&self->grid,
-		self->workspace->host_sequencer_time.lastplayline,
-		self->workspace->host_sequencer_time.currplayline);	
+		self->workspace->host_sequencer_time.lastplaycursor.linecache,
+		self->workspace->host_sequencer_time.currplaycursor.linecache);	
 }
 
 void pianoroll_on_timer(Pianoroll* self, uintptr_t timerid)

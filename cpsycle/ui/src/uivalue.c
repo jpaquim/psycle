@@ -76,6 +76,19 @@ void psy_ui_value_sub(psy_ui_Value* self, const psy_ui_Value* other,
 	}
 }
 
+void psy_ui_value_mul(psy_ui_Value* self, const psy_ui_Value* other,
+	const psy_ui_TextMetric* tm, const psy_ui_Size* pesize)
+{
+	if ((self->unit == psy_ui_UNIT_EH && other->unit == psy_ui_UNIT_EH) ||
+		(self->unit == psy_ui_UNIT_EW && other->unit == psy_ui_UNIT_EW)) {
+		self->quantity *= other->quantity;
+	} else {
+		self->quantity = psy_ui_value_px(self, tm, pesize) *
+			psy_ui_value_px(other, tm, pesize);
+		self->unit = psy_ui_UNIT_PX;
+	}
+}
+
 void psy_ui_value_mul_real(psy_ui_Value* self, double factor)
 {
 	if ((self->unit == psy_ui_UNIT_EH) ||
@@ -226,6 +239,16 @@ psy_ui_Value psy_ui_sub_values(psy_ui_Value lhs, psy_ui_Value rhs,
 
 	rv = lhs;
 	psy_ui_value_sub(&rv, &rhs, tm, pesize);
+	return rv;
+}
+
+psy_ui_Value psy_ui_mul_values(psy_ui_Value lhs, psy_ui_Value rhs,
+	const psy_ui_TextMetric* tm, const psy_ui_Size* pesize)
+{
+	psy_ui_Value rv;
+
+	rv = lhs;
+	psy_ui_value_mul(&rv, &rhs, tm, pesize);
 	return rv;
 }
 

@@ -894,21 +894,21 @@ void psy_audio_machines_removemixersend(psy_audio_Machines* self,
 	psy_table_remove(&self->connections.sends, slot);
 }
 
-void  psy_audio_machines_connectasmixersend(psy_audio_Machines* self)
+void  psy_audio_machines_connect_as_mixersend(psy_audio_Machines* self)
 {
 	assert(self);
 
 	self->mixersendconnect = TRUE;
 }
 
-void  psy_audio_machines_connectasmixerinput(psy_audio_Machines* self)
+void  psy_audio_machines_connect_as_mixerinput(psy_audio_Machines* self)
 {
 	assert(self);
 
 	self->mixersendconnect = FALSE;
 }
 
-bool  psy_audio_machines_isconnectasmixersend(const psy_audio_Machines* self)
+bool  psy_audio_machines_is_connect_as_mixersend(const psy_audio_Machines* self)
 {
 	assert(self);
 

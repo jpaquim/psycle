@@ -23,12 +23,12 @@ static void psy_ui_scrollbarpane_on_mouse_down(psy_ui_ScrollBarPane*,
 	psy_ui_MouseEvent*);
 static void psy_ui_scrollbarpane_on_mouse_up(psy_ui_ScrollBarPane*,
 	psy_ui_MouseEvent*);
-static void psy_ui_scrollbarpane_onmousemove(psy_ui_ScrollBarPane*,
+static void psy_ui_scrollbarpane_on_mouse_move(psy_ui_ScrollBarPane*,
 	psy_ui_MouseEvent*);
 static double psy_ui_scrollbarpane_step(psy_ui_ScrollBarPane*);
 static double psy_ui_scrollbarpane_position_in_scrollrange(
 	const psy_ui_ScrollBarPane*, double pos);
-static void psy_ui_scrollbarpane_updatethumbposition(psy_ui_ScrollBarPane*);
+static void psy_ui_scrollbarpane_update_thumb_position(psy_ui_ScrollBarPane*);
 static void psy_ui_scrollbarpane_on_timer(psy_ui_ScrollBarPane*, uintptr_t id);
 
 /* vtable */
@@ -52,7 +52,7 @@ static void psy_ui_scrollbarpane_vtable_init(psy_ui_ScrollBarPane* self)
 			psy_ui_scrollbarpane_on_mouse_down;
 		psy_ui_scrollbarpane_vtable.onmousemove =
 			(psy_ui_fp_component_on_mouse_event)
-			psy_ui_scrollbarpane_onmousemove;
+			psy_ui_scrollbarpane_on_mouse_move;
 		psy_ui_scrollbarpane_vtable.on_mouse_up =
 			(psy_ui_fp_component_on_mouse_event)
 			psy_ui_scrollbarpane_on_mouse_up;
@@ -76,12 +76,12 @@ void psy_ui_scrollbarpane_init(psy_ui_ScrollBarPane* self,
 	psy_ui_component_init(&self->thumb, &self->component, NULL);	
 	psy_signal_init(&self->signal_changed);
 	psy_ui_intpoint_init(&self->scrollrange);
-	self->position = 0;
-	self->screenpos = 0;
+	self->position = 0.0;
+	self->screenpos = 0.0;
 	self->orientation = psy_ui_VERTICAL;	
 	self->repeat = 0;
-	self->repeatdelaycounter = 0;		
-	psy_ui_scrollbarpane_setorientation(self, psy_ui_VERTICAL);	
+	self->repeat_delay_counter = 0;
+	psy_ui_scrollbarpane_set_orientation(self, psy_ui_VERTICAL);	
 }
 
 void psy_ui_scrollbarpane_on_destroy(psy_ui_ScrollBarPane* self)
@@ -91,7 +91,7 @@ void psy_ui_scrollbarpane_on_destroy(psy_ui_ScrollBarPane* self)
 	psy_signal_dispose(&self->signal_changed);	
 }
 
-void psy_ui_scrollbarpane_setorientation(psy_ui_ScrollBarPane* self,
+void psy_ui_scrollbarpane_set_orientation(psy_ui_ScrollBarPane* self,
 	psy_ui_Orientation orientation)
 {
 	assert(self);
@@ -116,10 +116,10 @@ void psy_ui_scrollbarpane_setorientation(psy_ui_ScrollBarPane* self,
 		psy_ui_component_set_preferred_size(&self->thumb,
 			psy_ui_size_make_em(1.0, 1.0));
 	}
-	psy_ui_scrollbarpane_updatethumbposition(self);
+	psy_ui_scrollbarpane_update_thumb_position(self);
 }
 
-void psy_ui_scrollbarpane_updatethumbposition(psy_ui_ScrollBarPane* self)
+void psy_ui_scrollbarpane_update_thumb_position(psy_ui_ScrollBarPane* self)
 {
 	psy_ui_RealRectangle newposition;
 	psy_ui_RealRectangle updateposition;
@@ -183,7 +183,7 @@ void psy_ui_scrollbarpane_on_mouse_down(psy_ui_ScrollBarPane* self,
 		psy_ui_scrollbarpane_setthumbposition(self,
 			self->position + self->repeat);
 		psy_signal_emit(&self->signal_changed, self, 0);
-		self->repeatdelaycounter = REPEAT_DELAYCOUNT;
+		self->repeat_delay_counter = REPEAT_DELAYCOUNT;
 		psy_ui_component_start_timer(&self->component, 0,
 			REPEAT_TIMEINTERVAL);
 	}
@@ -204,7 +204,7 @@ void psy_ui_scrollbarpane_on_mouse_up(psy_ui_ScrollBarPane* self,
 	}
 }
 
-void psy_ui_scrollbarpane_onmousemove(psy_ui_ScrollBarPane* self,
+void psy_ui_scrollbarpane_on_mouse_move(psy_ui_ScrollBarPane* self,
 	psy_ui_MouseEvent* ev)
 {
 	assert(self);
@@ -226,7 +226,7 @@ void psy_ui_scrollbarpane_onmousemove(psy_ui_ScrollBarPane* self,
 				psy_ui_mouseevent_pt(ev).y - self->dragoffset,
 				size.height - thumbsize.height));
 		}
-		psy_ui_scrollbarpane_updatethumbposition(self);		
+		psy_ui_scrollbarpane_update_thumb_position(self);		
 		position = (double)self->scrollrange.x;
 		step = psy_ui_scrollbarpane_step(self);		
 		position = psy_ui_scrollbarpane_position_in_scrollrange(self,
@@ -250,7 +250,7 @@ void psy_ui_scrollbarpane_setthumbposition(psy_ui_ScrollBarPane* self,
 	if (step != 0.0) {
 		self->position = psy_ui_scrollbarpane_position_in_scrollrange(self, position);
 		self->screenpos = (1.0 / step) * floor(self->position - self->scrollrange.x);
-		psy_ui_scrollbarpane_updatethumbposition(self);
+		psy_ui_scrollbarpane_update_thumb_position(self);
 	}
 }
 
@@ -294,14 +294,14 @@ void psy_ui_scrollbarpane_on_timer(psy_ui_ScrollBarPane* self, uintptr_t id)
 {
 	assert(self);
 
-	if (self->repeatdelaycounter == 0 ||
-			self->repeatdelaycounter == REPEAT_DELAYFIRSTCOUNT) {
+	if (self->repeat_delay_counter == 0 ||
+			self->repeat_delay_counter == REPEAT_DELAYFIRSTCOUNT) {
 		psy_ui_scrollbarpane_setthumbposition(self,
 			self->position + self->repeat);
 		psy_signal_emit(&self->signal_changed, self, 0);
 	}
-	if (self->repeatdelaycounter > 0) {
-		--self->repeatdelaycounter;
+	if (self->repeat_delay_counter > 0) {
+		--self->repeat_delay_counter;
 	}
 }
 
@@ -356,7 +356,7 @@ void psy_ui_scrollbar_init(psy_ui_ScrollBar* self, psy_ui_Component* parent)
 	psy_ui_button_init_connect(&self->more, &self->component,
 		self, psy_ui_scrollbar_onmore);
 	psy_ui_button_seticon(&self->more, psy_ui_ICON_DOWN);
-	psy_ui_button_setcharnumber(&self->more, 2);
+	psy_ui_button_setcharnumber(&self->more, 2.0);
 	psy_ui_component_set_align(psy_ui_button_base(&self->more),
 		psy_ui_ALIGN_BOTTOM);	
 	/* Scrollpane */
@@ -394,7 +394,7 @@ void psy_ui_scrollbar_setorientation(psy_ui_ScrollBar* self,
 			psy_INDEX_INVALID, psy_INDEX_INVALID);
 		psy_ui_component_set_style_type_active(psy_ui_button_base(&self->more),
 			psy_ui_STYLE_HSCROLLBUTTON_ACTIVE);
-		psy_ui_scrollbarpane_updatethumbposition(&self->pane);
+		psy_ui_scrollbarpane_update_thumb_position(&self->pane);
 	} else if (orientation == psy_ui_VERTICAL) {
 		psy_ui_button_seticon(&self->less, psy_ui_ICON_UP);
 		psy_ui_component_set_align(psy_ui_button_base(&self->less),
@@ -413,7 +413,7 @@ void psy_ui_scrollbar_setorientation(psy_ui_ScrollBar* self,
 		psy_ui_component_set_style_type_active(psy_ui_button_base(&self->more),
 			psy_ui_STYLE_VSCROLLBUTTON_ACTIVE);
 	}
-	psy_ui_scrollbarpane_setorientation(&self->pane, orientation);
+	psy_ui_scrollbarpane_set_orientation(&self->pane, orientation);
 }
 
 void psy_ui_scrollbar_on_destroy(psy_ui_ScrollBar* self)

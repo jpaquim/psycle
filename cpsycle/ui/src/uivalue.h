@@ -171,12 +171,16 @@ void psy_ui_value_add(psy_ui_Value*, const psy_ui_Value* other,
 	const psy_ui_TextMetric*, const struct psy_ui_Size* pesize);
 void psy_ui_value_sub(psy_ui_Value*, const psy_ui_Value* other,
 	const psy_ui_TextMetric*, const struct psy_ui_Size* pesize);
+void psy_ui_value_mul(psy_ui_Value*, const psy_ui_Value* other,
+	const psy_ui_TextMetric* tm, const struct psy_ui_Size* pesize);
 void psy_ui_value_mul_real(psy_ui_Value*, double factor);
 int psy_ui_value_comp(psy_ui_Value* self, const psy_ui_Value* other,
 	const psy_ui_TextMetric* tm, const struct psy_ui_Size* pesize);
 psy_ui_Value psy_ui_add_values(psy_ui_Value lhs, psy_ui_Value rhs,
 	const psy_ui_TextMetric* tm, const struct psy_ui_Size* pesize);
 psy_ui_Value psy_ui_sub_values(psy_ui_Value lhs, psy_ui_Value rhs,
+	const psy_ui_TextMetric* tm, const struct psy_ui_Size* pesize);
+psy_ui_Value psy_ui_mul_values(psy_ui_Value lhs, psy_ui_Value rhs,
 	const psy_ui_TextMetric* tm, const struct psy_ui_Size* pesize);
 
 INLINE psy_ui_Value psy_ui_mul_value_real(psy_ui_Value lhs, double factor)

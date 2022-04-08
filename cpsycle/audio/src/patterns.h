@@ -60,8 +60,8 @@ void psy_audio_patterns_armtrack(psy_audio_Patterns*, uintptr_t track);
 void psy_audio_patterns_unarmtrack(psy_audio_Patterns*, uintptr_t track);
 bool psy_audio_patterns_istrackarmed(const psy_audio_Patterns*, uintptr_t track);
 uintptr_t psy_audio_psy_audio_patterns_trackarmedcount(const psy_audio_Patterns*);
-void psy_audio_patterns_setnumtracks(psy_audio_Patterns*, uintptr_t numtracks);
-uintptr_t psy_audio_patterns_numtracks(const psy_audio_Patterns*);
+void psy_audio_patterns_set_num_tracks(psy_audio_Patterns*, uintptr_t numtracks);
+uintptr_t psy_audio_patterns_num_tracks(const psy_audio_Patterns*);
 uintptr_t psy_audio_patterns_slot(psy_audio_Patterns*, psy_audio_Pattern*);
 
 #ifdef __cplusplus

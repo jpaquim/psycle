@@ -98,14 +98,14 @@ void psy_path_setpath(psy_Path* self, const char* path)
 	psy_path_extract_path(self);
 }
 
-void psy_path_setname(psy_Path* self, const char* name)
+void psy_path_set_name(psy_Path* self, const char* name)
 {
 	free(self->name);
 	self->name = strdup((name) ? name : "");	
 	psy_path_update(self);
 }
 
-void psy_path_setprefix(psy_Path* self, const char* prefix)
+void psy_path_set_prefix(psy_Path* self, const char* prefix)
 {
 	free(self->prefix);
 	self->prefix = strdup((prefix) ? prefix : "");

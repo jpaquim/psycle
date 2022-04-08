@@ -57,16 +57,16 @@ void machineviewbar_onmixerconnectmodeclick(MachineViewBar* self,
 	psy_ui_Component* sender)
 {
 	if (psy_ui_checkbox_checked(&self->mixersend)) {
-		psy_audio_machines_connectasmixersend(self->machines);		
+		psy_audio_machines_connect_as_mixersend(self->machines);		
 	} else {
-		psy_audio_machines_connectasmixerinput(self->machines);		
+		psy_audio_machines_connect_as_mixerinput(self->machines);		
 	}    
 }
 
 void machineviewbar_updateconnectasmixersend(MachineViewBar* self)
 {
 	if (self->machines &&
-		psy_audio_machines_isconnectasmixersend(self->machines)) {
+		psy_audio_machines_is_connect_as_mixersend(self->machines)) {
 		psy_ui_checkbox_check(&self->mixersend);
 	} else {
 		psy_ui_checkbox_disablecheck(&self->mixersend);
@@ -109,7 +109,7 @@ void machineviewbar_onmachineinsert(MachineViewBar* self,
 		psy_snprintf(text, 128, "%s inserted at slot %u",
 			psy_audio_machine_editname(psy_audio_machines_at(sender, slot)),
 			(unsigned int)slot);
-		workspace_outputstatus(self->workspace, text);		
+		workspace_output_status(self->workspace, text);		
 	}	
 }
 
@@ -125,5 +125,5 @@ void machineviewbar_onmachineremoved(MachineViewBar* self,
 	}		
 	psy_snprintf(text, 128, "Machine removed from slot %u",
 		(unsigned int)slot);
-	workspace_outputstatus(self->workspace, text);
+	workspace_output_status(self->workspace, text);
 }

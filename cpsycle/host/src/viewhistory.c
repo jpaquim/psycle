@@ -35,14 +35,14 @@ void viewhistory_clear(ViewHistory* self)
 	self->prevented = FALSE;
 }
 
-void viewhistory_add(ViewHistory* self, ViewHistoryEntry view)
+void viewhistory_add(ViewHistory* self, ViewIndex view)
 {
 	assert(self);
 
 	if (!self->prevented) {
-		ViewHistoryEntry* entry;
+		ViewIndex* entry;
 
-		entry = (ViewHistoryEntry*)malloc(sizeof(ViewHistoryEntry));
+		entry = (ViewIndex*)malloc(sizeof(ViewIndex));
 		if (entry) {
 			*entry = view;			
 			psy_list_append(&self->container, entry);
@@ -53,23 +53,23 @@ void viewhistory_add(ViewHistory* self, ViewHistoryEntry view)
 
 void viewhistory_addseqpos(ViewHistory* self, uintptr_t seqpos)
 {
-	ViewHistoryEntry view;
+	ViewIndex view;
 
-	view = viewhistory_currview(self);
+	view = viewhistory_current(self);
 	view.seqpos = seqpos;
 	viewhistory_add(self, view);	
 }
 
-ViewHistoryEntry viewhistory_currview(const ViewHistory* self)
+ViewIndex viewhistory_current(const ViewHistory* self)
 {
-	ViewHistoryEntry rv;
+	ViewIndex rv;
 
 	assert(self);
 
 	if (viewhistory_hascurrview(self)) {
-		ViewHistoryEntry* entry;
+		ViewIndex* entry;
 
-		entry = (ViewHistoryEntry*)(self->currnavigation->entry);
+		entry = (ViewIndex*)(self->currnavigation->entry);
 		assert(entry);
 		rv = *entry;
 	} else {
@@ -102,12 +102,12 @@ bool viewhistory_forward(ViewHistory* self)
 	return FALSE;
 }
 
-bool viewhistory_equal(const ViewHistory* self, ViewHistoryEntry view)
+bool viewhistory_equal(const ViewHistory* self, ViewIndex view)
 {
-	ViewHistoryEntry curr;
+	ViewIndex curr;
 
 	assert(self);
 
-	curr = viewhistory_currview(self);
+	curr = viewhistory_current(self);
 	return (view.seqpos == curr.seqpos) && (view.id == curr.id);
 }
