@@ -239,7 +239,7 @@ void psy_ui_replacedefaultfont(psy_ui_Component* main, psy_ui_Font* font)
 		psy_ui_font_dispose(&root->font);
 		psy_ui_font_init(&root->font, NULL);
 		psy_ui_font_copy(&root->font, font);
-		psy_ui_notifystyleupdate(psy_ui_mainwindow());		
+		psy_ui_notify_style_update(psy_ui_mainwindow());		
 	}
 }
 
@@ -902,7 +902,13 @@ void psy_ui_component_showmaximized(psy_ui_Component* self)
 void psy_ui_component_togglefullscreen(psy_ui_Component* self)
 {
 #ifdef DIVERSALIS__OS__MICROSOFT	
+	psy_ui_Component* curr_focus;
+
+	curr_focus = psy_ui_app_focus(psy_ui_app());
 	psy_ui_component_showstate(self, 20);
+	if (curr_focus) {		
+		psy_ui_component_set_focus(curr_focus);
+	}
 #else
 	psy_ui_component_resize(self,
 		psy_ui_size_make_px(1024.0, 768.0));
@@ -2092,7 +2098,7 @@ void psy_ui_component_removestylestate_children(psy_ui_Component* self,
 		(uintptr_t)state);	
 }
 
-void psy_ui_notifystyleupdate(psy_ui_Component* main)
+void psy_ui_notify_style_update(psy_ui_Component* main)
 {
 	if (main) {
 		psy_List* p;

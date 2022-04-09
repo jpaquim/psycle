@@ -188,7 +188,7 @@ void psy_audio_eventdrivers_restart(psy_audio_EventDrivers* self, intptr_t id,
 	}
 }
 
-void psy_audio_eventdrivers_restartall(psy_audio_EventDrivers* self)
+void psy_audio_eventdrivers_restart_all(psy_audio_EventDrivers* self)
 {
 	psy_List* p;	
 

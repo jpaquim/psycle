@@ -117,12 +117,12 @@ void filebar_onloadsong(FileBar* self, psy_ui_Component* sender)
 				viewindex_make(VIEW_ID_CHECKUNSAVED, 0,
 				CONFIRM_LOAD, psy_INDEX_INVALID));
 		} else {
-			workspace_loadsong_fileselect(self->workspace);
+			workspace_load_song_fileselect(self->workspace);
 		}
 	}
 }
 
 void filebar_onsavesong(FileBar* self, psy_ui_Component* sender)
 {		
-	workspace_savesong_fileselect(self->workspace);
+	workspace_save_song_fileselect(self->workspace);
 }

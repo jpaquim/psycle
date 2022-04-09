@@ -161,7 +161,7 @@ void song_initsignals(psy_audio_Song* self)
 {
 	assert(self);
 
-	psy_signal_init(&self->signal_loadprogress);
+	psy_signal_init(&self->signal_load_progress);
 	psy_signal_init(&self->signal_saveprogress);
 }
 
@@ -182,7 +182,7 @@ void song_disposesignals(psy_audio_Song* self)
 {
 	assert(self);
 
-	psy_signal_dispose(&self->signal_loadprogress);
+	psy_signal_dispose(&self->signal_load_progress);
 	psy_signal_dispose(&self->signal_saveprogress);
 }
 

@@ -698,14 +698,14 @@ void psy_audio_player_setsong(psy_audio_Player* self, psy_audio_Song* song)
 			&song->machines, psy_audiodriver_samplerate(self->driver));		
 		psy_audio_player_setbpm(self, psy_audio_song_bpm(self->song));
 		psy_audio_player_setlpb(self, psy_audio_song_lpb(self->song));
-		psy_audio_player_setoctave(self, psy_audio_song_octave(self->song));
+		psy_audio_player_set_octave(self, psy_audio_song_octave(self->song));
 		self->sequencer.metronome = restore_metronome;		
-		psy_audio_player_setsamplerindex(self,
+		psy_audio_player_set_sampler_index(self,
 			psy_audio_song_samplerindex(self->song));		
 	}
 }
 
-void psy_audio_player_setoctave(psy_audio_Player* self, uint8_t octave)
+void psy_audio_player_set_octave(psy_audio_Player* self, uint8_t octave)
 {
 	assert(self);
 
@@ -717,7 +717,7 @@ void psy_audio_player_setoctave(psy_audio_Player* self, uint8_t octave)
 	}	
 }
 
-void psy_audio_player_setvumetermode(psy_audio_Player* self, VUMeterMode mode)
+void psy_audio_player_set_vu_meter_mode(psy_audio_Player* self, VUMeterMode mode)
 {
 	assert(self);
 
@@ -998,7 +998,7 @@ void psy_audio_player_restarteventdriver(psy_audio_Player* self, intptr_t id,
 	psy_audio_eventdrivers_restart(&self->eventdrivers, id, configuration);
 }
 
-void psy_audio_player_removeeventdriver(psy_audio_Player * self, intptr_t id)
+void psy_audio_player_remove_event_driver(psy_audio_Player * self, intptr_t id)
 {
 	assert(self);
 
@@ -1052,7 +1052,7 @@ void psy_audio_player_setemptysong(psy_audio_Player* self)
 	psy_audio_exclusivelock_leave();
 }
 
-void psy_audio_player_midiconfigure(psy_audio_Player* self, psy_Property*
+void psy_audio_player_midi_configure(psy_audio_Player* self, psy_Property*
 	configuration, bool datastr)
 {
 	assert(self);

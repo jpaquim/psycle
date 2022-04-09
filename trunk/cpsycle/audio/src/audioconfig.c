@@ -277,7 +277,7 @@ void audioconfig_onaudiodriverselect(AudioConfig* self, bool enable)
 	}
 }
 
-void audioconfig_oneditaudiodriverconfiguration(AudioConfig* self, bool enabled)
+void audioconfig_on_edit_audio_driver_configuration(AudioConfig* self, bool enabled)
 {
 	if (psy_audiodriver_configuration(self->player->driver) != NULL) {
 		psy_Property* driversection;
@@ -374,7 +374,7 @@ bool audioconfig_hasproperty(const AudioConfig* self,
 {
 	assert(self && self->driverconfigure);
 
-	return psy_property_insection(property, self->inputoutput);
+	return psy_property_in_section(property, self->inputoutput);
 }
 
 psy_Property* audioconfig_drivers(AudioConfig* self)

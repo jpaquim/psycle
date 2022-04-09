@@ -112,14 +112,14 @@ INLINE psy_audio_MidiConfig* psy_audio_player_midiconfig(psy_audio_Player* self)
 	return &self->midiinput.midiconfig;
 }
 
-void psy_audio_player_setoctave(psy_audio_Player*, uint8_t octave);
+void psy_audio_player_set_octave(psy_audio_Player*, uint8_t octave);
 
 INLINE uint8_t psy_audio_player_octave(const psy_audio_Player* self)
 {
 	return self->octave;
 }
 
-void psy_audio_player_setvumetermode(psy_audio_Player*, VUMeterMode);
+void psy_audio_player_set_vu_meter_mode(psy_audio_Player*, VUMeterMode);
 VUMeterMode psy_audio_player_vumetermode(psy_audio_Player*);
 void psy_audio_player_enabledither(psy_audio_Player*);
 void psy_audio_player_disabledither(psy_audio_Player*);
@@ -199,7 +199,7 @@ INLINE psy_dsp_big_beat_t psy_audio_player_extraticksperbeat(
 	return (psy_dsp_big_beat_t)self->sequencer.extraticks;
 }
 
-INLINE void psy_audio_player_setsamplerindex(psy_audio_Player* self,
+INLINE void psy_audio_player_set_sampler_index(psy_audio_Player* self,
 	uintptr_t samplerindex)
 {
 	self->sequencer.sample_event.mach = (uint8_t)samplerindex;
@@ -295,7 +295,7 @@ INLINE psy_audio_SequencerTime* psy_audio_player_sequencertime(
 /* event driver */
 psy_EventDriver* psy_audio_player_loadeventdriver(psy_audio_Player*,
 	const char* path);
-void psy_audio_player_removeeventdriver(psy_audio_Player*, intptr_t id);
+void psy_audio_player_remove_event_driver(psy_audio_Player*, intptr_t id);
 void psy_audio_player_restarteventdriver(psy_audio_Player*, intptr_t id,
 	psy_Property* configuration);
 psy_EventDriver* psy_audio_player_kbddriver(psy_audio_Player*);
@@ -306,7 +306,7 @@ void psy_audio_player_write_eventdrivers(psy_audio_Player*,
 void psy_audio_player_workmachine(psy_audio_Player*, uintptr_t amount,
 	uintptr_t slot);
 void psy_audio_player_setemptysong(psy_audio_Player*);
-void psy_audio_player_midiconfigure(psy_audio_Player*, psy_Property*
+void psy_audio_player_midi_configure(psy_audio_Player*, psy_Property*
 	configuration, bool datastr);
 void psy_audio_player_idle(psy_audio_Player*);
 void psy_audio_player_sendcmd(psy_audio_Player*, const char* section,

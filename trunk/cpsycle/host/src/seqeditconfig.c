@@ -59,5 +59,5 @@ bool seqeditconfig_hasproperty(const SeqEditConfig* self, psy_Property* property
 {
 	assert(self && self->seqedit);
 
-	return psy_property_insection(property, self->seqedit);
+	return psy_property_in_section(property, self->seqedit);
 }

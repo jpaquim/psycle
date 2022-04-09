@@ -583,12 +583,12 @@ void envelopebar_settext(EnvelopeBar* self, const char* text)
 void envelopebar_enablemillisecs(EnvelopeBar* self)
 {
 	psy_ui_button_highlight(&self->millisec);
-	psy_ui_button_disablehighlight(&self->ticks);
+	psy_ui_button_disable_highlight(&self->ticks);
 }
 
 void envelopebar_enableticks(EnvelopeBar* self)
 {
-	psy_ui_button_disablehighlight(&self->millisec);
+	psy_ui_button_disable_highlight(&self->millisec);
 	psy_ui_button_highlight(&self->ticks);
 }
 
@@ -688,12 +688,12 @@ void envelopeview_setenvelope(EnvelopeView* self,
 	if (settings && settings->timemode == psy_dsp_ENVELOPETIME_TICK) {
 		psy_ui_button_highlight(&self->bar.ticks);
 	} else {
-		psy_ui_button_disablehighlight(&self->bar.ticks);
+		psy_ui_button_disable_highlight(&self->bar.ticks);
 	}
 	if (!settings || (settings && settings->timemode == psy_dsp_ENVELOPETIME_SECONDS)) {
 		psy_ui_button_highlight(&self->bar.millisec);
 	} else {
-		psy_ui_button_disablehighlight(&self->bar.millisec);
+		psy_ui_button_disable_highlight(&self->bar.millisec);
 	}
 }
 

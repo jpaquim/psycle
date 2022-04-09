@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -45,13 +45,12 @@ void viewhistory_add(ViewHistory* self, ViewIndex view)
 		entry = (ViewIndex*)malloc(sizeof(ViewIndex));
 		if (entry) {
 			*entry = view;			
-			psy_list_append(&self->container, entry);
-			self->currnavigation = self->container->tail;
+			self->currnavigation = psy_list_append(&self->container, entry);
 		}
 	}
 }
 
-void viewhistory_addseqpos(ViewHistory* self, uintptr_t seqpos)
+void viewhistory_add_seq_pos(ViewHistory* self, uintptr_t seqpos)
 {
 	ViewIndex view;
 
@@ -66,16 +65,17 @@ ViewIndex viewhistory_current(const ViewHistory* self)
 
 	assert(self);
 
-	if (viewhistory_hascurrview(self)) {
-		ViewIndex* entry;
+	if (viewhistory_has_curr_view(self)) {
+		const ViewIndex* entry;
 
-		entry = (ViewIndex*)(self->currnavigation->entry);
+		entry = (ViewIndex*)psy_list_entry_const(self->currnavigation);
 		assert(entry);
 		rv = *entry;
 	} else {
 		rv.seqpos = psy_INDEX_INVALID;
-		rv.id = 0;
+		rv.id = 0;		
 		rv.section = 0;
+		rv.option = psy_INDEX_INVALID;
 	}
 	return rv;
 }

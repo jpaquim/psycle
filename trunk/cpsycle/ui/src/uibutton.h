@@ -91,7 +91,7 @@ void psy_ui_button_seticon(psy_ui_Button*, psy_ui_ButtonIcon);
 void psy_ui_button_loadresource(psy_ui_Button*, uintptr_t lightresourceid,
 	uintptr_t darkresourceid, psy_ui_Colour);
 void psy_ui_button_highlight(psy_ui_Button*);
-void psy_ui_button_disablehighlight(psy_ui_Button*);
+void psy_ui_button_disable_highlight(psy_ui_Button*);
 bool psy_ui_button_highlighted(const psy_ui_Button*);
 void psy_ui_button_settextcolour(psy_ui_Button*, psy_ui_Colour);
 void psy_ui_button_setcharnumber(psy_ui_Button*, double number);

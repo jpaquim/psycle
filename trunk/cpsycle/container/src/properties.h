@@ -138,7 +138,7 @@ psy_Property* psy_property_movedown(psy_Property*);
 psy_Property* psy_property_prev(psy_Property*);
 psy_Property* psy_property_next(psy_Property*);
 void psy_property_clear(psy_Property*);
-bool psy_property_insection(const psy_Property*, psy_Property* section);
+bool psy_property_in_section(const psy_Property*, psy_Property* section);
 void psy_property_enumerate(psy_Property*, void* target, psy_PropertyCallback);
 psy_Property* psy_property_find(psy_Property*, const char* key, psy_PropertyType);
 const psy_Property* psy_property_find_const(const psy_Property*, const char* key, psy_PropertyType);

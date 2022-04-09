@@ -49,6 +49,7 @@ static void samplessongimportview_oncopy(SamplesSongImportView*,
 	psy_ui_Component* sender);
 static void samplessongimportview_onsamplesboxchanged(SamplesSongImportView*,
 	psy_ui_Component* sender);
+
 /* implementation */
 void samplessongimportview_init(SamplesSongImportView* self, psy_ui_Component* parent,
 	SamplesView* view, Workspace* workspace)
@@ -335,8 +336,11 @@ void samplesgeneralview_init(SamplesGeneralView* self, psy_ui_Component* parent,
 	};	
 	int i;
 		
+	assert(workspace);
+
 	self->sample = NULL;	
-	self->notes_tab_mode = workspace_notetabmode(workspace);
+	self->notes_tab_mode = patternviewconfig_notetabmode(
+		&workspace->config.patview);
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_set_padding(&self->component,
 		psy_ui_margin_make_em(1.0, 0.0, 0.0, 0.0));
@@ -982,8 +986,8 @@ static uintptr_t samplesview_freesampleslot(SamplesView*, uintptr_t startslot,
 	uintptr_t maxslots);
 static void samplesview_onsamplemodified(SamplesView*, SampleEditor* sender,
 	psy_audio_Sample*);
-static void samplesview_onconfigure(SamplesView*, Workspace*,
-	psy_Property*);
+static void samplesview_onconfigure(SamplesView*, PatternViewConfig*,
+	psy_Property* property);
 static void samplesview_onresamplermethodchanged(SamplesView*,
 	psy_ui_Component* sender, int index);
 static void samplesview_onselectsection(SamplesView*, psy_ui_Component* sender,
@@ -1087,17 +1091,17 @@ void samplesview_init(SamplesView* self, psy_ui_Component* parent,
 	samplesview_setsample(self, psy_audio_sampleindex_make(0, 0));
 	psy_signal_connect(&self->sampleeditor.signal_samplemodified, self,
 		samplesview_onsamplemodified);
-	psy_signal_connect(&self->workspace->signal_configchanged, self,
+	psy_signal_connect(&self->workspace->config.patview.signal_changed, self,
 		samplesview_onconfigure);	
 	psy_ui_tabbar_select(&self->tabbar, 0);
 	psy_signal_connect(&samplesview_base(self)->signal_selectsection, self,
 		samplesview_onselectsection);
 }
 
-void samplesview_onconfigure(SamplesView* self, Workspace* sender,
+void samplesview_onconfigure(SamplesView* self, PatternViewConfig* config,
 	psy_Property* property)
 {
-	self->general.notes_tab_mode = workspace_notetabmode(sender);
+	self->general.notes_tab_mode = patternviewconfig_notetabmode(config);
 }
 
 void samplesview_onsamplesboxchanged(SamplesView* self, psy_ui_Component* sender)

@@ -141,7 +141,7 @@ INLINE const psy_audio_Patterns* patternviewstate_patterns_const(
 INLINE bool patternviewstate_single_mode(const PatternViewState* self)
 {
 	if (self->patconfig) {
-		return patternviewconfig_singlemode(self->patconfig);
+		return patternviewconfig_single_mode(self->patconfig);
 	}
 	return TRUE;
 }
@@ -252,8 +252,6 @@ INLINE void patternviewstate_invalidate(PatternViewState* self)
 		patternviewstate_pattern(self)->opcount++;
 	}
 }
-
-void patternviewstate_configure(PatternViewState*);
 
 void patternviewstate_sequencestart(PatternViewState*,
 	double startoffset, psy_audio_SequenceTrackIterator* rv);

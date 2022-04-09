@@ -190,7 +190,7 @@ INLINE void psy_audio_songproperties_setsamplerindex(
 /* psy_audio_Song */
 typedef struct psy_audio_Song {
 	/* signals */
-	psy_Signal signal_loadprogress;
+	psy_Signal signal_load_progress;
 	psy_Signal signal_saveprogress;
 	/* public data */
 	psy_audio_SongProperties properties;

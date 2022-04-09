@@ -48,7 +48,7 @@ void audioconfig_driverconfigure_section(AudioConfig*);
 void audioconfig_make_driver_configurations(AudioConfig* self, bool full);
 void audioconfig_makeconfiguration_driverkey(AudioConfig* self, const char* key);
 void audioconfig_onaudiodriverselect(AudioConfig*, bool enabled);
-void audioconfig_oneditaudiodriverconfiguration(AudioConfig*, bool enabled);
+void audioconfig_on_edit_audio_driver_configuration(AudioConfig*, bool enabled);
 uintptr_t audioconfig_numthreads(const AudioConfig*);
 
 bool audioconfig_onpropertychanged(AudioConfig*, psy_Property*,

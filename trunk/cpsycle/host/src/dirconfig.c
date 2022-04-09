@@ -233,5 +233,5 @@ bool dirconfig_hasproperty(const DirConfig* self, psy_Property* property)
 {
 	assert(self && self->directories);
 
-	return psy_property_insection(property, self->directories);
+	return psy_property_in_section(property, self->directories);
 }

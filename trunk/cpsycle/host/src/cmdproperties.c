@@ -484,7 +484,7 @@ void cmdproperties_makegeneral(psy_Property* self)
 		psy_property_setid(psy_property_append_int(general, "cmd_followsong",
 			psy_audio_encodeinput(psy_ui_KEY_F, psy_SHIFT_OFF, psy_CTRL_ON, 0, 0), 0, 0),
 			CMD_IMM_FOLLOWSONG),
-		"follow"), "followsong");
+		"follow"), "follow_song");
 	psy_property_settext(psy_property_setshorttext(
 		psy_property_setid(psy_property_append_int(general, "cmd_maxpattern",
 			psy_audio_encodeinput(psy_ui_KEY_TAB, 0, 1, 0, 0), 0, 0), CMD_IMM_MAXPATTERN),

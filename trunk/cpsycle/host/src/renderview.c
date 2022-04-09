@@ -142,7 +142,7 @@ void renderview_onsettingsviewchanged(RenderView* self, PropertiesView* sender,
 		if (strcmp(psy_property_key(property), "savewave") == 0) {
 			renderview_render(self);
 		}
-	} else if (psy_property_insection(property, self->driverconfigure)) {
+	} else if (psy_property_in_section(property, self->driverconfigure)) {
 		renderview_writedriverconfiguration(self);
 	}
 }

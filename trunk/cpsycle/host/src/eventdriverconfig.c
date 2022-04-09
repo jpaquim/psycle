@@ -106,7 +106,7 @@ void eventdriverconfig_registereventdrivers(EventDriverConfig* self)
 	}
 }
 
-void eventdriverconfig_configeventdrivers(EventDriverConfig* self)
+void eventdriverconfig_config(EventDriverConfig* self)
 {
 	psy_List* p;
 
@@ -134,19 +134,19 @@ void eventdriverconfig_configeventdrivers(EventDriverConfig* self)
 	}	
 }
 
-void eventdriverconfig_reseteventdriverconfiguration(EventDriverConfig* self)
+void eventdriverconfig_reset(EventDriverConfig* self)
 {	
 
 	assert(self && self->activedrivers);
 	
 	if (eventdriverconfig_selectedeventdriver(self)) {
 		psy_eventdriver_configure(eventdriverconfig_selectedeventdriver(self), NULL);
-		eventdriverconfig_showactiveeventdriverconfig(self,
+		eventdriverconfig_show_active(self,
 			psy_property_item_int(self->activedrivers));					
 	}
 }
 
-void eventdriverconfig_loadeventdriverconfiguration(EventDriverConfig* self)
+void eventdriverconfig_load(EventDriverConfig* self)
 {
 	psy_EventDriver* eventdriver;
 
@@ -172,7 +172,7 @@ void eventdriverconfig_loadeventdriverconfiguration(EventDriverConfig* self)
 			psy_propertyreader_dispose(&propertyreader);
 			psy_eventdriver_configure(eventdriver, local);			
 			if (self->activedrivers) {
-				eventdriverconfig_showactiveeventdriverconfig(self,
+				eventdriverconfig_show_active(self,
 					psy_property_item_int(self->activedrivers));
 			}
 			/* eventdriverconfig_update_driverconfigure_section(self); */
@@ -182,7 +182,7 @@ void eventdriverconfig_loadeventdriverconfiguration(EventDriverConfig* self)
 	}
 }
 
-void eventdriverconfig_saveeventdriverconfiguration(EventDriverConfig* self)
+void eventdriverconfig_save(EventDriverConfig* self)
 {
 	psy_EventDriver* eventdriver;
 
@@ -211,7 +211,7 @@ void eventdriverconfig_saveeventdriverconfiguration(EventDriverConfig* self)
 	}
 }
 
-void eventdriverconfig_updateactiveeventdriverlist(EventDriverConfig* self)
+void eventdriverconfig_update_active(EventDriverConfig* self)
 {
 	uintptr_t numdrivers;
 	uintptr_t i;
@@ -242,7 +242,7 @@ void eventdriverconfig_updateactiveeventdriverlist(EventDriverConfig* self)
 	}
 }
 
-void eventdriverconfig_makeeventdriverconfigurations(EventDriverConfig* self)
+void eventdriverconfig_make(EventDriverConfig* self)
 {
 	uintptr_t numdrivers;
 	uintptr_t i;
@@ -273,7 +273,7 @@ void eventdriverconfig_makeeventdriverconfigurations(EventDriverConfig* self)
 	}
 }
 
-void eventdriverconfig_readeventdriverconfigurations(EventDriverConfig* self)
+void eventdriverconfig_read(EventDriverConfig* self)
 {
 	assert(self);
 
@@ -317,7 +317,7 @@ void eventdriverconfig_readeventdriverconfigurations(EventDriverConfig* self)
 	}
 }
 
-intptr_t eventdriverconfig_curreventdriverconfiguration(EventDriverConfig* self)
+intptr_t eventdriverconfig_current(EventDriverConfig* self)
 {
 	assert(self && self->activedrivers);
 	
@@ -337,7 +337,7 @@ const char* eventdriverconfig_eventdriverpath(EventDriverConfig* self)
 	return NULL;
 }
 
-void eventdriverconfig_showactiveeventdriverconfig(EventDriverConfig* self, intptr_t driverid)
+void eventdriverconfig_show_active(EventDriverConfig* self, intptr_t driverid)
 {
 	psy_EventDriver* eventdriver;
 
@@ -383,5 +383,5 @@ bool eventdriverconfig_hasproperty(const EventDriverConfig* self,
 {
 	assert(self && self->eventinputs);
 
-	return psy_property_insection(property, self->eventinputs);
+	return psy_property_in_section(property, self->eventinputs);
 }

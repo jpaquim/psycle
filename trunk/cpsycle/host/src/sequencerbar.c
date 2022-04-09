@@ -40,7 +40,7 @@ void sequencerbar_init(SequencerBar* self, psy_ui_Component* parent,
 	psy_ui_component_set_defaultalign(&self->component, psy_ui_ALIGN_TOP,
 		margin);
 	self->workspace = workspace;
-	psy_ui_checkbox_init_text(&self->followsong, &self->component,	
+	psy_ui_checkbox_init_text(&self->follow_song, &self->component,	
 		"seqview.follow-song");	
 	psy_ui_checkbox_init_text(&self->shownames, &self->component,	
 		"seqview.show-pattern-names");			
@@ -68,7 +68,7 @@ void sequencerbar_init(SequencerBar* self, psy_ui_Component* parent,
 	psy_ui_button_seticon(&self->toggleseqedit, psy_ui_ICON_MORE);
 	psy_ui_margin_init_em(&margin, 0.0, 0.0, 1.0, 0.0);
 	psy_ui_component_set_margin(&self->allownotestoeffect.component, margin);
-	psy_signal_connect(&self->followsong.signal_clicked, self,
+	psy_signal_connect(&self->follow_song.signal_clicked, self,
 		sequencerbar_onfollowsong);
 	psy_signal_connect(&workspace->signal_followsongchanged, self,
 		sequencerbar_onfollowsongchanged);	
@@ -97,9 +97,9 @@ void sequencerbar_onfollowsong(SequencerBar* self, psy_ui_Button* sender)
 void sequencerbar_onfollowsongchanged(SequencerBar* self, Workspace* sender)
 {
 	if (workspace_following_song(sender)) {		
-		psy_ui_checkbox_check(&self->followsong);
+		psy_ui_checkbox_check(&self->follow_song);
 	} else {
-		psy_ui_checkbox_disablecheck(&self->followsong);
+		psy_ui_checkbox_disablecheck(&self->follow_song);
 	}
 }
 

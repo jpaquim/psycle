@@ -110,10 +110,10 @@ void playlistview_init(PlaylistView* self, psy_ui_Component* parent,
 void playlistview_onselected(PlaylistView* self, PropertiesView* sender,
 	psy_Property* property)
 {	
-	if (psy_property_insection(property, playlistview_currfiles(self))) {
+	if (psy_property_in_section(property, playlistview_currfiles(self))) {
 		if (self->starting || !self->workspace->filename || strcmp(self->workspace->filename,
 				psy_property_item_str(property)) != 0) {						
-			workspace_loadsong(self->workspace, psy_property_item_str(property),
+			workspace_load_song(self->workspace, psy_property_item_str(property),
 				generalconfig_playsongafterload(psycleconfig_general(
 					workspace_conf(self->workspace))));			
 			psy_audio_exclusivelock_enter();
@@ -167,7 +167,7 @@ void playlistview_onstop(PlaylistView* self, psy_ui_Button* sender)
 	psy_ui_component_stop_timer(&self->component, 0);
 	self->starting = FALSE;
 	self->running = FALSE;
-	psy_ui_button_disablehighlight(&self->bar.play);
+	psy_ui_button_disable_highlight(&self->bar.play);
 	psy_audio_player_stop(workspace_player(self->workspace));
 }
 
@@ -189,7 +189,7 @@ void playlistview_on_timer(PlaylistView* self, uintptr_t timerid)
 	if (self->running) {
 		psy_ui_button_highlight(&self->bar.play);
 	} else {
-		psy_ui_button_disablehighlight(&self->bar.play);
+		psy_ui_button_disable_highlight(&self->bar.play);
 	}
 }
 
@@ -214,7 +214,7 @@ void playlistview_on_mouse_down(PlaylistView* self, psy_ui_MouseEvent* ev)
 
 void playlistview_onsongchanged(PlaylistView* self, Workspace* sender)
 {
-	if (!sender->songhasfile) {
+	if (!sender->song_has_file) {
 		propertiesview_mark(&self->view, NULL);
 	}
 }

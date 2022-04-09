@@ -93,7 +93,7 @@ void machineview_init(MachineView* self, psy_ui_Component* parent,
 	self->shownewmachine = FALSE;
 	self->workspace = workspace;
 	paramviews_init(&self->paramviews, self->component.view, workspace);	
-	workspace_setparamviews(workspace, &self->paramviews);
+	workspace_set_param_views(workspace, &self->paramviews);
 	machineview_initnotebook(self, tabbarparent);
 	machineview_initpropertiesview(self);
 	machineview_initwireview(self, tabbarparent);
@@ -428,14 +428,8 @@ uintptr_t machineview_section(const MachineView* self)
 
 void machineview_idle(MachineView* self)
 {	
-	ViewIndex currview;
-
-	currview = workspace_current_view(self->workspace);
-	if (currview.section == SECTION_ID_MACHINEVIEW_WIRES) {
-		machinewireview_idle(&self->wireview);
-	} else if (currview.section == SECTION_ID_MACHINEVIEW_STACK) {
-		machinestackview_idle(&self->stackview);
-	}
+	machinewireview_idle(&self->wireview);	
+	machinestackview_idle(&self->stackview);
 	machineproperties_idle(&self->properties);
 }
 

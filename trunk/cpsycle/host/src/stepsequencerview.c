@@ -627,7 +627,7 @@ void stepsequencerview_connectworkspace(StepsequencerView* self,
 		psy_signal_connect(&workspace->song->sequence.signal_cursorchanged, self,
 			stepsequencerview_oncursorchanged);
 	}
-	psy_signal_connect(&workspace->signal_playlinechanged,
+	psy_signal_connect(&workspace->signal_play_line_changed,
 		self, stepsequencerview_onplaylinechanged);	
 }
 

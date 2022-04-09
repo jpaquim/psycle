@@ -74,5 +74,5 @@ bool compatconfig_hasproperty(const CompatConfig* self, psy_Property* property)
 {
 	assert(self && self->compatibility);
 
-	return psy_property_insection(property, self->compatibility);
+	return psy_property_in_section(property, self->compatibility);
 }

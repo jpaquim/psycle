@@ -340,7 +340,7 @@ void machineframe_setview(MachineFrame* self, psy_ui_Component* view,
 		if (psy_audio_machine_isbus(self->machine)) {	
 			psy_ui_button_highlight(&self->parameterbar.isbus);
 		} else {			
-			psy_ui_button_disablehighlight(&self->parameterbar.isbus);			
+			psy_ui_button_disable_highlight(&self->parameterbar.isbus);			
 		}
 	}	
 	machineframe_resize(self);		
@@ -355,7 +355,7 @@ void machineframe_toggleparameterbox(MachineFrame* self,
 	viewsize = psy_ui_component_preferredsize(self->view, 0);
 	if (psy_ui_component_visible(&self->parameterbox.component)) {
 		psy_ui_component_hide(&self->parameterbox.component);		
-		psy_ui_button_disablehighlight(&self->parameterbar.parameters);
+		psy_ui_button_disable_highlight(&self->parameterbar.parameters);
 	} else {
 		psy_ui_component_show(&self->parameterbox.component);		
 		psy_ui_button_highlight(&self->parameterbar.parameters);
@@ -372,7 +372,7 @@ void machineframe_toggleparammap(MachineFrame* self,
 	viewsize = psy_ui_component_preferredsize(self->view, 0);
 	if (psy_ui_component_visible(&self->parammap.component)) {
 		psy_ui_component_hide(&self->parammap.component);
-		psy_ui_button_disablehighlight(&self->parameterbar.parammap);
+		psy_ui_button_disable_highlight(&self->parameterbar.parammap);
 	} else {
 		psy_ui_component_show(&self->parammap.component);
 		psy_ui_button_highlight(&self->parameterbar.parammap);
@@ -393,7 +393,7 @@ void machineframe_togglehelp(MachineFrame* self,
 {	
 	if (psy_ui_notebook_pageindex(&self->notebook) == 0) {			
 		psy_ui_notebook_select(&self->notebook, 1);
-		psy_ui_button_disablehighlight(&self->parameterbar.help);
+		psy_ui_button_disable_highlight(&self->parameterbar.help);
 	} else {		
 		psy_ui_notebook_select(&self->notebook, 0);
 		psy_ui_button_highlight(&self->parameterbar.help);
@@ -416,7 +416,7 @@ void machineframe_togglepwr(MachineFrame* self,
 void machineframe_updatepwr(MachineFrame* self) {
 	if (self->machine) {
 		if (psy_audio_machine_hasstandby(self->machine)) {
-			psy_ui_button_disablehighlight(&self->parameterbar.power);
+			psy_ui_button_disable_highlight(&self->parameterbar.power);
 		} else {
 			psy_ui_button_highlight(&self->parameterbar.power);			
 		}
@@ -429,7 +429,7 @@ void machineframe_togglebus(MachineFrame* self,
 	if (self->machine) {
 		if (psy_audio_machine_isbus(self->machine)) {
 			psy_audio_machine_unsetbus(self->machine);
-			psy_ui_button_disablehighlight(&self->parameterbar.isbus);
+			psy_ui_button_disable_highlight(&self->parameterbar.isbus);
 		} else {
 			psy_audio_machine_setbus(self->machine);
 			psy_ui_button_highlight(&self->parameterbar.isbus);

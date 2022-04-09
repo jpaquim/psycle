@@ -1574,9 +1574,9 @@ void trackerview_init(TrackerView* self, psy_ui_Component* parent,
 		trackerview_on_song_changed);
 	psy_signal_connect(&self->grid.component.signal_scrolled, self,
 		trackerview_on_grid_scroll);
-	psy_signal_connect(&self->workspace->signal_playlinechanged, self,
+	psy_signal_connect(&self->workspace->signal_play_line_changed, self,
 		trackerview_on_play_line_changed);
-	psy_signal_connect(&self->workspace->signal_playstatuschanged, self,
+	psy_signal_connect(&self->workspace->signal_play_status_changed, self,
 		trackerview_on_play_status_changed);
 	trackerview_connect_song(self);	
 	psy_signal_connect(&workspace->config.patview.signal_changed, self,
@@ -1610,20 +1610,19 @@ void trackerview_on_cursor_changed(TrackerView* self, psy_audio_Sequence* sender
 		psy_ui_component_invalidate(&self->component);		
 	}
 	if (trackerview_playing_following_song(self)) {
+		bool wrap;
+
+		wrap = FALSE;		
 		if (patternviewstate_single_mode(self->grid.state->pv)) {
-			if (psy_audio_sequencecursor_pattern_offset(&self->grid.state->pv->sequence->cursor) <
-				psy_audio_sequencecursor_pattern_offset(&self->grid.state->pv->sequence->lastcursor))
-			{
-				psy_ui_component_set_scroll_top_px(&self->grid.component, 0.0);
-				psy_ui_component_invalidate(&self->grid.component);
-			}
+			wrap = (psy_audio_sequencecursor_pattern_offset(&self->grid.state->pv->sequence->cursor) <
+				psy_audio_sequencecursor_pattern_offset(&self->grid.state->pv->sequence->lastcursor));
 		} else {
-			if (psy_audio_sequencecursor_offset_abs(&self->grid.state->pv->sequence->cursor) <
-				psy_audio_sequencecursor_offset_abs(&self->grid.state->pv->sequence->lastcursor))
-			{
-				psy_ui_component_set_scroll_top_px(&self->grid.component, 0.0);
-				psy_ui_component_invalidate(&self->grid.component);
-			}
+			wrap = (psy_audio_sequencecursor_offset_abs(&self->grid.state->pv->sequence->cursor) <
+				psy_audio_sequencecursor_offset_abs(&self->grid.state->pv->sequence->lastcursor));
+		}
+		if (wrap) {
+			psy_ui_component_set_scroll_top_px(&self->grid.component, 0.0);
+			psy_ui_component_invalidate(&self->grid.component);
 		}
 	} else {	
 		trackerlinenumbers_invalidate_cursor(&self->lines.linenumbers);
@@ -1661,43 +1660,6 @@ void trackerview_on_play_status_changed(TrackerView* self, Workspace* sender)
 	trackergrid_invalidate_cursor(&self->grid);
 }
 
-void trackerview_on_configure(TrackerView* self, PatternViewConfig* config,
-	psy_Property* property)
-{
-	if (patternviewconfig_is_smooth_scrolling(config)) {
-		psy_ui_scroller_scroll_smooth(&self->scroller);
-	} else {
-		psy_ui_scroller_scroll_fast(&self->scroller);
-	}
-	if (patternviewconfig_center_cursor_on_screen(config)) {
-		trackergrid_center_on_cursor(&self->grid);
-	}	
-	trackergrid_show_empty_data(&self->grid,
-		patternviewconfig_draw_empty_data(config));
-	trackergrid_set_center_mode(&self->grid,
-		patternviewconfig_center_cursor_on_screen(config));
-	/* lines */
-	if (patternviewconfig_line_numbers(config)) {
-		psy_ui_component_show(&self->lines.component);
-	} else {
-		psy_ui_component_hide(&self->lines.component);
-	}	
-}
-
-void trackerview_on_grid_scroll(TrackerView* self, psy_ui_Component* sender)
-{
-	assert(self);
-		
-	trackerlinenumberview_set_scroll_top(&self->lines,
-		psy_ui_component_scrolltop(&self->grid.component));	
-}
-
-bool trackerview_playing_following_song(const TrackerView* self)
-{
-	return self->workspace->host_sequencer_time.currplaying &&
-		workspace_following_song(self->workspace);
-}
-
 void trackerview_on_sequence_changed(TrackerView* self,
 	psy_audio_Sequence* sender)
 {
@@ -1709,4 +1671,41 @@ void trackerview_on_follow_song_changed(TrackerView* self,
 	Workspace* sender)
 {
 	psy_ui_component_invalidate(&self->component);
+}
+
+bool trackerview_playing_following_song(const TrackerView* self)
+{
+	return self->workspace->host_sequencer_time.currplaying &&
+		workspace_following_song(self->workspace);
+}
+
+void trackerview_on_grid_scroll(TrackerView* self, psy_ui_Component* sender)
+{
+	assert(self);
+
+	trackerlinenumberview_set_scroll_top(&self->lines,
+		psy_ui_component_scroll_top(&self->grid.component));
+}
+
+void trackerview_on_configure(TrackerView* self, PatternViewConfig* config,
+	psy_Property* property)
+{
+	if (patternviewconfig_is_smooth_scrolling(config)) {
+		psy_ui_scroller_scroll_smooth(&self->scroller);
+	} else {
+		psy_ui_scroller_scroll_fast(&self->scroller);
+	}
+	if (patternviewconfig_center_cursor_on_screen(config)) {
+		trackergrid_center_on_cursor(&self->grid);
+	}
+	trackergrid_show_empty_data(&self->grid,
+		patternviewconfig_draw_empty_data(config));
+	trackergrid_set_center_mode(&self->grid,
+		patternviewconfig_center_cursor_on_screen(config));
+	/* lines */
+	if (patternviewconfig_line_numbers(config)) {
+		psy_ui_component_show(&self->lines.component);
+	} else {
+		psy_ui_component_hide(&self->lines.component);
+	}
 }

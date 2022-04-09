@@ -26,13 +26,13 @@ void viewhistory_init(ViewHistory*);
 void viewhistory_dispose(ViewHistory*);
 void viewhistory_clear(ViewHistory*);
 void viewhistory_add(ViewHistory*, ViewIndex view);
-void viewhistory_addseqpos(ViewHistory*, uintptr_t seqpos);
+void viewhistory_add_seq_pos(ViewHistory*, uintptr_t seqpos);
 bool viewhistory_back(ViewHistory*);
 bool viewhistory_forward(ViewHistory*);
 ViewIndex viewhistory_current(const ViewHistory*);
 bool viewhistory_equal(const ViewHistory*, ViewIndex);
 
-INLINE bool viewhistory_hascurrview(const ViewHistory* self)
+INLINE bool viewhistory_has_curr_view(const ViewHistory* self)
 {
 	assert(self);
 

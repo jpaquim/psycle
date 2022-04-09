@@ -193,7 +193,7 @@ int psy_audio_psy3loader_readchunks(psy_audio_PSY3Loader* self)
 			** psyfile_seekchunkend(self->file);
 			*/
 		}
-		psy_signal_emit(&self->song->signal_loadprogress, self, 1,
+		psy_signal_emit(&self->song->signal_load_progress, self, 1,
 			self->progress);
 	}
 	return PSY_OK;

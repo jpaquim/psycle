@@ -301,7 +301,7 @@ void wireview_onhold(WireView* self, psy_ui_Component* sender)
 		break;
 	}
 	if (psy_ui_button_highlighted(&self->hold)) {
-		psy_ui_button_disablehighlight(&self->hold);
+		psy_ui_button_disable_highlight(&self->hold);
 	} else {
 		psy_ui_button_highlight(&self->hold);
 	}

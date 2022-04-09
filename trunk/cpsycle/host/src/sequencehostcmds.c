@@ -247,7 +247,7 @@ void sequencecmds_clear(SequenceCmds* self)
 		psy_audio_exclusivelock_enter();
 		restore_song = psy_audio_player_song(&self->workspace->player);
 		psy_audio_player_setemptysong(&self->workspace->player);
-		workspace_clearsequencepaste(self->workspace);
+		workspace_clear_sequence_paste(self->workspace);
 		/* no undo / redo */
 		psy_audio_patterns_clear(self->sequence->patterns);
 		psy_audio_patterns_insert(self->sequence->patterns, 0,

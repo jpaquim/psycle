@@ -239,5 +239,5 @@ bool keyboardmiscconfig_hasproperty(const KeyboardMiscConfig* self,
 {
 	assert(self && self->keyboard);
 
-	return psy_property_insection(property, self->keyboard);
+	return psy_property_in_section(property, self->keyboard);
 }

@@ -60,7 +60,7 @@ double psy_ui_appzoom_rate(const psy_ui_AppZoom* self)
 	return self->rate;
 }
 
-void psy_ui_appzoom_updatebasefontsize(psy_ui_AppZoom* self, psy_ui_Font* basefont)
+void psy_ui_appzoom_update_base_fontsize(psy_ui_AppZoom* self, psy_ui_Font* basefont)
 {
 	psy_ui_FontInfo fontinfo;	
 
@@ -104,7 +104,7 @@ void psy_ui_app_init(psy_ui_App* self, bool dark, uintptr_t instance)
 	ui_app_initimpfactory(self);
 	ui_app_initimp(self, instance);
 	psy_ui_defaults_init(&self->defaults, psy_ui_DARKTHEME);
-	psy_ui_appzoom_updatebasefontsize(&self->zoom,
+	psy_ui_appzoom_update_base_fontsize(&self->zoom,
 		psy_ui_defaults_font(&self->defaults));	
 	psy_translator_init(&self->translator);
 	psy_signal_connect(&self->translator.signal_languagechanged, self,
@@ -294,14 +294,14 @@ void psy_ui_app_changedefaultfontsize(psy_ui_App* self, int size)
 	psy_ui_component_invalidate(self->main);	
 }
 
-void psy_ui_app_setdefaultfont(psy_ui_App* self, psy_ui_Font* font)
+void psy_ui_app_set_default_font(psy_ui_App* self, psy_ui_Font* font)
 {	
 	psy_ui_FontInfo fontinfo;
 	psy_ui_Font zoomedfont;
 
 	assert(self);
 	
-	psy_ui_appzoom_updatebasefontsize(&self->zoom, font);
+	psy_ui_appzoom_update_base_fontsize(&self->zoom, font);
 	if (self->zoom.rate != 1.0) {
 		fontinfo = psy_ui_font_fontinfo(font);
 		fontinfo.lfHeight = (int)(self->zoom.basefontsize * self->zoom.rate);

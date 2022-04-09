@@ -28,7 +28,7 @@ psy_ui_Style* psy_ui_defaults_style(psy_ui_Defaults* self, uintptr_t styletype);
 const psy_ui_Style* psy_ui_defaults_style_const(const psy_ui_Defaults*,
 	uintptr_t styletype);
 void psy_ui_defaults_inittheme(psy_ui_Defaults*, psy_ui_ThemeMode theme, bool keepfont);
-void psy_ui_defaults_loadtheme(psy_ui_Defaults*, const char* path, psy_ui_ThemeMode);
+void psy_ui_defaults_load_theme(psy_ui_Defaults*, const char* path, psy_ui_ThemeMode);
 void psy_ui_defaults_savetheme(psy_ui_Defaults* self, const char* filename);
 
 INLINE psy_ui_Margin psy_ui_defaults_hmargin(const psy_ui_Defaults* self)

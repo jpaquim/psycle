@@ -81,17 +81,17 @@ void exportview_onsettingsviewchanged(ExportView* self, PropertiesView* sender,
 
 void exportview_exportmodule(ExportView* self)
 {	
-	workspace_exportsong(self->workspace);
+	workspace_export_song(self->workspace);
 }
 
 void exportview_exportmidifile(ExportView* self)
 {
-	workspace_exportmidifile_fileselect(self->workspace);
+	workspace_export_midi_fileselect(self->workspace);
 }
 
 void exportview_exportlyfile(ExportView* self)
 {
-	workspace_exportlyfile_fileselect(self->workspace);
+	workspace_export_ly_fileselect(self->workspace);
 }
 
 

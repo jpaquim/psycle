@@ -200,7 +200,8 @@ void transformpatternview_initselection(TransformPatternView* self)
 	psy_ui_combobox_addtext(&self->searchnote, nonempty);	psy_ui_combobox_setitemdata(&self->searchnote, 2, 1002);
 	psy_ui_combobox_addtext(&self->replacenote, same);		psy_ui_combobox_setitemdata(&self->replacenote, 0, 1002);
 	psy_ui_combobox_addtext(&self->replacenote, empty);		psy_ui_combobox_setitemdata(&self->replacenote, 1, 1001);
-	is440 = workspace_notetabmode(self->workspace) == psy_dsp_NOTESTAB_A440;
+	is440 = patternviewconfig_notetabmode(&self->workspace->config.patview) ==
+		psy_dsp_NOTESTAB_A440;
 	for (i = psy_audio_NOTECOMMANDS_C0; i <= psy_audio_NOTECOMMANDS_B9; i++) {
 		char text[256];
 

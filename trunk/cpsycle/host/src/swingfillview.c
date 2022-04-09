@@ -148,10 +148,10 @@ void swingfillview_setoffset(SwingFillView* self, bool offset)
 	self->offset = offset;
 	if (offset) {
 		psy_ui_button_highlight(&self->actual_bpm);
-		psy_ui_button_disablehighlight(&self->center_bpm);		
+		psy_ui_button_disable_highlight(&self->center_bpm);		
 	} else {
 		psy_ui_button_highlight(&self->center_bpm);
-		psy_ui_button_disablehighlight(&self->actual_bpm);
+		psy_ui_button_disable_highlight(&self->actual_bpm);
 	}	
 }
 

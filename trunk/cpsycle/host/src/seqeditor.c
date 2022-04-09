@@ -221,7 +221,7 @@ void seqeditor_build(SeqEditor* self)
 void seqeditor_ontracksscroll(SeqEditor* self, psy_ui_Component* sender)
 {	
 	psy_ui_component_set_scroll_top(&self->trackdesc.component,
-		psy_ui_component_scrolltop(&self->tracks.component));
+		psy_ui_component_scroll_top(&self->tracks.component));
 	psy_ui_component_set_scroll_left(&self->header.pane,
 		psy_ui_component_scroll_left(&self->tracks.component));
 }
@@ -310,7 +310,7 @@ void seqeditor_ontoggletimesig(SeqEditor* self, psy_ui_Button* sender)
 		psy_ui_component_align(psy_ui_component_parent(
 			psy_ui_button_base(sender)));		
 	} else {		
-		psy_ui_button_disablehighlight(sender);
+		psy_ui_button_disable_highlight(sender);
 		psy_ui_button_seticon(sender, psy_ui_ICON_MORE);
 		psy_ui_component_align(psy_ui_component_parent(
 			psy_ui_button_base(sender)));
@@ -337,7 +337,7 @@ void seqeditor_ontoggleloop(SeqEditor* self, psy_ui_Button* sender)
 		psy_ui_component_align(psy_ui_component_parent(
 			psy_ui_button_base(sender)));		
 	} else {		
-		psy_ui_button_disablehighlight(sender);
+		psy_ui_button_disable_highlight(sender);
 		psy_ui_component_align(psy_ui_component_parent(
 			psy_ui_button_base(sender)));		
 	}
