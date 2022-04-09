@@ -179,7 +179,7 @@ void mainstatusbar_update_terminal_button(MainStatusBar* self)
 	psy_ui_component_invalidate(psy_ui_button_base(&self->toggleterminal));
 }
 
-void mainstatusbar_setdefaultstatustext(MainStatusBar* self, const char* text)
+void mainstatusbar_set_default_status_text(MainStatusBar* self, const char* text)
 {
 	psy_ui_label_set_text(&self->statusbarlabel, text);
 	psy_ui_label_set_default_text(&self->statusbarlabel, text);

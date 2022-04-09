@@ -489,9 +489,9 @@ void seqviewlist_init(SeqviewList* self, psy_ui_Component* parent,
 			&self->state->cmds->sequence->patterns->signal_namechanged,
 			self, seqviewlist_onpatternnamechanged);
 	}
-	psy_signal_connect(&self->state->cmds->workspace->signal_playlinechanged, self,
+	psy_signal_connect(&self->state->cmds->workspace->signal_play_line_changed, self,
 		seqviewlist_onplaylinechanged);
-	psy_signal_connect(&self->state->cmds->workspace->signal_playstatuschanged, self,
+	psy_signal_connect(&self->state->cmds->workspace->signal_play_status_changed, self,
 		seqviewlist_onplaystatuschanged);
 	psy_ui_component_setscrollstep(&self->component,
 		psy_ui_size_make(self->state->trackwidth, self->state->line_height));
@@ -743,8 +743,7 @@ void seqviewlist_on_focus(SeqviewList* self)
 	psy_ui_component_addstylestate(
 		psy_ui_component_parent(psy_ui_component_parent(&self->component)),
 		psy_ui_STYLESTATE_SELECT);
-	seqviewlist_invalidaterow(self, editposition.order);
-	self->state->cmds->workspace->seqviewactive = TRUE;
+	seqviewlist_invalidaterow(self, editposition.order);	
 }
 
 void seqviewlist_on_focuslost(SeqviewList* self)
@@ -755,8 +754,7 @@ void seqviewlist_on_focuslost(SeqviewList* self)
 	editposition = psy_audio_sequenceselection_first(
 		&self->state->cmds->workspace->song->sequence.sequenceselection);
 	self->state->active = FALSE;
-	seqviewlist_invalidaterow(self, editposition.order);
-	self->state->cmds->workspace->seqviewactive = FALSE;
+	seqviewlist_invalidaterow(self, editposition.order);	
 	psy_ui_component_setborder(
 		psy_ui_component_parent(psy_ui_component_parent(&self->component)),
 		psy_ui_component_border(&self->component));

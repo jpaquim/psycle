@@ -560,12 +560,12 @@ void paramrackmodebar_onmodeselect(ParamRackModeBar* self, psy_ui_Button* sender
 
 void paramrackmodebar_setmode(ParamRackModeBar* self, ParamRackMode mode)
 {
-	psy_ui_button_disablehighlight(&self->all);
-	psy_ui_button_disablehighlight(&self->inputs);
-	psy_ui_button_disablehighlight(&self->outputs);
-	psy_ui_button_disablehighlight(&self->inchain);
-	psy_ui_button_disablehighlight(&self->outchain);
-	psy_ui_button_disablehighlight(&self->level);
+	psy_ui_button_disable_highlight(&self->all);
+	psy_ui_button_disable_highlight(&self->inputs);
+	psy_ui_button_disable_highlight(&self->outputs);
+	psy_ui_button_disable_highlight(&self->inchain);
+	psy_ui_button_disable_highlight(&self->outchain);
+	psy_ui_button_disable_highlight(&self->level);
 	switch (mode) {
 	case PARAMRACK_ALL:
 		psy_ui_button_highlight(&self->all);

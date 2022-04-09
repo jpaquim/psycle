@@ -209,7 +209,7 @@ void psycleconfig_resetskin(PsycleConfig* self)
 	machineparamconfig_resettheme(&self->macparam);
 }
 
-void psycleconfig_resetcontrolskin(PsycleConfig* self)
+void psycleconfig_reset_control_skin(PsycleConfig* self)
 {
 	assert(self);
 	

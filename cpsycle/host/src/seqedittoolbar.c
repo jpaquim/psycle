@@ -133,11 +133,11 @@ void seqeditortoolbar_setdragtype(SeqEditToolBar* self, SeqEditorDragType type)
 	switch (type) {
 	case SEQEDIT_DRAGTYPE_MOVE:
 		psy_ui_button_highlight(&self->move);
-		psy_ui_button_disablehighlight(&self->reorder);
+		psy_ui_button_disable_highlight(&self->reorder);
 		break;
 	case SEQEDIT_DRAGTYPE_REORDER:
 		psy_ui_button_highlight(&self->reorder);
-		psy_ui_button_disablehighlight(&self->move);
+		psy_ui_button_disable_highlight(&self->move);
 		break;
 	default:
 		break;

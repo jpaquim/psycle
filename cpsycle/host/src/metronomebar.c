@@ -62,7 +62,7 @@ void metronomebar_fillprecount(MetronomeBar* self)
 void metronomebar_ontogglemetronomestate(MetronomeBar* self)
 {
 	if (psy_ui_button_highlighted(&self->activated)) {
-		psy_ui_button_disablehighlight(&self->activated);
+		psy_ui_button_disable_highlight(&self->activated);
 		psy_audio_player_deactivatemetronome(self->player);		
 	} else {
 		psy_ui_button_highlight(&self->activated);

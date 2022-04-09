@@ -198,7 +198,7 @@ void songpropertiesview_read(SongPropertiesView* self)
 void songpropertiesview_onsongchanged(SongPropertiesView* self,
 	Workspace* sender)
 {
-	if (sender->songhasfile) {
+	if (sender->song_has_file) {
 		songpropertiesview_disableedit(self);
 	} else {
 		songpropertiesview_enableedit(self);
@@ -313,7 +313,7 @@ void songpropertiesview_onetpbeditchange(SongPropertiesView* self,
 void songpropertiesview_onsamplerindexchange(SongPropertiesView* self,
 	IntEdit* sender)
 {
-	psy_audio_player_setsamplerindex(workspace_player(self->workspace), (uintptr_t)
+	psy_audio_player_set_sampler_index(workspace_player(self->workspace), (uintptr_t)
 		intedit_value(sender));	
 }
 

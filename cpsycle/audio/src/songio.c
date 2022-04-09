@@ -100,7 +100,7 @@ int psy_audio_songfile_load(psy_audio_SongFile* self, const char* filename)
 		header[8] = '\0';
 		strncpy(riff, header, 4);
 		riff[4] = '\0';
-		psy_signal_emit(&self->song->signal_loadprogress, self->song, 1, 1);		
+		psy_signal_emit(&self->song->signal_load_progress, self->song, 1, 1);		
 
 		if (strcmp(header,"PSY3SONG") == 0) {
 #ifdef PSYCLE_USE_PSY3
@@ -187,7 +187,7 @@ int psy_audio_songfile_load(psy_audio_SongFile* self, const char* filename)
 	} else {
 		status = psy_audio_songfile_errfile(self);
 	}
-	psy_signal_emit(&self->song->signal_loadprogress, self->song, 1, 0);
+	psy_signal_emit(&self->song->signal_load_progress, self->song, 1, 0);
 	return status;
 }
 
@@ -241,7 +241,7 @@ int psy_audio_songfile_exportmodule(psy_audio_SongFile* self, const char* filena
 	return status;
 }
 
-int psy_audio_songfile_exportmidifile(psy_audio_SongFile* self, const char* filename)
+int psy_audio_songfile_export_midi_file(psy_audio_SongFile* self, const char* filename)
 {
 	int status;
 	PsyFile file;
@@ -266,7 +266,7 @@ int psy_audio_songfile_exportmidifile(psy_audio_SongFile* self, const char* file
 	return status;
 }
 
-int psy_audio_songfile_exportlyfile(psy_audio_SongFile* self, const char* filename)
+int psy_audio_songfile_export_ly_file(psy_audio_SongFile* self, const char* filename)
 {
 	int status;
 	PsyFile file;

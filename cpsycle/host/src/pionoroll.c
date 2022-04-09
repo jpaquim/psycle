@@ -180,7 +180,7 @@ void pianoroll_init(Pianoroll* self, psy_ui_Component* parent,
 		pianoroll_ondisplayactivetracks);	
 	psy_signal_connect(&self->workspace->song->sequence.signal_cursorchanged,
 		self, pianoroll_oncursorchanged);
-	psy_signal_connect(&self->workspace->signal_playlinechanged, self,
+	psy_signal_connect(&self->workspace->signal_play_line_changed, self,
 		pianoroll_onplaylinechanged);
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		pianoroll_onsongchanged);	
@@ -206,7 +206,7 @@ void pianoroll_scroll_to_order(Pianoroll* self)
 		pianogrid_onpatternchange(&self->grid);
 		psy_ui_component_set_scroll(pianogrid_base(&self->grid),
 			psy_ui_point_make(psy_ui_value_zero(),
-				psy_ui_component_scrolltop(pianogrid_base(&self->grid))));
+				psy_ui_component_scroll_top(pianogrid_base(&self->grid))));
 		psy_ui_component_set_scroll(pianoruler_base(&self->header),
 			psy_ui_point_zero());
 		pianoroll_updatescroll(self);
@@ -317,7 +317,7 @@ void pianoroll_ongridscroll(Pianoroll* self, psy_ui_Component* sender)
 	if (psy_ui_component_scroll_top_px(pianogrid_base(&self->grid)) !=
 			psy_ui_component_scroll_top_px(&self->keyboard.component)) {
 		psy_ui_component_set_scroll_top(&self->keyboard.component,
-			psy_ui_component_scrolltop(pianogrid_base(&self->grid)));		
+			psy_ui_component_scroll_top(pianogrid_base(&self->grid)));		
 	}
 }
 
@@ -352,7 +352,7 @@ void pianoroll_onkeyheightchanged(Pianoroll* self, ZoomBox* sender)
 		psy_ui_value_make_px(self->keyboardstate.keyheightpx));
 	psy_ui_component_updateoverflow(pianogrid_base(&self->grid));
 	psy_ui_component_set_scroll_top(&self->keyboard.component,
-		psy_ui_component_scrolltop(pianogrid_base(&self->grid)));
+		psy_ui_component_scroll_top(pianogrid_base(&self->grid)));
 	psy_ui_component_invalidate(&self->keyboard.component);
 	psy_ui_component_update(&self->keyboard.component);	
 	psy_ui_component_align(&self->scroller.pane);
@@ -373,14 +373,14 @@ void pianoroll_oneditmode(Pianoroll* self, psy_ui_Button* sender)
 {
 	self->grid.edit_mode = TRUE;
 	psy_ui_button_highlight(sender);
-	psy_ui_button_disablehighlight(&self->bar.select_mode);
+	psy_ui_button_disable_highlight(&self->bar.select_mode);
 }
 
 void pianoroll_onselectmode(Pianoroll* self, psy_ui_Button* sender)
 {
 	self->grid.edit_mode = FALSE;
 	psy_ui_button_highlight(sender);
-	psy_ui_button_disablehighlight(&self->bar.edit_mode);
+	psy_ui_button_disable_highlight(&self->bar.edit_mode);
 }
 
 void pianoroll_ondisplayalltracks(Pianoroll* self, psy_ui_Button* sender)
@@ -411,9 +411,9 @@ void pianoroll_updatetrackdisplaybuttons(Pianoroll* self)
 {
 	assert(self);
 
-	psy_ui_button_disablehighlight(&self->bar.tracks_all);
-	psy_ui_button_disablehighlight(&self->bar.track_curr);
-	psy_ui_button_disablehighlight(&self->bar.tracks_active);
+	psy_ui_button_disable_highlight(&self->bar.tracks_all);
+	psy_ui_button_disable_highlight(&self->bar.track_curr);
+	psy_ui_button_disable_highlight(&self->bar.tracks_active);
 	switch (pianogrid_trackdisplay(&self->grid)) {
 		case PIANOROLL_TRACK_DISPLAY_ALL:
 			psy_ui_button_highlight(&self->bar.tracks_all);			

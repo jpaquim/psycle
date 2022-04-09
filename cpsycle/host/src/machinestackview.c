@@ -1667,15 +1667,11 @@ void machinestackview_ondisconnected(MachineStackView* self,
 }
 
 void machinestackview_idle(MachineStackView* self)
-{
-	ViewIndex currview;
-
+{	
 	if (machinestackstate_rebuildingview(&self->state)) {
 		machinestackview_build(self);
-	}
-	currview = workspace_current_view(self->workspace);
-	if (currview.id == VIEW_ID_MACHINEVIEW &&
-			currview.section == SECTION_ID_MACHINEVIEW_STACK) {
+	}	
+	if (psy_ui_component_draw_visible(&self->component)) {
 		psy_ui_component_invalidate(&self->volumes.component);
 		psy_ui_component_invalidate(&self->outputs.component);
 		machinestackinputs_updatevus(&self->inputs);

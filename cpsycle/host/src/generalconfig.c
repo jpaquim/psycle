@@ -69,7 +69,7 @@ void generalconfig_make(GeneralConfig* self, psy_Property* parent)
 		"settingsview.general.show-pattern-names");
 }
 
-bool generalconfig_showsonginfoonload(const GeneralConfig* self)
+bool generalconfig_show_song_info_on_load(const GeneralConfig* self)
 {
 	assert(self);
 
@@ -100,7 +100,7 @@ bool generalconfig_showmaximizedatstart(const GeneralConfig* self)
 	return psy_property_at_bool(self->general, "showmaximizedatstart", TRUE);
 }
 
-bool generalconfig_saverecentsongs(const GeneralConfig* self)
+bool generalconfig_save_recent_songs(const GeneralConfig* self)
 {
 	assert(self);
 
@@ -199,5 +199,5 @@ bool generalconfig_hasproperty(const GeneralConfig* self,
 {
 	assert(self && self->general);
 
-	return psy_property_insection(property, self->general);
+	return psy_property_in_section(property, self->general);
 }

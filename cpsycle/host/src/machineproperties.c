@@ -114,9 +114,9 @@ void machineproperties_setmachine(MachineProperties* self,
 		self->macid = psy_INDEX_INVALID;
 		psy_ui_textarea_settext(&self->nameedit, psy_ui_translate("machineview.editname"));
 		psy_ui_component_hide_align(psy_ui_button_base(&self->isbus));
-		psy_ui_button_disablehighlight(&self->issolobypass);
-		psy_ui_button_disablehighlight(&self->isbus);
-		psy_ui_button_disablehighlight(&self->ismute);		
+		psy_ui_button_disable_highlight(&self->issolobypass);
+		psy_ui_button_disable_highlight(&self->isbus);
+		psy_ui_button_disable_highlight(&self->ismute);		
 		psy_ui_component_preventinput(&self->component, psy_ui_RECURSIVE);
 		psy_ui_component_enableinput(psy_ui_button_base(&self->cancel),
 			psy_ui_NONE_RECURSIVE);
@@ -229,17 +229,17 @@ void machineproperties_idle(MachineProperties* self)
 		if (psy_audio_machine_muted(self->machine)) {
 			psy_ui_button_highlight(&self->ismute);
 		} else {
-			psy_ui_button_disablehighlight(&self->ismute);
+			psy_ui_button_disable_highlight(&self->ismute);
 		}
 		if (psy_audio_machine_hasstandby(self->machine)) {
 			psy_ui_button_highlight(&self->issolobypass);
 		} else {
-			psy_ui_button_disablehighlight(&self->issolobypass);
+			psy_ui_button_disable_highlight(&self->issolobypass);
 		}
 		if (psy_audio_machine_isbus(self->machine)) {
 			psy_ui_button_highlight(&self->isbus);
 		} else {
-			psy_ui_button_disablehighlight(&self->isbus);
+			psy_ui_button_disable_highlight(&self->isbus);
 		}
 	}
 }

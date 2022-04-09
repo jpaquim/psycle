@@ -445,7 +445,7 @@ void psy_property_clear(psy_Property* self)
 	self->children = NULL;
 }
 
-bool psy_property_insection(const psy_Property* self, psy_Property* section)
+bool psy_property_in_section(const psy_Property* self, psy_Property* section)
 {
 	assert(self);
 

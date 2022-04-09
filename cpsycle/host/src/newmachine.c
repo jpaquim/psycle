@@ -284,37 +284,37 @@ void newmachinefilterbar_update(NewMachineFilterBar* self)
 		if (self->filter->effect) {
 			psy_ui_button_highlight(&self->effects);
 		} else {
-			psy_ui_button_disablehighlight(&self->effects);
+			psy_ui_button_disable_highlight(&self->effects);
 		}
 		if (self->filter->gen) {
 			psy_ui_button_highlight(&self->gen);
 		} else {
-			psy_ui_button_disablehighlight(&self->gen);
+			psy_ui_button_disable_highlight(&self->gen);
 		}
 		if (self->filter->intern) {
 			psy_ui_button_highlight(&self->intern);
 		} else {
-			psy_ui_button_disablehighlight(&self->intern);
+			psy_ui_button_disable_highlight(&self->intern);
 		}
 		if (self->filter->native) {
 			psy_ui_button_highlight(&self->native);
 		} else {
-			psy_ui_button_disablehighlight(&self->native);
+			psy_ui_button_disable_highlight(&self->native);
 		}
 		if (self->filter->vst) {
 			psy_ui_button_highlight(&self->vst);
 		} else {
-			psy_ui_button_disablehighlight(&self->vst);
+			psy_ui_button_disable_highlight(&self->vst);
 		}
 		if (self->filter->lua) {
 			psy_ui_button_highlight(&self->lua);
 		} else {
-			psy_ui_button_disablehighlight(&self->lua);
+			psy_ui_button_disable_highlight(&self->lua);
 		}
 		if (self->filter->ladspa) {
 			psy_ui_button_highlight(&self->ladspa);
 		} else {
-			psy_ui_button_disablehighlight(&self->ladspa);
+			psy_ui_button_disable_highlight(&self->ladspa);
 		}
 	}
 }
@@ -386,7 +386,7 @@ void newmachinecategorybar_build(NewMachineCategoryBar* self)
 		if (newmachinefilter_useanycategory(self->filter)) {
 			psy_ui_button_highlight(button);
 		} else {
-			psy_ui_button_disablehighlight(button);
+			psy_ui_button_disable_highlight(button);
 		}
 		psy_signal_connect(&button->signal_clicked, self,
 			newmachinecategorybar_onclicked);
@@ -434,7 +434,7 @@ void newmachinecategorybar_onclicked(NewMachineCategoryBar* self, psy_ui_Button*
 		if (!newmachinefilter_useanycategory(self->filter) &&
 			newmachinefilter_hascategory(self->filter, psy_ui_button_text(sender))) {
 			newmachinefilter_removecategory(self->filter, psy_ui_button_text(sender));
-			psy_ui_button_disablehighlight(sender);
+			psy_ui_button_disable_highlight(sender);
 		} else {
 			newmachinefilter_addcategory(self->filter, psy_ui_button_text(sender));
 			psy_ui_button_highlight(sender);
@@ -1022,7 +1022,7 @@ void newmachine_onrescan(NewMachine* self, psy_ui_Component* sender)
 {	
 	if (!psy_audio_plugincatcher_scanning(&self->workspace->plugincatcher)) {
 		psy_ui_label_set_text(&self->scanview.processview.scanfile, "");		
-		workspace_scanplugins(self->workspace);
+		workspace_scan_plugins(self->workspace);
 	}
 }
 

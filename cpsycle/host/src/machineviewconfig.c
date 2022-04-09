@@ -717,7 +717,7 @@ void machineviewconfig_setdest(MachineViewConfig* self, psy_ui_RealPoint* pt,
 bool machineviewconfig_hasthemeproperty(const MachineViewConfig* self,
 	psy_Property* property)
 {
-	return (self->theme && psy_property_insection(property, self->theme));
+	return (self->theme && psy_property_in_section(property, self->theme));
 }
 
 bool machineviewconfig_hasproperty(const MachineViewConfig* self,
@@ -725,7 +725,7 @@ bool machineviewconfig_hasproperty(const MachineViewConfig* self,
 {
 	assert(self && self->machineview);
 
-	return  psy_property_insection(property, self->machineview);
+	return  psy_property_in_section(property, self->machineview);
 }
 
 bool machineviewconfig_machineindexes(const MachineViewConfig* self)

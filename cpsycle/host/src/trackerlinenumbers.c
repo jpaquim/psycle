@@ -209,7 +209,7 @@ TrackerColumnFlags trackerlinennumbers_column_flags(TrackerLineNumbers* self,
 		psy_dsp_testrange(self->workspace->host_sequencer_time.currplaycursor.absoffset,
 			offset, patternviewstate_bpl(self->state->pv));
 	rv.mid = 0;	
-	rv.cursor = (!self->workspace->followsong || !self->workspace->host_sequencer_time.currplaying) &&
+	rv.cursor = (!self->workspace->follow_song || !self->workspace->host_sequencer_time.currplaying) &&
 		self->draw_cursor &&
 		(psy_audio_sequencecursor_line(&self->state->pv->cursor) == line);
 	rv.beat = (line % self->state->pv->cursor.lpb) == 0;
@@ -393,7 +393,7 @@ void trackerlinenumbers_show_in_decimal(TrackerLineNumbers* self)
 
 void trackerlinenumbers_update_cursor(TrackerLineNumbers* self)
 {
-	if (!self->workspace->followsong || !self->workspace->host_sequencer_time.currplaying) {
+	if (!self->workspace->follow_song || !self->workspace->host_sequencer_time.currplaying) {
 		psy_audio_Sequence* sequence;
 
 		sequence = patternviewstate_sequence(self->state->pv);

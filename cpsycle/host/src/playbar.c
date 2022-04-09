@@ -211,7 +211,7 @@ void playbar_onloopclicked(PlayBar* self, psy_ui_Component* sender)
 {
 	if (psy_audio_sequencer_looping(&self->player->sequencer)) {
 		psy_audio_sequencer_stop_loop(&self->player->sequencer);
-		psy_ui_button_disablehighlight(&self->loop);
+		psy_ui_button_disable_highlight(&self->loop);
 	} else {
 		psy_audio_sequencer_loop(&self->player->sequencer);
 		psy_ui_button_highlight(&self->loop);
@@ -222,7 +222,7 @@ void playbar_onrecordnotesclicked(PlayBar* self, psy_ui_Component* sender)
 {	
 	if (psy_audio_player_recordingnotes(self->player)) {
 		psy_audio_player_stoprecordingnotes(self->player);
-		psy_ui_button_disablehighlight(&self->recordnotes);
+		psy_ui_button_disable_highlight(&self->recordnotes);
 	} else {
 		psy_audio_player_startrecordingnotes(self->player);
 		psy_ui_button_highlight(&self->recordnotes);
@@ -234,12 +234,12 @@ void playbar_on_timer(PlayBar* self, uintptr_t timerid)
 	if (psy_audio_player_playing(self->player)) {
 		psy_ui_button_highlight(&self->play);
 	} else {
-		psy_ui_button_disablehighlight(&self->play);
+		psy_ui_button_disable_highlight(&self->play);
 	}
 	if (psy_audio_sequencer_looping(&self->player->sequencer)) {
 		psy_ui_button_highlight(&self->loop);
 	} else {
-		psy_ui_button_disablehighlight(&self->loop);
+		psy_ui_button_disable_highlight(&self->loop);
 	}
 }
 

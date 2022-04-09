@@ -1155,7 +1155,7 @@ void machinewireview_onsongchanged(MachineWireView* self, Workspace* sender)
 		machinewireview_setmachines(self, NULL);
 	}	
 	psy_ui_component_set_scroll(&self->component, psy_ui_point_zero());
-	self->centermaster = !sender->songhasfile;
+	self->centermaster = !sender->song_has_file;
 	if (psy_ui_component_draw_visible(&self->component)) {		
 		psy_ui_component_invalidate(&self->component);
 	}	

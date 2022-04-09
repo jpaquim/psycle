@@ -89,7 +89,7 @@ bool metronomeconfig_hasproperty(const MetronomeConfig* self, psy_Property* prop
 {
 	assert(self && self->metronome);
 
-	return psy_property_insection(property, self->metronome);
+	return psy_property_in_section(property, self->metronome);
 }
 
 void metronomeconfig_updatemetronome(MetronomeConfig* self)

@@ -239,16 +239,16 @@ void instrumentgeneralview_nnahighlight(InstrumentGeneralView* self,
 {
 	psy_ui_button_highlight(highlight);
 	if (highlight != &self->nnacut) {
-		psy_ui_button_disablehighlight(&self->nnacut);
+		psy_ui_button_disable_highlight(&self->nnacut);
 	}
 	if (highlight != &self->nnafadeout) {
-		psy_ui_button_disablehighlight(&self->nnafadeout);
+		psy_ui_button_disable_highlight(&self->nnafadeout);
 	}
 	if (highlight != &self->nnarelease) {
-		psy_ui_button_disablehighlight(&self->nnarelease);
+		psy_ui_button_disable_highlight(&self->nnarelease);
 	}
 	if (highlight != &self->nnanone) {
-		psy_ui_button_disablehighlight(&self->nnanone);
+		psy_ui_button_disable_highlight(&self->nnanone);
 	}	
 }
 
@@ -291,10 +291,10 @@ void instrumentgeneralview_ondctinstrument(InstrumentGeneralView* self,
 
 void instrumentgeneralview_updatedct(InstrumentGeneralView* self)
 {	
-	psy_ui_button_disablehighlight(&self->dctnone);
-	psy_ui_button_disablehighlight(&self->dctnote);
-	psy_ui_button_disablehighlight(&self->dctsample);
-	psy_ui_button_disablehighlight(&self->dctinstrument);
+	psy_ui_button_disable_highlight(&self->dctnone);
+	psy_ui_button_disable_highlight(&self->dctnote);
+	psy_ui_button_disable_highlight(&self->dctsample);
+	psy_ui_button_disable_highlight(&self->dctinstrument);
 	if (self->instrument) {
 		switch (self->instrument->dct) {
 			case psy_audio_DUPECHECK_NONE:
@@ -363,10 +363,10 @@ void instrumentgeneralview_ondcanone(InstrumentGeneralView* self)
 
 void instrumentgeneralview_updatedca(InstrumentGeneralView* self)
 {
-	psy_ui_button_disablehighlight(&self->dcanone);
-	psy_ui_button_disablehighlight(&self->dcacut);
-	psy_ui_button_disablehighlight(&self->dcarelease);
-	psy_ui_button_disablehighlight(&self->dcafadeout);
+	psy_ui_button_disable_highlight(&self->dcanone);
+	psy_ui_button_disable_highlight(&self->dcacut);
+	psy_ui_button_disable_highlight(&self->dcarelease);
+	psy_ui_button_disable_highlight(&self->dcafadeout);
 	if (self->instrument) {
 		switch (self->instrument->dca) {
 		case psy_audio_NNA_STOP:

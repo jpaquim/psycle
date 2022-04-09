@@ -438,7 +438,7 @@ void splitter_onhide(psy_ui_Splitter* self)
 			psy_ui_splitter_onhidetoggle);
 	}
 	if (self->button) {
-		psy_ui_button_disablehighlight(self->button);
+		psy_ui_button_disable_highlight(self->button);
 	}
 }
 

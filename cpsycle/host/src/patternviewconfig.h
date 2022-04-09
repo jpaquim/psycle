@@ -21,14 +21,21 @@ extern "C" {
 /* PatternViewConfig */
 
 enum {
-	PROPERTY_ID_PATTERNDISPLAY = 80000,
-	PROPERTY_ID_PATTERN_DISPLAYMODE_TRACKER,
-	PROPERTY_ID_PATTERN_DISPLAYMODE_PIANOROLL,
-	PROPERTY_ID_PATTERN_DISPLAYMODE_TRACKER_PIANOROLL_VERTICAL,
-	PROPERTY_ID_PATTERN_DISPLAYMODE_TRACKER_PIANOROLL_HORIZONTAL,
+	PROPERTY_ID_PATTERNDISPLAY = 80000,	
 	PROPERTY_ID_TRACKSCOPES,
 	PROPERTY_ID_PATTERN_SKIN
 };
+
+/* The patternview display modes */
+typedef enum {
+	PATTERN_DISPLAYMODE_TRACKER,					/* only tracker visible */
+	PATTERN_DISPLAYMODE_PIANOROLL,					/* only pianoroll visible */
+	PATTERN_DISPLAYMODE_TRACKER_PIANOROLL_VERTICAL,	/* both of them visible */
+	PATTERN_DISPLAYMODE_TRACKER_PIANOROLL_HORIZONTAL,
+	PATTERN_DISPLAYMODE_INVALID,
+	PATTERN_DISPLAYMODE_NUM
+} PatternDisplayMode;
+
 
 typedef struct PatternViewConfig {
 	/* signals */
@@ -77,21 +84,21 @@ bool patternviewconfig_show_wide_inst_column(const PatternViewConfig*);
 psy_dsp_NotesTabMode patternviewconfig_notetabmode(const PatternViewConfig*);
 bool patternviewconfig_ismovecursorwhenpaste(const PatternViewConfig*);
 void patternviewconfig_setmovecursorwhenpaste(PatternViewConfig*, bool on);
-void patternviewconfig_setdisplaysinglepattern(PatternViewConfig*, bool on);
-bool patternviewconfig_issinglepatterndisplay(const PatternViewConfig*);
-bool patternviewconfig_useheaderbitmap(const PatternViewConfig*);
+void patternviewconfig_select_pattern_display(PatternViewConfig*,
+	PatternDisplayMode);
+PatternDisplayMode patternviewconfig_pattern_display(const PatternViewConfig*);
+void patternviewconfig_display_single_pattern(PatternViewConfig*);
+void patternviewconfig_display_sequence(PatternViewConfig*);
+bool patternviewconfig_single_mode(const PatternViewConfig*);
+bool patternviewconfig_use_header_bitmap(const PatternViewConfig*);
 bool patternviewconfig_show_trackscopes(const PatternViewConfig*);
 void patternviewconfig_toggle_pattern_defaultline(PatternViewConfig*);
 bool patternviewconfig_is_smooth_scrolling(const PatternViewConfig*);
-void patternviewconfig_setsmoothscrolling(PatternViewConfig*, bool on);
-int patternviewconfig_pattern_display(const PatternViewConfig*);
+void patternviewconfig_set_smooth_scrolling(PatternViewConfig*, bool on);
 psy_ui_FontInfo patternviewconfig_fontinfo(PatternViewConfig*, double zoom);
 void patternviewconfig_write_styles(PatternViewConfig*);
 void patternviewconfig_set_zoom(PatternViewConfig*, double zoom);
 double patternviewconfig_zoom(const PatternViewConfig*);
-void patternviewconfig_display_single_pattern(PatternViewConfig*);
-void patternviewconfig_display_sequence(PatternViewConfig*);
-bool patternviewconfig_singlemode(const PatternViewConfig*);
 
 /* events */
 int patternviewconfig_onchanged(PatternViewConfig*, psy_Property*);

@@ -670,7 +670,7 @@ void instrumententryview_outputstatus(InstrumentEntryView* self, uint8_t key)
 		keydesc = "Key";
 	}
 	notestr = psy_dsp_notetostr(key,
-		workspace_notetabmode(self->state->workspace));
+		patternviewconfig_notetabmode(&self->state->workspace->config.patview));		
 	if (notestr) {				
 		psy_snprintf(text, 64, "%s %s", keydesc, notestr);		
 	} else {

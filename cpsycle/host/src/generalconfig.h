@@ -36,11 +36,11 @@ typedef struct GeneralConfig {
 void generalconfig_init(GeneralConfig*, psy_Property* parent);
 void generalconfig_dispose(GeneralConfig*);
 
-bool generalconfig_showsonginfoonload(const GeneralConfig*);
+bool generalconfig_show_song_info_on_load(const GeneralConfig*);
 bool generalconfig_showaboutatstart(const GeneralConfig*);
 ViewIndex generalconfig_start_view(const GeneralConfig*);
 bool generalconfig_showmaximizedatstart(const GeneralConfig*);
-bool generalconfig_saverecentsongs(const GeneralConfig*);
+bool generalconfig_save_recent_songs(const GeneralConfig*);
 bool generalconfig_playsongafterload(const GeneralConfig*);
 bool generalconfig_showingpatternnames(const GeneralConfig*);
 bool generalconfig_showsequenceedit(const GeneralConfig*);

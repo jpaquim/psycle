@@ -163,7 +163,7 @@ void patternviewbar_init(PatternViewBar* self, psy_ui_Component* parent,
 		patternviewbar_base(self));
 	psy_ui_checkbox_settext(&self->displaysinglepattern,
 		"settingsview.pv.displaysinglepattern");
-	if (patternviewconfig_issinglepatterndisplay(psycleconfig_patview(
+	if (patternviewconfig_single_mode(psycleconfig_patview(
 			workspace_conf(workspace)))) {
 		psy_ui_checkbox_check(&self->displaysinglepattern);
 	}
@@ -183,9 +183,9 @@ void patternviewbar_init(PatternViewBar* self, psy_ui_Component* parent,
 	}	
 	patternviewbar_update_status(self);
 	patternviewbar_connect_song(self);
-	psy_signal_connect(&self->workspace->signal_playlinechanged, self,
+	psy_signal_connect(&self->workspace->signal_play_line_changed, self,
 		patternviewbar_on_playline_changed);
-	psy_signal_connect(&self->workspace->signal_playstatuschanged, self,
+	psy_signal_connect(&self->workspace->signal_play_status_changed, self,
 		patternviewbar_on_playstatus_changed);
 }
 
@@ -211,8 +211,11 @@ void patternviewbar_on_display_single_pattern(PatternViewBar* self,
 {
 	assert(self);
 
-	patternviewconfig_setdisplaysinglepattern(self->patconfig,
-		psy_ui_checkbox_checked(&self->displaysinglepattern));
+	if (psy_ui_checkbox_checked(&self->displaysinglepattern)) {
+		patternviewconfig_display_single_pattern(self->patconfig);
+	} else {
+		patternviewconfig_display_sequence(self->patconfig);
+	}
 }
 
 void patternviewbar_on_song_changed(PatternViewBar* self, Workspace* sender)
@@ -270,7 +273,7 @@ void patternviewbar_on_configure(PatternViewBar* self, PatternViewConfig* config
 	} else {
 		psy_ui_checkbox_disablecheck(&self->movecursorwhenpaste);
 	}
-	if (patternviewconfig_issinglepatterndisplay(config)) {
+	if (patternviewconfig_single_mode(config)) {
 		psy_ui_checkbox_check(&self->displaysinglepattern);
 	} else {
 		psy_ui_checkbox_disablecheck(&self->displaysinglepattern);

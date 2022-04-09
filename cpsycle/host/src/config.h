@@ -63,7 +63,7 @@ void psycleconfig_dispose(PsycleConfig*);
 
 void psycleconfig_loadskin(PsycleConfig*, const char* path);
 void psycleconfig_resetskin(PsycleConfig*);
-void psycleconfig_resetcontrolskin(PsycleConfig*);
+void psycleconfig_reset_control_skin(PsycleConfig*);
 
 INLINE GeneralConfig* psycleconfig_general(PsycleConfig* self)
 {

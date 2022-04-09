@@ -46,7 +46,7 @@ typedef struct SequencerBar {
 	/* inherits */
 	psy_ui_Component component;
 	/* internal */
-	psy_ui_CheckBox followsong;
+	psy_ui_CheckBox follow_song;
 	psy_ui_CheckBox shownames;	
 	psy_ui_CheckBox recordnoteoff;
 	psy_ui_CheckBox recordtweak;

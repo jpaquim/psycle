@@ -83,15 +83,6 @@ void patternviewstate_select_all(PatternViewState* self)
 	}
 }
 
-void patternviewstate_configure(PatternViewState* self)
-{	
-	if (patternviewconfig_issinglepatterndisplay(self->patconfig)) {
-		patternviewstate_displaypattern(self);
-	} else {
-		patternviewstate_displaysequence(self);
-	}
-}
-
 void patternviewstate_sequencestart(PatternViewState* self,
 	double startoffset, psy_audio_SequenceTrackIterator* rv)
 {

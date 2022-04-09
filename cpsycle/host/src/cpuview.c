@@ -65,7 +65,7 @@ void cpumoduleview_ondraw(CPUModuleView* self, psy_ui_Graphics* g)
 			if (machine) {
 				psy_ui_Value scrolltop;
 
-				scrolltop = psy_ui_component_scrolltop(&self->component);
+				scrolltop = psy_ui_component_scroll_top(&self->component);
 				if ((cpy - psy_ui_value_px(&scrolltop, tm, NULL)) >= 0) {
 					char text[40];
 					const psy_audio_MachineInfo* info;					

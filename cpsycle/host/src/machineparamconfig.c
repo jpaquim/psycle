@@ -140,7 +140,7 @@ void machineparamconfig_resettheme(MachineParamConfig* self)
 		psy_property_remove(self->paramview, self->theme);
 	}
 	machineparamconfig_maketheme(self, self->paramview);
-	machineparamconfig_updatestyles(self);
+	machineparamconfig_update_styles(self);
 }
 
 void machineparamconfig_settheme(MachineParamConfig* self, psy_Property* theme)
@@ -149,14 +149,14 @@ void machineparamconfig_settheme(MachineParamConfig* self, psy_Property* theme)
 
 	if (self->theme) {
 		psy_property_sync(self->theme, theme);
-		machineparamconfig_updatestyles(self);		
+		machineparamconfig_update_styles(self);		
 	}
 }
 
 bool machineparamconfig_hasthemeproperty(const MachineParamConfig* self,
 	psy_Property* property)
 {
-	return (self->theme && psy_property_insection(property, self->theme));
+	return (self->theme && psy_property_in_section(property, self->theme));
 }
 
 bool machineparamconfig_hasproperty(const MachineParamConfig* self,
@@ -164,7 +164,7 @@ bool machineparamconfig_hasproperty(const MachineParamConfig* self,
 {
 	assert(self && self->paramview);
 
-	return psy_property_insection(property, self->paramview);
+	return psy_property_in_section(property, self->paramview);
 }
 
 const char* machineparamconfig_dialbpm(const MachineParamConfig* self)
@@ -174,7 +174,7 @@ const char* machineparamconfig_dialbpm(const MachineParamConfig* self)
 	return psy_property_at_str(self->theme, "machinedial_bmp", "");
 }
 
-void machineparamconfig_setdialbpm(MachineParamConfig* self,
+void machineparamconfig_set_dial_bpm(MachineParamConfig* self,
 	const char* filename)
 {
 	assert(self);
@@ -218,7 +218,7 @@ int machineparamconfig_onchanged(MachineParamConfig* self, psy_Property*
 			}
 		}
 		if (!worked) {
-			machineparamconfig_updatestyles(self);
+			machineparamconfig_update_styles(self);
 		}		
 	} else {
 		psy_signal_emit(&self->signal_changed, self, 1, property);
@@ -226,7 +226,7 @@ int machineparamconfig_onchanged(MachineParamConfig* self, psy_Property*
 	return rebuild_level;
 }
 
-void machineparamconfig_updatestyles(MachineParamConfig* self)
+void machineparamconfig_update_styles(MachineParamConfig* self)
 {
 	assert(self);
 

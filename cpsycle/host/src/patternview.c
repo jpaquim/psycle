@@ -78,7 +78,7 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 	vtable_init(self);
 	psy_ui_component_set_id(patternview_base(self), VIEW_ID_PATTERNVIEW);
 	self->workspace = workspace;	
-	self->display = PROPERTY_ID_PATTERN_DISPLAYMODE_TRACKER;
+	self->display = PATTERN_DISPLAYMODE_TRACKER;
 	psy_ui_component_set_style_type(&self->component, STYLE_PATTERNVIEW);
 	psy_ui_notebook_init(&self->notebook, &self->component);
 	psy_ui_component_set_align(psy_ui_notebook_base(&self->notebook),
@@ -140,7 +140,8 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 	patternviewtabbar_init(&self->tabbar, tabbarparent, workspace);
 	psy_signal_connect(&self->tabbar.signal_toggle_properties, self,
 		patternview_on_toggle_properties);
-	patternview_select_display(self, PATTERN_DISPLAYMODE_TRACKER);		
+	self->display = PATTERN_DISPLAYMODE_INVALID;
+	patternview_select_display(self, PATTERN_DISPLAYMODE_TRACKER);
 	psy_signal_connect(&self->tabbar.contextbutton.signal_clicked, self,
 		patternview_on_context_menu);
 	/* Connect */	
@@ -150,8 +151,6 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 		patternview_on_parameter_tweak);	
 	psy_signal_connect(&psy_ui_app_zoom(psy_ui_app())->signal_zoom, self,
 		patternview_on_app_zoom);	
-	// psy_signal_connect(&self->psy_ui_app_zoom(psy_ui_app())->signal_zoom, self,
-	//	patternview_on_pattern_zoom);
 	/* Configuration */
 	psy_signal_connect(&self->pvstate.patconfig->signal_changed, self,
 		patternview_on_configure);
@@ -259,8 +258,9 @@ void patternview_on_configure(PatternView* self, PatternViewConfig* config,
 {	
 	assert(self);
 
-	patternview_update_font(self);
-	patternviewstate_configure(&self->pvstate);		
+	patternview_update_font(self);	
+	patternview_select_display(self,
+		patternviewconfig_pattern_display(config));
 	trackconfig_init_columns(&self->track_config,
 		patternviewconfig_show_wide_inst_column(config));
 	patternview_select_display(self, (PatternDisplayMode)

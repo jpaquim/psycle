@@ -363,11 +363,11 @@ void cmdplayer_loadandrun(CmdPlayer* self, const char* path)
 
 void cmdplayer_loadsong(CmdPlayer* self, const char* path)
 {		
-	psy_audio_Song* oldsong;
+	psy_audio_Song* old_song;
 	psy_audio_SongFile songfile;
 
 	psy_audio_player_stop(&self->player);
-	oldsong = self->song;
+	old_song = self->song;
 	psy_audio_exclusivelock_enter();	
 	self->song = psy_audio_song_allocinit(&self->machinefactory);
 	psy_audio_machinecallback_setsong(&self->machinecallback, self->song);
@@ -384,8 +384,8 @@ void cmdplayer_loadsong(CmdPlayer* self, const char* path)
 	psy_audio_player_setsong(&self->player, self->song);	
 	cmdplayer_applysongproperties(self);
 	psy_audio_exclusivelock_leave();
-	if (oldsong) {
-		psy_audio_song_deallocate(oldsong);
+	if (old_song) {
+		psy_audio_song_deallocate(old_song);
 	}
 	psy_audio_songfile_dispose(&songfile);
 }

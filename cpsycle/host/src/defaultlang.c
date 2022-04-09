@@ -918,7 +918,7 @@ void make_translator_tracker(psy_Property* parent)
 		"Select Mac/Ins in Cursor Pos");
 	add("undo", "Edit Undo");
 	add("redo", "Edit Redo");
-	add("followsong", "Follow Song");
+	add("follow_song", "Follow Song");
 }
 
 void make_translator_messages(psy_Property* parent)

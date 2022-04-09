@@ -401,7 +401,7 @@ void psy_ui_button_highlight(psy_ui_Button* self)
 	}
 }
 
-void psy_ui_button_disablehighlight(psy_ui_Button* self)
+void psy_ui_button_disable_highlight(psy_ui_Button* self)
 {
 	if (psy_ui_button_highlighted(self)) {		
 		psy_ui_component_removestylestate(psy_ui_button_base(self),

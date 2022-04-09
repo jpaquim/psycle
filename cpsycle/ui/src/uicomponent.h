@@ -219,7 +219,7 @@ typedef struct psy_ui_Component {
 } psy_ui_Component;
 
 void psy_ui_replacedefaultfont(psy_ui_Component* main, psy_ui_Font*);
-void psy_ui_notifystyleupdate(psy_ui_Component* main);
+void psy_ui_notify_style_update(psy_ui_Component* main);
 void psy_ui_component_updatefont(psy_ui_Component*);
 
 void psy_ui_component_init(psy_ui_Component*, psy_ui_Component* parent,
@@ -530,11 +530,6 @@ psy_ui_Component* psy_ui_mainwindow(void);
 
 INLINE void psy_ui_component_invalidate(psy_ui_Component* self)
 {	
-#if PSYCLE_USE_TK == PSYCLE_TK_X11	
-	// if (!psy_ui_mainwindow()->visible) {
-	//	return;
-	//}
-#endif	
 	if (psy_ui_component_draw_visible(self)) {
 		self->vtable->invalidate(self);
 	}
@@ -698,7 +693,7 @@ INLINE double psy_ui_component_scroll_left_px(psy_ui_Component* self)
 
 void psy_ui_component_set_scroll_top(psy_ui_Component*, psy_ui_Value top);
 
-INLINE psy_ui_Value psy_ui_component_scrolltop(psy_ui_Component* self)
+INLINE psy_ui_Value psy_ui_component_scroll_top(psy_ui_Component* self)
 {		
 	psy_ui_RealRectangle position;
 

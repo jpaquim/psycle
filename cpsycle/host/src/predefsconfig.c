@@ -134,5 +134,5 @@ bool predefsconfig_hasproperty(const PredefsConfig* self,
 {
 	assert(self && self->predefs);
 
-	return psy_property_insection(property, self->predefs);
+	return psy_property_in_section(property, self->predefs);
 }

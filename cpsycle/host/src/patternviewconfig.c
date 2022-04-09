@@ -141,26 +141,22 @@ void patternviewconfig_make_view(PatternViewConfig* self, psy_Property* parent)
 			"patterndisplay", 0),
 		"settingsview.pv.patterndisplay"),
 		PROPERTY_ID_PATTERNDISPLAY);
-	psy_property_setid(psy_property_settext(
+	psy_property_settext(
 		psy_property_append_int(choice, "tracker",
 			0, 0, 0),
-		"settingsview.pv.tracker"),
-		PROPERTY_ID_PATTERN_DISPLAYMODE_TRACKER);
-	psy_property_setid(psy_property_settext(
+		"settingsview.pv.tracker");
+	psy_property_settext(
 		psy_property_append_int(choice, "piano",
 			0, 0, 0),
-		"settingsview.pv.piano"),
-		PROPERTY_ID_PATTERN_DISPLAYMODE_PIANOROLL);
-	psy_property_setid(psy_property_settext(
+		"settingsview.pv.piano");
+	psy_property_settext(
 		psy_property_append_int(choice, "splitvertical",
 			0, 0, 0),
-		"settingsview.pv.splitvertical"),
-		PROPERTY_ID_PATTERN_DISPLAYMODE_TRACKER_PIANOROLL_VERTICAL);
-	psy_property_setid(psy_property_settext(
+		"settingsview.pv.splitvertical");
+	psy_property_settext(
 		psy_property_append_int(choice, "splithorizontal",
 			0, 0, 0),
-		"settingsview.pv.splithorizontal"),
-		PROPERTY_ID_PATTERN_DISPLAYMODE_TRACKER_PIANOROLL_HORIZONTAL);
+		"settingsview.pv.splithorizontal");
 	patternviewconfig_make_theme(self, pvc);
 }
 
@@ -391,7 +387,7 @@ void patternviewconfig_set_theme(PatternViewConfig* self, psy_Property* theme)
 bool patternviewconfig_has_theme_property(const PatternViewConfig* self,
 	psy_Property* property)
 {
-	return (self->theme && psy_property_insection(property, self->theme));
+	return (self->theme && psy_property_in_section(property, self->theme));
 }
 
 bool patternviewconfig_has_property(const PatternViewConfig* self,
@@ -399,7 +395,7 @@ bool patternviewconfig_has_property(const PatternViewConfig* self,
 {
 	assert(self &&  self->patternview);
 
-	return (psy_property_insection(property, self->patternview));
+	return (psy_property_in_section(property, self->patternview));
 }
 
 /* getter */
@@ -471,7 +467,7 @@ double patternviewconfig_linenumber_num_digits(const PatternViewConfig* self)
 		if (patternviewconfig_showbeatoffset(self)) {
 			rv += 5.0;
 		}
-		if (!patternviewconfig_issinglepatterndisplay(self)) {
+		if (!patternviewconfig_single_mode(self)) {
 			rv += 3.0;
 		}
 	}
@@ -518,7 +514,7 @@ bool patternviewconfig_is_smooth_scrolling(const PatternViewConfig* self)
 		TRUE);
 }
 
-void patternviewconfig_setsmoothscrolling(PatternViewConfig* self, bool on)
+void patternviewconfig_set_smooth_scrolling(PatternViewConfig* self, bool on)
 {
 	assert(self);
 
@@ -526,29 +522,70 @@ void patternviewconfig_setsmoothscrolling(PatternViewConfig* self, bool on)
 }
 
 
-void patternviewconfig_setdisplaysinglepattern(PatternViewConfig* self, bool on)
+void patternviewconfig_display_single_pattern(PatternViewConfig* self)
 {
 	psy_Property* property;
 
 	assert(self);
 
 	property = psy_property_set_bool(self->patternview, "displaysinglepattern",
-		on);
-	self->singlemode = on;
+		TRUE);
+	self->singlemode = TRUE;
 	if (property) {
 		psy_signal_emit(&self->signal_changed, self, 1, property);
 	}
 }
 
-bool patternviewconfig_issinglepatterndisplay(const PatternViewConfig* self)
+void patternviewconfig_display_sequence(PatternViewConfig* self)
 {
+	psy_Property* property;
+
 	assert(self);
 
-	return psy_property_at_bool(self->patternview, "displaysinglepattern",
-		TRUE);
+	property = psy_property_set_bool(self->patternview, "displaysinglepattern",
+		FALSE);
+	self->singlemode = FALSE;
+	if (property) {
+		psy_signal_emit(&self->signal_changed, self, 1, property);
+	}
 }
 
-bool patternviewconfig_useheaderbitmap(const PatternViewConfig* self)
+void patternviewconfig_select_pattern_display(PatternViewConfig* self,
+	PatternDisplayMode display)
+{
+	psy_Property* patterndisplay;
+
+	assert(self);
+	assert(self->patternview);
+
+	patterndisplay = psy_property_at(self->patternview, "patterndisplay",
+		PSY_PROPERTY_TYPE_CHOICE);
+	if (patterndisplay) {
+		psy_property_setitem_int(patterndisplay, display);
+	}
+	psy_signal_emit(&self->signal_changed, self, 1, patterndisplay);	
+}
+
+PatternDisplayMode patternviewconfig_pattern_display(const PatternViewConfig* self)
+{
+	psy_Property* property;
+
+	property = psy_property_at(self->patternview, "patterndisplay",
+		PSY_PROPERTY_TYPE_CHOICE);
+	if (property) {
+		return (PatternDisplayMode)psy_property_item_int(property);
+	}
+	return PATTERN_DISPLAYMODE_TRACKER;
+}
+
+bool patternviewconfig_single_mode(const PatternViewConfig* self)
+{
+	return self->singlemode;
+	/* return psy_property_at_bool(self->patternview, "displaysinglepattern",
+		TRUE); */
+}
+
+bool patternviewconfig_use_header_bitmap(const PatternViewConfig* self)
 {
 	assert(self);
 
@@ -632,33 +669,6 @@ double patternviewconfig_zoom(const PatternViewConfig* self)
 	assert(self);
 
 	return self->zoom;
-}
-
-void patternviewconfig_display_single_pattern(PatternViewConfig* self)
-{
-	self->singlemode = TRUE;
-}
-
-void patternviewconfig_display_sequence(PatternViewConfig* self)
-{
-	self->singlemode = FALSE;
-}
-
-bool patternviewconfig_singlemode(const PatternViewConfig* self)
-{
-	return self->singlemode;
-}
-
-int patternviewconfig_pattern_display(const PatternViewConfig* self)
-{
-	psy_Property* property;
-
-	property = psy_property_at(self->patternview, "patterndisplay",
-		PSY_PROPERTY_TYPE_CHOICE);
-	if (property) {
-		return (int)psy_property_item_int(property);
-	}
-	return PROPERTY_ID_PATTERN_DISPLAYMODE_TRACKER;		
 }
 
 psy_ui_FontInfo patternviewconfig_fontinfo(PatternViewConfig* self, double zoom)

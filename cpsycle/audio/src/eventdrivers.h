@@ -53,7 +53,7 @@ intptr_t psy_audio_eventdrivers_guid(psy_audio_EventDrivers*,
 	const char* path);
 void psy_audio_eventdrivers_restart(psy_audio_EventDrivers*, intptr_t id,
 	psy_Property* configuration);
-void psy_audio_eventdrivers_restartall(psy_audio_EventDrivers*);
+void psy_audio_eventdrivers_restart_all(psy_audio_EventDrivers*);
 void psy_audio_eventdrivers_remove(psy_audio_EventDrivers*, intptr_t id);
 void psy_audio_eventdrivers_setcmds(psy_audio_EventDrivers*, psy_Property* self);
 uintptr_t psy_audio_eventdrivers_size(psy_audio_EventDrivers*);

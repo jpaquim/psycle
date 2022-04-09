@@ -187,7 +187,7 @@ void pianokeyboard_drawuncoveredbottombackground(PianoKeyboard* self, psy_ui_Gra
 	assert(self);
 
 	blankstart = self->keyboardstate->keyboardheightpx;
-	scrolltop = psy_ui_component_scrolltop(&self->component);
+	scrolltop = psy_ui_component_scroll_top(&self->component);
 	if (blankstart - psy_ui_component_scroll_top_px(&self->component) <
 			size.height) {
 		psy_ui_drawsolidrectangle(g, psy_ui_realrectangle_make(

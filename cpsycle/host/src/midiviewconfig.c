@@ -89,7 +89,7 @@ void midiviewconfig_make(MidiViewConfig* self, psy_Property* parent)
 			"controllers"), "Mapping"));
 }
 
-void midiviewconfig_makecontrollers(MidiViewConfig* self)
+void midiviewconfig_make_controllers(MidiViewConfig* self)
 {
 	char text[256];
 
@@ -159,10 +159,10 @@ void midiviewconfig_makecontrollers(MidiViewConfig* self)
 			}
 		}
 	}
-	midiviewconfig_makecontrollersave(self);
+	midiviewconfig_make_controller_save(self);
 }
 
-void midiviewconfig_makecontrollersave(MidiViewConfig* self)
+void midiviewconfig_make_controller_save(MidiViewConfig* self)
 {
 	char_dyn_t* str;
 	psy_Property* controllers;
@@ -192,5 +192,5 @@ bool midiviewconfig_hasproperty(const MidiViewConfig* self,
 {
 	assert(self && self->controllers);
 
-	return psy_property_insection(property, self->controllers);
+	return psy_property_in_section(property, self->controllers);
 }

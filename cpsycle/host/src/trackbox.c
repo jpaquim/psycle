@@ -161,7 +161,7 @@ void trackbox_mute(TrackBox* self)
 
 void trackbox_unmute(TrackBox* self)
 {
-	psy_ui_button_disablehighlight(&self->mute);
+	psy_ui_button_disable_highlight(&self->mute);
 }
 
 void trackbox_solo(TrackBox* self)
@@ -171,7 +171,7 @@ void trackbox_solo(TrackBox* self)
 
 void trackbox_unsolo(TrackBox* self)
 {
-	psy_ui_button_disablehighlight(&self->solo);
+	psy_ui_button_disable_highlight(&self->solo);
 }
 
 void trackbox_preventclose(TrackBox* self)

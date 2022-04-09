@@ -965,7 +965,7 @@ void psy_audio_sequence_set_cursor(psy_audio_Sequence* self,
 
 		self->cursor = cursor;
 		if (!psy_audio_orderindex_equal(&self->lastcursor.orderindex,
-			self->cursor.orderindex)) {
+				self->cursor.orderindex)) {
 			entry = psy_audio_sequence_entry(self, cursor.orderindex);
 			if (entry && entry->type == psy_audio_SEQUENCEENTRY_PATTERN) {
 				psy_audio_SequencePatternEntry* patternentry;
@@ -973,7 +973,7 @@ void psy_audio_sequence_set_cursor(psy_audio_Sequence* self,
 				patternentry = (psy_audio_SequencePatternEntry*)entry;
 				self->cursor.seqoffset = psy_audio_sequenceentry_offset(entry);
 				self->cursor.patternid = patternentry->patternslot;
-			}
+			}			
 			psy_audio_sequenceselection_deselect(&self->sequenceselection,
 				psy_audio_sequenceselection_first(&self->sequenceselection));
 			psy_audio_sequenceselection_select_first(&self->sequenceselection,
