@@ -53,7 +53,6 @@ void trackergrid_init(TrackerGrid*, psy_ui_Component* parent,
 	TrackerState*, InputHandler*, Workspace*);
 
 void trackergrid_build(TrackerGrid*);
-bool trackergrid_scroll_to_order(TrackerGrid*);
 void trackergrid_show_empty_data(TrackerGrid*, int showstate);
 void trackergrid_invalidate_playbar(TrackerGrid*);
 void trackergrid_invalidate_line(TrackerGrid*, intptr_t line);

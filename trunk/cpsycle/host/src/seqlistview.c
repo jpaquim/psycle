@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -19,22 +19,22 @@
 /* SeqViewTrack */
 /* prototypes */
 static void seqviewtrack_on_destroy(SeqViewTrack*);
-static void seqviewtrack_onpreferredsize(SeqViewTrack*,
+static void seqviewtrack_on_preferred_size(SeqViewTrack*,
 	const psy_ui_Size* limit, psy_ui_Size* rv);
-static void seqviewtrack_ondraw(SeqViewTrack*, psy_ui_Graphics*);
-static void seqviewtrack_drawentry(SeqViewTrack*, psy_ui_Graphics*,
+static void seqviewtrack_on_draw(SeqViewTrack*, psy_ui_Graphics*);
+static void seqviewtrack_draw_entry(SeqViewTrack*, psy_ui_Graphics*,
 	psy_audio_SequenceEntry*, uintptr_t row, psy_ui_RealPoint,
 	bool progress, bool sel);
 static void seqviewtrack_textout_digit(SeqViewTrack*,
 	psy_ui_Graphics*, const char* str, uintptr_t num, psy_ui_RealPoint,
 	uintptr_t cursorcol);
-static void seqviewtrack_drawprogressbar(SeqViewTrack*,
+static void seqviewtrack_draw_progress_bar(SeqViewTrack*,
 	psy_ui_Graphics*, psy_ui_RealPoint);
 void seqviewtrack_on_mouse_down(SeqViewTrack*, psy_ui_MouseEvent*);
-void seqviewtrack_onmousedoubleclick(SeqViewTrack*, psy_ui_MouseEvent*);
-static void seqviewtrack_onsequenceselect(SeqViewTrack*,
+void seqviewtrack_on_mouse_doubleclick(SeqViewTrack*, psy_ui_MouseEvent*);
+static void seqviewtrack_on_sequence_select(SeqViewTrack*,
 	psy_audio_SequenceSelection*, psy_audio_OrderIndex*);
-static void seqviewtrack_onsequencedeselect(SeqViewTrack*,
+static void seqviewtrack_on_sequence_deselect(SeqViewTrack*,
 	psy_audio_SequenceSelection*, psy_audio_OrderIndex*);
 
 /* vtable */
@@ -50,16 +50,16 @@ static void seqviewtrack_vtable_init(SeqViewTrack* self)
 			seqviewtrack_on_destroy;
 		seqviewtrack_vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
-			seqviewtrack_ondraw;
+			seqviewtrack_on_draw;
 		seqviewtrack_vtable.onpreferredsize =
-			(psy_ui_fp_component_onpreferredsize)
-			seqviewtrack_onpreferredsize;
+			(psy_ui_fp_component_on_preferred_size)
+			seqviewtrack_on_preferred_size;
 		seqviewtrack_vtable.on_mouse_down =
 			(psy_ui_fp_component_on_mouse_event)
 			seqviewtrack_on_mouse_down;
 		seqviewtrack_vtable.onmousedoubleclick =
 			(psy_ui_fp_component_on_mouse_event)
-			seqviewtrack_onmousedoubleclick;		
+			seqviewtrack_on_mouse_doubleclick;		
 		seqviewtrack_vtable_initialized = TRUE;
 	}
 	self->component.vtable = &seqviewtrack_vtable;
@@ -80,10 +80,10 @@ void seqviewtrack_init(SeqViewTrack* self, psy_ui_Component* parent,
 	self->track = track;
 	psy_signal_connect(
 		&state->cmds->workspace->song->sequence.sequenceselection.signal_select,
-		self, seqviewtrack_onsequenceselect);
+		self, seqviewtrack_on_sequence_select);
 	psy_signal_connect(
 		&state->cmds->workspace->song->sequence.sequenceselection.signal_deselect,
-		self, seqviewtrack_onsequencedeselect);
+		self, seqviewtrack_on_sequence_deselect);
 	if (psy_audio_sequenceselection_first(&state->cmds->workspace->song->sequence.sequenceselection).track ==
 			trackindex) {
 		psy_ui_component_addstylestate(&self->component,
@@ -112,15 +112,20 @@ SeqViewTrack* seqviewtrack_allocinit(psy_ui_Component* parent,
 
 void seqviewtrack_on_destroy(SeqViewTrack* self)
 {
-	psy_signal_disconnect(
-		&self->state->cmds->workspace->song->sequence.sequenceselection.signal_select,
-		self, seqviewtrack_onsequenceselect);
-	psy_signal_disconnect(
-		&self->state->cmds->workspace->song->sequence.sequenceselection.signal_deselect,
-		self, seqviewtrack_onsequencedeselect);
+	if (&self->state->cmds->workspace->song) {
+		psy_audio_Sequence* sequence;
+
+		sequence = &self->state->cmds->workspace->song->sequence;
+		psy_signal_disconnect(
+			&sequence->sequenceselection.signal_select,
+			self, seqviewtrack_on_sequence_select);
+		psy_signal_disconnect(
+			&sequence->sequenceselection.signal_deselect,
+			self, seqviewtrack_on_sequence_deselect);
+	}
 }
 
-void seqviewtrack_ondraw(SeqViewTrack* self, psy_ui_Graphics* g)
+void seqviewtrack_on_draw(SeqViewTrack* self, psy_ui_Graphics* g)
 {
 	psy_List* p;
 	uintptr_t row;
@@ -143,7 +148,7 @@ void seqviewtrack_ondraw(SeqViewTrack* self, psy_ui_Graphics* g)
 	endrow = (uintptr_t)(floor(clip.bottom / lineheightpx + 0.5));		
 	psy_ui_settextcolour(g, psy_ui_style(STYLE_SEQLISTVIEW_ITEM)->colour);
 	psy_ui_realpoint_init_all(&cp, 0.0, lineheightpx * startrow);
-	p = psy_list_at(self->track->entries, startrow);
+	p = psy_list_at(self->track->nodes, startrow);
 	editposition = psy_audio_sequenceselection_first(
 		&self->state->cmds->workspace->song->sequence.sequenceselection);
 	for (row = startrow; p != NULL; psy_list_next(&p), ++row,
@@ -155,16 +160,16 @@ void seqviewtrack_ondraw(SeqViewTrack* self, psy_ui_Graphics* g)
 		rowplaying = psy_audio_player_playing(self->state->cmds->player) &&
 			psy_audio_player_playlist_position(self->state->cmds->player) == row;		
 		if (rowplaying) {
-			seqviewtrack_drawprogressbar(self, g, cp);
+			seqviewtrack_draw_progress_bar(self, g, cp);
 		}				
-		seqviewtrack_drawentry(self, g, seqentry, row, cp, rowplaying,
-			psy_audio_sequenceselection_isselected(
+		seqviewtrack_draw_entry(self, g, seqentry, row, cp, rowplaying,
+			psy_audio_sequenceselection_is_selected(
 			&self->state->cmds->workspace->song->sequence.sequenceselection,
 			psy_audio_orderindex_make(self->trackindex, row)));
 	}
 }
 
-void seqviewtrack_drawentry(SeqViewTrack* self, psy_ui_Graphics* g,
+void seqviewtrack_draw_entry(SeqViewTrack* self, psy_ui_Graphics* g,
 	psy_audio_SequenceEntry* entry, uintptr_t row, psy_ui_RealPoint cp,
 	bool rowplaying, bool sel)
 {
@@ -315,7 +320,7 @@ void seqviewtrack_textout_digit(SeqViewTrack* self,
 	}
 }
 
-void seqviewtrack_drawprogressbar(SeqViewTrack* self, psy_ui_Graphics* g,
+void seqviewtrack_draw_progress_bar(SeqViewTrack* self, psy_ui_Graphics* g,
 	psy_ui_RealPoint pt)
 {	
 	psy_ui_drawsolidrectangle(g,
@@ -329,7 +334,7 @@ void seqviewtrack_drawprogressbar(SeqViewTrack* self, psy_ui_Graphics* g,
 		psy_ui_style_const(STYLE_SEQ_PROGRESS)->background.colour);
 }
 
-void seqviewtrack_onpreferredsize(SeqViewTrack* self,
+void seqviewtrack_on_preferred_size(SeqViewTrack* self,
 	const psy_ui_Size* limit, psy_ui_Size* rv)
 {	
 	rv->width = self->state->trackwidth;
@@ -339,7 +344,7 @@ void seqviewtrack_onpreferredsize(SeqViewTrack* self,
 		tm = psy_ui_component_textmetric(&self->component);
 		rv->height = psy_ui_value_make_px(
 			psy_ui_value_px(&self->state->line_height, tm, NULL) *
-				(double)psy_list_size(self->track->entries));		
+				(double)psy_list_size(self->track->nodes));
 	} else {
 		rv->height = psy_ui_value_zero();		
 	}			
@@ -347,55 +352,61 @@ void seqviewtrack_onpreferredsize(SeqViewTrack* self,
 
 void seqviewtrack_on_mouse_down(SeqViewTrack* self, psy_ui_MouseEvent* ev)
 {
-	if (self->track) {		
-		if (self->track->entries) {
-			self->state->cmd_orderindex.order = psy_min(
-				(uintptr_t)((psy_ui_mouseevent_pt(ev).y) /
-				psy_ui_value_px(&self->state->line_height,
-					psy_ui_component_textmetric(&self->component), NULL)),
-				psy_list_size(self->track->entries) - 1);
-			self->state->cmd_orderindex.track = self->trackindex;
-			if (self->state->active) {
-				self->state->col = (uintptr_t)(
-					psy_ui_mouseevent_pt(ev).x / self->state->colwidth);
-				self->state->col = psy_min(self->state->col, COLMAX - 1);
-			}
+	if (psy_ui_mouseevent_button(ev) != 1) {
+		return;
+	}
+	if (self->track && self->state->cmds->workspace->song) {
+		psy_audio_Sequence* sequence;
+		psy_audio_SequenceCursor cursor;		
+		uintptr_t order;
+
+		sequence = &self->state->cmds->workspace->song->sequence;		
+		cursor = sequence->cursor;
+		if (psy_audio_sequencetrack_size(self->track) > 0) {
+			order = psy_min((uintptr_t)((psy_ui_mouseevent_pt(ev).y) /
+					psy_ui_value_px(&self->state->line_height,
+						psy_ui_component_textmetric(&self->component), NULL)),
+				psy_audio_sequencetrack_size(self->track) - 1);
+		} else {
+			order = psy_INDEX_INVALID;			
+		}
+		self->state->cmd_orderindex = psy_audio_orderindex_make(self->trackindex, order);
+		if (self->state->active) {
+			self->state->col = (uintptr_t)(
+				psy_ui_mouseevent_pt(ev).x / self->state->colwidth);
+			self->state->col = psy_min(self->state->col, COLMAX - 1);
+		}
+		if (order != psy_INDEX_INVALID) {
 			if (psy_ui_mouseevent_ctrlkey(ev)) {
-				if (!psy_audio_sequenceselection_isselected(
-						&self->state->cmds->workspace->song->sequence.sequenceselection,
+				if (!psy_audio_sequenceselection_is_selected(
+						&sequence->sequenceselection,
 						self->state->cmd_orderindex)) {
 					psy_audio_sequenceselection_select_first(
-						&self->state->cmds->workspace->song->sequence.sequenceselection,
+						&sequence->sequenceselection,
 						self->state->cmd_orderindex);
 				} else {
 					psy_audio_sequenceselection_deselect(
-						&self->state->cmds->workspace->song->sequence.sequenceselection,
+						&sequence->sequenceselection,
 						self->state->cmd_orderindex);
 				}
-			} else {
-				psy_audio_SequenceCursor cursor;
-				
-				cursor = self->state->cmds->workspace->song->sequence.cursor;				
+			} else {				
 				cursor.orderindex = self->state->cmd_orderindex;
 				cursor.absoffset -= cursor.seqoffset;
-				cursor.seqoffset = psy_audio_sequence_seqoffset(
-					&self->state->cmds->workspace->song->sequence,
+				cursor.seqoffset = psy_audio_sequence_seqoffset(sequence,
 					cursor.orderindex);
 				cursor.absoffset += cursor.seqoffset;
-				psy_audio_sequence_set_cursor(
-					&self->state->cmds->workspace->song->sequence, cursor);
+				psy_audio_sequence_set_cursor(sequence, cursor);
 			}
-		} else {
-			self->state->cmd_orderindex.track = self->trackindex;
-			self->state->cmd_orderindex.order = psy_INDEX_INVALID;
-			psy_audio_sequenceselection_select_first(
-				&self->state->cmds->workspace->song->sequence.sequenceselection,
-				self->state->cmd_orderindex);			
+		} else {						
+			cursor = psy_audio_sequencecursor_make(0, 0.0);
+			cursor.orderindex = self->state->cmd_orderindex;
+			cursor.patternid = psy_INDEX_INVALID;
+			psy_audio_sequence_set_cursor(sequence, cursor);			
 		}
 	}
 }
 
-void seqviewtrack_onmousedoubleclick(SeqViewTrack* self, psy_ui_MouseEvent* ev)
+void seqviewtrack_on_mouse_doubleclick(SeqViewTrack* self, psy_ui_MouseEvent* ev)
 {	
 	if (self->state->cmd_orderindex.track <
 			psy_audio_sequence_width(self->state->cmds->sequence)) {
@@ -413,7 +424,7 @@ void seqviewtrack_onmousedoubleclick(SeqViewTrack* self, psy_ui_MouseEvent* ev)
 	}
 }
 
-void seqviewtrack_onsequenceselect(SeqViewTrack* self,
+void seqviewtrack_on_sequence_select(SeqViewTrack* self,
 	psy_audio_SequenceSelection* selection, psy_audio_OrderIndex* index)
 {
 	if (index->track == self->trackindex) {
@@ -422,7 +433,7 @@ void seqviewtrack_onsequenceselect(SeqViewTrack* self,
 	}
 }
 
-void seqviewtrack_onsequencedeselect(SeqViewTrack* self,
+void seqviewtrack_on_sequence_deselect(SeqViewTrack* self,
 	psy_audio_SequenceSelection* selection, psy_audio_OrderIndex* index)
 {
 	if (index->track == self->trackindex) {
@@ -433,10 +444,10 @@ void seqviewtrack_onsequencedeselect(SeqViewTrack* self,
 
 /* SeqviewList */
 /* prototypes */
-static void seqviewlist_onpreferredsize(SeqviewList*,
+static void seqviewlist_on_preferred_size(SeqviewList*,
 	const psy_ui_Size* limit, psy_ui_Size* rv);
-static void seqviewlist_onplaylinechanged(SeqviewList*, Workspace* sender);
-static void seqviewlist_onplaystatuschanged(SeqviewList*, Workspace* sender);
+static void seqviewlist_on_playline_changed(SeqviewList*, Workspace* sender);
+static void seqviewlist_on_playstatus_changed(SeqviewList*, Workspace* sender);
 static psy_ui_RealRectangle seqviewlist_rowrectangle(SeqviewList*,
 	uintptr_t row);
 static void seqviewlist_invalidaterow(SeqviewList*, uintptr_t row);
@@ -456,8 +467,8 @@ static void seqviewlist_vtable_init(SeqviewList* self)
 		seqviewlist_vtable = *(self->component.vtable);
 		seqviewlist_super_vtable = *(self->component.vtable);		
 		seqviewlist_vtable.onpreferredsize =
-			(psy_ui_fp_component_onpreferredsize)
-			seqviewlist_onpreferredsize;		
+			(psy_ui_fp_component_on_preferred_size)
+			seqviewlist_on_preferred_size;		
 		seqviewlist_vtable.on_focus =
 			(psy_ui_fp_component_event)
 			seqviewlist_on_focus;
@@ -490,9 +501,9 @@ void seqviewlist_init(SeqviewList* self, psy_ui_Component* parent,
 			self, seqviewlist_onpatternnamechanged);
 	}
 	psy_signal_connect(&self->state->cmds->workspace->signal_play_line_changed, self,
-		seqviewlist_onplaylinechanged);
+		seqviewlist_on_playline_changed);
 	psy_signal_connect(&self->state->cmds->workspace->signal_play_status_changed, self,
-		seqviewlist_onplaystatuschanged);
+		seqviewlist_on_playstatus_changed);
 	psy_ui_component_setscrollstep(&self->component,
 		psy_ui_size_make(self->state->trackwidth, self->state->line_height));
 	psy_ui_component_set_overflow(&self->component, psy_ui_OVERFLOW_SCROLL);		
@@ -506,23 +517,23 @@ void seqviewlist_init(SeqviewList* self, psy_ui_Component* parent,
 }
 
 void seqviewlist_build(SeqviewList* self)
-{
-	psy_audio_SequenceTrackNode* p;	
+{	
 	uintptr_t trackindex = 0;	
 	
 	psy_ui_component_clear(&self->component);
-	for (p = self->state->cmds->sequence->tracks; p != NULL; p = p->next,
+	for (; trackindex < psy_audio_sequence_width(self->state->cmds->sequence);
 			++trackindex) {
 		SeqViewTrack* track;
 
 		track = seqviewtrack_allocinit(&self->component,
-			trackindex, (psy_audio_SequenceTrack*)psy_list_entry(p),
+			trackindex,
+			psy_audio_sequence_track_at(self->state->cmds->sequence, trackindex),
 			self->state);		
 	}
 	psy_ui_component_align(&self->component);
 }
 
-void seqviewlist_onpreferredsize(SeqviewList* self,
+void seqviewlist_on_preferred_size(SeqviewList* self,
 	const psy_ui_Size* limit, psy_ui_Size* rv)
 {
 	seqviewlist_super_vtable.onpreferredsize(&self->component, limit, rv);	
@@ -542,7 +553,7 @@ void seqviewlist_showpatternslots(SeqviewList* self)
 	psy_ui_component_invalidate(&self->component);
 }
 
-void seqviewlist_onplaylinechanged(SeqviewList* self, Workspace* sender)
+void seqviewlist_on_playline_changed(SeqviewList* self, Workspace* sender)
 {
 	uintptr_t row;
 
@@ -556,7 +567,7 @@ void seqviewlist_onplaylinechanged(SeqviewList* self, Workspace* sender)
 	seqviewlist_invalidaterow(self, self->lastplayrow);	
 }
 
-void seqviewlist_onplaystatuschanged(SeqviewList* self, Workspace* sender)
+void seqviewlist_on_playstatus_changed(SeqviewList* self, Workspace* sender)
 {
 	psy_ui_component_invalidate(&self->component);
 }

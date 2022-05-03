@@ -27,6 +27,7 @@
 #include <lock.h>
 #include <thread.h>
 /* file */
+#include <logger.h>
 #include <playlist.h>
 
 /*
@@ -105,9 +106,6 @@ typedef struct Workspace {
 	psy_Signal signal_beforesavesong;	
 	psy_Signal signal_viewselected;	
 	psy_Signal signal_parametertweak;
-	psy_Signal signal_terminal_error;
-	psy_Signal signal_terminal_warning;
-	psy_Signal signal_terminal_out;		
 	psy_Signal signal_status_out;
 	psy_Signal signal_followsongchanged;	
 	psy_Signal signal_togglegear;
@@ -156,6 +154,8 @@ typedef struct Workspace {
 	psy_Thread driverconfigloadthread;
 	psy_Thread pluginscanthread;
 	struct ParamViews* paramviews;
+	psy_Logger* terminal_output;
+	uintptr_t terminalstyleid;
 } Workspace;
 
 void workspace_init(Workspace*, psy_ui_Component* handle);
@@ -247,10 +247,6 @@ void workspace_output(Workspace*, const char* text);
 void workspace_output_status(Workspace*, const char* text);
 void workspace_goto_cursor(Workspace*, psy_audio_SequenceCursor);
 void workspace_multi_select_gear(Workspace*, psy_List* slotlist);
-void workspace_connect_terminal(Workspace*, void* context,
-	fp_workspace_output out,
-	fp_workspace_output warning,
-	fp_workspace_output error);
 void workspace_connect_status(Workspace*, void* context, fp_workspace_output);
 void workspace_connect_load_progress(Workspace*, void* context,
 	fp_workspace_songloadprogress);
@@ -268,6 +264,12 @@ INLINE const HostSequencerTime* workspace_host_sequencer_time(
 	const Workspace* self)
 {
 	return &self->host_sequencer_time;
+}
+
+INLINE void workspace_set_terminal_output(Workspace* self,
+	psy_Logger* terminal_output)
+{
+	self->terminal_output = terminal_output;
 }
 
 #ifdef __cplusplus

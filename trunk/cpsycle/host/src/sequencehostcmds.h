@@ -36,9 +36,9 @@ void sequencecmds_changepattern(SequenceCmds*, uintptr_t step);
 void sequencecmds_copy(SequenceCmds*);
 void sequencecmds_paste(SequenceCmds*);
 void sequencecmds_clear(SequenceCmds*);
-void sequencecmds_appendtrack(SequenceCmds*);
-void sequencecmds_inserttrack(SequenceCmds*);
-void sequencecmds_deltrack(SequenceCmds*, uintptr_t trackindex);
+void sequencecmds_append_track(SequenceCmds*);
+void sequencecmds_insert_track(SequenceCmds*);
+void sequencecmds_remove_track(SequenceCmds*, uintptr_t trackindex);
 void sequencecmds_changeplayposition(SequenceCmds*);
 
 #ifdef __cplusplus

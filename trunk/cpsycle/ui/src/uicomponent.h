@@ -45,6 +45,14 @@ extern "C" {
 
 struct psy_ui_Component;
 
+typedef enum psy_ui_ComponentState {
+	psy_ui_COMPONENTSTATE_NORMAL,
+	psy_ui_COMPONENTSTATE_MINIMIZED,
+	psy_ui_COMPONENTSTATE_MAXIMIZED,
+	psy_ui_COMPONENTSTATE_FULLSCREEN,
+	psy_ui_COMPONENTSTATE_DOCKED
+} psy_ui_ComponentState;
+
 typedef struct psy_ui_ComponentContainerAlign {
 	int alignexpandmode;
 	psy_ui_ContainerAlignType containeralign;
@@ -91,7 +99,7 @@ typedef void (*psy_ui_fp_component_setalign)(struct psy_ui_Component*, psy_ui_Al
 typedef void (*psy_ui_fp_component_event)(struct psy_ui_Component*);
 typedef void (*psy_ui_fp_component_focusin)(struct psy_ui_Component*, psy_ui_Event*);
 typedef bool (*psy_ui_fp_component_onclose)(struct psy_ui_Component*);
-typedef void (*psy_ui_fp_component_onpreferredsize)(struct psy_ui_Component*,
+typedef void (*psy_ui_fp_component_on_preferred_size)(struct psy_ui_Component*,
 	const psy_ui_Size* limit, psy_ui_Size* rv);
 typedef void (*psy_ui_fp_component_onpreferredscrollsize)(struct psy_ui_Component*,
 	const psy_ui_Size* limit, psy_ui_Size* rv);
@@ -134,7 +142,7 @@ typedef struct psy_ui_ComponentVTable {
 	psy_ui_fp_component_onclose onclose;
 	psy_ui_fp_component_event beforealign;
 	psy_ui_fp_component_event onalign;
-	psy_ui_fp_component_onpreferredsize onpreferredsize;
+	psy_ui_fp_component_on_preferred_size onpreferredsize;
 	psy_ui_fp_component_onpreferredscrollsize onpreferredscrollsize;
 	psy_ui_fp_component_on_mouse_event on_mouse_down;
 	psy_ui_fp_component_on_mouse_event onmousemove;
@@ -204,12 +212,12 @@ typedef struct psy_ui_Component {
 	psy_ui_ComponentStyle style;
 	psy_ui_ComponentScroll* scroll;
 	psy_ui_AlignType align;
-	psy_ui_AlignType alignsorted;
+	psy_ui_AlignType alignsorted;	
 	psy_ui_ComponentContainerAlign* containeralign;	
 	uintptr_t tabindex;
 	bool deallocate;
 	uintptr_t opcount;	
-	bool draggable;		
+	bool draggable;	
 	bool dropdown;
 	psy_ui_Bitmap bufferbitmap;
 	bool drawtobuffer;
@@ -250,6 +258,8 @@ void psy_ui_component_showstate(psy_ui_Component*, int cmd);
 void psy_ui_component_showmaximized(psy_ui_Component*);
 void psy_ui_component_togglefullscreen(psy_ui_Component*);
 bool psy_ui_component_toggle_visibility(psy_ui_Component*);
+psy_ui_ComponentState psy_ui_component_state(const psy_ui_Component*);
+void psy_ui_component_set_state(psy_ui_Component*, psy_ui_ComponentState);
 
 void psy_ui_component_usescroll(psy_ui_Component*);
 void psy_ui_component_usecontaineralign(psy_ui_Component*);
@@ -381,7 +391,7 @@ psy_ui_RealSize psy_ui_component_preferredscrollsize_px(psy_ui_Component*,
 	const psy_ui_Size* limit);
 void psy_ui_component_setmaximumsize(psy_ui_Component*, psy_ui_Size);
 const psy_ui_Size psy_ui_component_maximumsize(const psy_ui_Component*);
-void psy_ui_component_setminimumsize(psy_ui_Component*, psy_ui_Size);
+void psy_ui_component_set_minimum_size(psy_ui_Component*, psy_ui_Size);
 const psy_ui_Size psy_ui_component_minimumsize(const psy_ui_Component*);
 void psy_ui_component_seticonressource(psy_ui_Component*, int ressourceid);
 void psy_ui_component_doublebuffer(psy_ui_Component*);
@@ -463,6 +473,8 @@ typedef uintptr_t (*psy_ui_fp_componentimp_dev_flags)(const struct psy_ui_Compon
 typedef void (*psy_ui_fp_componentimp_dev_clear)(struct psy_ui_ComponentImp*);
 typedef void (*psy_ui_fp_componentimp_dev_mouseevent)(struct psy_ui_ComponentImp*, psy_ui_MouseEvent*);
 typedef void (*psy_ui_fp_componentimp_dev_initialized)(struct psy_ui_ComponentImp*);
+typedef psy_ui_ComponentState (*psy_ui_fp_componentimp_dev_component_state)(struct psy_ui_ComponentImp*);
+typedef void (*psy_ui_fp_componentimp_dev_set_component_state)(struct psy_ui_ComponentImp*, psy_ui_ComponentState);
 
 typedef struct psy_ui_ComponentImpVTable {
 	psy_ui_fp_componentimp_dev_dispose dev_dispose;
@@ -514,6 +526,8 @@ typedef struct psy_ui_ComponentImpVTable {
 	psy_ui_fp_componentimp_dev_flags dev_flags;
 	psy_ui_fp_componentimp_dev_clear dev_clear;	
 	psy_ui_fp_componentimp_dev_initialized dev_initialized;
+	psy_ui_fp_componentimp_dev_component_state dev_component_state;
+	psy_ui_fp_componentimp_dev_set_component_state dev_set_component_state;
 } psy_ui_ComponentImpVTable;
 
 typedef struct psy_ui_ComponentImp {

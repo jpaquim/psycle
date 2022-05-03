@@ -45,7 +45,7 @@ void psy_audio_wav_songio_load(psy_audio_SongFile* self)
 		psy_audio_patterns_insert(&self->song->patterns, 0, pattern);
 		psy_audio_song_setnumsongtracks(self->song, 1);
 	}				
-	psy_audio_sequence_appendtrack(&self->song->sequence,
+	psy_audio_sequence_append_track(&self->song->sequence,
 		psy_audio_sequencetrack_allocinit());		
 	psy_audio_sequence_insert(&self->song->sequence,
 		psy_audio_orderindex_make(0, 0), 0);	

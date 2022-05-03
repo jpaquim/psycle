@@ -84,6 +84,12 @@ INLINE psy_dsp_big_beat_t psy_audio_sequencecursor_pattern_offset(
 	return self->absoffset - self->seqoffset;
 }
 
+INLINE uintptr_t psy_audio_sequencecursor_pattern_id(
+	const psy_audio_SequenceCursor* self)
+{
+	return self->patternid;
+}
+
 INLINE uintptr_t psy_audio_sequencecursor_line_abs(const psy_audio_SequenceCursor* self)
 {
 	return cast_decimal(psy_audio_sequencecursor_offset_abs(self) * self->lpb);

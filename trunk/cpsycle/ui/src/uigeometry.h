@@ -138,6 +138,17 @@ INLINE bool psy_ui_realsize_equals(const psy_ui_RealSize* self,
 	return (self->height == other.height && self->width == other.width);
 }
 
+INLINE double psy_ui_realsize_width(const psy_ui_RealSize* self)
+{
+	return self->width;
+}
+
+
+INLINE double psy_ui_realsize_height(const psy_ui_RealSize* self)
+{
+	return self->height;
+}
+
 typedef struct psy_ui_RealRectangle {
 	double left;
 	double top;
@@ -195,16 +206,30 @@ INLINE void psy_ui_realrectangle_resize(psy_ui_RealRectangle* self, double width
 	self->bottom = self->top + height;
 }
 
-INLINE void psy_ui_realrectangle_setleft_resize(psy_ui_RealRectangle* self, double left)
+INLINE void psy_ui_realrectangle_set_left_resize(psy_ui_RealRectangle* self, double left)
 {
 	double width;
 
 	width = psy_ui_realrectangle_width(self);
 	self->left = left;
-	self->right += width;
+	self->right = left + width;
 }
 
-INLINE void psy_ui_realrectangle_setleft(psy_ui_RealRectangle* self, double left)
+INLINE double psy_ui_realrectangle_height(const psy_ui_RealRectangle* self)
+{
+	return self->bottom - self->top;
+}
+
+INLINE void psy_ui_realrectangle_set_top_resize(psy_ui_RealRectangle* self, double top)
+{
+	double height;
+
+	height = psy_ui_realrectangle_height(self);
+	self->top = top;
+	self->bottom = top + height;
+}
+
+INLINE void psy_ui_realrectangle_set_left(psy_ui_RealRectangle* self, double left)
 {	
 	self->left = left;	
 }
@@ -231,11 +256,6 @@ INLINE void psy_ui_realrectangle_setright(psy_ui_RealRectangle* self, double rig
 INLINE double psy_ui_realrectangle_right(const psy_ui_RealRectangle* self)
 {
 	return self->right;
-}
-
-INLINE double psy_ui_realrectangle_height(const psy_ui_RealRectangle* self)
-{
-	return self->bottom - self->top;
 }
 
 INLINE void psy_ui_realrectangle_setheight(psy_ui_RealRectangle* self, double height)
@@ -273,7 +293,7 @@ bool psy_ui_realrectangle_intersection(psy_ui_RealRectangle*,
 void psy_ui_realrectangle_expand(psy_ui_RealRectangle*,
 	double top, double right, double bottom, double left);
 void psy_ui_realrectangle_move(psy_ui_RealRectangle*, psy_ui_RealPoint);
-void psy_ui_realrectangle_settopleft(psy_ui_RealRectangle*,
+void psy_ui_realrectangle_set_topleft(psy_ui_RealRectangle*,
 	psy_ui_RealPoint topleft);
 
 void psy_ui_error(const char* err, const char* shorterr);

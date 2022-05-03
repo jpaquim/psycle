@@ -38,8 +38,7 @@ SeqEditTrack* seqedittrack_alloc(void);
 SeqEditTrack* seqedittrack_allocinit(psy_ui_Component* parent,
 	SeqEditState*, Workspace*);
 
-void seqedittrack_setsequencetrack(SeqEditTrack*,
-	psy_audio_SequenceTrackNode*,
+void seqedittrack_setsequencetrack(SeqEditTrack*,	
 	psy_audio_SequenceTrack*,
 	uintptr_t trackindex);
 

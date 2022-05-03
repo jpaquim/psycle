@@ -238,7 +238,7 @@ void paramview_build(ParamView* self)
 						psy_ui_component_set_align(component, psy_ui_ALIGN_TOP);
 					}
 					if (slider) {
-						psy_ui_component_setminimumsize(component,
+						psy_ui_component_set_minimum_size(component,
 							psy_ui_size_make_em(20.0, 15.0));
 					}
 				}

@@ -64,7 +64,7 @@ static void vtable_init(psy_ui_TextAreaPane* self)
 			(psy_ui_fp_component_ondraw)
 			psy_ui_textareapane_ondraw;
 		vtable.onpreferredsize =
-			(psy_ui_fp_component_onpreferredsize)
+			(psy_ui_fp_component_on_preferred_size)
 			psy_ui_textareapane_onpreferredsize;
 		vtable.on_focus =
 			(psy_ui_fp_component_event)

@@ -45,8 +45,7 @@ typedef struct MainStatusBar {
 	ClockBar clockbar;
 	psy_ui_Notebook viewstatusbars;
 	psy_ui_Label statusbarlabel;
-	ZoomBox zoombox;
-	uintptr_t terminalstyleid;
+	ZoomBox zoombox;	
 	intptr_t pluginscanprogress;
 	uintptr_t clockcounter;
 	psy_List* strbuffer;

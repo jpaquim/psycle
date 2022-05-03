@@ -96,6 +96,8 @@ static bool dev_issystem(psy_ui_win_ComponentImp* self) { return TRUE; }
 
 static void dev_setshowfullscreen(psy_ui_win_ComponentImp*, bool fullscreen);
 static void dev_showtaskbar(psy_ui_win_ComponentImp*, bool show);
+static psy_ui_ComponentState dev_component_state(psy_ui_win_ComponentImp*);
+static void dev_set_component_state(psy_ui_win_ComponentImp*, psy_ui_ComponentState);
 
 /* vtable */
 static psy_ui_ComponentImpVTable vtable;
@@ -237,6 +239,12 @@ static void win_imp_vtable_init(psy_ui_win_ComponentImp* self)
 		vtable.dev_issystem =
 			(psy_ui_fp_componentimp_dev_issystem)
 			dev_issystem;
+		vtable.dev_component_state =
+			(psy_ui_fp_componentimp_dev_component_state)
+			dev_component_state;
+		vtable.dev_set_component_state =
+			(psy_ui_fp_componentimp_dev_set_component_state)
+			dev_set_component_state;
 		vtable_initialized = TRUE;
 	}
 }
@@ -1134,6 +1142,47 @@ int windowexstyle(psy_ui_win_ComponentImp* self)
 	rv = (int)GetWindowLong(self->hwnd, GWL_EXSTYLE);
 #endif
 	return rv;
+}
+
+psy_ui_ComponentState dev_component_state(psy_ui_win_ComponentImp* self)
+{
+	WINDOWPLACEMENT state;
+
+	if (self->fullscreen) {
+		return psy_ui_COMPONENTSTATE_FULLSCREEN;
+	}
+	state.length = sizeof(WINDOWPLACEMENT);
+	GetWindowPlacement(self->hwnd, &state);
+	if (state.showCmd == SW_SHOWMAXIMIZED) {
+		return psy_ui_COMPONENTSTATE_MAXIMIZED;
+	} else if (state.showCmd == SW_SHOWMINIMIZED) {
+		return psy_ui_COMPONENTSTATE_MINIMIZED;
+	}
+	return psy_ui_COMPONENTSTATE_NORMAL;
+}
+
+void dev_set_component_state(psy_ui_win_ComponentImp* self, psy_ui_ComponentState state)
+{
+	WINDOWPLACEMENT wndstate;
+	
+	wndstate.length = sizeof(WINDOWPLACEMENT);
+	GetWindowPlacement(self->hwnd, &wndstate);	
+	if (state == psy_ui_COMPONENTSTATE_MAXIMIZED) {
+		wndstate.showCmd = SW_SHOWMAXIMIZED;
+	} if (state == psy_ui_COMPONENTSTATE_MINIMIZED) {
+		wndstate.showCmd = SW_SHOWMINIMIZED;
+	} else {
+		wndstate.showCmd = SW_SHOWNORMAL;
+	}
+	if (state == psy_ui_COMPONENTSTATE_FULLSCREEN) {
+		dev_setshowfullscreen(self, TRUE);
+	} else if (self->fullscreen) {
+		dev_setshowfullscreen(self, FALSE);
+		wndstate.showCmd = SW_SHOWMAXIMIZED;
+	}
+	if (!self->fullscreen) {
+		SetWindowPlacement(self->hwnd, &wndstate);
+	}
 }
 
 #endif /* PSYCLE_TK_WIN32 */

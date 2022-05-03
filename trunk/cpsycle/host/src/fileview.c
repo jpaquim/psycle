@@ -416,29 +416,25 @@ psy_List* fileview_sort(psy_List* source, psy_fp_comp comp)
 	rv = NULL;
 	if (source) {		
 		uintptr_t num;		
-		psy_List** arrayptr;
+		psy_Table arrayptr;
+		psy_List* p;
+		uintptr_t i;
 
 		num = psy_list_size(source);
 		if (num == 0) {
 			return NULL;
 		}
-		arrayptr = (psy_List**)malloc(sizeof(char*) * num);
-		if (arrayptr) {
-			psy_List* p;
-			uintptr_t i;
-			
-			p = source;
-			for (i = 0; p != NULL && i < num; p = p->next, ++i) {
-				arrayptr[i] = p;
-			}
-			psy_qsort((void **)arrayptr, 0, (int)(num - 1), comp);
-			for (i = 0; i < num; ++i) {
-				psy_list_append(&rv,
-					psy_strdup((const char*)(arrayptr[i]->entry)));
-			}			
-			free(arrayptr);
-			arrayptr = NULL;
+		psy_table_init(&arrayptr);			
+		p = source;
+		for (i = 0; p != NULL && i < num; p = p->next, ++i) {
+			psy_table_insert(&arrayptr, i, p);
 		}
+		psy_qsort(&arrayptr, psy_table_insert, psy_table_at, 0, (int)(num - 1), comp);
+		for (i = 0; i < num; ++i) {
+			psy_list_append(&rv,
+				psy_strdup((const char*)(((psy_List*)(psy_table_at(&arrayptr, i)))->entry)));
+			}		
+		psy_table_dispose(&arrayptr);
 	}
 	return rv;
 }

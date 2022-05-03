@@ -70,7 +70,6 @@ void patterndefaultline_init(PatternDefaultLine* self, psy_ui_Component* parent,
 	self->grid.state->draw_beat_highlights = FALSE;
 	self->grid.prevent_event_driver = TRUE;
 	self->grid.state->draw_playbar = FALSE;	
-	trackergrid_scroll_to_order(&self->grid);
 	trackergrid_build(&self->grid);
 	psy_signal_connect(
 		&workspace->player.patterndefaults.sequence.signal_cursorchanged,

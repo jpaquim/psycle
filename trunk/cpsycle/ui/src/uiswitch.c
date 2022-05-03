@@ -105,7 +105,7 @@ void psy_ui_switch_ondraw(psy_ui_Switch* self, psy_ui_Graphics* g)
 		psy_ui_drawsolidroundrectangle(g, knobrect, corner,
 			psy_ui_component_colour(psy_ui_switch_base(self)));
 	} else {
-		psy_ui_realrectangle_settopleft(&knobrect,
+		psy_ui_realrectangle_set_topleft(&knobrect,
 			psy_ui_realpoint_make(switchsize.width - knobsize.width, knobrect.top));
 		psy_ui_drawsolidroundrectangle(g, knobrect, corner,
 			psy_ui_component_colour(psy_ui_switch_base(self)));

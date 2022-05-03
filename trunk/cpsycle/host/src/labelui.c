@@ -41,7 +41,7 @@ static void labelui_vtable_init(LabelUi* self)
 			(psy_ui_fp_component_ondraw)
 			labelui_ondraw;
 		labelui_vtable.onpreferredsize =
-			(psy_ui_fp_component_onpreferredsize)
+			(psy_ui_fp_component_on_preferred_size)
 			labelui_onpreferredsize;		
 		labelui_vtable_initialized = TRUE;
 	}

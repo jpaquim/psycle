@@ -335,9 +335,8 @@ void pianogriddraw_drawentries(PianoGridDraw* self, psy_ui_Graphics* g,
 		** till the end of the pattern.
 		*/
 		psy_audio_sequencetrackiterator_init(&ite);
-		psy_audio_sequence_begin(self->gridstate->pv->sequence,
-			psy_audio_sequence_track_at(self->gridstate->pv->sequence,
-				self->gridstate->pv->cursor.orderindex.track),
+		psy_audio_sequence_begin(self->gridstate->pv->sequence,			
+				self->gridstate->pv->cursor.orderindex.track,
 			(patternviewstate_single_mode(self->gridstate->pv)
 				? self->gridstate->pv->cursor.seqoffset
 				: 0.0), &ite);
@@ -561,7 +560,7 @@ static void pianogrid_vtable_init(Pianogrid* self)
 			(psy_ui_fp_component_on_mouse_event)
 			pianogrid_onmousemove;
 		pianogrid_vtable.onpreferredsize =
-			(psy_ui_fp_component_onpreferredsize)
+			(psy_ui_fp_component_on_preferred_size)
 			pianogrid_onpreferredsize;
 		pianogrid_vtable_initialized = TRUE;
 	}

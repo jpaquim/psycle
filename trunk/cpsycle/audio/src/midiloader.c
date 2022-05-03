@@ -218,7 +218,7 @@ void midiloader_appendtrack(MidiLoader* self, uintptr_t trackidx)
     patidx = psy_audio_patterns_append(&song->patterns, pattern);
     /* append new sequence track */
     self->currtrack.track = psy_audio_sequencetrack_allocinit();
-    psy_audio_sequence_appendtrack(&song->sequence, self->currtrack.track);
+    psy_audio_sequence_append_track(&song->sequence, self->currtrack.track);
     psy_audio_sequence_insert(&self->songfile->song->sequence,
         psy_audio_orderindex_make(trackidx, 0), patidx);
     /* prepare currpattern */

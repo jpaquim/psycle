@@ -26,7 +26,7 @@ static void cpumoduleview_vtable_init(CPUModuleView* self)
 	if (!cpumoduleview_vtable_initialized) {
 		cpumoduleview_vtable = *(self->component.vtable);
 		cpumoduleview_vtable.ondraw = (psy_ui_fp_component_ondraw)cpumoduleview_ondraw;
-		cpumoduleview_vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
+		cpumoduleview_vtable.onpreferredsize = (psy_ui_fp_component_on_preferred_size)
 			cpumoduleview_onpreferredsize;
 		cpumoduleview_vtable_initialized = TRUE;
 	}

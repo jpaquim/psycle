@@ -41,7 +41,7 @@ static void psy_ui_listboxclient_vtable_init(psy_ui_ListBoxClient* self)
 			(psy_ui_fp_component_ondraw)
 			psy_ui_listboxclient_ondraw;
 		psy_ui_listboxclient_vtable.onpreferredsize =
-			(psy_ui_fp_component_onpreferredsize)
+			(psy_ui_fp_component_on_preferred_size)
 			psy_ui_listboxclient_onpreferredsize;
 		psy_ui_listboxclient_vtable.on_mouse_down =
 			(psy_ui_fp_component_on_mouse_event)
@@ -204,7 +204,7 @@ static void psy_ui_listbox_vtable_init(psy_ui_ListBox* self)
 			(psy_ui_fp_component_event)
 			psy_ui_listbox_on_destroy;
 		psy_ui_listbox_vtable.onpreferredsize =
-			(psy_ui_fp_component_onpreferredsize)
+			(psy_ui_fp_component_on_preferred_size)
 			psy_ui_listbox_onpreferredsize;		
 		psy_ui_listbox_vtable_initialized = TRUE;
 	}

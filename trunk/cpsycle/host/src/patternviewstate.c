@@ -99,18 +99,12 @@ void patternviewstate_sequencestart(PatternViewState* self,
 	length = rv->pattern->length;
 	offset = startoffset;	
 	if (!patternviewstate_single_mode(self) &&
-			patternviewstate_sequence(self)) {
-		psy_audio_SequenceTrackNode* tracknode;
+			patternviewstate_sequence(self)) {		
 		psy_audio_Sequence* sequence;
 
-		sequence = patternviewstate_sequence(self);
-		tracknode = psy_list_at(sequence->tracks,
-			self->cursor.orderindex.track);
-		if (!tracknode) {
-			tracknode = sequence->tracks;
-		}
+		sequence = patternviewstate_sequence(self);		
 		psy_audio_sequence_begin(sequence,
-			tracknode ? (psy_audio_SequenceTrack*)tracknode->entry : NULL,
+			self->cursor.orderindex.track,
 			offset, rv);
 		if (rv->sequencentrynode) {
 			seqoffset = psy_audio_sequencetrackiterator_seqoffset(rv);

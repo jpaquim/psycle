@@ -44,7 +44,7 @@ static void trackerlinenumbers_vtable_init(TrackerLineNumbers* self)
 			(psy_ui_fp_component_event)
 			trackerlinenumbers_on_align;
 		trackerlinenumbers_vtable.onpreferredsize =
-			(psy_ui_fp_component_onpreferredsize)
+			(psy_ui_fp_component_on_preferred_size)
 			trackerlinenumbers_on_preferred_size;
 		trackerlinenumbers_vtable_initialized = TRUE;
 	}
@@ -130,10 +130,8 @@ void trackerlinenumbers_on_draw(TrackerLineNumbers* self, psy_ui_Graphics* g)
 		trackerstate_line_clip(self->state, &g_clip, &clip, self->line_size.height);
 		offset = clip.topleft.absoffset;
 		psy_audio_sequencetrackiterator_init(&ite);
-		psy_audio_sequence_begin(self->state->pv->sequence,
-			psy_audio_sequence_track_at(self->state->pv->sequence,
-				self->state->pv->cursor.orderindex.track),
-			offset, &ite);		
+		psy_audio_sequence_begin(self->state->pv->sequence,			
+			self->state->pv->cursor.orderindex.track, offset, &ite);
 		maxabsoffset = 0.0;
 		if (ite.pattern) {
 			if (patternviewstate_single_mode(self->state->pv)) {

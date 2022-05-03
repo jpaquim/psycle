@@ -39,7 +39,7 @@ static void headerui_vtable_init(HeaderUi* self)
 			(psy_ui_fp_component_ondraw)
 			headerui_ondraw;
 		headerui_vtable.onpreferredsize =
-			(psy_ui_fp_component_onpreferredsize)
+			(psy_ui_fp_component_on_preferred_size)
 			headerui_onpreferredsize;		
 		headerui_vtable_initialized = TRUE;
 	}

@@ -5,6 +5,7 @@
 
 #include "properties.h"
 #include "list.h"
+#include "hashtbl.h"
 #include "qsort.h"
 
 #include <assert.h>
@@ -646,23 +647,22 @@ void psy_property_sort_keys(psy_Property* self)
 		uintptr_t i;
 		uintptr_t num;
 		psy_List* p;
-		psy_Property** propertiesptr;
+		psy_Table propertiesptr;
 
 		num = psy_property_size(self);
-		propertiesptr = (psy_Property**)malloc(sizeof(psy_Property*) * num);
-		if (propertiesptr) {
-			p = psy_property_begin(self);
-			for (i = 0; p != NULL && i < num; p = p->next, ++i) {
-				propertiesptr[i] = (psy_Property*)psy_list_entry(p);
-			}
-			psy_qsort((void **)propertiesptr, 0, (int)(num - 1),
-				psy_property_comp_key);
-			p = psy_property_begin(self);
-			for (i = 0; p != NULL && i < num; p = p->next, ++i) {
-				p->entry = (void*)propertiesptr[i];
-			}
-			free(propertiesptr);
+		psy_table_init(&propertiesptr);				
+		p = psy_property_begin(self);
+		for (i = 0; p != NULL && i < num; p = p->next, ++i) {
+			psy_table_insert(&propertiesptr, i, (psy_Property*)psy_list_entry(p));
 		}
+		psy_qsort(&propertiesptr, 
+			psy_table_insert, psy_table_at,
+			0, (int)(num - 1), psy_property_comp_key);
+		p = psy_property_begin(self);
+		for (i = 0; p != NULL && i < num; p = p->next, ++i) {
+			p->entry = psy_table_at(&propertiesptr, i);
+		}		
+		psy_table_dispose(&propertiesptr);
 	}
 }
 

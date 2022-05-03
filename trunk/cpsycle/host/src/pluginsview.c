@@ -39,23 +39,22 @@ psy_Property* newmachine_sort(psy_Property* source, psy_fp_comp comp)
 		uintptr_t i;
 		uintptr_t num;
 		psy_List* p;
-		psy_Property** propertiesptr;
+		psy_Table propertiesptr;
 
 		num = psy_property_size(source);
-		propertiesptr = (psy_Property**)malloc(sizeof(psy_Property*) * num);
-		if (propertiesptr) {
-			p = psy_property_begin(source);
-			for (i = 0; p != NULL && i < num; psy_list_next(&p), ++i) {
-				propertiesptr[i] = (psy_Property*)psy_list_entry(p);
-			}
-			psy_qsort((void **)propertiesptr, 0, (int)(num - 1), comp);
-			rv = psy_property_allocinit_key(NULL);
-			for (i = 0; i < num; ++i) {
-				psy_property_append_property(rv, psy_property_clone(
-					propertiesptr[i]));
-			}
-			free(propertiesptr);
+		psy_table_init(&propertiesptr);		
+		p = psy_property_begin(source);
+		for (i = 0; p != NULL && i < num; psy_list_next(&p), ++i) {
+			psy_table_insert(&propertiesptr, i, (psy_Property*)psy_list_entry(p));
 		}
+		psy_qsort(&propertiesptr, psy_table_insert, psy_table_at,
+			0, (int)(num - 1), comp);
+		rv = psy_property_allocinit_key(NULL);
+		for (i = 0; i < num; ++i) {
+			psy_property_append_property(rv, psy_property_clone(
+				psy_table_at(&propertiesptr, i)));
+		}		
+		psy_table_dispose(&propertiesptr);
 	}
 	return rv;
 }

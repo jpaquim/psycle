@@ -433,8 +433,7 @@ void BlockPasteCommandDispose(BlockPasteCommand* self)
 
 void BlockPasteCommandExecute(BlockPasteCommand* self, psy_Property* params)
 {
-	psy_audio_SequenceTrackIterator it;
-	psy_audio_SequenceTrack* track;	
+	psy_audio_SequenceTrackIterator it;	
 	psy_audio_PatternNode* p;
 	psy_audio_PatternNode* prev = 0;
 	psy_dsp_big_beat_t dstoffset;
@@ -475,11 +474,9 @@ void BlockPasteCommandExecute(BlockPasteCommand* self, psy_Property* params)
 					psy_audio_pattern_clone(pattern));
 			}
 		}
-	}
-
-	track = (psy_audio_SequenceTrack*)self->sequence->tracks->entry;
+	}	
 	psy_audio_sequencetrackiterator_init(&it);
-	psy_audio_sequence_begin(self->sequence, track,
+	psy_audio_sequence_begin(self->sequence, 0,
 		psy_audio_sequencecursor_offset_abs(&self->destcursor),
 		&it);	
 	dstoffset = psy_audio_sequencecursor_pattern_offset(&self->destcursor);

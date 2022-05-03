@@ -244,14 +244,14 @@ void splitter_onmousemove(psy_ui_Splitter* self, psy_ui_MouseEvent* ev)
 		}
 		switch (self->component.align) {
 			case psy_ui_ALIGN_LEFT:
-				psy_ui_realrectangle_settopleft(&newposition,
+				psy_ui_realrectangle_set_topleft(&newposition,
 					psy_ui_realpoint_make(psy_max(prevposition.left, psy_min(
 							nextposition.right - (position.right - position.left),
 							position.left + psy_ui_mouseevent_pt(ev).x - self->dragoffset)),
 						position.top));
 				break;
 			case psy_ui_ALIGN_RIGHT:				
-				psy_ui_realrectangle_settopleft(&newposition,
+				psy_ui_realrectangle_set_topleft(&newposition,
 					psy_ui_realpoint_make(
 							psy_max(nextposition.left,
 								psy_min(prevposition.right -
@@ -261,14 +261,14 @@ void splitter_onmousemove(psy_ui_Splitter* self, psy_ui_MouseEvent* ev)
 						position.top));
 				break;
 			case psy_ui_ALIGN_TOP:
-				psy_ui_realrectangle_settopleft(&newposition,
+				psy_ui_realrectangle_set_topleft(&newposition,
 					psy_ui_realpoint_make(
 						position.left, psy_max(prevposition.top, psy_min(
 							nextposition.bottom - (position.bottom - position.top),
 						position.top + psy_ui_mouseevent_pt(ev).y - self->dragoffset))));
 				break;
 			case psy_ui_ALIGN_BOTTOM:				
-				psy_ui_realrectangle_settopleft(&newposition,
+				psy_ui_realrectangle_set_topleft(&newposition,
 					psy_ui_realpoint_make(
 						position.left,
 						psy_max(0.0, psy_min(prevposition.bottom -

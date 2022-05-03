@@ -62,13 +62,13 @@ static void mainframe_delegate_keyboard(MainFrame*, intptr_t message,
 static void mainframe_on_toggle_gear(MainFrame*, Workspace* sender);
 static void mainframe_on_recent_songs(MainFrame*, psy_ui_Component* sender);
 static void mainframe_on_file_save_view(MainFrame*, psy_ui_Component* sender);
-static void mainframe_ondiskop(MainFrame*, psy_ui_Component* sender);
+static void mainframe_on_disk_op(MainFrame*, psy_ui_Component* sender);
 static void mainframe_on_plugin_editor(MainFrame*, psy_ui_Component* sender);
 static void mainframe_on_settings_view_changed(MainFrame*, PropertiesView* sender,
 	psy_Property*, uintptr_t* rebuild);
 static void mainframe_on_tabbar_changed(MainFrame*, psy_ui_TabBar* sender,
 	uintptr_t tabindex);
-static void mainframe_onscripttabbarchanged(MainFrame*, psy_ui_Component* sender,
+static void mainframe_on_script_tabbar_changed(MainFrame*, psy_ui_Component* sender,
 	uintptr_t tabindex);
 static void mainframe_on_song_changed(MainFrame*, Workspace* sender);
 static void mainframe_on_view_selected(MainFrame*, Workspace*, uintptr_t view,
@@ -80,7 +80,7 @@ static void mainframe_update_songtitle(MainFrame*);
 static void mainframe_on_timer(MainFrame*, uintptr_t timerid);
 static bool mainframe_on_input(MainFrame*, InputHandler* sender);
 static bool mainframe_on_notes(MainFrame*, InputHandler* sender);
-static void mainframe_ontoggleseqeditor(MainFrame*, psy_ui_Component* sender);
+static void mainframe_on_toggle_seq_editor(MainFrame*, psy_ui_Component* sender);
 static void mainframe_on_toggle_step_sequencer(MainFrame*, psy_ui_Component* sender);
 static void mainframe_on_toggle_scripts(MainFrame*, psy_ui_Component* sender);
 static void mainframe_update_step_sequencer_buttons(MainFrame*);
@@ -90,12 +90,6 @@ static void mainframe_connect_seq_editor_buttons(MainFrame*);
 static void mainframe_on_toggle_terminal(MainFrame*, psy_ui_Component* sender);
 static void mainframe_on_toggle_kbd_help(MainFrame*, psy_ui_Component* sender);
 static void mainframe_on_exit(MainFrame*, psy_ui_Component* sender);
-static void mainframe_on_terminal_output(MainFrame*, Workspace* sender,
-	const char* text);
-static void mainframe_on_terminal_warning(MainFrame*, Workspace* sender,
-	const char* text);
-static void mainframe_on_terminal_error(MainFrame*, Workspace* sender,
-	const char* text);
 static void mainframe_on_songtracks_changed(MainFrame*, psy_audio_Patterns* sender,
 	uintptr_t numsongtracks);
 static bool mainframe_on_close(MainFrame*);
@@ -106,6 +100,8 @@ static void mainframe_on_gear_select(MainFrame*, Workspace* sender,
 	psy_List* machinelist);
 static void mainframe_on_drag_over(MainFrame*, psy_ui_DragEvent*);
 static void mainframe_on_drop(MainFrame*, psy_ui_DragEvent*);
+static void mainframe_on_mouse_down(MainFrame*, psy_ui_MouseEvent*);
+static void mainframe_on_mouse_move(MainFrame*, psy_ui_MouseEvent*);
 static bool mainframe_on_input_handler_callback(MainFrame*, int message,
 	void* param1);
 static void mainframe_plugineditor_on_focus(MainFrame*, psy_ui_Component* sender);
@@ -133,6 +129,12 @@ static void vtable_init(MainFrame* self)
 		vtable.ondragover =
 			(psy_ui_fp_component_ondragover)
 			mainframe_on_drag_over;
+		vtable.on_mouse_down =
+			(psy_ui_fp_component_on_mouse_event)
+			mainframe_on_mouse_down;
+		vtable.onmousemove =
+			(psy_ui_fp_component_on_mouse_event)
+			mainframe_on_mouse_move;
 		vtable.ondrop =
 			(psy_ui_fp_component_ondrop)
 			mainframe_on_drop;
@@ -190,7 +192,7 @@ void mainframe_init(MainFrame* self)
 	startscript_init(&self->startscript, self);
 	startscript_run(&self->startscript);
 	psy_signal_connect(&self->scripttabbar.signal_change, self,
-		mainframe_onscripttabbarchanged);
+		mainframe_on_script_tabbar_changed);
 	workspace_select_start_view(&self->workspace);
 	self->machineview.wireview.centermaster = TRUE;	
 }
@@ -270,10 +272,8 @@ void mainframe_init_terminal(MainFrame* self)
 	psy_ui_splitter_init(&self->splitbarterminal, &self->pane);
 	psy_ui_component_set_align(psy_ui_splitter_base(&self->splitbarterminal),
 		psy_ui_ALIGN_BOTTOM);
-	workspace_connect_terminal(&self->workspace, self,
-		(fp_workspace_output)mainframe_on_terminal_output,
-		(fp_workspace_output)mainframe_on_terminal_warning,
-		(fp_workspace_output)mainframe_on_terminal_error);
+	workspace_set_terminal_output(&self->workspace,
+		psy_ui_terminal_logger_base(&self->terminal));	
 }
 
 void mainframe_init_kbd_help(MainFrame* self)
@@ -582,19 +582,24 @@ void mainframe_init_file_view(MainFrame* self)
 		filebar_useft2fileexplorer(&self->filebar);
 	}
 	psy_signal_connect(&self->filebar.diskop.signal_clicked, self,
-		mainframe_ondiskop);
+		mainframe_on_disk_op);
 	psy_signal_connect(&self->fileview.save.signal_clicked, self,
 		mainframe_on_file_save_view);
 }
 
 void mainframe_init_sequence_view(MainFrame* self)
 {
+	psy_ui_Size size;
 	psy_ui_component_init_align(&self->left, &self->pane, NULL,
-		psy_ui_ALIGN_LEFT);
+		psy_ui_ALIGN_LEFT);	
 	psy_ui_splitter_init(&self->splitbar, &self->pane);
 	seqview_init(&self->sequenceview, &self->left, &self->workspace);
 	psy_ui_component_set_align(seqview_base(&self->sequenceview),
 		psy_ui_ALIGN_CLIENT);
+	size = psy_ui_component_preferredsize(seqview_base(&self->sequenceview),
+		NULL);
+	psy_ui_component_set_preferred_size(&self->left,
+		psy_ui_size_make(size.width, psy_ui_value_zero()));
 }
 
 void mainframe_init_sequencer_bar(MainFrame* self)
@@ -775,18 +780,6 @@ void mainframe_on_recent_songs(MainFrame* self, psy_ui_Component* sender)
 {
 	psy_ui_component_toggle_visibility(&self->playlist.component);
 	psy_ui_component_toggle_visibility(&self->playlistsplitter.component);
-	/*if (psy_ui_component_visible(playlistview_base(&self->playlist))) {
-		psy_ui_button_seticon(&self->filebar.recentbutton, psy_ui_ICON_MORE);
-		psy_ui_component_hide(playlistview_base(&self->playlist));
-		// psy_ui_component_hide_align(psy_ui_splitter_base(&self->playlistsplitter));
-	} else {
-		psy_ui_button_seticon(&self->filebar.recentbutton, psy_ui_ICON_LESS);
-		playlistview_base(&self->playlist)->visible = 1;
-		// psy_ui_splitter_base(&self->playlistsplitter)->visible = 1;
-		psy_ui_component_align(&self->component);		
-		// psy_ui_component_show(psy_ui_splitter_base(&self->playlistsplitter));
-	}
-	psy_ui_component_invalidate(mainframe_base(self));*/
 	generalconfig_setplaylistshowstate(&self->workspace.config.general,
 		psy_ui_component_visible(playlistview_base(&self->playlist)));
 }
@@ -800,7 +793,7 @@ void mainframe_on_file_save_view(MainFrame* self, psy_ui_Component* sender)
 	workspace_save_song(&self->workspace, path);	
 }
 
-void mainframe_ondiskop(MainFrame* self, psy_ui_Component* sender)
+void mainframe_on_disk_op(MainFrame* self, psy_ui_Component* sender)
 {
 	psy_ui_component_toggle_visibility(&self->fileview.component);
 }
@@ -878,7 +871,7 @@ void mainframe_on_export(MainFrame* self, psy_ui_Component* sender)
 }
 
 void mainframe_on_timer(MainFrame* self, uintptr_t timerid)
-{
+{	
 	vubar_idle(&self->vubar);
 	workspace_idle(&self->workspace);
 	mainstatusbar_idle(&self->statusbar);
@@ -973,40 +966,9 @@ void mainframe_on_tabbar_changed(MainFrame* self, psy_ui_TabBar* sender,
 	psy_ui_component_invalidate(&self->mainviews.component);	
 }
 
-void mainframe_onscripttabbarchanged(MainFrame* self, psy_ui_Component* sender,
+void mainframe_on_script_tabbar_changed(MainFrame* self, psy_ui_Component* sender,
 	uintptr_t tabindex)
 {
-}
-
-void mainframe_on_terminal_output(MainFrame* self, Workspace* sender,
-	const char* text)
-{
-	if (self->statusbar.terminalstyleid == STYLE_TERM_BUTTON) {
-		mainstatusbar_update_terminal_button(&self->statusbar);
-	}
-	psy_ui_terminal_output(&self->terminal, text);
-}
-
-void mainframe_on_terminal_warning(MainFrame* self, Workspace* sender,
-	const char* text)
-{
-	if (self->statusbar.terminalstyleid != STYLE_TERM_BUTTON_ERROR) {
-		self->statusbar.terminalstyleid = STYLE_TERM_BUTTON_WARNING;
-		mainstatusbar_update_terminal_button(&self->statusbar);
-	}
-	psy_ui_terminal_output(&self->terminal, (text)
-		? text
-		: "unknown warning\n");
-}
-
-void mainframe_on_terminal_error(MainFrame* self, Workspace* sender,
-	const char* text)
-{
-	psy_ui_terminal_output(&self->terminal, (text)
-		? text
-		: "unknown error\n");
-	self->statusbar.terminalstyleid = STYLE_TERM_BUTTON_ERROR;
-	mainstatusbar_update_terminal_button(&self->statusbar);
 }
 
 void mainframe_on_songtracks_changed(MainFrame* self, psy_audio_Patterns* sender,
@@ -1107,7 +1069,7 @@ bool mainframe_on_close(MainFrame* self)
 	return TRUE;
 }
 
-void mainframe_ontoggleseqeditor(MainFrame* self, psy_ui_Component* sender)
+void mainframe_on_toggle_seq_editor(MainFrame* self, psy_ui_Component* sender)
 {
 	psy_ui_component_toggle_visibility(seqeditor_base(
 		&self->seqeditor));
@@ -1143,7 +1105,7 @@ void mainframe_connect_seq_editor_buttons(MainFrame* self)
 {
 	psy_signal_connect(
 		&self->sequencerbar.toggleseqedit.signal_clicked,
-		self, mainframe_ontoggleseqeditor);
+		self, mainframe_on_toggle_seq_editor);
 	if (!generalconfig_showsequenceedit(psycleconfig_general(
 		workspace_conf(&self->workspace)))) {
 			psy_ui_component_hide(seqeditor_base(&self->seqeditor));
@@ -1203,8 +1165,7 @@ void mainframe_on_toggle_terminal(MainFrame* self, psy_ui_Component* sender)
 			&self->terminal.component).height)) {
 		psy_ui_component_set_preferred_size(&self->terminal.component,
 			psy_ui_size_zero());
-		self->statusbar.terminalstyleid = STYLE_TERM_BUTTON;
-		mainstatusbar_update_terminal_button(&self->statusbar);
+		self->workspace.terminalstyleid = STYLE_TERM_BUTTON;
 	} else {
 		psy_ui_component_set_preferred_size(&self->terminal.component,
 			psy_ui_size_make(psy_ui_value_make_px(0),
@@ -1363,6 +1324,64 @@ void mainframe_on_drop(MainFrame* self, psy_ui_DragEvent* ev)
 				}
 				psy_ui_dragevent_prevent_default(ev);
 			}
+		}
+	}
+}
+
+void mainframe_on_mouse_down(MainFrame* self, psy_ui_MouseEvent* ev)
+{
+	self->frame_drag_offset = psy_ui_mouseevent_offset(ev);
+}
+
+
+void mainframe_on_mouse_move(MainFrame* self, psy_ui_MouseEvent* ev)
+{	
+	if (psy_ui_mouseevent_button(ev) == 1) {
+		psy_ui_Component* curr;
+		psy_ui_Component* accept[] = {
+			&self->top,
+			&self->toprows,
+			&self->toprow0_bars,
+			&self->toprow0_client,
+			&self->filebar.component,
+			&self->songbar.component,
+			&self->playbar.component,
+			&self->undoredobar.component,
+			&self->machineviewbar.component,
+			&self->vubar.component,
+			&self->vubar.vumeter.component,
+			NULL
+		};
+		bool allow_frame_move;
+		uintptr_t i;
+
+		i = 0;
+		curr = accept[i];
+		allow_frame_move = FALSE;
+		while (curr) {
+			if (curr == psy_ui_mouseevent_target(ev)) {
+				allow_frame_move = TRUE;
+				break;
+			}
+			++i;
+			curr = accept[i];		
+		}
+		if (allow_frame_move) {
+			psy_ui_RealRectangle position;
+			psy_ui_ComponentState state;
+			
+			position = psy_ui_component_position(&self->component);
+			state = psy_ui_component_state(&self->component);
+			if (state == psy_ui_COMPONENTSTATE_FULLSCREEN ||
+					state == psy_ui_COMPONENTSTATE_MAXIMIZED) {
+				psy_ui_component_set_state(&self->component,
+					psy_ui_COMPONENTSTATE_NORMAL);
+			}			
+			psy_ui_component_move(&self->component, psy_ui_point_make_px(
+				position.left + (psy_ui_mouseevent_offset(ev).x -
+					self->frame_drag_offset.x),
+				position.top + (psy_ui_mouseevent_offset(ev).y -
+					self->frame_drag_offset.y)));
 		}
 	}
 }

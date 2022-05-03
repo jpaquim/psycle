@@ -38,7 +38,7 @@ static void pianokeyboard_vtable_init(PianoKeyboard* self)
 			(psy_ui_fp_component_on_mouse_event)
 			pianokeyboard_on_mouse_down;
 		pianokeyboard_vtable.onpreferredsize =
-			(psy_ui_fp_component_onpreferredsize)
+			(psy_ui_fp_component_on_preferred_size)
 			pianokeyboard_onpreferredsize;
 		pianokeyboard_vtable_initialized = TRUE;
 	}

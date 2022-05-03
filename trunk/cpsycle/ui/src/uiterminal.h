@@ -9,6 +9,8 @@
 /* local */
 #include "uilabel.h"
 #include "uiscroller.h"
+/* file */
+#include <logger.h>
 /* thread */
 #include <lock.h>
 
@@ -20,10 +22,12 @@ extern "C" {
 typedef struct psy_ui_Terminal {
 	/* inherits */
 	psy_ui_Component component;
+	/* extends */
+	psy_Logger logger;
 	/* internal */
 	psy_ui_Scroller scroller;
 	psy_ui_Label output;
-	psy_List* strbuffer;
+	psy_List* strbuffer;	
 	psy_Lock lock;	
 } psy_ui_Terminal;
 
@@ -36,6 +40,11 @@ void psy_ui_terminal_clear(psy_ui_Terminal*);
 INLINE psy_ui_Component* psy_ui_terminal_base(psy_ui_Terminal* self)
 {
 	return &self->component;
+}
+
+INLINE psy_Logger* psy_ui_terminal_logger_base(psy_ui_Terminal* self)
+{
+	return &self->logger;
 }
 
 #ifdef __cplusplus

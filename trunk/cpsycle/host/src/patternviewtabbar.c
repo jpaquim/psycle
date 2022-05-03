@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -16,7 +16,7 @@
 
 /* prototypes*/
 static void patternviewtabbar_on_destroy(PatternViewTabBar*);
-static void patternviewtabbar_ontabbarchange(PatternViewTabBar*,
+static void patternviewtabbar_on_tabbar_change(PatternViewTabBar*,
 	psy_ui_Component* sender, uintptr_t tabindex);
 
 /* vtable */
@@ -34,9 +34,10 @@ static void vtable_init(PatternViewTabBar* self)
 	}
 	self->component.vtable = &vtable;
 }
+
 /* implementation */
 void patternviewtabbar_init(PatternViewTabBar* self, psy_ui_Component* parent,
-	Workspace* workspace)
+	PatternViewConfig* patconfig)
 {
 	psy_ui_Tab* tab;
 
@@ -45,7 +46,7 @@ void patternviewtabbar_init(PatternViewTabBar* self, psy_ui_Component* parent,
 	psy_ui_component_init_align(&self->component, parent, NULL,
 		psy_ui_ALIGN_LEFT);
 	vtable_init(self);
-	self->workspace = workspace;
+	self->patconfig = patconfig;
 	psy_signal_init(&self->signal_toggle_properties);
 	psy_ui_tabbar_init(&self->tabbar, &self->component);
 	psy_ui_component_set_align(psy_ui_tabbar_base(&self->tabbar),
@@ -70,12 +71,12 @@ void patternviewtabbar_init(PatternViewTabBar* self, psy_ui_Component* parent,
 		tab->istoggle = TRUE;
 	}
 	psy_ui_tabbar_select(&self->tabbar, 0);
-	psy_ui_button_init(&self->contextbutton, &self->component);
-	psy_ui_button_seticon(&self->contextbutton, psy_ui_ICON_MORE);
-	psy_ui_component_set_align(psy_ui_button_base(&self->contextbutton),
+	psy_ui_button_init(&self->context_button, &self->component);
+	psy_ui_button_seticon(&self->context_button, psy_ui_ICON_MORE);
+	psy_ui_component_set_align(psy_ui_button_base(&self->context_button),
 		psy_ui_ALIGN_RIGHT);
 	psy_signal_connect(&self->tabbar.signal_change, self,
-		patternviewtabbar_ontabbarchange);
+		patternviewtabbar_on_tabbar_change);
 }
 
 void patternviewtabbar_on_destroy(PatternViewTabBar* self)
@@ -85,18 +86,19 @@ void patternviewtabbar_on_destroy(PatternViewTabBar* self)
 	psy_signal_dispose(&self->signal_toggle_properties);
 }
 
-void patternviewtabbar_ontabbarchange(PatternViewTabBar* self,
+void patternviewtabbar_on_tabbar_change(PatternViewTabBar* self,
 	psy_ui_Component* sender, uintptr_t tabindex)
 {
-	if (tabindex <= PATTERN_DISPLAYMODE_NUM) {
-		static PatternDisplayMode display[] = {
+	if (tabindex == 5) {
+		psy_signal_emit(&self->signal_toggle_properties, self, 0);
+	} else if (tabindex <= PATTERN_DISPLAYMODE_NUM) {
+		const static PatternDisplayMode display[] = {
 			PATTERN_DISPLAYMODE_TRACKER, PATTERN_DISPLAYMODE_PIANOROLL,
 			PATTERN_DISPLAYMODE_NUM,
 			PATTERN_DISPLAYMODE_TRACKER_PIANOROLL_VERTICAL,
 			PATTERN_DISPLAYMODE_TRACKER_PIANOROLL_HORIZONTAL };
-		patternviewconfig_select_pattern_display(&self->workspace->config.patview,
+
+		patternviewconfig_select_pattern_display(self->patconfig,
 			display[tabindex]);
-	} else if (tabindex == 5) {
-		psy_signal_emit(&self->signal_toggle_properties, self, 0);		
 	}
 }

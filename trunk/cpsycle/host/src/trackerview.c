@@ -662,13 +662,14 @@ bool trackergrid_on_note_cmds(TrackerGrid* self, InputHandler* sender)
 	cmd = inputhandler_cmd(sender);
 	if (cmd.id != -1) {		
 		psy_audio_PatternEvent ev;
+		bool insert;
 		
 		trackergrid_prevent_pattern_sync(self);
+		insert = FALSE;
 		if (cmd.id >= CMD_NOTE_OFF_C_0 && cmd.id < 255) {
 			ev = psy_audio_player_pattern_event(&self->workspace->player, (uint8_t)cmd.id);
 			ev.note = CMD_NOTE_STOP;
-			psy_audio_player_playevent(&self->workspace->player, &ev);
-			return 1;
+			psy_audio_player_playevent(&self->workspace->player, &ev);			
 		} else if (cmd.id == CMD_NOTE_CHORD_END) {
 			if (self->chord) {
 				psy_audio_SequenceCursor cursor;
@@ -680,8 +681,7 @@ bool trackergrid_on_note_cmds(TrackerGrid* self, InputHandler* sender)
 				trackergrid_advance_line(self);
 			}
 			self->chord = FALSE;
-			self->chord_begin = 0;
-			return 1;
+			self->chord_begin = 0;			
 		} else if (cmd.id >= CMD_NOTE_CHORD_C_0 && cmd.id < CMD_NOTE_STOP) {
 			if (!self->chord) {
 				self->chord_begin = self->state->pv->cursor.track;
@@ -689,24 +689,28 @@ bool trackergrid_on_note_cmds(TrackerGrid* self, InputHandler* sender)
 			}
 			ev = psy_audio_player_pattern_event(&self->workspace->player,
 				(uint8_t)cmd.id - (uint8_t)CMD_NOTE_CHORD_C_0);
-		} else if (cmd.id < 256) {			
+			insert = TRUE;
+		} else if (cmd.id < 256) {
 			ev = psy_audio_player_pattern_event(&self->workspace->player, (uint8_t)cmd.id);
 			psy_audio_player_playevent(&self->workspace->player, &ev);
+			insert = TRUE;
 		}
-		self->prevent_scroll_top = TRUE;
-		psy_undoredo_execute(&self->workspace->undoredo,
-			&insertcommand_allocinit(pattern,
-				self->state->pv->cursor, ev,
-				self->state->pv->sequence)->command);
-		self->prevent_scroll_top = FALSE;
-		if (self->chord != FALSE) {
-			trackergrid_next_track(self);
-		} else {
-			trackergrid_advance_line(self);
-		}
-		if (ev.note < psy_audio_NOTECOMMANDS_RELEASE) {
-			self->state->pv->cursor.key = ev.note;			
-			trackergrid_set_cursor(self, self->state->pv->cursor);			
+		if (insert) {
+			self->prevent_scroll_top = TRUE;
+			psy_undoredo_execute(&self->workspace->undoredo,
+				&insertcommand_allocinit(pattern,
+					patternviewstate_cursor(self->state->pv), ev,
+					patternviewstate_sequence(self->state->pv))->command);
+			self->prevent_scroll_top = FALSE;
+			if (self->chord != FALSE) {
+				trackergrid_next_track(self);
+			} else {
+				trackergrid_advance_line(self);
+			}
+			if (ev.note < psy_audio_NOTECOMMANDS_RELEASE) {
+				self->state->pv->cursor.key = ev.note;
+				trackergrid_set_cursor(self, self->state->pv->cursor);
+			}
 		}
 		trackergrid_enable_pattern_sync(self);
 		return 1;
@@ -1177,30 +1181,6 @@ void trackergrid_update_size(TrackerGrid* self)
 			psy_ui_component_textmetric(&self->component), NULL));	
 }
 
-bool trackergrid_scroll_to_order(TrackerGrid* self)
-{
-	bool update_align;
-
-	assert(self);
-	
-	update_align = FALSE;
-	if (!self->prevent_scroll_top) {
-		trackergrid_reset_pattern_sync(self);		
-		if (!patternviewstate_single_mode(self->state->pv)) {
-			if (!(self->workspace->host_sequencer_time.currplaying && workspace_following_song(self->workspace))) {			
-				psy_ui_component_set_scroll_top_px(&self->component,
-					trackerstate_beat_to_px(self->state,
-						psy_audio_sequencecursor_offset_abs(&self->state->pv->cursor),
-						self->line_size.height));
-			}
-		}		
-	}
-	if (self->state->midline) {
-		trackergrid_center_on_cursor(self);
-	}	
-	return update_align;
-}
-
 void trackergrid_enable_pattern_sync(TrackerGrid* self)
 {
 	assert(self);
@@ -1624,9 +1604,25 @@ void trackerview_on_cursor_changed(TrackerView* self, psy_audio_Sequence* sender
 			psy_ui_component_set_scroll_top_px(&self->grid.component, 0.0);
 			psy_ui_component_invalidate(&self->grid.component);
 		}
-	} else {	
-		trackerlinenumbers_invalidate_cursor(&self->lines.linenumbers);
-		trackergrid_invalidate_cursor(&self->grid);
+	} else {
+		bool invalidate_cursor;
+
+		invalidate_cursor = TRUE;
+		if (patternviewstate_single_mode(self->grid.state->pv)) {
+			if (psy_audio_sequencecursor_pattern_id(&self->grid.state->pv->sequence->cursor) !=
+				psy_audio_sequencecursor_pattern_id(&self->grid.state->pv->sequence->lastcursor)) {
+				invalidate_cursor = FALSE;
+			}
+		}
+		if (invalidate_cursor) {
+			trackerlinenumbers_invalidate_cursor(&self->lines.linenumbers);
+			trackergrid_invalidate_cursor(&self->grid);
+		} else {
+			psy_ui_component_align(&self->grid.component);			
+			psy_ui_component_align(&self->lines.component);
+			psy_ui_component_invalidate(&self->grid.component);
+			psy_ui_component_invalidate(&self->lines.component);
+		}
 	}
 }
 

@@ -51,7 +51,7 @@ static void seqeditruler_vtable_init(SeqEditRuler* self)
 			(psy_ui_fp_component_ondraw)
 			seqeditruler_ondraw;
 		seqeditruler_vtable.onpreferredsize =
-			(psy_ui_fp_component_onpreferredsize)
+			(psy_ui_fp_component_on_preferred_size)
 			seqeditruler_onpreferredsize;
 		seqeditruler_vtable.onmousemove =
 			(psy_ui_fp_component_on_mouse_event)

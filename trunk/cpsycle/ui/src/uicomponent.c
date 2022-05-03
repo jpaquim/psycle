@@ -903,9 +903,15 @@ void psy_ui_component_togglefullscreen(psy_ui_Component* self)
 {
 #ifdef DIVERSALIS__OS__MICROSOFT	
 	psy_ui_Component* curr_focus;
+	psy_ui_ComponentState state;
 
 	curr_focus = psy_ui_app_focus(psy_ui_app());
-	psy_ui_component_showstate(self, 20);
+	state = psy_ui_component_state(self);
+	if (state == psy_ui_COMPONENTSTATE_FULLSCREEN) {
+		psy_ui_component_set_state(self, psy_ui_COMPONENTSTATE_NORMAL);
+	} else {
+		psy_ui_component_set_state(self, psy_ui_COMPONENTSTATE_FULLSCREEN);
+	}
 	if (curr_focus) {		
 		psy_ui_component_set_focus(curr_focus);
 	}
@@ -1323,6 +1329,11 @@ psy_ui_Size psy_ui_component_preferredsize(psy_ui_Component* self,
 	return rv;	
 }
 
+psy_ui_Size psy_ui_component_frame_size(psy_ui_Component* self)
+{
+	return self->vtable->framesize(self);
+}
+
 psy_ui_Size psy_ui_component_preferred_scrollsize(psy_ui_Component* self,
 	const psy_ui_Size* limit)
 {
@@ -1348,7 +1359,7 @@ const psy_ui_Size psy_ui_component_maximumsize(const psy_ui_Component* self)
 	return psy_ui_componentstyle_maximumsize(&self->style);
 }
 
-void psy_ui_component_setminimumsize(psy_ui_Component* self, psy_ui_Size size)
+void psy_ui_component_set_minimum_size(psy_ui_Component* self, psy_ui_Size size)
 {
 	psy_ui_componentstyle_setminimumsize(&self->style, size);
 }
@@ -1532,6 +1543,11 @@ static uintptr_t dev_platform_handle(psy_ui_ComponentImp* self) { return psy_IND
 static uintptr_t dev_flags(const psy_ui_ComponentImp* self) { return 0; }
 static void dev_clear(psy_ui_ComponentImp* self) {  }
 static void dev_initialized(psy_ui_ComponentImp* self) { }
+static psy_ui_ComponentState dev_component_state(const psy_ui_ComponentImp* self)
+{
+	return psy_ui_COMPONENTSTATE_NORMAL;
+}
+static void dev_set_component_state(psy_ui_ComponentImp* self, psy_ui_ComponentState state) { }
 
 static psy_ui_ComponentImpVTable imp_vtable;
 static int imp_vtable_initialized = 0;
@@ -1588,6 +1604,8 @@ static void imp_vtable_init(void)
 		imp_vtable.dev_flags = dev_flags;
 		imp_vtable.dev_clear = dev_clear;		
 		imp_vtable.dev_initialized = dev_initialized;
+		imp_vtable.dev_component_state = dev_component_state;
+		imp_vtable.dev_set_component_state = dev_set_component_state;
 		imp_vtable_initialized = TRUE;
 	}
 }
@@ -1862,6 +1880,20 @@ bool psy_ui_component_toggle_visibility(psy_ui_Component* self)
 		}		
 	}
 	return FALSE;
+}
+
+psy_ui_ComponentState psy_ui_component_state(const psy_ui_Component* self)
+{
+	assert(self->imp);
+
+	return self->imp->vtable->dev_component_state(self->imp);
+}
+
+void psy_ui_component_set_state(psy_ui_Component* self, psy_ui_ComponentState state)
+{
+	assert(self->imp);
+
+	self->imp->vtable->dev_set_component_state(self->imp, state);
 }
 
 psy_ui_RealRectangle psy_ui_component_scrolledposition(psy_ui_Component* self)
@@ -2226,7 +2258,7 @@ void psy_ui_component_draw_children(psy_ui_Component* self, psy_ui_Graphics* g)
 				intersection = clip;				
 				if (psy_ui_realrectangle_intersection(&intersection, &position)) {
 					/* translate graphics clip and origin */
-					psy_ui_realrectangle_settopleft(&intersection,
+					psy_ui_realrectangle_set_topleft(&intersection,
 						psy_ui_realpoint_make(
 							intersection.left - position.left,
 							intersection.top - position.top));

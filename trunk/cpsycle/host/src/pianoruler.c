@@ -36,7 +36,7 @@ static void pianoruler_vtable_init(PianoRuler* self)
 			(psy_ui_fp_component_ondraw)
 			pianoruler_ondraw;
 		pianoruler_vtable.onpreferredsize =
-			(psy_ui_fp_component_onpreferredsize)
+			(psy_ui_fp_component_on_preferred_size)
 			pianoruler_onpreferredsize;
 		pianoruler_vtable_initialized = TRUE;
 	}

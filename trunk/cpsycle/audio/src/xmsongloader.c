@@ -306,7 +306,7 @@ void xmsongloader_makesequence(XMSongLoader* self, struct XMFILEHEADER* xmheader
 {
 	uint16_t i;		
 	
-	psy_audio_sequence_appendtrack(&self->song->sequence,
+	psy_audio_sequence_append_track(&self->song->sequence,
 		psy_audio_sequencetrack_allocinit());
 	for (i = 0; i < xmheader->norder; ++i) {		
 		psy_audio_sequence_insert(&self->song->sequence,
@@ -1826,7 +1826,7 @@ void modsongloader_makesequence(MODSongLoader* self,
 {
 	uint8_t i;
 	
-	psy_audio_sequence_appendtrack(&self->song->sequence,
+	psy_audio_sequence_append_track(&self->song->sequence,
 		psy_audio_sequencetrack_allocinit());
 	for (i = 0; i < modheader->songlength; ++i) {		
 		psy_audio_sequence_insert(&self->song->sequence,

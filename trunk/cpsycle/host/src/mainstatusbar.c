@@ -138,10 +138,11 @@ void mainstatusbar_initkbdhelpbutton(MainStatusBar* self)
 }
 
 void mainstatusbar_initterminalbutton(MainStatusBar* self)
-{	
-	self->terminalstyleid = STYLE_TERM_BUTTON;	
+{		
 	psy_ui_button_init_text(&self->toggleterminal, &self->pane,
 		"Terminal");
+	psy_ui_component_set_style_type(&self->toggleterminal.component,
+		self->workspace->terminalstyleid);
 	psy_ui_component_set_align(psy_ui_button_base(&self->toggleterminal),
 		psy_ui_ALIGN_RIGHT);
 	psy_ui_button_loadresource(&self->toggleterminal, IDB_TERM, IDB_TERM,
@@ -174,9 +175,12 @@ void mainstatusbar_onstatus(MainStatusBar* self, Workspace* sender,
 
 void mainstatusbar_update_terminal_button(MainStatusBar* self)
 {
-	psy_ui_component_set_style_type(psy_ui_button_base(&self->toggleterminal),
-		self->terminalstyleid);
-	psy_ui_component_invalidate(psy_ui_button_base(&self->toggleterminal));
+	if (psy_ui_componentstyle_style_id(&self->component.style,
+			psy_ui_STYLESTATE_NONE) != self->workspace->terminalstyleid) {
+		psy_ui_component_set_style_type(psy_ui_button_base(&self->toggleterminal),
+			self->workspace->terminalstyleid);
+		psy_ui_component_invalidate(psy_ui_button_base(&self->toggleterminal));
+	}
 }
 
 void mainstatusbar_set_default_status_text(MainStatusBar* self, const char* text)
@@ -233,4 +237,5 @@ void mainstatusbar_idle(MainStatusBar* self)
 		psy_list_deallocate(&self->strbuffer, NULL);
 		psy_lock_leave(&self->outputlock);
 	}	
+	mainstatusbar_update_terminal_button(self);
 }

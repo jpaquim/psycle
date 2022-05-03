@@ -32,7 +32,7 @@ static void machineeditorview_vtable_init(MachineEditorView* self)
 	if (!machineeditorview_vtable_initialized) {
 		machineeditorview_vtable = *(self->component.vtable);
 		machineeditorview_vtable.onpreferredsize =
-			(psy_ui_fp_component_onpreferredsize)
+			(psy_ui_fp_component_on_preferred_size)
 			machineeditorview_onpreferredsize;
 		machineeditorview_vtable.on_timer =
 			(psy_ui_fp_component_on_timer)

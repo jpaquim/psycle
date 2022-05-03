@@ -388,14 +388,14 @@ int psy_audio_psy3saver_write_sngi(psy_audio_PSY3Saver* self)
 int psy_audio_psy3saver_write_seqd(psy_audio_PSY3Saver* self)
 {		
 	int status;
-	int32_t index;
-	psy_audio_SequenceTrackNode* t;
+	int32_t index;	
 
 	assert(self);
+	assert(self->song);
 
 	status = PSY_OK;
-	for (t = self->song->sequence.tracks, index = 0; t != NULL;
-			psy_list_next(&t), ++index) {
+	for (index = 0; index < psy_audio_sequence_width(&self->song->sequence);
+			++index) {
 		uint32_t sizepos;
 		uint32_t nummarkers;
 		uint32_t numsamples;
@@ -406,7 +406,7 @@ int psy_audio_psy3saver_write_seqd(psy_audio_PSY3Saver* self)
 				CURRENT_FILE_VERSION_SEQD, 0, &sizepos)) {
 			return status;
 		}
-		track = (psy_audio_SequenceTrack*)psy_list_entry(t);
+		track = psy_audio_sequence_track_at(&self->song->sequence, index);
 		/* sequence track number */
 		if (status = psyfile_write_int32(self->fp, (int32_t)index)) {
 			return status;
@@ -426,7 +426,7 @@ int psy_audio_psy3saver_write_seqd(psy_audio_PSY3Saver* self)
 		}		
 		nummarkers = 0;
 		numsamples = 0;
-		for (s = track->entries; s != NULL; psy_list_next(&s)) {
+		for (s = track->nodes; s != NULL; psy_list_next(&s)) {
 			psy_audio_SequenceEntry* seqentry;
 
 			seqentry = (psy_audio_SequenceEntry*)psy_list_entry(s);
@@ -449,7 +449,7 @@ int psy_audio_psy3saver_write_seqd(psy_audio_PSY3Saver* self)
 				}
 			}
 		}
-		for (s = track->entries; s != NULL; psy_list_next(&s)) {
+		for (s = track->nodes; s != NULL; psy_list_next(&s)) {
 			psy_audio_SequenceEntry* sequenceentry;
 
 			sequenceentry = (psy_audio_SequenceEntry*)psy_list_entry(s);
@@ -462,7 +462,7 @@ int psy_audio_psy3saver_write_seqd(psy_audio_PSY3Saver* self)
 		if (status = psyfile_write_uint32(self->fp, nummarkers)) {
 			return status;
 		}
-		for (s = track->entries; s != NULL; psy_list_next(&s)) {
+		for (s = track->nodes; s != NULL; psy_list_next(&s)) {
 			psy_audio_SequenceEntry* seqentry;
 
 			seqentry = (psy_audio_SequenceEntry*)psy_list_entry(s);
@@ -479,7 +479,7 @@ int psy_audio_psy3saver_write_seqd(psy_audio_PSY3Saver* self)
 		if (status = psyfile_write_uint32(self->fp, numsamples)) {
 			return status;
 		}
-		for (s = track->entries; s != NULL; psy_list_next(&s)) {
+		for (s = track->nodes; s != NULL; psy_list_next(&s)) {
 			psy_audio_SequenceEntry* seqentry;
 
 			seqentry = (psy_audio_SequenceEntry*)psy_list_entry(s);
