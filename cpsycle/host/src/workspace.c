@@ -158,6 +158,7 @@ void workspace_init(Workspace* self, psy_ui_Component* main)
 	self->undo_save_point = 0;
 	self->gearvisible = FALSE;
 	self->machines_undo_save_point = 0;	
+	self->terminalstyleid = STYLE_TERM_BUTTON;
 	self->restoreview = viewindex_make(VIEW_ID_MACHINEVIEW,
 		SECTION_ID_MACHINEVIEW_WIRES, psy_INDEX_INVALID, psy_INDEX_INVALID);
 	self->playrow = FALSE;
@@ -168,6 +169,7 @@ void workspace_init(Workspace* self, psy_ui_Component* main)
 	self->modified_without_undo = FALSE;	
 	self->song_has_file = FALSE;
 	self->paramviews = NULL;
+	self->terminal_output = NULL;
 	hostsequencertime_init(&self->host_sequencer_time);
 	psy_thread_init(&self->driverconfigloadthread);
 	psy_thread_init(&self->pluginscanthread);
@@ -237,9 +239,6 @@ void workspace_initsignals(Workspace* self)
 	psy_signal_init(&self->signal_beforesavesong);	
 	psy_signal_init(&self->signal_viewselected);	
 	psy_signal_init(&self->signal_parametertweak);
-	psy_signal_init(&self->signal_terminal_error);
-	psy_signal_init(&self->signal_terminal_out);
-	psy_signal_init(&self->signal_terminal_warning);
 	psy_signal_init(&self->signal_status_out);
 	psy_signal_init(&self->signal_followsongchanged);
 	psy_signal_init(&self->signal_togglegear);
@@ -316,9 +315,6 @@ void workspace_disposesignals(Workspace* self)
 	psy_signal_dispose(&self->signal_beforesavesong);	
 	psy_signal_dispose(&self->signal_viewselected);	
 	psy_signal_dispose(&self->signal_parametertweak);
-	psy_signal_dispose(&self->signal_terminal_error);
-	psy_signal_dispose(&self->signal_terminal_out);
-	psy_signal_dispose(&self->signal_terminal_warning);
 	psy_signal_dispose(&self->signal_status_out);
 	psy_signal_dispose(&self->signal_followsongchanged);
 	psy_signal_dispose(&self->signal_togglegear);
@@ -741,9 +737,8 @@ void workspace_load_song(Workspace* self, const char* filename, bool play)
 		psy_audio_machinecallback_setsong(&self->machinecallback, song);
 		if (psy_audio_songfile_load(&songfile, filename) != PSY_OK) {
 			psy_audio_song_deallocate(song);
-			psy_signal_emit(&self->signal_terminal_error, self, 1,
-				songfile.serr);
-			psy_signal_emit(&self->signal_terminal_error, self, 1, "\n");
+			workspace_output_error(self, songfile.serr);
+			workspace_output_error(self, "\n");			
 			psy_audio_songfile_dispose(&songfile);
 			play = FALSE;
 		} else {
@@ -757,7 +752,7 @@ void workspace_load_song(Workspace* self, const char* filename, bool play)
 			psy_audio_songfile_dispose(&songfile);
 		}
 		workspace_clear_undo(self);
-		psy_signal_emit(&self->signal_terminal_out, self, 1, "ready\n");
+		workspace_output(self, "ready\n");
 		if (play) {
 			psy_audio_player_stop(&self->player);
 			psy_audio_player_setposition(&self->player, 0.0);
@@ -866,8 +861,7 @@ void workspace_export_module(Workspace* self, const char* path)
 	songfile.song = self->song;
 	psy_signal_emit(&self->signal_beforesavesong, self, 1, &songfile);
 	if (psy_audio_songfile_exportmodule(&songfile, path)) {
-		psy_signal_emit(&self->signal_terminal_error, self, 1,
-			songfile.serr);
+		workspace_output_error(self, songfile.serr);			
 	} else {
 		self->undo_save_point = psy_list_size(self->undoredo.undo);
 		self->machines_undo_save_point = psy_list_size(self->undoredo.undo);
@@ -931,8 +925,7 @@ void workspace_export_midi_file(Workspace* self, const char* path)
 	psy_signal_emit(&self->signal_beforesavesong, self, 1, &songfile);
 
 	if (psy_audio_songfile_export_midi_file(&songfile, path)) {
-		psy_signal_emit(&self->signal_terminal_error, self, 1,
-			songfile.serr);
+		workspace_output_error(self, songfile.serr);
 	} else {
 		self->undo_save_point = psy_list_size(self->undoredo.undo);
 		self->machines_undo_save_point = psy_list_size(self->undoredo.undo);
@@ -1562,25 +1555,35 @@ void workspace_on_terminal_output(Workspace* self, psy_audio_SongFile* sender,
 	workspace_output(self, text);
 }
 
+void workspace_output(Workspace* self, const char* text)
+{
+	assert(self);
+
+	if (self->terminal_output) {		
+		self->terminal_output->vtable->output(self->terminal_output->context, text);
+	}
+}
+
 void workspace_output_warning(Workspace* self, const char* text)
 {
 	assert(self);
 
-	psy_signal_emit(&self->signal_terminal_warning, self, 1, text);
+	if (self->terminal_output) {
+		if (self->terminalstyleid == STYLE_TERM_BUTTON) {
+			self->terminalstyleid = STYLE_TERM_BUTTON_WARNING;
+		}
+		self->terminal_output->vtable->warn(self->terminal_output->context, text);
+	}
 }
 
 void workspace_output_error(Workspace* self, const char* text)
 {
 	assert(self);
 
-	psy_signal_emit(&self->signal_terminal_error, self, 1, text);
-}
-
-void workspace_output(Workspace* self, const char* text)
-{
-	assert(self);
-
-	psy_signal_emit(&self->signal_terminal_out, self, 1, text);
+	if (self->terminal_output) {
+		self->terminalstyleid = STYLE_TERM_BUTTON_ERROR;
+		self->terminal_output->vtable->error(self->terminal_output->context, text);
+	}
 }
 
 void workspace_output_status(Workspace* self, const char* text)
@@ -1630,10 +1633,7 @@ void workspace_on_machine_terminal_output(Workspace* self, const char* text)
 {
 	assert(self);
 
-	psy_audio_exclusivelock_enter();
-	psy_signal_emit(&self->signal_terminal_error, self, 1,
-		(void*)text);
-	psy_audio_exclusivelock_leave();	
+	workspace_output_error(self, text);	
 }
 
 static bool workspace_on_machine_edit_resize(Workspace* self,
@@ -1708,19 +1708,6 @@ void workspace_multi_select_gear(Workspace* self, psy_List* machinelist)
 	assert(self);
 
 	psy_signal_emit(&self->signal_gearselect, self, 1, machinelist);
-}
-
-void workspace_connect_terminal(Workspace* self,
-	void* context,
-	fp_workspace_output out,
-	fp_workspace_output warning,
-	fp_workspace_output error)
-{
-	assert(self);
-
-	psy_signal_connect(&self->signal_terminal_out, context, out);
-	psy_signal_connect(&self->signal_terminal_warning, context, warning);
-	psy_signal_connect(&self->signal_terminal_error, context, error);
 }
 
 void workspace_connect_status(Workspace* self,

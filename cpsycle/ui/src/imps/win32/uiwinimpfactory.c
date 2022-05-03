@@ -224,15 +224,24 @@ psy_ui_ComponentImp* allocinit_frameimp(psy_ui_win_ImpFactory* self,
 	psy_ui_win_ComponentImp* rv;
 	psy_ui_WinApp* winapp;
 
+/*
+#define WS_OVERLAPPEDWINDOW (WS_OVERLAPPED     | \
+							 WS_CAPTION        | \
+							 WS_SYSMENU        | \
+							 WS_THICKFRAME     | \
+							 WS_MINIMIZEBOX    | \
+							 WS_MAXIMIZEBOX)
+
+*/
 	winapp = (psy_ui_WinApp*)psy_ui_app()->imp;
 	rv = psy_ui_win_componentimp_allocinit(
 		component,
 		parent ? parent->imp : 0,
 		winapp->appclass,		
 		CW_USEDEFAULT, CW_USEDEFAULT,
-		CW_USEDEFAULT, CW_USEDEFAULT,
+		CW_USEDEFAULT, CW_USEDEFAULT,	
 		WS_OVERLAPPEDWINDOW,
-		0);
+		0);	
 	if (rv->hwnd == 0) {
 		free(rv);
 		rv = 0;

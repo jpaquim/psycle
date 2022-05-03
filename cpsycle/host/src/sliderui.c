@@ -40,7 +40,7 @@ static psy_ui_ComponentVtable* sliderui_vtable_init(SliderUi* self)
 	if (!sliderui_vtable_initialized) {
 		sliderui_vtable = *(self->component.vtable);				
 		sliderui_vtable.ondraw = (psy_ui_fp_component_ondraw)sliderui_ondraw;				
-		sliderui_vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
+		sliderui_vtable.onpreferredsize = (psy_ui_fp_component_on_preferred_size)
 			sliderui_onpreferredsize;
 		sliderui_vtable.on_mouse_down = (psy_ui_fp_component_on_mouse_event)sliderui_on_mouse_down;
 		sliderui_vtable.on_mouse_up = (psy_ui_fp_component_on_mouse_event)sliderui_on_mouse_up;

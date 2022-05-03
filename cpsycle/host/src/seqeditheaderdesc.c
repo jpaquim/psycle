@@ -64,7 +64,7 @@ void seqeditorheaderdescbar_init(SeqEditorHeaderDescBar* self,
 void seqeditorheaderdescbar_oninserttrack(SeqEditorHeaderDescBar* self,
 	psy_ui_Button* sender)
 {	
-	sequencecmds_inserttrack(self->state->cmds);	
+	sequencecmds_insert_track(self->state->cmds);	
 }
 
 void seqeditorheaderdescbar_ondeletetrack(SeqEditorHeaderDescBar* self,
@@ -74,7 +74,7 @@ void seqeditorheaderdescbar_ondeletetrack(SeqEditorHeaderDescBar* self,
 
 	editpos = seqeditstate_editposition(self->state);
 	if (editpos.track > 0) {
-		sequencecmds_deltrack(self->state->cmds, editpos.track);
+		sequencecmds_remove_track(self->state->cmds, editpos.track);
 	}
 }
 

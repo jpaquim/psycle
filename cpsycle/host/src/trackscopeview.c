@@ -43,7 +43,7 @@ static psy_ui_ComponentVtable* vtable_init(TrackScopes* self)
 			(psy_ui_fp_component_event)
 			trackscopes_onalign;
 		vtable.onpreferredsize =
-			(psy_ui_fp_component_onpreferredsize)
+			(psy_ui_fp_component_on_preferred_size)
 			trackscopes_onpreferredsize;
 		vtable.ondraw =
 			(psy_ui_fp_component_ondraw)

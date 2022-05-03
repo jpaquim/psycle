@@ -185,7 +185,7 @@ static void vtable_init(MachineWireView* self)
 			(psy_ui_fp_component_on_key_event)
 			machinewireview_on_key_down;
 		vtable.onpreferredsize =
-			(psy_ui_fp_component_onpreferredsize)
+			(psy_ui_fp_component_on_preferred_size)
 			machinewireview_onpreferredsize;
 		vtable.onalign =
 			(psy_ui_fp_component_event)

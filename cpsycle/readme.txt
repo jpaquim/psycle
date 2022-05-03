@@ -8,8 +8,10 @@ Building
 
 Visual Studio
 
-To build the windows version with Visual Studio 2019, check out the psycle
-svn trunk, open in the cpsycle directory  "cpsycle.msvc-2019.sln", choose
+You can use the current community version 2022 with the install option
+"Windows desktop development with C++ in Visual Studio".
+To build the windows version, check out the psycle svn trunk, open in the
+cpsycle directory  "cpsycle.msvc-2019.sln", choose
 Build target Win32 or X64) and ensure that the startproject is host. Compile
 the solution. If something went wrong press CTRL + SHIFT + B to try again.
 

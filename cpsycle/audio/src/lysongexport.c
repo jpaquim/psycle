@@ -96,18 +96,21 @@ int psy_audio_lysongexport_write_songinfo(psy_audio_LySongExport* self)
 
 int psy_audio_lysongexport_write_seqd(psy_audio_LySongExport* self)
 {
-	int32_t index;
-	psy_audio_SequenceTrackNode* t;
+	int32_t index;	
 
 	assert(self);
+	assert(self->song);
 	
-	for (t = self->song->sequence.tracks, index = 0; t != NULL;
-			psy_list_next(&t), ++index) {
+	for (index = 0; index < psy_audio_sequence_width(&self->song->sequence);
+			++index) {
 		psy_audio_SequenceTrack* track;	
 		psy_List* s;
 
-		track = (psy_audio_SequenceTrack*)psy_list_entry(t);
-		for (s = track->entries; s != NULL; psy_list_next(&s)) {
+		track = psy_audio_sequence_track_at(&self->song->sequence, index);
+		if (!track) {
+			continue;
+		}
+		for (s = track->nodes; s != NULL; psy_list_next(&s)) {
 			psy_audio_SequenceEntry* seqentry;
 
 			seqentry = (psy_audio_SequenceEntry*)psy_list_entry(s);

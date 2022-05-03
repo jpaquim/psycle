@@ -17,11 +17,10 @@ extern "C" {
 #endif
 
 /*
-** PatternView
-**
-**  Displays the tracker and/or pianoroll
-**
 ** PatternViewTabBar
+**
+** Sets the display type (tracker/roll), alignment and toggles the properties.
+**
 */
 
 typedef struct PatternViewTabBar {
@@ -31,13 +30,13 @@ typedef struct PatternViewTabBar {
 	psy_Signal signal_toggle_properties;
 	/* iinternal */
 	psy_ui_TabBar tabbar;
-	psy_ui_Button contextbutton;
+	psy_ui_Button context_button;
 	/* references */
-	Workspace* workspace;
+	PatternViewConfig* patconfig;
 } PatternViewTabBar;
 
 void patternviewtabbar_init(PatternViewTabBar*, psy_ui_Component* parent,
-	Workspace*);
+	PatternViewConfig*);
 
 INLINE psy_ui_Component* patternviewtabbar_base(PatternViewTabBar* self)
 {

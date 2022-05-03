@@ -13,6 +13,7 @@
 /* prototypes */
 static void psy_ui_terminal_on_destroy(psy_ui_Terminal*);
 static void psy_ui_terminal_on_timer(psy_ui_Terminal*, uintptr_t timerid);
+static void psy_ui_terminal_on_output(psy_ui_Terminal*, const char* str);
 
 /* vtable */
 static psy_ui_ComponentVtable vtable;
@@ -33,11 +34,36 @@ static void vtable_init(psy_ui_Terminal* self)
 	self->component.vtable = &vtable;
 }
 
+/* vtable */
+static psy_LoggerVTable terminal_logger_vtable;
+static bool terminal_logger_initialized = FALSE;
+
+static void terminal_logger_vtable_init(psy_ui_Terminal* self)
+{
+	if (!terminal_logger_initialized) {
+		terminal_logger_vtable = *(self->logger.vtable);
+		terminal_logger_vtable.output =
+			(fp_string_output)
+			psy_ui_terminal_on_output;
+		terminal_logger_vtable.warn =
+			(fp_string_output)
+			psy_ui_terminal_on_output;
+		terminal_logger_vtable.error =
+			(fp_string_output)
+			psy_ui_terminal_on_output;
+		terminal_logger_initialized = TRUE;
+	}
+	self->logger.vtable = &terminal_logger_vtable;
+	self->logger.context = (void*)self;
+}
+
 /* implementation */
 void psy_ui_terminal_init(psy_ui_Terminal* self, psy_ui_Component* parent)
 {			
-	psy_ui_component_init(&self->component, parent, NULL);
+	psy_ui_component_init(&self->component, parent, NULL);	
 	vtable_init(self);
+	psy_logger_init(&self->logger);
+	terminal_logger_vtable_init(self);
 	psy_ui_label_init(&self->output, &self->component);	
 	psy_ui_label_enable_wrap(&self->output);
 	psy_ui_label_set_charnumber(&self->output, 120.0);
@@ -97,4 +123,9 @@ void psy_ui_terminal_on_timer(psy_ui_Terminal* self, uintptr_t timerid)
 		psy_ui_component_align(&self->scroller.pane);
 		psy_ui_component_invalidate(&self->output.component);
 	}
+}
+
+void psy_ui_terminal_on_output(psy_ui_Terminal* self, const char* str)
+{
+	psy_ui_terminal_output(self, str);
 }

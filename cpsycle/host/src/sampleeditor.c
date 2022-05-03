@@ -404,7 +404,7 @@ static void sampleeditorheader_vtable_init(SampleEditorHeader* self)
 			(psy_ui_fp_component_ondraw)
 			sampleeditorheader_ondraw;
 		sampleeditorheader_vtable.onpreferredsize =
-			(psy_ui_fp_component_onpreferredsize)
+			(psy_ui_fp_component_on_preferred_size)
 			sampleeditorheader_onpreferredsize;
 		sampleeditorheader_vtable_initialized = TRUE;
 	}

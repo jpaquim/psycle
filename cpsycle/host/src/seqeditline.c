@@ -26,7 +26,7 @@ static void seqeditorline_vtable_init(SeqEditorLine* self)
 	if (!seqeditorline_vtable_initialized) {
 		seqeditorline_vtable = *(self->component.vtable);
 		seqeditorline_vtable.onpreferredsize =
-			(psy_ui_fp_component_onpreferredsize)
+			(psy_ui_fp_component_on_preferred_size)
 			seqeditorline_onpreferredsize;
 	}
 	self->component.vtable = &seqeditorline_vtable;

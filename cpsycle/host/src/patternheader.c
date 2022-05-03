@@ -36,7 +36,7 @@ static void patterntrackbox_vtable_init(PatternTrackBox* self)
 			(psy_ui_fp_component_on_mouse_event)
 			patterntrackbox_on_mouse_down;		
 		patterntrackbox_vtable.onpreferredsize =
-			(psy_ui_fp_component_onpreferredsize)
+			(psy_ui_fp_component_on_preferred_size)
 			patterntrackbox_on_preferred_size;
 		patterntrackbox_vtable_initialized = TRUE;
 	}
@@ -271,7 +271,7 @@ static void patterntrack_vtable_init(PatternTrack* self)
 	if (!patterntrack_vtable_initialized) {
 		patterntrack_vtable = *(self->component.vtable);		
 		patterntrack_vtable.onpreferredsize =
-			(psy_ui_fp_component_onpreferredsize)
+			(psy_ui_fp_component_on_preferred_size)
 			patterntrack_onpreferredsize;
 		patterntrack_vtable_initialized = TRUE;
 	}

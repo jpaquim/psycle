@@ -396,7 +396,7 @@ void view_dev_move(psy_ui_ViewComponentImp* self, psy_ui_Point origin)
 	const psy_ui_TextMetric* tm;	
 		
 	tm = view_dev_textmetric(self);
-	psy_ui_realrectangle_settopleft(&self->position,
+	psy_ui_realrectangle_set_topleft(&self->position,
 		psy_ui_realpoint_make(
 			psy_ui_value_px(&origin.x, tm, NULL),
 			psy_ui_value_px(&origin.y, tm, NULL)));	

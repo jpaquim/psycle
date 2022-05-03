@@ -414,7 +414,7 @@ void psy_audio_sequenceclearcommand_execute(psy_audio_SequenceClearCommand* self
 	psy_audio_sequenceselection_copy(&self->restoreselection, self->selection);
 	psy_audio_sequence_copy(&self->restoresequence, self->sequence);
 	psy_audio_sequence_clear(self->sequence);
-	psy_audio_sequence_appendtrack(self->sequence,
+	psy_audio_sequence_append_track(self->sequence,
 		psy_audio_sequencetrack_allocinit());
 	psy_audio_sequence_insert(self->sequence,
 		psy_audio_orderindex_make(0, 0), 0);

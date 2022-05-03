@@ -215,7 +215,8 @@ void seqeditor_build(SeqEditor* self)
 	seqeditortracks_build(&self->tracks);
 	seqedittrackdesc_build(&self->trackdesc);	
 	psy_ui_component_align(&self->scroller.pane);	
-	psy_ui_component_align(&self->trackdescpane);		
+	psy_ui_component_align(&self->trackdescpane);
+	psy_ui_component_invalidate(&self->component);
 }
 
 void seqeditor_ontracksscroll(SeqEditor* self, psy_ui_Component* sender)
@@ -260,9 +261,9 @@ void seqeditor_onmousemove(SeqEditor* self, psy_ui_MouseEvent* ev)
 void seqeditor_on_mouse_up(SeqEditor* self, psy_ui_MouseEvent* ev)
 {	
 	if (self->state.cmd == SEQEDTCMD_NEWTRACK) {
-		sequencecmds_appendtrack(self->state.cmds);
+		sequencecmds_append_track(self->state.cmds);
 	} else if (self->state.cmd == SEQEDTCMD_DELTRACK) {
-		sequencecmds_deltrack(self->state.cmds, self->state.dragseqpos.track);
+		sequencecmds_remove_track(self->state.cmds, self->state.dragseqpos.track);
 	}	
 	self->state.cmd = SEQEDTCMD_NONE;
 }

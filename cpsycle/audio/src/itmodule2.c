@@ -848,7 +848,7 @@ int itmodule2_readsequence(ITModule2* self)
 	uint16_t i;	
 		
 	status = PSY_OK;
-	psy_audio_sequence_appendtrack(&self->songfile->song->sequence,
+	psy_audio_sequence_append_track(&self->songfile->song->sequence,
 		psy_audio_sequencetrack_allocinit());
 	for (i = 0; i < self->fileheader.ordNum; ++i) {
 		uint8_t patidx;

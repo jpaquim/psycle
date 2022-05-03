@@ -367,7 +367,7 @@ int psy2loader_read_sequence(PSY2Loader* self)
 {
 	int32_t i;
 	
-	psy_audio_sequence_appendtrack(&self->song->sequence,
+	psy_audio_sequence_append_track(&self->song->sequence,
 		psy_audio_sequencetrack_allocinit());
 	for (i = 0; i < self->playlength; ++i) {
 		psy_audio_sequence_insert(&self->song->sequence,

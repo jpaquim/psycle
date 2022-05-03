@@ -486,7 +486,7 @@ int psy_audio_psy3loader_read_seqd(psy_audio_PSY3Loader* self)
 	}	
 	/* create new tracks (0..index), if not already existing */
 	for (i = (uint32_t)psy_audio_sequence_width(&self->song->sequence); i <= (uint32_t)index; ++i) {
-		psy_audio_sequence_appendtrack(&self->song->sequence,
+		psy_audio_sequence_append_track(&self->song->sequence,
 			psy_audio_sequencetrack_allocinit());
 	}
 	track = psy_audio_sequence_track_at(&self->song->sequence, index);		
@@ -537,7 +537,7 @@ int psy_audio_psy3loader_read_seqd(psy_audio_PSY3Loader* self)
 		*/
 		psy_audio_SequenceEntryNode* p;
 				
-		for (p = track->entries, i = 0; i < (uint32_t)playlength && p != NULL;
+		for (p = track->nodes, i = 0; i < (uint32_t)playlength && p != NULL;
 				++i, psy_list_next(&p)) {
 			float repositionoffset;
 			psy_audio_SequenceEntry* seqentry;
@@ -563,7 +563,7 @@ int psy_audio_psy3loader_read_seqd(psy_audio_PSY3Loader* self)
 		if (status = psyfile_read(self->fp, &nummarkers, sizeof(uint32_t))) {
 			return status;
 		}
-		for (s = track->entries, c = 0; s != NULL && c < nummarkers; psy_list_next(&s)) {
+		for (s = track->nodes, c = 0; s != NULL && c < nummarkers; psy_list_next(&s)) {
 			psy_audio_SequenceEntry* seqentry;
 
 			seqentry = (psy_audio_SequenceEntry*)psy_list_entry(s);
@@ -587,7 +587,7 @@ int psy_audio_psy3loader_read_seqd(psy_audio_PSY3Loader* self)
 		if (status = psyfile_read(self->fp, &numsamples, sizeof(uint32_t))) {
 			return status;
 		}
-		for (s = track->entries, c = 0; s != NULL && c < numsamples; psy_list_next(&s)) {
+		for (s = track->nodes, c = 0; s != NULL && c < numsamples; psy_list_next(&s)) {
 			psy_audio_SequenceEntry* seqentry;
 
 			seqentry = (psy_audio_SequenceEntry*)psy_list_entry(s);

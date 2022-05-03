@@ -829,7 +829,7 @@ static psy_ui_ComponentVtable* machinestackdesc_vtable_init(MachineStackDesc* se
 			(psy_ui_fp_component_event)
 			machinestackdesc_onalign;
 		machinestackdesc_vtable.onpreferredsize =
-			(psy_ui_fp_component_onpreferredsize)
+			(psy_ui_fp_component_on_preferred_size)
 			machinestackdesc_onpreferredsize;
 		machinestackdesc_vtable_initialized = TRUE;
 	}
@@ -978,7 +978,7 @@ static void machinestackinputs_vtable_init(MachineStackInputs* self)
 	if (!machinestackinputs_vtable_initialized) {
 		machinestackinputs_vtable = *(self->component.vtable);		
 		machinestackinputs_vtable.onpreferredsize =
-			(psy_ui_fp_component_onpreferredsize)
+			(psy_ui_fp_component_on_preferred_size)
 			machinestackinputs_onpreferredsize;
 		machinestackinputs_vtable.onmouseenter =
 			(psy_ui_fp_component_event)
@@ -1055,7 +1055,7 @@ void machinestackinputs_build(MachineStackInputs* self)
 				}
 			}
 			if (component) {
-				psy_ui_component_setminimumsize(component,
+				psy_ui_component_set_minimum_size(component,
 					self->state->columnsize);
 			}
 		}		
@@ -1110,7 +1110,7 @@ void machinestackoutputs_init(MachineStackOutputs* self,
 	psy_ui_component_set_vtable(&self->component,
 		machinestackoutputs_vtable_init(self));	
 	psy_ui_component_set_align_expand(&self->component, psy_ui_HEXPAND);
-	psy_ui_component_setminimumsize(&self->component,
+	psy_ui_component_set_minimum_size(&self->component,
 		psy_ui_size_make_em(10.0, 2.0));	
 	self->state = state;
 }
@@ -1134,7 +1134,7 @@ void machinestackoutputs_build(MachineStackOutputs* self)
 				? &column->outputroute.machineparam
 				: NULL);
 			if (knobui) {
-				psy_ui_component_setminimumsize(&knobui->component,
+				psy_ui_component_set_minimum_size(&knobui->component,
 					psy_ui_size_make(self->state->columnsize.width,
 						psy_ui_value_make_eh(1.0)));
 				psy_ui_component_set_align(&knobui->component,
@@ -1398,7 +1398,7 @@ void machinestackpane_build(MachineStackPane* self)
 					}
 				} 
 				if (!insert) {
-					psy_ui_component_setminimumsize(&trackpane->component,
+					psy_ui_component_set_minimum_size(&trackpane->component,
 						self->state->columnsize);
 					psy_ui_component_set_align(&trackpane->component,
 						psy_ui_ALIGN_LEFT);
@@ -1420,9 +1420,9 @@ psy_ui_Component* machinestackpane_insert(MachineStackPane* self, uintptr_t slot
 		trackpane, self->state->paramviews, FALSE, self->workspace);
 	if (rv) {
 		if (self->state->drawsmalleffects) {
-			psy_ui_component_setminimumsize(rv, self->state->effectsizesmall);
+			psy_ui_component_set_minimum_size(rv, self->state->effectsizesmall);
 		} else {
-			psy_ui_component_setminimumsize(rv, self->state->effectsize);
+			psy_ui_component_set_minimum_size(rv, self->state->effectsize);
 		}
 		rv->deallocate = TRUE;
 		return rv;
@@ -1507,7 +1507,7 @@ void machinestackvolumes_build(MachineStackVolumes* self)
 			psy_ui_Margin margin;
 
 			psy_ui_component_set_align(component, psy_ui_ALIGN_LEFT);
-			psy_ui_component_setminimumsize(component, psy_ui_size_make(
+			psy_ui_component_set_minimum_size(component, psy_ui_size_make(
 				psy_ui_value_make_px(138.0 + 19),
 				psy_ui_value_make_px(182.0)));
 			psy_ui_component_setmaximumsize(component, psy_ui_size_make(
@@ -1588,7 +1588,7 @@ void machinestackview_init(MachineStackView* self, psy_ui_Component* parent,
 	psy_ui_component_set_align(&self->pane.component, psy_ui_ALIGN_CLIENT);	
 	machinestackvolumes_init(&self->volumes, &self->columns, &self->state);
 	psy_ui_component_set_align(&self->volumes.component, psy_ui_ALIGN_BOTTOM);
-	psy_ui_component_setminimumsize(&self->volumes.component,
+	psy_ui_component_set_minimum_size(&self->volumes.component,
 		psy_ui_size_make(self->state.columnsize.width, psy_ui_value_make_px(182.0)));
 	machinestackoutputs_init(&self->outputs, &self->columns, &self->state);
 	psy_ui_component_set_align(&self->outputs.component, psy_ui_ALIGN_BOTTOM);

@@ -654,7 +654,7 @@ void trackerstate_line_clip(TrackerState* self, const psy_ui_RealRectangle* clip
 	offset = trackerstate_px_to_beat(self, psy_max(0.0, clip->top), line_height);
 	if (patternviewstate_single_mode(self->pv)) {
 		offset += self->pv->cursor.seqoffset;
-		rv->topleft.seqoffset = self->pv->cursor.seqoffset;
+		rv->topleft.seqoffset = self->pv->cursor.seqoffset;		
 	} else {
 		rv->topleft.seqoffset = 0;
 	}
@@ -662,19 +662,29 @@ void trackerstate_line_clip(TrackerState* self, const psy_ui_RealRectangle* clip
 	rv->topleft.column = 0;
 	rv->topleft.digit = 0;		
 	rv->topleft.lpb = patternviewstate_lpb(self->pv);
+	psy_audio_sequencecursor_updatecache(&rv->topleft);
 	rv->bottomright.column = 0;
 	rv->bottomright.digit = 0;
 	rv->bottomright.seqoffset = 0;	
-	offset = trackerstate_pxtobeatnotquantized(self,
-		psy_max(0.0, clip->bottom), line_height);
+	offset = trackerstate_px_to_beat(self,
+		psy_max(0.0, clip->bottom), line_height);	 
 	if (patternviewstate_single_mode(self->pv)) {
 		offset += self->pv->cursor.seqoffset;
-		rv->bottomright.seqoffset = self->pv->cursor.seqoffset;
+		rv->bottomright.absoffset = offset;		
+		rv->bottomright.seqoffset = self->pv->cursor.seqoffset;		
+		rv->bottomright.absoffset =
+			psy_min(rv->bottomright.absoffset,
+				rv->bottomright.seqoffset + 
+				patternviewstate_length(self->pv));
 	} else {
+		rv->bottomright.absoffset = offset;
 		rv->bottomright.seqoffset = 0;
-	}
-	rv->bottomright.absoffset = offset;
+		rv->bottomright.absoffset =
+			psy_min(rv->bottomright.absoffset,				
+				patternviewstate_length(self->pv));
+	}	
 	rv->bottomright.lpb = rv->topleft.lpb;
+	psy_audio_sequencecursor_updatecache(&rv->bottomright);
 }
 
 psy_audio_SequenceCursor trackerstate_make_cursor(TrackerState* self,

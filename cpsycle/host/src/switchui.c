@@ -43,7 +43,7 @@ static void switchui_vtable_init(SwitchUi* self)
 			(psy_ui_fp_component_ondraw)
 			switchui_ondraw;
 		switchui_vtable.onpreferredsize =
-			(psy_ui_fp_component_onpreferredsize)
+			(psy_ui_fp_component_on_preferred_size)
 			switchui_onpreferredsize;
 		switchui_vtable.on_mouse_down =
 			(psy_ui_fp_component_on_mouse_event)

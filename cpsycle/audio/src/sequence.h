@@ -28,6 +28,8 @@ extern "C" {
 
 typedef psy_List psy_audio_SequenceEntryNode;
 
+#define psy_audio_GLOBALTRACK 65535
+
 /* psy_audio_Order */
 typedef struct psy_audio_Order {
 	psy_audio_OrderIndex index;
@@ -40,7 +42,7 @@ void psy_audio_order_dispose(psy_audio_Order*);
 void psy_audio_order_setentry(psy_audio_Order*, const psy_audio_SequenceEntry*);
 
 typedef struct psy_audio_SequencePaste {
-	psy_List* entries;
+	psy_List* nodes;
 } psy_audio_SequencePaste;
 
 void psy_audio_sequencepaste_init(psy_audio_SequencePaste*);
@@ -55,8 +57,9 @@ void psy_audio_sequencepaste_copy(psy_audio_SequencePaste*,
 **
 ** A list of SequenceEntries sorted according to the playorder
 */
-typedef struct {
-	psy_audio_SequenceEntryNode* entries;	
+typedef struct psy_audio_SequenceTrack {
+	psy_audio_SequenceEntryNode* nodes;
+	psy_Table entries;
 	char* name;
 	double height;
 } psy_audio_SequenceTrack;
@@ -81,6 +84,15 @@ INLINE const char* psy_audio_sequencetrack_name(const psy_audio_SequenceTrack* s
 	return self->name;
 }
 
+void psy_audio_sequencetrack_insert(psy_audio_SequenceTrack*,
+	uintptr_t order, psy_audio_Patterns*, uintptr_t patidx);
+uintptr_t psy_audio_sequencetrack_remove(psy_audio_SequenceTrack*,
+	uintptr_t order);
+psy_audio_SequenceEntry* psy_audio_sequencetrack_entry(psy_audio_SequenceTrack*,
+	uintptr_t row);
+psy_audio_SequenceEntryNode* psy_audio_sequencetrack_node_at_offset(
+	psy_audio_SequenceTrack*, psy_dsp_big_beat_t offset);
+uintptr_t psy_audio_sequencetrack_size(const psy_audio_SequenceTrack*);
 /*
 ** psy_audio_SequenceTrackIterator
 **
@@ -96,9 +108,14 @@ typedef struct psy_audio_SequenceTrackIterator {
 void psy_audio_sequencetrackiterator_init(psy_audio_SequenceTrackIterator*);
 void psy_audio_sequencetrackiterator_dispose(psy_audio_SequenceTrackIterator*);
 
+psy_audio_SequenceTrackIterator* psy_audio_sequencetrackiterator_alloc(void);
+psy_audio_SequenceTrackIterator* psy_audio_sequencetrackiterator_allocinit(void);
+
 void psy_audio_sequencetrackiterator_inc(psy_audio_SequenceTrackIterator*);
 void psy_audio_sequencetrackiterator_inc_entry(psy_audio_SequenceTrackIterator*);
 void psy_audio_sequencetrackiterator_dec_entry(psy_audio_SequenceTrackIterator*);
+bool psy_audio_sequencetrackiterator_has_next_entry(
+	const psy_audio_SequenceTrackIterator*);
 
 void psy_audio_sequencetrackiterator_set_pattern(psy_audio_SequenceTrackIterator*,
 	psy_audio_Pattern*);
@@ -148,7 +165,7 @@ INLINE psy_dsp_big_beat_t psy_audio_sequencetrackiterator_seqoffset(
 
 	seqentry = psy_audio_sequencetrackiterator_entry(self);
 	if (seqentry) {
-		return seqentry->offset;
+		return psy_audio_sequenceentry_offset(seqentry);
 	}
 	return 0.0;
 }
@@ -162,6 +179,18 @@ INLINE psy_dsp_big_beat_t psy_audio_sequencetrackiterator_offset(
 			: 0.0);
 }
 
+INLINE psy_dsp_big_beat_t psy_audio_sequencetrackiterator_entry_length(
+	psy_audio_SequenceTrackIterator* self)
+{	
+	psy_audio_SequenceEntry* seqentry;
+
+	seqentry = psy_audio_sequencetrackiterator_entry(self);
+	if (seqentry) {
+		return psy_audio_sequenceentry_length(seqentry);
+	}
+	return 0.0;
+}
+
 typedef psy_List psy_audio_SequenceTrackNode;
 
 /*
@@ -170,7 +199,7 @@ typedef psy_List psy_audio_SequenceTrackNode;
 **  defines the overall position in a song
 */
 typedef struct {
-	psy_audio_SequenceTrackNode* tracknode;
+	uintptr_t track_index;
 	psy_audio_SequenceTrackIterator trackposition;	
 } psy_audio_SequencePosition;
 
@@ -198,8 +227,8 @@ typedef struct psy_audio_Sequence {
 	psy_Signal signal_mutechanged;
 	psy_Signal signal_solochanged;
 	psy_Signal signal_cursorchanged;
-	/* internal */
-	psy_audio_SequenceTrackNode* tracks;
+	/* internal */	
+	psy_Table tracks;
 	psy_audio_SequenceTrack globaltrack;
 	psy_audio_Pattern globalpattern;
 	psy_audio_TrackState trackstate;
@@ -253,17 +282,18 @@ bool psy_audio_sequence_patternused(psy_audio_Sequence*, uintptr_t patidx);
 psy_audio_OrderIndex psy_audio_sequence_patternfirstused(psy_audio_Sequence*,
 	uintptr_t patidx);
 /* track methods */
-void psy_audio_sequence_appendtrack(psy_audio_Sequence*,
+void psy_audio_sequence_append_track(psy_audio_Sequence*,
 	psy_audio_SequenceTrack*);
-uintptr_t psy_audio_sequence_inserttrack(psy_audio_Sequence*,
+uintptr_t psy_audio_sequence_set_track(psy_audio_Sequence*,
 	psy_audio_SequenceTrack*, uintptr_t index);
-psy_audio_SequenceTrackNode* psy_audio_sequence_removetrack(
-	psy_audio_Sequence*, psy_audio_SequenceTrackNode*);
+void psy_audio_sequence_remove_track(
+	psy_audio_Sequence*, uintptr_t track_idx);
 uintptr_t psy_audio_sequence_width(const psy_audio_Sequence*);
 psy_audio_SequenceTrack* psy_audio_sequence_track_at(psy_audio_Sequence*,
 	uintptr_t trackidx);
 const psy_audio_SequenceTrack* psy_audio_sequence_track_at_const(const
 	psy_audio_Sequence*, uintptr_t trackidx);
+uintptr_t psy_audio_sequence_num_tracks(const psy_audio_Sequence*);
 uintptr_t psy_audio_sequence_track_size(const psy_audio_Sequence*,
 	uintptr_t trackindex);
 uintptr_t psy_audio_sequence_maxtracksize(psy_audio_Sequence*);
@@ -278,12 +308,12 @@ void psy_audio_sequence_setplayselection(psy_audio_Sequence*,
 	struct psy_audio_SequenceSelection*);
 void psy_audio_sequence_clearplayselection(psy_audio_Sequence*);
 /* methods for the sequencer */
-void psy_audio_sequence_begin(psy_audio_Sequence*, psy_audio_SequenceTrack*,
+void psy_audio_sequence_begin(psy_audio_Sequence*, uintptr_t track_idx,
 	psy_dsp_big_beat_t position, psy_audio_SequenceTrackIterator* rv);
 void psy_audio_sequence_at(psy_audio_Sequence*, uintptr_t trackindex,
 	uintptr_t position, psy_audio_SequencePosition* rv);
 void psy_audio_sequence_make_position(psy_audio_Sequence*,
-	psy_audio_SequenceTrackNode*, psy_List* entries,
+	uintptr_t track_idx, psy_List* entries,
 	psy_audio_SequencePosition* rv);
 psy_audio_SequenceEntryNode* psy_audio_sequence_node(psy_audio_Sequence*,
 	psy_audio_OrderIndex, psy_audio_SequenceTrack** rv);

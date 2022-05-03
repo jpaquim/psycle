@@ -57,7 +57,7 @@ static void trackercolumn_vtable_init(TrackerColumn* self)
 			(psy_ui_fp_component_event)
 			trackercolumn_on_align;
 		trackercolumn_vtable.onpreferredsize =
-			(psy_ui_fp_component_onpreferredsize)
+			(psy_ui_fp_component_on_preferred_size)
 			trackercolumn_on_preferred_size;
 		trackercolumn_vtable.on_mouse_down =
 			(psy_ui_fp_component_on_mouse_event)

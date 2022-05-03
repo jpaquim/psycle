@@ -211,7 +211,7 @@ void sequencecmds_paste(SequenceCmds* self)
 		psy_List* p;		
 
 		sequencecmds_update(self);
-		for (p = self->workspace->sequencepaste.entries; p != NULL; psy_list_next(&p)) {
+		for (p = self->workspace->sequencepaste.nodes; p != NULL; psy_list_next(&p)) {
 			psy_audio_Order* order;
 			psy_audio_OrderIndex insertposition;
 			psy_audio_SequencePatternEntry* newentry;
@@ -264,31 +264,35 @@ void sequencecmds_clear(SequenceCmds* self)
 	}
 }
 
-void sequencecmds_appendtrack(SequenceCmds* self)
+void sequencecmds_append_track(SequenceCmds* self)
 {
 	if (workspace_song(self->workspace)) {
+		psy_audio_SequenceCursor cursor;
+
 		sequencecmds_update(self);
 		psy_audio_exclusivelock_enter();
-		psy_audio_sequence_appendtrack(self->sequence,
+		psy_audio_sequence_append_track(self->sequence,
 			psy_audio_sequencetrack_allocinit());
 		psy_audio_exclusivelock_leave();
-		psy_audio_sequenceselection_select_first(
-			&self->workspace->song->sequence.sequenceselection,
-			psy_audio_orderindex_make(
-				psy_audio_sequence_width(&self->workspace->song->sequence) - 1,
-				0));
+		cursor = psy_audio_sequencecursor_make(0, 0.0);
+		cursor.orderindex = psy_audio_orderindex_make(
+			psy_audio_sequence_width(&self->workspace->song->sequence) - 1,
+			psy_INDEX_INVALID);
+		cursor.patternid = psy_INDEX_INVALID;
+		psy_audio_sequence_set_cursor(self->sequence, cursor);
 	}
 }
 
-void sequencecmds_inserttrack(SequenceCmds* self)
+void sequencecmds_insert_track(SequenceCmds* self)
 {
 	if (workspace_song(self->workspace)) {
 		psy_audio_OrderIndex editpos;		
 
 		sequencecmds_update(self);		
-		editpos = psy_audio_sequenceselection_first(&self->workspace->song->sequence.sequenceselection);
+		editpos = psy_audio_sequenceselection_first(
+			&self->workspace->song->sequence.sequenceselection);
 		psy_audio_exclusivelock_enter();		
-		editpos.track = psy_audio_sequence_inserttrack(self->sequence,
+		editpos.track = psy_audio_sequence_set_track(self->sequence,
 			psy_audio_sequencetrack_allocinit(), editpos.track);			
 		psy_audio_exclusivelock_leave();	
 		psy_audio_sequenceselection_select_first(
@@ -296,23 +300,33 @@ void sequencecmds_inserttrack(SequenceCmds* self)
 	}
 }
 
-void sequencecmds_deltrack(SequenceCmds* self, uintptr_t trackindex)
+void sequencecmds_remove_track(SequenceCmds* self, uintptr_t trackindex)
 {
 	if (workspace_song(self->workspace)) {
-		psy_audio_SequencePosition position;
-
 		sequencecmds_update(self);
-		psy_audio_sequenceposition_init(&position);
-		psy_audio_sequence_at(self->sequence, trackindex, 0, &position);
-		if (position.tracknode) {
+		if (trackindex != psy_INDEX_INVALID) {
+			psy_audio_SequenceCursor cursor;
+
 			psy_audio_exclusivelock_enter();
-			psy_audio_sequence_removetrack(self->sequence, position.tracknode);
+			psy_audio_sequence_remove_track(self->sequence, trackindex);
 			psy_audio_exclusivelock_leave();
-			psy_audio_sequenceselection_select_first(
-				&self->workspace->song->sequence.sequenceselection,
-				psy_audio_orderindex_make(trackindex, 0));			
+			cursor = self->sequence->cursor;
+			if (trackindex >= psy_audio_sequence_width(self->sequence)) {
+				if (psy_audio_sequence_width(self->sequence) > 0) {
+					cursor.orderindex.track = psy_audio_sequence_width(self->sequence) - 1;
+				} else {
+					cursor.orderindex.track = psy_INDEX_INVALID;
+				}
+				if (cursor.orderindex.order >= psy_audio_sequence_track_size(self->sequence, trackindex)) {
+					if (psy_audio_sequence_track_size(self->sequence, trackindex) > 0) {
+						cursor.orderindex.order = psy_audio_sequence_track_size(self->sequence, trackindex) - 1;
+					} else {
+						cursor.orderindex.order = psy_INDEX_INVALID;
+					}
+				}				
+			}	
+			psy_audio_sequence_set_cursor(self->sequence, cursor);
 		}
-		psy_audio_sequenceposition_dispose(&position);
 	}
 }
 

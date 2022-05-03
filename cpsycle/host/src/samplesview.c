@@ -75,7 +75,7 @@ void samplessongimportview_init(SamplesSongImportView* self, psy_ui_Component* p
 	/* bar */
 	psy_ui_component_init(&self->bar, &self->component, NULL);
 	psy_ui_component_set_align(&self->bar, psy_ui_ALIGN_LEFT);		
-	psy_ui_component_setminimumsize(&self->bar, psy_ui_size_make_em(12, 1));
+	psy_ui_component_set_minimum_size(&self->bar, psy_ui_size_make_em(12, 1));
 	psy_ui_button_init(&self->add, &self->bar);
 	psy_ui_button_set_text(&self->add, "<- Copy");	
 	psy_ui_component_set_align(&self->add.component, psy_ui_ALIGN_CENTER);

@@ -131,26 +131,25 @@ void seqedittrackdesc_build(SeqEditTrackDesc* self)
 	psy_ui_component_clear(&self->component);	
 	sequence = seqeditstate_sequence(self->state);
 	if (sequence) {
-		psy_audio_SequenceTrackNode* t;
-		uintptr_t c;
+		uintptr_t t;		
 		psy_ui_Button* newtrack;
 		psy_audio_OrderIndex editposition;
 
 		editposition = psy_audio_sequenceselection_first(
 			&self->state->cmds->workspace->song->sequence.sequenceselection);
-		for (t = sequence->tracks, c = 0; t != NULL; t = t->next, ++c) {
+		for (t = 0; t < psy_audio_sequence_width(sequence); ++t) {
 			SequenceTrackBox* trackbox;
 			psy_audio_SequenceTrack* track;
 			
-			track = (psy_audio_SequenceTrack*)t->entry;			
+			track = psy_audio_sequence_track_at(sequence, t);			
 			trackbox = sequencetrackbox_allocinit(&self->component,
-				seqeditstate_sequence(self->state), c, self->workspace);
+				seqeditstate_sequence(self->state), t, self->workspace);
 			if (trackbox) {				
 				psy_ui_component_show(&trackbox->trackbox.resize);
-				psy_ui_component_setminimumsize(
+				psy_ui_component_set_minimum_size(
 					sequencetrackbox_base(trackbox),
 					psy_ui_size_make_em(0.0, 2.0));
-				if (track->height != 0.0) {
+				if (track && track->height != 0.0) {
 					psy_ui_component_setpreferredheight(&trackbox->component,
 						psy_ui_value_make_eh(track->height));
 				}
@@ -172,7 +171,7 @@ void seqedittrackdesc_build(SeqEditTrackDesc* self)
 				psy_signal_connect(
 					&trackbox->trackbox.track.component.signal_dragstart,
 					self, seqedittrackdesc_ondragstart);
-				if (c == editposition.track) {					
+				if (t == editposition.track) {					
 					psy_ui_component_addstylestate(
 						&trackbox->trackbox.component,
 						psy_ui_STYLESTATE_SELECT);
@@ -184,7 +183,7 @@ void seqedittrackdesc_build(SeqEditTrackDesc* self)
 		newtrack = psy_ui_button_allocinit(&self->component);
 		if (newtrack) {
 			psy_ui_button_set_text(newtrack, "seqview.new-trk");
-			psy_ui_component_setminimumsize(psy_ui_button_base(newtrack),
+			psy_ui_component_set_minimum_size(psy_ui_button_base(newtrack),
 				psy_ui_size_make_em(0.0, 2.0));
 			newtrack->stoppropagation = FALSE;
 			psy_signal_connect(&newtrack->signal_clicked, self,

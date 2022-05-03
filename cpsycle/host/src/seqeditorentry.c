@@ -38,7 +38,7 @@ static void seqeditentry_vtable_init(SeqEditEntry* self)
 			(psy_ui_fp_component_event)
 			seqeditentry_on_destroy;
 		seqeditentry_vtable.onpreferredsize =
-			(psy_ui_fp_component_onpreferredsize)
+			(psy_ui_fp_component_on_preferred_size)
 			seqeditentry_onpreferredsize;
 		seqeditentry_vtable.onmousemove =
 			(psy_ui_fp_component_on_mouse_event)
@@ -94,7 +94,7 @@ void seqeditentry_onpreferredsize(SeqEditEntry* self,
 void seqeditentry_startdrag(SeqEditEntry* self, psy_ui_MouseEvent* ev)
 {	
 	if (psy_ui_mouseevent_ctrlkey(ev)) {
-		if (!psy_audio_sequenceselection_isselected(
+		if (!psy_audio_sequenceselection_is_selected(
 				&self->state->workspace->song->sequence.sequenceselection,
 				seqeditentry_seqpos(self))) {
 			psy_audio_sequenceselection_select(
@@ -111,7 +111,7 @@ void seqeditentry_startdrag(SeqEditEntry* self, psy_ui_MouseEvent* ev)
 		psy_audio_OrderIndex index;
 
 		sequence = &self->state->workspace->song->sequence;
-		psy_audio_sequenceselection_deselectall(
+		psy_audio_sequenceselection_deselect_all(
 			&sequence->sequenceselection);
 		psy_audio_sequenceselection_select(
 			&sequence->sequenceselection,

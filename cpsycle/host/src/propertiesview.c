@@ -1219,7 +1219,7 @@ void propertiesview_onscrollpanealign(PropertiesView* self,
 			psy_ui_Component* component;
 
 			component = (psy_ui_Component*)psy_tableiterator_value(&it);
-			psy_ui_component_setminimumsize(component,
+			psy_ui_component_set_minimum_size(component,
 				psy_ui_size_make(
 					psy_ui_value_make_ew(0.0),
 					clientsize.height));

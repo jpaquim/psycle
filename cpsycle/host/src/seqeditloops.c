@@ -366,7 +366,7 @@ static void seqeditloops_vtable_init(SeqEditLoops* self)
 			(psy_ui_fp_component_event)
 			seqeditloops_on_destroy;
 		seqeditloops_vtable.onpreferredsize =
-			(psy_ui_fp_component_onpreferredsize)
+			(psy_ui_fp_component_on_preferred_size)
 			seqeditloops_onpreferredsize;
 		seqeditloops_vtable.on_mouse_down =
 			(psy_ui_fp_component_on_mouse_event)
@@ -568,7 +568,7 @@ void seqeditloops_build(SeqEditLoops* self)
 	if (sequence && sequence->patterns) {
 		psy_List* p;
 
-		for (p = sequence->globaltrack.entries; p != NULL; p = p->next) {
+		for (p = sequence->globaltrack.nodes; p != NULL; p = p->next) {
 			psy_audio_SequenceEntry* seqentry;
 
 			seqentry = (psy_audio_SequenceEntry*)p->entry;

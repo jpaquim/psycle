@@ -40,7 +40,7 @@ static void psy_ui_tab_vtable_init(psy_ui_Tab* self)
 			(psy_ui_fp_component_ondraw)
 			psy_ui_tab_ondraw;
 		psy_ui_tab_vtable.onpreferredsize =
-			(psy_ui_fp_component_onpreferredsize)
+			(psy_ui_fp_component_on_preferred_size)
 			psy_ui_tab_onpreferredsize;
 		psy_ui_tab_vtable.onlanguagechanged =
 			(psy_ui_fp_component_onlanguagechanged)

@@ -63,7 +63,7 @@ void psy_audio_patterndefaults_init(psy_audio_PatternDefaults* self)
 	psy_audio_patterns_init(&self->patterns);
 	psy_audio_patterns_insert(&self->patterns, 0, self->pattern);
 	psy_audio_sequence_init(&self->sequence, &self->patterns, NULL);
-	psy_audio_sequence_appendtrack(&self->sequence,
+	psy_audio_sequence_append_track(&self->sequence,
 		psy_audio_sequencetrack_allocinit());
 	psy_audio_sequence_insert(&self->sequence,
 		psy_audio_orderindex_make(0, 0), 0);

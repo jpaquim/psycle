@@ -137,12 +137,13 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 		psy_ui_ALIGN_BOTTOM);
 	psy_ui_component_hide(&self->interpolatecurveview.component);	
 	/* Tabbar */
-	patternviewtabbar_init(&self->tabbar, tabbarparent, workspace);
+	patternviewtabbar_init(&self->tabbar, tabbarparent,
+		&self->workspace->config.patview);
 	psy_signal_connect(&self->tabbar.signal_toggle_properties, self,
 		patternview_on_toggle_properties);
 	self->display = PATTERN_DISPLAYMODE_INVALID;
 	patternview_select_display(self, PATTERN_DISPLAYMODE_TRACKER);
-	psy_signal_connect(&self->tabbar.contextbutton.signal_clicked, self,
+	psy_signal_connect(&self->tabbar.context_button.signal_clicked, self,
 		patternview_on_context_menu);
 	/* Connect */	
 	psy_signal_connect(&self->trackerview.grid.component.signal_scrolled, self,
@@ -155,7 +156,6 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->pvstate.patconfig->signal_changed, self,
 		patternview_on_configure);
 	patternview_rebuild(self);	
-	psy_ui_component_start_timer(&self->component, 0, 50);	
 }
 
 void patternview_on_destroy(PatternView* self)

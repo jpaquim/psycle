@@ -86,6 +86,16 @@ void psy_audio_blockselection_select(psy_audio_BlockSelection*,
 	uintptr_t track, uintptr_t numtracks,
 	psy_dsp_big_beat_t offset, psy_dsp_big_beat_t length);
 
+INLINE psy_dsp_big_beat_t psy_audio_blockselection_start_offset(const psy_audio_BlockSelection* self)
+{
+	return self->topleft.absoffset;
+}
+
+INLINE psy_dsp_big_beat_t psy_audio_blockselection_end_offset(const psy_audio_BlockSelection* self)
+{
+	return self->bottomright.absoffset;
+}
+
 #ifdef __cplusplus
 }
 #endif

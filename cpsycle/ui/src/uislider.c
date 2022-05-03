@@ -47,7 +47,7 @@ static void vtable_init(psy_ui_SliderPane* self)
 			(psy_ui_fp_component_ondraw)
 			psy_ui_sliderpane_ondraw;		
 		vtable.onpreferredsize =
-			(psy_ui_fp_component_onpreferredsize)
+			(psy_ui_fp_component_on_preferred_size)
 			psy_ui_sliderpane_onpreferredsize;
 		vtable.on_mouse_down =
 			(psy_ui_fp_component_on_mouse_event)

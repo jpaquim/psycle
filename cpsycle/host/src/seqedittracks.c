@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -21,7 +21,7 @@ static void seqeditortracks_onsequenceselectionselect(SeqEditorTracks*,
 	psy_audio_SequenceSelection*, psy_audio_OrderIndex*);
 static void seqeditortracks_onsequenceselectiondeselect(SeqEditorTracks*,
 	psy_audio_SequenceSelection*, psy_audio_OrderIndex*);
-static void seqeditortracks_onalign(SeqEditorTracks*);
+static void seqeditortracks_on_align(SeqEditorTracks*);
 static void seqeditortracks_on_timer(SeqEditorTracks*, uintptr_t timerid);
 static void seqeditortracks_oncursorchanged(SeqEditorTracks*, SeqEditState*);
 static void seqeditortracks_updatecursorlineposition(SeqEditorTracks*);
@@ -36,7 +36,7 @@ static void seqeditortracks_vtable_init(SeqEditorTracks* self)
 		seqeditortracks_vtable = *(self->component.vtable);		
 		seqeditortracks_vtable.onalign =
 			(psy_ui_fp_component_event)
-			seqeditortracks_onalign;
+			seqeditortracks_on_align;
 		seqeditortracks_vtable.on_timer =
 			(psy_ui_fp_component_on_timer)
 			seqeditortracks_on_timer;
@@ -96,25 +96,20 @@ void seqeditortracks_build(SeqEditorTracks* self)
 	sequence = seqeditstate_sequence(self->state);
 	cursorcolour = psy_ui_style(STYLE_SEQEDT_RULER_CURSOR)->colour;
 	if (sequence) {
-		psy_audio_SequenceTrackNode* t;
-		uintptr_t c;
+		uintptr_t t;		
 		psy_ui_Component* spacer;		
 
-		for (t = sequence->tracks, c = 0; t != NULL;
-				psy_list_next(&t), ++c) {
+		for (t = 0; t < psy_audio_sequence_width(sequence); ++t) {
 			psy_audio_SequenceTrack* seqtrack;
 			SeqEditTrack* seqedittrack;
 						
-			seqtrack = (psy_audio_SequenceTrack*)t->entry;
+			seqtrack = psy_audio_sequence_track_at(sequence, t);			
 			seqedittrack = seqedittrack_allocinit(&self->component,
-				self->state, self->workspace);			
-			if (seqedittrack) {
-				seqedittrack_setsequencetrack(seqedittrack,
-					t, (psy_audio_SequenceTrack*)t->entry, c);				
-			}
+				self->state, self->workspace);						
+			seqedittrack_setsequencetrack(seqedittrack, seqtrack, t);			
 		}
 		spacer = psy_ui_component_allocinit(&self->component, NULL);
-		psy_ui_component_setminimumsize(spacer,
+		psy_ui_component_set_minimum_size(spacer,
 			psy_ui_size_make_em(10.0, 2.0));		
 	}
 	self->playline = seqeditorplayline_allocinit(&self->component,
@@ -175,7 +170,7 @@ void seqeditortracks_onsequenceselectiondeselect(SeqEditorTracks* self,
 	psy_ui_component_invalidate(&self->component);
 }
 
-void seqeditortracks_onalign(SeqEditorTracks* self)
+void seqeditortracks_on_align(SeqEditorTracks* self)
 {	
 	if (self->playline) {
 		seqeditorplayline_update(self->playline);

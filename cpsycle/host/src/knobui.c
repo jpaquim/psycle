@@ -43,7 +43,7 @@ static void knobui_vtable_init(KnobUi* self)
 			(psy_ui_fp_component_ondraw)
 			knobui_ondraw;		
 		knobui_vtable.onpreferredsize =
-			(psy_ui_fp_component_onpreferredsize)
+			(psy_ui_fp_component_on_preferred_size)
 			knobui_onpreferredsize;
 		knobui_vtable.on_mouse_down =
 			(psy_ui_fp_component_on_mouse_event)
@@ -128,7 +128,7 @@ void knobui_ondraw(KnobUi* self, psy_ui_Graphics* g)
 			knob_style->background.animation.framesize.width, size.height / 2));
 	psy_ui_drawsolidrectangle(g, r_top, top_style->background.colour);
 	r_bottom = r_top;
-	psy_ui_realrectangle_settopleft(&r_bottom,
+	psy_ui_realrectangle_set_topleft(&r_bottom,
 		psy_ui_realpoint_make(
 			r_top.left,
 			r_top.top + psy_ui_realrectangle_height(&r_top)));

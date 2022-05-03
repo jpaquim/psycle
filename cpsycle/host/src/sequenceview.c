@@ -171,8 +171,7 @@ void seqview_onsequencechanged(SeqView* self,
 	seqviewlist_build(&self->listview);
 	psy_ui_component_align(&self->scroller.pane);
 	psy_ui_component_updateoverflow(&self->listview.component);
-	psy_ui_component_invalidate(&self->listview.component);
-	psy_ui_component_align(&self->trackheader.component);
+	psy_ui_component_invalidate(&self->scroller.component);
 	seqviewduration_update(&self->duration, TRUE);
 }
 
