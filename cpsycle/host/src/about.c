@@ -270,7 +270,7 @@ static void about_vtable_init(About* self)
 {
 	if (!about_vtable_initialized) {
 		about_vtable = *(self->component.vtable);		
-		about_vtable.onmousedoubleclick =
+		about_vtable.on_mouse_double_click =
 			(psy_ui_fp_component_on_mouse_event)
 			about_on_mouse_doubleclick;
 		about_vtable.on_focus =

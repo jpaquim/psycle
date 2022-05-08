@@ -255,7 +255,7 @@ void pianogriddraw_drawcursor(PianoGridDraw* self, psy_ui_Graphics* g, psy_audio
 
 	if (self->gridstate->pv->sequence && !self->cursoronnoterelease &&
 		!(psy_audio_player_playing(workspace_player(self->workspace)) &&
-			workspace_following_song(self->workspace))) {
+			keyboardmiscconfig_following_song(&self->workspace->config.misc))) {
 		psy_ui_Style* style;
 		psy_audio_SequenceCursor cursor;
 		intptr_t key;

@@ -14,15 +14,16 @@
 #include "../../detail/trace.h"
 
 /* prototypes */
-static void sequencerbar_onshowpatternnames(SequencerBar*,
+static void sequencerbar_on_show_pattern_names(SequencerBar*,
 	psy_ui_CheckBox* sender);
-static void sequencerbar_onfollowsong(SequencerBar*, psy_ui_Button* sender);
-static void sequencerbar_onfollowsongchanged(SequencerBar*, Workspace* sender);
-static void sequencerbar_onrecordtweak(SequencerBar*, psy_ui_Button* sender);
-static void sequencerbar_onrecordnoteoff(SequencerBar*, psy_ui_Button* sender);
-static void sequencerbar_onmultichannelaudition(SequencerBar*,
+static void sequencerbar_on_follow_song(SequencerBar*, psy_ui_Button* sender);
+static void sequencerbar_on_record_tweak(SequencerBar*, psy_ui_Button* sender);
+static void sequencerbar_on_record_noteoff(SequencerBar*, psy_ui_Button* sender);
+static void sequencerbar_on_multi_channel_audition(SequencerBar*,
 	psy_ui_Button* sender);
-static void sequencerbar_onconfigure(SequencerBar*, GeneralConfig*,
+static void sequencerbar_on_configure(SequencerBar*, GeneralConfig*,
+	psy_Property*);
+void sequencerbar_on_misc_configure(SequencerBar*, KeyboardMiscConfig*,
 	psy_Property*);
 
 /* implementation */
@@ -69,41 +70,33 @@ void sequencerbar_init(SequencerBar* self, psy_ui_Component* parent,
 	psy_ui_margin_init_em(&margin, 0.0, 0.0, 1.0, 0.0);
 	psy_ui_component_set_margin(&self->allownotestoeffect.component, margin);
 	psy_signal_connect(&self->follow_song.signal_clicked, self,
-		sequencerbar_onfollowsong);
-	psy_signal_connect(&workspace->signal_followsongchanged, self,
-		sequencerbar_onfollowsongchanged);	
+		sequencerbar_on_follow_song);
 	psy_signal_connect(&self->shownames.signal_clicked, self,
-		sequencerbar_onshowpatternnames);
+		sequencerbar_on_show_pattern_names);
 	psy_signal_connect(&self->recordnoteoff.signal_clicked, self,
-		sequencerbar_onrecordnoteoff);
+		sequencerbar_on_record_noteoff);
 	psy_signal_connect(&self->recordtweak.signal_clicked, self,
-		sequencerbar_onrecordtweak);
+		sequencerbar_on_record_tweak);
 	psy_signal_connect(&self->multichannelaudition.signal_clicked, self,
-		sequencerbar_onmultichannelaudition);
+		sequencerbar_on_multi_channel_audition);
 	psy_signal_connect(
 		&psycleconfig_general(workspace_conf(workspace))->signal_changed,
-		self, sequencerbar_onconfigure);
+		self, sequencerbar_on_configure);
+	psy_signal_connect(
+		&psycleconfig_misc(workspace_conf(workspace))->signal_changed,
+		self, sequencerbar_on_misc_configure);
 }
 
-void sequencerbar_onfollowsong(SequencerBar* self, psy_ui_Button* sender)
+void sequencerbar_on_follow_song(SequencerBar* self, psy_ui_Button* sender)
 {
-	if (workspace_following_song(self->workspace)) {
-		workspace_stop_follow_song(self->workspace);
+	if (keyboardmiscconfig_following_song(&self->workspace->config.misc)) {
+		keyboardmiscconfig_stop_follow_song(&self->workspace->config.misc);		
 	} else {
-		workspace_follow_song(self->workspace);
+		keyboardmiscconfig_follow_song(&self->workspace->config.misc);		
 	}
 }
 
-void sequencerbar_onfollowsongchanged(SequencerBar* self, Workspace* sender)
-{
-	if (workspace_following_song(sender)) {		
-		psy_ui_checkbox_check(&self->follow_song);
-	} else {
-		psy_ui_checkbox_disablecheck(&self->follow_song);
-	}
-}
-
-void sequencerbar_onshowpatternnames(SequencerBar* self, psy_ui_CheckBox* sender)
+void sequencerbar_on_show_pattern_names(SequencerBar* self, psy_ui_CheckBox* sender)
 {
 	if (psy_ui_checkbox_checked(sender) != 0) {
 		generalconfig_showpatternnames(psycleconfig_general(
@@ -114,7 +107,7 @@ void sequencerbar_onshowpatternnames(SequencerBar* self, psy_ui_CheckBox* sender
 	}
 }
 
-void sequencerbar_onrecordtweak(SequencerBar* self, psy_ui_Button* sender)
+void sequencerbar_on_record_tweak(SequencerBar* self, psy_ui_Button* sender)
 {
 	if (workspace_recording_tweaks(self->workspace)) {
 		workspace_stop_record_tweaks(self->workspace);
@@ -123,7 +116,7 @@ void sequencerbar_onrecordtweak(SequencerBar* self, psy_ui_Button* sender)
 	}
 }
 
-void sequencerbar_onrecordnoteoff(SequencerBar* self, psy_ui_Button* sender)
+void sequencerbar_on_record_noteoff(SequencerBar* self, psy_ui_Button* sender)
 {
 	if (psy_audio_player_recording_noteoff(workspace_player(self->workspace))) {
 		psy_audio_player_preventrecordnoteoff(workspace_player(self->workspace));
@@ -132,13 +125,13 @@ void sequencerbar_onrecordnoteoff(SequencerBar* self, psy_ui_Button* sender)
 	}
 }
 
-void sequencerbar_onmultichannelaudition(SequencerBar* self, psy_ui_Button* sender)
+void sequencerbar_on_multi_channel_audition(SequencerBar* self, psy_ui_Button* sender)
 {
 	workspace_player(self->workspace)->multichannelaudition =
 		!workspace_player(self->workspace)->multichannelaudition;
 }
 
-void sequencerbar_onconfigure(SequencerBar* self, GeneralConfig* config,
+void sequencerbar_on_configure(SequencerBar* self, GeneralConfig* config,
 	psy_Property* property)
 {	
 	if (generalconfig_showingpatternnames(config)) {
@@ -146,4 +139,14 @@ void sequencerbar_onconfigure(SequencerBar* self, GeneralConfig* config,
 	} else {
 		psy_ui_checkbox_disablecheck(&self->shownames);
 	}	
+}
+
+void sequencerbar_on_misc_configure(SequencerBar* self, KeyboardMiscConfig* config,
+	psy_Property* property)
+{
+	if (keyboardmiscconfig_following_song(config)) {
+		psy_ui_checkbox_check(&self->follow_song);
+	} else {
+		psy_ui_checkbox_disablecheck(&self->follow_song);
+	}
 }

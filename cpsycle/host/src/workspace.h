@@ -106,8 +106,7 @@ typedef struct Workspace {
 	psy_Signal signal_beforesavesong;	
 	psy_Signal signal_viewselected;	
 	psy_Signal signal_parametertweak;
-	psy_Signal signal_status_out;
-	psy_Signal signal_followsongchanged;	
+	psy_Signal signal_status_out;	
 	psy_Signal signal_togglegear;
 	psy_Signal signal_machineeditresize;
 	psy_Signal signal_buschanged;
@@ -122,8 +121,7 @@ typedef struct Workspace {
 	ViewHistory view_history;
 	ViewIndex restoreview;	
 	char* filename;
-	bool song_has_file;
-	bool follow_song;
+	bool song_has_file;	
 	bool record_tweaks;	
 	psy_audio_SequencePaste sequencepaste;	
 	/* ui */	
@@ -217,9 +215,6 @@ void workspace_edit_quantize_change(Workspace*, int diff);
 int workspace_has_plugin_cache(const Workspace*);
 psy_audio_PluginCatcher* workspace_plugincatcher(Workspace*);
 psy_EventDriver* workspace_kbd_driver(Workspace*);
-bool workspace_following_song(const Workspace*);
-void workspace_follow_song(Workspace*);
-void workspace_stop_follow_song(Workspace*);
 void workspace_idle(Workspace*);
 void workspace_show_parameters(Workspace*, uintptr_t machineslot);
 void workspace_select_view(Workspace*, ViewIndex);

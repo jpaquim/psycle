@@ -32,12 +32,13 @@ enum {
 	PROPERTY_ID_LOADSKIN,
 	PROPERTY_ID_DEFAULTSKIN,	
 	PROPERTY_ID_DEFAULTFONT,	
-	PROPERTY_ID_APPTHEME
+	PROPERTY_ID_APPTHEME,
+	PROPERTY_ID_IMPORTCONFIG
 };
 
 typedef struct PsycleConfig {
 	psy_Property config;
-	psy_Property* global;
+	psy_Property* global;	
 	psy_Property* visual;	
 	psy_Property* defaultfont;
 	psy_Property* apptheme;
@@ -62,7 +63,7 @@ void psycleconfig_init(PsycleConfig*, psy_audio_Player*,
 void psycleconfig_dispose(PsycleConfig*);
 
 void psycleconfig_loadskin(PsycleConfig*, const char* path);
-void psycleconfig_resetskin(PsycleConfig*);
+void psycleconfig_reset_skin(PsycleConfig*);
 void psycleconfig_reset_control_skin(PsycleConfig*);
 
 INLINE GeneralConfig* psycleconfig_general(PsycleConfig* self)

@@ -16,6 +16,7 @@ void keyboardmiscconfig_init(KeyboardMiscConfig* self, psy_Property* parent)
 
 	self->parent = parent;
 	self->cursorstep = 1;
+	self->follow_song = FALSE;
 	keyboardmiscconfig_makekeyboardandmisc(self, parent);
 	psy_signal_init(&self->signal_changed);
 }
@@ -100,6 +101,10 @@ void keyboardmiscconfig_makekeyboardandmisc(KeyboardMiscConfig* self, psy_Proper
 		psy_property_append_bool(self->keyboard_misc,
 			"allowmultiinstances", FALSE),
 		"settingsview.kbd.allowmultiinstances");
+	psy_property_settext(
+		psy_property_append_bool(self->keyboard_misc,
+			"followsong", self->follow_song),
+		"settingsview.kbd.followsong");
 #if PSYCLE_USE_TK != PSYCLE_TK_X11
 	psy_property_setid(psy_property_settext(
 		psy_property_append_bool(self->keyboard_misc,
@@ -116,11 +121,43 @@ bool keyboardmiscconfig_ft2home(const KeyboardMiscConfig* self)
 	return psy_property_at_bool(self->keyboard, "ft2home", TRUE);
 }
 
+void keyboardmiscconfig_enable_ft2home(KeyboardMiscConfig* self)
+{
+	assert(self);
+
+	psy_signal_emit(&self->signal_changed, self, 1, psy_property_set_bool(
+		self->keyboard, "ft2home", TRUE));
+}
+
+void keyboardmiscconfig_disable_ft2home(KeyboardMiscConfig* self)
+{
+	assert(self);
+
+	psy_signal_emit(&self->signal_changed, self, 1, psy_property_set_bool(
+		self->keyboard, "ft2home", FALSE));
+}
+
 bool keyboardmiscconfig_ft2delete(const KeyboardMiscConfig* self)
 {
 	assert(self);
 
 	return psy_property_at_bool(self->keyboard, "ft2delete", TRUE);
+}
+
+void keyboardmiscconfig_enable_ft2delete(KeyboardMiscConfig* self)
+{
+	assert(self);
+
+	psy_signal_emit(&self->signal_changed, self, 1, psy_property_set_bool(
+		self->keyboard, "ft2delete", TRUE));
+}
+
+void keyboardmiscconfig_disable_ft2delete(KeyboardMiscConfig* self)
+{
+	assert(self);
+
+	psy_signal_emit(&self->signal_changed, self, 1, psy_property_set_bool(
+		self->keyboard, "ft2delete", FALSE));
 }
 
 bool keyboardmiscconfig_effcursoralwaysdown(const KeyboardMiscConfig* self)
@@ -135,6 +172,22 @@ bool keyboardmiscconfig_playstartwithrctrl(KeyboardMiscConfig* self)
 	assert(self);
 
 	return psy_property_at_bool(self->keyboard, "playstartwithrctrl", TRUE);
+}
+
+void keyboardmiscconfig_enable_playstartwithrctrl(KeyboardMiscConfig* self)
+{
+	assert(self);
+
+	psy_signal_emit(&self->signal_changed, self, 1, psy_property_set_bool(
+		self->keyboard, "playstartwithrctrl", TRUE));
+}
+
+void keyboardmiscconfig_disable_playstartwithrctrl(KeyboardMiscConfig* self)
+{
+	assert(self);
+
+	psy_signal_emit(&self->signal_changed, self, 1, psy_property_set_bool(
+		self->keyboard, "playstartwithrctrl", FALSE));
 }
 
 bool keyboardmiscconfig_movecursoronestep(const KeyboardMiscConfig* self)
@@ -225,12 +278,52 @@ bool keyboardmiscconfig_ft2fileexplorer(const KeyboardMiscConfig* self)
 #endif
 }
 
+bool keyboardmiscconfig_following_song(const KeyboardMiscConfig* self)
+{
+	assert(self);
+
+	return self->follow_song;
+}
+
+void keyboardmiscconfig_follow_song(KeyboardMiscConfig* self)
+{
+	psy_Property* property;
+
+	assert(self);
+
+	property = psy_property_at(self->keyboard_misc, "followsong",
+		PSY_PROPERTY_TYPE_NONE);
+	if (property) {
+		psy_property_setitem_bool(property, TRUE);
+		self->follow_song = TRUE;
+		psy_signal_emit(&self->signal_changed, self, 1, property);
+	}
+}
+
+void keyboardmiscconfig_stop_follow_song(KeyboardMiscConfig* self)
+{
+	psy_Property* property;
+
+	assert(self);
+
+	property = psy_property_at(self->keyboard_misc, "followsong",
+		PSY_PROPERTY_TYPE_NONE);
+	if (property) {
+		psy_property_setitem_bool(property, FALSE);
+		self->follow_song = FALSE;
+		psy_signal_emit(&self->signal_changed, self, 1, property);
+	}
+}
+
+
 /* events */
 void keyboardmiscconfig_onchanged(KeyboardMiscConfig* self, psy_Property*
 	property)
 {
 	assert(self);
 
+	self->follow_song = psy_property_at_bool(self->keyboard_misc, "followsong",
+		FALSE);
 	psy_signal_emit(&self->signal_changed, self, 1, property);
 }
 

@@ -320,7 +320,7 @@ void paramview_setzoom(ParamView* self, double zoomrate)
 }*/
 
 /*
-void onmousedoubleclick(ParamView* self, psy_ui_MouseEvent* ev)
+void on_mouse_double_click(ParamView* self, psy_ui_MouseEvent* ev)
 {
 	if (self->machine) {
 		psy_audio_MachineParam* tweakpar;

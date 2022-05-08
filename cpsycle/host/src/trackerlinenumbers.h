@@ -86,6 +86,13 @@ void trackerlinenumberview_init(TrackerLineNumberView*,
 void trackerlinenumberview_set_scroll_top(TrackerLineNumberView*,
 	psy_ui_Value top);
 
+INLINE psy_ui_Component* trackerlinenumberview_base(TrackerLineNumberView* self)
+{
+	assert(self);
+
+	return &self->component;
+}
+
 #ifdef __cplusplus
 }
 #endif

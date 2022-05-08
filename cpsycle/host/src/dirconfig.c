@@ -112,6 +112,14 @@ void dirconfig_append(DirConfig* self, const char* key,
 		PSY_PROPERTY_HINT_EDITDIR);
 }
 /* properties */
+const char* dirconfig_app(const DirConfig* self)
+{
+	assert(self);
+
+	return psy_property_at_str(self->directories, "app",
+		PSYCLE_APP64_DIR);
+}
+
 const char* dirconfig_songs(const DirConfig* self)
 {
 	assert(self);

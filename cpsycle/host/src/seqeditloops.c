@@ -380,7 +380,7 @@ static void seqeditloops_vtable_init(SeqEditLoops* self)
 		seqeditloops_vtable.onmouseleave =
 			(psy_ui_fp_component_event)
 			seqeditloops_onmouseleave;
-		seqeditloops_vtable.onmousedoubleclick =
+		seqeditloops_vtable.on_mouse_double_click =
 			(psy_ui_fp_component_on_mouse_event)
 			seqeditloops_onmousedoubleclick;
 		seqeditloops_vtable.onalign =

@@ -148,7 +148,7 @@ typedef struct psy_ui_ComponentVTable {
 	psy_ui_fp_component_on_mouse_event onmousemove;
 	psy_ui_fp_component_on_mouse_event onmousewheel;
 	psy_ui_fp_component_on_mouse_event on_mouse_up;
-	psy_ui_fp_component_on_mouse_event onmousedoubleclick;
+	psy_ui_fp_component_on_mouse_event on_mouse_double_click;
 	psy_ui_fp_component_event onmouseenter;
 	psy_ui_fp_component_event onmouseleave;
 	psy_ui_fp_component_on_key_event on_key_down;
@@ -489,6 +489,7 @@ typedef struct psy_ui_ComponentImpVTable {
 	psy_ui_fp_componentimp_dev_resize dev_resize;
 	psy_ui_fp_componentimp_dev_clientresize dev_clientresize;
 	psy_ui_fp_componentimp_dev_position dev_position;
+	psy_ui_fp_componentimp_dev_position dev_restore_position;
 	psy_ui_fp_componentimp_dev_screenposition dev_screenposition;
 	psy_ui_fp_componentimp_dev_setposition dev_setposition;
 	psy_ui_fp_componentimp_dev_size dev_size;
@@ -572,6 +573,11 @@ psy_ui_Size psy_ui_component_offsetsize(const psy_ui_Component* self);
 INLINE psy_ui_RealRectangle psy_ui_component_position(const psy_ui_Component* self)
 {
 	return self->imp->vtable->dev_position(self->imp);
+}
+
+INLINE psy_ui_RealRectangle psy_ui_component_restore_position(const psy_ui_Component* self)
+{
+	return self->imp->vtable->dev_restore_position(self->imp);
 }
 
 INLINE psy_ui_RealRectangle psy_ui_component_screenposition(const psy_ui_Component* self)

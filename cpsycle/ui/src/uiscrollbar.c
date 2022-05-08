@@ -47,7 +47,7 @@ static void psy_ui_scrollbarpane_vtable_init(psy_ui_ScrollBarPane* self)
 		psy_ui_scrollbarpane_vtable.on_mouse_down =
 			(psy_ui_fp_component_on_mouse_event)
 			psy_ui_scrollbarpane_on_mouse_down;
-		psy_ui_scrollbarpane_vtable.onmousedoubleclick =
+		psy_ui_scrollbarpane_vtable.on_mouse_double_click =
 			(psy_ui_fp_component_on_mouse_event)
 			psy_ui_scrollbarpane_on_mouse_down;
 		psy_ui_scrollbarpane_vtable.onmousemove =

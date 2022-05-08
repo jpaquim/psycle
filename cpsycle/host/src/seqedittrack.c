@@ -58,7 +58,7 @@ static void seqedittrack_vtable_init(SeqEditTrack* self)
 		seqedittrack_vtable.on_mouse_up =
 			(psy_ui_fp_component_on_mouse_event)
 			seqedittrack_on_mouse_up;
-		seqedittrack_vtable.onmousedoubleclick =
+		seqedittrack_vtable.on_mouse_double_click =
 			(psy_ui_fp_component_on_mouse_event)
 			seqedittrack_on_mouse_double_click;
 		seqedittrack_vtable_initialized = TRUE;

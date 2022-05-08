@@ -138,6 +138,7 @@ typedef struct MainFrame {
 	Interpreter interpreter;	
 	bool titlemodified;
 	psy_ui_RealPoint frame_drag_offset;
+	bool allow_frame_move;
 } MainFrame;
 
 void mainframe_init(MainFrame*);

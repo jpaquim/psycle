@@ -200,7 +200,7 @@ static void seqeditpatternentry_vtable_init(SeqEditPatternEntry* self)
 		seqeditpatternentry_vtable.on_mouse_down =
 			(psy_ui_fp_component_on_mouse_event)
 			seqeditpatternentry_on_mouse_down;		
-		seqeditpatternentry_vtable.onmousedoubleclick =
+		seqeditpatternentry_vtable.on_mouse_double_click =
 			(psy_ui_fp_component_on_mouse_event)
 			seqeditpatternentry_onmousedoubleclick;
 	}
@@ -368,7 +368,7 @@ static void seqeditsampleentry_vtable_init(
 		seqeditsampleentry_vtable.on_mouse_down =
 			(psy_ui_fp_component_on_mouse_event)
 			seqeditsampleentry_on_mouse_down;
-		seqeditsampleentry_vtable.onmousedoubleclick =
+		seqeditsampleentry_vtable.on_mouse_double_click =
 			(psy_ui_fp_component_on_mouse_event)
 			seqeditsampleentry_onmousedoubleclick;
 	}

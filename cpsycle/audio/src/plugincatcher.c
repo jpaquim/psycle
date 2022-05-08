@@ -125,7 +125,7 @@ void psy_audio_pluginsections_clear(psy_audio_PluginSections* self)
 	if (self->sections) {
 		psy_property_deallocate(self->sections);
 	}
-	self->sections = psy_property_setcomment(
+	self->sections = psy_property_set_comment(
 		psy_property_allocinit_key(NULL),
 		"Psycle Plugin Scanner Cache created by\r\n; " PSYCLE__BUILD__IDENTIFIER("\r\n; "));
 }

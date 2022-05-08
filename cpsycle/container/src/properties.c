@@ -1608,7 +1608,7 @@ const char* psy_property_shorttext(const psy_Property* self)
 				: "";
 }
 
-psy_Property* psy_property_setcomment(psy_Property* self, const char* text)
+psy_Property* psy_property_set_comment(psy_Property* self, const char* text)
 {
 	assert(self);
 

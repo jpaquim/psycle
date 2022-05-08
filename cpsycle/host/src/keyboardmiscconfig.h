@@ -30,6 +30,7 @@ typedef struct KeyboardMiscConfig {
 	psy_Property* keyboard;
 	psy_Property* keyboard_misc;
 	int cursorstep;
+	bool follow_song;
 	/* references */
 	psy_Property* parent;	
 } KeyboardMiscConfig;
@@ -38,9 +39,15 @@ void keyboardmiscconfig_init(KeyboardMiscConfig*, psy_Property* parent);
 void keyboardmiscconfig_dispose(KeyboardMiscConfig*);
 
 bool keyboardmiscconfig_ft2home(const KeyboardMiscConfig*);
+void keyboardmiscconfig_enable_ft2home(KeyboardMiscConfig*);
+void keyboardmiscconfig_disable_ft2home(KeyboardMiscConfig*);
 bool keyboardmiscconfig_ft2delete(const KeyboardMiscConfig*);
+void keyboardmiscconfig_enable_ft2delete(KeyboardMiscConfig*);
+void keyboardmiscconfig_disable_ft2delete(KeyboardMiscConfig*);
 bool keyboardmiscconfig_effcursoralwaysdown(const KeyboardMiscConfig*);
 bool keyboardmiscconfig_playstartwithrctrl(KeyboardMiscConfig*);
+void keyboardmiscconfig_enable_playstartwithrctrl(KeyboardMiscConfig*);
+void keyboardmiscconfig_disable_playstartwithrctrl(KeyboardMiscConfig*);
 bool keyboardmiscconfig_movecursoronestep(const KeyboardMiscConfig*);
 bool keyboardmiscconfig_savereminder(const KeyboardMiscConfig*);
 intptr_t keyboardmiscconfig_patdefaultlines(const KeyboardMiscConfig*);
@@ -52,6 +59,10 @@ intptr_t keyboardmiscconfig_pgupdownstep(const KeyboardMiscConfig*);
 void keyboardmiscconfig_setcursorstep(KeyboardMiscConfig*, int step);
 int keyboardmiscconfig_cursor_step(const KeyboardMiscConfig*);
 bool keyboardmiscconfig_ft2fileexplorer(const KeyboardMiscConfig*);
+bool keyboardmiscconfig_following_song(const KeyboardMiscConfig*);
+void keyboardmiscconfig_follow_song(KeyboardMiscConfig*);
+void keyboardmiscconfig_stop_follow_song(KeyboardMiscConfig*);
+
 
 void keyboardmiscconfig_onchanged(KeyboardMiscConfig*, psy_Property*);
 bool keyboardmiscconfig_hasproperty(const KeyboardMiscConfig*, psy_Property*);

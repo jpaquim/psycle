@@ -373,7 +373,7 @@ static void on_mouse_up(psy_ui_Component* self, psy_ui_MouseEvent* ev)
 	}
 }
 
-static void onmousedoubleclick(psy_ui_Component* self, psy_ui_MouseEvent* ev) { }
+static void on_mouse_double_click(psy_ui_Component* self, psy_ui_MouseEvent* ev) { }
 
 static void onmouseenter(psy_ui_Component* self)
 {		
@@ -450,7 +450,7 @@ static void vtable_init(void)
 		vtable.onmousemove = onmousemove;
 		vtable.onmousewheel = onmousewheel;
 		vtable.on_mouse_up = on_mouse_up;
-		vtable.onmousedoubleclick = onmousedoubleclick;
+		vtable.on_mouse_double_click = on_mouse_double_click;
 		vtable.onmouseenter = onmouseenter;
 		vtable.onmouseleave = onmouseleave;
 		vtable.onkeyup = onkeyup;
@@ -1567,6 +1567,7 @@ static void imp_vtable_init(void)
 		imp_vtable.dev_resize = dev_resize;
 		imp_vtable.dev_clientresize = dev_clientresize;
 		imp_vtable.dev_position = dev_position;
+		imp_vtable.dev_restore_position = dev_position;
 		imp_vtable.dev_screenposition = dev_position;
 		imp_vtable.dev_setposition = dev_setposition;
 		imp_vtable.dev_size = dev_size;

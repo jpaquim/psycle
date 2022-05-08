@@ -398,12 +398,27 @@ bool patternviewconfig_has_property(const PatternViewConfig* self,
 	return (psy_property_in_section(property, self->patternview));
 }
 
-/* getter */
 bool patternviewconfig_line_numbers(const PatternViewConfig* self)
 {
 	assert(self);
 	
 	return psy_property_at_bool(self->patternview, "linenumbers", TRUE);
+}
+
+void patternviewconfig_display_line_numbers(PatternViewConfig* self)
+{
+	assert(self);
+
+	psy_signal_emit(&self->signal_changed, self, 1, psy_property_set_bool(
+		self->patternview, "linenumbers", TRUE));
+}
+
+void patternviewconfig_hide_line_numbers(PatternViewConfig* self)
+{
+	assert(self);
+	
+	psy_signal_emit(&self->signal_changed, self, 1, psy_property_set_bool(
+		self->patternview, "linenumbers", FALSE));
 }
 
 bool patternviewconfig_linenumberscursor(const PatternViewConfig* self)
@@ -413,11 +428,43 @@ bool patternviewconfig_linenumberscursor(const PatternViewConfig* self)
 	return psy_property_at_bool(self->patternview, "linenumberscursor", TRUE);
 }
 
+void patternviewconfig_display_line_numbers_cursor(PatternViewConfig* self)
+{
+	assert(self);
+
+	psy_signal_emit(&self->signal_changed, self, 1, psy_property_set_bool(
+		self->patternview, "linenumberscursor", TRUE));
+}
+
+void patternviewconfig_hide_line_numbers_cursor(PatternViewConfig* self)
+{
+	assert(self);
+
+	psy_signal_emit(&self->signal_changed, self, 1, psy_property_set_bool(
+		self->patternview, "linenumberscursor", FALSE));
+}
+
 bool patternviewconfig_linenumbersinhex(const PatternViewConfig* self)
 {
 	assert(self);
 
 	return psy_property_at_bool(self->patternview, "linenumbersinhex", TRUE);
+}
+
+void patternviewconfig_display_line_numbers_in_hex(PatternViewConfig* self)
+{
+	assert(self);
+
+	psy_signal_emit(&self->signal_changed, self, 1, psy_property_set_bool(
+		self->patternview, "linenumbersinhex", TRUE));
+}
+
+void patternviewconfig_display_line_numbers_in_dec(PatternViewConfig* self)
+{
+	assert(self);
+
+	psy_signal_emit(&self->signal_changed, self, 1, psy_property_set_bool(
+		self->patternview, "linenumbersinhex", FALSE));
 }
 
 bool patternviewconfig_defaultline(const PatternViewConfig* self)
@@ -432,6 +479,22 @@ bool patternviewconfig_wrap_around(const PatternViewConfig* self)
 	assert(self);
 
 	return psy_property_at_bool(self->patternview, "wraparound", TRUE);
+}
+
+void patternviewconfig_enable_wrap_around(PatternViewConfig* self)
+{
+	assert(self);
+
+	psy_signal_emit(&self->signal_changed, self, 1, psy_property_set_bool(
+		self->patternview, "wraparound", TRUE));
+}
+
+void patternviewconfig_disable_wrap_around(PatternViewConfig* self)
+{
+	assert(self);
+
+	psy_signal_emit(&self->signal_changed, self, 1, psy_property_set_bool(
+		self->patternview, "wraparound", FALSE));
 }
 
 bool patternviewconfig_draw_empty_data(const PatternViewConfig* self)

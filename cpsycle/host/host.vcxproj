@@ -297,6 +297,7 @@
     <ClCompile Include="src\cmdproperties.c" />
     <ClCompile Include="src\compatconfig.c" />
     <ClCompile Include="src\config.c" />
+    <ClCompile Include="src\configimport.c" />
     <ClCompile Include="src\confirmbox.c" />
     <ClCompile Include="src\cpuview.c" />
     <ClCompile Include="src\defaultlang.c" />
@@ -489,6 +490,7 @@
     <ClInclude Include="src\cmdsgeneral.h" />
     <ClInclude Include="src\compatconfig.h" />
     <ClInclude Include="src\config.h" />
+    <ClInclude Include="src\configimport.h" />
     <ClInclude Include="src\confirmbox.h" />
     <ClInclude Include="src\cpuview.h" />
     <ClInclude Include="src\defaultlang.h" />

@@ -101,7 +101,11 @@ static void mainframe_on_gear_select(MainFrame*, Workspace* sender,
 static void mainframe_on_drag_over(MainFrame*, psy_ui_DragEvent*);
 static void mainframe_on_drop(MainFrame*, psy_ui_DragEvent*);
 static void mainframe_on_mouse_down(MainFrame*, psy_ui_MouseEvent*);
+static void mainframe_on_mouse_double_click(MainFrame*, psy_ui_MouseEvent* ev);
 static void mainframe_on_mouse_move(MainFrame*, psy_ui_MouseEvent*);
+static void mainframe_on_mouse_up(MainFrame*, psy_ui_MouseEvent* ev);
+static bool mainframe_accept_frame_move(const MainFrame*, psy_ui_Component*
+	target);
 static bool mainframe_on_input_handler_callback(MainFrame*, int message,
 	void* param1);
 static void mainframe_plugineditor_on_focus(MainFrame*, psy_ui_Component* sender);
@@ -132,6 +136,12 @@ static void vtable_init(MainFrame* self)
 		vtable.on_mouse_down =
 			(psy_ui_fp_component_on_mouse_event)
 			mainframe_on_mouse_down;
+		vtable.on_mouse_double_click =
+			(psy_ui_fp_component_on_mouse_event)
+			mainframe_on_mouse_double_click;
+		vtable.on_mouse_up =
+			(psy_ui_fp_component_on_mouse_event)
+			mainframe_on_mouse_up;
 		vtable.onmousemove =
 			(psy_ui_fp_component_on_mouse_event)
 			mainframe_on_mouse_move;
@@ -206,7 +216,8 @@ void mainframe_init_frame(MainFrame* self)
 	psy_ui_component_seticonressource(mainframe_base(self), IDI_PSYCLEICON);
 	init_host_styles(&psy_ui_appdefaults()->styles,
 		psy_ui_defaults()->styles.theme);
-	self->titlemodified = FALSE;	
+	self->titlemodified = FALSE;
+	self->allow_frame_move = FALSE;
 	psy_ui_component_init(&self->pane, mainframe_base(self),
 		mainframe_base(self));	
 	psy_ui_component_set_align(&self->pane, psy_ui_ALIGN_CLIENT);		
@@ -1330,53 +1341,102 @@ void mainframe_on_drop(MainFrame* self, psy_ui_DragEvent* ev)
 
 void mainframe_on_mouse_down(MainFrame* self, psy_ui_MouseEvent* ev)
 {
-	self->frame_drag_offset = psy_ui_mouseevent_offset(ev);
+	psy_ui_RealRectangle position;	
+
+	position = psy_ui_component_position(&self->component);	
+	self->frame_drag_offset = psy_ui_mouseevent_offset(ev);	
+	self->allow_frame_move = mainframe_accept_frame_move(self,
+		psy_ui_mouseevent_target(ev));
 }
 
+void mainframe_on_mouse_double_click(MainFrame* self, psy_ui_MouseEvent* ev)
+{	
+	if (mainframe_accept_frame_move(self, psy_ui_mouseevent_target(ev))) {		
+		switch (psy_ui_component_state(&self->component)) {
+		case psy_ui_COMPONENTSTATE_NORMAL:
+			psy_ui_component_set_state(&self->component,
+				psy_ui_COMPONENTSTATE_MAXIMIZED);
+			break;
+		case psy_ui_COMPONENTSTATE_MAXIMIZED:
+			psy_ui_component_set_state(&self->component,
+				psy_ui_COMPONENTSTATE_NORMAL);
+			break;
+		case psy_ui_COMPONENTSTATE_FULLSCREEN:
+			psy_ui_component_set_state(&self->component,
+				psy_ui_COMPONENTSTATE_NORMAL);
+			break;
+		default:
+			break;
+		}
+	}
+}
+
+bool mainframe_accept_frame_move(const MainFrame* self, psy_ui_Component*
+	target)
+{
+	const psy_ui_Component* curr;
+	const psy_ui_Component* accept[] = {
+		&self->top,
+		&self->toprows,
+		&self->toprow0_bars,
+		&self->toprow0_client,
+		&self->filebar.component,
+		&self->songbar.component,
+		&self->playbar.component,
+		&self->undoredobar.component,
+		&self->machineviewbar.component,
+		&self->vubar.component,
+		&self->vubar.vumeter.component,
+		NULL
+	};
+	bool rv;
+	uintptr_t i;
+
+	i = 0;
+	curr = accept[i];
+	rv = FALSE;
+	while (curr) {
+		if (curr == target) {
+			rv = TRUE;
+			break;
+		}
+		++i;
+		curr = accept[i];
+	}
+	return rv;
+}
 
 void mainframe_on_mouse_move(MainFrame* self, psy_ui_MouseEvent* ev)
 {	
-	if (psy_ui_mouseevent_button(ev) == 1) {
-		psy_ui_Component* curr;
-		psy_ui_Component* accept[] = {
-			&self->top,
-			&self->toprows,
-			&self->toprow0_bars,
-			&self->toprow0_client,
-			&self->filebar.component,
-			&self->songbar.component,
-			&self->playbar.component,
-			&self->undoredobar.component,
-			&self->machineviewbar.component,
-			&self->vubar.component,
-			&self->vubar.vumeter.component,
-			NULL
-		};
-		bool allow_frame_move;
-		uintptr_t i;
-
-		i = 0;
-		curr = accept[i];
-		allow_frame_move = FALSE;
-		while (curr) {
-			if (curr == psy_ui_mouseevent_target(ev)) {
-				allow_frame_move = TRUE;
-				break;
-			}
-			++i;
-			curr = accept[i];		
-		}
-		if (allow_frame_move) {
-			psy_ui_RealRectangle position;
-			psy_ui_ComponentState state;
+	if (psy_ui_mouseevent_button(ev) == 1 && self->allow_frame_move) {
+		psy_ui_RealRectangle position;
+		psy_ui_ComponentState state;
 			
-			position = psy_ui_component_position(&self->component);
-			state = psy_ui_component_state(&self->component);
-			if (state == psy_ui_COMPONENTSTATE_FULLSCREEN ||
-					state == psy_ui_COMPONENTSTATE_MAXIMIZED) {
-				psy_ui_component_set_state(&self->component,
-					psy_ui_COMPONENTSTATE_NORMAL);
-			}			
+		position = psy_ui_component_position(&self->component);
+		state = psy_ui_component_state(&self->component);
+		if (state == psy_ui_COMPONENTSTATE_FULLSCREEN ||
+				state == psy_ui_COMPONENTSTATE_MAXIMIZED) {
+			psy_ui_RealRectangle normal;
+			double left;
+			double width;
+
+			normal = psy_ui_component_restore_position(&self->component);
+			psy_ui_component_set_state(&self->component,
+				psy_ui_COMPONENTSTATE_NORMAL);			
+			width = position.right - position.left;
+			if (self->frame_drag_offset.x > width / 2.0) {
+				double margin_right;
+
+				margin_right = width - psy_ui_mouseevent_offset(ev).x;
+				width = normal.right - normal.left;
+				left = psy_ui_mouseevent_offset(ev).x - (width - margin_right);				
+				self->frame_drag_offset.x = (width - margin_right);				
+			} else {
+				left = 0.0;
+			}
+			psy_ui_component_move(&self->component, psy_ui_point_make_px(left,
+				0.0));
+		} else {
 			psy_ui_component_move(&self->component, psy_ui_point_make_px(
 				position.left + (psy_ui_mouseevent_offset(ev).x -
 					self->frame_drag_offset.x),
@@ -1385,6 +1445,12 @@ void mainframe_on_mouse_move(MainFrame* self, psy_ui_MouseEvent* ev)
 		}
 	}
 }
+
+void mainframe_on_mouse_up(MainFrame* self, psy_ui_MouseEvent* ev)
+{
+	self->allow_frame_move = FALSE;
+}
+
 
 bool mainframe_on_input_handler_callback(MainFrame* self, int message,
 	void* param1)

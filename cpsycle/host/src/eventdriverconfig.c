@@ -170,7 +170,7 @@ void eventdriverconfig_load(EventDriverConfig* self)
 					&opendialog)));
 			psy_propertyreader_load(&propertyreader);
 			psy_propertyreader_dispose(&propertyreader);
-			psy_eventdriver_configure(eventdriver, local);			
+			psy_eventdriver_configure(eventdriver, local);
 			if (self->activedrivers) {
 				eventdriverconfig_show_active(self,
 					psy_property_item_int(self->activedrivers));

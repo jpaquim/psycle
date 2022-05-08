@@ -64,7 +64,7 @@ static void machineview_vtable_init(MachineView* self)
 		machineview_vtable.on_mouse_up =
 			(psy_ui_fp_component_on_mouse_event)
 			machineview_on_mouse_up;
-		machineview_vtable.onmousedoubleclick =
+		machineview_vtable.on_mouse_double_click =
 			(psy_ui_fp_component_on_mouse_event)
 			machineview_onmousedoubleclick;
 		machineview_vtable.on_key_down =
