@@ -33,7 +33,7 @@ static void generatorui_vtable_init(GeneratorUi* self)
 		generatorui_vtable.on_mouse_down =
 			(psy_ui_fp_component_on_mouse_event)
 			generatorui_on_mouse_down;
-		generatorui_vtable.onmousedoubleclick =
+		generatorui_vtable.on_mouse_double_click =
 			(psy_ui_fp_component_on_mouse_event)
 			generatorui_onmousedoubleclick;
 		generatorui_vtable.move =

@@ -36,7 +36,7 @@ static void masterui_vtable_init(MasterUi* self)
 		masterui_vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
 			masterui_ondraw;
-		masterui_vtable.onmousedoubleclick =
+		masterui_vtable.on_mouse_double_click =
 			(psy_ui_fp_component_on_mouse_event)
 			masterui_onmousedoubleclick;
 		masterui_vtable.move =

@@ -645,6 +645,9 @@
     <ClCompile Include="src\viewindex.c">
       <Filter>app</Filter>
     </ClCompile>
+    <ClCompile Include="src\configimport.c">
+      <Filter>configuration</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\languageconfig.h">
@@ -1192,6 +1195,9 @@
     </ClInclude>
     <ClInclude Include="src\viewindex.h">
       <Filter>app</Filter>
+    </ClInclude>
+    <ClInclude Include="src\configimport.h">
+      <Filter>configuration</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

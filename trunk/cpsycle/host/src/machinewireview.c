@@ -178,7 +178,7 @@ static void vtable_init(MachineWireView* self)
 		vtable.onmousemove =
 			(psy_ui_fp_component_on_mouse_event)
 			machinewireview_onmousemove;
-		vtable.onmousedoubleclick =
+		vtable.on_mouse_double_click =
 			(psy_ui_fp_component_on_mouse_event)
 			machinewireview_onmousedoubleclick;
 		vtable.on_key_down =
@@ -494,7 +494,7 @@ void machinewireview_onmousedoubleclick(MachineWireView* self,
 				return;
 			}
 		} else if (machinewireviewuis_at(&self->machineuis, self->dragslot)) {			
-			machinewireviewuis_at(&self->machineuis, self->dragslot)->vtable->onmousedoubleclick(
+			machinewireviewuis_at(&self->machineuis, self->dragslot)->vtable->on_mouse_double_click(
 				machinewireviewuis_at(&self->machineuis, self->dragslot), ev);			
 		}
 		self->dragslot = psy_INDEX_INVALID;

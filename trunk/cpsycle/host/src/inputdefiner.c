@@ -1,18 +1,21 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
-// host
+
+/* host */
 #include "inputdefiner.h"
 #include "styles.h"
-// ui
+/* ui */
 #include <uiapp.h>
-// container
+/* container */
 #include <hashtbl.h>
-// driver
+/* driver */
 #include "../../driver/eventdriver.h"
-// platform
+/* platform */
 #include "../../detail/portable.h"
 
 static bool validkeycode(uintptr_t keycode)
@@ -32,16 +35,18 @@ static bool validkeycode(uintptr_t keycode)
 		keycode == psy_ui_KEY_NEXT);
 }
 
-// InputDefinerKeyNames
-// prototypes
-static void inputdefinerkeynames_initkeys(InputDefinerKeyNames*);
-// implementation
+/* InputDefinerKeyNames */
+
+/* prototypes */
+static void inputdefinerkeynames_init_keys(InputDefinerKeyNames*);
+
+/* implementation */
 void inputdefinerkeynames_init(InputDefinerKeyNames* self)
 {
 	assert(self);
 
 	psy_table_init(&self->container);
-	inputdefinerkeynames_initkeys(self);
+	inputdefinerkeynames_init_keys(self);
 }
 
 void inputdefinerkeynames_dispose(InputDefinerKeyNames* self)
@@ -51,7 +56,7 @@ void inputdefinerkeynames_dispose(InputDefinerKeyNames* self)
 	psy_table_disposeall(&self->container, (psy_fp_disposefunc)NULL);
 }
 
-void inputdefinerkeynames_initkeys(InputDefinerKeyNames* self)
+void inputdefinerkeynames_init_keys(InputDefinerKeyNames* self)
 {
 	uintptr_t key;
 
@@ -106,7 +111,7 @@ const char* inputdefinerkeynames_at(const InputDefinerKeyNames* self,
 		: "";
 }
 
-// static InputDefinerKeyNames definition
+/* static InputDefinerKeyNames definition */
 static int refcount = 0;
 static InputDefinerKeyNames keynames;
 
@@ -129,17 +134,21 @@ void keynames_release(void)
 	}
 }
 
-// InputDefiner
-// prototypes
+/* InputDefiner */
+
+/* prototypes */
 static void inputdefiner_on_destroy(InputDefiner*);
-static void inputdefiner_ondraw(InputDefiner*, psy_ui_Graphics*);
+static void inputdefiner_on_draw(InputDefiner*, psy_ui_Graphics*);
+static void inputdefiner_on_mouse_down(InputDefiner*, psy_ui_MouseEvent*);
 static void inputdefiner_on_key_down(InputDefiner*, psy_ui_KeyboardEvent*);
-static void inputdefiner_onkeyup(InputDefiner*, psy_ui_KeyboardEvent*);
+static void inputdefiner_on_key_up(InputDefiner*, psy_ui_KeyboardEvent*);
 static void inputdefiner_on_focus(InputDefiner*);
-static void inputdefiner_on_focuslost(InputDefiner*);
-static void inputdefiner_onmousehook(InputDefiner*, psy_ui_App* sender,
+static void inputdefiner_on_focus_in(InputDefiner*, psy_ui_Event*);
+static void inputdefiner_on_focus_lost(InputDefiner*);
+static void inputdefiner_on_mouse_hook(InputDefiner*, psy_ui_App* sender,
 	psy_ui_MouseEvent*);
-// vtable
+
+/* vtable */
 static psy_ui_ComponentVtable vtable;
 static psy_ui_ComponentVtable super_vtable;
 static bool vtable_initialized = FALSE;
@@ -156,24 +165,31 @@ static void vtable_init(InputDefiner* self)
 			inputdefiner_on_destroy;
 		vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
-			inputdefiner_ondraw;
+			inputdefiner_on_draw;
+		vtable.on_mouse_down =
+			(psy_ui_fp_component_on_mouse_event)
+			inputdefiner_on_mouse_down;
 		vtable.on_key_down =
 			(psy_ui_fp_component_on_key_event)
 			inputdefiner_on_key_down;
 		vtable.onkeyup = 
 			(psy_ui_fp_component_on_key_event)
-			inputdefiner_onkeyup;
+			inputdefiner_on_key_up;
 		vtable.on_focus =
 			(psy_ui_fp_component_event)
 			inputdefiner_on_focus;
+		vtable.on_focusin =
+			(psy_ui_fp_component_focusin)
+			inputdefiner_on_focus_in;
 		vtable.on_focuslost =
 			(psy_ui_fp_component_event)
-			inputdefiner_on_focuslost;
+			inputdefiner_on_focus_lost;
 		vtable_initialized = TRUE;
 	}
-	self->component.vtable = &vtable;
+	psy_ui_component_set_vtable(&self->component, &vtable);
 }
-// implementation
+
+/* implementation */
 void inputdefiner_init(InputDefiner* self, psy_ui_Component* parent)
 {
 	assert(self);
@@ -188,7 +204,7 @@ void inputdefiner_init(InputDefiner* self, psy_ui_Component* parent)
 	self->regularkey = 0;
 	self->preventhook = TRUE;
 	psy_signal_connect(&psy_ui_app()->signal_mousehook, self,
-		inputdefiner_onmousehook);	
+		inputdefiner_on_mouse_hook);	
 }
 
 void inputdefiner_on_destroy(InputDefiner* self)
@@ -197,11 +213,28 @@ void inputdefiner_on_destroy(InputDefiner* self)
 
 	psy_signal_dispose(&self->signal_accept);	
 	psy_signal_disconnect(&psy_ui_app()->signal_mousehook, self,
-		inputdefiner_onmousehook);
+		inputdefiner_on_mouse_hook);
 	keynames_release();
 }
 
-void inputdefiner_setinput(InputDefiner* self, uint32_t input)
+InputDefiner* inputdefiner_alloc(void)
+{
+	return (InputDefiner*)malloc(sizeof(InputDefiner));
+}
+
+InputDefiner* inputdefiner_allocinit(psy_ui_Component* parent)
+{
+	InputDefiner* rv;
+
+	rv = inputdefiner_alloc();
+	if (rv) {
+		inputdefiner_init(rv, parent);
+		psy_ui_component_deallocate_after_destroyed(&rv->component);
+	}
+	return rv;
+}
+
+void inputdefiner_set_input(InputDefiner* self, uint32_t input)
 {
 	assert(self);
 
@@ -212,10 +245,10 @@ void inputdefiner_text(InputDefiner* self, char* text)
 {	
 	assert(self);
 
-	inputdefiner_inputtotext(self->input, text);	
+	inputdefiner_input_to_text(self->input, text);	
 }
 
-void inputdefiner_inputtotext(uint32_t input, char* text)
+void inputdefiner_input_to_text(uint32_t input, char* text)
 {
 	uint32_t keycode;
 	bool shift;
@@ -245,18 +278,28 @@ void inputdefiner_inputtotext(uint32_t input, char* text)
 	keynames_release();
 }
 
-void inputdefiner_ondraw(InputDefiner* self, psy_ui_Graphics* g)
+void inputdefiner_on_draw(InputDefiner* self, psy_ui_Graphics* g)
 {
 	char text[40];
 
 	assert(self);
 	
+	if (psy_ui_component_has_focus(&self->component)) {
+		self = self;
+	}
 	psy_ui_settextcolour(g, psy_ui_colour_make(0x00FFFFFF));
 	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 	inputdefiner_text(self, text);
 	if (psy_strlen(text) > 0) {
 		psy_ui_textout(g, psy_ui_realpoint_zero(), text, psy_strlen(text));
 	}
+}
+
+void inputdefiner_on_mouse_down(InputDefiner* self, psy_ui_MouseEvent* ev)
+{
+	psy_ui_mouseevent_stop_propagation(ev);
+	psy_ui_component_set_focus(&self->component);
+	psy_ui_component_invalidate(&self->component);	
 }
 
 void inputdefiner_on_key_down(InputDefiner* self, psy_ui_KeyboardEvent* ev)
@@ -289,7 +332,7 @@ void inputdefiner_on_key_down(InputDefiner* self, psy_ui_KeyboardEvent* ev)
 	psy_ui_keyboardevent_stop_propagation(ev);
 }
 
-void inputdefiner_onkeyup(InputDefiner* self, psy_ui_KeyboardEvent* ev)
+void inputdefiner_on_key_up(InputDefiner* self, psy_ui_KeyboardEvent* ev)
 {
 	bool alt;
 	bool shift;
@@ -332,9 +375,15 @@ void inputdefiner_on_focus(InputDefiner* self)
 	super_vtable.on_focus(&self->component);
 	self->preventhook = FALSE;
 	psy_ui_app_startmousehook(psy_ui_app());
+	psy_ui_component_invalidate(&self->component);
 }
 
-void inputdefiner_on_focuslost(InputDefiner* self)
+void inputdefiner_on_focus_in(InputDefiner* self, psy_ui_Event* ev)
+{
+	psy_ui_event_stop_propagation(ev);
+}
+
+void inputdefiner_on_focus_lost(InputDefiner* self)
 {
 	assert(self);
 
@@ -344,7 +393,7 @@ void inputdefiner_on_focuslost(InputDefiner* self)
 	psy_signal_emit(&self->signal_accept, self, 0);
 }
 
-void inputdefiner_onmousehook(InputDefiner* self, psy_ui_App* sender,
+void inputdefiner_on_mouse_hook(InputDefiner* self, psy_ui_App* sender,
 	psy_ui_MouseEvent* ev)
 {
 	assert(self);

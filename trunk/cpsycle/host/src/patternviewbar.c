@@ -248,7 +248,7 @@ void patternviewbar_on_cursor_changed(PatternViewBar* self,
 
 void patternviewbar_on_playline_changed(PatternViewBar* self, Workspace* sender)
 {		
-	if (!workspace_following_song(sender)) {
+	if (!keyboardmiscconfig_following_song(&sender->config.misc)) {
 		patternviewbar_update_status(self);
 	}
 }

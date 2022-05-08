@@ -89,7 +89,7 @@ static void vtable_init(TrackerGrid* self)
 		vtable.on_mouse_up =
 			(psy_ui_fp_component_on_mouse_event)
 			trackergrid_on_mouse_up;
-		vtable.onmousedoubleclick =
+		vtable.on_mouse_double_click =
 			(psy_ui_fp_component_on_mouse_event)
 			trackergrid_on_mouse_doubleclick;
 		vtable.onalign =
@@ -1214,22 +1214,6 @@ void trackergrid_reset_pattern_sync(TrackerGrid* self)
 	}
 }
 
-void trackergrid_changegenerator(TrackerGrid* self)
-{
-	assert(self);
-
-	patterncmds_change_machine(self->state->pv->cmds, self->state->pv->selection);
-	psy_ui_component_invalidate(&self->component);
-}
-
-void trackergrid_changeinstrument(TrackerGrid* self)
-{
-	assert(self);
-	
-	patterncmds_change_instrument(self->state->pv->cmds, self->state->pv->selection);
-	psy_ui_component_invalidate(&self->component);	
-}
-
 void trackergrid_block_start(TrackerGrid* self)
 {
 	assert(self);
@@ -1268,7 +1252,8 @@ bool trackergrid_handle_command(TrackerGrid* self, intptr_t cmd)
 		}
 		return TRUE;
 	case CMD_NAVPAGEUP:
-		trackergrid_prev_lines(self, patternviewstate_curr_pgup_down_step(self->state->pv), FALSE);
+		trackergrid_prev_lines(self, patternviewstate_curr_pgup_down_step(
+			self->state->pv), FALSE);
 		return TRUE;
 	case CMD_NAVDOWN:
 		if (patternviewstate_move_cursor_one_step(self->state->pv)) {
@@ -1278,7 +1263,8 @@ bool trackergrid_handle_command(TrackerGrid* self, intptr_t cmd)
 		}
 		return TRUE;
 	case CMD_NAVPAGEDOWN:
-		trackergrid_advance_lines(self, patternviewstate_curr_pgup_down_step(self->state->pv), FALSE);
+		trackergrid_advance_lines(self, patternviewstate_curr_pgup_down_step(
+			self->state->pv), FALSE);
 		return TRUE;
 	case CMD_NAVLEFT:
 		trackergrid_prev_col(self);
@@ -1426,9 +1412,9 @@ void trackergrid_tweak(TrackerGrid* self, int slot, uintptr_t tweak,
 		trackergrid_prevent_pattern_sync(self);
 		psy_undoredo_execute(&self->workspace->undoredo,
 			&insertcommand_allocinit(pattern, self->state->pv->cursor, event,
-				&self->workspace->song->sequence)->command);
+				&self->workspace->song->sequence)->command);		
 		if (keyboardmiscconfig_advancelineonrecordtweak(&self->workspace->config.misc) &&
-			!(workspace_following_song(self->workspace) &&
+			!(keyboardmiscconfig_following_song(&self->workspace->config.misc) &&
 				psy_audio_player_playing(workspace_player(self->workspace)))) {
 			trackergrid_advance_line(self);
 		}
@@ -1523,8 +1509,6 @@ static void trackerview_on_grid_scroll(TrackerView*, psy_ui_Component*);
 static bool trackerview_playing_following_song(const TrackerView*);
 static void trackerview_on_sequence_changed(TrackerView*,
 	psy_audio_Sequence* sender);
-static void trackerview_on_follow_song_changed(TrackerView*,
-	Workspace* sender);
 
 /* implementation */
 void trackerview_init(TrackerView* self, psy_ui_Component* parent,
@@ -1561,8 +1545,6 @@ void trackerview_init(TrackerView* self, psy_ui_Component* parent,
 	trackerview_connect_song(self);	
 	psy_signal_connect(&workspace->config.patview.signal_changed, self,
 		trackerview_on_configure);
-	psy_signal_connect(&workspace->signal_followsongchanged, self,
-		trackerview_on_follow_song_changed);
 }
 
 void trackerview_on_song_changed(TrackerView* self, Workspace* sender)
@@ -1663,16 +1645,10 @@ void trackerview_on_sequence_changed(TrackerView* self,
 	psy_ui_component_invalidate(&self->component);
 }
 
-void trackerview_on_follow_song_changed(TrackerView* self,
-	Workspace* sender)
-{
-	psy_ui_component_invalidate(&self->component);
-}
-
 bool trackerview_playing_following_song(const TrackerView* self)
 {
 	return self->workspace->host_sequencer_time.currplaying &&
-		workspace_following_song(self->workspace);
+		keyboardmiscconfig_following_song(&self->workspace->config.misc);
 }
 
 void trackerview_on_grid_scroll(TrackerView* self, psy_ui_Component* sender)
@@ -1698,10 +1674,9 @@ void trackerview_on_configure(TrackerView* self, PatternViewConfig* config,
 		patternviewconfig_draw_empty_data(config));
 	trackergrid_set_center_mode(&self->grid,
 		patternviewconfig_center_cursor_on_screen(config));
-	/* lines */
 	if (patternviewconfig_line_numbers(config)) {
-		psy_ui_component_show(&self->lines.component);
+		psy_ui_component_show(trackerlinenumberview_base(&self->lines));
 	} else {
-		psy_ui_component_hide(&self->lines.component);
+		psy_ui_component_hide(trackerlinenumberview_base(&self->lines));
 	}
 }

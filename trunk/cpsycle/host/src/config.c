@@ -11,6 +11,7 @@
 #include "defaultlang.h"
 #include "skinio.h"
 #include "styles.h"
+#include "configimport.h"
 /* ui */
 #include <uicomponent.h> /* Translator */
 #include <uiapp.h> /* Styles */
@@ -26,24 +27,26 @@
 #endif
 
 /* prototypes */
-static void psycleconfig_definelanguage(PsycleConfig*);
-static void psycleconfig_initsections(PsycleConfig*, psy_audio_Player*,
+static void psycleconfig_define_language(PsycleConfig*);
+static void psycleconfig_init_sections(PsycleConfig*, psy_audio_Player*,
 	psy_audio_MachineFactory*);
-static void psycleconfig_makeglobal(PsycleConfig*);
-static void psycleconfig_makevisual(PsycleConfig*);
-static void psycleconfig_makemidiconfiguration(PsycleConfig*);
-static void psycleconfig_makemidicontrollers(PsycleConfig*);
-static void psycleconfig_onloadskin(PsycleConfig*);
+static void psycleconfig_make_global(PsycleConfig*);
+static void psycleconfig_make_visual(PsycleConfig*);
+static void psycleconfig_make_midi_configuration(PsycleConfig*);
+static void psycleconfig_make_midi_controllers(PsycleConfig*);
+static void psycleconfig_on_load_skin(PsycleConfig*);
+static void psycleconfig_on_import_config(PsycleConfig*);
+static void psycleconfig_import_config(PsycleConfig*, const char* path);
 
 /* implementation */
 void psycleconfig_init(PsycleConfig* self, psy_audio_Player* player,
 	psy_audio_MachineFactory* machinefactory)
 {	
 	psy_property_init(&self->config);
-	psy_property_setcomment(&self->config,
+	psy_property_set_comment(&self->config,
 		"Psycle Configuration File created by\r\n; " PSYCLE__BUILD__IDENTIFIER("\r\n; "));
-	psycleconfig_definelanguage(self);
-	psycleconfig_initsections(self, player, machinefactory);
+	psycleconfig_define_language(self);
+	psycleconfig_init_sections(self, player, machinefactory);
 }
 
 void psycleconfig_dispose(PsycleConfig* self)
@@ -65,7 +68,7 @@ void psycleconfig_dispose(PsycleConfig* self)
 	psy_property_dispose(&self->config);	
 }
 
-void psycleconfig_definelanguage(PsycleConfig* self)
+void psycleconfig_define_language(PsycleConfig* self)
 {
 	psy_Property defaultlang;
 
@@ -76,12 +79,12 @@ void psycleconfig_definelanguage(PsycleConfig* self)
 }
 
 /* creation */
-void psycleconfig_initsections(PsycleConfig* self, psy_audio_Player* player,
+void psycleconfig_init_sections(PsycleConfig* self, psy_audio_Player* player,
 	psy_audio_MachineFactory* machinefactory)
 {
-	psycleconfig_makeglobal(self);
+	psycleconfig_make_global(self);
 	generalconfig_init(&self->general, &self->config);
-	psycleconfig_makevisual(self);
+	psycleconfig_make_visual(self);
 	keyboardmiscconfig_init(&self->misc, &self->config);
 	dirconfig_init(&self->directories, &self->config);
 	audioconfig_init(&self->audio, &self->config, player);
@@ -96,7 +99,7 @@ void psycleconfig_initsections(PsycleConfig* self, psy_audio_Player* player,
 	machineviewconfig_setdirectories(&self->macview, &self->directories);	
 }
 
-void psycleconfig_makeglobal(PsycleConfig* self)
+void psycleconfig_make_global(PsycleConfig* self)
 {
 	assert(self);
 
@@ -112,9 +115,13 @@ void psycleconfig_makeglobal(PsycleConfig* self)
 		"settingsview.global.regenerate-plugincache"),
 		PROPERTY_ID_REGENERATEPLUGINCACHE);
 	languageconfig_init(&self->language, self->global, psy_ui_translator());
+	psy_property_setid(psy_property_settext(
+		psy_property_append_action(self->global, "importconfig"),
+		"settingsview.global.importconfig"),
+		PROPERTY_ID_IMPORTCONFIG);
 }
 
-void psycleconfig_makevisual(PsycleConfig* self)
+void psycleconfig_make_visual(PsycleConfig* self)
 {
 	assert(self);
 
@@ -200,7 +207,7 @@ void psycleconfig_loadskin(PsycleConfig* self, const char* path)
 	psy_property_dispose(&skin);
 }
 
-void psycleconfig_resetskin(PsycleConfig* self)
+void psycleconfig_reset_skin(PsycleConfig* self)
 {	
 	assert(self);
 		
@@ -243,10 +250,13 @@ int psycleconfig_notify_changed(PsycleConfig* self, psy_Property* property)
 {		
 	switch (psy_property_id(property)) {	
 	case PROPERTY_ID_DEFAULTSKIN:
-		psycleconfig_resetskin(self);
+		psycleconfig_reset_skin(self);
 		return 1;		
 	case PROPERTY_ID_LOADSKIN:
-		psycleconfig_onloadskin(self);
+		psycleconfig_on_load_skin(self);
+		return 1;
+	case PROPERTY_ID_IMPORTCONFIG:
+		psycleconfig_on_import_config(self);
 		return 1;
 	default:
 		break;
@@ -301,7 +311,7 @@ void psycleconfig_notifyall_changed(PsycleConfig* self)
 	seqeditconfig_onchanged(&self->seqedit, &self->config);
 }
 
-void psycleconfig_onloadskin(PsycleConfig* self)
+void psycleconfig_on_load_skin(PsycleConfig* self)
 {
 	psy_ui_OpenDialog opendialog;
 
@@ -313,4 +323,27 @@ void psycleconfig_onloadskin(PsycleConfig* self)
 			&opendialog)));
 	}
 	psy_ui_opendialog_dispose(&opendialog);
+}
+
+void psycleconfig_on_import_config(PsycleConfig* self)
+{
+	psy_ui_OpenDialog opendialog;
+
+	psy_ui_opendialog_init_all(&opendialog, 0,
+		"Import Config", "Psycle Ini Files|*.ini", "INI",
+		dirconfig_app(&self->directories));
+	if (psy_ui_opendialog_execute(&opendialog)) {
+		psycleconfig_import_config(self, psy_path_full(psy_ui_opendialog_path(
+			&opendialog)));
+	}
+	psy_ui_opendialog_dispose(&opendialog);
+}
+
+void psycleconfig_import_config(PsycleConfig* self, const char* path)
+{
+	PsycleConfigImport import;
+
+	psycleconfigimport_init(&import, self);
+	psycleconfigimport_read(&import, path);
+	psycleconfigimport_dispose(&import);
 }

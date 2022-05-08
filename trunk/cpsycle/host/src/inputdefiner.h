@@ -43,7 +43,10 @@ typedef struct InputDefiner {
 
 void inputdefiner_init(InputDefiner*, psy_ui_Component* parent);
 
-void inputdefiner_setinput(InputDefiner*, uint32_t input);
+InputDefiner* inputdefiner_alloc(void);
+InputDefiner* inputdefiner_allocinit(psy_ui_Component* parent);
+
+void inputdefiner_set_input(InputDefiner*, uint32_t input);
 
 INLINE unsigned int inputdefiner_input(const InputDefiner* self)
 {
@@ -53,7 +56,7 @@ INLINE unsigned int inputdefiner_input(const InputDefiner* self)
 }
 
 void inputdefiner_text(InputDefiner*, char* text);
-void inputdefiner_inputtotext(uint32_t input, char* text);
+void inputdefiner_input_to_text(uint32_t input, char* text);
 
 INLINE psy_ui_Component* inputdefiner_base(InputDefiner* self)
 {

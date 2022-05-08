@@ -320,7 +320,7 @@ static void seqedittimesigs_vtable_init(SeqEditTimeSigs* self)
 		seqedittimesigs_vtable.onmouseleave =
 			(psy_ui_fp_component_event)
 			seqedittimesigs_onmouseleave;
-		seqedittimesigs_vtable.onmousedoubleclick =
+		seqedittimesigs_vtable.on_mouse_double_click =
 			(psy_ui_fp_component_on_mouse_event)
 			seqedittimesigs_onmousedoubleclick;
 		seqedittimesigs_vtable.onalign =

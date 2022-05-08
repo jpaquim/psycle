@@ -47,13 +47,16 @@ void propertiesrenderstate_init(PropertiesRenderState*, uintptr_t numcols,
 typedef struct PropertiesRenderLine {
 	/* inherits */
 	psy_ui_Component component;	
+	/*signals */
+	psy_Signal signal_changed;
 	/* internal */
 	psy_ui_Label key;
 	psy_ui_Switch* check;
 	psy_ui_Label* label;
 	psy_ui_Button* dialogbutton;
+	InputDefiner* input_definer;
 	psy_ui_ComboBox* combo;
-	psy_ui_Component* colour;	
+	psy_ui_Component* colour;
 	psy_Property* property;	
 	PropertiesRenderState* state;
 } PropertiesRenderLine;
@@ -71,9 +74,9 @@ void propertiesrenderline_update(PropertiesRenderLine*);
 bool propertiesrenderline_updatecheck(PropertiesRenderLine*);
 bool propertiesrenderline_updateintegerlabel(PropertiesRenderLine*);
 bool propertiesrenderline_updatestringlabel(PropertiesRenderLine*);
-bool propertiesrenderline_updatefontlabel(PropertiesRenderLine*);
-bool propertiesrenderline_updateshortcut(PropertiesRenderLine*);
-bool propertiesrenderline_updatecolour(PropertiesRenderLine*);
+bool propertiesrenderline_update_font_label(PropertiesRenderLine*);
+bool propertiesrenderline_update_short_cut(PropertiesRenderLine*);
+bool propertiesrenderline_update_colour(PropertiesRenderLine*);
 
 typedef struct PropertiesRenderer {
 	/* inherits */
@@ -83,8 +86,7 @@ typedef struct PropertiesRenderer {
 	psy_Signal signal_changed;
 	psy_Signal signal_selected;
 	/* internal */	
-	psy_ui_TextArea edit;
-	InputDefiner inputdefiner;	
+	psy_ui_TextArea edit;	
 	uintptr_t currlinestatecount;		
 	psy_ui_Component* curr;	
 	PropertiesRenderLine* comboline;

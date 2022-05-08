@@ -57,7 +57,7 @@ static void seqviewtrack_vtable_init(SeqViewTrack* self)
 		seqviewtrack_vtable.on_mouse_down =
 			(psy_ui_fp_component_on_mouse_event)
 			seqviewtrack_on_mouse_down;
-		seqviewtrack_vtable.onmousedoubleclick =
+		seqviewtrack_vtable.on_mouse_double_click =
 			(psy_ui_fp_component_on_mouse_event)
 			seqviewtrack_on_mouse_doubleclick;		
 		seqviewtrack_vtable_initialized = TRUE;

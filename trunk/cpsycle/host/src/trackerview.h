@@ -73,8 +73,6 @@ INLINE const psy_audio_BlockSelection* trackergrid_selection(
 
 bool trackergrid_handle_command(TrackerGrid*, intptr_t cmd);
 /* block menu */
-void trackergrid_changegenerator(TrackerGrid*);
-void trackergrid_changeinstrument(TrackerGrid*);
 void trackergrid_block_start(TrackerGrid*);
 void trackergrid_block_end(TrackerGrid*);
 

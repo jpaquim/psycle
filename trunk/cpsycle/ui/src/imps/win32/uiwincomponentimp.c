@@ -98,6 +98,7 @@ static void dev_setshowfullscreen(psy_ui_win_ComponentImp*, bool fullscreen);
 static void dev_showtaskbar(psy_ui_win_ComponentImp*, bool show);
 static psy_ui_ComponentState dev_component_state(psy_ui_win_ComponentImp*);
 static void dev_set_component_state(psy_ui_win_ComponentImp*, psy_ui_ComponentState);
+static psy_ui_RealRectangle dev_restore_position(const psy_ui_win_ComponentImp*);
 
 /* vtable */
 static psy_ui_ComponentImpVTable vtable;
@@ -140,6 +141,9 @@ static void win_imp_vtable_init(psy_ui_win_ComponentImp* self)
 		vtable.dev_position =
 			(psy_ui_fp_componentimp_dev_position)
 			dev_position;
+		vtable.dev_restore_position =
+			(psy_ui_fp_componentimp_dev_position)
+			dev_restore_position;
 		vtable.dev_screenposition =
 			(psy_ui_fp_componentimp_dev_screenposition)
 			dev_screenposition;
@@ -1169,7 +1173,7 @@ void dev_set_component_state(psy_ui_win_ComponentImp* self, psy_ui_ComponentStat
 	GetWindowPlacement(self->hwnd, &wndstate);	
 	if (state == psy_ui_COMPONENTSTATE_MAXIMIZED) {
 		wndstate.showCmd = SW_SHOWMAXIMIZED;
-	} if (state == psy_ui_COMPONENTSTATE_MINIMIZED) {
+	} else if (state == psy_ui_COMPONENTSTATE_MINIMIZED) {
 		wndstate.showCmd = SW_SHOWMINIMIZED;
 	} else {
 		wndstate.showCmd = SW_SHOWNORMAL;
@@ -1183,6 +1187,24 @@ void dev_set_component_state(psy_ui_win_ComponentImp* self, psy_ui_ComponentStat
 	if (!self->fullscreen) {
 		SetWindowPlacement(self->hwnd, &wndstate);
 	}
+}
+
+psy_ui_RealRectangle dev_restore_position(const psy_ui_win_ComponentImp* self)
+{
+	psy_ui_RealRectangle rv;
+
+	WINDOWPLACEMENT wndstate;
+
+	wndstate.length = sizeof(WINDOWPLACEMENT);
+	GetWindowPlacement(self->hwnd, &wndstate);
+	rv = psy_ui_realrectangle_make(
+		psy_ui_realpoint_make(
+			wndstate.rcNormalPosition.left,
+			wndstate.rcNormalPosition.top),
+		psy_ui_realsize_make(
+			wndstate.rcNormalPosition.right - wndstate.rcNormalPosition.left,
+			wndstate.rcNormalPosition.bottom - wndstate.rcNormalPosition.top));	
+	return rv;
 }
 
 #endif /* PSYCLE_TK_WIN32 */

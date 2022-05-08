@@ -244,7 +244,7 @@ psy_Property* psy_property_settext(psy_Property*, const char* text);
 const char* psy_property_text(const psy_Property*);
 psy_Property* psy_property_setshorttext(psy_Property*, const char* text);
 const char* psy_property_shorttext(const psy_Property*);
-psy_Property* psy_property_setcomment(psy_Property*, const char* text);
+psy_Property* psy_property_set_comment(psy_Property*, const char* text);
 const char* psy_property_comment(const psy_Property*);
 
 #ifdef __cplusplus

@@ -24,6 +24,7 @@ typedef struct DirConfig {
 void dirconfig_init(DirConfig*, psy_Property* parent);
 void dirconfig_dispose(DirConfig*);
 
+const char* dirconfig_app(const DirConfig*);
 const char* dirconfig_songs(const DirConfig*);
 const char* dirconfig_samples(const DirConfig*);
 const char* dirconfig_plugins32(const DirConfig*);

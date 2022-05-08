@@ -150,8 +150,7 @@ void workspace_init(Workspace* self, psy_ui_Component* main)
 	psy_audio_machinecallbackvtable_init(self);
 	self->machinecallback.vtable = &machinecallback_vtable;
 	psy_lock_init(&self->pluginscanlock);
-	psy_audio_init();		
-	self->follow_song = FALSE;
+	psy_audio_init();
 	self->record_tweaks = FALSE;	
 	self->main = main;
 	self->filename = psy_strdup(PSYCLE_UNTITLED);	
@@ -240,7 +239,6 @@ void workspace_initsignals(Workspace* self)
 	psy_signal_init(&self->signal_viewselected);	
 	psy_signal_init(&self->signal_parametertweak);
 	psy_signal_init(&self->signal_status_out);
-	psy_signal_init(&self->signal_followsongchanged);
 	psy_signal_init(&self->signal_togglegear);
 	psy_signal_init(&self->signal_machineeditresize);
 	psy_signal_init(&self->signal_buschanged);
@@ -315,8 +313,7 @@ void workspace_disposesignals(Workspace* self)
 	psy_signal_dispose(&self->signal_beforesavesong);	
 	psy_signal_dispose(&self->signal_viewselected);	
 	psy_signal_dispose(&self->signal_parametertweak);
-	psy_signal_dispose(&self->signal_status_out);
-	psy_signal_dispose(&self->signal_followsongchanged);
+	psy_signal_dispose(&self->signal_status_out);	
 	psy_signal_dispose(&self->signal_togglegear);
 	psy_signal_dispose(&self->signal_machineeditresize);
 	psy_signal_dispose(&self->signal_buschanged);
@@ -428,10 +425,10 @@ void workspace_config_changed(Workspace* self, psy_Property* property,
 
 	worked = TRUE;
 	workspace_wait_for_driver_configure_load(self);
-	switch (psy_property_id(property)) {
+	switch (psy_property_id(property)) {	
 	case PROPERTY_ID_REGENERATEPLUGINCACHE:
 		workspace_scan_plugins(self);
-		break;	
+		break;
 	case PROPERTY_ID_LOADCONTROLSKIN:
 		workspace_on_load_control_skin(self);
 		break;
@@ -1274,33 +1271,6 @@ psy_EventDriver* workspace_kbd_driver(Workspace* self)
 	return psy_audio_player_kbddriver(&self->player);
 }
 
-bool workspace_following_song(const Workspace* self)
-{
-	assert(self);
-
-	return self->follow_song;
-}
-
-void workspace_follow_song(Workspace* self)
-{
-	assert(self);
-
-	if (self->follow_song == FALSE) {
-		self->follow_song = TRUE;
-		psy_signal_emit(&self->signal_followsongchanged, self, 0);
-	}
-}
-
-void workspace_stop_follow_song(Workspace* self)
-{
-	assert(self);
-
-	if (self->follow_song != FALSE) {
-		self->follow_song = FALSE;
-		psy_signal_emit(&self->signal_followsongchanged, self, 0);
-	}
-}
-
 void workspace_idle(Workspace* self)
 {
 	assert(self);
@@ -1383,8 +1353,8 @@ void workspace_update_play_status(Workspace* self)
 			}
 		}
 		psy_audio_exclusivelock_leave();
-		if (hostsequencertime_play_line_changed(&self->host_sequencer_time)) {
-			if (self->follow_song) {						
+		if (hostsequencertime_play_line_changed(&self->host_sequencer_time)) {			
+			if (keyboardmiscconfig_following_song(&self->config.misc)) {
 				bool restore_prevented;
 
 				restore_prevented = viewhistory_prevented(&self->view_history);
@@ -1901,10 +1871,10 @@ void workspace_on_input(Workspace* self, uintptr_t cmdid)
 		workspace_save_song_fileselect(self);
 		break;
 	case CMD_IMM_FOLLOWSONG:
-		if (workspace_following_song(self)) {
-			workspace_stop_follow_song(self);
+		if (keyboardmiscconfig_following_song(&self->config.misc)) {
+			keyboardmiscconfig_stop_follow_song(&self->config.misc);
 		} else {
-			workspace_follow_song(self);
+			keyboardmiscconfig_follow_song(&self->config.misc);			
 		}
 		break;
 	case CMD_COLUMN_0:

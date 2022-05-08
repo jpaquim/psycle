@@ -21,6 +21,8 @@ static void patternview_on_song_changed(PatternView*, Workspace* sender);
 static void patternview_connect_song(PatternView*);
 static void patternview_on_configure(PatternView*, PatternViewConfig*,
 	psy_Property*);
+static void patternview_on_misc_configure(PatternView*, KeyboardMiscConfig*,
+	psy_Property*);
 static void patternview_on_focus(PatternView*);
 static void patternview_on_mouse_down(PatternView*, psy_ui_MouseEvent*);
 static void patternview_on_mouse_up(PatternView*, psy_ui_MouseEvent*);
@@ -155,6 +157,8 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 	/* Configuration */
 	psy_signal_connect(&self->pvstate.patconfig->signal_changed, self,
 		patternview_on_configure);
+	psy_signal_connect(&self->pvstate.keymiscconfig->signal_changed, self,
+		patternview_on_misc_configure);
 	patternview_rebuild(self);	
 }
 
@@ -267,6 +271,12 @@ void patternview_on_configure(PatternView* self, PatternViewConfig* config,
 		patternviewconfig_pattern_display(config));
 	psy_ui_component_align(&self->component);	
 	patternview_update_font(self);
+}
+
+void patternview_on_misc_configure(PatternView* self, KeyboardMiscConfig* config,
+	psy_Property* property)
+{
+	psy_ui_component_invalidate(&self->trackerview.component);
 }
 
 void patternview_on_grid_scroll(PatternView* self, psy_ui_Component* sender)

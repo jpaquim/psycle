@@ -297,7 +297,7 @@ void psy_ui_eventdispatch_notify(psy_ui_EventDispatch* self,
 	psy_ui_event_setcurrenttarget(ev, component);	
 	switch (psy_ui_event_type(ev)) {
 	case psy_ui_DBLCLICK:
-		component->vtable->onmousedoubleclick(component, (psy_ui_MouseEvent*)ev);
+		component->vtable->on_mouse_double_click(component, (psy_ui_MouseEvent*)ev);
 		psy_signal_emit(&component->signal_mousedoubleclick,
 			component, 1, ev);
 		break;

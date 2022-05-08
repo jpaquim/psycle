@@ -983,7 +983,7 @@ static void machinestackinputs_vtable_init(MachineStackInputs* self)
 		machinestackinputs_vtable.onmouseenter =
 			(psy_ui_fp_component_event)
 			machinestackinputs_onmouseenter;
-		machinestackinputs_vtable.onmousedoubleclick =
+		machinestackinputs_vtable.on_mouse_double_click =
 			(psy_ui_fp_component_on_mouse_event)
 			machinestackinputs_onmousedoubleclick;
 		machinestackinputs_vtable_initialized = TRUE;
@@ -1198,7 +1198,7 @@ static psy_ui_ComponentVtable* machinestackpanetrack_vtable_init(
 {
 	if (!machinestackpanetrack_vtable_initialized) {
 		machinestackpanetrack_vtable = *(self->component.vtable);		
-		machinestackpanetrack_vtable.onmousedoubleclick =
+		machinestackpanetrack_vtable.on_mouse_double_click =
 			(psy_ui_fp_component_on_mouse_event)
 			machinestackpanetrack_onmousedoubleclick;
 		machinestackpanetrack_vtable_initialized = TRUE;
@@ -1317,7 +1317,7 @@ static psy_ui_ComponentVtable* machinestackpane_vtable_init(MachineStackPane* se
 {
 	if (!machinestackpane_vtable_initialized) {
 		machinestackpane_vtable = *(self->component.vtable);
-		machinestackpane_vtable.onmousedoubleclick =			
+		machinestackpane_vtable.on_mouse_double_click =			
 			(psy_ui_fp_component_on_mouse_event)
 			machinestackpane_onmousedoubleclick;
 		machinestackpane_vtable_initialized = TRUE;

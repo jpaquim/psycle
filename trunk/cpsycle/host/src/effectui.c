@@ -35,7 +35,7 @@ static void effectui_vtable_init(EffectUi* self)
 		effectui_vtable.on_mouse_down =
 			(psy_ui_fp_component_on_mouse_event)
 			effectui_on_mouse_down;
-		effectui_vtable.onmousedoubleclick =
+		effectui_vtable.on_mouse_double_click =
 			(psy_ui_fp_component_on_mouse_event)
 			effectui_onmousedoubleclick;
 		effectui_vtable.move =

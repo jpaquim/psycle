@@ -392,6 +392,7 @@ void make_translator_settingsview(psy_Property* parent)
 	add("de", "german");
 	add("en", "english");
 	add("es", "spanish");
+	add("importconfig", "Import MFC Ini File");
 	/* settingsview-midicontrollers	*/
 	setsection(psy_property_append_section(section, "midicontrollers"));
 	add("controllers", "MIDI Controllers");
@@ -954,7 +955,7 @@ void save_translator_default(void)
 	strcat(path, "\\en.ini");
 
 	lang = psy_property_allocinit_key(NULL);
-	psy_property_setcomment(lang,
+	psy_property_set_comment(lang,
 		"Psycle English Dictionary created by\r\n; " PSYCLE__BUILD__IDENTIFIER("\r\n; "));
 	make_translator_default(lang);
 	propertiesio_save(lang, path);
@@ -970,7 +971,7 @@ void save_translator_template(void)
 	strcat(path, "\\lang.ini");
 
 	lang = psy_property_allocinit_key(NULL);
-	psy_property_setcomment(lang,
+	psy_property_set_comment(lang,
 		"Psycle Template Dictionary created by\r\n; " PSYCLE__BUILD__IDENTIFIER("\r\n; "));
 	make_translator_default(lang);
 	psy_property_enumerate((psy_Property*)lang, NULL,
