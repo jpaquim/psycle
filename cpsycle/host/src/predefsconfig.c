@@ -120,13 +120,13 @@ void predefsconfig_storepredef(PredefsConfig* self, int index,
 	psy_property_set_str(self->predefs, key, psy_dsp_envelope_tostring(env));	
 }
 
-bool predefsconfig_onchanged(PredefsConfig* self, psy_Property*
+uintptr_t predefsconfig_onchanged(PredefsConfig* self, psy_Property*
 	property)
 {
 	assert(self && self->predefs);
 
 	psy_signal_emit(&self->signal_changed, self, 1, property);
-	return TRUE;
+	return psy_INDEX_INVALID;
 }
 
 bool predefsconfig_hasproperty(const PredefsConfig* self,

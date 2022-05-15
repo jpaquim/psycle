@@ -63,11 +63,11 @@ bool compatconfig_loadnewblitz(const CompatConfig* self)
 	return psy_property_at_bool(self->compatibility, "loadnewgamefxblitz", 0);
 }
 /* events */
-bool compatconfig_onchanged(CompatConfig* self, psy_Property*
+uintptr_t compatconfig_onchanged(CompatConfig* self, psy_Property*
 	property)
 {
 	psy_signal_emit(&self->signal_changed, self, 1, property);
-	return TRUE;
+	return psy_INDEX_INVALID;
 }
 
 bool compatconfig_hasproperty(const CompatConfig* self, psy_Property* property)

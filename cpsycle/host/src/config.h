@@ -131,7 +131,7 @@ bool psycleconfig_audio_enabled(const PsycleConfig*);
 void psycleconfig_enableaudio(PsycleConfig*, bool on);
 
 void psycleconfig_notifyall_changed(PsycleConfig*);
-int psycleconfig_notify_changed(PsycleConfig*, psy_Property*);
+uintptr_t psycleconfig_notify_changed(PsycleConfig*, psy_Property*);
 
 #ifdef __cplusplus
 }

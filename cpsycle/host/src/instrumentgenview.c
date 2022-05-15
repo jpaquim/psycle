@@ -159,7 +159,7 @@ void instrumentgeneralview_setinstrument(InstrumentGeneralView* self,
 			psy_ui_checkbox_disablecheck(&self->fitrowcheck);
 		}
 		psy_snprintf(text, 128, "%d", (int)self->instrument->lines);
-		psy_ui_textarea_settext(&self->fitrowedit, text);
+		psy_ui_textarea_set_text(&self->fitrowedit, text);
 		switch (self->instrument->nna) {
 			case psy_audio_NNA_STOP:
 				instrumentgeneralview_nnahighlight(self, &self->nnacut);

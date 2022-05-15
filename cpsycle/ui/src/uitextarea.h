@@ -60,15 +60,15 @@ typedef struct psy_ui_TextAreaPane {
 
 void psy_ui_textareapane_init(psy_ui_TextAreaPane*, psy_ui_Component* parent);
 
-void psy_ui_textareapane_enableinputfield(psy_ui_TextAreaPane*);
-void psy_ui_textareapane_settext(psy_ui_TextAreaPane*, const char* text);
-void psy_ui_textareapane_addtext(psy_ui_TextAreaPane*, const char* text);
+void psy_ui_textareapane_enable_inputfield(psy_ui_TextAreaPane*);
+void psy_ui_textareapane_set_text(psy_ui_TextAreaPane*, const char* text);
+void psy_ui_textareapane_add_text(psy_ui_TextAreaPane*, const char* text);
 const char* psy_ui_textareapane_text(const psy_ui_TextAreaPane* self);
-void psy_ui_textareapane_setcharnumber(psy_ui_TextAreaPane*, double number);
-void psy_ui_textareapane_setlinenumber(psy_ui_TextAreaPane*, int number);
-void psy_ui_textareapane_enableedit(psy_ui_TextAreaPane*);
-void psy_ui_textareapane_preventedit(psy_ui_TextAreaPane*);
-void psy_ui_textareapane_setsel(psy_ui_TextAreaPane*, uintptr_t cpmin,
+void psy_ui_textareapane_set_char_number(psy_ui_TextAreaPane*, double number);
+void psy_ui_textareapane_set_line_number(psy_ui_TextAreaPane*, int number);
+void psy_ui_textareapane_enable_edit(psy_ui_TextAreaPane*);
+void psy_ui_textareapane_prevent_edit(psy_ui_TextAreaPane*);
+void psy_ui_textareapane_set_sel(psy_ui_TextAreaPane*, uintptr_t cpmin,
     uintptr_t cpmax);
 uintptr_t psy_ui_textareapane_cursor_line(const psy_ui_TextAreaPane*);
 uintptr_t psy_ui_textareapane_cursor_column(const psy_ui_TextAreaPane*);
@@ -104,19 +104,23 @@ typedef struct psy_ui_TextArea {
 void psy_ui_textarea_init(psy_ui_TextArea*, psy_ui_Component* parent);
 void psy_ui_textarea_init_single_line(psy_ui_TextArea*, psy_ui_Component* parent);
 
-INLINE void psy_ui_textarea_enableinputfield(psy_ui_TextArea* self)
+psy_ui_TextArea* psy_ui_textarea_alloc(void);
+psy_ui_TextArea* psy_ui_textarea_allocinit(psy_ui_Component* parent);
+psy_ui_TextArea* psy_ui_textarea_allocinit_single_line(psy_ui_Component* parent);
+
+INLINE void psy_ui_textarea_enable_input_field(psy_ui_TextArea* self)
 {
-    psy_ui_textareapane_enableinputfield(&self->pane);
+    psy_ui_textareapane_enable_inputfield(&self->pane);
 }
 
-INLINE void psy_ui_textarea_settext(psy_ui_TextArea* self, const char* text)
+INLINE void psy_ui_textarea_set_text(psy_ui_TextArea* self, const char* text)
 {
-    psy_ui_textareapane_settext(&self->pane, text);
+    psy_ui_textareapane_set_text(&self->pane, text);
 }
 
-INLINE void psy_ui_textarea_addtext(psy_ui_TextArea* self, const char* text)
+INLINE void psy_ui_textarea_add_text(psy_ui_TextArea* self, const char* text)
 {
-    psy_ui_textareapane_addtext(&self->pane, text);
+    psy_ui_textareapane_add_text(&self->pane, text);
 }
 
 INLINE const char* psy_ui_textarea_text(const psy_ui_TextArea* self)
@@ -129,28 +133,28 @@ void psy_ui_textarea_range(psy_ui_TextArea*, intptr_t start, intptr_t end, char*
 
 INLINE void psy_ui_textarea_setcharnumber(psy_ui_TextArea* self, int number)
 {
-    psy_ui_textareapane_setcharnumber(&self->pane, number);
+    psy_ui_textareapane_set_char_number(&self->pane, number);
 }
 
 INLINE void psy_ui_textarea_setlinenumber(psy_ui_TextArea* self, int number)
 {
-    psy_ui_textareapane_setlinenumber(&self->pane, number);
+    psy_ui_textareapane_set_line_number(&self->pane, number);
 }
 
 INLINE void psy_ui_textarea_enableedit(psy_ui_TextArea* self)
 {
-    psy_ui_textareapane_enableedit(&self->pane);
+    psy_ui_textareapane_enable_edit(&self->pane);
 }
 
 INLINE void psy_ui_textarea_preventedit(psy_ui_TextArea* self)
 {
-    psy_ui_textareapane_preventedit(&self->pane);
+    psy_ui_textareapane_prevent_edit(&self->pane);
 }
 
 INLINE void psy_ui_textarea_setsel(psy_ui_TextArea* self,
     uintptr_t cpmin, uintptr_t cpmax)
 {
-    psy_ui_textareapane_setsel(&self->pane, cpmin, cpmax);
+    psy_ui_textareapane_set_sel(&self->pane, cpmin, cpmax);
 }
 
 void psy_ui_textarea_prevent_wrap(psy_ui_TextArea*);

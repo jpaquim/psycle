@@ -64,7 +64,7 @@ void keyboardmiscconfig_follow_song(KeyboardMiscConfig*);
 void keyboardmiscconfig_stop_follow_song(KeyboardMiscConfig*);
 
 
-void keyboardmiscconfig_onchanged(KeyboardMiscConfig*, psy_Property*);
+uintptr_t keyboardmiscconfig_onchanged(KeyboardMiscConfig*, psy_Property*);
 bool keyboardmiscconfig_hasproperty(const KeyboardMiscConfig*, psy_Property*);
 
 #ifdef __cplusplus

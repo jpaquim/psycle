@@ -62,7 +62,7 @@ const char* eventdriverconfig_eventdriverpath(EventDriverConfig*);
 void eventdriverconfig_read(EventDriverConfig*);
 psy_EventDriver* eventdriverconfig_selectedeventdriver(EventDriverConfig*);
 
-bool eventdriverconfig_onchanged(EventDriverConfig*, psy_Property*);
+uintptr_t eventdriverconfig_onchanged(EventDriverConfig*, psy_Property*);
 bool eventdriverconfig_hasproperty(const EventDriverConfig*, psy_Property*);
 
 #ifdef __cplusplus

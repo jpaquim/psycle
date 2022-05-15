@@ -109,7 +109,7 @@ void patternviewconfig_set_zoom(PatternViewConfig*, double zoom);
 double patternviewconfig_zoom(const PatternViewConfig*);
 
 /* events */
-int patternviewconfig_onchanged(PatternViewConfig*, psy_Property*);
+uintptr_t patternviewconfig_onchanged(PatternViewConfig*, psy_Property*);
 
 #ifdef __cplusplus
 }

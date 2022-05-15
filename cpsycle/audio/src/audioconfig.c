@@ -337,7 +337,11 @@ bool audioconfig_onpropertychanged(AudioConfig* self, psy_Property* property,
 		psy_audio_player_start_threads(self->player, psy_property_item_int(property));
 		return FALSE;
 	}
-	choice = psy_property_item_choice_parent(property);		
+	if (psy_property_type(property) == PSY_PROPERTY_TYPE_CHOICE) {
+		choice = property;
+	} else {
+		choice = psy_property_item_choice_parent(property);
+	}
 	if (choice && psy_property_hasid(choice, PROPERTY_ID_AUDIODRIVERS)) {
 		audioconfig_onaudiodriverselect(self, self->audioenabled);
 		*rebuild_level = 1;
@@ -360,13 +364,13 @@ uintptr_t audioconfig_numthreads(const AudioConfig* self)
 }
 
 /* events */
-bool audioconfig_onchanged(AudioConfig* self, psy_Property*
+uintptr_t audioconfig_onchanged(AudioConfig* self, psy_Property*
 	property)
 {
 	assert(self);	
 
 	psy_signal_emit(&self->signal_changed, self, 1, property);
-	return TRUE;
+	return psy_INDEX_INVALID;
 }
 
 bool audioconfig_hasproperty(const AudioConfig* self,

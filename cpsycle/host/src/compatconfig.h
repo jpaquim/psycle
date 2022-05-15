@@ -30,7 +30,7 @@ void compatconfig_dispose(CompatConfig*);
 void compatconfig_setloadnewblitz(CompatConfig*, bool mode);
 bool compatconfig_loadnewblitz(const CompatConfig*);
 
-bool compatconfig_onchanged(CompatConfig*, psy_Property*);
+uintptr_t compatconfig_onchanged(CompatConfig*, psy_Property*);
 bool compatconfig_hasproperty(const CompatConfig*, psy_Property*);
 
 

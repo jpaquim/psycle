@@ -16,6 +16,7 @@
 #include "../../detail/portable.h"
 
 /* psy_ui_TextAreaPane */
+
 /* prototypes */
 static void psy_ui_textareapane_on_destroy(psy_ui_TextAreaPane*);
 static void psy_ui_textareapane_onpreferredsize(psy_ui_TextAreaPane*,
@@ -115,13 +116,13 @@ void psy_ui_textareapane_on_destroy(psy_ui_TextAreaPane* self)
 	psy_signal_dispose(&self->signal_change);
 	psy_signal_dispose(&self->signal_accept);
 	psy_signal_dispose(&self->signal_reject);
-	psy_signal_disconnect(&psy_ui_app()->signal_mousehook, self,
-		psy_ui_textareapane_onmousehook);
+	psy_signal_disconnect(&psy_ui_app()->signal_mousehook,
+		self, psy_ui_textareapane_onmousehook);
 	free(self->text);
 	psy_ui_textformat_dispose(&self->format);
 }
 
-void psy_ui_textareapane_enableinputfield(psy_ui_TextAreaPane* self)
+void psy_ui_textareapane_enable_inputfield(psy_ui_TextAreaPane* self)
 {
 	self->isinputfield = TRUE;
 	psy_signal_disconnect(&psy_ui_app()->signal_mousehook, self,
@@ -130,7 +131,7 @@ void psy_ui_textareapane_enableinputfield(psy_ui_TextAreaPane* self)
 		psy_ui_textareapane_onmousehook);
 }
 
-void psy_ui_textareapane_settext(psy_ui_TextAreaPane* self, const char* text)
+void psy_ui_textareapane_set_text(psy_ui_TextAreaPane* self, const char* text)
 {	
 	psy_strreset(&self->text, text);
 	psy_ui_textformat_clear(&self->format);
@@ -138,7 +139,7 @@ void psy_ui_textareapane_settext(psy_ui_TextAreaPane* self, const char* text)
 	psy_ui_component_invalidate(&self->component);
 }
 
-void psy_ui_textareapane_addtext(psy_ui_TextAreaPane* self, const char* text)
+void psy_ui_textareapane_add_text(psy_ui_TextAreaPane* self, const char* text)
 {
 	self->text = psy_strcat_realloc(self->text, text);
 	psy_ui_textformat_clear(&self->format);	
@@ -162,13 +163,13 @@ void psy_ui_textareapane_addtext(psy_ui_TextAreaPane* self, const char* text)
 	 }
  }
 
-void psy_ui_textareapane_setcharnumber(psy_ui_TextAreaPane* self, double number)
+void psy_ui_textareapane_set_char_number(psy_ui_TextAreaPane* self, double number)
 {
 	self->charnumber = number;
 	psy_ui_textformat_clear(&self->format);
 }
 
-void psy_ui_textareapane_setlinenumber(psy_ui_TextAreaPane* self, int number)
+void psy_ui_textareapane_set_line_number(psy_ui_TextAreaPane* self, int number)
 {
 	self->linenumber = number;
 }
@@ -194,17 +195,17 @@ void psy_ui_textareapane_onpreferredsize(psy_ui_TextAreaPane* self,
 		psy_ui_textformat_numlines(&self->format) * (tm->tmHeight * 1.0));	
 }
 
-void psy_ui_textareapane_enableedit(psy_ui_TextAreaPane* self)
+void psy_ui_textareapane_enable_edit(psy_ui_TextAreaPane* self)
 {
 	psy_ui_component_enableinput(&self->component, psy_ui_NONE_RECURSIVE);
 }
 
-void psy_ui_textareapane_preventedit(psy_ui_TextAreaPane* self)
+void psy_ui_textareapane_prevent_edit(psy_ui_TextAreaPane* self)
 {
 	psy_ui_component_preventinput(&self->component, psy_ui_NONE_RECURSIVE);
 }
 
-void psy_ui_textareapane_setsel(psy_ui_TextAreaPane* self, uintptr_t cpmin, uintptr_t cpmax)
+void psy_ui_textareapane_set_sel(psy_ui_TextAreaPane* self, uintptr_t cpmin, uintptr_t cpmax)
 {
 
 }
@@ -638,6 +639,32 @@ void psy_ui_textarea_on_destroy(psy_ui_TextArea* self, psy_ui_Component* parent)
 	psy_signal_dispose(&self->signal_change);
 	psy_signal_dispose(&self->signal_accept);
 	psy_signal_dispose(&self->signal_reject);
+}
+
+psy_ui_TextArea* psy_ui_textarea_alloc(void)
+{
+	return (psy_ui_TextArea*)malloc(sizeof(psy_ui_TextArea));
+}
+
+psy_ui_TextArea* psy_ui_textarea_allocinit(psy_ui_Component* parent)
+{
+	psy_ui_TextArea* rv;
+
+	rv = psy_ui_textarea_alloc();
+	if (rv) {
+		psy_ui_textarea_init(rv, parent);
+	}
+	return rv;
+}
+psy_ui_TextArea* psy_ui_textarea_allocinit_single_line(psy_ui_Component* parent)
+{
+	psy_ui_TextArea* rv;
+
+	rv = psy_ui_textarea_alloc();
+	if (rv) {
+		psy_ui_textarea_init_single_line(rv, parent);
+	}
+	return rv;
 }
 
 void psy_ui_textarea_prevent_wrap(psy_ui_TextArea* self)

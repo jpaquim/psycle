@@ -32,7 +32,7 @@ void seqeditconfig_dispose(SeqEditConfig*);
 
 uintptr_t seqeditconfig_machine(const SeqEditConfig*);
 
-bool seqeditconfig_onchanged(SeqEditConfig*, psy_Property*);
+uintptr_t seqeditconfig_onchanged(SeqEditConfig*, psy_Property*);
 bool seqeditconfig_hasproperty(const SeqEditConfig*, psy_Property*);
 
 #ifdef __cplusplus

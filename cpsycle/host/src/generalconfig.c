@@ -187,11 +187,11 @@ bool generalconfig_showminiview(const GeneralConfig* self)
 }
 
 /* events */
-bool generalconfig_onchanged(GeneralConfig* self, psy_Property*
+uintptr_t generalconfig_onchanged(GeneralConfig* self, psy_Property*
 	property)
 {
 	psy_signal_emit(&self->signal_changed, self, 1, property);
-	return TRUE;
+	return psy_INDEX_INVALID;
 }
 
 bool generalconfig_hasproperty(const GeneralConfig* self,

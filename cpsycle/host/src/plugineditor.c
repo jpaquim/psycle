@@ -60,7 +60,7 @@ void plugineditorcreatebar_init(PluginEditorCreateBar* self,
 	psy_ui_component_set_align(&self->desc.component, psy_ui_ALIGN_LEFT);
 	psy_ui_textarea_init_single_line(&self->name, &self->component);	
 	psy_ui_component_set_align(&self->name.component, psy_ui_ALIGN_CLIENT);
-	psy_ui_textarea_settext(&self->name, "newplugin");
+	psy_ui_textarea_set_text(&self->name, "newplugin");
 	psy_ui_button_init_text(&self->create, &self->component, "Create");
 	psy_ui_component_set_align(&self->create.component, psy_ui_ALIGN_RIGHT);	
 }
@@ -250,7 +250,7 @@ void plugineditor_buildpluginlist(PluginEditor* self)
 
 			property = (psy_Property*)psy_list_entry(p);
 			if (psy_property_at_int(property, "type", -1) == psy_audio_LUA) {
-				psy_ui_combobox_addtext(&self->pluginselector, psy_property_key(property));
+				psy_ui_combobox_add_text(&self->pluginselector, psy_property_key(property));
 				psy_table_insert(&self->pluginmappping, (uintptr_t)c, property);
 				++c;
 			}
@@ -299,7 +299,7 @@ void plugineditor_buildfilelist(PluginEditor* self)
 		char path[4096];
 
 		psy_ui_combobox_clear(&self->fileselector);
-		psy_ui_combobox_addtext(&self->fileselector, self->basepath);
+		psy_ui_combobox_add_text(&self->fileselector, self->basepath);
 		psy_dir_extract_path(self->basepath, prefix, name, ext);		
 		psy_snprintf(path, 4096, "%s\\%s", prefix, name);		
 		psy_dir_enumerate_recursive(self, path, "*.lua",
@@ -309,7 +309,7 @@ void plugineditor_buildfilelist(PluginEditor* self)
 
 int plugineditor_onenumdir(PluginEditor* self, const char* path, int type)
 {
-	psy_ui_combobox_addtext(&self->fileselector, path);
+	psy_ui_combobox_add_text(&self->fileselector, path);
 	return 1;
 }
 

@@ -368,14 +368,15 @@ psy_EventDriver* eventdriverconfig_selectedeventdriver(EventDriverConfig* self)
 	return psy_audio_player_eventdriver(self->player,
 		psy_property_item_int(self->activedrivers));
 }
-// events
-bool eventdriverconfig_onchanged(EventDriverConfig* self, psy_Property*
+
+/* events */
+uintptr_t eventdriverconfig_onchanged(EventDriverConfig* self, psy_Property*
 	property)
 {
 	assert(self);
 
 	psy_signal_emit(&self->signal_changed, self, 1, property);
-	return TRUE;
+	return psy_INDEX_INVALID;
 }
 
 bool eventdriverconfig_hasproperty(const EventDriverConfig* self,

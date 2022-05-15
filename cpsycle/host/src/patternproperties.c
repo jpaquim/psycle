@@ -57,15 +57,15 @@ void patternproperties_init(PatternProperties* self, psy_ui_Component* parent)
 	psy_ui_label_init_text(&self->namelabel, &self->component,
 		"patternview.patname");	
 	psy_ui_textarea_init_single_line(&self->nameedit, &self->component);	
-	psy_ui_textarea_settext(&self->nameedit, "patternview.nopattern");
+	psy_ui_textarea_set_text(&self->nameedit, "patternview.nopattern");
 	psy_ui_textarea_setcharnumber(&self->nameedit, 40);
-	// psy_ui_textarea_enableinputfield(&self->nameedit);
+	// psy_ui_textarea_enable_input_field(&self->nameedit);
 	psy_ui_label_init_text(&self->lengthlabel, &self->component,
 		"patternview.length");
 	psy_ui_label_set_textalignment(&self->lengthlabel, psy_ui_ALIGNMENT_LEFT);
 	psy_ui_textarea_init_single_line(&self->lengthedit, &self->component);	
 	psy_ui_textarea_setcharnumber(&self->lengthedit, 20);
-	// psy_ui_textarea_enableinputfield(&self->lengthedit);
+	// psy_ui_textarea_enable_input_field(&self->lengthedit);
 	psy_ui_button_init_connect(&self->applybutton, &self->component, self,
 		patternproperties_onapply);	
 	intedit_init(&self->timesig_numerator, &self->component,
@@ -127,7 +127,7 @@ void patternproperties_on_focus(PatternProperties* self)
 void patternproperties_onpatternnamechanged(PatternProperties* self,
 	psy_audio_Pattern* pattern)
 {	
-	psy_ui_textarea_settext(&self->nameedit,
+	psy_ui_textarea_set_text(&self->nameedit,
 		psy_audio_pattern_name(pattern));	
 }
 
@@ -137,7 +137,7 @@ void patternproperties_onpatternlengthchanged(PatternProperties* self,
 	char buffer[20];
 
 	psy_snprintf(buffer, 20, "%.4f", sender->length);
-	psy_ui_textarea_settext(&self->lengthedit, buffer);
+	psy_ui_textarea_set_text(&self->lengthedit, buffer);
 }
 
 void patternproperties_ontimesignominator(PatternProperties* self, IntEdit* sender)
@@ -169,7 +169,7 @@ void patternproperties_select(PatternProperties* self, uintptr_t pattern_index)
 		self->pattern_index = pattern_index;
 		pattern = patternproperties_pattern(self);
 		if (pattern) {
-			psy_ui_textarea_settext(&self->nameedit, psy_audio_pattern_name(pattern));
+			psy_ui_textarea_set_text(&self->nameedit, psy_audio_pattern_name(pattern));
 			psy_snprintf(buffer, 20, "%.4f", (float)psy_audio_pattern_length(pattern));
 			intedit_setvalue(&self->timesig_numerator, (int)pattern->timesig.numerator);
 			intedit_setvalue(&self->timesig_denominator, (int)pattern->timesig.denominator);
@@ -178,10 +178,10 @@ void patternproperties_select(PatternProperties* self, uintptr_t pattern_index)
 			psy_signal_connect(&pattern->signal_lengthchanged, self,
 				patternproperties_onpatternlengthchanged);
 		} else {
-			psy_ui_textarea_settext(&self->nameedit, "");
+			psy_ui_textarea_set_text(&self->nameedit, "");
 			psy_snprintf(buffer, 10, "");
 		}
-		psy_ui_textarea_settext(&self->lengthedit, buffer);				
+		psy_ui_textarea_set_text(&self->lengthedit, buffer);				
 	}
 }
 

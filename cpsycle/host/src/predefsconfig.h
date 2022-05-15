@@ -38,8 +38,7 @@ void predefsconfig_dispose(PredefsConfig*);
 void predefsconfig_predef(PredefsConfig*, int index, psy_dsp_Envelope* rv);
 void predefsconfig_storepredef(PredefsConfig*, int index, psy_dsp_Envelope* rv);
 
-// Will be called if settingview was changed
-bool predefsconfig_onchanged(PredefsConfig*, psy_Property*);
+uintptr_t predefsconfig_onchanged(PredefsConfig*, psy_Property*);
 bool predefsconfig_hasproperty(const PredefsConfig*, psy_Property*);
 
 #ifdef __cplusplus

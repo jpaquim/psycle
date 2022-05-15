@@ -233,12 +233,12 @@ void sequencebuttons_onrename(SequenceButtons* self, psy_ui_Button* sender)
 	if (!psy_ui_component_visible(psy_ui_textarea_base(&self->edit))) {
 		psy_audio_Pattern* pattern;
 
-		psy_ui_textarea_enableinputfield(&self->edit);
+		psy_ui_textarea_enable_input_field(&self->edit);
 		
 		pattern = psy_audio_sequence_pattern(self->cmds->sequence,
 			psy_audio_sequenceselection_first(&self->cmds->workspace->song->sequence.sequenceselection));
 		if (pattern) {			
-			psy_ui_textarea_settext(&self->edit, psy_audio_pattern_name(pattern));
+			psy_ui_textarea_set_text(&self->edit, psy_audio_pattern_name(pattern));
 			psy_ui_textarea_setsel(&self->edit, 0, -1);
 			psy_ui_component_show(psy_ui_textarea_base(&self->edit));
 			psy_ui_component_align(psy_ui_component_parent(&self->component));

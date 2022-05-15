@@ -353,7 +353,7 @@ void presetsbar_buildprograms(PresetsBar* self)
 			char name[256];
 
 			psy_audio_machine_programname(self->machine, 0, i, name);
-			psy_ui_combobox_addtext(&self->programbox, name);
+			psy_ui_combobox_add_text(&self->programbox, name);
 		}		
 	}
 }
@@ -370,7 +370,7 @@ void presetsbar_buildbanks(PresetsBar* self)
 			char name[256];
 
 			psy_audio_machine_bankname(self->machine, i, name);
-			psy_ui_combobox_addtext(&self->bankselector, name);
+			psy_ui_combobox_add_text(&self->bankselector, name);
 		}		
 	}
 }
@@ -384,6 +384,6 @@ void presetsbar_updatesavename(PresetsBar* self)
 			psy_audio_machine_currbank(self->machine),
 			psy_audio_machine_currprogram(self->machine),
 			text);
-		psy_ui_textarea_settext(&self->savename, text);
+		psy_ui_textarea_set_text(&self->savename, text);
 	}
 }

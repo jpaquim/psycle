@@ -15,8 +15,8 @@
 #include "../../detail/portable.h"
 
 
-static void psy_ui_editor_setfont(psy_ui_Editor*, psy_ui_Font*);
-static void psy_ui_editor_getrange(psy_ui_Editor*, intptr_t start, intptr_t end,
+static void psy_ui_editor_set_font(psy_ui_Editor*, psy_ui_Font*);
+static void psy_ui_editor_get_range(psy_ui_Editor*, intptr_t start, intptr_t end,
 	char* text);
 
 /* implementation */
@@ -34,7 +34,7 @@ void psy_ui_editor_load(psy_ui_Editor* self, const char* path)
 {	
 	FILE* fp;
 
-	psy_ui_textarea_settext(&self->textarea, "");
+	psy_ui_textarea_set_text(&self->textarea, "");
 	fp = fopen(path, "rb");
 	if (fp) {
 		char data[BLOCKSIZE];
@@ -43,7 +43,7 @@ void psy_ui_editor_load(psy_ui_Editor* self, const char* path)
 		memset(data, 0, BLOCKSIZE);
 		lenfile = fread(data, 1, sizeof(data), fp);
 		while (lenfile > 0) {
-			psy_ui_textarea_addtext(&self->textarea, (char*)data);
+			psy_ui_textarea_add_text(&self->textarea, (char*)data);
 			lenfile = fread(data, 1, sizeof(data), fp);
 		}
 		fclose(fp);
@@ -69,26 +69,26 @@ void psy_ui_editor_save(psy_ui_Editor* self, const char* path)
 			grabsize = lengthdoc - i;
 			if (grabsize > BLOCKSIZE)
 				grabsize = BLOCKSIZE;
-			psy_ui_editor_getrange(self, i, i + grabsize, data);
+			psy_ui_editor_get_range(self, i, i + grabsize, data);
 			fwrite(data, grabsize, 1, fp);
 		}
 		fclose(fp);		
 	}
 }
 
-void psy_ui_editor_getrange(psy_ui_Editor* self, intptr_t start, intptr_t end, char* text)
+void psy_ui_editor_get_range(psy_ui_Editor* self, intptr_t start, intptr_t end, char* text)
 {
 	psy_ui_textarea_range(&self->textarea, start, end, text);
 }
 
-void psy_ui_editor_settext(psy_ui_Editor* self, const char* text)
+void psy_ui_editor_set_text(psy_ui_Editor* self, const char* text)
 {
-	psy_ui_textarea_settext(&self->textarea, text);	
+	psy_ui_textarea_set_text(&self->textarea, text);	
 }
 
-void psy_ui_editor_addtext(psy_ui_Editor* self, const char* text)
+void psy_ui_editor_add_text(psy_ui_Editor* self, const char* text)
 {
-	psy_ui_textarea_addtext(&self->textarea, text);	
+	psy_ui_textarea_add_text(&self->textarea, text);	
 }
 
 char* psy_ui_editor_text(psy_ui_Editor* self, uintptr_t maxlength, char* rv)
@@ -108,15 +108,15 @@ uintptr_t psy_ui_editor_length(psy_ui_Editor* self)
 
 void psy_ui_editor_clear(psy_ui_Editor* self)
 {
-	psy_ui_textarea_settext(&self->textarea, "");
+	psy_ui_textarea_set_text(&self->textarea, "");
 }
 
-void psy_ui_editor_preventedit(psy_ui_Editor* self)
+void psy_ui_editor_prevent_edit(psy_ui_Editor* self)
 {	
 	psy_ui_textarea_preventedit(&self->textarea);	
 }
 
-void psy_ui_editor_enableedit(psy_ui_Editor* self)
+void psy_ui_editor_enable_edit(psy_ui_Editor* self)
 {
 	psy_ui_textarea_enableedit(&self->textarea);
 }

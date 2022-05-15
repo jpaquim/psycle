@@ -353,7 +353,7 @@ void fileview_updatepath(FileView* self)
 	psy_ui_label_set_text(&self->dir,
 		psy_path_full(&self->curr));
 	fileview_currfile(self, fname, 256);
-	psy_ui_textarea_settext(&self->filename, fname);
+	psy_ui_textarea_set_text(&self->filename, fname);
 }
 
 const char* fileview_path(FileView* self)

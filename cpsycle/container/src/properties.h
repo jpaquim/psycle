@@ -231,10 +231,10 @@ bool psy_property_hastype(const psy_Property*, psy_PropertyType);
 uint32_t psy_property_item_colour(const psy_Property*);
 bool psy_property_ishex(const psy_Property*);
 bool psy_property_isbool(const psy_Property*);
-bool psy_property_isint(const psy_Property*);
-bool psy_property_isstr(const psy_Property*);
-bool psy_property_isfont(const psy_Property*);
-bool psy_property_isaction(const psy_Property*);
+bool psy_property_is_int(const psy_Property*);
+bool psy_property_is_string(const psy_Property*);
+bool psy_property_is_font(const psy_Property*);
+bool psy_property_is_action(const psy_Property*);
 bool psy_property_issection(const psy_Property*);
 
 /* Description */

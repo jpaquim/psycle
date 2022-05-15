@@ -57,7 +57,7 @@ bool audioconfig_onpropertychanged(AudioConfig*, psy_Property*,
 const char* audioconfig_driverpath(AudioConfig*);
 const char* audioconfig_driverkey(AudioConfig*);
 
-bool audioconfig_onchanged(AudioConfig*, psy_Property*);
+uintptr_t audioconfig_onchanged(AudioConfig*, psy_Property*);
 bool audioconfig_hasproperty(const AudioConfig*, psy_Property*);
 
 psy_Property* audioconfig_drivers(AudioConfig*);

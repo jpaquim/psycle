@@ -246,7 +246,7 @@ void psycleconfig_enableaudio(PsycleConfig* self, bool on)
 	audioconfig_enableaudio(&self->audio, on);
 }
 
-int psycleconfig_notify_changed(PsycleConfig* self, psy_Property* property)
+uintptr_t psycleconfig_notify_changed(PsycleConfig* self, psy_Property* property)
 {		
 	switch (psy_property_id(property)) {	
 	case PROPERTY_ID_DEFAULTSKIN:
@@ -263,34 +263,36 @@ int psycleconfig_notify_changed(PsycleConfig* self, psy_Property* property)
 	}
 	if (machineviewconfig_hasproperty(&self->macview, property)) {
 		return machineviewconfig_onchanged(&self->macview, property);
+	} else if (languageconfig_has_property(&self->language, property)) {
+		return languageconfig_on_changed(&self->language, property);
 	} else if (patternviewconfig_has_property(&self->patview, property)) {
 		return patternviewconfig_onchanged(&self->patview, property);
 	} else if (machineparamconfig_hasproperty(&self->macparam, property)) {
 		return machineparamconfig_onchanged(&self->macparam, property);
 	} else if (generalconfig_hasproperty(&self->general, property)) {
-		generalconfig_onchanged(&self->general, property);
+		return generalconfig_onchanged(&self->general, property);
 	} else if (audioconfig_hasproperty(&self->audio, property)) {
-		audioconfig_onchanged(&self->audio, property);	
+		return audioconfig_onchanged(&self->audio, property);	
 	} else if (eventdriverconfig_hasproperty(&self->input, property)) {
-		eventdriverconfig_onchanged(&self->input, property);
-	} else if (languageconfig_hasproperty(&self->language, property)) {
-		languageconfig_onchanged(&self->language, property);
+		return eventdriverconfig_onchanged(&self->input, property);
+	} else if (languageconfig_has_property(&self->language, property)) {
+		languageconfig_on_changed(&self->language, property);
 	} else if (dirconfig_hasproperty(&self->directories, property)) {
-		dirconfig_onchanged(&self->directories, property);
+		return dirconfig_onchanged(&self->directories, property);		
 	} else if (keyboardmiscconfig_hasproperty(&self->misc, property)) {
-		keyboardmiscconfig_onchanged(&self->misc, property);
-	} else if (midiviewconfig_hasproperty(&self->midi, property)) {
-		midiviewconfig_onchanged(&self->midi, property);
+		return keyboardmiscconfig_onchanged(&self->misc, property);
+	} else if (midiviewconfig_has_property(&self->midi, property)) {
+		return midiviewconfig_on_changed(&self->midi, property);
 	} else if (compatconfig_hasproperty(&self->compat, property)) {
-		compatconfig_onchanged(&self->compat, property);
+		return compatconfig_onchanged(&self->compat, property);
 	} else if (predefsconfig_hasproperty(&self->predefs, property)) {
-		predefsconfig_onchanged(&self->predefs, property);
+		return predefsconfig_onchanged(&self->predefs, property);
 	} else if (metronomeconfig_hasproperty(&self->metronome, property)) {
 		return metronomeconfig_onchanged(&self->metronome, property);
 	} else if (seqeditconfig_hasproperty(&self->seqedit, property)) {
 		seqeditconfig_onchanged(&self->seqedit, property);
 	}
-	return 0;
+	return psy_INDEX_INVALID;
 }
 
 void psycleconfig_notifyall_changed(PsycleConfig* self)
@@ -298,13 +300,13 @@ void psycleconfig_notifyall_changed(PsycleConfig* self)
 	generalconfig_onchanged(&self->general, &self->config);
 	audioconfig_onchanged(&self->audio, &self->config);
 	eventdriverconfig_onchanged(&self->input, &self->config);
-	languageconfig_onchanged(&self->language, &self->config);
+	languageconfig_on_changed(&self->language, &self->config);
 	dirconfig_onchanged(&self->directories, &self->config);
 	machineviewconfig_onchanged(&self->macview, &self->config);
 	machineparamconfig_onchanged(&self->macparam, &self->config);
 	patternviewconfig_onchanged(&self->patview, &self->config);
 	keyboardmiscconfig_onchanged(&self->misc, &self->config);
-	midiviewconfig_onchanged(&self->midi, &self->config);
+	midiviewconfig_on_changed(&self->midi, &self->config);
 	compatconfig_onchanged(&self->compat, &self->config);
 	predefsconfig_onchanged(&self->predefs, &self->config);
 	metronomeconfig_onchanged(&self->metronome, &self->config);

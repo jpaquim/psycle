@@ -1416,7 +1416,7 @@ bool psy_property_ishex(const psy_Property* self)
 {
 	assert(self);
 
-	return psy_property_isint(self) &&
+	return psy_property_is_int(self) &&
 		(psy_property_hint(self) == PSY_PROPERTY_HINT_EDITHEX);
 }
 
@@ -1427,24 +1427,24 @@ bool psy_property_isbool(const psy_Property* self)
 	return psy_property_type(self) == PSY_PROPERTY_TYPE_BOOL;
 }
 
-bool psy_property_isint(const psy_Property* self)
+bool psy_property_is_int(const psy_Property* self)
 {
 	assert(self);
 
 	return psy_property_type(self) == PSY_PROPERTY_TYPE_INTEGER;
 }
 
-bool psy_property_isstr(const psy_Property* self)
+bool psy_property_is_string(const psy_Property* self)
 {
 	return psy_property_type(self) == PSY_PROPERTY_TYPE_STRING;
 }
 
-bool psy_property_isfont(const psy_Property* self)
+bool psy_property_is_font(const psy_Property* self)
 {
 	return psy_property_type(self) == PSY_PROPERTY_TYPE_FONT;
 }
 
-bool psy_property_isaction(const psy_Property* self)
+bool psy_property_is_action(const psy_Property* self)
 {
 	return psy_property_type(self) == PSY_PROPERTY_TYPE_ACTION;
 }

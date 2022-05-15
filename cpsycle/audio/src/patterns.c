@@ -88,7 +88,7 @@ void psy_audio_patterns_disposeslots(psy_audio_Patterns* self)
 		free(pattern);
 	}
 	psy_table_dispose(&self->slots);
-	psy_signal_disconnectall(&self->signal_namechanged);
+	psy_signal_disconnect_all(&self->signal_namechanged);
 }
 
 void psy_audio_patterns_clear(psy_audio_Patterns* self)

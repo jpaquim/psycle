@@ -50,7 +50,7 @@ void octavebar_buildoctavebox(OctaveBar* self)
 
 	for (octave = 0; octave < 9; ++octave) {
 		psy_snprintf(text, 20, "%d", octave);		
-		psy_ui_combobox_addtext(&self->octavebox, text);
+		psy_ui_combobox_add_text(&self->octavebox, text);
 	}
 	psy_ui_combobox_setcursel(&self->octavebox,
 		workspace_octave(self->workspace));

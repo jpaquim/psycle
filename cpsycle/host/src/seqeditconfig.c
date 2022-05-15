@@ -48,11 +48,11 @@ uintptr_t seqeditconfig_machine(const SeqEditConfig* self)
 }
 
 /* events */
-bool seqeditconfig_onchanged(SeqEditConfig* self, psy_Property*
+uintptr_t seqeditconfig_onchanged(SeqEditConfig* self, psy_Property*
 	property)
 {
 	psy_signal_emit(&self->signal_changed, self, 1, property);
-	return TRUE;
+	return psy_INDEX_INVALID;
 }
 
 bool seqeditconfig_hasproperty(const SeqEditConfig* self, psy_Property* property)

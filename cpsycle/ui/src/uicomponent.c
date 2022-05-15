@@ -270,7 +270,7 @@ static void show(psy_ui_Component*);
 static void showstate(psy_ui_Component*, int state);
 static void hide(psy_ui_Component*);
 static int visible(psy_ui_Component*);
-static int drawvisible(psy_ui_Component*);
+static int draw_visible(psy_ui_Component*);
 static void move(psy_ui_Component*, psy_ui_Point);
 static void resize(psy_ui_Component*, psy_ui_Size);
 static void clientresize(psy_ui_Component*, psy_ui_Size);
@@ -425,7 +425,7 @@ static void vtable_init(void)
 		vtable.showstate = showstate;
 		vtable.hide = hide;
 		vtable.visible = visible;
-		vtable.drawvisible = drawvisible;
+		vtable.draw_visible = draw_visible;
 		vtable.move = move;
 		vtable.resize = resize;
 		vtable.clientresize = clientresize;		
@@ -535,6 +535,9 @@ void dispose(psy_ui_Component* self)
 	self->imp = 0;	
 	psy_ui_componentstyle_dispose(&self->style);
 	psy_ui_componentbackground_dispose(&self->componentbackground);
+	if (psy_ui_app()->focus == self) {
+		psy_ui_app()->focus = NULL;
+	}
 }
 
 void destroy(psy_ui_Component* self)
@@ -577,16 +580,25 @@ void hide(psy_ui_Component* self)
 
 int visible(psy_ui_Component* self)
 {	
+	assert(self);
+	assert(self->imp);
+
 	return self->imp->vtable->dev_visible(self->imp);
 }
 
-int drawvisible(psy_ui_Component* self)
+int draw_visible(psy_ui_Component* self)
 {
+	assert(self);
+	assert(self->imp);
+
 	return self->imp->vtable->dev_drawvisible(self->imp);
 }
 
 void move(psy_ui_Component* self, psy_ui_Point origin)
 {	
+	assert(self);
+	assert(self->imp);
+
 	self->imp->vtable->dev_move(self->imp, origin);		
 }
 
@@ -981,7 +993,7 @@ int psy_ui_component_visible(psy_ui_Component* self)
 
 bool psy_ui_component_draw_visible(psy_ui_Component* self)
 {
-	return self->vtable->drawvisible(self);
+	return self->vtable->draw_visible(self);
 }
 
 void psy_ui_component_align(psy_ui_Component* self)

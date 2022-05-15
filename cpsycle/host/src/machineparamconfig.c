@@ -195,19 +195,21 @@ psy_ui_FontInfo machineparamconfig_fontinfo(const MachineParamConfig* self)
 }
 
 /* events */
-int machineparamconfig_onchanged(MachineParamConfig* self, psy_Property*
+uintptr_t machineparamconfig_onchanged(MachineParamConfig* self, psy_Property*
 	property)
 {
-	int rebuild_level;
+	uintptr_t rebuild_level;
 
 	assert(self);
 
-	rebuild_level = 0;
+	rebuild_level = psy_INDEX_INVALID;
 	if (machineparamconfig_hasthemeproperty(self, property)) {
 		psy_Property* choice;
 		bool worked;
 
-		choice = (psy_property_is_choice_item(property)) ? psy_property_parent(property) : NULL;
+		choice = (psy_property_is_choice_item(property))
+			? psy_property_parent(property)
+			: NULL;
 		worked = FALSE;
 		if (choice) {
 			worked = TRUE;

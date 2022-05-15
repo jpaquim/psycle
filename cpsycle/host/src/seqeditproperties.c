@@ -204,7 +204,7 @@ void seqeditmarkerproperties_setorderindex(SeqEditMarkerProperties* self,
 		psy_audio_SequenceMarkerEntry* markerentry;
 
 		markerentry = (psy_audio_SequenceMarkerEntry*)entry;		
-		psy_ui_textarea_settext(&self->name.edit, markerentry->text);		
+		psy_ui_textarea_set_text(&self->name.edit, markerentry->text);		
 	}
 }
 

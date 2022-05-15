@@ -37,8 +37,8 @@ void midiviewconfig_dispose(MidiViewConfig*);
 void midiviewconfig_make_controllers(MidiViewConfig*);
 void midiviewconfig_make_controller_save(MidiViewConfig*);
 
-bool midiviewconfig_onchanged(MidiViewConfig*, psy_Property*);
-bool midiviewconfig_hasproperty(const MidiViewConfig*, psy_Property*);
+uintptr_t midiviewconfig_on_changed(MidiViewConfig*, psy_Property*);
+bool midiviewconfig_has_property(const MidiViewConfig*, psy_Property*);
 
 #ifdef __cplusplus
 }

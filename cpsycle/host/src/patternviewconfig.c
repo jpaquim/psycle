@@ -665,13 +665,13 @@ bool patternviewconfig_show_trackscopes(const PatternViewConfig* self)
 }
 
 /* events */
-int patternviewconfig_onchanged(PatternViewConfig* self, psy_Property* property)
+uintptr_t patternviewconfig_onchanged(PatternViewConfig* self, psy_Property* property)
 {
-	int rebuild_level;
+	uintptr_t rebuild_level;
 
 	assert(self);
 
-	rebuild_level = 0;
+	rebuild_level = psy_INDEX_INVALID;
 	if (patternviewconfig_has_theme_property(self, property)) {
 		psy_Property* choice;
 		bool worked;
@@ -682,6 +682,7 @@ int patternviewconfig_onchanged(PatternViewConfig* self, psy_Property* property)
 		worked = FALSE;
 		if (choice) {
 			worked = TRUE;
+			rebuild_level = 0;
 			switch (psy_property_id(choice)) {
 			case PROPERTY_ID_PATTERN_SKIN:
 				patternviewconfig_load_bitmap(self);

@@ -57,7 +57,7 @@ void machineparamconfig_set_dial_bpm(MachineParamConfig*, const char* filename);
 
 psy_ui_FontInfo machineparamconfig_fontinfo(const MachineParamConfig*);
 
-int machineparamconfig_onchanged(MachineParamConfig*, psy_Property*);
+uintptr_t machineparamconfig_onchanged(MachineParamConfig*, psy_Property*);
 
 #ifdef __cplusplus
 }

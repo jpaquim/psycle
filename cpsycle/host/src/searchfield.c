@@ -66,7 +66,7 @@ void searchfield_init(SearchField* self, psy_ui_Component* parent)
 		self, searchfield_oneditfocus);
 	psy_signal_connect(&self->edit.signal_change,
 		self, searchfield_oneditchange);
-	psy_ui_textarea_enableinputfield(&self->edit);
+	psy_ui_textarea_enable_input_field(&self->edit);
 	psy_signal_connect(&self->edit.signal_accept,
 		self, searchfield_onaccept);
 	psy_signal_connect(&self->edit.signal_reject,
@@ -102,7 +102,7 @@ void searchfield_oneditfocus(SearchField* self, psy_ui_Component* sender)
 {
 	psy_ui_component_addstylestate(&self->component, psy_ui_STYLESTATE_SELECT);
 	if (self->hasdefaulttext) {
-		psy_ui_textarea_settext(&self->edit, "");
+		psy_ui_textarea_set_text(&self->edit, "");
 	}
 }
 
@@ -145,7 +145,7 @@ void searchfield_checkdefault(SearchField* self)
 {
 	if (self->hasdefaulttext) {
 		psy_signal_preventall(&self->edit.signal_change);
-		psy_ui_textarea_settext(&self->edit, psy_ui_translate(self->defaulttext));
+		psy_ui_textarea_set_text(&self->edit, psy_ui_translate(self->defaulttext));
 		psy_signal_enableall(&self->edit.signal_change);		
 	}
 }
