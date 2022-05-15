@@ -59,7 +59,7 @@ bool machineviewconfig_vumeters(const MachineViewConfig*);
 bool machineviewconfig_virtualgenerators(const MachineViewConfig*);
 bool machineviewconfig_stackview_drawsmalleffects(const MachineViewConfig*);
 
-int machineviewconfig_onchanged(MachineViewConfig*, psy_Property*);
+uintptr_t machineviewconfig_onchanged(MachineViewConfig*, psy_Property*);
 
 
 #ifdef __cplusplus

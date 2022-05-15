@@ -55,7 +55,7 @@ void metronomebar_fillprecount(MetronomeBar* self)
 		char str[4];
 
 		psy_snprintf(str, 4, "%d", (int)i);
-		psy_ui_combobox_addtext(&self->precount, str);
+		psy_ui_combobox_add_text(&self->precount, str);
 	}	
 }
 

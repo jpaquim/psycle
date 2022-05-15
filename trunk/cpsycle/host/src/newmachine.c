@@ -605,7 +605,7 @@ void newmachinesectionspane_init(NewMachineSectionsPane* self, psy_ui_Component*
 	psy_ui_component_init(&self->sections, &self->component, NULL);
 	/* edit */
 	psy_ui_textarea_init_single_line(&self->edit, &self->component);	
-	psy_ui_textarea_enableinputfield(&self->edit);
+	psy_ui_textarea_enable_input_field(&self->edit);
 	psy_ui_component_hide(&self->edit.component);
 	/* section scroll */
 	psy_ui_component_set_overflow(&self->sections, psy_ui_OVERFLOW_VSCROLL);

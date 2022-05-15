@@ -82,8 +82,8 @@ void machinebar_init(MachineBar* self, psy_ui_Component* parent, Workspace* work
 	self->prevent_selchange_notify = FALSE;
 	psy_ui_combobox_init(&self->selectinstparam, &self->component);
 	psy_ui_combobox_setcharnumber(&self->selectinstparam, 14);
-	psy_ui_combobox_addtext(&self->selectinstparam, "Params");
-	psy_ui_combobox_addtext(&self->selectinstparam, psy_ui_translate(
+	psy_ui_combobox_add_text(&self->selectinstparam, "Params");
+	psy_ui_combobox_add_text(&self->selectinstparam, psy_ui_translate(
 		"Instrument"));
 	psy_signal_connect(&self->selectinstparam.signal_selchanged, self,
 		machinebar_onselectinstparamselchange);
@@ -185,7 +185,7 @@ void machinebar_buildmachinebox(MachineBar* self)
 {
 	machinebar_clearmachinebox(self);
 	if (psy_audio_machines_size(self->machines) == 1) {
-		psy_ui_combobox_addtext(&self->machinebox, psy_ui_translate(
+		psy_ui_combobox_add_text(&self->machinebox, psy_ui_translate(
 			"machineview.no-machines-loaded"));
 		psy_ui_combobox_setcursel(&self->machinebox, 0);
 	} else if (self->machines &&
@@ -200,7 +200,7 @@ void machinebar_buildmachinebox(MachineBar* self)
 				machinebar_insertmachine(self, i, machine);
 			}
 		}
-		i = psy_ui_combobox_addtext(&self->machinebox,
+		i = psy_ui_combobox_add_text(&self->machinebox,
 			"------------------------------");
 		psy_table_insert(&self->comboboxslots, i, (void*)psy_INDEX_INVALID);
 		psy_table_insert(&self->slotscombobox, psy_INDEX_INVALID, (void*)i);
@@ -216,7 +216,7 @@ int machinebar_insertmachine(MachineBar* self, size_t slot, psy_audio_Machine* m
 		char buffer[128];
 		psy_snprintf(buffer, 128, "%02X: %s", slot, 
 			machine->vtable->info(machine)->shortname); 
-		comboboxindex = psy_ui_combobox_addtext(&self->machinebox, buffer);
+		comboboxindex = psy_ui_combobox_add_text(&self->machinebox, buffer);
 		psy_table_insert(&self->comboboxslots, comboboxindex, (void*)slot);
 		psy_table_insert(&self->slotscombobox, slot, (void*)comboboxindex);
 	}
@@ -317,11 +317,11 @@ void machinebar_buildparamlist(MachineBar* self)
 				} else {
 					psy_snprintf(text, 128, "%s", label);
 				}
-				psy_ui_combobox_addtext(&self->instparambox, text);
+				psy_ui_combobox_add_text(&self->instparambox, text);
 			}
 		}
 	} else {
-		psy_ui_combobox_addtext(&self->instparambox, psy_ui_translate(
+		psy_ui_combobox_add_text(&self->instparambox, psy_ui_translate(
 			"machineview.no-machine"));
 	}
 }
@@ -343,7 +343,7 @@ void machinebar_buildinstrumentlist(MachineBar* self)
 		} else {
 			psy_snprintf(text, 32, "%02X:%s", slot, "");
 		}
-		psy_ui_combobox_addtext(&self->instparambox, text);
+		psy_ui_combobox_add_text(&self->instparambox, text);
 	}
 }
 
@@ -357,7 +357,7 @@ void machinebar_buildauxlist(MachineBar* self)
 
 		for (index = 0 ; index < psy_audio_machine_numauxcolumns(machine);
 				++index) {
-			psy_ui_combobox_addtext(&self->instparambox,
+			psy_ui_combobox_add_text(&self->instparambox,
 				psy_audio_machine_auxcolumnname(machine, index));
 		}
 	}

@@ -195,11 +195,11 @@ void transformpatternview_initselection(TransformPatternView* self)
 
 	// init maps
 	//Note (search and replace)
-	psy_ui_combobox_addtext(&self->searchnote, all);		psy_ui_combobox_setitemdata(&self->searchnote, 0, 1003);
-	psy_ui_combobox_addtext(&self->searchnote, empty);		psy_ui_combobox_setitemdata(&self->searchnote, 1, 1001);
-	psy_ui_combobox_addtext(&self->searchnote, nonempty);	psy_ui_combobox_setitemdata(&self->searchnote, 2, 1002);
-	psy_ui_combobox_addtext(&self->replacenote, same);		psy_ui_combobox_setitemdata(&self->replacenote, 0, 1002);
-	psy_ui_combobox_addtext(&self->replacenote, empty);		psy_ui_combobox_setitemdata(&self->replacenote, 1, 1001);
+	psy_ui_combobox_add_text(&self->searchnote, all);		psy_ui_combobox_setitemdata(&self->searchnote, 0, 1003);
+	psy_ui_combobox_add_text(&self->searchnote, empty);		psy_ui_combobox_setitemdata(&self->searchnote, 1, 1001);
+	psy_ui_combobox_add_text(&self->searchnote, nonempty);	psy_ui_combobox_setitemdata(&self->searchnote, 2, 1002);
+	psy_ui_combobox_add_text(&self->replacenote, same);		psy_ui_combobox_setitemdata(&self->replacenote, 0, 1002);
+	psy_ui_combobox_add_text(&self->replacenote, empty);		psy_ui_combobox_setitemdata(&self->replacenote, 1, 1001);
 	is440 = patternviewconfig_notetabmode(&self->workspace->config.patview) ==
 		psy_dsp_NOTESTAB_A440;
 	for (i = psy_audio_NOTECOMMANDS_C0; i <= psy_audio_NOTECOMMANDS_B9; i++) {
@@ -207,49 +207,49 @@ void transformpatternview_initselection(TransformPatternView* self)
 
 		psy_snprintf(text, 256, "%s%d", notes[i % 12],
 			(i / 12) + ((is440) ? - 1 : 0));
-		psy_ui_combobox_addtext(&self->searchnote, text);	psy_ui_combobox_setitemdata(&self->searchnote, 3 + i, i);
-		psy_ui_combobox_addtext(&self->replacenote, text);	psy_ui_combobox_setitemdata(&self->replacenote, 2 + i, i);
+		psy_ui_combobox_add_text(&self->searchnote, text);	psy_ui_combobox_setitemdata(&self->searchnote, 3 + i, i);
+		psy_ui_combobox_add_text(&self->replacenote, text);	psy_ui_combobox_setitemdata(&self->replacenote, 2 + i, i);
 	}
-	psy_ui_combobox_addtext(&self->searchnote, off);		psy_ui_combobox_setitemdata(&self->searchnote, 123, psy_audio_NOTECOMMANDS_RELEASE);
-	psy_ui_combobox_addtext(&self->searchnote, twk);		psy_ui_combobox_setitemdata(&self->searchnote, 124, psy_audio_NOTECOMMANDS_TWEAK);
-	psy_ui_combobox_addtext(&self->searchnote, tws);		psy_ui_combobox_setitemdata(&self->searchnote, 125, psy_audio_NOTECOMMANDS_TWEAKSLIDE);
-	psy_ui_combobox_addtext(&self->searchnote, mcm);		psy_ui_combobox_setitemdata(&self->searchnote, 126, psy_audio_NOTECOMMANDS_MIDICC);
-	psy_ui_combobox_addtext(&self->replacenote, off);		psy_ui_combobox_setitemdata(&self->replacenote, 122, psy_audio_NOTECOMMANDS_RELEASE);
-	psy_ui_combobox_addtext(&self->replacenote, twk);		psy_ui_combobox_setitemdata(&self->replacenote, 123, psy_audio_NOTECOMMANDS_TWEAK);
-	psy_ui_combobox_addtext(&self->replacenote, tws);		psy_ui_combobox_setitemdata(&self->replacenote, 124, psy_audio_NOTECOMMANDS_TWEAKSLIDE);
-	psy_ui_combobox_addtext(&self->replacenote, mcm);		psy_ui_combobox_setitemdata(&self->replacenote, 125, psy_audio_NOTECOMMANDS_MIDICC);
+	psy_ui_combobox_add_text(&self->searchnote, off);		psy_ui_combobox_setitemdata(&self->searchnote, 123, psy_audio_NOTECOMMANDS_RELEASE);
+	psy_ui_combobox_add_text(&self->searchnote, twk);		psy_ui_combobox_setitemdata(&self->searchnote, 124, psy_audio_NOTECOMMANDS_TWEAK);
+	psy_ui_combobox_add_text(&self->searchnote, tws);		psy_ui_combobox_setitemdata(&self->searchnote, 125, psy_audio_NOTECOMMANDS_TWEAKSLIDE);
+	psy_ui_combobox_add_text(&self->searchnote, mcm);		psy_ui_combobox_setitemdata(&self->searchnote, 126, psy_audio_NOTECOMMANDS_MIDICC);
+	psy_ui_combobox_add_text(&self->replacenote, off);		psy_ui_combobox_setitemdata(&self->replacenote, 122, psy_audio_NOTECOMMANDS_RELEASE);
+	psy_ui_combobox_add_text(&self->replacenote, twk);		psy_ui_combobox_setitemdata(&self->replacenote, 123, psy_audio_NOTECOMMANDS_TWEAK);
+	psy_ui_combobox_add_text(&self->replacenote, tws);		psy_ui_combobox_setitemdata(&self->replacenote, 124, psy_audio_NOTECOMMANDS_TWEAKSLIDE);
+	psy_ui_combobox_add_text(&self->replacenote, mcm);		psy_ui_combobox_setitemdata(&self->replacenote, 125, psy_audio_NOTECOMMANDS_MIDICC);
 
 	psy_ui_combobox_setcursel(&self->searchnote, 0);
 	psy_ui_combobox_setcursel(&self->replacenote, 0);
 
 	//Inst (search and replace)
-	psy_ui_combobox_addtext(&self->searchinst, all);		psy_ui_combobox_setitemdata(&self->searchinst, 0, 1003);
-	psy_ui_combobox_addtext(&self->searchinst, empty);		psy_ui_combobox_setitemdata(&self->searchinst, 1, 1001);
-	psy_ui_combobox_addtext(&self->searchinst, nonempty);	psy_ui_combobox_setitemdata(&self->searchinst, 2, 1002);
-	psy_ui_combobox_addtext(&self->replaceinst, same);		psy_ui_combobox_setitemdata(&self->replaceinst, 0, 1002);
-	psy_ui_combobox_addtext(&self->replaceinst, empty);		psy_ui_combobox_setitemdata(&self->replaceinst, 1, 1001);
+	psy_ui_combobox_add_text(&self->searchinst, all);		psy_ui_combobox_setitemdata(&self->searchinst, 0, 1003);
+	psy_ui_combobox_add_text(&self->searchinst, empty);		psy_ui_combobox_setitemdata(&self->searchinst, 1, 1001);
+	psy_ui_combobox_add_text(&self->searchinst, nonempty);	psy_ui_combobox_setitemdata(&self->searchinst, 2, 1002);
+	psy_ui_combobox_add_text(&self->replaceinst, same);		psy_ui_combobox_setitemdata(&self->replaceinst, 0, 1002);
+	psy_ui_combobox_add_text(&self->replaceinst, empty);		psy_ui_combobox_setitemdata(&self->replaceinst, 1, 1001);
 	for (i = 0; i < 0xFF; i++) {
 		char text[256];
 		
 		psy_snprintf(text, 256, "%02X", i);				
-		psy_ui_combobox_addtext(&self->searchinst, text);	psy_ui_combobox_setitemdata(&self->searchinst, 3 + i, i);
-		psy_ui_combobox_addtext(&self->replaceinst, text);	psy_ui_combobox_setitemdata(&self->replaceinst, 2 + i, i);
+		psy_ui_combobox_add_text(&self->searchinst, text);	psy_ui_combobox_setitemdata(&self->searchinst, 3 + i, i);
+		psy_ui_combobox_add_text(&self->replaceinst, text);	psy_ui_combobox_setitemdata(&self->replaceinst, 2 + i, i);
 	}
 	psy_ui_combobox_setcursel(&self->searchinst, 0);
 	psy_ui_combobox_setcursel(&self->replaceinst, 0);
 
 	//Mach (search and replace)
-	psy_ui_combobox_addtext(&self->searchmach, all);		psy_ui_combobox_setitemdata(&self->searchmach, 0, 1003);
-	psy_ui_combobox_addtext(&self->searchmach, empty);		psy_ui_combobox_setitemdata(&self->searchmach, 1, 1001);
-	psy_ui_combobox_addtext(&self->searchmach, nonempty);	psy_ui_combobox_setitemdata(&self->searchmach, 2, 1002);
-	psy_ui_combobox_addtext(&self->replacemach, same);		psy_ui_combobox_setitemdata(&self->replacemach, 0, 1002);
-	psy_ui_combobox_addtext(&self->replacemach, empty);		psy_ui_combobox_setitemdata(&self->replacemach, 1, 1001);
+	psy_ui_combobox_add_text(&self->searchmach, all);		psy_ui_combobox_setitemdata(&self->searchmach, 0, 1003);
+	psy_ui_combobox_add_text(&self->searchmach, empty);		psy_ui_combobox_setitemdata(&self->searchmach, 1, 1001);
+	psy_ui_combobox_add_text(&self->searchmach, nonempty);	psy_ui_combobox_setitemdata(&self->searchmach, 2, 1002);
+	psy_ui_combobox_add_text(&self->replacemach, same);		psy_ui_combobox_setitemdata(&self->replacemach, 0, 1002);
+	psy_ui_combobox_add_text(&self->replacemach, empty);		psy_ui_combobox_setitemdata(&self->replacemach, 1, 1001);
 	for (i = 0; i < 0xFF; i++) {
 		char text[256];
 
 		psy_snprintf(text, 256, "%02X", i);
-		psy_ui_combobox_addtext(&self->searchmach, text);	psy_ui_combobox_setitemdata(&self->searchmach, 3 + i, i);
-		psy_ui_combobox_addtext(&self->replacemach, text);	psy_ui_combobox_setitemdata(&self->replacemach, 2 + i, i);
+		psy_ui_combobox_add_text(&self->searchmach, text);	psy_ui_combobox_setitemdata(&self->searchmach, 3 + i, i);
+		psy_ui_combobox_add_text(&self->replacemach, text);	psy_ui_combobox_setitemdata(&self->replacemach, 2 + i, i);
 	}
 	psy_ui_combobox_setcursel(&self->searchmach, 0);
 	psy_ui_combobox_setcursel(&self->replacemach, 0);

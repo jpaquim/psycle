@@ -103,7 +103,7 @@ void intedit_setvalue(IntEdit* self, int value)
 		value = psy_min(psy_max(value, self->minval), self->maxval);
 	}
 	psy_snprintf(text, 128, "%d", value);
-	psy_ui_textarea_settext(&self->input, text);
+	psy_ui_textarea_set_text(&self->input, text);
 	psy_signal_emit(&self->signal_changed, self, 0);
 	self->restore = value;
 }

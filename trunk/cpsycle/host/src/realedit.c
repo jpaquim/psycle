@@ -84,7 +84,7 @@ void realedit_setvalue(RealEdit* self, realedit_real_t value)
 		value = psy_min(psy_max(value, self->minval), self->maxval);
 	}
 	psy_snprintf(text, 128, "%.2f", (float)value);
-	psy_ui_textarea_settext(&self->edit, text);
+	psy_ui_textarea_set_text(&self->edit, text);
 	psy_signal_emit(&self->signal_changed, self, 0);
 	self->restore = value;
 }

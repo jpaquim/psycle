@@ -317,7 +317,7 @@ void keyboardmiscconfig_stop_follow_song(KeyboardMiscConfig* self)
 
 
 /* events */
-void keyboardmiscconfig_onchanged(KeyboardMiscConfig* self, psy_Property*
+uintptr_t keyboardmiscconfig_onchanged(KeyboardMiscConfig* self, psy_Property*
 	property)
 {
 	assert(self);
@@ -325,6 +325,7 @@ void keyboardmiscconfig_onchanged(KeyboardMiscConfig* self, psy_Property*
 	self->follow_song = psy_property_at_bool(self->keyboard_misc, "followsong",
 		FALSE);
 	psy_signal_emit(&self->signal_changed, self, 1, property);
+	return psy_INDEX_INVALID;
 }
 
 bool keyboardmiscconfig_hasproperty(const KeyboardMiscConfig* self,

@@ -112,7 +112,10 @@ void psy_ui_eventdispatch_handlemouseevent(psy_ui_EventDispatch* self,
 				self->lastbutton = psy_ui_mouseevent_button(ev);
 			}
 		}
-	}	
+	}
+	if (psy_ui_event_type(&ev->event) == psy_ui_MOUSEUP) {
+		self = self;
+	}
 	psy_ui_eventdispatch_bubble(self, component, &ev->event);
 	if (psy_ui_event_type(&ev->event) == psy_ui_MOUSEDOWN) {
 		self->lastbuttontimestamp = eventtime;
@@ -238,6 +241,9 @@ void psy_ui_eventdispatch_bubble(psy_ui_EventDispatch* self,
 	curr = component;
 	while (curr) {						
 		psy_ui_eventdispatch_notify(self, curr, ev);
+		if (!psy_ui_event_bubbles(ev)) {
+			break;
+		}
 		if (psy_ui_event_type(ev) >= psy_ui_MOUSEDOWN &&
 				psy_ui_event_type(ev) <= psy_ui_DBLCLICK) {
 			psy_ui_MouseEvent* mouse_event;
@@ -249,10 +255,7 @@ void psy_ui_eventdispatch_bubble(psy_ui_EventDispatch* self,
 			r = psy_ui_component_position(curr);
 			psy_ui_realpoint_add(&offset, psy_ui_realrectangle_topleft(&r));
 			psy_ui_mouseevent_setoffset(mouse_event, offset);
-		}
-		if (!psy_ui_event_bubbles(ev)) {
-			break;
-		}
+		}		
 		curr = psy_ui_component_parent(curr);
 	};
 	psy_ui_event_stop_propagation(ev);

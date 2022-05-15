@@ -65,7 +65,7 @@ void zoombox_init(ZoomBox* self, psy_ui_Component* parent)
 	psy_ui_component_set_style_type(psy_ui_textarea_base(&self->zoom),
 		STYLE_ZOOMBOX_EDIT);
 	psy_ui_textarea_setcharnumber(&self->zoom, 7);
-	psy_ui_textarea_enableinputfield(&self->zoom);	
+	psy_ui_textarea_enable_input_field(&self->zoom);	
 	psy_signal_connect(&self->zoom.signal_accept, self,
 		zoombox_oneditaccept);
 	psy_signal_connect(&self->zoom.signal_reject, self,
@@ -180,5 +180,5 @@ void zoombox_update(ZoomBox* self)
 	assert(self);
 
 	psy_snprintf(text, 64, "%d%%", (int)(self->zoomrate * 100 + 0.5));
-	psy_ui_textarea_settext(&self->zoom, text);
+	psy_ui_textarea_set_text(&self->zoom, text);
 }

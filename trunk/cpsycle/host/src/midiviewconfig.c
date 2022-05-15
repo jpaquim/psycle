@@ -179,15 +179,15 @@ void midiviewconfig_make_controller_save(MidiViewConfig* self)
 }
 
 /* events */
-bool midiviewconfig_onchanged(MidiViewConfig* self, psy_Property* property)
+uintptr_t midiviewconfig_on_changed(MidiViewConfig* self, psy_Property* property)
 {
 	assert(self);
 
 	psy_signal_emit(&self->signal_changed, self, 1, property);
-	return TRUE;
+	return psy_INDEX_INVALID;
 }
 
-bool midiviewconfig_hasproperty(const MidiViewConfig* self,
+bool midiviewconfig_has_property(const MidiViewConfig* self,
 	psy_Property* property)
 {
 	assert(self && self->controllers);

@@ -120,7 +120,7 @@ typedef struct psy_ui_ComponentVTable {
 	psy_ui_fp_component_showstate showstate;
 	psy_ui_fp_component_event hide;
 	psy_ui_fp_component_visible visible;
-	psy_ui_fp_component_visible drawvisible;
+	psy_ui_fp_component_visible draw_visible;
 	psy_ui_fp_component_move move;
 	psy_ui_fp_component_resize resize;
 	psy_ui_fp_component_clientresize clientresize;	

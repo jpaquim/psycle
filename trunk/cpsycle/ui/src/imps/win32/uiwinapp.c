@@ -513,6 +513,9 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 			if (component) {
 				deallocate = component->deallocate;				
 			}			
+			if (component->id == 100) {
+				self = self;
+			}
 			psy_ui_component_dispose(component);
 			psy_table_remove(&winapp->selfmap, (uintptr_t)hwnd);
 			if (component) {				

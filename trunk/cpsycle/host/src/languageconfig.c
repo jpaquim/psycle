@@ -190,26 +190,23 @@ void languageconfig_update_language(LanguageConfig* self)
 	}
 }
 
-bool languageconfig_onchanged(LanguageConfig* self,
+uintptr_t languageconfig_on_changed(LanguageConfig* self,
 	psy_Property* property)
-{	
-	psy_Property* choice;	
-
-	assert(self && property);
-
-	choice = psy_property_item_choice_parent(property);
-	if (choice && psy_property_hasid(choice, PROPERTY_ID_LANG)) {
+{		
+	assert(self);
+	assert(property);
+	
+	if (psy_property_hasid(property, PROPERTY_ID_LANG)) {
 		languageconfig_update_language(self);
-		psy_signal_emit(&self->signal_changed, self, 1, property);
-		return TRUE;
+		psy_signal_emit(&self->signal_changed, self, 1, property);		
 	}
-	return FALSE;
+	return 0;
 }
 
-bool languageconfig_hasproperty(const LanguageConfig* self,
+bool languageconfig_has_property(const LanguageConfig* self,
 	psy_Property* property)
 {
 	assert(self && self->languagechoice);
 
-	return psy_property_in_section(property, self->languagechoice);
+	return (property == self->languagechoice) || psy_property_in_section(property, self->languagechoice);
 }

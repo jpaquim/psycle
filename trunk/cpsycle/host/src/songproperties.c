@@ -77,7 +77,7 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 	psy_ui_component_set_align(&self->label_title.component, psy_ui_ALIGN_LEFT);
 	psy_ui_component_set_margin(&self->label_title.component, margin);
 	psy_ui_textarea_init_single_line(&self->edit_title, &self->title);	
-	psy_ui_textarea_enableinputfield(&self->edit_title);
+	psy_ui_textarea_enable_input_field(&self->edit_title);
 	psy_ui_component_set_align(&self->edit_title.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_component_set_margin(&self->edit_title.component, margin);
 	psy_signal_connect(&self->edit_title.signal_accept, self,
@@ -95,7 +95,7 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 	psy_ui_component_set_margin(&self->label_credits.component, margin);
 	psy_ui_label_set_textalignment(&self->label_credits, psy_ui_ALIGNMENT_RIGHT);
 	psy_ui_textarea_init_single_line(&self->edit_credits, &self->credits);	
-	psy_ui_textarea_enableinputfield(&self->edit_credits);
+	psy_ui_textarea_enable_input_field(&self->edit_credits);
 	psy_ui_component_set_align(&self->edit_credits.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_component_set_margin(&self->edit_credits.component, margin);
 	psy_signal_connect(&self->edit_credits.signal_accept, self,
@@ -178,11 +178,11 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 void songpropertiesview_read(SongPropertiesView* self)
 {	
 	if (self->song) {
-		psy_ui_textarea_settext(&self->edit_title,
+		psy_ui_textarea_set_text(&self->edit_title,
 			self->song->properties.title);
-		psy_ui_textarea_settext(&self->edit_credits,
+		psy_ui_textarea_set_text(&self->edit_credits,
 			self->song->properties.credits);
-		psy_ui_textarea_settext(&self->edit_comments,
+		psy_ui_textarea_set_text(&self->edit_comments,
 			self->song->properties.comments);
 		intedit_setvalue(&self->tempo, (int)self->song->properties.bpm);
 		intedit_setvalue(&self->lpb, (int)self->song->properties.lpb);
@@ -237,7 +237,7 @@ void songpropertiesview_oneditaccept(SongPropertiesView* self,
 	if (self->song) {
 		if (psy_strlen(psy_ui_textarea_text(sender)) == 0) {
 			if (sender == &self->edit_title) {
-				psy_ui_textarea_settext(sender, "Untitled");
+				psy_ui_textarea_set_text(sender, "Untitled");
 			}
 		}
 		if (sender == &self->edit_title) {
@@ -254,14 +254,14 @@ void songpropertiesview_oneditreject(SongPropertiesView* self,
 {	
 	if (self->song) {
 		if (sender == &self->edit_title) {
-			psy_ui_textarea_settext(&self->edit_title,
+			psy_ui_textarea_set_text(&self->edit_title,
 				psy_audio_song_title(self->song));
 		} else if (sender == &self->edit_credits) {
-			psy_ui_textarea_settext(&self->edit_credits,
+			psy_ui_textarea_set_text(&self->edit_credits,
 				psy_audio_song_credits(self->song));
 		}
 	} else {
-		psy_ui_textarea_settext(&self->edit_title, "");
+		psy_ui_textarea_set_text(&self->edit_title, "");
 	}	
 	psy_ui_component_set_focus(psy_ui_component_parent(&self->component));
 }

@@ -84,7 +84,7 @@ void playbar_init(PlayBar* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_ui_combobox_setcharnumber(&self->playmode, 6.0);	
 	/* play beat num */
 	psy_ui_textarea_init_single_line(&self->loopbeatsedit, playbar_base(self));	
-	psy_ui_textarea_settext(&self->loopbeatsedit, "4.00");
+	psy_ui_textarea_set_text(&self->loopbeatsedit, "4.00");
 	psy_ui_textarea_setcharnumber(&self->loopbeatsedit, 6);
 	psy_ui_button_init_connect(&self->loopbeatsless, playbar_base(self),
 		self, playbar_onnumplaybeatsless);
@@ -107,9 +107,9 @@ void playbar_init(PlayBar* self, psy_ui_Component* parent, Workspace* workspace)
 void playbar_updatetext(PlayBar* self)
 {
 	psy_ui_combobox_clear(&self->playmode);
-	psy_ui_combobox_addtext(&self->playmode, psy_ui_translate("play.song"));
-	psy_ui_combobox_addtext(&self->playmode, psy_ui_translate("play.sel"));
-	psy_ui_combobox_addtext(&self->playmode, psy_ui_translate("play.beats"));
+	psy_ui_combobox_add_text(&self->playmode, psy_ui_translate("play.song"));
+	psy_ui_combobox_add_text(&self->playmode, psy_ui_translate("play.sel"));
+	psy_ui_combobox_add_text(&self->playmode, psy_ui_translate("play.beats"));
 }
 
 void playbar_onplaymodeselchanged(PlayBar* self, psy_ui_ComboBox* sender, int sel)
@@ -133,7 +133,7 @@ void playbar_onnumplaybeatsless(PlayBar* self, psy_ui_Button* sender)
 	}
 	psy_audio_sequencer_set_num_play_beats(&self->player->sequencer, playbeats);
 	psy_snprintf(text, 40, "%f", (double) playbeats);
-	psy_ui_textarea_settext(&self->loopbeatsedit, text);
+	psy_ui_textarea_set_text(&self->loopbeatsedit, text);
 }
 
 void playbar_onnumplaybeatsmore(PlayBar* self, psy_ui_Button* sender)
@@ -145,7 +145,7 @@ void playbar_onnumplaybeatsmore(PlayBar* self, psy_ui_Button* sender)
 	playbeats += 1;		
 	psy_audio_sequencer_set_num_play_beats(&self->player->sequencer, playbeats);
 	psy_snprintf(text, 40, "%f", (double) playbeats);
-	psy_ui_textarea_settext(&self->loopbeatsedit, text);
+	psy_ui_textarea_set_text(&self->loopbeatsedit, text);
 }
 
 void playbar_onplayclicked(PlayBar* self, psy_ui_Component* sender)

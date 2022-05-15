@@ -173,7 +173,7 @@ void newmachinesection_onlabelclick(NewMachineSection* self, psy_ui_Label* sende
 {
 	if (self->edit) {		
 		self->preventedit = FALSE;		
-		psy_ui_textarea_settext(self->edit, self->label.text);
+		psy_ui_textarea_set_text(self->edit, self->label.text);
 		psy_ui_textarea_setsel(self->edit, 0, -1);
 		newmachinesection_showedit(self);		
 	}

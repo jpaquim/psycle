@@ -146,7 +146,7 @@ void instrumentfilterview_fillfiltercombobox(InstrumentFilterView* self)
 	uintptr_t ft;
 
 	for (ft = 0; ft < filter_numfilters(); ++ft) {
-		psy_ui_combobox_addtext(&self->filtertype,
+		psy_ui_combobox_add_text(&self->filtertype,
 			filter_name((psy_dsp_FilterType)ft));
 	}
 }

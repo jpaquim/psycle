@@ -20,7 +20,7 @@ void labeledit_init(LabelEdit* self, psy_ui_Component* parent,
 	psy_ui_label_set_charnumber(&self->desc, 12.0);
 	psy_ui_textarea_init_single_line(&self->edit, labeledit_base(self));	
 	psy_ui_component_set_align(psy_ui_textarea_base(&self->edit), psy_ui_ALIGN_CLIENT);	
-	psy_ui_textarea_enableinputfield(&self->edit);		
+	psy_ui_textarea_enable_input_field(&self->edit);		
 }
 
 LabelEdit* labeledit_alloc(void)

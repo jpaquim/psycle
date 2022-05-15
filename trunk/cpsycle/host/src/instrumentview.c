@@ -77,7 +77,7 @@ void virtualgeneratorbox_updatesamplers(VirtualGeneratorsBox* self)
 
 				psy_snprintf(text, 512, "%X: %s", (int)i,
 					psy_audio_machine_editname(machine));
-				psy_ui_combobox_addtext(&self->samplers, text);
+				psy_ui_combobox_add_text(&self->samplers, text);
 				psy_ui_combobox_setitemdata(&self->samplers,  c++, i);
 			}
 		}
@@ -96,7 +96,7 @@ void virtualgeneratorbox_updategenerators(VirtualGeneratorsBox* self)
 		char text[512];
 
 		psy_snprintf(text, 512, "%X", (int)slot);
-		psy_ui_combobox_addtext(&self->generators, text);
+		psy_ui_combobox_add_text(&self->generators, text);
 		psy_ui_combobox_setitemdata(&self->generators, slot - start, slot);
 	}
 }
@@ -260,7 +260,7 @@ void instrumentheaderview_init(InstrumentHeaderView* self, psy_ui_Component* par
 	psy_ui_label_init_text(&self->namelabel, &self->component,
 		"instrumentview.instrument-name");
 	psy_ui_textarea_init_single_line(&self->nameedit, &self->component);
-	psy_ui_textarea_enableinputfield(&self->nameedit);
+	psy_ui_textarea_enable_input_field(&self->nameedit);
 	psy_ui_textarea_setcharnumber(&self->nameedit, 20);
 	psy_signal_connect(&self->nameedit.pane.signal_accept, self,
 		instrumentheaderview_oneditaccept);	
@@ -290,7 +290,7 @@ void instrumentheaderview_setinstrument(InstrumentHeaderView* self,
 {
 	self->instrument = instrument;
 	self->predefs.instrument = instrument;	
-	psy_ui_textarea_settext(&self->nameedit,
+	psy_ui_textarea_set_text(&self->nameedit,
 		(instrument)
 		? instrument->name
 		: "");	
@@ -310,7 +310,7 @@ void instrumentheaderview_oneditaccept(InstrumentHeaderView* self,
 		
 		index = instrumentsbox_selected(&self->view->instrumentsbox);
 		if (psy_strlen(psy_ui_textarea_text(sender)) == 0) {
-			psy_ui_textarea_settext(sender, "Untitled");
+			psy_ui_textarea_set_text(sender, "Untitled");
 		}
 		psy_audio_instrument_setname(self->instrument, psy_ui_textarea_text(sender));
 		psy_snprintf(text, 20, "%02X:%s", 
@@ -340,7 +340,7 @@ void instrumentheaderview_oneditreject(InstrumentHeaderView* self,
 	psy_ui_TextArea* sender)
 {
 	if (self->instrument) {
-		psy_ui_textarea_settext(&self->nameedit,
+		psy_ui_textarea_set_text(&self->nameedit,
 			(self->instrument)
 			? self->instrument->name
 			: "");

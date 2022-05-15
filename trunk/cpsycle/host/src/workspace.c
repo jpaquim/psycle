@@ -77,7 +77,7 @@ static void workspace_on_add_event_driver(Workspace*);
 static void workspace_on_remove_event_driver(Workspace*);
 static void workspace_on_edit_event_driver_configuration(Workspace*);
 static void workspace_set_default_font(Workspace*, psy_Property*);
-static void workspace_set_app_theme(Workspace*, psy_Property*);
+static void workspace_set_app_theme(Workspace*);
 static void workspace_updatesavepoint(Workspace*);
 /* machinecallback */
 static psy_audio_MachineFactory* workspace_on_machinefactory(Workspace*);
@@ -458,7 +458,8 @@ void workspace_config_changed(Workspace* self, psy_Property* property,
 		workspace_set_default_font(self, property);
 		break;
 	case PROPERTY_ID_APPTHEME:
-		workspace_set_app_theme(self, property);
+		workspace_set_app_theme(self);
+		*rebuild_level = 1;
 		break;
 	case PROPERTY_ID_DEFAULTLINES:
 		if (psy_property_item_int(property) > 0) {
@@ -501,51 +502,36 @@ void workspace_config_changed(Workspace* self, psy_Property* property,
 			}
 		}
 		break; }
-	default: {
-			psy_Property* choice;
-
-			choice = (psy_property_is_choice_item(property))
-				? psy_property_parent(property)
-				: NULL;
-			if (choice && psy_property_id(choice) == PROPERTY_ID_APPTHEME) {
-				workspace_set_app_theme(self, property);
-				worked = TRUE;
-			} else if (audioconfig_onpropertychanged(&self->config.audio,
-					property, rebuild_level)) {
-				worked = TRUE;
-			} else if (languageconfig_onchanged(
-				&self->config.language, property)) {
-				worked = TRUE;
-			} else if (choice && psy_property_id(choice) ==
-				PROPERTY_ID_ACTIVEEVENTDRIVERS) {
-					eventdriverconfig_show_active(
-						&self->config.input, psy_property_item_int(choice));
-					*rebuild_level = 1;
-			} else if (choice && (psy_property_id(choice) ==
-					PROPERTY_ID_PATTERNDISPLAY)) {
-				patternviewconfig_select_pattern_display(&self->config.patview,
-					(PatternDisplayMode)psy_property_item_int(choice));
-			} else if (psy_property_in_section(property,
-					self->config.audio.driverconfigure)) {
-				audioconfig_on_edit_audio_driver_configuration(&self->config.audio,
-					psycleconfig_audio_enabled(&self->config));
-				audioconfig_driverconfigure_section(&self->config.audio);
-				*rebuild_level = 0;
-			} else if (psy_property_in_section(property,
-					self->config.input.eventdriverconfigure)) {
-				workspace_on_edit_event_driver_configuration(self);
-			} else if (psy_property_in_section(property,
-					self->config.midi.controllers)) {
-				psy_audio_player_midi_configure(&self->player,
-					self->config.midi.controllers, FALSE);
-				midiviewconfig_make_controller_save(
-					psycleconfig_midi(&self->config));
-				*rebuild_level = 1;
-			} else {
-				worked = FALSE;
-			}
-			break;
-		}
+	case PROPERTY_ID_ACTIVEEVENTDRIVERS:
+		eventdriverconfig_show_active(
+			&self->config.input, psy_property_item_int(property));
+		*rebuild_level = 1;
+		break;
+	case PROPERTY_ID_PATTERNDISPLAY:
+		patternviewconfig_select_pattern_display(&self->config.patview,
+			(PatternDisplayMode)psy_property_item_int(property));
+		break;
+	default: {				
+		if (psy_property_in_section(property,
+				self->config.audio.driverconfigure)) {
+			audioconfig_on_edit_audio_driver_configuration(&self->config.audio,
+				psycleconfig_audio_enabled(&self->config));
+			audioconfig_driverconfigure_section(&self->config.audio);
+			*rebuild_level = 0;
+		} else if (psy_property_in_section(property,
+				self->config.input.eventdriverconfigure)) {
+			workspace_on_edit_event_driver_configuration(self);
+		} else if (psy_property_in_section(property,
+				self->config.midi.controllers)) {
+			psy_audio_player_midi_configure(&self->player,
+				self->config.midi.controllers, FALSE);
+			midiviewconfig_make_controller_save(
+				psycleconfig_midi(&self->config));
+			*rebuild_level = 1;
+		} else {
+			worked = FALSE;
+		}		
+		break; }
 	}
 	if (!worked) {
 		*rebuild_level = psycleconfig_notify_changed(&self->config, property);		
@@ -650,7 +636,7 @@ void workspace_set_default_font(Workspace* self, psy_Property* property)
 	}
 }
 
-void workspace_set_app_theme(Workspace* self, psy_Property* property)
+void workspace_set_app_theme(Workspace* self)
 {
 	psy_Property* choice;
 
@@ -1051,7 +1037,7 @@ void workspace_load_configuration(Workspace* self)
 			&self->machinefactory);
 	}
 	workspace_set_default_font(self, self->config.defaultfont);
-	workspace_set_app_theme(self, self->config.apptheme);	
+	workspace_set_app_theme(self);	
 	psycleconfig_notifyall_changed(&self->config);
 	psy_path_dispose(&path);
 	psy_propertyreader_load(&propertyreader);

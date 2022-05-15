@@ -107,7 +107,7 @@ void newmachinedetail_init(NewMachineDetail* self, psy_ui_Component* parent,
 	psy_ui_component_set_align(psy_ui_label_base(&self->categorydesc),
 		psy_ui_ALIGN_LEFT);
 	psy_ui_textarea_init_single_line(& self->categoryedit, &self->category);	
-	psy_ui_textarea_enableinputfield(&self->categoryedit);	
+	psy_ui_textarea_enable_input_field(&self->categoryedit);	
 	psy_ui_margin_init_em(&margin, 0.0, 0.0, 0.0, 1.5);
 	psy_ui_component_set_margin(psy_ui_textarea_base(&self->categoryedit), margin);
 	psy_ui_component_set_align(psy_ui_textarea_base(&self->categoryedit),
@@ -190,7 +190,7 @@ void newmachinedetail_setdllname(NewMachineDetail* self, const char* text)
 
 void newmachinedetail_setcategoryname(NewMachineDetail* self, const char* text)
 {	
-	psy_ui_textarea_settext(&self->categoryedit, text);	
+	psy_ui_textarea_set_text(&self->categoryedit, text);	
 }
 
 void newmachinedetail_setplugversion(NewMachineDetail* self, int16_t version)

@@ -69,10 +69,10 @@ void interpolatecurvebar_init(InterpolateCurveBar* self, psy_ui_Component* paren
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_combobox_init(&self->curvetype, &self->component);
 	psy_ui_component_set_align(&self->curvetype.component, psy_ui_ALIGN_LEFT);
-	psy_ui_combobox_addtext(&self->curvetype, "Linear");
-	psy_ui_combobox_addtext(&self->curvetype, "Hermite Curve");
-	psy_ui_combobox_addtext(&self->curvetype, "All to Linear");
-	psy_ui_combobox_addtext(&self->curvetype, "All to Hermite");
+	psy_ui_combobox_add_text(&self->curvetype, "Linear");
+	psy_ui_combobox_add_text(&self->curvetype, "Hermite Curve");
+	psy_ui_combobox_add_text(&self->curvetype, "All to Linear");
+	psy_ui_combobox_add_text(&self->curvetype, "All to Hermite");
 	psy_ui_combobox_setcursel(&self->curvetype, 0);
 	psy_ui_combobox_setcharnumber(&self->curvetype, 15);
 	psy_ui_button_init(&self->cancel, &self->component);

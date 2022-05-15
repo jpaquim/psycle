@@ -61,7 +61,7 @@ void newvalview_init(NewValView* self, psy_ui_Component* parent,
 	psy_ui_component_set_align(psy_ui_button_base(&self->cancel),
 		psy_ui_ALIGN_LEFT);	
 	psy_snprintf(buf, 32, "%d", vval);
-	psy_ui_textarea_settext(&self->edit, buf);
+	psy_ui_textarea_set_text(&self->edit, buf);
 	psy_signal_connect(&self->edit.component.signal_keydown, self,
 		oneditkeydown);
 	psy_signal_connect(&self->edit.component.signal_keyup, self,
@@ -88,7 +88,7 @@ void newvalview_reset(NewValView* self, uintptr_t mindex, uintptr_t pindex, intp
 	psy_snprintf(self->dlgtitle, 256, "%s", title);
 	psy_ui_label_set_text(&self->title, self->dlgtitle);
 	psy_snprintf(buf, 32, "%d", vval);
-	psy_ui_textarea_settext(&self->edit, buf);
+	psy_ui_textarea_set_text(&self->edit, buf);
 	newvalview_updateedit(self);
 }
 				

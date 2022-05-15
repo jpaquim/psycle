@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http:/*psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http:/*psycle.sourceforge.net
 */
 
 #ifndef psy_SIGNAL_H
@@ -77,7 +77,7 @@ void psy_signal_disconnect(psy_Signal*, void* context, void* fp);
 /* removes all slots with the context */
 void psy_signal_disconnect_context(psy_Signal*, void* context);
 /* clears the slot list */
-void psy_signal_disconnectall(psy_Signal*);
+void psy_signal_disconnect_all(psy_Signal*);
 /* excludes a slot called by psy_signal_emit */
 void psy_signal_prevent(psy_Signal*, void* context, void* fp);
 /* excludes all slots called by psy_signal_emit */

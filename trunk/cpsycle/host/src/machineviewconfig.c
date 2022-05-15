@@ -778,14 +778,14 @@ bool machineviewconfig_stackview_drawsmalleffects(const MachineViewConfig* self)
 }
 
 /* events */
-int machineviewconfig_onchanged(MachineViewConfig* self, psy_Property*
+uintptr_t machineviewconfig_onchanged(MachineViewConfig* self, psy_Property*
 	property)
 {
 	int rebuild_level;
 
 	assert(self);
 
-	rebuild_level = 0;
+	rebuild_level = psy_INDEX_INVALID;
 	if (machineviewconfig_hasthemeproperty(self, property)) {
 		psy_Property* choice;
 		bool worked;

@@ -53,7 +53,7 @@ void generalconfig_showpatternnames(GeneralConfig*);
 void generalconfig_showpatternids(GeneralConfig*);
 bool generalconfig_showminiview(const GeneralConfig*);
 
-bool generalconfig_onchanged(GeneralConfig*, psy_Property*);
+uintptr_t generalconfig_onchanged(GeneralConfig*, psy_Property*);
 bool generalconfig_hasproperty(const GeneralConfig*, psy_Property*);
 
 #ifdef __cplusplus

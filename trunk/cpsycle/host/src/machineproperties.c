@@ -73,9 +73,9 @@ void machineproperties_init(MachineProperties* self, psy_ui_Component* parent,
 	psy_ui_button_init_text_connect(&self->isbus, &self->component,
 		"Bus", self, machineproperties_ontogglebus);	
 	psy_ui_textarea_init_single_line(&self->nameedit, &self->component);	
-	psy_ui_textarea_settext(&self->nameedit, psy_ui_translate("machineview.editname"));
+	psy_ui_textarea_set_text(&self->nameedit, psy_ui_translate("machineview.editname"));
 	psy_ui_textarea_setcharnumber(&self->nameedit, 40);	
-	psy_ui_textarea_enableinputfield(&self->nameedit);
+	psy_ui_textarea_enable_input_field(&self->nameedit);
 	psy_signal_connect(&self->nameedit.signal_accept, self,
 		machineproperties_oneditaccept);
 	psy_signal_connect(&self->nameedit.signal_reject, self,
@@ -102,7 +102,7 @@ void machineproperties_setmachine(MachineProperties* self,
 	if (self->machine) {
 		psy_ui_component_preventinput(&self->component, psy_ui_RECURSIVE);
 		psy_ui_component_enableinput(&self->component, psy_ui_RECURSIVE);
-		psy_ui_textarea_settext(&self->nameedit,
+		psy_ui_textarea_set_text(&self->nameedit,
 			psy_audio_machine_editname(machine));
 		if (psy_audio_machine_mode(machine) == psy_audio_MACHMODE_GENERATOR) {
 			psy_ui_component_hide_align(psy_ui_button_base(&self->isbus));
@@ -112,7 +112,7 @@ void machineproperties_setmachine(MachineProperties* self,
 		psy_ui_component_invalidate(psy_ui_component_parent(&self->component));
 	} else {
 		self->macid = psy_INDEX_INVALID;
-		psy_ui_textarea_settext(&self->nameedit, psy_ui_translate("machineview.editname"));
+		psy_ui_textarea_set_text(&self->nameedit, psy_ui_translate("machineview.editname"));
 		psy_ui_component_hide_align(psy_ui_button_base(&self->isbus));
 		psy_ui_button_disable_highlight(&self->issolobypass);
 		psy_ui_button_disable_highlight(&self->isbus);
@@ -163,7 +163,7 @@ void machineproperties_onmachinenamechanged(MachineProperties* self,
 
 	machine = psy_audio_machines_at(machines, slot);
 	if (machine && machine == self->machine) {
-		psy_ui_textarea_settext(&self->nameedit,
+		psy_ui_textarea_set_text(&self->nameedit,
 			psy_audio_machine_editname(machine));
 	}
 }
@@ -183,7 +183,7 @@ void machineproperties_oneditreject(MachineProperties* self,
 	psy_ui_TextArea* sender)
 {
 	if (self->machine) {
-		psy_ui_textarea_settext(&self->nameedit,
+		psy_ui_textarea_set_text(&self->nameedit,
 			psy_audio_machine_editname(self->machine));
 	}	
 	psy_ui_component_set_focus(psy_ui_component_parent(&self->component));

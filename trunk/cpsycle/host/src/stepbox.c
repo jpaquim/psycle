@@ -43,7 +43,7 @@ void patterncursorstepbox_build(PatternCursorStepBox* self)
 		char text[20];
 
 		psy_snprintf(text, 20, "%d", step);
-		psy_ui_combobox_addtext(&self->combobox, text);
+		psy_ui_combobox_add_text(&self->combobox, text);
 	}	
 }
 

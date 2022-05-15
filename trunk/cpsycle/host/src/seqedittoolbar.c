@@ -55,7 +55,7 @@ void seqedittoolbar_init(SeqEditToolBar* self, psy_ui_Component* parent,
 	psy_ui_label_init_text(&self->trackname, &self->component, "Track");
 	psy_ui_textarea_init_single_line(&self->trackedit, &self->component);	
 	psy_ui_textarea_setcharnumber(&self->trackedit, 30);
-	psy_ui_textarea_enableinputfield(&self->trackedit);	
+	psy_ui_textarea_enable_input_field(&self->trackedit);	
 	psy_signal_connect(&self->trackedit.signal_accept,
 		self, seqeditortoolbar_ontrackeditaccept);
 	psy_signal_connect(&self->trackedit.signal_reject,
@@ -69,9 +69,9 @@ void seqedittoolbar_init(SeqEditToolBar* self, psy_ui_Component* parent,
 		"Insert");	
 	psy_ui_combobox_init(&self->inserttype, seqedittoolbar_base(self));
 	psy_ui_combobox_setcharnumber(&self->inserttype, 12.0);
-	psy_ui_combobox_addtext(&self->inserttype, "Pattern");
-	psy_ui_combobox_addtext(&self->inserttype, "Marker");
-	psy_ui_combobox_addtext(&self->inserttype, "Sample");
+	psy_ui_combobox_add_text(&self->inserttype, "Pattern");
+	psy_ui_combobox_add_text(&self->inserttype, "Marker");
+	psy_ui_combobox_add_text(&self->inserttype, "Sample");
 	psy_ui_combobox_setcursel(&self->inserttype, 0);
 	/* expand */
 	psy_ui_button_init(&self->expand, &self->component);
@@ -214,9 +214,9 @@ void seqeditortoolbar_updatetrackname(SeqEditToolBar* self)
 	editposition = seqeditstate_editposition(self->state);
 	track = psy_audio_sequence_track_at(sequence, editposition.track);
 	if (track) {
-		psy_ui_textarea_settext(&self->trackedit, track->name);
+		psy_ui_textarea_set_text(&self->trackedit, track->name);
 	} else {
-		psy_ui_textarea_settext(&self->trackedit, "");
+		psy_ui_textarea_set_text(&self->trackedit, "");
 	}
 }
 

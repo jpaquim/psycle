@@ -79,7 +79,7 @@ void sampleeditorbar_init(SampleEditorBar* self, psy_ui_Component* parent,
 		psy_ui_combobox_setcharnumber(&self->visualrepresentation, 12);
 		for (quality = 0; quality < psy_dsp_RESAMPLERQUALITY_NUMRESAMPLERS;
 				++quality) {
-			psy_ui_combobox_addtext(&self->visualrepresentation,
+			psy_ui_combobox_add_text(&self->visualrepresentation,
 				psy_dsp_multiresampler_name(
 					(psy_dsp_ResamplerQuality)quality));
 		}
@@ -103,17 +103,17 @@ void sampleeditorbar_setselection(SampleEditorBar* self,
 	psy_ui_textarea_enableedit(&self->selstartedit);
 	psy_ui_textarea_enableedit(&self->selendedit);
 	psy_snprintf(text, 128, "%u", (unsigned int)selectionstart);
-	psy_ui_textarea_settext(&self->selstartedit, text);
+	psy_ui_textarea_set_text(&self->selstartedit, text);
 	psy_snprintf(text, 128, "%u", (unsigned int)selectionend);
-	psy_ui_textarea_settext(&self->selendedit, text);
+	psy_ui_textarea_set_text(&self->selendedit, text);
 }
 
 void sampleeditorbar_clearselection(SampleEditorBar* self)
 {
 	psy_ui_textarea_preventedit(&self->selstartedit);
 	psy_ui_textarea_preventedit(&self->selendedit);
-	psy_ui_textarea_settext(&self->selstartedit, "");
-	psy_ui_textarea_settext(&self->selendedit, "");
+	psy_ui_textarea_set_text(&self->selstartedit, "");
+	psy_ui_textarea_set_text(&self->selendedit, "");
 }
 
 void sampleeditorbar_ondoublecontloop(SampleEditorBar* self,
@@ -243,7 +243,7 @@ void sampleeditluaprocessor_init(SampleEditLuaProcessor* self,
 	psy_ui_label_init_text(&self->header, &self->component, "Lua Processor");
 	psy_ui_component_set_align(&self->header.component, psy_ui_ALIGN_TOP);
 	psy_ui_editor_init(&self->editor, &self->component);
-	psy_ui_editor_settext(&self->editor, LUAPROCESSOR_DEFAULT);
+	psy_ui_editor_set_text(&self->editor, LUAPROCESSOR_DEFAULT);
 	psy_ui_component_set_align(&self->editor.component, psy_ui_ALIGN_CLIENT);	
 }
 
@@ -915,7 +915,7 @@ void sampleeditor_onprocess(SampleEditor* self, psy_ui_Component* sender)
 		} else			
 		if (selected == 7) {
 			if (self->sample) {
-				/*psy_ui_editor_settext(&self->processview.luaprocessor.console,
+				/*psy_ui_editor_set_text(&self->processview.luaprocessor.console,
 					"No Selection, first mark samples to process"); */
 			} 			
 		}		
@@ -923,7 +923,7 @@ void sampleeditor_onprocess(SampleEditor* self, psy_ui_Component* sender)
 	if (psy_table_size(&self->samplebox.waveboxes) == 0) {
 		if (selected == 7) {
 			if (!self->sample) {
-			/*	psy_ui_editor_settext(&self->processview.luaprocessor.console,
+			/*	psy_ui_editor_set_text(&self->processview.luaprocessor.console,
 					"No wave data, first load sample"); */
 			}
 		}
@@ -1061,14 +1061,14 @@ void sampleeditor_processlua(SampleEditor* self, uintptr_t channel,
 
 	if (psyclescript_loadstring(&processor, text) != LUA_OK) {
 		const char* msg = lua_tostring(processor.L, -1);
-		psy_ui_editor_settext(&self->processview.luaprocessor.console,
+		psy_ui_editor_set_text(&self->processview.luaprocessor.console,
 			msg);
 		psyclescript_dispose(&processor);
 		return;
 	}
 	if (psyclescript_run(&processor) != LUA_OK) {
 		const char* msg = lua_tostring(processor.L, -1);
-		psy_ui_editor_settext(&self->processview.luaprocessor.console,
+		psy_ui_editor_set_text(&self->processview.luaprocessor.console,
 			msg);
 		psyclescript_dispose(&processor);
 		return;
@@ -1081,7 +1081,7 @@ void sampleeditor_processlua(SampleEditor* self, uintptr_t channel,
 
 		if (status) {
 			const char* msg = lua_tostring(processor.L, -1);
-			psy_ui_editor_settext(&self->processview.luaprocessor.console,
+			psy_ui_editor_set_text(&self->processview.luaprocessor.console,
 				msg);
 			psyclescript_dispose(&processor);
 			return;

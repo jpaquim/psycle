@@ -117,8 +117,8 @@ void seqeditstate_edit(SeqEditState* self, psy_ui_Component* parent, psy_ui_Real
 				psy_ui_size_make_px(
 					tm->tmAveCharWidth * width,
 					tm->tmHeight)));
-		psy_ui_textarea_settext(self->edit, text);
-		psy_ui_textarea_enableinputfield(self->edit);
+		psy_ui_textarea_set_text(self->edit, text);
+		psy_ui_textarea_enable_input_field(self->edit);
 		psy_ui_component_show(&self->edit->component);
 		psy_ui_component_set_focus(&self->edit->component);
 	}

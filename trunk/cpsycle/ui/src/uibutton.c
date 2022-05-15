@@ -331,6 +331,9 @@ void psy_ui_button_on_mouse_down(psy_ui_Button* self, psy_ui_MouseEvent* ev)
 	if (!psy_ui_component_inputprevented(&self->component)) {
 		psy_ui_component_capture(psy_ui_button_base(self));
 	}
+	if (self->stoppropagation) {
+		psy_ui_mouseevent_stop_propagation(ev);
+	}
 }
 
 void psy_ui_button_on_mouse_up(psy_ui_Button* self, psy_ui_MouseEvent* ev)

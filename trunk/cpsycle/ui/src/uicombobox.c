@@ -58,7 +58,7 @@ void psy_ui_combobox_init(psy_ui_ComboBox* self, psy_ui_Component* parent)
 	psy_ui_component_set_align_expand(psy_ui_combobox_base(self),
 		psy_ui_HEXPAND);
 	/* dropdown */
-	psy_ui_dropdownbox_init(&self->dropdown, self->component.view);
+	psy_ui_dropdownbox_init(&self->dropdown, self->component.view);	
 	psy_ui_component_init(&self->pane, &self->dropdown.component, &self->dropdown.component);
 	psy_ui_component_set_align(&self->pane, psy_ui_ALIGN_CLIENT);
 	/* listbox */
@@ -104,6 +104,7 @@ void psy_ui_combobox_on_destroy(psy_ui_ComboBox* self)
 
 	psy_table_dispose(&self->itemdata);
 	psy_signal_dispose(&self->signal_selchanged);
+	psy_ui_component_destroy(&self->dropdown.component);
 }
 
 psy_ui_ComboBox* psy_ui_combobox_alloc(void)
@@ -123,14 +124,14 @@ psy_ui_ComboBox* psy_ui_combobox_allocinit(psy_ui_Component* parent)
 	return rv;
 }
 
-intptr_t psy_ui_combobox_addtext(psy_ui_ComboBox* self, const char* text)
+intptr_t psy_ui_combobox_add_text(psy_ui_ComboBox* self, const char* text)
 {	
 	assert(self);
 
 	return psy_ui_listbox_add_text(&self->listbox, text);	
 }
 
-void psy_ui_combobox_settext(psy_ui_ComboBox* self, const char* text,
+void psy_ui_combobox_set_text(psy_ui_ComboBox* self, const char* text,
 	intptr_t index)
 {
 	assert(self);

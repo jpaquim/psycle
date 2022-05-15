@@ -114,6 +114,7 @@ void psy_ui_switch_ondraw(psy_ui_Switch* self, psy_ui_Graphics* g)
 
 void psy_ui_switch_on_mouse_down(psy_ui_Switch* self, psy_ui_MouseEvent* ev)
 {
+	self->state = !self->state;
 	psy_signal_emit(&self->signal_clicked, self, psy_SIGNAL_NOPARAMS);
 }
 

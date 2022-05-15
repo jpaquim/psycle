@@ -228,13 +228,13 @@ const char* dirconfig_userpresets(const DirConfig* self)
 		PSYCLE_USERPRESETS_DEFAULT_DIR);
 }
 /* events */
-bool dirconfig_onchanged(DirConfig* self, psy_Property*
+uintptr_t dirconfig_onchanged(DirConfig* self, psy_Property*
 	property)
 {
 	assert(self);
 
 	psy_signal_emit(&self->signal_changed, self, 1, property);
-	return TRUE;
+	return psy_INDEX_INVALID;
 }
 
 bool dirconfig_hasproperty(const DirConfig* self, psy_Property* property)

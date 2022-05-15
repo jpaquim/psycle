@@ -73,16 +73,14 @@ bool metronomeconfig_showmetronomebar(const MetronomeConfig* self)
 }
 
 /* events */
-int metronomeconfig_onchanged(MetronomeConfig* self, psy_Property*
+uintptr_t metronomeconfig_onchanged(MetronomeConfig* self, psy_Property*
 	property)
-{
-	int rebuild_level = 0;
-	
+{		
 	metronomeconfig_updatemetronome(self);
 	if (property) {
 		psy_signal_emit(&self->signal_changed, self, 1, property);
 	}
-	return rebuild_level;
+	return psy_INDEX_INVALID;
 }
 
 bool metronomeconfig_hasproperty(const MetronomeConfig* self, psy_Property* property)
