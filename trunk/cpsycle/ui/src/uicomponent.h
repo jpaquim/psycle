@@ -145,7 +145,7 @@ typedef struct psy_ui_ComponentVTable {
 	psy_ui_fp_component_on_preferred_size onpreferredsize;
 	psy_ui_fp_component_onpreferredscrollsize onpreferredscrollsize;
 	psy_ui_fp_component_on_mouse_event on_mouse_down;
-	psy_ui_fp_component_on_mouse_event onmousemove;
+	psy_ui_fp_component_on_mouse_event on_mouse_move;
 	psy_ui_fp_component_on_mouse_event onmousewheel;
 	psy_ui_fp_component_on_mouse_event on_mouse_up;
 	psy_ui_fp_component_on_mouse_event on_mouse_double_click;
@@ -384,7 +384,7 @@ bool psy_ui_component_inputprevented(const psy_ui_Component*);
 void psy_ui_component_setbackgroundmode(psy_ui_Component*, psy_ui_BackgroundMode);
 void psy_ui_component_set_preferred_size(psy_ui_Component*, psy_ui_Size);
 void psy_ui_component_setpreferredheight(psy_ui_Component*, psy_ui_Value);
-void psy_ui_component_setpreferredwidth(psy_ui_Component*, psy_ui_Value);
+void psy_ui_component_set_preferred_width(psy_ui_Component*, psy_ui_Value);
 psy_ui_Size psy_ui_component_preferredsize(psy_ui_Component*, const psy_ui_Size* limit);
 psy_ui_Size psy_ui_component_preferred_scrollsize(psy_ui_Component*, const psy_ui_Size* limit);
 psy_ui_RealSize psy_ui_component_preferredscrollsize_px(psy_ui_Component*,
@@ -948,7 +948,7 @@ INLINE psy_ui_RealMargin psy_ui_component_spacing_px(const psy_ui_Component* sel
 
 void psy_ui_component_draw(psy_ui_Component*, psy_ui_Graphics*);
 
-INLINE void psy_ui_component_scrollto(psy_ui_Component* self,
+INLINE void psy_ui_component_scroll_to(psy_ui_Component* self,
 	intptr_t dx, intptr_t dy, const psy_ui_RealRectangle* r)
 {	
 	self->vtable->scrollto(self, dx, dy, r);

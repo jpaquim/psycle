@@ -75,6 +75,7 @@ typedef struct psy_audio_Player {
 	int recordingnotes;
 	bool recordnoteoff;
 	int multichannelaudition;
+	uint8_t active_note;
 	psy_Table notestotracks;
 	psy_Table trackstonotes;
 	psy_Table worked;
@@ -325,7 +326,9 @@ INLINE void psy_audio_player_deactivatemetronome(psy_audio_Player* self)
 void psy_audio_player_start_threads(psy_audio_Player*, uintptr_t thread_count);
 void psy_audio_player_stop_threads(psy_audio_Player*);
 
-uintptr_t psy_audio_player_numthreads(psy_audio_Player*);
+uintptr_t psy_audio_player_numthreads(const psy_audio_Player*);
+
+bool psy_audio_player_is_active_key(const psy_audio_Player*, uint8_t key);
 
 #ifdef __cplusplus
 }

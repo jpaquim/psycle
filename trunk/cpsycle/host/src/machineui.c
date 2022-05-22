@@ -179,7 +179,7 @@ static void panui_vtable_init(PanUi* self)
 		panui_vtable.on_mouse_up =
 			(psy_ui_fp_component_on_mouse_event)
 			panui_on_mouse_up;
-		panui_vtable.onmousemove =
+		panui_vtable.on_mouse_move =
 			(psy_ui_fp_component_on_mouse_event)
 			panui_onmousemove;
 		panui_vtable_initialized = TRUE;

@@ -175,7 +175,7 @@ static void vtable_init(MachineWireView* self)
 		vtable.on_mouse_up =
 			(psy_ui_fp_component_on_mouse_event)
 			machinewireview_on_mouse_up;
-		vtable.onmousemove =
+		vtable.on_mouse_move =
 			(psy_ui_fp_component_on_mouse_event)
 			machinewireview_onmousemove;
 		vtable.on_mouse_double_click =

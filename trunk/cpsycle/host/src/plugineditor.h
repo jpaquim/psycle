@@ -1,13 +1,15 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #if !defined(PLUGINEDITOR_H)
 #define PLUGINEDITOR_H
 
-// host
+/* host */
 #include "titlebar.h"
 #include "workspace.h"
-// ui
+/* ui */
 #include <uibutton.h>
 #include <uicombobox.h>
 #include <uitextarea.h>
@@ -18,14 +20,16 @@
 extern "C" {
 #endif
 
-// PluginEditor
-//
-// Editor for lua plugins
+/*
+** PluginEditor
+**
+** Editor for lua plugins
+*/
 
 typedef struct PluginEditorCreateBar {
-	// inherits
+	/* inherits */
 	psy_ui_Component component;
-	// internal	
+	/* internal */
 	psy_ui_Label desc;
 	psy_ui_TextArea name;
 	psy_ui_Button create;
@@ -37,9 +41,9 @@ void plugineditorcreatebar_init(PluginEditorCreateBar*, psy_ui_Component*
 	parent, Workspace*);
 
 typedef struct PluginEditor {
-	// inherits
+	/* inherits */
 	psy_ui_Component component;
-	// internal
+	/* internal */
 	TitleBar titlebar;
 	psy_ui_Editor editor;
 	psy_ui_Component bar;
@@ -53,12 +57,11 @@ typedef struct PluginEditor {
 	psy_ui_Label filedesc;
 	psy_ui_ComboBox fileselector;
 	PluginEditorCreateBar createbar;	
-	// internal data
 	const char* basepath;	
 	uintptr_t instanceidx;
 	psy_Table pluginmappping;
 	double zoom;
-	// referneces
+	/* references */
 	Workspace* workspace;
 } PluginEditor;
 

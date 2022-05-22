@@ -142,7 +142,7 @@ static void vtable_init(MainFrame* self)
 		vtable.on_mouse_up =
 			(psy_ui_fp_component_on_mouse_event)
 			mainframe_on_mouse_up;
-		vtable.onmousemove =
+		vtable.on_mouse_move =
 			(psy_ui_fp_component_on_mouse_event)
 			mainframe_on_mouse_move;
 		vtable.ondrop =

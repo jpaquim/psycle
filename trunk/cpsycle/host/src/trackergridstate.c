@@ -249,7 +249,7 @@ void trackdef_init(TrackDef* self)
 		psy_audio_NOTECOMMANDS_INST_EMPTY);
 	trackcolumndef_init(&self->mach, 2, 2, 1,
 		PATTERNEVENT_COLUMN_MACH, PATTERNEVENT_COLUMN_MACH,
-		psy_audio_NOTECOMMANDS_psy_audio_EMPTY);
+		psy_audio_NOTECOMMANDS_EMPTY);
 	trackcolumndef_init(&self->vol, 2, 2, 1,
 		PATTERNEVENT_COLUMN_VOL, PATTERNEVENT_COLUMN_VOL,
 		psy_audio_NOTECOMMANDS_VOL_EMPTY);

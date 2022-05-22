@@ -51,7 +51,7 @@ static void knobui_vtable_init(KnobUi* self)
 		knobui_vtable.on_mouse_up =
 			(psy_ui_fp_component_on_mouse_event)
 			knobui_on_mouse_up;
-		knobui_vtable.onmousemove =
+		knobui_vtable.on_mouse_move =
 			(psy_ui_fp_component_on_mouse_event)
 			knobui_onmousemove;
 		knobui_vtable_initialized = TRUE;

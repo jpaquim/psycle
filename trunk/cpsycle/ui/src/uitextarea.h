@@ -55,7 +55,7 @@ typedef struct psy_ui_TextAreaPane {
     bool preventedit;
     char* text;
     psy_ui_TextFormat format;
-    uintptr_t cp;    
+    uintptr_t cp;     
 } psy_ui_TextAreaPane;
 
 void psy_ui_textareapane_init(psy_ui_TextAreaPane*, psy_ui_Component* parent);

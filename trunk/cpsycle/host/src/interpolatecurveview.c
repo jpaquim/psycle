@@ -96,7 +96,7 @@ static void interpolatecurvebox_vtable_init(InterpolateCurveBox* self)
 			(psy_ui_fp_component_ondraw) interpolatecurvebox_ondraw;
 		interpolatecurvebox_vtable.on_mouse_down = (psy_ui_fp_component_on_mouse_event)
 			interpolatecurvebox_on_mouse_down;
-		interpolatecurvebox_vtable.onmousemove = (psy_ui_fp_component_on_mouse_event)
+		interpolatecurvebox_vtable.on_mouse_move = (psy_ui_fp_component_on_mouse_event)
 			interpolatecurvebox_onmousemove;
 		interpolatecurvebox_vtable.on_mouse_up = (psy_ui_fp_component_on_mouse_event)
 			interpolatecurvebox_on_mouse_up;		

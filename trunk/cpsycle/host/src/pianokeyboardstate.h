@@ -10,6 +10,7 @@
 #include <pattern.h>
 /* ui */
 #include <uivalue.h>
+#include <uigeometry.h>
 /* dsp */
 #include <notestab.h>
 
@@ -53,14 +54,33 @@ INLINE double keyboardstate_keytopx(KeyboardState* self, intptr_t key)
 	return self->keyboardheightpx - (key + 1) * self->keyheightpx;
 }
 
-INLINE uint8_t keyboardstate_pxtokey(KeyboardState* self, double px)
+INLINE uint8_t keyboardstate_screen_to_key(KeyboardState* self, psy_ui_RealPoint pt,
+	double width)
 {
+	uint8_t rv;
 	assert(self);
 
-	if (self->keymax - 1 >= px / self->keyheightpx) {
-		return (uint8_t)(self->keymax - px / self->keyheightpx);
+	rv = 0;
+	if (self->keymax - 1 >= pt.y / self->keyheightpx) {		
+		rv = (uint8_t)(self->keymax - pt.y / self->keyheightpx);
 	}
-	return 0;
+	if (rv != psy_audio_NOTECOMMANDS_EMPTY && psy_dsp_isblack(rv)) {				
+		if (pt.x > (width * 0.60)) {
+			double cpy;
+
+			cpy = keyboardstate_keytopx(self, rv) + (self->keyheightpx / 2);
+			if (pt.y > cpy) {
+				if (rv > self->keymin) {
+					rv--;
+				}
+			} else {
+				if (rv < self->keymax) {
+					rv++;
+				}
+			}
+		}
+	}
+	return rv;
 }
 
 INLINE void pianokeyboardstate_clip(KeyboardState* self,

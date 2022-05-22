@@ -74,8 +74,7 @@ typedef struct Pianoroll {
 	PianoKeyboard keyboard;	
 	PianoGridState gridstate;	
 	uintptr_t opcount;
-	bool sync_pattern;	
-	uintptr_t chord_begin;
+	bool center_key;
 	/* references */
 	Workspace* workspace;
 } Pianoroll;
@@ -83,8 +82,9 @@ typedef struct Pianoroll {
 void pianoroll_init(Pianoroll*, psy_ui_Component* parent, PatternViewState*,
 	Workspace*);
 void pianoroll_scroll_to_order(Pianoroll*);
-void pianoroll_updatescroll(Pianoroll*);
-void pianoroll_makecmds(psy_Property* parent);
+void pianoroll_scroll_to_key(Pianoroll*, uint8_t key);
+void pianoroll_update_scroll(Pianoroll*);
+void pianoroll_make_cmds(psy_Property* parent);
 bool pianoroll_handlecommand(Pianoroll*, uintptr_t cmd);
 
 /* block operations */

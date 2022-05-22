@@ -40,7 +40,7 @@ static void seqeditentry_vtable_init(SeqEditEntry* self)
 		seqeditentry_vtable.onpreferredsize =
 			(psy_ui_fp_component_on_preferred_size)
 			seqeditentry_onpreferredsize;
-		seqeditentry_vtable.onmousemove =
+		seqeditentry_vtable.on_mouse_move =
 			(psy_ui_fp_component_on_mouse_event)
 			seqeditentry_onmousemove;
 	}

@@ -98,7 +98,7 @@ psy_audio_PatternEvent psy_audio_patterndefaults_fill_event(const
 	if (defaultevent.inst != psy_audio_NOTECOMMANDS_INST_EMPTY) {
 		rv.inst = defaultevent.inst;
 	}
-	if (defaultevent.mach != psy_audio_NOTECOMMANDS_psy_audio_EMPTY) {
+	if (defaultevent.mach != psy_audio_NOTECOMMANDS_EMPTY) {
 		rv.mach = defaultevent.mach;
 	}
 	if (defaultevent.vol != psy_audio_NOTECOMMANDS_VOL_EMPTY) {
@@ -135,7 +135,7 @@ static void psy_audio_player_ditherbuffer(psy_audio_Player*,
 static void psy_audio_player_resetvumeters(psy_audio_Player*);
 static void psy_audio_player_dostop(psy_audio_Player*);
 static void psy_audio_player_notifylinetick(psy_audio_Player*);
-static uintptr_t psy_audio_player_multichannelaudition(psy_audio_Player*,
+static uintptr_t psy_audio_player_multi_channel_audition(psy_audio_Player*,
 	const psy_audio_PatternEvent*);
 static void psy_audio_player_recordnotes(psy_audio_Player*,
 	uintptr_t track, const psy_audio_PatternEvent*);
@@ -171,7 +171,8 @@ void psy_audio_player_init(psy_audio_Player* self, psy_audio_Song* song,
 	self->threads_ = NULL;
 	self->waiting = 0;
 	self->stop_requested_ = FALSE;
-	self->nodes_queue_ = NULL;	
+	self->nodes_queue_ = NULL;
+	self->active_note = psy_audio_NOTECOMMANDS_EMPTY;
 	psy_lock_init(&self->mutex);
 	psy_lock_init(&self->block);
 	psy_dsp_dither_init(&self->dither);	
@@ -571,7 +572,7 @@ void psy_audio_player_oneventdriverinput(psy_audio_Player* self,
 			}
 			return;
 		}
-		track = psy_audio_player_multichannelaudition(self, &ev);
+		track = psy_audio_player_multi_channel_audition(self, &ev);
 		psy_audio_sequencer_add_input_event(&self->sequencer, &ev, track);
 		if (self->recordingnotes && psy_audio_player_playing(self)) {
 			psy_audio_player_recordnotes(self, 0, &ev);
@@ -584,7 +585,7 @@ void psy_audio_player_playevent(psy_audio_Player* self,
 {
 	uintptr_t track;
 
-	track = psy_audio_player_multichannelaudition(self, ev);
+	track = psy_audio_player_multi_channel_audition(self, ev);
 	psy_audio_sequencer_add_input_event(&self->sequencer, ev, track);	
 }
 
@@ -593,7 +594,7 @@ void psy_audio_player_inputpatternevent(psy_audio_Player* self,
 {
 	uintptr_t track;
 
-	track = psy_audio_player_multichannelaudition(self, ev);
+	track = psy_audio_player_multi_channel_audition(self, ev);
 	psy_audio_sequencer_add_input_event(&self->sequencer, ev, track);
 	if (self->recordingnotes && psy_audio_player_playing(self)) {
 		psy_audio_player_recordnotes(self, 0, ev);
@@ -634,13 +635,12 @@ psy_audio_PatternEvent psy_audio_player_pattern_event(psy_audio_Player* self,
 	return rv;
 }
 
-uintptr_t psy_audio_player_multichannelaudition(psy_audio_Player* self,
+uintptr_t psy_audio_player_multi_channel_audition(psy_audio_Player* self,
 	const psy_audio_PatternEvent* ev)
 {
 	uintptr_t track = 0;
 
-	if (self->multichannelaudition) {		
-
+	if (self->multichannelaudition) {
 		if (ev->note < psy_audio_NOTECOMMANDS_RELEASE) {
 			if (psy_table_exists(&self->notestotracks, ev->note)) {
 				track = (uintptr_t)psy_table_at(&self->notestotracks,
@@ -661,6 +661,12 @@ uintptr_t psy_audio_player_multichannelaudition(psy_audio_Player* self,
 				psy_table_remove(&self->notestotracks, ev->note);
 				psy_table_remove(&self->trackstonotes, track);
 			}
+		}
+	} else {
+		if (ev->note < psy_audio_NOTECOMMANDS_RELEASE) {
+			self->active_note = ev->note;			
+		} else if (ev->note == psy_audio_NOTECOMMANDS_RELEASE) {			
+			self->active_note = psy_audio_NOTECOMMANDS_EMPTY;			
 		}
 	}
 	return track;
@@ -1152,10 +1158,15 @@ void psy_audio_player_stop_threads(psy_audio_Player* self)
 	psy_list_deallocate(&self->nodes_queue_, NULL);
 }
 
-uintptr_t psy_audio_player_numthreads(psy_audio_Player* self)
+uintptr_t psy_audio_player_numthreads(const psy_audio_Player* self)
 {
 	if (self->thread_count < 2) {
 		return 1;
 	}
 	return psy_list_size(self->threads_);
+}
+
+bool psy_audio_player_is_active_key(const psy_audio_Player* self, uint8_t key)
+{
+	return (self->active_note == key);
 }

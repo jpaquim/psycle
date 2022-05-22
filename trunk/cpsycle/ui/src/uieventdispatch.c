@@ -313,7 +313,7 @@ void psy_ui_eventdispatch_notify(psy_ui_EventDispatch* self,
 		psy_signal_emit(&component->signal_mouseup, component, 1, ev);
 		break;
 	case psy_ui_MOUSEMOVE:
-		component->vtable->onmousemove(component, (psy_ui_MouseEvent*)ev);
+		component->vtable->on_mouse_move(component, (psy_ui_MouseEvent*)ev);
 		psy_signal_emit(&component->signal_mousemove, component, 1, ev);
 		break;
 	case psy_ui_WHEEL:

@@ -25,6 +25,8 @@ void psy_ui_editor_init(psy_ui_Editor* self, psy_ui_Component* parent)
 	psy_ui_component_init(&self->component, parent, NULL);	
 	psy_ui_textarea_init(&self->textarea, &self->component);
 	psy_ui_component_set_style_type(&self->textarea.pane.component, psy_ui_STYLE_EDITOR);
+	psy_ui_component_set_style_type_hover(&self->textarea.pane.component, psy_ui_STYLE_EDITOR);
+	psy_ui_component_set_style_type_focus(&self->textarea.pane.component, psy_ui_STYLE_EDITOR);
 	psy_ui_textarea_prevent_wrap(&self->textarea);
 	psy_ui_textarea_line_wrap(&self->textarea);
 	psy_ui_component_set_align(&self->textarea.component, psy_ui_ALIGN_CLIENT);

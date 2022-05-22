@@ -55,9 +55,6 @@
     <Filter Include="machine\gear">
       <UniqueIdentifier>{eed26dec-cf5b-44a3-bf2b-f3bdef2018bf}</UniqueIdentifier>
     </Filter>
-    <Filter Include="machine\plugineditor">
-      <UniqueIdentifier>{a145b49d-3ea3-4483-bd9e-b2f9173aa910}</UniqueIdentifier>
-    </Filter>
     <Filter Include="machine\common">
       <UniqueIdentifier>{208b62b4-b5e7-42a2-975e-ffa644ae17dc}</UniqueIdentifier>
     </Filter>
@@ -99,6 +96,9 @@
     </Filter>
     <Filter Include="sequence\stepsequencer">
       <UniqueIdentifier>{d57e5a73-fa56-4264-aca0-019d64308ca6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="machine\plugineditor">
+      <UniqueIdentifier>{a145b49d-3ea3-4483-bd9e-b2f9173aa910}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

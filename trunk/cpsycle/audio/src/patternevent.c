@@ -42,7 +42,7 @@ void psy_audio_patternevent_clear(psy_audio_PatternEvent* self)
 {
 	self->note = psy_audio_NOTECOMMANDS_EMPTY;
 	self->inst = psy_audio_NOTECOMMANDS_INST_EMPTY;
-	self->mach = psy_audio_NOTECOMMANDS_psy_audio_EMPTY;
+	self->mach = psy_audio_NOTECOMMANDS_EMPTY;
 	self->vol = psy_audio_NOTECOMMANDS_VOL_EMPTY;
 	self->cmd = 0;
 	self->parameter = 0;
@@ -53,7 +53,7 @@ int psy_audio_patternevent_empty(const psy_audio_PatternEvent* self)
 	return
 		self->note == psy_audio_NOTECOMMANDS_EMPTY &&
 		self->inst == psy_audio_NOTECOMMANDS_INST_EMPTY &&
-		self->mach == psy_audio_NOTECOMMANDS_psy_audio_EMPTY &&
+		self->mach == psy_audio_NOTECOMMANDS_EMPTY &&
 		self->vol == psy_audio_NOTECOMMANDS_VOL_EMPTY &&
 		self->cmd == 0 &&		
 		self->parameter == 0;		
@@ -64,7 +64,7 @@ int psy_audio_patternevent_empty_except_volume(const psy_audio_PatternEvent* sel
 	return
 		self->note == psy_audio_NOTECOMMANDS_EMPTY &&
 		self->inst == psy_audio_NOTECOMMANDS_INST_EMPTY &&
-		self->mach == psy_audio_NOTECOMMANDS_psy_audio_EMPTY &&		
+		self->mach == psy_audio_NOTECOMMANDS_EMPTY &&		
 		self->cmd == 0 &&		
 		self->parameter == 0;
 }

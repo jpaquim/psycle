@@ -44,7 +44,7 @@ static psy_ui_ComponentVtable* sliderui_vtable_init(SliderUi* self)
 			sliderui_onpreferredsize;
 		sliderui_vtable.on_mouse_down = (psy_ui_fp_component_on_mouse_event)sliderui_on_mouse_down;
 		sliderui_vtable.on_mouse_up = (psy_ui_fp_component_on_mouse_event)sliderui_on_mouse_up;
-		sliderui_vtable.onmousemove = (psy_ui_fp_component_on_mouse_event)sliderui_onmousemove;
+		sliderui_vtable.on_mouse_move = (psy_ui_fp_component_on_mouse_event)sliderui_onmousemove;
 		sliderui_vtable_initialized = TRUE;
 	}
 	return &sliderui_vtable;

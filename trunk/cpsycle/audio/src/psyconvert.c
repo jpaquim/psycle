@@ -108,7 +108,7 @@ void psy_audio_convert_legacypattern(
 					? psy_audio_NOTECOMMANDS_INST_EMPTY
 					: psy2ev->_inst;
 				e.mach = (psy2ev->_mach == 255)
-					? psy_audio_NOTECOMMANDS_psy_audio_EMPTY
+					? psy_audio_NOTECOMMANDS_EMPTY
 					: psy2ev->_mach;
 				e.cmd = psy2ev->_cmd;
 				e.parameter = psy2ev->_parameter;				

@@ -83,9 +83,8 @@ typedef	enum {
 	psy_audio_NOTECOMMANDS_MIDI_CLK_CONT = 252,
 	psy_audio_NOTECOMMANDS_MIDI_CLK_STOP = 253,
 	psy_audio_NOTECOMMANDS_MIDI_SYNC = 254,
-	psy_audio_NOTECOMMANDS_EMPTY = 255,
 	psy_audio_NOTECOMMANDS_INST_EMPTY = 0xFFFF,
-	psy_audio_NOTECOMMANDS_psy_audio_EMPTY = 0xFF,
+	psy_audio_NOTECOMMANDS_EMPTY = 0xFF,
 	psy_audio_NOTECOMMANDS_VOL_EMPTY = 0xFF,
 	psy_audio_NOTECOMMANDS_GATE_EMPTY = 0xFF
 } psy_audio_NoteCommands;
@@ -114,7 +113,7 @@ INLINE void psy_audio_patternevent_init(psy_audio_PatternEvent* self)
 {
 	self->note = psy_audio_NOTECOMMANDS_EMPTY;
 	self->inst = psy_audio_NOTECOMMANDS_INST_EMPTY;
-	self->mach = psy_audio_NOTECOMMANDS_psy_audio_EMPTY;
+	self->mach = psy_audio_NOTECOMMANDS_EMPTY;
 	self->vol = psy_audio_NOTECOMMANDS_VOL_EMPTY;
 	self->cmd = 0;
 	self->parameter = 0;

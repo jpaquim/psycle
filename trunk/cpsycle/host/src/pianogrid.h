@@ -112,6 +112,7 @@ typedef struct Pianogrid {
 	bool prevent_context_menu;
 	bool edit_mode;
 	bool preventscrollleft;
+	psy_audio_PatternEvent play_event;
 	/* references */
 	KeyboardState* keyboardstate;
 	PianoGridState* gridstate;

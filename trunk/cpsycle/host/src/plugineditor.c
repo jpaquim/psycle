@@ -89,8 +89,8 @@ void plugineditor_init(PluginEditor* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {	
 	psy_ui_component_init(&self->component, parent, NULL);	
-	psy_ui_component_set_style_type(&self->component,
-		STYLE_RECENTVIEW_MAINSECTION);
+	//psy_ui_component_set_style_type(&self->component,
+	//	STYLE_RECENTVIEW_MAINSECTION);
 	plugineditor_inittitlebar(self);
 	self->workspace = workspace;
 	self->basepath = 0;	

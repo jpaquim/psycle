@@ -112,7 +112,7 @@ static void seqeditorplayline_vtable_init(SeqEditorPlayline* self)
 		seqeditorplayline_vtable.on_mouse_down =
 			(psy_ui_fp_component_on_mouse_event)
 			seqeditorplayline_on_mouse_down;
-		seqeditorplayline_vtable.onmousemove =
+		seqeditorplayline_vtable.on_mouse_move =
 			(psy_ui_fp_component_on_mouse_event)
 			seqeditorplayline_onmousemove;
 		seqeditorplayline_vtable.on_mouse_up =

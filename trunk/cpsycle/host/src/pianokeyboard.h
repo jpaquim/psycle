@@ -14,6 +14,7 @@
 #include <uicomponent.h>
 /* audio */
 #include <pattern.h>
+#include <player.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -30,15 +31,17 @@ typedef enum {
 typedef struct PianoKeyboard {
 	/* inherits */
 	psy_ui_Component component;
+	uint8_t active_note;
 	/* references */
 	KeyboardState* keyboardstate;
-	KeyboardState defaultkeyboardstate;
+	psy_audio_Player* player;
 } PianoKeyboard;
 
 void pianokeyboard_init(PianoKeyboard*, psy_ui_Component* parent,
-	KeyboardState*);
-void pianokeyboard_setsharedkeyboardstate(PianoKeyboard*, KeyboardState*);
-void pianokeyboard_setkeyboardtype(PianoKeyboard*, KeyboardType);
+	KeyboardState*, psy_audio_Player* player);
+
+void pianokeyboard_set_keyboard_type(PianoKeyboard*, KeyboardType);
+void pianokeyboard_idle(PianoKeyboard*);
 
 INLINE psy_ui_Component* pianokeyboard_base(PianoKeyboard* self)
 {
