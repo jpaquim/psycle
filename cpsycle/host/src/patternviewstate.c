@@ -28,7 +28,9 @@ void patternviewstate_init(PatternViewState* self,
 	self->sequence = sequence;	
 	self->patconfig = patconfig;
 	self->keymiscconfig = keymiscconfig;	
-	self->cmds = cmds;	
+	self->cmds = cmds;
+	self->chord = FALSE;
+	self->chord_begin = 0;
 	psy_audio_pattern_init(&self->patternpaste);	
 	if (cmds) {
 		cmds->patternpaste = &self->patternpaste;

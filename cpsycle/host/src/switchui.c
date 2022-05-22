@@ -51,7 +51,7 @@ static void switchui_vtable_init(SwitchUi* self)
 		switchui_vtable.on_mouse_up =
 			(psy_ui_fp_component_on_mouse_event)
 			switchui_on_mouse_up;
-		switchui_vtable.onmousemove =
+		switchui_vtable.on_mouse_move =
 			(psy_ui_fp_component_on_mouse_event)
 			switchui_onmousemove;
 		switchui_vtable_initialized = TRUE;

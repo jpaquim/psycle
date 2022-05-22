@@ -31,7 +31,9 @@ typedef struct PatternViewState {
 	psy_audio_SequenceCursor cursor;
 	psy_audio_BlockSelection selection;
 	psy_audio_SequenceCursor dragselectionbase;
-	psy_audio_Pattern patternpaste;	
+	psy_audio_Pattern patternpaste;
+	bool chord;
+	uintptr_t chord_begin;
 	/* references */	
 	psy_audio_Sequence* sequence;	
 	PatternCmds* cmds;

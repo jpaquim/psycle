@@ -55,7 +55,7 @@ static void envelopebox_vtable_init(EnvelopeBox* self)
 		envelopebox_vtable.on_mouse_down =
 			(psy_ui_fp_component_on_mouse_event)
 			envelopebox_on_mouse_down;
-		envelopebox_vtable.onmousemove =
+		envelopebox_vtable.on_mouse_move =
 			(psy_ui_fp_component_on_mouse_event)
 			envelopebox_onmousemove;
 		envelopebox_vtable.on_mouse_up =

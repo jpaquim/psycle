@@ -335,7 +335,7 @@ static void on_mouse_down(psy_ui_Component* self, psy_ui_MouseEvent* ev)
 	}
 }
 
-static void onmousemove(psy_ui_Component* self, psy_ui_MouseEvent* ev)
+static void on_mouse_move(psy_ui_Component* self, psy_ui_MouseEvent* ev)
 {
 	psy_ui_DragEvent* dragevent;
 
@@ -447,7 +447,7 @@ static void vtable_init(void)
 		vtable.onsize = onsize;
 		vtable.onclose = onclose;
 		vtable.on_mouse_down = on_mouse_down;
-		vtable.onmousemove = onmousemove;
+		vtable.on_mouse_move = on_mouse_move;
 		vtable.onmousewheel = onmousewheel;
 		vtable.on_mouse_up = on_mouse_up;
 		vtable.on_mouse_double_click = on_mouse_double_click;
@@ -1298,7 +1298,7 @@ void psy_ui_component_setpreferredheight(psy_ui_Component* self, psy_ui_Value he
 	psy_ui_componentstyle_setpreferredheight(&self->style, height);	
 }
 
-void psy_ui_component_setpreferredwidth(psy_ui_Component* self, psy_ui_Value width)
+void psy_ui_component_set_preferred_width(psy_ui_Component* self, psy_ui_Value width)
 {
 	psy_ui_componentstyle_setpreferredwidth(&self->style, width);
 }
@@ -1700,6 +1700,7 @@ void psy_ui_component_set_scroll_left(psy_ui_Component* self, psy_ui_Value left)
 {		
 	psy_ui_RealRectangle position;
 	double newleft;
+	psy_ui_RealRectangle r;
 
 	position = psy_ui_component_position(self);
 	newleft = -psy_ui_value_px(&left, psy_ui_component_textmetric(self), NULL);
@@ -1711,20 +1712,27 @@ void psy_ui_component_set_scroll_left(psy_ui_Component* self, psy_ui_Value left)
 			psy_ui_value_make_px(
 				-psy_ui_value_px(&left, psy_ui_component_textmetric(self), NULL)),
 			psy_ui_value_make_px(position.top)));
+	r = psy_ui_realrectangle_make(
+		psy_ui_realpoint_make(
+			-newleft,
+			psy_ui_component_scroll_top_px(self)),
+		psy_ui_component_scroll_size_px(psy_ui_component_parent(self)));
 	if (!self->blitscroll) {
 		psy_ui_component_invalidate(self);
-	} else {
-		psy_ui_RealRectangle r;
-		psy_ui_RealSize parentsize;		
+	} else {		
+		psy_ui_component_scroll_to(self, newleft - position.left, 0.0, &r);
+	}
+	if (newleft - position.left < 0) {
+		double delta;
 
-		parentsize = psy_ui_component_scroll_size_px(psy_ui_component_parent(self));
-		r = psy_ui_realrectangle_make(
-			psy_ui_realpoint_make(
-				-newleft,
-				psy_ui_component_scroll_top_px(self)),
-			parentsize);
-		psy_ui_component_scrollto(self, newleft - position.left, 0.0, &r);
-	}	
+		delta = psy_ui_realrectangle_width(&r) - (newleft + psy_ui_realrectangle_width(&position));
+		if (delta > 0) {			
+			psy_ui_component_invalidate_rect(psy_ui_component_parent(self),
+				psy_ui_realrectangle_make(
+					psy_ui_realpoint_make(psy_ui_realrectangle_width(&r) - delta, 0.0),
+					psy_ui_realsize_make(delta, psy_ui_realrectangle_height(&r))));
+		}
+	}
 	psy_signal_emit(&self->signal_scrolled, self, 0);	
 }
 
@@ -1732,6 +1740,7 @@ void psy_ui_component_set_scroll_top(psy_ui_Component* self, psy_ui_Value top)
 {	
 	psy_ui_RealRectangle position;	
 	double newtop;
+	psy_ui_RealRectangle r;
 
 	position = psy_ui_component_position(self);		
 	newtop = -psy_ui_value_px(&top, psy_ui_component_textmetric(self), NULL);
@@ -1756,17 +1765,25 @@ void psy_ui_component_set_scroll_top(psy_ui_Component* self, psy_ui_Value top)
 		psy_signal_emit(&self->signal_scrolled, self, 0);
 		return;
 	}
+	r = psy_ui_realrectangle_make(
+		psy_ui_realpoint_make(
+			psy_ui_component_scroll_left_px(self),
+			-newtop),
+		psy_ui_component_scroll_size_px(psy_ui_component_parent(self)));
 	if (!self->blitscroll) {
 		psy_ui_component_invalidate(self);
 	} else {
-		psy_ui_RealRectangle r;		
+		psy_ui_component_scroll_to(self, 0.0, newtop - position.top, &r);		
+	}
+	if (newtop - position.top < 0) {
+		double delta;
 
-		r = psy_ui_realrectangle_make(
-				psy_ui_realpoint_make(
-					psy_ui_component_scroll_left_px(self),
-					-newtop),
-				psy_ui_component_scroll_size_px(psy_ui_component_parent(self)));
-		psy_ui_component_scrollto(self, 0.0, newtop - position.top, &r);
+		delta = psy_ui_realrectangle_height(&r) - (newtop + psy_ui_realrectangle_height(&position));
+		if (delta > 0) {			
+			psy_ui_component_invalidate_rect(psy_ui_component_parent(self), psy_ui_realrectangle_make(
+				psy_ui_realpoint_make(0.0, psy_ui_realrectangle_height(&r) - delta),
+				psy_ui_realsize_make(psy_ui_realrectangle_width(&r), delta)));
+		}
 	}
 	psy_signal_emit(&self->signal_scrolled, self, 0);
 }

@@ -62,7 +62,7 @@ static void trackercolumn_vtable_init(TrackerColumn* self)
 		trackercolumn_vtable.on_mouse_down =
 			(psy_ui_fp_component_on_mouse_event)
 			trackercolumn_on_mouse_down;
-		trackercolumn_vtable.onmousemove =
+		trackercolumn_vtable.on_mouse_move =
 			(psy_ui_fp_component_on_mouse_event)
 			trackercolumn_on_mouse_move;
 		trackercolumn_vtable.on_mouse_up =

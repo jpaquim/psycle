@@ -35,10 +35,7 @@ typedef struct TrackerGrid {
 	/* internal */	
 	psy_audio_SequenceCursor old_cursor;
 	psy_audio_SequenceCursor last_drag_cursor;
-	bool chord;
-	uintptr_t chord_begin;	
 	bool effcursor_always_down;	
-	bool prevent_scroll_top;
 	bool prevent_cursor;
 	psy_Table columns;
 	bool prevent_event_driver;

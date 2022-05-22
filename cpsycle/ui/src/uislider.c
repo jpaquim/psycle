@@ -55,7 +55,7 @@ static void vtable_init(psy_ui_SliderPane* self)
 		vtable.onalign =
 			(psy_ui_fp_component_event)
 			psy_ui_sliderpane_onalign;
-		vtable.onmousemove =
+		vtable.on_mouse_move =
 			(psy_ui_fp_component_on_mouse_event)
 			psy_ui_sliderpane_onmousemove;
 		vtable.onmousewheel =

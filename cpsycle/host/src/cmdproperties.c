@@ -1,21 +1,21 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
+
 
 #include "cmdproperties.h"
 #include "cmdsgeneral.h"
 #include "uidef.h"
 #include "trackercmds.h"
 #include "pianoroll.h"
-
 #include <cmdsnotes.h>
 
-static void cmdproperties_makenotes(psy_Property*);
-static void cmdproperties_makegeneral(psy_Property*);
-static void cmdproperties_setinput(psy_Property*);
+static void cmdproperties_make_notes(psy_Property*);
+static void cmdproperties_make_general(psy_Property*);
+static void cmdproperties_set_input(psy_Property*);
 
 psy_Property* cmdproperties_create(void)
 {
@@ -23,15 +23,15 @@ psy_Property* cmdproperties_create(void)
 
 	rv = psy_property_allocinit_key("cmds");
 	if (rv) {
-		cmdproperties_makenotes(rv);
-		cmdproperties_makegeneral(rv);
+		cmdproperties_make_notes(rv);
+		cmdproperties_make_general(rv);
 		trackercmds_make(rv);
-		pianoroll_makecmds(rv);
+		pianoroll_make_cmds(rv);
 	}
 	return rv;
 }
 
-void cmdproperties_makenotes(psy_Property* self)
+void cmdproperties_make_notes(psy_Property* self)
 {
 	psy_Property* notes;	
 	
@@ -409,10 +409,10 @@ void cmdproperties_makenotes(psy_Property* self)
 		psy_property_setid(psy_property_append_int(notes, "cmd_note_off_e_2",
 			psy_audio_encodeinput('P', 0, 0, 0, 1), 0, 0), CMD_NOTE_OFF_E_2),
 		"E2 OFF");	
-	cmdproperties_setinput(notes);
+	cmdproperties_set_input(notes);
 }
 
-void cmdproperties_makegeneral(psy_Property* self)
+void cmdproperties_make_general(psy_Property* self)
 {
 	psy_Property* general;
 
@@ -659,10 +659,10 @@ void cmdproperties_makegeneral(psy_Property* self)
 			psy_audio_encodeinput(psy_ui_KEY_DIGIT9, 0, 0, TRUE, 0), 0, 0),
 			CMD_IMM_TAB9),
 		"tab9"), "cmds.tab9");
-	cmdproperties_setinput(general);
+	cmdproperties_set_input(general);
 }
 
-void cmdproperties_setinput(psy_Property* properties)
+void cmdproperties_set_input(psy_Property* properties)
 {
 	if (properties) {
 		psy_List* p;

@@ -104,7 +104,7 @@ static void seqeditloop_vtable_init(SeqEditLoop* self)
 		seqeditloop_vtable.on_mouse_down =
 			(psy_ui_fp_component_on_mouse_event)
 			seqeditloop_on_mouse_down;
-		seqeditloop_vtable.onmousemove =
+		seqeditloop_vtable.on_mouse_move =
 			(psy_ui_fp_component_on_mouse_event)
 			seqeditloop_onmousemove;
 		seqeditloop_vtable.on_mouse_up =
@@ -371,7 +371,7 @@ static void seqeditloops_vtable_init(SeqEditLoops* self)
 		seqeditloops_vtable.on_mouse_down =
 			(psy_ui_fp_component_on_mouse_event)
 			seqeditloops_on_mouse_down;
-		seqeditloops_vtable.onmousemove =
+		seqeditloops_vtable.on_mouse_move =
 			(psy_ui_fp_component_on_mouse_event)
 			seqeditloops_onmousemove;
 		seqeditloops_vtable.onmouseenter =

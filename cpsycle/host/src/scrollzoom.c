@@ -30,7 +30,7 @@ static void scrollzoomvtable_init(ScrollZoom* self)
 		scrollzoom_vtable.ondraw = (psy_ui_fp_component_ondraw)scrollzoom_ondraw;
 		scrollzoom_vtable.on_mouse_down = (psy_ui_fp_component_on_mouse_event)
 			scrollzoom_on_mouse_down;
-		scrollzoom_vtable.onmousemove = (psy_ui_fp_component_on_mouse_event)
+		scrollzoom_vtable.on_mouse_move = (psy_ui_fp_component_on_mouse_event)
 			scrollzoom_onmousemove;
 		scrollzoom_vtable.on_mouse_up = (psy_ui_fp_component_on_mouse_event)
 			scrollzoom_on_mouse_up;

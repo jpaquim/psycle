@@ -75,7 +75,7 @@ static void seqedittimesig_vtable_init(SeqEditTimeSig* self)
 		seqedittimesig_vtable.on_mouse_down =
 			(psy_ui_fp_component_on_mouse_event)
 			seqedittimesig_on_mouse_down;
-		seqedittimesig_vtable.onmousemove =
+		seqedittimesig_vtable.on_mouse_move =
 			(psy_ui_fp_component_on_mouse_event)
 			seqedittimesig_onmousemove;
 		seqedittimesig_vtable.on_mouse_up =
@@ -311,7 +311,7 @@ static void seqedittimesigs_vtable_init(SeqEditTimeSigs* self)
 		seqedittimesigs_vtable.on_mouse_down =
 			(psy_ui_fp_component_on_mouse_event)
 			seqedittimesigs_on_mouse_down;	
-		seqedittimesigs_vtable.onmousemove =
+		seqedittimesigs_vtable.on_mouse_move =
 			(psy_ui_fp_component_on_mouse_event)
 			seqedittimesigs_onmousemove;
 		seqedittimesigs_vtable.onmouseenter =

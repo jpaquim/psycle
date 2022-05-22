@@ -46,7 +46,7 @@ static void seqeditortracks_vtable_init(SeqEditorTracks* self)
 		seqeditortracks_vtable.on_mouse_up =
 			(psy_ui_fp_component_on_mouse_event)
 			seqeditortracks_on_mouse_up;
-		seqeditortracks_vtable.onmousemove =
+		seqeditortracks_vtable.on_mouse_move =
 			(psy_ui_fp_component_on_mouse_event)
 			seqeditortracks_onmousemove;
 		seqeditortracks_vtable.onmouseenter =

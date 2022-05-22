@@ -47,7 +47,7 @@ static void vtable_init(psy_ui_Splitter* self)
 		vtable.on_mouse_down =
 			(psy_ui_fp_component_on_mouse_event)
 			splitter_on_mouse_down;
-		vtable.onmousemove =
+		vtable.on_mouse_move =
 			(psy_ui_fp_component_on_mouse_event)
 			splitter_onmousemove;
 		vtable.on_mouse_up =

@@ -592,7 +592,7 @@ void view_dev_scrollto(psy_ui_ViewComponentImp* self, intptr_t dx, intptr_t dy,
 			psy_ui_component_scroll_size_px(self->component));
 		rc = view_translation(self, &rc);
 	}
-	psy_ui_component_scrollto(self->view, dx, dy, &rc);
+	psy_ui_component_scroll_to(self->view, dx, dy, &rc);
 }
 
 
