@@ -322,7 +322,7 @@ void interpolatecurvebox_insertkeyframe(InterpolateCurveBox* self, double x, dou
 	psy_dsp_big_beat_t offset;
 	const psy_ui_TextMetric* tm;
 	
-	size = psy_ui_component_scrollsize(&self->component);
+	size = psy_ui_component_scroll_size(&self->component);
 	tm = psy_ui_component_textmetric(&self->component);
 	scalex = psy_ui_value_px(&size.width, tm, NULL) / self->range;
 	scaley = psy_ui_value_px(&size.height, tm, NULL) / (double)0xFF;
@@ -380,7 +380,7 @@ void interpolatecurvebox_onmousemove(InterpolateCurveBox* self, psy_ui_MouseEven
 		double scaley;
 		const psy_ui_TextMetric* tm;
 
-		size = psy_ui_component_scrollsize(&self->component);
+		size = psy_ui_component_scroll_size(&self->component);
 		tm = psy_ui_component_textmetric(&self->component);
 		scaley = psy_ui_value_px(&size.height, tm, NULL) / (double)0xFF;
 		entry = (KeyFrame*)self->dragkeyframe->entry;
@@ -411,7 +411,7 @@ psy_List* interpolatecurvebox_hittest(InterpolateCurveBox* self, double x, doubl
 	double scaley;
 	intptr_t half = 4;
 
-	size = psy_ui_component_scrollsize(&self->component);
+	size = psy_ui_component_scroll_size(&self->component);
 	tm = psy_ui_component_textmetric(&self->component);
 	scalex = psy_ui_value_px(&size.width, tm, NULL) / self->range;
 	scaley = psy_ui_value_px(&size.height, tm, NULL) / (double)0xFF;

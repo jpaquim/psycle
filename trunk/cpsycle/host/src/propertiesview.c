@@ -1153,7 +1153,7 @@ void propertiesview_on_scroll_pane_align(PropertiesView* self,
 		psy_TableIterator it;
 		psy_ui_Size clientsize;		
 
-		clientsize = psy_ui_component_clientsize(&self->renderer.component);
+		clientsize = psy_ui_component_client_size(&self->renderer.component);
 		for (it = psy_table_begin(&self->renderer.sections);
 			!psy_tableiterator_equal(&it, psy_table_end());
 			psy_tableiterator_inc(&it)) {

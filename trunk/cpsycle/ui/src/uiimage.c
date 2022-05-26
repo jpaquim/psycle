@@ -64,7 +64,7 @@ void ondraw(psy_ui_Image* self, psy_ui_Component* sender, psy_ui_Graphics* g)
 	double width;
 	double height;	
 
-	size = psy_ui_component_scrollsize(&self->component);	
+	size = psy_ui_component_scroll_size(&self->component);	
 	tm = psy_ui_component_textmetric(&self->component);
 	width = psy_ui_value_px(&size.width, tm, NULL);
 	height = psy_ui_value_px(&size.height, tm, NULL);

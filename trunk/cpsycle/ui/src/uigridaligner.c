@@ -61,12 +61,12 @@ void psy_ui_gridaligner_align(psy_ui_GridAligner* self)
 	
 	assert(self->component);
 
-	size = psy_ui_component_scrollsize(self->component);	
+	size = psy_ui_component_scroll_size(self->component);	
 	if (psy_ui_component_parent_const(self->component)) {
-		parentsize = psy_ui_component_scrollsize(
+		parentsize = psy_ui_component_scroll_size(
 			psy_ui_component_parent_const(self->component));
 	} else {
-		parentsize = psy_ui_component_scrollsize(self->component);
+		parentsize = psy_ui_component_scroll_size(self->component);
 	}
 	tm = psy_ui_component_textmetric(self->component);
 	psy_ui_realpoint_init(&cp_topleft);

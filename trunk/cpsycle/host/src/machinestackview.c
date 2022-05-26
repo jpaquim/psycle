@@ -877,7 +877,7 @@ void machinestackdesc_onalign(MachineStackDesc* self)
 
 	margin_left = 8.0;
 	tm = psy_ui_component_textmetric(&self->component);
-	size = psy_ui_component_scrollsize(&self->component);
+	size = psy_ui_component_scroll_size(&self->component);
 	sizepx = psy_ui_component_scroll_size_px(&self->component);
 	if (psy_ui_component_visible(&self->view->scroller_columns.hscroll->component)) {
 		sizepx.height -= tm->tmHeight * 1.5;

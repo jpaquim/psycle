@@ -63,6 +63,7 @@ typedef struct MachineFrame {
 	/* internal */
 	ParameterBar parameterbar;
 	psy_ui_Component client;
+	psy_ui_Component parameters;
 	ParameterListBox parameterbox;
 	ParamMap parammap;
 	psy_ui_Notebook notebook;

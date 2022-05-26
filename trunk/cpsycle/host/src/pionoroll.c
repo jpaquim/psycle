@@ -141,26 +141,7 @@ void pianoroll_init(Pianoroll* self, psy_ui_Component* parent,
 	/* left area (keyboardheader, keyboard) */
 	psy_ui_component_init(&self->left, &self->component, NULL);
 	psy_ui_component_set_align(&self->left, psy_ui_ALIGN_LEFT);
-	psy_ui_combobox_init(&self->keytype, &self->left);
-	psy_ui_combobox_setcharnumber(&self->keytype, 6);
-	psy_ui_combobox_add_text(&self->keytype, "Keys");
-	psy_ui_combobox_add_text(&self->keytype, "Notes");
-	psy_ui_combobox_add_text(&self->keytype, "Drums");
-	psy_ui_combobox_setcursel(&self->keytype, 0);	
-	psy_ui_component_setpreferredheight(&self->keytype.component,
-		psy_ui_value_make_eh(1.0));
-	psy_ui_component_hide(&self->keytype.expand.component);
-	psy_ui_component_set_align(&self->keytype.component,
-		psy_ui_ALIGN_TOP);
-	psy_signal_connect(&self->keytype.signal_selchanged, self,
-		pianoroll_on_keytype_changed);
-	/* Keyboard */
-	psy_ui_component_init(&self->keyboardpane, &self->left, NULL);
-	psy_ui_component_set_align(&self->keyboardpane, psy_ui_ALIGN_CLIENT);
-	pianokeyboard_init(&self->keyboard, &self->keyboardpane,
-		&self->keyboardstate, &self->workspace->player);
-	psy_ui_component_set_align(&self->keyboard.component,
-		psy_ui_ALIGN_HCLIENT);	
+	
 	/* top area (beatruler) */
 	psy_ui_component_init(&self->top, &self->component, NULL);
 	psy_ui_component_set_align(&self->top, psy_ui_ALIGN_TOP);
@@ -176,7 +157,28 @@ void pianoroll_init(Pianoroll* self, psy_ui_Component* parent,
 	psy_ui_scroller_set_client(&self->scroller, pianogrid_base(&self->grid));
 	psy_ui_component_set_align(&self->scroller.component, psy_ui_ALIGN_CLIENT);	
 	psy_ui_component_set_align(&self->grid.component, psy_ui_ALIGN_FIXED);
-
+	/* Keyboard */
+	psy_ui_component_init(&self->keyboardpane, &self->left, NULL);
+	psy_ui_component_set_align(&self->keyboardpane, psy_ui_ALIGN_CLIENT);
+	pianokeyboard_init(&self->keyboard, &self->keyboardpane,
+		&self->keyboardstate, &self->workspace->player,
+		&self->grid.component);
+	psy_ui_combobox_init(&self->keytype, &self->left);
+	psy_ui_combobox_setcharnumber(&self->keytype, 6);
+	psy_ui_combobox_add_text(&self->keytype, "Keys");
+	psy_ui_combobox_add_text(&self->keytype, "Notes");
+	psy_ui_combobox_add_text(&self->keytype, "Drums");
+	psy_ui_combobox_setcursel(&self->keytype, 0);
+	psy_ui_component_setpreferredheight(&self->keytype.component,
+		psy_ui_value_make_eh(1.0));
+	psy_ui_component_hide(&self->keytype.expand.component);
+	psy_ui_component_set_align(&self->keytype.component,
+		psy_ui_ALIGN_TOP);
+	psy_signal_connect(&self->keytype.signal_selchanged, self,
+		pianoroll_on_keytype_changed);
+	psy_ui_component_set_align(&self->keyboard.component,
+		psy_ui_ALIGN_HCLIENT);
+	/* connect signals */
 	psy_signal_connect(&pianogrid_base(&self->grid)->signal_scrolled, self,
 		pianoroll_on_grid_scroll);
 	psy_signal_connect(&self->workspace->song->sequence.signal_cursorchanged,

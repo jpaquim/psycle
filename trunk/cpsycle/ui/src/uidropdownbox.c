@@ -32,7 +32,7 @@ void psy_ui_dropdownbox_show(psy_ui_DropDownBox* self, psy_ui_Component* field)
 	psy_ui_Size size;
 	psy_ui_RealRectangle position;	
 	
-	size = psy_ui_component_scrollsize(field);
+	size = psy_ui_component_scroll_size(field);
 	position = psy_ui_component_screenposition(field);		
 	psy_ui_component_setposition(&self->component,
 		psy_ui_rectangle_make(

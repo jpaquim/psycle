@@ -632,9 +632,9 @@ void dev_setposition(psy_ui_win_ComponentImp* self, psy_ui_Point topleft,
 		psy_ui_Size parentsize;
 
 		if (psy_ui_component_parent_const(self->component)) {
-			parentsize = psy_ui_component_scrollsize(psy_ui_component_parent_const(self->component));
+			parentsize = psy_ui_component_scroll_size(psy_ui_component_parent_const(self->component));
 		} else {
-			parentsize = psy_ui_component_scrollsize(self->component);
+			parentsize = psy_ui_component_scroll_size(self->component);
 		}
 		SetWindowPos(self->hwnd, 0,
 			(int)psy_ui_value_px(&topleft.x, tm, &parentsize),

@@ -65,9 +65,9 @@ void psy_ui_lclaligner_align(psy_ui_LCLAligner* self)
 	
 	assert(self->component);
 
-	size = psy_ui_component_scrollsize(self->component);
+	size = psy_ui_component_scroll_size(self->component);
 	if (psy_ui_component_parent(self->component)) {
-		parentsize = psy_ui_component_scrollsize(
+		parentsize = psy_ui_component_scroll_size(
 			psy_ui_component_parent(self->component));
 	} else {
 		parentsize = size;
@@ -239,7 +239,7 @@ void psy_ui_lclaligner_resizewrapline(psy_ui_LCLAligner* self, psy_List* wrap, d
 		c_margin = psy_ui_component_margin(c);
 		psy_ui_component_resize(c,
 			psy_ui_size_make(
-				psy_ui_component_scrollsize(c).width,
+				psy_ui_component_scroll_size(c).width,
 				psy_ui_value_make_px(cpymax - cpy -
 					psy_ui_margin_height_px(&c_margin,
 						psy_ui_component_textmetric(c), NULL))));
@@ -296,7 +296,7 @@ void psy_ui_lclaligner_alignclients(psy_ui_LCLAligner* self, psy_List* children,
 					psy_ui_Size limit;
 
 					position = psy_ui_component_position(component);
-					limit = psy_ui_component_scrollsize(self->component);
+					limit = psy_ui_component_scroll_size(self->component);
 					c_tm = psy_ui_component_textmetric(self->component);
 					componentsize = psy_ui_component_preferredsize(component,
 						&limit);
@@ -320,7 +320,7 @@ void psy_ui_lclaligner_alignclients(psy_ui_LCLAligner* self, psy_List* children,
 					psy_ui_Size limit;
 
 					position = psy_ui_component_position(component);
-					limit = psy_ui_component_scrollsize(self->component);
+					limit = psy_ui_component_scroll_size(self->component);
 					c_tm = psy_ui_component_textmetric(self->component);
 					componentsize = psy_ui_component_preferredsize(component,
 						&limit);

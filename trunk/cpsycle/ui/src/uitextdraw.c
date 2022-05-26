@@ -21,8 +21,7 @@ static double psy_ui_textdraw_center_x(const psy_ui_TextDraw*,
 	double width, const char* text, uintptr_t count, const psy_ui_Font*,
 	const psy_ui_TextMetric*);
 static double psy_ui_textdraw_center_y(const psy_ui_TextDraw*,
-	double height, uintptr_t numlines, const psy_ui_Font*,
-	const psy_ui_TextMetric*);
+	double height, uintptr_t numlines, const psy_ui_TextMetric*);
 
 /* implementation */
 void psy_ui_textdraw_init(psy_ui_TextDraw* self, psy_ui_TextFormat* format, psy_ui_RealSize size,
@@ -54,23 +53,27 @@ void psy_ui_textdraw_draw(psy_ui_TextDraw* self, psy_ui_Graphics* g,
 		psy_ui_textdraw_draw_single_line(self, g, tm);
 		if (cursorpos >= 0 && cursorpos <= psy_strlen(self->text)) {			
 			psy_ui_textdraw_drawcursor(self, g, tm,
-				psy_ui_textdraw_center_y(self, self->size.height, 1, psy_ui_font(g), tm),
+				psy_ui_textdraw_center_y(self, self->size.height, 1, tm),
 				0, cursorpos);
 		}
 		return;
 	}	
+	center.y = psy_ui_textdraw_center_y(self, self->size.height, 0, tm);
+	clip = psy_ui_graphics_cliprect(g);
+	line_height = (self->format->linespacing * tm->tmHeight);
+	line = (intptr_t)(clip.top / line_height);
 	if (psy_strlen(self->text) == 0) {
+		if (cursorpos == 0) {			
+			psy_ui_textdraw_drawcursor(self, g, tm, center.y, 0, cursorpos);
+		}
 		return;
 	}		
 	psy_ui_textformat_update(self->format, self->text, self->size.width, psy_ui_font(g), tm);
 	numlines = psy_ui_textformat_numlines(self->format);
+	center.y = psy_ui_textdraw_center_y(self, self->size.height, numlines, tm);	
 	if (numlines == 0) {
 		return;
-	}	
-	center.y = psy_ui_textdraw_center_y(self, self->size.height, numlines, psy_ui_font(g), tm);
-	clip = psy_ui_graphics_cliprect(g);
-	line_height = (self->format->linespacing * tm->tmHeight);
-	line = (intptr_t)(clip.top / line_height);
+	}		
 	if (line > 0 && line < (intptr_t)numlines) {
 		linestart = psy_ui_textformat_line_at(self->format, line - 1) + 1;		
 	} else {
@@ -80,12 +83,17 @@ void psy_ui_textdraw_draw(psy_ui_TextDraw* self, psy_ui_Graphics* g,
 	numlines = psy_min(numlines, ((uintptr_t)(floor(clip.bottom) / line_height)) + 1);
 	for (; line < (intptr_t)numlines; ++line) {
 		if (line >= 0) {
+			uintptr_t len;
+			char* str;
+
 			cp = psy_ui_textformat_line_at(self->format, line);
 			center.x = psy_ui_textdraw_center_x(self, self->size.width,
 				self->text + linestart, cp - linestart, psy_ui_font(g), tm);
-			psy_ui_textout(g, center, self->text + linestart, cp - linestart);
+			str = psy_ui_textformat_fill_tabs(self->text + linestart, cp - linestart, &len);
+			psy_ui_textout(g, center, str, len);
+			free(str);
 			if (cursorpos >= linestart && cursorpos <= cp) {
-				psy_ui_textdraw_drawcursor(self, g, tm, center.y, linestart, cursorpos);				
+				psy_ui_textdraw_drawcursor(self, g, tm, center.y, linestart, cursorpos);
 			}
 			linestart = cp + 1;
 		}
@@ -93,19 +101,23 @@ void psy_ui_textdraw_draw(psy_ui_TextDraw* self, psy_ui_Graphics* g,
 	}	
 }
 
+
 void psy_ui_textdraw_drawcursor(psy_ui_TextDraw* self, psy_ui_Graphics* g,
 	const psy_ui_TextMetric* tm, double cpy, uintptr_t linestart, uintptr_t cp)
 {	
 		psy_ui_Size textsize;
 		double x;		
+		uintptr_t len;
+		char* str;
 				
-		textsize = psy_ui_textsize(g, self->text + linestart, cp - linestart);
+		str = psy_ui_textformat_fill_tabs(self->text + linestart, cp - linestart, &len);
+		textsize = psy_ui_textsize(g, str, len);
+		free(str);
 		x = psy_ui_value_px(&textsize.width, tm, NULL);
 		psy_ui_drawline(g,
 			psy_ui_realpoint_make(x, cpy),
 			psy_ui_realpoint_make(x, cpy + tm->tmHeight));	
 }
-
 
 void psy_ui_textdraw_draw_single_line(psy_ui_TextDraw* self, psy_ui_Graphics* g,
 	const psy_ui_TextMetric* tm)
@@ -123,7 +135,7 @@ void psy_ui_textdraw_draw_single_line(psy_ui_TextDraw* self, psy_ui_Graphics* g,
 	}
 	psy_ui_textout(g, psy_ui_realpoint_make(
 		psy_ui_textdraw_center_x(self, self->size.width, self->text, numchars, font, tm),
-		psy_ui_textdraw_center_y(self, self->size.height, 1, font, tm)),
+		psy_ui_textdraw_center_y(self, self->size.height, 1, tm)),
 		self->text, numchars);	
 }
 
@@ -152,8 +164,7 @@ double psy_ui_textdraw_center_x(const psy_ui_TextDraw* self,
 }
 
 double psy_ui_textdraw_center_y(const psy_ui_TextDraw* self, double height,
-	uintptr_t numlines, const psy_ui_Font* font,
-	const psy_ui_TextMetric* tm)
+	uintptr_t numlines, const psy_ui_TextMetric* tm)
 {	
 	if (psy_ui_textalignment_vertical_centered(&self->format->textalignment)) {		
 		return (height - self->format->linespacing * tm->tmHeight * numlines) / 2.0;

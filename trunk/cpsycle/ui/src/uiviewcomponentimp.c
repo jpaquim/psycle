@@ -456,10 +456,10 @@ void view_dev_setposition(psy_ui_ViewComponentImp* self, psy_ui_Point topleft,
 	tm = view_dev_textmetric(self);
 	if (psy_ui_size_has_percent(&size)) {
 		if (psy_ui_component_parent_const(self->component)) {
-			parentsize = psy_ui_component_scrollsize(
+			parentsize = psy_ui_component_scroll_size(
 				psy_ui_component_parent_const(self->component));
 		} else {
-			parentsize = psy_ui_component_scrollsize(self->component);
+			parentsize = psy_ui_component_scroll_size(self->component);
 		}
 		pparentsize = &parentsize;
 	} else {

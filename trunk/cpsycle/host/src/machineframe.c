@@ -190,10 +190,12 @@ void machineframe_init(MachineFrame* self, psy_ui_Component* parent,
 	parammap_init(&self->parammap, &self->client, NULL,
 		psycleconfig_macparam(workspace_conf(workspace)));
 	psy_ui_component_set_align(&self->parammap.component, psy_ui_ALIGN_RIGHT);
-	parameterlistbox_init(&self->parameterbox, &self->client, NULL,
+	psy_ui_component_init(&self->parameters, &self->client, &self->client);
+	psy_ui_component_set_align(&self->parameters, psy_ui_ALIGN_RIGHT);
+	parameterlistbox_init(&self->parameterbox, &self->parameters, NULL,
 		psycleconfig_macparam(workspace_conf(workspace)));	
 	psy_ui_component_set_align(&self->parameterbox.component,
-		psy_ui_ALIGN_RIGHT);
+		psy_ui_ALIGN_CLIENT);
 	psy_ui_notebook_init(&self->notebook, &self->client);
 	psy_ui_component_set_align(psy_ui_notebook_base(&self->notebook),
 		psy_ui_ALIGN_CLIENT);

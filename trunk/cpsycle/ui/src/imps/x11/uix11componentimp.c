@@ -656,10 +656,10 @@ void dev_setposition(psy_ui_x11_ComponentImp* self, psy_ui_Point topleft,
 	pparentsize = NULL;
     if (psy_ui_size_has_percent(&size)) {
         if (psy_ui_component_parent_const(self->component)) {
-			parentsize = psy_ui_component_scrollsize(
+			parentsize = psy_ui_component_scroll_size(
 				psy_ui_component_parent_const(self->component));
 		} else {
-			parentsize = psy_ui_component_scrollsize(self->component);
+			parentsize = psy_ui_component_scroll_size(self->component);
 		}
 		pparentsize = &parentsize;
     }

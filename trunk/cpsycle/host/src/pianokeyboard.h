@@ -32,13 +32,17 @@ typedef struct PianoKeyboard {
 	/* inherits */
 	psy_ui_Component component;
 	uint8_t active_note;
+	intptr_t scroll;
+	intptr_t scrollspeed;
+	intptr_t scrollcount;
 	/* references */
 	KeyboardState* keyboardstate;
 	psy_audio_Player* player;
+	psy_ui_Component* grid;
 } PianoKeyboard;
 
 void pianokeyboard_init(PianoKeyboard*, psy_ui_Component* parent,
-	KeyboardState*, psy_audio_Player* player);
+	KeyboardState*, psy_audio_Player* player, psy_ui_Component* grid);
 
 void pianokeyboard_set_keyboard_type(PianoKeyboard*, KeyboardType);
 void pianokeyboard_idle(PianoKeyboard*);

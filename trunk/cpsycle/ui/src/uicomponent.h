@@ -602,13 +602,13 @@ INLINE const psy_ui_TextMetric* psy_ui_component_textmetric(const psy_ui_Compone
 psy_ui_Size psy_ui_component_size(const psy_ui_Component*);
 
 /* returns the element’s size that include padding but without the border */
-psy_ui_Size psy_ui_component_clientsize(const psy_ui_Component*);
+psy_ui_Size psy_ui_component_client_size(const psy_ui_Component*);
 
 /*
 ** returns the element’s entire size that includes padding but
 ** not border, not margin and not scrollbars
 */
-psy_ui_Size psy_ui_component_scrollsize(const psy_ui_Component*);
+psy_ui_Size psy_ui_component_scroll_size(const psy_ui_Component*);
 
 void psy_ui_component_setcolour(psy_ui_Component*, psy_ui_Colour);
 psy_ui_Colour psy_ui_component_colour(psy_ui_Component*);
@@ -721,7 +721,7 @@ INLINE psy_ui_Value psy_ui_component_scroll_top(psy_ui_Component* self)
 	return psy_ui_value_make_px(-position.top);
 }
 
-INLINE double psy_ui_component_scroll_top_px(psy_ui_Component* self)
+INLINE double psy_ui_component_scroll_top_px(const psy_ui_Component* self)
 {		
 	psy_ui_RealRectangle position;
 
@@ -840,16 +840,16 @@ void psy_ui_component_focus_prev(psy_ui_Component*);
 
 INLINE psy_ui_IntSize psy_ui_component_intsize(psy_ui_Component* self)
 {	
-	return psy_ui_intsize_init_size(psy_ui_component_scrollsize(self),
+	return psy_ui_intsize_init_size(psy_ui_component_scroll_size(self),
 		psy_ui_component_textmetric(self), NULL);
 }
 
 INLINE psy_ui_Size psy_ui_component_parentsize(const psy_ui_Component* self)
 {	
 	if (psy_ui_component_parent_const(self)) {
-		return psy_ui_component_scrollsize(psy_ui_component_parent_const(self));
+		return psy_ui_component_scroll_size(psy_ui_component_parent_const(self));
 	}
-	return psy_ui_component_scrollsize(self);	
+	return psy_ui_component_scroll_size(self);	
 }
 
 INLINE psy_ui_RealSize psy_ui_component_scroll_size_px(const psy_ui_Component* self)
@@ -858,7 +858,7 @@ INLINE psy_ui_RealSize psy_ui_component_scroll_size_px(const psy_ui_Component* s
 	psy_ui_Size parentsize;
 	
 	parentsize = psy_ui_component_parentsize(self);
-	size = psy_ui_component_scrollsize(self);	
+	size = psy_ui_component_scroll_size(self);	
 	return psy_ui_size_px(&size, psy_ui_component_textmetric(self), &parentsize);
 }
 
@@ -868,7 +868,7 @@ INLINE psy_ui_RealSize psy_ui_component_clientsize_px(const psy_ui_Component* se
 	psy_ui_Size parentsize;
 
 	parentsize = psy_ui_component_parentsize(self);
-	size = psy_ui_component_clientsize(self);
+	size = psy_ui_component_client_size(self);
 	return psy_ui_size_px(&size, psy_ui_component_textmetric(self), &parentsize);
 }
 

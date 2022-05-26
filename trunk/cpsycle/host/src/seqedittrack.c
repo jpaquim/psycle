@@ -239,7 +239,7 @@ void seqedittrack_on_align(SeqEditTrack* self)
 	if (!self->currtrack) {
 		return;
 	}
-	size = psy_ui_component_scrollsize(&self->component);	
+	size = psy_ui_component_scroll_size(&self->component);	
 	p = self->entries;
 	for (p = self->entries, q = self->currtrack->nodes;
 			p != NULL && q != NULL; psy_list_next(&p), q = q->next) {
