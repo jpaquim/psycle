@@ -220,7 +220,7 @@ void instrumentkeyboardview_updatemetrics(InstrumentKeyboardView* self)
 	}
 	tm = psy_ui_component_textmetric(&self->component);
 	size = psy_ui_intsize_init_size(
-		psy_ui_component_scrollsize(&self->component), tm, NULL);
+		psy_ui_component_scroll_size(&self->component), tm, NULL);
 	self->metrics.keysize = size.width / (double)numwhitekeys;
 	psy_ui_component_set_scroll_step_height(&self->component,
 		psy_ui_value_make_px(self->metrics.line_height * 3));
@@ -475,7 +475,7 @@ void instrumententryview_updatemetrics(InstrumentEntryView* self)
 	}
 	tm = psy_ui_component_textmetric(&self->component);
 	size = psy_ui_intsize_init_size(
-		psy_ui_component_scrollsize(&self->component), tm, NULL);
+		psy_ui_component_scroll_size(&self->component), tm, NULL);
 	self->metrics.keysize = size.width / (double)numwhitekeys;
 	psy_ui_component_set_scroll_step_height(&self->component,
 		psy_ui_value_make_px(self->metrics.line_height * 3));
@@ -549,7 +549,7 @@ double instrumententryview_keysize(InstrumentEntryView* self)
 		}
 	}
 	tm = psy_ui_component_textmetric(&self->component);
-	size = psy_ui_component_scrollsize(&self->component);
+	size = psy_ui_component_scroll_size(&self->component);
 	return psy_ui_value_px(&size.width, tm, NULL) / numwhitekeys;
 }
 
@@ -1136,7 +1136,7 @@ psy_ui_Rectangle instrumententryrow_editposition(InstrumentEntryRow* self,
 	if (!columndef) {
 		return psy_ui_rectangle_make(psy_ui_point_zero(), psy_ui_size_zero());
 	}
-	size = psy_ui_component_scrollsize(&self->component);
+	size = psy_ui_component_scroll_size(&self->component);
 	position = psy_ui_component_position(&self->component);
 	return psy_ui_rectangle_make(
 		psy_ui_point_make_px(			

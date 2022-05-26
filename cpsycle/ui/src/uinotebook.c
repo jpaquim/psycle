@@ -56,7 +56,7 @@ void psy_ui_notebook_select(psy_ui_Notebook* self, uintptr_t pageindex)
 	
 	self->pageindex = pageindex;
 	if (!self->split) {
-		size = psy_ui_component_scrollsize(psy_ui_notebook_base(self));
+		size = psy_ui_component_scroll_size(psy_ui_notebook_base(self));
 		if (self->component.align == psy_ui_ALIGN_LEFT) {
 			size = psy_ui_component_preferredsize(psy_ui_notebook_base(self), &size);
 		}
@@ -71,7 +71,7 @@ void psy_ui_notebook_select(psy_ui_Notebook* self, uintptr_t pageindex)
 				if (c == pageindex) {
 					psy_ui_Size oldsize;
 					bool resize;					
-					oldsize = psy_ui_component_scrollsize(component);
+					oldsize = psy_ui_component_scroll_size(component);
 					resize = (psy_ui_value_px(&oldsize.width, psy_ui_component_textmetric(component), NULL) !=
 						psy_ui_value_px(&size.width, psy_ui_component_textmetric(component), NULL)) ||
 						(psy_ui_value_px(&oldsize.height, psy_ui_component_textmetric(component), NULL) !=
@@ -154,7 +154,7 @@ void psy_ui_notebook_onalign(psy_ui_Notebook* self)
 			if (psy_ui_component_visible(component)) {
 				psy_ui_Size size;
 
-				size = psy_ui_component_scrollsize(&self->component);				
+				size = psy_ui_component_scroll_size(&self->component);				
 				psy_ui_component_setposition(component,
 					psy_ui_rectangle_make(psy_ui_point_zero(), size));				
 			}
@@ -193,7 +193,7 @@ void psy_ui_notebook_split(psy_ui_Notebook* self, psy_ui_Orientation orientation
 			psy_ui_Size size;
 			const psy_ui_TextMetric* tm;
 				
-			size = psy_ui_component_scrollsize(psy_ui_notebook_base(self));
+			size = psy_ui_component_scroll_size(psy_ui_notebook_base(self));
 			tm = psy_ui_component_textmetric(psy_ui_notebook_base(self));			
 			if (orientation == psy_ui_VERTICAL) {
 				psy_ui_component_set_preferred_size(component,

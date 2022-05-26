@@ -103,6 +103,7 @@ uintptr_t psy_ui_textformat_cursor_position(const psy_ui_TextFormat*,
 double psy_ui_textformat_screen_offset(const psy_ui_TextFormat*,
     const char* text, uintptr_t count, const psy_ui_Font*,
     const psy_ui_TextMetric*);
+char_dyn_t* psy_ui_textformat_fill_tabs(const char* text, uintptr_t len, uintptr_t* rv_len);
 
 #ifdef __cplusplus
 }

@@ -81,7 +81,7 @@ static void vtable_init(psy_ui_TextAreaPane* self)
 			psy_ui_textareapane_on_mouse_down;
 		vtable_initialized = TRUE;
 	}	
-	self->component.vtable = &vtable;
+	psy_ui_component_set_vtable(&self->component, &vtable);
 }
 
 /* implementation */
@@ -93,7 +93,7 @@ void psy_ui_textareapane_init(psy_ui_TextAreaPane* self, psy_ui_Component* paren
 	self->linenumber = 1;
 	self->isinputfield = FALSE;
 	self->preventedit = TRUE;
-	self->text = psy_strdup("textinput");
+	self->text = psy_strdup("textinput	tab1	tab2 word line break");
 	self->cp = 0;
 	psy_ui_textformat_init(&self->format);
 	psy_signal_init(&self->signal_change);
@@ -185,7 +185,7 @@ void psy_ui_textareapane_on_preferred_size(psy_ui_TextAreaPane* self,
 	tm = psy_ui_component_textmetric(psy_ui_textareapane_base(self));	
 	width = (self->charnumber == 0 && limit)
 		? psy_ui_value_px(&limit->width, tm, limit)
-		: self->charnumber * tm->tmAveCharWidth;
+		: (self->charnumber) * tm->tmAveCharWidth;
 	psy_ui_textformat_update(&self->format, self->text, width, font, tm);
 	if (self->format.line_wrap && !self->format.word_wrap && self->charnumber == 0.0) {
 		width = psy_max(psy_ui_value_px(&limit->width, tm, limit),
@@ -271,6 +271,9 @@ void psy_ui_textareapane_on_key_down(psy_ui_TextAreaPane* self, psy_ui_KeyboardE
 		break;
 	case psy_ui_KEY_SPACE:
 		insertchar(self, ' ');
+		break;
+	case psy_ui_KEY_TAB:
+		insertchar(self, '\t');
 		break;
 	case psy_ui_KEY_SHIFT:
 	case psy_ui_KEY_CONTROL:
@@ -463,6 +466,7 @@ void insertchar(psy_ui_TextAreaPane* self, char c)
 	right = NULL;
 	++self->cp;
 	psy_ui_textformat_clear(&self->format);
+	psy_signal_emit(&self->signal_change, self, 0);
 }
 
 void deletechar(psy_ui_TextAreaPane* self)
@@ -484,6 +488,7 @@ void deletechar(psy_ui_TextAreaPane* self)
 		--self->cp;
 	}
 	psy_ui_textformat_clear(&self->format);
+	psy_signal_emit(&self->signal_change, self, 0);
 }
 
 void removechar(psy_ui_TextAreaPane* self)
@@ -502,6 +507,7 @@ void removechar(psy_ui_TextAreaPane* self)
 	free(right);
 	right = NULL;
 	psy_ui_textformat_clear(&self->format);
+	psy_signal_emit(&self->signal_change, self, 0);
 }
 
 char_dyn_t* lefttext(psy_ui_TextAreaPane* self, uintptr_t split)

@@ -797,7 +797,7 @@ uintptr_t wavebox_screentoframe(WaveBox* self, double x)
 	if (self->context.sample) {
 		psy_ui_Size size;		
 		
-		size = psy_ui_component_scrollsize(&self->component);			
+		size = psy_ui_component_scroll_size(&self->component);			
 		frame = (int)(self->context.offsetstep * x) +
 			(int)(waveboxcontext_numframes(&self->context) * self->context.zoomleft);
 		if (frame < 0) {
@@ -908,7 +908,7 @@ void  wavebox_onsize(WaveBox* self)
 {	
 	psy_ui_Size size;
 
-	size = psy_ui_component_scrollsize(&self->component);
+	size = psy_ui_component_scroll_size(&self->component);
 	waveboxcontext_setsize(&self->context, &size);	
 }
 

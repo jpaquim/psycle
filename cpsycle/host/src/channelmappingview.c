@@ -115,7 +115,7 @@ void pinedit_drawpinoutput(PinEdit* self, psy_ui_Graphics* g, uintptr_t pin)
 	psy_ui_RealRectangle r;
 
 	tm = psy_ui_component_textmetric(&self->component);
-	size = psy_ui_component_scrollsize(&self->component);
+	size = psy_ui_component_scroll_size(&self->component);
 	height = tm->tmHeight * 2;
 	height2 = height / 2;
 	centery = (height - tm->tmHeight) / 2;
@@ -149,7 +149,7 @@ void pinedit_drawpininput(PinEdit* self, psy_ui_Graphics* g, uintptr_t pin)
 	psy_ui_RealRectangle r;
 
 	tm = psy_ui_component_textmetric(&self->component);
-	size = psy_ui_component_scrollsize(&self->component);
+	size = psy_ui_component_scroll_size(&self->component);
 	height = tm->tmHeight * 2;
 	height2 = height / 2;
 	centery = (height - tm->tmHeight) / 2;
@@ -185,7 +185,7 @@ psy_ui_RealRectangle pinedit_pinposition_output(PinEdit* self, uintptr_t pin)
 	psy_ui_RealRectangle r;
 
 	tm = psy_ui_component_textmetric(&self->component);
-	size = psy_ui_component_scrollsize(&self->component);
+	size = psy_ui_component_scroll_size(&self->component);
 	height = tm->tmHeight * 2;
 	height2 = height / 2;
 	centery = (height - tm->tmHeight) / 2;
@@ -214,7 +214,7 @@ psy_ui_RealRectangle pinedit_pinposition_input(PinEdit* self, uintptr_t pin)
 	psy_ui_Size size;	
 
 	tm = psy_ui_component_textmetric(&self->component);
-	size = psy_ui_component_scrollsize(&self->component);
+	size = psy_ui_component_scroll_size(&self->component);
 	height = tm->tmHeight * 2;
 	height2 = height / 2;
 	centery = (height - tm->tmHeight) / 2;
@@ -330,7 +330,7 @@ void pinedit_on_mouse_down(PinEdit* self, psy_ui_MouseEvent* ev)
 				pinconnection = (psy_audio_PinConnection*)(pinpair->entry);
 				self->drag_dst = pinconnection->dst;
 				self->drag_src = pinconnection->src;
-				size = psy_ui_component_scrollsize(&self->component);
+				size = psy_ui_component_scroll_size(&self->component);
 				tm = psy_ui_component_textmetric(&self->component);
 				if (psy_ui_mouseevent_pt(ev).x < psy_ui_value_px(&size.width, tm, NULL) / 2) {
 					self->dragmode = PINEDIT_DRAG_SRC;

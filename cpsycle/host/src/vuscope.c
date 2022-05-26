@@ -98,7 +98,7 @@ void vuscope_drawscale(VuScope* self, psy_ui_Graphics* g)
 
 	tm = psy_ui_component_textmetric(&self->component);
 	charwidth = tm->tmAveCharWidth * 8;
-	size = psy_ui_component_scrollsize(&self->component);
+	size = psy_ui_component_scroll_size(&self->component);
 	right = psy_ui_value_px(&size.width, tm, NULL);
 	centerx = psy_ui_value_px(&size.width, tm, NULL) / 2;
 	step = psy_ui_value_px(&size.height, tm, NULL) / 7;
@@ -213,7 +213,7 @@ void vuscope_drawbars(VuScope* self, psy_ui_Graphics* g)
 	pSamplesL = buffer->samples[0];
 	pSamplesR = buffer->samples[1];
 
-	size = psy_ui_component_scrollsize(&self->component);
+	size = psy_ui_component_scroll_size(&self->component);
 	tm = psy_ui_component_textmetric(&self->component);
 	right = psy_ui_value_px(&size.width, tm, NULL);
 	centerx = psy_ui_value_px(&size.width, tm, NULL) / 2;

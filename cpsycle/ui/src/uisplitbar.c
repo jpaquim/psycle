@@ -155,32 +155,32 @@ void splitter_on_mouse_down(psy_ui_Splitter* self, psy_ui_MouseEvent* ev)
 			if (prev->align == psy_ui_ALIGN_LEFT ||
 					prev->align == psy_ui_ALIGN_RIGHT) {
 				if (!self->hasrestore) {
-					self->restoresize = psy_ui_component_scrollsize(prev);
+					self->restoresize = psy_ui_component_scroll_size(prev);
 					self->hasrestore = TRUE;
 					psy_ui_component_set_preferred_size(prev,
 						psy_ui_size_make(psy_ui_value_make_ew(0),
-							psy_ui_component_scrollsize(prev).height));
+							psy_ui_component_scroll_size(prev).height));
 				} else {
 					self->hasrestore = FALSE;
 					psy_ui_component_set_preferred_size(prev,
 						psy_ui_size_make(self->restoresize.width,
-						psy_ui_component_scrollsize(prev).height));
+						psy_ui_component_scroll_size(prev).height));
 				}
 			} else
 			if (prev->align == psy_ui_ALIGN_TOP ||
 					prev->align == psy_ui_ALIGN_BOTTOM) {
 				if (!self->hasrestore) {
 					self->hasrestore = TRUE;
-					self->restoresize = psy_ui_component_scrollsize(prev);					
+					self->restoresize = psy_ui_component_scroll_size(prev);					
 					psy_ui_component_set_preferred_size(prev,
 						psy_ui_size_make(
-							psy_ui_component_scrollsize(prev).width,
+							psy_ui_component_scroll_size(prev).width,
 							psy_ui_value_make_px(0)));
 				} else {
 					self->hasrestore = FALSE;
 					psy_ui_component_set_preferred_size(prev,
 						psy_ui_size_make(
-							psy_ui_component_scrollsize(prev).width,
+							psy_ui_component_scroll_size(prev).width,
 							self->restoresize.height));
 				}
 			}
@@ -307,7 +307,7 @@ void splitter_on_mouse_up(psy_ui_Splitter* self, psy_ui_MouseEvent* ev)
 					psy_ui_size_make(
 						psy_ui_value_make_px(position.left -
 							prev_position.left),
-						psy_ui_component_scrollsize(prev).height));
+						psy_ui_component_scroll_size(prev).height));
 			} else if (prev->align == psy_ui_ALIGN_RIGHT) {
 				psy_ui_RealRectangle prev_position;
 
@@ -316,11 +316,11 @@ void splitter_on_mouse_up(psy_ui_Splitter* self, psy_ui_MouseEvent* ev)
 					psy_ui_size_make(
 						psy_ui_value_make_px(
 							prev_position.right - position.right),
-						psy_ui_component_scrollsize(prev).height));
+						psy_ui_component_scroll_size(prev).height));
 			} else if (prev->align == psy_ui_ALIGN_TOP) {				
 				psy_ui_component_set_preferred_size(prev,
 					psy_ui_size_make(
-						psy_ui_component_scrollsize(prev).width,
+						psy_ui_component_scroll_size(prev).width,
 						psy_ui_value_make_px(position.top)));
 			} else if (prev->align == psy_ui_ALIGN_BOTTOM) {
 				psy_ui_RealRectangle prev_position;
@@ -328,7 +328,7 @@ void splitter_on_mouse_up(psy_ui_Splitter* self, psy_ui_MouseEvent* ev)
 				prev_position = psy_ui_component_position(prev);				
 				psy_ui_component_set_preferred_size(prev,
 					psy_ui_size_make(
-						psy_ui_component_scrollsize(prev).width,
+						psy_ui_component_scroll_size(prev).width,
 						psy_ui_value_make_px(prev_position.bottom -
 							position.bottom)));
 			}

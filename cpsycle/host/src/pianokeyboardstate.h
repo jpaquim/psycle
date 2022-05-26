@@ -63,6 +63,8 @@ INLINE uint8_t keyboardstate_screen_to_key(KeyboardState* self, psy_ui_RealPoint
 	rv = 0;
 	if (self->keymax - 1 >= pt.y / self->keyheightpx) {		
 		rv = (uint8_t)(self->keymax - pt.y / self->keyheightpx);
+		rv = psy_min(self->keymax, rv);
+		rv = psy_max(self->keymin, rv);
 	}
 	if (rv != psy_audio_NOTECOMMANDS_EMPTY && psy_dsp_isblack(rv)) {				
 		if (pt.x > (width * 0.60)) {

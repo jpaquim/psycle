@@ -61,8 +61,10 @@ void searchfield_init(SearchField* self, psy_ui_Component* parent)
 		psy_ui_margin_make_em(0.0, 1.0, 0.0, 1.0));	
 	psy_ui_textarea_init_single_line(&self->edit, &self->component);	
 	psy_ui_textarea_setcharnumber(&self->edit, 42);
+	psy_ui_component_set_align(psy_ui_textarea_base(&self->edit),
+		psy_ui_ALIGN_LEFT);
 	searchfield_reset(self);
-	psy_signal_connect(&self->edit.component.signal_focus,
+	psy_signal_connect(&self->edit.pane.component.signal_focus,
 		self, searchfield_oneditfocus);
 	psy_signal_connect(&self->edit.signal_change,
 		self, searchfield_oneditchange);
@@ -70,9 +72,7 @@ void searchfield_init(SearchField* self, psy_ui_Component* parent)
 	psy_signal_connect(&self->edit.signal_accept,
 		self, searchfield_onaccept);
 	psy_signal_connect(&self->edit.signal_reject,
-		self, searchfield_onreject);
-	psy_ui_component_set_align(psy_ui_textarea_base(&self->edit),
-		psy_ui_ALIGN_CLIENT);	
+		self, searchfield_onreject);		
 }
 
 void searchfield_on_destroy(SearchField* self)
