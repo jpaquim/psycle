@@ -42,6 +42,10 @@ void patterndefaultline_init(PatternDefaultLine* self, psy_ui_Component* parent,
 {
 	psy_ui_component_init(&self->component, parent, NULL);
 	vtable_init(self);
+	psy_ui_component_set_style_type_select(&self->component,
+		STYLE_PV_TRACK_VIEW_SELECT);
+	psy_ui_component_set_style_type(&self->component,
+		STYLE_PV_TRACK_VIEW);
 	psy_ui_component_set_align(&self->component, psy_ui_ALIGN_TOP);
 	self->workspace = workspace;
 	/* states */

@@ -914,8 +914,8 @@ void psy_ui_component_set_style_type_active(psy_ui_Component*, uintptr_t active)
 void psy_ui_component_set_style_type_select(psy_ui_Component*, uintptr_t select);
 void psy_ui_component_set_style_type_disabled(psy_ui_Component*, uintptr_t disabled);
 void psy_ui_component_set_style_state(psy_ui_Component*, psy_ui_StyleState);
-void psy_ui_component_addstylestate(psy_ui_Component*, psy_ui_StyleState);
-void psy_ui_component_removestylestate(psy_ui_Component*, psy_ui_StyleState);
+void psy_ui_component_add_style_state(psy_ui_Component*, psy_ui_StyleState);
+void psy_ui_component_remove_style_state(psy_ui_Component*, psy_ui_StyleState);
 void psy_ui_component_addstylestate_children(psy_ui_Component*, psy_ui_StyleState);
 void psy_ui_component_removestylestate_children(psy_ui_Component*, psy_ui_StyleState);
 bool psy_ui_component_stylestate_active(const psy_ui_Component*, psy_ui_StyleState);

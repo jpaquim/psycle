@@ -66,6 +66,8 @@ static void trackergrid_scroll_up(TrackerGrid*, psy_audio_SequenceCursor);
 static void trackergrid_scroll_down(TrackerGrid*, psy_audio_SequenceCursor, bool set);
 static void trackergrid_set_cursor(TrackerGrid*, psy_audio_SequenceCursor);
 static void trackergrid_on_timer(TrackerGrid*, uintptr_t id);
+static void trackergrid_on_focus(TrackerGrid*);
+static void trackergrid_on_focus_lost(TrackerGrid*);
 
 /* vtable */
 static psy_ui_ComponentVtable vtable;
@@ -99,6 +101,12 @@ static void vtable_init(TrackerGrid* self)
 		vtable.on_timer =
 			(psy_ui_fp_component_on_timer)
 			trackergrid_on_timer;
+		vtable.on_focus =
+			(psy_ui_fp_component_event)
+			trackergrid_on_focus;
+		vtable.on_focuslost =
+			(psy_ui_fp_component_event)
+			trackergrid_on_focus_lost;
 		vtable_initialized = TRUE;
 	}
 	psy_ui_component_set_vtable(&self->component, &vtable);
@@ -1498,6 +1506,20 @@ void trackergrid_on_timer(TrackerGrid* self, uintptr_t id)
 	}
 }
 
+void trackergrid_on_focus(TrackerGrid* self)
+{
+	psy_ui_component_add_style_state(
+		psy_ui_component_parent(psy_ui_component_parent(psy_ui_component_parent(&self->component))),
+		psy_ui_STYLESTATE_SELECT);
+}
+
+void trackergrid_on_focus_lost(TrackerGrid* self)
+{
+	psy_ui_component_remove_style_state(
+		psy_ui_component_parent(psy_ui_component_parent(psy_ui_component_parent(&self->component))),
+		psy_ui_STYLESTATE_SELECT);
+}
+
 /* TrackerView */
 
 /* prototypes */
@@ -1519,6 +1541,10 @@ void trackerview_init(TrackerView* self, psy_ui_Component* parent,
 	TrackerState* state, Workspace* workspace)
 {
 	psy_ui_component_init(&self->component, parent, NULL);
+	psy_ui_component_set_style_type(&self->component,
+		STYLE_PV_TRACK_VIEW);
+	psy_ui_component_set_style_type_select(&self->component,
+		STYLE_PV_TRACK_VIEW_SELECT);
 	self->workspace = workspace;
 	/* hscroll */
 	psy_ui_scrollbar_init(&self->hscroll, &self->component);

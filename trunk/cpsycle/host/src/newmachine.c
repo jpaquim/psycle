@@ -442,10 +442,10 @@ void newmachinecategorybar_onclicked(NewMachineCategoryBar* self, psy_ui_Button*
 		first = psy_ui_component_at(&self->client, 0);
 		if (first) {
 			if ((newmachinefilter_useanycategory(self->filter))) {
-				psy_ui_component_addstylestate(first,
+				psy_ui_component_add_style_state(first,
 					psy_ui_STYLESTATE_SELECT);
 			} else {
-				psy_ui_component_removestylestate(first,
+				psy_ui_component_remove_style_state(first,
 					psy_ui_STYLESTATE_SELECT);
 			}
 		}
@@ -696,7 +696,7 @@ void newmachinesectionspane_buildsections(NewMachineSectionsPane* self)
 			if (p == psy_property_begin(self->workspace->plugincatcher.sections.sections)) {
 				self->newmachine->selectedsection = section;
 				selidx = i;
-				psy_ui_component_addstylestate(&section->component,
+				psy_ui_component_add_style_state(&section->component,
 					psy_ui_STYLESTATE_SELECT);
 			}
 			psy_table_insert(&self->newmachinesections, i, section);

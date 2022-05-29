@@ -86,7 +86,7 @@ void seqviewtrack_init(SeqViewTrack* self, psy_ui_Component* parent,
 		self, seqviewtrack_on_sequence_deselect);
 	if (psy_audio_sequenceselection_first(&state->cmds->workspace->song->sequence.sequenceselection).track ==
 			trackindex) {
-		psy_ui_component_addstylestate(&self->component,
+		psy_ui_component_add_style_state(&self->component,
 			psy_ui_STYLESTATE_SELECT);
 	}
 }
@@ -428,7 +428,7 @@ void seqviewtrack_on_sequence_select(SeqViewTrack* self,
 	psy_audio_SequenceSelection* selection, psy_audio_OrderIndex* index)
 {
 	if (index->track == self->trackindex) {
-		psy_ui_component_addstylestate(&self->component,
+		psy_ui_component_add_style_state(&self->component,
 			psy_ui_STYLESTATE_SELECT);
 	}
 }
@@ -437,7 +437,7 @@ void seqviewtrack_on_sequence_deselect(SeqViewTrack* self,
 	psy_audio_SequenceSelection* selection, psy_audio_OrderIndex* index)
 {
 	if (index->track == self->trackindex) {
-		psy_ui_component_removestylestate(&self->component,
+		psy_ui_component_remove_style_state(&self->component,
 			psy_ui_STYLESTATE_SELECT);
 	}
 }
@@ -751,7 +751,7 @@ void seqviewlist_on_focus(SeqviewList* self)
 	psy_ui_component_setborder(
 		psy_ui_component_parent(psy_ui_component_parent(&self->component)),
 		NULL);
-	psy_ui_component_addstylestate(
+	psy_ui_component_add_style_state(
 		psy_ui_component_parent(psy_ui_component_parent(&self->component)),
 		psy_ui_STYLESTATE_SELECT);
 	seqviewlist_invalidaterow(self, editposition.order);	
@@ -769,7 +769,7 @@ void seqviewlist_on_focuslost(SeqviewList* self)
 	psy_ui_component_setborder(
 		psy_ui_component_parent(psy_ui_component_parent(&self->component)),
 		psy_ui_component_border(&self->component));
-	psy_ui_component_removestylestate(
+	psy_ui_component_remove_style_state(
 		psy_ui_component_parent(psy_ui_component_parent(&self->component)),
 		psy_ui_STYLESTATE_SELECT);
 }

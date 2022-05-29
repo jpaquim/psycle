@@ -139,17 +139,17 @@ void effectui_onmousedoubleclick(EffectUi* self, psy_ui_MouseEvent* ev)
 void effectui_on_timer(EffectUi* self, uintptr_t timerid)
 {
 	if (psy_audio_machine_muted(self->machine)) {
-		psy_ui_component_addstylestate(&self->mute,
+		psy_ui_component_add_style_state(&self->mute,
 			psy_ui_STYLESTATE_SELECT);
 	} else {
-		psy_ui_component_removestylestate(&self->mute,
+		psy_ui_component_remove_style_state(&self->mute,
 			psy_ui_STYLESTATE_SELECT);
 	}
 	if (psy_audio_machine_bypassed(self->machine)) {
-		psy_ui_component_addstylestate(&self->bypass,
+		psy_ui_component_add_style_state(&self->bypass,
 			psy_ui_STYLESTATE_SELECT);
 	} else {
-		psy_ui_component_removestylestate(&self->bypass,
+		psy_ui_component_remove_style_state(&self->bypass,
 			psy_ui_STYLESTATE_SELECT);
 	}
 	if (psy_ui_component_draw_visible(&self->component)) {

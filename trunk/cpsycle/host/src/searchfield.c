@@ -100,7 +100,7 @@ const char* searchfield_text(const SearchField* self)
 
 void searchfield_oneditfocus(SearchField* self, psy_ui_Component* sender)
 {
-	psy_ui_component_addstylestate(&self->component, psy_ui_STYLESTATE_SELECT);
+	psy_ui_component_add_style_state(&self->component, psy_ui_STYLESTATE_SELECT);
 	if (self->hasdefaulttext) {
 		psy_ui_textarea_set_text(&self->edit, "");
 	}
@@ -131,7 +131,7 @@ void searchfield_reset(SearchField* self)
 	self->hasdefaulttext = TRUE;
 	searchfield_checkdefault(self);	
 	psy_signal_emit(&self->signal_changed, self, 0);	
-	psy_ui_component_removestylestate(&self->component,
+	psy_ui_component_remove_style_state(&self->component,
 		psy_ui_STYLESTATE_SELECT);
 	psy_ui_component_set_focus(psy_ui_component_parent(&self->component));	
 }

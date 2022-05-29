@@ -37,13 +37,13 @@ void clipbox_init(ClipBox*, psy_ui_Component* parent, Workspace* workspace);
 
 INLINE void clipbox_activate(ClipBox* self)
 {
-	psy_ui_component_addstylestate(&self->component,
+	psy_ui_component_add_style_state(&self->component,
 		psy_ui_STYLESTATE_SELECT);
 }
 
 INLINE void clipbox_deactivate(ClipBox* self)
 {
-	psy_ui_component_removestylestate(&self->component,
+	psy_ui_component_remove_style_state(&self->component,
 		psy_ui_STYLESTATE_SELECT);
 }
 

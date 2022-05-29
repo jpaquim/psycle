@@ -66,7 +66,7 @@ void seqeditentry_init(SeqEditEntry* self, psy_ui_Component* parent,
 		self, seqeditentry_onsequenceselectiondeselect);
 	if (psy_audio_orderindex_equal(&self->seqpos,
 		psy_audio_sequenceselection_first(&self->state->workspace->song->sequence.sequenceselection))) {
-		psy_ui_component_addstylestate(&self->component,
+		psy_ui_component_add_style_state(&self->component,
 			psy_ui_STYLESTATE_SELECT);
 	}
 }
@@ -163,7 +163,7 @@ void seqeditentry_onsequenceselectionselect(SeqEditEntry* self,
 	assert(index);
 
 	if (psy_audio_orderindex_equal(&self->seqpos, *index)) {
-		psy_ui_component_addstylestate(&self->component,
+		psy_ui_component_add_style_state(&self->component,
 			psy_ui_STYLESTATE_SELECT);
 	}
 }
@@ -174,7 +174,7 @@ void seqeditentry_onsequenceselectiondeselect(SeqEditEntry* self,
 	assert(index);
 
 	if (psy_audio_orderindex_equal(&self->seqpos, *index)) {
-		psy_ui_component_removestylestate(&self->component,
+		psy_ui_component_remove_style_state(&self->component,
 			psy_ui_STYLESTATE_SELECT);
 	}
 }

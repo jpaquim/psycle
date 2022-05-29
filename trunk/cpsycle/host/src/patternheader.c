@@ -96,12 +96,12 @@ PatternTrackBox* patterntrackbox_allocinit(psy_ui_Component* parent,
 
 void patterntrackbox_playon(PatternTrackBox* self)
 {
-	psy_ui_component_addstylestate(&self->play, psy_ui_STYLESTATE_SELECT);
+	psy_ui_component_add_style_state(&self->play, psy_ui_STYLESTATE_SELECT);
 }
 
 void patterntrackbox_playoff(PatternTrackBox* self)
 {
-	psy_ui_component_removestylestate(&self->play, psy_ui_STYLESTATE_SELECT);
+	psy_ui_component_remove_style_state(&self->play, psy_ui_STYLESTATE_SELECT);
 }
 
 void patterntrackbox_ondraw(PatternTrackBox* self, psy_ui_Graphics* g)
@@ -234,24 +234,24 @@ void patterntrackbox_update(PatternTrackBox* self)
 	
 	patterns = patternviewstate_patterns(self->state->pv);
 	if (psy_audio_patterns_istracksoloed(patterns, self->index)) {
-		psy_ui_component_addstylestate(&self->solo,
+		psy_ui_component_add_style_state(&self->solo,
 			psy_ui_STYLESTATE_SELECT);
 	} else {
-		psy_ui_component_removestylestate(&self->solo,
+		psy_ui_component_remove_style_state(&self->solo,
 			psy_ui_STYLESTATE_SELECT);
 	}
 	if (psy_audio_patterns_istrackmuted(patterns, self->index)) {
-		psy_ui_component_addstylestate(&self->mute,
+		psy_ui_component_add_style_state(&self->mute,
 			psy_ui_STYLESTATE_SELECT);
 	} else {
-		psy_ui_component_removestylestate(&self->mute,
+		psy_ui_component_remove_style_state(&self->mute,
 			psy_ui_STYLESTATE_SELECT);
 	}
 	if (psy_audio_patterns_istrackarmed(patterns, self->index)) {
-		psy_ui_component_addstylestate(&self->record,
+		psy_ui_component_add_style_state(&self->record,
 			psy_ui_STYLESTATE_SELECT);
 	} else {
-		psy_ui_component_removestylestate(&self->record,
+		psy_ui_component_remove_style_state(&self->record,
 			psy_ui_STYLESTATE_SELECT);
 	}
 }

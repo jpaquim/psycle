@@ -1026,7 +1026,7 @@ void propertiesview_select(PropertiesView* self, psy_Property* property)
 		}
 	}
 	if (self->renderer.state.selectedline) {
-		psy_ui_component_removestylestate(
+		psy_ui_component_remove_style_state(
 			&self->renderer.state.selectedline->component,
 			psy_ui_STYLESTATE_SELECT);
 	}
@@ -1036,7 +1036,7 @@ void propertiesview_select(PropertiesView* self, psy_Property* property)
 		psy_signal_emit(&self->signal_selected, self, 1, property);
 	}
 	if (self->renderer.state.selectedline) {
-		psy_ui_component_addstylestate(
+		psy_ui_component_add_style_state(
 			&self->renderer.state.selectedline->component,
 			psy_ui_STYLESTATE_SELECT);
 	}*/

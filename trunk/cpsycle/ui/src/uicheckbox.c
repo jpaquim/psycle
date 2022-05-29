@@ -94,7 +94,7 @@ void psy_ui_checkbox_check(psy_ui_CheckBox* self)
 	assert(self);
 
 	if (!psy_ui_checkbox_checked(self)) {
-		psy_ui_component_addstylestate(&self->checkmark,
+		psy_ui_component_add_style_state(&self->checkmark,
 			psy_ui_STYLESTATE_SELECT);
 	}
 }
@@ -104,7 +104,7 @@ void psy_ui_checkbox_disablecheck(psy_ui_CheckBox* self)
 	assert(self);
 
 	if (psy_ui_checkbox_checked(self)) {
-		psy_ui_component_removestylestate(&self->checkmark,
+		psy_ui_component_remove_style_state(&self->checkmark,
 			psy_ui_STYLESTATE_SELECT);
 	}
 }

@@ -203,7 +203,7 @@ void splitter_on_mouse_down(psy_ui_Splitter* self, psy_ui_MouseEvent* ev)
 		splitter_setcursor(self);
 	}
 	if (self->resize) {
-		psy_ui_component_addstylestate(&self->component,
+		psy_ui_component_add_style_state(&self->component,
 			psy_ui_STYLESTATE_SELECT);
 	}
 }
@@ -345,7 +345,7 @@ void splitter_on_mouse_up(psy_ui_Splitter* self, psy_ui_MouseEvent* ev)
 		psy_ui_component_invalidate(&self->component);
 	}	
 	self->resize = 0;
-	psy_ui_component_removestylestate(&self->component,
+	psy_ui_component_remove_style_state(&self->component,
 		psy_ui_STYLESTATE_SELECT);	
 }
 
