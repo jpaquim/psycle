@@ -305,7 +305,7 @@ void seqeditloop_on_mouse_up(SeqEditLoop* self, psy_ui_MouseEvent* ev)
 {	
 	psy_ui_component_release_capture(&self->component);
 	seqeditloopstate_reset(self->loopstate);
-	psy_ui_component_removestylestate(&self->component,
+	psy_ui_component_remove_style_state(&self->component,
 			psy_ui_STYLESTATE_ACTIVE);
 }
 
@@ -323,7 +323,7 @@ void seqeditloop_onmouseleave(SeqEditLoop* self)
 
 void seqeditloop_select(SeqEditLoop* self)
 {
-	psy_ui_component_addstylestate(&self->component,
+	psy_ui_component_add_style_state(&self->component,
 		psy_ui_STYLESTATE_ACTIVE);		
 	psy_signal_emit(&self->state->signal_itemselected, self->state, 3,
 		SEQEDITITEM_LOOP, 

@@ -178,7 +178,7 @@ void pluginscantaskview_selecttask(PluginScanTaskView* self,
 			psy_ui_STYLESTATE_SELECT);
 		component = psy_ui_component_at(&self->tasks, index);
 		if (component) {
-			psy_ui_component_addstylestate(component, psy_ui_STYLESTATE_SELECT);
+			psy_ui_component_add_style_state(component, psy_ui_STYLESTATE_SELECT);
 		}
 	}
 }

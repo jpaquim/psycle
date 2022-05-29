@@ -322,7 +322,7 @@ static void on_mouse_down(psy_ui_Component* self, psy_ui_MouseEvent* ev)
 {
 	assert(ev);
 
-	psy_ui_component_addstylestate(self, psy_ui_STYLESTATE_ACTIVE);
+	psy_ui_component_add_style_state(self, psy_ui_STYLESTATE_ACTIVE);
 	if (self->draggable) {
 		psy_ui_DragEvent* dragevent;
 
@@ -362,7 +362,7 @@ static void on_mouse_up(psy_ui_Component* self, psy_ui_MouseEvent* ev)
 	assert(ev);
 	
 
-	psy_ui_component_removestylestate(self, psy_ui_STYLESTATE_ACTIVE);
+	psy_ui_component_remove_style_state(self, psy_ui_STYLESTATE_ACTIVE);
 	dragevent = &psy_ui_app()->dragevent;
 	if (dragevent->active) {
 		dragevent->mouse = *ev;
@@ -377,12 +377,12 @@ static void on_mouse_double_click(psy_ui_Component* self, psy_ui_MouseEvent* ev)
 
 static void onmouseenter(psy_ui_Component* self)
 {		
-	psy_ui_component_addstylestate(self, psy_ui_STYLESTATE_HOVER);
+	psy_ui_component_add_style_state(self, psy_ui_STYLESTATE_HOVER);
 }
 
 static void onmouseleave(psy_ui_Component* self)
 {
-	psy_ui_component_removestylestate(self, psy_ui_STYLESTATE_HOVER);
+	psy_ui_component_remove_style_state(self, psy_ui_STYLESTATE_HOVER);
 }
 
 static void on_key_down(psy_ui_Component* self, psy_ui_KeyboardEvent* ev) { }
@@ -395,12 +395,12 @@ static void onlanguagechanged(psy_ui_Component* self) { }
 
 static void on_focus(psy_ui_Component* self)
 {
-	psy_ui_component_addstylestate(self, psy_ui_STYLESTATE_FOCUS);
+	psy_ui_component_add_style_state(self, psy_ui_STYLESTATE_FOCUS);
 }
 
 static void on_focuslost(psy_ui_Component* self)
 {
-	psy_ui_component_removestylestate(self, psy_ui_STYLESTATE_FOCUS);
+	psy_ui_component_remove_style_state(self, psy_ui_STYLESTATE_FOCUS);
 	psy_ui_app()->focus = NULL;
 }
 
@@ -1244,13 +1244,13 @@ void enableinput_internal(psy_ui_Component* self, int enable, int recursive)
 static void enableinput(psy_ui_Component* self)
 {
 	self->imp->vtable->dev_enableinput(self->imp);	
-	psy_ui_component_removestylestate(self, psy_ui_STYLESTATE_DISABLED);
+	psy_ui_component_remove_style_state(self, psy_ui_STYLESTATE_DISABLED);
 }
 
 static void preventinput(psy_ui_Component* self)
 {
 	self->imp->vtable->dev_preventinput(self->imp);
-	psy_ui_component_addstylestate(self, psy_ui_STYLESTATE_DISABLED);	
+	psy_ui_component_add_style_state(self, psy_ui_STYLESTATE_DISABLED);	
 }
 
 bool psy_ui_component_inputprevented(const psy_ui_Component* self)
@@ -2114,7 +2114,7 @@ void psy_ui_component_set_style_state(psy_ui_Component* self,
 	}	
 }
 
-void psy_ui_component_addstylestate(psy_ui_Component* self,
+void psy_ui_component_add_style_state(psy_ui_Component* self,
 	psy_ui_StyleState state)
 {	
 	if (psy_ui_componentstyle_addstate(&self->style, state)) {
@@ -2133,11 +2133,11 @@ void psy_ui_component_addstylestate_children(psy_ui_Component* self,
 	psy_ui_StyleState state)
 {
 	psy_ui_component_traverse_int(self,
-		(psy_fp_int)psy_ui_component_addstylestate,
+		(psy_fp_int)psy_ui_component_add_style_state,
 		(uintptr_t)state);
 }
 
-void psy_ui_component_removestylestate(psy_ui_Component* self,
+void psy_ui_component_remove_style_state(psy_ui_Component* self,
 	psy_ui_StyleState state)
 {
 	if (psy_ui_componentstyle_removestate(&self->style, state)) {
@@ -2149,7 +2149,7 @@ void psy_ui_component_removestylestate_children(psy_ui_Component* self,
 	psy_ui_StyleState state)
 {
 	psy_ui_component_traverse_int(self,
-		(psy_fp_int)psy_ui_component_removestylestate,
+		(psy_fp_int)psy_ui_component_remove_style_state,
 		(uintptr_t)state);	
 }
 

@@ -230,11 +230,11 @@ void psy_ui_tab_on_mouse_down(psy_ui_Tab* self, psy_ui_MouseEvent* ev)
 		if (self->istoggle) {
 			if (self->checkstate != TABCHECKSTATE_OFF) {
 				self->checkstate = TABCHECKSTATE_OFF;
-				psy_ui_component_removestylestate(&self->component,
+				psy_ui_component_remove_style_state(&self->component,
 					psy_ui_STYLE_TAB_SELECT);
 			} else {
 				self->checkstate = TABCHECKSTATE_ON;
-				psy_ui_component_addstylestate(&self->component,
+				psy_ui_component_add_style_state(&self->component,
 					psy_ui_STYLE_TAB_SELECT);
 			}
 		}		
@@ -363,11 +363,11 @@ void psy_ui_tabbar_mark(psy_ui_TabBar* self, uintptr_t tabindex)
 
 			oldtab = psy_ui_tabbar_tab(self, self->selected);
 			if (oldtab) {
-				psy_ui_component_removestylestate(&oldtab->component,
+				psy_ui_component_remove_style_state(&oldtab->component,
 					psy_ui_STYLESTATE_SELECT);
 			}
 			self->selected = tabindex;
-			psy_ui_component_addstylestate(&tab->component,
+			psy_ui_component_add_style_state(&tab->component,
 				psy_ui_STYLESTATE_SELECT);
 		}
 	}

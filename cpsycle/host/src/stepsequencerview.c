@@ -98,14 +98,14 @@ void stepsequencertile_turnon(StepSequencerTile* self)
 {
 	assert(self);
 
-	psy_ui_component_addstylestate(&self->component, psy_ui_STYLESTATE_SELECT);
+	psy_ui_component_add_style_state(&self->component, psy_ui_STYLESTATE_SELECT);
 }
 
 void stepsequencertile_turnoff(StepSequencerTile* self)
 {
 	assert(self);
 
-	psy_ui_component_removestylestate(&self->component,
+	psy_ui_component_remove_style_state(&self->component,
 		psy_ui_STYLESTATE_SELECT);	
 }
 
@@ -113,14 +113,14 @@ void stepsequencertile_play(StepSequencerTile* self)
 {
 	assert(self);
 
-	psy_ui_component_addstylestate(&self->component, psy_ui_STYLESTATE_ACTIVE);
+	psy_ui_component_add_style_state(&self->component, psy_ui_STYLESTATE_ACTIVE);
 }
 
 void stepsequencertile_resetplay(StepSequencerTile* self)
 {
 	assert(self);
 
-	psy_ui_component_removestylestate(&self->component,
+	psy_ui_component_remove_style_state(&self->component,
 		psy_ui_STYLESTATE_ACTIVE);
 }
 

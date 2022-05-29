@@ -19,8 +19,8 @@
 #include "../../detail/portable.h"
 
 /* prototypes */
-static void initlighttheme(psy_ui_Styles*);
-static void initwin98theme(psy_ui_Styles*);
+static void init_light_theme(psy_ui_Styles*);
+static void init_win98_theme(psy_ui_Styles*);
 
 void init_host_styles(psy_ui_Styles* self, psy_ui_ThemeMode theme)
 {
@@ -28,11 +28,11 @@ void init_host_styles(psy_ui_Styles* self, psy_ui_ThemeMode theme)
 	psy_ui_Style* style;
 
 	if (theme == psy_ui_WIN98THEME) {
-		initwin98theme(self);
+		init_win98_theme(self);
 		return;
 	}
 	if (theme == psy_ui_LIGHTTHEME) {
-		initlighttheme(self);
+		init_light_theme(self);
 		return;
 	}
 	self->theme = theme;
@@ -681,7 +681,7 @@ void init_host_styles(psy_ui_Styles* self, psy_ui_ThemeMode theme)
 }
 
 /* LightTheme */
-void initlighttheme(psy_ui_Styles* self)
+void init_light_theme(psy_ui_Styles* self)
 {
 	psy_ui_MaterialTheme material;
 	psy_ui_LightTheme light;
@@ -1288,7 +1288,7 @@ void initlighttheme(psy_ui_Styles* self)
 }
 
 /* Win98Theme */
-void initwin98theme(psy_ui_Styles* self)
+void init_win98_theme(psy_ui_Styles* self)
 {
 	psy_ui_WinTheme win;
 	psy_ui_Style* style;
@@ -1978,6 +1978,15 @@ void init_patternview_styles(psy_ui_Styles* self)
 		psy_ui_colour_make(0x00CACACA),
 		psy_ui_colour_make(0x00292929));
 	psy_ui_styles_set_style(self, STYLE_PATTERNVIEW, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_set_padding_px(style, 0.0, 0.0, 0.0, 1.0);	
+	psy_ui_styles_set_style(self, STYLE_PV_TRACK_VIEW, style);
+
+	style = psy_ui_style_allocinit();	
+	psy_ui_border_init_left(&style->border, psy_ui_BORDER_SOLID,
+		psy_ui_colour_make(0x00808080));
+	psy_ui_styles_set_style(self, STYLE_PV_TRACK_VIEW_SELECT, style);
 
 	style = psy_ui_style_allocinit();
 	psy_ui_style_set_background_id(style, IDB_HEADERSKIN);

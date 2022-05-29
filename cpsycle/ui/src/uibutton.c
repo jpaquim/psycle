@@ -399,7 +399,7 @@ void psy_ui_button_loadresource(psy_ui_Button* self,
 void psy_ui_button_highlight(psy_ui_Button* self)
 {
 	if (!psy_ui_button_highlighted(self)) {		
-		psy_ui_component_addstylestate(psy_ui_button_base(self),
+		psy_ui_component_add_style_state(psy_ui_button_base(self),
 			psy_ui_STYLESTATE_SELECT);		
 	}
 }
@@ -407,7 +407,7 @@ void psy_ui_button_highlight(psy_ui_Button* self)
 void psy_ui_button_disable_highlight(psy_ui_Button* self)
 {
 	if (psy_ui_button_highlighted(self)) {		
-		psy_ui_component_removestylestate(psy_ui_button_base(self),
+		psy_ui_component_remove_style_state(psy_ui_button_base(self),
 			psy_ui_STYLESTATE_SELECT);		
 	}
 }

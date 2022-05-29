@@ -88,7 +88,7 @@ void seqedittrackdesc_onsequenceselectionselect(SeqEditTrackDesc* self,
 		
 		trackbox = psy_ui_component_at(track, 0);
 		if (trackbox) {
-			psy_ui_component_addstylestate(trackbox, psy_ui_STYLESTATE_SELECT);
+			psy_ui_component_add_style_state(trackbox, psy_ui_STYLESTATE_SELECT);
 		}
 	}
 }
@@ -105,7 +105,7 @@ void seqedittrackdesc_onsequenceselectiondeselect(SeqEditTrackDesc* self,
 
 		trackbox = psy_ui_component_at(track, 0);
 		if (trackbox) {
-			psy_ui_component_removestylestate(trackbox,
+			psy_ui_component_remove_style_state(trackbox,
 				psy_ui_STYLESTATE_SELECT);
 		}
 	}
@@ -172,7 +172,7 @@ void seqedittrackdesc_build(SeqEditTrackDesc* self)
 					&trackbox->trackbox.track.component.signal_dragstart,
 					self, seqedittrackdesc_ondragstart);
 				if (t == editposition.track) {					
-					psy_ui_component_addstylestate(
+					psy_ui_component_add_style_state(
 						&trackbox->trackbox.component,
 						psy_ui_STYLESTATE_SELECT);
 				}

@@ -28,7 +28,7 @@ void pianobar_init(PianoBar* self, psy_ui_Component* parent)
 {
 	assert(self);
 		
-	psy_ui_component_init(&self->component, parent, NULL);		
+	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_set_defaultalign(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_margin_make_em(0.0, 1.0, 0.0, 0.0));	
 	psy_ui_label_init_text(&self->beats, pianobar_base(self),
@@ -81,6 +81,8 @@ static bool pianoroll_on_roll_cmds(Pianoroll*, InputHandler* sender);
 static bool pianoroll_on_note_cmds(Pianoroll*, InputHandler* sender);
 static void pianoroll_on_configure(Pianoroll*, PatternViewConfig* sender,
 	psy_Property*);
+static void pianoroll_on_focus(Pianoroll*);
+static void pianoroll_on_focus_lost(Pianoroll*);
 
 /* vtable */
 static psy_ui_ComponentVtable pianoroll_vtable;
@@ -101,6 +103,13 @@ static psy_ui_ComponentVtable* pianoroll_vtable_init(Pianoroll* self)
 		pianoroll_vtable.on_timer =
 			(psy_ui_fp_component_on_timer)
 			pianoroll_on_timer;
+		pianoroll_vtable.on_focus =
+			(psy_ui_fp_component_event)
+			pianoroll_on_focus;
+		pianoroll_vtable.on_focuslost =
+			(psy_ui_fp_component_event)
+			pianoroll_on_focus_lost;
+
 		pianoroll_vtable_initialized = TRUE;
 	}
 	return &pianoroll_vtable;
@@ -113,6 +122,10 @@ void pianoroll_init(Pianoroll* self, psy_ui_Component* parent,
 
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_set_vtable(&self->component, pianoroll_vtable_init(self));
+	psy_ui_component_set_style_type(&self->component,
+		STYLE_PV_TRACK_VIEW);
+	psy_ui_component_set_style_type_select(&self->component,
+		STYLE_PV_TRACK_VIEW_SELECT);
 	self->workspace = workspace;	
 	self->opcount = 0;
 	self->center_key = TRUE;
@@ -752,4 +765,16 @@ void pianoroll_on_configure(Pianoroll* self, PatternViewConfig* config,
 	} else {
 		psy_ui_scroller_scroll_fast(&self->scroller);
 	}
+}
+
+void pianoroll_on_focus(Pianoroll* self)
+{
+	psy_ui_component_add_style_state(&self->component,
+		psy_ui_STYLESTATE_SELECT);
+}
+
+void pianoroll_on_focus_lost(Pianoroll* self)
+{
+	psy_ui_component_remove_style_state(&self->component,
+		psy_ui_STYLESTATE_SELECT);
 }

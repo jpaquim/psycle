@@ -157,35 +157,35 @@ void kbdboxkey_on_mouse_down(KbdBoxKey* self, psy_ui_MouseEvent* ev)
 	if (self->keycode == psy_ui_KEY_SHIFT) {
 		self->state->shift = !self->state->shift;		
 		if (self->state->shift) {
-			psy_ui_component_addstylestate(&self->component,
+			psy_ui_component_add_style_state(&self->component,
 				psy_ui_STYLESTATE_SELECT);			
 		} else {
-			psy_ui_component_removestylestate(&self->component,
+			psy_ui_component_remove_style_state(&self->component,
 				psy_ui_STYLESTATE_SELECT);
 		}		
 		psy_ui_mouseevent_stop_propagation(ev);
 	} else if (self->keycode == psy_ui_KEY_CONTROL) {
 		self->state->ctrl = !self->state->ctrl;
 		if (self->state->ctrl) {
-			psy_ui_component_addstylestate(&self->component,
+			psy_ui_component_add_style_state(&self->component,
 				psy_ui_STYLESTATE_SELECT);
 		} else {
-			psy_ui_component_removestylestate(&self->component,
+			psy_ui_component_remove_style_state(&self->component,
 				psy_ui_STYLESTATE_SELECT);
 		}
 		psy_ui_mouseevent_stop_propagation(ev);
 	} else if (self->keycode == psy_ui_KEY_MENU) {
 		self->state->alt = !self->state->alt;
 		if (self->state->alt) {
-			psy_ui_component_addstylestate(&self->component,
+			psy_ui_component_add_style_state(&self->component,
 				psy_ui_STYLESTATE_SELECT);
 		} else {
-			psy_ui_component_removestylestate(&self->component,
+			psy_ui_component_remove_style_state(&self->component,
 				psy_ui_STYLESTATE_SELECT);
 		}
 		psy_ui_mouseevent_stop_propagation(ev);
 	} else {
-		psy_ui_component_addstylestate(&self->component,
+		psy_ui_component_add_style_state(&self->component,
 			psy_ui_STYLESTATE_SELECT);		
 	}
 }
@@ -500,7 +500,7 @@ void kbdbox_resetmodstates(KbdBox* self)
 		key = (KbdBoxKey*)psy_tableiterator_value(&it);
 		if (key->keycode == psy_ui_KEY_SHIFT || key->keycode == psy_ui_KEY_CONTROL
 				|| key->keycode == psy_ui_KEY_MENU) {
-			psy_ui_component_removestylestate(kbdboxkey_base(key),
+			psy_ui_component_remove_style_state(kbdboxkey_base(key),
 				psy_ui_STYLESTATE_SELECT);
 		}
 	}	
@@ -535,7 +535,7 @@ void kbdbox_presskey(KbdBox* self, uint32_t keycode)
 	psy_audio_decodeinput(keycode, &keycode_decoded, &shift, &ctrl, &alt, &up);
 	key = (KbdBoxKey*)psy_table_at(&self->keys, keycode_decoded);
 	if (key) {		
-		psy_ui_component_addstylestate(&key->component,
+		psy_ui_component_add_style_state(&key->component,
 			psy_ui_STYLESTATE_SELECT);
 		if (shift) {
 			self->state.shift = shift;
@@ -561,7 +561,7 @@ void kbdbox_releasekey(KbdBox* self, uint32_t keycode)
 	psy_audio_decodeinput(keycode, &keycode_decoded, &shift, &ctrl, &alt, &up);
 	key = (KbdBoxKey*)psy_table_at(&self->keys, keycode_decoded);
 	if (key) {		
-		psy_ui_component_removestylestate(&key->component,
+		psy_ui_component_remove_style_state(&key->component,
 			psy_ui_STYLESTATE_SELECT);
 		kbdboxstate_clearmodifier(&self->state);		
 	}

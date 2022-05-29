@@ -121,14 +121,14 @@ void psy_ui_switch_on_mouse_down(psy_ui_Switch* self, psy_ui_MouseEvent* ev)
 void psy_ui_switch_check(psy_ui_Switch* self)
 {
 	self->state = TRUE;
-	psy_ui_component_addstylestate(psy_ui_switch_base(self),
+	psy_ui_component_add_style_state(psy_ui_switch_base(self),
 		psy_ui_STYLESTATE_SELECT);	
 }
 
 void psy_ui_switch_uncheck(psy_ui_Switch* self)
 {
 	self->state = FALSE;
-	psy_ui_component_removestylestate(psy_ui_switch_base(self),
+	psy_ui_component_remove_style_state(psy_ui_switch_base(self),
 		psy_ui_STYLESTATE_SELECT);	
 }
 

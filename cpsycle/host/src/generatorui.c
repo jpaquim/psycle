@@ -138,16 +138,16 @@ void generatorui_onmousedoubleclick(GeneratorUi* self, psy_ui_MouseEvent* ev)
 void generatorui_on_timer(GeneratorUi* self, uintptr_t timerid)
 {
 	if (psy_audio_machine_muted(self->machine)) {
-		psy_ui_component_addstylestate(&self->mute, psy_ui_STYLESTATE_SELECT);
+		psy_ui_component_add_style_state(&self->mute, psy_ui_STYLESTATE_SELECT);
 	} else {
-		psy_ui_component_removestylestate(&self->mute,
+		psy_ui_component_remove_style_state(&self->mute,
 			psy_ui_STYLESTATE_SELECT);
 	}
 	if (psy_audio_machines_soloed(self->machines) ==
 			psy_audio_machine_slot(self->machine)) {
-		psy_ui_component_addstylestate(&self->solo, psy_ui_STYLESTATE_SELECT);
+		psy_ui_component_add_style_state(&self->solo, psy_ui_STYLESTATE_SELECT);
 	} else {
-		psy_ui_component_removestylestate(&self->solo,
+		psy_ui_component_remove_style_state(&self->solo,
 			psy_ui_STYLESTATE_SELECT);
 	}
 	if (psy_ui_component_draw_visible(&self->component)) {

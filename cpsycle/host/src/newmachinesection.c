@@ -249,7 +249,7 @@ void newmachinesection_mark(NewMachineSection* self)
 	psy_ui_component_removestylestate_children(
 		psy_ui_component_parent(&self->component),
 		psy_ui_STYLESTATE_SELECT);	
-	psy_ui_component_addstylestate(&self->component, psy_ui_STYLESTATE_SELECT);
+	psy_ui_component_add_style_state(&self->component, psy_ui_STYLESTATE_SELECT);
 }
 
 void newmachinsection_clearselection(NewMachineSection* self)
