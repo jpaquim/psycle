@@ -86,6 +86,7 @@ static void dev_seticonressource(psy_ui_win_ComponentImp*, int ressourceid);
 static const psy_ui_TextMetric* dev_textmetric(const psy_ui_win_ComponentImp*);
 static void dev_setbackgroundcolour(psy_ui_win_ComponentImp*, psy_ui_Colour);
 static void dev_settitle(psy_ui_win_ComponentImp*, const char* title);
+static const char* dev_title(const psy_ui_win_ComponentImp*);
 static void dev_setfocus(psy_ui_win_ComponentImp*);
 static int dev_hasfocus(psy_ui_win_ComponentImp*);
 
@@ -225,6 +226,9 @@ static void win_imp_vtable_init(psy_ui_win_ComponentImp* self)
 		vtable.dev_settitle =
 			(psy_ui_fp_componentimp_dev_settitle)
 			dev_settitle;
+		vtable.dev_title =
+			(psy_ui_fp_componentimp_dev_title)
+			dev_title;
 		vtable.dev_setfocus =
 			(psy_ui_fp_componentimp_dev_setfocus)
 			dev_setfocus;
@@ -280,6 +284,7 @@ void psy_ui_win_componentimp_init(psy_ui_win_ComponentImp* self,
 	self->fullscreen = FALSE;
 	self->restore_style = 0;
 	self->restore_exstyle = 0;
+	self->title = NULL;
 	parent_imp = (parent)
 		? (psy_ui_win_ComponentImp*)parent
 		: NULL;	
@@ -378,6 +383,8 @@ void dev_dispose(psy_ui_win_ComponentImp* self)
 	}
 	psy_ui_componentimp_dispose(&self->imp);
 	dev_clear(self);
+	free(self->title);
+	self->title = NULL;
 }
 
 void dev_clear(psy_ui_win_ComponentImp* self)
@@ -1095,7 +1102,16 @@ void dev_setbackgroundcolour(psy_ui_win_ComponentImp* self, psy_ui_Colour colour
 
 void dev_settitle(psy_ui_win_ComponentImp* self, const char* title)
 {
+	psy_strreset(&self->title, title);
 	SetWindowText(self->hwnd, title);
+}
+
+const char* dev_title(const psy_ui_win_ComponentImp* self)
+{	
+	if (self->title) {
+		return self->title;
+	}
+	return "";
 }
 
 void dev_setfocus(psy_ui_win_ComponentImp* self)

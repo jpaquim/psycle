@@ -1,5 +1,5 @@
 /* This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #ifndef psy_ui_APP_H
@@ -88,7 +88,7 @@ void psy_ui_app_darktheme(psy_ui_App*);
 bool psy_ui_app_hasdarktheme(const psy_ui_App*);
 psy_ui_Style* psy_ui_app_style(psy_ui_App*, uintptr_t styletype);
 const psy_ui_Style* psy_ui_app_style_const(const psy_ui_App*, uintptr_t styletype);
-void psy_ui_app_sethover(psy_ui_App*, struct psy_ui_Component* hover);
+void psy_ui_app_set_hover(psy_ui_App*, struct psy_ui_Component* hover);
 void psy_ui_app_startdrag(psy_ui_App*);
 void psy_ui_app_stopdrag(psy_ui_App*);
 void psy_ui_app_starttimer(psy_ui_App*, struct psy_ui_Component*, uintptr_t id,
@@ -123,7 +123,7 @@ INLINE struct psy_ui_Component* psy_ui_app_focus(psy_ui_App* self)
 	return self->focus;
 }
 
-void psy_ui_app_setfocus(psy_ui_App*, struct psy_ui_Component*);
+void psy_ui_app_set_focus(psy_ui_App*, struct psy_ui_Component*);
 
 psy_ui_Style* psy_ui_style(uintptr_t styletype);
 const psy_ui_Style* psy_ui_style_const(uintptr_t styletype);

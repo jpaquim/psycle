@@ -312,7 +312,7 @@ psy_ui_Component* psy_ui_component_at(psy_ui_Component*, uintptr_t index);
 psy_ui_Component* psy_ui_component_intersect(psy_ui_Component*, psy_ui_RealPoint,
 	uintptr_t* index);
 void psy_ui_component_setfont(psy_ui_Component*, const psy_ui_Font*);
-void psy_ui_component_setfontinfo(psy_ui_Component*, psy_ui_FontInfo);
+void psy_ui_component_set_font_info(psy_ui_Component*, psy_ui_FontInfo);
 const psy_ui_Font* psy_ui_component_font(const psy_ui_Component*);
 void psy_ui_component_init_base(psy_ui_Component*);
 void psy_ui_component_init_signals(psy_ui_Component*);
@@ -464,6 +464,7 @@ typedef void (*psy_ui_fp_componentimp_dev_seticonressource)(struct psy_ui_Compon
 typedef const psy_ui_TextMetric* (*psy_ui_fp_componentimp_dev_textmetric)(const struct psy_ui_ComponentImp*);
 typedef void (*psy_ui_fp_componentimp_dev_setbackgroundcolour)(struct psy_ui_ComponentImp*, psy_ui_Colour);
 typedef void (*psy_ui_fp_componentimp_dev_settitle)(struct psy_ui_ComponentImp*, const char* title);
+typedef const char* (*psy_ui_fp_componentimp_dev_title)(const struct psy_ui_ComponentImp*);
 typedef void (*psy_ui_fp_componentimp_dev_setfocus)(struct psy_ui_ComponentImp*);
 typedef int (*psy_ui_fp_componentimp_dev_hasfocus)(struct psy_ui_ComponentImp*);
 typedef void* (*psy_ui_fp_componentimp_dev_platform)(struct psy_ui_ComponentImp*);
@@ -519,6 +520,7 @@ typedef struct psy_ui_ComponentImpVTable {
 	psy_ui_fp_componentimp_dev_textmetric dev_textmetric;	
 	psy_ui_fp_componentimp_dev_setbackgroundcolour dev_setbackgroundcolour;
 	psy_ui_fp_componentimp_dev_settitle dev_settitle;
+	psy_ui_fp_componentimp_dev_title dev_title;
 	psy_ui_fp_componentimp_dev_setfocus dev_setfocus;
 	psy_ui_fp_componentimp_dev_hasfocus dev_hasfocus;
 	psy_ui_fp_componentimp_dev_issystem dev_issystem;
@@ -620,6 +622,14 @@ INLINE void psy_ui_component_set_title(psy_ui_Component* self, const char* text)
 	self->imp->vtable->dev_settitle(self->imp, text);
 }
 
+INLINE const char* psy_ui_component_title(const psy_ui_Component* self)
+{
+	assert(self);
+	assert(self->imp);
+
+	return self->imp->vtable->dev_title(self->imp);
+}
+
 void psy_ui_component_capture(psy_ui_Component* self);
 void psy_ui_component_release_capture(psy_ui_Component* self);
 
@@ -650,7 +660,7 @@ INLINE const psy_ui_Component* psy_ui_component_parent_const(const psy_ui_Compon
 		((psy_ui_Component*)(self))->imp);
 }
 
-INLINE void psy_ui_component_setparent(psy_ui_Component* self, psy_ui_Component* parent)
+INLINE void psy_ui_component_set_parent(psy_ui_Component* self, psy_ui_Component* parent)
 {
 	self->imp->vtable->dev_setparent(self->imp, parent);
 }
@@ -821,14 +831,14 @@ INLINE void psy_ui_component_set_scrollstep_width(psy_ui_Component* self,
 	self->scroll->step.width = step;
 }
 
-INLINE void psy_ui_component_settabindex(psy_ui_Component* self, uintptr_t index)
+INLINE void psy_ui_component_set_tab_index(psy_ui_Component* self, uintptr_t index)
 {
 	assert(self);
 
 	self->tabindex = index;
 }
 
-INLINE uintptr_t psy_ui_component_tabindex(const psy_ui_Component* self)
+INLINE uintptr_t psy_ui_component_tab_index(const psy_ui_Component* self)
 {
 	assert(self);
 

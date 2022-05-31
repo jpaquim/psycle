@@ -615,7 +615,7 @@ void newmachinesectionspane_init(NewMachineSectionsPane* self, psy_ui_Component*
 	psy_ui_scroller_init(&self->scroller_sections, &self->component, NULL, NULL);
 	psy_ui_scroller_set_client(&self->scroller_sections, &self->sections);
 	psy_ui_component_set_align(&self->sections, psy_ui_ALIGN_HCLIENT);
-	psy_ui_component_settabindex(&self->scroller_sections.component, 0);
+	psy_ui_component_set_tab_index(&self->scroller_sections.component, 0);
 	psy_ui_component_set_align(&self->scroller_sections.component,
 		psy_ui_ALIGN_CLIENT);
 	psy_ui_component_setbackgroundmode(&self->scroller_sections.pane,

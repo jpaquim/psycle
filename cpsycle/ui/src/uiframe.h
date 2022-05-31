@@ -18,6 +18,11 @@ void psy_ui_frame_init(psy_ui_Frame*, psy_ui_Component* parent);
 void psy_ui_toolframe_init(psy_ui_Frame* self, psy_ui_Component* parent);
 void psy_ui_frame_init_main(psy_ui_Frame*);
 
+psy_ui_Component* psy_ui_frame_alloc(void);
+psy_ui_Component* psy_ui_frame_allocinit(psy_ui_Component* parent);
+psy_ui_Component* psy_ui_toolframe_alloc(void);
+psy_ui_Component* psy_ui_toolframe_allocinit(psy_ui_Component* parent);
+
 #ifdef __cplusplus
 }
 #endif

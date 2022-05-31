@@ -536,6 +536,8 @@ static void pianogrid_on_mouse_down(Pianogrid*, psy_ui_MouseEvent*);
 static void pianogrid_on_mouse_move(Pianogrid*, psy_ui_MouseEvent*);
 static void pianogrid_on_mouse_up(Pianogrid*, psy_ui_MouseEvent*);
 static psy_audio_SequenceCursor pianogrid_make_cursor(Pianogrid* self, double x, double y);
+static void pianogrid_on_focus(Pianogrid*);
+static void pianogrid_on_focus_lost(Pianogrid*);
 
 /* vtable */
 static psy_ui_ComponentVtable pianogrid_vtable;
@@ -562,6 +564,12 @@ static void pianogrid_vtable_init(Pianogrid* self)
 		pianogrid_vtable.onpreferredsize =
 			(psy_ui_fp_component_on_preferred_size)
 			pianogrid_on_preferred_size;
+		pianogrid_vtable.on_focus =
+			(psy_ui_fp_component_event)
+			pianogrid_on_focus;
+		pianogrid_vtable.on_focuslost =
+			(psy_ui_fp_component_event)
+			pianogrid_on_focus_lost;
 		pianogrid_vtable_initialized = TRUE;
 	}
 	psy_ui_component_set_vtable(pianogrid_base(self), &pianogrid_vtable);
@@ -576,6 +584,8 @@ void pianogrid_init(Pianogrid* self, psy_ui_Component* parent,
 
 	psy_ui_component_init(pianogrid_base(self), parent, NULL);	
 	pianogrid_vtable_init(self);
+	psy_ui_component_set_tab_index(&self->component, 0);
+	psy_ui_component_set_style_type(&self->component, STYLE_PV_TRACK_VIEW_SELECT);
 	psy_ui_component_set_wheel_scroll(pianogrid_base(self), 4);
 	self->workspace = workspace;
 	self->gridstate = gridstate;
@@ -1335,4 +1345,18 @@ void pianogrid_set_cursor(Pianogrid* self, psy_audio_SequenceCursor cursor)
 			self->gridstate->pv), cursor);
 		self->preventscrollleft = restore;
 	}
+}
+
+void pianogrid_on_focus(Pianogrid* self)
+{
+	psy_ui_component_add_style_state(
+		psy_ui_component_parent(psy_ui_component_parent(psy_ui_component_parent(&self->component))),
+		psy_ui_STYLESTATE_SELECT);
+}
+
+void pianogrid_on_focus_lost(Pianogrid* self)
+{
+	psy_ui_component_remove_style_state(
+		psy_ui_component_parent(psy_ui_component_parent(psy_ui_component_parent(&self->component))),
+		psy_ui_STYLESTATE_SELECT);
 }

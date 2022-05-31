@@ -7,6 +7,7 @@
 #define PATTERNVIEWCONFIG_H
 
 /* ui*/
+#include <uicolour.h>
 #include <uifont.h>
 /* dsp */
 #include <notestab.h>
@@ -107,7 +108,43 @@ psy_ui_FontInfo patternviewconfig_fontinfo(PatternViewConfig*, double zoom);
 void patternviewconfig_write_styles(PatternViewConfig*);
 void patternviewconfig_set_zoom(PatternViewConfig*, double zoom);
 double patternviewconfig_zoom(const PatternViewConfig*);
-
+/* theme */
+void patternviewconfig_set_background_colour_left(PatternViewConfig*,
+	psy_ui_Colour);
+void patternviewconfig_set_background_colour_right(PatternViewConfig*,
+	psy_ui_Colour);
+void patternviewconfig_set_row4beat_colour_left(PatternViewConfig*,
+	psy_ui_Colour);
+void patternviewconfig_set_row4beat_colour_right(PatternViewConfig*,
+	psy_ui_Colour);
+void patternviewconfig_set_rowbeat_colour_left(PatternViewConfig*,
+	psy_ui_Colour);
+void patternviewconfig_set_rowbeat_colour_right(PatternViewConfig*,
+	psy_ui_Colour);
+void patternviewconfig_set_row_colour_left(PatternViewConfig*,
+	psy_ui_Colour);
+void patternviewconfig_set_row_colour_right(PatternViewConfig*,
+	psy_ui_Colour);
+void patternviewconfig_set_font_colour_left(PatternViewConfig*,
+	psy_ui_Colour);
+void patternviewconfig_set_font_colour_right(PatternViewConfig*,
+	psy_ui_Colour);
+void patternviewconfig_set_font_play_colour_left(PatternViewConfig*,
+	psy_ui_Colour);
+void patternviewconfig_set_font_play_colour_right(PatternViewConfig*,
+	psy_ui_Colour);
+void patternviewconfig_set_font_sel_colour_left(PatternViewConfig*,
+	psy_ui_Colour);
+void patternviewconfig_set_font_sel_colour_right(PatternViewConfig*,
+	psy_ui_Colour);
+void patternviewconfig_set_selection_colour_left(PatternViewConfig*,
+	psy_ui_Colour);
+void patternviewconfig_set_selection_colour_right(PatternViewConfig*,
+	psy_ui_Colour);
+void patternviewconfig_set_playbar_colour_left(PatternViewConfig*,
+	psy_ui_Colour);
+void patternviewconfig_set_playbar_colour_right(PatternViewConfig*,
+	psy_ui_Colour);
 /* events */
 uintptr_t patternviewconfig_onchanged(PatternViewConfig*, psy_Property*);
 

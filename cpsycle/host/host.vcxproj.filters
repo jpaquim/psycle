@@ -1414,6 +1414,12 @@
     <Image Include="src\resources\seq-add-track.bmp">
       <Filter>bitmaps</Filter>
     </Image>
+    <Image Include="src\resources\float-dark.bmp">
+      <Filter>bitmaps</Filter>
+    </Image>
+    <Image Include="float-light.bmp">
+      <Filter>bitmaps</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <None Include="en.ini">

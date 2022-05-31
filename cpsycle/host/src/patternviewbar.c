@@ -82,8 +82,10 @@ void patternviewstatus_update(PatternViewStatus* self)
 				&self->workspace->host_sequencer_time.currplaycursor,
 				psy_audio_song_sequence(workspace_song(self->workspace)));
 			line = psy_audio_sequencecursor_line(&self->workspace->host_sequencer_time.currplaycursor);
+			line -= psy_audio_sequencecursor_seqline(&self->workspace->host_sequencer_time.currplaycursor);
 		} else {
 			line = psy_audio_sequencecursor_line(&cursor);
+			line -= psy_audio_sequencecursor_seqline(&cursor);
 		}
 		itoa((int)patternid, text, 10);
 		psy_ui_label_set_text(&self->pat, text);

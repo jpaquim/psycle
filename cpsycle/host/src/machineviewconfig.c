@@ -45,6 +45,10 @@ static void read_colour(psy_Property* config, const char* key, psy_ui_Style*,
 static void machineviewconfig_set_style_default_settings(MachineViewConfig*);
 static void machineviewconfig_set_style_default_colours(MachineViewConfig*);
 static void machineviewconfig_set_style_default_skin(MachineViewConfig*);
+static void machineviewconfig_set_colour(MachineViewConfig*,
+	const char* key, uintptr_t style_id, psy_ui_Colour);
+static void machineviewconfig_set_style_background_colour(MachineViewConfig*,
+	const char* key, uintptr_t style_id, psy_ui_Colour);
 
 void machineviewconfig_init(MachineViewConfig* self, psy_Property* parent)
 {
@@ -1034,4 +1038,45 @@ void machineviewconfig_set_style_default_skin(MachineViewConfig* self)
 	psy_ui_style_set_size(style, psy_ui_size_make_px(138.0, 52.0));
 	style = psy_ui_style(STYLE_MV_LEVEL);
 	psy_ui_style_set_size(style, psy_ui_size_make_px(16.0, 90.0));
+}
+
+void machineviewconfig_set_background_colour(MachineViewConfig* self,
+	psy_ui_Colour colour_left)
+{
+	machineviewconfig_set_style_background_colour(self, "mv_colour",
+		STYLE_MV, colour_left);
+}
+
+void machineviewconfig_set_colour(MachineViewConfig* self,
+	const char* key, uintptr_t style_id, psy_ui_Colour colour)
+{
+	psy_ui_Style* style;
+	psy_Property* property;
+
+	style = psy_ui_style(style_id);
+	if (style) {
+		psy_ui_style_set_colour(style, colour);
+	}
+	property = psy_property_set_int(self->theme, key,
+		psy_ui_colour_colorref(&colour));
+	if (property) {
+		psy_signal_emit(&self->signal_changed, self, 1, property);
+	}
+}
+
+void machineviewconfig_set_style_background_colour(MachineViewConfig* self,
+	const char* key, uintptr_t style_id, psy_ui_Colour colour)
+{
+	psy_ui_Style* style;
+	psy_Property* property;
+
+	style = psy_ui_style(style_id);
+	if (style) {
+		psy_ui_style_set_background_colour(style, colour);
+	}
+	property = psy_property_set_int(self->theme, key,
+		psy_ui_colour_colorref(&colour));
+	if (property) {
+		psy_signal_emit(&self->signal_changed, self, 1, property);
+	}
 }

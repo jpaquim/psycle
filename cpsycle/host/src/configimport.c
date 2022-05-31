@@ -18,6 +18,12 @@ static void psycleconfigimport_on_read(PsycleConfigImport*, psy_IniReader* sende
 static void psycleconfigimport_read_cmdset(PsycleConfigImport*,
 	const char* strkey, const char* strval);
 
+static int _httoi(const char* value)
+{
+	return (int)strtol(value, 0, 16);
+}
+
+
 /* implementation */
 void psycleconfigimport_init(PsycleConfigImport* self, PsycleConfig* config)
 {
@@ -57,14 +63,14 @@ int psycleconfigimport_read(PsycleConfigImport* self, const char* path)
 }
 
 void psycleconfigimport_on_read(PsycleConfigImport* self, psy_IniReader* sender,
-	const char* key, const char* value)
+	const char* key, const char* strval)
 {
-	if (!key || !value) {
+	if (!key || !strval) {
 		return;
 	}
 	/* [configuration] */	
 	if (strcmp(key, "FollowSong") == 0) {
-		if (strcmp(value, "1") == 0) {
+		if (strcmp(strval, "1") == 0) {
 			keyboardmiscconfig_follow_song(&self->config->misc);
 		} else {
 			keyboardmiscconfig_stop_follow_song(&self->config->misc);
@@ -72,8 +78,134 @@ void psycleconfigimport_on_read(PsycleConfigImport* self, psy_IniReader* sender,
 		return;
 	}
 	/* [PatternVisual] */
-	if (strcmp(key, "DisplayLineNumbers") == 0) {
-		if (strcmp(value, "1") == 0) {
+	if (strcmp(key, "pvc_background") == 0) {
+		int value;
+
+		value = _httoi(strval);
+		patternviewconfig_set_background_colour_left(&self->config->patview,
+			psy_ui_colour_make(value));
+		return;
+	} else if (strcmp(key, "pvc_background2") == 0) {
+		int value;
+
+		value = _httoi(strval);
+		patternviewconfig_set_background_colour_right(&self->config->patview,
+			psy_ui_colour_make(value));
+		return;
+	} else if (strcmp(key, "pvc_row4beat") == 0) {
+			int value;
+
+			value = _httoi(strval);
+			patternviewconfig_set_row4beat_colour_left(&self->config->patview,
+				psy_ui_colour_make(value));
+			return;
+	} else if (strcmp(key, "pvc_row4beat2") == 0) {
+		int value;
+
+		value = _httoi(strval);
+		patternviewconfig_set_row4beat_colour_right(&self->config->patview,
+			psy_ui_colour_make(value));
+		return;
+	} else if (strcmp(key, "pvc_rowbeat") == 0) {
+		int value;
+
+		value = _httoi(strval);
+		patternviewconfig_set_rowbeat_colour_left(&self->config->patview,
+			psy_ui_colour_make(value));
+		return;
+	} else if (strcmp(key, "pvc_rowbeat2") == 0) {
+		int value;
+
+		value = _httoi(strval);
+		patternviewconfig_set_rowbeat_colour_right(&self->config->patview,
+			psy_ui_colour_make(value));
+		return;
+	} else if (strcmp(key, "pvc_row") == 0) {
+		int value;
+
+		value = _httoi(strval);
+		patternviewconfig_set_row_colour_left(&self->config->patview,
+			psy_ui_colour_make(value));
+		return;
+	} else if (strcmp(key, "pvc_row2") == 0) {
+		int value;
+
+		value = _httoi(strval);
+		patternviewconfig_set_row_colour_right(&self->config->patview,
+			psy_ui_colour_make(value));
+		return;
+	} else if (strcmp(key, "pvc_font") == 0) {
+		int value;
+
+		value = _httoi(strval);
+		patternviewconfig_set_font_colour_left(&self->config->patview,
+			psy_ui_colour_make(value));
+		return;
+	} else if (strcmp(key, "pvc_font2") == 0) {
+		int value;
+
+		value = _httoi(strval);
+		patternviewconfig_set_font_colour_right(&self->config->patview,
+			psy_ui_colour_make(value));
+		return;
+	} else if (strcmp(key, "pvc_fontPlay") == 0) {
+		int value;
+
+		value = _httoi(strval);
+		patternviewconfig_set_font_play_colour_left(&self->config->patview,
+			psy_ui_colour_make(value));
+		return;
+	} else if (strcmp(key, "pvc_fontPlay2") == 0) {
+		int value;
+
+		value = _httoi(strval);
+		patternviewconfig_set_font_play_colour_right(&self->config->patview,
+			psy_ui_colour_make(value));
+		return;
+	} else if (strcmp(key, "pvc_fontSel") == 0) {
+		int value;
+
+		value = _httoi(strval);
+		patternviewconfig_set_font_sel_colour_left(&self->config->patview,
+			psy_ui_colour_make(value));
+		return;
+	} else if (strcmp(key, "pvc_fontSel2") == 0) {
+		int value;
+
+		value = _httoi(strval);
+		patternviewconfig_set_font_sel_colour_right(&self->config->patview,
+			psy_ui_colour_make(value));
+		return;
+	} else if (strcmp(key, "pvc_selection") == 0) {
+		int value;
+
+		value = _httoi(strval);
+		patternviewconfig_set_selection_colour_left(&self->config->patview,
+			psy_ui_colour_make(value));
+		return;
+	} else if (strcmp(key, "pvc_selection2") == 0) {
+		int value;
+
+		value = _httoi(strval);
+		patternviewconfig_set_selection_colour_right(&self->config->patview,
+			psy_ui_colour_make(value));
+		return;
+	} else if (strcmp(key, "pvc_playbar") == 0) {
+		int value;
+
+		value = _httoi(strval);
+		patternviewconfig_set_playbar_colour_left(&self->config->patview,
+			psy_ui_colour_make(value));
+		return;
+	} else if (strcmp(key, "pvc_playbar2") == 0) {
+		int value;
+
+		value = _httoi(strval);
+		patternviewconfig_set_playbar_colour_right(&self->config->patview,
+			psy_ui_colour_make(value));
+		return;
+	} else if (strcmp(key, "DisplayLineNumbers") == 0) {
+		if (strcmp(strval, "1") == 0) {
 			patternviewconfig_display_line_numbers(&self->config->patview);
 		} else {
 			patternviewconfig_hide_line_numbers(&self->config->patview);
@@ -81,7 +213,7 @@ void psycleconfigimport_on_read(PsycleConfigImport* self, psy_IniReader* sender,
 		return;
 	}
 	if (strcmp(key, "DisplayLineNumbersHex") == 0) {
-		if (strcmp(value, "1") == 0) {
+		if (strcmp(strval, "1") == 0) {
 			patternviewconfig_display_line_numbers_in_hex(&self->config->patview);
 		} else {
 			patternviewconfig_display_line_numbers_in_dec(&self->config->patview);
@@ -89,7 +221,7 @@ void psycleconfigimport_on_read(PsycleConfigImport* self, psy_IniReader* sender,
 		return;
 	}
 	if (strcmp(key, "DisplayLineNumbersCursor") == 0) {
-		if (strcmp(value, "1") == 0) {
+		if (strcmp(strval, "1") == 0) {
 			patternviewconfig_display_line_numbers_cursor(&self->config->patview);
 		} else {
 			patternviewconfig_hide_line_numbers_cursor(&self->config->patview);
@@ -98,7 +230,7 @@ void psycleconfigimport_on_read(PsycleConfigImport* self, psy_IniReader* sender,
 	}
 	/* [InputHandling] */
 	if (strcmp(key, "bCtrlPlay") == 0) {
-		if (strcmp(value, "1") == 0) {
+		if (strcmp(strval, "1") == 0) {
 			keyboardmiscconfig_enable_playstartwithrctrl(&self->config->misc);
 		} else {
 			keyboardmiscconfig_disable_playstartwithrctrl(&self->config->misc);
@@ -106,7 +238,7 @@ void psycleconfigimport_on_read(PsycleConfigImport* self, psy_IniReader* sender,
 		return;
 	}
 	if (strcmp(key, "bFT2HomeBehaviour") == 0) {
-		if (strcmp(value, "1") == 0) {
+		if (strcmp(strval, "1") == 0) {
 			keyboardmiscconfig_enable_ft2home(&self->config->misc);
 		} else {
 			keyboardmiscconfig_disable_ft2home(&self->config->misc);
@@ -114,7 +246,7 @@ void psycleconfigimport_on_read(PsycleConfigImport* self, psy_IniReader* sender,
 		return;
 	}
 	if (strcmp(key, "bFT2DelBehaviour") == 0) {
-		if (strcmp(value, "1") == 0) {
+		if (strcmp(strval, "1") == 0) {
 			keyboardmiscconfig_enable_ft2delete(&self->config->misc);
 		} else {
 			keyboardmiscconfig_disable_ft2delete(&self->config->misc);
@@ -122,14 +254,23 @@ void psycleconfigimport_on_read(PsycleConfigImport* self, psy_IniReader* sender,
 		return;
 	}
 	if (strcmp(key, "wrapAround") == 0) {
-		if (strcmp(value, "1") == 0) {
+		if (strcmp(strval, "1") == 0) {
 			patternviewconfig_enable_wrap_around(&self->config->patview);
 		} else {
 			patternviewconfig_disable_wrap_around(&self->config->patview);
 		}
 		return;
 	}	
-	psycleconfigimport_read_cmdset(self, key, value);
+	/* [MachineVisual] */
+	if (strcmp(key, "mv_colour") == 0) {
+		int value;
+
+		value = _httoi(strval);
+		machineviewconfig_set_background_colour(&self->config->macview,
+			psy_ui_colour_make(value));
+		return;
+	}
+	psycleconfigimport_read_cmdset(self, key, strval);
 }
 
 void psycleconfigimport_read_cmdset(PsycleConfigImport* self,

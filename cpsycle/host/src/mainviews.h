@@ -21,6 +21,29 @@
 extern "C" {
 #endif
 
+typedef struct ViewFrame {
+	psy_ui_Component component;
+	psy_ui_Component pane;
+	psy_ui_Component* view;
+	psy_ui_Notebook* dock;
+	Workspace* workspace;
+} ViewFrame;
+
+void viewframe_init(ViewFrame*, psy_ui_Component* parent,
+	psy_ui_Notebook* dock, Workspace* workspace);
+
+ViewFrame* viewframe_alloc(void);
+ViewFrame* viewframe_allocinit(psy_ui_Component* parent,
+	psy_ui_Notebook* dock, Workspace*);
+
+void viewframe_float(ViewFrame*);
+void viewframe_dock(ViewFrame*);
+
+INLINE psy_ui_Component* viewframe_base(ViewFrame* self)
+{
+	return &self->component;
+}
+
 /*
 ** MainViews
 */
@@ -38,7 +61,7 @@ typedef struct MainViews {
 void mainviews_init(MainViews*, psy_ui_Component* parent, psy_ui_Component* pane,
 	Workspace* workspace);
 
-INLINE psy_ui_Component* mainviews_base(MainViews* self, psy_ui_Component* parent)
+INLINE psy_ui_Component* mainviews_base(MainViews* self)
 {
 	return &self->component;
 }

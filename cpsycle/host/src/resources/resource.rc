@@ -154,6 +154,10 @@ IDB_SEQ_DEL_TRACK       BITMAP                  "seq-del-track.bmp"
 
 IDB_SEQ_ADD_TRACK       BITMAP                  "seq-add-track.bmp"
 
+IDB_FLOAT_DARK          BITMAP                  "float-dark.bmp"
+
+IDB_FLOAT_LIGHT         BITMAP                  "float-light.bmp"
+
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////

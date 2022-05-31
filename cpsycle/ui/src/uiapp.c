@@ -360,7 +360,7 @@ const psy_ui_Style* psy_ui_style_const(uintptr_t styletype)
 	return psy_ui_app_style_const(psy_ui_app(), styletype);
 }
 
-void psy_ui_app_setfocus(psy_ui_App* self, psy_ui_Component* component)
+void psy_ui_app_set_focus(psy_ui_App* self, psy_ui_Component* component)
 {
 	if (self->focus == component) {
 		return;
@@ -471,7 +471,7 @@ int psy_ui_logpixelsy(void)
 	return 72;
 }
 
-void psy_ui_app_sethover(psy_ui_App* self, psy_ui_Component* hover)
+void psy_ui_app_set_hover(psy_ui_App* self, psy_ui_Component* hover)
 {
 	self->hover = hover;
 }

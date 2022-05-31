@@ -71,6 +71,7 @@ static const psy_ui_TextMetric* view_dev_textmetric(
 static void view_dev_setbackgroundcolour(psy_ui_ViewComponentImp*,
 	psy_ui_Colour);
 static void view_dev_settitle(psy_ui_ViewComponentImp*, const char* title);
+const char* view_dev_title(const psy_ui_ViewComponentImp*);
 static void view_dev_setfocus(psy_ui_ViewComponentImp*);
 static int view_dev_hasfocus(psy_ui_ViewComponentImp*);
 static uintptr_t view_dev_flags(const psy_ui_ComponentImp*);
@@ -207,6 +208,9 @@ static void view_imp_vtable_init(psy_ui_ViewComponentImp* self)
 		view_imp_vtable.dev_settitle =
 			(psy_ui_fp_componentimp_dev_settitle)
 			view_dev_settitle;
+		view_imp_vtable.dev_title =
+			(psy_ui_fp_componentimp_dev_title)
+			view_dev_title;
 		view_imp_vtable.dev_setfocus =
 			(psy_ui_fp_componentimp_dev_setfocus)
 			view_dev_setfocus;
@@ -236,7 +240,8 @@ void psy_ui_viewcomponentimp_init(psy_ui_ViewComponentImp* self,
 	self->view = view;
 	self->component = component;	
 	self->parent = parent;
-	self->visible = TRUE;	
+	self->visible = TRUE;
+	self->title = NULL;
 	if (parent && parent->imp) {
 		parent->imp->vtable->dev_insert(parent->imp, &self->imp, NULL);		
 	}
@@ -255,6 +260,8 @@ void view_dev_dispose(psy_ui_ViewComponentImp* self)
 	self->parent = NULL;
 	psy_list_free(self->viewcomponents);
 	self->viewcomponents = NULL;
+	free(self->title);
+	self->title = NULL;
 }
 
 void view_dev_clear(psy_ui_ViewComponentImp* self)
@@ -521,6 +528,26 @@ void view_dev_insert(psy_ui_ViewComponentImp* self, psy_ui_ViewComponentImp* chi
 	if ((child->imp.vtable->dev_flags(&child->imp) & psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN) ==
 		psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN) {
 		psy_list_append(&self->viewcomponents, child->component);
+		if (child->view != self->view) {
+			psy_List* p;
+			psy_List* q;
+
+			child->view = self->view;
+			child->component->view = self->view;
+			q = p = psy_ui_component_children(child->component, psy_ui_RECURSIVE);
+			for (; p != NULL; p = p->next) {
+				psy_ui_Component* curr;
+				psy_ui_ViewComponentImp* imp;
+
+				curr = (psy_ui_Component*)p->entry;
+				curr->view = child->view;
+				if (child->imp.vtable->dev_flags(curr->imp) & psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN) {
+					imp = (psy_ui_ViewComponentImp*)curr->imp;					
+					imp->view = child->view;
+				}
+			}
+			psy_list_free(q);
+		}
 	}
 }
 
@@ -702,6 +729,15 @@ void view_dev_setbackgroundcolour(psy_ui_ViewComponentImp* self, psy_ui_Colour c
 
 void view_dev_settitle(psy_ui_ViewComponentImp* self, const char* title)
 {
+	psy_strreset(&self->title, title);
+}
+
+const char* view_dev_title(const psy_ui_ViewComponentImp* self)
+{
+	if (self->title) {
+		return self->title;
+	}
+	return "";
 }
 
 void view_dev_setfocus(psy_ui_ViewComponentImp* self)

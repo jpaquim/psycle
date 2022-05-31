@@ -110,7 +110,7 @@ void seqeditstate_edit(SeqEditState* self, psy_ui_Component* parent, psy_ui_Real
 			}
 		}
 		tm = psy_ui_component_textmetric(view);
-		psy_ui_component_setparent(&self->edit->component, view);		
+		psy_ui_component_set_parent(&self->edit->component, view);		
 		psy_ui_component_setposition(&self->edit->component,
 			psy_ui_rectangle_make(
 				psy_ui_point_make_px(cp.x + offset.x, cp.y + offset.y),

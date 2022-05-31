@@ -160,15 +160,14 @@ void trackerlinenumbers_on_draw(TrackerLineNumbers* self, psy_ui_Graphics* g)
 			char text[64];
 			psy_ui_Colour bg;
 			psy_ui_Colour fore;
-				
+							
 			if (!patternviewstate_single_mode(self->state->pv) && seqoffset == offset) {
 				psy_snprintf(text, 64, self->format_seqstart, (int)patidx,
-					(int)line, (float)offset);
+					(int)line - seqline, (float)offset);
 			} else {
-				psy_snprintf(text, 64, self->format, (int)(line - 
-					((patternviewstate_single_mode(self->state->pv)) ? seqline : 0)),
+				psy_snprintf(text, 64, self->format, (int)(line - seqline),
 					(float)offset);
-			}			
+			}						
 			trackerstate_columncolours(self->state,
 				trackerlinennumbers_column_flags(self, offset, line,
 					seqline), 0, &bg, &fore);
@@ -341,7 +340,7 @@ void trackerlinenumbers_on_preferred_size(TrackerLineNumbers* self,
 		width += 5.0;
 	}
 	if (!patternviewstate_single_mode(self->state->pv)) {
-		width += 3.0;	
+		width += 1.0;	
 	}
 	rv->width =
 		psy_ui_mul_values(
