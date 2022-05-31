@@ -88,7 +88,8 @@ static void vtable_init(psy_ui_TextAreaPane* self)
 void psy_ui_textareapane_init(psy_ui_TextAreaPane* self, psy_ui_Component* parent)
 { 
 	psy_ui_component_init(psy_ui_textareapane_base(self), parent, NULL);
-	vtable_init(self);	
+	vtable_init(self);
+	psy_ui_component_set_tab_index(&self->component, 0);
 	self->charnumber = 0.0;
 	self->linenumber = 1;
 	self->isinputfield = FALSE;
@@ -99,16 +100,13 @@ void psy_ui_textareapane_init(psy_ui_TextAreaPane* self, psy_ui_Component* paren
 	psy_signal_init(&self->signal_change);
 	psy_signal_init(&self->signal_accept);
 	psy_signal_init(&self->signal_reject);	
-	psy_ui_component_set_style_types(&self->component,
-		psy_ui_STYLE_EDIT, psy_INDEX_INVALID, psy_INDEX_INVALID,
-		psy_INDEX_INVALID);
+	psy_ui_component_set_style_type(&self->component, psy_ui_STYLE_EDIT);
 	psy_ui_component_set_style_type_focus(&self->component,
 		psy_ui_STYLE_EDIT_FOCUS);
 	psy_ui_component_setscrollstep(psy_ui_textareapane_base(self),
 		psy_ui_size_make_em(1.0, 1.0));		
 	psy_ui_component_set_wheel_scroll(&self->component, 4);
 	psy_ui_component_set_overflow(&self->component, psy_ui_OVERFLOW_SCROLL);
-
 }
 
 void psy_ui_textareapane_on_destroy(psy_ui_TextAreaPane* self)

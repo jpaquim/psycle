@@ -16,11 +16,11 @@
 
 /* prototypes */
 static void mainviewbar_on_destroy(MainViewBar*);
-static void mainviewbar_initnavigation(MainViewBar*, Workspace* workspace);
+static void mainviewbar_init_navigation(MainViewBar*, Workspace*);
 static void mainviewbar_init_main_tabbar(MainViewBar*);
-static void mainviewbar_inithelpsettingstabbar(MainViewBar*s);
-static void mainviewbar_initviewtabbars(MainViewBar*);
-static void mainviewbar_onmaxminimizeview(MainViewBar*, psy_ui_Button* sender);
+static void mainviewbar_init_help_settings_tabbar(MainViewBar*s);
+static void mainviewbar_init_view_tabbars(MainViewBar*);
+static void mainviewbar_on_maxminimize_view(MainViewBar*, psy_ui_Button* sender);
 
 /* vtable */
 static psy_ui_ComponentVtable vtable;
@@ -48,24 +48,31 @@ void mainviewbar_init(MainViewBar* self, psy_ui_Component* parent,
 	psy_ui_component_init_align(&self->tabbars, &self->component, NULL,
 		psy_ui_ALIGN_LEFT);
 	psy_ui_button_init_connect(&self->maximizebtn, &self->component,
-		self, mainviewbar_onmaxminimizeview);	
+		self, mainviewbar_on_maxminimize_view);	
 	psy_ui_component_set_align(psy_ui_button_base(&self->maximizebtn),
+		psy_ui_ALIGN_RIGHT);
+	psy_ui_button_init(&self->view_float, &self->component);
+	psy_ui_component_set_align(psy_ui_button_base(&self->view_float),
 		psy_ui_ALIGN_RIGHT);
 	if (psy_strlen(PSYCLE_RES_DIR) == 0) {
 		psy_ui_button_loadresource(&self->maximizebtn,
 			IDB_EXPAND_LIGHT, IDB_EXPAND_DARK, psy_ui_colour_white());
+		psy_ui_button_loadresource(&self->view_float,
+			IDB_FLOAT_LIGHT, IDB_FLOAT_DARK, psy_ui_colour_white());
 	} else {
 		psy_ui_bitmap_load(&self->maximizebtn.bitmapicon,
 			PSYCLE_RES_DIR"/""expand-dark.bmp");
+		psy_ui_bitmap_load(&self->maximizebtn.bitmapicon,
+			PSYCLE_RES_DIR"/""float-dark.bmp");
 	}
 	psy_ui_button_init(&self->extract, &self->component);
 	psy_ui_button_seticon(&self->extract, psy_ui_ICON_MORE);
 	psy_ui_component_set_align(psy_ui_button_base(&self->extract),
 		psy_ui_ALIGN_RIGHT);
-	mainviewbar_initnavigation(self, workspace);	
+	mainviewbar_init_navigation(self, workspace);	
 	mainviewbar_init_main_tabbar(self);
-	mainviewbar_inithelpsettingstabbar(self);
-	mainviewbar_initviewtabbars(self);
+	mainviewbar_init_help_settings_tabbar(self);
+	mainviewbar_init_view_tabbars(self);
 	minmaximize_init(&self->minmaximize, pane);
 }
 
@@ -74,7 +81,7 @@ void mainviewbar_on_destroy(MainViewBar* self)
 	minmaximize_dispose(&self->minmaximize);
 }
 
-void mainviewbar_initnavigation(MainViewBar* self, Workspace* workspace)
+void mainviewbar_init_navigation(MainViewBar* self, Workspace* workspace)
 {
 	navigation_init(&self->navigation, &self->tabbars, workspace);
 	psy_ui_component_set_align(navigation_base(&self->navigation),
@@ -91,7 +98,7 @@ void mainviewbar_toggle_minmaximze(MainViewBar* self)
 	minmaximize_toggle(&self->minmaximize);
 }
 
-void mainviewbar_onmaxminimizeview(MainViewBar* self, psy_ui_Button* sender)
+void mainviewbar_on_maxminimize_view(MainViewBar* self, psy_ui_Button* sender)
 {
 	minmaximize_toggle(&self->minmaximize);
 }
@@ -123,7 +130,7 @@ void mainviewbar_init_main_tabbar(MainViewBar* self)
 		psy_ui_colour_white());
 }
 
-void mainviewbar_inithelpsettingstabbar(MainViewBar* self)
+void mainviewbar_init_help_settings_tabbar(MainViewBar* self)
 {	
 	psy_ui_tabbar_append(&self->tabbar, "main.settings",
 		VIEW_ID_SETTINGSVIEW,
@@ -136,7 +143,7 @@ void mainviewbar_inithelpsettingstabbar(MainViewBar* self)
 }
 
 
-void mainviewbar_initviewtabbars(MainViewBar* self)
+void mainviewbar_init_view_tabbars(MainViewBar* self)
 {
 	psy_ui_notebook_init(&self->viewtabbars, &self->component);
 	psy_ui_component_set_margin(&self->viewtabbars.component,

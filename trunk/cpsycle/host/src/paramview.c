@@ -25,9 +25,9 @@
 /* paramview */
 /* prototypes */
 static void paramview_on_destroyed(ParamView*);
-static void paramview_updateskin(ParamView*);
+static void paramview_update_skin(ParamView*);
 static void paramview_on_timer(ParamView*, uintptr_t timerid);
-static uintptr_t paramview_numrows(const ParamView*);
+static uintptr_t paramview_num_rows(const ParamView*);
 static void paramview_build(ParamView*);
 
 /* vtable */
@@ -63,7 +63,7 @@ void paramview_init(ParamView* self, psy_ui_Component* parent,
 	self->paramstrobe = 0;
 	self->sizechanged = 1;
 	self->frameview = frameview;	
-	paramview_updateskin(self);
+	paramview_update_skin(self);
 	paramview_build(self);		
 }
 
@@ -93,10 +93,10 @@ ParamView* paramview_allocinit(psy_ui_Component* parent,
 	return rv;
 }
 
-void paramview_updateskin(ParamView* self)
+void paramview_update_skin(ParamView* self)
 {
 	self->fontinfo = machineparamconfig_fontinfo(self->config);
-	psy_ui_component_setfontinfo(&self->component, self->fontinfo);	
+	psy_ui_component_set_font_info(&self->component, self->fontinfo);	
 }
 
 void paramview_on_timer(ParamView* self, uintptr_t timerid)
@@ -121,7 +121,7 @@ void paramview_build(ParamView* self)
 		psy_ui_Component* currcolumn;
 		SliderGroupUi* currslider;
 		
-		numrows = paramview_numrows(self);
+		numrows = paramview_num_rows(self);
 		currcolumn = NULL;
 		currslider = NULL;
 		for (paramnum = 0; paramnum < psy_audio_machine_numparameters(self->machine);
@@ -255,7 +255,7 @@ void paramview_build(ParamView* self)
 	psy_signal_emit(&self->component.signal_preferredsizechanged, self, 0);
 }
 
-uintptr_t paramview_numrows(const ParamView* self)
+uintptr_t paramview_num_rows(const ParamView* self)
 {
 	if (self->machine &&
 			psy_audio_machine_numparametercols(self->machine) > 0) {

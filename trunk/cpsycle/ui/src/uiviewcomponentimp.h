@@ -22,6 +22,7 @@ typedef struct psy_ui_ViewComponentImp {
 	psy_ui_Component* view;
 	psy_ui_Component* parent;
 	psy_List* viewcomponents;
+	char* title;
 } psy_ui_ViewComponentImp;
 
 void psy_ui_viewcomponentimp_init(psy_ui_ViewComponentImp* self,

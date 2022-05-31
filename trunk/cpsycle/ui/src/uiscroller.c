@@ -84,7 +84,7 @@ static void psy_ui_scroller_vertical_onchanged(psy_ui_Scroller*,
 	psy_ui_ScrollBar* sender);
 static void psy_ui_scroller_scroll_range_changed(psy_ui_Scroller*,
 	psy_ui_Component* sender, psy_ui_Orientation);
-static void psy_ui_scroller_on_focus_in(psy_ui_Scroller*, psy_ui_Event*);
+static void psy_ui_scroller_on_mouse_down(psy_ui_Scroller*, psy_ui_MouseEvent*);
 static void psy_ui_scroller_on_timer(psy_ui_Scroller*, uintptr_t timerid);
 static void psy_ui_scroller_connect_client(psy_ui_Scroller*);
 
@@ -99,9 +99,9 @@ static void vtable_init(psy_ui_Scroller* self)
 		vtable.on_timer =
 			(psy_ui_fp_component_on_timer)
 			psy_ui_scroller_on_timer;
-		vtable.on_focusin =
-			(psy_ui_fp_component_focusin)
-			psy_ui_scroller_on_focus_in;
+		vtable.on_mouse_down =
+			(psy_ui_fp_component_on_mouse_event)
+			psy_ui_scroller_on_mouse_down;
 		vtable_initialized = TRUE;
 	}
 	psy_ui_component_set_vtable(psy_ui_scroller_base(self), &vtable);
@@ -113,7 +113,7 @@ void psy_ui_scroller_init(psy_ui_Scroller* self,
 	psy_ui_ScrollBar* vscroll)
 {	
 	psy_ui_component_init(&self->component, parent, NULL);
-	vtable_init(self);	
+	vtable_init(self);		
 	self->vscroll_autohide = TRUE;
 	self->hscroll_autohide = TRUE;	
 	/* pane */
@@ -135,7 +135,7 @@ void psy_ui_scroller_init(psy_ui_Scroller* self,
 	if (!vscroll) {
 		psy_ui_scrollbar_init(&self->vscroll_intern, &self->component);				
 		psy_ui_component_set_align(&self->vscroll_intern.component,
-			psy_ui_ALIGN_RIGHT);
+			psy_ui_ALIGN_RIGHT);		
 		self->vscroll = &self->vscroll_intern;
 	} else {
 		self->vscroll = vscroll;		
@@ -163,7 +163,7 @@ void psy_ui_scroller_set_client(psy_ui_Scroller* self, psy_ui_Component* client)
 		return;
 	}	
 	/* reparent client */
-	psy_ui_component_setparent(client, &self->pane);	
+	psy_ui_component_set_parent(client, &self->pane);	
 	psy_ui_scroller_connect_client(self);
 }
 
@@ -380,10 +380,11 @@ void psy_ui_scroller_scroll_range_changed(psy_ui_Scroller* self, psy_ui_Componen
 	}
 }
 
-void psy_ui_scroller_on_focus_in(psy_ui_Scroller* self, psy_ui_Event* ev)
+void psy_ui_scroller_on_mouse_down(psy_ui_Scroller* self, psy_ui_MouseEvent* ev)
 {
 	if (self->client) {		
-		psy_ui_component_set_focus(self->client);
+		psy_ui_component_set_focus(self->client);		
+		ev->event.prevent_focus = TRUE;		
 	}
-	psy_ui_event_stop_propagation(ev);
+	psy_ui_event_stop_propagation(psy_ui_mouseevent_base(ev));
 }

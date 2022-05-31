@@ -665,6 +665,7 @@
     <ClInclude Include="src\zoombox.h" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="float-light.bmp" />
     <Image Include="heart-dark.bmp" />
     <Image Include="src\resources\arrow-back-circle-outline.bmp" />
     <Image Include="src\resources\arrow-back-dark.bmp" />
@@ -684,6 +685,7 @@
     <Image Include="src\resources\exit_light.bmp" />
     <Image Include="src\resources\expand-dark.bmp" />
     <Image Include="src\resources\expand-light.bmp" />
+    <Image Include="src\resources\float-dark.bmp" />
     <Image Include="src\resources\heart-dark.bmp" />
     <Image Include="src\resources\heart-full-dark.bpm.bmp" />
     <Image Include="src\resources\help.bmp" />

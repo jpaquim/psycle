@@ -33,7 +33,7 @@ static void vtable_init(PatternDefaultLine* self)
 			patterndefaultline_on_destroy;
 		vtable_initialized = TRUE;
 	}
-	self->component.vtable = &vtable;
+	psy_ui_component_set_vtable(&self->component, &vtable);
 }
 
 /* implementation */

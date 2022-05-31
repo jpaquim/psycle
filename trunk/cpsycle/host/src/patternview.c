@@ -78,6 +78,7 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 	
 	psy_ui_component_init(&self->component, parent, NULL);
 	vtable_init(self);
+	psy_ui_component_set_title(patternview_base(self), "Pattern");
 	psy_ui_component_set_id(patternview_base(self), VIEW_ID_PATTERNVIEW);
 	self->workspace = workspace;	
 	self->display = PATTERN_DISPLAYMODE_TRACKER;

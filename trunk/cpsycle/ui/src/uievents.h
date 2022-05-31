@@ -44,6 +44,7 @@ typedef struct psy_ui_Event {
 	psy_ui_EventType type_;
 	bool bubbles_;
 	bool default_prevented_;
+	bool prevent_focus;
 	struct psy_ui_Component* target_;
 	struct psy_ui_Component* currenttarget_;
 	uintptr_t timestamp_;
@@ -261,7 +262,7 @@ INLINE psy_ui_RealPoint psy_ui_mouseevent_offset(const psy_ui_MouseEvent* self)
 	return self->offset_;
 }
 
-INLINE void psy_ui_mouseevent_setoffset(psy_ui_MouseEvent* self,
+INLINE void psy_ui_mouseevent_set_offset(psy_ui_MouseEvent* self,
 	psy_ui_RealPoint offset)
 {
 	self->offset_ = offset;

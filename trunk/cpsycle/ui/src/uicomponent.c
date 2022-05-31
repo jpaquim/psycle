@@ -245,7 +245,9 @@ void psy_ui_replacedefaultfont(psy_ui_Component* main, psy_ui_Font* font)
 
 void psy_ui_component_set_focus(psy_ui_Component* self)
 {	
-	psy_ui_app_setfocus(psy_ui_app(), self);		
+	if (self->tabindex != psy_INDEX_INVALID) {
+		psy_ui_app_set_focus(psy_ui_app(), self);
+	}
 }
 
 void psy_ui_component_capture(psy_ui_Component* self)
@@ -588,7 +590,7 @@ int visible(psy_ui_Component* self)
 
 int draw_visible(psy_ui_Component* self)
 {
-	assert(self);
+	assert(self);	
 	assert(self->imp);
 
 	return self->imp->vtable->dev_drawvisible(self->imp);
@@ -742,7 +744,7 @@ void psy_ui_component_dispose(psy_ui_Component* self)
 	self->vtable->dispose(self);	
 	psy_ui_component_dispose_signals(self);	
 	if (psy_ui_app()->hover == self) {
-		psy_ui_app_sethover(psy_ui_app(), NULL);
+		psy_ui_app_set_hover(psy_ui_app(), NULL);
 	}	
 	if (self->scroll != &componentscroll) {		
 		free(self->scroll);
@@ -976,7 +978,7 @@ void psy_ui_component_setfont(psy_ui_Component* self, const psy_ui_Font* source)
 	self->vtable->setfont(self, source);
 }
 
-void psy_ui_component_setfontinfo(psy_ui_Component* self,
+void psy_ui_component_set_font_info(psy_ui_Component* self,
 	psy_ui_FontInfo fontinfo)
 {
 	psy_ui_Font font;
@@ -1540,6 +1542,7 @@ static const psy_ui_TextMetric* dev_textmetric(const psy_ui_ComponentImp* self)
 
 static void dev_setbackgroundcolour(psy_ui_ComponentImp* self, psy_ui_Colour colour) { }
 static void dev_settitle(psy_ui_ComponentImp* self, const char* title) { }
+static const char* dev_title(const psy_ui_ComponentImp* self) { return ""; }
 static void dev_setfocus(psy_ui_ComponentImp* self) { }
 static int dev_hasfocus(psy_ui_ComponentImp* self) { return 0;  }
 static bool dev_issystem(psy_ui_ComponentImp* self) { return FALSE; }
@@ -1548,11 +1551,15 @@ static uintptr_t dev_platform_handle(psy_ui_ComponentImp* self) { return psy_IND
 static uintptr_t dev_flags(const psy_ui_ComponentImp* self) { return 0; }
 static void dev_clear(psy_ui_ComponentImp* self) {  }
 static void dev_initialized(psy_ui_ComponentImp* self) { }
+
 static psy_ui_ComponentState dev_component_state(const psy_ui_ComponentImp* self)
 {
 	return psy_ui_COMPONENTSTATE_NORMAL;
 }
-static void dev_set_component_state(psy_ui_ComponentImp* self, psy_ui_ComponentState state) { }
+static void dev_set_component_state(psy_ui_ComponentImp* self,
+	psy_ui_ComponentState state)
+{
+}
 
 static psy_ui_ComponentImpVTable imp_vtable;
 static int imp_vtable_initialized = 0;
@@ -1602,6 +1609,7 @@ static void imp_vtable_init(void)
 		imp_vtable.dev_textmetric = dev_textmetric;		
 		imp_vtable.dev_setbackgroundcolour = dev_setbackgroundcolour;
 		imp_vtable.dev_settitle = dev_settitle;
+		imp_vtable.dev_title = dev_title;
 		imp_vtable.dev_setfocus = dev_setfocus;
 		imp_vtable.dev_hasfocus = dev_hasfocus;
 		imp_vtable.dev_issystem = dev_issystem;
@@ -1734,6 +1742,7 @@ void psy_ui_component_set_scroll_top(psy_ui_Component* self, psy_ui_Value top)
 	psy_ui_RealRectangle position;	
 	double newtop;
 	psy_ui_RealRectangle r;
+	psy_ui_IntPoint range;
 
 	position = psy_ui_component_position(self);		
 	newtop = -psy_ui_value_px(&top, psy_ui_component_textmetric(self), NULL);
@@ -1768,7 +1777,13 @@ void psy_ui_component_set_scroll_top(psy_ui_Component* self, psy_ui_Value top)
 	} else {
 		psy_ui_component_scroll_to(self, 0.0, newtop - position.top, &r);		
 	}
-	if (newtop - position.top < 0) {
+	range = psy_ui_component_verticalscrollrange(self);
+	if (newtop > 0) {
+		psy_ui_component_invalidate_rect(psy_ui_component_parent(self),
+			psy_ui_realrectangle_make(
+				psy_ui_realpoint_make(0.0, 0.0),
+				psy_ui_realsize_make(psy_ui_realrectangle_width(&r), newtop)));
+	} else if (newtop - position.top < 0) {
 		double delta;
 
 		delta = psy_ui_realrectangle_height(&r) - (newtop + psy_ui_realrectangle_height(&position));
@@ -1930,7 +1945,7 @@ psy_ui_RealRectangle psy_ui_component_scrolledposition(psy_ui_Component* self)
 
 void psy_ui_component_focus_next(psy_ui_Component* self)
 {
-	if (self->tabindex != psy_INDEX_INVALID) {
+	if (self->tabindex != -1) {
 		psy_ui_Component* parent;		
 		
 		parent = psy_ui_component_parent(self);
@@ -1940,16 +1955,16 @@ void psy_ui_component_focus_next(psy_ui_Component* self)
 			psy_List* q;
 			uintptr_t tabindex;
 
-			tabindex = psy_ui_component_tabindex(self);			
+			tabindex = psy_ui_component_tab_index(self);			
 			focus = NULL;
 			for (q = p = psy_ui_component_children(parent, 0); p != NULL;
 					psy_list_next(&p)) {
 				psy_ui_Component* component;
 
 				component = (psy_ui_Component*)psy_list_entry(p);
-				if (tabindex < psy_ui_component_tabindex(component)) {
+				if (tabindex < psy_ui_component_tab_index(component)) {
 					focus = component;
-					tabindex = psy_ui_component_tabindex(focus);
+					tabindex = psy_ui_component_tab_index(focus);
 				}
 			}
 			psy_list_free(q);
@@ -1972,17 +1987,17 @@ void psy_ui_component_focus_prev(psy_ui_Component* self)
 			psy_List* q;
 			uintptr_t tabindex;
 
-			tabindex = psy_ui_component_tabindex(self);
+			tabindex = psy_ui_component_tab_index(self);
 			focus = NULL;
 			for (q = p = psy_ui_component_children(parent, 0); p != NULL;
 					psy_list_next(&p)) {
 				psy_ui_Component* component;
 
 				component = (psy_ui_Component*)psy_list_entry(p);				
-				if (psy_ui_component_tabindex(component) != psy_INDEX_INVALID &&
-						tabindex > psy_ui_component_tabindex(component)) {
+				if (psy_ui_component_tab_index(component) != psy_INDEX_INVALID &&
+						tabindex > psy_ui_component_tab_index(component)) {
 					focus = component;
-					tabindex = psy_ui_component_tabindex(focus);
+					tabindex = psy_ui_component_tab_index(focus);
 				}
 			}
 			psy_list_free(q);

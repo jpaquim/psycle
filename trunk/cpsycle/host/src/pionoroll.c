@@ -81,8 +81,6 @@ static bool pianoroll_on_roll_cmds(Pianoroll*, InputHandler* sender);
 static bool pianoroll_on_note_cmds(Pianoroll*, InputHandler* sender);
 static void pianoroll_on_configure(Pianoroll*, PatternViewConfig* sender,
 	psy_Property*);
-static void pianoroll_on_focus(Pianoroll*);
-static void pianoroll_on_focus_lost(Pianoroll*);
 
 /* vtable */
 static psy_ui_ComponentVtable pianoroll_vtable;
@@ -103,13 +101,6 @@ static psy_ui_ComponentVtable* pianoroll_vtable_init(Pianoroll* self)
 		pianoroll_vtable.on_timer =
 			(psy_ui_fp_component_on_timer)
 			pianoroll_on_timer;
-		pianoroll_vtable.on_focus =
-			(psy_ui_fp_component_event)
-			pianoroll_on_focus;
-		pianoroll_vtable.on_focuslost =
-			(psy_ui_fp_component_event)
-			pianoroll_on_focus_lost;
-
 		pianoroll_vtable_initialized = TRUE;
 	}
 	return &pianoroll_vtable;
@@ -765,16 +756,4 @@ void pianoroll_on_configure(Pianoroll* self, PatternViewConfig* config,
 	} else {
 		psy_ui_scroller_scroll_fast(&self->scroller);
 	}
-}
-
-void pianoroll_on_focus(Pianoroll* self)
-{
-	psy_ui_component_add_style_state(&self->component,
-		psy_ui_STYLESTATE_SELECT);
-}
-
-void pianoroll_on_focus_lost(Pianoroll* self)
-{
-	psy_ui_component_remove_style_state(&self->component,
-		psy_ui_STYLESTATE_SELECT);
 }

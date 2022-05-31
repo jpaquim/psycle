@@ -34,6 +34,10 @@ static void patternviewconfig_set_dest(PatternViewConfig*, psy_ui_RealPoint*,
 static void patternviewconfig_set_style_coords(PatternViewConfig*,
 	uintptr_t styleid, uintptr_t select_styleid, psy_ui_RealRectangle src,
 	psy_ui_RealPoint dst);
+static void patternviewconfig_set_colour(PatternViewConfig*,
+	const char* key, uintptr_t style_id, psy_ui_Colour);
+static void patternviewconfig_set_background_colour(PatternViewConfig*,
+	const char* key, uintptr_t style_id, psy_ui_Colour);
 
 /* implementation */
 void patternviewconfig_init(PatternViewConfig* self, psy_Property* parent,
@@ -1132,5 +1136,165 @@ void patternviewconfig_set_style_coords(PatternViewConfig* self,
 		psy_ui_style_set_background_size_px(style, 
 			psy_ui_realrectangle_size(&src));
 		psy_ui_style_set_position(style, psy_ui_rectangle_make(pt, size));
+	}
+}
+
+void patternviewconfig_set_background_colour_left(PatternViewConfig* self,
+	psy_ui_Colour colour_left)
+{
+	patternviewconfig_set_background_colour(self, "pvc_background",
+		STYLE_PATTERNVIEW, colour_left);
+}
+
+void patternviewconfig_set_background_colour_right(PatternViewConfig* self,
+	psy_ui_Colour colour_right)
+{
+	patternviewconfig_set_background_colour(self, "pvc_background2",
+		STYLE_PATTERNVIEW, colour_right);
+}
+
+void patternviewconfig_set_row4beat_colour_left(PatternViewConfig* self,
+	psy_ui_Colour colour)
+{
+	patternviewconfig_set_background_colour(self, "pvc_row4beat",
+		STYLE_PV_ROW4BEAT, colour);
+}
+
+void patternviewconfig_set_row4beat_colour_right(PatternViewConfig* self,
+	psy_ui_Colour colour)
+{
+	patternviewconfig_set_background_colour(self, "pvc_row4beat2",
+		STYLE_PV_ROW4BEAT, colour);
+}
+
+void patternviewconfig_set_rowbeat_colour_left(PatternViewConfig* self,
+	psy_ui_Colour colour)
+{
+	patternviewconfig_set_background_colour(self, "pvc_rowbeat",
+		STYLE_PV_ROWBEAT, colour);
+}
+
+void patternviewconfig_set_rowbeat_colour_right(PatternViewConfig* self,
+	psy_ui_Colour colour)
+{
+	patternviewconfig_set_background_colour(self, "pvc_rowbeat2",
+		STYLE_PV_ROWBEAT, colour);
+}
+
+void patternviewconfig_set_row_colour_left(PatternViewConfig* self,
+	psy_ui_Colour colour)
+{
+	patternviewconfig_set_background_colour(self, "pvc_row",
+		STYLE_PV_ROW, colour);
+}
+
+void patternviewconfig_set_row_colour_right(PatternViewConfig* self,
+	psy_ui_Colour colour)
+{
+	patternviewconfig_set_background_colour(self, "pvc_row2",
+		STYLE_PV_ROW, colour);
+}
+
+void patternviewconfig_set_font_colour_left(PatternViewConfig* self,
+	psy_ui_Colour colour)
+{
+	patternviewconfig_set_colour(self, "pvc_font",
+		STYLE_PATTERNVIEW, colour);
+}
+
+void patternviewconfig_set_font_colour_right(PatternViewConfig* self,
+	psy_ui_Colour colour)
+{
+	patternviewconfig_set_colour(self, "pvc_font2",
+		STYLE_PATTERNVIEW, colour);
+}
+
+void patternviewconfig_set_font_play_colour_left(PatternViewConfig* self,
+	psy_ui_Colour colour)
+{
+	patternviewconfig_set_colour(self, "pvc_fontPlay",
+		STYLE_PV_PLAYBAR, colour);
+}
+
+void patternviewconfig_set_font_play_colour_right(PatternViewConfig* self,
+	psy_ui_Colour colour)
+{
+	patternviewconfig_set_colour(self, "pvc_fontPlay2",
+		STYLE_PV_PLAYBAR, colour);
+}
+
+void patternviewconfig_set_font_sel_colour_left(PatternViewConfig* self,
+	psy_ui_Colour colour)
+{
+	patternviewconfig_set_colour(self, "pvc_fontSel",
+		STYLE_PV_ROW_SELECT, colour);
+}
+
+void patternviewconfig_set_font_sel_colour_right(PatternViewConfig* self,
+	psy_ui_Colour colour)
+{
+	patternviewconfig_set_colour(self, "pvc_fontSel2",
+		STYLE_PV_ROW_SELECT, colour);
+}
+
+void patternviewconfig_set_selection_colour_left(PatternViewConfig* self,
+	psy_ui_Colour colour)
+{
+	patternviewconfig_set_background_colour(self, "pvc_selection",
+		STYLE_PV_ROW_SELECT, colour);
+}
+
+void patternviewconfig_set_selection_colour_right(PatternViewConfig* self,
+	psy_ui_Colour colour)
+{
+	patternviewconfig_set_background_colour(self, "pvc_selection2",
+		STYLE_PV_ROW_SELECT, colour);
+}
+
+void patternviewconfig_set_playbar_colour_left(PatternViewConfig* self,
+	psy_ui_Colour colour)
+{
+	patternviewconfig_set_colour(self, "pvc_playbar",
+		STYLE_PV_PLAYBAR, colour);
+}
+
+void patternviewconfig_set_playbar_colour_right(PatternViewConfig* self,
+	psy_ui_Colour colour)
+{
+	patternviewconfig_set_colour(self, "pvc_playbar2",
+		STYLE_PV_PLAYBAR, colour);
+}
+
+void patternviewconfig_set_colour(PatternViewConfig* self,
+	const char* key, uintptr_t style_id, psy_ui_Colour colour)
+{
+	psy_ui_Style* style;
+	psy_Property* property;
+
+	style = psy_ui_style(style_id);
+	if (style) {
+		psy_ui_style_set_colour(style, colour);
+	}
+	property = psy_property_set_int(self->theme, key,
+		psy_ui_colour_colorref(&colour));
+	if (property) {
+		psy_signal_emit(&self->signal_changed, self, 1, property);
+	}
+}
+
+void patternviewconfig_set_background_colour(PatternViewConfig* self,
+	const char* key, uintptr_t style_id, psy_ui_Colour colour)
+{
+	psy_ui_Style* style;
+	psy_Property* property;
+
+	style = psy_ui_style(style_id);
+	if (style) {
+		psy_ui_style_set_background_colour(style, colour);
+	}
+	property = psy_property_set_int(self->theme, key,
+		psy_ui_colour_colorref(&colour));
+	if (property) {
+		psy_signal_emit(&self->signal_changed, self, 1, property);
 	}
 }

@@ -41,6 +41,7 @@ typedef struct psy_ui_win_ComponentImp {
 	bool fullscreen;
 	int restore_style;
 	int restore_exstyle;
+	char* title;
 } psy_ui_win_ComponentImp;
 
 void psy_ui_win_componentimp_init(psy_ui_win_ComponentImp* self,

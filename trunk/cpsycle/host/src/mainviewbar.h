@@ -27,6 +27,7 @@ typedef struct MainViewBar {
 	psy_ui_Component component;
 	/* internal */
 	psy_ui_Button extract;
+	psy_ui_Button view_float;
 	psy_ui_Button maximizebtn;
 	psy_ui_Component tabbars;
 	Navigation navigation;

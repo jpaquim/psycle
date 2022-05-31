@@ -58,6 +58,9 @@ bool machineviewconfig_wirehover(const MachineViewConfig*);
 bool machineviewconfig_vumeters(const MachineViewConfig*);
 bool machineviewconfig_virtualgenerators(const MachineViewConfig*);
 bool machineviewconfig_stackview_drawsmalleffects(const MachineViewConfig*);
+/* theme */
+void machineviewconfig_set_background_colour(MachineViewConfig* self,
+	psy_ui_Colour colour);
 
 uintptr_t machineviewconfig_onchanged(MachineViewConfig*, psy_Property*);
 

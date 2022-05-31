@@ -18,6 +18,7 @@ void psy_ui_event_init(psy_ui_Event* self, psy_ui_EventType type)
 	self->type_ = type;
 	self->bubbles_ = TRUE;
 	self->default_prevented_ = FALSE;
+	self->prevent_focus = FALSE;
 	self->target_ = NULL;
 	self->currenttarget_ = NULL;
 	self->timestamp_ = 0;
