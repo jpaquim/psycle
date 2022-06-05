@@ -20,12 +20,18 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\luacomponent.c" />
+    <ClCompile Include="src\luagraphics.c" />
+    <ClCompile Include="src\luaopendialogs.c" />
     <ClCompile Include="src\luapoint.c" />
+    <ClCompile Include="src\luasavedialog.c" />
     <ClCompile Include="src\luaui.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\luacomponent.h" />
+    <ClInclude Include="src\luagraphics.h" />
+    <ClInclude Include="src\luaopendialog.h" />
     <ClInclude Include="src\luapoint.h" />
+    <ClInclude Include="src\luasavedialog.h" />
     <ClInclude Include="src\luaui.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
@@ -105,7 +111,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(SolutionDir)lua54\src;$(SolutionDir)container\src;$(SolutionDir)file\src;$(SolutionDir)ui\src</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)lua54\src;$(SolutionDir)script\src;$(SolutionDir)container\src;$(SolutionDir)file\src;$(SolutionDir)ui\src</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -123,7 +129,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(SolutionDir)lua54\src;$(SolutionDir)container\src;$(SolutionDir)file\src;$(SolutionDir)ui\src</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)lua54\src;$(SolutionDir)script\src;$(SolutionDir)container\src;$(SolutionDir)file\src;$(SolutionDir)ui\src</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -141,7 +147,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(SolutionDir)lua54\src;$(SolutionDir)container\src;$(SolutionDir)file\src;$(SolutionDir)ui\src</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)lua54\src;$(SolutionDir)script\src;$(SolutionDir)container\src;$(SolutionDir)file\src;$(SolutionDir)ui\src</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -160,7 +166,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(SolutionDir)lua54\src;$(SolutionDir)container\src;$(SolutionDir)file\src;$(SolutionDir)ui\src</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)lua54\src;$(SolutionDir)script\src;$(SolutionDir)container\src;$(SolutionDir)file\src;$(SolutionDir)ui\src</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>

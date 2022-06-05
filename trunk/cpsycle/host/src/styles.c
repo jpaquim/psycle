@@ -568,8 +568,10 @@ void init_host_styles(psy_ui_Styles* self, psy_ui_ThemeMode theme)
 		material.overlay_1p);
 	psy_ui_border_init_bottom(&style->border, psy_ui_BORDER_SOLID,
 		material.surface_overlay_7p);
-	psy_ui_style_set_margin_em(style, 0.0, 0.0, 0.5, 0.0);
-	psy_ui_style_set_padding_em(style, 0.5, 0.0, 0.5, 1.0);
+	psy_ui_style_set_margin_em(style, 0.0, 0.0, 0.4, 0.0);
+	//psy_ui_style_set_padding_em(style, 0.5, 0.0, 0.5, 1.0);
+	psy_ui_style_set_padding_em(style, 0.125, 1.0, 0.125, 1.0);
+	psy_ui_style_set_background_overlay(style, 4);
 	psy_ui_styles_set_style(self, STYLE_HEADER, style);	
 	
 	style = psy_ui_style_allocinit();

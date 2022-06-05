@@ -120,7 +120,7 @@ void psy_ui_label_on_language_changed(psy_ui_Label* self)
 
 	psy_strreset(&self->translation, psy_ui_translate(self->text));
 	psy_ui_textformat_clear(&self->format);
-	psy_ui_component_invalidate(psy_ui_label_base(self));
+	psy_ui_component_invalidate(psy_ui_label_base(self));	
 }
 
 void psy_ui_label_set_text(psy_ui_Label* self, const char* text)

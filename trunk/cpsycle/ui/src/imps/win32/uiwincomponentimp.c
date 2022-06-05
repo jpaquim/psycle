@@ -329,6 +329,10 @@ void psy_ui_win_component_create_window(psy_ui_win_ComponentImp* self,
 		err = 1;
 	} else {
 		psy_table_insert(&winapp->selfmap, (uintptr_t)self->hwnd, self);
+		if ((dwStyle & WS_OVERLAPPED) == WS_OVERLAPPED ||
+			(dwStyle & WS_OVERLAPPED) == WS_POPUP) {
+			psy_table_insert(&winapp->toplevelmap, (uintptr_t)self->hwnd, self);
+		}
 	}
 	if (err == 0 && usecommand) {
 		psy_table_insert(&winapp->winidmap, winapp->winid, self);

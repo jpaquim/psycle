@@ -57,6 +57,29 @@ void machineparamconfig_set_dial_bpm(MachineParamConfig*, const char* filename);
 
 psy_ui_FontInfo machineparamconfig_fontinfo(const MachineParamConfig*);
 
+void machineparamconfig_set_param_top_colour(MachineParamConfig*,
+	psy_ui_Colour);
+void machineparamconfig_set_param_top_background_colour(MachineParamConfig*,
+	psy_ui_Colour);
+void machineparamconfig_set_param_top_colour_active(MachineParamConfig*,
+	psy_ui_Colour);
+void machineparamconfig_set_param_top_background_colour_active(MachineParamConfig*,
+	psy_ui_Colour);
+void machineparamconfig_set_param_bottom_colour(MachineParamConfig*,
+	psy_ui_Colour);
+void machineparamconfig_set_param_bottom_background_colour(MachineParamConfig*,
+	psy_ui_Colour);
+void machineparamconfig_set_param_bottom_colour_active(MachineParamConfig*,
+	psy_ui_Colour);
+void machineparamconfig_set_param_bottom_background_colour_active(MachineParamConfig*,
+	psy_ui_Colour);
+void machineparamconfig_set_param_title_colour(MachineParamConfig*,
+	psy_ui_Colour);
+void machineparamconfig_set_param_title_background_colour(MachineParamConfig*,
+	psy_ui_Colour);
+void machineparamconfig_set_param_machinedial_bmp(MachineParamConfig*,
+	const char*);
+
 uintptr_t machineparamconfig_onchanged(MachineParamConfig*, psy_Property*);
 
 #ifdef __cplusplus

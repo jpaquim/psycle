@@ -29,8 +29,8 @@
 #include "lock.h"
 #include "machines.h"
 #include "machinefactory.h"
+#include <uicomponent.h>
 #include <luapoint.h>
-
 #include <list.h>
 
 #include <stdlib.h>
@@ -391,9 +391,15 @@ static int loadspecific(psy_audio_LuaPlugin*, psy_audio_SongFile*,
 	uintptr_t slot);
 static int savespecific(psy_audio_LuaPlugin*, psy_audio_SongFile*,
 	uintptr_t slot);
+
 static psy_dsp_amp_range_t amprange(psy_audio_LuaPlugin* self)
 {
 	return PSY_DSP_AMP_RANGE_VST;
+}
+
+static void sethostview(psy_audio_LuaPlugin* self, psy_ui_Component* view)
+{
+	self->hostview = view;
 }
 
 static int luascript_setmachine(lua_State*);
@@ -428,26 +434,54 @@ static void vtable_init(psy_audio_LuaPlugin* self)
 {
 	if (!vtable_initialized) {
 		vtable = *self->custommachine.machine.vtable;
-		vtable.amprange = (fp_machine_amprange)amprange;
-		vtable.generateaudio = (fp_machine_generateaudio)generateaudio;
-		vtable.seqtick = (fp_machine_seqtick)seqtick;
-		vtable.newline = (fp_machine_newline)
+		vtable.amprange =
+			(fp_machine_amprange)
+			amprange;
+		vtable.generateaudio =
+			(fp_machine_generateaudio)
+			generateaudio;
+		vtable.seqtick =
+			(fp_machine_seqtick)
+			seqtick;
+		vtable.newline =
+			(fp_machine_newline)
 			newline;
-		vtable.stop = (fp_machine_stop)
+		vtable.stop =
+			(fp_machine_stop)
 			stop;
-		vtable.info = (fp_machine_info)info;
-		vtable.parameter = (fp_machine_parameter)parameter;
-		vtable.numparametercols = (fp_machine_numparametercols)
+		vtable.info =
+			(fp_machine_info)
+			info;
+		vtable.parameter =
+			(fp_machine_parameter)
+			parameter;
+		vtable.numparametercols =
+			(fp_machine_numparametercols)
 			numparametercols;
-		vtable.numparameters = (fp_machine_numparameters)numparameters;
-		vtable.dispose =(fp_machine_dispose)dispose;
-		vtable.reload = (fp_machine_reload)reload;
-		vtable.numinputs = (fp_machine_numinputs)numinputs;
-		vtable.numoutputs = (fp_machine_numoutputs)numoutputs;
-		vtable.loadspecific = (fp_machine_loadspecific)loadspecific;
-		vtable.savespecific = (fp_machine_savespecific)savespecific;
+		vtable.numparameters =
+			(fp_machine_numparameters)
+			numparameters;
+		vtable.dispose =
+			(fp_machine_dispose)
+			dispose;
+		vtable.reload =
+			(fp_machine_reload)
+			reload;
+		vtable.numinputs =
+			(fp_machine_numinputs)
+			numinputs;
+		vtable.numoutputs =
+			(fp_machine_numoutputs)
+			numoutputs;
+		vtable.loadspecific =
+			(fp_machine_loadspecific)
+			loadspecific;
+		vtable.savespecific =
+			(fp_machine_savespecific)
+			savespecific;
 		vtable_initialized = TRUE;
 	}
+	psy_audio_luaplugin_base(self)->vtable = &vtable;
 }
 		
 void psy_audio_luaplugin_init(psy_audio_LuaPlugin* self, psy_audio_MachineCallback* callback,
@@ -457,9 +491,13 @@ void psy_audio_luaplugin_init(psy_audio_LuaPlugin* self, psy_audio_MachineCallba
 
 	self->plugininfo = 0;
 	self->usenoteon = FALSE;
+	self->hostview = NULL;
 	psy_audio_custommachine_init(&self->custommachine, callback);
-	vtable_init(self);
-	psy_audio_luaplugin_base(self)->vtable = &vtable;
+	vtable_init(self);	
+	self->lock = psy_lock_allocinit();
+	if (!self->lock) {
+		return;
+	}
 	psy_audio_luapluginmachineparam_init(&self->parameter, self, UINTPTR_MAX);
 	psyclescript_init(&self->script);
 	if (err = psyclescript_load(&self->script, path)) {
@@ -470,11 +508,8 @@ void psy_audio_luaplugin_init(psy_audio_LuaPlugin* self, psy_audio_MachineCallba
 		return;
 	}
 	psy_audio_plugin_luascript_exportcmodules(&self->script);
+	// psy_luaui_init(&self->ui, &self->script);
 	if (err = psyclescript_run(&self->script)) {
-		return;
-	}
-	self->lock = psy_lock_allocinit();
-	if (!self->lock) {
 		return;
 	}
 	if (err = psyclescript_start(&self->script)) {

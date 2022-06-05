@@ -242,25 +242,33 @@ void psy_ui_app_stopmousehook(psy_ui_App* self)
 }
 
 void psy_ui_app_onlanguagechanged(psy_ui_App* self, psy_Translator* translator)
-{	
+{
+	psy_List* r;
+	psy_List* t;
+
 	assert(self);
 
-	if (self->main) {
+	t = r = psy_ui_app_toplevel(self);
+	for (; r != NULL; psy_list_next(&r)) {
 		psy_List* p;
 		psy_List* q;
+		psy_ui_Component* curr_toplevel;
 
+		curr_toplevel = (psy_ui_Component*)r->entry;
 		/* notify all components language changed */
-		psy_ui_component_updatelanguage(self->main);
-		for (p = q = psy_ui_component_children(self->main, psy_ui_RECURSIVE);
-				p != NULL; psy_list_next(&p)) {
+		psy_ui_component_update_language(curr_toplevel);
+		for (p = q = psy_ui_component_children(curr_toplevel, psy_ui_RECURSIVE);
+			p != NULL; psy_list_next(&p)) {
 			psy_ui_Component* component;
 
 			component = (psy_ui_Component*)psy_list_entry(p);
-			psy_ui_component_updatelanguage(component);
+			psy_ui_component_update_language(component);
 		}
 		psy_list_free(q);
-		psy_ui_component_align_full(self->main);		
-	}	
+		psy_ui_component_align_full(self->main);	
+	}
+	psy_list_free(t);
+	t = NULL;
 }
 
 void psy_ui_app_setzoomrate(psy_ui_App* self, double rate)
@@ -284,14 +292,24 @@ void psy_ui_app_changedefaultfontsize(psy_ui_App* self, int size)
 {
 	psy_ui_FontInfo fontinfo;
 	psy_ui_Font font;
+	psy_List* r;
+	psy_List* t;
 
 	assert(self);
 
 	fontinfo = psy_ui_font_fontinfo(&psy_ui_style_const(psy_ui_STYLE_ROOT)->font);	
 	fontinfo.lfHeight = size;	
 	psy_ui_font_init(&font, &fontinfo);
-	psy_ui_replacedefaultfont(self->main, &font);
-	psy_ui_component_invalidate(self->main);	
+	t = r = psy_ui_app_toplevel(self);
+	for (; r != NULL; psy_list_next(&r)) {
+		psy_ui_Component* curr_toplevel;
+
+		curr_toplevel = (psy_ui_Component*)r->entry;
+		psy_ui_replacedefaultfont(curr_toplevel, &font);
+		psy_ui_component_invalidate(curr_toplevel);
+	}
+	psy_list_free(t);
+	t = NULL;	
 }
 
 void psy_ui_app_set_default_font(psy_ui_App* self, psy_ui_Font* font)
@@ -360,6 +378,13 @@ const psy_ui_Style* psy_ui_style_const(uintptr_t styletype)
 	return psy_ui_app_style_const(psy_ui_app(), styletype);
 }
 
+psy_List* psy_ui_app_toplevel(psy_ui_App* self)
+{
+	assert(self->imp);
+
+	return self->imp->vtable->dev_toplevel(self->imp);
+}
+
 void psy_ui_app_set_focus(psy_ui_App* self, psy_ui_Component* component)
 {
 	if (self->focus == component) {
@@ -401,6 +426,11 @@ static psy_ui_Component* psy_ui_appimp_component(psy_ui_AppImp* self,
 	return NULL;
 }
 
+static psy_List* psy_ui_appimp_toplevel(psy_ui_AppImp* self)
+{
+	return NULL;
+}
+
 static psy_ui_AppImpVTable imp_vtable;
 static bool imp_vtable_initialized = FALSE;
 
@@ -416,6 +446,7 @@ static void imp_vtable_init(void)
 		imp_vtable.dev_stopmousehook = psy_ui_appimp_stopmousehook;
 		imp_vtable.dev_sendevent = psy_ui_appimp_sendevent;
 		imp_vtable.dev_component = psy_ui_appimp_component;
+		imp_vtable.dev_toplevel = psy_ui_appimp_toplevel;
 		imp_vtable_initialized = TRUE;
 	}
 }

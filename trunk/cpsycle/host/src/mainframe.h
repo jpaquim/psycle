@@ -59,6 +59,16 @@
 extern "C" {
 #endif
 
+typedef struct Links {
+	psy_Table container;
+} Links;
+
+void links_init(Links*);
+void links_dispose(Links*);
+
+void links_add(Links*, const Link* link);
+const Link* links_at(const Links*, uintptr_t index);
+
 /*
 ** MainFrame
 **
@@ -86,8 +96,9 @@ typedef struct MainFrame {
 	psy_ui_Terminal terminal;
 	psy_ui_Splitter splitbar;
 	psy_ui_Splitter splitbarterminal;
-	StartScript startscript;	
-	psy_ui_TabBar scripttabbar;
+	StartScript startscript;
+	Links links;
+	psy_ui_TabBar scripttabbar;	
 	psy_ui_Button togglescripts;
 	FileBar filebar;
 	UndoRedoBar undoredobar;
@@ -144,13 +155,15 @@ typedef struct MainFrame {
 void mainframe_init(MainFrame*);
 
 MainFrame* mainframe_alloc(void);
-MainFrame* mainframe_allocinit(void);	
+MainFrame* mainframe_allocinit(void);
 
 INLINE int mainframe_showmaximizedatstart(MainFrame* self)
 {	
 	return generalconfig_showmaximizedatstart(
 		psycleconfig_general(workspace_conf(&self->workspace)));
 }
+
+void mainframe_add_link(MainFrame*, Link*);
 
 INLINE psy_ui_Component* mainframe_base(MainFrame* self)
 {

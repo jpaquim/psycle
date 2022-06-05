@@ -59,8 +59,16 @@ bool machineviewconfig_vumeters(const MachineViewConfig*);
 bool machineviewconfig_virtualgenerators(const MachineViewConfig*);
 bool machineviewconfig_stackview_drawsmalleffects(const MachineViewConfig*);
 /* theme */
-void machineviewconfig_set_background_colour(MachineViewConfig* self,
-	psy_ui_Colour colour);
+void machineviewconfig_set_background_colour(MachineViewConfig*,
+	psy_ui_Colour);
+void machineviewconfig_set_poly_colour(MachineViewConfig*,
+	psy_ui_Colour);
+void machineviewconfig_set_wire_colour(MachineViewConfig*,
+	psy_ui_Colour);
+void machineviewconfig_set_generator_colour(MachineViewConfig*,
+	psy_ui_Colour);
+void machineviewconfig_set_effect_colour(MachineViewConfig*,
+	psy_ui_Colour);
 
 uintptr_t machineviewconfig_onchanged(MachineViewConfig*, psy_Property*);
 

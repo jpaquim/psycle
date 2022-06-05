@@ -45,6 +45,7 @@ typedef struct psy_ui_WinApp {
 	psy_ui_fp_winproc comwinproc;
 	psy_Table selfmap;
 	psy_Table winidmap;
+	psy_Table toplevelmap;
 	uintptr_t winid;
 	HBRUSH defaultbackgroundbrush;		
 	HHOOK mousehook;	

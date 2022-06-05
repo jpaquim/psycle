@@ -36,11 +36,17 @@ typedef struct GeneralConfig {
 void generalconfig_init(GeneralConfig*, psy_Property* parent);
 void generalconfig_dispose(GeneralConfig*);
 
-bool generalconfig_show_song_info_on_load(const GeneralConfig*);
-bool generalconfig_showaboutatstart(const GeneralConfig*);
+void generalconfig_show_song_info_on_load(GeneralConfig*);
+void generalconfig_prevent_song_info_on_load(GeneralConfig*);
+bool generalconfig_showing_song_info_on_load(const GeneralConfig*);
+void generalconfig_show_about_at_start(GeneralConfig*);
+void generalconfig_hide_about_at_start(GeneralConfig*);
+bool generalconfig_showing_about_at_start(const GeneralConfig*);
 ViewIndex generalconfig_start_view(const GeneralConfig*);
 bool generalconfig_showmaximizedatstart(const GeneralConfig*);
-bool generalconfig_save_recent_songs(const GeneralConfig*);
+void generalconfig_show_saving_recent_songs(GeneralConfig*);
+void generalconfig_prevent_saving_recent_songs(GeneralConfig*);
+bool generalconfig_saving_recent_songs(const GeneralConfig*);
 bool generalconfig_playsongafterload(const GeneralConfig*);
 bool generalconfig_showingpatternnames(const GeneralConfig*);
 bool generalconfig_showsequenceedit(const GeneralConfig*);
@@ -49,8 +55,8 @@ bool generalconfig_showstepsequencer(const GeneralConfig*);
 void generalconfig_setstepsequencershowstate(GeneralConfig*, bool state);
 bool generalconfig_showplaylist(const GeneralConfig*);
 void generalconfig_setplaylistshowstate(GeneralConfig*, bool state);
-void generalconfig_showpatternnames(GeneralConfig*);
-void generalconfig_showpatternids(GeneralConfig*);
+void generalconfig_show_pattern_names(GeneralConfig*);
+void generalconfig_show_pattern_ids(GeneralConfig*);
 bool generalconfig_showminiview(const GeneralConfig*);
 
 uintptr_t generalconfig_onchanged(GeneralConfig*, psy_Property*);

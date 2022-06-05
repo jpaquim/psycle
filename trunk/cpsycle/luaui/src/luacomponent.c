@@ -36,15 +36,15 @@ int psy_luaui_component_open(lua_State *L)
 int psy_luaui_component_create(lua_State* L)
 {  
 	psy_ui_Component** udata;
-  int n = lua_gettop(L);
+	int n = lua_gettop(L);
 
-  if (n == 1) {
-	  udata = (psy_ui_Component**)lua_newuserdata(L, sizeof(psy_ui_Component*));
-	  luaL_setmetatable(L, psy_luaui_component_meta);
-  } else {
-    luaL_error(L, "Wrong number of arguments");
-  }
-  return 1;
+	if (n == 1) {
+		udata = (psy_ui_Component**)lua_newuserdata(L, sizeof(psy_ui_Component*));		
+		luaL_setmetatable(L, psy_luaui_component_meta);
+	} else {
+	luaL_error(L, "Wrong number of arguments");
+	}
+	return 1;
 }
 
 int psy_luaui_component_gc(lua_State* L)

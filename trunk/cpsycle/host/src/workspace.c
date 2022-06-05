@@ -728,7 +728,7 @@ void workspace_load_song(Workspace* self, const char* filename, bool play)
 			psy_strreset(&self->filename, filename);
 			workspace_set_song(self, song, WORKSPACE_LOADSONG);
 			psy_audio_songfile_dispose(&songfile);
-			if (generalconfig_save_recent_songs(psycleconfig_general(
+			if (generalconfig_saving_recent_songs(psycleconfig_general(
 					workspace_conf(self)))) {
 				psy_playlist_add(&self->playlist, filename);
 			}

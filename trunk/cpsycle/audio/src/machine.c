@@ -346,6 +346,7 @@ static void setposition(psy_audio_Machine* self, double x, double y) { }
 static void position(psy_audio_Machine* self, double* x, double* y) { *x = *y = 0; }
 static const char* editname(psy_audio_Machine* self) { return ""; }
 static void seteditname(psy_audio_Machine* self, const char* name) { }
+static void sethostview(psy_audio_Machine* self, struct psy_ui_Component* handle) { }
 static psy_audio_Buffer* buffermemory(psy_audio_Machine* self) { return NULL; }
 static uintptr_t buffermemorysize(psy_audio_Machine* self) { return 0; }
 static void setbuffermemorysize(psy_audio_Machine* self, uintptr_t size) { }
@@ -653,6 +654,7 @@ static void vtable_init(void)
 		vtable.position = position;
 		vtable.editname = editname;
 		vtable.seteditname = seteditname;
+		vtable.sethostview = sethostview;
 		vtable.buffermemory = buffermemory;
 		vtable.buffermemorysize = buffermemorysize;
 		vtable.setbuffermemorysize = setbuffermemorysize;

@@ -107,7 +107,7 @@ void propertiesrenderline_init(PropertiesRenderLine* self,
 	self->edit = NULL;
 	self->state = state;	
 	/* column 0 */
-	key = psy_ui_label_allocinit(&self->component);	
+	key = psy_ui_label_allocinit(&self->component);		
 	psy_ui_component_set_padding(psy_ui_label_base(key),
 		psy_ui_margin_make_em(0.0, 0.0, 0.0, psy_min(level, 5.0) * 4.0));
 	psy_ui_component_set_preferred_size(psy_ui_label_base(key),

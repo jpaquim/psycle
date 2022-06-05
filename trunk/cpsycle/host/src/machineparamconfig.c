@@ -22,6 +22,10 @@
 
 static void machineparamconfig_makeview(MachineParamConfig*, psy_Property*);
 static void machineparamconfig_maketheme(MachineParamConfig*, psy_Property*);
+static void machineparamconfig_set_colour(MachineParamConfig*,
+	const char* key, uintptr_t style_id, psy_ui_Colour);
+static void machineparamconfig_set_style_background_colour(MachineParamConfig*,
+	const char* key, uintptr_t style_id, psy_ui_Colour);
 
 void machineparamconfig_init(MachineParamConfig* self, psy_Property* parent)
 {
@@ -281,5 +285,120 @@ void machineparamconfig_update_styles(MachineParamConfig* self)
 				machineparamconfig_dialbpm(self)) != PSY_OK) {
 			psy_ui_style_set_background_id(style, IDB_PARAMKNOB);
 		}				
+	}
+}
+
+void machineparamconfig_set_param_top_colour(MachineParamConfig* self,
+	psy_ui_Colour colour)
+{
+	machineparamconfig_set_colour(self, "machineGUIFontTopColor",
+		STYLE_MACPARAM_TOP, colour);
+}
+
+void machineparamconfig_set_param_top_background_colour(MachineParamConfig* self,
+	psy_ui_Colour colour)
+{
+	machineparamconfig_set_style_background_colour(self, "machineGUITopColor",
+		STYLE_MACPARAM_TOP, colour);
+}
+
+void machineparamconfig_set_param_top_colour_active(MachineParamConfig* self,
+	psy_ui_Colour colour)
+{
+	machineparamconfig_set_colour(self, "machineGUIHFontTopColor",
+		STYLE_MACPARAM_TOP_ACTIVE, colour);
+}
+
+void machineparamconfig_set_param_top_background_colour_active(MachineParamConfig* self,
+	psy_ui_Colour colour)
+{
+	machineparamconfig_set_style_background_colour(self, "machineGUIHTopColor",
+		STYLE_MACPARAM_TOP_ACTIVE, colour);
+}
+
+void machineparamconfig_set_param_bottom_colour(MachineParamConfig* self,
+	psy_ui_Colour colour)
+{
+	machineparamconfig_set_colour(self, "machineGUIFontBottomColor",
+		STYLE_MACPARAM_BOTTOM, colour);
+}
+
+void machineparamconfig_set_param_bottom_background_colour(MachineParamConfig* self,
+	psy_ui_Colour colour)
+{
+	machineparamconfig_set_style_background_colour(self, "machineGUIBottomColor",
+		STYLE_MACPARAM_BOTTOM, colour);
+}
+
+void machineparamconfig_set_param_bottom_colour_active(MachineParamConfig* self,
+	psy_ui_Colour colour)
+{
+	machineparamconfig_set_colour(self, "machineGUIHFontBottomColor",
+		STYLE_MACPARAM_BOTTOM_ACTIVE, colour);
+}
+
+void machineparamconfig_set_param_bottom_background_colour_active(MachineParamConfig* self,
+	psy_ui_Colour colour)
+{
+	machineparamconfig_set_style_background_colour(self, "machineGUIHBottomColor",
+		STYLE_MACPARAM_BOTTOM, colour);
+}
+
+void machineparamconfig_set_param_title_colour(MachineParamConfig* self,
+	psy_ui_Colour colour)
+{
+	machineparamconfig_set_colour(self, "machineGUITitleFontColor",
+		STYLE_MACPARAM_TITLE, colour);
+}
+
+void machineparamconfig_set_param_title_background_colour(MachineParamConfig* self,
+	psy_ui_Colour colour)
+{
+	machineparamconfig_set_style_background_colour(self, "machineGUITitleColor",
+		STYLE_MACPARAM_TITLE, colour);
+}
+
+void machineparamconfig_set_param_machinedial_bmp(MachineParamConfig* self,
+	const char* str)
+{
+	psy_Property* property;
+	
+	property = psy_property_set_str(self->theme, "machinedial_bmp", str);
+	if (property) {
+		psy_signal_emit(&self->signal_changed, self, 1, property);
+	}
+}
+
+void machineparamconfig_set_colour(MachineParamConfig* self,
+	const char* key, uintptr_t style_id, psy_ui_Colour colour)
+{
+	psy_ui_Style* style;
+	psy_Property* property;
+
+	style = psy_ui_style(style_id);
+	if (style) {
+		psy_ui_style_set_colour(style, colour);
+	}
+	property = psy_property_set_int(self->theme, key,
+		psy_ui_colour_colorref(&colour));
+	if (property) {
+		psy_signal_emit(&self->signal_changed, self, 1, property);
+	}
+}
+
+void machineparamconfig_set_style_background_colour(MachineParamConfig* self,
+	const char* key, uintptr_t style_id, psy_ui_Colour colour)
+{
+	psy_ui_Style* style;
+	psy_Property* property;
+
+	style = psy_ui_style(style_id);
+	if (style) {
+		psy_ui_style_set_background_colour(style, colour);
+	}
+	property = psy_property_set_int(self->theme, key,
+		psy_ui_colour_colorref(&colour));
+	if (property) {
+		psy_signal_emit(&self->signal_changed, self, 1, property);
 	}
 }

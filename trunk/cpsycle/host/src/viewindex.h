@@ -26,6 +26,7 @@ extern "C" {
 #define	VIEW_ID_CONFIRM			10
 #define	VIEW_NUM				11
 #define	VIEW_ID_SCRIPTS			12
+#define	VIEW_ID_FLOATED			13
 
 #define SECTION_ID_HELPVIEW_HELP			0
 #define SECTION_ID_HELPVIEW_ABOUT			1

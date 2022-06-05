@@ -45,6 +45,18 @@ INLINE psy_ui_Component* viewframe_base(ViewFrame* self)
 }
 
 /*
+** EmptyViewPage
+*/
+
+typedef struct EmptyViewPage {
+	/* inherits */
+	psy_ui_Component component;
+	psy_ui_Label label;
+} EmptyViewPage;
+
+void emptyviewpage_init(EmptyViewPage*, psy_ui_Component* parent);
+
+/*
 ** MainViews
 */
 
@@ -54,6 +66,7 @@ typedef struct MainViews {
 	/* internal */	
 	MainViewBar mainviewbar;
 	psy_ui_Notebook notebook;
+	EmptyViewPage empty_page;
 	/* references */
 	Workspace* workspace;
 } MainViews;

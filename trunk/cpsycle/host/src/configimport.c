@@ -77,6 +77,38 @@ void psycleconfigimport_on_read(PsycleConfigImport* self, psy_IniReader* sender,
 		}
 		return;
 	}
+	if (strcmp(key, "ShowPatternNames") == 0) {
+		if (strcmp(strval, "1") == 0) {
+			generalconfig_show_pattern_names(&self->config->general);
+		} else {
+			generalconfig_show_pattern_ids(&self->config->general);
+		}
+		return;
+	}
+	if (strcmp(key, "showAboutAtStart") == 0) {
+		if (strcmp(strval, "1") == 0) {
+			generalconfig_show_about_at_start(&self->config->general);
+		} else {
+			generalconfig_hide_about_at_start(&self->config->general);
+		}
+		return;
+	}
+	if (strcmp(key, "bShowSongInfoOnLoad") == 0) {
+		if (strcmp(strval, "1") == 0) {
+			generalconfig_show_song_info_on_load(&self->config->general);
+		} else {
+			generalconfig_prevent_song_info_on_load(&self->config->general);
+		}
+		return;
+	}
+	if (strcmp(key, "bFileSaveReminders") == 0) {
+		if (strcmp(strval, "1") == 0) {
+			generalconfig_show_saving_recent_songs(&self->config->general);
+		} else {
+			generalconfig_prevent_saving_recent_songs(&self->config->general);
+		}
+		return;
+	}
 	/* [PatternVisual] */
 	if (strcmp(key, "pvc_background") == 0) {
 		int value;
@@ -270,6 +302,128 @@ void psycleconfigimport_on_read(PsycleConfigImport* self, psy_IniReader* sender,
 			psy_ui_colour_make(value));
 		return;
 	}
+	if (strcmp(key, "mv_polycolour") == 0) {
+		int value;
+
+		value = _httoi(strval);
+		machineviewconfig_set_poly_colour(&self->config->macview,
+			psy_ui_colour_make(value));
+		return;
+	}
+	if (strcmp(key, "mv_wirecolour") == 0) {
+		int value;
+
+		value = _httoi(strval);
+		machineviewconfig_set_wire_colour(&self->config->macview,
+			psy_ui_colour_make(value));
+		return;
+	}
+	if (strcmp(key, "mv_generator_fontcolour") == 0) {
+		int value;
+
+		value = _httoi(strval);
+		machineviewconfig_set_generator_colour(&self->config->macview,
+			psy_ui_colour_make(value));
+		return;
+	}
+	if (strcmp(key, "mv_effect_fontcolour") == 0) {
+		int value;
+
+		value = _httoi(strval);
+		machineviewconfig_set_effect_colour(&self->config->macview,
+			psy_ui_colour_make(value));
+		return;
+	}
+	/* machineparams */
+	/* top */
+	if (strcmp(key, "machineGUIFontTopColor") == 0) {
+		int value;
+
+		value = _httoi(strval);
+		machineparamconfig_set_param_top_colour(&self->config->macparam,
+			psy_ui_colour_make(value));
+		return;
+	}
+	if (strcmp(key, "machineGUIHFontBottomColor") == 0) {
+		int value;
+
+		value = _httoi(strval);
+		machineparamconfig_set_param_top_colour_active(&self->config->macparam,
+			psy_ui_colour_make(value));
+		return;
+	}
+	if (strcmp(key, "machineGUITopColor") == 0) {
+		int value;
+
+		value = _httoi(strval);
+		machineparamconfig_set_param_top_background_colour(&self->config->macparam,
+			psy_ui_colour_make(value));
+		return;
+	}
+	if (strcmp(key, "machineGUIHTopColor") == 0) {
+		int value;
+
+		value = _httoi(strval);
+		machineparamconfig_set_param_top_background_colour_active(&self->config->macparam,
+			psy_ui_colour_make(value));
+		return;
+	}
+	/* bottom */
+	if (strcmp(key, "machineGUIFontBottomColor") == 0) {
+		int value;
+
+		value = _httoi(strval);
+		machineparamconfig_set_param_bottom_colour(&self->config->macparam,
+			psy_ui_colour_make(value));
+		return;
+	}
+	if (strcmp(key, "machineGUIHFontBottomColor") == 0) {
+		int value;
+
+		value = _httoi(strval);
+		machineparamconfig_set_param_bottom_colour_active(&self->config->macparam,
+			psy_ui_colour_make(value));
+		return;
+	}
+	if (strcmp(key, "machineGUIBottomColor") == 0) {
+		int value;
+
+		value = _httoi(strval);
+		machineparamconfig_set_param_bottom_background_colour(&self->config->macparam,
+			psy_ui_colour_make(value));
+		return;
+	}
+	if (strcmp(key, "machineGUIHBottomColor") == 0) {
+		int value;
+
+		value = _httoi(strval);
+		machineparamconfig_set_param_bottom_background_colour_active(&self->config->macparam,
+			psy_ui_colour_make(value));
+		return;
+	}
+	if (strcmp(key, "machineGUITitleFontColor") == 0) {
+		int value;
+
+		value = _httoi(strval);
+		machineparamconfig_set_param_title_colour(&self->config->macparam,
+			psy_ui_colour_make(value));
+		return;
+	}
+	if (strcmp(key, "machineGUITitleColor") == 0) {
+		int value;
+
+		value = _httoi(strval);
+		machineparamconfig_set_param_title_background_colour(&self->config->macparam,
+			psy_ui_colour_make(value));
+		return;
+	}
+	if (strcmp(key, "szBmpDialFilename") == 0) {
+		if (strval) {
+			machineparamconfig_set_param_machinedial_bmp(&self->config->macparam,
+				strval);
+		}
+		return;
+	}	
 	psycleconfigimport_read_cmdset(self, key, strval);
 }
 

@@ -62,6 +62,7 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 	self->workspace = workspace;
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_set_id(songpropertiesview_base(self), VIEW_ID_SONGPROPERTIES);
+	psy_ui_component_set_title(songpropertiesview_base(self), "main.properties");
 	psy_ui_component_set_style_type(&self->component, STYLE_SONGPROPERTIES);
 	psy_ui_component_init(&self->viewtabbar, tabbarparent, NULL);
 	psy_ui_component_init(&self->top, &self->component, NULL);

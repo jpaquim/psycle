@@ -40,6 +40,9 @@ void psy_ui_opendialog_init_all(psy_ui_OpenDialog*,
 	const char* initialdir);
 void psy_ui_opendialog_dispose(psy_ui_OpenDialog*);
 
+psy_ui_OpenDialog* psy_ui_opendialog_alloc(void);
+psy_ui_OpenDialog* psy_ui_opendialog_allocinit(psy_ui_Component* parent);
+
 int psy_ui_opendialog_execute(psy_ui_OpenDialog*);
 const psy_Path* psy_ui_opendialog_path(const psy_ui_OpenDialog*);
 

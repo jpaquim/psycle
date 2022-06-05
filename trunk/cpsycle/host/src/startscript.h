@@ -45,6 +45,8 @@ void link_init_all(Link*, const char* dllname, const char* label,
 	int viewport, int user_interface);
 void link_dispose(Link*);
 
+Link* link_clone(const Link*);
+
 struct MainFrame;
 
 typedef struct StartScript {	

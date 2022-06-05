@@ -1041,10 +1041,52 @@ void machineviewconfig_set_style_default_skin(MachineViewConfig* self)
 }
 
 void machineviewconfig_set_background_colour(MachineViewConfig* self,
-	psy_ui_Colour colour_left)
+	psy_ui_Colour colour)
 {
 	machineviewconfig_set_style_background_colour(self, "mv_colour",
-		STYLE_MV, colour_left);
+		STYLE_MV, colour);
+}
+
+void machineviewconfig_set_poly_colour(MachineViewConfig* self,
+	psy_ui_Colour colour)
+{
+	machineviewconfig_set_colour(self, "mv_polycolour",
+		STYLE_MV_WIRE_POLY, colour);
+}
+
+void machineviewconfig_set_wire_colour(MachineViewConfig* self,
+	psy_ui_Colour colour)
+{
+	machineviewconfig_set_colour(self, "mv_wirecolour",
+		STYLE_MV_WIRE, colour);
+}
+
+void machineviewconfig_set_generator_colour(MachineViewConfig* self,
+	psy_ui_Colour colour)
+{
+	machineviewconfig_set_colour(self, "mv_generator_fontcolour",
+		STYLE_MV_GENERATOR, colour);
+}
+
+void machineviewconfig_set_effect_colour(MachineViewConfig* self,
+	psy_ui_Colour colour)
+{
+	machineviewconfig_set_colour(self, "mv_generator_fontcolour",
+		STYLE_MV_EFFECT, colour);
+}
+
+void machineviewconfig_set_param_top_colour(MachineViewConfig* self,
+	psy_ui_Colour colour)
+{
+	machineviewconfig_set_colour(self, "machineGUIFontTopColor",
+		STYLE_MACPARAM_TOP, colour);
+}
+
+void machineviewconfig_set_param_bottom_colour(MachineViewConfig* self,
+	psy_ui_Colour colour)
+{
+	machineviewconfig_set_colour(self, "machineGUIFontBottomColor",
+		STYLE_MACPARAM_BOTTOM, colour);
 }
 
 void machineviewconfig_set_colour(MachineViewConfig* self,
