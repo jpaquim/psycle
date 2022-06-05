@@ -41,6 +41,22 @@ void psy_ui_opendialog_dispose(psy_ui_OpenDialog* self)
 	self->imp = NULL;
 }
 
+psy_ui_OpenDialog* psy_ui_opendialog_alloc(void)
+{
+	return (psy_ui_OpenDialog*)malloc(sizeof(psy_ui_OpenDialog*));
+}
+
+psy_ui_OpenDialog* psy_ui_opendialog_allocinit(psy_ui_Component* parent)
+{
+	psy_ui_OpenDialog* rv;
+
+	rv = psy_ui_opendialog_alloc();
+	if (rv) {
+		psy_ui_opendialog_init(rv, parent);
+	}
+	return rv;
+}
+
 int psy_ui_opendialog_execute(psy_ui_OpenDialog* self)
 {
 	return self->imp->vtable->dev_execute(self->imp);

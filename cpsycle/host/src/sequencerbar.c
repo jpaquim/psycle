@@ -99,10 +99,10 @@ void sequencerbar_on_follow_song(SequencerBar* self, psy_ui_Button* sender)
 void sequencerbar_on_show_pattern_names(SequencerBar* self, psy_ui_CheckBox* sender)
 {
 	if (psy_ui_checkbox_checked(sender) != 0) {
-		generalconfig_showpatternnames(psycleconfig_general(
+		generalconfig_show_pattern_names(psycleconfig_general(
 			workspace_conf(self->workspace)));		
 	} else {
-		generalconfig_showpatternids(psycleconfig_general(
+		generalconfig_show_pattern_ids(psycleconfig_general(
 			workspace_conf(self->workspace)));		
 	}
 }

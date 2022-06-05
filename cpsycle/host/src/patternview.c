@@ -66,7 +66,7 @@ static void vtable_init(PatternView* self)
 			patternview_on_focus;
 		vtable_initialized = TRUE;
 	}
-	psy_ui_component_set_vtable(&self->component, &vtable);	
+	psy_ui_component_set_vtable(patternview_base(self), &vtable);
 }
 
 /* implementation */
@@ -78,7 +78,8 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 	
 	psy_ui_component_init(&self->component, parent, NULL);
 	vtable_init(self);
-	psy_ui_component_set_title(patternview_base(self), "Pattern");
+	psy_ui_component_set_tab_index(patternview_base(self), 0);
+	psy_ui_component_set_title(patternview_base(self), "main.patterns");
 	psy_ui_component_set_id(patternview_base(self), VIEW_ID_PATTERNVIEW);
 	self->workspace = workspace;	
 	self->display = PATTERN_DISPLAYMODE_TRACKER;

@@ -19,6 +19,7 @@ typedef struct psy_ui_Notebook {
 	/* internal */
 	psy_ui_Splitter splitbar;	
 	uintptr_t pageindex;
+	uintptr_t page_not_found_index;
 	int split;
 	bool preventalign;	
 } psy_ui_Notebook;

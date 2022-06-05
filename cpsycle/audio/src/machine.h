@@ -133,11 +133,14 @@ typedef enum {
 	MACHINE_PARAMVIEW_COMPACT = 1
 } MachineViewOptions;
 
+/* audio */
 struct psy_audio_Machine;
 struct psy_audio_Player;
 struct psy_audio_SongFile;
 struct psy_audio_Preset;
 struct psy_audio_Presets;
+/* ui */
+struct psy_ui_Component;
 
 /* machine vtable function pointers */
 typedef	void (*fp_machine_init)(struct psy_audio_Machine*);
@@ -225,9 +228,12 @@ typedef	int (*fp_machine_savewiremapping)(struct psy_audio_Machine*,
 	struct psy_audio_SongFile*, uintptr_t slot);
 typedef	void (*fp_machine_postload)(struct psy_audio_Machine*,
 	struct psy_audio_SongFile*, uintptr_t slot);
+/* editor */
 typedef	int (*fp_machine_haseditor)(struct psy_audio_Machine*);
 typedef	void (*fp_machine_seteditorhandle)(struct psy_audio_Machine*,
 	void* handle);
+typedef	void (*fp_machine_sethostview)(struct psy_audio_Machine*,
+	struct psy_ui_Component* view);
 typedef	void (*fp_machine_editorsize)(struct psy_audio_Machine*, double* width,
 	double* height);
 typedef	void (*fp_machine_editoridle)(struct psy_audio_Machine*);
@@ -397,7 +403,8 @@ typedef struct {
 	fp_machine_editresize editresize;
 	fp_machine_editoridle editoridle;
 	fp_machine_setposition setposition;
-	fp_machine_position position;	
+	fp_machine_position position;
+	fp_machine_sethostview sethostview;
 	/* states */
 	fp_machine_bypassed bypassed;
 	fp_machine_bypass bypass;
@@ -948,6 +955,12 @@ INLINE void psy_audio_machine_position(psy_audio_Machine* self, double* x,
 	double* y)
 {
 	self->vtable->position(self, x, y);
+}
+
+INLINE void psy_audio_machine_sethostview(psy_audio_Machine* self,
+	struct psy_ui_Component* view)
+{
+	self->vtable->sethostview(self, view);
 }
 
 INLINE void psy_audio_machine_mute(psy_audio_Machine* self)

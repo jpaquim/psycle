@@ -34,6 +34,7 @@ void helpview_initbase(HelpView* self, psy_ui_Component* parent)
 {
 	psy_ui_component_init(helpview_base(self), parent, NULL);
 	psy_ui_component_set_id(helpview_base(self), VIEW_ID_HELPVIEW);
+	psy_ui_component_set_title(helpview_base(self), "main.help");
 	psy_signal_connect(&helpview_base(self)->signal_focus, self,
 		helpview_on_focus);
 	psy_signal_connect(&helpview_base(self)->signal_selectsection, self,

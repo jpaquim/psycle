@@ -21,6 +21,28 @@
 #include "defaultlang.h"
 #endif
 
+
+void links_init(Links* self)
+{
+	psy_table_init(&self->container);
+}
+
+void links_dispose(Links* self)
+{
+	psy_table_disposeall(&self->container, (psy_fp_disposefunc)link_dispose);
+}
+
+void links_add(Links* self, const Link* link)
+{
+	psy_table_insert(&self->container, psy_table_size(&self->container),
+		link_clone(link));		
+}
+
+const Link* links_at(const Links* self, uintptr_t index)
+{
+	return (const Link*)psy_table_at_const(&self->container, index);
+}
+
 static void update_showstate(psy_Property*, psy_ui_Component*);
 
 /* prototypes */
@@ -220,12 +242,14 @@ void mainframe_init_frame(MainFrame* self)
 	self->allow_frame_move = FALSE;
 	psy_ui_component_init(&self->pane, mainframe_base(self),
 		mainframe_base(self));	
-	psy_ui_component_set_align(&self->pane, psy_ui_ALIGN_CLIENT);		
+	psy_ui_component_set_align(&self->pane, psy_ui_ALIGN_CLIENT);
+	links_init(&self->links);
 }
 
 void mainframe_on_destroyed(MainFrame* self)
 {
-	startscript_dispose(&self->startscript);	
+	startscript_dispose(&self->startscript);
+	links_dispose(&self->links);
 	workspace_dispose(&self->workspace);
 	interpreter_dispose(&self->interpreter);
 	psy_ui_app_stop(psy_ui_app());
@@ -437,9 +461,10 @@ void mainframe_init_main_pane(MainFrame* self)
 		psy_ui_notebook_base(&self->mainviews.notebook),
 		psy_ui_notebook_base(&self->mainviews.mainviewbar.viewtabbars),
 		&self->workspace.config.config, 3,
-		&self->workspace.inputhandler);	
+		&self->workspace.inputhandler);
 	psy_ui_component_set_id(&self->settingsview.component,
 		VIEW_ID_SETTINGSVIEW);
+	psy_ui_component_set_title(&self->settingsview.component, "main.settings");
 	psy_signal_connect(&self->settingsview.signal_changed, self,
 		mainframe_on_settings_view_changed);
 	helpview_init(&self->helpview,
@@ -741,7 +766,7 @@ bool mainframe_on_notes(MainFrame* self, InputHandler* sender)
 void mainframe_on_song_changed(MainFrame* self, Workspace* sender)
 {
 	if (workspace_song_has_file(sender)) {
-		if (generalconfig_show_song_info_on_load(psycleconfig_general(
+		if (generalconfig_showing_song_info_on_load(psycleconfig_general(
 				workspace_conf(sender)))) {
 			workspace_select_view(&self->workspace,
 				viewindex_make(VIEW_ID_SONGPROPERTIES, psy_INDEX_INVALID,
@@ -980,6 +1005,19 @@ void mainframe_on_tabbar_changed(MainFrame* self, psy_ui_TabBar* sender,
 void mainframe_on_script_tabbar_changed(MainFrame* self, psy_ui_Component* sender,
 	uintptr_t tabindex)
 {
+	const Link* link;
+
+	link = links_at(&self->links, tabindex);
+	if (link) {
+		psy_audio_Machine* machine;
+		
+		machine = psy_audio_machinefactory_makemachinefrompath(
+			&self->workspace.machinefactory, psy_audio_LUA, link->dllname_,
+			0, 0);
+		if (machine) {
+			psy_audio_machine_sethostview(machine, &self->mainviews.notebook.component);
+		}
+	}
 }
 
 void mainframe_on_songtracks_changed(MainFrame* self, psy_audio_Patterns* sender,
@@ -1468,4 +1506,13 @@ bool mainframe_on_input_handler_callback(MainFrame* self, int message,
 void mainframe_plugineditor_on_focus(MainFrame* self, psy_ui_Component* sender)
 {
 	psy_ui_notebook_select(&self->statusbar.viewstatusbars, 4);
+}
+
+void mainframe_add_link(MainFrame* self, Link* link)
+{
+	links_add(&self->links, link);
+	psy_ui_tabbar_append(&self->scripttabbar, link->label_,
+		psy_INDEX_INVALID,
+		psy_INDEX_INVALID, psy_INDEX_INVALID,
+		psy_ui_colour_white());
 }

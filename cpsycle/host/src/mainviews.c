@@ -20,10 +20,12 @@
 /* prototypes */
 static bool viewframe_on_close(ViewFrame*);
 static void viewframe_on_key_down(ViewFrame*, psy_ui_KeyboardEvent*);
-static void viewframe_checkplaystartwithrctrl(ViewFrame*, psy_ui_KeyboardEvent*);
+static void viewframe_checkplaystartwithrctrl(ViewFrame*,
+	psy_ui_KeyboardEvent*);
 static void viewframe_on_key_up(ViewFrame*, psy_ui_KeyboardEvent*);
 static void viewframe_delegate_keyboard(ViewFrame*, intptr_t message,
 	psy_ui_KeyboardEvent*);
+static void viewframe_on_language_changed(ViewFrame*);
 
 /* vtable */
 static psy_ui_ComponentVtable vtable;
@@ -42,11 +44,13 @@ static void vtable_init(ViewFrame* self)
 		vtable.onkeyup =
 			(psy_ui_fp_component_on_key_event)
 			viewframe_on_key_up;
+		vtable.onlanguagechanged =
+			(psy_ui_fp_component_onlanguagechanged)
+			viewframe_on_language_changed;
 		vtable_initialized = TRUE;
 	}
 	psy_ui_component_set_vtable(&self->component, &vtable);
 }
-
 
 /* implementation */
 void viewframe_init(ViewFrame* self, psy_ui_Component* parent,
@@ -87,7 +91,7 @@ bool viewframe_on_close(ViewFrame* self)
 }
 
 void viewframe_float(ViewFrame* self)
-{
+{	
 	psy_ui_Component* page;
 	uintptr_t id;
 
@@ -100,11 +104,11 @@ void viewframe_float(ViewFrame* self)
 	}
 	if (page) {					
 		psy_ui_component_set_parent(page, &self->pane);
-		psy_ui_component_set_align(page, psy_ui_ALIGN_CLIENT);
-		psy_ui_notebook_select_by_component_id(self->dock, id);
+		psy_ui_component_set_align(page, psy_ui_ALIGN_CLIENT);		
 		psy_ui_component_set_title(&self->component, 
-			psy_ui_component_title(page));
+			psy_ui_translate(psy_ui_component_title(page)));
 		psy_ui_component_show(&self->component);
+		psy_ui_notebook_select_by_component_id(self->dock, VIEW_ID_FLOATED);
 	}
 }
 
@@ -115,8 +119,8 @@ void viewframe_dock(ViewFrame* self)
 	page = psy_ui_component_at(&self->pane, 0);
 	if (page) {
 		psy_ui_component_set_parent(page, &self->dock->component);
-		psy_ui_component_set_align(page, psy_ui_ALIGN_CLIENT);
-		psy_ui_notebook_select_by_component_id(self->dock, self->dock->component.id);
+		psy_ui_component_set_align(page, psy_ui_ALIGN_CLIENT);		
+		psy_ui_notebook_select_by_component_id(self->dock, psy_ui_component_id(page));
 	}
 }
 
@@ -172,6 +176,29 @@ void viewframe_delegate_keyboard(ViewFrame* self, intptr_t message,
 
 }
 
+void viewframe_on_language_changed(ViewFrame* self)
+{
+	psy_ui_Component* page;
+
+	page = psy_ui_component_at(&self->pane, 0);
+	if (page) {
+		psy_ui_component_set_title(&self->component,
+			psy_ui_translate(psy_ui_component_title(page)));
+	}
+}
+
+
+/* EmptyViewPage */
+
+void emptyviewpage_init(EmptyViewPage* self, psy_ui_Component* parent)
+{
+	psy_ui_component_init(&self->component, parent, NULL);
+	psy_ui_component_set_id(&self->component, VIEW_ID_FLOATED);
+	psy_ui_label_init_text(&self->label, &self->component,
+		"Floated");
+	psy_ui_component_set_align(psy_ui_label_base(&self->label),
+		psy_ui_ALIGN_CENTER);
+}
 
 /* MainViews */
 
@@ -195,8 +222,11 @@ void mainviews_init(MainViews* self, psy_ui_Component* parent, psy_ui_Component*
 	psy_ui_component_set_align(mainviewbar_base(&self->mainviewbar),
 		psy_ui_ALIGN_TOP);
 	psy_ui_notebook_init(&self->notebook, &self->component);
+	self->notebook.page_not_found_index = VIEW_ID_FLOATED;
 	psy_ui_component_set_align(psy_ui_notebook_base(&self->notebook),
-		psy_ui_ALIGN_CLIENT);	
+		psy_ui_ALIGN_CLIENT);
+	emptyviewpage_init(&self->empty_page, 
+		psy_ui_notebook_base(&self->notebook));
 }
 
 void mainviews_onextract(MainViews* self, psy_ui_Button* sender)
@@ -236,7 +266,7 @@ void mainviews_extract(MainViews* self)
 		psy_ui_component_set_align(&splitter->component, psy_ui_ALIGN_RIGHT);
 		psy_ui_component_align(&self->component);
 		psy_ui_component_invalidate(&self->component);
-		psy_ui_notebook_select_by_component_id(&self->notebook, id);
+		psy_ui_notebook_select_by_component_id(&self->notebook,  VIEW_ID_FLOATED);
 	}	
 }
 

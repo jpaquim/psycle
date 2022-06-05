@@ -24,6 +24,15 @@
     <ClCompile Include="src\luacomponent.c">
       <Filter>Quelldateien</Filter>
     </ClCompile>
+    <ClCompile Include="src\luagraphics.c">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="src\luaopendialogs.c">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="src\luasavedialog.c">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\luaui.h">
@@ -33,6 +42,15 @@
       <Filter>Headerdateien</Filter>
     </ClInclude>
     <ClInclude Include="src\luacomponent.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="src\luagraphics.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="src\luaopendialog.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="src\luasavedialog.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
   </ItemGroup>

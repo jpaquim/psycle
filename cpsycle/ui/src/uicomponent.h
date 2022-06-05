@@ -911,7 +911,7 @@ int psy_ui_component_level(const psy_ui_Component*);
 void psy_ui_component_set_defaultalign(psy_ui_Component*,
 	psy_ui_AlignType, psy_ui_Margin);
 
-void psy_ui_component_updatelanguage(psy_ui_Component*);
+void psy_ui_component_update_language(psy_ui_Component*);
 psy_Translator* psy_ui_translator(void);
 const char* psy_ui_translate(const char* key);
 

@@ -60,6 +60,7 @@ static psy_ui_Component* psy_ui_winapp_component(psy_ui_WinApp*,
 	uintptr_t handle);
 psy_ui_win_ComponentImp* psy_ui_winapp_componentimp(psy_ui_WinApp*,
 	uintptr_t handle);
+static psy_List* psy_ui_winapp_toplevel(psy_ui_WinApp* self);
 
 /* vtable */
 static psy_ui_AppImpVTable imp_vtable;
@@ -98,6 +99,9 @@ static void imp_vtable_init(psy_ui_WinApp* self)
 		imp_vtable.dev_component =
 			(psy_ui_fp_appimp_component)
 			psy_ui_winapp_component;		
+		imp_vtable.dev_toplevel =
+			(psy_ui_fp_appimp_toplevel)
+			psy_ui_winapp_toplevel;
 		imp_vtable_initialized = TRUE;
 	}
 	self->imp.vtable = &imp_vtable;
@@ -138,6 +142,7 @@ void psy_ui_winapp_init(psy_ui_WinApp* self, psy_ui_App* app, HINSTANCE instance
 	}
 	psy_table_init(&self->selfmap);
 	psy_table_init(&self->winidmap);
+	psy_table_init(&self->toplevelmap);
 	self->defaultbackgroundbrush = CreateSolidBrush(0x00232323);	
 }
 
@@ -145,7 +150,8 @@ void psy_ui_winapp_dispose(psy_ui_WinApp* self)
 {
 	psy_ui_winapp_stopmousehook(self);
 	psy_table_dispose(&self->selfmap);
-	psy_table_dispose(&self->winidmap);	
+	psy_table_dispose(&self->winidmap);
+	psy_table_dispose(&self->toplevelmap);
 	DeleteObject(self->defaultbackgroundbrush);
 	CoUninitialize();	
 }
@@ -518,6 +524,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 			}
 			psy_ui_component_dispose(component);
 			psy_table_remove(&winapp->selfmap, (uintptr_t)hwnd);
+			psy_table_remove(&winapp->toplevelmap, (uintptr_t)hwnd);
 			if (component) {				
 				component->vtable->on_destroyed(component);
 			}
@@ -995,6 +1002,25 @@ psy_ui_win_ComponentImp* psy_ui_winapp_componentimp(psy_ui_WinApp* self,
 	uintptr_t handle)
 {
 	return (psy_ui_win_ComponentImp*)psy_table_at(&winapp->selfmap, handle);
+}
+
+psy_List* psy_ui_winapp_toplevel(psy_ui_WinApp* self)
+{
+	psy_List* rv;
+	psy_TableIterator it;	
+	
+	rv = NULL;
+	for (it = psy_table_begin(&self->toplevelmap);
+		!psy_tableiterator_equal(&it, psy_table_end());
+		psy_tableiterator_inc(&it)) {
+		psy_ui_win_ComponentImp* imp;
+
+		imp = (psy_ui_Component*)psy_tableiterator_value(&it);
+		if (imp->component) {
+			psy_list_append(&rv, imp->component);
+		}
+	}
+	return rv;
 }
 
 #endif /* PSYCLE_TK_WIN32 */

@@ -57,6 +57,20 @@ void link_dispose(Link* self)
 	self->dllname_ = NULL;
 }
 
+Link* link_clone(const Link* self)
+{
+	Link* rv;
+
+	rv = (Link*)malloc(sizeof(Link));
+	if (rv) {
+		rv->dllname_ = psy_strdup(self->dllname_);
+		rv->label_ = psy_strdup(self->label_);
+		rv->viewport_ = self->viewport_;
+		rv->userinterface_ = self->userinterface_;
+	}
+	return rv;
+}
+
 /* StartScript */
 /* prototypes */
 int startscript_addmenu(lua_State*);
@@ -148,10 +162,7 @@ int startscript_addmenu(lua_State* L)
 		luaL_checkstring(L, -3),
 		(int)luaL_checkinteger(L, -2),
 		(int)luaL_checkinteger(L, -1));
-	psy_ui_tabbar_append(&self->mainframe->scripttabbar, link.label_,
-		psy_INDEX_INVALID,
-		psy_INDEX_INVALID, psy_INDEX_INVALID,
-		psy_ui_colour_white());
+	mainframe_add_link(self->mainframe, &link);	
 	link_dispose(&link);
 	return 0;
 }

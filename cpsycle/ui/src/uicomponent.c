@@ -239,7 +239,7 @@ void psy_ui_replacedefaultfont(psy_ui_Component* main, psy_ui_Font* font)
 		psy_ui_font_dispose(&root->font);
 		psy_ui_font_init(&root->font, NULL);
 		psy_ui_font_copy(&root->font, font);
-		psy_ui_notify_style_update(psy_ui_mainwindow());		
+		psy_ui_notify_style_update(main);
 	}
 }
 
@@ -2030,7 +2030,7 @@ void psy_ui_component_set_defaultalign(psy_ui_Component* self,
 	self->containeralign->insertmargin = margin;
 }
 
-void psy_ui_component_updatelanguage(psy_ui_Component* self)
+void psy_ui_component_update_language(psy_ui_Component* self)
 {
 	assert(self);
 

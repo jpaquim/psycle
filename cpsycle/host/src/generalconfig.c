@@ -69,14 +69,42 @@ void generalconfig_make(GeneralConfig* self, psy_Property* parent)
 		"settingsview.general.show-pattern-names");
 }
 
-bool generalconfig_show_song_info_on_load(const GeneralConfig* self)
+bool generalconfig_showing_song_info_on_load(const GeneralConfig* self)
 {
 	assert(self);
 
 	return psy_property_at_bool(self->general, "showsonginfoonload", TRUE);
 }
 
-bool generalconfig_showaboutatstart(const GeneralConfig* self)
+void generalconfig_show_song_info_on_load(GeneralConfig* self)
+{
+	assert(self);
+
+	psy_property_set_bool(self->general, "showsonginfoonload", TRUE);
+}
+
+void generalconfig_prevent_song_info_on_load(GeneralConfig* self)
+{
+	assert(self);
+
+	psy_property_set_bool(self->general, "showsonginfoonload", FALSE);
+}
+
+void generalconfig_show_about_at_start(GeneralConfig* self)
+{
+	assert(self);
+
+	psy_property_set_bool(self->general, "showaboutatstart", TRUE);
+}
+
+void generalconfig_hide_about_at_start(GeneralConfig* self)
+{
+	assert(self);
+
+	psy_property_set_bool(self->general, "showaboutatstart", FALSE);
+}
+
+bool generalconfig_showing_about_at_start(const GeneralConfig* self)
 {
 	assert(self);
 
@@ -85,7 +113,7 @@ bool generalconfig_showaboutatstart(const GeneralConfig* self)
 
 ViewIndex generalconfig_start_view(const GeneralConfig* self)
 {
-	if (generalconfig_showaboutatstart(self)) {
+	if (generalconfig_showing_about_at_start(self)) {
 		return viewindex_make(VIEW_ID_HELPVIEW,
 			SECTION_ID_HELPVIEW_ABOUT, 0, psy_INDEX_INVALID);
 	}
@@ -100,11 +128,26 @@ bool generalconfig_showmaximizedatstart(const GeneralConfig* self)
 	return psy_property_at_bool(self->general, "showmaximizedatstart", TRUE);
 }
 
-bool generalconfig_save_recent_songs(const GeneralConfig* self)
+bool generalconfig_saving_recent_songs(const GeneralConfig* self)
 {
 	assert(self);
 
 	return psy_property_at_bool(self->general, "saverecentsongs", TRUE);
+}
+
+
+void generalconfig_show_saving_recent_songs(GeneralConfig* self)
+{
+	assert(self);
+
+	psy_property_set_bool(self->general, "saverecentsongs", TRUE);
+}
+
+void generalconfig_prevent_saving_recent_songs(GeneralConfig* self)
+{
+	assert(self);
+
+	psy_property_set_bool(self->general, "saverecentsongs", FALSE);
 }
 
 bool generalconfig_playsongafterload(const GeneralConfig* self)
@@ -163,7 +206,7 @@ void generalconfig_setstepsequencershowstate(GeneralConfig* self, bool state)
 	psy_property_set_bool(self->general, "showstepsequencer", state);
 }
 
-void generalconfig_showpatternnames(GeneralConfig* self)
+void generalconfig_show_pattern_names(GeneralConfig* self)
 {
 	assert(self);
 
@@ -171,7 +214,7 @@ void generalconfig_showpatternnames(GeneralConfig* self)
 		psy_property_set_bool(self->general, "showpatternnames", TRUE));
 }
 
-void generalconfig_showpatternids(GeneralConfig* self)
+void generalconfig_show_pattern_ids(GeneralConfig* self)
 {
 	assert(self);
 
