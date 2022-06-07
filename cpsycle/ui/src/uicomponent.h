@@ -474,7 +474,7 @@ typedef uintptr_t (*psy_ui_fp_componentimp_dev_flags)(const struct psy_ui_Compon
 typedef void (*psy_ui_fp_componentimp_dev_clear)(struct psy_ui_ComponentImp*);
 typedef void (*psy_ui_fp_componentimp_dev_mouseevent)(struct psy_ui_ComponentImp*, psy_ui_MouseEvent*);
 typedef void (*psy_ui_fp_componentimp_dev_initialized)(struct psy_ui_ComponentImp*);
-typedef psy_ui_ComponentState (*psy_ui_fp_componentimp_dev_component_state)(struct psy_ui_ComponentImp*);
+typedef psy_ui_ComponentState (*psy_ui_fp_componentimp_dev_component_state)(const struct psy_ui_ComponentImp*);
 typedef void (*psy_ui_fp_componentimp_dev_set_component_state)(struct psy_ui_ComponentImp*, psy_ui_ComponentState);
 
 typedef struct psy_ui_ComponentImpVTable {

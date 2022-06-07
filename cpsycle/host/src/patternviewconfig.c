@@ -22,6 +22,11 @@
 
 #define PSYCLE__PATH__DEFAULT_PATTERN_HEADER_SKIN "Psycle Default (internal)"
 
+#if defined DIVERSALIS__OS__UNIX
+#define _MAX_PATH 4096
+#include <unistd.h>
+#endif
+
 /* prototypes*/
 static void patternviewconfig_make_view(PatternViewConfig*, psy_Property*
 	parent);

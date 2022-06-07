@@ -87,11 +87,12 @@ void patternviewstatus_update(PatternViewStatus* self)
 			line = psy_audio_sequencecursor_line(&cursor);
 			line -= psy_audio_sequencecursor_seqline(&cursor);
 		}
-		itoa((int)patternid, text, 10);
+		psy_snprintf(text, 256, "%d", (int)patternid);		
 		psy_ui_label_set_text(&self->pat, text);
-		itoa((int)line, text, 10);
+		psy_snprintf(text, 256, "%d", (int)line);		
 		psy_ui_label_set_text(&self->ln, text);
-		itoa((int)psy_audio_sequencecursor_track(&cursor), text, 10);
+		psy_snprintf(text, 256, "%d",
+			(int)psy_audio_sequencecursor_track(&cursor));
 		psy_ui_label_set_text(&self->trk, text);
 		psy_snprintf(text, 256, "%d: %d",
 			(int)psy_audio_sequencecursor_column(&cursor),

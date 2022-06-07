@@ -54,6 +54,7 @@ static XButtonEvent psy_ui_X11app_make_x11buttonevent(psy_ui_MouseEvent*,
 static void psy_ui_x11app_sendx11event(psy_ui_X11App*, int mask, int hwnd,
 	XEvent*);
 static void psy_ui_x11app_sync(psy_ui_X11App*);
+static psy_List* psy_ui_x11app_toplevel(psy_ui_X11App* self);
 
 /* vtable */
 static psy_ui_AppImpVTable imp_vtable;
@@ -85,7 +86,10 @@ static void imp_vtable_init(psy_ui_X11App* self)
 			psy_ui_x11app_sendevent;
 		imp_vtable.dev_component =
 			(psy_ui_fp_appimp_component)
-			psy_ui_x11app_component;				
+			psy_ui_x11app_component;
+		imp_vtable.dev_toplevel =
+			(psy_ui_fp_appimp_toplevel)
+			psy_ui_x11app_toplevel;							
 		imp_vtable_initialized = TRUE;
 	}
 	self->imp.vtable = &imp_vtable;
@@ -109,6 +113,7 @@ void psy_ui_x11app_init(psy_ui_X11App* self, psy_ui_App* app, void* instance)
 	self->winid = 20000;
 	psy_table_init(&self->selfmap);
 	psy_table_init(&self->winidmap);
+	psy_table_init(&self->toplevelmap);
 	self->wmDeleteMessage = XInternAtom(self->dpy, "WM_DELETE_WINDOW", False);
 	self->running = FALSE;
 	shape_extension = XShapeQueryExtension (self->dpy,
@@ -188,6 +193,7 @@ void psy_ui_x11app_dispose(psy_ui_X11App* self)
 	}
 	psy_table_dispose(&self->selfmap);
 	psy_table_dispose(&self->winidmap);
+	psy_table_dispose(&self->toplevelmap);
 	XCloseDisplay(self->dpy);
 	psy_ui_x11colours_dispose(&self->colourmap);
 	psy_list_free(self->targetids);	
@@ -265,8 +271,7 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 		psy_ui_RealRectangle* rc;
 		psy_List* p;
 
-		border = psy_ui_component_border(imp->component);
-				
+		border = psy_ui_component_border(imp->component);					
 		rc = (psy_ui_RealRectangle*)malloc(sizeof(psy_ui_RealRectangle));
 		*rc = psy_ui_realrectangle_make(
 				psy_ui_realpoint_make(
@@ -279,12 +284,13 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 		if (event->xexpose.count > 0) {
 			return 0;
 		}
-		imp->exposeareavalid = TRUE;
+		imp->exposeareavalid = TRUE;		
 		for (p = imp->expose_rectangles; p != NULL; p = p->next) {
-			r = (psy_ui_RealRectangle*)p->entry;
-			if (imp->component->vtable->ondraw ||
+			r = (psy_ui_RealRectangle*)p->entry;			
+			if (imp->component->vtable->ondraw ||					
 					imp->component->signal_draw.slots ||
-					imp->component->backgroundmode != psy_ui_NOBACKGROUND ||
+					imp->component->componentbackground.backgroundmode
+						!= psy_ui_NOBACKGROUND ||					
 					psy_ui_border_isset(border)) {
 				psy_ui_x11_GraphicsImp* gx11;
 				XRectangle rectangle;
@@ -298,7 +304,7 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 				/* reset scroll origin */
 				gx11->org.x = 0;
 				gx11->org.y = 0;							
-				psy_ui_graphics_setcliprect(&imp->g, *r);				
+				psy_ui_graphics_setcliprect(&imp->g, *r);					
 				psy_ui_component_draw(imp->component, &imp->g);			
 			}
 			if (self->dbe) {
@@ -540,6 +546,7 @@ void psy_ui_x11app_destroy_window(psy_ui_X11App* self, Window window)
 			imp->imp.vtable->dev_dispose(&imp->imp);
 		}
 		psy_table_remove(&self->selfmap, (uintptr_t)window);
+		psy_table_remove(&self->toplevelmap, (uintptr_t)window);
 		if (component && deallocate) {
             free(component);
         }
@@ -771,6 +778,25 @@ psy_ui_Component* psy_ui_x11app_component(psy_ui_X11App* self,
 		return imp->component;
 	}
 	return NULL;
+}
+
+psy_List* psy_ui_x11app_toplevel(psy_ui_X11App* self)
+{
+	psy_List* rv;
+	psy_TableIterator it;	
+	
+	rv = NULL;
+	for (it = psy_table_begin(&self->toplevelmap);
+			!psy_tableiterator_equal(&it, psy_table_end());
+			psy_tableiterator_inc(&it)) {
+		psy_ui_x11_ComponentImp* imp;
+
+		imp = (psy_ui_x11_ComponentImp*)psy_tableiterator_value(&it);
+		if (imp->component) {
+			psy_list_append(&rv, imp->component);
+		}
+	}
+	return rv;
 }
 
 #endif /* PSYCLE_TK_X11 */

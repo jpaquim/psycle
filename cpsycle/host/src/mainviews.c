@@ -195,7 +195,7 @@ void emptyviewpage_init(EmptyViewPage* self, psy_ui_Component* parent)
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_set_id(&self->component, VIEW_ID_FLOATED);
 	psy_ui_label_init_text(&self->label, &self->component,
-		"Floated");
+		"main.floated");
 	psy_ui_component_set_align(psy_ui_label_base(&self->label),
 		psy_ui_ALIGN_CENTER);
 }

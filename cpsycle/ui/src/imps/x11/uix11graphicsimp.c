@@ -45,6 +45,7 @@ static void psy_ui_x11_g_imp_settextcolour(psy_ui_x11_GraphicsImp*, psy_ui_Colou
 static void psy_ui_x11_g_imp_settextalign(psy_ui_x11_GraphicsImp*, uintptr_t align);
 static void psy_ui_x11_g_imp_setcolour(psy_ui_x11_GraphicsImp*, psy_ui_Colour colour);
 static void psy_ui_x11_g_imp_setfont(psy_ui_x11_GraphicsImp*, psy_ui_Font* font);
+static const psy_ui_Font* psy_ui_x11_g_imp_font(const psy_ui_x11_GraphicsImp*);
 static void psy_ui_x11_g_imp_moveto(psy_ui_x11_GraphicsImp*, psy_ui_RealPoint pt);
 static void psy_ui_x11_g_imp_devcurveto(psy_ui_x11_GraphicsImp*, psy_ui_RealPoint control_p1,
 	psy_ui_RealPoint control_p2, psy_ui_RealPoint p);
@@ -125,6 +126,9 @@ static void x11_imp_vtable_init(psy_ui_x11_GraphicsImp* self)
 		x11_imp_vtable.dev_setfont =
 			(psy_ui_fp_graphicsimp_dev_setfont)
 			psy_ui_x11_g_imp_setfont;
+		x11_imp_vtable.dev_font =
+			(psy_ui_fp_graphicsimp_dev_font)
+			psy_ui_x11_g_imp_font;
 		x11_imp_vtable.dev_moveto =
 			(psy_ui_fp_graphicsimp_dev_moveto)
 			psy_ui_x11_g_imp_moveto;
@@ -201,6 +205,7 @@ void psy_ui_x11_graphicsimp_init(psy_ui_x11_GraphicsImp* self,
 	self->bitmap = FALSE;
 	psy_ui_realpoint_init(&self->cp);
 	self->clip = psy_ui_realrectangle_zero();
+	self->font = NULL;
 }
 
 void psy_ui_x11_graphicsimp_init_bitmap(psy_ui_x11_GraphicsImp* self,
@@ -371,41 +376,47 @@ void psy_ui_x11_g_imp_drawroundrectangle(psy_ui_x11_GraphicsImp* self,
 }
 
 void psy_ui_x11_g_imp_drawsolidrectangle(psy_ui_x11_GraphicsImp* self,
-	const psy_ui_RealRectangle r, psy_ui_Colour color)
+	const psy_ui_RealRectangle r, psy_ui_Colour colour)
 {
-	XGCValues xgcv;
-	psy_ui_X11App* x11app;		
+	if (!colour.mode.transparent) {
+		XGCValues xgcv;
+		psy_ui_X11App* x11app;		
 
-	x11app = (psy_ui_X11App*)psy_ui_app()->imp;
-	XGetGCValues(self->display, self->gc, GCForeground | GCBackground, &xgcv);
-	XSetForeground(self->display, self->gc,
-		psy_ui_x11app_colourindex(x11app, color));
-	XFillRectangle(self->display, self->window, self->gc,
-		r.left - (int)(self->org.x),
-		r.top - (int)(self->org.y),
-		r.right- r.left, r.bottom - r.top);
-	XChangeGC(self->display, self->gc, GCForeground | GCBackground,
+		x11app = (psy_ui_X11App*)psy_ui_app()->imp;
+		XGetGCValues(self->display, self->gc, GCForeground | GCBackground,
 			&xgcv);
+		XSetForeground(self->display, self->gc,
+			psy_ui_x11app_colourindex(x11app, colour));
+		XFillRectangle(self->display, self->window, self->gc,
+			r.left - (int)(self->org.x),
+			r.top - (int)(self->org.y),
+			r.right- r.left, r.bottom - r.top);
+		XChangeGC(self->display, self->gc, GCForeground | GCBackground,
+				&xgcv);
+	}
 }
 
 void psy_ui_x11_g_imp_drawsolidroundrectangle(psy_ui_x11_GraphicsImp* self,
-    const psy_ui_RealRectangle r, psy_ui_RealSize cornersize, psy_ui_Colour color)
+    const psy_ui_RealRectangle r, psy_ui_RealSize cornersize,
+    psy_ui_Colour colour)
 {
-	XGCValues xgcv;
-	psy_ui_X11App* x11app;		
+	if (!colour.mode.transparent) {
+		XGCValues xgcv;
+		psy_ui_X11App* x11app;		
 
-	x11app = (psy_ui_X11App*)psy_ui_app()->imp;
-	XGetGCValues(self->display, self->gc, GCForeground | GCBackground, &xgcv);
-	XSetForeground(self->display, self->gc,
-		psy_ui_x11app_colourindex(x11app, color));		
-	XmuFillRoundedRectangle(self->display,
-		self->window, self->gc,
-		r.left - (int)(self->org.x),
-		r.top - (int)(self->org.y),
-		r.right - r.left, r.bottom - r.top,
-		cornersize.width, cornersize.height);
-	XChangeGC(self->display, self->gc, GCForeground | GCBackground,
-			&xgcv);
+		x11app = (psy_ui_X11App*)psy_ui_app()->imp;
+		XGetGCValues(self->display, self->gc, GCForeground | GCBackground, &xgcv);
+		XSetForeground(self->display, self->gc,
+			psy_ui_x11app_colourindex(x11app, colour));		
+		XmuFillRoundedRectangle(self->display,
+			self->window, self->gc,
+			r.left - (int)(self->org.x),
+			r.top - (int)(self->org.y),
+			r.right - r.left, r.bottom - r.top,
+			cornersize.width, cornersize.height);
+		XChangeGC(self->display, self->gc, GCForeground | GCBackground,
+				&xgcv);
+	}
 }
 
 void psy_ui_x11_g_imp_drawsolidpolygon(psy_ui_x11_GraphicsImp* self,
@@ -533,9 +544,15 @@ void psy_ui_x11_g_imp_settextalign(psy_ui_x11_GraphicsImp* self, uintptr_t align
 
 void psy_ui_x11_g_imp_setfont(psy_ui_x11_GraphicsImp* self, psy_ui_Font* font)
 {	
+	self->font = font;
 	if (font && ((psy_ui_x11_FontImp*)font->imp)->hfont) {
 		self->xftfont = ((psy_ui_x11_FontImp*)(font->imp))->hfont;
 	}
+}
+
+const psy_ui_Font* psy_ui_x11_g_imp_font(const psy_ui_x11_GraphicsImp* self)
+{
+	return self->font;
 }
 
 void psy_ui_x11_g_imp_drawline(psy_ui_x11_GraphicsImp* self,

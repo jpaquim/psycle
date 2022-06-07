@@ -58,14 +58,16 @@ void init_host_styles(psy_ui_Styles* self, psy_ui_ThemeMode theme)
 	style = psy_ui_style_allocinit();
 	psy_ui_style_set_colours(style, material.onprimary_medium,
 		material.surface_overlay_9p);
-	psy_ui_border_init_solid_radius(&style->border, material.surface_overlay_11p, 6.0);
+	psy_ui_border_init_solid_radius(&style->border,
+		material.surface_overlay_11p, 6.0);
 	psy_ui_style_set_padding_em(style, 0.25, 1.0, 0.25, 1.0);
 	psy_ui_styles_set_style(self, STYLE_SEQVIEW_BUTTON_HOVER, style);
 	
 	style = psy_ui_style_allocinit();
 	psy_ui_style_set_colours(style,  material.onsecondary,
 		material.surface_overlay_9p);	
-	psy_ui_border_init_solid_radius(&style->border, material.surface_overlay_16p, 6.0);
+	psy_ui_border_init_solid_radius(&style->border,
+		material.surface_overlay_16p, 6.0);
 	psy_ui_style_set_padding_em(style, 0.25, 1.0, 0.25, 1.0);
 	psy_ui_styles_set_style(self, STYLE_SEQVIEW_BUTTON_SELECT, style);
 	
@@ -75,14 +77,16 @@ void init_host_styles(psy_ui_Styles* self, psy_ui_ThemeMode theme)
 
 	style = psy_ui_style_allocinit();
 	psy_ui_style_set_colour(style, material.onprimary_medium);
-	psy_ui_border_init_solid_radius(&style->border, material.surface_overlay_7p, 6.0);
+	psy_ui_border_init_solid_radius(&style->border,
+		material.surface_overlay_7p, 6.0);
 	psy_ui_styles_set_style(self, STYLE_SEQLISTVIEW, style);
 
 	style = psy_ui_style_allocinit();	
 	psy_ui_styles_set_style(self, STYLE_SEQLISTVIEW_FOCUS, style);
 	
 	style = psy_ui_style_allocinit();
-	psy_ui_style_set_colours(style, material.onprimary_strong, material.surface_overlay_5p);
+	psy_ui_style_set_colours(style, material.onprimary_strong,
+		material.surface_overlay_5p);
 	psy_ui_border_init_solid(&style->border, material.surface_overlay_7p);
 	psy_ui_styles_set_style(self, STYLE_SEQLISTVIEW_SELECT, style);
 	
@@ -219,7 +223,8 @@ void init_host_styles(psy_ui_Styles* self, psy_ui_ThemeMode theme)
 	psy_ui_styles_set_style(self, STYLE_SEQEDT_RULER_BOTTOM, style);
 
 	style = psy_ui_style_allocinit();
-	psy_ui_style_set_colour(style, psy_ui_colour_weighted(&material.secondary, 900));	
+	psy_ui_style_set_colour(style, psy_ui_colour_weighted(&material.secondary,
+		900));	
 	psy_ui_styles_set_style(self, STYLE_SEQEDT_RULER_CURSOR, style);
 
 	style = psy_ui_style_allocinit();
@@ -662,14 +667,16 @@ void init_host_styles(psy_ui_Styles* self, psy_ui_ThemeMode theme)
 	style = psy_ui_style_allocinit();
 	psy_ui_style_set_colours(style, material.onprimary_medium,
 		material.overlay_12p);
-	psy_ui_border_init_solid_radius(&style->border, material.surface_overlay_11p, 6.0);
+	psy_ui_border_init_solid_radius(&style->border,
+		material.surface_overlay_11p, 6.0);
 	psy_ui_style_set_padding_em(style, 0.25, 1.0, 0.25, 1.0);
 	psy_ui_styles_set_style(self, STYLE_DIALOG_BUTTON_HOVER, style);
 
 	style = psy_ui_style_allocinit();
 	psy_ui_style_set_colours(style, material.onsecondary,
 		material.overlay_12p);
-	psy_ui_border_init_solid_radius(&style->border, material.surface_overlay_16p, 6.0);
+	psy_ui_border_init_solid_radius(&style->border,
+		material.surface_overlay_16p, 6.0);
 	psy_ui_style_set_padding_em(style, 0.25, 1.0, 0.25, 1.0);
 	psy_ui_styles_set_style(self, STYLE_DIALOG_BUTTON_SELECT, style);
 

@@ -204,7 +204,7 @@ uintptr_t psy_ui_textformat_numchars(const psy_ui_TextFormat* self,
 		len = psy_strlen(text);
 		((psy_ui_TextFormat*)self)->numavgchars = psy_min(
 			(uintptr_t)(width / (tm->tmAveCharWidth * 1.3)), len);
-		if (text[i] == '/t') {			
+		if (text[i] == '\t') {			
 			curr_width += (avg_char_width * 4);
 		} else {
 			curr_width += avg_char_width;
