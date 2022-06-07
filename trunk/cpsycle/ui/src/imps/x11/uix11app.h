@@ -35,6 +35,7 @@ typedef struct psy_ui_X11App {
 	const char* componentclass;	
 	psy_Table selfmap;
 	psy_Table winidmap;
+	psy_Table toplevelmap;
 	uintptr_t winid;	
 	struct psy_ui_Component* eventretarget;	
 	Atom wmDeleteMessage;

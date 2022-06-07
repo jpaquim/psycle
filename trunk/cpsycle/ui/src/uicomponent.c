@@ -2204,7 +2204,7 @@ void psy_ui_component_draw(psy_ui_Component* self, psy_ui_Graphics* g)
 	psy_ui_RealRectangle oldclip;
 	psy_ui_RealRectangle clip;
 	psy_ui_RealSize size;
-		
+			
 	temp_g = NULL;	
 	oldclip = psy_ui_graphics_cliprect(g);
 	if (self->drawtobuffer) {
@@ -2230,7 +2230,7 @@ void psy_ui_component_draw(psy_ui_Component* self, psy_ui_Graphics* g)
 		psy_ui_realrectangle_intersection(&clip, &oldclip);
 	}
 	psy_ui_graphics_setcliprect(g, clip);
-	/* draw background */	
+	/* draw background */		
 	psy_ui_componentbackground_draw(&self->componentbackground, g);		
 	psy_ui_component_draw_border(self, g);
 	/* prepare colours */

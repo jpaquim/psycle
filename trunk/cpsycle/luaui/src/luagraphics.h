@@ -6,11 +6,11 @@
 #ifndef psy_audio_LUAUI_GRAPHICS_H
 #define psy_audio_LUAUI_GRAPHICS_H
 
+#include <lua.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#include <lua.h>
 
 int psy_luaui_graphics_open(lua_State* L);
 

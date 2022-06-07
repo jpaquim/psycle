@@ -56,7 +56,7 @@ void mainstatusbar_init(MainStatusBar* self, psy_ui_Component* parent,
 	vtable_init(self);	
 	psy_ui_component_set_style_type(&self->component, STYLE_STATUSBAR);
 	psy_ui_component_init(&self->pane, &self->component, NULL);
-	psy_ui_component_set_align(&self->pane, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_set_align(&self->pane, psy_ui_ALIGN_CLIENT);	
 	self->workspace = workspace;
 	self->clockcounter = 20;
 	psy_lock_init(&self->outputlock);
@@ -81,7 +81,7 @@ void mainstatusbar_on_destroy(MainStatusBar* self)
 
 void mainstatusbar_initzoombox(MainStatusBar* self)
 {
-	zoombox_init(&self->zoombox, &self->pane);
+	zoombox_init(&self->zoombox, &self->pane);	
 	psy_signal_connect(&self->zoombox.signal_changed,
 		self, mainstatusbar_onzoomboxchanged);
 }

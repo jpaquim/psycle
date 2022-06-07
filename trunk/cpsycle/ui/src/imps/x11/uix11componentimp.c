@@ -76,8 +76,6 @@ static bool dev_inputprevented(const psy_ui_x11_ComponentImp* self);
 static void dev_setcursor(psy_ui_x11_ComponentImp*, psy_ui_CursorStyle);
 static void dev_seticonressource(psy_ui_x11_ComponentImp*, int ressourceid);
 static const psy_ui_TextMetric* dev_textmetric(const psy_ui_x11_ComponentImp*);
-static psy_ui_Size dev_textsize(psy_ui_x11_ComponentImp*, const char* text,
-	psy_ui_Font*);
 static void dev_setbackgroundcolour(psy_ui_x11_ComponentImp*, psy_ui_Colour);
 static void dev_settitle(psy_ui_x11_ComponentImp*, const char* title);
 static void dev_setfocus(psy_ui_x11_ComponentImp*);
@@ -201,10 +199,7 @@ static void xt_imp_vtable_init(psy_ui_x11_ComponentImp* self)
 			dev_seticonressource;
 		vtable.dev_textmetric =
 			(psy_ui_fp_componentimp_dev_textmetric)
-			dev_textmetric;
-		vtable.dev_textsize =
-			(psy_ui_fp_componentimp_dev_textsize)
-			dev_textsize;
+			dev_textmetric;		
 		vtable.dev_setbackgroundcolour =
 			(psy_ui_fp_componentimp_dev_setbackgroundcolour)
 			dev_setbackgroundcolour;
@@ -373,6 +368,10 @@ void psy_ui_x11_component_create_window(psy_ui_x11_ComponentImp* self,
 		err = 1;
 	} else {
 		psy_table_insert(&x11app->selfmap, (uintptr_t) self->hwnd, self);
+		if ((dwStyle & 2) == 2 ||
+			(dwStyle & 1) == 1) {
+			psy_table_insert(&x11app->toplevelmap, (uintptr_t)self->hwnd, self);
+		}
 	}
 	//if (err == 0 && usecommand) {
 		//psy_table_insert(&winapp->winidmap, winapp->winid, self);
@@ -672,7 +671,7 @@ void dev_setposition(psy_ui_x11_ComponentImp* self, psy_ui_Point topleft,
         ? psy_ui_value_px(&size.height, tm, pparentsize)
         : 1;
     if (win_attr.x != left || win_attr.y != top ||
-            win_attr.width != width || win_attr.height != height) {
+            win_attr.width != width || win_attr.height != height) {		
         if (win_attr.width == width && win_attr.height == height) {
             XMoveWindow(x11app->dpy, self->hwnd, left, top);
         } else if (win_attr.x == left && win_attr.y == top) {
@@ -1231,31 +1230,6 @@ void dev_seticonressource(psy_ui_x11_ComponentImp* self, int ressourceid)
 	//SetClassLong(self->hwnd, GCL_HICON,
 		//(intptr_t)LoadIcon(winapp->instance, MAKEINTRESOURCE(ressourceid)));
 //#endif
-}
-
-psy_ui_Size dev_textsize(psy_ui_x11_ComponentImp* self, const char* text,
-	psy_ui_Font* font)
-{
-    psy_ui_Size rv;
-	psy_ui_X11App* x11app;
-	GC gc;
-	PlatformXtGC xgc;
-	psy_ui_Graphics g;
-
-	x11app = (psy_ui_X11App*)psy_ui_app()->imp;
-	gc = XCreateGC(x11app->dpy, self->hwnd, 0, 0);
-	xgc.display =x11app->dpy;
-	if (x11app->dbe) {
-		xgc.window = self->d_backBuf;
-	} else {
-		xgc.window = self->hwnd;
-	}
-	xgc.visual = x11app->visual;
-	xgc.gc = gc;
-	psy_ui_graphics_init(&g, &xgc);
-	rv = psy_ui_textsize(&g, text, psy_strlen(text));
-	psy_ui_graphics_dispose(&g);
-	return rv;
 }
 
 void dev_setbackgroundcolour(psy_ui_x11_ComponentImp* self, psy_ui_Colour colour)

@@ -33,8 +33,8 @@ typedef struct psy_ui_x11_GraphicsImp {
 	Region region;
 	XftDraw* xfd;
 	XftColor black;
-	XftFont* defaultfont;
 	XftFont* xftfont;
+	XftFont* defaultfont;
 	XftColor textcolor;
 	psy_ui_Colour textbackgroundcolor;
 	unsigned int backgroundmode;
@@ -43,6 +43,8 @@ typedef struct psy_ui_x11_GraphicsImp {
 	bool bitmap;
 	psy_ui_RealPoint cp;	
 	psy_ui_RealRectangle clip;
+	/* reference */
+	const psy_ui_Font* font;
 } psy_ui_x11_GraphicsImp;
 
 void psy_ui_x11_graphicsimp_init(psy_ui_x11_GraphicsImp* self, 

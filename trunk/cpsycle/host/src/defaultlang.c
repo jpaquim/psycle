@@ -184,6 +184,7 @@ void make_translator_mainview(psy_Property* parent)
 	add("exit", "Exit");
 	add("kbd", "Kbd");
 	add("terminal", "Terminal");
+	add("floated", "This view is floated");
 }
 
 void make_translator_help(psy_Property* parent)

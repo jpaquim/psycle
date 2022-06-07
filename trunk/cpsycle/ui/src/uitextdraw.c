@@ -47,8 +47,13 @@ void psy_ui_textdraw_draw(psy_ui_TextDraw* self, psy_ui_Graphics* g,
 	double line_height;
 	psy_ui_RealRectangle clip;	
 	const psy_ui_TextMetric* tm;
+	const psy_ui_Font* font;
 
-	tm = psy_ui_font_textmetric(psy_ui_font(g));
+	font = psy_ui_font(g);
+	if (!font) {
+		return;
+	}
+	tm = psy_ui_font_textmetric(font);
 	if (!psy_ui_textformat_has_wrap(self->format)) {
 		psy_ui_textdraw_draw_single_line(self, g, tm);
 		if (cursorpos >= 0 && cursorpos <= psy_strlen(self->text)) {			

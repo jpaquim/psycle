@@ -5,6 +5,7 @@
 
 #include "../../detail/prefix.h"
 
+
 #include "uix11fontimp.h"
 
 #if PSYCLE_USE_TK == PSYCLE_TK_X11
@@ -15,14 +16,17 @@
 #include "uix11app.h"
 #include "uix11graphicsimp.h"
 
-extern psy_ui_App app;
+/* platform */
+#include "../../detail/portable.h"
 
 /* prototypes */
 static void psy_ui_x11_font_imp_dispose(psy_ui_x11_FontImp*);
 static void psy_ui_x11_font_imp_copy(psy_ui_x11_FontImp*, psy_ui_x11_FontImp* other);
 static psy_ui_FontInfo dev_fontinfo(psy_ui_x11_FontImp*);
-static psy_ui_TextMetric dev_textmetric(const psy_ui_x11_FontImp*);
+static const psy_ui_TextMetric* dev_textmetric(const psy_ui_x11_FontImp*);
 static bool dev_equal(const psy_ui_x11_FontImp*, const psy_ui_x11_FontImp* other);
+static psy_ui_Size dev_textsize(const psy_ui_x11_FontImp*,
+	const char* text, uintptr_t count);
 
 /* vtable */
 static psy_ui_FontImpVTable imp_vtable;
@@ -46,6 +50,9 @@ static void imp_vtable_init(psy_ui_x11_FontImp* self)
 		imp_vtable.dev_equal =
 			(psy_ui_font_imp_fp_dev_equal)
 			dev_equal;
+		imp_vtable.dev_textsize =
+			(psy_ui_font_imp_fp_dev_textsize)
+			dev_textsize;
 		imp_vtable_initialized = TRUE;
 	}
 	self->imp.vtable = &imp_vtable;
@@ -56,7 +63,8 @@ void psy_ui_x11_fontimp_init(psy_ui_x11_FontImp* self, const psy_ui_FontInfo*
 	fontinfo)
 {	
 	psy_ui_font_imp_init(&self->imp);
-	imp_vtable_init(self);	
+	imp_vtable_init(self);
+	self->tmcachevalid = FALSE;	
 	if (fontinfo) {
 		psy_ui_X11App* x11app;		
 
@@ -94,42 +102,52 @@ void psy_ui_x11_font_imp_copy(psy_ui_x11_FontImp* self, psy_ui_x11_FontImp* othe
 //	psy_ui_x11_font_imp_dispose(self);
 //	GetObject(other->hfont, sizeof(LOGFONT), &lf);
 //	self->hfont = CreateFontIndirect(&lf);	
+	self->tmcachevalid = other->tmcachevalid;
+	if (other->tmcachevalid) {
+		self->tmcache = other->tmcache;
+	}
 }
 
 psy_ui_FontInfo dev_fontinfo(psy_ui_x11_FontImp* self)
 {
 	psy_ui_FontInfo rv;
+	
 	psy_ui_fontinfo_init(&rv, "arial", 12);
 	return rv;
 }
 
-psy_ui_TextMetric dev_textmetric(const psy_ui_x11_FontImp* self)
+const psy_ui_TextMetric* dev_textmetric(const psy_ui_x11_FontImp* self)
 {
 	psy_ui_TextMetric rv;	
-	psy_ui_X11App* x11app;
-	GC gc;
-	PlatformXtGC xgc;
-	psy_ui_Graphics g;
-	psy_ui_x11_GraphicsImp* gx11;
+	
+	if (!self->tmcachevalid) {
+		psy_ui_X11App* x11app;
+		GC gc;
+		PlatformXtGC xgc;
+		psy_ui_Graphics g;
+		psy_ui_x11_GraphicsImp* gx11;
 
-	rv.tmAveCharWidth = 10;
-	x11app = (psy_ui_X11App*)psy_ui_app()->imp;
-	gc = XCreateGC(x11app->dpy, DefaultRootWindow(x11app->dpy), 0, 0);
-	xgc.display = x11app->dpy;	
-	xgc.window = DefaultRootWindow(x11app->dpy);
-	xgc.visual = x11app->visual;
-	xgc.gc = gc;
-	psy_ui_graphics_init(&g, &xgc);
-	gx11 = (psy_ui_x11_GraphicsImp*)g.imp;
-	rv.tmHeight = gx11->xftfont->height;
-	rv.tmAscent = gx11->xftfont->ascent;
-	rv.tmDescent = gx11->xftfont->descent;
-	rv.tmMaxCharWidth = gx11->xftfont->max_advance_width;
-	rv.tmAveCharWidth = gx11->xftfont->max_advance_width / 4;
-	rv.tmInternalLeading = 0;
-	rv.tmExternalLeading = 0;
-	psy_ui_graphics_dispose(&g);
-	return rv;
+		rv.tmAveCharWidth = 10;
+		x11app = (psy_ui_X11App*)psy_ui_app()->imp;
+		gc = XCreateGC(x11app->dpy, DefaultRootWindow(x11app->dpy), 0, 0);
+		xgc.display = x11app->dpy;	
+		xgc.window = DefaultRootWindow(x11app->dpy);
+		xgc.visual = x11app->visual;
+		xgc.gc = gc;
+		psy_ui_graphics_init(&g, &xgc);
+		gx11 = (psy_ui_x11_GraphicsImp*)g.imp;
+		rv.tmHeight = gx11->xftfont->height;
+		rv.tmAscent = gx11->xftfont->ascent;
+		rv.tmDescent = gx11->xftfont->descent;
+		rv.tmMaxCharWidth = gx11->xftfont->max_advance_width;
+		rv.tmAveCharWidth = gx11->xftfont->max_advance_width / 4;
+		rv.tmInternalLeading = 0;
+		rv.tmExternalLeading = 0;
+		psy_ui_graphics_dispose(&g);
+		((psy_ui_x11_FontImp*)self)->tmcache = rv;
+		((psy_ui_x11_FontImp*)self)->tmcachevalid = TRUE;
+	}
+	return &self->tmcache;
 }
 
 /*
@@ -179,6 +197,31 @@ psy_ui_FontInfo psy_ui_fontinfo(LOGFONT lf)
 bool dev_equal(const psy_ui_x11_FontImp* self, const psy_ui_x11_FontImp* other)
 {
 	return self->hfont == other->hfont;
+}
+
+psy_ui_Size dev_textsize(const psy_ui_x11_FontImp* self,
+	const char* text, uintptr_t count)
+{		
+	psy_ui_Size rv;
+	psy_ui_X11App* x11app;
+	GC gc;
+	PlatformXtGC xgc;
+	psy_ui_Graphics g;
+
+	x11app = (psy_ui_X11App*)psy_ui_app()->imp;
+		
+	gc = XCreateGC(x11app->dpy, 
+		XDefaultRootWindow(x11app->dpy), 0, NULL);	
+	xgc.display =x11app->dpy;	
+	xgc.window = XDefaultRootWindow(x11app->dpy);	
+	xgc.visual = x11app->visual;
+	xgc.gc = gc;
+	psy_ui_graphics_init(&g, &xgc);
+	rv = psy_ui_textsize(&g, text, psy_strlen(text));
+	psy_ui_graphics_dispose(&g);
+	return rv;
+	
+	return rv;
 }
 
 #endif

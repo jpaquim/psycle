@@ -422,11 +422,9 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 			psy_signal_emit(&imp->component->signal_create, component, 0);
 			return 0;			
 		case WM_PAINT: {
-			const psy_ui_Border* border;
-			psy_ui_Colour bgcolor;
+			const psy_ui_Border* border;			
 
-			border = psy_ui_component_border(imp->component);
-			bgcolor = psy_ui_component_backgroundcolour(imp->component);
+			border = psy_ui_component_border(imp->component);			
 			if (imp->component->vtable->ondraw ||
 				imp->component->signal_draw.slots ||				
 				imp->component->componentbackground.backgroundmode != psy_ui_NOBACKGROUND ||

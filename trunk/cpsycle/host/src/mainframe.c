@@ -232,7 +232,7 @@ void mainframe_init(MainFrame* self)
 void mainframe_init_frame(MainFrame* self)
 {
 	psy_ui_frame_init_main(mainframe_base(self));
-	vtable_init(self);		
+	vtable_init(self);			
 	psy_ui_component_doublebuffer(mainframe_base(self));
 	psy_ui_app_setmain(psy_ui_app(), mainframe_base(self));
 	psy_ui_component_seticonressource(mainframe_base(self), IDI_PSYCLEICON);

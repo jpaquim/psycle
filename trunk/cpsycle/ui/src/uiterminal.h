@@ -9,7 +9,7 @@
 /* local */
 #include "uilabel.h"
 #include "uiscroller.h"
-/* file */
+/* container */
 #include <logger.h>
 /* thread */
 #include <lock.h>

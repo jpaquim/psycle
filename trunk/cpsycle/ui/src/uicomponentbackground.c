@@ -96,7 +96,7 @@ void psy_ui_componentbackground_draw_image(psy_ui_ComponentBackground* self,
 
 void psy_ui_componentbackground_draw(psy_ui_ComponentBackground* self,
 	psy_ui_Graphics* g)
-{
+{		
 	if (self->backgroundmode == psy_ui_SETBACKGROUND) {
 		const psy_ui_Border* b;
 
@@ -121,7 +121,7 @@ void psy_ui_componentbackground_draw(psy_ui_ComponentBackground* self,
 			const psy_ui_Style* style;
 
 			style = psy_ui_componentstyle_currstyle_const(&self->component->style);
-			if (psy_ui_bitmap_empty(&style->background.bitmap)) {
+			if (psy_ui_bitmap_empty(&style->background.bitmap)) {								
 				psy_ui_drawsolidrectangle(g, psy_ui_graphics_cliprect(g),
 					psy_ui_component_backgroundcolour(self->component));
 			} else {
