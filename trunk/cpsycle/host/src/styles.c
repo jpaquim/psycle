@@ -1897,7 +1897,12 @@ void init_machineparam_styles(psy_ui_Styles* self)
 	psy_ui_styles_set_style(self, STYLE_MACPARAM_BOTTOM_ACTIVE, style);
 
 	style = psy_ui_style_allocinit();
-	psy_ui_style_set_background_id(style, IDB_PARAMKNOB);
+	if (psy_strlen(PSYCLE_RES_DIR) == 0) {
+		psy_ui_style_set_background_id(style, IDB_PARAMKNOB);
+	} else {
+		psy_ui_style_setbackgroundpath(style,
+			PSYCLE_RES_DIR psy_SLASHSTR "TbMainKnob.bmp");
+	}	
 	psy_ui_style_animate_background(style, 0,
 		psy_ui_realsize_make(28.0, 28.0), TRUE);
 	psy_ui_styles_set_style(self, STYLE_MACPARAM_KNOB, style);
@@ -1998,14 +2003,24 @@ void init_patternview_styles(psy_ui_Styles* self)
 	psy_ui_styles_set_style(self, STYLE_PV_TRACK_VIEW_SELECT, style);
 
 	style = psy_ui_style_allocinit();
-	psy_ui_style_set_background_id(style, IDB_HEADERSKIN);
+	if (psy_strlen(PSYCLE_RES_DIR) == 0) {
+		psy_ui_style_set_background_id(style, IDB_HEADERSKIN);
+	} else {
+		psy_ui_style_setbackgroundpath(style,
+			PSYCLE_RES_DIR psy_SLASHSTR "pattern_header_skin.bmp");
+	}	
 	psy_ui_style_set_background_size_px(style,
 		psy_ui_realsize_make(102.0, 23.0));
 	psy_ui_style_set_background_position_px(style, -2.0, -0.0);
 	psy_ui_styles_set_style(self, STYLE_PV_TRACK_HEADER, style);
 
 	style = psy_ui_style_allocinit();
-	psy_ui_style_set_background_id(style, IDB_HEADERSKIN);
+	if (psy_strlen(PSYCLE_RES_DIR) == 0) {
+		psy_ui_style_set_background_id(style, IDB_HEADERSKIN);
+	} else {
+		psy_ui_style_setbackgroundpath(style,
+			PSYCLE_RES_DIR psy_SLASHSTR "pattern_header_skin.bmp");
+	}
 	psy_ui_style_set_background_size_px(style,
 		psy_ui_realsize_make(9, 17));
 	psy_ui_style_set_background_position_px(style, 0.0, -23.0);
@@ -2013,7 +2028,12 @@ void init_patternview_styles(psy_ui_Styles* self)
 	psy_ui_styles_set_style(self, STYLE_PV_TRACK_HEADER_DIGITX0, style);
 
 	style = psy_ui_style_allocinit();
-	psy_ui_style_set_background_id(style, IDB_HEADERSKIN);
+	if (psy_strlen(PSYCLE_RES_DIR) == 0) {
+		psy_ui_style_set_background_id(style, IDB_HEADERSKIN);
+	} else {
+		psy_ui_style_setbackgroundpath(style,
+			PSYCLE_RES_DIR psy_SLASHSTR "pattern_header_skin.bmp");
+	}
 	psy_ui_style_set_background_size_px(style, psy_ui_realsize_make(9, 17));
 	psy_ui_style_set_background_position_px(style, 0.0, -23.0);
 	psy_ui_style_set_padding_px(style, 3.0, 0.0, 0.0, 22.0);
@@ -2025,7 +2045,12 @@ void init_patternview_styles(psy_ui_Styles* self)
 	psy_ui_styles_set_style(self, STYLE_PV_TRACK_HEADER_MUTE, style);
 
 	style = psy_ui_style_allocinit();
-	psy_ui_style_set_background_id(style, IDB_HEADERSKIN);
+	if (psy_strlen(PSYCLE_RES_DIR) == 0) {
+		psy_ui_style_set_background_id(style, IDB_HEADERSKIN);
+	} else {
+		psy_ui_style_setbackgroundpath(style,
+			PSYCLE_RES_DIR psy_SLASHSTR "pattern_header_skin.bmp");
+	}
 	psy_ui_style_set_background_size_px(style,
 		psy_ui_realsize_make(17.0, 17.0));
 	psy_ui_style_set_background_position_px(style, -79.0, -40.0);	
@@ -2039,7 +2064,12 @@ void init_patternview_styles(psy_ui_Styles* self)
 	psy_ui_styles_set_style(self, STYLE_PV_TRACK_HEADER_SOLO, style);
 
 	style = psy_ui_style_allocinit();
-	psy_ui_style_set_background_id(style, IDB_HEADERSKIN);
+	if (psy_strlen(PSYCLE_RES_DIR) == 0) {
+		psy_ui_style_set_background_id(style, IDB_HEADERSKIN);
+	} else {
+		psy_ui_style_setbackgroundpath(style,
+			PSYCLE_RES_DIR psy_SLASHSTR "pattern_header_skin.bmp");
+	}
 	psy_ui_style_set_background_size_px(style,
 		psy_ui_realsize_make(17.0, 17.0));
 	psy_ui_style_set_background_position_px(style, -62, -40.0);
@@ -2053,7 +2083,12 @@ void init_patternview_styles(psy_ui_Styles* self)
 	psy_ui_styles_set_style(self, STYLE_PV_TRACK_HEADER_RECORD, style);
 
 	style = psy_ui_style_allocinit();
-	psy_ui_style_set_background_id(style, IDB_HEADERSKIN);
+	if (psy_strlen(PSYCLE_RES_DIR) == 0) {
+		psy_ui_style_set_background_id(style, IDB_HEADERSKIN);
+	} else {
+		psy_ui_style_setbackgroundpath(style,
+			PSYCLE_RES_DIR psy_SLASHSTR "pattern_header_skin.bmp");
+	}
 	psy_ui_style_set_background_size_px(style,
 		psy_ui_realsize_make(17.0, 17.0));
 	psy_ui_style_set_background_position_px(style, -96.0, -40.0);	
@@ -2067,7 +2102,12 @@ void init_patternview_styles(psy_ui_Styles* self)
 	psy_ui_styles_set_style(self, STYLE_PV_TRACK_HEADER_PLAY, style);
 
 	style = psy_ui_style_allocinit();
-	psy_ui_style_set_background_id(style, IDB_HEADERSKIN);
+	if (psy_strlen(PSYCLE_RES_DIR) == 0) {
+		psy_ui_style_set_background_id(style, IDB_HEADERSKIN);
+	} else {
+		psy_ui_style_setbackgroundpath(style,
+			PSYCLE_RES_DIR psy_SLASHSTR "pattern_header_skin.bmp");
+	}
 	psy_ui_style_set_background_size_px(style,
 		psy_ui_realsize_make(8, 17));
 	psy_ui_style_set_background_position_px(style, 0.0, -40.0);	
@@ -2079,7 +2119,12 @@ void init_patternview_styles(psy_ui_Styles* self)
 	psy_ui_styles_set_style(self, STYLE_PV_TRACK_HEADER_TEXT, style);
 
 	style = psy_ui_style_allocinit();
-	psy_ui_style_set_background_id(style, IDB_HEADERSKIN);
+	if (psy_strlen(PSYCLE_RES_DIR) == 0) {
+		psy_ui_style_set_background_id(style, IDB_HEADERSKIN);
+	} else {
+		psy_ui_style_setbackgroundpath(style,
+			PSYCLE_RES_DIR psy_SLASHSTR "pattern_header_skin.bmp");
+	}
 	psy_ui_style_set_background_size_px(style,
 		psy_ui_realsize_make(8, 17));
 	psy_ui_style_set_background_position_px(style, 0.0, -40.0);

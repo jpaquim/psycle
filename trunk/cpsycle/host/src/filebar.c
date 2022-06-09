@@ -1,9 +1,10 @@
 /*
 ** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
+
 
 #include "filebar.h"
 /* host */
@@ -34,27 +35,27 @@ void filebar_init(FileBar* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_ui_label_init_text(&self->header, filebar_base(self), "file.song");	
 	psy_ui_button_init_text_connect(&self->newbutton, filebar_base(self),
 		"file.new", self, filebar_onnewsong);
-	psy_ui_bitmap_loadresource(&self->newbutton.bitmapicon, IDB_NEW_DARK);
+	psy_ui_bitmap_load_resource(&self->newbutton.bitmapicon, IDB_NEW_DARK);
 	psy_ui_bitmap_settransparency(&self->newbutton.bitmapicon, psy_ui_colour_make(0x00FFFFFF));	
 	psy_ui_button_init_text_connect(&self->diskop, filebar_base(self),
 		"file.diskop", self, filebar_ondiskop);	
 	psy_ui_button_init_text(&self->loadbutton, filebar_base(self),
 		"file.load");
-	psy_ui_button_loadresource(&self->loadbutton, IDB_OPEN_LIGHT,
+	psy_ui_button_load_resource(&self->loadbutton, IDB_OPEN_LIGHT,
 		IDB_OPEN_DARK, psy_ui_colour_white()); 
 	psy_signal_connect(&self->loadbutton.signal_clicked, self,
 		filebar_onloadsong);
 	psy_ui_button_init_text_connect(&self->savebutton, filebar_base(self),
 		"file.save", self, filebar_onsavesong);
-	psy_ui_button_loadresource(&self->savebutton, IDB_SAVE_LIGHT,
+	psy_ui_button_load_resource(&self->savebutton, IDB_SAVE_LIGHT,
 		IDB_SAVE_DARK, psy_ui_colour_white());
 	psy_ui_button_init_text(&self->exportbutton, filebar_base(self),
 		"file.export");
-	psy_ui_button_loadresource(&self->exportbutton, IDB_EARTH_LIGHT,
+	psy_ui_button_load_resource(&self->exportbutton, IDB_EARTH_LIGHT,
 		IDB_EARTH_DARK, psy_ui_colour_white());
 	psy_ui_button_init_text(&self->renderbutton, filebar_base(self),
 		"file.render");	
-	psy_ui_button_loadresource(&self->renderbutton, IDB_PULSE_LIGHT,
+	psy_ui_button_load_resource(&self->renderbutton, IDB_PULSE_LIGHT,
 		IDB_PULSE_DARK, psy_ui_colour_white());
 	if (keyboardmiscconfig_ft2fileexplorer(psycleconfig_misc(
 		workspace_conf(workspace)))) {

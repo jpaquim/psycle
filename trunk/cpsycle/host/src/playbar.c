@@ -69,7 +69,7 @@ void playbar_init(PlayBar* self, psy_ui_Component* parent, Workspace* workspace)
 	/* loop */
 	psy_ui_button_init_text_connect(&self->loop, playbar_base(self),
 		"play.loop", self, playbar_onloopclicked);	
-	psy_ui_button_loadresource(&self->loop, IDB_LOOP_LIGHT, IDB_LOOP_DARK,
+	psy_ui_button_load_resource(&self->loop, IDB_LOOP_LIGHT, IDB_LOOP_DARK,
 		psy_ui_colour_white());
 	/* record */
 	psy_ui_button_init_text_connect(&self->recordnotes, playbar_base(self),
@@ -77,7 +77,7 @@ void playbar_init(PlayBar* self, psy_ui_Component* parent, Workspace* workspace)
 	/* play */
 	psy_ui_button_init_text_connect(&self->play, playbar_base(self),
 		"play.play", self, playbar_onplayclicked);
-	psy_ui_button_loadresource(&self->play, IDB_PLAY_LIGHT, IDB_PLAY_DARK,
+	psy_ui_button_load_resource(&self->play, IDB_PLAY_LIGHT, IDB_PLAY_DARK,
 		psy_ui_colour_white());
 	/* playmode */
 	psy_ui_combobox_init(&self->playmode, playbar_base(self));
@@ -95,7 +95,7 @@ void playbar_init(PlayBar* self, psy_ui_Component* parent, Workspace* workspace)
 	/* stop */
 	psy_ui_button_init_text_connect(&self->stop, playbar_base(self),
 		"play.stop", self, playbar_onstopclicked);	
-	psy_ui_button_loadresource(&self->stop, IDB_STOP_LIGHT, IDB_STOP_DARK,
+	psy_ui_button_load_resource(&self->stop, IDB_STOP_LIGHT, IDB_STOP_DARK,
 		psy_ui_colour_white());
 	playbar_updatetext(self);
 	psy_ui_combobox_setcursel(&self->playmode, 0);

@@ -109,7 +109,7 @@ void mainstatusbar_initviewstatusbars(MainStatusBar* self)
 void mainstatusbar_initturnoffbutton(MainStatusBar* self)
 {
 	psy_ui_button_init_text(&self->turnoff, &self->pane, "main.exit");
-	psy_ui_button_loadresource(&self->turnoff, IDB_EXIT_LIGHT,
+	psy_ui_button_load_resource(&self->turnoff, IDB_EXIT_LIGHT,
 		IDB_EXIT_DARK, psy_ui_colour_white());
 	psy_ui_component_set_align(psy_ui_button_base(&self->turnoff),
 		psy_ui_ALIGN_RIGHT);		
@@ -133,7 +133,7 @@ void mainstatusbar_initkbdhelpbutton(MainStatusBar* self)
 		 margin);
 	psy_ui_component_set_align(psy_ui_button_base(&self->togglekbdhelp),
 		psy_ui_ALIGN_RIGHT);	
-	psy_ui_button_loadresource(&self->togglekbdhelp, IDB_KBD, IDB_KBD,
+	psy_ui_button_load_resource(&self->togglekbdhelp, IDB_KBD, IDB_KBD,
 		psy_ui_colour_white());
 }
 
@@ -145,7 +145,7 @@ void mainstatusbar_initterminalbutton(MainStatusBar* self)
 		self->workspace->terminalstyleid);
 	psy_ui_component_set_align(psy_ui_button_base(&self->toggleterminal),
 		psy_ui_ALIGN_RIGHT);
-	psy_ui_button_loadresource(&self->toggleterminal, IDB_TERM, IDB_TERM,
+	psy_ui_button_load_resource(&self->toggleterminal, IDB_TERM, IDB_TERM,
 		psy_ui_colour_white());
 }
 

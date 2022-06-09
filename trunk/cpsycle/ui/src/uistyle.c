@@ -233,7 +233,7 @@ void psy_ui_style_set_background_id(psy_ui_Style* self,
 	free(self->background.image_path);
 	self->background.image_path = NULL;
 	self->background.image_id = id;
-	psy_ui_bitmap_loadresource(&self->background.bitmap, id);
+	psy_ui_bitmap_load_resource(&self->background.bitmap, id);
 }
 
 int psy_ui_style_setbackgroundpath(psy_ui_Style* self,

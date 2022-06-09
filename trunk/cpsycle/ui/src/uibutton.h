@@ -71,6 +71,8 @@ typedef struct psy_ui_Button {
 	uintptr_t data;
 	uintptr_t lightresourceid;
 	uintptr_t darkresourceid;
+	char* light_path;
+	char* dark_path;	
 	psy_ui_Colour bitmaptransparency;
 } psy_ui_Button;
 
@@ -88,8 +90,10 @@ psy_ui_Button* psy_ui_button_allocinit(psy_ui_Component* parent);
 void psy_ui_button_set_text(psy_ui_Button*, const char* text);
 const char* psy_ui_button_text(const psy_ui_Button*);
 void psy_ui_button_seticon(psy_ui_Button*, psy_ui_ButtonIcon);
-void psy_ui_button_loadresource(psy_ui_Button*, uintptr_t lightresourceid,
+void psy_ui_button_load_resource(psy_ui_Button*, uintptr_t lightresourceid,
 	uintptr_t darkresourceid, psy_ui_Colour);
+void psy_ui_button_load_bitmap(psy_ui_Button*, const char* light_path,
+	const char* dark_path, psy_ui_Colour);
 void psy_ui_button_highlight(psy_ui_Button*);
 void psy_ui_button_disable_highlight(psy_ui_Button*);
 bool psy_ui_button_highlighted(const psy_ui_Button*);

@@ -82,7 +82,7 @@ INLINE int psy_ui_bitmap_load(psy_ui_Bitmap* self, const char* path)
 	return self->vtable->load(self, path);
 }
 
-INLINE int psy_ui_bitmap_loadresource(psy_ui_Bitmap* self, uintptr_t resourceid)
+INLINE int psy_ui_bitmap_load_resource(psy_ui_Bitmap* self, uintptr_t resourceid)
 {
 	return self->vtable->loadresource(self, resourceid);
 }

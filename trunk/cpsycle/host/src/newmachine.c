@@ -73,7 +73,7 @@ void newmachinerescanbar_init(NewMachineRescanBar* self,
 		"newmachine.plugin-directories");
 	psy_ui_component_set_padding(psy_ui_button_base(&self->selectdirectories),
 		spacing);
-	psy_ui_button_loadresource(&self->selectdirectories, IDB_SETTINGS_DARK,
+	psy_ui_button_load_resource(&self->selectdirectories, IDB_SETTINGS_DARK,
 		IDB_SETTINGS_DARK, psy_ui_colour_white());
 	psy_signal_connect(&self->selectdirectories.signal_clicked, self,
 		newmachinerescanbar_onselectdirectories);
@@ -545,7 +545,7 @@ void newmachinesectionsheader_init(NewMachineSectionsHeader* self,
 			&self->component, iconresourceid, psy_ui_colour_white());
 	}
 	psy_ui_button_init(&self->expand, &self->component);	
-	psy_ui_button_loadresource(&self->expand, IDB_EXPAND_LIGHT,
+	psy_ui_button_load_resource(&self->expand, IDB_EXPAND_LIGHT,
 		IDB_EXPAND_DARK, psy_ui_colour_white());		
 	psy_ui_component_set_align(psy_ui_button_base(&self->expand),
 		psy_ui_ALIGN_RIGHT);

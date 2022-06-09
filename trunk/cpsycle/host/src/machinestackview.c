@@ -849,7 +849,7 @@ void machinestackdesc_init(MachineStackDesc* self, psy_ui_Component* parent,
 		"stackview.inputs");
 	psy_ui_button_init_text_connect(&self->effects, &self->component,
 		"stackview.effects", self, machinestackdesc_configureeffects);
-	psy_ui_button_loadresource(&self->effects, IDB_SETTINGS_LIGHT,
+	psy_ui_button_load_resource(&self->effects, IDB_SETTINGS_LIGHT,
 		IDB_SETTINGS_DARK, psy_ui_colour_white());
 	psy_ui_button_init_text_connect(&self->outputs, &self->component,
 		"stackview.outputs", self, machinestackdesc_ontoggleoutputs);

@@ -26,7 +26,7 @@ void psy_ui_image_init_resource(psy_ui_Image* self, psy_ui_Component* parent,
 	uintptr_t resourceid)
 {
 	psy_ui_image_init(self, parent);
-	psy_ui_bitmap_loadresource(&self->bitmap, resourceid);
+	psy_ui_bitmap_load_resource(&self->bitmap, resourceid);
 	if (!psy_ui_bitmap_empty(&self->bitmap)) {
 		psy_ui_RealSize size;
 

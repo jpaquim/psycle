@@ -75,14 +75,14 @@ void seqedittoolbar_init(SeqEditToolBar* self, psy_ui_Component* parent,
 	psy_ui_combobox_setcursel(&self->inserttype, 0);
 	/* expand */
 	psy_ui_button_init(&self->expand, &self->component);
-	psy_ui_button_loadresource(&self->expand, IDB_EXPAND_LIGHT,
+	psy_ui_button_load_resource(&self->expand, IDB_EXPAND_LIGHT,
 		IDB_EXPAND_DARK, psy_ui_colour_white());
 	psy_ui_component_set_align(psy_ui_button_base(&self->expand),
 		psy_ui_ALIGN_RIGHT);	
 	/* configure */
 	psy_ui_button_init_connect(&self->configure, &self->component,
 		self, seqeditortoolbar_onconfigure);
-	psy_ui_button_loadresource(&self->configure, IDB_SETTINGS_LIGHT,
+	psy_ui_button_load_resource(&self->configure, IDB_SETTINGS_LIGHT,
 		IDB_SETTINGS_DARK, psy_ui_colour_white());
 	psy_ui_component_set_align(psy_ui_button_base(&self->configure),
 		psy_ui_ALIGN_RIGHT);

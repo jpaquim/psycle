@@ -27,11 +27,11 @@ void navigation_init(Navigation* self, psy_ui_Component* parent,
 	psy_ui_component_set_align_expand(&self->component, psy_ui_HEXPAND);
 	psy_ui_button_init_connect(&self->prev, &self->component,
 		self, navigation_onprev);		
-	psy_ui_button_loadresource(&self->prev, IDB_ARROW_BACK_LIGHT,
+	psy_ui_button_load_resource(&self->prev, IDB_ARROW_BACK_LIGHT,
 		IDB_ARROW_BACK_DARK, psy_ui_colour_white());
 	psy_ui_button_init_connect(&self->next, &self->component,
 		self, navigation_onnext);	
-	psy_ui_button_loadresource(&self->next, IDB_ARROW_FORWARD_LIGHT,
+	psy_ui_button_load_resource(&self->next, IDB_ARROW_FORWARD_LIGHT,
 		IDB_ARROW_FORWARD_DARK, psy_ui_colour_white());
 }
 

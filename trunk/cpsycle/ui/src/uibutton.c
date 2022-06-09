@@ -23,8 +23,8 @@ static void psy_ui_button_onpreferredsize(psy_ui_Button*, psy_ui_Size* limit,
 	psy_ui_Size* rv);
 static void button_on_key_down(psy_ui_Button*, psy_ui_KeyboardEvent*);
 static double psy_ui_button_width(psy_ui_Button*);
-static void psy_ui_button_onupdatestyles(psy_ui_Button*);
-static void psy_ui_button_loadbitmaps(psy_ui_Button*);
+static void psy_ui_button_on_update_styles(psy_ui_Button*);
+static void psy_ui_button_load_bitmaps(psy_ui_Button*);
 /* vtable */
 static psy_ui_ComponentVtable vtable;
 static psy_ui_ComponentVtable super_vtable;
@@ -58,7 +58,7 @@ static void vtable_init(psy_ui_Button* self)
 			psy_ui_button_onlanguagechanged;
 		vtable.onupdatestyles =
 			(psy_ui_fp_component_event)
-			psy_ui_button_onupdatestyles;
+			psy_ui_button_on_update_styles;
 		vtable_initialized = TRUE;
 	}
 	psy_ui_component_set_vtable(psy_ui_button_base(self), &vtable);
@@ -85,6 +85,8 @@ void psy_ui_button_init(psy_ui_Button* self, psy_ui_Component* parent)
 	self->stoppropagation = TRUE;
 	self->lightresourceid = psy_INDEX_INVALID;
 	self->darkresourceid = psy_INDEX_INVALID;
+	self->light_path = NULL;
+	self->dark_path = NULL;
 	psy_ui_colour_init(&self->bitmaptransparency);
 	psy_ui_bitmap_init(&self->bitmapicon);
 	psy_signal_init(&self->signal_clicked);	
@@ -149,6 +151,10 @@ void psy_ui_button_on_destroy(psy_ui_Button* self)
 	self->text = NULL;
 	free(self->translation);
 	self->translation = NULL;
+	free(self->light_path);
+	self->light_path = NULL;
+	free(self->dark_path);
+	self->dark_path = NULL;
 	psy_signal_dispose(&self->signal_clicked);
 	psy_ui_bitmap_dispose(&self->bitmapicon);
 }
@@ -201,17 +207,12 @@ void psy_ui_button_ondraw(psy_ui_Button* self, psy_ui_Graphics* g)
 		destbpmsize.height = srcbpmsize.height * ratio;
 		vcenter = (size.height - destbpmsize.height) / 2.0;		
 		
-#if defined(DIVERSALIS__OS__MICROSOFT)		
 		psy_ui_drawstretchedbitmap(g, &self->bitmapicon,
 		psy_ui_realrectangle_make(
 			psy_ui_realpoint_make(cpx, vcenter),
 			destbpmsize),
-		psy_ui_realpoint_zero(),
-		srcbpmsize);
-#else
-		psy_ui_drawfullbitmap(g, &self->bitmapicon,
-			psy_ui_realpoint_zero());
-#endif
+			psy_ui_realpoint_zero(),
+			srcbpmsize);
 		cpx += destbpmsize.width + tm->tmAveCharWidth * self->bitmapident;
 
 	}
@@ -386,14 +387,27 @@ void psy_ui_button_seticon(psy_ui_Button* self, psy_ui_ButtonIcon icon)
 	psy_ui_component_invalidate(psy_ui_button_base(self));
 }
 
-void psy_ui_button_loadresource(psy_ui_Button* self,
+void psy_ui_button_load_resource(psy_ui_Button* self,
 	uintptr_t lightresourceid, uintptr_t darkresourceid,
 	psy_ui_Colour transparency)
 {
 	self->lightresourceid = lightresourceid;
 	self->darkresourceid = darkresourceid;
 	self->bitmaptransparency = transparency;
-	psy_ui_button_loadbitmaps(self);
+	psy_ui_button_load_bitmaps(self);
+}
+
+void psy_ui_button_load_bitmap(psy_ui_Button* self, const char* light_path,
+	const char* dark_path, psy_ui_Colour transparency)
+{
+	if (light_path) {
+		psy_strreset(&self->light_path, light_path);
+	}
+	if (dark_path) {
+		psy_strreset(&self->dark_path, dark_path);
+	}
+	self->bitmaptransparency = transparency;
+	psy_ui_button_load_bitmaps(self);
 }
 
 void psy_ui_button_highlight(psy_ui_Button* self)
@@ -447,20 +461,24 @@ void button_on_key_down(psy_ui_Button* self, psy_ui_KeyboardEvent* ev)
 	}
 }
 
-void psy_ui_button_onupdatestyles(psy_ui_Button* self)
+void psy_ui_button_on_update_styles(psy_ui_Button* self)
 {
-	psy_ui_button_loadbitmaps(self);
+	psy_ui_button_load_bitmaps(self);
 }
 
-void psy_ui_button_loadbitmaps(psy_ui_Button* self)
+void psy_ui_button_load_bitmaps(psy_ui_Button* self)
 {
-	if (psy_ui_app_hasdarktheme(psy_ui_app())) {
+	if (psy_ui_app_hasdarktheme(psy_ui_app())) {		
 		if (self->darkresourceid != psy_INDEX_INVALID) {
-			psy_ui_bitmap_loadresource(&self->bitmapicon, self->darkresourceid);
+			psy_ui_bitmap_load_resource(&self->bitmapicon, self->darkresourceid);
+		} else if (psy_strlen(self->dark_path) > 0) {
+			psy_ui_bitmap_load(&self->bitmapicon, self->dark_path);
 		}
 	} else {
 		if (self->lightresourceid != psy_INDEX_INVALID) {
-			psy_ui_bitmap_loadresource(&self->bitmapicon, self->lightresourceid);
+			psy_ui_bitmap_load_resource(&self->bitmapicon, self->lightresourceid);
+		} else if (psy_strlen(self->light_path) > 0) {
+			psy_ui_bitmap_load(&self->bitmapicon, self->light_path);
 		}
 	}
 	if (!self->bitmaptransparency.mode.transparent) {
