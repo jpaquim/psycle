@@ -45,9 +45,12 @@ psy_Property* newmachine_sort(psy_Property* source, psy_fp_comp comp)
 		psy_table_init(&propertiesptr);		
 		p = psy_property_begin(source);
 		for (i = 0; p != NULL && i < num; psy_list_next(&p), ++i) {
-			psy_table_insert(&propertiesptr, i, (psy_Property*)psy_list_entry(p));
+			psy_table_insert(&propertiesptr, i,
+				(psy_Property*)psy_list_entry(p));
 		}
-		psy_qsort(&propertiesptr, psy_table_insert, psy_table_at,
+		psy_qsort(&propertiesptr,
+			(psy_fp_set_index_double)psy_table_insert,
+			(psy_fp_index_double)psy_table_at,
 			0, (int)(num - 1), comp);
 		rv = psy_property_allocinit_key(NULL);
 		for (i = 0; i < num; ++i) {

@@ -22,6 +22,8 @@
 #define PSYCLE_TK_WIN32 1
 #define PSYCLE_TK_X11 3
 
+/* #define PSYCLE_TK_WIN32_USE_BPM_READER */
+
 #if defined(DIVERSALIS__OS__UNIX)
 #define PSYCLE_USE_TK PSYCLE_TK_X11
 #elif defined(DIVERSALIS__OS__MICROSOFT)
@@ -35,7 +37,8 @@
 #define PSYCLE_USER_DIR "../../../cpsycle"
 #define PSYCLE_USER64_DIR "../../../cpsycle"
 #elif defined(_MSC_VER) && _MSC_VER > 1200
-#define PSYCLE_RES_DIR ""
+// #define PSYCLE_RES_DIR ""
+#define PSYCLE_RES_DIR "./src/resources"
 #define PSYCLE_APP_DIR "C:\\Program Files (x86)\\Psycle Modular Music Studio"
 #define PSYCLE_APP64_DIR "C:\\Program Files\\Psycle Modular Music Studio"
 #define PSYCLE_USER_DIR "C:\\Program Files (x86)\\Psycle Modular Music Studio"

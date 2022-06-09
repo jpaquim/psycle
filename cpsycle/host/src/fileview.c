@@ -429,10 +429,14 @@ psy_List* fileview_sort(psy_List* source, psy_fp_comp comp)
 		for (i = 0; p != NULL && i < num; p = p->next, ++i) {
 			psy_table_insert(&arrayptr, i, p);
 		}
-		psy_qsort(&arrayptr, psy_table_insert, psy_table_at, 0, (int)(num - 1), comp);
+		psy_qsort(&arrayptr,
+			(psy_fp_set_index_double)psy_table_insert,
+			(psy_fp_index_double)psy_table_at,
+			0, (int)(num - 1), comp);
 		for (i = 0; i < num; ++i) {
 			psy_list_append(&rv,
-				psy_strdup((const char*)(((psy_List*)(psy_table_at(&arrayptr, i)))->entry)));
+				psy_strdup((const char*)(((psy_List*)
+					(psy_table_at(&arrayptr, i)))->entry)));
 			}		
 		psy_table_dispose(&arrayptr);
 	}

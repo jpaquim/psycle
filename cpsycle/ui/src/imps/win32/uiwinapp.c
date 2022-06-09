@@ -1009,11 +1009,11 @@ psy_List* psy_ui_winapp_toplevel(psy_ui_WinApp* self)
 	
 	rv = NULL;
 	for (it = psy_table_begin(&self->toplevelmap);
-		!psy_tableiterator_equal(&it, psy_table_end());
-		psy_tableiterator_inc(&it)) {
+			!psy_tableiterator_equal(&it, psy_table_end());
+			psy_tableiterator_inc(&it)) {
 		psy_ui_win_ComponentImp* imp;
 
-		imp = (psy_ui_Component*)psy_tableiterator_value(&it);
+		imp = (psy_ui_win_ComponentImp*)psy_tableiterator_value(&it);
 		if (imp->component) {
 			psy_list_append(&rv, imp->component);
 		}

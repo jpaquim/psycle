@@ -471,14 +471,56 @@ void psy_ui_x11_g_imp_drawbitmap(psy_ui_x11_GraphicsImp* self,
 	psy_ui_Bitmap* bitmap, double x, double y, double width,
 	double height, double xsrc, double ysrc)
 {
-    Pixmap xtbitmap; 
+	psy_ui_x11_BitmapImp* imp;
+    Pixmap xtbitmap;
     
-    xtbitmap = ((psy_ui_x11_BitmapImp*)bitmap->imp)->pixmap;
-    if (xtbitmap) {        
-        XCopyArea(self->display, xtbitmap, self->window, self->gc,
-            xsrc, ysrc, width, height,
-            x - (int)(self->org.x),
-            y - (int)(self->org.y));
+    if (!bitmap->imp) {
+		return;
+	}    
+    imp = (psy_ui_x11_BitmapImp*)bitmap->imp;    
+    if (imp->pixmap) {  
+		if (imp->mask) {
+			XGCValues gcv;
+			int func;
+			// uint32_t restoretextcolour;
+			/*
+			** We are going to paint the two DDB's in sequence to the destination.
+			** 1st the monochrome bitmap will be blitted using an AND operation to
+			** cut a hole in the destination. The color image will then be ORed
+			** with the destination, filling it into the hole, but leaving the
+			** surrounding area untouched.
+			*/
+			// SelectObject(hdcmem, winimp->mask);
+			// restoretextcolour = GetTextColor(self->hdc);
+			// SetTextColor(self->hdc, RGB(0, 0, 0));
+			// SetBkColor(self->hdc, RGB(255, 255, 255));
+			// BitBlt(self->hdc, (int)x - (int)(self->org.x), (int)y - (int)(self->org.y), (int)width, (int)height, hdcmem, (int)xsrc, (int)ysrc, SRCAND);
+			// SelectObject(hdcmem, wbitmap);
+			/* Also note the use of SRCPAINT rather than SRCCOPY. */
+			// BitBlt(self->hdc, (int)x - (int)(self->org.x), (int)y - (int)(self->org.y), (int)width, (int)height, hdcmem, (int)xsrc, (int)ysrc, SRCPAINT);			
+			XGetGCValues(self->display, self->gc, GCFunction, &gcv);	
+			func = gcv.function;
+			gcv.function = GXand;
+			XChangeGC(self->display, self->gc, GCFunction, &gcv);
+			XCopyArea(self->display, imp->mask, self->window, self->gc,
+				xsrc, ysrc, width, height,
+				x - (int)(self->org.x),
+				y - (int)(self->org.y));
+			gcv.function = gcv.function = GXor;
+			XChangeGC(self->display, self->gc, GCFunction, &gcv);
+			XCopyArea(self->display, imp->pixmap, self->window, self->gc,
+				xsrc, ysrc, width, height,
+				x - (int)(self->org.x),
+				y - (int)(self->org.y));
+			gcv.function = func;
+			XChangeGC(self->display, self->gc, GCFunction, &gcv);
+			// SetTextColor(self->hdc, restoretextcolour);
+		} else {
+			XCopyArea(self->display, imp->pixmap, self->window, self->gc,
+				xsrc, ysrc, width, height,
+				x - (int)(self->org.x),
+				y - (int)(self->org.y));
+		}
     }
 }
 
@@ -486,7 +528,7 @@ void psy_ui_x11_g_imp_drawstretchedbitmap(psy_ui_x11_GraphicsImp* self,
 	psy_ui_Bitmap* bitmap, double x, double y, double width,
 	double height, double xsrc, double ysrc, double wsrc, double hsrc)
 {
-	Pixmap xtbitmap; 
+	/* Pixmap xtbitmap; 
     
     xtbitmap = ((psy_ui_x11_BitmapImp*)bitmap->imp)->pixmap;
     if (xtbitmap) {        
@@ -494,7 +536,9 @@ void psy_ui_x11_g_imp_drawstretchedbitmap(psy_ui_x11_GraphicsImp* self,
             xsrc, ysrc, width, height,
             x - (int)(self->org.x),
             y - (int)(self->org.y));
-    }
+    }*/
+    psy_ui_x11_g_imp_drawbitmap(self, bitmap,
+		x, y, width, height, xsrc, ysrc);
 }
 
 void psy_ui_x11_g_imp_setcolour(psy_ui_x11_GraphicsImp* self, psy_ui_Colour color)

@@ -40,22 +40,22 @@ void seqeditorheaderdescbar_init(SeqEditorHeaderDescBar* self,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));		
 	psy_ui_button_init_connect(&self->insert, &self->top, self,
 		seqeditorheaderdescbar_oninserttrack);
-	psy_ui_button_loadresource(&self->insert, IDB_SEQ_ADD_TRACK,
+	psy_ui_button_load_resource(&self->insert, IDB_SEQ_ADD_TRACK,
 		IDB_SEQ_ADD_TRACK, psy_ui_colour_white());
 	psy_ui_button_init_connect(&self->del, &self->top, self,
 		seqeditorheaderdescbar_ondeletetrack);
-	psy_ui_button_loadresource(&self->del, IDB_SEQ_DEL_TRACK,
+	psy_ui_button_load_resource(&self->del, IDB_SEQ_DEL_TRACK,
 		IDB_SEQ_DEL_TRACK, psy_ui_colour_white());	
 	margin = psy_ui_defaults_hmargin(psy_ui_defaults());
 	psy_ui_margin_setright(&margin, psy_ui_value_make_ew(3.0));
 	psy_ui_component_set_margin(psy_ui_button_base(&self->del), margin);
 	psy_ui_button_init_connect(&self->up, &self->top, self,
 		seqeditorheaderdescbar_onmovetrackup);
-	psy_ui_button_loadresource(&self->up, IDB_ARROW_UP_DARK,
+	psy_ui_button_load_resource(&self->up, IDB_ARROW_UP_DARK,
 		IDB_ARROW_UP_DARK, psy_ui_colour_white());	
 	psy_ui_button_init_connect(&self->down, &self->top, self,
 		seqeditorheaderdescbar_onmovetrackdown);
-	psy_ui_button_loadresource(&self->down, IDB_ARROW_DOWN_DARK,
+	psy_ui_button_load_resource(&self->down, IDB_ARROW_DOWN_DARK,
 		IDB_ARROW_DOWN_DARK, psy_ui_colour_white());
 	psy_ui_component_set_margin(psy_ui_button_base(&self->down), margin);
 	zoombox_init(&self->hzoom, &self->top);

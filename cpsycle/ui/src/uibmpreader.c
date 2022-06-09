@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -42,8 +42,7 @@ typedef struct BmpColourIndex {
 	uint8_t r, g, b, junk;
 } BmpColourIndex;
 
-static bool
-bigendian(void)
+static bool bigendian(void)
 {
 	union { int i; char c[sizeof(int)]; } u;
 	u.i = 1;
@@ -69,12 +68,11 @@ int psy_ui_bmpreader_load(psy_ui_BmpReader* self, const char* path)
 	BmpInfo infoheader;
 	BmpColourIndex colourindex[256];
 	uintptr_t bytesRead;
-	int32_t i, j;
+	int32_t j;
 	int32_t gotindex = FALSE;
 	uint8_t grey, r, g, b;
 	psy_ui_Graphics gc;	
-	psy_ui_Colour colour;
-	uint32_t padding;
+	psy_ui_Colour colour;	
 	bool verbose;
 
 	assert(self);
@@ -85,7 +83,7 @@ int psy_ui_bmpreader_load(psy_ui_BmpReader* self, const char* path)
 		
 	verbose = 0;
 	if ((fp = fopen(path, "rb")) == NULL) {
-		return PSY_ERRFILE;
+		return PSY_ERRFILEFORMAT;
 	}
 	/* Magic identifier            */
 	bytesRead = fread(&header.type, sizeof(char), 2, fp);
@@ -104,6 +102,7 @@ int psy_ui_bmpreader_load(psy_ui_BmpReader* self, const char* path)
 		return PSY_ERRFILE;
 	}
 	if (verbose) {
+		fprintf(stderr, "Image path = %s\n", path);
 		fprintf(stderr, "Image size = %d x %d\n", infoheader.width, infoheader.height);
 		fprintf(stderr, "Number of colour planes is %d\n", infoheader.planes);
 		fprintf(stderr, "Bits per pixel is %d\n", infoheader.bits);
@@ -113,13 +112,18 @@ int psy_ui_bmpreader_load(psy_ui_BmpReader* self, const char* path)
 			infoheader.importantcolours);
 	}
 	/* Read the lookup table if there is one */
-	for (i = 0; i < 255; i++) {
-		colourindex[i].r = rand() % 256;
-		colourindex[i].g = rand() % 256;
-		colourindex[i].b = rand() % 256;
-		colourindex[i].junk = rand() % 256;
+	{
+		uint32_t i;
+
+		for (i = 0; i < 255; i++) {
+			colourindex[i].r = rand() % 256;
+			colourindex[i].g = rand() % 256;
+			colourindex[i].b = rand() % 256;
+			colourindex[i].junk = rand() % 256;
+		}
 	}
 	if (infoheader.ncolours > 0) {
+		uint32_t i;
 		for (i = 0; i < infoheader.ncolours; i++) {
 			if (fread(&colourindex[i].b, sizeof(unsigned char), 1, fp) != 1) {
 				fprintf(stderr, "Image read failed\n");
@@ -162,9 +166,25 @@ int psy_ui_bmpreader_load(psy_ui_BmpReader* self, const char* path)
 				infoheader.height)),
 		colour);	
 	if (infoheader.height > 0) {
-		/* Read the image */
-		padding = (infoheader.width * 3) % 4;
+		int32_t padding; 
+
+		/* Read the image */		
+
+		/* 
+		** Each scan line is zero padded to the nearest 4-byte boundary. If the image
+		** has a width that is not divisible by four, say, 21 bytes, there would be
+		** 3 bytes of padding at the end of every scan line.
+		*/
+		if (infoheader.bits == 24) {
+			/* padding width: 4 bytes */
+			/* num bytes per line: infoheader.width * 3 */
+			padding = (int32_t)(ceil((infoheader.width * 3) / 4.0)) * 4 - (infoheader.width * 3);
+		} else {
+			padding = 1;
+		}
 		for (j = infoheader.height - 1; j >= 0; j--) {
+			int32_t i;
+
 			for (i = 0; i < infoheader.width; i++) {
 
 				switch (infoheader.bits) {
@@ -172,7 +192,7 @@ int psy_ui_bmpreader_load(psy_ui_BmpReader* self, const char* path)
 					break;
 				case 4:
 					break;
-				case 8:
+				case 8:					
 					if (fread(&grey, sizeof(unsigned char), 1, fp) != 1) {
 						fprintf(stderr, "Image read failed\n");
 						exit(-1);
@@ -188,15 +208,21 @@ int psy_ui_bmpreader_load(psy_ui_BmpReader* self, const char* path)
 				case 24:
 					if (fread(&b, sizeof(unsigned char), 1, fp) != 1) {
 						fprintf(stderr, "Image read failed\n");
-						exit(-1);
+						psy_ui_graphics_dispose(&gc);	
+						fclose(fp);
+						return PSY_ERRFILEFORMAT;
 					}
 					if (fread(&g, sizeof(unsigned char), 1, fp) != 1) {
 						fprintf(stderr, "Image read failed\n");
-						exit(-1);
+						psy_ui_graphics_dispose(&gc);	
+						fclose(fp);
+						return PSY_ERRFILEFORMAT;
 					}
 					if (fread(&r, sizeof(unsigned char), 1, fp) != 1) {
 						fprintf(stderr, "Image read failed\n");
-						exit(-1);
+						psy_ui_graphics_dispose(&gc);	
+						fclose(fp);
+						return PSY_ERRFILEFORMAT;
 					}
 					psy_ui_colour_init_rgb(&colour, r, g, b);
 					psy_ui_drawsolidrectangle(&gc,

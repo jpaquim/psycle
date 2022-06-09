@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -13,6 +13,9 @@
 /* local */
 #include "../../uiapp.h"
 #include "uiwinapp.h"
+#ifdef PSYCLE_TK_WIN32_USE_BPM_READER
+#include "../../uibmpreader.h"
+#endif
 
 /* prototypes */
 static void dev_dispose(psy_ui_win_BitmapImp*);
@@ -56,6 +59,7 @@ static void imp_vtable_init(psy_ui_win_BitmapImp* self)
 	}
 	self->imp.vtable = &imp_vtable;
 }
+
 /* implementation */
 void psy_ui_win_bitmapimp_init(psy_ui_win_BitmapImp* self, psy_ui_RealSize size)
 {
@@ -94,6 +98,18 @@ void dev_dispose(psy_ui_win_BitmapImp* self)
 
 int dev_load(psy_ui_win_BitmapImp* self, struct psy_ui_Bitmap* bitmap, const char* path)
 {
+#ifdef PSYCLE_TK_WIN32_USE_BPM_READER
+	int rv;
+
+	assert(path);
+
+	psy_ui_BmpReader bmpreader;
+
+	psy_ui_bmpreader_init(&bmpreader, bitmap);
+	rv = psy_ui_bmpreader_load(&bmpreader, path);
+	psy_ui_bmpreader_dispose(&bmpreader);
+	return rv;
+#else
 	assert(self);
 
 	dev_dispose(self);
@@ -104,6 +120,7 @@ int dev_load(psy_ui_win_BitmapImp* self, struct psy_ui_Bitmap* bitmap, const cha
 		0, 0,
 		LR_DEFAULTSIZE | LR_LOADFROMFILE);	
 	return (self->bitmap == 0);
+#endif
 }
 
 int dev_loadresource(psy_ui_win_BitmapImp* self, uintptr_t resourceid)

@@ -257,11 +257,11 @@ void psy_ui_tab_loadbitmaps(psy_ui_Tab* self)
 {
 	if (psy_ui_app_hasdarktheme(psy_ui_app())) {
 		if (self->darkresourceid != psy_INDEX_INVALID) {
-			psy_ui_bitmap_loadresource(&self->bitmapicon, self->darkresourceid);
+			psy_ui_bitmap_load_resource(&self->bitmapicon, self->darkresourceid);
 		}
 	} else {
 		if (self->lightresourceid != psy_INDEX_INVALID) {
-			psy_ui_bitmap_loadresource(&self->bitmapicon, self->lightresourceid);
+			psy_ui_bitmap_load_resource(&self->bitmapicon, self->lightresourceid);
 		}
 	}
 	if (!self->bitmaptransparency.mode.transparent) {

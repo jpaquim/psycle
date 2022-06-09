@@ -1,22 +1,28 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
+
 
 #include "uix11bitmapimp.h"
 
 #if PSYCLE_USE_TK == PSYCLE_TK_X11
 
+/* local */
 #include "uiapp.h"
 #include "uigraphics.h"
 #include "uibmpreader.h"
 #include "uix11app.h"
+/* x11 */
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/IntrinsicP.h>
 #include <X11/ShellP.h>
 #include <X11/extensions/shape.h>
 #include <X11/extensions/Xdbe.h>
+/* std */
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -26,7 +32,8 @@
 
 /* prototypes */
 static void dispose(psy_ui_x11_BitmapImp*);
-static int load(psy_ui_x11_BitmapImp*, struct psy_ui_Bitmap* bitmap, const char* path);
+static int load(psy_ui_x11_BitmapImp*, struct psy_ui_Bitmap* bitmap,
+	const char* path);
 static int loadresource(psy_ui_x11_BitmapImp*, int resourceid);
 static psy_ui_RealSize dev_size(psy_ui_x11_BitmapImp*);
 static int empty(psy_ui_x11_BitmapImp*);
@@ -103,7 +110,8 @@ void dispose(psy_ui_x11_BitmapImp* self)
 	}
 }
 
-int load(psy_ui_x11_BitmapImp* self, struct psy_ui_Bitmap* bitmap, const char* path)
+int load(psy_ui_x11_BitmapImp* self, struct psy_ui_Bitmap* bitmap,
+	const char* path)
 {	
 	int rv;
 	
@@ -167,7 +175,68 @@ void dev_settransparency(psy_ui_x11_BitmapImp* self, psy_ui_Colour colour)
 
 void dev_preparemask(psy_ui_x11_BitmapImp* self, psy_ui_Colour clrtrans)
 {	
-	
+	psy_ui_X11App* x11app;
+	psy_ui_RealSize size;
+	int screen;
+	GC gc;
+	XGCValues gcv;
+
+	if (!self->pixmap) {
+		return;
+	}
+	x11app = (psy_ui_X11App*)psy_ui_app()->imp;
+	screen = DefaultScreen(x11app->dpy);
+	/* Create the mask bitmap */
+	if (self->mask) {		
+		XFreePixmap(x11app->dpy, self->mask);
+		self->mask = 0;
+	}
+	size = dev_size(self);
+	if (size.width == 0 && size.height == 0) {
+		return;
+	}			
+	/*
+	** When blitting onto a monochrome bitmap from a color, pixels
+	** in the source color bitmap that are equal to the background
+	** color are blitted as white.All the remaining pixels are
+	** blitted as black.
+	*/
+	self->mask = XCreatePixmap(x11app->dpy,
+		DefaultRootWindow(x11app->dpy), (int)size.width, (int)size.height,
+		DefaultDepth(x11app->dpy, screen));
+	gc = XCreateGC(x11app->dpy,
+		XDefaultRootWindow(x11app->dpy), 0, NULL);
+	XGetGCValues(x11app->dpy, gc, GCFunction, &gcv);
+	/* Change the background to trans color */
+	XSetBackground(x11app->dpy, gc,
+		psy_ui_x11app_colourindex(x11app,
+			clrtrans));
+	/* This call sets up the mask bitmap. */
+	gcv.function = gcv.function = GXcopy;
+	XChangeGC(x11app->dpy, gc, GCFunction, &gcv);
+	/* This call sets up the mask bitmap. */
+	XCopyArea(x11app->dpy, self->pixmap, self->mask, gc,
+		0, 0, (int)size.width, (int)size.height, 0, 0);
+	/*
+	** Now, we need to paint onto the original image, making
+	** sure that the "transparent" area is set to black. What
+	** we do is AND the monochrome image onto the color Image
+	** first. When blitting from mono to color, the monochrome
+	** pixel is first transformed as follows:
+	** if  1 (black) it is mapped to the color set by SetTextColor().
+	** if  0 (white) is is mapped to the color set by SetBkColor().
+	** Only then is the raster operation performed.
+	*/
+	XSetForeground(x11app->dpy, gc,
+		psy_ui_x11app_colourindex(x11app, 
+			psy_ui_colour_make_rgb(255, 255, 255)));
+	XSetBackground(x11app->dpy, gc,
+		psy_ui_x11app_colourindex(x11app,
+			psy_ui_colour_make_rgb(0, 0, 0)));
+	gcv.function = GXand;
+	XCopyArea(x11app->dpy, self->mask, self->pixmap, gc,
+		0, 0, (int)size.width, (int)size.height, 0, 0);
+	XFreeGC(x11app->dpy, gc);
 }	
 
 #endif
