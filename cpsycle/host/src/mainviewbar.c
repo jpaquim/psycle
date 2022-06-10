@@ -20,7 +20,8 @@ static void mainviewbar_init_navigation(MainViewBar*, Workspace*);
 static void mainviewbar_init_main_tabbar(MainViewBar*);
 static void mainviewbar_init_help_settings_tabbar(MainViewBar*s);
 static void mainviewbar_init_view_tabbars(MainViewBar*);
-static void mainviewbar_on_maxminimize_view(MainViewBar*, psy_ui_Button* sender);
+static void mainviewbar_on_maxminimize_view(MainViewBar*,
+	psy_ui_Button* sender);
 
 /* vtable */
 static psy_ui_ComponentVtable vtable;

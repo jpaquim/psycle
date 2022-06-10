@@ -154,7 +154,8 @@ void init_host_styles(psy_ui_Styles* self, psy_ui_ThemeMode theme)
 	psy_ui_style_set_colours(style,
 		psy_ui_colour_weighted(&material.onprimary, material.accent),
 		psy_ui_colour_make(0x00475E38));
-	psy_ui_border_init_solid_radius(&style->border, material.surface_overlay_11p, 6.0);
+	psy_ui_border_init_solid_radius(&style->border,
+		material.surface_overlay_11p, 6.0);
 	psy_ui_styles_set_style(self, STYLE_SEQEDT_SAMPLE_HOVER, style);
 
 	style = psy_ui_style_allocinit();
@@ -2239,7 +2240,11 @@ void init_patternview_styles(psy_ui_Styles* self)
 	style = psy_ui_style_allocinit();
 	psy_ui_style_set_position(style, psy_ui_rectangle_make(
 		psy_ui_point_make_px(18.0, 8.0), psy_ui_size_make_px(84.0, 13.0)));
-	psy_ui_style_set_font(style, "Tahoma", 12);
+#if defined(DIVERSALIS__OS__UNIX)
+		psy_ui_style_set_font(style, "FreeSans", 10);
+#else
+		psy_ui_style_set_font(style, "Tahoma", 12);
+#endif
 	psy_ui_styles_set_style(self, STYLE_PV_TRACK_TEXT_HEADER_TEXT, style);
 
 	style = psy_ui_style_allocinit();

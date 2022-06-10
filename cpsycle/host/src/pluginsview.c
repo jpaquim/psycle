@@ -894,8 +894,11 @@ uintptr_t pluginsview_topline(PluginsView* self)
 
 uintptr_t pluginsview_numlines(const PluginsView* self)
 {
-	return psy_property_size(self->currplugins) /
-		self->numparametercols + 1;
+	if (self->numparametercols > 0) {
+		return psy_property_size(self->currplugins) /
+			self->numparametercols + 1;
+	}
+	return 1;
 }
 
 void pluginsview_settopline(PluginsView* self, intptr_t line)
