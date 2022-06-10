@@ -407,23 +407,35 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
         break;
     case KeyPress: {	
 		if (imp->component) {
-			psy_ui_KeyboardEvent ev;
+			psy_ui_Component* component;
+			psy_ui_KeyboardEvent key_event;
 
-			ev = psy_ui_x11_keyboardevent_make(&event->xkey);
-			psy_ui_event_settype(&ev.event, psy_ui_KEYDOWN);
+			key_event = psy_ui_x11_keyboardevent_make(&event->xkey);			
+			psy_ui_event_settype(&key_event.event, psy_ui_KEYDOWN);
+			if (psy_ui_app_focus(psy_ui_app())) {
+				component = psy_ui_app_focus(psy_ui_app());
+			} else {
+				component = imp->component;
+			}
 			psy_ui_eventdispatch_send(&self->app->eventdispatch,
-				imp->component, &ev.event);			
+				component, &key_event.event);			
 			return 0;
 		}
 		break; }
     case KeyRelease:
 		if (imp->component) {
-			psy_ui_KeyboardEvent ev;
+			psy_ui_Component* component;
+			psy_ui_KeyboardEvent key_event;
 
-			ev = psy_ui_x11_keyboardevent_make(&event->xkey);			
-			psy_ui_event_settype(&ev.event, psy_ui_KEYUP);
+			key_event = psy_ui_x11_keyboardevent_make(&event->xkey);			
+			psy_ui_event_settype(&key_event.event, psy_ui_KEYUP);
+			if (psy_ui_app_focus(psy_ui_app())) {
+				component = psy_ui_app_focus(psy_ui_app());
+			} else {
+				component = imp->component;
+			}
 			psy_ui_eventdispatch_send(&self->app->eventdispatch,
-				imp->component, &ev.event);			
+				component, &key_event.event);			
 			return 0;
 		}
 		break;

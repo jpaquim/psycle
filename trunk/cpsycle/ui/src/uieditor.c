@@ -10,23 +10,25 @@
 
 #define BLOCKSIZE 128 * 1024
 
-/* local */
 /* platform */
 #include "../../detail/portable.h"
 
 
 static void psy_ui_editor_set_font(psy_ui_Editor*, psy_ui_Font*);
-static void psy_ui_editor_get_range(psy_ui_Editor*, intptr_t start, intptr_t end,
-	char* text);
+static void psy_ui_editor_get_range(psy_ui_Editor*, intptr_t start,
+	intptr_t end, char* text);
 
 /* implementation */
 void psy_ui_editor_init(psy_ui_Editor* self, psy_ui_Component* parent)
 {  	
 	psy_ui_component_init(&self->component, parent, NULL);	
 	psy_ui_textarea_init(&self->textarea, &self->component);
-	psy_ui_component_set_style_type(&self->textarea.pane.component, psy_ui_STYLE_EDITOR);
-	psy_ui_component_set_style_type_hover(&self->textarea.pane.component, psy_ui_STYLE_EDITOR);
-	psy_ui_component_set_style_type_focus(&self->textarea.pane.component, psy_ui_STYLE_EDITOR);
+	psy_ui_component_set_style_type(&self->textarea.pane.component,
+		psy_ui_STYLE_EDITOR);
+	psy_ui_component_set_style_type_hover(&self->textarea.pane.component,
+		psy_ui_STYLE_EDITOR);
+	psy_ui_component_set_style_type_focus(&self->textarea.pane.component,
+		psy_ui_STYLE_EDITOR);
 	psy_ui_textarea_prevent_wrap(&self->textarea);
 	psy_ui_textarea_line_wrap(&self->textarea);
 	psy_ui_component_set_align(&self->textarea.component, psy_ui_ALIGN_CLIENT);
@@ -78,7 +80,8 @@ void psy_ui_editor_save(psy_ui_Editor* self, const char* path)
 	}
 }
 
-void psy_ui_editor_get_range(psy_ui_Editor* self, intptr_t start, intptr_t end, char* text)
+void psy_ui_editor_get_range(psy_ui_Editor* self, intptr_t start, intptr_t end,
+	char* text)
 {
 	psy_ui_textarea_range(&self->textarea, start, end, text);
 }

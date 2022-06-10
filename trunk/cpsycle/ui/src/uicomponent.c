@@ -908,7 +908,7 @@ void psy_ui_component_showmaximized(psy_ui_Component* self)
 	psy_ui_component_showstate(self, SW_MAXIMIZE);
 #else
 	psy_ui_component_resize(self,
-		psy_ui_size_make_px(1024.0, 768.0));
+		psy_ui_size_make_px(1800.0, 864.0));
 	psy_ui_component_showstate(self, 0);
 #endif	
 }

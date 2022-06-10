@@ -72,10 +72,15 @@ void psy_ui_x11_fontimp_init(psy_ui_x11_FontImp* self, const psy_ui_FontInfo*
 		psy_ui_X11App* x11app;		
 
 		x11app = (psy_ui_X11App*)psy_ui_app()->imp;
-		self->hfont = XftFontOpenXlfd(
-			x11app->dpy,
+		self->hfont = XftFontOpen(
+			x11app->dpy, 
 			DefaultScreen(x11app->dpy),
-			fontinfo->lfFaceName);
+			FC_FAMILY, FcTypeString, fontinfo->lfFaceName,
+			FC_SIZE, FcTypeDouble, (double)fontinfo->lfHeight,
+			FC_WEIGHT, FcTypeInteger, FC_WEIGHT_MEDIUM,
+			FC_ANTIALIAS, FcTypeBool, TRUE,
+			XFT_CORE, FcTypeBool, False,
+			NULL);			
 		if (!self->hfont) {
 			self->hfont = XftFontOpenName(x11app->dpy,
 				DefaultScreen(x11app->dpy),
@@ -125,30 +130,17 @@ const psy_ui_TextMetric* dev_textmetric(const psy_ui_x11_FontImp* self)
 {
 	psy_ui_TextMetric rv;	
 	
-	if (!self->tmcachevalid) {
-		psy_ui_X11App* x11app;
-		GC gc;
-		PlatformXtGC xgc;
-		psy_ui_Graphics g;
-		psy_ui_x11_GraphicsImp* gx11;
-
-		rv.tmAveCharWidth = 10;
-		x11app = (psy_ui_X11App*)psy_ui_app()->imp;
-		gc = XCreateGC(x11app->dpy, DefaultRootWindow(x11app->dpy), 0, 0);
-		xgc.display = x11app->dpy;	
-		xgc.window = DefaultRootWindow(x11app->dpy);
-		xgc.visual = x11app->visual;
-		xgc.gc = gc;
-		psy_ui_graphics_init(&g, &xgc);
-		gx11 = (psy_ui_x11_GraphicsImp*)g.imp;
-		rv.tmHeight = gx11->xftfont->height;
-		rv.tmAscent = gx11->xftfont->ascent;
-		rv.tmDescent = gx11->xftfont->descent;
-		rv.tmMaxCharWidth = gx11->xftfont->max_advance_width;
-		rv.tmAveCharWidth = gx11->xftfont->max_advance_width / 4;
+	psy_ui_textmetric_init(&rv);
+	if (!self->hfont) {		
+		((psy_ui_x11_FontImp*)self)->tmcache = rv;
+	} else if (!self->tmcachevalid) {					
+		rv.tmHeight = self->hfont->height;		
+		rv.tmAscent = self->hfont->ascent;
+		rv.tmDescent = self->hfont->descent;
+		rv.tmMaxCharWidth = self->hfont->max_advance_width;
+		rv.tmAveCharWidth = self->hfont->max_advance_width / 4;
 		rv.tmInternalLeading = 0;
-		rv.tmExternalLeading = 0;
-		psy_ui_graphics_dispose(&g);
+		rv.tmExternalLeading = 0;		
 		((psy_ui_x11_FontImp*)self)->tmcache = rv;
 		((psy_ui_x11_FontImp*)self)->tmcachevalid = TRUE;
 	}

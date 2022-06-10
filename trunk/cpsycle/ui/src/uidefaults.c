@@ -52,7 +52,8 @@ const psy_ui_Style* psy_ui_defaults_style_const(const psy_ui_Defaults* self,
 	return psy_ui_styles_at_const(&self->styles, type);
 }
 
-void psy_ui_defaults_load_theme(psy_ui_Defaults* self, const char* dir, psy_ui_ThemeMode theme)
+void psy_ui_defaults_load_theme(psy_ui_Defaults* self, const char* dir,
+	psy_ui_ThemeMode theme)
 {
 	psy_Property* styleconfig;
 	psy_Path path;
