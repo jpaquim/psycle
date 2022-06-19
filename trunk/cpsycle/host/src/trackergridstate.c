@@ -61,7 +61,7 @@ void trackconfig_init(TrackConfig* self, bool wideinst)
 
 void trackconfig_dispose(TrackConfig* self)
 {
-	psy_table_disposeall(&self->trackconfigs, (psy_fp_disposefunc)NULL);
+	psy_table_dispose_all(&self->trackconfigs, (psy_fp_disposefunc)NULL);
 }
 
 void trackconfig_init_columns(TrackConfig* self, bool wideinst)

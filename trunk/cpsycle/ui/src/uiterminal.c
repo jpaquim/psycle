@@ -11,7 +11,7 @@
 #include "../../detail/portable.h"
 
 /* prototypes */
-static void psy_ui_terminal_on_destroy(psy_ui_Terminal*);
+static void psy_ui_terminal_on_destroyed(psy_ui_Terminal*);
 static void psy_ui_terminal_on_timer(psy_ui_Terminal*, uintptr_t timerid);
 static void psy_ui_terminal_on_output(psy_ui_Terminal*, const char* str);
 
@@ -23,9 +23,9 @@ static void vtable_init(psy_ui_Terminal* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);		
-		vtable.on_destroy =
+		vtable.on_destroyed =
 			(psy_ui_fp_component_event)
-			psy_ui_terminal_on_destroy;
+			psy_ui_terminal_on_destroyed;
 		vtable.on_timer =
 			(psy_ui_fp_component_on_timer)
 			psy_ui_terminal_on_timer;
@@ -87,7 +87,7 @@ void psy_ui_terminal_init(psy_ui_Terminal* self, psy_ui_Component* parent)
 	psy_ui_component_start_timer(&self->component, 0, 50);
 }
 
-void psy_ui_terminal_on_destroy(psy_ui_Terminal* self)
+void psy_ui_terminal_on_destroyed(psy_ui_Terminal* self)
 {
 	psy_list_deallocate(&self->strbuffer, NULL);
 	psy_lock_dispose(&self->lock);

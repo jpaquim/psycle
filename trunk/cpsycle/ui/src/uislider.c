@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -15,7 +15,9 @@
 #include "../../detail/portable.h"
 
 /* psy_ui_SliderPane */
+
 /* prototypes */
+static void psy_ui_sliderpane_on_destroyed(psy_ui_SliderPane*);
 static void psy_ui_sliderpane_initsignals(psy_ui_SliderPane*);
 static void psy_ui_sliderpane_disposesignals(psy_ui_SliderPane*);
 static void psy_ui_sliderpane_ondraw(psy_ui_SliderPane*, psy_ui_Graphics*);
@@ -27,14 +29,13 @@ static void psy_ui_sliderpane_onmousemove(psy_ui_SliderPane*, psy_ui_MouseEvent*
 static void psy_ui_sliderpane_onmousewheel(psy_ui_SliderPane*, psy_ui_MouseEvent*);
 static void psy_ui_sliderpane_onmouseenter(psy_ui_SliderPane*);
 static void psy_ui_sliderpane_onmouseleave(psy_ui_SliderPane*);
-static void psy_ui_sliderpane_on_destroy(psy_ui_SliderPane*, psy_ui_Component* sender);
-static void psy_ui_sliderpane_on_timer(psy_ui_SliderPane*, psy_ui_Component* sender,
-	uintptr_t timerid);
+static void psy_ui_sliderpane_on_timer(psy_ui_SliderPane*, uintptr_t timerid);
 static void psy_ui_sliderpane_updatevalue(psy_ui_SliderPane*);
 static void psy_ui_sliderpane_describevalue(psy_ui_SliderPane*);
 static void psy_ui_sliderpane_onpreferredsize(psy_ui_SliderPane*,
 	psy_ui_Size* limit, psy_ui_Size* rv);
 static psy_ui_RealRectangle psy_ui_sliderpane_sliderposition(const psy_ui_SliderPane*);
+
 /* vtable */
 static psy_ui_ComponentVtable vtable;
 static bool vtable_initialized = FALSE;
@@ -43,6 +44,9 @@ static void vtable_init(psy_ui_SliderPane* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
+		vtable.on_destroyed =
+			(psy_ui_fp_component_event)
+			psy_ui_sliderpane_on_destroyed;
 		vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
 			psy_ui_sliderpane_ondraw;		
@@ -69,16 +73,19 @@ static void vtable_init(psy_ui_SliderPane* self)
 			psy_ui_sliderpane_onmouseenter;
 		vtable.onmouseleave = 
 			(psy_ui_fp_component_event)
-			psy_ui_sliderpane_onmouseleave;	
+			psy_ui_sliderpane_onmouseleave;
+		vtable.on_timer =
+			(psy_ui_fp_component_on_timer)
+			psy_ui_sliderpane_on_timer;
 		vtable_initialized = TRUE;
 	}
-	self->component.vtable = &vtable;
+	psy_ui_component_set_vtable(&self->component, &vtable);
 }
+
 /* implementation */
-void psy_ui_sliderpane_init(psy_ui_SliderPane* self, psy_ui_Component* parent,
-	psy_ui_Component* view)
+void psy_ui_sliderpane_init(psy_ui_SliderPane* self, psy_ui_Component* parent)
 {	
-	psy_ui_component_init(&self->component, parent, view);
+	psy_ui_component_init(&self->component, parent, NULL);
 	vtable_init(self);	
 	self->slider = NULL;	
 	self->tweakbase = -1;
@@ -92,8 +99,6 @@ void psy_ui_sliderpane_init(psy_ui_SliderPane* self, psy_ui_Component* parent,
 	self->poll = FALSE;
 	self->hover = FALSE;
 	psy_ui_sliderpane_initsignals(self);	
-	psy_signal_connect(&self->component.signal_destroy, self, 
-		psy_ui_sliderpane_on_destroy);	
 	psy_signal_connect(&self->component.signal_timer, self,
 		psy_ui_sliderpane_on_timer);
 	psy_ui_component_set_style_types(&self->component,
@@ -111,7 +116,7 @@ void psy_ui_sliderpane_initsignals(psy_ui_SliderPane* self)
 	psy_signal_init(&self->signal_customdraw);
 }
 
-void psy_ui_sliderpane_on_destroy(psy_ui_SliderPane* self, psy_ui_Component* sender)
+void psy_ui_sliderpane_on_destroyed(psy_ui_SliderPane* self)
 {	
 	psy_ui_sliderpane_disposesignals(self);
 }
@@ -329,8 +334,7 @@ psy_ui_Orientation psy_ui_sliderpane_orientation(psy_ui_SliderPane* self)
 	return self->orientation;
 }
 
-void psy_ui_sliderpane_on_timer(psy_ui_SliderPane* self, psy_ui_Component* sender,
-	uintptr_t timerid)
+void psy_ui_sliderpane_on_timer(psy_ui_SliderPane* self, uintptr_t timerid)
 {	
 	if (psy_ui_component_draw_visible(psy_ui_sliderpane_base(self))) {
 		psy_ui_sliderpane_updatevalue(self);
@@ -390,24 +394,26 @@ void psy_ui_sliderpane_onpreferredsize(psy_ui_SliderPane* self, psy_ui_Size* lim
 }
 
 /* psy_ui_Slider */
+
+/* implementation */
 void psy_ui_slider_init(psy_ui_Slider* self, psy_ui_Component* parent)
 {
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_label_init(&self->desc, &self->component);	
-	psy_ui_sliderpane_init(&self->pane, &self->component, NULL);
+	psy_ui_sliderpane_init(&self->pane, &self->component);
 	self->pane.slider = self;	
 	psy_ui_component_set_align(psy_ui_sliderpane_base(&self->pane),
 		psy_ui_ALIGN_CLIENT);
 	psy_ui_label_init(&self->value, &self->component);
 	psy_ui_label_prevent_translation(&self->value);	
-	psy_ui_slider_showhorizontal(self);
+	psy_ui_slider_show_horizontal(self);
 }
 
 void psy_ui_slider_init_text(psy_ui_Slider* self, psy_ui_Component* parent,
 	const char* text)
 {
 	psy_ui_slider_init(self, parent);
-	psy_ui_slider_settext(self, text);
+	psy_ui_slider_set_text(self, text);
 }
 
 void psy_ui_slider_connect(psy_ui_Slider* self, void* context,
@@ -418,7 +424,7 @@ void psy_ui_slider_connect(psy_ui_Slider* self, void* context,
 		fp_describe, fp_tweak, fp_value);	
 }
 
-void psy_ui_slider_settext(psy_ui_Slider* self, const char* text)
+void psy_ui_slider_set_text(psy_ui_Slider* self, const char* text)
 {
 	psy_ui_label_set_text(&self->desc, text);
 }
@@ -444,7 +450,7 @@ void psy_ui_slider_showvertical(psy_ui_Slider* self)
 		psy_ui_margin_make_em(0.0, 2.0, 0.0, 2.0));		
 }
 
-void psy_ui_slider_showhorizontal(psy_ui_Slider* self)
+void psy_ui_slider_show_horizontal(psy_ui_Slider* self)
 {
 	psy_ui_sliderpane_showhorizontal(&self->pane);
 	psy_ui_component_set_align(psy_ui_label_base(&self->desc),

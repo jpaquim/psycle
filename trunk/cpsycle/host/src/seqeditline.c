@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -17,6 +17,7 @@
 /* SeqEditorLine */
 static void seqeditorline_onpreferredsize(SeqEditorLine*,
 	const psy_ui_Size* limit, psy_ui_Size* rv);
+
 /* vtable */
 static psy_ui_ComponentVtable seqeditorline_vtable;
 static bool seqeditorline_vtable_initialized = FALSE;

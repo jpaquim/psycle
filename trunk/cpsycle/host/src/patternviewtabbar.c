@@ -15,7 +15,7 @@
 /* PatternViewTabBar */
 
 /* prototypes*/
-static void patternviewtabbar_on_destroy(PatternViewTabBar*);
+static void patternviewtabbar_on_destroyed(PatternViewTabBar*);
 static void patternviewtabbar_on_tabbar_change(PatternViewTabBar*,
 	psy_ui_Component* sender, uintptr_t tabindex);
 
@@ -27,9 +27,9 @@ static void vtable_init(PatternViewTabBar* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.on_destroy =
+		vtable.on_destroyed =
 			(psy_ui_fp_component_event)
-			patternviewtabbar_on_destroy;		
+			patternviewtabbar_on_destroyed;		
 		vtable_initialized = TRUE;
 	}
 	self->component.vtable = &vtable;
@@ -79,7 +79,7 @@ void patternviewtabbar_init(PatternViewTabBar* self, psy_ui_Component* parent,
 		patternviewtabbar_on_tabbar_change);
 }
 
-void patternviewtabbar_on_destroy(PatternViewTabBar* self)
+void patternviewtabbar_on_destroyed(PatternViewTabBar* self)
 {
 	assert(self);
 	

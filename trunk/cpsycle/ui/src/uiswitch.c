@@ -11,7 +11,7 @@
 #include <stdlib.h>
 
 /* prototypes */
-static void psy_ui_switch_on_destroy(psy_ui_Switch*);
+static void psy_ui_switch_on_destroyed(psy_ui_Switch*);
 static void psy_ui_switch_ondraw(psy_ui_Switch*, psy_ui_Graphics*);
 static void psy_ui_switch_on_mouse_down(psy_ui_Switch*, psy_ui_MouseEvent*);
 /* vtable */
@@ -22,9 +22,9 @@ static void vtable_init(psy_ui_Switch* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.on_destroy =
+		vtable.on_destroyed =
 			(psy_ui_fp_component_event)
-			psy_ui_switch_on_destroy;
+			psy_ui_switch_on_destroyed;
 		vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
 			psy_ui_switch_ondraw;
@@ -50,7 +50,7 @@ void psy_ui_switch_init(psy_ui_Switch* self, psy_ui_Component* parent,
 		psy_ui_size_make_em(4.0, 1.5));
 }
 
-void psy_ui_switch_on_destroy(psy_ui_Switch* self)
+void psy_ui_switch_on_destroyed(psy_ui_Switch* self)
 {	
 	psy_signal_dispose(&self->signal_clicked);	
 }

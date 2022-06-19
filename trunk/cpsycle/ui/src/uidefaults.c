@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -54,8 +54,8 @@ const psy_ui_Style* psy_ui_defaults_style_const(const psy_ui_Defaults* self,
 
 void psy_ui_defaults_load_theme(psy_ui_Defaults* self, const char* dir,
 	psy_ui_ThemeMode theme)
-{
-	psy_Property* styleconfig;
+{	
+	/*psy_Property* styleconfig;
 	psy_Path path;
 	psy_PropertyReader propertyreader;
 	
@@ -83,7 +83,7 @@ void psy_ui_defaults_load_theme(psy_ui_Defaults* self, const char* dir,
 	}	
 	psy_propertyreader_dispose(&propertyreader);
 	psy_property_deallocate(styleconfig);
-	psy_path_dispose(&path);	
+	psy_path_dispose(&path);*/
 }
 
 void psy_ui_defaults_savetheme(psy_ui_Defaults* self, const char* path)

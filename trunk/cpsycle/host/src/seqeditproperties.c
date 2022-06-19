@@ -491,8 +491,8 @@ void seqeditloopproperties_setloopindex(SeqEditLoopProperties* self, uintptr_t l
 }
 
 /* SeqEditProperties */
+
 /* prototypes */
-static void seqeditproperties_on_destroy(SeqEditProperties*);
 static void seqeditproperties_onitemselected(SeqEditProperties*,
 	SeqEditState* sender, uintptr_t itemtype, uintptr_t param, uintptr_t param1);
 static void seqeditproperties_onsequencetrackreposition(SeqEditProperties*,
@@ -501,27 +501,11 @@ static void seqeditproperties_onsongchanged(SeqEditProperties*,
 	Workspace* sender);
 static void seqeditproperties_connectsong(SeqEditProperties*);
 
-/* vtable */
-static psy_ui_ComponentVtable seqeditproperties_vtable;
-static bool seqeditproperties_vtable_initialized = FALSE;
-
-static void seqeditproperties_vtable_init(SeqEditProperties* self)
-{
-	if (!seqeditproperties_vtable_initialized) {
-		seqeditproperties_vtable = *(self->component.vtable);		
-		seqeditproperties_vtable.on_destroy =
-			(psy_ui_fp_component_event)
-			seqeditproperties_on_destroy;
-		seqeditproperties_vtable_initialized = TRUE;
-	}
-	self->component.vtable = &seqeditproperties_vtable;
-}
 /*  implementation */
 void seqeditproperties_init(SeqEditProperties* self, psy_ui_Component* parent,
 	SeqEditState* state)
 {	
 	psy_ui_component_init(&self->component, parent, NULL);	
-	seqeditproperties_vtable_init(self);
 	self->state = state;
 	self->itemtype = SEQEDITITEM_NONE;
 	self->param1 = 0;
@@ -551,11 +535,6 @@ void seqeditproperties_init(SeqEditProperties* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->state->cmds->workspace->signal_songchanged, self,
 		seqeditproperties_onsongchanged);
 	seqeditproperties_connectsong(self);
-}
-
-void seqeditproperties_on_destroy(SeqEditProperties* self)
-{
-
 }
 
 void seqeditproperties_selectitem(SeqEditProperties* self, SeqEditItemType type,

@@ -37,8 +37,8 @@
 #define PSYCLE_USER_DIR "../../../cpsycle"
 #define PSYCLE_USER64_DIR "../../../cpsycle"
 #elif defined(_MSC_VER) && _MSC_VER > 1200
-// #define PSYCLE_RES_DIR ""
-#define PSYCLE_RES_DIR "./src/resources"
+#define PSYCLE_RES_DIR ""
+// #define PSYCLE_RES_DIR "./src/resources"
 #define PSYCLE_APP_DIR "C:\\Program Files (x86)\\Psycle Modular Music Studio"
 #define PSYCLE_APP64_DIR "C:\\Program Files\\Psycle Modular Music Studio"
 #define PSYCLE_USER_DIR "C:\\Program Files (x86)\\Psycle Modular Music Studio"

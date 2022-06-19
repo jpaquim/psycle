@@ -20,7 +20,7 @@ static const char* tws = "tws";
 static const char* mcm = "mcm";
 
 // prototypes
-static void transformpatternview_on_destroy(TransformPatternView*);
+static void transformpatternview_on_destroyed(TransformPatternView*);
 static void transformpatternview_init_search(TransformPatternView*);
 static void transformpatternview_init_replace(TransformPatternView*);
 static void transformpatternview_init_searchon(TransformPatternView*);
@@ -44,6 +44,22 @@ static psy_audio_PatternSearchReplaceMode setupsearchreplacemode(
 	int replnote, int replinst, int replmach, bool repltweak);
 static psy_audio_Pattern* transformpatternview_currpattern(TransformPatternView*);
 
+/* vtable */
+static psy_ui_ComponentVtable vtable;
+static bool vtable_initialized = FALSE;
+
+static void vtable_init(TransformPatternView* self)
+{
+	if (!vtable_initialized) {
+		vtable = *(self->component.vtable);
+		vtable.on_destroyed =
+			(psy_ui_fp_component_event)
+			transformpatternview_on_destroyed;
+		vtable_initialized = TRUE;
+	}
+	psy_ui_component_set_vtable(&self->component, &vtable);
+}
+
 /* implementation */
 void transformpatternview_init(TransformPatternView* self, psy_ui_Component*
 	parent, Workspace* workspace)
@@ -51,6 +67,7 @@ void transformpatternview_init(TransformPatternView* self, psy_ui_Component*
 	assert(self);
 
 	psy_ui_component_init(transformpatternview_base(self), parent, NULL);
+	vtable_init(self);
 	self->workspace = workspace;
 	self->applyto = 0;
 	psy_audio_blockselection_init(&self->patternselection);
@@ -63,15 +80,13 @@ void transformpatternview_init(TransformPatternView* self, psy_ui_Component*
 	transformpatternview_init_replace(self);
 	transformpatternview_init_searchon(self);
 	transformpatternview_init_actions(self);
-	transformpatternview_initselection(self);
-	psy_signal_connect(&self->component.signal_destroy, self,
-		transformpatternview_on_destroy);
+	transformpatternview_initselection(self);	
 	psy_ui_component_set_align(transformpatternview_base(self),
 		psy_ui_ALIGN_RIGHT);
 	psy_ui_component_hide(transformpatternview_base(self));
 }
 
-void transformpatternview_on_destroy(TransformPatternView* self)
+void transformpatternview_on_destroyed(TransformPatternView* self)
 {
 }
 

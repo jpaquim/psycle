@@ -15,8 +15,7 @@
 #include "../../detail/portable.h"
 
 /* prototypes */
-static void instrumentvolumeview_on_destroy(InstrumentVolumeView*,
-	psy_ui_Component* sender);
+static void instrumentvolumeview_on_destroyed(InstrumentVolumeView*);
 static void instrumentvolumeview_updatesliders(InstrumentVolumeView*);
 static void instrumentvolumeview_ondescribe(InstrumentVolumeView*,
 	psy_ui_Slider* sender, char* text);
@@ -28,6 +27,23 @@ static void instrumentvolumeview_ontweaked(InstrumentVolumeView*,
 	psy_ui_Component*, int pointindex);
 static void instrumentvolumeview_onenvelopeviewtweaked(InstrumentVolumeView*,
 	psy_ui_Component*, int pointindex);
+
+/* vtable */
+static psy_ui_ComponentVtable vtable;
+static bool vtable_initialized = FALSE;
+
+static void vtable_init(InstrumentVolumeView* self)
+{
+	if (!vtable_initialized) {
+		vtable = *(self->component.vtable);
+		vtable.on_destroyed =
+			(psy_ui_fp_component_event)
+			instrumentvolumeview_on_destroyed;
+		vtable_initialized = TRUE;
+	}
+	psy_ui_component_set_vtable(&self->component, &vtable);
+}
+
 /* implementation */
 void instrumentvolumeview_init(InstrumentVolumeView* self, 
 	psy_ui_Component* parent, psy_audio_Instruments* instruments, 
@@ -43,8 +59,7 @@ void instrumentvolumeview_init(InstrumentVolumeView* self,
 	self->instruments = instruments;	
 	self->instrument = 0;
 	psy_ui_component_init(&self->component, parent, NULL);
-	psy_signal_connect(&self->component.signal_destroy, self,
-		instrumentvolumeview_on_destroy);
+	vtable_init(self);	
 	psy_signal_init(&self->signal_status);
 	psy_ui_component_set_defaultalign(&self->component, psy_ui_ALIGN_TOP,
 		psy_ui_defaults_vmargin(psy_ui_defaults()));
@@ -76,8 +91,7 @@ void instrumentvolumeview_init(InstrumentVolumeView* self,
 	instrumentvolumeview_updatesliders(self);
 }
 
-void instrumentvolumeview_on_destroy(InstrumentVolumeView* self,
-	psy_ui_Component* sender)
+void instrumentvolumeview_on_destroyed(InstrumentVolumeView* self)
 {
 	psy_signal_dispose(&self->signal_status);
 }
@@ -90,12 +104,12 @@ void instrumentvolumeview_setinstrument(InstrumentVolumeView* self,
 		double dt;
 
 		dt = psy_dsp_envelope_decaytime(&self->instrument->volumeenvelope);
-		adsrsliders_setenvelope(&self->adsrsliders,			
+		adsrsliders_set_envelope(&self->adsrsliders,			
 			&self->instrument->volumeenvelope);
 		envelopeview_setenvelope(&self->envelopeview,
 			&instrument->volumeenvelope);
 	} else {
-		adsrsliders_setenvelope(&self->adsrsliders,	NULL);
+		adsrsliders_set_envelope(&self->adsrsliders,	NULL);
 		envelopeview_setenvelope(&self->envelopeview, NULL);
 	}
 	instrumentvolumeview_updatesliders(self);	

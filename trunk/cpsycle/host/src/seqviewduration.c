@@ -20,14 +20,30 @@
 /* SeqviewDuration */
 
 /* prototypes */
-static void seqviewduration_on_destroy(SeqviewDuration* self,
-	psy_ui_Component* sender);	
+static void seqviewduration_on_destroyed(SeqviewDuration* self);	
+
+/* vtable */
+static psy_ui_ComponentVtable vtable;
+static bool vtable_initialized = FALSE;
+
+static void vtable_init(SeqviewDuration* self)
+{
+	if (!vtable_initialized) {
+		vtable = *(self->component.vtable);
+		vtable.on_destroyed =
+			(psy_ui_fp_component_event)
+			seqviewduration_on_destroyed;
+		vtable_initialized = TRUE;
+	}
+	psy_ui_component_set_vtable(&self->component, &vtable);
+}
 
 /* implementation */
 void seqviewduration_init(SeqviewDuration* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {	
 	psy_ui_component_init(&self->component, parent, NULL);
+	vtable_init(self);
 	self->workspace = workspace;
 	self->duration_ms = 0;
 	self->duration_bts = 0.0;
@@ -44,13 +60,11 @@ void seqviewduration_init(SeqviewDuration* self, psy_ui_Component* parent,
 	psy_ui_label_set_charnumber(&self->duration, 18.0);
 	psy_ui_label_prevent_translation(&self->duration);
 	psy_ui_component_set_style_type(psy_ui_label_base(&self->duration),
-		STYLE_DURATION_TIME);		
-	psy_signal_connect(&self->component.signal_destroy, self,
-		seqviewduration_on_destroy);	
+		STYLE_DURATION_TIME);	
 	seqviewduration_update(self, FALSE);
 }
 
-void seqviewduration_on_destroy(SeqviewDuration* self, psy_ui_Component* sender)
+void seqviewduration_on_destroyed(SeqviewDuration* self)
 {		
 	seqviewduration_stopdurationcalc(self);
 }

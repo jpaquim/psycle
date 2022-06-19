@@ -35,7 +35,7 @@ void psy_ui_styles_init(psy_ui_Styles* self)
 
 void psy_ui_styles_dispose(psy_ui_Styles* self)
 {
-	psy_table_disposeall(&self->styles,
+	psy_table_dispose_all(&self->styles,
 		(psy_fp_disposefunc)psy_ui_style_dispose);
 	psy_property_dispose(&self->config);
 }

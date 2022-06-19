@@ -223,7 +223,7 @@ void newmachinefilter_init(NewMachineFilter* self)
 
 void newmachinefilter_dispose(NewMachineFilter* self)
 {	
-	psy_table_disposeall(&self->categories, NULL);
+	psy_table_dispose_all(&self->categories, NULL);
 	psy_signal_dispose(&self->signal_changed);
 	free(self->text);
 }
@@ -237,7 +237,7 @@ void newmachinefilter_reset(NewMachineFilter* self)
 {	
 	newmachinefilter_setalltypes(self);
 	psy_strreset(&self->text, "");
-	psy_table_disposeall(&self->categories, NULL);
+	psy_table_dispose_all(&self->categories, NULL);
 	psy_table_init(&self->categories);
 	newmachinefilter_notify(self);
 }
@@ -311,7 +311,7 @@ void newmachinefilter_removecategory(NewMachineFilter* self, const char* categor
 
 void newmachinefilter_anycategory(NewMachineFilter* self)
 {
-	psy_table_disposeall(&self->categories, NULL);
+	psy_table_dispose_all(&self->categories, NULL);
 	psy_table_init(&self->categories);
 	newmachinefilter_notify(self);
 }
@@ -415,7 +415,7 @@ void searchfilter(psy_Property* plugin, NewMachineFilter* filter,
 }
 
 /* PluginsView */
-static void pluginsview_on_destroy(PluginsView*);
+static void pluginsview_on_destroyed(PluginsView*);
 static void pluginsview_ondraw(PluginsView*, psy_ui_Graphics*);
 static void pluginsview_drawitem(PluginsView*, psy_ui_Graphics*, psy_Property*,
 	psy_ui_RealPoint topleft, bool sel);
@@ -449,9 +449,9 @@ static void pluginsview_vtable_init(PluginsView* self)
 	if (!pluginsview_vtable_initialized) {
 		pluginsview_vtable = *(self->component.vtable);
 		pluginsview_super_vtable = pluginsview_vtable;
-		pluginsview_vtable.on_destroy =
+		pluginsview_vtable.on_destroyed =
 			(psy_ui_fp_component_event)
-			pluginsview_on_destroy;
+			pluginsview_on_destroyed;
 		pluginsview_vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
 			pluginsview_ondraw;
@@ -498,7 +498,7 @@ void pluginsview_init(PluginsView* self, psy_ui_Component* parent)
 	pluginsview_computetextsizes(self, 1024.0);
 }
 
-void pluginsview_on_destroy(PluginsView* self)
+void pluginsview_on_destroyed(PluginsView* self)
 {	
 	psy_signal_dispose(&self->signal_selected);
 	psy_signal_dispose(&self->signal_changed);

@@ -85,15 +85,6 @@ void pianoroll_scroll_to_order(Pianoroll*);
 void pianoroll_scroll_to_key(Pianoroll*, uint8_t key);
 void pianoroll_update_scroll(Pianoroll*);
 void pianoroll_make_cmds(psy_Property* parent);
-bool pianoroll_handlecommand(Pianoroll*, uintptr_t cmd);
-
-/* block operations */
-void pianoroll_navup(Pianoroll*);
-void pianoroll_navdown(Pianoroll*);
-void pianoroll_enter(Pianoroll*);
-void pianoroll_rowclear(Pianoroll*);
-void pianoroll_blockstart(Pianoroll*);
-void pianoroll_blockend(Pianoroll*);
 
 INLINE psy_ui_Component* pianoroll_base(Pianoroll* self)
 {

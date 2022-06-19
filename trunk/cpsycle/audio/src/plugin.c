@@ -338,13 +338,13 @@ void dispose(psy_audio_Plugin* self)
 
 void disposeparameters(psy_audio_Plugin* self)
 {
-	psy_table_disposeall(&self->parameters, (psy_fp_disposefunc)
+	psy_table_dispose_all(&self->parameters, (psy_fp_disposefunc)
 		psy_audio_pluginmachineparam_dispose);
 }
 
 void clearparameters(psy_audio_Plugin* self)
 {
-	psy_table_disposeall(&self->parameters, (psy_fp_disposefunc)
+	psy_table_dispose_all(&self->parameters, (psy_fp_disposefunc)
 		psy_audio_pluginmachineparam_dispose);	
 	psy_table_init(&self->parameters);
 }

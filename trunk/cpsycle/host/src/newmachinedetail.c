@@ -17,13 +17,13 @@
 /* NewMachineDetail */
 
 /* prototypes */
+static void newmachinedetail_on_destroyed(NewMachineDetail*);
 static void newmachinedetail_onloadnewblitz(NewMachineDetail*,
 	psy_ui_Component* sender);
 static void newmachinedetail_oncategoryeditaccept(NewMachineDetail*,
 	psy_ui_Component* sender);
 static void newmachinedetail_oncategoryeditreject(NewMachineDetail*,
 	psy_ui_Component* sender);
-static void newmachinedetail_on_destroy(NewMachineDetail*);
 
 /* vtable */
 static psy_ui_ComponentVtable newmachinedetail_vtable;
@@ -33,9 +33,9 @@ static void newmachinedetail_vtable_init(NewMachineDetail* self)
 {
 	if (!newmachinedetail_vtable_initialized) {
 		newmachinedetail_vtable = *(self->component.vtable);
-		newmachinedetail_vtable.on_destroy =
+		newmachinedetail_vtable.on_destroyed =
 			(psy_ui_fp_component_event)
-			newmachinedetail_on_destroy;
+			newmachinedetail_on_destroyed;
 		newmachinedetail_vtable_initialized = TRUE;
 	}
 	self->component.vtable = &newmachinedetail_vtable;
@@ -122,7 +122,7 @@ void newmachinedetail_init(NewMachineDetail* self, psy_ui_Component* parent,
 	newmachinedetail_reset(self);
 }
 
-void newmachinedetail_on_destroy(NewMachineDetail* self)
+void newmachinedetail_on_destroyed(NewMachineDetail* self)
 {
 	psy_signal_dispose(&self->signal_categorychanged);
 }

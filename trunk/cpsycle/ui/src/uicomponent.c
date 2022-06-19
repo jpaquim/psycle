@@ -288,7 +288,6 @@ static void invalidate(psy_ui_Component*);
 static uintptr_t section(const psy_ui_Component* self) { return 0; }
 static void setalign(psy_ui_Component* self, psy_ui_AlignType align) {  }
 /* events */
-static void on_destroy(psy_ui_Component* self) {	}
 static void on_destroyed(psy_ui_Component* self) { }
 static void onsize(psy_ui_Component* self) { }
 static void beforealign(psy_ui_Component* self) { }
@@ -438,8 +437,7 @@ static void vtable_init(void)
 		vtable.children = children;
 		vtable.section = section;
 		vtable.setalign = setalign;
-		/* events */
-		vtable.on_destroy = on_destroy;
+		/* events */		
 		vtable.on_destroyed = on_destroyed;
 		vtable.ondraw = NULL;
 		vtable.beforealign = beforealign;
@@ -688,7 +686,7 @@ void psy_ui_component_init_signals(psy_ui_Component* self)
 	psy_signal_init(&self->signal_scrolled);
 	psy_signal_init(&self->signal_create);
 	psy_signal_init(&self->signal_close);
-	psy_signal_init(&self->signal_destroy);	
+	psy_signal_init(&self->signal_destroyed);	
 	psy_signal_init(&self->signal_show);
 	psy_signal_init(&self->signal_hide);	
 	psy_signal_init(&self->signal_focus);
@@ -740,8 +738,10 @@ void psy_ui_component_init_base(psy_ui_Component* self) {
 }
 
 void psy_ui_component_dispose(psy_ui_Component* self)
-{	
-	self->vtable->dispose(self);	
+{		
+	self->vtable->dispose(self);
+	psy_signal_emit(&self->signal_destroyed, self, 0);
+	self->vtable->on_destroyed(self);
 	psy_ui_component_dispose_signals(self);	
 	if (psy_ui_app()->hover == self) {
 		psy_ui_app_set_hover(psy_ui_app(), NULL);
@@ -756,7 +756,7 @@ void psy_ui_component_dispose(psy_ui_Component* self)
 	}
 	psy_ui_bitmap_dispose(&self->bufferbitmap);
 	psy_ui_app_stoptimer(psy_ui_app(), self, psy_INDEX_INVALID);
-	psy_table_remove(&psy_ui_app()->components, (uintptr_t)self);
+	psy_table_remove(&psy_ui_app()->components, (uintptr_t)self);	
 }
 
 void psy_ui_component_dispose_signals(psy_ui_Component* self)
@@ -778,7 +778,7 @@ void psy_ui_component_dispose_signals(psy_ui_Component* self)
 	psy_signal_dispose(&self->signal_scrolled);
 	psy_signal_dispose(&self->signal_create);
 	psy_signal_dispose(&self->signal_close);
-	psy_signal_dispose(&self->signal_destroy);	
+	psy_signal_dispose(&self->signal_destroyed);
 	psy_signal_dispose(&self->signal_show);
 	psy_signal_dispose(&self->signal_hide);	
 	psy_signal_dispose(&self->signal_focus);
@@ -1460,6 +1460,29 @@ psy_ui_Size psy_ui_component_offsetsize(const psy_ui_Component* self)
 		psy_ui_component_parent_const(self)->imp);	
 }
 
+void psy_ui_component_clear(psy_ui_Component* self)
+{
+	psy_List* c;
+	psy_List* p;
+	psy_List* q;
+
+	c = psy_ui_component_children(self, psy_ui_NONE_RECURSIVE);
+	for (p = c; p != NULL; p = q) {
+		psy_ui_Component* component;
+		bool deallocate;
+
+		q = p->next;
+		component = (psy_ui_Component*)psy_list_entry(p);
+		deallocate = component->deallocate;
+		psy_ui_component_destroy(component);
+		if (deallocate) {
+			free(component);
+		}
+	}
+	psy_list_free(c);
+	c = NULL;
+}
+
 void psy_ui_component_setcursor(psy_ui_Component* self, psy_ui_CursorStyle style)
 {
 	self->imp->vtable->dev_setcursor(self->imp, style);
@@ -1471,7 +1494,6 @@ static bool default_tm_initialized = FALSE;
 /* psy_ui_ComponentImp vtable */
 static void dev_dispose(psy_ui_ComponentImp* self) { }
 static void dev_destroy(psy_ui_ComponentImp* self) { }
-static void dev_destroyed(psy_ui_ComponentImp* self) { }
 static void dev_show(psy_ui_ComponentImp* self) { }
 static void dev_showstate(psy_ui_ComponentImp* self, int state) { }
 static void dev_hide(psy_ui_ComponentImp* self) { }
@@ -1549,7 +1571,6 @@ static bool dev_issystem(psy_ui_ComponentImp* self) { return FALSE; }
 static void* dev_platform(psy_ui_ComponentImp* self) { return (void*) self; }
 static uintptr_t dev_platform_handle(psy_ui_ComponentImp* self) { return psy_INDEX_INVALID; }
 static uintptr_t dev_flags(const psy_ui_ComponentImp* self) { return 0; }
-static void dev_clear(psy_ui_ComponentImp* self) {  }
 static void dev_initialized(psy_ui_ComponentImp* self) { }
 
 static psy_ui_ComponentState dev_component_state(const psy_ui_ComponentImp* self)
@@ -1562,14 +1583,13 @@ static void dev_set_component_state(psy_ui_ComponentImp* self,
 }
 
 static psy_ui_ComponentImpVTable imp_vtable;
-static int imp_vtable_initialized = 0;
+static bool imp_vtable_initialized = FALSE;
 
 static void imp_vtable_init(void)
 {
 	if (!imp_vtable_initialized) {
 		imp_vtable.dev_dispose = dev_dispose;
 		imp_vtable.dev_destroy = dev_destroy;
-		imp_vtable.dev_destroyed = dev_destroyed;
 		imp_vtable.dev_show = dev_show;
 		imp_vtable.dev_showstate = dev_showstate;
 		imp_vtable.dev_hide = dev_hide;
@@ -1615,8 +1635,7 @@ static void imp_vtable_init(void)
 		imp_vtable.dev_issystem = dev_issystem;
 		imp_vtable.dev_platform = dev_platform;
 		imp_vtable.dev_platform_handle = dev_platform_handle;
-		imp_vtable.dev_flags = dev_flags;
-		imp_vtable.dev_clear = dev_clear;		
+		imp_vtable.dev_flags = dev_flags;		
 		imp_vtable.dev_initialized = dev_initialized;
 		imp_vtable.dev_component_state = dev_component_state;
 		imp_vtable.dev_set_component_state = dev_set_component_state;

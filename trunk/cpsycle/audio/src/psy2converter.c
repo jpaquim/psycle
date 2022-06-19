@@ -181,7 +181,7 @@ void internalmachinesconvert_init(InternalMachinesConvert* self)
 void internalmachinesconvert_dispose(InternalMachinesConvert* self)
 {
 	pluginnames_dispose(&self->pluginnames);
-	psy_table_disposeall(&self->machine_converted_from,
+	psy_table_dispose_all(&self->machine_converted_from,
 		(psy_fp_disposefunc)NULL);
 }
 

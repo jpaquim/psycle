@@ -53,7 +53,7 @@ void inputdefinerkeynames_dispose(InputDefinerKeyNames* self)
 {
 	assert(self);
 
-	psy_table_disposeall(&self->container, (psy_fp_disposefunc)NULL);
+	psy_table_dispose_all(&self->container, (psy_fp_disposefunc)NULL);
 }
 
 void inputdefinerkeynames_init_keys(InputDefinerKeyNames* self)
@@ -137,7 +137,7 @@ void keynames_release(void)
 /* InputDefiner */
 
 /* prototypes */
-static void inputdefiner_on_destroy(InputDefiner*);
+static void inputdefiner_on_destroyed(InputDefiner*);
 static void inputdefiner_on_draw(InputDefiner*, psy_ui_Graphics*);
 static void inputdefiner_on_mouse_down(InputDefiner*, psy_ui_MouseEvent*);
 static void inputdefiner_on_key_down(InputDefiner*, psy_ui_KeyboardEvent*);
@@ -160,9 +160,9 @@ static void vtable_init(InputDefiner* self)
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
 		super_vtable = *(self->component.vtable);
-		vtable.on_destroy =
+		vtable.on_destroyed =
 			(psy_ui_fp_component_event)
-			inputdefiner_on_destroy;
+			inputdefiner_on_destroyed;
 		vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
 			inputdefiner_on_draw;
@@ -207,7 +207,7 @@ void inputdefiner_init(InputDefiner* self, psy_ui_Component* parent)
 		inputdefiner_on_mouse_hook);	
 }
 
-void inputdefiner_on_destroy(InputDefiner* self)
+void inputdefiner_on_destroyed(InputDefiner* self)
 {	
 	assert(self);
 

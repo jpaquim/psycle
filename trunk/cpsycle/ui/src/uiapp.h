@@ -40,6 +40,7 @@ double psy_ui_appzoom_rate(const psy_ui_AppZoom*);
 void psy_ui_appzoom_update_base_fontsize(psy_ui_AppZoom*, psy_ui_Font*);
 
 struct psy_ui_Component;
+struct psy_ui_ComponentImp;
 
 /* psy_ui_App */
 typedef struct psy_ui_App {
@@ -94,6 +95,10 @@ void psy_ui_app_stopdrag(psy_ui_App*);
 void psy_ui_app_starttimer(psy_ui_App*, struct psy_ui_Component*, uintptr_t id,
 	uintptr_t interval);
 void psy_ui_app_stoptimer(psy_ui_App*, struct psy_ui_Component*, uintptr_t id);
+void psy_ui_app_register_native(psy_ui_App*,
+	uintptr_t handle, struct psy_ui_ComponentImp*, bool top_level);
+void psy_ui_app_unregister_native(psy_ui_App*,
+	uintptr_t handle);
 
 
 INLINE struct psy_ui_Component* psy_ui_app_capture(psy_ui_App* self)
@@ -142,6 +147,8 @@ typedef psy_List* (*psy_ui_fp_appimp_toplevel)(struct psy_ui_AppImp*);
 typedef void (*psy_ui_fp_appimp_onappdefaultschange)(struct psy_ui_AppImp*);
 typedef void (*psy_ui_fp_appimp_startmousehook)(struct psy_ui_AppImp*);
 typedef void (*psy_ui_fp_appimp_stopmousehook)(struct psy_ui_AppImp*);
+typedef void (*psy_ui_fp_appimp_register_native)(struct psy_ui_AppImp*, uintptr_t handle, struct psy_ui_ComponentImp*, bool);
+typedef void (*psy_ui_fp_appimp_unregister_native)(struct psy_ui_AppImp*, uintptr_t handle);
 
 typedef struct psy_ui_AppImpVTable {
 	psy_ui_fp_appimp_dispose dev_dispose;
@@ -154,6 +161,8 @@ typedef struct psy_ui_AppImpVTable {
 	psy_ui_fp_appimp_sendevent dev_sendevent;
 	psy_ui_fp_appimp_component dev_component;
 	psy_ui_fp_appimp_toplevel dev_toplevel;
+	psy_ui_fp_appimp_register_native dev_register_native;
+	psy_ui_fp_appimp_unregister_native dev_unregister_native;
 } psy_ui_AppImpVTable;
 
 typedef struct psy_ui_AppImp {

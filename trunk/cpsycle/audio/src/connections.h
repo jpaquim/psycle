@@ -91,13 +91,13 @@ INLINE void wiresockets_init(psy_audio_WireSockets* self)
 
 INLINE void wiresockets_dispose(psy_audio_WireSockets* self)
 {
-	psy_table_disposeall(&self->sockets, (psy_fp_disposefunc)
+	psy_table_dispose_all(&self->sockets, (psy_fp_disposefunc)
 		psy_audio_wiresocket_dispose);
 }
 
 INLINE void wiresockets_clear(psy_audio_WireSockets* self)
 {
-	psy_table_disposeall(&self->sockets, (psy_fp_disposefunc)
+	psy_table_dispose_all(&self->sockets, (psy_fp_disposefunc)
 		psy_audio_wiresocket_dispose);
 	psy_table_init(&self->sockets);
 }

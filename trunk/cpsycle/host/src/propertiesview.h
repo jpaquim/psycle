@@ -105,7 +105,7 @@ typedef struct PropertiesRenderer {
 void propertiesrenderer_init(PropertiesRenderer*, psy_ui_Component* parent,
 	psy_Property*, uintptr_t numcols);
 
-void propertiesrenderer_setstyle(PropertiesRenderer*,
+void propertiesrenderer_set_style(PropertiesRenderer*,
 	uintptr_t mainsection,
 	uintptr_t mainsectionheader,
 	uintptr_t keystyle,

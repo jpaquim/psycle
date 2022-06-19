@@ -68,9 +68,9 @@ void psy_audio_machinewires_copy(psy_audio_MachineWires* self, psy_audio_Machine
 
 void psy_audio_machinewires_dispose(psy_audio_MachineWires* self)
 {
-	//psy_table_disposeall(&self->wires, (psy_fp_disposefunc)
+	//psy_table_dispose_all(&self->wires, (psy_fp_disposefunc)
 		//psy_audio_legacywire_dispose);
-	psy_table_disposeall(self, (psy_fp_disposefunc)
+	psy_table_dispose_all(self, (psy_fp_disposefunc)
 		psy_audio_legacywire_dispose);
 }
 
@@ -152,7 +152,7 @@ void psy_audio_legacywires_init(psy_audio_LegacyWires* self)
 
 void psy_audio_legacywires_dispose(psy_audio_LegacyWires* self)
 {
-	psy_table_disposeall(&self->legacywires, (psy_fp_disposefunc)
+	psy_table_dispose_all(&self->legacywires, (psy_fp_disposefunc)
 		psy_audio_machinewires_dispose);	
 }
 

@@ -10,7 +10,7 @@
 
 
 /* prototypes */
-static void psy_ui_checkbox_on_destroy(psy_ui_CheckBox*);
+static void psy_ui_checkbox_on_destroyed(psy_ui_CheckBox*);
 static void psy_ui_checkbox_on_mouse_down(psy_ui_CheckBox*, psy_ui_MouseEvent*);
 
 /* vtable */
@@ -25,9 +25,9 @@ static void vtable_init(psy_ui_CheckBox* self)
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
 		super_vtable = *(psy_ui_checkbox_base(self)->vtable);
-		vtable.on_destroy =
+		vtable.on_destroyed =
 			(psy_ui_fp_component_event)
-			psy_ui_checkbox_on_destroy;
+			psy_ui_checkbox_on_destroyed;
 		vtable.on_mouse_down =
 			(psy_ui_fp_component_on_mouse_event)
 			psy_ui_checkbox_on_mouse_down;
@@ -68,7 +68,7 @@ void psy_ui_checkbox_init_text(psy_ui_CheckBox* self, psy_ui_Component* parent,
 	psy_ui_checkbox_settext(self, text);
 }
 
-void psy_ui_checkbox_on_destroy(psy_ui_CheckBox* self)
+void psy_ui_checkbox_on_destroyed(psy_ui_CheckBox* self)
 {	
 	assert(self);
 

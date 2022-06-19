@@ -16,15 +16,15 @@
 
 /* ListBoxClient */
 /* prototypes*/
-static void psy_ui_listboxclient_on_destroy(psy_ui_ListBoxClient*);
-static void psy_ui_listboxclient_ondraw(psy_ui_ListBoxClient*,
+static void psy_ui_listboxclient_on_destroyed(psy_ui_ListBoxClient*);
+static void psy_ui_listboxclient_on_draw(psy_ui_ListBoxClient*,
 	psy_ui_Graphics*);
-static void psy_ui_listboxclient_onpreferredsize(psy_ui_ListBoxClient*,
+static void psy_ui_listboxclient_on_preferred_size(psy_ui_ListBoxClient*,
 	psy_ui_Size* limit, psy_ui_Size* rv);
 static void psy_ui_listboxclient_on_mouse_down(psy_ui_ListBoxClient*,
 	psy_ui_MouseEvent*);
-static void psy_ui_listboxclient_onsize(psy_ui_ListBoxClient*);
-static intptr_t  psy_ui_listboxclient_count(const psy_ui_ListBoxClient* self);
+static void psy_ui_listboxclient_on_size(psy_ui_ListBoxClient*);
+static intptr_t psy_ui_listboxclient_count(const psy_ui_ListBoxClient*);
 
 /* vtable */
 static psy_ui_ComponentVtable psy_ui_listboxclient_vtable;
@@ -34,21 +34,21 @@ static void psy_ui_listboxclient_vtable_init(psy_ui_ListBoxClient* self)
 {
 	if (!psy_ui_listboxclient_vtable_initialized) {
 		psy_ui_listboxclient_vtable = *(self->component.vtable);
-		psy_ui_listboxclient_vtable.on_destroy =
+		psy_ui_listboxclient_vtable.on_destroyed =
 			(psy_ui_fp_component_event)
-			psy_ui_listboxclient_on_destroy;
+			psy_ui_listboxclient_on_destroyed;
 		psy_ui_listboxclient_vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
-			psy_ui_listboxclient_ondraw;
+			psy_ui_listboxclient_on_draw;
 		psy_ui_listboxclient_vtable.onpreferredsize =
 			(psy_ui_fp_component_on_preferred_size)
-			psy_ui_listboxclient_onpreferredsize;
+			psy_ui_listboxclient_on_preferred_size;
 		psy_ui_listboxclient_vtable.on_mouse_down =
 			(psy_ui_fp_component_on_mouse_event)
 			psy_ui_listboxclient_on_mouse_down;
 		psy_ui_listboxclient_vtable.onsize =
 			(psy_ui_fp_component_event)
-			psy_ui_listboxclient_onsize;
+			psy_ui_listboxclient_on_size;
 		psy_ui_listboxclient_vtable_initialized = TRUE;
 	}
 	psy_ui_component_set_vtable(&self->component, &psy_ui_listboxclient_vtable);
@@ -68,13 +68,13 @@ void psy_ui_listboxclient_init(psy_ui_ListBoxClient* self, psy_ui_Component*
 	psy_ui_component_set_overflow(&self->component, psy_ui_OVERFLOW_VSCROLL);
 }
 
-void psy_ui_listboxclient_on_destroy(psy_ui_ListBoxClient* self)
+void psy_ui_listboxclient_on_destroyed(psy_ui_ListBoxClient* self)
 {
 	psy_signal_dispose(&self->signal_selchanged);
-	psy_table_disposeall(&self->items, NULL);
+	psy_table_dispose_all(&self->items, NULL);
 }
 
-void psy_ui_listboxclient_onsize(psy_ui_ListBoxClient* self)
+void psy_ui_listboxclient_on_size(psy_ui_ListBoxClient* self)
 {
 	const psy_ui_TextMetric* tm;
 	int line_height;
@@ -85,7 +85,7 @@ void psy_ui_listboxclient_onsize(psy_ui_ListBoxClient* self)
 		psy_ui_value_make_px(line_height));
 }
 
-void psy_ui_listboxclient_ondraw(psy_ui_ListBoxClient* self, psy_ui_Graphics* g)
+void psy_ui_listboxclient_on_draw(psy_ui_ListBoxClient* self, psy_ui_Graphics* g)
 {
 	psy_TableIterator it;
 	const psy_ui_TextMetric* tm;
@@ -115,7 +115,7 @@ void psy_ui_listboxclient_ondraw(psy_ui_ListBoxClient* self, psy_ui_Graphics* g)
 	}
 }
 
-void psy_ui_listboxclient_onpreferredsize(psy_ui_ListBoxClient* self,
+void psy_ui_listboxclient_on_preferred_size(psy_ui_ListBoxClient* self,
 	psy_ui_Size* limit, psy_ui_Size* rv)
 {
 	const psy_ui_TextMetric* tm;
@@ -146,7 +146,7 @@ void psy_ui_listboxclient_on_mouse_down(psy_ui_ListBoxClient* self,
 void psy_ui_listboxclient_clear(psy_ui_ListBoxClient* self)
 {
 	self->selindex = -1;
-	psy_table_disposeall(&self->items, NULL);
+	psy_table_dispose_all(&self->items, NULL);
 	psy_table_init(&self->items);
 	psy_ui_component_updateoverflow(&self->component);
 	psy_ui_component_invalidate(&self->component);
@@ -186,7 +186,7 @@ intptr_t  psy_ui_listboxclient_count(const psy_ui_ListBoxClient* self)
 }
 
 /* psy_ui_ListBox*/
-static void psy_ui_listbox_on_destroy(psy_ui_ListBox*);
+static void psy_ui_listbox_on_destroyed(psy_ui_ListBox*);
 static void psy_ui_listbox_onpreferredsize(psy_ui_ListBox*,
 	psy_ui_Size* limit, psy_ui_Size* rv);
 static void psy_ui_listbox_onselchanged(psy_ui_ListBox*,
@@ -200,9 +200,9 @@ static void psy_ui_listbox_vtable_init(psy_ui_ListBox* self)
 {
 	if (!psy_ui_listbox_vtable_initialized) {
 		psy_ui_listbox_vtable = *(self->component.vtable);
-		psy_ui_listbox_vtable.on_destroy =
+		psy_ui_listbox_vtable.on_destroyed =
 			(psy_ui_fp_component_event)
-			psy_ui_listbox_on_destroy;
+			psy_ui_listbox_on_destroyed;
 		psy_ui_listbox_vtable.onpreferredsize =
 			(psy_ui_fp_component_on_preferred_size)
 			psy_ui_listbox_onpreferredsize;		
@@ -234,7 +234,7 @@ void psy_ui_listbox_init_multiselect(psy_ui_ListBox* self, psy_ui_Component*
 	psy_ui_listbox_init(self, parent);
 }
 
-void psy_ui_listbox_on_destroy(psy_ui_ListBox* self)
+void psy_ui_listbox_on_destroyed(psy_ui_ListBox* self)
 {
 	psy_signal_dispose(&self->signal_selchanged);
 }

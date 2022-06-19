@@ -9,7 +9,7 @@
 #include "uiprogressbar.h"
 
 /* prototypes */
-static void ondraw(psy_ui_ProgressBar*, psy_ui_Graphics*);
+static void psy_ui_progressbar_ondraw(psy_ui_ProgressBar*, psy_ui_Graphics*);
 
 /* vtable */
 static psy_ui_ComponentVtable vtable;
@@ -21,7 +21,7 @@ static void vtable_init(psy_ui_ProgressBar* self)
 		vtable = *(self->component.vtable);
 		vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
-			ondraw;
+			psy_ui_progressbar_ondraw;
 		vtable_initialized = TRUE;
 	}
 	psy_ui_component_set_vtable(&self->component, &vtable);
@@ -39,7 +39,7 @@ void psy_ui_progressbar_init(psy_ui_ProgressBar* self,
 	self->progress = 0.0;
 }
 
-void ondraw(psy_ui_ProgressBar* self, psy_ui_Graphics* g)
+void psy_ui_progressbar_ondraw(psy_ui_ProgressBar* self, psy_ui_Graphics* g)
 {	
 	psy_ui_RealSize size;	
 	psy_ui_RealRectangle bar;
@@ -52,7 +52,7 @@ void ondraw(psy_ui_ProgressBar* self, psy_ui_Graphics* g)
 		psy_ui_component_colour(progressbar_base(self)));
 }
 
-void psy_ui_progressbar_setprogress(psy_ui_ProgressBar* self, double progress)
+void psy_ui_progressbar_set_progress(psy_ui_ProgressBar* self, double progress)
 {
 	self->progress = progress;
 	psy_ui_component_invalidate(progressbar_base(self));
@@ -61,5 +61,5 @@ void psy_ui_progressbar_setprogress(psy_ui_ProgressBar* self, double progress)
 
 void psy_ui_progressbar_tick(psy_ui_ProgressBar* self)
 {
-	psy_ui_progressbar_setprogress(self, self->progress + 0.01);	
+	psy_ui_progressbar_set_progress(self, self->progress + 0.01);	
 }

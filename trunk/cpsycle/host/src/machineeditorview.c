@@ -10,7 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-static void machineeditorview_on_destroy(MachineEditorView*, psy_ui_Component* sender);
+static void machineeditorview_on_destroyed(MachineEditorView*);
 static void machineeditorview_onpreferredsize(MachineEditorView*,
 	psy_ui_Size* limit, psy_ui_Size* rv);
 static void machineeditorview_on_timer(MachineEditorView*, uintptr_t id);
@@ -31,6 +31,9 @@ static void machineeditorview_vtable_init(MachineEditorView* self)
 {
 	if (!machineeditorview_vtable_initialized) {
 		machineeditorview_vtable = *(self->component.vtable);
+		machineeditorview_vtable.on_destroyed =
+			(psy_ui_fp_component_event)
+			machineeditorview_on_destroyed;
 		machineeditorview_vtable.onpreferredsize =
 			(psy_ui_fp_component_on_preferred_size)
 			machineeditorview_onpreferredsize;
@@ -52,14 +55,12 @@ void machineeditorview_init(MachineEditorView* self, psy_ui_Component* parent,
 #if PSYCLE_USE_TK == PSYCLE_TK_WIN32
 	psy_audio_machine_seteditorhandle(machine,
 		(void*) psy_ui_win_component_details(&self->component)->hwnd);
-#endif
-	psy_signal_connect(&self->component.signal_destroy, self,
-		machineeditorview_on_destroy);
+#endif	
 	psy_signal_connect(&workspace->signal_machineeditresize, self,
 		machineeditorview_onmachineeditresize);	
 }
 
-void machineeditorview_on_destroy(MachineEditorView* self, psy_ui_Component* sender)
+void machineeditorview_on_destroyed(MachineEditorView* self)
 {
 	if (self->machine) {
 		psy_audio_machine_seteditorhandle(self->machine, NULL);

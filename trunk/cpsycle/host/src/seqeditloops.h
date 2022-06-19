@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #if !defined(SEQEDITLOOPS_H)
@@ -29,7 +29,7 @@ typedef struct SeqEditLoopState {
 
 void seqeditloopstate_init(SeqEditLoopState*);
 
-void seqeditloopstate_startdrag(SeqEditLoopState*, psy_audio_PatternNode*);
+void seqeditloopstate_start_drag(SeqEditLoopState*, psy_audio_PatternNode*);
 void seqeditloopstate_remove(SeqEditLoopState*, psy_audio_PatternNode*);
 void seqeditloopstate_reset(SeqEditLoopState*);
 

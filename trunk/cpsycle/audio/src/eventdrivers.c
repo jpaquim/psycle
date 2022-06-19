@@ -72,7 +72,7 @@ void psy_audio_eventdrivers_dispose(psy_audio_EventDrivers* self)
 	self->eventdrivers = NULL;
 	psy_property_deallocate(self->cmds);
 	self->cmds = NULL;
-	psy_table_disposeall(&self->guids, (psy_fp_disposefunc)0);
+	psy_table_dispose_all(&self->guids, (psy_fp_disposefunc)0);
 	psy_signal_dispose(&self->signal_input);
 	psy_eventdriver_release(self->cmddriver);
 	self->cmddriver = NULL;

@@ -80,7 +80,6 @@ static void dev_setbackgroundcolour(psy_ui_x11_ComponentImp*, psy_ui_Colour);
 static void dev_settitle(psy_ui_x11_ComponentImp*, const char* title);
 static void dev_setfocus(psy_ui_x11_ComponentImp*);
 static int dev_hasfocus(psy_ui_x11_ComponentImp*);
-static void dev_clear(psy_ui_x11_ComponentImp*);
 static void dev_initialized(psy_ui_x11_ComponentImp* self) { }
 static psy_ui_RealPoint translatecoords(psy_ui_x11_ComponentImp*,
 	psy_ui_Component* src, psy_ui_Component* dst);
@@ -211,10 +210,7 @@ static void xt_imp_vtable_init(psy_ui_x11_ComponentImp* self)
 			dev_setfocus;
 		vtable.dev_hasfocus =
 			(psy_ui_fp_componentimp_dev_hasfocus)
-			dev_hasfocus;
-		vtable.dev_clear =
-			(psy_ui_fp_componentimp_dev_clear)
-			dev_clear;		
+			dev_hasfocus;		
 		vtable.dev_initialized =
 			(psy_ui_fp_componentimp_dev_initialized)
 			dev_initialized;
@@ -333,12 +329,7 @@ void psy_ui_x11_component_create_window(psy_ui_x11_ComponentImp* self,
 			EnterWindowMask | LeaveWindowMask | FocusChangeMask);
 		self->mapped = TRUE;
 		self->parent = parent;
-    }
-    if (self->parent) {
-		psy_list_free(self->parent->children_nonrec_cache);
-		self->parent->children_nonrec_cache = NULL;
-	}
-    self->children_nonrec_cache = NULL;
+    }    
     if (self->hwnd) {
         GC gc;
 		PlatformXtGC xgc;
@@ -367,11 +358,9 @@ void psy_ui_x11_component_create_window(psy_ui_x11_ComponentImp* self,
 		printf("Failed To Create Component\n");
 		err = 1;
 	} else {
-		psy_table_insert(&x11app->selfmap, (uintptr_t) self->hwnd, self);
-		if ((dwStyle & 2) == 2 ||
-			(dwStyle & 1) == 1) {
-			psy_table_insert(&x11app->toplevelmap, (uintptr_t)self->hwnd, self);
-		}
+		psy_ui_app_register_native(x11app->app,
+			(uintptr_t)self->hwnd, &self->imp,
+			((dwStyle & 2) == 2) || ((dwStyle & 1) == 1));
 	}
 	//if (err == 0 && usecommand) {
 		//psy_table_insert(&winapp->winidmap, winapp->winid, self);
@@ -380,40 +369,15 @@ void psy_ui_x11_component_create_window(psy_ui_x11_ComponentImp* self,
 }
 
 void dev_dispose(psy_ui_x11_ComponentImp* self)
-{
-	psy_ui_X11App* x11app;
+{	
 	psy_List* p;
 	psy_List* q;
 
-    x11app = (psy_ui_X11App*)psy_ui_app()->imp;
-	psy_ui_component_stop_timer(self->component, psy_INDEX_INVALID);    
+	psy_ui_component_stop_timer(self->component, psy_INDEX_INVALID);
+	psy_ui_app_unregister_native(psy_ui_app(), (uintptr_t)self->hwnd);
 	psy_ui_componentimp_dispose(&self->imp);
 	psy_ui_graphics_dispose(&self->g);
-	for (p = self->viewcomponents; p != NULL; psy_list_next(&p)) {
-		psy_ui_Component* component;
-		bool deallocate;
-
-		component = (psy_ui_Component*)psy_list_entry(p);
-		deallocate = component->deallocate;
-		psy_ui_component_destroy(component);
-		if (deallocate) {
-			free(component);
-		}
-	}
-	psy_list_free(self->viewcomponents);
-	self->viewcomponents = NULL;
-	psy_list_free(self->children_nonrec_cache);
-	self->children_nonrec_cache = NULL;
-	psy_list_deallocate(&self->expose_rectangles, NULL);
-}
-
-void dev_clear(psy_ui_x11_ComponentImp* self)
-{
-	psy_List* p;
-	psy_List* q;
-	psy_ui_X11App* x11app;
-
-    x11app = (psy_ui_X11App*)psy_ui_app()->imp;
+	psy_list_deallocate(&self->expose_rectangles, NULL);		
 	for (p = self->viewcomponents; p != NULL; p = q) {
 		psy_ui_Component* component;
 		bool deallocate;
@@ -421,28 +385,13 @@ void dev_clear(psy_ui_x11_ComponentImp* self)
 		q = p->next;
 		component = (psy_ui_Component*)psy_list_entry(p);
 		deallocate = component->deallocate;
-		psy_ui_component_destroy(component);
-		if (deallocate) {
+		psy_ui_component_destroy(component);		
+		if (deallocate) {			
 			free(component);
 		}
 	}
 	psy_list_free(self->viewcomponents);
 	self->viewcomponents = NULL;
-	if (self->component) {
-		psy_List* c;
-		
-		c = psy_ui_component_children(self->component, psy_ui_NONE_RECURSIVE);
-		for (p = c; p != NULL; p = q) {
-			psy_ui_Component* component;
-
-			q = p->next;
-			component = (psy_ui_Component*)psy_list_entry(p);
-			psy_ui_component_destroy(component);
-		}
-		psy_list_free(c);
-	}
-	psy_list_free(self->children_nonrec_cache);
-	self->children_nonrec_cache = NULL;
 }
 
 psy_ui_x11_ComponentImp* psy_ui_x11_componentimp_alloc(void)
@@ -479,25 +428,34 @@ void dev_destroy(psy_ui_x11_ComponentImp* self)
 	psy_ui_X11App* x11app;
 	XEvent event;
 	Window window;
+	bool deallocate;
 
+	deallocate = self->component->deallocate;
     x11app = (psy_ui_X11App*)psy_ui_app()->imp;
 	self->mapped = FALSE;
 	self->visible = FALSE;
 	window = self->hwnd;
+	if (self->parent != NULL) {
+		psy_ui_x11app_flush_events(x11app);
+	}
 	XDestroyWindow(x11app->dpy, window);
-	while (TRUE) {
-        if (XPending(x11app->dpy)) {
-            XNextEvent(x11app->dpy, &event);
-            if (event.type ==  DestroyNotify) {
-                psy_ui_x11app_destroy_window(x11app, event.xany.window);
-                if (window == event.xany.window) {
-                    printf("cleaned up\n");
-                    break;
-                }
-            }
-        } else {
-            break;
-        }
+	if (self->parent == NULL) {
+		XEvent event;	
+		XSync(x11app->dpy, FALSE);
+		while (x11app->running) {
+			if (XPending(x11app->dpy)) {
+				if (XCheckTypedWindowEvent(x11app->dpy, window,
+						DestroyNotify, &event)) {
+					psy_ui_x11app_handle_event(x11app, &event);
+					break;
+				}
+			} else {
+				break;
+			}
+		}
+    } else {	
+		deallocate = self->component->deallocate;
+		psy_ui_x11app_flush_events(x11app);
 	}
 }
 
@@ -829,9 +787,7 @@ void dev_setparent(psy_ui_x11_ComponentImp* self, psy_ui_Component* parent)
 		x11app = (psy_ui_X11App*)psy_ui_app()->imp;
 		parentimp = (psy_ui_x11_ComponentImp*)parent->imp;
 		if (parentimp) {
-			self->parent = parentimp;
-			psy_list_free(self->parent->children_nonrec_cache);
-			self->parent->children_nonrec_cache = NULL;
+			self->parent = parentimp;			
 			XReparentWindow(x11app->dpy,
 				self->hwnd,
 				parentimp->hwnd,
@@ -1023,45 +979,33 @@ psy_List* dev_children(psy_ui_x11_ComponentImp* self, int recursive)
 
 	if (recursive == psy_ui_RECURSIVE) {
 		dev_rec_children(self, &rv);
-	} else {
-		if (self->children_nonrec_cache) {
-			psy_List* p;
+	} else {		
+		Window root_win;
+		Window parent_win;
+		Window* child_windows;
+		int i;
+		int num_child_windows;
+		psy_ui_x11_ComponentImp* imp;
+		psy_ui_X11App* x11app;
 
-			for (p = self->children_nonrec_cache; p != NULL;
-				psy_list_next(&p)) {
-					psy_list_append(&rv, (psy_ui_Component*)
-						psy_list_entry(p));
-			}
-		} else {
-			Window root_win;
-			Window parent_win;
-			Window* child_windows;
-			int i;
-			int num_child_windows;
+		x11app = (psy_ui_X11App*)psy_ui_app()->imp;		
+		XQueryTree(x11app->dpy, self->hwnd,
+			   &root_win,
+			   &parent_win,
+			   &child_windows, &num_child_windows);
+		for (i = 0; i < num_child_windows; ++i) {
+			uintptr_t hwnd;
 			psy_ui_x11_ComponentImp* imp;
-			psy_ui_X11App* x11app;
+			psy_ui_Component* child;
 
-			x11app = (psy_ui_X11App*)psy_ui_app()->imp;
-			XQueryTree(x11app->dpy, self->hwnd,
-				   &root_win,
-				   &parent_win,
-				   &child_windows, &num_child_windows);
-			for (i = 0; i < num_child_windows; ++i) {
-				uintptr_t hwnd;
-				psy_ui_x11_ComponentImp* imp;
-				psy_ui_Component* child;
-
-				hwnd = child_windows[i];
-				imp = psy_table_at(&x11app->selfmap, hwnd);
-				child = imp ? imp->component : 0;
-				if (child) {
-					psy_list_append(&rv, child);
-					psy_list_append(&self->children_nonrec_cache, child);
-				}
+			hwnd = child_windows[i];
+			imp = psy_table_at(&x11app->selfmap, hwnd);
+			child = imp ? imp->component : 0;
+			if (child) {
+				psy_list_append(&rv, child);				
 			}
-			XFree(child_windows);
-
 		}
+		XFree(child_windows);
 	}
 	for (p = self->viewcomponents; p != NULL; psy_list_next(&p)) {
 		psy_list_append(&rv, (psy_ui_Component*)psy_list_entry(p));

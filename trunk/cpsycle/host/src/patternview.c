@@ -14,7 +14,7 @@
 
 /* PatternView */
 /* prototypes */
-static void patternview_on_destroy(PatternView*);
+static void patternview_on_destroyed(PatternView*);
 static void patternview_rebuild(PatternView*);
 static void patternview_on_toggle_properties(PatternView*, PatternViewTabBar*);
 static void patternview_on_song_changed(PatternView*, Workspace* sender);
@@ -49,9 +49,9 @@ static void vtable_init(PatternView* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.on_destroy =
+		vtable.on_destroyed =
 			(psy_ui_fp_component_event)
-			patternview_on_destroy;
+			patternview_on_destroyed;
 		vtable.on_mouse_down =
 			(psy_ui_fp_component_on_mouse_event)
 			patternview_on_mouse_down;
@@ -164,7 +164,7 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 	patternview_rebuild(self);	
 }
 
-void patternview_on_destroy(PatternView* self)
+void patternview_on_destroyed(PatternView* self)
 {	
 	assert(self);
 

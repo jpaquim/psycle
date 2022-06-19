@@ -64,7 +64,7 @@ void psy_audio_duplicatormap_init(psy_audio_DuplicatorMap* self,
 
 void psy_audio_duplicatormap_dispose(psy_audio_DuplicatorMap* self)
 {
-	psy_table_disposeall(&self->outputs, (psy_fp_disposefunc)
+	psy_table_dispose_all(&self->outputs, (psy_fp_disposefunc)
 		duplicatoroutput_dispose);	
 	psy_table_dispose(&self->unavail);		
 }

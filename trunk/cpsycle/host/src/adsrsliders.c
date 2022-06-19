@@ -15,13 +15,30 @@
 #include "../../detail/portable.h"
 
 /* prototypes */
-static void adsrsliders_on_destroy(AdsrSliders*, psy_ui_Component* sender);
-static void adsrsliders_onvolumeviewdescribe(AdsrSliders*,
+static void adsrsliders_on_destroyed(AdsrSliders*);
+static void adsrsliders_on_volume_view_describe(AdsrSliders*,
 	psy_ui_Slider*, char* txt);
-static void adsrsliders_onvolumeviewtweak(AdsrSliders*,
+static void adsrsliders_on_volume_view_tweak(AdsrSliders*,
 	psy_ui_Slider*, float value);
-static void adsrsliders_onvolumeviewvalue(AdsrSliders*,
+static void adsrsliders_on_volume_view_value(AdsrSliders*,
 	psy_ui_Slider*, float* value);
+
+/* vtable */
+static psy_ui_ComponentVtable vtable;
+static bool vtable_initialized = FALSE;
+
+static void vtable_init(AdsrSliders* self)
+{
+	if (!vtable_initialized) {
+		vtable = *(self->component.vtable);
+		vtable.on_destroyed =
+			(psy_ui_fp_component_event)
+			adsrsliders_on_destroyed;
+		vtable_initialized = TRUE;
+	}
+	psy_ui_component_set_vtable(&self->component, &vtable);
+}
+
 /* implementation */
 void adsrsliders_init(AdsrSliders* self, psy_ui_Component* parent)
 {	
@@ -34,19 +51,18 @@ void adsrsliders_init(AdsrSliders* self, psy_ui_Component* parent)
 	};
 	self->envelope = NULL;	
 	psy_ui_component_init(&self->component, parent, NULL);
-	psy_signal_connect(&self->component.signal_destroy, self,
-		adsrsliders_on_destroy);
+	vtable_init(self);	
 	psy_ui_component_set_defaultalign(&self->component, psy_ui_ALIGN_TOP,
 		psy_ui_defaults_vmargin(psy_ui_defaults()));	
 	psy_ui_slider_init(&self->attack, &self->component);
-	psy_ui_slider_settext(&self->attack, "instrumentview.attack");
+	psy_ui_slider_set_text(&self->attack, "instrumentview.attack");
 	psy_ui_slider_init(&self->decay, &self->component);
-	psy_ui_slider_settext(&self->decay, "instrumentview.decay");
+	psy_ui_slider_set_text(&self->decay, "instrumentview.decay");
 	psy_ui_slider_init(&self->sustain, &self->component);
-	psy_ui_slider_settext(&self->sustain, "instrumentview.sustain-level");
+	psy_ui_slider_set_text(&self->sustain, "instrumentview.sustain-level");
 	psy_ui_slider_setdefaultvalue(&self->sustain, 1.0);
 	psy_ui_slider_init(&self->release, &self->component);
-	psy_ui_slider_settext(&self->release, "instrumentview.release");
+	psy_ui_slider_set_text(&self->release, "instrumentview.release");
 	psy_ui_slider_setdefaultvalue(&self->attack, 0.005 /
 		adsrsliders_maxtime(self));
 	psy_ui_slider_setdefaultvalue(&self->decay, 0.005 /
@@ -58,19 +74,19 @@ void adsrsliders_init(AdsrSliders* self, psy_ui_Component* parent)
 		psy_ui_slider_setcharnumber(sliders[i], 21);
 		psy_ui_slider_setvaluecharnumber(sliders[i], 15);
 		psy_ui_slider_connect(sliders[i], self,
-			(ui_slider_fpdescribe)adsrsliders_onvolumeviewdescribe,
-			(ui_slider_fptweak)adsrsliders_onvolumeviewtweak,
-			(ui_slider_fpvalue)adsrsliders_onvolumeviewvalue);
+			(ui_slider_fpdescribe)adsrsliders_on_volume_view_describe,
+			(ui_slider_fptweak)adsrsliders_on_volume_view_tweak,
+			(ui_slider_fpvalue)adsrsliders_on_volume_view_value);
 	}
 	psy_signal_init(&self->signal_tweaked);
 }
 
-void adsrsliders_on_destroy(AdsrSliders* self, psy_ui_Component* sender)
+void adsrsliders_on_destroyed(AdsrSliders* self)
 {
 	psy_signal_dispose(&self->signal_tweaked);
 }
 
-void adsrsliders_setenvelope(AdsrSliders* self,
+void adsrsliders_set_envelope(AdsrSliders* self,
 	psy_dsp_Envelope* envelope)
 {	
 	self->envelope = envelope;
@@ -85,7 +101,7 @@ void adsrsliders_update(AdsrSliders* self)
 	psy_ui_slider_update(&self->release);
 }
 
-void adsrsliders_onvolumeviewdescribe(AdsrSliders* self,
+void adsrsliders_on_volume_view_describe(AdsrSliders* self,
 	psy_ui_Slider* slider, char* txt)
 {
 	if (slider == &self->attack) {
@@ -135,7 +151,7 @@ void adsrsliders_onvolumeviewdescribe(AdsrSliders* self,
 	}
 }
 
-void adsrsliders_onvolumeviewtweak(AdsrSliders* self,
+void adsrsliders_on_volume_view_tweak(AdsrSliders* self,
 	psy_ui_Slider* slider, float value)
 {
 	if (!self->envelope) {
@@ -159,7 +175,7 @@ void adsrsliders_onvolumeviewtweak(AdsrSliders* self,
 	}	
 }
 
-void adsrsliders_onvolumeviewvalue(AdsrSliders* self,
+void adsrsliders_on_volume_view_value(AdsrSliders* self,
 	psy_ui_Slider* slider, float* value)
 {
 	if (slider == &self->attack) {

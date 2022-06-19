@@ -552,8 +552,9 @@ void newmachinesectionsheader_init(NewMachineSectionsHeader* self,
 }
 
 /* NewMachineSectionsPane */
+
 /* prototypes */
-static void newmachinesectionspane_on_destroy(NewMachineSectionsPane*);
+static void newmachinesectionspane_on_destroyed(NewMachineSectionsPane*);
 static void newmachinesectionspane_ontabbarchanged(NewMachineSectionsPane*,
 	psy_ui_TabBar* sender, uintptr_t index);
 static void newmachinesectionspane_buildnavsections(NewMachineSectionsPane*);
@@ -562,6 +563,7 @@ static void newmachinesectionspane_onsectionrenamed(NewMachineSectionsPane*, New
 static void newmachinesectionspane_onsectionchanged(NewMachineSectionsPane*, NewMachineSection* sender);
 static void newmachinesectionspane_onlanguagechanged(NewMachineSectionsPane*);
 static void newmachinesectionpane_on_mouse_down(NewMachineSectionsPane*, psy_ui_MouseEvent*);
+
 /* vtable */
 static psy_ui_ComponentVtable newmachinesectionspane_vtable;
 static bool newmachinesectionspane_vtable_initialized = FALSE;
@@ -570,9 +572,9 @@ static void newmachinesectionspane_vtable_init(NewMachineSectionsPane* self)
 {
 	if (!newmachinesectionspane_vtable_initialized) {
 		newmachinesectionspane_vtable = *(self->component.vtable);
-		newmachinesectionspane_vtable.on_destroy =
+		newmachinesectionspane_vtable.on_destroyed =
 			(psy_ui_fp_component_event)
-			newmachinesectionspane_on_destroy;
+			newmachinesectionspane_on_destroyed;
 		newmachinesectionspane_vtable.on_mouse_down =
 			(psy_ui_fp_component_on_mouse_event)
 			newmachinesectionpane_on_mouse_down;
@@ -583,6 +585,7 @@ static void newmachinesectionspane_vtable_init(NewMachineSectionsPane* self)
 	}
 	self->component.vtable = &newmachinesectionspane_vtable;
 }
+
 /* implementation */
 void newmachinesectionspane_init(NewMachineSectionsPane* self, psy_ui_Component* parent,
 	NewMachine* newmachine, Workspace* workspace)
@@ -622,7 +625,7 @@ void newmachinesectionspane_init(NewMachineSectionsPane* self, psy_ui_Component*
 		psy_ui_SETBACKGROUND);	
 }
 
-void newmachinesectionspane_on_destroy(NewMachineSectionsPane* self)
+void newmachinesectionspane_on_destroyed(NewMachineSectionsPane* self)
 {
 	psy_table_dispose(&self->newmachinesections);
 	newmachinefilter_dispose(&self->filter);
@@ -781,8 +784,9 @@ void newmachinesectionpane_on_mouse_down(NewMachineSectionsPane* self,
 }
 
 /* NewMachine */
+
 /* prototypes */
-static void newmachine_on_destroy(NewMachine*);
+static void newmachine_on_destroyed(NewMachine*);
 static void newmachine_onplugincachechanged(NewMachine*, Workspace*);
 static void newmachine_on_mouse_down(NewMachine*, psy_ui_MouseEvent*);
 static void newmachine_on_focus(NewMachine*, psy_ui_Component* sender);
@@ -809,6 +813,7 @@ static void newmachine_onaddtosection(NewMachine*, psy_ui_Component* sender);
 static void newmachine_onremovefromsection(NewMachine*, psy_ui_Component* sender);
 static bool newmachine_checksection(NewMachine*);
 static bool newmachine_checkplugin(NewMachine*);
+
 /* vtable */
 static psy_ui_ComponentVtable newmachine_vtable;
 static bool newmachine_vtable_initialized = FALSE;
@@ -817,9 +822,9 @@ static void newmachine_vtable_init(NewMachine* self)
 {
 	if (!newmachine_vtable_initialized) {
 		newmachine_vtable = *(self->component.vtable);
-		newmachine_vtable.on_destroy =
+		newmachine_vtable.on_destroyed =
 			(psy_ui_fp_component_event)
-			newmachine_on_destroy;
+			newmachine_on_destroyed;
 		newmachine_vtable.on_mouse_down =
 			(psy_ui_fp_component_on_mouse_event)
 			newmachine_on_mouse_down;				
@@ -827,6 +832,7 @@ static void newmachine_vtable_init(NewMachine* self)
 	}
 	self->component.vtable = &newmachine_vtable;
 }
+
 /* implementation */
 void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 	Workspace* workspace)
@@ -949,7 +955,7 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 	psy_ui_component_show(&self->spacer);
 }
 
-void newmachine_on_destroy(NewMachine* self)
+void newmachine_on_destroyed(NewMachine* self)
 {	
 	newmachinesort_dispose(&self->sort);
 	psy_signal_dispose(&self->signal_selected);	

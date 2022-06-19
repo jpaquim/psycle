@@ -108,11 +108,7 @@ void inputhandler_oneventdriverinput(InputHandler* self,
 		if (emit && slot->type == INPUTHANDLER_FOCUS) {
 			emit = inputhandler_sendmessage(self,
 				INPUTHANDLER_HASFOCUS, slot->context);
-		}
-		if (emit && slot->type == INPUTHANDLER_VIEW) {
-			emit = inputhandler_sendmessage(self,
-				INPUTHANDLER_HASVIEW, (void*)slot->id);
-		}
+		}		
 		if (emit) {
 			self->cmd = psy_eventdriver_getcmd(sender, slot->section);
 			self->sender = sender;

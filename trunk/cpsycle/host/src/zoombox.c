@@ -1,6 +1,6 @@
 /*
 ** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -13,7 +13,7 @@
 #include "../../detail/portable.h"
 
 /* prototypes */
-static void zoombox_on_destroy(ZoomBox*);
+static void zoombox_on_destroyed(ZoomBox*);
 static void zoombox_onzoomin(ZoomBox*, psy_ui_Component* sender);
 static void zoombox_onzoomout(ZoomBox*, psy_ui_Component* sender);
 static void zoombox_onmousewheel(ZoomBox*, psy_ui_MouseEvent*);
@@ -29,9 +29,9 @@ static void vtable_init(ZoomBox* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.on_destroy =
+		vtable.on_destroyed =
 			(psy_ui_fp_component_event)
-			zoombox_on_destroy;
+			zoombox_on_destroyed;
 		vtable.onmousewheel =
 			(psy_ui_fp_component_on_mouse_event)
 			zoombox_onmousewheel;		
@@ -90,7 +90,7 @@ void zoombox_init_connect(ZoomBox* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->signal_changed, context, fp);
 }
 
-void zoombox_on_destroy(ZoomBox* self)
+void zoombox_on_destroyed(ZoomBox* self)
 {
 	assert(self);
 

@@ -321,7 +321,7 @@ void patterntrack_onpreferredsize(PatternTrack* self,
 /* TrackerHeader */
 
 /* prototypes */
-static void trackerheader_on_destroy(TrackerHeader*);
+static void trackerheader_on_destroyed(TrackerHeader*);
 static void trackerheader_onsongchanged(TrackerHeader*, Workspace* sender);
 static void trackerheader_connectsong(TrackerHeader*);
 static void trackerheader_oncursorchanged(TrackerHeader*, psy_audio_Sequence*);
@@ -339,9 +339,9 @@ static void trackerheader_vtable_init(TrackerHeader* self)
 {
 	if (!trackerheader_vtable_initialized) {
 		trackerheader_vtable = *(self->component.vtable);
-		trackerheader_vtable.on_destroy =
+		trackerheader_vtable.on_destroyed =
 			(psy_ui_fp_component_event)
-			trackerheader_on_destroy;
+			trackerheader_on_destroyed;
 		trackerheader_vtable.on_timer =
 			(psy_ui_fp_component_on_timer)
 			trackerheader_on_timer;
@@ -371,7 +371,7 @@ void trackerheader_init(TrackerHeader* self, psy_ui_Component* parent,
 	psy_ui_component_start_timer(&self->component, 0, 50);
 }
 
-void trackerheader_on_destroy(TrackerHeader* self)
+void trackerheader_on_destroyed(TrackerHeader* self)
 {
 	psy_table_dispose(&self->boxes);
 }

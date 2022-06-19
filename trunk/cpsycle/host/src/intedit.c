@@ -17,7 +17,7 @@
 /* IntEdit */
 
 /* prototypes */
-static void intedit_on_destroy(IntEdit*, psy_ui_Component* sender);
+static void intedit_on_destroyed(IntEdit*);
 static void intedit_onlessclicked(IntEdit*, psy_ui_Component* sender);
 static void intedit_onmoreclicked(IntEdit*, psy_ui_Component* sender);
 static void intedit_oneditkeydown(IntEdit*, psy_ui_Component* sender,
@@ -26,12 +26,29 @@ static void intedit_oneditkeyup(IntEdit*, psy_ui_Component* sender,
 	psy_ui_KeyboardEvent*);
 static void intedit_oneditfocuslost(IntEdit*, psy_ui_Component* sender);
 
+/* vtable */
+static psy_ui_ComponentVtable intedit_vtable;
+static bool intedit_vtable_initialized = FALSE;
+
+static void intedit_vtable_init(IntEdit* self)
+{
+	if (!intedit_vtable_initialized) {
+		intedit_vtable = *(self->component.vtable);
+		intedit_vtable.on_destroyed =
+			(psy_ui_fp_component_event)
+			intedit_on_destroyed;		
+		intedit_vtable_initialized = TRUE;
+	}
+	psy_ui_component_set_vtable(&self->component, &intedit_vtable);
+}
+
 /* implementation */
 void intedit_init(IntEdit* self, psy_ui_Component* parent,
 	const char* desc, int value, int minval,
 	int maxval)
 {	
 	psy_ui_component_init(intedit_base(self), parent, NULL);
+	intedit_vtable_init(self);
 	psy_ui_component_set_align_expand(intedit_base(self), psy_ui_HEXPAND);
 	psy_ui_component_set_defaultalign(intedit_base(self), psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
@@ -54,9 +71,7 @@ void intedit_init(IntEdit* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->input.component.signal_keyup, self,
 		intedit_oneditkeyup);
 	psy_signal_connect(&self->input.component.signal_focuslost, self,
-		intedit_oneditfocuslost);
-	psy_signal_connect(&self->component.signal_destroy, self,
-		intedit_on_destroy);
+		intedit_oneditfocuslost);	
 }
 
 void intedit_init_connect(IntEdit* self, psy_ui_Component* parent,
@@ -65,6 +80,11 @@ void intedit_init_connect(IntEdit* self, psy_ui_Component* parent,
 {
 	intedit_init(self, parent, desc, value, minval, maxval);
 	psy_signal_connect(&self->signal_changed, context, fp);
+}
+
+void intedit_on_destroyed(IntEdit* self)
+{
+	psy_signal_dispose(&self->signal_changed);
 }
 
 IntEdit* intedit_alloc(void)
@@ -83,11 +103,6 @@ IntEdit* intedit_allocinit(psy_ui_Component* parent,
 		psy_ui_component_deallocate_after_destroyed(&rv->component);
 	}
 	return rv;
-}
-
-void intedit_on_destroy(IntEdit* self, psy_ui_Component* sender)
-{
-	psy_signal_dispose(&self->signal_changed);
 }
 
 int intedit_value(IntEdit* self)

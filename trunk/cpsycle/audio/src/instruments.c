@@ -26,7 +26,7 @@ void psy_audio_instrumentsgroup_init(psy_audio_InstrumentsGroup* self)
 
 void psy_audio_instrumentsgroup_dispose(psy_audio_InstrumentsGroup* self)
 {
-	psy_table_disposeall(&self->container, (psy_fp_disposefunc)
+	psy_table_dispose_all(&self->container, (psy_fp_disposefunc)
 		psy_audio_instrument_dispose);	
 }
 
@@ -94,7 +94,7 @@ void psy_audio_instruments_init(psy_audio_Instruments* self)
 
 void psy_audio_instruments_dispose(psy_audio_Instruments* self)
 {	
-	psy_table_disposeall(&self->groups, (psy_fp_disposefunc)
+	psy_table_dispose_all(&self->groups, (psy_fp_disposefunc)
 		psy_audio_instrumentsgroup_dispose);
 	psy_signal_dispose(&self->signal_insert);
 	psy_signal_dispose(&self->signal_removed);

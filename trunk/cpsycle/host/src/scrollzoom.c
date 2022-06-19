@@ -1,10 +1,13 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
-#include "scrollzoom.h"
 
+#include "scrollzoom.h"
+/* platform */
 #include "../../detail/portable.h"
 
 enum {
@@ -14,31 +17,42 @@ enum {
 	SCROLLZOOM_DRAG_MOVE
 };
 
-static void scrollzoom_on_destroy(ScrollZoom*, psy_ui_Component* sender);
-static void scrollzoom_ondraw(ScrollZoom*, psy_ui_Graphics*);
+/* prototypes */
+static void scrollzoom_on_destroyed(ScrollZoom*);
+static void scrollzoom_on_draw(ScrollZoom*, psy_ui_Graphics*);
 static void scrollzoom_on_mouse_down(ScrollZoom*, psy_ui_MouseEvent*);
 static void scrollzoom_on_mouse_up(ScrollZoom*, psy_ui_MouseEvent*);
-static void scrollzoom_onmousemove(ScrollZoom*, psy_ui_MouseEvent*);
+static void scrollzoom_on_mouse_move(ScrollZoom*, psy_ui_MouseEvent*);
 
+/* vtable */
 static psy_ui_ComponentVtable scrollzoom_vtable;
 static bool scrollzoom_vtable_initialized = FALSE;
 
 static void scrollzoomvtable_init(ScrollZoom* self)
 {
 	if (!scrollzoom_vtable_initialized) {
-		scrollzoom_vtable = *(self->component.vtable);		
-		scrollzoom_vtable.ondraw = (psy_ui_fp_component_ondraw)scrollzoom_ondraw;
-		scrollzoom_vtable.on_mouse_down = (psy_ui_fp_component_on_mouse_event)
+		scrollzoom_vtable = *(self->component.vtable);
+		scrollzoom_vtable.on_destroyed =
+			(psy_ui_fp_component_event)
+			scrollzoom_on_destroyed;
+		scrollzoom_vtable.ondraw =
+			(psy_ui_fp_component_ondraw)
+			scrollzoom_on_draw;
+		scrollzoom_vtable.on_mouse_down =
+			(psy_ui_fp_component_on_mouse_event)
 			scrollzoom_on_mouse_down;
-		scrollzoom_vtable.on_mouse_move = (psy_ui_fp_component_on_mouse_event)
-			scrollzoom_onmousemove;
-		scrollzoom_vtable.on_mouse_up = (psy_ui_fp_component_on_mouse_event)
+		scrollzoom_vtable.on_mouse_move =
+			(psy_ui_fp_component_on_mouse_event)
+			scrollzoom_on_mouse_move;
+		scrollzoom_vtable.on_mouse_up =
+			(psy_ui_fp_component_on_mouse_event)
 			scrollzoom_on_mouse_up;
 		scrollzoom_vtable_initialized = TRUE;
 	}
-	self->component.vtable = &scrollzoom_vtable;
+	psy_ui_component_set_vtable(&self->component, &scrollzoom_vtable);
 }
 
+/* implementation */
 void scrollzoom_init(ScrollZoom* self, psy_ui_Component* parent)
 {		
 	psy_ui_component_init(&self->component, parent, NULL);
@@ -49,18 +63,16 @@ void scrollzoom_init(ScrollZoom* self, psy_ui_Component* parent)
 	self->dragmode = SCROLLZOOM_DRAG_NONE;
 	self->dragoffset = 0;	
 	psy_signal_init(&self->signal_customdraw);
-	psy_signal_init(&self->signal_zoom);	
-	psy_signal_connect(&self->component.signal_destroy, self,
-		scrollzoom_on_destroy);
+	psy_signal_init(&self->signal_zoom);
 }
 
-void scrollzoom_on_destroy(ScrollZoom* self, psy_ui_Component* sender)
+void scrollzoom_on_destroyed(ScrollZoom* self)
 {
 	psy_signal_dispose(&self->signal_customdraw);
 	psy_signal_dispose(&self->signal_zoom);	
 }
 
-void scrollzoom_ondraw(ScrollZoom* self, psy_ui_Graphics* g)
+void scrollzoom_on_draw(ScrollZoom* self, psy_ui_Graphics* g)
 {	
 	psy_ui_RealSize size;	
 	double zoomleftpx;
@@ -106,7 +118,7 @@ void scrollzoom_on_mouse_down(ScrollZoom* self, psy_ui_MouseEvent* ev)
 	psy_ui_component_capture(&self->component);
 }
 
-void scrollzoom_onmousemove(ScrollZoom* self, psy_ui_MouseEvent* ev)
+void scrollzoom_on_mouse_move(ScrollZoom* self, psy_ui_MouseEvent* ev)
 {	
 	psy_ui_RealSize size;
 

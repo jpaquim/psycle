@@ -20,7 +20,7 @@ void psy_audio_plugincategorylist_init(psy_audio_PluginCategoryList* self)
 
 void psy_audio_plugincategorylist_dispose(psy_audio_PluginCategoryList* self)
 {
-	psy_table_disposeall(&self->container, NULL);
+	psy_table_dispose_all(&self->container, NULL);
 }
 
 const char* psy_audio_plugincategorylist_category(psy_audio_PluginCategoryList* self,

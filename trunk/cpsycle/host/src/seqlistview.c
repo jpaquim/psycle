@@ -17,8 +17,9 @@
 #define COLMAX 13
 
 /* SeqViewTrack */
+
 /* prototypes */
-static void seqviewtrack_on_destroy(SeqViewTrack*);
+static void seqviewtrack_on_destroyed(SeqViewTrack*);
 static void seqviewtrack_on_preferred_size(SeqViewTrack*,
 	const psy_ui_Size* limit, psy_ui_Size* rv);
 static void seqviewtrack_on_draw(SeqViewTrack*, psy_ui_Graphics*);
@@ -45,9 +46,9 @@ static void seqviewtrack_vtable_init(SeqViewTrack* self)
 {
 	if (!seqviewtrack_vtable_initialized) {
 		seqviewtrack_vtable = *(self->component.vtable);
-		seqviewtrack_vtable.on_destroy =
+		seqviewtrack_vtable.on_destroyed =
 			(psy_ui_fp_component_event)
-			seqviewtrack_on_destroy;
+			seqviewtrack_on_destroyed;
 		seqviewtrack_vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
 			seqviewtrack_on_draw;
@@ -110,7 +111,7 @@ SeqViewTrack* seqviewtrack_allocinit(psy_ui_Component* parent,
 	return rv;
 }
 
-void seqviewtrack_on_destroy(SeqViewTrack* self)
+void seqviewtrack_on_destroyed(SeqViewTrack* self)
 {
 	if (&self->state->cmds->workspace->song) {
 		psy_audio_Sequence* sequence;

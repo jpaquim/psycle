@@ -173,7 +173,7 @@ int driver_dispose(psy_EventDriver* driver)
 	psy_property_deallocate(self->configuration);
 	self->configuration = 0;
 	CloseHandle(self->hEvent);	
-	psy_table_disposeall(&self->inputs, (psy_fp_disposefunc)NULL);
+	psy_table_dispose_all(&self->inputs, (psy_fp_disposefunc)NULL);
 	return 0;
 }
 

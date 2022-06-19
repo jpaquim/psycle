@@ -225,10 +225,10 @@ psy_dsp_amp_t waveboxcontext_frame_at(WaveBoxContext* self, float frame)
 }
 
 
+static void wavebox_on_destroyed(WaveBox*);
 static void wavebox_updatetext(WaveBox*);
 static void wavebox_onlanguagechanged(WaveBox*, psy_ui_Component* sender);
 static void wavebox_ondraw(WaveBox*, psy_ui_Graphics*);
-static void wavebox_on_destroy(WaveBox*, psy_ui_Component* sender);
 static void wavebox_on_mouse_down(WaveBox*, psy_ui_Component* sender,
 	psy_ui_MouseEvent*);
 static void wavebox_onmousemove(WaveBox*, psy_ui_Component* sender,
@@ -253,7 +253,10 @@ static bool vtable_initialized = FALSE;
 static void vtable_init(WaveBox* self)
 {
 	if (!vtable_initialized) {
-		vtable = *(self->component.vtable);		
+		vtable = *(self->component.vtable);
+		vtable.on_destroyed =
+			(psy_ui_fp_component_event)
+			wavebox_on_destroyed;
 		vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
 			wavebox_ondraw;
@@ -276,8 +279,7 @@ void wavebox_init(WaveBox* self, psy_ui_Component* parent, Workspace* workspace)
 	self->dragstarted = FALSE;
 	self->drawline = FALSE;
 	waveboxcontext_init(&self->context, &self->component);
-	psy_signal_init(&self->selectionchanged);
-	psy_signal_connect(&self->component.signal_destroy, self, wavebox_on_destroy);
+	psy_signal_init(&self->selectionchanged);	
 	psy_signal_connect(&self->component.signal_mousedown, self,
 		wavebox_on_mouse_down);
 	psy_signal_connect(&self->component.signal_mousemove, self,
@@ -292,7 +294,7 @@ void wavebox_init(WaveBox* self, psy_ui_Component* parent, Workspace* workspace)
 	self->preventselection = FALSE;
 }
 
-void wavebox_on_destroy(WaveBox* self, psy_ui_Component* sender)
+void wavebox_on_destroyed(WaveBox* self)
 {	
 	waveboxcontext_dispose(&self->context);
 	psy_signal_dispose(&self->selectionchanged);

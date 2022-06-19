@@ -533,25 +533,40 @@ void sampleeditor_onscrollzoom_customdraw(SampleEditor* self,
 }
 
 /* prototypes */
-static void samplebox_on_destroy(SampleBox*, psy_ui_Component* sender);
+static void samplebox_on_destroyed(SampleBox*);
 static void samplebox_clearwaveboxes(SampleBox*);
 static void samplebox_buildwaveboxes(SampleBox*, psy_audio_Sample*,
 	WaveBoxLoopViewMode);
 static void samplebox_onselectionchanged(SampleBox*, WaveBox* sender);
+
+/* vtable */
+static psy_ui_ComponentVtable vtable;
+static bool vtable_initialized = FALSE;
+
+static void vtable_init(SampleBox* self)
+{
+	if (!vtable_initialized) {
+		vtable = *(self->component.vtable);
+		vtable.on_destroyed =
+			(psy_ui_fp_component_event)
+			samplebox_on_destroyed;
+		vtable_initialized = TRUE;
+	}
+	psy_ui_component_set_vtable(&self->component, &vtable);
+}
 
 /* implementation */
 void samplebox_init(SampleBox* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {
 	psy_ui_component_init(&self->component, parent, NULL);
+	vtable_init(self);
 	self->workspace = workspace;	
-	psy_table_init(&self->waveboxes);
-	psy_signal_connect(&self->component.signal_destroy, self,
-		samplebox_on_destroy);	
+	psy_table_init(&self->waveboxes);	
 	psy_signal_init(&self->signal_selectionchanged);
 }
 
-void samplebox_on_destroy(SampleBox* self, psy_ui_Component* sender)
+void samplebox_on_destroyed(SampleBox* self)
 {		
 	psy_signal_dispose(&self->signal_selectionchanged);
 	psy_table_dispose(&self->waveboxes);
@@ -667,6 +682,26 @@ void samplebox_onselectionchanged(SampleBox* self, WaveBox* sender)
 	psy_signal_emit(&self->signal_selectionchanged, self, 1, sender);
 }
 
+/* SampleEditor*/
+
+static void sampleeditor_on_destroyed(SampleEditor* self);
+
+/* vtable */
+static psy_ui_ComponentVtable sampleeditor_vtable;
+static bool sampleeditor_vtable_initialized = FALSE;
+
+static void sampleeditor_vtable_init(SampleEditor* self)
+{
+	if (!vtable_initialized) {
+		sampleeditor_vtable = *(self->component.vtable);
+		sampleeditor_vtable.on_destroyed =
+			(psy_ui_fp_component_event)
+			sampleeditor_on_destroyed;
+		sampleeditor_vtable_initialized = TRUE;
+	}
+	psy_ui_component_set_vtable(&self->component, &sampleeditor_vtable);
+}
+
 void sampleeditor_init(SampleEditor* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {
@@ -675,8 +710,7 @@ void sampleeditor_init(SampleEditor* self, psy_ui_Component* parent,
 	self->workspace = workspace;
 	self->loopviewmode = WAVEBOX_LOOPVIEW_CONT_SINGLE;
 	psy_ui_component_init(&self->component, parent, NULL);	
-	psy_signal_connect(&self->component.signal_destroy, self,
-		sampleeditor_on_destroy);	
+	sampleeditor_vtable_init(self);
 	sampleprocessview_init(&self->processview, &self->component, workspace);
 	psy_ui_component_set_align(&self->processview.component, psy_ui_ALIGN_RIGHT);
 	//psy_ui_component_set_margin(&self->processview.component, &margin);
@@ -725,7 +759,7 @@ void sampleeditor_initsampler(SampleEditor* self)
 		psy_audio_MAX_STREAM_SIZE);
 }
 
-void sampleeditor_on_destroy(SampleEditor* self, psy_ui_Component* sender)
+void sampleeditor_on_destroyed(SampleEditor* self)
 {		
 	psy_audio_machine_dispose(&self->sampler.custommachine.machine);	
 	psy_audio_buffer_dispose(&self->samplerbuffer);	

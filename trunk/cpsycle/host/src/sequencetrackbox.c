@@ -8,7 +8,7 @@
 
 // SequenceTrackBox
 // prototypes
-static void sequencetrackbox_on_destroy(SequenceTrackBox*);
+static void sequencetrackbox_on_destroyed(SequenceTrackBox*);
 static void sequencetrackbox_onsolotrack(SequenceTrackBox*, TrackBox* sender);
 static void sequencetrackbox_onmutetrack(SequenceTrackBox*, TrackBox* sender);
 static void sequencetrackbox_onsolochanged(SequenceTrackBox*,
@@ -27,9 +27,9 @@ static void sequencetrackbox_vtable_init(SequenceTrackBox* self)
 {
 	if (!sequencetrackbox_vtable_initialized) {
 		sequencetrackbox_vtable = *(sequencetrackbox_base(self)->vtable);		
-		sequencetrackbox_vtable.on_destroy =
+		sequencetrackbox_vtable.on_destroyed =
 			(psy_ui_fp_component_event)
-			sequencetrackbox_on_destroy;		
+			sequencetrackbox_on_destroyed;		
 		sequencetrackbox_vtable_initialized = TRUE;
 	}
 	psy_ui_component_set_vtable(sequencetrackbox_base(self),
@@ -72,7 +72,7 @@ void sequencetrackbox_init(SequenceTrackBox* self, psy_ui_Component* parent,
 		sequencetrackbox_onlabelclick);	
 }
 
-void sequencetrackbox_on_destroy(SequenceTrackBox* self)
+void sequencetrackbox_on_destroyed(SequenceTrackBox* self)
 {
 	assert(self);
 

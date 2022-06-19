@@ -90,7 +90,6 @@ static const char* dev_title(const psy_ui_win_ComponentImp*);
 static void dev_setfocus(psy_ui_win_ComponentImp*);
 static int dev_hasfocus(psy_ui_win_ComponentImp*);
 
-static void dev_clear(psy_ui_win_ComponentImp*);
 static void dev_initialized(psy_ui_win_ComponentImp* self) { }
 static uintptr_t dev_platform_handle(psy_ui_win_ComponentImp* self) { return (uintptr_t)self->hwnd; }
 static bool dev_issystem(psy_ui_win_ComponentImp* self) { return TRUE; }
@@ -235,9 +234,6 @@ static void win_imp_vtable_init(psy_ui_win_ComponentImp* self)
 		vtable.dev_hasfocus =
 			(psy_ui_fp_componentimp_dev_hasfocus)
 			dev_hasfocus;
-		vtable.dev_clear =
-			(psy_ui_fp_componentimp_dev_clear)
-			dev_clear;
 		vtable.dev_initialized =
 			(psy_ui_fp_componentimp_dev_initialized)
 			dev_initialized;
@@ -328,11 +324,10 @@ void psy_ui_win_component_create_window(psy_ui_win_ComponentImp* self,
 			MB_OK | MB_ICONERROR);
 		err = 1;
 	} else {
-		psy_table_insert(&winapp->selfmap, (uintptr_t)self->hwnd, self);
-		if ((dwStyle & WS_OVERLAPPED) == WS_OVERLAPPED ||
-			(dwStyle & WS_OVERLAPPED) == WS_POPUP) {
-			psy_table_insert(&winapp->toplevelmap, (uintptr_t)self->hwnd, self);
-		}
+		psy_ui_app_register_native(winapp->app, 
+			(uintptr_t)self->hwnd, &self->imp,
+			((dwStyle & WS_OVERLAPPED) == WS_OVERLAPPED) ||
+			((dwStyle & WS_OVERLAPPED) == WS_POPUP));
 	}
 	if (err == 0 && usecommand) {
 		psy_table_insert(&winapp->winidmap, winapp->winid, self);
@@ -382,20 +377,14 @@ void psy_ui_win_component_init_wndproc(psy_ui_win_ComponentImp* self,
 /* win32 implementation method for psy_ui_Component */
 void dev_dispose(psy_ui_win_ComponentImp* self)
 {
-	if (self->background) {
-		DeleteObject(self->background);
-	}
-	psy_ui_componentimp_dispose(&self->imp);
-	dev_clear(self);
-	free(self->title);
-	self->title = NULL;
-}
-
-void dev_clear(psy_ui_win_ComponentImp* self)
-{ 
 	psy_List* p;
 	psy_List* q;
 
+	if (self->background) {
+		DeleteObject(self->background);
+	}
+	psy_ui_app_unregister_native(psy_ui_app(), (uintptr_t)self->hwnd);
+	psy_ui_componentimp_dispose(&self->imp);
 	for (p = self->viewcomponents; p != NULL; p = q) {
 		psy_ui_Component* component;
 		bool deallocate;
@@ -403,27 +392,15 @@ void dev_clear(psy_ui_win_ComponentImp* self)
 		q = p->next;
 		component = (psy_ui_Component*)psy_list_entry(p);
 		deallocate = component->deallocate;
-		psy_ui_component_destroy(component);		
-		if (deallocate) {			
+		psy_ui_component_destroy(component);
+		if (deallocate) {
 			free(component);
 		}
 	}
 	psy_list_free(self->viewcomponents);
-	self->viewcomponents = NULL;	
-
-	if (self->component) {
-		psy_List* c;
-		
-		c = psy_ui_component_children(self->component, psy_ui_NONE_RECURSIVE);
-		for (p = c; p != NULL; p = q) {
-			psy_ui_Component* component;			
-
-			q = p->next;
-			component = (psy_ui_Component*)psy_list_entry(p);			
-			psy_ui_component_destroy(component);			
-		}
-		psy_list_free(c);
-	}
+	self->viewcomponents = NULL;
+	free(self->title);
+	self->title = NULL;
 }
 
 psy_ui_win_ComponentImp* psy_ui_win_componentimp_alloc(void)
@@ -485,7 +462,9 @@ void dev_setshowfullscreen(psy_ui_win_ComponentImp* self, bool fullscreen)
 	RECT fullrect = { 0 };	
 
 	dev_showtaskbar(self, !fullscreen);				
-	SetRect(&fullrect, 0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN));
+	SetRect(&fullrect, 0, 0, 
+		GetSystemMetrics(SM_CXSCREEN),
+		GetSystemMetrics(SM_CYSCREEN));
 	if (fullscreen) {				
 		self->restore_style = windowstyle(self);
 		self->restore_exstyle = windowexstyle(self);		

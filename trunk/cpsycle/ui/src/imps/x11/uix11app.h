@@ -63,7 +63,8 @@ INLINE int psy_ui_x11app_colourindex(psy_ui_X11App* self, psy_ui_Colour colour)
 	return psy_ui_x11colours_index(&self->colourmap, colour);
 }
 
-void psy_ui_x11app_destroy_window(psy_ui_X11App*, Window);
+void psy_ui_x11app_flush_events(psy_ui_X11App*);
+int psy_ui_x11app_handle_event(psy_ui_X11App*, XEvent*);
 
 INLINE void psy_ui_x11app_startgrab(psy_ui_X11App* self, Window w)
 {

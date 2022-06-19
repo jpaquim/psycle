@@ -11,8 +11,6 @@
 
 #include <X11/IntrinsicP.h>
 #include <X11/ShellP.h>
-#include <Xm/Xm.h>
-#include <Xm/Display.h>
 #include <X11/extensions/Xdbe.h>
 
 #ifdef __cplusplus
@@ -42,8 +40,7 @@ typedef struct psy_ui_x11_ComponentImp {
 	int prev_w; // used to detect change with ConfigureNotify that can be
 	int prev_h; // triggered for other reasons than resize		
 	bool mapped;
-	psy_ui_Graphics g;
-	psy_List* children_nonrec_cache;
+	psy_ui_Graphics g;	
 	struct psy_ui_x11_ComponentImp* parent;
 	XdbeBackBuffer d_backBuf;
 	psy_ui_RealRectangle exposearea;

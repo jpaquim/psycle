@@ -56,7 +56,7 @@ void psy_table_dispose(psy_Table* self)
   self->keys = NULL;
 }
 
-void psy_table_disposeall(psy_Table* self, psy_fp_disposefunc disposefunc)
+void psy_table_dispose_all(psy_Table* self, psy_fp_disposefunc disposefunc)
 {
 	psy_TableIterator it;
 

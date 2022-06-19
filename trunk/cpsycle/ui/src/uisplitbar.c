@@ -16,17 +16,17 @@ static void splitter_ondraw(psy_ui_Splitter*, psy_ui_Graphics*);
 static void splitter_on_mouse_down(psy_ui_Splitter*, psy_ui_MouseEvent*);
 static void splitter_onmousemove(psy_ui_Splitter*, psy_ui_MouseEvent*);
 static void splitter_on_mouse_up(psy_ui_Splitter*, psy_ui_MouseEvent*);
-static void splitter_onmouseenter(psy_ui_Splitter*);
-static void splitter_onhide(psy_ui_Splitter*);
-static void splitter_onshow(psy_ui_Splitter*);
+static void splitter_on_mouse_enter(psy_ui_Splitter*);
+static void splitter_on_hide(psy_ui_Splitter*);
+static void splitter_on_show(psy_ui_Splitter*);
 static psy_ui_Component* splitter_prev(psy_ui_Splitter*);
 static psy_ui_Component* splitter_next(psy_ui_Splitter*);
 static void splitter_setcursor(psy_ui_Splitter*);
 static psy_ui_RealPoint splitter_vthumbcenter(const psy_ui_Splitter*);
 static psy_ui_RealPoint splitter_hthumbcenter(const psy_ui_Splitter*);
-static void psy_ui_splitter_onbutton(psy_ui_Splitter*);
-static void psy_ui_splitter_onshowtoggle(psy_ui_Splitter*, psy_ui_Component* sender);
-static void psy_ui_splitter_onhidetoggle(psy_ui_Splitter*, psy_ui_Component* sender);
+static void psy_ui_splitter_on_button(psy_ui_Splitter*);
+static void psy_ui_splitter_on_show_toggle(psy_ui_Splitter*, psy_ui_Component* sender);
+static void psy_ui_splitter_on_hide_toggle(psy_ui_Splitter*, psy_ui_Component* sender);
 
 /* vtable */
 static psy_ui_ComponentVtable vtable;
@@ -55,13 +55,13 @@ static void vtable_init(psy_ui_Splitter* self)
 			splitter_on_mouse_up;
 		vtable.onmouseenter =
 			(psy_ui_fp_component_event)
-			splitter_onmouseenter;
+			splitter_on_mouse_enter;
 		vtable.hide =
 			(psy_ui_fp_component_hide)
-			splitter_onhide;
+			splitter_on_hide;
 		vtable.show =
 			(psy_ui_fp_component_show)
-			splitter_onshow;
+			splitter_on_show;
 		vtable_initialized = TRUE;
 	}
 	self->component.vtable = &vtable;
@@ -349,7 +349,7 @@ void splitter_on_mouse_up(psy_ui_Splitter* self, psy_ui_MouseEvent* ev)
 		psy_ui_STYLESTATE_SELECT);	
 }
 
-void splitter_onmouseenter(psy_ui_Splitter* self)
+void splitter_on_mouse_enter(psy_ui_Splitter* self)
 {		
 	super.onmouseenter(psy_ui_splitter_base(self));
 	splitter_setcursor(self);	
@@ -427,30 +427,30 @@ void splitter_setalign(psy_ui_Splitter* self, psy_ui_AlignType align)
 		: psy_ui_size_make_em(1.5, 0.5));
 }
 
-void splitter_onhide(psy_ui_Splitter* self)
+void splitter_on_hide(psy_ui_Splitter* self)
 {
 	super.hide(&self->component);
 	if (self->toggle && psy_ui_component_visible(self->toggle)) {
 		psy_signal_prevent(&self->toggle->signal_hide, self,
-			psy_ui_splitter_onhidetoggle);
+			psy_ui_splitter_on_hide_toggle);
 		psy_ui_component_hide_align(self->toggle);
 		psy_signal_enable(&self->toggle->signal_hide, self,
-			psy_ui_splitter_onhidetoggle);
+			psy_ui_splitter_on_hide_toggle);
 	}
 	if (self->button) {
 		psy_ui_button_disable_highlight(self->button);
 	}
 }
 
-void splitter_onshow(psy_ui_Splitter* self)
+void splitter_on_show(psy_ui_Splitter* self)
 {
 	super.show(&self->component);
 	if (self->toggle && !psy_ui_component_visible(self->toggle)) {
 		psy_signal_prevent(&self->toggle->signal_show, self,
-			psy_ui_splitter_onshowtoggle);
+			psy_ui_splitter_on_show_toggle);
 		psy_ui_component_show_align(self->toggle);
 		psy_signal_enable(&self->toggle->signal_show, self,
-			psy_ui_splitter_onshowtoggle);
+			psy_ui_splitter_on_show_toggle);
 	}
 	if (self->button) {
 		psy_ui_button_highlight(self->button);
@@ -461,30 +461,30 @@ void psy_ui_splitter_settoggle(psy_ui_Splitter* self, psy_ui_Component* toggle)
 {
 	if (self->toggle) {
 		psy_signal_disconnect(&self->toggle->signal_hide, self,
-			psy_ui_splitter_onhidetoggle);
+			psy_ui_splitter_on_hide_toggle);
 		psy_signal_disconnect(&self->toggle->signal_show, self,
-			psy_ui_splitter_onshowtoggle);
+			psy_ui_splitter_on_show_toggle);
 	}
 	self->toggle = toggle;
 	psy_signal_connect(&self->toggle->signal_hide, self,
-		psy_ui_splitter_onhidetoggle);
+		psy_ui_splitter_on_hide_toggle);
 	psy_signal_connect(&self->toggle->signal_show, self,
-		psy_ui_splitter_onshowtoggle);
+		psy_ui_splitter_on_show_toggle);
 }
 
 void psy_ui_splitter_setbutton(psy_ui_Splitter* self, psy_ui_Button* button)
 {	
 	if (self->button) {
 		psy_signal_disconnect(&self->button->signal_clicked, self,
-			psy_ui_splitter_onbutton);
+			psy_ui_splitter_on_button);
 	}
 	self->button = button;
 	psy_signal_connect(&self->button->signal_clicked, self,
-		psy_ui_splitter_onbutton);
+		psy_ui_splitter_on_button);
 }
 
 
-void psy_ui_splitter_onbutton(psy_ui_Splitter* self)
+void psy_ui_splitter_on_button(psy_ui_Splitter* self)
 {
 	if (psy_ui_component_visible(&self->component)) {
 		psy_ui_component_hide(&self->component);
@@ -493,12 +493,12 @@ void psy_ui_splitter_onbutton(psy_ui_Splitter* self)
 	}
 }
 
-void psy_ui_splitter_onshowtoggle(psy_ui_Splitter* self, psy_ui_Component* sender)
+void psy_ui_splitter_on_show_toggle(psy_ui_Splitter* self, psy_ui_Component* sender)
 {	
 	psy_ui_component_show(&self->component);
 }
 
-void psy_ui_splitter_onhidetoggle(psy_ui_Splitter* self, psy_ui_Component* sender)
+void psy_ui_splitter_on_hide_toggle(psy_ui_Splitter* self, psy_ui_Component* sender)
 {
 	psy_ui_component_hide(&self->component);
 }

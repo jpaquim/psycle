@@ -145,7 +145,7 @@ void initparameters(psy_audio_Duplicator2* self)
 
 void disposeparameters(psy_audio_Duplicator2* self)
 {
-	psy_table_disposeall(&self->parameters, (psy_fp_disposefunc)
+	psy_table_dispose_all(&self->parameters, (psy_fp_disposefunc)
 		psy_audio_custommachineparam_dispose);
 }
 

@@ -383,7 +383,7 @@ void psy_audio_sequence_initsignals(psy_audio_Sequence* self)
 
 void psy_audio_sequence_dispose(psy_audio_Sequence* self)
 {
-	psy_table_disposeall(&self->tracks, (psy_fp_disposefunc)
+	psy_table_dispose_all(&self->tracks, (psy_fp_disposefunc)
 		psy_audio_sequencetrack_dispose);
 	psy_audio_sequencetrack_dispose(&self->globaltrack);	
 	psy_audio_trackstate_dispose(&self->trackstate);	
@@ -431,7 +431,7 @@ void psy_audio_sequence_copy(psy_audio_Sequence* self, psy_audio_Sequence* other
 
 void psy_audio_sequence_clear(psy_audio_Sequence* self)
 {
-	psy_table_disposeall(&self->tracks, (psy_fp_disposefunc)
+	psy_table_dispose_all(&self->tracks, (psy_fp_disposefunc)
 		psy_audio_sequencetrack_dispose);
 	psy_table_init(&self->tracks);	
 	psy_audio_trackstate_dispose(&self->trackstate);

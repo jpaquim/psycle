@@ -10,7 +10,7 @@
 // platform
 #include "../../detail/portable.h"
 
-static void machinesbox_on_destroy(MachinesBox*, psy_ui_Component*);
+static void machinesbox_on_destroyed(MachinesBox*);
 static void machinesbox_clearmachinebox(MachinesBox*);
 static void machinesbox_buildmachineslist(MachinesBox*);
 static void machinesbox_insertslot(MachinesBox*, uintptr_t slot, psy_audio_Machine*);
@@ -25,10 +25,27 @@ static void machinesbox_on_key_down(MachinesBox*, psy_ui_Component*, psy_ui_Keyb
 static void machinesbox_onkeyup(MachinesBox*, psy_ui_Component*, psy_ui_KeyboardEvent*);
 static bool machinesbox_testmachinemode(const MachinesBox*, uintptr_t index);
 
+/* vtable */
+static psy_ui_ComponentVtable vtable;
+static bool vtable_initialized = FALSE;
+
+static void vtable_init(MachinesBox* self)
+{
+	if (!vtable_initialized) {
+		vtable = *(self->component.vtable);
+		vtable.on_destroyed =
+			(psy_ui_fp_component_event)
+			machinesbox_on_destroyed;
+		vtable_initialized = TRUE;
+	}
+	psy_ui_component_set_vtable(&self->component, &vtable);
+}
+
 void machinesbox_init(MachinesBox* self, psy_ui_Component* parent,
 	psy_audio_Machines* machines, MachineBoxMode mode, Workspace* workspace)
 {	
 	psy_ui_component_init(&self->component, parent, NULL);
+	vtable_init(self);
 	psy_ui_component_set_style_types(&self->component, STYLE_MACHINEBOX,
 		psy_INDEX_INVALID, psy_INDEX_INVALID, psy_INDEX_INVALID);
 	self->workspace = workspace;
@@ -40,16 +57,14 @@ void machinesbox_init(MachinesBox* self, psy_ui_Component* parent,
 	psy_ui_component_set_align(&self->listbox.component, psy_ui_ALIGN_CLIENT);
 	machinesbox_setmachines(self, machines);
 	psy_signal_connect(&self->listbox.signal_selchanged, self,
-		machinesbox_onlistboxselected);
-	psy_signal_connect(&self->listbox.component.signal_destroy, self,
-		machinesbox_on_destroy);
+		machinesbox_onlistboxselected);	
 	psy_signal_connect(&self->listbox.component.signal_keydown, self,
 		machinesbox_on_key_down);
 	psy_signal_connect(&self->listbox.component.signal_keyup, self,
 		machinesbox_onkeyup);
 }
 
-void machinesbox_on_destroy(MachinesBox* self, psy_ui_Component* component)
+void machinesbox_on_destroyed(MachinesBox* self)
 {
 	psy_table_dispose(&self->listboxslots);
 	psy_table_dispose(&self->slotslistbox);
