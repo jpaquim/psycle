@@ -1063,18 +1063,18 @@ void psy_audio_mixer_dispose(psy_audio_Mixer* self)
 
 void psy_audio_mixer_dispose_channels(psy_audio_Mixer* self)
 {	
-	psy_table_disposeall(&self->inputs, (psy_fp_disposefunc)
+	psy_table_dispose_all(&self->inputs, (psy_fp_disposefunc)
 		inputchannel_dispose);
 }
 
 void psy_audio_mixer_dispose_sends(psy_audio_Mixer* self)
 {	
-	psy_table_disposeall(&self->sends, (psy_fp_disposefunc)NULL);
+	psy_table_dispose_all(&self->sends, (psy_fp_disposefunc)NULL);
 }
 
 void psy_audio_mixer_dispose_returns(psy_audio_Mixer* self)
 {
-	psy_table_disposeall(&self->returns, (psy_fp_disposefunc)
+	psy_table_dispose_all(&self->returns, (psy_fp_disposefunc)
 		returnchannel_dispose);	
 }
 
@@ -2328,11 +2328,11 @@ void postreturnchannels(psy_audio_Mixer* self, psy_audio_SongFile* songfile, uin
 void psy_audio_mixer_clearlegacywires(psy_audio_Mixer* self)
 {
 	{ // return
-		psy_table_disposeall(&self->legacyreturn_, (psy_fp_disposefunc)NULL);	
+		psy_table_dispose_all(&self->legacyreturn_, (psy_fp_disposefunc)NULL);	
 		psy_table_init(&self->legacyreturn_);
 	}
 	{ // send
-		psy_table_disposeall(&self->legacysend_, (psy_fp_disposefunc) NULL);
+		psy_table_dispose_all(&self->legacysend_, (psy_fp_disposefunc) NULL);
 		psy_table_init(&self->legacysend_);
 	}
 }

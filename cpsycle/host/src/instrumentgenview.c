@@ -140,7 +140,7 @@ void instrumentgeneralview_init(InstrumentGeneralView* self,
 	psy_ui_component_set_align(&self->notemapview.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_checkbox_settext(&self->fitrowcheck,
 		"instrumentview.play-sample-to-fit");
-	psy_ui_slider_settext(&self->globalvolume,
+	psy_ui_slider_set_text(&self->globalvolume,
 		"instrumentview.global-volume");
 	instrumentgeneralview_updateslider(self);
 }

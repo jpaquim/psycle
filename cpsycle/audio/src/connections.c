@@ -341,7 +341,7 @@ void psy_audio_connections_init(psy_audio_Connections* self)
 
 void psy_audio_connections_dispose(psy_audio_Connections* self)
 {
-	psy_table_disposeall(&self->container, (psy_fp_disposefunc)
+	psy_table_dispose_all(&self->container, (psy_fp_disposefunc)
 		psy_audio_machinesockets_dispose);	
 	psy_table_dispose(&self->sends);
 	psy_signal_dispose(&self->signal_connected);
@@ -352,7 +352,7 @@ void psy_audio_connections_copy(psy_audio_Connections* self, psy_audio_Connectio
 {	
 	psy_TableIterator it;
 
-	psy_table_disposeall(&self->container, (psy_fp_disposefunc)
+	psy_table_dispose_all(&self->container, (psy_fp_disposefunc)
 		psy_audio_machinesockets_dispose);	
 	psy_table_dispose(&self->sends);
 	psy_table_init(&self->container); 

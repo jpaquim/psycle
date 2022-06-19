@@ -93,7 +93,7 @@ void psy_audio_activechannels_dispose(psy_audio_ActiveChannels* self)
 {	
 	assert(self);
 
-	psy_table_disposeall(&self->channels,
+	psy_table_dispose_all(&self->channels,
 		(psy_fp_disposefunc)psy_audio_activechannelmacs_dispose);
 }
 
@@ -109,7 +109,7 @@ void psy_audio_activechannels_reset(psy_audio_ActiveChannels* self)
 {
 	assert(self);
 
-	psy_table_disposeall(&self->channels,
+	psy_table_dispose_all(&self->channels,
 		(psy_fp_disposefunc)psy_audio_activechannelmacs_dispose);
 	psy_table_init(&self->channels);
 }

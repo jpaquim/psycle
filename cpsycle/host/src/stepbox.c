@@ -1,6 +1,6 @@
 /*
 ** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -14,6 +14,7 @@
 static void patterncursorstepbox_build(PatternCursorStepBox*);
 static void patterncursorstepbox_onselectionchanged(PatternCursorStepBox*,
 	psy_ui_Component* sender, int index);
+
 /* implementation */
 void patterncursorstepbox_init(PatternCursorStepBox* self, psy_ui_Component*
 	parent, Workspace* workspace)

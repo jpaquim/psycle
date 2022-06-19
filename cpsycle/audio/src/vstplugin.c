@@ -263,7 +263,7 @@ void disposeparameters(psy_audio_VstPlugin* self)
 {
 	assert(self);
 
-	psy_table_disposeall(&self->parameters, (psy_fp_disposefunc)
+	psy_table_dispose_all(&self->parameters, (psy_fp_disposefunc)
 		psy_audio_vstpluginparam_dispose);	
 }
 

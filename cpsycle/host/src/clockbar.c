@@ -32,7 +32,7 @@ static void vtable_init(ClockBar* self)
 			clockbar_on_timer;
 		vtable_initialized = TRUE;
 	}
-	self->component.vtable = &vtable;
+	psy_ui_component_set_vtable(&self->component, &vtable);
 }
 
 /* implementation */

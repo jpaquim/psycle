@@ -39,7 +39,7 @@ void psy_translator_dispose(psy_Translator* self)
 {
 	assert(self);
 
-	psy_table_disposeall(&self->container, NULL);
+	psy_table_dispose_all(&self->container, NULL);
 	free(self->testid);
 	self->testid = NULL;
 	psy_signal_dispose(&self->signal_languagechanged);
@@ -58,7 +58,7 @@ void psy_translator_reset(psy_Translator* self)
 {
 	assert(self);
 	
-	psy_table_disposeall(&self->container, NULL);
+	psy_table_dispose_all(&self->container, NULL);
 	psy_table_init_keysize(&self->container, HASHSIZE);
 }
 

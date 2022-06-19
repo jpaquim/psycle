@@ -1,28 +1,32 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "trackbox.h"
-// ui
+/* ui */
 #include <uiapp.h>
-// platform
+/* platform */
 #include "../../detail/portable.h"
 
-// TrackBox
+
+/* prototypes */
+static void trackbox_on_destroyed(TrackBox*);
 static void trackbox_updatetrack(TrackBox*);
 static void trackbox_onmute(TrackBox*, psy_ui_Button* sender);
 static void trackbox_onsolo(TrackBox*, psy_ui_Button* sender);
 static void trackbox_onclose(TrackBox*, psy_ui_Button* sender);
 static void trackbox_onresizemousedown(TrackBox*, psy_ui_Component* sender,
-	psy_ui_MouseEvent* ev);
+	psy_ui_MouseEvent*);
 static void trackbox_onresizemousemove(TrackBox*, psy_ui_Component* sender,
-	psy_ui_MouseEvent* ev);
+	psy_ui_MouseEvent*);
 static void trackbox_onresizemouseup(TrackBox*, psy_ui_Component* sender,
-	psy_ui_MouseEvent* ev);
-// prototypes
-static void trackbox_on_destroy(TrackBox*);
-// vtable
+	psy_ui_MouseEvent*);
+
+/* vtable */
 static psy_ui_ComponentVtable trackbox_vtable;
 static bool trackbox_vtable_initialized = FALSE;
 
@@ -30,12 +34,12 @@ static void trackbox_vtableinit_init(TrackBox* self)
 {
 	if (!trackbox_vtable_initialized) {
 		trackbox_vtable = *(self->component.vtable);
-		trackbox_vtable.on_destroy =
+		trackbox_vtable.on_destroyed =
 			(psy_ui_fp_component_event)
-			trackbox_on_destroy;
+			trackbox_on_destroyed;
 		trackbox_vtable_initialized = TRUE;
 	}
-	self->component.vtable = &trackbox_vtable;
+	psy_ui_component_set_vtable(&self->component, &trackbox_vtable);
 }
 
 /* implementation */
@@ -68,6 +72,7 @@ void trackbox_init(TrackBox* self, psy_ui_Component* parent)
 	self->doresize = FALSE;
 	self->baseheight = 0.0;
 	self->dragoffset = 0.0;
+	self->trackidx = psy_INDEX_INVALID;
 	/* track number */
 	psy_ui_label_init(&self->track, &self->client);
 	psy_ui_label_set_textalignment(&self->track, psy_ui_ALIGNMENT_CENTER);
@@ -87,6 +92,7 @@ void trackbox_init(TrackBox* self, psy_ui_Component* parent)
 	psy_ui_button_prevent_translation(&self->close);
 	psy_ui_button_set_text(&self->close, "X");
 	self->close.stoppropagation = FALSE;
+	self->closeprevented = FALSE;
 	psy_ui_component_set_align(psy_ui_button_base(&self->close),
 		psy_ui_ALIGN_RIGHT);
 	psy_signal_init(&self->signal_mute);
@@ -96,12 +102,10 @@ void trackbox_init(TrackBox* self, psy_ui_Component* parent)
 	psy_signal_connect(&self->mute.signal_clicked, self, trackbox_onmute);
 	psy_signal_connect(&self->solo.signal_clicked, self, trackbox_onsolo);
 	psy_signal_connect(&self->close.signal_clicked, self, trackbox_onclose);	
-	self->trackidx = psy_INDEX_INVALID;
-	self->closeprevented = FALSE;
 	trackbox_updatetrack(self);
 }
 
-void trackbox_on_destroy(TrackBox* self)
+void trackbox_on_destroyed(TrackBox* self)
 {
 	psy_signal_dispose(&self->signal_mute);
 	psy_signal_dispose(&self->signal_solo);

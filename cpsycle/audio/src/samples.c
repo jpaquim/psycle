@@ -44,7 +44,7 @@ void samplesgroup_dispose(psy_audio_SamplesGroup* self)
 {
 	assert(self);
 
-	psy_table_disposeall(&self->container, (psy_fp_disposefunc)
+	psy_table_dispose_all(&self->container, (psy_fp_disposefunc)
 		psy_audio_sample_dispose);	
 }
 
@@ -139,7 +139,7 @@ void psy_audio_samples_dispose(psy_audio_Samples* self)
 {	
 	assert(self);
 
-	psy_table_disposeall(&self->groups, (psy_fp_disposefunc)
+	psy_table_dispose_all(&self->groups, (psy_fp_disposefunc)
 		samplesgroup_dispose);	
 	psy_signal_dispose(&self->signal_insert);
 	psy_signal_dispose(&self->signal_removed);

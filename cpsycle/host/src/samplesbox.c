@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -10,7 +10,8 @@
 /* platform */
 #include "../../detail/portable.h"
 
-static void samplesbox_on_destroy(SamplesBox*);
+/* prototypes */
+static void samplesbox_on_destroyed(SamplesBox*);
 static void samplesbox_buildsamplelist(SamplesBox*);
 static void samplesbox_buildsubsamplelist(SamplesBox*, uintptr_t slot, bool create);
 static void samplesbox_onsampleinsert(SamplesBox*, psy_ui_Component* sender,
@@ -22,6 +23,22 @@ static void samplesbox_onsamplelistchanged(SamplesBox*, psy_ui_Component* sender
 static void samplesbox_onsubsamplelistchanged(SamplesBox*, psy_ui_Component* sender,
 	int slot);
 
+/* vtable */
+static psy_ui_ComponentVtable vtable;
+static bool vtable_initialized = FALSE;
+
+static void vtable_init(SamplesBox* self)
+{
+	if (!vtable_initialized) {
+		vtable = *(self->component.vtable);
+		vtable.on_destroyed =
+			(psy_ui_fp_component_event)
+			samplesbox_on_destroyed;
+		vtable_initialized = TRUE;
+	}
+	psy_ui_component_set_vtable(&self->component, &vtable);
+}
+
 void samplesbox_init(SamplesBox* self, psy_ui_Component* parent,
 	psy_audio_Samples* samples, Workspace* workspace)
 {	
@@ -29,6 +46,7 @@ void samplesbox_init(SamplesBox* self, psy_ui_Component* parent,
 
 	psy_ui_margin_init_em(&margin, 0.0, 0.0, 1.0, 0.0);	
 	psy_ui_component_init(&self->component, parent, NULL);
+	vtable_init(self);
 	psy_ui_label_init(&self->header, &self->component);
 	psy_ui_label_set_text(&self->header, "samplesview.groupsfirstsample");
 	psy_ui_label_set_charnumber(&self->header, 25);
@@ -47,8 +65,6 @@ void samplesbox_init(SamplesBox* self, psy_ui_Component* parent,
 	psy_ui_component_set_align(&self->group.component, psy_ui_ALIGN_BOTTOM);
 	psy_ui_component_set_margin(&self->group.component, margin);	
 	psy_signal_init(&self->signal_changed);
-	psy_signal_connect(&self->component.signal_destroy, self,
-		samplesbox_on_destroy);
 	psy_ui_component_set_margin(&self->samplelist.component, margin);
 	samplesbox_setsamples(self, samples);	
 	psy_signal_connect(&self->samplelist.signal_selchanged, self,
@@ -57,7 +73,7 @@ void samplesbox_init(SamplesBox* self, psy_ui_Component* parent,
 		samplesbox_onsubsamplelistchanged);	
 }
 
-void samplesbox_on_destroy(SamplesBox* self)
+void samplesbox_on_destroyed(SamplesBox* self)
 {
 	psy_signal_dispose(&self->signal_changed);
 }

@@ -14,7 +14,7 @@
 
 /* PatternDefaultLine */
 /* prototypes */
-static void patterndefaultline_on_destroy(PatternDefaultLine*);
+static void patterndefaultline_on_destroyed(PatternDefaultLine*);
 static void patterndefaultline_on_configure(PatternDefaultLine*,
 	PatternViewConfig*, psy_Property*);
 static void patterndefaultline_on_cursor_changed(PatternDefaultLine*,
@@ -28,9 +28,9 @@ static void vtable_init(PatternDefaultLine* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.on_destroy =
+		vtable.on_destroyed =
 			(psy_ui_fp_component_event)
-			patterndefaultline_on_destroy;
+			patterndefaultline_on_destroyed;
 		vtable_initialized = TRUE;
 	}
 	psy_ui_component_set_vtable(&self->component, &vtable);
@@ -83,7 +83,7 @@ void patterndefaultline_init(PatternDefaultLine* self, psy_ui_Component* parent,
 		patterndefaultline_on_configure);	
 }
 
-void patterndefaultline_on_destroy(PatternDefaultLine* self)
+void patterndefaultline_on_destroyed(PatternDefaultLine* self)
 {	
 	trackerstate_dispose(&self->state);
 	patternviewstate_dispose(&self->pvstate_default_line);

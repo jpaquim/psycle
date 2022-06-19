@@ -77,7 +77,7 @@ INLINE bool psy_table_empty(const psy_Table* self)
 /// Deallocates all entries of the table and disposes the table
 /// For all entries: disposefunc is not NULL, call disposefunc, then
 /// always (even if disposefunc is NULL) free entry
-void psy_table_disposeall(psy_Table* self, psy_fp_disposefunc disposefunc);
+void psy_table_dispose_all(psy_Table* self, psy_fp_disposefunc disposefunc);
 
 uintptr_t psy_strhash(const char* str);
 

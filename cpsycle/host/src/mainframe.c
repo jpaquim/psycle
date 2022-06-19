@@ -29,7 +29,7 @@ void links_init(Links* self)
 
 void links_dispose(Links* self)
 {
-	psy_table_disposeall(&self->container, (psy_fp_disposefunc)link_dispose);
+	psy_table_dispose_all(&self->container, (psy_fp_disposefunc)link_dispose);
 }
 
 void links_add(Links* self, const Link* link)
@@ -930,19 +930,19 @@ void mainframe_on_view_selected(MainFrame* self, Workspace* sender, uintptr_t in
 	if (index == VIEW_ID_CHECKUNSAVED) {
 		if (options == CONFIRM_CLOSE) {
 			self->checkunsavedbox.mode = (ConfirmBoxAction)options;
-			confirmbox_setlabels(&self->checkunsavedbox,
+			confirmbox_set_labels(&self->checkunsavedbox,
 				"msg.psyexit", "msg.saveexit", "msg.nosaveexit");
 		} else if (options == CONFIRM_NEW) {
 			self->checkunsavedbox.mode = (ConfirmBoxAction)options;
-			confirmbox_setlabels(&self->checkunsavedbox,
+			confirmbox_set_labels(&self->checkunsavedbox,
 				"msg.newsong", "msg.savenew", "msg.nosavenew");
 		} else if (options == CONFIRM_LOAD) {
 			self->checkunsavedbox.mode = (ConfirmBoxAction)options;
-			confirmbox_setlabels(&self->checkunsavedbox,
+			confirmbox_set_labels(&self->checkunsavedbox,
 				"msg.loadsong", "msg.saveload", "msg.nosaveload");
 		} else if (options == CONFIRM_SEQUENCECLEAR) {
 			self->checkunsavedbox.mode = (ConfirmBoxAction)options;
-			confirmbox_setlabels(&self->checkunsavedbox,
+			confirmbox_set_labels(&self->checkunsavedbox,
 				"msg.seqclear", "msg.yes", "msg.no");
 		}
 	}
@@ -1489,15 +1489,12 @@ void mainframe_on_mouse_up(MainFrame* self, psy_ui_MouseEvent* ev)
 	self->allow_frame_move = FALSE;
 }
 
-
 bool mainframe_on_input_handler_callback(MainFrame* self, int message,
 	void* param1)
 {
 	switch (message) {
 	case INPUTHANDLER_HASFOCUS:
-		return (psy_ui_component_has_focus((psy_ui_Component*)param1));
-	case INPUTHANDLER_HASVIEW:
-		return (workspace_current_view(&self->workspace).id == (uintptr_t)param1);
+		return (psy_ui_component_has_focus((psy_ui_Component*)param1));	
 	default:
 		return FALSE;
 	}

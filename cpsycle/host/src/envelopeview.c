@@ -16,7 +16,7 @@
 #include "../../detail/portable.h"
 
 /* prototypes */
-static void envelopebox_on_destroy(EnvelopeBox*);
+static void envelopebox_on_destroyed(EnvelopeBox*);
 static void envelopebox_ondraw(EnvelopeBox*, psy_ui_Graphics*);
 static void envelopebox_drawgrid(EnvelopeBox*, psy_ui_Graphics*);
 static void envelopebox_drawpoints(EnvelopeBox*, psy_ui_Graphics*);
@@ -43,9 +43,9 @@ static void envelopebox_vtable_init(EnvelopeBox* self)
 {
 	if (!envelopebox_vtable_initialized) {
 		envelopebox_vtable = *(self->component.vtable);
-		envelopebox_vtable.on_destroy =
+		envelopebox_vtable.on_destroyed =
 			(psy_ui_fp_component_event)
-			envelopebox_on_destroy;
+			envelopebox_on_destroyed;
 		envelopebox_vtable.onsize =
 			(psy_ui_fp_component_event)
 			envelopebox_onsize;
@@ -65,6 +65,7 @@ static void envelopebox_vtable_init(EnvelopeBox* self)
 	}
 	self->component.vtable = &envelopebox_vtable;
 }
+
 /* implementation */
 void envelopebox_init(EnvelopeBox* self, psy_ui_Component* parent)
 {				
@@ -92,17 +93,18 @@ void envelopebox_init(EnvelopeBox* self, psy_ui_Component* parent)
 	psy_signal_init(&self->signal_tweaked);
 }
 
+
+void envelopebox_on_destroyed(EnvelopeBox* self)
+{
+	psy_signal_dispose(&self->signal_tweaked);
+}
+
 void envelopebox_setenvelope(EnvelopeBox* self,
 	psy_dsp_Envelope* settings)
 {	
 	self->settings = settings;
 	self->modamount = 1.f;
 	psy_ui_component_invalidate(&self->component);
-}
-
-void envelopebox_on_destroy(EnvelopeBox* self)
-{
-	psy_signal_dispose(&self->signal_tweaked);
 }
 
 void envelopebox_ondraw(EnvelopeBox* self, psy_ui_Graphics* g)
@@ -603,7 +605,7 @@ void envelopebar_onticks(EnvelopeBar* self, psy_ui_Component* sender)
 }
 
 // EnvelopeView
-static void envelopeview_on_destroy(EnvelopeView*);
+static void envelopeview_on_destroyed(EnvelopeView*);
 static void envelopeview_onzoom(EnvelopeView*, ScrollZoom* sender);
 static void envelopeview_onpredefs(EnvelopeView* self, psy_ui_Button* sender);
 static void envelopeview_onenable(EnvelopeView*, psy_ui_CheckBox* sender);
@@ -620,8 +622,9 @@ static psy_ui_ComponentVtable* envelopeview_vtable_init(EnvelopeView* self)
 {
 	if (!envelopeview_vtable_initialized) {
 		envelopeview_vtable = *(self->component.vtable);
-		envelopeview_vtable.on_destroy = (psy_ui_fp_component_destroy)
-			envelopeview_on_destroy;
+		envelopeview_vtable.on_destroyed =
+			(psy_ui_fp_component_destroy)
+			envelopeview_on_destroyed;
 		envelopeview_vtable_initialized = TRUE;
 	}
 	return &envelopeview_vtable;
@@ -661,7 +664,7 @@ void envelopeview_init(EnvelopeView* self, psy_ui_Component* parent)
 		envelopeview_ontweaked);	
 }
 
-void envelopeview_on_destroy(EnvelopeView* self)
+void envelopeview_on_destroyed(EnvelopeView* self)
 {
 	psy_signal_dispose(&self->signal_tweaked);
 }

@@ -15,7 +15,7 @@
 
 
 /* prototypes */
-static void mainviewbar_on_destroy(MainViewBar*);
+static void mainviewbar_on_destroyed(MainViewBar*);
 static void mainviewbar_init_navigation(MainViewBar*, Workspace*);
 static void mainviewbar_init_main_tabbar(MainViewBar*);
 static void mainviewbar_init_help_settings_tabbar(MainViewBar*s);
@@ -31,9 +31,9 @@ static void vtable_init(MainViewBar* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.on_destroy =
+		vtable.on_destroyed =
 			(psy_ui_fp_component_event)
-			mainviewbar_on_destroy;
+			mainviewbar_on_destroyed;
 		vtable_initialized = TRUE;
 	}
 	psy_ui_component_set_vtable(mainviewbar_base(self), &vtable);
@@ -81,7 +81,7 @@ void mainviewbar_init(MainViewBar* self, psy_ui_Component* parent,
 	minmaximize_init(&self->minmaximize, pane);
 }
 
-void mainviewbar_on_destroy(MainViewBar* self)
+void mainviewbar_on_destroyed(MainViewBar* self)
 {
 	minmaximize_dispose(&self->minmaximize);
 }

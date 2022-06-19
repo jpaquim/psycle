@@ -14,10 +14,7 @@
 
 #define TIMEBAR_REFRESHRATE 50
 
-/*
-** TimeBar
-** prototypes
-*/
+/* prototypes */
 static void timebar_onlesslessclicked(TimeBar*, psy_ui_Button* sender);
 static void timebar_onlessclicked(TimeBar*, psy_ui_Button* sender);
 static void timebar_onmoreclicked(TimeBar*, psy_ui_Button* sender);
@@ -25,6 +22,7 @@ static void timebar_onmoremoreclicked(TimeBar*, psy_ui_Button* sender);
 static void timebar_on_timer(TimeBar*, uintptr_t timerid);
 static void timebar_offsetbpm(TimeBar*, psy_dsp_big_beat_t bpm);
 static void timebar_updatebpmlabel(TimeBar*);
+
 /* vtable */
 static psy_ui_ComponentVtable vtable;
 static bool vtable_initialized = FALSE;
@@ -42,6 +40,7 @@ static void vtable_init(TimeBar* self)
 	}
 	psy_ui_component_set_vtable(timebar_base(self), &vtable);
 }
+
 /* implementation */
 void timebar_init(TimeBar* self, psy_ui_Component* parent,
 	psy_audio_Player* player)

@@ -228,7 +228,7 @@ void instrumentkeyboardview_updatemetrics(InstrumentKeyboardView* self)
 
 /* InstrumentEntryView */
 /* prototypes */
-static void instrumententryview_on_destroy(InstrumentEntryView*);
+static void instrumententryview_on_destroyed(InstrumentEntryView*);
 static void instrumententryview_onpreferredsize(InstrumentEntryView*,
 	psy_ui_Size* limit, psy_ui_Size* rv);
 static void instrumententryview_ondraw(InstrumentEntryView*, psy_ui_Graphics*);
@@ -257,9 +257,9 @@ static void instrumententryview_vtable_init(InstrumentEntryView* self)
 {
 	if (!instrumententryview_vtable_initialized) {
 		instrumententryview_vtable = *(self->component.vtable);
-		instrumententryview_vtable.on_destroy =
+		instrumententryview_vtable.on_destroyed =
 			(psy_ui_fp_component_event)
-			instrumententryview_on_destroy;
+			instrumententryview_on_destroyed;
 		instrumententryview_vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
 			instrumententryview_ondraw;
@@ -306,7 +306,7 @@ void instrumententryview_init(InstrumentEntryView* self,
 	psy_ui_component_set_overflow(&self->component, psy_ui_OVERFLOW_VSCROLL);
 }
 
-void instrumententryview_on_destroy(InstrumentEntryView* self)
+void instrumententryview_on_destroyed(InstrumentEntryView* self)
 {	
 	psy_signal_disconnect(&self->state->signal_select, self,
 		instrumententryview_onentryselected);
@@ -751,7 +751,7 @@ void instrumententrystate_dispose(InstrumentEntryState* self)
 {
 	psy_signal_dispose(&self->signal_select);
 	psy_signal_dispose(&self->signal_entrychanged);
-	psy_table_disposeall(&self->columns, (psy_fp_disposefunc)
+	psy_table_dispose_all(&self->columns, (psy_fp_disposefunc)
 		instrumententrytablecolumn_dispose);
 }
 
@@ -917,7 +917,7 @@ void instrumententrytableviewheader_onpreferredsize(InstrumentEntryTableViewHead
 
 /* InstrumentEntryRow */
 /* prototypes */
-static void instrumententryrow_on_destroy(InstrumentEntryRow*);
+static void instrumententryrow_on_destroyed(InstrumentEntryRow*);
 static void instrumententryrow_ondraw(InstrumentEntryRow*, psy_ui_Graphics*);
 static void instrumententryrow_onpreferredsize(InstrumentEntryRow*,
 		const psy_ui_Size* limit, psy_ui_Size* rv);
@@ -945,9 +945,9 @@ static void instrumententryrow_vtableinit_init(InstrumentEntryRow* self)
 {
 	if (!instrumententryrow_vtable_initialized) {
 		instrumententryrow_vtable = *(self->component.vtable);
-		instrumententryrow_vtable.on_destroy =
+		instrumententryrow_vtable.on_destroyed =
 			(psy_ui_fp_component_event)
-			instrumententryrow_on_destroy;
+			instrumententryrow_on_destroyed;
 		instrumententryrow_vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
 			instrumententryrow_ondraw;
@@ -1007,7 +1007,7 @@ InstrumentEntryRow* instrumententryrow_allocinit(
 	return rv;
 }
 
-void instrumententryrow_on_destroy(InstrumentEntryRow* self)
+void instrumententryrow_on_destroyed(InstrumentEntryRow* self)
 {	
 	self->state->curredit = NULL;
 	psy_signal_disconnect(&self->state->signal_select, self,
@@ -1205,7 +1205,7 @@ void instrumententryrow_updatestyles(InstrumentEntryRow* self)
 
 /* InstrumentEntryTableView */
 /* prototypes */
-static void instrumententrytableview_on_destroy(InstrumentEntryTableView*);
+static void instrumententrytableview_on_destroyed(InstrumentEntryTableView*);
 static void instrumententrytableview_onpreferredsize(InstrumentEntryTableView*,
 	const psy_ui_Size* limit, psy_ui_Size* rv);
 static void instrumententrytableview_ondraw(InstrumentEntryTableView*,
@@ -1218,9 +1218,9 @@ static void instrumententrytableview_vtable_init(InstrumentEntryTableView* self)
 {
 	if (!instrumententrytableview_vtable_initialized) {
 		instrumententrytableview_vtable = *(self->component.vtable);
-		instrumententryview_vtable.on_destroy =
+		instrumententryview_vtable.on_destroyed =
 			(psy_ui_fp_component_event)
-			instrumententrytableview_on_destroy;
+			instrumententrytableview_on_destroyed;
 		instrumententrytableview_vtable.onpreferredsize =
 			(psy_ui_fp_component_on_preferred_size)
 			instrumententrytableview_onpreferredsize;		
@@ -1248,7 +1248,7 @@ void instrumententrytableview_init(InstrumentEntryTableView* self,
 	psy_ui_component_set_overflow(&self->component, psy_ui_OVERFLOW_VSCROLL);
 }
 
-void instrumententrytableview_on_destroy(InstrumentEntryTableView* self)
+void instrumententrytableview_on_destroyed(InstrumentEntryTableView* self)
 {	
 }
 
@@ -1309,8 +1309,9 @@ void instrumentnotemapbuttons_init(InstrumentNoteMapButtons* self,
 }
 
 /* InstrumentNoteMapView */
+
 /* prototypes */
-static void instrumentnotemapview_on_destroy(InstrumentNoteMapView*);	
+static void instrumentnotemapview_on_destroyed(InstrumentNoteMapView*);	
 static void instrumentnotemapview_initentries(InstrumentNoteMapView*,
 	Workspace*);
 static void instrumentnotemapview_inittable(InstrumentNoteMapView*,
@@ -1327,6 +1328,7 @@ static void instrumentnotemapview_onentryupdate(
 	InstrumentNoteMapView*, InstrumentEntryState* sender,
 	psy_audio_InstrumentEntry*);
 static void instrumentnotemapview_onlanguagechanged(InstrumentNoteMapView*);
+
 /* vtable */
 static psy_ui_ComponentVtable instrumentnotemapview_vtable;
 static bool instrumentnotemapview_vtable_initialized = FALSE;
@@ -1335,9 +1337,9 @@ static void instrumentnotemapview_vtable_init(InstrumentNoteMapView* self)
 {
 	if (!instrumentnotemapview_vtable_initialized) {
 		instrumentnotemapview_vtable = *(self->component.vtable);
-		instrumentnotemapview_vtable.on_destroy =
+		instrumentnotemapview_vtable.on_destroyed =
 			(psy_ui_fp_component_event)
-			instrumentnotemapview_on_destroy;
+			instrumentnotemapview_on_destroyed;
 		instrumentnotemapview_vtable.onlanguagechanged =
 			(psy_ui_fp_component_onlanguagechanged)
 			instrumentnotemapview_onlanguagechanged;
@@ -1345,6 +1347,7 @@ static void instrumentnotemapview_vtable_init(InstrumentNoteMapView* self)
 	}
 	self->component.vtable = &instrumentnotemapview_vtable;
 }
+
 /* implementation */
 void instrumentnotemapview_init(InstrumentNoteMapView* self,
 	psy_ui_Component* parent, Workspace* workspace)
@@ -1387,7 +1390,7 @@ void instrumentnotemapview_init(InstrumentNoteMapView* self,
 		instrumentnotemapview_onentryupdate);
 }
 
-void instrumentnotemapview_on_destroy(InstrumentNoteMapView* self)
+void instrumentnotemapview_on_destroyed(InstrumentNoteMapView* self)
 {
 	instrumententrystate_dispose(&self->state);
 }

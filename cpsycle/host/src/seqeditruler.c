@@ -20,8 +20,9 @@
 #define DEFAULT_PXPERBEAT 10.0
 
 /* SeqEditRuler */
+
 /* prototypes */
-static void seqeditruler_on_destroy(SeqEditRuler*);
+static void seqeditruler_on_destroyed(SeqEditRuler*);
 static void seqeditruler_ondraw(SeqEditRuler*, psy_ui_Graphics*);
 static void seqeditruler_drawruler(SeqEditRuler*, psy_ui_Graphics*,
 	double baseline);
@@ -44,9 +45,9 @@ static void seqeditruler_vtable_init(SeqEditRuler* self)
 {
 	if (!seqeditruler_vtable_initialized) {
 		seqeditruler_vtable = *(self->component.vtable);
-		seqeditruler_vtable.on_destroy =
+		seqeditruler_vtable.on_destroyed =
 			(psy_ui_fp_component_event)
-			seqeditruler_on_destroy;
+			seqeditruler_on_destroyed;
 		seqeditruler_vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
 			seqeditruler_ondraw;
@@ -66,6 +67,7 @@ static void seqeditruler_vtable_init(SeqEditRuler* self)
 	}
 	self->component.vtable = &seqeditruler_vtable;
 }
+
 /* implementation */
 void seqeditruler_init(SeqEditRuler* self, psy_ui_Component* parent,
 	SeqEditState* state)
@@ -82,7 +84,7 @@ void seqeditruler_init(SeqEditRuler* self, psy_ui_Component* parent,
 		seqeditruler_oncursorchanged);		
 }
 
-void seqeditruler_on_destroy(SeqEditRuler* self)
+void seqeditruler_on_destroyed(SeqEditRuler* self)
 {
 	psy_signal_disconnect(
 		&self->state->workspace->song->sequence.sequenceselection.signal_select,

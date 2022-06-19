@@ -420,6 +420,16 @@ static void psy_ui_appimp_sendevent(psy_ui_AppImp* self,
 {
 }
 
+static void psy_ui_appimp_register_native(psy_ui_AppImp* self,
+		uintptr_t handle, psy_ui_ComponentImp* imp, bool top_level)
+{
+}
+
+static void psy_ui_appimp_unregister_native(psy_ui_AppImp* self,
+	uintptr_t handle)
+{
+}
+
 static psy_ui_Component* psy_ui_appimp_component(psy_ui_AppImp* self,
 	uintptr_t platformhandle)
 {
@@ -447,6 +457,8 @@ static void imp_vtable_init(void)
 		imp_vtable.dev_sendevent = psy_ui_appimp_sendevent;
 		imp_vtable.dev_component = psy_ui_appimp_component;
 		imp_vtable.dev_toplevel = psy_ui_appimp_toplevel;
+		imp_vtable.dev_register_native = psy_ui_appimp_register_native;
+		imp_vtable.dev_unregister_native = psy_ui_appimp_unregister_native;
 		imp_vtable_initialized = TRUE;
 	}
 }
@@ -535,6 +547,17 @@ void psy_ui_app_starttimer(psy_ui_App* self, psy_ui_Component* component, uintpt
 void psy_ui_app_stoptimer(psy_ui_App* self, psy_ui_Component* component, uintptr_t id)
 {
 	psy_timers_removetimer(&self->wintimers, (uintptr_t)component, id);
+}
+
+void psy_ui_app_register_native(psy_ui_App* self, uintptr_t handle,
+	psy_ui_ComponentImp* imp, bool top_level)
+{
+	self->imp->vtable->dev_register_native(self->imp, handle, imp, top_level);
+}
+
+void psy_ui_app_unregister_native(psy_ui_App* self, uintptr_t handle)
+{
+	self->imp->vtable->dev_unregister_native(self->imp, handle);
 }
 
 /*

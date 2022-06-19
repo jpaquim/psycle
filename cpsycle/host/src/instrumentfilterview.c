@@ -15,8 +15,7 @@
 #include "../../detail/portable.h"
 
 /* prototypes */
-static void instrumentfilterview_on_destroy(InstrumentFilterView*,
-	psy_ui_Component* sender);
+static void instrumentfilterview_on_destroyed(InstrumentFilterView*);
 static void instrumentfilterview_updateslider(InstrumentFilterView*);
 static void instrumentfilterview_fillfiltercombobox(InstrumentFilterView*);
 static void instrumentfilterview_ondescribe(InstrumentFilterView*,
@@ -31,6 +30,22 @@ static void instrumentfilterview_ontweaked(InstrumentFilterView*,
 	psy_ui_Component*, int pointindex);
 static void instrumentfilterview_onenvelopeviewtweaked(InstrumentFilterView*,
 	psy_ui_Component* sender, int pointindex);
+
+/* vtable */
+static psy_ui_ComponentVtable instrumentfilterview_vtable;
+static bool instrumentfilterview_vtable_initialized = FALSE;
+
+static void instrumentfilterview_vtable_init(InstrumentFilterView* self)
+{
+	if (!instrumentfilterview_vtable_initialized) {
+		instrumentfilterview_vtable = *(self->component.vtable);
+		instrumentfilterview_vtable.on_destroyed =
+			(psy_ui_fp_component_event)
+			instrumentfilterview_on_destroyed;
+		instrumentfilterview_vtable_initialized = TRUE;
+	}
+	psy_ui_component_set_vtable(&self->component, &instrumentfilterview_vtable);
+}
 
 /* implementation */
 void instrumentfilterview_init(InstrumentFilterView* self,
@@ -50,8 +65,7 @@ void instrumentfilterview_init(InstrumentFilterView* self,
 	self->instruments = instruments;
 	self->instrument = NULL;
 	psy_ui_component_init(&self->component, parent, NULL);
-	psy_signal_connect(&self->component.signal_destroy, self,
-		instrumentfilterview_on_destroy);
+	instrumentfilterview_vtable_init(self);	
 	psy_signal_init(&self->signal_status);
 	psy_ui_component_set_defaultalign(&self->component, psy_ui_ALIGN_TOP,
 		psy_ui_defaults_vmargin(psy_ui_defaults()));
@@ -76,11 +90,11 @@ void instrumentfilterview_init(InstrumentFilterView* self,
 	psy_signal_connect(&self->filtertype.signal_selchanged, self,
 		instrumentfilterview_onfiltercomboboxchanged);
 	psy_ui_slider_init(&self->randomcutoff, &self->top);
-	psy_ui_slider_settext(&self->randomcutoff, "Random Cutoff");
+	psy_ui_slider_set_text(&self->randomcutoff, "Random Cutoff");
 	psy_ui_slider_setdefaultvalue(&self->randomcutoff, 0.0);
 	psy_ui_slider_init(&self->randomresonance, &self->top);
 	psy_ui_slider_setdefaultvalue(&self->randomresonance, 0.0);
-	psy_ui_slider_settext(&self->randomresonance, "Random Res");
+	psy_ui_slider_set_text(&self->randomresonance, "Random Res");
 	envelopeview_init(&self->envelopeview, &self->component);
 	psy_ui_component_set_align(&self->envelopeview.component,
 		psy_ui_ALIGN_CLIENT);
@@ -106,12 +120,12 @@ void instrumentfilterview_init(InstrumentFilterView* self,
 		instrumentfilterview_ontweaked);
 	psy_ui_slider_init(&self->cutoff, &self->bottom);
 	psy_ui_slider_setdefaultvalue(&self->cutoff, 1.0);
-	psy_ui_slider_settext(&self->cutoff, "instrumentview.cut-off");
+	psy_ui_slider_set_text(&self->cutoff, "instrumentview.cut-off");
 	psy_ui_slider_init(&self->res, &self->bottom);
 	psy_ui_slider_setdefaultvalue(&self->res, 0.0);
-	psy_ui_slider_settext(&self->res, "instrumentview.res");	
+	psy_ui_slider_set_text(&self->res, "instrumentview.res");	
 	psy_ui_slider_init(&self->modamount, &self->bottom);
-	psy_ui_slider_settext(&self->modamount, "instrumentview.mod");
+	psy_ui_slider_set_text(&self->modamount, "instrumentview.mod");
 	psy_ui_slider_setdefaultvalue(&self->modamount, 1.0);
 	for (i = 0; i < 5; ++i) {				
 		psy_ui_slider_setcharnumber(sliders[i], 18);
@@ -126,8 +140,7 @@ void instrumentfilterview_init(InstrumentFilterView* self,
 		instrumentfilterview_onenvelopeviewtweaked);
 }
 
-void instrumentfilterview_on_destroy(InstrumentFilterView* self,
-	psy_ui_Component* sender)
+void instrumentfilterview_on_destroyed(InstrumentFilterView* self)
 {
 	psy_signal_dispose(&self->signal_status);
 }
@@ -162,7 +175,7 @@ void instrumentfilterview_setinstrument(InstrumentFilterView* self,
 {	
 	self->instrument = instrument;
 	if (self->instrument) {
-		adsrsliders_setenvelope(&self->adsrsliders,
+		adsrsliders_set_envelope(&self->adsrsliders,
 			&self->instrument->filterenvelope);
 		envelopeview_setenvelope(&self->envelopeview,
 			&instrument->filterenvelope);		
@@ -171,7 +184,7 @@ void instrumentfilterview_setinstrument(InstrumentFilterView* self,
 		psy_ui_combobox_setcursel(&self->filtertype,
 			(intptr_t)instrument->filtertype);
 	} else {
-		adsrsliders_setenvelope(&self->adsrsliders,
+		adsrsliders_set_envelope(&self->adsrsliders,
 			NULL);
 		envelopeview_setenvelope(&self->envelopeview, NULL);
 		psy_ui_combobox_setcursel(&self->filtertype, (intptr_t)F_NONE);

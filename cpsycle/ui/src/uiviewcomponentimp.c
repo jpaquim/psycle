@@ -16,10 +16,8 @@
 
 /* ViewComponentImp */
 /* prototypes */
-static void view_dev_destroyed(psy_ui_ViewComponentImp*);
 static void view_dev_dispose(psy_ui_ViewComponentImp*);
 static void view_dev_destroy(psy_ui_ViewComponentImp*);
-static void view_dev_clear(psy_ui_ViewComponentImp*);
 static void view_dev_show(psy_ui_ViewComponentImp*);
 static void view_dev_showstate(psy_ui_ViewComponentImp*, int state);
 static void view_dev_hide(psy_ui_ViewComponentImp*);
@@ -80,6 +78,11 @@ static psy_ui_RealRectangle view_translation(psy_ui_ViewComponentImp*,
 static psy_ui_RealPoint translatecoords(psy_ui_ViewComponentImp*,
 	psy_ui_Component* src, psy_ui_Component* dst);
 
+static uintptr_t dev_platform_handle(psy_ui_ViewComponentImp* self)
+{ 
+	return psy_INDEX_INVALID;
+}
+
 /* vtable */
 static psy_ui_ComponentImpVTable view_imp_vtable;
 static bool view_imp_vtable_initialized = FALSE;
@@ -91,15 +94,9 @@ static void view_imp_vtable_init(psy_ui_ViewComponentImp* self)
 		view_imp_vtable.dev_destroy =
 			(psy_ui_fp_componentimp_dev_destroy)
 			view_dev_destroy;
-		view_imp_vtable.dev_destroyed =
-			(psy_ui_fp_componentimp_dev_destroyed)
-			view_dev_destroyed;
 		view_imp_vtable.dev_dispose =
 			(psy_ui_fp_componentimp_dev_dispose)
-			view_dev_dispose;
-		view_imp_vtable.dev_clear =
-			(psy_ui_fp_componentimp_dev_clear)
-			view_dev_clear;
+			view_dev_dispose;		
 		view_imp_vtable.dev_show =
 			(psy_ui_fp_componentimp_dev_show)
 			view_dev_show;
@@ -219,7 +216,10 @@ static void view_imp_vtable_init(psy_ui_ViewComponentImp* self)
 			view_dev_hasfocus;
 		view_imp_vtable.dev_flags =
 			(psy_ui_fp_componentimp_dev_flags)
-			view_dev_flags;		
+			view_dev_flags;	
+		view_imp_vtable.dev_platform_handle =
+			(psy_ui_fp_componentimp_dev_platform_handle)
+			dev_platform_handle;
 		view_imp_vtable_initialized = TRUE;
 	}
 }
@@ -262,28 +262,6 @@ void view_dev_dispose(psy_ui_ViewComponentImp* self)
 	self->viewcomponents = NULL;
 	free(self->title);
 	self->title = NULL;
-}
-
-void view_dev_clear(psy_ui_ViewComponentImp* self)
-{
-	psy_List* p;
-	psy_List* q;
-
-	for (p = self->viewcomponents; p != NULL; p = q) {
-		psy_ui_Component* component;
-		bool deallocate;
-
-		q = p->next;
-		component = (psy_ui_Component*)psy_list_entry(p);
-		deallocate = component->deallocate;
-		psy_ui_component_destroy(component);
-		if (deallocate) {
-			free(component);
-		}
-	}
-	psy_list_free(self->viewcomponents);
-	self->viewcomponents = NULL;
-
 }
 
 psy_ui_ViewComponentImp* psy_ui_viewcomponentimp_alloc(void)
@@ -330,9 +308,9 @@ void view_dev_destroy(psy_ui_ViewComponentImp* self)
 		return;
 	}	
 	parent = psy_ui_component_parent(component);
-	psy_signal_emit(&component->signal_destroy,
-		self->component, 0);
-	component->vtable->on_destroy(component);	
+	// psy_signal_emit(&component->signal_destroy,
+	//	self->component, 0);
+	// component->vtable->on_destroy(component);	
 	if (parent) {
 		psy_ui_component_erase(parent, component);
 	}
@@ -351,13 +329,7 @@ void view_dev_destroy(psy_ui_ViewComponentImp* self)
 	}
 	psy_list_free(c);	
 	psy_list_free(self->viewcomponents);
-	self->viewcomponents = NULL;	
-	component->imp->vtable->dev_destroyed(component->imp);			
-}
-
-void view_dev_destroyed(psy_ui_ViewComponentImp* self)
-{		
-	self->component->vtable->on_destroyed(self->component);	
+	self->viewcomponents = NULL;
 	psy_ui_component_dispose(self->component);	
 }
 

@@ -118,7 +118,7 @@ void paramrackbox_onaddeffect(ParamRackBox* self, psy_ui_Button* sender)
 /* ParamRackPane */
 
 /* implementation */
-static void paramrackpane_on_destroy(ParamRackPane*);
+static void paramrackpane_on_destroyed(ParamRackPane*);
 static void paramrackpane_build(ParamRackPane*);
 static void paramrackpane_buildall(ParamRackPane*);
 static void paramrackpane_buildinputs(ParamRackPane*);
@@ -150,9 +150,9 @@ static void vtable_init(ParamRackPane* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.on_destroy =
+		vtable.on_destroyed =
 			(psy_ui_fp_component_event)
-			paramrackpane_on_destroy;		
+			paramrackpane_on_destroyed;		
 		vtable_initialized = TRUE;
 	}
 	self->component.vtable = &vtable;
@@ -182,7 +182,7 @@ void paramrackpane_init(ParamRackPane* self, psy_ui_Component* parent,
 		paramrackpane_onsongchanged);
 }
 
-void paramrackpane_on_destroy(ParamRackPane* self)
+void paramrackpane_on_destroyed(ParamRackPane* self)
 {
 	psy_table_dispose(&self->boxes);
 }
@@ -493,7 +493,7 @@ void paramrackbatchbar_init(ParamRackBatchBar* self, psy_ui_Component* parent)
 }
 
 /* ParamRackModeBar */
-static void paramrackmodebar_on_destroy(ParamRackModeBar*);
+static void paramrackmodebar_on_destroyed(ParamRackModeBar*);
 static void paramrackmodebar_onmodeselect(ParamRackModeBar*, psy_ui_Button* sender);
 
 /* vtable */
@@ -504,9 +504,9 @@ static void paramrackmodebar_vtable_init(ParamRackModeBar* self)
 {
 	if (!paramrackmodebar_vtable_initialized) {
 		paramrackmodebar_vtable = *(self->component.vtable);
-		paramrackmodebar_vtable.on_destroy =
+		paramrackmodebar_vtable.on_destroyed =
 			(psy_ui_fp_component_event)
-			paramrackmodebar_on_destroy;
+			paramrackmodebar_on_destroyed;
 		paramrackmodebar_vtable_initialized = TRUE;
 	}
 	self->component.vtable = &paramrackmodebar_vtable;
@@ -533,7 +533,7 @@ void paramrackmodebar_init(ParamRackModeBar* self, psy_ui_Component* parent)
 		"Level", self, paramrackmodebar_onmodeselect);
 }
 
-void paramrackmodebar_on_destroy(ParamRackModeBar* self)
+void paramrackmodebar_on_destroyed(ParamRackModeBar* self)
 {
 	psy_signal_dispose(&self->signal_select);
 }

@@ -26,7 +26,7 @@ static void psy_ui_scrollanimate_reset(psy_ui_ScrollAnimate* self)
 	self->speed = 1.0;
 }
 
-static void psy_ui_scrollanimate_calcstep(psy_ui_ScrollAnimate* self,
+static void psy_ui_scrollanimate_calcs_step(psy_ui_ScrollAnimate* self,
 	double startpx, double targetpx)
 {
 	double diff;
@@ -42,7 +42,7 @@ static void psy_ui_scrollanimate_calcstep(psy_ui_ScrollAnimate* self,
 	}
 }
 
-static double psy_ui_scrollanimate_currposition(const psy_ui_ScrollAnimate* self)
+static double psy_ui_scrollanimate_curr_position(const psy_ui_ScrollAnimate* self)
 {
 	double rv;
 
@@ -64,8 +64,8 @@ static bool psy_ui_scrollanimate_tick(psy_ui_ScrollAnimate* self)
 	if (self->counter > 0) {
 		--self->counter;
 		self->speed *= 2;
-		psy_ui_scrollanimate_calcstep(self,
-			psy_ui_scrollanimate_currposition(self),
+		psy_ui_scrollanimate_calcs_step(self,
+			psy_ui_scrollanimate_curr_position(self),
 			self->targetpx);
 	}
 	return self->counter == 0;
@@ -78,9 +78,9 @@ static void psy_ui_scroller_on_pane_size(psy_ui_Scroller*,
 	psy_ui_Component* sender);
 static void psy_ui_scroller_on_scroll(psy_ui_Scroller*,
 	psy_ui_Component* sender);
-static void psy_ui_scroller_horizontal_onchanged(psy_ui_Scroller*,
+static void psy_ui_scroller_horizontal_on_changed(psy_ui_Scroller*,
 	psy_ui_ScrollBar* sender);
-static void psy_ui_scroller_vertical_onchanged(psy_ui_Scroller*,
+static void psy_ui_scroller_vertical_on_changed(psy_ui_Scroller*,
 	psy_ui_ScrollBar* sender);
 static void psy_ui_scroller_scroll_range_changed(psy_ui_Scroller*,
 	psy_ui_Component* sender, psy_ui_Orientation);
@@ -129,7 +129,7 @@ void psy_ui_scroller_init(psy_ui_Scroller* self,
 	} else {
 		self->hscroll = hscroll;		
 	}
-	psy_ui_scrollbar_setorientation(self->hscroll, psy_ui_HORIZONTAL);
+	psy_ui_scrollbar_set_orientation(self->hscroll, psy_ui_HORIZONTAL);
 	psy_ui_component_hide(&self->hscroll->component);
 	/* vertical scrollbar */
 	if (!vscroll) {
@@ -140,7 +140,7 @@ void psy_ui_scroller_init(psy_ui_Scroller* self,
 	} else {
 		self->vscroll = vscroll;		
 	}
-	psy_ui_scrollbar_setorientation(self->vscroll, psy_ui_VERTICAL);
+	psy_ui_scrollbar_set_orientation(self->vscroll, psy_ui_VERTICAL);
 	psy_ui_component_hide(&self->vscroll->component);
 	self->thumbmove = FALSE;	
 	/* scroll animate */
@@ -149,9 +149,9 @@ void psy_ui_scroller_init(psy_ui_Scroller* self,
 	psy_ui_scrollanimate_init(&self->vanimate);		
 	self->client = NULL;	
 	psy_signal_connect(&self->vscroll->signal_changed, self,
-		psy_ui_scroller_vertical_onchanged);
+		psy_ui_scroller_vertical_on_changed);
 	psy_signal_connect(&self->hscroll->signal_changed, self,
-		psy_ui_scroller_horizontal_onchanged);
+		psy_ui_scroller_horizontal_on_changed);
 	psy_ui_scrollbar_setscrollrange(self->vscroll,
 		psy_ui_intpoint_make(0, 100));	
 }
@@ -191,7 +191,7 @@ void psy_ui_scroller_on_pane_size(psy_ui_Scroller* self, psy_ui_Component* sende
 	}
 }
 
-void psy_ui_scroller_horizontal_onchanged(psy_ui_Scroller* self, psy_ui_ScrollBar* sender)
+void psy_ui_scroller_horizontal_on_changed(psy_ui_Scroller* self, psy_ui_ScrollBar* sender)
 {
 	double iPos;
 	double nPos;
@@ -211,7 +211,7 @@ void psy_ui_scroller_horizontal_onchanged(psy_ui_Scroller* self, psy_ui_ScrollBa
 	if (self->smooth) {	
 		if (self->hanimate.counter == 0) {
 			psy_ui_scrollanimate_reset(&self->hanimate);
-			psy_ui_scrollanimate_calcstep(&self->hanimate, scrollleftpx,
+			psy_ui_scrollanimate_calcs_step(&self->hanimate, scrollleftpx,
 				floor((scrollleftpx + diff) / scrollsteppx) * scrollsteppx);
 			psy_ui_component_start_timer(psy_ui_scroller_base(self), 0, 50);
 		} else {
@@ -229,7 +229,7 @@ void psy_ui_scroller_horizontal_onchanged(psy_ui_Scroller* self, psy_ui_ScrollBa
 	}
 }
 
-void psy_ui_scroller_vertical_onchanged(psy_ui_Scroller* self,
+void psy_ui_scroller_vertical_on_changed(psy_ui_Scroller* self,
 	psy_ui_ScrollBar* sender)
 {
 	double iPos;
@@ -254,7 +254,7 @@ void psy_ui_scroller_vertical_onchanged(psy_ui_Scroller* self,
 	if (self->smooth) {		
 		if (self->vanimate.counter == 0) {
 			psy_ui_scrollanimate_reset(&self->vanimate);
-			psy_ui_scrollanimate_calcstep(&self->vanimate, scrolltoppx,
+			psy_ui_scrollanimate_calcs_step(&self->vanimate, scrolltoppx,
 				floor((scrolltoppx + diff) / scrollstepy_px) * scrollstepy_px);
 			psy_ui_component_start_timer(psy_ui_scroller_base(self), 1, 50);
 		} else {
@@ -279,14 +279,14 @@ void psy_ui_scroller_on_timer(psy_ui_Scroller* self, uintptr_t timerid)
 			psy_ui_component_stop_timer(psy_ui_scroller_base(self), 0);
 		}
 		psy_ui_component_set_scroll_left(self->client,
-			psy_ui_value_make_px(psy_ui_scrollanimate_currposition(
+			psy_ui_value_make_px(psy_ui_scrollanimate_curr_position(
 				&self->hanimate)));
 	} else if (timerid == 1) {
 		if (psy_ui_scrollanimate_tick(&self->vanimate)) {
 			psy_ui_component_stop_timer(psy_ui_scroller_base(self), 1);
 		}
 		psy_ui_component_set_scroll_top(self->client,
-			psy_ui_value_make_px(psy_ui_scrollanimate_currposition(
+			psy_ui_value_make_px(psy_ui_scrollanimate_curr_position(
 				&self->vanimate)));
 	}
 }

@@ -127,7 +127,7 @@ void stepsequencertile_resetplay(StepSequencerTile* self)
 /* StepsequencerBar */
 
 /* prototypes */
-static void stepsequencerbar_on_destroy(StepsequencerBar*);
+static void stepsequencerbar_on_destroyed(StepsequencerBar*);
 static void stepsequencerbar_build(StepsequencerBar*);
 static void stepsequencerbar_update(StepsequencerBar*);
 static void stepsequencerbar_update_playline(StepsequencerBar* self);
@@ -144,9 +144,9 @@ static void vtable_init(StepsequencerBar* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.on_destroy =
+		vtable.on_destroyed =
 			(psy_ui_fp_component_event)
-			stepsequencerbar_on_destroy;
+			stepsequencerbar_on_destroyed;
 		vtable.on_mouse_down =
 			(psy_ui_fp_component_on_mouse_event)
 			stepsequencerbar_on_mouse_down;
@@ -173,7 +173,7 @@ void stepsequencerbar_init(StepsequencerBar* self, psy_ui_Component* parent,
 	stepsequencerbar_build(self);
 }
 
-void stepsequencerbar_on_destroy(StepsequencerBar* self)
+void stepsequencerbar_on_destroyed(StepsequencerBar* self)
 {
 	assert(self);
 
@@ -467,7 +467,7 @@ void stepsequencerbarbutton_ondraw(StepSequencerBarButton* self,
 
 /* StepsequencerBarSelect */
 /* prototypes */
-static void stepsequencerbarselect_on_destroy(StepsequencerBarSelect*);
+static void stepsequencerbarselect_on_destroyed(StepsequencerBarSelect*);
 static void stepsequencerbarselect_on_mouse_down(StepsequencerBarSelect*,
 	psy_ui_MouseEvent*);
 static void stepsequencerbarselect_build(StepsequencerBarSelect*);
@@ -480,9 +480,9 @@ static void stepsequencerbarselect_vtable_init(StepsequencerBarSelect* self)
 {
 	if (!stepsequencerbarselect_vtable_initialized) {
 		stepsequencerbarselect_vtable = *(self->component.vtable);
-		stepsequencerbarselect_vtable.on_destroy =
+		stepsequencerbarselect_vtable.on_destroyed =
 			(psy_ui_fp_component_event)
-			stepsequencerbarselect_on_destroy;
+			stepsequencerbarselect_on_destroyed;
 		stepsequencerbarselect_vtable.on_mouse_down =
 			(psy_ui_fp_component_on_mouse_event)
 			stepsequencerbarselect_on_mouse_down;
@@ -507,7 +507,7 @@ void stepsequencerbarselect_init(StepsequencerBarSelect* self,
 	stepsequencerbarselect_build(self);
 }
 
-void stepsequencerbarselect_on_destroy(StepsequencerBarSelect* self)
+void stepsequencerbarselect_on_destroyed(StepsequencerBarSelect* self)
 {
 	assert(self);
 

@@ -1,19 +1,22 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "realedit.h"
-// audio
+/* audio */
 #include <songio.h>
-// std
+/* std */
 #include <ctype.h>
-// platform
+/* platform */
 #include "../../detail/portable.h"
 
-// RealEdit
-// prototypes
-static void realedit_on_destroy(RealEdit*, psy_ui_Component* sender);
+
+/* prototypes */
+static void realedit_on_destroyed(RealEdit*);
 static void realedit_onlessclicked(RealEdit*, psy_ui_Component* sender);
 static void realedit_onmoreclicked(RealEdit*, psy_ui_Component* sender);
 static void realedit_oneditkeydown(RealEdit*, psy_ui_Component* sender,
@@ -23,12 +26,29 @@ static void realedit_oneditkeyup(RealEdit*, psy_ui_Component* sender,
 static void realedit_oneditfocuslost(RealEdit*, psy_ui_Component* sender,
 	psy_ui_KeyboardEvent*);
 
+/* vtable */
+static psy_ui_ComponentVtable vtable;
+static bool vtable_initialized = FALSE;
+
+static void vtable_init(RealEdit* self)
+{
+	if (!vtable_initialized) {
+		vtable = *(self->component.vtable);
+		vtable.on_destroyed =
+			(psy_ui_fp_component_event)
+			realedit_on_destroyed;		
+		vtable_initialized = TRUE;
+	}
+	psy_ui_component_set_vtable(&self->component, &vtable);
+}
+
 /* implementation */
 void realedit_init(RealEdit* self, psy_ui_Component* parent,
 	const char* desc, realedit_real_t value,
 	realedit_real_t minval, realedit_real_t maxval)
 {
 	psy_ui_component_init(realedit_base(self), parent, NULL);
+	vtable_init(self);
 	psy_ui_component_set_align_expand(realedit_base(self), psy_ui_HEXPAND);
 	psy_ui_component_set_defaultalign(realedit_base(self), psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
@@ -52,9 +72,7 @@ void realedit_init(RealEdit* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->edit.component.signal_keyup, self,
 		realedit_oneditkeyup);
 	psy_signal_connect(&self->edit.component.signal_focuslost, self,
-		realedit_oneditfocuslost);
-	psy_signal_connect(&self->component.signal_destroy, self,
-		realedit_on_destroy);
+		realedit_oneditfocuslost);	
 }
 
 void realedit_init_connect(RealEdit* self, psy_ui_Component* parent,
@@ -65,7 +83,7 @@ void realedit_init_connect(RealEdit* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->signal_changed, context, fp);
 }
 
-void realedit_on_destroy(RealEdit* self, psy_ui_Component* sender)
+void realedit_on_destroyed(RealEdit* self)
 {
 	psy_signal_dispose(&self->signal_changed);
 }

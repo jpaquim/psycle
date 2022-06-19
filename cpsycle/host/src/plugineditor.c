@@ -66,13 +66,14 @@ void plugineditorcreatebar_init(PluginEditorCreateBar* self,
 }
 
 /* PluginEditor */
+
 /* prototypes */
+static void plugineditor_on_destroyed(PluginEditor*);
 static void plugineditor_inittitlebar(PluginEditor*);
 static void plugineditor_onmachineschangeslot(PluginEditor*,
 	psy_audio_Machines*, uintptr_t slot);
 static void plugineditor_onsongchanged(PluginEditor*, Workspace* sender);
 static void plugineditor_connectmachinesignals(PluginEditor*, Workspace*);
-static void plugineditor_on_destroy(PluginEditor*, psy_ui_Component* sender);
 static void plugineditor_onnewplugin(PluginEditor*, psy_ui_Component* sender);
 static void plugineditor_onreload(PluginEditor*, psy_ui_Component* sender);
 static void plugineditor_onsave(PluginEditor*, psy_ui_Component* sender);
@@ -84,11 +85,28 @@ static int plugineditor_onenumdir(PluginEditor*, const char* path, int flag);
 static void plugineditor_oncreatenewplugin(PluginEditor*, psy_ui_Component* sender);
 static void writetext(const char* path, const char* text);
 
+/* vtable */
+static psy_ui_ComponentVtable vtable;
+static bool vtable_initialized = FALSE;
+
+static void vtable_init(PluginEditor* self)
+{
+	if (!vtable_initialized) {
+		vtable = *(self->component.vtable);
+		vtable.on_destroyed =
+			(psy_ui_fp_component_event)
+			plugineditor_on_destroyed;
+		vtable_initialized = TRUE;
+	}
+	psy_ui_component_set_vtable(&self->component, &vtable);
+}
+
 /* implementation */
 void plugineditor_init(PluginEditor* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {	
-	psy_ui_component_init(&self->component, parent, NULL);	
+	psy_ui_component_init(&self->component, parent, NULL);
+	vtable_init(self);
 	//psy_ui_component_set_style_type(&self->component,
 	//	STYLE_RECENTVIEW_MAINSECTION);
 	plugineditor_inittitlebar(self);
@@ -138,8 +156,6 @@ void plugineditor_init(PluginEditor* self, psy_ui_Component* parent,
 	/* editor */
 	psy_ui_editor_init(&self->editor, &self->component);	
 	psy_ui_component_set_align(&self->editor.component, psy_ui_ALIGN_CLIENT);	
-	psy_signal_connect(&self->component.signal_destroy, self,
-		plugineditor_on_destroy);
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		plugineditor_onsongchanged);
 	psy_signal_connect(&self->pluginselector.signal_selchanged, self,
@@ -153,7 +169,7 @@ void plugineditor_init(PluginEditor* self, psy_ui_Component* parent,
 	plugineditor_connectmachinesignals(self, workspace);
 }
 
-void plugineditor_on_destroy(PluginEditor* self, psy_ui_Component* sender)
+void plugineditor_on_destroyed(PluginEditor* self)
 {
 	psy_table_dispose(&self->pluginmappping);
 }

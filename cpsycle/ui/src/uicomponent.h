@@ -134,8 +134,7 @@ typedef struct psy_ui_ComponentVTable {
 	psy_ui_fp_component_invalidate invalidate;
 	psy_ui_fp_component_section section;
 	psy_ui_fp_component_setalign setalign;
-	/* events */
-	psy_ui_fp_component_event on_destroy;
+	/* events */	
 	psy_ui_fp_component_event on_destroyed;
 	psy_ui_fp_component_ondraw ondraw;
 	psy_ui_fp_component_event onsize;
@@ -191,7 +190,7 @@ typedef struct psy_ui_Component {
 	psy_Signal signal_scrolled;
 	psy_Signal signal_create;
 	psy_Signal signal_close;
-	psy_Signal signal_destroy;
+	psy_Signal signal_destroyed;
 	psy_Signal signal_childenum;
 	psy_Signal signal_show;
 	psy_Signal signal_hide;	
@@ -471,7 +470,6 @@ typedef void* (*psy_ui_fp_componentimp_dev_platform)(struct psy_ui_ComponentImp*
 typedef bool (*psy_ui_fp_componentimp_dev_issystem)(struct psy_ui_ComponentImp*);
 typedef uintptr_t (*psy_ui_fp_componentimp_dev_platform_handle)(struct psy_ui_ComponentImp*);
 typedef uintptr_t (*psy_ui_fp_componentimp_dev_flags)(const struct psy_ui_ComponentImp*);
-typedef void (*psy_ui_fp_componentimp_dev_clear)(struct psy_ui_ComponentImp*);
 typedef void (*psy_ui_fp_componentimp_dev_mouseevent)(struct psy_ui_ComponentImp*, psy_ui_MouseEvent*);
 typedef void (*psy_ui_fp_componentimp_dev_initialized)(struct psy_ui_ComponentImp*);
 typedef psy_ui_ComponentState (*psy_ui_fp_componentimp_dev_component_state)(const struct psy_ui_ComponentImp*);
@@ -479,8 +477,7 @@ typedef void (*psy_ui_fp_componentimp_dev_set_component_state)(struct psy_ui_Com
 
 typedef struct psy_ui_ComponentImpVTable {
 	psy_ui_fp_componentimp_dev_dispose dev_dispose;
-	psy_ui_fp_componentimp_dev_destroy dev_destroy;
-	psy_ui_fp_componentimp_dev_destroyed dev_destroyed;
+	psy_ui_fp_componentimp_dev_destroy dev_destroy;	
 	psy_ui_fp_componentimp_dev_show dev_show;
 	psy_ui_fp_componentimp_dev_showstate dev_showstate;	
 	psy_ui_fp_componentimp_dev_hide dev_hide;
@@ -526,8 +523,7 @@ typedef struct psy_ui_ComponentImpVTable {
 	psy_ui_fp_componentimp_dev_issystem dev_issystem;
 	psy_ui_fp_componentimp_dev_platform dev_platform;
 	psy_ui_fp_componentimp_dev_platform_handle dev_platform_handle;
-	psy_ui_fp_componentimp_dev_flags dev_flags;
-	psy_ui_fp_componentimp_dev_clear dev_clear;	
+	psy_ui_fp_componentimp_dev_flags dev_flags;	
 	psy_ui_fp_componentimp_dev_initialized dev_initialized;
 	psy_ui_fp_componentimp_dev_component_state dev_component_state;
 	psy_ui_fp_componentimp_dev_set_component_state dev_set_component_state;
@@ -564,10 +560,7 @@ INLINE void psy_ui_component_update(psy_ui_Component* self)
 	self->imp->vtable->dev_update(self->imp);
 }
 
-INLINE void psy_ui_component_clear(psy_ui_Component* self)
-{
-	self->imp->vtable->dev_clear(self->imp);
-}
+void psy_ui_component_clear(psy_ui_Component*);
 
 /* returns the element’s size that includes padding and border */
 psy_ui_Size psy_ui_component_offsetsize(const psy_ui_Component* self);

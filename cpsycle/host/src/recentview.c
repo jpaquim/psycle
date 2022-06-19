@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -87,7 +87,7 @@ void playlistview_init(PlaylistView* self, psy_ui_Component* parent,
 		tabbarparent, workspace_recentsongs(workspace), 1,
 		&workspace->inputhandler);
 	propertiesview_enablemousepropagation(&self->view);		
-	propertiesrenderer_setstyle(&self->view.renderer,
+	propertiesrenderer_set_style(&self->view.renderer,
 		STYLE_RECENTVIEW_MAINSECTION,
 		STYLE_RECENTVIEW_MAINSECTIONHEADER,
 		STYLE_RECENTVIEW_LINE,

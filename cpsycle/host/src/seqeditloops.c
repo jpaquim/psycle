@@ -40,7 +40,7 @@ void seqeditloopstate_init(SeqEditLoopState* self)
 	seqeditloopstate_reset(self);
 }
 
-void seqeditloopstate_startdrag(SeqEditLoopState* self,
+void seqeditloopstate_start_drag(SeqEditLoopState* self,
 	psy_audio_PatternNode* node)
 {	
 	seqeditloopstate_reset(self);
@@ -64,7 +64,7 @@ void seqeditloopstate_startdrag(SeqEditLoopState* self,
 
 void seqeditloopstate_remove(SeqEditLoopState* self, psy_audio_PatternNode* node)
 {
-	seqeditloopstate_startdrag(self, node);
+	seqeditloopstate_start_drag(self, node);
 	self->drag = FALSE;
 	self->remove = TRUE;
 }
@@ -241,7 +241,7 @@ void seqeditloop_on_mouse_down(SeqEditLoop* self, psy_ui_MouseEvent* ev)
 		psy_ui_mouseevent_stop_propagation(ev);
 		return;
 	}
-	seqeditloopstate_startdrag(self->loopstate, self->node);
+	seqeditloopstate_start_drag(self->loopstate, self->node);
 	if (psy_ui_mouseevent_button(ev) == 1) {
 		seqeditloop_select(self);
 		psy_ui_component_capture(&self->component);
@@ -335,7 +335,7 @@ void seqeditloop_select(SeqEditLoop* self)
 
 /* SeqEditLoops*/
 /* prototypes */
-static void seqeditloops_on_destroy(SeqEditLoops*);
+static void seqeditloops_on_destroyed(SeqEditLoops*);
 static void seqeditloops_on_mouse_down(SeqEditLoops*, psy_ui_MouseEvent*);
 static void seqeditloops_onmousemove(SeqEditLoops*, psy_ui_MouseEvent*);
 static void seqeditloops_on_mouse_up(SeqEditLoops*, psy_ui_MouseEvent*);
@@ -362,9 +362,9 @@ static void seqeditloops_vtable_init(SeqEditLoops* self)
 {
 	if (!seqeditloops_vtable_initialized) {
 		seqeditloops_vtable = *(self->component.vtable);
-		seqeditloops_vtable.on_destroy =
+		seqeditloops_vtable.on_destroyed =
 			(psy_ui_fp_component_event)
-			seqeditloops_on_destroy;
+			seqeditloops_on_destroyed;
 		seqeditloops_vtable.onpreferredsize =
 			(psy_ui_fp_component_on_preferred_size)
 			seqeditloops_onpreferredsize;
@@ -412,7 +412,7 @@ void seqeditloops_init(SeqEditLoops* self, psy_ui_Component* parent,
 		seqeditloops_onloopchanged);
 }
 
-void seqeditloops_on_destroy(SeqEditLoops* self)
+void seqeditloops_on_destroyed(SeqEditLoops* self)
 {	
 	psy_list_free(self->entries);
 	self->entries = NULL;

@@ -41,9 +41,8 @@ typedef struct ConfirmBox {
 
 void confirmbox_init(ConfirmBox*, psy_ui_Component* parent, Workspace*);
 
-void confirmbox_setexitmode(ConfirmBox*);
-void confirmbox_setnewsongmode(ConfirmBox*);
-void confirmbox_setlabels(ConfirmBox* self, const char* title,
+void confirmbox_set_exit_mode(ConfirmBox*);
+void confirmbox_set_labels(ConfirmBox* self, const char* title,
 	const char* yesstr, const char* nostr);
 
 INLINE psy_ui_Component* confirmbox_base(ConfirmBox* self)

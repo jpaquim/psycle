@@ -387,6 +387,7 @@
     <ClCompile Include="src\patternviewstate.c" />
     <ClCompile Include="src\patternviewtabbar.c" />
     <ClCompile Include="src\pianogrid.c" />
+    <ClCompile Include="src\pianogriddraw.c" />
     <ClCompile Include="src\pianogridstate.c" />
     <ClCompile Include="src\pianokeyboard.c" />
     <ClCompile Include="src\pianokeyboardstate.c" />
@@ -580,6 +581,7 @@
     <ClInclude Include="src\patternviewstate.h" />
     <ClInclude Include="src\patternviewtabbar.h" />
     <ClInclude Include="src\pianogrid.h" />
+    <ClInclude Include="src\pianogriddraw.h" />
     <ClInclude Include="src\pianogridstate.h" />
     <ClInclude Include="src\pianokeyboard.h" />
     <ClInclude Include="src\pianokeyboardstate.h" />

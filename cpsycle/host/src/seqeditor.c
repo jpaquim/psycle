@@ -11,9 +11,9 @@
 #include "styles.h"
 
 /* prototypes */
-static void seqeditor_on_destroy(SeqEditor*);
-static void seqeditor_onsongchanged(SeqEditor*, Workspace* sender);
-static void seqeditor_updatesong(SeqEditor*);
+static void seqeditor_on_destroyed(SeqEditor*);
+static void seqeditor_on_song_changed(SeqEditor*, Workspace* sender);
+static void seqeditor_update_song(SeqEditor*);
 static void seqeditor_build(SeqEditor*);
 static void seqeditor_ontracksscroll(SeqEditor*, psy_ui_Component* sender);
 static void seqeditor_onconfigure(SeqEditor*, GeneralConfig* sender,
@@ -44,9 +44,9 @@ static void seqeditor_vtable_init(SeqEditor* self)
 {
 	if (!seqeditor_vtable_initialized) {
 		seqeditor_vtable = *(self->component.vtable);
-		seqeditor_vtable.on_destroy =
+		seqeditor_vtable.on_destroyed =
 			(psy_ui_fp_component_event)
-			seqeditor_on_destroy;
+			seqeditor_on_destroyed;
 		seqeditor_vtable.on_mouse_move =
 			(psy_ui_fp_component_on_mouse_event)
 			seqeditor_onmousemove;
@@ -118,10 +118,10 @@ void seqeditor_init(SeqEditor* self, psy_ui_Component* parent,
 	psy_ui_component_set_align(&self->scroller.component, psy_ui_ALIGN_CLIENT);	
 	psy_ui_component_set_preferred_size(&self->component, psy_ui_size_make(
 		psy_ui_value_make_ew(20.0), psy_ui_value_make_ph(0.30)));
-	seqeditor_updatesong(self);	
+	seqeditor_update_song(self);	
 	/* connect signals */
 	psy_signal_connect(&self->state.workspace->signal_songchanged, self,
-		seqeditor_onsongchanged);
+		seqeditor_on_song_changed);
 	psy_signal_connect(&self->tracks.component.signal_scrolled, self,
 		seqeditor_ontracksscroll);	
 	psy_signal_connect(
@@ -134,17 +134,17 @@ void seqeditor_init(SeqEditor* self, psy_ui_Component* parent,
 	seqeditor_updatescrollstep(self);
 }
 
-void seqeditor_on_destroy(SeqEditor* self)
+void seqeditor_on_destroyed(SeqEditor* self)
 {
 	seqeditstate_dispose(&self->state);
 }
 
-void seqeditor_onsongchanged(SeqEditor* self, Workspace* sender)
+void seqeditor_on_song_changed(SeqEditor* self, Workspace* sender)
 {	
-	seqeditor_updatesong(self);
+	seqeditor_update_song(self);
 }
 
-void seqeditor_updatesong(SeqEditor* self)
+void seqeditor_update_song(SeqEditor* self)
 {
 	psy_audio_Song* song;
 

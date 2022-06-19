@@ -571,13 +571,13 @@ void machinestackstate_init(MachineStackState* self, ParamViews* paramviews)
 
 void machinestackstate_dispose(MachineStackState* self)
 {
-	psy_table_disposeall(&self->columns, (psy_fp_disposefunc)
+	psy_table_dispose_all(&self->columns, (psy_fp_disposefunc)
 		machinestackcolumn_dispose);
 }
 
 void machinestackstate_clear(MachineStackState* self)
 {
-	psy_table_disposeall(&self->columns, (psy_fp_disposefunc)
+	psy_table_dispose_all(&self->columns, (psy_fp_disposefunc)
 		machinestackcolumn_dispose);
 	psy_table_init(&self->columns);
 }
@@ -1523,8 +1523,9 @@ void machinestackvolumes_build(MachineStackVolumes* self)
 }
 
 /* MachineStackView */
+
 /* prototypes */
-static void machinestackview_destroy(MachineStackView*);
+static void machinestackview_destroyed(MachineStackView*);
 static void machinestackview_onsongchanged(MachineStackView*,
 	Workspace* sender);
 static void machinestackview_onbuschanged(MachineStackView*, Workspace*,
@@ -1540,7 +1541,8 @@ static void machinestackview_ondisconnected(MachineStackView*,
 	psy_audio_Connections*, uintptr_t outputslot, uintptr_t inputslot);
 static void machinestackview_setmachines(MachineStackView*,
 	psy_audio_Machines*);
-// vtable
+
+/* vtable */
 static psy_ui_ComponentVtable vtable;
 static bool vtable_initialized = FALSE;
 
@@ -1550,14 +1552,15 @@ static void vtable_init(MachineStackView* self)
 
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);		
-		vtable.on_destroy =
+		vtable.on_destroyed =
 			(psy_ui_fp_component_event)
-			machinestackview_destroy;
+			machinestackview_destroyed;
 		vtable_initialized = TRUE;
 	}
 	psy_ui_component_set_vtable(&self->component, &vtable);
 }
-// implementation
+
+/* implementation */
 void machinestackview_init(MachineStackView* self, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent,
 	ParamViews* paramviews, Workspace* workspace)
@@ -1605,7 +1608,7 @@ void machinestackview_init(MachineStackView* self, psy_ui_Component* parent,
 		? &workspace_song(workspace)->machines : NULL);	
 }
 
-void machinestackview_destroy(MachineStackView* self)
+void machinestackview_destroyed(MachineStackView* self)
 {
 	machinestackstate_dispose(&self->state);
 }

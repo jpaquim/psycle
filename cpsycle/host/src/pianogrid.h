@@ -8,6 +8,7 @@
 
 /* host */
 #include "patternhostcmds.h"
+#include "pianogriddraw.h"
 #include "pianokeyboard.h"
 #include "pianoruler.h"
 #include "workspace.h"
@@ -24,81 +25,9 @@ extern "C" {
 #endif
 
 /*
-** Pianoroll
-**
-** The Pianoroll is another way than the normal tracker view to enter notes.
-** It displays a Pattern selected by the SeqView in a roll with a piano
-** keyboard at the left and the time line to the right.
+** Pianogrid
 */
 
-typedef enum {
-	PIANOROLL_TRACK_DISPLAY_ALL,
-	PIANOROLL_TRACK_DISPLAY_CURRENT,
-	PIANOROLL_TRACK_DISPLAY_ACTIVE
-} PianoTrackDisplay;
-
-/* PianogridTrackEvent */
-typedef struct PianogridTrackEvent {
-	uint8_t note;
-	psy_dsp_big_beat_t offset;	
-	uintptr_t track;
-	/* draw hover */
-	bool hover;
-	/* draw noterelease */
-	bool noterelease;
-	/* event exists */
-	bool active;
-} PianogridTrackEvent;
-
-/* PianoGridDraw */
-typedef struct PianoGridDraw {
-	const psy_ui_TextMetric* tm;
-	psy_ui_RealSize size;	
-	bool cursoronnoterelease;
-	psy_dsp_big_beat_t sequenceentryoffset;	
-	PianoTrackDisplay trackdisplay;	
-	/* references */
-	KeyboardState* keyboardstate;
-	PianoGridState* gridstate;
-	Workspace* workspace;
-	psy_audio_PatternEntry* hoverpatternentry;
-	bool drawgrid;
-	bool drawentries;
-	bool drawcursor;
-	bool drawplaybar;	
-} PianoGridDraw;
-
-void pianogriddraw_init(PianoGridDraw*,
-	KeyboardState*, PianoGridState*,	
-	psy_dsp_big_beat_t sequenceentryoffset,
-	psy_audio_PatternEntry* hoverpatternentry,	
-	PianoTrackDisplay,
-	bool cursoronnoterelease,	
-	psy_ui_RealSize, Workspace*);
-
-void pianogriddraw_ondraw(PianoGridDraw*, psy_ui_Graphics*);
-
-INLINE void pianogriddraw_preventgrid(PianoGridDraw* self)
-{
-	self->drawgrid = FALSE;
-}
-
-INLINE void pianogriddraw_preventplaybar(PianoGridDraw* self)
-{
-	self->drawplaybar = FALSE;
-}
-
-INLINE void pianogriddraw_preventcursor(PianoGridDraw* self)
-{
-	self->drawcursor = FALSE;
-}
-
-INLINE void pianogriddraw_preventeventdraw(PianoGridDraw* self)
-{
-	self->drawentries = FALSE;
-}
-
-/* Pianogrid */
 typedef struct Pianogrid {
 	/* inherits */
 	psy_ui_Component component;
@@ -120,7 +49,7 @@ typedef struct Pianogrid {
 } Pianogrid;
 
 void pianogrid_init(Pianogrid*, psy_ui_Component* parent, KeyboardState*,
-	PianoGridState*, Workspace*);
+	PianoGridState*, InputHandler*, Workspace*);
 
 void pianogrid_invalidate_line(Pianogrid*, intptr_t line);
 void pianogrid_invalidate_lines(Pianogrid*, intptr_t line1, intptr_t line2);

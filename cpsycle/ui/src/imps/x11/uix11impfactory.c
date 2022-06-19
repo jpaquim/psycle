@@ -290,16 +290,18 @@ psy_ui_ComponentImp* allocinit_popupimp(psy_ui_x11_ImpFactory* self,
 	struct psy_ui_Component* component, struct psy_ui_Component* parent)
 {	
 	psy_ui_x11_ComponentImp* rv;
-	psy_ui_X11App* winapp;
+	psy_ui_X11App* x11app;
+	bool deallocate;
 
-	winapp = (psy_ui_X11App*)psy_ui_app()->imp;
+	x11app = (psy_ui_X11App*)psy_ui_app()->imp;	
 	rv = psy_ui_x11_componentimp_allocinit(
 		component,
 		parent ? parent->imp : 0,
-		winapp->appclass,
+		x11app->appclass,
 		0, 0, 1, 1,
 		2 /* popup */, 0); 
-	if (rv->hwnd == 0) {
+	
+	if (rv->hwnd == 0) {		
 		free(rv);
 		rv = 0;
 	}

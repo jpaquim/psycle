@@ -19,7 +19,7 @@
 /* TrackerGrid */
 
 /* prototypes */
-static void trackergrid_on_destroy(TrackerGrid*);
+static void trackergrid_on_destroyed(TrackerGrid*);
 static void trackergrid_init_signals(TrackerGrid*);
 static void trackergrid_dispose_signals(TrackerGrid*);
 static void trackergrid_connect_input_handler(TrackerGrid*, InputHandler*);
@@ -77,9 +77,9 @@ static void vtable_init(TrackerGrid* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.on_destroy =
+		vtable.on_destroyed =
 			(psy_ui_fp_component_event)
-			trackergrid_on_destroy;
+			trackergrid_on_destroyed;
 		vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
 			trackergrid_on_draw;
@@ -149,7 +149,7 @@ void trackergrid_init(TrackerGrid* self, psy_ui_Component* parent,
 	psy_ui_component_start_timer(&self->component, 0, 50);
 }
 
-void trackergrid_on_destroy(TrackerGrid* self)
+void trackergrid_on_destroyed(TrackerGrid* self)
 {
 	assert(self);
 
@@ -180,7 +180,7 @@ void trackergrid_connect_input_handler(TrackerGrid* self,
 	inputhandler_connect(input_handler, INPUTHANDLER_FOCUS,
 		psy_EVENTDRIVER_CMD, "notes", psy_INDEX_INVALID,
 		self, (fp_inputhandler_input)trackergrid_on_note_cmds);
-	inputhandler_connect(input_handler, INPUTHANDLER_VIEW,
+	inputhandler_connect(input_handler, INPUTHANDLER_FOCUS,
 		psy_EVENTDRIVER_MIDI, "", VIEW_ID_PATTERNVIEW,
 		self, (fp_inputhandler_input)trackergrid_on_midi_cmds);
 }

@@ -94,7 +94,7 @@ void machinewireviewuis_redrawvus(MachineWireViewUis* self)
 
 /* MachineWireView */
 /* prototypes */
-static void machinewireview_on_destroy(MachineWireView*);
+static void machinewireview_on_destroyed(MachineWireView*);
 static void machinewireview_setmachines(MachineWireView*, psy_audio_Machines*);
 static void machinewireview_ondraw(MachineWireView*, psy_ui_Graphics*);
 static void machinewireview_drawdragwire(MachineWireView*, psy_ui_Graphics*);
@@ -140,7 +140,7 @@ static void machinewireview_onsongchanged(MachineWireView*, Workspace* sender);
 static void machinewireview_build(MachineWireView*);
 static void machinewireview_destroywireframes(MachineWireView*);
 static void machinewireview_showwireview(MachineWireView*, psy_audio_Wire);
-static void machinewireview_onwireframedestroy(MachineWireView*,
+static void machinewireview_onwireframedestroyed(MachineWireView*,
 	psy_ui_Component* sender);
 static WireFrame* machinewireview_wireframe(MachineWireView*, psy_audio_Wire);
 static psy_ui_RealRectangle machinewireview_updaterect(MachineWireView*,
@@ -163,9 +163,9 @@ static void vtable_init(MachineWireView* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.on_destroy =
+		vtable.on_destroyed =
 			(psy_ui_fp_component_event)
-			machinewireview_on_destroy;
+			machinewireview_on_destroyed;
 		vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
 			machinewireview_ondraw;
@@ -257,12 +257,8 @@ void machinewireview_setmachines(MachineWireView* self,
 	machinewireview_build(self);
 }
 
-void machinewireview_on_destroy(MachineWireView* self)
+void machinewireview_on_destroyed(MachineWireView* self)
 {	
-	if (self->machines) {
-		psy_signal_disconnect_context(
-			&psy_audio_machines_master(self->machines)->signal_worked, self);
-	}
 	machinewireviewuis_dispose(&self->machineuis);
 	psy_list_deallocate(&self->wireframes, (psy_fp_disposefunc)
 		psy_ui_component_destroy);	
@@ -1208,8 +1204,8 @@ void machinewireview_showwireview(MachineWireView* self, psy_audio_Wire wire)
 				self->workspace);
 			if (wireframe) {
 				psy_list_append(&self->wireframes, wireframe);
-				psy_signal_connect(&wireframe->component.signal_destroy,
-					self, machinewireview_onwireframedestroy);
+				psy_signal_connect(&wireframe->component.signal_destroyed,
+					self, machinewireview_onwireframedestroyed);
 			}
 		}
 		if (wireframe != NULL) {
@@ -1218,7 +1214,7 @@ void machinewireview_showwireview(MachineWireView* self, psy_audio_Wire wire)
 	}
 }
 
-void machinewireview_onwireframedestroy(MachineWireView* self,
+void machinewireview_onwireframedestroyed(MachineWireView* self,
 	psy_ui_Component* sender)
 {
 	psy_List* p;

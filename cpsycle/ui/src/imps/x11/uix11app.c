@@ -22,6 +22,7 @@
 #include <X11/extensions/Xdbe.h>
 #include <X11/keysym.h>
 /* std */
+#include <stdlib.h>
 #include <stdio.h>
 
 static psy_ui_MouseEvent buttonpressevent;
@@ -35,8 +36,6 @@ static void psy_ui_x11app_sendevent(psy_ui_X11App*, psy_ui_Component*,
 	psy_ui_Event*);
 static psy_ui_Component* psy_ui_x11app_component(psy_ui_X11App*,
 	uintptr_t platformhandle);
-
-static int psy_ui_x11app_handle_event(psy_ui_X11App*, XEvent*);
 static void psy_ui_x11app_mousewheel(psy_ui_X11App*, psy_ui_x11_ComponentImp*,
 	XEvent*);
 static int psy_ui_x11app_translate_x11button(int button);
@@ -55,6 +54,13 @@ static void psy_ui_x11app_sendx11event(psy_ui_X11App*, int mask, int hwnd,
 	XEvent*);
 static void psy_ui_x11app_sync(psy_ui_X11App*);
 static psy_List* psy_ui_x11app_toplevel(psy_ui_X11App* self);
+static int errorHandler(Display *dpy, XErrorEvent *err);
+static void psy_ui_x11app_handle_destroy_window(psy_ui_X11App*,
+	psy_ui_Component*);
+static void psy_ui_x11app_register_native(psy_ui_X11App*,
+	uintptr_t handle, psy_ui_ComponentImp*, bool top_level);
+static void psy_ui_x11app_unregister_native(psy_ui_X11App*,
+	uintptr_t handle);
 
 /* vtable */
 static psy_ui_AppImpVTable imp_vtable;
@@ -89,7 +95,13 @@ static void imp_vtable_init(psy_ui_X11App* self)
 			psy_ui_x11app_component;
 		imp_vtable.dev_toplevel =
 			(psy_ui_fp_appimp_toplevel)
-			psy_ui_x11app_toplevel;							
+			psy_ui_x11app_toplevel;		
+		imp_vtable.dev_register_native =
+			(psy_ui_fp_appimp_register_native)
+			psy_ui_x11app_register_native;
+		imp_vtable.dev_unregister_native =
+			(psy_ui_fp_appimp_unregister_native)
+			psy_ui_x11app_unregister_native;
 		imp_vtable_initialized = TRUE;
 	}
 	self->imp.vtable = &imp_vtable;
@@ -136,6 +148,7 @@ void psy_ui_x11app_init(psy_ui_X11App* self, psy_ui_App* app, void* instance)
 	self->shiftstate = FALSE;
 	self->controlstate = FALSE;
 	self->altstate = FALSE;
+	XSetErrorHandler(errorHandler);
 }
 
 void psy_ui_x11app_initdbe(psy_ui_X11App* self)
@@ -229,6 +242,21 @@ int psy_ui_x11app_run(psy_ui_X11App* self)
     return 0;
 }
 
+void psy_ui_x11app_flush_events(psy_ui_X11App* self)
+{
+	XEvent event;
+	
+	XSync(self->dpy, FALSE);
+	while (self->running) {
+		if (XPending(self->dpy)) {
+			XNextEvent(self->dpy, &event);
+			psy_ui_x11app_handle_event(self, &event);
+		} else {
+			break;
+		}
+    }
+}
+
 void psy_ui_x11app_stop(psy_ui_X11App* self)
 {
 	self->running = FALSE;
@@ -247,14 +275,14 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 	psy_ui_x11_ComponentImp* rootimp;
 
 	imp = (psy_ui_x11_ComponentImp*)psy_table_at(&self->selfmap,
-		(uintptr_t) event->xany.window);
+		(uintptr_t)event->xany.window);
 	if (!imp) {
 		return 0;
 	}
 	switch (event->type) {
-	case DestroyNotify: {
-		psy_ui_x11app_destroy_window(self, imp->hwnd);
-		break; }
+	case DestroyNotify:		
+		psy_ui_x11app_handle_destroy_window(self, imp->component);
+		break;
 	case NoExpose:
 		/* expose_window(self, imp,
 		   event->xnoexpose.x, event->xnoexpose.y,
@@ -386,20 +414,9 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 				return 0;
 			}
 			hwnd = event->xclient.window;
+			psy_ui_x11app_flush_events(self);
 			XDestroyWindow(self->dpy, event->xclient.window);
-			while (TRUE) {
-                if (XPending(self->dpy)) {
-                    XNextEvent(self->dpy, event);
-                    if (event->type ==  DestroyNotify) {
-                        psy_ui_x11app_destroy_window(self, event->xany.window);
-                        if (hwnd == event->xany.window) {             
-                            break;
-                        }
-                    }
-                } else {
-                    break;
-                }
-			}			
+			psy_ui_x11app_flush_events(self);			
 			if (ismain) {
 				self->running = FALSE;
 			}
@@ -536,32 +553,20 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 	return 0;
 }
 
-void psy_ui_x11app_destroy_window(psy_ui_X11App* self, Window window)
+void psy_ui_x11app_handle_destroy_window(psy_ui_X11App* self,
+	psy_ui_Component* component)
 {
-	psy_ui_x11_ComponentImp* imp;
-	
-	imp = (psy_ui_x11_ComponentImp*)psy_table_at(
-		&self->selfmap, (uintptr_t)window);
-	if (imp) {
-        psy_ui_Component* component;
-        bool deallocate;
+	assert(self);
 
-		component = imp->component;
-		deallocate = FALSE;
-		if (imp->component) {
-            deallocate = imp->component->deallocate;
-            psy_signal_emit(&imp->component->signal_destroy,
-					imp->component, 0);
-			imp->component->vtable->on_destroy(imp->component);    
-			psy_ui_component_dispose(imp->component);
-		} else {
-			imp->imp.vtable->dev_dispose(&imp->imp);
+	if (component) {
+		bool deallocate;
+
+		deallocate = component->deallocate;
+		psy_ui_component_dispose(component);
+		if (deallocate) {
+			free(component);
+			component = NULL;
 		}
-		psy_table_remove(&self->selfmap, (uintptr_t)window);
-		psy_table_remove(&self->toplevelmap, (uintptr_t)window);
-		if (component && deallocate) {
-            free(component);
-        }
 	}
 }
 
@@ -810,5 +815,32 @@ psy_List* psy_ui_x11app_toplevel(psy_ui_X11App* self)
 	}
 	return rv;
 }
+
+int errorHandler(Display *dpy, XErrorEvent *err)
+{
+    char buf[4096];
+    
+    XGetErrorText(dpy, err->error_code, buf, 4096);
+    printf("%s\n", buf);
+    assert(0);
+    return 0;
+}
+
+void psy_ui_x11app_register_native(psy_ui_X11App* self,
+	uintptr_t handle, psy_ui_ComponentImp* imp, bool top_level)
+{
+	psy_table_insert(&self->selfmap, handle, imp);
+	if (top_level) {
+		psy_table_insert(&self->toplevelmap, handle, imp);
+	}
+}
+
+void psy_ui_x11app_unregister_native(psy_ui_X11App* self,
+	uintptr_t handle)
+{
+	psy_table_remove(&self->selfmap, handle);
+	psy_table_remove(&self->toplevelmap, handle);
+}
+
 
 #endif /* PSYCLE_TK_X11 */

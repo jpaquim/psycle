@@ -191,7 +191,9 @@ void kbdboxkey_on_mouse_down(KbdBoxKey* self, psy_ui_MouseEvent* ev)
 }
 
 /* KbdBox */
-static void kbdbox_on_destroy(KbdBox*);
+
+/* implementation */
+static void kbdbox_on_destroyed(KbdBox*);
 static void kbdbox_on_mouse_down(KbdBox*, psy_ui_MouseEvent*);
 static void kbdbox_on_mouse_up(KbdBox*, psy_ui_MouseEvent*);
 static void kbdbox_initfont(KbdBox*);
@@ -204,7 +206,8 @@ static void kbdbox_addkey(KbdBox*, uint32_t keycode, uintptr_t size,
 	const char* label);
 static void kbdbox_resetmodstates(KbdBox*);
 static void kbdbox_oninput(KbdBox*, psy_EventDriver* sender);
-// vtable
+
+/* vtable */
 static psy_ui_ComponentVtable kbdbox_vtable;
 static bool kbdbox_vtable_initialized = FALSE;
 
@@ -212,9 +215,9 @@ static void kbdbox_vtable_init(KbdBox* self)
 {
 	if (!kbdbox_vtable_initialized) {
 		kbdbox_vtable = *(self->component.vtable);
-		kbdbox_vtable.on_destroy =
+		kbdbox_vtable.on_destroyed =
 			(psy_ui_fp_component_event)
-			kbdbox_on_destroy;
+			kbdbox_on_destroyed;
 		kbdbox_vtable.on_mouse_down =
 			(psy_ui_fp_component_on_mouse_event)
 			kbdbox_on_mouse_down;
@@ -223,7 +226,7 @@ static void kbdbox_vtable_init(KbdBox* self)
 			kbdbox_on_mouse_up;
 		kbdbox_vtable_initialized = TRUE;
 	}
-	self->component.vtable = &kbdbox_vtable;
+	psy_ui_component_set_vtable(&self->component, &kbdbox_vtable);
 }
 
 /* implementation */
@@ -242,7 +245,7 @@ void kbdbox_init(KbdBox* self, psy_ui_Component* parent, Workspace* workspace)
 		self, kbdbox_oninput);
 }
 
-void kbdbox_on_destroy(KbdBox* self)
+void kbdbox_on_destroyed(KbdBox* self)
 {
 	psy_table_dispose(&self->keys);
 }

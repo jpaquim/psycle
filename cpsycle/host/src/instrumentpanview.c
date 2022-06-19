@@ -15,8 +15,7 @@
 #include "../../detail/portable.h"
 
 /* prototypes */
-static void instrumentpanview_on_destroy(InstrumentPanView*,
-	psy_ui_Component* sender);
+static void instrumentpanview_on_destroyed(InstrumentPanView*);
 static void instrumentpanview_oninstpanenabled(InstrumentPanView*,
 	psy_ui_CheckBox* sender);
 static void instrumentpanview_updatesliders(InstrumentPanView*);
@@ -30,7 +29,24 @@ static void instrumentpanview_ontweaked(InstrumentPanView*,
 	psy_ui_Component*, int pointindex);
 static void instrumentpanview_onenvelopeviewtweaked(InstrumentPanView*,
 	psy_ui_Component* sender, int pointindex);
-// implementation
+
+/* vtable */
+static psy_ui_ComponentVtable vtable;
+static bool vtable_initialized = FALSE;
+
+static void vtable_init(InstrumentPanView* self)
+{
+	if (!vtable_initialized) {
+		vtable = *(self->component.vtable);
+		vtable.on_destroyed =
+			(psy_ui_fp_component_event)
+			instrumentpanview_on_destroyed;
+		vtable_initialized = TRUE;
+	}
+	psy_ui_component_set_vtable(&self->component, &vtable);
+}
+
+/* implementation */
 void instrumentpanview_init(InstrumentPanView* self, psy_ui_Component* parent,
 	psy_audio_Instruments* instruments, Workspace* workspace)
 {
@@ -46,8 +62,7 @@ void instrumentpanview_init(InstrumentPanView* self, psy_ui_Component* parent,
 	self->instruments = instruments;
 	self->workspace = workspace;
 	psy_ui_component_init(&self->component, parent, NULL);
-	psy_signal_connect(&self->component.signal_destroy, self,
-		instrumentpanview_on_destroy);
+	vtable_init(self);
 	psy_signal_init(&self->signal_status);
 	psy_ui_component_set_defaultalign(&self->component, psy_ui_ALIGN_TOP,
 		psy_ui_defaults_vmargin(psy_ui_defaults()));
@@ -72,16 +87,16 @@ void instrumentpanview_init(InstrumentPanView* self, psy_ui_Component* parent,
 		(ui_slider_fpvalue)instrumentpanview_onvalue);
 	psy_ui_component_set_minimum_size(&self->instpanning.component,
 		psy_ui_size_make_em(50.0, 1.0));
-	psy_ui_slider_showhorizontal(&self->instpanning);
+	psy_ui_slider_show_horizontal(&self->instpanning);
 
 	psy_ui_slider_init(&self->randompanning, &self->top);
-	psy_ui_slider_settext(&self->randompanning,
+	psy_ui_slider_set_text(&self->randompanning,
 		"Swing (Randomize)");
 	psy_ui_slider_init(&self->notemodcenternote, &self->top);
-	psy_ui_slider_settext(&self->notemodcenternote,
+	psy_ui_slider_set_text(&self->notemodcenternote,
 		"Note Mod Center Note");
 	psy_ui_slider_init(&self->notemodamount, &self->top);
-	psy_ui_slider_settext(&self->notemodamount,
+	psy_ui_slider_set_text(&self->notemodamount,
 		"Note Mod Amount");
 	envelopeview_init(&self->envelopeview, &self->component);
 	envelopeview_settext(&self->envelopeview,
@@ -110,8 +125,7 @@ void instrumentpanview_init(InstrumentPanView* self, psy_ui_Component* parent,
 	instrumentpanview_updatesliders(self);
 }
 
-void instrumentpanview_on_destroy(InstrumentPanView* self,
-	psy_ui_Component* sender)
+void instrumentpanview_on_destroyed(InstrumentPanView* self)
 {
 	psy_signal_dispose(&self->signal_status);
 }
@@ -121,7 +135,7 @@ void instrumentpanview_setinstrument(InstrumentPanView* self,
 {	
 	self->instrument = instrument;
 	if (self->instrument) {
-		adsrsliders_setenvelope(&self->adsrsliders, &instrument->panenvelope);
+		adsrsliders_set_envelope(&self->adsrsliders, &instrument->panenvelope);
 		envelopeview_setenvelope(&self->envelopeview,
 			&instrument->panenvelope);
 		if (instrument->panenabled) {
@@ -130,7 +144,7 @@ void instrumentpanview_setinstrument(InstrumentPanView* self,
 			psy_ui_checkbox_disablecheck(&self->instpanenabled);
 		}
 	} else {
-		adsrsliders_setenvelope(&self->adsrsliders, NULL);
+		adsrsliders_set_envelope(&self->adsrsliders, NULL);
 		envelopeview_setenvelope(&self->envelopeview, NULL);
 		psy_ui_checkbox_disablecheck(&self->instpanenabled);
 	}

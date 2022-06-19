@@ -13,7 +13,7 @@ void psy_audio_presets_init(psy_audio_Presets* self)
 
 void psy_audio_presets_dispose(psy_audio_Presets* self)
 {
-	psy_table_disposeall(&self->container, (psy_fp_disposefunc)
+	psy_table_dispose_all(&self->container, (psy_fp_disposefunc)
 		psy_audio_preset_dispose);	
 }
 

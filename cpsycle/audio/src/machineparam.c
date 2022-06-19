@@ -806,7 +806,7 @@ void psy_audio_choicemachineparam_dispose(psy_audio_ChoiceMachineParam* self)
 	psy_audio_machineparam_dispose(&self->machineparam);
 	free(self->name);
 	free(self->label);
-	psy_table_disposeall(&self->descriptions, (psy_fp_disposefunc)NULL);
+	psy_table_dispose_all(&self->descriptions, (psy_fp_disposefunc)NULL);
 }
 
 void choicemachineparam_range(psy_audio_ChoiceMachineParam* self,

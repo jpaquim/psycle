@@ -10,7 +10,7 @@
 // 
 #include "../../detail/portable.h"
 
-static void machinecombobox_on_destroy(MachineComboBox*, psy_ui_Component* component);
+static void machinecombobox_on_destroyed(MachineComboBox*);
 static void machinecombobox_onmachineboxselchange(MachineComboBox*,
 	psy_ui_Component* sender, int sel);
 static void machinecombobox_buildmachinebox(MachineComboBox*);
@@ -22,6 +22,24 @@ static void machinecombobox_onsongchanged(MachineComboBox*, Workspace* sender);
 static void machinecombobox_connectsongsignals(MachineComboBox*);
 static void machinecombobox_connectinstrumentsignals(MachineComboBox*);
 static void machinecombobox_clearmachinebox(MachineComboBox* self);
+
+/* vtable */
+static psy_ui_ComponentVtable vtable;
+static psy_ui_ComponentVtable super_vtable;
+static bool vtable_initialized = FALSE;
+
+static void vtable_init(MachineComboBox* self)
+{
+	if (!vtable_initialized) {
+		vtable = *(self->machinebox.component.vtable);
+		super_vtable = *(self->machinebox.component.vtable);
+		vtable.on_destroyed =
+			(psy_ui_fp_component_event)
+			machinecombobox_on_destroyed;
+		vtable_initialized = TRUE;
+	}
+	psy_ui_component_set_vtable(&self->machinebox.component, &vtable);
+}
 
 void machinecombobox_init(MachineComboBox* self, psy_ui_Component* parent,
 	bool showmaster, Workspace* workspace)
@@ -39,9 +57,7 @@ void machinecombobox_init(MachineComboBox* self, psy_ui_Component* parent,
 	psy_table_init(&self->slotscombobox);	
 	/* Machine ComboBox */
 	psy_ui_combobox_init(&self->machinebox, parent);
-	psy_ui_combobox_setcharnumber(&self->machinebox, 10);
-	psy_signal_connect(&self->machinebox.component.signal_destroy,
-		self, machinecombobox_on_destroy);
+	psy_ui_combobox_setcharnumber(&self->machinebox, 10);	
 	psy_signal_connect(&self->machinebox.signal_selchanged, self,
 		machinecombobox_onmachineboxselchange);
 	machinecombobox_buildmachinebox(self);	
@@ -51,7 +67,7 @@ void machinecombobox_init(MachineComboBox* self, psy_ui_Component* parent,
 	psy_signal_init(&self->signal_selected);
 }
 
-void machinecombobox_on_destroy(MachineComboBox* self, psy_ui_Component* component)
+void machinecombobox_on_destroyed(MachineComboBox* self)
 {
 	psy_table_dispose(&self->comboboxslots);
 	psy_table_dispose(&self->slotscombobox);
@@ -66,6 +82,7 @@ void machinecombobox_on_destroy(MachineComboBox* self, psy_ui_Component* compone
 			machinecombobox_onmachineselect);
 	}
 	psy_signal_dispose(&self->signal_selected);
+	super_vtable.on_destroyed(&self->machinebox.component);
 }
 
 void machinecombobox_clearmachinebox(MachineComboBox* self)

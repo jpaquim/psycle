@@ -550,7 +550,7 @@ LadspaParam* valueat(psy_audio_LadspaPlugin* self, uintptr_t index)
 
 void clearparams(psy_audio_LadspaPlugin* self)
 {
-	psy_table_disposeall(&self->values_, (psy_fp_disposefunc)
+	psy_table_dispose_all(&self->values_, (psy_fp_disposefunc)
 		ladspaparam_dispose);	
 	psy_table_init(&self->values_);
 }

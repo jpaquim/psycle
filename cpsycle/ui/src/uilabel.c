@@ -14,7 +14,7 @@
 #include "../../detail/portable.h"
 
 /* prototypes */
-static void psy_ui_label_on_destroy(psy_ui_Label*);
+static void psy_ui_label_on_destroyed(psy_ui_Label*);
 static void psy_ui_label_on_draw(psy_ui_Label*, psy_ui_Graphics*);
 static void psy_ui_label_on_preferred_size(psy_ui_Label*,
 	const psy_ui_Size* limit, psy_ui_Size* rv);
@@ -34,9 +34,9 @@ static void vtable_init(psy_ui_Label* self)
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
 		super_vtable = *(self->component.vtable);
-		vtable.on_destroy =
+		vtable.on_destroyed =
 			(psy_ui_fp_component_event)
-			psy_ui_label_on_destroy;
+			psy_ui_label_on_destroyed;
 		vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
 			psy_ui_label_on_draw;
@@ -87,6 +87,16 @@ void psy_ui_label_init_text(psy_ui_Label* self, psy_ui_Component* parent,
 	psy_ui_label_set_text(self, text);
 }
 
+void psy_ui_label_on_destroyed(psy_ui_Label* self)
+{
+	assert(self);
+
+	free(self->text);
+	free(self->translation);
+	free(self->defaulttext);
+	psy_ui_textformat_dispose(&self->format);
+}
+
 psy_ui_Label* psy_ui_label_alloc(void)
 {
 	return (psy_ui_Label*)malloc(sizeof(psy_ui_Label));
@@ -102,16 +112,6 @@ psy_ui_Label* psy_ui_label_allocinit(psy_ui_Component* parent)
 		psy_ui_component_deallocate_after_destroyed(&rv->component);
 	}
 	return rv;
-}
-
-void psy_ui_label_on_destroy(psy_ui_Label* self)
-{
-	assert(self);
-	
-	free(self->text);
-	free(self->translation);
-	free(self->defaulttext);
-	psy_ui_textformat_dispose(&self->format);
 }
 
 void psy_ui_label_on_language_changed(psy_ui_Label* self)

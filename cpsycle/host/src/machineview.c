@@ -15,8 +15,9 @@
 #include <exclusivelock.h>
 
 /* MachineView */
+
 /* prototypes */
-static void machineview_on_destroy(MachineView*);
+static void machineview_on_destroyed(MachineView*);
 static void machineview_initcomponent(MachineView*, psy_ui_Component* parent);
 static void machineview_initpropertiesview(MachineView*);
 static void machineview_initnotebook(MachineView*,
@@ -55,9 +56,9 @@ static void machineview_vtable_init(MachineView* self)
 {
 	if (!machineview_vtable_initialized) {
 		machineview_vtable = *(self->component.vtable);
-		machineview_vtable.on_destroy =
+		machineview_vtable.on_destroyed =
 			(psy_ui_fp_component_event)
-			machineview_on_destroy;
+			machineview_on_destroyed;
 		machineview_vtable.on_mouse_down =
 			(psy_ui_fp_component_on_mouse_event)
 			machineview_on_mouse_down;
@@ -104,7 +105,7 @@ void machineview_init(MachineView* self, psy_ui_Component* parent,
 	psy_ui_tabbar_select(&self->tabbar, SECTION_ID_MACHINEVIEW_WIRES);	
 }
 
-void machineview_on_destroy(MachineView* self)
+void machineview_on_destroyed(MachineView* self)
 {		
 	paramviews_dispose(&self->paramviews);
 }

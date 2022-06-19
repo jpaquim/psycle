@@ -14,16 +14,15 @@
 #include "../../detail/portable.h"
 
 /* prototypes */
-static void mainstatusbar_on_destroy(MainStatusBar*);
-static void psy_ui_terminal_on_destroy(MainStatusBar*);
-static void mainstatusbar_initzoombox(MainStatusBar*);
-static void mainstatusbar_initviewstatusbars(MainStatusBar*);
-static void mainstatusbar_initstatuslabel(MainStatusBar*);
-static void mainstatusbar_initturnoffbutton(MainStatusBar*);
-static void mainstatusbar_initclockbar(MainStatusBar*);
-static void mainstatusbar_initkbdhelpbutton(MainStatusBar*);
-static void mainstatusbar_initterminalbutton(MainStatusBar*);
-static void mainstatusbar_initprogressbar(MainStatusBar*);
+static void mainstatusbar_on_destroyed(MainStatusBar*);
+static void mainstatusbar_init_zoom_box(MainStatusBar*);
+static void mainstatusbar_init_view_status_bars(MainStatusBar*);
+static void mainstatusbar_init_status_label(MainStatusBar*);
+static void mainstatusbar_init_turnoff_button(MainStatusBar*);
+static void mainstatusbar_init_clock_bar(MainStatusBar*);
+static void mainstatusbar_init_kbd_help_button(MainStatusBar*);
+static void mainstatusbar_init_terminal_button(MainStatusBar*);
+static void mainstatusbar_init_progress_bar(MainStatusBar*);
 static void mainstatusbar_onzoomboxchanged(MainStatusBar*, ZoomBox* sender);
 static void mainstatusbar_onsongloadprogress(MainStatusBar*, Workspace* sender,
 	intptr_t progress);
@@ -40,9 +39,9 @@ static void vtable_init(MainStatusBar* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.on_destroy =
+		vtable.on_destroyed =
 			(psy_ui_fp_component_event)
-			mainstatusbar_on_destroy;		
+			mainstatusbar_on_destroyed;		
 		vtable_initialized = TRUE;
 	}
 	self->component.vtable = &vtable;
@@ -63,30 +62,30 @@ void mainstatusbar_init(MainStatusBar* self, psy_ui_Component* parent,
 	self->strbuffer = NULL;	
 	psy_ui_component_set_defaultalign(&self->pane, psy_ui_ALIGN_LEFT,
 		psy_ui_margin_make_em(0.0, 1.0, 0.0, 0.0));
-	mainstatusbar_initzoombox(self);
-	mainstatusbar_initstatuslabel(self);
-	mainstatusbar_initviewstatusbars(self);
-	mainstatusbar_initturnoffbutton(self);
-	mainstatusbar_initclockbar(self);
-	mainstatusbar_initkbdhelpbutton(self);
-	mainstatusbar_initterminalbutton(self);
-	mainstatusbar_initprogressbar(self);
+	mainstatusbar_init_zoom_box(self);
+	mainstatusbar_init_status_label(self);
+	mainstatusbar_init_view_status_bars(self);
+	mainstatusbar_init_turnoff_button(self);
+	mainstatusbar_init_clock_bar(self);
+	mainstatusbar_init_kbd_help_button(self);
+	mainstatusbar_init_terminal_button(self);
+	mainstatusbar_init_progress_bar(self);
 }
 
-void mainstatusbar_on_destroy(MainStatusBar* self)
+void mainstatusbar_on_destroyed(MainStatusBar* self)
 {
 	psy_list_deallocate(&self->strbuffer, NULL);
 	psy_lock_dispose(&self->outputlock);
 }
 
-void mainstatusbar_initzoombox(MainStatusBar* self)
+void mainstatusbar_init_zoom_box(MainStatusBar* self)
 {
 	zoombox_init(&self->zoombox, &self->pane);	
 	psy_signal_connect(&self->zoombox.signal_changed,
 		self, mainstatusbar_onzoomboxchanged);
 }
 
-void mainstatusbar_initstatuslabel(MainStatusBar* self)
+void mainstatusbar_init_status_label(MainStatusBar* self)
 {
 	psy_ui_label_init(&self->statusbarlabel, &self->pane);
 	psy_ui_label_prevent_translation(&self->statusbarlabel);
@@ -96,7 +95,7 @@ void mainstatusbar_initstatuslabel(MainStatusBar* self)
 		(fp_workspace_output)mainstatusbar_onstatus);
 }
 
-void mainstatusbar_initviewstatusbars(MainStatusBar* self)
+void mainstatusbar_init_view_status_bars(MainStatusBar* self)
 {
 	psy_ui_notebook_init(&self->viewstatusbars, &self->pane);	
 	psy_ui_component_set_align(psy_ui_notebook_base(&self->viewstatusbars),
@@ -106,7 +105,7 @@ void mainstatusbar_initviewstatusbars(MainStatusBar* self)
 		psy_ui_ALIGN_LEFT, psy_ui_defaults_hmargin(psy_ui_defaults()));	
 }
 
-void mainstatusbar_initturnoffbutton(MainStatusBar* self)
+void mainstatusbar_init_turnoff_button(MainStatusBar* self)
 {
 	psy_ui_button_init_text(&self->turnoff, &self->pane, "main.exit");
 	psy_ui_button_load_resource(&self->turnoff, IDB_EXIT_LIGHT,
@@ -115,14 +114,14 @@ void mainstatusbar_initturnoffbutton(MainStatusBar* self)
 		psy_ui_ALIGN_RIGHT);		
 }
 
-void mainstatusbar_initclockbar(MainStatusBar* self)
+void mainstatusbar_init_clock_bar(MainStatusBar* self)
 {
 	clockbar_init(&self->clockbar, &self->pane);
 	psy_ui_component_set_align(clockbar_base(&self->clockbar),
 		psy_ui_ALIGN_RIGHT);		
 }
 
-void mainstatusbar_initkbdhelpbutton(MainStatusBar* self)
+void mainstatusbar_init_kbd_help_button(MainStatusBar* self)
 {	
 	psy_ui_Margin margin;
 
@@ -137,7 +136,7 @@ void mainstatusbar_initkbdhelpbutton(MainStatusBar* self)
 		psy_ui_colour_white());
 }
 
-void mainstatusbar_initterminalbutton(MainStatusBar* self)
+void mainstatusbar_init_terminal_button(MainStatusBar* self)
 {		
 	psy_ui_button_init_text(&self->toggleterminal, &self->pane,
 		"Terminal");
@@ -149,7 +148,7 @@ void mainstatusbar_initterminalbutton(MainStatusBar* self)
 		psy_ui_colour_white());
 }
 
-void mainstatusbar_initprogressbar(MainStatusBar* self)
+void mainstatusbar_init_progress_bar(MainStatusBar* self)
 {
 	self->pluginscanprogress = -1;
 	psy_ui_progressbar_init(&self->progressbar, &self->pane);
@@ -200,7 +199,7 @@ void mainstatusbar_onsongloadprogress(MainStatusBar* self, Workspace* workspace,
 	if (progress == -1) {
 		workspace_output(self->workspace, "\n");
 	}
-	psy_ui_progressbar_setprogress(&self->progressbar, progress / 100.f);
+	psy_ui_progressbar_set_progress(&self->progressbar, progress / 100.f);
 }
 
 void mainstatusbar_onpluginscanprogress(MainStatusBar* self, Workspace* workspace,
@@ -213,7 +212,7 @@ void mainstatusbar_idle(MainStatusBar* self)
 {
 	if (self->pluginscanprogress != -1) {
 		if (self->pluginscanprogress == 0) {
-			psy_ui_progressbar_setprogress(&self->progressbar, 0);
+			psy_ui_progressbar_set_progress(&self->progressbar, 0);
 			self->pluginscanprogress = -1;
 		} else {
 			psy_ui_progressbar_tick(&self->progressbar);

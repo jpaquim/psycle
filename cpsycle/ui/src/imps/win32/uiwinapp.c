@@ -47,6 +47,9 @@ static psy_ui_win_ComponentImp* psy_ui_win_component_details(psy_ui_Component*
 	return (psy_ui_win_ComponentImp*)self->imp->vtable->dev_platform(self->imp);
 }
 
+static void psy_ui_winapp_handle_destroy_window(psy_ui_WinApp*,
+	psy_ui_Component*);
+
 /* virtual */
 static void psy_ui_winapp_dispose(psy_ui_WinApp*);
 static int psy_ui_winapp_run(psy_ui_WinApp*);
@@ -60,7 +63,11 @@ static psy_ui_Component* psy_ui_winapp_component(psy_ui_WinApp*,
 	uintptr_t handle);
 psy_ui_win_ComponentImp* psy_ui_winapp_componentimp(psy_ui_WinApp*,
 	uintptr_t handle);
-static psy_List* psy_ui_winapp_toplevel(psy_ui_WinApp* self);
+static psy_List* psy_ui_winapp_toplevel(psy_ui_WinApp*);
+static void psy_ui_winimp_register_native(psy_ui_WinApp*,
+	uintptr_t handle, psy_ui_ComponentImp*, bool top_level);
+static void psy_ui_winimp_unregister_native(psy_ui_WinApp*,
+	uintptr_t handle);
 
 /* vtable */
 static psy_ui_AppImpVTable imp_vtable;
@@ -102,6 +109,12 @@ static void imp_vtable_init(psy_ui_WinApp* self)
 		imp_vtable.dev_toplevel =
 			(psy_ui_fp_appimp_toplevel)
 			psy_ui_winapp_toplevel;
+		imp_vtable.dev_register_native =
+			(psy_ui_fp_appimp_register_native)
+			psy_ui_winimp_register_native;
+		imp_vtable.dev_unregister_native =
+			(psy_ui_fp_appimp_unregister_native)
+			psy_ui_winimp_unregister_native;
 		imp_vtable_initialized = TRUE;
 	}
 	self->imp.vtable = &imp_vtable;
@@ -211,28 +224,17 @@ LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 		component = imp->component;
 		switch (message) {
 		case WM_NCDESTROY:
-			/* restore default winproc */
-			if (component) {				
-				component->vtable->on_destroyed(component);					
-			}
+			/* restore default winproc */			
 #if defined(_WIN64)		
 			SetWindowLongPtr(imp->hwnd, GWLP_WNDPROC, (LONG_PTR)
 				imp->wndproc);
 #else	
 			SetWindowLong(imp->hwnd, GWL_WNDPROC, (LONG)imp->wndproc);
 #endif				
-			if (component) {
-				psy_ui_component_dispose(component);
-			} else {
-				imp->imp.vtable->dev_dispose(&imp->imp);
-			}
-			psy_table_remove(&winapp->selfmap, (uintptr_t)hwnd);
+			psy_ui_winapp_handle_destroy_window(winapp, component);
 			break;
 		case WM_DESTROY:
-			if (component) {					
-				psy_signal_emit(&component->signal_destroy, component, 0);
-				component->vtable->on_destroy(component);
-			}								
+			/* deallocation handled in WM_NCDESTROY */			
 			break;		
 		case WM_CHAR:
 			if (imp->preventwmchar) {
@@ -511,30 +513,11 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 			}
 			break; }
 		case WM_NCDESTROY: {
-			bool deallocate;
-
-			deallocate = FALSE;
-			if (component) {
-				deallocate = component->deallocate;				
-			}			
-			if (component->id == 100) {
-				self = self;
-			}
-			psy_ui_component_dispose(component);
-			psy_table_remove(&winapp->selfmap, (uintptr_t)hwnd);
-			psy_table_remove(&winapp->toplevelmap, (uintptr_t)hwnd);
-			if (component) {				
-				component->vtable->on_destroyed(component);
-			}
-			if (deallocate) {
-				free(component);
-			}
-			return 0;
+			psy_ui_winapp_handle_destroy_window(winapp, component);
 			break; }
 		case WM_DESTROY:
 			if (component) {
-				psy_signal_emit(&component->signal_destroy, component, 0);
-				component->vtable->on_destroy(component);			
+				/* deallocation handled in WM_NCDESTROY */			
 				return 0;
 			}
 			break;
@@ -756,6 +739,23 @@ bool handle_ctlcolor(psy_ui_WinApp* self, int msg, HWND hwnd, WPARAM wparam,
 		break;
 	}
 	return FALSE;
+}
+
+void psy_ui_winapp_handle_destroy_window(psy_ui_WinApp* self,
+	psy_ui_Component* component)
+{
+	assert(self);
+
+	if (component) {
+		bool deallocate;		
+			
+		deallocate = component->deallocate;
+		psy_ui_component_dispose(component);		
+		if (deallocate) {
+			free(component);
+			component = NULL;
+		}
+	}
 }
 
 int translate_win_button(int message)
@@ -1019,6 +1019,21 @@ psy_List* psy_ui_winapp_toplevel(psy_ui_WinApp* self)
 		}
 	}
 	return rv;
+}
+
+void psy_ui_winimp_register_native(psy_ui_WinApp* self, uintptr_t handle,
+	psy_ui_ComponentImp* imp, bool top_level)
+{
+	psy_table_insert(&winapp->selfmap, handle, imp);
+	if (top_level) {
+		psy_table_insert(&winapp->toplevelmap, handle, imp);
+	}
+}
+
+void psy_ui_winimp_unregister_native(psy_ui_WinApp* self, uintptr_t handle)
+{	
+	psy_table_remove(&winapp->selfmap, handle);
+	psy_table_remove(&winapp->toplevelmap, handle);
 }
 
 #endif /* PSYCLE_TK_WIN32 */

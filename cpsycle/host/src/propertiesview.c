@@ -32,7 +32,7 @@ void propertiesrenderstate_init(PropertiesRenderState* self, uintptr_t numcols)
 /* PropertiesRenderLine */
 
 /* prototypes */
-static void propertiesrenderline_on_destroy(PropertiesRenderLine*);
+static void propertiesrenderline_on_destroyed(PropertiesRenderLine*);
 static void propertiesrenderline_on_mouse_down(PropertiesRenderLine*,
 	psy_ui_MouseEvent*);
 static void propertiesrenderline_on_combo_select(PropertiesRenderLine*,
@@ -64,9 +64,9 @@ static void propertiesrenderline_vtable_init(PropertiesRenderLine* self)
 {
 	if (!propertiesrenderline_vtable_initialized) {
 		propertiesrenderline_vtable = *(self->component.vtable);
-		propertiesrenderline_vtable.on_destroy =
+		propertiesrenderline_vtable.on_destroyed =
 			(psy_ui_fp_component_event)
-			propertiesrenderline_on_destroy;
+			propertiesrenderline_on_destroyed;
 		propertiesrenderline_vtable.on_mouse_down =
 			(psy_ui_fp_component_on_mouse_event)
 			propertiesrenderline_on_mouse_down;
@@ -256,7 +256,7 @@ void propertiesrenderline_init(PropertiesRenderLine* self,
 	propertiesrenderline_update(self);
 }
 
-void propertiesrenderline_on_destroy(PropertiesRenderLine* self)
+void propertiesrenderline_on_destroyed(PropertiesRenderLine* self)
 {
 	psy_signal_dispose(&self->signal_changed);
 	psy_signal_dispose(&self->signal_selected);
@@ -553,7 +553,7 @@ void propertiesrenderline_on_edit_reject(PropertiesRenderLine* self,
 /* PropertiesRenderer */
 
 /* prototypes */
-static void propertiesrenderer_on_destroy(PropertiesRenderer*);
+static void propertiesrenderer_on_destroyed(PropertiesRenderer*);
 static void propertiesrenderer_on_timer(PropertiesRenderer*, uintptr_t timerid);
 static int propertiesrenderer_on_properties_build(PropertiesRenderer*,
 	psy_Property*, uintptr_t level);
@@ -575,9 +575,9 @@ static void propertiesrenderer_vtable_init(PropertiesRenderer* self)
 {
 	if (!propertiesrenderer_vtable_initialized) {
 		propertiesrenderer_vtable = *(self->component.vtable);
-		propertiesrenderer_vtable.on_destroy =
+		propertiesrenderer_vtable.on_destroyed =
 			(psy_ui_fp_component_event)
-			propertiesrenderer_on_destroy;
+			propertiesrenderer_on_destroyed;
 		propertiesrenderer_vtable.on_mouse_down =
 			(psy_ui_fp_component_on_mouse_event)
 			propertiesrenderer_on_mouse_down;
@@ -621,14 +621,14 @@ void propertiesrenderer_init(PropertiesRenderer* self,
 	psy_ui_component_start_timer(&self->component, 0, 100);
 }
 
-void propertiesrenderer_on_destroy(PropertiesRenderer* self)
+void propertiesrenderer_on_destroyed(PropertiesRenderer* self)
 {
 	psy_signal_dispose(&self->signal_changed);
 	psy_signal_dispose(&self->signal_selected);
 	psy_table_dispose(&self->sections);
 }
 
-void propertiesrenderer_setstyle(PropertiesRenderer* self,
+void propertiesrenderer_set_style(PropertiesRenderer* self,
 	uintptr_t mainsection,
 	uintptr_t mainsectionheader,
 	uintptr_t keystyle,
@@ -841,7 +841,7 @@ void propertiesrenderer_on_line_selected(PropertiesRenderer* self,
 /* PropertiesView */
 
 /* prototypes */
-static void propertiesview_on_destroy(PropertiesView*);
+static void propertiesview_on_destroyed(PropertiesView*);
 static void propertiesview_select_section(PropertiesView*,
 	psy_ui_Component* sender, uintptr_t section, uintptr_t options);
 static void propertiesview_update_tabbar_sections(PropertiesView*);
@@ -866,9 +866,9 @@ static void propertiesview_vtable_init(PropertiesView* self)
 {
 	if (!propertiesview_vtable_initialized) {
 		propertiesview_vtable = *(self->component.vtable);
-		propertiesview_vtable.on_destroy =
+		propertiesview_vtable.on_destroyed =
 			(psy_ui_fp_component_event)
-			propertiesview_on_destroy;
+			propertiesview_on_destroyed;
 		propertiesview_vtable.on_mouse_down =
 			(psy_ui_fp_component_on_mouse_event)
 			propertiesview_on_mouse_up;
@@ -923,7 +923,7 @@ void propertiesview_init(PropertiesView* self, psy_ui_Component* parent,
 		propertiesview_on_scroll_pane_align);
 }
 
-void propertiesview_on_destroy(PropertiesView* self)
+void propertiesview_on_destroyed(PropertiesView* self)
 {
 	psy_signal_dispose(&self->signal_changed);
 	psy_signal_dispose(&self->signal_selected);

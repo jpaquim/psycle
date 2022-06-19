@@ -20,7 +20,7 @@
 /* FileViewFilter */
 
 /* prototypes */
-static void fileviewfilter_on_destroy(FileViewFilter*);
+static void fileviewfilter_on_destroyed(FileViewFilter*);
 static void fileviewfilter_update(FileViewFilter*);
 static void fileviewfilter_oncheckbox(FileViewFilter*,
 	psy_ui_CheckBox* sender);
@@ -34,9 +34,9 @@ static void fileviewfilter_vtable_init(FileViewFilter* self)
 {
 	if (!fileviewfilter_vtable_initialized) {
 		fileviewfilter_vtable = *(self->component.vtable);
-		fileviewfilter_vtable.on_destroy =
+		fileviewfilter_vtable.on_destroyed =
 			(psy_ui_fp_component_event)
-			fileviewfilter_on_destroy;
+			fileviewfilter_on_destroyed;
 		fileviewfilter_vtable_initialized = TRUE;
 	}
 	self->component.vtable = &fileviewfilter_vtable;
@@ -64,7 +64,7 @@ void fileviewfilter_init(FileViewFilter* self, psy_ui_Component* parent)
 	psy_signal_init(&self->signal_changed);
 }
 
-void fileviewfilter_on_destroy(FileViewFilter* self)
+void fileviewfilter_on_destroyed(FileViewFilter* self)
 {
 	psy_signal_dispose(&self->signal_changed);
 }
@@ -119,7 +119,7 @@ void fileviewsavefilter_init(FileViewSaveFilter* self, psy_ui_Component* parent)
 }
 
 /* prototypes */
-static void fileview_on_destroy(FileView*, psy_ui_Component* sender);
+static void fileview_on_destroyed(FileView*);
 static void fileview_build(FileView*);
 static void fileview_builddrives(FileView*);
 static void fileview_builddirectories(FileView*);
@@ -135,12 +135,27 @@ static void fileview_file(FileView*, char* filename, uintptr_t index, uintptr_t 
 static void fileview_ondirfilter(FileView*, psy_ui_Component* sender);
 static void fileview_onhide(FileView*, psy_ui_Component* sender);
 
+/* vtable */
+static psy_ui_ComponentVtable vtable;
+static bool vtable_initialized = FALSE;
+
+static void vtable_init(FileView* self)
+{
+	if (!vtable_initialized) {
+		vtable = *(self->component.vtable);
+		vtable.on_destroyed =
+			(psy_ui_fp_component_event)
+			fileview_on_destroyed;
+		vtable_initialized = TRUE;
+	}
+	psy_ui_component_set_vtable(&self->component, &vtable);
+}
+
 /* implementation */
 void fileview_init(FileView* self, psy_ui_Component* parent)
 {		
 	psy_ui_component_init(fileview_base(self), parent, NULL);
-	psy_signal_connect(&self->component.signal_destroy, self,
-		fileview_on_destroy);
+	vtable_init(self);	
 	/* filename */
 	psy_ui_component_init(&self->bottom, &self->component, NULL);
 	psy_ui_component_set_align(&self->bottom, psy_ui_ALIGN_BOTTOM);
@@ -209,7 +224,7 @@ void fileview_init(FileView* self, psy_ui_Component* parent)
 		fileview_ondirfilter);
 }
 
-void fileview_on_destroy(FileView* self, psy_ui_Component* sender)
+void fileview_on_destroyed(FileView* self)
 {
 	psy_path_dispose(&self->curr);	
 	psy_signal_dispose(&self->signal_selected);	

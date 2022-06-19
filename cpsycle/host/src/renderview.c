@@ -15,7 +15,7 @@
 #include "../../detail/portable.h"
 
 /* prototypes */
-static void renderview_on_destroy(RenderView*);
+static void renderview_on_destroyed(RenderView*);
 static void renderview_build(RenderView*);
 static void renderview_onsettingsviewchanged(RenderView*,
 	PropertiesView* sender, psy_Property*, uintptr_t* rebuild);
@@ -36,9 +36,9 @@ static void renderview_vtable_init(RenderView* self)
 {
 	if (!renderview_vtable_initialized) {
 		renderview_vtable = *(self->component.vtable);
-		renderview_vtable.on_destroy =
+		renderview_vtable.on_destroyed =
 			(psy_ui_fp_component_event)
-			renderview_on_destroy;
+			renderview_on_destroyed;
 		renderview_vtable.on_focus =
 			(psy_ui_fp_component_event)
 			renderview_on_focus;
@@ -69,7 +69,7 @@ void renderview_init(RenderView* self, psy_ui_Component* parent,
 	psy_ui_component_hide(&self->progressview.component);
 }
 
-void renderview_on_destroy(RenderView* self)
+void renderview_on_destroyed(RenderView* self)
 {
 	psy_property_deallocate(self->properties);	
 	psy_audiodriver_deallocate(self->fileoutdriver);

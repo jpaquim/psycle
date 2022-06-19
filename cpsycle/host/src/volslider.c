@@ -27,7 +27,7 @@ void volslider_init(VolSlider* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->component, parent, NULL);
 	self->workspace = workspace;
 	psy_ui_slider_init(&self->slider, &self->component);
-	psy_ui_slider_settext(&self->slider, "VU");	
+	psy_ui_slider_set_text(&self->slider, "VU");	
 	psy_ui_slider_setvaluecharnumber(&self->slider, 10.0);
 	psy_ui_slider_startpoll(&self->slider);	
 	psy_ui_component_set_align(&self->slider.component, psy_ui_ALIGN_TOP);

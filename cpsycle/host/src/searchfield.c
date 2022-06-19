@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -13,11 +13,9 @@
 /* platform */
 #include "../../detail/portable.h"
 
-/*
-** SearchField
-** prototypes
-*/
-static void searchfield_on_destroy(SearchField*);
+
+/* prototypes */
+static void searchfield_on_destroyed(SearchField*);
 static void searchfield_oneditfocus(SearchField*, psy_ui_Component* sender);
 static void searchfield_oneditchange(SearchField*, psy_ui_Component* sender);
 static void searchfield_onaccept(SearchField*, psy_ui_Component* sender);
@@ -25,6 +23,7 @@ static void searchfield_onreject(SearchField*, psy_ui_Component* sender);
 static void searchfield_reset(SearchField*);
 static void searchfield_onlanguagechanged(SearchField*);
 static void searchfield_checkdefault(SearchField*);
+
 /* vtable */
 static psy_ui_ComponentVtable searchfield_vtable;
 static bool searchfield_vtable_initialized = FALSE;
@@ -33,16 +32,17 @@ static void searchfield_vtable_init(SearchField* self)
 {
 	if (!searchfield_vtable_initialized) {
 		searchfield_vtable = *(self->component.vtable);
-		searchfield_vtable.on_destroy =
+		searchfield_vtable.on_destroyed =
 			(psy_ui_fp_component_event)
-			searchfield_on_destroy;
+			searchfield_on_destroyed;
 		searchfield_vtable.onlanguagechanged =
 			(psy_ui_fp_component_onlanguagechanged)
 			searchfield_onlanguagechanged;
 		searchfield_vtable_initialized = TRUE;
 	}
-	self->component.vtable = &searchfield_vtable;
+	psy_ui_component_set_vtable(&self->component, &searchfield_vtable);
 }
+
 /* implementation */
 void searchfield_init(SearchField* self, psy_ui_Component* parent)
 {
@@ -75,7 +75,7 @@ void searchfield_init(SearchField* self, psy_ui_Component* parent)
 		self, searchfield_onreject);		
 }
 
-void searchfield_on_destroy(SearchField* self)
+void searchfield_on_destroyed(SearchField* self)
 {
 	psy_signal_dispose(&self->signal_changed);
 	free(self->defaulttext);

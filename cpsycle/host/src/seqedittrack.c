@@ -15,8 +15,9 @@
 #include "../../detail/portable.h"
 
 /* SeqEditTrack */
+
 /* prototypes */
-static void seqedittrack_on_destroy(SeqEditTrack*);
+static void seqedittrack_on_destroyed(SeqEditTrack*);
 static void seqedittrack_on_preferred_size(SeqEditTrack*,
 	const psy_ui_Size* limit, psy_ui_Size* rv);
 static void seqedittrack_on_align(SeqEditTrack*);
@@ -40,9 +41,9 @@ static void seqedittrack_vtable_init(SeqEditTrack* self)
 {
 	if (!seqedittrack_vtable_initialized) {
 		seqedittrack_vtable = *(self->component.vtable);
-		seqedittrack_vtable.on_destroy =
+		seqedittrack_vtable.on_destroyed =
 			(psy_ui_fp_component_event)
-			seqedittrack_on_destroy;
+			seqedittrack_on_destroyed;
 		seqedittrack_vtable.onalign =
 			(psy_ui_fp_component_event)
 			seqedittrack_on_align;
@@ -94,7 +95,7 @@ void seqedittrack_init(SeqEditTrack* self, psy_ui_Component* parent,
 	}
 }
 
-void seqedittrack_on_destroy(SeqEditTrack* self)
+void seqedittrack_on_destroyed(SeqEditTrack* self)
 {
 	if (seqeditstate_sequence(self->state)) {
 		psy_signal_disconnect(

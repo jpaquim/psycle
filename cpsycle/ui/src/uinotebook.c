@@ -11,9 +11,9 @@
 #include "uiapp.h"
 
 /* prototypes */
-static void psy_ui_notebook_ontabbarchange(psy_ui_Notebook*,
+static void psy_ui_notebook_on_tabbar_change(psy_ui_Notebook*,
 	psy_ui_Component* sender, uintptr_t tabindex);
-static void psy_ui_notebook_onalign(psy_ui_Notebook*);
+static void psy_ui_notebook_on_align(psy_ui_Notebook*);
 static void psy_ui_notebook_show_page(psy_ui_Notebook*, psy_ui_Component*,
 	const psy_ui_Size*);
 
@@ -31,7 +31,7 @@ static void vtable_init(psy_ui_Notebook* self)
 		super_vtable = *(self->component.vtable);		
 		vtable.onalign =
 			(psy_ui_fp_component_event)
-			psy_ui_notebook_onalign;
+			psy_ui_notebook_on_align;
 		vtable_initialized = TRUE;
 	}
 	psy_ui_component_set_vtable(&self->component, &vtable);
@@ -154,10 +154,10 @@ uintptr_t psy_ui_notebook_pageindex(psy_ui_Notebook* self)
 void psy_ui_notebook_connectcontroller(psy_ui_Notebook* self, psy_Signal* 
 	controllersignal)
 {
-	psy_signal_connect(controllersignal, self, psy_ui_notebook_ontabbarchange);
+	psy_signal_connect(controllersignal, self, psy_ui_notebook_on_tabbar_change);
 }
 
-void psy_ui_notebook_onalign(psy_ui_Notebook* self)
+void psy_ui_notebook_on_align(psy_ui_Notebook* self)
 {
 	if (!self->split) {
 		psy_List* p;
@@ -181,7 +181,7 @@ void psy_ui_notebook_onalign(psy_ui_Notebook* self)
 	}
 }
 
-void psy_ui_notebook_ontabbarchange(psy_ui_Notebook* self,
+void psy_ui_notebook_on_tabbar_change(psy_ui_Notebook* self,
 	psy_ui_Component* sender, uintptr_t tabindex)
 {
 	psy_ui_notebook_select(self, tabindex);

@@ -367,15 +367,15 @@ void samplesgeneralview_init(SamplesGeneralView* self, psy_ui_Component* parent,
 
 void generalview_updatetext(SamplesGeneralView* self)
 {
-	psy_ui_slider_settext(&self->defaultvolume, 
+	psy_ui_slider_set_text(&self->defaultvolume, 
 		"samplesview.default-volume");
-	psy_ui_slider_settext(&self->globalvolume,
+	psy_ui_slider_set_text(&self->globalvolume,
 		"samplesview.global-volume");
-	psy_ui_slider_settext(&self->panposition,
+	psy_ui_slider_set_text(&self->panposition,
 		"samplesview.pan-position");
-	psy_ui_slider_settext(&self->samplednote,
+	psy_ui_slider_set_text(&self->samplednote,
 		"samplesview.sampled-note");
-	psy_ui_slider_settext(&self->pitchfinetune,
+	psy_ui_slider_set_text(&self->pitchfinetune,
 		"samplesview.pitch-finetune");
 }
 
@@ -568,11 +568,11 @@ void samplesvibratoview_init(SamplesVibratoView* self, psy_ui_Component* parent,
 			vibratoview_onwaveformchange);
 	}
 	psy_ui_slider_init(&self->attack, &self->component);
-	psy_ui_slider_settext(&self->attack, "Attack");	
+	psy_ui_slider_set_text(&self->attack, "Attack");	
 	psy_ui_slider_init(&self->speed, &self->component);
-	psy_ui_slider_settext(&self->speed,"Speed");
+	psy_ui_slider_set_text(&self->speed,"Speed");
 	psy_ui_slider_init(&self->depth, &self->component);
-	psy_ui_slider_settext(&self->depth, "Depth");	
+	psy_ui_slider_set_text(&self->depth, "Depth");	
 	for (i = 0; i < 3; ++i) {		
 		psy_ui_slider_setcharnumber(sliders[i], 16);
 		psy_ui_slider_setdefaultvalue(sliders[i], 0.0);

@@ -18,7 +18,7 @@
 /* psy_ui_TextAreaPane */
 
 /* prototypes */
-static void psy_ui_textareapane_on_destroy(psy_ui_TextAreaPane*);
+static void psy_ui_textareapane_on_destroyed(psy_ui_TextAreaPane*);
 static void psy_ui_textareapane_on_preferred_size(psy_ui_TextAreaPane*,
 	psy_ui_Size* limit, psy_ui_Size* rv);
 static void psy_ui_textareapane_on_key_down(psy_ui_TextAreaPane*,
@@ -60,9 +60,9 @@ static void vtable_init(psy_ui_TextAreaPane* self)
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
 		super_vtable = *(self->component.vtable);
-		vtable.on_destroy =
+		vtable.on_destroyed =
 			(psy_ui_fp_component_event)
-			psy_ui_textareapane_on_destroy;
+			psy_ui_textareapane_on_destroyed;
 		vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
 			psy_ui_textareapane_on_draw;
@@ -112,7 +112,7 @@ void psy_ui_textareapane_init(psy_ui_TextAreaPane* self,
 	psy_ui_component_set_overflow(&self->component, psy_ui_OVERFLOW_SCROLL);
 }
 
-void psy_ui_textareapane_on_destroy(psy_ui_TextAreaPane* self)
+void psy_ui_textareapane_on_destroyed(psy_ui_TextAreaPane* self)
 {
 	psy_signal_dispose(&self->signal_change);
 	psy_signal_dispose(&self->signal_accept);
@@ -620,8 +620,7 @@ void psy_ui_textareapane_on_mouse_down(psy_ui_TextAreaPane* self,
 /* psy_ui_TextArea */
 
 /* prototypes */
-static void psy_ui_textarea_on_destroy(psy_ui_TextArea*,
-	psy_ui_Component* parent);
+static void psy_ui_textarea_on_destroyed(psy_ui_TextArea*);
 static void psy_ui_textarea_on_edit_accept(psy_ui_TextArea*,
 	psy_ui_TextAreaPane* sender);
 static void psy_ui_textarea_on_edit_reject(psy_ui_TextArea*,
@@ -629,10 +628,29 @@ static void psy_ui_textarea_on_edit_reject(psy_ui_TextArea*,
 static void psy_ui_textarea_oneditchange(psy_ui_TextArea*,
 	psy_ui_TextAreaPane* sender);
 
+/* psy_ui_textarea_vtable */
+static psy_ui_ComponentVtable psy_ui_textarea_vtable;
+static psy_ui_ComponentVtable psy_ui_textarea_super_vtable;
+static bool psy_ui_textarea_vtable_initialized = FALSE;
+
+static void psy_ui_textarea_vtable_init(psy_ui_TextArea* self)
+{
+	if (!psy_ui_textarea_vtable_initialized) {
+		psy_ui_textarea_vtable = *(self->component.vtable);
+		psy_ui_textarea_super_vtable = *(self->component.vtable);
+		psy_ui_textarea_vtable.on_destroyed =
+			(psy_ui_fp_component_event)
+			psy_ui_textarea_on_destroyed;		
+		psy_ui_textarea_vtable_initialized = TRUE;
+	}
+	psy_ui_component_set_vtable(&self->component, &psy_ui_textarea_vtable);
+}
+
 /* implementation */
 void psy_ui_textarea_init(psy_ui_TextArea* self, psy_ui_Component* parent)
 {
 	psy_ui_component_init(psy_ui_textarea_base(self), parent, NULL);
+	psy_ui_textarea_vtable_init(self);
 	psy_ui_textareapane_init(&self->pane, psy_ui_textarea_base(self));
 	psy_ui_scroller_init(&self->scroller, psy_ui_textarea_base(self), NULL,
 		NULL);
@@ -640,9 +658,7 @@ void psy_ui_textarea_init(psy_ui_TextArea* self, psy_ui_Component* parent)
 	psy_ui_component_set_align(&self->scroller.component, psy_ui_ALIGN_CLIENT);
 	psy_signal_init(&self->signal_change);
 	psy_signal_init(&self->signal_accept);
-	psy_signal_init(&self->signal_reject);
-	psy_signal_connect(&self->component.signal_destroy, self,
-		psy_ui_textarea_on_destroy);
+	psy_signal_init(&self->signal_reject);	
 	psy_signal_connect(&self->pane.signal_accept, self,
 		psy_ui_textarea_on_edit_accept);
 	psy_signal_connect(&self->pane.signal_reject, self,
@@ -662,7 +678,7 @@ void psy_ui_textarea_init_single_line(psy_ui_TextArea* self,
 	psy_ui_component_set_align(&self->pane.component, psy_ui_ALIGN_CLIENT);
 }
 
-void psy_ui_textarea_on_destroy(psy_ui_TextArea* self, psy_ui_Component* parent)
+void psy_ui_textarea_on_destroyed(psy_ui_TextArea* self)
 {
 	psy_signal_dispose(&self->signal_change);
 	psy_signal_dispose(&self->signal_accept);

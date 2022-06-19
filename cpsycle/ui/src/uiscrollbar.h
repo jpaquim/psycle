@@ -99,7 +99,7 @@ typedef struct psy_ui_ScrollBar {
 
 void psy_ui_scrollbar_init(psy_ui_ScrollBar*, psy_ui_Component* parent);
 
-void psy_ui_scrollbar_setorientation(psy_ui_ScrollBar*, psy_ui_Orientation);
+void psy_ui_scrollbar_set_orientation(psy_ui_ScrollBar*, psy_ui_Orientation);
 
 INLINE void psy_ui_scrollbar_setthumbposition(psy_ui_ScrollBar* self,
     double pos)

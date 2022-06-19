@@ -13,8 +13,9 @@
 #include "../../detail/portable.h"
 
 /* psy_ui_Tab */
+
 /* protoypes */
-static void psy_ui_tab_on_destroy(psy_ui_Tab*);
+static void psy_ui_tab_on_destroyed(psy_ui_Tab*);
 static void psy_ui_tab_on_mouse_down(psy_ui_Tab*, psy_ui_MouseEvent*);
 static void psy_ui_tab_ondraw(psy_ui_Tab*, psy_ui_Graphics*);
 static void psy_ui_tab_onpreferredsize(psy_ui_Tab*,
@@ -30,9 +31,9 @@ static void psy_ui_tab_vtable_init(psy_ui_Tab* self)
 {
 	if (!psy_ui_tab_vtable_initialized) {
 		psy_ui_tab_vtable = *(self->component.vtable);
-		psy_ui_tab_vtable.on_destroy =
+		psy_ui_tab_vtable.on_destroyed =
 			(psy_ui_fp_component_event)
-			psy_ui_tab_on_destroy;
+			psy_ui_tab_on_destroyed;
 		psy_ui_tab_vtable.on_mouse_down =
 			(psy_ui_fp_component_on_mouse_event)
 			psy_ui_tab_on_mouse_down;
@@ -98,7 +99,7 @@ psy_ui_Tab* psy_ui_tab_allocinit(psy_ui_Component* parent,
 	return rv;
 }
 
-void psy_ui_tab_on_destroy(psy_ui_Tab* self)
+void psy_ui_tab_on_destroyed(psy_ui_Tab* self)
 {
 	assert(self);
 
@@ -272,7 +273,7 @@ void psy_ui_tab_loadbitmaps(psy_ui_Tab* self)
 
 /* psy_ui_TabBar */
 /* prototypes */
-static void tabbar_on_destroy(psy_ui_TabBar*);
+static void tabbar_on_destroyed(psy_ui_TabBar*);
 static void tabbar_on_tab_clicked(psy_ui_TabBar*, psy_ui_Tab* sender);
 static void tabbar_onmousewheel(psy_ui_TabBar*, psy_ui_MouseEvent*);
 /* vtable */
@@ -283,9 +284,9 @@ static void vtable_init(psy_ui_TabBar* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.on_destroy =
+		vtable.on_destroyed =
 			(psy_ui_fp_component_event)
-			tabbar_on_destroy;
+			tabbar_on_destroyed;
 		vtable.onmousewheel =
 			(psy_ui_fp_component_on_mouse_event)
 			tabbar_onmousewheel;
@@ -311,7 +312,7 @@ void psy_ui_tabbar_init(psy_ui_TabBar* self, psy_ui_Component* parent)
 		psy_ui_margin_zero());	
 }
 
-void tabbar_on_destroy(psy_ui_TabBar* self)
+void tabbar_on_destroyed(psy_ui_TabBar* self)
 {	
 	assert(self);
 	

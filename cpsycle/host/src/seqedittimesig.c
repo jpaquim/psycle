@@ -277,7 +277,7 @@ void seqedittimesig_onmouseleave(SeqEditTimeSig* self)
 
 /* SeqEditTimeSig*/
 /* prototypes */
-static void seqedittimesigs_on_destroy(SeqEditTimeSigs*);
+static void seqedittimesigs_on_destroyed(SeqEditTimeSigs*);
 static void seqedittimesigs_on_mouse_down(SeqEditTimeSigs*, psy_ui_MouseEvent*);
 static void seqedittimesigs_onmousemove(SeqEditTimeSigs*, psy_ui_MouseEvent*);
 static void seqedittimesigs_onmouseenter(SeqEditTimeSigs*);
@@ -302,9 +302,9 @@ static void seqedittimesigs_vtable_init(SeqEditTimeSigs* self)
 {
 	if (!seqedittimesigs_vtable_initialized) {
 		seqedittimesigs_vtable = *(self->component.vtable);
-		seqedittimesigs_vtable.on_destroy =
+		seqedittimesigs_vtable.on_destroyed =
 			(psy_ui_fp_component_event)
-			seqedittimesigs_on_destroy;		
+			seqedittimesigs_on_destroyed;		
 		seqedittimesigs_vtable.onpreferredsize =
 			(psy_ui_fp_component_on_preferred_size)
 			seqedittimesigs_onpreferredsize;
@@ -349,7 +349,7 @@ void seqedittimesigs_init(SeqEditTimeSigs* self, psy_ui_Component* parent,
 		seqedittimesigs_ontimesigchanged);
 }
 
-void seqedittimesigs_on_destroy(SeqEditTimeSigs* self)
+void seqedittimesigs_on_destroyed(SeqEditTimeSigs* self)
 {	
 	psy_list_free(self->entries);
 	self->entries = NULL;

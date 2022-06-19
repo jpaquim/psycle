@@ -14,7 +14,7 @@
 
 /* NewMachineSection */
 /* prototypes */
-static void newmachinesection_on_destroy(NewMachineSection*);
+static void newmachinesection_on_destroyed(NewMachineSection*);
 static void newmachinesection_showedit(NewMachineSection*);
 static void newmachinesection_onlabelclick(NewMachineSection*, psy_ui_Label* sender,
 	psy_ui_MouseEvent*);
@@ -33,9 +33,9 @@ static void newmachinesection_vtable_init(NewMachineSection* self)
 {
 	if (!newmachinesection_vtable_initialized) {
 		newmachinesection_vtable = *(self->component.vtable);
-		newmachinesection_vtable.on_destroy =
+		newmachinesection_vtable.on_destroyed =
 			(psy_ui_fp_component_event)
-			newmachinesection_on_destroy;
+			newmachinesection_on_destroyed;
 		newmachinesection_vtable.on_mouse_down =
 			(psy_ui_fp_component_on_mouse_event)
 			newmachinesection_on_mouse_down;
@@ -93,7 +93,7 @@ void newmachinesection_init(NewMachineSection* self, psy_ui_Component* parent,
 	}
 }
 
-void newmachinesection_on_destroy(NewMachineSection* self)
+void newmachinesection_on_destroyed(NewMachineSection* self)
 {
 	psy_signal_dispose(&self->signal_selected);
 	psy_signal_dispose(&self->signal_changed);

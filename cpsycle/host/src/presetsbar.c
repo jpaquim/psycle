@@ -17,8 +17,9 @@
 
 #include "../../detail/portable.h"
 
+/* prototypes */
+static void presetsbar_on_destroyed(PresetsBar*);
 static bool presetsbar_userpresetpath(PresetsBar*, psy_Path*);
-static void presetsbar_on_destroy(PresetsBar*, psy_ui_Component* sender);
 static void presetsbar_setpresets(PresetsBar*, psy_audio_Presets*,
 	bool setfirstprog);
 static void presetsbar_setprogram(PresetsBar*, uintptr_t prog);
@@ -35,12 +36,30 @@ static void presetsbar_onsavenameeditkeydown(PresetsBar*,
 	psy_ui_Component* sender, psy_ui_KeyboardEvent*);
 static void presetsbar_updatesavename(PresetsBar*);
 
+/* vtable */
+static psy_ui_ComponentVtable vtable;
+static bool vtable_initialized = FALSE;
+
+static void vtable_init(PresetsBar* self)
+{
+	if (!vtable_initialized) {
+		vtable = *(self->component.vtable);
+		vtable.on_destroyed =
+			(psy_ui_fp_component_event)
+			presetsbar_on_destroyed;
+		vtable_initialized = TRUE;
+	}
+	psy_ui_component_set_vtable(&self->component, &vtable);
+}
+
+/* implementation */
 void presetsbar_init(PresetsBar* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {
 	psy_ui_Margin margin;
 
 	psy_ui_component_init(&self->component, parent, NULL);
+	vtable_init(self);
 	psy_ui_component_set_align_expand(&self->component,
 		psy_ui_HEXPAND);
 	self->workspace = workspace;
@@ -68,9 +87,7 @@ void presetsbar_init(PresetsBar* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->bankselector.signal_selchanged, self,
 		presetsbar_onbankselected);
 	psy_signal_connect(&self->programbox.signal_selchanged, self,
-		presetsbar_onprogramselected);
-	psy_signal_connect(&self->component.signal_destroy, self,
-		presetsbar_on_destroy);
+		presetsbar_onprogramselected);	
 	psy_signal_connect(&self->importpresets.signal_clicked, self,
 		presetsbar_onimport);
 	psy_signal_connect(&self->exportpresets.signal_clicked, self,
@@ -81,7 +98,7 @@ void presetsbar_init(PresetsBar* self, psy_ui_Component* parent,
 		presetsbar_onsavenameeditkeydown);
 }
 
-void presetsbar_on_destroy(PresetsBar* self, psy_ui_Component* sender)
+void presetsbar_on_destroyed(PresetsBar* self)
 {
 	psy_path_dispose(&self->presetpath);
 }

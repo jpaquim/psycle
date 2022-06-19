@@ -1,23 +1,46 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "confirmbox.h"
-// std
+/* std */
 #include <stdlib.h>
 #include <string.h>
 
+
+/* prototypes */
+static void confirmbox_on_destroyed(ConfirmBox*);
 static void confirmbox_onok(ConfirmBox*, psy_ui_Component* sender);
 static void confirmbox_onno(ConfirmBox*, psy_ui_Component* sender);
 static void confirmbox_oncontinue(ConfirmBox*, psy_ui_Component* sender);
-static void checkunsavedbox_on_destroy(ConfirmBox*, psy_ui_Component* sender);
 
+/* vtable */
+static psy_ui_ComponentVtable vtable;
+static bool vtable_initialized = FALSE;
+
+static void vtable_init(ConfirmBox* self)
+{
+	if (!vtable_initialized) {
+		vtable = *(self->component.vtable);
+		vtable.on_destroyed =
+			(psy_ui_fp_component_event)
+			confirmbox_on_destroyed;
+		vtable_initialized = TRUE;
+	}
+	psy_ui_component_set_vtable(&self->component, &vtable);
+}
+
+/* implementation */
 void confirmbox_init(ConfirmBox* self, psy_ui_Component* parent, Workspace* workspace)
 {	
 	psy_ui_Margin spacing;
 	
-	psy_ui_component_init(confirmbox_base(self), parent, NULL);	
+	psy_ui_component_init(confirmbox_base(self), parent, NULL);
+	vtable_init(self);
 	self->workspace = workspace;
 	self->mode = CONFIRM_CLOSE;	
 	psy_ui_component_init_align(&self->view, confirmbox_base(self), NULL,
@@ -34,17 +57,15 @@ void confirmbox_init(ConfirmBox* self, psy_ui_Component* parent, Workspace* work
 		self, confirmbox_oncontinue);	
 	psy_ui_margin_init_em(&spacing, 0.5, 0.0, 0.5, 0.0);
 	psy_ui_component_setpadding_children(&self->view, spacing);
-	psy_signal_init(&self->signal_execute);
-	psy_signal_connect(&self->component.signal_destroy, self,
-		checkunsavedbox_on_destroy);
+	psy_signal_init(&self->signal_execute);	
 }
 
-void checkunsavedbox_on_destroy(ConfirmBox* self, psy_ui_Component* sender)
+void confirmbox_on_destroyed(ConfirmBox* self)
 {
 	psy_signal_dispose(&self->signal_execute);	
 }
 
-void confirmbox_setlabels(ConfirmBox* self, const char* title,
+void confirmbox_set_labels(ConfirmBox* self, const char* title,
 	const char* yesstr, const char* nostr)
 {		
 	psy_ui_label_set_text(&self->title, title); 

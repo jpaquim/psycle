@@ -14,7 +14,7 @@
 #include "../../detail/portable.h"
 
 /* prototypes */
-static void machinebar_on_destroy(MachineBar*, psy_ui_Component* component);
+static void machinebar_on_destroyed(MachineBar*);
 static MachineBarInstParamMode machinebar_mode(MachineBar*);
 static void machinebar_updatemode(MachineBar*);
 static void machinebar_onmachineboxselchange(MachineBar*,
@@ -45,12 +45,29 @@ static void machinebar_onprevmachine(MachineBar*, psy_ui_Component* sender);
 static void machinebar_onnextmachine(MachineBar*, psy_ui_Component* sender);
 static intptr_t machinebar_comboboxindex(MachineBar* self, uintptr_t slot);
 
+/* vtable */
+static psy_ui_ComponentVtable vtable;
+static bool vtable_initialized = FALSE;
+
+static void vtable_init(MachineBar* self)
+{
+	if (!vtable_initialized) {
+		vtable = *(machinebar_base(self)->vtable);
+		vtable.on_destroyed =
+			(psy_ui_fp_component_event)
+			machinebar_on_destroyed;
+		vtable_initialized = TRUE;
+	}
+	psy_ui_component_set_vtable(machinebar_base(self), &vtable);
+}
+
 /* implementation */
 void machinebar_init(MachineBar* self, psy_ui_Component* parent, Workspace* workspace)
 {		
 	psy_ui_Margin margin;
 
-	psy_ui_component_init(&self->component, parent, NULL);	
+	psy_ui_component_init(&self->component, parent, NULL);
+	vtable_init(self);
 	self->workspace = workspace;
 	psy_ui_margin_init_em(&margin, 0.0, 2.0, 0.0, 0.0);			
 	self->selchange = 0;	
@@ -59,9 +76,7 @@ void machinebar_init(MachineBar* self, psy_ui_Component* parent, Workspace* work
 	psy_table_init(&self->comboboxslots);
 	psy_table_init(&self->slotscombobox);	
 	psy_ui_component_set_defaultalign(machinebar_base(self), psy_ui_ALIGN_LEFT,
-		margin);
-	psy_signal_connect(&self->component.signal_destroy, self,
-		machinebar_on_destroy);
+		margin);	
 	/* Machine ComboBox */
 	psy_ui_combobox_init(&self->machinebox, &self->component);
 	psy_ui_combobox_setcharnumber(&self->machinebox, 30);
@@ -100,7 +115,7 @@ void machinebar_init(MachineBar* self, psy_ui_Component* parent, Workspace* work
 	machinebar_connectsongsignals(self);		
 }
 
-void machinebar_on_destroy(MachineBar* self, psy_ui_Component* component)
+void machinebar_on_destroyed(MachineBar* self)
 {
 	psy_table_dispose(&self->comboboxslots);
 	psy_table_dispose(&self->slotscombobox);

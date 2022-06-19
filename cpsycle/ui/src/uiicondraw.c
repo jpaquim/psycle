@@ -33,7 +33,7 @@ psy_ui_RealSize psy_ui_buttonicon_size(psy_ui_ButtonIcon icon)
 }
 
 static void makearrow(psy_ui_RealPoint*, psy_ui_ButtonIcon, double x, double y);
-static void psy_ui_icondraw_drawarrow(psy_ui_IconDraw*, psy_ui_RealPoint*,
+static void psy_ui_icondraw_draw_arrow(psy_ui_IconDraw*, psy_ui_RealPoint*,
 psy_ui_Graphics*, psy_ui_Colour);
 
 void psy_ui_icondraw_init(psy_ui_IconDraw* self, psy_ui_ButtonIcon icon)
@@ -50,21 +50,21 @@ void psy_ui_icondraw_draw(psy_ui_IconDraw* self, psy_ui_Graphics* g,
 	
 	if (self->icon == psy_ui_ICON_LESSLESS) {
 		makearrow(arrow, psy_ui_ICON_LESS, pt.x - 4, pt.y);
-		psy_ui_icondraw_drawarrow(self, arrow, g, colour);
+		psy_ui_icondraw_draw_arrow(self, arrow, g, colour);
 		makearrow(arrow, psy_ui_ICON_LESS, pt.x + 4, pt.y);
-		psy_ui_icondraw_drawarrow(self, arrow, g, colour);
+		psy_ui_icondraw_draw_arrow(self, arrow, g, colour);
 	} else if (self->icon == psy_ui_ICON_MOREMORE) {
 		makearrow(arrow, psy_ui_ICON_MORE, pt.x - 6, pt.y);
-		psy_ui_icondraw_drawarrow(self, arrow, g, colour);
+		psy_ui_icondraw_draw_arrow(self, arrow, g, colour);
 		makearrow(arrow, psy_ui_ICON_MORE, pt.x + 2, pt.y);
-		psy_ui_icondraw_drawarrow(self, arrow, g, colour);
+		psy_ui_icondraw_draw_arrow(self, arrow, g, colour);
 	} else {
 		makearrow(arrow, self->icon, pt.x, pt.y);
-		psy_ui_icondraw_drawarrow(self, arrow, g, colour);
+		psy_ui_icondraw_draw_arrow(self, arrow, g, colour);
 	}
 }
 
-void psy_ui_icondraw_drawarrow(psy_ui_IconDraw* self, psy_ui_RealPoint* arrow, psy_ui_Graphics* g,
+void psy_ui_icondraw_draw_arrow(psy_ui_IconDraw* self, psy_ui_RealPoint* arrow, psy_ui_Graphics* g,
 	psy_ui_Colour colour)
 {	
 	psy_ui_drawsolidpolygon(g, arrow, 4, psy_ui_colour_colorref(&colour),
