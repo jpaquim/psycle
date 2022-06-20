@@ -48,12 +48,6 @@ typedef enum psy_ui_Orientation {
 	psy_ui_VERTICAL
 } psy_ui_Orientation;
 
-typedef enum psy_ui_ContainerAlignType {
-	psy_ui_CONTAINER_ALIGN_NONE,
-	psy_ui_CONTAINER_ALIGN_LCL,
-	psy_ui_CONTAINER_ALIGN_GRID
-} psy_ui_ContainerAlignType;
-
 typedef enum psy_ui_AlignType {
 	psy_ui_ALIGN_NONE,
 	psy_ui_ALIGN_CLIENT,

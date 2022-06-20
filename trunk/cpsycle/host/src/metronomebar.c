@@ -24,7 +24,7 @@ void metronomebar_init(MetronomeBar* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {				
 	psy_ui_component_init(metronomebar_base(self), parent, NULL);
-	psy_ui_component_set_defaultalign(metronomebar_base(self),
+	psy_ui_component_set_default_align(metronomebar_base(self),
 		psy_ui_ALIGN_LEFT, psy_ui_defaults_hmargin(psy_ui_defaults()));
 	self->workspace = workspace;
 	self->player = &workspace->player;

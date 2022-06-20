@@ -7,6 +7,8 @@
 
 
 #include "intedit.h"
+/* ui */
+#include <uiapp.h>
 /* audio */
 #include <songio.h>
 /* std */
@@ -18,13 +20,13 @@
 
 /* prototypes */
 static void intedit_on_destroyed(IntEdit*);
-static void intedit_onlessclicked(IntEdit*, psy_ui_Component* sender);
-static void intedit_onmoreclicked(IntEdit*, psy_ui_Component* sender);
-static void intedit_oneditkeydown(IntEdit*, psy_ui_Component* sender,
+static void intedit_on_less(IntEdit*, psy_ui_Component* sender);
+static void intedit_on_more(IntEdit*, psy_ui_Component* sender);
+static void intedit_on_edit_key_down(IntEdit*, psy_ui_Component* sender,
 	psy_ui_KeyboardEvent*);
-static void intedit_oneditkeyup(IntEdit*, psy_ui_Component* sender,
+static void intedit_on_edit_key_up(IntEdit*, psy_ui_Component* sender,
 	psy_ui_KeyboardEvent*);
-static void intedit_oneditfocuslost(IntEdit*, psy_ui_Component* sender);
+static void intedit_on_edi_tfocus_lost(IntEdit*, psy_ui_Component* sender);
 
 /* vtable */
 static psy_ui_ComponentVtable intedit_vtable;
@@ -50,28 +52,28 @@ void intedit_init(IntEdit* self, psy_ui_Component* parent,
 	psy_ui_component_init(intedit_base(self), parent, NULL);
 	intedit_vtable_init(self);
 	psy_ui_component_set_align_expand(intedit_base(self), psy_ui_HEXPAND);
-	psy_ui_component_set_defaultalign(intedit_base(self), psy_ui_ALIGN_LEFT,
+	psy_ui_component_set_default_align(intedit_base(self), psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	self->minval = minval;
 	self->maxval = maxval;
 	self->restore = value;
 	psy_ui_label_init_text(&self->desc, intedit_base(self), desc);
 	psy_ui_textarea_init_single_line(&self->input, intedit_base(self));	
-	psy_ui_textarea_setcharnumber(&self->input, 5);	
+	psy_ui_textarea_set_char_number(&self->input, 5);	
 	psy_ui_button_init_connect(&self->less, intedit_base(self),
-		self, intedit_onlessclicked);
+		self, intedit_on_less);
 	psy_ui_button_seticon(&self->less, psy_ui_ICON_LESS);
 	psy_ui_button_init_connect(&self->more, intedit_base(self),
-		self, intedit_onmoreclicked);
+		self, intedit_on_more);
 	psy_ui_button_seticon(&self->more, psy_ui_ICON_MORE);
 	psy_signal_init(&self->signal_changed);
-	intedit_setvalue(self, value);
+	intedit_set_value(self, value);
 	psy_signal_connect(&self->input.component.signal_keydown, self,
-		intedit_oneditkeydown);	
+		intedit_on_edit_key_down);	
 	psy_signal_connect(&self->input.component.signal_keyup, self,
-		intedit_oneditkeyup);
+		intedit_on_edit_key_up);
 	psy_signal_connect(&self->input.component.signal_focuslost, self,
-		intedit_oneditfocuslost);	
+		intedit_on_edi_tfocus_lost);	
 }
 
 void intedit_init_connect(IntEdit* self, psy_ui_Component* parent,
@@ -110,7 +112,7 @@ int intedit_value(IntEdit* self)
 	return atoi(psy_ui_textarea_text(&self->input));
 }
 
-void intedit_setvalue(IntEdit* self, int value)
+void intedit_set_value(IntEdit* self, int value)
 {
 	char text[128];
 
@@ -123,42 +125,42 @@ void intedit_setvalue(IntEdit* self, int value)
 	self->restore = value;
 }
 
-void intedit_enableedit(IntEdit* self)
+void intedit_enable_edit(IntEdit* self)
 {
 	psy_ui_textarea_enableedit(&self->input);
 }
 
-void intedit_preventedit(IntEdit* self)
+void intedit_prevent_edit(IntEdit* self)
 {
 	psy_ui_textarea_preventedit(&self->input);
 }
 
-void intedit_seteditcharnumber(IntEdit* self, int charnumber)
+void intedit_set_edit_char_number(IntEdit* self, int charnumber)
 {
-	psy_ui_textarea_setcharnumber(&self->input, charnumber);
+	psy_ui_textarea_set_char_number(&self->input, charnumber);
 }
 
-void intedit_setdesccharnumber(IntEdit* self, int charnumber)
+void intedit_set_desc_char_number(IntEdit* self, int charnumber)
 {
-	psy_ui_label_set_charnumber(&self->desc, charnumber);
+	psy_ui_label_set_char_number(&self->desc, charnumber);
 }
 
-void intedit_onlessclicked(IntEdit* self, psy_ui_Component* sender)
+void intedit_on_less(IntEdit* self, psy_ui_Component* sender)
 {
-	intedit_setvalue(self, intedit_value(self) - 1);
+	intedit_set_value(self, intedit_value(self) - 1);
 }
 
-void intedit_onmoreclicked(IntEdit* self, psy_ui_Component* sender)
+void intedit_on_more(IntEdit* self, psy_ui_Component* sender)
 {
-	intedit_setvalue(self, intedit_value(self) + 1);
+	intedit_set_value(self, intedit_value(self) + 1);
 }
 
-void intedit_oneditkeydown(IntEdit* self, psy_ui_Component* sender,
+void intedit_on_edit_key_down(IntEdit* self, psy_ui_Component* sender,
 	psy_ui_KeyboardEvent* ev)
 {
 	if (isalpha(psy_ui_keyboardevent_keycode(ev)) ||
 			psy_ui_keyboardevent_keycode(ev) == psy_ui_KEY_ESCAPE) {
-		intedit_setvalue(self, self->restore);
+		intedit_set_value(self, self->restore);
 		psy_ui_keyboardevent_prevent_default(ev);
 		return;
 	}
@@ -171,24 +173,23 @@ void intedit_oneditkeydown(IntEdit* self, psy_ui_Component* sender,
 		if (self->maxval != 0 && self->minval != 0) {
 			value = psy_min(psy_max(value, self->minval), self->maxval);
 		}
-		intedit_setvalue(self, value);
+		intedit_set_value(self, value);
 		psy_signal_emit(&self->signal_changed, self, 0);
 	}
 	psy_ui_keyboardevent_stop_propagation(ev);
 }
 
-void intedit_oneditkeyup(IntEdit* self, psy_ui_Component* sender,
+void intedit_on_edit_key_up(IntEdit* self, psy_ui_Component* sender,
 	psy_ui_KeyboardEvent* ev)
 {
 	psy_ui_keyboardevent_stop_propagation(ev);
 }
 
-void intedit_oneditfocuslost(IntEdit* self , psy_ui_Component* sender)
+void intedit_on_edi_tfocus_lost(IntEdit* self , psy_ui_Component* sender)
 {
 	int value;
 	
 	value = intedit_value(self);
-	intedit_setvalue(self, value);
+	intedit_set_value(self, value);
 	psy_signal_emit(&self->signal_changed, self, 0);
 }
-

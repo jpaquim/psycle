@@ -1553,7 +1553,7 @@ bool psy_property_hastype(const psy_Property* self, psy_PropertyType type)
 	return self->item.typ == type;
 }
 
-psy_Property* psy_property_setid(psy_Property* self, intptr_t id)
+psy_Property* psy_property_set_id(psy_Property* self, intptr_t id)
 {
 	assert(self);
 

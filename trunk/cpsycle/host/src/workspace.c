@@ -65,7 +65,7 @@ static void workspace_disposesignals(Workspace*);
 static void workspace_wait_for_driver_configure_load(Workspace*);
 static void workspace_update_play_status(Workspace*);
 /* config */
-static void workspace_configvisual(Workspace*);
+static void workspace_config_visual(Workspace*);
 static void workspace_set_song(Workspace*, psy_audio_Song*, int flag);
 static void workspace_on_load_progress(Workspace*, psy_audio_Song*, int progress);
 static void workspace_on_scan_progress(Workspace*, psy_audio_PluginCatcher*,
@@ -176,16 +176,16 @@ void workspace_init(Workspace* self, psy_ui_Component* main)
 	psy_playlist_init(&self->playlist);
 	workspace_initplugincatcherandmachinefactory(self);
 	psycleconfig_init(&self->config, &self->player, &self->machinefactory);
-	psy_audio_plugincatcher_setdirectories(&self->plugincatcher,
+	psy_audio_plugincatcher_set_directories(&self->plugincatcher,
 		psycleconfig_directories(&self->config)->directories);
 	psy_audio_plugincatcher_load(&self->plugincatcher);
 	self->song = psy_audio_song_allocinit(&self->machinefactory);
-	psy_audio_machinecallback_setsong(&self->machinecallback, self->song);	
+	psy_audio_machinecallback_set_song(&self->machinecallback, self->song);	
 	psy_audio_sequencepaste_init(&self->sequencepaste);
 	psy_undoredo_init(&self->undoredo);
 	workspace_initsignals(self);
 	workspace_initplayer(self);	
-	eventdriverconfig_registereventdrivers(&self->config.input);
+	eventdriverconfig_register_event_drivers(&self->config.input);
 	inputhandler_init(&self->inputhandler, &self->player, NULL, NULL);	
 }
 
@@ -360,7 +360,7 @@ void workspace_updatemetronome(Workspace* self)
 		metronomeconfig_machine(&self->config.metronome);
 }
 
-void workspace_configvisual(Workspace* self)
+void workspace_config_visual(Workspace* self)
 {
 	psy_ui_Font font;
 	psy_ui_FontInfo fontinfo;
@@ -377,7 +377,7 @@ void workspace_configvisual(Workspace* self)
 
 const char* workspace_driverpath(Workspace* self)
 {
-	return audioconfig_driverpath(&self->config.audio);
+	return audioconfig_driver_path(&self->config.audio);
 }
 
 #if defined DIVERSALIS__OS__MICROSOFT
@@ -390,8 +390,7 @@ static unsigned int pluginscanthread(void* context)
 
 	assert(context);
 
-	self = (Workspace*)context;
-	printf("Enter Pluginscan Thread function\n");
+	self = (Workspace*)context;	
 	psy_audio_plugincatcher_scan(&self->plugincatcher);
 	self->filescanned = 0;
 	self->scantaskstart = 0;
@@ -513,7 +512,7 @@ void workspace_config_changed(Workspace* self, psy_Property* property,
 		break;
 	default: {				
 		if (psy_property_in_section(property,
-				self->config.audio.driverconfigure)) {
+				self->config.audio.driver_configure)) {
 			audioconfig_on_edit_audio_driver_configuration(&self->config.audio,
 				psycleconfig_audio_enabled(&self->config));
 			audioconfig_driverconfigure_section(&self->config.audio);
@@ -717,7 +716,7 @@ void workspace_load_song(Workspace* self, const char* filename, bool play)
 		songfile.song = song;
 		songfile.file = 0;
 		psy_audio_player_setemptysong(&self->player);
-		psy_audio_machinecallback_setsong(&self->machinecallback, song);
+		psy_audio_machinecallback_set_song(&self->machinecallback, song);
 		if (psy_audio_songfile_load(&songfile, filename) != PSY_OK) {
 			psy_audio_song_deallocate(song);
 			workspace_output_error(self, songfile.serr);
@@ -771,7 +770,7 @@ void workspace_set_song(Workspace* self, psy_audio_Song* song, int flag)
 		viewhistory_clear(&self->view_history);
 		viewhistory_add(&self->view_history, view);		
 		psy_audio_exclusivelock_enter();
-		psy_audio_machinecallback_setsong(&self->machinecallback, song);
+		psy_audio_machinecallback_set_song(&self->machinecallback, song);
 		self->song = song;
 		psy_audio_player_setsong(&self->player, self->song);					
 		if (flag == WORKSPACE_NEWSONG) {
@@ -994,7 +993,7 @@ void workspace_load_configuration(Workspace* self)
 	{
 		psy_Property* driversection = NULL;
 
-		psy_audio_player_loaddriver(&self->player, audioconfig_driverpath(
+		psy_audio_player_loaddriver(&self->player, audioconfig_driver_path(
 			&self->config.audio), NULL /*no config*/,
 			FALSE /* don't open yet*/);
 		if (psy_audiodriver_configuration(self->player.driver)) {
@@ -1005,7 +1004,7 @@ void workspace_load_configuration(Workspace* self)
 				PSY_PROPERTY_TYPE_NONE);
 		}
 		if (psycleconfig_audio_enabled(&self->config)) {
-			/* psy_audio_player_restartdriver(&self->player, driversection); */
+			/* psy_audio_player_restart_driver(&self->player, driversection); */
 			psy_audiodriver_close(self->player.driver);
 			psy_audiodriver_configure(self->player.driver, driversection);
 		} else if (self->player.driver) {
@@ -1027,7 +1026,7 @@ void workspace_load_configuration(Workspace* self)
 		TRUE /* use controllerdata */);
 	midiviewconfig_make_controllers(
 		psycleconfig_midi(&self->config));	
-	workspace_configvisual(self);
+	workspace_config_visual(self);
 	if (compatconfig_loadnewblitz(psycleconfig_compat(
 			workspace_conf(self)))) {
 		psy_audio_machinefactory_loadnewgamefxandblitzifversionunknown(

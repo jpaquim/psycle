@@ -115,7 +115,7 @@ void psy_ui_tabbar_clear(psy_ui_TabBar*);
 void psy_ui_tabbar_select(psy_ui_TabBar*, uintptr_t tabindex);
 void psy_ui_tabbar_mark(psy_ui_TabBar*, uintptr_t tabindex);
 void psy_ui_tabbar_unmark(psy_ui_TabBar*);
-void psy_ui_tabbar_settabalign(psy_ui_TabBar*, psy_ui_AlignType align);
+void psy_ui_tabbar_set_tab_align(psy_ui_TabBar*, psy_ui_AlignType align);
 void psy_ui_tabbar_preventtranslation(psy_ui_TabBar*);
 
 INLINE uintptr_t psy_ui_tabbar_selected(const psy_ui_TabBar* self)

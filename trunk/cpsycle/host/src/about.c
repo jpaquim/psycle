@@ -19,7 +19,7 @@ void contrib_init(Contrib* self, psy_ui_Component* parent)
 	psy_ui_component_init(contrib_base(self), parent, NULL);	
 	psy_ui_label_init(&self->contrib, contrib_base(self));
 	psy_ui_label_prevent_translation(&self->contrib);
-	psy_ui_label_set_charnumber(&self->contrib, 120.0);	
+	psy_ui_label_set_char_number(&self->contrib, 120.0);	
 	psy_ui_component_set_scroll_step_height(psy_ui_label_base(&self->contrib),
 		psy_ui_value_make_eh(1.0));
 	psy_ui_component_set_wheel_scroll(&self->contrib.component, 4);
@@ -70,7 +70,7 @@ void contrib_init(Contrib* self, psy_ui_Component* parent)
 	psy_ui_component_set_align(&self->scroller.component, psy_ui_ALIGN_CLIENT);
 	/* bottom */
 	psy_ui_component_init(&self->bottom, &self->component, NULL);
-	psy_ui_component_set_defaultalign(&self->bottom, psy_ui_ALIGN_TOP,
+	psy_ui_component_set_default_align(&self->bottom, psy_ui_ALIGN_TOP,
 		psy_ui_defaults_vmargin(psy_ui_defaults()));
 	psy_ui_component_set_align(&self->bottom, psy_ui_ALIGN_BOTTOM);
 	psy_ui_label_init(&self->psycledelics, &self->bottom);
@@ -115,7 +115,7 @@ void licence_init(Licence* self, psy_ui_Component* parent)
 		self, licence_onlanguagechanged);	
 	psy_ui_label_init(&self->licenceinfo, &self->component);	
 	psy_ui_label_prevent_translation(&self->licenceinfo);
-	// psy_ui_label_set_charnumber(&self->licenceinfo, 0.0);
+	// psy_ui_label_set_char_number(&self->licenceinfo, 0.0);
 	psy_ui_component_set_wheel_scroll(&self->licenceinfo.component, 4);
 	psy_ui_component_set_align(psy_ui_label_base(&self->licenceinfo),
 		psy_ui_ALIGN_FIXED);	
@@ -311,7 +311,7 @@ void about_init_buttons(About* self)
 			psy_ui_value_make_ph(0.15), psy_ui_value_zero()));
 	psy_ui_component_init_align(&self->buttons, &self->bottom, NULL,
 		psy_ui_ALIGN_CENTER);
-	psy_ui_component_set_defaultalign(&self->buttons, psy_ui_ALIGN_LEFT,
+	psy_ui_component_set_default_align(&self->buttons, psy_ui_ALIGN_LEFT,
 		psy_ui_margin_make_em(0.0, 20.0, 0.0, 0.0));			
 	psy_ui_button_init_text_connect(&self->contribbutton, &self->buttons,
 		"help.contributors-credits", self, about_on_button);

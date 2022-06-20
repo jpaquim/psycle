@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #if !defined(KBDBOX_H)
@@ -51,17 +51,16 @@ typedef struct KbdBoxKey {
 	psy_ui_Label desc3; /* row 3 keycode with shift + ctrl */	
 	uint32_t keycode;
 	/* references */
-	KbdBoxState* state;
-	Workspace* workspace;	
+	KbdBoxState* state;	
 } KbdBoxKey;
 
 void kbdboxkey_init_all(KbdBoxKey*, psy_ui_Component* parent,
 	uintptr_t size, uint32_t keycode, const char* label,
-	Workspace*, KbdBoxState* state);
+	KbdBoxState* state);
 
 KbdBoxKey* kbdboxkey_allocinit_all(psy_ui_Component* parent,
 	uintptr_t size, uint32_t keycode, const char* label,
-	Workspace*, KbdBoxState* state);
+	KbdBoxState*);
 
 void kbdboxkey_cleardescriptions(KbdBoxKey*);
 void kbdboxkey_setdescription(KbdBoxKey*, uint32_t keycode, const char* text);

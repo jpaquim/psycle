@@ -66,7 +66,10 @@ void psy_ui_win_fontimp_init(psy_ui_win_FontImp* self, const psy_ui_FontInfo* fo
 		LOGFONT lf;
 
 		lf = logfont(*fontinfo);
-		self->hfont = CreateFontIndirect(&lf);		
+		self->hfont = CreateFontIndirect(&lf);
+		GetObject(self->hfont, sizeof(lf), &lf);
+		lf = lf;
+		assert(lf.lfHeight);
 	} else {
 		self->hfont = 0;		
 	}	

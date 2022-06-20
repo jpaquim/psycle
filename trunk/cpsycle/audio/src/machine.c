@@ -227,7 +227,7 @@ void psy_audio_machinecallback_setplayer(psy_audio_MachineCallback* self,
 	self->player = player;
 }
 
-void psy_audio_machinecallback_setsong(psy_audio_MachineCallback* self,
+void psy_audio_machinecallback_set_song(psy_audio_MachineCallback* self,
 	psy_audio_Song* song)
 {
 	self->song = song;

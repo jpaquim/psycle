@@ -76,7 +76,7 @@ void midiviewconfig_make(MidiViewConfig* self, psy_Property* parent)
 			"recordrawmidiasmcm", TRUE),
 		"settingsview.midicontrollers.recordrawmidiasmcm");
 	/* Map Controllers */
-	psy_property_setid(psy_property_settext(
+	psy_property_set_id(psy_property_settext(
 		psy_property_append_action(self->controllers,
 			"addcontroller"),
 		"settingsview.midicontrollers.add"),
@@ -151,7 +151,7 @@ void midiviewconfig_make_controllers(MidiViewConfig* self)
 				group, "to", midigroup->to, 0, 0xFF),
 				PSY_PROPERTY_HINT_EDITHEX);
 			if (hasmessage) {
-				psy_property_setid(psy_property_settext(
+				psy_property_set_id(psy_property_settext(
 					psy_property_append_action(group,
 						"removecontroller"),
 					"Remove"),

@@ -332,7 +332,7 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 				/* reset scroll origin */
 				gx11->org.x = 0;
 				gx11->org.y = 0;							
-				psy_ui_graphics_setcliprect(&imp->g, *r);					
+				psy_ui_graphics_set_clip_rect(&imp->g, *r);					
 				psy_ui_component_draw(imp->component, &imp->g);			
 			}
 			if (self->dbe) {

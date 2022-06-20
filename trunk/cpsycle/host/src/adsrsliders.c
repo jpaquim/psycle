@@ -52,7 +52,7 @@ void adsrsliders_init(AdsrSliders* self, psy_ui_Component* parent)
 	self->envelope = NULL;	
 	psy_ui_component_init(&self->component, parent, NULL);
 	vtable_init(self);	
-	psy_ui_component_set_defaultalign(&self->component, psy_ui_ALIGN_TOP,
+	psy_ui_component_set_default_align(&self->component, psy_ui_ALIGN_TOP,
 		psy_ui_defaults_vmargin(psy_ui_defaults()));	
 	psy_ui_slider_init(&self->attack, &self->component);
 	psy_ui_slider_set_text(&self->attack, "instrumentview.attack");

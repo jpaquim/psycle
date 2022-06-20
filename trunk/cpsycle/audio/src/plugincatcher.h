@@ -1,18 +1,20 @@
 /*
 ** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #ifndef psy_audio_PLUGINCATCHER_H
 #define psy_audio_PLUGINCATCHER_H
 
+/* local */
 #include "machinedefs.h"
 #include "machineinfo.h"
 #include "plugincategorylist.h"
-
+/* container */
+#include <hashtbl.h>
 #include <propertiesio.h>
 #include <signal.h>
-#include <hashtbl.h>
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -108,7 +110,7 @@ void psy_audio_plugincatcher_clear(psy_audio_PluginCatcher*);
 void psy_audio_plugincatcher_abort(psy_audio_PluginCatcher*);
 int psy_audio_plugincatcher_load(psy_audio_PluginCatcher*);
 int psy_audio_plugincatcher_save(psy_audio_PluginCatcher*);
-void psy_audio_plugincatcher_setdirectories(psy_audio_PluginCatcher*, psy_Property*);
+void psy_audio_plugincatcher_set_directories(psy_audio_PluginCatcher*, psy_Property*);
 /*const psy_audio_MachineInfo* plugincatcher_machineinfo(psy_audio_PluginCatcher*, psy_audio_MachineType,
 	const char* name);*/
 char* psy_audio_plugincatcher_modulepath(psy_audio_PluginCatcher*, psy_audio_MachineType,

@@ -49,12 +49,12 @@ void seqedittoolbar_init(SeqEditToolBar* self, psy_ui_Component* parent,
 
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_set_style_type(&self->component, STYLE_SEQEDT_TOOLBAR);		
-	psy_ui_component_set_defaultalign(&self->component, psy_ui_ALIGN_LEFT,
+	psy_ui_component_set_default_align(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_margin_make_em(0.0, 0.5, 0.0, 1.0));		
 	self->state = state;
 	psy_ui_label_init_text(&self->trackname, &self->component, "Track");
 	psy_ui_textarea_init_single_line(&self->trackedit, &self->component);	
-	psy_ui_textarea_setcharnumber(&self->trackedit, 30);
+	psy_ui_textarea_set_char_number(&self->trackedit, 30);
 	psy_ui_textarea_enable_input_field(&self->trackedit);	
 	psy_signal_connect(&self->trackedit.signal_accept,
 		self, seqeditortoolbar_ontrackeditaccept);
@@ -188,7 +188,7 @@ void seqeditortoolbar_onsequenceselectionselect(SeqEditToolBar* self,
 	if (sampleentry) {
 		if (sampleentry->samplerindex != psy_INDEX_INVALID) {
 			psy_ui_checkbox_check(&self->usesamplerindex);
-			intedit_setvalue(&self->samplerindex,
+			intedit_set_value(&self->samplerindex,
 				(int)sampleentry->samplerindex);			
 			psy_ui_component_show_align(intedit_base(&self->samplerindex));
 		} else {			

@@ -221,7 +221,7 @@ void psy_ui_label_on_draw(psy_ui_Label* self, psy_ui_Graphics* g)
 	psy_ui_textdraw_dispose(&textdraw);
 }
 
-void psy_ui_label_set_charnumber(psy_ui_Label* self, double number)
+void psy_ui_label_set_char_number(psy_ui_Label* self, double number)
 {	
 	self->charnumber = psy_max(0.0, number);
 }

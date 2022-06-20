@@ -52,7 +52,7 @@ void linesperbeatbar_init(LinesPerBeatBar* self, psy_ui_Component* parent,
 	/* prevent line wrap */
 	psy_ui_component_set_align_expand(linesperbeatbar_base(self),
 		psy_ui_HEXPAND);
-	psy_ui_component_set_defaultalign(linesperbeatbar_base(self),
+	psy_ui_component_set_default_align(linesperbeatbar_base(self),
 		psy_ui_ALIGN_LEFT, psy_ui_defaults_hmargin(psy_ui_defaults()));
 	/* lpb description label */
 	psy_ui_label_init_text(&self->desc, linesperbeatbar_base(self),
@@ -66,7 +66,7 @@ void linesperbeatbar_init(LinesPerBeatBar* self, psy_ui_Component* parent,
 	psy_ui_component_set_style_type(psy_ui_label_base(&self->number),
 		STYLE_LPB_NUMLABEL);
 	psy_ui_label_prevent_translation(&self->number);
-	psy_ui_label_set_charnumber(&self->number, 6.0);
+	psy_ui_label_set_char_number(&self->number, 6.0);
 	psy_ui_label_set_textalignment(&self->number, psy_ui_ALIGNMENT_CENTER);
 	/* more button */
 	psy_ui_button_init_connect(&self->more, linesperbeatbar_base(self),

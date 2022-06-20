@@ -1,6 +1,6 @@
 /*
 ** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #if !defined(REALEDIT_H)
@@ -41,11 +41,11 @@ void realedit_init_connect(RealEdit*, psy_ui_Component* parent,
 	void* context, void* fp);
 
 realedit_real_t realedit_value(RealEdit*);
-void realedit_setvalue(RealEdit*, realedit_real_t value);
-void realedit_enableedit(RealEdit*);
-void realedit_preventedit(RealEdit*);
-void realedit_seteditcharnumber(RealEdit*, int charnumber);
-void realedit_setdesccharnumber(RealEdit*, int charnumber);
+void realedit_set_value(RealEdit*, realedit_real_t value);
+void realedit_enable(RealEdit*);
+void realedit_prevent(RealEdit*);
+void realedit_set_edit_char_number(RealEdit*, int charnumber);
+void realedit_set_desc_char_number(RealEdit*, int charnumber);
 
 INLINE psy_ui_Component* realedit_base(RealEdit* self)
 {

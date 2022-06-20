@@ -51,7 +51,7 @@ void timebar_init(TimeBar* self, psy_ui_Component* parent,
 	psy_ui_component_init(timebar_base(self), parent, NULL);
 	vtable_init(self);
 	psy_ui_component_set_align_expand(timebar_base(self), psy_ui_HEXPAND);
-	psy_ui_component_set_defaultalign(timebar_base(self), psy_ui_ALIGN_LEFT,
+	psy_ui_component_set_default_align(timebar_base(self), psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	self->player = player;
 	self->bpm = self->realbpm = (psy_dsp_big_beat_t)0.0;
@@ -73,7 +73,7 @@ void timebar_init(TimeBar* self, psy_ui_Component* parent,
 	psy_ui_component_set_style_type(psy_ui_label_base(&self->bpmlabel),
 		STYLE_TIMEBAR_NUMLABEL);
 	psy_ui_label_prevent_translation(&self->bpmlabel);
-	psy_ui_label_set_charnumber(&self->bpmlabel, 14.5);
+	psy_ui_label_set_char_number(&self->bpmlabel, 14.5);
 	psy_ui_label_set_textalignment(&self->bpmlabel, psy_ui_ALIGNMENT_CENTER);
 	timebar_updatebpmlabel(self);
 	/* bpm +1 */

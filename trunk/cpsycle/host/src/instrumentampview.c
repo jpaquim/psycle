@@ -61,7 +61,7 @@ void instrumentvolumeview_init(InstrumentVolumeView* self,
 	psy_ui_component_init(&self->component, parent, NULL);
 	vtable_init(self);	
 	psy_signal_init(&self->signal_status);
-	psy_ui_component_set_defaultalign(&self->component, psy_ui_ALIGN_TOP,
+	psy_ui_component_set_default_align(&self->component, psy_ui_ALIGN_TOP,
 		psy_ui_defaults_vmargin(psy_ui_defaults()));
 	psy_ui_slider_init_text(&self->randomvolume, &self->component,
 		"instrumentview.swing");

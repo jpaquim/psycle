@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -10,16 +10,20 @@
 /* platform */
 #include "../../detail/portable.h"
 
-static void audioconfig_makesection(AudioConfig*, psy_Property* parent);
-static void audioconfig_makethreads(AudioConfig*);
-static void audioconfig_makeconfiguration(AudioConfig*, psy_Property*);
-static void audioconfig_makedriverlist(AudioConfig*);
 
-void audioconfig_init(AudioConfig* self, psy_Property* parent, psy_audio_Player* player)
+/* prototypes */
+static void audioconfig_make_section(AudioConfig*, psy_Property* parent);
+static void audioconfig_make_threads(AudioConfig*);
+static void audioconfig_make_configuration(AudioConfig*, psy_Property*);
+static void audioconfig_make_driver_list(AudioConfig*);
+
+/* implementation */
+void audioconfig_init(AudioConfig* self, psy_Property* parent,
+	psy_audio_Player* player)
 {
 	self->player = player;
 	self->audioenabled = TRUE;
-	audioconfig_makesection(self, parent);
+	audioconfig_make_section(self, parent);
 	psy_signal_init(&self->signal_changed);
 }
 
@@ -30,19 +34,19 @@ void audioconfig_dispose(AudioConfig* self)
 	psy_signal_dispose(&self->signal_changed);
 }
 
-void audioconfig_makesection(AudioConfig* self, psy_Property* parent)
+void audioconfig_make_section(AudioConfig* self, psy_Property* parent)
 {
 	assert(self);
 
 	self->inputoutput = psy_property_settext(
 		psy_property_append_section(parent, "inputoutput"),
 		"Input/Output");
-	audioconfig_makedriverlist(self);
-	audioconfig_makethreads(self);
-	self->driverconfigure = psy_property_settext(
+	audioconfig_make_driver_list(self);
+	audioconfig_make_threads(self);
+	self->driver_configure = psy_property_settext(
 		psy_property_append_section(self->inputoutput, "configure"),
 		"settingsview.configure");
-	self->driverconfigure->item.save = 0;	
+	self->driver_configure->item.save = 0;	
 	audioconfig_make_driver_configurations(self, FALSE /* full*/ );
 }
 
@@ -73,7 +77,7 @@ void audioconfig_make_driver_configurations(AudioConfig* self, bool full)
 			psy_Property* property;
 			
 			property = (psy_Property*)psy_list_entry(p);
-			audioconfig_makeconfiguration(self, property);			
+			audioconfig_make_configuration(self, property);			
 		}
 	}	
 }
@@ -95,7 +99,7 @@ void audioconfig_makeconfiguration_driverkey(AudioConfig* self, const char* key)
 
 				property = (psy_Property*)psy_list_entry(p);
 				if (strcmp(key, psy_property_key(property)) == 0) {
-					audioconfig_makeconfiguration(self, property);
+					audioconfig_make_configuration(self, property);
 					break;
 				}
 			}
@@ -103,20 +107,20 @@ void audioconfig_makeconfiguration_driverkey(AudioConfig* self, const char* key)
 	}
 }
 
-void audioconfig_makethreads(AudioConfig* self)
+void audioconfig_make_threads(AudioConfig* self)
 {	
 	psy_Property* threads;
 
 	threads = psy_property_settext(
 		psy_property_append_section(self->inputoutput, "threads"),
 		"Audio Threads");
-	psy_property_setid(psy_property_settext(
+	psy_property_set_id(psy_property_settext(
 		psy_property_append_int(threads, "num", 0, 0, 99),
 		"Use the value 0 to autodetect your cpu threads"),
 		PROPERTY_ID_NUMAUDIOTHREADS);
 }
 
-void audioconfig_makeconfiguration(AudioConfig* self, psy_Property* property)
+void audioconfig_make_configuration(AudioConfig* self, psy_Property* property)
 {	
 	assert(property);
 
@@ -154,21 +158,20 @@ void audioconfig_makeconfiguration(AudioConfig* self, psy_Property* property)
 	}
 }
 
-void audioconfig_makedriverlist(AudioConfig* self)
+void audioconfig_make_driver_list(AudioConfig* self)
 {	
 	assert(self);
 
-	// change number to set startup driver, if no psycle.ini found
+	/* change number to set startup driver, if no psycle.ini found */
 #if defined(DIVERSALIS__OS__MICROSOFT)	
-	// 2 : directx
-	self->drivers = psy_property_setid(psy_property_settext(
+	/* 2 : directx */
+	self->drivers = psy_property_set_id(psy_property_settext(
 		psy_property_append_choice(self->inputoutput,
 			"audiodrivers", 2),
 		"settingsview.audio-drivers"),
 		PROPERTY_ID_AUDIODRIVERS);
-
 #elif defined(DIVERSALIS__OS__LINUX)
-	// 1 : alsa
+	/* 1 : alsa */
 	self->drivers = psy_property_settext(psy_property_append_choice(
 		self->inputoutput, "audiodrivers", 1),
 		"settingsview.audio-drivers");
@@ -191,7 +194,7 @@ void audioconfig_makedriverlist(AudioConfig* self)
 #endif
 }
 
-const char* audioconfig_driverpath(AudioConfig* self)
+const char* audioconfig_driver_path(AudioConfig* self)
 {
 	psy_Property* p;
 
@@ -226,12 +229,12 @@ void audioconfig_driverconfigure_section(AudioConfig* self)
 {
 	assert(self);
 
-	if (self->driverconfigure) {
+	if (self->driver_configure) {
 		psy_Property* driversection;
 
-		psy_property_clear(self->driverconfigure);
+		psy_property_clear(self->driver_configure);
 		if (psy_audiodriver_configuration(self->player->driver)) {
-			psy_property_append_property(self->driverconfigure,
+			psy_property_append_property(self->driver_configure,
 				psy_property_clone(psy_audiodriver_configuration(
 					self->player->driver)));
 		}
@@ -256,7 +259,7 @@ void audioconfig_onaudiodriverselect(AudioConfig* self, bool enable)
 	psy_Property* driversection = NULL;
 
 	psy_audio_player_unloaddriver(self->player);
-	psy_audio_player_loaddriver(self->player, audioconfig_driverpath(self),
+	psy_audio_player_loaddriver(self->player, audioconfig_driver_path(self),
 		NULL /*no config*/, FALSE /*do not open yet*/);
 	if (psy_audiodriver_configuration(self->player->driver)) {
 		driversection = psy_property_find(self->driverconfigurations,
@@ -265,13 +268,13 @@ void audioconfig_onaudiodriverselect(AudioConfig* self, bool enable)
 			PSY_PROPERTY_TYPE_NONE);
 	}
 	if (enable) {
-		psy_audio_player_restartdriver(self->player, driversection);
+		psy_audio_player_restart_driver(self->player, driversection);
 	} else if (self->player->driver) {
 		psy_audiodriver_configure(self->player->driver, driversection);
 	}
-	psy_property_clear(self->driverconfigure);
+	psy_property_clear(self->driver_configure);
 	if (psy_audiodriver_configuration(self->player->driver)) {
-		psy_property_append_property(self->driverconfigure,
+		psy_property_append_property(self->driver_configure,
 			psy_property_clone(psy_audiodriver_configuration(
 				self->player->driver)));
 	}
@@ -282,13 +285,13 @@ void audioconfig_on_edit_audio_driver_configuration(AudioConfig* self, bool enab
 	if (psy_audiodriver_configuration(self->player->driver) != NULL) {
 		psy_Property* driversection;
 
-		driversection = psy_property_find(self->driverconfigure,
+		driversection = psy_property_find(self->driver_configure,
 			psy_property_key(psy_audiodriver_configuration(
 				self->player->driver)),
 			PSY_PROPERTY_TYPE_NONE);
 		if (driversection) {
 			if (enabled) {
-				psy_audio_player_restartdriver(self->player, driversection);
+				psy_audio_player_restart_driver(self->player, driversection);
 			} else if (self->player->driver) {
 				psy_audiodriver_configure(self->player->driver, driversection);
 			}			
@@ -296,7 +299,7 @@ void audioconfig_on_edit_audio_driver_configuration(AudioConfig* self, bool enab
 	}
 }
 
-void audioconfig_enableaudio(AudioConfig* self, bool enable)
+void audioconfig_enable_audio(AudioConfig* self, bool enable)
 {
 	if (self->player->driver) {
 		if (enable) {
@@ -308,10 +311,10 @@ void audioconfig_enableaudio(AudioConfig* self, bool enable)
 						self->player->driver)),
 					PSY_PROPERTY_TYPE_NONE);
 			}
-			psy_audio_player_restartdriver(self->player, driversection);
-			psy_property_clear(self->driverconfigure);
+			psy_audio_player_restart_driver(self->player, driversection);
+			psy_property_clear(self->driver_configure);
 			if (psy_audiodriver_configuration(self->player->driver)) {
-				psy_property_append_property(self->driverconfigure,
+				psy_property_append_property(self->driver_configure,
 					psy_property_clone(psy_audiodriver_configuration(
 						self->player->driver)));
 			}
@@ -329,7 +332,7 @@ bool audioconfig_onpropertychanged(AudioConfig* self, psy_Property* property,
 	assert(self && property);
 
 	if (psy_property_hasid(property, PROPERTY_ID_ENABLEAUDIO)) {
-		audioconfig_enableaudio(self, psy_property_item_bool(property));
+		audioconfig_enable_audio(self, psy_property_item_bool(property));
 		return TRUE;
 	}
 	if (psy_property_hasid(property, PROPERTY_ID_NUMAUDIOTHREADS)) {
@@ -376,7 +379,7 @@ uintptr_t audioconfig_onchanged(AudioConfig* self, psy_Property*
 bool audioconfig_hasproperty(const AudioConfig* self,
 	psy_Property* property)
 {
-	assert(self && self->driverconfigure);
+	assert(self && self->driver_configure);
 
 	return psy_property_in_section(property, self->inputoutput);
 }

@@ -98,7 +98,7 @@ void psy_ui_button_highlight(psy_ui_Button*);
 void psy_ui_button_disable_highlight(psy_ui_Button*);
 bool psy_ui_button_highlighted(const psy_ui_Button*);
 void psy_ui_button_settextcolour(psy_ui_Button*, psy_ui_Colour);
-void psy_ui_button_setcharnumber(psy_ui_Button*, double number);
+void psy_ui_button_set_char_number(psy_ui_Button*, double number);
 void psy_ui_button_setlinespacing(psy_ui_Button*, double spacing);
 void psy_ui_button_settextalignment(psy_ui_Button*, psy_ui_Alignment);
 void psy_ui_button_prevent_translation(psy_ui_Button*);

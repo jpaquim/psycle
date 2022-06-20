@@ -62,7 +62,7 @@ void playbar_init(PlayBar* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_ui_component_init(playbar_base(self), parent, NULL);
 	vtable_init(self);
 	psy_ui_component_set_style_type(playbar_base(self), STYLE_PLAYBAR);	
-	psy_ui_component_set_defaultalign(playbar_base(self), psy_ui_ALIGN_LEFT,
+	psy_ui_component_set_default_align(playbar_base(self), psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	self->workspace = workspace;
 	self->player = workspace_player(workspace);
@@ -85,7 +85,7 @@ void playbar_init(PlayBar* self, psy_ui_Component* parent, Workspace* workspace)
 	/* play beat num */
 	psy_ui_textarea_init_single_line(&self->loopbeatsedit, playbar_base(self));	
 	psy_ui_textarea_set_text(&self->loopbeatsedit, "4.00");
-	psy_ui_textarea_setcharnumber(&self->loopbeatsedit, 6);
+	psy_ui_textarea_set_char_number(&self->loopbeatsedit, 6);
 	psy_ui_button_init_connect(&self->loopbeatsless, playbar_base(self),
 		self, playbar_onnumplaybeatsless);
 	psy_ui_button_seticon(&self->loopbeatsless, psy_ui_ICON_LESS);	

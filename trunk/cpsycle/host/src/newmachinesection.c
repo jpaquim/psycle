@@ -74,7 +74,7 @@ void newmachinesection_init(NewMachineSection* self, psy_ui_Component* parent,
 	psy_ui_component_set_align(&self->header, psy_ui_ALIGN_TOP);
 	psy_ui_component_set_style_type(&self->header,
 		STYLE_NEWMACHINE_SECTION_HEADER);	
-	psy_ui_component_set_defaultalign(&self->header, psy_ui_ALIGN_LEFT,
+	psy_ui_component_set_default_align(&self->header, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));	
 	psy_ui_label_init(&self->label, &self->header);
 	psy_ui_label_prevent_translation(&self->label);

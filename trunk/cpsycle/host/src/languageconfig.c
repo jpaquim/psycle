@@ -52,7 +52,7 @@ void languageconfig_makelanguagechoice(LanguageConfig* self)
 	self->languagechoice = psy_property_sethint(
 		psy_property_append_choice(self->parent, "lang", 0),
 		PSY_PROPERTY_HINT_LIST);
-	psy_property_setid(self->languagechoice, PROPERTY_ID_LANG);
+	psy_property_set_id(self->languagechoice, PROPERTY_ID_LANG);
 	psy_property_settext(self->languagechoice, "settingsview.global.language");
 }
 

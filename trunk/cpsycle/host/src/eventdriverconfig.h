@@ -48,7 +48,7 @@ void eventdriverconfig_init(EventDriverConfig*, psy_Property* parent, psy_audio_
 void eventdriverconfig_dispose(EventDriverConfig*);
 void eventdriverconfig_makeeventinput(EventDriverConfig*);
 void eventdriverconfig_makeeventdriverlist(EventDriverConfig*);
-void eventdriverconfig_registereventdrivers(EventDriverConfig*);
+void eventdriverconfig_register_event_drivers(EventDriverConfig*);
 void eventdriverconfig_make(EventDriverConfig*);
 void eventdriverconfig_show_active(EventDriverConfig*, intptr_t deviceid);
 void eventdriverconfig_update_active(EventDriverConfig*);

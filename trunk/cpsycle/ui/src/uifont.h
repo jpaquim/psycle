@@ -30,8 +30,8 @@ extern "C" {
 
 /* psy_ui_FontInfo */
 typedef struct psy_ui_FontInfo {
-    int32_t lfHeight;
-    int32_t lfWidth;
+    double lfHeight;
+    double lfWidth;
     int32_t lfEscapement;
     int32_t lfOrientation;
     int32_t lfWeight;
@@ -47,7 +47,7 @@ typedef struct psy_ui_FontInfo {
 } psy_ui_FontInfo;
 
 void psy_ui_fontinfo_init(psy_ui_FontInfo*, const char* family,
-    int32_t height);
+    double height);
 void psy_ui_fontinfo_init_string(psy_ui_FontInfo*, const char* text);
 void psy_ui_fontinfo_string(const psy_ui_FontInfo*, char* rv,
     uintptr_t max_len);

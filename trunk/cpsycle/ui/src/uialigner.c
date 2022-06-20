@@ -11,15 +11,17 @@
 #include "uicomponent.h"
 /* std */
 #include <math.h>
+#include <stdlib.h>
 #include <stdio.h>
 
 /* prototypes */
 static void psy_ui_aligner_dispose_virtual(psy_ui_Aligner* self) { }
-static void psy_ui_aligner_align_virtual(psy_ui_Aligner* self) { }
+static void psy_ui_aligner_align_virtual(psy_ui_Aligner* self, psy_ui_Component* component) { }
 static void psy_ui_aligner_preferredsize_virtual(psy_ui_Aligner* self,
-	const psy_ui_Size* limit, psy_ui_Size* rv)
+	psy_ui_Component* component, const psy_ui_Size* limit, psy_ui_Size* rv)
 {	
 }
+
 /* vtable */
 static psy_ui_AlignerVTable aligner_vtable;
 static bool aligner_vtable_initialized = FALSE;
@@ -33,11 +35,16 @@ static void aligner_vtable_init(void)
 		aligner_vtable_initialized = TRUE;
 	}	
 }
+
 /* implementation */
 void psy_ui_aligner_init(psy_ui_Aligner* self)
 {
 	aligner_vtable_init();
 	self->vtable = &aligner_vtable;
+	self->alignexpandmode = psy_ui_NOEXPAND;
+	self->insertaligntype = psy_ui_ALIGN_NONE;
+	self->alignsorted = psy_ui_ALIGN_NONE;
+	psy_ui_margin_init(&self->insertmargin);
 }
 
 /* implementation helper functions */

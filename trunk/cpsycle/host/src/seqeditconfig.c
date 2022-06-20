@@ -30,7 +30,7 @@ void seqeditconfig_make(SeqEditConfig* self, psy_Property* parent)
 {
 	assert(self);
 
-	self->seqedit = psy_property_setid(psy_property_settext(
+	self->seqedit = psy_property_set_id(psy_property_settext(
 		psy_property_append_section(parent, "seqedit"),
 		"settingsview.seqeditor.seqeditor"), PROPERTY_ID_SEQEDIT);	
 	psy_property_sethint(psy_property_settext(

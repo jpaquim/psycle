@@ -26,7 +26,7 @@ void plugineditorbar_init(PluginEditorBar* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->component, parent, NULL);
 	self->workspace = workspace;	
 	self->editor = NULL;
-	psy_ui_component_set_defaultalign(plugineditorbar_base(self),
+	psy_ui_component_set_default_align(plugineditorbar_base(self),
 		psy_ui_ALIGN_LEFT, psy_ui_defaults_hmargin(psy_ui_defaults()));
 	/* Zoom */
 	zoombox_init(&self->zoombox, plugineditorbar_base(self));
@@ -39,14 +39,14 @@ void plugineditorbar_init(PluginEditorBar* self, psy_ui_Component* parent,
 	psy_ui_label_prevent_translation(&self->line_desc);
 	psy_ui_label_set_text(&self->line_desc, "Line:");
 	psy_ui_label_init(&self->line, &self->component);
-	psy_ui_label_set_charnumber(&self->line, 5.0);
+	psy_ui_label_set_char_number(&self->line, 5.0);
 	psy_ui_label_prevent_translation(&self->line);
 	/* col */
 	psy_ui_label_init(&self->column_desc, &self->component);
 	psy_ui_label_prevent_translation(&self->column_desc);
 	psy_ui_label_set_text(&self->column_desc, "Col:");
 	psy_ui_label_init(&self->column, &self->component);
-	psy_ui_label_set_charnumber(&self->column, 5.0);
+	psy_ui_label_set_char_number(&self->column, 5.0);
 	psy_ui_label_prevent_translation(&self->column);
 }
 

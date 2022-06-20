@@ -954,7 +954,7 @@ void psy_audio_player_reloaddriver(psy_audio_Player* self, const char* path,
 	psy_audio_player_loaddriver(self, path, config, TRUE);
 }
 
-void psy_audio_player_restartdriver(psy_audio_Player* self,
+void psy_audio_player_restart_driver(psy_audio_Player* self,
 	const psy_Property* config)
 {
 	assert(self);

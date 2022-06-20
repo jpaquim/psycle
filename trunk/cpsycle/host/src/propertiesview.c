@@ -157,7 +157,7 @@ void propertiesrenderline_init(PropertiesRenderLine* self,
 			self->label = psy_ui_label_allocinit(col1);
 			psy_ui_component_set_align(psy_ui_label_base(self->label),
 				psy_ui_ALIGN_LEFT);
-			psy_ui_label_set_charnumber(self->label, 20.0);
+			psy_ui_label_set_char_number(self->label, 20.0);
 			self->colour = psy_ui_component_allocinit(col1, NULL);
 			psy_ui_component_set_align(self->colour, psy_ui_ALIGN_LEFT);
 			psy_ui_component_set_preferred_size(self->colour,
@@ -608,7 +608,7 @@ void propertiesrenderer_init(PropertiesRenderer* self,
 	psy_ui_component_set_wheel_scroll(&self->component, 4);	
 	psy_ui_component_init(&self->client, &self->component, NULL);	
 	psy_ui_component_set_align(&self->client, psy_ui_ALIGN_CLIENT);
-	psy_ui_component_set_defaultalign(&self->client,
+	psy_ui_component_set_default_align(&self->client,
 		psy_ui_ALIGN_TOP, psy_ui_margin_make_em(0.0, 0.0, 0.5, 0.0));	
 	propertiesrenderstate_init(&self->state, numcols);	
 	psy_signal_init(&self->signal_changed);
@@ -787,7 +787,7 @@ void propertiesrenderer_build_main_section(PropertiesRenderer* self,
 		psy_ui_Label* label;
 
 		currsection = psy_ui_component_allocinit(&self->client, NULL);
-		psy_ui_component_set_defaultalign(currsection, psy_ui_ALIGN_TOP,
+		psy_ui_component_set_default_align(currsection, psy_ui_ALIGN_TOP,
 			psy_ui_margin_zero());		
 		psy_ui_component_set_style_type(currsection, self->mainsectionstyle);
 		label = psy_ui_label_allocinit(currsection);		
@@ -798,7 +798,7 @@ void propertiesrenderer_build_main_section(PropertiesRenderer* self,
 		psy_ui_component_set_style_type(psy_ui_label_base(label),
 			self->mainsectionheaderstyle);		
 		lines = psy_ui_component_allocinit(currsection, NULL);
-		psy_ui_component_set_defaultalign(lines, psy_ui_ALIGN_TOP,
+		psy_ui_component_set_default_align(lines, psy_ui_ALIGN_TOP,
 			psy_ui_margin_zero());
 		psy_ui_label_set_text(label, psy_property_text(section));
 		psy_table_insert(&self->sections, psy_property_index(section),
@@ -904,7 +904,7 @@ void propertiesview_init(PropertiesView* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->component.signal_selectsection, self,
 		propertiesview_select_section);
 	psy_ui_tabbar_init(&self->tabbar, &self->component);
-	psy_ui_tabbar_settabalign(&self->tabbar, psy_ui_ALIGN_TOP);
+	psy_ui_tabbar_set_tab_align(&self->tabbar, psy_ui_ALIGN_TOP);
 	psy_ui_component_set_align(psy_ui_tabbar_base(&self->tabbar),
 		psy_ui_ALIGN_RIGHT);
 	propertiesview_update_tabbar_sections(self);
@@ -1044,9 +1044,9 @@ void propertiesview_select(PropertiesView* self, psy_Property* property)
 
 void propertiesview_mark(PropertiesView* self, psy_Property* property)
 {
-	psy_signal_preventall(&self->signal_selected);
+	psy_signal_prevent_all(&self->signal_selected);
 	propertiesview_select(self, property);
-	psy_signal_enableall(&self->signal_selected);
+	psy_signal_enable_all(&self->signal_selected);
 }
 
 psy_Property* propertiesview_selected(PropertiesView* self)
@@ -1054,12 +1054,12 @@ psy_Property* propertiesview_selected(PropertiesView* self)
 	return NULL; 
 }
 
-void propertiesview_enablemousepropagation(PropertiesView* self)
+void propertiesview_enable_mouse_propagation(PropertiesView* self)
 {
 	self->renderer.state.prevent_mouse_propagation = FALSE;
 }
 
-void propertiesview_prevent_maximize_mainsections(PropertiesView* self)
+void propertiesview_prevent_maximize_main_sections(PropertiesView* self)
 {
 	self->maximizemainsections = FALSE;
 }

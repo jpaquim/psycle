@@ -431,7 +431,7 @@ INLINE uintptr_t psy_ui_graphics_dev_gc(psy_ui_Graphics* self)
 	return self->imp->vtable->dev_gc(self->imp);
 }
 
-INLINE void psy_ui_graphics_setcliprect(psy_ui_Graphics* self,
+INLINE void psy_ui_graphics_set_clip_rect(psy_ui_Graphics* self,
 	psy_ui_RealRectangle clip)
 {	
 	self->imp->vtable->dev_setcliprect(self->imp, clip);

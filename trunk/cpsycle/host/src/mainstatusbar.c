@@ -60,7 +60,7 @@ void mainstatusbar_init(MainStatusBar* self, psy_ui_Component* parent,
 	self->clockcounter = 20;
 	psy_lock_init(&self->outputlock);
 	self->strbuffer = NULL;	
-	psy_ui_component_set_defaultalign(&self->pane, psy_ui_ALIGN_LEFT,
+	psy_ui_component_set_default_align(&self->pane, psy_ui_ALIGN_LEFT,
 		psy_ui_margin_make_em(0.0, 1.0, 0.0, 0.0));
 	mainstatusbar_init_zoom_box(self);
 	mainstatusbar_init_status_label(self);
@@ -90,7 +90,7 @@ void mainstatusbar_init_status_label(MainStatusBar* self)
 	psy_ui_label_init(&self->statusbarlabel, &self->pane);
 	psy_ui_label_prevent_translation(&self->statusbarlabel);
 	psy_ui_label_set_text(&self->statusbarlabel, "Ready");	
-	psy_ui_label_set_charnumber(&self->statusbarlabel, 35.0);
+	psy_ui_label_set_char_number(&self->statusbarlabel, 35.0);
 	workspace_connect_status(self->workspace, self,
 		(fp_workspace_output)mainstatusbar_onstatus);
 }
@@ -100,7 +100,7 @@ void mainstatusbar_init_view_status_bars(MainStatusBar* self)
 	psy_ui_notebook_init(&self->viewstatusbars, &self->pane);	
 	psy_ui_component_set_align(psy_ui_notebook_base(&self->viewstatusbars),
 		psy_ui_ALIGN_CLIENT);	
-	psy_ui_component_set_defaultalign(
+	psy_ui_component_set_default_align(
 		psy_ui_notebook_base(&self->viewstatusbars),
 		psy_ui_ALIGN_LEFT, psy_ui_defaults_hmargin(psy_ui_defaults()));	
 }

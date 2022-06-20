@@ -179,11 +179,11 @@ void help_onalign(Help* self, psy_ui_Component* sender)
 		if (psy_ui_component_parent(sender)->align == psy_ui_ALIGN_RIGHT) {
 			psy_ui_component_set_align(&self->tabbar.component,
 				psy_ui_ALIGN_TOP);
-			psy_ui_tabbar_settabalign(&self->tabbar, psy_ui_ALIGN_RIGHT);
+			psy_ui_tabbar_set_tab_align(&self->tabbar, psy_ui_ALIGN_RIGHT);
 		} else {
 			psy_ui_component_set_align(psy_ui_tabbar_base(&self->tabbar),
 				psy_ui_ALIGN_RIGHT);
-			psy_ui_tabbar_settabalign(&self->tabbar, psy_ui_ALIGN_TOP);
+			psy_ui_tabbar_set_tab_align(&self->tabbar, psy_ui_ALIGN_TOP);
 		}
 		psy_ui_component_align(psy_ui_tabbar_base(&self->tabbar));
 		self->lastalign = psy_ui_component_parent(sender)->align;

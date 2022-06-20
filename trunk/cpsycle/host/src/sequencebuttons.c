@@ -60,7 +60,7 @@ void sequencebuttons_init(SequenceButtons* self, psy_ui_Component* parent,
 	psy_ui_component_set_align(&self->standard, psy_ui_ALIGN_TOP);
 	psy_ui_component_init(&self->row0, &self->standard, NULL);
 	psy_ui_component_set_align(&self->row0, psy_ui_ALIGN_TOP);
-	psy_ui_component_set_defaultalign(&self->row0, psy_ui_ALIGN_LEFT,
+	psy_ui_component_set_default_align(&self->row0, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	psy_ui_margin_init_em(&rowmargin, 0.0, 0.0, 0.5, 0.0);
 	psy_ui_component_set_margin(&self->row0, rowmargin);
@@ -75,7 +75,7 @@ void sequencebuttons_init(SequenceButtons* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->row1, &self->standard, NULL);
 	psy_ui_component_set_margin(&self->row1, rowmargin);
 	psy_ui_component_set_align(&self->row1, psy_ui_ALIGN_TOP);
-	psy_ui_component_set_defaultalign(&self->row1, psy_ui_ALIGN_LEFT,
+	psy_ui_component_set_default_align(&self->row1, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	psy_ui_button_init_text(&self->newentry, &self->row1,
 		"seqview.new");
@@ -87,7 +87,7 @@ void sequencebuttons_init(SequenceButtons* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->rowmore, &self->standard, NULL);
 	psy_ui_component_set_margin(&self->rowmore, rowmargin);
 	psy_ui_component_set_align(&self->rowmore, psy_ui_ALIGN_TOP);
-	psy_ui_component_set_defaultalign(&self->rowmore, psy_ui_ALIGN_LEFT,
+	psy_ui_component_set_default_align(&self->rowmore, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	psy_ui_button_init(&self->more, &self->rowmore);
 	psy_ui_button_seticon(&self->more, psy_ui_ICON_MORE);
@@ -101,7 +101,7 @@ void sequencebuttons_init(SequenceButtons* self, psy_ui_Component* parent,
 	psy_ui_margin_init_em(&rowmargin, 0.5, 0.0, 0.5, 0.0);
 	psy_ui_component_set_margin(&self->row2, rowmargin);
 	psy_ui_component_set_align(&self->row2, psy_ui_ALIGN_TOP);
-	psy_ui_component_set_defaultalign(&self->row2, psy_ui_ALIGN_LEFT,
+	psy_ui_component_set_default_align(&self->row2, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));	
 	psy_ui_button_init_text(&self->clear, &self->row2, "seqview.clear");
 	psy_ui_button_init_text(&self->rename, &self->row2, "seqview.rename");	
@@ -116,19 +116,19 @@ void sequencebuttons_init(SequenceButtons* self, psy_ui_Component* parent,
 	/* row3 */
 	psy_ui_component_init(&self->row3, &self->block, NULL);
 	psy_ui_component_set_align(&self->row3, psy_ui_ALIGN_TOP);
-	psy_ui_component_set_defaultalign(&self->row3, psy_ui_ALIGN_LEFT,
+	psy_ui_component_set_default_align(&self->row3, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	psy_ui_button_init_text(&self->paste, &self->row3, "seqview.paste");
 	psy_ui_component_hide(&self->block);
 
 	for (i = 0; i < sizeof(buttons) / sizeof(psy_ui_Button*); ++i) {		
-		psy_ui_button_setcharnumber(buttons[i], 12.0);
+		psy_ui_button_set_char_number(buttons[i], 12.0);
 		if (buttons[i] != &self->more) {
 			psy_ui_component_set_style_types(psy_ui_button_base(buttons[i]),
 				STYLE_SEQVIEW_BUTTON, STYLE_SEQVIEW_BUTTON_HOVER,
 				STYLE_SEQVIEW_BUTTON_SELECT, psy_INDEX_INVALID);				
 		} else {			
-			psy_ui_button_setcharnumber(buttons[i], 0.0);
+			psy_ui_button_set_char_number(buttons[i], 0.0);
 		}		
 	}
 	psy_signal_connect(&self->newentry.signal_clicked, self,

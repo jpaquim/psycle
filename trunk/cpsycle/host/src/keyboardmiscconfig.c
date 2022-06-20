@@ -92,7 +92,7 @@ void keyboardmiscconfig_makekeyboardandmisc(KeyboardMiscConfig* self, psy_Proper
 		psy_property_append_bool(self->keyboard_misc,
 			"savereminder", TRUE),
 		"settingsview.kbd.savereminder");
-	psy_property_setid(psy_property_settext(
+	psy_property_set_id(psy_property_settext(
 		psy_property_append_int(self->keyboard_misc,
 			"numdefaultlines", 64, 1, 1024),
 		"settingsview.kbd.numdefaultlines"),
@@ -106,7 +106,7 @@ void keyboardmiscconfig_makekeyboardandmisc(KeyboardMiscConfig* self, psy_Proper
 			"followsong", self->follow_song),
 		"settingsview.kbd.followsong");
 #if PSYCLE_USE_TK != PSYCLE_TK_X11
-	psy_property_setid(psy_property_settext(
+	psy_property_set_id(psy_property_settext(
 		psy_property_append_bool(self->keyboard_misc,
 			"ft2fileexplorer", FALSE),
 		"settingsview.kbd.ft2-explorer"),

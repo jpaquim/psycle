@@ -77,7 +77,7 @@ void newmachinedetail_init(NewMachineDetail* self, psy_ui_Component* parent,
 	psy_ui_component_set_align(&self->bottom, psy_ui_ALIGN_BOTTOM);
 	psy_ui_margin_init_em(&spacing, 0.5, 1.0, 0.5, 0.0);
 	psy_ui_component_set_padding(&self->bottom, spacing);
-	psy_ui_component_set_defaultalign(&self->bottom,
+	psy_ui_component_set_default_align(&self->bottom,
 		psy_ui_ALIGN_TOP, psy_ui_defaults_vmargin(psy_ui_defaults()));
 	psy_ui_label_init_text(&self->compatlabel, &self->bottom,
 		"newmachine.song-loading-compatibility");
@@ -95,7 +95,7 @@ void newmachinedetail_init(NewMachineDetail* self, psy_ui_Component* parent,
 	/* details */
 	psy_ui_component_init(&self->details, &self->component, NULL);
 	psy_ui_component_set_align(&self->details, psy_ui_ALIGN_BOTTOM);
-	psy_ui_component_set_defaultalign(&self->details, psy_ui_ALIGN_TOP,
+	psy_ui_component_set_default_align(&self->details, psy_ui_ALIGN_TOP,
 		psy_ui_defaults_vmargin(psy_ui_defaults())); 
 	/* category */
 	psy_ui_component_init(&self->category, &self->details, NULL);	
@@ -103,7 +103,7 @@ void newmachinedetail_init(NewMachineDetail* self, psy_ui_Component* parent,
 		"newmachine.category");
 	psy_ui_label_set_textalignment(&self->categorydesc,
 		psy_ui_ALIGNMENT_RIGHT);
-	psy_ui_label_set_charnumber(&self->categorydesc, numcol0);
+	psy_ui_label_set_char_number(&self->categorydesc, numcol0);
 	psy_ui_component_set_align(psy_ui_label_base(&self->categorydesc),
 		psy_ui_ALIGN_LEFT);
 	psy_ui_textarea_init_single_line(& self->categoryedit, &self->category);	

@@ -57,7 +57,7 @@ void seqviewduration_init(SeqviewDuration* self, psy_ui_Component* parent,
 	psy_ui_component_set_align(&self->desc.component, psy_ui_ALIGN_LEFT);
 	psy_ui_label_init(&self->duration, &self->component);	
 	psy_ui_component_set_align(&self->duration.component, psy_ui_ALIGN_LEFT);	
-	psy_ui_label_set_charnumber(&self->duration, 18.0);
+	psy_ui_label_set_char_number(&self->duration, 18.0);
 	psy_ui_label_prevent_translation(&self->duration);
 	psy_ui_component_set_style_type(psy_ui_label_base(&self->duration),
 		STYLE_DURATION_TIME);	

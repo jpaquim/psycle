@@ -166,7 +166,7 @@ void paramrackpane_init(ParamRackPane* self, psy_ui_Component* parent,
 	vtable_init(self);	
 	self->lastselected = psy_INDEX_INVALID;
 	self->level = 2;	
-	psy_ui_component_set_defaultalign(&self->component,
+	psy_ui_component_set_default_align(&self->component,
 		psy_ui_ALIGN_LEFT, psy_ui_margin_make(
 		psy_ui_value_make_eh(0.0), psy_ui_value_make_ew(0.1),
 		psy_ui_value_make_eh(0.0), psy_ui_value_make_ew(0.0)));	
@@ -487,7 +487,7 @@ void paramrackpane_onmachineselected(ParamRackPane* self,
 void paramrackbatchbar_init(ParamRackBatchBar* self, psy_ui_Component* parent)
 {
 	psy_ui_component_init(&self->component, parent, NULL);
-	psy_ui_component_set_defaultalign(&self->component, psy_ui_ALIGN_LEFT,
+	psy_ui_component_set_default_align(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));	
 	psy_ui_button_init_text(&self->select, &self->component, "Select in Gear");
 }
@@ -516,7 +516,7 @@ void paramrackmodebar_init(ParamRackModeBar* self, psy_ui_Component* parent)
 {
 	psy_ui_component_init(&self->component, parent, NULL);
 	paramrackmodebar_vtable_init(self);
-	psy_ui_component_set_defaultalign(&self->component, psy_ui_ALIGN_LEFT,
+	psy_ui_component_set_default_align(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	psy_signal_init(&self->signal_select);
 	psy_ui_button_init_text_connect(&self->all, &self->component,
@@ -726,7 +726,7 @@ void paramrack_onmachineselected(ParamRack* self,
 
 		level = psy_audio_machines_levelofmachine(sender, slot);
 		if (level != psy_INDEX_INVALID) {			
-			intedit_setvalue(&self->leveledit, (int32_t)level);
+			intedit_set_value(&self->leveledit, (int32_t)level);
 		}
 	}
 }

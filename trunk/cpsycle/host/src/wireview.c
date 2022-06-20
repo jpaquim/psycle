@@ -148,12 +148,12 @@ void wireview_initvolumeslider(WireView* self)
 	psy_ui_button_init(&self->percvol, &self->slidergroup);
 	psy_ui_button_set_text(&self->percvol, "100%");
 	psy_ui_button_prevent_translation(&self->percvol);
-	psy_ui_button_setcharnumber(&self->percvol, 10);	
+	psy_ui_button_set_char_number(&self->percvol, 10);	
 	psy_ui_component_set_align(&self->percvol.component, psy_ui_ALIGN_BOTTOM);
 	psy_ui_button_init(&self->dbvol, &self->slidergroup);	
 	psy_ui_button_set_text(&self->dbvol, "db 100");
 	psy_ui_button_prevent_translation(&self->dbvol);
-	psy_ui_button_setcharnumber(&self->dbvol, 10);	
+	psy_ui_button_set_char_number(&self->dbvol, 10);	
 	psy_ui_component_set_align(&self->dbvol.component, psy_ui_ALIGN_BOTTOM);
 	psy_ui_slider_init(&self->volslider, &self->slidergroup);
 	psy_ui_slider_setcharnumber(&self->volslider, 4);
@@ -210,7 +210,7 @@ void wireview_initbottomgroup(WireView* self)
 {
 	psy_ui_component_init(&self->bottomgroup, wireview_base(self), NULL);
 	psy_ui_component_set_align(&self->bottomgroup, psy_ui_ALIGN_BOTTOM);
-	psy_ui_component_set_defaultalign(&self->bottomgroup, psy_ui_ALIGN_LEFT,
+	psy_ui_component_set_default_align(&self->bottomgroup, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	psy_ui_button_init_connect(&self->deletewire, &self->bottomgroup,
 		self, wireview_ondeleteconnection);

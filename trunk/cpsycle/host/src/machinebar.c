@@ -75,7 +75,7 @@ void machinebar_init(MachineBar* self, psy_ui_Component* parent, Workspace* work
 	self->instruments = &workspace->song->instruments;
 	psy_table_init(&self->comboboxslots);
 	psy_table_init(&self->slotscombobox);	
-	psy_ui_component_set_defaultalign(machinebar_base(self), psy_ui_ALIGN_LEFT,
+	psy_ui_component_set_default_align(machinebar_base(self), psy_ui_ALIGN_LEFT,
 		margin);	
 	/* Machine ComboBox */
 	psy_ui_combobox_init(&self->machinebox, &self->component);

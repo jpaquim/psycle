@@ -486,7 +486,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 							psy_ui_graphics_init(&g, hdc);
 						}						
 						/* set clip */						
-						psy_ui_graphics_setcliprect(&g,
+						psy_ui_graphics_set_clip_rect(&g,
 							psy_ui_realrectangle_make(
 								psy_ui_realpoint_make(rcPaint.left,
 									rcPaint.top),

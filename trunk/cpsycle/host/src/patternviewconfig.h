@@ -104,7 +104,7 @@ bool patternviewconfig_show_trackscopes(const PatternViewConfig*);
 void patternviewconfig_toggle_pattern_defaultline(PatternViewConfig*);
 bool patternviewconfig_is_smooth_scrolling(const PatternViewConfig*);
 void patternviewconfig_set_smooth_scrolling(PatternViewConfig*, bool on);
-psy_ui_FontInfo patternviewconfig_fontinfo(PatternViewConfig*, double zoom);
+psy_ui_FontInfo patternviewconfig_font_info(PatternViewConfig*, double zoom);
 void patternviewconfig_write_styles(PatternViewConfig*);
 void patternviewconfig_set_zoom(PatternViewConfig*, double zoom);
 double patternviewconfig_zoom(const PatternViewConfig*);

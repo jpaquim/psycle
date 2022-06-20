@@ -1,25 +1,30 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
-#include "sequencetrackbox.h"
-#include "uiapp.h"
 
-// SequenceTrackBox
-// prototypes
+#include "sequencetrackbox.h"
+/* ui */
+#include <uiapp.h>
+
+
+/* prototypes */
 static void sequencetrackbox_on_destroyed(SequenceTrackBox*);
-static void sequencetrackbox_onsolotrack(SequenceTrackBox*, TrackBox* sender);
-static void sequencetrackbox_onmutetrack(SequenceTrackBox*, TrackBox* sender);
-static void sequencetrackbox_onsolochanged(SequenceTrackBox*,
+static void sequencetrackbox_on_solo_track(SequenceTrackBox*, TrackBox* sender);
+static void sequencetrackbox_on_mutetrack(SequenceTrackBox*, TrackBox* sender);
+static void sequencetrackbox_on_solochanged(SequenceTrackBox*,
 	psy_audio_Sequence* sender, uintptr_t track);
-static void sequencetrackbox_onmutechanged(SequenceTrackBox*,
+static void sequencetrackbox_on_mutechanged(SequenceTrackBox*,
 	psy_audio_Sequence* sender, uintptr_t track);
-static void sequencetrackbox_onlabelclick(SequenceTrackBox*, psy_ui_Label* sender,
+static void sequencetrackbox_on_label_click(SequenceTrackBox*, psy_ui_Label* sender,
 	psy_ui_MouseEvent*);
-static void sequencetrackbox_onresize(SequenceTrackBox*, psy_ui_Component* sender,
+static void sequencetrackbox_on_resize(SequenceTrackBox*, psy_ui_Component* sender,
 	double* offset);
-// vtable
+
+/* vtable */
 static psy_ui_ComponentVtable sequencetrackbox_vtable;
 static bool sequencetrackbox_vtable_initialized = FALSE;
 
@@ -50,26 +55,26 @@ void sequencetrackbox_init(SequenceTrackBox* self, psy_ui_Component* parent,
 		psy_ui_ALIGN_CLIENT);	
 	sequencetrackbox_vtable_init(self);
 	psy_signal_connect(&self->trackbox.signal_resize, self,
-		sequencetrackbox_onresize);
+		sequencetrackbox_on_resize);
 	self->sequence = sequence;
 	self->trackidx = trackidx;
 	self->preventedit = TRUE;
 	self->workspace = workspace;
 	self->component.id = (intptr_t)self->trackidx;
 	self->trackbox.track.component.id = (intptr_t)self->trackidx;
-	trackbox_setindex(&self->trackbox, trackidx);	
+	trackbox_set_index(&self->trackbox, trackidx);	
 	if (self->sequence) {
 		psy_signal_connect(&self->sequence->signal_solochanged, self,
-			sequencetrackbox_onsolochanged);
+			sequencetrackbox_on_solochanged);
 		psy_signal_connect(&self->sequence->signal_mutechanged, self,
-			sequencetrackbox_onmutechanged);
+			sequencetrackbox_on_mutechanged);
 	}
 	psy_signal_connect(&self->trackbox.signal_solo, self,
-		sequencetrackbox_onsolotrack);
+		sequencetrackbox_on_solo_track);
 	psy_signal_connect(&self->trackbox.signal_mute, self,
-		sequencetrackbox_onmutetrack);	
+		sequencetrackbox_on_mutetrack);	
 	psy_signal_connect(&self->trackbox.desc.component.signal_mousedown, self,
-		sequencetrackbox_onlabelclick);	
+		sequencetrackbox_on_label_click);	
 }
 
 void sequencetrackbox_on_destroyed(SequenceTrackBox* self)
@@ -78,9 +83,9 @@ void sequencetrackbox_on_destroyed(SequenceTrackBox* self)
 
 	if (self->sequence) {
 		psy_signal_disconnect(&self->sequence->signal_solochanged, self,
-			sequencetrackbox_onsolochanged);
+			sequencetrackbox_on_solochanged);
 		psy_signal_disconnect(&self->sequence->signal_mutechanged, self,
-			sequencetrackbox_onmutechanged);
+			sequencetrackbox_on_mutechanged);
 	}
 	psy_signal_dispose(&self->signal_resize);	
 }
@@ -103,7 +108,7 @@ SequenceTrackBox* sequencetrackbox_allocinit(psy_ui_Component* parent,
 	return rv;
 }
 
-void sequencetrackbox_onsolotrack(SequenceTrackBox* self, TrackBox* sender)
+void sequencetrackbox_on_solo_track(SequenceTrackBox* self, TrackBox* sender)
 {
 	assert(self);
 
@@ -116,7 +121,7 @@ void sequencetrackbox_onsolotrack(SequenceTrackBox* self, TrackBox* sender)
 	}
 }
 
-void sequencetrackbox_onmutetrack(SequenceTrackBox* self, TrackBox* sender)
+void sequencetrackbox_on_mutetrack(SequenceTrackBox* self, TrackBox* sender)
 {
 	assert(self);
 
@@ -129,7 +134,7 @@ void sequencetrackbox_onmutetrack(SequenceTrackBox* self, TrackBox* sender)
 	}
 }
 
-void sequencetrackbox_onsolochanged(SequenceTrackBox* self,
+void sequencetrackbox_on_solochanged(SequenceTrackBox* self,
 	psy_audio_Sequence* sender, uintptr_t trackidx)
 {	
 	assert(self);
@@ -147,7 +152,7 @@ void sequencetrackbox_onsolochanged(SequenceTrackBox* self,
 	}
 }
 
-void sequencetrackbox_onmutechanged(SequenceTrackBox* self,
+void sequencetrackbox_on_mutechanged(SequenceTrackBox* self,
 	psy_audio_Sequence* sender, uintptr_t trackidx)
 {
 	assert(self);
@@ -170,12 +175,12 @@ void sequencetrackbox_showtrackname(SequenceTrackBox* self)
 
 		track = psy_audio_sequence_track_at(self->sequence, self->trackidx);
 		if (track) {
-			trackbox_setdescription(&self->trackbox, track->name);
+			trackbox_set_description(&self->trackbox, track->name);
 		}
 	}
 }
 
-void sequencetrackbox_onlabelclick(SequenceTrackBox* self, psy_ui_Label* sender,
+void sequencetrackbox_on_label_click(SequenceTrackBox* self, psy_ui_Label* sender,
 	psy_ui_MouseEvent* ev)
 {
 	psy_audio_OrderIndex editposition;	
@@ -192,7 +197,7 @@ void sequencetrackbox_onlabelclick(SequenceTrackBox* self, psy_ui_Label* sender,
 	}	
 }
 
-void sequencetrackbox_onresize(SequenceTrackBox* self, psy_ui_Component* sender,
+void sequencetrackbox_on_resize(SequenceTrackBox* self, psy_ui_Component* sender,
 	double* offset)
 {	
 	psy_signal_emit(&self->signal_resize, self, 1, (void*)offset);

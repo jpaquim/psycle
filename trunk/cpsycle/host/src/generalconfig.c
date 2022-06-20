@@ -46,15 +46,15 @@ void generalconfig_make(GeneralConfig* self, psy_Property* parent)
 	psy_property_settext(
 		psy_property_append_bool(self->general, "showmaximizedatstart", TRUE),
 		"settingsview.general.show-maximized-at-startup");
-	psy_property_setid(psy_property_settext(
+	psy_property_set_id(psy_property_settext(
 		psy_property_append_bool(self->general, "showsequenceedit", FALSE),
 		"settingsview.general.show-sequenceedit"),
 		PROPERTY_ID_SHOWSEQUENCEEDIT);
-	psy_property_setid(psy_property_settext(
+	psy_property_set_id(psy_property_settext(
 		psy_property_append_bool(self->general, "showstepsequencer", TRUE),
 		"settingsview.general.show-sequencestepbar"),
 		PROPERTY_ID_SHOWSTEPSEQUENCER);
-	psy_property_setid(psy_property_settext(
+	psy_property_set_id(psy_property_settext(
 		psy_property_append_bool(self->general, "showplaylist", FALSE),
 		"settingsview.general.show-playlist"),
 		PROPERTY_ID_SHOWPLAYLIST);

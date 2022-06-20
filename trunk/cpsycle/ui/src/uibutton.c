@@ -303,7 +303,7 @@ double psy_ui_button_width(psy_ui_Button* self)
 	return rv;
 }
 
-void psy_ui_button_setcharnumber(psy_ui_Button* self, double number)
+void psy_ui_button_set_char_number(psy_ui_Button* self, double number)
 {
 	self->charnumber = psy_max(0.0, number);
 }

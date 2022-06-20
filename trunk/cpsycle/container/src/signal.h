@@ -81,11 +81,11 @@ void psy_signal_disconnect_all(psy_Signal*);
 /* excludes a slot called by psy_signal_emit */
 void psy_signal_prevent(psy_Signal*, void* context, void* fp);
 /* excludes all slots called by psy_signal_emit */
-void psy_signal_preventall(psy_Signal*);
+void psy_signal_prevent_all(psy_Signal*);
 /* activates a slot called by psy_signal_emit (default) */
 void psy_signal_enable(psy_Signal*, void* context, void* fp);
 /* activates all slots called by psy_signal_emit (default) */ 
-void psy_signal_enableall(psy_Signal*);
+void psy_signal_enable_all(psy_Signal*);
 /* returns the slot matching the context and function callback or NULL */
 psy_Slot* psy_signal_findslot(psy_Signal*, void* context, void* fp);
 /*

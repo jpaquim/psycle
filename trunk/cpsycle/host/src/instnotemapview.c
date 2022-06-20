@@ -103,13 +103,13 @@ void instrumentkeyboardview_init(InstrumentKeyboardView* self,
 	psy_ui_Component* parent)
 {	
 	psy_ui_component_init(&self->component, parent, NULL);
-	instrumentkeyboardview_vtable_init(self);	
+	instrumentkeyboardview_vtable_init(self);
 	self->metrics.keysize = 6;
 	self->metrics.line_height = 15;
 	psy_audio_instrumententry_init(&self->entry);
 	self->entry.keyrange.low = 255;
 	self->entry.keyrange.high = 255;
-	psy_ui_component_preventalign(&self->component);
+	psy_ui_component_set_aligner(&self->component, NULL);
 	psy_ui_component_set_preferred_size(&self->component,
 		psy_ui_size_make_em(0.0, 2.0));	
 }
@@ -1084,16 +1084,16 @@ void instrumententryrow_on_mouse_down(InstrumentEntryRow* self,
 			self->state->editcolumn = column;
 			switch (column) {
 			case 0:
-				intedit_setvalue(self->state->curredit, (int)self->entry->sampleindex.subslot);
+				intedit_set_value(self->state->curredit, (int)self->entry->sampleindex.subslot);
 				break;
 			case 1:
-				intedit_setvalue(self->state->curredit, (uint8_t)self->entry->keyrange.low);
+				intedit_set_value(self->state->curredit, (uint8_t)self->entry->keyrange.low);
 				break;
 			case 2:
-				intedit_setvalue(self->state->curredit, (uint8_t)self->entry->keyrange.high);
+				intedit_set_value(self->state->curredit, (uint8_t)self->entry->keyrange.high);
 				break;
 			case 3:
-				intedit_setvalue(self->state->curredit, (uint8_t)self->entry->fixedkey);
+				intedit_set_value(self->state->curredit, (uint8_t)self->entry->fixedkey);
 				break;
 			}
 			psy_ui_component_setposition(intedit_base(self->state->curredit),
@@ -1234,7 +1234,7 @@ void instrumententrytableview_init(InstrumentEntryTableView* self,
 {
 	psy_ui_component_init(&self->component, parent, NULL);
 	instrumententrytableview_vtable_init(self);		
-	psy_ui_component_set_defaultalign(&self->component,
+	psy_ui_component_set_default_align(&self->component,
 		psy_ui_ALIGN_TOP, psy_ui_margin_zero());
 	self->state = state;	
 	self->instrument = NULL;		
@@ -1300,7 +1300,7 @@ void instrumentnotemapbuttons_init(InstrumentNoteMapButtons* self,
 	psy_ui_Component* parent)
 {	
 	psy_ui_component_init(&self->component, parent, NULL);
-	psy_ui_component_set_defaultalign(&self->component, psy_ui_ALIGN_LEFT,
+	psy_ui_component_set_default_align(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	psy_ui_button_init(&self->add, &self->component);
 	psy_ui_button_set_text(&self->add, "instrumentview.add");

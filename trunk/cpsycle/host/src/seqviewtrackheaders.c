@@ -50,7 +50,7 @@ void seqviewtrackheaders_init(SeqviewTrackHeaders* self,
 	psy_signal_init(&self->signal_trackselected);
 	psy_ui_component_init(&self->client, &self->component, NULL);
 	psy_ui_component_set_align(&self->client, psy_ui_ALIGN_FIXED);
-	psy_ui_component_set_defaultalign(&self->client,
+	psy_ui_component_set_default_align(&self->client,
 		psy_ui_ALIGN_LEFT, psy_ui_margin_zero());
 	psy_ui_component_set_align_expand(&self->client, psy_ui_HEXPAND);
 	psy_ui_component_setscrollstep(&self->client,

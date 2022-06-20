@@ -582,7 +582,7 @@ void channelmappingview_init(ChannelMappingView* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->component, parent, NULL);
 	self->workspace = workspace;
 	psy_ui_component_init(&self->buttongroup, &self->component, NULL);
-	psy_ui_component_set_defaultalign(&self->buttongroup, psy_ui_ALIGN_TOP,
+	psy_ui_component_set_default_align(&self->buttongroup, psy_ui_ALIGN_TOP,
 		psy_ui_defaults_vmargin(psy_ui_defaults()));
 	psy_ui_label_init_text(&self->help, &self->component,
 		"channelmapping.remove-connection-with-right-click");

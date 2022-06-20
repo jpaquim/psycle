@@ -47,7 +47,7 @@ void parameterbar_init(ParameterBar* self, psy_ui_Component* parent,
 	psy_ui_component_doublebuffer(&self->component);
 	psy_ui_component_set_vtable(&self->component, vtable_init(self));
 	psy_ui_margin_init_em(&margin, 0.0, 1.0, 0.0, 0.0);
-	psy_ui_component_set_defaultalign(&self->component, psy_ui_ALIGN_TOP,
+	psy_ui_component_set_default_align(&self->component, psy_ui_ALIGN_TOP,
 		psy_ui_defaults_vmargin(psy_ui_defaults()));
 	/* row0 */
 	psy_ui_component_init(&self->row0, &self->component, NULL);
@@ -59,7 +59,7 @@ void parameterbar_init(ParameterBar* self, psy_ui_Component* parent,
 	psy_ui_component_set_align(&self->buttons, psy_ui_ALIGN_CLIENT);
 	psy_ui_component_set_align_expand(&self->buttons,
 		psy_ui_HEXPAND);
-	psy_ui_component_set_defaultalign(&self->buttons, psy_ui_ALIGN_LEFT,
+	psy_ui_component_set_default_align(&self->buttons, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	psy_ui_button_init(&self->power, &self->buttons);
 	psy_ui_button_set_text(&self->power, "machineframe.pwr");

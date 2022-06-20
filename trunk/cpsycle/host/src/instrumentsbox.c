@@ -35,7 +35,7 @@ void instrumentsbox_init(InstrumentsBox* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {		
 	psy_ui_component_init(&self->component, parent, NULL);
-	psy_ui_component_set_defaultalign(&self->component, psy_ui_ALIGN_TOP,
+	psy_ui_component_set_default_align(&self->component, psy_ui_ALIGN_TOP,
 		psy_ui_defaults_vmargin(psy_ui_defaults()));
 	// Groups
 	psy_ui_component_init(&self->groupheader, &self->component, NULL);

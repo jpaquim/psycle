@@ -18,12 +18,11 @@ extern "C" {
 struct psy_ui_Component;
 
 typedef struct psy_ui_GridAligner {
-	psy_ui_Aligner aligner;
-	struct psy_ui_Component* component;
+	psy_ui_Aligner aligner;	
 	uintptr_t numcols;
 } psy_ui_GridAligner;
 
-void psy_ui_gridaligner_init(psy_ui_GridAligner*, struct psy_ui_Component*);
+void psy_ui_gridaligner_init(psy_ui_GridAligner*);
 
 INLINE psy_ui_Aligner* psy_ui_gridaligner_base(psy_ui_GridAligner* self)
 {

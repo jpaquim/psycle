@@ -21,7 +21,7 @@ void patterncursorstepbox_init(PatternCursorStepBox* self, psy_ui_Component*
 {	
 	psy_ui_component_init(patterncursorstepbox_base(self), parent, NULL);
 	self->workspace = workspace;
-	psy_ui_component_set_defaultalign(patterncursorstepbox_base(self),
+	psy_ui_component_set_default_align(patterncursorstepbox_base(self),
 		psy_ui_ALIGN_LEFT, psy_ui_defaults_hmargin(psy_ui_defaults()));
 	psy_ui_component_set_align_expand(patterncursorstepbox_base(self),
 		psy_ui_HEXPAND);

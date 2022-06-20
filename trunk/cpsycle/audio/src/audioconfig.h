@@ -32,7 +32,7 @@ typedef struct AudioConfig {
 	psy_Signal signal_changed;
 	psy_Property* inputoutput;
 	psy_Property* drivers;
-	psy_Property* driverconfigure;
+	psy_Property* driver_configure;
 	psy_Property* driverconfigurations;
 	/* internal */
 	bool audioenabled;
@@ -43,7 +43,7 @@ typedef struct AudioConfig {
 
 void audioconfig_init(AudioConfig*, psy_Property* parent, psy_audio_Player*);
 void audioconfig_dispose(AudioConfig*);
-void audioconfig_enableaudio(AudioConfig*, bool enable);
+void audioconfig_enable_audio(AudioConfig*, bool enable);
 void audioconfig_driverconfigure_section(AudioConfig*);
 void audioconfig_make_driver_configurations(AudioConfig* self, bool full);
 void audioconfig_makeconfiguration_driverkey(AudioConfig* self, const char* key);
@@ -54,7 +54,7 @@ uintptr_t audioconfig_numthreads(const AudioConfig*);
 bool audioconfig_onpropertychanged(AudioConfig*, psy_Property*,
 	uintptr_t* rebuild_level);
 
-const char* audioconfig_driverpath(AudioConfig*);
+const char* audioconfig_driver_path(AudioConfig*);
 const char* audioconfig_driverkey(AudioConfig*);
 
 uintptr_t audioconfig_onchanged(AudioConfig*, psy_Property*);

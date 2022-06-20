@@ -6,8 +6,6 @@
 #if !defined(INTEDIT_H)
 #define INTEDIT_H
 
-/* host */
-#include "workspace.h"
 /* ui */
 #include <uibutton.h>
 #include <uilabel.h>
@@ -26,8 +24,7 @@ typedef struct IntEdit {
 	psy_ui_Label desc;
 	psy_ui_TextArea input;
 	psy_ui_Button less;
-	psy_ui_Button more;
-	// internal data
+	psy_ui_Button more;	
 	int minval;
 	int maxval;
 	int restore;	
@@ -45,11 +42,11 @@ IntEdit* intedit_allocinit(psy_ui_Component* parent,
 	int maxval);
 
 int intedit_value(IntEdit*);
-void intedit_setvalue(IntEdit*, int value);
-void intedit_enableedit(IntEdit*);
-void intedit_preventedit(IntEdit*);
-void intedit_seteditcharnumber(IntEdit*, int charnumber);
-void intedit_setdesccharnumber(IntEdit*, int charnumber);
+void intedit_set_value(IntEdit*, int value);
+void intedit_enable_edit(IntEdit*);
+void intedit_prevent_edit(IntEdit*);
+void intedit_set_edit_char_number(IntEdit*, int charnumber);
+void intedit_set_desc_char_number(IntEdit*, int charnumber);
 
 INLINE psy_ui_Component* intedit_base(IntEdit* self)
 {

@@ -78,14 +78,14 @@
 #endif
 
 #if defined(_MSC_VER) && _MSC_VER > 1200
-#define PSYCLE_DEFAULT_FONT "Tahoma;-16"
-#define PSYCLE_DEFAULT_PATTERN_FONT "Verdana;-16"
+#define PSYCLE_DEFAULT_FONT "Tahoma; 16"
+#define PSYCLE_DEFAULT_PATTERN_FONT "Verdana; 16"
 #elif defined(DIVERSALIS__OS__MICROSOFT)
-#define PSYCLE_DEFAULT_FONT "tahoma;-12"
-#define PSYCLE_DEFAULT_PATTERN_FONT "verdana;-12"
+#define PSYCLE_DEFAULT_FONT "tahoma; 12"
+#define PSYCLE_DEFAULT_PATTERN_FONT "verdana; 12"
 #else
-#define PSYCLE_DEFAULT_FONT "FreeSans;12"
-#define PSYCLE_DEFAULT_PATTERN_FONT "FreeSans;12"
+#define PSYCLE_DEFAULT_FONT "FreeSans; 12"
+#define PSYCLE_DEFAULT_PATTERN_FONT "FreeSans; 12"
 #endif
 
 #define PSYCLE_UNTITLED "Untitled.psy"

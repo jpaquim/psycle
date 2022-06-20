@@ -79,7 +79,7 @@ void presetsbar_init(PresetsBar* self, psy_ui_Component* parent,
 	psy_ui_button_init_text(&self->savepresets, &self->component,
 		"machineframe.saveas");
 	psy_ui_textarea_init_single_line(&self->savename, &self->component);	
-	psy_ui_textarea_setcharnumber(&self->savename, 12);
+	psy_ui_textarea_set_char_number(&self->savename, 12);
 	psy_ui_margin_init_em(&margin, 0.0, 1.0, 0.0, 0.0);
 	psy_list_free(psy_ui_components_setalign(
 		psy_ui_component_children(&self->component, psy_ui_NONE_RECURSIVE),

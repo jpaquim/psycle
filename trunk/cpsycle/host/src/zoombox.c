@@ -14,11 +14,11 @@
 
 /* prototypes */
 static void zoombox_on_destroyed(ZoomBox*);
-static void zoombox_onzoomin(ZoomBox*, psy_ui_Component* sender);
-static void zoombox_onzoomout(ZoomBox*, psy_ui_Component* sender);
-static void zoombox_onmousewheel(ZoomBox*, psy_ui_MouseEvent*);
-static void zoombox_oneditaccept(ZoomBox*, psy_ui_TextArea* sender);
-static void zoombox_oneditreject(ZoomBox*, psy_ui_TextArea* sender);
+static void zoombox_on_zoom_in(ZoomBox*, psy_ui_Component* sender);
+static void zoombox_on_zoom_out(ZoomBox*, psy_ui_Component* sender);
+static void zoombox_on_mouse_wheel(ZoomBox*, psy_ui_MouseEvent*);
+static void zoombox_on_edit_accept(ZoomBox*, psy_ui_TextArea* sender);
+static void zoombox_on_edit_reject(ZoomBox*, psy_ui_TextArea* sender);
 static void zoombox_update(ZoomBox*);
 
 /* vtable */
@@ -34,7 +34,7 @@ static void vtable_init(ZoomBox* self)
 			zoombox_on_destroyed;
 		vtable.onmousewheel =
 			(psy_ui_fp_component_on_mouse_event)
-			zoombox_onmousewheel;		
+			zoombox_on_mouse_wheel;		
 		vtable_initialized = TRUE;
 	}
 	psy_ui_component_set_vtable(zoombox_base(self), &vtable);
@@ -55,28 +55,28 @@ void zoombox_init(ZoomBox* self, psy_ui_Component* parent)
 	psy_ui_component_set_style_type(&self->component, STYLE_ZOOMBOX);
 	psy_ui_component_set_align_expand(&self->component, psy_ui_HEXPAND);	
 	psy_ui_button_init_connect(&self->zoomout, zoombox_base(self),
-		self, zoombox_onzoomout);
+		self, zoombox_on_zoom_out);
 	/* zoom out */
 	psy_ui_button_prevent_translation(&self->zoomout);
 	psy_ui_button_set_text(&self->zoomout, "-");	
-	psy_ui_button_setcharnumber(&self->zoomout, 2);
+	psy_ui_button_set_char_number(&self->zoomout, 2);
 	/* zoom */
 	psy_ui_textarea_init_single_line(&self->zoom, zoombox_base(self));	
 	psy_ui_component_set_style_type(psy_ui_textarea_base(&self->zoom),
 		STYLE_ZOOMBOX_EDIT);
-	psy_ui_textarea_setcharnumber(&self->zoom, 7);
+	psy_ui_textarea_set_char_number(&self->zoom, 7);
 	psy_ui_textarea_enable_input_field(&self->zoom);	
 	psy_signal_connect(&self->zoom.signal_accept, self,
-		zoombox_oneditaccept);
+		zoombox_on_edit_accept);
 	psy_signal_connect(&self->zoom.signal_reject, self,
-		zoombox_oneditreject);
+		zoombox_on_edit_reject);
 	zoombox_update(self);
 	/* zoom in */
 	psy_ui_button_init_connect(&self->zoomin, zoombox_base(self),
-		self, zoombox_onzoomin);
+		self, zoombox_on_zoom_in);
 	psy_ui_button_prevent_translation(&self->zoomin);
 	psy_ui_button_set_text(&self->zoomin, "+");	
-	psy_ui_button_setcharnumber(&self->zoomin, 2);		
+	psy_ui_button_set_char_number(&self->zoomin, 2);		
 	psy_ui_component_setalign_children(zoombox_base(self),
 		psy_ui_ALIGN_LEFT);
 }
@@ -97,21 +97,21 @@ void zoombox_on_destroyed(ZoomBox* self)
 	psy_signal_dispose(&self->signal_changed);
 }
 
-void zoombox_onzoomin(ZoomBox* self, psy_ui_Component* sender)
+void zoombox_on_zoom_in(ZoomBox* self, psy_ui_Component* sender)
 {
 	assert(self);
 
-	zoombox_setrate(self,  self->zoomrate + self->zoomstep);
+	zoombox_set_rate(self,  self->zoomrate + self->zoomstep);
 }
 
-void zoombox_onzoomout(ZoomBox* self, psy_ui_Component* sender)
+void zoombox_on_zoom_out(ZoomBox* self, psy_ui_Component* sender)
 {
 	assert(self);
 
-	zoombox_setrate(self, self->zoomrate - self->zoomstep);
+	zoombox_set_rate(self, self->zoomrate - self->zoomstep);
 }
 
-void zoombox_setrate(ZoomBox* self, double rate)
+void zoombox_set_rate(ZoomBox* self, double rate)
 {	
 	assert(self);
 	
@@ -131,19 +131,19 @@ void zoombox_setstep(ZoomBox* self, double step)
 	self->zoomstep = step;
 }
 
-void zoombox_onmousewheel(ZoomBox* self, psy_ui_MouseEvent* ev)
+void zoombox_on_mouse_wheel(ZoomBox* self, psy_ui_MouseEvent* ev)
 {
 	assert(self);
 
 	if (psy_ui_mouseevent_delta(ev) != 0) {
-		zoombox_setrate(self, self->zoomrate +
+		zoombox_set_rate(self, self->zoomrate +
 			psy_sgn(psy_ui_mouseevent_delta(ev)) * self->zoomstep);
 	}
 	psy_ui_mouseevent_prevent_default(ev);
 	psy_ui_mouseevent_stop_propagation(ev);
 }
 
-void zoombox_oneditaccept(ZoomBox* self, psy_ui_TextArea* sender)
+void zoombox_on_edit_accept(ZoomBox* self, psy_ui_TextArea* sender)
 {
 	const char* text;		
 
@@ -160,13 +160,13 @@ void zoombox_oneditaccept(ZoomBox* self, psy_ui_TextArea* sender)
 			*p = '\0';
 		}
 		rate = atoi(temp);
-		zoombox_setrate(self,  psy_min(self->maxrate, psy_max(self->minrate,
+		zoombox_set_rate(self,  psy_min(self->maxrate, psy_max(self->minrate,
 			(double)(rate / 100.0))));
 		psy_ui_component_set_focus(&self->component);
 	}
 }
 
-void zoombox_oneditreject(ZoomBox* self, psy_ui_TextArea* sender)
+void zoombox_on_edit_reject(ZoomBox* self, psy_ui_TextArea* sender)
 {	
 	assert(self);
 

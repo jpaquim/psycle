@@ -106,16 +106,16 @@ void psycleconfig_make_global(PsycleConfig* self)
 	self->global = psy_property_settext(
 		psy_property_append_section(&self->config, "global"),
 		"settingsview.global.configuration");
-	psy_property_setid(psy_property_settext(
+	psy_property_set_id(psy_property_settext(
 		psy_property_append_bool(self->global, "enableaudio", TRUE),
 		"settingsview.global.enable-audio"),
 		PROPERTY_ID_ENABLEAUDIO);
-	psy_property_setid(psy_property_settext(
+	psy_property_set_id(psy_property_settext(
 		psy_property_append_action(self->global, "regenerateplugincache"),
 		"settingsview.global.regenerate-plugincache"),
 		PROPERTY_ID_REGENERATEPLUGINCACHE);
 	languageconfig_init(&self->language, self->global, psy_ui_translator());
-	psy_property_setid(psy_property_settext(
+	psy_property_set_id(psy_property_settext(
 		psy_property_append_action(self->global, "importconfig"),
 		"settingsview.global.importconfig"),
 		PROPERTY_ID_IMPORTCONFIG);
@@ -128,20 +128,20 @@ void psycleconfig_make_visual(PsycleConfig* self)
 	self->visual = psy_property_settext(
 		psy_property_append_section(&self->config, "visual"),
 		"settingsview.visual.visual");
-	psy_property_setid(psy_property_settext(
+	psy_property_set_id(psy_property_settext(
 		psy_property_append_action(self->visual, "loadskin"),
 		"settingsview.visual.load-skin"),
 		PROPERTY_ID_LOADSKIN);
-	psy_property_setid(psy_property_settext(
+	psy_property_set_id(psy_property_settext(
 		psy_property_append_action(self->visual, "defaultskin"),
 		"settingsview.visual.default-skin"),
 		PROPERTY_ID_DEFAULTSKIN);
-	self->defaultfont = psy_property_setid(psy_property_settext(
+	self->defaultfont = psy_property_set_id(psy_property_settext(
 		psy_property_append_font(self->visual, "defaultfont",
 			PSYCLE_DEFAULT_FONT),
 		"settingsview.visual.default-font"),
 		PROPERTY_ID_DEFAULTFONT);
-	self->apptheme = psy_property_setid(psy_property_settext(
+	self->apptheme = psy_property_set_id(psy_property_settext(
 		psy_property_append_choice(self->visual,
 			"apptheme", 1),
 		"settingsview.visual.apptheme"),
@@ -243,7 +243,7 @@ void psycleconfig_enableaudio(PsycleConfig* self, bool on)
 	assert(self);
 
 	psy_property_set_bool(self->global, "enableaudio", on);
-	audioconfig_enableaudio(&self->audio, on);
+	audioconfig_enable_audio(&self->audio, on);
 }
 
 uintptr_t psycleconfig_notify_changed(PsycleConfig* self, psy_Property* property)

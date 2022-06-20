@@ -492,7 +492,7 @@ void seqviewlist_init(SeqviewList* self, psy_ui_Component* parent,
 	self->showpatternnames = generalconfig_showingpatternnames(
 		psycleconfig_general(workspace_conf(self->state->cmds->workspace)));	
 	psy_ui_component_set_wheel_scroll(&self->component, 1);	
-	psy_ui_component_set_defaultalign(&self->component, psy_ui_ALIGN_LEFT,
+	psy_ui_component_set_default_align(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_margin_zero());
 	psy_ui_component_set_align_expand(&self->component, psy_ui_HEXPAND);
 	psy_ui_component_set_overflow(&self->component, psy_ui_OVERFLOW_SCROLL);	

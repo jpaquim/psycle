@@ -131,7 +131,7 @@ INLINE const char* psy_ui_textarea_text(const psy_ui_TextArea* self)
 uintptr_t psy_ui_textarea_length(const psy_ui_TextArea*);
 void psy_ui_textarea_range(psy_ui_TextArea*, intptr_t start, intptr_t end, char* text);
 
-INLINE void psy_ui_textarea_setcharnumber(psy_ui_TextArea* self, int number)
+INLINE void psy_ui_textarea_set_char_number(psy_ui_TextArea* self, int number)
 {
     psy_ui_textareapane_set_char_number(&self->pane, number);
 }

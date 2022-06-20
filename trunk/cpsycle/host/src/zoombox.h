@@ -1,6 +1,6 @@
 /*
 ** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #if !defined(ZOOMBOX_H)
@@ -23,6 +23,8 @@ extern "C" {
 typedef struct ZoomBox {
 	/* inherits */
 	psy_ui_Component component;
+	/* Signal */
+	psy_Signal signal_changed;
 	/* internal */
 	psy_ui_Button zoomin;
 	psy_ui_TextArea zoom;
@@ -30,16 +32,14 @@ typedef struct ZoomBox {
 	double zoomrate;
 	double zoomstep;
 	double minrate;
-	double maxrate;
-	/* Signal */
-	psy_Signal signal_changed;
+	double maxrate;	
 } ZoomBox;
 
 void zoombox_init(ZoomBox*, psy_ui_Component* parent);
 void zoombox_init_connect(ZoomBox*, psy_ui_Component* parent,
 	void* context, void* fp);
 
-void zoombox_setrate(ZoomBox*, double);
+void zoombox_set_rate(ZoomBox*, double);
 
 INLINE double zoombox_rate(const ZoomBox* self)
 {
@@ -50,7 +50,7 @@ INLINE double zoombox_rate(const ZoomBox* self)
 
 void zoombox_setstep(ZoomBox*, double);
 
-// sets the step, the rate is inc-/decremented
+/* sets the step, the rate is inc-/decremented */
 INLINE double zoombox_step(const ZoomBox* self)
 {
 	assert(self);
@@ -58,8 +58,8 @@ INLINE double zoombox_step(const ZoomBox* self)
 	return self->zoomstep;
 }
 
-// sets a min and maxrange (including maxval)
-INLINE void zoombox_setrange(ZoomBox* self, double minval, double maxval)
+/* sets a min and maxrange (including maxval) */
+INLINE void zoombox_set_range(ZoomBox* self, double minval, double maxval)
 {
 	assert(self);
 
@@ -67,7 +67,8 @@ INLINE void zoombox_setrange(ZoomBox* self, double minval, double maxval)
 	self->maxrate = psy_max(maxval, minval);
 }
 
-INLINE void zoombox_range(const ZoomBox* self, double* rv_minval, double* rv_maxval)
+INLINE void zoombox_range(const ZoomBox* self, double* rv_minval,
+	double* rv_maxval)
 {
 	assert(self);
 

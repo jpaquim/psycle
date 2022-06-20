@@ -417,7 +417,7 @@ void patternview_update_font(PatternView* self)
 		((self->state.pv->patconfig)
 		? patternviewconfig_zoom(self->state.pv->patconfig)
 		: 1.0);
-	fontinfo = patternviewconfig_fontinfo(self->pvstate.patconfig, zoomrate);	
+	fontinfo = patternviewconfig_font_info(self->pvstate.patconfig, zoomrate);	
 	psy_ui_font_init(&font, &fontinfo);
 	psy_ui_component_setfont(&self->component, &font);	
 	psy_ui_font_dispose(&font);		
