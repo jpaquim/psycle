@@ -72,7 +72,7 @@ void transformpatternview_init(TransformPatternView* self, psy_ui_Component*
 	self->applyto = 0;
 	psy_audio_blockselection_init(&self->patternselection);
 	psy_ui_margin_init_em(&self->sectionmargin, 0.0, 0.0, 0.0, 2.0);
-	psy_ui_component_set_defaultalign(transformpatternview_base(self),
+	psy_ui_component_set_default_align(transformpatternview_base(self),
 		psy_ui_ALIGN_TOP, psy_ui_margin_make(psy_ui_value_make_px(0),
 			psy_ui_value_make_ew(0.0), psy_ui_value_make_eh(0.5),
 			psy_ui_value_make_ew(2.0)));
@@ -95,7 +95,7 @@ void transformpatternview_init_search(TransformPatternView* self)
 	assert(self);
 	
 	psy_ui_component_init(&self->search, transformpatternview_base(self), NULL);
-	psy_ui_component_set_defaultalign(&self->search,
+	psy_ui_component_set_default_align(&self->search,
 		psy_ui_ALIGN_TOP, psy_ui_defaults_vmargin(psy_ui_defaults()));
 	psy_ui_component_init(&self->searchtop, &self->search, NULL);
 	psy_ui_component_set_align(&self->searchtop, psy_ui_ALIGN_TOP);
@@ -109,7 +109,7 @@ void transformpatternview_init_search(TransformPatternView* self)
 		self, transformpatternview_onhide);
 	psy_ui_button_set_text(&self->hide, "X");
 	psy_ui_component_set_align(psy_ui_button_base(&self->hide), psy_ui_ALIGN_RIGHT);
-	psy_ui_component_set_defaultalign(&self->search, psy_ui_ALIGN_TOP,
+	psy_ui_component_set_default_align(&self->search, psy_ui_ALIGN_TOP,
 		self->sectionmargin);
 	/* Note */
 	psy_ui_label_init(&self-> searchnotedesc, &self->search);
@@ -130,11 +130,11 @@ void transformpatternview_init_replace(TransformPatternView* self)
 	assert(self);
 
 	psy_ui_component_init(&self->replace, transformpatternview_base(self), NULL);
-	psy_ui_component_set_defaultalign(&self->replace,
+	psy_ui_component_set_default_align(&self->replace,
 		psy_ui_ALIGN_TOP, psy_ui_defaults_vmargin(psy_ui_defaults()));
 	psy_ui_label_init(&self->replacetitle, &self->replace);
 	psy_ui_label_set_text(&self->replacetitle, "transformpattern.replacepattern");	
-	psy_ui_component_set_defaultalign(&self->replace, psy_ui_ALIGN_TOP,
+	psy_ui_component_set_default_align(&self->replace, psy_ui_ALIGN_TOP,
 		self->sectionmargin);
 	/* Note */
 	psy_ui_label_init(&self->replacenotedesc, &self->replace);
@@ -155,14 +155,14 @@ void transformpatternview_init_searchon(TransformPatternView* self)
 	assert(self);
 
 	psy_ui_component_init(&self->searchon, transformpatternview_base(self), NULL);
-	psy_ui_component_set_defaultalign(&self->searchon,
+	psy_ui_component_set_default_align(&self->searchon,
 		psy_ui_ALIGN_TOP, psy_ui_defaults_vmargin(psy_ui_defaults()));
 	psy_ui_label_init_text(&self->searchontitle, &self->searchon,
 		"transformpattern.searchon");
 	psy_ui_component_init(&self->searchonchoice, &self->searchon, NULL);
 	psy_signal_connect(&self->searchonchoice.signal_mousedown, self,
 		transformpatternview_onsearchon_mouse_down);
-	psy_ui_component_set_defaultalign(&self->searchonchoice,
+	psy_ui_component_set_default_align(&self->searchonchoice,
 		psy_ui_ALIGN_TOP, self->sectionmargin);
 	psy_ui_label_init_text(&self->entire, &self->searchonchoice,
 		"transformpattern.entiresong");
@@ -184,7 +184,7 @@ void transformpatternview_init_actions(TransformPatternView* self)
 	psy_ui_component_init(&self->actions, transformpatternview_base(self), NULL);
 	psy_ui_margin_init_em(&margin, 0.5, 2.0, 0.0, 2.0);		
 	psy_ui_component_set_margin(&self->actions, margin);
-	psy_ui_component_set_defaultalign(&self->actions,
+	psy_ui_component_set_default_align(&self->actions,
 		psy_ui_ALIGN_LEFT, psy_ui_defaults_hmargin(psy_ui_defaults()));
 	/* search */
 	psy_ui_button_init_connect(&self->dosearch, &self->actions,

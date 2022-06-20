@@ -7,6 +7,7 @@
 #define psy_ui_COMPONENT_H
 
 /* local */
+#include "uialigner.h"
 #include "uicomponentscroll.h"
 #include "uicomponentstyle.h"
 #include "uicomponentbackground.h"
@@ -53,18 +54,6 @@ typedef enum psy_ui_ComponentState {
 	psy_ui_COMPONENTSTATE_DOCKED
 } psy_ui_ComponentState;
 
-typedef struct psy_ui_ComponentContainerAlign {
-	int alignexpandmode;
-	psy_ui_ContainerAlignType containeralign;
-	psy_ui_AlignType insertaligntype;
-	psy_ui_Margin insertmargin;
-} psy_ui_ComponentContainerAlign;
-
-void psy_ui_componentcontaineralign_init(psy_ui_ComponentContainerAlign*);
-
-psy_ui_ComponentContainerAlign* psy_ui_componentcontaineralign_alloc(void);
-psy_ui_ComponentContainerAlign* psy_ui_componentcontaineralign_allocinit(void);
-void psy_ui_componentcontaineralign_deallocate(psy_ui_ComponentContainerAlign*);
 
 /* vtable function pointers */
 typedef void (*psy_ui_fp_component_dispose)(struct psy_ui_Component*);
@@ -210,9 +199,8 @@ typedef struct psy_ui_Component {
 	bool doublebuffered;	
 	psy_ui_ComponentStyle style;
 	psy_ui_ComponentScroll* scroll;
-	psy_ui_AlignType align;
-	psy_ui_AlignType alignsorted;	
-	psy_ui_ComponentContainerAlign* containeralign;	
+	psy_ui_AlignType align;	
+	psy_ui_Aligner* aligner;	
 	uintptr_t tabindex;
 	bool deallocate;
 	uintptr_t opcount;	
@@ -261,7 +249,6 @@ psy_ui_ComponentState psy_ui_component_state(const psy_ui_Component*);
 void psy_ui_component_set_state(psy_ui_Component*, psy_ui_ComponentState);
 
 void psy_ui_component_usescroll(psy_ui_Component*);
-void psy_ui_component_usecontaineralign(psy_ui_Component*);
 
 INLINE psy_ui_IntPoint psy_ui_component_horizontalscrollrange(
 	const psy_ui_Component* self)
@@ -323,8 +310,7 @@ void psy_ui_component_align_cached(psy_ui_Component*);
 
 INLINE bool psy_ui_component_hasalign(const psy_ui_Component* self)
 {
-	return (self->containeralign &&
-		self->containeralign->containeralign != psy_ui_CONTAINER_ALIGN_NONE);
+	return (self->aligner != NULL);	
 }
 
 psy_ui_Component* psy_ui_component_preferredsize_parent(psy_ui_Component*);
@@ -373,9 +359,7 @@ INLINE void psy_ui_component_init_align(psy_ui_Component* self,
 	psy_ui_component_set_align(self, aligntype);
 }
 
-void psy_ui_component_setcontaineralign(psy_ui_Component*,
-	psy_ui_ContainerAlignType);
-void psy_ui_component_preventalign(psy_ui_Component*);
+void psy_ui_component_set_aligner(psy_ui_Component*, psy_ui_Aligner*);
 void psy_ui_component_set_align_expand(psy_ui_Component*, psy_ui_ExpandMode);
 void psy_ui_component_enableinput(psy_ui_Component*, int recursive);
 void psy_ui_component_preventinput(psy_ui_Component*, int recursive);
@@ -901,7 +885,7 @@ INLINE psy_ui_RealSize psy_ui_component_size_px(const psy_ui_Component* self)
 
 
 int psy_ui_component_level(const psy_ui_Component*);
-void psy_ui_component_set_defaultalign(psy_ui_Component*,
+void psy_ui_component_set_default_align(psy_ui_Component*,
 	psy_ui_AlignType, psy_ui_Margin);
 
 void psy_ui_component_update_language(psy_ui_Component*);

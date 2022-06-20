@@ -25,11 +25,13 @@ extern "C" {
 struct psy_ui_Component;
 
 typedef struct psy_ui_LCLAligner {
-	psy_ui_Aligner aligner;
-	struct psy_ui_Component* component;
+	psy_ui_Aligner aligner;	
 } psy_ui_LCLAligner;
 
-void psy_ui_lclaligner_init(psy_ui_LCLAligner*, struct psy_ui_Component*);
+void psy_ui_lclaligner_init(psy_ui_LCLAligner*);
+
+psy_ui_LCLAligner* psy_ui_lclaligner_alloc(void);
+psy_ui_LCLAligner* psy_ui_lclaligner_allocinit(void);
 
 INLINE psy_ui_Aligner* psy_ui_lclaligner_base(psy_ui_LCLAligner* self)
 {

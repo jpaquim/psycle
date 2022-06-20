@@ -41,41 +41,8 @@ static psy_ui_RealPoint mapcoords(psy_ui_Component* src,
 static void psy_ui_component_draw_children(psy_ui_Component*, psy_ui_Graphics*);
 static void psy_ui_component_draw_border(psy_ui_Component*, psy_ui_Graphics*);
 
-void psy_ui_componentcontaineralign_init(psy_ui_ComponentContainerAlign* self)
-{
-	self->alignexpandmode = psy_ui_NOEXPAND;
-	self->containeralign = psy_ui_CONTAINER_ALIGN_LCL;
-	self->insertaligntype = psy_ui_ALIGN_NONE;	
-	psy_ui_margin_init(&self->insertmargin);
-}
-
-psy_ui_ComponentContainerAlign* psy_ui_componentcontaineralign_alloc(void)
-{
-	return (psy_ui_ComponentContainerAlign*)malloc(sizeof(
-		psy_ui_ComponentContainerAlign));
-}
-
-psy_ui_ComponentContainerAlign* psy_ui_componentcontaineralign_allocinit(void)
-{
-	psy_ui_ComponentContainerAlign* rv;
-
-	rv = psy_ui_componentcontaineralign_alloc();
-	if (rv) {
-		psy_ui_componentcontaineralign_init(rv);
-	}
-	return rv;
-}
-
-void psy_ui_componentcontaineralign_deallocate(psy_ui_ComponentContainerAlign* self)
-{
-	free(self);
-}
-
 static bool componentscroll_initialized = FALSE;
 static psy_ui_ComponentScroll componentscroll;
-
-static bool containeralign_initialized = FALSE;
-static psy_ui_ComponentContainerAlign containeralign;
 
 static void enableinput_internal(psy_ui_Component*, int enable, int recursive);
 static void psy_ui_component_dispose_signals(psy_ui_Component*);
@@ -490,10 +457,10 @@ void psy_ui_component_init_imp(psy_ui_Component* self, psy_ui_Component* parent,
 	self->imp = imp;
 	psy_ui_component_init_base(self);
 	psy_ui_component_init_signals(self);
-	if (parent && parent->containeralign->insertaligntype != psy_ui_ALIGN_NONE) {
-		psy_ui_component_set_align(self, parent->containeralign->insertaligntype);
-		psy_ui_component_set_margin(self, parent->containeralign->insertmargin);
-	}	
+	if (parent && parent->aligner && parent->aligner->insertaligntype != psy_ui_ALIGN_NONE) {
+		psy_ui_component_set_align(self, parent->aligner->insertaligntype);
+		psy_ui_component_set_margin(self, parent->aligner->insertmargin);
+	}
 }
 
 void psy_ui_component_init(psy_ui_Component* self, psy_ui_Component* parent, psy_ui_Component* view)
@@ -516,14 +483,14 @@ void psy_ui_component_init(psy_ui_Component* self, psy_ui_Component* parent, psy
 				self, parent, self->view, "",
 				0, 0, 100, 100, 0, 0);		
 	} else {
-		self->imp = psy_ui_impfactory_allocinit_componentimp(psy_ui_app_impfactory(psy_ui_app()),
-			self, parent);
+		self->imp = psy_ui_impfactory_allocinit_componentimp(
+			psy_ui_app_impfactory(psy_ui_app()), self, parent);
 	}
 	psy_ui_component_init_base(self);
 	psy_ui_component_init_signals(self);
-	if (parent && parent->containeralign->insertaligntype != psy_ui_ALIGN_NONE) {
-		psy_ui_component_set_align(self, parent->containeralign->insertaligntype);
-		psy_ui_component_set_margin(self, parent->containeralign->insertmargin);
+	if (parent && parent->aligner && parent->aligner->insertaligntype != psy_ui_ALIGN_NONE) {
+		psy_ui_component_set_align(self, parent->aligner->insertaligntype);
+		psy_ui_component_set_margin(self, parent->aligner->insertmargin);
 	}
 	self->imp->vtable->dev_initialized(self->imp);
 }
@@ -705,11 +672,7 @@ void psy_ui_component_init_signals(psy_ui_Component* self)
 void psy_ui_component_init_base(psy_ui_Component* self) {
 	psy_table_insert(&psy_ui_app()->components,
 		(uintptr_t)self, (void*)self);
-	if (!containeralign_initialized) {
-		psy_ui_componentcontaineralign_init(&containeralign);
-		containeralign_initialized = TRUE;
-	}
-	self->containeralign = &containeralign;
+	self->aligner = (psy_ui_Aligner*)psy_ui_lclaligner_allocinit();
 	if (!componentscroll_initialized) {
 		psy_ui_componentscroll_init(&componentscroll);
 		componentscroll_initialized = TRUE;
@@ -718,8 +681,7 @@ void psy_ui_component_init_base(psy_ui_Component* self) {
 	self->id = psy_INDEX_INVALID;
 	psy_ui_componentstyle_init(&self->style);
 	psy_ui_componentbackground_init(&self->componentbackground, self);
-	self->align = psy_ui_ALIGN_NONE;
-	self->alignsorted = psy_ui_ALIGN_NONE;
+	self->align = psy_ui_ALIGN_NONE;	
 	self->deallocate = FALSE;	
 	self->doublebuffered = FALSE;	
 	self->tabindex = psy_INDEX_INVALID;
@@ -749,10 +711,11 @@ void psy_ui_component_dispose(psy_ui_Component* self)
 	if (self->scroll != &componentscroll) {		
 		free(self->scroll);
 		self->scroll = NULL;
-	}	
-	if (self->containeralign != &containeralign) {
-		free(self->containeralign);
-		self->containeralign = NULL;
+	}
+	if (self->aligner) {
+		psy_ui_aligner_dispose(self->aligner);
+		free(self->aligner);
+		self->aligner = NULL;
 	}
 	psy_ui_bitmap_dispose(&self->bufferbitmap);
 	psy_ui_app_stoptimer(psy_ui_app(), self, psy_INDEX_INVALID);
@@ -1000,32 +963,13 @@ bool psy_ui_component_draw_visible(psy_ui_Component* self)
 
 void psy_ui_component_align(psy_ui_Component* self)
 {	
-	switch (self->containeralign->containeralign) {
-	case psy_ui_CONTAINER_ALIGN_LCL: {
-		psy_ui_LCLAligner aligner;
-
-		psy_ui_lclaligner_init(&aligner, self);
+	if (self->aligner) {	
 		self->vtable->beforealign(self);
 		psy_signal_emit(&self->signal_beforealign, self, 0);
-		psy_ui_aligner_align(psy_ui_lclaligner_base(&aligner));
+		psy_ui_aligner_align(self->aligner, self);
 		psy_signal_emit(&self->signal_align, self, 0);
-		self->vtable->onalign(self);
-		psy_ui_aligner_dispose(psy_ui_lclaligner_base(&aligner));
-		break; }
-	case psy_ui_CONTAINER_ALIGN_GRID: {
-		psy_ui_GridAligner aligner;
-
-		psy_ui_gridaligner_init(&aligner, self);
-		self->vtable->beforealign(self);
-		psy_signal_emit(&self->signal_beforealign, self, 0);
-		psy_ui_aligner_align(psy_ui_gridaligner_base(&aligner));
-		psy_signal_emit(&self->signal_align, self, 0);
-		self->vtable->onalign(self);
-		psy_ui_aligner_dispose(psy_ui_gridaligner_base(&aligner));
-		break; }
-	default:
-		break;
-	}
+		self->vtable->onalign(self);		
+	}	
 }
 
 void psy_ui_component_align_full(psy_ui_Component* self)
@@ -1082,10 +1026,9 @@ psy_ui_Component* psy_ui_component_root(psy_ui_Component* self)
 void onpreferredsize(psy_ui_Component* self, const psy_ui_Size* limit,
 	psy_ui_Size* rv)
 {		
-	psy_ui_LCLAligner aligner;
-
-	psy_ui_lclaligner_init(&aligner, self);
-	psy_ui_aligner_preferredsize(psy_ui_lclaligner_base(&aligner), limit, rv);	
+	if (self->aligner) {
+		psy_ui_aligner_preferredsize(self->aligner, self, limit, rv);
+	}
 }
 
 void onpreferredscrollsize(psy_ui_Component* self, const psy_ui_Size* limit,
@@ -1146,7 +1089,7 @@ void psy_ui_component_setalign_children(psy_ui_Component* self,
 void psy_ui_component_checksortedalign(psy_ui_Component* self,
 	psy_ui_AlignType align)
 {
-	if (self->alignsorted != align) {
+	if (self->aligner && self->aligner->alignsorted != align) {
 		psy_List* p;
 		psy_List* q;
 
@@ -1156,12 +1099,12 @@ void psy_ui_component_checksortedalign(psy_ui_Component* self,
 
 			component = (psy_ui_Component*)p->entry;
 			if (component->align != align) {
-				self->alignsorted = psy_ui_ALIGN_NONE;
+				self->aligner->alignsorted = psy_ui_ALIGN_NONE;
 				break;
 			}
 		}
 		if (p == NULL) {
-			self->alignsorted = align;
+			self->aligner->alignsorted = align;
 		}
 		psy_list_free(q);
 	}
@@ -1182,23 +1125,21 @@ psy_ui_Component* psy_ui_component_set_align(psy_ui_Component* self,
 	return self;
 }
 
-void psy_ui_component_setcontaineralign(psy_ui_Component* self, 
-	psy_ui_ContainerAlignType containeralign)
-{
-	psy_ui_component_usecontaineralign(self);
-	self->containeralign->containeralign = containeralign;
-}
-
-void psy_ui_component_preventalign(psy_ui_Component* self)
-{
-	psy_ui_component_usecontaineralign(self);
-	self->containeralign->containeralign = psy_ui_CONTAINER_ALIGN_NONE;
+void psy_ui_component_set_aligner(psy_ui_Component* self, 
+	psy_ui_Aligner* aligner)
+{	
+	if (self->aligner) {
+		psy_ui_aligner_dispose(self->aligner);
+		free(self->aligner);
+	}
+	self->aligner = aligner;	
 }
 
 void psy_ui_component_set_align_expand(psy_ui_Component* self, psy_ui_ExpandMode mode)
 {
-	psy_ui_component_usecontaineralign(self);
-	self->containeralign->alignexpandmode = mode;
+	if (self->aligner) {
+		self->aligner->alignexpandmode = mode;
+	}
 }
 
 void psy_ui_component_enableinput(psy_ui_Component* self, int recursive)
@@ -1913,13 +1854,6 @@ void psy_ui_component_usescroll(psy_ui_Component* self)
 	}
 }
 
-void psy_ui_component_usecontaineralign(psy_ui_Component* self)
-{
-	if (self->containeralign == &containeralign) {
-		self->containeralign = psy_ui_componentcontaineralign_allocinit();
-	}
-}
-
 bool psy_ui_component_toggle_visibility(psy_ui_Component* self)
 {
 	assert(self);
@@ -2041,12 +1975,13 @@ int psy_ui_component_level(const psy_ui_Component* self)
 	return rv;
 }
 
-void psy_ui_component_set_defaultalign(psy_ui_Component* self,
+void psy_ui_component_set_default_align(psy_ui_Component* self,
 	psy_ui_AlignType aligntype, psy_ui_Margin margin)
 {
-	psy_ui_component_usecontaineralign(self);
-	self->containeralign->insertaligntype = aligntype;
-	self->containeralign->insertmargin = margin;
+	if (self->aligner) {
+		self->aligner->insertaligntype = aligntype;
+		self->aligner->insertmargin = margin;
+	}
 }
 
 void psy_ui_component_update_language(psy_ui_Component* self)
@@ -2248,7 +2183,7 @@ void psy_ui_component_draw(psy_ui_Component* self, psy_ui_Graphics* g)
 	if ((oldclip.bottom - oldclip.top != 0.0)) {
 		psy_ui_realrectangle_intersection(&clip, &oldclip);
 	}
-	psy_ui_graphics_setcliprect(g, clip);
+	psy_ui_graphics_set_clip_rect(g, clip);
 	/* draw background */		
 	psy_ui_componentbackground_draw(&self->componentbackground, g);		
 	psy_ui_component_draw_border(self, g);
@@ -2283,7 +2218,7 @@ void psy_ui_component_draw(psy_ui_Component* self, psy_ui_Graphics* g)
 				psy_ui_realpoint_zero());
 		}
 	}
-	psy_ui_graphics_setcliprect(g, oldclip);
+	psy_ui_graphics_set_clip_rect(g, oldclip);
 }
 
 void psy_ui_component_draw_children(psy_ui_Component* self, psy_ui_Graphics* g)
@@ -2308,8 +2243,9 @@ void psy_ui_component_draw_children(psy_ui_Component* self, psy_ui_Graphics* g)
 				psy_ui_RealRectangle intersection;				
 
 				position = psy_ui_component_position(component);
-				if ((self->alignsorted == psy_ui_ALIGN_TOP && position.bottom < clip.top) ||
-					(self->alignsorted == psy_ui_ALIGN_LEFT && position.right < clip.left)) {
+				if (self->aligner &&
+					(self->aligner->alignsorted == psy_ui_ALIGN_TOP && position.bottom < clip.top) ||
+					(self->aligner->alignsorted == psy_ui_ALIGN_LEFT && position.right < clip.left)) {
 					continue;
 				}
 				intersection = clip;				
@@ -2319,7 +2255,7 @@ void psy_ui_component_draw_children(psy_ui_Component* self, psy_ui_Graphics* g)
 						psy_ui_realpoint_make(
 							intersection.left - position.left,
 							intersection.top - position.top));
-					psy_ui_graphics_setcliprect(g, clip);
+					psy_ui_graphics_set_clip_rect(g, clip);
 					psy_ui_setorigin(g,
 						psy_ui_realpoint_make(
 							-position.left + origin.x,
@@ -2329,8 +2265,9 @@ void psy_ui_component_draw_children(psy_ui_Component* self, psy_ui_Graphics* g)
 					/* reset origin */
 					psy_ui_setorigin(g, origin);
 					/* terminate? */
-					if ((self->alignsorted == psy_ui_ALIGN_TOP && position.top > clip.bottom) ||
-						(self->alignsorted == psy_ui_ALIGN_LEFT && position.left > clip.right)) {
+					if (self->aligner &&
+						(self->aligner->alignsorted == psy_ui_ALIGN_TOP && position.top > clip.bottom) ||
+						(self->aligner->alignsorted == psy_ui_ALIGN_LEFT && position.left > clip.right)) {
 						break;
 					}
 				}

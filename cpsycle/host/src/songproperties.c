@@ -67,14 +67,14 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->viewtabbar, tabbarparent, NULL);
 	psy_ui_component_init(&self->top, &self->component, NULL);
 	psy_ui_component_set_align(&self->top, psy_ui_ALIGN_TOP);
-	psy_ui_component_set_defaultalign(&self->top, psy_ui_ALIGN_TOP,
+	psy_ui_component_set_default_align(&self->top, psy_ui_ALIGN_TOP,
 		psy_ui_margin_zero());
 	/* title */
 	psy_ui_component_init(&self->title, &self->top, NULL);	
 	psy_ui_label_init(&self->label_title, &self->title);
 	psy_ui_label_set_textalignment(&self->label_title, psy_ui_ALIGNMENT_RIGHT);
 	psy_ui_label_set_text(&self->label_title, "songproperties.title");
-	psy_ui_label_set_charnumber(&self->label_title, charnum);
+	psy_ui_label_set_char_number(&self->label_title, charnum);
 	psy_ui_component_set_align(&self->label_title.component, psy_ui_ALIGN_LEFT);
 	psy_ui_component_set_margin(&self->label_title.component, margin);
 	psy_ui_textarea_init_single_line(&self->edit_title, &self->title);	
@@ -91,7 +91,7 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->credits, &self->top, NULL);
 	psy_ui_label_init_text(&self->label_credits, &self->credits,
 		"songproperties.credits");
-	psy_ui_label_set_charnumber(&self->label_credits, charnum);
+	psy_ui_label_set_char_number(&self->label_credits, charnum);
 	psy_ui_component_set_align(&self->label_credits.component, psy_ui_ALIGN_LEFT);
 	psy_ui_component_set_margin(&self->label_credits.component, margin);
 	psy_ui_label_set_textalignment(&self->label_credits, psy_ui_ALIGNMENT_RIGHT);
@@ -111,14 +111,14 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 		self, songpropertiesview_onsamplerindexchange);
 	/* Speed */
 	psy_ui_component_init(&self->speed, &self->top, NULL);
-	psy_ui_component_set_defaultalign(&self->speed, psy_ui_ALIGN_LEFT,
+	psy_ui_component_set_default_align(&self->speed, psy_ui_ALIGN_LEFT,
 		margin);
 	psy_ui_label_init_text(&self->label_speed, &self->speed,
 		"songproperties.speed");
 	psy_ui_component_init(&self->speedbar, &self->speed, NULL);
 	psy_ui_component_set_align(&self->speedbar, psy_ui_ALIGN_LEFT);
-	psy_ui_label_set_charnumber(&self->label_speed, charnum);
-	psy_ui_component_set_defaultalign(&self->speedbar, psy_ui_ALIGN_LEFT,
+	psy_ui_label_set_char_number(&self->label_speed, charnum);
+	psy_ui_component_set_default_align(&self->speedbar, psy_ui_ALIGN_LEFT,
 		psy_ui_margin_make(psy_ui_value_make_px(0),
 			psy_ui_value_make_ew(1.0), psy_ui_value_make_px(0.0),
 			psy_ui_value_make_px(0.0)));		
@@ -135,11 +135,11 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 	psy_ui_label_init_text(&self->realtempo_desc, &self->speedbar,
 		"songproperties.realtempo");
 	psy_ui_label_init(&self->realtempo, &self->speedbar);
-	psy_ui_label_set_charnumber(&self->realtempo, 8);
+	psy_ui_label_set_char_number(&self->realtempo, 8);
 	psy_ui_label_init_text(&self->realticksperbeat_desc, &self->speedbar,
 		"songproperties.realtpb");	
 	psy_ui_label_init(&self->realticksperbeat, &self->speedbar);
-	psy_ui_label_set_charnumber(&self->realticksperbeat, 8);			
+	psy_ui_label_set_char_number(&self->realticksperbeat, 8);			
 	psy_ui_component_set_margin(&self->samplerindex.component, margin);
 	/* Comments */
 	psy_ui_component_init(&self->comments, &self->component, NULL);
@@ -185,12 +185,12 @@ void songpropertiesview_read(SongPropertiesView* self)
 			self->song->properties.credits);
 		psy_ui_textarea_set_text(&self->edit_comments,
 			self->song->properties.comments);
-		intedit_setvalue(&self->tempo, (int)self->song->properties.bpm);
-		intedit_setvalue(&self->lpb, (int)self->song->properties.lpb);
-		intedit_setvalue(&self->tpb, (int)self->song->properties.tpb);
-		intedit_setvalue(&self->etpb, (int)
+		intedit_set_value(&self->tempo, (int)self->song->properties.bpm);
+		intedit_set_value(&self->lpb, (int)self->song->properties.lpb);
+		intedit_set_value(&self->tpb, (int)self->song->properties.tpb);
+		intedit_set_value(&self->etpb, (int)
 			self->song->properties.extraticksperbeat);
-		intedit_setvalue(&self->samplerindex, (int)
+		intedit_set_value(&self->samplerindex, (int)
 			self->song->properties.samplerindex);
 		songpropertiesview_updaterealspeed(self);
 	}
@@ -213,8 +213,8 @@ void songpropertiesview_enableedit(SongPropertiesView* self)
 	psy_ui_textarea_enableedit(&self->edit_title);
 	psy_ui_textarea_enableedit(&self->edit_credits);
 	psy_ui_textarea_enableedit(&self->edit_comments);
-	intedit_enableedit(&self->tpb);
-	intedit_enableedit(&self->etpb);	
+	intedit_enable_edit(&self->tpb);
+	intedit_enable_edit(&self->etpb);	
 }
 
 void songpropertiesview_disableedit(SongPropertiesView* self)
@@ -222,8 +222,8 @@ void songpropertiesview_disableedit(SongPropertiesView* self)
 	psy_ui_textarea_preventedit(&self->edit_title);
 	psy_ui_textarea_preventedit(&self->edit_credits);
 	psy_ui_textarea_preventedit(&self->edit_comments);
-	intedit_preventedit(&self->tpb);
-	intedit_preventedit(&self->etpb);	
+	intedit_prevent_edit(&self->tpb);
+	intedit_prevent_edit(&self->etpb);	
 }
 
 void songpropertiesview_onhide(SongPropertiesView* self,

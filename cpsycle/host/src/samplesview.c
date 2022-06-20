@@ -30,7 +30,7 @@ void samplesviewbuttons_init(SamplesViewButtons* self, psy_ui_Component* parent,
 {	
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_set_style_type(&self->component, STYLE_SAMPLESVIEW_BUTTONS);
-	psy_ui_component_set_defaultalign(&self->component, psy_ui_ALIGN_LEFT,
+	psy_ui_component_set_default_align(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));	
 	psy_ui_button_init_text(&self->load, &self->component, "file.load");
 	psy_ui_button_init_text(&self->save, &self->component, "file.save");
@@ -60,14 +60,14 @@ void samplessongimportview_init(SamplesSongImportView* self, psy_ui_Component* p
 	psy_ui_component_init(&self->component, parent, NULL);	
 	psy_ui_component_init(&self->header, &self->component, NULL);
 	psy_ui_component_set_align(&self->header, psy_ui_ALIGN_TOP);
-	psy_ui_component_set_defaultalign(&self->header, psy_ui_ALIGN_LEFT,
+	psy_ui_component_set_default_align(&self->header, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	psy_ui_component_set_padding(&self->header,
 		psy_ui_margin_make_em(0.5, 0.0, 0.5, 0.0));
 	psy_ui_label_init_text(&self->label, &self->header, "Source");
 	psy_ui_label_init_text(&self->songname, &self->header,
 		"No song loaded");
-	psy_ui_label_set_charnumber(&self->songname, 30);	
+	psy_ui_label_set_char_number(&self->songname, 30);	
 	psy_ui_button_init(&self->browse, &self->header);
 	psy_ui_button_set_text(&self->browse, "Select a song");
 	psy_signal_connect(&self->browse.signal_clicked, self,
@@ -196,13 +196,13 @@ void samplesheaderview_init(SamplesHeaderView* self, psy_ui_Component* parent,
 	self->instruments = instruments;	
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_set_style_type(&self->component, STYLE_SAMPLESVIEW_HEADER);	
-	psy_ui_component_set_defaultalign(&self->component, psy_ui_ALIGN_LEFT,
+	psy_ui_component_set_default_align(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	/* sample name */
 	psy_ui_label_init_text(&self->namelabel, &self->component,
 		"samplesview.samplename");	
 	psy_ui_textarea_init_single_line(&self->nameedit, &self->component);	
-	psy_ui_textarea_setcharnumber(&self->nameedit, 20);
+	psy_ui_textarea_set_char_number(&self->nameedit, 20);
 	psy_signal_connect(&self->nameedit.signal_change, self,
 		samplesheaderview_oneditsamplename);
 	/* sample navigation */
@@ -218,18 +218,18 @@ void samplesheaderview_init(SamplesHeaderView* self, psy_ui_Component* parent,
 	psy_ui_label_init_text(&self->srlabel, &self->component,
 		"samplesview.samplerate");	
 	psy_ui_textarea_init_single_line(&self->sredit, &self->component);	
-	psy_ui_textarea_setcharnumber(&self->sredit, 8);
+	psy_ui_textarea_set_char_number(&self->sredit, 8);
 	/* numsamples */
 	psy_ui_label_init_text(&self->numsamplesheaderlabel, &self->component,
 		"samplesview.samples");
 	psy_ui_label_init(&self->numsampleslabel, &self->component);
 	psy_ui_label_prevent_translation(&self->numsampleslabel);
-	psy_ui_label_set_charnumber(&self->numsampleslabel, 10);
+	psy_ui_label_set_char_number(&self->numsampleslabel, 10);
 	/* channels */
 	psy_ui_label_init(&self->channellabel, &self->component);
 	psy_ui_label_prevent_translation(&self->channellabel);
 	psy_ui_label_set_text(&self->channellabel, "");
-	psy_ui_label_set_charnumber(&self->channellabel, 7);	
+	psy_ui_label_set_char_number(&self->channellabel, 7);	
 	psy_ui_component_setalign_children(&self->component, psy_ui_ALIGN_LEFT);
 }
 
@@ -344,7 +344,7 @@ void samplesgeneralview_init(SamplesGeneralView* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_set_padding(&self->component,
 		psy_ui_margin_make_em(1.0, 0.0, 0.0, 0.0));
-	psy_ui_component_set_defaultalign(&self->component, psy_ui_ALIGN_TOP,
+	psy_ui_component_set_default_align(&self->component, psy_ui_ALIGN_TOP,
 		psy_ui_defaults_vmargin(psy_ui_defaults()));
 	psy_ui_slider_init(&self->defaultvolume, &self->component);
 	psy_ui_slider_setdefaultvalue(&self->defaultvolume, 1.0);
@@ -537,7 +537,7 @@ void samplesvibratoview_init(SamplesVibratoView* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_set_padding(&self->component,
 		psy_ui_margin_make_em(1.0, 0.0, 0.0, 0.0));
-	psy_ui_component_set_defaultalign(&self->component, psy_ui_ALIGN_TOP,
+	psy_ui_component_set_default_align(&self->component, psy_ui_ALIGN_TOP,
 		psy_ui_defaults_vmargin(psy_ui_defaults()));
 	self->sample = 0;
 	self->player = player;
@@ -730,17 +730,17 @@ void samplesloopview_init(SamplesLoopView* self, psy_ui_Component* parent,
 	self->view = view;		
 	self->sample = NULL;
 	psy_ui_component_init(&self->component, parent, NULL);
-	psy_ui_component_set_defaultalign(&self->component, psy_ui_ALIGN_TOP,
+	psy_ui_component_set_default_align(&self->component, psy_ui_ALIGN_TOP,
 		psy_ui_margin_zero());
 	/* continious loop */
 	psy_ui_component_init(&self->cont, &self->component, NULL);
-	psy_ui_component_set_defaultalign(&self->cont, psy_ui_ALIGN_LEFT,
+	psy_ui_component_set_default_align(&self->cont, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	psy_ui_component_set_padding(&self->cont,
 		psy_ui_margin_make_em(0.25, 0.0, 0.25, 0.0));
 	psy_ui_label_init_text(&self->loopheaderlabel, &self->cont,
 		"samplesview.cont-loop");	
-	psy_ui_label_set_charnumber(&self->loopheaderlabel, 18);	
+	psy_ui_label_set_char_number(&self->loopheaderlabel, 18);	
 	psy_ui_combobox_init(&self->loopdir, &self->cont);
 	psy_ui_combobox_add_text(&self->loopdir,
 		psy_ui_translate("samplesview.disabled"));
@@ -753,20 +753,20 @@ void samplesloopview_init(SamplesLoopView* self, psy_ui_Component* parent,
 	psy_ui_label_init(&self->loopstartlabel, &self->cont);
 	psy_ui_label_set_text(&self->loopstartlabel, "samplesview.start");
 	psy_ui_textarea_init_single_line(&self->loopstartedit, &self->cont);	
-	psy_ui_textarea_setcharnumber(&self->loopstartedit, 10);
+	psy_ui_textarea_set_char_number(&self->loopstartedit, 10);
 	psy_ui_label_init(&self->loopendlabel, &self->cont);
 	psy_ui_label_set_text(&self->loopendlabel, "samplesview.end");
 	psy_ui_textarea_init_single_line(&self->loopendedit, &self->cont);	
-	psy_ui_textarea_setcharnumber(&self->loopendedit, 10);
+	psy_ui_textarea_set_char_number(&self->loopendedit, 10);
 	/* sustain loop */
 	psy_ui_component_init(&self->sustain, &self->component, NULL);
-	psy_ui_component_set_defaultalign(&self->sustain, psy_ui_ALIGN_LEFT,
+	psy_ui_component_set_default_align(&self->sustain, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	psy_ui_component_set_padding(&self->sustain,
 		psy_ui_margin_make_em(0.25, 0.0, 0.25, 0.0));
 	psy_ui_label_init(&self->sustainloopheaderlabel, &self->sustain);
 	psy_ui_label_set_text(&self->sustainloopheaderlabel, "samplesview.sustain-loop");
-	psy_ui_label_set_charnumber(&self->sustainloopheaderlabel, 18);
+	psy_ui_label_set_char_number(&self->sustainloopheaderlabel, 18);
 	psy_ui_combobox_init(&self->sustainloopdir, &self->sustain);
 	psy_ui_combobox_add_text(&self->sustainloopdir,
 		psy_ui_translate("samplesview.disabled"));
@@ -779,11 +779,11 @@ void samplesloopview_init(SamplesLoopView* self, psy_ui_Component* parent,
 	psy_ui_label_init(&self->sustainloopstartlabel, &self->sustain);
 	psy_ui_label_set_text(&self->sustainloopstartlabel, "samplesview.start");
 	psy_ui_textarea_init_single_line(&self->sustainloopstartedit, &self->sustain);	
-	psy_ui_textarea_setcharnumber(&self->sustainloopstartedit, 10);
+	psy_ui_textarea_set_char_number(&self->sustainloopstartedit, 10);
 	psy_ui_label_init(&self->sustainloopendlabel, &self->sustain);
 	psy_ui_label_set_text(&self->sustainloopendlabel, "samplesview.end");
 	psy_ui_textarea_init_single_line(&self->sustainloopendedit, &self->sustain);	
-	psy_ui_textarea_setcharnumber(&self->sustainloopendedit, 10);
+	psy_ui_textarea_set_char_number(&self->sustainloopendedit, 10);
 	psy_signal_connect(&self->loopdir.signal_selchanged, self,
 		samplesloopview_onlooptypechange);
 	psy_signal_connect(&self->sustainloopdir.signal_selchanged, self,

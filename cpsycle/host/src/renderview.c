@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -17,17 +17,18 @@
 /* prototypes */
 static void renderview_on_destroyed(RenderView*);
 static void renderview_build(RenderView*);
-static void renderview_onsettingsviewchanged(RenderView*,
+static void renderview_on_settings_view_changed(RenderView*,
 	PropertiesView* sender, psy_Property*, uintptr_t* rebuild);
 static void renderview_render(RenderView*);
-static void renderview_onstoprendering(RenderView*, psy_AudioDriver* sender);
+static void renderview_on_stop_rendering(RenderView*, psy_AudioDriver* sender);
 static void renderview_on_focus(RenderView*);
-static void renderview_configure_setdefaultoutputpath(RenderView*);
+static void renderview_configure_set_default_output_path(RenderView*);
 static void renderview_configure_player_dither(RenderView*);
 static void renderview_configure_player_record(RenderView*);
-static psy_audio_SequencerPlayMode renderview_recordmode(const RenderView*);
-static void renderview_readdriverconfiguration(RenderView*);
-static void renderview_writedriverconfiguration(RenderView*);
+static psy_audio_SequencerPlayMode renderview_record_mode(const RenderView*);
+static void renderview_read_driver_configuration(RenderView*);
+static void renderview_write_driver_configuration(RenderView*);
+
 /* vtable */
 static psy_ui_ComponentVtable renderview_vtable;
 static bool renderview_vtable_initialized = FALSE;
@@ -44,7 +45,7 @@ static void renderview_vtable_init(RenderView* self)
 			renderview_on_focus;
 		renderview_vtable_initialized = TRUE;
 	}
-	self->component.vtable = &renderview_vtable;
+	psy_ui_component_set_vtable(renderview_base(self), &renderview_vtable);
 }
 
 /* implementation */
@@ -55,24 +56,24 @@ void renderview_init(RenderView* self, psy_ui_Component* parent,
 	renderview_vtable_init(self);
 	psy_ui_component_set_id(&self->component, VIEW_ID_RENDERVIEW);
 	self->workspace = workspace;
-	self->fileoutdriver = psy_audio_create_fileout_driver();
+	self->fileout_driver = psy_audio_create_fileout_driver();
 	renderview_build(self);
 	propertiesview_init(&self->view, &self->component,
 		tabbarparent, self->properties, 3, &workspace->inputhandler);
-	propertiesview_prevent_maximize_mainsections(&self->view);	
+	propertiesview_prevent_maximize_main_sections(&self->view);	
 	psy_signal_connect(&self->view.signal_changed, self,
-		renderview_onsettingsviewchanged);
+		renderview_on_settings_view_changed);
 	psy_ui_component_set_align(&self->view.component, psy_ui_ALIGN_CLIENT);
-	renderprogressview_init(&self->progressview, &self->component, workspace);
-	psy_ui_component_set_align(&self->progressview.component,
+	renderprogressview_init(&self->progress_view, &self->component, workspace);
+	psy_ui_component_set_align(&self->progress_view.component,
 		psy_ui_ALIGN_CLIENT);
-	psy_ui_component_hide(&self->progressview.component);
+	psy_ui_component_hide(&self->progress_view.component);
 }
 
 void renderview_on_destroyed(RenderView* self)
 {
 	psy_property_deallocate(self->properties);	
-	psy_audiodriver_deallocate(self->fileoutdriver);
+	psy_audiodriver_deallocate(self->fileout_driver);
 }
 
 void renderview_build(RenderView* self)
@@ -100,50 +101,50 @@ void renderview_build(RenderView* self)
 	psy_property_settext(
 		psy_property_append_str(recordchoice, "record-songsel", ""),
 		"render.songsel");
-	self->driverconfigure = psy_property_settext(
+	self->driver_configure = psy_property_settext(
 		psy_property_append_section(self->properties, "configure"),
 		"render.configure");
-	renderview_readdriverconfiguration(self);
-	renderview_configure_setdefaultoutputpath(self);
-	renderview_writedriverconfiguration(self);
+	renderview_read_driver_configuration(self);
+	renderview_configure_set_default_output_path(self);
+	renderview_write_driver_configuration(self);
 }
 
-void renderview_readdriverconfiguration(RenderView* self)
+void renderview_read_driver_configuration(RenderView* self)
 {	
-	psy_property_clear(self->driverconfigure);
-	if (psy_audiodriver_configuration(self->fileoutdriver)) {
-		psy_property_append_property(self->driverconfigure,
+	psy_property_clear(self->driver_configure);
+	if (psy_audiodriver_configuration(self->fileout_driver)) {
+		psy_property_append_property(self->driver_configure,
 			psy_property_clone(psy_audiodriver_configuration(
-				self->fileoutdriver)));
+				self->fileout_driver)));
 	}	
 }
 
-void renderview_writedriverconfiguration(RenderView* self)
+void renderview_write_driver_configuration(RenderView* self)
 {
-	assert(self->fileoutdriver);
+	assert(self->fileout_driver);
 
-	if (psy_audiodriver_configuration(self->fileoutdriver)) {
+	if (psy_audiodriver_configuration(self->fileout_driver)) {
 		psy_Property* driversection = NULL;
 
-		driversection = psy_property_find(self->driverconfigure,
+		driversection = psy_property_find(self->driver_configure,
 			psy_property_key(psy_audiodriver_configuration(
-				self->fileoutdriver)),
+				self->fileout_driver)),
 			PSY_PROPERTY_TYPE_NONE);
 		if (driversection) {
-			psy_audiodriver_configure(self->fileoutdriver, driversection);
+			psy_audiodriver_configure(self->fileout_driver, driversection);
 		}
 	}
 }
 
-void renderview_onsettingsviewchanged(RenderView* self, PropertiesView* sender,
+void renderview_on_settings_view_changed(RenderView* self, PropertiesView* sender,
 	psy_Property* property, uintptr_t* rebuild)
 {
 	if (psy_property_type(property) == PSY_PROPERTY_TYPE_ACTION) {
 		if (strcmp(psy_property_key(property), "savewave") == 0) {
 			renderview_render(self);
 		}
-	} else if (psy_property_in_section(property, self->driverconfigure)) {
-		renderview_writedriverconfiguration(self);
+	} else if (psy_property_in_section(property, self->driver_configure)) {
+		renderview_write_driver_configuration(self);
 	}
 }
 
@@ -152,22 +153,22 @@ void renderview_render(RenderView* self)
 	if (!workspace_song(self->workspace)) {
 		return;
 	}
-	self->curraudiodriver = psy_audio_player_audiodriver(
+	self->curr_audio_driver = psy_audio_player_audiodriver(
 		workspace_player(self->workspace));
-	psy_audiodriver_close(self->curraudiodriver);
+	psy_audiodriver_close(self->curr_audio_driver);
 	psy_audio_player_setaudiodriver(
-		workspace_player(self->workspace), self->fileoutdriver);	
+		workspace_player(self->workspace), self->fileout_driver);	
 	renderview_configure_player_dither(self);
 	renderview_configure_player_record(self);	
 	psy_audio_player_start(workspace_player(self->workspace));
-	psy_signal_connect(&self->fileoutdriver->signal_stop, self,
-		renderview_onstoprendering);
-	psy_audiodriver_open(self->fileoutdriver);
+	psy_signal_connect(&self->fileout_driver->signal_stop, self,
+		renderview_on_stop_rendering);
+	psy_audiodriver_open(self->fileout_driver);
 	psy_ui_component_hide(&self->view.component);
-	psy_ui_component_show_align(&self->progressview.component);
+	psy_ui_component_show_align(&self->progress_view.component);
 }
 
-void renderview_configure_setdefaultoutputpath(RenderView* self)
+void renderview_configure_set_default_output_path(RenderView* self)
 {		
 	const char* current_wave_rec_dir;
 	char outputpath[4096];
@@ -176,16 +177,16 @@ void renderview_configure_setdefaultoutputpath(RenderView* self)
 		&self->workspace->config.directories);
 	psy_snprintf(outputpath, 4096, "%s%s%s", current_wave_rec_dir,
 		psy_SLASHSTR, "Untitled.wav");
-	psy_property_set_str(self->driverconfigure, "fileout.outputpath",
+	psy_property_set_str(self->driver_configure, "fileout.outputpath",
 		outputpath);
 }
 
 void renderview_configure_player_dither(RenderView* self)
 {
-	self->restoredither = psy_dsp_dither_settings(
+	self->restore_dither = psy_dsp_dither_settings(
 		&workspace_player(self->workspace)->dither);
-	self->restoredodither = workspace_player(self->workspace)->dodither;
-	if (psy_property_at_bool(self->driverconfigure,
+	self->restore_do_dither = workspace_player(self->workspace)->dodither;
+	if (psy_property_at_bool(self->driver_configure,
 			"fileout.dither.enable", FALSE) != FALSE) {
 		psy_Property* property;
 		intptr_t bitdepth;
@@ -195,19 +196,19 @@ void renderview_configure_player_dither(RenderView* self)
 		psy_dsp_DitherNoiseShape dither_noiseshape =
 			psy_dsp_DITHER_NOISESHAPE_NONE;
 
-		pdf = psy_property_at(self->driverconfigure, "fileout.dither.pdf",
+		pdf = psy_property_at(self->driver_configure, "fileout.dither.pdf",
 			PSY_PROPERTY_TYPE_NONE);
 		if (pdf) {
 			dither_pdf = (psy_dsp_DitherPdf)psy_property_item_int(pdf);
 		}
-		noiseshaping = psy_property_at(self->driverconfigure,
+		noiseshaping = psy_property_at(self->driver_configure,
 			"fileout.dither.noiseshape", PSY_PROPERTY_TYPE_NONE);
 		if (noiseshaping) {
 			dither_noiseshape = (psy_dsp_DitherNoiseShape)
 				psy_property_item_int(noiseshaping);
 		}
 		bitdepth = 16;
-		property = psy_property_at(self->driverconfigure, "fileout.bitdepth",
+		property = psy_property_at(self->driver_configure, "fileout.bitdepth",
 			PSY_PROPERTY_TYPE_CHOICE);
 		if (property) {
 			property = psy_property_at_choice(property);
@@ -223,7 +224,7 @@ void renderview_configure_player_dither(RenderView* self)
 
 void renderview_configure_player_record(RenderView* self)
 {
-	self->restoreloopmode = workspace_player(
+	self->restore_loop_mode = workspace_player(
 		self->workspace)->sequencer.looping;
 	workspace_player(self->workspace)->sequencer.looping = 0;
 	psy_audio_player_setposition(workspace_player(self->workspace), 0);
@@ -232,24 +233,24 @@ void renderview_configure_player_record(RenderView* self)
 		&self->workspace->song->sequence.sequenceselection);
 	psy_audio_sequencer_set_play_mode(
 		&workspace_player(self->workspace)->sequencer,
-		renderview_recordmode(self));
+		renderview_record_mode(self));
 }
 
-void renderview_onstoprendering(RenderView* self, psy_AudioDriver* sender)
+void renderview_on_stop_rendering(RenderView* self, psy_AudioDriver* sender)
 {
 	psy_audio_player_stop(workspace_player(self->workspace));
 	psy_audio_player_setaudiodriver(workspace_player(self->workspace),
-		self->curraudiodriver);
+		self->curr_audio_driver);
 	workspace_player(self->workspace)->sequencer.looping =
-		self->restoreloopmode;
-	if (!self->restoredodither) {
+		self->restore_loop_mode;
+	if (!self->restore_do_dither) {
 		psy_audio_player_disabledither(workspace_player(self->workspace));
 	}
 	psy_dsp_dither_setsettings(&workspace_player(self->workspace)->dither,
-		self->restoredither);	
-	psy_audiodriver_open(self->curraudiodriver);
-	psy_audiodriver_close(self->fileoutdriver);
-	psy_ui_component_hide(&self->progressview.component);
+		self->restore_dither);	
+	psy_audiodriver_open(self->curr_audio_driver);
+	psy_audiodriver_close(self->fileout_driver);
+	psy_ui_component_hide(&self->progress_view.component);
 	psy_ui_component_show_align(&self->view.component);
 }
 
@@ -258,7 +259,7 @@ void renderview_on_focus(RenderView* self)
 	psy_ui_component_set_focus(&self->view.component);
 }
 
-psy_audio_SequencerPlayMode renderview_recordmode(const RenderView* self)
+psy_audio_SequencerPlayMode renderview_record_mode(const RenderView* self)
 {
 	psy_Property* recordmode;
 

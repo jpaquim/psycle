@@ -67,10 +67,10 @@ void instrumentfilterview_init(InstrumentFilterView* self,
 	psy_ui_component_init(&self->component, parent, NULL);
 	instrumentfilterview_vtable_init(self);	
 	psy_signal_init(&self->signal_status);
-	psy_ui_component_set_defaultalign(&self->component, psy_ui_ALIGN_TOP,
+	psy_ui_component_set_default_align(&self->component, psy_ui_ALIGN_TOP,
 		psy_ui_defaults_vmargin(psy_ui_defaults()));
 	psy_ui_component_init(&self->top, &self->component, NULL);
-	psy_ui_component_set_defaultalign(&self->top, psy_ui_ALIGN_TOP,
+	psy_ui_component_set_default_align(&self->top, psy_ui_ALIGN_TOP,
 		psy_ui_defaults_vmargin(psy_ui_defaults()));
 	psy_ui_component_init(&self->filter, &self->top, NULL);
 	margin = psy_ui_defaults_vmargin(psy_ui_defaults());
@@ -106,7 +106,7 @@ void instrumentfilterview_init(InstrumentFilterView* self,
 	margin = psy_ui_defaults_vmargin(psy_ui_defaults());
 	margin.top = psy_ui_value_make_eh(1.0);
 	psy_ui_component_set_margin(&self->bottom, margin);
-	psy_ui_component_set_defaultalign(&self->bottom, psy_ui_ALIGN_TOP,
+	psy_ui_component_set_default_align(&self->bottom, psy_ui_ALIGN_TOP,
 		psy_ui_defaults_vmargin(psy_ui_defaults()));
 	adsrsliders_init(&self->adsrsliders, &self->bottom);	
 	psy_ui_slider_setdefaultvalue(&self->adsrsliders.decay, 0.370 /

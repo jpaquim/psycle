@@ -70,7 +70,7 @@ static void envelopebox_vtable_init(EnvelopeBox* self)
 void envelopebox_init(EnvelopeBox* self, psy_ui_Component* parent)
 {				
 	psy_ui_component_init(&self->component, parent, NULL);	
-	psy_ui_component_preventalign(&self->component);
+	psy_ui_component_set_aligner(&self->component, NULL);
 	psy_ui_component_set_style_type(&self->component, STYLE_ENVELOPE);
 	envelopebox_vtable_init(self);	
 	self->zoomleft = 0.f;
@@ -561,7 +561,7 @@ void envelopebar_init(EnvelopeBar* self, psy_ui_Component* parent)
 	tab = psy_ui_defaults_hmargin(psy_ui_defaults());
 	tab.right = psy_ui_value_make_ew(4.0);
 	psy_ui_component_init(&self->component, parent, NULL);
-	psy_ui_component_set_defaultalign(envelopebar_base(self), psy_ui_ALIGN_LEFT,
+	psy_ui_component_set_default_align(envelopebar_base(self), psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	psy_ui_checkbox_init_text(&self->enabled, &self->component, "Envelope");	
 	psy_ui_component_set_margin(psy_ui_checkbox_base(&self->enabled), tab);

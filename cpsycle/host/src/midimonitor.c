@@ -381,7 +381,7 @@ void midimonitor_init(MidiMonitor* self, psy_ui_Component* parent, Workspace*
 void midimonitor_inittitlebar(MidiMonitor* self)
 {		
 	titlebar_init(&self->titlebar, &self->component, "Psycle MIDI Monitor");
-	titlebar_hideonclose(&self->titlebar);
+	titlebar_hide_on_close(&self->titlebar);
 	psy_ui_button_init_text(&self->configure, &self->titlebar.client,
 		"Devices");
 	psy_ui_button_load_resource(&self->configure, IDB_SETTINGS_LIGHT,

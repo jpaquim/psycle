@@ -36,7 +36,7 @@ void psy_ui_appzoom_init(psy_ui_AppZoom* self)
 	assert(self);
 
 	self->rate = 1.0;
-	self->basefontsize = -16;
+	self->basefontsize = 16;
 	psy_signal_init(&self->signal_zoom);
 }
 
@@ -71,7 +71,7 @@ void psy_ui_appzoom_update_base_fontsize(psy_ui_AppZoom* self, psy_ui_Font* base
 }
 
 /* psy_ui_App */
-static void psy_ui_app_changedefaultfontsize(psy_ui_App*, int size);
+static void psy_ui_app_change_default_font_size(psy_ui_App*, double size);
 static void psy_ui_app_onlanguagechanged(psy_ui_App*, psy_Translator* sender);
 
 static void ui_app_initimpfactory(psy_ui_App*);
@@ -274,7 +274,7 @@ void psy_ui_app_onlanguagechanged(psy_ui_App* self, psy_Translator* translator)
 void psy_ui_app_setzoomrate(psy_ui_App* self, double rate)
 {
 	psy_ui_appzoom_setrate(&self->zoom, rate);
-	psy_ui_app_changedefaultfontsize(self,
+	psy_ui_app_change_default_font_size(self,
 		(int)(self->zoom.basefontsize * rate));
 }
 
@@ -288,7 +288,7 @@ psy_ui_AppZoom* psy_ui_app_zoom(psy_ui_App* self)
 	return &self->zoom;
 }
 
-void psy_ui_app_changedefaultfontsize(psy_ui_App* self, int size)
+void psy_ui_app_change_default_font_size(psy_ui_App* self, double size)
 {
 	psy_ui_FontInfo fontinfo;
 	psy_ui_Font font;

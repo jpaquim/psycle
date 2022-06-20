@@ -152,7 +152,7 @@ void psy_signal_prevent(psy_Signal* self, void* context, void* fp)
 	}
 }
 
-void psy_signal_preventall(psy_Signal* self)
+void psy_signal_prevent_all(psy_Signal* self)
 {
 	psy_List* p;
 
@@ -176,7 +176,7 @@ void psy_signal_enable(psy_Signal* self, void* context, void* fp)
 	}
 }
 
-void psy_signal_enableall(psy_Signal* self)
+void psy_signal_enable_all(psy_Signal* self)
 {
 	psy_List* p;
 

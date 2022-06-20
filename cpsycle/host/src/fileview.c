@@ -47,7 +47,7 @@ void fileviewfilter_init(FileViewFilter* self, psy_ui_Component* parent)
 {
 	psy_ui_component_init(fileviewfilter_base(self), parent, NULL);
 	fileviewfilter_vtable_init(self);
-	psy_ui_component_set_defaultalign(fileviewfilter_base(self), psy_ui_ALIGN_TOP,
+	psy_ui_component_set_default_align(fileviewfilter_base(self), psy_ui_ALIGN_TOP,
 		psy_ui_defaults_vmargin(psy_ui_appdefaults()));
 	psy_ui_label_init_text(&self->desc, fileviewfilter_base(self), "Item:");
 	psy_ui_checkbox_init_text(&self->psy, fileviewfilter_base(self),
@@ -109,7 +109,7 @@ void fileviewfilter_clear(FileViewFilter* self)
 void fileviewsavefilter_init(FileViewSaveFilter* self, psy_ui_Component* parent)
 {
 	psy_ui_component_init(fileviewsavefilter_base(self), parent, NULL);
-	psy_ui_component_set_defaultalign(fileviewsavefilter_base(self), psy_ui_ALIGN_TOP,
+	psy_ui_component_set_default_align(fileviewsavefilter_base(self), psy_ui_ALIGN_TOP,
 		psy_ui_defaults_vmargin(psy_ui_appdefaults()));
 	psy_ui_label_init_text(&self->desc, fileviewsavefilter_base(self),
 		"Save as:");
@@ -194,7 +194,7 @@ void fileview_init(FileView* self, psy_ui_Component* parent)
 	psy_ui_component_set_align(&self->exit.component, psy_ui_ALIGN_TOP);
 	/* drives */
 	psy_ui_tabbar_init(&self->drives, fileview_base(self));
-	psy_ui_tabbar_settabalign(&self->drives, psy_ui_ALIGN_TOP);
+	psy_ui_tabbar_set_tab_align(&self->drives, psy_ui_ALIGN_TOP);
 	psy_ui_component_set_align(psy_ui_tabbar_base(&self->drives),
 		psy_ui_ALIGN_LEFT);
 	/* directory */

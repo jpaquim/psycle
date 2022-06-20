@@ -349,14 +349,14 @@ void psy_ui_scrollbar_init(psy_ui_ScrollBar* self, psy_ui_Component* parent)
 	psy_ui_button_init_connect(&self->less, &self->component,
 		self, psy_ui_scrollbar_on_less);
 	psy_ui_button_seticon(&self->less, psy_ui_ICON_UP);
-	psy_ui_button_setcharnumber(&self->less, 2);
+	psy_ui_button_set_char_number(&self->less, 2);
 	psy_ui_component_set_align(psy_ui_button_base(&self->less),
 		psy_ui_ALIGN_TOP);	
 	/* More Button */
 	psy_ui_button_init_connect(&self->more, &self->component,
 		self, psy_ui_scrollbar_on_more);
 	psy_ui_button_seticon(&self->more, psy_ui_ICON_DOWN);
-	psy_ui_button_setcharnumber(&self->more, 2.0);
+	psy_ui_button_set_char_number(&self->more, 2.0);
 	psy_ui_component_set_align(psy_ui_button_base(&self->more),
 		psy_ui_ALIGN_BOTTOM);	
 	/* Scrollpane */

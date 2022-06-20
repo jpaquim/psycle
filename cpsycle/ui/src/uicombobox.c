@@ -75,7 +75,7 @@ void psy_ui_combobox_init(psy_ui_ComboBox* self, psy_ui_Component* parent)
 		psy_ui_STYLE_COMBOBOX_TEXT);
 	psy_ui_component_set_align(psy_ui_label_base(&self->textfield),
 		psy_ui_ALIGN_LEFT);
-	psy_ui_label_set_charnumber(&self->textfield, 10.0);
+	psy_ui_label_set_char_number(&self->textfield, 10.0);
 	psy_signal_connect(&psy_ui_label_base(&self->textfield)->signal_mousedown,
 		self, psy_ui_combobox_ontextfield);
 	/* less */
@@ -192,7 +192,7 @@ void psy_ui_combobox_setcharnumber(psy_ui_ComboBox* self, double number)
 {
 	assert(self);
 
-	psy_ui_label_set_charnumber(&self->textfield, number);
+	psy_ui_label_set_char_number(&self->textfield, number);
 }
 
 void psy_ui_combobox_setitemdata(psy_ui_ComboBox* self, uintptr_t index,

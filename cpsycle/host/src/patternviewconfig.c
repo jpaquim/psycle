@@ -114,7 +114,7 @@ void patternviewconfig_make_view(PatternViewConfig* self, psy_Property* parent)
 	psy_property_settext(
 		psy_property_append_bool(pvc, "wideinstcolumn", FALSE),
 		"settingsview.pv.wide-instrument-column");
-	psy_property_setid(psy_property_settext(
+	psy_property_set_id(psy_property_settext(
 		psy_property_append_bool(pvc, "trackscopes", TRUE),
 		"settingsview.pv.pattern-track-scopes"),
 		PROPERTY_ID_TRACKSCOPES);
@@ -145,7 +145,7 @@ void patternviewconfig_make_view(PatternViewConfig* self, psy_Property* parent)
 		psy_property_append_bool(pvc, "useheaderbitmap", FALSE),
 		"settingsview.pv.useheaderbitmap");
 	/* pattern display choice */
-	choice = psy_property_setid(psy_property_settext(
+	choice = psy_property_set_id(psy_property_settext(
 		psy_property_append_choice(pvc,
 			"patterndisplay", 0),
 		"settingsview.pv.patterndisplay"),
@@ -326,7 +326,7 @@ void patternviewconfig_make_theme(PatternViewConfig* self, psy_Property* parent)
 			"pvc_midline2", 0x007D6100, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
 		"settingsview.pv.theme.midline2");
-	self->headerskins = psy_property_setid(
+	self->headerskins = psy_property_set_id(
 		psy_property_sethint(psy_property_settext(
 			psy_property_append_choice(self->theme, "skins", 0),
 			"Skin"), PSY_PROPERTY_HINT_COMBO),
@@ -744,17 +744,15 @@ double patternviewconfig_zoom(const PatternViewConfig* self)
 	return self->zoom;
 }
 
-psy_ui_FontInfo patternviewconfig_fontinfo(PatternViewConfig* self, double zoom)
+psy_ui_FontInfo patternviewconfig_font_info(PatternViewConfig* self, double zoom)
 {
 	psy_ui_FontInfo fontinfo;
+
+	assert(self);
 	
 	psy_ui_fontinfo_init_string(&fontinfo,
-		psy_property_at_str(self->patternview, "font", "tahoma;-16"));	
-#if PSYCLE_USE_TK == PSYCLE_TK_X11	
-	fontinfo.lfHeight = 18;	
-#else				
+		psy_property_at_str(self->patternview, "font", "tahoma; 16"));	
 	fontinfo.lfHeight = (int32_t)((double)fontinfo.lfHeight * zoom);
-#endif		
 	return fontinfo;
 }
 

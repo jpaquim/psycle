@@ -30,7 +30,7 @@ void newmachinesearchbar_init(NewMachineSearchBar* self,
 		psy_ui_ALIGN_RIGHT);
 	psy_signal_connect(&self->search.signal_changed, self,
 		newmachinesearchbar_onsearchfieldchange);
-	searchfield_setdefaulttext(&self->search, "newmachine.search-plugin");
+	searchfield_set_default_text(&self->search, "newmachine.search-plugin");
 }
 
 void newmachinesearchbar_setfilter(NewMachineSearchBar* self,
@@ -60,7 +60,7 @@ void newmachinerescanbar_init(NewMachineRescanBar* self,
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_set_style_type(&self->component,
 		STYLE_NEWMACHINE_RESCANBAR);	
-	psy_ui_component_set_defaultalign(&self->component, psy_ui_ALIGN_LEFT,
+	psy_ui_component_set_default_align(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	self->workspace = workspace;	
 	psy_ui_button_init_text(&self->rescan, &self->component,
@@ -96,7 +96,7 @@ void newmachinesectionbar_init(NewMachineSectionBar* self,
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_set_style_type(&self->component,
 		STYLE_NEWMACHINE_SECTIONBAR);
-	psy_ui_component_set_defaultalign(&self->component, psy_ui_ALIGN_LEFT,
+	psy_ui_component_set_default_align(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	self->workspace = workspace;	
 	psy_ui_button_init_text(&self->removesection, &self->component,
@@ -134,7 +134,7 @@ void newmachinesortbar_init(NewMachineSortBar* self, psy_ui_Component* parent,
 		STYLE_NEWMACHINE_SORTBAR);
 	psy_ui_component_set_align_expand(&self->component,
 		psy_ui_HEXPAND);	
-	psy_ui_component_set_defaultalign(&self->component, psy_ui_ALIGN_LEFT,
+	psy_ui_component_set_default_align(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));	
 	self->sort = sort;
 	psy_ui_label_init_text(&self->desc, &self->component, "newmachine.sort");
@@ -195,7 +195,7 @@ void newmachinefilterbar_init(NewMachineFilterBar* self,
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_set_style_type(&self->component,
 		STYLE_NEWMACHINE_FILTERBAR);
-	psy_ui_component_set_defaultalign(&self->component, psy_ui_ALIGN_LEFT,
+	psy_ui_component_set_default_align(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	psy_ui_label_init_text(&self->desc, &self->component, "newmachine.filter");
 	psy_ui_button_init_text_connect(&self->gen, &self->component,
@@ -358,7 +358,7 @@ void newmachinecategorybar_init(NewMachineCategoryBar* self,
 		STYLE_NEWMACHINE_CATEGORYBAR);
 	psy_ui_component_init_align(&self->client, &self->component, NULL,
 		psy_ui_ALIGN_CLIENT);
-	psy_ui_component_set_defaultalign(&self->client, psy_ui_ALIGN_LEFT,
+	psy_ui_component_set_default_align(&self->client, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	self->plugincatcher = plugincatcher;
 	self->filter = filter;
@@ -538,7 +538,7 @@ void newmachinesectionsheader_init(NewMachineSectionsHeader* self,
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_set_style_type(&self->component,
 		STYLE_NEWMACHINE_SECTIONS_HEADER);
-	psy_ui_component_set_defaultalign(&self->component, psy_ui_ALIGN_LEFT,
+	psy_ui_component_set_default_align(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_appdefaults()));
 	if (iconresourceid != psy_INDEX_INVALID) {
 		psy_ui_image_init_resource_transparency(&self->icon,

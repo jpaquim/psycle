@@ -25,7 +25,7 @@ extern "C" {
 **
 ** Example:
 **  psy_property_settext(psy_property_setshorttext(
-**	  psy_property_setid(psy_property_append_int(general, "cmd_terminal",
+**	  psy_property_set_id(psy_property_append_int(general, "cmd_terminal",
 **    psy_audio_encodeinput(psy_ui_KEY_F12, 0, 0, 0), 0, 0), CMD_IMM_TERMINAL),
 **    "term"), "Terminal");
 */

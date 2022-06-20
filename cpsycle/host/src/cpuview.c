@@ -168,8 +168,8 @@ void cpuview_init_title(CPUView* self)
 {	
 	titlebar_init(&self->titlebar, &self->component,
 		"Psycle DSP/CPU Performance Monitor");		
-	titlebar_hideonclose(&self->titlebar);
-	titlebar_enabledrag(&self->titlebar, "cpu");
+	titlebar_hide_on_close(&self->titlebar);
+	titlebar_enable_drag(&self->titlebar, "cpu");
 }
 
 void cpuview_init_core_info(CPUView* self)
@@ -181,7 +181,7 @@ void cpuview_init_core_info(CPUView* self)
 void cpuview_init_resources(CPUView* self)
 {	
 	psy_ui_component_init(&self->resources, &self->top, NULL);
-	psy_ui_component_set_defaultalign(&self->resources, psy_ui_ALIGN_TOP,
+	psy_ui_component_set_default_align(&self->resources, psy_ui_ALIGN_TOP,
 		self->topmargin);
 	psy_ui_component_set_align(&self->resources, psy_ui_ALIGN_LEFT);
 	psy_ui_label_init_text(&self->resourcestitle, &self->resources,
@@ -196,7 +196,7 @@ void cpuview_init_performance(CPUView* self)
 {	
 	psy_ui_component_init_align(&self->performance, &self->top, NULL,
 		psy_ui_ALIGN_LEFT);
-	psy_ui_component_set_defaultalign(&self->performance, psy_ui_ALIGN_TOP,
+	psy_ui_component_set_default_align(&self->performance, psy_ui_ALIGN_TOP,
 		self->topmargin);	
 	psy_ui_checkbox_init_text(&self->cpucheck, &self->performance,
 		"cpu.performance");

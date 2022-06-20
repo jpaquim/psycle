@@ -121,7 +121,7 @@ INLINE void psy_ui_style_set_colours(psy_ui_Style* self,
 	psy_ui_style_set_background_colour(self, background);	
 }
 
-void psy_ui_style_set_font(psy_ui_Style*, const char* family, int size);
+void psy_ui_style_set_font(psy_ui_Style*, const char* family, double size);
 
 INLINE void psy_ui_style_setmargin(psy_ui_Style* self, psy_ui_Margin margin)
 {

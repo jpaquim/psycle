@@ -80,6 +80,11 @@ int dev_execute(psy_ui_win_FontDialogImp* self)
 	cf.nSizeMax = 0;
 	rv = ChooseFont(&cf);
 	if (rv) {
+		if (lf.lfHeight < 0) {
+			HDC display = GetDC(NULL);
+
+			lf.lfHeight = -MulDiv(lf.lfHeight, 72, GetDeviceCaps(display, LOGPIXELSY));
+		}
 		self->fontinfo = psy_ui_fontinfo(lf);
 	}
 	return rv;

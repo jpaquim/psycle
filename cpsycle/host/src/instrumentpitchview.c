@@ -45,7 +45,7 @@ void instrumentpitchview_init(InstrumentPitchView* self,
 	psy_ui_component_init(&self->component, parent, NULL);
 	vtable_init(self);
 	psy_signal_init(&self->signal_status);
-	psy_ui_component_set_defaultalign(&self->component, psy_ui_ALIGN_TOP,
+	psy_ui_component_set_default_align(&self->component, psy_ui_ALIGN_TOP,
 		psy_ui_defaults_vmargin(psy_ui_defaults()));	
 	margin = psy_ui_defaults_vmargin(psy_ui_defaults());
 	margin.top = psy_ui_value_make_eh(1.0);		

@@ -128,7 +128,7 @@ void interpolatecurvebox_init(InterpolateCurveBox* self,
 	self->dragkeyframe = 0;
 	self->selected = 0;
 	self->bpl = 0.25;	
-	psy_ui_component_preventalign(&self->component);
+	psy_ui_component_set_aligner(&self->component, NULL);
 	psy_ui_component_set_preferred_size(&self->component,
 		psy_ui_size_make_em(0.0, 10.0));
 }

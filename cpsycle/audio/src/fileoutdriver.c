@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-20222 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -45,8 +45,8 @@ typedef struct FileContext {
 	uint32_t numsamples;
 } FileContext;
 
-/* FileOutDriver */
-typedef struct FileOutDriver {
+/* fileout_driver */
+typedef struct fileout_driver {
 	psy_AudioDriver driver;
 	psy_AudioDriverSettings settings;
 	psy_Property* configuration;
@@ -59,29 +59,29 @@ typedef struct FileOutDriver {
 	psy_audio_WaveFormatChunk format;
 	bool write32bitsasint;
 	psy_Thread thread;
-} FileOutDriver;
+} fileout_driver;
 
 /* prototypes */
 static void driver_deallocate(psy_AudioDriver*);
-static int fileoutdriver_init(FileOutDriver*);
+static int fileoutdriver_init(fileout_driver*);
 static int driver_open(psy_AudioDriver*);
-static void driver_configure(FileOutDriver*, psy_Property*);
+static void driver_configure(fileout_driver*, psy_Property*);
 static const psy_Property* driver_configuration(const psy_AudioDriver*);
 static int driver_close(psy_AudioDriver*);
 static int driver_dispose(psy_AudioDriver*);
 static psy_dsp_big_hz_t samplerate(psy_AudioDriver*);
 
 #if defined DIVERSALIS__OS__MICROSOFT
-static unsigned int __stdcall PollerThread(void *fileoutdriver);
+static unsigned int __stdcall PollerThread(void *fileout_driver);
 #else
-static unsigned int PollerThread(void *fileoutdriver);
+static unsigned int PollerThread(void *fileout_driver);
 #endif
-static void fileoutdriver_createfile(FileOutDriver*);
-static void fileoutdriver_writebuffer(FileOutDriver*, float* pBuf,
+static void fileoutdriver_createfile(fileout_driver*);
+static void fileoutdriver_writebuffer(fileout_driver*, float* pBuf,
 	uintptr_t amount);
-static void fileoutdriver_closefile(FileOutDriver*);
+static void fileoutdriver_closefile(fileout_driver*);
 static uintptr_t playposinsamples(psy_AudioDriver*);
-static void fileoutdriver_makeconfig(FileOutDriver*);
+static void fileoutdriver_makeconfig(fileout_driver*);
 /* vtable */
 static psy_AudioDriverVTable vtable;
 static int vtable_initialized = 0;
@@ -108,7 +108,7 @@ static void vtable_init(void)
 /* implementation */
 psy_AudioDriver* psy_audio_create_fileout_driver(void)
 {
-	FileOutDriver* out = malloc(sizeof(FileOutDriver));
+	fileout_driver* out = malloc(sizeof(fileout_driver));
 	if (out) {		
 		fileoutdriver_init(out);
 		return &out->driver;
@@ -122,7 +122,7 @@ void driver_deallocate(psy_AudioDriver* driver)
 	free(driver);
 }
 
-int fileoutdriver_init(FileOutDriver* self)
+int fileoutdriver_init(fileout_driver* self)
 {
 	memset(&self->driver, 0, sizeof(psy_AudioDriver));
 	vtable_init();
@@ -143,9 +143,9 @@ int fileoutdriver_init(FileOutDriver* self)
 
 int driver_dispose(psy_AudioDriver* driver)
 {
-	FileOutDriver* self;
+	fileout_driver* self;
 
-	self = (FileOutDriver*) driver;
+	self = (fileout_driver*) driver;
 	psy_thread_dispose(&self->thread);
 	psy_property_deallocate(self->configuration);
 	self->configuration = NULL;
@@ -157,9 +157,9 @@ int driver_dispose(psy_AudioDriver* driver)
 
 int driver_open(psy_AudioDriver* driver)
 {	
-	FileOutDriver* self;	
+	fileout_driver* self;	
 
-	self = (FileOutDriver*) driver;
+	self = (fileout_driver*) driver;
 	self->stoppolling = 0;
 #if defined(DIVERSALIS__OS__MICROSOFT)	
 	ResetEvent(self->hEvent);
@@ -170,7 +170,7 @@ int driver_open(psy_AudioDriver* driver)
 
 int driver_close(psy_AudioDriver* driver)
 {
-	FileOutDriver* self = (FileOutDriver*) driver;
+	fileout_driver* self = (fileout_driver*) driver;
 
 	self->stoppolling = 1;
 #if defined(DIVERSALIS__OS__MICROSOFT)		
@@ -179,7 +179,7 @@ int driver_close(psy_AudioDriver* driver)
 	return 0;
 }
 
-void fileoutdriver_makeconfig(FileOutDriver* self)
+void fileoutdriver_makeconfig(fileout_driver* self)
 {
 	psy_AudioDriver* driver = &self->driver;
 	psy_Property* samplerate;
@@ -287,7 +287,7 @@ void fileoutdriver_makeconfig(FileOutDriver* self)
 }
 
 
-void driver_configure(FileOutDriver* self, psy_Property* config)
+void driver_configure(fileout_driver* self, psy_Property* config)
 {
 	psy_AudioDriver* driver = &self->driver;
 	psy_Property* property;	
@@ -350,7 +350,7 @@ unsigned int PollerThread(void* driver)
 	uint32_t blocksize = 2048;
 	int hostisplaying = 1;
 
-	FileOutDriver* self = (FileOutDriver*) driver;
+	fileout_driver* self = (fileout_driver*) driver;
 #if defined(DIVERSALIS__OS__MICROSOFT)	
 	SetThreadPriority(GetCurrentThread(),
 		THREAD_PRIORITY_ABOVE_NORMAL);
@@ -377,7 +377,7 @@ unsigned int PollerThread(void* driver)
 	return 0;
 }
 
-void fileoutdriver_createfile(FileOutDriver* self)
+void fileoutdriver_createfile(fileout_driver* self)
 {		
 	int bitspersample = 16;
 	uint8_t temp8 = 0;
@@ -441,7 +441,7 @@ void fileoutdriver_createfile(FileOutDriver* self)
 	psyfile_write(file, &temp32, sizeof(temp32));
 }
 
-void fileoutdriver_writebuffer(FileOutDriver* self, float* pBuf, uintptr_t amount)
+void fileoutdriver_writebuffer(fileout_driver* self, float* pBuf, uintptr_t amount)
 {
 	uintptr_t i;
 	float* currbuf = pBuf;	
@@ -490,7 +490,7 @@ void fileoutdriver_writebuffer(FileOutDriver* self, float* pBuf, uintptr_t amoun
 	self->filecontext.numsamples += (uint32_t)amount;
 }
 
-void fileoutdriver_closefile(FileOutDriver* self)
+void fileoutdriver_closefile(fileout_driver* self)
 {
 	uint32_t pos2;
 	uint32_t size;
@@ -639,7 +639,7 @@ int WriteStereoSample(psy_audio_WaveFormatChunk* wave_format, float LeftSample, 
 
 const psy_Property* driver_configuration(const psy_AudioDriver* driver)
 {
-	FileOutDriver* self = (FileOutDriver*)driver;
+	fileout_driver* self = (fileout_driver*)driver;
 
 	return self->configuration;
 }

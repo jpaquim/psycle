@@ -28,7 +28,7 @@ typedef struct psy_ui_AppZoom {
 	psy_Signal signal_zoom;
 	/* internal data */
 	double rate;
-	int basefontsize;	
+	double basefontsize;	
 } psy_ui_AppZoom;
 
 void psy_ui_appzoom_init(psy_ui_AppZoom*);

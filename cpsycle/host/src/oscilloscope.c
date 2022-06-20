@@ -274,7 +274,7 @@ void oscilloscopecontrols_init(OscilloscopeControls* self, psy_ui_Component* par
 		"Channel");
 	psy_ui_component_set_margin(&self->channellbl.component, margin);
 	psy_ui_button_init(&self->channelmode, &self->component);
-	psy_ui_button_setcharnumber(&self->channelmode, 6);
+	psy_ui_button_set_char_number(&self->channelmode, 6);
 	psy_ui_margin_setright(&margin, psy_ui_value_make_ew(2.0));
 	psy_ui_component_set_margin(&self->channelmode.component, margin);
 	psy_signal_connect(&self->channelmode.signal_clicked, self,

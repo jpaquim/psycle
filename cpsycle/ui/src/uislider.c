@@ -431,12 +431,12 @@ void psy_ui_slider_set_text(psy_ui_Slider* self, const char* text)
 
 void psy_ui_slider_setcharnumber(psy_ui_Slider* self, double number)
 {
-	psy_ui_label_set_charnumber(&self->desc, number);
+	psy_ui_label_set_char_number(&self->desc, number);
 }
 
 void psy_ui_slider_setvaluecharnumber(psy_ui_Slider* self, double number)
 {
-	psy_ui_label_set_charnumber(&self->value, number);
+	psy_ui_label_set_char_number(&self->value, number);
 }
 
 void psy_ui_slider_showvertical(psy_ui_Slider* self)

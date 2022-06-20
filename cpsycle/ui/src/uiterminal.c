@@ -66,7 +66,7 @@ void psy_ui_terminal_init(psy_ui_Terminal* self, psy_ui_Component* parent)
 	terminal_logger_vtable_init(self);
 	psy_ui_label_init(&self->output, &self->component);	
 	psy_ui_label_enable_wrap(&self->output);
-	psy_ui_label_set_charnumber(&self->output, 120.0);
+	psy_ui_label_set_char_number(&self->output, 120.0);
 	psy_ui_label_prevent_translation(&self->output);
 	psy_ui_label_set_textalignment(&self->output, psy_ui_ALIGNMENT_LEFT);
 	psy_ui_component_set_scroll_step_height(

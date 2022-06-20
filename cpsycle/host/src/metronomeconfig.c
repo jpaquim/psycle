@@ -36,10 +36,10 @@ void metronomeconfig_make(MetronomeConfig* self, psy_Property* parent)
 {
 	assert(self);
 
-	self->metronome = psy_property_setid(psy_property_settext(
+	self->metronome = psy_property_set_id(psy_property_settext(
 		psy_property_append_section(parent, "metronome"),
 		"settingsview.metronome.metronome"), PROPERTY_ID_METRONOME);
-	psy_property_setid(psy_property_settext(
+	psy_property_set_id(psy_property_settext(
 		psy_property_append_bool(self->metronome, "showmetronome", FALSE),
 		"settingsview.metronome.show"), PROPERTY_ID_SHOWMETRONOME);
 	psy_property_settext(

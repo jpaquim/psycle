@@ -18,7 +18,7 @@ void playlistbar_init(PlaylistBar* self, psy_ui_Component* parent)
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_set_padding(&self->component,
 		psy_ui_margin_make_em(0.0, 0.0, 0.5, 0.0));
-	psy_ui_component_set_defaultalign(&self->component, psy_ui_ALIGN_LEFT,
+	psy_ui_component_set_default_align(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	psy_ui_button_init(&self->up, &self->component);
 	psy_ui_button_seticon(&self->up, psy_ui_ICON_UP);
@@ -86,7 +86,7 @@ void playlistview_init(PlaylistView* self, psy_ui_Component* parent,
 	propertiesview_init(&self->view, &self->component,
 		tabbarparent, workspace_recentsongs(workspace), 1,
 		&workspace->inputhandler);
-	propertiesview_enablemousepropagation(&self->view);		
+	propertiesview_enable_mouse_propagation(&self->view);		
 	propertiesrenderer_set_style(&self->view.renderer,
 		STYLE_RECENTVIEW_MAINSECTION,
 		STYLE_RECENTVIEW_MAINSECTIONHEADER,

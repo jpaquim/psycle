@@ -150,9 +150,9 @@ void cmdplayer_restartdriver(CmdPlayer* self)
 	driversection = NULL;
 	// load
 	printf("load driver %s:\n",
-		audioconfig_driverpath(&self->audioconfig));
+		audioconfig_driver_path(&self->audioconfig));
 	psy_audio_player_loaddriver(&self->player,
-		audioconfig_driverpath(&self->audioconfig),
+		audioconfig_driver_path(&self->audioconfig),
 		NULL /*no config*/, FALSE /*do not open yet*/);
 	// configure	
 	if (psy_audiodriver_configuration(self->player.driver)) {
@@ -162,7 +162,7 @@ void cmdplayer_restartdriver(CmdPlayer* self)
 			PSY_PROPERTY_TYPE_NONE);
 	}
 	// start
-	psy_audio_player_restartdriver(&self->player, driversection);
+	psy_audio_player_restart_driver(&self->player, driversection);
 	if (self->player.driver) {
 		printf("Audio driver %s \n",
 			psy_audiodriver_info(self->player.driver)->Name);
@@ -172,7 +172,7 @@ void cmdplayer_restartdriver(CmdPlayer* self)
 void cmdplayer_initplugincatcherandmachinefactory(CmdPlayer* self)
 {
 	psy_audio_plugincatcher_init(&self->plugincatcher);
-	psy_audio_plugincatcher_setdirectories(&self->plugincatcher, self->directories);
+	psy_audio_plugincatcher_set_directories(&self->plugincatcher, self->directories);
 	psy_signal_connect(&self->plugincatcher.signal_scanfile, self,
 		cmdplayer_onscanfile);
 	if (psy_audio_plugincatcher_load(&self->plugincatcher) == PSY_ERRFILE) {
@@ -370,7 +370,7 @@ void cmdplayer_loadsong(CmdPlayer* self, const char* path)
 	old_song = self->song;
 	psy_audio_exclusivelock_enter();	
 	self->song = psy_audio_song_allocinit(&self->machinefactory);
-	psy_audio_machinecallback_setsong(&self->machinecallback, self->song);
+	psy_audio_machinecallback_set_song(&self->machinecallback, self->song);
 	songfile.song = self->song;
 	songfile.file = 0;
 	psy_audio_songfile_init(&songfile);

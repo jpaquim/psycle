@@ -46,10 +46,10 @@ void newvalview_init(NewValView* self, psy_ui_Component* parent,
 	psy_ui_component_init_align(&self->editbar, newvalview_base(self), NULL,
 		psy_ui_ALIGN_TOP);
 	psy_ui_component_set_align_expand(&self->editbar, psy_ui_HEXPAND);
-	psy_ui_component_set_defaultalign(&self->editbar, psy_ui_ALIGN_LEFT,
+	psy_ui_component_set_default_align(&self->editbar, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	psy_ui_textarea_init_single_line(&self->edit, &self->editbar);	
-	psy_ui_textarea_setcharnumber(&self->edit, 40);
+	psy_ui_textarea_set_char_number(&self->edit, 40);
 	psy_ui_component_set_align(psy_ui_textarea_base(&self->edit),
 		psy_ui_ALIGN_LEFT);
 	psy_ui_button_init_text_connect(&self->apply, &self->editbar,

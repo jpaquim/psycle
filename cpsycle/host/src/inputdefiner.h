@@ -1,22 +1,26 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #if !defined(INPUTDEFINER_H)
 #define INPUTDEFINER_H
 
-// ui
+/* ui */
 #include <uicomponent.h>
 
-// InputDefiner
-//
-// Component to define a keyboard shortcut. It is used by the SettingsView to
-// edit the keyboard settings.
+/*
+** InputDefiner
+**
+** Component to define a keyboard shortcut. It is used by the SettingsView to
+** edit the keyboard settings.
+*/
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// InputDefinerKeyNames
+/* InputDefinerKeyNames */
 typedef struct InputDefinerKeyNames {
 	psy_Table container;
 } InputDefinerKeyNames;
@@ -29,16 +33,16 @@ void inputdefinerkeynames_add(InputDefinerKeyNames*,
 const char* inputdefinerkeynames_at(const InputDefinerKeyNames*,
 	uintptr_t keycode);
 
-// InputDefiner
+/* InputDefiner */
 typedef struct InputDefiner {
-	// inherits 
+	/* inherits */
 	psy_ui_Component component;
-	// signals
+	/* signals */
 	psy_Signal signal_accept;
-	// internal
+	/* internal */
 	uint32_t input;
-	int regularkey;
-	bool preventhook;
+	int regular_key;
+	bool prevent_hook;
 } InputDefiner;
 
 void inputdefiner_init(InputDefiner*, psy_ui_Component* parent);

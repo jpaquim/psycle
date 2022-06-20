@@ -1,6 +1,6 @@
 /*
 ** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #if !defined(TRACKBOX_H)
@@ -42,13 +42,13 @@ void trackbox_init(TrackBox*, psy_ui_Component* parent);
 TrackBox* trackbox_alloc(void);
 TrackBox* trackbox_allocinit(psy_ui_Component* parent);
 
-void trackbox_setdescription(TrackBox*, const char* text);
-void trackbox_setindex(TrackBox*, uintptr_t index);
+void trackbox_set_description(TrackBox*, const char* text);
+void trackbox_set_index(TrackBox*, uintptr_t index);
 void trackbox_mute(TrackBox*);
 void trackbox_unmute(TrackBox*);
 void trackbox_solo(TrackBox*);
 void trackbox_unsolo(TrackBox*);
-void trackbox_preventclose(TrackBox*);
+void trackbox_prevent_close(TrackBox*);
 
 INLINE uintptr_t trackbox_trackindex(const TrackBox* self)
 {

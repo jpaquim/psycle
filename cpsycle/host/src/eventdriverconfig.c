@@ -66,15 +66,15 @@ void eventdriverconfig_makeeventdriverlist(EventDriverConfig* self)
 	psy_property_append_str(self->installeddriver, "mmemidi", ".\\mmemidi.dll");
 	psy_property_append_str(self->installeddriver, "dxjoystick", ".\\dxjoystick.dll");
 #endif
-	psy_property_setid(psy_property_settext(
+	psy_property_set_id(psy_property_settext(
 		psy_property_append_action(self->eventinputs, "addeventdriver"),
 		"Add to active drivers"),
 		PROPERTY_ID_ADDEVENTDRIVER);
-	self->activedrivers = psy_property_enableappend(psy_property_setid(
+	self->activedrivers = psy_property_enableappend(psy_property_set_id(
 		psy_property_settext(psy_property_append_choice(
 			self->eventinputs, "activedrivers", 0),
 		"Active Drivers"), PROPERTY_ID_ACTIVEEVENTDRIVERS));
-	psy_property_setid(psy_property_settext(
+	psy_property_set_id(psy_property_settext(
 		psy_property_append_action(self->eventinputs, "removeeventdriver"),
 		"Remove active driver"),
 		PROPERTY_ID_REMOVEEVENTDRIVER);
@@ -84,7 +84,7 @@ void eventdriverconfig_makeeventdriverlist(EventDriverConfig* self)
 		"Configure");
 }
 
-void eventdriverconfig_registereventdrivers(EventDriverConfig* self)
+void eventdriverconfig_register_event_drivers(EventDriverConfig* self)
 {
 	psy_List* p;
 
@@ -346,13 +346,13 @@ void eventdriverconfig_show_active(EventDriverConfig* self, intptr_t driverid)
 	psy_property_clear(self->eventdriverconfigure);
 	eventdriver = psy_audio_player_eventdriver(self->player, driverid);
 	if (eventdriver && psy_eventdriver_configuration(eventdriver)) {
-		psy_property_setid(psy_property_settext(
+		psy_property_set_id(psy_property_settext(
 			psy_property_append_action(self->eventdriverconfigure, "defaults"),
 			"Defaults"), PROPERTY_ID_EVENTDRIVERCONFIGDEFAULTS);
-		psy_property_setid(psy_property_settext(
+		psy_property_set_id(psy_property_settext(
 			psy_property_append_action(self->eventdriverconfigure, "load"),
 			"Load"), PROPERTY_ID_EVENTDRIVERCONFIGLOAD);
-		psy_property_setid(psy_property_settext(
+		psy_property_set_id(psy_property_settext(
 			psy_property_append_action(self->eventdriverconfigure, "save"),
 			"Save"), PROPERTY_ID_EVENTDRIVERCONFIGKEYMAPSAVE);		
 		psy_property_preventsave(self->eventdriverconfigure);

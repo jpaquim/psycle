@@ -35,7 +35,6 @@ typedef enum {
 	VUMETER_RMS,	
 } VUMeterMode;
 
-
 typedef struct psy_audio_MachineWork {
 	uintptr_t amount;
 	uintptr_t slot;
@@ -56,15 +55,12 @@ psy_audio_PatternEvent psy_audio_patterndefaults_fill_event(const
 	psy_audio_PatternDefaults*, uintptr_t track,
 	psy_audio_PatternEvent src);
 
+/* psy_audio_Player */
 typedef struct psy_audio_Player {
 	psy_AudioDriver* driver;
-	psy_audio_Song* song;
-	/*
-	** empty song for lock minimized
-	** song switching	
-	*/
+	psy_audio_Song* song;	
 	psy_audio_MachineFactory machinefactory;
-	psy_audio_Song emptysong;
+	psy_audio_Song emptysong; /* dummy song while song switching */
 	psy_audio_Sequencer sequencer;	
 	psy_Signal signal_lpbchanged;
 	psy_Signal signal_inputevent;
@@ -259,7 +255,7 @@ void psy_audio_player_loaddriver(psy_audio_Player*, const char* path,
 void psy_audio_player_unloaddriver(psy_audio_Player*);
 void psy_audio_player_reloaddriver(psy_audio_Player*, const char* path,
 	psy_Property* config);
-void psy_audio_player_restartdriver(psy_audio_Player*,
+void psy_audio_player_restart_driver(psy_audio_Player*,
 	const psy_Property* config);
 /* event recording */
 void psy_audio_player_startrecordingnotes(psy_audio_Player*);

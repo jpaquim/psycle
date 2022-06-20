@@ -15,22 +15,22 @@
 
 /* prototypes */
 static void trackbox_on_destroyed(TrackBox*);
-static void trackbox_updatetrack(TrackBox*);
-static void trackbox_onmute(TrackBox*, psy_ui_Button* sender);
-static void trackbox_onsolo(TrackBox*, psy_ui_Button* sender);
-static void trackbox_onclose(TrackBox*, psy_ui_Button* sender);
-static void trackbox_onresizemousedown(TrackBox*, psy_ui_Component* sender,
+static void trackbox_update_track(TrackBox*);
+static void trackbox_on_mute(TrackBox*, psy_ui_Button* sender);
+static void trackbox_on_solo(TrackBox*, psy_ui_Button* sender);
+static void trackbox_on_close(TrackBox*, psy_ui_Button* sender);
+static void trackbox_on_resize_mouse_down(TrackBox*, psy_ui_Component* sender,
 	psy_ui_MouseEvent*);
-static void trackbox_onresizemousemove(TrackBox*, psy_ui_Component* sender,
+static void trackbox_on_resize_mouse_move(TrackBox*, psy_ui_Component* sender,
 	psy_ui_MouseEvent*);
-static void trackbox_onresizemouseup(TrackBox*, psy_ui_Component* sender,
+static void trackbox_on_resize_mouse_up(TrackBox*, psy_ui_Component* sender,
 	psy_ui_MouseEvent*);
 
 /* vtable */
 static psy_ui_ComponentVtable trackbox_vtable;
 static bool trackbox_vtable_initialized = FALSE;
 
-static void trackbox_vtableinit_init(TrackBox* self)
+static void trackbox_vtable_init(TrackBox* self)
 {
 	if (!trackbox_vtable_initialized) {
 		trackbox_vtable = *(self->component.vtable);
@@ -39,21 +39,19 @@ static void trackbox_vtableinit_init(TrackBox* self)
 			trackbox_on_destroyed;
 		trackbox_vtable_initialized = TRUE;
 	}
-	psy_ui_component_set_vtable(&self->component, &trackbox_vtable);
+	psy_ui_component_set_vtable(trackbox_base(self), &trackbox_vtable);
 }
 
 /* implementation */
 void trackbox_init(TrackBox* self, psy_ui_Component* parent)
-{
-	psy_ui_Margin spacing;
-	
+{		
 	psy_ui_component_init(trackbox_base(self), parent, NULL);
-	trackbox_vtableinit_init(self);
-	psy_ui_margin_init_em(&spacing, 0.0, 0.0, 0.0, 1.0);
-	psy_ui_component_set_padding(trackbox_base(self), spacing);
+	trackbox_vtable_init(self);
+	psy_ui_component_set_padding(trackbox_base(self), 
+		psy_ui_margin_make_em(0.0, 0.0, 0.0, 1.0));
 	psy_ui_component_init(&self->client, &self->component, NULL);
 	psy_ui_component_set_align(&self->client, psy_ui_ALIGN_TOP);
-	psy_ui_component_set_defaultalign(&self->client,
+	psy_ui_component_set_default_align(&self->client,
 		psy_ui_ALIGN_LEFT, psy_ui_defaults_hmargin(psy_ui_defaults()));
 	psy_ui_component_set_align_expand(&self->client,
 		psy_ui_HEXPAND);
@@ -64,11 +62,11 @@ void trackbox_init(TrackBox* self, psy_ui_Component* parent)
 	psy_ui_component_set_preferred_size(&self->resize,
 		psy_ui_size_make_px(0.0, 4));	
 	psy_signal_connect(&self->resize.signal_mousedown, self,
-		trackbox_onresizemousedown);
+		trackbox_on_resize_mouse_down);
 	psy_signal_connect(&self->resize.signal_mousemove, self,
-		trackbox_onresizemousemove);
+		trackbox_on_resize_mouse_move);
 	psy_signal_connect(&self->resize.signal_mouseup, self,
-		trackbox_onresizemouseup);
+		trackbox_on_resize_mouse_up);
 	self->doresize = FALSE;
 	self->baseheight = 0.0;
 	self->dragoffset = 0.0;
@@ -77,7 +75,7 @@ void trackbox_init(TrackBox* self, psy_ui_Component* parent)
 	psy_ui_label_init(&self->track, &self->client);
 	psy_ui_label_set_textalignment(&self->track, psy_ui_ALIGNMENT_CENTER);
 	psy_ui_label_prevent_translation(&self->track);		
-	psy_ui_label_set_charnumber(&self->track, 5);
+	psy_ui_label_set_char_number(&self->track, 5);
 	psy_ui_button_init(&self->solo, &self->client);
 	psy_ui_button_prevent_translation(&self->solo);
 	psy_ui_button_set_text(&self->solo, "S");	
@@ -99,10 +97,10 @@ void trackbox_init(TrackBox* self, psy_ui_Component* parent)
 	psy_signal_init(&self->signal_solo);
 	psy_signal_init(&self->signal_close);
 	psy_signal_init(&self->signal_resize);
-	psy_signal_connect(&self->mute.signal_clicked, self, trackbox_onmute);
-	psy_signal_connect(&self->solo.signal_clicked, self, trackbox_onsolo);
-	psy_signal_connect(&self->close.signal_clicked, self, trackbox_onclose);	
-	trackbox_updatetrack(self);
+	psy_signal_connect(&self->mute.signal_clicked, self, trackbox_on_mute);
+	psy_signal_connect(&self->solo.signal_clicked, self, trackbox_on_solo);
+	psy_signal_connect(&self->close.signal_clicked, self, trackbox_on_close);	
+	trackbox_update_track(self);
 }
 
 void trackbox_on_destroyed(TrackBox* self)
@@ -130,18 +128,18 @@ TrackBox* trackbox_allocinit(psy_ui_Component* parent)
 	return rv;
 }
 
-void trackbox_setdescription(TrackBox* self, const char* text)
+void trackbox_set_description(TrackBox* self, const char* text)
 {
 	psy_ui_label_set_text(&self->desc, text);
 }
 
-void trackbox_setindex(TrackBox* self, uintptr_t index)
+void trackbox_set_index(TrackBox* self, uintptr_t index)
 {	
 	self->trackidx = index;
-	trackbox_updatetrack(self);
+	trackbox_update_track(self);
 }
 
-void trackbox_updatetrack(TrackBox* self)
+void trackbox_update_track(TrackBox* self)
 {
 	char text[64];
 
@@ -178,7 +176,7 @@ void trackbox_unsolo(TrackBox* self)
 	psy_ui_button_disable_highlight(&self->solo);
 }
 
-void trackbox_preventclose(TrackBox* self)
+void trackbox_prevent_close(TrackBox* self)
 {
 	self->closeprevented = TRUE;
 	if (self->trackidx == 0) {
@@ -188,23 +186,23 @@ void trackbox_preventclose(TrackBox* self)
 	}
 }
 
-// delegate button clicked signals to trackbox signals
-void trackbox_onmute(TrackBox* self, psy_ui_Button* sender)
+/* delegate button clicked signals to trackbox signals */
+void trackbox_on_mute(TrackBox* self, psy_ui_Button* sender)
 {
 	psy_signal_emit(&self->signal_mute, self, 0);
 }
 
-void trackbox_onsolo(TrackBox* self, psy_ui_Button* sender)
+void trackbox_on_solo(TrackBox* self, psy_ui_Button* sender)
 {
 	psy_signal_emit(&self->signal_solo, self, 0);
 }
 
-void trackbox_onclose(TrackBox* self, psy_ui_Button* sender)
+void trackbox_on_close(TrackBox* self, psy_ui_Button* sender)
 {
 	psy_signal_emit(&self->signal_close, self, 0);
 }
 
-void trackbox_onresizemousedown(TrackBox* self, psy_ui_Component* sender,
+void trackbox_on_resize_mouse_down(TrackBox* self, psy_ui_Component* sender,
 	psy_ui_MouseEvent* ev)
 {
 	psy_ui_RealSize size;
@@ -218,7 +216,7 @@ void trackbox_onresizemousedown(TrackBox* self, psy_ui_Component* sender,
 		psy_ui_CURSORSTYLE_ROW_RESIZE);
 }
 
-void trackbox_onresizemousemove(TrackBox* self, psy_ui_Component* sender,
+void trackbox_on_resize_mouse_move(TrackBox* self, psy_ui_Component* sender,
 	psy_ui_MouseEvent* ev)
 {
 	if (self->doresize) {
@@ -231,7 +229,7 @@ void trackbox_onresizemousemove(TrackBox* self, psy_ui_Component* sender,
 		psy_ui_CURSORSTYLE_ROW_RESIZE);
 }
 
-void trackbox_onresizemouseup(TrackBox* self, psy_ui_Component* sender,
+void trackbox_on_resize_mouse_up(TrackBox* self, psy_ui_Component* sender,
 	psy_ui_MouseEvent* ev)
 {
 	psy_ui_component_release_capture(&self->resize);

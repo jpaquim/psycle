@@ -8,6 +8,7 @@
 
 #include "uidefaults.h"
 /* local */
+#include "uilclaligner.h"
 #include "uifont.h"
 /* file */
 #include <dir.h>
@@ -19,7 +20,7 @@ void psy_ui_defaults_init(psy_ui_Defaults* self, psy_ui_ThemeMode theme)
 	psy_ui_defaults_inittheme(self, theme, FALSE);	
 	psy_ui_margin_init_em(&self->hmargin, 0.0, 1.0, 0.0, 0.0);		
 	psy_ui_margin_init_em(&self->vmargin, 0.0, 0.0, 0.5, 0.0);		
-	psy_ui_margin_init_em(&self->cmargin, 0.0, 0.5, 0.5, 0.5);		
+	psy_ui_margin_init_em(&self->cmargin, 0.0, 0.5, 0.5, 0.5);	
 }
 
 void psy_ui_defaults_inittheme(psy_ui_Defaults* self, psy_ui_ThemeMode theme,
@@ -77,7 +78,7 @@ void psy_ui_defaults_load_theme(psy_ui_Defaults* self, const char* dir,
 
 		self->styles.theme = theme;
 		psy_ui_styles_configure(&self->styles, styleconfig);				
-		psy_ui_fontinfo_init(&fontinfo, "Tahoma", -16);
+		psy_ui_fontinfo_init(&fontinfo, "Tahoma", 16);
 		psy_ui_font_init(&psy_ui_defaults_style(self, psy_ui_STYLE_ROOT)->font,
 			&fontinfo);		
 	}	

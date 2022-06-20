@@ -308,7 +308,7 @@ void psy_ui_tabbar_init(psy_ui_TabBar* self, psy_ui_Component* parent)
 	self->selected = 0;
 	self->prevent_translation = FALSE;
 	self->tab_alignment = psy_ui_ALIGN_LEFT;
-	psy_ui_component_set_defaultalign(&self->component, self->tab_alignment,
+	psy_ui_component_set_default_align(&self->component, self->tab_alignment,
 		psy_ui_margin_zero());	
 }
 
@@ -319,7 +319,7 @@ void tabbar_on_destroyed(psy_ui_TabBar* self)
 	psy_signal_dispose(&self->signal_change);
 }
 
-void psy_ui_tabbar_settabalign(psy_ui_TabBar* self, psy_ui_AlignType align)
+void psy_ui_tabbar_set_tab_align(psy_ui_TabBar* self, psy_ui_AlignType align)
 {	
 	psy_List* p;
 	psy_List* q;
@@ -327,8 +327,10 @@ void psy_ui_tabbar_settabalign(psy_ui_TabBar* self, psy_ui_AlignType align)
 	assert(self);
 	
 	self->tab_alignment = align;
-	psy_ui_component_set_defaultalign(&self->component, align,
-		self->component.containeralign->insertmargin);
+	if (self->component.aligner) {
+		psy_ui_component_set_default_align(&self->component, align,
+			self->component.aligner->insertmargin);
+	}
 	q = psy_ui_component_children(psy_ui_tabbar_base(self),
 		psy_ui_NONE_RECURSIVE);
 	for (p = q; p != NULL; p = p->next) {

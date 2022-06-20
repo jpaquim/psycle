@@ -29,7 +29,7 @@ void pianobar_init(PianoBar* self, psy_ui_Component* parent)
 	assert(self);
 		
 	psy_ui_component_init(&self->component, parent, NULL);
-	psy_ui_component_set_defaultalign(&self->component, psy_ui_ALIGN_LEFT,
+	psy_ui_component_set_default_align(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_margin_make_em(0.0, 1.0, 0.0, 0.0));	
 	psy_ui_label_init_text(&self->beats, pianobar_base(self),
 		"patternview.beats");
@@ -541,7 +541,7 @@ void set_cmd(psy_Property* cmds, uintptr_t cmd, uint32_t keycode, bool shift,
 
 	psy_snprintf(text, 256, "cmds.%s", key);
 	psy_property_sethint(psy_property_settext(psy_property_setshorttext(
-		psy_property_setid(psy_property_append_int(cmds, key,
+		psy_property_set_id(psy_property_append_int(cmds, key,
 			psy_audio_encodeinput(keycode, shift, ctrl, 0, 0), 0, 0),
 			cmd), shorttext), text), PSY_PROPERTY_HINT_SHORTCUT);
 }

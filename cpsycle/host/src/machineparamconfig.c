@@ -63,11 +63,11 @@ void machineparamconfig_makeview(MachineParamConfig* self, psy_Property* parent)
 	psy_property_settext(
 		psy_property_append_font(self->paramview, "font", PSYCLE_DEFAULT_FONT),
 		"settingsview.paramview.font");
-	psy_property_setid(psy_property_settext(
+	psy_property_set_id(psy_property_settext(
 		psy_property_append_action(self->paramview, "loadcontrolskin"),
 		"settingsview.paramview.load-dial-bitmap"),
 		PROPERTY_ID_LOADCONTROLSKIN);
-	psy_property_setid(psy_property_settext(
+	psy_property_set_id(psy_property_settext(
 		psy_property_append_action(self->paramview, "defaultskin"),
 		"settingsview.paramview.default-skin"),
 		PROPERTY_ID_DEFAULTCONTROLSKIN);
@@ -194,7 +194,7 @@ psy_ui_FontInfo machineparamconfig_fontinfo(const MachineParamConfig* self)
 	assert(self->paramview);
 
 	psy_ui_fontinfo_init_string(&rv,
-		psy_property_at_str(self->paramview, "font", "tahoma;-16"));
+		psy_property_at_str(self->paramview, "font", "tahoma; 16"));
 	return rv;
 }
 

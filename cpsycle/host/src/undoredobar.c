@@ -47,7 +47,7 @@ void undoredobar_init(UndoRedoBar* self, psy_ui_Component* parent,
 	vtable_init(self);
 	self->workspace = workspace;
 	psy_ui_component_set_style_type(undoredobar_base(self), STYLE_UNDOBAR);		
-	psy_ui_component_set_defaultalign(undoredobar_base(self), psy_ui_ALIGN_LEFT,
+	psy_ui_component_set_default_align(undoredobar_base(self), psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));	
 	psy_ui_button_init_connect(&self->undobutton, undoredobar_base(self),
 		self, undoredobar_onundo);

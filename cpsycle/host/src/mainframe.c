@@ -288,7 +288,7 @@ void mainframe_init_layout(MainFrame* self)
 		psy_ui_ALIGN_CLIENT);	
 	psy_ui_component_init_align(&self->top, &self->pane,
 		NULL, psy_ui_ALIGN_TOP);	
-	psy_ui_component_set_defaultalign(&self->top, psy_ui_ALIGN_TOP,
+	psy_ui_component_set_default_align(&self->top, psy_ui_ALIGN_TOP,
 		psy_ui_margin_zero());
 	mainviews_init(&self->mainviews, &self->client, &self->pane, &self->workspace);
 	psy_ui_component_set_align(&self->mainviews.component, psy_ui_ALIGN_CLIENT);
@@ -378,7 +378,7 @@ void mainframe_init_bars(MainFrame* self)
 	psy_ui_component_init_align(&self->toprows, &self->top, NULL,
 		psy_ui_ALIGN_TOP);	
 	psy_ui_component_set_style_type(&self->toprows, STYLE_TOPROWS);
-	psy_ui_component_set_defaultalign(&self->toprows, psy_ui_ALIGN_TOP,
+	psy_ui_component_set_default_align(&self->toprows, psy_ui_ALIGN_TOP,
 		psy_ui_margin_zero());
 	/* row0 */
 	psy_ui_component_init(&self->toprow0, &self->toprows, NULL);
@@ -392,7 +392,7 @@ void mainframe_init_bars(MainFrame* self)
 	psy_ui_component_set_align(&self->toprow0_bars, psy_ui_ALIGN_TOP);
 	psy_ui_component_set_style_type(&self->toprow0_bars, STYLE_TOPROW0_BARS);
 	psy_ui_margin_init_em(&margin, 0.0, 2.0, 0.0, 0.0);
-	psy_ui_component_set_defaultalign(&self->toprow0_bars, psy_ui_ALIGN_LEFT,
+	psy_ui_component_set_default_align(&self->toprow0_bars, psy_ui_ALIGN_LEFT,
 		margin);
 	filebar_init(&self->filebar, &self->toprow0_bars, &self->workspace);
 	undoredobar_init(&self->undoredobar, &self->toprow0_bars, &self->workspace);
@@ -486,8 +486,7 @@ void mainframe_init_main_pane(MainFrame* self)
 	psy_signal_connect(&self->workspace.signal_viewselected, self,
 		mainframe_on_view_selected);
 	confirmbox_init(&self->checkunsavedbox,
-		psy_ui_notebook_base(&self->mainviews.notebook),
-		&self->workspace);
+		psy_ui_notebook_base(&self->mainviews.notebook));
 	psy_ui_component_set_id(confirmbox_base(&self->checkunsavedbox),
 		VIEW_ID_CHECKUNSAVED);
 	psy_signal_connect(&self->mainviews.mainviewbar.tabbar.signal_change, self,

@@ -53,11 +53,11 @@ void sampleeditorbar_init(SampleEditorBar* self, psy_ui_Component* parent,
 	psy_ui_label_init_text(&self->selstartlabel, &self->component,
 		"samplesview.selstart");
 	psy_ui_textarea_init_single_line(&self->selstartedit, &self->component);	
-	psy_ui_textarea_setcharnumber(&self->selstartedit, 10);			
+	psy_ui_textarea_set_char_number(&self->selstartedit, 10);			
 	psy_ui_label_init_text(&self->selendlabel, &self->component,
 		"samplesview.selend");
 	psy_ui_textarea_init_single_line(&self->selendedit, &self->component);	
-	psy_ui_textarea_setcharnumber(&self->selendedit, 10);
+	psy_ui_textarea_set_char_number(&self->selendedit, 10);
 	psy_ui_label_init_text(&self->visualrepresentationdesc, &self->component,
 		"samplesview.visual");
 	psy_ui_checkbox_init(&self->doublecontloop, &self->component);

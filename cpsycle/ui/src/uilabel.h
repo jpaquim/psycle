@@ -53,7 +53,7 @@ void psy_ui_label_add_text(psy_ui_Label*, const char* text);
 /* returns the text owned by the label */
 const char* psy_ui_label_text(const psy_ui_Label*);
 void psy_ui_label_set_default_text(psy_ui_Label*, const char* text);
-void psy_ui_label_set_charnumber(psy_ui_Label*, double number);
+void psy_ui_label_set_char_number(psy_ui_Label*, double number);
 void psy_ui_label_set_line_spacing(psy_ui_Label*, double spacing);
 void psy_ui_label_set_textalignment(psy_ui_Label*, psy_ui_Alignment);
 void psy_ui_label_prevent_translation(psy_ui_Label*);

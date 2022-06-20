@@ -49,7 +49,7 @@ void samplesbox_init(SamplesBox* self, psy_ui_Component* parent,
 	vtable_init(self);
 	psy_ui_label_init(&self->header, &self->component);
 	psy_ui_label_set_text(&self->header, "samplesview.groupsfirstsample");
-	psy_ui_label_set_charnumber(&self->header, 25);
+	psy_ui_label_set_char_number(&self->header, 25);
 	psy_ui_component_set_margin(&self->header.component, margin);		
 	psy_ui_component_set_align(&self->header.component, psy_ui_ALIGN_TOP);	
 	psy_ui_listbox_init(&self->samplelist, &self->component);	

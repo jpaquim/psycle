@@ -238,7 +238,7 @@ bool psy_property_is_action(const psy_Property*);
 bool psy_property_issection(const psy_Property*);
 
 /* Description */
-psy_Property* psy_property_setid(psy_Property*, intptr_t id);
+psy_Property* psy_property_set_id(psy_Property*, intptr_t id);
 intptr_t psy_property_id(const psy_Property* self);
 psy_Property* psy_property_settext(psy_Property*, const char* text);
 const char* psy_property_text(const psy_Property*);

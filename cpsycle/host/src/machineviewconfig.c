@@ -85,7 +85,7 @@ void machineviewconfig_makeview(MachineViewConfig* self, psy_Property* parent)
 		psy_property_append_bool(self->machineview,
 			"drawmachineindexes", TRUE),
 		"settingsview.mv.draw-machine-indexes");
-	psy_property_setid(psy_property_settext(
+	psy_property_set_id(psy_property_settext(
 		psy_property_append_bool(self->machineview,
 			"drawvumeters", TRUE),
 		"settingsview.mv.draw-vumeters"),
@@ -94,7 +94,7 @@ void machineviewconfig_makeview(MachineViewConfig* self, psy_Property* parent)
 		psy_property_append_bool(self->machineview,
 			"drawwirehover", FALSE),
 		"settingsview.mv.draw-wirehover");
-	psy_property_setid(psy_property_settext(
+	psy_property_set_id(psy_property_settext(
 		psy_property_append_bool(self->machineview,
 			"drawvirtualgenerators", FALSE),
 		"settingsview.mv.draw-virtualgenerators"),
@@ -217,7 +217,7 @@ void machineviewconfig_maketheme(MachineViewConfig* self, psy_Property* parent)
 			"mv_triangle_size", style_value, 0, 0),
 			PSY_PROPERTY_HINT_EDIT),
 		"settingsview.mv.theme.polygon-size");	
-	self->machineskins = psy_property_setid(
+	self->machineskins = psy_property_set_id(
 		psy_property_sethint(psy_property_settext(
 		psy_property_append_choice(self->theme, "skins", 0),
 		"Skin"), PSY_PROPERTY_HINT_COMBO),

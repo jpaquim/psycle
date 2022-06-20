@@ -177,7 +177,7 @@ void plugineditor_on_destroyed(PluginEditor* self)
 void plugineditor_inittitlebar(PluginEditor* self)
 {
 	titlebar_init(&self->titlebar, &self->component, "Plugin Editor");
-	titlebar_hideonclose(&self->titlebar);
+	titlebar_hide_on_close(&self->titlebar);
 }
 
 void plugineditor_onmachineschangeslot(PluginEditor* self,
@@ -392,7 +392,7 @@ void plugineditor_updatefont(PluginEditor* self)
 	assert(self);
 
 	zoomrate = psy_ui_app_zoomrate(psy_ui_app()) * self->zoom;	
-	psy_ui_fontinfo_init(&fontinfo, "Consolas", -16);
+	psy_ui_fontinfo_init(&fontinfo, "Consolas", 16);
 	fontinfo.lfHeight = (int32_t)((double)fontinfo.lfHeight * zoomrate);
 	psy_ui_font_init(&font, &fontinfo);
 	psy_ui_component_setfont(&self->editor.textarea.pane.component, &font);

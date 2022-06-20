@@ -152,8 +152,8 @@ void propertiesview_reload(PropertiesView*);
 void propertiesview_mark(PropertiesView*, psy_Property*);
 void propertiesview_select(PropertiesView*, psy_Property*);
 psy_Property* propertiesview_selected(PropertiesView*);
-void propertiesview_enablemousepropagation(PropertiesView*);
-void propertiesview_prevent_maximize_mainsections(PropertiesView*);
+void propertiesview_enable_mouse_propagation(PropertiesView*);
+void propertiesview_prevent_maximize_main_sections(PropertiesView*);
 
 INLINE psy_ui_Component* propertiesview_base(PropertiesView* self)
 {

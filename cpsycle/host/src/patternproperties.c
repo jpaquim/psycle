@@ -51,20 +51,20 @@ void patternproperties_init(PatternProperties* self, psy_ui_Component* parent)
 		patternproperties_vtable_init(self));	
 	self->patterns = NULL;
 	self->pattern_index = psy_INDEX_INVALID;
-	psy_ui_component_set_defaultalign(&self->component, psy_ui_ALIGN_LEFT,
+	psy_ui_component_set_default_align(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_margin_make(psy_ui_value_make_px(0), psy_ui_value_make_ew(2.0),
 			psy_ui_value_make_eh(1.0), psy_ui_value_make_px(0)));	
 	psy_ui_label_init_text(&self->namelabel, &self->component,
 		"patternview.patname");	
 	psy_ui_textarea_init_single_line(&self->nameedit, &self->component);	
 	psy_ui_textarea_set_text(&self->nameedit, "patternview.nopattern");
-	psy_ui_textarea_setcharnumber(&self->nameedit, 40);
+	psy_ui_textarea_set_char_number(&self->nameedit, 40);
 	// psy_ui_textarea_enable_input_field(&self->nameedit);
 	psy_ui_label_init_text(&self->lengthlabel, &self->component,
 		"patternview.length");
 	psy_ui_label_set_textalignment(&self->lengthlabel, psy_ui_ALIGNMENT_LEFT);
 	psy_ui_textarea_init_single_line(&self->lengthedit, &self->component);	
-	psy_ui_textarea_setcharnumber(&self->lengthedit, 20);
+	psy_ui_textarea_set_char_number(&self->lengthedit, 20);
 	// psy_ui_textarea_enable_input_field(&self->lengthedit);
 	psy_ui_button_init_connect(&self->applybutton, &self->component, self,
 		patternproperties_onapply);	
@@ -171,8 +171,8 @@ void patternproperties_select(PatternProperties* self, uintptr_t pattern_index)
 		if (pattern) {
 			psy_ui_textarea_set_text(&self->nameedit, psy_audio_pattern_name(pattern));
 			psy_snprintf(buffer, 20, "%.4f", (float)psy_audio_pattern_length(pattern));
-			intedit_setvalue(&self->timesig_numerator, (int)pattern->timesig.numerator);
-			intedit_setvalue(&self->timesig_denominator, (int)pattern->timesig.denominator);
+			intedit_set_value(&self->timesig_numerator, (int)pattern->timesig.numerator);
+			intedit_set_value(&self->timesig_denominator, (int)pattern->timesig.denominator);
 			psy_signal_connect(&pattern->signal_namechanged, self,
 				patternproperties_onpatternnamechanged);
 			psy_signal_connect(&pattern->signal_lengthchanged, self,

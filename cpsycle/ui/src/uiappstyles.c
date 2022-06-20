@@ -67,7 +67,7 @@ void psy_ui_appstyles_initdarktheme(psy_ui_Styles* self,
 #if defined(DIVERSALIS__OS__UNIX)
 		psy_ui_style_set_font(style, "FreeSans", 12);
 #else
-		psy_ui_style_set_font(style, "Tahoma", -16);
+		psy_ui_style_set_font(style, "Tahoma", 16);
 #endif	
 	}	
 	if (keepfont) {
@@ -323,7 +323,7 @@ void psy_ui_appstyles_initdarktheme(psy_ui_Styles* self,
 #if defined(DIVERSALIS__OS__UNIX)
 	psy_ui_style_set_font(style, "FreeMono", 12);
 #else
-	psy_ui_style_set_font(style, "Consolas", -16);
+	psy_ui_style_set_font(style, "Consolas", 16);
 #endif	
 	psy_ui_styles_set_style(self, psy_ui_STYLE_EDITOR, style);
 }
@@ -359,7 +359,7 @@ void psy_ui_appstyles_initlighttheme(psy_ui_Styles* self,
 #if defined(DIVERSALIS__OS__UNIX)
 		psy_ui_style_set_font(style, "FreeSans", 12);
 #else
-		psy_ui_style_set_font(style, "Tahoma", -16);
+		psy_ui_style_set_font(style, "Tahoma", 16);
 #endif		
 	}
 	if (keepfont) {
@@ -562,7 +562,7 @@ void psy_ui_appstyles_initlighttheme(psy_ui_Styles* self,
 #if defined(DIVERSALIS__OS__UNIX)
 	psy_ui_style_set_font(style, "FreeMono", 12);
 #else
-	psy_ui_style_set_font(style, "Consolas", -16);
+	psy_ui_style_set_font(style, "Consolas", 16);
 #endif
 	psy_ui_styles_set_style(self, psy_ui_STYLE_EDITOR, style);
 }
@@ -595,7 +595,7 @@ void psy_ui_appstyles_inittheme_win98(psy_ui_Styles* self, bool keepfont)
 #if defined(DIVERSALIS__OS__UNIX)
 		psy_ui_style_set_font(style, "FreeSans", 12);
 #else
-		psy_ui_style_set_font(style, "Tahoma", -16);
+		psy_ui_style_set_font(style, "Tahoma", 16);
 #endif
 	}
 	if (keepfont) {
@@ -787,7 +787,7 @@ void psy_ui_appstyles_inittheme_win98(psy_ui_Styles* self, bool keepfont)
 #if defined(DIVERSALIS__OS__UNIX)
 		psy_ui_style_set_font(style, "FreeMono", 12);
 #else
-		psy_ui_style_set_font(style, "Consolas", -16);
+		psy_ui_style_set_font(style, "Consolas", 16);
 #endif	
 	psy_ui_styles_set_style(self, psy_ui_STYLE_EDITOR, style);
 }

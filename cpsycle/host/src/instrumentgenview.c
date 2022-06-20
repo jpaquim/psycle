@@ -57,14 +57,14 @@ void instrumentgeneralview_init(InstrumentGeneralView* self,
 	psy_ui_Margin margin;
 	
 	psy_ui_component_init(&self->component, parent, NULL);
-	psy_ui_component_set_defaultalign(&self->component, psy_ui_ALIGN_TOP,
+	psy_ui_component_set_default_align(&self->component, psy_ui_ALIGN_TOP,
 		psy_ui_defaults_vmargin(psy_ui_defaults()));
 	psy_ui_margin_init_em(&margin, 0.0, 2.0, 1.5, 0.0);
 	self->instruments = instruments;
 	self->instrument = NULL;
 	/* nna */
 	psy_ui_component_init(&self->nna, &self->component, NULL);
-	psy_ui_component_set_defaultalign(&self->nna, psy_ui_ALIGN_LEFT,
+	psy_ui_component_set_default_align(&self->nna, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	margin = psy_ui_defaults_vmargin(psy_ui_defaults());
 	margin.top = psy_ui_value_make_eh(1.0);
@@ -85,7 +85,7 @@ void instrumentgeneralview_init(InstrumentGeneralView* self,
 	psy_ui_button_set_text(&self->nnanone, "instrumentview.none");
 	/* dct */
 	psy_ui_component_init(&self->dct, &self->component, NULL);
-	psy_ui_component_set_defaultalign(&self->dct, psy_ui_ALIGN_LEFT,
+	psy_ui_component_set_default_align(&self->dct, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));	
 	psy_ui_label_init_text(&self->dctheader, &self->dct,
 		"instrumentview.same");
@@ -122,13 +122,13 @@ void instrumentgeneralview_init(InstrumentGeneralView* self,
 	margin = psy_ui_defaults_vmargin(psy_ui_defaults());
 	margin.top = psy_ui_value_make_eh(1.0);
 	psy_ui_component_set_margin(&self->fitrow, margin);
-	psy_ui_component_set_defaultalign(&self->fitrow, psy_ui_ALIGN_LEFT,
+	psy_ui_component_set_default_align(&self->fitrow, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	psy_ui_checkbox_init(&self->fitrowcheck, &self->fitrow);
 	psy_signal_connect(&self->fitrowcheck.signal_clicked, self,
 		instrumentgeneralview_onfitrow);
 	psy_ui_textarea_init_single_line(&self->fitrowedit, &self->fitrow);
-	psy_ui_textarea_setcharnumber(&self->fitrowedit, 4);
+	psy_ui_textarea_set_char_number(&self->fitrowedit, 4);
 	psy_ui_label_init_text(&self->fitrowlabel, &self->fitrow,
 		"instrumentview.pattern-rows");
 	psy_ui_slider_init(&self->globalvolume, &self->component);

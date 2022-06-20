@@ -17,7 +17,7 @@ void patternviewstatus_init(PatternViewStatus* self, psy_ui_Component* parent,
 {	
 	psy_ui_component_init(&self->component, parent, NULL);
 	self->workspace = workspace;
-	psy_ui_component_set_defaultalign(&self->component, psy_ui_ALIGN_LEFT,
+	psy_ui_component_set_default_align(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_margin_make_em(0.0, 1.0, 0.0, 0.0));
 	/* pattern index */
 	psy_ui_label_init(&self->pat_desc, &self->component);
@@ -25,32 +25,32 @@ void patternviewstatus_init(PatternViewStatus* self, psy_ui_Component* parent,
 	psy_ui_label_set_text(&self->pat_desc, "Pat");
 	psy_ui_label_init(&self->pat, &self->component);
 	psy_ui_label_prevent_translation(&self->pat);
-	psy_ui_label_set_charnumber(&self->pat, 3.0);
+	psy_ui_label_set_char_number(&self->pat, 3.0);
 	/* line */
 	psy_ui_label_init(&self->ln_desc, &self->component);
 	psy_ui_label_prevent_translation(&self->ln_desc);
 	psy_ui_label_set_text(&self->ln_desc, "Ln");
 	psy_ui_label_init(&self->ln, &self->component);
 	psy_ui_label_prevent_translation(&self->ln);
-	psy_ui_label_set_charnumber(&self->ln, 3.0);
+	psy_ui_label_set_char_number(&self->ln, 3.0);
 	/* track */
 	psy_ui_label_init(&self->trk_desc, &self->component);
 	psy_ui_label_prevent_translation(&self->trk_desc);
 	psy_ui_label_set_text(&self->trk_desc, "Trk");
 	psy_ui_label_init(&self->trk, &self->component);
 	psy_ui_label_prevent_translation(&self->trk);
-	psy_ui_label_set_charnumber(&self->trk, 2.0);
+	psy_ui_label_set_char_number(&self->trk, 2.0);
 	/* col */
 	psy_ui_label_init(&self->col_desc, &self->component);
 	psy_ui_label_prevent_translation(&self->col_desc);
 	psy_ui_label_set_text(&self->col_desc, "Col");
 	psy_ui_label_init(&self->col, &self->component);
 	psy_ui_label_prevent_translation(&self->col);
-	psy_ui_label_set_charnumber(&self->col, 4.0);
+	psy_ui_label_set_char_number(&self->col, 4.0);
 	/* edit mode */	
 	psy_ui_label_init(&self->mode, &self->component);
 	psy_ui_label_prevent_translation(&self->mode);
-	psy_ui_label_set_charnumber(&self->mode, 4.0);
+	psy_ui_label_set_char_number(&self->mode, 4.0);
 }
 
 void patternviewstatus_update(PatternViewStatus* self)
@@ -136,7 +136,7 @@ void patternviewbar_init(PatternViewBar* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->component, parent, NULL);	
 	self->patconfig = patconfig;
 	self->workspace = workspace;	
-	psy_ui_component_set_defaultalign(patternviewbar_base(self),
+	psy_ui_component_set_default_align(patternviewbar_base(self),
 		psy_ui_ALIGN_LEFT, psy_ui_defaults_hmargin(psy_ui_defaults()));	
 	/* Zoom */
 	zoombox_init(&self->zoombox, patternviewbar_base(self));

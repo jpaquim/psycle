@@ -35,11 +35,9 @@ typedef struct ConfirmBox {
 	psy_ui_Button no;
 	psy_ui_Button cont;	
 	ConfirmBoxAction mode;	
-	/* references */
-	Workspace* workspace;
 } ConfirmBox;
 
-void confirmbox_init(ConfirmBox*, psy_ui_Component* parent, Workspace*);
+void confirmbox_init(ConfirmBox*, psy_ui_Component* parent);
 
 void confirmbox_set_exit_mode(ConfirmBox*);
 void confirmbox_set_labels(ConfirmBox* self, const char* title,

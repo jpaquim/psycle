@@ -62,7 +62,7 @@ void seqedittrackdesc_init(SeqEditTrackDesc* self, psy_ui_Component* parent,
 	psy_signal_init(&self->signal_resize);
 	self->workspace = workspace;
 	self->state = state;		
-	psy_ui_component_set_defaultalign(&self->component,
+	psy_ui_component_set_default_align(&self->component,
 		psy_ui_ALIGN_TOP, psy_ui_margin_zero());	
 	seqedittrackdesc_build(self);	
 	psy_signal_connect(&workspace->song->sequence.sequenceselection.signal_select, self,

@@ -21,7 +21,7 @@ void gearbuttons_init(GearButtons* self, psy_ui_Component* parent,
 	psy_ui_component_init(gearbuttons_base(self), parent, NULL);
 	psy_ui_component_set_style_type(&self->component,
 		STYLE_RECENTVIEW_MAINSECTION);
-	psy_ui_component_set_defaultalign(gearbuttons_base(self), psy_ui_ALIGN_TOP,
+	psy_ui_component_set_default_align(gearbuttons_base(self), psy_ui_ALIGN_TOP,
 		psy_ui_defaults_vmargin(psy_ui_defaults()));	
 	psy_ui_button_init_text(&self->createreplace, gearbuttons_base(self),
 		"gear.create-replace");
@@ -127,8 +127,8 @@ void gear_init(Gear* self, psy_ui_Component* parent, Workspace* workspace)
 void gear_inittitle(Gear* self)
 {	
 	titlebar_init(&self->titlebar, gear_base(self), "machinebar.gear");
-	titlebar_hideonclose(&self->titlebar);
-	titlebar_enabledrag(&self->titlebar, "gear");
+	titlebar_hide_on_close(&self->titlebar);
+	titlebar_enable_drag(&self->titlebar, "gear");
 }
 
 void gear_oncreate(Gear* self, psy_ui_Component* sender)

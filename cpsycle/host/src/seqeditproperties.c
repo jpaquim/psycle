@@ -259,14 +259,14 @@ void seqedittimesigproperties_init(SeqEditTimesigProperties* self, psy_ui_Compon
 	intedit_init(&self->nominator, &self->component, "Nominator", 1, 1, 0xF);
 	psy_ui_component_set_align(intedit_base(&self->nominator),
 		psy_ui_ALIGN_TOP);
-	psy_ui_label_set_charnumber(&self->nominator.desc, 14.0);
+	psy_ui_label_set_char_number(&self->nominator.desc, 14.0);
 	psy_ui_component_set_margin(&self->nominator.component,
 		psy_ui_margin_make_em(0.5, 0.0, 0.0, 0.0));	
 	/* denominator */
 	intedit_init(&self->denominator, &self->component, "Denominator", 1, 1, 0xF);
 	psy_ui_component_set_align(intedit_base(&self->denominator),
 		psy_ui_ALIGN_TOP);
-	psy_ui_label_set_charnumber(&self->denominator.desc, 14.0);
+	psy_ui_label_set_char_number(&self->denominator.desc, 14.0);
 	/* position */	
 	labelpair_init(&self->offset, &self->component, "Position", 12.0);
 	psy_ui_component_set_align(labelpair_base(&self->offset), psy_ui_ALIGN_TOP);	
@@ -306,8 +306,8 @@ void seqedittimesigproperties_settimesigindex(SeqEditTimesigProperties* self,
 
 			entry = (psy_audio_PatternEntry*)(node->entry); 
 			e = *psy_audio_patternentry_front(entry);
-			intedit_setvalue(&self->nominator, (e.cmd));
-			intedit_setvalue(&self->denominator, (e.parameter));				
+			intedit_set_value(&self->nominator, (e.cmd));
+			intedit_set_value(&self->denominator, (e.parameter));				
 			psy_snprintf(text, 64, "%7.3f", (float)entry->offset);		
 			psy_ui_label_set_text(&self->offset.second, text);
 		}
@@ -384,7 +384,7 @@ void seqeditloopproperties_init(SeqEditLoopProperties* self, psy_ui_Component* p
 	intedit_init(&self->numloops, &self->component, "Repetitions", 1, 1, 0xF);
 	psy_ui_component_set_align(intedit_base(&self->numloops),
 		psy_ui_ALIGN_TOP);
-	psy_ui_label_set_charnumber(&self->numloops.desc, 12.0);
+	psy_ui_label_set_char_number(&self->numloops.desc, 12.0);
 	psy_ui_component_set_margin(&self->numloops.component,
 		psy_ui_margin_make_em(0.5, 0.0, 0.0, 0.0));	
 	/* position */
@@ -467,7 +467,7 @@ void seqeditloopproperties_setloopindex(SeqEditLoopProperties* self, uintptr_t l
 		}
 		if (end) {		
 			e = *psy_audio_patternentry_front(end);
-			intedit_setvalue(&self->numloops, (e.parameter & 0x0F));
+			intedit_set_value(&self->numloops, (e.parameter & 0x0F));
 		}
 		if (start) {			
 			psy_snprintf(text, 64, "%7.3f", (float)start->offset);

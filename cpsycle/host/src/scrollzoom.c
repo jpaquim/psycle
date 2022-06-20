@@ -49,15 +49,15 @@ static void scrollzoomvtable_init(ScrollZoom* self)
 			scrollzoom_on_mouse_up;
 		scrollzoom_vtable_initialized = TRUE;
 	}
-	psy_ui_component_set_vtable(&self->component, &scrollzoom_vtable);
+	psy_ui_component_set_vtable(scrollzoom_base(self), &scrollzoom_vtable);
 }
 
 /* implementation */
 void scrollzoom_init(ScrollZoom* self, psy_ui_Component* parent)
 {		
 	psy_ui_component_init(&self->component, parent, NULL);
-	scrollzoomvtable_init(self);
-	psy_ui_component_preventalign(&self->component);	
+	scrollzoomvtable_init(self);	
+	psy_ui_component_set_aligner(&self->component, NULL);
 	self->start = 0.0;
 	self->end = 1.0;
 	self->dragmode = SCROLLZOOM_DRAG_NONE;

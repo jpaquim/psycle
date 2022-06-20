@@ -227,7 +227,7 @@ void paramview_build(ParamView* self)
 					component = psy_ui_component_allocinit(currcolumn, NULL);
 					psy_ui_component_set_preferred_size(component,
 						psy_ui_size_make_em(PARAMWIDTH_SMALL, 2.0));
-					psy_ui_component_preventalign(component);
+					psy_ui_component_set_aligner(component, NULL);
 					break; }
 				}
 				if (component) {

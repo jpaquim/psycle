@@ -48,7 +48,7 @@
     <ClCompile Include="src\songio.c">
       <Filter>file</Filter>
     </ClCompile>
-    <ClCompile Include="src\fileoutdriver.c">
+    <ClCompile Include="src\fileout_driver.c">
       <Filter>file</Filter>
     </ClCompile>
     <ClCompile Include="src\machine.c">
@@ -359,7 +359,7 @@
     <ClInclude Include="src\songio.h">
       <Filter>file</Filter>
     </ClInclude>
-    <ClInclude Include="src\fileoutdriver.h">
+    <ClInclude Include="src\fileout_driver.h">
       <Filter>file</Filter>
     </ClInclude>
     <ClInclude Include="src\psy3saver.h">

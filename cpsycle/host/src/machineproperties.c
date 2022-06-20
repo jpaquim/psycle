@@ -64,7 +64,7 @@ void machineproperties_init(MachineProperties* self, psy_ui_Component* parent,
 	self->macid = psy_INDEX_INVALID;			
 	psy_ui_component_set_style_type(&self->component,
 		STYLE_MV_PROPERTIES);	
-	psy_ui_component_set_defaultalign(&self->component, psy_ui_ALIGN_LEFT,
+	psy_ui_component_set_default_align(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));	
 	psy_ui_button_init_text_connect(&self->issolobypass, &self->component,
 		"machineview.pwr", self, machineproperties_onsolobypass);
@@ -74,7 +74,7 @@ void machineproperties_init(MachineProperties* self, psy_ui_Component* parent,
 		"Bus", self, machineproperties_ontogglebus);	
 	psy_ui_textarea_init_single_line(&self->nameedit, &self->component);	
 	psy_ui_textarea_set_text(&self->nameedit, psy_ui_translate("machineview.editname"));
-	psy_ui_textarea_setcharnumber(&self->nameedit, 40);	
+	psy_ui_textarea_set_char_number(&self->nameedit, 40);	
 	psy_ui_textarea_enable_input_field(&self->nameedit);
 	psy_signal_connect(&self->nameedit.signal_accept, self,
 		machineproperties_oneditaccept);

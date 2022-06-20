@@ -15,7 +15,7 @@
 
 /* psy_ui_FontInfo */
 void psy_ui_fontinfo_init(psy_ui_FontInfo* self, const char* family,
-	int32_t height)
+	double height)
 {
 	memset(self, 0, sizeof(psy_ui_FontInfo));
 	psy_snprintf(self->lfFaceName, 32, "%s", family);	
@@ -26,7 +26,7 @@ void psy_ui_fontinfo_init_string(psy_ui_FontInfo* self, const char* text)
 {	
 	memset(self, 0, sizeof(psy_ui_FontInfo));
 	self->lfFaceName[0] = '\0';
-	self->lfHeight = 12;
+	self->lfHeight = 12.0;
 	if (psy_strlen(text) > 0) {
 		char buffer[256];
 		char* token;
@@ -52,7 +52,7 @@ void psy_ui_fontinfo_init_string(psy_ui_FontInfo* self, const char* text)
 void psy_ui_fontinfo_string(const psy_ui_FontInfo* self, char* rv,
 	uintptr_t max_len)
 {
-	psy_snprintf(rv, max_len, "%s;%d", self->lfFaceName, self->lfHeight);
+	psy_snprintf(rv, max_len, "%s;%g", self->lfFaceName, (float)self->lfHeight);
 }
 
 /* psy_ui_Font */

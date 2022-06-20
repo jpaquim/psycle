@@ -201,8 +201,8 @@ void inputdefiner_init(InputDefiner* self, psy_ui_Component* parent)
 	psy_signal_init(&self->signal_accept);
 	keynames_init();
 	self->input = 0;
-	self->regularkey = 0;
-	self->preventhook = TRUE;
+	self->regular_key = 0;
+	self->prevent_hook = TRUE;
 	psy_signal_connect(&psy_ui_app()->signal_mousehook, self,
 		inputdefiner_on_mouse_hook);	
 }
@@ -318,15 +318,15 @@ void inputdefiner_on_key_down(InputDefiner* self, psy_ui_KeyboardEvent* ev)
 	if (psy_ui_keyboardevent_keycode(ev) == psy_ui_KEY_SHIFT ||
 			psy_ui_keyboardevent_keycode(ev) == psy_ui_KEY_CONTROL ||
 			psy_ui_keyboardevent_keycode(ev) == psy_ui_KEY_MENU) {
-		if (self->regularkey == 0) {
+		if (self->regular_key == 0) {
 			self->input = psy_audio_encodeinput(0, shift, ctrl, alt, up);
 		} else {
-			self->input = psy_audio_encodeinput(self->regularkey, shift, ctrl, alt, up);
+			self->input = psy_audio_encodeinput(self->regular_key, shift, ctrl, alt, up);
 		}
 	}
 	if (validkeycode(psy_ui_keyboardevent_keycode(ev))) {
-		self->regularkey = psy_ui_keyboardevent_keycode(ev);
-		self->input = psy_audio_encodeinput(self->regularkey, shift, ctrl, alt, up);
+		self->regular_key = psy_ui_keyboardevent_keycode(ev);
+		self->input = psy_audio_encodeinput(self->regular_key, shift, ctrl, alt, up);
 	}
 	psy_ui_component_invalidate(&self->component);
 	psy_ui_keyboardevent_stop_propagation(ev);
@@ -351,7 +351,7 @@ void inputdefiner_on_key_up(InputDefiner* self, psy_ui_KeyboardEvent* ev)
     ctrl = psy_ui_keyboardevent_ctrlkey(ev);
 	up = 0;
 	psy_audio_decodeinput(self->input, &inputkeycode, &inputshift, &inputctrl, &inputalt, &inputup);
-	if (self->regularkey) {
+	if (self->regular_key) {
 		if (inputalt) {
 			self->input = psy_audio_encodeinput(inputkeycode, inputshift, inputctrl, inputalt, inputup);
 		} else {
@@ -359,7 +359,7 @@ void inputdefiner_on_key_up(InputDefiner* self, psy_ui_KeyboardEvent* ev)
 		}
 	}
 	if (validkeycode(psy_ui_keyboardevent_keycode(ev))) {
-		self->regularkey = 0;
+		self->regular_key = 0;
 	}
 	if (!validkeycode(inputkeycode)) {
 		self->input = psy_audio_encodeinput(0, shift, ctrl, alt, up);
@@ -373,7 +373,7 @@ void inputdefiner_on_focus(InputDefiner* self)
 	assert(self);
 
 	super_vtable.on_focus(&self->component);
-	self->preventhook = FALSE;
+	self->prevent_hook = FALSE;
 	psy_ui_app_startmousehook(psy_ui_app());
 	psy_ui_component_invalidate(&self->component);
 }
@@ -388,7 +388,7 @@ void inputdefiner_on_focus_lost(InputDefiner* self)
 	assert(self);
 
 	super_vtable.on_focuslost(&self->component);
-	self->preventhook = TRUE;
+	self->prevent_hook = TRUE;
 	psy_ui_app_stopmousehook(psy_ui_app());
 	psy_signal_emit(&self->signal_accept, self, 0);
 }
@@ -398,13 +398,13 @@ void inputdefiner_on_mouse_hook(InputDefiner* self, psy_ui_App* sender,
 {
 	assert(self);
 
-	if (psy_ui_component_visible(&self->component) && !self->preventhook) {
+	if (psy_ui_component_visible(&self->component) && !self->prevent_hook) {
 		psy_ui_RealRectangle position;
 
 		position = psy_ui_component_screenposition(&self->component);
 		if (!psy_ui_realrectangle_intersect(&position,
 				psy_ui_mouseevent_pt(ev))) {
-			self->preventhook = TRUE;
+			self->prevent_hook = TRUE;
 			psy_signal_emit(&self->signal_accept, self, 0);
 			psy_ui_app_stopmousehook(psy_ui_app());
 		}

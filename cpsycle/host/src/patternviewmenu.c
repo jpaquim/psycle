@@ -53,7 +53,7 @@ void patternblockmenu_init(PatternBlockMenu* self, psy_ui_Component* parent,
 	self->transformpattern = transformpattern;
 	self->interpolatecurveview = interpolatecurveview;
 	self->pvstate = pvstate;
-	psy_ui_component_set_defaultalign(&self->component, psy_ui_ALIGN_TOP,
+	psy_ui_component_set_default_align(&self->component, psy_ui_ALIGN_TOP,
 		psy_ui_margin_zero());	
 	psy_ui_button_init_text_connect(&self->cut, &self->component,
 		"edit.cut", self, patternblockmenu_oncut);			

@@ -74,7 +74,7 @@ void seqeditortracks_init(SeqEditorTracks* self, psy_ui_Component* parent,
 		psy_ui_size_make_em(8.0, 0.0));	
 	psy_ui_component_set_wheel_scroll(&self->component, 1);	
 	psy_ui_component_set_overflow(&self->component, psy_ui_OVERFLOW_SCROLL);	
-	psy_ui_component_set_defaultalign(&self->component,
+	psy_ui_component_set_default_align(&self->component,
 		psy_ui_ALIGN_TOP, psy_ui_margin_zero());
 	psy_signal_connect(&workspace->song->sequence.sequenceselection.signal_select, self,
 		seqeditortracks_onsequenceselectionselect);
