@@ -41,6 +41,11 @@ void presetsbar_init(PresetsBar*, psy_ui_Component* parent, Workspace*);
 void presetsbar_setmachine(PresetsBar*, psy_audio_Machine* machine);
 void presetsbar_showprogram(PresetsBar*);
 
+INLINE psy_ui_Component* presetsbar_base(PresetsBar* self)
+{
+	return &self->component;
+}
+
 #ifdef __cplusplus
 }
 #endif

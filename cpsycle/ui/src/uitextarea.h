@@ -51,8 +51,7 @@ typedef struct psy_ui_TextAreaPane {
     /* internal */
 	double charnumber;
 	int linenumber;
-    bool isinputfield;
-    bool preventedit;
+    bool isinputfield;    
     char* text;
     psy_ui_TextFormat format;
     uintptr_t cp;     
@@ -141,17 +140,17 @@ INLINE void psy_ui_textarea_setlinenumber(psy_ui_TextArea* self, int number)
     psy_ui_textareapane_set_line_number(&self->pane, number);
 }
 
-INLINE void psy_ui_textarea_enableedit(psy_ui_TextArea* self)
+INLINE void psy_ui_textarea_enable(psy_ui_TextArea* self)
 {
     psy_ui_textareapane_enable_edit(&self->pane);
 }
 
-INLINE void psy_ui_textarea_preventedit(psy_ui_TextArea* self)
+INLINE void psy_ui_textarea_prevent(psy_ui_TextArea* self)
 {
     psy_ui_textareapane_prevent_edit(&self->pane);
 }
 
-INLINE void psy_ui_textarea_setsel(psy_ui_TextArea* self,
+INLINE void psy_ui_textarea_select(psy_ui_TextArea* self,
     uintptr_t cpmin, uintptr_t cpmax)
 {
     psy_ui_textareapane_set_sel(&self->pane, cpmin, cpmax);

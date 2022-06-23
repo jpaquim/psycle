@@ -382,7 +382,7 @@ const char* psy_ui_button_text(const psy_ui_Button* self)
 	return self->text;
 }
 
-void psy_ui_button_seticon(psy_ui_Button* self, psy_ui_ButtonIcon icon)
+void psy_ui_button_set_icon(psy_ui_Button* self, psy_ui_ButtonIcon icon)
 {
 	self->icon = icon;
 	psy_ui_component_invalidate(psy_ui_button_base(self));

@@ -1137,14 +1137,14 @@ void mainframe_update_seq_editor_buttons(MainFrame* self)
 		psy_ui_button_set_text(&self->sequencerbar.toggleseqedit,
 			"seqview.hideseqeditor");
 		psy_ui_button_highlight(&self->sequencerbar.toggleseqedit);
-		psy_ui_button_seticon(&self->sequencerbar.toggleseqedit,
+		psy_ui_button_set_icon(&self->sequencerbar.toggleseqedit,
 			psy_ui_ICON_LESS);		
 	} else {
 		psy_ui_button_set_text(&self->sequencerbar.toggleseqedit,
 			"seqview.showseqeditor");
 		psy_ui_button_disable_highlight(
 			&self->sequencerbar.toggleseqedit);
-		psy_ui_button_seticon(&self->sequencerbar.toggleseqedit,
+		psy_ui_button_set_icon(&self->sequencerbar.toggleseqedit,
 			psy_ui_ICON_MORE);
 	}
 }
@@ -1184,14 +1184,14 @@ void mainframe_update_step_sequencer_buttons(MainFrame* self)
 		psy_ui_button_set_text(&self->sequencerbar.togglestepseq,
 			"seqview.hidestepsequencer");
 		psy_ui_button_highlight(&self->sequencerbar.togglestepseq);
-		psy_ui_button_seticon(&self->sequencerbar.togglestepseq,
+		psy_ui_button_set_icon(&self->sequencerbar.togglestepseq,
 			psy_ui_ICON_LESS);
 	} else {
 		psy_ui_button_set_text(&self->sequencerbar.togglestepseq,
 			"seqview.showstepsequencer");
 		psy_ui_button_disable_highlight(
 			&self->sequencerbar.togglestepseq);
-		psy_ui_button_seticon(&self->sequencerbar.togglestepseq,
+		psy_ui_button_set_icon(&self->sequencerbar.togglestepseq,
 			psy_ui_ICON_MORE);
 	}
 }
@@ -1303,15 +1303,9 @@ void mainframe_delegate_keyboard(MainFrame* self, intptr_t message,
 	psy_ui_KeyboardEvent* ev)
 {
 	psy_eventdriver_write(workspace_kbd_driver(&self->workspace),
-		psy_eventdriverinput_make(message,
-			psy_audio_encodeinput(psy_ui_keyboardevent_keycode(ev),
-				psy_ui_keyboardevent_shiftkey(ev),
-				psy_ui_keyboardevent_ctrlkey(ev),
-				psy_ui_keyboardevent_altkey(ev),
-				message == psy_EVENTDRIVER_RELEASE),
-			psy_ui_keyboardevent_repeat(ev),
-			workspace_current_view(&self->workspace).id));
-
+		psy_eventdriverinput_make(message, psy_ui_keyboardevent_encode(ev,
+			message == psy_EVENTDRIVER_RELEASE),
+			psy_ui_keyboardevent_repeat(ev)));
 }
 
 void mainframe_on_gear_select(MainFrame* self, Workspace* sender,

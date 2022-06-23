@@ -703,7 +703,7 @@ void psy_audio_player_setsong(psy_audio_Player* self, psy_audio_Song* song)
 		psy_audio_sequencer_reset(&self->sequencer, &song->sequence,
 			&song->machines, psy_audiodriver_samplerate(self->driver));		
 		psy_audio_player_setbpm(self, psy_audio_song_bpm(self->song));
-		psy_audio_player_setlpb(self, psy_audio_song_lpb(self->song));
+		psy_audio_player_set_lpb(self, psy_audio_song_lpb(self->song));
 		psy_audio_player_set_octave(self, psy_audio_song_octave(self->song));
 		self->sequencer.metronome = restore_metronome;		
 		psy_audio_player_set_sampler_index(self,
@@ -836,7 +836,7 @@ void psy_audio_player_dostop(psy_audio_Player* self)
 			machine->vtable->stop(machine);			
 		}
 		psy_audio_player_setbpm(self, self->song->properties.bpm);
-		psy_audio_player_setlpb(self, self->song->properties.lpb);
+		psy_audio_player_set_lpb(self, self->song->properties.lpb);
 		psy_audio_activechannels_reset(&self->playon);
 	}
 }
@@ -849,7 +849,7 @@ void psy_audio_player_setposition(psy_audio_Player* self, psy_dsp_big_beat_t
 	psy_audio_sequencer_set_position(&self->sequencer, offset);
 }
 
-void psy_audio_player_setlpb(psy_audio_Player* self, uintptr_t lpb)
+void psy_audio_player_set_lpb(psy_audio_Player* self, uintptr_t lpb)
 {	
 	assert(self);	
 

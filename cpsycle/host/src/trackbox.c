@@ -73,7 +73,7 @@ void trackbox_init(TrackBox* self, psy_ui_Component* parent)
 	self->trackidx = psy_INDEX_INVALID;
 	/* track number */
 	psy_ui_label_init(&self->track, &self->client);
-	psy_ui_label_set_textalignment(&self->track, psy_ui_ALIGNMENT_CENTER);
+	psy_ui_label_set_text_alignment(&self->track, psy_ui_ALIGNMENT_CENTER);
 	psy_ui_label_prevent_translation(&self->track);		
 	psy_ui_label_set_char_number(&self->track, 5);
 	psy_ui_button_init(&self->solo, &self->client);

@@ -95,7 +95,7 @@ void kbdboxkey_initlabel(KbdBoxKey* self, psy_ui_Label* label,
 	psy_ui_label_init(label, &self->component);
 	psy_ui_label_prevent_translation(label);
 	psy_ui_label_set_char_number(label, 8.0);
-	psy_ui_label_set_textalignment(label, psy_ui_ALIGNMENT_LEFT);
+	psy_ui_label_set_text_alignment(label, psy_ui_ALIGNMENT_LEFT);
 	psy_ui_label_set_text(label, text);
 }
 

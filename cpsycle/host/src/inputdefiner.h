@@ -33,6 +33,7 @@ void inputdefinerkeynames_add(InputDefinerKeyNames*,
 const char* inputdefinerkeynames_at(const InputDefinerKeyNames*,
 	uintptr_t keycode);
 
+
 /* InputDefiner */
 typedef struct InputDefiner {
 	/* inherits */
@@ -41,8 +42,9 @@ typedef struct InputDefiner {
 	psy_Signal signal_accept;
 	/* internal */
 	uint32_t input;
+	uint32_t old_input;
 	int regular_key;
-	bool prevent_hook;
+	bool changed;
 } InputDefiner;
 
 void inputdefiner_init(InputDefiner*, psy_ui_Component* parent);

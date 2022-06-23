@@ -8,15 +8,13 @@
 
 #include "clockbar.h"
 
-/* audio */
-#include <songio.h>
-/* std */
-#include <stdio.h>
 /* platform */
 #include "../../detail/portable.h"
 
+#define CLOCKBAR_REFRESHRATE 200
+
 /* prototypes */
-static void clockbar_updatelabel(ClockBar*);
+static void clockbar_update_label(ClockBar*);
 static void clockbar_on_timer(ClockBar*, uintptr_t timer_id);
 
 /* vtable */
@@ -32,7 +30,7 @@ static void vtable_init(ClockBar* self)
 			clockbar_on_timer;
 		vtable_initialized = TRUE;
 	}
-	psy_ui_component_set_vtable(&self->component, &vtable);
+	psy_ui_component_set_vtable(clockbar_base(self), &vtable);
 }
 
 /* implementation */
@@ -42,22 +40,16 @@ void clockbar_init(ClockBar* self, psy_ui_Component* parent)
 	vtable_init(self);
 	self->display_minutes = FALSE;
 	self->start = time(NULL);
-	psy_ui_component_set_align_expand(&self->component,
-		psy_ui_HEXPAND);
-	psy_ui_component_set_default_align(&self->component, psy_ui_ALIGN_LEFT,
+	psy_ui_component_set_align_expand(clockbar_base(self), psy_ui_HEXPAND);
+	psy_ui_component_set_default_align(clockbar_base(self), psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
-	psy_ui_label_init(&self->position, &self->component);	
+	psy_ui_label_init(&self->position, clockbar_base(self));
 	psy_ui_label_prevent_translation(&self->position);
 	psy_ui_label_set_char_number(&self->position, 10.0);
-	clockbar_updatelabel(self);
+	clockbar_update_label(self);
 }
 
-void clockbar_idle(ClockBar* self)
-{	
-	clockbar_updatelabel(self);	
-}
-
-void clockbar_updatelabel(ClockBar* self)
+void clockbar_update_label(ClockBar* self)
 {
 	time_t currtime;
 	char text[80];
@@ -78,20 +70,20 @@ void clockbar_updatelabel(ClockBar* self)
 void clockbar_reset(ClockBar* self)
 {
 	self->start = time(NULL);
-	clockbar_updatelabel(self);
+	clockbar_update_label(self);
 }
 
 void clockbar_start(ClockBar* self)
 {
-	psy_ui_component_start_timer(&self->component, 0, 50);
+	psy_ui_component_start_timer(clockbar_base(self), 0, CLOCKBAR_REFRESHRATE);
 }
 
 void clockbar_stop(ClockBar* self)
 {
-	psy_ui_component_stop_timer(&self->component, 0);
+	psy_ui_component_stop_timer(clockbar_base(self), 0);
 }
 
 void clockbar_on_timer(ClockBar* self, uintptr_t timer_id)
 {
-	clockbar_idle(self);
+	clockbar_update_label(self);
 }

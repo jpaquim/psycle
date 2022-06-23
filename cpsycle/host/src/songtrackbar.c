@@ -34,7 +34,7 @@ void songtrackbar_init(SongTrackBar* self, psy_ui_Component* parent,
 	psy_ui_label_init(&self->desc, songtrackbar_base(self));
 	psy_ui_label_set_text(&self->desc, "trackbar.tracks");
 	psy_ui_combobox_init(&self->tracknumbers, songtrackbar_base(self));
-	psy_ui_combobox_setcharnumber(&self->tracknumbers, 3.0);
+	psy_ui_combobox_set_char_number(&self->tracknumbers, 3.0);
 	songtrackbar_build(self);	
 	psy_signal_connect(&self->tracknumbers.signal_selchanged, self,
 		songtrackbar_onselchange);
@@ -54,7 +54,7 @@ void songtrackbar_build(SongTrackBar* self)
 		psy_ui_combobox_add_text(&self->tracknumbers, text);
 	}	
 	if (workspace_song(self->workspace)) {
-		psy_ui_combobox_setcursel(&self->tracknumbers,
+		psy_ui_combobox_select(&self->tracknumbers,
 			psy_audio_song_numsongtracks(workspace_song(self->workspace)) -
 			MIN_TRACKS);
 	}
@@ -72,13 +72,13 @@ void songtrackbar_onselchange(SongTrackBar* self, psy_ui_Component* sender,
 void songtrackbar_onsongtracknumchanged(SongTrackBar* self,
 	psy_audio_Patterns* patterns, uintptr_t numsongtracks)
 {
-	psy_ui_combobox_setcursel(&self->tracknumbers, numsongtracks - MIN_TRACKS);
+	psy_ui_combobox_select(&self->tracknumbers, numsongtracks - MIN_TRACKS);
 }
 
 void songtrackbar_onsongchanged(SongTrackBar* self, Workspace* sender)
 {	
 	if (workspace_song(sender)) {
-		psy_ui_combobox_setcursel(&self->tracknumbers,
+		psy_ui_combobox_select(&self->tracknumbers,
 			psy_audio_song_numsongtracks(workspace_song(sender)) - MIN_TRACKS);
 		psy_signal_connect(
 			&workspace_song(sender)->patterns.signal_numsongtrackschanged,

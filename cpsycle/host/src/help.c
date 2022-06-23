@@ -62,7 +62,7 @@ void help_init(Help* self, psy_ui_Component* parent, DirConfig* dir_config)
 	psy_ui_label_enable_wrap(&self->text);
 	psy_ui_component_set_align(&self->text.component, psy_ui_ALIGN_CLIENT);	
 	psy_ui_label_prevent_translation(&self->text);	
-	psy_ui_label_set_textalignment(&self->text, psy_ui_ALIGNMENT_LEFT);
+	psy_ui_label_set_text_alignment(&self->text, psy_ui_ALIGNMENT_LEFT);
 	psy_ui_component_set_scroll_step_height(psy_ui_label_base(&self->text),
 		psy_ui_value_make_eh(1.0));		
 	psy_ui_component_set_wheel_scroll(&self->text.component, 4);

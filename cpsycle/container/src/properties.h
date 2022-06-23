@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+**  copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #ifndef psy_PROPERTIES_H
@@ -221,7 +221,7 @@ bool psy_property_int_valid(const psy_Property*, intptr_t value);
 bool psy_property_int_hasrange(const psy_Property*);
 psy_Property* psy_property_setitem_double(psy_Property*, double value);
 double psy_property_item_double(const psy_Property*);
-psy_Property* psy_property_setitem_str(psy_Property*, const char* str);
+psy_Property* psy_property_set_item_str(psy_Property*, const char* str);
 const char* psy_property_item_str(const psy_Property*);
 psy_Property* psy_property_setitem_font(psy_Property*, const char* value);
 const char* psy_property_item_font(const psy_Property*);

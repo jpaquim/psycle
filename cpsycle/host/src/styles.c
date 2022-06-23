@@ -629,13 +629,23 @@ void init_host_styles(psy_ui_Styles* self, psy_ui_ThemeMode theme)
 	psy_ui_styles_set_style(self, STYLE_TERM_BUTTON_ERROR, style);
 
 	style = psy_ui_style_allocinit();
-	psy_ui_style_set_background_id(style, IDB_BGMAIN);
+	if (psy_strlen(PSYCLE_RES_DIR) == 0) {
+		psy_ui_style_set_background_id(style, IDB_BGMAIN);
+	} else {
+		psy_ui_style_setbackgroundpath(style,
+			PSYCLE_RES_DIR psy_SLASHSTR "bgmain.bmp");
+	}	
 	psy_ui_style_animate_background(style, 20,
 		psy_ui_realsize_make(96, 192), TRUE);
 	psy_ui_styles_set_style(self, STYLE_GREET, style);
 
 	style = psy_ui_style_allocinit();
-	psy_ui_style_set_background_id(style, IDB_BGTOP);
+	if (psy_strlen(PSYCLE_RES_DIR) == 0) {
+		psy_ui_style_set_background_id(style, IDB_BGTOP);
+	} else {
+		psy_ui_style_setbackgroundpath(style,
+			PSYCLE_RES_DIR psy_SLASHSTR "bgtop.bmp");
+	}	
 	psy_ui_style_animate_background(style, 40,
 		psy_ui_realsize_make(128, 128), TRUE);
 	psy_ui_styles_set_style(self, STYLE_GREET_TOP, style);
@@ -1247,13 +1257,23 @@ void init_light_theme(psy_ui_Styles* self)
 	psy_ui_styles_set_style(self, STYLE_TERM_BUTTON_ERROR, style);
 
 	style = psy_ui_style_allocinit();
-	psy_ui_style_set_background_id(style, IDB_BGMAIN);
+	if (psy_strlen(PSYCLE_RES_DIR) == 0) {
+		psy_ui_style_set_background_id(style, IDB_BGMAIN);
+	} else {
+		psy_ui_style_setbackgroundpath(style,
+			PSYCLE_RES_DIR psy_SLASHSTR "bgmain.bmp");
+	}	
 	psy_ui_style_animate_background(style, 20,
 		psy_ui_realsize_make(96, 192), TRUE);
 	psy_ui_styles_set_style(self, STYLE_GREET, style);
 
 	style = psy_ui_style_allocinit();
-	psy_ui_style_set_background_id(style, IDB_BGTOP);
+	if (psy_strlen(PSYCLE_RES_DIR) == 0) {
+		psy_ui_style_set_background_id(style, IDB_BGTOP);
+	} else {
+		psy_ui_style_setbackgroundpath(style,
+			PSYCLE_RES_DIR psy_SLASHSTR "bgtop.bmp");
+	}	
 	psy_ui_style_animate_background(style, 40,
 		psy_ui_realsize_make(128, 128), TRUE);
 	psy_ui_styles_set_style(self, STYLE_GREET_TOP, style);
@@ -1779,13 +1799,23 @@ void init_win98_theme(psy_ui_Styles* self)
 	psy_ui_styles_set_style(self, STYLE_TERM_BUTTON_ERROR, style);
 
 	style = psy_ui_style_allocinit();
-	psy_ui_style_set_background_id(style, IDB_BGMAIN);
+	if (psy_strlen(PSYCLE_RES_DIR) == 0) {
+		psy_ui_style_set_background_id(style, IDB_BGMAIN);
+	} else {
+		psy_ui_style_setbackgroundpath(style,
+			PSYCLE_RES_DIR psy_SLASHSTR "bgmain.bmp");
+	}
 	psy_ui_style_animate_background(style, 20,
 		psy_ui_realsize_make(96, 192), TRUE);
 	psy_ui_styles_set_style(self, STYLE_GREET, style);
 
 	style = psy_ui_style_allocinit();
-	psy_ui_style_set_background_id(style, IDB_BGTOP);
+	if (psy_strlen(PSYCLE_RES_DIR) == 0) {
+		psy_ui_style_set_background_id(style, IDB_BGTOP);
+	} else {
+		psy_ui_style_setbackgroundpath(style,
+			PSYCLE_RES_DIR psy_SLASHSTR "bgtop.bmp");
+	}
 	psy_ui_style_animate_background(style, 40,
 		psy_ui_realsize_make(128, 128), TRUE);
 	psy_ui_styles_set_style(self, STYLE_GREET_TOP, style);
@@ -1842,15 +1872,16 @@ void init_machineview_styles(psy_ui_Styles* self)
 		STYLE_MV, STYLE_MV_WIRES, STYLE_MV_STACK, STYLE_MV_PROPERTIES,
 		STYLE_MV_NEWMACHINE, STYLE_MV_WIRE, STYLE_MV_WIRE_SELECT,
 		STYLE_MV_WIRE_HOVER, STYLE_MV_WIRE_POLY, STYLE_MV_MASTER,
-		STYLE_MV_MASTER_NAME, STYLE_MV_GENERATOR, STYLE_MV_GENERATOR_NAME,
-		STYLE_MV_GENERATOR_MUTE, STYLE_MV_GENERATOR_MUTE_SELECT,
-		STYLE_MV_GENERATOR_SOLO, STYLE_MV_GENERATOR_SOLO_SELECT,
-		STYLE_MV_GENERATOR_VU, STYLE_MV_GENERATOR_VU0,
-		STYLE_MV_GENERATOR_VUPEAK, STYLE_MV_GENERATOR_PAN,
-		STYLE_MV_GENERATOR_PAN_SLIDER, STYLE_MV_EFFECT, STYLE_MV_EFFECT_NAME,
-		STYLE_MV_EFFECT_MUTE, STYLE_MV_EFFECT_MUTE_SELECT,
-		STYLE_MV_EFFECT_BYPASS, STYLE_MV_EFFECT_BYPASS_SELECT,
-		STYLE_MV_EFFECT_VU, STYLE_MV_EFFECT_VU0, STYLE_MV_EFFECT_VUPEAK,
+		STYLE_MV_MASTER_NAME, STYLE_MV_GENERATOR,
+		STYLE_MV_GENERATOR_NAME, STYLE_MV_GENERATOR_MUTE,
+		STYLE_MV_GENERATOR_MUTE_SELECT, STYLE_MV_GENERATOR_SOLO,
+		STYLE_MV_GENERATOR_SOLO_SELECT, STYLE_MV_GENERATOR_VU,
+		STYLE_MV_GENERATOR_VU0, STYLE_MV_GENERATOR_VUPEAK,
+		STYLE_MV_GENERATOR_PAN, STYLE_MV_GENERATOR_PAN_SLIDER,
+		STYLE_MV_EFFECT, STYLE_MV_EFFECT_NAME, STYLE_MV_EFFECT_MUTE,
+		STYLE_MV_EFFECT_MUTE_SELECT, STYLE_MV_EFFECT_BYPASS,
+		STYLE_MV_EFFECT_BYPASS_SELECT, STYLE_MV_EFFECT_VU,
+		STYLE_MV_EFFECT_VU0, STYLE_MV_EFFECT_VUPEAK,
 		STYLE_MV_EFFECT_PAN, STYLE_MV_EFFECT_PAN_SLIDER, STYLE_MV_ARROW,
 		STYLE_MV_CHECK, STYLE_MV_KNOB, STYLE_MV_LABEL, STYLE_MV_HEADER,
 		STYLE_MV_LEVEL, 0
@@ -1858,7 +1889,8 @@ void init_machineview_styles(psy_ui_Styles* self)
 	int i;
 
 	for (i = 0; styles[i] != 0; ++i) {
-		psy_ui_styles_set_style(self, styles[i], psy_ui_style_allocinit());
+		psy_ui_styles_set_style(self, styles[i],
+			psy_ui_style_allocinit());
 	}
 	/* style configuration in machineviewconfig */
 }
@@ -1909,7 +1941,12 @@ void init_machineparam_styles(psy_ui_Styles* self)
 	psy_ui_styles_set_style(self, STYLE_MACPARAM_KNOB, style);
 
 	style = psy_ui_style_allocinit();
-	psy_ui_style_set_background_id(style, IDB_MIXERSKIN);
+	if (psy_strlen(PSYCLE_RES_DIR) == 0) {
+		psy_ui_style_set_background_id(style, IDB_MIXERSKIN);
+	} else {
+		psy_ui_style_setbackgroundpath(style,
+			PSYCLE_RES_DIR psy_SLASHSTR "mixer_skin.bmp");
+	}	
 	psy_ui_style_set_background_size_px(style,
 		psy_ui_realsize_make(30.0, 182.0));
 	psy_ui_style_set_background_repeat(style, psy_ui_NOREPEAT);
@@ -1919,14 +1956,24 @@ void init_machineparam_styles(psy_ui_Styles* self)
 	psy_ui_styles_set_style(self, STYLE_MACPARAM_SLIDER, style);
 
 	style = psy_ui_style_allocinit();
-	psy_ui_style_set_background_id(style, IDB_MIXERSKIN);
+	if (psy_strlen(PSYCLE_RES_DIR) == 0) {
+		psy_ui_style_set_background_id(style, IDB_MIXERSKIN);
+	} else {
+		psy_ui_style_setbackgroundpath(style,
+			PSYCLE_RES_DIR psy_SLASHSTR "mixer_skin.bmp");
+	}
 	psy_ui_style_set_background_size_px(style,
 		psy_ui_realsize_make(22.0, 10.0));
 	psy_ui_style_set_background_position_px(style, 0.0, -182.0);
 	psy_ui_styles_set_style(self, STYLE_MACPARAM_SLIDERKNOB, style);
 
 	style = psy_ui_style_allocinit();
-	psy_ui_style_set_background_id(style, IDB_MIXERSKIN);
+	if (psy_strlen(PSYCLE_RES_DIR) == 0) {
+		psy_ui_style_set_background_id(style, IDB_MIXERSKIN);
+	} else {
+		psy_ui_style_setbackgroundpath(style,
+			PSYCLE_RES_DIR psy_SLASHSTR "mixer_skin.bmp");
+	}
 	psy_ui_style_set_background_size_px(style,
 		psy_ui_realsize_make(28.0, 28.0));
 	psy_ui_style_set_background_position_px(style, -30.0, -118.0);
@@ -1937,7 +1984,12 @@ void init_machineparam_styles(psy_ui_Styles* self)
 	psy_ui_styles_set_style(self, STYLE_MACPARAM_SWITCHON, style);
 
 	style = psy_ui_style_allocinit();
-	psy_ui_style_set_background_id(style, IDB_MIXERSKIN);
+	if (psy_strlen(PSYCLE_RES_DIR) == 0) {
+		psy_ui_style_set_background_id(style, IDB_MIXERSKIN);
+	} else {
+		psy_ui_style_setbackgroundpath(style,
+			PSYCLE_RES_DIR psy_SLASHSTR "mixer_skin.bmp");
+	}
 	psy_ui_style_set_background_size_px(style,
 		psy_ui_realsize_make(28.0, 28.0));
 	psy_ui_style_set_background_position_px(style, -30.0, -90.0);
@@ -1948,7 +2000,12 @@ void init_machineparam_styles(psy_ui_Styles* self)
 	psy_ui_styles_set_style(self, STYLE_MACPARAM_SWITCHOFF, style);
 
 	style = psy_ui_style_allocinit();
-	psy_ui_style_set_background_id(style, IDB_MIXERSKIN);
+	if (psy_strlen(PSYCLE_RES_DIR) == 0) {
+		psy_ui_style_set_background_id(style, IDB_MIXERSKIN);
+	} else {
+		psy_ui_style_setbackgroundpath(style,
+			PSYCLE_RES_DIR psy_SLASHSTR "mixer_skin.bmp");
+	}
 	psy_ui_style_set_background_size_px(style,
 		psy_ui_realsize_make(13.0, 13.0));
 	psy_ui_style_set_background_position_px(style, -30.0, -159.0);
@@ -1959,7 +2016,12 @@ void init_machineparam_styles(psy_ui_Styles* self)
 	psy_ui_styles_set_style(self, STYLE_MACPARAM_CHECKON, style);
 
 	style = psy_ui_style_allocinit();
-	psy_ui_style_set_background_id(style, IDB_MIXERSKIN);
+	if (psy_strlen(PSYCLE_RES_DIR) == 0) {
+		psy_ui_style_set_background_id(style, IDB_MIXERSKIN);
+	} else {
+		psy_ui_style_setbackgroundpath(style,
+			PSYCLE_RES_DIR psy_SLASHSTR "mixer_skin.bmp");
+	}
 	psy_ui_style_set_background_size_px(style,
 		psy_ui_realsize_make(13.0, 13.0));
 	psy_ui_style_set_background_position_px(style, -30.0, -146.0);
@@ -1970,14 +2032,24 @@ void init_machineparam_styles(psy_ui_Styles* self)
 	psy_ui_styles_set_style(self, STYLE_MACPARAM_CHECKOFF, style);
 
 	style = psy_ui_style_allocinit();
-	psy_ui_style_set_background_id(style, IDB_MIXERSKIN);
+	if (psy_strlen(PSYCLE_RES_DIR) == 0) {
+		psy_ui_style_set_background_id(style, IDB_MIXERSKIN);
+	} else {
+		psy_ui_style_setbackgroundpath(style,
+			PSYCLE_RES_DIR psy_SLASHSTR "mixer_skin.bmp");
+	}
 	psy_ui_style_set_background_size_px(style,
 		psy_ui_realsize_make(16.0, 90.0));
 	psy_ui_style_set_background_position_px(style, -46.0, 0.0);
 	psy_ui_styles_set_style(self, STYLE_MACPARAM_VUON, style);
 
 	style = psy_ui_style_allocinit();
-	psy_ui_style_set_background_id(style, IDB_MIXERSKIN);
+	if (psy_strlen(PSYCLE_RES_DIR) == 0) {
+		psy_ui_style_set_background_id(style, IDB_MIXERSKIN);
+	} else {
+		psy_ui_style_setbackgroundpath(style,
+			PSYCLE_RES_DIR psy_SLASHSTR "mixer_skin.bmp");
+	}
 	psy_ui_style_set_background_size_px(style,
 		psy_ui_realsize_make(16.0, 90.0));
 	psy_ui_style_set_background_position_px(style, -30.0, 0.0);

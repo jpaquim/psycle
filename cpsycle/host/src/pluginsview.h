@@ -1,19 +1,23 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #if !defined(PLUGINSVIEW_H)
 #define PLUGINSVIEW_H
 
-// host
+/* host */
 #include "workspace.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// PluginsView
-//
-// Displays plugin properties in a list. Used by NewMachine.
+/*
+** PluginsView
+**
+** Displays plugin properties in a list. Used by NewMachine.
+*/
 
 typedef enum NewMachineSortMode {
 	NEWMACHINESORTMODE_NONE,
@@ -33,7 +37,7 @@ void newmachinesort_dispose(NewMachineSort*);
 
 void newmachinesort_sort(NewMachineSort*, NewMachineSortMode);
 
-// NewMachineFilter
+/* NewMachineFilter */
 typedef struct NewMachineFilter {
 	psy_Signal signal_changed;
 	bool gen;
@@ -87,25 +91,25 @@ bool newmachineselection_isselected(const NewMachineSelection*,
 	uintptr_t index);
 uintptr_t newmachineselection_first(const NewMachineSelection*);
 
-// PluginsView
+/* PluginsView */
 typedef struct PluginsView {
-	// inherits
+	/* inherits */
 	psy_ui_Component component;
-	// signals	
+	/* signals */
 	psy_Signal signal_selected;	
 	psy_Signal signal_changed;
-	// internal	
+	/* internal */
 	double line_height;
 	double columnwidth;
 	double identwidth;
 	intptr_t numparametercols;
 	double avgcharwidth;
 	intptr_t pluginpos;	
-	// ptr to unfiltered/filtered plugins
+	/* ptr to unfiltered/filtered plugins */
 	psy_Property* currplugins;
-	// Unfiltered Plugins
+	/* Unfiltered Plugins */
 	psy_Property* plugins;
-	// Filtered Plugins
+	/* Filtered Plugins */
 	psy_Property* filteredplugins;
 	bool generatorsenabled;
 	bool effectsenabled;	
@@ -114,7 +118,7 @@ typedef struct PluginsView {
 	uintptr_t dragindex;
 	NewMachineSelection selection;
 	bool readonly;
-	// References
+	/* References */
 	NewMachineFilter* filter;
 	NewMachineSort* sort;	
 } PluginsView;
@@ -124,7 +128,7 @@ void pluginsview_init(PluginsView*, psy_ui_Component* parent);
 void pluginsview_clear(PluginsView*);
 void pluginsview_clearfilter(PluginsView*);
 void pluginsview_setplugins(PluginsView*, const psy_Property*);
-void pluginsview_setfilter(PluginsView*, NewMachineFilter*);
+void pluginsview_set_filter(PluginsView*, NewMachineFilter*);
 void pluginsview_filter(PluginsView*);
 void pluginsview_setsort(PluginsView*, NewMachineSort*);
 void pluginsview_sort(PluginsView*, NewMachineSortMode);
@@ -135,6 +139,11 @@ void pluginsview_enablegenerators(PluginsView*);
 void pluginsview_preventgenerators(PluginsView*);
 void pluginsview_enableeffects(PluginsView*);
 void pluginsview_preventeffects(PluginsView*);
+
+INLINE psy_ui_Component* pluginsview_base(PluginsView* self)
+{
+	return &self->component;
+}
 
 #ifdef __cplusplus
 }

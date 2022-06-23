@@ -1027,7 +1027,7 @@ void onpreferredsize(psy_ui_Component* self, const psy_ui_Size* limit,
 	psy_ui_Size* rv)
 {		
 	if (self->aligner) {
-		psy_ui_aligner_preferredsize(self->aligner, self, limit, rv);
+		psy_ui_aligner_preferred_size(self->aligner, self, limit, rv);
 	}
 }
 

@@ -59,7 +59,7 @@ void patterndefaultline_init(PatternDefaultLine* self, psy_ui_Component* parent,
 	/* label */
 	psy_ui_label_init(&self->desc, &self->component);
 	psy_ui_label_set_text(&self->desc, "Def");
-	psy_ui_label_set_textalignment(&self->desc,
+	psy_ui_label_set_text_alignment(&self->desc,
 		psy_ui_ALIGNMENT_CENTER_HORIZONTAL);
 	psy_ui_component_set_align(&self->desc.component, psy_ui_ALIGN_LEFT);	
 	/* scroller */

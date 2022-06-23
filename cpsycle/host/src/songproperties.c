@@ -1,6 +1,6 @@
 /*
 ** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -72,7 +72,7 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 	/* title */
 	psy_ui_component_init(&self->title, &self->top, NULL);	
 	psy_ui_label_init(&self->label_title, &self->title);
-	psy_ui_label_set_textalignment(&self->label_title, psy_ui_ALIGNMENT_RIGHT);
+	psy_ui_label_set_text_alignment(&self->label_title, psy_ui_ALIGNMENT_RIGHT);
 	psy_ui_label_set_text(&self->label_title, "songproperties.title");
 	psy_ui_label_set_char_number(&self->label_title, charnum);
 	psy_ui_component_set_align(&self->label_title.component, psy_ui_ALIGN_LEFT);
@@ -94,7 +94,7 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 	psy_ui_label_set_char_number(&self->label_credits, charnum);
 	psy_ui_component_set_align(&self->label_credits.component, psy_ui_ALIGN_LEFT);
 	psy_ui_component_set_margin(&self->label_credits.component, margin);
-	psy_ui_label_set_textalignment(&self->label_credits, psy_ui_ALIGNMENT_RIGHT);
+	psy_ui_label_set_text_alignment(&self->label_credits, psy_ui_ALIGNMENT_RIGHT);
 	psy_ui_textarea_init_single_line(&self->edit_credits, &self->credits);	
 	psy_ui_textarea_enable_input_field(&self->edit_credits);
 	psy_ui_component_set_align(&self->edit_credits.component, psy_ui_ALIGN_CLIENT);
@@ -148,7 +148,7 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 	psy_ui_component_set_align(&self->comments, psy_ui_ALIGN_CLIENT);
 	psy_ui_label_init_text(&self->label_comments, &self->comments,
 		"songproperties.extcomments");	
-	psy_ui_label_set_textalignment(&self->label_comments,
+	psy_ui_label_set_text_alignment(&self->label_comments,
 		psy_ui_ALIGNMENT_TOP);	
 	psy_ui_component_set_align(&self->label_comments.component,
 		psy_ui_ALIGN_TOP);
@@ -210,18 +210,18 @@ void songpropertiesview_onsongchanged(SongPropertiesView* self,
 
 void songpropertiesview_enableedit(SongPropertiesView* self)
 {
-	psy_ui_textarea_enableedit(&self->edit_title);
-	psy_ui_textarea_enableedit(&self->edit_credits);
-	psy_ui_textarea_enableedit(&self->edit_comments);
+	psy_ui_textarea_enable(&self->edit_title);
+	psy_ui_textarea_enable(&self->edit_credits);
+	psy_ui_textarea_enable(&self->edit_comments);
 	intedit_enable_edit(&self->tpb);
 	intedit_enable_edit(&self->etpb);	
 }
 
 void songpropertiesview_disableedit(SongPropertiesView* self)
 {
-	psy_ui_textarea_preventedit(&self->edit_title);
-	psy_ui_textarea_preventedit(&self->edit_credits);
-	psy_ui_textarea_preventedit(&self->edit_comments);
+	psy_ui_textarea_prevent(&self->edit_title);
+	psy_ui_textarea_prevent(&self->edit_credits);
+	psy_ui_textarea_prevent(&self->edit_comments);
 	intedit_prevent_edit(&self->tpb);
 	intedit_prevent_edit(&self->etpb);	
 }
@@ -290,7 +290,7 @@ void songpropertiesview_ontempoeditchange(SongPropertiesView* self,
 void songpropertiesview_onlpbeditchange(SongPropertiesView* self,
 	IntEdit* sender)
 {
-	psy_audio_player_setlpb(workspace_player(self->workspace), (uintptr_t)
+	psy_audio_player_set_lpb(workspace_player(self->workspace), (uintptr_t)
 		intedit_value(sender));
 	songpropertiesview_updaterealspeed(self);
 }

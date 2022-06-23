@@ -174,7 +174,7 @@ void midiviewconfig_make_controller_save(MidiViewConfig* self)
 	}
 	str = psy_audio_midiconfig_controllers_tostring(
 		psy_audio_player_midiconfig(self->player));
-	psy_property_setitem_str(controllers, str);
+	psy_property_set_item_str(controllers, str);
 	free(str);
 }
 

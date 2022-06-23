@@ -231,7 +231,7 @@ void psy_ui_label_set_line_spacing(psy_ui_Label* self, double line_spacing)
 	psy_ui_textformat_set_line_spacing(&self->format, line_spacing);	
 }
 
-void psy_ui_label_set_textalignment(psy_ui_Label* self,
+void psy_ui_label_set_text_alignment(psy_ui_Label* self,
 	psy_ui_Alignment alignment)
 {
 	psy_ui_textformat_set_alignment(&self->format,

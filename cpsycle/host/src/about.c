@@ -94,7 +94,7 @@ void version_init(Version* self, psy_ui_Component* parent)
 	psy_ui_component_set_align(psy_ui_label_base(&self->versioninfo),
 		psy_ui_ALIGN_CLIENT);
 	psy_ui_label_prevent_translation(&self->versioninfo);
-	psy_ui_label_set_textalignment(&self->versioninfo,
+	psy_ui_label_set_text_alignment(&self->versioninfo,
 		psy_ui_ALIGNMENT_CENTER_HORIZONTAL);
 	psy_ui_label_set_text(&self->versioninfo, PSYCLE__BUILD__IDENTIFIER("\r\n"));
 }

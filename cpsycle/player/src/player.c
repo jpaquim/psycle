@@ -393,7 +393,7 @@ void cmdplayer_loadsong(CmdPlayer* self, const char* path)
 void cmdplayer_applysongproperties(CmdPlayer* self)
 {			
 	psy_audio_player_setbpm(&self->player, self->song->properties.bpm);
-	psy_audio_player_setlpb(&self->player, self->song->properties.lpb);
+	psy_audio_player_set_lpb(&self->player, self->song->properties.lpb);
 }
 
 void cmdplayer_run(CmdPlayer* self)

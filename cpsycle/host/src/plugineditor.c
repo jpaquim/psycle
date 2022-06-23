@@ -138,7 +138,7 @@ void plugineditor_init(PluginEditor* self, psy_ui_Component* parent,
 		"Plugin");
 	psy_ui_component_set_align(&self->plugindesc.component, psy_ui_ALIGN_LEFT);
 	psy_ui_combobox_init(&self->pluginselector, &self->row0);
-	//psy_ui_combobox_setcharnumber(&self->pluginselector, 32);
+	//psy_ui_combobox_set_char_number(&self->pluginselector, 32);
 	psy_ui_component_set_align(&self->pluginselector.component, psy_ui_ALIGN_CLIENT);
 	/* File Select */
 	psy_ui_component_init(&self->row1, &self->component, NULL);
@@ -146,7 +146,7 @@ void plugineditor_init(PluginEditor* self, psy_ui_Component* parent,
 	psy_ui_label_init_text(&self->filedesc, &self->row1, "File");
 	psy_ui_component_set_align(&self->filedesc.component, psy_ui_ALIGN_LEFT);
 	psy_ui_combobox_init(&self->fileselector, &self->row1);
-	//psy_ui_combobox_setcharnumber(&self->fileselector, 32);
+	//psy_ui_combobox_set_char_number(&self->fileselector, 32);
 	psy_ui_component_set_align(&self->fileselector.component, psy_ui_ALIGN_CLIENT);
 	plugineditorcreatebar_init(&self->createbar, &self->component, workspace);
 	psy_signal_connect(&self->createbar.create.signal_clicked, self,
@@ -290,7 +290,7 @@ void plugineditor_onpluginselected(PluginEditor* self, psy_ui_Component* sender,
 				self->basepath = path;
 				self->instanceidx = psy_INDEX_INVALID;
 				plugineditor_buildfilelist(self);
-				psy_ui_combobox_setcursel(&self->fileselector, 1);
+				psy_ui_combobox_select(&self->fileselector, 1);
 				plugineditor_onfileselected(self, &self->fileselector.component, 1);
 			}
 		}

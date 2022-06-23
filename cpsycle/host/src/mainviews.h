@@ -8,9 +8,9 @@
 
 /* host */
 #include "mainviewbar.h"
+#include "viewframe.h"
 #include "workspace.h"
 /* ui */
-#include <uiframe.h>
 #include <uiterminal.h>
 #include <uinotebook.h>
 #include <uisplitbar.h>
@@ -20,29 +20,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-typedef struct ViewFrame {
-	psy_ui_Component component;
-	psy_ui_Component pane;
-	psy_ui_Component* view;
-	psy_ui_Notebook* dock;
-	Workspace* workspace;
-} ViewFrame;
-
-void viewframe_init(ViewFrame*, psy_ui_Component* parent,
-	psy_ui_Notebook* dock, Workspace* workspace);
-
-ViewFrame* viewframe_alloc(void);
-ViewFrame* viewframe_allocinit(psy_ui_Component* parent,
-	psy_ui_Notebook* dock, Workspace*);
-
-void viewframe_float(ViewFrame*);
-void viewframe_dock(ViewFrame*);
-
-INLINE psy_ui_Component* viewframe_base(ViewFrame* self)
-{
-	return &self->component;
-}
 
 /*
 ** EmptyViewPage

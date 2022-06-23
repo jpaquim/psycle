@@ -32,7 +32,7 @@ void greet_init(Greet* self, psy_ui_Component* parent)
 		STYLE_GREET_TOP);
 	psy_ui_label_set_text(&self->headerlabel, "greetings.wantstothank");
 	psy_ui_label_enable_wrap(&self->headerlabel);
-	psy_ui_label_set_textalignment(&self->headerlabel,
+	psy_ui_label_set_text_alignment(&self->headerlabel,
 		psy_ui_ALIGNMENT_CENTER);	
 	psy_ui_component_set_padding(psy_ui_label_base(&self->headerlabel),
 		psy_ui_margin_make_em(1.0, 0.0, 1.0, 2.0));

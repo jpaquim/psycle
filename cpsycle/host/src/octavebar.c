@@ -7,18 +7,17 @@
 
 
 #include "octavebar.h"
-/* audio */
-#include <songio.h>
+
 /* platform */
 #include "../../detail/portable.h"
 
 /* prototypes */
-static void octavebar_buildoctavebox(OctaveBar*);
-static void octavebar_onoctaveboxselchange(OctaveBar*,
+static void octavebar_build_octave_box(OctaveBar*);
+static void octavebar_on_octavebox_sekected(OctaveBar*,
 	psy_ui_Component* sender, intptr_t sel);
-static void octavebar_onoctavechanged(OctaveBar*, Workspace*,
+static void octavebar_on_octave_changed(OctaveBar*, Workspace*,
 	intptr_t octave);
-static void octavebar_onsongchanged(OctaveBar*, Workspace* sender);
+static void octavebar_on_song_changed(OctaveBar*, Workspace* sender);
 
 /* implementation */
 void octavebar_init(OctaveBar* self, psy_ui_Component* parent,
@@ -30,20 +29,20 @@ void octavebar_init(OctaveBar* self, psy_ui_Component* parent,
 	psy_ui_component_set_align_expand(octavebar_base(self),
 		psy_ui_HEXPAND);
 	self->workspace = workspace;
-	psy_ui_label_init_text(&self->headerlabel, octavebar_base(self),
+	psy_ui_label_init_text(&self->desc, octavebar_base(self),
 		"octavebar.octave");
 	psy_ui_combobox_init(&self->octavebox, octavebar_base(self));
-	psy_ui_combobox_setcharnumber(&self->octavebox, 3);	
-	octavebar_buildoctavebox(self);
+	psy_ui_combobox_set_char_number(&self->octavebox, 3);	
+	octavebar_build_octave_box(self);
 	psy_signal_connect(&self->octavebox.signal_selchanged, self,
-		octavebar_onoctaveboxselchange);
+		octavebar_on_octavebox_sekected);
 	psy_signal_connect(&workspace->signal_octavechanged, self,
-		octavebar_onoctavechanged);
+		octavebar_on_octave_changed);
 	psy_signal_connect(&workspace->signal_songchanged, self,
-		octavebar_onsongchanged);	
+		octavebar_on_song_changed);	
 }
 
-void octavebar_buildoctavebox(OctaveBar* self)
+void octavebar_build_octave_box(OctaveBar* self)
 {
 	int octave;
 	char text[20];
@@ -52,27 +51,25 @@ void octavebar_buildoctavebox(OctaveBar* self)
 		psy_snprintf(text, 20, "%d", octave);		
 		psy_ui_combobox_add_text(&self->octavebox, text);
 	}
-	psy_ui_combobox_setcursel(&self->octavebox,
+	psy_ui_combobox_select(&self->octavebox,
 		workspace_octave(self->workspace));
 }
 
-void octavebar_onoctaveboxselchange(OctaveBar* self, psy_ui_Component* sender,
-	intptr_t sel)
+void octavebar_on_octavebox_sekected(OctaveBar* self, psy_ui_Component* sender,
+	intptr_t index)
 {	
-	if (self >= 0 && sel <= 8) {
-		workspace_set_octave(self->workspace, (uint8_t)sel);
+	if (index >= 0 && index <= 8) {
+		workspace_set_octave(self->workspace, (uint8_t)index);
 	}
 }
 
-void octavebar_onoctavechanged(OctaveBar* self, Workspace* workspace,
+void octavebar_on_octave_changed(OctaveBar* self, Workspace* sender,
 	intptr_t octave)
 {
-	psy_ui_combobox_setcursel(&self->octavebox,
-		workspace_octave(self->workspace));
+	psy_ui_combobox_select(&self->octavebox, workspace_octave(sender));
 }
 
-void octavebar_onsongchanged(OctaveBar* self, Workspace* sender)
+void octavebar_on_song_changed(OctaveBar* self, Workspace* sender)
 {	
-	psy_ui_combobox_setcursel(&self->octavebox,
-		workspace_octave(sender));
+	psy_ui_combobox_select(&self->octavebox, workspace_octave(sender));
 }

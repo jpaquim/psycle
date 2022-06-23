@@ -206,7 +206,7 @@ INLINE void psy_audio_player_set_sampler_index(psy_audio_Player* self,
 }
 
 /* \returns lines per beat */
-void psy_audio_player_setlpb(psy_audio_Player*, uintptr_t lpb);
+void psy_audio_player_set_lpb(psy_audio_Player*, uintptr_t lpb);
 
 INLINE uintptr_t psy_audio_player_lpb(psy_audio_Player* self)
 {

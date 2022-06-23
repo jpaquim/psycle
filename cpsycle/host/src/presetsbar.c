@@ -1,21 +1,26 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "presetsbar.h"
 
+/* file */
 #include <dir.h>
 #include <presetio.h>
-
+/* ui */
 #include <uiframe.h>
 #include <uiopendialog.h>
 #include <uisavedialog.h>
-
+/* std */
 #include <stdlib.h>
 #include <string.h>
-
+/* platform */
 #include "../../detail/portable.h"
+
 
 /* prototypes */
 static void presetsbar_on_destroyed(PresetsBar*);
@@ -49,7 +54,7 @@ static void vtable_init(PresetsBar* self)
 			presetsbar_on_destroyed;
 		vtable_initialized = TRUE;
 	}
-	psy_ui_component_set_vtable(&self->component, &vtable);
+	psy_ui_component_set_vtable(presetsbar_base(self), &vtable);
 }
 
 /* implementation */
@@ -68,14 +73,14 @@ void presetsbar_init(PresetsBar* self, psy_ui_Component* parent,
 	psy_path_init(&self->presetpath, "");	
 	psy_ui_label_init_text(&self->bank, &self->component, "machineframe.bank");
 	psy_ui_combobox_init(&self->bankselector, &self->component);
-	psy_ui_combobox_setcharnumber(&self->bankselector, 10);
+	psy_ui_combobox_set_char_number(&self->bankselector, 10);
 	psy_ui_button_init_text(&self->importpresets, &self->component,
 		"machineframe.import");
 	psy_ui_button_init_text(&self->exportpresets, &self->component,
 		"machineframe.export");
 	psy_ui_label_init_text(&self->program, &self->component, "machineframe.program");
 	psy_ui_combobox_init(&self->programbox, &self->component);
-	psy_ui_combobox_setcharnumber(&self->programbox, 20);
+	psy_ui_combobox_set_char_number(&self->programbox, 20);
 	psy_ui_button_init_text(&self->savepresets, &self->component,
 		"machineframe.saveas");
 	psy_ui_textarea_init_single_line(&self->savename, &self->component);	
@@ -294,7 +299,7 @@ void presetsbar_onsavenameeditkeydown(PresetsBar* self,
 		presetsbar_onsavepresets(self, &self->component);
 		index = psy_ui_combobox_cursel(&self->programbox);
 		presetsbar_buildprograms(self);
-		psy_ui_combobox_setcursel(&self->programbox, index);		
+		psy_ui_combobox_select(&self->programbox, index);		
 		psy_ui_component_set_focus(&self->component);		
 		psy_ui_keyboardevent_prevent_default(ev);
 	} else if (psy_ui_keyboardevent_keycode(ev) == psy_ui_KEY_ESCAPE) {
@@ -336,9 +341,9 @@ void presetsbar_setprogram(PresetsBar* self, uintptr_t prog)
 		psy_audio_machine_setcurrprogram(self->machine, prog);
 		presetsbar_buildprograms(self);
 		presetsbar_buildbanks(self);		
-		psy_ui_combobox_setcursel(&self->bankselector,
+		psy_ui_combobox_select(&self->bankselector,
 			psy_audio_machine_currbank(self->machine));
-		psy_ui_combobox_setcursel(&self->programbox,
+		psy_ui_combobox_select(&self->programbox,
 			psy_audio_machine_currprogram(self->machine));
 		presetsbar_updatesavename(self);
 	}
@@ -350,9 +355,9 @@ void presetsbar_showprogram(PresetsBar* self)
 	if (self->machine) {		
 		presetsbar_buildprograms(self);
 		presetsbar_buildbanks(self);
-		psy_ui_combobox_setcursel(&self->bankselector,
+		psy_ui_combobox_select(&self->bankselector,
 			psy_audio_machine_currbank(self->machine));
-		psy_ui_combobox_setcursel(&self->programbox,
+		psy_ui_combobox_select(&self->programbox,
 			psy_audio_machine_currprogram(self->machine));
 		presetsbar_updatesavename(self);
 	}

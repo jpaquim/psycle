@@ -214,7 +214,7 @@ void pluginscanprocessview_init(PluginScanProcessView* self, psy_ui_Component* p
 	psy_ui_component_set_align(&self->bottom, psy_ui_ALIGN_BOTTOM);
 	psy_ui_label_init(&self->scanfile, &self->bottom);
 	psy_ui_label_prevent_translation(&self->scanfile);
-	psy_ui_label_set_textalignment(&self->scanfile,
+	psy_ui_label_set_text_alignment(&self->scanfile,
 		psy_ui_ALIGNMENT_CENTER_HORIZONTAL);
 	psy_ui_component_set_align(psy_ui_label_base(&self->scanfile),
 		psy_ui_ALIGN_TOP);

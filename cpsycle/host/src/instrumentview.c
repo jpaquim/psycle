@@ -50,11 +50,11 @@ void virtualgeneratorbox_init(VirtualGeneratorsBox* self, psy_ui_Component* pare
 	psy_signal_connect(&self->generators.signal_selchanged, self,
 		virtualgeneratorbox_ongeneratorschanged);
 	psy_ui_label_init_text(&self->on, &self->component, "on");
-	psy_ui_combobox_setcharnumber(&self->generators, 10);
+	psy_ui_combobox_set_char_number(&self->generators, 10);
 	psy_ui_combobox_init(&self->samplers, &self->component);
 	psy_signal_connect(&self->samplers.signal_selchanged, self,
 		virtualgeneratorbox_onsamplerschanged);
-	psy_ui_combobox_setcharnumber(&self->samplers, 20);
+	psy_ui_combobox_set_char_number(&self->samplers, 20);
 	virtualgeneratorbox_updategenerators(self);
 }
 
@@ -144,8 +144,8 @@ void virtualgeneratorbox_update(VirtualGeneratorsBox* self)
 {
 	psy_TableIterator it;	
 
-	psy_ui_combobox_setcursel(&self->generators, -1);
-	psy_ui_combobox_setcursel(&self->samplers, -1);
+	psy_ui_combobox_select(&self->generators, -1);
+	psy_ui_combobox_select(&self->samplers, -1);
 	psy_ui_checkbox_disablecheck(&self->active);
 	for (it = psy_audio_machines_begin(&self->workspace->song->machines);
 		!psy_tableiterator_equal(&it, psy_table_end());
@@ -167,9 +167,9 @@ void virtualgeneratorbox_update(VirtualGeneratorsBox* self)
 						uintptr_t macindex;
 
 						macindex = psy_audio_machine_parameter_scaledvalue(machine, param);											
-						psy_ui_combobox_setcursel(&self->samplers, macindex);					
+						psy_ui_combobox_select(&self->samplers, macindex);					
 					}
-					psy_ui_combobox_setcursel(&self->generators,
+					psy_ui_combobox_select(&self->generators,
 						psy_audio_machine_slot(machine) - 0x81);
 					psy_ui_checkbox_check(&self->active);
 					break;
@@ -268,10 +268,10 @@ void instrumentheaderview_init(InstrumentHeaderView* self, psy_ui_Component* par
 		instrumentheaderview_oneditreject);
 	psy_ui_button_init_connect(&self->prevbutton, &self->component,
 		self, instrumentheaderview_onprevinstrument);
-	psy_ui_button_seticon(&self->prevbutton, psy_ui_ICON_LESS);
+	psy_ui_button_set_icon(&self->prevbutton, psy_ui_ICON_LESS);
 	psy_ui_button_init_connect(&self->nextbutton, &self->component,
 		self, instrumentheaderview_onnextinstrument);
-	psy_ui_button_seticon(&self->nextbutton, psy_ui_ICON_MORE);
+	psy_ui_button_set_icon(&self->nextbutton, psy_ui_ICON_MORE);
 	psy_ui_component_init(&self->more, &self->component, NULL);
 	psy_ui_component_set_default_align(&self->more, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
@@ -488,7 +488,7 @@ void instrumentview_init(InstrumentView* self, psy_ui_Component* parent,
 	/* empty */
 	psy_ui_label_init_text(&self->empty,
 		psy_ui_notebook_base(&self->clientnotebook), "No Instrument");
-	psy_ui_label_set_textalignment(&self->empty,
+	psy_ui_label_set_text_alignment(&self->empty,
 		(psy_ui_Alignment)(psy_ui_ALIGNMENT_CENTER_HORIZONTAL | psy_ui_ALIGNMENT_CENTER_VERTICAL));	
 	/* client */
 	psy_ui_component_init(&self->client, psy_ui_notebook_base(

@@ -13,46 +13,66 @@
 /* platform */
 #include "../../detail/portable.h"
 
-/* SeqEditEntryProperties */
+
+void seqeditpropertiesentry_init(SeqEditPropertiesEntry* self, psy_ui_Component* parent,
+	const char* title, SeqEditState* state)
+{
+	psy_ui_component_init(&self->component, parent, NULL);	
+	psy_ui_component_set_title(&self->component, title);
+	self->state = state;
+}
+
+/* SeqEditPropertiesSeqEntry */
+
 /* prototypes */
-static void seqeditentryproperties_update(SeqEditEntryProperties*);
+static void seqeditentryproperties_update(SeqEditPropertiesSeqEntry*);
+static void seqeditpropertiesseqentry_select(SeqEditPropertiesSeqEntry*,
+	psy_ui_Component* sender, uintptr_t param1, uintptr_t param2);
 
 /* implementation */
-void seqeditentryproperties_init(SeqEditEntryProperties* self, psy_ui_Component* parent,
-	SeqEditState* state)
+void seqeditpropertiesseqentry_init(SeqEditPropertiesSeqEntry* self, psy_ui_Component* parent,
+	const char* title, SeqEditState* state)
 {
-	psy_ui_component_init(&self->component, parent, NULL);
-	self->state = state;
-	self->orderindex = psy_audio_orderindex_make_invalid();
+	seqeditpropertiesentry_init(&self->entry, parent, title, state);
+	psy_signal_connect(&self->entry.component.signal_selectsection, self,
+		seqeditpropertiesseqentry_select);
+	self->orderindex = psy_audio_orderindex_make_invalid();	
 	/* position */
-	labelpair_init(&self->offset, &self->component, "Position", 12.0);
+	labelpair_init(&self->offset, seqeditpropertiesseqentry_base(self), "Position", 12.0);
 	psy_ui_component_set_align(psy_ui_label_base(&self->offset.second),
 		psy_ui_ALIGN_CLIENT);
 	psy_ui_component_set_align(labelpair_base(&self->offset), psy_ui_ALIGN_TOP);
 	/* length */
-	labelpair_init(&self->length, &self->component, "Length", 12.0);
+	labelpair_init(&self->length, seqeditpropertiesseqentry_base(self), "Length", 12.0);
 	psy_ui_component_set_align(psy_ui_label_base(&self->length.second),
 		psy_ui_ALIGN_CLIENT);
 	psy_ui_component_set_align(labelpair_base(&self->length), psy_ui_ALIGN_TOP);
 	/* end */
-	labelpair_init(&self->end, &self->component, "End", 12.0);
+	labelpair_init(&self->end, seqeditpropertiesseqentry_base(self), "End", 12.0);
 	psy_ui_component_set_align(psy_ui_label_base(&self->end.second),
 		psy_ui_ALIGN_CLIENT);
 	psy_ui_component_set_align(labelpair_base(&self->end), psy_ui_ALIGN_TOP);	
 }
 
-void seqeditentryproperties_setorderindex(SeqEditEntryProperties* self,
+void seqeditpropertiesseqentry_select(SeqEditPropertiesSeqEntry* self,
+	psy_ui_Component* sender, uintptr_t param1, uintptr_t param2)
+{
+	seqeditpropertiesseqentry_set_order_index(self,
+		psy_audio_orderindex_make(param1, param2));
+}
+
+void seqeditpropertiesseqentry_set_order_index(SeqEditPropertiesSeqEntry* self,
 	psy_audio_OrderIndex orderindex)
 {
 	self->orderindex = orderindex;
 	seqeditentryproperties_update(self);
 }
 
-void seqeditentryproperties_update(SeqEditEntryProperties* self)
+void seqeditentryproperties_update(SeqEditPropertiesSeqEntry* self)
 {
 	psy_audio_Sequence* sequence;
 
-	sequence = seqeditstate_sequence(self->state);
+	sequence = seqeditstate_sequence(self->entry.state);
 	if (sequence) {
 		char text[64];
 		psy_audio_SequenceEntry* seqentry;
@@ -83,16 +103,8 @@ void seqeditentryproperties_update(SeqEditEntryProperties* self)
 void seqeditemptyproperties_init(SeqEditEmptyProperties* self, psy_ui_Component* parent,
 	SeqEditState* state)
 {	
-	psy_ui_component_init(&self->component, parent, NULL);
-	self->state = state;		
-	psy_ui_component_set_preferred_size(&self->component,
-		psy_ui_size_make_em(40.0, 20.0));
-	psy_ui_component_set_padding(&self->component,
-		psy_ui_margin_make_em(0.0, 0.0, 0.0, 1.0));
-	psy_ui_label_init(&self->caption, &self->component);
-	psy_ui_label_set_text(&self->caption, "No Item selected");
-	psy_ui_component_set_align(psy_ui_label_base(&self->caption),
-		psy_ui_ALIGN_TOP);
+	seqeditpropertiesentry_init(&self->entry, parent, "No Item Selected", state);
+	psy_ui_component_set_id(&self->entry.component, SEQEDITITEM_NONE);
 }
 
 /* SeqEditPatternProperties */
@@ -100,28 +112,10 @@ void seqeditemptyproperties_init(SeqEditEmptyProperties* self, psy_ui_Component*
 /* implementation */
 void seqeditpatternproperties_init(SeqEditPatternProperties* self, psy_ui_Component* parent,
 	SeqEditState* state)
-{	
-	psy_ui_component_init(&self->component, parent, NULL);
-	self->state = state;		
-	psy_ui_component_set_preferred_size(&self->component,
-		psy_ui_size_make_em(40.0, 20.0));
-	psy_ui_component_set_padding(&self->component,
-		psy_ui_margin_make_em(0.0, 0.0, 0.0, 1.0));
-	psy_ui_label_init(&self->caption, &self->component);
-	psy_ui_label_set_text(&self->caption, "Pattern Item selected");
-	psy_ui_component_set_align(psy_ui_label_base(&self->caption),
-		psy_ui_ALIGN_TOP);
-	/* seqentry properties */
-	seqeditentryproperties_init(&self->entry, &self->component, self->state);
-	psy_ui_component_set_align(&self->entry.component, psy_ui_ALIGN_TOP);
-	psy_ui_component_set_margin(&self->entry.component,
-		psy_ui_margin_make_em(0.5, 0.0, 0.0, 0.0));
-}
-
-void seqeditpatternproperties_setorderindex(SeqEditPatternProperties* self,
-	psy_audio_OrderIndex orderindex)
 {		
-	seqeditentryproperties_setorderindex(&self->entry, orderindex);	
+	seqeditpropertiesseqentry_init(&self->entry, parent,
+		"Pattern Item Selected", state);
+	psy_ui_component_set_id(&self->entry.entry.component, SEQEDITITEM_PATTERN);		
 }
 
 /* SeqEditSampleProperties */
@@ -130,75 +124,55 @@ void seqeditpatternproperties_setorderindex(SeqEditPatternProperties* self,
 void seqeditsampleproperties_init(SeqEditSampleProperties* self, psy_ui_Component* parent,
 	SeqEditState* state)
 {	
-	psy_ui_component_init(&self->component, parent, NULL);
-	self->state = state;		
-	psy_ui_component_set_preferred_size(&self->component,
-		psy_ui_size_make_em(40.0, 20.0));
-	psy_ui_component_set_padding(&self->component,
-		psy_ui_margin_make_em(0.0, 0.0, 0.0, 1.0));
-	psy_ui_label_init(&self->caption, &self->component);
-	psy_ui_label_set_text(&self->caption, "Sample Item selected");
-	psy_ui_component_set_align(psy_ui_label_base(&self->caption),
-		psy_ui_ALIGN_TOP);
-	/* seqentry properties */
-	seqeditentryproperties_init(&self->entry, &self->component, self->state);
-	psy_ui_component_set_align(&self->entry.component, psy_ui_ALIGN_TOP);
-	psy_ui_component_set_margin(&self->entry.component,
-		psy_ui_margin_make_em(0.5, 0.0, 0.0, 0.0));
-}
-
-void seqeditsampleproperties_setorderindex(SeqEditSampleProperties* self,
-	psy_audio_OrderIndex orderindex)
-{		
-	seqeditentryproperties_setorderindex(&self->entry, orderindex);	
+	seqeditpropertiesseqentry_init(&self->entry, parent,
+		"Sample Item Selected", state);
+	psy_ui_component_set_id(&self->entry.entry.component, SEQEDITITEM_SAMPLE);
 }
 
 /* SeqEditMarkerProperties */
 
 /* prototypes */
-static void seqeditmarkerproperties_oneditaccept(SeqEditMarkerProperties*,
+static void seqeditmarkerproperties_on_edit_accept(SeqEditMarkerProperties*,
 	psy_ui_TextArea* sender);
-static void seqeditmarkerproperties_oneditreject(SeqEditMarkerProperties*,
+static void seqeditmarkerproperties_on_edit_reject(SeqEditMarkerProperties*,
 	psy_ui_TextArea* sender);
+static void seqeditmarkerproperties_select(SeqEditMarkerProperties*,
+	psy_ui_Component* sender, uintptr_t param1, uintptr_t param2);
 
 /* implementation */
 void seqeditmarkerproperties_init(SeqEditMarkerProperties* self, psy_ui_Component* parent,
 	SeqEditState* state)
 {	
-	psy_ui_component_init(&self->component, parent, NULL);
-	self->state = state;			
-	psy_ui_component_set_preferred_size(&self->component,
-		psy_ui_size_make_em(40.0, 20.0));
-	psy_ui_component_set_padding(&self->component,
-		psy_ui_margin_make_em(0.0, 0.0, 0.0, 1.0));
-	psy_ui_label_init(&self->caption, &self->component);
-	psy_ui_label_set_text(&self->caption, "Marker Item selected");
-	psy_ui_component_set_align(psy_ui_label_base(&self->caption),
-		psy_ui_ALIGN_TOP);
-	labeledit_init(&self->name, &self->component, "Name");
+	seqeditpropertiesseqentry_init(&self->entry, parent,
+		"Marker Item Selected", state);	
+	psy_signal_connect(&self->entry.entry.component.signal_selectsection, self,
+		seqeditmarkerproperties_select);
+	psy_ui_component_set_id(&self->entry.entry.component, SEQEDITITEM_MARKER);
+	labeledit_init(&self->name, &self->entry.entry.component, "Name");
 	psy_ui_component_set_margin(&self->name.component,
 		psy_ui_margin_make_em(0.5, 0.0, 0.0, 0.0));	
 	psy_ui_component_set_align(labeledit_base(&self->name),
-		psy_ui_ALIGN_TOP);
-	/* seqentry properties */
-	seqeditentryproperties_init(&self->entry, &self->component, self->state);
-	psy_ui_component_set_align(&self->entry.component, psy_ui_ALIGN_TOP);
-	psy_ui_component_set_margin(&self->entry.component,
-		psy_ui_margin_make_em(0.5, 0.0, 0.0, 0.0));
-	/* connect */
+		psy_ui_ALIGN_TOP);	
 	psy_signal_connect(&self->name.edit.signal_accept,
-		self, seqeditmarkerproperties_oneditaccept);
+		self, seqeditmarkerproperties_on_edit_accept);
 	psy_signal_connect(&self->name.edit.signal_reject,
-		self, seqeditmarkerproperties_oneditreject);	
+		self, seqeditmarkerproperties_on_edit_reject);	
 }
 
-void seqeditmarkerproperties_setorderindex(SeqEditMarkerProperties* self,
+void seqeditmarkerproperties_select(SeqEditMarkerProperties* self,
+	psy_ui_Component* sender, uintptr_t param1, uintptr_t param2)
+{
+	seqeditmarkerproperties_set_order_index(self,
+		psy_audio_orderindex_make(param1, param2));	
+}
+
+void seqeditmarkerproperties_set_order_index(SeqEditMarkerProperties* self,
 	psy_audio_OrderIndex orderindex)
 {
 	psy_audio_SequenceEntry* entry;	
 		
-	seqeditentryproperties_setorderindex(&self->entry, orderindex);
-	entry = psy_audio_sequence_entry(seqeditstate_sequence(self->state),
+	seqeditpropertiesseqentry_set_order_index(&self->entry, orderindex);
+	entry = psy_audio_sequence_entry(seqeditstate_sequence(self->entry.entry.state),
 		orderindex);
 	if (entry && entry->type == psy_audio_SEQUENCEENTRY_MARKER) {		
 		psy_audio_SequenceMarkerEntry* markerentry;
@@ -208,12 +182,12 @@ void seqeditmarkerproperties_setorderindex(SeqEditMarkerProperties* self,
 	}
 }
 
-void seqeditmarkerproperties_oneditaccept(SeqEditMarkerProperties* self,
+void seqeditmarkerproperties_on_edit_accept(SeqEditMarkerProperties* self,
 	psy_ui_TextArea* sender)
 {
 	psy_audio_Sequence* sequence;
 	
-	sequence = seqeditstate_sequence(self->state);
+	sequence = seqeditstate_sequence(self->entry.entry.state);
 	if (sequence) {
 		psy_audio_SequenceEntry* seqentry;
 
@@ -223,77 +197,74 @@ void seqeditmarkerproperties_oneditaccept(SeqEditMarkerProperties* self,
 
 			markerentry = (psy_audio_SequenceMarkerEntry*)seqentry;
 			psy_strreset(&markerentry->text, psy_ui_textarea_text(sender));
-			psy_ui_component_invalidate(self->state->view);
-			psy_ui_component_set_focus(self->state->view);
+			psy_ui_component_invalidate(self->entry.entry.state->view);
+			psy_ui_component_set_focus(self->entry.entry.state->view);
 		}
 	}
 }
 
-void seqeditmarkerproperties_oneditreject(SeqEditMarkerProperties* self,
+void seqeditmarkerproperties_on_edit_reject(SeqEditMarkerProperties* self,
 	psy_ui_TextArea* sender)
 {
-	psy_ui_component_set_focus(self->state->view);
+	psy_ui_component_set_focus(self->entry.entry.state->view);
 }
 
 /* SeqEditTimesigProperties */
 /* prototypes */
-void seqedittimesigproperties_onnominator(SeqEditTimesigProperties*, IntEdit* sender);
-void seqedittimesigproperties_ondenominator(SeqEditTimesigProperties*, IntEdit* sender);
+static void seqedittimesigproperties_on_nominator(SeqEditTimesigProperties*, IntEdit* sender);
+static void seqedittimesigproperties_on_denominator(SeqEditTimesigProperties*, IntEdit* sender);
+static void seqedittimesigproperties_select(SeqEditTimesigProperties*,
+	psy_ui_Component* sender, uintptr_t param1, uintptr_t param2);
 
 /* implementation */
 void seqedittimesigproperties_init(SeqEditTimesigProperties* self, psy_ui_Component* parent,
 	SeqEditState* state)
 {	
-	psy_ui_component_init(&self->component, parent, NULL);
-	self->state = state;
-	self->timesigindex = psy_INDEX_INVALID;		
-	psy_ui_component_set_preferred_size(&self->component,
-		psy_ui_size_make_em(40.0, 20.0));
-	psy_ui_component_set_padding(&self->component,
-		psy_ui_margin_make_em(0.0, 0.0, 0.0, 1.0));
-	psy_ui_label_init(&self->caption, &self->component);
-	psy_ui_label_set_text(&self->caption, "Timesig Item selected");
-	psy_ui_component_set_align(psy_ui_label_base(&self->caption),
-		psy_ui_ALIGN_TOP);
+	seqeditpropertiesentry_init(&self->entry, parent, "TimeSig Item Selected",
+		state);	
+	psy_signal_connect(&self->entry.component.signal_selectsection, self,
+		seqedittimesigproperties_select);
+	psy_ui_component_set_id(&self->entry.component, SEQEDITITEM_TIMESIG);
+	self->timesigindex = psy_INDEX_INVALID;	
 	/* nominator */
-	intedit_init(&self->nominator, &self->component, "Nominator", 1, 1, 0xF);
+	intedit_init(&self->nominator, seqedittimesigproperties_base(self), "Nominator", 1, 1, 0xF);
 	psy_ui_component_set_align(intedit_base(&self->nominator),
 		psy_ui_ALIGN_TOP);
 	psy_ui_label_set_char_number(&self->nominator.desc, 14.0);
 	psy_ui_component_set_margin(&self->nominator.component,
 		psy_ui_margin_make_em(0.5, 0.0, 0.0, 0.0));	
 	/* denominator */
-	intedit_init(&self->denominator, &self->component, "Denominator", 1, 1, 0xF);
+	intedit_init(&self->denominator, seqedittimesigproperties_base(self), "Denominator", 1, 1, 0xF);
 	psy_ui_component_set_align(intedit_base(&self->denominator),
 		psy_ui_ALIGN_TOP);
 	psy_ui_label_set_char_number(&self->denominator.desc, 14.0);
 	/* position */	
-	labelpair_init(&self->offset, &self->component, "Position", 12.0);
+	labelpair_init(&self->offset, seqedittimesigproperties_base(self), "Position", 12.0);
 	psy_ui_component_set_align(labelpair_base(&self->offset), psy_ui_ALIGN_TOP);	
 	psy_ui_component_set_margin(labelpair_base(&self->offset), psy_ui_margin_make_em(
 		0.5, 0.0, 0.0, 0.0));
 	/* connect signals */
 	psy_signal_connect(&self->nominator.signal_changed, self,
-		seqedittimesigproperties_onnominator);	
+		seqedittimesigproperties_on_nominator);	
 	psy_signal_connect(&self->denominator.signal_changed, self,
-		seqedittimesigproperties_ondenominator);	
+		seqedittimesigproperties_on_denominator);	
 }
 
-void seqedittimesigproperties_settimesigindex(SeqEditTimesigProperties* self,
+void seqedittimesigproperties_select(SeqEditTimesigProperties* self,
+	psy_ui_Component* sender, uintptr_t param1, uintptr_t param2)
+{
+	seqedittimesigproperties_set_timesig_index(self, param1);
+}
+
+void seqedittimesigproperties_set_timesig_index(SeqEditTimesigProperties* self,
 	uintptr_t timesigindex)
 {
 	psy_audio_Pattern* pattern;
 
 	self->timesigindex = timesigindex;	
 	pattern = psy_audio_patterns_at(
-		&self->state->cmds->workspace->song->patterns,
-		psy_audio_GLOBALPATTERN);			
-	if (timesigindex == psy_INDEX_INVALID) {						
-		psy_ui_label_set_text(&self->caption, "No Timesig selected");	
-		return;
-	} else {
-		psy_ui_label_set_text(&self->caption, "TimeSig Item selected");	
-	}
+		&self->entry.state->cmds->workspace->song->patterns,
+		psy_audio_GLOBALPATTERN);	
 	if (pattern) {
 		psy_audio_PatternNode* node;
 		psy_audio_PatternEntry* entry;
@@ -314,12 +285,12 @@ void seqedittimesigproperties_settimesigindex(SeqEditTimesigProperties* self,
 	}
 }
 
-void seqedittimesigproperties_onnominator(SeqEditTimesigProperties* self, IntEdit* sender)
+void seqedittimesigproperties_on_nominator(SeqEditTimesigProperties* self, IntEdit* sender)
 {
 	psy_audio_Pattern* pattern;
 
 	pattern = psy_audio_patterns_at(
-		&self->state->cmds->workspace->song->patterns,
+		&self->entry.state->cmds->workspace->song->patterns,
 		psy_audio_GLOBALPATTERN);				
 	if (pattern) {
 		psy_audio_PatternNode* node;
@@ -333,17 +304,17 @@ void seqedittimesigproperties_onnominator(SeqEditTimesigProperties* self, IntEdi
 			entry = (psy_audio_PatternEntry*)(node->entry); 
 			e = psy_audio_patternentry_front(entry);
 			e->cmd = intedit_value(sender);
-			psy_signal_emit(&self->state->signal_timesigchanged, self->state, 0);
+			psy_signal_emit(&self->entry.state->signal_timesigchanged, self->entry.state, 0);
 		}		
 	}
 }
 
-void seqedittimesigproperties_ondenominator(SeqEditTimesigProperties* self, IntEdit* sender)
+void seqedittimesigproperties_on_denominator(SeqEditTimesigProperties* self, IntEdit* sender)
 {
 	psy_audio_Pattern* pattern;
 
 	pattern = psy_audio_patterns_at(
-		&self->state->cmds->workspace->song->patterns,
+		&self->entry.state->cmds->workspace->song->patterns,
 		psy_audio_GLOBALPATTERN);				
 	if (pattern) {
 		psy_audio_PatternNode* node;
@@ -357,63 +328,65 @@ void seqedittimesigproperties_ondenominator(SeqEditTimesigProperties* self, IntE
 			entry = (psy_audio_PatternEntry*)(node->entry); 
 			e = psy_audio_patternentry_front(entry);
 			e->parameter = intedit_value(sender);
-			psy_signal_emit(&self->state->signal_timesigchanged, self->state, 0);
+			psy_signal_emit(&self->entry.state->signal_timesigchanged, self->entry.state, 0);
 		}		
 	}
 }
 
-
 /* SeqEditLoopProperties */
 /* prototypes */
-static void seqeditloopproperties_onnumloops(SeqEditLoopProperties*, IntEdit* sender);
+static void seqeditloopproperties_on_num_loops(SeqEditLoopProperties*, IntEdit* sender);
+static void seqeditloopproperties_select(SeqEditLoopProperties*,
+	psy_ui_Component* sender, uintptr_t param1, uintptr_t param2);
 
 /*  implementation */
 void seqeditloopproperties_init(SeqEditLoopProperties* self, psy_ui_Component* parent,
 	SeqEditState* state)
 {	
-	psy_ui_component_init(&self->component, parent, NULL);
-	self->state = state;		
-	psy_ui_component_set_preferred_size(&self->component,
-		psy_ui_size_make_em(40.0, 20.0));
-	psy_ui_component_set_padding(&self->component,
-		psy_ui_margin_make_em(0.0, 0.0, 0.0, 1.0));
-	psy_ui_label_init(&self->caption, &self->component);
-	psy_ui_label_set_text(&self->caption, "Loop Item selected");
-	psy_ui_component_set_align(psy_ui_label_base(&self->caption),
-		psy_ui_ALIGN_TOP);	
-	intedit_init(&self->numloops, &self->component, "Repetitions", 1, 1, 0xF);
+	seqeditpropertiesentry_init(&self->entry, parent, "Loop Item Selected",
+		state);
+	psy_ui_component_set_id(&self->entry.component, SEQEDITITEM_LOOP);
+	psy_signal_connect(&self->entry.component.signal_selectsection, self,
+		seqeditloopproperties_select);
+	intedit_init(&self->numloops, seqeditloopproperties_base(self), "Repetitions", 1, 1, 0xF);
 	psy_ui_component_set_align(intedit_base(&self->numloops),
 		psy_ui_ALIGN_TOP);
 	psy_ui_label_set_char_number(&self->numloops.desc, 12.0);
 	psy_ui_component_set_margin(&self->numloops.component,
 		psy_ui_margin_make_em(0.5, 0.0, 0.0, 0.0));	
 	/* position */
-	labelpair_init(&self->offset, &self->component, "Position", 12.0);
+	labelpair_init(&self->offset, seqeditloopproperties_base(self), "Position", 12.0);
 	psy_ui_component_set_align(psy_ui_label_base(&self->offset.second),
 		psy_ui_ALIGN_CLIENT);
 	psy_ui_component_set_align(labelpair_base(&self->offset), psy_ui_ALIGN_TOP);
 	/* length */
-	labelpair_init(&self->length, &self->component, "Length", 12.0);
+	labelpair_init(&self->length, seqeditloopproperties_base(self), "Length", 12.0);
 	psy_ui_component_set_align(psy_ui_label_base(&self->length.second),
 		psy_ui_ALIGN_CLIENT);
 	psy_ui_component_set_align(labelpair_base(&self->length), psy_ui_ALIGN_TOP);
 	/* end */
-	labelpair_init(&self->end, &self->component, "End", 12.0);
+	labelpair_init(&self->end, seqeditloopproperties_base(self), "End", 12.0);
 	psy_ui_component_set_align(psy_ui_label_base(&self->end.second),
 		psy_ui_ALIGN_CLIENT);
 	psy_ui_component_set_align(labelpair_base(&self->end), psy_ui_ALIGN_TOP);	
 
 	seqeditloopproperties_setloopindex(self, psy_INDEX_INVALID);	
 	psy_signal_connect(&self->numloops.signal_changed, self,
-		seqeditloopproperties_onnumloops);	
+		seqeditloopproperties_on_num_loops);	
 }
 
-void seqeditloopproperties_onnumloops(SeqEditLoopProperties* self, IntEdit* sender)
+void seqeditloopproperties_select(SeqEditLoopProperties* self,
+	psy_ui_Component* sender, uintptr_t param1, uintptr_t param2)
+{
+	seqeditloopproperties_setloopindex(self, param1);
+}
+
+void seqeditloopproperties_on_num_loops(SeqEditLoopProperties* self, IntEdit* sender)
 {
 	psy_audio_Pattern* pattern;
 
 	pattern = psy_audio_patterns_at(
-		&self->state->cmds->workspace->song->patterns,
+		&self->entry.state->cmds->workspace->song->patterns,
 		psy_audio_GLOBALPATTERN);				
 	if (pattern) {
 		psy_audio_Loop loop;
@@ -427,7 +400,7 @@ void seqeditloopproperties_onnumloops(SeqEditLoopProperties* self, IntEdit* send
 			entry = (psy_audio_PatternEntry*)(loop.end->entry); 
 			e = psy_audio_patternentry_front(entry);
 			e->parameter = 0xB0 | (uint8_t)intedit_value(sender);
-			psy_signal_emit(&self->state->signal_loopchanged, self->state, 0);
+			psy_signal_emit(&self->entry.state->signal_loopchanged, self->entry.state, 0);
 		}		
 	}
 }
@@ -438,14 +411,8 @@ void seqeditloopproperties_setloopindex(SeqEditLoopProperties* self, uintptr_t l
 
 	self->loopindex = loopindex;	
 	pattern = psy_audio_patterns_at(
-		&self->state->cmds->workspace->song->patterns,
-		psy_audio_GLOBALPATTERN);			
-	if (loopindex == psy_INDEX_INVALID) {						
-		psy_ui_label_set_text(&self->caption, "No Loop selected");	
-		return;
-	} else {
-		psy_ui_label_set_text(&self->caption, "Loop Item selected");	
-	}
+		&self->entry.state->cmds->workspace->song->patterns,
+		psy_audio_GLOBALPATTERN);				
 	if (pattern) {
 		char text[64];
 		psy_audio_Loop loop;
@@ -493,13 +460,14 @@ void seqeditloopproperties_setloopindex(SeqEditLoopProperties* self, uintptr_t l
 /* SeqEditProperties */
 
 /* prototypes */
-static void seqeditproperties_onitemselected(SeqEditProperties*,
+static void seqeditproperties_on_item_selected(SeqEditProperties*,
 	SeqEditState* sender, uintptr_t itemtype, uintptr_t param, uintptr_t param1);
-static void seqeditproperties_onsequencetrackreposition(SeqEditProperties*,
+static void seqeditproperties_on_track_reposition(SeqEditProperties*,
 	psy_audio_Sequence* sender, uintptr_t trackidx);
-static void seqeditproperties_onsongchanged(SeqEditProperties*,
+static void seqeditproperties_on_song_changed(SeqEditProperties*,
 	Workspace* sender);
-static void seqeditproperties_connectsong(SeqEditProperties*);
+static void seqeditproperties_connect_song(SeqEditProperties*);
+static void seqeditproperties_set_caption(SeqEditProperties*, const char* text);
 
 /*  implementation */
 void seqeditproperties_init(SeqEditProperties* self, psy_ui_Component* parent,
@@ -511,10 +479,15 @@ void seqeditproperties_init(SeqEditProperties* self, psy_ui_Component* parent,
 	self->param1 = 0;
 	self->param2 = 0;		
 	psy_ui_component_set_preferred_size(&self->component,
-		psy_ui_size_make_em(30.0, 20.0));
-	psy_ui_component_set_padding(&self->component,
-		psy_ui_margin_make_em(0.0, 0.0, 0.0, 1.0));	
+		psy_ui_size_make_em(40.0, 20.0));	
+	/* caption */
+	psy_ui_label_init_text(&self->caption, &self->component,
+		"No Item selected");
+	psy_ui_component_set_align(psy_ui_label_base(&self->caption),
+		psy_ui_ALIGN_TOP);
 	psy_ui_notebook_init(&self->notebook, &self->component);
+	psy_ui_component_set_margin(&self->notebook.component,
+		psy_ui_margin_make_em(0.5, 0.0, 0.0, 2.0));
 	psy_ui_component_set_align(psy_ui_notebook_base(&self->notebook),
 		psy_ui_ALIGN_CLIENT);
 	seqeditemptyproperties_init(&self->empty, psy_ui_notebook_base(&self->notebook),
@@ -529,84 +502,64 @@ void seqeditproperties_init(SeqEditProperties* self, psy_ui_Component* parent,
 		self->state);
 	seqeditloopproperties_init(&self->loop, psy_ui_notebook_base(&self->notebook),
 		self->state);
-	seqeditproperties_selectitem(self, SEQEDITITEM_NONE, 0, 0);
+	seqeditproperties_select(self, SEQEDITITEM_NONE, 0, 0);
 	psy_signal_connect(&self->state->signal_itemselected, self,
-		seqeditproperties_onitemselected);
+		seqeditproperties_on_item_selected);
 	psy_signal_connect(&self->state->cmds->workspace->signal_songchanged, self,
-		seqeditproperties_onsongchanged);
-	seqeditproperties_connectsong(self);
+		seqeditproperties_on_song_changed);
+	seqeditproperties_connect_song(self);
+	psy_ui_notebook_select(&self->notebook, 0);
 }
 
-void seqeditproperties_selectitem(SeqEditProperties* self, SeqEditItemType type,
+void seqeditproperties_select(SeqEditProperties* self, SeqEditItemType type,
 	uintptr_t param1, uintptr_t param2)
-{
-	uintptr_t pageindex;
-
+{	
 	self->itemtype = type;
-	pageindex = 0;
 	self->param1 = param1;
 	self->param2 = param2;
-	switch (self->itemtype) {	
-	case SEQEDITITEM_PATTERN:
-		seqeditpatternproperties_setorderindex(&self->pattern,
-			psy_audio_orderindex_make(param1, param2));
-		pageindex = 1;
-		break;
-	case SEQEDITITEM_SAMPLE:
-		seqeditsampleproperties_setorderindex(&self->sample,
-			psy_audio_orderindex_make(param1, param2));
-		pageindex = 2;
-		break;
-	case SEQEDITITEM_MARKER:
-		seqeditmarkerproperties_setorderindex(&self->marker,
-			psy_audio_orderindex_make(param1, param2));
-		pageindex = 3;
-		break;
-	case SEQEDITITEM_TIMESIG: {		
-		seqedittimesigproperties_settimesigindex(&self->timesig, param1);
-		pageindex = 4;
-		break; }
-	case SEQEDITITEM_LOOP: {		
-		seqeditloopproperties_setloopindex(&self->loop, param1);
-		pageindex = 5;
-		break; }
-	case SEQEDITITEM_NONE:
-	default:		
-		pageindex = 0;
-		psy_ui_notebook_select(&self->notebook, 0);
-		break;
-	}
-	if (psy_ui_notebook_pageindex(&self->notebook) != pageindex) {
-		psy_ui_notebook_select(&self->notebook, pageindex);
-	}
+	psy_ui_notebook_select_by_component_id(&self->notebook, type);
+	if (psy_ui_notebook_active_page(&self->notebook)) {
+		psy_ui_component_select_section(psy_ui_notebook_active_page(&self->notebook),
+			param1, param2);		
+		seqeditproperties_set_caption(self,
+			psy_ui_component_title(psy_ui_notebook_active_page(&self->notebook)));
+	} else {
+		seqeditproperties_set_caption(self, NULL);
+	}	
 }
 
-void seqeditproperties_onitemselected(SeqEditProperties* self,
+void seqeditproperties_set_caption(SeqEditProperties* self, const char* text)
+{	
+	psy_ui_label_set_text(&self->caption, (text)
+		? text
+		: "No Item selected");
+}
+
+void seqeditproperties_on_item_selected(SeqEditProperties* self,
 	SeqEditState* sender, uintptr_t itemtype, uintptr_t param1, uintptr_t param2)
 {
-	seqeditproperties_selectitem(self, (SeqEditItemType)itemtype, param1, param2);
+	seqeditproperties_select(self, (SeqEditItemType)itemtype, param1, param2);
 }
 
-void seqeditproperties_onsongchanged(SeqEditProperties* self, Workspace* sender)
+void seqeditproperties_on_song_changed(SeqEditProperties* self, Workspace* sender)
 {
-	seqeditproperties_connectsong(self);
-	seqeditproperties_selectitem(self, SEQEDITITEM_NONE, 0, 0);
+	seqeditproperties_connect_song(self);
+	seqeditproperties_select(self, SEQEDITITEM_NONE, 0, 0);
 }
 
-void seqeditproperties_connectsong(SeqEditProperties* self)
+void seqeditproperties_connect_song(SeqEditProperties* self)
 {
 	psy_audio_Song* song;
 
 	song = workspace_song(self->state->cmds->workspace);
 	if (song) {		
 		psy_signal_connect(&song->sequence.signal_trackreposition,
-			self, seqeditproperties_onsequencetrackreposition);
+			self, seqeditproperties_on_track_reposition);
 	}
 }
 
-void seqeditproperties_onsequencetrackreposition(SeqEditProperties* self,
+void seqeditproperties_on_track_reposition(SeqEditProperties* self,
 	psy_audio_Sequence* sender, uintptr_t trackidx)
-{
-	seqeditproperties_selectitem(self, self->itemtype, self->param1,
-		self->param2);
+{	
+	seqeditproperties_select(self, self->itemtype, self->param1, self->param2);
 }

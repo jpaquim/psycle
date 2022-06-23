@@ -118,12 +118,12 @@ void psy_ui_editor_clear(psy_ui_Editor* self)
 
 void psy_ui_editor_prevent_edit(psy_ui_Editor* self)
 {	
-	psy_ui_textarea_preventedit(&self->textarea);	
+	psy_ui_textarea_prevent(&self->textarea);	
 }
 
 void psy_ui_editor_enable_edit(psy_ui_Editor* self)
 {
-	psy_ui_textarea_enableedit(&self->textarea);
+	psy_ui_textarea_enable(&self->textarea);
 }
 
 void psy_ui_editor_wrap(psy_ui_Editor* self)

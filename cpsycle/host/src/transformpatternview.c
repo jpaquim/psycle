@@ -234,8 +234,8 @@ void transformpatternview_initselection(TransformPatternView* self)
 	psy_ui_combobox_add_text(&self->replacenote, tws);		psy_ui_combobox_setitemdata(&self->replacenote, 124, psy_audio_NOTECOMMANDS_TWEAKSLIDE);
 	psy_ui_combobox_add_text(&self->replacenote, mcm);		psy_ui_combobox_setitemdata(&self->replacenote, 125, psy_audio_NOTECOMMANDS_MIDICC);
 
-	psy_ui_combobox_setcursel(&self->searchnote, 0);
-	psy_ui_combobox_setcursel(&self->replacenote, 0);
+	psy_ui_combobox_select(&self->searchnote, 0);
+	psy_ui_combobox_select(&self->replacenote, 0);
 
 	//Inst (search and replace)
 	psy_ui_combobox_add_text(&self->searchinst, all);		psy_ui_combobox_setitemdata(&self->searchinst, 0, 1003);
@@ -250,8 +250,8 @@ void transformpatternview_initselection(TransformPatternView* self)
 		psy_ui_combobox_add_text(&self->searchinst, text);	psy_ui_combobox_setitemdata(&self->searchinst, 3 + i, i);
 		psy_ui_combobox_add_text(&self->replaceinst, text);	psy_ui_combobox_setitemdata(&self->replaceinst, 2 + i, i);
 	}
-	psy_ui_combobox_setcursel(&self->searchinst, 0);
-	psy_ui_combobox_setcursel(&self->replaceinst, 0);
+	psy_ui_combobox_select(&self->searchinst, 0);
+	psy_ui_combobox_select(&self->replaceinst, 0);
 
 	//Mach (search and replace)
 	psy_ui_combobox_add_text(&self->searchmach, all);		psy_ui_combobox_setitemdata(&self->searchmach, 0, 1003);
@@ -266,8 +266,8 @@ void transformpatternview_initselection(TransformPatternView* self)
 		psy_ui_combobox_add_text(&self->searchmach, text);	psy_ui_combobox_setitemdata(&self->searchmach, 3 + i, i);
 		psy_ui_combobox_add_text(&self->replacemach, text);	psy_ui_combobox_setitemdata(&self->replacemach, 2 + i, i);
 	}
-	psy_ui_combobox_setcursel(&self->searchmach, 0);
-	psy_ui_combobox_setcursel(&self->replacemach, 0);
+	psy_ui_combobox_select(&self->searchmach, 0);
+	psy_ui_combobox_select(&self->replacemach, 0);
 }
 
 void transformpatternview_onsearchon_mouse_down(TransformPatternView* self,

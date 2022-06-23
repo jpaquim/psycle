@@ -90,7 +90,7 @@ void sequencebuttons_init(SequenceButtons* self, psy_ui_Component* parent,
 	psy_ui_component_set_default_align(&self->rowmore, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	psy_ui_button_init(&self->more, &self->rowmore);
-	psy_ui_button_seticon(&self->more, psy_ui_ICON_MORE);
+	psy_ui_button_set_icon(&self->more, psy_ui_ICON_MORE);
 	psy_ui_button_set_text(&self->more, "seqview.more");	
 	/* more block */
 	psy_ui_component_init(&self->block, &self->component, NULL);
@@ -164,11 +164,11 @@ void sequencebuttons_onmore(SequenceButtons* self,
 {
 	if (psy_ui_component_visible(&self->block)) {
 		psy_ui_component_hide(&self->block);
-		psy_ui_button_seticon(&self->more, psy_ui_ICON_MORE);
+		psy_ui_button_set_icon(&self->more, psy_ui_ICON_MORE);
 		psy_ui_button_set_text(&self->more, "seqview.more");
 		
 	} else {
-		psy_ui_button_seticon(&self->more, psy_ui_ICON_LESS);
+		psy_ui_button_set_icon(&self->more, psy_ui_ICON_LESS);
 		psy_ui_button_set_text(&self->more, "seqview.less");
 		psy_ui_component_show(&self->block);		
 	}
@@ -240,7 +240,7 @@ void sequencebuttons_onrename(SequenceButtons* self, psy_ui_Button* sender)
 			psy_audio_sequenceselection_first(&self->cmds->workspace->song->sequence.sequenceselection));
 		if (pattern) {			
 			psy_ui_textarea_set_text(&self->edit, psy_audio_pattern_name(pattern));
-			psy_ui_textarea_setsel(&self->edit, 0, -1);
+			psy_ui_textarea_select(&self->edit, 0, -1);
 			psy_ui_component_show(psy_ui_textarea_base(&self->edit));
 			psy_ui_component_align(psy_ui_component_parent(&self->component));
 			psy_ui_component_invalidate(psy_ui_component_parent(&self->component));

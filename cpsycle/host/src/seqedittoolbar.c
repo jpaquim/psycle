@@ -68,11 +68,11 @@ void seqedittoolbar_init(SeqEditToolBar* self, psy_ui_Component* parent,
 	psy_ui_label_init_text(&self->desctype, seqedittoolbar_base(self),
 		"Insert");	
 	psy_ui_combobox_init(&self->inserttype, seqedittoolbar_base(self));
-	psy_ui_combobox_setcharnumber(&self->inserttype, 12.0);
+	psy_ui_combobox_set_char_number(&self->inserttype, 12.0);
 	psy_ui_combobox_add_text(&self->inserttype, "Pattern");
 	psy_ui_combobox_add_text(&self->inserttype, "Marker");
 	psy_ui_combobox_add_text(&self->inserttype, "Sample");
-	psy_ui_combobox_setcursel(&self->inserttype, 0);
+	psy_ui_combobox_select(&self->inserttype, 0);
 	/* expand */
 	psy_ui_button_init(&self->expand, &self->component);
 	psy_ui_button_load_resource(&self->expand, IDB_EXPAND_LIGHT,
@@ -99,10 +99,10 @@ void seqedittoolbar_init(SeqEditToolBar* self, psy_ui_Component* parent,
 	psy_ui_component_hide(intedit_base(&self->samplerindex));	
 	/* timesig */
 	psy_ui_button_init_text(&self->timesig, &self->component, "Timesigs");
-	psy_ui_button_seticon(&self->timesig, psy_ui_ICON_MORE);
+	psy_ui_button_set_icon(&self->timesig, psy_ui_ICON_MORE);
 	/* loop */
 	psy_ui_button_init_text(&self->loop, &self->component, "Repetitions");
-	psy_ui_button_seticon(&self->timesig, psy_ui_ICON_MORE);
+	psy_ui_button_set_icon(&self->timesig, psy_ui_ICON_MORE);
 	psy_signal_connect(&self->inserttype.signal_selchanged, self,
 		seqedittoolbar_oninserttypeselchange);
 	psy_signal_connect(&self->move.signal_clicked, self,

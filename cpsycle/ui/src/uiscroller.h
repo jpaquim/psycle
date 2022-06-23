@@ -36,6 +36,7 @@ typedef struct psy_ui_Scroller {
 	bool thumbmove;	
 	bool vscroll_autohide;
 	bool hscroll_autohide;
+	bool prevent_mouse_down_propagation;
 } psy_ui_Scroller;
 
 void psy_ui_scroller_init(psy_ui_Scroller*, psy_ui_Component* parent,

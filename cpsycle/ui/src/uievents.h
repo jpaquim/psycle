@@ -197,6 +197,15 @@ INLINE bool psy_ui_keyboardevent_altkey(const psy_ui_KeyboardEvent* self)
 	return self->alt_key_;
 }
 
+INLINE uint32_t psy_ui_keyboardevent_encode(const psy_ui_KeyboardEvent* self, bool up)
+{
+	return (self->keycode_ |
+		((uintptr_t)self->shift_key_ << 8) |
+		((uintptr_t)self->ctrl_key_ << 9) |
+		((uintptr_t) self->alt_key_ << 10) |
+		((uintptr_t)up << 11));
+}
+
 INLINE psy_ui_Event* psy_ui_keyboardevent_base(psy_ui_KeyboardEvent* self)
 {
 	return &self->event;

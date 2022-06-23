@@ -461,6 +461,7 @@
     <ClCompile Include="src\trackscopeview.c" />
     <ClCompile Include="src\transformpatternview.c" />
     <ClCompile Include="src\undoredobar.c" />
+    <ClCompile Include="src\viewframe.c" />
     <ClCompile Include="src\viewhistory.c" />
     <ClCompile Include="src\viewindex.c" />
     <ClCompile Include="src\volslider.c" />
@@ -655,6 +656,7 @@
     <ClInclude Include="src\trackscopeview.h" />
     <ClInclude Include="src\transformpatternview.h" />
     <ClInclude Include="src\undoredobar.h" />
+    <ClInclude Include="src\viewframe.h" />
     <ClInclude Include="src\viewhistory.h" />
     <ClInclude Include="src\viewindex.h" />
     <ClInclude Include="src\volslider.h" />

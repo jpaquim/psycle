@@ -30,7 +30,7 @@ static void machineview_initnewmachine(MachineView*,
 	psy_ui_Component* tabbarparent);
 static void machineview_init_tabbar(MachineView*,
 	psy_ui_Component* tabbarparent);
-static void machineview_ontabbarchanged(MachineView*, psy_ui_TabBar* sender,
+static void machineview_on_tabbar_changed(MachineView*, psy_ui_TabBar* sender,
 	uintptr_t index);
 static void machineview_connectsignals(MachineView*);
 static uintptr_t machineview_section(const MachineView*);
@@ -193,7 +193,7 @@ void machineview_connectsignals(MachineView* self)
 	psy_ui_notebook_connectcontroller(&self->notebook,
 		&self->tabbar.signal_change);
 	psy_signal_connect(&self->tabbar.signal_change, self,
-		machineview_ontabbarchanged);
+		machineview_on_tabbar_changed);
 	psy_signal_connect(&self->workspace->signal_songchanged, self,
 		machineview_onsongchanged);
 }
@@ -282,7 +282,7 @@ void machineview_on_focus(MachineView* self)
 	}
 }
 
-void machineview_ontabbarchanged(MachineView* self, psy_ui_TabBar* sender, uintptr_t index)
+void machineview_on_tabbar_changed(MachineView* self, psy_ui_TabBar* sender, uintptr_t index)
 {
 	ViewIndex entry;
 

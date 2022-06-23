@@ -11,7 +11,6 @@
 #include "uicomponent.h"
 /* std */
 #include <math.h>
-#include <stdlib.h>
 #include <stdio.h>
 
 /* prototypes */
@@ -48,7 +47,7 @@ void psy_ui_aligner_init(psy_ui_Aligner* self)
 }
 
 /* implementation helper functions */
-void psy_ui_aligner_adjustminmaxsize(
+void psy_ui_aligner_adjust_minmax_size(
 	psy_ui_Component* component, const psy_ui_TextMetric* tm,
 	psy_ui_Size* componentsize, psy_ui_Size* parentsize)
 {
@@ -87,7 +86,7 @@ void psy_ui_aligner_adjustminmaxsize(
 	}
 }
 
-void psy_ui_aligner_addborder(psy_ui_Component* component,
+void psy_ui_aligner_add_border(psy_ui_Component* component,
 	psy_ui_Size* rv)
 {
 	const psy_ui_TextMetric* tm;
@@ -102,7 +101,7 @@ void psy_ui_aligner_addborder(psy_ui_Component* component,
 		psy_ui_margin_height_px(&bordermargin, tm, NULL));
 }
 
-void psy_ui_aligner_addspacingandborder(psy_ui_Component* component,
+void psy_ui_aligner_add_spacing_and_border(psy_ui_Component* component,
 	psy_ui_Size* rv)
 {
 	const psy_ui_TextMetric* tm;	
@@ -121,7 +120,7 @@ void psy_ui_aligner_addspacingandborder(psy_ui_Component* component,
 		psy_ui_margin_height_px(&bordermargin, tm, NULL));
 }
 
-void psy_ui_aligner_adjustspacing(psy_ui_Component* component,
+void psy_ui_aligner_adjust_spacing(psy_ui_Component* component,
 	psy_ui_RealPoint* cp_topleft, psy_ui_RealPoint* cp_bottomright)
 {
 	psy_ui_Margin padding;
@@ -139,7 +138,7 @@ void psy_ui_aligner_adjustspacing(psy_ui_Component* component,
 	cp_bottomright->y = psy_max(0.0, cp_bottomright->y);
 }
 
-void psy_ui_aligner_adjustborder(psy_ui_Component* component,
+void psy_ui_aligner_adjust_border(psy_ui_Component* component,
 	psy_ui_RealPoint* cp_topleft, psy_ui_RealPoint* cp_bottomright)
 {
 	const psy_ui_TextMetric* tm;

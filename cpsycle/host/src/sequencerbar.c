@@ -55,7 +55,7 @@ void sequencerbar_init(SequencerBar* self, psy_ui_Component* parent,
 		"seqview.allow-notes-to_effect");						
 	psy_ui_button_init_text(&self->togglestepseq, &self->component,
 		"seqview.showstepsequencer");
-	psy_ui_button_seticon(&self->togglestepseq, psy_ui_ICON_MORE);
+	psy_ui_button_set_icon(&self->togglestepseq, psy_ui_ICON_MORE);
 	psy_ui_button_settextalignment(&self->togglestepseq,
 		(psy_ui_Alignment)(psy_ui_ALIGNMENT_LEFT | psy_ui_ALIGNMENT_CENTER_VERTICAL));
 	psy_ui_component_set_align(&self->togglestepseq.component,
@@ -66,7 +66,7 @@ void sequencerbar_init(SequencerBar* self, psy_ui_Component* parent,
 		psy_ui_ALIGN_BOTTOM);
 	psy_ui_button_settextalignment(&self->toggleseqedit,
 		(psy_ui_Alignment)(psy_ui_ALIGNMENT_LEFT | psy_ui_ALIGNMENT_CENTER_VERTICAL));
-	psy_ui_button_seticon(&self->toggleseqedit, psy_ui_ICON_MORE);
+	psy_ui_button_set_icon(&self->toggleseqedit, psy_ui_ICON_MORE);
 	psy_ui_margin_init_em(&margin, 0.0, 0.0, 1.0, 0.0);
 	psy_ui_component_set_margin(&self->allownotestoeffect.component, margin);
 	psy_signal_connect(&self->follow_song.signal_clicked, self,
