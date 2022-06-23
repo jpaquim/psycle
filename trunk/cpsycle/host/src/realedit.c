@@ -23,8 +23,7 @@ static void realedit_on_edit_key_down(RealEdit*, psy_ui_Component* sender,
 	psy_ui_KeyboardEvent*);
 static void realedit_on_edit_key_up(RealEdit*, psy_ui_Component* sender,
 	psy_ui_KeyboardEvent*);
-static void realedit_on_edit_focus_lost(RealEdit*, psy_ui_Component* sender,
-	psy_ui_KeyboardEvent*);
+static void realedit_on_edit_accept(RealEdit*, psy_ui_Component* sender);
 
 /* vtable */
 static psy_ui_ComponentVtable vtable;
@@ -59,20 +58,21 @@ void realedit_init(RealEdit* self, psy_ui_Component* parent,
 	psy_ui_label_set_text(&self->desc, desc);
 	psy_ui_textarea_init_single_line(&self->edit, realedit_base(self));	
 	psy_ui_textarea_set_char_number(&self->edit, 5);
+	psy_ui_textarea_enable_input_field(&self->edit);
 	psy_ui_button_init_connect(&self->less, realedit_base(self),
 		self, realedit_on_less);
-	psy_ui_button_seticon(&self->less, psy_ui_ICON_LESS);
+	psy_ui_button_set_icon(&self->less, psy_ui_ICON_LESS);
 	psy_ui_button_init_connect(&self->more, realedit_base(self),
 		self, realedit_on_more);
-	psy_ui_button_seticon(&self->more, psy_ui_ICON_MORE);
+	psy_ui_button_set_icon(&self->more, psy_ui_ICON_MORE);
 	psy_signal_init(&self->signal_changed);
 	realedit_set_value(self, value);
 	psy_signal_connect(&self->edit.component.signal_keydown, self,
 		realedit_on_edit_key_down);	
 	psy_signal_connect(&self->edit.component.signal_keyup, self,
 		realedit_on_edit_key_up);
-	psy_signal_connect(&self->edit.component.signal_focuslost, self,
-		realedit_on_edit_focus_lost);	
+	psy_signal_connect(&self->edit.signal_accept, self,
+		realedit_on_edit_accept);	
 }
 
 void realedit_init_connect(RealEdit* self, psy_ui_Component* parent,
@@ -109,12 +109,12 @@ void realedit_set_value(RealEdit* self, realedit_real_t value)
 
 void realedit_enable(RealEdit* self)
 {
-	psy_ui_textarea_enableedit(&self->edit);
+	psy_ui_textarea_enable(&self->edit);
 }
 
 void realedit_prevent(RealEdit* self)
 {
-	psy_ui_textarea_preventedit(&self->edit);
+	psy_ui_textarea_prevent(&self->edit);
 }
 
 void realedit_set_edit_char_number(RealEdit* self, int charnumber)
@@ -166,12 +166,10 @@ void realedit_on_edit_key_up(RealEdit* self, psy_ui_Component* sender,
 	psy_ui_keyboardevent_stop_propagation(ev);
 }
 
-void realedit_on_edit_focus_lost(RealEdit* self , psy_ui_Component* sender,
-	psy_ui_KeyboardEvent* ev)
+void realedit_on_edit_accept(RealEdit* self , psy_ui_Component* sender)
 {
 	realedit_real_t value;
-
-	psy_ui_keyboardevent_prevent_default(ev);
+	
 	value = realedit_value(self);
 	realedit_set_value(self, value);
 	psy_signal_emit(&self->signal_changed, self, 0);

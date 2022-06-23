@@ -62,29 +62,29 @@ void timebar_init(TimeBar* self, psy_ui_Component* parent,
 	/* bpm - 10 */
 	psy_ui_button_init_connect(&self->lessless, timebar_base(self),
 		self, timebar_onlesslessclicked);
-	psy_ui_button_seticon(&self->lessless, psy_ui_ICON_LESSLESS);			
+	psy_ui_button_set_icon(&self->lessless, psy_ui_ICON_LESSLESS);			
 #endif
 	/* bpm -1 */
 	psy_ui_button_init_connect(&self->less, timebar_base(self),
 		self, timebar_onlessclicked);
-	psy_ui_button_seticon(&self->less, psy_ui_ICON_LESS);
+	psy_ui_button_set_icon(&self->less, psy_ui_ICON_LESS);
 	/* bpm (realbpm) number label */
 	psy_ui_label_init(&self->bpmlabel, timebar_base(self));
 	psy_ui_component_set_style_type(psy_ui_label_base(&self->bpmlabel),
 		STYLE_TIMEBAR_NUMLABEL);
 	psy_ui_label_prevent_translation(&self->bpmlabel);
 	psy_ui_label_set_char_number(&self->bpmlabel, 14.5);
-	psy_ui_label_set_textalignment(&self->bpmlabel, psy_ui_ALIGNMENT_CENTER);
+	psy_ui_label_set_text_alignment(&self->bpmlabel, psy_ui_ALIGNMENT_CENTER);
 	timebar_updatebpmlabel(self);
 	/* bpm +1 */
 	psy_ui_button_init_connect(&self->more, timebar_base(self),
 		self, timebar_onmoreclicked);		
-	psy_ui_button_seticon(&self->more, psy_ui_ICON_MORE);		
+	psy_ui_button_set_icon(&self->more, psy_ui_ICON_MORE);		
 #ifdef PSYCLE_TIMEBAR_OLD
 	/* bpm + 10 */
 	psy_ui_button_init_connect(&self->moremore, timebar_base(self),
 		self, timebar_onmoremoreclicked);
-	psy_ui_button_seticon(&self->moremore, psy_ui_ICON_MOREMORE);
+	psy_ui_button_set_icon(&self->moremore, psy_ui_ICON_MOREMORE);
 #endif		
 	psy_ui_component_start_timer(timebar_base(self), 0, TIMEBAR_REFRESHRATE);
 }

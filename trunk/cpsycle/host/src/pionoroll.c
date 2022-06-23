@@ -166,11 +166,11 @@ void pianoroll_init(Pianoroll* self, psy_ui_Component* parent,
 		&self->keyboardstate, &self->workspace->player,
 		&self->grid.component);
 	psy_ui_combobox_init(&self->keytype, &self->left);
-	psy_ui_combobox_setcharnumber(&self->keytype, 6);
+	psy_ui_combobox_set_char_number(&self->keytype, 6);
 	psy_ui_combobox_add_text(&self->keytype, "Keys");
 	psy_ui_combobox_add_text(&self->keytype, "Notes");
 	psy_ui_combobox_add_text(&self->keytype, "Drums");
-	psy_ui_combobox_setcursel(&self->keytype, 0);
+	psy_ui_combobox_select(&self->keytype, 0);
 	psy_ui_component_setpreferredheight(&self->keytype.component,
 		psy_ui_value_make_eh(1.0));
 	psy_ui_component_hide(&self->keytype.expand.component);

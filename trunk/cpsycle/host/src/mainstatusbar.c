@@ -56,8 +56,7 @@ void mainstatusbar_init(MainStatusBar* self, psy_ui_Component* parent,
 	psy_ui_component_set_style_type(&self->component, STYLE_STATUSBAR);
 	psy_ui_component_init(&self->pane, &self->component, NULL);
 	psy_ui_component_set_align(&self->pane, psy_ui_ALIGN_CLIENT);	
-	self->workspace = workspace;
-	self->clockcounter = 20;
+	self->workspace = workspace;	
 	psy_lock_init(&self->outputlock);
 	self->strbuffer = NULL;	
 	psy_ui_component_set_default_align(&self->pane, psy_ui_ALIGN_LEFT,
@@ -118,7 +117,8 @@ void mainstatusbar_init_clock_bar(MainStatusBar* self)
 {
 	clockbar_init(&self->clockbar, &self->pane);
 	psy_ui_component_set_align(clockbar_base(&self->clockbar),
-		psy_ui_ALIGN_RIGHT);		
+		psy_ui_ALIGN_RIGHT);
+	clockbar_start(&self->clockbar);
 }
 
 void mainstatusbar_init_kbd_help_button(MainStatusBar* self)
@@ -217,12 +217,7 @@ void mainstatusbar_idle(MainStatusBar* self)
 		} else {
 			psy_ui_progressbar_tick(&self->progressbar);
 		}
-	}
-	if (self->clockcounter == 0) {
-		clockbar_idle(&self->clockbar);
-		self->clockcounter = 20;
-	}
-	--self->clockcounter;
+	}	
 	if (self->strbuffer) {
 		psy_List* p;
 

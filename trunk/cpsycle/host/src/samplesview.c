@@ -207,11 +207,11 @@ void samplesheaderview_init(SamplesHeaderView* self, psy_ui_Component* parent,
 		samplesheaderview_oneditsamplename);
 	/* sample navigation */
 	psy_ui_button_init(&self->prevbutton, &self->component);
-	psy_ui_button_seticon(&self->prevbutton, psy_ui_ICON_LESS);	
+	psy_ui_button_set_icon(&self->prevbutton, psy_ui_ICON_LESS);	
 	psy_signal_connect(&self->prevbutton.signal_clicked, self,
 		samplesheaderview_onprevsample);
 	psy_ui_button_init(&self->nextbutton, &self->component);
-	psy_ui_button_seticon(&self->nextbutton, psy_ui_ICON_MORE);	
+	psy_ui_button_set_icon(&self->nextbutton, psy_ui_ICON_MORE);	
 	psy_signal_connect(&self->nextbutton.signal_clicked, self,
 		samplesheaderview_onnextsample);
 	/* samplerate */
@@ -555,7 +555,7 @@ void samplesvibratoview_init(SamplesVibratoView* self, psy_ui_Component* parent,
 		psy_ui_component_set_margin(&self->waveformheaderlabel.component,
 			header_margin);
 		psy_ui_combobox_init(&self->waveformbox, &self->header);
-		psy_ui_combobox_setcharnumber(&self->waveformbox, 15);
+		psy_ui_combobox_set_char_number(&self->waveformbox, 15);
 		psy_ui_combobox_add_text(&self->waveformbox, "Sinus");
 		psy_ui_combobox_add_text(&self->waveformbox, "Square");
 		psy_ui_combobox_add_text(&self->waveformbox, "RampUp");
@@ -563,7 +563,7 @@ void samplesvibratoview_init(SamplesVibratoView* self, psy_ui_Component* parent,
 		psy_ui_combobox_add_text(&self->waveformbox, "Random");
 		psy_ui_component_set_align(&self->waveformbox.component,
 			psy_ui_ALIGN_LEFT);
-		psy_ui_combobox_setcursel(&self->waveformbox, 0);
+		psy_ui_combobox_select(&self->waveformbox, 0);
 		psy_signal_connect(&self->waveformbox.signal_selchanged, self,
 			vibratoview_onwaveformchange);
 	}
@@ -588,11 +588,11 @@ void vibratoview_setsample(SamplesVibratoView* self, psy_audio_Sample* sample)
 	self->sample = sample;
 	if (self->sample) {
 		psy_ui_component_enableinput(&self->component, 1);
-		psy_ui_combobox_setcursel(&self->waveformbox,
+		psy_ui_combobox_select(&self->waveformbox,
 			vibratoview_waveformtocombobox(self->sample->vibrato.type));
 	} else {
 		psy_ui_component_preventinput(&self->component, 1);
-		psy_ui_combobox_setcursel(&self->waveformbox,
+		psy_ui_combobox_select(&self->waveformbox,
 			vibratoview_waveformtocombobox(psy_audio_WAVEFORMS_SINUS));
 	}
 }
@@ -748,8 +748,8 @@ void samplesloopview_init(SamplesLoopView* self, psy_ui_Component* parent,
 		psy_ui_translate("samplesview.forward"));
 	psy_ui_combobox_add_text(&self->loopdir,
 		psy_ui_translate("samplesview.bidirection"));
-	psy_ui_combobox_setcursel(&self->loopdir, 0);
-	psy_ui_combobox_setcharnumber(&self->loopdir, 14);
+	psy_ui_combobox_select(&self->loopdir, 0);
+	psy_ui_combobox_set_char_number(&self->loopdir, 14);
 	psy_ui_label_init(&self->loopstartlabel, &self->cont);
 	psy_ui_label_set_text(&self->loopstartlabel, "samplesview.start");
 	psy_ui_textarea_init_single_line(&self->loopstartedit, &self->cont);	
@@ -774,8 +774,8 @@ void samplesloopview_init(SamplesLoopView* self, psy_ui_Component* parent,
 		psy_ui_translate("samplesview.forward"));
 	psy_ui_combobox_add_text(&self->sustainloopdir,
 		psy_ui_translate("samplesview.bidirection"));	
-	psy_ui_combobox_setcursel(&self->sustainloopdir, 0);
-	psy_ui_combobox_setcharnumber(&self->sustainloopdir, 14);
+	psy_ui_combobox_select(&self->sustainloopdir, 0);
+	psy_ui_combobox_set_char_number(&self->sustainloopdir, 14);
 	psy_ui_label_init(&self->sustainloopstartlabel, &self->sustain);
 	psy_ui_label_set_text(&self->sustainloopstartlabel, "samplesview.start");
 	psy_ui_textarea_init_single_line(&self->sustainloopstartedit, &self->sustain);	
@@ -818,9 +818,9 @@ void samplesloopview_setsample(SamplesLoopView* self, psy_audio_Sample* sample)
 		psy_ui_textarea_set_text(&self->sustainloopstartedit, tmp);
 		sprintf(tmp, "%d", (int)sample->sustainloop.end);
 		psy_ui_textarea_set_text(&self->sustainloopendedit, tmp);
-		psy_ui_combobox_setcursel(&self->loopdir,
+		psy_ui_combobox_select(&self->loopdir,
 			LoopTypeToComboBox(self->sample->loop.type));		
-		psy_ui_combobox_setcursel(&self->sustainloopdir,
+		psy_ui_combobox_select(&self->sustainloopdir,
 			LoopTypeToComboBox(self->sample->sustainloop.type));
 		self->currloop = self->sample->loop;
 		self->currsustainloop = self->sample->sustainloop;
@@ -831,9 +831,9 @@ void samplesloopview_setsample(SamplesLoopView* self, psy_audio_Sample* sample)
 		psy_ui_textarea_set_text(&self->loopendedit, tmp);
 		psy_ui_textarea_set_text(&self->sustainloopstartedit, tmp);
 		psy_ui_textarea_set_text(&self->sustainloopendedit, tmp);
-		psy_ui_combobox_setcursel(&self->loopdir,
+		psy_ui_combobox_select(&self->loopdir,
 			LoopTypeToComboBox(psy_audio_SAMPLE_LOOP_DO_NOT));
-		psy_ui_combobox_setcursel(&self->sustainloopdir,
+		psy_ui_combobox_select(&self->sustainloopdir,
 			LoopTypeToComboBox(psy_audio_SAMPLE_LOOP_DO_NOT));
 		psy_ui_component_stop_timer(&self->component, 0);
 		psy_audio_sampleloop_init(&self->currloop);

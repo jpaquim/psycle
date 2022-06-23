@@ -46,8 +46,7 @@ typedef struct MainStatusBar {
 	psy_ui_Notebook viewstatusbars;
 	psy_ui_Label statusbarlabel;
 	ZoomBox zoombox;	
-	intptr_t pluginscanprogress;
-	uintptr_t clockcounter;
+	intptr_t pluginscanprogress;	
 	psy_List* strbuffer;
 	psy_Lock outputlock;
 	/* references */

@@ -72,7 +72,7 @@ void patternviewtabbar_init(PatternViewTabBar* self, psy_ui_Component* parent,
 	}
 	psy_ui_tabbar_select(&self->tabbar, 0);
 	psy_ui_button_init(&self->context_button, &self->component);
-	psy_ui_button_seticon(&self->context_button, psy_ui_ICON_MORE);
+	psy_ui_button_set_icon(&self->context_button, psy_ui_ICON_MORE);
 	psy_ui_component_set_align(psy_ui_button_base(&self->context_button),
 		psy_ui_ALIGN_RIGHT);
 	psy_signal_connect(&self->tabbar.signal_change, self,

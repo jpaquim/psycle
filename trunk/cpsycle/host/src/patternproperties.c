@@ -62,7 +62,7 @@ void patternproperties_init(PatternProperties* self, psy_ui_Component* parent)
 	// psy_ui_textarea_enable_input_field(&self->nameedit);
 	psy_ui_label_init_text(&self->lengthlabel, &self->component,
 		"patternview.length");
-	psy_ui_label_set_textalignment(&self->lengthlabel, psy_ui_ALIGNMENT_LEFT);
+	psy_ui_label_set_text_alignment(&self->lengthlabel, psy_ui_ALIGNMENT_LEFT);
 	psy_ui_textarea_init_single_line(&self->lengthedit, &self->component);	
 	psy_ui_textarea_set_char_number(&self->lengthedit, 20);
 	// psy_ui_textarea_enable_input_field(&self->lengthedit);

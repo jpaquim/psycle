@@ -71,7 +71,7 @@ void mainviewbar_init(MainViewBar* self, psy_ui_Component* parent,
 			psy_ui_colour_white());
 	}
 	psy_ui_button_init(&self->extract, &self->component);
-	psy_ui_button_seticon(&self->extract, psy_ui_ICON_MORE);
+	psy_ui_button_set_icon(&self->extract, psy_ui_ICON_MORE);
 	psy_ui_component_set_align(psy_ui_button_base(&self->extract),
 		psy_ui_ALIGN_RIGHT);
 	mainviewbar_init_navigation(self, workspace);	

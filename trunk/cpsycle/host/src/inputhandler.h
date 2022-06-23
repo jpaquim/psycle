@@ -18,6 +18,8 @@ extern "C" {
 typedef bool (*fp_inputhandler_input)(void* context, void* sender);
 typedef bool (*fp_inputhandler_hostcallback)(void* context, int message, void* param1);
 
+#define INPUTHANDLER_STOP TRUE;
+
 typedef enum {
 	INPUTHANDLER_IMM = 1,
 	INPUTHANDLER_FOCUS = 2	

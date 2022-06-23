@@ -73,8 +73,8 @@ void interpolatecurvebar_init(InterpolateCurveBar* self, psy_ui_Component* paren
 	psy_ui_combobox_add_text(&self->curvetype, "Hermite Curve");
 	psy_ui_combobox_add_text(&self->curvetype, "All to Linear");
 	psy_ui_combobox_add_text(&self->curvetype, "All to Hermite");
-	psy_ui_combobox_setcursel(&self->curvetype, 0);
-	psy_ui_combobox_setcharnumber(&self->curvetype, 15);
+	psy_ui_combobox_select(&self->curvetype, 0);
+	psy_ui_combobox_set_char_number(&self->curvetype, 15);
 	psy_ui_button_init(&self->cancel, &self->component);
 	psy_ui_button_set_text(&self->cancel, "Cancel");
 	psy_ui_component_set_align(&self->cancel.component, psy_ui_ALIGN_RIGHT);
@@ -368,10 +368,10 @@ void interpolatecurveview_updatecurvetype(InterpolateCurveView* self)
 
 		keyframe = (KeyFrame*)self->box.selected->entry;
 		if (keyframe->curve == INTERPOLATECURVETYPE_LINEAR) {
-			psy_ui_combobox_setcursel(&self->bar.curvetype, 0);
+			psy_ui_combobox_select(&self->bar.curvetype, 0);
 		} else
 		if (keyframe->curve == INTERPOLATECURVETYPE_HERMITE) {
-			psy_ui_combobox_setcursel(&self->bar.curvetype, 1);
+			psy_ui_combobox_select(&self->bar.curvetype, 1);
 		}
 	}
 }
@@ -509,14 +509,14 @@ void interpolatecurveview_set_selection(InterpolateCurveView* self,
 		keyframe = (KeyFrame*)self->box.keyframes;
 		self->box.selected = self->box.keyframes;
 		if (keyframe->curve == INTERPOLATECURVETYPE_LINEAR) {
-			psy_ui_combobox_setcursel(&self->bar.curvetype, 0);
+			psy_ui_combobox_select(&self->bar.curvetype, 0);
 		} else
 		if (keyframe->curve == INTERPOLATECURVETYPE_HERMITE) {
-			psy_ui_combobox_setcursel(&self->bar.curvetype, 1);
+			psy_ui_combobox_select(&self->bar.curvetype, 1);
 		}
 	} else {
 		self->box.selected = 0;
-		psy_ui_combobox_setcursel(&self->bar.curvetype, 0);
+		psy_ui_combobox_select(&self->bar.curvetype, 0);
 	}
 	psy_ui_component_invalidate(&self->box.component);
 }

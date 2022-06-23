@@ -76,7 +76,7 @@ void sampleeditorbar_init(SampleEditorBar* self, psy_ui_Component* parent,
 		int quality;
 		
 		psy_ui_combobox_init(&self->visualrepresentation, &self->component);
-		psy_ui_combobox_setcharnumber(&self->visualrepresentation, 12);
+		psy_ui_combobox_set_char_number(&self->visualrepresentation, 12);
 		for (quality = 0; quality < psy_dsp_RESAMPLERQUALITY_NUMRESAMPLERS;
 				++quality) {
 			psy_ui_combobox_add_text(&self->visualrepresentation,
@@ -85,7 +85,7 @@ void sampleeditorbar_init(SampleEditorBar* self, psy_ui_Component* parent,
 		}
 	}
 	// set to default in wavebox, change it there, too
-	psy_ui_combobox_setcursel(&self->visualrepresentation,
+	psy_ui_combobox_select(&self->visualrepresentation,
 		psy_dsp_RESAMPLERQUALITY_SPLINE);	
 	sampleeditorbar_clearselection(self);
 	psy_ui_margin_init_em(&margin, 0.0, 2.0, 0.0, 0.0);
@@ -100,8 +100,8 @@ void sampleeditorbar_setselection(SampleEditorBar* self,
 {
 	char text[128];
 
-	psy_ui_textarea_enableedit(&self->selstartedit);
-	psy_ui_textarea_enableedit(&self->selendedit);
+	psy_ui_textarea_enable(&self->selstartedit);
+	psy_ui_textarea_enable(&self->selendedit);
 	psy_snprintf(text, 128, "%u", (unsigned int)selectionstart);
 	psy_ui_textarea_set_text(&self->selstartedit, text);
 	psy_snprintf(text, 128, "%u", (unsigned int)selectionend);
@@ -110,8 +110,8 @@ void sampleeditorbar_setselection(SampleEditorBar* self,
 
 void sampleeditorbar_clearselection(SampleEditorBar* self)
 {
-	psy_ui_textarea_preventedit(&self->selstartedit);
-	psy_ui_textarea_preventedit(&self->selendedit);
+	psy_ui_textarea_prevent(&self->selstartedit);
+	psy_ui_textarea_prevent(&self->selendedit);
 	psy_ui_textarea_set_text(&self->selstartedit, "");
 	psy_ui_textarea_set_text(&self->selendedit, "");
 }

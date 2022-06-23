@@ -1,6 +1,6 @@
 /*
 ** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -9,15 +9,17 @@
 #include "linesperbeatbar.h"
 /* host */
 #include "styles.h"
+/* ui */
+#include <uiapp.h>
 /* platform */
 #include "../../detail/portable.h"
 
 #define LPB_REFRESHRATE 200
 
 /* prototypes */
-static void linesperbeatbar_onlessclicked(LinesPerBeatBar*,
+static void linesperbeatbar_on_less(LinesPerBeatBar*,
 	psy_ui_Component* sender);
-static void linesperbeatbar_onmoreclicked(LinesPerBeatBar*,
+static void linesperbeatbar_on_more(LinesPerBeatBar*,
 	psy_ui_Component* sender);
 static void linesperbeatbar_on_timer(LinesPerBeatBar*, uintptr_t timerid);
 static void linesperbeatbar_update(LinesPerBeatBar*);
@@ -59,41 +61,42 @@ void linesperbeatbar_init(LinesPerBeatBar* self, psy_ui_Component* parent,
 		"lpb.lines-per-beat");	
 	/* less button */
 	psy_ui_button_init_connect(&self->less, linesperbeatbar_base(self),
-		self, linesperbeatbar_onlessclicked);
-	psy_ui_button_seticon(&self->less, psy_ui_ICON_LESS);
+		self, linesperbeatbar_on_less);
+	psy_ui_button_set_icon(&self->less, psy_ui_ICON_LESS);
 	/* lpb number label */
 	psy_ui_label_init(&self->number, linesperbeatbar_base(self));
 	psy_ui_component_set_style_type(psy_ui_label_base(&self->number),
 		STYLE_LPB_NUMLABEL);
 	psy_ui_label_prevent_translation(&self->number);
 	psy_ui_label_set_char_number(&self->number, 6.0);
-	psy_ui_label_set_textalignment(&self->number, psy_ui_ALIGNMENT_CENTER);
+	psy_ui_label_set_text_alignment(&self->number, psy_ui_ALIGNMENT_CENTER);
 	/* more button */
 	psy_ui_button_init_connect(&self->more, linesperbeatbar_base(self),
-		self, linesperbeatbar_onmoreclicked);
-	psy_ui_button_seticon(&self->more, psy_ui_ICON_MORE);
+		self, linesperbeatbar_on_more);
+	psy_ui_button_set_icon(&self->more, psy_ui_ICON_MORE);
 	/* start lpb poll timer */
 	psy_ui_component_start_timer(linesperbeatbar_base(self), 0,
 		LPB_REFRESHRATE);
 	linesperbeatbar_update(self);
 }
 
-void linesperbeatbar_onlessclicked(LinesPerBeatBar* self, psy_ui_Component* sender)
-{
-	assert(self);
-
-	if (psy_audio_player_lpb(self->player) > 1) {
-		psy_audio_player_setlpb(self->player,
-			psy_audio_player_lpb(self->player) - 1);
-	}
-}
-
-void linesperbeatbar_onmoreclicked(LinesPerBeatBar* self,
+void linesperbeatbar_on_less(LinesPerBeatBar* self,
 	psy_ui_Component* sender)
 {
 	assert(self);
 
-	psy_audio_player_setlpb(self->player,
+	if (psy_audio_player_lpb(self->player) > 1) {
+		psy_audio_player_set_lpb(self->player,
+			psy_audio_player_lpb(self->player) - 1);
+	}
+}
+
+void linesperbeatbar_on_more(LinesPerBeatBar* self,
+	psy_ui_Component* sender)
+{
+	assert(self);
+
+	psy_audio_player_set_lpb(self->player,
 		psy_audio_player_lpb(self->player) + 1);
 }
 

@@ -115,7 +115,8 @@ void psy_ui_scroller_init(psy_ui_Scroller* self,
 	psy_ui_component_init(&self->component, parent, NULL);
 	vtable_init(self);		
 	self->vscroll_autohide = TRUE;
-	self->hscroll_autohide = TRUE;	
+	self->hscroll_autohide = TRUE;
+	self->prevent_mouse_down_propagation = TRUE;
 	/* pane */
 	psy_ui_component_init(&self->pane, &self->component, NULL);
 	psy_ui_component_set_align(&self->pane, psy_ui_ALIGN_CLIENT);
@@ -381,10 +382,8 @@ void psy_ui_scroller_scroll_range_changed(psy_ui_Scroller* self, psy_ui_Componen
 }
 
 void psy_ui_scroller_on_mouse_down(psy_ui_Scroller* self, psy_ui_MouseEvent* ev)
-{
-	if (self->client) {		
-		psy_ui_component_set_focus(self->client);		
-		ev->event.prevent_focus = TRUE;		
+{	
+	if (self->prevent_mouse_down_propagation) {
+		psy_ui_event_stop_propagation(psy_ui_mouseevent_base(ev));
 	}
-	psy_ui_event_stop_propagation(psy_ui_mouseevent_base(ev));
 }

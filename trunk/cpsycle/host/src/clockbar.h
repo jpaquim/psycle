@@ -34,7 +34,6 @@ typedef struct ClockBar {
 
 void clockbar_init(ClockBar*, psy_ui_Component* parent);
 
-void clockbar_idle(ClockBar*);
 void clockbar_reset(ClockBar*);
 void clockbar_start(ClockBar*);
 void clockbar_stop(ClockBar*);

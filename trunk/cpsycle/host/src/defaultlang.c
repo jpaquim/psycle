@@ -984,7 +984,7 @@ void save_translator_template(void)
 int onenumproperties(void* context, psy_Property* property, uintptr_t level)
 {
 	if (psy_property_type(property) == PSY_PROPERTY_TYPE_STRING) {
-		psy_property_setitem_str(property, "");
+		psy_property_set_item_str(property, "");
 	}
 	return 1;
 }

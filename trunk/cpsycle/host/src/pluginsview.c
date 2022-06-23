@@ -62,7 +62,6 @@ psy_Property* newmachine_sort(psy_Property* source, psy_fp_comp comp)
 	return rv;
 }
 
-
 int newmachine_comp_favorite(psy_Property* p, psy_Property* q)
 {
 	int left;
@@ -212,7 +211,7 @@ int isplugin(int type)
 }
 
 
-// NewMachineFilter
+/* NewMachineFilter */
 void newmachinefilter_init(NewMachineFilter* self)
 {
 	self->text = NULL;	
@@ -415,6 +414,8 @@ void searchfilter(psy_Property* plugin, NewMachineFilter* filter,
 }
 
 /* PluginsView */
+
+/* prototypes */
 static void pluginsview_on_destroyed(PluginsView*);
 static void pluginsview_ondraw(PluginsView*, psy_ui_Graphics*);
 static void pluginsview_drawitem(PluginsView*, psy_ui_Graphics*, psy_Property*,
@@ -439,7 +440,8 @@ static uintptr_t pluginenabled(const PluginsView*, psy_Property* property);
 static void pluginsview_onfilterchanged(PluginsView*, NewMachineFilter* sender);
 static void pluginsview_onsortchanged(PluginsView*, NewMachineSort* sender);
 static void pluginsview_ondragstart(PluginsView*, psy_ui_DragEvent*);
-/* vtbale */
+
+/* vtable */
 static psy_ui_ComponentVtable pluginsview_vtable;
 static psy_ui_ComponentVtable pluginsview_super_vtable;
 static bool pluginsview_vtable_initialized = FALSE;
@@ -475,13 +477,15 @@ static void pluginsview_vtable_init(PluginsView* self)
 			pluginsview_ondragstart;
 		pluginsview_vtable_initialized = TRUE;
 	}
-	self->component.vtable = &pluginsview_vtable;
+	psy_ui_component_set_vtable(pluginsview_base(self), &pluginsview_vtable);
 }
+
 /* implementation */
 void pluginsview_init(PluginsView* self, psy_ui_Component* parent)
 {
 	psy_ui_component_init(&self->component, parent, NULL);
-	psy_ui_component_set_style_type(&self->component, STYLE_PLUGINVIEW);
+	psy_ui_component_set_style_type(pluginsview_base(self), 
+		STYLE_PLUGINVIEW);
 	pluginsview_vtable_init(self);	
 	self->component.draggable = TRUE;
 	psy_signal_init(&self->signal_selected);
@@ -544,7 +548,7 @@ void pluginsview_setplugins(PluginsView* self, const psy_Property* property)
 	psy_ui_component_invalidate(&self->component);
 }
 
-void pluginsview_setfilter(PluginsView* self, NewMachineFilter* filter)
+void pluginsview_set_filter(PluginsView* self, NewMachineFilter* filter)
 {
 	pluginsview_clearfilter(self);
 	if (self->filter) {

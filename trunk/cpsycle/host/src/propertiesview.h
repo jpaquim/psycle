@@ -26,8 +26,7 @@ extern "C" {
 
 struct PropertiesRenderLine;
 
-typedef struct PropertiesRenderState {	
-	bool dialogbutton;
+typedef struct PropertiesRenderState {
 	psy_ui_Size size_col0;
 	psy_ui_Size size_col2;
 	uintptr_t numcols;
@@ -39,7 +38,6 @@ typedef struct PropertiesRenderState {
 void propertiesrenderstate_init(PropertiesRenderState*, uintptr_t numcols);
 
 
-
 /* PropertiesRenderLine */
 
 struct PropertiesRenderLine;
@@ -48,7 +46,6 @@ typedef struct PropertiesRenderLine {
 	/* inherits */
 	psy_ui_Component component;	
 	/*signals */
-	psy_Signal signal_changed;
 	psy_Signal signal_selected;
 	/* internal */	
 	psy_ui_Switch* check;
@@ -141,7 +138,7 @@ typedef struct PropertiesView {
 	psy_ui_TabBar tabbar;
 	PropertiesRenderer renderer;
 	psy_ui_Scroller scroller;	
-	bool maximizemainsections;
+	bool maximize_main_sections;
 } PropertiesView;
 
 void propertiesview_init(PropertiesView*, psy_ui_Component* parent,

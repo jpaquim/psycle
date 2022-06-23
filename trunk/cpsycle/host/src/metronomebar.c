@@ -35,9 +35,9 @@ void metronomebar_init(MetronomeBar* self, psy_ui_Component* parent,
 	psy_ui_label_init_text(&self->desc, metronomebar_base(self),
 		"metronome.precount");
 	psy_ui_combobox_init(&self->precount, metronomebar_base(self));
-	psy_ui_combobox_setcharnumber(&self->precount, 6);
+	psy_ui_combobox_set_char_number(&self->precount, 6);
 	metronomebar_fill_precount(self);
-	psy_ui_combobox_setcursel(&self->precount, 0);
+	psy_ui_combobox_select(&self->precount, 0);
 	psy_signal_connect(&self->precount.signal_selchanged, self,
 		metronomebar_on_precount_changed);
 	/* configure */

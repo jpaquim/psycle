@@ -26,7 +26,7 @@ static void intedit_on_edit_key_down(IntEdit*, psy_ui_Component* sender,
 	psy_ui_KeyboardEvent*);
 static void intedit_on_edit_key_up(IntEdit*, psy_ui_Component* sender,
 	psy_ui_KeyboardEvent*);
-static void intedit_on_edi_tfocus_lost(IntEdit*, psy_ui_Component* sender);
+static void intedit_on_edit_accept(IntEdit*, psy_ui_Component* sender);
 
 /* vtable */
 static psy_ui_ComponentVtable intedit_vtable;
@@ -60,20 +60,21 @@ void intedit_init(IntEdit* self, psy_ui_Component* parent,
 	psy_ui_label_init_text(&self->desc, intedit_base(self), desc);
 	psy_ui_textarea_init_single_line(&self->input, intedit_base(self));	
 	psy_ui_textarea_set_char_number(&self->input, 5);	
+	psy_ui_textarea_enable_input_field(&self->input);	
 	psy_ui_button_init_connect(&self->less, intedit_base(self),
 		self, intedit_on_less);
-	psy_ui_button_seticon(&self->less, psy_ui_ICON_LESS);
+	psy_ui_button_set_icon(&self->less, psy_ui_ICON_LESS);
 	psy_ui_button_init_connect(&self->more, intedit_base(self),
 		self, intedit_on_more);
-	psy_ui_button_seticon(&self->more, psy_ui_ICON_MORE);
+	psy_ui_button_set_icon(&self->more, psy_ui_ICON_MORE);
 	psy_signal_init(&self->signal_changed);
 	intedit_set_value(self, value);
 	psy_signal_connect(&self->input.component.signal_keydown, self,
 		intedit_on_edit_key_down);	
 	psy_signal_connect(&self->input.component.signal_keyup, self,
 		intedit_on_edit_key_up);
-	psy_signal_connect(&self->input.component.signal_focuslost, self,
-		intedit_on_edi_tfocus_lost);	
+	psy_signal_connect(&self->input.signal_accept, self,
+		intedit_on_edit_accept);	
 }
 
 void intedit_init_connect(IntEdit* self, psy_ui_Component* parent,
@@ -127,12 +128,12 @@ void intedit_set_value(IntEdit* self, int value)
 
 void intedit_enable_edit(IntEdit* self)
 {
-	psy_ui_textarea_enableedit(&self->input);
+	psy_ui_textarea_enable(&self->input);
 }
 
 void intedit_prevent_edit(IntEdit* self)
 {
-	psy_ui_textarea_preventedit(&self->input);
+	psy_ui_textarea_prevent(&self->input);
 }
 
 void intedit_set_edit_char_number(IntEdit* self, int charnumber)
@@ -185,7 +186,7 @@ void intedit_on_edit_key_up(IntEdit* self, psy_ui_Component* sender,
 	psy_ui_keyboardevent_stop_propagation(ev);
 }
 
-void intedit_on_edi_tfocus_lost(IntEdit* self , psy_ui_Component* sender)
+void intedit_on_edit_accept(IntEdit* self , psy_ui_Component* sender)
 {
 	int value;
 	

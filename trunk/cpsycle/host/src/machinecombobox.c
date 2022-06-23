@@ -57,7 +57,7 @@ void machinecombobox_init(MachineComboBox* self, psy_ui_Component* parent,
 	psy_table_init(&self->slotscombobox);	
 	/* Machine ComboBox */
 	psy_ui_combobox_init(&self->machinebox, parent);
-	psy_ui_combobox_setcharnumber(&self->machinebox, 10);	
+	psy_ui_combobox_set_char_number(&self->machinebox, 10);	
 	psy_signal_connect(&self->machinebox.signal_selchanged, self,
 		machinecombobox_onmachineboxselchange);
 	machinecombobox_buildmachinebox(self);	
@@ -98,7 +98,7 @@ void machinecombobox_onmachinesinsert(MachineComboBox* self, psy_audio_Machines*
 	uintptr_t slot)
 {	
 	//machinecombobox_buildmachinebox(self);
-	//psy_ui_combobox_setcursel(&self->machinebox,
+	//psy_ui_combobox_select(&self->machinebox,
 		//psy_audio_machines_selected(sender));
 }
 
@@ -106,7 +106,7 @@ void machinecombobox_onmachinesremoved(MachineComboBox* self, psy_audio_Machines
 	uintptr_t slot)
 {
 	//machinecombobox_buildmachinebox(self);
-	//psy_ui_combobox_setcursel(&self->machinebox,
+	//psy_ui_combobox_select(&self->machinebox,
 		//psy_audio_machines_selected(sender));
 }
 
@@ -116,7 +116,7 @@ void machinecombobox_buildmachinebox(MachineComboBox* self)
 	if (psy_audio_machines_size(self->machines) == 1) {
 		psy_ui_combobox_add_text(&self->machinebox, psy_ui_translate(
 			"machineview.no-machines-loaded"));
-		psy_ui_combobox_setcursel(&self->machinebox, 0);
+		psy_ui_combobox_select(&self->machinebox, 0);
 	} else if (self->machines &&
 			(psy_audio_machines_size(self->machines) > 0)) {
 		uintptr_t i;
@@ -200,5 +200,5 @@ void machinecombobox_select(MachineComboBox* self, uintptr_t slot)
 	} else {
 		comboboxindex = psy_ui_combobox_count(&self->machinebox) - 1;
 	}	
-	psy_ui_combobox_setcursel(&self->machinebox, comboboxindex);	
+	psy_ui_combobox_select(&self->machinebox, comboboxindex);	
 }

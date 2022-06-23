@@ -73,8 +73,8 @@ void psy_ui_gridaligner_align(psy_ui_GridAligner* self, psy_ui_Component* group)
 	psy_ui_realpoint_init_all(&cp_bottomright,
 		psy_ui_value_px(&size.width, tm, &parentsize),
 		psy_ui_value_px(&size.height, tm, &parentsize));
-	psy_ui_aligner_adjustborder(group, &cp_topleft, &cp_bottomright);
-	psy_ui_aligner_adjustspacing(group, &cp_topleft, &cp_bottomright);
+	psy_ui_aligner_adjust_border(group, &cp_topleft, &cp_bottomright);
+	psy_ui_aligner_adjust_spacing(group, &cp_topleft, &cp_bottomright);
 	colsize.width = (cp_bottomright.x - cp_topleft.x) / (double) self->numcols;
 	colsize.height = cp_bottomright.y - cp_topleft.y;
 	for (p = q = psy_ui_component_children(group, 0); p != NULL;
@@ -93,7 +93,7 @@ void psy_ui_gridaligner_align(psy_ui_GridAligner* self, psy_ui_Component* group)
 				cp_bottomright.y - cp_topleft.y);						
 			componentsize = psy_ui_component_preferredsize(curr,
 					&limit);			
-			psy_ui_aligner_adjustminmaxsize(curr, tm, &componentsize,
+			psy_ui_aligner_adjust_minmax_size(curr, tm, &componentsize,
 				NULL); /* todo percent */
 			componentsize.width = psy_ui_value_make_px(colsize.width);
 			c_tm = psy_ui_component_textmetric(curr);
@@ -181,7 +181,7 @@ void psy_ui_gridaligner_preferredsize(psy_ui_GridAligner* self,
 				limit.height = size.height;
 				componentsize = psy_ui_component_preferredsize(curr,
 					&limit);					
-				psy_ui_aligner_adjustminmaxsize(curr, tm,
+				psy_ui_aligner_adjust_minmax_size(curr, tm,
 					&componentsize, NULL); /* todo percent */
 				c_tm = psy_ui_component_textmetric(curr);
 				cp.x += psy_ui_value_px(&colsize.width, c_tm, NULL) +
@@ -203,6 +203,6 @@ void psy_ui_gridaligner_preferredsize(psy_ui_GridAligner* self,
 		}
 		psy_list_free(q);
 		*rv = maxsize;
-		psy_ui_aligner_addspacingandborder(group, rv);
+		psy_ui_aligner_add_spacing_and_border(group, rv);
 	}	
 }

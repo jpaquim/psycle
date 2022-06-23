@@ -853,10 +853,10 @@ void machinestackdesc_init(MachineStackDesc* self, psy_ui_Component* parent,
 		IDB_SETTINGS_DARK, psy_ui_colour_white());
 	psy_ui_button_init_text_connect(&self->outputs, &self->component,
 		"stackview.outputs", self, machinestackdesc_ontoggleoutputs);
-	psy_ui_button_seticon(&self->outputs, psy_ui_ICON_LESS);
+	psy_ui_button_set_icon(&self->outputs, psy_ui_ICON_LESS);
 	psy_ui_button_init_text_connect(&self->volumes, &self->component,
 		"stackview.volumes", self, machinestackdesc_ontogglevolumes);
-	psy_ui_button_seticon(&self->volumes, psy_ui_ICON_LESS);	
+	psy_ui_button_set_icon(&self->volumes, psy_ui_ICON_LESS);	
 }
 
 void machinestackdesc_onalign(MachineStackDesc* self)
@@ -935,9 +935,9 @@ void machinestackdesc_ontoggleoutputs(MachineStackDesc* self,
 {
 	psy_ui_component_toggle_visibility(&self->view->outputs.component);
 	if (psy_ui_component_visible(&self->view->outputs.component)) {
-		psy_ui_button_seticon(&self->outputs, psy_ui_ICON_LESS);
+		psy_ui_button_set_icon(&self->outputs, psy_ui_ICON_LESS);
 	} else {
-		psy_ui_button_seticon(&self->outputs, psy_ui_ICON_MORE);
+		psy_ui_button_set_icon(&self->outputs, psy_ui_ICON_MORE);
 	}
 }
 
@@ -946,9 +946,9 @@ void machinestackdesc_ontogglevolumes(MachineStackDesc* self,
 {
 	psy_ui_component_toggle_visibility(&self->view->volumes.component);
 	if (psy_ui_component_visible(&self->view->volumes.component)) {
-		psy_ui_button_seticon(&self->volumes, psy_ui_ICON_LESS);
+		psy_ui_button_set_icon(&self->volumes, psy_ui_ICON_LESS);
 	} else {
-		psy_ui_button_seticon(&self->volumes, psy_ui_ICON_MORE);
+		psy_ui_button_set_icon(&self->volumes, psy_ui_ICON_MORE);
 	}
 }
 

@@ -81,24 +81,24 @@ void playbar_init(PlayBar* self, psy_ui_Component* parent, Workspace* workspace)
 		psy_ui_colour_white());
 	/* playmode */
 	psy_ui_combobox_init(&self->playmode, playbar_base(self));
-	psy_ui_combobox_setcharnumber(&self->playmode, 6.0);	
+	psy_ui_combobox_set_char_number(&self->playmode, 6.0);	
 	/* play beat num */
 	psy_ui_textarea_init_single_line(&self->loopbeatsedit, playbar_base(self));	
 	psy_ui_textarea_set_text(&self->loopbeatsedit, "4.00");
 	psy_ui_textarea_set_char_number(&self->loopbeatsedit, 6);
 	psy_ui_button_init_connect(&self->loopbeatsless, playbar_base(self),
 		self, playbar_onnumplaybeatsless);
-	psy_ui_button_seticon(&self->loopbeatsless, psy_ui_ICON_LESS);	
+	psy_ui_button_set_icon(&self->loopbeatsless, psy_ui_ICON_LESS);	
 	psy_ui_button_init_connect(&self->loopbeatsmore, playbar_base(self),
 		self, playbar_onnumplaybeatsmore);
-	psy_ui_button_seticon(&self->loopbeatsmore, psy_ui_ICON_MORE);	
+	psy_ui_button_set_icon(&self->loopbeatsmore, psy_ui_ICON_MORE);	
 	/* stop */
 	psy_ui_button_init_text_connect(&self->stop, playbar_base(self),
 		"play.stop", self, playbar_onstopclicked);	
 	psy_ui_button_load_resource(&self->stop, IDB_STOP_LIGHT, IDB_STOP_DARK,
 		psy_ui_colour_white());
 	playbar_updatetext(self);
-	psy_ui_combobox_setcursel(&self->playmode, 0);
+	psy_ui_combobox_select(&self->playmode, 0);
 	psy_signal_connect(&self->playmode.signal_selchanged, self,
 		playbar_onplaymodeselchanged);	
 	psy_ui_component_start_timer(playbar_base(self), 0, PLAYBAR_TIMERINTERVAL);	

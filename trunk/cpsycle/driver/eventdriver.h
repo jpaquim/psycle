@@ -43,19 +43,17 @@ typedef struct
 {	
 	intptr_t message;
 	intptr_t param1;
-	intptr_t param2;
-	uintptr_t target;
+	intptr_t param2;	
 } psy_EventDriverInput;
 
 INLINE psy_EventDriverInput psy_eventdriverinput_make(intptr_t message,
-	intptr_t param1, intptr_t param2, uintptr_t target)
+	intptr_t param1, intptr_t param2)
 {
 	psy_EventDriverInput rv;
 
 	rv.message = message;
 	rv.param1 = param1;
-	rv.param2 = param1;
-	rv.target = target;
+	rv.param2 = param1;	
 	return rv;
 }
 

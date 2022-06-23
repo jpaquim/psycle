@@ -68,7 +68,7 @@ void psy_ui_terminal_init(psy_ui_Terminal* self, psy_ui_Component* parent)
 	psy_ui_label_enable_wrap(&self->output);
 	psy_ui_label_set_char_number(&self->output, 120.0);
 	psy_ui_label_prevent_translation(&self->output);
-	psy_ui_label_set_textalignment(&self->output, psy_ui_ALIGNMENT_LEFT);
+	psy_ui_label_set_text_alignment(&self->output, psy_ui_ALIGNMENT_LEFT);
 	psy_ui_component_set_scroll_step_height(
 		psy_ui_label_base(&self->output),
 		psy_ui_value_make_eh(1.0));

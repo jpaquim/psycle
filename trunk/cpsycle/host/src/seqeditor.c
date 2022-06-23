@@ -307,12 +307,12 @@ void seqeditor_ontoggletimesig(SeqEditor* self, psy_ui_Button* sender)
 	size = psy_ui_component_preferredsize(&self->header.component, NULL);
 	if (psy_ui_component_visible(&self->header.timesig.component)) {
 		psy_ui_button_highlight(sender);
-		psy_ui_button_seticon(sender, psy_ui_ICON_LESS);
+		psy_ui_button_set_icon(sender, psy_ui_ICON_LESS);
 		psy_ui_component_align(psy_ui_component_parent(
 			psy_ui_button_base(sender)));		
 	} else {		
 		psy_ui_button_disable_highlight(sender);
-		psy_ui_button_seticon(sender, psy_ui_ICON_MORE);
+		psy_ui_button_set_icon(sender, psy_ui_ICON_MORE);
 		psy_ui_component_align(psy_ui_component_parent(
 			psy_ui_button_base(sender)));
 	}

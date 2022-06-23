@@ -23,10 +23,7 @@ static void psy_ui_textareapane_on_preferred_size(psy_ui_TextAreaPane*,
 	psy_ui_Size* limit, psy_ui_Size* rv);
 static void psy_ui_textareapane_on_key_down(psy_ui_TextAreaPane*,
 	psy_ui_KeyboardEvent*);
-static void psy_ui_textareapane_on_focus(psy_ui_TextAreaPane*);
-static void psy_ui_textareapane_on_focuslost(psy_ui_TextAreaPane*);
-static void psy_ui_textareapane_on_mouse_hook(psy_ui_TextAreaPane*,
-	psy_ui_App* sender, psy_ui_MouseEvent*);
+static void psy_ui_textareapane_on_focus_lost(psy_ui_TextAreaPane*);
 static void psy_ui_textareapane_on_draw(psy_ui_TextAreaPane*, psy_ui_Graphics*);
 static void psy_ui_textareapane_on_mouse_down(psy_ui_TextAreaPane*,
 	psy_ui_MouseEvent*);
@@ -68,13 +65,10 @@ static void vtable_init(psy_ui_TextAreaPane* self)
 			psy_ui_textareapane_on_draw;
 		vtable.onpreferredsize =
 			(psy_ui_fp_component_on_preferred_size)
-			psy_ui_textareapane_on_preferred_size;
-		vtable.on_focus =
-			(psy_ui_fp_component_event)
-			psy_ui_textareapane_on_focus;
+			psy_ui_textareapane_on_preferred_size;		
 		vtable.on_focuslost =
 			(psy_ui_fp_component_event)
-			psy_ui_textareapane_on_focuslost;
+			psy_ui_textareapane_on_focus_lost;
 		vtable.on_key_down =
 			(psy_ui_fp_component_on_key_event)
 			psy_ui_textareapane_on_key_down;
@@ -95,8 +89,7 @@ void psy_ui_textareapane_init(psy_ui_TextAreaPane* self,
 	psy_ui_component_set_tab_index(&self->component, 0);
 	self->charnumber = 0.0;
 	self->linenumber = 1;
-	self->isinputfield = FALSE;
-	self->preventedit = TRUE;
+	self->isinputfield = FALSE;	
 	self->text = psy_strdup("textinput	tab1	tab2 word line break");
 	self->cp = 0;
 	psy_ui_textformat_init(&self->format);
@@ -116,20 +109,15 @@ void psy_ui_textareapane_on_destroyed(psy_ui_TextAreaPane* self)
 {
 	psy_signal_dispose(&self->signal_change);
 	psy_signal_dispose(&self->signal_accept);
-	psy_signal_dispose(&self->signal_reject);
-	psy_signal_disconnect(&psy_ui_app()->signal_mousehook,
-		self, psy_ui_textareapane_on_mouse_hook);
+	psy_signal_dispose(&self->signal_reject);	
 	free(self->text);
+	self->text = NULL;
 	psy_ui_textformat_dispose(&self->format);
 }
 
 void psy_ui_textareapane_enable_inputfield(psy_ui_TextAreaPane* self)
 {
-	self->isinputfield = TRUE;
-	psy_signal_disconnect(&psy_ui_app()->signal_mousehook, self,
-		psy_ui_textareapane_on_mouse_hook);
-	psy_signal_connect(&psy_ui_app()->signal_mousehook, self,
-		psy_ui_textareapane_on_mouse_hook);
+	self->isinputfield = TRUE;	
 }
 
 void psy_ui_textareapane_set_text(psy_ui_TextAreaPane* self, const char* text)
@@ -224,9 +212,7 @@ void psy_ui_textareapane_on_key_down(psy_ui_TextAreaPane* self,
 	switch (psy_ui_keyboardevent_keycode(ev)) {
 	case psy_ui_KEY_ESCAPE:
 		if (self->isinputfield) {
-			psy_ui_keyboardevent_prevent_default(ev);
-			self->preventedit = TRUE;
-			psy_ui_app_stopmousehook(psy_ui_app());
+			psy_ui_keyboardevent_prevent_default(ev);						
 			psy_signal_emit(&self->signal_reject, self, 0);
 			psy_ui_keyboardevent_prevent_default(ev);
 		}
@@ -548,46 +534,14 @@ char_dyn_t* righttext(psy_ui_TextAreaPane* self, uintptr_t split)
 	return rv;
 }
 
-void psy_ui_textareapane_on_focus(psy_ui_TextAreaPane* self)
-{	
-	super_vtable.on_focus(&self->component);
-	if (self->isinputfield) {
-		self->preventedit = FALSE;
-		psy_ui_app_startmousehook(psy_ui_app());
-	}
-	psy_ui_component_invalidate(&self->component);
-}
-
-void psy_ui_textareapane_on_focuslost(psy_ui_TextAreaPane* self)
+void psy_ui_textareapane_on_focus_lost(psy_ui_TextAreaPane* self)
 {
 	assert(self);
 
 	super_vtable.on_focuslost(&self->component);
-	if (self->isinputfield && !self->preventedit) {
-		self->preventedit = TRUE;
-		psy_ui_app_stopmousehook(psy_ui_app());
+	if (self->isinputfield) {		
 		psy_signal_emit(&self->signal_accept, self, 0);		
-	}
-	psy_ui_component_invalidate(&self->component);
-}
-
-void psy_ui_textareapane_on_mouse_hook(psy_ui_TextAreaPane* self,
-	psy_ui_App* sender, psy_ui_MouseEvent* ev)
-{
-	if (self->isinputfield) {
-		if (psy_ui_component_visible(&self->component) && !self->preventedit) {
-			psy_ui_RealRectangle position;
-
-			position = psy_ui_component_screenposition(&self->component);			
-			if (!psy_ui_realrectangle_intersect(&position,
-					psy_ui_mouseevent_pt(ev))) {
-				self->preventedit = TRUE;
-				psy_ui_app_stopmousehook(psy_ui_app());
-				psy_signal_emit(&self->signal_accept, self, 0);
-				psy_ui_component_invalidate(&self->component);
-			}
-		}
-	}
+	}	
 }
 
 void psy_ui_textareapane_on_draw(psy_ui_TextAreaPane* self, psy_ui_Graphics* g)

@@ -55,7 +55,7 @@ INLINE void psy_ui_aligner_align(psy_ui_Aligner* self, struct psy_ui_Component* 
 	self->vtable->align(self, component);
 }
 
-INLINE void psy_ui_aligner_preferredsize(psy_ui_Aligner* self,
+INLINE void psy_ui_aligner_preferred_size(psy_ui_Aligner* self,
 	struct psy_ui_Component* component, const psy_ui_Size* limit, psy_ui_Size* rv)
 {
 	assert(self);
@@ -65,17 +65,15 @@ INLINE void psy_ui_aligner_preferredsize(psy_ui_Aligner* self,
 
 /* helper functions */
 
-struct psy_ui_Component;
-
-void psy_ui_aligner_adjustminmaxsize(
+void psy_ui_aligner_adjust_minmax_size(
 	struct psy_ui_Component*, const psy_ui_TextMetric*,
 	psy_ui_Size*, psy_ui_Size* parentsize);
-void psy_ui_aligner_addborder(struct psy_ui_Component*, psy_ui_Size* rv);
-void psy_ui_aligner_addspacingandborder(struct psy_ui_Component*,
+void psy_ui_aligner_add_border(struct psy_ui_Component*, psy_ui_Size* rv);
+void psy_ui_aligner_add_spacing_and_border(struct psy_ui_Component*,
 	psy_ui_Size* rv);
-void psy_ui_aligner_adjustspacing(struct psy_ui_Component*,
+void psy_ui_aligner_adjust_spacing(struct psy_ui_Component*,
 	psy_ui_RealPoint* cp_topleft, psy_ui_RealPoint* cp_bottomright);
-void psy_ui_aligner_adjustborder(struct psy_ui_Component*,
+void psy_ui_aligner_adjust_border(struct psy_ui_Component*,
 	psy_ui_RealPoint* cp_topleft, psy_ui_RealPoint* cp_bottomright);
 void psy_ui_aligner_adjust_margin_size(struct psy_ui_Component* component,
 	const psy_ui_Size* parentsize,

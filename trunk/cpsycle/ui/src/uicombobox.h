@@ -59,9 +59,9 @@ psy_ui_ComboBox* psy_ui_combobox_allocinit(psy_ui_Component* parent);
 
 intptr_t psy_ui_combobox_add_text(psy_ui_ComboBox*, const char* text);
 void psy_ui_combobox_clear(psy_ui_ComboBox*);
-void psy_ui_combobox_setcursel(psy_ui_ComboBox*, intptr_t index);
+void psy_ui_combobox_select(psy_ui_ComboBox*, intptr_t index);
 intptr_t psy_ui_combobox_cursel(const psy_ui_ComboBox*);
-void psy_ui_combobox_setcharnumber(psy_ui_ComboBox*, double num);
+void psy_ui_combobox_set_char_number(psy_ui_ComboBox*, double num);
 void psy_ui_combobox_setitemdata(psy_ui_ComboBox*, uintptr_t index, intptr_t data);
 intptr_t psy_ui_combobox_itemdata(psy_ui_ComboBox*, uintptr_t index);
 void psy_ui_combobox_text(psy_ui_ComboBox*, char* text);

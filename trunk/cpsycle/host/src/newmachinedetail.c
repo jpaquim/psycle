@@ -69,7 +69,7 @@ void newmachinedetail_init(NewMachineDetail* self, psy_ui_Component* parent,
 	psy_ui_component_set_margin(&self->plugname.component, margin);
 	/* description */
 	psy_ui_label_init(&self->desclabel, &self->component);
-	psy_ui_label_set_textalignment(&self->desclabel, psy_ui_ALIGNMENT_TOP);
+	psy_ui_label_set_text_alignment(&self->desclabel, psy_ui_ALIGNMENT_TOP);
 	psy_ui_label_enable_wrap(&self->desclabel);
 	psy_ui_component_set_align(&self->desclabel.component, psy_ui_ALIGN_CLIENT);
 	/* bottom */
@@ -81,7 +81,7 @@ void newmachinedetail_init(NewMachineDetail* self, psy_ui_Component* parent,
 		psy_ui_ALIGN_TOP, psy_ui_defaults_vmargin(psy_ui_defaults()));
 	psy_ui_label_init_text(&self->compatlabel, &self->bottom,
 		"newmachine.song-loading-compatibility");
-	psy_ui_label_set_textalignment(&self->compatlabel, psy_ui_ALIGNMENT_LEFT);
+	psy_ui_label_set_text_alignment(&self->compatlabel, psy_ui_ALIGNMENT_LEFT);
 	psy_ui_checkbox_init_text(&self->compatblitzgamefx, &self->bottom,	
 		"newmachine.jme-version-unknown");
 	if (compatconfig_loadnewblitz(psycleconfig_compat(
@@ -101,7 +101,7 @@ void newmachinedetail_init(NewMachineDetail* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->category, &self->details, NULL);	
 	psy_ui_label_init_text(&self->categorydesc, &self->category,
 		"newmachine.category");
-	psy_ui_label_set_textalignment(&self->categorydesc,
+	psy_ui_label_set_text_alignment(&self->categorydesc,
 		psy_ui_ALIGNMENT_RIGHT);
 	psy_ui_label_set_char_number(&self->categorydesc, numcol0);
 	psy_ui_component_set_align(psy_ui_label_base(&self->categorydesc),

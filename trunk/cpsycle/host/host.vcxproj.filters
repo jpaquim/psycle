@@ -651,6 +651,9 @@
     <ClCompile Include="src\pianogriddraw.c">
       <Filter>pattern\pianoroll</Filter>
     </ClCompile>
+    <ClCompile Include="src\viewframe.c">
+      <Filter>uicontrols</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\languageconfig.h">
@@ -1204,6 +1207,9 @@
     </ClInclude>
     <ClInclude Include="src\pianogriddraw.h">
       <Filter>pattern\pianoroll</Filter>
+    </ClInclude>
+    <ClInclude Include="src\viewframe.h">
+      <Filter>uicontrols</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

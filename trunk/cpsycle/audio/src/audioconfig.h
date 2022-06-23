@@ -51,9 +51,6 @@ void audioconfig_onaudiodriverselect(AudioConfig*, bool enabled);
 void audioconfig_on_edit_audio_driver_configuration(AudioConfig*, bool enabled);
 uintptr_t audioconfig_numthreads(const AudioConfig*);
 
-bool audioconfig_onpropertychanged(AudioConfig*, psy_Property*,
-	uintptr_t* rebuild_level);
-
 const char* audioconfig_driver_path(AudioConfig*);
 const char* audioconfig_driverkey(AudioConfig*);
 

@@ -264,15 +264,18 @@ void psy_ui_eventdispatch_bubble(psy_ui_EventDispatch* self,
 	};	
 	focus = NULL;
 	/* set focus */
-	if (!ev->prevent_focus && psy_ui_event_bubbles(ev) && psy_ui_event_type(ev) == psy_ui_MOUSEDOWN) {
-		curr = component;
-		while (curr) {
-			if (psy_ui_component_tab_index(curr) != psy_INDEX_INVALID) {
-				focus = curr;
+	if (!ev->prevent_focus && psy_ui_event_type(ev) == psy_ui_MOUSEDOWN) {
+		if (psy_ui_mouseevent_button((psy_ui_MouseEvent*)ev) == 1) {
+			curr = component;
+			while (curr) {
+				if (psy_ui_component_tab_index(curr) != psy_INDEX_INVALID) {
+					focus = curr;
+					break;
+				}
+				curr = psy_ui_component_parent(curr);
 			}
-			curr = psy_ui_component_parent(curr);
+			psy_ui_app_set_focus(psy_ui_app(), focus);
 		}
-		psy_ui_app_set_focus(psy_ui_app(), focus);
 	}
 	psy_ui_event_stop_propagation(ev);
 }

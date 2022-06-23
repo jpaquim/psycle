@@ -1,13 +1,15 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #if !defined(NEWMACHINESECTION_H)
 #define NEWMACHINESECTION_H
 
-// host
+/* host */
 #include "pluginsview.h"
 #include "workspace.h"
-// ui
+/* ui */
 #include <uitextarea.h>
 #include <uilabel.h>
 
@@ -18,36 +20,34 @@ extern "C" {
 struct NewMachine;
 
 typedef struct NewMachineSection {
-	// inherits
+	/* inherits */
 	psy_ui_Component component;
-	// signals
+	/* signals */
 	psy_Signal signal_selected;
 	psy_Signal signal_changed;
 	psy_Signal signal_renamed;	
-	// intern
+	/* internal */
 	psy_ui_Component header;
-	psy_ui_Label label;
-	PluginsView pluginview;
-	bool preventedit;
-	// references
-	psy_Property* section;
-	psy_ui_TextArea* edit;
+	psy_ui_TextArea name;
+	PluginsView pluginview;	
+	/* references */
+	psy_Property* section;	
 	Workspace* workspace;
 	NewMachineFilter* filter;
 } NewMachineSection;
 
 void newmachinesection_init(NewMachineSection* self, psy_ui_Component* parent,
-	psy_Property* section, psy_ui_TextArea*, NewMachineFilter* filter, Workspace*);
+	psy_Property* section, NewMachineFilter* filter, Workspace*);
 
 NewMachineSection* newmachinesection_alloc(void);
 NewMachineSection* newmachinesection_allocinit(psy_ui_Component* parent,
-	psy_Property* section, psy_ui_TextArea*, NewMachineFilter* filter, Workspace*);
+	psy_Property* section, NewMachineFilter* filter, Workspace*);
 
-void newmachinesection_findplugins(NewMachineSection*);
+void newmachinesection_find_plugins(NewMachineSection*);
 const char* newmachinesection_key(const NewMachineSection*);
 const char* newmachinesection_name(const NewMachineSection*);
 void newmachinesection_mark(NewMachineSection*);
-void newmachinsection_clearselection(NewMachineSection*);
+void newmachinsection_clear_selection(NewMachineSection*);
 
 #ifdef __cplusplus
 }

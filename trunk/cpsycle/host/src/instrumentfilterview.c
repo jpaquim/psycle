@@ -83,10 +83,10 @@ void instrumentfilterview_init(InstrumentFilterView* self,
 	psy_ui_margin_init_em(&margin, 0.0, 2.0, 0.0, 0.0);		
 	psy_ui_component_set_margin(&self->filtertypeheader.component, margin);
 	psy_ui_combobox_init(&self->filtertype, &self->filter);
-	psy_ui_combobox_setcharnumber(&self->filtertype, 20);
+	psy_ui_combobox_set_char_number(&self->filtertype, 20);
 	psy_ui_component_set_align(&self->filtertype.component, psy_ui_ALIGN_LEFT);
 	instrumentfilterview_fillfiltercombobox(self);
-	psy_ui_combobox_setcursel(&self->filtertype, (int)F_NONE);
+	psy_ui_combobox_select(&self->filtertype, (int)F_NONE);
 	psy_signal_connect(&self->filtertype.signal_selchanged, self,
 		instrumentfilterview_onfiltercomboboxchanged);
 	psy_ui_slider_init(&self->randomcutoff, &self->top);
@@ -181,13 +181,13 @@ void instrumentfilterview_setinstrument(InstrumentFilterView* self,
 			&instrument->filterenvelope);		
 		envelopeview_setmodamount(&self->envelopeview,
 			instrument->filtermodamount);
-		psy_ui_combobox_setcursel(&self->filtertype,
+		psy_ui_combobox_select(&self->filtertype,
 			(intptr_t)instrument->filtertype);
 	} else {
 		adsrsliders_set_envelope(&self->adsrsliders,
 			NULL);
 		envelopeview_setenvelope(&self->envelopeview, NULL);
-		psy_ui_combobox_setcursel(&self->filtertype, (intptr_t)F_NONE);
+		psy_ui_combobox_select(&self->filtertype, (intptr_t)F_NONE);
 	}
 	instrumentfilterview_updateslider(self);	
 }

@@ -21,9 +21,9 @@ void playlistbar_init(PlaylistBar* self, psy_ui_Component* parent)
 	psy_ui_component_set_default_align(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	psy_ui_button_init(&self->up, &self->component);
-	psy_ui_button_seticon(&self->up, psy_ui_ICON_UP);
+	psy_ui_button_set_icon(&self->up, psy_ui_ICON_UP);
 	psy_ui_button_init(&self->down, &self->component);
-	psy_ui_button_seticon(&self->down, psy_ui_ICON_DOWN);
+	psy_ui_button_set_icon(&self->down, psy_ui_ICON_DOWN);
 	psy_ui_button_init_text(&self->play, &self->component, "playlist.play");
 	psy_ui_button_init_text(&self->stop, &self->component, "playlist.stop");
 	psy_ui_button_init_text(&self->del, &self->component, "playlist.delete");

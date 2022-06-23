@@ -31,7 +31,7 @@ void patterncursorstepbox_init(PatternCursorStepBox* self, psy_ui_Component*
 		patterncursorstepbox_base(self));
 	psy_signal_connect(&self->combobox.signal_selchanged, self,
 		patterncursorstepbox_onselectionchanged);
-	psy_ui_combobox_setcharnumber(&self->combobox, 3);
+	psy_ui_combobox_set_char_number(&self->combobox, 3);
 	patterncursorstepbox_build(self);
 	patterncursorstepbox_update(self);	
 }
@@ -58,6 +58,6 @@ void patterncursorstepbox_onselectionchanged(PatternCursorStepBox* self,
 
 void patterncursorstepbox_update(PatternCursorStepBox* self)
 {
-	psy_ui_combobox_setcursel(&self->combobox,
+	psy_ui_combobox_select(&self->combobox,
 		keyboardmiscconfig_cursor_step(&self->workspace->config.misc));
 }
