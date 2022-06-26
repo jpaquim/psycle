@@ -300,7 +300,7 @@ psy_EventDriver* psy_audio_player_eventdriver(psy_audio_Player*, intptr_t id);
 uintptr_t psy_audio_player_numeventdrivers(psy_audio_Player*);
 void psy_audio_player_write_eventdrivers(psy_audio_Player*,
 	psy_EventDriverInput input);
-void psy_audio_player_workmachine(psy_audio_Player*, uintptr_t amount,
+void psy_audio_player_work_machine(psy_audio_Player*, uintptr_t amount,
 	uintptr_t slot);
 void psy_audio_player_setemptysong(psy_audio_Player*);
 void psy_audio_player_midi_configure(psy_audio_Player*, psy_Property*
@@ -325,6 +325,9 @@ void psy_audio_player_stop_threads(psy_audio_Player*);
 uintptr_t psy_audio_player_numthreads(const psy_audio_Player*);
 
 bool psy_audio_player_is_active_key(const psy_audio_Player*, uint8_t key);
+
+void psy_audio_player_enable_audio(psy_audio_Player*);
+void psy_audio_player_disable_audio(psy_audio_Player*);
 
 #ifdef __cplusplus
 }

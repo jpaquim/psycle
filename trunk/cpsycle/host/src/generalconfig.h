@@ -48,7 +48,7 @@ void generalconfig_show_saving_recent_songs(GeneralConfig*);
 void generalconfig_prevent_saving_recent_songs(GeneralConfig*);
 bool generalconfig_saving_recent_songs(const GeneralConfig*);
 bool generalconfig_playsongafterload(const GeneralConfig*);
-bool generalconfig_showingpatternnames(const GeneralConfig*);
+bool generalconfig_showing_pattern_names(const GeneralConfig*);
 bool generalconfig_showsequenceedit(const GeneralConfig*);
 void generalconfig_setsequenceeditshowstate(GeneralConfig*, bool state);
 bool generalconfig_showstepsequencer(const GeneralConfig*);

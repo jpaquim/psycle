@@ -22,18 +22,6 @@ extern "C" {
 #endif
 
 /*
-** EmptyViewPage
-*/
-
-typedef struct EmptyViewPage {
-	/* inherits */
-	psy_ui_Component component;
-	psy_ui_Label label;
-} EmptyViewPage;
-
-void emptyviewpage_init(EmptyViewPage*, psy_ui_Component* parent);
-
-/*
 ** MainViews
 */
 

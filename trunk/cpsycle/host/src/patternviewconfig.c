@@ -674,7 +674,8 @@ bool patternviewconfig_show_trackscopes(const PatternViewConfig* self)
 }
 
 /* events */
-uintptr_t patternviewconfig_onchanged(PatternViewConfig* self, psy_Property* property)
+uintptr_t patternviewconfig_on_changed(PatternViewConfig* self,
+	psy_Property* property)
 {
 	uintptr_t rebuild_level;
 
@@ -710,7 +711,7 @@ uintptr_t patternviewconfig_onchanged(PatternViewConfig* self, psy_Property* pro
 	return rebuild_level;
 }
 
-void patternviewconfig_toggle_pattern_defaultline(PatternViewConfig* self)
+void patternviewconfig_toggle_pattern_default_line(PatternViewConfig* self)
 {			
 	psy_Property* property;
 
@@ -744,7 +745,8 @@ double patternviewconfig_zoom(const PatternViewConfig* self)
 	return self->zoom;
 }
 
-psy_ui_FontInfo patternviewconfig_font_info(PatternViewConfig* self, double zoom)
+psy_ui_FontInfo patternviewconfig_font_info(PatternViewConfig* self,
+	double zoom)
 {
 	psy_ui_FontInfo fontinfo;
 

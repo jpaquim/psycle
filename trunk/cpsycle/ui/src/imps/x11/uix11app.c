@@ -514,6 +514,8 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 			button = 3;
 		} else if (xme.state & Button3Mask) {
 			button = 2;
+		} else {
+			button = 0;
 		}
 		psy_ui_mouseevent_init_all(&ev,
 			psy_ui_realpoint_make(xme.x, xme.y),			

@@ -206,7 +206,7 @@ void patternviewbar_on_default_line(PatternViewBar* self, psy_ui_CheckBox*
 {	
 	assert(self);
 
-	patternviewconfig_toggle_pattern_defaultline(self->patconfig);
+	patternviewconfig_toggle_pattern_default_line(self->patconfig);
 }
 
 void patternviewbar_on_display_single_pattern(PatternViewBar* self,

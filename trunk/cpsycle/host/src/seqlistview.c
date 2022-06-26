@@ -489,7 +489,7 @@ void seqviewlist_init(SeqviewList* self, psy_ui_Component* parent,
 	seqviewlist_vtable_init(self);	
 	self->state = state;	
 	self->lastplayrow = psy_INDEX_INVALID;	
-	self->showpatternnames = generalconfig_showingpatternnames(
+	self->showpatternnames = generalconfig_showing_pattern_names(
 		psycleconfig_general(workspace_conf(self->state->cmds->workspace)));	
 	psy_ui_component_set_wheel_scroll(&self->component, 1);	
 	psy_ui_component_set_default_align(&self->component, psy_ui_ALIGN_LEFT,

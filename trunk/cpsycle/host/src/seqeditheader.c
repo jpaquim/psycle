@@ -39,25 +39,25 @@ void seqeditheader_init(SeqEditHeader* self, psy_ui_Component* parent,
 	psy_ui_component_set_align(&self->ruler.component, psy_ui_ALIGN_TOP);
 }
 
-void seqeditheader_hidetimesig(SeqEditHeader* self)
+void seqeditheader_hide_timesig(SeqEditHeader* self)
 {
 	psy_ui_component_hide(&self->timesig.component);
 	psy_ui_component_invalidate(&self->component);
 }
 
-void seqeditheader_showtimesig(SeqEditHeader* self)
+void seqeditheader_show_timesig(SeqEditHeader* self)
 {
 	psy_ui_component_show(&self->timesig.component);
 	psy_ui_component_invalidate(&self->component);
 }
 
-void seqeditheader_hideloops(SeqEditHeader* self)
+void seqeditheader_hide_loops(SeqEditHeader* self)
 {
 	psy_ui_component_hide(&self->loops.component);
 	psy_ui_component_invalidate(&self->component);
 }
 
-void seqeditheader_showloops(SeqEditHeader* self)
+void seqeditheader_show_loops(SeqEditHeader* self)
 {
 	psy_ui_component_show(&self->loops.component);
 	psy_ui_component_invalidate(&self->component);

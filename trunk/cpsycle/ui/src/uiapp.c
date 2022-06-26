@@ -72,10 +72,11 @@ void psy_ui_appzoom_update_base_fontsize(psy_ui_AppZoom* self, psy_ui_Font* base
 
 /* psy_ui_App */
 static void psy_ui_app_change_default_font_size(psy_ui_App*, double size);
-static void psy_ui_app_onlanguagechanged(psy_ui_App*, psy_Translator* sender);
+static void psy_ui_app_on_language_changed(psy_ui_App*,
+	psy_Translator* sender);
 
-static void ui_app_initimpfactory(psy_ui_App*);
-static void ui_app_initimp(psy_ui_App*, uintptr_t instance);
+static void ui_app_init_imp_factory(psy_ui_App*);
+static void ui_app_init_imp(psy_ui_App*, uintptr_t instance);
 
 psy_ui_App* psy_ui_app(void)
 {
@@ -101,14 +102,14 @@ void psy_ui_app_init(psy_ui_App* self, bool dark, uintptr_t instance)
 	psy_signal_init(&self->signal_dispose);	
 	psy_signal_init(&self->signal_mousehook);
 	psy_ui_appzoom_init(&self->zoom);
-	ui_app_initimpfactory(self);
-	ui_app_initimp(self, instance);
+	ui_app_init_imp_factory(self);
+	ui_app_init_imp(self, instance);
 	psy_ui_defaults_init(&self->defaults, psy_ui_DARKTHEME);
 	psy_ui_appzoom_update_base_fontsize(&self->zoom,
 		psy_ui_defaults_font(&self->defaults));	
 	psy_translator_init(&self->translator);
 	psy_signal_connect(&self->translator.signal_languagechanged, self,
-		psy_ui_app_onlanguagechanged);
+		psy_ui_app_on_language_changed);
 	psy_ui_dragevent_init(&self->dragevent);		
 	psy_ui_eventdispatch_init(&self->eventdispatch);
 #ifdef DIVERSALIS__OS__MICROSOFT
@@ -117,7 +118,7 @@ void psy_ui_app_init(psy_ui_App* self, bool dark, uintptr_t instance)
 	psy_timers_init(&self->wintimers);
 }
 
-void ui_app_initimpfactory(psy_ui_App* self)
+void ui_app_init_imp_factory(psy_ui_App* self)
 {
 	assert(self);
 
@@ -125,25 +126,23 @@ void ui_app_initimpfactory(psy_ui_App* self)
 	self->impfactory = (psy_ui_ImpFactory*)
 		psy_ui_win_impfactory_allocinit();
 #elif PSYCLE_USE_TK == PSYCLE_TK_CURSES
-	/* todo
-	   initscr();
-	   refresh();
-	   self->imp_factory = (psy_ui_ImpFactory*)
-		  psy_ui_curses_impfactory_allocinit(); */
-#elif PSYCLE_USE_TK == PSYCLE_TK_X11
-	printf("Create X11 Impfactory\n");
+	/* todo */
+#elif PSYCLE_USE_TK == PSYCLE_TK_X11	
 	self->impfactory = (psy_ui_ImpFactory*)
-		psy_ui_x11_impfactory_allocinit();	
-	printf("X11 Impfactory created\n");
+		psy_ui_x11_impfactory_allocinit();
 #elif PSYCLE_USE_TK == PSYCLE_TK_GTK
 	self->impfactory = (psy_ui_ImpFactory*)
 		psy_ui_gtk_impfactory_allocinit();
 #else
 	#error "Platform not supported"
 #endif	
+	if (!self->impfactory) {
+		psy_ui_error("Failed to create psy_ui_ImpFactory.", "Psycle Error");
+		exit(1);
+	}
 }
 
-void ui_app_initimp(psy_ui_App* self, uintptr_t instance)
+void ui_app_init_imp(psy_ui_App* self, uintptr_t instance)
 {
 	assert(self);
 
@@ -241,7 +240,8 @@ void psy_ui_app_stopmousehook(psy_ui_App* self)
 	}
 }
 
-void psy_ui_app_onlanguagechanged(psy_ui_App* self, psy_Translator* translator)
+void psy_ui_app_on_language_changed(psy_ui_App* self, psy_Translator*
+	translator)
 {
 	psy_List* r;
 	psy_List* t;
@@ -254,18 +254,19 @@ void psy_ui_app_onlanguagechanged(psy_ui_App* self, psy_Translator* translator)
 		psy_List* q;
 		psy_ui_Component* curr_toplevel;
 
-		curr_toplevel = (psy_ui_Component*)r->entry;
-		/* notify all components language changed */
+		curr_toplevel = (psy_ui_Component*)psy_list_entry(r);
+		/* notify all toplevel components language changed */
 		psy_ui_component_update_language(curr_toplevel);
-		for (p = q = psy_ui_component_children(curr_toplevel, psy_ui_RECURSIVE);
-			p != NULL; psy_list_next(&p)) {
+		p = q = psy_ui_component_children(curr_toplevel, psy_ui_RECURSIVE);
+		for (; p != NULL; psy_list_next(&p)) {
 			psy_ui_Component* component;
 
 			component = (psy_ui_Component*)psy_list_entry(p);
-			psy_ui_component_update_language(component);
+			psy_ui_component_update_language(component);			
 		}
 		psy_list_free(q);
-		psy_ui_component_align_full(self->main);	
+		psy_ui_component_align_full(curr_toplevel);
+		psy_ui_component_invalidate(curr_toplevel);
 	}
 	psy_list_free(t);
 	t = NULL;

@@ -31,10 +31,10 @@ typedef struct SeqEditHeader {
 void seqeditheader_init(SeqEditHeader*, psy_ui_Component* parent,
 	SeqEditState*);
 
-void seqeditheader_hidetimesig(SeqEditHeader*);
-void seqeditheader_showtimesig(SeqEditHeader*);
-void seqeditheader_hideloops(SeqEditHeader*);
-void seqeditheader_showloops(SeqEditHeader*);
+void seqeditheader_hide_timesig(SeqEditHeader*);
+void seqeditheader_show_timesig(SeqEditHeader*);
+void seqeditheader_hide_loops(SeqEditHeader*);
+void seqeditheader_show_loops(SeqEditHeader*);
 
 
 #ifdef __cplusplus

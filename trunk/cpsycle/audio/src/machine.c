@@ -718,9 +718,9 @@ void work(psy_audio_Machine* self, psy_audio_BufferContext* bc)
 {
 	psy_List* p;
 	uintptr_t amount;
-	uintptr_t pos;
+	uintptr_t pos;	
 
-	amount = psy_audio_buffercontext_numsamples(bc);
+	amount = psy_audio_buffercontext_numsamples(bc);	
 	for (pos = 0, p = bc->events; p != NULL; psy_list_next(&p)) {
 		psy_audio_PatternEntry* entry;
 
@@ -732,7 +732,7 @@ void work(psy_audio_Machine* self, psy_audio_BufferContext* bc)
 			if (num > 0) {
 				work_dogenerateaudio(self, bc, pos, num);
 				amount -= num;
-			}
+			}			
 			work_entry(self, entry);
 			pos = (uintptr_t)entry->delta;
 		}
@@ -796,8 +796,7 @@ void work_entry(psy_audio_Machine* self, psy_audio_PatternEntry* entry)
 					}
 				}
 			}
-		} else 
-		if (ev->note == psy_audio_NOTECOMMANDS_EMPTY && ev->cmd == psy_audio_PATTERNCMD_EXTENDED) {
+		} else if (ev->note == psy_audio_NOTECOMMANDS_EMPTY && ev->cmd == psy_audio_PATTERNCMD_EXTENDED) {
 			if ((ev->parameter & 0xF0) == psy_audio_PATTERNCMD_SET_BYPASS) {
 				if ((ev->parameter & 0x0F) == 0) {
 					psy_audio_machine_unbypass(self);

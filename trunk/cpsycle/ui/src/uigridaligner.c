@@ -91,7 +91,7 @@ void psy_ui_gridaligner_align(psy_ui_GridAligner* self, psy_ui_Component* group)
 			psy_ui_size_init_px(&limit,
 				cp_bottomright.x - cp_topleft.x,
 				cp_bottomright.y - cp_topleft.y);						
-			componentsize = psy_ui_component_preferredsize(curr,
+			componentsize = psy_ui_component_preferred_size(curr,
 					&limit);			
 			psy_ui_aligner_adjust_minmax_size(curr, tm, &componentsize,
 				NULL); /* todo percent */
@@ -179,7 +179,7 @@ void psy_ui_gridaligner_preferredsize(psy_ui_GridAligner* self,
 				limit.width = psy_ui_value_make_px(psy_ui_value_px(
 					&size.width, tm, NULL) - cp_topleft.x - cp_bottomright.x);
 				limit.height = size.height;
-				componentsize = psy_ui_component_preferredsize(curr,
+				componentsize = psy_ui_component_preferred_size(curr,
 					&limit);					
 				psy_ui_aligner_adjust_minmax_size(curr, tm,
 					&componentsize, NULL); /* todo percent */

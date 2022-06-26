@@ -96,14 +96,14 @@ static void psy_audio_sequencer_makeretriggercontinueevents(
 	psy_dsp_big_beat_t offset);
 static int psy_audio_sequencer_isoffsetinwindow(psy_audio_Sequencer*,
 	psy_dsp_big_beat_t offset);
-static void psy_audio_sequencer_insertevents(psy_audio_Sequencer*);
+static void psy_audio_sequencer_insert_events(psy_audio_Sequencer*);
 static void psy_audio_sequencer_insertmetronometicks(psy_audio_Sequencer*,
 	psy_dsp_big_beat_t position, psy_dsp_big_beat_t width);
-static void psy_audio_sequencer_insertinputevents(psy_audio_Sequencer*);
+static void psy_audio_sequencer_insert_input_events(psy_audio_Sequencer*);
 static void psy_audio_sequencer_insertdelayedevents(psy_audio_Sequencer*);
 static int psy_audio_sequencer_sequencerinsert(psy_audio_Sequencer*);
 static void psy_audio_sequencer_compute_beatspersample(psy_audio_Sequencer*);
-static void psy_audio_sequencer_notifysequencertick(psy_audio_Sequencer*,
+static void psy_audio_sequencer_notify_sequencer_tick(psy_audio_Sequencer*,
 	psy_dsp_big_beat_t width);
 static uintptr_t psy_audio_sequencer_currframesperline(psy_audio_Sequencer*);
 static void psy_audio_sequencer_sortevents(psy_audio_Sequencer*);
@@ -135,9 +135,9 @@ static void psy_audio_sequencer_tweak(psy_audio_Sequencer*,
 	psy_audio_PatternEntry*,
 	uintptr_t channeloffset,
 	psy_dsp_big_beat_t offset);
-static void psy_audio_sequencer_executeline(psy_audio_Sequencer*,
+static void psy_audio_sequencer_execute_line(psy_audio_Sequencer*,
 	psy_audio_SequencerTrack*, psy_dsp_big_beat_t offset);
-static bool psy_audio_sequencer_executeglobalcommands(psy_audio_Sequencer*,
+static bool psy_audio_sequencer_execute_global_commands(psy_audio_Sequencer*,
 	psy_audio_PatternEntry*, psy_audio_SequencerTrack*,
 	psy_dsp_big_beat_t offset);
 static bool psy_audio_sequencer_executetimesig(psy_audio_Sequencer*,
@@ -496,18 +496,15 @@ void psy_audio_sequencer_clear_input_events(psy_audio_Sequencer* self)
 
 uintptr_t psy_audio_sequencer_frame_tick(psy_audio_Sequencer* self,
 	uintptr_t numframes)
-{	
-	uintptr_t numworked;
-
+{
 	assert(self);
 	
 	psy_audio_sequencer_tick(self, psy_audio_sequencer_frame_to_offset(self,
-		numframes));
-	numworked = (uintptr_t)(self->window / self->beatspersample + 0.5);	
+		numframes));	
 	if (self->seqtime.playing) {
-		self->seqtime.playcounter += numworked;
+		self->seqtime.playcounter += numframes;
 	}
-	return numworked;
+	return numframes;
 }
 
 void psy_audio_sequencer_tick(psy_audio_Sequencer* self,
@@ -524,17 +521,17 @@ void psy_audio_sequencer_tick(psy_audio_Sequencer* self,
 	}
 	self->window = width;
 	psy_audio_sequencer_clear_events(self);
-	psy_audio_sequencer_insertinputevents(self);
+	psy_audio_sequencer_insert_input_events(self);
 	if (psy_audio_sequencer_playing(self)) {
 		psy_audio_sequencer_updateplaymodeposition(self);
 		if (self->metronome.active) {
 			psy_audio_sequencer_insertmetronometicks(self, self->seqtime.position,
 				width);
 		}
-		psy_audio_sequencer_insertevents(self);
+		psy_audio_sequencer_insert_events(self);
 		psy_audio_sequencer_insertdelayedevents(self);
 	} 	
-	psy_audio_sequencer_notifysequencertick(self, width);
+	psy_audio_sequencer_notify_sequencer_tick(self, width);
 	if (psy_audio_sequencer_playing(self) &&
 			psy_audio_sequencer_sequencerinsert(self)) {
 		psy_audio_sequencer_insertdelayedevents(self);
@@ -589,7 +586,7 @@ void psy_audio_sequencer_updateplaymodeposition(psy_audio_Sequencer* self)
 	}
 }
 
-void psy_audio_sequencer_notifysequencertick(psy_audio_Sequencer* self,
+void psy_audio_sequencer_notify_sequencer_tick(psy_audio_Sequencer* self,
 	psy_dsp_big_beat_t width)
 {
 	assert(self);
@@ -647,7 +644,7 @@ void psy_audio_sequencer_clock_stop(psy_audio_Sequencer* self)
 	psy_audio_sequencer_stop(self);
 }
 
-void psy_audio_sequencer_onnewline(psy_audio_Sequencer* self)
+void psy_audio_sequencer_on_newline(psy_audio_Sequencer* self)
 {
 	assert(self);
 	
@@ -665,6 +662,27 @@ void psy_audio_sequencer_onnewline(psy_audio_Sequencer* self)
 	psy_signal_emit(&self->signal_newline, self, 0);
 	self->linetickcount += psy_audio_sequencer_curr_beats_per_line(self);
 }
+
+/* each machine gets notified a new tracker line has started */
+void psy_audio_sequencer_notify_newline(psy_audio_Sequencer* self)
+{
+	assert(self);
+
+	if (self->machines) {
+		psy_TableIterator it;
+
+		if (psy_audio_sequencer_playing(self)) {
+			++self->seqtime.linecounter;
+		}
+		for (it = psy_audio_machines_begin(self->machines);
+				!psy_tableiterator_equal(&it, psy_table_end());
+				psy_tableiterator_inc(&it)) {
+			psy_audio_machine_newline((psy_audio_Machine*)
+				psy_tableiterator_value(&it));
+		}
+	}
+}
+
 
 void psy_audio_sequencer_executejump(psy_audio_Sequencer* self)
 {
@@ -713,7 +731,7 @@ int psy_audio_sequencer_sequencerinsert(psy_audio_Sequencer* self) {
 	return rv;
 }
 
-void psy_audio_sequencer_insertevents(psy_audio_Sequencer* self)
+void psy_audio_sequencer_insert_events(psy_audio_Sequencer* self)
 {
 	bool continueplaying = FALSE;
 	bool work = TRUE;
@@ -775,7 +793,7 @@ void psy_audio_sequencer_insertevents(psy_audio_Sequencer* self)
 					offset = psy_audio_sequencetrackiterator_offset(
 						track->iterator);
 					if (psy_audio_sequencer_isoffsetinwindow(self, offset)) {
-						psy_audio_sequencer_executeline(self, track, offset);						
+						psy_audio_sequencer_execute_line(self, track, offset);						
 						work = TRUE;
 					}
 				}
@@ -816,7 +834,7 @@ void psy_audio_sequencer_insertmetronometicks(psy_audio_Sequencer* self,
 	}
 }
 
-void psy_audio_sequencer_executeline(psy_audio_Sequencer* self,
+void psy_audio_sequencer_execute_line(psy_audio_Sequencer* self,
 	psy_audio_SequencerTrack* track,
 	psy_dsp_big_beat_t offset)
 {
@@ -848,7 +866,7 @@ void psy_audio_sequencer_executeline(psy_audio_Sequencer* self,
 				psy_audio_sequencetrackiterator_inc(track->iterator);
 				break;
 			}
-			psy_audio_sequencer_executeglobalcommands(self,
+			psy_audio_sequencer_execute_global_commands(self,
 				entry, track, offset);
 			psy_list_append(&events, entry);
 		}
@@ -889,7 +907,7 @@ bool psy_audio_sequencer_executetimesig(psy_audio_Sequencer* self,
 	return done;
 }
 
-bool psy_audio_sequencer_executeglobalcommands(psy_audio_Sequencer* self,
+bool psy_audio_sequencer_execute_global_commands(psy_audio_Sequencer* self,
 	psy_audio_PatternEntry* patternentry, psy_audio_SequencerTrack* track,
 	psy_dsp_big_beat_t offset)
 {
@@ -938,7 +956,7 @@ bool psy_audio_sequencer_executeglobalcommands(psy_audio_Sequencer* self,
 					}
 				break;
 				case psy_audio_PATTERNCMD_SET_TEMPO:
-					self->seqtime.bpm = ev->parameter;
+					self->seqtime.bpm = ev->parameter;					
 					psy_audio_sequencer_compute_beatspersample(self);
 					done = TRUE;
 				break;				
@@ -1434,7 +1452,7 @@ void psy_audio_sequencer_insertdelayedevents(psy_audio_Sequencer* self)
 	}	
 }
 
-void psy_audio_sequencer_insertinputevents(psy_audio_Sequencer* self)
+void psy_audio_sequencer_insert_input_events(psy_audio_Sequencer* self)
 {
 	psy_List* p;
 	psy_List* q;

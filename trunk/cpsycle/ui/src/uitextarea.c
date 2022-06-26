@@ -24,7 +24,8 @@ static void psy_ui_textareapane_on_preferred_size(psy_ui_TextAreaPane*,
 static void psy_ui_textareapane_on_key_down(psy_ui_TextAreaPane*,
 	psy_ui_KeyboardEvent*);
 static void psy_ui_textareapane_on_focus_lost(psy_ui_TextAreaPane*);
-static void psy_ui_textareapane_on_draw(psy_ui_TextAreaPane*, psy_ui_Graphics*);
+static void psy_ui_textareapane_on_draw(psy_ui_TextAreaPane*,
+	psy_ui_Graphics*);
 static void psy_ui_textareapane_on_mouse_down(psy_ui_TextAreaPane*,
 	psy_ui_MouseEvent*);
 static void insertchar(psy_ui_TextAreaPane*, char c);
@@ -36,8 +37,10 @@ static void psy_ui_textarea_on_edit_accept(psy_ui_TextArea*,
 	psy_ui_TextAreaPane* sender);
 static void psy_ui_textarea_on_edit_reject(psy_ui_TextArea*,
 	psy_ui_TextAreaPane* sender);
-static void psy_ui_textareapane_prev_col(psy_ui_TextAreaPane*, uintptr_t step);
-static void psy_ui_textareapane_next_col(psy_ui_TextAreaPane*, uintptr_t step);
+static void psy_ui_textareapane_prev_col(psy_ui_TextAreaPane*,
+	uintptr_t step);
+static void psy_ui_textareapane_next_col(psy_ui_TextAreaPane*,
+	uintptr_t step);
 static void psy_ui_textareapane_prev_lines(psy_ui_TextAreaPane*,
 	uintptr_t step);
 static void psy_ui_textareapane_advance_lines(psy_ui_TextAreaPane*,
@@ -96,13 +99,15 @@ void psy_ui_textareapane_init(psy_ui_TextAreaPane* self,
 	psy_signal_init(&self->signal_change);
 	psy_signal_init(&self->signal_accept);
 	psy_signal_init(&self->signal_reject);	
-	psy_ui_component_set_style_type(&self->component, psy_ui_STYLE_EDIT);
+	psy_ui_component_set_style_type(&self->component,
+		psy_ui_STYLE_EDIT);
 	psy_ui_component_set_style_type_focus(&self->component,
 		psy_ui_STYLE_EDIT_FOCUS);
 	psy_ui_component_setscrollstep(psy_ui_textareapane_base(self),
 		psy_ui_size_make_em(1.0, 1.0));		
 	psy_ui_component_set_wheel_scroll(&self->component, 4);
-	psy_ui_component_set_overflow(&self->component, psy_ui_OVERFLOW_SCROLL);
+	psy_ui_component_set_overflow(&self->component,
+		psy_ui_OVERFLOW_SCROLL);
 }
 
 void psy_ui_textareapane_on_destroyed(psy_ui_TextAreaPane* self)
@@ -120,7 +125,8 @@ void psy_ui_textareapane_enable_inputfield(psy_ui_TextAreaPane* self)
 	self->isinputfield = TRUE;	
 }
 
-void psy_ui_textareapane_set_text(psy_ui_TextAreaPane* self, const char* text)
+void psy_ui_textareapane_set_text(psy_ui_TextAreaPane* self,
+	const char* text)
 {	
 	psy_strreset(&self->text, text);
 	psy_ui_textformat_clear(&self->format);
@@ -128,7 +134,8 @@ void psy_ui_textareapane_set_text(psy_ui_TextAreaPane* self, const char* text)
 	psy_ui_component_invalidate(&self->component);
 }
 
-void psy_ui_textareapane_add_text(psy_ui_TextAreaPane* self, const char* text)
+void psy_ui_textareapane_add_text(psy_ui_TextAreaPane* self,
+	const char* text)
 {
 	self->text = psy_strcat_realloc(self->text, text);
 	psy_ui_textformat_clear(&self->format);	
@@ -145,8 +152,8 @@ void psy_ui_textareapane_add_text(psy_ui_TextAreaPane* self, const char* text)
 	 return psy_strlen(self->pane.text);
  }
 
- void psy_ui_textarea_range(psy_ui_TextArea* self, intptr_t start, intptr_t end,
-	char* rv)
+ void psy_ui_textarea_range(psy_ui_TextArea* self, intptr_t start,
+	intptr_t end, char* rv)
  {
 	 if (end > start) {
 		 psy_snprintf(rv, end - start, self->pane.text);
@@ -160,7 +167,8 @@ void psy_ui_textareapane_set_char_number(psy_ui_TextAreaPane* self,
 	psy_ui_textformat_clear(&self->format);
 }
 
-void psy_ui_textareapane_set_line_number(psy_ui_TextAreaPane* self, int number)
+void psy_ui_textareapane_set_line_number(psy_ui_TextAreaPane* self,
+	int number)
 {
 	self->linenumber = number;
 }
@@ -177,28 +185,32 @@ void psy_ui_textareapane_on_preferred_size(psy_ui_TextAreaPane* self,
 	width = (self->charnumber == 0 && limit)
 		? psy_ui_value_px(&limit->width, tm, limit)
 		: (self->charnumber) * tm->tmAveCharWidth;
-	psy_ui_textformat_update(&self->format, self->text, width, font, tm);
+	psy_ui_textformat_update(&self->format, self->text, width, font,
+		tm);
 	if (self->format.line_wrap && !self->format.word_wrap &&
 			self->charnumber == 0.0) {
 		width = psy_max(psy_ui_value_px(&limit->width, tm, limit),
 			self->format.nummaxchars * tm->tmAveCharWidth);
 	}
 	*rv = psy_ui_size_make_px(width,
-		psy_ui_textformat_numlines(&self->format) * (tm->tmHeight * 1.0));	
+		psy_ui_textformat_numlines(&self->format) *
+			(tm->tmHeight * 1.0));	
 }
 
 void psy_ui_textareapane_enable_edit(psy_ui_TextAreaPane* self)
 {
-	psy_ui_component_enableinput(&self->component, psy_ui_NONE_RECURSIVE);
+	psy_ui_component_enableinput(&self->component,
+		psy_ui_NONE_RECURSIVE);
 }
 
 void psy_ui_textareapane_prevent_edit(psy_ui_TextAreaPane* self)
 {
-	psy_ui_component_preventinput(&self->component, psy_ui_NONE_RECURSIVE);
+	psy_ui_component_preventinput(&self->component,
+		psy_ui_NONE_RECURSIVE);
 }
 
-void psy_ui_textareapane_set_sel(psy_ui_TextAreaPane* self, uintptr_t cpmin,
-	uintptr_t cpmax)
+void psy_ui_textareapane_set_sel(psy_ui_TextAreaPane* self,
+	uintptr_t cpmin, uintptr_t cpmax)
 {
 
 }
@@ -240,7 +252,8 @@ void psy_ui_textareapane_on_key_down(psy_ui_TextAreaPane* self,
 
 		currline = psy_ui_textareapane_cursor_line(self);
 		if (currline > 0) {
-			self->cp = psy_ui_textformat_line_at(&self->format, currline - 1) +
+			self->cp = psy_ui_textformat_line_at(&self->format,
+				currline - 1) +
 				1;
 		} else {
 			self->cp = 0;
@@ -275,7 +288,8 @@ void psy_ui_textareapane_on_key_down(psy_ui_TextAreaPane* self,
 	default:
 		if (psy_ui_keyboardevent_shiftkey(ev)) {
 			insertchar(self, psy_ui_keyboardevent_keycode(ev));
-		} else if (psy_ui_keyboardevent_keycode(ev) == psy_ui_KEY_RETURN) {
+		} else if (psy_ui_keyboardevent_keycode(ev) ==
+				psy_ui_KEY_RETURN) {
 			if (self->format.line_wrap) {
 				insertchar(self, '\n');
 				psy_ui_component_align(psy_ui_component_parent(
@@ -289,7 +303,8 @@ void psy_ui_textareapane_on_key_down(psy_ui_TextAreaPane* self,
 			&& psy_ui_keyboardevent_keycode(ev) <= psy_ui_KEY_DIGIT9) {
 			insertchar(self, psy_ui_keyboardevent_keycode(ev));
 		} else {
-			insertchar(self, psy_ui_keyboardevent_keycode(ev) - 'A' + 'a');
+			insertchar(self, psy_ui_keyboardevent_keycode(ev) -
+				'A' + 'a');
 		}						
 		break;
 	}
@@ -297,7 +312,8 @@ void psy_ui_textareapane_on_key_down(psy_ui_TextAreaPane* self,
 	psy_ui_keyboardevent_stop_propagation(ev);	
 }
 
-void psy_ui_textareapane_prev_col(psy_ui_TextAreaPane* self, uintptr_t step)
+void psy_ui_textareapane_prev_col(psy_ui_TextAreaPane* self,
+	uintptr_t step)
 {
 	if (self->cp > step) {
 		self->cp -= step;
@@ -307,12 +323,14 @@ void psy_ui_textareapane_prev_col(psy_ui_TextAreaPane* self, uintptr_t step)
 	psy_ui_textareapane_scroll_left(self);
 }
 
-void psy_ui_textareapane_next_col(psy_ui_TextAreaPane* self, uintptr_t step)
+void psy_ui_textareapane_next_col(psy_ui_TextAreaPane* self,
+	uintptr_t step)
 {	
 	self->cp = psy_min(self->cp + step, psy_strlen(self->text));
 }
 
-void psy_ui_textareapane_prev_lines(psy_ui_TextAreaPane* self, uintptr_t step)
+void psy_ui_textareapane_prev_lines(psy_ui_TextAreaPane* self,
+	uintptr_t step)
 {
 	uintptr_t currline;
 	double cpx;
@@ -324,7 +342,8 @@ void psy_ui_textareapane_prev_lines(psy_ui_TextAreaPane* self, uintptr_t step)
 
 	currline = psy_ui_textareapane_cursor_line(self);
 	if (currline > 0) {
-		oldlinestart = psy_ui_textformat_line_at(&self->format, currline - 1);
+		oldlinestart = psy_ui_textformat_line_at(&self->format,
+			currline - 1);
 	} else {
 		oldlinestart = 0;
 	}
@@ -337,7 +356,8 @@ void psy_ui_textareapane_prev_lines(psy_ui_TextAreaPane* self, uintptr_t step)
 	tm = psy_ui_component_textmetric(&self->component);
 	cpy = currline * self->format.linespacing * tm->tmHeight;
 	if (currline > 0) {
-		linestart = psy_ui_textformat_line_at(&self->format, currline - 1);
+		linestart = psy_ui_textformat_line_at(&self->format,
+			currline - 1);
 	} else {
 		linestart = 0;
 	}
@@ -370,7 +390,8 @@ void psy_ui_textareapane_advance_lines(psy_ui_TextAreaPane* self,
 
 	currline = psy_ui_textareapane_cursor_line(self);
 	if (currline > 0) {
-		oldlinestart = psy_ui_textformat_line_at(&self->format, currline - 1);
+		oldlinestart = psy_ui_textformat_line_at(&self->format,
+			currline - 1);
 	} else {
 		oldlinestart = 0;
 	}
@@ -402,7 +423,8 @@ void psy_ui_textareapane_advance_lines(psy_ui_TextAreaPane* self,
 	psy_ui_textareapane_scroll_down(self);
 }
 
-uintptr_t psy_ui_textareapane_cursor_line(const psy_ui_TextAreaPane* self)
+uintptr_t psy_ui_textareapane_cursor_line(const psy_ui_TextAreaPane*
+	self)
 {
 	uintptr_t line;
 	uintptr_t numlines;
@@ -425,14 +447,16 @@ uintptr_t psy_ui_textareapane_cursor_line(const psy_ui_TextAreaPane* self)
 	return line;
 }
 
-uintptr_t psy_ui_textareapane_cursor_column(const psy_ui_TextAreaPane* self)
+uintptr_t psy_ui_textareapane_cursor_column(const psy_ui_TextAreaPane*
+	self)
 {
 	uintptr_t line;	
 	uintptr_t linestart;
 
 	line = psy_ui_textareapane_cursor_line(self);
 	if (line > 0) {
-		linestart = psy_ui_textformat_line_at(&self->format, line - 1) + 1;
+		linestart = psy_ui_textformat_line_at(&self->format, line - 1) +
+			1;
 	} else {
 		linestart = 0;
 	}
@@ -544,12 +568,14 @@ void psy_ui_textareapane_on_focus_lost(psy_ui_TextAreaPane* self)
 	}	
 }
 
-void psy_ui_textareapane_on_draw(psy_ui_TextAreaPane* self, psy_ui_Graphics* g)
+void psy_ui_textareapane_on_draw(psy_ui_TextAreaPane* self,
+	psy_ui_Graphics* g)
 {		
 	psy_ui_TextDraw textdraw;	
 	
-	psy_ui_textdraw_init(&textdraw, &self->format, psy_ui_component_size_px(
-		psy_ui_textareapane_base(self)), self->text);
+	psy_ui_textdraw_init(&textdraw, &self->format,
+		psy_ui_component_size_px(psy_ui_textareapane_base(self)),
+		self->text);
 	psy_ui_textdraw_draw(&textdraw, g,
 		(psy_ui_component_has_focus(&self->component))
 		? self->cp
@@ -606,10 +632,11 @@ void psy_ui_textarea_init(psy_ui_TextArea* self, psy_ui_Component* parent)
 	psy_ui_component_init(psy_ui_textarea_base(self), parent, NULL);
 	psy_ui_textarea_vtable_init(self);
 	psy_ui_textareapane_init(&self->pane, psy_ui_textarea_base(self));
-	psy_ui_scroller_init(&self->scroller, psy_ui_textarea_base(self), NULL,
-		NULL);
+	psy_ui_scroller_init(&self->scroller, psy_ui_textarea_base(self),
+		NULL, NULL);
 	psy_ui_scroller_set_client(&self->scroller, &self->pane.component);
-	psy_ui_component_set_align(&self->scroller.component, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_set_align(&self->scroller.component,
+		psy_ui_ALIGN_CLIENT);
 	psy_signal_init(&self->signal_change);
 	psy_signal_init(&self->signal_accept);
 	psy_signal_init(&self->signal_reject);	
@@ -629,7 +656,8 @@ void psy_ui_textarea_init_single_line(psy_ui_TextArea* self,
 	psy_ui_textformat_set_alignment(&self->pane.format,
 		psy_ui_textalignment_make(psy_ui_ALIGNMENT_LEFT |
 			psy_ui_ALIGNMENT_CENTER_VERTICAL));
-	psy_ui_component_set_align(&self->pane.component, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_set_align(&self->pane.component,
+		psy_ui_ALIGN_CLIENT);
 }
 
 void psy_ui_textarea_on_destroyed(psy_ui_TextArea* self)
@@ -651,16 +679,19 @@ psy_ui_TextArea* psy_ui_textarea_allocinit(psy_ui_Component* parent)
 	rv = psy_ui_textarea_alloc();
 	if (rv) {
 		psy_ui_textarea_init(rv, parent);
+		psy_ui_component_deallocate_after_destroyed(&rv->component);
 	}
 	return rv;
 }
-psy_ui_TextArea* psy_ui_textarea_allocinit_single_line(psy_ui_Component* parent)
+psy_ui_TextArea* psy_ui_textarea_allocinit_single_line(
+	psy_ui_Component* parent)
 {
 	psy_ui_TextArea* rv;
 
 	rv = psy_ui_textarea_alloc();
 	if (rv) {
 		psy_ui_textarea_init_single_line(rv, parent);
+		psy_ui_component_deallocate_after_destroyed(&rv->component);
 	}
 	return rv;
 }
@@ -716,11 +747,13 @@ void psy_ui_textareapane_scroll_up(psy_ui_TextAreaPane* self)
 			topline * line_height > top) {
 		intptr_t dlines;
 
-		dlines = (intptr_t)((psy_ui_component_scroll_top_px(&self->component) +
-			topline * line_height - top) / (line_height));
+		dlines = (intptr_t)((psy_ui_component_scroll_top_px(
+			&self->component) + topline * line_height - top) /
+			(line_height));
 		psy_ui_component_set_scroll_top_px(&self->component,
 			psy_ui_component_scroll_top_px(&self->component) -
-			psy_ui_component_scroll_step_height_px(&self->component) * dlines);
+			psy_ui_component_scroll_step_height_px(&self->component) *
+				dlines);
 	}
 }
 
@@ -737,8 +770,8 @@ void psy_ui_textareapane_scroll_down(psy_ui_TextAreaPane* self)
 	line_height = tm->tmHeight * self->format.linespacing;
 	clientsize = psy_ui_component_clientsize_px(&self->component);
 	visilines = (uintptr_t)(clientsize.height / line_height);		
-	if (visilines < line - psy_ui_component_scroll_top_px(&self->component) /
-		line_height) {
+	if (visilines < line - psy_ui_component_scroll_top_px(
+			&self->component) / line_height) {
 		intptr_t dlines;
 
 		dlines = (intptr_t)
@@ -747,7 +780,8 @@ void psy_ui_textareapane_scroll_down(psy_ui_TextAreaPane* self)
 		self->component.blitscroll = TRUE;
 		psy_ui_component_set_scroll_top_px(&self->component,
 			psy_ui_component_scroll_top_px(&self->component) +
-			psy_ui_component_scroll_step_height_px(&self->component) * dlines);
+			psy_ui_component_scroll_step_height_px(&self->component) *
+				dlines);
 		self->component.blitscroll = FALSE;
 	}
 }
@@ -764,7 +798,8 @@ void psy_ui_textareapane_scroll_left(psy_ui_TextAreaPane* self)
 	line = psy_ui_textareapane_cursor_line(self);
 	column = psy_ui_textareapane_cursor_column(self);
 	if (line > 0) {
-		linestart = psy_ui_textformat_line_at(&self->format, line - 1) + 1;
+		linestart = psy_ui_textformat_line_at(&self->format, line - 1) +
+			1;
 	} else {
 		linestart = 0;
 	}
@@ -773,7 +808,8 @@ void psy_ui_textareapane_scroll_left(psy_ui_TextAreaPane* self)
 		psy_ui_component_font(&self->component),
 		tm);	
 			
-	if (psy_ui_component_scroll_left_px(&self->component) > screen_offset) {
+	if (psy_ui_component_scroll_left_px(&self->component) >
+			screen_offset) {
 		intptr_t chars;
 		
 		chars = (intptr_t)(screen_offset / tm->tmAveCharWidth);
@@ -797,7 +833,8 @@ void psy_ui_textareapane_scroll_right(psy_ui_TextAreaPane* self)
 	line = psy_ui_textareapane_cursor_line(self);
 	column = psy_ui_textareapane_cursor_column(self);
 	if (line > 0) {
-		linestart = psy_ui_textformat_line_at(&self->format, line - 1) + 1;
+		linestart = psy_ui_textformat_line_at(&self->format, line - 1) +
+			1;
 	} else {
 		linestart = 0;
 	}
@@ -805,7 +842,8 @@ void psy_ui_textareapane_scroll_right(psy_ui_TextAreaPane* self)
 		self->text + linestart, psy_max(0, column),
 		psy_ui_component_font(&self->component),
 		tm);	
-	if (screen_offset > psy_ui_component_scroll_left_px(&self->component) +
+	if (screen_offset >
+			psy_ui_component_scroll_left_px(&self->component) +
 			client_size.width) {				
 		psy_ui_component_set_scroll_left(&self->component,
 			psy_ui_value_make_px(psy_ui_component_scroll_left_px(

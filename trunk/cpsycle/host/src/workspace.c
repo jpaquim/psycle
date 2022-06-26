@@ -57,11 +57,11 @@ void hostsequencertime_update_last_play_cursor(HostSequencerTime* self)
 /* Workspace */
 
 /* audio */
-static void workspace_initplayer(Workspace*);
-static void workspace_initaudio(Workspace*);
+static void workspace_init_player(Workspace*);
+static void workspace_init_audio(Workspace*);
 static void workspace_initplugincatcherandmachinefactory(Workspace*);
-static void workspace_initsignals(Workspace*);
-static void workspace_disposesignals(Workspace*);
+static void workspace_init_signals(Workspace*);
+static void workspace_dispose_signals(Workspace*);
 static void workspace_wait_for_driver_configure_load(Workspace*);
 static void workspace_update_play_status(Workspace*);
 /* config */
@@ -183,8 +183,8 @@ void workspace_init(Workspace* self, psy_ui_Component* main)
 	psy_audio_machinecallback_set_song(&self->machinecallback, self->song);	
 	psy_audio_sequencepaste_init(&self->sequencepaste);
 	psy_undoredo_init(&self->undoredo);
-	workspace_initsignals(self);
-	workspace_initplayer(self);	
+	workspace_init_signals(self);
+	workspace_init_player(self);	
 	eventdriverconfig_register_event_drivers(&self->config.input);
 	inputhandler_init(&self->inputhandler, &self->player, NULL, NULL);	
 }
@@ -219,7 +219,7 @@ void workspace_initplugincatcherandmachinefactory(Workspace* self)
 	self->scanplugintype = psy_audio_UNDEFINED;
 }
 
-void workspace_initsignals(Workspace* self)
+void workspace_init_signals(Workspace* self)
 {
 	assert(self);
 
@@ -251,7 +251,7 @@ void workspace_dispose(Workspace* self)
 
 	psy_thread_dispose(&self->driverconfigloadthread);
 	psy_thread_dispose(&self->pluginscanthread);
-	workspace_save_styleconfiguration(self);
+	workspace_save_styles(self);
 	psy_audio_player_dispose(&self->player);
 	psy_audio_song_deallocate(self->song);
 	self->song = NULL;
@@ -263,7 +263,7 @@ void workspace_dispose(Workspace* self)
 	psy_audio_machinefactory_dispose(&self->machinefactory);
 	psy_undoredo_dispose(&self->undoredo);
 	viewhistory_dispose(&self->view_history);
-	workspace_disposesignals(self);	
+	workspace_dispose_signals(self);	
 	psy_audio_sequencepaste_dispose(&self->sequencepaste);
 	psy_playlist_dispose(&self->playlist);
 	psy_audio_dispose();
@@ -273,7 +273,40 @@ void workspace_dispose(Workspace* self)
 	inputhandler_dispose(&self->inputhandler);
 }
 
-void workspace_save_styleconfiguration(Workspace* self)
+void workspace_dispose_signals(Workspace* self)
+{
+	assert(self);
+
+	psy_signal_dispose(&self->signal_octavechanged);
+	psy_signal_dispose(&self->signal_songchanged);
+	psy_signal_dispose(&self->signal_play_line_changed);
+	psy_signal_dispose(&self->signal_play_status_changed);
+	psy_signal_dispose(&self->signal_gotocursor);
+	psy_signal_dispose(&self->signal_load_progress);
+	psy_signal_dispose(&self->signal_scanprogress);
+	psy_signal_dispose(&self->signal_scanfile);
+	psy_signal_dispose(&self->signal_scanstart);
+	psy_signal_dispose(&self->signal_scanend);
+	psy_signal_dispose(&self->signal_scantaskstart);
+	psy_signal_dispose(&self->signal_plugincachechanged);
+	psy_signal_dispose(&self->signal_beforesavesong);
+	psy_signal_dispose(&self->signal_viewselected);
+	psy_signal_dispose(&self->signal_parametertweak);
+	psy_signal_dispose(&self->signal_status_out);
+	psy_signal_dispose(&self->signal_togglegear);
+	psy_signal_dispose(&self->signal_machineeditresize);
+	psy_signal_dispose(&self->signal_buschanged);
+	psy_signal_dispose(&self->signal_gearselect);
+}
+
+void workspace_clear_sequence_paste(Workspace* self)
+{
+	assert(self);
+
+	psy_audio_sequencepaste_clear(&self->sequencepaste);
+}
+
+void workspace_save_styles(Workspace* self)
 {
 	psy_Path path;
 	const psy_Property* styleconfig;
@@ -294,40 +327,7 @@ void workspace_save_styleconfiguration(Workspace* self)
 	}
 }
 
-void workspace_disposesignals(Workspace* self)
-{
-	assert(self);
-
-	psy_signal_dispose(&self->signal_octavechanged);
-	psy_signal_dispose(&self->signal_songchanged);		
-	psy_signal_dispose(&self->signal_play_line_changed);
-	psy_signal_dispose(&self->signal_play_status_changed);
-	psy_signal_dispose(&self->signal_gotocursor);
-	psy_signal_dispose(&self->signal_load_progress);
-	psy_signal_dispose(&self->signal_scanprogress);
-	psy_signal_dispose(&self->signal_scanfile);
-	psy_signal_dispose(&self->signal_scanstart);
-	psy_signal_dispose(&self->signal_scanend);
-	psy_signal_dispose(&self->signal_scantaskstart);
-	psy_signal_dispose(&self->signal_plugincachechanged);
-	psy_signal_dispose(&self->signal_beforesavesong);	
-	psy_signal_dispose(&self->signal_viewselected);	
-	psy_signal_dispose(&self->signal_parametertweak);
-	psy_signal_dispose(&self->signal_status_out);	
-	psy_signal_dispose(&self->signal_togglegear);
-	psy_signal_dispose(&self->signal_machineeditresize);
-	psy_signal_dispose(&self->signal_buschanged);
-	psy_signal_dispose(&self->signal_gearselect);
-}
-
-void workspace_clear_sequence_paste(Workspace* self)
-{
-	assert(self);
-
-	psy_audio_sequencepaste_clear(&self->sequencepaste);
-}
-
-void workspace_initplayer(Workspace* self)
+void workspace_init_player(Workspace* self)
 {
 	assert(self);
 		
@@ -340,24 +340,15 @@ void workspace_initplayer(Workspace* self)
 	psy_audio_eventdrivers_setcmds(&self->player.eventdrivers,
 		cmdproperties_create());
 	psy_audio_luabind_setplayer(&self->player);
-	workspace_initaudio(self);
+	workspace_init_audio(self);
 	metronomeconfig_onchanged(&self->config.metronome, NULL);
 }
 
-void workspace_initaudio(Workspace* self)
+void workspace_init_audio(Workspace* self)
 {
 	audioconfig_driverconfigure_section(&self->config.audio);
 	eventdriverconfig_update_active(&self->config.input);
 	eventdriverconfig_show_active(&self->config.input, 0);	
-}
-
-void workspace_updatemetronome(Workspace* self)
-{
-	self->player.sequencer.metronome_event.note =
-		metronomeconfig_note(&self->config.metronome);
-	self->player.sequencer.metronome_event.mach =
-		(uint8_t)
-		metronomeconfig_machine(&self->config.metronome);
 }
 
 void workspace_config_visual(Workspace* self)
@@ -373,11 +364,6 @@ void workspace_config_visual(Workspace* self)
 	fontinfo = psy_ui_font_fontinfo(&font);	
 	psy_ui_replacedefaultfont(self->main, &font);
 	psy_ui_font_dispose(&font);
-}
-
-const char* workspace_driverpath(Workspace* self)
-{
-	return audioconfig_driver_path(&self->config.audio);
 }
 
 #if defined DIVERSALIS__OS__MICROSOFT
@@ -423,8 +409,16 @@ void workspace_config_changed(Workspace* self, psy_Property* property,
 	assert(self && property);
 
 	worked = TRUE;
+	*rebuild_level = psy_INDEX_INVALID;
 	workspace_wait_for_driver_configure_load(self);
-	switch (psy_property_id(property)) {	
+	switch (psy_property_id(property)) {
+	case PROPERTY_ID_ENABLEAUDIO:
+		if (psy_property_item_bool(property)) {
+			psy_audio_player_enable_audio(&self->player);
+		} else {
+			psy_audio_player_disable_audio(&self->player);
+		}
+		break;
 	case PROPERTY_ID_REGENERATEPLUGINCACHE:
 		workspace_scan_plugins(self);
 		break;
@@ -509,6 +503,7 @@ void workspace_config_changed(Workspace* self, psy_Property* property,
 	case PROPERTY_ID_PATTERNDISPLAY:
 		patternviewconfig_select_pattern_display(&self->config.patview,
 			(PatternDisplayMode)psy_property_item_int(property));
+		*rebuild_level = 1;
 		break;
 	default: {				
 		if (psy_property_in_section(property,
@@ -533,7 +528,7 @@ void workspace_config_changed(Workspace* self, psy_Property* property,
 		break; }
 	}
 	if (!worked) {
-		*rebuild_level = psycleconfig_notify_changed(&self->config, property);		
+		*rebuild_level = psycleconfig_notify_changed(&self->config, property);
 	}
 }
 
@@ -1043,6 +1038,7 @@ void workspace_load_configuration(Workspace* self)
 	workspace_postload_driver_configurations(self);
 	psy_audio_player_set_sampler_index(&self->player,
 		seqeditconfig_machine(&self->config.seqedit));
+	psy_propertyreader_dispose(&propertyreader);
 }
 
 void workspace_start_audio(Workspace* self)
@@ -1745,7 +1741,7 @@ void workspace_on_input(Workspace* self, uintptr_t cmdid)
 		}
 		break;
 	case CMD_IMM_ENABLEAUDIO:
-		psycleconfig_enableaudio(&self->config,
+		psycleconfig_enable_audio(&self->config,
 			!psycleconfig_audio_enabled(&self->config));
 		break;
 	case CMD_IMM_SETTINGS:

@@ -780,8 +780,24 @@ void make_translator_sequenceview(psy_Property* parent)
 void make_translator_seqedit(psy_Property* parent)
 {
 	setsection(psy_property_append_section(parent, "seqedit"));
+	add("track", "Track");
 	add("move", "Move");
 	add("reorder", "Reorder");
+	add("insert", "Insert");
+	add("timesigs", "Timesigs");
+	add("repetitions", "Repetitions");
+	add("noitem", "No Item Selected");
+	add("patternitem", "Pattern Item");
+	add("sampleitem", "Sample Item");
+	add("markeritem", "Marker Item");
+	add("timesigitem", "TimeSig Item");
+	add("loopitem", "Loop Item");
+	add("position", "Position");
+	add("length", "Length");
+	add("end", "End");
+	add("name", "Name");
+	add("numerator", "Numerator");
+	add("denominator", "Denominator");
 }
 
 void make_translator_newmachine(psy_Property* parent)

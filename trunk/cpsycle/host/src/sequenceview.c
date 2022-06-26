@@ -185,7 +185,7 @@ void seqview_ontrackreposition(SeqView* self, psy_audio_Sequence* sender,
 void seqview_onconfigure(SeqView* self, GeneralConfig* config,
 	psy_Property* property)
 {
-	if (generalconfig_showingpatternnames(config)) {
+	if (generalconfig_showing_pattern_names(config)) {
 		self->state.showpatternnames = TRUE;
 		self->state.trackwidth = psy_ui_value_make_ew(26.0);		
 	} else {

@@ -404,7 +404,7 @@ void seqeditloops_init(SeqEditLoops* self, psy_ui_Component* parent,
 	self->state = state;	
 	self->entries = NULL;	
 	seqeditloopstate_init(&self->loopstate);
-	psy_ui_component_setpreferredheight(&self->component,
+	psy_ui_component_set_preferred_height(&self->component,
 		psy_ui_value_make_eh(2.0));
 	psy_signal_connect(&self->state->cmds->workspace->signal_songchanged, self,
 		seqeditloops_onsongchanged);

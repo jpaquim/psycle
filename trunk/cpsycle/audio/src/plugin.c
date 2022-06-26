@@ -14,6 +14,7 @@
 #include <math.h>
 // platform
 #include "../../detail/portable.h"
+#include "../../detail/trace.h"
 
 // psy_audio_PluginMachineParam
 typedef struct psy_audio_PluginMachineParam {
@@ -415,7 +416,7 @@ void seqtick(psy_audio_Plugin* self, uintptr_t channel,
 	const psy_audio_PatternEvent* ev)
 {	
 	uintptr_t physicalchannel;
-
+	
 	physicalchannel = psy_audio_logicalchannels_physical(
 		&self->logicalchannels, channel);
 	if (psy_audio_patternevent_has_volume(ev)) {
@@ -435,7 +436,7 @@ void seqtick(psy_audio_Plugin* self, uintptr_t channel,
 }
 
 void generateaudio(psy_audio_Plugin* self, psy_audio_BufferContext* bc)
-{
+{	
 	mi_work(self->mi,
 		psy_audio_buffer_at(bc->output, 0),
 		psy_audio_buffer_at(bc->output, 1),

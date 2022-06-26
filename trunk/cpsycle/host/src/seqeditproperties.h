@@ -114,7 +114,7 @@ typedef struct SeqEditTimesigProperties {
 	/* inherits */
 	SeqEditPropertiesEntry entry;
 	/* internal */	
-	IntEdit nominator;
+	IntEdit numerator;
 	IntEdit denominator;
 	LabelPair offset;
 	uintptr_t timesigindex;	
@@ -159,7 +159,8 @@ typedef struct SeqEditProperties {
 	/* inherits */
 	psy_ui_Component component;
 	/* internal */	
-	psy_ui_Label caption;
+	psy_ui_Component top;
+	psy_ui_Label caption;	
 	psy_ui_Notebook notebook;
 	SeqEditEmptyProperties empty;
 	SeqEditPatternProperties pattern;

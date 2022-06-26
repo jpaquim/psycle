@@ -366,9 +366,9 @@ void psy_ui_component_preventinput(psy_ui_Component*, int recursive);
 bool psy_ui_component_inputprevented(const psy_ui_Component*);
 void psy_ui_component_setbackgroundmode(psy_ui_Component*, psy_ui_BackgroundMode);
 void psy_ui_component_set_preferred_size(psy_ui_Component*, psy_ui_Size);
-void psy_ui_component_setpreferredheight(psy_ui_Component*, psy_ui_Value);
+void psy_ui_component_set_preferred_height(psy_ui_Component*, psy_ui_Value);
 void psy_ui_component_set_preferred_width(psy_ui_Component*, psy_ui_Value);
-psy_ui_Size psy_ui_component_preferredsize(psy_ui_Component*, const psy_ui_Size* limit);
+psy_ui_Size psy_ui_component_preferred_size(psy_ui_Component*, const psy_ui_Size* limit);
 psy_ui_Size psy_ui_component_preferred_scrollsize(psy_ui_Component*, const psy_ui_Size* limit);
 psy_ui_RealSize psy_ui_component_preferredscrollsize_px(psy_ui_Component*,
 	const psy_ui_Size* limit);
@@ -831,7 +831,7 @@ INLINE psy_ui_IntSize psy_ui_component_intsize(psy_ui_Component* self)
 		psy_ui_component_textmetric(self), NULL);
 }
 
-INLINE psy_ui_Size psy_ui_component_parentsize(const psy_ui_Component* self)
+INLINE psy_ui_Size psy_ui_component_parent_size(const psy_ui_Component* self)
 {	
 	if (psy_ui_component_parent_const(self)) {
 		return psy_ui_component_scroll_size(psy_ui_component_parent_const(self));
@@ -841,46 +841,64 @@ INLINE psy_ui_Size psy_ui_component_parentsize(const psy_ui_Component* self)
 
 INLINE psy_ui_RealSize psy_ui_component_scroll_size_px(const psy_ui_Component* self)
 {
-	psy_ui_Size size;
-	psy_ui_Size parentsize;
-	
-	parentsize = psy_ui_component_parentsize(self);
-	size = psy_ui_component_scroll_size(self);	
-	return psy_ui_size_px(&size, psy_ui_component_textmetric(self), &parentsize);
+	psy_ui_Size size;	
+		
+	size = psy_ui_component_scroll_size(self);
+	if (psy_ui_size_has_percent(&size)) {
+		psy_ui_Size parentsize;
+
+		parentsize = psy_ui_component_parent_size(self);
+		return psy_ui_size_px(&size, psy_ui_component_textmetric(self), &parentsize);
+	}
+	return psy_ui_size_px(&size, psy_ui_component_textmetric(self), NULL);
 }
 
 INLINE psy_ui_RealSize psy_ui_component_clientsize_px(const psy_ui_Component* self)
 {
 	psy_ui_Size size;
-	psy_ui_Size parentsize;
-
-	parentsize = psy_ui_component_parentsize(self);
+	
 	size = psy_ui_component_client_size(self);
-	return psy_ui_size_px(&size, psy_ui_component_textmetric(self), &parentsize);
+	if (psy_ui_size_has_percent(&size)) {
+		psy_ui_Size parentsize;
+
+		parentsize = psy_ui_component_parent_size(self);
+		return psy_ui_size_px(&size, psy_ui_component_textmetric(self), &parentsize);
+	}
+	return psy_ui_size_px(&size, psy_ui_component_textmetric(self), NULL);
 }
 
 INLINE psy_ui_RealSize psy_ui_component_offsetsize_px(const psy_ui_Component* self)
 {
 	const psy_ui_TextMetric* tm;
-	psy_ui_Size size;
-	psy_ui_Size parentsize;
+	psy_ui_Size size;	
 	
 	tm = psy_ui_component_textmetric(self);
 	size = psy_ui_component_offsetsize(self);
-	parentsize = psy_ui_component_parentsize(self);
+	if (psy_ui_size_has_percent(&size)) {
+		psy_ui_Size parentsize;
+
+		parentsize = psy_ui_component_parent_size(self);
+		return psy_ui_realsize_make(
+			psy_ui_value_px(&size.width, tm, &parentsize),
+			psy_ui_value_px(&size.height, tm, &parentsize));
+	}
 	return psy_ui_realsize_make(
-		psy_ui_value_px(&size.width, tm, &parentsize),
-		psy_ui_value_px(&size.height, tm, &parentsize));
+		psy_ui_value_px(&size.width, tm, NULL),
+		psy_ui_value_px(&size.height, tm, NULL));
 }
 
 INLINE psy_ui_RealSize psy_ui_component_size_px(const psy_ui_Component* self)
 {
-	psy_ui_Size size;
-	psy_ui_Size parentsize;
+	psy_ui_Size size;	
 
 	size = psy_ui_component_size(self);
-	parentsize = psy_ui_component_parentsize(self);
-	return psy_ui_size_px(&size, psy_ui_component_textmetric(self), &parentsize);
+	if (psy_ui_size_has_percent(&size)) {
+		psy_ui_Size parent_size;
+
+		parent_size = psy_ui_component_parent_size(self);
+		return psy_ui_size_px(&size, psy_ui_component_textmetric(self), &parent_size);
+	}
+	return psy_ui_size_px(&size, psy_ui_component_textmetric(self), NULL);
 }
 
 
@@ -914,7 +932,7 @@ INLINE psy_ui_RealMargin psy_ui_component_margin_px(const psy_ui_Component* self
 	psy_ui_Size parentsize;
 	
 	margin = psy_ui_component_margin(self);
-	parentsize = psy_ui_component_parentsize(self);
+	parentsize = psy_ui_component_parent_size(self);
 	psy_ui_realmargin_init_margin(&rv, &margin,
 		psy_ui_component_textmetric(self), &parentsize);
 	return rv;
@@ -927,7 +945,7 @@ INLINE psy_ui_RealMargin psy_ui_component_spacing_px(const psy_ui_Component* sel
 	psy_ui_Size parentsize;
 	
 	margin = psy_ui_component_padding(self);
-	parentsize = psy_ui_component_parentsize(self);
+	parentsize = psy_ui_component_parent_size(self);
 	psy_ui_realmargin_init_margin(&rv, &margin,
 		psy_ui_component_textmetric(self), &parentsize);
 	return rv;

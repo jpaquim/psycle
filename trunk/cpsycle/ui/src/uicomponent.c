@@ -1236,7 +1236,7 @@ void psy_ui_component_set_preferred_size(psy_ui_Component* self, psy_ui_Size siz
 	psy_ui_componentstyle_setpreferredsize(&self->style, size);	
 }
 
-void psy_ui_component_setpreferredheight(psy_ui_Component* self, psy_ui_Value height)
+void psy_ui_component_set_preferred_height(psy_ui_Component* self, psy_ui_Value height)
 {
 	psy_ui_componentstyle_setpreferredheight(&self->style, height);	
 }
@@ -1246,7 +1246,7 @@ void psy_ui_component_set_preferred_width(psy_ui_Component* self, psy_ui_Value w
 	psy_ui_componentstyle_setpreferredwidth(&self->style, width);
 }
 
-psy_ui_Size psy_ui_component_preferredsize(psy_ui_Component* self,
+psy_ui_Size psy_ui_component_preferred_size(psy_ui_Component* self,
 	const psy_ui_Size* limit)
 {		
 	psy_ui_Size rv;
@@ -1274,7 +1274,7 @@ psy_ui_Size psy_ui_component_preferredsize(psy_ui_Component* self,
 	}
 	if (rv.height.unit == psy_ui_UNIT_PH ||
 		rv.width.unit == psy_ui_UNIT_PW) {
-		parentsize = psy_ui_component_parentsize(self);
+		parentsize = psy_ui_component_parent_size(self);
 		pparentsize = &parentsize;
 	} else {
 		pparentsize = NULL;
@@ -1292,7 +1292,7 @@ psy_ui_Size psy_ui_component_frame_size(psy_ui_Component* self)
 psy_ui_Size psy_ui_component_preferred_scrollsize(psy_ui_Component* self,
 	const psy_ui_Size* limit)
 {
-	return psy_ui_component_preferredsize(self, limit);	
+	return psy_ui_component_preferred_size(self, limit);	
 }
 
 psy_ui_RealSize psy_ui_component_preferredscrollsize_px(psy_ui_Component* self,

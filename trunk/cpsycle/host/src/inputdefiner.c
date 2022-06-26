@@ -39,7 +39,7 @@ static bool valid_key_code(uintptr_t keycode)
 /* InputDefinerKeyNames */
 
 /* prototypes */
-static void inputdefinerkeynames_init_keys(InputDefinerKeyNames*);
+static void inputdefinerkeynames_add_keys(InputDefinerKeyNames*);
 
 /* implementation */
 void inputdefinerkeynames_init(InputDefinerKeyNames* self)
@@ -47,7 +47,7 @@ void inputdefinerkeynames_init(InputDefinerKeyNames* self)
 	assert(self);
 
 	psy_table_init(&self->container);
-	inputdefinerkeynames_init_keys(self);
+	inputdefinerkeynames_add_keys(self);
 }
 
 void inputdefinerkeynames_dispose(InputDefinerKeyNames* self)
@@ -57,13 +57,12 @@ void inputdefinerkeynames_dispose(InputDefinerKeyNames* self)
 	psy_table_dispose_all(&self->container, (psy_fp_disposefunc)NULL);
 }
 
-void inputdefinerkeynames_init_keys(InputDefinerKeyNames* self)
+void inputdefinerkeynames_add_keys(InputDefinerKeyNames* self)
 {
 	uintptr_t key;
 
 	assert(self);
-
-	psy_table_init(&self->container);
+	
 	inputdefinerkeynames_add(self, psy_ui_KEY_LEFT, "LEFT");
 	inputdefinerkeynames_add(self, psy_ui_KEY_RIGHT, "RIGHT");
 	inputdefinerkeynames_add(self, psy_ui_KEY_UP, "UP");
@@ -132,7 +131,7 @@ void keynames_init(void)
 void keynames_release(void)
 {
 	--refcount;
-	if (refcount == 0) {
+	if (refcount == 0) {		
 		inputdefinerkeynames_dispose(&keynames);
 	}
 }

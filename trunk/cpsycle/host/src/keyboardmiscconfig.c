@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -320,12 +320,19 @@ void keyboardmiscconfig_stop_follow_song(KeyboardMiscConfig* self)
 uintptr_t keyboardmiscconfig_onchanged(KeyboardMiscConfig* self, psy_Property*
 	property)
 {
+	uintptr_t rebuild_level;
+
 	assert(self);
 
+	rebuild_level = psy_INDEX_INVALID;
 	self->follow_song = psy_property_at_bool(self->keyboard_misc, "followsong",
 		FALSE);
+	if ((psy_property_type(property) == PSY_PROPERTY_TYPE_CHOICE) &&
+			(psy_property_hint(property) == PSY_PROPERTY_HINT_LIST)) {
+		rebuild_level = 1;
+	}
 	psy_signal_emit(&self->signal_changed, self, 1, property);
-	return psy_INDEX_INVALID;
+	return rebuild_level;
 }
 
 bool keyboardmiscconfig_hasproperty(const KeyboardMiscConfig* self,

@@ -39,7 +39,8 @@ void seqeditstate_init(SeqEditState* self, SequenceCmds* cmds,
 	self->dragstatus = SEQEDIT_DRAG_NONE;
 	self->updatecursorposition = TRUE;
 	self->seqentry = NULL;
-	self->cmd = SEQEDTCMD_NONE;	
+	self->cmd = SEQEDTCMD_NONE;
+	self->propertiesview_desc_column_width = 14.0;
 	self->showpatternnames = FALSE;	
 }
 

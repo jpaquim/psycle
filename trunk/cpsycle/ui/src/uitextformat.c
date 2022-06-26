@@ -222,7 +222,10 @@ uintptr_t psy_ui_textformat_cursor_position(const psy_ui_TextFormat* self,
 	uintptr_t linestart;
 	uintptr_t lineend;
 	double x;	
-	
+
+	if (!text) {
+		return 0;
+	}	
 	line = (uintptr_t)(pt.y / tm->tmHeight);
 	if (line > 0) {
 		linestart = psy_ui_textformat_line_at(self, line - 1) + 1;
@@ -230,6 +233,9 @@ uintptr_t psy_ui_textformat_cursor_position(const psy_ui_TextFormat* self,
 		linestart = 0;
 	}
 	lineend = psy_ui_textformat_line_at(self, line);
+	if (lineend == psy_INDEX_INVALID) {	
+		lineend = linestart + psy_strlen(text + linestart);		
+	}
 	x = 0.0;
 	cp = linestart;	
 	while (x < pt.x && cp < lineend) {
