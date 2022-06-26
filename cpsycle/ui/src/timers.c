@@ -43,8 +43,8 @@ psy_TimerTask* psy_timertask_allocinit(uintptr_t id,
 	
 	rv = psy_timertask_alloc();
 	if (rv) {
-		psy_timertask_init(rv, id, context, timerwork, timersignal, customid,
-			interval);
+		psy_timertask_init(rv, id, context, timerwork, timersignal,
+			customid, interval);
 	}	
 	return rv;
 }
@@ -57,7 +57,8 @@ void psy_timertask_tick(psy_TimerTask* self)
 	if (self->counter >= self->interval) {
 		self->counter = 0;
 		if (self->timersignal) {
-			psy_signal_emit(self->timersignal, self->context, 1, self->customid);
+			psy_signal_emit(self->timersignal, self->context, 1,
+				self->customid);
 		}
 		if (self->timerwork) {
 			self->timerwork(self->context, self->customid);
@@ -111,7 +112,8 @@ void psy_timers_addtimer(psy_Timers* self, uintptr_t id, void* context,
 	}
 }
 
-void psy_timers_removetimer(psy_Timers* self, uintptr_t id, uintptr_t customid)
+void psy_timers_removetimer(psy_Timers* self, uintptr_t id,
+	uintptr_t customid)
 {
 	psy_List* p;
 	psy_List* q;

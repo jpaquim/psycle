@@ -101,7 +101,7 @@ void patternviewconfig_display_sequence(PatternViewConfig*);
 bool patternviewconfig_single_mode(const PatternViewConfig*);
 bool patternviewconfig_use_header_bitmap(const PatternViewConfig*);
 bool patternviewconfig_show_trackscopes(const PatternViewConfig*);
-void patternviewconfig_toggle_pattern_defaultline(PatternViewConfig*);
+void patternviewconfig_toggle_pattern_default_line(PatternViewConfig*);
 bool patternviewconfig_is_smooth_scrolling(const PatternViewConfig*);
 void patternviewconfig_set_smooth_scrolling(PatternViewConfig*, bool on);
 psy_ui_FontInfo patternviewconfig_font_info(PatternViewConfig*, double zoom);
@@ -146,7 +146,7 @@ void patternviewconfig_set_playbar_colour_left(PatternViewConfig*,
 void patternviewconfig_set_playbar_colour_right(PatternViewConfig*,
 	psy_ui_Colour);
 /* events */
-uintptr_t patternviewconfig_onchanged(PatternViewConfig*, psy_Property*);
+uintptr_t patternviewconfig_on_changed(PatternViewConfig*, psy_Property*);
 
 #ifdef __cplusplus
 }

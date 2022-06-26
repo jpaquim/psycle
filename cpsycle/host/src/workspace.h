@@ -163,7 +163,7 @@ void workspace_postload_driver_configurations(Workspace*);
 void workspace_start_audio(Workspace*);
 void workspace_save_configuration(Workspace*);
 void workspace_clear_sequence_paste(Workspace*);
-void workspace_save_styleconfiguration(Workspace*);
+void workspace_save_styles(Workspace*);
 void workspace_newsong(Workspace*);
 void workspace_load_song_fileselect(Workspace*);
 void workspace_load_song(Workspace*, const char*, bool play);

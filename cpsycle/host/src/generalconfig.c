@@ -157,7 +157,7 @@ bool generalconfig_playsongafterload(const GeneralConfig* self)
 	return psy_property_at_bool(self->general, "playsongafterload", TRUE);
 }
 
-bool generalconfig_showingpatternnames(const GeneralConfig* self)
+bool generalconfig_showing_pattern_names(const GeneralConfig* self)
 {
 	assert(self);
 

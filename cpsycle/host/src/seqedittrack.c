@@ -137,7 +137,7 @@ void seqedittrack_setsequencetrack(SeqEditTrack* self,
 	self->currtrack = track;	
 	self->trackindex = trackindex;	
 	if (track->height != 0.0) {
-		psy_ui_component_setpreferredheight(&self->component,
+		psy_ui_component_set_preferred_height(&self->component,
 			psy_ui_value_make_eh(track->height));
 	}
 	seqedittrack_build(self);		

@@ -98,8 +98,8 @@ void parameterbar_onalign(ParameterBar* self)
 	psy_ui_RealSize size;
 	const psy_ui_TextMetric* tm;
 
-	preferredsize = psy_ui_component_preferredsize(&self->component, NULL);
-	preferredsize_more = psy_ui_component_preferredsize(
+	preferredsize = psy_ui_component_preferred_size(&self->component, NULL);
+	preferredsize_more = psy_ui_component_preferred_size(
 		psy_ui_button_base(&self->more), NULL);
 	size = psy_ui_component_scroll_size_px(&self->component);
 	tm = psy_ui_component_textmetric(&self->component);
@@ -354,7 +354,7 @@ void machineframe_toggleparameterbox(MachineFrame* self,
 {
 	psy_ui_Size viewsize;
 
-	viewsize = psy_ui_component_preferredsize(self->view, 0);
+	viewsize = psy_ui_component_preferred_size(self->view, 0);
 	if (psy_ui_component_visible(&self->parameterbox.component)) {
 		psy_ui_component_hide(&self->parameterbox.component);		
 		psy_ui_button_disable_highlight(&self->parameterbar.parameters);
@@ -371,7 +371,7 @@ void machineframe_toggleparammap(MachineFrame* self,
 {
 	psy_ui_Size viewsize;
 
-	viewsize = psy_ui_component_preferredsize(self->view, 0);
+	viewsize = psy_ui_component_preferred_size(self->view, 0);
 	if (psy_ui_component_visible(&self->parammap.component)) {
 		psy_ui_component_hide(&self->parammap.component);
 		psy_ui_button_disable_highlight(&self->parameterbar.parammap);
@@ -454,12 +454,12 @@ void machineframe_resize(MachineFrame* self)
 	const psy_ui_TextMetric* tm;
 
 	tm = psy_ui_component_textmetric(&self->component);	
-	viewsize = psy_ui_component_preferredsize(self->view, NULL);	
+	viewsize = psy_ui_component_preferred_size(self->view, NULL);	
 	if (psy_ui_component_visible(&self->parameterbox.component)) {
 		psy_ui_Size paramsize;		
 		uintptr_t numparams;
 
-		paramsize = psy_ui_component_preferredsize(
+		paramsize = psy_ui_component_preferred_size(
 			&self->parameterbox.component, NULL);
 		viewsize.width = psy_ui_add_values(viewsize.width, 
 			paramsize.width, tm, NULL);
@@ -471,7 +471,7 @@ void machineframe_resize(MachineFrame* self)
 		psy_ui_Size paramsize;
 		uintptr_t numparams;
 
-		paramsize = psy_ui_component_preferredsize(
+		paramsize = psy_ui_component_preferred_size(
 			&self->parammap.component, NULL);
 		viewsize.width = psy_ui_add_values(viewsize.width,
 			paramsize.width, tm, NULL);
@@ -480,13 +480,13 @@ void machineframe_resize(MachineFrame* self)
 			psy_ui_value_make_eh(psy_min(numparams + 4.0, 8.0)), tm, NULL);
 	}
 	if (self->showfullmenu) {
-		bar = psy_ui_component_preferredsize(&self->parameterbar.component,
+		bar = psy_ui_component_preferred_size(&self->parameterbar.component,
 			NULL);
 		viewsize.width = psy_ui_max_values(viewsize.width, bar.width, tm, NULL);
 	}
-	newval = psy_ui_component_preferredsize(&self->newval.component,
+	newval = psy_ui_component_preferred_size(&self->newval.component,
 		&viewsize);
-	bar = psy_ui_component_preferredsize(&self->parameterbar.component,
+	bar = psy_ui_component_preferred_size(&self->parameterbar.component,
 		&viewsize);
 	viewsize.height = psy_ui_add_values(bar.height, viewsize.height, tm, NULL);
 	if (psy_ui_component_visible(&self->newval.component)) {

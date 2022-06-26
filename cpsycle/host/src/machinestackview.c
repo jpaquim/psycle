@@ -882,23 +882,23 @@ void machinestackdesc_onalign(MachineStackDesc* self)
 	if (psy_ui_component_visible(&self->view->scroller_columns.hscroll->component)) {
 		sizepx.height -= tm->tmHeight * 1.5;
 	}
-	insize = psy_ui_component_preferredsize(&self->view->inputs.component,
+	insize = psy_ui_component_preferred_size(&self->view->inputs.component,
 		NULL);
 	insizepx = psy_ui_size_px(&insize, tm, NULL);
-	effectsize = psy_ui_component_preferredsize(&self->view->pane.component,
+	effectsize = psy_ui_component_preferred_size(&self->view->pane.component,
 		NULL);
 	effectsizepx = psy_ui_size_px(&effectsize, tm, NULL);
-	btnsize = psy_ui_component_preferredsize(psy_ui_button_base(
+	btnsize = psy_ui_component_preferred_size(psy_ui_button_base(
 		&self->effects), NULL);
 	if (psy_ui_component_visible(&self->view->outputs.component)) {
-		outsize = psy_ui_component_preferredsize(&self->view->outputs.component,
+		outsize = psy_ui_component_preferred_size(&self->view->outputs.component,
 			NULL);
 	} else {
 		outsize = psy_ui_size_make_em(0.0, 1.0);
 	}
 	outsizepx = psy_ui_size_px(&outsize, tm, NULL);
 	if (psy_ui_component_visible(&self->view->outputs.component)) {
-		volumesize = psy_ui_component_preferredsize(&self->view->volumes.component,
+		volumesize = psy_ui_component_preferred_size(&self->view->volumes.component,
 			NULL);
 	} else {
 		volumesize = psy_ui_size_make_em(0.0, 1.0);
@@ -1041,8 +1041,7 @@ void machinestackinputs_build(MachineStackInputs* self)
 					self->workspace);
 			} else {
 				if (!column || column->offset != 0) {
-					component = psy_ui_component_allocinit(&self->component,
-						&self->component);					
+					component = psy_ui_component_allocinit(&self->component, NULL);					
 				} else {
 					ArrowUi* arrow;
 					uintptr_t first;

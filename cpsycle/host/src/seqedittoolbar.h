@@ -31,7 +31,9 @@ typedef struct SeqEditToolBar {
 	psy_ui_CheckBox usesamplerindex;	
 	IntEdit samplerindex;
 	psy_ui_Button configure;
+	psy_ui_Component alignbar;
 	psy_ui_Button expand;
+	psy_ui_Button view_float;
 	psy_ui_Button timesig;
 	psy_ui_Button loop;
 	psy_ui_Label trackname;	
@@ -45,7 +47,7 @@ void seqedittoolbar_init(SeqEditToolBar*, psy_ui_Component* parent,
 
 void seqeditortoolbar_setdragtype(SeqEditToolBar*, SeqEditorDragType);
 
-void seqeditortoolbar_updatetrackname(SeqEditToolBar*);
+void seqeditortoolbar_update_track_name(SeqEditToolBar*);
 
 INLINE psy_ui_Component* seqedittoolbar_base(SeqEditToolBar* self)
 {

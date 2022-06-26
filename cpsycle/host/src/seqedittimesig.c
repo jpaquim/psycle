@@ -172,14 +172,14 @@ void seqedittimesig_ondraw(SeqEditTimeSig* self, psy_ui_Graphics* g)
 		patternentry = (psy_audio_PatternEntry*)self->node->entry;
 		e = psy_audio_patternentry_front(patternentry);
 		if (e->note == psy_audio_NOTECOMMANDS_TIMESIG) {
-			int nominator;
+			int numerator;
 			int denominator;
 			
-			nominator = e->cmd;
+			numerator = e->cmd;
 			denominator = e->parameter;
 			cpx = 0.0;
 			tm = psy_ui_component_textmetric(&self->component);			
-			psy_snprintf(text, 64, "%d", (int)(nominator));
+			psy_snprintf(text, 64, "%d", (int)(numerator));
 			psy_ui_textout(g, psy_ui_realpoint_make(cpx, 0.0), text, psy_strlen(text));
 			psy_snprintf(text, 64, "%d", (int)(denominator));
 			psy_ui_textout(g, psy_ui_realpoint_make(cpx, tm->tmHeight), text,

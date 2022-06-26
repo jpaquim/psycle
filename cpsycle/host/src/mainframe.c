@@ -131,6 +131,7 @@ static bool mainframe_accept_frame_move(const MainFrame*, psy_ui_Component*
 static bool mainframe_on_input_handler_callback(MainFrame*, int message,
 	void* param1);
 static void mainframe_plugineditor_on_focus(MainFrame*, psy_ui_Component* sender);
+static void mainframe_seqeditor_on_float(MainFrame*, psy_ui_Button* sender);
 
 /* vtable */
 static psy_ui_ComponentVtable vtable;
@@ -580,6 +581,9 @@ void mainframe_init_seq_editor(MainFrame* self)
 		psy_ui_component_hide(seqeditor_base(&self->seqeditor));
 		psy_ui_component_hide(psy_ui_splitter_base(&self->splitseqeditor));
 	}
+	/* connect float */
+	psy_signal_connect(&self->seqeditor.toolbar.view_float.signal_clicked,
+		self, mainframe_seqeditor_on_float);
 }
 
 void mainframe_init_recent_view(MainFrame* self)
@@ -631,7 +635,7 @@ void mainframe_init_sequence_view(MainFrame* self)
 	seqview_init(&self->sequenceview, &self->left, &self->workspace);
 	psy_ui_component_set_align(seqview_base(&self->sequenceview),
 		psy_ui_ALIGN_CLIENT);
-	size = psy_ui_component_preferredsize(seqview_base(&self->sequenceview),
+	size = psy_ui_component_preferred_size(seqview_base(&self->sequenceview),
 		NULL);
 	psy_ui_component_set_preferred_size(&self->left,
 		psy_ui_size_make(size.width, psy_ui_value_zero()));
@@ -1505,4 +1509,13 @@ void mainframe_add_link(MainFrame* self, Link* link)
 		psy_INDEX_INVALID,
 		psy_INDEX_INVALID, psy_INDEX_INVALID,
 		psy_ui_colour_white());
+}
+
+void mainframe_seqeditor_on_float(MainFrame* self, psy_ui_Button* sender)
+{
+	viewframe_allocinit(&self->component,
+		&self->seqeditor.component,
+		&self->splitseqeditor.component,
+		&self->seqeditor.toolbar.alignbar,
+		workspace_kbd_driver(&self->workspace));
 }

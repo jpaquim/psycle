@@ -147,7 +147,7 @@ void pianoroll_init(Pianoroll* self, psy_ui_Component* parent,
 	/* top area (beatruler) */
 	psy_ui_component_init(&self->top, &self->component, NULL);
 	psy_ui_component_set_align(&self->top, psy_ui_ALIGN_TOP);
-	psy_ui_component_setpreferredheight(&self->top,
+	psy_ui_component_set_preferred_height(&self->top,
 		psy_ui_value_make_eh(1.0));
 	pianoruler_init(&self->header, &self->top, &self->gridstate);
 	psy_ui_component_set_align(pianoruler_base(&self->header),
@@ -171,7 +171,7 @@ void pianoroll_init(Pianoroll* self, psy_ui_Component* parent,
 	psy_ui_combobox_add_text(&self->keytype, "Notes");
 	psy_ui_combobox_add_text(&self->keytype, "Drums");
 	psy_ui_combobox_select(&self->keytype, 0);
-	psy_ui_component_setpreferredheight(&self->keytype.component,
+	psy_ui_component_set_preferred_height(&self->keytype.component,
 		psy_ui_value_make_eh(1.0));
 	psy_ui_component_hide(&self->keytype.expand.component);
 	psy_ui_component_set_align(&self->keytype.component,

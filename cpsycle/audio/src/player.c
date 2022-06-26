@@ -122,19 +122,18 @@ static void psy_audio_player_initsignals(psy_audio_Player*);
 static void psy_audio_player_unloadeventdrivers(psy_audio_Player*);
 static psy_dsp_amp_t* psy_audio_player_work(psy_audio_Player*, int* numsamples,
 	int* stop);
-static void psy_audio_player_workamount(psy_audio_Player*, uintptr_t amount,
+static void psy_audio_player_work_amount(psy_audio_Player*, uintptr_t amount,
 	uintptr_t* numsamplex, psy_dsp_amp_t** psamples);
 static void psy_audio_player_oneventdriverinput(psy_audio_Player*,
 	psy_EventDriver* sender);
-static void psy_audio_player_workpath(psy_audio_Player*, uintptr_t amount);
+static void psy_audio_player_work_path(psy_audio_Player*, uintptr_t amount);
 static void log_workevents(psy_List* events);
-static void psy_audio_player_filldriver(psy_audio_Player*,
+static void psy_audio_player_fill_driver(psy_audio_Player*,
 	psy_dsp_amp_t* buffer, uintptr_t amount);
 static void psy_audio_player_ditherbuffer(psy_audio_Player*,
 	psy_audio_Buffer* buffer, uintptr_t amount);
 static void psy_audio_player_resetvumeters(psy_audio_Player*);
 static void psy_audio_player_dostop(psy_audio_Player*);
-static void psy_audio_player_notifylinetick(psy_audio_Player*);
 static uintptr_t psy_audio_player_multi_channel_audition(psy_audio_Player*,
 	const psy_audio_PatternEvent*);
 static void psy_audio_player_recordnotes(psy_audio_Player*,
@@ -267,7 +266,7 @@ psy_dsp_amp_t* psy_audio_player_work(psy_audio_Player* self, int* numsamples,
 		? psy_audio_MAX_STREAM_SIZE
 		: numsamplex;
 	psy_audio_exclusivelock_enter();
-	self->resyncplayposinsamples = psy_audiodriver_playposinsamples(
+	self->resyncplayposinsamples = psy_audiodriver_playpos_in_samples(
 		self->driver);
 	self->resyncplayposinbeats = psy_audio_player_position(self);
 	do {		
@@ -285,7 +284,7 @@ psy_dsp_amp_t* psy_audio_player_work(psy_audio_Player* self, int* numsamples,
 				if (pre) {
 					pre--;
 					if (pre) {
-						psy_audio_player_workamount(self, pre, &numsamplex,
+						psy_audio_player_work_amount(self, pre, &numsamplex,
 							&samples);
 						amount -= pre;
 						self->sequencer.linetickcount -=
@@ -294,11 +293,11 @@ psy_dsp_amp_t* psy_audio_player_work(psy_audio_Player* self, int* numsamples,
 					}
 				}
 			}
-			psy_audio_player_notifylinetick(self);			
-			psy_audio_sequencer_onnewline(&self->sequencer);			
+			psy_audio_sequencer_notify_newline(&self->sequencer);			
+			psy_audio_sequencer_on_newline(&self->sequencer);
 		}		
 		if (amount > 0) {			
-			psy_audio_player_workamount(self, amount, &numsamplex, &samples);
+			psy_audio_player_work_amount(self, amount, &numsamplex, &samples);
 			self->sequencer.linetickcount -=
 				psy_audio_sequencer_frame_to_offset(&self->sequencer, amount);			
 		}		
@@ -308,7 +307,7 @@ psy_dsp_amp_t* psy_audio_player_work(psy_audio_Player* self, int* numsamples,
 	return bufferdriver;
 }
 
-void psy_audio_player_workamount(psy_audio_Player* self, uintptr_t amount,
+void psy_audio_player_work_amount(psy_audio_Player* self, uintptr_t amount,
 	uintptr_t* numsamplex, psy_dsp_amp_t** psamples)
 {		
 	assert(self);
@@ -325,37 +324,17 @@ void psy_audio_player_workamount(psy_audio_Player* self, uintptr_t amount,
 				if (worked > numsamples) {
 					worked = numsamples;
 				}
-				psy_audio_player_workpath(self, worked);
+				psy_audio_player_work_path(self, worked);
 				numsamples -= worked;
 			}
 		}			
 	}
-	psy_audio_player_filldriver(self, *psamples, amount);
+	psy_audio_player_fill_driver(self, *psamples, amount);
 	*numsamplex -= amount;
 	*psamples += (amount * 2);
 }
 
-/* each machine gets notified a new tracker line has started */
-void psy_audio_player_notifylinetick(psy_audio_Player* self)
-{
-	assert(self);
-
-	if (self->song) {
-		psy_TableIterator it;
-		
-		if (psy_audio_player_playing(self)) {			
-			++self->sequencer.seqtime.linecounter;			
-		}
-		for (it = psy_audio_machines_begin(&self->song->machines); 
-				!psy_tableiterator_equal(&it, psy_table_end());		
-				psy_tableiterator_inc(&it)) {			
-			psy_audio_machine_newline((psy_audio_Machine*)
-				psy_tableiterator_value(&it));
-		}		
-	}
-}
-
-void psy_audio_player_workpath(psy_audio_Player* self, uintptr_t amount)
+void psy_audio_player_work_path(psy_audio_Player* self, uintptr_t amount)
 {
 	MachinePath* path;
 	uintptr_t waiting;
@@ -372,7 +351,7 @@ void psy_audio_player_workpath(psy_audio_Player* self, uintptr_t amount)
 			if (self->thread_count < 2) {
 				if (slot != psy_INDEX_INVALID) {
 					if (!psy_audio_machines_ismixersend(&self->song->machines, slot)) {
-						psy_audio_player_workmachine(self, amount, slot);
+						psy_audio_player_work_machine(self, amount, slot);
 					}
 				}
 			} else if (slot != psy_INDEX_INVALID) {
@@ -405,7 +384,7 @@ void psy_audio_player_workpath(psy_audio_Player* self, uintptr_t amount)
 	} while (waiting > 0);	
 }
 
-void psy_audio_player_workmachine(psy_audio_Player* self, uintptr_t amount,
+void psy_audio_player_work_machine(psy_audio_Player* self, uintptr_t amount,
 	uintptr_t slot)
 {
 	psy_audio_Machine* machine;
@@ -493,7 +472,7 @@ void log_workevents(psy_List* events)
 }
 #endif
 
-void psy_audio_player_filldriver(psy_audio_Player* self, psy_dsp_amp_t* buffer,
+void psy_audio_player_fill_driver(psy_audio_Player* self, psy_dsp_amp_t* buffer,
 	uintptr_t amount)
 {
 	psy_audio_Buffer* masteroutput;
@@ -678,7 +657,7 @@ void psy_audio_player_recordnotes(psy_audio_Player* self,
 	psy_dsp_big_beat_t offset;
 
 	offset = psy_audio_sequencer_frame_to_offset(&self->sequencer,
-		psy_audiodriver_playposinsamples(self->driver) -
+		psy_audiodriver_playpos_in_samples(self->driver) -
 		self->resyncplayposinsamples);
 	if (offset < 0) {
 		offset = 0;
@@ -1140,7 +1119,7 @@ void psy_audio_player_process_loop(psy_audio_Player* self)
 				psy_lock_enter(&self->block);
 				++self->waiting;
 				psy_lock_leave(&self->block);
-				psy_audio_player_workmachine(self, work->amount, work->slot);
+				psy_audio_player_work_machine(self, work->amount, work->slot);
 				psy_lock_enter(&self->block);
 				--self->waiting;
 				psy_lock_leave(&self->block);
@@ -1169,4 +1148,37 @@ uintptr_t psy_audio_player_numthreads(const psy_audio_Player* self)
 bool psy_audio_player_is_active_key(const psy_audio_Player* self, uint8_t key)
 {
 	return (self->active_note == key);
+}
+
+void psy_audio_player_enable_audio(psy_audio_Player* self)
+{
+	assert(self);
+
+	if (self->driver) {	
+		psy_audiodriver_open(self->driver);
+		/*psy_Property* driversection = NULL;
+
+		if (psy_audiodriver_configuration(self->player->driver)) {
+			driversection = psy_property_find(self->driverconfigurations,
+				psy_property_key(psy_audiodriver_configuration(
+					self->player->driver)),
+				PSY_PROPERTY_TYPE_NONE);
+		}
+		psy_audio_player_restart_driver(self->player, driversection);
+		psy_property_clear(self->driver_configure);
+		if (psy_audiodriver_configuration(self->player->driver)) {
+			psy_property_append_property(self->driver_configure,
+				psy_property_clone(psy_audiodriver_configuration(
+					self->player->driver)));
+		}*/
+	}	
+}
+
+void psy_audio_player_disable_audio(psy_audio_Player* self)
+{
+	assert(self);
+
+	if (self->driver) {
+		psy_audiodriver_close(self->driver);
+	}
 }

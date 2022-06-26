@@ -150,7 +150,7 @@ void seqedittrackdesc_build(SeqEditTrackDesc* self)
 					sequencetrackbox_base(trackbox),
 					psy_ui_size_make_em(0.0, 2.0));
 				if (track && track->height != 0.0) {
-					psy_ui_component_setpreferredheight(&trackbox->component,
+					psy_ui_component_set_preferred_height(&trackbox->component,
 						psy_ui_value_make_eh(track->height));
 				}
 				sequencetrackbox_showtrackname(trackbox);
@@ -206,7 +206,7 @@ void seqedittrackdesc_onresize(SeqEditTrackDesc* self,
 	sequencecmds_update(self->state->cmds);
 	psy_audio_sequence_settrackheight(self->state->cmds->sequence,
 		(uintptr_t)sender->id, height);
-	psy_ui_component_setpreferredheight(sender,
+	psy_ui_component_set_preferred_height(sender,
 		psy_ui_value_make_eh(height));	
 	psy_signal_emit(&self->signal_resize, self, 2, (void*)sender->id,
 		&height);

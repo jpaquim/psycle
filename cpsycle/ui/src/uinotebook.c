@@ -16,6 +16,9 @@ static void psy_ui_notebook_on_tabbar_change(psy_ui_Notebook*,
 static void psy_ui_notebook_on_align(psy_ui_Notebook*);
 static void psy_ui_notebook_show_page(psy_ui_Notebook*, psy_ui_Component*,
 	const psy_ui_Size*);
+static void psy_ui_notebook_on_select_section(psy_ui_Notebook*, psy_ui_Component* sender,
+	uintptr_t param1, uintptr_t param2);
+static uintptr_t psy_ui_notebook_on_section(psy_ui_Notebook*);
 
 /* vtable */
 static psy_ui_ComponentVtable vtable;
@@ -32,6 +35,9 @@ static void vtable_init(psy_ui_Notebook* self)
 		vtable.onalign =
 			(psy_ui_fp_component_event)
 			psy_ui_notebook_on_align;
+		vtable.section =
+			(psy_ui_fp_component_section)
+			psy_ui_notebook_on_section;
 		vtable_initialized = TRUE;
 	}
 	psy_ui_component_set_vtable(&self->component, &vtable);
@@ -44,6 +50,8 @@ void psy_ui_notebook_init(psy_ui_Notebook* self, psy_ui_Component* parent)
 	vtable_init(self);
 	psy_ui_component_set_background_colour(psy_ui_notebook_base(self),
 		psy_ui_colour_transparent());
+	psy_signal_connect(&self->component.signal_selectsection, self,
+		psy_ui_notebook_on_select_section);
 	self->pageindex = 0;
 	self->page_not_found_index = 0;
 	self->split = 0;
@@ -61,7 +69,7 @@ void psy_ui_notebook_select(psy_ui_Notebook* self, uintptr_t pageindex)
 	if (!self->split) {
 		size = psy_ui_component_scroll_size(psy_ui_notebook_base(self));
 		if (self->component.align == psy_ui_ALIGN_LEFT) {
-			size = psy_ui_component_preferredsize(psy_ui_notebook_base(self), &size);
+			size = psy_ui_component_preferred_size(psy_ui_notebook_base(self), &size);
 		}		
 		for (p = q = psy_ui_component_children(psy_ui_notebook_base(self), 0); p != NULL;
 			psy_list_next(&p), ++c) {
@@ -268,4 +276,18 @@ psy_ui_Component* psy_ui_notebook_active_page(psy_ui_Notebook* self)
 psy_ui_Component* psy_ui_notebook_page(psy_ui_Notebook* self, uintptr_t pageindex)
 {
 	return psy_ui_component_at(psy_ui_notebook_base(self), pageindex);
+}
+
+void psy_ui_notebook_on_select_section(psy_ui_Notebook* self, psy_ui_Component* sender,
+	uintptr_t param1, uintptr_t param2)
+{
+	psy_ui_notebook_select_by_component_id(self, param1);
+}
+
+uintptr_t psy_ui_notebook_on_section(psy_ui_Notebook* self)
+{
+	if (psy_ui_notebook_active_page(self)) {
+		return psy_ui_component_id(psy_ui_notebook_active_page(self));
+	}
+	return psy_INDEX_INVALID;
 }

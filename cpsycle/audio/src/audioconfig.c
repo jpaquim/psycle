@@ -309,31 +309,6 @@ void audioconfig_on_edit_audio_driver_configuration(AudioConfig* self, bool enab
 	}
 }
 
-void audioconfig_enable_audio(AudioConfig* self, bool enable)
-{
-	if (self->player->driver) {
-		if (enable) {
-			psy_Property* driversection = NULL;
-
-			if (psy_audiodriver_configuration(self->player->driver)) {
-				driversection = psy_property_find(self->driverconfigurations,
-					psy_property_key(psy_audiodriver_configuration(
-						self->player->driver)),
-					PSY_PROPERTY_TYPE_NONE);
-			}
-			psy_audio_player_restart_driver(self->player, driversection);
-			psy_property_clear(self->driver_configure);
-			if (psy_audiodriver_configuration(self->player->driver)) {
-				psy_property_append_property(self->driver_configure,
-					psy_property_clone(psy_audiodriver_configuration(
-						self->player->driver)));
-			}
-		} else {
-			psy_audiodriver_close(self->player->driver);
-		}
-	}
-}
-
 uintptr_t audioconfig_numthreads(const AudioConfig* self)
 {
 	psy_Property* p;
@@ -348,7 +323,7 @@ uintptr_t audioconfig_numthreads(const AudioConfig* self)
 }
 
 /* events */
-uintptr_t audioconfig_onchanged(AudioConfig* self, psy_Property*
+uintptr_t audioconfig_on_changed(AudioConfig* self, psy_Property*
 	property)
 {
 	uintptr_t rebuild_level;
@@ -357,9 +332,7 @@ uintptr_t audioconfig_onchanged(AudioConfig* self, psy_Property*
 	assert(property);
 
 	rebuild_level = psy_INDEX_INVALID;
-	if (psy_property_hasid(property, PROPERTY_ID_ENABLEAUDIO)) {
-		audioconfig_enable_audio(self, psy_property_item_bool(property));			
-	} else if (psy_property_hasid(property, PROPERTY_ID_NUMAUDIOTHREADS)) {
+	if (psy_property_hasid(property, PROPERTY_ID_NUMAUDIOTHREADS)) {
 		psy_audio_player_stop_threads(self->player);
 		psy_audio_player_start_threads(self->player, psy_property_item_int(property));			
 	} else if (psy_property_hasid(property, PROPERTY_ID_AUDIODRIVERS)) {

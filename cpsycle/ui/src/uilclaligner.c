@@ -117,7 +117,7 @@ void psy_ui_lclaligner_align(psy_ui_LCLAligner* self, psy_ui_Component* group)
 				cp_bottomright.x - cp_topleft.x,
 				cp_bottomright.y - cp_topleft.y);
 			psy_ui_aligner_adjust_margin_size(curr, &size, &limit);
-			componentsize = psy_ui_component_preferredsize(curr, &limit);
+			componentsize = psy_ui_component_preferred_size(curr, &limit);
 			psy_ui_aligner_adjust_minmax_size(curr, tm, &componentsize,
 				&size);
 			c_tm = psy_ui_component_textmetric(curr);
@@ -215,7 +215,7 @@ void psy_ui_lclaligner_align(psy_ui_LCLAligner* self, psy_ui_Component* group)
 						psy_ui_size_init_px(&limit,
 							cp_bottomright.x - cp_topleft.x,
 							cp_bottomright.y - cp_topleft.y);
-						componentsize = psy_ui_component_preferredsize(curr,
+						componentsize = psy_ui_component_preferred_size(curr,
 							&limit);
 					}		
 					psy_list_append(&wrap, curr);
@@ -316,7 +316,7 @@ void psy_ui_lclaligner_align_clients(psy_ui_LCLAligner* self, psy_ui_Component* 
 				position = psy_ui_component_position(curr);
 				limit = psy_ui_component_scroll_size(group);
 				c_tm = tm;
-				componentsize = psy_ui_component_preferredsize(curr,
+				componentsize = psy_ui_component_preferred_size(curr,
 					&limit);
 				cp_topleft.y += psy_ui_value_px(&c_margin.top, c_tm, NULL);
 				psy_ui_component_setposition(curr,
@@ -339,7 +339,7 @@ void psy_ui_lclaligner_align_clients(psy_ui_LCLAligner* self, psy_ui_Component* 
 				position = psy_ui_component_position(curr);
 				limit = psy_ui_component_scroll_size(group);
 				c_tm = tm;
-				componentsize = psy_ui_component_preferredsize(curr,
+				componentsize = psy_ui_component_preferred_size(curr,
 					&limit);
 				cp_topleft.y += psy_ui_value_px(&c_margin.top, c_tm, NULL);
 				psy_ui_component_setposition(curr,
@@ -408,7 +408,7 @@ void psy_ui_lclaligner_preferred_size(psy_ui_LCLAligner* self,
 			limit.width = psy_ui_value_make_px(psy_ui_value_px(
 				&size.width, tm, NULL) - cp_topleft.x - cp_bottomright.x);
 			limit.height = size.height;
-			componentsize = psy_ui_component_preferredsize(curr, &limit);
+			componentsize = psy_ui_component_preferred_size(curr, &limit);
 			psy_ui_aligner_adjust_minmax_size(curr, tm, &componentsize,
 				NULL);
 			c_tm = psy_ui_component_textmetric(curr);
@@ -498,7 +498,7 @@ void psy_ui_lclaligner_preferred_size(psy_ui_LCLAligner* self,
 						cp.y = psy_ui_value_px(&maxsize.height, tm, &size);
 						cp.x = 0;
 						cp_topleft.x = 0;	
-						componentsize = psy_ui_component_preferredsize(curr,
+						componentsize = psy_ui_component_preferred_size(curr,
 							&size);
 					}						
 				}						

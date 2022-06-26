@@ -134,7 +134,7 @@ void sequencerbar_on_multi_channel_audition(SequencerBar* self, psy_ui_Button* s
 void sequencerbar_on_configure(SequencerBar* self, GeneralConfig* config,
 	psy_Property* property)
 {	
-	if (generalconfig_showingpatternnames(config)) {
+	if (generalconfig_showing_pattern_names(config)) {
 		psy_ui_checkbox_check(&self->shownames);
 	} else {
 		psy_ui_checkbox_disablecheck(&self->shownames);

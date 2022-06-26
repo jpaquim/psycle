@@ -1362,7 +1362,7 @@ void machinewireview_onalign(MachineWireView* self)
 		psy_audio_Machine* machine;
 		
 		component = (psy_ui_Component*)psy_tableiterator_value(&it);
-		componentsize = psy_ui_component_preferredsize(component, NULL);
+		componentsize = psy_ui_component_preferred_size(component, NULL);
 		machine = psy_audio_machines_at(self->machines,
 			psy_tableiterator_key(&it));
 		if (machine) {

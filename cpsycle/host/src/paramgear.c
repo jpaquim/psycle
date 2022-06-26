@@ -666,7 +666,7 @@ void paramrack_onalign(ParamRack* self, psy_ui_Component* sender)
 
 		// update scroll step
 		limit = psy_ui_component_scroll_size(&self->component);
-		preferredboxsize = psy_ui_component_preferredsize(
+		preferredboxsize = psy_ui_component_preferred_size(
 			psy_ui_component_at(&self->pane.component, 0), &limit);
 		psy_ui_component_set_scroll_step_width(&self->pane.component,
 			preferredboxsize.width);

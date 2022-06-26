@@ -32,7 +32,8 @@ typedef struct PropertiesRenderState {
 	uintptr_t numcols;
 	bool prevent_mouse_propagation;
 	/* references */	
-	struct PropertiesRenderLine* property_line_changed;
+	struct PropertiesRenderLine* property_line_selected;
+	struct PropertiesRenderLine* property_line_changed;	
 } PropertiesRenderState;
 
 void propertiesrenderstate_init(PropertiesRenderState*, uintptr_t numcols);
@@ -45,8 +46,6 @@ struct PropertiesRenderLine;
 typedef struct PropertiesRenderLine {
 	/* inherits */
 	psy_ui_Component component;	
-	/*signals */
-	psy_Signal signal_selected;
 	/* internal */	
 	psy_ui_Switch* check;
 	psy_ui_Label* label;
@@ -119,6 +118,7 @@ void propertiesrenderer_update_line(PropertiesRenderer*, PropertiesRenderLine*);
 void propertiesrenderer_build(PropertiesRenderer*);
 void propertiesrenderer_rebuild(PropertiesRenderer*,
 	psy_Property* mainsection);
+void propertiesrenderer_maximize_sections(PropertiesRenderer*);
 
 INLINE psy_ui_Component* propertiesrenderer_base(PropertiesRenderer* self)
 {

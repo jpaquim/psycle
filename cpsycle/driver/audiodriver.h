@@ -182,7 +182,7 @@ INLINE void psy_audiodriver_readbuffers(psy_AudioDriver* self, int index,
 	self->vtable->readbuffers(self, index, pleft, pright, numsamples);
 }
 
-INLINE uintptr_t psy_audiodriver_playposinsamples(psy_AudioDriver* self)
+INLINE uintptr_t psy_audiodriver_playpos_in_samples(psy_AudioDriver* self)
 {
 	return self->vtable->playposinsamples(self);
 }

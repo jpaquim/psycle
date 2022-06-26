@@ -11,7 +11,6 @@
 /* ui */
 #include <uiframe.h>
 #include <uiterminal.h>
-#include <uinotebook.h>
 #include <uisplitbar.h>
 /* container */
 #include <properties.h>
@@ -20,22 +19,40 @@
 extern "C" {
 #endif
 
+/*
+** EmptyViewPage
+*/
+
+typedef struct EmptyViewPage {
+	/* inherits */
+	psy_ui_Component component;
+	psy_ui_Label label;
+} EmptyViewPage;
+
+void emptyviewpage_init(EmptyViewPage*, psy_ui_Component* parent);
+
+
+/* ViewFrame */
 typedef struct ViewFrame {
 	psy_ui_Component component;
 	psy_ui_Component pane;
-	psy_ui_Component* view;
-	psy_ui_Notebook* dock;
+	psy_ui_Component* view;	
+	psy_ui_Component* splitter;
+	psy_ui_Component* icons;
+	psy_ui_Component* restore_parent;
+	psy_ui_AlignType restore_align;
+	uintptr_t restore_section;
 	psy_EventDriver* kbd;	
 } ViewFrame;
 
 void viewframe_init(ViewFrame*, psy_ui_Component* parent,
-	psy_ui_Component* page, psy_ui_Notebook* dock,
-	psy_EventDriver* kbd);
+	psy_ui_Component* page, psy_ui_Component* splitter,
+	psy_ui_Component* icons, psy_EventDriver* kbd);
 
 ViewFrame* viewframe_alloc(void);
 ViewFrame* viewframe_allocinit(psy_ui_Component* parent,
-	psy_ui_Component* page, psy_ui_Notebook* dock,
-	psy_EventDriver* kbd);
+	psy_ui_Component* page, psy_ui_Component* splitter,
+	psy_ui_Component* icons, psy_EventDriver* kbd);
 
 void viewframe_float(ViewFrame*, psy_ui_Component* component);
 void viewframe_dock(ViewFrame*);

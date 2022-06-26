@@ -1018,7 +1018,7 @@ bool psy_audio_sequence_calcdurationinms(psy_audio_Sequence* self)
 					}
 				}
 			}					
-			psy_audio_sequencer_onnewline(self->sequencerduration);
+			psy_audio_sequencer_on_newline(self->sequencerduration);
 		}			
 		if (amount > 0) {
 			psy_audio_sequencer_frame_tick(self->sequencerduration, amount);

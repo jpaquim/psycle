@@ -185,7 +185,8 @@ void psy_audio_sequencer_clock(psy_audio_Sequencer*);
 void psy_audio_sequencer_clock_continue(psy_audio_Sequencer*);
 void psy_audio_sequencer_clock_stop(psy_audio_Sequencer*);
 
-void psy_audio_sequencer_onnewline(psy_audio_Sequencer*);
+void psy_audio_sequencer_on_newline(psy_audio_Sequencer*);
+void psy_audio_sequencer_notify_newline(psy_audio_Sequencer*);
 void psy_audio_sequencer_set_position(psy_audio_Sequencer*,
 	psy_dsp_big_beat_t position);
 

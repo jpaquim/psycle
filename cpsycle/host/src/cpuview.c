@@ -19,8 +19,8 @@
 
 /* prototypes */
 static void cpumoduleview_on_draw(CPUModuleView*, psy_ui_Graphics*);
-static void cpumoduleview_on_preferred_size(CPUModuleView*, const psy_ui_Size* limit,
-	psy_ui_Size* rv);
+static void cpumoduleview_on_preferred_size(CPUModuleView*,
+	const psy_ui_Size* limit, psy_ui_Size* rv);
 
 /* vtable */
 static psy_ui_ComponentVtable cpumoduleview_vtable;
@@ -147,6 +147,7 @@ void cpuview_init(CPUView* self, psy_ui_Component* parent,
 
 	psy_ui_margin_init_em(&margin, 0.0, 0.0, 0.5, 2.0);		
 	psy_ui_component_init(&self->component, parent, NULL);
+	self->lastnummachines = psy_INDEX_INVALID;
 	psy_ui_component_set_style_type(&self->component,
 		STYLE_RECENTVIEW_MAINSECTION);
 	self->workspace = workspace;

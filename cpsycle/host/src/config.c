@@ -238,12 +238,19 @@ bool psycleconfig_audio_enabled(const PsycleConfig* self)
 	return psy_property_at_bool(self->global, "enableaudio", TRUE);
 }
 
-void psycleconfig_enableaudio(PsycleConfig* self, bool on)
+void psycleconfig_enable_audio(PsycleConfig* self, bool on)
 {
 	assert(self);
 
 	psy_property_set_bool(self->global, "enableaudio", on);
-	audioconfig_enable_audio(&self->audio, on);
+	if (!self->audio.player) {
+		return;
+	}
+	if (on) {
+		psy_audio_player_enable_audio(self->audio.player);
+	} else {
+		psy_audio_player_disable_audio(self->audio.player);
+	}	
 }
 
 uintptr_t psycleconfig_notify_changed(PsycleConfig* self, psy_Property* property)
@@ -266,13 +273,13 @@ uintptr_t psycleconfig_notify_changed(PsycleConfig* self, psy_Property* property
 	} else if (languageconfig_has_property(&self->language, property)) {
 		return languageconfig_on_changed(&self->language, property);
 	} else if (patternviewconfig_has_property(&self->patview, property)) {
-		return patternviewconfig_onchanged(&self->patview, property);
+		return patternviewconfig_on_changed(&self->patview, property);
 	} else if (machineparamconfig_hasproperty(&self->macparam, property)) {
 		return machineparamconfig_onchanged(&self->macparam, property);
 	} else if (generalconfig_hasproperty(&self->general, property)) {
 		return generalconfig_onchanged(&self->general, property);
 	} else if (audioconfig_hasproperty(&self->audio, property)) {
-		return audioconfig_onchanged(&self->audio, property);	
+		return audioconfig_on_changed(&self->audio, property);	
 	} else if (eventdriverconfig_hasproperty(&self->input, property)) {
 		return eventdriverconfig_onchanged(&self->input, property);
 	} else if (languageconfig_has_property(&self->language, property)) {
@@ -298,13 +305,13 @@ uintptr_t psycleconfig_notify_changed(PsycleConfig* self, psy_Property* property
 void psycleconfig_notifyall_changed(PsycleConfig* self)
 {
 	generalconfig_onchanged(&self->general, &self->config);
-	audioconfig_onchanged(&self->audio, &self->config);
+	audioconfig_on_changed(&self->audio, &self->config);
 	eventdriverconfig_onchanged(&self->input, &self->config);
 	languageconfig_on_changed(&self->language, &self->config);
 	dirconfig_onchanged(&self->directories, &self->config);
 	machineviewconfig_onchanged(&self->macview, &self->config);
 	machineparamconfig_onchanged(&self->macparam, &self->config);
-	patternviewconfig_onchanged(&self->patview, &self->config);
+	patternviewconfig_on_changed(&self->patview, &self->config);
 	keyboardmiscconfig_onchanged(&self->misc, &self->config);
 	midiviewconfig_on_changed(&self->midi, &self->config);
 	compatconfig_onchanged(&self->compat, &self->config);

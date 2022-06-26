@@ -16,21 +16,10 @@
 #include "../../detail/portable.h"
 
 
-/* EmptyViewPage */
-
-void emptyviewpage_init(EmptyViewPage* self, psy_ui_Component* parent)
-{
-	psy_ui_component_init(&self->component, parent, NULL);
-	psy_ui_component_set_id(&self->component, VIEW_ID_FLOATED);
-	psy_ui_label_init_text(&self->label, &self->component, "main.floated");
-	psy_ui_component_set_align(psy_ui_label_base(&self->label),
-		psy_ui_ALIGN_CENTER);
-}
-
 /* MainViews */
 
 /* prototypes */
-static void mainviews_onextract(MainViews*, psy_ui_Button* sender);
+static void mainviews_on_extract(MainViews*, psy_ui_Button* sender);
 static void mainviews_extract(MainViews*);
 static void mainviews_dock(MainViews*, psy_ui_Component* page);
 static void mainviews_on_float(MainViews*, psy_ui_Button* sender);
@@ -43,7 +32,7 @@ void mainviews_init(MainViews* self, psy_ui_Component* parent, psy_ui_Component*
 	self->workspace = workspace;
 	mainviewbar_init(&self->mainviewbar, &self->component, pane, workspace);
 	psy_signal_connect(&self->mainviewbar.extract.signal_clicked,
-		self, mainviews_onextract);
+		self, mainviews_on_extract);
 	psy_signal_connect(&self->mainviewbar.view_float.signal_clicked,
 		self, mainviews_on_float);
 	psy_ui_component_set_align(mainviewbar_base(&self->mainviewbar),
@@ -56,7 +45,7 @@ void mainviews_init(MainViews* self, psy_ui_Component* parent, psy_ui_Component*
 		psy_ui_notebook_base(&self->notebook));
 }
 
-void mainviews_onextract(MainViews* self, psy_ui_Button* sender)
+void mainviews_on_extract(MainViews* self, psy_ui_Button* sender)
 {
 	ViewIndex view;
 	psy_ui_Component* page;
@@ -126,7 +115,8 @@ void mainviews_float(MainViews* self)
 
 	page = psy_ui_notebook_active_page(&self->notebook);
 	if (page) {
-		viewframe_allocinit(self->workspace->main, page, &self->notebook,
+		viewframe_allocinit(self->workspace->main, page,
+			NULL, NULL,
 			workspace_kbd_driver(self->workspace));
 	}
 }

@@ -15,6 +15,8 @@
 extern "C" {
 #endif
 
+#define SEQEDIT_PROPERTIESVIEW 1000
+
 typedef enum SeqEditItemType {
 	SEQEDITITEM_NONE,
 	SEQEDITITEM_PATTERN,
@@ -53,6 +55,7 @@ typedef struct SeqEditState {
 	psy_Signal signal_loopchanged;	
 	double pxperbeat;
 	double defaultpxperbeat;
+	double propertiesview_desc_column_width;
 	psy_ui_Value line_height;
 	psy_ui_Value defaultlineheight;	
 	psy_dsp_big_beat_t cursorposition;
@@ -133,7 +136,7 @@ INLINE void seqeditstate_setcursor(SeqEditState* self,
 psy_dsp_big_beat_t seqeditstate_quantize(const SeqEditState*,
 	psy_dsp_big_beat_t position);
 
-INLINE psy_ui_Value seqeditstate_lineheight(const SeqEditState* self)
+INLINE psy_ui_Value seqeditstate_line_height(const SeqEditState* self)
 {
 	return self->line_height;
 }
