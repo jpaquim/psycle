@@ -306,15 +306,12 @@ int psy_ui_component_visible(psy_ui_Component*);
 bool psy_ui_component_draw_visible(psy_ui_Component*);
 void psy_ui_component_align(psy_ui_Component*);
 void psy_ui_component_align_full(psy_ui_Component*);
-void psy_ui_component_align_cached(psy_ui_Component*);
 
 INLINE bool psy_ui_component_hasalign(const psy_ui_Component* self)
 {
 	return (self->aligner != NULL);	
 }
 
-psy_ui_Component* psy_ui_component_preferredsize_parent(psy_ui_Component*);
-psy_ui_Component* psy_ui_component_root(psy_ui_Component*);
 
 INLINE void psy_ui_component_set_margin(psy_ui_Component* self, psy_ui_Margin margin)
 {	
@@ -325,9 +322,6 @@ INLINE psy_ui_Margin psy_ui_component_margin(const psy_ui_Component* self)
 {
 	return psy_ui_componentstyle_margin(&self->style);	
 }
-
-void psy_ui_component_setmargin_children(psy_ui_Component*,
-	psy_ui_Margin);
 
 INLINE void psy_ui_component_set_padding(psy_ui_Component* self,
 	psy_ui_Margin padding)
@@ -340,9 +334,7 @@ INLINE psy_ui_Margin psy_ui_component_padding(const psy_ui_Component* self)
 	return psy_ui_componentstyle_spacing(&self->style);
 }
 
-void psy_ui_component_setpadding_children(psy_ui_Component*, psy_ui_Margin);
-void psy_ui_component_setalign_children(psy_ui_Component*, psy_ui_AlignType);
-void psy_ui_component_checksortedalign(psy_ui_Component*, psy_ui_AlignType);
+void psy_ui_component_check_sorted_align(psy_ui_Component*, psy_ui_AlignType);
 const psy_ui_Border* psy_ui_component_border(const psy_ui_Component*);
 void psy_ui_component_setborder(psy_ui_Component*, const psy_ui_Border*);
 uintptr_t psy_ui_component_backgroundimageid(const psy_ui_Component*);
@@ -361,10 +353,9 @@ INLINE void psy_ui_component_init_align(psy_ui_Component* self,
 
 void psy_ui_component_set_aligner(psy_ui_Component*, psy_ui_Aligner*);
 void psy_ui_component_set_align_expand(psy_ui_Component*, psy_ui_ExpandMode);
-void psy_ui_component_enableinput(psy_ui_Component*, int recursive);
-void psy_ui_component_preventinput(psy_ui_Component*, int recursive);
-bool psy_ui_component_inputprevented(const psy_ui_Component*);
-void psy_ui_component_setbackgroundmode(psy_ui_Component*, psy_ui_BackgroundMode);
+void psy_ui_component_enable_input(psy_ui_Component*, int recursive);
+void psy_ui_component_prevent_input(psy_ui_Component*, int recursive);
+bool psy_ui_component_input_prevented(const psy_ui_Component*);
 void psy_ui_component_set_preferred_size(psy_ui_Component*, psy_ui_Size);
 void psy_ui_component_set_preferred_height(psy_ui_Component*, psy_ui_Value);
 void psy_ui_component_set_preferred_width(psy_ui_Component*, psy_ui_Value);
@@ -522,8 +513,6 @@ typedef struct psy_ui_ComponentImp {
 
 void psy_ui_componentimp_init(psy_ui_ComponentImp*);
 void psy_ui_componentimp_dispose(psy_ui_ComponentImp*);
-
-psy_ui_Component* psy_ui_mainwindow(void);
 
 INLINE void psy_ui_component_invalidate(psy_ui_Component* self)
 {	

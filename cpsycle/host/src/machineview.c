@@ -190,7 +190,7 @@ void machineview_connectsignals(MachineView* self)
 	psy_signal_connect(
 		&psycleconfig_macview(workspace_conf(self->workspace))->signal_changed,
 		self, machineview_onconfigure);
-	psy_ui_notebook_connectcontroller(&self->notebook,
+	psy_ui_notebook_connect_controller(&self->notebook,
 		&self->tabbar.signal_change);
 	psy_signal_connect(&self->tabbar.signal_change, self,
 		machineview_on_tabbar_changed);

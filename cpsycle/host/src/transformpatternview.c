@@ -170,7 +170,7 @@ void transformpatternview_init_searchon(TransformPatternView* self)
 		"transformpattern.currentpattern");
 	psy_ui_label_init_text(&self->currselection, &self->searchonchoice,
 		"transformpattern.currentselection");
-	psy_ui_component_preventinput(psy_ui_label_base(&self->currselection),
+	psy_ui_component_prevent_input(psy_ui_label_base(&self->currselection),
 		psy_ui_NONE_RECURSIVE);
 	transformpatternview_applyto(self, 1);
 }
@@ -214,8 +214,8 @@ void transformpatternview_initselection(TransformPatternView* self)
 	psy_ui_combobox_add_text(&self->searchnote, empty);		psy_ui_combobox_setitemdata(&self->searchnote, 1, 1001);
 	psy_ui_combobox_add_text(&self->searchnote, nonempty);	psy_ui_combobox_setitemdata(&self->searchnote, 2, 1002);
 	psy_ui_combobox_add_text(&self->replacenote, same);		psy_ui_combobox_setitemdata(&self->replacenote, 0, 1002);
-	psy_ui_combobox_add_text(&self->replacenote, empty);		psy_ui_combobox_setitemdata(&self->replacenote, 1, 1001);
-	is440 = patternviewconfig_notetabmode(&self->workspace->config.patview) ==
+	psy_ui_combobox_add_text(&self->replacenote, empty);	psy_ui_combobox_setitemdata(&self->replacenote, 1, 1001);
+	is440 = patternviewconfig_notetabmode(&self->workspace->config.visual.patview) ==
 		psy_dsp_NOTESTAB_A440;
 	for (i = psy_audio_NOTECOMMANDS_C0; i <= psy_audio_NOTECOMMANDS_B9; i++) {
 		char text[256];
@@ -433,11 +433,11 @@ void transformpatternview_set_pattern_selection(TransformPatternView* self,
 	if (self->patternselection.valid != selection->valid) {
 		self->patternselection = *selection;
 		if (selection->valid) {
-			psy_ui_component_enableinput(psy_ui_label_base(&self->currselection),
+			psy_ui_component_enable_input(psy_ui_label_base(&self->currselection),
 				psy_ui_NONE_RECURSIVE);
 			transformpatternview_applyto(self, 2);
 		} else {
-			psy_ui_component_preventinput(psy_ui_label_base(&self->currselection),
+			psy_ui_component_prevent_input(psy_ui_label_base(&self->currselection),
 				psy_ui_NONE_RECURSIVE);
 			if (self->applyto == 2) {
 				transformpatternview_applyto(self, 1);

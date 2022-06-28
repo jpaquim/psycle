@@ -19,6 +19,7 @@ typedef bool (*fp_inputhandler_input)(void* context, void* sender);
 typedef bool (*fp_inputhandler_hostcallback)(void* context, int message, void* param1);
 
 #define INPUTHANDLER_STOP TRUE;
+#define INPUTHANDLER_CONTINUE FALSE;
 
 typedef enum {
 	INPUTHANDLER_IMM = 1,
@@ -64,7 +65,7 @@ void inputhandler_dispose(InputHandler*);
 void inputhandler_connect(InputHandler*, InputHandlerType type,
 	psy_EventDriverCmdType cmdtype, const char* section,
 	uintptr_t id, void* context, fp_inputhandler_input);
-void inputhandler_connecthost(InputHandler*, void* context,
+void inputhandler_connect_host(InputHandler*, void* context,
 	fp_inputhandler_hostcallback);
 psy_EventDriverCmd inputhandler_cmd(const InputHandler*);
 psy_EventDriver* inputhandler_sender(const InputHandler*);

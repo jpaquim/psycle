@@ -160,5 +160,7 @@ void greet_on_current_original(Greet* self, psy_ui_Component* sender)
 	} else {
 		greet_build_original(self);
 		psy_ui_button_set_text(&self->original, "greetings.showcurrent");
-	}	
+	}
+	psy_ui_component_align(&self->greetz.component);
+	psy_ui_component_invalidate(&self->greetz.component);
 }

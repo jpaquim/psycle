@@ -193,7 +193,7 @@ void pianoroll_init(Pianoroll* self, psy_ui_Component* parent,
 		pianoroll_on_lpb_changed);	
 	psy_ui_component_start_timer(&self->component, 0, PIANOROLL_REFRESHRATE);
 	/* configuration */
-	psy_signal_connect(&workspace->config.patview.signal_changed, self,
+	psy_signal_connect(&workspace->config.visual.patview.signal_changed, self,
 		pianoroll_on_configure);
 	keyboardstate_update_metrics(&self->keyboardstate,
 		psy_ui_component_textmetric(&self->component));

@@ -87,7 +87,7 @@ void inputhandler_connect(InputHandler* self, InputHandlerType type,
 		inputslot_allocinit(type, cmdtype, section, id, context, input));
 }
 
-void inputhandler_connecthost(InputHandler* self, void* context,
+void inputhandler_connect_host(InputHandler* self, void* context,
 	fp_inputhandler_hostcallback callback)
 {
 	self->hostcontext = context;

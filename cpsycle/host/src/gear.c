@@ -101,7 +101,7 @@ void gear_init(Gear* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_ui_component_set_margin(&self->instrumentsbox.groupheader, psy_ui_margin_zero());
 	samplesbox_init(&self->samplesbox, psy_ui_notebook_base(&self->notebook),
 		&workspace->song->samples, workspace);
-	psy_ui_notebook_connectcontroller(&self->notebook,
+	psy_ui_notebook_connect_controller(&self->notebook,
 		&self->tabbar.signal_change);
 	psy_ui_tabbar_select(&self->tabbar, 0);
 	gearbuttons_init(&self->buttons, &self->client, workspace);

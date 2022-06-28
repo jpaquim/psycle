@@ -132,7 +132,7 @@ void startscript_run(StartScript* self)
 	char path[4096];
 	int err;
 
-	psy_snprintf(path, 4096, "%s/%s", dirconfig_luascripts(
+	psy_snprintf(path, 4096, "%s/%s", dirconfig_lua_scripts(
 		&self->mainframe->workspace.config.directories), "start.lua");
 	if (err = psyclescript_load(&self->script, path)) {
 		return;	

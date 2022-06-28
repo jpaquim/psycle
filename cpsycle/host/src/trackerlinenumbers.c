@@ -71,7 +71,7 @@ void trackerlinenumbers_init(TrackerLineNumbers* self,
 		state->line_height);
 	self->component.blitscroll = TRUE;
 	/* configuration */
-	psy_signal_connect(&workspace->config.patview.signal_changed, self,
+	psy_signal_connect(&workspace->config.visual.patview.signal_changed, self,
 		trackerlinenumbers_on_configure);
 }
 

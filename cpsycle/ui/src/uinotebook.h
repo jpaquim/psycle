@@ -35,7 +35,7 @@ psy_ui_Component* psy_ui_notebook_page(psy_ui_Notebook*, uintptr_t pageindex);
 void psy_ui_notebook_split(psy_ui_Notebook*, psy_ui_Orientation);
 int psy_ui_notebook_splitactivated(psy_ui_Notebook*);
 void psy_ui_notebook_full(psy_ui_Notebook*);
-void psy_ui_notebook_connectcontroller(psy_ui_Notebook*, 
+void psy_ui_notebook_connect_controller(psy_ui_Notebook*, 
 	psy_Signal* controllersignal);
 
 INLINE psy_ui_Component* psy_ui_notebook_base(psy_ui_Notebook* self)

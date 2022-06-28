@@ -53,7 +53,9 @@ void zoombox_init(ZoomBox* self, psy_ui_Component* parent)
 	self->minrate = 0.10;
 	self->maxrate = 10.0;
 	psy_ui_component_set_style_type(&self->component, STYLE_ZOOMBOX);
-	psy_ui_component_set_align_expand(&self->component, psy_ui_HEXPAND);	
+	psy_ui_component_set_align_expand(&self->component, psy_ui_HEXPAND);
+	psy_ui_component_set_default_align(&self->component,
+		psy_ui_ALIGN_LEFT, psy_ui_margin_zero());
 	psy_ui_button_init_connect(&self->zoomout, zoombox_base(self),
 		self, zoombox_on_zoom_out);
 	/* zoom out */
@@ -76,9 +78,7 @@ void zoombox_init(ZoomBox* self, psy_ui_Component* parent)
 		self, zoombox_on_zoom_in);
 	psy_ui_button_prevent_translation(&self->zoomin);
 	psy_ui_button_set_text(&self->zoomin, "+");	
-	psy_ui_button_set_char_number(&self->zoomin, 2);		
-	psy_ui_component_setalign_children(zoombox_base(self),
-		psy_ui_ALIGN_LEFT);
+	psy_ui_button_set_char_number(&self->zoomin, 2);
 }
 
 void zoombox_init_connect(ZoomBox* self, psy_ui_Component* parent,

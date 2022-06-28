@@ -53,6 +53,7 @@ typedef struct PropertiesRenderLine {
 	InputDefiner* input_definer;
 	psy_ui_ComboBox* combo;
 	psy_ui_Component* colour;
+	psy_ui_Component* list;
 	psy_Property* property;	
 	/* references */
 	PropertiesRenderState* state;

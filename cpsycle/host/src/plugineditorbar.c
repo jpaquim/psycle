@@ -17,18 +17,15 @@ static void plugineditorbar_on_zoombox_changed(PluginEditorBar*, ZoomBox* sender
 static void plugineditorbar_update_line(PluginEditorBar*);
 
 /* implementation */
-void plugineditorbar_init(PluginEditorBar* self, psy_ui_Component* parent,
-	Workspace* workspace)
+void plugineditorbar_init(PluginEditorBar* self, psy_ui_Component* parent)
 {		
-	assert(self);
-	assert(workspace);
+	assert(self);	
 
 	psy_ui_component_init(&self->component, parent, NULL);
-	self->workspace = workspace;	
 	self->editor = NULL;
 	psy_ui_component_set_default_align(plugineditorbar_base(self),
 		psy_ui_ALIGN_LEFT, psy_ui_defaults_hmargin(psy_ui_defaults()));
-	/* Zoom */
+	/* zoom */
 	zoombox_init(&self->zoombox, plugineditorbar_base(self));
 	psy_ui_component_set_preferred_size(&self->zoombox.component,
 		psy_ui_size_make_em(16.0, 1.0));
@@ -41,7 +38,7 @@ void plugineditorbar_init(PluginEditorBar* self, psy_ui_Component* parent,
 	psy_ui_label_init(&self->line, &self->component);
 	psy_ui_label_set_char_number(&self->line, 5.0);
 	psy_ui_label_prevent_translation(&self->line);
-	/* col */
+	/* column */
 	psy_ui_label_init(&self->column_desc, &self->component);
 	psy_ui_label_prevent_translation(&self->column_desc);
 	psy_ui_label_set_text(&self->column_desc, "Col:");
@@ -59,7 +56,7 @@ void plugineditorbar_on_zoombox_changed(PluginEditorBar* self, ZoomBox* sender)
 {
 	if (self->editor) {
 		self->editor->zoom = zoombox_rate(&self->zoombox);
-		plugineditor_updatefont(self->editor);
+		plugineditor_update_font(self->editor);
 	}
 }
 

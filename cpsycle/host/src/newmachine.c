@@ -90,9 +90,7 @@ void newmachinerescanbar_onselectdirectories(NewMachineRescanBar* self,
 /* implementation */
 void newmachinesectionbar_init(NewMachineSectionBar* self,
 	psy_ui_Component* parent, Workspace* workspace)
-{
-	psy_ui_Margin spacing;
-
+{	
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_set_style_type(&self->component,
 		STYLE_NEWMACHINE_SECTIONBAR);
@@ -109,8 +107,6 @@ void newmachinesectionbar_init(NewMachineSectionBar* self,
 		"newmachine.mksection");
 	psy_ui_button_init_text(&self->removefromsection, &self->component,
 		"newmachine.delete");	
-	psy_ui_margin_init_em(&spacing, 0.2, 0.2, 0.2, 0.2);
-	psy_ui_component_setpadding_children(&self->component, spacing);	
 }
 
 /* NewMachineSortBar */
@@ -146,8 +142,6 @@ void newmachinesortbar_init(NewMachineSortBar* self, psy_ui_Component* parent,
 		"newmachine.type", self, newmachinesortbar_onsortbytype);
 	psy_ui_button_init_text_connect(&self->sortbymode, &self->component,
 		"newmachine.mode", self, newmachinesortbar_onsortbymode);	
-	psy_ui_component_setpadding_children(&self->component,
-		psy_ui_margin_make_em(0.2, 0.2, 0.2, 0.2));
 }
 
 void newmachinesortbar_onsortbyfavorite(NewMachineSortBar* self,
@@ -616,9 +610,7 @@ void newmachinesectionspane_init(NewMachineSectionsPane* self, psy_ui_Component*
 	psy_ui_component_set_align(&self->sections, psy_ui_ALIGN_HCLIENT);
 	psy_ui_component_set_tab_index(&self->scroller_sections.component, 0);
 	psy_ui_component_set_align(&self->scroller_sections.component,
-		psy_ui_ALIGN_CLIENT);
-	psy_ui_component_setbackgroundmode(&self->scroller_sections.pane,
-		psy_ui_SETBACKGROUND);	
+		psy_ui_ALIGN_CLIENT);	
 }
 
 void newmachinesectionspane_on_destroyed(NewMachineSectionsPane* self)
@@ -1305,7 +1297,7 @@ void newmachine_onclearsection(NewMachine* self, psy_ui_Component* sender)
 {
 	if (newmachine_checksection(self)) {
 		self->selectedplugin = NULL;
-		psy_audio_pluginsections_clearplugins(
+		psy_audio_pluginsections_clear_plugins(
 			&self->workspace->plugincatcher.sections,
 			newmachinesection_key(self->selectedsection));
 		newmachinesectionspane_buildsections(&self->sectionspane0);

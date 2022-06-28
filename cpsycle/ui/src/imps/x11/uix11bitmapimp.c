@@ -39,6 +39,8 @@ static psy_ui_RealSize dev_size(psy_ui_x11_BitmapImp*);
 static int empty(psy_ui_x11_BitmapImp*);
 static void dev_settransparency(psy_ui_x11_BitmapImp*, psy_ui_Colour colour);
 static void dev_preparemask(psy_ui_x11_BitmapImp*, psy_ui_Colour clrtrans);
+static uintptr_t dev_native(psy_ui_x11_BitmapImp*);
+static uintptr_t dev_native_mask(psy_ui_x11_BitmapImp*);
 
 /* vtable */
 static psy_ui_BitmapImpVTable imp_vtable;
@@ -66,6 +68,12 @@ static void imp_vtable_init(psy_ui_x11_BitmapImp* self)
 		imp_vtable.dev_settransparency =
 			(psy_ui_bitmap_imp_fp_settransparency)
 			dev_settransparency;
+		imp_vtable.dev_native =
+			(psy_ui_bitmap_imp_fp_native)
+			dev_native;
+		imp_vtable.dev_native_mask =
+			(psy_ui_bitmap_imp_fp_native)
+			dev_native_mask;
 		imp_vtable_initialized = TRUE;
 	}
 }
@@ -237,6 +245,16 @@ void dev_preparemask(psy_ui_x11_BitmapImp* self, psy_ui_Colour clrtrans)
 	XCopyArea(x11app->dpy, self->mask, self->pixmap, gc,
 		0, 0, (int)size.width, (int)size.height, 0, 0);
 	XFreeGC(x11app->dpy, gc);
-}	
+}
+
+uintptr_t dev_native(psy_ui_x11_BitmapImp* self)
+{
+	return (uintptr_t)self->pixmap;
+}
+
+uintptr_t dev_native_mask(psy_ui_x11_BitmapImp* self)
+{
+	return (uintptr_t)self->mask;
+}
 
 #endif

@@ -53,8 +53,8 @@ void patternblockmenu_init(PatternBlockMenu* self, psy_ui_Component* parent,
 	self->transformpattern = transformpattern;
 	self->interpolatecurveview = interpolatecurveview;
 	self->pvstate = pvstate;
-	psy_ui_component_set_default_align(&self->component, psy_ui_ALIGN_TOP,
-		psy_ui_margin_zero());	
+	psy_ui_component_set_default_align(&self->component, psy_ui_ALIGN_TOP,		
+		psy_ui_margin_zero());
 	psy_ui_button_init_text_connect(&self->cut, &self->component,
 		"edit.cut", self, patternblockmenu_oncut);			
 	psy_ui_button_init_text_connect(&self->copy, &self->component,
@@ -90,9 +90,7 @@ void patternblockmenu_init(PatternBlockMenu* self, psy_ui_Component* parent,
 	psy_ui_button_init_text_connect(&self->importbtn, &self->component,
 		"edit.importpsb", self, patternblockmenu_onimport);
 	psy_ui_button_init_text_connect(&self->exportbtn, &self->component,
-		"edit.exportpsb", self, patternblockmenu_onexport);		
-	psy_ui_component_setpadding_children(&self->component,
-		psy_ui_margin_make_em(0.25, 0.25, 0.25, 0.25));
+		"edit.exportpsb", self, patternblockmenu_onexport);			
 	psy_ui_component_set_align(patternblockmenu_base(self),
 		psy_ui_ALIGN_RIGHT);
 	psy_ui_component_hide(patternblockmenu_base(self));

@@ -50,7 +50,7 @@ void patterndefaultline_init(PatternDefaultLine* self, psy_ui_Component* parent,
 	self->workspace = workspace;
 	/* states */
 	patternviewstate_init(&self->pvstate_default_line,
-		&workspace->config.patview,
+		&workspace->config.visual.patview,
 		&workspace->config.misc,
 		&workspace->player.patterndefaults.sequence,
 		NULL);
@@ -79,7 +79,7 @@ void patterndefaultline_init(PatternDefaultLine* self, psy_ui_Component* parent,
 		&workspace->player.patterndefaults.sequence.signal_cursorchanged,
 		self, patterndefaultline_on_cursor_changed);
 	/* configuration */
-	psy_signal_connect(&workspace->config.patview.signal_changed, self,
+	psy_signal_connect(&workspace->config.visual.patview.signal_changed, self,
 		patterndefaultline_on_configure);	
 }
 

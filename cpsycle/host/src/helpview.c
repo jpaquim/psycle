@@ -11,11 +11,11 @@
 #include "resources/resource.h"
 
 /* prototypes */
-static void helpview_initbase(HelpView*, psy_ui_Component* parent);
-static void helpview_inittabbar(HelpView*, psy_ui_Component* tabbarparent,
+static void helpview_init_base(HelpView*, psy_ui_Component* parent);
+static void helpview_init_tabbar(HelpView*, psy_ui_Component* tabbarparent,
 	Workspace*);
-static void helpview_initsections(HelpView*, Workspace* workspace);
-static void helpview_onselectsection(HelpView*, psy_ui_Component* sender,
+static void helpview_init_sections(HelpView*, Workspace* workspace);
+static void helpview_on_select_section(HelpView*, psy_ui_Component* sender,
 	uintptr_t section, uintptr_t options);
 static void helpview_on_focus(HelpView*, psy_ui_Component* sender);
 
@@ -23,14 +23,13 @@ static void helpview_on_focus(HelpView*, psy_ui_Component* sender);
 void helpview_init(HelpView* self, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, Workspace* workspace)
 {	
-	helpview_initbase(self, parent);
-	self->workspace = workspace;
-	helpview_inittabbar(self, tabbarparent, workspace);
-	helpview_initsections(self, workspace);	
+	helpview_init_base(self, parent);	
+	helpview_init_tabbar(self, tabbarparent, workspace);
+	helpview_init_sections(self, workspace);	
 	psy_ui_tabbar_select(&self->tabbar, HELPVIEWSECTION_ABOUT);
 }
 
-void helpview_initbase(HelpView* self, psy_ui_Component* parent)
+void helpview_init_base(HelpView* self, psy_ui_Component* parent)
 {
 	psy_ui_component_init(helpview_base(self), parent, NULL);
 	psy_ui_component_set_id(helpview_base(self), VIEW_ID_HELPVIEW);
@@ -38,10 +37,10 @@ void helpview_initbase(HelpView* self, psy_ui_Component* parent)
 	psy_signal_connect(&helpview_base(self)->signal_focus, self,
 		helpview_on_focus);
 	psy_signal_connect(&helpview_base(self)->signal_selectsection, self,
-		helpview_onselectsection);
+		helpview_on_select_section);
 }
 
-void helpview_inittabbar(HelpView* self, psy_ui_Component* tabbarparent,
+void helpview_init_tabbar(HelpView* self, psy_ui_Component* tabbarparent,
 	Workspace* workspace)
 {	
 	psy_ui_component_init_align(&self->bar, tabbarparent, NULL,
@@ -54,12 +53,12 @@ void helpview_inittabbar(HelpView* self, psy_ui_Component* tabbarparent,
 		"help.greetings", NULL);	
 }
 
-void helpview_initsections(HelpView* self, Workspace* workspace)
+void helpview_init_sections(HelpView* self, Workspace* workspace)
 {
 	psy_ui_notebook_init(&self->notebook, helpview_base(self));
 	psy_ui_component_set_align(psy_ui_notebook_base(&self->notebook),
 		psy_ui_ALIGN_CLIENT);
-	psy_ui_notebook_connectcontroller(&self->notebook,
+	psy_ui_notebook_connect_controller(&self->notebook,
 		&self->tabbar.signal_change);
 	help_init(&self->help, psy_ui_notebook_base(&self->notebook),
 		&workspace->config.directories);
@@ -67,7 +66,7 @@ void helpview_initsections(HelpView* self, Workspace* workspace)
 	greet_init(&self->greet, psy_ui_notebook_base(&self->notebook));	
 }
 
-void helpview_onselectsection(HelpView* self, psy_ui_Component* sender,
+void helpview_on_select_section(HelpView* self, psy_ui_Component* sender,
 	uintptr_t section, uintptr_t options)
 {
 	psy_ui_tabbar_select(&self->tabbar, (int)section);

@@ -15,41 +15,25 @@ extern "C" {
 #include "dirconfig.h"
 #include "eventdriverconfig.h"
 #include "generalconfig.h"
+#include "globalconfig.h"
 #include "keyboardmiscconfig.h"
-#include "languageconfig.h"
-#include "machineviewconfig.h"
-#include "machineparamconfig.h"
 #include "metronomeconfig.h"
 #include "midiviewconfig.h"
-#include "patternviewconfig.h"
 #include "predefsconfig.h"
 #include "seqeditconfig.h"
+#include "visualconfig.h"
 /* audio */
 #include <audioconfig.h>
 
-enum {
-	PROPERTY_ID_REGENERATEPLUGINCACHE = 10000,	
-	PROPERTY_ID_LOADSKIN,
-	PROPERTY_ID_DEFAULTSKIN,	
-	PROPERTY_ID_DEFAULTFONT,	
-	PROPERTY_ID_APPTHEME,
-	PROPERTY_ID_IMPORTCONFIG
-};
 
 typedef struct PsycleConfig {
 	psy_Property config;
-	psy_Property* global;	
-	psy_Property* visual;	
-	psy_Property* defaultfont;
-	psy_Property* apptheme;
+	GlobalConfig global;	
 	GeneralConfig general;
+	VisualConfig visual;
 	AudioConfig audio;
-	EventDriverConfig input;
-	LanguageConfig language;
+	EventDriverConfig input;	
 	DirConfig directories;	
-	PatternViewConfig patview;
-	MachineViewConfig macview;
-	MachineParamConfig macparam;
 	MetronomeConfig metronome;
 	KeyboardMiscConfig misc;
 	MidiViewConfig midi;
@@ -83,7 +67,7 @@ INLINE EventDriverConfig* psycleconfig_input(PsycleConfig* self)
 
 INLINE LanguageConfig* psycleconfig_language(PsycleConfig* self)
 {
-	return &self->language;
+	return &self->global.language;
 }
 
 INLINE DirConfig* psycleconfig_directories(PsycleConfig* self)
@@ -93,17 +77,17 @@ INLINE DirConfig* psycleconfig_directories(PsycleConfig* self)
 
 INLINE PatternViewConfig* psycleconfig_patview(PsycleConfig* self)
 {
-	return &self->patview;
+	return &self->visual.patview;
 }
 
 INLINE MachineViewConfig* psycleconfig_macview(PsycleConfig* self)
 {
-	return &self->macview;
+	return &self->visual.macview;
 }
 
 INLINE MachineParamConfig* psycleconfig_macparam(PsycleConfig* self)
 {
-	return &self->macparam;
+	return &self->visual.macparam;
 }
 
 INLINE KeyboardMiscConfig* psycleconfig_misc(PsycleConfig* self)

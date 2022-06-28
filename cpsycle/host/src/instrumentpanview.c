@@ -208,7 +208,7 @@ void instrumentpanview_ondescribe(InstrumentPanView* self,
 		} else {
 			pos = psy_audio_NOTECOMMANDS_MIDDLEC;
 		}
-		offset = (patternviewconfig_notetabmode(&self->workspace->config.patview) ==
+		offset = (patternviewconfig_notetabmode(&self->workspace->config.visual.patview) ==
 			psy_dsp_NOTESTAB_A440)  ? -1 : 0;
 		psy_snprintf(tmp, 40, "%s", notes[pos % 12]);
 		psy_snprintf(txt, 64, "%s%d", tmp, offset + (pos / 12));

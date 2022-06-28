@@ -121,7 +121,7 @@ void wireview_init(WireView* self, psy_ui_Component* parent,
 	/* Channel Mapping */
 	channelmappingview_init(&self->channelmappingview,
 		psy_ui_notebook_base(&self->notebook), wire, workspace);
-	psy_ui_notebook_connectcontroller(&self->notebook,
+	psy_ui_notebook_connect_controller(&self->notebook,
 		&self->tabbar.signal_change);
 	psy_ui_tabbar_select(&self->tabbar, WIREVIEW_TAB_VUMETER);
 	psy_signal_connect(&self->component.signal_timer, self, wireview_on_timer);
@@ -378,8 +378,6 @@ void wireframe_init(WireFrame* self, psy_ui_Component* parent,
 
 	psy_ui_frame_init(wireframe_base(self), (parent->view)
 		? parent->view : parent);
-	psy_ui_component_setbackgroundmode(wireframe_base(self),
-		psy_ui_SETBACKGROUND);
 	psy_ui_component_doublebuffer(wireframe_base(self));
 	psy_ui_component_seticonressource(wireframe_base(self), IDI_MACPARAM);
 	wireview_init(&self->wireview, wireframe_base(self),

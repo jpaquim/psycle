@@ -1612,7 +1612,7 @@ void trackerview_init(TrackerView* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->workspace->signal_play_status_changed, self,
 		trackerview_on_play_status_changed);
 	trackerview_connect_song(self);	
-	psy_signal_connect(&workspace->config.patview.signal_changed, self,
+	psy_signal_connect(&workspace->config.visual.patview.signal_changed, self,
 		trackerview_on_configure);
 }
 

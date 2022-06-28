@@ -191,7 +191,7 @@ void psy_audio_pluginsections_add(psy_audio_PluginSections* self,
 				(psy_strlen(macinfo->modulepath) > 0)
 				? macinfo->shellidx
 				: psy_INDEX_INVALID);
-			if (!psy_audio_pluginsections_pluginexists(self, section, macinfo)) {
+			if (!psy_audio_pluginsections_plugin_exists(self, section, macinfo)) {
 				makeplugininfo(plugins, name, macinfo->modulepath, macinfo->type,
 					macinfo, NULL);
 			}
@@ -241,7 +241,7 @@ void psy_audio_pluginsections_removesection(psy_audio_PluginSections* self,
 	}
 }
 
-void psy_audio_pluginsections_clearplugins(psy_audio_PluginSections* self,
+void psy_audio_pluginsections_clear_plugins(psy_audio_PluginSections* self,
 	const char* sectionkey)
 {
 	psy_Property* section;
@@ -320,8 +320,9 @@ psy_Property* psy_audio_pluginsections_pluginbyid(psy_audio_PluginSections* self
 	return NULL;
 }
 
-psy_Property* psy_audio_pluginsections_pluginexists(psy_audio_PluginSections* self,
-	psy_Property* section, psy_audio_MachineInfo* macinfo)
+psy_Property* psy_audio_pluginsections_plugin_exists(
+	psy_audio_PluginSections* self, psy_Property* section,
+	psy_audio_MachineInfo* macinfo)
 {
 	if (section) {
 		psy_Property* plugins;
@@ -435,8 +436,8 @@ static void plugincatcher_makeinternals(psy_audio_PluginCatcher*);
 static void plugincatcher_makesampler(psy_audio_PluginCatcher*);
 static void plugincatcher_makeduplicator(psy_audio_PluginCatcher*);
 static int isplugin(int type);
-static int onenumdir(psy_audio_PluginCatcher*, const char* path, int flag);
-static int onpropertiesenum(psy_audio_PluginCatcher*, psy_Property*, int level);
+static int on_enum_dir(psy_audio_PluginCatcher*, const char* path, int flag);
+static int on_properties_enum(psy_audio_PluginCatcher*, psy_Property*, int level);
 static int pathhasextension(const char* path);
 static void plugincatcher_scan_multipath(psy_audio_PluginCatcher*,
 	const char* multipath, const char* wildcard, int option,
@@ -507,7 +508,7 @@ void psy_audio_plugincatcher_set_directories(psy_audio_PluginCatcher* self, psy_
 
 void psy_audio_plugincatcher_clear(psy_audio_PluginCatcher* self)
 {
-	psy_audio_pluginsections_clearplugins(&self->sections, "all");
+	psy_audio_pluginsections_clear_plugins(&self->sections, "all");
 	plugincatcher_makeinternals(self);
 	self->hasplugincache = FALSE;
 }
@@ -591,10 +592,10 @@ void plugincatcher_scan_multipath(psy_audio_PluginCatcher* self,
 	while (token != NULL && !self->abort) {
 		if (recursive) {
 			psy_dir_enumerate_recursive(self, token, wildcard, option,
-				(psy_fp_findfile)onenumdir);
+				(psy_fp_findfile)on_enum_dir);
 		} else {
 			psy_dir_enumerate(self, token, wildcard, option,
-				(psy_fp_findfile)onenumdir);
+				(psy_fp_findfile)on_enum_dir);
 		}
 		token = strtok(0, seps );
 	}
@@ -653,7 +654,7 @@ int isplugin(int type)
 		type == psy_audio_LADSPA;
 }
 
-int onenumdir(psy_audio_PluginCatcher* self, const char* path, int type)
+int on_enum_dir(psy_audio_PluginCatcher* self, const char* path, int type)
 {
 	psy_audio_MachineInfo macinfo;
 	char name[_MAX_PATH];
@@ -772,7 +773,7 @@ char* psy_audio_plugincatcher_modulepath(psy_audio_PluginCatcher* self,
 		self->all = psy_audio_pluginsections_section_plugins(&self->sections,
 			"all");
 		psy_property_enumerate(self->all, self,
-			(psy_PropertyCallback)onpropertiesenum);
+			(psy_PropertyCallback)on_properties_enum);
 		if (!searchresult) {
 			if (strstr(path, "blitz")) {
 				if (newgamefxblitzifversionunknown) {
@@ -783,13 +784,13 @@ char* psy_audio_plugincatcher_modulepath(psy_audio_PluginCatcher* self,
 				searchtype = machtype;
 				searchresult = 0;
 				psy_property_enumerate(self->all, self,
-					(psy_PropertyCallback)onpropertiesenum);
+					(psy_PropertyCallback)on_properties_enum);
 				if (!searchresult) {
 					searchname = "blitzn:0";
 					searchtype = machtype;
 					searchresult = 0;
 					psy_property_enumerate(self->all, self,
-						(psy_PropertyCallback)onpropertiesenum);
+						(psy_PropertyCallback)on_properties_enum);
 				}
 				if (!searchresult) {
 					if (newgamefxblitzifversionunknown) {
@@ -800,7 +801,7 @@ char* psy_audio_plugincatcher_modulepath(psy_audio_PluginCatcher* self,
 					searchtype = machtype;
 					searchresult = 0;
 					psy_property_enumerate(self->all, self,
-						(psy_PropertyCallback)onpropertiesenum);
+						(psy_PropertyCallback)on_properties_enum);
 				}
 			} else
 			if (strstr(path, "gamefx")) {
@@ -813,13 +814,13 @@ char* psy_audio_plugincatcher_modulepath(psy_audio_PluginCatcher* self,
 				searchtype = machtype;
 				searchresult = 0;
 				psy_property_enumerate(self->all, self,
-					(psy_PropertyCallback)onpropertiesenum);
+					(psy_PropertyCallback)on_properties_enum);
 				if (!searchresult) {
 					searchname = "gamefxn:0";
 					searchtype = machtype;
 					searchresult = 0;
 					psy_property_enumerate(self->all, self,
-						(psy_PropertyCallback)onpropertiesenum);
+						(psy_PropertyCallback)on_properties_enum);
 				}
 				if (!searchresult) {
 					if (newgamefxblitzifversionunknown) {
@@ -831,7 +832,7 @@ char* psy_audio_plugincatcher_modulepath(psy_audio_PluginCatcher* self,
 					searchtype = machtype;
 					searchresult = 0;
 					psy_property_enumerate(self->all, self,
-						(psy_PropertyCallback)onpropertiesenum);
+						(psy_PropertyCallback)on_properties_enum);
 				}
 			}
 		}
@@ -841,7 +842,7 @@ char* psy_audio_plugincatcher_modulepath(psy_audio_PluginCatcher* self,
 				searchtype = machtype;
 				searchresult = 0;
 				psy_property_enumerate(self->all, self,
-					(psy_PropertyCallback)onpropertiesenum);
+					(psy_PropertyCallback)on_properties_enum);
 			}
 		}
 		if (!searchresult) {
@@ -850,7 +851,7 @@ char* psy_audio_plugincatcher_modulepath(psy_audio_PluginCatcher* self,
 				searchtype = machtype;
 				searchresult = 0;
 				psy_property_enumerate(self->all, self,
-					(psy_PropertyCallback)onpropertiesenum);
+					(psy_PropertyCallback)on_properties_enum);
 			}
 		}
 		if (!searchresult) {
@@ -859,7 +860,7 @@ char* psy_audio_plugincatcher_modulepath(psy_audio_PluginCatcher* self,
 				searchtype = machtype;
 				searchresult = 0;
 				psy_property_enumerate(self->all, self,
-					(psy_PropertyCallback)onpropertiesenum);
+					(psy_PropertyCallback)on_properties_enum);
 			}
 		}
 		if (searchresult) {
@@ -871,7 +872,7 @@ char* psy_audio_plugincatcher_modulepath(psy_audio_PluginCatcher* self,
 	return fullpath;
 }
 
-int onpropertiesenum(psy_audio_PluginCatcher* self, psy_Property* property, int level)
+int on_properties_enum(psy_audio_PluginCatcher* self, psy_Property* property, int level)
 {
 	if (psy_property_type(property) == PSY_PROPERTY_TYPE_SECTION) {
 		const char* key = psy_property_key(property);
@@ -890,7 +891,7 @@ int pathhasextension(const char* path)
 	return strrchr(path, '.') != 0;
 }
 
-const char* psy_audio_plugincatcher_searchpath(psy_audio_PluginCatcher* self, const char* name,
+const char* psy_audio_plugincatcher_search_path(psy_audio_PluginCatcher* self, const char* name,
 	int machtype)
 {
 	searchname = name;
@@ -898,7 +899,7 @@ const char* psy_audio_plugincatcher_searchpath(psy_audio_PluginCatcher* self, co
 	searchresult = 0;
 	self->all = psy_audio_pluginsections_section_plugins(&self->sections, "all");
 	psy_property_enumerate(self->all, self,
-		(psy_PropertyCallback)onpropertiesenum);
+		(psy_PropertyCallback)on_properties_enum);
 	if (searchresult) {
 		return psy_property_at_str(searchresult, "path", 0);
 	}

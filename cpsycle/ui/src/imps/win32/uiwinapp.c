@@ -423,94 +423,86 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 		case WM_CREATE:
 			psy_signal_emit(&imp->component->signal_create, component, 0);
 			return 0;			
-		case WM_PAINT: {
-			const psy_ui_Border* border;			
+		case WM_PAINT: {			
+			HDC hdc;
+			PAINTSTRUCT ps;
+			psy_ui_RealSize clipsize;
+			HRGN hrgn;
+			DWORD rectcount;
+			DWORD r;
+			const RECT* pRect;
+			RGNDATA* pRegion;
 
-			border = psy_ui_component_border(imp->component);			
-			if (imp->component->vtable->ondraw ||
-				imp->component->signal_draw.slots ||				
-				imp->component->componentbackground.backgroundmode != psy_ui_NOBACKGROUND ||
-				psy_ui_border_isset(border)) {
-				HDC hdc;
-				PAINTSTRUCT ps;
-				psy_ui_RealSize clipsize;
-				HRGN hrgn;
-				DWORD rectcount;
-				DWORD r;
-				const RECT* pRect;
-				RGNDATA* pRegion;
+			hrgn = CreateRectRgn(0, 0, 0, 0);
+			rectcount = 0;
+			pRegion = 0;
+			if (GetUpdateRgn(hwnd, hrgn, FALSE) != NULLREGION) {
+				DWORD size;
 
-				hrgn = CreateRectRgn(0, 0, 0, 0);
-				rectcount = 0;
-				pRegion = 0;
-				if (GetUpdateRgn(hwnd, hrgn, FALSE) != NULLREGION) {
-					DWORD size;
-
-					size = GetRegionData(
-						hrgn, /* handle to region */
-						0,    /* size of region data buffering a region. */
-						NULL  /* region data buffer */
-					);
-					if (size) {
-						pRegion = (RGNDATA*)malloc(size);
-						GetRegionData(hrgn, size, pRegion);
-						pRect = (const RECT*)&pRegion->Buffer;						
-						rectcount = pRegion->rdh.nCount;						
-					}
+				size = GetRegionData(
+					hrgn, /* handle to region */
+					0,    /* size of region data buffering a region. */
+					NULL  /* region data buffer */
+				);
+				if (size) {
+					pRegion = (RGNDATA*)malloc(size);
+					GetRegionData(hrgn, size, pRegion);
+					pRect = (const RECT*)&pRegion->Buffer;						
+					rectcount = pRegion->rdh.nCount;						
 				}
-				hdc = BeginPaint(hwnd, &ps);				
-				for (r = 0; r < rectcount; ++r) {
-					RECT rcPaint;
-					rcPaint = pRect[r];
-					/* store clip / repaint size of paint request */
-					clipsize = psy_ui_realsize_make(
-						(double)rcPaint.right - (double)rcPaint.left,
-						(double)rcPaint.bottom - (double)rcPaint.top);
-					/* anything to paint ? */
-					if (!psy_ui_realsize_equals(&clipsize, psy_ui_realsize_zero())) {
-						psy_ui_Graphics	g;
-						psy_ui_Bitmap dblbuffer;
-
-						if (psy_ui_component_doublebuffered(component)) {
-							/*
-							** create a graphics context with back buffer bitmap
-							** with origin (0; 0) and size of the paint request
-							*/
-							psy_ui_bitmap_init_size(&dblbuffer, clipsize);
-							psy_ui_graphics_init_bitmap(&g, &dblbuffer);
-							/* translate paint request to buffer 0, 0 origin */
-							psy_ui_setorigin(&g, psy_ui_realpoint_make(
-								rcPaint.left, rcPaint.top));
-						} else {
-							/* create graphics handle with the paint hdc */
-							psy_ui_graphics_init(&g, hdc);
-						}						
-						/* set clip */						
-						psy_ui_graphics_set_clip_rect(&g,
-							psy_ui_realrectangle_make(
-								psy_ui_realpoint_make(rcPaint.left,
-									rcPaint.top),
-								clipsize));
-						/* draw */
-						psy_ui_component_draw(component, &g);						
-						if (psy_ui_component_doublebuffered(component)) {
-							/* copy the double buffer bitmap to the paint hdc */
-							BitBlt(hdc, rcPaint.left, rcPaint.top,
-								(int)clipsize.width, (int)clipsize.height,
-								(HDC)psy_ui_graphics_dev_gc(&g), 0, 0, SRCCOPY);
-							psy_ui_bitmap_dispose(&dblbuffer);
-						}
-						psy_ui_graphics_dispose(&g);
-					}					
-				}				
-				free(pRegion);
-				pRegion = NULL;
-				if (hrgn) {
-					DeleteObject((HGDIOBJ)hrgn);
-				}
-				EndPaint(hwnd, &ps);				
-				return 0;
 			}
+			hdc = BeginPaint(hwnd, &ps);				
+			for (r = 0; r < rectcount; ++r) {
+				RECT rcPaint;
+				rcPaint = pRect[r];
+				/* store clip / repaint size of paint request */
+				clipsize = psy_ui_realsize_make(
+					(double)rcPaint.right - (double)rcPaint.left,
+					(double)rcPaint.bottom - (double)rcPaint.top);
+				/* anything to paint ? */
+				if (!psy_ui_realsize_equals(&clipsize, psy_ui_realsize_zero())) {
+					psy_ui_Graphics	g;
+					psy_ui_Bitmap dblbuffer;
+
+					if (psy_ui_component_doublebuffered(component)) {
+						/*
+						** create a graphics context with back buffer bitmap
+						** with origin (0; 0) and size of the paint request
+						*/
+						psy_ui_bitmap_init_size(&dblbuffer, clipsize);
+						psy_ui_graphics_init_bitmap(&g, &dblbuffer);
+						/* translate paint request to buffer 0, 0 origin */
+						psy_ui_setorigin(&g, psy_ui_realpoint_make(
+							rcPaint.left, rcPaint.top));
+					} else {
+						/* create graphics handle with the paint hdc */
+						psy_ui_graphics_init(&g, hdc);
+					}						
+					/* set clip */						
+					psy_ui_graphics_set_clip_rect(&g,
+						psy_ui_realrectangle_make(
+							psy_ui_realpoint_make(rcPaint.left,
+								rcPaint.top),
+							clipsize));
+					/* draw */
+					psy_ui_component_draw(component, &g);						
+					if (psy_ui_component_doublebuffered(component)) {
+						/* copy the double buffer bitmap to the paint hdc */
+						BitBlt(hdc, rcPaint.left, rcPaint.top,
+							(int)clipsize.width, (int)clipsize.height,
+							(HDC)psy_ui_graphics_dev_gc(&g), 0, 0, SRCCOPY);
+						psy_ui_bitmap_dispose(&dblbuffer);
+					}
+					psy_ui_graphics_dispose(&g);
+				}					
+			}				
+			free(pRegion);
+			pRegion = NULL;
+			if (hrgn) {
+				DeleteObject((HGDIOBJ)hrgn);
+			}
+			EndPaint(hwnd, &ps);				
+			return 0;			
 			break; }
 		case WM_NCDESTROY: {
 			psy_ui_winapp_handle_destroy_window(winapp, component);
@@ -711,18 +703,13 @@ bool handle_ctlcolor(psy_ui_WinApp* self, int msg, HWND hwnd, WPARAM wparam,
 			colorref = psy_ui_colour_colorref(&colour);
 			colour = psy_ui_component_backgroundcolour(imp->component);
 			bgcolorref = psy_ui_colour_colorref(&colour);
-			if (((imp->component->componentbackground.backgroundmode & psy_ui_SETBACKGROUND)
-				== psy_ui_SETBACKGROUND) && !colour.mode.transparent) {
+			if (!colour.mode.transparent) {
 				DeleteObject(psy_ui_win_component_details(imp->component)->background);
 				psy_ui_win_component_details(imp->component)->background =
 					CreateSolidBrush(RGB(colour.r, colour.g, colour.b));
 			} else {
-				brush = (HBRUSH)GetStockObject(NULL_BRUSH);
-			}
-			brush = ((imp->component->componentbackground.backgroundmode & psy_ui_SETBACKGROUND)
-				== psy_ui_SETBACKGROUND)
-				? psy_ui_win_component_details(imp->component)->background
-				: (HBRUSH)GetStockObject(NULL_BRUSH);
+				brush = psy_ui_win_component_details(imp->component)->background;
+			}			
 		} else {
 			colorref = psy_ui_colour_colorref(
 				&psy_ui_style_const(psy_ui_STYLE_ROOT)->colour);

@@ -654,6 +654,12 @@
     <ClCompile Include="src\seqeditproperties.c">
       <Filter>sequence\seqeditor</Filter>
     </ClCompile>
+    <ClCompile Include="src\globalconfig.c">
+      <Filter>configuration</Filter>
+    </ClCompile>
+    <ClCompile Include="src\visualconfig.c">
+      <Filter>configuration</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\languageconfig.h">
@@ -1210,6 +1216,12 @@
     </ClInclude>
     <ClInclude Include="src\seqeditproperties.h">
       <Filter>sequence\seqeditor</Filter>
+    </ClInclude>
+    <ClInclude Include="src\globalconfig.h">
+      <Filter>configuration</Filter>
+    </ClInclude>
+    <ClInclude Include="src\visualconfig.h">
+      <Filter>configuration</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

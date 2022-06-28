@@ -1,38 +1,41 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #if !defined(PARAMRACK_H)
 #define PARAMRACK_H
 
-// host
+/* host */
 #include "workspace.h"
 #include "paramlistbox.h"
 #include "intedit.h"
-// ui
+/* ui */
 #include <uibutton.h>
 #include <uilabel.h>
 #include <uiscroller.h>
-// audio
+/* audio */
 #include <machine.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// ParamRackBox
+/* ParamRackBox */
+
 struct ParamRackBox;
 
 typedef struct ParamRackBox {
-	// inherits
+	/* inherits */
 	psy_ui_Component component;
-	// internal
+	/* internal */
 	psy_ui_Component header;
 	psy_ui_Label title;
 	psy_ui_Button inserteffect;
 	ParameterListBox parameters;	
 	psy_ui_Colour restorebgcolour;
 	uintptr_t slot;
-	// references
+	/* references */
 	Workspace* workspace;
 	struct ParamRackBox* nextbox;
 } ParamRackBox;
@@ -47,7 +50,7 @@ ParamRackBox* paramrackbox_allocinit(psy_ui_Component* parent, uintptr_t slot,
 void paramrackbox_select(ParamRackBox*);
 void paramrackbox_deselect(ParamRackBox*);
 
-// ParamRackMode
+/* ParamRackMode */
 typedef enum ParamRackMode {
 	PARAMRACK_NONE,
 	PARAMRACK_ALL,
@@ -59,9 +62,9 @@ typedef enum ParamRackMode {
 } ParamRackMode;
 
 typedef struct ParamRackBatchBar {
-	// inherits
+	/* inherits */
 	psy_ui_Component component;
-	// internal	
+	/* internal */
 	psy_ui_Button solo;
 	psy_ui_Button mute;
 	psy_ui_Button remove;
@@ -72,11 +75,11 @@ typedef struct ParamRackBatchBar {
 void paramrackbatchbar_init(ParamRackBatchBar*, psy_ui_Component* parent);
 
 typedef struct ParamRackModeBar {
-	// inherits
+	/* inherits */
 	psy_ui_Component component;
-	// signals
+	/* signals */
 	psy_Signal signal_select;
-	// internal	
+	/* internal */
 	psy_ui_Button all;
 	psy_ui_Button inputs;
 	psy_ui_Button outputs;
@@ -88,16 +91,16 @@ typedef struct ParamRackModeBar {
 void paramrackmodebar_init(ParamRackModeBar*, psy_ui_Component* parent);
 void paramrackmodebar_setmode(ParamRackModeBar*, ParamRackMode);
 
-// ParamRackPane
+/* ParamRackPane */
 typedef struct ParamRackPane {
-	// inherit
+	/* inherit */
 	psy_ui_Component component;	
-	// internal
+	/* internal */
 	psy_Table boxes;
 	uintptr_t lastselected;
 	ParamRackMode mode;
 	uintptr_t level;
-	// references
+	/* references */
 	Workspace* workspace;
 	psy_audio_Machines* machines;	
 	ParamRackBox* lastinserted;	
@@ -107,18 +110,18 @@ void paramrackpane_init(ParamRackPane*, psy_ui_Component* parent, Workspace*);
 
 void paramrackpane_setmode(ParamRackPane*, ParamRackMode);
 
-// ParamRack
+/* ParamRack */
 typedef struct ParamRack {
-	// inherit
+	/* inherit */
 	psy_ui_Component component;
-	// internal
+	/* internal */
 	ParamRackPane pane;
 	psy_ui_Component bottom;
 	ParamRackBatchBar batchbar;
 	ParamRackModeBar modebar;	
 	IntEdit leveledit;
 	psy_ui_Scroller scroller;
-	// references
+	/* references */
 	Workspace* workspace;
 } ParamRack;
 

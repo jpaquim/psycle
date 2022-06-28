@@ -519,7 +519,7 @@ void instrumentview_init(InstrumentView* self, psy_ui_Component* parent,
 		psy_ui_notebook_base(&self->notebook),
 		&workspace->song->instruments, workspace);
 	/* connect signals */
-	psy_ui_notebook_connectcontroller(&self->notebook,
+	psy_ui_notebook_connect_controller(&self->notebook,
 		&self->tabbar.signal_change);
 	psy_signal_connect(&workspace_song(self->workspace)->instruments.signal_insert, self,
 		instrumentview_oninstrumentinsert);

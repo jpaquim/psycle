@@ -397,20 +397,23 @@ void psy_ui_win_g_imp_drawfullbitmap(psy_ui_win_GraphicsImp* self,
 	HDC hdcmem;
 	psy_ui_RealSize size;
 	HBITMAP wbitmap;
-	psy_ui_TextMetric tm;
-	TEXTMETRIC win_tm;
+
+	assert(self);
 
 	hdcmem = CreateCompatibleDC(self->hdc);
-	wbitmap = ((psy_ui_win_BitmapImp*)bitmap->imp)->bitmap;
-	SelectObject(hdcmem, wbitmap);
-	size = psy_ui_bitmap_size(bitmap);
-	GetTextMetrics(self->hdc, &win_tm);
-	tm = converttextmetric(&win_tm);
-	BitBlt(self->hdc,
-		(int)x - (int)(self->org.x),
-		(int)y - (int)(self->org.y),
-		(int)size.width,
-		(int)size.height, hdcmem, 0, 0, SRCCOPY);
+	if (hdcmem == NULL) {
+		return;
+	}
+	wbitmap = (HBITMAP)psy_ui_bitmap_native(bitmap);
+	if (wbitmap) {
+		SelectObject(hdcmem, wbitmap);
+		size = psy_ui_bitmap_size(bitmap);		
+		BitBlt(self->hdc,
+			(int)x - (int)(self->org.x),
+			(int)y - (int)(self->org.y),
+			(int)size.width,
+			(int)size.height, hdcmem, 0, 0, SRCCOPY);
+	}
 	DeleteDC(hdcmem);
 }
 
@@ -421,13 +424,16 @@ void psy_ui_win_g_imp_drawbitmap(psy_ui_win_GraphicsImp* self,
 	HDC hdcmem;
 	HBITMAP mask;
 	HBITMAP wbitmap;
-	psy_ui_win_BitmapImp* winimp;
+	DWORD rop;
 
-	winimp = (psy_ui_win_BitmapImp*)bitmap->imp;
-	mask = winimp->mask;
-	wbitmap = winimp->bitmap;
+	assert(self);
+		
 	hdcmem = CreateCompatibleDC(self->hdc);
-	if (winimp->mask) {
+	if (hdcmem == NULL) {
+		return;
+	}
+	mask = (HBITMAP)psy_ui_bitmap_native_mask(bitmap);
+	if (mask) {
 		uint32_t restoretextcolour;
 
 		/*
@@ -437,18 +443,31 @@ void psy_ui_win_g_imp_drawbitmap(psy_ui_win_GraphicsImp* self,
 		** with the destination, filling it into the hole, but leaving the
 		** surrounding area untouched.
 		*/
-		SelectObject(hdcmem, winimp->mask);
+		SelectObject(hdcmem, mask);
 		restoretextcolour = GetTextColor(self->hdc);
 		SetTextColor(self->hdc, RGB(0, 0, 0));
 		SetBkColor(self->hdc, RGB(255, 255, 255));
-		BitBlt(self->hdc, (int)x - (int)(self->org.x), (int)y - (int)(self->org.y), (int)width, (int)height, hdcmem, (int)xsrc, (int)ysrc, SRCAND);
-		SelectObject(hdcmem, wbitmap);
+		BitBlt(self->hdc,
+			(int)x - (int)(self->org.x), (int)y - (int)(self->org.y), 
+			(int)width, (int)height, 
+			hdcmem, 
+			(int)xsrc, (int)ysrc, 
+			SRCAND);		
 		/* Also note the use of SRCPAINT rather than SRCCOPY. */
-		BitBlt(self->hdc, (int)x - (int)(self->org.x), (int)y - (int)(self->org.y), (int)width, (int)height, hdcmem, (int)xsrc, (int)ysrc, SRCPAINT);
-		SetTextColor(self->hdc, restoretextcolour);
+		rop = SRCPAINT;
+		SetTextColor(self->hdc, restoretextcolour);		
 	} else {
+		rop = SRCCOPY;		
+	}
+	wbitmap = (HBITMAP)psy_ui_bitmap_native(bitmap);
+	if (wbitmap) {
 		SelectObject(hdcmem, wbitmap);
-		BitBlt(self->hdc, (int)x - (int)(self->org.x), (int)y - (int)(self->org.y), (int)width, (int)height, hdcmem, (int)xsrc, (int)ysrc, SRCCOPY);
+		BitBlt(self->hdc,
+			(int)x - (int)(self->org.x), (int)y - (int)(self->org.y),
+			(int)width, (int)height,
+			hdcmem,
+			(int)xsrc, (int)ysrc,
+			rop);
 	}
 	DeleteDC(hdcmem);
 }
@@ -458,15 +477,18 @@ void psy_ui_win_g_imp_drawstretchedbitmap(psy_ui_win_GraphicsImp* self,
 	double height, double xsrc, double ysrc, double wsrc, double hsrc)
 {
 	HDC hdcmem;
-	HBITMAP mask;
 	HBITMAP wbitmap;
-	psy_ui_win_BitmapImp* winimp;
+	HBITMAP mask;	
+	DWORD rop;
 
-	winimp = (psy_ui_win_BitmapImp*)bitmap->imp;
-	mask = winimp->mask;
-	wbitmap = winimp->bitmap;
+	assert(self);
+	
 	hdcmem = CreateCompatibleDC(self->hdc);
-	if (winimp->mask) {
+	if (hdcmem == NULL) {
+		return;
+	}
+	mask = (HBITMAP)psy_ui_bitmap_native_mask(bitmap);
+	if (mask) {
 		uint32_t restoretextcolour;
 		/*
 		** We are going to paint the two DDB's in sequence to the destination.
@@ -476,20 +498,31 @@ void psy_ui_win_g_imp_drawstretchedbitmap(psy_ui_win_GraphicsImp* self,
 		**  surrounding area untouched.
 		*/
 		restoretextcolour = GetTextColor(self->hdc);
-		SelectObject(hdcmem, winimp->mask);
+		SelectObject(hdcmem, mask);
 		SetTextColor(self->hdc, RGB(0, 0, 0));
 		SetBkColor(self->hdc, RGB(255, 255, 255));
-		StretchBlt(self->hdc, (int)x - (int)(self->org.x), (int)y - (int)(self->org.y), (int)width, (int)height, hdcmem, (int)xsrc, (int)ysrc, (int)wsrc, (int)hsrc,
-			SRCAND);
-		SelectObject(hdcmem, wbitmap);
-		/* Also note the use of SRCPAINT rather than SRCCOPY. */
-		StretchBlt(self->hdc, (int)x - (int)(self->org.x), (int)y - (int)(self->org.y), (int)width, (int)height, hdcmem, (int)xsrc, (int)ysrc, (int)wsrc, (int)hsrc,
-			SRCPAINT);
+		StretchBlt(self->hdc,
+			(int)x - (int)(self->org.x), (int)y - (int)(self->org.y), 
+			(int)width, (int)height, 
+			hdcmem, 
+			(int)xsrc, (int)ysrc, (int)wsrc, (int)hsrc,
+			SRCAND);		
 		SetTextColor(self->hdc, restoretextcolour);
+		/* Also note the use of SRCPAINT rather than SRCCOPY. */
+		rop = SRCPAINT;		
 	} else {
+		rop = SRCCOPY;
+	}
+	wbitmap = (HBITMAP)psy_ui_bitmap_native(bitmap);
+	if (wbitmap) {
 		SelectObject(hdcmem, wbitmap);
-		StretchBlt(self->hdc, (int)x - (int)(self->org.x), (int)y - (int)(self->org.y), (int)width, (int)height, hdcmem, (int)xsrc, (int)ysrc, (int)wsrc, (int)hsrc,
-			SRCCOPY);
+		StretchBlt(self->hdc,
+			(int)x - (int)(self->org.x), (int)y - (int)(self->org.y),
+			(int)width, (int)height,
+			hdcmem,
+			(int)xsrc, (int)ysrc,
+			(int)wsrc, (int)hsrc,
+			rop);
 	}
 	DeleteDC(hdcmem);
 }

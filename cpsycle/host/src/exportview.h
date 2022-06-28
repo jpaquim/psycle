@@ -1,32 +1,34 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #if !defined(EXPORTVIEW_H)
 #define EXPORTVIEW_H
 
-// host
+/* host */
 #include "propertiesview.h"
 #include "workspace.h"
-// ui
+/* ui */
 #include <uibutton.h>
 #include <uicheckbox.h>
-#include <uitextarea.h>
 #include <uilabel.h>
+#include <uitextarea.h>
+
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// View for Module export
+/* Module export view */
 
 typedef struct ExportView {
-	// inherits
+	/* inherits */
 	psy_ui_Component component;
-	// ui elements
-	PropertiesView view;
-	// internal data
+	/* internal */
+	PropertiesView view;	
 	psy_Property* properties;
-	// references
+	/* references */
 	Workspace* workspace;	
 } ExportView;
 

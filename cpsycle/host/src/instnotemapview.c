@@ -670,7 +670,7 @@ void instrumententryview_outputstatus(InstrumentEntryView* self, uint8_t key)
 		keydesc = "Key";
 	}
 	notestr = psy_dsp_notetostr(key,
-		patternviewconfig_notetabmode(&self->state->workspace->config.patview));		
+		patternviewconfig_notetabmode(&self->state->workspace->config.visual.patview));
 	if (notestr) {				
 		psy_snprintf(text, 64, "%s %s", keydesc, notestr);		
 	} else {
@@ -1436,8 +1436,7 @@ void instrumentnotemapview_inittable(InstrumentNoteMapView* self, Workspace* wor
 	psy_ui_scroller_init(&self->scroller_table, &self->table, NULL, NULL);
 	psy_ui_scroller_set_client(&self->scroller, &self->tableview.component);
 	psy_ui_component_set_align(&self->scroller_table.component, psy_ui_ALIGN_CLIENT);
-	psy_ui_component_set_align(&self->tableview.component, psy_ui_ALIGN_FIXED);
-	psy_ui_component_setbackgroundmode(&self->scroller_table.pane, psy_ui_SETBACKGROUND);
+	psy_ui_component_set_align(&self->tableview.component, psy_ui_ALIGN_FIXED);	
 }
 
 void instrumentnotemapview_setinstrument(InstrumentNoteMapView* self,

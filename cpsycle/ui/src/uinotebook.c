@@ -159,7 +159,7 @@ uintptr_t psy_ui_notebook_pageindex(psy_ui_Notebook* self)
 	return self->pageindex;
 }
 
-void psy_ui_notebook_connectcontroller(psy_ui_Notebook* self, psy_Signal* 
+void psy_ui_notebook_connect_controller(psy_ui_Notebook* self, psy_Signal* 
 	controllersignal)
 {
 	psy_signal_connect(controllersignal, self, psy_ui_notebook_on_tabbar_change);

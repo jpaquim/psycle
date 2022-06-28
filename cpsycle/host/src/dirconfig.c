@@ -165,7 +165,7 @@ const char* dirconfig_pluginscurrplatform(const DirConfig* self)
 #endif
 }
 
-const char* dirconfig_luascripts(const DirConfig* self)
+const char* dirconfig_lua_scripts(const DirConfig* self)
 {
 	assert(self);
 

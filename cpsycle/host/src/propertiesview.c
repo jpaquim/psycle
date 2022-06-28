@@ -83,6 +83,10 @@ void propertiesrenderline_init(PropertiesRenderLine* self,
 	uintptr_t level)
 {
 	psy_ui_Label* key;
+	psy_ui_Size col0;
+	psy_ui_Value ident;
+
+	assert(property);
 
 	psy_ui_component_init(&self->component, parent, NULL);	
 	propertiesrenderline_vtable_init(self);	
@@ -93,8 +97,10 @@ void propertiesrenderline_init(PropertiesRenderLine* self,
 	if (state->numcols == 1) {
 		psy_ui_component_set_preferred_size(&self->component, state->size_col0);
 	} else {
-		psy_ui_component_set_preferred_size(&self->component,
-			psy_ui_size_make_em(190.0, 1.5));
+		if (psy_property_hint(property) != PSY_PROPERTY_HINT_LIST) {
+			psy_ui_component_set_preferred_size(&self->component,
+				psy_ui_size_make_em(120.0, 1.5));
+		}
 	}
 	self->property = property;	
 	assert(self->property);
@@ -104,13 +110,16 @@ void propertiesrenderline_init(PropertiesRenderLine* self,
 	self->combo = NULL;
 	self->input_definer = NULL;	
 	self->edit = NULL;
+	self->list = NULL;
 	self->state = state;	
 	/* column 0 */
 	key = psy_ui_label_allocinit(&self->component);		
+	ident = psy_ui_value_make_ew(psy_min(level, 5.0) * 4.0);
 	psy_ui_component_set_padding(psy_ui_label_base(key),
-		psy_ui_margin_make_em(0.0, 0.0, 0.0, psy_min(level, 5.0) * 4.0));
-	psy_ui_component_set_preferred_size(psy_ui_label_base(key),
-		self->state->size_col0);
+		psy_ui_margin_make_em(0.0, 0.0, 0.0, 
+			psy_ui_value_ew(&ident, NULL, NULL)));
+	col0 = self->state->size_col0;	
+	psy_ui_component_set_preferred_size(psy_ui_label_base(key), col0);
 	if (state->numcols == 1) {
 		psy_ui_component_set_align(&key->component, psy_ui_ALIGN_CLIENT);
 	} else {
@@ -249,6 +258,23 @@ void propertiesrenderline_init(PropertiesRenderLine* self,
 			psy_ui_component_set_align(col2, psy_ui_ALIGN_RIGHT);
 			psy_ui_component_set_preferred_size(col2, self->state->size_col2);				
 		}
+		self->list = NULL;
+		if (psy_property_hint(property) == PSY_PROPERTY_HINT_LIST) {
+			psy_List* p;			
+
+			self->list = psy_ui_component_allocinit(&self->component, NULL);
+			psy_ui_component_set_align(self->list, psy_ui_ALIGN_TOP);
+			p = psy_property_begin(property);
+			for (; p != NULL; p = p->next) {
+				psy_Property* property;
+				PropertiesRenderLine* line;
+
+				property = (psy_Property*)p->entry;
+				line = propertiesrenderline_allocinit(self->list,
+					self->state, property, level);
+				line->choice_line = self;
+			}
+		}
 	}
 	propertiesrenderline_update(self);
 }
@@ -274,7 +300,9 @@ PropertiesRenderLine* propertiesrenderline_allocinit(psy_ui_Component* parent,
 void propertiesrenderline_on_mouse_down(PropertiesRenderLine* self,
 	psy_ui_MouseEvent* ev)
 {	
-	self->state->property_line_selected = self;	
+	if (self->list == NULL) {
+		self->state->property_line_selected = self;
+	}
 }
 
 void propertiesrenderline_on_combo_select(PropertiesRenderLine* self,
@@ -397,8 +425,23 @@ bool propertiesrenderline_update_font(PropertiesRenderLine* self)
 }
 
 void propertiesrenderline_update(PropertiesRenderLine* self)
-{
+{	
 	if (self->state->numcols < 2) {
+		return;
+	}
+	if (self->list) {
+		psy_List* p;
+		psy_List* q;
+
+		q = p = psy_ui_component_children(self->list, psy_ui_NONE_RECURSIVE);		
+		for (; p != NULL; p = p->next) {
+			PropertiesRenderLine* line;
+
+			line = (PropertiesRenderLine*)p->entry;
+			propertiesrenderline_update(line);
+		}
+		psy_list_free(q);
+		q = NULL;
 		return;
 	}
 	if (propertiesrenderline_update_bool(self)) {		
@@ -682,7 +725,7 @@ void propertiesrenderer_update_line(PropertiesRenderer* self,
 	}
 	if (!line->property) {
 		return;
-	}	
+	}		
 	propertiesrenderline_update(line);
 }
 
@@ -705,7 +748,7 @@ int propertiesrenderer_on_properties_build(PropertiesRenderer* self,
 						psy_property_item_int(self->choiceline->property));
 				}
 				self->choicelevel = psy_INDEX_INVALID;				
-				self->choiceline = NULL;
+				self->choiceline = NULL;				
 			} else if (self->choiceline) {
 				if (self->choiceline->combo) {
 					if (psy_property_translation_prevented(property)) {
@@ -721,7 +764,7 @@ int propertiesrenderer_on_properties_build(PropertiesRenderer* self,
 		}
 		if (psy_property_hint(property) != PSY_PROPERTY_HINT_HIDE) {
 			PropertiesRenderLine* line;
-						
+									
 			line = propertiesrenderline_allocinit(self->curr,
 				&self->state, property, level + self->rebuild_level);
 			line->choice_line = self->choiceline;							
@@ -731,9 +774,12 @@ int propertiesrenderer_on_properties_build(PropertiesRenderer* self,
 				self->keystyle_hover);
 			psy_ui_component_set_style_type_select(&line->component,
 				self->linestyle_select);
-			if (psy_property_type(property) == PSY_PROPERTY_TYPE_CHOICE) {				
+			if (psy_property_type(property) == PSY_PROPERTY_TYPE_CHOICE) {
 				self->choicelevel = level;
-				self->choiceline = line;
+				self->choiceline = line;				
+			}
+			if (psy_property_hint(property) == PSY_PROPERTY_HINT_LIST) {
+				return 2;
 			}
 		}
 	}
@@ -1013,12 +1059,11 @@ bool propertiesview_on_input(PropertiesView* self, InputHandler* sender)
 {
 	psy_EventDriverCmd cmd;
 	double step;
-	double top;
-	double newtop;	
+	double top;	
 
 	cmd = inputhandler_cmd(sender);
 	if (cmd.id == -1) {
-		return 0;
+		return INPUTHANDLER_CONTINUE;
 	}					
 	step = psy_ui_component_scroll_step_height_px(
 		propertiesrenderer_base(&self->renderer));
@@ -1026,30 +1071,30 @@ bool propertiesview_on_input(PropertiesView* self, InputHandler* sender)
 		&self->renderer));
 	switch (cmd.id) {
 	case CMD_NAVTOP:
-		newtop = 0.0;		
+		top = 0.0;		
 		break;
 	case CMD_NAVBOTTOM:
-		newtop = (double)INT32_MAX;
+		top = (double)INT32_MAX;
 		break;
 	case CMD_NAVUP:
-		newtop = psy_max(0, top - step);
+		top = psy_max(0, top - step);
 		break;
 	case CMD_NAVDOWN:					
-		newtop = top + step;
+		top = top + step;
 		break;
 	case CMD_NAVPAGEUP:					
-		newtop = psy_max(0, top - step * 16.0);		
+		top = psy_max(0, top - step * 16.0);		
 		break;
 	case CMD_NAVPAGEDOWN:
-		newtop = top + step * 16.0;
+		top = top + step * 16.0;
 		break;
 	default:
-		newtop = -1.0;
+		top = -1.0;
 		break;
 	}
-	if (newtop != -1.0) {
+	if (top != -1.0) {
 		psy_ui_component_set_scroll_top(propertiesrenderer_base(
-			&self->renderer), psy_ui_value_make_px(psy_max(0.0, newtop)));
+			&self->renderer), psy_ui_value_make_px(psy_max(0.0, top)));
 	}	
 	return INPUTHANDLER_STOP;
 }

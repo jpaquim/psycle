@@ -61,12 +61,11 @@ KeyFrame* keyframe_allocinit(psy_dsp_big_beat_t offset, intptr_t value,
 	return rv;
 }
 
-void interpolatecurvebar_init(InterpolateCurveBar* self, psy_ui_Component* parent,
-	Workspace* workspace)
-{
-	psy_ui_Margin margin;
-	
+void interpolatecurvebar_init(InterpolateCurveBar* self, psy_ui_Component* parent)
+{	
 	psy_ui_component_init(&self->component, parent, NULL);
+	psy_ui_component_set_default_align(&self->component, psy_ui_ALIGN_LEFT,
+		psy_ui_margin_make_em(0.0, 2.0, 0.0, 0.0));
 	psy_ui_combobox_init(&self->curvetype, &self->component);
 	psy_ui_component_set_align(&self->curvetype.component, psy_ui_ALIGN_LEFT);
 	psy_ui_combobox_add_text(&self->curvetype, "Linear");
@@ -80,9 +79,7 @@ void interpolatecurvebar_init(InterpolateCurveBar* self, psy_ui_Component* paren
 	psy_ui_component_set_align(&self->cancel.component, psy_ui_ALIGN_RIGHT);
 	psy_ui_button_init(&self->ok, &self->component);
 	psy_ui_button_set_text(&self->ok, "Interpolate");
-	psy_ui_component_set_align(&self->ok.component, psy_ui_ALIGN_RIGHT);
-	psy_ui_margin_init_em(&margin, 0.0, 2.0, 0.0, 0.0);		
-	psy_ui_component_setmargin_children(&self->component, margin);
+	psy_ui_component_set_align(&self->ok.component, psy_ui_ALIGN_RIGHT);				
 }
 
 static psy_ui_ComponentVtable interpolatecurvebox_vtable;
@@ -475,7 +472,7 @@ void interpolatecurveview_init(InterpolateCurveView* self, psy_ui_Component*
 	psy_ui_component_init(&self->component, parent, NULL);
 	vtable_init(self);
 	self->state = state;
-	interpolatecurvebar_init(&self->bar, &self->component, workspace);
+	interpolatecurvebar_init(&self->bar, &self->component);
 	psy_ui_component_set_align(&self->bar.component, psy_ui_ALIGN_BOTTOM);
 	interpolatecurvebox_init(&self->box, &self->component, self, state,
 		workspace);

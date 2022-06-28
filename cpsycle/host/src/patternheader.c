@@ -501,7 +501,7 @@ void trackerheaderview_init(TrackerHeaderView* self, psy_ui_Component* parent, T
 	trackerheader_init(&self->header, &self->pane, config, state, workspace);
 	psy_ui_component_set_align(&self->header.component, psy_ui_ALIGN_FIXED);
 	/* configuration */
-	psy_signal_connect(&workspace->config.patview.signal_changed, self,
+	psy_signal_connect(&workspace->config.visual.patview.signal_changed, self,
 		trackerheaderview_on_configure);
 }
 
@@ -525,7 +525,7 @@ void trackerheaderview_on_configure(TrackerHeaderView* self, PatternViewConfig* 
 
 void trackerheaderview_on_header_line(TrackerHeaderView* self, psy_ui_Component* sender)
 {
-	patternviewconfig_switch_header(&self->header.workspace->config.patview);
+	patternviewconfig_switch_header(&self->header.workspace->config.visual.patview);
 	psy_ui_component_align(&self->header.component);
 	psy_ui_component_invalidate(&self->header.component);
 }
