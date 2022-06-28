@@ -4,7 +4,7 @@ LIBDIRS = -L ../../container/src -L ../../file/src -L ../../src -L ../../ui/src
 src = $(wildcard *.c)
 obj = $(src:.c=.o)
 
-LDFLAGS = -no-pie -lX11 -lXft -lXext -lXmu -lm -llua5.3 -lpthread -ldl -lstdc++ -lpsyui -lcontainer -lfile
+LDFLAGS = -no-pie -lpsyui -lX11 -lXft -lXext -lXmu -lm -llua5.3 -lpthread -ldl -lstdc++  -lcontainer -lfile
 
 uitest: $(obj)
 		$(CC) -g -o $@ $^ $(LIBDIRS) $(LDFLAGS)	

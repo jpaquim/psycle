@@ -313,28 +313,22 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 			return 0;
 		}
 		imp->exposeareavalid = TRUE;		
-		for (p = imp->expose_rectangles; p != NULL; p = p->next) {
-			r = (psy_ui_RealRectangle*)p->entry;			
-			if (imp->component->vtable->ondraw ||					
-					imp->component->signal_draw.slots ||
-					imp->component->componentbackground.backgroundmode
-						!= psy_ui_NOBACKGROUND ||					
-					psy_ui_border_isset(border)) {
-				psy_ui_x11_GraphicsImp* gx11;
-				XRectangle rectangle;
-				psy_ui_RealMargin spacing;
-				psy_ui_RealRectangle clip;
+		for (p = imp->expose_rectangles; p != NULL; p = p->next) {			
+			psy_ui_x11_GraphicsImp* gx11;
+			XRectangle rectangle;
+			psy_ui_RealMargin spacing;
+			psy_ui_RealRectangle clip;
 
-				if (!psy_ui_component_visible(imp->component)) {
-					return 0;
-				}
-				gx11 = (psy_ui_x11_GraphicsImp*)imp->g.imp;
-				/* reset scroll origin */
-				gx11->org.x = 0;
-				gx11->org.y = 0;							
-				psy_ui_graphics_set_clip_rect(&imp->g, *r);					
-				psy_ui_component_draw(imp->component, &imp->g);			
+			r = (psy_ui_RealRectangle*)p->entry;
+			if (!psy_ui_component_visible(imp->component)) {
+				return 0;
 			}
+			gx11 = (psy_ui_x11_GraphicsImp*)imp->g.imp;
+			/* reset scroll origin */
+			gx11->org.x = 0;
+			gx11->org.y = 0;							
+			psy_ui_graphics_set_clip_rect(&imp->g, *r);					
+			psy_ui_component_draw(imp->component, &imp->g);			
 			if (self->dbe) {
 				int w;
 				int h;
