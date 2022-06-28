@@ -33,7 +33,7 @@ typedef struct PluginEditorCreateBar {
 	psy_ui_Label desc;
 	psy_ui_TextArea name;
 	psy_ui_Button create;
-	// references
+	/* references */
 	Workspace* workspace;
 } PluginEditorCreateBar;
 
@@ -67,7 +67,7 @@ typedef struct PluginEditor {
 
 void plugineditor_init(PluginEditor*, psy_ui_Component* parent, Workspace*);
 
-void plugineditor_updatefont(PluginEditor*);
+void plugineditor_update_font(PluginEditor*);
 
 INLINE psy_ui_Component* plugineditor_base(PluginEditor* self)
 {

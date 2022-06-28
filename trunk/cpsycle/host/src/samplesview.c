@@ -230,7 +230,6 @@ void samplesheaderview_init(SamplesHeaderView* self, psy_ui_Component* parent,
 	psy_ui_label_prevent_translation(&self->channellabel);
 	psy_ui_label_set_text(&self->channellabel, "");
 	psy_ui_label_set_char_number(&self->channellabel, 7);	
-	psy_ui_component_setalign_children(&self->component, psy_ui_ALIGN_LEFT);
 }
 
 void samplesheaderview_setsample(SamplesHeaderView* self, psy_audio_Sample* sample)
@@ -268,9 +267,9 @@ void samplesheaderview_setsample(SamplesHeaderView* self, psy_audio_Sample* samp
 	}
 	psy_ui_label_set_text(&self->channellabel, text);
 	if (self->sample) {
-		psy_ui_component_enableinput(&self->component, 1);
+		psy_ui_component_enable_input(&self->component, 1);
 	} else {
-		psy_ui_component_preventinput(&self->component, 1);
+		psy_ui_component_prevent_input(&self->component, 1);
 	}
 }
 
@@ -340,7 +339,7 @@ void samplesgeneralview_init(SamplesGeneralView* self, psy_ui_Component* parent,
 
 	self->sample = NULL;	
 	self->notes_tab_mode = patternviewconfig_notetabmode(
-		&workspace->config.patview);
+		&workspace->config.visual.patview);
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_set_padding(&self->component,
 		psy_ui_margin_make_em(1.0, 0.0, 0.0, 0.0));
@@ -392,9 +391,9 @@ void generalview_setsample(SamplesGeneralView* self, psy_audio_Sample* sample)
 {
 	self->sample = sample;
 	if (self->sample) {
-		psy_ui_component_enableinput(&self->component, 1);
+		psy_ui_component_enable_input(&self->component, 1);
 	} else {
-		psy_ui_component_preventinput(&self->component, 1);
+		psy_ui_component_prevent_input(&self->component, 1);
 	}
 	generalview_updatesliders(self);
 }
@@ -587,11 +586,11 @@ void vibratoview_setsample(SamplesVibratoView* self, psy_audio_Sample* sample)
 {
 	self->sample = sample;
 	if (self->sample) {
-		psy_ui_component_enableinput(&self->component, 1);
+		psy_ui_component_enable_input(&self->component, 1);
 		psy_ui_combobox_select(&self->waveformbox,
 			vibratoview_waveformtocombobox(self->sample->vibrato.type));
 	} else {
-		psy_ui_component_preventinput(&self->component, 1);
+		psy_ui_component_prevent_input(&self->component, 1);
 		psy_ui_combobox_select(&self->waveformbox,
 			vibratoview_waveformtocombobox(psy_audio_WAVEFORMS_SINUS));
 	}
@@ -809,7 +808,7 @@ void samplesloopview_setsample(SamplesLoopView* self, psy_audio_Sample* sample)
 	self->sample = sample;
 	if (self->sample) {
 		psy_ui_component_start_timer(&self->component, 0, 200);
-		psy_ui_component_enableinput(&self->component, 1);
+		psy_ui_component_enable_input(&self->component, 1);
 		sprintf(tmp, "%d", (int)sample->loop.start);
 		psy_ui_textarea_set_text(&self->loopstartedit, tmp);
 		sprintf(tmp, "%d", (int)sample->loop.end);
@@ -825,7 +824,7 @@ void samplesloopview_setsample(SamplesLoopView* self, psy_audio_Sample* sample)
 		self->currloop = self->sample->loop;
 		self->currsustainloop = self->sample->sustainloop;
 	} else {
-		psy_ui_component_preventinput(&self->component, 1);
+		psy_ui_component_prevent_input(&self->component, 1);
 		sprintf(tmp, "%d", 0);
 		psy_ui_textarea_set_text(&self->loopstartedit, tmp);
 		psy_ui_textarea_set_text(&self->loopendedit, tmp);
@@ -891,29 +890,29 @@ void samplesloopview_onsustainlooptypechange(SamplesLoopView* self,
 void samplesloopview_looptypeenablepreventinput(SamplesLoopView* self)
 {
 #if PSYCLE_USE_TK == PSYCLE_TK_X11
-	/* todo seqfault in psy_ui_component_inputprevented X11 Imp */
+	/* todo seqfault in psy_ui_component_input_prevented X11 Imp */
 	return;	
 #endif
 	if (self->sample) {
 		if (self->sample->loop.type == psy_audio_SAMPLE_LOOP_DO_NOT) {
-			psy_ui_component_preventinput(&self->loopstartedit.component, 0);
-			psy_ui_component_preventinput(&self->loopendedit.component, 0);
+			psy_ui_component_prevent_input(&self->loopstartedit.component, 0);
+			psy_ui_component_prevent_input(&self->loopendedit.component, 0);
 		} else {
-			psy_ui_component_enableinput(&self->loopstartedit.component, 0);
-			psy_ui_component_enableinput(&self->loopendedit.component, 0);
+			psy_ui_component_enable_input(&self->loopstartedit.component, 0);
+			psy_ui_component_enable_input(&self->loopendedit.component, 0);
 		}
 		if (self->sample->sustainloop.type == psy_audio_SAMPLE_LOOP_DO_NOT) {
-			psy_ui_component_preventinput(&self->sustainloopstartedit.component, 0);
-			psy_ui_component_preventinput(&self->sustainloopendedit.component, 0);
+			psy_ui_component_prevent_input(&self->sustainloopstartedit.component, 0);
+			psy_ui_component_prevent_input(&self->sustainloopendedit.component, 0);
 		} else {
-			psy_ui_component_enableinput(&self->sustainloopstartedit.component, 0);
-			psy_ui_component_enableinput(&self->sustainloopendedit.component, 0);
+			psy_ui_component_enable_input(&self->sustainloopstartedit.component, 0);
+			psy_ui_component_enable_input(&self->sustainloopendedit.component, 0);
 		}
 	} else {
-		psy_ui_component_preventinput(&self->loopstartedit.component, 0);
-		psy_ui_component_preventinput(&self->loopendedit.component, 0);
-		psy_ui_component_preventinput(&self->sustainloopstartedit.component, 0);
-		psy_ui_component_preventinput(&self->sustainloopendedit.component, 0);	
+		psy_ui_component_prevent_input(&self->loopstartedit.component, 0);
+		psy_ui_component_prevent_input(&self->loopendedit.component, 0);
+		psy_ui_component_prevent_input(&self->sustainloopstartedit.component, 0);
+		psy_ui_component_prevent_input(&self->sustainloopendedit.component, 0);	
 	}
 }
 
@@ -1051,10 +1050,8 @@ void samplesview_init(SamplesView* self, psy_ui_Component* parent,
 	psy_ui_component_set_margin(psy_ui_notebook_base(&self->notebook),
 		psy_ui_margin_make_em(0.0, 0.0, 0.0, 0.5));
 	psy_ui_component_set_align(psy_ui_notebook_base(&self->notebook),
-		psy_ui_ALIGN_TOP);
-	psy_ui_component_setbackgroundmode(psy_ui_notebook_base(&self->notebook),
-		psy_ui_SETBACKGROUND);
-	psy_ui_notebook_connectcontroller(&self->notebook,
+		psy_ui_ALIGN_TOP);	
+	psy_ui_notebook_connect_controller(&self->notebook,
 		&self->tabbar.signal_change);
 	/* GeneralView */
 	samplesgeneralview_init(&self->general, psy_ui_notebook_base(
@@ -1087,12 +1084,12 @@ void samplesview_init(SamplesView* self, psy_ui_Component* parent,
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		samplesview_onsongchanged);
 	psy_ui_notebook_select(&self->clientnotebook, 0);
-	psy_ui_notebook_connectcontroller(&self->clientnotebook,
+	psy_ui_notebook_connect_controller(&self->clientnotebook,
 		&self->clienttabbar.signal_change);
 	samplesview_setsample(self, psy_audio_sampleindex_make(0, 0));
 	psy_signal_connect(&self->sampleeditor.signal_samplemodified, self,
 		samplesview_onsamplemodified);
-	psy_signal_connect(&self->workspace->config.patview.signal_changed, self,
+	psy_signal_connect(&self->workspace->config.visual.patview.signal_changed, self,
 		samplesview_onconfigure);	
 	psy_ui_tabbar_select(&self->tabbar, 0);
 	psy_signal_connect(&samplesview_base(self)->signal_selectsection, self,

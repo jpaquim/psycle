@@ -330,6 +330,7 @@ static void seqedittimesigs_vtable_init(SeqEditTimeSigs* self)
 	}
 	self->component.vtable = &seqedittimesigs_vtable;
 }
+
 void seqedittimesigs_init(SeqEditTimeSigs* self, psy_ui_Component* parent,
 	SeqEditState* state)
 {
@@ -339,8 +340,7 @@ void seqedittimesigs_init(SeqEditTimeSigs* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->component, parent, NULL);
 	seqedittimesigs_vtable_init(self);		
 	self->state = state;		
-	self->entries = NULL;
-	psy_ui_component_setbackgroundmode(&self->component, psy_ui_NOBACKGROUND);
+	self->entries = NULL;	
 	seqedittimesigstate_init(&self->timesigstate);
 	psy_signal_connect(&self->state->cmds->workspace->signal_songchanged, self,
 		seqedittimesigs_onsongchanged);

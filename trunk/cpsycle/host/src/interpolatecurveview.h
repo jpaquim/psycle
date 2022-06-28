@@ -45,8 +45,7 @@ typedef struct InterpolateCurveBar {
 	psy_ui_Button cancel;	
 } InterpolateCurveBar;
 
-void interpolatecurvebar_init(InterpolateCurveBar*, psy_ui_Component* parent,
-	Workspace*);
+void interpolatecurvebar_init(InterpolateCurveBar*, psy_ui_Component* parent);
 
 typedef struct KeyFrame {
 	psy_dsp_big_beat_t offset;

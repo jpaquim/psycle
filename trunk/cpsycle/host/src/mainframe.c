@@ -344,7 +344,7 @@ void mainframe_init_view_statusbars(MainFrame* self)
 		&self->workspace);
 	patternviewbar_init(&self->patternviewbar,
 		psy_ui_notebook_base(&self->statusbar.viewstatusbars),
-		&self->workspace.config.patview,
+		&self->workspace.config.visual.patview,
 		&self->workspace);	
 	sampleeditorbar_init(&self->samplesview.sampleeditor.sampleeditortbar,
 		psy_ui_notebook_base(&self->statusbar.viewstatusbars),
@@ -355,8 +355,7 @@ void mainframe_init_view_statusbars(MainFrame* self)
 	instrumentsview_setstatusbar(&self->instrumentsview,
 		&self->instrumentsviewbar);
 	plugineditorbar_init(&self->plugineditorbar,
-		psy_ui_notebook_base(&self->statusbar.viewstatusbars),
-		&self->workspace);
+		psy_ui_notebook_base(&self->statusbar.viewstatusbars));
 	plugineditorbar_set_editor(&self->plugineditorbar, &self->plugineditor);
 	psy_ui_notebook_select(&self->statusbar.viewstatusbars, 0);
 }
@@ -673,7 +672,7 @@ void mainframe_connect_workspace(MainFrame* self)
 	inputhandler_connect(&self->workspace.inputhandler,
 		INPUTHANDLER_IMM, psy_EVENTDRIVER_CMD, "notes",
 		psy_INDEX_INVALID, self, (fp_inputhandler_input)mainframe_on_notes);
-	inputhandler_connecthost(&self->workspace.inputhandler,
+	inputhandler_connect_host(&self->workspace.inputhandler,
 		self, (fp_inputhandler_hostcallback)mainframe_on_input_handler_callback);	
 	psy_signal_connect(&self->workspace.signal_togglegear, self,
 		mainframe_on_toggle_gear);
@@ -985,13 +984,9 @@ void mainframe_on_tabbar_changed(MainFrame* self, psy_ui_TabBar* sender,
 	tab = psy_ui_tabbar_tab(sender, tabindex);
 	if (!tab) {
 		return;
-	}
-	if (psy_ui_tab_target_id(tab) != psy_INDEX_INVALID) {
-		psy_ui_notebook_select_by_component_id(&self->mainviews.notebook,
-			psy_ui_tab_target_id(tab));
-	} else {
-		psy_ui_notebook_select(&self->mainviews.notebook, tabindex);
-	}		
+	}	
+	psy_ui_component_select_section(&self->mainviews.notebook.component,
+		psy_ui_tab_target_id(tab), psy_INDEX_INVALID);	
 	psy_ui_notebook_select(&self->statusbar.viewstatusbars, tabindex);
 	psy_ui_notebook_select(&self->mainviews.mainviewbar.viewtabbars, tabindex);
 	component = psy_ui_notebook_active_page(&self->mainviews.notebook);
@@ -1001,7 +996,7 @@ void mainframe_on_tabbar_changed(MainFrame* self, psy_ui_TabBar* sender,
 			psy_INDEX_INVALID));
 		psy_ui_component_set_focus(component);
 	}
-	psy_ui_component_align(&self->component);		
+	psy_ui_component_align(&self->mainviews.component);
 	psy_ui_component_invalidate(&self->mainviews.component);	
 }
 

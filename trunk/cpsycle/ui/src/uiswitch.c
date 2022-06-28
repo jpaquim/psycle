@@ -41,6 +41,7 @@ void psy_ui_switch_init(psy_ui_Switch* self, psy_ui_Component* parent,
 {		
 	psy_ui_component_init(&self->component, parent, view);
 	vtable_init(self);
+	psy_ui_component_set_aligner(&self->component, NULL);
 	psy_signal_init(&self->signal_clicked);
 	self->state = FALSE;
 	psy_ui_component_set_style_types(psy_ui_switch_base(self),

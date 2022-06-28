@@ -32,12 +32,8 @@ typedef void (*psy_fp_margin)(psy_ui_Component*, psy_ui_Margin);
 
 static void psy_ui_component_traverse_int(psy_ui_Component*,
 	psy_fp_int, uintptr_t value);
-static void psy_ui_component_traverse_margin(psy_ui_Component*,
-	psy_fp_margin fp, psy_ui_Margin value);
 static double lines(double pos, double size, double scrollsize, double step,
 	bool round, double* rv_max, double* rv_visi);
-static psy_ui_RealPoint mapcoords(psy_ui_Component* src,
-	psy_ui_Component* dst);
 static void psy_ui_component_draw_children(psy_ui_Component*, psy_ui_Graphics*);
 static void psy_ui_component_draw_border(psy_ui_Component*, psy_ui_Graphics*);
 
@@ -963,7 +959,7 @@ bool psy_ui_component_draw_visible(psy_ui_Component* self)
 
 void psy_ui_component_align(psy_ui_Component* self)
 {	
-	if (self->aligner) {	
+	if (self->aligner) {
 		self->vtable->beforealign(self);
 		psy_signal_emit(&self->signal_beforealign, self, 0);
 		psy_ui_aligner_align(self->aligner, self);
@@ -974,53 +970,11 @@ void psy_ui_component_align(psy_ui_Component* self)
 
 void psy_ui_component_align_full(psy_ui_Component* self)
 {
-	psy_ui_app()->alignvalid = FALSE;
-	psy_ui_component_align(self);
-	psy_ui_app()->alignvalid = TRUE;
-}
-
-void psy_ui_component_align_cached(psy_ui_Component* self)
-{
-	psy_ui_app()->setpositioncacheonly = TRUE;
-	psy_ui_component_align(self);		
-	psy_ui_component_applyposition(self, TRUE);
-	psy_ui_app()->setpositioncacheonly = FALSE;
-}
-
-psy_ui_Component* psy_ui_component_preferredsize_parent(psy_ui_Component* self)
-{
-	psy_ui_Component* curr;	
-
-	assert(self);
-
-	curr = self;
-	while (curr) {		
-		if (curr->align == psy_ui_ALIGN_CLIENT || curr->align == psy_ui_ALIGN_NONE) {
-			if (curr == self) {
-				return self;
-			}
-			break;
-		}		
-		if (psy_ui_component_parent(curr)) {
-			curr = psy_ui_component_parent(curr);
-		}
-	}	
-	return curr;
-}
-
-psy_ui_Component* psy_ui_component_root(psy_ui_Component* self)
-{
-	psy_ui_Component* curr;
-
-	assert(self);
-
-	curr = self;
-	while (curr) {		
-		if (psy_ui_component_parent(curr)) {
-			curr = psy_ui_component_parent(curr);
-		}
+	if (self->aligner) {
+		psy_ui_app()->alignvalid = FALSE;
+		psy_ui_component_align(self);
+		psy_ui_app()->alignvalid = TRUE;
 	}
-	return curr;
 }
 
 void onpreferredsize(psy_ui_Component* self, const psy_ui_Size* limit,
@@ -1040,20 +994,6 @@ void onpreferredscrollsize(psy_ui_Component* self, const psy_ui_Size* limit,
 void psy_ui_component_doublebuffer(psy_ui_Component* self)
 {
 	self->doublebuffered = TRUE;
-}
-
-void psy_ui_component_setmargin_children(psy_ui_Component* self,
-	psy_ui_Margin margin)
-{
-	psy_ui_component_traverse_margin(self,
-		(psy_fp_margin)psy_ui_component_set_margin, margin);
-}
-
-void psy_ui_component_setpadding_children(psy_ui_Component* self,
-	psy_ui_Margin spacing)
-{
-	psy_ui_component_traverse_margin(self,
-		(psy_fp_margin)psy_ui_component_set_padding, spacing);	
 }
 
 uintptr_t psy_ui_component_index(psy_ui_Component* self)
@@ -1079,14 +1019,7 @@ uintptr_t psy_ui_component_index(psy_ui_Component* self)
 	return rv;
 }
 
-void psy_ui_component_setalign_children(psy_ui_Component* self,
-	psy_ui_AlignType align)
-{
-	psy_ui_component_traverse_int(self,
-		(psy_fp_int)psy_ui_component_set_align, align);	
-}
-
-void psy_ui_component_checksortedalign(psy_ui_Component* self,
+void psy_ui_component_check_sorted_align(psy_ui_Component* self,
 	psy_ui_AlignType align)
 {
 	if (self->aligner && self->aligner->alignsorted != align) {
@@ -1118,7 +1051,7 @@ psy_ui_Component* psy_ui_component_set_align(psy_ui_Component* self,
 
 		self->align = align;
 		if (parent = psy_ui_component_parent(self)) {
-			psy_ui_component_checksortedalign(parent, align);
+			psy_ui_component_check_sorted_align(parent, align);
 		}
 		self->vtable->setalign(self, align);
 	}
@@ -1142,17 +1075,17 @@ void psy_ui_component_set_align_expand(psy_ui_Component* self, psy_ui_ExpandMode
 	}
 }
 
-void psy_ui_component_enableinput(psy_ui_Component* self, int recursive)
+void psy_ui_component_enable_input(psy_ui_Component* self, int recursive)
 {
-	if (psy_ui_component_inputprevented(self)) {
+	if (psy_ui_component_input_prevented(self)) {
 		enableinput_internal(self, TRUE, recursive);		
 		psy_ui_component_invalidate(self);
 	}
 }
 
-void psy_ui_component_preventinput(psy_ui_Component* self, int recursive)
+void psy_ui_component_prevent_input(psy_ui_Component* self, int recursive)
 {
-	if (!psy_ui_component_inputprevented(self)) {
+	if (!psy_ui_component_input_prevented(self)) {
 		enableinput_internal(self, FALSE, recursive);		
 		psy_ui_component_invalidate(self);
 	}
@@ -1196,17 +1129,11 @@ static void preventinput(psy_ui_Component* self)
 	psy_ui_component_add_style_state(self, psy_ui_STYLESTATE_DISABLED);	
 }
 
-bool psy_ui_component_inputprevented(const psy_ui_Component* self)
+bool psy_ui_component_input_prevented(const psy_ui_Component* self)
 {	
 	assert(self->imp);
 	
 	return self->imp->vtable->dev_inputprevented(self->imp);	
-}
-
-void psy_ui_component_setbackgroundmode(psy_ui_Component* self,
-	psy_ui_BackgroundMode mode)
-{
-	self->componentbackground.backgroundmode = mode;	
 }
 
 psy_List* psy_ui_components_setalign(psy_List* list, psy_ui_AlignType align,
@@ -2288,40 +2215,6 @@ void psy_ui_component_traverse_int(psy_ui_Component* self, psy_fp_int fp,
 		fp((psy_ui_Component*)p->entry, value);
 	}
 	psy_list_free(q);
-}
-
-void psy_ui_component_traverse_margin(psy_ui_Component* self, psy_fp_margin fp,
-	psy_ui_Margin value)
-{
-	psy_List* p;
-	psy_List* q;
-
-	for (p = q = psy_ui_component_children(self, psy_ui_NONE_RECURSIVE);
-		p != NULL; p = p->next) {
-		fp((psy_ui_Component*)p->entry, value);
-	}
-	psy_list_free(q);
-}
-
-psy_ui_RealPoint mapcoords(psy_ui_Component* src, psy_ui_Component* dst)
-{
-	psy_ui_RealPoint rv;
-	psy_ui_Component* curr;
-	psy_ui_RealRectangle r;
-
-	curr = src;
-	psy_ui_realpoint_init(&rv);
-	while (dst != curr && curr != NULL) {
-		r = psy_ui_component_position(curr);
-		psy_ui_realpoint_add(&rv, psy_ui_realrectangle_topleft(&r));
-		curr = psy_ui_component_parent(curr);
-	}
-	return rv;
-}
-
-psy_ui_Component* psy_ui_mainwindow(void)
-{
-	return psy_ui_app()->main;
 }
 
 void psy_ui_component_set_id(psy_ui_Component* self, uintptr_t id)

@@ -59,7 +59,7 @@ void hostsequencertime_update_last_play_cursor(HostSequencerTime* self)
 /* audio */
 static void workspace_init_player(Workspace*);
 static void workspace_init_audio(Workspace*);
-static void workspace_initplugincatcherandmachinefactory(Workspace*);
+static void workspace_init_plugin_catcher_and_machinefactory(Workspace*);
 static void workspace_init_signals(Workspace*);
 static void workspace_dispose_signals(Workspace*);
 static void workspace_wait_for_driver_configure_load(Workspace*);
@@ -78,7 +78,7 @@ static void workspace_on_remove_event_driver(Workspace*);
 static void workspace_on_edit_event_driver_configuration(Workspace*);
 static void workspace_set_default_font(Workspace*, psy_Property*);
 static void workspace_set_app_theme(Workspace*);
-static void workspace_updatesavepoint(Workspace*);
+static void workspace_update_save_point(Workspace*);
 /* machinecallback */
 static psy_audio_MachineFactory* workspace_on_machinefactory(Workspace*);
 static bool workspace_on_machine_file_select_load(Workspace*, char filter[],
@@ -140,6 +140,7 @@ static void psy_audio_machinecallbackvtable_init(Workspace* self)
 			workspace_on_machine_terminal_output;
 		machinecallback_vtable_initialized = TRUE;
 	}
+	self->machinecallback.vtable = &machinecallback_vtable;
 }
 
 void workspace_init(Workspace* self, psy_ui_Component* main)
@@ -147,8 +148,7 @@ void workspace_init(Workspace* self, psy_ui_Component* main)
 	assert(self);
 
 	psy_audio_machinecallback_init(&self->machinecallback);
-	psy_audio_machinecallbackvtable_init(self);
-	self->machinecallback.vtable = &machinecallback_vtable;
+	psy_audio_machinecallbackvtable_init(self);	
 	psy_lock_init(&self->pluginscanlock);
 	psy_audio_init();
 	self->record_tweaks = FALSE;	
@@ -174,7 +174,7 @@ void workspace_init(Workspace* self, psy_ui_Component* main)
 	psy_thread_init(&self->pluginscanthread);
 	viewhistory_init(&self->view_history);
 	psy_playlist_init(&self->playlist);
-	workspace_initplugincatcherandmachinefactory(self);
+	workspace_init_plugin_catcher_and_machinefactory(self);
 	psycleconfig_init(&self->config, &self->player, &self->machinefactory);
 	psy_audio_plugincatcher_set_directories(&self->plugincatcher,
 		psycleconfig_directories(&self->config)->directories);
@@ -189,7 +189,7 @@ void workspace_init(Workspace* self, psy_ui_Component* main)
 	inputhandler_init(&self->inputhandler, &self->player, NULL, NULL);	
 }
 
-void workspace_initplugincatcherandmachinefactory(Workspace* self)
+void workspace_init_plugin_catcher_and_machinefactory(Workspace* self)
 {
 	assert(self);
 
@@ -406,7 +406,9 @@ void workspace_config_changed(Workspace* self, psy_Property* property,
 	uintptr_t* rebuild_level)
 {
 	bool worked;
-	assert(self && property);
+
+	assert(self);
+	assert (property);
 
 	worked = TRUE;
 	*rebuild_level = psy_INDEX_INVALID;
@@ -452,7 +454,6 @@ void workspace_config_changed(Workspace* self, psy_Property* property,
 		break;
 	case PROPERTY_ID_APPTHEME:
 		workspace_set_app_theme(self);
-		*rebuild_level = 1;
 		break;
 	case PROPERTY_ID_DEFAULTLINES:
 		if (psy_property_item_int(property) > 0) {
@@ -501,9 +502,8 @@ void workspace_config_changed(Workspace* self, psy_Property* property,
 		*rebuild_level = 1;
 		break;
 	case PROPERTY_ID_PATTERNDISPLAY:
-		patternviewconfig_select_pattern_display(&self->config.patview,
-			(PatternDisplayMode)psy_property_item_int(property));
-		*rebuild_level = 1;
+		patternviewconfig_select_pattern_display(&self->config.visual.patview,
+			(PatternDisplayMode)psy_property_item_int(property));		
 		break;
 	default: {				
 		if (psy_property_in_section(property,
@@ -636,7 +636,7 @@ void workspace_set_app_theme(Workspace* self)
 
 	assert(self);
 
-	choice = psy_property_at_choice(self->config.apptheme);
+	choice = psy_property_at_choice(self->config.visual.apptheme);
 	if (choice) {
 		psy_ui_ThemeMode theme;
 
@@ -644,9 +644,9 @@ void workspace_set_app_theme(Workspace* self)
 		/* reset styles */		
 		psy_ui_defaults_inittheme(psy_ui_appdefaults(), theme, TRUE);
 		init_host_styles(&psy_ui_appdefaults()->styles, theme);
-		machineviewconfig_load(&self->config.macview);
-		machineparamconfig_update_styles(&self->config.macparam);
-		patternviewconfig_write_styles(&self->config.patview);		
+		machineviewconfig_load(&self->config.visual.macview);
+		machineparamconfig_update_styles(&self->config.visual.macparam);
+		patternviewconfig_write_styles(&self->config.visual.patview);
 		psy_ui_defaults_load_theme(psy_ui_appdefaults(),
 			dirconfig_config_dir(&self->config.directories),
 			theme);		
@@ -922,7 +922,7 @@ void workspace_export_ly_file(Workspace* self, const char* path)
 	if (psy_audio_songfile_export_ly_file(&songfile, path)) {
 		workspace_output_error(self, songfile.serr);
 	} else {
-		workspace_updatesavepoint(self);
+		workspace_update_save_point(self);
 	}
 	psy_audio_songfile_dispose(&songfile);
 	workspace_output(self, "ready\n");
@@ -940,7 +940,7 @@ void workspace_save_song(Workspace* self, const char* path)
 		if (psy_audio_songfile_save(&songfile, path)) {
 			workspace_output_error(self, songfile.serr);
 		} else {
-			workspace_updatesavepoint(self);
+			workspace_update_save_point(self);
 			self->song_has_file = TRUE;
 		}
 		psy_audio_songfile_dispose(&songfile);
@@ -948,7 +948,7 @@ void workspace_save_song(Workspace* self, const char* path)
 	}
 }
 
-void workspace_updatesavepoint(Workspace* self)
+void workspace_update_save_point(Workspace* self)
 {
 	self->undo_save_point = psy_list_size(self->undoredo.undo);
 	self->machines_undo_save_point = psy_list_size(self->undoredo.undo);	
@@ -984,7 +984,7 @@ void workspace_load_configuration(Workspace* self)
 		psy_audio_pattern_setdefaultlines(keyboardmiscconfig_patdefaultlines(
 			&self->config.misc));
 	}
-	languageconfig_update_language(&self->config.language);
+	languageconfig_update_language(&self->config.global.language);
 	{
 		psy_Property* driversection = NULL;
 
@@ -1030,7 +1030,7 @@ void workspace_load_configuration(Workspace* self)
 		psy_audio_machinefactory_loadoldgamefxandblitzifversionunknown(
 			&self->machinefactory);
 	}
-	workspace_set_default_font(self, self->config.defaultfont);
+	workspace_set_default_font(self, self->config.visual.defaultfont);
 	workspace_set_app_theme(self);	
 	psycleconfig_notifyall_changed(&self->config);
 	psy_path_dispose(&path);
@@ -1047,7 +1047,7 @@ void workspace_start_audio(Workspace* self)
 		psy_audiodriver_open(self->player.driver);
 		psy_audio_player_stop_threads(&self->player);
 		psy_audio_player_start_threads(&self->player,
-			audioconfig_numthreads(&self->config.audio));
+			audioconfig_num_threads(&self->config.audio));
 	}
 }
 

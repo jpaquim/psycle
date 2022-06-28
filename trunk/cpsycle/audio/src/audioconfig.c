@@ -309,7 +309,7 @@ void audioconfig_on_edit_audio_driver_configuration(AudioConfig* self, bool enab
 	}
 }
 
-uintptr_t audioconfig_numthreads(const AudioConfig* self)
+uintptr_t audioconfig_num_threads(const AudioConfig* self)
 {
 	psy_Property* p;
 

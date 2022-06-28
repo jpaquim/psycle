@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+**  copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #if !defined(DIRCONFIG_H)
@@ -30,7 +30,7 @@ const char* dirconfig_samples(const DirConfig*);
 const char* dirconfig_plugins32(const DirConfig*);
 const char* dirconfig_plugins64(const DirConfig*);
 const char* dirconfig_pluginscurrplatform(const DirConfig*);
-const char* dirconfig_luascripts(const DirConfig*);
+const char* dirconfig_lua_scripts(const DirConfig*);
 const char* dirconfig_vsts32(const DirConfig*);
 const char* dirconfig_vsts64(const DirConfig*);
 const char* dirconfig_ladspas(const DirConfig*);

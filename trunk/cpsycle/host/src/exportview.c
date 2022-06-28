@@ -16,12 +16,12 @@
 
 /* prototypes */
 static void exportview_on_destroyed(ExportView*);
-static void exportview_makeproperties(ExportView*);
-static void exportview_onsettingsviewchanged(ExportView*, PropertiesView* sender,
-	psy_Property*, uintptr_t* rebuild);
-static void exportview_exportmodule(ExportView*);
-static void exportview_exportmidifile(ExportView*);
-static void exportview_exportlyfile(ExportView*);
+static void exportview_make_properties(ExportView*);
+static void exportview_on_settings_view_changed(ExportView*,
+	PropertiesView* sender, psy_Property*, uintptr_t* rebuild);
+static void exportview_export_module(ExportView*);
+static void exportview_export_midi_file(ExportView*);
+static void exportview_export_ly_file(ExportView*);
 static void exportview_on_focus(ExportView*, psy_ui_Component* sender);
 
 /* vtable */
@@ -40,6 +40,7 @@ static void vtable_init(ExportView* self)
 	psy_ui_component_set_vtable(&self->component, &vtable);
 }
 
+/* implementation */
 void exportview_init(ExportView* self, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, Workspace* workspace)
 {		
@@ -49,12 +50,12 @@ void exportview_init(ExportView* self, psy_ui_Component* parent,
 	self->workspace = workspace;	
 	psy_signal_connect(&self->component.signal_focus,
 		self, exportview_on_focus);
-	exportview_makeproperties(self);
+	exportview_make_properties(self);
 	propertiesview_init(&self->view, &self->component,
 		tabbarparent, self->properties, 3, &workspace->inputhandler);
 	psy_signal_connect(&self->view.signal_changed, self,
-		exportview_onsettingsviewchanged);
-	psy_ui_component_set_align(&self->view.component, psy_ui_ALIGN_CLIENT);	
+		exportview_on_settings_view_changed);
+	psy_ui_component_set_align(&self->view.component, psy_ui_ALIGN_CLIENT);
 }
 
 void exportview_on_destroyed(ExportView* self)
@@ -62,7 +63,7 @@ void exportview_on_destroyed(ExportView* self)
 	psy_property_deallocate(self->properties);	
 }
 
-void exportview_makeproperties(ExportView* self)
+void exportview_make_properties(ExportView* self)
 {	
 	psy_Property* actions;
 
@@ -81,31 +82,31 @@ void exportview_makeproperties(ExportView* self)
 		"export.export-lyfile");
 }
 
-void exportview_onsettingsviewchanged(ExportView* self, PropertiesView* sender,
+void exportview_on_settings_view_changed(ExportView* self, PropertiesView* sender,
 	psy_Property* property, uintptr_t* rebuild)
 {
 	if (psy_property_type(property) == PSY_PROPERTY_TYPE_ACTION) {
 		if (strcmp(psy_property_key(property), "exportmodule") == 0) {
-			exportview_exportmodule(self);
+			exportview_export_module(self);
 		} else if (strcmp(psy_property_key(property), "exportmidifile") == 0) {
-			exportview_exportmidifile(self);
+			exportview_export_midi_file(self);
 		} else if (strcmp(psy_property_key(property), "exportlyfile") == 0) {
-			exportview_exportlyfile(self);
+			exportview_export_ly_file(self);
 		}
 	}
 }
 
-void exportview_exportmodule(ExportView* self)
+void exportview_export_module(ExportView* self)
 {	
 	workspace_export_song(self->workspace);
 }
 
-void exportview_exportmidifile(ExportView* self)
+void exportview_export_midi_file(ExportView* self)
 {
 	workspace_export_midi_fileselect(self->workspace);
 }
 
-void exportview_exportlyfile(ExportView* self)
+void exportview_export_ly_file(ExportView* self)
 {
 	workspace_export_ly_fileselect(self->workspace);
 }

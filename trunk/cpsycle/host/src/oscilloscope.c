@@ -269,6 +269,8 @@ void oscilloscopecontrols_init(OscilloscopeControls* self, psy_ui_Component* par
 
 	psy_ui_margin_init_em(&margin, 0.0, 0.5, 0.0, 0.0);		
 	psy_ui_component_init(&self->component, parent, NULL);
+	psy_ui_component_set_default_align(&self->component, 
+		psy_ui_ALIGN_LEFT, psy_ui_margin_zero());
 	self->oscilloscope = oscilloscope;
 	psy_ui_label_init_text(&self->channellbl, &self->component,
 		"Channel");
@@ -288,7 +290,6 @@ void oscilloscopecontrols_init(OscilloscopeControls* self, psy_ui_Component* par
 	zoombox_init(&self->ampzoom, &self->component);
 	psy_signal_connect(&self->ampzoom.signal_changed, self,
 		oscilloscopecontrols_onampzoomchanged);	
-	psy_ui_component_setalign_children(&self->component, psy_ui_ALIGN_LEFT);		
 }
 
 void oscilloscopecontrols_onchannelselect(OscilloscopeControls* self,

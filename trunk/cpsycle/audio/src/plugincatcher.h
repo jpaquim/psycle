@@ -42,9 +42,9 @@ void psy_audio_pluginsections_removesection(psy_audio_PluginSections*,
 	psy_Property* section);
 psy_Property* psy_audio_pluginsections_addsection(psy_audio_PluginSections*,
 	const char* sectionkey);
-void psy_audio_pluginsections_clearplugins(psy_audio_PluginSections*,
+void psy_audio_pluginsections_clear_plugins(psy_audio_PluginSections*,
 	const char* sectionkey);
-psy_Property* psy_audio_pluginsections_pluginexists(psy_audio_PluginSections*,
+psy_Property* psy_audio_pluginsections_plugin_exists(psy_audio_PluginSections*,
 	psy_Property* section, psy_audio_MachineInfo* macinfo);
 psy_Property* psy_audio_pluginsections_pluginbyid(psy_audio_PluginSections*,
 	psy_Property* section, const char* id);
@@ -120,7 +120,7 @@ char* psy_audio_plugincatcher_modulepath(psy_audio_PluginCatcher*, psy_audio_Mac
 uintptr_t psy_audio_plugincatcher_extractshellidx(const char* path);
 void psy_audio_plugincatcher_catchername(const char* path,
 	char* name, uintptr_t shellidx);
-const char* psy_audio_plugincatcher_searchpath(psy_audio_PluginCatcher*, const char* name,
+const char* psy_audio_plugincatcher_search_path(psy_audio_PluginCatcher*, const char* name,
 	int type);
 psy_Property* psy_audio_plugincatcher_at(psy_audio_PluginCatcher* self, const char* id);
 void plugincatcher_incfavorite(psy_audio_PluginCatcher*, const char* id);

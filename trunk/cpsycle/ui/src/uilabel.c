@@ -60,7 +60,8 @@ void psy_ui_label_init(psy_ui_Label* self, psy_ui_Component* parent)
 	assert(self);
 
 	psy_ui_component_init(&self->component, parent, NULL);
-	vtable_init(self);	
+	vtable_init(self);
+	psy_ui_component_set_aligner(&self->component, NULL);
 	self->charnumber = 0.0;	
 	self->text = NULL;
 	self->defaulttext = NULL;
@@ -75,7 +76,7 @@ void psy_ui_label_init(psy_ui_Label* self, psy_ui_Component* parent)
 	psy_ui_component_set_style_type_disabled(psy_ui_label_base(self),		
 		psy_ui_STYLE_LABEL_DISABLED);
 	psy_ui_component_set_style_type_select(psy_ui_label_base(self),
-		psy_ui_STYLE_LABEL_SELECT);
+		psy_ui_STYLE_LABEL_SELECT);	
 }
 
 void psy_ui_label_init_text(psy_ui_Label* self, psy_ui_Component* parent,

@@ -35,16 +35,13 @@ typedef enum {
 typedef struct HelpView {
 	/* inherits */
 	psy_ui_Component component;
-	/* ui elements */
+	/* internal */
 	psy_ui_Notebook notebook;
 	psy_ui_Component bar;
 	psy_ui_TabBar tabbar;	
-	/* sections */
 	Help help;
 	About about;
 	Greet greet;	
-	/* references */
-	Workspace* workspace;
 } HelpView;
 
 void helpview_init(HelpView*, psy_ui_Component* parent,

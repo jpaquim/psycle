@@ -15,17 +15,17 @@
 
 
 /* ParamRackBox */
+
 /* prototypes */
-static void paramrackbox_onmousedoubleclick(ParamRackBox*, psy_ui_Component* sender,
-	psy_ui_MouseEvent*);
-static void paramrackbox_onaddeffect(ParamRackBox*, psy_ui_Button* sender);
+static void paramrackbox_on_mouse_double_click(ParamRackBox*,
+	psy_ui_Component* sender, psy_ui_MouseEvent*);
+static void paramrackbox_on_add_effect(ParamRackBox*, psy_ui_Button* sender);
 
 /* implementation */
 void paramrackbox_init(ParamRackBox* self, psy_ui_Component* parent,
 	uintptr_t slot, Workspace* workspace)
 {	
-	psy_audio_Machine* machine;
-	psy_ui_Margin margin;
+	psy_audio_Machine* machine;	
 
 	machine = psy_audio_machines_at(&workspace->song->machines, slot);
 	psy_ui_component_init(&self->component, parent, NULL);	
@@ -44,21 +44,23 @@ void paramrackbox_init(ParamRackBox* self, psy_ui_Component* parent,
 	}
 	psy_ui_component_set_align(&self->title.component, psy_ui_ALIGN_LEFT);
 	psy_signal_connect(&self->title.component.signal_mousedoubleclick, self,
-		paramrackbox_onmousedoubleclick);	
-	psy_ui_margin_init_em(&margin, 0.0, 0.0, 0.5, 0.5);		
-	//psy_ui_component_set_padding(&self->title.component, &margin);
+		paramrackbox_on_mouse_double_click);	
 	/* Insert Effect */
 	if (machine && slot != psy_audio_MASTER_INDEX) {
-		psy_ui_button_init_text(&self->inserteffect, &self->header, "+");
-		psy_ui_component_set_align(&self->inserteffect.component, psy_ui_ALIGN_RIGHT);
+		psy_ui_button_init(&self->inserteffect, &self->header);
+		psy_ui_button_prevent_translation(&self->inserteffect);
+		psy_ui_button_set_text(&self->inserteffect, "+");
+		psy_ui_component_set_align(&self->inserteffect.component,
+			psy_ui_ALIGN_RIGHT);
 		psy_signal_connect(&self->inserteffect.signal_clicked, self,
-			paramrackbox_onaddeffect);
+			paramrackbox_on_add_effect);
 	}
 	/* Parameter List */
 	parameterlistbox_init(&self->parameters, &self->component,
 		psy_audio_machines_at(&workspace->song->machines, slot),
 		psycleconfig_macparam(workspace_conf(workspace)));
-	psy_ui_component_set_align(&self->parameters.component, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_set_align(&self->parameters.component,
+		psy_ui_ALIGN_CLIENT);
 	self->nextbox = NULL;	
 }
 
@@ -90,13 +92,13 @@ void paramrackbox_deselect(ParamRackBox* self)
 	psy_ui_component_invalidate(&self->header);
 }
 
-void paramrackbox_onmousedoubleclick(ParamRackBox* self, psy_ui_Component* sender,
+void paramrackbox_on_mouse_double_click(ParamRackBox* self, psy_ui_Component* sender,
 	psy_ui_MouseEvent* ev)
 {	
 	workspace_show_parameters(self->workspace, self->slot);	
 }
 
-void paramrackbox_onaddeffect(ParamRackBox* self, psy_ui_Button* sender)
+void paramrackbox_on_add_effect(ParamRackBox* self, psy_ui_Button* sender)
 {
 	if (self->workspace && workspace_song(self->workspace)) {
 		if (self->nextbox) {
@@ -321,8 +323,7 @@ void paramrackpane_buildinchain(ParamRackPane* self)
 
 			slot = (size_t)path->entry;
 			if (slot == psy_INDEX_INVALID) {
-				// delimits the machines that could be processed parallel
-				// todo: add thread functions
+				/* skip parallel process machine delimiter */
 				continue;
 			}
 			paramrackpane_insertbox(self, slot);
@@ -427,7 +428,7 @@ void paramrackpane_connectsong(ParamRackPane* self)
 void paramrackpane_onmachinesinsert(ParamRackPane* self,
 	psy_audio_Machines* sender, uintptr_t slot)
 {
-	// handled in select
+	/* handled in select */
 }
 
 void paramrackpane_onmachinesremoved(ParamRackPane* self,
@@ -511,7 +512,8 @@ static void paramrackmodebar_vtable_init(ParamRackModeBar* self)
 	}
 	self->component.vtable = &paramrackmodebar_vtable;
 }
-// implementation
+
+/* implementation */
 void paramrackmodebar_init(ParamRackModeBar* self, psy_ui_Component* parent)
 {
 	psy_ui_component_init(&self->component, parent, NULL);
@@ -596,15 +598,15 @@ void paramrackmodebar_setmode(ParamRackModeBar* self, ParamRackMode mode)
 
 /* ParamRack */
 /* prototypes */
-static void paramrack_onmodeselected(ParamRack*, ParamRackModeBar* sender,
+static void paramrack_on_mode_selected(ParamRack*, ParamRackModeBar* sender,
 	intptr_t index);
-static void paramrack_onalign(ParamRack*, psy_ui_Component* sender);
-static void paramrack_onlevelchanged(ParamRack*, IntEdit* sender);
-static void paramrack_onselect(ParamRack*, psy_ui_Button* sender);
-static void paramrack_onmachineselected(ParamRack*,
+static void paramrack_on_align(ParamRack*, psy_ui_Component* sender);
+static void paramrack_on_level_changed(ParamRack*, IntEdit* sender);
+static void paramrack_on_select(ParamRack*, psy_ui_Button* sender);
+static void paramrack_on_machine_selected(ParamRack*,
 	psy_audio_Machines*, uintptr_t slot);
-static void paramrack_onsongchanged(ParamRack*, Workspace* sender);
-static void paramrack_connectsong(ParamRack*);
+static void paramrack_on_song_changed(ParamRack*, Workspace* sender);
+static void paramrack_connect_song(ParamRack*);
 
 /* implementation */
 void paramrack_init(ParamRack* self, psy_ui_Component* parent,
@@ -614,24 +616,24 @@ void paramrack_init(ParamRack* self, psy_ui_Component* parent,
 	psy_ui_component_set_preferred_size(&self->component,
 		psy_ui_size_make_em(0.0, 10.0));		
 	self->workspace = workspace;	
-	// Bottom
+	/* Bottom */
 	psy_ui_component_init_align(&self->bottom, &self->component, NULL,
 		psy_ui_ALIGN_BOTTOM);	
-	// IntEdit
+	/* IntEdit */
 	intedit_init(&self->leveledit, &self->bottom, "", 2, 0, INT32_MAX);
 	psy_ui_component_set_align(&self->leveledit.component, psy_ui_ALIGN_RIGHT);
-	psy_signal_connect(&self->leveledit.signal_changed, self, paramrack_onlevelchanged);
-	// ChainMode
+	psy_signal_connect(&self->leveledit.signal_changed, self, paramrack_on_level_changed);
+	/* ChainMode */
 	paramrackmodebar_init(&self->modebar, &self->bottom);		
 	psy_ui_component_set_align(&self->modebar.component,
 		psy_ui_ALIGN_RIGHT);
 	psy_signal_connect(&self->modebar.signal_select, self,
-		paramrack_onmodeselected);
-	// BatchBar
+		paramrack_on_mode_selected);
+	/* BatchBar */
 	paramrackbatchbar_init(&self->batchbar, &self->bottom);
 	psy_ui_component_set_align(&self->batchbar.component, psy_ui_ALIGN_RIGHT);
 	psy_signal_connect(&self->batchbar.select.signal_clicked, self,
-		paramrack_onselect);
+		paramrack_on_select);
 	/* Pane */
 	paramrackpane_init(&self->pane, &self->component, workspace);	
 	psy_ui_component_set_overflow(&self->pane.component,
@@ -639,32 +641,30 @@ void paramrack_init(ParamRack* self, psy_ui_Component* parent,
 	/* connect scrollbar */
 	psy_ui_scroller_init(&self->scroller, &self->component, NULL, NULL);
 	psy_ui_scroller_set_client(&self->scroller, &self->pane.component);
-	psy_ui_component_set_align(&self->pane.component,
-		psy_ui_ALIGN_VCLIENT);
-	psy_ui_component_set_align(&self->scroller.component, psy_ui_ALIGN_CLIENT);
-	psy_ui_component_setbackgroundmode(&self->scroller.pane, psy_ui_SETBACKGROUND);
+	psy_ui_component_set_align(&self->pane.component, psy_ui_ALIGN_VCLIENT);
+	psy_ui_component_set_align(&self->scroller.component, psy_ui_ALIGN_CLIENT);	
 	psy_signal_connect(&self->component.signal_align, self,
-		paramrack_onalign);		
+		paramrack_on_align);
 	psy_signal_connect(&workspace->signal_songchanged, self,
-		paramrack_onsongchanged);
-	paramrack_connectsong(self);
+		paramrack_on_song_changed);
+	paramrack_connect_song(self);
 	paramrackmodebar_setmode(&self->modebar, self->pane.mode);	
 }
 
-void paramrack_onmodeselected(ParamRack* self, ParamRackModeBar* sender,
+void paramrack_on_mode_selected(ParamRack* self, ParamRackModeBar* sender,
 	intptr_t index)
 {			
 	paramrackpane_setmode(&self->pane, (ParamRackMode)index);
 	psy_ui_component_show_align(&self->pane.component);	
 }
 
-void paramrack_onalign(ParamRack* self, psy_ui_Component* sender)
+void paramrack_on_align(ParamRack* self, psy_ui_Component* sender)
 {
 	if (psy_ui_component_at(&self->pane.component, 0)) {		
 		psy_ui_Size limit;
 		psy_ui_Size preferredboxsize;
 
-		// update scroll step
+		/* update scroll step */
 		limit = psy_ui_component_scroll_size(&self->component);
 		preferredboxsize = psy_ui_component_preferred_size(
 			psy_ui_component_at(&self->pane.component, 0), &limit);
@@ -673,7 +673,7 @@ void paramrack_onalign(ParamRack* self, psy_ui_Component* sender)
 	}	
 }
 
-void paramrack_onlevelchanged(ParamRack* self, IntEdit* sender)
+void paramrack_on_level_changed(ParamRack* self, IntEdit* sender)
 {
 	if (self->pane.mode == PARAMRACK_LEVEL) {
 		self->pane.level = intedit_value(&self->leveledit);
@@ -681,7 +681,7 @@ void paramrack_onlevelchanged(ParamRack* self, IntEdit* sender)
 	}
 }
 
-void paramrack_onselect(ParamRack* self, psy_ui_Button* sender)
+void paramrack_on_select(ParamRack* self, psy_ui_Button* sender)
 {
 	psy_TableIterator it;
 	psy_List* slotlist;	
@@ -702,23 +702,23 @@ void paramrack_onselect(ParamRack* self, psy_ui_Button* sender)
 	psy_list_free(slotlist);	
 }
 
-void paramrack_onsongchanged(ParamRack* self, Workspace* sender)
+void paramrack_on_song_changed(ParamRack* self, Workspace* sender)
 {		
-	paramrack_connectsong(self);		
+	paramrack_connect_song(self);		
 }
 
-void paramrack_connectsong(ParamRack* self)
+void paramrack_connect_song(ParamRack* self)
 {
 	if (workspace_song(self->workspace)) {
 		psy_audio_Machines* machines;
 
 		machines = &self->workspace->song->machines;
 		psy_signal_connect(&machines->signal_slotchange, self,
-			paramrack_onmachineselected);
+			paramrack_on_machine_selected);
 	}
 }
 
-void paramrack_onmachineselected(ParamRack* self,
+void paramrack_on_machine_selected(ParamRack* self,
 	psy_audio_Machines* sender, uintptr_t slot)
 {	
 	if (self->pane.mode == PARAMRACK_LEVEL && self->pane.lastselected != slot) {

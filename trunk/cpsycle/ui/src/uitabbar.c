@@ -61,6 +61,7 @@ void psy_ui_tab_init(psy_ui_Tab* self, psy_ui_Component* parent,
 	
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_tab_vtable_init(self);
+	psy_ui_component_set_aligner(&self->component, NULL);
 	psy_ui_component_set_style_types(&self->component,
 		psy_ui_STYLE_TAB, psy_ui_STYLE_TAB_HOVER, psy_ui_STYLE_TAB_SELECT,
 		psy_INDEX_INVALID);

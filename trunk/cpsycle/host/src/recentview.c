@@ -13,6 +13,8 @@
 #include <exclusivelock.h>
 #include <songio.h>
 
+
+/* implementation */
 void playlistbar_init(PlaylistBar* self, psy_ui_Component* parent)
 {
 	psy_ui_component_init(&self->component, parent, NULL);

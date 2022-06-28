@@ -31,6 +31,7 @@ static int loadresource(psy_ui_Bitmap*, uintptr_t resourceid);
 static psy_ui_RealSize size(const psy_ui_Bitmap*);
 static bool empty(const psy_ui_Bitmap*);
 static void settransparency(psy_ui_Bitmap*, psy_ui_Colour);
+static void createimp(const psy_ui_Bitmap*);
 /* vtable */
 static psy_ui_BitmapVTable vtable;
 static bool vtable_initialized = FALSE;
@@ -47,14 +48,13 @@ static void vtable_init(void)
 		vtable_initialized = TRUE;
 	}
 }
+
 /* implementation */
 void psy_ui_bitmap_init(psy_ui_Bitmap* self)
 {
 	vtable_init();
 	self->vtable = &vtable;
-	self->imp = psy_ui_impfactory_allocinit_bitmapimp(
-		psy_ui_app_impfactory(psy_ui_app()),
-		psy_ui_realsize_zero());	
+	self->imp = NULL;
 }
 
 void psy_ui_bitmap_init_size(psy_ui_Bitmap* self, psy_ui_RealSize size)
@@ -67,46 +67,89 @@ void psy_ui_bitmap_init_size(psy_ui_Bitmap* self, psy_ui_RealSize size)
 
 void dispose(psy_ui_Bitmap* self)
 {
-	self->imp->vtable->dev_dispose(self->imp);
-	free(self->imp);
-	self->imp = NULL;
+	if (self->imp) {
+		self->imp->vtable->dev_dispose(self->imp);
+		free(self->imp);
+		self->imp = NULL;
+	}
 }
 
 int load(psy_ui_Bitmap* self, const char* path)
 {
+	createimp(self);
 	return self->imp->vtable->dev_load(self->imp, self, path);
 }
 
 int loadresource(psy_ui_Bitmap* self, uintptr_t resourceid)
 {
+	createimp(self);
 	return self->imp->vtable->dev_loadresource(self->imp, resourceid);
 }
 
 psy_ui_RealSize size(const psy_ui_Bitmap* self)
 {
-	return self->imp->vtable->dev_size(self->imp);
+	if (self->imp) {
+		return self->imp->vtable->dev_size(self->imp);
+	}
+	return psy_ui_realsize_zero();
 }
 
 bool empty(const psy_ui_Bitmap* self)
 {
+	if (!self->imp) {
+		return TRUE;
+	}
+	createimp(self);
 	return self->imp->vtable->dev_empty(self->imp);
 }
 
 void settransparency(psy_ui_Bitmap* self, psy_ui_Colour colour)
 {
+	createimp(self);
 	self->imp->vtable->dev_settransparency(self->imp, colour);
 }
 
 void psy_ui_bitmap_copy(psy_ui_Bitmap* self, const psy_ui_Bitmap* other)
-{
+{	
 	if (!other->imp) {
-		psy_ui_bitmap_dispose(self);
-	} else {				
+		if (self->imp) {
+			psy_ui_bitmap_dispose(self);
+			self->imp = NULL;
+		}
+	} else {
+		createimp(self);
 		self->imp->vtable->dev_copy(self->imp, other->imp);
 	}
 }
 
-// psy_ui_BitmapImp
+uintptr_t psy_ui_bitmap_native(psy_ui_Bitmap* self)
+{	
+	if (self->imp) {
+		return self->imp->vtable->dev_native(self->imp);
+	}
+	return 0;
+}
+
+uintptr_t psy_ui_bitmap_native_mask(psy_ui_Bitmap* self)
+{
+	if (self->imp) {
+		return self->imp->vtable->dev_native_mask(self->imp);
+	}
+	return 0;
+}
+
+void createimp(const psy_ui_Bitmap* self)
+{
+	if (!self->imp) {
+		((psy_ui_Bitmap*)self)->imp =
+			psy_ui_impfactory_allocinit_bitmapimp(
+			psy_ui_app_impfactory(psy_ui_app()),
+			psy_ui_realsize_zero());
+	}
+}
+
+/* psy_ui_BitmapImp */
+
 static void psy_ui_bitmap_imp_dispose(psy_ui_BitmapImp* self) { }
 static int psy_ui_bitmap_imp_load(psy_ui_BitmapImp* self,
 	struct psy_ui_Bitmap* bitmap, const char* path)
@@ -139,6 +182,10 @@ static void dev_copy(psy_ui_BitmapImp* self, const psy_ui_BitmapImp* other)
 {
 }
 
+uintptr_t dev_native(psy_ui_BitmapImp* self) { return 0; }
+
+
+
 /* psy_ui_BitmapImp */
 /* vtable */
 static psy_ui_BitmapImpVTable imp_vtable;
@@ -154,6 +201,8 @@ static void imp_vtable_init(void)
 		imp_vtable.dev_empty = psy_ui_bitmap_imp_empty;
 		imp_vtable.dev_settransparency = psy_ui_bitmap_imp_settransparency;
 		imp_vtable.dev_copy = dev_copy;
+		imp_vtable.dev_native = dev_native;
+		imp_vtable.dev_native_mask = dev_native;
 		imp_vtable_initialized = TRUE;
 	}
 }

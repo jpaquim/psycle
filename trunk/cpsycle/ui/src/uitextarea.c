@@ -89,6 +89,7 @@ void psy_ui_textareapane_init(psy_ui_TextAreaPane* self,
 { 
 	psy_ui_component_init(psy_ui_textareapane_base(self), parent, NULL);
 	vtable_init(self);
+	psy_ui_component_set_aligner(&self->component, NULL);
 	psy_ui_component_set_tab_index(&self->component, 0);
 	self->charnumber = 0.0;
 	self->linenumber = 1;
@@ -199,13 +200,13 @@ void psy_ui_textareapane_on_preferred_size(psy_ui_TextAreaPane* self,
 
 void psy_ui_textareapane_enable_edit(psy_ui_TextAreaPane* self)
 {
-	psy_ui_component_enableinput(&self->component,
+	psy_ui_component_enable_input(&self->component,
 		psy_ui_NONE_RECURSIVE);
 }
 
 void psy_ui_textareapane_prevent_edit(psy_ui_TextAreaPane* self)
 {
-	psy_ui_component_preventinput(&self->component,
+	psy_ui_component_prevent_input(&self->component,
 		psy_ui_NONE_RECURSIVE);
 }
 

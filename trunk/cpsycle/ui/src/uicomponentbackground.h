@@ -11,15 +11,8 @@
 
 struct psy_ui_Component;
 
-typedef enum {
-	psy_ui_NOBACKGROUND,
-	psy_ui_SETBACKGROUND,
-	psy_ui_BACKGROUND_PARENT,
-} psy_ui_BackgroundMode;
-
 typedef struct psy_ui_ComponentBackground {
 	struct psy_ui_Component* component;
-	psy_ui_BackgroundMode backgroundmode;
 	uintptr_t bgframetimer;
 	uintptr_t currbgframe;
 } psy_ui_ComponentBackground;

@@ -114,149 +114,149 @@ void psycleconfigimport_on_read(PsycleConfigImport* self, psy_IniReader* sender,
 		int value;
 
 		value = _httoi(strval);
-		patternviewconfig_set_background_colour_left(&self->config->patview,
+		patternviewconfig_set_background_colour_left(&self->config->visual.patview,
 			psy_ui_colour_make(value));
 		return;
 	} else if (strcmp(key, "pvc_background2") == 0) {
 		int value;
 
 		value = _httoi(strval);
-		patternviewconfig_set_background_colour_right(&self->config->patview,
+		patternviewconfig_set_background_colour_right(&self->config->visual.patview,
 			psy_ui_colour_make(value));
 		return;
 	} else if (strcmp(key, "pvc_row4beat") == 0) {
 			int value;
 
 			value = _httoi(strval);
-			patternviewconfig_set_row4beat_colour_left(&self->config->patview,
+			patternviewconfig_set_row4beat_colour_left(&self->config->visual.patview,
 				psy_ui_colour_make(value));
 			return;
 	} else if (strcmp(key, "pvc_row4beat2") == 0) {
 		int value;
 
 		value = _httoi(strval);
-		patternviewconfig_set_row4beat_colour_right(&self->config->patview,
+		patternviewconfig_set_row4beat_colour_right(&self->config->visual.patview,
 			psy_ui_colour_make(value));
 		return;
 	} else if (strcmp(key, "pvc_rowbeat") == 0) {
 		int value;
 
 		value = _httoi(strval);
-		patternviewconfig_set_rowbeat_colour_left(&self->config->patview,
+		patternviewconfig_set_rowbeat_colour_left(&self->config->visual.patview,
 			psy_ui_colour_make(value));
 		return;
 	} else if (strcmp(key, "pvc_rowbeat2") == 0) {
 		int value;
 
 		value = _httoi(strval);
-		patternviewconfig_set_rowbeat_colour_right(&self->config->patview,
+		patternviewconfig_set_rowbeat_colour_right(&self->config->visual.patview,
 			psy_ui_colour_make(value));
 		return;
 	} else if (strcmp(key, "pvc_row") == 0) {
 		int value;
 
 		value = _httoi(strval);
-		patternviewconfig_set_row_colour_left(&self->config->patview,
+		patternviewconfig_set_row_colour_left(&self->config->visual.patview,
 			psy_ui_colour_make(value));
 		return;
 	} else if (strcmp(key, "pvc_row2") == 0) {
 		int value;
 
 		value = _httoi(strval);
-		patternviewconfig_set_row_colour_right(&self->config->patview,
+		patternviewconfig_set_row_colour_right(&self->config->visual.patview,
 			psy_ui_colour_make(value));
 		return;
 	} else if (strcmp(key, "pvc_font") == 0) {
 		int value;
 
 		value = _httoi(strval);
-		patternviewconfig_set_font_colour_left(&self->config->patview,
+		patternviewconfig_set_font_colour_left(&self->config->visual.patview,
 			psy_ui_colour_make(value));
 		return;
 	} else if (strcmp(key, "pvc_font2") == 0) {
 		int value;
 
 		value = _httoi(strval);
-		patternviewconfig_set_font_colour_right(&self->config->patview,
+		patternviewconfig_set_font_colour_right(&self->config->visual.patview,
 			psy_ui_colour_make(value));
 		return;
 	} else if (strcmp(key, "pvc_fontPlay") == 0) {
 		int value;
 
 		value = _httoi(strval);
-		patternviewconfig_set_font_play_colour_left(&self->config->patview,
+		patternviewconfig_set_font_play_colour_left(&self->config->visual.patview,
 			psy_ui_colour_make(value));
 		return;
 	} else if (strcmp(key, "pvc_fontPlay2") == 0) {
 		int value;
 
 		value = _httoi(strval);
-		patternviewconfig_set_font_play_colour_right(&self->config->patview,
+		patternviewconfig_set_font_play_colour_right(&self->config->visual.patview,
 			psy_ui_colour_make(value));
 		return;
 	} else if (strcmp(key, "pvc_fontSel") == 0) {
 		int value;
 
 		value = _httoi(strval);
-		patternviewconfig_set_font_sel_colour_left(&self->config->patview,
+		patternviewconfig_set_font_sel_colour_left(&self->config->visual.patview,
 			psy_ui_colour_make(value));
 		return;
 	} else if (strcmp(key, "pvc_fontSel2") == 0) {
 		int value;
 
 		value = _httoi(strval);
-		patternviewconfig_set_font_sel_colour_right(&self->config->patview,
+		patternviewconfig_set_font_sel_colour_right(&self->config->visual.patview,
 			psy_ui_colour_make(value));
 		return;
 	} else if (strcmp(key, "pvc_selection") == 0) {
 		int value;
 
 		value = _httoi(strval);
-		patternviewconfig_set_selection_colour_left(&self->config->patview,
+		patternviewconfig_set_selection_colour_left(&self->config->visual.patview,
 			psy_ui_colour_make(value));
 		return;
 	} else if (strcmp(key, "pvc_selection2") == 0) {
 		int value;
 
 		value = _httoi(strval);
-		patternviewconfig_set_selection_colour_right(&self->config->patview,
+		patternviewconfig_set_selection_colour_right(&self->config->visual.patview,
 			psy_ui_colour_make(value));
 		return;
 	} else if (strcmp(key, "pvc_playbar") == 0) {
 		int value;
 
 		value = _httoi(strval);
-		patternviewconfig_set_playbar_colour_left(&self->config->patview,
+		patternviewconfig_set_playbar_colour_left(&self->config->visual.patview,
 			psy_ui_colour_make(value));
 		return;
 	} else if (strcmp(key, "pvc_playbar2") == 0) {
 		int value;
 
 		value = _httoi(strval);
-		patternviewconfig_set_playbar_colour_right(&self->config->patview,
+		patternviewconfig_set_playbar_colour_right(&self->config->visual.patview,
 			psy_ui_colour_make(value));
 		return;
 	} else if (strcmp(key, "DisplayLineNumbers") == 0) {
 		if (strcmp(strval, "1") == 0) {
-			patternviewconfig_display_line_numbers(&self->config->patview);
+			patternviewconfig_display_line_numbers(&self->config->visual.patview);
 		} else {
-			patternviewconfig_hide_line_numbers(&self->config->patview);
+			patternviewconfig_hide_line_numbers(&self->config->visual.patview);
 		}
 		return;
 	}
 	if (strcmp(key, "DisplayLineNumbersHex") == 0) {
 		if (strcmp(strval, "1") == 0) {
-			patternviewconfig_display_line_numbers_in_hex(&self->config->patview);
+			patternviewconfig_display_line_numbers_in_hex(&self->config->visual.patview);
 		} else {
-			patternviewconfig_display_line_numbers_in_dec(&self->config->patview);
+			patternviewconfig_display_line_numbers_in_dec(&self->config->visual.patview);
 		}
 		return;
 	}
 	if (strcmp(key, "DisplayLineNumbersCursor") == 0) {
 		if (strcmp(strval, "1") == 0) {
-			patternviewconfig_display_line_numbers_cursor(&self->config->patview);
+			patternviewconfig_display_line_numbers_cursor(&self->config->visual.patview);
 		} else {
-			patternviewconfig_hide_line_numbers_cursor(&self->config->patview);
+			patternviewconfig_hide_line_numbers_cursor(&self->config->visual.patview);
 		}
 		return;
 	}
@@ -287,9 +287,9 @@ void psycleconfigimport_on_read(PsycleConfigImport* self, psy_IniReader* sender,
 	}
 	if (strcmp(key, "wrapAround") == 0) {
 		if (strcmp(strval, "1") == 0) {
-			patternviewconfig_enable_wrap_around(&self->config->patview);
+			patternviewconfig_enable_wrap_around(&self->config->visual.patview);
 		} else {
-			patternviewconfig_disable_wrap_around(&self->config->patview);
+			patternviewconfig_disable_wrap_around(&self->config->visual.patview);
 		}
 		return;
 	}	
@@ -298,7 +298,7 @@ void psycleconfigimport_on_read(PsycleConfigImport* self, psy_IniReader* sender,
 		int value;
 
 		value = _httoi(strval);
-		machineviewconfig_set_background_colour(&self->config->macview,
+		machineviewconfig_set_background_colour(&self->config->visual.macview,
 			psy_ui_colour_make(value));
 		return;
 	}
@@ -306,7 +306,7 @@ void psycleconfigimport_on_read(PsycleConfigImport* self, psy_IniReader* sender,
 		int value;
 
 		value = _httoi(strval);
-		machineviewconfig_set_poly_colour(&self->config->macview,
+		machineviewconfig_set_poly_colour(&self->config->visual.macview,
 			psy_ui_colour_make(value));
 		return;
 	}
@@ -314,7 +314,7 @@ void psycleconfigimport_on_read(PsycleConfigImport* self, psy_IniReader* sender,
 		int value;
 
 		value = _httoi(strval);
-		machineviewconfig_set_wire_colour(&self->config->macview,
+		machineviewconfig_set_wire_colour(&self->config->visual.macview,
 			psy_ui_colour_make(value));
 		return;
 	}
@@ -322,7 +322,7 @@ void psycleconfigimport_on_read(PsycleConfigImport* self, psy_IniReader* sender,
 		int value;
 
 		value = _httoi(strval);
-		machineviewconfig_set_generator_colour(&self->config->macview,
+		machineviewconfig_set_generator_colour(&self->config->visual.macview,
 			psy_ui_colour_make(value));
 		return;
 	}
@@ -330,7 +330,7 @@ void psycleconfigimport_on_read(PsycleConfigImport* self, psy_IniReader* sender,
 		int value;
 
 		value = _httoi(strval);
-		machineviewconfig_set_effect_colour(&self->config->macview,
+		machineviewconfig_set_effect_colour(&self->config->visual.macview,
 			psy_ui_colour_make(value));
 		return;
 	}
@@ -340,7 +340,7 @@ void psycleconfigimport_on_read(PsycleConfigImport* self, psy_IniReader* sender,
 		int value;
 
 		value = _httoi(strval);
-		machineparamconfig_set_param_top_colour(&self->config->macparam,
+		machineparamconfig_set_param_top_colour(&self->config->visual.macparam,
 			psy_ui_colour_make(value));
 		return;
 	}
@@ -348,7 +348,7 @@ void psycleconfigimport_on_read(PsycleConfigImport* self, psy_IniReader* sender,
 		int value;
 
 		value = _httoi(strval);
-		machineparamconfig_set_param_top_colour_active(&self->config->macparam,
+		machineparamconfig_set_param_top_colour_active(&self->config->visual.macparam,
 			psy_ui_colour_make(value));
 		return;
 	}
@@ -356,7 +356,7 @@ void psycleconfigimport_on_read(PsycleConfigImport* self, psy_IniReader* sender,
 		int value;
 
 		value = _httoi(strval);
-		machineparamconfig_set_param_top_background_colour(&self->config->macparam,
+		machineparamconfig_set_param_top_background_colour(&self->config->visual.macparam,
 			psy_ui_colour_make(value));
 		return;
 	}
@@ -364,7 +364,7 @@ void psycleconfigimport_on_read(PsycleConfigImport* self, psy_IniReader* sender,
 		int value;
 
 		value = _httoi(strval);
-		machineparamconfig_set_param_top_background_colour_active(&self->config->macparam,
+		machineparamconfig_set_param_top_background_colour_active(&self->config->visual.macparam,
 			psy_ui_colour_make(value));
 		return;
 	}
@@ -373,7 +373,7 @@ void psycleconfigimport_on_read(PsycleConfigImport* self, psy_IniReader* sender,
 		int value;
 
 		value = _httoi(strval);
-		machineparamconfig_set_param_bottom_colour(&self->config->macparam,
+		machineparamconfig_set_param_bottom_colour(&self->config->visual.macparam,
 			psy_ui_colour_make(value));
 		return;
 	}
@@ -381,7 +381,7 @@ void psycleconfigimport_on_read(PsycleConfigImport* self, psy_IniReader* sender,
 		int value;
 
 		value = _httoi(strval);
-		machineparamconfig_set_param_bottom_colour_active(&self->config->macparam,
+		machineparamconfig_set_param_bottom_colour_active(&self->config->visual.macparam,
 			psy_ui_colour_make(value));
 		return;
 	}
@@ -389,7 +389,7 @@ void psycleconfigimport_on_read(PsycleConfigImport* self, psy_IniReader* sender,
 		int value;
 
 		value = _httoi(strval);
-		machineparamconfig_set_param_bottom_background_colour(&self->config->macparam,
+		machineparamconfig_set_param_bottom_background_colour(&self->config->visual.macparam,
 			psy_ui_colour_make(value));
 		return;
 	}
@@ -397,7 +397,7 @@ void psycleconfigimport_on_read(PsycleConfigImport* self, psy_IniReader* sender,
 		int value;
 
 		value = _httoi(strval);
-		machineparamconfig_set_param_bottom_background_colour_active(&self->config->macparam,
+		machineparamconfig_set_param_bottom_background_colour_active(&self->config->visual.macparam,
 			psy_ui_colour_make(value));
 		return;
 	}
@@ -405,7 +405,7 @@ void psycleconfigimport_on_read(PsycleConfigImport* self, psy_IniReader* sender,
 		int value;
 
 		value = _httoi(strval);
-		machineparamconfig_set_param_title_colour(&self->config->macparam,
+		machineparamconfig_set_param_title_colour(&self->config->visual.macparam,
 			psy_ui_colour_make(value));
 		return;
 	}
@@ -413,13 +413,13 @@ void psycleconfigimport_on_read(PsycleConfigImport* self, psy_IniReader* sender,
 		int value;
 
 		value = _httoi(strval);
-		machineparamconfig_set_param_title_background_colour(&self->config->macparam,
+		machineparamconfig_set_param_title_background_colour(&self->config->visual.macparam,
 			psy_ui_colour_make(value));
 		return;
 	}
 	if (strcmp(key, "szBmpDialFilename") == 0) {
 		if (strval) {
-			machineparamconfig_set_param_machinedial_bmp(&self->config->macparam,
+			machineparamconfig_set_param_machinedial_bmp(&self->config->visual.macparam,
 				strval);
 		}
 		return;

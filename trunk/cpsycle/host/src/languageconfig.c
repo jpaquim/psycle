@@ -200,7 +200,7 @@ uintptr_t languageconfig_on_changed(LanguageConfig* self,
 		languageconfig_update_language(self);
 		psy_signal_emit(&self->signal_changed, self, 1, property);		
 	}
-	return 0;
+	return psy_INDEX_INVALID;
 }
 
 bool languageconfig_has_property(const LanguageConfig* self,

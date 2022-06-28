@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+**  copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #ifndef psy_ui_BITMAP_H
@@ -114,6 +114,7 @@ typedef void (*psy_ui_bitmap_imp_fp_settransparency)(struct psy_ui_BitmapImp*,
 	psy_ui_Colour);
 typedef void (*psy_ui_bitmap_imp_fp_copy)(struct psy_ui_BitmapImp*,
 	const struct psy_ui_BitmapImp*);
+typedef uintptr_t (*psy_ui_bitmap_imp_fp_native)(struct psy_ui_BitmapImp*);
 
 typedef struct psy_ui_BitmapImpVTable {
 	psy_ui_bitmap_imp_fp_dispose dev_dispose;
@@ -123,6 +124,8 @@ typedef struct psy_ui_BitmapImpVTable {
 	psy_ui_bitmap_imp_fp_empty dev_empty;
 	psy_ui_bitmap_imp_fp_settransparency dev_settransparency;
 	psy_ui_bitmap_imp_fp_copy dev_copy;
+	psy_ui_bitmap_imp_fp_native dev_native;
+	psy_ui_bitmap_imp_fp_native dev_native_mask;
 } psy_ui_BitmapImpVTable;
 
 typedef struct psy_ui_BitmapImp {
@@ -130,6 +133,9 @@ typedef struct psy_ui_BitmapImp {
 } psy_ui_BitmapImp;
 
 void psy_ui_bitmap_imp_init(psy_ui_BitmapImp*);
+
+uintptr_t psy_ui_bitmap_native(psy_ui_Bitmap*);
+uintptr_t psy_ui_bitmap_native_mask(psy_ui_Bitmap*);
 
 #ifdef __cplusplus
 }

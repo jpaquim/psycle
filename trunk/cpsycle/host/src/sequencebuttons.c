@@ -172,8 +172,7 @@ void sequencebuttons_onmore(SequenceButtons* self,
 		psy_ui_button_set_text(&self->more, "seqview.less");
 		psy_ui_component_show(&self->block);		
 	}
-	psy_ui_component_align_full(
-		psy_ui_component_preferredsize_parent(&self->component));
+	psy_ui_component_align(psy_ui_component_parent(&self->component));
 	psy_ui_component_invalidate(psy_ui_component_parent(&self->component));
 }
 

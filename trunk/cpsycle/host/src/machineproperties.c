@@ -89,9 +89,9 @@ void machineproperties_init(MachineProperties* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->workspace->signal_songchanged, self,
 		machineproperties_onsongchanged);
 	machineproperties_connectsongsignals(self);
-	psy_ui_component_preventinput(&self->component, psy_ui_RECURSIVE);
-	psy_ui_component_enableinput(&self->component, psy_ui_NONE_RECURSIVE);
-	psy_ui_component_enableinput(psy_ui_button_base(&self->cancel),
+	psy_ui_component_prevent_input(&self->component, psy_ui_RECURSIVE);
+	psy_ui_component_enable_input(&self->component, psy_ui_NONE_RECURSIVE);
+	psy_ui_component_enable_input(psy_ui_button_base(&self->cancel),
 		psy_ui_NONE_RECURSIVE);
 }
 
@@ -100,8 +100,8 @@ void machineproperties_setmachine(MachineProperties* self,
 {
 	self->machine = machine;
 	if (self->machine) {
-		psy_ui_component_preventinput(&self->component, psy_ui_RECURSIVE);
-		psy_ui_component_enableinput(&self->component, psy_ui_RECURSIVE);
+		psy_ui_component_prevent_input(&self->component, psy_ui_RECURSIVE);
+		psy_ui_component_enable_input(&self->component, psy_ui_RECURSIVE);
 		psy_ui_textarea_set_text(&self->nameedit,
 			psy_audio_machine_editname(machine));
 		if (psy_audio_machine_mode(machine) == psy_audio_MACHMODE_GENERATOR) {
@@ -117,10 +117,10 @@ void machineproperties_setmachine(MachineProperties* self,
 		psy_ui_button_disable_highlight(&self->issolobypass);
 		psy_ui_button_disable_highlight(&self->isbus);
 		psy_ui_button_disable_highlight(&self->ismute);		
-		psy_ui_component_preventinput(&self->component, psy_ui_RECURSIVE);
-		psy_ui_component_enableinput(psy_ui_button_base(&self->cancel),
+		psy_ui_component_prevent_input(&self->component, psy_ui_RECURSIVE);
+		psy_ui_component_enable_input(psy_ui_button_base(&self->cancel),
 			psy_ui_NONE_RECURSIVE);
-		psy_ui_component_enableinput(&self->component, psy_ui_NONE_RECURSIVE);
+		psy_ui_component_enable_input(&self->component, psy_ui_NONE_RECURSIVE);
 		psy_ui_component_align(&self->component);
 		psy_ui_component_invalidate(psy_ui_component_parent(&self->component));
 	}	

@@ -8,6 +8,7 @@
 
 #include "minmaximize.h"
 /* ui */
+#include <uiapp.h>
 #include <uicomponent.h>
 
 /* implementation */
@@ -49,6 +50,6 @@ void minmaximize_toggle(MinMaximize* self)
 			}
 		}
 		psy_ui_component_align(self->view);
-		psy_ui_component_invalidate(psy_ui_mainwindow());
+		psy_ui_component_invalidate(psy_ui_app_main(psy_ui_app()));
 	}
 }

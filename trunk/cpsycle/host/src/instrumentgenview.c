@@ -315,15 +315,15 @@ void instrumentgeneralview_updatedct(InstrumentGeneralView* self)
 	}
 	if (self->instrument) {
 		if (self->instrument->dct != psy_audio_DUPECHECK_NONE) {
-			psy_ui_component_enableinput(&self->dcacut.component, psy_ui_NONE_RECURSIVE);
-			psy_ui_component_enableinput(&self->dcarelease.component, psy_ui_NONE_RECURSIVE);
-			psy_ui_component_enableinput(&self->dcafadeout.component, psy_ui_NONE_RECURSIVE);
-			psy_ui_component_enableinput(&self->dcanone.component, psy_ui_NONE_RECURSIVE);
+			psy_ui_component_enable_input(&self->dcacut.component, psy_ui_NONE_RECURSIVE);
+			psy_ui_component_enable_input(&self->dcarelease.component, psy_ui_NONE_RECURSIVE);
+			psy_ui_component_enable_input(&self->dcafadeout.component, psy_ui_NONE_RECURSIVE);
+			psy_ui_component_enable_input(&self->dcanone.component, psy_ui_NONE_RECURSIVE);
 		} else {
-			psy_ui_component_preventinput(&self->dcacut.component, psy_ui_NONE_RECURSIVE);
-			psy_ui_component_preventinput(&self->dcarelease.component, psy_ui_NONE_RECURSIVE);
-			psy_ui_component_preventinput(&self->dcafadeout.component, psy_ui_NONE_RECURSIVE);
-			psy_ui_component_preventinput(&self->dcanone.component, psy_ui_NONE_RECURSIVE);
+			psy_ui_component_prevent_input(&self->dcacut.component, psy_ui_NONE_RECURSIVE);
+			psy_ui_component_prevent_input(&self->dcarelease.component, psy_ui_NONE_RECURSIVE);
+			psy_ui_component_prevent_input(&self->dcafadeout.component, psy_ui_NONE_RECURSIVE);
+			psy_ui_component_prevent_input(&self->dcanone.component, psy_ui_NONE_RECURSIVE);
 		}
 	}
 }

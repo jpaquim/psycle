@@ -16,8 +16,7 @@ extern "C" {
 #endif
 
 enum {
-	PROPERTY_ID_AUDIODRIVERS = 2000,
-	PROPERTY_ID_ENABLEAUDIO,
+	PROPERTY_ID_AUDIODRIVERS = 2000,	
 	PROPERTY_ID_NUMAUDIOTHREADS,
 };
 
@@ -48,7 +47,7 @@ void audioconfig_make_driver_configurations(AudioConfig* self, bool full);
 void audioconfig_makeconfiguration_driverkey(AudioConfig* self, const char* key);
 void audioconfig_onaudiodriverselect(AudioConfig*, bool enabled);
 void audioconfig_on_edit_audio_driver_configuration(AudioConfig*, bool enabled);
-uintptr_t audioconfig_numthreads(const AudioConfig*);
+uintptr_t audioconfig_num_threads(const AudioConfig*);
 
 const char* audioconfig_driver_path(AudioConfig*);
 const char* audioconfig_driverkey(AudioConfig*);

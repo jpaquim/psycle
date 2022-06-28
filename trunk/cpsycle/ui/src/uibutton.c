@@ -69,7 +69,8 @@ static void vtable_init(psy_ui_Button* self)
 void psy_ui_button_init(psy_ui_Button* self, psy_ui_Component* parent)
 {
 	psy_ui_component_init(psy_ui_button_base(self), parent, NULL);
-	vtable_init(self);	
+	vtable_init(self);
+	psy_ui_component_set_aligner(&self->component, NULL);
 	self->icon = psy_ui_ICON_NONE;
 	self->charnumber = 0.0;
 	self->linespacing = 1.0;
@@ -244,7 +245,7 @@ void psy_ui_button_on_draw(psy_ui_Button* self, psy_ui_Graphics* g)
 		} else {
 			vcenter = 0.0;
 		}
-		if (psy_ui_component_inputprevented(&self->component)) {
+		if (psy_ui_component_input_prevented(&self->component)) {
 			psy_ui_settextcolour(g, psy_ui_colour_make(0x00777777));
 		} else {
 			psy_ui_settextcolour(g, psy_ui_component_colour(&self->component));
@@ -330,7 +331,7 @@ void psy_ui_button_on_preferred_size(psy_ui_Button* self, psy_ui_Size* limit,
 void psy_ui_button_on_mouse_down(psy_ui_Button* self, psy_ui_MouseEvent* ev)
 {
 	super_vtable.on_mouse_down(psy_ui_button_base(self), ev);
-	if (!psy_ui_component_inputprevented(&self->component)) {
+	if (!psy_ui_component_input_prevented(&self->component)) {
 		psy_ui_component_capture(psy_ui_button_base(self));
 	}
 	if (self->stoppropagation) {
@@ -341,9 +342,9 @@ void psy_ui_button_on_mouse_down(psy_ui_Button* self, psy_ui_MouseEvent* ev)
 void psy_ui_button_on_mouse_up(psy_ui_Button* self, psy_ui_MouseEvent* ev)
 {	
 	super_vtable.on_mouse_up(psy_ui_button_base(self), ev);
-	if (!psy_ui_component_inputprevented(&self->component)) {
+	if (!psy_ui_component_input_prevented(&self->component)) {
 		psy_ui_component_release_capture(psy_ui_button_base(self));
-		if (psy_ui_component_inputprevented(&self->component)) {
+		if (psy_ui_component_input_prevented(&self->component)) {
 			psy_ui_mouseevent_stop_propagation(ev);
 			return;
 		}
@@ -456,7 +457,7 @@ void psy_ui_button_prevent_translation(psy_ui_Button* self)
 void button_on_key_down(psy_ui_Button* self, psy_ui_KeyboardEvent* ev)
 {
 	if (psy_ui_keyboardevent_keycode(ev) == psy_ui_KEY_RETURN &&
-			!psy_ui_component_inputprevented(&self->component)) {
+			!psy_ui_component_input_prevented(&self->component)) {
 		psy_signal_emit(&self->signal_clicked, self, 0);
 		psy_ui_keyboardevent_stop_propagation(ev);
 	}

@@ -311,6 +311,7 @@
     <ClCompile Include="src\gear.c" />
     <ClCompile Include="src\generalconfig.c" />
     <ClCompile Include="src\generatorui.c" />
+    <ClCompile Include="src\globalconfig.c" />
     <ClCompile Include="src\greet.c" />
     <ClCompile Include="src\headerui.c" />
     <ClCompile Include="src\help.c" />
@@ -464,6 +465,7 @@
     <ClCompile Include="src\viewframe.c" />
     <ClCompile Include="src\viewhistory.c" />
     <ClCompile Include="src\viewindex.c" />
+    <ClCompile Include="src\visualconfig.c" />
     <ClCompile Include="src\volslider.c" />
     <ClCompile Include="src\vubar.c" />
     <ClCompile Include="src\vumeter.c" />
@@ -506,6 +508,7 @@
     <ClInclude Include="src\gear.h" />
     <ClInclude Include="src\generalconfig.h" />
     <ClInclude Include="src\generatorui.h" />
+    <ClInclude Include="src\globalconfig.h" />
     <ClInclude Include="src\greet.h" />
     <ClInclude Include="src\headerui.h" />
     <ClInclude Include="src\help.h" />
@@ -659,6 +662,7 @@
     <ClInclude Include="src\viewframe.h" />
     <ClInclude Include="src\viewhistory.h" />
     <ClInclude Include="src\viewindex.h" />
+    <ClInclude Include="src\visualconfig.h" />
     <ClInclude Include="src\volslider.h" />
     <ClInclude Include="src\vubar.h" />
     <ClInclude Include="src\vumeter.h" />

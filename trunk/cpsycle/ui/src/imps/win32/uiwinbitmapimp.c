@@ -19,13 +19,16 @@
 
 /* prototypes */
 static void dev_dispose(psy_ui_win_BitmapImp*);
-static int dev_load(psy_ui_win_BitmapImp*, struct psy_ui_Bitmap* bitmap, const char* path);
+static int dev_load(psy_ui_win_BitmapImp*, struct psy_ui_Bitmap*, const char* path);
 static int dev_loadresource(psy_ui_win_BitmapImp*, uintptr_t resourceid);
 static psy_ui_RealSize dev_size(const psy_ui_win_BitmapImp*);
 static bool dev_empty(const psy_ui_win_BitmapImp*);
 static void dev_settransparency(psy_ui_win_BitmapImp*, psy_ui_Colour);
 static void dev_preparemask(psy_ui_win_BitmapImp*, psy_ui_Colour clrtrans);
 static void dev_copy(psy_ui_win_BitmapImp* self, const psy_ui_win_BitmapImp* other);
+static uintptr_t dev_native(psy_ui_win_BitmapImp*);
+static uintptr_t dev_native_mask(psy_ui_win_BitmapImp*);
+	
 /* vtable */
 static psy_ui_BitmapImpVTable imp_vtable;
 static bool imp_vtable_initialized = FALSE;
@@ -54,7 +57,15 @@ static void imp_vtable_init(psy_ui_win_BitmapImp* self)
 		imp_vtable.dev_settransparency =
 			(psy_ui_bitmap_imp_fp_settransparency)
 			dev_settransparency;
-		imp_vtable.dev_copy = (psy_ui_bitmap_imp_fp_copy)dev_copy;
+		imp_vtable.dev_copy =
+			(psy_ui_bitmap_imp_fp_copy)
+			dev_copy;
+		imp_vtable.dev_native =
+			(psy_ui_bitmap_imp_fp_native)
+			dev_native;
+		imp_vtable.dev_native_mask =
+			(psy_ui_bitmap_imp_fp_native)
+			dev_native_mask;
 		imp_vtable_initialized = TRUE;
 	}
 	self->imp.vtable = &imp_vtable;
@@ -217,6 +228,16 @@ void dev_copy(psy_ui_win_BitmapImp* self, const psy_ui_win_BitmapImp* other)
 {
 	dev_dispose(self);
 	self->bitmap = (HBITMAP)CopyImage(other->bitmap, IMAGE_BITMAP, 0, 0, LR_DEFAULTSIZE);
+}
+
+uintptr_t dev_native(psy_ui_win_BitmapImp* self)
+{
+	return (uintptr_t)self->bitmap;
+}
+
+uintptr_t dev_native_mask(psy_ui_win_BitmapImp* self)
+{
+	return (uintptr_t)self->mask;
 }
 
 #endif /* PSYCLE_TK_WIN32 */

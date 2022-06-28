@@ -7,7 +7,6 @@
 #define PLUGINEDITORBAR_H
 
 /* host */
-#include "workspace.h"
 #include "zoombox.h"
 /* ui */
 #include <uicheckbox.h>
@@ -36,11 +35,9 @@ typedef struct PluginEditorBar {
 	psy_ui_Label column;
 	/* references */
 	struct PluginEditor* editor;
-	Workspace* workspace;	
 } PluginEditorBar;
 
-void plugineditorbar_init(PluginEditorBar*, psy_ui_Component* parent,
-	Workspace*);
+void plugineditorbar_init(PluginEditorBar*, psy_ui_Component* parent);
 
 void plugineditorbar_set_editor(PluginEditorBar*, struct PluginEditor*);
 void plugineditorbar_idle(PluginEditorBar*);

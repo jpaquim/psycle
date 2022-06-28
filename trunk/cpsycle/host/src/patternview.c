@@ -102,7 +102,7 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 		patternviewconfig_show_wide_inst_column(
 			psycleconfig_patview(workspace_conf(workspace))));
 	patternviewstate_init(&self->pvstate,
-		&workspace->config.patview,
+		&workspace->config.visual.patview,
 		&workspace->config.misc,
 		NULL, &self->cmds);
 	trackerstate_init(&self->state, &self->track_config, &self->pvstate);
@@ -142,7 +142,7 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 	psy_ui_component_hide(&self->interpolatecurveview.component);	
 	/* Tabbar */
 	patternviewtabbar_init(&self->tabbar, tabbarparent,
-		&self->workspace->config.patview);
+		&self->workspace->config.visual.patview);
 	psy_signal_connect(&self->tabbar.signal_toggle_properties, self,
 		patternview_on_toggle_properties);
 	self->display = PATTERN_DISPLAYMODE_INVALID;
