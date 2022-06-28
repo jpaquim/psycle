@@ -66,7 +66,8 @@ uintptr_t globalconfig_on_changed(GlobalConfig* self, psy_Property*
 bool globalconfig_hasproperty(const GlobalConfig* self,
 	psy_Property* property)
 {
-	assert(self && self->general);
+	assert(self);
+	assert(self->global);
 
 	return psy_property_in_section(property, self->global);
 }
