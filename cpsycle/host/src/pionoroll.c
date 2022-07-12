@@ -192,9 +192,7 @@ void pianoroll_init(Pianoroll* self, psy_ui_Component* parent,
 	psy_signal_connect(&workspace->player.signal_lpbchanged, self,
 		pianoroll_on_lpb_changed);	
 	psy_ui_component_start_timer(&self->component, 0, PIANOROLL_REFRESHRATE);
-	/* configuration */
-	psy_signal_connect(&workspace->config.visual.patview.signal_changed, self,
-		pianoroll_on_configure);
+	/* configuration */	
 	keyboardstate_update_metrics(&self->keyboardstate,
 		psy_ui_component_textmetric(&self->component));
 }
@@ -450,7 +448,7 @@ void pianoroll_make_cmds(psy_Property* parent)
 
 	assert(parent);
 
-	cmds = psy_property_settext(psy_property_append_section(parent,
+	cmds = psy_property_set_text(psy_property_append_section(parent,
 		"pianoroll"), "Pianoroll");
 	set_cmd(cmds, CMD_NAVUP,
 		psy_ui_KEY_UP, psy_SHIFT_OFF, psy_CTRL_OFF,
@@ -540,7 +538,7 @@ void set_cmd(psy_Property* cmds, uintptr_t cmd, uint32_t keycode, bool shift,
 	assert(cmds);
 
 	psy_snprintf(text, 256, "cmds.%s", key);
-	psy_property_sethint(psy_property_settext(psy_property_setshorttext(
+	psy_property_set_hint(psy_property_set_text(psy_property_set_short_text(
 		psy_property_set_id(psy_property_append_int(cmds, key,
 			psy_audio_encodeinput(keycode, shift, ctrl, 0, 0), 0, 0),
 			cmd), shorttext), text), PSY_PROPERTY_HINT_SHORTCUT);

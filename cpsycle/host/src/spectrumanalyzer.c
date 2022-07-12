@@ -125,7 +125,7 @@ void spectrumanalyzer_drawbackground(SpectrumAnalyzer* self, psy_ui_Graphics* g)
 	}
 	
 	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
-	psy_ui_settextcolour(g, psy_ui_colour_make(0x505050));
+	psy_ui_set_text_colour(g, psy_ui_colour_make(0x505050));
 	rect.left = 0;
 	rect.right = 256;
 	psy_snprintf(buf, sizeof(buf), "db");
@@ -185,7 +185,7 @@ void spectrumanalyzer_drawbackground(SpectrumAnalyzer* self, psy_ui_Graphics* g)
 		self->scope_spec_samples, 1000.0f / self->scope_spec_rate);
 	//sprintf(buf,"%d Samples Refresh %.2fhz Window %d",scope_spec_samples,1000.0f/scope_spec_rate, FFTMethod);
 	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
-	psy_ui_settextcolour(g, psy_ui_colour_make(0x505050));
+	psy_ui_set_text_colour(g, psy_ui_colour_make(0x505050));
 	psy_ui_textout(g, psy_ui_realpoint_make(4, 128 - 14), buf, psy_strlen(buf));
 }
 

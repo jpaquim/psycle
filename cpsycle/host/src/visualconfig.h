@@ -29,9 +29,11 @@ enum {
 	PROPERTY_ID_LOADSKIN
 };
 
+struct DirConfig;
+struct psy_audio_Player;
+
 typedef struct VisualConfig {
 	/* signals */
-	psy_Signal signal_changed;
 	psy_Property* visual;
 	psy_Property* defaultfont;
 	psy_Property* apptheme;
@@ -40,14 +42,23 @@ typedef struct VisualConfig {
 	MachineViewConfig macview;
 	MachineParamConfig macparam;
 	/* references */
-	psy_Property* parent;	
+	psy_Property* parent;
+	struct DirConfig* dirconfig;
+	struct psy_audio_Player* player;
 } VisualConfig;
 
-void visualconfig_init(VisualConfig*, psy_Property* parent);
+void visualconfig_init(VisualConfig*, psy_Property* parent, struct psy_audio_Player*);
 void visualconfig_dispose(VisualConfig*);
 
+void visualconfig_set_directories(VisualConfig* self, struct DirConfig*);
+void visualconfig_load_skin(VisualConfig*, const char* path);
+void visualconfig_reset_skin(VisualConfig*);
+void visualconfig_reset_control_skin(VisualConfig*);
+void visualconfig_set_app_theme(VisualConfig*);
 
-uintptr_t visualconfig_on_changed(VisualConfig*, psy_Property*);
+const char* visualconfig_default_font_str(const VisualConfig*);
+void visualconfig_set_default_font(VisualConfig*, psy_Property*);
+
 bool visualconfig_hasproperty(const VisualConfig*, psy_Property*);
 
 #ifdef __cplusplus

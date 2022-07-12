@@ -660,6 +660,12 @@
     <ClCompile Include="src\visualconfig.c">
       <Filter>configuration</Filter>
     </ClCompile>
+    <ClCompile Include="src\pluginscanthread.c">
+      <Filter>app</Filter>
+    </ClCompile>
+    <ClCompile Include="src\patternviewtheme.c">
+      <Filter>configuration</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\languageconfig.h">
@@ -1223,6 +1229,12 @@
     <ClInclude Include="src\visualconfig.h">
       <Filter>configuration</Filter>
     </ClInclude>
+    <ClInclude Include="src\pluginscanthread.h">
+      <Filter>app</Filter>
+    </ClInclude>
+    <ClInclude Include="src\patternviewtheme.h">
+      <Filter>configuration</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="src\resources\arrow-back-circle-outline.bmp">
@@ -1442,6 +1454,57 @@
       <Filter>bitmaps</Filter>
     </Image>
     <Image Include="float-light.bmp">
+      <Filter>bitmaps</Filter>
+    </Image>
+    <Image Include="src\resources\folder-dark.bmp">
+      <Filter>bitmaps</Filter>
+    </Image>
+    <Image Include="src\resources\folder-light.bmp">
+      <Filter>bitmaps</Filter>
+    </Image>
+    <Image Include="src\resources\trail-sign-dark.bmp">
+      <Filter>bitmaps</Filter>
+    </Image>
+    <Image Include="src\resources\trail-sign-light.bmp">
+      <Filter>bitmaps</Filter>
+    </Image>
+    <Image Include="src\resources\float-light.bmp">
+      <Filter>bitmaps</Filter>
+    </Image>
+    <Image Include="src\resources\image-dark.bmp">
+      <Filter>bitmaps</Filter>
+    </Image>
+    <Image Include="src\resources\image-light.bmp">
+      <Filter>bitmaps</Filter>
+    </Image>
+    <Image Include="src\resources\keypad-dark.bmp">
+      <Filter>bitmaps</Filter>
+    </Image>
+    <Image Include="src\resources\keypad-light.bmp">
+      <Filter>bitmaps</Filter>
+    </Image>
+    <Image Include="src\resources\metronome-dark.bmp">
+      <Filter>bitmaps</Filter>
+    </Image>
+    <Image Include="src\resources\metronome-light.bmp">
+      <Filter>bitmaps</Filter>
+    </Image>
+    <Image Include="src\resources\toggle-dark.bmp">
+      <Filter>bitmaps</Filter>
+    </Image>
+    <Image Include="src\resources\toggle-light.bmp">
+      <Filter>bitmaps</Filter>
+    </Image>
+    <Image Include="src\resources\options-dark.bmp">
+      <Filter>bitmaps</Filter>
+    </Image>
+    <Image Include="src\resources\options-light.bmp">
+      <Filter>bitmaps</Filter>
+    </Image>
+    <Image Include="src\resources\step-light.bmp">
+      <Filter>bitmaps</Filter>
+    </Image>
+    <Image Include="src\resources\step-dark.bmp">
       <Filter>bitmaps</Filter>
     </Image>
   </ItemGroup>

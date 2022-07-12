@@ -103,7 +103,7 @@ void vuscope_drawscale(VuScope* self, psy_ui_Graphics* g)
 	centerx = psy_ui_value_px(&size.width, tm, NULL) / 2;
 	step = psy_ui_value_px(&size.height, tm, NULL) / 7;
 	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
-	psy_ui_settextcolour(g, psy_ui_colour_make(0x606060));
+	psy_ui_set_text_colour(g, psy_ui_colour_make(0x606060));
 
 	rect.left = 32 + 24;
 	rect.right = right - 32 - 24;
@@ -154,7 +154,7 @@ void vuscope_drawscale(VuScope* self, psy_ui_Graphics* g)
 
 	psy_snprintf(buf, 64, "Refresh %.2fhz", 1000.0f / self->scope_peak_rate);	
 	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
-	psy_ui_settextcolour(g, psy_ui_colour_make(0x505050));
+	psy_ui_set_text_colour(g, psy_ui_colour_make(0x505050));
 	psy_ui_textout(g, psy_ui_realpoint_make(tm->tmAveCharWidth, psy_ui_value_px(&size.height, tm,
 		NULL) - tm->tmHeight), buf, psy_strlen(buf));
 }

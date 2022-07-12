@@ -9,12 +9,14 @@
 #include "trackerlinenumbers.h"
 /* local */
 #include "patternview.h"
+#include "patternviewconfig.h"
 /* platform */
 #include "../../detail/portable.h"
 
 /* TrackerLineNumbers */
 
 /* prototypes */
+static void trackerlinenumbers_connect_configuration(TrackerLineNumbers*);
 static void trackerlinenumbers_on_draw(TrackerLineNumbers*, psy_ui_Graphics*);
 static TrackerColumnFlags trackerlinennumbers_column_flags(TrackerLineNumbers*,
 	psy_dsp_big_beat_t offset, intptr_t line, intptr_t seqline);
@@ -26,8 +28,13 @@ static void trackerlinenumbers_on_align(TrackerLineNumbers*);
 static void trackerlinenumbers_on_preferred_size(TrackerLineNumbers*,
 	psy_ui_Size* limit, psy_ui_Size* rv);
 static void trackerlinenumbers_update_size(TrackerLineNumbers*);
-static void trackerlinenumbers_on_configure(TrackerLineNumbers*,
-	PatternViewConfig*, psy_Property*);
+static void trackerlinenumbers_configure(TrackerLineNumbers*);
+static void trackerlinenumbers_on_show_beat_offset(TrackerLineNumbers*,
+	psy_Property* sender);
+static void trackerlinenumbers_on_show_cursor(TrackerLineNumbers*,
+	psy_Property* sender);
+static void trackerlinenumbers_on_show_in_hex(TrackerLineNumbers*,
+	psy_Property* sender);
 
 /* vtable */
 static psy_ui_ComponentVtable trackerlinenumbers_vtable;
@@ -62,17 +69,34 @@ void trackerlinenumbers_init(TrackerLineNumbers* self,
 	self->workspace = workspace;
 	self->show_in_hex = TRUE;
 	self->show_beat = FALSE;
-	self->draw_cursor = TRUE;	
+	self->draw_cursor = TRUE;
+	self->draw_restore_fg_colour = psy_ui_colour_white();
+	self->draw_restore_bg_colour = psy_ui_colour_black();
 	psy_ui_realsize_init(&self->size);
 	psy_ui_realsize_init(&self->line_size);	
 	psy_audio_sequencecursor_init(&self->old_cursor);
 	trackerlinenumbers_update_format(self);		
 	psy_ui_component_set_scroll_step_height(&self->component,
 		state->line_height);
-	self->component.blitscroll = TRUE;
-	/* configuration */
-	psy_signal_connect(&workspace->config.visual.patview.signal_changed, self,
-		trackerlinenumbers_on_configure);
+	self->component.blitscroll = TRUE;	
+	trackerlinenumbers_connect_configuration(self);
+	trackerlinenumbers_configure(self);	
+}
+
+void trackerlinenumbers_connect_configuration(TrackerLineNumbers* self)
+{
+	patternviewconfig_connect(
+		&self->workspace->config.visual.patview,
+		"beatoffset", 
+		self, trackerlinenumbers_on_show_beat_offset);
+	patternviewconfig_connect(
+		&self->workspace->config.visual.patview,
+		"linenumberscursor", 
+		self, trackerlinenumbers_on_show_cursor);
+	patternviewconfig_connect(
+		&self->workspace->config.visual.patview,
+		"linenumbersinhex", 
+		self, trackerlinenumbers_on_show_in_hex);	
 }
 
 void trackerlinenumbers_update_format(TrackerLineNumbers* self)
@@ -155,11 +179,12 @@ void trackerlinenumbers_on_draw(TrackerLineNumbers* self, psy_ui_Graphics* g)
 			cpy -= trackerstate_beat_to_px(self->state, clip.topleft.seqoffset,
 				self->line_size.height);
 		}
+		self->draw_restore_fg_colour = psy_ui_component_colour(&self->component);
+		self->draw_restore_bg_colour = psy_ui_component_background_colour(&self->component);
 		while (offset <= clip.bottomright.absoffset && line < (intptr_t)maxlines) {
 			double ystart;			
 			char text[64];
-			psy_ui_Colour bg;
-			psy_ui_Colour fore;
+			psy_ui_Style* style;
 							
 			if (!patternviewstate_single_mode(self->state->pv) && seqoffset == offset) {
 				psy_snprintf(text, 64, self->format_seqstart, (int)patidx,
@@ -168,11 +193,21 @@ void trackerlinenumbers_on_draw(TrackerLineNumbers* self, psy_ui_Graphics* g)
 				psy_snprintf(text, 64, self->format, (int)(line - seqline),
 					(float)offset);
 			}						
-			trackerstate_columncolours(self->state,
-				trackerlinennumbers_column_flags(self, offset, line,
-					seqline), 0, &bg, &fore);
-			psy_ui_setbackgroundcolour(g, bg);
-			psy_ui_settextcolour(g, fore);			
+			style = trackerstate_column_style(self->state,
+				trackerlinennumbers_column_flags(self, offset, line, seqline),
+				0);
+			if (style) {
+				if (style->background.colour.mode.transparent) {
+					psy_ui_set_background_colour(g, self->draw_restore_bg_colour);
+				} else {
+					psy_ui_set_background_colour(g, style->background.colour);
+				}
+				if (style->colour.mode.transparent) {
+					psy_ui_set_text_colour(g, self->draw_restore_fg_colour);
+				} else {
+					psy_ui_set_text_colour(g, style->colour);
+				}
+			}			
 			trackerlinennumbers_draw_text(self, g, text, cpy, size.width, text);
 			cpy += self->line_size.height;
 			ystart = cpy;
@@ -406,9 +441,11 @@ void trackerlinenumbers_update_cursor(TrackerLineNumbers* self)
 	}
 }
 
-void trackerlinenumbers_on_configure(TrackerLineNumbers* self,
-	PatternViewConfig* config, psy_Property* property)
+void trackerlinenumbers_configure(TrackerLineNumbers* self)
 {
+	PatternViewConfig* config;
+
+	config = &self->workspace->config.visual.patview;
 	if (patternviewconfig_showbeatoffset(config)) {
 		trackerlinenumbers_show_beat(self);		
 	} else {
@@ -423,6 +460,45 @@ void trackerlinenumbers_on_configure(TrackerLineNumbers* self,
 		trackerlinenumbers_show_in_hex(self);
 	} else {
 		trackerlinenumbers_show_in_decimal(self);
+	}
+}
+
+void trackerlinenumbers_on_show_beat_offset(TrackerLineNumbers* self,
+	psy_Property* sender)
+{
+	psy_ui_Component* align_parent;
+
+	if (psy_property_item_bool(sender)) {
+		trackerlinenumbers_show_beat(self);
+	} else {
+		trackerlinenumbers_hide_beat(self);
+	}
+	align_parent = psy_ui_component_parent(psy_ui_component_parent(
+		psy_ui_component_parent(&self->component)));
+	if (align_parent) {
+		psy_ui_component_align(align_parent);
+		psy_ui_component_invalidate(align_parent);
+	}
+}
+
+void trackerlinenumbers_on_show_in_hex(TrackerLineNumbers* self,
+	psy_Property* sender)
+{
+	if (psy_property_item_bool(sender)) {
+		trackerlinenumbers_show_in_hex(self);
+	} else {
+		trackerlinenumbers_show_in_decimal(self);
+	}	
+}
+
+void trackerlinenumbers_on_show_cursor(TrackerLineNumbers* self,
+	psy_Property* sender)
+{
+	if (psy_property_item_bool(sender)) {
+		trackerlinenumbers_show_cursor(self);
+	}
+	else {
+		trackerlinenumbers_hide_cursor(self);
 	}
 }
 

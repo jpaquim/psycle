@@ -21,6 +21,7 @@ static void filebar_onnewsong(FileBar*, psy_ui_Component* sender);
 static void filebar_ondiskop(FileBar*, psy_ui_Component* sender);
 static void filebar_onloadsong(FileBar*, psy_ui_Component* sender);
 static void filebar_onsavesong(FileBar*, psy_ui_Component* sender);
+static void filebar_on_ft2_explorer(FileBar*, psy_Property* sender);
 
 /* implementation */
 void filebar_init(FileBar* self, psy_ui_Component* parent, Workspace* workspace)
@@ -32,6 +33,8 @@ void filebar_init(FileBar* self, psy_ui_Component* parent, Workspace* workspace)
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	psy_ui_button_init(&self->recentbutton, filebar_base(self));	
 	psy_ui_button_set_icon(&self->recentbutton, psy_ui_ICON_MORE);	
+	psy_ui_button_data_exchange(&self->recentbutton, generalconfig_property(
+		&self->workspace->config.general, "showplaylist"));
 	psy_ui_label_init_text(&self->header, filebar_base(self), "file.song");	
 	psy_ui_button_init_text_connect(&self->newbutton, filebar_base(self),
 		"file.new", self, filebar_onnewsong);
@@ -63,6 +66,9 @@ void filebar_init(FileBar* self, psy_ui_Component* parent, Workspace* workspace)
 	} else {
 		filebar_usenativefileexplorer(self);
 	}
+	keyboardmiscconfig_connect(
+		psycleconfig_misc(workspace_conf(workspace)),
+		"ft2fileexplorer", self, filebar_on_ft2_explorer);
 }
 
 void filebar_useft2fileexplorer(FileBar* self)
@@ -126,4 +132,15 @@ void filebar_onloadsong(FileBar* self, psy_ui_Component* sender)
 void filebar_onsavesong(FileBar* self, psy_ui_Component* sender)
 {		
 	workspace_save_song_fileselect(self->workspace);
+}
+
+void filebar_on_ft2_explorer(FileBar* self, psy_Property* sender)
+{
+	if (psy_property_item_bool(sender)) {
+		filebar_useft2fileexplorer(self);
+	} else {
+		filebar_usenativefileexplorer(self);
+	}
+	psy_ui_component_align(psy_ui_app_main(psy_ui_app()));
+	psy_ui_component_invalidate(psy_ui_app_main(psy_ui_app()));
 }

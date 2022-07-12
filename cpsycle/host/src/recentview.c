@@ -87,8 +87,7 @@ void playlistview_init(PlaylistView* self, psy_ui_Component* parent,
 		playlistview_onmovedown);
 	propertiesview_init(&self->view, &self->component,
 		tabbarparent, workspace_recentsongs(workspace), 1,
-		&workspace->inputhandler);
-	propertiesview_enable_mouse_propagation(&self->view);		
+		&workspace->inputhandler);	
 	propertiesrenderer_set_style(&self->view.renderer,
 		STYLE_RECENTVIEW_MAINSECTION,
 		STYLE_RECENTVIEW_MAINSECTIONHEADER,

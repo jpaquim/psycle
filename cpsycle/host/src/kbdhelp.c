@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -49,7 +49,7 @@ void kbdhelp_buildtabbar(KbdHelp* self)
 		const psy_Property* property;
 
 		property = (const psy_Property*)psy_list_entry_const(p);
-		if (psy_property_issection(property)) {
+		if (psy_property_is_section(property)) {
 			psy_ui_tabbar_append(&self->tabbar, psy_property_text(property),
 				psy_INDEX_INVALID, psy_INDEX_INVALID, psy_INDEX_INVALID,
 				psy_ui_colour_white());
@@ -85,7 +85,7 @@ void kbdhelp_setcmdsection(KbdHelp* self, uintptr_t index)
 			property = (const psy_Property*)psy_list_entry_const(p);
 			kbdbox_setdescription(&self->kbdbox,
 				(uint32_t)psy_property_item_int(property),
-				psy_property_shorttext(property));
+				psy_property_short_text(property));
 		}
 	}
 }

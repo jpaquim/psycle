@@ -88,6 +88,10 @@ void newmachinedetail_init(NewMachineDetail* self, psy_ui_Component* parent,
 			workspace_conf(self->workspace)))) {
 		psy_ui_checkbox_check(&self->compatblitzgamefx);
 	}
+	psy_ui_checkbox_data_exchange(&self->compatblitzgamefx,
+		compatconfig_property(psycleconfig_compat(
+			workspace_conf(self->workspace)),
+			"loadnewgamefxblitz"));
 	psy_signal_connect(&self->compatblitzgamefx.signal_clicked, self,
 		newmachinedetail_onloadnewblitz);	
 	psy_ui_margin_init_em(&margin, 0.0, 0.0, 0.5, 0.0);

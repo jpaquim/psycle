@@ -83,6 +83,8 @@ void trackercolumn_init(TrackerColumn* self, psy_ui_Component* parent,
 	self->state = state;
 	self->workspace = workspace;	
 	self->track = index;
+	self->draw_restore_fg_colour = psy_ui_colour_white();
+	self->draw_restore_bg_colour = psy_ui_colour_black();
 	psy_ui_realsize_init(&self->size);
 	psy_ui_realsize_init(&self->line_size);
 }
@@ -128,7 +130,9 @@ void trackercolumn_draw_track_events(TrackerColumn* self, psy_ui_Graphics* g)
 	self->digitsize = psy_ui_realsize_make(
 		psy_ui_value_px(&self->state->track_config->flatsize,
 			psy_ui_component_textmetric(&self->component), NULL),
-		self->line_size.height - 1);		
+		self->line_size.height - 1);
+	self->draw_restore_fg_colour = psy_ui_component_colour(&self->component);
+	self->draw_restore_bg_colour = psy_ui_component_background_colour(&self->component);
 	for (p = *events,			
 			cpy = trackerstate_beat_to_px(self->state,
 				patternviewstate_draw_offset(self->state->pv,
@@ -184,7 +188,7 @@ void trackercolumn_draw_entry(TrackerColumn* self, psy_ui_Graphics* g,
 	psy_ui_RealPoint cp;		
 	psy_List* curr;
 	char* emptystr;
-	psy_audio_PatternEvent emptyevent;	
+	psy_audio_PatternEvent emptyevent;		
 
 	if (!entry) {
 		entry = &self->state->empty;
@@ -210,8 +214,7 @@ void trackercolumn_draw_entry(TrackerColumn* self, psy_ui_Graphics* g,
 		cp_leftedge.x += self->state->track_config->textleftedge;
 		/* draw note */
 		if (!self->state->track_config->multicolumn || noteindex == 0) {
-			psy_ui_Colour bg;
-			psy_ui_Colour fore;
+			psy_ui_Style* style;
 
 			column = 0;
 			currcolumnflags = columnflags;
@@ -219,10 +222,20 @@ void trackercolumn_draw_entry(TrackerColumn* self, psy_ui_Graphics* g,
 				columnflags.cursor &&
 				(self->state->pv->cursor.column == 0) &&
 				(self->state->pv->cursor.noteindex == noteindex);
-			trackerstate_columncolours(self->state, currcolumnflags,
-				entry->track, &bg, &fore);
-			psy_ui_setbackgroundcolour(g, bg);
-			psy_ui_settextcolour(g, fore);			
+			style = trackerstate_column_style(self->state, currcolumnflags,
+				entry->track);
+			if (style) {
+				if (style->background.colour.mode.transparent) {
+					psy_ui_set_background_colour(g, self->draw_restore_bg_colour);
+				} else {
+					psy_ui_set_background_colour(g, style->background.colour);
+				}
+				if (style->colour.mode.transparent) {
+					psy_ui_set_text_colour(g, self->draw_restore_fg_colour);
+				} else {
+					psy_ui_set_text_colour(g, style->colour);
+				}
+			}
 			notestr = notetostr(*ev, psy_dsp_NOTESTAB_A440, FALSE);
 			psy_ui_textoutrectangle(g,
 				cp_leftedge,
@@ -264,18 +277,27 @@ void trackercolumn_draw_entry(TrackerColumn* self, psy_ui_Graphics* g,
 				(self->state->pv->cursor.noteindex == noteindex);
 			for (num = coldef->numdigits, digit = 0; digit < num;
 					++digit, cp.x += self->digitsize.width) {
-				psy_ui_Colour bg;
-				psy_ui_Colour fore;
+				psy_ui_Style* style;
 
 				currcolumnflags = columnflags;
 				currcolumnflags.cursor = columnflags.cursor &&
 					(self->state->pv->cursor.column == column) &&
 					(self->state->pv->cursor.digit == digit) &&
 					(self->state->pv->cursor.noteindex == noteindex);
-				trackerstate_columncolours(self->state, currcolumnflags,
-					entry->track, &bg, &fore);
-				psy_ui_setbackgroundcolour(g, bg);
-				psy_ui_settextcolour(g, fore);				
+				style = trackerstate_column_style(self->state, currcolumnflags,
+					entry->track);
+				if (style) {
+					if (style->background.colour.mode.transparent) {
+						psy_ui_set_background_colour(g, self->draw_restore_bg_colour);
+					} else {
+						psy_ui_set_background_colour(g, style->background.colour);
+					}
+					if (style->colour.mode.transparent) {
+						psy_ui_set_text_colour(g, self->draw_restore_fg_colour);
+					} else {
+						psy_ui_set_text_colour(g, style->colour);
+					}
+				}				
 				if (!empty) {
 					digitstr = hex_tab[((value >> ((num - digit - 1) * 4)) & 0x0F)];
 				}

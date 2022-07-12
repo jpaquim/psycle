@@ -25,6 +25,9 @@ static void button_on_key_down(psy_ui_Button*, psy_ui_KeyboardEvent*);
 static double psy_ui_button_width(psy_ui_Button*);
 static void psy_ui_button_on_update_styles(psy_ui_Button*);
 static void psy_ui_button_load_bitmaps(psy_ui_Button*);
+static void psy_ui_button_on_property_changed(psy_ui_Button*,
+	psy_Property* sender);
+static void psy_ui_button_before_property_destroyed(psy_ui_Button*, psy_Property* sender);
 
 /* vtable */
 static psy_ui_ComponentVtable vtable;
@@ -70,6 +73,7 @@ void psy_ui_button_init(psy_ui_Button* self, psy_ui_Component* parent)
 {
 	psy_ui_component_init(psy_ui_button_base(self), parent, NULL);
 	vtable_init(self);
+	self->property = NULL;
 	psy_ui_component_set_aligner(&self->component, NULL);
 	self->icon = psy_ui_ICON_NONE;
 	self->charnumber = 0.0;
@@ -149,6 +153,9 @@ void psy_ui_button_on_destroyed(psy_ui_Button* self)
 {	
 	assert(self);
 
+	if (self->property) {
+		psy_property_disconnect(self->property, self);
+	}
 	free(self->text);
 	self->text = NULL;
 	free(self->translation);
@@ -246,9 +253,9 @@ void psy_ui_button_on_draw(psy_ui_Button* self, psy_ui_Graphics* g)
 			vcenter = 0.0;
 		}
 		if (psy_ui_component_input_prevented(&self->component)) {
-			psy_ui_settextcolour(g, psy_ui_colour_make(0x00777777));
+			psy_ui_set_text_colour(g, psy_ui_colour_make(0x00777777));
 		} else {
-			psy_ui_settextcolour(g, psy_ui_component_colour(&self->component));
+			psy_ui_set_text_colour(g, psy_ui_component_colour(&self->component));
 		}
 		psy_ui_textoutrectangle(g, psy_ui_realpoint_make(cpx, vcenter),
 			psy_ui_ETO_CLIPPED, r, text, strlen(text));
@@ -354,15 +361,24 @@ void psy_ui_button_on_mouse_up(psy_ui_Button* self, psy_ui_MouseEvent* ev)
 						
 			client_position = psy_ui_realrectangle_make(psy_ui_realpoint_zero(),
 				psy_ui_component_scroll_size_px(psy_ui_button_base(self)));
-			if (psy_ui_realrectangle_intersect(&client_position,
-					psy_ui_mouseevent_offset(ev))) {
-				self->shiftstate = psy_ui_mouseevent_shiftkey(ev);
-				self->ctrlstate = psy_ui_mouseevent_ctrlkey(ev);
-				psy_signal_emit(&self->signal_clicked, self, 0);
-			}
 			if (self->stoppropagation) {
 				psy_ui_mouseevent_stop_propagation(ev);
 			}
+			if (psy_ui_realrectangle_intersect(&client_position,
+					psy_ui_mouseevent_offset(ev))) {
+				self->shiftstate = psy_ui_mouseevent_shift_key(ev);
+				self->ctrlstate = psy_ui_mouseevent_ctrl_key(ev);
+				psy_signal_emit(&self->signal_clicked, self, 0);
+				if (self->property) {
+					if (psy_property_is_bool(self->property)) {
+						psy_property_set_item_bool(self->property,
+							!psy_property_item_bool(self->property));
+					} else {
+						psy_signal_emit(&self->property->changed, self->property, 0);
+					}
+					psy_ui_mouseevent_stop_propagation(ev);
+				}
+			}			
 		}
 	}
 }
@@ -487,4 +503,33 @@ void psy_ui_button_load_bitmaps(psy_ui_Button* self)
 		psy_ui_bitmap_settransparency(&self->bitmapicon,
 			self->bitmaptransparency);
 	}
+}
+
+void psy_ui_button_data_exchange(psy_ui_Button* self, psy_Property* property)
+{
+	assert(self);
+	assert(property);
+
+	self->property = property;
+	if (property) {
+		psy_ui_button_on_property_changed(self, property);
+		psy_property_connect(property, self,
+			psy_ui_button_on_property_changed);
+		psy_signal_connect(&self->property->before_destroyed, self,
+			psy_ui_button_before_property_destroyed);
+		if (psy_property_is_action(property)) {
+			psy_ui_button_set_text(self, psy_property_text(property));
+		}
+	}
+}
+
+void psy_ui_button_on_property_changed(psy_ui_Button* self, psy_Property* sender)
+{	
+}
+
+void psy_ui_button_before_property_destroyed(psy_ui_Button* self, psy_Property* sender)
+{
+	assert(self);
+
+	self->property = NULL;
 }

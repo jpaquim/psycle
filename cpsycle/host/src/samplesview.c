@@ -1088,9 +1088,7 @@ void samplesview_init(SamplesView* self, psy_ui_Component* parent,
 		&self->clienttabbar.signal_change);
 	samplesview_setsample(self, psy_audio_sampleindex_make(0, 0));
 	psy_signal_connect(&self->sampleeditor.signal_samplemodified, self,
-		samplesview_onsamplemodified);
-	psy_signal_connect(&self->workspace->config.visual.patview.signal_changed, self,
-		samplesview_onconfigure);	
+		samplesview_onsamplemodified);	
 	psy_ui_tabbar_select(&self->tabbar, 0);
 	psy_signal_connect(&samplesview_base(self)->signal_selectsection, self,
 		samplesview_onselectsection);

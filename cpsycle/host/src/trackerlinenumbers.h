@@ -33,6 +33,8 @@ typedef struct TrackerLineNumbers {
 	psy_audio_SequenceCursor old_cursor;
 	psy_ui_RealSize size;
 	psy_ui_RealSize line_size;	
+	psy_ui_Colour draw_restore_fg_colour;
+	psy_ui_Colour draw_restore_bg_colour;
 	/* references */
 	TrackerState* state;
 	Workspace* workspace;

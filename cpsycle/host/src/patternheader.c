@@ -20,6 +20,7 @@ static void patterntrackbox_drawtext(PatternTrackBox*, psy_ui_Graphics*);
 static void patterntrackbox_on_mouse_down(PatternTrackBox*, psy_ui_MouseEvent*);
 static void patterntrackbox_on_preferred_size(PatternTrackBox*,
 	const psy_ui_Size* limit, psy_ui_Size* rv);
+static void patterndefaultline_update_preferred_size(TrackerHeaderView*);
 
 /* vtable */
 static psy_ui_ComponentVtable patterntrackbox_vtable;
@@ -476,18 +477,21 @@ void trackerheader_ontrackstatechanged(TrackerHeader* self,
 /* TrackerHeaderView */
 
 /* prototypes*/
-void trackerheaderview_on_configure(TrackerHeaderView*, PatternViewConfig*,
-	psy_Property*);
-void trackerheaderview_on_header_line(TrackerHeaderView*, psy_ui_Component* sender);
+static void trackerheaderview_on_switch_header_line(TrackerHeaderView*, psy_ui_Component* sender);
+static void trackerheaderview_on_update_size(TrackerHeaderView*,
+	psy_Property* sender);
+static void trackerheaderview_update_preferred_size(TrackerHeaderView*);
 
 /* implementation */
 void trackerheaderview_init(TrackerHeaderView* self, psy_ui_Component* parent, TrackConfig* config,
 	TrackerState* state, Workspace* workspace)
 {
+	PatternViewConfig* pvconfig;
+	
 	psy_ui_component_init(&self->component, parent, NULL);
 	/* desc */
 	psy_ui_button_init_connect(&self->desc, &self->component,
-		self, trackerheaderview_on_header_line);
+		self, trackerheaderview_on_switch_header_line);
 	psy_ui_component_set_style_types(&self->desc.component,
 		psy_ui_STYLE_LABEL, psy_INDEX_INVALID, psy_INDEX_INVALID,
 		psy_INDEX_INVALID);
@@ -500,32 +504,51 @@ void trackerheaderview_init(TrackerHeaderView* self, psy_ui_Component* parent, T
 	psy_ui_component_set_align(&self->pane, psy_ui_ALIGN_CLIENT);
 	trackerheader_init(&self->header, &self->pane, config, state, workspace);
 	psy_ui_component_set_align(&self->header.component, psy_ui_ALIGN_FIXED);
+	trackerheaderview_update_preferred_size(self);
 	/* configuration */
-	psy_signal_connect(&workspace->config.visual.patview.signal_changed, self,
-		trackerheaderview_on_configure);
+	pvconfig = &self->header.workspace->config.visual.patview;	
+	patternviewconfig_connect(pvconfig, "linenumbers",
+		self, trackerheaderview_on_update_size);
+	patternviewconfig_connect(pvconfig, "beatoffset",
+		self, trackerheaderview_on_update_size);
+	patternviewconfig_connect(pvconfig, "displaysinglepattern",
+		self, trackerheaderview_on_update_size);	
 }
 
-void trackerheaderview_on_configure(TrackerHeaderView* self, PatternViewConfig* config,
-	psy_Property* property)
-{	
+void trackerheaderview_on_switch_header_line(TrackerHeaderView* self, psy_ui_Component* sender)
+{
+	patternviewtheme_switch_header(&self->header.workspace->config.visual.patview.theme);
+	trackerheaderview_update_preferred_size(self);
+}
+
+void trackerheaderview_on_update_size(TrackerHeaderView* self,
+	psy_Property* sender)
+{
+	trackerheaderview_update_preferred_size(self);
+}
+
+void trackerheaderview_update_preferred_size(TrackerHeaderView* self)
+{
+	PatternViewConfig* config;
+
+	config = &self->header.workspace->config.visual.patview;
 	if (patternviewconfig_linenumber_num_digits(config) == 0.0) {
 		psy_ui_component_hide(&self->desc.component);
-	} else {
+	}
+	else {
 		psy_ui_component_set_preferred_size(&self->desc.component,
 			psy_ui_size_make(
 				psy_ui_mul_values(
-					psy_ui_value_make_ew(patternviewconfig_linenumber_num_digits(config)),
+					psy_ui_value_make_ew(
+						patternviewconfig_linenumber_num_digits(
+							config)),
 					self->header.state->track_config->flatsize,
 					psy_ui_component_textmetric(&self->component),
-					NULL),				
+					NULL),
 				psy_ui_value_make_eh(1.0)));
 		psy_ui_component_show(&self->desc.component);
-	}	
+	}
+	psy_ui_component_align(&self->component);
+	psy_ui_component_invalidate(&self->component);
 }
 
-void trackerheaderview_on_header_line(TrackerHeaderView* self, psy_ui_Component* sender)
-{
-	patternviewconfig_switch_header(&self->header.workspace->config.visual.patview);
-	psy_ui_component_align(&self->header.component);
-	psy_ui_component_invalidate(&self->header.component);
-}

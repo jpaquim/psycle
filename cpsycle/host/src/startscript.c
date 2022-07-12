@@ -71,6 +71,28 @@ Link* link_clone(const Link* self)
 	return rv;
 }
 
+void links_init(Links* self)
+{
+	psy_table_init(&self->container);
+}
+
+void links_dispose(Links* self)
+{
+	psy_table_dispose_all(&self->container, (psy_fp_disposefunc)link_dispose);
+}
+
+void links_add(Links* self, const Link* link)
+{
+	psy_table_insert(&self->container, psy_table_size(&self->container),
+		link_clone(link));
+}
+
+const Link* links_at(const Links* self, uintptr_t index)
+{
+	return (const Link*)psy_table_at_const(&self->container, index);
+}
+
+
 /* StartScript */
 /* prototypes */
 int startscript_addmenu(lua_State*);

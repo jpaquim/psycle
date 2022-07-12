@@ -158,6 +158,38 @@ IDB_FLOAT_DARK          BITMAP                  "float-dark.bmp"
 
 IDB_FLOAT_LIGHT         BITMAP                  "float-light.bmp"
 
+IDB_FOLDER_DARK         BITMAP                  "folder-dark.bmp"
+
+IDB_FOLDER_LIGHT        BITMAP                  "folder-light.bmp"
+
+IDB_TRAIL_SIGN_DARK     BITMAP                  "trail-sign-dark.bmp"
+
+IDB_TRAIL_SIGN_LIGHT    BITMAP                  "trail-sign-light.bmp"
+
+IDB_IMAGE_DARK          BITMAP                  "image-dark.bmp"
+
+IDB_IMAGE_LIGHT         BITMAP                  "image-light.bmp"
+
+IDB_KEYPAD_DARK         BITMAP                  "keypad-dark.bmp"
+
+IDB_KEYPAD_LIGHT        BITMAP                  "keypad-light.bmp"
+
+IDB_METRONOME_DARK      BITMAP                  "metronome-dark.bmp"
+
+IDB_METRONOME_LIGHT     BITMAP                  "metronome-light.bmp"
+
+IDB_TOGGLE_DARK         BITMAP                  "toggle-dark.bmp"
+
+IDB_TOGGLE_LIGHT        BITMAP                  "toggle-light.bmp"
+
+IDB_OPTIONS_DARK        BITMAP                  "options-dark.bmp"
+
+IDB_OPTIONS_LIGHT       BITMAP                  "options-light.bmp"
+
+IDB_STEP_DARK           BITMAP                  "step-dark.bmp"
+
+IDB_STEP_LIGHT          BITMAP                  "step-light.bmp"
+
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////

@@ -26,7 +26,7 @@ void psy_playlist_init(psy_Playlist* self)
 	self->recentsongs = psy_property_set_comment(
 		psy_property_allocinit_key(NULL),
 		"Psycle Recent Song ViewHistory created by\r\n; " PSYCLE__BUILD__IDENTIFIER("\r\n; "));
-	self->recentfiles = psy_property_settext(
+	self->recentfiles = psy_property_set_text(
 		psy_property_append_section(self->recentsongs, "files"),
 		"playlist.recent-songs");
 	playlist_initpath(self);
@@ -68,7 +68,7 @@ void psy_playlist_add(psy_Playlist* self, const char* filename)
 		psy_Path path;
 		
 		psy_path_init(&path, filename);		
-		psy_property_preventtranslate(psy_property_settext(
+		psy_property_preventtranslate(psy_property_set_text(
 			psy_property_setreadonly(psy_property_append_str(
 				self->recentfiles, hashkey, filename), TRUE),
 			psy_path_name(&path)));
@@ -108,7 +108,7 @@ void psy_playlist_load(psy_Playlist* self)
 
 			property = (psy_Property*)psy_list_entry(p);
 			psy_path_init(&path, psy_property_item_str(property));
-			psy_property_settext(property, psy_path_name(&path));
+			psy_property_set_text(property, psy_path_name(&path));
 			psy_property_setreadonly(property, TRUE);
 			psy_property_preventtranslate(property);
 			psy_path_dispose(&path);

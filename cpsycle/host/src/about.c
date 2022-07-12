@@ -244,8 +244,8 @@ void licence_onlanguagechanged(Licence* self, psy_Translator* sender)
 
 void licence_setlanguage(Licence* self)
 {
-	if (psy_translator_langid(&psy_ui_app()->translator) &&
-			(strcmp(psy_translator_langid(&psy_ui_app()->translator), "es") == 0)) {
+	if (psy_translator_lang_id(&psy_ui_app()->translator) &&
+			(strcmp(psy_translator_lang_id(&psy_ui_app()->translator), "es") == 0)) {
 		licence_set_es(self);
 	} else {
 		licence_set_en(self);

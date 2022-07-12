@@ -22,9 +22,8 @@ enum {
 typedef struct SeqEditConfig {
 	/* signals */
 	psy_Signal signal_changed;
-	psy_Property* seqedit;
-	/* references */
-	psy_Property* parent;	
+	/* intern */
+	psy_Property* seqedit;		
 } SeqEditConfig;
 
 void seqeditconfig_init(SeqEditConfig*, psy_Property* parent);
@@ -32,7 +31,6 @@ void seqeditconfig_dispose(SeqEditConfig*);
 
 uintptr_t seqeditconfig_machine(const SeqEditConfig*);
 
-uintptr_t seqeditconfig_onchanged(SeqEditConfig*, psy_Property*);
 bool seqeditconfig_hasproperty(const SeqEditConfig*, psy_Property*);
 
 #ifdef __cplusplus

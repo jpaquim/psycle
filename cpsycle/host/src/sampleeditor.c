@@ -47,7 +47,7 @@ void sampleeditorbar_init(SampleEditorBar* self, psy_ui_Component* parent,
 	self->editor = editor;
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_checkbox_init(&self->selecttogether, &self->component);
-	psy_ui_checkbox_settext(&self->selecttogether,
+	psy_ui_checkbox_set_text(&self->selecttogether,
 		"samplesview.select-together");
 	psy_ui_checkbox_check(&self->selecttogether);
 	psy_ui_label_init_text(&self->selstartlabel, &self->component,
@@ -61,15 +61,15 @@ void sampleeditorbar_init(SampleEditorBar* self, psy_ui_Component* parent,
 	psy_ui_label_init_text(&self->visualrepresentationdesc, &self->component,
 		"samplesview.visual");
 	psy_ui_checkbox_init(&self->doublecontloop, &self->component);
-	psy_ui_checkbox_settext(&self->doublecontloop, "samplesview.doublecont");		
+	psy_ui_checkbox_set_text(&self->doublecontloop, "samplesview.doublecont");		
 	psy_signal_connect(&self->doublecontloop.signal_clicked, self,
 		sampleeditorbar_ondoublecontloop);
 	psy_ui_checkbox_init(&self->doublesustainloop, &self->component);
-	psy_ui_checkbox_settext(&self->doublesustainloop, "samplesview.doublesus");
+	psy_ui_checkbox_set_text(&self->doublesustainloop, "samplesview.doublesus");
 	psy_signal_connect(&self->doublesustainloop.signal_clicked, self,
 		sampleeditorbar_ondoublesustainloop);	
 	psy_ui_checkbox_init(&self->drawlines, &self->component);
-	psy_ui_checkbox_settext(&self->drawlines, "samplesview.lines");
+	psy_ui_checkbox_set_text(&self->drawlines, "samplesview.lines");
 	psy_signal_connect(&self->drawlines.signal_clicked, self,
 		sampleeditorbar_ondrawlines);
 	{	// resampling methods
@@ -124,7 +124,7 @@ void sampleeditorbar_ondoublecontloop(SampleEditorBar* self,
 	} else {
 		sampleeditor_showsinglecontloop(self->editor);
 	}
-	psy_ui_checkbox_disablecheck(&self->doublesustainloop);
+	psy_ui_checkbox_disable_check(&self->doublesustainloop);
 }
 
 void sampleeditorbar_ondoublesustainloop(SampleEditorBar* self,
@@ -135,7 +135,7 @@ void sampleeditorbar_ondoublesustainloop(SampleEditorBar* self,
 	} else {
 		sampleeditor_showsinglesustainloop(self->editor);		
 	}
-	psy_ui_checkbox_disablecheck(&self->doublecontloop);
+	psy_ui_checkbox_disable_check(&self->doublecontloop);
 }
 
 void sampleeditorbar_ondrawlines(SampleEditorBar* self,
@@ -455,7 +455,7 @@ void sampleeditorheader_drawruler(SampleEditorHeader* self, psy_ui_Graphics* g)
 	psy_ui_drawline(g, psy_ui_realpoint_make(0, baseline),
 		psy_ui_realpoint_make(size.width, baseline));
 	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
-	psy_ui_settextcolour(g, psy_ui_colour_make(0x00999999));
+	psy_ui_set_text_colour(g, psy_ui_colour_make(0x00999999));
 	if (self->metric) {
 		step = waveboxcontext_numframes(self->metric) / 10;
 		step = (uintptr_t)((double)step * (self->metric->zoomright -
@@ -501,7 +501,7 @@ void sampleeditor_onscrollzoom_customdraw(SampleEditor* self,
 			static const char* txt = "No wave loaded";
 			
 			psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
-			psy_ui_settextcolour(g, psy_ui_colour_make(0x00D1C5B6));
+			psy_ui_set_text_colour(g, psy_ui_colour_make(0x00D1C5B6));
 			psy_ui_textout(g, psy_ui_realpoint_make(
 				(size.width - tm->tmAveCharWidth * psy_strlen(txt)) / 2,
 				(size.height - tm->tmHeight) / 2),

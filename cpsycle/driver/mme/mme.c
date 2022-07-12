@@ -139,6 +139,7 @@ typedef struct {
 static void driver_deallocate(psy_AudioDriver*);
 static int driver_init(psy_AudioDriver*);
 static int driver_open(psy_AudioDriver*);
+static bool driver_opened(const psy_AudioDriver*);
 static int driver_close(psy_AudioDriver*);
 static int driver_dispose(psy_AudioDriver*);
 static void driver_configure(psy_AudioDriver*, const psy_Property*);
@@ -183,6 +184,7 @@ static void vtable_init(void)
 {
 	if (!vtable_initialized) {
 		vtable.open = driver_open;
+		vtable.opened = driver_opened;
 		vtable.deallocate = driver_deallocate;		
 		vtable.close = driver_close;
 		vtable.dispose = driver_dispose;
@@ -284,58 +286,57 @@ static void init_properties(psy_AudioDriver* driver)
 
 	self = (MmeDriver*)driver;
 	psy_snprintf(key, 256, "mme-guid-%d", PSY_AUDIODRIVER_MME_GUID);
-	self->configuration = psy_property_preventtranslate(psy_property_settext(
+	self->configuration = psy_property_preventtranslate(psy_property_set_text(
 		psy_property_allocinit_key(key), "Windows Wave MME"));
-	psy_property_sethint(psy_property_append_int(self->configuration,
-		"guid", PSY_AUDIODRIVER_MME_GUID, 0, 0),
-		PSY_PROPERTY_HINT_HIDE);
-	psy_property_settext(psy_property_setreadonly(
+	psy_property_hide(psy_property_append_int(self->configuration,
+		"guid", PSY_AUDIODRIVER_MME_GUID, 0, 0));
+	psy_property_set_text(psy_property_setreadonly(
 		psy_property_append_str(self->configuration, "name", "Windows Wave MME"),
 		TRUE),
 		"Driver");
-	psy_property_settext(psy_property_setreadonly(
+	psy_property_set_text(psy_property_setreadonly(
 		psy_property_append_str(self->configuration, "vendor", "Psycledelics"),
 		TRUE),
 		"Vendor");
-	psy_property_settext(psy_property_setreadonly(
+	psy_property_set_text(psy_property_setreadonly(
 		psy_property_append_str(self->configuration, "version", "1.0"),
 		TRUE),
 		"Version");
-	psy_property_settext(
+	psy_property_set_text(
 		psy_property_append_int(self->configuration, "bitdepth",
 			psy_audiodriversettings_bitdepth(&self->settings), 0, 32),
 		"Bitrate");
-	psy_property_settext(
+	psy_property_set_text(
 		psy_property_append_int(self->configuration, "samplerate",
 			(intptr_t)psy_audiodriversettings_samplespersec(&self->settings),
 				0, 0),
 		"Samplerate"
 		);
-	psy_property_settext(
+	psy_property_set_text(
 		psy_property_append_int(self->configuration, "dither", 0, 0, 1),
 		"Dither");
-	psy_property_settext(
+	psy_property_set_text(
 		psy_property_append_int(self->configuration, "numbuf",
 			psy_audiodriversettings_blockcount(&self->settings), 1, 8),
 		"Buffer Number");
-	psy_property_settext(
+	psy_property_set_text(
 		psy_property_append_int(self->configuration, "numsamples",
 			psy_audiodriversettings_blockframes(&self->settings),
 			64, 8193),
 		"Buffer Samples");
-	devices = psy_property_settext(
+	devices = psy_property_set_text(
 		psy_property_append_choice(self->configuration, "device", 0),
 		"Output Device");
-	psy_property_sethint(devices, PSY_PROPERTY_HINT_COMBO);
+	psy_property_set_hint(devices, PSY_PROPERTY_HINT_COMBO);
 	psy_property_append_int(devices, "WAVE_MAPPER", -1, 0, 0);
 	for (p = self->_playEnums, i = 0; p != NULL; p = p->next, ++i) {
 		PortEnums* port = (PortEnums*)p->entry;
 		psy_property_append_int(devices, port->portname, i, 0, 0);
 	}
-	indevices = psy_property_settext(
+	indevices = psy_property_set_text(
 		psy_property_append_choice(self->configuration, "indevice", 0),
 		"Standard Input Device (Select different in Recorder)");
-	psy_property_sethint(indevices, PSY_PROPERTY_HINT_COMBO);
+	psy_property_set_hint(indevices, PSY_PROPERTY_HINT_COMBO);
 	for (p = self->_capEnums, i = 0; p != NULL; p = p->next, ++i) {
 		PortEnums* port = (PortEnums*)p->entry;
 		psy_property_append_int(indevices, port->portname, i, 0, 0);
@@ -382,6 +383,14 @@ psy_dsp_big_hz_t samplerate(psy_AudioDriver* self)
 int driver_open(psy_AudioDriver* driver)
 {
 	return start((MmeDriver*)driver);
+}
+
+bool driver_opened(const psy_AudioDriver* driver)
+{
+	MmeDriver* self;
+
+	self = (MmeDriver*)driver;
+	return (self->_running != FALSE);
 }
 
 bool start(MmeDriver* self)

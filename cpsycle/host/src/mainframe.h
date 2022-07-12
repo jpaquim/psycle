@@ -59,16 +59,6 @@
 extern "C" {
 #endif
 
-typedef struct Links {
-	psy_Table container;
-} Links;
-
-void links_init(Links*);
-void links_dispose(Links*);
-
-void links_add(Links*, const Link* link);
-const Link* links_at(const Links*, uintptr_t index);
-
 /*
 ** MainFrame
 **
@@ -159,7 +149,7 @@ MainFrame* mainframe_allocinit(void);
 
 INLINE int mainframe_showmaximizedatstart(MainFrame* self)
 {	
-	return generalconfig_showmaximizedatstart(
+	return generalconfig_show_maximized_at_start(
 		psycleconfig_general(workspace_conf(&self->workspace)));
 }
 

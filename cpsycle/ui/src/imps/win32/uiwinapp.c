@@ -285,7 +285,7 @@ LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 #endif
 				psy_ui_Colour bgcolour;
 
-				bgcolour = psy_ui_component_backgroundcolour(imp->component);
+				bgcolour = psy_ui_component_background_colour(imp->component);
 				if (!bgcolour.mode.transparent) {
 					HDC hdc = GetDCEx(hwnd, 0, DCX_WINDOW | DCX_USESTYLE);
 					if (hdc) {
@@ -701,7 +701,7 @@ bool handle_ctlcolor(psy_ui_WinApp* self, int msg, HWND hwnd, WPARAM wparam,
 
 			colour = psy_ui_component_colour(imp->component);
 			colorref = psy_ui_colour_colorref(&colour);
-			colour = psy_ui_component_backgroundcolour(imp->component);
+			colour = psy_ui_component_background_colour(imp->component);
 			bgcolorref = psy_ui_colour_colorref(&colour);
 			if (!colour.mode.transparent) {
 				DeleteObject(psy_ui_win_component_details(imp->component)->background);

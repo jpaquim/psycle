@@ -140,7 +140,7 @@ void init_properties(SilentDriver* self)
 
 	psy_snprintf(key, 256, "silent-guid-%d",
 		PSY_AUDIODRIVER_SILENTDRIVER_GUID);
-	self->configuration = psy_property_preventtranslate(psy_property_settext(
+	self->configuration = psy_property_preventtranslate(psy_property_set_text(
 		psy_property_allocinit_key(key), "Silent"));
 	psy_property_setreadonly(
 		psy_property_append_str(self->configuration, "name", "Silent AudioDriver"),

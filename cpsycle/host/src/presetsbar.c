@@ -133,7 +133,7 @@ void presetsbar_setmachine(PresetsBar* self, psy_audio_Machine* machine)
 				presets,
 				psy_audio_machine_numtweakparameters(self->machine),
 				psy_audio_machine_datasize(self->machine),
-				dirconfig_pluginscurrplatform(&self->workspace->config.directories));
+				dirconfig_plugins_curr_platform(&self->workspace->config.directories));
 			if (status != psy_audio_PRESETIO_OK) {
 				psy_audio_machine_setpresets(self->machine, NULL);
 				psy_audio_presets_dispose(presets);
@@ -164,7 +164,7 @@ bool presetsbar_userpresetpath(PresetsBar* self, psy_Path* path)
 
 		psy_path_setpath(path, info->modulepath);
 		psy_path_set_prefix(path,
-			dirconfig_userpresets(&self->workspace->config.directories));
+			dirconfig_user_presets(&self->workspace->config.directories));
 		psy_path_setext(path, "prs");
 		if (psy_filereadable(psy_path_full(path))) {
 			return TRUE;
@@ -186,7 +186,7 @@ void presetsbar_onimport(PresetsBar* self, psy_ui_Component* sender)
 
 	psy_ui_opendialog_init_all(&dialog, NULL, "Import Presets",
 		"Psycle Presets(*.prs)|*.prs", "PRS",
-		dirconfig_userpresets(&self->workspace->config.directories));
+		dirconfig_user_presets(&self->workspace->config.directories));
 	if (psy_ui_opendialog_execute(&dialog)) {
 		int status;
 		psy_audio_Presets* presets;
@@ -196,7 +196,7 @@ void presetsbar_onimport(PresetsBar* self, psy_ui_Component* sender)
 			presets,
 			psy_audio_machine_numtweakparameters(self->machine),
 			psy_audio_machine_datasize(self->machine),
-			dirconfig_pluginscurrplatform(&self->workspace->config.directories));
+			dirconfig_plugins_curr_platform(&self->workspace->config.directories));
 		if (status) {
 			workspace_output_error(self->workspace,
 				psy_audio_presetsio_statusstr(status));
@@ -274,7 +274,7 @@ void presetsbar_onsavepresets(PresetsBar* self, psy_ui_Component* sender)
 			psy_audio_presets_insert(presets, index, preset);
 			if (!self->userpreset) {
 				psy_path_set_prefix(&self->presetpath,
-					dirconfig_userpresets(&self->workspace->config.directories));
+					dirconfig_user_presets(&self->workspace->config.directories));
 				if (!psy_direxists(psy_path_prefix(&self->presetpath))) {
 					psy_mkdir(psy_path_prefix(&self->presetpath));
 				}

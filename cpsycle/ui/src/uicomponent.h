@@ -581,7 +581,7 @@ psy_ui_Size psy_ui_component_scroll_size(const psy_ui_Component*);
 void psy_ui_component_setcolour(psy_ui_Component*, psy_ui_Colour);
 psy_ui_Colour psy_ui_component_colour(psy_ui_Component*);
 void psy_ui_component_set_background_colour(psy_ui_Component*, psy_ui_Colour);
-psy_ui_Colour psy_ui_component_backgroundcolour(psy_ui_Component*);
+psy_ui_Colour psy_ui_component_background_colour(psy_ui_Component*);
 
 INLINE void psy_ui_component_set_title(psy_ui_Component* self, const char* text)
 {	

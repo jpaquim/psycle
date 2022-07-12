@@ -64,7 +64,7 @@ void cpumoduleview_on_draw(CPUModuleView* self, psy_ui_Graphics* g)
 		size = psy_ui_intsize_init_size(
 			psy_ui_component_scroll_size(&self->component), tm, NULL);
 		psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
-		psy_ui_settextcolour(g, psy_ui_colour_make(0x00D1C5B6));
+		psy_ui_set_text_colour(g, psy_ui_colour_make(0x00D1C5B6));
 		for (slot = 0; slot <= psy_audio_machines_maxindex(
 				&workspace_song(self->workspace)->machines); ++slot) {
 			psy_audio_Machine* machine;

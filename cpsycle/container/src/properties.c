@@ -1,20 +1,24 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "properties.h"
+/* local */
 #include "list.h"
 #include "hashtbl.h"
 #include "qsort.h"
-
+/* std */
 #include <assert.h>
 #include <stdio.h>
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
 #include <malloc.h>
-
+/* platform */
 #include "../../detail/portable.h"
 
 typedef struct {
@@ -28,8 +32,9 @@ static int psy_property_onsearchenum(psy_Property*, psy_Property*, uintptr_t lev
 static int psy_property_onsearchpropertyenum(psy_Property*, psy_Property*,
 	uintptr_t level);
 
-// psy_PropertyItem
-// implementation
+/* psy_PropertyItem */
+
+/* implementation */
 void psy_propertyitem_init(psy_PropertyItem* self)
 {
 	assert(self);
@@ -43,12 +48,15 @@ void psy_propertyitem_init(psy_PropertyItem* self)
 	self->min = 0;
 	self->max = 0;
 	self->hint = PSY_PROPERTY_HINT_NONE;
+	self->hide = FALSE;
 	self->disposechildren = TRUE;
 	self->save = TRUE;
-	self->allowappend = FALSE;
+	self->allow_append = FALSE;
 	self->readonly = FALSE;
 	self->translate = TRUE;
 	self->id = -1;
+	self->icon_dark_id = psy_INDEX_INVALID;
+	self->icon_light_id = psy_INDEX_INVALID;
 	self->marked = FALSE;
 }
 
@@ -78,15 +86,14 @@ void psy_propertyitem_copy(psy_PropertyItem* self, const psy_PropertyItem*
 
 	if (self == source) {
 		return;
-	}
-	psy_propertyitem_dispose(self);
-	self->key = psy_strdup(source->key);
-	self->text = psy_strdup(source->text);
-	self->shorttext = psy_strdup(source->shorttext);	
-	self->comment = psy_strdup(source->comment);
+	}	
+	psy_strreset(&self->key, source->key);
+	psy_strreset(&self->text, source->text);
+	psy_strreset(&self->shorttext, source->shorttext);
+	psy_strreset(&self->comment, source->comment);
 	if (source->typ == PSY_PROPERTY_TYPE_STRING ||
 			source->typ == PSY_PROPERTY_TYPE_FONT) {
-		self->value.s = psy_strdup(source->value.s);
+		psy_strreset(&self->value.s, source->value.s);
 	} else {
 		self->value = source->value;
 	}
@@ -97,13 +104,17 @@ void psy_propertyitem_copy(psy_PropertyItem* self, const psy_PropertyItem*
 	self->disposechildren = source->disposechildren;
 	self->save = source->save;
 	self->id = source->id;
+	self->icon_dark_id = source->icon_dark_id;
+	self->icon_light_id = source->icon_light_id;
+	self->allow_append = source->allow_append;
 	self->readonly = source->readonly;
 	self->save = source->save;
-	self->marked = source->marked;
+	self->marked = source->marked;	
 }
 
-// psy_Property
-// Prototypes
+/* psy_Property */
+
+/* prototypes */
 static psy_Property* psy_property_create_string(const char* key,
 	const char* value);
 static psy_Property* psy_property_create_font(const char* key,
@@ -114,12 +125,12 @@ static psy_Property* psy_property_create_bool(const char* key, bool value);
 static psy_Property* psy_property_create_choice(const char* key, intptr_t value);
 static int psy_property_comp_key(psy_Property* p, psy_Property* q);
 
-// Implementation
 static const char* searchkey;
 static psy_PropertyType searchtyp;
 static psy_Property* keyfound;
 static psy_Property* searchproperty;
 
+/* implementation */
 void psy_property_init(psy_Property* self)
 {
 	assert(self);
@@ -143,6 +154,9 @@ void psy_property_init_type(psy_Property* self, const char* key,
 {
 	assert(self);
 
+	psy_signal_init(&self->changed);
+	psy_signal_init(&self->rebuild);
+	psy_signal_init(&self->before_destroyed);
 	psy_propertyitem_init(&self->item);	
 	psy_strreset(&self->item.key, key);	
 	self->item.typ = typ;
@@ -156,11 +170,15 @@ void psy_property_dispose(psy_Property* self)
 {
 	assert(self);
 
+	psy_signal_emit(&self->before_destroyed, self, 0);
 	if (self->item.disposechildren) {
 		psy_list_deallocate(&self->children, (psy_fp_disposefunc)
 			psy_property_dispose);
 	}
 	psy_propertyitem_dispose(&self->item);
+	psy_signal_dispose(&self->before_destroyed);
+	psy_signal_dispose(&self->rebuild);
+	psy_signal_dispose(&self->changed);
 }
 
 psy_Property* psy_property_allocinit_key(const char* key)
@@ -176,7 +194,7 @@ psy_Property* psy_property_allocinit_key(const char* key)
 
 void psy_property_deallocate(psy_Property* self)
 {
-	if (self) {
+	if (self) {		
 		psy_property_dispose(self);
 		free(self);
 	}
@@ -193,6 +211,9 @@ psy_Property* psy_property_clone(const psy_Property* self)
 		rv->parent = NULL;
 		rv->children = NULL;
 		rv->dispose = NULL;
+		psy_signal_init(&rv->before_destroyed);
+		psy_signal_init(&rv->changed);
+		psy_signal_init(&rv->rebuild);
 		psy_propertyitem_init(&rv->item);
 		psy_propertyitem_copy(&rv->item, &self->item);
 		if (self->children) {
@@ -625,7 +646,7 @@ char_dyn_t* psy_property_sections(const psy_Property* self)
 	return rv;
 }
 
-char_dyn_t* psy_property_fullkey(const psy_Property* self)
+char_dyn_t* psy_property_full_key(const psy_Property* self)
 {
 	char_dyn_t* rv;
 	
@@ -869,8 +890,8 @@ psy_Property* psy_property_set_bool(psy_Property* self, const char* key,
 	assert(self);
 
 	rv = psy_property_at(self, key, PSY_PROPERTY_TYPE_BOOL);
-	if (rv) {
-		psy_property_setitem_bool(rv, value);
+	if (rv) {		
+		psy_property_set_item_bool(rv, value);
 	} else {
 		rv = psy_property_append_int(self, key, value, 0, 0);
 	}
@@ -901,7 +922,7 @@ psy_Property* psy_property_set_int(psy_Property* self, const char* key,
 
 	rv = psy_property_at(self, key, PSY_PROPERTY_TYPE_INTEGER);
 	if (rv) {
-		psy_property_setitem_int(rv, value);		
+		psy_property_set_item_int(rv, value);		
 	} else {
 		rv = psy_property_append_int(self, key, value, 0, 0);
 	}
@@ -960,7 +981,7 @@ psy_Property* psy_property_set_double(psy_Property* self, const char* key,
 
 	rv = psy_property_at(self, key, PSY_PROPERTY_TYPE_DOUBLE);
 	if (rv) {
-		psy_property_setitem_double(rv, value);
+		psy_property_set_item_double(rv, value);
 	} else {
 		rv = psy_property_append_double(self, key, value, 0, 0);
 	}
@@ -1021,7 +1042,7 @@ psy_Property* psy_property_set_font(psy_Property* self, const char* key,
 
 	rv = psy_property_at(self, key, PSY_PROPERTY_TYPE_FONT);
 	if (rv) {
-		psy_property_setitem_font(rv, font);
+		psy_property_set_item_font(rv, font);
 	} else {
 		rv = psy_property_append_font(self, key, font);
 	}
@@ -1301,7 +1322,7 @@ const char* psy_property_key(const psy_Property* self)
 	return self->item.key;
 }
 
-int psy_property_type(const psy_Property* self)
+psy_PropertyType psy_property_type(const psy_Property* self)
 {
 	assert(self);
 
@@ -1323,7 +1344,7 @@ bool psy_property_readonly(const psy_Property* self)
 	return self->item.readonly;
 }
 
-psy_Property* psy_property_sethint(psy_Property* self, psy_PropertyHint hint)
+psy_Property* psy_property_set_hint(psy_Property* self, psy_PropertyHint hint)
 {
 	assert(self);
 
@@ -1338,7 +1359,7 @@ psy_PropertyHint psy_property_hint(const psy_Property* self)
 	return self->item.hint;
 }
 
-psy_Property* psy_property_preventsave(psy_Property* self)
+psy_Property* psy_property_prevent_save(psy_Property* self)
 {
 	assert(self);
 
@@ -1358,7 +1379,23 @@ psy_Property* psy_property_enableappend(psy_Property* self)
 {
 	assert(self);
 
-	self->item.allowappend = TRUE;
+	self->item.allow_append = TRUE;
+	return self;
+}
+
+psy_Property* psy_property_show(psy_Property* self)
+{
+	assert(self);
+
+	self->item.hide = FALSE;
+	return self;
+}
+
+psy_Property* psy_property_hide(psy_Property* self)
+{
+	assert(self);
+
+	self->item.hide = TRUE;
 	return self;
 }
 
@@ -1384,13 +1421,74 @@ bool psy_property_hasid(const psy_Property* self, int id)
 	return (self->item.id == id);
 }
 
-// item setter/getter
-psy_Property* psy_property_setitem_bool(psy_Property* self, bool value)
+psy_Property* psy_property_connect(psy_Property* self, void* context, void* fp)
 {
 	assert(self);
 
-	if (!self->item.readonly) {
+	psy_signal_connect(&self->changed, context, fp);
+	return self;
+}
+
+void psy_property_disconnect(psy_Property* self, void* context)
+{
+	assert(self);
+
+	psy_signal_disconnect_context(&self->changed, context);
+	psy_signal_disconnect_context(&self->rebuild, context);
+	psy_signal_disconnect_context(&self->before_destroyed, context);
+}
+
+psy_Property* psy_property_connect_children(psy_Property* self, int recursive,
+	void* context, void* fp)
+{
+	psy_List* p;
+
+	assert(self);
+
+	for (p = self->children; p != NULL; p = p->next) {
+		psy_Property* curr;
+
+		curr = (psy_Property*)p->entry;
+		psy_property_connect(curr, context, fp);		
+		if (recursive == TRUE &&
+			psy_property_type(curr) != PSY_PROPERTY_TYPE_ACTION) {
+			psy_property_connect_children(curr, recursive, context, fp);
+		}
+	}
+	return self;
+}
+
+void psy_property_notify_all(psy_Property* self)
+{
+	psy_List* p;
+
+	assert(self);
+
+	for (p = self->children; p != NULL; p = p->next) {
+		psy_Property* curr;
+
+		curr = (psy_Property*)p->entry;
+		psy_property_notify_all(curr);
+		if (psy_property_type(curr) != PSY_PROPERTY_TYPE_ACTION) {
+			psy_signal_emit(&curr->changed, curr, 0);
+		}
+	}
+}
+
+void psy_property_rebuild(psy_Property* self)
+{
+	assert(self);
+
+	psy_signal_emit(&self->rebuild, self, 0);
+}
+
+psy_Property* psy_property_set_item_bool(psy_Property* self, bool value)
+{
+	assert(self);
+
+	if (!self->item.readonly && self->item.value.i != value) {
 		self->item.value.i = value != FALSE;
+		psy_signal_emit(&self->changed, self, 0);
 	}
 	return self;
 }
@@ -1402,17 +1500,34 @@ bool psy_property_item_bool(const psy_Property* self)
 	return self->item.value.i != FALSE;
 }
 
-psy_Property* psy_property_setitem_int(psy_Property* self, intptr_t value)
+psy_Property* psy_property_set_item_int(psy_Property* self, intptr_t value)
 {
 	assert(self);
 
 	if (!self->item.readonly && psy_property_int_valid(self, value)) {
+		intptr_t oldvalue;
+
+		oldvalue = self->item.value.i;
 		self->item.value.i = value;
-	}
+		psy_signal_emit(&self->changed, self, 0);
+		if (oldvalue != value && psy_property_type(self) ==
+				PSY_PROPERTY_TYPE_CHOICE) {
+			psy_Property* item;
+			
+			item = psy_property_at_index(self, value);
+			if (item) {
+				psy_signal_emit(&item->changed, item, 0);
+			}
+			item = psy_property_at_index(self, oldvalue);
+			if (item) {
+				psy_signal_emit(&item->changed, item, 0);
+			}			
+		}
+	}	
 	return self;
 }
 
-bool psy_property_ishex(const psy_Property* self)
+bool psy_property_is_hex(const psy_Property* self)
 {
 	assert(self);
 
@@ -1420,7 +1535,7 @@ bool psy_property_ishex(const psy_Property* self)
 		(psy_property_hint(self) == PSY_PROPERTY_HINT_EDITHEX);
 }
 
-bool psy_property_isbool(const psy_Property* self)
+bool psy_property_is_bool(const psy_Property* self)
 {
 	assert(self);
 
@@ -1432,6 +1547,20 @@ bool psy_property_is_int(const psy_Property* self)
 	assert(self);
 
 	return psy_property_type(self) == PSY_PROPERTY_TYPE_INTEGER;
+}
+
+bool psy_property_is_choice(const psy_Property* self)
+{
+	assert(self);
+
+	return psy_property_type(self) == PSY_PROPERTY_TYPE_CHOICE;
+}
+
+bool psy_property_is_double(const psy_Property* self)
+{
+	assert(self);
+
+	return psy_property_type(self) == PSY_PROPERTY_TYPE_DOUBLE;
 }
 
 bool psy_property_is_string(const psy_Property* self)
@@ -1449,7 +1578,7 @@ bool psy_property_is_action(const psy_Property* self)
 	return psy_property_type(self) == PSY_PROPERTY_TYPE_ACTION;
 }
 
-bool psy_property_issection(const psy_Property* self)
+bool psy_property_is_section(const psy_Property* self)
 {
 	assert(self);
 
@@ -1470,12 +1599,13 @@ uint32_t psy_property_item_colour(const psy_Property* self)
 	return (uint32_t)self->item.value.i;
 }
 
-psy_Property* psy_property_setitem_double(psy_Property* self, double value)
+psy_Property* psy_property_set_item_double(psy_Property* self, double value)
 {
 	assert(self);
 
-	if (!self->item.readonly) {
+	if (!self->item.readonly && self->item.value.d != value) {
 		self->item.value.d = value;
+		psy_signal_emit(&self->changed, self, 0);
 	}
 	return self;
 }
@@ -1510,15 +1640,13 @@ const char* psy_property_item_str(const psy_Property* self)
 	return (self->item.value.s) ? self->item.value.s : "";
 }
 
-psy_Property* psy_property_setitem_font(psy_Property* self, const char* value)
+psy_Property* psy_property_set_item_font(psy_Property* self, const char* value)
 {
 	assert(self);
 
-	if (!self->item.readonly) {
-		if (value != self->item.value.s) {
-			free(self->item.value.s);
-			self->item.value.s = psy_strdup(value);
-		}
+	if (!self->item.readonly) {		
+		psy_strreset(&self->item.value.s, value);
+		psy_signal_emit(&self->changed, self, 0);		
 	}
 	return self;
 }
@@ -1539,14 +1667,14 @@ psy_Property* psy_property_item_choice_parent(psy_Property* self)
 		: NULL;
 }
 
-bool psy_property_haskey(const psy_Property* self, const char* key)
+bool psy_property_has_key(const psy_Property* self, const char* key)
 {
 	assert(self);
 
 	return strcmp(self->item.key, key) == 0;
 }
 
-bool psy_property_hastype(const psy_Property* self, psy_PropertyType type)
+bool psy_property_has_type(const psy_Property* self, psy_PropertyType type)
 {
 	assert(self);
 
@@ -1568,7 +1696,7 @@ intptr_t psy_property_id(const psy_Property* self)
 	return self->item.id;
 }
 
-psy_Property* psy_property_settext(psy_Property* self, const char* text)
+psy_Property* psy_property_set_text(psy_Property* self, const char* text)
 {
 	assert(self);
 
@@ -1587,7 +1715,7 @@ const char* psy_property_text(const psy_Property* self)
 			: "";
 }
 
-psy_Property* psy_property_setshorttext(psy_Property* self, const char* text)
+psy_Property* psy_property_set_short_text(psy_Property* self, const char* text)
 {
 	assert(self);
 
@@ -1595,7 +1723,7 @@ psy_Property* psy_property_setshorttext(psy_Property* self, const char* text)
 	return self;
 }
 
-const char* psy_property_shorttext(const psy_Property* self)
+const char* psy_property_short_text(const psy_Property* self)
 {
 	assert(self);
 
@@ -1623,4 +1751,14 @@ const char* psy_property_comment(const psy_Property* self)
 	return (psy_strlen(self->item.comment) != 0)
 		? self->item.comment
 		: "";
+}
+
+psy_Property* psy_property_set_icon(psy_Property* self,
+	uintptr_t icon_light_id, uintptr_t icon_dark_id)
+{
+	assert(self);
+
+	self->item.icon_light_id = icon_light_id;
+	self->item.icon_dark_id = icon_dark_id;
+	return self;
 }

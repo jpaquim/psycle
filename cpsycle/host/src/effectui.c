@@ -98,7 +98,7 @@ void effectui_on_mouse_down(EffectUi* self, psy_ui_MouseEvent* ev)
 	if (psy_ui_mouseevent_button(ev) == 1) {
 		if (psy_audio_machine_slot(self->machine) !=
 				psy_audio_machines_selected(self->machines)) {
-			if (psy_ui_mouseevent_ctrlkey(ev)) {
+			if (psy_ui_mouseevent_ctrl_key(ev)) {
 				psy_audio_machineselection_select(&self->machines->selection,
 					psy_audio_machineindex_make(psy_audio_machine_slot(
 						self->machine)));

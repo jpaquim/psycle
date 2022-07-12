@@ -26,6 +26,8 @@ static int languageconfig_enumlanguagedir(LanguageConfig*, const char* path,
 static void languageconfig_setdefaultlanguage(LanguageConfig*);
 static const char* languageconfig_defaultlanguagekey(LanguageConfig*);
 static const char* languageconfig_chooselang(LanguageConfig* self, int id);
+static void languageconfig_connect_choice(LanguageConfig*);
+static void languageconfig_on_choice(LanguageConfig*, psy_Property* sender);
 
 void languageconfig_init(LanguageConfig* self, psy_Property* parent,
 	psy_Translator* translator)
@@ -38,6 +40,7 @@ void languageconfig_init(LanguageConfig* self, psy_Property* parent,
 	languageconfig_makelanguagechoice(self);
 	languageconfig_makelanguagelist(self);
 	languageconfig_setdefaultlanguage(self);
+	languageconfig_connect_choice(self);
 }
 
 void languageconfig_dispose(LanguageConfig* self)
@@ -49,11 +52,11 @@ void languageconfig_dispose(LanguageConfig* self)
 
 void languageconfig_makelanguagechoice(LanguageConfig* self)
 {
-	self->languagechoice = psy_property_sethint(
+	self->languagechoice = psy_property_set_hint(
 		psy_property_append_choice(self->parent, "lang", 0),
 		PSY_PROPERTY_HINT_LIST);
 	psy_property_set_id(self->languagechoice, PROPERTY_ID_LANG);
-	psy_property_settext(self->languagechoice, "settingsview.global.language");
+	psy_property_set_text(self->languagechoice, "settingsview.global.language");
 }
 
 void languageconfig_makelanguagelist(LanguageConfig* self)
@@ -76,7 +79,7 @@ int languageconfig_enumlanguagedir(LanguageConfig* self, const char* path,
 	assert(self);
 
 	if (psy_translator_test(self->translator, path, lang)) {
-		psy_property_settext(psy_property_append_str(
+		psy_property_set_text(psy_property_append_str(
 			self->languagechoice, lang, path), lang);
 	}
 	return TRUE;
@@ -93,9 +96,15 @@ void languageconfig_setdefaultlanguage(LanguageConfig* self)
 
 		index = psy_property_index(defaultlang);
 		if (index != psy_INDEX_INVALID) {
-			psy_property_setitem_int(self->languagechoice, index);
+			psy_property_set_item_int(self->languagechoice, index);
 		}
 	}
+}
+
+void languageconfig_connect_choice(LanguageConfig* self)
+{
+	psy_signal_connect(&self->languagechoice->changed, self,
+		languageconfig_on_choice);
 }
 
 const char* languageconfig_defaultlanguagekey(LanguageConfig* self)
@@ -190,23 +199,17 @@ void languageconfig_update_language(LanguageConfig* self)
 	}
 }
 
-uintptr_t languageconfig_on_changed(LanguageConfig* self,
-	psy_Property* property)
-{		
-	assert(self);
-	assert(property);
-	
-	if (psy_property_hasid(property, PROPERTY_ID_LANG)) {
-		languageconfig_update_language(self);
-		psy_signal_emit(&self->signal_changed, self, 1, property);		
-	}
-	return psy_INDEX_INVALID;
+void languageconfig_on_choice(LanguageConfig* self, psy_Property* sender)
+{
+	languageconfig_update_language(self);
 }
 
 bool languageconfig_has_property(const LanguageConfig* self,
 	psy_Property* property)
 {
-	assert(self && self->languagechoice);
+	assert(self);
+	assert(self->languagechoice);
 
-	return (property == self->languagechoice) || psy_property_in_section(property, self->languagechoice);
+	return (property == self->languagechoice) || psy_property_in_section(
+		property, self->languagechoice);
 }

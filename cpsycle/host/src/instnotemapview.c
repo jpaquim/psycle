@@ -135,7 +135,7 @@ void instrumentkeyboardview_drawwhitekeys(InstrumentKeyboardView* self,
 	size = psy_ui_component_size_px(&self->component);
 	psy_ui_setcolour(g, psy_ui_colour_make(0x00333333));
 	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
-	psy_ui_settextcolour(g, psy_ui_colour_make(0x00333333));	
+	psy_ui_set_text_colour(g, psy_ui_colour_make(0x00333333));	
 	for (key = keymin; key < keymax; ++key) {
 		if (!psy_dsp_isblack(key)) {
 			psy_ui_RealRectangle r;
@@ -171,7 +171,7 @@ void instrumentkeyboardview_drawblackkeys(InstrumentKeyboardView* self,
 	double bottom = 1 - top;		
 	
 	size = psy_ui_component_size_px(&self->component);
-	psy_ui_settextcolour(g, psy_ui_colour_make(0x00CACACA));
+	psy_ui_set_text_colour(g, psy_ui_colour_make(0x00CACACA));
 	for (cp = 0, key = keymin; key < keymax; ++key) {							
 		if (!psy_dsp_isblack(key)) {
 			cp += self->metrics.keysize;
@@ -1023,7 +1023,7 @@ void instrumententryrow_ondraw(InstrumentEntryRow* self, psy_ui_Graphics* g)
 
 	psy_ui_setcolour(g, psy_ui_colour_make(0x00CACACA));
 	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
-	psy_ui_settextcolour(g, psy_ui_colour_make(0x00CACACA));
+	psy_ui_set_text_colour(g, psy_ui_colour_make(0x00CACACA));
 	cp = psy_ui_realpoint_zero();	
 	for (it = psy_table_begin(&self->state->columns);
 			!psy_tableiterator_equal(&it, psy_table_end());

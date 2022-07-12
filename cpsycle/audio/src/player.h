@@ -76,8 +76,7 @@ typedef struct psy_audio_Player {
 	psy_Table trackstonotes;
 	psy_Table worked;
 	psy_audio_PatternDefaults patterndefaults;	
-	psy_dsp_Dither dither;
-	bool dodither;
+	psy_dsp_Dither dither;	
 	uint8_t octave;
 	uintptr_t resyncplayposinsamples;
 	psy_dsp_big_beat_t resyncplayposinbeats;
@@ -118,10 +117,10 @@ INLINE uint8_t psy_audio_player_octave(const psy_audio_Player* self)
 
 void psy_audio_player_set_vu_meter_mode(psy_audio_Player*, VUMeterMode);
 VUMeterMode psy_audio_player_vumetermode(psy_audio_Player*);
-void psy_audio_player_enabledither(psy_audio_Player*);
+void psy_audio_player_enable_dither(psy_audio_Player*);
 void psy_audio_player_disabledither(psy_audio_Player*);
-void psy_audio_player_setdither(psy_audio_Player*, uintptr_t depth,
-	psy_dsp_DitherPdf, psy_dsp_DitherNoiseShape);
+void psy_audio_player_configure_dither(psy_audio_Player*, psy_dsp_DitherSettings);
+psy_dsp_DitherSettings psy_audio_player_dither_configuration(const psy_audio_Player*);
 
 /* sequencer */
 void psy_audio_player_start(psy_audio_Player*);
@@ -293,7 +292,7 @@ INLINE psy_audio_SequencerTime* psy_audio_player_sequencertime(
 psy_EventDriver* psy_audio_player_loadeventdriver(psy_audio_Player*,
 	const char* path);
 void psy_audio_player_remove_event_driver(psy_audio_Player*, intptr_t id);
-void psy_audio_player_restarteventdriver(psy_audio_Player*, intptr_t id,
+void psy_audio_player_restart_event_driver(psy_audio_Player*, intptr_t id,
 	psy_Property* configuration);
 psy_EventDriver* psy_audio_player_kbddriver(psy_audio_Player*);
 psy_EventDriver* psy_audio_player_eventdriver(psy_audio_Player*, intptr_t id);
@@ -328,6 +327,7 @@ bool psy_audio_player_is_active_key(const psy_audio_Player*, uint8_t key);
 
 void psy_audio_player_enable_audio(psy_audio_Player*);
 void psy_audio_player_disable_audio(psy_audio_Player*);
+bool psy_audio_player_enabled(const psy_audio_Player*);
 
 #ifdef __cplusplus
 }

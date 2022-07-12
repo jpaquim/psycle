@@ -25,21 +25,28 @@ enum {
 	PROPERTY_ID_IMPORTCONFIG
 };
 
+struct psy_audio_Player;
+struct PluginScanThread;
+
 typedef struct GlobalConfig {
 	/* signals */
-	psy_Signal signal_changed;
 	psy_Property* global;
+	psy_Property* import_config;
 	/* internal */
 	LanguageConfig language;
 	/* references */
-	psy_Property* parent;	
+	psy_Property* parent;
+	struct psy_audio_Player* player;
+	struct PluginScanThread* pluginscanthread;
 } GlobalConfig;
 
-void globalconfig_init(GlobalConfig*, psy_Property* parent);
+void globalconfig_init(GlobalConfig*, psy_Property* parent,
+	struct psy_audio_Player*, struct PluginScanThread*);
 void globalconfig_dispose(GlobalConfig*);
 
+bool globalconfig_audio_enabled(const GlobalConfig*);
+void globalconfig_enable_audio(GlobalConfig*, bool on);
 
-uintptr_t globalconfig_on_changed(GlobalConfig*, psy_Property*);
 bool globalconfig_hasproperty(const GlobalConfig*, psy_Property*);
 
 #ifdef __cplusplus

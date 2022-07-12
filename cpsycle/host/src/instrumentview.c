@@ -43,7 +43,7 @@ void virtualgeneratorbox_init(VirtualGeneratorsBox* self, psy_ui_Component* pare
 	psy_ui_component_set_default_align(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	psy_ui_checkbox_init(&self->active, &self->component);
-	psy_ui_checkbox_settext(&self->active, "Virtual generator");
+	psy_ui_checkbox_set_text(&self->active, "Virtual generator");
 	psy_signal_connect(&self->active.signal_clicked, self,
 		virtualgeneratorbox_onactivechanged);
 	psy_ui_combobox_init(&self->generators, &self->component);
@@ -146,7 +146,7 @@ void virtualgeneratorbox_update(VirtualGeneratorsBox* self)
 
 	psy_ui_combobox_select(&self->generators, -1);
 	psy_ui_combobox_select(&self->samplers, -1);
-	psy_ui_checkbox_disablecheck(&self->active);
+	psy_ui_checkbox_disable_check(&self->active);
 	for (it = psy_audio_machines_begin(&self->workspace->song->machines);
 		!psy_tableiterator_equal(&it, psy_table_end());
 		psy_tableiterator_inc(&it)) {

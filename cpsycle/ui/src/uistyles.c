@@ -152,13 +152,13 @@ void psy_ui_styles_addcolourtoconfig(psy_ui_Styles* self, psy_Property* parent,
 	if (!colour.mode.transparent) {
 		p = psy_property_append_int(parent, key, psy_ui_colour_colorref(&colour), 0, 0);
 	} else {
-		psy_property_preventsave(
+		psy_property_prevent_save(
 			psy_property_append_int(parent, key, 0, 0, 0));
 	}
 	
 	colourset = psy_strdup(key);
 	colourset = psy_strcat_realloc(colourset, "-set");
-	psy_property_preventsave(
+	psy_property_prevent_save(
 		psy_property_append_bool(parent, colourset, !colour.mode.transparent));
 	free(colourset);
 	colourset = NULL;

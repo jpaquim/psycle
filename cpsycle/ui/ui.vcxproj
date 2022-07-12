@@ -348,6 +348,7 @@
     <ClInclude Include="src\uiicondraw.h" />
     <ClInclude Include="src\uiimage.h" />
     <ClInclude Include="src\uiimpfactory.h" />
+    <ClInclude Include="src\uikeys.h" />
     <ClInclude Include="src\uilabel.h" />
     <ClInclude Include="src\uilclaligner.h" />
     <ClInclude Include="src\uilistbox.h" />

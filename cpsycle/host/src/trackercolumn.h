@@ -25,6 +25,8 @@ typedef struct TrackerColumn {
 	psy_ui_RealSize digitsize;		
 	psy_ui_RealSize size;
 	psy_ui_RealSize line_size;
+	psy_ui_Colour draw_restore_fg_colour;
+	psy_ui_Colour draw_restore_bg_colour;
 	/* references */
 	TrackerState* state;	
 	Workspace* workspace;

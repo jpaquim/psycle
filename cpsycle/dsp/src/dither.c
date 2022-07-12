@@ -13,9 +13,9 @@ void psy_dsp_dither_init(psy_dsp_Dither* self)
 {
 	uint32_t init[4] = { 0x123, 0x234, 0x345, 0x456 };
 
-	self->settings.bitdepth = 16;
-	self->settings.pdf = psy_dsp_DITHER_PDF_TRIANGULAR;
-	self->settings.noiseshape = psy_dsp_DITHER_NOISESHAPE_NONE;
+	self->settings = psy_dsp_dithersettings_make(FALSE, 
+		16, psy_dsp_DITHER_PDF_TRIANGULAR, 
+		psy_dsp_DITHER_NOISESHAPE_NONE);	
 
 	psy_dsp_mersennetwisterinit_by_array(&self->mt, init, sizeof(init));
 }

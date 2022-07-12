@@ -88,7 +88,7 @@ void pinedit_drawsockets(PinEdit* self, psy_ui_Graphics* g)
 
 		psy_ui_setcolour(g, self->pincolour);
 		psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
-		psy_ui_settextcolour(g, self->pincolour);
+		psy_ui_set_text_colour(g, self->pincolour);
 		numsrcpins = psy_audio_machine_numoutputs(srcmachine);
 		for (p = 0; p < numsrcpins; ++p) {
 			pinedit_drawpinoutput(self, g, p);

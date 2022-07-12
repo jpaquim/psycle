@@ -63,9 +63,10 @@ bool keyboardmiscconfig_following_song(const KeyboardMiscConfig*);
 void keyboardmiscconfig_follow_song(KeyboardMiscConfig*);
 void keyboardmiscconfig_stop_follow_song(KeyboardMiscConfig*);
 
+bool keyboardmiscconfig_connect(KeyboardMiscConfig*, const char* key, void* context,
+	void* fp);
+psy_Property* keyboardmiscconfig_property(KeyboardMiscConfig*, const char* key);
 
-uintptr_t keyboardmiscconfig_onchanged(KeyboardMiscConfig*, psy_Property*);
-bool keyboardmiscconfig_hasproperty(const KeyboardMiscConfig*, psy_Property*);
 
 #ifdef __cplusplus
 }

@@ -102,9 +102,9 @@ void pianokeyboard_on_draw(PianoKeyboard* self, psy_ui_Graphics* g)
 	self->keyboardstate->keyheightpx = psy_ui_value_px(&self->keyboardstate->keyheight, tm, NULL);
 	psy_ui_setcolour(g, keyseparator);
 	if (self->keyboardstate->drawpianokeys) {
-		psy_ui_settextcolour(g, keyseparator);
+		psy_ui_set_text_colour(g, keyseparator);
 	} else {
-		psy_ui_settextcolour(g, keywhite);
+		psy_ui_set_text_colour(g, keywhite);
 	}
 	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 	for (key = self->keyboardstate->keymin; key < self->keyboardstate->keymax; ++key) {
@@ -169,7 +169,7 @@ void pianokeyboard_on_draw(PianoKeyboard* self, psy_ui_Graphics* g)
 					psy_ui_realpoint_make(0, cpy + self->keyboardstate->keyheightpx),
 					psy_ui_realpoint_make(size.width, cpy + self->keyboardstate->keyheightpx));
 				if (psy_dsp_iskey_c(key)) {
-					psy_ui_settextcolour(g, keyblack);
+					psy_ui_set_text_colour(g, keyblack);
 					psy_ui_textoutrectangle(g,
 						psy_ui_realpoint_make(
 							size.width - tm->tmAveCharWidth * 4,
@@ -177,7 +177,7 @@ void pianokeyboard_on_draw(PianoKeyboard* self, psy_ui_Graphics* g)
 						psy_ui_ETO_CLIPPED, r,
 						psy_dsp_notetostr(key, self->keyboardstate->notemode),
 						psy_strlen(psy_dsp_notetostr(key, self->keyboardstate->notemode)));
-					psy_ui_settextcolour(g, keyseparator);
+					psy_ui_set_text_colour(g, keyseparator);
 				}
 			}
 			}
@@ -187,13 +187,13 @@ void pianokeyboard_on_draw(PianoKeyboard* self, psy_ui_Graphics* g)
 		psy_ui_Colour bg;
 		psy_ui_Component* curr;
 
-		restorebg = psy_ui_component_backgroundcolour(&self->component);
+		restorebg = psy_ui_component_background_colour(&self->component);
 		bg = restorebg;
 		curr = &self->component;
 		while (curr && bg.mode.transparent) {
 			curr = psy_ui_component_parent(curr);
 			if (curr) {
-				bg = psy_ui_component_backgroundcolour(curr);
+				bg = psy_ui_component_background_colour(curr);
 			}
 		}
 		r = psy_ui_realrectangle_make(psy_ui_realpoint_make(0.0, cpy),
@@ -202,16 +202,16 @@ void pianokeyboard_on_draw(PianoKeyboard* self, psy_ui_Graphics* g)
 		if (psy_dsp_isblack(key) && psy_strlen(psy_dsp_notetostr(key,
 			self->keyboardstate->notemode)) > 0) {
 			psy_ui_colour_add_rgb(&bg, 5, 5, 5);
-			psy_ui_setbackgroundcolour(g, bg);
+			psy_ui_set_background_colour(g, bg);
 		} else {
-			psy_ui_setbackgroundcolour(g, bg);
+			psy_ui_set_background_colour(g, bg);
 		}
 		psy_ui_textoutrectangle(g,
 			psy_ui_realrectangle_topleft(&r),
 			psy_ui_ETO_CLIPPED | psy_ui_ETO_OPAQUE, r,
 			psy_dsp_notetostr(key, self->keyboardstate->notemode),
 			psy_strlen(psy_dsp_notetostr(key, self->keyboardstate->notemode)));
-		psy_ui_setbackgroundcolour(g, restorebg);
+		psy_ui_set_background_colour(g, restorebg);
 		}
 	}
 }

@@ -176,13 +176,12 @@ void driver_makeconfig(psy_EventDriver* context)
 	psy_snprintf(key, 256, "mmemidi-guid-%d", PSY_EVENTDRIVER_MMEMIDI_GUID);
 	self->configuration = psy_property_preventtranslate(
 		psy_property_allocinit_key(key));
-	psy_property_sethint(psy_property_append_int(self->configuration,
-		"guid", PSY_EVENTDRIVER_MMEMIDI_GUID, 0, 0),
-		PSY_PROPERTY_HINT_HIDE);
+	psy_property_hide(psy_property_append_int(self->configuration,
+		"guid", PSY_EVENTDRIVER_MMEMIDI_GUID, 0, 0));
 	psy_property_append_str(self->configuration, "name", "winmme midi");
 	psy_property_append_str(self->configuration, "version", "1.0");
 	devices = psy_property_append_choice(self->configuration, "device", 0);
-	psy_property_sethint(devices, PSY_PROPERTY_HINT_COMBO);
+	psy_property_set_hint(devices, PSY_PROPERTY_HINT_COMBO);
 	n = midiInGetNumDevs();	
 	for (i = 0; i < n; ++i) {
 		char text[256];

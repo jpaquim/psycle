@@ -170,7 +170,7 @@ void psy_audio_midiconfig_configure(psy_audio_MidiConfig* self,
 							group.record = vals[3];
 							group.from = vals[4];
 							group.to = vals[5];
-							psy_audio_midiconfig_addcontroller(self, group);
+							psy_audio_midiconfig_add_controller(self, group);
 						}
 						c = 0;
 						++i;
@@ -216,7 +216,7 @@ void psy_audio_midiconfig_configure(psy_audio_MidiConfig* self,
 						group->from = newgroup.from;
 						group->to = newgroup.to;
 					} else {
-						psy_audio_midiconfig_addcontroller(self, newgroup);
+						psy_audio_midiconfig_add_controller(self, newgroup);
 					}
 				}
 			}		
@@ -224,7 +224,7 @@ void psy_audio_midiconfig_configure(psy_audio_MidiConfig* self,
 	}
 }
 
-void psy_audio_midiconfig_addcontroller(psy_audio_MidiConfig* self,
+void psy_audio_midiconfig_add_controller(psy_audio_MidiConfig* self,
 	psy_audio_MidiConfigGroup group)
 {
 	psy_audio_MidiConfigGroup* newgroup;

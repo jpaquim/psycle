@@ -6,13 +6,16 @@
 #include "../../detail/prefix.h"
 
 
+/* host */
+#include "resources/resource.h"
 /* audio */
 #include <player.h>
 
 #include "metronomeconfig.h"
 
 static void metronomeconfig_make(MetronomeConfig*, psy_Property*);
-static void metronomeconfig_updatemetronome(MetronomeConfig*);
+static void metronomeconfig_on_property_changed(MetronomeConfig*,
+	psy_Property* sender);
 
 void metronomeconfig_init(MetronomeConfig* self, psy_Property* parent,
 	psy_audio_Player* player)
@@ -36,18 +39,23 @@ void metronomeconfig_make(MetronomeConfig* self, psy_Property* parent)
 {
 	assert(self);
 
-	self->metronome = psy_property_set_id(psy_property_settext(
+	self->metronome = psy_property_set_id(psy_property_set_text(
 		psy_property_append_section(parent, "metronome"),
 		"settingsview.metronome.metronome"), PROPERTY_ID_METRONOME);
-	psy_property_set_id(psy_property_settext(
+	psy_property_set_icon(self->metronome, IDB_METRONOME_LIGHT,
+		IDB_METRONOME_DARK);
+	psy_property_connect(psy_property_set_id(psy_property_set_text(
 		psy_property_append_bool(self->metronome, "showmetronome", FALSE),
-		"settingsview.metronome.show"), PROPERTY_ID_SHOWMETRONOME);
-	psy_property_settext(
+		"settingsview.metronome.show"), PROPERTY_ID_SHOWMETRONOME),
+		self, metronomeconfig_on_property_changed);
+	psy_property_connect(psy_property_set_text(
 		psy_property_append_int(self->metronome, "machine", 0x3F, 0, 0x40),
-		"settingsview.metronome.machine");
-	psy_property_settext(
+		"settingsview.metronome.machine"),
+		self, metronomeconfig_on_property_changed);
+	psy_property_connect(psy_property_set_text(
 		psy_property_append_int(self->metronome, "note", 48, 0, 119),
-		"settingsview.metronome.note");
+		"settingsview.metronome.note"),
+		self, metronomeconfig_on_property_changed);
 }
 
 /* Properties */
@@ -72,29 +80,34 @@ bool metronomeconfig_showmetronomebar(const MetronomeConfig* self)
 	return (psy_property_at_bool(self->metronome, "showmetronome", FALSE));
 }
 
-/* events */
-uintptr_t metronomeconfig_onchanged(MetronomeConfig* self, psy_Property*
-	property)
-{		
-	metronomeconfig_updatemetronome(self);
-	if (property) {
-		psy_signal_emit(&self->signal_changed, self, 1, property);
-	}
-	return psy_INDEX_INVALID;
-}
-
-bool metronomeconfig_hasproperty(const MetronomeConfig* self, psy_Property* property)
-{
-	assert(self && self->metronome);
-
-	return psy_property_in_section(property, self->metronome);
-}
-
-void metronomeconfig_updatemetronome(MetronomeConfig* self)
+void metronomeconfig_on_property_changed(MetronomeConfig* self, psy_Property* sender)
 {
 	self->player->sequencer.metronome_event.note =
 		metronomeconfig_note(self);
 	self->player->sequencer.metronome_event.mach =
 		(uint8_t)
 		metronomeconfig_machine(self);
+	psy_signal_emit(&self->signal_changed, self, 1, sender);
+}
+
+bool metronomeconfig_connect(MetronomeConfig* self, const char* key, void* context,
+	void* fp)
+{
+	psy_Property* p;
+
+	assert(self);
+
+	p = metronomeconfig_property(self, key);
+	if (p) {
+		psy_property_connect(p, context, fp);
+		return TRUE;
+	}
+	return FALSE;
+}
+
+psy_Property* metronomeconfig_property(MetronomeConfig* self, const char* key)
+{
+	assert(self);
+
+	return psy_property_at(self->metronome, key, PSY_PROPERTY_TYPE_NONE);
 }

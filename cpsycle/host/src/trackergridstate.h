@@ -223,7 +223,7 @@ INLINE uintptr_t trackerstate_midline(const TrackerState* self,
 psy_audio_SequenceCursor trackerstate_make_cursor(TrackerState*,
 	psy_ui_RealPoint pt, uintptr_t index, double line_height,
 	const psy_ui_TextMetric*);
-void trackerstate_columncolours(TrackerState*, TrackerColumnFlags,
-	uintptr_t track, psy_ui_Colour* bg, psy_ui_Colour* fore);
+psy_ui_Style* trackerstate_column_style(TrackerState*, TrackerColumnFlags,
+	uintptr_t track);
 
 #endif /* TRACKERGRIDSTATE_H */

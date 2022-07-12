@@ -54,7 +54,7 @@ typedef struct psy_ui_TextAreaPane {
     bool isinputfield;    
     char* text;
     psy_ui_TextFormat format;
-    uintptr_t cp;     
+    uintptr_t cp; 
 } psy_ui_TextAreaPane;
 
 void psy_ui_textareapane_init(psy_ui_TextAreaPane*, psy_ui_Component* parent);
@@ -98,6 +98,8 @@ typedef struct psy_ui_TextArea {
     /* internal */
     psy_ui_Scroller scroller;
     psy_ui_TextAreaPane pane;
+    /* references */
+    psy_Property* property;
 } psy_ui_TextArea;
 
 void psy_ui_textarea_init(psy_ui_TextArea*, psy_ui_Component* parent);
@@ -106,6 +108,8 @@ void psy_ui_textarea_init_single_line(psy_ui_TextArea*, psy_ui_Component* parent
 psy_ui_TextArea* psy_ui_textarea_alloc(void);
 psy_ui_TextArea* psy_ui_textarea_allocinit(psy_ui_Component* parent);
 psy_ui_TextArea* psy_ui_textarea_allocinit_single_line(psy_ui_Component* parent);
+
+void psy_ui_textarea_data_exchange(psy_ui_TextArea*, psy_Property*);
 
 INLINE void psy_ui_textarea_enable_input_field(psy_ui_TextArea* self)
 {

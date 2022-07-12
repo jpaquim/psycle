@@ -13,6 +13,7 @@
 /* platform */
 #include "../../detail/portable.h"
 
+
 /* prototypes */
 static void psy_ui_label_on_destroyed(psy_ui_Label*);
 static void psy_ui_label_on_draw(psy_ui_Label*, psy_ui_Graphics*);
@@ -21,6 +22,8 @@ static void psy_ui_label_on_preferred_size(psy_ui_Label*,
 static void psy_ui_label_on_language_changed(psy_ui_Label*);
 static void psy_ui_label_on_timer(psy_ui_Label*, uintptr_t timerid);
 static const char* psy_ui_label_text_internal(const psy_ui_Label*);
+static void psy_ui_label_on_property_changed(psy_ui_Label*, psy_Property* sender);
+static void psy_ui_label_before_property_destroyed(psy_ui_Label*, psy_Property* sender);
 
 /* vtable */
 static psy_ui_ComponentVtable vtable;
@@ -68,7 +71,8 @@ void psy_ui_label_init(psy_ui_Label* self, psy_ui_Component* parent)
 	self->translation = NULL;
 	self->translate = TRUE;
 	self->fadeoutcounter = 0;
-	self->fadeout = FALSE;	
+	self->fadeout = FALSE;
+	self->property = NULL;
 	psy_ui_textformat_init(&self->format);
 	psy_ui_textformat_set_alignment(&self->format, psy_ui_textalignment_make(
 		psy_ui_ALIGNMENT_CENTER_VERTICAL | psy_ui_ALIGNMENT_LEFT));
@@ -92,6 +96,9 @@ void psy_ui_label_on_destroyed(psy_ui_Label* self)
 {
 	assert(self);
 
+	if (self->property) {
+		psy_property_disconnect(self->property, self);
+	}
 	free(self->text);
 	free(self->translation);
 	free(self->defaulttext);
@@ -122,6 +129,65 @@ void psy_ui_label_on_language_changed(psy_ui_Label* self)
 	psy_strreset(&self->translation, psy_ui_translate(self->text));
 	psy_ui_textformat_clear(&self->format);
 	psy_ui_component_invalidate(psy_ui_label_base(self));	
+}
+
+void psy_ui_label_data_exchange(psy_ui_Label* self, psy_Property* property)
+{
+	self->property = property;
+	if (self->property) {
+		psy_ui_label_on_property_changed(self, self->property);
+		psy_property_connect(self->property, self,
+			psy_ui_label_on_property_changed);
+		psy_signal_connect(&self->property->before_destroyed, self,
+			psy_ui_label_before_property_destroyed);
+	}
+}
+
+void psy_ui_label_on_property_changed(psy_ui_Label* self, psy_Property* sender)
+{
+	if (psy_property_is_font(self->property)) {		
+		char str[128];
+		psy_ui_FontInfo fontinfo;
+		psy_ui_Font font;
+		int pt;
+		const psy_ui_TextMetric* tm;
+
+		psy_ui_fontinfo_init_string(&fontinfo,
+			psy_property_item_str(self->property));
+		psy_ui_font_init(&font, &fontinfo);
+		tm = psy_ui_font_textmetric(&font);
+		if (fontinfo.lfHeight < 0) {
+			pt = ((tm->tmHeight - tm->tmInternalLeading) * 72) /
+				psy_ui_logpixelsy();
+		} else {
+			pt = tm->tmHeight;
+		}
+		psy_ui_font_dispose(&font);
+		tm = NULL;
+		psy_snprintf(str, 128, "%s %d pt", fontinfo.lfFaceName, (int)pt);			
+		psy_ui_label_set_text(self, str);		
+	} else if (psy_property_is_int(sender)) {
+		char text[64];
+
+		psy_snprintf(text, 40,
+			(psy_property_is_hex(self->property)) ? "%X" : "%d",
+			(int)psy_property_item_int(self->property));
+		psy_ui_label_set_text(self, text);
+	} else if (psy_property_is_double(sender)) {
+		char text[64];
+
+		psy_snprintf(text, 40, "%f", psy_property_item_double(self->property));
+		psy_ui_label_set_text(self, text);
+	} else if (psy_property_is_string(sender)) {
+		psy_ui_label_set_text(self, psy_property_item_str(sender));
+	}
+}
+
+void psy_ui_label_before_property_destroyed(psy_ui_Label* self, psy_Property* sender)
+{
+	assert(self);
+
+	self->property = NULL;
 }
 
 void psy_ui_label_set_text(psy_ui_Label* self, const char* text)
@@ -275,7 +341,7 @@ void psy_ui_label_on_timer(psy_ui_Label* self, uintptr_t timerid)
 		--self->fadeoutcounter;
 		if (self->fadeoutcounter <= 80) {
 			colour = psy_ui_style_const(psy_ui_STYLE_ROOT)->colour;
-			bgcolour = psy_ui_component_backgroundcolour(
+			bgcolour = psy_ui_component_background_colour(
 				psy_ui_label_base(self));
 			fadeoutstep = self->fadeoutcounter * 1 / 80.f;
 			psy_ui_colour_mul_rgb(&colour, fadeoutstep, fadeoutstep, fadeoutstep);

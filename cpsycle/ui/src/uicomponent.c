@@ -75,7 +75,7 @@ const psy_ui_Font* psy_ui_component_font(const psy_ui_Component* self)
 	return rv;
 }
 
-psy_ui_Colour psy_ui_component_backgroundcolour(psy_ui_Component* self)
+psy_ui_Colour psy_ui_component_background_colour(psy_ui_Component* self)
 {
 	psy_ui_Component* curr;
 	psy_ui_Colour base;
@@ -691,7 +691,7 @@ void psy_ui_component_init_base(psy_ui_Component* self) {
 	psy_ui_component_updatefont(self);	
 	if (self->imp) {
 		self->imp->vtable->dev_setbackgroundcolour(self->imp,
-			psy_ui_component_backgroundcolour(self));
+			psy_ui_component_background_colour(self));
 	}
 }
 
@@ -2067,7 +2067,7 @@ void psy_ui_notify_style_update(psy_ui_Component* main)
 			psy_signal_emit(&child->signal_styleupdate, child, 0);
 			if (child->imp) {
 				child->imp->vtable->dev_setbackgroundcolour(child->imp,
-					psy_ui_component_backgroundcolour(child));
+					psy_ui_component_background_colour(child));
 				psy_ui_component_updatefont(child);
 			}
 		}
@@ -2116,7 +2116,7 @@ void psy_ui_component_draw(psy_ui_Component* self, psy_ui_Graphics* g)
 	psy_ui_component_draw_border(self, g);
 	/* prepare colours */
 	psy_ui_setcolour(g, psy_ui_component_colour(self));
-	psy_ui_settextcolour(g, psy_ui_component_colour(self));
+	psy_ui_set_text_colour(g, psy_ui_component_colour(self));
 	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 	if (self->vtable->ondraw) {
 		psy_ui_Margin padding;

@@ -78,7 +78,7 @@ void instrumentpanview_init(InstrumentPanView* self, psy_ui_Component* parent,
 	psy_ui_checkbox_init(&self->instpanenabled, &self->instpan);
 	psy_signal_connect(&self->instpanenabled.signal_clicked, self,
 		instrumentpanview_oninstpanenabled);
-	psy_ui_checkbox_settext(&self->instpanenabled, "Instrument Pan");
+	psy_ui_checkbox_set_text(&self->instpanenabled, "Instrument Pan");
 	psy_ui_component_set_minimum_size(&self->instpanenabled.component, psy_ui_size_make_em(22, 1.0));
 	psy_ui_slider_init(&self->instpanning, &self->instpan);
 	psy_ui_slider_connect(&self->instpanning, self,
@@ -141,12 +141,12 @@ void instrumentpanview_setinstrument(InstrumentPanView* self,
 		if (instrument->panenabled) {
 			psy_ui_checkbox_check(&self->instpanenabled);
 		} else {
-			psy_ui_checkbox_disablecheck(&self->instpanenabled);
+			psy_ui_checkbox_disable_check(&self->instpanenabled);
 		}
 	} else {
 		adsrsliders_set_envelope(&self->adsrsliders, NULL);
 		envelopeview_setenvelope(&self->envelopeview, NULL);
-		psy_ui_checkbox_disablecheck(&self->instpanenabled);
+		psy_ui_checkbox_disable_check(&self->instpanenabled);
 	}
 	instrumentpanview_updatesliders(self);	
 }

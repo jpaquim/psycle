@@ -387,6 +387,7 @@
     <ClCompile Include="src\patternviewmenu.c" />
     <ClCompile Include="src\patternviewstate.c" />
     <ClCompile Include="src\patternviewtabbar.c" />
+    <ClCompile Include="src\patternviewtheme.c" />
     <ClCompile Include="src\pianogrid.c" />
     <ClCompile Include="src\pianogriddraw.c" />
     <ClCompile Include="src\pianogridstate.c" />
@@ -398,6 +399,7 @@
     <ClCompile Include="src\playposbar.c" />
     <ClCompile Include="src\plugineditor.c" />
     <ClCompile Include="src\plugineditorbar.c" />
+    <ClCompile Include="src\pluginscanthread.c" />
     <ClCompile Include="src\pluginscanview.c" />
     <ClCompile Include="src\pluginsview.c" />
     <ClCompile Include="src\predefsconfig.c" />
@@ -584,6 +586,7 @@
     <ClInclude Include="src\patternviewmenu.h" />
     <ClInclude Include="src\patternviewstate.h" />
     <ClInclude Include="src\patternviewtabbar.h" />
+    <ClInclude Include="src\patternviewtheme.h" />
     <ClInclude Include="src\pianogrid.h" />
     <ClInclude Include="src\pianogriddraw.h" />
     <ClInclude Include="src\pianogridstate.h" />
@@ -595,6 +598,7 @@
     <ClInclude Include="src\playposbar.h" />
     <ClInclude Include="src\plugineditor.h" />
     <ClInclude Include="src\plugineditorbar.h" />
+    <ClInclude Include="src\pluginscanthread.h" />
     <ClInclude Include="src\pluginscanview.h" />
     <ClInclude Include="src\pluginsview.h" />
     <ClInclude Include="src\predefsconfig.h" />
@@ -694,11 +698,18 @@
     <Image Include="src\resources\expand-dark.bmp" />
     <Image Include="src\resources\expand-light.bmp" />
     <Image Include="src\resources\float-dark.bmp" />
+    <Image Include="src\resources\float-light.bmp" />
+    <Image Include="src\resources\folder-dark.bmp" />
+    <Image Include="src\resources\folder-light.bmp" />
     <Image Include="src\resources\heart-dark.bmp" />
     <Image Include="src\resources\heart-full-dark.bpm.bmp" />
     <Image Include="src\resources\help.bmp" />
     <Image Include="src\resources\icon1.ico" />
+    <Image Include="src\resources\image-dark.bmp" />
+    <Image Include="src\resources\image-light.bmp" />
     <Image Include="src\resources\kbd.bmp" />
+    <Image Include="src\resources\keypad-dark.bmp" />
+    <Image Include="src\resources\keypad-light.bmp" />
     <Image Include="src\resources\loop_dark.bmp" />
     <Image Include="src\resources\loop_light.bmp" />
     <Image Include="src\resources\machines-dark.bmp" />
@@ -707,6 +718,8 @@
     <Image Include="src\resources\macparam.ico" />
     <Image Include="src\resources\matrix-dark.bmp" />
     <Image Include="src\resources\matrix-light.bmp" />
+    <Image Include="src\resources\metronome-dark.bmp" />
+    <Image Include="src\resources\metronome-light.bmp" />
     <Image Include="src\resources\mixer_skin.bmp" />
     <Image Include="src\resources\new-dark.bmp" />
     <Image Include="src\resources\newmachine-dark.bmp" />
@@ -715,6 +728,8 @@
     <Image Include="src\resources\notes-light.bmp" />
     <Image Include="src\resources\open-dark.bmp" />
     <Image Include="src\resources\open-light.bmp" />
+    <Image Include="src\resources\options-dark.bmp" />
+    <Image Include="src\resources\options-light.bmp" />
     <Image Include="src\resources\pattern-editor.bmp" />
     <Image Include="src\resources\pattern_header_skin.bmp" />
     <Image Include="src\resources\play-dark.bmp" />
@@ -733,10 +748,16 @@
     <Image Include="src\resources\settings-dark.bmp" />
     <Image Include="src\resources\settings-light.bmp" />
     <Image Include="src\resources\splash_screen.bmp" />
+    <Image Include="src\resources\step-dark.bmp" />
+    <Image Include="src\resources\step-light.bmp" />
     <Image Include="src\resources\stop-dark.bmp" />
     <Image Include="src\resources\stop-light.bmp" />
     <Image Include="src\resources\TbMainKnob.bmp" />
     <Image Include="src\resources\term.bmp" />
+    <Image Include="src\resources\toggle-dark.bmp" />
+    <Image Include="src\resources\toggle-light.bmp" />
+    <Image Include="src\resources\trail-sign-dark.bmp" />
+    <Image Include="src\resources\trail-sign-light.bmp" />
     <Image Include="src\resources\tray-dark.bmp" />
     <Image Include="src\resources\undo-dark.bmp" />
     <Image Include="src\resources\undo-light.bmp" />

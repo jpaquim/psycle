@@ -39,8 +39,9 @@ bool metronomeconfig_showmetronomebar(const MetronomeConfig*);
 uint8_t metronomeconfig_note(const MetronomeConfig* self);
 uintptr_t metronomeconfig_machine(const MetronomeConfig*);
 
-uintptr_t metronomeconfig_onchanged(MetronomeConfig*, psy_Property*);
-bool metronomeconfig_hasproperty(const MetronomeConfig*, psy_Property*);
+bool metronomeconfig_connect(MetronomeConfig*, const char* key, void* context,
+	void* fp);
+psy_Property* metronomeconfig_property(MetronomeConfig*, const char* key);
 
 #ifdef __cplusplus
 }
