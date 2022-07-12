@@ -112,10 +112,7 @@ void psy_ui_eventdispatch_handle_mouse_event(psy_ui_EventDispatch* self,
 				self->lastbutton = psy_ui_mouseevent_button(ev);
 			}
 		}
-	}
-	if (psy_ui_event_type(&ev->event) == psy_ui_MOUSEUP) {
-		self = self;
-	}
+	}	
 	psy_ui_eventdispatch_bubble(self, component, &ev->event);
 	if (psy_ui_event_type(&ev->event) == psy_ui_MOUSEDOWN) {
 		self->lastbuttontimestamp = eventtime;
@@ -240,9 +237,6 @@ void psy_ui_eventdispatch_bubble(psy_ui_EventDispatch* self,
 	psy_ui_Component* focus;
 
 	curr = component;	
-	if (psy_ui_event_type(ev) == psy_ui_MOUSEDOWN) {
-		self = self;
-	}
 	while (curr) {
 		psy_ui_eventdispatch_notify(self, curr, ev);
 		if (!psy_ui_event_bubbles(ev)) {
@@ -329,7 +323,9 @@ void psy_ui_eventdispatch_notify(psy_ui_EventDispatch* self,
 		break;
 	case psy_ui_MOUSEUP:
 		component->vtable->on_mouse_up(component, (psy_ui_MouseEvent*)ev);
-		psy_signal_emit(&component->signal_mouseup, component, 1, ev);
+		if (psy_ui_event_bubbles(ev)) {
+			psy_signal_emit(&component->signal_mouseup, component, 1, ev);
+		}
 		break;
 	case psy_ui_MOUSEMOVE:
 		component->vtable->on_mouse_move(component, (psy_ui_MouseEvent*)ev);

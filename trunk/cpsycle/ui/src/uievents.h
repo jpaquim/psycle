@@ -294,13 +294,13 @@ INLINE intptr_t psy_ui_mouseevent_delta(const psy_ui_MouseEvent* self)
 psy_ui_RealPoint psy_ui_mouseevent_pt(const psy_ui_MouseEvent* self);
 
 /* returns TRUE if the Ctrl key was pressed down when the event occurred. */
-INLINE bool psy_ui_mouseevent_ctrlkey(const psy_ui_MouseEvent* self)
+INLINE bool psy_ui_mouseevent_ctrl_key(const psy_ui_MouseEvent* self)
 {
 	return self->ctrl_key_;
 }
 
 /* returns TRUE if the Shift key was pressed down when the event occurred */
-INLINE bool psy_ui_mouseevent_shiftkey(const psy_ui_MouseEvent* self)
+INLINE bool psy_ui_mouseevent_shift_key(const psy_ui_MouseEvent* self)
 {
 	return self->shift_key_;
 }

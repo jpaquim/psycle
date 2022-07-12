@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #ifndef psy_audio_MIDICONFIG_H
@@ -8,6 +8,8 @@
 
 #include "../../detail/psydef.h"
 
+
+/* container */
 #include <list.h>
 #include <properties.h>
 
@@ -105,7 +107,7 @@ void psy_audio_midiconfig_reset(psy_audio_MidiConfig*);
 void psy_audio_midiconfig_configure(psy_audio_MidiConfig*,
 	const psy_Property* configuration, bool datastr);
 
-void psy_audio_midiconfig_addcontroller(psy_audio_MidiConfig*,
+void psy_audio_midiconfig_add_controller(psy_audio_MidiConfig*,
 	psy_audio_MidiConfigGroup group);
 void psy_audio_midiconfig_removecontroller(psy_audio_MidiConfig* self, intptr_t id);
 char_dyn_t* psy_audio_midiconfig_controllers_tostring(const psy_audio_MidiConfig* self);

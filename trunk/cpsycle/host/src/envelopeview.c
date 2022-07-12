@@ -239,7 +239,7 @@ void envelopebox_drawruler(EnvelopeBox* self, psy_ui_Graphics* g)
 	psy_ui_drawline(g, psy_ui_realpoint_make(0, self->cy),
 		psy_ui_realpoint_make(self->cx, self->cy));
 	tm = psy_ui_component_textmetric(envelopebox_base(self));
-	psy_ui_settextcolour(g, style->colour);
+	psy_ui_set_text_colour(g, style->colour);
 	if (self->settings && self->settings->timemode == psy_dsp_ENVELOPETIME_TICK) {
 		numsteps = (int)(maxtime);
 	} else {
@@ -579,7 +579,7 @@ void envelopebar_init(EnvelopeBar* self, psy_ui_Component* parent)
 
 void envelopebar_settext(EnvelopeBar* self, const char* text)
 {
-	psy_ui_checkbox_settext(&self->enabled, text);	
+	psy_ui_checkbox_set_text(&self->enabled, text);	
 }
 
 void envelopebar_enablemillisecs(EnvelopeBar* self)
@@ -681,12 +681,12 @@ void envelopeview_setenvelope(EnvelopeView* self,
 	if (settings && psy_dsp_envelope_isenabled(settings)) {
 		psy_ui_checkbox_check(&self->bar.enabled);
 	} else {
-		psy_ui_checkbox_disablecheck(&self->bar.enabled);
+		psy_ui_checkbox_disable_check(&self->bar.enabled);
 	}
 	if (settings && psy_dsp_envelope_iscarry(settings)) {
 		psy_ui_checkbox_check(&self->bar.carry);
 	} else {
-		psy_ui_checkbox_disablecheck(&self->bar.carry);
+		psy_ui_checkbox_disable_check(&self->bar.carry);
 	}
 	if (settings && settings->timemode == psy_dsp_ENVELOPETIME_TICK) {
 		psy_ui_button_highlight(&self->bar.ticks);

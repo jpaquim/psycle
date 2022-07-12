@@ -189,99 +189,98 @@ void fileoutdriver_makeconfig(fileout_driver* self)
 	psy_Property* ditherpdf;
 	psy_Property* dithernoiseshape;
 
-	self->configuration = psy_property_settext(
+	self->configuration = psy_property_set_text(
 		psy_property_preventtranslate(psy_property_allocinit_key("fileout")),
 		"Output");
-	psy_property_sethint(psy_property_settext(
+	psy_property_hide(psy_property_set_text(
 		psy_property_setreadonly(
 			psy_property_append_str(self->configuration, "name", "FileOut Driver"),
-			TRUE),
-		"Name"), PSY_PROPERTY_HINT_HIDE);
-	psy_property_sethint(psy_property_setreadonly(
+			TRUE), "Name"));
+	psy_property_hide(psy_property_setreadonly(
 		psy_property_append_str(self->configuration, "vendor", "Psycledelics"),
-		TRUE), PSY_PROPERTY_HINT_HIDE);
-	psy_property_sethint(psy_property_setreadonly(
+		TRUE));
+	psy_property_hide(psy_property_setreadonly(
 		psy_property_append_str(self->configuration, "version", "1.0"),
-		TRUE), PSY_PROPERTY_HINT_HIDE);
-	psy_property_settext(
+		TRUE));
+	psy_property_set_text(
 		psy_property_append_str(self->configuration, "outputpath",
 			"Untitled.wav"),
 		"Output to file");	
-	samplerate = psy_property_sethint(psy_property_settext(
+	samplerate = psy_property_set_hint(psy_property_set_text(
 		psy_property_append_choice(self->configuration, "samplerate", 5),
 		"Sample Rate"), /* default 5: 44100*/
 		PSY_PROPERTY_HINT_COMBO);
-	psy_property_settext(psy_property_append_int(samplerate, "sr8000",
+	psy_property_set_text(psy_property_append_int(samplerate, "sr8000",
 		8000, 0, 0), "8000 hz");
-	psy_property_settext(psy_property_append_int(samplerate, "sr11025",
+	psy_property_set_text(psy_property_append_int(samplerate, "sr11025",
 		11025, 0, 0), "11025 hz");
-	psy_property_settext(psy_property_append_int(samplerate, "sr16000",
+	psy_property_set_text(psy_property_append_int(samplerate, "sr16000",
 		16000, 0, 0), "16000 hz");
-	psy_property_settext(psy_property_append_int(samplerate, "sr22050",
+	psy_property_set_text(psy_property_append_int(samplerate, "sr22050",
 		22050, 0, 0), "22050 hz");
-	psy_property_settext(psy_property_append_int(samplerate, "sr32000",
+	psy_property_set_text(psy_property_append_int(samplerate, "sr32000",
 		32000, 0, 0), "32000 hz");
-	psy_property_settext(psy_property_append_int(samplerate, "sr44100",
+	psy_property_set_text(psy_property_append_int(samplerate, "sr44100",
 		44100, 0, 0), "44100 hz");
-	psy_property_settext(psy_property_append_int(samplerate, "sr48000",
+	psy_property_set_text(psy_property_append_int(samplerate, "sr48000",
 		48000, 0, 0), "48000 hz");
-	psy_property_settext(psy_property_append_int(samplerate, "sr88200",
+	psy_property_set_text(psy_property_append_int(samplerate, "sr88200",
 		88200, 0, 0), "88200 hz");
-	psy_property_settext(psy_property_append_int(samplerate, "sr96000",
+	psy_property_set_text(psy_property_append_int(samplerate, "sr96000",
 		96000, 0, 0), "96000 hz");
-	bitdepth = psy_property_sethint(psy_property_settext(
+	bitdepth = psy_property_set_hint(psy_property_set_text(
 		psy_property_append_choice(self->configuration, "bitdepth", 1),
 		"Bit Depth"), /* default 1: 16 bit*/
 		PSY_PROPERTY_HINT_COMBO);
-	psy_property_settext(psy_property_append_int(bitdepth, "bits8",
+	psy_property_set_text(psy_property_append_int(bitdepth, "bits8",
 		8, 0, 0), "8 bit");
-	psy_property_settext(psy_property_append_int(bitdepth, "bits16",
+	psy_property_set_text(psy_property_append_int(bitdepth, "bits16",
 		16, 0, 0), "16 bit");
-	psy_property_settext(psy_property_append_int(bitdepth, "bits24",
+	psy_property_set_text(psy_property_append_int(bitdepth, "bits24",
 		24, 0, 0), "24 bit");
-	psy_property_settext(psy_property_append_int(bitdepth, "bits32",
+	psy_property_set_text(psy_property_append_int(bitdepth, "bits32",
 		32, 0, 0), "32 bit (int)");
-	psy_property_settext(psy_property_append_int(bitdepth, "bits32f",
+	psy_property_set_text(psy_property_append_int(bitdepth, "bits32f",
 		32, 0, 0), "32 bit (float)");
-	channels = psy_property_sethint(psy_property_settext(
+	channels = psy_property_set_hint(psy_property_set_text(
 		psy_property_append_choice(self->configuration, "channels", 3),
 		"Channels"), /* default 3: stereo*/
 		PSY_PROPERTY_HINT_COMBO);
-	psy_property_settext(psy_property_append_int(channels, "mono-mix",
+	psy_property_set_text(psy_property_append_int(channels, "mono-mix",
 		0, 0, 0), "Mono (Mix)");
-	psy_property_settext(psy_property_append_int(channels, "mono-left",
+	psy_property_set_text(psy_property_append_int(channels, "mono-left",
 		1, 0, 0), "Mono (Left)");
-	psy_property_settext(psy_property_append_int(channels, "mono-right",
+	psy_property_set_text(psy_property_append_int(channels, "mono-right",
 		2, 0, 0), "Mono (Right)");
-	psy_property_settext(psy_property_append_int(channels, "stereo",
+	psy_property_set_text(psy_property_append_int(channels, "stereo",
 		3, 0, 0), "Stereo");	
 	
-	dither = psy_property_settext(
+	dither = psy_property_set_text(
 		psy_property_append_section(self->configuration, "dither"),
 		"Dither");
-	psy_property_settext(
+	psy_property_set_text(
 		psy_property_append_bool(dither, "enable", FALSE),
 		"Enable");
-	ditherpdf = psy_property_sethint(psy_property_settext(
+	ditherpdf = psy_property_set_hint(psy_property_set_text(
 		psy_property_append_choice(dither, "pdf", 0),
 		"render.pdf"), PSY_PROPERTY_HINT_COMBO);
-	psy_property_settext(
+	psy_property_set_text(
 		psy_property_append_str(ditherpdf, "triangular", ""),
 		"render.triangular");
-	psy_property_settext(
+	psy_property_set_text(
 		psy_property_append_str(ditherpdf, "rectangular", ""),
 		"render.rectangular");
-	psy_property_settext(
+	psy_property_set_text(
 		psy_property_append_str(ditherpdf, "gaussian", ""),
 		"render.gaussian");
-	dithernoiseshape = psy_property_sethint(psy_property_settext(
+	dithernoiseshape = psy_property_set_hint(psy_property_set_text(
 		psy_property_append_choice(dither, "noiseshape", 0),
 		"render.noise-shaping"),
 		PSY_PROPERTY_HINT_COMBO);
-	psy_property_settext(
+	psy_property_set_text(
 		psy_property_append_str(dithernoiseshape, "none", ""),
 		"render.none");
-	psy_property_settext(
+	psy_property_set_text(
 		psy_property_append_str(dithernoiseshape, "highpass", ""),
 		"render.high-pass-contour");
 }

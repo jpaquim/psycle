@@ -95,7 +95,7 @@ void seqeditentry_onpreferredsize(SeqEditEntry* self,
 
 void seqeditentry_startdrag(SeqEditEntry* self, psy_ui_MouseEvent* ev)
 {	
-	if (psy_ui_mouseevent_ctrlkey(ev)) {
+	if (psy_ui_mouseevent_ctrl_key(ev)) {
 		if (!psy_audio_sequenceselection_is_selected(
 				&self->state->workspace->song->sequence.sequenceselection,
 				seqeditentry_seqpos(self))) {

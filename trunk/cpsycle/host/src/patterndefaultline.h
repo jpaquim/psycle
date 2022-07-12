@@ -29,10 +29,11 @@ typedef struct PatternDefaultLine {
 	TrackerState state;
 	/* references */
 	Workspace* workspace;
+	PatternViewConfig* config;
 } PatternDefaultLine;
 
 void patterndefaultline_init(PatternDefaultLine*, psy_ui_Component* parent,
-	TrackConfig*, Workspace*);
+	TrackConfig*, PatternViewConfig*, Workspace*);
 
 void patterndefaultline_update_song_tracks(PatternDefaultLine*);
 

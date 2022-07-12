@@ -66,6 +66,21 @@ typedef struct psy_ui_PropertyMode {
 	bool set;
 } psy_ui_PropertyMode;
 
+
+typedef struct psy_RealPair {
+	double first;
+	double second;
+} psy_RealPair;
+
+INLINE psy_RealPair psy_realpair_make(double first, double second)
+{
+	psy_RealPair rv;
+
+	rv.first = first;
+	rv.second = second;
+	return rv;
+}
+
 #if _MSC_VER
 #define psy_SLASHSTR "\\"
 #define psy_SLASH '\\'

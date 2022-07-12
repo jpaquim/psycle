@@ -70,9 +70,6 @@ void machineviewconfig_set_generator_colour(MachineViewConfig*,
 void machineviewconfig_set_effect_colour(MachineViewConfig*,
 	psy_ui_Colour);
 
-uintptr_t machineviewconfig_onchanged(MachineViewConfig*, psy_Property*);
-
-
 #ifdef __cplusplus
 }
 #endif

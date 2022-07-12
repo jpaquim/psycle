@@ -15,17 +15,19 @@
 
 /* SeqView */
 /* prototypes */
-static void seqview_onsongchanged(SeqView*, Workspace* sender);
-static void seqview_onsequenceselect(SeqView*,
+static void seqview_on_song_changed(SeqView*, Workspace* sender);
+static void seqview_on_sequence_select(SeqView*,
 	psy_audio_SequenceSelection*, psy_audio_OrderIndex*);
-static void seqview_ontrackreposition(SeqView*,
+static void seqview_on_track_reposition(SeqView*,
 	psy_audio_Sequence* sender, uintptr_t trackidx);
-static void seqview_onsequencechanged(SeqView*,
+static void seqview_on_sequence_changed(SeqView*,
 	psy_audio_Sequence* sender);
-static void seqview_onconfigure(SeqView*, GeneralConfig*, psy_Property*);
-static void seqview_onscroll(SeqView*, psy_ui_Component* sender);
+static void seqview_show_pattern_names(SeqView*);
+static void seqview_hide_pattern_names(SeqView*);
+static void seqview_on_pattern_names(SeqView*, psy_Property*);
+static void seqview_on_scroll(SeqView*, psy_ui_Component* sender);
 static void seqview_rebuild(SeqView*);
-static void seqview_oneditseqlist(SeqView*, psy_ui_Button* sender);
+static void seqview_on_edit_seqlist(SeqView*, psy_ui_Button* sender);
 
 /* implementation */
 void seqview_init(SeqView* self, psy_ui_Component* parent,
@@ -59,29 +61,32 @@ void seqview_init(SeqView* self, psy_ui_Component* parent,
 		&self->state);
 	psy_ui_component_set_align(&self->trackheader.component, psy_ui_ALIGN_TOP);
 	psy_signal_connect(&self->listview.component.signal_scrolled, self,
-		seqview_onscroll);	
+		seqview_on_scroll);	
 	/* duration*/
 	seqviewduration_init(&self->duration, seqview_base(self), workspace);
 	psy_ui_component_set_align(&self->duration.component, psy_ui_ALIGN_BOTTOM);	
 	psy_signal_connect(&workspace->signal_songchanged, self,
-		seqview_onsongchanged);		
+		seqview_on_song_changed);		
 	psy_signal_connect(&workspace->song->sequence.sequenceselection.signal_select, self,
-		seqview_onsequenceselect);
+		seqview_on_sequence_select);
 	if (self->cmds.sequence && self->cmds.sequence->patterns) {
 		psy_signal_connect(&self->cmds.sequence->patterns->signal_namechanged,
 			&self->listview,
 			seqviewlist_onpatternnamechanged);
 		psy_signal_connect(&self->cmds.sequence->signal_changed,
-			self, seqview_onsequencechanged);
+			self, seqview_on_sequence_changed);
 		psy_signal_connect(&self->cmds.sequence->signal_trackreposition,
-			self, seqview_ontrackreposition);
+			self, seqview_on_track_reposition);
 	}
-	psy_signal_connect(
-		&psycleconfig_general(workspace_conf(workspace))->signal_changed,
-		self, seqview_onconfigure);	
+	seqview_on_pattern_names(self, generalconfig_property(
+		psycleconfig_general(workspace_conf(workspace)),
+		"showpatternnames"));
+	generalconfig_connect(
+		psycleconfig_general(workspace_conf(workspace)),
+		"showpatternnames", self, seqview_on_pattern_names);	
 }
 
-void seqview_onscroll(SeqView* self, psy_ui_Component* sender)
+void seqview_on_scroll(SeqView* self, psy_ui_Component* sender)
 {	
 	psy_ui_component_set_scroll_left(&self->trackheader.client,
 		psy_ui_component_scroll_left(seqviewlist_base(&self->listview)));
@@ -97,7 +102,7 @@ void seqview_idle(SeqView* self)
 	seqviewduration_idle(&self->duration);
 }
 
-void seqview_onsongchanged(SeqView* self, Workspace* sender)
+void seqview_on_song_changed(SeqView* self, Workspace* sender)
 {
 	sequencecmds_update(&self->cmds);	
 	if (workspace_song(sender)) {		
@@ -106,9 +111,9 @@ void seqview_onsongchanged(SeqView* self, Workspace* sender)
 				&self->cmds.sequence->patterns->signal_namechanged,
 				&self->listview, seqviewlist_onpatternnamechanged);
 			psy_signal_connect(&self->cmds.sequence->signal_changed,
-				self, seqview_onsequencechanged);
+				self, seqview_on_sequence_changed);
 			psy_signal_connect(&self->cmds.sequence->signal_trackreposition,
-				self, seqview_ontrackreposition);
+				self, seqview_on_track_reposition);
 		}
 	}
 	seqview_rebuild(self);
@@ -124,12 +129,12 @@ void seqview_rebuild(SeqView* self)
 	psy_ui_component_invalidate(&self->scroller.component);	
 }
 
-void seqview_oneditseqlist(SeqView* self, psy_ui_Button* sender)
+void seqview_on_edit_seqlist(SeqView* self, psy_ui_Button* sender)
 {
 	psy_ui_component_set_focus(&self->listview.component);
 }
 
-void seqview_onsequenceselect(SeqView* self,
+void seqview_on_sequence_select(SeqView* self,
 	psy_audio_SequenceSelection* sender, psy_audio_OrderIndex* index)
 {		
 	uintptr_t c = 0;
@@ -163,7 +168,7 @@ void seqview_onsequenceselect(SeqView* self,
 	psy_ui_component_invalidate(&self->trackheader.component);
 }
 
-void seqview_onsequencechanged(SeqView* self,
+void seqview_on_sequence_changed(SeqView* self,
 	psy_audio_Sequence* sender)
 {			
 	seqviewduration_stopdurationcalc(&self->duration);
@@ -175,25 +180,39 @@ void seqview_onsequencechanged(SeqView* self,
 	seqviewduration_update(&self->duration, TRUE);
 }
 
-void seqview_ontrackreposition(SeqView* self, psy_audio_Sequence* sender,
+void seqview_on_track_reposition(SeqView* self, psy_audio_Sequence* sender,
 	uintptr_t trackindex)
 {
 	seqviewduration_update(&self->duration, FALSE);	
 	psy_ui_component_invalidate(&self->listview.component);
 }
 
-void seqview_onconfigure(SeqView* self, GeneralConfig* config,
-	psy_Property* property)
+void seqview_show_pattern_names(SeqView* self)
 {
-	if (generalconfig_showing_pattern_names(config)) {
-		self->state.showpatternnames = TRUE;
-		self->state.trackwidth = psy_ui_value_make_ew(26.0);		
-	} else {
-		self->state.showpatternnames = FALSE;
-		self->state.trackwidth = psy_ui_value_make_ew(18.0);		
-	}
+	self->state.showpatternnames = TRUE;
+	self->state.trackwidth = psy_ui_value_make_ew(26.0);
 	seqviewtrackheaders_build(&self->trackheader);
 	psy_ui_component_align(&self->trackheader.component);
 	psy_ui_component_align(&self->listview.component);
-	psy_ui_component_invalidate(&self->listview.component);	
+	psy_ui_component_invalidate(&self->listview.component);
+}
+
+void seqview_hide_pattern_names(SeqView* self)
+{
+	self->state.showpatternnames = FALSE;
+	self->state.trackwidth = psy_ui_value_make_ew(18.0);
+	seqviewtrackheaders_build(&self->trackheader);
+	psy_ui_component_align(&self->trackheader.component);
+	psy_ui_component_align(&self->listview.component);
+	psy_ui_component_invalidate(&self->listview.component);
+}
+
+void seqview_on_pattern_names(SeqView* self, psy_Property* sender)
+{
+	if (psy_property_item_bool(sender)) {
+		seqview_show_pattern_names(self);
+	}
+	else {
+		seqview_hide_pattern_names(self);
+	}
 }

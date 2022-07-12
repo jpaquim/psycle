@@ -360,13 +360,13 @@ INLINE void psy_ui_setbackgroundmode(psy_ui_Graphics* self, uintptr_t mode)
 	self->vtable->setbackgroundmode(self, mode);
 }
 
-INLINE void psy_ui_setbackgroundcolour(psy_ui_Graphics* self,
+INLINE void psy_ui_set_background_colour(psy_ui_Graphics* self,
 	psy_ui_Colour colour)
 {	
 	self->vtable->setbackgroundcolour(self, colour);
 }
 
-INLINE void psy_ui_settextcolour(psy_ui_Graphics* self, psy_ui_Colour colour)
+INLINE void psy_ui_set_text_colour(psy_ui_Graphics* self, psy_ui_Colour colour)
 {
 	self->vtable->settextcolour(self, colour);
 }

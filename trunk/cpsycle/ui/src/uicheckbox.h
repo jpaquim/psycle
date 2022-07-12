@@ -33,20 +33,23 @@ typedef struct psy_ui_CheckBox {
    psy_Signal signal_clicked;
    /* internal */
    psy_ui_Component checkmark;
-   psy_ui_Label text;               
+   psy_ui_Label text;   
+   /* references */
+   psy_Property* property;
 } psy_ui_CheckBox;
 
 void psy_ui_checkbox_init(psy_ui_CheckBox*, psy_ui_Component* parent);
 void psy_ui_checkbox_init_text(psy_ui_CheckBox*, psy_ui_Component* parent,
     const char* text);
 
-void psy_ui_checkbox_settext(psy_ui_CheckBox*, const char* text);
+void psy_ui_checkbox_set_text(psy_ui_CheckBox*, const char* text);
 const char* psy_ui_checkbox_text(psy_ui_CheckBox*);
 void psy_ui_checkbox_check(psy_ui_CheckBox*);
-void psy_ui_checkbox_disablecheck(psy_ui_CheckBox*);
+void psy_ui_checkbox_disable_check(psy_ui_CheckBox*);
 bool psy_ui_checkbox_checked(const psy_ui_CheckBox*);
-void psy_ui_checkbox_preventwrap(psy_ui_CheckBox*);
+void psy_ui_checkbox_prevent_wrap(psy_ui_CheckBox*);
 void psy_ui_checkbox_enablewrap(psy_ui_CheckBox*);
+void psy_ui_checkbox_data_exchange(psy_ui_CheckBox*, psy_Property*);
 
 INLINE psy_ui_Component* psy_ui_checkbox_base(psy_ui_CheckBox* self)
 {

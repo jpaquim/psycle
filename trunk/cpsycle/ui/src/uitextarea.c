@@ -112,7 +112,7 @@ void psy_ui_textareapane_init(psy_ui_TextAreaPane* self,
 }
 
 void psy_ui_textareapane_on_destroyed(psy_ui_TextAreaPane* self)
-{
+{	
 	psy_signal_dispose(&self->signal_change);
 	psy_signal_dispose(&self->signal_accept);
 	psy_signal_dispose(&self->signal_reject);	
@@ -602,6 +602,10 @@ void psy_ui_textareapane_on_mouse_down(psy_ui_TextAreaPane* self,
 
 /* prototypes */
 static void psy_ui_textarea_on_destroyed(psy_ui_TextArea*);
+static void psy_ui_textarea_on_property_changed(psy_ui_TextArea*,
+	psy_Property* sender);
+static void psy_ui_textarea_before_property_destroyed(psy_ui_TextArea*,
+	psy_Property* sender);
 static void psy_ui_textarea_on_edit_accept(psy_ui_TextArea*,
 	psy_ui_TextAreaPane* sender);
 static void psy_ui_textarea_on_edit_reject(psy_ui_TextArea*,
@@ -632,6 +636,7 @@ void psy_ui_textarea_init(psy_ui_TextArea* self, psy_ui_Component* parent)
 {
 	psy_ui_component_init(psy_ui_textarea_base(self), parent, NULL);
 	psy_ui_textarea_vtable_init(self);
+	self->property = NULL;
 	psy_ui_textareapane_init(&self->pane, psy_ui_textarea_base(self));
 	psy_ui_scroller_init(&self->scroller, psy_ui_textarea_base(self),
 		NULL, NULL);
@@ -663,6 +668,9 @@ void psy_ui_textarea_init_single_line(psy_ui_TextArea* self,
 
 void psy_ui_textarea_on_destroyed(psy_ui_TextArea* self)
 {
+	if (self->property) {
+		psy_property_disconnect(self->property, self);
+	}
 	psy_signal_dispose(&self->signal_change);
 	psy_signal_dispose(&self->signal_accept);
 	psy_signal_dispose(&self->signal_reject);
@@ -697,6 +705,45 @@ psy_ui_TextArea* psy_ui_textarea_allocinit_single_line(
 	return rv;
 }
 
+void psy_ui_textarea_data_exchange(psy_ui_TextArea* self,
+	psy_Property* property)
+{
+	self->property = property;
+	if (self->property) {
+		psy_ui_textarea_on_property_changed(self, self->property);
+		psy_property_connect(self->property, self,
+			psy_ui_textarea_on_property_changed);
+		psy_signal_connect(&self->property->before_destroyed, self,
+			psy_ui_textarea_before_property_destroyed);
+	}
+}
+
+void psy_ui_textarea_on_property_changed(psy_ui_TextArea* self, psy_Property* sender)
+{
+	if (psy_property_is_int(sender)) {
+		char text[64];
+
+		psy_snprintf(text, 40,
+			(psy_property_is_hex(self->property)) ? "%X" : "%d",
+			(int)psy_property_item_int(self->property));
+		psy_ui_textarea_set_text(self, text);
+	} else if (psy_property_is_double(sender)) {
+		char text[64];
+
+		psy_snprintf(text, 40, "%f", psy_property_item_double(sender));
+		psy_ui_textarea_set_text(self, text);
+	} else if (psy_property_is_string(sender)) {
+		psy_ui_textarea_set_text(self, psy_property_item_str(sender));
+	}
+}
+
+void psy_ui_textarea_before_property_destroyed(psy_ui_TextArea* self, psy_Property* sender)
+{
+	assert(self);
+
+	self->property = NULL;
+}
+
 void psy_ui_textarea_prevent_wrap(psy_ui_TextArea* self)
 {
 	psy_ui_textformat_prevent_word_wrap(&self->pane.format);
@@ -716,6 +763,19 @@ void psy_ui_textarea_line_wrap(psy_ui_TextArea* self)
 void psy_ui_textarea_on_edit_accept(psy_ui_TextArea* self,
 	psy_ui_TextAreaPane* sender)
 {	
+	if (self->property) {
+		if (psy_property_is_double(self->property)) {
+			psy_property_set_item_double(self->property,
+				strtof(psy_ui_textarea_text(self), NULL));
+		} else if (psy_property_is_int(self->property)) {
+			psy_property_set_item_int(self->property,
+				(psy_property_is_hex(self->property))
+				? strtol(psy_ui_textarea_text(self), NULL, 16)
+				: atoi(psy_ui_textarea_text(self)));
+		} else if (psy_property_is_string(self->property)) {
+			psy_property_set_item_str(self->property, psy_ui_textarea_text(self));
+		}
+	}
 	psy_signal_emit(&self->signal_accept, self, 0);
 }
 

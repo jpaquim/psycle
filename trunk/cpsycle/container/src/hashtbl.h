@@ -81,6 +81,20 @@ void psy_table_dispose_all(psy_Table* self, psy_fp_disposefunc disposefunc);
 
 uintptr_t psy_strhash(const char* str);
 
+
+/* psy_Dictionary */
+typedef struct psy_Dictionary {
+	psy_Table container;
+} psy_Dictionary;
+
+void psy_dictionary_init(psy_Dictionary*);
+void psy_dictionary_dispose(psy_Dictionary*);
+
+void psy_dictionary_reset(psy_Dictionary*);
+const char* psy_dictionary_at(const psy_Dictionary*, const char* key);
+void psy_dictionary_set(psy_Dictionary*, const char* key, const char* value);
+void psy_dictionary_set_hash(psy_Dictionary*, uintptr_t hash_key, const char* value);
+
 #ifdef __cplusplus
 }
 #endif

@@ -37,6 +37,8 @@ typedef struct psy_ui_Label {
     bool fadeout;    
     uintptr_t fadeoutcounter;
     psy_ui_TextFormat format;
+    /* references */
+    psy_Property* property;
 } psy_ui_Label;
 
 void psy_ui_label_init(psy_ui_Label*, psy_ui_Component* parent);
@@ -45,6 +47,8 @@ void psy_ui_label_init_text(psy_ui_Label*, psy_ui_Component* parent,
 
 psy_ui_Label* psy_ui_label_alloc(void);
 psy_ui_Label* psy_ui_label_allocinit(psy_ui_Component* parent);
+
+void psy_ui_label_data_exchange(psy_ui_Label*, psy_Property*);
 
 /* copies the text to the label */
 void psy_ui_label_set_text(psy_ui_Label*, const char* text);

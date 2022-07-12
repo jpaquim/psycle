@@ -10,8 +10,13 @@
 
 
 /* prototypes */
+static void psy_ui_checkbox_mark(psy_ui_CheckBox*);
+static void psy_ui_checkbox_unmark(psy_ui_CheckBox*);
 static void psy_ui_checkbox_on_destroyed(psy_ui_CheckBox*);
 static void psy_ui_checkbox_on_mouse_down(psy_ui_CheckBox*, psy_ui_MouseEvent*);
+static void psy_ui_checkbox_on_property_changed(psy_ui_CheckBox*,
+	psy_Property* sender);
+static void psy_ui_checkbox_before_property_destroyed(psy_ui_CheckBox*, psy_Property* sender);
 
 /* vtable */
 static psy_ui_ComponentVtable vtable;
@@ -43,6 +48,7 @@ void psy_ui_checkbox_init(psy_ui_CheckBox* self, psy_ui_Component* parent)
 
 	psy_ui_component_init(psy_ui_checkbox_base(self), parent, NULL);
 	vtable_init(self);
+	self->property = NULL;
 	psy_ui_component_init(&self->checkmark, psy_ui_checkbox_base(self), NULL);
 	psy_ui_component_set_align(&self->checkmark, psy_ui_ALIGN_LEFT);
 	psy_ui_component_set_style_types(&self->checkmark,
@@ -65,17 +71,20 @@ void psy_ui_checkbox_init_text(psy_ui_CheckBox* self, psy_ui_Component* parent,
 	assert(self);
 
 	psy_ui_checkbox_init(self, parent);
-	psy_ui_checkbox_settext(self, text);
+	psy_ui_checkbox_set_text(self, text);
 }
 
 void psy_ui_checkbox_on_destroyed(psy_ui_CheckBox* self)
 {	
 	assert(self);
 
+	if (self->property) {
+		psy_property_disconnect(self->property, self);
+	}
 	psy_signal_dispose(&self->signal_clicked);
 }
 
-void psy_ui_checkbox_settext(psy_ui_CheckBox* self, const char* text)
+void psy_ui_checkbox_set_text(psy_ui_CheckBox* self, const char* text)
 {
 	assert(self);
 
@@ -89,7 +98,7 @@ const char* psy_ui_checkbox_text(psy_ui_CheckBox* self)
 	return psy_ui_label_text(&self->text);
 }
 
-void psy_ui_checkbox_check(psy_ui_CheckBox* self)
+void psy_ui_checkbox_mark(psy_ui_CheckBox* self)
 {
 	assert(self);
 
@@ -99,13 +108,35 @@ void psy_ui_checkbox_check(psy_ui_CheckBox* self)
 	}
 }
 
-void psy_ui_checkbox_disablecheck(psy_ui_CheckBox* self)
+void psy_ui_checkbox_unmark(psy_ui_CheckBox* self)
 {
 	assert(self);
 
 	if (psy_ui_checkbox_checked(self)) {
 		psy_ui_component_remove_style_state(&self->checkmark,
 			psy_ui_STYLESTATE_SELECT);
+	}
+}
+
+void psy_ui_checkbox_check(psy_ui_CheckBox* self)
+{
+	assert(self);
+
+	if (self->property) {
+		psy_property_set_item_bool(self->property, TRUE);
+	} else {
+		psy_ui_checkbox_mark(self);
+	}	
+}
+
+void psy_ui_checkbox_disable_check(psy_ui_CheckBox* self)
+{
+	assert(self);
+	
+	if (self->property) {
+		psy_property_set_item_bool(self->property, FALSE);
+	} else {
+		psy_ui_checkbox_unmark(self);
 	}
 }
 
@@ -117,7 +148,7 @@ bool psy_ui_checkbox_checked(const psy_ui_CheckBox* self)
 		psy_ui_STYLESTATE_SELECT) == psy_ui_STYLESTATE_SELECT;
 }
 
-void psy_ui_checkbox_preventwrap(psy_ui_CheckBox* self)
+void psy_ui_checkbox_prevent_wrap(psy_ui_CheckBox* self)
 {
 	assert(self);
 
@@ -131,13 +162,45 @@ void psy_ui_checkbox_enablewrap(psy_ui_CheckBox* self)
 	psy_ui_label_enable_wrap(&self->text);
 }
 
+void psy_ui_checkbox_data_exchange(psy_ui_CheckBox* self, psy_Property* property)
+{
+	assert(self);
+	assert(property);
+
+	self->property = property;
+	if (property) {
+		psy_ui_checkbox_on_property_changed(self, property);
+		psy_property_connect(property, self,
+			psy_ui_checkbox_on_property_changed);
+		psy_signal_connect(&self->property->before_destroyed, self,
+			psy_ui_checkbox_before_property_destroyed);
+	}
+}
+
+void psy_ui_checkbox_on_property_changed(psy_ui_CheckBox* self,
+	psy_Property* sender)
+{
+	if (psy_property_item_bool(sender)) {		
+		psy_ui_checkbox_mark(self);
+	} else {
+		psy_ui_checkbox_unmark(self);
+	}
+}
+
+void psy_ui_checkbox_before_property_destroyed(psy_ui_CheckBox* self, psy_Property* sender)
+{
+	assert(self);
+
+	self->property = NULL;
+}
+
 void psy_ui_checkbox_on_mouse_down(psy_ui_CheckBox* self, psy_ui_MouseEvent* ev)
 {	
 	assert(self);
 
 	super_vtable.on_mouse_down(psy_ui_checkbox_base(self), ev);
 	if (psy_ui_checkbox_checked(self)) {
-		psy_ui_checkbox_disablecheck(self);
+		psy_ui_checkbox_disable_check(self);
 	} else {
 		psy_ui_checkbox_check(self);
 	}

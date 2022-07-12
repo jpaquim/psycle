@@ -38,8 +38,6 @@ void languageconfig_init(LanguageConfig*, psy_Property* parent,
 void languageconfig_dispose(LanguageConfig*);
 void languageconfig_update_language(LanguageConfig*);
 
-/* Will be called if settingview was changed */
-uintptr_t languageconfig_on_changed(LanguageConfig*, psy_Property*);
 bool languageconfig_has_property(const LanguageConfig*, psy_Property*);
 
 #ifdef __cplusplus

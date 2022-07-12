@@ -32,7 +32,6 @@ typedef struct RenderView {
 	psy_AudioDriver* fileout_driver;		
 	int restore_loop_mode;
 	psy_dsp_DitherSettings restore_dither;
-	bool restore_do_dither;
 	/* references */
 	psy_AudioDriver* curr_audio_driver;
 	Workspace* workspace;

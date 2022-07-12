@@ -12,13 +12,16 @@
 /* platform */
 #include "../../detail/portable.h"
 
-/* PatternDefaultLine */
+
 /* prototypes */
 static void patterndefaultline_on_destroyed(PatternDefaultLine*);
-static void patterndefaultline_on_configure(PatternDefaultLine*,
-	PatternViewConfig*, psy_Property*);
+static void patterndefaultline_on_show_line(PatternDefaultLine*,
+	psy_Property* sender);
+static void patterndefaultline_on_update_size(PatternDefaultLine*,
+	psy_Property* sender);
 static void patterndefaultline_on_cursor_changed(PatternDefaultLine*,
 	psy_audio_Sequence* sender);
+static void patterndefaultline_update_preferred_size(PatternDefaultLine*);
 
 /* vtable */
 static psy_ui_ComponentVtable vtable;
@@ -38,16 +41,17 @@ static void vtable_init(PatternDefaultLine* self)
 
 /* implementation */
 void patterndefaultline_init(PatternDefaultLine* self, psy_ui_Component* parent,
-	TrackConfig* track_config, Workspace* workspace)
+	TrackConfig* track_config, PatternViewConfig* config, Workspace* workspace)
 {
 	psy_ui_component_init(&self->component, parent, NULL);
 	vtable_init(self);
+	self->workspace = workspace;
+	self->config = config;
 	psy_ui_component_set_style_type_select(&self->component,
 		STYLE_PV_TRACK_VIEW_SELECT);
 	psy_ui_component_set_style_type(&self->component,
 		STYLE_PV_TRACK_VIEW);
-	psy_ui_component_set_align(&self->component, psy_ui_ALIGN_TOP);
-	self->workspace = workspace;
+	psy_ui_component_set_align(&self->component, psy_ui_ALIGN_TOP);	
 	/* states */
 	patternviewstate_init(&self->pvstate_default_line,
 		&workspace->config.visual.patview,
@@ -78,9 +82,16 @@ void patterndefaultline_init(PatternDefaultLine* self, psy_ui_Component* parent,
 	psy_signal_connect(
 		&workspace->player.patterndefaults.sequence.signal_cursorchanged,
 		self, patterndefaultline_on_cursor_changed);
-	/* configuration */
-	psy_signal_connect(&workspace->config.visual.patview.signal_changed, self,
-		patterndefaultline_on_configure);	
+	patterndefaultline_update_preferred_size(self);
+	/* configuration */	
+	patternviewconfig_connect(self->config, "griddefaults",
+		self, patterndefaultline_on_show_line);
+	patternviewconfig_connect(self->config, "linenumbers",
+		self, patterndefaultline_on_update_size);
+	patternviewconfig_connect(self->config, "beatoffset", 
+		self, patterndefaultline_on_update_size);
+	patternviewconfig_connect(self->config, "displaysinglepattern",
+		self, patterndefaultline_on_update_size);
 }
 
 void patterndefaultline_on_destroyed(PatternDefaultLine* self)
@@ -89,32 +100,42 @@ void patterndefaultline_on_destroyed(PatternDefaultLine* self)
 	patternviewstate_dispose(&self->pvstate_default_line);
 }
 
-void patterndefaultline_on_configure(PatternDefaultLine* self,
-	PatternViewConfig* config, psy_Property* property)
+void patterndefaultline_on_show_line(PatternDefaultLine* self,
+	psy_Property* sender)
 {
-	if (psy_ui_component_visible(&self->component) !=
-		patternviewconfig_defaultline(config)) {
-		if (patternviewconfig_defaultline(config)) {
-			psy_ui_component_show_align(&self->component);
-		} else {
-			psy_ui_component_hide_align(&self->component);
-		}
-	}
-	if (patternviewconfig_linenumber_num_digits(config) == 0.0) {
-		psy_ui_component_hide(&self->desc.component);
+	patterndefaultline_update_preferred_size(self);
+	if (psy_property_item_bool(sender)) {
+		psy_ui_component_show_align(&self->component);
 	} else {
+		psy_ui_component_hide_align(&self->component);
+	}	
+}
+
+void patterndefaultline_on_update_size(PatternDefaultLine* self,
+	psy_Property* sender)
+{
+	patterndefaultline_update_preferred_size(self);
+}
+
+void patterndefaultline_update_preferred_size(PatternDefaultLine* self)
+{	
+	if (patternviewconfig_linenumber_num_digits(self->config) == 0.0) {
+		psy_ui_component_hide(&self->desc.component);
+	}else {
 		psy_ui_component_set_preferred_size(&self->desc.component,
 			psy_ui_size_make(
 				psy_ui_mul_values(
 					psy_ui_value_make_ew(
 						patternviewconfig_linenumber_num_digits(
-						config)),
+							self->config)),
 					self->state.track_config->flatsize,
 					psy_ui_component_textmetric(&self->component),
 					NULL),
 				psy_ui_value_make_eh(1.0)));
 		psy_ui_component_show(&self->desc.component);
 	}
+	psy_ui_component_align(&self->component);
+	psy_ui_component_invalidate(&self->component);
 }
 
 void patterndefaultline_on_cursor_changed(PatternDefaultLine* self,

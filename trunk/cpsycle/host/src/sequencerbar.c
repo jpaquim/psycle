@@ -14,15 +14,11 @@
 #include "../../detail/trace.h"
 
 /* prototypes */
-static void sequencerbar_on_show_pattern_names(SequencerBar*,
-	psy_ui_CheckBox* sender);
 static void sequencerbar_on_follow_song(SequencerBar*, psy_ui_Button* sender);
 static void sequencerbar_on_record_tweak(SequencerBar*, psy_ui_Button* sender);
 static void sequencerbar_on_record_noteoff(SequencerBar*, psy_ui_Button* sender);
 static void sequencerbar_on_multi_channel_audition(SequencerBar*,
 	psy_ui_Button* sender);
-static void sequencerbar_on_configure(SequencerBar*, GeneralConfig*,
-	psy_Property*);
 void sequencerbar_on_misc_configure(SequencerBar*, KeyboardMiscConfig*,
 	psy_Property*);
 
@@ -44,7 +40,9 @@ void sequencerbar_init(SequencerBar* self, psy_ui_Component* parent,
 	psy_ui_checkbox_init_text(&self->follow_song, &self->component,	
 		"seqview.follow-song");	
 	psy_ui_checkbox_init_text(&self->shownames, &self->component,	
-		"seqview.show-pattern-names");			
+		"seqview.show-pattern-names");
+	psy_ui_checkbox_data_exchange(&self->shownames, generalconfig_property(
+		&self->workspace->config.general, "showpatternnames"));
 	psy_ui_checkbox_init_text(&self->recordnoteoff, &self->component,
 		"seqview.record-noteoff");	
 	psy_ui_checkbox_init_text(&self->recordtweak, &self->component,
@@ -55,6 +53,8 @@ void sequencerbar_init(SequencerBar* self, psy_ui_Component* parent,
 		"seqview.allow-notes-to_effect");						
 	psy_ui_button_init_text(&self->togglestepseq, &self->component,
 		"seqview.showstepsequencer");
+	psy_ui_button_data_exchange(&self->togglestepseq, generalconfig_property(
+		&self->workspace->config.general, "showstepsequencer"));
 	psy_ui_button_set_icon(&self->togglestepseq, psy_ui_ICON_MORE);
 	psy_ui_button_settextalignment(&self->togglestepseq,
 		(psy_ui_Alignment)(psy_ui_ALIGNMENT_LEFT | psy_ui_ALIGNMENT_CENTER_VERTICAL));
@@ -62,6 +62,8 @@ void sequencerbar_init(SequencerBar* self, psy_ui_Component* parent,
 		psy_ui_ALIGN_BOTTOM);	
 	psy_ui_button_init_text(&self->toggleseqedit, &self->component,
 		"seqview.showseqeditor");
+	psy_ui_button_data_exchange(&self->toggleseqedit, generalconfig_property(
+		&self->workspace->config.general, "showsequenceedit"));
 	psy_ui_component_set_align(&self->toggleseqedit.component,
 		psy_ui_ALIGN_BOTTOM);
 	psy_ui_button_settextalignment(&self->toggleseqedit,
@@ -70,18 +72,13 @@ void sequencerbar_init(SequencerBar* self, psy_ui_Component* parent,
 	psy_ui_margin_init_em(&margin, 0.0, 0.0, 1.0, 0.0);
 	psy_ui_component_set_margin(&self->allownotestoeffect.component, margin);
 	psy_signal_connect(&self->follow_song.signal_clicked, self,
-		sequencerbar_on_follow_song);
-	psy_signal_connect(&self->shownames.signal_clicked, self,
-		sequencerbar_on_show_pattern_names);
+		sequencerbar_on_follow_song);	
 	psy_signal_connect(&self->recordnoteoff.signal_clicked, self,
 		sequencerbar_on_record_noteoff);
 	psy_signal_connect(&self->recordtweak.signal_clicked, self,
 		sequencerbar_on_record_tweak);
 	psy_signal_connect(&self->multichannelaudition.signal_clicked, self,
 		sequencerbar_on_multi_channel_audition);
-	psy_signal_connect(
-		&psycleconfig_general(workspace_conf(workspace))->signal_changed,
-		self, sequencerbar_on_configure);
 	psy_signal_connect(
 		&psycleconfig_misc(workspace_conf(workspace))->signal_changed,
 		self, sequencerbar_on_misc_configure);
@@ -93,17 +90,6 @@ void sequencerbar_on_follow_song(SequencerBar* self, psy_ui_Button* sender)
 		keyboardmiscconfig_stop_follow_song(&self->workspace->config.misc);		
 	} else {
 		keyboardmiscconfig_follow_song(&self->workspace->config.misc);		
-	}
-}
-
-void sequencerbar_on_show_pattern_names(SequencerBar* self, psy_ui_CheckBox* sender)
-{
-	if (psy_ui_checkbox_checked(sender) != 0) {
-		generalconfig_show_pattern_names(psycleconfig_general(
-			workspace_conf(self->workspace)));		
-	} else {
-		generalconfig_show_pattern_ids(psycleconfig_general(
-			workspace_conf(self->workspace)));		
 	}
 }
 
@@ -131,22 +117,12 @@ void sequencerbar_on_multi_channel_audition(SequencerBar* self, psy_ui_Button* s
 		!workspace_player(self->workspace)->multichannelaudition;
 }
 
-void sequencerbar_on_configure(SequencerBar* self, GeneralConfig* config,
-	psy_Property* property)
-{	
-	if (generalconfig_showing_pattern_names(config)) {
-		psy_ui_checkbox_check(&self->shownames);
-	} else {
-		psy_ui_checkbox_disablecheck(&self->shownames);
-	}	
-}
-
 void sequencerbar_on_misc_configure(SequencerBar* self, KeyboardMiscConfig* config,
 	psy_Property* property)
 {
 	if (keyboardmiscconfig_following_song(config)) {
 		psy_ui_checkbox_check(&self->follow_song);
 	} else {
-		psy_ui_checkbox_disablecheck(&self->follow_song);
+		psy_ui_checkbox_disable_check(&self->follow_song);
 	}
 }

@@ -160,8 +160,7 @@ void psy_audio_player_init(psy_audio_Player* self, psy_audio_Song* song,
 	}	
 	self->recordingnotes = FALSE;
 	self->recordnoteoff = FALSE;
-	self->multichannelaudition = FALSE;
-	self->dodither = FALSE;
+	self->multichannelaudition = FALSE;	
 	self->octave = 4;
 	self->resyncplayposinsamples = 0;
 	self->resyncplayposinbeats = 0.0;
@@ -483,7 +482,7 @@ void psy_audio_player_fill_driver(psy_audio_Player* self, psy_dsp_amp_t* buffer,
 		psy_audio_MASTER_INDEX);
 	if (masteroutput) {		
 		psy_audio_buffer_scale(masteroutput, PSY_DSP_AMP_RANGE_NATIVE, amount);
-		if (self->dodither) {
+		if (self->dither.settings.enabled) {
 			psy_audio_player_ditherbuffer(self, masteroutput, amount);			
 		}		
 		dsp.interleave(buffer, masteroutput->samples[0],
@@ -716,28 +715,33 @@ VUMeterMode psy_audio_player_vumetermode(psy_audio_Player* self)
 	return self->vumode;
 }
 
-void psy_audio_player_enabledither(psy_audio_Player* self)
+void psy_audio_player_enable_dither(psy_audio_Player* self)
 {
 	assert(self);
 
-	self->dodither = TRUE;	
+	self->dither.settings.enabled = TRUE;	
 }
 
 void psy_audio_player_disabledither(psy_audio_Player* self)
 {
 	assert(self);
 
-	self->dodither = FALSE;
+	self->dither.settings.enabled = FALSE;
 }
 
-void psy_audio_player_setdither(psy_audio_Player* self, uintptr_t depth,
-	psy_dsp_DitherPdf pdf, psy_dsp_DitherNoiseShape noiseshaping)
+void psy_audio_player_configure_dither(psy_audio_Player* self,
+	psy_dsp_DitherSettings settings)
 {
 	assert(self);
 
-	psy_dsp_dither_setbitdepth(&self->dither, depth);
-	psy_dsp_dither_setpdf(&self->dither, pdf);
-	psy_dsp_dither_setnoiseshaping(&self->dither, noiseshaping);
+	psy_dsp_dither_configure(&self->dither, settings);	
+}
+
+psy_dsp_DitherSettings psy_audio_player_dither_configuration(const psy_audio_Player* self)
+{
+	assert(self);
+
+	return self->dither.settings;	
 }
 
 void psy_audio_player_start(psy_audio_Player* self)
@@ -975,7 +979,7 @@ psy_EventDriver* psy_audio_player_loadeventdriver(psy_audio_Player* self, const 
 	return psy_audio_eventdrivers_load(&self->eventdrivers, path);
 }
 
-void psy_audio_player_restarteventdriver(psy_audio_Player* self, intptr_t id,
+void psy_audio_player_restart_event_driver(psy_audio_Player* self, intptr_t id,
 	psy_Property* configuration)
 {
 	assert(self);
@@ -1181,4 +1185,14 @@ void psy_audio_player_disable_audio(psy_audio_Player* self)
 	if (self->driver) {
 		psy_audiodriver_close(self->driver);
 	}
+}
+
+bool psy_audio_player_enabled(const psy_audio_Player* self)
+{
+	assert(self);
+
+	if (self->driver) {
+		return psy_audiodriver_opened(self->driver);
+	}
+	return FALSE;
 }

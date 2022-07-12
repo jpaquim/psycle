@@ -7,9 +7,20 @@
 
 
 #include "keyboardmiscconfig.h"
+/* host */
+#include "resources/resource.h"
+/* audio */
+#include <pattern.h>
 
-static void keyboardmiscconfig_makekeyboardandmisc(KeyboardMiscConfig*, psy_Property*);
 
+/* prototypes */
+static void keyboardmiscconfig_make(KeyboardMiscConfig*, psy_Property*);
+static void keyboardmiscconfig_on_follow_song(KeyboardMiscConfig*,
+	psy_Property* sender);
+static void keyboardmiscconfig_on_pattern_default_lines(KeyboardMiscConfig*,
+	psy_Property* sender);
+
+/* implementation */
 void keyboardmiscconfig_init(KeyboardMiscConfig* self, psy_Property* parent)
 {
 	assert(self && parent);
@@ -17,7 +28,7 @@ void keyboardmiscconfig_init(KeyboardMiscConfig* self, psy_Property* parent)
 	self->parent = parent;
 	self->cursorstep = 1;
 	self->follow_song = FALSE;
-	keyboardmiscconfig_makekeyboardandmisc(self, parent);
+	keyboardmiscconfig_make(self, parent);
 	psy_signal_init(&self->signal_changed);
 }
 
@@ -28,85 +39,89 @@ void keyboardmiscconfig_dispose(KeyboardMiscConfig* self)
 	psy_signal_dispose(&self->signal_changed);
 }
 
-void keyboardmiscconfig_makekeyboardandmisc(KeyboardMiscConfig* self, psy_Property* parent)
+void keyboardmiscconfig_make(KeyboardMiscConfig* self, psy_Property* parent)
 {
 	psy_Property* choice;
 
 	assert(self);
 
-	self->keyboard = psy_property_settext(
+	self->keyboard = psy_property_set_text(
 		psy_property_append_section(parent, "keyboard"),
 		"settingsview.kbd.kbd-misc");
-	psy_property_settext(
+	psy_property_set_icon(self->keyboard, IDB_KEYPAD_LIGHT,
+		IDB_KEYPAD_DARK);
+	psy_property_set_text(
 		psy_property_append_bool(self->keyboard,
 			"playstartwithrctrl", TRUE),
 		"settingsview.kbd.ctrl-play");
-	psy_property_settext(
+	psy_property_set_text(
 		psy_property_append_bool(self->keyboard,
 			"ft2home", TRUE),
 		"settingsview.kbd.ft2-home");
-	psy_property_settext(
+	psy_property_set_text(
 		psy_property_append_bool(self->keyboard,
 			"ft2delete", TRUE),
 		"settingsview.kbd.ft2-delete");
-	psy_property_settext(
+	psy_property_set_text(
 		psy_property_append_bool(self->keyboard,
 			"effcursoralwayssdown", FALSE),
 		"settingsview.kbd.cursoralwayssdown");
-	psy_property_settext(
+	psy_property_set_text(
 		psy_property_append_bool(self->keyboard,
 			"recordtweaksastws", 0),
 		"settingsview.kbd.record-tws");
-	psy_property_settext(
+	psy_property_set_text(
 		psy_property_append_bool(self->keyboard,
 			"advancelineonrecordtweak", 0),
 		"settingsview.kbd.advance-line-on-record");
-	psy_property_settext(
+	psy_property_set_text(
 		psy_property_append_bool(self->keyboard,
 			"movecursoronestep", 0),
 		"settingsview.kbd.force-patstep1");
-	choice = psy_property_settext(
+	choice = psy_property_set_text(
 		psy_property_append_choice(self->keyboard,
 			"pgupdowntype", 0),
 		"settingsview.kbd.pgupdowntype");
-	psy_property_settext(
+	psy_property_set_text(
 		psy_property_append_int(choice, "beat",
 			0, 0, 0),
 		"settingsview.kbd.pgupdowntype-one-beat");
-	psy_property_settext(
+	psy_property_set_text(
 		psy_property_append_int(choice, "bar",
 			0, 0, 0),
 		"settingsview.kbd.pgupdowntype-one-bar");
-	psy_property_settext(
+	psy_property_set_text(
 		psy_property_append_int(choice, "lines",
 			0, 0, 0),
 		"settingsview.kbd.pgupdowntype-lines");
-	psy_property_settext(
+	psy_property_set_text(
 		psy_property_append_int(self->keyboard, "pgupdownstep",
 			4, 0, 32),
 		"settingsview.kbd.pgupdowntype-step-lines");
-	self->keyboard_misc = psy_property_settext(
+	self->keyboard_misc = psy_property_set_text(
 		psy_property_append_section(self->keyboard, "misc"),
 		"settingsview.kbd.misc");
-	psy_property_settext(
+	psy_property_set_text(
 		psy_property_append_bool(self->keyboard_misc,
 			"savereminder", TRUE),
 		"settingsview.kbd.savereminder");
-	psy_property_set_id(psy_property_settext(
+	psy_property_connect(psy_property_set_id(psy_property_set_text(
 		psy_property_append_int(self->keyboard_misc,
 			"numdefaultlines", 64, 1, 1024),
 		"settingsview.kbd.numdefaultlines"),
-		PROPERTY_ID_DEFAULTLINES);
-	psy_property_settext(
+		PROPERTY_ID_DEFAULTLINES),
+		self, keyboardmiscconfig_on_pattern_default_lines);
+	psy_property_set_text(
 		psy_property_append_bool(self->keyboard_misc,
 			"allowmultiinstances", FALSE),
 		"settingsview.kbd.allowmultiinstances");
-	psy_property_settext(
+	psy_property_connect(psy_property_set_text(
 		psy_property_append_bool(self->keyboard_misc,
 			"followsong", self->follow_song),
-		"settingsview.kbd.followsong");
+		"settingsview.kbd.followsong"),
+		self, keyboardmiscconfig_on_follow_song);
 #if PSYCLE_USE_TK != PSYCLE_TK_X11
-	psy_property_set_id(psy_property_settext(
+	psy_property_set_id(psy_property_set_text(
 		psy_property_append_bool(self->keyboard_misc,
 			"ft2fileexplorer", FALSE),
 		"settingsview.kbd.ft2-explorer"),
@@ -285,6 +300,12 @@ bool keyboardmiscconfig_following_song(const KeyboardMiscConfig* self)
 	return self->follow_song;
 }
 
+void keyboardmiscconfig_on_follow_song(KeyboardMiscConfig* self,
+	psy_Property* sender)
+{
+	keyboardmiscconfig_follow_song(self);
+}
+
 void keyboardmiscconfig_follow_song(KeyboardMiscConfig* self)
 {
 	psy_Property* property;
@@ -294,7 +315,7 @@ void keyboardmiscconfig_follow_song(KeyboardMiscConfig* self)
 	property = psy_property_at(self->keyboard_misc, "followsong",
 		PSY_PROPERTY_TYPE_NONE);
 	if (property) {
-		psy_property_setitem_bool(property, TRUE);
+		psy_property_set_item_bool(property, TRUE);
 		self->follow_song = TRUE;
 		psy_signal_emit(&self->signal_changed, self, 1, property);
 	}
@@ -309,36 +330,40 @@ void keyboardmiscconfig_stop_follow_song(KeyboardMiscConfig* self)
 	property = psy_property_at(self->keyboard_misc, "followsong",
 		PSY_PROPERTY_TYPE_NONE);
 	if (property) {
-		psy_property_setitem_bool(property, FALSE);
+		psy_property_set_item_bool(property, FALSE);
 		self->follow_song = FALSE;
 		psy_signal_emit(&self->signal_changed, self, 1, property);
 	}
 }
 
-
-/* events */
-uintptr_t keyboardmiscconfig_onchanged(KeyboardMiscConfig* self, psy_Property*
-	property)
+void keyboardmiscconfig_on_pattern_default_lines(KeyboardMiscConfig* self,
+	psy_Property* sender)
 {
-	uintptr_t rebuild_level;
+	if (psy_property_item_int(sender) > 0) {
+		psy_audio_pattern_setdefaultlines((uintptr_t)
+			psy_property_item_int(sender));
+	}	
+	psy_signal_emit(&self->signal_changed, self, 1, sender);	
+}
+
+bool keyboardmiscconfig_connect(KeyboardMiscConfig* self, const char* key, void* context,
+	void* fp)
+{
+	psy_Property* p;
 
 	assert(self);
 
-	rebuild_level = psy_INDEX_INVALID;
-	self->follow_song = psy_property_at_bool(self->keyboard_misc, "followsong",
-		FALSE);
-	if ((psy_property_type(property) == PSY_PROPERTY_TYPE_CHOICE) &&
-			(psy_property_hint(property) == PSY_PROPERTY_HINT_LIST)) {
-		rebuild_level = 1;
+	p = keyboardmiscconfig_property(self, key);
+	if (p) {
+		psy_property_connect(p, context, fp);
+		return TRUE;
 	}
-	psy_signal_emit(&self->signal_changed, self, 1, property);
-	return rebuild_level;
+	return FALSE;
 }
 
-bool keyboardmiscconfig_hasproperty(const KeyboardMiscConfig* self,
-	psy_Property* property)
+psy_Property* keyboardmiscconfig_property(KeyboardMiscConfig* self, const char* key)
 {
-	assert(self && self->keyboard);
+	assert(self);
 
-	return psy_property_in_section(property, self->keyboard);
+	return psy_property_at(self->keyboard_misc, key, PSY_PROPERTY_TYPE_NONE);
 }

@@ -80,8 +80,6 @@ void machineparamconfig_set_param_title_background_colour(MachineParamConfig*,
 void machineparamconfig_set_param_machinedial_bmp(MachineParamConfig*,
 	const char*);
 
-uintptr_t machineparamconfig_onchanged(MachineParamConfig*, psy_Property*);
-
 #ifdef __cplusplus
 }
 #endif

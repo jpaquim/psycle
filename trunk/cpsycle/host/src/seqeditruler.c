@@ -156,13 +156,13 @@ void seqeditruler_drawruler(SeqEditRuler* self, psy_ui_Graphics* g,
 
 		cpx = seqeditstate_beattopx(self->state, currbeat);
 		if (((intptr_t)(currbeat / step) % 8) == 0) {
-			psy_ui_settextcolour(g, linebeat4colour);
+			psy_ui_set_text_colour(g, linebeat4colour);
 			psy_ui_setcolour(g, linebeat4colour);
 		} else if (((intptr_t)(currbeat /step) % 4) == 0) {
-			psy_ui_settextcolour(g, linebeatcolour);
+			psy_ui_set_text_colour(g, linebeatcolour);
 			psy_ui_setcolour(g, linebeatcolour);
 		} else {
-			psy_ui_settextcolour(g, linecolour);
+			psy_ui_set_text_colour(g, linecolour);
 			psy_ui_setcolour(g, linecolour);
 		}
 		psy_ui_drawline(g, psy_ui_realpoint_make(cpx, baseline),
@@ -177,10 +177,10 @@ void seqeditruler_drawruler(SeqEditRuler* self, psy_ui_Graphics* g,
 
 				if (cursor == currbeat &&
 						self->state->cursorposition - cursor < step / 2) {
-					psy_ui_settextcolour(g, linebeat4colour);
+					psy_ui_set_text_colour(g, linebeat4colour);
 				} else if (cursor + step == currbeat &&
 					self->state->cursorposition - cursor > step / 2) {
-					psy_ui_settextcolour(g, linebeat4colour);
+					psy_ui_set_text_colour(g, linebeat4colour);
 				}
 				psy_ui_setcolour(g, linebeat4colour);
 				start = cursor * self->state->pxperbeat;

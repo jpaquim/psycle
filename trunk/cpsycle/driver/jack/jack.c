@@ -36,6 +36,7 @@ typedef struct {
 static void driver_deallocate(psy_AudioDriver*);
 static int driver_init(psy_AudioDriver*);
 static int driver_open(psy_AudioDriver*);
+static bool driver_opened(const psy_AudioDriver*);
 static int driver_close(psy_AudioDriver*);
 static int driver_dispose(psy_AudioDriver*);
 static void driver_configure(psy_AudioDriver*, psy_Property*);
@@ -83,6 +84,7 @@ static void vtable_init(void)
 {
 	if (!vtable_initialized) {
 		vtable.open = driver_open;
+		vtable.opened = driver_opened;
 		vtable.deallocate = driver_deallocate;
 		vtable.close = driver_close;
 		vtable.dispose = driver_dispose;
@@ -283,6 +285,14 @@ int driver_open(psy_AudioDriver* driver)
 	printf("jack enabled\n");
 	self->running_ = TRUE;	
 	return TRUE;
+}
+
+bool driver_opened(const psy_AudioDriver* driver)
+{
+	JackDriver* self;
+
+	self = (JackDriver*)driver;
+	return (self->running_ != FALSE);
 }
 
 int process(jack_nframes_t nframes, void *arg)

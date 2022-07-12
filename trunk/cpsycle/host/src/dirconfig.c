@@ -1,36 +1,40 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
 
 
 #include "dirconfig.h"
+/* host */
+#include "resources/resource.h"
+/* container */
+#include <properties.h>
 /* file */
 #include <dir.h>
 /* platform */
-#include "../../detail/cpu.h"
 #include "../../detail/portable.h"
 
+
+/* prototypes */
 static void dirconfig_make(DirConfig*, psy_Property* parent);
-static void dirconfig_makedefaultuserpresets(DirConfig*);
-static void dirconfig_append(DirConfig*, const char* key,
+static void dirconfig_make_default_user_presets(DirConfig*);
+static void dirconfig_append_dir_edit(DirConfig*, const char* key,
 	const char* label, const char* defaultdir);
 
+/* implementation */
 void dirconfig_init(DirConfig* self, psy_Property* parent)
 {
-	assert(self && parent);
+	assert(self);
+	assert(parent);
 	
-	dirconfig_make(self, parent);
-	psy_signal_init(&self->signal_changed);
+	dirconfig_make(self, parent);	
 }
 
 void dirconfig_dispose(DirConfig* self)
 {
-	assert(self);
-
-	psy_signal_dispose(&self->signal_changed);
+	assert(self);	
 }
 
 void dirconfig_make(DirConfig* self, psy_Property* parent)
@@ -42,52 +46,63 @@ void dirconfig_make(DirConfig* self, psy_Property* parent)
 
 	assert(self);
 	
-	self->directories = psy_property_settext(
+	self->directories = psy_property_set_text(
 		psy_property_append_section(parent, "directories"),
 		"settingsview.dirs.dirs");
+	psy_property_set_icon(self->directories, IDB_FOLDER_LIGHT,
+		IDB_FOLDER_DARK);
 #if (DIVERSALIS__CPU__SIZEOF_POINTER == 4)	
-	psy_property_sethint(
-		psy_property_settext(
+	psy_property_hide(
+		psy_property_set_text(
 			psy_property_append_str(self->directories,
-				"app", PSYCLE_APP_DIR), "App directory"),
+				"app", PSYCLE_APP_DIR), "App directory"));
 #else
-	psy_property_sethint(
-		psy_property_settext(
+	psy_property_hide(
+		psy_property_set_text(
 			psy_property_append_str(self->directories,
-				"app", PSYCLE_APP64_DIR), "App directory"),
-#endif
-		PSY_PROPERTY_HINT_HIDE);
+				"app", PSYCLE_APP64_DIR), "App directory"));
+#endif	
 #if defined(DIVERSALIS__OS__MICROSOFT)		
-	dirconfig_append(self, "songs", "settingsview.dirs.song",
+	dirconfig_append_dir_edit(self,
+		"songs", "settingsview.dirs.song",
 		PSYCLE_SONGS_DEFAULT_DIR);
 #else
 	psy_snprintf(path, 4096, "%s", psy_dir_home());
 	printf("path %s\n", path);
 	/* dirconfig_makedirectory(self, "songs", "settingsview.dirs.song",
 	   path); */
-	dirconfig_append(self, "songs", "settingsview.dirs.song",
+	dirconfig_append_dir_edit(self,
+		"songs", "settingsview.dirs.song",
 		PSYCLE_SONGS_DEFAULT_DIR);
 #endif		
-	dirconfig_append(self, "samples", "settingsview.dirs.samples",
+	dirconfig_append_dir_edit(self,
+		"samples", "settingsview.dirs.samples",
 		PSYCLE_SAMPLES_DEFAULT_DIR);
-	dirconfig_append(self, "plugins32", "settingsview.dirs.plugin32",
+	dirconfig_append_dir_edit(self,
+		"plugins32", "settingsview.dirs.plugin32",
 		PSYCLE_PLUGINS32_DEFAULT_DIR);
-	dirconfig_append(self, "plugins64", "settingsview.dirs.plugin64",
+	dirconfig_append_dir_edit(self,
+		"plugins64", "settingsview.dirs.plugin64",
 		PSYCLE_PLUGINS64_DEFAULT_DIR);
-	dirconfig_append(self, "luascripts", "settingsview.dirs.lua",
+	dirconfig_append_dir_edit(self,
+		"luascripts", "settingsview.dirs.lua",
 		PSYCLE_LUASCRIPTS_DEFAULT_DIR);
-	dirconfig_append(self, "vsts32", "settingsview.dirs.vst32",
+	dirconfig_append_dir_edit(self,
+		"vsts32", "settingsview.dirs.vst32",
 		PSYCLE_VSTS32_DEFAULT_DIR);
-	dirconfig_append(self, "vsts64", "settingsview.dirs.vst64",
+	dirconfig_append_dir_edit(self,
+		"vsts64", "settingsview.dirs.vst64",
 		PSYCLE_VSTS64_DEFAULT_DIR);
-	dirconfig_append(self, "ladspas", "settingsview.dirs.ladspa",
+	dirconfig_append_dir_edit(self,
+		"ladspas", "settingsview.dirs.ladspa",
 		PSYCLE_LADSPAS_DEFAULT_DIR);
-	dirconfig_append(self, "skin", "settingsview.dirs.skin",
+	dirconfig_append_dir_edit(self,
+		"skin", "settingsview.dirs.skin",
 		"C:\\Programme\\Psycle\\Skins");
-	dirconfig_makedefaultuserpresets(self);
+	dirconfig_make_default_user_presets(self);
 }
 
-void dirconfig_makedefaultuserpresets(DirConfig* self)
+void dirconfig_make_default_user_presets(DirConfig* self)
 {
 	psy_Path defaultuserpresetpath;
 
@@ -95,21 +110,20 @@ void dirconfig_makedefaultuserpresets(DirConfig* self)
 
 	psy_path_init(&defaultuserpresetpath, psy_dir_home());
 	psy_path_set_name(&defaultuserpresetpath, "Presets");
-	dirconfig_append(self, "presets", "User Presets directory",
+	dirconfig_append_dir_edit(self, 
+		"presets", "User Presets directory",
 		psy_path_full(&defaultuserpresetpath));
 	psy_path_dispose(&defaultuserpresetpath);
 }
 
-void dirconfig_append(DirConfig* self, const char* key,
+void dirconfig_append_dir_edit(DirConfig* self, const char* key,
 	const char* label, const char* defaultdir)
 {
 	assert(self);
 
-	psy_property_sethint(
-		psy_property_settext(
-			psy_property_append_str(self->directories, key, defaultdir),
-			label),
-		PSY_PROPERTY_HINT_EDITDIR);
+	psy_property_set_hint(psy_property_set_text(
+		psy_property_append_str(self->directories, key, defaultdir),
+		label), PSY_PROPERTY_HINT_EDITDIR);
 }
 /* properties */
 const char* dirconfig_app(const DirConfig* self)
@@ -152,7 +166,7 @@ const char* dirconfig_plugins64(const DirConfig* self)
 		PSYCLE_PLUGINS32_DEFAULT_DIR);
 }
 
-const char* dirconfig_pluginscurrplatform(const DirConfig* self)
+const char* dirconfig_plugins_curr_platform(const DirConfig* self)
 {
 	assert(self);
 
@@ -220,26 +234,10 @@ const char* dirconfig_config_dir(const DirConfig* self)
 	return psy_dir_config();
 }
 
-const char* dirconfig_userpresets(const DirConfig* self)
+const char* dirconfig_user_presets(const DirConfig* self)
 {
 	assert(self);
 
 	return psy_property_at_str(self->directories, "presets",
 		PSYCLE_USERPRESETS_DEFAULT_DIR);
-}
-/* events */
-uintptr_t dirconfig_onchanged(DirConfig* self, psy_Property*
-	property)
-{
-	assert(self);
-
-	psy_signal_emit(&self->signal_changed, self, 1, property);
-	return psy_INDEX_INVALID;
-}
-
-bool dirconfig_hasproperty(const DirConfig* self, psy_Property* property)
-{
-	assert(self && self->directories);
-
-	return psy_property_in_section(property, self->directories);
 }

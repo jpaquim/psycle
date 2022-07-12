@@ -72,12 +72,29 @@
 #define IDB_FLOAT_DARK                  194
 #define IDB_BITMAP1                     195
 #define IDB_FLOAT_LIGHT                 195
+#define IDB_FOLDER_DARK                 196
+#define IDB_FOLDER_LIGHT                197
+#define IDB_TRAIL_SIGN_DARK             198
+#define IDB_TRAIL_SIGN_LIGHT            199
+#define IDB_IMAGE_DARK                  201
+#define IDB_IMAGE_LIGHT                 202
+#define IDB_KEYPAD_DARK                 203
+#define IDB_KEYPAD_LIGHT                204
+#define IDB_METRONOME_DARK              205
+#define IDB_METRONOME_LIGHT             206
+#define IDB_TOGGLE_DARK                 207
+#define IDB_TOGGLE_LIGHT                208
+#define IDB_OPTIONS_DARK                209
+#define IDB_OPTIONS_LIGHT               210
+#define IDB_STEP_DARK                   211
+#define IDB_BITMAP3                     212
+#define IDB_STEP_LIGHT                  212
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        196
+#define _APS_NEXT_RESOURCE_VALUE        213
 #define _APS_NEXT_COMMAND_VALUE         40001
 #define _APS_NEXT_CONTROL_VALUE         1000
 #define _APS_NEXT_SYMED_VALUE           101

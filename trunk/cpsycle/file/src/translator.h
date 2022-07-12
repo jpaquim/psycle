@@ -39,14 +39,14 @@ typedef struct psy_Translator {
 	/* signals */
 	psy_Signal signal_languagechanged;
 	/* internal */
-	psy_Table container;
+	psy_Dictionary dictionary;
 	char* testid;
 } psy_Translator;
 
 void psy_translator_init(psy_Translator*);
 void psy_translator_dispose(psy_Translator*);
 /* sets a default dictionary */
-void psy_translator_setdefault(psy_Translator*, const psy_Property*);
+void psy_translator_set_default(psy_Translator*, const psy_Dictionary*);
 /* reset to default (english) */
 void psy_translator_reset(psy_Translator*);
 /*
@@ -66,7 +66,7 @@ bool psy_translator_test(const psy_Translator*, const char* path, char* id);
 **    returns: load (not found in help, return key without section prefix)
 */
 const char* psy_translator_translate(psy_Translator*, const char* key);
-const char* psy_translator_langid(const psy_Translator*);
+const char* psy_translator_lang_id(const psy_Translator*);
 
 #ifdef __cplusplus
 }

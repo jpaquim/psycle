@@ -49,7 +49,9 @@ typedef struct psy_ui_ComboBox {
     psy_ui_Button more;    
     psy_ui_Button expand;
     psy_ui_Label textfield;        
-    psy_Table itemdata;   
+    psy_Table itemdata;
+    /* references */
+    psy_Property* property;
 } psy_ui_ComboBox;
 
 void psy_ui_combobox_init(psy_ui_ComboBox*, psy_ui_Component* parent);
@@ -57,6 +59,7 @@ void psy_ui_combobox_init(psy_ui_ComboBox*, psy_ui_Component* parent);
 psy_ui_ComboBox* psy_ui_combobox_alloc(void);
 psy_ui_ComboBox* psy_ui_combobox_allocinit(psy_ui_Component* parent);
 
+void psy_ui_combobox_data_exchange(psy_ui_ComboBox*, psy_Property*);
 intptr_t psy_ui_combobox_add_text(psy_ui_ComboBox*, const char* text);
 void psy_ui_combobox_clear(psy_ui_ComboBox*);
 void psy_ui_combobox_select(psy_ui_ComboBox*, intptr_t index);

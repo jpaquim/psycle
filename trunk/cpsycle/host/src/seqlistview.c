@@ -147,7 +147,7 @@ void seqviewtrack_on_draw(SeqViewTrack* self, psy_ui_Graphics* g)
 		lineheightpx);
 	startrow = (uintptr_t)floor(psy_max(0, (clip.top / lineheightpx)));
 	endrow = (uintptr_t)(floor(clip.bottom / lineheightpx + 0.5));		
-	psy_ui_settextcolour(g, psy_ui_style(STYLE_SEQLISTVIEW_ITEM)->colour);
+	psy_ui_set_text_colour(g, psy_ui_style(STYLE_SEQLISTVIEW_ITEM)->colour);
 	psy_ui_realpoint_init_all(&cp, 0.0, lineheightpx * startrow);
 	p = psy_list_at(self->track->nodes, startrow);
 	editposition = psy_audio_sequenceselection_first(
@@ -247,9 +247,9 @@ void seqviewtrack_draw_entry(SeqViewTrack* self, psy_ui_Graphics* g,
 		} else {
 			psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 		}
-		psy_ui_settextcolour(g, psy_ui_style(STYLE_SEQLISTVIEW_ITEM_SELECT)->colour);
+		psy_ui_set_text_colour(g, psy_ui_style(STYLE_SEQLISTVIEW_ITEM_SELECT)->colour);
 	} else {
-		psy_ui_settextcolour(g, psy_ui_style_const(STYLE_SEQLISTVIEW)->colour);
+		psy_ui_set_text_colour(g, psy_ui_style_const(STYLE_SEQLISTVIEW)->colour);
 	}
 	if (!bg.mode.transparent && !drawcol) {
 		psy_ui_drawsolidrectangle(g,
@@ -271,10 +271,10 @@ void seqviewtrack_draw_entry(SeqViewTrack* self, psy_ui_Graphics* g,
 				&self->component), NULL);		
 		col = (uintptr_t)(pos / self->state->colwidth + 0.5);
 		col = psy_min(col, strlen(text));
-		psy_ui_settextcolour(g, psy_ui_style_const(STYLE_SEQ_PROGRESS)->colour);
+		psy_ui_set_text_colour(g, psy_ui_style_const(STYLE_SEQ_PROGRESS)->colour);
 		seqviewtrack_textout_digit(self, g, text, col, cp,
 			(drawcol) ? self->state->col : psy_INDEX_INVALID);
-		psy_ui_settextcolour(g, psy_ui_style_const(STYLE_SEQLISTVIEW)->colour);
+		psy_ui_set_text_colour(g, psy_ui_style_const(STYLE_SEQLISTVIEW)->colour);
 		seqviewtrack_textout_digit(self, g, text + col, col, 
 			psy_ui_realpoint_make(col * self->state->colwidth, cp.y),
 			(drawcol) ? self->state->col : psy_INDEX_INVALID);
@@ -295,7 +295,7 @@ void seqviewtrack_textout_digit(SeqViewTrack* self,
 	numchars = psy_strlen(str);
 	cp = pt;	
 	if (cursorcol != psy_INDEX_INVALID) {
-		psy_ui_settextcolour(g,
+		psy_ui_set_text_colour(g,
 			psy_ui_style(STYLE_SEQLISTVIEW_ITEM)->colour);
 	}
 	for (digit = 0; digit < numchars; ++digit) {
@@ -304,15 +304,15 @@ void seqviewtrack_textout_digit(SeqViewTrack* self,
 		digitstr[0] = str[digit];
 		digitstr[1] = '\n';
 		if (digit == cursorcol) {			
-			psy_ui_setbackgroundcolour(g,
+			psy_ui_set_background_colour(g,
 				psy_ui_style(STYLE_SEQLISTVIEW_ITEM_SELECT)->background.colour);			
-			psy_ui_settextcolour(g,
+			psy_ui_set_text_colour(g,
 				psy_ui_style(STYLE_SEQLISTVIEW_ITEM_SELECT)->colour);
 			psy_ui_textoutrectangle(g,				
 				cp, psy_ui_ETO_OPAQUE | psy_ui_ETO_CLIPPED,
 				psy_ui_realrectangle_make(cp, self->state->digitsize),
 				digitstr, 1);
-			psy_ui_settextcolour(g,
+			psy_ui_set_text_colour(g,
 				psy_ui_style(STYLE_SEQLISTVIEW_ITEM)->colour);
 		} else {			
 			psy_ui_textout(g, cp, digitstr, 1);
@@ -378,7 +378,7 @@ void seqviewtrack_on_mouse_down(SeqViewTrack* self, psy_ui_MouseEvent* ev)
 			self->state->col = psy_min(self->state->col, COLMAX - 1);
 		}
 		if (order != psy_INDEX_INVALID) {
-			if (psy_ui_mouseevent_ctrlkey(ev)) {
+			if (psy_ui_mouseevent_ctrl_key(ev)) {
 				if (!psy_audio_sequenceselection_is_selected(
 						&sequence->sequenceselection,
 						self->state->cmd_orderindex)) {

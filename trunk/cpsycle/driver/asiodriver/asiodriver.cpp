@@ -1,5 +1,7 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
@@ -1372,6 +1374,7 @@ typedef struct {
 
 static int driver_init(psy_AudioDriver*);
 static int driver_open(psy_AudioDriver*);
+static bool driver_opened(const psy_AudioDriver*);
 static int driver_close(psy_AudioDriver*);
 static int driver_dispose(psy_AudioDriver*);
 static void driver_configure(psy_AudioDriver*, const psy_Property*);
@@ -1399,6 +1402,7 @@ static void vtable_init(void)
 {
 	if (!vtable_initialized) {
 		vtable.open = driver_open;
+		vtable.opened = driver_opened;
 		vtable.deallocate = driver_deallocate;
 		vtable.open = driver_open;
 		vtable.close = driver_close;
@@ -1494,12 +1498,11 @@ void init_properties(psy_AudioDriver* driver)
 	std::vector<std::string> playbackports;
 
 	psy_snprintf(key, 256, "asio-guid-%d", PSY_AUDIODRIVER_ASIO_GUID);
-	self->configuration = psy_property_preventtranslate(psy_property_settext(
+	self->configuration = psy_property_preventtranslate(psy_property_set_text(
 		psy_property_allocinit_key(key), "Asio 2_2"));
-	psy_property_sethint(psy_property_append_int(self->configuration,
-		"guid", PSY_AUDIODRIVER_ASIO_GUID, 0, 0),
-		PSY_PROPERTY_HINT_HIDE);
-	psy_property_settext(
+	psy_property_hide((psy_property_append_int(self->configuration,
+		"guid", PSY_AUDIODRIVER_ASIO_GUID, 0, 0)));
+	psy_property_set_text(
 		psy_property_setreadonly(
 			psy_property_append_str(self->configuration, "name", "Asio 2_2 Driver"),
 			TRUE),
@@ -1516,19 +1519,19 @@ void init_properties(psy_AudioDriver* driver)
 		(intptr_t)psy_audiodriversettings_samplespersec(
 			&ASIOInterface::settings_), 0, 0);
 	psy_property_append_int(self->configuration, "dither", 0, 0, 1);
-	psy_property_settext(
+	psy_property_set_text(
 		psy_property_append_int(self->configuration, "numbuf",
 			psy_audiodriversettings_blockcount(&ASIOInterface::settings_), 1, 8),
 		"Buffer Number");
-	psy_property_settext(
+	psy_property_set_text(
 		psy_property_append_int(self->configuration, "numsamples",
 			psy_audiodriversettings_blockframes(&ASIOInterface::settings_),
 			64, 8193),
 		"Buffer Samples");
-	devices = psy_property_settext(
+	devices = psy_property_set_text(
 		psy_property_append_choice(self->configuration, "device", 0),
 		"Output Device");
-	psy_property_sethint(devices, PSY_PROPERTY_HINT_COMBO);
+	psy_property_set_hint(devices, PSY_PROPERTY_HINT_COMBO);
 	self->asioif->RefreshAvailablePorts();
 	self->asioif->GetPlaybackPorts(playbackports);
 	intptr_t i = 0;
@@ -1536,7 +1539,7 @@ void init_properties(psy_AudioDriver* driver)
 			it != playbackports.end(); ++it, ++i) {
 		psy_property_append_int(devices, (*it).c_str(), i, 0, 0);
 	}	
-	indevices = psy_property_settext(
+	indevices = psy_property_set_text(
 		psy_property_append_choice(self->configuration, "indevice", 0),
 		"Standard Input Device(Select different in Recorder)");
 }
@@ -1606,6 +1609,13 @@ int driver_open(psy_AudioDriver* driver)
 	ASIOInterface::_pCallbackContext = driver->callbackcontext;
 	status = self->asioif->Enable(true);
 	return status;
+}
+
+bool driver_opened(const psy_AudioDriver* driver)
+{
+	AsioDriver* self = (AsioDriver*)driver;
+
+	return (self->asioif->Enabled() != FALSE);
 }
 
 int driver_close(psy_AudioDriver* driver)

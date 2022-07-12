@@ -2320,8 +2320,7 @@ void init_patternview_styles(psy_ui_Styles* self)
 	psy_ui_styles_set_style(self, STYLE_PV_TRACK_TEXT_HEADER_TEXT, style);
 
 	style = psy_ui_style_allocinit();
-	psy_ui_style_set_colours(style,
-		psy_ui_colour_make(0x00CACACA),
+	psy_ui_style_set_background_colour(style,		
 		psy_ui_colour_make(0x003E3E3E));
 	psy_ui_styles_set_style(self, STYLE_PV_ROW, style);
 
@@ -2332,8 +2331,7 @@ void init_patternview_styles(psy_ui_Styles* self)
 	psy_ui_styles_set_style(self, STYLE_PV_ROW_SELECT, style);
 
 	style = psy_ui_style_allocinit();
-	psy_ui_style_set_colours(style,
-		psy_ui_colour_make(0x00CACACA),
+	psy_ui_style_set_background_colour(style,
 		psy_ui_colour_make(0x00363636));
 	psy_ui_styles_set_style(self, STYLE_PV_ROWBEAT, style);
 
@@ -2344,8 +2342,7 @@ void init_patternview_styles(psy_ui_Styles* self)
 	psy_ui_styles_set_style(self, STYLE_PV_ROWBEAT_SELECT, style);
 
 	style = psy_ui_style_allocinit();
-	psy_ui_style_set_colours(style,
-		psy_ui_colour_make(0x00CACACA),
+	psy_ui_style_set_background_colour(style,
 		psy_ui_colour_make(0x00595959));
 	psy_ui_styles_set_style(self, STYLE_PV_ROW4BEAT, style);
 

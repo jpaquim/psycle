@@ -43,7 +43,7 @@ void generalconfig_show_about_at_start(GeneralConfig*);
 void generalconfig_hide_about_at_start(GeneralConfig*);
 bool generalconfig_showing_about_at_start(const GeneralConfig*);
 ViewIndex generalconfig_start_view(const GeneralConfig*);
-bool generalconfig_showmaximizedatstart(const GeneralConfig*);
+bool generalconfig_show_maximized_at_start(const GeneralConfig*);
 void generalconfig_show_saving_recent_songs(GeneralConfig*);
 void generalconfig_prevent_saving_recent_songs(GeneralConfig*);
 bool generalconfig_saving_recent_songs(const GeneralConfig*);
@@ -57,10 +57,11 @@ bool generalconfig_showplaylist(const GeneralConfig*);
 void generalconfig_setplaylistshowstate(GeneralConfig*, bool state);
 void generalconfig_show_pattern_names(GeneralConfig*);
 void generalconfig_show_pattern_ids(GeneralConfig*);
-bool generalconfig_showminiview(const GeneralConfig*);
 
-uintptr_t generalconfig_onchanged(GeneralConfig*, psy_Property*);
 bool generalconfig_hasproperty(const GeneralConfig*, psy_Property*);
+bool generalconfig_connect(GeneralConfig*, const char* key, void* context,
+	void* fp);
+psy_Property* generalconfig_property(GeneralConfig*, const char* key);
 
 #ifdef __cplusplus
 }

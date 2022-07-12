@@ -113,8 +113,8 @@ void headerui_ondraw(HeaderUi* self, psy_ui_Graphics* g)
 		r = psy_ui_realrectangle_make(
 			psy_ui_realpoint_make(0, quarter),
 			psy_ui_realsize_make(size.width, half));
-		psy_ui_setbackgroundcolour(g, title_style->background.colour);
-		psy_ui_settextcolour(g, title_style->colour);
+		psy_ui_set_background_colour(g, title_style->background.colour);
+		psy_ui_set_text_colour(g, title_style->colour);
 		/* todo font_bold */
 		psy_ui_textoutrectangle(g, psy_ui_realpoint_make(0, quarter),
 			psy_ui_ETO_OPAQUE | psy_ui_ETO_CLIPPED, r, str,

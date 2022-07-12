@@ -40,6 +40,7 @@ typedef psy_dsp_amp_t* (*AUDIODRIVERWORKFN)(void* context, int* numSamples,
 struct psy_AudioDriver;
 
 typedef int (*psy_audiodriver_fp_open)(struct psy_AudioDriver*);
+typedef bool (*psy_audiodriver_fp_opened)(const struct psy_AudioDriver*);
 typedef int (*psy_audiodriver_fp_dispose)(struct psy_AudioDriver*);
 typedef void (*psy_audiodriver_fp_deallocate)(struct psy_AudioDriver*);
 typedef void (*psy_audiodriver_fp_configure)(struct psy_AudioDriver*, const psy_Property*);
@@ -62,6 +63,7 @@ typedef uintptr_t(*psy_audiodriver_fp_playposinsamples)(struct psy_AudioDriver*)
 
 typedef struct psy_AudioDriverVTable {
 	psy_audiodriver_fp_open open;
+	psy_audiodriver_fp_opened opened;
 	psy_audiodriver_fp_dispose dispose;
 	psy_audiodriver_fp_deallocate deallocate;
 	psy_audiodriver_fp_configure configure;
@@ -105,6 +107,11 @@ EXPORT psy_AudioDriverInfo const * GetPsycleDriverInfo(void);
 INLINE int psy_audiodriver_open(psy_AudioDriver* self)
 {
 	return self->vtable->open(self);
+}
+
+INLINE bool psy_audiodriver_opened(const psy_AudioDriver* self)
+{
+	return self->vtable->opened(self);
 }
 
 INLINE int psy_audiodriver_dispose(psy_AudioDriver* self)

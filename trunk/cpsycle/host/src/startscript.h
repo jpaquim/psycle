@@ -47,6 +47,16 @@ void link_dispose(Link*);
 
 Link* link_clone(const Link*);
 
+typedef struct Links {
+	psy_Table container;
+} Links;
+
+void links_init(Links*);
+void links_dispose(Links*);
+
+void links_add(Links*, const Link* link);
+const Link* links_at(const Links*, uintptr_t index);
+
 struct MainFrame;
 
 typedef struct StartScript {	

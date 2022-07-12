@@ -26,9 +26,7 @@ enum {
 ** Configures and selects the audiodriver
 */
 
-typedef struct AudioConfig {
-	/* signals */
-	psy_Signal signal_changed;
+typedef struct AudioConfig {		
 	psy_Property* inputoutput;
 	psy_Property* drivers;
 	psy_Property* driver_configure;
@@ -45,14 +43,11 @@ void audioconfig_dispose(AudioConfig*);
 void audioconfig_driverconfigure_section(AudioConfig*);
 void audioconfig_make_driver_configurations(AudioConfig* self, bool full);
 void audioconfig_makeconfiguration_driverkey(AudioConfig* self, const char* key);
-void audioconfig_onaudiodriverselect(AudioConfig*, bool enabled);
-void audioconfig_on_edit_audio_driver_configuration(AudioConfig*, bool enabled);
 uintptr_t audioconfig_num_threads(const AudioConfig*);
 
 const char* audioconfig_driver_path(AudioConfig*);
 const char* audioconfig_driverkey(AudioConfig*);
 
-uintptr_t audioconfig_on_changed(AudioConfig*, psy_Property*);
 bool audioconfig_hasproperty(const AudioConfig*, psy_Property*);
 
 psy_Property* audioconfig_drivers(AudioConfig*);

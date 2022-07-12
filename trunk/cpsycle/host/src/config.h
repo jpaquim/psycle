@@ -26,7 +26,10 @@ extern "C" {
 #include <audioconfig.h>
 
 
-typedef struct PsycleConfig {
+struct PluginScanThread;
+
+typedef struct PsycleConfig {	
+	/* internal */
 	psy_Property config;
 	GlobalConfig global;	
 	GeneralConfig general;
@@ -43,12 +46,10 @@ typedef struct PsycleConfig {
 } PsycleConfig;
 
 void psycleconfig_init(PsycleConfig*, psy_audio_Player*,
-	psy_audio_MachineFactory*);
+	struct PluginScanThread*, psy_audio_MachineFactory*);
 void psycleconfig_dispose(PsycleConfig*);
 
-void psycleconfig_loadskin(PsycleConfig*, const char* path);
-void psycleconfig_reset_skin(PsycleConfig*);
-void psycleconfig_reset_control_skin(PsycleConfig*);
+void psycleconfig_notify_all(PsycleConfig*);
 
 INLINE GeneralConfig* psycleconfig_general(PsycleConfig* self)
 {
@@ -109,13 +110,6 @@ INLINE PredefsConfig* psycleconfig_predefs(PsycleConfig* self)
 {
 	return &self->predefs;
 }
-
-const char* psycleconfig_defaultfontstr(const PsycleConfig* self);
-bool psycleconfig_audio_enabled(const PsycleConfig*);
-void psycleconfig_enable_audio(PsycleConfig*, bool on);
-
-void psycleconfig_notifyall_changed(PsycleConfig*);
-uintptr_t psycleconfig_notify_changed(PsycleConfig*, psy_Property*);
 
 #ifdef __cplusplus
 }

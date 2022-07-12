@@ -22,7 +22,7 @@ extern "C" {
 
 /* psy_PropertyReaderConfig */
 typedef struct psy_PropertyReaderConfig {
-	bool allowappend;
+	bool allow_append;
 	bool cpp_comment;
 	bool parse_types;
 	bool ignore_sections;
@@ -31,12 +31,12 @@ typedef struct psy_PropertyReaderConfig {
 
 void psy_propertyreaderconfig_init(psy_PropertyReaderConfig*);
 
-INLINE psy_PropertyReaderConfig psy_propertyreaderconfig_make(bool allowappend,
+INLINE psy_PropertyReaderConfig psy_propertyreaderconfig_make(bool allow_append,
 		bool cpp_comment, bool parse_types, bool ignore_sections,
 		bool skip_double_quotes) {
 	psy_PropertyReaderConfig rv;
 
-	rv.allowappend = allowappend;
+	rv.allow_append = allow_append;
 	rv.cpp_comment = cpp_comment;
 	rv.parse_types = parse_types;
 	rv.ignore_sections = ignore_sections;
@@ -48,7 +48,7 @@ INLINE psy_PropertyReaderConfig psy_propertyreaderconfig_make(bool allowappend,
 typedef struct psy_PropertyReader {
 	char* path;
 	psy_PropertyReaderConfig config;
-	int ischoice;
+	bool is_choice;
 	psy_Property* root;
 	psy_Property* curr;
 	psy_Property* choice;	
@@ -69,7 +69,7 @@ INLINE void psy_propertyreader_allow_cpp_comments(psy_PropertyReader* self)
 
 INLINE void psy_propertyreader_allow_append(psy_PropertyReader* self)
 {
-	self->config.allowappend = TRUE;
+	self->config.allow_append = TRUE;
 }
 
 INLINE void psy_propertyreader_parse_types(psy_PropertyReader* self)

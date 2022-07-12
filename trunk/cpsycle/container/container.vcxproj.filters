@@ -60,6 +60,8 @@
     <ClInclude Include="src\containerconvert.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\logger.h" />
+    <ClInclude Include="src\logger.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

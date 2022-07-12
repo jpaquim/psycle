@@ -1,6 +1,6 @@
 /*
 ** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -25,7 +25,7 @@ void trackercmds_make(psy_Property* parent)
 
 	assert(parent);
 
-	cmds = psy_property_settext(
+	cmds = psy_property_set_text(
 		psy_property_append_section(parent, "tracker"),
 		"Tracker");
 	setcmd(cmds, CMD_NAVUP, psy_ui_KEY_UP, "navup", "up");
@@ -116,7 +116,7 @@ void setcmdall(psy_Property* cmds, int cmd, uint32_t keycode, bool shift,
 	assert(cmds);
 
 	psy_snprintf(text, 256, "cmds.%s", key);
-	psy_property_sethint(psy_property_settext(psy_property_setshorttext(
+	psy_property_set_hint(psy_property_set_text(psy_property_set_short_text(
 		psy_property_set_id(psy_property_append_int(cmds, key,
 			psy_audio_encodeinput(keycode, shift, ctrl, 0, 0), 0, 0),
 			cmd), shorttext), text), PSY_PROPERTY_HINT_SHORTCUT);

@@ -1,22 +1,30 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
 
 
 #include "predefsconfig.h"
+/* host */
+#include "resources/resource.h"
 /* file */
 #include <dir.h>
 /* platform */
 #include "../../detail/portable.h"
 
-static void predefsconfig_make(PredefsConfig*);
 
+/* prototypes */
+static void predefsconfig_make(PredefsConfig*);
+static void predefsconfig_on_property_changed(PredefsConfig*, psy_Property*
+	sender);
+
+/* implementation */
 void predefsconfig_init(PredefsConfig* self, psy_Property* parent)
 {
-	assert(self && parent);
+	assert(self);
+	assert(parent);
 
 	self->parent = parent;
 	psy_signal_init(&self->signal_changed);
@@ -32,15 +40,26 @@ void predefsconfig_dispose(PredefsConfig* self)
 
 void predefsconfig_make(PredefsConfig* self)
 {
-	self->predefs = psy_property_append_section(self->parent, "Predefs");
+	assert(self);
 
-	psy_property_append_str(self->predefs, "adsr", "2 0.0 0.0 1.0 1.0 2.0 0.5 3.0 0.0");
-	psy_property_append_str(self->predefs, "def1", "");
-	psy_property_append_str(self->predefs, "def2", "");
-	psy_property_append_str(self->predefs, "def3", "");
-	psy_property_append_str(self->predefs, "def4", "");
-	psy_property_append_str(self->predefs, "def5", "");
-	psy_property_append_str(self->predefs, "def6", "");
+	self->predefs = psy_property_append_section(self->parent, "Predefs");
+	psy_property_set_icon(self->predefs, IDB_OPTIONS_LIGHT,
+		IDB_OPTIONS_DARK);
+	psy_property_connect(psy_property_append_str(self->predefs,
+		"adsr", "2 0.0 0.0 1.0 1.0 2.0 0.5 3.0 0.0"),
+		self, predefsconfig_on_property_changed);
+	psy_property_connect(psy_property_append_str(self->predefs,
+		"def1", ""), self, predefsconfig_on_property_changed);
+	psy_property_connect(psy_property_append_str(self->predefs,
+		"def2", ""), self, predefsconfig_on_property_changed);
+	psy_property_connect(psy_property_append_str(self->predefs,
+		"def3", ""), self, predefsconfig_on_property_changed);
+	psy_property_connect(psy_property_append_str(self->predefs,
+		"def4", ""), self, predefsconfig_on_property_changed);
+	psy_property_connect(psy_property_append_str(self->predefs,
+		"def5", ""), self, predefsconfig_on_property_changed);
+	psy_property_connect(psy_property_append_str(self->predefs,
+		"def6", ""), self, predefsconfig_on_property_changed);
 }
 
 void predefsconfig_predef(PredefsConfig* self, int index, psy_dsp_Envelope* rv)
@@ -120,13 +139,12 @@ void predefsconfig_storepredef(PredefsConfig* self, int index,
 	psy_property_set_str(self->predefs, key, psy_dsp_envelope_tostring(env));	
 }
 
-uintptr_t predefsconfig_onchanged(PredefsConfig* self, psy_Property*
-	property)
+void predefsconfig_on_property_changed(PredefsConfig* self, psy_Property*
+	sender)
 {
 	assert(self && self->predefs);
 
-	psy_signal_emit(&self->signal_changed, self, 1, property);
-	return psy_INDEX_INVALID;
+	psy_signal_emit(&self->signal_changed, self, 1, sender);	
 }
 
 bool predefsconfig_hasproperty(const PredefsConfig* self,

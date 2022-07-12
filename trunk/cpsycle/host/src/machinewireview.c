@@ -532,11 +532,11 @@ void machinewireview_on_mouse_down(MachineWireView* self, psy_ui_MouseEvent* ev)
 			selectedwire = machinewireview_hittestwire(self, psy_ui_mouseevent_pt(ev));
 			psy_audio_machines_selectwire(self->machines,
 				selectedwire);
-			if (psy_audio_wire_valid(&selectedwire) && psy_ui_mouseevent_shiftkey(ev)) {
+			if (psy_audio_wire_valid(&selectedwire) && psy_ui_mouseevent_shift_key(ev)) {
 				self->dragmode = MACHINEVIEW_DRAG_LEFTCONNECTION;
 				self->dragslot = selectedwire.src;
 			}
-			if (psy_audio_wire_valid(&selectedwire) && psy_ui_mouseevent_ctrlkey(ev)) {
+			if (psy_audio_wire_valid(&selectedwire) && psy_ui_mouseevent_ctrl_key(ev)) {
 				self->dragmode = MACHINEVIEW_DRAG_RIGHTCONNECTION;
 				self->dragslot = selectedwire.dst;
 			}

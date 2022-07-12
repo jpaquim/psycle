@@ -101,8 +101,8 @@ void fileviewfilter_oncheckbox(FileViewFilter* self, psy_ui_CheckBox* sender)
 
 void fileviewfilter_clear(FileViewFilter* self)
 {
-	psy_ui_checkbox_disablecheck(&self->psy);
-	psy_ui_checkbox_disablecheck(&self->mod);
+	psy_ui_checkbox_disable_check(&self->psy);
+	psy_ui_checkbox_disable_check(&self->mod);
 }
 
 /* FileViewSaveFilter */

@@ -9,6 +9,7 @@
 /* host */
 #include "config.h"
 #include "inputhandler.h"
+#include "pluginscanthread.h"
 #include "undoredo.h"
 #include "viewhistory.h"
 /* audio */
@@ -23,9 +24,6 @@
 /* ui */
 #include <uicomponent.h>
 #include <uiapp.h>
-/* thread */
-#include <lock.h>
-#include <thread.h>
 /* file */
 #include <logger.h>
 #include <playlist.h>
@@ -130,18 +128,8 @@ typedef struct Workspace {
 	/* UndoRedo */
 	psy_UndoRedo undoredo;
 	uintptr_t undo_save_point;
-	uintptr_t machines_undo_save_point;
-	psy_Lock pluginscanlock;	
-	int filescanned;
-	char* scanfilename;
-	int scanstart;
-	int scanend;
-	int scantaskstart;
-	int plugincachechanged;
-	int scanprogress;
-	int scanprogresschanged;
-	psy_audio_PluginScanTask lastscantask;
-	int scanplugintype;
+	uintptr_t machines_undo_save_point;		
+	PluginScanThread pluginscanthread;
 	bool playrow;
 	psy_audio_SequencerPlayMode restoreplaymode;
 	psy_dsp_big_beat_t restorenumplaybeats;
@@ -149,8 +137,7 @@ typedef struct Workspace {
 	bool driverconfigloading;	
 	HostSequencerTime host_sequencer_time;
 	InputHandler inputhandler;
-	psy_Thread driverconfigloadthread;
-	psy_Thread pluginscanthread;
+	psy_Thread driverconfigloadthread;	
 	struct ParamViews* paramviews;
 	psy_Logger* terminal_output;
 	uintptr_t terminalstyleid;
@@ -187,7 +174,7 @@ INLINE PsycleConfig* workspace_conf(Workspace* self) { return &self->config; }
 
 INLINE void workspace_configure_host(Workspace* self)
 {
-	psycleconfig_notifyall_changed(&self->config);	
+	// psycleconfig_notifyall_changed(&self->config);	
 }
 
 INLINE psy_audio_Song* workspace_song(Workspace* self) { return self->song; }
@@ -207,8 +194,6 @@ psy_Playlist* workspace_playlist(Workspace*);
 void workspace_load_recentsongs(Workspace*);
 void workspace_set_octave(Workspace*, uint8_t octave);
 uint8_t workspace_octave(Workspace*);
-void workspace_config_changed(Workspace*, psy_Property*,
-	uintptr_t* rebuild_level);
 void workspace_undo(Workspace*);
 void workspace_redo(Workspace*);
 void workspace_edit_quantize_change(Workspace*, int diff);

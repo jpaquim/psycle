@@ -28,10 +28,24 @@ typedef	enum {
 // case for other use cases.
 
 typedef struct psy_dsp_DitherSettings {
+	bool enabled;
 	uintptr_t bitdepth;
 	psy_dsp_DitherPdf pdf;
 	psy_dsp_DitherNoiseShape noiseshape;
 } psy_dsp_DitherSettings;
+
+INLINE psy_dsp_DitherSettings psy_dsp_dithersettings_make(
+	bool enabled, uintptr_t depth, psy_dsp_DitherPdf pdf,
+	psy_dsp_DitherNoiseShape noiseshaping)
+{
+	psy_dsp_DitherSettings rv;
+
+	rv.enabled = enabled;
+	rv.bitdepth = depth;
+	rv.pdf = pdf;
+	rv.noiseshape = noiseshaping;
+	return rv;
+}
 
 typedef struct psy_dsp_Dither {
 	psy_dsp_DitherSettings settings;
@@ -42,7 +56,7 @@ void psy_dsp_dither_init(psy_dsp_Dither*);
 void psy_dsp_dither_dispose(psy_dsp_Dither*);
 void psy_dsp_dither_process(psy_dsp_Dither*, float* inSamps, uintptr_t length);
 
-INLINE void  psy_dsp_dither_setsettings(psy_dsp_Dither* self,
+INLINE void  psy_dsp_dither_configure(psy_dsp_Dither* self,
 	psy_dsp_DitherSettings settings)
 {
 	self->settings = settings;

@@ -9,14 +9,14 @@
 #include "../../detail/psyconf.h"
 
 /* container */
-#include <properties.h>
+#include <hashtbl.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /* Defines a default dictionary in english. */
-void make_translator_default(psy_Property* lang);
+void make_translator_default(psy_Dictionary* lang);
 
 #ifdef PSYCLE_MAKE_DEFAULT_LANG
 /* Saves the eng default dictionary (psy_dir_config() + en.ini) */

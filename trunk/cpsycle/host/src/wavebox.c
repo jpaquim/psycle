@@ -360,7 +360,7 @@ void wavebox_ondraw(WaveBox* self, psy_ui_Graphics* g)
 	psy_ui_setcolour(g, psy_ui_colour_make(0x00B1C8B0));
 	if (!self->context.sample) {		
 		psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
-		psy_ui_settextcolour(g, psy_ui_colour_make(0x00D1C5B6));
+		psy_ui_set_text_colour(g, psy_ui_colour_make(0x00D1C5B6));
 		psy_ui_textout(g, psy_ui_realpoint_make(
 			(size.width - tm->tmAveCharWidth * psy_strlen(self->nowavetext)) / 2,
 			(size.height - tm->tmHeight) / 2),

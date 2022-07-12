@@ -7,6 +7,7 @@
 #define psy_PROPERTIES_H
 
 #include "../../detail/psydef.h"
+#include "signal.h"
 #include "list.h"
 
 #ifdef __cplusplus
@@ -44,8 +45,7 @@ typedef enum {
 
 /* View/Edit Hints */
 typedef enum {
-	PSY_PROPERTY_HINT_NONE,
-	PSY_PROPERTY_HINT_HIDE,
+	PSY_PROPERTY_HINT_NONE,	
 	PSY_PROPERTY_HINT_EDIT,	
 	PSY_PROPERTY_HINT_EDITDIR,
 	PSY_PROPERTY_HINT_EDITCOLOR,
@@ -54,7 +54,8 @@ typedef enum {
 	PSY_PROPERTY_HINT_LIST,
 	PSY_PROPERTY_HINT_CHECK,
 	PSY_PROPERTY_HINT_SELECTION,
-	PSY_PROPERTY_HINT_COMBO
+	PSY_PROPERTY_HINT_COMBO,
+	PSY_PROPERTY_HINT_ZOOM
 } psy_PropertyHint;
 
 typedef struct psy_PropertyItem {
@@ -72,13 +73,16 @@ typedef struct psy_PropertyItem {
 	intptr_t max;
 	int typ;
 	int hint;
+	uintptr_t icon_dark_id;
+	uintptr_t icon_light_id;
 	bool readonly;
-	bool allowappend;
+	bool allow_append;
 	bool disposechildren;
 	bool save;
 	bool translate;
 	intptr_t id;
 	bool marked;
+	bool hide;	
 } psy_PropertyItem;
 
 void psy_propertyitem_init(psy_PropertyItem*);
@@ -86,6 +90,9 @@ void psy_propertyitem_dispose(psy_PropertyItem*);
 void psy_propertyitem_copy(psy_PropertyItem*, const psy_PropertyItem* source);
 
 typedef struct psy_Property {
+	psy_Signal changed;
+	psy_Signal rebuild;
+	psy_Signal before_destroyed;
 	psy_PropertyItem item;
 	psy_List* children;
 	struct psy_Property* parent;
@@ -94,9 +101,8 @@ typedef struct psy_Property {
 
 typedef int (*psy_PropertyCallback)(void*, psy_Property*, uintptr_t level);
 
-/*
-** Init/dispose
-*/
+/* Init/dispose */
+
 /* Inits a property, key and type is root. */
 void psy_property_init(psy_Property*);
 /* Inits a property with a key. if key is zero, the key is "root". */
@@ -106,9 +112,9 @@ void psy_property_init_type(psy_Property*, const char* key, psy_PropertyType);
 /* Disposes a property and its children, but doesn't free self. */
 void psy_property_dispose(psy_Property*);
 
-/*
-**Allocation/deallocation
-*/
+
+/* Allocation/deallocation */
+
 /*
 ** Allocates memory for a property and inits it with a key,
 ** if key is zero, the key is "root".
@@ -200,52 +206,65 @@ psy_Property* psy_property_append_action(psy_Property*, const char* key);
 /* Definition */
 void psy_property_change_key(psy_Property*, const char* key);
 const char* psy_property_key(const psy_Property*);
-char_dyn_t* psy_property_fullkey(const psy_Property* self);
-int psy_property_type(const psy_Property*);
+char_dyn_t* psy_property_full_key(const psy_Property* self);
+psy_PropertyType psy_property_type(const psy_Property*);
 psy_Property* psy_property_setreadonly(psy_Property*, bool on);
 bool psy_property_readonly(const psy_Property*);
-psy_Property* psy_property_sethint(psy_Property*, psy_PropertyHint);
+psy_Property* psy_property_set_hint(psy_Property*, psy_PropertyHint);
 psy_PropertyHint psy_property_hint(const psy_Property*);
-psy_Property* psy_property_preventsave(psy_Property*);
+psy_Property* psy_property_prevent_save(psy_Property*);
+psy_Property* psy_property_show(psy_Property*);
+psy_Property* psy_property_hide(psy_Property*);
 psy_Property* psy_property_enablesave(psy_Property*);
 psy_Property* psy_property_enableappend(psy_Property*);
 psy_Property* psy_property_preventtranslate(psy_Property*);
 bool psy_property_translation_prevented(const psy_Property*);
 bool psy_property_hasid(const psy_Property* self, int id);
+/* signals */
+psy_Property* psy_property_connect(psy_Property*, void* context, void* fp);
+void psy_property_disconnect(psy_Property*, void* context);
+psy_Property* psy_property_connect_children(psy_Property*, int recursive,
+	void* context, void* fp);
+void psy_property_notify_all(psy_Property*);
+void psy_property_rebuild(psy_Property*);
 /* Value */
-psy_Property* psy_property_setitem_bool(psy_Property*, bool value);
+psy_Property* psy_property_set_item_bool(psy_Property*, bool value);
 bool psy_property_item_bool(const psy_Property*);
-psy_Property* psy_property_setitem_int(psy_Property*, intptr_t value);
+psy_Property* psy_property_set_item_int(psy_Property*, intptr_t value);
 intptr_t psy_property_item_int(const psy_Property*);
 bool psy_property_int_valid(const psy_Property*, intptr_t value);
 bool psy_property_int_hasrange(const psy_Property*);
-psy_Property* psy_property_setitem_double(psy_Property*, double value);
+psy_Property* psy_property_set_item_double(psy_Property*, double value);
 double psy_property_item_double(const psy_Property*);
 psy_Property* psy_property_set_item_str(psy_Property*, const char* str);
 const char* psy_property_item_str(const psy_Property*);
-psy_Property* psy_property_setitem_font(psy_Property*, const char* value);
+psy_Property* psy_property_set_item_font(psy_Property*, const char* value);
 const char* psy_property_item_font(const psy_Property*);
 psy_Property* psy_property_item_choice_parent(psy_Property*);
-bool psy_property_haskey(const psy_Property*, const char* key);
-bool psy_property_hastype(const psy_Property*, psy_PropertyType);
+bool psy_property_has_key(const psy_Property*, const char* key);
+bool psy_property_has_type(const psy_Property*, psy_PropertyType);
 uint32_t psy_property_item_colour(const psy_Property*);
-bool psy_property_ishex(const psy_Property*);
-bool psy_property_isbool(const psy_Property*);
+bool psy_property_is_hex(const psy_Property*);
+bool psy_property_is_bool(const psy_Property*);
 bool psy_property_is_int(const psy_Property*);
+bool psy_property_is_choice(const psy_Property*);
+bool psy_property_is_double(const psy_Property*);
 bool psy_property_is_string(const psy_Property*);
 bool psy_property_is_font(const psy_Property*);
 bool psy_property_is_action(const psy_Property*);
-bool psy_property_issection(const psy_Property*);
+bool psy_property_is_section(const psy_Property*);
 
 /* Description */
 psy_Property* psy_property_set_id(psy_Property*, intptr_t id);
-intptr_t psy_property_id(const psy_Property* self);
-psy_Property* psy_property_settext(psy_Property*, const char* text);
+intptr_t psy_property_id(const psy_Property*);
+psy_Property* psy_property_set_text(psy_Property*, const char* text);
 const char* psy_property_text(const psy_Property*);
-psy_Property* psy_property_setshorttext(psy_Property*, const char* text);
-const char* psy_property_shorttext(const psy_Property*);
+psy_Property* psy_property_set_short_text(psy_Property*, const char* text);
+const char* psy_property_short_text(const psy_Property*);
 psy_Property* psy_property_set_comment(psy_Property*, const char* text);
 const char* psy_property_comment(const psy_Property*);
+psy_Property* psy_property_set_icon(psy_Property*,
+	uintptr_t icon_light_id, uintptr_t icon_dark_id);
 
 #ifdef __cplusplus
 }

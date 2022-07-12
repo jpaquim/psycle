@@ -228,9 +228,9 @@ void midichannelmappingview_ondraw(MidiChannelMappingView* self, psy_ui_Graphics
 				
 		machine = NULL;	
 		if (psy_audio_midiinput_genmap(midiinput, ch) != psy_INDEX_INVALID) {
-			psy_ui_settextcolour(g, psy_ui_component_colour(&self->component));
+			psy_ui_set_text_colour(g, psy_ui_component_colour(&self->component));
 		} else {
-			psy_ui_settextcolour(g, psy_ui_colour_make(0x00444444));
+			psy_ui_set_text_colour(g, psy_ui_colour_make(0x00444444));
 		}
 		psy_snprintf(text, 256, "Ch %d", (ch + 1));
 		psy_ui_textout(g, psy_ui_realpoint_make(colx_px[0], cpy), text, psy_strlen(text));
@@ -420,7 +420,7 @@ void midimonitor_initcorestatusright(MidiMonitor* self)
 	psy_ui_component_init(&self->performance, &self->top, NULL);
 	psy_ui_component_set_align(&self->performance, psy_ui_ALIGN_LEFT);
 	psy_ui_checkbox_init(&self->cpucheck, &self->performance);
-	psy_ui_checkbox_settext(&self->cpucheck, "");	
+	psy_ui_checkbox_set_text(&self->cpucheck, "");	
 	labelpair_init(&self->audiothreads, &self->performance, "Internal MIDI Version", 25.0);
 	labelpair_init(&self->totaltime, &self->performance, "MIDI clock deviation (ms)", 25.0);
 	labelpair_init(&self->machines, &self->performance, "Audio latency (sampl.)", 25.0);

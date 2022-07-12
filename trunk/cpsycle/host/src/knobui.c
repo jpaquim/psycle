@@ -156,19 +156,19 @@ void knobui_ondraw(KnobUi* self, psy_ui_Graphics* g)
 			}
 		}
 		if ((paramtweak_active(&self->paramtweak))) {
-			psy_ui_setbackgroundcolour(g, htop_style->background.colour);
-			psy_ui_settextcolour(g, htop_style->colour);
+			psy_ui_set_background_colour(g, htop_style->background.colour);
+			psy_ui_set_text_colour(g, htop_style->colour);
 		} else {
-			psy_ui_setbackgroundcolour(g, top_style->background.colour);
-			psy_ui_settextcolour(g, top_style->colour);
+			psy_ui_set_background_colour(g, top_style->background.colour);
+			psy_ui_set_text_colour(g, top_style->colour);
 		}
 		psy_ui_textoutrectangle(g, psy_ui_realrectangle_topleft(&r_top),
 			psy_ui_ETO_OPAQUE, r_top, label, psy_strlen(label));
-		psy_ui_setbackgroundcolour(g,
+		psy_ui_set_background_colour(g,
 			(paramtweak_active(&self->paramtweak))
 			? hbottom_style->background.colour
 			: bottom_style->background.colour);
-		psy_ui_settextcolour(g,
+		psy_ui_set_text_colour(g,
 			(paramtweak_active(&self->paramtweak))
 			? hbottom_style->colour
 			: bottom_style->colour);

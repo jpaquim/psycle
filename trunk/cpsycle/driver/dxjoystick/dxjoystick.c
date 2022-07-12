@@ -186,9 +186,8 @@ void driver_makeconfig(psy_EventDriver* context)
 	self = (DXJoystickDriver*)context;
 	psy_snprintf(key, 256, "dxjoystick-guid-%d", PSY_EVENTDRIVER_DXJOYSTICK_GUID);
 	self->configuration = psy_property_preventtranslate(psy_property_allocinit_key(key));
-	psy_property_sethint(psy_property_append_int(self->configuration,
-		"guid", PSY_EVENTDRIVER_DXJOYSTICK_GUID, 0, 0),
-		PSY_PROPERTY_HINT_HIDE);
+	psy_property_hide((psy_property_append_int(self->configuration,
+		"guid", PSY_EVENTDRIVER_DXJOYSTICK_GUID, 0, 0)));
 	psy_property_append_str(self->configuration, "name", "directx joystick");
 	psy_property_append_str(self->configuration, "version", "1.0");
 	self->devices = psy_property_append_choice(self->configuration, "device", 0);
@@ -418,7 +417,7 @@ void driver_setcmddef(psy_EventDriver* driver, const psy_Property* cmddef)
 		self->cmddef = psy_property_clone(cmddef);
 		psy_property_append_property(self->configuration,
 			self->cmddef);
-		psy_property_settext(self->cmddef, "cmds.keymap");
+		psy_property_set_text(self->cmddef, "cmds.keymap");
 		driver_setcmddefaults(self, self->cmddef);
 	}			
 }

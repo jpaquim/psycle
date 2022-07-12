@@ -100,8 +100,8 @@ void labelui_ondraw(LabelUi* self, psy_ui_Graphics* g)
 	r = psy_ui_realrectangle_make(
 		psy_ui_realpoint_make(0.0, 0.0),
 		psy_ui_realsize_make(size.width, half));
-	psy_ui_setbackgroundcolour(g, title_style->background.colour);
-	psy_ui_settextcolour(g, title_style->colour);
+	psy_ui_set_background_colour(g, title_style->background.colour);
+	psy_ui_set_text_colour(g, title_style->colour);
 	if (self->param) {
 		if (!psy_audio_machineparam_name(self->param, str)) {
 			if (!psy_audio_machineparam_label(self->param, str)) {
@@ -115,8 +115,8 @@ void labelui_ondraw(LabelUi* self, psy_ui_Graphics* g)
 	if (self->param && psy_audio_machineparam_describe(self->param, str) == FALSE) {
 		psy_snprintf(str, 128, "%s", "");
 	}
-	psy_ui_setbackgroundcolour(g, bottom_style->background.colour);
-	psy_ui_settextcolour(g, bottom_style->colour);
+	psy_ui_set_background_colour(g, bottom_style->background.colour);
+	psy_ui_set_text_colour(g, bottom_style->colour);
 	r = psy_ui_realrectangle_make(
 		psy_ui_realpoint_make(0, half),
 		psy_ui_realsize_make(size.width, half));

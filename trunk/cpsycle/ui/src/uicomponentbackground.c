@@ -108,24 +108,24 @@ void psy_ui_componentbackground_draw(psy_ui_ComponentBackground* self,
 			psy_ui_component_scroll_size_px(self->component));
 		tm = psy_ui_component_textmetric(self->component);
 		psy_ui_drawsolidrectangle(g, r,
-			psy_ui_component_backgroundcolour(
+			psy_ui_component_background_colour(
 				psy_ui_component_parent(self->component)));
 		psy_ui_drawsolidroundrectangle(g, r,
 			psy_ui_realsize_make(
 				psy_ui_value_px(&b->left.radius, tm, NULL),
 				psy_ui_value_px(&b->left.radius, tm, NULL)),
-			psy_ui_component_backgroundcolour(self->component));
+			psy_ui_component_background_colour(self->component));
 	} else {
 		const psy_ui_Style* style;
 
 		style = psy_ui_componentstyle_currstyle_const(&self->component->style);
 		if (psy_ui_bitmap_empty(&style->background.bitmap)) {								
 			psy_ui_drawsolidrectangle(g, psy_ui_graphics_cliprect(g),
-				psy_ui_component_backgroundcolour(self->component));
+				psy_ui_component_background_colour(self->component));
 		} else {
 			if (&style->background.repeat == psy_ui_NOREPEAT) {
 				psy_ui_drawsolidrectangle(g, psy_ui_graphics_cliprect(g),
-					psy_ui_component_backgroundcolour(self->component));
+					psy_ui_component_background_colour(self->component));
 			}
 			psy_ui_componentbackground_draw_image(self, g, style);
 		}

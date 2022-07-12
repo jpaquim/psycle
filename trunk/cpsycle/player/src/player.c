@@ -196,10 +196,10 @@ void cmdplayer_scanplugins(CmdPlayer* self)
 
 void cmdplayer_makedirectories(CmdPlayer* self)
 {	
-	self->directories = psy_property_settext(
+	self->directories = psy_property_set_text(
 		psy_property_append_section(self->config, "directories"),
 		"Directories");		
-	psy_property_sethint(psy_property_settext(
+	psy_property_set_hint(psy_property_set_text(
 		psy_property_append_str(
 			self->directories,
 			"song",
@@ -207,7 +207,7 @@ void cmdplayer_makedirectories(CmdPlayer* self)
 		"Song directory"),
 		PSY_PROPERTY_HINT_EDITDIR);
 #ifdef DIVERSALIS__OS__MICROSOFT		
-	psy_property_sethint(psy_property_settext(
+	psy_property_set_hint(psy_property_set_text(
 		psy_property_append_str(
 			self->directories,
 			"plugins64",
@@ -215,7 +215,7 @@ void cmdplayer_makedirectories(CmdPlayer* self)
 		"Plug-in directory"),		
 		PSY_PROPERTY_HINT_EDITDIR);
 #else
-	psy_property_sethint(psy_property_settext(
+	psy_property_set_hint(psy_property_set_text(
 		psy_property_append_str(
 			self->directories,
 			"plugins64",
@@ -223,7 +223,7 @@ void cmdplayer_makedirectories(CmdPlayer* self)
 		"Plug-in directory"),		
 		PSY_PROPERTY_HINT_EDITDIR);
 #endif		
-	psy_property_sethint(psy_property_settext(
+	psy_property_set_hint(psy_property_set_text(
 		psy_property_append_str(
 			self->directories,
 			"vst",			

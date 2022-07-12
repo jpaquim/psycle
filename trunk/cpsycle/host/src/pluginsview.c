@@ -625,14 +625,14 @@ void pluginsview_drawitem(PluginsView* self, psy_ui_Graphics* g,
 	}
 
 	if (itemstyle->background.colour.mode.transparent) {
-		bgcolour = psy_ui_component_backgroundcolour(&self->component);
+		bgcolour = psy_ui_component_background_colour(&self->component);
 	} else {
 		bgcolour = itemstyle->background.colour;
 	}
 	if (!itemstyle->colour.mode.transparent) {
-		psy_ui_settextcolour(g, itemstyle->colour);
+		psy_ui_set_text_colour(g, itemstyle->colour);
 	} else {
-		psy_ui_settextcolour(g, psy_ui_component_colour(&self->component));
+		psy_ui_set_text_colour(g, psy_ui_component_colour(&self->component));
 	}
 	if (!itemstyle->background.colour.mode.transparent) {
 		psy_ui_drawsolidrectangle(g,
@@ -642,9 +642,9 @@ void pluginsview_drawitem(PluginsView* self, psy_ui_Graphics* g,
 			bgcolour);
 	}			
 	/* if (pluginenabled(self, property)) {
-		psy_ui_settextcolour(g, psy_ui_colour_make(0x00CACACA));
+		psy_ui_set_text_colour(g, psy_ui_colour_make(0x00CACACA));
 	} else {
-		psy_ui_settextcolour(g, psy_ui_colour_make(0x00666666));
+		psy_ui_set_text_colour(g, psy_ui_colour_make(0x00666666));
 	}*/		
 	plugindisplayname(property, text);	
 	psy_ui_textout(g, psy_ui_realpoint_make(topleft.x, topleft.y + 2), text, psy_strlen(text));
@@ -652,9 +652,9 @@ void pluginsview_drawitem(PluginsView* self, psy_ui_Graphics* g,
 	psy_ui_textout(g, psy_ui_realpoint_make(topleft.x + self->columnwidth - self->avgcharwidth * 7,
 		topleft.y + 2), text, psy_strlen(text));
 	if (pluginmode(property, text) == psy_audio_MACHMODE_FX) {
-		psy_ui_settextcolour(g, psy_ui_colour_make(0x00B1C8B0));
+		psy_ui_set_text_colour(g, psy_ui_colour_make(0x00B1C8B0));
 	} else {		
-		psy_ui_settextcolour(g, psy_ui_colour_make(0x00D1C5B6));
+		psy_ui_set_text_colour(g, psy_ui_colour_make(0x00D1C5B6));
 	}
 	psy_ui_textout(g, psy_ui_realpoint_make(topleft.x + self->columnwidth - 10 * self->avgcharwidth,
 		topleft.y + 2), text, psy_strlen(text));
@@ -951,7 +951,7 @@ void pluginsview_on_mouse_down(PluginsView* self, psy_ui_MouseEvent* ev)
 
 		index = pluginsview_hittest(self, psy_ui_mouseevent_pt(ev));
 		if (index != psy_INDEX_INVALID) {			
-			if (psy_ui_mouseevent_ctrlkey(ev)) {
+			if (psy_ui_mouseevent_ctrl_key(ev)) {
 				newmachineselection_toggle(&self->selection, index);
 			} else {
 				if (psy_list_size(self->selection.items) > 1 &&

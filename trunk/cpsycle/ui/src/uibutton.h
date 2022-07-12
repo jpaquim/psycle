@@ -74,6 +74,8 @@ typedef struct psy_ui_Button {
 	char* light_path;
 	char* dark_path;	
 	psy_ui_Colour bitmaptransparency;
+	/* references */
+	psy_Property* property;
 } psy_ui_Button;
 
 void psy_ui_button_init(psy_ui_Button*, psy_ui_Component* parent);
@@ -87,6 +89,7 @@ void psy_ui_button_init_text_connect(psy_ui_Button*, psy_ui_Component* parent,
 psy_ui_Button* psy_ui_button_alloc(void);
 psy_ui_Button* psy_ui_button_allocinit(psy_ui_Component* parent);
 
+void psy_ui_button_data_exchange(psy_ui_Button*, psy_Property*);
 void psy_ui_button_set_text(psy_ui_Button*, const char* text);
 const char* psy_ui_button_text(const psy_ui_Button*);
 void psy_ui_button_set_icon(psy_ui_Button*, psy_ui_ButtonIcon);

@@ -1,15 +1,17 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
 
 
+/* std */
 #include "hashtbl.h"
 #include <stdlib.h>
-#include <string.h>
 #include <assert.h>
+/* platform */
+#include "../../detail/portable.h"
 
 psy_TableIterator tableend;
 
@@ -351,4 +353,73 @@ uintptr_t psy_strhash(const char* str)
 		hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
 
 	return hash;
+}
+
+
+
+/* psy_Dictionary */
+
+#define PSY_DICTIONARY_HASH_SIZE 401
+
+void psy_dictionary_init(psy_Dictionary* self)
+{
+	psy_table_init_keysize(&self->container, PSY_DICTIONARY_HASH_SIZE);
+}
+
+void psy_dictionary_dispose(psy_Dictionary* self)
+{
+	psy_table_dispose_all(&self->container, NULL);
+}
+
+void psy_dictionary_reset(psy_Dictionary* self)
+{
+	assert(self);
+
+	psy_table_dispose_all(&self->container, NULL);
+	psy_table_init_keysize(&self->container, PSY_DICTIONARY_HASH_SIZE);
+}
+
+const char* psy_dictionary_at(const psy_Dictionary* self, const char* key)
+{
+	assert(self);
+
+	if (psy_strlen(key) > 0) {
+		const char* rv;
+
+		rv = psy_table_at_strhash(&(((psy_Dictionary*)self)->container), key);
+		if (rv) {
+			return rv;
+		}
+	}
+	return NULL;
+}
+
+void psy_dictionary_set(psy_Dictionary* self, const char* key, const char* value)
+{
+	char* old;
+
+	assert(self);
+
+	if (old = psy_table_at_strhash(&self->container, key)) {
+		if (value == old) {
+			return;
+		}
+		free(old);
+	}
+	psy_table_insert_strhash(&self->container, key, psy_strdup(value));
+}
+
+void psy_dictionary_set_hash(psy_Dictionary* self, uintptr_t hash_key, const char* value)
+{
+	char* old;
+
+	assert(self);
+
+	if (old = psy_table_at(&self->container, hash_key)) {
+		if (value == old) {
+			return;
+		}
+		free(old);
+	}
+	psy_table_insert(&self->container, hash_key, psy_strdup(value));
 }

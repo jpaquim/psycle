@@ -213,7 +213,7 @@ void pianogrid_drawuncoveredrightbackground(Pianogrid* self,
 				(blankstart - psy_ui_component_scroll_left_px(
 					pianogrid_base(self))),
 				size.height)),
-			psy_ui_component_backgroundcolour(&self->component));
+			psy_ui_component_background_colour(&self->component));
 			// patternviewskin_separatorcolour(patternviewstate_skin(
 			//	self->gridstate->pv), 1, 2));
 	}
@@ -236,7 +236,7 @@ void pianogrid_drawuncoveredbottombackground(Pianogrid* self,
 			psy_ui_realsize_make(size.width,
 				size.height - (blankstart - psy_ui_component_scroll_top_px(
 					pianogrid_base(self))))),
-			psy_ui_component_backgroundcolour(&self->component));
+			psy_ui_component_background_colour(&self->component));
 			// patternviewskin_separatorcolour(patternviewstate_skin(
 			//     self->gridstate->pv), 1, 2));
 	}
@@ -369,7 +369,7 @@ void pianogrid_on_mouse_down(Pianogrid* self, psy_ui_MouseEvent* ev)
 			psy_ui_mouseevent_stop_propagation(ev);
 			self->gridstate->pv->selection.valid = FALSE;
 		}
-	} else if (!psy_ui_mouseevent_ctrlkey(ev)  &&	
+	} else if (!psy_ui_mouseevent_ctrl_key(ev)  &&	
 			(psy_ui_mouseevent_button(ev) == 1)) {
 		if (self->edit_mode) {
 			psy_audio_PatternEvent patternevent;			
@@ -443,7 +443,7 @@ void pianogrid_on_mouse_move(Pianogrid* self, psy_ui_MouseEvent* ev)
 		if (self->hoverpatternentry != oldhover) {
 			psy_ui_component_invalidate(&self->component);
 		}
-		if (((psy_ui_mouseevent_button(ev) == 1) && (!self->edit_mode || psy_ui_mouseevent_ctrlkey(ev)))) {
+		if (((psy_ui_mouseevent_button(ev) == 1) && (!self->edit_mode || psy_ui_mouseevent_ctrl_key(ev)))) {
 			cursor = pianogrid_make_cursor(self, psy_ui_mouseevent_pt(ev).x,
 				psy_ui_mouseevent_pt(ev).y);
 			if (cursor.key != self->last_drag_cursor.key ||
@@ -527,7 +527,7 @@ void pianogrid_on_mouse_up(Pianogrid* self, psy_ui_MouseEvent* ev)
 	if (self->prevent_context_menu) {				
 		self->prevent_context_menu = FALSE;			
 	} else if (!self->gridstate->pv->selection.valid) {		
-		if (!self->edit_mode || ((psy_ui_mouseevent_button(ev) == 1 && psy_ui_mouseevent_ctrlkey(ev)))) {
+		if (!self->edit_mode || ((psy_ui_mouseevent_button(ev) == 1 && psy_ui_mouseevent_ctrl_key(ev)))) {
 			pianogrid_set_cursor(self, self->dragcursor);			
 		}
 	}

@@ -718,52 +718,44 @@ psy_audio_SequenceCursor trackerstate_make_cursor(TrackerState* self,
 	return rv; // trackerstate_checkcursorbounds(self, rv);
 }
 
-void trackerstate_columncolours(TrackerState* self,
-	TrackerColumnFlags flags, uintptr_t track,
-	psy_ui_Colour* bg, psy_ui_Colour* fore)
-{		
-	/* uintptr_t numtracks; */
-	psy_ui_Style* style;
-
-	assert(bg);
-	assert(fore);
+psy_ui_Style* trackerstate_column_style(TrackerState* self,
+	TrackerColumnFlags flags, uintptr_t track)
+{			
+	psy_ui_Style* rv;	
 	
 	// numtracks = patternviewstate_num_song_tracks(self->pv);
-	style = NULL;
+	rv = NULL;
 	if (flags.cursor != FALSE) {		
-		style = psy_ui_style(STYLE_PV_CURSOR);
+		rv = psy_ui_style(STYLE_PV_CURSOR);
 	} else if (flags.playbar) {
-		style = psy_ui_style(STYLE_PV_PLAYBAR);		
+		rv = psy_ui_style(STYLE_PV_PLAYBAR);
 	} else if (flags.selection) {
 		if (flags.beat4) {
-			style = psy_ui_style(STYLE_PV_ROW4BEAT_SELECT);			
+			rv = psy_ui_style(STYLE_PV_ROW4BEAT_SELECT);
 		} else if (flags.beat) {
-			style = psy_ui_style(STYLE_PV_ROWBEAT_SELECT);			
+			rv = psy_ui_style(STYLE_PV_ROWBEAT_SELECT);
 		} else {
-			style = psy_ui_style(STYLE_PV_ROW_SELECT);			
+			rv = psy_ui_style(STYLE_PV_ROW_SELECT);
 		}		
 	} else if (flags.mid) {				
 		if (flags.cursor != FALSE) {
-			style = psy_ui_style(STYLE_PV_CURSOR);			
+			rv = psy_ui_style(STYLE_PV_CURSOR);
 		} else {
-			style = psy_ui_style(STYLE_PV_PLAYBAR);			
+			rv = psy_ui_style(STYLE_PV_PLAYBAR);
 		}
 	} else {
 		if (flags.beat4) {			
-			style = psy_ui_style(STYLE_PV_ROW4BEAT);			
+			rv = psy_ui_style(STYLE_PV_ROW4BEAT);
 		} else if (flags.beat) {
-			style = psy_ui_style(STYLE_PV_ROWBEAT);			
+			rv = psy_ui_style(STYLE_PV_ROWBEAT);
 		} else {
-			style = psy_ui_style(STYLE_PV_ROW);				
+			rv = psy_ui_style(STYLE_PV_ROW);				
 		}
 	}	
-	if (style) {
-		*bg = style->background.colour;
-		*fore = style->colour;
-	} else {
-		*bg = psy_ui_colour_black();
-		*fore = psy_ui_colour_white();
+	if (rv) {
+		return rv;		
 	}
+	return psy_ui_style(STYLE_PATTERNVIEW);		
 }
 
 void trackerstate_update_clip_events(TrackerState* self,

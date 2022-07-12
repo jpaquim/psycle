@@ -69,7 +69,7 @@ void machineviewbar_updateconnectasmixersend(MachineViewBar* self)
 		psy_audio_machines_is_connect_as_mixersend(self->machines)) {
 		psy_ui_checkbox_check(&self->mixersend);
 	} else {
-		psy_ui_checkbox_disablecheck(&self->mixersend);
+		psy_ui_checkbox_disable_check(&self->mixersend);
 	}
 }
 

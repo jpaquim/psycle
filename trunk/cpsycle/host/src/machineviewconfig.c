@@ -49,6 +49,7 @@ static void machineviewconfig_set_colour(MachineViewConfig*,
 	const char* key, uintptr_t style_id, psy_ui_Colour);
 static void machineviewconfig_set_style_background_colour(MachineViewConfig*,
 	const char* key, uintptr_t style_id, psy_ui_Colour);
+static void machineviewconfig_on_load_bitmap(MachineViewConfig*, psy_Property* sender);
 
 void machineviewconfig_init(MachineViewConfig* self, psy_Property* parent)
 {
@@ -78,23 +79,23 @@ void machineviewconfig_makeview(MachineViewConfig* self, psy_Property* parent)
 {	
 	assert(self);
 
-	self->machineview = psy_property_settext(
+	self->machineview = psy_property_set_text(
 		psy_property_append_section(parent, "machineview"),
 		"settingsview.mv.machineview");
-	psy_property_settext(
+	psy_property_set_text(
 		psy_property_append_bool(self->machineview,
 			"drawmachineindexes", TRUE),
 		"settingsview.mv.draw-machine-indexes");
-	psy_property_set_id(psy_property_settext(
+	psy_property_set_id(psy_property_set_text(
 		psy_property_append_bool(self->machineview,
 			"drawvumeters", TRUE),
 		"settingsview.mv.draw-vumeters"),
 		PROPERTY_ID_DRAWVUMETERS);
-	psy_property_settext(
+	psy_property_set_text(
 		psy_property_append_bool(self->machineview,
 			"drawwirehover", FALSE),
 		"settingsview.mv.draw-wirehover");
-	psy_property_set_id(psy_property_settext(
+	psy_property_set_id(psy_property_set_text(
 		psy_property_append_bool(self->machineview,
 			"drawvirtualgenerators", FALSE),
 		"settingsview.mv.draw-virtualgenerators"),
@@ -106,10 +107,10 @@ void machineviewconfig_makeview(MachineViewConfig* self, psy_Property* parent)
 
 void machineviewconfig_makestackview(MachineViewConfig* self, psy_Property* parent)
 {
-	self->stackview = psy_property_settext(
+	self->stackview = psy_property_set_text(
 		psy_property_append_section(parent, "stackview"),
 		"settingsview.mv.stackview");
-	psy_property_settext(
+	psy_property_set_text(
 		psy_property_append_bool(self->stackview,
 			"drawsmalleffects", FALSE),
 		"settingsview.mv.stackview-draw-smalleffects");
@@ -123,105 +124,107 @@ void machineviewconfig_maketheme(MachineViewConfig* self, psy_Property* parent)
 	assert(self);
 	
 	/* define theme properties */	
-	self->theme = psy_property_settext(
+	self->theme = psy_property_set_text(
 		psy_property_append_section(parent, "theme"),
 		"settingsview.mv.theme.theme");	
-	psy_property_settext(
-		psy_property_sethint(psy_property_append_int(self->theme,
+	psy_property_set_text(
+		psy_property_set_hint(psy_property_append_int(self->theme,
 			"vu2", 0x00403731, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
 		"settingsview.mv.theme.vu-background");
-	psy_property_settext(
-		psy_property_sethint(psy_property_append_int(self->theme,
+	psy_property_set_text(
+		psy_property_set_hint(psy_property_append_int(self->theme,
 			"vu1", 0x0080FF80, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
 		"settingsview.mv.theme.vu-bar");
-	psy_property_settext(
-		psy_property_sethint(psy_property_append_int(self->theme,
+	psy_property_set_text(
+		psy_property_set_hint(psy_property_append_int(self->theme,
 			"vu3", 0x00262bd7, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
 		"settingsview.mv.theme.onclip");
-	psy_property_settext(
+	psy_property_set_text(
 		psy_property_append_str(self->theme,
 			"generator_fontface", style_str),
 		"settingsview.mv.theme.generators-font-face");
-	psy_property_settext(
-		psy_property_sethint(psy_property_append_int(self->theme,
+	psy_property_set_text(
+		psy_property_set_hint(psy_property_append_int(self->theme,
 			"generator_font_point", 0x00000050, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
 		"settingsview.mv.theme.generators-font-point");
-	psy_property_settext(psy_property_sethint(
+	psy_property_set_text(psy_property_set_hint(
 		psy_property_append_int(self->theme,
 			"generator_font_flags", 0x00000000, 0, 0),
 		PSY_PROPERTY_HINT_EDITCOLOR),
 		"settingsview.mv.theme.generator_font_flags");
-	psy_property_settext(psy_property_append_str(self->theme,
+	psy_property_set_text(psy_property_append_str(self->theme,
 		"effect_fontface", style_str),
 		"settingsview.mv.theme.effect-fontface");
-	psy_property_settext(
-		psy_property_sethint(psy_property_append_int(self->theme,
+	psy_property_set_text(
+		psy_property_set_hint(psy_property_append_int(self->theme,
 			"effect_font_point", 0x00000050, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
 		"settingsview.mv.theme.effect-font-point");
-	psy_property_settext(
-		psy_property_sethint(psy_property_append_int(self->theme,
+	psy_property_set_text(
+		psy_property_set_hint(psy_property_append_int(self->theme,
 			"effect_font_flags", 0x00000000, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
 		"settingsview.mv.theme.effect-font-flags");	
-	psy_property_settext(
-		psy_property_sethint(psy_property_append_int(self->theme,
+	psy_property_set_text(
+		psy_property_set_hint(psy_property_append_int(self->theme,
 			"mv_colour", style_value,
 			0, 0), PSY_PROPERTY_HINT_EDITCOLOR),
 		"settingsview.mv.theme.background");
-	psy_property_settext(
-		psy_property_sethint(psy_property_append_int(self->theme,
+	psy_property_set_text(
+		psy_property_set_hint(psy_property_append_int(self->theme,
 			"mv_wirecolour", style_value, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
 		"settingsview.mv.theme.wirecolour");
-	psy_property_settext(
-		psy_property_sethint(psy_property_append_int(self->theme,
+	psy_property_set_text(
+		psy_property_set_hint(psy_property_append_int(self->theme,
 			"mv_wirecolour2", style_value, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
 		"settingsview.mv.theme.wirecolour2");
-	psy_property_settext(
-		psy_property_sethint(psy_property_append_int(self->theme,
+	psy_property_set_text(
+		psy_property_set_hint(psy_property_append_int(self->theme,
 			"mv_polycolour", style_value, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
 		"settingsview.mv.theme.polygons");
-	psy_property_settext(
-		psy_property_sethint(psy_property_append_int(self->theme,
+	psy_property_set_text(
+		psy_property_set_hint(psy_property_append_int(self->theme,
 			"mv_generator_fontcolour", style_value, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
 		"settingsview.mv.theme.generators-font");
-	psy_property_settext(
-		psy_property_sethint(psy_property_append_int(self->theme,
+	psy_property_set_text(
+		psy_property_set_hint(psy_property_append_int(self->theme,
 			"mv_effect_fontcolour", style_value, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
 		"settingsview.mv.theme.effects-font");
-	psy_property_settext(
-		psy_property_sethint(psy_property_append_int(self->theme,
+	psy_property_set_text(
+		psy_property_set_hint(psy_property_append_int(self->theme,
 			"mv_wirewidth", 0x00000001, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
 		"settingsview.mv.theme.wire-width");
-	psy_property_settext(
-		psy_property_sethint(psy_property_append_int(self->theme,
+	psy_property_set_text(
+		psy_property_set_hint(psy_property_append_int(self->theme,
 			"mv_wireaa", 0x01, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
 		"settingsview.mv.theme.antialias-halo");
-	psy_property_settext(
+	psy_property_set_text(
 		psy_property_append_str(self->theme,
 			"machine_background", style_str),
 		"settingsview.mv.theme.machine-background");
-	psy_property_settext(
-		psy_property_sethint(psy_property_append_int(self->theme,
+	psy_property_set_text(
+		psy_property_set_hint(psy_property_append_int(self->theme,
 			"mv_triangle_size", style_value, 0, 0),
 			PSY_PROPERTY_HINT_EDIT),
 		"settingsview.mv.theme.polygon-size");	
-	self->machineskins = psy_property_set_id(
-		psy_property_sethint(psy_property_settext(
-		psy_property_append_choice(self->theme, "skins", 0),
-		"Skin"), PSY_PROPERTY_HINT_COMBO),
-		PROPERTY_ID_MACHINESKIN);
+	self->machineskins =
+		psy_property_connect(psy_property_set_id(psy_property_set_hint(
+			psy_property_set_text(psy_property_append_choice(
+				self->theme, "skins", 0),
+				"Skin"), PSY_PROPERTY_HINT_COMBO),
+			PROPERTY_ID_MACHINESKIN),
+			self, machineviewconfig_on_load_bitmap);
 	machineviewconfig_update_machine_skins(self);	
 }
 
@@ -242,7 +245,7 @@ void machineviewconfig_resettheme(MachineViewConfig* self)
 	assert(self);
 	
 	machineviewconfig_set_style_default_settings(self);
-	psy_property_setitem_int(self->machineskins, 0);
+	psy_property_set_item_int(self->machineskins, 0);
 	machineviewconfig_save(self);
 }
 
@@ -257,10 +260,10 @@ void machineviewconfig_settheme(MachineViewConfig* self, psy_Property* theme)
 			psy_property_at_str(theme, "machine_skin", ""),
 			PSY_PROPERTY_TYPE_STRING);
 		if (machine_skin) {			
-			psy_property_setitem_int(self->machineskins,
+			psy_property_set_item_int(self->machineskins,
 				psy_property_index(machine_skin));
 		} else {
-			psy_property_setitem_int(self->machineskins, 0);
+			psy_property_set_item_int(self->machineskins, 0);
 		}
 		psy_property_sync(self->theme, theme);
 		machineviewconfig_load(self);
@@ -341,6 +344,11 @@ void read_colour(psy_Property* config, const char* key, psy_ui_Style* style, boo
 				(uint32_t)psy_property_item_int(p)));
 		}
 	}
+}
+
+void machineviewconfig_on_load_bitmap(MachineViewConfig* self, psy_Property* sender)
+{
+
 }
 
 void machineviewconfig_load_bitmap(MachineViewConfig* self)
@@ -467,8 +475,7 @@ void machineviewconfig_save(MachineViewConfig* self)
 	psy_property_set_int(self->theme, "effect_font_point",
 		fontinfo.lfHeight);
 	psy_property_set_int(self->theme, "effect_font_flags",
-		0x00000000);
-		
+		0x00000000);		
 	psy_property_set_str(self->theme, "machine_background",
 		style->background.image_path);	
 }
@@ -779,43 +786,6 @@ bool machineviewconfig_stackview_drawsmalleffects(const MachineViewConfig* self)
 	assert(self);
 
 	return psy_property_at_bool(self->stackview, "drawsmalleffects", FALSE);
-}
-
-/* events */
-uintptr_t machineviewconfig_onchanged(MachineViewConfig* self, psy_Property*
-	property)
-{
-	uintptr_t rebuild_level;
-
-	assert(self);
-
-	rebuild_level = psy_INDEX_INVALID;
-	if (machineviewconfig_hasthemeproperty(self, property)) {
-		psy_Property* choice;
-		bool worked;
-
-		choice = (psy_property_is_choice_item(property))
-			? psy_property_parent(property)
-			: NULL;
-		worked = FALSE;
-		if (choice) {
-			worked = TRUE;
-			switch (psy_property_id(choice)) {
-			case PROPERTY_ID_MACHINESKIN:
-				machineviewconfig_load_bitmap(self);
-				break;
-			default:
-				worked = FALSE;
-				break;
-			}
-		}
-		if (!worked) {
-			machineviewconfig_load(self);
-		}
-	} else {
-		psy_signal_emit(&self->signal_changed, self, 1, property);
-	}
-	return rebuild_level;
 }
 
 void machineviewconfig_set_style_default_settings(MachineViewConfig* self)

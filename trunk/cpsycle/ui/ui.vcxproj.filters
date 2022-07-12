@@ -543,5 +543,8 @@
     <ClInclude Include="src\uitextdraw.h">
       <Filter>components</Filter>
     </ClInclude>
+    <ClInclude Include="src\uikeys.h">
+      <Filter>common</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

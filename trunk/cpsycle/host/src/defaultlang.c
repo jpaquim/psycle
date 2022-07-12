@@ -8,964 +8,715 @@
 
 #include "defaultlang.h"
 
-/* container */
-#include <propertiesio.h>
-/* std */
-#include <string.h>
-
-static psy_Property* currsection = NULL;
-
-static psy_Property* setsection(psy_Property* section)
-{
-	currsection = section;
-	return section;
-}
-
-static void add(const char* key, const char* translation)
-{
-	assert(currsection);
-
-	psy_property_set_str(currsection, key, translation);
-}
-
-/* prototypes */
-static void make_translator_filebar(psy_Property* parent);
-static void make_translator_undobar(psy_Property* parent);
-static void make_translator_playbar(psy_Property* parent);
-static void make_translator_playlist(psy_Property* parent);
-static void make_translator_metronomebar(psy_Property* parent);
-static void make_translator_mainview(psy_Property* parent);
-static void make_translator_help(psy_Property* parent);
-static void make_translator_greetings(psy_Property* parent);
-static void make_translator_machinebar(psy_Property* parent);
-static void make_translator_trackbar(psy_Property* parent);
-static void make_translator_octavebar(psy_Property* parent);
-static void make_translator_edit(psy_Property* parent);
-static void make_translator_timebar(psy_Property* parent);
-static void make_translator_linesperbeatbar(psy_Property* parent);
-static void make_translator_channelmapping(psy_Property* parent);
-static void make_translator_renderview(psy_Property* parent);
-static void make_translator_export(psy_Property* parent);
-static void make_translator_gear(psy_Property* parent);
-static void make_translator_cpu(psy_Property* parent);
-static void make_translator_songproperties(psy_Property* parent);
-static void make_translator_settingsview(psy_Property* parent);
-static void make_translator_instrumentsbox(psy_Property* parent);
-static void make_translator_instrumentview(psy_Property* parent);
-static void make_translator_machineview(psy_Property* parent);
-static void make_translator_machineframe(psy_Property* parent);
-static void make_translator_patternview(psy_Property* parent);
-static void make_translator_transformpattern(psy_Property* parent);
-static void make_translator_swingfillview(psy_Property* parent);
-static void make_translator_sequenceview(psy_Property* parent);
-static void make_translator_seqedit(psy_Property* parent);
-static void make_translator_newmachine(psy_Property* parent);
-static void make_translator_samplesview(psy_Property* parent);
-static void make_translator_general(psy_Property* parent);
-static void make_translator_tracker(psy_Property* parent);
-static void make_translator_messages(psy_Property* parent);
 
 /* implementation */
-void make_translator_default(psy_Property* lang)
+void make_translator_default(psy_Dictionary* dict)
 {
-	psy_Property* section;
-
-	assert(lang);
-
-	section = setsection(lang);
-	add("lang", "en");
-	make_translator_filebar(lang);
-	make_translator_undobar(lang);
-	make_translator_playbar(lang);
-	make_translator_playlist(lang);
-	make_translator_metronomebar(lang);	
-	make_translator_mainview(lang);
-	make_translator_help(lang);
-	make_translator_greetings(lang);
-	make_translator_machinebar(lang);
-	make_translator_trackbar(lang);
-	make_translator_octavebar(lang);
-	make_translator_edit(lang);
-	make_translator_timebar(lang);
-	make_translator_linesperbeatbar(lang);
-	make_translator_channelmapping(lang);
-	make_translator_renderview(lang);
-	make_translator_export(lang);
-	make_translator_gear(lang);
-	make_translator_cpu(lang);
-	make_translator_songproperties(lang);
-	make_translator_settingsview(lang);
-	make_translator_instrumentsbox(lang);
-	make_translator_instrumentview(lang);
-	make_translator_machineview(lang);
-	make_translator_machineframe(lang);
-	make_translator_patternview(lang);
-	make_translator_transformpattern(lang);
-	make_translator_swingfillview(lang);	
-	make_translator_sequenceview(lang);
-	make_translator_seqedit(lang);
-	make_translator_newmachine(lang);
-	make_translator_samplesview(lang);
-	make_translator_general(lang);
-	make_translator_tracker(lang);
-	make_translator_messages(lang);
-}
-
-void make_translator_filebar(psy_Property* parent)
-{	
-	setsection(psy_property_append_section(parent, "file"));	
-	add("showall", "Show all");
-	add("file", "File:");
-	add("song", "Song");
-	add("diskop", "Disk op.");
-	add("load", "Load");
-	add("save", "Save");
-	add("refresh", "Refresh");
-	add("export", "Export");
-	add("new", "New");
-	add("render", "Render");
-	add("loadsong", "Load Song");
-	add("savesong", "Save Song");	
-	add("plugin-filesave", "Plugin File Load");
-	add("plugin-fileload", "Plugin File Save");
-	add("exit", "Exit");
-}
-
-void make_translator_undobar(psy_Property* parent)
-{
-	setsection(psy_property_append_section(parent, "undo"));
-	add("undo", "Undo");
-	add("redo", "Redo");
-}
-
-void make_translator_playbar(psy_Property* parent)
-{	
-	setsection(psy_property_append_section(parent, "play"));
-	add("loop", "Loop");
-	add("record-notes", "Record Notes");
-	add("play", "Play");
-	add("stop", "Stop");
-	add("song", "Song");
-	add("sel", "Sel");
-	add("beats", "Beats");
-}
-
-void make_translator_playlist(psy_Property* parent)
-{
-	setsection(psy_property_append_section(parent, "playlist"));
-	add("play", "Play");
-	add("stop", "Stop");
-	add("delete", "Delete");
-	add("clear", "Clear");
-	add("recent-songs", "Recent Songs");
-}
-
-void make_translator_metronomebar(psy_Property* parent)
-{
-	setsection(psy_property_append_section(parent, "metronome"));
-	add("metronome", "Metronome");
-	add("configure", "(Configure)");	
-	add("precount", "Precount");
-}
-
-void make_translator_mainview(psy_Property* parent)
-{
-	setsection(psy_property_append_section(parent, "main"));	
-	add("machines", "Machines");
-	add("patterns", "Patterns");
-	add("pattern", "Pattern");
-	add("samples", "Samples");
-	add("instrument", "Instrument");
-	add("instruments", "Instruments");
-	add("scripts", "...");
-	add("help", "Help");
-	add("settings", "Settings");
-	add("properties", "Properties");
-	add("exit", "Exit");
-	add("kbd", "Kbd");
-	add("terminal", "Terminal");
-	add("floated", "This view is floated");
-}
-
-void make_translator_help(psy_Property* parent)
-{
-	setsection(psy_property_append_section(parent, "help"));
-	add("help", "Help");
-	add("about", "About");
-	add("greetings", "Greetings");
-	add("licence", "Licence");
-	add("contributors-credits", "Contributors / Credits");
-	add("ok", "OK");
-	add("extract", "Extract Help");
-	add("combine", "Combine Help");
-}
-
-void make_translator_greetings(psy_Property* parent)
-{
-	setsection(psy_property_append_section(parent, "greetings"));
-	add("thanks", "Thanks! / ");
-	add("wantstothank",
+	assert(dict);
+	
+	psy_dictionary_set(dict, "lang", "en");
+	/* [file] */
+	psy_dictionary_set(dict, "file.showall", "Show all");
+	psy_dictionary_set(dict, "file.file", "File:");
+	psy_dictionary_set(dict, "file.song", "Song");
+	psy_dictionary_set(dict, "file.diskop", "Disk op.");
+	psy_dictionary_set(dict, "file.load", "Load");
+	psy_dictionary_set(dict, "file.save", "Save");
+	psy_dictionary_set(dict, "file.refresh", "Refresh");
+	psy_dictionary_set(dict, "file.export", "Export");
+	psy_dictionary_set(dict, "file.new", "New");
+	psy_dictionary_set(dict, "file.render", "Render");
+	psy_dictionary_set(dict, "file.loadsong", "Load Song");
+	psy_dictionary_set(dict, "file.savesong", "Save Song");
+	psy_dictionary_set(dict, "file.plugin-filesave", "Plugin File Load");
+	psy_dictionary_set(dict, "file.plugin-fileload", "Plugin File Save");
+	psy_dictionary_set(dict, "file.exit", "Exit");
+	/* [undo] */
+	psy_dictionary_set(dict, "undo.undo", "Undo");
+	psy_dictionary_set(dict, "undo.redo", "Redo");
+	/* [play] */	
+	psy_dictionary_set(dict, "play.loop", "Loop");
+	psy_dictionary_set(dict, "play.record-notes", "Record Notes");
+	psy_dictionary_set(dict, "play.play", "Play");
+	psy_dictionary_set(dict, "play.stop", "Stop");
+	psy_dictionary_set(dict, "play.song", "Song");
+	psy_dictionary_set(dict, "play.sel", "Sel");
+	psy_dictionary_set(dict, "play.beats", "Beats");
+	/* playlist */	
+	psy_dictionary_set(dict, "playlist.play", "Play");
+	psy_dictionary_set(dict, "playlist.stop", "Stop");
+	psy_dictionary_set(dict, "playlist.delete", "Delete");
+	psy_dictionary_set(dict, "playlist.clear", "Clear");
+	psy_dictionary_set(dict, "playlist.recent-songs", "Recent Songs");
+	/* metronome */	
+	psy_dictionary_set(dict, "metronome.metronome", "Metronome");
+	psy_dictionary_set(dict, "metronome.configure", "(Configure)");
+	psy_dictionary_set(dict, "metronome.precount", "Precount");
+	/* main */	
+	psy_dictionary_set(dict, "main.machines", "Machines");
+	psy_dictionary_set(dict, "main.patterns", "Patterns");
+	psy_dictionary_set(dict, "main.pattern", "Pattern");
+	psy_dictionary_set(dict, "main.samples", "Samples");
+	psy_dictionary_set(dict, "main.instrument", "Instrument");
+	psy_dictionary_set(dict, "main.instruments", "Instruments");
+	psy_dictionary_set(dict, "main.scripts", "...");
+	psy_dictionary_set(dict, "main.help", "Help");
+	psy_dictionary_set(dict, "main.settings", "Settings");
+	psy_dictionary_set(dict, "main.properties", "Properties");
+	psy_dictionary_set(dict, "main.exit", "Exit");
+	psy_dictionary_set(dict, "main.kbd", "Kbd");
+	psy_dictionary_set(dict, "main.terminal", "Terminal");
+	psy_dictionary_set(dict, "main.floated", "This view is floated");
+	/* help */	
+	psy_dictionary_set(dict, "help.help", "Help");
+	psy_dictionary_set(dict, "help.about", "About");
+	psy_dictionary_set(dict, "help.greetings", "Greetings");
+	psy_dictionary_set(dict, "help.licence", "Licence");
+	psy_dictionary_set(dict, "help.contributors-credits", "Contributors / Credits");
+	psy_dictionary_set(dict, "help.ok", "OK");
+	psy_dictionary_set(dict, "help.extract", "Extract Help");
+	psy_dictionary_set(dict, "help.combine", "Combine Help");
+	/* greetings */	
+	psy_dictionary_set(dict, "greetings.thanks", "Thanks! / ");
+	psy_dictionary_set(dict, "greetings.wantstothank",
 		"Psycledelics, the Community, wants to thank the following people "
 		"for their contributions in the developement of Psycle");
-	add("showargurus", "Show Original Arguru's Greetings");
-	add("showcurrent", "Show Current Greetings");
-}
-
-void make_translator_machinebar(psy_Property* parent)
-{
-	setsection(psy_property_append_section(parent, "machinebar"));
-	add("gear", "Gear Rack");
-	add("dock", "Param Rack");
-	add("editor", "Editor");
-	add("cpu", "CPU");
-	add("midi", "MIDI");
-}
-
-void make_translator_trackbar(psy_Property* parent)
-{
-	setsection(psy_property_append_section(parent, "trackbar"));
-	add("tracks", "Tracks");
-}
-
-void make_translator_octavebar(psy_Property* parent)
-{
-	setsection(psy_property_append_section(parent, "octavebar"));
-	add("octave", "Octave");
-}
-
-void make_translator_edit(psy_Property* parent)
-{
-	setsection(psy_property_append_section(parent, "edit"));
-	add("cut", "Cut");
-	add("copy", "Copy");
-	add("crop", "Crop");
-	add("delete", "Delete");
-	add("paste", "Paste");
-	add("mixpaste", "MixPaste");
-	add("clear", "Clear");
-	add("duplicate", "Duplicate");
-	add("clone", "Clone");
-	add("transposeblockinc", "Transpose +1");
-	add("transposeblockdec", "Transpose -1");
-	add("transposeblockinc12", "Transpose +12");
-	add("transposeblockdec12", "Transpose -12");
-	add("transposeblockdec12", "Transpose -12");
-	add("blockinterpolate", "Interpolate (Linear)");
-	add("blockinterpolatecurve", "Interpolate (Curve)");
-	add("blocksetinstr", "Change Instrument");
-	add("blocksetmachine", "Change Machine");
-	add("blockswingfill", "Swing Fill Block");
-	add("trackswingfill", "Swing Fill Track");
-	add("searchreplace", "Search and Replace");
-	add("importpsb", "Import (psb)");
-	add("exportpsb", "Export (psb)");
-}
-
-void make_translator_timebar(psy_Property* parent)
-{
-	setsection(psy_property_append_section(parent, "timebar"));
-	add("tempo", "Tempo");
-}
-
-void make_translator_linesperbeatbar(psy_Property* parent)
-{
-	setsection(psy_property_append_section(parent, "lpb"));
-	add("lines-per-beat", "Lines per beat");
-}
-
-void make_translator_channelmapping(psy_Property* parent)
-{
-	setsection(psy_property_append_section(parent, "channelmapping"));
-	add("autowire", "Autowire");
-	add("unselect-all", "Unselect all");
-	add("remove-connection-with-right-click",
+	psy_dictionary_set(dict, "greetings.showargurus", "Show Original Arguru's Greetings");
+	psy_dictionary_set(dict, "greetings.showcurrent", "Show Current Greetings");
+	/* machinebar */
+	psy_dictionary_set(dict, "machinebar.gear", "Gear Rack");
+	psy_dictionary_set(dict, "machinebar.dock", "Param Rack");
+	psy_dictionary_set(dict, "machinebar.editor", "Editor");
+	psy_dictionary_set(dict, "machinebar.cpu", "CPU");
+	psy_dictionary_set(dict, "machinebar.midi", "MIDI");
+	/* trackbar */	
+	psy_dictionary_set(dict, "trackbar.tracks", "Tracks");
+	/* octavebar */	
+	psy_dictionary_set(dict, "octavebar.octave", "Octave");
+	/* edit */	
+	psy_dictionary_set(dict, "edit.cut", "Cut");
+	psy_dictionary_set(dict, "edit.copy", "Copy");
+	psy_dictionary_set(dict, "edit.crop", "Crop");
+	psy_dictionary_set(dict, "edit.delete", "Delete");
+	psy_dictionary_set(dict, "edit.paste", "Paste");
+	psy_dictionary_set(dict, "edit.mixpaste", "MixPaste");
+	psy_dictionary_set(dict, "edit.clear", "Clear");
+	psy_dictionary_set(dict, "edit.duplicate", "Duplicate");
+	psy_dictionary_set(dict, "edit.clone", "Clone");
+	psy_dictionary_set(dict, "edit.transposeblockinc", "Transpose +1");
+	psy_dictionary_set(dict, "edit.transposeblockdec", "Transpose -1");
+	psy_dictionary_set(dict, "edit.transposeblockinc12", "Transpose +12");
+	psy_dictionary_set(dict, "edit.transposeblockdec12", "Transpose -12");
+	psy_dictionary_set(dict, "edit.transposeblockdec12", "Transpose -12");
+	psy_dictionary_set(dict, "edit.blockinterpolate", "Interpolate (Linear)");
+	psy_dictionary_set(dict, "edit.blockinterpolatecurve", "Interpolate (Curve)");
+	psy_dictionary_set(dict, "edit.blocksetinstr", "Change Instrument");
+	psy_dictionary_set(dict, "edit.blocksetmachine", "Change Machine");
+	psy_dictionary_set(dict, "edit.blockswingfill", "Swing Fill Block");
+	psy_dictionary_set(dict, "edit.trackswingfill", "Swing Fill Track");
+	psy_dictionary_set(dict, "edit.searchreplace", "Search and Replace");
+	psy_dictionary_set(dict, "edit.importpsb", "Import (psb)");
+	psy_dictionary_set(dict, "edit.exportpsb", "Export (psb)");
+	/* timebar */
+	psy_dictionary_set(dict, "timebar.tempo", "Tempo");
+	/* lpb */	
+	psy_dictionary_set(dict, "lpb.lines-per-beat", "Lines per beat");
+	/* channelmapping */
+	psy_dictionary_set(dict, "channelmapping.autowire", "Autowire");
+	psy_dictionary_set(dict, "channelmapping.unselect-all", "Unselect all");
+	psy_dictionary_set(dict, "channelmapping.remove-connection-with-right-click",
 		"Remove connection with right click");
-}
-
-void make_translator_renderview(psy_Property* parent)
-{
-	setsection(psy_property_append_section(parent, "render"));
-	add("render", "Render");
-	add("configure", "Configure");
-	add("file", "File");
-	add("sequence-positions", "Sequence positions");
-	add("quality", "Quality");
-	add("dither", "Dither");
-	add("selection", "Selection");
-	add("record", "Record");
-	add("enable", "enable");
-	add("from", "from");
-	add("to", "to");	
-	add("save-wave", "Save Wave");
-	add("entire-song", "The Entire Song");
-	add("songsel", "The Song Selection");
-	add("samplerate", "Samplerate");
-	add("bitdepth", "Bit depth");
-	add("none", "None");
-	add("pdf", "Prob. Distribution");
-	add("triangular", "Triangular");
-	add("rectangular", "Rectangular");
-	add("gaussian", "Gaussian");
-	add("noise-shaping", "Noise-shaping");
-	add("high-pass-contour", "High-Pass Contour");
-	add("none", "none");
-	add("output-path", "Output path");
-	add("save-each-unmuted", "Save each unmuted");
-}
-
-void make_translator_export(psy_Property* parent)
-{
-	setsection(psy_property_append_section(parent, "export"));
-	add("export-module", "Export Module");
-	add("export-midifile", "Export Midi File");
-	add("export-lyfile", "Export LilyPond File");
-}
-
-void make_translator_gear(psy_Property* parent)
-{
-	setsection(psy_property_append_section(parent, "gear"));
-	add("clone", "Clone");
-	add("delete", "Delete");
-	add("properties", "Properties");
-	add("parameters", "Parameters");
-	add("exchange", "Exchange");
-	add("show-master", "Show Master");
-	add("connecttomaster", "Connect To Master");
-	add("create-replace", "Create/Replace");
-	add("mute-unmute", "Mute/Unmute");
-	add("effects", "Effects");
-	add("instruments", "Instruments");
-	add("generators", "Generators");
-	add("waves", "Waves");
-}
-
-void make_translator_cpu(psy_Property* parent)
-{
-	setsection(psy_property_append_section(parent, "cpu"));
-	add("performance", "CPU Performance");
-	add("resources", "Windows Resources");
-	add("ram", "Physical Memory(RAM)");
-	add("ram", "Memoria fisica");
-	add("swap", "Page File (Swap)");
-	add("vram", "Virtual Memory");
-	add("audio-threads", "Audio threads");
-	add("total", "Total (time)");
-	add("machines", "Machines");
-	add("routing", "Routing");	
-}
-
-void make_translator_songproperties(psy_Property* parent)
-{
-	setsection(psy_property_append_section(parent, "songproperties"));
-	add("title", "Song Title");
-	add("credits", "Credits");
-	add("speed", "Speed");
-	add("tempo", "Tempo");
-	add("lpb", "Lines Per Beat");
-	add("tpb", "Ticks Per Beat");
-	add("etpb", "Extra Ticks Per Beat");
-	add("realtempo", "Real Tempo");
-	add("realtpb", "Real Ticks Per Beat");
-	add("extcomments", "Extended Comments");
-}
-
-void make_translator_settingsview(psy_Property* parent)
-{
-	psy_Property* section;
-	psy_Property* subsection;
-
-	section = setsection(psy_property_append_section(parent, "settingsview"));
+	/* render */
+	psy_dictionary_set(dict, "render.render", "Render");
+	psy_dictionary_set(dict, "render.configure", "Configure");
+	psy_dictionary_set(dict, "render.file", "File");
+	psy_dictionary_set(dict, "render.sequence-positions", "Sequence positions");
+	psy_dictionary_set(dict, "render.quality", "Quality");
+	psy_dictionary_set(dict, "render.dither", "Dither");
+	psy_dictionary_set(dict, "render.selection", "Selection");
+	psy_dictionary_set(dict, "render.record", "Record");
+	psy_dictionary_set(dict, "render.enable", "enable");
+	psy_dictionary_set(dict, "render.from", "from");
+	psy_dictionary_set(dict, "render.to", "to");	
+	psy_dictionary_set(dict, "render.save-wave", "Save Wave");
+	psy_dictionary_set(dict, "render.entire-song", "The Entire Song");
+	psy_dictionary_set(dict, "render.songsel", "The Song Selection");
+	psy_dictionary_set(dict, "render.samplerate", "Samplerate");
+	psy_dictionary_set(dict, "render.bitdepth", "Bit depth");
+	psy_dictionary_set(dict, "render.none", "None");
+	psy_dictionary_set(dict, "render.pdf", "Prob. Distribution");
+	psy_dictionary_set(dict, "render.triangular", "Triangular");
+	psy_dictionary_set(dict, "render.rectangular", "Rectangular");
+	psy_dictionary_set(dict, "render.gaussian", "Gaussian");
+	psy_dictionary_set(dict, "render.noise-shaping", "Noise-shaping");
+	psy_dictionary_set(dict, "render.high-pass-contour", "High-Pass Contour");
+	psy_dictionary_set(dict, "render.none", "none");
+	psy_dictionary_set(dict, "render.output-path", "Output path");
+	psy_dictionary_set(dict, "render.save-each-unmuted", "Save each unmuted");
+	/* export */
+	psy_dictionary_set(dict, "export.export-module", "Export Module");
+	psy_dictionary_set(dict, "export.export-midifile", "Export Midi File");
+	psy_dictionary_set(dict, "export.export-lyfile", "Export LilyPond File");
+	/* gear */
+	psy_dictionary_set(dict, "gear.clone", "Clone");
+	psy_dictionary_set(dict, "gear.delete", "Delete");
+	psy_dictionary_set(dict, "gear.properties", "Properties");
+	psy_dictionary_set(dict, "gear.parameters", "Parameters");
+	psy_dictionary_set(dict, "gear.exchange", "Exchange");
+	psy_dictionary_set(dict, "gear.show-master", "Show Master");
+	psy_dictionary_set(dict, "gear.connecttomaster", "Connect To Master");
+	psy_dictionary_set(dict, "gear.create-replace", "Create/Replace");
+	psy_dictionary_set(dict, "gear.mute-unmute", "Mute/Unmute");
+	psy_dictionary_set(dict, "gear.effects", "Effects");
+	psy_dictionary_set(dict, "gear.instruments", "Instruments");
+	psy_dictionary_set(dict, "gear.generators", "Generators");
+	psy_dictionary_set(dict, "gear.waves", "Waves");
+	/* cpu */	
+	psy_dictionary_set(dict, "cpu.performance", "CPU Performance");
+	psy_dictionary_set(dict, "cpu.resources", "Windows Resources");
+	psy_dictionary_set(dict, "cpu.ram", "Physical Memory(RAM)");
+	psy_dictionary_set(dict, "cpu.ram", "Memoria fisica");
+	psy_dictionary_set(dict, "cpu.swap", "Page File (Swap)");
+	psy_dictionary_set(dict, "cpu.vram", "Virtual Memory");
+	psy_dictionary_set(dict, "cpu.audio-threads", "Audio threads");
+	psy_dictionary_set(dict, "cpu.total", "Total (time)");
+	psy_dictionary_set(dict, "cpu.machines", "Machines");
+	psy_dictionary_set(dict, "cpu.routing", "Routing");	
+	/* songproperties */
+	psy_dictionary_set(dict, "songproperties.title", "Song Title");
+	psy_dictionary_set(dict, "songproperties.credits", "Credits");
+	psy_dictionary_set(dict, "songproperties.speed", "Speed");
+	psy_dictionary_set(dict, "songproperties.tempo", "Tempo");
+	psy_dictionary_set(dict, "songproperties.lpb", "Lines Per Beat");
+	psy_dictionary_set(dict, "songproperties.tpb", "Ticks Per Beat");
+	psy_dictionary_set(dict, "songproperties.etpb", "Extra Ticks Per Beat");
+	psy_dictionary_set(dict, "songproperties.realtempo", "Real Tempo");
+	psy_dictionary_set(dict, "songproperties.realtpb", "Real Ticks Per Beat");
+	psy_dictionary_set(dict, "songproperties.extcomments", "Extended Comments");		
 	/* settingsview */
-	add("event-input", "Event Input");
-	add("audio-drivers", "Audio Drivers");
-	add("configure", "Configure");	
-	add("compatibility", "Compatibility");
-	add("choose-font", "Choose Font");	
-	add("none", "None");
-	add("from", "from");
-	add("to", "to");
-	/* settingsview global */
-	setsection(psy_property_append_section(section, "global"));
-	add("configuration", "Configuration");
-	add("enable-audio", "Enable Audio");
-	add("regenerate-plugincache", "Regenerate the plugin cache");		
-	add("language", "Language");
-	add("de", "german");
-	add("en", "english");
-	add("es", "spanish");
-	add("importconfig", "Import MFC Ini File");
-	/* settingsview-midicontrollers	*/
-	setsection(psy_property_append_section(section, "midicontrollers"));
-	add("controllers", "MIDI Controllers");
-	add("add", "Add Controller Map");
-	add("remove", "Remove");
-	add("mapping", "Midi controllers mapping");
-	add("macselect", "Select Generator/Instrument with");
-	add("auxselect", "Select Instrument/Aux with");
-	add("select-inpsycle", "Currently selected in Psycle");
-	add("select-bybank", "Selected by bank change");
-	add("select-byprogram", "Selected by program change");
-	add("select-bychannel", "Selected by MIDI channel index");
-	add("recordrawmidiasmcm", "Record Raw MIDI as MCM");
-	add("mapping-map-velocity", "Map Velocity");
-	add("mapping-map-pitchwheel", "Map Pitch Wheel");
-	add("mapping-map-controller", "Map Controller");
-	add("mapping-map-active", "active");		
-	/* settingsview-metronome */
-	setsection(psy_property_append_section(section, "metronome"));
-	add("metronome", "Metronome");
-	add("show", "Show Metronome Bar");
-	add("machine", "Machine");
-	add("note", "Note");
-	/* settingsview-seqedit */
-	setsection(psy_property_append_section(section, "seqeditor"));
-	add("seqeditor", "Sequence Editor");	
-	add("machine", "New Song Default Sampler (For current change song properties)");
-	/* settingsview-directories */
-	setsection(psy_property_append_section(section, "dirs"));
-	add("dirs", "Directories");
-	add("song", "Song directory");
-	add("samples", "Samples directory");
-	add("plugin32", "Plug-in32 directory");
-	add("plugin64", "Plug-in64 directory");
-	add("lua", "Lua-scripts directory");
-	add("vst32", "Vst32 directories");
-	add("vst64", "Vst64 directories");
-	add("ladspa", "Ladspa directories");
-	add("skin", "Skin directory");
-	/* settingsview-theme */
-	setsection(section);
-	add("theme", "Theme");
-	add("background", "Background");
-	add("font", "Font");
-	add("name", "Name");
-	/* settingsview-general */
-	setsection(psy_property_append_section(section, "general"));
-	add("general", "General");
-	add("version", "Version");
-	add("show-about-at-startup", "Show About At Startup");
-	add("show-song-info-on-load", "Show Song Info On Load");
-	add("show-maximized-at-startup", "Show maximized at startup");
-	add("show-playlist", "Show Playlist/Recentsongs");
-	add("show-sequenceedit", "Show Sequenceeditor");
-	add("show-sequencestepbar", "Show Sequencestepbar");
-	add("save-recent-songs", "Save recent songs");
-	add("play-song-after-load", "Play Song After Load");	
-	add("show-pattern-names", "Show Pattern Names");
-	/* settingsview-visual */
-	setsection(psy_property_append_section(section, "visual"));
-	add("visual", "Visual");
-	add("load-skin", "Load skin");
-	add("default-skin", "Default skin");
-	add("default-font", "Default Font");
-	add("default-line", "Default Line");
-	add("load-dial-bitmap", "Load dial bitmap");
-	add("apptheme", "App Theme");
-	add("light", "light");
-	add("dark", "dark");
-	/* settingsview-patternview */
-	subsection = setsection(psy_property_append_section(section, "pv"));
-	add("patternview", "Pattern View");
-	add("font", "Font");
-	add("choose-font", "Choose Font");
-	add("draw-empty-data", "Draw empty data");
-	add("smoothscroll", "Scroll smooth");
-	add("default-entries", "Default entries");
-	add("displaysinglepattern", "Display Single Pattern");
-	add("useheaderbitmap", "Use Pattern Header Bitmap");
-	add("line-numbers", "Line numbers");
-	add("beat-offset", "Beat offset");
-	add("line-numbers-cursor", "Line numbers cursor");
-	add("line-numbers-in-hex", "Line numbers in HEX");
-	add("wide-instrument-column", "Wide instrument column");
-	add("pattern-track-scopes", "Pattern track scopes");
-	add("wrap-around", "Wrap Around");
-	add("center-cursor-on-screen", "Center cursor on screen");
-	add("bar-highlighting", "Bar highlighting: (beats/bar)");
-	add("a4-440hz", "A4 is 440Hz (Otherwise it is 220Hz)");
-	add("patterndisplay", "Display pattern in");
-	add("tracker", "Tracker");
-	add("piano", "Pianoroll");
-	add("splitvertical", "both side by side");
-	add("splithorizontal", "both one below the other");
-	add("move-cursor-when-paste", "Move Cursor When Paste");	
-	setsection(psy_property_append_section(subsection, "theme"));
-	/* settingsview-patternview/theme */
-	add("theme", "Theme");
-	add("fontface", "Pattern Fontface");
-	add("fontpoint", "Pattern Fontpoint");
-	add("fontflags", "Pattern Fontflags");
-	add("font_x", "Point X");
-	add("font_y", "Point Y");
-	add("headerskin", "Pattern Header Skin");
-	add("separator", "Separator Left");
-	add("separator2", "Separator Right");
-	add("background", "BackGnd Left");
-	add("background2", "BackGnd Right");	
-	add("font", "Font Left");
-	add("font2", "Font Right");
-	add("fontcur", "Font Cur Left");
-	add("fontcur2", "Font Cur Right");
-	add("fontsel", "Font Sel Left");
-	add("fontsel2", "Font Sel Right");
-	add("fontplay", "Font Play Left");
-	add("fontplay2", "Font Play Right");
-	add("row", "Row Left");
-	add("row2", "Row Right");
-	add("rowbeat", "Beat Left");
-	add("rowbeat2", "Beat Right");
-	add("row4beat", "Bar Left");
-	add("row4beat2", "Bar Right");
-	add("selection", "Selection Left");
-	add("selection2", "Selection Right");
-	add("playbar", "Playbar Left");
-	add("playbar2", "Playbar Right");
-	add("cursor", "Cursor Left");
-	add("cursor2", "Cursor Right");
-	add("midline", "Midline Left");
-	add("midline2", "Midline Right");
-	/* settingsview-machineview	*/
-	subsection = setsection(psy_property_append_section(section, "mv"));
-	add("machineview", "Machine View");
-	add("draw-machine-indexes", "Draw Machine Indexes");
-	add("draw-vumeters", "Draw VU Meters");
-	add("draw-wirehover", "Draw Wire Hover");
-	add("draw-virtualgenerators", "Draw Virtual Generators");
-	add("stackview", "Stackview");
-	add("stackview-draw-smalleffects", "Draw Small Effects");
-	/* settingsview-machineview-stackview */
-	setsection(psy_property_append_section(subsection, "theme"));
-	/* settingsview-machineview-theme */
-	add("theme", "Theme");
-	add("vu-background", "Vu BackGround");
-	add("vu-bar", "Vu Bar");
-	add("onclip", "OnClip");
-	add("generators-font-face", "Generators Font Face");
-	add("generators-font-point", "Generators Font Point");
-	add("effect-fontface", "Effect Fontface");
-	add("effect-font-point", "Effect Font Point");
-	add("effect-font-flags", "Effect Font Flags");	
-	add("background", "Background");
-	add("wirecolour", "Wires Left");
-	add("wirecolour2", "Wires Right");
-	add("polygons", "Polygons");
-	add("generators-font", "Generators Font");
-	add("effects-font", "Effects Font");
-	add("wire-width", "Wire width");
-	add("antialias-halo", "AntiAlias halo");
-	add("machine-background", "Machine Background");
-	add("polygon-size", "Polygon size");
-	add("machineskin", "Machineskin");
-	/* settingsview-paramview */
-	subsection = setsection(psy_property_append_section(section, "paramview"));
-	add("native-machine-parameter-window",
+	psy_dictionary_set(dict, "settingsview.event-input", "Event Input");
+	psy_dictionary_set(dict, "settingsview.audio-drivers", "Audio Drivers");
+	psy_dictionary_set(dict, "settingsview.configure", "Configure");	
+	psy_dictionary_set(dict, "settingsview.compatibility", "Compatibility");
+	psy_dictionary_set(dict, "settingsview.choose-font", "Choose Font");	
+	psy_dictionary_set(dict, "settingsview.none", "None");
+	psy_dictionary_set(dict, "settingsview.from", "from");
+	psy_dictionary_set(dict, "settingsview.to", "to");
+	/* settingsview global */	
+	psy_dictionary_set(dict, "settingsview.global.configuration", "Configuration");
+	psy_dictionary_set(dict, "settingsview.global.enable-audio", "Enable Audio");
+	psy_dictionary_set(dict, "settingsview.global.regenerate-plugincache", "Regenerate the plugin cache");		
+	psy_dictionary_set(dict, "settingsview.global.language", "Language");
+	psy_dictionary_set(dict, "settingsview.global.de", "german");
+	psy_dictionary_set(dict, "settingsview.global.en", "english");
+	psy_dictionary_set(dict, "settingsview.global.es", "spanish");
+	psy_dictionary_set(dict, "settingsview.global.importconfig", "Import MFC Ini File");
+	/* settingsview-midicontrollers	*/	
+	psy_dictionary_set(dict, "settingsview.midicontrollers.controllers", "MIDI Controllers");
+	psy_dictionary_set(dict, "settingsview.midicontrollers.add", "Add Controller Map");
+	psy_dictionary_set(dict, "settingsview.midicontrollers.remove", "Remove");
+	psy_dictionary_set(dict, "settingsview.midicontrollers.mapping", "Midi controllers mapping");
+	psy_dictionary_set(dict, "settingsview.midicontrollers.macselect", "Select Generator/Instrument with");
+	psy_dictionary_set(dict, "settingsview.midicontrollers.auxselect", "Select Instrument/Aux with");
+	psy_dictionary_set(dict, "settingsview.midicontrollers.select-inpsycle", "Currently selected in Psycle");
+	psy_dictionary_set(dict, "settingsview.midicontrollers.select-bybank", "Selected by bank change");
+	psy_dictionary_set(dict, "settingsview.midicontrollers.select-byprogram", "Selected by program change");
+	psy_dictionary_set(dict, "settingsview.midicontrollers.select-bychannel", "Selected by MIDI channel index");
+	psy_dictionary_set(dict, "settingsview.midicontrollers.recordrawmidiasmcm", "Record Raw MIDI as MCM");
+	psy_dictionary_set(dict, "settingsview.midicontrollers.mapping-map-velocity", "Map Velocity");
+	psy_dictionary_set(dict, "settingsview.midicontrollers.mapping-map-pitchwheel", "Map Pitch Wheel");
+	psy_dictionary_set(dict, "settingsview.midicontrollers.mapping-map-controller", "Map Controller");
+	psy_dictionary_set(dict, "settingsview.midicontrollers.mapping-map-active", "active");		
+	/* settingsview.metronome */	
+	psy_dictionary_set(dict, "settingsview.metronome.metronome", "Metronome");
+	psy_dictionary_set(dict, "settingsview.metronome.show", "Show Metronome Bar");
+	psy_dictionary_set(dict, "settingsview.metronome.machine", "Machine");
+	psy_dictionary_set(dict, "settingsview.metronome.note", "Note");
+	/* settingsview.seqedit */	
+	psy_dictionary_set(dict, "settingsview.seqedit.seqeditor", "Sequence Editor");	
+	psy_dictionary_set(dict, "settingsview.seqedit.machine", "New Song Default Sampler (For current change song properties)");
+	/* settingsview.dirs */	
+	psy_dictionary_set(dict, "settingsview.dirs.dirs", "Directories");
+	psy_dictionary_set(dict, "settingsview.dirs.song", "Song directory");
+	psy_dictionary_set(dict, "settingsview.dirs.samples", "Samples directory");
+	psy_dictionary_set(dict, "settingsview.dirs.plugin32", "Plug-in32 directory");
+	psy_dictionary_set(dict, "settingsview.dirs.plugin64", "Plug-in64 directory");
+	psy_dictionary_set(dict, "settingsview.dirs.lua", "Lua-scripts directory");
+	psy_dictionary_set(dict, "settingsview.dirs.vst32", "Vst32 directories");
+	psy_dictionary_set(dict, "settingsview.dirs.vst64", "Vst64 directories");
+	psy_dictionary_set(dict, "settingsview.dirs.ladspa", "Ladspa directories");
+	psy_dictionary_set(dict, "settingsview.dirs.skin", "Skin directory");
+	/* settingsview.theme */	
+	psy_dictionary_set(dict, "settingsview.theme.theme", "Theme");
+	psy_dictionary_set(dict, "settingsview.theme.background", "Background");
+	psy_dictionary_set(dict, "settingsview.theme.font", "Font");
+	psy_dictionary_set(dict, "settingsview.theme.name", "Name");
+	/* settingsview.general */	
+	psy_dictionary_set(dict, "settingsview.general.general", "General");
+	psy_dictionary_set(dict, "settingsview.general.version", "Version");
+	psy_dictionary_set(dict, "settingsview.general.show-about-at-startup", "Show About At Startup");
+	psy_dictionary_set(dict, "settingsview.general.show-song-info-on-load", "Show Song Info On Load");
+	psy_dictionary_set(dict, "settingsview.general.show-maximized-at-startup", "Show maximized at startup");
+	psy_dictionary_set(dict, "settingsview.general.show-playlist", "Show Playlist/Recentsongs");
+	psy_dictionary_set(dict, "settingsview.general.show-sequenceedit", "Show Sequenceeditor");
+	psy_dictionary_set(dict, "settingsview.general.show-sequencestepbar", "Show Sequencestepbar");
+	psy_dictionary_set(dict, "settingsview.general.save-recent-songs", "Save recent songs");
+	psy_dictionary_set(dict, "settingsview.general.play-song-after-load", "Play Song After Load");	
+	psy_dictionary_set(dict, "settingsview.general.show-pattern-names", "Show Pattern Names");
+	/* settingsview.visual */	
+	psy_dictionary_set(dict, "settingsview.visual.visual", "Visual");
+	psy_dictionary_set(dict, "settingsview.visual.load-skin", "Load skin");
+	psy_dictionary_set(dict, "settingsview.visual.default-skin", "Default skin");
+	psy_dictionary_set(dict, "settingsview.visual.default-font", "Default Font");
+	psy_dictionary_set(dict, "settingsview.visual.zoom", "Zoom");
+	psy_dictionary_set(dict, "settingsview.visual.default-line", "Default Line");
+	psy_dictionary_set(dict, "settingsview.visual.load-dial-bitmap", "Load dial bitmap");
+	psy_dictionary_set(dict, "settingsview.visual.apptheme", "App Theme");
+	psy_dictionary_set(dict, "settingsview.visual.light", "light");
+	psy_dictionary_set(dict, "settingsview.visual.dark", "dark");
+	/* settingsview.pv */	
+	psy_dictionary_set(dict, "settingsview.pv.patternview", "Pattern View");
+	psy_dictionary_set(dict, "settingsview.pv.font", "Font");
+	psy_dictionary_set(dict, "settingsview.pv.choose-font", "Choose Font");
+	psy_dictionary_set(dict, "settingsview.pv.draw-empty-data", "Draw empty data");
+	psy_dictionary_set(dict, "settingsview.pv.smoothscroll", "Scroll smooth");
+	psy_dictionary_set(dict, "settingsview.pv.default-entries", "Default entries");
+	psy_dictionary_set(dict, "settingsview.pv.displaysinglepattern", "Display Single Pattern");
+	psy_dictionary_set(dict, "settingsview.pv.useheaderbitmap", "Use Pattern Header Bitmap");
+	psy_dictionary_set(dict, "settingsview.pv.line-numbers", "Line numbers");
+	psy_dictionary_set(dict, "settingsview.pv.beat-offset", "Beat offset");
+	psy_dictionary_set(dict, "settingsview.pv.line-numbers-cursor", "Line numbers cursor");
+	psy_dictionary_set(dict, "settingsview.pv.line-numbers-in-hex", "Line numbers in HEX");
+	psy_dictionary_set(dict, "settingsview.pv.wide-instrument-column", "Wide instrument column");
+	psy_dictionary_set(dict, "settingsview.pv.pattern-track-scopes", "Pattern track scopes");
+	psy_dictionary_set(dict, "settingsview.pv.wrap-around", "Wrap Around");
+	psy_dictionary_set(dict, "settingsview.pv.center-cursor-on-screen", "Center cursor on screen");
+	psy_dictionary_set(dict, "settingsview.pv.bar-highlighting", "Bar highlighting: (beats/bar)");
+	psy_dictionary_set(dict, "settingsview.pv.a4-440hz", "A4 is 440Hz (Otherwise it is 220Hz)");
+	psy_dictionary_set(dict, "settingsview.pv.patterndisplay", "Display pattern in");
+	psy_dictionary_set(dict, "settingsview.pv.tracker", "Tracker");
+	psy_dictionary_set(dict, "settingsview.pv.piano", "Pianoroll");
+	psy_dictionary_set(dict, "splitvertical", "both side by side");
+	psy_dictionary_set(dict, "splithorizontal", "both one below the other");
+	psy_dictionary_set(dict, "settingsview.pv.move-cursor-when-paste", "Move Cursor When Paste");		
+	/* settingsview.pv.theme */
+	psy_dictionary_set(dict, "settingsview.pv.theme.theme", "Theme");
+	psy_dictionary_set(dict, "settingsview.pv.theme.fontface", "Pattern Fontface");
+	psy_dictionary_set(dict, "settingsview.pv.theme.fontpoint", "Pattern Fontpoint");
+	psy_dictionary_set(dict, "settingsview.pv.theme.fontflags", "Pattern Fontflags");
+	psy_dictionary_set(dict, "settingsview.pv.theme.font_x", "Point X");
+	psy_dictionary_set(dict, "settingsview.pv.theme.font_y", "Point Y");
+	psy_dictionary_set(dict, "settingsview.pv.theme.headerskin", "Pattern Header Skin");
+	psy_dictionary_set(dict, "settingsview.pv.theme.separator", "Separator Left");
+	psy_dictionary_set(dict, "settingsview.pv.theme.separator2", "Separator Right");
+	psy_dictionary_set(dict, "settingsview.pv.theme.background", "BackGnd Left");
+	psy_dictionary_set(dict, "settingsview.pv.theme.background2", "BackGnd Right");	
+	psy_dictionary_set(dict, "settingsview.pv.theme.font", "Font Left");
+	psy_dictionary_set(dict, "settingsview.pv.theme.font2", "Font Right");
+	psy_dictionary_set(dict, "settingsview.pv.theme.fontcur", "Font Cur Left");
+	psy_dictionary_set(dict, "settingsview.pv.theme.fontcur2", "Font Cur Right");
+	psy_dictionary_set(dict, "settingsview.pv.theme.fontsel", "Font Sel Left");
+	psy_dictionary_set(dict, "settingsview.pv.theme.fontsel2", "Font Sel Right");
+	psy_dictionary_set(dict, "settingsview.pv.theme.fontplay", "Font Play Left");
+	psy_dictionary_set(dict, "settingsview.pv.theme.fontplay2", "Font Play Right");
+	psy_dictionary_set(dict, "settingsview.pv.theme.row", "Row Left");
+	psy_dictionary_set(dict, "settingsview.pv.theme.row2", "Row Right");
+	psy_dictionary_set(dict, "settingsview.pv.theme.rowbeat", "Beat Left");
+	psy_dictionary_set(dict, "settingsview.pv.theme.rowbeat2", "Beat Right");
+	psy_dictionary_set(dict, "settingsview.pv.theme.row4beat", "Bar Left");
+	psy_dictionary_set(dict, "settingsview.pv.theme.row4beat2", "Bar Right");
+	psy_dictionary_set(dict, "settingsview.pv.theme.selection", "Selection Left");
+	psy_dictionary_set(dict, "settingsview.pv.theme.selection2", "Selection Right");
+	psy_dictionary_set(dict, "settingsview.pv.theme.playbar", "Playbar Left");
+	psy_dictionary_set(dict, "settingsview.pv.theme.playbar2", "Playbar Right");
+	psy_dictionary_set(dict, "settingsview.pv.theme.cursor", "Cursor Left");
+	psy_dictionary_set(dict, "settingsview.pv.theme.cursor2", "Cursor Right");
+	psy_dictionary_set(dict, "settingsview.pv.theme.midline", "Midline Left");
+	psy_dictionary_set(dict, "settingsview.pv.theme.midline2", "Midline Right");
+	/* settingsview.mv */	
+	psy_dictionary_set(dict, "settingsview.mv.machineview", "Machine View");
+	psy_dictionary_set(dict, "settingsview.mv.draw-machine-indexes", "Draw Machine Indexes");
+	psy_dictionary_set(dict, "settingsview.mv.draw-vumeters", "Draw VU Meters");
+	psy_dictionary_set(dict, "settingsview.mv.draw-wirehover", "Draw Wire Hover");
+	psy_dictionary_set(dict, "settingsview.mv.draw-virtualgenerators", "Draw Virtual Generators");
+	psy_dictionary_set(dict, "settingsview.mv.stackview", "Stackview");
+	psy_dictionary_set(dict, "settingsview.mv.stackview-draw-smalleffects", "Draw Small Effects");
+	/* settingsview.mv.stackview */
+	/* settingsview.mv.theme */
+	psy_dictionary_set(dict, "settingsview.mv.theme.theme", "Theme");
+	psy_dictionary_set(dict, "settingsview.mv.theme.vu-background", "Vu BackGround");
+	psy_dictionary_set(dict, "settingsview.mv.theme.vu-bar", "Vu Bar");
+	psy_dictionary_set(dict, "settingsview.mv.theme.onclip", "OnClip");
+	psy_dictionary_set(dict, "settingsview.mv.theme.generators-font-face", "Generators Font Face");
+	psy_dictionary_set(dict, "settingsview.mv.theme.generators-font-point", "Generators Font Point");
+	psy_dictionary_set(dict, "settingsview.mv.theme.effect-fontface", "Effect Fontface");
+	psy_dictionary_set(dict, "settingsview.mv.theme.effect-font-point", "Effect Font Point");
+	psy_dictionary_set(dict, "settingsview.mv.theme.effect-font-flags", "Effect Font Flags");	
+	psy_dictionary_set(dict, "settingsview.mv.theme.background", "Background");
+	psy_dictionary_set(dict, "settingsview.mv.theme.wirecolour", "Wires Left");
+	psy_dictionary_set(dict, "settingsview.mv.theme.wirecolour2", "Wires Right");
+	psy_dictionary_set(dict, "settingsview.mv.theme.polygons", "Polygons");
+	psy_dictionary_set(dict, "settingsview.mv.theme.generators-font", "Generators Font");
+	psy_dictionary_set(dict, "settingsview.mv.theme.effects-font", "Effects Font");
+	psy_dictionary_set(dict, "settingsview.mv.theme.wire-width", "Wire width");
+	psy_dictionary_set(dict, "settingsview.mv.theme.antialias-halo", "AntiAlias halo");
+	psy_dictionary_set(dict, "settingsview.mv.theme.machine-background", "Machine Background");
+	psy_dictionary_set(dict, "settingsview.mv.theme.polygon-size", "Polygon size");
+	psy_dictionary_set(dict, "settingsview.mv.theme.machineskin", "Machineskin");
+	/* settingsview.paramview */	
+	psy_dictionary_set(dict, "settingsview.paramview.native-machine-parameter-window",
 		"Native Machine Parameter Window");
-	add("font", "Font");
-	add("load-dial-bitmap", "Load Dial Bitmap");
-	add("default-skin", "Default skin");
-	/* settingsview-paramview-theme */
-	setsection(psy_property_append_section(subsection, "theme"));
-	add("theme", "Theme");
-	add("title-background", "Title Background");
-	add("title-font", "Title Font");
-	add("param-background", "Param Background");
-	add("param-font", "Param Font");
-	add("value-background", "Value Background");
-	add("value-font", "Value Font");
-	add("selparam-background", "SelParam Background");
-	add("selparam-font", "SelParam Font");
-	add("selvalue-background", "SelValue Background");
-	add("selvalue-font", "SelValue Font");
-	add("machinedialbmp", "Machine Dial Bitmap");
-	/* settingsview-keyboard-misc */
-	setsection(psy_property_append_section(section, "kbd"));
-	add("kbd-misc", "Keyboard and misc");
-	add("record-tws",
+	psy_dictionary_set(dict, "settingsview.paramview.font", "Font");
+	psy_dictionary_set(dict, "settingsview.paramview.load-dial-bitmap", "Load Dial Bitmap");
+	psy_dictionary_set(dict, "settingsview.paramview.default-skin", "Default skin");
+	/* settingsview.paramview.theme */	
+	psy_dictionary_set(dict, "settingsview.paramview.theme.theme", "Theme");
+	psy_dictionary_set(dict, "settingsview.paramview.theme.title-background", "Title Background");
+	psy_dictionary_set(dict, "settingsview.paramview.theme.title-font", "Title Font");
+	psy_dictionary_set(dict, "settingsview.paramview.theme.param-background", "Param Background");
+	psy_dictionary_set(dict, "settingsview.paramview.theme.param-font", "Param Font");
+	psy_dictionary_set(dict, "settingsview.paramview.theme.value-background", "Value Background");
+	psy_dictionary_set(dict, "settingsview.paramview.theme.value-font", "Value Font");
+	psy_dictionary_set(dict, "settingsview.paramview.theme.selparam-background", "SelParam Background");
+	psy_dictionary_set(dict, "settingsview.paramview.theme.selparam-font", "SelParam Font");
+	psy_dictionary_set(dict, "settingsview.paramview.theme.selvalue-background", "SelValue Background");
+	psy_dictionary_set(dict, "settingsview.paramview.theme.selvalue-font", "SelValue Font");
+	psy_dictionary_set(dict, "settingsview.paramview.theme.machinedialbmp", "Machine Dial Bitmap");
+	/* settingsview.kbd */	
+	psy_dictionary_set(dict, "settingsview.kbd.kbd-misc", "Keyboard and misc");
+	psy_dictionary_set(dict, "settingsview.kbd.record-tws",
 		"Record Mouse Tweaks as tws (Smooth tweaks)");
-	add("advance-line-on-record", "Advance Line On Record");
-	add("ctrl-play", "Right CTRL = play; Edit Toggle = stop");
-	add("ft2-home", "FT2 Style Home / End Behaviour");
-	add("ft2-delete", "FT2 Style Delete Behaviour");
-	add("cursoralwayssdown", "Cursor always moves down in Effect Column");
-	add("force-patstep1", "Force pattern step 1 when moving with cursors");
-	add("pgupdowntype", "Page Up / Page Down step by");
-	add("pgupdowntype", "Page Up / Page Down step by");
-	add("pgupdowntype-one-beat", "one beat");
-	add("pgupdowntype-one-bar", "one bar");
-	add("pgupdowntype-lines", "lines");
-	add("pgupdowntype-step-lines", "Page Up / Page Down step lines");
-	add("misc", "Miscellaneous options");
-	add("savereminder", "\"Save file?\" reminders on Load, New or Exit");
-	add("numdefaultlines", "Default lines on new pattern");
-	add("allowmultiinstances", "Allow multiple instances of Psycle");
-	add("ft2-explorer", "Use FT2 Style Fileexplorer");
-}
-
-void make_translator_instrumentsbox(psy_Property* parent)
-{
-	setsection(psy_property_append_section(parent, "instrumentsbox"));
-	add("instrument-groups", "Instrument Groups");
-	add("group-instruments", "Group Instruments");
-}
-
-void make_translator_instrumentview(psy_Property* parent)
-{
-	setsection(psy_property_append_section(parent, "instrumentview"));
-	add("instrument", "Instrument");
-	add("instrument-name", "Instrument Name");
-	add("new-note-action", "New Note Action");
-	add("same", "but if the same");
-	add("do", "do");
-	add("note-cut", "Note Cut");
-	add("note-release", "Note Release");
-	add("note-fadeout", "Note Fadeout");
-	add("none", "None");
-	add("notemap", "Notemap");
-	add("play-sample-to-fit", "Play sample to fit");
-	add("pattern-rows", "Pattern rows");
-	add("global-volume", "Global volume");
-	add("amplitude-envelope", "Amplitude envelope");
-	add("pan-envelope", "Pan envelope");
-	add("pitch-envelope", "Pitch envelope");
-	add("swing", "Swing (Randomize)");
-	add("fadeout", "Fadeout");
-	add("attack", "Attack");
-	add("decay", "Decay");
-	add("sustain-level", "Sustain level");
-	add("release", "Release");
-	add("filter-type", "Filter type");
-	add("filter-envelope", "Filter envelope");
-	add("cut-off", "Cut-off");
-	add("res", "Res/bandw.");
-	add("mod", "Mod. Amount");
-	add("random-panning", "Random panning");
-	add("general", "General");
-	add("volume", "Volume");
-	add("pan", "Pan");
-	add("filter", "Filter");
-	add("pitch", "Pitch");
-	add("add", "Add");
-	add("remove", "Remove");
-	add("smplidx", "Smpl Idx");
-	add("key", "Key");
-	add("keylo", "Key Lo");
-	add("keyhi", "Key Hi");
-	add("keyfixed", "Key Fixed");
-}
-
-void make_translator_machineview(psy_Property* parent)
-{
-	setsection(psy_property_append_section(parent, "machineview"));
-	add("new-machine", "New Machine");
-	add("wires", "Wires");
-	add("stack", "Stack");
-	add("no-machines-loaded", "No Machines Loaded");
-	add("no-machine", "No Machine");
-	add("connect-to-mixer-send-return-input",
+	psy_dictionary_set(dict, "settingsview.kbd.advance-line-on-record", "Advance Line On Record");
+	psy_dictionary_set(dict, "settingsview.kbd.ctrl-play", "Right CTRL = play; Edit Toggle = stop");
+	psy_dictionary_set(dict, "settingsview.kbd.ft2-home", "FT2 Style Home / End Behaviour");
+	psy_dictionary_set(dict, "settingsview.kbd.ft2-delete", "FT2 Style Delete Behaviour");
+	psy_dictionary_set(dict, "settingsview.kbd.cursoralwayssdown", "Cursor always moves down in Effect Column");
+	psy_dictionary_set(dict, "settingsview.kbd.force-patstep1", "Force pattern step 1 when moving with cursors");
+	psy_dictionary_set(dict, "settingsview.kbd.pgupdowntype", "Page Up / Page Down step by");
+	psy_dictionary_set(dict, "settingsview.kbd.pgupdowntype", "Page Up / Page Down step by");
+	psy_dictionary_set(dict, "settingsview.kbd.pgupdowntype-one-beat", "one beat");
+	psy_dictionary_set(dict, "settingsview.kbd.pgupdowntype-one-bar", "one bar");
+	psy_dictionary_set(dict, "settingsview.kbd.pgupdowntype-lines", "lines");
+	psy_dictionary_set(dict, "settingsview.kbd.pgupdowntype-step-lines", "Page Up / Page Down step lines");
+	psy_dictionary_set(dict, "settingsview.kbd.misc", "Miscellaneous options");
+	psy_dictionary_set(dict, "settingsview.kbd.savereminder", "\"Save file?\" reminders on Load, New or Exit");
+	psy_dictionary_set(dict, "settingsview.kbd.numdefaultlines", "Default lines on new pattern");
+	psy_dictionary_set(dict, "settingsview.kbd.allowmultiinstances", "Allow multiple instances of Psycle");
+	psy_dictionary_set(dict, "settingsview.kbd.ft2-explorer", "Use FT2 Style Fileexplorer");
+	/* settingsview.io */	
+	psy_dictionary_set(dict, "settingsview.io.input-output", "Input/Output");
+	/* instrumentsbox */	
+	psy_dictionary_set(dict, "instrumentsbox.instrument-groups", "Instrument Groups");
+	psy_dictionary_set(dict, "instrumentsbox.group-instruments", "Group Instruments");
+	/* instrumentview */
+	psy_dictionary_set(dict, "instrumentview.instrument", "Instrument");
+	psy_dictionary_set(dict, "instrumentview.instrument-name", "Instrument Name");
+	psy_dictionary_set(dict, "instrumentview.new-note-action", "New Note Action");
+	psy_dictionary_set(dict, "instrumentview.same", "but if the same");
+	psy_dictionary_set(dict, "instrumentview.do", "do");
+	psy_dictionary_set(dict, "instrumentview.note-cut", "Note Cut");
+	psy_dictionary_set(dict, "instrumentview.note-release", "Note Release");
+	psy_dictionary_set(dict, "instrumentview.note-fadeout", "Note Fadeout");
+	psy_dictionary_set(dict, "instrumentview.none", "None");
+	psy_dictionary_set(dict, "instrumentview.notemap", "Notemap");
+	psy_dictionary_set(dict, "instrumentview.play-sample-to-fit", "Play sample to fit");
+	psy_dictionary_set(dict, "instrumentview.pattern-rows", "Pattern rows");
+	psy_dictionary_set(dict, "instrumentview.global-volume", "Global volume");
+	psy_dictionary_set(dict, "instrumentview.amplitude-envelope", "Amplitude envelope");
+	psy_dictionary_set(dict, "instrumentview.pan-envelope", "Pan envelope");
+	psy_dictionary_set(dict, "instrumentview.pitch-envelope", "Pitch envelope");
+	psy_dictionary_set(dict, "instrumentview.swing", "Swing (Randomize)");
+	psy_dictionary_set(dict, "instrumentview.fadeout", "Fadeout");
+	psy_dictionary_set(dict, "instrumentview.attack", "Attack");
+	psy_dictionary_set(dict, "instrumentview.decay", "Decay");
+	psy_dictionary_set(dict, "instrumentview.sustain-level", "Sustain level");
+	psy_dictionary_set(dict, "instrumentview.release", "Release");
+	psy_dictionary_set(dict, "instrumentview.filter-type", "Filter type");
+	psy_dictionary_set(dict, "instrumentview.filter-envelope", "Filter envelope");
+	psy_dictionary_set(dict, "instrumentview.cut-off", "Cut-off");
+	psy_dictionary_set(dict, "instrumentview.res", "Res/bandw.");
+	psy_dictionary_set(dict, "instrumentview.mod", "Mod. Amount");
+	psy_dictionary_set(dict, "instrumentview.random-panning", "Random panning");
+	psy_dictionary_set(dict, "instrumentview.general", "General");
+	psy_dictionary_set(dict, "instrumentview.volume", "Volume");
+	psy_dictionary_set(dict, "instrumentview.pan", "Pan");
+	psy_dictionary_set(dict, "instrumentview.filter", "Filter");
+	psy_dictionary_set(dict, "instrumentview.pitch", "Pitch");
+	psy_dictionary_set(dict, "instrumentview.add", "Add");
+	psy_dictionary_set(dict, "instrumentview.remove", "Remove");
+	psy_dictionary_set(dict, "instrumentview.smplidx", "Smpl Idx");
+	psy_dictionary_set(dict, "instrumentview.key", "Key");
+	psy_dictionary_set(dict, "instrumentview.keylo", "Key Lo");
+	psy_dictionary_set(dict, "instrumentview.keyhi", "Key Hi");
+	psy_dictionary_set(dict, "instrumentview.keyfixed", "Key Fixed");
+	/* machineview */
+	psy_dictionary_set(dict, "machineview.new-machine", "New Machine");
+	psy_dictionary_set(dict, "machineview.wires", "Wires");
+	psy_dictionary_set(dict, "machineview.stack", "Stack");
+	psy_dictionary_set(dict, "machineview.no-machines-loaded", "No Machines Loaded");
+	psy_dictionary_set(dict, "machineview.no-machine", "No Machine");
+	psy_dictionary_set(dict, "machineview.connect-to-mixer-send-return-input",
 		"Connect to Mixer-send/return-input");
-	add("delete", "Delete");
-	add("editname", "Editname");
-	add("mute", "Mute");
-	add("pwr", "Pwr");
-	setsection(psy_property_append_section(parent, "stackview"));
-	add("inputs", "Inputs");
-	add("effects", "Effects");
-	add("outputs", "Outputs");
-	add("volumes", "Volumes");
-}
-
-void make_translator_machineframe(psy_Property* parent)
-{
-	setsection(psy_property_append_section(parent, "machineframe"));
-	add("about", "About");
-	add("pwr", "Pwr");
-	add("parameters", "Parameters");
-	add("parammap", "Parammap");
-	add("command", "Command");
-	add("help", "Help");
-	add("bus", "Bus");
-	add("bank", "Bank");
-	add("program", "Program");
-	add("import", "Import");
-	add("export", "Export");
-	add("saveas", "Save as");
-}
-
-void make_translator_patternview(psy_Property* parent)
-{
-	setsection(psy_property_append_section(parent, "patternview"));
-	add("line", "Line");
-	add("defaults", "Defaults");
-	add("step", "Step");
-	add("patname", "Pattern Name");
-	add("nopattern", "No Pattern");
-	add("length", "Length");
-	add("apply", "Apply");
-	add("tracker", "Tracker");
-	add("roll", "Pianoroll");
-	add("horz", "Horizontal");
-	add("vert", "Vertical");
-	add("split", "Split");
-	add("properties", "Properties");
-	add("beats", "Beats");
-	add("keyboard", "Keyboard");
-	add("showtracks", "Show Tracks");
-	add("all", "All");
-	add("current", "Current");
-	add("active", "Active");
-}
-
-void make_translator_transformpattern(psy_Property* parent)
-{
-	setsection(psy_property_append_section(parent, "transformpattern"));
-	add("searchpattern", "Search pattern");
-	add("note", "Note");
-	add("instr", "Instrum/Aux");
-	add("mac", "Machine");
-	add("replacepattern", "Replace pattern");
-	add("search", "Search");	
-	add("replaceall", "Replace all");
-	add("cancel", "Cancel");	
-	add("searchon", "Search on");
-	add("entiresong", "Entire song");
-	add("currentpattern", "Current pattern");
-	add("currentselection", "Current selection");
-}
-
-void make_translator_swingfillview(psy_Property* parent)
-{
-	setsection(psy_property_append_section(parent, "swingfill"));
-	add("tempo", "Tempo(BPM)");
-	add("bpm", "BPM");
-	add("center", "Center");
-	add("actual", "Actual");
-	add("cycle", "Cycle Length(lines)");
-	add("variance", "Variance(%)");
-	add("phase", "Phase (degrees)");	
-	add("cancel", "Cancel");
-	add("apply", "Apply");
-}
-
-void make_translator_sequenceview(psy_Property* parent)
-{
-	setsection(psy_property_append_section(parent, "seqview"));
-	add("follow-song", "Follow Song");
-	add("show-playlist", "Show Playlist");
-	add("show-pattern-names", "Show Pattern Names");
-	add("record-noteoff", "Record note-off");
-	add("record-tweak", "Record tweak");
-	add("allow-notes-to_effect", "Allow notes to effect");
-	add("multichannel-audition", "Multitrack playback on keypress");
-	add("duration", "Duration");
-	add("more", "Show More");
-	add("less", "Show Less");
-	add("ins", "Ins");
-	add("new", "New");
-	add("clone", "Clone");
-	add("del", "Delete");
-	add("new-trk", "+ New Track");
-	add("del-trk", "Del Track");
-	add("clear", "Clear");
-	add("rename", "Rename");
-	add("copy", "Copy");
-	add("paste", "Paste");
-	add("singlesel", "SingleSel");
-	add("multisel", "MultiSel");	
-	add("showseqeditor", "Show SequenceEditor");
-	add("hideseqeditor", "Hide SequenceEditor");
-	add("showstepsequencer", "Show Stepsequencer");
-	add("hidestepsequencer", "Hide Stepsequencer");
-}
-
-void make_translator_seqedit(psy_Property* parent)
-{
-	setsection(psy_property_append_section(parent, "seqedit"));
-	add("track", "Track");
-	add("move", "Move");
-	add("reorder", "Reorder");
-	add("insert", "Insert");
-	add("timesigs", "Timesigs");
-	add("repetitions", "Repetitions");
-	add("noitem", "No Item Selected");
-	add("patternitem", "Pattern Item");
-	add("sampleitem", "Sample Item");
-	add("markeritem", "Marker Item");
-	add("timesigitem", "TimeSig Item");
-	add("loopitem", "Loop Item");
-	add("position", "Position");
-	add("length", "Length");
-	add("end", "End");
-	add("name", "Name");
-	add("numerator", "Numerator");
-	add("denominator", "Denominator");
-}
-
-void make_translator_newmachine(psy_Property* parent)
-{
-	setsection(psy_property_append_section(parent, "newmachine"));
-	add("all", "All");
-	add("favorites", "Favorites");
-	add("jme-version-unknown",
+	psy_dictionary_set(dict, "machineview.delete", "Delete");
+	psy_dictionary_set(dict, "machineview.editname", "Editname");
+	psy_dictionary_set(dict, "machineview.mute", "Mute");
+	psy_dictionary_set(dict, "machineview.pwr", "Pwr");
+	/* stackview */
+	psy_dictionary_set(dict, "stackview.inputs", "Inputs");
+	psy_dictionary_set(dict, "stackview.effects", "Effects");
+	psy_dictionary_set(dict, "stackview.outputs", "Outputs");
+	psy_dictionary_set(dict, "stackview.volumes", "Volumes");
+	/* machineframe */
+	psy_dictionary_set(dict, "machineframe.about", "About");
+	psy_dictionary_set(dict, "machineframe.pwr", "Pwr");
+	psy_dictionary_set(dict, "machineframe.parameters", "Parameters");
+	psy_dictionary_set(dict, "machineframe.parammap", "Parammap");
+	psy_dictionary_set(dict, "machineframe.command", "Command");
+	psy_dictionary_set(dict, "machineframe.help", "Help");
+	psy_dictionary_set(dict, "machineframe.bus", "Bus");
+	psy_dictionary_set(dict, "machineframe.bank", "Bank");
+	psy_dictionary_set(dict, "machineframe.program", "Program");
+	psy_dictionary_set(dict, "machineframe.import", "Import");
+	psy_dictionary_set(dict, "machineframe.export", "Export");
+	psy_dictionary_set(dict, "machineframe.saveas", "Save as");
+	/* patternview */
+	psy_dictionary_set(dict, "patternview.line", "Line");
+	psy_dictionary_set(dict, "patternview.defaults", "Defaults");
+	psy_dictionary_set(dict, "patternview.step", "Step");
+	psy_dictionary_set(dict, "patternview.patname", "Pattern Name");
+	psy_dictionary_set(dict, "patternview.nopattern", "No Pattern");
+	psy_dictionary_set(dict, "patternview.length", "Length");
+	psy_dictionary_set(dict, "patternview.apply", "Apply");
+	psy_dictionary_set(dict, "patternview.tracker", "Tracker");
+	psy_dictionary_set(dict, "patternview.roll", "Pianoroll");
+	psy_dictionary_set(dict, "patternview.horz", "Horizontal");
+	psy_dictionary_set(dict, "patternview.vert", "Vertical");
+	psy_dictionary_set(dict, "patternview.split", "Split");
+	psy_dictionary_set(dict, "patternview.properties", "Properties");
+	psy_dictionary_set(dict, "patternview.beats", "Beats");
+	psy_dictionary_set(dict, "patternview.keyboard", "Keyboard");
+	psy_dictionary_set(dict, "patternview.showtracks", "Show Tracks");
+	psy_dictionary_set(dict, "patternview.all", "All");
+	psy_dictionary_set(dict, "patternview.current", "Current");
+	psy_dictionary_set(dict, "patternview.active", "Active");
+	/* transformpattern */
+	psy_dictionary_set(dict, "transformpattern.searchpattern", "Search pattern");
+	psy_dictionary_set(dict, "transformpattern.note", "Note");
+	psy_dictionary_set(dict, "transformpattern.instr", "Instrum/Aux");
+	psy_dictionary_set(dict, "transformpattern.mac", "Machine");
+	psy_dictionary_set(dict, "transformpattern.replacepattern", "Replace pattern");
+	psy_dictionary_set(dict, "transformpattern.search", "Search");	
+	psy_dictionary_set(dict, "transformpattern.replaceall", "Replace all");
+	psy_dictionary_set(dict, "transformpattern.cancel", "Cancel");	
+	psy_dictionary_set(dict, "transformpattern.searchon", "Search on");
+	psy_dictionary_set(dict, "transformpattern.entiresong", "Entire song");
+	psy_dictionary_set(dict, "transformpattern.currentpattern", "Current pattern");
+	psy_dictionary_set(dict, "transformpattern.currentselection", "Current selection");
+	/* swingfill */
+	psy_dictionary_set(dict, "swingfill.tempo", "Tempo(BPM)");
+	psy_dictionary_set(dict, "swingfill.bpm", "BPM");
+	psy_dictionary_set(dict, "swingfill.center", "Center");
+	psy_dictionary_set(dict, "swingfill.actual", "Actual");
+	psy_dictionary_set(dict, "swingfill.cycle", "Cycle Length(lines)");
+	psy_dictionary_set(dict, "swingfill.variance", "Variance(%)");
+	psy_dictionary_set(dict, "swingfill.phase", "Phase (degrees)");	
+	psy_dictionary_set(dict, "swingfill.cancel", "Cancel");
+	psy_dictionary_set(dict, "swingfill.apply", "Apply");
+	/* seqview */
+	psy_dictionary_set(dict, "seqview.follow-song", "Follow Song");
+	psy_dictionary_set(dict, "seqview.show-playlist", "Show Playlist");
+	psy_dictionary_set(dict, "seqview.show-pattern-names", "Show Pattern Names");
+	psy_dictionary_set(dict, "seqview.record-noteoff", "Record note-off");
+	psy_dictionary_set(dict, "seqview.record-tweak", "Record tweak");
+	psy_dictionary_set(dict, "seqview.allow-notes-to_effect", "Allow notes to effect");
+	psy_dictionary_set(dict, "seqview.multichannel-audition", "Multitrack playback on keypress");
+	psy_dictionary_set(dict, "seqview.duration", "Duration");
+	psy_dictionary_set(dict, "seqview.more", "Show More");
+	psy_dictionary_set(dict, "seqview.less", "Show Less");
+	psy_dictionary_set(dict, "seqview.ins", "Ins");
+	psy_dictionary_set(dict, "seqview.new", "New");
+	psy_dictionary_set(dict, "seqview.clone", "Clone");
+	psy_dictionary_set(dict, "seqview.del", "Delete");
+	psy_dictionary_set(dict, "seqview.new-trk", "+ New Track");
+	psy_dictionary_set(dict, "seqview.del-trk", "Del Track");
+	psy_dictionary_set(dict, "seqview.clear", "Clear");
+	psy_dictionary_set(dict, "seqview.rename", "Rename");
+	psy_dictionary_set(dict, "seqview.copy", "Copy");
+	psy_dictionary_set(dict, "seqview.paste", "Paste");
+	psy_dictionary_set(dict, "seqview.singlesel", "SingleSel");
+	psy_dictionary_set(dict, "seqview.multisel", "MultiSel");	
+	psy_dictionary_set(dict, "seqview.showseqeditor", "Show SequenceEditor");
+	psy_dictionary_set(dict, "seqview.hideseqeditor", "Hide SequenceEditor");
+	psy_dictionary_set(dict, "seqview.showstepsequencer", "Show Stepsequencer");
+	psy_dictionary_set(dict, "seqview.hidestepsequencer", "Hide Stepsequencer");
+	/* seqedit */
+	psy_dictionary_set(dict, "seqedit.track", "Track");
+	psy_dictionary_set(dict, "seqedit.move", "Move");
+	psy_dictionary_set(dict, "seqedit.reorder", "Reorder");
+	psy_dictionary_set(dict, "seqedit.insert", "Insert");
+	psy_dictionary_set(dict, "seqedit.timesigs", "Timesigs");
+	psy_dictionary_set(dict, "seqedit.repetitions", "Repetitions");
+	psy_dictionary_set(dict, "seqedit.noitem", "No Item Selected");
+	psy_dictionary_set(dict, "seqedit.patternitem", "Pattern Item");
+	psy_dictionary_set(dict, "seqedit.sampleitem", "Sample Item");
+	psy_dictionary_set(dict, "seqedit.markeritem", "Marker Item");
+	psy_dictionary_set(dict, "seqedit.timesigitem", "TimeSig Item");
+	psy_dictionary_set(dict, "seqedit.loopitem", "Loop Item");
+	psy_dictionary_set(dict, "seqedit.position", "Position");
+	psy_dictionary_set(dict, "seqedit.length", "Length");
+	psy_dictionary_set(dict, "seqedit.end", "End");
+	psy_dictionary_set(dict, "seqedit.name", "Name");
+	psy_dictionary_set(dict, "seqedit.numerator", "Numerator");
+	psy_dictionary_set(dict, "seqedit.denominator", "Denominator");
+	/* newmachine */
+	psy_dictionary_set(dict, "newmachine.all", "All");
+	psy_dictionary_set(dict, "newmachine.favorites", "Favorites");
+	psy_dictionary_set(dict, "newmachine.jme-version-unknown",
 		"Load new gamefx and blitz if version is unknown");
-	add("song-loading-compatibility", "Song loading compatibility");
-	add("rescan", "Rescan");
-	add("in", "in");
-	add("plugin-directories", "Plugin directories");
-	add("filter", "Filter by");
-	add("sort", "Sort by");
-	add("favorite", "Favorite");
-	add("favorites", "Favorites");
-	add("name", "Name");
-	add("type", "Type");
-	add("mode", "Mode");
-	add("sections", "Sections");
-	add("section", "Section");
-	add("mksection", "Mksection");
-	add("remove", "Remove");
-	add("clear", "Clear");
-	add("copy", "Copy");
-	add("delete", "Delete");
-	add("select-plugin-to-view-description",
+	psy_dictionary_set(dict, "newmachine.song-loading-compatibility", "Song loading compatibility");
+	psy_dictionary_set(dict, "newmachine.rescan", "Rescan");
+	psy_dictionary_set(dict, "newmachine.in", "in");
+	psy_dictionary_set(dict, "newmachine.plugin-directories", "Plugin directories");
+	psy_dictionary_set(dict, "newmachine.filter", "Filter by");
+	psy_dictionary_set(dict, "newmachine.sort", "Sort by");
+	psy_dictionary_set(dict, "newmachine.favorite", "Favorite");
+	psy_dictionary_set(dict, "newmachine.favorites", "Favorites");
+	psy_dictionary_set(dict, "newmachine.name", "Name");
+	psy_dictionary_set(dict, "newmachine.type", "Type");
+	psy_dictionary_set(dict, "newmachine.mode", "Mode");
+	psy_dictionary_set(dict, "newmachine.sections", "Sections");
+	psy_dictionary_set(dict, "newmachine.section", "Section");
+	psy_dictionary_set(dict, "newmachine.mksection", "Mksection");
+	psy_dictionary_set(dict, "newmachine.remove", "Remove");
+	psy_dictionary_set(dict, "newmachine.clear", "Clear");
+	psy_dictionary_set(dict, "newmachine.copy", "Copy");
+	psy_dictionary_set(dict, "newmachine.delete", "Delete");
+	psy_dictionary_set(dict, "newmachine.select-plugin-to-view-description",
 		"Select a plugin to view its description");
-	add("select-first-section", "Select/Create first a section");
-	add("select-first-plugin", "Select first a plugin");
-	add("search-plugin", "Search Plugin");
-	add("category", "Category");
-	add("apiversion", "API Version");
-	add("version", "Version");
-	add("dllname", "DllName");
-	add("anycategory", "Any Category");
-	add("scanning", "Scanning");
-	add("stop", "Stop");
-	add("stopping", "Stopping");
-}
+	psy_dictionary_set(dict, "newmachine.select-first-section", "Select/Create first a section");
+	psy_dictionary_set(dict, "newmachine.select-first-plugin", "Select first a plugin");
+	psy_dictionary_set(dict, "newmachine.search-plugin", "Search Plugin");
+	psy_dictionary_set(dict, "newmachine.category", "Category");
+	psy_dictionary_set(dict, "newmachine.apiversion", "API Version");
+	psy_dictionary_set(dict, "newmachine.version", "Version");
+	psy_dictionary_set(dict, "newmachine.dllname", "DllName");
+	psy_dictionary_set(dict, "newmachine.anycategory", "Any Category");
+	psy_dictionary_set(dict, "newmachine.scanning", "Scanning");
+	psy_dictionary_set(dict, "newmachine.stop", "Stop");
+	psy_dictionary_set(dict, "newmachine.stopping", "Stopping");
+	/* samplesview */	
+	psy_dictionary_set(dict, "samplesview.samplename", "Samplename");
+	psy_dictionary_set(dict, "samplesview.samplerate", "Samplerate");
+	psy_dictionary_set(dict, "samplesview.samples", "Samples");
+	psy_dictionary_set(dict, "samplesview.groupsamples", "Group Samples");
+	psy_dictionary_set(dict, "samplesview.groupsfirstsample", "Groups first sample");
+	psy_dictionary_set(dict, "samplesview.default-volume", "Default volume");
+	psy_dictionary_set(dict, "samplesview.global-volume", "Global volume");
+	psy_dictionary_set(dict, "samplesview.pan-position", "Pan Position");
+	psy_dictionary_set(dict, "samplesview.sampled-note", "Sampled note");
+	psy_dictionary_set(dict, "samplesview.pitch-finetune", "Pitch finetune");
+	psy_dictionary_set(dict, "samplesview.process", "Process");
+	psy_dictionary_set(dict, "samplesview.no-wave-loaded", "No wave loaded");
+	psy_dictionary_set(dict, "samplesview.cont-loop", "Continuous Loop");
+	psy_dictionary_set(dict, "samplesview.disabled", "Disabled");
+	psy_dictionary_set(dict, "samplesview.forward", "Forward");
+	psy_dictionary_set(dict, "samplesview.bidirection", "Bidirection");
+	psy_dictionary_set(dict, "samplesview.start", "Start");
+	psy_dictionary_set(dict, "samplesview.end", "End");
+	psy_dictionary_set(dict, "samplesview.sustain-loop", "Sustain Loop");
+	psy_dictionary_set(dict, "samplesview.play", "Play");
+	psy_dictionary_set(dict, "samplesview.stop", "Stop");
+	psy_dictionary_set(dict, "samplesview.select-together", "Select Channels Together");
+	psy_dictionary_set(dict, "samplesview.selstart", "Selection Start");
+	psy_dictionary_set(dict, "samplesview.selend", "Selection End");
+	psy_dictionary_set(dict, "samplesview.visual", "Visual");
+	psy_dictionary_set(dict, "samplesview.doublecont", "Double Cont Loop");
+	psy_dictionary_set(dict, "samplesview.doublesus", "Double Sus Loop");
+	psy_dictionary_set(dict, "samplesview.lines", "Lines");
+	/* cmds */	
+	psy_dictionary_set(dict, "cmds.keymap", "Keymap");	
+	psy_dictionary_set(dict, "cmds.help", "Help");
+	psy_dictionary_set(dict, "cmds.helpshortcut", "Kbd Help");
+	psy_dictionary_set(dict, "cmds.editmachine", "Machines");
+	psy_dictionary_set(dict, "cmds.editpattern", "Patterns");
+	psy_dictionary_set(dict, "cmds.addmachine", "Add Machine");
+	psy_dictionary_set(dict, "cmds.playsong", "Play Song");
+	psy_dictionary_set(dict, "cmds.playstart", "Play Start");
+	psy_dictionary_set(dict, "cmds.playfrompos", "Play Pos");
+	psy_dictionary_set(dict, "cmds.playstop", "stop");
+	psy_dictionary_set(dict, "cmds.songposdec", "Seqpos dec");
+	psy_dictionary_set(dict, "cmds.songposinc", "Seqpos Inc");
+	psy_dictionary_set(dict, "cmds.maxpattern", "Max Pattern");
+	psy_dictionary_set(dict, "cmds.infomachine", "gear");
+	psy_dictionary_set(dict, "cmds.editinstr", "Instruments");
+	psy_dictionary_set(dict, "cmds.editsample", "Samples");
+	psy_dictionary_set(dict, "cmds.editwave", "Wave Edit");
+	psy_dictionary_set(dict, "cmds.terminal", "Terminal");
+	psy_dictionary_set(dict, "cmds.instrdec", "Current Instrument -1");
+	psy_dictionary_set(dict, "cmds.instrinc", "Current Instrument +1");
 
-void make_translator_samplesview(psy_Property* parent)
-{
-	setsection(psy_property_append_section(parent, "samplesview"));
-	add("samplename", "Samplename");
-	add("samplerate", "Samplerate");
-	add("samples", "Samples");
-	add("groupsamples", "Group Samples");
-	add("groupsfirstsample", "Groups first sample");
-	add("default-volume", "Default volume");
-	add("global-volume", "Global volume");
-	add("pan-position", "Pan Position");
-	add("sampled-note", "Sampled note");
-	add("pitch-finetune", "Pitch finetune");
-	add("process", "Process");
-	add("no-wave-loaded", "No wave loaded");
-	add("cont-loop", "Continuous Loop");
-	add("disabled", "Disabled");
-	add("forward", "Forward");
-	add("bidirection", "Bidirection");
-	add("start", "Start");
-	add("end", "End");
-	add("sustain-loop", "Sustain Loop");
-	add("play", "Play");
-	add("stop", "Stop");
-	add("select-together", "Select Channels Together");
-	add("selstart", "Selection Start");
-	add("selend", "Selection End");
-	add("visual", "Visual");
-	add("doublecont", "Double Cont Loop");
-	add("doublesus", "Double Sus Loop");
-	add("lines", "Lines");
-	setsection(psy_property_append_section(parent, "cmds"));
-	add("keymap", "Keymap");	
-}
+	psy_dictionary_set(dict, "cmds.navup", "Nav Up");
+	psy_dictionary_set(dict, "cmds.navdown", "Nav Down");
+	psy_dictionary_set(dict, "cmds.navleft", "Nav Left");
+	psy_dictionary_set(dict, "cmds.navright", "Nav Right");
+	psy_dictionary_set(dict, "cmds.navpageup", "Nav Up 16");
+	psy_dictionary_set(dict, "cmds.navpagedown", "Nav Down 16");
+	psy_dictionary_set(dict, "cmds.navtop", "Nav Top");
+	psy_dictionary_set(dict, "cmds.navbottom", "Nav Bottom");
+	psy_dictionary_set(dict, "cmds.columnprev", "Prev column");
+	psy_dictionary_set(dict, "cmds.columnnext", "Next column");
 
-void make_translator_general(psy_Property* parent)
-{
-	add("help", "Help");
-	add("helpshortcut", "Kbd Help");
-	add("editmachine", "Machines");
-	add("editpattern", "Patterns");
-	add("addmachine", "Add Machine");
-	add("playsong", "Play Song");
-	add("playstart", "Play Start");
-	add("playfrompos", "Play Pos");
-	add("playstop", "stop");
-	add("songposdec", "Seqpos dec");
-	add("songposinc", "Seqpos Inc");
-	add("maxpattern", "Max Pattern");
-	add("infomachine", "gear");
-	add("editinstr", "Instruments");
-	add("editsample", "Samples");
-	add("editwave", "Wave Edit");
-	add("terminal", "Terminal");
-	add("instrdec", "Current Instrument -1");
-	add("instrinc", "Current Instrument +1");
-}
+	psy_dictionary_set(dict, "cmds.rowinsert", "Insert row");
+	psy_dictionary_set(dict, "cmds.rowdelete", "Delete row");
+	psy_dictionary_set(dict, "cmds.rowclear", "Clear row");
 
-void make_translator_tracker(psy_Property* parent)
-{
-	add("navup", "Nav Up");
-	add("navdown", "Nav Down");
-	add("navleft", "Nav Left");
-	add("navright", "Nav Right");
-	add("navpageup", "Nav Up 16");
-	add("navpagedown", "Nav Down 16");
-	add("navtop", "Nav Top");
-	add("navbottom", "Nav Bottom");
-	add("columnprev", "Prev column");
-	add("columnnext", "Next column");
+	psy_dictionary_set(dict, "cmds.blockstart", "Block Start");
+	psy_dictionary_set(dict, "cmds.blockend", "Block End");
+	psy_dictionary_set(dict, "cmds.blockunmark", "Block Unmark");
+	psy_dictionary_set(dict, "cmds.blockcut", "Block cut");
+	psy_dictionary_set(dict, "cmds.blockcopy", "Block copy");
+	psy_dictionary_set(dict, "cmds.blockpaste", "Block paste");
+	psy_dictionary_set(dict, "cmds.blockmix", "Block Mix");
 
-	add("rowinsert", "Insert row");
-	add("rowdelete", "Delete row");
-	add("rowclear", "Clear row");
+	psy_dictionary_set(dict, "cmds.transposeblockinc", "Transpose Block +1");
+	psy_dictionary_set(dict, "cmds.transposeblockdec", "Transpose Block -1");
+	psy_dictionary_set(dict, "cmds.transposeblockinc12", "Transpose Block +12");
+	psy_dictionary_set(dict, "cmds.transposeblockdec12", "Transpose Block -12");
 
-	add("blockstart", "Block Start");
-	add("blockend", "Block End");
-	add("blockunmark", "Block Unmark");
-	add("blockcut", "Block cut");
-	add("blockcopy", "Block copy");
-	add("blockpaste", "Block paste");
-	add("blockmix", "Block Mix");
+	psy_dictionary_set(dict, "cmds.selectall", "Block Select All");
+	psy_dictionary_set(dict, "cmds.selectcol", "Block Select Column");
+	psy_dictionary_set(dict, "cmds.selectbar", "Block Select Bar");
 
-	add("transposeblockinc", "Transpose Block +1");
-	add("transposeblockdec", "Transpose Block -1");
-	add("transposeblockinc12", "Transpose Block +12");
-	add("transposeblockdec12", "Transpose Block -12");
-
-	add("selectall", "Block Select All");
-	add("selectcol", "Block Select Column");
-	add("selectbar", "Block Select Bar");
-
-	add("selectmachine",
+	psy_dictionary_set(dict, "cmds.selectmachine",
 		"Select Mac/Ins in Cursor Pos");
-	add("undo", "Edit Undo");
-	add("redo", "Edit Redo");
-	add("follow_song", "Follow Song");
-}
-
-void make_translator_messages(psy_Property* parent)
-{
-	setsection(psy_property_append_section(parent, "msg"));
-	add("psyreq", "Psycle Request");
-	add("seqclear", "Sequence Clear Request! Do you really want clear the sequenceand pattern data?");
-	add("yes", "Yes");
-	add("no", "No");
-	add("cont", "Continue");
-	add("psyexit", "Exit Psycle Request, but your Song is not saved!");
-	add("saveexit", "Save and Exit");
-	add("nosaveexit", "Exit (no save)");
-	add("newsong", "New Song Request, but your Song is not saved!");
-	add("savenew", "Save and Create New Song");
-	add("nosavenew", "Create New Song (no save)");
-	add("loadsong", "New Load Request, but your Song is not saved!");
-	add("saveload", "Save and Load Song");
-	add("nosaveload", "Load Song (no save)");
-	add("audiostarting", "Audio starting");
-	add("audiostarted", "Audio started");
+	psy_dictionary_set(dict, "undo", "Edit Undo");
+	psy_dictionary_set(dict, "redo", "Edit Redo");
+	psy_dictionary_set(dict, "follow_song", "Follow Song");
+	/* msg */
+	psy_dictionary_set(dict, "msg.psyreq", "Psycle Request");
+	psy_dictionary_set(dict, "msg.seqclear", "Sequence Clear Request! Do you really want clear the sequenceand pattern data?");
+	psy_dictionary_set(dict, "msg.yes", "Yes");
+	psy_dictionary_set(dict, "msg.no", "No");
+	psy_dictionary_set(dict, "msg.cont", "Continue");
+	psy_dictionary_set(dict, "msg.psyexit", "Exit Psycle Request, but your Song is not saved!");
+	psy_dictionary_set(dict, "msg.saveexit", "Save and Exit");
+	psy_dictionary_set(dict, "msg.nosaveexit", "Exit (no save)");
+	psy_dictionary_set(dict, "msg.newsong", "New Song Request, but your Song is not saved!");
+	psy_dictionary_set(dict, "msg.savenew", "Save and Create New Song");
+	psy_dictionary_set(dict, "msg.nosavenew", "Create New Song (no save)");
+	psy_dictionary_set(dict, "msg.loadsong", "New Load Request, but your Song is not saved!");
+	psy_dictionary_set(dict, "msg.saveload", "Save and Load Song");
+	psy_dictionary_set(dict, "msg.nosaveload", "Load Song (no save)");
+	psy_dictionary_set(dict, "msg.audiostarting", "Audio starting");
+	psy_dictionary_set(dict, "msg.audiostarted", "Audio started");
 }
 
 #ifdef PSYCLE_DEFAULT_LANG
-static int onenumproperties(void* context, psy_Property* property, uintptr_t level);
+static int onenumproperties(void* context, psy_Dictionary* property, uintptr_t level);
 
 void save_translator_default(void)
 {
-	psy_Property* lang;
+	psy_Dictionary* lang;
 	char path[4096];
 
 	strcpy(path, psy_dir_config());	
@@ -981,7 +732,7 @@ void save_translator_default(void)
 
 void save_translator_template(void)
 {
-	psy_Property* lang;
+	psy_Dictionary* lang;
 	char path[4096];
 
 	strcpy(path, psy_dir_config());
@@ -991,13 +742,13 @@ void save_translator_template(void)
 	psy_property_set_comment(lang,
 		"Psycle Template Dictionary created by\r\n; " PSYCLE__BUILD__IDENTIFIER("\r\n; "));
 	make_translator_default(lang);
-	psy_property_enumerate((psy_Property*)lang, NULL,
+	psy_property_enumerate((psy_Dictionary*)lang, NULL,
 		(psy_PropertyCallback)onenumproperties);
 	propertiesio_save(lang, path);
 	psy_property_deallocate(lang);
 }
 
-int onenumproperties(void* context, psy_Property* property, uintptr_t level)
+int onenumproperties(void* context, psy_Dictionary* property, uintptr_t level)
 {
 	if (psy_property_type(property) == PSY_PROPERTY_TYPE_STRING) {
 		psy_property_set_item_str(property, "");

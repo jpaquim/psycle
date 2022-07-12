@@ -159,16 +159,15 @@ void driver_makeconfig(psy_EventDriver* context)
 	self = (CmdDriver*)context;
 	psy_snprintf(key, 256, "cmd-guid-%d", PSY_EVENTDRIVER_CMD_GUID);
 	self->configuration = psy_property_preventtranslate(psy_property_allocinit_key(key));
-	psy_property_sethint(psy_property_append_int(self->configuration,
-		"guid", PSY_EVENTDRIVER_CMD_GUID, 0, 0),
-		PSY_PROPERTY_HINT_HIDE);
-	psy_property_settext(
+	psy_property_hide(psy_property_append_int(self->configuration,
+		"guid", PSY_EVENTDRIVER_CMD_GUID, 0, 0));
+	psy_property_set_text(
 		psy_property_append_str(self->configuration, "name", "cmd"),
 		"settingsview.name");
-	psy_property_settext(
+	psy_property_set_text(
 		psy_property_append_str(self->configuration, "version", "1.0"),
 		"settingsview.version");
-	self->cmddef = psy_property_settext(
+	self->cmddef = psy_property_set_text(
 		psy_property_append_section(self->configuration, "cmds"),
 		"cmds.keymap");
 }
@@ -275,7 +274,7 @@ void setcmddef(psy_EventDriver* driver, const psy_Property* cmddef)
 		self->cmddef = psy_property_clone(cmddef);
 		psy_property_append_property(self->configuration,
 			self->cmddef);
-		psy_property_settext(self->cmddef, "cmds.keymap");		
+		psy_property_set_text(self->cmddef, "cmds.keymap");		
 	}
 }
 

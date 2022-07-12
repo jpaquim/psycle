@@ -59,6 +59,7 @@ typedef struct {
 static void driver_deallocate(psy_AudioDriver*);
 static int driver_init(psy_AudioDriver*);
 static int driver_open(psy_AudioDriver*);
+static bool driver_opened(const psy_AudioDriver*);
 static int driver_close(psy_AudioDriver*);
 static int driver_dispose(psy_AudioDriver*);
 static void driver_configure(psy_AudioDriver*, psy_Property*);
@@ -109,6 +110,7 @@ static void vtable_init(void)
 {
 	if (!vtable_initialized) {
 		vtable.open = driver_open;
+		vtable.opened = driver_opened;
 		vtable.deallocate = driver_deallocate;
 		vtable.close = driver_close;
 		vtable.dispose = driver_dispose;
@@ -315,6 +317,15 @@ int driver_open(psy_AudioDriver* driver)
 	}
 	return FALSE;
 }
+
+bool driver_opened(const psy_AudioDriver* driver)
+{
+	AlsaDriver* self;
+
+	self = (AlsaDriver*)driver;
+	return (self->running_ != FALSE);
+}
+
 
 void thread_function(void* driver) {
 	AlsaDriver* self = (AlsaDriver*) driver;

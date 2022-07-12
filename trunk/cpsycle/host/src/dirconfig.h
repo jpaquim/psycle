@@ -6,22 +6,18 @@
 #if !defined(DIRCONFIG_H)
 #define DIRCONFIG_H
 
-/* container */
-#include <properties.h>
-#include <signal.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef struct DirConfig {
-	/* signals */
-	psy_Signal signal_changed;
+struct psy_Property;
+
+typedef struct DirConfig {	
 	/* internal */
-	psy_Property* directories;	
+	struct psy_Property* directories;	
 } DirConfig;
 
-void dirconfig_init(DirConfig*, psy_Property* parent);
+void dirconfig_init(DirConfig*, struct psy_Property* parent);
 void dirconfig_dispose(DirConfig*);
 
 const char* dirconfig_app(const DirConfig*);
@@ -29,7 +25,7 @@ const char* dirconfig_songs(const DirConfig*);
 const char* dirconfig_samples(const DirConfig*);
 const char* dirconfig_plugins32(const DirConfig*);
 const char* dirconfig_plugins64(const DirConfig*);
-const char* dirconfig_pluginscurrplatform(const DirConfig*);
+const char* dirconfig_plugins_curr_platform(const DirConfig*);
 const char* dirconfig_lua_scripts(const DirConfig*);
 const char* dirconfig_vsts32(const DirConfig*);
 const char* dirconfig_vsts64(const DirConfig*);
@@ -37,10 +33,7 @@ const char* dirconfig_ladspas(const DirConfig*);
 const char* dirconfig_skins(const DirConfig*);
 const char* dirconfig_doc(const DirConfig*);
 const char* dirconfig_config_dir(const DirConfig*);
-const char* dirconfig_userpresets(const DirConfig*);
-
-uintptr_t dirconfig_onchanged(DirConfig*, psy_Property*);
-bool dirconfig_hasproperty(const DirConfig*, psy_Property*);
+const char* dirconfig_user_presets(const DirConfig*);
 
 #ifdef __cplusplus
 }

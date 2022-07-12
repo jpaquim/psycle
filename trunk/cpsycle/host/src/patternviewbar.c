@@ -143,17 +143,19 @@ void patternviewbar_init(PatternViewBar* self, psy_ui_Component* parent,
 	psy_ui_component_set_preferred_size(&self->zoombox.component,
 		psy_ui_size_make_em(16.0, 1.0));
 	psy_signal_connect(&self->zoombox.signal_changed, self,
-		patternviewbar_on_zoombox_changed);
+		patternviewbar_on_zoombox_changed);	
+	zoombox_data_exchange(&self->zoombox, patternviewconfig_property(
+		self->patconfig, "zoom"));	
 	patterncursorstepbox_init(&self->cursorstep, &self->component, workspace);	
 	/* Move cursor when paste */
 	psy_ui_checkbox_init(&self->movecursorwhenpaste, patternviewbar_base(self));
-	psy_ui_checkbox_settext(&self->movecursorwhenpaste,
+	psy_ui_checkbox_set_text(&self->movecursorwhenpaste,
 		"settingsview.pv.move-cursor-when-paste");	
 	psy_signal_connect(&self->movecursorwhenpaste.signal_clicked, self,
 		patternviewbar_on_move_cursor_when_paste);
 	/* Default line */
 	psy_ui_checkbox_init(&self->defaultentries, patternviewbar_base(self));
-	psy_ui_checkbox_settext(&self->defaultentries,
+	psy_ui_checkbox_set_text(&self->defaultentries,
 		"settingsview.visual.default-line");
 	if (patternviewconfig_defaultline(psycleconfig_patview(
 			workspace_conf(workspace)))) {
@@ -164,7 +166,7 @@ void patternviewbar_init(PatternViewBar* self, psy_ui_Component* parent,
 	/* Single pattern display mode */
 	psy_ui_checkbox_init(&self->displaysinglepattern,
 		patternviewbar_base(self));
-	psy_ui_checkbox_settext(&self->displaysinglepattern,
+	psy_ui_checkbox_set_text(&self->displaysinglepattern,
 		"settingsview.pv.displaysinglepattern");
 	if (patternviewconfig_single_mode(psycleconfig_patview(
 			workspace_conf(workspace)))) {
@@ -173,16 +175,13 @@ void patternviewbar_init(PatternViewBar* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->displaysinglepattern.signal_clicked, self,
 		patternviewbar_on_display_single_pattern);
 	patternviewstatus_init(&self->status, patternviewbar_base(self), workspace);	
-	psy_signal_connect(&psycleconfig_patview(
-		workspace_conf(workspace))->signal_changed, self,
-		patternviewbar_on_configure);
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		patternviewbar_on_song_changed);
 	if (patternviewconfig_ismovecursorwhenpaste(psycleconfig_patview(
 			workspace_conf(workspace)))) {
 		psy_ui_checkbox_check(&self->movecursorwhenpaste);
 	} else {
-		psy_ui_checkbox_disablecheck(&self->movecursorwhenpaste);
+		psy_ui_checkbox_disable_check(&self->movecursorwhenpaste);
 	}	
 	patternviewbar_update_status(self);
 	patternviewbar_connect_song(self);
@@ -274,12 +273,12 @@ void patternviewbar_on_configure(PatternViewBar* self, PatternViewConfig* config
 	if (patternviewconfig_ismovecursorwhenpaste(config)) {
 		psy_ui_checkbox_check(&self->movecursorwhenpaste);
 	} else {
-		psy_ui_checkbox_disablecheck(&self->movecursorwhenpaste);
+		psy_ui_checkbox_disable_check(&self->movecursorwhenpaste);
 	}
 	if (patternviewconfig_single_mode(config)) {
 		psy_ui_checkbox_check(&self->displaysinglepattern);
 	} else {
-		psy_ui_checkbox_disablecheck(&self->displaysinglepattern);
+		psy_ui_checkbox_disable_check(&self->displaysinglepattern);
 	}
 }
 

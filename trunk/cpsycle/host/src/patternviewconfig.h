@@ -6,26 +6,17 @@
 #if !defined(PATTERNVIEWCONFIG_H)
 #define PATTERNVIEWCONFIG_H
 
-/* ui*/
-#include <uicolour.h>
-#include <uifont.h>
+#include "patternviewtheme.h"
 /* dsp */
 #include <notestab.h>
 /* container */
 #include <properties.h>
-#include <signal.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /* PatternViewConfig */
-
-enum {
-	PROPERTY_ID_PATTERNDISPLAY = 80000,	
-	PROPERTY_ID_TRACKSCOPES,
-	PROPERTY_ID_PATTERN_SKIN
-};
 
 /* The patternview display modes */
 typedef enum {
@@ -37,36 +28,26 @@ typedef enum {
 	PATTERN_DISPLAYMODE_NUM
 } PatternDisplayMode;
 
-
 typedef struct PatternViewConfig {
-	/* signals */
-	psy_Signal signal_changed;	
 	/* internal */
 	psy_Property* patternview;
-	psy_Property* theme;
-	psy_Property* headerskins;
-	char* skindir;
-	bool has_classic_header;
-	double zoom;
+	PatternViewTheme theme;	
 	bool singlemode;
-	/* references */
-	psy_Property* parent;
-	struct DirConfig* dirconfig;
 } PatternViewConfig;
 
 void patternviewconfig_init(PatternViewConfig*, psy_Property* parent,
 	const char* skindir);
 void patternviewconfig_dispose(PatternViewConfig*);
 
-void patternviewconfig_set_directories(PatternViewConfig*, struct DirConfig*);
-void patternviewconfig_update_header_skins(PatternViewConfig*);
-void patternviewconfig_load_bitmap(PatternViewConfig*);
+bool patternviewconfig_connect(PatternViewConfig*, const char* key, void* context,
+	void* fp);
+
+psy_Property* patternviewconfig_property(PatternViewConfig*, const char* key);
 void patternviewconfig_reset_theme(PatternViewConfig* self);
 const char* patternviewconfig_headerskinname(PatternViewConfig*);
 void patternviewconfig_set_theme(PatternViewConfig*, psy_Property* skin);
 bool boolpatternviewconfig_hasthemeproperty(const PatternViewConfig*,
 	psy_Property*);
-bool patternviewconfig_has_property(const PatternViewConfig*, psy_Property*);
 
 void patternviewconfig_switch_header(PatternViewConfig*);
 void patternviewconfig_switch_to_classic(PatternViewConfig*);
@@ -105,48 +86,10 @@ void patternviewconfig_toggle_pattern_default_line(PatternViewConfig*);
 bool patternviewconfig_is_smooth_scrolling(const PatternViewConfig*);
 void patternviewconfig_set_smooth_scrolling(PatternViewConfig*, bool on);
 psy_ui_FontInfo patternviewconfig_font_info(PatternViewConfig*, double zoom);
-void patternviewconfig_write_styles(PatternViewConfig*);
 void patternviewconfig_set_zoom(PatternViewConfig*, double zoom);
 double patternviewconfig_zoom(const PatternViewConfig*);
 /* theme */
-void patternviewconfig_set_background_colour_left(PatternViewConfig*,
-	psy_ui_Colour);
-void patternviewconfig_set_background_colour_right(PatternViewConfig*,
-	psy_ui_Colour);
-void patternviewconfig_set_row4beat_colour_left(PatternViewConfig*,
-	psy_ui_Colour);
-void patternviewconfig_set_row4beat_colour_right(PatternViewConfig*,
-	psy_ui_Colour);
-void patternviewconfig_set_rowbeat_colour_left(PatternViewConfig*,
-	psy_ui_Colour);
-void patternviewconfig_set_rowbeat_colour_right(PatternViewConfig*,
-	psy_ui_Colour);
-void patternviewconfig_set_row_colour_left(PatternViewConfig*,
-	psy_ui_Colour);
-void patternviewconfig_set_row_colour_right(PatternViewConfig*,
-	psy_ui_Colour);
-void patternviewconfig_set_font_colour_left(PatternViewConfig*,
-	psy_ui_Colour);
-void patternviewconfig_set_font_colour_right(PatternViewConfig*,
-	psy_ui_Colour);
-void patternviewconfig_set_font_play_colour_left(PatternViewConfig*,
-	psy_ui_Colour);
-void patternviewconfig_set_font_play_colour_right(PatternViewConfig*,
-	psy_ui_Colour);
-void patternviewconfig_set_font_sel_colour_left(PatternViewConfig*,
-	psy_ui_Colour);
-void patternviewconfig_set_font_sel_colour_right(PatternViewConfig*,
-	psy_ui_Colour);
-void patternviewconfig_set_selection_colour_left(PatternViewConfig*,
-	psy_ui_Colour);
-void patternviewconfig_set_selection_colour_right(PatternViewConfig*,
-	psy_ui_Colour);
-void patternviewconfig_set_playbar_colour_left(PatternViewConfig*,
-	psy_ui_Colour);
-void patternviewconfig_set_playbar_colour_right(PatternViewConfig*,
-	psy_ui_Colour);
-/* events */
-uintptr_t patternviewconfig_on_changed(PatternViewConfig*, psy_Property*);
+
 
 #ifdef __cplusplus
 }

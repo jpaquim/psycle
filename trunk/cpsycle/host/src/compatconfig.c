@@ -1,15 +1,22 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
 
 
 #include "compatconfig.h"
+/* host */
+#include "resources/resource.h"
 
+
+/* prototypes */
 static void compatconfig_make(CompatConfig*, psy_Property*);
+static void compatconfig_on_blitz_compatibility(CompatConfig*,
+	psy_Property* sender);
 
+/* implementation */
 void compatconfig_init(CompatConfig* self, psy_Property* parent,
 	psy_audio_MachineFactory* machinefactory)
 {
@@ -32,13 +39,16 @@ void compatconfig_make(CompatConfig* self, psy_Property* parent)
 {
 	assert(self);
 
-	self->compatibility = psy_property_settext(
+	self->compatibility = psy_property_set_text(
 		psy_property_append_section(parent,
 		"compatibility"),
-		"settingsview.compatibility");	
-	psy_property_settext(
+		"settingsview.compatibility");
+	psy_property_set_icon(self->compatibility, IDB_TRAIL_SIGN_LIGHT,
+		IDB_TRAIL_SIGN_DARK);
+	psy_property_connect(psy_property_set_text(
 		psy_property_append_bool(self->compatibility, "loadnewgamefxblitz", 0),
-		"newmachine.jme-version-unknown");
+		"newmachine.jme-version-unknown"),
+		self, compatconfig_on_blitz_compatibility);
 }
 
 void compatconfig_setloadnewblitz(CompatConfig* self, bool mode)
@@ -62,17 +72,30 @@ bool compatconfig_loadnewblitz(const CompatConfig* self)
 
 	return psy_property_at_bool(self->compatibility, "loadnewgamefxblitz", 0);
 }
-/* events */
-uintptr_t compatconfig_onchanged(CompatConfig* self, psy_Property*
-	property)
+
+void compatconfig_on_blitz_compatibility(CompatConfig* self, psy_Property* sender)
 {
-	psy_signal_emit(&self->signal_changed, self, 1, property);
-	return psy_INDEX_INVALID;
+	compatconfig_setloadnewblitz(self, psy_property_item_bool(sender));	
 }
 
-bool compatconfig_hasproperty(const CompatConfig* self, psy_Property* property)
+bool compatconfig_connect(CompatConfig* self, const char* key, void* context,
+	void* fp)
 {
-	assert(self && self->compatibility);
+	psy_Property* p;
 
-	return psy_property_in_section(property, self->compatibility);
+	assert(self);
+
+	p = compatconfig_property(self, key);
+	if (p) {
+		psy_property_connect(p, context, fp);
+		return TRUE;
+	}
+	return FALSE;
+}
+
+psy_Property* compatconfig_property(CompatConfig* self, const char* key)
+{
+	assert(self);
+
+	return psy_property_at(self->compatibility, key, PSY_PROPERTY_TYPE_NONE);
 }

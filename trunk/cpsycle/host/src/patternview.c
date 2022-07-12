@@ -21,6 +21,8 @@ static void patternview_on_song_changed(PatternView*, Workspace* sender);
 static void patternview_connect_song(PatternView*);
 static void patternview_on_configure(PatternView*, PatternViewConfig*,
 	psy_Property*);
+static void patternview_on_zoom(PatternView*, psy_Property*);
+static void patternview_on_select_display(PatternView*, psy_Property*);
 static void patternview_on_misc_configure(PatternView*, KeyboardMiscConfig*,
 	psy_Property*);
 static void patternview_on_focus(PatternView*);
@@ -72,7 +74,9 @@ static void vtable_init(PatternView* self)
 /* implementation */
 void patternview_init(PatternView* self, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent,	Workspace* workspace)
-{		
+{	
+	PatternViewConfig* pvconfig;
+
 	assert(self);
 	assert(workspace);
 	
@@ -113,7 +117,7 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 	psy_ui_component_set_align(&self->header.component, psy_ui_ALIGN_TOP);	
 	/* Defaultline */
 	patterndefaultline_init(&self->defaultline, &self->component,
-		&self->track_config, workspace);	
+		&self->track_config, &workspace->config.visual.patview, workspace);	
 	psy_signal_connect(&self->defaultline.grid.signal_colresize, self,
 		patternview_on_column_resize);
 	/* Tracker */
@@ -157,10 +161,14 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 	psy_signal_connect(&psy_ui_app_zoom(psy_ui_app())->signal_zoom, self,
 		patternview_on_app_zoom);	
 	/* Configuration */
-	psy_signal_connect(&self->pvstate.patconfig->signal_changed, self,
-		patternview_on_configure);
+	pvconfig = &self->workspace->config.visual.patview;
+	patternviewconfig_connect(pvconfig,
+		"patterndisplay", self, patternview_on_select_display);
+	patternviewconfig_connect(pvconfig,
+		"zoom", self, patternview_on_zoom);
 	psy_signal_connect(&self->pvstate.keymiscconfig->signal_changed, self,
 		patternview_on_misc_configure);
+	patternview_on_configure(self, self->pvstate.patconfig, NULL);
 	patternview_rebuild(self);	
 }
 
@@ -264,7 +272,7 @@ void patternview_on_configure(PatternView* self, PatternViewConfig* config,
 {	
 	assert(self);
 
-	patternview_update_font(self);	
+	patternview_update_font(self);
 	patternview_select_display(self,
 		patternviewconfig_pattern_display(config));
 	trackconfig_init_columns(&self->track_config,
@@ -272,7 +280,19 @@ void patternview_on_configure(PatternView* self, PatternViewConfig* config,
 	patternview_select_display(self, (PatternDisplayMode)
 		patternviewconfig_pattern_display(config));
 	psy_ui_component_align(&self->component);	
+}
+
+void patternview_on_zoom(PatternView* self, psy_Property* sender)
+{
+	assert(self);
+
 	patternview_update_font(self);
+}
+
+void patternview_on_select_display(PatternView* self, psy_Property* sender)
+{
+	patternview_select_display(self, (PatternDisplayMode)
+		psy_property_item_int(sender));
 }
 
 void patternview_on_misc_configure(PatternView* self, KeyboardMiscConfig* config,

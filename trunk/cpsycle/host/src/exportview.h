@@ -9,12 +9,6 @@
 /* host */
 #include "propertiesview.h"
 #include "workspace.h"
-/* ui */
-#include <uibutton.h>
-#include <uicheckbox.h>
-#include <uilabel.h>
-#include <uitextarea.h>
-
 
 #ifdef __cplusplus
 extern "C" {

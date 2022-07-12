@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -138,7 +138,7 @@ void instrumentgeneralview_init(InstrumentGeneralView* self,
 		(ui_slider_fpvalue)instrumentgeneralview_ongeneralviewvalue);
 	instrumentnotemapview_init(&self->notemapview, &self->component, workspace);
 	psy_ui_component_set_align(&self->notemapview.component, psy_ui_ALIGN_CLIENT);
-	psy_ui_checkbox_settext(&self->fitrowcheck,
+	psy_ui_checkbox_set_text(&self->fitrowcheck,
 		"instrumentview.play-sample-to-fit");
 	psy_ui_slider_set_text(&self->globalvolume,
 		"instrumentview.global-volume");
@@ -156,7 +156,7 @@ void instrumentgeneralview_setinstrument(InstrumentGeneralView* self,
 		if (self->instrument->loop) {
 			psy_ui_checkbox_check(&self->fitrowcheck);
 		} else {
-			psy_ui_checkbox_disablecheck(&self->fitrowcheck);
+			psy_ui_checkbox_disable_check(&self->fitrowcheck);
 		}
 		psy_snprintf(text, 128, "%d", (int)self->instrument->lines);
 		psy_ui_textarea_set_text(&self->fitrowedit, text);

@@ -31,13 +31,22 @@ typedef struct ZoomBox {
 	psy_ui_Button zoomout;	
 	double zoomrate;
 	double zoomstep;
-	double minrate;
-	double maxrate;	
+	psy_RealPair range;
+	/* references */
+	psy_Property* property;
 } ZoomBox;
 
 void zoombox_init(ZoomBox*, psy_ui_Component* parent);
 void zoombox_init_connect(ZoomBox*, psy_ui_Component* parent,
 	void* context, void* fp);
+void zoombox_init_exchange(ZoomBox*, psy_ui_Component* parent,
+	psy_Property*);
+
+ZoomBox* zoombox_alloc(void);
+ZoomBox* zoombox_allocinit(psy_ui_Component* parent);
+ZoomBox* zoombox_allocinit_exchange(psy_ui_Component* parent, psy_Property*);
+
+void zoombox_data_exchange(ZoomBox*, psy_Property*);
 
 void zoombox_set_rate(ZoomBox*, double);
 
@@ -48,9 +57,8 @@ INLINE double zoombox_rate(const ZoomBox* self)
 	return self->zoomrate;
 }
 
-void zoombox_setstep(ZoomBox*, double);
-
 /* sets the step, the rate is inc-/decremented */
+void zoombox_set_step(ZoomBox*, double);
 INLINE double zoombox_step(const ZoomBox* self)
 {
 	assert(self);
@@ -58,22 +66,20 @@ INLINE double zoombox_step(const ZoomBox* self)
 	return self->zoomstep;
 }
 
-/* sets a min and maxrange (including maxval) */
-INLINE void zoombox_set_range(ZoomBox* self, double minval, double maxval)
+/* sets min/max-range (including maxval) */
+INLINE void zoombox_set_range(ZoomBox* self, psy_RealPair range)
 {
 	assert(self);
 
-	self->minrate = minval;
-	self->maxrate = psy_max(maxval, minval);
+	self->range = range;	
+	self->range.second = psy_max(self->range.first, self->range.second);
 }
 
-INLINE void zoombox_range(const ZoomBox* self, double* rv_minval,
-	double* rv_maxval)
+INLINE psy_RealPair zoombox_range(const ZoomBox* self)
 {
 	assert(self);
 
-	*rv_minval = self->minrate;
-	*rv_maxval = self->maxrate;
+	return self->range;
 }
 
 INLINE psy_ui_Component* zoombox_base(ZoomBox* self)
