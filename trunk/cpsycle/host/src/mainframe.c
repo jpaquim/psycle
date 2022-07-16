@@ -440,7 +440,7 @@ void mainframe_init_main_pane(MainFrame* self)
 	propertiesview_init(&self->settingsview,
 		psy_ui_notebook_base(&self->mainviews.notebook),
 		psy_ui_notebook_base(&self->mainviews.mainviewbar.viewtabbars),
-		&self->workspace.config.config, 3,
+		&self->workspace.config.config, 3, TRUE,
 		&self->workspace.inputhandler);
 	psy_ui_component_set_id(&self->settingsview.component,
 		VIEW_ID_SETTINGSVIEW);

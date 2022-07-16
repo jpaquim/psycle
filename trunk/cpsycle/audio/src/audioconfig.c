@@ -43,12 +43,12 @@ void audioconfig_make(AudioConfig* self, psy_Property* parent)
 
 	self->inputoutput = psy_property_set_text(
 		psy_property_append_section(parent, "inputoutput"),
-		"settingsview.io.input-output");
+		"settings.io.input-output");
 	audioconfig_make_driver_list(self);
 	audioconfig_make_threads(self);
 	self->driver_configure = psy_property_set_text(
 		psy_property_append_section(self->inputoutput, "configure"),
-		"settingsview.configure");
+		"settings.configure");
 	self->driver_configure->item.save = 0;	
 	audioconfig_make_driver_configurations(self, FALSE /* full*/ );
 }
@@ -189,7 +189,7 @@ void audioconfig_make_driver_list(AudioConfig* self)
 		psy_property_set_id(psy_property_set_text(
 		psy_property_append_choice(self->inputoutput,
 			"audiodrivers", default_driver_index),
-		"settingsview.audio-drivers"),
+		"settings.audio-drivers"),
 		PROPERTY_ID_AUDIODRIVERS),
 		PSY_PROPERTY_HINT_COMBO);
 	psy_property_connect(self->drivers,

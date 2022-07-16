@@ -34,42 +34,42 @@ void generalconfig_make(GeneralConfig* self, psy_Property* parent)
 
 	self->general = psy_property_set_text(
 		psy_property_append_section(parent, "general"),
-		"settingsview.general.general");
+		"settings.general.general");
 	psy_property_set_icon(self->general, IDB_TOGGLE_LIGHT,
 		IDB_TOGGLE_DARK);
 	psy_property_hide(psy_property_set_text(
 		psy_property_append_str(self->general, "version", "alpha"),
-		"settingsview.general.version"));
+		"settings.general.version"));
 	psy_property_set_text(
 		psy_property_append_bool(self->general, "showaboutatstart", TRUE),
-		"settingsview.general.show-about-at-startup");
+		"settings.general.show-about-at-startup");
 	psy_property_set_text(
 		psy_property_append_bool(self->general, "showsonginfoonload", TRUE),
-		"settingsview.general.show-song-info-on-load");
+		"settings.general.show-song-info-on-load");
 	psy_property_set_text(
 		psy_property_append_bool(self->general, "showmaximizedatstart", TRUE),
-		"settingsview.general.show-maximized-at-startup");
+		"settings.general.show-maximized-at-startup");
 	psy_property_set_id(psy_property_set_text(
 		psy_property_append_bool(self->general, "showsequenceedit", FALSE),
-		"settingsview.general.show-sequenceedit"),
+		"settings.general.show-sequenceedit"),
 		PROPERTY_ID_SHOWSEQUENCEEDIT);
 	psy_property_set_id(psy_property_set_text(
 		psy_property_append_bool(self->general, "showstepsequencer", TRUE),
-		"settingsview.general.show-sequencestepbar"),
+		"settings.general.show-sequencestepbar"),
 		PROPERTY_ID_SHOWSTEPSEQUENCER);
 	psy_property_set_id(psy_property_set_text(
 		psy_property_append_bool(self->general, "showplaylist", FALSE),
-		"settingsview.general.show-playlist"),
+		"settings.general.show-playlist"),
 		PROPERTY_ID_SHOWPLAYLIST);
 	psy_property_set_text(
 		psy_property_append_bool(self->general, "saverecentsongs", TRUE),
-		"settingsview.general.save-recent-songs");
+		"settings.general.save-recent-songs");
 	psy_property_set_text(
 		psy_property_append_bool(self->general, "playsongafterload", TRUE),
-		"settingsview.general.play-song-after-load");
+		"settings.general.play-song-after-load");
 	psy_property_set_text(
 		psy_property_append_bool(self->general, "showpatternnames", FALSE),
-		"settingsview.general.show-pattern-names");
+		"settings.general.show-pattern-names");
 }
 
 bool generalconfig_showing_song_info_on_load(const GeneralConfig* self)

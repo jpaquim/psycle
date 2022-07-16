@@ -65,42 +65,42 @@ void visualconfig_make(VisualConfig* self, psy_Property* parent)
 
 	self->visual = psy_property_set_text(
 		psy_property_append_section(parent, "visual"),
-		"settingsview.visual.visual");
+		"settings.visual.visual");
 	psy_property_set_icon(self->visual, IDB_IMAGE_LIGHT,
 		IDB_IMAGE_DARK);
 	psy_property_connect(psy_property_set_id(
 		psy_property_set_text(psy_property_append_action(
 			self->visual, "loadskin"),
-			"settingsview.visual.load-skin"), PROPERTY_ID_LOADSKIN),
+			"settings.visual.load-skin"), PROPERTY_ID_LOADSKIN),
 		self, visualconfig_on_load_skin);
 	psy_property_connect(psy_property_set_id(
 		psy_property_set_text(
 			psy_property_append_action(self->visual, "defaultskin"),
-			"settingsview.visual.default-skin"),
+			"settings.visual.default-skin"),
 		PROPERTY_ID_DEFAULTSKIN), self, visualconfig_on_reset_skin);
 	self->defaultfont = psy_property_connect(psy_property_set_id(psy_property_set_text(
 		psy_property_append_font(self->visual, "defaultfont",
 			PSYCLE_DEFAULT_FONT),
-		"settingsview.visual.default-font"),
+		"settings.visual.default-font"),
 		PROPERTY_ID_DEFAULTFONT),
 		self, visualconfig_on_set_default_font);
 	psy_property_set_hint(psy_property_set_text(psy_property_append_double(
 		self->visual, "zoom", 1.0, 0.1, 4.0),
-		"settingsview.visual.zoom"),
+		"settings.visual.zoom"),
 		PSY_PROPERTY_HINT_ZOOM);
 	self->apptheme =
 		psy_property_connect(psy_property_set_id(psy_property_set_text(
 			psy_property_append_choice(self->visual,
 				"apptheme", 1),
-			"settingsview.visual.apptheme"),
+			"settings.visual.apptheme"),
 			PROPERTY_ID_APPTHEME),
 			self, visualconfig_on_set_app_theme);			
 	psy_property_set_text(
 		psy_property_append_int(self->apptheme, "light", psy_ui_LIGHTTHEME, 0, 2),
-		"settingsview.visual.light");
+		"settings.visual.light");
 	psy_property_set_text(
 		psy_property_append_int(self->apptheme, "dark", psy_ui_DARKTHEME, 0, 2),
-		"settingsview.visual.dark");
+		"settings.visual.dark");
 	psy_property_set_text(
 		psy_property_append_int(self->apptheme, "win98", psy_ui_WIN98THEME, 0, 2),
 		"Windows 98");

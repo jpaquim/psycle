@@ -55,7 +55,8 @@ typedef enum {
 	PSY_PROPERTY_HINT_CHECK,
 	PSY_PROPERTY_HINT_SELECTION,
 	PSY_PROPERTY_HINT_COMBO,
-	PSY_PROPERTY_HINT_ZOOM
+	PSY_PROPERTY_HINT_ZOOM,
+	PSY_PROPERTY_HINT_RANGE	
 } psy_PropertyHint;
 
 typedef struct psy_PropertyItem {
@@ -215,6 +216,7 @@ psy_PropertyHint psy_property_hint(const psy_Property*);
 psy_Property* psy_property_prevent_save(psy_Property*);
 psy_Property* psy_property_show(psy_Property*);
 psy_Property* psy_property_hide(psy_Property*);
+bool psy_property_hidden(const psy_Property*);
 psy_Property* psy_property_enablesave(psy_Property*);
 psy_Property* psy_property_enableappend(psy_Property*);
 psy_Property* psy_property_preventtranslate(psy_Property*);

@@ -150,13 +150,13 @@ void patternviewbar_init(PatternViewBar* self, psy_ui_Component* parent,
 	/* Move cursor when paste */
 	psy_ui_checkbox_init(&self->movecursorwhenpaste, patternviewbar_base(self));
 	psy_ui_checkbox_set_text(&self->movecursorwhenpaste,
-		"settingsview.pv.move-cursor-when-paste");	
+		"settings.pv.move-cursor-when-paste");	
 	psy_signal_connect(&self->movecursorwhenpaste.signal_clicked, self,
 		patternviewbar_on_move_cursor_when_paste);
 	/* Default line */
 	psy_ui_checkbox_init(&self->defaultentries, patternviewbar_base(self));
 	psy_ui_checkbox_set_text(&self->defaultentries,
-		"settingsview.visual.default-line");
+		"settings.visual.default-line");
 	if (patternviewconfig_defaultline(psycleconfig_patview(
 			workspace_conf(workspace)))) {
 		psy_ui_checkbox_check(&self->defaultentries);
@@ -167,7 +167,7 @@ void patternviewbar_init(PatternViewBar* self, psy_ui_Component* parent,
 	psy_ui_checkbox_init(&self->displaysinglepattern,
 		patternviewbar_base(self));
 	psy_ui_checkbox_set_text(&self->displaysinglepattern,
-		"settingsview.pv.displaysinglepattern");
+		"settings.pv.displaysinglepattern");
 	if (patternviewconfig_single_mode(psycleconfig_patview(
 			workspace_conf(workspace)))) {
 		psy_ui_checkbox_check(&self->displaysinglepattern);

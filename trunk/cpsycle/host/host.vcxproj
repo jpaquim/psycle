@@ -406,6 +406,7 @@
     <ClCompile Include="src\presetsbar.c" />
     <ClCompile Include="src\propertiesview.c" />
     <ClCompile Include="src\psycle.c" />
+    <ClCompile Include="src\rangeedit.c" />
     <ClCompile Include="src\realedit.c" />
     <ClCompile Include="src\recentview.c" />
     <ClCompile Include="src\renderprogressview.c" />
@@ -604,6 +605,7 @@
     <ClInclude Include="src\predefsconfig.h" />
     <ClInclude Include="src\presetsbar.h" />
     <ClInclude Include="src\propertiesview.h" />
+    <ClInclude Include="src\rangeedit.h" />
     <ClInclude Include="src\realedit.h" />
     <ClInclude Include="src\recentview.h" />
     <ClInclude Include="src\renderprogressview.h" />

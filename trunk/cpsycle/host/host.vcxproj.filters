@@ -666,6 +666,9 @@
     <ClCompile Include="src\patternviewtheme.c">
       <Filter>configuration</Filter>
     </ClCompile>
+    <ClCompile Include="src\rangeedit.c">
+      <Filter>uicontrols</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\languageconfig.h">
@@ -1234,6 +1237,9 @@
     </ClInclude>
     <ClInclude Include="src\patternviewtheme.h">
       <Filter>configuration</Filter>
+    </ClInclude>
+    <ClInclude Include="src\rangeedit.h">
+      <Filter>uicontrols</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

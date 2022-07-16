@@ -61,7 +61,8 @@ void renderview_init(RenderView* self, psy_ui_Component* parent,
 		workspace_player(self->workspace));
 	renderview_make(self);
 	propertiesview_init(&self->view, &self->component,
-		tabbarparent, self->properties, 3, &workspace->inputhandler);
+		tabbarparent, self->properties, 3, FALSE,
+		&workspace->inputhandler);
 	propertiesview_prevent_maximize_main_sections(&self->view);	
 	psy_ui_component_set_align(&self->view.component, psy_ui_ALIGN_CLIENT);
 	renderprogressview_init(&self->progress_view, &self->component, workspace);

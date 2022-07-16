@@ -38,12 +38,12 @@ void seqeditconfig_make(SeqEditConfig* self, psy_Property* parent)
 
 	self->seqedit = psy_property_set_id(psy_property_set_text(
 		psy_property_append_section(parent, "seqedit"),
-		"settingsview.seqeditor.seqeditor"), PROPERTY_ID_SEQEDIT);
+		"settings.seqeditor.seqeditor"), PROPERTY_ID_SEQEDIT);
 	psy_property_set_icon(self->seqedit, IDB_STEP_LIGHT,
 		IDB_STEP_DARK);
 	psy_property_connect(psy_property_set_hint(psy_property_set_text(
 		psy_property_append_int(self->seqedit, "machine", 0x3E, 0, 0x40),
-		"settingsview.seqeditor.machine"), PSY_PROPERTY_HINT_EDITHEX),
+		"settings.seqeditor.machine"), PSY_PROPERTY_HINT_EDITHEX),
 		self, seqeditconfig_on_property_changed);
 }
 

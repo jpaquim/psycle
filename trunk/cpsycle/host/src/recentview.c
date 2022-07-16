@@ -86,7 +86,7 @@ void playlistview_init(PlaylistView* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->bar.down.signal_clicked, self,
 		playlistview_onmovedown);
 	propertiesview_init(&self->view, &self->component,
-		tabbarparent, workspace_recentsongs(workspace), 1,
+		tabbarparent, workspace_recentsongs(workspace), 1, FALSE,
 		&workspace->inputhandler);	
 	propertiesrenderer_set_style(&self->view.renderer,
 		STYLE_RECENTVIEW_MAINSECTION,

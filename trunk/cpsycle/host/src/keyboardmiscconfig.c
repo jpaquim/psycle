@@ -47,84 +47,84 @@ void keyboardmiscconfig_make(KeyboardMiscConfig* self, psy_Property* parent)
 
 	self->keyboard = psy_property_set_text(
 		psy_property_append_section(parent, "keyboard"),
-		"settingsview.kbd.kbd-misc");
+		"settings.kbd.kbd-misc");
 	psy_property_set_icon(self->keyboard, IDB_KEYPAD_LIGHT,
 		IDB_KEYPAD_DARK);
 	psy_property_set_text(
 		psy_property_append_bool(self->keyboard,
 			"playstartwithrctrl", TRUE),
-		"settingsview.kbd.ctrl-play");
+		"settings.kbd.ctrl-play");
 	psy_property_set_text(
 		psy_property_append_bool(self->keyboard,
 			"ft2home", TRUE),
-		"settingsview.kbd.ft2-home");
+		"settings.kbd.ft2-home");
 	psy_property_set_text(
 		psy_property_append_bool(self->keyboard,
 			"ft2delete", TRUE),
-		"settingsview.kbd.ft2-delete");
+		"settings.kbd.ft2-delete");
 	psy_property_set_text(
 		psy_property_append_bool(self->keyboard,
 			"effcursoralwayssdown", FALSE),
-		"settingsview.kbd.cursoralwayssdown");
+		"settings.kbd.cursoralwayssdown");
 	psy_property_set_text(
 		psy_property_append_bool(self->keyboard,
 			"recordtweaksastws", 0),
-		"settingsview.kbd.record-tws");
+		"settings.kbd.record-tws");
 	psy_property_set_text(
 		psy_property_append_bool(self->keyboard,
 			"advancelineonrecordtweak", 0),
-		"settingsview.kbd.advance-line-on-record");
+		"settings.kbd.advance-line-on-record");
 	psy_property_set_text(
 		psy_property_append_bool(self->keyboard,
 			"movecursoronestep", 0),
-		"settingsview.kbd.force-patstep1");
+		"settings.kbd.force-patstep1");
 	choice = psy_property_set_text(
 		psy_property_append_choice(self->keyboard,
 			"pgupdowntype", 0),
-		"settingsview.kbd.pgupdowntype");
+		"settings.kbd.pgupdowntype");
 	psy_property_set_text(
 		psy_property_append_int(choice, "beat",
 			0, 0, 0),
-		"settingsview.kbd.pgupdowntype-one-beat");
+		"settings.kbd.pgupdowntype-one-beat");
 	psy_property_set_text(
 		psy_property_append_int(choice, "bar",
 			0, 0, 0),
-		"settingsview.kbd.pgupdowntype-one-bar");
+		"settings.kbd.pgupdowntype-one-bar");
 	psy_property_set_text(
 		psy_property_append_int(choice, "lines",
 			0, 0, 0),
-		"settingsview.kbd.pgupdowntype-lines");
+		"settings.kbd.pgupdowntype-lines");
 	psy_property_set_text(
 		psy_property_append_int(self->keyboard, "pgupdownstep",
 			4, 0, 32),
-		"settingsview.kbd.pgupdowntype-step-lines");
+		"settings.kbd.pgupdowntype-step-lines");
 	self->keyboard_misc = psy_property_set_text(
 		psy_property_append_section(self->keyboard, "misc"),
-		"settingsview.kbd.misc");
+		"settings.kbd.misc");
 	psy_property_set_text(
 		psy_property_append_bool(self->keyboard_misc,
 			"savereminder", TRUE),
-		"settingsview.kbd.savereminder");
+		"settings.kbd.savereminder");
 	psy_property_connect(psy_property_set_id(psy_property_set_text(
 		psy_property_append_int(self->keyboard_misc,
 			"numdefaultlines", 64, 1, 1024),
-		"settingsview.kbd.numdefaultlines"),
+		"settings.kbd.numdefaultlines"),
 		PROPERTY_ID_DEFAULTLINES),
 		self, keyboardmiscconfig_on_pattern_default_lines);
 	psy_property_set_text(
 		psy_property_append_bool(self->keyboard_misc,
 			"allowmultiinstances", FALSE),
-		"settingsview.kbd.allowmultiinstances");
+		"settings.kbd.allowmultiinstances");
 	psy_property_connect(psy_property_set_text(
 		psy_property_append_bool(self->keyboard_misc,
 			"followsong", self->follow_song),
-		"settingsview.kbd.followsong"),
+		"settings.kbd.followsong"),
 		self, keyboardmiscconfig_on_follow_song);
 #if PSYCLE_USE_TK != PSYCLE_TK_X11
 	psy_property_set_id(psy_property_set_text(
 		psy_property_append_bool(self->keyboard_misc,
 			"ft2fileexplorer", FALSE),
-		"settingsview.kbd.ft2-explorer"),
+		"settings.kbd.ft2-explorer"),
 		PROPERTY_ID_FT2FILEEXPLORER);
 #endif	
 }

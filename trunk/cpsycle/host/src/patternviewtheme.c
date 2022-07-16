@@ -135,176 +135,176 @@ void patternviewtheme_make(PatternViewTheme* self, psy_Property* parent)
 
 	self->theme = psy_property_set_text(
 		psy_property_append_section(parent, "theme"),
-		"settingsview.pv.theme.theme");
+		"settings.pv.theme.theme");
 	psy_property_set_text(
 		psy_property_append_str(self->theme,
 			"pattern_fontface", "Tahoma"),
-		"settingsview.pv.theme.fontface");
+		"settings.pv.theme.fontface");
 	psy_property_set_text(
 		psy_property_append_int(self->theme,
 			"pattern_font_point", 0x00000050, 0, 0),
-		"settingsview.pv.theme.fontpoint");
+		"settings.pv.theme.fontpoint");
 	psy_property_set_text(
 		psy_property_append_int(self->theme,
 			"pattern_font_flags", 0x00000001, 0, 0),
-		"settingsview.pv.theme.fontflags");
+		"settings.pv.theme.fontflags");
 	psy_property_set_text(
 		psy_property_append_int(self->theme,
 			"pattern_font_x", 0x00000009, 0, 0),
-		"settingsview.pv.theme.font_x");
+		"settings.pv.theme.font_x");
 	psy_property_set_text(
 		psy_property_append_int(self->theme,
 			"pattern_font_y", 0x0000000B, 0, 0),
-		"settingsview.pv.theme.font_y");
+		"settings.pv.theme.font_y");
 	psy_property_set_text(
 		psy_property_set_hint(psy_property_append_int(self->theme,
 			"pvc_separator", 0x00292929, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
-		"settingsview.pv.theme.separator");
+		"settings.pv.theme.separator");
 	psy_property_set_text(
 		psy_property_set_hint(psy_property_append_int(self->theme,
 			"pvc_separator2", 0x00292929, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
-		"settingsview.pv.theme.separator2");
+		"settings.pv.theme.separator2");
 	psy_property_set_id(psy_property_set_text(
 		psy_property_set_hint(psy_property_append_int(self->theme,
 			"pvc_background", 0x00292929, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
-		"settingsview.pv.theme.background"),
+		"settings.pv.theme.background"),
 		STYLE_PATTERNVIEW);
 	psy_property_set_id(psy_property_set_text(
 		psy_property_set_hint(psy_property_append_int(self->theme,
 			"pvc_background2", 0x00292929, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
-		"settingsview.pv.theme.background2"),
+		"settings.pv.theme.background2"),
 		STYLE_PATTERNVIEW);
 	psy_property_set_id(psy_property_set_text(
 		psy_property_set_hint(psy_property_append_int(self->theme,
 			"pvc_font", 0x00CACACA, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
-		"settingsview.pv.theme.font"),
+		"settings.pv.theme.font"),
 		STYLE_PATTERNVIEW);
 	psy_property_set_id(psy_property_set_text(
 		psy_property_set_hint(psy_property_append_int(self->theme,
 			"pvc_font2", 0x00CACACA, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
-		"settingsview.pv.theme.font2"),
+		"settings.pv.theme.font2"),
 		STYLE_PATTERNVIEW);
 	psy_property_set_id(psy_property_set_text(
 		psy_property_set_hint(psy_property_append_int(self->theme,
 			"pvc_fontCur", 0x00FFFFFF, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
-		"settingsview.pv.theme.fontcur"),
+		"settings.pv.theme.fontcur"),
 		STYLE_PV_CURSOR);
 	psy_property_set_id(psy_property_set_text(
 		psy_property_set_hint(psy_property_append_int(self->theme,
 			"pvc_fontCur2", 0x00FFFFFF, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
-		"settingsview.pv.theme.fontcur2"),
+		"settings.pv.theme.fontcur2"),
 		STYLE_PV_CURSOR);
 	psy_property_set_text(
 		psy_property_set_hint(psy_property_append_int(self->theme,
 			"pvc_fontSel", 0x00FFFFFF, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
-		"settingsview.pv.theme.fontsel");
+		"settings.pv.theme.fontsel");
 	psy_property_set_text(
 		psy_property_set_hint(psy_property_append_int(self->theme,
 			"pvc_fontSel2", 0x00FFFFFF, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
-		"settingsview.pv.theme.fontsel2");
+		"settings.pv.theme.fontsel2");
 	psy_property_set_text(
 		psy_property_set_hint(psy_property_append_int(self->theme,
 			"pvc_fontPlay", 0x00FFFFFF, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
-		"settingsview.pv.theme.fontplay");
+		"settings.pv.theme.fontplay");
 	psy_property_set_text(
 		psy_property_set_hint(psy_property_append_int(self->theme,
 			"pvc_fontPlay2", 0x00FFFFFF, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
-		"settingsview.pv.theme.fontplay2");
+		"settings.pv.theme.fontplay2");
 	psy_property_set_id(psy_property_set_text(
 		psy_property_set_hint(psy_property_append_int(self->theme,
 			"pvc_row", 0x003E3E3E, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
-		"settingsview.pv.theme.row"),
+		"settings.pv.theme.row"),
 		STYLE_PV_ROW);
 	psy_property_set_id(psy_property_set_text(
 		psy_property_set_hint(psy_property_append_int(self->theme,
 			"pvc_row2", 0x003E3E3E, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
-		"settingsview.pv.theme.row2"),
+		"settings.pv.theme.row2"),
 		STYLE_PV_ROW);
 	psy_property_set_id(psy_property_set_text(
 		psy_property_set_hint(psy_property_append_int(self->theme,
 			"pvc_rowbeat", 0x00363636, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
-		"settingsview.pv.theme.rowbeat"),
+		"settings.pv.theme.rowbeat"),
 		STYLE_PV_ROWBEAT);
 	psy_property_set_id(psy_property_set_text(
 		psy_property_set_hint(psy_property_append_int(self->theme,
 			"pvc_rowbeat2", 0x00363636, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
-		"settingsview.pv.theme.rowbeat2"),
+		"settings.pv.theme.rowbeat2"),
 		STYLE_PV_ROWBEAT);
 	psy_property_set_id(psy_property_set_text(
 		psy_property_set_hint(psy_property_append_int(self->theme,
 			"pvc_row4beat", 0x00595959, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
-		"settingsview.pv.theme.row4beat"),
+		"settings.pv.theme.row4beat"),
 		STYLE_PV_ROW4BEAT);
 	psy_property_set_id(psy_property_set_text(
 		psy_property_set_hint(psy_property_append_int(self->theme,
 			"pvc_row4beat2", 0x00595959, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
-		"settingsview.pv.theme.row4beat2"),
+		"settings.pv.theme.row4beat2"),
 		STYLE_PV_ROW4BEAT);
 	psy_property_set_id(psy_property_set_text(
 		psy_property_set_hint(psy_property_append_int(self->theme,
 			"pvc_selection", 0x009B7800, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
-		"settingsview.pv.theme.selection"),
+		"settings.pv.theme.selection"),
 		STYLE_PV_ROW_SELECT);
 	psy_property_set_id(psy_property_set_text(
 		psy_property_set_hint(psy_property_append_int(self->theme,
 			"pvc_selection2", 0x009B7800, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
-		"settingsview.pv.theme.selection2"),
+		"settings.pv.theme.selection2"),
 		STYLE_PV_ROW_SELECT);
 	psy_property_set_id(psy_property_set_text(
 		psy_property_set_hint(psy_property_append_int(self->theme,
 			"pvc_playbar", 0x009F7B00, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
-		"settingsview.pv.theme.playbar"),
+		"settings.pv.theme.playbar"),
 		STYLE_PV_PLAYBAR);
 	psy_property_set_id(psy_property_set_text(
 		psy_property_set_hint(psy_property_append_int(self->theme,
 			"pvc_playbar2", 0x009F7B00, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
-		"settingsview.pv.theme.playbar2"),
+		"settings.pv.theme.playbar2"),
 		STYLE_PV_PLAYBAR);
 	psy_property_set_id(psy_property_set_text(
 		psy_property_set_hint(psy_property_append_int(self->theme,
 			"pvc_cursor", 0x009F7B00, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
-		"settingsview.pv.theme.cursor"),
+		"settings.pv.theme.cursor"),
 		STYLE_PV_CURSOR);
 	psy_property_set_id(psy_property_set_text(
 		psy_property_set_hint(psy_property_append_int(self->theme,
 			"pvc_cursor2", 0x009F7B00, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
-		"settingsview.pv.theme.cursor2"),
+		"settings.pv.theme.cursor2"),
 		STYLE_PV_CURSOR);
 	psy_property_set_id(psy_property_set_text(
 		psy_property_set_hint(psy_property_append_int(self->theme,
 			"pvc_midline", 0x007D6100, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
-		"settingsview.pv.theme.midline"),
+		"settings.pv.theme.midline"),
 		STYLE_PV_PLAYBAR);
 	psy_property_set_id(psy_property_set_text(
 		psy_property_set_hint(psy_property_append_int(self->theme,
 			"pvc_midline2", 0x007D6100, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
-		"settingsview.pv.theme.midline2"),
+		"settings.pv.theme.midline2"),
 		STYLE_PV_PLAYBAR);
 	self->headerskins = psy_property_connect(
 		psy_property_set_hint(psy_property_set_text(

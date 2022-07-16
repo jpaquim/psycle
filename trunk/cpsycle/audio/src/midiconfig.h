@@ -109,7 +109,7 @@ void psy_audio_midiconfig_configure(psy_audio_MidiConfig*,
 
 void psy_audio_midiconfig_add_controller(psy_audio_MidiConfig*,
 	psy_audio_MidiConfigGroup group);
-void psy_audio_midiconfig_removecontroller(psy_audio_MidiConfig* self, intptr_t id);
+void psy_audio_midiconfig_remove_controller(psy_audio_MidiConfig* self, intptr_t id);
 char_dyn_t* psy_audio_midiconfig_controllers_tostring(const psy_audio_MidiConfig* self);
 
 INLINE uintptr_t psy_audio_midiconfig_numcontrollers(const
