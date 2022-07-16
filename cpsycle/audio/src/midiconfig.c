@@ -233,11 +233,11 @@ void psy_audio_midiconfig_add_controller(psy_audio_MidiConfig* self,
 
 	numcontrollers = psy_list_size(self->groups);
 	if (numcontrollers == 0) {
-		// Velocity Controller
+		/* Velocity Controller */
 		group.grouptype = psy_audio_MIDICONFIG_GT_VELOCITY;
 		command = 0x0c;
 	} if (numcontrollers == 1) {
-		// Pitchwheel Controller
+		/* Pitchwheel Controller */
 		group.grouptype = psy_audio_MIDICONFIG_GT_PITCHWHEEL;
 		command = 0x01;
 	} else {
@@ -250,11 +250,11 @@ void psy_audio_midiconfig_add_controller(psy_audio_MidiConfig* self,
 	}
 }
 
-void psy_audio_midiconfig_removecontroller(psy_audio_MidiConfig* self, intptr_t id)
+void psy_audio_midiconfig_remove_controller(psy_audio_MidiConfig* self, intptr_t id)
 {
 	assert(self);
 
-	// doesn't remove velocity or pitchwheel	
+	/* doesn't remove velocity or pitchwheel */
 	if (self->groups && id > 1) {
 		psy_List* i;
 

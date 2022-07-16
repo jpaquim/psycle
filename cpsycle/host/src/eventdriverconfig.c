@@ -82,7 +82,7 @@ void eventdriverconfig_make_driver_list(EventDriverConfig* self)
 {
 	assert(self);
 
-	psy_property_set_text(self->eventinputs, "settingsview.event-input");
+	psy_property_set_text(self->eventinputs, "settings.event-input");
 	/* change number to set startup driver, if no psycle.ini found */
 	self->installeddriver = psy_property_set_text(
 		psy_property_append_choice(self->eventinputs, "installeddriver", 0),

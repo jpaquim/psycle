@@ -7,7 +7,8 @@
 
 
 #include "uicheckbox.h"
-
+/* std */
+#include <stdlib.h>
 
 /* prototypes */
 static void psy_ui_checkbox_mark(psy_ui_CheckBox*);
@@ -82,6 +83,37 @@ void psy_ui_checkbox_on_destroyed(psy_ui_CheckBox* self)
 		psy_property_disconnect(self->property, self);
 	}
 	psy_signal_dispose(&self->signal_clicked);
+}
+
+psy_ui_CheckBox* psy_ui_checkbox_alloc(void)
+{
+	return (psy_ui_CheckBox*)malloc(sizeof(psy_ui_CheckBox));
+}
+
+psy_ui_CheckBox* psy_ui_checkbox_allocinit(psy_ui_Component* parent)
+{
+	psy_ui_CheckBox* rv;
+
+	rv = psy_ui_checkbox_alloc();
+	if (rv) {
+		psy_ui_checkbox_init(rv, parent);
+		psy_ui_component_deallocate_after_destroyed(&rv->component);
+	}
+	return rv;
+}
+
+psy_ui_CheckBox* psy_ui_checkbox_allocinit_exchange(psy_ui_Component* parent,
+	psy_Property* property)
+{
+	psy_ui_CheckBox* rv;
+
+	rv = psy_ui_checkbox_alloc();
+	if (rv) {
+		psy_ui_checkbox_init(rv, parent);
+		psy_ui_checkbox_data_exchange(rv, property);
+		psy_ui_component_deallocate_after_destroyed(&rv->component);
+	}
+	return rv;
 }
 
 void psy_ui_checkbox_set_text(psy_ui_CheckBox* self, const char* text)

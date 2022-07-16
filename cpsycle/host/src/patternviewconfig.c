@@ -43,60 +43,60 @@ void patternviewconfig_make(PatternViewConfig* self, psy_Property* parent)
 
 	pvc = psy_property_append_section(parent, "patternview");
 	psy_property_set_text(pvc,
-		"settingsview.pv.patternview");
+		"settings.pv.patternview");
 	self->patternview = pvc;
 	psy_property_set_text(
 		psy_property_append_font(pvc, "font", PSYCLE_DEFAULT_PATTERN_FONT),
-		"settingsview.pv.font");
+		"settings.pv.font");
 	psy_property_set_hint(psy_property_set_text(psy_property_append_double(
 		self->patternview, "zoom", 1.0, 0.1, 4.0),
-		"settingsview.visual.zoom"),
+		"settings.visual.zoom"),
 		PSY_PROPERTY_HINT_ZOOM);
 	psy_property_set_text(
 		psy_property_append_bool(pvc, "smoothscroll", FALSE),
-		"settingsview.pv.smoothscroll");
+		"settings.pv.smoothscroll");
 	psy_property_set_text(
 		psy_property_append_bool(pvc, "drawemptydata", FALSE),
-		"settingsview.pv.draw-empty-data");
+		"settings.pv.draw-empty-data");
 	psy_property_set_text(
 		psy_property_append_bool(pvc, "griddefaults", TRUE),
-		"settingsview.pv.default-entries");
+		"settings.pv.default-entries");
 	psy_property_set_text(
 		psy_property_append_bool(pvc, "linenumbers", TRUE),
-		"settingsview.pv.line-numbers");
+		"settings.pv.line-numbers");
 	psy_property_set_text(
 		psy_property_append_bool(pvc, "beatoffset", FALSE),
-		"settingsview.pv.beat-offset");
+		"settings.pv.beat-offset");
 	psy_property_set_text(
 		psy_property_append_bool(pvc, "linenumberscursor", TRUE),
-		"settingsview.pv.line-numbers-cursor");
+		"settings.pv.line-numbers-cursor");
 	psy_property_set_text(
 		psy_property_append_bool(pvc, "linenumbersinhex", FALSE),
-		"settingsview.pv.line-numbers-in-hex");
+		"settings.pv.line-numbers-in-hex");
 	psy_property_set_text(
 		psy_property_append_bool(pvc, "wideinstcolumn", FALSE),
-		"settingsview.pv.wide-instrument-column");
+		"settings.pv.wide-instrument-column");
 	psy_property_set_text(
 		psy_property_append_bool(pvc, "trackscopes", TRUE),
-		"settingsview.pv.pattern-track-scopes");
+		"settings.pv.pattern-track-scopes");
 	psy_property_set_text(
 		psy_property_append_bool(pvc, "wraparound", TRUE),
-		"settingsview.pv.wrap-around");
+		"settings.pv.wrap-around");
 	psy_property_set_text(
 		psy_property_append_bool(pvc, "centercursoronscreen", FALSE),
-		"settingsview.pv.center-cursor-on-screen");
+		"settings.pv.center-cursor-on-screen");
 	psy_property_set_text(
 		psy_property_append_int(pvc, "beatsperbar", 4, 1, 16),
-		"settingsview.pv.bar-highlighting");
+		"settings.pv.bar-highlighting");
 	psy_property_set_text(
 		psy_property_append_bool(pvc, "notetab", TRUE),
-		"settingsview.pv.a4-440hz");
+		"settings.pv.a4-440hz");
 	psy_property_set_text(
 		psy_property_append_bool(pvc, "movecursorwhenpaste", TRUE),
-		"settingsview.pv.move-cursor-when-paste");
+		"settings.pv.move-cursor-when-paste");
 	psy_property_set_text(
 		psy_property_append_bool(pvc, "displaysinglepattern", TRUE),
-		"settingsview.pv.displaysinglepattern");
+		"settings.pv.displaysinglepattern");
 	/*
 	** useheaderbitmap
 	** default set to false, because the bitmap skins dont fit to recent
@@ -104,27 +104,27 @@ void patternviewconfig_make(PatternViewConfig* self, psy_Property* parent)
 	*/
 	psy_property_set_text(
 		psy_property_append_bool(pvc, "useheaderbitmap", FALSE),
-		"settingsview.pv.useheaderbitmap");
+		"settings.pv.useheaderbitmap");
 	/* pattern display choice */
 	choice = psy_property_set_text(
 		psy_property_append_choice(pvc, "patterndisplay", 0),
-		"settingsview.pv.patterndisplay");
+		"settings.pv.patterndisplay");
 	psy_property_set_text(
 		psy_property_append_int(choice, "tracker",
 			0, 0, 0),
-		"settingsview.pv.tracker");
+		"settings.pv.tracker");
 	psy_property_set_text(
 		psy_property_append_int(choice, "piano",
 			0, 0, 0),
-		"settingsview.pv.piano");
+		"settings.pv.piano");
 	psy_property_set_text(
 		psy_property_append_int(choice, "splitvertical",
 			0, 0, 0),
-		"settingsview.pv.splitvertical");
+		"settings.pv.splitvertical");
 	psy_property_set_text(
 		psy_property_append_int(choice, "splithorizontal",
 			0, 0, 0),
-		"settingsview.pv.splithorizontal");	
+		"settings.pv.splithorizontal");	
 }
 
 void patternviewconfig_reset_theme(PatternViewConfig* self)

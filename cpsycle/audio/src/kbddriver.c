@@ -144,10 +144,10 @@ void driver_makeconfig(psy_EventDriver* context)
 		"guid", PSY_EVENTDRIVER_KBD_GUID, 0, 0));
 	psy_property_set_text(
 		psy_property_append_str(self->configuration, "name", "kbd"),
-		"settingsview.name");
+		"settings.name");
 	psy_property_set_text(
 		psy_property_append_str(self->configuration, "version", "1.0"),
-		"settingsview.version");
+		"settings.version");
 	self->cmddef = psy_property_set_text(
 		psy_property_append_section(self->configuration, "cmds"),
 		"cmds.keymap");

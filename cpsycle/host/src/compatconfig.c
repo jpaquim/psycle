@@ -42,7 +42,7 @@ void compatconfig_make(CompatConfig* self, psy_Property* parent)
 	self->compatibility = psy_property_set_text(
 		psy_property_append_section(parent,
 		"compatibility"),
-		"settingsview.compatibility");
+		"settings.compatibility");
 	psy_property_set_icon(self->compatibility, IDB_TRAIL_SIGN_LIGHT,
 		IDB_TRAIL_SIGN_DARK);
 	psy_property_connect(psy_property_set_text(

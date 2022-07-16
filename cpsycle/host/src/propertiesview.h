@@ -33,13 +33,14 @@ typedef struct PropertiesRenderState {
 	uintptr_t keystyle;
 	uintptr_t keystyle_hover;
 	uintptr_t linestyle_select;
+	bool do_build;
 	/* references */	
 	psy_Table sections;
 	struct PropertiesRenderLine* property_line_selected;
 	psy_ui_Component* view;
 } PropertiesRenderState;
 
-void propertiesrenderstate_init(PropertiesRenderState*, uintptr_t numcols);
+void propertiesrenderstate_init(PropertiesRenderState*, uintptr_t numcols, bool lazy);
 void propertiesrenderstate_dispose(PropertiesRenderState*);
 
 
@@ -81,7 +82,7 @@ typedef struct PropertiesRenderer {
 } PropertiesRenderer;
 
 void propertiesrenderer_init(PropertiesRenderer*, psy_ui_Component* parent,
-	psy_Property*, uintptr_t numcols);
+	psy_Property*, uintptr_t numcols, bool lazy);
 
 void propertiesrenderer_set_style(PropertiesRenderer*,
 	uintptr_t mainsection,
@@ -116,12 +117,12 @@ typedef struct PropertiesView {
 	psy_ui_TabBar tabbar;
 	PropertiesRenderer renderer;
 	psy_ui_Scroller scroller;	
-	bool maximize_main_sections;
+	bool maximize_main_sections;	
 } PropertiesView;
 
 void propertiesview_init(PropertiesView*, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, psy_Property*, uintptr_t numcols,
-	InputHandler*);
+	bool lazy, InputHandler*);
 
 void propertiesview_reload(PropertiesView*);
 void propertiesview_mark(PropertiesView*, psy_Property*);

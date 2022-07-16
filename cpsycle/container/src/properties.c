@@ -1219,8 +1219,7 @@ psy_Property* psy_property_append_action(psy_Property* self, const char* key)
 
 	property = psy_property_create_int(key, 0, 0, 0);
 	if (property) {
-		property->item.typ = PSY_PROPERTY_TYPE_ACTION;
-		property->item.hint = PSY_PROPERTY_HINT_CHECK;
+		property->item.typ = PSY_PROPERTY_TYPE_ACTION;		
 		psy_property_append_property(self, property);
 	}
 	return property;
@@ -1241,8 +1240,7 @@ psy_Property* psy_property_create_bool(const char* key, bool value)
 
 	property = psy_property_create_int(key, value != FALSE, 0, 1);
 	if (property) {
-		property->item.typ = PSY_PROPERTY_TYPE_BOOL;
-		property->item.hint = PSY_PROPERTY_HINT_CHECK;
+		property->item.typ = PSY_PROPERTY_TYPE_BOOL;		
 	}
 	return property;
 }
@@ -1257,8 +1255,7 @@ psy_Property* psy_property_append_bool(psy_Property* self,
 	rv = (psy_Property*)malloc(sizeof(psy_Property));
 	if (rv) {
 		psy_property_init_type(rv, key, PSY_PROPERTY_TYPE_BOOL);
-		rv->item.value.i = (value != FALSE);
-		rv->item.hint = PSY_PROPERTY_HINT_CHECK;
+		rv->item.value.i = (value != FALSE);		
 	}
 	return psy_property_append_property(self, rv);
 }
@@ -1397,6 +1394,13 @@ psy_Property* psy_property_hide(psy_Property* self)
 
 	self->item.hide = TRUE;
 	return self;
+}
+
+bool psy_property_hidden(const psy_Property* self)
+{
+	assert(self);
+
+	return (self->item.hide != FALSE);
 }
 
 psy_Property* psy_property_preventtranslate(psy_Property* self)

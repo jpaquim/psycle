@@ -18,8 +18,10 @@ static void midiviewconfig_make(MidiViewConfig*, psy_Property*);
 static void midiviewconfig_on_controller_changed(MidiViewConfig* self, psy_Property* sender);
 static void midiviewconfig_on_add_controller_map(MidiViewConfig*,
 	psy_Property* sender);
-static void midiviewconfig_on_remove_controller_map(MidiViewConfig*,
+static void midiviewconfig_on_remove_controller_maps(MidiViewConfig*,
 	psy_Property* sender);
+static void midiviewconfig_remove_controller_map(MidiViewConfig*,
+	psy_Property* group);
 
 /* implementation */
 void midiviewconfig_init(MidiViewConfig* self, psy_Property* parent,
@@ -43,55 +45,64 @@ void midiviewconfig_make(MidiViewConfig* self, psy_Property* parent)
 
 	self->controllers = psy_property_set_text(
 		psy_property_append_section(parent, "controllers"),
-		"settingsview.midicontrollers.controllers");
+		"settings.midicontrollers.controllers");
 	psy_property_set_icon(self->controllers, IDB_WIRES_LIGHT,
 		IDB_WIRES_DARK);
 	/* macselect */
-	choice = psy_property_set_text(
+	choice = psy_property_set_hint(psy_property_set_text(
 		psy_property_append_choice(self->controllers,
 			"macselect", 0),
-		"settingsview.midicontrollers.macselect");
+		"settings.midicontrollers.macselect"),
+		PSY_PROPERTY_HINT_COMBO);
 	psy_property_set_text(
 		psy_property_append_str(choice, "inpsycle", ""),
-		"settingsview.midicontrollers.select-inpsycle");
+		"settings.midicontrollers.select-inpsycle");
 	psy_property_set_text(
 		psy_property_append_str(choice, "bybank", ""),
-		"settingsview.midicontrollers.select-bybank");
+		"settings.midicontrollers.select-bybank");
 	psy_property_set_text(
 		psy_property_append_str(choice, "bybank", ""),
-		"settingsview.midicontrollers.select-byprogram");
+		"settings.midicontrollers.select-byprogram");
 	psy_property_set_text(
 		psy_property_append_str(choice, "bybank", ""),
-		"settingsview.midicontrollers.select-bychannel");
+		"settings.midicontrollers.select-bychannel");
 	/* auxselect */
-	choice = psy_property_set_text(
+	choice = psy_property_set_hint(psy_property_set_text(
 		psy_property_append_choice(self->controllers,
 			"auxselect", 0),
-		"settingsview.midicontrollers.auxselect");
+		"settings.midicontrollers.auxselect"),
+		PSY_PROPERTY_HINT_COMBO);
 	psy_property_set_text(
 		psy_property_append_str(choice, "inpsycle", ""),
-		"settingsview.midicontrollers.select-inpsycle");
+		"settings.midicontrollers.select-inpsycle");
 	psy_property_set_text(
 		psy_property_append_str(choice, "bybank", ""),
-		"settingsview.midicontrollers.select-bybank");
+		"settings.midicontrollers.select-bybank");
 	psy_property_set_text(
 		psy_property_append_str(choice, "bybank", ""),
-		"settingsview.midicontrollers.select-byprogram");
+		"settings.midicontrollers.select-byprogram");
 	psy_property_set_text(
 		psy_property_append_str(choice, "bybank", ""),
-		"settingsview.midicontrollers.select-bychannel");
+		"settings.midicontrollers.select-bychannel");
 	psy_property_set_text(
 		psy_property_append_bool(self->controllers,
 			"recordrawmidiasmcm", TRUE),
-		"settingsview.midicontrollers.recordrawmidiasmcm");
+		"settings.midicontrollers.recordrawmidiasmcm");
 	/* map controllers */
 	psy_property_connect(
 		psy_property_set_id(psy_property_set_text(
 			psy_property_append_action(self->controllers,
 			"addcontroller"),
-			"settingsview.midicontrollers.add"),
+			"settings.midicontrollers.add"),
 		PROPERTY_ID_ADDCONTROLLERMAP),
 		self, midiviewconfig_on_add_controller_map);
+	psy_property_connect(
+		psy_property_set_id(psy_property_set_text(
+			psy_property_append_action(self->controllers,
+				"removecontrollers"),
+			"settings.midicontrollers.remove"),
+			PROPERTY_ID_REMOVECONTROLLERMAP),
+		self, midiviewconfig_on_remove_controller_maps);
 	psy_property_hide(psy_property_append_str(self->controllers,
 		"controllerdata", ""));
 	psy_property_prevent_save(psy_property_set_text(
@@ -118,6 +129,7 @@ void midiviewconfig_make_controllers(MidiViewConfig* self)
 			psy_audio_MidiConfigGroup* midigroup;
 			psy_Property* group;
 			psy_Property* choice;
+			psy_Property* range;
 			bool isvelocity;
 			bool ispitchwheel;
 			bool hasmessage;
@@ -136,38 +148,37 @@ void midiviewconfig_make_controllers(MidiViewConfig* self)
 				? "Pitch Wheel"
 				: "Controller");
 			psy_property_hide(psy_property_append_int(group, "id", c, 0, 0));
+			if (hasmessage) {
+				psy_property_set_hint(psy_property_set_text(psy_property_append_bool(
+					group, "select", midigroup->record),
+					"settings.midicontrollers.select"),
+					PSY_PROPERTY_HINT_CHECK);
+			}
 			psy_property_set_text(psy_property_append_bool(group, "record",
 				midigroup->record), "Map");
 			psy_property_set_hint(psy_property_setreadonly(psy_property_set_text(
 				psy_property_append_int(group, "message", midigroup->message, 0, 127),
 				"Controller Number"), (!hasmessage)), PSY_PROPERTY_HINT_EDITHEX);
 			if (hasmessage || ispitchwheel) {
-				choice = psy_property_set_text(
+				choice = psy_property_set_hint(psy_property_set_text(
 					psy_property_append_choice(group, "type", midigroup->type),
-					"to");
+					"to"), PSY_PROPERTY_HINT_COMBO);
 				psy_property_append_str(choice, "cmd", "");
 				psy_property_append_str(choice, "twk", "");
 				psy_property_append_str(choice, "tws", "");
 				psy_property_append_str(choice, "mcm", "");
-			}
+			}			
 			psy_property_set_hint(psy_property_set_text(psy_property_append_int(
 				group, "cmd", midigroup->command, 0, 0xF), "value"),
 				PSY_PROPERTY_HINT_EDITHEX);
+			range = psy_property_set_hint(psy_property_append_section(
+				group, "range"), PSY_PROPERTY_HINT_RANGE);
 			psy_property_set_hint(psy_property_append_int(
-				group, "from", midigroup->from, 0, 0xFF),
+				range, "from", midigroup->from, 0, 0xFF),
 				PSY_PROPERTY_HINT_EDITHEX);
 			psy_property_set_hint(psy_property_append_int(
-				group, "to", midigroup->to, 0, 0xFF),
-				PSY_PROPERTY_HINT_EDITHEX);
-			if (hasmessage) {
-				psy_property_connect(
-					psy_property_set_id(psy_property_set_text(
-						psy_property_append_action(group,
-							"removecontroller"),
-						"Remove"),
-						PROPERTY_ID_REMOVECONTROLLERMAP),
-					self, midiviewconfig_on_remove_controller_map);
-			}
+				range, "to", midigroup->to, 0, 0xFF),
+				PSY_PROPERTY_HINT_EDITHEX);			
 		}
 		psy_property_rebuild(controllers);
 	}
@@ -197,37 +208,74 @@ void midiviewconfig_on_add_controller_map(MidiViewConfig* self,
 {
 	psy_audio_MidiConfigGroup group;
 
-	psy_audio_midiconfiggroup_init(&group, psy_audio_MIDICONFIG_GT_CUSTOM,
-		1);
-	psy_audio_midiconfig_add_controller(
-		&self->player->midiinput.midiconfig, group);
+	psy_audio_midiconfiggroup_init(&group, psy_audio_MIDICONFIG_GT_CUSTOM, 1);
+	psy_audio_midiconfig_add_controller(&self->player->midiinput.midiconfig, group);
 	midiviewconfig_make_controllers(self);
 }
 
-void midiviewconfig_on_remove_controller_map(MidiViewConfig* self,
+void midiviewconfig_on_remove_controller_maps(MidiViewConfig* self,
 	psy_Property* sender)
 {
-	psy_Property* group;
-	intptr_t id;
+	psy_Property* controllers;
+	psy_List* p;
+	psy_List* q;	
+	bool removed;
 
-	group = psy_property_parent(sender);
-	if (group) {
-		id = psy_property_at_int(group, "id", -1);
-		if (id != -1) {
-			psy_audio_midiconfig_removecontroller(
-				&self->player->midiinput.midiconfig, id);
-			midiviewconfig_make_controller_save(self);
-			midiviewconfig_make_controllers(self);
+	assert(self);
+
+	q = NULL;
+	removed = FALSE;
+
+	controllers = psy_property_at(self->controllers, "controllers",
+		PSY_PROPERTY_TYPE_SECTION);
+	if (!controllers) {
+		return;
+	}
+	for (p = psy_property_begin(controllers); p != NULL; p = q) {
+		psy_Property* group;
+		bool selected;
+
+		q = p->next;
+		group = (psy_Property*)p->entry;
+		selected = psy_property_at_bool(group, "select", FALSE);
+		if (selected) {
+			midiviewconfig_remove_controller_map(self, group);
+			removed = TRUE;
 		}
+	}
+	if (removed) {
+		psy_property_rebuild(controllers);
 	}
 }
 
-void midiviewconfig_on_controller_changed(MidiViewConfig* self, psy_Property* sender)
+void midiviewconfig_remove_controller_map(MidiViewConfig* self,
+	psy_Property* group)
+{
+	intptr_t id;
+
+	assert(self);
+	assert(group);
+
+	id = psy_property_at_int(group, "id", -1);
+	if (id != -1) {
+		psy_Property* parent;
+
+		parent = psy_property_parent(group);		
+		psy_audio_midiconfig_remove_controller(
+			&self->player->midiinput.midiconfig, id);
+		if (parent) {
+			psy_property_remove(parent, group);
+		}
+		// midiviewconfig_make_controller_save(self);
+	}
+}
+
+void midiviewconfig_on_controller_changed(MidiViewConfig* self,
+	psy_Property* sender)
 {	
 	assert(self);
 	
-	if (psy_property_in_section(sender,
-		self->controllers)) {
+	if (psy_property_in_section(sender, self->controllers)) {
 		psy_audio_player_midi_configure(self->player,
 			self->controllers, FALSE);
 		midiviewconfig_make_controller_save(self);

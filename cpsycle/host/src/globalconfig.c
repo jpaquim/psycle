@@ -50,22 +50,22 @@ void globalconfig_make(GlobalConfig* self, psy_Property* parent)
 
 	self->global = psy_property_set_text(
 		psy_property_append_section(parent, "global"),
-		"settingsview.global.configuration");
+		"settings.global.configuration");
 	psy_property_set_icon(self->global, IDB_SETTINGS_LIGHT, IDB_SETTINGS_DARK);
 	psy_property_connect(psy_property_set_id(psy_property_set_text(
 		psy_property_append_bool(self->global, "enableaudio", TRUE),
-		"settingsview.global.enable-audio"),
+		"settings.global.enable-audio"),
 		PROPERTY_ID_ENABLEAUDIO),
 		self, globalconfig_on_enable_audio);
 	psy_property_connect(psy_property_set_id(psy_property_set_text(
 		psy_property_append_action(self->global, "regenerateplugincache"),
-		"settingsview.global.regenerate-plugincache"),
+		"settings.global.regenerate-plugincache"),
 		PROPERTY_ID_REGENERATEPLUGINCACHE),
 		self, globalconfig_on_plugin_scan);
 	languageconfig_init(&self->language, self->global, psy_ui_translator());
 	self->import_config = psy_property_set_id(
 		psy_property_set_text(psy_property_append_action(self->global,
-			"importconfig"), "settingsview.global.importconfig"),
+			"importconfig"), "settings.global.importconfig"),
 		PROPERTY_ID_IMPORTCONFIG);
 
 }

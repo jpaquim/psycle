@@ -41,20 +41,20 @@ void metronomeconfig_make(MetronomeConfig* self, psy_Property* parent)
 
 	self->metronome = psy_property_set_id(psy_property_set_text(
 		psy_property_append_section(parent, "metronome"),
-		"settingsview.metronome.metronome"), PROPERTY_ID_METRONOME);
+		"settings.metronome.metronome"), PROPERTY_ID_METRONOME);
 	psy_property_set_icon(self->metronome, IDB_METRONOME_LIGHT,
 		IDB_METRONOME_DARK);
 	psy_property_connect(psy_property_set_id(psy_property_set_text(
 		psy_property_append_bool(self->metronome, "showmetronome", FALSE),
-		"settingsview.metronome.show"), PROPERTY_ID_SHOWMETRONOME),
+		"settings.metronome.show"), PROPERTY_ID_SHOWMETRONOME),
 		self, metronomeconfig_on_property_changed);
 	psy_property_connect(psy_property_set_text(
 		psy_property_append_int(self->metronome, "machine", 0x3F, 0, 0x40),
-		"settingsview.metronome.machine"),
+		"settings.metronome.machine"),
 		self, metronomeconfig_on_property_changed);
 	psy_property_connect(psy_property_set_text(
 		psy_property_append_int(self->metronome, "note", 48, 0, 119),
-		"settingsview.metronome.note"),
+		"settings.metronome.note"),
 		self, metronomeconfig_on_property_changed);
 }
 
