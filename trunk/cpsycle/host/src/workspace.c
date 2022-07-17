@@ -693,6 +693,9 @@ void workspace_postload_driver_configurations(Workspace* self)
 {
 	assert(self);
 
+#if defined DIVERSALIS__OS__UNIX
+	driverconfigloadthread(self);
+#else	
 	if (!self->driverconfigloading) {
 		psy_Thread thread;
 
@@ -700,6 +703,7 @@ void workspace_postload_driver_configurations(Workspace* self)
 		workspace_output_status(self, psy_ui_translate("msg.audiostarting"));
 		psy_thread_start(&thread, self, driverconfigloadthread);
 	}
+#endif	
 }
 
 psy_Property* workspace_recentsongs(Workspace* self)

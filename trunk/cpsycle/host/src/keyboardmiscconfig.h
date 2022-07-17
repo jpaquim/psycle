@@ -23,7 +23,7 @@ enum {
 	PROPERTY_ID_FT2FILEEXPLORER = 30001
 };
 
-struct psy_audio_Player* player;
+struct psy_audio_Player;
 
 typedef struct KeyboardMiscConfig {		
 	/* internal*/
