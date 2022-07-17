@@ -64,7 +64,8 @@ typedef struct psy_audio_Player {
 	psy_audio_Sequencer sequencer;	
 	psy_Signal signal_lpbchanged;
 	psy_Signal signal_inputevent;
-	psy_Signal signal_stop;	
+	psy_Signal signal_stop;
+	psy_Signal signal_octavechanged;
 	psy_Library drivermodule;
 	psy_audio_EventDrivers eventdrivers;	
 	VUMeterMode vumode;

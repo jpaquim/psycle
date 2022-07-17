@@ -59,8 +59,7 @@ typedef struct MachineView {
 	psy_ui_Scroller scroller;
 	MachineStackView stackview;	
 	NewMachine newmachine;	
-	bool shownewmachine;
-	ParamViews paramviews;
+	bool shownewmachine;	
 	/* references */
 	Workspace* workspace;	
 } MachineView;

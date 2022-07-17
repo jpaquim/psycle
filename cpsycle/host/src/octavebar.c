@@ -11,11 +11,12 @@
 /* platform */
 #include "../../detail/portable.h"
 
+
 /* prototypes */
 static void octavebar_build_octave_box(OctaveBar*);
 static void octavebar_on_octavebox_sekected(OctaveBar*,
 	psy_ui_Component* sender, intptr_t sel);
-static void octavebar_on_octave_changed(OctaveBar*, Workspace*,
+static void octavebar_on_octave_changed(OctaveBar*, psy_audio_Player*,
 	intptr_t octave);
 static void octavebar_on_song_changed(OctaveBar*, Workspace* sender);
 
@@ -36,7 +37,7 @@ void octavebar_init(OctaveBar* self, psy_ui_Component* parent,
 	octavebar_build_octave_box(self);
 	psy_signal_connect(&self->octavebox.signal_selchanged, self,
 		octavebar_on_octavebox_sekected);
-	psy_signal_connect(&workspace->signal_octavechanged, self,
+	psy_signal_connect(&workspace->player.signal_octavechanged, self,
 		octavebar_on_octave_changed);
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		octavebar_on_song_changed);	
@@ -52,24 +53,24 @@ void octavebar_build_octave_box(OctaveBar* self)
 		psy_ui_combobox_add_text(&self->octavebox, text);
 	}
 	psy_ui_combobox_select(&self->octavebox,
-		workspace_octave(self->workspace));
+		psy_audio_player_octave(&self->workspace->player));
 }
 
 void octavebar_on_octavebox_sekected(OctaveBar* self, psy_ui_Component* sender,
 	intptr_t index)
 {	
 	if (index >= 0 && index <= 8) {
-		workspace_set_octave(self->workspace, (uint8_t)index);
+		psy_audio_player_set_octave(&self->workspace->player, (uint8_t)index);
 	}
 }
 
-void octavebar_on_octave_changed(OctaveBar* self, Workspace* sender,
+void octavebar_on_octave_changed(OctaveBar* self, psy_audio_Player* sender,
 	intptr_t octave)
 {
-	psy_ui_combobox_select(&self->octavebox, workspace_octave(sender));
+	psy_ui_combobox_select(&self->octavebox, psy_audio_player_octave(sender));
 }
 
 void octavebar_on_song_changed(OctaveBar* self, Workspace* sender)
 {	
-	psy_ui_combobox_select(&self->octavebox, workspace_octave(sender));
+	psy_ui_combobox_select(&self->octavebox, psy_audio_player_octave(&sender->player));
 }

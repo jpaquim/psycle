@@ -501,9 +501,9 @@ void seqviewlist_init(SeqviewList* self, psy_ui_Component* parent,
 			&self->state->cmds->sequence->patterns->signal_namechanged,
 			self, seqviewlist_onpatternnamechanged);
 	}
-	psy_signal_connect(&self->state->cmds->workspace->signal_play_line_changed, self,
+	psy_signal_connect(&self->state->cmds->workspace->player.sequencer.signal_play_line_changed, self,
 		seqviewlist_on_playline_changed);
-	psy_signal_connect(&self->state->cmds->workspace->signal_play_status_changed, self,
+	psy_signal_connect(&self->state->cmds->workspace->player.sequencer.signal_play_status_changed, self,
 		seqviewlist_on_playstatus_changed);
 	psy_ui_component_setscrollstep(&self->component,
 		psy_ui_size_make(self->state->trackwidth, self->state->line_height));

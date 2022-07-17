@@ -74,6 +74,28 @@ INLINE bool psy_audio_sequencertime_playing(const psy_audio_SequencerTime*
 	return self->playing;
 }
 
+typedef struct psy_audio_HostSequencerTime {
+	bool currplaying;
+	psy_audio_SequenceCursor lastplaycursor;
+	psy_audio_SequenceCursor currplaycursor;
+} psy_audio_HostSequencerTime;
+
+void psy_audio_hostsequencertime_init(psy_audio_HostSequencerTime*);
+
+void psy_audio_hostsequencertime_set_play_cursor(psy_audio_HostSequencerTime*,
+	psy_audio_SequenceCursor);
+void psy_audio_hostsequencertime_update_last_play_cursor(psy_audio_HostSequencerTime*);
+
+INLINE bool psy_audio_hostsequencertime_playing(const psy_audio_HostSequencerTime* self)
+{
+	return (self->currplaying);
+}
+
+INLINE bool psy_audio_hostsequencertime_play_line_changed(const psy_audio_HostSequencerTime* self)
+{
+	return (self->currplaycursor.linecache != self->lastplaycursor.linecache);
+}
+
 typedef enum {
 	psy_audio_SEQUENCERPLAYMODE_PLAYALL,
 	psy_audio_SEQUENCERPLAYMODE_PLAYNUMBEATS,
@@ -131,8 +153,11 @@ void psy_audio_sequencermetronome_init(psy_audio_SequencerMetronome*);
 typedef struct psy_audio_Sequencer {
 	/* signals */
 	psy_Signal signal_newline;
+	psy_Signal signal_play_line_changed;
+	psy_Signal signal_play_status_changed;
 	/* internal */
 	psy_audio_SequencerTime seqtime;
+	psy_audio_HostSequencerTime hostseqtime;
 	psy_dsp_big_beat_t beatspersample;
 	uintptr_t lpb; /* global */
 	psy_dsp_big_beat_t lpbspeed; /* pattern */
@@ -179,6 +204,7 @@ void psy_audio_sequencer_tick(psy_audio_Sequencer*,
 	psy_dsp_big_beat_t offset);
 uintptr_t psy_audio_sequencer_updatelinetickcount(psy_audio_Sequencer*,
 	uintptr_t amount);
+void psy_audio_sequencer_update_host_seq_time(psy_audio_Sequencer* self, bool follow_song);
 // clock
 void psy_audio_sequencer_clock_start(psy_audio_Sequencer*);
 void psy_audio_sequencer_clock(psy_audio_Sequencer*);

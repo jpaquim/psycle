@@ -6,6 +6,8 @@
 #ifndef psy_LOGGER_H
 #define psy_LOGGER_H
 
+#include "../../detail/psydef.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -24,6 +26,27 @@ typedef struct psy_Logger {
 } psy_Logger;
 
 void psy_logger_init(psy_Logger*);
+
+INLINE void psy_logger_output(psy_Logger* self, const char* text)
+{
+	assert(self);
+
+	self->vtable->output(self->context, text);
+}
+
+INLINE void psy_logger_warn(psy_Logger* self, const char* text)
+{
+	assert(self);
+
+	self->vtable->output(self->context, text);
+}
+
+INLINE void psy_logger_error(psy_Logger* self, const char* text)
+{
+	assert(self);
+
+	self->vtable->error(self->context, text);
+}
 
 #ifdef __cplusplus
 }

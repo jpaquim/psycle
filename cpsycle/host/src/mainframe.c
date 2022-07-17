@@ -220,11 +220,12 @@ void mainframe_init_frame(MainFrame* self)
 	psy_ui_component_init(&self->pane, mainframe_base(self),
 		mainframe_base(self));	
 	psy_ui_component_set_align(&self->pane, psy_ui_ALIGN_CLIENT);
-	links_init(&self->links);
+	links_init(&self->links);	
 }
 
 void mainframe_on_destroyed(MainFrame* self)
 {
+	paramviews_dispose(&self->paramviews);
 	startscript_dispose(&self->startscript);
 	links_dispose(&self->links);
 	workspace_dispose(&self->workspace);
@@ -252,8 +253,10 @@ MainFrame* mainframe_allocinit(void)
 void mainframe_init_workspace(MainFrame* self)
 {
 	workspace_init(&self->workspace, mainframe_base(self));
+	paramviews_init(&self->paramviews, &self->component, &self->workspace);
+	workspace_set_param_views(&self->workspace, &self->paramviews);
+	workspace_load_recent_songs(&self->workspace);
 	workspace_load_configuration(&self->workspace);
-	workspace_load_recentsongs(&self->workspace);
 }
 
 void mainframe_init_layout(MainFrame* self)
@@ -473,7 +476,7 @@ void mainframe_init_main_pane(MainFrame* self)
 
 void mainframe_init_gear(MainFrame* self)
 {
-	gear_init(&self->gear, &self->client, &self->workspace);
+	gear_init(&self->gear, &self->client, &self->paramviews, &self->workspace);
 	psy_ui_component_hide(gear_base(&self->gear));
 	psy_ui_component_set_align(gear_base(&self->gear), psy_ui_ALIGN_RIGHT);
 	psy_ui_splitter_init(&self->gearsplitter, &self->client);
@@ -620,7 +623,8 @@ void mainframe_init_sequence_view(MainFrame* self)
 
 void mainframe_init_sequencer_bar(MainFrame* self)
 {
-	sequencerbar_init(&self->sequencerbar, &self->left, &self->workspace);
+	sequencerbar_init(&self->sequencerbar, &self->left,
+		&self->workspace.config.misc, &self->workspace.config.general);
 	psy_ui_component_set_align(sequencerbar_base(&self->sequencerbar),
 		psy_ui_ALIGN_BOTTOM);	
 }
@@ -680,7 +684,7 @@ bool mainframe_on_input(MainFrame* self, InputHandler* sender)
 		return 1;
 	case CMD_IMM_INFOMACHINE:
 		if (self->workspace.song) {
-			paramviews_show(&self->machineview.paramviews,
+			paramviews_show(&self->paramviews,
 				psy_audio_machines_selected(&self->workspace.song->machines));
 		}
 		break;
@@ -759,7 +763,7 @@ void mainframe_on_song_changed(MainFrame* self, Workspace* sender)
 	clockbar_reset(&self->statusbar.clockbar);
 	psy_ui_component_align(&self->client);
 	psy_ui_component_align(mainframe_base(self));
-	if (!sender->song_has_file) {
+	if (!workspace_song_has_file(sender)) {
 		machinewireview_centermaster(&self->machineview.wireview);
 	}
 }

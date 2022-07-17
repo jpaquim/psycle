@@ -464,7 +464,7 @@ void kbdbox_on_mouse_down(KbdBox* self, psy_ui_MouseEvent* ev)
 		input.message = psy_EVENTDRIVER_PRESS;
 		input.param1 = psy_audio_encodeinput(self->state.pressedkey,
 			self->state.shift, self->state.ctrl, self->state.alt, 0);
-		input.param2 = workspace_octave(self->workspace) * 12;
+		input.param2 = psy_audio_player_octave(&self->workspace->player) * 12;
 		psy_eventdriver_write(workspace_kbd_driver(self->workspace), input);		
 		kbdbox_resetmodstates(self);
 	}
@@ -483,7 +483,7 @@ void kbdbox_on_mouse_up(KbdBox* self, psy_ui_MouseEvent* ev)
 		input.message = psy_EVENTDRIVER_RELEASE;
 		input.param1 = psy_audio_encodeinput(self->state.pressedkey,
 			self->state.shift, self->state.ctrl, self->state.alt, 0);
-		input.param2 = workspace_octave(self->workspace) * 12;
+		input.param2 = psy_audio_player_octave(&self->workspace->player) * 12;
 		psy_eventdriver_write(workspace_kbd_driver(self->workspace), input);		
 		self->state.pressedkey = 0;
 	}	

@@ -188,6 +188,7 @@ static void vtable_init(void)
 		vtable.deallocate = driver_deallocate;		
 		vtable.close = driver_close;
 		vtable.dispose = driver_dispose;
+		vtable.refresh_ports = (psy_audiodriver_fp_refresh_ports)refreshavailableports;
 		vtable.configure = driver_configure;
 		vtable.configuration = driver_configuration;
 		vtable.samplerate = samplerate;

@@ -65,6 +65,7 @@ typedef struct fileout_driver {
 static void driver_deallocate(psy_AudioDriver*);
 static int fileoutdriver_init(fileout_driver*);
 static int driver_open(psy_AudioDriver*);
+static void driver_refresh_ports(psy_AudioDriver* self) { }
 static void driver_configure(fileout_driver*, psy_Property*);
 static const psy_Property* driver_configuration(const psy_AudioDriver*);
 static int driver_close(psy_AudioDriver*);
@@ -92,6 +93,7 @@ static void vtable_init(void)
 		vtable.open = driver_open;
 		vtable.deallocate = driver_deallocate;
 		vtable.open = driver_open;
+		vtable.refresh_ports = driver_refresh_ports;
 		vtable.close = driver_close;
 		vtable.dispose = driver_dispose;
 		vtable.configure =

@@ -8,6 +8,7 @@
 
 /* host */
 #include "config.h"
+#include "hostmachinecallback.h"
 #include "inputhandler.h"
 #include "pluginscanthread.h"
 #include "undoredo.h"
@@ -33,16 +34,14 @@
 **
 ** connects the player with the psycle host ui and configures both
 **
-** psy_audio_MachineCallback
-**         ^
-**         |
-**     Workspace
-**             <>---- PsycleConfig;	              host
-**             <>---- ViewHistory
-**             <>---- psy_audio_Player;           audio imports
-**             <>---- psy_audio_MachineFactory
-**             <>---- psy_audio_PluginCatcher
-**             <>---- psy_audio_Song
+** Workspace
+**           <>---- HostMachineCallback
+**           <>---- PsycleConfig;
+**           <>---- ViewHistory
+**           <>---- psy_audio_Player;
+**           <>---- psy_audio_MachineFactory
+**           <>---- psy_audio_PluginCatcher
+**           <>---- psy_audio_Song
 */
 
 #ifdef __cplusplus
@@ -54,27 +53,6 @@ enum {
 	WORKSPACE_LOADSONG
 };
 
-typedef struct HostSequencerTime {	
-	bool currplaying;
-	psy_audio_SequenceCursor lastplaycursor;
-	psy_audio_SequenceCursor currplaycursor;
-} HostSequencerTime;
-
-void hostsequencertime_init(HostSequencerTime*);
-
-void hostsequencertime_set_play_cursor(HostSequencerTime*, 
-	psy_audio_SequenceCursor);
-void hostsequencertime_update_last_play_cursor(HostSequencerTime*);
-
-INLINE bool hostsequencertime_playing(const HostSequencerTime* self)
-{
-	return (self->currplaying);
-}
-
-INLINE bool hostsequencertime_play_line_changed(const HostSequencerTime* self)
-{
-	return (self->currplaycursor.linecache != self->lastplaycursor.linecache);
-}
 
 struct Workspace;
 
@@ -85,14 +63,10 @@ typedef void (*fp_workspace_songloadprogress)(void* context,
 
 struct ParamViews;
 
-typedef struct Workspace {
-	/* implements */
-	psy_audio_MachineCallback machinecallback;
-	/* signals */
-	psy_Signal signal_octavechanged;
-	psy_Signal signal_songchanged;		
-	psy_Signal signal_play_line_changed;
-	psy_Signal signal_play_status_changed;
+typedef struct Workspace {	
+	HostMachineCallback hostmachinecallback;
+	/* signals */	
+	psy_Signal signal_songchanged;	
 	psy_Signal signal_gotocursor;	
 	psy_Signal signal_load_progress;
 	psy_Signal signal_scanprogress;
@@ -100,8 +74,7 @@ typedef struct Workspace {
 	psy_Signal signal_scanend;
 	psy_Signal signal_scanfile;
 	psy_Signal signal_scantaskstart;
-	psy_Signal signal_plugincachechanged;
-	psy_Signal signal_beforesavesong;	
+	psy_Signal signal_plugincachechanged;	
 	psy_Signal signal_viewselected;	
 	psy_Signal signal_parametertweak;
 	psy_Signal signal_status_out;	
@@ -117,10 +90,7 @@ typedef struct Workspace {
 	psy_Playlist playlist;
 	psy_ui_Component* main;	
 	ViewHistory view_history;
-	ViewIndex restoreview;	
-	char* filename;
-	bool song_has_file;	
-	bool record_tweaks;	
+	ViewIndex restoreview;
 	psy_audio_SequencePaste sequencepaste;	
 	/* ui */	
 	bool gearvisible;
@@ -135,7 +105,6 @@ typedef struct Workspace {
 	psy_dsp_big_beat_t restorenumplaybeats;
 	bool restoreloop;	
 	bool driverconfigloading;	
-	HostSequencerTime host_sequencer_time;
 	InputHandler inputhandler;
 	psy_Thread driverconfigloadthread;	
 	struct ParamViews* paramviews;
@@ -145,6 +114,7 @@ typedef struct Workspace {
 
 void workspace_init(Workspace*, psy_ui_Component* handle);
 void workspace_dispose(Workspace*);
+
 void workspace_load_configuration(Workspace*);
 void workspace_postload_driver_configurations(Workspace*);
 void workspace_start_audio(Workspace*);
@@ -191,9 +161,7 @@ INLINE psy_audio_Player* workspace_player(Workspace* self)
 
 psy_Property* workspace_recentsongs(Workspace*);
 psy_Playlist* workspace_playlist(Workspace*);
-void workspace_load_recentsongs(Workspace*);
-void workspace_set_octave(Workspace*, uint8_t octave);
-uint8_t workspace_octave(Workspace*);
+void workspace_load_recent_songs(Workspace*);
 void workspace_undo(Workspace*);
 void workspace_redo(Workspace*);
 void workspace_edit_quantize_change(Workspace*, int diff);
@@ -201,15 +169,11 @@ int workspace_has_plugin_cache(const Workspace*);
 psy_audio_PluginCatcher* workspace_plugincatcher(Workspace*);
 psy_EventDriver* workspace_kbd_driver(Workspace*);
 void workspace_idle(Workspace*);
-void workspace_show_parameters(Workspace*, uintptr_t machineslot);
 void workspace_select_view(Workspace*, ViewIndex);
 void workspace_save_view(Workspace*);
 void workspace_restore_view(Workspace*);
 void workspace_parameter_tweak(Workspace*, int slot, uintptr_t tweak,
 	float value);
-void workspace_record_tweaks(Workspace*);
-void workspace_stop_record_tweaks(Workspace*);
-bool workspace_recording_tweaks(Workspace*);
 void workspace_on_view_changed(Workspace*, ViewIndex);
 void workspace_back(Workspace*);
 void workspace_forward(Workspace*);
@@ -237,19 +201,23 @@ void workspace_on_input(Workspace*, uintptr_t cmd);
 
 INLINE bool workspace_song_has_file(const Workspace* self)
 {
-	return self->song_has_file;
+	if (self->song) {
+		return self->song->song_has_file;
+	}
+	return FALSE;
 }
 
-INLINE const HostSequencerTime* workspace_host_sequencer_time(
+INLINE const psy_audio_HostSequencerTime* workspace_host_seq_time(
 	const Workspace* self)
 {
-	return &self->host_sequencer_time;
+	return &self->player.sequencer.hostseqtime;
 }
 
 INLINE void workspace_set_terminal_output(Workspace* self,
 	psy_Logger* terminal_output)
 {
 	self->terminal_output = terminal_output;
+	self->hostmachinecallback.logger = terminal_output;
 }
 
 #ifdef __cplusplus

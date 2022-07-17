@@ -276,10 +276,10 @@ void pianogriddraw_drawplaybar(PianoGridDraw* self, psy_ui_Graphics* g, psy_audi
 {
 	assert(self);
 
-	if (self->workspace->host_sequencer_time.currplaying) {
+	if (self->workspace->player.sequencer.hostseqtime.currplaying) {
 		psy_dsp_big_beat_t offset;
 
-		offset = self->workspace->host_sequencer_time.currplaycursor.absoffset;
+		offset = self->workspace->player.sequencer.hostseqtime.currplaycursor.absoffset;
 		if (offset >= 0 && offset < patternviewstate_length(self->gridstate->pv)) {
 			psy_ui_Style* style;
 

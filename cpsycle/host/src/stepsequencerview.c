@@ -211,9 +211,9 @@ void stepsequencerbar_update(StepsequencerBar* self)
 		uintptr_t i;
 		uintptr_t line;
 		uintptr_t steprow;
-		HostSequencerTime host_time;
+		psy_audio_HostSequencerTime host_time;
 
-		host_time = self->state->workspace->host_sequencer_time;
+		host_time = self->state->workspace->player.sequencer.hostseqtime;
 		cursor = song->sequence.cursor;		
 		steprow = psy_audio_sequencecursor_line_pattern(&cursor) / self->state->numtiles;
 		line = steprow * self->state->numtiles;
@@ -272,10 +272,10 @@ void stepsequencerbar_update_playline(StepsequencerBar* self)
 		psy_audio_SequenceCursor cursor;		
 		uintptr_t linestart;
 		uintptr_t steprow;
-		HostSequencerTime host_time;
+		psy_audio_HostSequencerTime host_time;
 		StepSequencerTile* tile;
 
-		host_time = self->state->workspace->host_sequencer_time;
+		host_time = self->state->workspace->player.sequencer.hostseqtime;
 		cursor = song->sequence.cursor;		
 		steprow = psy_audio_sequencecursor_line_pattern(&cursor) /
 			self->state->numtiles;
@@ -631,7 +631,7 @@ void stepsequencerview_connect_workspace(StepsequencerView* self,
 		psy_signal_connect(&workspace->song->sequence.signal_cursorchanged, self,
 			stepsequencerview_on_cursor_changed);
 	}
-	psy_signal_connect(&workspace->signal_play_line_changed,
+	psy_signal_connect(&workspace->player.sequencer.signal_play_line_changed,
 		self, stepsequencerview_on_playline_changed);	
 }
 

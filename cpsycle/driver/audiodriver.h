@@ -43,6 +43,7 @@ typedef int (*psy_audiodriver_fp_open)(struct psy_AudioDriver*);
 typedef bool (*psy_audiodriver_fp_opened)(const struct psy_AudioDriver*);
 typedef int (*psy_audiodriver_fp_dispose)(struct psy_AudioDriver*);
 typedef void (*psy_audiodriver_fp_deallocate)(struct psy_AudioDriver*);
+typedef void (*psy_audiodriver_fp_refresh_ports)(struct psy_AudioDriver*);
 typedef void (*psy_audiodriver_fp_configure)(struct psy_AudioDriver*, const psy_Property*);
 typedef const psy_Property* (*psy_audiodriver_fp_configuration)(const struct psy_AudioDriver*);
 typedef int (*psy_audiodriver_fp_close)(struct psy_AudioDriver*);
@@ -66,6 +67,7 @@ typedef struct psy_AudioDriverVTable {
 	psy_audiodriver_fp_opened opened;
 	psy_audiodriver_fp_dispose dispose;
 	psy_audiodriver_fp_deallocate deallocate;
+	psy_audiodriver_fp_refresh_ports refresh_ports;
 	psy_audiodriver_fp_configure configure;
 	psy_audiodriver_fp_configuration configuration;
 	psy_audiodriver_fp_close close;

@@ -199,12 +199,12 @@ void songpropertiesview_read(SongPropertiesView* self)
 void songpropertiesview_onsongchanged(SongPropertiesView* self,
 	Workspace* sender)
 {
-	if (sender->song_has_file) {
+	if (workspace_song_has_file(sender)) {
 		songpropertiesview_disableedit(self);
 	} else {
 		songpropertiesview_enableedit(self);
 	}
-	self->song = sender->song;
+	self->song = workspace_song(sender);
 	songpropertiesview_read(self);
 }
 

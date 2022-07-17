@@ -455,7 +455,7 @@ void psy_ui_button_settextcolour(psy_ui_Button* self, psy_ui_Colour colour)
 	psy_ui_component_setcolour(&self->component, colour);	
 }
 
-void psy_ui_button_settextalignment(psy_ui_Button* self,
+void psy_ui_button_set_text_alignment(psy_ui_Button* self,
 	psy_ui_Alignment alignment)
 {
 	self->textalignment = alignment;
@@ -511,15 +511,12 @@ void psy_ui_button_data_exchange(psy_ui_Button* self, psy_Property* property)
 	assert(property);
 
 	self->property = property;
-	if (property) {
-		psy_ui_button_on_property_changed(self, property);
+	if (property) {		
+		psy_ui_button_on_property_changed(self, property);		
 		psy_property_connect(property, self,
 			psy_ui_button_on_property_changed);
 		psy_signal_connect(&self->property->before_destroyed, self,
-			psy_ui_button_before_property_destroyed);
-		if (psy_property_is_action(property)) {
-			psy_ui_button_set_text(self, psy_property_text(property));
-		}
+			psy_ui_button_before_property_destroyed);		
 	}
 }
 

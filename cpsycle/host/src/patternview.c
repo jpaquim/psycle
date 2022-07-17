@@ -12,7 +12,7 @@
 /* platform */
 #include "../../detail/portable.h"
 
-/* PatternView */
+
 /* prototypes */
 static void patternview_on_destroyed(PatternView*);
 static void patternview_rebuild(PatternView*);
@@ -23,8 +23,7 @@ static void patternview_on_configure(PatternView*, PatternViewConfig*,
 	psy_Property*);
 static void patternview_on_zoom(PatternView*, psy_Property*);
 static void patternview_on_select_display(PatternView*, psy_Property*);
-static void patternview_on_misc_configure(PatternView*, KeyboardMiscConfig*,
-	psy_Property*);
+static void patternview_on_follow_song(PatternView*, psy_Property* sender);
 static void patternview_on_focus(PatternView*);
 static void patternview_on_mouse_down(PatternView*, psy_ui_MouseEvent*);
 static void patternview_on_mouse_up(PatternView*, psy_ui_MouseEvent*);
@@ -166,8 +165,8 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 		"patterndisplay", self, patternview_on_select_display);
 	patternviewconfig_connect(pvconfig,
 		"zoom", self, patternview_on_zoom);
-	psy_signal_connect(&self->pvstate.keymiscconfig->signal_changed, self,
-		patternview_on_misc_configure);
+	keyboardmiscconfig_connect(self->pvstate.keymiscconfig, "followsong",
+		self, patternview_on_follow_song);
 	patternview_on_configure(self, self->pvstate.patconfig, NULL);
 	patternview_rebuild(self);	
 }
@@ -182,7 +181,7 @@ void patternview_on_destroyed(PatternView* self)
 }
 
 void patternview_on_toggle_properties(PatternView* self,
-	PatternViewTabBar*sender)
+	PatternViewTabBar* sender)
 {		
 	assert(self);
 	
@@ -295,8 +294,7 @@ void patternview_on_select_display(PatternView* self, psy_Property* sender)
 		psy_property_item_int(sender));
 }
 
-void patternview_on_misc_configure(PatternView* self, KeyboardMiscConfig* config,
-	psy_Property* property)
+void patternview_on_follow_song(PatternView* self, psy_Property* sender)
 {
 	psy_ui_component_invalidate(&self->trackerview.component);
 }

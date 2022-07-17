@@ -937,8 +937,8 @@ void trackergrid_invalidate_line(TrackerGrid* self, intptr_t line)
 
 void trackergrid_invalidate_playbar(TrackerGrid* self)
 {
-	trackergrid_invalidate_lines(self, self->workspace->host_sequencer_time.lastplaycursor.linecache,
-		self->workspace->host_sequencer_time.currplaycursor.linecache);
+	trackergrid_invalidate_lines(self, self->workspace->player.sequencer.hostseqtime.lastplaycursor.linecache,
+		self->workspace->player.sequencer.hostseqtime.currplaycursor.linecache);
 }
 
 void trackergrid_invalidate_lines(TrackerGrid* self, intptr_t line1, intptr_t line2)
@@ -1418,7 +1418,7 @@ void trackergrid_tweak(TrackerGrid* self, int slot, uintptr_t tweak,
 {
 	assert(self);
 
-	if (workspace_recording_tweaks(self->workspace)) {
+	if (psy_property_at_bool(self->workspace->config.misc.misc, "record-tweaks", FALSE)) {
 		psy_audio_PatternEvent event;
 		psy_audio_Machine* machine;
 		int value;
@@ -1609,9 +1609,9 @@ void trackerview_init(TrackerView* self, psy_ui_Component* parent,
 		trackerview_on_song_changed);
 	psy_signal_connect(&self->grid.component.signal_scrolled, self,
 		trackerview_on_grid_scroll);
-	psy_signal_connect(&self->workspace->signal_play_line_changed, self,
+	psy_signal_connect(&self->workspace->player.sequencer.signal_play_line_changed, self,
 		trackerview_on_play_line_changed);
-	psy_signal_connect(&self->workspace->signal_play_status_changed, self,
+	psy_signal_connect(&self->workspace->player.sequencer.signal_play_status_changed, self,
 		trackerview_on_play_status_changed);
 	trackerview_connect_song(self);	
 	/* configuration */
@@ -1695,15 +1695,15 @@ void trackerview_on_play_line_changed(TrackerView* self, Workspace* sender)
 	}
 	if (trackerview_playing_following_song(self)) {
 		trackergrid_invalidate_line(&self->grid,
-			self->workspace->host_sequencer_time.lastplaycursor.linecache);
+			self->workspace->player.sequencer.hostseqtime.lastplaycursor.linecache);
 		trackerlinenumbers_invalidate_line(&self->lines.linenumbers,
-			self->workspace->host_sequencer_time.lastplaycursor.linecache);
+			self->workspace->player.sequencer.hostseqtime.lastplaycursor.linecache);
 		trackergrid_scroll_down(&self->grid,
 			patternviewstate_cursor(self->grid.state->pv), FALSE);
 		trackergrid_invalidate_line(&self->grid,
-			self->workspace->host_sequencer_time.currplaycursor.linecache);
+			self->workspace->player.sequencer.hostseqtime.currplaycursor.linecache);
 		trackerlinenumbers_invalidate_line(&self->lines.linenumbers,
-			self->workspace->host_sequencer_time.currplaycursor.linecache);
+			self->workspace->player.sequencer.hostseqtime.currplaycursor.linecache);
 	} else {
 		trackerlinenumbers_invalidate_playbar(&self->lines.linenumbers);
 		trackergrid_invalidate_playbar(&self->grid);
@@ -1727,7 +1727,7 @@ void trackerview_on_sequence_changed(TrackerView* self,
 
 bool trackerview_playing_following_song(const TrackerView* self)
 {
-	return self->workspace->host_sequencer_time.currplaying &&
+	return self->workspace->player.sequencer.hostseqtime.currplaying &&
 		keyboardmiscconfig_following_song(&self->workspace->config.misc);
 }
 

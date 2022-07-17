@@ -41,6 +41,8 @@ typedef struct psy_ui_CheckBox {
 void psy_ui_checkbox_init(psy_ui_CheckBox*, psy_ui_Component* parent);
 void psy_ui_checkbox_init_text(psy_ui_CheckBox*, psy_ui_Component* parent,
     const char* text);
+void psy_ui_checkbox_init_exchange(psy_ui_CheckBox*, psy_ui_Component* parent,
+    psy_Property*);
 
 psy_ui_CheckBox* psy_ui_checkbox_alloc(void);
 psy_ui_CheckBox* psy_ui_checkbox_allocinit(psy_ui_Component* parent);

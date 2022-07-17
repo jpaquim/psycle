@@ -138,8 +138,9 @@ typedef struct MainFrame {
 	ConfirmBox checkunsavedbox;		
 	Interpreter interpreter;	
 	bool titlemodified;
+	ParamViews paramviews;
 	psy_ui_RealPoint frame_drag_offset;
-	bool allow_frame_move;
+	bool allow_frame_move;	
 } MainFrame;
 
 void mainframe_init(MainFrame*);

@@ -11,6 +11,7 @@
 #include "resources/resource.h"
 /* audio */
 #include <pattern.h>
+#include <player.h>
 
 
 /* prototypes */
@@ -19,24 +20,29 @@ static void keyboardmiscconfig_on_follow_song(KeyboardMiscConfig*,
 	psy_Property* sender);
 static void keyboardmiscconfig_on_pattern_default_lines(KeyboardMiscConfig*,
 	psy_Property* sender);
+static void keyboardmiscconfig_on_multi_key(KeyboardMiscConfig*,
+	psy_Property* sender);
+static void keyboardmiscconfig_on_notes_to_effect(KeyboardMiscConfig*,
+	psy_Property* sender);
+static void keyboardmiscconfig_on_record_noteoff(KeyboardMiscConfig*,
+	psy_Property* sender);
 
 /* implementation */
-void keyboardmiscconfig_init(KeyboardMiscConfig* self, psy_Property* parent)
+void keyboardmiscconfig_init(KeyboardMiscConfig* self, psy_Property* parent,
+	psy_audio_Player* player)
 {
 	assert(self && parent);
 
 	self->parent = parent;
 	self->cursorstep = 1;
 	self->follow_song = FALSE;
-	keyboardmiscconfig_make(self, parent);
-	psy_signal_init(&self->signal_changed);
+	self->player = player;
+	keyboardmiscconfig_make(self, parent);	
 }
 
 void keyboardmiscconfig_dispose(KeyboardMiscConfig* self)
 {
 	assert(self);
-
-	psy_signal_dispose(&self->signal_changed);
 }
 
 void keyboardmiscconfig_make(KeyboardMiscConfig* self, psy_Property* parent)
@@ -45,41 +51,41 @@ void keyboardmiscconfig_make(KeyboardMiscConfig* self, psy_Property* parent)
 
 	assert(self);
 
-	self->keyboard = psy_property_set_text(
-		psy_property_append_section(parent, "keyboard"),
+	self->misc = psy_property_set_text(
+		psy_property_append_section(parent, "inputhandling"),
 		"settings.kbd.kbd-misc");
-	psy_property_set_icon(self->keyboard, IDB_KEYPAD_LIGHT,
+	psy_property_set_icon(self->misc, IDB_KEYPAD_LIGHT,
 		IDB_KEYPAD_DARK);
 	psy_property_set_text(
-		psy_property_append_bool(self->keyboard,
+		psy_property_append_bool(self->misc,
 			"playstartwithrctrl", TRUE),
 		"settings.kbd.ctrl-play");
 	psy_property_set_text(
-		psy_property_append_bool(self->keyboard,
+		psy_property_append_bool(self->misc,
 			"ft2home", TRUE),
 		"settings.kbd.ft2-home");
 	psy_property_set_text(
-		psy_property_append_bool(self->keyboard,
+		psy_property_append_bool(self->misc,
 			"ft2delete", TRUE),
 		"settings.kbd.ft2-delete");
 	psy_property_set_text(
-		psy_property_append_bool(self->keyboard,
+		psy_property_append_bool(self->misc,
 			"effcursoralwayssdown", FALSE),
 		"settings.kbd.cursoralwayssdown");
 	psy_property_set_text(
-		psy_property_append_bool(self->keyboard,
+		psy_property_append_bool(self->misc,
 			"recordtweaksastws", 0),
 		"settings.kbd.record-tws");
 	psy_property_set_text(
-		psy_property_append_bool(self->keyboard,
+		psy_property_append_bool(self->misc,
 			"advancelineonrecordtweak", 0),
 		"settings.kbd.advance-line-on-record");
 	psy_property_set_text(
-		psy_property_append_bool(self->keyboard,
+		psy_property_append_bool(self->misc,
 			"movecursoronestep", 0),
 		"settings.kbd.force-patstep1");
 	choice = psy_property_set_text(
-		psy_property_append_choice(self->keyboard,
+		psy_property_append_choice(self->misc,
 			"pgupdowntype", 0),
 		"settings.kbd.pgupdowntype");
 	psy_property_set_text(
@@ -95,34 +101,50 @@ void keyboardmiscconfig_make(KeyboardMiscConfig* self, psy_Property* parent)
 			0, 0, 0),
 		"settings.kbd.pgupdowntype-lines");
 	psy_property_set_text(
-		psy_property_append_int(self->keyboard, "pgupdownstep",
+		psy_property_append_int(self->misc, "pgupdownstep",
 			4, 0, 32),
-		"settings.kbd.pgupdowntype-step-lines");
-	self->keyboard_misc = psy_property_set_text(
-		psy_property_append_section(self->keyboard, "misc"),
-		"settings.kbd.misc");
+		"settings.kbd.pgupdowntype-step-lines");	
 	psy_property_set_text(
-		psy_property_append_bool(self->keyboard_misc,
+		psy_property_append_bool(self->misc,
 			"savereminder", TRUE),
 		"settings.kbd.savereminder");
 	psy_property_connect(psy_property_set_id(psy_property_set_text(
-		psy_property_append_int(self->keyboard_misc,
+		psy_property_append_int(self->misc,
 			"numdefaultlines", 64, 1, 1024),
 		"settings.kbd.numdefaultlines"),
 		PROPERTY_ID_DEFAULTLINES),
 		self, keyboardmiscconfig_on_pattern_default_lines);
 	psy_property_set_text(
-		psy_property_append_bool(self->keyboard_misc,
+		psy_property_append_bool(self->misc,
 			"allowmultiinstances", FALSE),
 		"settings.kbd.allowmultiinstances");
 	psy_property_connect(psy_property_set_text(
-		psy_property_append_bool(self->keyboard_misc,
+		psy_property_append_bool(self->misc,
 			"followsong", self->follow_song),
 		"settings.kbd.followsong"),
 		self, keyboardmiscconfig_on_follow_song);
+	psy_property_set_text(
+		psy_property_append_bool(self->misc,
+			"record-tweak", FALSE),
+		"seqview.record-tweak");
+	psy_property_connect(psy_property_set_text(
+		psy_property_append_bool(self->misc,
+			"recordnoteoff", FALSE),
+		"seqview.record-noteoff"),
+		self, keyboardmiscconfig_on_record_noteoff);
+	psy_property_connect(psy_property_set_text(
+		psy_property_append_bool(self->misc,
+			"multikey", FALSE),
+		"seqview.multichannel-audition"),
+		self, keyboardmiscconfig_on_multi_key);
+	psy_property_connect(psy_property_set_text(
+		psy_property_append_bool(self->misc,
+			"notestoeffects", FALSE),
+		"seqview.allow-notes-to_effect"),
+		self, keyboardmiscconfig_on_notes_to_effect);
 #if PSYCLE_USE_TK != PSYCLE_TK_X11
 	psy_property_set_id(psy_property_set_text(
-		psy_property_append_bool(self->keyboard_misc,
+		psy_property_append_bool(self->misc,
 			"ft2fileexplorer", FALSE),
 		"settings.kbd.ft2-explorer"),
 		PROPERTY_ID_FT2FILEEXPLORER);
@@ -133,102 +155,96 @@ bool keyboardmiscconfig_ft2home(const KeyboardMiscConfig* self)
 {
 	assert(self);
 
-	return psy_property_at_bool(self->keyboard, "ft2home", TRUE);
+	return psy_property_at_bool(self->misc, "ft2home", TRUE);
 }
 
 void keyboardmiscconfig_enable_ft2home(KeyboardMiscConfig* self)
 {
 	assert(self);
 
-	psy_signal_emit(&self->signal_changed, self, 1, psy_property_set_bool(
-		self->keyboard, "ft2home", TRUE));
+	psy_property_set_bool(self->misc, "ft2home", TRUE);
 }
 
 void keyboardmiscconfig_disable_ft2home(KeyboardMiscConfig* self)
 {
 	assert(self);
 
-	psy_signal_emit(&self->signal_changed, self, 1, psy_property_set_bool(
-		self->keyboard, "ft2home", FALSE));
+	psy_property_set_bool(self->misc, "ft2home", FALSE);
 }
 
 bool keyboardmiscconfig_ft2delete(const KeyboardMiscConfig* self)
 {
 	assert(self);
 
-	return psy_property_at_bool(self->keyboard, "ft2delete", TRUE);
+	return psy_property_at_bool(self->misc, "ft2delete", TRUE);
 }
 
 void keyboardmiscconfig_enable_ft2delete(KeyboardMiscConfig* self)
 {
 	assert(self);
 
-	psy_signal_emit(&self->signal_changed, self, 1, psy_property_set_bool(
-		self->keyboard, "ft2delete", TRUE));
+	psy_property_set_bool(self->misc, "ft2delete", TRUE);
 }
 
 void keyboardmiscconfig_disable_ft2delete(KeyboardMiscConfig* self)
 {
 	assert(self);
 
-	psy_signal_emit(&self->signal_changed, self, 1, psy_property_set_bool(
-		self->keyboard, "ft2delete", FALSE));
+	psy_property_set_bool(self->misc, "ft2delete", FALSE);
 }
 
 bool keyboardmiscconfig_effcursoralwaysdown(const KeyboardMiscConfig* self)
 {
 	assert(self);
 
-	return psy_property_at_bool(self->keyboard, "effcursoralwayssdown", FALSE);
+	return psy_property_at_bool(self->misc, "effcursoralwayssdown", FALSE);
 }
 
 bool keyboardmiscconfig_playstartwithrctrl(KeyboardMiscConfig* self)
 {
 	assert(self);
 
-	return psy_property_at_bool(self->keyboard, "playstartwithrctrl", TRUE);
+	return psy_property_at_bool(self->misc, "playstartwithrctrl", TRUE);
 }
 
 void keyboardmiscconfig_enable_playstartwithrctrl(KeyboardMiscConfig* self)
 {
 	assert(self);
 
-	psy_signal_emit(&self->signal_changed, self, 1, psy_property_set_bool(
-		self->keyboard, "playstartwithrctrl", TRUE));
+	psy_property_set_bool(self->misc, "playstartwithrctrl", TRUE);
 }
 
 void keyboardmiscconfig_disable_playstartwithrctrl(KeyboardMiscConfig* self)
 {
 	assert(self);
 
-	psy_signal_emit(&self->signal_changed, self, 1, psy_property_set_bool(
-		self->keyboard, "playstartwithrctrl", FALSE));
+	psy_property_set_bool(self->misc, "playstartwithrctrl", FALSE);
 }
 
 bool keyboardmiscconfig_movecursoronestep(const KeyboardMiscConfig* self)
 {
 	assert(self);
 
-	return psy_property_at_bool(self->keyboard, "movecursoronestep", TRUE);
+	return psy_property_at_bool(self->misc, "movecursoronestep", TRUE);
 }
 
 bool keyboardmiscconfig_savereminder(const KeyboardMiscConfig* self)
 {
 	assert(self);
 
-	return  psy_property_at_bool(self->keyboard_misc, "savereminder", TRUE);
+	return  psy_property_at_bool(self->misc, "savereminder", TRUE);
 }
 
 intptr_t keyboardmiscconfig_patdefaultlines(const KeyboardMiscConfig* self)
 {
 	assert(self);
 
-	return psy_property_at_int(self->keyboard_misc, "numdefaultlines", 64);
+	return psy_property_at_int(self->misc, "numdefaultlines", 64);
 }
 
 bool keyboardmiscconfig_allowmultipleinstances(const KeyboardMiscConfig* self)
 {
-	return psy_property_at_bool(self->keyboard_misc, "allowmultiinstances",
+	return psy_property_at_bool(self->misc, "allowmultiinstances",
 		FALSE);
 }
 
@@ -236,15 +252,14 @@ bool keyboardmiscconfig_recordtweaksastws(const KeyboardMiscConfig* self)
 {
 	assert(self);
 
-	return psy_property_at_bool(self->keyboard,
-		"recordtweaksastws", 0);
+	return psy_property_at_bool(self->misc,"recordtweaksastws", FALSE);
 }
 
 bool keyboardmiscconfig_advancelineonrecordtweak(const KeyboardMiscConfig* self)
 {
 	assert(self);
 
-	return psy_property_at_bool(self->keyboard,
+	return psy_property_at_bool(self->misc,
 		"advancelineonrecordtweak", 0);
 }
 
@@ -254,7 +269,7 @@ uintptr_t keyboardmiscconfig_pgupdowntype(const KeyboardMiscConfig* self)
 
 	assert(self);
 
-	p = psy_property_at(self->keyboard, "pgupdowntype", PSY_PROPERTY_TYPE_CHOICE);
+	p = psy_property_at(self->misc, "pgupdowntype", PSY_PROPERTY_TYPE_CHOICE);
 	if (p) {
 		return (uintptr_t)psy_property_item_int(p);
 	}
@@ -265,7 +280,7 @@ intptr_t keyboardmiscconfig_pgupdownstep(const KeyboardMiscConfig* self)
 {
 	assert(self);
 
-	return psy_property_at_int(self->keyboard, "pgupdownstep", 4);
+	return psy_property_at_int(self->misc, "pgupdownstep", 4);
 }
 
 void keyboardmiscconfig_setcursorstep(KeyboardMiscConfig* self, int step)
@@ -289,7 +304,7 @@ bool keyboardmiscconfig_ft2fileexplorer(const KeyboardMiscConfig* self)
 #if PSYCLE_USE_TK == PSYCLE_TK_X11
 	return TRUE;
 #else
-	return psy_property_at_bool(self->keyboard_misc, "ft2fileexplorer", FALSE);
+	return psy_property_at_bool(self->misc, "ft2fileexplorer", FALSE);
 #endif
 }
 
@@ -303,7 +318,7 @@ bool keyboardmiscconfig_following_song(const KeyboardMiscConfig* self)
 void keyboardmiscconfig_on_follow_song(KeyboardMiscConfig* self,
 	psy_Property* sender)
 {
-	keyboardmiscconfig_follow_song(self);
+	self->follow_song = psy_property_item_bool(sender);	
 }
 
 void keyboardmiscconfig_follow_song(KeyboardMiscConfig* self)
@@ -312,12 +327,10 @@ void keyboardmiscconfig_follow_song(KeyboardMiscConfig* self)
 
 	assert(self);
 
-	property = psy_property_at(self->keyboard_misc, "followsong",
+	property = psy_property_at(self->misc, "followsong",
 		PSY_PROPERTY_TYPE_NONE);
 	if (property) {
-		psy_property_set_item_bool(property, TRUE);
-		self->follow_song = TRUE;
-		psy_signal_emit(&self->signal_changed, self, 1, property);
+		psy_property_set_item_bool(property, TRUE);			
 	}
 }
 
@@ -327,23 +340,53 @@ void keyboardmiscconfig_stop_follow_song(KeyboardMiscConfig* self)
 
 	assert(self);
 
-	property = psy_property_at(self->keyboard_misc, "followsong",
+	property = psy_property_at(self->misc, "followsong",
 		PSY_PROPERTY_TYPE_NONE);
 	if (property) {
-		psy_property_set_item_bool(property, FALSE);
-		self->follow_song = FALSE;
-		psy_signal_emit(&self->signal_changed, self, 1, property);
+		psy_property_set_item_bool(property, FALSE);		
 	}
 }
 
 void keyboardmiscconfig_on_pattern_default_lines(KeyboardMiscConfig* self,
 	psy_Property* sender)
 {
+	assert(self);
+
 	if (psy_property_item_int(sender) > 0) {
 		psy_audio_pattern_setdefaultlines((uintptr_t)
 			psy_property_item_int(sender));
 	}	
-	psy_signal_emit(&self->signal_changed, self, 1, sender);	
+}
+
+void keyboardmiscconfig_on_multi_key(KeyboardMiscConfig* self,
+	psy_Property* sender)
+{
+	assert(self);
+
+	if (self->player) {
+		self->player->multichannelaudition = psy_property_item_bool(sender);
+	}
+}
+
+void keyboardmiscconfig_on_record_noteoff(KeyboardMiscConfig* self, psy_Property* sender)
+{
+	assert(self);
+
+	if (!self->player) {
+		return;
+	}
+	if (psy_property_item_bool(sender)) {
+		psy_audio_player_preventrecordnoteoff(self->player);
+	} else {
+		psy_audio_player_recordnoteoff(self->player);
+	}
+}
+
+
+void keyboardmiscconfig_on_notes_to_effect(KeyboardMiscConfig* self,
+	psy_Property* sender)
+{
+
 }
 
 bool keyboardmiscconfig_connect(KeyboardMiscConfig* self, const char* key, void* context,
@@ -365,5 +408,5 @@ psy_Property* keyboardmiscconfig_property(KeyboardMiscConfig* self, const char* 
 {
 	assert(self);
 
-	return psy_property_at(self->keyboard_misc, key, PSY_PROPERTY_TYPE_NONE);
+	return psy_property_at(self->misc, key, PSY_PROPERTY_TYPE_NONE);
 }

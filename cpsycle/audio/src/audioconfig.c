@@ -282,7 +282,7 @@ void audioconfig_select_driver(AudioConfig* self, bool enable)
 
 	psy_audio_player_unloaddriver(self->player);
 	psy_audio_player_loaddriver(self->player, audioconfig_driver_path(self),
-		NULL /* no config */, FALSE /* do not open yet */);
+		NULL /* no config */, FALSE /* do not open yet */);	
 	if (psy_audiodriver_configuration(self->player->driver)) {
 		driversection = psy_property_find(self->driverconfigurations,
 			psy_property_key(psy_audiodriver_configuration(

@@ -592,11 +592,11 @@ void channelmappingview_init(ChannelMappingView* self, psy_ui_Component* parent,
 	psy_ui_button_init_connect(&self->autowire, &self->buttongroup,
 		self, channelmappingview_onautowire);
 	psy_ui_button_set_text(&self->autowire, "channelmapping.autowire");
-	psy_ui_button_settextalignment(&self->autowire, psy_ui_ALIGNMENT_LEFT);
+	psy_ui_button_set_text_alignment(&self->autowire, psy_ui_ALIGNMENT_LEFT);
 	psy_ui_button_init_connect(&self->unselectall, &self->buttongroup,
 		self, channelmappingview_unselectall);
 	psy_ui_button_set_text(&self->unselectall, "channelmapping.unselect-all");
-	psy_ui_button_settextalignment(&self->unselectall, psy_ui_ALIGNMENT_LEFT);	
+	psy_ui_button_set_text_alignment(&self->unselectall, psy_ui_ALIGNMENT_LEFT);	
 	pinedit_init(&self->pinedit, &self->component, wire, workspace);
 	psy_ui_component_set_align(&self->pinedit.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_margin_init_em(&margin, 0.0, 0.5, 0.0, 2.0);

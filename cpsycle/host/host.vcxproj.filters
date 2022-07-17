@@ -669,6 +669,9 @@
     <ClCompile Include="src\rangeedit.c">
       <Filter>uicontrols</Filter>
     </ClCompile>
+    <ClCompile Include="src\hostmachinecallback.c">
+      <Filter>app</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\languageconfig.h">
@@ -1240,6 +1243,9 @@
     </ClInclude>
     <ClInclude Include="src\rangeedit.h">
       <Filter>uicontrols</Filter>
+    </ClInclude>
+    <ClInclude Include="src\hostmachinecallback.h">
+      <Filter>app</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

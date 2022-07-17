@@ -238,11 +238,11 @@ TrackerColumnFlags trackerlinennumbers_column_flags(TrackerLineNumbers* self,
 {
 	TrackerColumnFlags rv;	
 	rv.playbar = psy_audio_player_playing(workspace_player(self->workspace)) &&
-		psy_dsp_testrange(self->workspace->host_sequencer_time.currplaycursor.absoffset,
+		psy_dsp_testrange(self->workspace->player.sequencer.hostseqtime.currplaycursor.absoffset,
 			offset, patternviewstate_bpl(self->state->pv));
 	rv.mid = 0;	
 	rv.cursor = (keyboardmiscconfig_following_song(&self->workspace->config.misc) ||
-		!self->workspace->host_sequencer_time.currplaying) &&
+		!self->workspace->player.sequencer.hostseqtime.currplaying) &&
 		self->draw_cursor &&
 		(psy_audio_sequencecursor_line(&self->state->pv->cursor) == line);
 	rv.beat = (line % self->state->pv->cursor.lpb) == 0;
@@ -351,9 +351,9 @@ void trackerlinenumbers_invalidate_line(TrackerLineNumbers* self, intptr_t line)
 void trackerlinenumbers_invalidate_playbar(TrackerLineNumbers* self)
 {
 	trackerlinenumbers_invalidate_line(self,
-		self->workspace->host_sequencer_time.lastplaycursor.linecache);
+		self->workspace->player.sequencer.hostseqtime.lastplaycursor.linecache);
 	trackerlinenumbers_invalidate_line(self,
-		self->workspace->host_sequencer_time.currplaycursor.linecache);
+		self->workspace->player.sequencer.hostseqtime.currplaycursor.linecache);
 }
 
 void trackerlinenumbers_on_align(TrackerLineNumbers* self)
@@ -427,7 +427,7 @@ void trackerlinenumbers_show_in_decimal(TrackerLineNumbers* self)
 void trackerlinenumbers_update_cursor(TrackerLineNumbers* self)
 {
 	if (!keyboardmiscconfig_following_song(&self->workspace->config.misc) ||
-			!self->workspace->host_sequencer_time.currplaying) {
+			!self->workspace->player.sequencer.hostseqtime.currplaying) {
 		psy_audio_Sequence* sequence;
 
 		sequence = patternviewstate_sequence(self->state->pv);
