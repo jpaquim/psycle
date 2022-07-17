@@ -745,11 +745,13 @@ psy_Property* psy_property_at(psy_Property* self, const char* key,
 	}
 	while (p != NULL) {
 		psy_Property* property;
+		const char* item_key;
 
 		property = (psy_Property*)psy_list_entry(p);
-		assert(property->item.key);
-		if (((type == PSY_PROPERTY_TYPE_NONE) || (property->item.typ == type)) &&
-			(strcmp(key, property->item.key) == 0)) {
+		item_key = psy_property_key(property);
+		assert(key);
+		if (((type == PSY_PROPERTY_TYPE_NONE) || (psy_property_type(property) == type)) &&
+			(strcmp(key, item_key) == 0)) {
 			break;
 		}
 		psy_list_next(&p);
@@ -922,7 +924,7 @@ psy_Property* psy_property_set_int(psy_Property* self, const char* key,
 
 	rv = psy_property_at(self, key, PSY_PROPERTY_TYPE_INTEGER);
 	if (rv) {
-		psy_property_set_item_int(rv, value);		
+		psy_property_set_item_int(rv, value);
 	} else {
 		rv = psy_property_append_int(self, key, value, 0, 0);
 	}
@@ -1055,12 +1057,12 @@ psy_Property* psy_property_set_choice(psy_Property* self, const char* key,
 	psy_Property* rv;
 
 	assert(self);
-
+	
 	rv = psy_property_at(self, key, PSY_PROPERTY_TYPE_NONE);
 	if (rv) {
 		if (!psy_property_readonly(rv)) {
-			rv->item.value.i = value;
 			rv->item.typ = PSY_PROPERTY_TYPE_CHOICE;
+			psy_property_set_item_int(rv, value);			
 		}
 	} else {
 		rv = psy_property_append_int(self, key, value, 0, 0);
@@ -1513,7 +1515,9 @@ psy_Property* psy_property_set_item_int(psy_Property* self, intptr_t value)
 
 		oldvalue = self->item.value.i;
 		self->item.value.i = value;
-		psy_signal_emit(&self->changed, self, 0);
+		if (oldvalue != value) {
+			psy_signal_emit(&self->changed, self, 0);
+		}
 		if (oldvalue != value && psy_property_type(self) ==
 				PSY_PROPERTY_TYPE_CHOICE) {
 			psy_Property* item;

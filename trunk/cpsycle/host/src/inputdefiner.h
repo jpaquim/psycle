@@ -7,7 +7,8 @@
 #define INPUTDEFINER_H
 
 /* ui */
-#include <uicomponent.h>
+#include <uilabel.h>
+#include <uibutton.h>
 
 /*
 ** InputDefiner
@@ -39,6 +40,8 @@ typedef struct InputDefiner {
 	/* inherits */
 	psy_ui_Component component;
 	/* signals */
+	psy_ui_Label label;
+	psy_ui_Button clear;
 	psy_Signal signal_accept;
 	/* internal */
 	uint32_t input;

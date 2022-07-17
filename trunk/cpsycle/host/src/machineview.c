@@ -92,9 +92,7 @@ void machineview_init(MachineView* self, psy_ui_Component* parent,
 {
 	machineview_initcomponent(self, parent);
 	self->shownewmachine = FALSE;
-	self->workspace = workspace;
-	paramviews_init(&self->paramviews, self->component.view, workspace);	
-	workspace_set_param_views(workspace, &self->paramviews);
+	self->workspace = workspace;	
 	machineview_initnotebook(self, tabbarparent);
 	machineview_initpropertiesview(self);
 	machineview_initwireview(self, tabbarparent);
@@ -107,7 +105,7 @@ void machineview_init(MachineView* self, psy_ui_Component* parent,
 
 void machineview_on_destroyed(MachineView* self)
 {		
-	paramviews_dispose(&self->paramviews);
+	
 }
 
 void machineview_initcomponent(MachineView* self, psy_ui_Component* parent)
@@ -139,7 +137,7 @@ void machineview_initwireview(MachineView* self, psy_ui_Component* tabbarparent)
 {
 	machinewireview_init(&self->wireview,
 		psy_ui_notebook_base(&self->notebook), tabbarparent,
-		&self->paramviews, self->workspace);
+		self->workspace->paramviews, self->workspace);
 	psy_ui_scroller_init(&self->scroller, psy_ui_notebook_base(
 		&self->notebook), NULL, NULL);
 	psy_ui_scroller_set_client(&self->scroller, &self->wireview.component);
@@ -153,7 +151,7 @@ void machineview_initstackview(MachineView* self,
 {
 	machinestackview_init(&self->stackview,
 		psy_ui_notebook_base(&self->notebook), tabbarparent,
-		&self->paramviews, self->workspace);
+		self->workspace->paramviews, self->workspace);
 }
 
 void machineview_initnewmachine(MachineView* self,

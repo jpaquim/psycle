@@ -174,8 +174,8 @@ TrackerColumnFlags trackercolumn_columnflags(TrackerColumn* self,
 	rv.selection = psy_audio_blockselection_test_line(
 		&self->state->pv->selection, self->track, line);
 	rv.playbar = self->state->draw_playbar &&
-		self->workspace->host_sequencer_time.currplaying &&
-		(self->workspace->host_sequencer_time.currplaycursor.linecache == line);
+		self->workspace->player.sequencer.hostseqtime.currplaying &&
+		(self->workspace->player.sequencer.hostseqtime.currplaycursor.linecache == line);
 	rv.focus = TRUE;
 	return rv;
 }

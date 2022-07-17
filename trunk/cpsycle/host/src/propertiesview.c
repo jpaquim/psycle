@@ -353,11 +353,8 @@ void propertiesrenderline_build(PropertiesRenderLine* self)
 				psy_ui_button_set_text(dialogbutton, "settings.choose-font");
 				psy_signal_connect(&dialogbutton->signal_clicked, self,
 					propertiesrenderline_on_font_dialog_button);
-			}
-			else if (psy_property_hint(self->property) == PSY_PROPERTY_HINT_SHORTCUT) {
-				dialogbutton = psy_ui_button_allocinit(&self->component);
-				col2 = &dialogbutton->component;
-				psy_ui_button_set_text(dialogbutton, "settings.none");
+			} else if (psy_property_hint(self->property) == PSY_PROPERTY_HINT_SHORTCUT) {				
+				col2 = psy_ui_component_allocinit(&self->component, NULL);				
 			}
 			else if (psy_property_int_hasrange(self->property) &&
 				!psy_property_readonly(self->property)) {

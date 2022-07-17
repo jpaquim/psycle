@@ -140,10 +140,10 @@ void keynames_release(void)
 
 /* prototypes */
 static void inputdefiner_on_destroyed(InputDefiner*);
-static void inputdefiner_on_draw(InputDefiner*, psy_ui_Graphics*);
 static void inputdefiner_on_key_down(InputDefiner*, psy_ui_KeyboardEvent*);
 static void inputdefiner_on_key_up(InputDefiner*, psy_ui_KeyboardEvent*);
 static void inputdefiner_on_focus_lost(InputDefiner*);
+static void inputdefiner_on_clear(InputDefiner*, psy_ui_Component* sender);
 
 /* vtable */
 static psy_ui_ComponentVtable vtable;
@@ -160,9 +160,6 @@ static void vtable_init(InputDefiner* self)
 		vtable.on_destroyed =
 			(psy_ui_fp_component_event)
 			inputdefiner_on_destroyed;
-		vtable.ondraw =
-			(psy_ui_fp_component_ondraw)
-			inputdefiner_on_draw;		
 		vtable.on_key_down =
 			(psy_ui_fp_component_on_key_event)
 			inputdefiner_on_key_down;
@@ -187,11 +184,20 @@ void inputdefiner_init(InputDefiner* self, psy_ui_Component* parent)
 	psy_ui_component_set_style_type_focus(inputdefiner_base(self),
 		STYLE_INPUTDEFINER_FOCUS);
 	psy_ui_component_set_tab_index(inputdefiner_base(self), 0);
+	psy_ui_label_init(&self->label, &self->component);
+	psy_ui_component_set_align(psy_ui_label_base(&self->label),
+		psy_ui_ALIGN_CLIENT);
+	psy_ui_button_init_connect(&self->clear, &self->component,
+		self, inputdefiner_on_clear);
+	psy_ui_button_set_text(&self->clear, "settings.none");
+	psy_ui_component_set_align(psy_ui_button_base(&self->clear),
+		psy_ui_ALIGN_RIGHT);
 	psy_signal_init(&self->signal_accept);
 	keynames_init();
 	self->input = 0;
 	self->regular_key = 0;
 	self->changed = FALSE;
+	inputdefiner_set_input(self, self->input);
 }
 
 void inputdefiner_on_destroyed(InputDefiner* self)
@@ -221,10 +227,14 @@ InputDefiner* inputdefiner_allocinit(psy_ui_Component* parent)
 
 void inputdefiner_set_input(InputDefiner* self, uint32_t input)
 {
+	char text[64];
+
 	assert(self);
 	
 	self->input = input;
-	self->changed = FALSE;
+	self->changed = FALSE;	
+	inputdefiner_text(self, text);
+	psy_ui_label_set_text(&self->label, text);
 }
 
 void inputdefiner_text(InputDefiner* self, char* text)
@@ -264,18 +274,6 @@ void inputdefiner_input_to_text(uint32_t input, char* text)
 	keynames_release();
 }
 
-void inputdefiner_on_draw(InputDefiner* self, psy_ui_Graphics* g)
-{
-	char text[64];
-
-	assert(self);
-			
-	inputdefiner_text(self, text);
-	if (psy_strlen(text) > 0) {
-		psy_ui_textout(g, psy_ui_realpoint_zero(), text, psy_strlen(text));
-	}
-}
-
 void inputdefiner_on_key_down(InputDefiner* self, psy_ui_KeyboardEvent* ev)
 {
 	bool alt;
@@ -303,7 +301,7 @@ void inputdefiner_on_key_down(InputDefiner* self, psy_ui_KeyboardEvent* ev)
 		self->regular_key = psy_ui_keyboardevent_keycode(ev);
 		self->input = psy_audio_encodeinput(self->regular_key, shift, ctrl, alt, up);
 	}
-	psy_ui_component_invalidate(&self->component);
+	inputdefiner_set_input(self, self->input);
 	psy_ui_keyboardevent_stop_propagation(ev);
 }
 
@@ -342,7 +340,7 @@ void inputdefiner_on_key_up(InputDefiner* self, psy_ui_KeyboardEvent* ev)
 	if (self->input != self->old_input) {
 		self->changed = TRUE;
 	}
-	psy_ui_component_invalidate(&self->component);
+	inputdefiner_set_input(self, self->input);
 	psy_ui_keyboardevent_stop_propagation(ev);
 }
 
@@ -355,4 +353,9 @@ void inputdefiner_on_focus_lost(InputDefiner* self)
 		self->changed = FALSE;
 		psy_signal_emit(&self->signal_accept, self, 0);
 	}
+}
+
+void inputdefiner_on_clear(InputDefiner* self, psy_ui_Component* sender)
+{
+	inputdefiner_set_input(self, 0);
 }

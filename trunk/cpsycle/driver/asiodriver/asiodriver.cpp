@@ -1394,6 +1394,7 @@ static void readbuffers(AsioDriver* self, int idx,
 	float** left, float** right, uintptr_t numsamples);
 static const psy_AudioDriverInfo* driver_info(psy_AudioDriver*);
 static uintptr_t playposinsamples(psy_AudioDriver*);
+static void driver_refresh_ports(AsioDriver*);
 
 static psy_AudioDriverVTable vtable;
 static int vtable_initialized = 0;
@@ -1407,6 +1408,7 @@ static void vtable_init(void)
 		vtable.open = driver_open;
 		vtable.close = driver_close;
 		vtable.dispose = driver_dispose;
+		vtable.refresh_ports = (psy_audiodriver_fp_refresh_ports)driver_refresh_ports;
 		vtable.configure = driver_configure;
 		vtable.configuration = driver_configuration;
 		vtable.samplerate = driver_samplerate;
@@ -1494,8 +1496,7 @@ void init_properties(psy_AudioDriver* driver)
 	AsioDriver* self = (AsioDriver*)driver;
 	char key[256];	
 	psy_Property* devices;
-	psy_Property* indevices;	
-	std::vector<std::string> playbackports;
+	psy_Property* indevices;		
 
 	psy_snprintf(key, 256, "asio-guid-%d", PSY_AUDIODRIVER_ASIO_GUID);
 	self->configuration = psy_property_preventtranslate(psy_property_set_text(
@@ -1531,17 +1532,28 @@ void init_properties(psy_AudioDriver* driver)
 	devices = psy_property_set_text(
 		psy_property_append_choice(self->configuration, "device", 0),
 		"Output Device");
-	psy_property_set_hint(devices, PSY_PROPERTY_HINT_COMBO);
-	self->asioif->RefreshAvailablePorts();
-	self->asioif->GetPlaybackPorts(playbackports);
-	intptr_t i = 0;
-	for (std::vector<std::string>::iterator it = playbackports.begin();
-			it != playbackports.end(); ++it, ++i) {
-		psy_property_append_int(devices, (*it).c_str(), i, 0, 0);
-	}	
+	psy_property_set_hint(devices, PSY_PROPERTY_HINT_COMBO);	
 	indevices = psy_property_set_text(
 		psy_property_append_choice(self->configuration, "indevice", 0),
 		"Standard Input Device(Select different in Recorder)");
+}
+
+void driver_refresh_ports(AsioDriver* self)
+{
+	intptr_t i = 0;
+	std::vector<std::string> playbackports;
+	psy_Property* devices;
+
+	devices = psy_property_at(self->configuration, "device", PSY_PROPERTY_TYPE_CHOICE);	
+	if (devices) {		
+		self->asioif->RefreshAvailablePorts();
+		self->asioif->GetPlaybackPorts(playbackports);
+		psy_property_clear(devices);
+		for (std::vector<std::string>::iterator it = playbackports.begin();
+			it != playbackports.end(); ++it, ++i) {
+			psy_property_append_int(devices, (*it).c_str(), i, 0, 0);
+		}
+	}
 }
 
 void driver_configure(psy_AudioDriver* driver, const psy_Property* config)

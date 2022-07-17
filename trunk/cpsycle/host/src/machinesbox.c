@@ -1,15 +1,20 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
 
 #include "machinesbox.h"
-// host
+/* host */
+#include "paramviews.h"
 #include "styles.h"
-// platform
+/* platform */
 #include "../../detail/portable.h"
 
+
+/* prototypes */
 static void machinesbox_on_destroyed(MachinesBox*);
 static void machinesbox_clearmachinebox(MachinesBox*);
 static void machinesbox_buildmachineslist(MachinesBox*);
@@ -41,6 +46,7 @@ static void vtable_init(MachinesBox* self)
 	psy_ui_component_set_vtable(&self->component, &vtable);
 }
 
+/* implementation */
 void machinesbox_init(MachinesBox* self, psy_ui_Component* parent,
 	psy_audio_Machines* machines, MachineBoxMode mode, Workspace* workspace)
 {	
@@ -364,7 +370,7 @@ void machinesbox_muteunmute(MachinesBox* self)
 	}
 }
 
-void machinesbox_showparameters(MachinesBox* self)
+void machinesbox_show_parameters(MachinesBox* self)
 {	
 	int selcount;	
 	
@@ -381,8 +387,8 @@ void machinesbox_showparameters(MachinesBox* self)
 				
 				slot = (uintptr_t)psy_table_at(&self->listboxslots, selection[i]);
 				machine = psy_audio_machines_at(self->machines, slot);
-				if (machine) {					
-					workspace_show_parameters(self->workspace, slot);
+				if (machine) {			
+					paramviews_show(self->workspace->paramviews, slot);					
 				}
 			}
 		}
@@ -440,7 +446,7 @@ void machinesbox_onkeyup(MachinesBox* self, psy_ui_Component* sender , psy_ui_Ke
 	psy_ui_keyboardevent_stop_propagation(ev);
 }
 
-void machinesbox_addsel(MachinesBox* self, uintptr_t slot)
+void machinesbox_add_sel(MachinesBox* self, uintptr_t slot)
 {
 	if (psy_table_exists(&self->slotslistbox, slot)) {
 		uintptr_t boxindex;
@@ -450,7 +456,7 @@ void machinesbox_addsel(MachinesBox* self, uintptr_t slot)
 	}
 }
 
-void machinesbox_deselectall(MachinesBox* self)
+void machinesbox_deselect_all(MachinesBox* self)
 {
 	psy_ui_listbox_setcursel(&self->listbox, -1);
 }

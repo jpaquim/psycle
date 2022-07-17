@@ -210,6 +210,7 @@ void psy_audio_player_initsignals(psy_audio_Player* self)
 
 	psy_signal_init(&self->signal_lpbchanged);
 	psy_signal_init(&self->signal_inputevent);
+	psy_signal_init(&self->signal_octavechanged);
 }
 
 void psy_audio_player_dispose(psy_audio_Player* self)
@@ -226,6 +227,7 @@ void psy_audio_player_dispose(psy_audio_Player* self)
 	psy_lock_dispose(&self->block);
 	psy_signal_dispose(&self->signal_lpbchanged);
 	psy_signal_dispose(&self->signal_inputevent);
+	psy_signal_dispose(&self->signal_octavechanged);
 	psy_audio_activechannels_dispose(&self->playon);
 	psy_audio_sequencer_dispose(&self->sequencer);
 	psy_table_dispose(&self->notestotracks);
@@ -697,6 +699,7 @@ void psy_audio_player_set_octave(psy_audio_Player* self, uint8_t octave)
 		self->octave = octave;
 		if (self->song) {
 			psy_audio_song_setoctave(self->song, octave);
+			psy_signal_emit(&self->signal_octavechanged, self, 1, octave);
 		}
 	}	
 }
@@ -905,6 +908,9 @@ void psy_audio_player_loaddriver(psy_audio_Player* self, const char* path,
 	psy_dsp_rmsvol_setsamplerate((uint32_t)psy_audiodriver_samplerate(driver));
 	self->driver = driver;
 	if (self->driver) {
+		if (self->driver) {
+			self->driver->vtable->refresh_ports(self->driver);
+		}
 		if (config) {
 			printf("driver driver_configure\n");
 			psy_audiodriver_configure(self->driver, config);

@@ -23,19 +23,20 @@ enum {
 	PROPERTY_ID_FT2FILEEXPLORER = 30001
 };
 
-typedef struct KeyboardMiscConfig {	
-	/* signals */
-	psy_Signal signal_changed;
+struct psy_audio_Player* player;
+
+typedef struct KeyboardMiscConfig {		
 	/* internal*/
-	psy_Property* keyboard;
-	psy_Property* keyboard_misc;
-	int cursorstep;
+	psy_Property* misc;	
+	intptr_t cursorstep;
 	bool follow_song;
 	/* references */
-	psy_Property* parent;	
+	psy_Property* parent;
+	struct psy_audio_Player* player;
 } KeyboardMiscConfig;
 
-void keyboardmiscconfig_init(KeyboardMiscConfig*, psy_Property* parent);
+void keyboardmiscconfig_init(KeyboardMiscConfig*, psy_Property* parent,
+	struct psy_audio_Player* player);
 void keyboardmiscconfig_dispose(KeyboardMiscConfig*);
 
 bool keyboardmiscconfig_ft2home(const KeyboardMiscConfig*);

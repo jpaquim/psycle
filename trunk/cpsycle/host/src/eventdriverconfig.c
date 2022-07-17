@@ -18,6 +18,9 @@
 /* platform */
 #include "../../detail/portable.h"
 
+#define PSY_EVENTDRIVER_KBD_GUID 0x0001
+#define PSY_EVENTDRIVER_MMEMIDI_GUID 0x0002
+#define PSY_EVENTDRIVER_DXJOYSTICK_GUID 0x0003
 
 /* prototypes */
 static void eventdriverconfig_make_input(EventDriverConfig*);
@@ -87,10 +90,13 @@ void eventdriverconfig_make_driver_list(EventDriverConfig* self)
 	self->installeddriver = psy_property_set_text(
 		psy_property_append_choice(self->eventinputs, "installeddriver", 0),
 		"Input Drivers");
-	psy_property_append_str(self->installeddriver, "kbd", "kbd");
+	psy_property_set_id(psy_property_append_str(self->installeddriver, "kbd", "kbd"),
+		PSY_EVENTDRIVER_KBD_GUID);
 #if defined(DIVERSALIS__OS__MICROSOFT)
-	psy_property_set_id(psy_property_append_str(self->installeddriver, "mmemidi", ".\\mmemidi.dll"), 200);
-	psy_property_append_str(self->installeddriver, "dxjoystick", ".\\dxjoystick.dll");
+	psy_property_set_id(psy_property_append_str(self->installeddriver, "mmemidi", ".\\mmemidi.dll"),
+		PSY_EVENTDRIVER_MMEMIDI_GUID);
+	psy_property_set_id(psy_property_append_str(self->installeddriver, "dxjoystick", ".\\dxjoystick.dll"),
+		PSY_EVENTDRIVER_DXJOYSTICK_GUID);
 #endif
 	psy_property_connect(
 	psy_property_set_id(psy_property_set_text(
@@ -127,8 +133,7 @@ void eventdriverconfig_register_event_drivers(EventDriverConfig* self)
 
 		property = (psy_Property*)psy_list_entry(p);
 		if (psy_property_type(property) == PSY_PROPERTY_TYPE_STRING) {
-			guid = psy_audio_eventdrivers_guid(&self->player->eventdrivers,
-				psy_property_item_str(property));
+			guid = psy_property_id(property);
 			if (guid != -1) {
 				psy_audio_eventdrivers_register(&self->player->eventdrivers,
 					guid, psy_property_item_str(property));

@@ -22,6 +22,28 @@
 
 #define QSORTARRAYRESIZE 1024
 
+/* psy_audio_HostSequencerTime */
+
+void psy_audio_hostsequencertime_init(psy_audio_HostSequencerTime* self)
+{
+	psy_audio_sequencecursor_init(&self->currplaycursor);
+	psy_audio_sequencecursor_init(&self->lastplaycursor);
+	self->lastplaycursor.linecache = psy_INDEX_INVALID;
+	self->currplaying = FALSE;
+}
+
+void psy_audio_hostsequencertime_set_play_cursor(psy_audio_HostSequencerTime* self,
+	psy_audio_SequenceCursor cursor)
+{
+	self->currplaycursor = cursor;
+}
+
+void psy_audio_hostsequencertime_update_last_play_cursor(psy_audio_HostSequencerTime* self)
+{
+	self->lastplaycursor = self->currplaycursor;
+}
+
+
 static void psy_audio_sequencerjump_init(psy_audio_SequencerJump* self)
 {
 	assert(self);
@@ -165,7 +187,9 @@ void psy_audio_sequencer_init(psy_audio_Sequencer* self, psy_audio_Sequence*
 	self->currtracks = NULL;	
 	psy_audio_sequencer_init_qsortarray(self);
 	psy_table_init(&self->lastmachine);
-	psy_signal_init(&self->signal_newline);	
+	psy_signal_init(&self->signal_newline);
+	psy_signal_init(&self->signal_play_line_changed);
+	psy_signal_init(&self->signal_play_status_changed);
 	psy_audio_patternevent_init(&self->metronome_event);	
 	self->metronome_event.note = 48;
 	self->metronome_event.mach = 0x3F;
@@ -175,6 +199,7 @@ void psy_audio_sequencer_init(psy_audio_Sequencer* self, psy_audio_Sequence*
 	psy_audio_sequencer_reset_common(self, sequence, machines,
 		(psy_dsp_big_hz_t)44100.0);
 	psy_audio_sequencertime_init(&self->seqtime);
+	psy_audio_hostsequencertime_init(&self->hostseqtime);
 }
 
 void psy_audio_sequencer_init_qsortarray(psy_audio_Sequencer* self)
@@ -194,6 +219,8 @@ void psy_audio_sequencer_dispose(psy_audio_Sequencer* self)
 	psy_audio_sequencer_clearcurrtracks(self);	
 	psy_table_dispose(&self->lastmachine);
 	psy_signal_dispose(&self->signal_newline);
+	psy_signal_dispose(&self->signal_play_line_changed);
+	psy_signal_dispose(&self->signal_play_status_changed);
 	free(self->qsortarray);
 	self->qsortarray = NULL;
 	self->sequence = NULL;
@@ -1828,4 +1855,38 @@ psy_audio_SequenceCursor psy_audio_sequencer_play_cursor(
 	}
 	psy_audio_sequencecursor_init(&rv);
 	return rv;
+}
+
+void psy_audio_sequencer_update_host_seq_time(psy_audio_Sequencer* self, bool follow_song)
+{
+	bool play_status_changed;	
+
+	assert(self);
+		
+	play_status_changed = psy_audio_sequencer_playing(self) !=
+		psy_audio_hostsequencertime_playing(&self->hostseqtime);
+	if (psy_audio_hostsequencertime_playing(&self->hostseqtime) || play_status_changed) {
+		psy_audio_exclusivelock_enter();
+		psy_audio_hostsequencertime_set_play_cursor(&self->hostseqtime,
+			psy_audio_sequencer_play_cursor(self));
+		if (play_status_changed) {
+			self->hostseqtime.currplaying =
+				psy_audio_sequencer_playing(self);
+			if (psy_audio_hostsequencertime_playing(&self->hostseqtime)) {
+				self->hostseqtime.lastplaycursor.linecache = psy_INDEX_INVALID;
+			}
+		}
+		psy_audio_exclusivelock_leave();
+		if (psy_audio_hostsequencertime_play_line_changed(&self->hostseqtime)) {
+			if (follow_song) {
+				psy_audio_sequence_set_cursor(self->sequence,
+					self->hostseqtime.currplaycursor);
+			}
+			psy_signal_emit(&self->signal_play_line_changed, self, 0);
+		}
+		if (play_status_changed) {
+			psy_signal_emit(&self->signal_play_status_changed, self, 0);
+		}
+		psy_audio_hostsequencertime_update_last_play_cursor(&self->hostseqtime);
+	}	
 }

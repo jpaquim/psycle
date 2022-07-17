@@ -185,7 +185,7 @@ void pianoroll_init(Pianoroll* self, psy_ui_Component* parent,
 		pianoroll_on_grid_scroll);
 	psy_signal_connect(&self->workspace->song->sequence.signal_cursorchanged,
 		self, pianoroll_on_cursor_changed);
-	psy_signal_connect(&self->workspace->signal_play_line_changed, self,
+	psy_signal_connect(&self->workspace->player.sequencer.signal_play_line_changed, self,
 		pianoroll_on_play_line_changed);
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		pianoroll_on_song_changed);	
@@ -228,8 +228,8 @@ void pianoroll_on_play_line_changed(Pianoroll* self, Workspace* sender)
 		return;
 	}	
 	pianogrid_invalidate_lines(&self->grid,
-		self->workspace->host_sequencer_time.lastplaycursor.linecache,
-		self->workspace->host_sequencer_time.currplaycursor.linecache);	
+		self->workspace->player.sequencer.hostseqtime.lastplaycursor.linecache,
+		self->workspace->player.sequencer.hostseqtime.currplaycursor.linecache);
 }
 
 void pianoroll_on_timer(Pianoroll* self, uintptr_t timerid)

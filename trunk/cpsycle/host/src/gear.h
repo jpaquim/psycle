@@ -29,6 +29,8 @@ extern "C" {
 ** different tabs
 */
 
+struct ParamViews;
+
 typedef struct GearButtons {
 	/* inherits */
 	psy_ui_Component component;
@@ -45,7 +47,7 @@ typedef struct GearButtons {
 } GearButtons;
 
 void gearbuttons_init(GearButtons*, psy_ui_Component* parent,
-	Workspace*);
+	struct ParamViews*);
 
 INLINE psy_ui_Component* gearbuttons_base(GearButtons* self)
 {
@@ -68,10 +70,11 @@ typedef struct Gear {
 	GearButtons buttons;
 	/* references */
 	psy_audio_Machines* machines;
+	struct ParamViews* param_views;
 	Workspace* workspace;	
 } Gear;
 
-void gear_init(Gear*, psy_ui_Component* parent, Workspace*);
+void gear_init(Gear*, psy_ui_Component* parent, struct ParamViews*, Workspace*);
 
 void gear_select(Gear*, psy_List* list);
 

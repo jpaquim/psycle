@@ -117,6 +117,8 @@ void psy_audio_song_init(psy_audio_Song* self, psy_audio_MachineFactory*
 	assert(self);
 
 	self->machinefactory = machinefactory;
+	self->filename = psy_strdup(PSYCLE_UNTITLED);
+	self->song_has_file = FALSE;
 	psy_audio_songproperties_init(&self->properties, "Untitled", "Unnamed",
 		"No Comments");	
 	song_initmachines(self);
@@ -176,6 +178,8 @@ void psy_audio_song_dispose(psy_audio_Song* self)
 	psy_audio_samples_dispose(&self->samples);
 	psy_audio_instruments_dispose(&self->instruments);
 	song_disposesignals(self);
+	free(self->filename);
+	self->filename = NULL;
 }
 
 void song_disposesignals(psy_audio_Song* self)
@@ -258,5 +262,18 @@ void psy_audio_song_insertvirtualgenerator(psy_audio_Song* self,
 			psy_audio_machine_seteditname(machine, "Virtual Generator");
 			psy_audio_machines_insert(&self->machines, virtual_inst, machine);
 		}
+	}
+}
+
+void psy_audio_song_set_file(psy_audio_Song* self, const char* filename)
+{
+	assert(self);
+
+	if (filename) {
+		psy_strreset(&self->filename, filename);
+		self->song_has_file = TRUE;
+	} else {
+		psy_strreset(&self->filename, PSYCLE_UNTITLED);
+		self->song_has_file = FALSE;
 	}
 }

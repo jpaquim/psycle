@@ -192,13 +192,15 @@ typedef struct psy_audio_Song {
 	/* signals */
 	psy_Signal signal_load_progress;
 	psy_Signal signal_saveprogress;
-	/* public data */
+	/* public data */	
 	psy_audio_SongProperties properties;
 	psy_audio_Machines machines;
 	psy_audio_Patterns patterns;
 	psy_audio_Sequence sequence;
 	psy_audio_Samples samples;
 	psy_audio_Instruments instruments;
+	char* filename;
+	bool song_has_file;
 	/* references */
 	struct psy_audio_MachineFactory* machinefactory;
 } psy_audio_Song;
@@ -417,6 +419,8 @@ INLINE void psy_audio_song_setsamplerindex(psy_audio_Song* self,
 
 	psy_audio_songproperties_setsamplerindex(&self->properties, samplerindex);
 }
+
+void psy_audio_song_set_file(psy_audio_Song* self, const char* filename);
 
 #ifdef __cplusplus
 }

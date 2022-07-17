@@ -87,7 +87,7 @@ void patternproperties_init(PatternProperties* self, psy_ui_Component* parent)
 	psy_ui_button_set_text(&self->applybutton, "patternview.apply");
 	psy_ui_component_set_padding(&self->applybutton.component,
 		psy_ui_margin_make_em(0.0, 0.0, 0.0, 0.0));
-	psy_ui_button_settextalignment(&self->applybutton, psy_ui_ALIGNMENT_LEFT);	
+	psy_ui_button_set_text_alignment(&self->applybutton, psy_ui_ALIGNMENT_LEFT);	
 	psy_ui_component_set_align(&self->component, psy_ui_ALIGN_TOP);
 	psy_ui_component_hide(&self->component);
 }

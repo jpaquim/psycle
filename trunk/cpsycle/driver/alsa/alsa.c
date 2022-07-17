@@ -62,6 +62,7 @@ static int driver_open(psy_AudioDriver*);
 static bool driver_opened(const psy_AudioDriver*);
 static int driver_close(psy_AudioDriver*);
 static int driver_dispose(psy_AudioDriver*);
+static void driver_refresh_ports(psy_AudioDriver* self) { }
 static void driver_configure(psy_AudioDriver*, psy_Property*);
 static const psy_Property* driver_configuration(const psy_AudioDriver*);
 static psy_dsp_big_hz_t driver_samplerate(psy_AudioDriver*);
@@ -114,6 +115,7 @@ static void vtable_init(void)
 		vtable.deallocate = driver_deallocate;
 		vtable.close = driver_close;
 		vtable.dispose = driver_dispose;
+		vtable.refresh_ports = driver_refresh_ports;
 		vtable.configure = driver_configure;
 		vtable.configuration = driver_configuration;
 		vtable.samplerate = driver_samplerate;		

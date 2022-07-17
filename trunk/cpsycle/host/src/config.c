@@ -88,7 +88,7 @@ void psycleconfig_init_sections(PsycleConfig* self, psy_audio_Player* player,
 	globalconfig_init(&self->global, &self->config, player, pluginscanthread);	
 	generalconfig_init(&self->general, &self->config);
 	visualconfig_init(&self->visual, &self->config, player);
-	keyboardmiscconfig_init(&self->misc, &self->config);
+	keyboardmiscconfig_init(&self->misc, &self->config, player);
 	dirconfig_init(&self->directories, &self->config);
 	audioconfig_init(&self->audio, &self->config, player);
 	psy_property_set_icon(self->audio.inputoutput, IDB_PULSE_LIGHT,

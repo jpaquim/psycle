@@ -9,6 +9,7 @@
 #include "paramgear.h"
 
 /* host */
+#include "paramviews.h"
 #include "styles.h"
 /* platform */
 #include "../../detail/portable.h"
@@ -95,7 +96,9 @@ void paramrackbox_deselect(ParamRackBox* self)
 void paramrackbox_on_mouse_double_click(ParamRackBox* self, psy_ui_Component* sender,
 	psy_ui_MouseEvent* ev)
 {	
-	workspace_show_parameters(self->workspace, self->slot);	
+	if (self->workspace->paramviews) {
+		paramviews_show(self->workspace->paramviews, self->slot);
+	}
 }
 
 void paramrackbox_on_add_effect(ParamRackBox* self, psy_ui_Button* sender)

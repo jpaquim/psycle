@@ -316,6 +316,7 @@
     <ClCompile Include="src\headerui.c" />
     <ClCompile Include="src\help.c" />
     <ClCompile Include="src\helpview.c" />
+    <ClCompile Include="src\hostmachinecallback.c" />
     <ClCompile Include="src\inputdefiner.c" />
     <ClCompile Include="src\inputhandler.c" />
     <ClCompile Include="src\instnotemapview.c" />
@@ -516,6 +517,7 @@
     <ClInclude Include="src\headerui.h" />
     <ClInclude Include="src\help.h" />
     <ClInclude Include="src\helpview.h" />
+    <ClInclude Include="src\hostmachinecallback.h" />
     <ClInclude Include="src\inputdefiner.h" />
     <ClInclude Include="src\inputhandler.h" />
     <ClInclude Include="src\instnotemapview.h" />

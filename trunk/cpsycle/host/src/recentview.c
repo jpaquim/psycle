@@ -112,8 +112,8 @@ void playlistview_onselected(PlaylistView* self, PropertiesView* sender,
 	psy_Property* property)
 {	
 	if (psy_property_in_section(property, playlistview_currfiles(self))) {
-		if (self->starting || !self->workspace->filename || strcmp(self->workspace->filename,
-				psy_property_item_str(property)) != 0) {						
+		if (!self->workspace->song || self->starting || !self->workspace->song->filename ||
+				strcmp(self->workspace->song->filename, psy_property_item_str(property)) != 0) {						
 			workspace_load_song(self->workspace, psy_property_item_str(property),
 				generalconfig_playsongafterload(psycleconfig_general(
 					workspace_conf(self->workspace))));			
@@ -215,7 +215,7 @@ void playlistview_on_mouse_down(PlaylistView* self, psy_ui_MouseEvent* ev)
 
 void playlistview_onsongchanged(PlaylistView* self, Workspace* sender)
 {
-	if (!sender->song_has_file) {
+	if (!workspace_song_has_file(sender)) {
 		propertiesview_mark(&self->view, NULL);
 	}
 }

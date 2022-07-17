@@ -75,6 +75,13 @@ void psy_ui_checkbox_init_text(psy_ui_CheckBox* self, psy_ui_Component* parent,
 	psy_ui_checkbox_set_text(self, text);
 }
 
+void psy_ui_checkbox_init_exchange(psy_ui_CheckBox* self, psy_ui_Component* parent,
+	psy_Property* property)
+{
+	psy_ui_checkbox_init(self, parent);
+	psy_ui_checkbox_data_exchange(self, property);
+}
+
 void psy_ui_checkbox_on_destroyed(psy_ui_CheckBox* self)
 {	
 	assert(self);
@@ -108,9 +115,8 @@ psy_ui_CheckBox* psy_ui_checkbox_allocinit_exchange(psy_ui_Component* parent,
 	psy_ui_CheckBox* rv;
 
 	rv = psy_ui_checkbox_alloc();
-	if (rv) {
-		psy_ui_checkbox_init(rv, parent);
-		psy_ui_checkbox_data_exchange(rv, property);
+	if (rv) {		
+		psy_ui_checkbox_init_exchange(rv, parent, property);
 		psy_ui_component_deallocate_after_destroyed(&rv->component);
 	}
 	return rv;
@@ -202,6 +208,7 @@ void psy_ui_checkbox_data_exchange(psy_ui_CheckBox* self, psy_Property* property
 	self->property = property;
 	if (property) {
 		psy_ui_checkbox_on_property_changed(self, property);
+		psy_ui_checkbox_set_text(self, psy_property_text(property));
 		psy_property_connect(property, self,
 			psy_ui_checkbox_on_property_changed);
 		psy_signal_connect(&self->property->before_destroyed, self,

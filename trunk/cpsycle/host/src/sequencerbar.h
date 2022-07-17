@@ -1,25 +1,17 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #if !defined(SEQUENCERBAR_H)
 #define SEQUENCERBAR_H
 
 /* host */
-#include "sequencetrackbox.h"
-#include "sequencebuttons.h"
-/* audio */
-#include <patterns.h>
-#include <sequence.h>
+#include "generalconfig.h"
+#include "keyboardmiscconfig.h"
 /* ui */
 #include <uibutton.h>
 #include <uicheckbox.h>
-#include <uitextarea.h>
-#include <uilabel.h>
-#include <uinotebook.h>
-#include <uiscroller.h>
-#include <uisplitbar.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -53,13 +45,11 @@ typedef struct SequencerBar {
 	psy_ui_CheckBox multichannelaudition;
 	psy_ui_CheckBox allownotestoeffect;	
 	psy_ui_Button toggleseqedit;
-	psy_ui_Button togglestepseq;	
-	/* references */
-	Workspace* workspace;
+	psy_ui_Button togglestepseq;
 } SequencerBar;
 
 void sequencerbar_init(SequencerBar* self, psy_ui_Component* parent,
-	Workspace*);
+	KeyboardMiscConfig*, GeneralConfig*);
 
 INLINE psy_ui_Component* sequencerbar_base(SequencerBar* self)
 {

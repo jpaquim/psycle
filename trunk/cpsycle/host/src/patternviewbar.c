@@ -79,10 +79,10 @@ void patternviewstatus_update(PatternViewStatus* self)
 
 		if (psy_audio_player_playing(&self->workspace->player)) {
 			patternid = psy_audio_sequencecursor_patternid(
-				&self->workspace->host_sequencer_time.currplaycursor,
+				&self->workspace->player.sequencer.hostseqtime.currplaycursor,
 				psy_audio_song_sequence(workspace_song(self->workspace)));
-			line = psy_audio_sequencecursor_line(&self->workspace->host_sequencer_time.currplaycursor);
-			line -= psy_audio_sequencecursor_seqline(&self->workspace->host_sequencer_time.currplaycursor);
+			line = psy_audio_sequencecursor_line(&self->workspace->player.sequencer.hostseqtime.currplaycursor);
+			line -= psy_audio_sequencecursor_seqline(&self->workspace->player.sequencer.hostseqtime.currplaycursor);
 		} else {
 			line = psy_audio_sequencecursor_line(&cursor);
 			line -= psy_audio_sequencecursor_seqline(&cursor);
@@ -185,9 +185,9 @@ void patternviewbar_init(PatternViewBar* self, psy_ui_Component* parent,
 	}	
 	patternviewbar_update_status(self);
 	patternviewbar_connect_song(self);
-	psy_signal_connect(&self->workspace->signal_play_line_changed, self,
+	psy_signal_connect(&self->workspace->player.sequencer.signal_play_line_changed, self,
 		patternviewbar_on_playline_changed);
-	psy_signal_connect(&self->workspace->signal_play_status_changed, self,
+	psy_signal_connect(&self->workspace->player.sequencer.signal_play_status_changed, self,
 		patternviewbar_on_playstatus_changed);
 }
 
