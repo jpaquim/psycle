@@ -14,6 +14,11 @@
 #include "../../detail/portable.h"
 
 
+#if defined DIVERSALIS__OS__UNIX
+#define _MAX_PATH 4096
+#include <unistd.h>
+#endif
+
 /* prototypes */
 static psy_audio_MachineFactory* hostmachinecallback_on_machinefactory(HostMachineCallback*);
 static bool hostmachinecallback_on_machine_file_select_load(HostMachineCallback*,

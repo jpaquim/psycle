@@ -10,7 +10,6 @@
 #include "dirconfig.h"
 /* audio */
 #include <machinefactory.h>
-#include <player.h>
 #include <signal.h>
 /* file */
 #include <logger.h>

@@ -15,7 +15,6 @@
 #include "viewhistory.h"
 /* audio */
 #include <machinefactory.h>
-#include <player.h>
 #include <plugincatcher.h>
 #include <song.h>
 #include <sequence.h>
