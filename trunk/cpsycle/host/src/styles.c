@@ -330,13 +330,8 @@ void init_host_styles(psy_ui_Styles* self, psy_ui_ThemeMode theme)
 	psy_ui_styles_set_style(self, STYLE_SONGPROPERTIES_COMMENTS_EDIT, style);
 	
 	style = psy_ui_style_allocinit();
-	psy_ui_style_set_background_colour(style, material.surface_overlay_5p);
-	if (psy_strlen(PSYCLE_RES_DIR) == 0) {
-		psy_ui_style_set_background_id(style, IDB_ABOUT);
-	} else {
-		psy_ui_style_setbackgroundpath(style,
-			PSYCLE_RES_DIR psy_SLASHSTR "splash_screen.bmp");
-	}
+	psy_ui_style_set_background_colour(style, material.surface_overlay_5p);	
+	psy_ui_style_set_background_id(style, IDB_ABOUT);	
 	style->background.repeat = psy_ui_NOREPEAT;
 	style->background.align = psy_ui_ALIGNMENT_CENTER;
 	psy_ui_styles_set_style(self, STYLE_ABOUT, style);
@@ -628,24 +623,14 @@ void init_host_styles(psy_ui_Styles* self, psy_ui_ThemeMode theme)
 	psy_ui_style_set_colour(style, psy_ui_colour_make(0x007966CF));
 	psy_ui_styles_set_style(self, STYLE_TERM_BUTTON_ERROR, style);
 
-	style = psy_ui_style_allocinit();
-	if (psy_strlen(PSYCLE_RES_DIR) == 0) {
-		psy_ui_style_set_background_id(style, IDB_BGMAIN);
-	} else {
-		psy_ui_style_setbackgroundpath(style,
-			PSYCLE_RES_DIR psy_SLASHSTR "bgmain.bmp");
-	}	
+	style = psy_ui_style_allocinit();	
+	psy_ui_style_set_background_id(style, IDB_BGMAIN);	
 	psy_ui_style_animate_background(style, 20,
 		psy_ui_realsize_make(96, 192), TRUE);
 	psy_ui_styles_set_style(self, STYLE_GREET, style);
 
-	style = psy_ui_style_allocinit();
-	if (psy_strlen(PSYCLE_RES_DIR) == 0) {
-		psy_ui_style_set_background_id(style, IDB_BGTOP);
-	} else {
-		psy_ui_style_setbackgroundpath(style,
-			PSYCLE_RES_DIR psy_SLASHSTR "bgtop.bmp");
-	}	
+	style = psy_ui_style_allocinit();	
+	psy_ui_style_set_background_id(style, IDB_BGTOP);	
 	psy_ui_style_animate_background(style, 40,
 		psy_ui_realsize_make(128, 128), TRUE);
 	psy_ui_styles_set_style(self, STYLE_GREET_TOP, style);
@@ -1256,24 +1241,14 @@ void init_light_theme(psy_ui_Styles* self)
 	psy_ui_style_set_colour(style, psy_ui_colour_make(0x007966CF));
 	psy_ui_styles_set_style(self, STYLE_TERM_BUTTON_ERROR, style);
 
-	style = psy_ui_style_allocinit();
-	if (psy_strlen(PSYCLE_RES_DIR) == 0) {
-		psy_ui_style_set_background_id(style, IDB_BGMAIN);
-	} else {
-		psy_ui_style_setbackgroundpath(style,
-			PSYCLE_RES_DIR psy_SLASHSTR "bgmain.bmp");
-	}	
+	style = psy_ui_style_allocinit();	
+	psy_ui_style_set_background_id(style, IDB_BGMAIN);	
 	psy_ui_style_animate_background(style, 20,
 		psy_ui_realsize_make(96, 192), TRUE);
 	psy_ui_styles_set_style(self, STYLE_GREET, style);
 
-	style = psy_ui_style_allocinit();
-	if (psy_strlen(PSYCLE_RES_DIR) == 0) {
-		psy_ui_style_set_background_id(style, IDB_BGTOP);
-	} else {
-		psy_ui_style_setbackgroundpath(style,
-			PSYCLE_RES_DIR psy_SLASHSTR "bgtop.bmp");
-	}	
+	style = psy_ui_style_allocinit();	
+	psy_ui_style_set_background_id(style, IDB_BGTOP);	
 	psy_ui_style_animate_background(style, 40,
 		psy_ui_realsize_make(128, 128), TRUE);
 	psy_ui_styles_set_style(self, STYLE_GREET_TOP, style);
@@ -1798,24 +1773,14 @@ void init_win98_theme(psy_ui_Styles* self)
 	psy_ui_style_set_colour(style, win.cl_red);	
 	psy_ui_styles_set_style(self, STYLE_TERM_BUTTON_ERROR, style);
 
-	style = psy_ui_style_allocinit();
-	if (psy_strlen(PSYCLE_RES_DIR) == 0) {
-		psy_ui_style_set_background_id(style, IDB_BGMAIN);
-	} else {
-		psy_ui_style_setbackgroundpath(style,
-			PSYCLE_RES_DIR psy_SLASHSTR "bgmain.bmp");
-	}
+	style = psy_ui_style_allocinit();	
+	psy_ui_style_set_background_id(style, IDB_BGMAIN);	
 	psy_ui_style_animate_background(style, 20,
 		psy_ui_realsize_make(96, 192), TRUE);
 	psy_ui_styles_set_style(self, STYLE_GREET, style);
 
-	style = psy_ui_style_allocinit();
-	if (psy_strlen(PSYCLE_RES_DIR) == 0) {
-		psy_ui_style_set_background_id(style, IDB_BGTOP);
-	} else {
-		psy_ui_style_setbackgroundpath(style,
-			PSYCLE_RES_DIR psy_SLASHSTR "bgtop.bmp");
-	}
+	style = psy_ui_style_allocinit();	
+	psy_ui_style_set_background_id(style, IDB_BGTOP);	
 	psy_ui_style_animate_background(style, 40,
 		psy_ui_realsize_make(128, 128), TRUE);
 	psy_ui_styles_set_style(self, STYLE_GREET_TOP, style);
@@ -1929,24 +1894,14 @@ void init_machineparam_styles(psy_ui_Styles* self)
 		psy_ui_colour_make(0x00292929));
 	psy_ui_styles_set_style(self, STYLE_MACPARAM_BOTTOM_ACTIVE, style);
 
-	style = psy_ui_style_allocinit();
-	if (psy_strlen(PSYCLE_RES_DIR) == 0) {
-		psy_ui_style_set_background_id(style, IDB_PARAMKNOB);
-	} else {
-		psy_ui_style_setbackgroundpath(style,
-			PSYCLE_RES_DIR psy_SLASHSTR "TbMainKnob.bmp");
-	}	
+	style = psy_ui_style_allocinit();	
+	psy_ui_style_set_background_id(style, IDB_PARAMKNOB);	
 	psy_ui_style_animate_background(style, 0,
 		psy_ui_realsize_make(28.0, 28.0), TRUE);
 	psy_ui_styles_set_style(self, STYLE_MACPARAM_KNOB, style);
 
-	style = psy_ui_style_allocinit();
-	if (psy_strlen(PSYCLE_RES_DIR) == 0) {
-		psy_ui_style_set_background_id(style, IDB_MIXERSKIN);
-	} else {
-		psy_ui_style_setbackgroundpath(style,
-			PSYCLE_RES_DIR psy_SLASHSTR "mixer_skin.bmp");
-	}	
+	style = psy_ui_style_allocinit();	
+	psy_ui_style_set_background_id(style, IDB_MIXERSKIN);	
 	psy_ui_style_set_background_size_px(style,
 		psy_ui_realsize_make(30.0, 182.0));
 	psy_ui_style_set_background_repeat(style, psy_ui_NOREPEAT);
@@ -1955,25 +1910,15 @@ void init_machineparam_styles(psy_ui_Styles* self)
 		psy_ui_colour_make(0x00292929));
 	psy_ui_styles_set_style(self, STYLE_MACPARAM_SLIDER, style);
 
-	style = psy_ui_style_allocinit();
-	if (psy_strlen(PSYCLE_RES_DIR) == 0) {
-		psy_ui_style_set_background_id(style, IDB_MIXERSKIN);
-	} else {
-		psy_ui_style_setbackgroundpath(style,
-			PSYCLE_RES_DIR psy_SLASHSTR "mixer_skin.bmp");
-	}
+	style = psy_ui_style_allocinit();	
+	psy_ui_style_set_background_id(style, IDB_MIXERSKIN);	
 	psy_ui_style_set_background_size_px(style,
 		psy_ui_realsize_make(22.0, 10.0));
 	psy_ui_style_set_background_position_px(style, 0.0, -182.0);
 	psy_ui_styles_set_style(self, STYLE_MACPARAM_SLIDERKNOB, style);
 
-	style = psy_ui_style_allocinit();
-	if (psy_strlen(PSYCLE_RES_DIR) == 0) {
-		psy_ui_style_set_background_id(style, IDB_MIXERSKIN);
-	} else {
-		psy_ui_style_setbackgroundpath(style,
-			PSYCLE_RES_DIR psy_SLASHSTR "mixer_skin.bmp");
-	}
+	style = psy_ui_style_allocinit();	
+	psy_ui_style_set_background_id(style, IDB_MIXERSKIN);	
 	psy_ui_style_set_background_size_px(style,
 		psy_ui_realsize_make(28.0, 28.0));
 	psy_ui_style_set_background_position_px(style, -30.0, -118.0);
@@ -1983,13 +1928,8 @@ void init_machineparam_styles(psy_ui_Styles* self)
 		psy_ui_colour_make(0x00444444));
 	psy_ui_styles_set_style(self, STYLE_MACPARAM_SWITCHON, style);
 
-	style = psy_ui_style_allocinit();
-	if (psy_strlen(PSYCLE_RES_DIR) == 0) {
-		psy_ui_style_set_background_id(style, IDB_MIXERSKIN);
-	} else {
-		psy_ui_style_setbackgroundpath(style,
-			PSYCLE_RES_DIR psy_SLASHSTR "mixer_skin.bmp");
-	}
+	style = psy_ui_style_allocinit();	
+	psy_ui_style_set_background_id(style, IDB_MIXERSKIN);	
 	psy_ui_style_set_background_size_px(style,
 		psy_ui_realsize_make(28.0, 28.0));
 	psy_ui_style_set_background_position_px(style, -30.0, -90.0);
@@ -1999,13 +1939,8 @@ void init_machineparam_styles(psy_ui_Styles* self)
 		psy_ui_colour_make(0x00444444));
 	psy_ui_styles_set_style(self, STYLE_MACPARAM_SWITCHOFF, style);
 
-	style = psy_ui_style_allocinit();
-	if (psy_strlen(PSYCLE_RES_DIR) == 0) {
-		psy_ui_style_set_background_id(style, IDB_MIXERSKIN);
-	} else {
-		psy_ui_style_setbackgroundpath(style,
-			PSYCLE_RES_DIR psy_SLASHSTR "mixer_skin.bmp");
-	}
+	style = psy_ui_style_allocinit();	
+	psy_ui_style_set_background_id(style, IDB_MIXERSKIN);	
 	psy_ui_style_set_background_size_px(style,
 		psy_ui_realsize_make(13.0, 13.0));
 	psy_ui_style_set_background_position_px(style, -30.0, -159.0);
@@ -2015,13 +1950,8 @@ void init_machineparam_styles(psy_ui_Styles* self)
 		psy_ui_colour_make(0x00444444));
 	psy_ui_styles_set_style(self, STYLE_MACPARAM_CHECKON, style);
 
-	style = psy_ui_style_allocinit();
-	if (psy_strlen(PSYCLE_RES_DIR) == 0) {
-		psy_ui_style_set_background_id(style, IDB_MIXERSKIN);
-	} else {
-		psy_ui_style_setbackgroundpath(style,
-			PSYCLE_RES_DIR psy_SLASHSTR "mixer_skin.bmp");
-	}
+	style = psy_ui_style_allocinit();	
+	psy_ui_style_set_background_id(style, IDB_MIXERSKIN);	
 	psy_ui_style_set_background_size_px(style,
 		psy_ui_realsize_make(13.0, 13.0));
 	psy_ui_style_set_background_position_px(style, -30.0, -146.0);
@@ -2031,25 +1961,15 @@ void init_machineparam_styles(psy_ui_Styles* self)
 		psy_ui_colour_make(0x00444444));
 	psy_ui_styles_set_style(self, STYLE_MACPARAM_CHECKOFF, style);
 
-	style = psy_ui_style_allocinit();
-	if (psy_strlen(PSYCLE_RES_DIR) == 0) {
-		psy_ui_style_set_background_id(style, IDB_MIXERSKIN);
-	} else {
-		psy_ui_style_setbackgroundpath(style,
-			PSYCLE_RES_DIR psy_SLASHSTR "mixer_skin.bmp");
-	}
+	style = psy_ui_style_allocinit();	
+	psy_ui_style_set_background_id(style, IDB_MIXERSKIN);	
 	psy_ui_style_set_background_size_px(style,
 		psy_ui_realsize_make(16.0, 90.0));
 	psy_ui_style_set_background_position_px(style, -46.0, 0.0);
 	psy_ui_styles_set_style(self, STYLE_MACPARAM_VUON, style);
 
-	style = psy_ui_style_allocinit();
-	if (psy_strlen(PSYCLE_RES_DIR) == 0) {
-		psy_ui_style_set_background_id(style, IDB_MIXERSKIN);
-	} else {
-		psy_ui_style_setbackgroundpath(style,
-			PSYCLE_RES_DIR psy_SLASHSTR "mixer_skin.bmp");
-	}
+	style = psy_ui_style_allocinit();	
+	psy_ui_style_set_background_id(style, IDB_MIXERSKIN);	
 	psy_ui_style_set_background_size_px(style,
 		psy_ui_realsize_make(16.0, 90.0));
 	psy_ui_style_set_background_position_px(style, -30.0, 0.0);
@@ -2075,38 +1995,23 @@ void init_patternview_styles(psy_ui_Styles* self)
 		psy_ui_colour_make(0x00808080));
 	psy_ui_styles_set_style(self, STYLE_PV_TRACK_VIEW_SELECT, style);
 
-	style = psy_ui_style_allocinit();
-	if (psy_strlen(PSYCLE_RES_DIR) == 0) {
-		psy_ui_style_set_background_id(style, IDB_HEADERSKIN);
-	} else {
-		psy_ui_style_setbackgroundpath(style,
-			PSYCLE_RES_DIR psy_SLASHSTR "pattern_header_skin.bmp");
-	}	
+	style = psy_ui_style_allocinit();	
+	psy_ui_style_set_background_id(style, IDB_HEADERSKIN);	
 	psy_ui_style_set_background_size_px(style,
 		psy_ui_realsize_make(102.0, 23.0));
 	psy_ui_style_set_background_position_px(style, -2.0, -0.0);
 	psy_ui_styles_set_style(self, STYLE_PV_TRACK_HEADER, style);
 
-	style = psy_ui_style_allocinit();
-	if (psy_strlen(PSYCLE_RES_DIR) == 0) {
-		psy_ui_style_set_background_id(style, IDB_HEADERSKIN);
-	} else {
-		psy_ui_style_setbackgroundpath(style,
-			PSYCLE_RES_DIR psy_SLASHSTR "pattern_header_skin.bmp");
-	}
+	style = psy_ui_style_allocinit();	
+	psy_ui_style_set_background_id(style, IDB_HEADERSKIN);	
 	psy_ui_style_set_background_size_px(style,
 		psy_ui_realsize_make(9, 17));
 	psy_ui_style_set_background_position_px(style, 0.0, -23.0);
 	psy_ui_style_set_padding_px(style, 3.0, 0.0, 0.0, 15.0);
 	psy_ui_styles_set_style(self, STYLE_PV_TRACK_HEADER_DIGITX0, style);
 
-	style = psy_ui_style_allocinit();
-	if (psy_strlen(PSYCLE_RES_DIR) == 0) {
-		psy_ui_style_set_background_id(style, IDB_HEADERSKIN);
-	} else {
-		psy_ui_style_setbackgroundpath(style,
-			PSYCLE_RES_DIR psy_SLASHSTR "pattern_header_skin.bmp");
-	}
+	style = psy_ui_style_allocinit();	
+	psy_ui_style_set_background_id(style, IDB_HEADERSKIN);	
 	psy_ui_style_set_background_size_px(style, psy_ui_realsize_make(9, 17));
 	psy_ui_style_set_background_position_px(style, 0.0, -23.0);
 	psy_ui_style_set_padding_px(style, 3.0, 0.0, 0.0, 22.0);
@@ -2117,13 +2022,8 @@ void init_patternview_styles(psy_ui_Styles* self)
 		psy_ui_point_make_px(66.0, 3.0), psy_ui_size_make_px(17.0, 17.)));
 	psy_ui_styles_set_style(self, STYLE_PV_TRACK_HEADER_MUTE, style);
 
-	style = psy_ui_style_allocinit();
-	if (psy_strlen(PSYCLE_RES_DIR) == 0) {
-		psy_ui_style_set_background_id(style, IDB_HEADERSKIN);
-	} else {
-		psy_ui_style_setbackgroundpath(style,
-			PSYCLE_RES_DIR psy_SLASHSTR "pattern_header_skin.bmp");
-	}
+	style = psy_ui_style_allocinit();	
+	psy_ui_style_set_background_id(style, IDB_HEADERSKIN);	
 	psy_ui_style_set_background_size_px(style,
 		psy_ui_realsize_make(17.0, 17.0));
 	psy_ui_style_set_background_position_px(style, -79.0, -40.0);	
@@ -2136,13 +2036,8 @@ void init_patternview_styles(psy_ui_Styles* self)
 		psy_ui_point_make_px(47.0, 3.0), psy_ui_size_make_px(17.0, 17.)));
 	psy_ui_styles_set_style(self, STYLE_PV_TRACK_HEADER_SOLO, style);
 
-	style = psy_ui_style_allocinit();
-	if (psy_strlen(PSYCLE_RES_DIR) == 0) {
-		psy_ui_style_set_background_id(style, IDB_HEADERSKIN);
-	} else {
-		psy_ui_style_setbackgroundpath(style,
-			PSYCLE_RES_DIR psy_SLASHSTR "pattern_header_skin.bmp");
-	}
+	style = psy_ui_style_allocinit();	
+	psy_ui_style_set_background_id(style, IDB_HEADERSKIN);	
 	psy_ui_style_set_background_size_px(style,
 		psy_ui_realsize_make(17.0, 17.0));
 	psy_ui_style_set_background_position_px(style, -62, -40.0);
@@ -2155,13 +2050,8 @@ void init_patternview_styles(psy_ui_Styles* self)
 		psy_ui_point_make_px(85.0, 3.0), psy_ui_size_make_px(17.0, 17.)));
 	psy_ui_styles_set_style(self, STYLE_PV_TRACK_HEADER_RECORD, style);
 
-	style = psy_ui_style_allocinit();
-	if (psy_strlen(PSYCLE_RES_DIR) == 0) {
-		psy_ui_style_set_background_id(style, IDB_HEADERSKIN);
-	} else {
-		psy_ui_style_setbackgroundpath(style,
-			PSYCLE_RES_DIR psy_SLASHSTR "pattern_header_skin.bmp");
-	}
+	style = psy_ui_style_allocinit();	
+	psy_ui_style_set_background_id(style, IDB_HEADERSKIN);	
 	psy_ui_style_set_background_size_px(style,
 		psy_ui_realsize_make(17.0, 17.0));
 	psy_ui_style_set_background_position_px(style, -96.0, -40.0);	
@@ -2174,13 +2064,8 @@ void init_patternview_styles(psy_ui_Styles* self)
 		psy_ui_point_make_px(5.0, 3.0), psy_ui_size_make_px(7, 17)));
 	psy_ui_styles_set_style(self, STYLE_PV_TRACK_HEADER_PLAY, style);
 
-	style = psy_ui_style_allocinit();
-	if (psy_strlen(PSYCLE_RES_DIR) == 0) {
-		psy_ui_style_set_background_id(style, IDB_HEADERSKIN);
-	} else {
-		psy_ui_style_setbackgroundpath(style,
-			PSYCLE_RES_DIR psy_SLASHSTR "pattern_header_skin.bmp");
-	}
+	style = psy_ui_style_allocinit();	
+	psy_ui_style_set_background_id(style, IDB_HEADERSKIN);	
 	psy_ui_style_set_background_size_px(style,
 		psy_ui_realsize_make(8, 17));
 	psy_ui_style_set_background_position_px(style, 0.0, -40.0);	
@@ -2191,13 +2076,8 @@ void init_patternview_styles(psy_ui_Styles* self)
 	style = psy_ui_style_allocinit();	
 	psy_ui_styles_set_style(self, STYLE_PV_TRACK_HEADER_TEXT, style);
 
-	style = psy_ui_style_allocinit();
-	if (psy_strlen(PSYCLE_RES_DIR) == 0) {
-		psy_ui_style_set_background_id(style, IDB_HEADERSKIN);
-	} else {
-		psy_ui_style_setbackgroundpath(style,
-			PSYCLE_RES_DIR psy_SLASHSTR "pattern_header_skin.bmp");
-	}
+	style = psy_ui_style_allocinit();	
+	psy_ui_style_set_background_id(style, IDB_HEADERSKIN);	
 	psy_ui_style_set_background_size_px(style,
 		psy_ui_realsize_make(8, 17));
 	psy_ui_style_set_background_position_px(style, 0.0, -40.0);

@@ -80,10 +80,10 @@ int load(psy_ui_Bitmap* self, const char* path)
 	return self->imp->vtable->dev_load(self->imp, self, path);
 }
 
-int loadresource(psy_ui_Bitmap* self, uintptr_t resourceid)
-{
+int loadresource(psy_ui_Bitmap* self, uintptr_t id)
+{	
 	createimp(self);
-	return self->imp->vtable->dev_loadresource(self->imp, resourceid);
+	return psy_ui_bitmaps_load(&psy_ui_app()->bitmaps, id, self);	
 }
 
 psy_ui_RealSize size(const psy_ui_Bitmap* self)

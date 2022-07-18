@@ -1081,85 +1081,19 @@ const psy_ui_TextMetric* dev_textmetric(const psy_ui_x11_ComponentImp* self)
 void dev_setcursor(psy_ui_x11_ComponentImp* self, psy_ui_CursorStyle
 	cursorstyle)
 {
-	//HCURSOR hc;
-
-	//switch (cursorstyle) {
-	//case psy_ui_CURSORSTYLE_AUTO:
-		//hc = LoadCursor(NULL, IDC_SIZEWE);
-		//break;
-	//case psy_ui_CURSORSTYLE_MOVE:
-		//hc = LoadCursor(NULL, IDC_SIZEALL);
-		//break;
-	//case psy_ui_CURSORSTYLE_NODROP:
-		//hc = LoadCursor(NULL, IDC_SIZEWE);
-		//break;
-	//case psy_ui_CURSORSTYLE_COL_RESIZE:
-		//hc = LoadCursor(NULL, IDC_SIZEWE);
-		//break;
-	//case psy_ui_CURSORSTYLE_ALL_SCROLL:
-		//hc = LoadCursor(NULL, IDC_SIZEWE);
-		//break;
-	//case psy_ui_CURSORSTYLE_POINTER:
-		//hc = LoadCursor(NULL, IDC_SIZEWE);
-		//break;
-	//case psy_ui_CURSORSTYLE_NOT_ALLOWED:
-		//hc = LoadCursor(NULL, IDC_SIZEWE);
-		//break;
-	//case psy_ui_CURSORSTYLE_ROW_RESIZE:
-		//hc = LoadCursor(NULL, IDC_SIZENS);
-		//break;
-	//case psy_ui_CURSORSTYLE_CROSSHAIR:
-		//hc = LoadCursor(NULL, IDC_SIZEWE);
-		//break;
-	//case psy_ui_CURSORSTYLE_PROGRESS:
-		//hc = LoadCursor(NULL, IDC_SIZEWE);
-		//break;
-	//case psy_ui_CURSORSTYLE_E_RESIZE:
-		//hc = LoadCursor(NULL, IDC_SIZEWE);
-		//break;
-	//case psy_ui_CURSORSTYLE_NE_RESIZE:
-		//hc = LoadCursor(NULL, IDC_SIZEWE);
-		//break;
-	//case psy_ui_CURSORSTYLE_DEFAULT_TEXT:
-		//hc = LoadCursor(NULL, IDC_SIZEWE);
-		//break;
-	//case psy_ui_CURSORSTYLE_N_RESIZE:
-		//hc = LoadCursor(NULL, IDC_SIZEWE);
-		//break;
-	//case psy_ui_CURSORSTYLE_NW_RESIZE:
-		//hc = LoadCursor(NULL, IDC_SIZEWE);
-		//break;
-	//case psy_ui_CURSORSTYLE_HELP:
-		//hc = LoadCursor(NULL, IDC_SIZEWE);
-		//break;
-	//case psy_ui_CURSORSTYLE_VERTICAL_TEXT:
-		//hc = LoadCursor(NULL, IDC_SIZEWE);
-		//break;
-	//case psy_ui_CURSORSTYLE_S_RESIZE:
-		//hc = LoadCursor(NULL, IDC_SIZEWE);
-		//break;
-	//case psy_ui_CURSORSTYLE_SE_RESIZE:
-		//hc = LoadCursor(NULL, IDC_SIZEWE);
-		//break;
-	//case psy_ui_CURSORSTYLE_INHERIT:
-		//hc = LoadCursor(NULL, IDC_SIZEWE);
-		//break;
-	//case psy_ui_CURSORSTYLE_WAIT:
-		//hc = LoadCursor(NULL, IDC_SIZEWE);
-		//break;
-	//case psy_ui_CURSORSTYLE_W_RESIZE:
-		//hc = LoadCursor(NULL, IDC_SIZEWE);
-		//break;
-	//case psy_ui_CURSORSTYLE_SW_RESIZE:
-		//hc = LoadCursor(NULL, IDC_SIZEWE);
-		//break;
-	//default:
-		//hc = 0;
-		//break;
-	//}
-	//if (hc) {
-		//SetCursor(hc);
-	//}
+	psy_ui_X11App* x11app;	
+	
+	assert(self);
+	x11app = (psy_ui_X11App*)psy_ui_app()->imp;
+	if (cursorstyle == psy_ui_CURSORSTYLE_RESET) {
+		XUndefineCursor(x11app->dpy, self->hwnd);
+		return;
+	}
+	x11app->resetcursor = TRUE;	
+	XDefineCursor(x11app->dpy, self->hwnd,
+		psy_ui_x11_cursors_cursor(&x11app->cursors,
+			psy_ui_x11_cursors_shape(&x11app->cursors,
+			cursorstyle)));	
 }
 
 void dev_seticonressource(psy_ui_x11_ComponentImp* self, int ressourceid)

@@ -7,6 +7,7 @@
 
 
 /* host */
+#include "bitmaps.h"
 #include "mainframe.h"
 /* ui */
 #include <uiapp.h>
@@ -28,7 +29,10 @@ int psycle_run(uintptr_t instance, int options)
 		
 	/* set env for scintilla module */
 	psy_insertpathenv(psy_workdir(workpath));
-	psy_ui_app_init(&app, psy_ui_DARKTHEME, instance);	
+	psy_ui_app_init(&app, psy_ui_DARKTHEME, instance);
+#ifdef DIVERSALIS__OS__UNIX
+	register_bitmaps(&app, PSYCLE_RES_DIR);		
+#endif
 	mainframe = mainframe_allocinit();	
 	if (mainframe) {	
 		if (mainframe_showmaximizedatstart(mainframe)) {

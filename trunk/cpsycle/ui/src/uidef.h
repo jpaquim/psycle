@@ -35,7 +35,8 @@ typedef enum psy_ui_Overflow {
 
 typedef enum psy_ui_Cursor {
 	psy_ui_CURSOR_DEFAULT,
-	psy_ui_CURSOR_COLRESIZE
+	psy_ui_CURSOR_COLRESIZE,
+	psy_ui_CURSOR_RESET
 } psy_ui_Cursor;
 
 typedef enum psy_ui_ExpandMode {
@@ -132,6 +133,7 @@ typedef enum psy_ui_CursorStyle {
 	psy_ui_CURSORSTYLE_W_RESIZE,
 	psy_ui_CURSORSTYLE_SW_RESIZE,
 	psy_ui_CURSORSTYLE_GRAB,
+	psy_ui_CURSORSTYLE_RESET
 } psy_ui_CursorStyle;
 
 #ifdef __cplusplus

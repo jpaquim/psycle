@@ -186,7 +186,7 @@ void dev_preparemask(psy_ui_x11_BitmapImp* self, psy_ui_Colour clrtrans)
 	psy_ui_X11App* x11app;
 	psy_ui_RealSize size;
 	int screen;
-	GC gc;
+	GC gc;	
 	XGCValues gcv;
 
 	if (!self->pixmap) {
@@ -212,8 +212,7 @@ void dev_preparemask(psy_ui_x11_BitmapImp* self, psy_ui_Colour clrtrans)
 	self->mask = XCreatePixmap(x11app->dpy,
 		DefaultRootWindow(x11app->dpy), (int)size.width, (int)size.height,
 		DefaultDepth(x11app->dpy, screen));
-	gc = XCreateGC(x11app->dpy,
-		XDefaultRootWindow(x11app->dpy), 0, NULL);
+	gc = XCreateGC(x11app->dpy, self->mask, 0, NULL);
 	XGetGCValues(x11app->dpy, gc, GCFunction, &gcv);
 	/* Change the background to trans color */
 	XSetBackground(x11app->dpy, gc,
@@ -225,6 +224,7 @@ void dev_preparemask(psy_ui_x11_BitmapImp* self, psy_ui_Colour clrtrans)
 	/* This call sets up the mask bitmap. */
 	XCopyArea(x11app->dpy, self->pixmap, self->mask, gc,
 		0, 0, (int)size.width, (int)size.height, 0, 0);
+	XFreeGC(x11app->dpy, gc);
 	/*
 	** Now, we need to paint onto the original image, making
 	** sure that the "transparent" area is set to black. What
@@ -235,6 +235,7 @@ void dev_preparemask(psy_ui_x11_BitmapImp* self, psy_ui_Colour clrtrans)
 	** if  0 (white) is is mapped to the color set by SetBkColor().
 	** Only then is the raster operation performed.
 	*/
+	gc = XCreateGC(x11app->dpy, self->pixmap, 0, NULL);
 	XSetForeground(x11app->dpy, gc,
 		psy_ui_x11app_colourindex(x11app, 
 			psy_ui_colour_make_rgb(255, 255, 255)));

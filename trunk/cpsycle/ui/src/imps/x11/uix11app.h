@@ -13,6 +13,7 @@
 #include "../../uiapp.h"
 #include "../../detail/os.h"
 #include "uix11colours.h"
+#include "uix11cursors.h"
 /* container */
 #include <list.h>
 /* X11 */
@@ -49,9 +50,11 @@ typedef struct psy_ui_X11App {
 	psy_List* targetids;	
 	bool shiftstate;
 	bool controlstate;
-	bool altstate;	
+	bool altstate;
+	bool resetcursor;
 	/* references */
 	psy_ui_App* app;
+	psy_ui_x11_Cursors cursors;
 } psy_ui_X11App;
 
 void psy_ui_x11app_init(psy_ui_X11App*, psy_ui_App*, void* instance);

@@ -120,6 +120,7 @@ void psy_ui_x11app_init(psy_ui_X11App* self, psy_ui_App* app, void* instance)
 	self->app = app;
 	printf("open display\n");
 	self->dpy = XOpenDisplay(NULL);
+	psy_ui_x11_cursors_init(&self->cursors, self->dpy);
 	self->appclass = szAppClass;
 	self->componentclass = szComponentClass;
 	self->winid = 20000;
@@ -148,6 +149,7 @@ void psy_ui_x11app_init(psy_ui_X11App* self, psy_ui_App* app, void* instance)
 	self->shiftstate = FALSE;
 	self->controlstate = FALSE;
 	self->altstate = FALSE;
+	self->resetcursor = TRUE;
 	XSetErrorHandler(errorHandler);
 }
 
@@ -210,6 +212,7 @@ void psy_ui_x11app_dispose(psy_ui_X11App* self)
 	XCloseDisplay(self->dpy);
 	psy_ui_x11colours_dispose(&self->colourmap);
 	psy_list_free(self->targetids);	
+	psy_ui_x11_cursors_dispose(&self->cursors);
 }
 
 int psy_ui_x11app_run(psy_ui_X11App* self)
@@ -500,6 +503,7 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 		psy_ui_MouseEvent ev;
 		XMotionEvent xme;
 		int button;
+		bool restorecursor;
 		
 		xme = event->xmotion;
 		if (xme.state & Button1Mask) {
@@ -516,9 +520,16 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 			button, 0, 0, 0);
 		psy_ui_event_settype(&ev.event, psy_ui_MOUSEMOVE);
 		psy_ui_x11app_update_mouseevent_mods(self, &ev);		
-		ev.event.timestamp_ = (uintptr_t)event->xbutton.time;					
+		ev.event.timestamp_ = (uintptr_t)event->xbutton.time;
+		restorecursor = self->resetcursor;
+		self->resetcursor = FALSE;		
 		psy_ui_eventdispatch_send(&self->app->eventdispatch,
 			imp->component, &ev.event);		
+		if (!self->resetcursor && restorecursor) {
+			psy_ui_component_setcursor(imp->component,
+				psy_ui_CURSORSTYLE_RESET);
+			self->resetcursor = FALSE;		
+		}
 		return 0; }
 	case EnterNotify: {
 		// imp->imp.vtable->dev_mouseenter(&imp->imp);
@@ -712,7 +723,7 @@ void psy_ui_x11app_sendevent(psy_ui_X11App* self, psy_ui_Component* component,
 	case psy_ui_MOUSEMOVE: {
 		psy_ui_MouseEvent* mouseevent;
 		XMotionEvent xme;		
-
+		
 		mouseevent = (psy_ui_MouseEvent*)ev;
 		xme.serial = MotionNotify;
 		xme.send_event = False;

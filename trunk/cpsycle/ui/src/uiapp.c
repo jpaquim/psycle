@@ -116,6 +116,7 @@ void psy_ui_app_init(psy_ui_App* self, bool dark, uintptr_t instance)
 	psy_ui_eventdispatch_disable_handle_doubleclick(&self->eventdispatch);
 #endif
 	psy_timers_init(&self->wintimers);
+	psy_ui_bitmaps_init(&self->bitmaps);
 }
 
 void ui_app_init_imp_factory(psy_ui_App* self)
@@ -180,6 +181,7 @@ void psy_ui_app_dispose(psy_ui_App* self)
 	psy_ui_eventdispatch_dispose(&self->eventdispatch);
 	psy_table_dispose(&self->components);
 	psy_timers_dispose(&self->wintimers);
+	psy_ui_bitmaps_dispose(&self->bitmaps);
 }
 
 void psy_ui_app_setmain(psy_ui_App* self, psy_ui_Component* main)
@@ -192,6 +194,17 @@ struct psy_ui_Component* psy_ui_app_main(psy_ui_App* self)
 	assert(self);
 
 	return self->main;	
+}
+
+void psy_ui_app_set_bmp_path(psy_ui_App* self, const char* path)
+{
+	psy_ui_bitmaps_set_app_bmp_path(&self->bitmaps, path);
+}
+
+void psy_ui_app_add_app_bmp(psy_ui_App* self, uintptr_t id,
+	const char* filename)
+{
+	psy_ui_bitmaps_add(&self->bitmaps, id, filename);
 }
 
 int psy_ui_app_run(psy_ui_App* self) 
