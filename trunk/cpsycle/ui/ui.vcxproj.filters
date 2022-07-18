@@ -298,6 +298,12 @@
     <ClCompile Include="src\uitextdraw.c">
       <Filter>components</Filter>
     </ClCompile>
+    <ClCompile Include="src\uibitmaps.c">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="src\imps\x11\uix11cursors.c">
+      <Filter>imps\x11\common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\uibutton.h">
@@ -545,6 +551,12 @@
     </ClInclude>
     <ClInclude Include="src\uikeys.h">
       <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="src\uibitmaps.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="src\imps\x11\uix11cursors.h">
+      <Filter>imps\x11\common</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
