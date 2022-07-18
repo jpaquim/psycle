@@ -54,22 +54,11 @@ void mainviewbar_init(MainViewBar* self, psy_ui_Component* parent,
 		psy_ui_ALIGN_RIGHT);
 	psy_ui_button_init(&self->view_float, &self->component);
 	psy_ui_component_set_align(psy_ui_button_base(&self->view_float),
-		psy_ui_ALIGN_RIGHT);
-	if (psy_strlen(PSYCLE_RES_DIR) == 0) {
-		psy_ui_button_load_resource(&self->maximizebtn,
-			IDB_EXPAND_LIGHT, IDB_EXPAND_DARK, psy_ui_colour_white());
-		psy_ui_button_load_resource(&self->view_float,
-			IDB_FLOAT_LIGHT, IDB_FLOAT_DARK, psy_ui_colour_white());
-	} else {
-		psy_ui_button_load_bitmap(&self->maximizebtn,
-			PSYCLE_RES_DIR"/""expand-light.bmp",
-			PSYCLE_RES_DIR"/""expand-dark.bmp",
-			psy_ui_colour_white());
-		psy_ui_button_load_bitmap(&self->view_float,
-			PSYCLE_RES_DIR"/""float-light.bmp",
-			PSYCLE_RES_DIR"/""float-dark.bmp",
-			psy_ui_colour_white());
-	}
+		psy_ui_ALIGN_RIGHT);	
+	psy_ui_button_load_resource(&self->maximizebtn,
+		IDB_EXPAND_LIGHT, IDB_EXPAND_DARK, psy_ui_colour_white());
+	psy_ui_button_load_resource(&self->view_float,
+		IDB_FLOAT_LIGHT, IDB_FLOAT_DARK, psy_ui_colour_white());	
 	psy_ui_button_init(&self->extract, &self->component);
 	psy_ui_button_set_icon(&self->extract, psy_ui_ICON_MORE);
 	psy_ui_component_set_align(psy_ui_button_base(&self->extract),

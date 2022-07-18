@@ -1,4 +1,5 @@
-/* This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 ** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
@@ -8,6 +9,7 @@
 /* local */
 #include "uieventdispatch.h"
 #include "uidefaults.h"
+#include "uibitmaps.h"
 #include "timers.h"
 /* container */
 #include <signal.h>
@@ -65,6 +67,7 @@ typedef struct psy_ui_App {
 	psy_ui_DragEvent dragevent;	
 	psy_ui_EventDispatch eventdispatch;
 	psy_Table components;
+	psy_ui_Bitmaps bitmaps;
 } psy_ui_App;
 
 psy_ui_App* psy_ui_app(void);
@@ -99,6 +102,9 @@ void psy_ui_app_register_native(psy_ui_App*,
 	uintptr_t handle, struct psy_ui_ComponentImp*, bool top_level);
 void psy_ui_app_unregister_native(psy_ui_App*,
 	uintptr_t handle);
+void psy_ui_app_set_bmp_path(psy_ui_App*, const char* path);
+void psy_ui_app_add_app_bmp(psy_ui_App*, uintptr_t id,
+	const char* filename);
 
 
 INLINE struct psy_ui_Component* psy_ui_app_capture(psy_ui_App* self)
