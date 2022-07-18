@@ -7,11 +7,12 @@
 
 
 #include "uix11cursors.h"
-/* x11 */
-#include <X11/cursorfont.h>
 
 
 #if PSYCLE_USE_TK == PSYCLE_TK_X11
+/* x11 */
+#include <X11/cursorfont.h>
+
 
 void psy_ui_x11_cursors_init(psy_ui_x11_Cursors* self,
 	Display* dpy)

@@ -291,6 +291,7 @@
     <ClCompile Include="src\about.c" />
     <ClCompile Include="src\adsrsliders.c" />
     <ClCompile Include="src\arrowui.c" />
+    <ClCompile Include="src\bitmaps.c" />
     <ClCompile Include="src\channelmappingview.c" />
     <ClCompile Include="src\clipbox.c" />
     <ClCompile Include="src\clockbar.c" />
@@ -491,6 +492,7 @@
     <ClInclude Include="src\about.h" />
     <ClInclude Include="src\adsrsliders.h" />
     <ClInclude Include="src\arrowui.h" />
+    <ClInclude Include="src\bitmaps.h" />
     <ClInclude Include="src\channelmappingview.h" />
     <ClInclude Include="src\clipbox.h" />
     <ClInclude Include="src\clockbar.h" />

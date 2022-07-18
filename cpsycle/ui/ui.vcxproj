@@ -224,6 +224,7 @@
     <ClCompile Include="src\imps\x11\uix11colordialogimp.c" />
     <ClCompile Include="src\imps\x11\uix11colours.c" />
     <ClCompile Include="src\imps\x11\uix11componentimp.c" />
+    <ClCompile Include="src\imps\x11\uix11cursors.c" />
     <ClCompile Include="src\imps\x11\uix11folderdialogimp.c" />
     <ClCompile Include="src\imps\x11\uix11fontdialogimp.c" />
     <ClCompile Include="src\imps\x11\uix11fontimp.c" />
@@ -237,6 +238,7 @@
     <ClCompile Include="src\uiapp.c" />
     <ClCompile Include="src\uiappstyles.c" />
     <ClCompile Include="src\uibitmap.c" />
+    <ClCompile Include="src\uibitmaps.c" />
     <ClCompile Include="src\uibmpreader.c" />
     <ClCompile Include="src\uiborder.c" />
     <ClCompile Include="src\uibutton.c" />
@@ -306,6 +308,7 @@
     <ClInclude Include="src\imps\x11\uix11colordialogimp.h" />
     <ClInclude Include="src\imps\x11\uix11colours.h" />
     <ClInclude Include="src\imps\x11\uix11componentimp.h" />
+    <ClInclude Include="src\imps\x11\uix11cursors.h" />
     <ClInclude Include="src\imps\x11\uix11folderdialogimp.h" />
     <ClInclude Include="src\imps\x11\uix11fontdialogimp.h" />
     <ClInclude Include="src\imps\x11\uix11fontimp.h" />
@@ -319,6 +322,7 @@
     <ClInclude Include="src\uiapp.h" />
     <ClInclude Include="src\uiappstyles.h" />
     <ClInclude Include="src\uibitmap.h" />
+    <ClInclude Include="src\uibitmaps.h" />
     <ClInclude Include="src\uibmpreader.h" />
     <ClInclude Include="src\uiborder.h" />
     <ClInclude Include="src\uibutton.h" />
