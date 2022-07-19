@@ -15,7 +15,6 @@
 
 #include <operations.h>
 
-psy_dsp_Operations dsp;
 
 /******************************************************************************************/
 /// C1999 *round* - converts a floating point number to an integer by rounding to the nearest integer.
