@@ -68,6 +68,7 @@ static void psy_ui_winimp_register_native(psy_ui_WinApp*,
 	uintptr_t handle, psy_ui_ComponentImp*, bool top_level);
 static void psy_ui_winimp_unregister_native(psy_ui_WinApp*,
 	uintptr_t handle);
+static psy_List* psy_ui_winimp_fonts(psy_ui_WinApp*);
 
 /* vtable */
 static psy_ui_AppImpVTable imp_vtable;
@@ -115,6 +116,9 @@ static void imp_vtable_init(psy_ui_WinApp* self)
 		imp_vtable.dev_unregister_native =
 			(psy_ui_fp_appimp_unregister_native)
 			psy_ui_winimp_unregister_native;
+		imp_vtable.dev_fonts = 
+			(psy_ui_fp_appimp_fonts)
+			psy_ui_winimp_fonts;
 		imp_vtable_initialized = TRUE;
 	}
 	self->imp.vtable = &imp_vtable;
@@ -1021,6 +1025,36 @@ void psy_ui_winimp_unregister_native(psy_ui_WinApp* self, uintptr_t handle)
 {	
 	psy_table_remove(&winapp->selfmap, handle);
 	psy_table_remove(&winapp->toplevelmap, handle);
+}
+
+BOOL CALLBACK EnumFamCallBack(LPLOGFONT lplf, LPNEWTEXTMETRIC lpntm, DWORD FontType, LPVOID lParam);
+
+psy_List* psy_ui_winimp_fonts(psy_ui_WinApp* self)
+{
+	HDC hdc;
+	psy_List* rv;
+
+	hdc = GetDC(NULL);
+	rv = NULL;
+	EnumFontFamilies(hdc, (LPCTSTR)NULL,
+		(FONTENUMPROC)EnumFamCallBack, (LPARAM)&rv);
+	ReleaseDC(NULL, hdc);
+	return rv;
+}
+
+BOOL CALLBACK EnumFamCallBack(LPLOGFONT lplf, LPNEWTEXTMETRIC lpntm, DWORD FontType, LPVOID lParam)
+{
+	psy_List** rv;
+	psy_ui_FontInfo* fontinfo;
+
+	rv = ((psy_List**)lParam);	
+	fontinfo = (psy_ui_FontInfo*)malloc(sizeof(psy_ui_FontInfo));
+	psy_ui_fontinfo_init(fontinfo, lplf->lfFaceName, lplf->lfHeight);
+	psy_list_append(rv, fontinfo);
+
+	return TRUE;
+	UNREFERENCED_PARAMETER(lplf);
+	UNREFERENCED_PARAMETER(lpntm);
 }
 
 #endif /* PSYCLE_TK_WIN32 */

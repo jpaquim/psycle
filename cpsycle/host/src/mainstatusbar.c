@@ -23,7 +23,6 @@ static void mainstatusbar_init_clock_bar(MainStatusBar*);
 static void mainstatusbar_init_kbd_help_button(MainStatusBar*);
 static void mainstatusbar_init_terminal_button(MainStatusBar*);
 static void mainstatusbar_init_progress_bar(MainStatusBar*);
-static void mainstatusbar_onzoomboxchanged(MainStatusBar*, ZoomBox* sender);
 static void mainstatusbar_onsongloadprogress(MainStatusBar*, Workspace* sender,
 	intptr_t progress);
 static void mainstatusbar_onpluginscanprogress(MainStatusBar*, Workspace*,
@@ -79,9 +78,9 @@ void mainstatusbar_on_destroyed(MainStatusBar* self)
 
 void mainstatusbar_init_zoom_box(MainStatusBar* self)
 {
-	zoombox_init(&self->zoombox, &self->pane);	
-	psy_signal_connect(&self->zoombox.signal_changed,
-		self, mainstatusbar_onzoomboxchanged);
+	zoombox_init(&self->zoombox, &self->pane);
+	zoombox_data_exchange(&self->zoombox, visualconfig_property(
+		&self->workspace->config.visual, "zoom"));	
 }
 
 void mainstatusbar_init_status_label(MainStatusBar* self)
@@ -186,11 +185,6 @@ void mainstatusbar_set_default_status_text(MainStatusBar* self, const char* text
 {
 	psy_ui_label_set_text(&self->statusbarlabel, text);
 	psy_ui_label_set_default_text(&self->statusbarlabel, text);
-}
-
-void mainstatusbar_onzoomboxchanged(MainStatusBar* self, ZoomBox* sender)
-{
-	psy_ui_app_setzoomrate(psy_ui_app(), zoombox_rate(sender));
 }
 
 void mainstatusbar_onsongloadprogress(MainStatusBar* self, Workspace* workspace,

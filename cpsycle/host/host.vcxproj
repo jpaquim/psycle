@@ -296,6 +296,7 @@
     <ClCompile Include="src\clipbox.c" />
     <ClCompile Include="src\clockbar.c" />
     <ClCompile Include="src\cmdproperties.c" />
+    <ClCompile Include="src\colourbox.c" />
     <ClCompile Include="src\compatconfig.c" />
     <ClCompile Include="src\config.c" />
     <ClCompile Include="src\configimport.c" />
@@ -308,7 +309,9 @@
     <ClCompile Include="src\eventdriverconfig.c" />
     <ClCompile Include="src\exportview.c" />
     <ClCompile Include="src\filebar.c" />
+    <ClCompile Include="src\filebox.c" />
     <ClCompile Include="src\fileview.c" />
+    <ClCompile Include="src\fontbox.c" />
     <ClCompile Include="src\gear.c" />
     <ClCompile Include="src\generalconfig.c" />
     <ClCompile Include="src\generatorui.c" />
@@ -498,6 +501,7 @@
     <ClInclude Include="src\clockbar.h" />
     <ClInclude Include="src\cmdproperties.h" />
     <ClInclude Include="src\cmdsgeneral.h" />
+    <ClInclude Include="src\colourbox.h" />
     <ClInclude Include="src\compatconfig.h" />
     <ClInclude Include="src\config.h" />
     <ClInclude Include="src\configimport.h" />
@@ -510,7 +514,9 @@
     <ClInclude Include="src\eventdriverconfig.h" />
     <ClInclude Include="src\exportview.h" />
     <ClInclude Include="src\filebar.h" />
+    <ClInclude Include="src\filebox.h" />
     <ClInclude Include="src\fileview.h" />
+    <ClInclude Include="src\fontbox.h" />
     <ClInclude Include="src\gear.h" />
     <ClInclude Include="src\generalconfig.h" />
     <ClInclude Include="src\generatorui.h" />

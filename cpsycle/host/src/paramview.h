@@ -35,7 +35,7 @@ void paramview_init(ParamView*, psy_ui_Component* parent, psy_audio_Machine*,
 ParamView* paramview_alloc(void);
 ParamView* paramview_allocinit(psy_ui_Component* parent, psy_audio_Machine*,
 	MachineParamConfig*, psy_ui_Component** frameview);
-void paramview_setzoom(ParamView*, double zoomrate);
+void paramview_set_zoom(ParamView*, double zoomrate);
 
 #ifdef __cplusplus
 }

@@ -59,7 +59,10 @@ void visualconfig_set_app_theme(VisualConfig*);
 const char* visualconfig_default_font_str(const VisualConfig*);
 void visualconfig_set_default_font(VisualConfig*, psy_Property*);
 
-bool visualconfig_hasproperty(const VisualConfig*, psy_Property*);
+bool visualconfig_connect(VisualConfig*, const char* key, void* context,
+	void* fp);
+psy_Property* visualconfig_property(VisualConfig*, const char* key);
+
 
 #ifdef __cplusplus
 }

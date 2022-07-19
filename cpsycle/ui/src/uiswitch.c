@@ -14,8 +14,10 @@
 static void psy_ui_switch_on_destroyed(psy_ui_Switch*);
 static void psy_ui_switch_on_draw(psy_ui_Switch*, psy_ui_Graphics*);
 static void psy_ui_switch_on_mouse_down(psy_ui_Switch*, psy_ui_MouseEvent*);
-static void psy_ui_switch_on_property_changed(psy_ui_Switch*, psy_Property* sender);
-static void psy_ui_switch_before_property_destroyed(psy_ui_Switch*, psy_Property* sender);
+static void psy_ui_switch_on_property_changed(psy_ui_Switch*,
+	psy_Property* sender);
+static void psy_ui_switch_before_property_destroyed(psy_ui_Switch*,
+	psy_Property* sender);
 
 /* vtable */
 static psy_ui_ComponentVtable vtable;
@@ -36,8 +38,9 @@ static void vtable_init(psy_ui_Switch* self)
 			psy_ui_switch_on_mouse_down;
 		vtable_initialized = TRUE;
 	}
-	self->component.vtable = &vtable;
+	psy_ui_component_set_vtable(&self->component, &vtable);	
 }
+
 /* implementation */
 void psy_ui_switch_init(psy_ui_Switch* self, psy_ui_Component* parent)
 {		
@@ -51,7 +54,7 @@ void psy_ui_switch_init(psy_ui_Switch* self, psy_ui_Component* parent)
 		psy_ui_STYLE_SWITCH, psy_ui_STYLE_SWITCH_HOVER,
 		psy_ui_STYLE_SWITCH_SELECT, psy_INDEX_INVALID);
 	psy_ui_component_set_preferred_size(psy_ui_switch_base(self),
-		psy_ui_size_make_em(4.0, 1.5));
+		psy_ui_size_make_em(5.0, 1.5));
 }
 
 void psy_ui_switch_init_exchange(psy_ui_Switch* self, psy_ui_Component* parent,

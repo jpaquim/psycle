@@ -25,6 +25,12 @@
 extern "C" {
 #endif
 
+typedef enum {
+    psy_ui_PROPERTY_MODE_VALUE = 1,
+    psy_ui_PROPERTY_MODE_KEY = 2,
+    psy_ui_PROPERTY_MODE_RANGE = 4,
+} psy_ui_PropertyDisplayMode;
+
 typedef struct psy_ui_Label {
     /* inherits */
     psy_ui_Component component;
@@ -37,6 +43,7 @@ typedef struct psy_ui_Label {
     bool fadeout;    
     uintptr_t fadeoutcounter;
     psy_ui_TextFormat format;
+    psy_ui_PropertyDisplayMode property_display_mode;
     /* references */
     psy_Property* property;
 } psy_ui_Label;
@@ -48,7 +55,8 @@ void psy_ui_label_init_text(psy_ui_Label*, psy_ui_Component* parent,
 psy_ui_Label* psy_ui_label_alloc(void);
 psy_ui_Label* psy_ui_label_allocinit(psy_ui_Component* parent);
 
-void psy_ui_label_data_exchange(psy_ui_Label*, psy_Property*);
+void psy_ui_label_data_exchange(psy_ui_Label*, psy_Property*,
+    psy_ui_PropertyDisplayMode);
 
 /* copies the text to the label */
 void psy_ui_label_set_text(psy_ui_Label*, const char* text);

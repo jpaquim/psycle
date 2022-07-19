@@ -61,6 +61,7 @@ static void psy_ui_x11app_register_native(psy_ui_X11App*,
 	uintptr_t handle, psy_ui_ComponentImp*, bool top_level);
 static void psy_ui_x11app_unregister_native(psy_ui_X11App*,
 	uintptr_t handle);
+static psy_List* psy_x11app_fonts(psy_ui_X11App*);
 
 /* vtable */
 static psy_ui_AppImpVTable imp_vtable;
@@ -102,6 +103,9 @@ static void imp_vtable_init(psy_ui_X11App* self)
 		imp_vtable.dev_unregister_native =
 			(psy_ui_fp_appimp_unregister_native)
 			psy_ui_x11app_unregister_native;
+		imp_vtable.dev_fonts =
+			(psy_ui_fp_appimp_fonts)
+			psy_ui_x11app_fonts;
 		imp_vtable_initialized = TRUE;
 	}
 	self->imp.vtable = &imp_vtable;
@@ -849,5 +853,10 @@ void psy_ui_x11app_unregister_native(psy_ui_X11App* self,
 	psy_table_remove(&self->toplevelmap, handle);
 }
 
+psy_List* psy_x11app_fonts(psy_ui_X11App* self)
+{
+	/* todo */
+	return NULL;
+}
 
 #endif /* PSYCLE_TK_X11 */

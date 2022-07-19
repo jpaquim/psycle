@@ -144,6 +144,10 @@ static void inputdefiner_on_key_down(InputDefiner*, psy_ui_KeyboardEvent*);
 static void inputdefiner_on_key_up(InputDefiner*, psy_ui_KeyboardEvent*);
 static void inputdefiner_on_focus_lost(InputDefiner*);
 static void inputdefiner_on_clear(InputDefiner*, psy_ui_Component* sender);
+static void inputdefiner_on_property_changed(InputDefiner*,
+	psy_Property* sender);
+static void inputdefiner_before_property_destroyed(InputDefiner*,
+	psy_Property* sender);
 
 /* vtable */
 static psy_ui_ComponentVtable vtable;
@@ -181,6 +185,7 @@ void inputdefiner_init(InputDefiner* self, psy_ui_Component* parent)
 
 	psy_ui_component_init(&self->component, parent, NULL);
 	vtable_init(self);
+	self->property = NULL;
 	psy_ui_component_set_style_type_focus(inputdefiner_base(self),
 		STYLE_INPUTDEFINER_FOCUS);
 	psy_ui_component_set_tab_index(inputdefiner_base(self), 0);
@@ -206,6 +211,9 @@ void inputdefiner_on_destroyed(InputDefiner* self)
 
 	psy_signal_dispose(&self->signal_accept);	
 	keynames_release();
+	if (self->property) {
+		psy_property_disconnect(self->property, self);
+	}
 }
 
 InputDefiner* inputdefiner_alloc(void)
@@ -223,6 +231,21 @@ InputDefiner* inputdefiner_allocinit(psy_ui_Component* parent)
 		psy_ui_component_deallocate_after_destroyed(&rv->component);
 	}
 	return rv;
+}
+
+void inputdefiner_data_exchange(InputDefiner* self, psy_Property* property)
+{
+	assert(self);
+	assert(property);
+
+	self->property = property;
+	if (property) {
+		inputdefiner_on_property_changed(self, property);
+		psy_property_connect(property, self,
+			inputdefiner_on_property_changed);
+		psy_signal_connect(&self->property->before_destroyed, self,
+			inputdefiner_before_property_destroyed);
+	}
 }
 
 void inputdefiner_set_input(InputDefiner* self, uint32_t input)
@@ -351,6 +374,10 @@ void inputdefiner_on_focus_lost(InputDefiner* self)
 	super_vtable.on_focuslost(&self->component);
 	if (self->changed) {
 		self->changed = FALSE;
+		if (self->property) {
+			psy_property_set_item_int(self->property,
+				inputdefiner_input(self));			
+		}
 		psy_signal_emit(&self->signal_accept, self, 0);
 	}
 }
@@ -358,4 +385,17 @@ void inputdefiner_on_focus_lost(InputDefiner* self)
 void inputdefiner_on_clear(InputDefiner* self, psy_ui_Component* sender)
 {
 	inputdefiner_set_input(self, 0);
+}
+
+void inputdefiner_on_property_changed(InputDefiner* self, psy_Property* sender)
+{
+	inputdefiner_set_input(self, (uint32_t)psy_property_item_int(
+		self->property));
+}
+
+void inputdefiner_before_property_destroyed(InputDefiner* self, psy_Property* sender)
+{
+	assert(self);
+
+	self->property = NULL;
 }

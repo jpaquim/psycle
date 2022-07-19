@@ -297,7 +297,7 @@ psy_ui_Size psy_ui_component_frame_size(psy_ui_Component*);
 psy_ui_Component* psy_ui_component_at(psy_ui_Component*, uintptr_t index);
 psy_ui_Component* psy_ui_component_intersect(psy_ui_Component*, psy_ui_RealPoint,
 	uintptr_t* index);
-void psy_ui_component_setfont(psy_ui_Component*, const psy_ui_Font*);
+void psy_ui_component_set_font(psy_ui_Component*, const psy_ui_Font*);
 void psy_ui_component_set_font_info(psy_ui_Component*, psy_ui_FontInfo);
 const psy_ui_Font* psy_ui_component_font(const psy_ui_Component*);
 void psy_ui_component_init_base(psy_ui_Component*);

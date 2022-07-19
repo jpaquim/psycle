@@ -48,6 +48,8 @@ typedef struct InputDefiner {
 	uint32_t old_input;
 	int regular_key;
 	bool changed;
+	/* references */
+	psy_Property* property;
 } InputDefiner;
 
 void inputdefiner_init(InputDefiner*, psy_ui_Component* parent);
@@ -55,6 +57,7 @@ void inputdefiner_init(InputDefiner*, psy_ui_Component* parent);
 InputDefiner* inputdefiner_alloc(void);
 InputDefiner* inputdefiner_allocinit(psy_ui_Component* parent);
 
+void inputdefiner_data_exchange(InputDefiner*, psy_Property*);
 void inputdefiner_set_input(InputDefiner*, uint32_t input);
 
 INLINE unsigned int inputdefiner_input(const InputDefiner* self)

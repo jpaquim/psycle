@@ -70,6 +70,7 @@ void psy_ui_tab_init(psy_ui_Tab* self, psy_ui_Component* parent,
 	self->text = psy_strdup(text);
 	self->translation = NULL;
 	self->prevent_translation = FALSE;
+	self->key = psy_strdup("");
 	psy_strreset(&self->translation, psy_ui_translate(text));
 	self->istoggle = FALSE;
 	self->mode = psy_ui_TABMODE_SINGLESEL;
@@ -108,11 +109,13 @@ void psy_ui_tab_on_destroyed(psy_ui_Tab* self)
 	self->text = NULL;
 	free(self->translation);
 	self->translation = NULL;
+	free(self->key);
+	self->key = NULL;
 	psy_ui_bitmap_dispose(&self->bitmapicon);
 	psy_signal_dispose(&self->signal_clicked);
 }
 
-void psy_ui_tab_settext(psy_ui_Tab* self, const char* text)
+void psy_ui_tab_set_text(psy_ui_Tab* self, const char* text)
 {
 	assert(self);
 
@@ -125,7 +128,14 @@ void psy_ui_tab_settext(psy_ui_Tab* self, const char* text)
 	}
 }
 
-void psy_ui_tab_setmode(psy_ui_Tab* self, TabMode mode)
+void psy_ui_tab_set_key(psy_ui_Tab* self, const char* text)
+{
+	assert(self);
+
+	psy_strreset(&self->key, text);	
+}
+
+void psy_ui_tab_set_mode(psy_ui_Tab* self, TabMode mode)
 {
 	self->mode = mode;	
 	if (mode == psy_ui_TABMODE_LABEL) {
@@ -139,7 +149,7 @@ void psy_ui_tab_setmode(psy_ui_Tab* self, TabMode mode)
 	}
 }
 
-void psy_ui_tab_preventtranslation(psy_ui_Tab* self)
+void psy_ui_tab_prevent_translation(psy_ui_Tab* self)
 {
 	self->prevent_translation = TRUE;
 	free(self->translation);
@@ -341,7 +351,7 @@ void psy_ui_tabbar_set_tab_align(psy_ui_TabBar* self, psy_ui_AlignType align)
 	psy_list_free(q);	
 }
 
-void psy_ui_tabbar_preventtranslation(psy_ui_TabBar* self)
+void psy_ui_tabbar_prevent_translation(psy_ui_TabBar* self)
 {
 	self->prevent_translation = TRUE;
 }
@@ -401,7 +411,7 @@ psy_ui_Tab* psy_ui_tabbar_append(psy_ui_TabBar* self, const char* label,
 	if (rv) {
 		psy_ui_tab_set_target_id(rv, target_id);
 		if (self->prevent_translation) {
-			psy_ui_tab_preventtranslation(rv);
+			psy_ui_tab_prevent_translation(rv);
 		}
 		psy_ui_tab_load_resource(rv, lightresourceid, darkresourceid,
 			transparency);
@@ -435,7 +445,7 @@ void psy_ui_tabbar_clear(psy_ui_TabBar* self)
 	self->num_tabs = 0;
 }
 
-void psy_ui_tabbar_settabmode(psy_ui_TabBar* self, uintptr_t tabindex,
+void psy_ui_tabbar_set_tab_mode(psy_ui_TabBar* self, uintptr_t tabindex,
 	TabMode mode)
 {
 	psy_ui_Tab* tab;
@@ -444,7 +454,7 @@ void psy_ui_tabbar_settabmode(psy_ui_TabBar* self, uintptr_t tabindex,
 
 	tab = psy_ui_tabbar_tab(self, tabindex);
 	if (tab) {
-		psy_ui_tab_setmode(tab, mode);
+		psy_ui_tab_set_mode(tab, mode);
 	}
 }
 

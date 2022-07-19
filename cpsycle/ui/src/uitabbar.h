@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #ifndef psy_ui_TABBAR_H
@@ -51,6 +51,7 @@ typedef struct psy_ui_Tab {
 	/* internal */
 	char* text;
 	char* translation;
+	char* key;
 	TabMode mode;		
 	bool istoggle;	
 	psy_ui_TabCheckState checkstate;
@@ -71,9 +72,25 @@ psy_ui_Tab* psy_ui_tab_alloc(void);
 psy_ui_Tab* psy_ui_tab_allocinit(psy_ui_Component* parent,
 	const char* text, uintptr_t index);
 
-void psy_ui_tab_settext(psy_ui_Tab*, const char* text);
-void psy_ui_tab_setmode(psy_ui_Tab*, TabMode);
-void psy_ui_tab_preventtranslation(psy_ui_Tab*);
+void psy_ui_tab_set_text(psy_ui_Tab*, const char* text);
+
+INLINE const char* psy_ui_tab_text(const psy_ui_Tab* self)
+{
+	assert(self);
+
+	return self->text;
+}
+
+void psy_ui_tab_set_key(psy_ui_Tab*, const char* key);
+
+INLINE const char* psy_ui_tab_key(const psy_ui_Tab* self)
+{
+	assert(self);
+
+	return self->key;
+}
+void psy_ui_tab_set_mode(psy_ui_Tab*, TabMode);
+void psy_ui_tab_prevent_translation(psy_ui_Tab*);
 void psy_ui_tab_load_resource(psy_ui_Tab*, uintptr_t lightresourceid,
 	uintptr_t darkresourceid, psy_ui_Colour);
 
@@ -108,15 +125,15 @@ typedef struct psy_ui_TabBar {
 void psy_ui_tabbar_init(psy_ui_TabBar*, psy_ui_Component* parent);
 
 psy_ui_Tab* psy_ui_tabbar_append(psy_ui_TabBar*, const char* label,
-	uintptr_t target_id, uintptr_t lightresourceid, uintptr_t darkresourceid,
-	psy_ui_Colour transparency);
+	uintptr_t target_id, uintptr_t light_resource_id,
+	uintptr_t dark_resource_id, psy_ui_Colour transparency);
 void psy_ui_tabbar_append_tabs(psy_ui_TabBar*, const char* label, ...);
 void psy_ui_tabbar_clear(psy_ui_TabBar*);
-void psy_ui_tabbar_select(psy_ui_TabBar*, uintptr_t tabindex);
-void psy_ui_tabbar_mark(psy_ui_TabBar*, uintptr_t tabindex);
+void psy_ui_tabbar_select(psy_ui_TabBar*, uintptr_t tab_index);
+void psy_ui_tabbar_mark(psy_ui_TabBar*, uintptr_t tab_index);
 void psy_ui_tabbar_unmark(psy_ui_TabBar*);
-void psy_ui_tabbar_set_tab_align(psy_ui_TabBar*, psy_ui_AlignType align);
-void psy_ui_tabbar_preventtranslation(psy_ui_TabBar*);
+void psy_ui_tabbar_set_tab_align(psy_ui_TabBar*, psy_ui_AlignType);
+void psy_ui_tabbar_prevent_translation(psy_ui_TabBar*);
 
 INLINE uintptr_t psy_ui_tabbar_selected(const psy_ui_TabBar* self)
 {	
@@ -125,9 +142,10 @@ INLINE uintptr_t psy_ui_tabbar_selected(const psy_ui_TabBar* self)
 	return self->selected;	
 }
 
-void psy_ui_tabbar_settabmode(psy_ui_TabBar*, uintptr_t tab, TabMode);
-psy_ui_Tab* psy_ui_tabbar_tab(psy_ui_TabBar*, uintptr_t tabindex);
-const psy_ui_Tab* psy_ui_tabbar_tab_const(const psy_ui_TabBar*, uintptr_t tabindex);
+void psy_ui_tabbar_set_tab_mode(psy_ui_TabBar*, uintptr_t tab, TabMode);
+psy_ui_Tab* psy_ui_tabbar_tab(psy_ui_TabBar*, uintptr_t tab_index);
+const psy_ui_Tab* psy_ui_tabbar_tab_const(const psy_ui_TabBar*,
+	uintptr_t tab_index);
 
 INLINE psy_ui_Component* psy_ui_tabbar_base(psy_ui_TabBar* self)
 {

@@ -35,6 +35,7 @@ void filebar_init(FileBar* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_ui_button_set_icon(&self->recentbutton, psy_ui_ICON_MORE);	
 	psy_ui_button_data_exchange(&self->recentbutton, generalconfig_property(
 		&self->workspace->config.general, "showplaylist"));
+	psy_ui_button_set_text(&self->recentbutton, "");
 	psy_ui_label_init_text(&self->header, filebar_base(self), "file.song");	
 	psy_ui_button_init_text_connect(&self->newbutton, filebar_base(self),
 		"file.new", self, filebar_onnewsong);

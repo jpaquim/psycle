@@ -675,6 +675,15 @@
     <ClCompile Include="src\bitmaps.c">
       <Filter>app</Filter>
     </ClCompile>
+    <ClCompile Include="src\fontbox.c">
+      <Filter>uicontrols</Filter>
+    </ClCompile>
+    <ClCompile Include="src\colourbox.c">
+      <Filter>uicontrols</Filter>
+    </ClCompile>
+    <ClCompile Include="src\filebox.c">
+      <Filter>uicontrols</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\languageconfig.h">
@@ -1252,6 +1261,15 @@
     </ClInclude>
     <ClInclude Include="src\bitmaps.h">
       <Filter>app</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fontbox.h">
+      <Filter>uicontrols</Filter>
+    </ClInclude>
+    <ClInclude Include="src\colourbox.h">
+      <Filter>uicontrols</Filter>
+    </ClInclude>
+    <ClInclude Include="src\filebox.h">
+      <Filter>uicontrols</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
