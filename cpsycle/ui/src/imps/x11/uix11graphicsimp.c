@@ -290,36 +290,26 @@ void psy_ui_x11_g_imp_textout(psy_ui_x11_GraphicsImp* self, double x, double y,
 		psy_ui_x11_g_imp_drawsolidrectangle(self, r,
 			self->textbackgroundcolor);		
 	}	
-	XftDrawStringUtf8(self->xfd, &self->textcolor, 
-		self->xftfont,
+	XftDrawStringUtf8(self->xfd, &self->textcolor, self->xftfont,
 		x - (int)(self->org.x),
-		y - (int)(self->org.y)
-		+ self->xftfont->ascent,
+		y - (int)(self->org.y) + self->xftfont->ascent,
 		(const FcChar8*)str,
-		(int) len);
+		(int)len);
 }
 
 void psy_ui_x11_g_imp_textoutrectangle(psy_ui_x11_GraphicsImp* self,
 	double x, double y, uintptr_t options,
 	psy_ui_RealRectangle r, const char* str, uintptr_t len)
-{
+{	
 	if (self->backgroundmode  == psy_ui_OPAQUE ||
-			((options & psy_ui_ETO_OPAQUE) == psy_ui_ETO_OPAQUE)) {
-		psy_ui_RealRectangle temp;
-		
-		temp.left = x - (int)(self->org.x);
-		temp.top = y - (int)(self->org.y);
-		temp.right = r.right;
-		temp.bottom = r.bottom;
+			((options & psy_ui_ETO_OPAQUE) == psy_ui_ETO_OPAQUE)) {		
 		psy_ui_x11_g_imp_drawsolidrectangle(self, r,
-			self->textbackgroundcolor);	
-	}
-	XftDrawStringUtf8(self->xfd, &self->textcolor, 
-		self->xftfont,
+			self->textbackgroundcolor);
+	}	
+	XftDrawStringUtf8(self->xfd, &self->textcolor, self->xftfont,
 		x - (int)(self->org.x),
-		y - (int)(self->org.y) +
-		self->xftfont->ascent,
-		(const FcChar8*)str, (int) len);
+		y - (int)(self->org.y) + self->xftfont->ascent,
+		(const FcChar8*)str, (int)len);
 //	RECT rect;
 //	int woptions = 0;
 
