@@ -136,7 +136,7 @@ const psy_ui_TextMetric* dev_textmetric(const psy_ui_x11_FontImp* self)
 	} else if (!self->tmcachevalid) {					
 		rv.tmHeight = self->hfont->height;		
 		rv.tmAscent = self->hfont->ascent;
-		rv.tmDescent = self->hfont->descent;
+		rv.tmDescent = self->hfont->descent;		
 		rv.tmMaxCharWidth = self->hfont->max_advance_width;
 		rv.tmAveCharWidth = self->hfont->max_advance_width / 4;
 		rv.tmInternalLeading = 0;

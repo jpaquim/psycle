@@ -32,7 +32,8 @@ static void seqviewtrack_textout_digit(SeqViewTrack*,
 static void seqviewtrack_draw_progress_bar(SeqViewTrack*,
 	psy_ui_Graphics*, psy_ui_RealPoint);
 void seqviewtrack_on_mouse_down(SeqViewTrack*, psy_ui_MouseEvent*);
-void seqviewtrack_on_mouse_doubleclick(SeqViewTrack*, psy_ui_MouseEvent*);
+void seqviewtrack_on_mouse_doubleclick(SeqViewTrack*,
+	psy_ui_MouseEvent*);
 static void seqviewtrack_on_sequence_select(SeqViewTrack*,
 	psy_audio_SequenceSelection*, psy_audio_OrderIndex*);
 static void seqviewtrack_on_sequence_deselect(SeqViewTrack*,
@@ -140,8 +141,8 @@ void seqviewtrack_on_draw(SeqViewTrack* self, psy_ui_Graphics* g)
 		
 	clip = psy_ui_graphics_cliprect(g);
 	tm = psy_ui_component_textmetric(&self->component);
-	lineheightpx = psy_max(1.0, floor(psy_ui_value_px(&self->state->line_height,
-		tm, NULL)));
+	lineheightpx = psy_max(1.0, psy_ui_value_px(
+		&self->state->line_height, tm, NULL));
 	self->state->colwidth = floor(tm->tmAveCharWidth * 1.4);	
 	self->state->digitsize = psy_ui_realsize_make(self->state->colwidth,
 		lineheightpx);
@@ -240,7 +241,6 @@ void seqviewtrack_draw_entry(SeqViewTrack* self, psy_ui_Graphics* g,
 		text[0] = '\0';
 		break;
 	}
-
 	if (sel) {
 		if (!rowplaying) {
 			bg = psy_ui_style(STYLE_SEQLISTVIEW_ITEM_SELECT)->background.colour;

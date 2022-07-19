@@ -21,11 +21,15 @@
 #include <X11/extensions/shape.h>
 #include <X11/extensions/Xdbe.h>
 #include <X11/keysym.h>
+/* fontconfig */
+#include <fontconfig/fontconfig.h>
 /* std */
 #include <stdlib.h>
 #include <stdio.h>
 
+
 static psy_ui_MouseEvent buttonpressevent;
+
 /* prototypes */
 static void psy_ui_x11app_initdbe(psy_ui_X11App*);
 static void psy_ui_x11app_dispose(psy_ui_X11App*);
@@ -36,8 +40,8 @@ static void psy_ui_x11app_sendevent(psy_ui_X11App*, psy_ui_Component*,
 	psy_ui_Event*);
 static psy_ui_Component* psy_ui_x11app_component(psy_ui_X11App*,
 	uintptr_t platformhandle);
-static void psy_ui_x11app_mousewheel(psy_ui_X11App*, psy_ui_x11_ComponentImp*,
-	XEvent*);
+static void psy_ui_x11app_mousewheel(psy_ui_X11App*,
+	psy_ui_x11_ComponentImp*, XEvent*);
 static int psy_ui_x11app_translate_x11button(int button);
 static int psy_ui_x11app_make_x11button(int button);
 static bool psy_ui_x11app_sendeventtoparent(psy_ui_X11App*,
@@ -48,10 +52,10 @@ static void psy_ui_x11app_update_keyevent_mods(psy_ui_X11App*,
 	psy_ui_KeyboardEvent*);
 static void psy_ui_x11app_update_mouseevent_mods(psy_ui_X11App*,
 	psy_ui_MouseEvent*);
-static XButtonEvent psy_ui_X11app_make_x11buttonevent(psy_ui_MouseEvent*,
-	Display*, int hwnd);	
-static void psy_ui_x11app_sendx11event(psy_ui_X11App*, int mask, int hwnd,
-	XEvent*);
+static XButtonEvent psy_ui_X11app_make_x11buttonevent(
+	psy_ui_MouseEvent*, Display*, int hwnd);	
+static void psy_ui_x11app_sendx11event(psy_ui_X11App*, int mask,
+	int hwnd, XEvent*);
 static void psy_ui_x11app_sync(psy_ui_X11App*);
 static psy_List* psy_ui_x11app_toplevel(psy_ui_X11App* self);
 static int errorHandler(Display *dpy, XErrorEvent *err);
@@ -61,7 +65,7 @@ static void psy_ui_x11app_register_native(psy_ui_X11App*,
 	uintptr_t handle, psy_ui_ComponentImp*, bool top_level);
 static void psy_ui_x11app_unregister_native(psy_ui_X11App*,
 	uintptr_t handle);
-static psy_List* psy_x11app_fonts(psy_ui_X11App*);
+static psy_List* psy_ui_x11app_fonts(psy_ui_X11App*);
 
 /* vtable */
 static psy_ui_AppImpVTable imp_vtable;
@@ -110,8 +114,10 @@ static void imp_vtable_init(psy_ui_X11App* self)
 	}
 	self->imp.vtable = &imp_vtable;
 }
+
 /* implementation */
-void psy_ui_x11app_init(psy_ui_X11App* self, psy_ui_App* app, void* instance)
+void psy_ui_x11app_init(psy_ui_X11App* self, psy_ui_App* app,
+	void* instance)
 {
 	static const char szAppClass[] = "PsycleApp";
 	static const char szComponentClass[] = "PsycleComponent";	
@@ -131,7 +137,8 @@ void psy_ui_x11app_init(psy_ui_X11App* self, psy_ui_App* app, void* instance)
 	psy_table_init(&self->selfmap);
 	psy_table_init(&self->winidmap);
 	psy_table_init(&self->toplevelmap);
-	self->wmDeleteMessage = XInternAtom(self->dpy, "WM_DELETE_WINDOW", False);
+	self->wmDeleteMessage = XInternAtom(self->dpy, "WM_DELETE_WINDOW",
+		False);
 	self->running = FALSE;
 	shape_extension = XShapeQueryExtension (self->dpy,
 		&shapeEventBase,
@@ -179,23 +186,24 @@ void psy_ui_x11app_initdbe(psy_ui_X11App* self)
 			return;
 		}
 		/*
-		** Choosing the first one, seems that they have all perflevel of 0,
-		** and the depth varies.
+		** Choosing the first one, seems that they have all perflevel
+		** of 0, and the depth varies.
 		*/
 		/* We know there's at least one */
 		xvisinfo_templ.visualid = info->visinfo[0].visual;
 		/*
-		** As far as I know, screens are densely packed, so we can assume that
-		** if at least 1 exists, it's screen 0.
+		** As far as I know, screens are densely packed, so we can
+		** assume that if at least 1 exists, it's screen 0.
 		*/
 		xvisinfo_templ.screen = 0;
 		xvisinfo_templ.depth = info->visinfo[0].depth;
 		XdbeFreeVisualInfo(info);
 		self->vinfo = XGetVisualInfo(self->dpy,
-			VisualIDMask|VisualScreenMask|VisualDepthMask, &xvisinfo_templ,
-			&matches);
+			VisualIDMask|VisualScreenMask|VisualDepthMask,
+			&xvisinfo_templ, &matches);
 		if (!self->vinfo || matches < 1) {
-			fprintf(stderr, "Couldn't match a Visual with double buffering\n");
+			fprintf(stderr,
+				"Couldn't match a Visual with double buffering\n");
 			return;
 		}		
 		self->visual = self->vinfo->visual;
@@ -298,7 +306,8 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 	case GraphicsExpose:
 		/* expose_window(self, imp,
 		   event->xgraphicsexpose.x, event->xgraphicsexpose.y,
-		   event->xgraphicsexpose.width, event->xgraphicsexpose.height); */
+		   event->xgraphicsexpose.width, event->xgraphicsexpose.height);
+		*/
 		break;
 	case Expose: {
 		const psy_ui_Border* border;
@@ -480,8 +489,10 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 			return 0;
 		}		
 		psy_ui_mouseevent_init_all(&ev,	
-				psy_ui_realpoint_make(event->xbutton.x, event->xbutton.y),
-				psy_ui_x11app_translate_x11button(event->xbutton.button),
+				psy_ui_realpoint_make(event->xbutton.x,
+					event->xbutton.y),
+				psy_ui_x11app_translate_x11button(
+					event->xbutton.button),
 				0, 0, 0);
 		ev.event.timestamp_ = (uintptr_t)event->xbutton.time;
 		psy_ui_event_settype(&ev.event,	psy_ui_MOUSEDOWN);
@@ -677,8 +688,8 @@ void psy_ui_x11app_onappdefaultschange(psy_ui_X11App* self)
 {
 }
 
-void psy_ui_x11app_sendevent(psy_ui_X11App* self, psy_ui_Component* component,
-	psy_ui_Event* ev)
+void psy_ui_x11app_sendevent(psy_ui_X11App* self,
+	psy_ui_Component* component, psy_ui_Event* ev)
 {
 	psy_ui_x11_ComponentImp* imp;
 	
@@ -711,16 +722,16 @@ void psy_ui_x11app_sendevent(psy_ui_X11App* self, psy_ui_Component* component,
 	case psy_ui_DBLCLICK : {				
 		XButtonEvent xbutton;		
 				
-		xbutton = psy_ui_X11app_make_x11buttonevent((psy_ui_MouseEvent*)ev,
-			self->dpy, imp->hwnd);		
+		xbutton = psy_ui_X11app_make_x11buttonevent(
+			(psy_ui_MouseEvent*)ev, self->dpy, imp->hwnd);		
 		psy_ui_x11app_sendx11event(self, ButtonPressMask,
 			imp->hwnd, (XEvent*)&xbutton);
 		break; }
 	case psy_ui_MOUSEUP: {		
 		XButtonEvent xbutton;		
 
-		xbutton = psy_ui_X11app_make_x11buttonevent((psy_ui_MouseEvent*)ev,
-			self->dpy, imp->hwnd);
+		xbutton = psy_ui_X11app_make_x11buttonevent(
+			(psy_ui_MouseEvent*)ev, self->dpy, imp->hwnd);
 		psy_ui_x11app_sendx11event(self, ButtonReleaseMask,
 			imp->hwnd, (XEvent*)&xbutton);
 		break; }		
@@ -781,7 +792,8 @@ XButtonEvent psy_ui_X11app_make_x11buttonevent(psy_ui_MouseEvent* ev,
 	rv.root         = DefaultRootWindow(dpy);
 	rv.time         = (Time)ev->event.timestamp_;
 	rv.same_screen  = True;
-	rv.button       = psy_ui_x11app_make_x11button(psy_ui_mouseevent_button(ev));
+	rv.button       = psy_ui_x11app_make_x11button(
+		psy_ui_mouseevent_button(ev));
 	rv.state        = 0;
 	rv.x            = psy_ui_mouseevent_offset(ev).x;
 	rv.y            = psy_ui_mouseevent_offset(ev).y;
@@ -801,7 +813,8 @@ psy_ui_Component* psy_ui_x11app_component(psy_ui_X11App* self,
 {	
 	psy_ui_x11_ComponentImp* imp;
 	
-	imp = (psy_ui_x11_ComponentImp*)psy_table_at(&self->selfmap, handle);
+	imp = (psy_ui_x11_ComponentImp*)psy_table_at(&self->selfmap,
+		handle);
 	if (imp) {
 		return imp->component;
 	}
@@ -853,10 +866,48 @@ void psy_ui_x11app_unregister_native(psy_ui_X11App* self,
 	psy_table_remove(&self->toplevelmap, handle);
 }
 
-psy_List* psy_x11app_fonts(psy_ui_X11App* self)
+psy_List* psy_ui_x11app_fonts(psy_ui_X11App* self)
 {
-	/* todo */
-	return NULL;
+	psy_List* rv;    
+    int	j;
+    FcObjectSet *os = 0;
+    FcFontSet *fs;
+    FcPattern *pat;    
+        
+	rv = NULL;
+	// if (!FcInit ())
+    // {
+	//	 fprintf (stderr, "Can't init font config library\n");
+	//	 return NULL;
+    // }    
+	pat = FcPatternCreate();    
+    fs = FcFontList(0, pat, os);
+    if (os) {		
+		FcObjectSetDestroy(os);
+	}    
+	FcPatternDestroy(pat);	
+	for (j = 0; j < fs->nfont; j++) {	    
+		FcChar8 *file;
+		
+		if (FcPatternGetString(fs->fonts[j], FC_FAMILY, 0, &file) ==
+				FcResultMatch) {				
+		    // printf ("%s: ", file);
+		    psy_ui_FontInfo* fontinfo;
+		
+			fontinfo = (psy_ui_FontInfo*)malloc(sizeof(
+				psy_ui_FontInfo));
+			psy_ui_fontinfo_init(fontinfo, file, 18);
+			psy_list_append(&rv, fontinfo);
+		}		
+    }
+    if (fs) {
+		int	nfont;
+		
+		nfont = fs->nfont;
+		FcFontSetDestroy(fs);
+    }
+    // FcFini();    
+	return rv;
 }
 
 #endif /* PSYCLE_TK_X11 */
