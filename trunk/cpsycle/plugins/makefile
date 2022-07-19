@@ -43,10 +43,20 @@ PLUGDIRS :=\
 			yezar_freeverb/src\
 			zephod_super_fm/src
 SUBDIRS := $(HELPERDIRS) $(PLUGDIRS)
+OUT_DIR := ./build
 
-all: $(SUBDIRS)
+MKDIR_P = mkdir -p
+
+.PHONY: directories
+
+all: directories $(SUBDIRS)
 $(SUBDIRS):
 	$(MAKE) -C $@
+
+directories: ${OUT_DIR}
+
+${OUT_DIR}:
+	${MKDIR_P} ${OUT_DIR}
 
 .PHONY: all $(SUBDIRS)
 
