@@ -393,7 +393,7 @@ void plugineditor_update_font(PluginEditor* self)
 	psy_ui_fontinfo_init(&fontinfo, "Consolas", 16);
 	fontinfo.lfHeight = (int32_t)((double)fontinfo.lfHeight * zoomrate);
 	psy_ui_font_init(&font, &fontinfo);
-	psy_ui_component_setfont(&self->editor.textarea.pane.component, &font);
+	psy_ui_component_set_font(&self->editor.textarea.pane.component, &font);
 	psy_ui_font_dispose(&font);	
 	if (psy_ui_component_visible(&self->component)) {
 		psy_ui_component_align_full(&self->component);

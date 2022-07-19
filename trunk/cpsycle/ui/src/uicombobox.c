@@ -12,6 +12,7 @@
 /* platform */
 #include "../../detail/portable.h"
 
+
 /* prototypes */
 static void psy_ui_combobox_on_destroyed(psy_ui_ComboBox*);
 static void psy_ui_combobox_on_property_changed(psy_ui_ComboBox*,
@@ -25,10 +26,10 @@ static void psy_ui_combobox_on_less(psy_ui_ComboBox*, psy_ui_Button* sender);
 static void psy_ui_combobox_on_more(psy_ui_ComboBox*, psy_ui_Button* sender);
 static void psy_ui_combobox_on_expand(psy_ui_ComboBox*, psy_ui_Button* sender,
 	psy_ui_MouseEvent*);
-static void psy_ui_combobox_ontextfield(psy_ui_ComboBox*, psy_ui_Label* sender,
+static void psy_ui_combobox_on_text_field(psy_ui_ComboBox*, psy_ui_Label* sender,
 	psy_ui_MouseEvent*);
 static void psy_ui_combobox_expand(psy_ui_ComboBox*);
-static void psy_ui_combobox_onmousewheel(psy_ui_ComboBox*, psy_ui_MouseEvent*);
+static void psy_ui_combobox_on_mouse_wheel(psy_ui_ComboBox*, psy_ui_MouseEvent*);
 
 /* vtable */
 static psy_ui_ComponentVtable vtable;
@@ -43,7 +44,7 @@ static void vtable_init(psy_ui_ComboBox* self)
 			psy_ui_combobox_on_destroyed;
 		vtable.onmousewheel =
 			(psy_ui_fp_component_on_mouse_event)
-			psy_ui_combobox_onmousewheel;
+			psy_ui_combobox_on_mouse_wheel;
 		vtable_initialized = TRUE;
 	}
 	self->component.vtable = &vtable;
@@ -82,7 +83,7 @@ void psy_ui_combobox_init(psy_ui_ComboBox* self, psy_ui_Component* parent)
 		psy_ui_ALIGN_LEFT);
 	psy_ui_label_set_char_number(&self->textfield, 10.0);
 	psy_signal_connect(&psy_ui_label_base(&self->textfield)->signal_mousedown,
-		self, psy_ui_combobox_ontextfield);
+		self, psy_ui_combobox_on_text_field);
 	/* less */
 	psy_ui_button_init_connect(&self->less, &self->component,
 		self, psy_ui_combobox_on_less);
@@ -187,6 +188,13 @@ void psy_ui_combobox_text(psy_ui_ComboBox* self, char* text)
 
 	psy_ui_listbox_text(&self->listbox, text,
 		psy_ui_listbox_cursel(&self->listbox));
+}
+
+void psy_ui_combobox_text_at(psy_ui_ComboBox* self, char* text, intptr_t index)
+{
+	assert(self);
+
+	psy_ui_listbox_text(&self->listbox, text, index);
 }
 
 intptr_t psy_ui_combobox_count(const psy_ui_ComboBox* self)
@@ -316,7 +324,7 @@ void psy_ui_combobox_on_more(psy_ui_ComboBox* self, psy_ui_Button* sender)
 	}
 }
 
-void psy_ui_combobox_ontextfield(psy_ui_ComboBox* self, psy_ui_Label* sender,
+void psy_ui_combobox_on_text_field(psy_ui_ComboBox* self, psy_ui_Label* sender,
 	psy_ui_MouseEvent* ev)
 {
 	assert(self);
@@ -343,7 +351,7 @@ void psy_ui_combobox_expand(psy_ui_ComboBox* self)
 	}
 }
 
-void psy_ui_combobox_onmousewheel(psy_ui_ComboBox* self, psy_ui_MouseEvent* ev)
+void psy_ui_combobox_on_mouse_wheel(psy_ui_ComboBox* self, psy_ui_MouseEvent* ev)
 {
 	assert(self);
 

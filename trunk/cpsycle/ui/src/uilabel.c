@@ -73,6 +73,7 @@ void psy_ui_label_init(psy_ui_Label* self, psy_ui_Component* parent)
 	self->fadeoutcounter = 0;
 	self->fadeout = FALSE;
 	self->property = NULL;
+	self->property_display_mode = psy_ui_PROPERTY_MODE_VALUE;
 	psy_ui_textformat_init(&self->format);
 	psy_ui_textformat_set_alignment(&self->format, psy_ui_textalignment_make(
 		psy_ui_ALIGNMENT_CENTER_VERTICAL | psy_ui_ALIGNMENT_LEFT));
@@ -126,14 +127,23 @@ void psy_ui_label_on_language_changed(psy_ui_Label* self)
 {
 	assert(self);
 
-	psy_strreset(&self->translation, psy_ui_translate(self->text));
-	psy_ui_textformat_clear(&self->format);
-	psy_ui_component_invalidate(psy_ui_label_base(self));	
+	if (self->translate) {
+		if (self->property && (self->property->item.translate ||
+				self->property_display_mode == psy_ui_PROPERTY_MODE_RANGE)) {
+			psy_ui_label_on_property_changed(self, self->property);
+		} else {
+			psy_strreset(&self->translation, psy_ui_translate(self->text));				
+			psy_ui_textformat_clear(&self->format);
+			psy_ui_component_invalidate(psy_ui_label_base(self));
+		}		
+	}
 }
 
-void psy_ui_label_data_exchange(psy_ui_Label* self, psy_Property* property)
+void psy_ui_label_data_exchange(psy_ui_Label* self, psy_Property* property,
+	psy_ui_PropertyDisplayMode mode)
 {
 	self->property = property;
+	self->property_display_mode = mode;
 	if (self->property) {
 		psy_ui_label_on_property_changed(self, self->property);
 		psy_property_connect(self->property, self,
@@ -145,41 +155,56 @@ void psy_ui_label_data_exchange(psy_ui_Label* self, psy_Property* property)
 
 void psy_ui_label_on_property_changed(psy_ui_Label* self, psy_Property* sender)
 {
-	if (psy_property_is_font(self->property)) {		
-		char str[128];
-		psy_ui_FontInfo fontinfo;
-		psy_ui_Font font;
-		int pt;
-		const psy_ui_TextMetric* tm;
+	if (self->property_display_mode == psy_ui_PROPERTY_MODE_VALUE) {
+		if (psy_property_is_font(self->property)) {
+			char str[128];
+			psy_ui_FontInfo fontinfo;
+			psy_ui_Font font;
+			int pt;
+			const psy_ui_TextMetric* tm;
 
-		psy_ui_fontinfo_init_string(&fontinfo,
-			psy_property_item_str(self->property));
-		psy_ui_font_init(&font, &fontinfo);
-		tm = psy_ui_font_textmetric(&font);
-		if (fontinfo.lfHeight < 0) {
-			pt = ((tm->tmHeight - tm->tmInternalLeading) * 72) /
-				psy_ui_logpixelsy();
-		} else {
-			pt = tm->tmHeight;
+			psy_ui_fontinfo_init_string(&fontinfo,
+				psy_property_item_str(self->property));
+			psy_ui_font_init(&font, &fontinfo);
+			tm = psy_ui_font_textmetric(&font);
+			if (fontinfo.lfHeight < 0) {
+				pt = ((tm->tmHeight - tm->tmInternalLeading) * 72) /
+					psy_ui_logpixelsy();
+			}
+			else {
+				pt = tm->tmHeight;
+			}
+			psy_ui_font_dispose(&font);
+			tm = NULL;
+			psy_snprintf(str, 128, "%s %d pt", fontinfo.lfFaceName, (int)pt);
+			psy_ui_label_set_text(self, str);
 		}
-		psy_ui_font_dispose(&font);
-		tm = NULL;
-		psy_snprintf(str, 128, "%s %d pt", fontinfo.lfFaceName, (int)pt);			
-		psy_ui_label_set_text(self, str);		
-	} else if (psy_property_is_int(sender)) {
-		char text[64];
+		else if (psy_property_is_int(sender)) {
+			char text[64];
 
-		psy_snprintf(text, 40,
-			(psy_property_is_hex(self->property)) ? "%X" : "%d",
-			(int)psy_property_item_int(self->property));
-		psy_ui_label_set_text(self, text);
-	} else if (psy_property_is_double(sender)) {
-		char text[64];
+			psy_snprintf(text, 40,
+				(psy_property_is_hex(self->property)) ? "%X" : "%d",
+				(int)psy_property_item_int(self->property));
+			psy_ui_label_set_text(self, text);
+		}
+		else if (psy_property_is_double(sender)) {
+			char text[64];
 
-		psy_snprintf(text, 40, "%f", psy_property_item_double(self->property));
-		psy_ui_label_set_text(self, text);
-	} else if (psy_property_is_string(sender)) {
-		psy_ui_label_set_text(self, psy_property_item_str(sender));
+			psy_snprintf(text, 40, "%f", psy_property_item_double(self->property));
+			psy_ui_label_set_text(self, text);
+		}
+		else if (psy_property_is_string(sender)) {
+			psy_ui_label_set_text(self, psy_property_item_str(sender));
+		}
+	} else if (self->property_display_mode == psy_ui_PROPERTY_MODE_RANGE) {		
+		char text[256];
+			
+		psy_snprintf(text, 256, "%s %d %s %d",
+			psy_ui_translate("settings.from"),
+			self->property->item.min,
+			psy_ui_translate("settings.to"),
+			self->property->item.max);		
+		psy_ui_label_set_text(self, text);		
 	}
 }
 

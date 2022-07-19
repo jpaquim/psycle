@@ -512,7 +512,8 @@ void psy_ui_button_data_exchange(psy_ui_Button* self, psy_Property* property)
 
 	self->property = property;
 	if (property) {		
-		psy_ui_button_on_property_changed(self, property);		
+		psy_ui_button_on_property_changed(self, property);	
+		psy_ui_button_set_text(self, psy_property_text(property));
 		psy_property_connect(property, self,
 			psy_ui_button_on_property_changed);
 		psy_signal_connect(&self->property->before_destroyed, self,

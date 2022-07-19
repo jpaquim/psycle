@@ -41,7 +41,13 @@ void psy_ui_fontinfo_init_string(psy_ui_FontInfo* self, const char* text)
 			} else if (c == 1) {
 				self->lfHeight = atoi(token);
 			} else {
-				break;
+				if (strcmp(token, "underline") == 0) {
+					self->lfUnderline = 1;
+				} else if (strcmp(token, "italic") == 0) {
+					self->lfItalic = 1;
+				} else {
+					break;
+				}
 			}
 			++c;
 			token = strtok(NULL, ";");
@@ -52,7 +58,13 @@ void psy_ui_fontinfo_init_string(psy_ui_FontInfo* self, const char* text)
 void psy_ui_fontinfo_string(const psy_ui_FontInfo* self, char* rv,
 	uintptr_t max_len)
 {
-	psy_snprintf(rv, max_len, "%s;%g", self->lfFaceName, (float)self->lfHeight);
+	psy_snprintf(rv, max_len, "%s;%g%s%s", self->lfFaceName, (float)self->lfHeight, 
+		(self->lfItalic)
+		? ";italic"
+		: "",
+		(self->lfUnderline)
+		? ";underline"
+		: "");
 }
 
 /* psy_ui_Font */

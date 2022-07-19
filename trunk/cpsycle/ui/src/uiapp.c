@@ -285,7 +285,7 @@ void psy_ui_app_on_language_changed(psy_ui_App* self, psy_Translator*
 	t = NULL;
 }
 
-void psy_ui_app_setzoomrate(psy_ui_App* self, double rate)
+void psy_ui_app_set_zoom_rate(psy_ui_App* self, double rate)
 {
 	psy_ui_appzoom_setrate(&self->zoom, rate);
 	psy_ui_app_change_default_font_size(self,
@@ -433,6 +433,10 @@ static void psy_ui_appimp_sendevent(psy_ui_AppImp* self,
 	psy_ui_Component* component, psy_ui_Event* ev)
 {
 }
+static psy_List* psy_ui_appimp_fonts(psy_ui_AppImp* self)
+{
+	return NULL;
+}
 
 static void psy_ui_appimp_register_native(psy_ui_AppImp* self,
 		uintptr_t handle, psy_ui_ComponentImp* imp, bool top_level)
@@ -455,6 +459,13 @@ static psy_List* psy_ui_appimp_toplevel(psy_ui_AppImp* self)
 	return NULL;
 }
 
+psy_List* psy_ui_app_fonts(psy_ui_App* self)
+{
+	assert(self->imp);
+
+	return self->imp->vtable->dev_fonts(self->imp);
+}
+
 static psy_ui_AppImpVTable imp_vtable;
 static bool imp_vtable_initialized = FALSE;
 
@@ -473,6 +484,7 @@ static void imp_vtable_init(void)
 		imp_vtable.dev_toplevel = psy_ui_appimp_toplevel;
 		imp_vtable.dev_register_native = psy_ui_appimp_register_native;
 		imp_vtable.dev_unregister_native = psy_ui_appimp_unregister_native;
+		imp_vtable.dev_fonts = psy_ui_appimp_fonts;
 		imp_vtable_initialized = TRUE;
 	}
 }

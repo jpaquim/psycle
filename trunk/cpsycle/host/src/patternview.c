@@ -22,6 +22,7 @@ static void patternview_connect_song(PatternView*);
 static void patternview_on_configure(PatternView*, PatternViewConfig*,
 	psy_Property*);
 static void patternview_on_zoom(PatternView*, psy_Property*);
+static void patternview_on_font(PatternView*, psy_Property*);
 static void patternview_on_select_display(PatternView*, psy_Property*);
 static void patternview_on_follow_song(PatternView*, psy_Property* sender);
 static void patternview_on_focus(PatternView*);
@@ -165,6 +166,8 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 		"patterndisplay", self, patternview_on_select_display);
 	patternviewconfig_connect(pvconfig,
 		"zoom", self, patternview_on_zoom);
+	patternviewconfig_connect(pvconfig,
+		"font", self, patternview_on_font);
 	keyboardmiscconfig_connect(self->pvstate.keymiscconfig, "followsong",
 		self, patternview_on_follow_song);
 	patternview_on_configure(self, self->pvstate.patconfig, NULL);
@@ -279,6 +282,11 @@ void patternview_on_configure(PatternView* self, PatternViewConfig* config,
 	patternview_select_display(self, (PatternDisplayMode)
 		patternviewconfig_pattern_display(config));
 	psy_ui_component_align(&self->component);	
+}
+
+void patternview_on_font(PatternView* self, psy_Property* sender)
+{
+	patternview_update_font(self);
 }
 
 void patternview_on_zoom(PatternView* self, psy_Property* sender)
@@ -437,7 +445,7 @@ void patternview_update_font(PatternView* self)
 		: 1.0);
 	fontinfo = patternviewconfig_font_info(self->pvstate.patconfig, zoomrate);	
 	psy_ui_font_init(&font, &fontinfo);
-	psy_ui_component_setfont(&self->component, &font);	
+	psy_ui_component_set_font(&self->component, &font);	
 	psy_ui_font_dispose(&font);		
 	keyboardstate_update_metrics(&self->pianoroll.keyboardstate,
 		psy_ui_component_textmetric(&self->component));

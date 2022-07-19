@@ -93,6 +93,7 @@ void psy_propertyitem_copy(psy_PropertyItem*, const psy_PropertyItem* source);
 typedef struct psy_Property {
 	psy_Signal changed;
 	psy_Signal rebuild;
+	psy_Signal scrollto;	
 	psy_Signal before_destroyed;
 	psy_PropertyItem item;
 	psy_List* children;
@@ -229,13 +230,14 @@ psy_Property* psy_property_connect_children(psy_Property*, int recursive,
 	void* context, void* fp);
 void psy_property_notify_all(psy_Property*);
 void psy_property_rebuild(psy_Property*);
+void psy_property_scrollto(psy_Property*);
 /* Value */
 psy_Property* psy_property_set_item_bool(psy_Property*, bool value);
 bool psy_property_item_bool(const psy_Property*);
 psy_Property* psy_property_set_item_int(psy_Property*, intptr_t value);
 intptr_t psy_property_item_int(const psy_Property*);
 bool psy_property_int_valid(const psy_Property*, intptr_t value);
-bool psy_property_int_hasrange(const psy_Property*);
+bool psy_property_int_has_range(const psy_Property*);
 psy_Property* psy_property_set_item_double(psy_Property*, double value);
 double psy_property_item_double(const psy_Property*);
 psy_Property* psy_property_set_item_str(psy_Property*, const char* str);

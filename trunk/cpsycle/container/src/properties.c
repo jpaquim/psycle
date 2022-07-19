@@ -156,7 +156,8 @@ void psy_property_init_type(psy_Property* self, const char* key,
 
 	psy_signal_init(&self->changed);
 	psy_signal_init(&self->rebuild);
-	psy_signal_init(&self->before_destroyed);
+	psy_signal_init(&self->scrollto);
+	psy_signal_init(&self->before_destroyed);	
 	psy_propertyitem_init(&self->item);	
 	psy_strreset(&self->item.key, key);	
 	self->item.typ = typ;
@@ -179,6 +180,7 @@ void psy_property_dispose(psy_Property* self)
 	psy_signal_dispose(&self->before_destroyed);
 	psy_signal_dispose(&self->rebuild);
 	psy_signal_dispose(&self->changed);
+	psy_signal_dispose(&self->scrollto);
 }
 
 psy_Property* psy_property_allocinit_key(const char* key)
@@ -214,6 +216,7 @@ psy_Property* psy_property_clone(const psy_Property* self)
 		psy_signal_init(&rv->before_destroyed);
 		psy_signal_init(&rv->changed);
 		psy_signal_init(&rv->rebuild);
+		psy_signal_init(&rv->scrollto);
 		psy_propertyitem_init(&rv->item);
 		psy_propertyitem_copy(&rv->item, &self->item);
 		if (self->children) {
@@ -534,8 +537,10 @@ psy_Property* psy_property_find(psy_Property* self, const char* key,
 	searchtyp = typ;
 	searchkey = key;
 	keyfound = 0;
-	psy_property_enumerate(self, self, (psy_PropertyCallback)
-		psy_property_onsearchenum);
+	if (psy_strlen(key) > 0) {
+		psy_property_enumerate(self, self, (psy_PropertyCallback)
+			psy_property_onsearchenum);
+	}
 	return keyfound;
 }
 
@@ -963,13 +968,13 @@ bool psy_property_int_valid(const psy_Property* self, intptr_t value)
 {
 	assert(self);
 
-	if (psy_property_int_hasrange(self)) {
+	if (psy_property_int_has_range(self)) {
 		return (value >= self->item.min) && (value <= self->item.max);
 	}
 	return TRUE;
 }
 
-bool psy_property_int_hasrange(const psy_Property* self)
+bool psy_property_int_has_range(const psy_Property* self)
 {
 	return !(self->item.min == 0 && self->item.max == 0);
 }
@@ -1488,6 +1493,13 @@ void psy_property_rebuild(psy_Property* self)
 	psy_signal_emit(&self->rebuild, self, 0);
 }
 
+void psy_property_scrollto(psy_Property* self)
+{
+	assert(self);
+
+	psy_signal_emit(&self->scrollto, self, 0);
+}
+
 psy_Property* psy_property_set_item_bool(psy_Property* self, bool value)
 {
 	assert(self);
@@ -1632,7 +1644,10 @@ psy_Property* psy_property_set_item_str(psy_Property* self, const char* str)
 	if (!self->item.readonly) {
 		if ((self->item.typ == PSY_PROPERTY_TYPE_STRING ||
 				self->item.typ == PSY_PROPERTY_TYPE_FONT)) {
-			psy_strreset(&self->item.value.s, str);
+			if (self->item.value.s == NULL || str == NULL || strcmp(str, self->item.value.s) != 0) {
+				psy_strreset(&self->item.value.s, str);
+				psy_signal_emit(&self->changed, self, 0);
+			}
 		} else {
 			self->item.typ = PSY_PROPERTY_TYPE_STRING;
 			self->item.value.s = psy_strdup(str);

@@ -705,7 +705,7 @@ void newmachinesectionspane_build_nav_sections(NewMachineSectionsPane* self)
 
 	selidx = psy_ui_tabbar_selected(&self->navsections);
 	psy_ui_tabbar_clear(&self->navsections);
-	psy_ui_tabbar_preventtranslation(&self->navsections);
+	psy_ui_tabbar_prevent_translation(&self->navsections);
 	self->newmachine->selectedsection = NULL;
 	p = psy_property_begin(self->workspace->plugincatcher.sections.sections);
 	for (; p != 0; p = p->next) {
@@ -759,7 +759,7 @@ void newmachinesectionspane_on_language_changed(NewMachineSectionsPane* self)
 
 	first = psy_ui_tabbar_tab(&self->navsections, 0);
 	if (first) {
-		psy_ui_tab_settext(first, psy_ui_translate("newmachine.favorites"));
+		psy_ui_tab_set_text(first, psy_ui_translate("newmachine.favorites"));
 	}
 }
 

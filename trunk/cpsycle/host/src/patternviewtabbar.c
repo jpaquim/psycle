@@ -56,7 +56,7 @@ void patternviewtabbar_init(PatternViewTabBar* self, psy_ui_Component* parent,
 		"patternview.horz", "patternview.properties", NULL);
 	tab = psy_ui_tabbar_tab(&self->tabbar, 2);
 	if (tab) {
-		psy_ui_tab_setmode(tab, psy_ui_TABMODE_LABEL);
+		psy_ui_tab_set_mode(tab, psy_ui_TABMODE_LABEL);
 	}
 	tab = psy_ui_tabbar_tab(&self->tabbar, 0);
 	if (tab) {

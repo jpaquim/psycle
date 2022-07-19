@@ -27,6 +27,7 @@
 #define _MAX_PATH 4096
 #endif
 
+/* prototypes */
 static void visualconfig_make(VisualConfig*, psy_Property*);
 static void visualconfig_load_control_skin(VisualConfig* self);
 static void visualconfig_on_set_app_theme(VisualConfig*, psy_Property* sender);
@@ -36,7 +37,9 @@ static void visualconfig_on_reset_control_skin(VisualConfig*, psy_Property* send
 static void visualconfig_on_load_control_skin(VisualConfig*, psy_Property* sender);
 static void visualconfig_on_draw_vu_meters(VisualConfig*, psy_Property* sender);
 static void visualconfig_on_set_default_font(VisualConfig*, psy_Property* sender);
+static void visualconfig_on_zoom(VisualConfig*, psy_Property* sender);
 
+/* implementation */
 void visualconfig_init(VisualConfig* self, psy_Property* parent,
 	psy_audio_Player* player)
 {
@@ -84,15 +87,13 @@ void visualconfig_make(VisualConfig* self, psy_Property* parent)
 		"settings.visual.default-font"),
 		PROPERTY_ID_DEFAULTFONT),
 		self, visualconfig_on_set_default_font);
-	psy_property_set_hint(psy_property_set_text(psy_property_append_double(
-		self->visual, "zoom", 1.0, 0.1, 4.0),
-		"settings.visual.zoom"),
-		PSY_PROPERTY_HINT_ZOOM);
-	self->apptheme =
-		psy_property_connect(psy_property_set_id(psy_property_set_text(
-			psy_property_append_choice(self->visual,
-				"apptheme", 1),
-			"settings.visual.apptheme"),
+	psy_property_connect(psy_property_set_hint(psy_property_set_text(
+		psy_property_append_double(self->visual, "zoom", 1.0, 0.1, 4.0),
+		"settings.visual.zoom"), PSY_PROPERTY_HINT_ZOOM), self,
+		visualconfig_on_zoom);
+	self->apptheme = psy_property_connect(psy_property_set_id(
+		psy_property_set_text(psy_property_append_choice(self->visual,
+			"apptheme", 1), "settings.visual.apptheme"),
 			PROPERTY_ID_APPTHEME),
 			self, visualconfig_on_set_app_theme);			
 	psy_property_set_text(
@@ -209,15 +210,6 @@ void visualconfig_set_default_font(VisualConfig* self, psy_Property* property)
 	}
 }
 
-bool visualconfig_hasproperty(const VisualConfig* self, psy_Property* property)
-{
-	assert(self);
-
-	assert(self->visual);
-
-	return psy_property_in_section(property, self->visual);
-}
-
 void visualconfig_on_load_skin(VisualConfig* self, psy_Property* sender)
 {
 	psy_ui_OpenDialog opendialog;
@@ -309,4 +301,31 @@ void visualconfig_on_draw_vu_meters(VisualConfig* self, psy_Property* sender)
 void visualconfig_on_set_default_font(VisualConfig* self, psy_Property* sender)
 {
 	visualconfig_set_default_font(self, sender);
+}
+
+void visualconfig_on_zoom(VisualConfig* self, psy_Property* sender)
+{
+	psy_ui_app_set_zoom_rate(psy_ui_app(), psy_property_item_double(sender));
+}
+
+bool visualconfig_connect(VisualConfig* self, const char* key, void* context,
+	void* fp)
+{
+	psy_Property* p;
+
+	assert(self);
+
+	p = visualconfig_property(self, key);
+	if (p) {
+		psy_property_connect(p, context, fp);
+		return TRUE;
+	}
+	return FALSE;
+}
+
+psy_Property* visualconfig_property(VisualConfig* self, const char* key)
+{
+	assert(self);
+
+	return psy_property_at(self->visual, key, PSY_PROPERTY_TYPE_NONE);
 }

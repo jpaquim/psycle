@@ -265,7 +265,7 @@ uintptr_t paramview_num_rows(const ParamView* self)
 	return 0;
 }
 
-void paramview_setzoom(ParamView* self, double zoomrate)
+void paramview_set_zoom(ParamView* self, double zoomrate)
 {
 	psy_ui_Font font;	
 	psy_ui_FontInfo fontinfo;
@@ -273,7 +273,7 @@ void paramview_setzoom(ParamView* self, double zoomrate)
 	fontinfo = self->fontinfo;
 	fontinfo.lfHeight = (int32_t)(self->fontinfo.lfHeight * zoomrate);
 	psy_ui_font_init(&font, &fontinfo);
-	psy_ui_component_setfont(&self->component, &font);
+	psy_ui_component_set_font(&self->component, &font);
 	psy_ui_font_dispose(&font);
 	self->sizechanged = 1;
 }

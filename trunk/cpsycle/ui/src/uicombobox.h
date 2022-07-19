@@ -68,6 +68,7 @@ void psy_ui_combobox_set_char_number(psy_ui_ComboBox*, double num);
 void psy_ui_combobox_setitemdata(psy_ui_ComboBox*, uintptr_t index, intptr_t data);
 intptr_t psy_ui_combobox_itemdata(psy_ui_ComboBox*, uintptr_t index);
 void psy_ui_combobox_text(psy_ui_ComboBox*, char* text);
+void psy_ui_combobox_text_at(psy_ui_ComboBox*, char* text, intptr_t index);
 intptr_t psy_ui_combobox_count(const psy_ui_ComboBox*);
 
 

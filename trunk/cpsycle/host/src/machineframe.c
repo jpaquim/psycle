@@ -509,7 +509,7 @@ void ondefaultfontchanged(MachineFrame* self, Workspace* sender)
 void machineframe_onzoomboxchanged(MachineFrame* self, ZoomBox* sender)
 {
 	if (self->paramview) {		
-		paramview_setzoom(self->paramview, sender->zoomrate);
+		paramview_set_zoom(self->paramview, sender->zoomrate);
 		machineframe_resize(self);
 	}
 }

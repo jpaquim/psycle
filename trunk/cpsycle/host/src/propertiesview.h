@@ -25,8 +25,7 @@ extern "C" {
 struct PropertiesRenderLine;
 
 typedef struct PropertiesRenderState {
-	psy_ui_Size size_col0;
-	psy_ui_Size size_col2;
+	psy_ui_Size size_col0;	
 	uintptr_t numcols;	
 	uintptr_t mainsectionstyle;
 	uintptr_t mainsectionheaderstyle;
@@ -34,25 +33,22 @@ typedef struct PropertiesRenderState {
 	uintptr_t keystyle_hover;
 	uintptr_t linestyle_select;
 	bool do_build;
-	/* references */	
-	psy_Table sections;
+	/* references */		
 	struct PropertiesRenderLine* property_line_selected;
 	psy_ui_Component* view;
+	psy_ui_Component* renderer;
 } PropertiesRenderState;
 
-void propertiesrenderstate_init(PropertiesRenderState*, uintptr_t numcols, bool lazy);
+void propertiesrenderstate_init(PropertiesRenderState*, uintptr_t numcols,
+	bool lazy);
 void propertiesrenderstate_dispose(PropertiesRenderState*);
-
 
 /* PropertiesRenderLine */
 
 typedef struct PropertiesRenderLine {
 	/* inherits */
 	psy_ui_Component component;	
-	/* internal */
-	psy_ui_Label* label;	
-	InputDefiner* input_definer;	
-	psy_ui_Component* colour;
+	/* internal */		
 	uintptr_t level;
 	/* references */
 	psy_Property* property;
@@ -76,7 +72,7 @@ typedef struct PropertiesRenderer {
 	psy_Signal signal_selected;
 	/* internal */	
 	uintptr_t currlinestatecount;			
-	PropertiesRenderState state;	
+	PropertiesRenderState state;
 	/* references */
 	psy_Property* properties;	
 } PropertiesRenderer;
