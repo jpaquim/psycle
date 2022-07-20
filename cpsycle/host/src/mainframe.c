@@ -585,25 +585,26 @@ void mainframe_init_recent_view(MainFrame* self)
 }
 
 void mainframe_init_file_view(MainFrame* self)
-{	
-	/* ft2 style file load view */	
+{
+	/* ft2 style file load view */
 	fileview_init(&self->fileview, &self->pane);
 #if defined(DIVERSALIS__OS__MICROSOFT)	
-	fileview_setdirectory(&self->fileview,
+	fileview_set_directory(&self->fileview,
 		dirconfig_songs(&self->workspace.config.directories));
 #endif		
-	psy_ui_component_set_align(&self->fileview.component, psy_ui_ALIGN_LEFT);
+	psy_ui_component_set_align(fileview_base(&self->fileview),
+		psy_ui_ALIGN_LEFT);
+	psy_signal_connect(&self->fileview.save.signal_clicked, self,
+		mainframe_on_file_save_view);
 	psy_ui_component_hide(&self->fileview.component);
 	psy_signal_connect(&self->fileview.signal_selected,
 		self, mainframe_on_file_load);
 	if (keyboardmiscconfig_ft2fileexplorer(psycleconfig_misc(
-		workspace_conf(&self->workspace)))) {		
+		workspace_conf(&self->workspace)))) {
 		filebar_useft2fileexplorer(&self->filebar);
 	}
 	psy_signal_connect(&self->filebar.diskop.signal_clicked, self,
 		mainframe_on_disk_op);
-	psy_signal_connect(&self->fileview.save.signal_clicked, self,
-		mainframe_on_file_save_view);
 }
 
 void mainframe_init_sequence_view(MainFrame* self)
@@ -983,10 +984,10 @@ void mainframe_on_check_unsaved(MainFrame* self, ConfirmBox* sender,
 			} else if (mode == CONFIRM_LOAD) {
 				if (keyboardmiscconfig_ft2fileexplorer(psycleconfig_misc(
 					workspace_conf(&self->workspace)))) {
-					const char* path;
-					path = fileview_path(&self->fileview);
-					workspace_load_song(&self->workspace,
-						path,
+					char path[4096];
+					
+					fileview_filename(&self->fileview, path, 4096);
+					workspace_load_song(&self->workspace, path,
 						generalconfig_playsongafterload(psycleconfig_general(
 							workspace_conf(&self->workspace))));
 				} else {
@@ -1011,9 +1012,9 @@ void mainframe_on_check_unsaved(MainFrame* self, ConfirmBox* sender,
 			} else if (mode == CONFIRM_LOAD) {
 				if (keyboardmiscconfig_ft2fileexplorer(psycleconfig_misc(
 					workspace_conf(&self->workspace)))) {
-					const char* path;
+					char path[4096];
 
-					path = fileview_path(&self->fileview);
+					fileview_filename(&self->fileview, path, 4096);
 					workspace_load_song(&self->workspace,
 						path,
 						generalconfig_playsongafterload(psycleconfig_general(

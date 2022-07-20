@@ -98,7 +98,7 @@ void psy_audio_player_init(psy_audio_Player*, psy_audio_Song*,
 	void* systemhandle);
 void psy_audio_player_dispose(psy_audio_Player*);
 
-void psy_audio_player_setsong(psy_audio_Player*, psy_audio_Song*);
+void psy_audio_player_set_song(psy_audio_Player*, psy_audio_Song*);
 INLINE psy_audio_Song* psy_audio_player_song(psy_audio_Player* self)
 {
 	return self->song;

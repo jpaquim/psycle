@@ -52,7 +52,7 @@
 #endif
 
 #if defined(DIVERSALIS__OS__MICROSOFT)
-#define PSYCLE_SONGS_DEFAULT_DIR PSYCLE_USER_DIR "\\Songs"
+#define PSYCLE_SONGS_DEFAULT_DIR "C:\\Users\\Public\\Documents\\Psycle Songs"
 #define PSYCLE_SAMPLES_DEFAULT_DIR PSYCLE_USER_DIR "\\Samples"
 #define PSYCLE_PLUGINS32_DEFAULT_DIR PSYCLE_USER_DIR "\\PsyclePlugins"
 #define PSYCLE_PLUGINS64_DEFAULT_DIR PSYCLE_USER64_DIR "\\PsyclePlugins"

@@ -17,21 +17,21 @@
 /* FontBox */
 
 /* prototypes */
-static void filebox_on_destroyed(FileBox*);
-static void filebox_on_property_changed(FileBox*,
+static void fileedit_on_destroyed(FileEdit*);
+static void fileedit_on_property_changed(FileEdit*,
 	psy_Property* sender);
-static void filebox_before_property_destroyed(FileBox*, psy_Property* sender);
-static void filebox_on_dialog(FileBox*, psy_ui_Component* sender);
-static void filebox_on_edit_keydown(FileBox*, psy_ui_Component* sender,
+static void fileedit_before_property_destroyed(FileEdit*, psy_Property* sender);
+static void fileedit_on_dialog(FileEdit*, psy_ui_Component* sender);
+static void fileedit_on_edit_keydown(FileEdit*, psy_ui_Component* sender,
 	psy_ui_KeyboardEvent*);
-static void filebox_on_edit_reject(FileBox*, psy_ui_TextArea* sender);
+static void fileedit_on_edit_reject(FileEdit*, psy_ui_TextArea* sender);
 
 /* vtable */
 static psy_ui_ComponentVtable vtable;
 static psy_ui_ComponentVtable super_vtable;
 static bool vtable_initialized = FALSE;
 
-static void vtable_init(FileBox* self)
+static void vtable_init(FileEdit* self)
 {
 	assert(self);
 
@@ -40,14 +40,14 @@ static void vtable_init(FileBox* self)
 		super_vtable = *(self->component.vtable);
 		vtable.on_destroyed =
 			(psy_ui_fp_component_event)
-			filebox_on_destroyed;		
+			fileedit_on_destroyed;		
 		vtable_initialized = TRUE;
 	}
-	psy_ui_component_set_vtable(filebox_base(self), &vtable);
+	psy_ui_component_set_vtable(fileedit_base(self), &vtable);
 }
 
 /* implementation */
-void filebox_init(FileBox* self, psy_ui_Component* parent)
+void fileedit_init(FileEdit* self, psy_ui_Component* parent)
 {
 	assert(self);
 
@@ -59,19 +59,19 @@ void filebox_init(FileBox* self, psy_ui_Component* parent)
 		psy_ui_ALIGN_CLIENT);
 	psy_ui_textarea_enable_input_field(&self->edit);
 	psy_signal_connect(&self->edit.signal_reject, self,
-		filebox_on_edit_reject);
+		fileedit_on_edit_reject);
 	psy_signal_connect(&self->edit.component.signal_keydown, self,
-		filebox_on_edit_keydown);	
+		fileedit_on_edit_keydown);	
 	psy_ui_button_init(&self->dialog, &self->component);
 	psy_ui_component_set_align(psy_ui_button_base(&self->dialog),
 		psy_ui_ALIGN_RIGHT);
 	psy_ui_button_prevent_translation(&self->dialog);
 	psy_ui_button_set_text(&self->dialog, "...");
 	psy_signal_connect(&self->dialog.signal_clicked, self,
-		filebox_on_dialog);
+		fileedit_on_dialog);
 }
 
-void filebox_on_destroyed(FileBox* self)
+void fileedit_on_destroyed(FileEdit* self)
 {	
 	assert(self);
 
@@ -80,51 +80,51 @@ void filebox_on_destroyed(FileBox* self)
 	}
 }
 
-FileBox* filebox_alloc(void)
+FileEdit* fileedit_alloc(void)
 {
-	return (FileBox*)malloc(sizeof(FileBox));
+	return (FileEdit*)malloc(sizeof(FileEdit));
 }
 
-FileBox* filebox_allocinit(psy_ui_Component* parent)
+FileEdit* fileedit_allocinit(psy_ui_Component* parent)
 {
-	FileBox* rv;
+	FileEdit* rv;
 
-	rv = filebox_alloc();
+	rv = fileedit_alloc();
 	if (rv) {
-		filebox_init(rv, parent);
+		fileedit_init(rv, parent);
 		psy_ui_component_deallocate_after_destroyed(&rv->component);
 	}
 	return rv;
 }
 
-void filebox_data_exchange(FileBox* self, psy_Property* property)
+void fileedit_data_exchange(FileEdit* self, psy_Property* property)
 {
 	assert(self);
 	assert(property);
 
 	self->property = property;
 	if (property) {
-		filebox_on_property_changed(self, property);
+		fileedit_on_property_changed(self, property);
 		psy_ui_textarea_data_exchange(&self->edit, self->property);
 		psy_property_connect(property, self,
-			filebox_on_property_changed);
+			fileedit_on_property_changed);
 		psy_signal_connect(&self->property->before_destroyed, self,
-			filebox_before_property_destroyed);
+			fileedit_before_property_destroyed);
 	}
 }
 
-void filebox_on_property_changed(FileBox* self, psy_Property* sender)
+void fileedit_on_property_changed(FileEdit* self, psy_Property* sender)
 {
 }
 
-void filebox_before_property_destroyed(FileBox* self, psy_Property* sender)
+void fileedit_before_property_destroyed(FileEdit* self, psy_Property* sender)
 {
 	assert(self);
 
 	self->property = NULL;
 }
 
-void filebox_on_dialog(FileBox* self,psy_ui_Component* sender)
+void fileedit_on_dialog(FileEdit* self,psy_ui_Component* sender)
 {
 	psy_ui_FolderDialog dialog;
 
@@ -137,7 +137,7 @@ void filebox_on_dialog(FileBox* self,psy_ui_Component* sender)
 	}
 }
 
-void filebox_on_edit_keydown(FileBox* self, psy_ui_Component* sender,
+void fileedit_on_edit_keydown(FileEdit* self, psy_ui_Component* sender,
 	psy_ui_KeyboardEvent* ev)
 {
 	if (psy_property_is_hex(self->property)) {
@@ -151,7 +151,7 @@ void filebox_on_edit_keydown(FileBox* self, psy_ui_Component* sender,
 	psy_ui_keyboardevent_stop_propagation(ev);
 }
 
-void filebox_on_edit_reject(FileBox* self, psy_ui_TextArea* sender)
+void fileedit_on_edit_reject(FileEdit* self, psy_ui_TextArea* sender)
 {
 	psy_ui_component_set_focus(&self->component);
 }

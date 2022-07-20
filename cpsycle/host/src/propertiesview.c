@@ -101,7 +101,7 @@ void propertiesrenderline_init(PropertiesRenderLine* self,
 	self->level = level;	
 	psy_ui_component_set_align(&self->component, psy_ui_ALIGN_TOP);
 	psy_ui_component_set_default_align(&self->component, psy_ui_ALIGN_TOP,
-		psy_ui_margin_zero());
+		psy_ui_margin_zero());	
 	if (psy_property_hidden(self->property)) {
 		psy_ui_component_hide(&self->component);
 	}
@@ -199,28 +199,17 @@ void propertiesrenderline_build(PropertiesRenderLine* self)
 				if (psy_property_hint(self->property) == PSY_PROPERTY_HINT_RANGE) {
 					RangeEdit* range_edit;
 
-					range_edit = rangeedit_allocinit(&self->component);
-					psy_ui_component_set_align(&range_edit->component, psy_ui_ALIGN_LEFT);
-					rangeedit_data_exchange(range_edit, psy_property_at_index(self->property, 0),
+					range_edit = rangeedit_allocinit_range(&self->component,
+						psy_property_at_index(self->property, 0),
 						psy_property_at_index(self->property, 1));
+					psy_ui_component_set_align(&range_edit->component, psy_ui_ALIGN_LEFT);
 				}
 				else if (psy_property_hint(self->property) == PSY_PROPERTY_HINT_COMBO) {
-					psy_ui_ComboBox* combo;
-					psy_List* p;
+					psy_ui_ComboBox* combo;					
 
 					combo = psy_ui_combobox_allocinit(&self->component);
 					psy_ui_combobox_set_char_number(combo, 50.0);
-					psy_ui_component_set_align(&combo->component, psy_ui_ALIGN_LEFT);
-					p = psy_property_begin(self->property);
-					for (; p != NULL; p = p->next) {
-						psy_Property* property;
-
-						property = (psy_Property*)p->entry;
-						psy_ui_combobox_add_text(combo,
-							(psy_property_translation_prevented(property))
-							? psy_property_text(property)
-							: psy_ui_translate(psy_property_text(property)));
-					}
+					psy_ui_component_set_align(&combo->component, psy_ui_ALIGN_LEFT);					
 					psy_ui_combobox_data_exchange(combo, self->property);
 				}
 				else if (psy_property_is_bool(self->property) || psy_property_is_choice_item(
@@ -263,11 +252,11 @@ void propertiesrenderline_build(PropertiesRenderLine* self)
 						psy_ui_ALIGN_CLIENT);
 				}
 				else if (psy_property_hint(self->property) == PSY_PROPERTY_HINT_EDITDIR) {
-					FileBox* filebox;
+					FileEdit* filebox;
 
-					filebox = filebox_allocinit(&self->component);
-					filebox_data_exchange(filebox, self->property);
-					psy_ui_component_set_align(filebox_base(filebox), psy_ui_ALIGN_CLIENT);
+					filebox = fileedit_allocinit(&self->component);
+					fileedit_data_exchange(filebox, self->property);
+					psy_ui_component_set_align(fileedit_base(filebox), psy_ui_ALIGN_CLIENT);
 				}
 				else if (psy_property_is_int(self->property) ||
 					psy_property_is_double(self->property) ||

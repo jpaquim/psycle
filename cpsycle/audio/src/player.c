@@ -670,7 +670,7 @@ void psy_audio_player_recordnotes(psy_audio_Player* self,
 }
 
 /* properties */
-void psy_audio_player_setsong(psy_audio_Player* self, psy_audio_Song* song)
+void psy_audio_player_set_song(psy_audio_Player* self, psy_audio_Song* song)
 {
 	assert(self);
 
@@ -859,8 +859,10 @@ void psy_audio_player_setaudiodriver(psy_audio_Player* self, psy_AudioDriver*
 	assert(self);
 
 	self->driver = driver;
-	psy_audiodriver_connect(driver, self, (AUDIODRIVERWORKFN)psy_audio_player_work,
-		mainframe);
+	if (self->driver) {
+		psy_audiodriver_connect(driver, self, (AUDIODRIVERWORKFN)psy_audio_player_work,
+			mainframe);
+	}
 }
 
 psy_AudioDriver* psy_audio_player_audiodriver(psy_audio_Player* self)
@@ -1042,7 +1044,7 @@ void psy_audio_player_setemptysong(psy_audio_Player* self)
 	assert(self);
 
 	psy_audio_exclusivelock_enter();	
-	psy_audio_player_setsong(self, &self->emptysong);
+	psy_audio_player_set_song(self, &self->emptysong);
 	dsp.clear(bufferdriver, MAX_SAMPLES_WORKFN);
 	psy_audio_exclusivelock_leave();
 }

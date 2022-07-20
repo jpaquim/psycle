@@ -39,7 +39,6 @@ static void workspace_init_audio(Workspace*);
 static void workspace_init_plugin_catcher_and_machinefactory(Workspace*);
 static void workspace_init_signals(Workspace*);
 static void workspace_dispose_signals(Workspace*);
-static void workspace_wait_for_driver_configure_load(Workspace*);
 static void workspace_update_play_status(Workspace*, bool follow_song);
 /* config */
 static void workspace_config_visual(Workspace*);
@@ -79,11 +78,9 @@ void workspace_init(Workspace* self, psy_ui_Component* main)
 	self->restoreplaymode = psy_audio_SEQUENCERPLAYMODE_PLAYALL;
 	self->restorenumplaybeats = 4.0;
 	self->restoreloop = TRUE;
-	self->driverconfigloading = FALSE;	
 	self->modified_without_undo = FALSE;
 	self->paramviews = NULL;
 	self->terminal_output = NULL;	
-	psy_thread_init(&self->driverconfigloadthread);	
 	viewhistory_init(&self->view_history);
 	psy_playlist_init(&self->playlist);
 	workspace_init_plugin_catcher_and_machinefactory(self);
@@ -138,8 +135,7 @@ void workspace_init_signals(Workspace* self)
 void workspace_dispose(Workspace* self)
 {
 	assert(self);
-
-	psy_thread_dispose(&self->driverconfigloadthread);	
+	
 	workspace_save_styles(self);
 	psy_audio_player_dispose(&self->player);
 	psy_audio_song_deallocate(self->song);
@@ -356,7 +352,7 @@ void workspace_set_song(Workspace* self, psy_audio_Song* song, const char* filen
 		psy_audio_exclusivelock_enter();
 		psy_audio_machinecallback_set_song(&self->hostmachinecallback.machinecallback, song);
 		self->song = song;
-		psy_audio_player_setsong(&self->player, self->song);
+		psy_audio_player_set_song(&self->player, self->song);
 		psy_audio_song_set_file(self->song, filename);
 		if (psy_strlen(filename) == 0) {			
 			psy_audio_player_set_sampler_index(&self->player,
@@ -633,8 +629,7 @@ void workspace_save_configuration(Workspace* self)
 	psy_PropertyWriter propertywriter;
 
 	assert(self);
-
-	workspace_wait_for_driver_configure_load(self);
+	
 	psy_path_init(&path, NULL);
 	psy_path_set_prefix(&path, dirconfig_config_dir(&self->config.directories));
 	psy_path_set_name(&path, PSYCLE_INI);
@@ -647,31 +642,13 @@ void workspace_save_configuration(Workspace* self)
 	psy_path_dispose(&path);
 }
 
-void workspace_wait_for_driver_configure_load(Workspace* self)
-{
-	while (self->driverconfigloading) {
-#ifdef DIVERSALIS__OS__MICROSOFT
-		Sleep(50);
-#endif
-#ifdef DIVERSALIS__OS__UNIX
-		usleep(50000);
-#endif
-	}
-}
-
-#if defined DIVERSALIS__OS__MICROSOFT
-static unsigned int __stdcall driverconfigloadthread(void* context)
-#else
-static unsigned int driverconfigloadthread(void* context)
-#endif
-{
-	Workspace* self;
+static void driverconfigload(Workspace* self)
+{	
 	psy_Path path;
 	psy_PropertyReader propertyreader;
 
-	assert(context);
-	
-	self = (Workspace*)context;
+	assert(self);
+		
 	psy_path_init(&path, NULL);
 	psy_path_set_prefix(&path, dirconfig_config_dir(&self->config.directories));
 	psy_path_set_name(&path, PSYCLE_INI);	
@@ -681,29 +658,17 @@ static unsigned int driverconfigloadthread(void* context)
 	psy_propertyreader_load(&propertyreader);
 	psy_propertyreader_dispose(&propertyreader);	
 	psy_path_dispose(&path);
-	self->driverconfigloading = FALSE;
 	if (globalconfig_audio_enabled(&self->config.global)) {
 		workspace_start_audio(self);
 		workspace_output_status(self, psy_ui_translate("msg.audiostarted"));
-	}
-	return 0;
+	}	
 }
 
 void workspace_postload_driver_configurations(Workspace* self)
 {
 	assert(self);
 
-#if defined DIVERSALIS__OS__UNIX
-	driverconfigloadthread(self);
-#else	
-	if (!self->driverconfigloading) {
-		psy_Thread thread;
-
-		self->driverconfigloading = TRUE;
-		workspace_output_status(self, psy_ui_translate("msg.audiostarting"));
-		psy_thread_start(&thread, self, driverconfigloadthread);
-	}
-#endif	
+	driverconfigload(self);
 }
 
 psy_Property* workspace_recentsongs(Workspace* self)

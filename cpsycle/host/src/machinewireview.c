@@ -67,8 +67,9 @@ psy_ui_Component* machinewireviewuis_insert(MachineWireViewUis* self, uintptr_t 
 		newui = machineui_create(
 			psy_audio_machines_at(self->machines, slot),
 			self->view, self->paramviews, TRUE,
-			self->workspace);
+			self->workspace);		
 		if (newui) {
+			psy_ui_component_set_align(newui, psy_ui_ALIGN_NONE);
 			psy_table_insert(&self->machineuis, slot, newui);
 			return newui;
 		}

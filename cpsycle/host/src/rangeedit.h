@@ -30,6 +30,8 @@ void rangeedit_init(RangeEdit*, psy_ui_Component* parent);
 
 RangeEdit* rangeedit_alloc(void);
 RangeEdit* rangeedit_allocinit(psy_ui_Component* parent);
+RangeEdit* rangeedit_allocinit_range(psy_ui_Component* parent, psy_Property* from,
+	psy_Property* to);
 
 void rangeedit_data_exchange(RangeEdit*, psy_Property* from, psy_Property* to);
 

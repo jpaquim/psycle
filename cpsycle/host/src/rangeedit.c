@@ -77,6 +77,18 @@ RangeEdit* rangeedit_allocinit(psy_ui_Component* parent)
 	return rv;
 }
 
+RangeEdit* rangeedit_allocinit_range(psy_ui_Component* parent, psy_Property* from,
+	psy_Property* to)
+{
+	RangeEdit* rv;
+
+	rv = rangeedit_allocinit(parent);
+	if (rv) {
+		rangeedit_data_exchange(rv, from, to);
+	}
+	return rv;
+}
+
 void rangeedit_data_exchange(RangeEdit* self, psy_Property* from,
 	psy_Property* to)
 {

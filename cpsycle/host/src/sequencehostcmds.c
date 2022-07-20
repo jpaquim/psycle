@@ -259,7 +259,7 @@ void sequencecmds_clear(SequenceCmds* self)
 		psy_undoredo_execute(&self->workspace->undoredo,
 			&psy_audio_sequenceclearcommand_alloc(self->sequence,
 				&self->sequence->sequenceselection)->command);
-		psy_audio_player_setsong(&self->workspace->player, restore_song);		
+		psy_audio_player_set_song(&self->workspace->player, restore_song);		
 		psy_audio_exclusivelock_leave();		
 	}
 }
