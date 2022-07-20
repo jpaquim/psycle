@@ -263,7 +263,8 @@ void fileline_init(FileLine* self, psy_ui_Component* parent, const char* path, b
 
 		/* size */
 		psy_ui_label_init(&self->size, &self->component);
-		psy_ui_component_set_align(psy_ui_label_base(&self->size), psy_ui_ALIGN_RIGHT);
+		psy_ui_component_set_align(psy_ui_label_base(&self->size),
+			psy_ui_ALIGN_RIGHT);
 		psy_ui_label_prevent_translation(&self->size);
 		psy_ui_label_set_text_alignment(&self->size,
 			psy_ui_ALIGNMENT_LEFT | psy_ui_ALIGNMENT_CENTER_VERTICAL);
@@ -521,7 +522,8 @@ void filebox_on_timer(FileBox* self, uintptr_t timer_id)
 
 void filebox_on_button(FileBox* self, psy_ui_Button* sender)
 {
-	self->selindex = psy_ui_component_index(psy_ui_button_base(sender));
+	self->selindex = psy_ui_component_index(
+		psy_ui_component_parent(psy_ui_button_base(sender)));
 	psy_signal_emit(&self->signal_selected, self, 0);
 }
 
@@ -660,7 +662,7 @@ void fileview_build_drives(FileView* self)
 void fileview_on_file_selected(FileView* self, FileBox* sender)
 {		
 	psy_ui_textarea_set_text(&self->filename,
-		filebox_file_name(&self->filebox));	
+		filebox_file_name(&self->filebox));
 	psy_signal_emit(&self->signal_selected, self, 0);	
 }
 
@@ -683,6 +685,7 @@ void fileview_filename(FileView* self, char* filename, uintptr_t maxsize)
 		psy_snprintf(filename, maxsize, "%s%s%s",
 			psy_path_prefix(&self->filebox.curr_dir),
 			psy_SLASHSTR, psy_ui_textarea_text(&self->filename));
+		printf("%s\n", filename);
 	}	
 }
 
