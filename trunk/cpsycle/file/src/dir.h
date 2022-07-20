@@ -86,8 +86,9 @@ bool psy_direxists(const char* path);
 bool psy_filereadable(const char* fname);
 psy_List* psy_drives(void);
 psy_List* psy_directories(const char* path);
+psy_List* psy_files(const char* path, const char* wildcard, int recursive);
 
-uintptr_t psy_file_size(const psy_Path*);
+uintptr_t psy_file_size(const char* path);
 bool psy_file_is_directory(const psy_Path* p);
 
 #ifdef __cplusplus

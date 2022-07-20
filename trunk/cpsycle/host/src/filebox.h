@@ -12,27 +12,26 @@
 #include <uibutton.h>
 #include <uitextarea.h>
 
-/* FileBox */
+/* FileEdit */
 
-typedef struct FileBox {
+typedef struct FileEdit {
 	/* inherits */
 	psy_ui_Component component;
-	/* inrernal */
-	psy_ui_Component colour;	
+	/* inrernal */	
 	psy_ui_TextArea edit;
 	psy_ui_Button dialog;
 	/* references */
 	psy_Property* property;
-} FileBox;
+} FileEdit;
 
-void filebox_init(FileBox*, psy_ui_Component* parent);
+void fileedit_init(FileEdit*, psy_ui_Component* parent);
 
-FileBox* filebox_alloc(void);
-FileBox* filebox_allocinit(psy_ui_Component* parent);
+FileEdit* fileedit_alloc(void);
+FileEdit* fileedit_allocinit(psy_ui_Component* parent);
 
-void filebox_data_exchange(FileBox*, psy_Property*);
+void fileedit_data_exchange(FileEdit*, psy_Property*);
 
-INLINE psy_ui_Component* filebox_base(FileBox* self)
+INLINE psy_ui_Component* fileedit_base(FileEdit* self)
 {
 	return &self->component;
 }

@@ -495,7 +495,7 @@ void seqviewlist_init(SeqviewList* self, psy_ui_Component* parent,
 	psy_ui_component_set_default_align(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_margin_zero());
 	psy_ui_component_set_align_expand(&self->component, psy_ui_HEXPAND);
-	psy_ui_component_set_overflow(&self->component, psy_ui_OVERFLOW_SCROLL);	
+	psy_ui_component_set_overflow(&self->component, psy_ui_OVERFLOW_SCROLL);
 	if (self->state->cmds->sequence && self->state->cmds->sequence->patterns) {
 		psy_signal_connect(
 			&self->state->cmds->sequence->patterns->signal_namechanged,

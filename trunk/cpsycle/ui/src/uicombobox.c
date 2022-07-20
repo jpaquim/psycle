@@ -138,6 +138,18 @@ void psy_ui_combobox_data_exchange(psy_ui_ComboBox* self, psy_Property* property
 {
 	self->property = property;
 	if (self->property) {
+		psy_List* p;
+
+		p = psy_property_begin(self->property);
+		for (; p != NULL; p = p->next) {
+			psy_Property* property;
+
+			property = (psy_Property*)p->entry;
+			psy_ui_combobox_add_text(self,
+				(psy_property_translation_prevented(property))
+				? psy_property_text(property)
+				: psy_ui_translate(psy_property_text(property)));
+		}
 		psy_ui_combobox_on_property_changed(self, self->property);
 		psy_property_connect(self->property, self,
 			psy_ui_combobox_on_property_changed);

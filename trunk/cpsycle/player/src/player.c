@@ -381,7 +381,7 @@ void cmdplayer_loadsong(CmdPlayer* self, const char* path)
 	if (songfile.err) {
 		fprintf(stderr, "Couldn't load song\n");
 	}	
-	psy_audio_player_setsong(&self->player, self->song);	
+	psy_audio_player_set_song(&self->player, self->song);	
 	cmdplayer_applysongproperties(self);
 	psy_audio_exclusivelock_leave();
 	if (old_song) {

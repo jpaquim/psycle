@@ -107,8 +107,7 @@ void psy_path_set_name(psy_Path* self, const char* name)
 
 void psy_path_set_prefix(psy_Path* self, const char* prefix)
 {
-	free(self->prefix);
-	self->prefix = strdup((prefix) ? prefix : "");
+	psy_strreset(&self->prefix, prefix);	
 	psy_path_update(self);
 }
 
@@ -252,15 +251,13 @@ void psy_path_extract_path(psy_Path* self)
 	}
 }
 
-uintptr_t psy_file_size(const psy_Path* p)
+uintptr_t psy_file_size(const char* path)
 {
 	struct stat sb;
-	const char* filename;
 
-	assert(p);
-
-	filename = psy_path_full(p);
-	if (stat(filename, &sb) == -1) {
+	assert(path);
+	
+	if (stat(path, &sb) == -1) {
 		return psy_INDEX_INVALID;
 	}
 	return sb.st_size;
@@ -930,4 +927,27 @@ bool psy_filereadable(const char* fname)
 		return TRUE;
 	}
 	return FALSE;
+}
+
+static int on_enum_files(psy_List** rv, const char* path, int flag);
+
+psy_List* psy_files(const char* path, const char* wildcard, int recursive)
+{
+	psy_List* rv;
+
+	rv = NULL;
+	if (recursive) {
+		psy_dir_enumerate_recursive(&rv, path, wildcard, 0,
+			(psy_fp_findfile)on_enum_files);
+	} else {
+		psy_dir_enumerate(&rv, path, wildcard, 0,
+			(psy_fp_findfile)on_enum_files);
+	}
+	return rv;
+}
+
+int on_enum_files(psy_List** rv, const char* path, int flag)
+{
+	psy_list_append(rv, psy_strdup(path));	
+	return 1;
 }

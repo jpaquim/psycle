@@ -103,9 +103,7 @@ typedef struct Workspace {
 	psy_audio_SequencerPlayMode restoreplaymode;
 	psy_dsp_big_beat_t restorenumplaybeats;
 	bool restoreloop;	
-	bool driverconfigloading;	
-	InputHandler inputhandler;
-	psy_Thread driverconfigloadthread;	
+	InputHandler inputhandler;	
 	struct ParamViews* paramviews;
 	psy_Logger* terminal_output;
 	uintptr_t terminalstyleid;
