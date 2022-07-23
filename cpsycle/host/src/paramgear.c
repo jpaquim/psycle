@@ -20,16 +20,19 @@
 /* prototypes */
 static void paramrackbox_on_mouse_double_click(ParamRackBox*,
 	psy_ui_Component* sender, psy_ui_MouseEvent*);
-static void paramrackbox_on_add_effect(ParamRackBox*, psy_ui_Button* sender);
+static void paramrackbox_on_add_effect(ParamRackBox*,
+	psy_ui_Button* sender);
 
 /* implementation */
 void paramrackbox_init(ParamRackBox* self, psy_ui_Component* parent,
 	uintptr_t slot, Workspace* workspace)
 {	
 	psy_audio_Machine* machine;	
-
+	
+	psy_ui_component_init(&self->component, parent, NULL);
 	machine = psy_audio_machines_at(&workspace->song->machines, slot);
-	psy_ui_component_init(&self->component, parent, NULL);	
+	psy_ui_component_set_preferred_width(&self->component,
+		psy_ui_value_make_ew(35.0));	
 	psy_ui_component_set_style_type(&self->component, STYLE_MACPARAM_TITLE);	
 	self->workspace = workspace;
 	self->slot = slot;	
@@ -38,12 +41,13 @@ void paramrackbox_init(ParamRackBox* self, psy_ui_Component* parent,
 	psy_ui_component_set_align(&self->header, psy_ui_ALIGN_TOP);	
 	/* title label */
 	psy_ui_label_init(&self->title, &self->header);	
-	psy_ui_component_set_style_type(&self->title.component, STYLE_MACPARAM_TITLE);
+	psy_ui_component_set_preferred_height(&self->title.component,
+		psy_ui_value_make_eh(1.5));
 	psy_ui_label_prevent_translation(&self->title);	
 	if (machine) {
 		psy_ui_label_set_text(&self->title, psy_audio_machine_editname(machine));
 	}
-	psy_ui_component_set_align(&self->title.component, psy_ui_ALIGN_LEFT);
+	psy_ui_component_set_align(&self->title.component, psy_ui_ALIGN_CLIENT);
 	psy_signal_connect(&self->title.component.signal_mousedoubleclick, self,
 		paramrackbox_on_mouse_double_click);	
 	/* Insert Effect */
@@ -70,8 +74,8 @@ ParamRackBox* paramrackbox_alloc(void)
 	return(ParamRackBox*)malloc(sizeof(ParamRackBox));
 }
 
-ParamRackBox* paramrackbox_allocinit(psy_ui_Component* parent, uintptr_t slot,
-	Workspace* workspace)
+ParamRackBox* paramrackbox_allocinit(psy_ui_Component* parent,
+	uintptr_t slot, Workspace* workspace)
 {
 	ParamRackBox* rv;
 	
@@ -93,15 +97,16 @@ void paramrackbox_deselect(ParamRackBox* self)
 	psy_ui_component_invalidate(&self->header);
 }
 
-void paramrackbox_on_mouse_double_click(ParamRackBox* self, psy_ui_Component* sender,
-	psy_ui_MouseEvent* ev)
+void paramrackbox_on_mouse_double_click(ParamRackBox* self,
+	psy_ui_Component* sender, psy_ui_MouseEvent* ev)
 {	
 	if (self->workspace->paramviews) {
 		paramviews_show(self->workspace->paramviews, self->slot);
 	}
 }
 
-void paramrackbox_on_add_effect(ParamRackBox* self, psy_ui_Button* sender)
+void paramrackbox_on_add_effect(ParamRackBox* self,
+	psy_ui_Button* sender)
 {
 	if (self->workspace && workspace_song(self->workspace)) {
 		if (self->nextbox) {
@@ -109,12 +114,14 @@ void paramrackbox_on_add_effect(ParamRackBox* self, psy_ui_Button* sender)
 				psy_audio_wire_make(self->slot, self->nextbox->slot));
 			workspace_select_view(self->workspace,
 				viewindex_make(VIEW_ID_MACHINEVIEW,
-				SECTION_ID_MACHINEVIEW_NEWMACHINE, NEWMACHINE_ADDEFFECT,
-					psy_INDEX_INVALID));
+				SECTION_ID_MACHINEVIEW_NEWMACHINE,
+				NEWMACHINE_ADDEFFECT,
+				psy_INDEX_INVALID));
 		} else {
 			workspace_select_view(self->workspace,
 				viewindex_make(VIEW_ID_MACHINEVIEW,
-					SECTION_ID_MACHINEVIEW_NEWMACHINE, NEWMACHINE_APPEND,
+					SECTION_ID_MACHINEVIEW_NEWMACHINE,
+					NEWMACHINE_APPEND,
 					psy_INDEX_INVALID));
 		}
 	}
@@ -176,7 +183,8 @@ void paramrackpane_init(ParamRackPane* self, psy_ui_Component* parent,
 		psy_ui_value_make_eh(0.0), psy_ui_value_make_ew(0.1),
 		psy_ui_value_make_eh(0.0), psy_ui_value_make_ew(0.0)));	
 	psy_ui_component_set_align_expand(&self->component, psy_ui_HEXPAND);
-	psy_ui_component_set_scroll_step_width(&self->component, psy_ui_value_make_px(100));	
+	psy_ui_component_set_scroll_step_width(&self->component,
+		psy_ui_value_make_px(100));	
 	self->mode = PARAMRACK_OUTCHAIN;
 	self->workspace = workspace;
 	self->lastinserted = NULL;
@@ -206,7 +214,8 @@ void paramrackpane_build(ParamRackPane* self)
 	paramrackpane_clear(self);
 	if (!self->machines) {	
 		psy_ui_component_show(&self->component);
-		psy_ui_component_align_full(psy_ui_component_parent(&self->component));		
+		psy_ui_component_align_full(psy_ui_component_parent(
+			&self->component));		
 		return;
 	}	
 	self->lastselected = psy_audio_machines_selected(self->machines);
@@ -386,13 +395,15 @@ void paramrackpane_buildlevel(ParamRackPane* self, uintptr_t level)
 		if (psy_table_exists(&self->boxes, slot)) {
 			paramrackpane_removebox(self, slot);
 		}
-		box = paramrackbox_allocinit(&self->component, slot, self->workspace);
+		box = paramrackbox_allocinit(&self->component, slot,
+			self->workspace);
 		if (box) {												
 			if (self->lastinserted) {
 				self->lastinserted->nextbox = box;
 			}
 			self->lastinserted = box;
-			psy_ui_component_set_align(&box->component, psy_ui_ALIGN_LEFT);
+			psy_ui_component_set_align(&box->component,
+				psy_ui_ALIGN_LEFT);
 			psy_table_insert(&self->boxes, slot, box);			
 		}		
 	}
@@ -600,6 +611,7 @@ void paramrackmodebar_setmode(ParamRackModeBar* self, ParamRackMode mode)
 }
 
 /* ParamRack */
+
 /* prototypes */
 static void paramrack_on_mode_selected(ParamRack*, ParamRackModeBar* sender,
 	intptr_t index);

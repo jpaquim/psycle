@@ -622,8 +622,7 @@ void psy_audio_plugincatcher_scan(psy_audio_PluginCatcher* self)
 			task = (psy_audio_PluginScanTask*)p->entry;
 			psy_signal_emit(&self->signal_taskstart, self, 1, task);
 			path = psy_property_at_str(self->directories, task->key, NULL);
-			if (path) {
-				printf("scan path: %s\n", path);
+			if (path) {				
 				plugincatcher_scan_multipath(self, path, task->wildcard,
 					task->type, task->recursive);
 			}
@@ -661,6 +660,7 @@ int on_enum_dir(psy_audio_PluginCatcher* self, const char* path, int type)
 
 	psy_signal_emit(&self->signal_scanfile, self, 2, path, type);
 	machineinfo_init(&macinfo);
+	printf("%s\n", path);
 	switch (type) {
 		case psy_audio_PLUGIN:
 			if (psy_audio_plugin_psycle_test(path, self->nativeroot, &macinfo)) {

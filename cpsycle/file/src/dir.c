@@ -345,44 +345,46 @@ int psy_dir_enumerate_recursive(void* context, const char* root, const char* wil
 	struct dirent *dir_ptr;
 	char path[4096];
 	
-	/* First, enumerate all files using the wildcard in the current directory */
+	/* 
+	** First, enumerate all files using the wildcard in the current
+	** directory
+	**/
 	if ((dir=opendir(root)) == NULL) {
 	   return 0;
     }    
 	while((dir_ptr = readdir(dir)) != NULL) {
-	   if (wildcardmatch((*dir_ptr).d_name, wildcard)) {
-		  if ((strncmp(".", (*dir_ptr).d_name, 1) != 0) && 
- 		  	 (strncmp("..", (*dir_ptr).d_name, 2) != 0)) {
-					psy_snprintf(path, 4096, "%s/%s", root,
-		                (*dir_ptr).d_name);
-					enumproc(context, path, flag);										   
-          }				   
-       }
+		if (wildcardmatch((*dir_ptr).d_name, wildcard)) {
+			if ((strncmp(".", (*dir_ptr).d_name, 1) != 0) && 
+					(strncmp("..", (*dir_ptr).d_name, 2) != 0)) {
+				psy_snprintf(path, 4096, "%s/%s", root,
+					(*dir_ptr).d_name);
+				enumproc(context, path, flag);										   
+			}				   
+		}
     }
     if(closedir(dir) == -1) {
       return 0;
     }
     /* 
-    ** Secondly, find and emumerate all subdirectories with their subdirectories
+    ** Secondly, find and emumerate all subdirectories with their
+    ** subdirectories
     */
     if ((dir=opendir(root)) == NULL) {
 	   return 0;
-    }    
-	while((dir_ptr = readdir(dir)) != NULL) {
-	   if (wildcardmatch((*dir_ptr).d_name, wildcard)) {
-		  if ((strncmp(".", (*dir_ptr).d_name, 1) != 0) && 
- 		  	 (strncmp("..", (*dir_ptr).d_name, 2) != 0) &&
- 		  	 dir_ptr->d_type == DT_DIR) {
-				/* enumerate subdirectory with its subdirectories */
-				psy_snprintf(path, 4096, "%s" psy_SLASHSTR "%s", root,
-					(*dir_ptr).d_name);				
-				if (psy_dir_enumerate_recursive(context, path, wildcard, flag,
-						enumproc) == 0) {
-					closedir(dir);				
-					return 0;
-				}									   
-          }				   
-       }
+    }        
+	while((dir_ptr = readdir(dir)) != NULL) {				   
+		if ((strncmp(".", (*dir_ptr).d_name, 1) != 0) && 
+				(strncmp("..", (*dir_ptr).d_name, 2) != 0) &&
+				dir_ptr->d_type == DT_DIR) {
+			/* enumerate subdirectory with its subdirectories */
+			psy_snprintf(path, 4096, "%s" psy_SLASHSTR "%s", root,
+				(*dir_ptr).d_name);			
+			if (psy_dir_enumerate_recursive(context, path, wildcard,
+					flag, enumproc) == 0) {
+				closedir(dir);				
+				return 0;
+			}									   
+		 }       
     }
     if(closedir(dir) == -1) {
       return 0;

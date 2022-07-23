@@ -454,7 +454,7 @@ void view_dev_setposition(psy_ui_ViewComponentImp* self, psy_ui_Point topleft,
 	}
 	if (size.width.set) {
 		self->position.right = self->position.left +
-			psy_ui_value_px(&size.width, tm, pparentsize);
+			psy_ui_value_px(&size.width, tm, pparentsize);		
 	}
 	if (size.height.set) {
 		self->position.bottom = self->position.top +
@@ -678,7 +678,7 @@ const psy_ui_TextMetric* view_dev_textmetric(const psy_ui_ViewComponentImp* self
 		const psy_ui_Font* font;
 
 		font = psy_ui_component_font(self->component);
-		if (font) {
+		if (font) {			
 			return psy_ui_font_textmetric(font);
 		}
 	}

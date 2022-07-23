@@ -38,6 +38,18 @@ void newmachinesort_dispose(NewMachineSort*);
 void newmachinesort_sort(NewMachineSort*, NewMachineSortMode);
 
 /* NewMachineFilter */
+
+typedef enum NewMachineFilterTypes {
+	NEWMACHINE_FILTERTYPES_NONE = 0,
+	NEWMACHINE_FILTERTYPES_GENERATORS = 1,
+	NEWMACHINE_FILTERTYPES_EFFECTS = 2,
+	NEWMACHINE_FILTERTYPES_INTERN = 4,
+	NEWMACHINE_FILTERTYPES_NATIVE = 8,
+	NEWMACHINE_FILTERTYPES_VST = 16,
+	NEWMACHINE_FILTERTYPES_LUA = 32,
+	NEWMACHINE_FILTERTYPES_LADSPA = 64
+} NewMachineFilterTypes;
+
 typedef struct NewMachineFilter {
 	psy_Signal signal_changed;
 	bool gen;

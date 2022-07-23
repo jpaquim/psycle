@@ -69,8 +69,8 @@ const psy_ui_Font* psy_ui_component_font(const psy_ui_Component* self)
 		}
 		curr = psy_ui_component_parent_const(curr);
 	}
-	if (!rv) {
-		rv = &psy_ui_style_const(psy_ui_STYLE_ROOT)->font;
+	if (!rv) {		
+		rv = &psy_ui_style_const(psy_ui_STYLE_ROOT)->font;		
 	}
 	return rv;
 }
@@ -196,12 +196,12 @@ const char* psy_ui_component_backgroundimagepath(const psy_ui_Component* self)
 void psy_ui_replacedefaultfont(psy_ui_Component* main, psy_ui_Font* font)
 {		
 	if (main) {
-		psy_ui_Style* root;		
+		psy_ui_Style* root;
 
 		root = (psy_ui_Style*)psy_ui_style_const(psy_ui_STYLE_ROOT);
-		psy_ui_font_dispose(&root->font);
+		psy_ui_font_dispose(&root->font);		
 		psy_ui_font_init(&root->font, NULL);
-		psy_ui_font_copy(&root->font, font);
+		psy_ui_font_copy(&root->font, font);		
 		psy_ui_notify_style_update(main);
 	}
 }
@@ -1183,7 +1183,7 @@ psy_ui_Size psy_ui_component_preferred_size(psy_ui_Component* self,
 	psy_ui_Margin padding;
 	const psy_ui_TextMetric* tm;
 	
-	rv = preferredsize = psy_ui_componentstyle_preferredsize(&self->style);
+	rv = preferredsize = psy_ui_componentstyle_preferredsize(&self->style);	
 	padding = psy_ui_component_padding(self);
 	tm = psy_ui_component_textmetric(self);
 	if (preferredsize.width.set && preferredsize.height.set) {
@@ -1197,7 +1197,7 @@ psy_ui_Size psy_ui_component_preferred_size(psy_ui_Component* self,
 		}
 		if (preferredsize.height.set) {
 			rv.height = self->style.sizehints->preferredsize.height;
-		}
+		}		
 	}
 	if (rv.height.unit == psy_ui_UNIT_PH ||
 		rv.width.unit == psy_ui_UNIT_PW) {
@@ -1205,9 +1205,11 @@ psy_ui_Size psy_ui_component_preferred_size(psy_ui_Component* self,
 		pparentsize = &parentsize;
 	} else {
 		pparentsize = NULL;
-	}
-	rv.height = psy_ui_add_values(rv.height, psy_ui_margin_height(&padding, tm, pparentsize), tm, pparentsize);
-	rv.width = psy_ui_add_values(rv.width, psy_ui_margin_width(&padding, tm, pparentsize), tm, pparentsize);
+	}	
+	rv.height = psy_ui_add_values(rv.height, psy_ui_margin_height(
+		&padding, tm, pparentsize), tm, pparentsize);	
+	rv.width = psy_ui_add_values(rv.width, psy_ui_margin_width(
+		&padding, tm, pparentsize), tm, pparentsize);
 	return rv;	
 }
 

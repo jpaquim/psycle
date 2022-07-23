@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
+// copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 
 #include "../../detail/prefix.h"
 #include "../audiodriversettings.h"
@@ -54,6 +54,7 @@ typedef struct {
 	// condition_variable condition_;
 	///\}
 	int (*error)(int, const char*);
+	pthread_mutex_t mutex;
 } AlsaDriver;
 
 static void driver_deallocate(psy_AudioDriver*);
@@ -116,17 +117,25 @@ static void vtable_init(void)
 		vtable.close = driver_close;
 		vtable.dispose = driver_dispose;
 		vtable.refresh_ports = driver_refresh_ports;
-		vtable.configure = driver_configure;
+		vtable.configure =
+			(psy_audiodriver_fp_configure)
+			driver_configure;
 		vtable.configuration = driver_configuration;
 		vtable.samplerate = driver_samplerate;		
-		vtable.addcapture = addcaptureport;
-		vtable.removecapture = removecaptureport;
+		vtable.addcapture =
+			(psy_audiodriver_fp_addcapture)
+			addcaptureport;
+		vtable.removecapture =
+			(psy_audiodriver_fp_removecapture)
+			removecaptureport;
 		vtable.readbuffers = readbuffers;
 		vtable.capturename = capturename;
 		vtable.numcaptures = numcaptures;
 		vtable.playbackname = playbackname;
 		vtable.numplaybacks = numplaybacks;
-		vtable.playposinsamples = playposinsamples;
+		vtable.playposinsamples =
+			(psy_audiodriver_fp_playposinsamples)
+			playposinsamples;
 		vtable.info = driver_info;
 		vtable_initialized = 1;
 	}
@@ -169,6 +178,7 @@ void driver_deallocate(psy_AudioDriver* driver)
 int driver_init(psy_AudioDriver* driver)
 {
 	AlsaDriver* self = (AlsaDriver*) driver;	
+	pthread_mutexattr_t recursiveattr;
 
 	memset(self, 0, sizeof(AlsaDriver));
 	vtable_init();
@@ -187,6 +197,11 @@ int driver_init(psy_AudioDriver* driver)
 	self->buffer_size = 0;
 	self->period_size = 0;
 	self->output = 0;
+	
+	pthread_mutexattr_init(&recursiveattr);
+	pthread_mutexattr_settype(&recursiveattr, PTHREAD_MUTEX_RECURSIVE);
+	pthread_mutex_init(&self->mutex, &recursiveattr);
+	pthread_mutexattr_destroy(&recursiveattr);	
 	psy_audiodriversettings_init(&self->settings);
 	init_properties(driver);
 	return 0;
@@ -197,6 +212,7 @@ int driver_dispose(psy_AudioDriver* driver)
 	AlsaDriver* self = (AlsaDriver*) driver;
 	psy_property_deallocate(self->configuration);
 	self->configuration = NULL;
+	pthread_mutex_destroy(&self->mutex);
 	return 0;
 }
 
@@ -253,10 +269,10 @@ int driver_open(psy_AudioDriver* driver)
 	char* device_name;
 	unsigned int chn;
 	int err;
-	int threadid;
+	pthread_t threadid;
 
-	// return immediatly if the thread is already running
-	if (self->running_) return 0;
+	// return immediatly if the thread is already running	
+	if (self->running_) return 0;	
 	if (driver->callback == NULL) {
 		return FALSE;
 	}	
@@ -304,14 +320,13 @@ int driver_open(psy_AudioDriver* driver)
 		self->areas[chn].addr = self->samples;
 		self->areas[chn].first = chn * 16;
 		self->areas[chn].step = self->channels * 16;
-	}
-
-	// thread t(boost::bind(&AlsaOut::thread_function, this));
+	}	
+	
 	// wait for the thread to be running
 	// { scoped_lock lock(mutex_);
 	// while (!running_) condition_.wait(lock);
-	// }
-	self->stop_requested_ = FALSE;
+	// }	
+	self->stop_requested_ = FALSE;	
 	if (pthread_create(&threadid, NULL, (void*(*)(void*))thread_function,
 		(void*) driver) == 0)
 	{		
@@ -332,8 +347,9 @@ bool driver_opened(const psy_AudioDriver* driver)
 void thread_function(void* driver) {
 	AlsaDriver* self = (AlsaDriver*) driver;
 	// notify that the thread is now running
-	// { scoped_lock lock(mutex_);
-	self->running_ = TRUE;
+	// { scoped_lock lock(mutex_);	
+	pthread_mutex_lock(&self->mutex);
+	self->running_ = TRUE;	
 	//}
 	//condition_.notify_one();
 	printf("Enter Alsa Thread function\n");
@@ -368,11 +384,10 @@ void thread_function(void* driver) {
 	}
 
 	// notify that the thread is not running anymore
-notify_termination:
-	// { scoped_lock lock(mutex_);
+notify_termination:	
 	self->running_ = FALSE;
 	// }
-	// condition_.notify_one();
+	pthread_mutex_unlock(&self->mutex);	
 	printf("Leave Alsa Thread\n");
 }
 
@@ -406,8 +421,8 @@ int xrun_recovery(AlsaDriver* self, int err)
 
 void do_stop(AlsaDriver* self)
 {
-	// return immediatly if the thread is not running
-	if (!self->running_) return;
+	// return immediatly if the thread is not running	
+	if (!self->running_) return;	
 
 	// ask the thread to terminate
 	// { scoped_lock lock(mutex_);
@@ -418,13 +433,21 @@ void do_stop(AlsaDriver* self)
 	/// join the thread
 	// { scoped_lock lock(mutex_);
 	// while (running_) condition_.wait(lock);
+	pthread_mutex_lock(&self->mutex);
 	self->stop_requested_ = FALSE;
+	pthread_mutex_unlock(&self->mutex);
 	//}
 }
 
-int driver_close(psy_AudioDriver* self)
+int driver_close(psy_AudioDriver* driver)
 {
-    do_stop((AlsaDriver*)self);
+	AlsaDriver* self = (AlsaDriver*)driver;
+    do_stop(self);    
+	if (self->handle) {
+		free(self->areas);
+		free(self->samples);
+		snd_pcm_close(self->handle);
+	}	
 }
 
 void FillBuffer(AlsaDriver* self, snd_pcm_uframes_t offset, int count)

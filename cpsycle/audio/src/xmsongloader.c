@@ -187,7 +187,9 @@ bool xmsongloader_makexmsampler(XMSongLoader* self)
 	if (self->sampler) {
 		psy_audio_Wire wire;
 
-		psy_audio_machine_setposition(self->sampler, rand() / 64, rand() / 80);
+		psy_audio_machine_setposition(self->sampler, 
+			psy_audio_MACH_AUTO_POSITION,
+			psy_audio_MACH_AUTO_POSITION);
 		psy_audio_machines_insert(&self->song->machines, 0, self->sampler);
 		wire = psy_audio_wire_make(0, psy_audio_MASTER_INDEX);
 		psy_audio_machines_connect(&self->song->machines, wire);
@@ -1670,8 +1672,10 @@ bool modsongloader_makexmsampler(MODSongLoader* self)
 		psy_INDEX_INVALID);
 	if (self->sampler) {
 		psy_audio_Wire wire;
-
-		psy_audio_machine_setposition(self->sampler, rand() / 64, rand() / 80);
+		
+		psy_audio_machine_setposition(self->sampler,
+			psy_audio_MACH_AUTO_POSITION,
+			psy_audio_MACH_AUTO_POSITION);
 		psy_audio_machines_insert(&self->song->machines, 0, self->sampler);
 		wire = psy_audio_wire_make(0, psy_audio_MASTER_INDEX);
 		psy_audio_machines_connect(&self->song->machines, wire);

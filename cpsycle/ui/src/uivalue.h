@@ -202,7 +202,7 @@ INLINE psy_ui_Value psy_ui_value_zero(void)
 
 INLINE bool psy_ui_value_iszero(const psy_ui_Value* self)
 {
-	return self->quantity == 0.0;
+	return (self->quantity == 0.0);
 }
 
 INLINE bool psy_ui_isvaluezero(psy_ui_Value value)

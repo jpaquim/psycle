@@ -237,7 +237,7 @@ void workspace_config_visual(Workspace* self)
 	psy_ui_fontinfo_init_string(&fontinfo,
 		visualconfig_default_font_str(&self->config.visual));
 	psy_ui_font_init(&font, &fontinfo);
-	fontinfo = psy_ui_font_fontinfo(&font);	
+	fontinfo = psy_ui_font_fontinfo(&font);		
 	psy_ui_replacedefaultfont(self->main, &font);
 	psy_ui_font_dispose(&font);
 }

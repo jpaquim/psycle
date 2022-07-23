@@ -456,10 +456,10 @@ void init_host_styles(psy_ui_Styles* self, psy_ui_ThemeMode theme)
 	psy_ui_styles_set_style(self, STYLE_INPUTDEFINER_FOCUS, style);
 	
 	style = psy_ui_style_allocinit();
-	psy_ui_style_set_margin_em(style, 0.0, 0.0, 1.0, 0.0);
+	psy_ui_style_set_margin_em(style, 0.0, 0.0, 0.5, 0.0);
 	psy_ui_style_set_padding_em(style, 1.0, 0.0, 0.0, 0.0);
 	psy_ui_border_init_top(&style->border, psy_ui_BORDER_SOLID,
-		 psy_ui_colour_overlayed(&material.surface, &material.overlay, 0.3));
+		 psy_ui_colour_overlayed(&material.surface, &material.overlay, 0.2));
 	psy_ui_styles_set_style(self, STYLE_NEWMACHINE_SECTIONS_HEADER, style);		
 	
 	style = psy_ui_style_allocinit();
@@ -479,7 +479,7 @@ void init_host_styles(psy_ui_Styles* self, psy_ui_ThemeMode theme)
 	psy_ui_styles_set_style(self, STYLE_NEWMACHINE_SECTION_HEADER, style);
 	
 	style = psy_ui_style_allocinit();
-	psy_ui_style_set_margin_em(style, 0.5, 0.0, 0.5, 0.0);	
+	psy_ui_style_set_margin_em(style, 0.5, 0.0, 1.0, 0.0);	
 	psy_ui_styles_set_style(self, STYLE_NEWMACHINE_SEARCHBAR, style);
 	
 	style = psy_ui_style_allocinit();
@@ -505,15 +505,18 @@ void init_host_styles(psy_ui_Styles* self, psy_ui_ThemeMode theme)
 		psy_ui_style_clone(style));	
 	
 	style = psy_ui_style_allocinit();
-	psy_ui_style_set_padding_em(style, 0.2, 0.0, 0.2, 0.0);	
-	psy_ui_style_set_margin_em(style, 0.0, 0.0, 0.0, 3.0);
-	psy_ui_styles_set_style(self, STYLE_NEWMACHINE_SORTBAR, style);	
+	psy_ui_style_set_padding_em(style, 0.2, 0.0, 0.2, 0.0);
+	psy_ui_style_set_margin_em(style, 1.0, 0.0, 0.0, 0.0);
 	psy_ui_styles_set_style(self, STYLE_NEWMACHINE_FILTERBAR,
-		psy_ui_style_clone(style));		
-	
+		style);
+		
 	style = psy_ui_style_allocinit();
-	psy_ui_style_set_margin_em(style, 0.0, 0.0, 1.0, 0.0);
-	psy_ui_styles_set_style(self, STYLE_NEWMACHINE_CATEGORYBAR, style);	
+	psy_ui_border_init_bottom(&style->border, psy_ui_BORDER_SOLID,
+		material.surface_overlay_12p);
+	psy_ui_style_set_padding_em(style, 0.0, 0.0, 0.5, 0.0);
+	psy_ui_style_set_margin_em(style, 0.0, 0.0, 0.0, 1.0);
+	psy_ui_styles_set_style(self, STYLE_NEWMACHINE_FILTERBAR_LABEL,
+		style);		
 	
 	style = psy_ui_style_allocinit();
 	psy_ui_style_set_padding_em(style, 0.5, 0.5, 0.5, 2.0);
@@ -1126,13 +1129,11 @@ void init_light_theme(psy_ui_Styles* self)
 	style = psy_ui_style_allocinit();
 	psy_ui_style_set_padding_em(style, 0.2, 0.0, 0.2, 0.0);
 	psy_ui_style_set_margin_em(style, 0.0, 0.0, 0.0, 3.0);
-	psy_ui_styles_set_style(self, STYLE_NEWMACHINE_SORTBAR, style);
-	psy_ui_styles_set_style(self, STYLE_NEWMACHINE_FILTERBAR,
-		psy_ui_style_clone(style));
+	psy_ui_styles_set_style(self, STYLE_NEWMACHINE_FILTERBAR, style);
 
 	style = psy_ui_style_allocinit();
-	psy_ui_style_set_margin_em(style, 0.0, 0.0, 1.0, 0.0);
-	psy_ui_styles_set_style(self, STYLE_NEWMACHINE_CATEGORYBAR, style);
+	psy_ui_styles_set_style(self, STYLE_NEWMACHINE_FILTERBAR_LABEL,
+		style);		
 
 	style = psy_ui_style_allocinit();
 	psy_ui_style_set_padding_em(style, 0.5, 0.5, 0.5, 2.0);
@@ -1677,13 +1678,11 @@ void init_win98_theme(psy_ui_Styles* self)
 	style = psy_ui_style_allocinit();
 	psy_ui_style_set_padding_em(style, 0.2, 0.0, 0.2, 0.0);
 	psy_ui_style_set_margin_em(style, 0.0, 0.0, 0.0, 3.0);
-	psy_ui_styles_set_style(self, STYLE_NEWMACHINE_SORTBAR, style);
-	psy_ui_styles_set_style(self, STYLE_NEWMACHINE_FILTERBAR,
-		psy_ui_style_clone(style));
-
+	psy_ui_styles_set_style(self, STYLE_NEWMACHINE_FILTERBAR, style);
+	
 	style = psy_ui_style_allocinit();
-	psy_ui_style_set_margin_em(style, 0.0, 0.0, 1.0, 0.0);
-	psy_ui_styles_set_style(self, STYLE_NEWMACHINE_CATEGORYBAR, style);
+	psy_ui_styles_set_style(self, STYLE_NEWMACHINE_FILTERBAR_LABEL,
+		style);		
 
 	style = psy_ui_style_allocinit();
 	psy_ui_style_set_padding_em(style, 0.5, 0.5, 0.5, 2.0);

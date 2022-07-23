@@ -183,69 +183,55 @@ void dev_settransparency(psy_ui_x11_BitmapImp* self, psy_ui_Colour colour)
 
 void dev_preparemask(psy_ui_x11_BitmapImp* self, psy_ui_Colour clrtrans)
 {	
-	psy_ui_X11App* x11app;
 	psy_ui_RealSize size;
+	psy_ui_X11App* x11app;
 	int screen;
-	GC gc;	
-	XGCValues gcv;
-
-	if (!self->pixmap) {
-		return;
-	}
+	GC gc_src;
+	GC gc_dst;	
+	
 	x11app = (psy_ui_X11App*)psy_ui_app()->imp;
 	screen = DefaultScreen(x11app->dpy);
+	/* Get the dimensions of the source bitmap */	
+	size = dev_size(self);
+	if (size.width == 0 || size.height == 0) {
+		return;
+	}
 	/* Create the mask bitmap */
 	if (self->mask) {		
 		XFreePixmap(x11app->dpy, self->mask);
 		self->mask = 0;
 	}
-	size = dev_size(self);
-	if (size.width == 0 && size.height == 0) {
-		return;
-	}			
-	/*
-	** When blitting onto a monochrome bitmap from a color, pixels
-	** in the source color bitmap that are equal to the background
-	** color are blitted as white.All the remaining pixels are
-	** blitted as black.
-	*/
 	self->mask = XCreatePixmap(x11app->dpy,
-		DefaultRootWindow(x11app->dpy), (int)size.width, (int)size.height,
-		DefaultDepth(x11app->dpy, screen));
-	gc = XCreateGC(x11app->dpy, self->mask, 0, NULL);
-	XGetGCValues(x11app->dpy, gc, GCFunction, &gcv);
+		RootWindow(x11app->dpy, screen),
+		(int)size.width, (int)size.height,
+		1);
+	gc_src = XCreateGC(x11app->dpy, self->pixmap, 0, NULL);
+	gc_dst = XCreateGC(x11app->dpy, self->mask, 0, NULL);
 	/* Change the background to trans color */
-	XSetBackground(x11app->dpy, gc,
-		psy_ui_x11app_colourindex(x11app,
-			clrtrans));
-	/* This call sets up the mask bitmap. */
-	gcv.function = gcv.function = GXcopy;
-	XChangeGC(x11app->dpy, gc, GCFunction, &gcv);
-	/* This call sets up the mask bitmap. */
-	XCopyArea(x11app->dpy, self->pixmap, self->mask, gc,
-		0, 0, (int)size.width, (int)size.height, 0, 0);
-	XFreeGC(x11app->dpy, gc);
+	// XSetForeground(x11app->dpy, gc_dst, 
+	//	WhitePixel(x11app->dpy, screen));
+	XSetBackground(x11app->dpy, gc_dst, psy_ui_x11app_colourindex(
+		x11app, clrtrans));
+	/* This call sets up the mask bitmap. */	
+	XCopyPlane(x11app->dpy, self->pixmap, self->mask, gc_dst,
+		0, 0, (int)size.width, (int)size.height, 0, 0, 1);	
 	/*
 	** Now, we need to paint onto the original image, making
 	** sure that the "transparent" area is set to black. What
 	** we do is AND the monochrome image onto the color Image
 	** first. When blitting from mono to color, the monochrome
 	** pixel is first transformed as follows:
-	** if  1 (black) it is mapped to the color set by SetTextColor().
-	** if  0 (white) is is mapped to the color set by SetBkColor().
+	** if  1 (black) it is mapped to the color set by XSetForeground().
+	** if  0 (white) is is mapped to the color set by XSetBackground().
 	** Only then is the raster operation performed.
-	*/
-	gc = XCreateGC(x11app->dpy, self->pixmap, 0, NULL);
-	XSetForeground(x11app->dpy, gc,
-		psy_ui_x11app_colourindex(x11app, 
-			psy_ui_colour_make_rgb(255, 255, 255)));
-	XSetBackground(x11app->dpy, gc,
-		psy_ui_x11app_colourindex(x11app,
-			psy_ui_colour_make_rgb(0, 0, 0)));
-	gcv.function = GXand;
-	XCopyArea(x11app->dpy, self->mask, self->pixmap, gc,
-		0, 0, (int)size.width, (int)size.height, 0, 0);
-	XFreeGC(x11app->dpy, gc);
+	*/	
+	XSetForeground(x11app->dpy, gc_src, WhitePixel(x11app->dpy, screen));
+	XSetBackground(x11app->dpy, gc_src, BlackPixel(x11app->dpy, screen));
+	XSetFunction(x11app->dpy, gc_src, GXand);
+	XCopyPlane(x11app->dpy, self->mask, self->pixmap, gc_src,
+		0, 0, (int)size.width, (int)size.height, 0, 0, 1);
+	XFreeGC(x11app->dpy, gc_src);
+	XFreeGC(x11app->dpy, gc_dst);	
 }
 
 uintptr_t dev_native(psy_ui_x11_BitmapImp* self)

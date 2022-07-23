@@ -1,15 +1,17 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
 #include "custommachine.h"
-// dsp
+/* dsp */
 #include <operations.h>
-// std
+/* std */
 #include <stdlib.h>
 #include <string.h>
-// platform
+/* platform */
 #include "../../detail/portable.h"
 
 static void custommachine_init_memory(psy_audio_CustomMachine*, uintptr_t numframes);
@@ -66,11 +68,28 @@ static uintptr_t custommachine_buffermemorysize(psy_audio_CustomMachine*);
 static void custommachine_setbuffermemorysize(psy_audio_CustomMachine*, uintptr_t size);
 static uintptr_t custommachine_slot(psy_audio_CustomMachine*);
 static void custommachine_setslot(psy_audio_CustomMachine*, uintptr_t slot);
+
+static int16_t rand16(void)
+{
+	return ((int16_t)(32767.0 * ((double)rand() / (double)RAND_MAX)));
+}
+
 static void setposition(psy_audio_CustomMachine* self, double x, double y)
 {
-	self->x = x;
-	self->y = y;
+	assert(self);
+	
+	if (x == psy_audio_MACH_AUTO_POSITION) {
+		self->x = rand16() / 64.0;
+	} else {
+		self->x = x;
+	}
+	if (y == psy_audio_MACH_AUTO_POSITION) {		
+		self->y = rand16() / 80.0;
+	} else {
+		self->y = y;
+	}
 }
+
 static void position(psy_audio_CustomMachine* self, double* x, double* y)
 {
 	*x = self->x;

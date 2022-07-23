@@ -91,7 +91,7 @@ void psy_ui_lclaligner_align(psy_ui_LCLAligner* self, psy_ui_Component* group)
 	} else {
 		parentsize = size;
 	}
-	tm = psy_ui_component_textmetric(group);
+	tm = psy_ui_component_textmetric(group);	
 	psy_ui_realpoint_init(&cp_topleft);
 	psy_ui_realpoint_init_all(&cp_bottomright,
 		psy_ui_value_px(&size.width, tm, &parentsize),
@@ -120,7 +120,7 @@ void psy_ui_lclaligner_align(psy_ui_LCLAligner* self, psy_ui_Component* group)
 			componentsize = psy_ui_component_preferred_size(curr, &limit);
 			psy_ui_aligner_adjust_minmax_size(curr, tm, &componentsize,
 				&size);
-			c_tm = psy_ui_component_textmetric(curr);
+			c_tm = psy_ui_component_textmetric(curr);			
 			c_margin = psy_ui_component_margin(curr);
 			if (curr->align == psy_ui_ALIGN_CLIENT ||
 				curr->align == psy_ui_ALIGN_VCLIENT ||
@@ -223,12 +223,16 @@ void psy_ui_lclaligner_align(psy_ui_LCLAligner* self, psy_ui_Component* group)
 				cp_topleft.x += psy_ui_value_px(&c_margin.left, c_tm, &size);
 				psy_ui_component_setposition(curr,
 					psy_ui_rectangle_make(
-						psy_ui_point_make_px(cp_topleft.x,
-							cp_topleft.y +	psy_ui_value_px(&c_margin.top, c_tm, &size)),
+						psy_ui_point_make_px(
+							cp_topleft.x,
+							cp_topleft.y +	psy_ui_value_px(&c_margin.top,
+							c_tm, &size)),
 						psy_ui_size_make(
 							componentsize.width,
-							psy_ui_value_make_px(cp_bottomright.y - cp_topleft.y -
-								psy_ui_margin_height_px(&c_margin, c_tm, &size)))));
+							psy_ui_value_make_px(
+								cp_bottomright.y - cp_topleft.y -
+								psy_ui_margin_height_px(&c_margin,
+								c_tm, &size)))));
 				cp_topleft.x += psy_ui_value_px(&c_margin.right, c_tm, &size);
 				cp_topleft.x += psy_ui_value_px(&componentsize.width, c_tm, &size);
 				if (cpymax < cp_topleft.y +

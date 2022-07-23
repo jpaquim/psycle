@@ -14,6 +14,8 @@ enum {
 	psy_audio_SUPPORTS_INSTRUMENTS = 128
 };
 
+#define psy_audio_MACH_AUTO_POSITION -1.0
+
 typedef enum {
 	psy_audio_MACHMODE_GENERATOR = 0,
 	psy_audio_MACHMODE_FX = 1,

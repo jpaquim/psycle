@@ -74,7 +74,7 @@ void* module_load(const char* path, int* err)
 {
 	void* rv;
 
-	rv = dlopen(path, RTLD_LAZY /*RTLD_NOW*/);
+	rv = dlopen(path, RTLD_LAZY /*RTLD_NOW*/);	
 	if (rv == 0) {
 		*err = (dlerror()) ? 1 : 0;
 		perror("library load ");

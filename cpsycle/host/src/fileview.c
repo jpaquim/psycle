@@ -348,7 +348,7 @@ void filebox_init(FileBox* self, psy_ui_Component* parent)
 #if defined(DIVERSALIS__OS__MICROSOFT)
 	psy_path_set_prefix(&self->curr_dir, "C:\\");	
 #else	
-	psy_path_set_prefix(&self->curr_dir, "//");	
+	psy_path_set_prefix(&self->curr_dir, "/");	
 #endif
 	psy_signal_init(&self->signal_selected);
 	psy_signal_init(&self->signal_dir_changed);

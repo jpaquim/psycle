@@ -105,8 +105,13 @@ void pluginscanthread_start(PluginScanThread* self)
 		self->scantaskstart = 0;
 		free(self->scanfilename);
 		self->scanplugintype = psy_audio_UNDEFINED;
+#ifdef PSYCLE_THREAD_PLUGIN_SCAN		
 		psy_thread_start(&self->pluginscanthread, self,
-			pluginscanthread);
+			pluginscanthread);		
+#else		
+		pluginscanthread(self);
+#endif		
+			
 	}
 }
 

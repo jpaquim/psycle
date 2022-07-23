@@ -76,29 +76,75 @@ typedef struct NewMachineSectionBar {
 void newmachinesectionbar_init(NewMachineSectionBar*, psy_ui_Component* parent,
 	Workspace*);
 
+/* NewMachineFilterGroup */
+typedef struct NewMachineFilterGroup {
+	/* inherits */
+	psy_ui_Component component;
+	/* signals */
+	psy_Signal signal_selected;
+	/* intern */
+	psy_ui_Component header;
+	psy_ui_Label desc;
+	psy_ui_Component types;
+	psy_ui_Component client;	
+} NewMachineFilterGroup;
+
+void newmachinefiltergroup_init(NewMachineFilterGroup*,
+	psy_ui_Component* parent, const char* label);
+	
+void newmachinefiltergroup_add(NewMachineFilterGroup*,
+	const char* label, uintptr_t id);
+void newmachinefiltergroup_set(NewMachineFilterGroup*,
+	uintptr_t id, bool);
+void newmachinefiltergroup_mark(NewMachineFilterGroup*,
+	uintptr_t id);	
+void newmachinefiltergroup_unmark(NewMachineFilterGroup*,
+	uintptr_t id);	
+	
 /* NewMachineSortBar */
 typedef struct NewMachineSortBar {
 	/* inherits */
-	psy_ui_Component component;
-	/* intern */
-	psy_ui_Label desc;
-	psy_ui_Button sortbyfavorite;
-	psy_ui_Button sortbyname;
-	psy_ui_Button sortbytype;
-	psy_ui_Button sortbymode;
+	NewMachineFilterGroup group;
 	/* references */
 	NewMachineSort* sort;	
 } NewMachineSortBar;
 
 void newmachinesortbar_init(NewMachineSortBar*, psy_ui_Component* parent,
 	NewMachineSort*);
+	
+INLINE psy_ui_Component* newmachinesortbar_base(NewMachineSortBar* self)
+{
+	return &self->group.component;
+}	
 
 /* NewMachineFilterBar */
+
+typedef struct NewMachineModeBar {
+	/* inherits */
+	NewMachineFilterGroup group;
+	/* intern */
+	psy_ui_Button gen;
+	psy_ui_Button effects;	
+	/* references */
+	NewMachineFilter* filter;
+} NewMachineModeBar;
+
+void newmachinemodebar_init(NewMachineModeBar*, psy_ui_Component* parent,
+	NewMachineFilter*);
+
+void newmachinemodebar_setfilter(NewMachineModeBar*, NewMachineFilter*);
+void newmachinemodebar_update(NewMachineModeBar*);
+
+INLINE psy_ui_Component* newmachinemodebar_base(NewMachineModeBar* self)
+{
+	return &self->group.component;
+}
+
+
 typedef struct NewMachineFilterBar {
 	/* inherits */
-	psy_ui_Component component;	
+	NewMachineFilterGroup group;
 	/* intern */
-	psy_ui_Label desc;
 	psy_ui_Button gen;
 	psy_ui_Button effects;
 	psy_ui_Button intern;
@@ -116,12 +162,16 @@ void newmachinefilterbar_init(NewMachineFilterBar*, psy_ui_Component* parent,
 void newmachinefilterbar_setfilter(NewMachineFilterBar*, NewMachineFilter*);
 void newmachinefilterbar_update(NewMachineFilterBar*);
 
+INLINE psy_ui_Component* newmachinefilterbar_base(NewMachineFilterBar* self)
+{
+	return &self->group.component;
+}
+
 /* NewMachineCategoryBar */
 typedef struct NewMachineCategoryBar {
 	/* inherits */
-	psy_ui_Component component;
-	/* intern */
-	psy_ui_Component client;	
+	NewMachineFilterGroup group;
+	/* intern */	
 	/* references */
 	NewMachineFilter* filter;
 	psy_audio_PluginCatcher* plugincatcher;
@@ -132,6 +182,12 @@ void newmachinecategorybar_init(NewMachineCategoryBar*, psy_ui_Component* parent
 
 void newmachinecategorybar_setfilter(NewMachineCategoryBar*, NewMachineFilter*);
 void newmachinecategorybar_build(NewMachineCategoryBar*);
+
+
+INLINE psy_ui_Component* newmachinecategorybar_base(NewMachineCategoryBar* self)
+{
+	return &self->group.component;
+}
 
 typedef struct NewMachineSectionsHeader {
 	/* inherits */
@@ -164,6 +220,10 @@ typedef struct NewMachineSectionsPane {
 void newmachinesectionspane_init(NewMachineSectionsPane*,
 	psy_ui_Component* parent, struct NewMachine*, Workspace*);
 
+NewMachineSectionsPane* newmachinesectionspane_alloc(void);
+NewMachineSectionsPane* newmachinesectionspane_allocinit(
+	psy_ui_Component* parent, struct NewMachine*, Workspace*);
+
 void newmachinesectionspane_checkselections(NewMachineSectionsPane*,
 	PluginsView* sender);
 
@@ -176,17 +236,17 @@ typedef struct NewMachine {
 	/* ui elements */
 	psy_ui_Notebook notebook;
 	NewMachineSearchBar searchbar;
-	psy_ui_Button horizontal;
-	psy_ui_Button vertical;	
 	psy_ui_Component client;	
-	psy_ui_Component pluginsheaderbars;
 	psy_ui_Label pluginslabel;
+	psy_ui_Component filtersbar;
+	psy_ui_Component expandfiltersbar;
+	psy_ui_Component filters;
+	psy_ui_Button togglefilters;
+	NewMachineModeBar modebar;
 	NewMachineFilterBar filterbar;
 	NewMachineSortBar sortbar;
 	NewMachineCategoryBar categorybar;
-	NewMachineSectionsPane sectionspane0;
-	NewMachineSectionsPane sectionspane1;
-	psy_ui_Component spacer;
+	psy_ui_Component sections;	
 	NewMachineDetail detail;
 	PluginScanView scanview;
 	NewMachineSectionBar sectionbar;
@@ -203,6 +263,7 @@ typedef struct NewMachine {
 	psy_Property* selectedplugin;
 	NewMachineFilter* currfilter;
 	NewMachineSection* selectedsection;	
+	NewMachineSectionsPane* curr_sections_pane;
 } NewMachine;
 
 void newmachine_init(NewMachine*, psy_ui_Component* parent, Workspace*);

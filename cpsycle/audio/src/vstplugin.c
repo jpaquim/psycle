@@ -286,7 +286,7 @@ bool psy_audio_plugin_vst_test(const char* path, psy_audio_MachineInfo* rv)
 	if (path && strcmp(path, "") != 0) {
 		psy_Library library;
 		PluginEntryProc mainentry;	
-		
+				
 		psy_library_init(&library);		
 		psy_library_load(&library, path);
 		if (!psy_library_empty(&library)) {

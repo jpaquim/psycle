@@ -87,7 +87,7 @@ void psy_ui_listboxclient_on_size(psy_ui_ListBoxClient* self)
 
 void psy_ui_listboxclient_on_draw(psy_ui_ListBoxClient* self, psy_ui_Graphics* g)
 {
-	psy_TableIterator it;
+	uintptr_t i;
 	const psy_ui_TextMetric* tm;
 	psy_ui_RealSize size;
 	psy_ui_RealPoint cp;	
@@ -97,14 +97,11 @@ void psy_ui_listboxclient_on_draw(psy_ui_ListBoxClient* self, psy_ui_Graphics* g
 	size = psy_ui_component_scroll_size_px(&self->component);
 	line_height = floor(tm->tmHeight * 1.2);
 	cp = psy_ui_realpoint_zero();
-	for (it = psy_table_begin(&self->items);
-		!psy_tableiterator_equal(&it, psy_table_end());
-		psy_tableiterator_inc(&it)) {
+	for (i = 0; i < psy_table_size(&self->items); ++i) {		
 		char* itemtext;
 
-		itemtext = (char*)psy_tableiterator_value(&it);
-		if (self->selindex != -1 && self->selindex == (intptr_t)
-				psy_tableiterator_key(&it)) {			
+		itemtext = (char*)psy_table_at(&self->items, i);
+		if (self->selindex != -1 && self->selindex == i) {			
 			psy_ui_drawsolidrectangle(g,
 				psy_ui_realrectangle_make(cp,
 					psy_ui_realsize_make(size.width, line_height)),
@@ -133,11 +130,13 @@ void psy_ui_listboxclient_on_mouse_down(psy_ui_ListBoxClient* self,
 {
 	const psy_ui_TextMetric* tm;
 	intptr_t index;
+	double line_height;
 
 	tm = psy_ui_component_textmetric(&self->component);
-	index = (intptr_t)(psy_ui_mouseevent_pt(ev).y / (intptr_t)(tm->tmHeight * 1.2));
+	line_height = floor(tm->tmHeight * 1.2);	
+	index = (intptr_t)(psy_ui_mouseevent_pt(ev).y / line_height);	
 	if (index < (intptr_t)psy_table_size(&self->items)) {
-		self->selindex = index;
+		self->selindex = index;		
 		psy_ui_component_invalidate(&self->component);
 		psy_signal_emit(&self->signal_selchanged, self, 0);
 	}
@@ -313,7 +312,7 @@ void psy_ui_listbox_onselchanged(psy_ui_ListBox* self, psy_ui_ListBoxClient* sen
 {
 	intptr_t sel;
 
-	sel = psy_ui_listbox_cursel(self);
+	sel = psy_ui_listbox_cursel(self);	
 	psy_signal_emit(&self->signal_selchanged, self, 1, sel);
 }
 

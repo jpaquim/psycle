@@ -1042,7 +1042,9 @@ void mainframe_on_exit(MainFrame* self, psy_ui_Component* sender)
 
 bool mainframe_on_close(MainFrame* self)
 {
+	printf("save configuration\n");
 	workspace_save_configuration(&self->workspace);
+	printf("saved configuration\n");
 	if (keyboardmiscconfig_savereminder(&self->workspace.config.misc) &&
 			workspace_song_modified(&self->workspace)) {
 		workspace_select_view(&self->workspace,

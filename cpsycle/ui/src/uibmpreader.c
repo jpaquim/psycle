@@ -223,7 +223,7 @@ int psy_ui_bmpreader_load(psy_ui_BmpReader* self, const char* path)
 						psy_ui_graphics_dispose(&gc);	
 						fclose(fp);
 						return PSY_ERRFILEFORMAT;
-					}
+					}					
 					psy_ui_colour_init_rgb(&colour, r, g, b);
 					psy_ui_drawsolidrectangle(&gc,
 						psy_ui_realrectangle_make(
