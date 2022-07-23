@@ -75,7 +75,7 @@ unsigned int psy_ui_x11_cursors_shape(psy_ui_x11_Cursors* self,
 	case psy_ui_CURSORSTYLE_NOT_ALLOWED:
 		return XC_arrow;
 	case psy_ui_CURSORSTYLE_ROW_RESIZE:
-		return XC_arrow;	
+		return XC_sb_v_double_arrow;
 	case psy_ui_CURSORSTYLE_CROSSHAIR:
 		return XC_tcross;	
 	case psy_ui_CURSORSTYLE_PROGRESS:

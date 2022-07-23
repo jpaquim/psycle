@@ -227,7 +227,7 @@ void psy_ui_componentstyle_setpreferredheight(psy_ui_ComponentStyle* self, psy_u
 void psy_ui_componentstyle_setpreferredwidth(psy_ui_ComponentStyle* self, psy_ui_Value width)
 {
 	psy_ui_componentstyle_usesizehints(self);
-	self->sizehints->preferredsize.width = width;	
+	self->sizehints->preferredsize.width = width;
 }
 
 void psy_ui_componentstyle_setmaximumsize(psy_ui_ComponentStyle* self, psy_ui_Size size)

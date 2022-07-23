@@ -49,22 +49,26 @@ static int psy_audio_psy3loader_read_virg(psy_audio_PSY3Loader*);
 
 static int psy_audio_psy3loader_loadxminstrument(psy_audio_PSY3Loader*,
 	psy_audio_Instrument*, bool islegacy, uint32_t legacyversion);
-static int psy_audio_psy3loader_xminstrumentenvelopeload(psy_audio_PSY3Loader*,
-	psy_dsp_Envelope* envelope,
+static int psy_audio_psy3loader_xminstrumentenvelopeload(
+	psy_audio_PSY3Loader*, psy_dsp_Envelope* envelope,
 	bool legacy, uint32_t legacyversion);
-static int psy_audio_psy3loader_xmloadwav(psy_audio_PSY3Loader*, psy_audio_Sample* rv);
-static int psy_audio_psy3loader_loadwavesubchunk(psy_audio_PSY3Loader*, int32_t instrIdx,
-	int32_t pan, char * instrum_name, int32_t fullopen, int32_t loadIdx);
+static int psy_audio_psy3loader_xmloadwav(psy_audio_PSY3Loader*,
+	psy_audio_Sample* rv);
+static int psy_audio_psy3loader_loadwavesubchunk(psy_audio_PSY3Loader*,
+	int32_t instrIdx, int32_t pan, char * instrum_name,
+	int32_t fullopen, int32_t loadIdx);
 static int psy_audio_psy3loader_machineloadchunk(psy_audio_PSY3Loader*,
 	int32_t index);
 static int psy_audio_psy3loader_machineloadchunk_createmachine(
-	psy_audio_PSY3Loader*, int32_t index, char* modulename, char* catchername,
-	bool* rv_replaced, psy_audio_Machine** rv_machine);
+	psy_audio_PSY3Loader*, int32_t index, char* modulename,
+	char* catchername, bool* rv_replaced,
+	psy_audio_Machine** rv_machine);
 static int psy_audio_psy3loader_loadparammapping(psy_audio_PSY3Loader*,
 	psy_audio_Machine*);
 static int psy_audio_psy3loader_loadismachinebus(psy_audio_PSY3Loader*,
 	psy_audio_Machine*);
-static void psy_audio_psy3loader_setinstrumentnames(psy_audio_PSY3Loader*);
+static void psy_audio_psy3loader_setinstrumentnames(
+	psy_audio_PSY3Loader*);
 static void psy_audio_psy3loader_postload(psy_audio_PSY3Loader*);
 
 /* implementation */
@@ -142,7 +146,8 @@ int psy_audio_psy3loader_readversion(psy_audio_PSY3Loader* self)
 			"This file is from a newer version of Psycle! "
 			"This process will try to load it anyway.\n");
 	}
-	if (status = psyfile_read(self->fp, &self->fp->chunkcount, sizeof(uint32_t))) {
+	if (status = psyfile_read(self->fp, &self->fp->chunkcount,
+			sizeof(uint32_t))) {
 		return status;
 	}
 	if (self->fp->fileversion >= 8) {
@@ -266,7 +271,8 @@ void psy_audio_psy3loader_setinstrumentnames(psy_audio_PSY3Loader* self)
 		sample = psy_audio_samples_at(&self->song->samples,
 			psy_audio_sampleindex_make(psy_tableiterator_key(&it), 0));
 		if (sample) {
-			psy_audio_instrument_setname(instrument, psy_audio_sample_name(sample));
+			psy_audio_instrument_setname(instrument,
+				psy_audio_sample_name(sample));
 		}
 	}
 }
@@ -281,16 +287,20 @@ int psy_audio_psy3loader_read_info(psy_audio_PSY3Loader* self)
 	char comments[65536];	
 	psy_audio_SongProperties songproperties;
 
-	if (status = psyfile_readstring(self->fp, name, sizeof name)) {
+	if (status = psyfile_readstring(self->fp, name,
+			sizeof(name))) {
 		return status;
 	}
-	if (status = psyfile_readstring(self->fp, author, sizeof author)) {
+	if (status = psyfile_readstring(self->fp, author,
+			sizeof(author))) {
 		return status;
 	}
-	if (status = psyfile_readstring(self->fp, comments, sizeof comments)) {
+	if (status = psyfile_readstring(self->fp, comments,
+			sizeof(comments))) {
 		return status;
 	}
-	psy_audio_songproperties_init(&songproperties, name, author, comments);
+	psy_audio_songproperties_init(&songproperties, name, author,
+		comments);
 	psy_audio_song_setproperties(self->song, &songproperties);
 	/* bugfix. There were songs with incorrect size. */
 	if (psyfile_currchunkversion(self->fp) == 0) {
@@ -328,7 +338,8 @@ int psy_audio_psy3loader_read_sngi(psy_audio_PSY3Loader* self)
 	songtracks = temp;
 	psy_audio_song_setnumsongtracks(self->song, songtracks);
 	/* bpm */
-	{ /* \todo: this was a hack added in 1.9alpha to allow decimal bpm values */
+	{ /* \todo: this was a hack added in 1.9alpha to allow decimal bpm
+				values */
 		int32_t bpmcoarse;
 		int32_t bpmfine;		
 		short temp16 = 0;
@@ -341,7 +352,8 @@ int psy_audio_psy3loader_read_sngi(psy_audio_PSY3Loader* self)
 			return status;
 		}
 		bpmfine = temp16;
-		psy_audio_song_setbpm(self->song, bpmcoarse + (bpmfine / 100.0));
+		psy_audio_song_setbpm(self->song, bpmcoarse +
+			(bpmfine / 100.0));
 	}
 	/* linesperbeat */
 	if (status = psyfile_read(self->fp, &temp, sizeof temp)) {
@@ -410,7 +422,8 @@ int psy_audio_psy3loader_read_sngi(psy_audio_PSY3Loader* self)
 		}		
 	}
 	if (tracksoloed >= 0) {
-		psy_audio_patterns_setsolotrack(&self->song->patterns, tracksoloed);
+		psy_audio_patterns_setsolotrack(&self->song->patterns,
+			tracksoloed);
 	}
 	if(self->fp->currchunk.version == 0) {
 		/*
@@ -2330,7 +2343,8 @@ int psy_audio_psy3loader_machineloadchunk(
 		if (status = psyfile_read(self->fp, &y, sizeof(y))) {
 			return status;
 		}
-		if (psyfile_skip(self->fp, 2 * sizeof(int32_t)) == -1) {	/* numInputs, numOutputs */
+		/* numInputs, numOutputs */
+		if (psyfile_skip(self->fp, 2 * sizeof(int32_t)) == -1) {
 			return PSY_ERRFILE;
 		}		
 		psy_audio_machine_setposition(machine, x, y);		

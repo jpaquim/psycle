@@ -228,7 +228,7 @@ void fontbox_on_family_selected(FontBox* self, psy_ui_Component* sender, intptr_
 		char text[512];
 		psy_ui_FontInfo fontinfo;
 
-		psy_ui_combobox_text(&self->family, text);				
+		psy_ui_combobox_text_at(&self->family, text, index);		
 		psy_ui_fontinfo_init_string(&fontinfo,
 			psy_property_item_str(self->property));
 		psy_snprintf(fontinfo.lfFaceName, 32, "%s", text);

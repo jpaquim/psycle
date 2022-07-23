@@ -24,7 +24,8 @@ static void psy_ui_x11_font_imp_dispose(psy_ui_x11_FontImp*);
 static void psy_ui_x11_font_imp_copy(psy_ui_x11_FontImp*,
 	psy_ui_x11_FontImp* other);
 static psy_ui_FontInfo dev_fontinfo(psy_ui_x11_FontImp*);
-static const psy_ui_TextMetric* dev_textmetric(const psy_ui_x11_FontImp*);
+static const psy_ui_TextMetric* dev_textmetric(const
+	psy_ui_x11_FontImp*);
 static bool dev_equal(const psy_ui_x11_FontImp*,
 	const psy_ui_x11_FontImp* other);
 static psy_ui_Size dev_textsize(const psy_ui_x11_FontImp*,
@@ -86,8 +87,10 @@ void psy_ui_x11_fontimp_init(psy_ui_x11_FontImp* self, const psy_ui_FontInfo*
 				DefaultScreen(x11app->dpy),
 				fontinfo->lfFaceName);
 		}
+		self->lfHeight = fontinfo->lfHeight;
 	} else {
-		self->hfont = 0;		
+		self->hfont = 0;
+		self->lfHeight = 12;
 	}
 }
 
@@ -112,17 +115,32 @@ void psy_ui_x11_font_imp_copy(psy_ui_x11_FontImp* self,
 	if (other->hfont) {
 		self->hfont = XftFontCopy(x11app->dpy, other->hfont);	
 		self->tmcachevalid = other->tmcachevalid;
+		self->lfHeight = other->lfHeight;
 		if (other->tmcachevalid) {
 			self->tmcache = other->tmcache;
-		}
+		}		
+	} else {
+		self->tmcachevalid = FALSE;
 	}
 }
 
 psy_ui_FontInfo dev_fontinfo(psy_ui_x11_FontImp* self)
-{
+{		
 	psy_ui_FontInfo rv;
 	
-	psy_ui_fontinfo_init(&rv, "arial", 12);
+	if (self->hfont) {
+		FcChar8 *name;
+		
+		name = NULL;	
+		if (FcPatternGetString(self->hfont->pattern, FC_FAMILY, 0,
+				&name) == FcResultMatch) {
+			psy_ui_fontinfo_init(&rv, name, self->lfHeight);
+		} else {
+			psy_ui_fontinfo_init(&rv, "FreeSans", self->lfHeight);
+		}
+		return rv;
+	}
+	psy_ui_fontinfo_init(&rv, "FreeSans", self->lfHeight);
 	return rv;
 }
 
@@ -130,15 +148,16 @@ const psy_ui_TextMetric* dev_textmetric(const psy_ui_x11_FontImp* self)
 {
 	psy_ui_TextMetric rv;	
 	
-	psy_ui_textmetric_init(&rv);
+	psy_ui_textmetric_init(&rv);	
 	if (!self->hfont) {		
 		((psy_ui_x11_FontImp*)self)->tmcache = rv;
-	} else if (!self->tmcachevalid) {					
-		rv.tmHeight = self->hfont->height;		
+	} else if (!self->tmcachevalid) {		
+		rv.tmHeight = self->hfont->height;
 		rv.tmAscent = self->hfont->ascent;
 		rv.tmDescent = self->hfont->descent;		
 		rv.tmMaxCharWidth = self->hfont->max_advance_width;
-		rv.tmAveCharWidth = self->hfont->max_advance_width / 4;
+		/* todo monospace */
+		rv.tmAveCharWidth = self->hfont->max_advance_width / 4.0;
 		rv.tmInternalLeading = 0;
 		rv.tmExternalLeading = 0;		
 		((psy_ui_x11_FontImp*)self)->tmcache = rv;
@@ -147,51 +166,8 @@ const psy_ui_TextMetric* dev_textmetric(const psy_ui_x11_FontImp* self)
 	return &self->tmcache;
 }
 
-/*
-LOGFONT logfont(psy_ui_FontInfo lf)
-{
-	LOGFONT rv;
-
-	rv.lfHeight = lf.lfHeight;
-	rv.lfWidth = lf.lfWidth;
-	rv.lfEscapement = lf.lfEscapement;
-	rv.lfOrientation = lf.lfOrientation;
-	rv.lfWeight = lf.lfWeight;
-	rv.lfItalic = lf.lfItalic;
-	rv.lfUnderline = lf.lfUnderline;
-	rv.lfStrikeOut = lf.lfStrikeOut;
-	rv.lfCharSet = lf.lfCharSet;
-	rv.lfOutPrecision = lf.lfOutPrecision;
-	rv.lfClipPrecision = lf.lfClipPrecision;
-	rv.lfQuality = lf.lfQuality;
-	rv.lfPitchAndFamily = lf.lfPitchAndFamily;
-	memcpy(rv.lfFaceName, lf.lfFaceName, 32); // TODO UNICODE
-	return rv;
-}
-
-psy_ui_FontInfo psy_ui_fontinfo(LOGFONT lf)
-{
-	psy_ui_FontInfo rv;
-
-	rv.lfHeight = lf.lfHeight;
-	rv.lfWidth = lf.lfWidth;
-	rv.lfEscapement = lf.lfEscapement;
-	rv.lfOrientation = lf.lfOrientation;
-	rv.lfWeight = lf.lfWeight;
-	rv.lfItalic = lf.lfItalic;
-	rv.lfUnderline = lf.lfUnderline;
-	rv.lfStrikeOut = lf.lfStrikeOut;
-	rv.lfCharSet = lf.lfCharSet;
-	rv.lfOutPrecision = lf.lfOutPrecision;
-	rv.lfClipPrecision = lf.lfClipPrecision;
-	rv.lfQuality = lf.lfQuality;
-	rv.lfPitchAndFamily = lf.lfPitchAndFamily;
-	memcpy(rv.lfFaceName, lf.lfFaceName, 32); // TODO UNICODE
-	return rv;
-}
-*/
-
-bool dev_equal(const psy_ui_x11_FontImp* self, const psy_ui_x11_FontImp* other)
+bool dev_equal(const psy_ui_x11_FontImp* self, const
+	psy_ui_x11_FontImp* other)
 {
 	return (self->hfont == other->hfont);
 }

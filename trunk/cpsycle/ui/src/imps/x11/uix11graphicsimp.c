@@ -167,6 +167,7 @@ static void x11_imp_vtable_init(psy_ui_x11_GraphicsImp* self)
 	self->imp.vtable = &x11_imp_vtable;
 }
 
+/* implementation */
 void psy_ui_x11_graphicsimp_init(psy_ui_x11_GraphicsImp* self, 
 	PlatformXtGC* platformgc)
 {
@@ -185,9 +186,9 @@ void psy_ui_x11_graphicsimp_init(psy_ui_x11_GraphicsImp* self,
 		self->visual,
 	    DefaultColormap(self->display, screen));
 	self->defaultfont = XftFontOpenXlfd(self->display,
-		screen, "arial");
+		screen, "FreeSans");
 	if (!self->defaultfont) {
-		self->defaultfont = XftFontOpenName(self->display, screen, "arial");
+		self->defaultfont = XftFontOpenName(self->display, screen, "FreeSans");
 	}
 	self->xftfont = self->defaultfont;
 	XftColorAllocName(self->display,
@@ -256,7 +257,6 @@ void psy_ui_x11_graphicsimp_updatexft(psy_ui_x11_GraphicsImp* self)
 	    DefaultColormap(self->display, DefaultScreen(self->display)));	
 }
 
-// xt implementation method for psy_ui_Graphics
 void psy_ui_x11_g_imp_dispose(psy_ui_x11_GraphicsImp* self)
 {		
 	XDestroyRegion(self->region);	
@@ -461,56 +461,22 @@ void psy_ui_x11_g_imp_drawbitmap(psy_ui_x11_GraphicsImp* self,
 	psy_ui_Bitmap* bitmap, double x, double y, double width,
 	double height, double xsrc, double ysrc)
 {
-	psy_ui_x11_BitmapImp* imp;
-    Pixmap xtbitmap;
+	psy_ui_x11_BitmapImp* imp;    
     
     if (!bitmap->imp) {
 		return;
 	}    
     imp = (psy_ui_x11_BitmapImp*)bitmap->imp;    
     if (imp->pixmap) {  
-		if (imp->mask) {
-			XGCValues gcv;
-			int func;
-			// uint32_t restoretextcolour;
-			/*
-			** We are going to paint the two DDB's in sequence to the destination.
-			** 1st the monochrome bitmap will be blitted using an AND operation to
-			** cut a hole in the destination. The color image will then be ORed
-			** with the destination, filling it into the hole, but leaving the
-			** surrounding area untouched.
-			*/
-			// SelectObject(hdcmem, winimp->mask);
-			// restoretextcolour = GetTextColor(self->hdc);
-			// SetTextColor(self->hdc, RGB(0, 0, 0));
-			// SetBkColor(self->hdc, RGB(255, 255, 255));
-			// BitBlt(self->hdc, (int)x - (int)(self->org.x), (int)y - (int)(self->org.y), (int)width, (int)height, hdcmem, (int)xsrc, (int)ysrc, SRCAND);
-			// SelectObject(hdcmem, wbitmap);
-			/* Also note the use of SRCPAINT rather than SRCCOPY. */
-			// BitBlt(self->hdc, (int)x - (int)(self->org.x), (int)y - (int)(self->org.y), (int)width, (int)height, hdcmem, (int)xsrc, (int)ysrc, SRCPAINT);			
-			XGetGCValues(self->display, self->gc, GCFunction, &gcv);	
-			func = gcv.function;
-			gcv.function = GXand;
-			XChangeGC(self->display, self->gc, GCFunction, &gcv);
-			XCopyArea(self->display, imp->mask, self->window, self->gc,
-				xsrc, ysrc, width, height,
-				x - (int)(self->org.x),
-				y - (int)(self->org.y));
-			gcv.function = gcv.function = GXor;
-			XChangeGC(self->display, self->gc, GCFunction, &gcv);
-			XCopyArea(self->display, imp->pixmap, self->window, self->gc,
-				xsrc, ysrc, width, height,
-				x - (int)(self->org.x),
-				y - (int)(self->org.y));
-			gcv.function = func;
-			XChangeGC(self->display, self->gc, GCFunction, &gcv);
-			// SetTextColor(self->hdc, restoretextcolour);
-		} else {
-			XCopyArea(self->display, imp->pixmap, self->window, self->gc,
-				xsrc, ysrc, width, height,
+		if (imp->mask) {			
+			XSetClipMask(self->display, self->gc, imp->mask);
+			XSetClipOrigin(self->display, self->gc, 
 				x - (int)(self->org.x),
 				y - (int)(self->org.y));
 		}
+		XCopyArea(self->display, imp->pixmap, self->window, self->gc,
+			xsrc, ysrc, width, height, x - (int)(self->org.x),
+			y - (int)(self->org.y));		
     }
 }
 
@@ -549,7 +515,7 @@ void psy_ui_x11_g_imp_setbackgroundmode(psy_ui_x11_GraphicsImp* self,
 void psy_ui_x11_g_imp_setbackgroundcolour(psy_ui_x11_GraphicsImp* self,
     psy_ui_Colour color)
 {
-	psy_ui_X11App* x11app;		
+	psy_ui_X11App* x11app;
 
 	x11app = (psy_ui_X11App*)psy_ui_app()->imp;
 	self->textbackgroundcolor = color;

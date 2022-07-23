@@ -885,7 +885,7 @@ psy_List* psy_ui_x11app_fonts(psy_ui_X11App* self)
     if (os) {		
 		FcObjectSetDestroy(os);
 	}    
-	FcPatternDestroy(pat);	
+	FcPatternDestroy(pat);
 	for (j = 0; j < fs->nfont; j++) {	    
 		FcChar8 *file;
 		
