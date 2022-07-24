@@ -457,9 +457,7 @@ void init_host_styles(psy_ui_Styles* self, psy_ui_ThemeMode theme)
 	
 	style = psy_ui_style_allocinit();
 	psy_ui_style_set_margin_em(style, 0.0, 0.0, 0.5, 0.0);
-	psy_ui_style_set_padding_em(style, 1.0, 0.0, 0.0, 0.0);
-	psy_ui_border_init_top(&style->border, psy_ui_BORDER_SOLID,
-		 psy_ui_colour_overlayed(&material.surface, &material.overlay, 0.2));
+	psy_ui_style_set_padding_em(style, 0.0, 0.0, 0.0, 0.0);	
 	psy_ui_styles_set_style(self, STYLE_NEWMACHINE_SECTIONS_HEADER, style);		
 	
 	style = psy_ui_style_allocinit();
@@ -471,7 +469,7 @@ void init_host_styles(psy_ui_Styles* self, psy_ui_ThemeMode theme)
 	psy_ui_style_set_padding_em(style, 0.5, 0.5, 1.0, 1.0);
 	psy_ui_border_init_solid(&style->border,
 		psy_ui_colour_overlayed(&material.surface, &material.secondary, 0.30));
-	psy_ui_border_setradius_px(&style->border, 6.0);	
+	psy_ui_border_setradius_px(&style->border, 6.0);
 	psy_ui_styles_set_style(self, STYLE_NEWMACHINE_SECTION_SELECTED, style);
 	
 	style = psy_ui_style_allocinit();	
@@ -487,8 +485,7 @@ void init_host_styles(psy_ui_Styles* self, psy_ui_ThemeMode theme)
 	psy_ui_border_init_solid(&style->border,
 		psy_ui_colour_overlayed(&material.surface, &material.overlay, 0.20));
 	psy_ui_border_setradius_px(&style->border, 6.0);	
-	psy_ui_style_set_padding_em(style, 0.3, 0.3, 0.3, 0.0);
-	psy_ui_style_set_margin_em(style, 0.0, 8.0, 0.0, 0.0);	
+	psy_ui_style_set_padding_em(style, 0.3, 0.3, 0.3, 0.0);	
 	psy_ui_styles_set_style(self, STYLE_SEARCHFIELD, style);
 	
 	style = psy_ui_style_clone(style);	
@@ -521,6 +518,14 @@ void init_host_styles(psy_ui_Styles* self, psy_ui_ThemeMode theme)
 	style = psy_ui_style_allocinit();
 	psy_ui_style_set_padding_em(style, 0.5, 0.5, 0.5, 2.0);
 	psy_ui_styles_set_style(self, STYLE_NEWMACHINE_DETAIL, style);
+	
+	style = psy_ui_style_allocinit();
+	psy_ui_border_init_solid(&style->border,
+		 psy_ui_colour_overlayed(&material.surface, &material.overlay, 0.2));
+	psy_ui_border_setradius_px(&style->border, 6.0);		 
+	psy_ui_style_set_margin_em(style, 0.5, 0.0, 0.0, 0.0);
+	psy_ui_style_set_padding_em(style, 0.0, 1.0, 0.0, 0.0);
+	psy_ui_styles_set_style(self, STYLE_NEWMACHINE_DETAIL_GROUP, style);
 	
 	style = psy_ui_style_allocinit();
 	psy_ui_border_init_solid(&style->border,

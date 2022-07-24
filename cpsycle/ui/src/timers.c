@@ -28,6 +28,7 @@ void psy_timertask_init(psy_TimerTask* self, uintptr_t id,
 	self->customid = customid;
 	self->interval = interval;
 	self->counter = 0;
+	self->expired = FALSE;
 }
 
 psy_TimerTask* psy_timertask_alloc(void)
@@ -86,8 +87,13 @@ void psy_timers_tick(psy_Timers* self)
 		
 		q = p->next;
 		task = (psy_TimerTask*)p->entry;
-		psy_timertask_tick(task);
-	}
+		if (!task->expired) {
+			psy_timertask_tick(task);
+		} else {
+			psy_list_remove(&self->tasks, p);
+			free(task);
+		}
+	}	
 }
 
 void psy_timers_addtimer(psy_Timers* self, uintptr_t id, void* context,
@@ -124,9 +130,8 @@ void psy_timers_removetimer(psy_Timers* self, uintptr_t id,
 		q = p->next;
 		task = (psy_TimerTask*)p->entry;
 		if ((task->id == id) && 
-			(customid == psy_INDEX_INVALID || task->customid == customid)) {			
-			psy_list_remove(&self->tasks, p);
-			free(task);
+			(customid == psy_INDEX_INVALID || task->customid == customid)) {
+				task->expired = TRUE;			
 		}		
 	}
 }

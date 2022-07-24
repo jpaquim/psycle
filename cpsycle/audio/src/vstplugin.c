@@ -203,7 +203,7 @@ void psy_audio_vstplugin_init(psy_audio_VstPlugin* self,
 			psy_audio_vstevents_dispose(&self->vstoutevents);
 			psy_audio_vstevents_init(&self->vstevents, 1024);
 			psy_audio_vstevents_init(&self->vstoutevents, 1024);
-			psy_audio_vstinterface_init(&self->mi, effect, self);			
+			psy_audio_vstinterface_init(&self->mi, effect, self);
 			psy_audio_vstinterface_open(&self->mi);
 			psy_audio_vstinterface_setsamplerate(&self->mi,	(float)
 				psy_audio_machine_samplerate(psy_audio_vstplugin_base(self)));

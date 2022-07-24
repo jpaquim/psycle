@@ -10,14 +10,17 @@
 /* std */
 #include <stdlib.h>
 
+
 /* prototypes */
+static void psy_ui_checkbox_on_destroyed(psy_ui_CheckBox*);
 static void psy_ui_checkbox_mark(psy_ui_CheckBox*);
 static void psy_ui_checkbox_unmark(psy_ui_CheckBox*);
-static void psy_ui_checkbox_on_destroyed(psy_ui_CheckBox*);
-static void psy_ui_checkbox_on_mouse_down(psy_ui_CheckBox*, psy_ui_MouseEvent*);
+static void psy_ui_checkbox_on_mouse_down(psy_ui_CheckBox*,
+	psy_ui_MouseEvent*);
 static void psy_ui_checkbox_on_property_changed(psy_ui_CheckBox*,
 	psy_Property* sender);
-static void psy_ui_checkbox_before_property_destroyed(psy_ui_CheckBox*, psy_Property* sender);
+static void psy_ui_checkbox_before_property_destroyed(psy_ui_CheckBox*,
+	psy_Property* sender);
 
 /* vtable */
 static psy_ui_ComponentVtable vtable;
@@ -43,31 +46,37 @@ static void vtable_init(psy_ui_CheckBox* self)
 }
 
 /* implementation */
-void psy_ui_checkbox_init(psy_ui_CheckBox* self, psy_ui_Component* parent)
+void psy_ui_checkbox_init(psy_ui_CheckBox* self,
+	psy_ui_Component* parent)
 {  	
 	assert(self);
 
 	psy_ui_component_init(psy_ui_checkbox_base(self), parent, NULL);
 	vtable_init(self);
 	self->property = NULL;
-	psy_ui_component_init(&self->checkmark, psy_ui_checkbox_base(self), NULL);
+	psy_ui_component_init(&self->checkmark, psy_ui_checkbox_base(self),
+		NULL);
 	psy_ui_component_set_align(&self->checkmark, psy_ui_ALIGN_LEFT);
 	psy_ui_component_set_style_types(&self->checkmark,
 		psy_ui_STYLE_CHECKMARK, psy_ui_STYLE_CHECKMARK_HOVER,
 		psy_ui_STYLE_CHECKMARK_SELECT, psy_INDEX_INVALID);	
 	psy_ui_component_set_preferred_size(&self->checkmark,
 		psy_ui_size_make_em(2.0, 1.0));
+	psy_ui_component_setmaximumsize(&self->checkmark,
+		psy_ui_size_make_em(2.0, 1.0));
 	psy_ui_label_init(&self->text, psy_ui_checkbox_base(self));
 	psy_ui_component_set_margin(&self->text.component,
 		psy_ui_margin_make_em(0.0, 0.0, 0.0, 1.0));
 	psy_ui_label_prevent_wrap(&self->text);
-	psy_ui_component_set_align(&self->text.component, psy_ui_ALIGN_LEFT);
-	psy_ui_component_set_align_expand(&self->text.component, psy_ui_HEXPAND);	
+	psy_ui_component_set_align(&self->text.component,
+		psy_ui_ALIGN_LEFT);
+	psy_ui_component_set_align_expand(&self->text.component,
+		psy_ui_HEXPAND);	
 	psy_signal_init(&self->signal_clicked);	
 }
 
-void psy_ui_checkbox_init_text(psy_ui_CheckBox* self, psy_ui_Component* parent,
-	const char* text)
+void psy_ui_checkbox_init_text(psy_ui_CheckBox* self,
+	psy_ui_Component* parent, const char* text)
 {
 	assert(self);
 
@@ -75,8 +84,8 @@ void psy_ui_checkbox_init_text(psy_ui_CheckBox* self, psy_ui_Component* parent,
 	psy_ui_checkbox_set_text(self, text);
 }
 
-void psy_ui_checkbox_init_exchange(psy_ui_CheckBox* self, psy_ui_Component* parent,
-	psy_Property* property)
+void psy_ui_checkbox_init_exchange(psy_ui_CheckBox* self,
+	psy_ui_Component* parent, psy_Property* property)
 {
 	psy_ui_checkbox_init(self, parent);
 	psy_ui_checkbox_data_exchange(self, property);
@@ -109,8 +118,8 @@ psy_ui_CheckBox* psy_ui_checkbox_allocinit(psy_ui_Component* parent)
 	return rv;
 }
 
-psy_ui_CheckBox* psy_ui_checkbox_allocinit_exchange(psy_ui_Component* parent,
-	psy_Property* property)
+psy_ui_CheckBox* psy_ui_checkbox_allocinit_exchange(
+	psy_ui_Component* parent, psy_Property* property)
 {
 	psy_ui_CheckBox* rv;
 
@@ -200,7 +209,8 @@ void psy_ui_checkbox_enablewrap(psy_ui_CheckBox* self)
 	psy_ui_label_enable_wrap(&self->text);
 }
 
-void psy_ui_checkbox_data_exchange(psy_ui_CheckBox* self, psy_Property* property)
+void psy_ui_checkbox_data_exchange(psy_ui_CheckBox* self,
+	psy_Property* property)
 {
 	assert(self);
 	assert(property);
@@ -226,14 +236,16 @@ void psy_ui_checkbox_on_property_changed(psy_ui_CheckBox* self,
 	}
 }
 
-void psy_ui_checkbox_before_property_destroyed(psy_ui_CheckBox* self, psy_Property* sender)
+void psy_ui_checkbox_before_property_destroyed(psy_ui_CheckBox* self,
+	psy_Property* sender)
 {
 	assert(self);
 
 	self->property = NULL;
 }
 
-void psy_ui_checkbox_on_mouse_down(psy_ui_CheckBox* self, psy_ui_MouseEvent* ev)
+void psy_ui_checkbox_on_mouse_down(psy_ui_CheckBox* self,
+	psy_ui_MouseEvent* ev)
 {	
 	assert(self);
 

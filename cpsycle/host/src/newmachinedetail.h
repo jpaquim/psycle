@@ -24,10 +24,11 @@ typedef struct NewMachineDetail {
 	psy_ui_Component component;
 	// signals
 	psy_Signal signal_categorychanged;
-	// intern
-	psy_ui_Label desclabel;
-	LabelPair plugname;
+	/* intern */
 	psy_ui_Component details;
+	psy_ui_Label detaildesc;
+	LabelPair plugname;
+	LabelPair desc;		
 	LabelPair dllname;
 	LabelPair version;
 	LabelPair apiversion;

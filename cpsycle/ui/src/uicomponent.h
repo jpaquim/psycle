@@ -213,7 +213,8 @@ typedef struct psy_ui_Component {
 	psy_ui_ComponentBackground componentbackground;
 } psy_ui_Component;
 
-void psy_ui_replacedefaultfont(psy_ui_Component* main, psy_ui_Font*);
+void psy_ui_replacedefaultfont(psy_ui_Component* main,
+	const psy_ui_Font*);
 void psy_ui_notify_style_update(psy_ui_Component* main);
 void psy_ui_component_updatefont(psy_ui_Component*);
 

@@ -1,18 +1,23 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "ladspaplugin.h"
+/* local */
 #include "pattern.h"
 #include "plugin_interface.h"
 #include "songio.h"
-
+/* std */
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-
+/* platform */
 #include "../../detail/portable.h"
+
 
 /* implementation */
 static psy_audio_Machine* clone(psy_audio_LadspaPlugin*);
@@ -41,6 +46,10 @@ void preparebuffers(psy_audio_LadspaPlugin*, psy_audio_BufferContext*);
 void prepareparams(psy_audio_LadspaPlugin*);
 static void clearparams(psy_audio_LadspaPlugin*);
 
+static psy_dsp_amp_range_t amprange(psy_audio_LadspaPlugin* self)
+{
+	return PSY_DSP_AMP_RANGE_VST;
+}
 /* vtable */
 static MachineVtable vtable;
 static bool vtable_initialized = FALSE;
@@ -49,45 +58,80 @@ static void vtable_init(psy_audio_LadspaPlugin* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(psy_audio_ladspaplugin_base(self)->vtable);
-		vtable.setcallback = (fp_machine_setcallback)setcallback;
-		vtable.clone = (fp_machine_clone)clone;
-		vtable.hostevent = (fp_machine_hostevent)hostevent;
-		vtable.seqtick = (fp_machine_seqtick)seqtick;
-		vtable.stop = (fp_machine_stop)stop;
-		vtable.newline = (fp_machine_newline)
+		vtable.setcallback =
+			(fp_machine_setcallback)
+			setcallback;
+		vtable.clone =
+			(fp_machine_clone)
+			clone;
+		vtable.hostevent =
+			(fp_machine_hostevent)
+			hostevent;
+		vtable.seqtick =
+			(fp_machine_seqtick)
+			seqtick;
+		vtable.stop =
+			(fp_machine_stop)
+			stop;
+		vtable.newline =
+			(fp_machine_newline)
 			newline;
-		vtable.info = (fp_machine_info)info;
-		vtable.numparametercols = (fp_machine_numparametercols)
+		vtable.info =
+			(fp_machine_info)
+			info;
+		vtable.numparametercols =
+			(fp_machine_numparametercols)
 			numparametercols;
-		vtable.numparameters = (fp_machine_numparameters)numparameters;
-		vtable.parameter = (fp_machine_parameter)parameter;
-		vtable.dispose = (fp_machine_dispose)dispose;
-		vtable.generateaudio = (fp_machine_generateaudio)generateaudio;
-		vtable.numinputs = (fp_machine_numinputs)numinputs;
-		vtable.numoutputs = (fp_machine_numoutputs)numoutputs;
-		vtable.loadspecific = (fp_machine_loadspecific)loadspecific;
-		vtable.savespecific = (fp_machine_savespecific)savespecific;		
+		vtable.numparameters =
+			(fp_machine_numparameters)
+			numparameters;
+		vtable.parameter =
+			(fp_machine_parameter)
+			parameter;
+		vtable.dispose =
+			(fp_machine_dispose)
+			dispose;
+		vtable.generateaudio =
+			(fp_machine_generateaudio)
+			generateaudio;
+		vtable.numinputs =
+			(fp_machine_numinputs)
+			numinputs;
+		vtable.numoutputs =
+			(fp_machine_numoutputs)
+			numoutputs;
+		vtable.loadspecific =
+			(fp_machine_loadspecific)
+			loadspecific;
+		vtable.savespecific =
+			(fp_machine_savespecific)
+			savespecific;
+		vtable.amprange =
+			(fp_machine_amprange)
+			amprange;
 		vtable_initialized = TRUE;
 	}
 	psy_audio_ladspaplugin_base(self)->vtable = &vtable;
 }
 
 /* implementation */
-void psy_audio_ladspaplugin_init(psy_audio_LadspaPlugin* self, psy_audio_MachineCallback* callback,
-	const char* path, uintptr_t shellidx)
+void psy_audio_ladspaplugin_init(psy_audio_LadspaPlugin* self,
+	psy_audio_MachineCallback* callback, const char* path,
+	uintptr_t shellidx)
 {
 	LADSPA_Descriptor_Function pfDescriptorFunction;
 
 	psy_audio_custommachine_init(&self->custommachine, callback);
 	vtable_init(self);	
-	psy_audio_machine_setcallback(&self->custommachine.machine, callback);
+	psy_audio_machine_setcallback(&self->custommachine.machine,
+		callback);
 	psy_table_init(&self->parameters);	
 	psy_table_init(&self->inportmap);
 	psy_table_init(&self->outportmap);
 	psy_library_init(&self->library);
+	psy_audio_ladspainterface_init(&self->mi, NULL, NULL);
 	psy_library_load(&self->library, path);	
 	self->plugininfo = 0;	
-
 	pfDescriptorFunction = (LADSPA_Descriptor_Function)
 		psy_library_functionpointer(&self->library, "ladspa_descriptor");					
 	if (!pfDescriptorFunction) {
@@ -99,8 +143,10 @@ void psy_audio_ladspaplugin_init(psy_audio_LadspaPlugin* self, psy_audio_Machine
 		if (psDescriptor) {
 			LADSPA_Handle handle = instantiate(psDescriptor);
 			if (handle) {
-				self->pluginHandle = handle;
-				self->psDescriptor = psDescriptor;					
+				self->handle = handle;
+				self->psDescriptor = psDescriptor;
+				psy_audio_ladspainterface_init(&self->mi, psDescriptor,
+					handle);
 				self->plugininfo = machineinfo_allocinit();								
 				machineinfo_set(self->plugininfo,
 					psDescriptor->Maker,
@@ -121,6 +167,7 @@ void psy_audio_ladspaplugin_init(psy_audio_LadspaPlugin* self, psy_audio_Machine
 				psy_audio_machine_seteditname(psy_audio_ladspaplugin_base(self),
 					self->plugininfo->shortname);
 				prepareparams(self);
+				psy_audio_ladspainterface_activate(&self->mi);				
 			}
 		}
 	}	
@@ -135,15 +182,17 @@ LADSPA_Handle instantiate(const LADSPA_Descriptor* psDescriptor)
 
 void dispose(psy_audio_LadspaPlugin* self)
 {	
+	psy_audio_ladspainterface_deactivate(&self->mi);
+	psy_audio_ladspainterface_cleanup(&self->mi);	
 	psy_table_dispose_all(&self->parameters,
 		(psy_fp_disposefunc)		
 		psy_audio_ladspaparam_dispose);	
 	psy_table_dispose(&self->inportmap);
 	psy_table_dispose(&self->outportmap);
-	if (self->library.module != 0 && self->pluginHandle) {
+	if (self->library.module != 0 && self->handle) {
 		// mi_dispose(self->mi);
 		psy_library_dispose(&self->library);
-		self->pluginHandle = 0;
+		self->handle = 0;
 	}
 	if (self->plugininfo) {
 		machineinfo_dispose(self->plugininfo);
@@ -165,7 +214,8 @@ psy_audio_Machine* clone(psy_audio_LadspaPlugin* self)
 	return rv ? &rv->custommachine.machine : 0;
 }
 
-int psy_audio_plugin_ladspa_test(const char* path, psy_audio_MachineInfo* info, uintptr_t shellidx)
+int psy_audio_plugin_ladspa_test(const char* path, psy_audio_MachineInfo*
+	machine_info, uintptr_t shellidx)
 {
 	int rv = 0;
 
@@ -182,7 +232,7 @@ int psy_audio_plugin_ladspa_test(const char* path, psy_audio_MachineInfo* info, 
 			
 			psDescriptor = pfDescriptorFunction((uint32_t)shellidx);
 			if (psDescriptor != NULL) {
-				machineinfo_set(info,
+				machineinfo_set(machine_info,
 					psDescriptor->Maker,
 					"", //const char* command,
 					0, // int flags,
@@ -233,7 +283,7 @@ void prepareparams(psy_audio_LadspaPlugin* self)
 			psy_table_insert(&self->parameters, index, (void*)
 				param);
 			++index;
-			self->psDescriptor->connect_port(self->pluginHandle,
+			self->psDescriptor->connect_port(self->handle,
 				lPortIndex, &param->value_);
 //				ladspaparam_valueaddress(parameter));
 			indexpar++;			
@@ -250,13 +300,15 @@ void stop(psy_audio_LadspaPlugin* self)
 {
 }
 
-void generateaudio(psy_audio_LadspaPlugin* self, psy_audio_BufferContext* bc)
+void generateaudio(psy_audio_LadspaPlugin* self,
+	psy_audio_BufferContext* bc)
 {
 	preparebuffers(self, bc);
-	self->psDescriptor->run(self->pluginHandle, (uint32_t)bc->numsamples);
+	psy_audio_ladspainterface_run(&self->mi, (uint32_t)bc->numsamples);
 }
 
-void preparebuffers(psy_audio_LadspaPlugin* self, psy_audio_BufferContext* bc)
+void preparebuffers(psy_audio_LadspaPlugin* self,
+	psy_audio_BufferContext* bc)
 {
 	//we're passing addresses within the vector to the plugin.. let's be sure they don't move around	
 	int indexinput = 0;
@@ -269,13 +321,14 @@ void preparebuffers(psy_audio_LadspaPlugin* self, psy_audio_BufferContext* bc)
 		if (LADSPA_IS_PORT_AUDIO(iPortDescriptor))
 		{
 			if (LADSPA_IS_PORT_INPUT(iPortDescriptor)) {
-				self->psDescriptor->connect_port(self->pluginHandle, lPortIndex,
-					psy_audio_buffer_at(bc->output, indexinput));
+				self->psDescriptor->connect_port(self->handle,
+					lPortIndex, psy_audio_buffer_at(bc->output,
+					indexinput));
 				//inportmap[indexinput] = lPortIndex;
 				indexinput++;
 			}
 			else if (LADSPA_IS_PORT_OUTPUT(iPortDescriptor)) {
-				self->psDescriptor->connect_port(self->pluginHandle, lPortIndex,
+				self->psDescriptor->connect_port(self->handle, lPortIndex,
 					psy_audio_buffer_at(bc->output, indexoutput));
 				indexoutput++;
 			}
@@ -296,34 +349,6 @@ psy_audio_MachineInfo* info(psy_audio_LadspaPlugin* self)
 {
 	return self->plugininfo;
 }
-
-/*int describevalue(psy_audio_LadspaPlugin* self, char* txt, uintptr_t param,
-	int value)
-{
-	LadspaParam* ladspa_param;
-
-	ladspa_param = valueat(self, param);
-	if (ladspa_param) {
-		LADSPA_PortRangeHintDescriptor iHintDescriptor = ladspaparam_hint(ladspa_param);
-		float value = ladspaparam_rawvalue(ladspa_param);
-		if (LADSPA_IS_HINT_TOGGLED(iHintDescriptor))
-		{
-			strcpy(txt, (value > 0.0) ? "on" : "off");
-			return 1;
-		}
-		else if (LADSPA_IS_HINT_INTEGER(iHintDescriptor))
-		{
-			sprintf(txt, "%.0f", value);
-			return 1;
-		}
-		else
-		{
-			sprintf(txt, "%.4f", value);
-			return 1;
-		}
-	}
-	return 0;
-}*/
 
 uintptr_t numinputs(psy_audio_LadspaPlugin* self)
 {

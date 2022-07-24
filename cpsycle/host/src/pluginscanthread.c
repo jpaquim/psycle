@@ -130,7 +130,7 @@ void pluginscanthread_on_scan_file(PluginScanThread* self, psy_audio_PluginCatch
 	assert(self);
 
 	psy_lock_enter(&self->pluginscanlock);
-	self->filescanned = 1;
+	self->filescanned = 1;	
 	psy_strreset(&self->scanfilename, path);
 	self->scanplugintype = type;
 	psy_lock_leave(&self->pluginscanlock);
@@ -150,7 +150,7 @@ void pluginscanthread_on_scan_end(PluginScanThread* self, psy_audio_PluginCatche
 	assert(self);
 
 	psy_lock_enter(&self->pluginscanlock);
-	self->scanend = 1;
+	self->scanend = 1;	
 	psy_lock_leave(&self->pluginscanlock);
 }
 

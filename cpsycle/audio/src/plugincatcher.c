@@ -659,8 +659,7 @@ int on_enum_dir(psy_audio_PluginCatcher* self, const char* path, int type)
 	char name[_MAX_PATH];
 
 	psy_signal_emit(&self->signal_scanfile, self, 2, path, type);
-	machineinfo_init(&macinfo);
-	printf("%s\n", path);
+	machineinfo_init(&macinfo);	
 	switch (type) {
 		case psy_audio_PLUGIN:
 			if (psy_audio_plugin_psycle_test(path, self->nativeroot, &macinfo)) {

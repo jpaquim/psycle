@@ -269,6 +269,6 @@ void pluginscanview_reset(PluginScanView* self)
 }
 
 void pluginscanview_scanstop(PluginScanView* self)
-{	
-	clockbar_stop(&self->processview.statusview.time);
+{		
+	clockbar_stop(&self->processview.statusview.time);	
 }

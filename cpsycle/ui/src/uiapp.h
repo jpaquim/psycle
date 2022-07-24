@@ -39,7 +39,8 @@ void psy_ui_appzoom_dispose(psy_ui_AppZoom*);
 void psy_ui_appzoom_setrate(psy_ui_AppZoom*, double rate);
 double psy_ui_appzoom_rate(const psy_ui_AppZoom*);
 
-void psy_ui_appzoom_update_base_fontsize(psy_ui_AppZoom*, psy_ui_Font*);
+void psy_ui_appzoom_update_base_fontsize(psy_ui_AppZoom*,
+	const psy_ui_Font*);
 
 struct psy_ui_Component;
 struct psy_ui_ComponentImp;
@@ -86,7 +87,7 @@ void psy_ui_app_stopmousehook(psy_ui_App*);
 void psy_ui_app_set_zoom_rate(psy_ui_App*, double rate);
 double psy_ui_app_zoomrate(const psy_ui_App*);
 psy_ui_AppZoom* psy_ui_app_zoom(psy_ui_App*);
-void psy_ui_app_set_default_font(psy_ui_App*, psy_ui_Font*);
+void psy_ui_app_set_default_font(psy_ui_App*, const psy_ui_Font*);
 void psy_ui_app_lighttheme(psy_ui_App*);
 void psy_ui_app_darktheme(psy_ui_App*);
 bool psy_ui_app_hasdarktheme(const psy_ui_App*);

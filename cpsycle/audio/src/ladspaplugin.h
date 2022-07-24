@@ -6,9 +6,11 @@
 #ifndef psy_audio_LADSPAPLUGIN_H
 #define psy_audio_LADSPAPLUGIN_H
 
+/* local */
 #include "custommachine.h"
-#include "library.h"
 #include "ladspaparam.h"
+#include "ladspainterface.h"
+#include "library.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -18,9 +20,10 @@ typedef struct {
 	psy_audio_CustomMachine custommachine;	
 	psy_Library library;
 	psy_audio_MachineInfo* plugininfo;
-	int key_;				
+	int key_;
+	psy_audio_LadspaInterface mi;				
 	const LADSPA_Descriptor* psDescriptor;
-	/*const*/ LADSPA_Handle pluginHandle;	
+	/*const*/ LADSPA_Handle handle;	
 	//psycle index, ladspa index
 	psy_Table inportmap; // int x int
 	psy_Table outportmap; // int x int

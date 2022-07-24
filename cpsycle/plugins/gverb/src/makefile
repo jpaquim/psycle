@@ -1,7 +1,7 @@
 CC = g++
 INC = -I ../../ -I ../../../dsp/src
-LIBDIRS = -L ../../../dsp/src -l dsp
-LDFLAGS = -shared
+LIBDIRS = -L ../../../dsp/src
+LDFLAGS = -ldsp -shared
 OUTPUTFILE = ladspa-gverb.so
 OUTPUTDIR = ../../build/
 src = $(wildcard *.cpp)
