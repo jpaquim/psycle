@@ -60,9 +60,9 @@ void searchfield_init(SearchField* self, psy_ui_Component* parent)
 	psy_ui_component_set_margin(psy_ui_image_base(&self->image),
 		psy_ui_margin_make_em(0.0, 1.0, 0.0, 1.0));	
 	psy_ui_textarea_init_single_line(&self->edit, &self->component);	
-	psy_ui_textarea_set_char_number(&self->edit, 42);
+	// psy_ui_textarea_set_char_number(&self->edit, 42);
 	psy_ui_component_set_align(psy_ui_textarea_base(&self->edit),
-		psy_ui_ALIGN_LEFT);
+		psy_ui_ALIGN_CLIENT);
 	searchfield_reset(self);
 	psy_signal_connect(&self->edit.pane.component.signal_focus,
 		self, searchfield_on_edit_focus);

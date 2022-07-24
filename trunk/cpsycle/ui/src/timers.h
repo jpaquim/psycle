@@ -23,6 +23,7 @@ typedef struct psy_TimerTask {
 	uintptr_t customid;
 	uintptr_t interval;
 	uintptr_t counter;
+	bool expired;	
 } psy_TimerTask;
 
 void psy_timertask_init(psy_TimerTask*, uintptr_t id,
@@ -36,7 +37,7 @@ psy_TimerTask* psy_timertask_allocinit(uintptr_t id,
 
 typedef struct psy_Timers {	
 	uintptr_t counter;
-	psy_List* tasks;
+	psy_List* tasks;	
 } psy_Timers;
 
 void psy_timers_init(psy_Timers*);

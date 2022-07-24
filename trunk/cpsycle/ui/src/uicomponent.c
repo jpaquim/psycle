@@ -193,7 +193,8 @@ const char* psy_ui_component_backgroundimagepath(const psy_ui_Component* self)
 	return psy_ui_componentstyle_currstyle_const(&self->style)->background.image_path;
 }
 
-void psy_ui_replacedefaultfont(psy_ui_Component* main, psy_ui_Font* font)
+void psy_ui_replacedefaultfont(psy_ui_Component* main,
+	const psy_ui_Font* font)
 {		
 	if (main) {
 		psy_ui_Style* root;

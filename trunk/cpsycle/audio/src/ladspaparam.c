@@ -21,11 +21,11 @@ static int ladspapluginparam_describe(psy_audio_LadspaParam*, char* text);
 static float ladspapluginparam_normvalue(psy_audio_LadspaParam*);
 static void ladspapluginparam_range(psy_audio_LadspaParam*,
 	intptr_t* minval, intptr_t* maxval);
-static void ladspapluginparam_set_default(psy_audio_LadspaParam* self);
+static void ladspapluginparam_set_default(psy_audio_LadspaParam*);
 
 /* vtable */
 static MachineParamVtable ladspapluginparam_vtable;
-static int ladspapluginparam_vtable_initialized = 0;
+static bool ladspapluginparam_vtable_initialized = FALSE;
 
 static void ladspapluginparam_vtable_init(psy_audio_LadspaParam* self)
 {
@@ -43,6 +43,8 @@ static void ladspapluginparam_vtable_init(psy_audio_LadspaParam* self)
 		ladspapluginparam_vtable.describe = (fp_machineparam_describe)
 			ladspapluginparam_describe;
 	}
+	self->custommachineparam.machineparam.vtable =
+		&ladspapluginparam_vtable;
 }	
 
 void psy_audio_ladspaparam_init(
@@ -59,20 +61,19 @@ void psy_audio_ladspaparam_init(
 		MPF_STATE,
 		0,
 		0xFFFF);
-	ladspapluginparam_vtable_init(self);
-	self->custommachineparam.machineparam.vtable = &ladspapluginparam_vtable;	
+	ladspapluginparam_vtable_init(self);	
 	self->index = index;
 	self->port_index = port_index;
 	self->descriptor = descriptor;
 	self->hint = hint;
 	self->port_name = newname;		
 	if (LADSPA_IS_HINT_BOUNDED_BELOW(self->hint.HintDescriptor)) {
-		self->minval_ = self->hint.LowerBound;
+		self->minval_ = self->hint.LowerBound;		
 	} else {
 		self->minval_ = 0.0;
 	}
 	if (LADSPA_IS_HINT_BOUNDED_ABOVE(self->hint.HintDescriptor)) {
-		self->maxval_ = self->hint.UpperBound;
+		self->maxval_ = self->hint.UpperBound;		
 	} else {
 		self->maxval_ = 1.0;
 	}	
@@ -126,9 +127,11 @@ int ladspapluginparam_name(psy_audio_LadspaParam* self, char* text)
 }
 
 void ladspapluginparam_tweak(psy_audio_LadspaParam* self, float value)
-{		
-	self->value_ = value * (self->maxval_ - self->minval_) -
-		self->minval_; 
+{	
+	float range;
+	
+	range = (self->maxval_ - self->minval_);	
+	self->value_ = value * range + self->minval_;
 }
 
 int ladspapluginparam_describe(psy_audio_LadspaParam* self, char* text)
@@ -141,17 +144,17 @@ int ladspapluginparam_describe(psy_audio_LadspaParam* self, char* text)
 		sprintf(text, "%.0f", self->value_);		
 	} else {
 		sprintf(text, "%.4f", self->value_);
-	}	
-	// self->effect->dispatcher(self->effect, effGetParamDisplay, (VstInt32)self->index, 0,
-	// 	text, 0);
+	}
 	return *text != '\0';
 }
 
 float ladspapluginparam_normvalue(psy_audio_LadspaParam* self)
 {
-	if (self->maxval_ - self->minval_ != 0.0) {	
-		return (self->value_ - self->minval_) /
-			(self->maxval_ - self->minval_);
+	float range;
+	
+	range = (self->maxval_ - self->minval_);
+	if (range != 0.0) {	
+		return (self->value_ - self->minval_) / (range);
 	}
 	return 0.0;
 }

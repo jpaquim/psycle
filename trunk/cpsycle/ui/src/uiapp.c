@@ -60,7 +60,8 @@ double psy_ui_appzoom_rate(const psy_ui_AppZoom* self)
 	return self->rate;
 }
 
-void psy_ui_appzoom_update_base_fontsize(psy_ui_AppZoom* self, psy_ui_Font* basefont)
+void psy_ui_appzoom_update_base_fontsize(psy_ui_AppZoom* self,
+	const psy_ui_Font* basefont)
 {
 	psy_ui_FontInfo fontinfo;	
 
@@ -311,7 +312,8 @@ void psy_ui_app_change_default_font_size(psy_ui_App* self, double size)
 
 	assert(self);
 
-	fontinfo = psy_ui_font_fontinfo(&psy_ui_style_const(psy_ui_STYLE_ROOT)->font);	
+	fontinfo = psy_ui_font_fontinfo(&psy_ui_style_const(
+		psy_ui_STYLE_ROOT)->font);	
 	fontinfo.lfHeight = size;	
 	psy_ui_font_init(&font, &fontinfo);
 	t = r = psy_ui_app_toplevel(self);
@@ -323,22 +325,26 @@ void psy_ui_app_change_default_font_size(psy_ui_App* self, double size)
 		psy_ui_component_invalidate(curr_toplevel);
 	}
 	psy_list_free(t);
-	t = NULL;	
+	psy_ui_font_dispose(&font);
+	t = NULL;
 }
 
-void psy_ui_app_set_default_font(psy_ui_App* self, psy_ui_Font* font)
+void psy_ui_app_set_default_font(psy_ui_App* self,
+	const psy_ui_Font* font)
 {	
-	psy_ui_FontInfo fontinfo;
-	psy_ui_Font zoomedfont;
+	psy_ui_FontInfo font_info;
+	psy_ui_Font zoomed_font;
 
 	assert(self);
 	
 	psy_ui_appzoom_update_base_fontsize(&self->zoom, font);
 	if (self->zoom.rate != 1.0) {
-		fontinfo = psy_ui_font_fontinfo(font);
-		fontinfo.lfHeight = (int)(self->zoom.basefontsize * self->zoom.rate);
-		psy_ui_font_init(&zoomedfont, &fontinfo);
-		psy_ui_replacedefaultfont(self->main, &zoomedfont);
+		font_info = psy_ui_font_fontinfo(font);
+		font_info.lfHeight = (int)(self->zoom.basefontsize *
+			self->zoom.rate);
+		psy_ui_font_init(&zoomed_font, &font_info);
+		psy_ui_replacedefaultfont(self->main, &zoomed_font);
+		psy_ui_font_dispose(&zoomed_font);
 	} else {
 		psy_ui_replacedefaultfont(self->main, font);
 	}
