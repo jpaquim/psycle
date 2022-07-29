@@ -40,6 +40,8 @@ typedef struct psy_ui_X11App {
 	uintptr_t winid;	
 	struct psy_ui_Component* eventretarget;	
 	Atom wmDeleteMessage;
+	Atom wmNetState;
+	Atom wmStateAbove;
 	bool running;	
 	psy_ui_X11Colours colourmap;
 	XVisualInfo* vinfo;

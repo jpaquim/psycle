@@ -139,6 +139,10 @@ void psy_ui_x11app_init(psy_ui_X11App* self, psy_ui_App* app,
 	psy_table_init(&self->toplevelmap);
 	self->wmDeleteMessage = XInternAtom(self->dpy, "WM_DELETE_WINDOW",
 		False);
+	self->wmStateAbove = XInternAtom(self->dpy, "_NET_WM_STATE_ABOVE",
+		False);
+	self->wmNetState = XInternAtom(self->dpy, "_NET_WM_STATE",
+		False);
 	self->running = FALSE;
 	shape_extension = XShapeQueryExtension (self->dpy,
 		&shapeEventBase,
@@ -366,7 +370,7 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 		psy_list_deallocate(&imp->expose_rectangles, NULL);
 		imp->exposeareavalid = FALSE;
 		break; }
-	case MapNotify:
+	case MapNotify:		
 		psy_signal_emit(&imp->component->signal_show,
 			imp->component, 0);
 		if (self->dograb && imp->hwnd == self->grabwin) {
@@ -374,6 +378,9 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 			PointerMotionMask | ButtonReleaseMask | ButtonPressMask,
 			GrabModeAsync,
 			GrabModeAsync,None,None,CurrentTime);
+		}
+		if (imp->above) {			
+			psy_ui_x11_componentimp_stay_always_on_top(imp);
 		}
 		break;
 	case UnmapNotify:
