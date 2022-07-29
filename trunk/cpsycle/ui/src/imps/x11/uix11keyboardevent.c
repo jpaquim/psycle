@@ -12,177 +12,226 @@
 
 /* X11 */
 #include <X11/keysym.h>
-#include <X11/IntrinsicP.h>
-#include <X11/ShellP.h>
 
-psy_ui_KeyboardEvent psy_ui_x11_keyboardevent_make(XKeyEvent* event)
+static int psy_ui_x11_keyboardevent_keycode_from_sym(KeySym);
+
+psy_ui_KeyboardEvent psy_ui_x11_keyboardevent_make(const XKeyEvent* event)
 {
-	psy_ui_KeyboardEvent rv;
-	KeySym keysym = NoSymbol;
-	int repeat = 0;
-	static unsigned char buf[64];
-	static unsigned char bufnomod[2];
-	int ret;
-	XKeyEvent xkevent;
-	bool shift;
-	bool ctrl;
-
-	xkevent = *event;
-	shift = (xkevent.state & ShiftMask) == ShiftMask;
-	ctrl = (xkevent.state & ControlMask) == ControlMask;
-	xkevent.state = 0;	
-	ret = XLookupString(&xkevent, buf, sizeof buf, &keysym, 0);
-	switch (keysym) {
+	psy_ui_KeyboardEvent rv;	
+	XKeyEvent xkey;
+	assert(event);
+		
+	if (event) {
+		KeySym sym;	
+		
+		xkey = *event;
+		XLookupString(&xkey, NULL, 0, &sym, NULL);	
+		psy_ui_keyboardevent_init_all(&rv,
+			psy_ui_x11_keyboardevent_keycode_from_sym(sym),
+			0,
+			(event->state & ShiftMask) == ShiftMask,
+			(event->state & ControlMask) == ControlMask,
+			0,
+			0);	
+	} else {
+		psy_ui_keyboardevent_init(&rv);
+	}
+	return rv;
+}
+	
+int psy_ui_x11_keyboardevent_keycode_from_sym(KeySym sym)
+{
+	switch (sym) {
 	case XK_Home:
-		keysym = psy_ui_KEY_HOME;
-		break;
+		return psy_ui_KEY_HOME;
 	case XK_End:
-		keysym = psy_ui_KEY_END;
-		break;
+		return psy_ui_KEY_END;
 	case XK_Shift_L:
 	case XK_Shift_R:
-		keysym = psy_ui_KEY_SHIFT;
-		break;
+		return psy_ui_KEY_SHIFT;
 	case XK_Control_L:
 	case XK_Control_R:
-		keysym = psy_ui_KEY_CONTROL;
-		break;
+		return psy_ui_KEY_CONTROL;
 	case XK_Escape:
-		keysym = psy_ui_KEY_ESCAPE;
-		break;
+		return psy_ui_KEY_ESCAPE;
 	case XK_Return:
-		keysym = psy_ui_KEY_RETURN;
-		break;
+		return psy_ui_KEY_RETURN;
 	case XK_Tab:
-		keysym = psy_ui_KEY_TAB;
-		break;
+		return psy_ui_KEY_TAB;
 	case XK_Prior:
-		keysym = psy_ui_KEY_PRIOR;
-		break;
+		return psy_ui_KEY_PRIOR;
 	case XK_Next:
-		keysym = psy_ui_KEY_NEXT;
-		break;
+		return psy_ui_KEY_NEXT;		
 	case XK_Left:
-		keysym = psy_ui_KEY_LEFT;
-		break;
+		return psy_ui_KEY_LEFT;		
 	case XK_Up:
-		keysym = psy_ui_KEY_UP;
-		break;
+		return psy_ui_KEY_UP;		
 	case XK_Right:
-		keysym = psy_ui_KEY_RIGHT;
-		break;
+		return psy_ui_KEY_RIGHT;		
 	case XK_Down:
-		keysym = psy_ui_KEY_DOWN;
-		break;
+		return psy_ui_KEY_DOWN;		
 	case XK_Delete:
-		keysym = psy_ui_KEY_DELETE;
-		break;
+		return psy_ui_KEY_DELETE;		
 	case XK_BackSpace:
-		keysym = psy_ui_KEY_BACK;
-		break;	
+		return psy_ui_KEY_BACK;			
 	case XK_F1:
-		keysym = psy_ui_KEY_F1;
-		break;
-	case XK_F2:		
-		keysym = psy_ui_KEY_F2;
-		break;
+		return psy_ui_KEY_F1;		
+	case XK_F2:
+		return psy_ui_KEY_F2;		
 	case XK_F3:
-		keysym = psy_ui_KEY_F3;
-		break;
+		return psy_ui_KEY_F3;		
 	case XK_F4:
-		keysym = psy_ui_KEY_F4;
-		break;
+		return psy_ui_KEY_F4;		
 	case XK_F5:
-		keysym = psy_ui_KEY_F5;
-		break;
+		return psy_ui_KEY_F5;
 	case XK_F6:
-		keysym = psy_ui_KEY_F6;
-		break;
+		return psy_ui_KEY_F6;
 	case XK_F7:
-		keysym = psy_ui_KEY_F7;
-		break;
+		return psy_ui_KEY_F7;
 	case XK_F8:
-		keysym = psy_ui_KEY_F8;
-		break;
+		return psy_ui_KEY_F8;
 	case XK_F9:
-		keysym = psy_ui_KEY_F9;
-		break;
+		return psy_ui_KEY_F9;
 	case XK_F10:
-		keysym = psy_ui_KEY_F10;
-		break;
+		return psy_ui_KEY_F10;		
 	case XK_F11:
-		keysym = psy_ui_KEY_F11;
-		break;
+		return psy_ui_KEY_F11;		
 	case XK_F12:
-		keysym = psy_ui_KEY_F12;
-		break;
+		return psy_ui_KEY_F12;
 	case XK_space:
-		keysym = psy_ui_KEY_SPACE;
-		break;
+		return psy_ui_KEY_SPACE;
 	case XK_0:
-		keysym = psy_ui_KEY_DIGIT0;
-		break;
+		return psy_ui_KEY_DIGIT0;
 	case XK_1:
-		keysym = psy_ui_KEY_DIGIT1;
-		break;
+		return psy_ui_KEY_DIGIT1;
 	case XK_2:
-		keysym = psy_ui_KEY_DIGIT2;
-		break;
+		return psy_ui_KEY_DIGIT2;
 	case XK_3:
-		keysym = psy_ui_KEY_DIGIT3;
-		break;
+		return psy_ui_KEY_DIGIT3;
 	case XK_4:
-		keysym = psy_ui_KEY_DIGIT4;
-		break;
+		return psy_ui_KEY_DIGIT4;
 	case XK_5:
-		keysym = psy_ui_KEY_DIGIT5;
-		break;
+		return psy_ui_KEY_DIGIT5;
 	case XK_6:
-		keysym = psy_ui_KEY_DIGIT6;
-		break;
+		return psy_ui_KEY_DIGIT6;
 	case XK_7:
-		keysym = psy_ui_KEY_DIGIT7;
-		break;
+		return psy_ui_KEY_DIGIT7;
 	case XK_8:
-		keysym = psy_ui_KEY_DIGIT8;
-		break;	
+		return psy_ui_KEY_DIGIT8;
 	case XK_9:
-		keysym = psy_ui_KEY_DIGIT9;
-		break;
+		return psy_ui_KEY_DIGIT9;
+	case XK_A:
+	case XK_a:
+		return psy_ui_KEY_A;
+	case XK_B:
+	case XK_b:
+		return psy_ui_KEY_B;
+	case XK_C:
+	case XK_c:
+		return psy_ui_KEY_C;
+	case XK_D:
+	case XK_d:
+		return psy_ui_KEY_D;
+	case XK_E:
+	case XK_e:
+		return psy_ui_KEY_E;
+	case XK_F:
+	case XK_f:
+		return psy_ui_KEY_F;
+	case XK_G:
+	case XK_g:
+		return psy_ui_KEY_G;
+	case XK_H:
+	case XK_h:
+		return psy_ui_KEY_H;
+	case XK_I:
+	case XK_i:
+		return psy_ui_KEY_I;
+	case XK_J:
+	case XK_j:
+		return psy_ui_KEY_J;
+	case XK_K:
+	case XK_k:
+		return psy_ui_KEY_K;
+	case XK_L:
+	case XK_l:
+		return psy_ui_KEY_L;
+	case XK_M:		
+	case XK_m:
+		return psy_ui_KEY_M;
+	case XK_N:
+	case XK_n:
+		return psy_ui_KEY_N;
+	case XK_O:
+	case XK_o:
+		return psy_ui_KEY_O;
+	case XK_P:
+	case XK_p:
+		return psy_ui_KEY_P;
+	case XK_Q:
+	case XK_q:
+		return psy_ui_KEY_Q;
+	case XK_R:
+	case XK_r:
+		return psy_ui_KEY_R;
+	case XK_S:
+	case XK_s:
+		return psy_ui_KEY_S;
+	case XK_T:
+	case XK_t:
+		return psy_ui_KEY_T;
+	case XK_U:
+	case XK_u:
+		return psy_ui_KEY_U;
+	case XK_V:
+	case XK_v:
+		return psy_ui_KEY_V;
+	case XK_W:
+	case XK_w:
+		return psy_ui_KEY_W;
+	case XK_X:
+	case XK_x:
+		return psy_ui_KEY_X;
+	case XK_Y:
+	case XK_y:
+		return psy_ui_KEY_Y;
+	case XK_Z:
+	case XK_z:
+		return psy_ui_KEY_Z;
 	case XK_ISO_Left_Tab:
-		keysym = psy_ui_KEY_TAB;
-		break;
-	default:
-		if (ret && buf[0] != '\0') {
-			if (buf[0] >= 'A' && buf[0] <= 'Z') {
-				keysym = psy_ui_KEY_A +
-					buf[0] - 'A';
-			} else if (buf[0] >= 'a' && buf[0] <= 'z') {
-				keysym = psy_ui_KEY_A +
-					buf[0] - 'a';
-			} else if (buf[0] >= '0' && buf[0] <= '9') {
-				keysym = psy_ui_KEY_DIGIT0 +
-					buf[0] - '0';
-			} else {
-				keysym = psy_ui_KEY_A; //buf[0];
-			}
-		}
-		break;
-	}
-	// if (ret && buf[0] != '\0') {
-	// 	keysym = buf[0];
-	// 	printf("%d,%d\n", ret, (int)buf[0]);
-	// } else {
-	// 	printf("no lookup %d\n", keysym);
-	// }
-	psy_ui_keyboardevent_init_all(&rv,
-		keysym,
-		0,
-		shift,
-		ctrl,
-		0,
-		repeat);
-	return rv;
+		return psy_ui_KEY_TAB;
+	case XK_semicolon:
+		return psy_ui_KEY_SEMICOLON;
+	case XK_equal:
+		return psy_ui_KEY_EQUAL;
+	case XK_comma:
+		return psy_ui_KEY_COMMA;
+	case XK_plus:
+	case XK_KP_Add:
+		return psy_ui_KEY_ADD;		
+	case XK_minus:
+		return psy_ui_KEY_MINUS;
+	case XK_KP_Multiply:
+		return psy_ui_KEY_MULTIPLY;
+	case XK_KP_Divide:
+		return psy_ui_KEY_DIVIDE;
+	case XK_period:
+		return psy_ui_KEY_PERIOD;
+	case XK_slash:	
+		return psy_ui_KEY_SLASH;
+	case XK_apostrophe:	
+		return psy_ui_KEY_BACKQUOTE;
+	case XK_bracketleft:	
+		return psy_ui_KEY_BRACKETLEFT;
+	case XK_backslash:	
+		return psy_ui_KEY_BACKSLASH;
+	case XK_grave:	
+		return psy_ui_KEY_QUOTE;
+	case XK_bracketright:	
+		return psy_ui_KEY_BRACKETRIGHT;
+	default:		
+		return 0;		
+	}	
 }
 
 XKeyEvent psy_ui_x11_xkeyevent_make(psy_ui_KeyboardEvent* e,

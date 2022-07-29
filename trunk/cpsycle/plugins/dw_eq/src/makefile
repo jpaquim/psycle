@@ -1,7 +1,8 @@
 CC = g++
-INC = -I ../../ -I ../../../dsp/src
-LIBDIRS = -L ../../../dsp/src -l dsp
-LDFLAGS = -shared
+INC = -I ../../ -I ../../psycle -I ../../../dsp/src
+LDFLAGS = -lcontainer -ldsp -shared
+LIBDIRS = -L ../../../container/src -L ../../../dsp/src
+
 OUTPUTFILE = dw-eq.so
 OUTPUTDIR = ../../build/
 src = $(wildcard *.cpp)

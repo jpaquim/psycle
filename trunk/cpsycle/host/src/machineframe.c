@@ -43,7 +43,7 @@ void parameterbar_init(ParameterBar* self, psy_ui_Component* parent,
 {			
 	psy_ui_Margin margin;
 	
-	psy_ui_component_init(&self->component, parent, NULL);
+	psy_ui_component_init(&self->component, parent, parent);
 	psy_ui_component_doublebuffer(&self->component);
 	psy_ui_component_set_vtable(&self->component, vtable_init(self));
 	psy_ui_margin_init_em(&margin, 0.0, 1.0, 0.0, 0.0);
@@ -576,9 +576,9 @@ void machineframe_on_timer(MachineFrame* self, uintptr_t timerid)
 {
 	if (self->view) {
 		self->view->vtable->on_timer(self->view, 0);
-	}
+	}	
 	machineframe_updatepwr(self);
 	if (psy_ui_component_visible(&self->parameterbox.component)) {
 		psy_ui_component_invalidate(&self->parameterbox.knob.component);
-	}
+	}	
 }

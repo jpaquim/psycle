@@ -676,6 +676,7 @@ void psy_ui_component_init_base(psy_ui_Component* self) {
 	}
 	self->scroll = &componentscroll;	
 	self->id = psy_INDEX_INVALID;
+	self->dbg = psy_INDEX_INVALID;
 	psy_ui_componentstyle_init(&self->style);
 	psy_ui_componentbackground_init(&self->componentbackground, self);
 	self->align = psy_ui_ALIGN_NONE;	
@@ -1303,7 +1304,6 @@ psy_ui_Size psy_ui_component_client_size(const psy_ui_Component* self)
 		psy_ui_realpoint_zero(),
 		parent_size);
 	position = psy_ui_component_position(self);
-
 	psy_ui_realrectangle_intersection(&position, &parent_position);			
 	rv.width = psy_ui_value_make_px(psy_ui_realrectangle_width(&position));
 	rv.height = psy_ui_value_make_px(psy_ui_realrectangle_height(&position));		

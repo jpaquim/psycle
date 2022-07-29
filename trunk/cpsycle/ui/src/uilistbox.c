@@ -85,7 +85,8 @@ void psy_ui_listboxclient_on_size(psy_ui_ListBoxClient* self)
 		psy_ui_value_make_px(line_height));
 }
 
-void psy_ui_listboxclient_on_draw(psy_ui_ListBoxClient* self, psy_ui_Graphics* g)
+void psy_ui_listboxclient_on_draw(psy_ui_ListBoxClient* self,
+	psy_ui_Graphics* g)
 {
 	uintptr_t i;
 	const psy_ui_TextMetric* tm;
@@ -275,7 +276,8 @@ void psy_ui_listbox_addsel(psy_ui_ListBox* self, intptr_t index)
 	
 }
 
-void psy_ui_listbox_selitems(psy_ui_ListBox* self, intptr_t* items, intptr_t maxitems)
+void psy_ui_listbox_selitems(psy_ui_ListBox* self, intptr_t* items,
+	intptr_t maxitems)
 {		
 	
 }
@@ -308,7 +310,8 @@ void psy_ui_listbox_onpreferredsize(psy_ui_ListBox* self,
 		psy_ui_listbox_count(self));	
 }
 
-void psy_ui_listbox_onselchanged(psy_ui_ListBox* self, psy_ui_ListBoxClient* sender)
+void psy_ui_listbox_onselchanged(psy_ui_ListBox* self,
+	psy_ui_ListBoxClient* sender)
 {
 	intptr_t sel;
 

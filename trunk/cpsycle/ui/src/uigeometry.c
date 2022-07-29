@@ -8,6 +8,7 @@
 
 #include "uigeometry.h"
 /* std */
+#include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 
@@ -153,6 +154,11 @@ void psy_ui_realrectangle_expand(psy_ui_RealRectangle* self, double top, double 
 	self->left -= left;	
 }
 
+void psy_ui_realrectangle_expand_all(psy_ui_RealRectangle* self, double margin)
+{
+	psy_ui_realrectangle_expand(self, margin, margin, margin, margin);
+}
+
 void psy_ui_realrectangle_move(psy_ui_RealRectangle* self, psy_ui_RealPoint pt)
 {
 	self->top += pt.y;
@@ -172,6 +178,16 @@ void psy_ui_realrectangle_set_topleft(psy_ui_RealRectangle* self, psy_ui_RealPoi
 	self->bottom = self->top + size.height;	
 }
 
+void psy_ui_realrectangle_trace(const psy_ui_RealRectangle* self)
+{
+	printf("r: l %d r %d, t %d b %d, w %d h %d \n",
+		(int)self->left, (int)self->right,
+		(int)self->top, (int)self->bottom,
+		(int)(self->right - self->left),
+		(int)(self->bottom - self->top));
+}
+
+/* Margin */
 void psy_ui_margin_init(psy_ui_Margin* self)
 {
 	self->top = psy_ui_value_make_px(0);

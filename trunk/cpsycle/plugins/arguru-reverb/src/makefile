@@ -1,17 +1,17 @@
 CC = g++
 INC = -I ../../ -I ../../../dsp/src
-LIBDIRS = -L ../../../dsp/src -l dsp
-LDFLAGS = -shared
+LDFLAGS = -lcontainer -ldsp -shared
+LIBDIRS = -L ../../../container/src -L ../../../dsp/src
 OUTPUTFILE = arguru-reverb.so
 OUTPUTDIR = ../../build/
 src = $(wildcard *.cpp)
 obj = $(src:.cpp=.o)
 
 $(OUTPUTFILE): $(obj)
-	$(CC) $(LIBDIRS) $(INC) -g -o $(OUTPUTDIR)$@ $^ $(LDFLAGS)
+	$(CC) $(INC) $(LIBDIRS) -fPIC -o $(OUTPUTDIR)$@ $^ $(LDFLAGS)
 	
 %.o: %.cpp
-	$(CC) -g $(INC) -c $(src) -fPIC
+	$(CC) $(INC) -g -c $(src) -fPIC
 	
 .PHONY: clean	
 clean:

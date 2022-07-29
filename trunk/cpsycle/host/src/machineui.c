@@ -410,7 +410,7 @@ psy_ui_Component* machineui_create(psy_audio_Machine* machine,
 
 void machineui_drawhighlight(psy_ui_Graphics* g, psy_ui_RealRectangle position)
 {
-	static double d = 5.0; // the distance of the highlight from the machine
+	static double d = PSYCLE_MACHINE_BORDER_DISTANCE;
 	static psy_ui_RealPoint dirs[] = {
 		{ 1.0, 0.0 }, { 0.0, 1.0 }, { -1.0, 0.0 }, { 0.0, -1.0 }
 	};

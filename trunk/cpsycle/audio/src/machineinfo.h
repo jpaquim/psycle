@@ -70,6 +70,8 @@ void machineinfo_init_copy(psy_audio_MachineInfo*, psy_audio_MachineInfo* other)
 void machineinfo_copy(psy_audio_MachineInfo*, const psy_audio_MachineInfo* other);
 void machineinfo_clear(psy_audio_MachineInfo*);
 
+bool machineinfo_internal(const psy_audio_MachineInfo*);
+
 #ifdef __cplusplus
 }
 #endif

@@ -83,16 +83,17 @@ static void makeplugininfo(
 	}
 }
 
-/*
-** psy_audio_PluginSections
-**  prototypes
-**  implementation
-*/
+/* psy_audio_PluginSections */
+
+/* implementation */
 void psy_audio_pluginsections_init(psy_audio_PluginSections* self)
 {
 	char inipath[_MAX_PATH];
 
-	strcpy(inipath, psy_dir_config());
+	inipath[0] = '\0';
+	if (psy_dir_config()) {
+		psy_snprintf(inipath, _MAX_PATH, "%s", psy_dir_config());
+	}	
 #if (DIVERSALIS__CPU__SIZEOF_POINTER == 4)
 	strcat(inipath, SLASH "psycle-plugin-scanner-cache32.ini");
 #else
@@ -361,6 +362,20 @@ psy_Property* psy_audio_pluginsections_plugin_exists(
 	return NULL;
 }
 
+uintptr_t psy_audio_pluginsections_num_plugins(const psy_audio_PluginSections*
+	self, const char* sectionkey)
+{
+	psy_Property* plugins;
+	
+	plugins = psy_audio_pluginsections_section_plugins(
+		(psy_audio_PluginSections*)self, sectionkey);
+	if (plugins) {
+		return psy_property_size(plugins);
+	}
+	return 0;
+}
+
+/* psy_audio_PluginScanTask */
 void psy_audio_pluginscantask_init_all(psy_audio_PluginScanTask* self,
 	psy_audio_MachineType type, const char* wildcard, const char* label,
 	const char* key, bool recursive)
@@ -587,10 +602,11 @@ void plugincatcher_scan_multipath(psy_audio_PluginCatcher* self,
 	char seps[] = ";,";
 	char *token;
 
-	strcpy(text, multipath);
+	strcpy(text, multipath);	
 	token = strtok(text, seps);
 	while (token != NULL && !self->abort) {
-		if (recursive) {
+		if (recursive) {		
+			printf("%s\n", token);	
 			psy_dir_enumerate_recursive(self, token, wildcard, option,
 				(psy_fp_findfile)on_enum_dir);
 		} else {
@@ -677,7 +693,7 @@ int on_enum_dir(psy_audio_PluginCatcher* self, const char* path, int type)
 				psy_signal_emit(&self->signal_scanprogress, self, 1, 1);
 			}
 			break;
-		case psy_audio_VST:
+		case psy_audio_VST:			
 			if (psy_audio_plugin_vst_test(path, &macinfo)) {
 				psy_audio_plugincatcher_catchername(path, name, macinfo.shellidx);
 				makeplugininfo(self->all, name, path, macinfo.type,

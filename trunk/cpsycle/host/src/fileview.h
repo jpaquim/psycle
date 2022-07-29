@@ -6,15 +6,14 @@
 #if !defined(FILEVIEW_H)
 #define FILEVIEW_H
 
+/* local */
+#include "filebox.h"
 /* ui */
 #include <uibutton.h>
 #include <uicheckbox.h>
 #include <uilabel.h>
-#include "uilistbox.h"
 #include <uitabbar.h>
 #include <uitextarea.h>
-/* file */
-#include <dir.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -87,42 +86,6 @@ void fileviewlinks_add(FileViewLinks*, const char* label,
 const char* fileviewlinks_path(FileViewLinks*, uintptr_t index);
 
 
-typedef struct FileLine {
-	psy_ui_Component component;
-	psy_ui_Button name;
-	psy_ui_Label size;
-	char* path;
-} FileLine;
-
-void fileline_init(FileLine*, psy_ui_Component* parent, const char* path, bool is_dir);
-
-FileLine* fileline_alloc(void);
-FileLine* fileline_allocinit(psy_ui_Component* parent, const char* path, bool is_dir);
-
-typedef struct FileBox {
-	/* inherits */
-	psy_ui_Component component;
-	/* internal */
-	psy_ui_Scroller scroller;	
-	psy_ui_Component pane;
-	psy_ui_Component filepane;
-	psy_ui_Component dirpane;
-	uintptr_t selindex;
-	psy_Path curr_dir;
-	bool rebuild;
-	char* wildcard;
-	/* signal */
-	psy_Signal signal_selected;
-	psy_Signal signal_dir_changed;
-} FileBox;
-
-void filebox_init(FileBox*, psy_ui_Component* parent);
-
-void filebox_read(FileBox*, const char* path);
-uintptr_t filebox_selected(const FileBox*);
-void filebox_set_wildcard(FileBox* self, const char* wildcard);
-void filebox_set_directory(FileBox* self, const char* path);
-const char* filebox_file_name(FileBox*);
 
 typedef struct FileView {
 	/* inherits */

@@ -50,7 +50,7 @@ static void newmachinesection_vtable_init(NewMachineSection* self)
 }
 // implementation
 void newmachinesection_init(NewMachineSection* self, psy_ui_Component* parent,
-	psy_Property* section, NewMachineFilter* filter,
+	psy_Property* section, PluginFilter* filter,
 	Workspace* workspace)
 {
 	psy_ui_component_init(&self->component, parent, NULL);
@@ -94,7 +94,7 @@ NewMachineSection* newmachinesection_alloc(void)
 }
 
 NewMachineSection* newmachinesection_allocinit(psy_ui_Component* parent,
-	psy_Property* property, NewMachineFilter* filter,
+	psy_Property* property, PluginFilter* filter,
 	Workspace* workspace)
 {
 	NewMachineSection* rv;

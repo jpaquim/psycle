@@ -196,6 +196,7 @@ typedef struct psy_ui_Component {
 	psy_Signal signal_styleupdate;
 	/* internal */
 	uintptr_t id;
+	uintptr_t dbg;
 	bool doublebuffered;	
 	psy_ui_ComponentStyle style;
 	psy_ui_ComponentScroll* scroll;
@@ -829,7 +830,8 @@ INLINE psy_ui_Size psy_ui_component_parent_size(const psy_ui_Component* self)
 	return psy_ui_component_scroll_size(self);	
 }
 
-INLINE psy_ui_RealSize psy_ui_component_scroll_size_px(const psy_ui_Component* self)
+INLINE psy_ui_RealSize psy_ui_component_scroll_size_px(const psy_ui_Component*
+	self)
 {
 	psy_ui_Size size;	
 		
@@ -838,7 +840,8 @@ INLINE psy_ui_RealSize psy_ui_component_scroll_size_px(const psy_ui_Component* s
 		psy_ui_Size parentsize;
 
 		parentsize = psy_ui_component_parent_size(self);
-		return psy_ui_size_px(&size, psy_ui_component_textmetric(self), &parentsize);
+		return psy_ui_size_px(&size, psy_ui_component_textmetric(self),
+			&parentsize);
 	}
 	return psy_ui_size_px(&size, psy_ui_component_textmetric(self), NULL);
 }

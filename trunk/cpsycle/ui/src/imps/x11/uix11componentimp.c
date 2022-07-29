@@ -81,6 +81,18 @@ static void dev_settitle(psy_ui_x11_ComponentImp*, const char* title);
 static void dev_setfocus(psy_ui_x11_ComponentImp*);
 static int dev_hasfocus(psy_ui_x11_ComponentImp*);
 static void dev_initialized(psy_ui_x11_ComponentImp* self) { }
+static uintptr_t dev_platform_handle(psy_ui_x11_ComponentImp* self)
+{
+	psy_ui_X11App* x11app;	
+
+	x11app = (psy_ui_X11App*)psy_ui_app()->imp;
+	if (x11app->dbe) {			
+		return self->d_backBuf;
+	} else {
+		return self->hwnd;
+	}
+	 return (uintptr_t)self->hwnd;
+}
 static psy_ui_RealPoint translatecoords(psy_ui_x11_ComponentImp*,
 	psy_ui_Component* src, psy_ui_Component* dst);
 static psy_ui_RealPoint mapcoords(psy_ui_x11_ComponentImp* self,
@@ -214,6 +226,9 @@ static void xt_imp_vtable_init(psy_ui_x11_ComponentImp* self)
 		vtable.dev_initialized =
 			(psy_ui_fp_componentimp_dev_initialized)
 			dev_initialized;
+		vtable.dev_platform_handle =
+			(psy_ui_fp_componentimp_dev_platform_handle)
+			dev_platform_handle;			
 		vtable_initialized = TRUE;
 	}
 }
@@ -708,7 +723,7 @@ psy_ui_Size dev_framesize(psy_ui_x11_ComponentImp* self)
 
 void dev_scrollto(psy_ui_x11_ComponentImp* self, intptr_t dx, intptr_t dy,
 	const psy_ui_RealRectangle* r)
-{
+{	
 	if (r) {
 		dev_invalidaterect(self, r);
 	} else {
@@ -894,7 +909,7 @@ void dev_invalidate(psy_ui_x11_ComponentImp* self)
 	XWindowAttributes win_attr;
 	XExposeEvent xev;
 
-	x11app = (psy_ui_X11App*)psy_ui_app()->imp;
+	x11app = (psy_ui_X11App*)psy_ui_app()->imp;	
     XGetWindowAttributes(x11app->dpy, self->hwnd, &win_attr);
 	xev.type = Expose;
 	xev.display = x11app->dpy;
@@ -913,17 +928,19 @@ void dev_invalidaterect(psy_ui_x11_ComponentImp* self,
 	psy_ui_X11App* x11app;
 	XExposeEvent xev;
 	XWindowAttributes win_attr;
-
+	
 	x11app = (psy_ui_X11App*)psy_ui_app()->imp;
 	xev.type = Expose;
 	xev.display = x11app->dpy;
 	xev.window = self->hwnd;
 	xev.count = 0;			
-	xev.x = (int)r->left;
-	xev.y = (int)r->top;
-	xev.width = (int)r->right - (int)r->left;
-	xev.height = (int)r->bottom - (int)r->top;	
-	XSendEvent(x11app->dpy, self->hwnd, True, ExposureMask, (XEvent*)&xev);
+	xev.x = psy_max(0.0, (int)r->left);
+	xev.y = psy_max(0.0, (int)r->top);
+	xev.width = psy_max(0.0, (int)r->right - (int)r->left);
+	xev.height = psy_max(0.0, (int)r->bottom - (int)r->top);	
+	if (xev.width != 0.0 && xev.height != 0.0) {	
+		XSendEvent(x11app->dpy, self->hwnd, True, ExposureMask, (XEvent*)&xev);
+	}
 }
 
 void dev_update(psy_ui_x11_ComponentImp* self)

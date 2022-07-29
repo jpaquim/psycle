@@ -1,7 +1,7 @@
 CC = g++
 INC = -I ../../ -I ../../psycle -I ../../../dsp/src
-LIBDIRS = -L ../../../dsp/src -l dsp
-LDFLAGS = -shared
+LIBDIRS = -L ../../../dsp/src
+LDFLAGS = -ldsp -shared
 OUTPUTFILE = filter-2-poles.so
 OUTPUTDIR = ../../build/
 src = $(wildcard *.cpp)
