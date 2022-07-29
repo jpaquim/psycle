@@ -684,6 +684,9 @@
     <ClCompile Include="src\filebox.c">
       <Filter>uicontrols</Filter>
     </ClCompile>
+    <ClCompile Include="src\fileedit.c">
+      <Filter>file</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\languageconfig.h">
@@ -1270,6 +1273,9 @@
     </ClInclude>
     <ClInclude Include="src\filebox.h">
       <Filter>uicontrols</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fileedit.h">
+      <Filter>file</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -310,6 +310,7 @@
     <ClCompile Include="src\exportview.c" />
     <ClCompile Include="src\filebar.c" />
     <ClCompile Include="src\filebox.c" />
+    <ClCompile Include="src\fileedit.c" />
     <ClCompile Include="src\fileview.c" />
     <ClCompile Include="src\fontbox.c" />
     <ClCompile Include="src\gear.c" />
@@ -515,6 +516,7 @@
     <ClInclude Include="src\exportview.h" />
     <ClInclude Include="src\filebar.h" />
     <ClInclude Include="src\filebox.h" />
+    <ClInclude Include="src\fileedit.h" />
     <ClInclude Include="src\fileview.h" />
     <ClInclude Include="src\fontbox.h" />
     <ClInclude Include="src\gear.h" />

@@ -290,7 +290,7 @@ void keyboardmiscconfig_setcursorstep(KeyboardMiscConfig* self, int step)
 	self->cursorstep = step;
 }
 
-int keyboardmiscconfig_cursor_step(const KeyboardMiscConfig* self)
+intptr_t keyboardmiscconfig_cursor_step(const KeyboardMiscConfig* self)
 {
 	assert(self);
 
