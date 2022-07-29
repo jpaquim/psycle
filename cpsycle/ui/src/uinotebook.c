@@ -284,7 +284,7 @@ void psy_ui_notebook_on_select_section(psy_ui_Notebook* self, psy_ui_Component* 
 	if (param1 != psy_INDEX_INVALID) {
 		psy_ui_notebook_select_by_component_id(self, param1);
 	} else {
-		psy_ui_notebook_select_by_component_id(self, param2);
+		psy_ui_notebook_select(self, param2);
 	}
 }
 

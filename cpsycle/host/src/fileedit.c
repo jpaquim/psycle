@@ -139,7 +139,7 @@ void fileedit_on_dialog(FileEdit* self,psy_ui_Component* sender)
 				self->filebox->dirsonly = FALSE;
 			}			
 		}
-		self->filebox->property = self->property;
+		self->filebox->property = self->property;		
 		psy_ui_component_select_section(psy_ui_component_parent(
 			psy_ui_component_parent(&self->filebox->component)),
 			psy_INDEX_INVALID, 0);
