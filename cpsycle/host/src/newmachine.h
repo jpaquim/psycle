@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #if !defined(NEWMACHINE_H)
@@ -36,13 +36,13 @@ typedef struct NewMachineSearchBar {
 	psy_ui_Component component;
 	/* intern */
 	SearchField search;
-	NewMachineFilter* filter;
+	PluginFilter* filter;
 } NewMachineSearchBar;
 
 void newmachinesearchbar_init(NewMachineSearchBar*, psy_ui_Component* parent,
-	NewMachineFilter* filter);
+	PluginFilter* filter);
 
-void newmachinesearchbar_setfilter(NewMachineSearchBar*, NewMachineFilter*);
+void newmachinesearchbar_setfilter(NewMachineSearchBar*, PluginFilter*);
 
 /* NewMachineRescanBar */
 typedef struct NewMachineRescanBar {
@@ -90,14 +90,20 @@ typedef struct NewMachineFilterGroup {
 	psy_ui_Component header;
 	psy_ui_Label desc;
 	psy_ui_Component types;
-	psy_ui_Component client;	
+	psy_ui_Component client;
+	/* references */
+	PluginFilter* filter;
+	PluginFilterGroup* filter_group;
 } NewMachineFilterGroup;
 
 void newmachinefiltergroup_init(NewMachineFilterGroup*,
-	psy_ui_Component* parent, const char* label);
+	psy_ui_Component* parent, PluginFilter* filter,
+	PluginFilterGroup*);
 	
+void newmachinefiltergroup_set_filter(NewMachineFilterGroup*,
+	PluginFilter*, PluginFilterGroup*);
 void newmachinefiltergroup_add(NewMachineFilterGroup*,
-	const char* label, uintptr_t id);
+	const char* label, uintptr_t id, bool active);
 void newmachinefiltergroup_set(NewMachineFilterGroup*,
 	uintptr_t id, bool);
 void newmachinefiltergroup_mark(NewMachineFilterGroup*,
@@ -105,86 +111,25 @@ void newmachinefiltergroup_mark(NewMachineFilterGroup*,
 void newmachinefiltergroup_unmark(NewMachineFilterGroup*,
 	uintptr_t id);	
 	
-/* NewMachineSortBar */
-typedef struct NewMachineSortBar {
-	/* inherits */
-	NewMachineFilterGroup group;
-	/* references */
-	NewMachineSort* sort;	
-} NewMachineSortBar;
-
-void newmachinesortbar_init(NewMachineSortBar*, psy_ui_Component* parent,
-	NewMachineSort*);
+INLINE psy_ui_Component* newmachinefiltergroup_base(NewMachineFilterGroup* self)
+{
+	return &self->component;
+}		
 	
-INLINE psy_ui_Component* newmachinesortbar_base(NewMachineSortBar* self)
-{
-	return &self->group.component;
-}	
-
-/* NewMachineFilterBar */
-
-typedef struct NewMachineModeBar {
-	/* inherits */
-	NewMachineFilterGroup group;
-	/* intern */
-	psy_ui_Button gen;
-	psy_ui_Button effects;	
-	/* references */
-	NewMachineFilter* filter;
-} NewMachineModeBar;
-
-void newmachinemodebar_init(NewMachineModeBar*, psy_ui_Component* parent,
-	NewMachineFilter*);
-
-void newmachinemodebar_setfilter(NewMachineModeBar*, NewMachineFilter*);
-void newmachinemodebar_update(NewMachineModeBar*);
-
-INLINE psy_ui_Component* newmachinemodebar_base(NewMachineModeBar* self)
-{
-	return &self->group.component;
-}
-
-
-typedef struct NewMachineTypeBar {
-	/* inherits */
-	NewMachineFilterGroup group;
-	/* intern */
-	psy_ui_Button gen;
-	psy_ui_Button effects;
-	psy_ui_Button intern;
-	psy_ui_Button native;
-	psy_ui_Button vst;
-	psy_ui_Button lua;
-	psy_ui_Button ladspa;
-	/* references */
-	NewMachineFilter* filter;
-} NewMachineTypeBar;
-
-void newmachinetypebar_init(NewMachineTypeBar*,
-	psy_ui_Component* parent, NewMachineFilter*);
-
-void newmachinetypebar_setfilter(NewMachineTypeBar*, NewMachineFilter*);
-void newmachinetypebar_update(NewMachineTypeBar*);
-
-INLINE psy_ui_Component* newmachinetypebar_base(NewMachineTypeBar* self)
-{
-	return &self->group.component;
-}
-
 /* NewMachineCategoryBar */
 typedef struct NewMachineCategoryBar {
 	/* inherits */
 	NewMachineFilterGroup group;
 	/* intern */	
 	/* references */
-	NewMachineFilter* filter;
+	PluginFilter* filter;
 	psy_audio_PluginCatcher* plugincatcher;
 } NewMachineCategoryBar;
 
 void newmachinecategorybar_init(NewMachineCategoryBar*, psy_ui_Component* parent,
-	NewMachineFilter*, psy_audio_PluginCatcher*);
+	PluginFilter*, psy_audio_PluginCatcher*);
 
-void newmachinecategorybar_setfilter(NewMachineCategoryBar*, NewMachineFilter*);
+void newmachinecategorybar_setfilter(NewMachineCategoryBar*, PluginFilter*);
 void newmachinecategorybar_build(NewMachineCategoryBar*);
 
 
@@ -201,19 +146,18 @@ typedef struct NewMachineFiltersBar {
 	psy_ui_Component expandfiltersbar;
 	psy_ui_Component filters;
 	psy_ui_Button togglefilters;
-	NewMachineModeBar modebar;
-	NewMachineTypeBar typebar;
-	NewMachineSortBar sortbar;
-	NewMachineCategoryBar categorybar;
-	NewMachineSort sort;
+	NewMachineFilterGroup modebar;
+	NewMachineFilterGroup typebar;
+	NewMachineFilterGroup sortbar;
+	NewMachineCategoryBar categorybar;	
 	/* references */	
 	psy_audio_PluginCatcher* plugincatcher;
 } NewMachineFiltersBar;
 
 void newmachinefiltersbar_init(NewMachineFiltersBar*, psy_ui_Component* parent,
-	NewMachineFilter*, psy_audio_PluginCatcher*);
+	PluginFilter*, psy_audio_PluginCatcher*);
 
-void newmachinefiltersbar_setfilter(NewMachineFiltersBar*, NewMachineFilter*);
+void newmachinefiltersbar_setfilter(NewMachineFiltersBar*, PluginFilter*);
 void newmachinefiltersbar_build(NewMachineFiltersBar*);
 
 
@@ -248,7 +192,7 @@ typedef struct NewMachineSectionsPane {
 	NewMachineFiltersBar filtersbar;
 	Workspace* workspace;
 	psy_Table newmachinesections;
-	NewMachineFilter filter;	
+	PluginFilter filter;	
 	/* references */
 	struct NewMachine* newmachine;
 } NewMachineSectionsPane;
@@ -306,13 +250,15 @@ void newmachine_insertmode(NewMachine*);
 void newmachine_appendmode(NewMachine*);
 void newmachine_addeffectmode(NewMachine*);
 
-bool newmachine_selectedmachineinfo(const NewMachine*, psy_audio_MachineInfo* rv);
+bool newmachine_selectedmachineinfo(const NewMachine*,
+	psy_audio_MachineInfo* rv);
 
 void newmachine_onpluginselected(NewMachine*, PluginsView* sender);
 void newmachine_onsectionselected(NewMachine*,
 	NewMachineSection* sender);
 void newmachine_onpluginchanged(NewMachine*, PluginsView* parent);
-void newmachine_setfilter(NewMachine*, NewMachineFilter*);
+void newmachine_setfilter(NewMachine*, PluginFilter*);
+void newmachine_select_pane(NewMachine*, NewMachineSectionsPane*);
 
 INLINE psy_ui_Component* newmachine_base(NewMachine* self)
 {

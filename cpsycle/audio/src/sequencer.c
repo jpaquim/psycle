@@ -1881,10 +1881,10 @@ void psy_audio_sequencer_update_host_seq_time(psy_audio_Sequencer* self, bool fo
 			if (follow_song) {
 				psy_audio_sequence_set_cursor(self->sequence,
 					self->hostseqtime.currplaycursor);
-			}
+			}			
 			psy_signal_emit(&self->signal_play_line_changed, self, 0);
 		}
-		if (play_status_changed) {
+		if (play_status_changed) {			
 			psy_signal_emit(&self->signal_play_status_changed, self, 0);
 		}
 		psy_audio_hostsequencertime_update_last_play_cursor(&self->hostseqtime);

@@ -52,10 +52,9 @@ void machineeditorview_init(MachineEditorView* self, psy_ui_Component* parent,
 	machineeditorview_vtable_init(self);	
 	self->machine = machine;
 	self->workspace = workspace;
-#if PSYCLE_USE_TK == PSYCLE_TK_WIN32
 	psy_audio_machine_seteditorhandle(machine,
-		(void*) psy_ui_win_component_details(&self->component)->hwnd);
-#endif	
+		(void*)self->component.imp->vtable->dev_platform(
+			self->component.imp));
 	psy_signal_connect(&workspace->signal_machineeditresize, self,
 		machineeditorview_onmachineeditresize);	
 }

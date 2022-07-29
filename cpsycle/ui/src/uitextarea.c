@@ -286,31 +286,38 @@ void psy_ui_textareapane_on_key_down(psy_ui_TextAreaPane* self,
 	case psy_ui_KEY_CONTROL:
 	case psy_ui_KEY_MENU:
 		break;
-	default:
-		if (psy_ui_keyboardevent_shiftkey(ev)) {
-			insertchar(self, psy_ui_keyboardevent_keycode(ev));
+	case psy_ui_KEY_RETURN:
+		if (self->format.line_wrap) {
+			insertchar(self, '\n');
+			psy_ui_component_align(psy_ui_component_parent(
+				&self->component));
+		} else if (self->isinputfield) {
+			psy_signal_emit(&self->signal_accept, self, 0);
+		}		
+		break;
+	default: {
+		unsigned char printable;
+		
+		printable = psy_ui_keyboardevent_printable_char(ev);		
+		if (printable != '\0') {
+			insertchar(self, printable);
 		} else if (psy_ui_keyboardevent_keycode(ev) ==
 				psy_ui_KEY_RETURN) {
-			if (self->format.line_wrap) {
-				insertchar(self, '\n');
-				psy_ui_component_align(psy_ui_component_parent(
-					&self->component));
-			} else {
-				if (self->isinputfield) {
-					psy_signal_emit(&self->signal_accept, self, 0);
-				}
-			}
-		} else if (psy_ui_keyboardevent_keycode(ev) >= psy_ui_KEY_DIGIT0
-			&& psy_ui_keyboardevent_keycode(ev) <= psy_ui_KEY_DIGIT9) {
-			insertchar(self, psy_ui_keyboardevent_keycode(ev));
-		} else {
-			insertchar(self, psy_ui_keyboardevent_keycode(ev) -
-				'A' + 'a');
-		}						
-		break;
+			
+		}
+		break; }
 	}
 	psy_ui_component_invalidate(&self->component);
 	psy_ui_keyboardevent_stop_propagation(ev);	
+}
+
+char psy_ui_textareapane_char_from_keycode(psy_ui_TextAreaPane* self, int keycode, bool shift_state)
+{
+	switch (keycode) {
+		default:
+		break;
+	}
+	return keycode;
 }
 
 void psy_ui_textareapane_prev_col(psy_ui_TextAreaPane* self,

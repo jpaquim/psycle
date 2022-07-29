@@ -19,6 +19,8 @@
 extern "C" {
 #endif
 
+#define PSYCLE_MACHINE_BORDER_DISTANCE 5.0
+
 /*
 ** Components to draw a machine with its buttonsand vumeterand reacting to
 ** ui events to solo/mute/bypass or pan the machine

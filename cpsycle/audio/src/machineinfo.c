@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -13,9 +13,12 @@
 /* platform */
 #include "../../detail/portable.h"
 
+
 /* implementation */
 void machineinfo_init(psy_audio_MachineInfo* self)
 {
+	assert(self);
+	
 	self->author = psy_strdup("");
 	self->command = psy_strdup("");
 	self->flags = 0;
@@ -35,6 +38,8 @@ void machineinfo_init(psy_audio_MachineInfo* self)
 void machineinfo_init_copy(psy_audio_MachineInfo* self,
 	psy_audio_MachineInfo* src)
 {
+	assert(self);
+	
 	self->author = psy_strdup(src->author);
 	self->command = psy_strdup(src->command);
 	self->flags = src->flags;
@@ -53,6 +58,8 @@ void machineinfo_init_copy(psy_audio_MachineInfo* self,
 void machineinfo_copy(psy_audio_MachineInfo* self,
 	const psy_audio_MachineInfo* src)
 {
+	assert(self);
+	
 	machineinfo_dispose(self);
 	self->author = psy_strdup(src->author);
 	self->command = psy_strdup(src->command);
@@ -84,7 +91,9 @@ void machineinfo_set(psy_audio_MachineInfo* self,
 		const char* helptext,
 		const char* desc,
 		const char* category)
-{		
+{	
+	assert(self);
+		
 	psy_strreset(&self->author, author);
 	psy_strreset(&self->command, command);
 	self->flags = flags;
@@ -107,6 +116,8 @@ void machineinfo_setnativeinfo(psy_audio_MachineInfo* self,
 	const char* modulepath,
 	int shellidx)
 {
+	assert(self);
+	
 	machineinfo_dispose(self);
 	psy_strreset(&self->author, info->Author);
 	psy_strreset(&self->command, info->Command);
@@ -131,6 +142,8 @@ void machineinfo_setnativeinfo(psy_audio_MachineInfo* self,
 
 void machineinfo_dispose(psy_audio_MachineInfo* self)
 {
+	assert(self);
+	
 	free(self->author);
 	self->author = NULL;
 	free(self->name);
@@ -168,6 +181,8 @@ psy_audio_MachineInfo* machineinfo_allocinit(void)
 psy_audio_MachineInfo* machineinfo_clone(const psy_audio_MachineInfo* self)
 {
 	psy_audio_MachineInfo* rv;
+	
+	assert(self);
 
 	rv = (psy_audio_MachineInfo*)malloc(sizeof(psy_audio_MachineInfo));
 	if (rv) {
@@ -190,6 +205,19 @@ psy_audio_MachineInfo* machineinfo_clone(const psy_audio_MachineInfo* self)
 
 void machineinfo_clear(psy_audio_MachineInfo* self)
 {
+	assert(self);
+	
 	machineinfo_dispose(self);
 	machineinfo_init(self);
+}
+
+bool machineinfo_internal(const psy_audio_MachineInfo* self)
+{
+	assert(self);
+	
+	return !(self->type == psy_audio_PLUGIN ||
+		self->type == psy_audio_LUA ||
+		self->type == psy_audio_VST ||
+		self->type == psy_audio_VSTFX ||
+		self->type == psy_audio_LADSPA);
 }

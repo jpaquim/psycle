@@ -281,7 +281,11 @@ psy_ui_Component* psy_ui_notebook_page(psy_ui_Notebook* self, uintptr_t pageinde
 void psy_ui_notebook_on_select_section(psy_ui_Notebook* self, psy_ui_Component* sender,
 	uintptr_t param1, uintptr_t param2)
 {
-	psy_ui_notebook_select_by_component_id(self, param1);
+	if (param1 != psy_INDEX_INVALID) {
+		psy_ui_notebook_select_by_component_id(self, param1);
+	} else {
+		psy_ui_notebook_select_by_component_id(self, param2);
+	}
 }
 
 uintptr_t psy_ui_notebook_on_section(psy_ui_Notebook* self)

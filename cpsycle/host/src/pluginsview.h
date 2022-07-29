@@ -6,8 +6,10 @@
 #if !defined(PLUGINSVIEW_H)
 #define PLUGINSVIEW_H
 
-/* host */
-#include "workspace.h"
+/* ui */
+#include <uicomponent.h>
+/* audio */
+#include <machine.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -37,49 +39,67 @@ void newmachinesort_dispose(NewMachineSort*);
 
 void newmachinesort_sort(NewMachineSort*, NewMachineSortMode);
 
-/* NewMachineFilter */
+/* PluginFilter */
 
-typedef enum NewMachineFilterTypes {
-	NEWMACHINE_FILTERTYPES_NONE = 0,
-	NEWMACHINE_FILTERTYPES_GENERATORS = 1,
-	NEWMACHINE_FILTERTYPES_EFFECTS = 2,
-	NEWMACHINE_FILTERTYPES_INTERN = 4,
-	NEWMACHINE_FILTERTYPES_NATIVE = 8,
-	NEWMACHINE_FILTERTYPES_VST = 16,
-	NEWMACHINE_FILTERTYPES_LUA = 32,
-	NEWMACHINE_FILTERTYPES_LADSPA = 64
-} NewMachineFilterTypes;
+typedef struct PluginFilterItem {
+	uintptr_t key;
+	char* name;
+	bool active;	
+} PluginFilterItem;
 
-typedef struct NewMachineFilter {
+void pluginfilteritem_init(PluginFilterItem*, uintptr_t key, const char* name,
+	bool active);
+void pluginfilteritem_dispose(PluginFilterItem*);
+	
+PluginFilterItem* pluginfilteritem_allocinit(uintptr_t key, const char* name,
+	bool active);
+
+typedef struct PluginFilterGroup {	
+	psy_List* items;
+	uintptr_t id;
+	char* label;
+} PluginFilterGroup;
+
+void pluginfiltergroup_init(PluginFilterGroup*, uintptr_t id,
+	const char* label);
+void pluginfiltergroup_dispose(PluginFilterGroup*);
+
+PluginFilterGroup* pluginfiltergroup_allocinit(uintptr_t id,
+	const char* label);
+
+void pluginfiltergroup_clear(PluginFilterGroup*);
+bool pluginfiltergroup_add(PluginFilterGroup*,
+	uintptr_t key, const char* name, bool active);
+bool pluginfiltergroup_remove(PluginFilterGroup*, uintptr_t key);
+
+void pluginfiltergroup_select(PluginFilterGroup*, 
+	uintptr_t key);
+void pluginfiltergroup_select_all(PluginFilterGroup*);
+void pluginfiltergroup_deselect(PluginFilterGroup*, 
+	uintptr_t key);
+void pluginfiltergroup_deselect_all(PluginFilterGroup*);	
+void pluginfiltergroup_toggle(PluginFilterGroup*, 
+	uintptr_t key);
+bool pluginfiltergroup_selected(const PluginFilterGroup*, 
+	uintptr_t key);
+bool pluginfiltergroup_exists(const PluginFilterGroup*, 
+	uintptr_t key);	
+
+typedef struct PluginFilter {
 	psy_Signal signal_changed;
-	bool gen;
-	bool effect;
-	bool intern;
-	bool native;
-	bool vst;
-	bool lua;
-	bool ladspa;
-	psy_audio_MachineType type;
-	char_dyn_t* text;
-	psy_Table categories;	
-} NewMachineFilter;
+	char_dyn_t* search_text;	
+	PluginFilterGroup mode;
+	PluginFilterGroup types;
+	PluginFilterGroup categories;
+	PluginFilterGroup sort;
+} PluginFilter;
 
-void newmachinefilter_init(NewMachineFilter*);
-void newmachinefilter_dispose(NewMachineFilter*);
+void pluginfilter_init(PluginFilter*);
+void pluginfilter_dispose(PluginFilter*);
 
-void newmachinefilter_reset(NewMachineFilter*);
-bool newmachinefilter_all(const NewMachineFilter*);
-void newmachinefilter_notify(NewMachineFilter*);
-void newmachinefilter_settext(NewMachineFilter*, const char* text);
-void newmachinefilter_setalltypes(NewMachineFilter*);
-void newmachinefilter_clear_all(NewMachineFilter*);
-void newmachinefilter_clear_types(NewMachineFilter*);
-void newmachinefilter_addcategory(NewMachineFilter*, const char* category);
-void newmachinefilter_removecategory(NewMachineFilter*, const char* category);
-void newmachinefilter_anycategory(NewMachineFilter*);
-bool newmachinefilter_useanycategory(const NewMachineFilter*);
-bool newmachinefilter_hascategory(const NewMachineFilter*,
-	const char* category);
+void pluginfilter_select_all(PluginFilter*);
+void pluginfilter_notify(PluginFilter*);
+void pluginfilter_set_search_text(PluginFilter*, const char* text);
 
 typedef struct NewMachineSelection {
 	psy_List* items;
@@ -131,7 +151,7 @@ typedef struct PluginsView {
 	NewMachineSelection selection;
 	bool readonly;
 	/* References */
-	NewMachineFilter* filter;
+	PluginFilter* filter;
 	NewMachineSort* sort;	
 } PluginsView;
 
@@ -140,7 +160,7 @@ void pluginsview_init(PluginsView*, psy_ui_Component* parent);
 void pluginsview_clear(PluginsView*);
 void pluginsview_clearfilter(PluginsView*);
 void pluginsview_setplugins(PluginsView*, const psy_Property*);
-void pluginsview_set_filter(PluginsView*, NewMachineFilter*);
+void pluginsview_set_filter(PluginsView*, PluginFilter*);
 void pluginsview_filter(PluginsView*);
 void pluginsview_setsort(PluginsView*, NewMachineSort*);
 void pluginsview_sort(PluginsView*, NewMachineSortMode);

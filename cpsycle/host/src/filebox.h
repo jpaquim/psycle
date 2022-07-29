@@ -6,35 +6,58 @@
 #if !defined(FILEBOX_H)
 #define FILEBOX_H
 
-/* host */
 /* ui */
-// #include <uitextarea.h>
 #include <uibutton.h>
+#include <uicheckbox.h>
+#include <uilabel.h>
+#include "uilistbox.h"
+#include <uitabbar.h>
 #include <uitextarea.h>
+/* file */
+#include <dir.h>
 
-/* FileEdit */
+typedef struct FileLine {
+	psy_ui_Component component;
+	psy_ui_Button name;
+	psy_ui_Label size;
+	char* path;
+} FileLine;
 
-typedef struct FileEdit {
+void fileline_init(FileLine*, psy_ui_Component* parent, const char* path, bool is_dir);
+
+FileLine* fileline_alloc(void);
+FileLine* fileline_allocinit(psy_ui_Component* parent, const char* path, bool is_dir);
+
+
+typedef struct FileBox {
 	/* inherits */
 	psy_ui_Component component;
-	/* inrernal */	
-	psy_ui_TextArea edit;
-	psy_ui_Button dialog;
+	/* internal */
+	psy_ui_Scroller scroller;	
+	psy_ui_Component pane;
+	psy_ui_Component filepane;
+	psy_ui_Component dirpane;
+	uintptr_t selindex;
+	psy_Path curr_dir;
+	bool rebuild;
+	char* wildcard;
+	bool dirsonly;
+	/* signal */
+	psy_Signal signal_selected;	
+	psy_Signal signal_dir_changed;
 	/* references */
-	psy_Property* property;
-} FileEdit;
+	psy_Property* property;	
+} FileBox;
 
-void fileedit_init(FileEdit*, psy_ui_Component* parent);
+void filebox_init(FileBox*, psy_ui_Component* parent);
 
-FileEdit* fileedit_alloc(void);
-FileEdit* fileedit_allocinit(psy_ui_Component* parent);
+void filebox_read(FileBox*, const char* path);
+uintptr_t filebox_selected(const FileBox*);
+void filebox_set_wildcard(FileBox* self, const char* wildcard);
+void filebox_set_directory(FileBox* self, const char* path);
+const char* filebox_directory(const FileBox*);
+const char* filebox_file_name(FileBox*);
 
-void fileedit_data_exchange(FileEdit*, psy_Property*);
-
-INLINE psy_ui_Component* fileedit_base(FileEdit* self)
-{
-	return &self->component;
-}
 
 #ifdef __cplusplus
 }

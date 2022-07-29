@@ -17,6 +17,7 @@ PLUGDIRS :=\
 			druttis_koruz/src\
 			druttis_phantom/src\
 			druttis_slicit/src\
+			druttis_pluckedstring/src\			
 			dw_eq/src\
 			dw_granulizer/src\
 			dw_iopan/src\
@@ -38,7 +39,14 @@ PLUGDIRS :=\
 			negative/src\
 			ninereeds_7900/src\
 			phaser/src\
+			pooplog_filter/src\
+			pooplog-synth/src\
+			pooplog-synth-light/src\
+			pooplog-synth-ultralight/src\
 			schorus/src\
+			stk-plugged/src\
+			stk-reverbs/src\
+			stk-shakers/src\
 			ring_modulator/src\
 			yezar_freeverb/src\
 			zephod_super_fm/src

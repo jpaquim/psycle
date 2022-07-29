@@ -99,6 +99,9 @@ void dirconfig_make(DirConfig* self, psy_Property* parent)
 	dirconfig_append_dir_edit(self,
 		"skin", "settings.dirs.skin",
 		"C:\\Programme\\Psycle\\Skins");
+	dirconfig_append_dir_edit(self,
+		"doc", "settings.dirs.doc",
+		PSYCLE_DOC_DEFAULT_DIR);		
 	dirconfig_make_default_user_presets(self);
 }
 
@@ -223,7 +226,7 @@ const char* dirconfig_doc(const DirConfig* self)
 {
 	assert(self);
 
-	return psy_property_at_str(self->directories, "skins",
+	return psy_property_at_str(self->directories, "doc",
 		PSYCLE_DOC_DEFAULT_DIR);
 }
 

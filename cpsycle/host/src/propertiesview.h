@@ -8,13 +8,14 @@
 
 /* host */
 #include "inputdefiner.h"
-#include <uitabbar.h>
+#include "filebox.h"
 #include "workspace.h"
 /* ui */
 #include <uicombobox.h>
 #include <uilabel.h>
 #include <uiscroller.h>
 #include <uinotebook.h>
+#include <uitabbar.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -23,6 +24,35 @@ extern "C" {
 /* Displays and edits properties */
 
 struct PropertiesRenderLine;
+
+/* FileBar */
+typedef struct PropertiesFileBar {
+	/* inherits */
+	psy_ui_Component component;
+	/* intern */	
+	psy_ui_Button add;
+	psy_ui_Button cancel;
+	/* refercences */
+	psy_ui_Notebook* notebook;	
+	FileBox* filebox;
+} PropertiesFileBar;
+
+void propertiesfilebar_init(PropertiesFileBar*, psy_ui_Component* parent);
+
+/* FileBar */
+typedef struct PropertiesDirBar {
+	/* inherits */
+	psy_ui_Component component;
+	/* intern */	
+	psy_ui_Label label;	
+	/* refercences */
+	psy_ui_Notebook* notebook;	
+	FileBox* filebox;
+} PropertiesDirBar;
+
+void propertiesdirbar_init(PropertiesDirBar*, psy_ui_Component* parent);
+
+void propertiesdirbar_set_text(PropertiesDirBar*, const char* text);
 
 typedef struct PropertiesRenderState {
 	psy_ui_Size size_col0;	
@@ -37,6 +67,7 @@ typedef struct PropertiesRenderState {
 	struct PropertiesRenderLine* property_line_selected;
 	psy_ui_Component* view;
 	psy_ui_Component* renderer;
+	FileBox* filebox;
 } PropertiesRenderState;
 
 void propertiesrenderstate_init(PropertiesRenderState*, uintptr_t numcols,
@@ -78,7 +109,7 @@ typedef struct PropertiesRenderer {
 } PropertiesRenderer;
 
 void propertiesrenderer_init(PropertiesRenderer*, psy_ui_Component* parent,
-	psy_Property*, uintptr_t numcols, bool lazy);
+	psy_Property*, uintptr_t numcols, bool lazy, FileBox*);
 
 void propertiesrenderer_set_style(PropertiesRenderer*,
 	uintptr_t mainsection,
@@ -106,11 +137,17 @@ typedef struct PropertiesView {
 	psy_ui_Component component;
 	/* signals */	
 	psy_Signal signal_selected;
-	/* intern */
+	/* intern */	
 	psy_ui_Component sectionfloated;
 	psy_ui_Label floatdesc;
-	psy_ui_Component viewtabbar;	
+	psy_ui_Component viewtabbar;
 	psy_ui_TabBar tabbar;
+	psy_ui_Notebook notebook;
+	psy_ui_Component fileview;
+	FileBox filebox;
+	PropertiesFileBar filebar;
+	PropertiesDirBar dirbar;
+	psy_ui_Component mainview;
 	PropertiesRenderer renderer;
 	psy_ui_Scroller scroller;	
 	bool maximize_main_sections;	

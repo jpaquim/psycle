@@ -346,13 +346,16 @@ void* psy_tableiterator_value(psy_TableIterator* self)
 
 uintptr_t psy_strhash(const char* str)
 {
-	uintptr_t hash = 5381;
-	int c;
+	if (str) {
+		uintptr_t hash = 5381;
+		int c;
+		
+		while (c = *str++)
+			hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
 
-	while (c = *str++)
-		hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
-
-	return hash;
+		return hash;
+	}
+	return psy_INDEX_INVALID;
 }
 
 

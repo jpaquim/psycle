@@ -74,7 +74,7 @@ void psy_ui_button_init(psy_ui_Button* self, psy_ui_Component* parent)
 	psy_ui_component_init(psy_ui_button_base(self), parent, NULL);
 	vtable_init(self);
 	self->property = NULL;
-	psy_ui_component_set_aligner(&self->component, NULL);
+	psy_ui_component_set_aligner(&self->component, NULL);	
 	self->icon = psy_ui_ICON_NONE;
 	self->charnumber = 0.0;
 	self->linespacing = 1.0;

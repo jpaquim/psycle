@@ -9,6 +9,10 @@
 #include "pluginsview.h"
 /* host */
 #include "styles.h"
+/* ui */
+#include <uiapp.h>
+/* audio */
+#include <plugincatcher.h>
 /* container */
 #include <qsort.h>
 /* platform */
@@ -18,8 +22,8 @@
 static void plugindisplayname(psy_Property*, char* text);
 static uintptr_t plugintype(psy_Property*, char* text);
 static uintptr_t pluginmode(psy_Property*, char* text);
-static psy_Property* search(psy_Property* source, NewMachineFilter*);
-static void searchfilter(psy_Property* plugin, NewMachineFilter*,
+static psy_Property* search(psy_Property* source, PluginFilter*);
+static void searchfilter(psy_Property* plugin, PluginFilter*,
 	psy_Property* parent);
 static int isplugin(int type);
 
@@ -211,128 +215,261 @@ int isplugin(int type)
 }
 
 
-/* NewMachineFilter */
-void newmachinefilter_init(NewMachineFilter* self)
+/* PluginFilterGroup */
+
+void pluginfilteritem_init(PluginFilterItem* self, uintptr_t key,
+	const char* name, bool active)
 {
-	self->text = NULL;	
-	psy_table_init(&self->categories);
-	newmachinefilter_setalltypes(self);		
+	self->key = key;
+	self->name = psy_strdup(name);
+	self->active = active;
+}
+
+void pluginfilteritem_dispose(PluginFilterItem* self)
+{	
+	free(self->name);
+	self->name = NULL;	
+}
+
+PluginFilterItem* pluginfilteritem_allocinit(uintptr_t key, const char* name,
+	bool active)
+{
+	PluginFilterItem* rv;
+	
+	rv = (PluginFilterItem*)malloc(sizeof(PluginFilterItem));
+	if (rv) {
+		pluginfilteritem_init(rv, key, name, active);
+	}
+	return rv;
+}
+
+/* PluginFilterGroup */
+
+static PluginFilterItem* pluginfiltergroup_item(PluginFilterGroup*,
+	uintptr_t key);
+
+void pluginfiltergroup_init(PluginFilterGroup* self, uintptr_t id,
+	const char* label)
+{
+	self->items = NULL;	
+	self->id = id;
+	self->label = psy_strdup(label);
+}
+
+void pluginfiltergroup_dispose(PluginFilterGroup* self)
+{
+	psy_list_deallocate(&self->items, (psy_fp_disposefunc)
+		pluginfilteritem_dispose);
+	free(self->label);
+	self->label = NULL;
+}
+
+PluginFilterGroup* pluginfiltergroup_allocinit(uintptr_t id,
+	const char* label)
+{
+	PluginFilterGroup* rv;
+	
+	rv = (PluginFilterGroup*)malloc(sizeof(PluginFilterGroup));
+	if (rv) {
+		pluginfiltergroup_init(rv, id, label);
+	}
+	return rv;
+}
+
+
+bool pluginfiltergroup_add(PluginFilterGroup* self,
+	uintptr_t key, const char* name, bool active)
+{
+	if (key == psy_INDEX_INVALID) {
+		return FALSE;
+	}
+	if (pluginfiltergroup_item(self, key)) {
+		return FALSE;
+	}
+	psy_list_append(&self->items, pluginfilteritem_allocinit(key, name,
+		active));
+	return TRUE;
+}
+
+void pluginfiltergroup_clear(PluginFilterGroup* self)
+{
+	psy_list_deallocate(&self->items, (psy_fp_disposefunc)
+		pluginfilteritem_dispose);
+}
+
+bool pluginfiltergroup_remove(PluginFilterGroup* self, uintptr_t key)
+{
+	psy_List* p;
+	
+	for (p = self->items; p != NULL; p = p->next) {
+		PluginFilterItem* curr;
+		
+		curr = (PluginFilterItem*)p->entry;
+		if (curr->key && key == curr->key) {
+			pluginfilteritem_dispose(curr);
+			psy_list_remove(&self->items, p);
+			break;
+		}
+	}	
+	return (p != NULL);
+}
+
+void pluginfiltergroup_select(PluginFilterGroup* self, uintptr_t key)
+{
+	PluginFilterItem* item;
+	
+	item = pluginfiltergroup_item(self, key);
+	if (item) {
+		item->active = TRUE;
+	}	
+}
+
+void pluginfiltergroup_select_all(PluginFilterGroup* self)
+{
+	psy_List* p;
+
+	for (p = self->items; p != NULL; p = p->next) {
+		PluginFilterItem* curr;
+		
+		curr = (PluginFilterItem*)p->entry;
+		curr->active = TRUE;
+	}	
+}
+
+void pluginfiltergroup_deselect(PluginFilterGroup* self, uintptr_t key)
+{
+	PluginFilterItem* item;
+	
+	item = pluginfiltergroup_item(self, key);
+	if (item) {
+		item->active = FALSE;
+	}
+}
+
+void pluginfiltergroup_deselect_all(PluginFilterGroup* self)
+{
+	psy_List* p;
+
+	for (p = self->items; p != NULL; p = p->next) {
+		PluginFilterItem* curr;
+		
+		curr = (PluginFilterItem*)p->entry;
+		curr->active = FALSE;
+	}	
+}
+
+void pluginfiltergroup_toggle(PluginFilterGroup* self, uintptr_t key)
+{
+	if (pluginfiltergroup_selected(self, key)) {
+		pluginfiltergroup_deselect(self, key);
+	} else {
+		pluginfiltergroup_select(self, key);
+	}	
+}
+
+bool pluginfiltergroup_selected(const PluginFilterGroup* self, uintptr_t key)
+{
+	PluginFilterItem* item;
+	
+	item = pluginfiltergroup_item((PluginFilterGroup*)self, key);
+	if (item) {
+		return item->active;
+	}
+	return FALSE;
+}
+
+bool pluginfiltergroup_exists(const PluginFilterGroup* self, uintptr_t key)
+{
+	return (pluginfiltergroup_item((PluginFilterGroup*)self, key) != NULL);
+}
+
+PluginFilterItem* pluginfiltergroup_item(PluginFilterGroup* self, uintptr_t id)
+{
+	PluginFilterItem* rv;
+	
+	psy_List* p;
+	rv = NULL;
+	for (p = self->items; p != NULL; p = p->next) {
+		PluginFilterItem* curr;
+		
+		curr = (PluginFilterItem*)p->entry;
+		if (curr->key && id == curr->key) {
+			rv = curr;
+			break;
+		}
+	}
+	return rv;
+}
+
+/* PluginFilter */
+
+void pluginfilter_init(PluginFilter* self)
+{
+	psy_Property* curr;
+	self->search_text = NULL;	
+	pluginfiltergroup_init(&self->mode, psy_strhash("mode"), "Mode");
+	pluginfiltergroup_add(&self->mode,
+		psy_strhash("generator"), "Generator", TRUE);
+	pluginfiltergroup_add(&self->mode,
+		psy_strhash("effect"), "Effect", TRUE);		
+	pluginfiltergroup_init(&self->types, psy_strhash("type"), "Type");
+	pluginfiltergroup_add(&self->types,
+		psy_strhash("intern"), "Internal", TRUE);
+	pluginfiltergroup_add(&self->types,
+		psy_strhash("native"), "Native", TRUE);
+	pluginfiltergroup_add(&self->types,
+		psy_strhash("vst"), "Vst", TRUE);
+	pluginfiltergroup_add(&self->types,
+		psy_strhash("lua"), "Lua", TRUE);
+	pluginfiltergroup_add(&self->types,
+		psy_strhash("ladspa"), "Ladspa", TRUE);
+	pluginfiltergroup_init(&self->categories, psy_strhash("categories"),
+		"newmachine.categories");
+	pluginfiltergroup_init(&self->sort, psy_strhash("sort"),
+		"newmachine.sort");		
+	pluginfiltergroup_add(&self->sort, NEWMACHINESORTMODE_FAVORITE,
+		"newmachine.favorite", FALSE);
+	pluginfiltergroup_add(&self->sort, NEWMACHINESORTMODE_NAME,
+		"newmachine.name",  FALSE);
+	pluginfiltergroup_add(&self->sort, NEWMACHINESORTMODE_TYPE,
+		"newmachine.type", FALSE);
+	pluginfiltergroup_add(&self->sort, NEWMACHINESORTMODE_MODE,
+		"newmachine.mode", FALSE);	
 	psy_signal_init(&self->signal_changed);
 }
 
-void newmachinefilter_dispose(NewMachineFilter* self)
-{	
-	psy_table_dispose_all(&self->categories, NULL);
+void pluginfilter_dispose(PluginFilter* self)
+{		
+	pluginfiltergroup_dispose(&self->mode);
+	pluginfiltergroup_dispose(&self->types);
+	pluginfiltergroup_dispose(&self->categories);
+	pluginfiltergroup_dispose(&self->sort);
 	psy_signal_dispose(&self->signal_changed);
-	free(self->text);
+	free(self->search_text);
+	self->search_text = NULL;	
 }
 
-void newmachinefilter_notify(NewMachineFilter* self)
+void pluginfilter_notify(PluginFilter* self)
 {	
 	psy_signal_emit(&self->signal_changed, self, 0);
 }
 
-void newmachinefilter_reset(NewMachineFilter* self)
+void pluginfilter_select_all(PluginFilter* self)
 {	
-	newmachinefilter_setalltypes(self);
-	psy_strreset(&self->text, "");
-	psy_table_dispose_all(&self->categories, NULL);
-	psy_table_init(&self->categories);
-	newmachinefilter_notify(self);
+	psy_strreset(&self->search_text, "");
+	pluginfiltergroup_select_all(&self->mode);
+	pluginfiltergroup_select_all(&self->types);	
+	pluginfiltergroup_select_all(&self->categories);
+	pluginfilter_notify(self);
 }
 
-void newmachinefilter_settext(NewMachineFilter* self, const char* text)
+void pluginfilter_set_search_text(PluginFilter* self, const char* text)
 {
-	psy_strreset(&self->text, text);
-	newmachinefilter_notify(self);
+	psy_strreset(&self->search_text, text);
+	pluginfilter_notify(self);
 }
 
-void newmachinefilter_setalltypes(NewMachineFilter* self)
-{
-	self->effect = TRUE;
-	self->gen = TRUE;
-	self->intern = TRUE;
-	self->native = TRUE;
-	self->vst = TRUE;
-	self->lua = TRUE;
-	self->ladspa = TRUE;
-}
-
-void newmachinefilter_clear_all(NewMachineFilter* self)
-{
-	self->effect = FALSE;
-	self->gen = FALSE;
-	self->intern = FALSE;
-	self->native = FALSE;
-	self->vst = FALSE;
-	self->lua = FALSE;
-	self->ladspa = FALSE;
-}
-
-void newmachinefilter_clear_types(NewMachineFilter* self)
-{	
-	self->intern = FALSE;
-	self->native = FALSE;
-	self->vst = FALSE;
-	self->lua = FALSE;
-	self->ladspa = FALSE;
-}
-
-bool newmachinefilter_all(const NewMachineFilter* self)
-{
-	return (self->gen && self->effect);
-}
-
-void newmachinefilter_addcategory(NewMachineFilter* self, const char* category)
-{
-	if (psy_strlen(category) > 0) {
-		if (!psy_table_exists_strhash(&self->categories, category)) {
-			psy_table_insert_strhash(&self->categories, category,
-				(void*)psy_strdup(category));
-			newmachinefilter_notify(self);
-		}
-	}
-}
-
-void newmachinefilter_removecategory(NewMachineFilter* self, const char* category)
-{
-	if (psy_strlen(category) > 0) {
-		if (psy_table_exists_strhash(&self->categories, category)) {
-			char* item;
-			
-			item = (char*)psy_table_at(&self->categories, psy_strhash(category));
-			free(item);
-			psy_table_remove(&self->categories, psy_strhash(category));
-			newmachinefilter_notify(self);
-		}
-	}
-}
-
-void newmachinefilter_anycategory(NewMachineFilter* self)
-{
-	psy_table_dispose_all(&self->categories, NULL);
-	psy_table_init(&self->categories);
-	newmachinefilter_notify(self);
-}
-
-bool newmachinefilter_useanycategory(const NewMachineFilter* self)
-{
-	return psy_table_size(&self->categories) == 0;	
-}
-
-bool newmachinefilter_hascategory(const NewMachineFilter* self,
-	const char* category)
-{
-	if (newmachinefilter_useanycategory(self)) {
-		return TRUE;
-	}
-	if (!category) {
-		return FALSE;
-	}
-	return psy_table_exists_strhash(&self->categories, category);
-}
-
-psy_Property* search(psy_Property* source, NewMachineFilter* filter)
+psy_Property* search(psy_Property* source, PluginFilter* filter)
 {
 	psy_Property* rv;
 	psy_List* p;
@@ -348,7 +485,7 @@ psy_Property* search(psy_Property* source, NewMachineFilter* filter)
 	}
 	num = psy_property_size(source);
 	p = psy_property_begin(source);
-	text = filter->text;
+	text = filter->search_text;
 	for (i = 0; p != NULL && i < num; psy_list_next(&p), ++i) {
 		psy_Property* q;
 
@@ -363,54 +500,59 @@ psy_Property* search(psy_Property* source, NewMachineFilter* filter)
 	return rv;
 }
 
-static bool isinternalplugin(int type)
-{
-	return !(type == psy_audio_PLUGIN ||
-		type == psy_audio_LUA ||
-		type == psy_audio_VST ||
-		type == psy_audio_VSTFX ||
-		type == psy_audio_LADSPA);
-}
-
-void searchfilter(psy_Property* plugin, NewMachineFilter* filter,
+void searchfilter(psy_Property* plugin, PluginFilter* filter,
 	psy_Property* parent)
 {
 	psy_audio_MachineInfo machineinfo;
-	bool isintern;
+	bool intern;
 	int mactype;
 	int macmode;
-
+	uintptr_t category;	
+	
 	machineinfo_init(&machineinfo);
 	psy_audio_machineinfo_from_property(plugin, &machineinfo);
-	isintern = isinternalplugin(machineinfo.type);
+	intern = machineinfo_internal(&machineinfo);
 	mactype = machineinfo.type;
 	macmode = machineinfo.mode;
-	if (!newmachinefilter_hascategory(filter, machineinfo.category)) {
-		machineinfo_dispose(&machineinfo);
-		return;
+	if (psy_strlen(machineinfo.category)) {
+		category = psy_strhash(machineinfo.category);
+	} else {
+		category = psy_INDEX_INVALID;
 	}
 	machineinfo_dispose(&machineinfo);
-	if (!filter->vst && (mactype == psy_audio_VST || mactype == psy_audio_VSTFX)) {
+	if (category != psy_INDEX_INVALID &&
+			!pluginfiltergroup_selected(&filter->categories, category)) {		
 		return;
-	}
-	if (!filter->native && mactype == psy_audio_PLUGIN) {
-		return;
-	}
-	if (!filter->ladspa && mactype == psy_audio_LADSPA) {
-		return;
-	}
-	if (!filter->lua && mactype == psy_audio_LUA) {
-		return;
-	}		
-	if (!filter->intern && isintern) {
-		return;
-	}
-	if (filter->effect && macmode == psy_audio_MACHMODE_FX) {
-		psy_property_append_property(parent, psy_property_clone(plugin));
-	}
-	if (filter->gen && macmode == psy_audio_MACHMODE_GENERATOR) {
-		psy_property_append_property(parent, psy_property_clone(plugin));
 	}	
+	if (!pluginfiltergroup_selected(&filter->types, psy_strhash("vst")) &&
+			(mactype == psy_audio_VST || mactype == psy_audio_VSTFX)) {		
+		return;
+	}	
+	if (!pluginfiltergroup_selected(&filter->types, psy_strhash("native")) &&
+			mactype == psy_audio_PLUGIN) {
+		return;
+	}	
+	if (!pluginfiltergroup_selected(&filter->types, psy_strhash("ladspa")) &&
+			mactype == psy_audio_LADSPA) {		
+		return;
+	}	
+	if (!pluginfiltergroup_selected(&filter->types, psy_strhash("lua")) &&
+			mactype == psy_audio_LUA) {
+		return;
+	}
+	if (!pluginfiltergroup_selected(&filter->types, psy_strhash("intern")) &&
+			intern) {
+		return;
+	}	
+	if (!pluginfiltergroup_selected(&filter->mode, psy_strhash("effect")) &&
+			(macmode == psy_audio_MACHMODE_FX)) {
+		return;		
+	}
+	if (!pluginfiltergroup_selected(&filter->mode, psy_strhash("generator")) &&
+			(macmode == psy_audio_MACHMODE_GENERATOR)) {
+		return;
+	}
+	psy_property_append_property(parent, psy_property_clone(plugin));
 }
 
 /* PluginsView */
@@ -437,7 +579,7 @@ static uintptr_t pluginsview_topline(PluginsView*);
 static void pluginsview_settopline(PluginsView*, intptr_t line);
 static uintptr_t pluginsview_numlines(const PluginsView*);
 static uintptr_t pluginenabled(const PluginsView*, psy_Property* property);
-static void pluginsview_onfilterchanged(PluginsView*, NewMachineFilter* sender);
+static void pluginsview_onfilterchanged(PluginsView*, PluginFilter* sender);
 static void pluginsview_onsortchanged(PluginsView*, NewMachineSort* sender);
 static void pluginsview_ondragstart(PluginsView*, psy_ui_DragEvent*);
 
@@ -548,7 +690,7 @@ void pluginsview_setplugins(PluginsView* self, const psy_Property* property)
 	psy_ui_component_invalidate(&self->component);
 }
 
-void pluginsview_set_filter(PluginsView* self, NewMachineFilter* filter)
+void pluginsview_set_filter(PluginsView* self, PluginFilter* filter)
 {
 	pluginsview_clearfilter(self);
 	if (self->filter) {
@@ -963,6 +1105,7 @@ void pluginsview_on_mouse_down(PluginsView* self, psy_ui_MouseEvent* ev)
 					newmachineselection_singleselect(&self->selection, index);
 				}
 			}
+			self->component.dbg = 400;
 			psy_ui_component_invalidate(&self->component);
 			psy_signal_emit(&self->signal_changed, self, 0);
 			psy_ui_component_set_focus(&self->component);
@@ -1023,13 +1166,11 @@ void pluginsview_onmousedoubleclick(PluginsView* self, psy_ui_MouseEvent* ev)
 {
 	if (newmachineselection_first(&self->selection) != psy_INDEX_INVALID) {		
 		psy_signal_emit(&self->signal_selected, self, 0);
-//		workspace_select_view(self->workspace, VIEW_ID_MACHINEVIEW,
-//			SECTION_ID_MACHINEVIEW_WIRES, 0);
 		psy_ui_mouseevent_stop_propagation(ev);		
 	}	
 }
 
-void pluginsview_onfilterchanged(PluginsView* self, NewMachineFilter* sender)
+void pluginsview_onfilterchanged(PluginsView* self, PluginFilter* sender)
 {
 	pluginsview_filter(self);	
 }

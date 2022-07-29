@@ -247,6 +247,7 @@ void make_translator_default(psy_Dictionary* dict)
 	psy_dictionary_set(dict, "settings.dirs.vst64", "Vst64 directories");
 	psy_dictionary_set(dict, "settings.dirs.ladspa", "Ladspa directories");
 	psy_dictionary_set(dict, "settings.dirs.skin", "Skin directory");
+	psy_dictionary_set(dict, "settings.dirs.doc", "Documentation directory");
 	/* settings.theme */	
 	psy_dictionary_set(dict, "settings.theme.theme", "Theme");
 	psy_dictionary_set(dict, "settings.theme.background", "Background");
@@ -580,6 +581,7 @@ void make_translator_default(psy_Dictionary* dict)
 	psy_dictionary_set(dict, "newmachine.in", "in");
 	psy_dictionary_set(dict, "newmachine.plugin-directories", "Plugin directories");
 	psy_dictionary_set(dict, "newmachine.filter", "Filter by");
+	psy_dictionary_set(dict, "newmachine.categories", "Categories");
 	psy_dictionary_set(dict, "newmachine.sort", "Sort by");
 	psy_dictionary_set(dict, "newmachine.favorite", "Favorite");
 	psy_dictionary_set(dict, "newmachine.favorites", "Favorites");

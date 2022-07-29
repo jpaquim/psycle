@@ -14,7 +14,7 @@
 #include "../../detail/portable.h"
 #include "../../detail/trace.h"
 
-/* ViewComponentImp */
+
 /* prototypes */
 static void view_dev_dispose(psy_ui_ViewComponentImp*);
 static void view_dev_destroy(psy_ui_ViewComponentImp*);
@@ -77,6 +77,8 @@ static psy_ui_RealRectangle view_translation(psy_ui_ViewComponentImp*,
 	const psy_ui_RealRectangle*);
 static psy_ui_RealPoint translatecoords(psy_ui_ViewComponentImp*,
 	psy_ui_Component* src, psy_ui_Component* dst);
+psy_ui_RealRectangle view_intersection(psy_ui_ViewComponentImp*, 
+	const psy_ui_RealRectangle*);
 
 static uintptr_t dev_platform_handle(psy_ui_ViewComponentImp* self)
 { 
@@ -580,7 +582,6 @@ void view_dev_releasecapture(psy_ui_ViewComponentImp* self)
 void view_dev_scrollto(psy_ui_ViewComponentImp* self, intptr_t dx, intptr_t dy,
 	const psy_ui_RealRectangle* r)
 {
-	
 	psy_ui_RealRectangle rc;
 	
 	if (r) {
@@ -596,23 +597,24 @@ void view_dev_scrollto(psy_ui_ViewComponentImp* self, intptr_t dx, intptr_t dy,
 
 
 void view_dev_invalidate(psy_ui_ViewComponentImp* self)
-{	
-	psy_ui_RealSize size;
+{		
 	psy_ui_RealRectangle r;
-
-	size = psy_ui_component_scroll_size_px(self->component);
-	r = psy_ui_realrectangle_make(
-		psy_ui_realpoint_zero(),
-		size);
-	view_dev_invalidaterect(self, &r);
+	
+	r = psy_ui_realrectangle_make(psy_ui_realpoint_zero(),
+		psy_ui_component_scroll_size_px(self->component));	
+	view_dev_invalidaterect(self, &r);	
 }
 
 void view_dev_invalidaterect(psy_ui_ViewComponentImp* self,
 	const psy_ui_RealRectangle* r)
 {
-	if (psy_ui_component_draw_visible(self->view) && r) {		
-		psy_ui_component_invalidate_rect(self->view,
-			view_translation(self, r));
+	if (psy_ui_component_draw_visible(self->view) && r) {	
+		psy_ui_RealRectangle rc;
+		
+		rc = view_intersection(self, r);
+		if (!psy_ui_realrectangle_empty(&rc)) {		
+			psy_ui_component_invalidate_rect(self->view, rc);
+		}
 	}
 }
 
@@ -630,10 +632,51 @@ psy_ui_RealRectangle view_translation(psy_ui_ViewComponentImp* self,
 			psy_ui_realpoint_make(
 				position.left + r->left + translation.x + spacing.left,
 				position.top + r->top + translation.y + spacing.top),
-			psy_ui_realrectangle_size(r));
+			psy_ui_realrectangle_size(r));	
 }
 
-psy_ui_RealPoint translatecoords(psy_ui_ViewComponentImp* self, psy_ui_Component* src,
+psy_ui_RealRectangle view_intersection(psy_ui_ViewComponentImp* self, 
+	const psy_ui_RealRectangle* rc)
+{	
+	psy_ui_RealRectangle rv;
+	psy_ui_Component* curr;
+	psy_ui_RealRectangle parent_position;
+	psy_ui_RealRectangle client;	
+		
+	assert(self);
+		
+	curr = self->component;	
+	parent_position = psy_ui_component_position(curr);	
+	client = psy_ui_realrectangle_make(
+			psy_ui_realpoint_zero(),
+			psy_ui_realrectangle_size(&parent_position));
+	if (rc) {
+		rv = *rc;
+	} else {
+		rv = client;
+	}			
+	if (!psy_ui_realrectangle_intersection(&rv, &client)) {
+		return rv;
+	}
+	while (curr && curr != self->view && psy_ui_component_parent(curr)) {
+		psy_ui_RealRectangle client;
+		
+		psy_ui_realrectangle_move(&rv, psy_ui_realrectangle_topleft(
+			&parent_position));
+		curr = psy_ui_component_parent(curr);
+		parent_position = psy_ui_component_position(curr);
+		client = psy_ui_realrectangle_make(
+			psy_ui_realpoint_zero(),
+			psy_ui_realrectangle_size(&parent_position));			
+		if (!psy_ui_realrectangle_intersection(&rv, &client)) {
+			break;
+		}		
+	}
+	return rv;
+}
+
+psy_ui_RealPoint translatecoords(psy_ui_ViewComponentImp* self,
+	psy_ui_Component* src,
 	psy_ui_Component* dst)
 {
 	psy_ui_RealPoint rv;
@@ -672,7 +715,8 @@ bool view_dev_inputprevented(const psy_ui_ViewComponentImp* self)
 	return FALSE;
 }
 
-const psy_ui_TextMetric* view_dev_textmetric(const psy_ui_ViewComponentImp* self)
+const psy_ui_TextMetric* view_dev_textmetric(const psy_ui_ViewComponentImp*
+	self)
 {	
 	if (self->component) {
 		const psy_ui_Font* font;
@@ -695,7 +739,8 @@ void view_dev_seticonressource(psy_ui_ViewComponentImp* self, int ressourceid)
 {
 }
 
-void view_dev_setbackgroundcolour(psy_ui_ViewComponentImp* self, psy_ui_Colour colour)
+void view_dev_setbackgroundcolour(psy_ui_ViewComponentImp* self,
+	psy_ui_Colour colour)
 {
 }
 
@@ -743,7 +788,8 @@ psy_List* view_dev_children(psy_ui_ViewComponentImp* self, int recursive)
 			psy_List* r;
 			psy_List* q;
 
-			q = psy_ui_component_children((psy_ui_Component*)psy_list_entry(p), recursive);
+			q = psy_ui_component_children((psy_ui_Component*)psy_list_entry(p),
+				recursive);
 			for (r = q; r != NULL; psy_list_next(&r)) {
 				psy_list_append(&rv, (psy_ui_Component*)psy_list_entry(r));
 			}

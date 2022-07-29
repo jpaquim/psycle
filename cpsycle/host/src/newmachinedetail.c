@@ -38,22 +38,22 @@ static void newmachinedetail_vtable_init(NewMachineDetail* self)
 }
 
 /* implementation */
-void newmachinedetail_init(NewMachineDetail* self,
-	psy_ui_Component* parent, Workspace* workspace)
+void newmachinedetail_init(NewMachineDetail* self, psy_ui_Component* parent,
+	Workspace* workspace)
 {	
 	double numcol0;
 
 	/* component */
 	psy_ui_component_init(&self->component, parent, NULL);
 	newmachinedetail_vtable_init(self);
+	self->workspace = workspace;
 	psy_ui_component_set_style_type(&self->component,
 		STYLE_NEWMACHINE_DETAIL);
 	psy_ui_component_set_preferred_size(&self->component,
 		psy_ui_size_make_perc(0.25, 0.0));
 	psy_signal_init(&self->signal_categorychanged);	
-	self->plugin = NULL;
-	self->workspace = workspace;
-	numcol0 = 12;
+	self->plugin = NULL;	
+	numcol0 = 12.0;
 	/*details desc */
 	psy_ui_label_init_text(&self->detaildesc, &self->component,
 		"Machine Properties");	

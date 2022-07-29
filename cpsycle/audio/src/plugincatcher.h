@@ -50,10 +50,12 @@ psy_Property* psy_audio_pluginsections_pluginbyid(psy_audio_PluginSections*,
 	psy_Property* section, const char* id);
 psy_Property* psy_audio_pluginsections_section(psy_audio_PluginSections*,
 	const char* key);
-psy_Property* psy_audio_pluginsections_section_plugins(psy_audio_PluginSections*,
-	const char* key);
+psy_Property* psy_audio_pluginsections_section_plugins(
+	psy_audio_PluginSections*, const char* key);
+uintptr_t psy_audio_pluginsections_num_plugins(const psy_audio_PluginSections*,
+	const char* sectionkey);
 
-
+/* psy_audio_PluginScanTask */
 typedef struct psy_audio_PluginScanTask {
 	psy_audio_MachineType type;
 	char wildcard[256];
@@ -110,23 +112,24 @@ void psy_audio_plugincatcher_clear(psy_audio_PluginCatcher*);
 void psy_audio_plugincatcher_abort(psy_audio_PluginCatcher*);
 int psy_audio_plugincatcher_load(psy_audio_PluginCatcher*);
 int psy_audio_plugincatcher_save(psy_audio_PluginCatcher*);
-void psy_audio_plugincatcher_set_directories(psy_audio_PluginCatcher*, psy_Property*);
-/*const psy_audio_MachineInfo* plugincatcher_machineinfo(psy_audio_PluginCatcher*, psy_audio_MachineType,
-	const char* name);*/
-char* psy_audio_plugincatcher_modulepath(psy_audio_PluginCatcher*, psy_audio_MachineType,
-	int newgamefxblitzifversionunknown,
+void psy_audio_plugincatcher_set_directories(psy_audio_PluginCatcher*,
+	psy_Property*);
+char* psy_audio_plugincatcher_modulepath(psy_audio_PluginCatcher*,
+	psy_audio_MachineType, int newgamefxblitzifversionunknown,
 	const char* path,
 	char* fullpath);
 uintptr_t psy_audio_plugincatcher_extractshellidx(const char* path);
 void psy_audio_plugincatcher_catchername(const char* path,
 	char* name, uintptr_t shellidx);
-const char* psy_audio_plugincatcher_search_path(psy_audio_PluginCatcher*, const char* name,
-	int type);
-psy_Property* psy_audio_plugincatcher_at(psy_audio_PluginCatcher* self, const char* id);
+const char* psy_audio_plugincatcher_search_path(psy_audio_PluginCatcher*,
+	const char* name, int type);
+psy_Property* psy_audio_plugincatcher_at(psy_audio_PluginCatcher* self,
+	const char* id);
 void plugincatcher_incfavorite(psy_audio_PluginCatcher*, const char* id);
 bool psy_audio_plugincatcher_scanning(const psy_audio_PluginCatcher* self);
 
-INLINE bool psy_audio_plugincatcher_hascache(const psy_audio_PluginCatcher* self)
+INLINE bool psy_audio_plugincatcher_hascache(const psy_audio_PluginCatcher*
+	self)
 {
 	assert(self);
 
@@ -138,7 +141,8 @@ INLINE psy_Property* psy_audio_plugincatcher_plugins(psy_audio_PluginCatcher*
 {
 	assert(self);
 
-	self->all = psy_audio_pluginsections_section_plugins(&self->sections, "all");
+	self->all = psy_audio_pluginsections_section_plugins(&self->sections,
+		"all");
 	return self->all;
 }
 
@@ -147,7 +151,8 @@ INLINE void psy_audio_plugincatcher_notifychange(psy_audio_PluginCatcher* self)
 	psy_signal_emit(&self->signal_changed, self, 0);
 }
 
-void psy_audio_machineinfo_from_property(const psy_Property* property, psy_audio_MachineInfo* rv);
+void psy_audio_machineinfo_from_property(const psy_Property* property,
+	psy_audio_MachineInfo* rv);
 
 #ifdef __cplusplus
 }

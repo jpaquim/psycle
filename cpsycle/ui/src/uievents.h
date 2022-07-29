@@ -211,6 +211,8 @@ INLINE psy_ui_Event* psy_ui_keyboardevent_base(psy_ui_KeyboardEvent* self)
 	return &self->event;
 }
 
+unsigned char psy_ui_keyboardevent_printable_char(psy_ui_KeyboardEvent*);
+
 
 /* psy_ui_MouseEvent */
 typedef struct psy_ui_MouseEvent {

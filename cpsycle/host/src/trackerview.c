@@ -937,7 +937,8 @@ void trackergrid_invalidate_line(TrackerGrid* self, intptr_t line)
 
 void trackergrid_invalidate_playbar(TrackerGrid* self)
 {
-	trackergrid_invalidate_lines(self, self->workspace->player.sequencer.hostseqtime.lastplaycursor.linecache,
+	trackergrid_invalidate_lines(self,
+		self->workspace->player.sequencer.hostseqtime.lastplaycursor.linecache,
 		self->workspace->player.sequencer.hostseqtime.currplaycursor.linecache);
 }
 
@@ -1693,21 +1694,12 @@ void trackerview_on_play_line_changed(TrackerView* self, Workspace* sender)
 	if (!psy_ui_component_draw_visible(trackerview_base(self))) {
 		return;
 	}
-	if (trackerview_playing_following_song(self)) {
-		trackergrid_invalidate_line(&self->grid,
-			self->workspace->player.sequencer.hostseqtime.lastplaycursor.linecache);
-		trackerlinenumbers_invalidate_line(&self->lines.linenumbers,
-			self->workspace->player.sequencer.hostseqtime.lastplaycursor.linecache);
-		trackergrid_scroll_down(&self->grid,
-			patternviewstate_cursor(self->grid.state->pv), FALSE);
-		trackergrid_invalidate_line(&self->grid,
-			self->workspace->player.sequencer.hostseqtime.currplaycursor.linecache);
-		trackerlinenumbers_invalidate_line(&self->lines.linenumbers,
-			self->workspace->player.sequencer.hostseqtime.currplaycursor.linecache);
-	} else {
-		trackerlinenumbers_invalidate_playbar(&self->lines.linenumbers);
-		trackergrid_invalidate_playbar(&self->grid);
+	if (trackerview_playing_following_song(self)) {		
+		trackergrid_scroll_down(&self->grid, patternviewstate_cursor(
+			self->grid.state->pv), FALSE);		
 	}
+	trackergrid_invalidate_playbar(&self->grid);
+	trackerlinenumbers_invalidate_playbar(&self->lines.linenumbers);	
 }
 
 void trackerview_on_play_status_changed(TrackerView* self, Workspace* sender)

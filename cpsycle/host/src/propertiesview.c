@@ -9,7 +9,7 @@
 #include "propertiesview.h"
 /* host */
 #include "colourbox.h"
-#include "filebox.h"
+#include "fileedit.h"
 #include "fontbox.h"
 #include "rangeedit.h"
 #include "styles.h"
@@ -19,10 +19,85 @@
 #include <uicheckbox.h>
 #include <uiswitch.h>
 #include <uitextarea.h>
+/* platform */
+#include "../../detail/os.h"
+
+
+/* PropertiesFileBar */
+
+/* prototypes */
+static void propertiesfilebar_on_ok(PropertiesFileBar* self,
+	psy_ui_Component* sender);
+static void propertiesfilebar_on_cancel(PropertiesFileBar* self,
+	psy_ui_Component* sender);
+	
+/* implementation */
+void propertiesfilebar_init(PropertiesFileBar* self, psy_ui_Component* parent)
+{
+	psy_ui_component_init(&self->component, parent, NULL);
+	self->notebook = NULL;
+	self->filebox = NULL;
+	psy_ui_component_set_style_type(&self->component,
+		STYLE_NEWMACHINE_RESCANBAR);
+	psy_ui_component_set_default_align(&self->component,
+		psy_ui_ALIGN_LEFT, psy_ui_defaults_hmargin(psy_ui_defaults()));	
+	psy_ui_button_init_text_connect(&self->cancel, &self->component,
+		"Cancel", self, propertiesfilebar_on_cancel);		
+	psy_ui_component_set_align(psy_ui_button_base(&self->cancel),
+		psy_ui_ALIGN_RIGHT);
+	psy_ui_component_set_preferred_width(psy_ui_button_base(
+		&self->cancel), psy_ui_value_make_ew(15.0));
+	psy_ui_button_init_text_connect(&self->add, &self->component,
+		"OK", self, propertiesfilebar_on_ok);
+	psy_ui_component_set_preferred_width(psy_ui_button_base(&self->add),
+		psy_ui_value_make_ew(15.0));		
+	psy_ui_component_set_align(psy_ui_button_base(&self->add),
+		psy_ui_ALIGN_RIGHT);	
+}
+
+void propertiesfilebar_on_cancel(PropertiesFileBar* self, psy_ui_Component* sender)
+{
+	if (self->notebook) {
+		psy_ui_notebook_select(self->notebook, 1);
+	}
+}
+
+void propertiesfilebar_on_ok(PropertiesFileBar* self,
+	psy_ui_Component* sender)
+{
+	if (self->filebox && self->filebox->property) {
+		psy_property_set_item_str(self->filebox->property,
+			filebox_directory(self->filebox));
+	}
+	if (self->notebook) {
+		psy_ui_notebook_select(self->notebook, 1);
+	}
+}
+
+/* implementation */
+void propertiesdirbar_init(PropertiesDirBar* self, psy_ui_Component* parent)
+{
+	psy_ui_component_init(&self->component, parent, NULL);
+	self->notebook = NULL;
+	self->filebox = NULL;
+	psy_ui_component_set_style_type(&self->component,
+		STYLE_NEWMACHINE_RESCANBAR);	
+	psy_ui_label_init(&self->label, &self->component);
+	psy_ui_component_set_align(&self->label.component, psy_ui_ALIGN_TOP);
+	psy_ui_component_set_padding(&self->label.component,
+		psy_ui_margin_make_em(0.25, 0.0, 0.25, 2.0));
+	
+}
+
+void propertiesdirbar_set_text(PropertiesDirBar* self, const char* text)
+{
+	psy_ui_label_set_text(&self->label, text);
+}
 
 
 /* PropertiesRenderState */
-void propertiesrenderstate_init(PropertiesRenderState* self, uintptr_t numcols, bool lazy)
+void propertiesrenderstate_init(PropertiesRenderState* self, uintptr_t numcols,
+	bool lazy)
 {	
 	assert(self);
 
@@ -35,7 +110,8 @@ void propertiesrenderstate_init(PropertiesRenderState* self, uintptr_t numcols, 
 	self->linestyle_select = psy_INDEX_INVALID;
 	self->view = NULL;
 	self->renderer = NULL;
-	self->do_build = !lazy;	
+	self->do_build = !lazy;
+	self->filebox = NULL;
 	psy_ui_size_init_all(&self->size_col0, psy_ui_value_make_pw(0.4),
 		psy_ui_value_make_eh(1.5));	
 }
@@ -119,7 +195,8 @@ void propertiesrenderline_init(PropertiesRenderLine* self,
 	propertiesrenderline_build(self);
 }
 
-void propertiesrenderline_on_rebuild(PropertiesRenderLine* self, psy_Property* sender)
+void propertiesrenderline_on_rebuild(PropertiesRenderLine* self,
+	psy_Property* sender)
 {
 	
 	psy_ui_component_clear(&self->component);
@@ -130,7 +207,8 @@ void propertiesrenderline_on_rebuild(PropertiesRenderLine* self, psy_Property* s
 	}
 }
 
-void propertiesrenderline_on_scrollto(PropertiesRenderLine* self, psy_Property* sender)
+void propertiesrenderline_on_scrollto(PropertiesRenderLine* self,
+	psy_Property* sender)
 {
 	if (self->state->renderer) {
 		psy_ui_RealRectangle position;
@@ -151,14 +229,16 @@ void propertiesrenderline_build(PropertiesRenderLine* self)
 	
 	lines = &self->component;
 	if (self->level != 0) {
-		if (psy_property_is_section(self->property) && psy_property_hint(self->property) != PSY_PROPERTY_HINT_RANGE) {
+		if (psy_property_is_section(self->property) &&
+				psy_property_hint(self->property) != PSY_PROPERTY_HINT_RANGE) {
 			if (self->level == 1) {
 				lines = propertiesrenderline_build_main_section(self);
 			}
 		} else {
 			psy_ui_component_set_align_expand(&self->component, psy_ui_HEXPAND);
 			if (self->state->numcols == 1) {
-				psy_ui_component_set_preferred_size(&self->component, self->state->size_col0);
+				psy_ui_component_set_preferred_size(&self->component,
+					self->state->size_col0);
 			}
 			else if (psy_property_hint(self->property) != PSY_PROPERTY_HINT_LIST) {
 				psy_ui_component_set_preferred_size(&self->component,
@@ -252,11 +332,13 @@ void propertiesrenderline_build(PropertiesRenderLine* self)
 						psy_ui_ALIGN_CLIENT);
 				}
 				else if (psy_property_hint(self->property) == PSY_PROPERTY_HINT_EDITDIR) {
-					FileEdit* filebox;
+					FileEdit* fileedit;
 
-					filebox = fileedit_allocinit(&self->component);
-					fileedit_data_exchange(filebox, self->property);
-					psy_ui_component_set_align(fileedit_base(filebox), psy_ui_ALIGN_CLIENT);
+					fileedit = fileedit_allocinit(&self->component);
+					fileedit_set_file_box(fileedit, self->state->filebox);
+					fileedit_data_exchange(fileedit, self->property);
+					psy_ui_component_set_align(fileedit_base(fileedit),
+						psy_ui_ALIGN_CLIENT);
 				}
 				else if (psy_property_is_int(self->property) ||
 					psy_property_is_double(self->property) ||
@@ -451,7 +533,8 @@ static void propertiesrenderer_vtable_init(PropertiesRenderer* self)
 
 /* implementation */
 void propertiesrenderer_init(PropertiesRenderer* self, psy_ui_Component* parent,
-	psy_Property* properties, uintptr_t numcols, bool lazy)
+	psy_Property* properties, uintptr_t numcols, bool lazy,
+	FileBox* filebox)
 {
 	self->properties = properties;		
 	psy_ui_component_init(&self->component, parent, NULL);
@@ -465,6 +548,9 @@ void propertiesrenderer_init(PropertiesRenderer* self, psy_ui_Component* parent,
 	propertiesrenderstate_init(&self->state, numcols, lazy);
 	self->state.view = parent;
 	self->state.renderer = propertiesrenderer_base(self);
+#if PSYCLE_USE_TK == PSYCLE_TK_X11	
+	self->state.filebox = filebox;
+#endif	
 	psy_signal_init(&self->signal_selected);	
 	psy_ui_component_set_overflow(&self->component, psy_ui_OVERFLOW_VSCROLL);	
 	psy_ui_component_setscrollstep(&self->component,
@@ -566,6 +652,7 @@ static void propertiesview_on_scroll_pane_align(PropertiesView*,
 	psy_ui_Component* sender);
 static void propertiesview_on_show(PropertiesView*);
 static void propertiesview_scroll_to(PropertiesView*, const char* key);
+static void propertiesview_on_dir_changed(PropertiesView*, FileBox* sender);
 
 /* vtable */
 static psy_ui_ComponentVtable propertiesview_vtable;
@@ -602,11 +689,27 @@ void propertiesview_init(PropertiesView* self, psy_ui_Component* parent,
 	psy_ui_component_set_id(&self->component, VIEW_ID_SONGPROPERTIES);
 	psy_ui_component_set_tab_index(&self->component, 0);	
 	self->maximize_main_sections = TRUE;
-	psy_signal_init(&self->signal_selected);	
+	psy_signal_init(&self->signal_selected);		
 	psy_ui_component_init(&self->viewtabbar, tabbarparent, NULL);	
-	propertiesrenderer_init(&self->renderer, &self->component, properties,
-		numcols, lazy);
-	psy_ui_scroller_init(&self->scroller, &self->component, NULL, NULL);
+	psy_ui_notebook_init(&self->notebook, &self->component);
+	psy_ui_component_set_align(&self->notebook.component, psy_ui_ALIGN_CLIENT);
+	/* filebox */
+	psy_ui_component_init(&self->fileview, &self->notebook.component, NULL);	
+	filebox_init(&self->filebox, &self->fileview);
+	psy_signal_connect(&self->filebox.signal_dir_changed, self,
+		propertiesview_on_dir_changed);
+	psy_ui_component_set_align(&self->filebox.component, psy_ui_ALIGN_CLIENT);
+	propertiesfilebar_init(&self->filebar, &self->fileview);
+	propertiesdirbar_init(&self->dirbar, &self->fileview);
+	psy_ui_component_set_align(&self->dirbar.component, psy_ui_ALIGN_TOP);
+	self->filebar.filebox = &self->filebox;
+	self->filebar.notebook = &self->notebook;
+	psy_ui_component_set_align(&self->filebar.component, psy_ui_ALIGN_BOTTOM);
+	/* mainview */
+	psy_ui_component_init(&self->mainview, &self->notebook.component, NULL);	
+	propertiesrenderer_init(&self->renderer, &self->mainview, properties,
+		numcols, lazy, &self->filebox);
+	psy_ui_scroller_init(&self->scroller, &self->mainview, NULL, NULL);
 	self->scroller.prevent_mouse_down_propagation = FALSE;
 	psy_ui_scroller_set_client(&self->scroller, &self->renderer.component);
 	psy_ui_component_set_align(&self->scroller.component, psy_ui_ALIGN_CLIENT);
@@ -617,7 +720,7 @@ void propertiesview_init(PropertiesView* self, psy_ui_Component* parent,
 	psy_ui_component_set_align(&self->renderer.component, psy_ui_ALIGN_HCLIENT);
 	psy_signal_connect(&self->component.signal_selectsection, self,
 		propertiesview_select_section);
-	psy_ui_tabbar_init(&self->tabbar, &self->component);
+	psy_ui_tabbar_init(&self->tabbar, &self->mainview);
 	psy_ui_tabbar_set_tab_align(&self->tabbar, psy_ui_ALIGN_TOP);
 	psy_ui_component_set_align(psy_ui_tabbar_base(&self->tabbar),
 		psy_ui_ALIGN_RIGHT);
@@ -633,6 +736,7 @@ void propertiesview_init(PropertiesView* self, psy_ui_Component* parent,
 		propertiesview_on_tabbar_change);
 	psy_signal_connect(&self->scroller.pane.signal_beforealign, self,
 		propertiesview_on_scroll_pane_align);
+	psy_ui_notebook_select(&self->notebook, 1);
 }
 
 void propertiesview_on_destroyed(PropertiesView* self)
@@ -800,4 +904,9 @@ void propertiesview_on_show(PropertiesView* self)
 		self->renderer.state.do_build = TRUE;
 		propertiesrenderer_build(&self->renderer);
 	}
+}
+
+void propertiesview_on_dir_changed(PropertiesView* self, FileBox* sender)
+{
+	propertiesdirbar_set_text(&self->dirbar, filebox_directory(sender));
 }

@@ -195,9 +195,7 @@ void psy_ui_lclaligner_align(psy_ui_LCLAligner* self, psy_ui_Component* group)
 						componentsize.width,
 						psy_ui_value_make_px(cp_bottomright.y - cp_topleft.y -
 							psy_ui_margin_height_px(&c_margin, c_tm, &size)))));
-			} else if (curr->align == psy_ui_ALIGN_LEFT) {
-				psy_ui_Size newsize;
-				
+			} else if (curr->align == psy_ui_ALIGN_LEFT) {				
 				if ((self->aligner.alignexpandmode & psy_ui_HEXPAND)
 						== psy_ui_HEXPAND) {
 				} else {
@@ -222,29 +220,27 @@ void psy_ui_lclaligner_align(psy_ui_LCLAligner* self, psy_ui_Component* group)
 					}		
 					psy_list_append(&wrap, curr);
 				}
-				cp_topleft.x += psy_ui_value_px(&c_margin.left, c_tm, &size);
-				newsize = psy_ui_size_make(
-					componentsize.width,
-						psy_ui_value_make_px(
-						cp_bottomright.y - cp_topleft.y -
-						psy_ui_margin_height_px(&c_margin,
-						c_tm, &size)));
-				psy_ui_aligner_adjust_minmax_size(curr, tm, &newsize,
-					&size);
+				cp_topleft.x += psy_ui_value_px(&c_margin.left, c_tm,
+					&size);				
 				psy_ui_component_setposition(curr,
 					psy_ui_rectangle_make(
 						psy_ui_point_make_px(
 							cp_topleft.x,
-							cp_topleft.y + psy_ui_value_px(&c_margin.top,
+							cp_topleft.y +	psy_ui_value_px(&c_margin.top,
 							c_tm, &size)),
-						newsize));
+						psy_ui_size_make(
+							componentsize.width,
+							psy_ui_value_make_px(
+								cp_bottomright.y - cp_topleft.y -
+								psy_ui_margin_height_px(&c_margin,
+								c_tm, &size)))));
 				cp_topleft.x += psy_ui_value_px(&c_margin.right, c_tm, &size);
-				cp_topleft.x += psy_ui_value_px(&newsize.width, c_tm, &size);
+				cp_topleft.x += psy_ui_value_px(&componentsize.width, c_tm, &size);
 				if (cpymax < cp_topleft.y +
-						psy_ui_value_px(&newsize.height, c_tm, &size) +
+						psy_ui_value_px(&componentsize.height, c_tm, &size) +
 						psy_ui_margin_height_px(&c_margin, c_tm, &size)) {
 					cpymax = cp_topleft.y + psy_ui_value_px(
-						&newsize.height, c_tm, &size) +
+						&componentsize.height, c_tm, &size) +
 						psy_ui_margin_height_px(&c_margin, c_tm, &size);
 				}
 			} 

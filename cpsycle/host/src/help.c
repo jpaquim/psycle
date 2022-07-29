@@ -145,7 +145,7 @@ void help_loadpage(Help* self, uintptr_t index)
 		psy_path_init(&path, NULL);
 		psy_path_set_prefix(&path, dirconfig_doc(self->dir_config));
 		psy_path_set_name(&path, (const char*)psy_table_at(&self->filenames,
-			index));
+			index));		
 		help_load(self, psy_path_full(&path));
 		psy_path_dispose(&path);
 	}
@@ -160,7 +160,7 @@ void help_load(Help* self, const char* path)
 	fp = fopen(path, "rb");
 	if (fp) {
 		char data[BLOCKSIZE];
-		uintptr_t lenfile;
+		uintptr_t lenfile;				
 
 		memset(data, 0, BLOCKSIZE);
 		lenfile = fread(data, 1, sizeof(data), fp);

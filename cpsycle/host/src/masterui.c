@@ -63,6 +63,7 @@ void masterui_init(MasterUi* self, psy_ui_Component* parent,
 	self->machine = psy_audio_machines_master(&workspace->song->machines);
 	assert(self->machine);
 	self->preventmachinepos = FALSE;
+	self->component.dbg = 300;
 }
 
 void masterui_move(MasterUi* self, psy_ui_Point topleft)
