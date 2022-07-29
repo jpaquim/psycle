@@ -67,7 +67,7 @@ void viewframe_init(ViewFrame* self, psy_ui_Component* parent,
 {
 	assert(page);
 
-	psy_ui_frame_init(&self->component, parent);
+	psy_ui_toolframe_init(&self->component, parent);
 	vtable_init(self);
 	psy_ui_component_doublebuffer(viewframe_base(self));
 	self->splitter = splitter;

@@ -46,6 +46,7 @@ typedef struct psy_ui_x11_ComponentImp {
 	psy_ui_RealRectangle exposearea;
 	bool exposeareavalid;
 	psy_List* expose_rectangles;
+	bool above;
 } psy_ui_x11_ComponentImp;
 
 void psy_ui_x11_componentimp_init(psy_ui_x11_ComponentImp* self,
@@ -64,6 +65,8 @@ psy_ui_x11_ComponentImp* psy_ui_x11_componentimp_allocinit(
 	int x, int y, int width, int height,
 	uint32_t dwStyle,
 	int usecommand);
+	
+void psy_ui_x11_componentimp_stay_always_on_top(psy_ui_x11_ComponentImp* self);
 
 #ifdef __cplusplus
 }

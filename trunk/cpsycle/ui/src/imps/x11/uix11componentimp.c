@@ -257,6 +257,7 @@ void psy_ui_x11_componentimp_init(psy_ui_x11_ComponentImp* self,
 	self->dbg = 0;
 	self->visible = parent ? TRUE : FALSE;
 	self->viewcomponents = NULL;
+	self->above = FALSE;
 	psy_ui_realrectangle_init(&self->exposearea);
 	self->exposeareavalid = FALSE;
 	self->expose_rectangles = NULL;
@@ -288,10 +289,11 @@ void psy_ui_x11_component_create_window(psy_ui_x11_ComponentImp* self,
 		/* popup */
 		XSetWindowAttributes xattr;	
 		unsigned long xattrmask;
-		
+				
+		self->above = TRUE;
 		xattrmask = CWOverrideRedirect | CWBackPixel;		
 		xattr.override_redirect = True;
-		xattr.background_pixel = 0x00232323;
+		xattr.background_pixel = 0x00232323;		
 		self->hwnd = XCreateWindow(
 			x11app->dpy, XDefaultRootWindow(x11app->dpy),
 				x, y, width, height, 0,
@@ -303,8 +305,8 @@ void psy_ui_x11_component_create_window(psy_ui_x11_ComponentImp* self,
 			StructureNotifyMask |
 			EnterWindowMask | LeaveWindowMask | FocusChangeMask);
 		self->mapped = FALSE;
-		self->parent = NULL;
-	} else if (parent == 0 || ((dwStyle & 1) == 1)) {
+		self->parent = NULL;		
+	} else if (((dwStyle & 1) == 1)) {
 		/* frame */
 		XSetWindowAttributes xattr;
 		unsigned long xattrmask = CWBackPixel;
@@ -312,6 +314,29 @@ void psy_ui_x11_component_create_window(psy_ui_x11_ComponentImp* self,
 		xattr.background_pixel = 0x00232323;
 	/*	xAttr.bit_gravity = NorthWestGravity;
 		xAttrMask |= CWBitGravity; */
+		printf("toolframe \n");
+		self->above = TRUE;
+        self->hwnd = XCreateWindow(
+			x11app->dpy, XDefaultRootWindow(x11app->dpy),
+				x, y, width, height, 0,
+				CopyFromParent, CopyFromParent, x11app->visual,
+				xattrmask, &xattr);
+		XSelectInput(x11app->dpy, self->hwnd,
+			ExposureMask | KeyPressMask | KeyReleaseMask |
+			ButtonPressMask | ButtonReleaseMask | PointerMotionMask |
+			StructureNotifyMask |
+			EnterWindowMask | LeaveWindowMask | FocusChangeMask);
+		self->mapped = FALSE;
+		self->parent = NULL;
+	} else if (parent == 0) {
+		/* frame */
+		XSetWindowAttributes xattr;
+		unsigned long xattrmask = CWBackPixel;
+
+		xattr.background_pixel = 0x00232323;
+	/*	xAttr.bit_gravity = NorthWestGravity;
+		xAttrMask |= CWBitGravity; */
+		printf("frame \n");		
         self->hwnd = XCreateWindow(
 			x11app->dpy, XDefaultRootWindow(x11app->dpy),
 				x, y, width, height, 0,
@@ -355,7 +380,7 @@ void psy_ui_x11_component_create_window(psy_ui_x11_ComponentImp* self,
 		Window window;
 		int     screen;
 
-		XSetWMProtocols(x11app->dpy, self->hwnd, &x11app->wmDeleteMessage, 1);
+		XSetWMProtocols(x11app->dpy, self->hwnd, &x11app->wmDeleteMessage, 1);		
 		if (x11app->dbe) {
 			self->d_backBuf = XdbeAllocateBackBufferName(x11app->dpy,
 				self->hwnd, XdbeBackground);
@@ -382,6 +407,31 @@ void psy_ui_x11_component_create_window(psy_ui_x11_ComponentImp* self,
 		//++winapp->winid;
 	//}
 }
+
+void psy_ui_x11_componentimp_stay_always_on_top(psy_ui_x11_ComponentImp* self)
+{
+    XEvent event;
+    psy_ui_X11App* x11app;	
+
+	x11app = (psy_ui_X11App*)psy_ui_app()->imp;
+	memset(&event, 0, sizeof(event));
+    event.xclient.type = ClientMessage;
+    event.xclient.serial = 0;
+    event.xclient.send_event = True;
+    event.xclient.display = x11app->dpy;
+    event.xclient.window  = self->hwnd;
+    event.xclient.message_type = x11app->wmNetState;
+    event.xclient.format = 32;
+
+    event.xclient.data.l[0] = 1;
+    event.xclient.data.l[1] = x11app->wmStateAbove;
+	event.xclient.data.l[2] = 0;
+	event.xclient.data.l[3] = 0;	
+	event.xclient.data.l[4] = 0;	
+    XSendEvent(x11app->dpy, DefaultRootWindow(x11app->dpy), False,
+		SubstructureRedirectMask|SubstructureNotifyMask, &event);			
+}
+
 
 void dev_dispose(psy_ui_x11_ComponentImp* self)
 {	
@@ -481,7 +531,7 @@ void dev_show(psy_ui_x11_ComponentImp* self)
 	self->visible = TRUE;
     x11app = (psy_ui_X11App*)psy_ui_app()->imp;
 	XMapWindow(x11app->dpy, self->hwnd);
-	self->mapped = TRUE;
+	self->mapped = TRUE;	
 }
 
 void dev_showstate(psy_ui_x11_ComponentImp* self, int state)
@@ -490,8 +540,8 @@ void dev_showstate(psy_ui_x11_ComponentImp* self, int state)
 
 	self->visible = TRUE;
     x11app = (psy_ui_X11App*)psy_ui_app()->imp;
-	XMapWindow(x11app->dpy, self->hwnd);
-	self->mapped = TRUE;
+	XMapWindow(x11app->dpy, self->hwnd);	
+	self->mapped = TRUE;	
 }
 
 void dev_hide(psy_ui_x11_ComponentImp* self)
