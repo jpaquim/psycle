@@ -320,7 +320,7 @@ void psy_ui_app_change_default_font_size(psy_ui_App* self, double size)
 	for (; r != NULL; psy_list_next(&r)) {
 		psy_ui_Component* curr_toplevel;
 
-		curr_toplevel = (psy_ui_Component*)r->entry;
+		curr_toplevel = (psy_ui_Component*)r->entry;		
 		psy_ui_replacedefaultfont(curr_toplevel, &font);
 		psy_ui_component_invalidate(curr_toplevel);
 	}
