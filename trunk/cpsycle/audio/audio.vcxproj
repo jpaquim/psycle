@@ -264,6 +264,8 @@
     </ClCompile>
     <ClCompile Include="src\itmodule2.c" />
     <ClCompile Include="src\kbddriver.c" />
+    <ClCompile Include="src\ladspainterface.c" />
+    <ClCompile Include="src\ladspaparam.c" />
     <ClCompile Include="src\ladspaplugin.c" />
     <ClCompile Include="src\library.c">
       <RuntimeTypeInfo Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</RuntimeTypeInfo>
@@ -435,6 +437,8 @@
     <ClInclude Include="src\instruments.h" />
     <ClInclude Include="src\itmodule2.h" />
     <ClInclude Include="src\kbddriver.h" />
+    <ClInclude Include="src\ladspainterface.h" />
+    <ClInclude Include="src\ladspaparam.h" />
     <ClInclude Include="src\ladspaplugin.h" />
     <ClInclude Include="src\library.h" />
     <ClInclude Include="src\logicalchannels.h" />

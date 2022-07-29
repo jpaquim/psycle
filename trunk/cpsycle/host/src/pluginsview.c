@@ -405,7 +405,8 @@ PluginFilterItem* pluginfiltergroup_item(PluginFilterGroup* self, uintptr_t id)
 
 void pluginfilter_init(PluginFilter* self)
 {
-	psy_Property* curr;
+	assert(self);
+
 	self->search_text = NULL;	
 	pluginfiltergroup_init(&self->mode, psy_strhash("mode"), "Mode");
 	pluginfiltergroup_add(&self->mode,

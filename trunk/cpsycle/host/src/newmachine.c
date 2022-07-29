@@ -58,9 +58,7 @@ static void newmachinerescanbar_onselectdirectories(NewMachineRescanBar*,
 /* implementation */
 void newmachinerescanbar_init(NewMachineRescanBar* self,
 	psy_ui_Component* parent, Workspace* workspace)
-{	
-	psy_ui_Margin spacing;	
-
+{
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_set_style_type(&self->component,
 		STYLE_NEWMACHINE_RESCANBAR);	
@@ -70,13 +68,9 @@ void newmachinerescanbar_init(NewMachineRescanBar* self,
 	psy_ui_button_init_text(&self->rescan, &self->component,
 		"newmachine.rescan");	
 	psy_ui_label_init_text(&self->desc, &self->component,
-		"newmachine.in");
-	psy_ui_component_set_padding(psy_ui_label_base(&self->desc),
-		spacing);
+		"newmachine.in");	
 	psy_ui_button_init_text(&self->selectdirectories, &self->component,
-		"newmachine.plugin-directories");
-	psy_ui_component_set_padding(psy_ui_button_base(
-		&self->selectdirectories), spacing);
+		"newmachine.plugin-directories");	
 	psy_ui_button_load_resource(&self->selectdirectories,
 		IDB_SETTINGS_DARK, IDB_SETTINGS_DARK, psy_ui_colour_white());		
 	psy_signal_connect(&self->selectdirectories.signal_clicked, self,
