@@ -307,7 +307,7 @@ void psy_ui_x11_component_create_window(psy_ui_x11_ComponentImp* self,
 		self->mapped = FALSE;
 		self->parent = NULL;		
 	} else if (((dwStyle & 1) == 1)) {
-		/* frame */
+		/* toolframe */
 		XSetWindowAttributes xattr;
 		unsigned long xattrmask = CWBackPixel;
 
@@ -400,7 +400,8 @@ void psy_ui_x11_component_create_window(psy_ui_x11_ComponentImp* self,
 	} else {
 		psy_ui_app_register_native(x11app->app,
 			(uintptr_t)self->hwnd, &self->imp,
-			((dwStyle & 2) == 2) || ((dwStyle & 1) == 1));
+			((dwStyle & 2) == 2) || ((dwStyle & 1) == 1) ||
+			(((dwStyle == 0) && self->parent == NULL)));
 	}
 	//if (err == 0 && usecommand) {
 		//psy_table_insert(&winapp->winidmap, winapp->winid, self);
