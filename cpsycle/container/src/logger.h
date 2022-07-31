@@ -7,6 +7,7 @@
 #define psy_LOGGER_H
 
 #include "../../detail/psydef.h"
+#include <assert.h>
 
 #ifdef __cplusplus
 extern "C" {

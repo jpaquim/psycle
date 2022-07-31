@@ -953,3 +953,15 @@ int on_enum_files(psy_List** rv, const char* path, int flag)
 	psy_list_append(rv, psy_strdup(path));	
 	return 1;
 }
+
+bool psy_dir_normalize(const char* path, char* rv)
+{
+#if defined DIVERSALIS__COMPILER__GNU || defined DIVERSALIS__OS__POSIX
+    if (!realpath(path, rv)) {
+		return FALSE;
+	}
+#else
+	psy_snprintf(rv, psy_path_max(), "%s", path);
+#endif
+	return TRUE;
+}

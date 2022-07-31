@@ -27,6 +27,7 @@ typedef enum {
 } PropertiesIOState;
 
 static int reallocstr(char** str, size_t size, size_t* cap);
+static void dos_to_utf8(unsigned char *in, unsigned char *out);
 
 static char_dyn_t* lastkey(const char* key)
 {
@@ -57,6 +58,7 @@ void psy_inireader_init(psy_IniReader* self)
 	psy_signal_init(&self->signal_section);
 	self->section = NULL;
 	self->cpp_comment = FALSE;
+	self->dos_to_utf8 = FALSE;
 }
 
 void psy_inireader_dispose(psy_IniReader* self)
@@ -153,8 +155,18 @@ int inireader_load(psy_IniReader* self, const char* path)
 			default:
 				break;
 			}
-			if (state == INIREADER_STATE_ADDVAL) {
-				psy_signal_emit(&self->signal_read, self, 2, key, value);				
+			if (state == INIREADER_STATE_ADDVAL) {				
+				if (self->dos_to_utf8 && psy_strlen(value)) {
+					char* out;
+				
+					out = (char*)malloc(psy_strlen(value) * 2 + 1);
+					dos_to_utf8(value, out);				
+					psy_signal_emit(&self->signal_read, self, 2, key, out);
+					free(out);
+					out = NULL;
+				} else {
+					psy_signal_emit(&self->signal_read, self, 2, key, value);
+				}
 				cp = 0;
 				state = INIREADER_STATE_READKEY;
 			} else if (state == INIREADER_STATE_ADDSECTION) {
@@ -171,7 +183,17 @@ int inireader_load(psy_IniReader* self, const char* path)
 			} else {
 				value[MAXSTRINGSIZE - 1] = '\0';
 			}
-			psy_signal_emit(&self->signal_read, self, 2, key, value);			
+			if (self->dos_to_utf8 && psy_strlen(value)) {
+				char* out;
+				
+				out = (char*)malloc(psy_strlen(value) * 2 + 1);
+				dos_to_utf8(value, out);				
+				psy_signal_emit(&self->signal_read, self, 2, key, out);
+				free(out);
+				out = NULL;
+			} else {
+				psy_signal_emit(&self->signal_read, self, 2, key, value);
+			}
 		}
 		free(key);
 		free(value);
@@ -180,6 +202,29 @@ int inireader_load(psy_IniReader* self, const char* path)
 		return PSY_OK;
 	}	
 	return PSY_ERRFILE;
+}
+
+void dos_to_utf8(unsigned char *in, unsigned char *out)
+{	
+	char* p;
+		
+	if (!in) {
+		return;
+	}		
+    for (p = in; (*p) != '\0'; p++) {
+        uint8_t ch = *p;
+        
+        if (ch < 0x80) {
+			*out = ch;
+            ++out;
+        } else {
+			*out = (0xc0 | (ch >> 6));
+			out++;
+            *out = (0x80 | (ch & 0x3f));
+            out++;
+        }
+    }
+    *out = '\0';
 }
 
 int reallocstr(char** str, size_t size, size_t* cap)

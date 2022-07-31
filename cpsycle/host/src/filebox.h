@@ -57,6 +57,7 @@ void filebox_set_wildcard(FileBox* self, const char* wildcard);
 void filebox_set_directory(FileBox* self, const char* path);
 const char* filebox_directory(const FileBox*);
 const char* filebox_file_name(FileBox*);
+void filebox_full_name(FileBox*, char* rv, uintptr_t maxlen);
 
 
 #ifdef __cplusplus

@@ -99,9 +99,7 @@ void psy_ui_appstyles_initdarktheme(psy_ui_Styles* self,
 	psy_ui_style_set_background_colour(style, psy_ui_colour_make_overlay(6));
 	psy_ui_styles_set_style(self, psy_ui_STYLE_EDIT_FOCUS, style);
 	/* button */
-	style = psy_ui_style_allocinit();
-	psy_ui_style_set_colour(style,
-		psy_ui_colour_weighted(&material.onsurface, material.medium));	
+	style = psy_ui_style_allocinit();	
 	psy_ui_style_set_padding_em(style, 0.25, 1.0, 0.25, 1.0);
 	psy_ui_styles_set_style(self, psy_ui_STYLE_BUTTON, style);
 	/* button::hover */

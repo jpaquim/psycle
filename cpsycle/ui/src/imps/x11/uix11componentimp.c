@@ -5,6 +5,7 @@
 
 #include "../../detail/prefix.h"
 
+
 #include "uix11componentimp.h"
 
 #if PSYCLE_USE_TK == PSYCLE_TK_X11
@@ -19,6 +20,7 @@
 #include "../../detail/portable.h"
 #include "../../detail/trace.h"
 
+
 static void dev_rec_children(psy_ui_x11_ComponentImp*,
 	psy_List** children);
 static int windowstyle(psy_ui_x11_ComponentImp*);
@@ -31,7 +33,7 @@ static void psy_ui_x11_component_create_window(psy_ui_x11_ComponentImp*,
 	uint32_t dwStyle,
 	int usecommand);
 
-// prototypes
+/* prototypes */
 static void dev_dispose(psy_ui_x11_ComponentImp*);
 static void dev_destroy(psy_ui_x11_ComponentImp*);
 static void dev_show(psy_ui_x11_ComponentImp*);
@@ -233,6 +235,7 @@ static void xt_imp_vtable_init(psy_ui_x11_ComponentImp* self)
 	}
 }
 
+/* implementation */
 void psy_ui_x11_componentimp_init(psy_ui_x11_ComponentImp* self,
 	psy_ui_Component* component,
 	psy_ui_ComponentImp* parent,
@@ -278,98 +281,47 @@ void psy_ui_x11_component_create_window(psy_ui_x11_ComponentImp* self,
 	uint32_t dwStyle,
 	int usecommand)
 {
-	psy_ui_X11App* x11app;
+	psy_ui_X11App* x11app;	
+	XSetWindowAttributes xattr;	
+	unsigned long xattrmask;
+	bool top_level;
 	int err = 0;
 
 	x11app = (psy_ui_X11App*)psy_ui_app()->imp;
 	self->prev_w = width;
 	self->prev_h = height;
-	self->d_backBuf = 0;
-	if (((dwStyle & 2) == 2)) {
-		/* popup */
-		XSetWindowAttributes xattr;	
-		unsigned long xattrmask;
-				
+	self->d_backBuf = 0;			
+	xattrmask = CWBackPixel;
+	xattr.background_pixel = 0x00232323;
+	self->mapped = FALSE;
+	self->parent = parent;
+	self->above = FALSE;
+	top_level = FALSE;
+	if ((dwStyle & psy_ui_POPUP) == psy_ui_POPUP) {						
 		self->above = TRUE;
-		xattrmask = CWOverrideRedirect | CWBackPixel;		
+		self->parent = NULL;
+		top_level = TRUE;
 		xattr.override_redirect = True;
-		xattr.background_pixel = 0x00232323;		
-		self->hwnd = XCreateWindow(
-			x11app->dpy, XDefaultRootWindow(x11app->dpy),
-				x, y, width, height, 0,
-				CopyFromParent, CopyFromParent, x11app->visual,
-				xattrmask, &xattr);
-		XSelectInput(x11app->dpy, self->hwnd,
-			ExposureMask | KeyPressMask | KeyReleaseMask |
-			ButtonPressMask | ButtonReleaseMask | PointerMotionMask |
-			StructureNotifyMask |
-			EnterWindowMask | LeaveWindowMask | FocusChangeMask);
-		self->mapped = FALSE;
-		self->parent = NULL;		
-	} else if (((dwStyle & 1) == 1)) {
-		/* toolframe */
-		XSetWindowAttributes xattr;
-		unsigned long xattrmask = CWBackPixel;
-
-		xattr.background_pixel = 0x00232323;
-	/*	xAttr.bit_gravity = NorthWestGravity;
-		xAttrMask |= CWBitGravity; */
-		printf("toolframe \n");
-		self->above = TRUE;
-        self->hwnd = XCreateWindow(
-			x11app->dpy, XDefaultRootWindow(x11app->dpy),
-				x, y, width, height, 0,
-				CopyFromParent, CopyFromParent, x11app->visual,
-				xattrmask, &xattr);
-		XSelectInput(x11app->dpy, self->hwnd,
-			ExposureMask | KeyPressMask | KeyReleaseMask |
-			ButtonPressMask | ButtonReleaseMask | PointerMotionMask |
-			StructureNotifyMask |
-			EnterWindowMask | LeaveWindowMask | FocusChangeMask);
-		self->mapped = FALSE;
+		xattrmask = xattrmask | CWOverrideRedirect;
+	} else if ((dwStyle & psy_ui_TOOLFRAME) == psy_ui_TOOLFRAME) {		
+		self->above = TRUE;		
 		self->parent = NULL;
-	} else if (parent == 0) {
-		/* frame */
-		XSetWindowAttributes xattr;
-		unsigned long xattrmask = CWBackPixel;
-
-		xattr.background_pixel = 0x00232323;
-	/*	xAttr.bit_gravity = NorthWestGravity;
-		xAttrMask |= CWBitGravity; */
-		printf("frame \n");		
-        self->hwnd = XCreateWindow(
-			x11app->dpy, XDefaultRootWindow(x11app->dpy),
-				x, y, width, height, 0,
-				CopyFromParent, CopyFromParent, x11app->visual,
-				xattrmask, &xattr);
-		XSelectInput(x11app->dpy, self->hwnd,
-			ExposureMask | KeyPressMask | KeyReleaseMask |
-			ButtonPressMask | ButtonReleaseMask | PointerMotionMask |
-			StructureNotifyMask |
-			EnterWindowMask | LeaveWindowMask | FocusChangeMask);
-		self->mapped = FALSE;
+		top_level = TRUE;
+	} else if ((dwStyle & psy_ui_FRAME) == psy_ui_FRAME) {
+		xattrmask = CWBackPixel;		
 		self->parent = NULL;
-    } else {
-		XSetWindowAttributes xAttr;
-		unsigned long xAttrMask = CWBackPixel;
-
-		xAttr.background_pixel = 0x00232323;
-	/*	xAttrMask |= CWBitGravity;
-		xAttr.bit_gravity = NorthWestGravity; */
-        self->hwnd = XCreateWindow(
-			x11app->dpy, parent->hwnd,
-				x, y, width, height, 0,
-				CopyFromParent, CopyFromParent, x11app->visual,
-				xAttrMask, &xAttr);
-		XMapWindow(x11app->dpy, self->hwnd);
-		XSelectInput(x11app->dpy, self->hwnd,
-			KeyPressMask | KeyReleaseMask |
-			ButtonPressMask | ButtonReleaseMask | PointerMotionMask |
-			ExposureMask | StructureNotifyMask |
-			EnterWindowMask | LeaveWindowMask | FocusChangeMask);
+		top_level = TRUE;
+	} else {				
 		self->mapped = TRUE;
-		self->parent = parent;
-    }    
+	}	
+	self->hwnd = XCreateWindow(
+		x11app->dpy,
+		(self->parent)
+		? parent->hwnd
+		: XDefaultRootWindow(x11app->dpy),
+		x, y, width, height, 0,
+		CopyFromParent, CopyFromParent, x11app->visual,
+		xattrmask, &xattr);		
     if (self->hwnd) {
         GC gc;
 		PlatformXtGC xgc;
@@ -379,7 +331,15 @@ void psy_ui_x11_component_create_window(psy_ui_x11_ComponentImp* self,
 		Window root;
 		Window window;
 		int     screen;
-
+		
+		XSelectInput(x11app->dpy, self->hwnd,
+		ExposureMask | KeyPressMask | KeyReleaseMask |
+		ButtonPressMask | ButtonReleaseMask | PointerMotionMask |
+		StructureNotifyMask |
+		EnterWindowMask | LeaveWindowMask | FocusChangeMask);		     				
+		if (self->mapped) {
+			XMapWindow(x11app->dpy, self->hwnd);
+		}
 		XSetWMProtocols(x11app->dpy, self->hwnd, &x11app->wmDeleteMessage, 1);		
 		if (x11app->dbe) {
 			self->d_backBuf = XdbeAllocateBackBufferName(x11app->dpy,
@@ -393,15 +353,11 @@ void psy_ui_x11_component_create_window(psy_ui_x11_ComponentImp* self,
 		xgc.gc = gc;
 		xgc.visual = x11app->visual;
 		psy_ui_graphics_init(&self->g, &xgc);
-    }
-	if (self->hwnd == 0) {
+		psy_ui_app_register_native(x11app->app, (uintptr_t)self->hwnd,
+			&self->imp, top_level);
+    } else {	
 		printf("Failed To Create Component\n");
 		err = 1;
-	} else {
-		psy_ui_app_register_native(x11app->app,
-			(uintptr_t)self->hwnd, &self->imp,
-			((dwStyle & 2) == 2) || ((dwStyle & 1) == 1) ||
-			(((dwStyle == 0) && self->parent == NULL)));
 	}
 	//if (err == 0 && usecommand) {
 		//psy_table_insert(&winapp->winidmap, winapp->winid, self);
@@ -977,19 +933,18 @@ void dev_invalidaterect(psy_ui_x11_ComponentImp* self,
 	const psy_ui_RealRectangle* r)
 {	
 	psy_ui_X11App* x11app;
-	XExposeEvent xev;
-	XWindowAttributes win_attr;
+	XExposeEvent xev;	
 	
 	x11app = (psy_ui_X11App*)psy_ui_app()->imp;
 	xev.type = Expose;
 	xev.display = x11app->dpy;
 	xev.window = self->hwnd;
 	xev.count = 0;			
-	xev.x = psy_max(0.0, (int)r->left);
-	xev.y = psy_max(0.0, (int)r->top);
-	xev.width = psy_max(0.0, (int)r->right - (int)r->left);
-	xev.height = psy_max(0.0, (int)r->bottom - (int)r->top);	
-	if (xev.width != 0.0 && xev.height != 0.0) {	
+	xev.x = (int)r->left;
+	xev.y = (int)r->top;
+	xev.width = (int)r->right - (int)r->left;
+	xev.height = (int)r->bottom - (int)r->top;	
+	if (xev.width != 0 && xev.height != 0) {	
 		XSendEvent(x11app->dpy, self->hwnd, True, ExposureMask, (XEvent*)&xev);
 	}
 }

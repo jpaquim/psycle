@@ -11,6 +11,7 @@
 #include "inireader.h"
 /* platform */
 #include "../../detail/portable.h"
+#include "../../detail/os.h"
 
 
 /* psy_Translator */
@@ -77,6 +78,9 @@ bool psy_translator_load(psy_Translator* self, const char* path)
 	assert(self);
 	
 	psy_inireader_init(&inireader);
+#if defined DIVERSALIS__OS__POSIX
+	inireader.dos_to_utf8 = TRUE;	
+#endif
 	psy_signal_connect(&inireader.signal_read, self, 
 		psy_translator_on_read);
 	success = inireader_load(&inireader, path);
@@ -94,6 +98,9 @@ bool psy_translator_test(const psy_Translator* self, const char* path, char* id)
 	free(((psy_Translator*)self)->testid);
 	((psy_Translator*)self)->testid = NULL;
 	psy_inireader_init(&inireader);
+#if defined DIVERSALIS__OS__POSIX
+	inireader.dos_to_utf8 = TRUE;
+#endif	
 	psy_signal_connect(&inireader.signal_read, (psy_Translator*)self, 
 		psy_translator_on_test);
 	id[0] = '\0';
@@ -139,11 +146,11 @@ void psy_translator_on_read(psy_Translator* self, psy_IniReader* sender,
 	len = psy_strlen(sender->section) + psy_strlen(key) + 1;
 	full_key = (char*)malloc(len + 1);
 	if (sender->section) {
-		psy_snprintf(full_key, len + 1, "%s.%s", sender->section, key);
+		psy_snprintf(full_key, len + 1, "%s.%s", sender->section, key);		
 	} else {
 		psy_snprintf(full_key, len + 1, "%s", key);
 	}
-	if (psy_dictionary_at(&self->dictionary, full_key)) {
+	if (psy_dictionary_at(&self->dictionary, full_key)) {		
 		psy_dictionary_set(&self->dictionary, full_key, value);
 	}
 	free(full_key);

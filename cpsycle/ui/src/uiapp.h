@@ -140,7 +140,7 @@ void psy_ui_app_set_focus(psy_ui_App*, struct psy_ui_Component*);
 psy_ui_Style* psy_ui_style(uintptr_t styletype);
 const psy_ui_Style* psy_ui_style_const(uintptr_t styletype);
 psy_List* psy_ui_app_toplevel(psy_ui_App* self);
-psy_List* psy_ui_app_fonts(psy_ui_App*);
+const psy_List* psy_ui_app_fonts(const psy_ui_App*);
 
 /* psy_ui_AppImp */
 typedef void (*psy_ui_fp_appimp_dispose)(struct psy_ui_AppImp*);
@@ -157,7 +157,7 @@ typedef void (*psy_ui_fp_appimp_startmousehook)(struct psy_ui_AppImp*);
 typedef void (*psy_ui_fp_appimp_stopmousehook)(struct psy_ui_AppImp*);
 typedef void (*psy_ui_fp_appimp_register_native)(struct psy_ui_AppImp*, uintptr_t handle, struct psy_ui_ComponentImp*, bool);
 typedef void (*psy_ui_fp_appimp_unregister_native)(struct psy_ui_AppImp*, uintptr_t handle);
-typedef psy_List* (*psy_ui_fp_appimp_fonts)(struct psy_ui_AppImp*);
+typedef const psy_List* (*psy_ui_fp_appimp_fonts)(const struct psy_ui_AppImp*);
 
 typedef struct psy_ui_AppImpVTable {
 	psy_ui_fp_appimp_dispose dev_dispose;

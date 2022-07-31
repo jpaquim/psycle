@@ -684,10 +684,24 @@ void init_host_styles(psy_ui_Styles* self, psy_ui_ThemeMode theme)
 	psy_ui_style_set_padding_em(style, 0.25, 1.0, 0.25, 1.0);
 	psy_ui_styles_set_style(self, STYLE_DIALOG_BUTTON_SELECT, style);
 
-	style = psy_ui_style_allocinit();	
+	style = psy_ui_style_allocinit();
 	psy_ui_border_init_right(&style->border, psy_ui_BORDER_SOLID,
 		material.surface_overlay_12p);
 	psy_ui_styles_set_style(self, STYLE_SCANTASK, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_set_colour(style, psy_ui_colour_make(0xFF5555));
+	psy_ui_styles_set_style(self, STYLE_FILEBOX_DIR_PANE, style);
+	
+	style = psy_ui_style_allocinit();	
+	psy_ui_styles_set_style(self, STYLE_FILEBOX_FILE_PANE, style);
+	
+	style = psy_ui_style_allocinit();
+	psy_ui_style_set_padding_em(style, 0.2, 0.0, 0.2, 0.0);
+	psy_ui_style_set_margin_em(style, 0.3, 0.0, 0.0, 0.0);		
+	psy_ui_style_set_colour(style, psy_ui_colour_make(0x55FF45));
+	psy_ui_style_set_background_overlay(style, 4);
+	psy_ui_styles_set_style(self, STYLE_FILEVIEW_DIRBAR, style);
 
 	init_envelope_styles(self);
 	init_psycletheme_styles(self);

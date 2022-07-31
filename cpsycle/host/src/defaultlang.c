@@ -7,7 +7,7 @@
 
 
 #include "defaultlang.h"
-
+#include <stdio.h>
 
 /* implementation */
 void make_translator_default(psy_Dictionary* dict)
@@ -53,7 +53,7 @@ void make_translator_default(psy_Dictionary* dict)
 	psy_dictionary_set(dict, "metronome.configure", "(Configure)");
 	psy_dictionary_set(dict, "metronome.precount", "Precount");
 	/* main */	
-	psy_dictionary_set(dict, "main.machines", "Machines");
+	psy_dictionary_set(dict, "main.machines", "Machines");	
 	psy_dictionary_set(dict, "main.patterns", "Patterns");
 	psy_dictionary_set(dict, "main.pattern", "Pattern");
 	psy_dictionary_set(dict, "main.samples", "Samples");

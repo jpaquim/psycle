@@ -8,6 +8,7 @@
 
 #include "fileview.h"
 #include "styles.h"
+#include "viewindex.h"
 /* ui */
 #include <uiapp.h>
 /* file */
@@ -241,10 +242,13 @@ static void vtable_init(FileView* self)
 }
 
 /* implementation */
-void fileview_init(FileView* self, psy_ui_Component* parent)
+void fileview_init(FileView* self, psy_ui_Component* parent,
+	DirConfig* dirconfig)
 {		
 	psy_ui_component_init(fileview_base(self), parent, NULL);
-	vtable_init(self);		
+	vtable_init(self);
+	self->dirconfig = dirconfig;
+	psy_ui_component_set_id(fileview_base(self), VIEW_ID_FILEVIEW);
 	psy_ui_component_set_preferred_size(&self->component,
 		psy_ui_size_make_em(80.0, 25.0));
 	psy_ui_component_set_padding(&self->component,
@@ -255,6 +259,8 @@ void fileview_init(FileView* self, psy_ui_Component* parent)
 	psy_ui_component_set_margin(&self->bottom, psy_ui_margin_make_em(
 		0.5, 0.0, 0.0, 0.0));
 	psy_ui_label_init(&self->dir, &self->bottom);
+	psy_ui_component_set_style_type(&self->dir.component,
+		STYLE_FILEVIEW_DIRBAR);
 	psy_ui_component_set_align(psy_ui_label_base(&self->dir),
 		psy_ui_ALIGN_TOP);
 	psy_ui_component_init_align(&self->filebar, &self->bottom, NULL,
@@ -290,7 +296,7 @@ void fileview_init(FileView* self, psy_ui_Component* parent)
 	psy_ui_button_init_text_connect(&self->exit, &self->buttons,
 		"file.exit", self, fileview_on_hide);
 	psy_ui_component_set_align(&self->exit.component, psy_ui_ALIGN_TOP);
-	/* drives */
+	/* file links */
 	fileviewlinks_init(&self->links, &self->component);
 	psy_ui_component_set_align(&self->links.component, psy_ui_ALIGN_LEFT);
 	psy_signal_connect(&self->links.signal_selected, self,
@@ -322,14 +328,14 @@ void fileview_on_destroyed(FileView* self)
 void fileview_build_drives(FileView* self)
 {
 	psy_List* p;
-	psy_List* q;
+	psy_List* q;	
 		
-	fileviewlinks_add(&self->links, ".."psy_SLASHSTR, "..");
-//	fileviewlinks_add(&self->links, psy_SLASHSTR, psy_SLASHSTR);
+	fileviewlinks_add(&self->links, ".."psy_SLASHSTR, "..");	
 	for (q = p = psy_drives(); p != NULL; psy_list_next(&p)) {		
 		fileviewlinks_add(&self->links, (char*)psy_list_entry(p), 
 			(char*)psy_list_entry(p));
 	}
+	fileviewlinks_add(&self->links, "Songs", dirconfig_songs(self->dirconfig));
 	psy_list_deallocate(&q, NULL);
 }
 

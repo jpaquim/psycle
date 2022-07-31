@@ -15,7 +15,6 @@
 /* platform */
 #include "../../detail/portable.h"
 
-/* FontBox */
 
 /* prototypes */
 static void fontbox_on_destroyed(FontBox*);
@@ -203,24 +202,23 @@ void fontbox_on_dialog(FontBox* self,psy_ui_Component* sender)
 
 void fontbox_build(FontBox* self)
 {
-	psy_List* fonts;
+	const psy_List* fonts;
 	
 	fonts = psy_ui_app_fonts(psy_ui_app());
 	if (fonts) {
-		psy_List* p;
+		const psy_List* p;
 
 		for (p = fonts; p != NULL; p = p->next) {
-			psy_ui_FontInfo* font_info;
+			const psy_ui_FontInfo* font_info;
 
-			font_info = (psy_ui_FontInfo*)p->entry;
+			font_info = (const psy_ui_FontInfo*)p->entry;
 			psy_ui_combobox_add_text(&self->family, font_info->lfFaceName);			
 		}
-	}
-	psy_list_deallocate(&fonts, NULL);
-	fonts = NULL;
+	}	
 }
 
-void fontbox_on_family_selected(FontBox* self, psy_ui_Component* sender, intptr_t index)
+void fontbox_on_family_selected(FontBox* self, psy_ui_Component* sender,
+	intptr_t index)
 {
 	assert(self);
 

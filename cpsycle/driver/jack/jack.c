@@ -162,7 +162,11 @@ int driver_dispose(psy_AudioDriver* driver)
 	JackDriver* self = (JackDriver*)driver;
 	driver_close(self);
 	psy_property_deallocate(self->configuration);
-	self->configuration = NULL;	
+	self->configuration = NULL;
+	free(self->clientName_);
+	self->clientName_ = NULL;
+	free(self->serverName_);
+	self->serverName_ = NULL;
 	return 0;
 }
 

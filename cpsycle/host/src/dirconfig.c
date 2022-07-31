@@ -98,7 +98,7 @@ void dirconfig_make(DirConfig* self, psy_Property* parent)
 		PSYCLE_LADSPAS_DEFAULT_DIR);
 	dirconfig_append_dir_edit(self,
 		"skin", "settings.dirs.skin",
-		"C:\\Programme\\Psycle\\Skins");
+		PSYCLE_SKINS_DEFAULT_DIR);
 	dirconfig_append_dir_edit(self,
 		"doc", "settings.dirs.doc",
 		PSYCLE_DOC_DEFAULT_DIR);		

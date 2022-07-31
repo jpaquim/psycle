@@ -157,7 +157,7 @@ const psy_ui_TextMetric* dev_textmetric(const psy_ui_x11_FontImp* self)
 		rv.tmDescent = self->hfont->descent;		
 		rv.tmMaxCharWidth = self->hfont->max_advance_width;
 		/* todo monospace */
-		rv.tmAveCharWidth = self->hfont->max_advance_width / 4.0;
+		rv.tmAveCharWidth = self->hfont->max_advance_width / 4.5;
 		rv.tmInternalLeading = 0;
 		rv.tmExternalLeading = 0;		
 		((psy_ui_x11_FontImp*)self)->tmcache = rv;
