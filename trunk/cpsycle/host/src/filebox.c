@@ -47,7 +47,7 @@ void fileline_init(FileLine* self, psy_ui_Component* parent, const char* path,
 	psy_ui_component_set_align_expand(&self->component, psy_ui_HEXPAND);
 	psy_ui_component_set_align(&self->component, psy_ui_ALIGN_TOP);
 	/* filename */
-	psy_ui_button_init(&self->name, &self->component);
+	psy_ui_button_init(&self->name, &self->component);	
 	psy_ui_component_set_align(psy_ui_button_base(&self->name),
 		psy_ui_ALIGN_CLIENT);
 	psy_ui_button_prevent_translation(&self->name);
@@ -179,8 +179,10 @@ void filebox_init(FileBox* self, psy_ui_Component* parent)
 	psy_ui_component_set_align(&self->scroller.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_component_set_align(&self->pane, psy_ui_ALIGN_HCLIENT);
 	psy_ui_component_init(&self->dirpane, &self->pane, NULL);
+	psy_ui_component_set_style_type(&self->dirpane, STYLE_FILEBOX_DIR_PANE);
 	psy_ui_component_set_align(&self->dirpane, psy_ui_ALIGN_TOP);
 	psy_ui_component_init(&self->filepane, &self->pane, NULL);
+	psy_ui_component_set_style_type(&self->filepane, STYLE_FILEBOX_FILE_PANE);
 	psy_ui_component_set_align(&self->filepane, psy_ui_ALIGN_TOP);
 	filebox_read(self, psy_path_prefix(&self->curr_dir));
 }
@@ -197,9 +199,9 @@ void filebox_on_destroyed(FileBox* self)
 void filebox_read(FileBox* self, const char* path)
 {
 	psy_List* p;
-	psy_List* q;
+	psy_List* q;	
+	psy_List* sorted;
 	psy_List* files;
-	psy_List* sorted;	
 
 	self->selindex = psy_INDEX_INVALID;
 	psy_ui_component_clear(&self->dirpane);
@@ -210,9 +212,9 @@ void filebox_read(FileBox* self, const char* path)
 	files = sorted;
 	for (q = p = files; p != NULL; psy_list_next(&p)) {			
 		filebox_add(self, &self->dirpane, (const char*)p->entry, TRUE);
-	}
+	}	
 	psy_list_deallocate(&q, NULL);
-	if (!self->dirsonly) {
+	if (!self->dirsonly) {		
 		files = psy_files(path, self->wildcard, psy_ui_NONE_RECURSIVE);
 		sorted = filebox_sort(files, (psy_fp_comp)filebox_comp_filename);
 		psy_list_deallocate(&files, (psy_fp_disposefunc)NULL);
@@ -299,17 +301,20 @@ void filebox_set_wildcard(FileBox* self, const char* wildcard)
 
 void filebox_set_directory(FileBox* self, const char* path)
 {	
+#if defined DIVERSALIS__OS__POSIX	
+	char norm[4096];
+
+	psy_dir_normalize(path, norm);
+	psy_path_set_prefix(&self->curr_dir, norm);
+	filebox_read(self, norm);
+#else	
 	if (strcmp(path, "..") == 0) {
 		psy_path_remove_dir(&self->curr_dir);
-#if defined DIVERSALIS__OS__POSIX		
-		if (psy_strlen(psy_path_prefix(&self->curr_dir)) == 0) {
-			psy_path_set_prefix(&self->curr_dir, "/");
-		}
-#endif
 		filebox_read(self, psy_path_prefix(&self->curr_dir));
 	} else {
 		filebox_read(self, path);
 	}
+#endif	
 	psy_ui_component_align(&self->component);
 	psy_ui_component_invalidate(&self->component);
 }
@@ -319,7 +324,7 @@ void filebox_on_dir_button(FileBox* self, psy_ui_Button* sender)
 	if (strcmp(psy_ui_button_text(sender), psy_SLASHSTR"..") == 0 ||
 			(strcmp(psy_ui_button_text(sender), "..") == 0)) {
 		psy_path_remove_dir(&self->curr_dir);
-#if defined DIVERSALIS__OS__POSIX		
+#if defined DIVERSALIS__OS__POSIX
 		if (psy_strlen(psy_path_prefix(&self->curr_dir)) == 0) {
 			psy_path_set_prefix(&self->curr_dir, "/");
 		}
@@ -365,4 +370,12 @@ const char* filebox_file_name(FileBox* self)
 const char* filebox_directory(const FileBox* self)
 {
 	return psy_path_full(&self->curr_dir);
+}
+
+void filebox_full_name(FileBox* self, char* rv, uintptr_t maxlen)
+{
+	psy_snprintf(rv, maxlen, "%s"psy_SLASHSTR"%s",
+		psy_path_prefix(&self->curr_dir),
+		filebox_file_name(self));
+	printf("%s\n", rv);
 }

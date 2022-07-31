@@ -91,6 +91,8 @@ psy_List* psy_files(const char* path, const char* wildcard, int recursive);
 uintptr_t psy_file_size(const char* path);
 bool psy_file_is_directory(const psy_Path* p);
 
+bool psy_dir_normalize(const char* path, char* rv);
+
 #ifdef __cplusplus
 }
 #endif

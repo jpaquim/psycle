@@ -12,10 +12,11 @@
 /* platform */
 #include "../../detail/portable.h"
 
+
 /* prototypes */
-static void volslider_ondescribe(VolSlider*, psy_ui_Slider*, char* text);
-static void volslider_ontweak(VolSlider*, psy_ui_Slider*, float value);
-static void volslider_onvalue(VolSlider*, psy_ui_Slider*, float* value);
+static void volslider_on_describe(VolSlider*, psy_ui_Slider*, char* text);
+static void volslider_on_tweak(VolSlider*, psy_ui_Slider*, float value);
+static void volslider_on_value(VolSlider*, psy_ui_Slider*, float* value);
 
 /* implementation */
 void volslider_init(VolSlider* self, psy_ui_Component* parent,
@@ -29,16 +30,16 @@ void volslider_init(VolSlider* self, psy_ui_Component* parent,
 	psy_ui_slider_init(&self->slider, &self->component);
 	psy_ui_slider_set_text(&self->slider, "VU");	
 	psy_ui_slider_setvaluecharnumber(&self->slider, 10.0);
-	psy_ui_slider_startpoll(&self->slider);	
+	psy_ui_slider_startpoll(&self->slider);
+	psy_ui_slider_set_wheel_step(&self->slider, 0.02);	
 	psy_ui_component_set_align(&self->slider.component, psy_ui_ALIGN_TOP);
 	psy_ui_slider_connect(&self->slider, self,
-		(ui_slider_fpdescribe)volslider_ondescribe,
-		(ui_slider_fptweak)volslider_ontweak,
-		(ui_slider_fpvalue)volslider_onvalue);
+		(ui_slider_fpdescribe)volslider_on_describe,
+		(ui_slider_fptweak)volslider_on_tweak,
+		(ui_slider_fpvalue)volslider_on_value);
 }
 
-void volslider_ondescribe(VolSlider* self, psy_ui_Slider* sender,
-	char* text)
+void volslider_on_describe(VolSlider* self, psy_ui_Slider* sender, char* text)
 {
 	assert(self);
 
@@ -61,12 +62,12 @@ void volslider_ondescribe(VolSlider* self, psy_ui_Slider* sender,
 	}
 }
 
-void volslider_ontweak(VolSlider* self, psy_ui_Slider* sender, float value)
+void volslider_on_tweak(VolSlider* self, psy_ui_Slider* sender, float value)
 {
 	assert(self);
 
-	if (workspace_song(self->workspace) &&
-			psy_audio_machines_master(&workspace_song(self->workspace)->machines)) {
+	if (workspace_song(self->workspace) && psy_audio_machines_master(
+			&workspace_song(self->workspace)->machines)) {
 		psy_audio_MachineParam* param;
 
 		param = psy_audio_machine_tweakparameter(
@@ -77,7 +78,7 @@ void volslider_ontweak(VolSlider* self, psy_ui_Slider* sender, float value)
 	}
 }
 
-void volslider_onvalue(VolSlider* self, psy_ui_Slider* sender, float* rv)
+void volslider_on_value(VolSlider* self, psy_ui_Slider* sender, float* rv)
 {	
 	assert(self);
 

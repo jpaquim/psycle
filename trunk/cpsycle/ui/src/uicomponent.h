@@ -55,6 +55,10 @@ typedef enum psy_ui_ComponentState {
 } psy_ui_ComponentState;
 
 
+#define psy_ui_FRAME		1
+#define psy_ui_TOOLFRAME	2
+#define psy_ui_POPUP		3
+
 /* vtable function pointers */
 typedef void (*psy_ui_fp_component_dispose)(struct psy_ui_Component*);
 typedef void (*psy_ui_fp_component_destroy)(struct psy_ui_Component*);

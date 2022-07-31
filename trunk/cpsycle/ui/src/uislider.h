@@ -31,6 +31,7 @@ typedef struct psy_ui_SliderPane {
 	double value;
 	double defaultvalue;
 	double rulerstep;
+	double wheelstep;
 	double tweakbase;	
 	float step;
 	psy_ui_Size hslidersize;
@@ -93,6 +94,8 @@ void psy_ui_slider_startpoll(psy_ui_Slider*);
 void psy_ui_slider_stoppoll(psy_ui_Slider*);
 void psy_ui_slider_update(psy_ui_Slider*);
 void psy_ui_slider_setdefaultvalue(psy_ui_Slider*, double value);
+void psy_ui_slider_set_ruler_step(psy_ui_Slider*, double value);
+void psy_ui_slider_set_wheel_step(psy_ui_Slider*, double value);
 
 INLINE psy_ui_Component* psy_ui_slider_base(psy_ui_Slider* self)
 {

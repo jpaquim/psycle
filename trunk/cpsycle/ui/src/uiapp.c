@@ -439,7 +439,7 @@ static void psy_ui_appimp_sendevent(psy_ui_AppImp* self,
 	psy_ui_Component* component, psy_ui_Event* ev)
 {
 }
-static psy_List* psy_ui_appimp_fonts(psy_ui_AppImp* self)
+static const psy_List* psy_ui_appimp_fonts(const psy_ui_AppImp* self)
 {
 	return NULL;
 }
@@ -465,7 +465,7 @@ static psy_List* psy_ui_appimp_toplevel(psy_ui_AppImp* self)
 	return NULL;
 }
 
-psy_List* psy_ui_app_fonts(psy_ui_App* self)
+const psy_List* psy_ui_app_fonts(const psy_ui_App* self)
 {
 	assert(self->imp);
 

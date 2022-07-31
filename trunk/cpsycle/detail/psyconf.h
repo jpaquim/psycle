@@ -31,14 +31,15 @@
 #endif
 
 #if defined(DIVERSALIS__OS__UNIX)
-#define PSYCLE_RES_DIR "./resources"
-#define PSYCLE_APP_DIR "../../../cpsycle"
-#define PSYCLE_APP64_DIR "../../../cpsycle"
-#define PSYCLE_USER_DIR "../../../cpsycle"
-#define PSYCLE_USER64_DIR "../../../cpsycle"
+#define PSYCLE_APP_DIR "."
+#define PSYCLE_APP64_DIR "."
+#define PSYCLE_RES_DIR PSYCLE_APP_DIR "/host/src/resources"
+#define PSYCLE_USER_DIR "."
+#define PSYCLE_USER64_DIR "."
+#define PSYCLE_AUDIO_DRIVER_DIR "./driver"
 #elif defined(_MSC_VER) && _MSC_VER > 1200
 #define PSYCLE_RES_DIR ""
-// #define PSYCLE_RES_DIR "./src/resources"
+/* #define PSYCLE_RES_DIR "./src/resources" */
 #define PSYCLE_APP_DIR "C:\\Program Files (x86)\\Psycle Modular Music Studio"
 #define PSYCLE_APP64_DIR "C:\\Program Files\\Psycle Modular Music Studio"
 #define PSYCLE_USER_DIR "C:\\Program Files (x86)\\Psycle Modular Music Studio"
@@ -64,16 +65,16 @@
 #define PSYCLE_DOC_DEFAULT_DIR PSYCLE_APP_DIR "\\Docs"
 #define PSYCLE_USERPRESETS_DEFAULT_DIR PSYCLE_APP_DIR "\\Presets"
 #else
-#define PSYCLE_SONGS_DEFAULT_DIR PSYCLE_USER_DIR "/songs"
-#define PSYCLE_SAMPLES_DEFAULT_DIR PSYCLE_USER_DIR "/samples"
-#define PSYCLE_PLUGINS32_DEFAULT_DIR PSYCLE_USER_DIR "/plugins/build"
-#define PSYCLE_PLUGINS64_DEFAULT_DIR PSYCLE_USER64_DIR "/plugins/build"
-#define PSYCLE_LUASCRIPTS_DEFAULT_DIR PSYCLE_USER_DIR "/luascripts"
+#define PSYCLE_SONGS_DEFAULT_DIR PSYCLE_APP_DIR "/doc"
+#define PSYCLE_SAMPLES_DEFAULT_DIR PSYCLE_APP_DIR "/doc"
+#define PSYCLE_PLUGINS32_DEFAULT_DIR PSYCLE_APP_DIR "/plugins/build"
+#define PSYCLE_PLUGINS64_DEFAULT_DIR PSYCLE_APP64_DIR "/plugins/build"
+#define PSYCLE_LUASCRIPTS_DEFAULT_DIR PSYCLE_APP_DIR "/luascripts"
 #define PSYCLE_VSTS32_DEFAULT_DIR "/usr/lib/vst"
 #define PSYCLE_VSTS64_DEFAULT_DIR "/usr/lib/vst"
 #define PSYCLE_LADSPAS_DEFAULT_DIR "/usr/lib/ladspa"
-#define PSYCLE_SKINS_DEFAULT_DIR PSYCLE_USER_DIR "/Skins"
-#define PSYCLE_DOC_DEFAULT_DIR PSYCLE_USER_DIR "/docs"
+#define PSYCLE_SKINS_DEFAULT_DIR PSYCLE_APP_DIR "/skins"
+#define PSYCLE_DOC_DEFAULT_DIR PSYCLE_APP_DIR "/doc"
 #define PSYCLE_USERPRESETS_DEFAULT_DIR PSYCLE_APP_DIR "/Presets"
 #endif
 

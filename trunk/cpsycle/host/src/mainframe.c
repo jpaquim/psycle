@@ -160,9 +160,9 @@ static void vtable_init(MainFrame* self)
 
 /* implementation */
 void mainframe_init(MainFrame* self)
-{
+{	
 	mainframe_init_frame(self);
-	mainframe_init_workspace(self);
+	mainframe_init_workspace(self);		
 	mainframe_init_layout(self);
 	mainframe_init_terminal(self);
 	mainframe_init_kbd_help(self);
@@ -585,13 +585,13 @@ void mainframe_init_recent_view(MainFrame* self)
 }
 
 void mainframe_init_file_view(MainFrame* self)
-{
+{	
 	/* ft2 style file load view */
-	fileview_init(&self->fileview, &self->pane);
-#if defined(DIVERSALIS__OS__MICROSOFT)	
-	fileview_set_directory(&self->fileview,
+	fileview_init(&self->fileview,
+		psy_ui_notebook_base(&self->mainviews.notebook),
+		&self->workspace.config.directories);
+	fileview_set_directory(&self->fileview,	
 		dirconfig_songs(&self->workspace.config.directories));
-#endif		
 	psy_ui_component_set_align(fileview_base(&self->fileview),
 		psy_ui_ALIGN_LEFT);
 	psy_signal_connect(&self->fileview.save.signal_clicked, self,
@@ -818,8 +818,9 @@ void mainframe_on_file_save_view(MainFrame* self, psy_ui_Component* sender)
 }
 
 void mainframe_on_disk_op(MainFrame* self, psy_ui_Component* sender)
-{
-	psy_ui_component_toggle_visibility(&self->fileview.component);
+{	
+	workspace_select_view(&self->workspace, viewindex_make(VIEW_ID_FILEVIEW,
+		0, 0, psy_INDEX_INVALID));	
 }
 
 void mainframe_on_plugin_editor(MainFrame* self, psy_ui_Component* sender)

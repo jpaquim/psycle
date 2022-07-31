@@ -33,6 +33,8 @@ static void visualconfig_load_control_skin(VisualConfig* self);
 static void visualconfig_on_set_app_theme(VisualConfig*, psy_Property* sender);
 static void visualconfig_on_reset_skin(VisualConfig*, psy_Property* sender);
 static void visualconfig_on_load_skin(VisualConfig*, psy_Property* sender);
+static void visualconfig_on_file_accept_load_skin(VisualConfig*,
+	psy_Property* sender, const char* path);
 static void visualconfig_on_reset_control_skin(VisualConfig*, psy_Property* sender);
 static void visualconfig_on_load_control_skin(VisualConfig*, psy_Property* sender);
 static void visualconfig_on_draw_vu_meters(VisualConfig*, psy_Property* sender);
@@ -71,11 +73,12 @@ void visualconfig_make(VisualConfig* self, psy_Property* parent)
 		"settings.visual.visual");
 	psy_property_set_icon(self->visual, IDB_IMAGE_LIGHT,
 		IDB_IMAGE_DARK);
-	psy_property_connect(psy_property_set_id(
+	psy_property_connect_file_accept(psy_property_connect(psy_property_set_id(
 		psy_property_set_text(psy_property_append_action(
 			self->visual, "loadskin"),
 			"settings.visual.load-skin"), PROPERTY_ID_LOADSKIN),
-		self, visualconfig_on_load_skin);
+		self, visualconfig_on_load_skin),
+		self, visualconfig_on_file_accept_load_skin);
 	psy_property_connect(psy_property_set_id(
 		psy_property_set_text(
 			psy_property_append_action(self->visual, "defaultskin"),
@@ -212,16 +215,14 @@ void visualconfig_set_default_font(VisualConfig* self, psy_Property* property)
 
 void visualconfig_on_load_skin(VisualConfig* self, psy_Property* sender)
 {
-	psy_ui_OpenDialog opendialog;
+	// "Load", "Psycle Display Presets|*.psv", "PSV",
+	psy_signal_emit(&sender->signal_file_request, sender, 1, "*.psv");	
+}
 
-	psy_ui_opendialog_init_all(&opendialog, 0,
-		"Load Theme", "Psycle Display Presets|*.psv", "PSV",
-		dirconfig_skins(self->dirconfig));
-	if (psy_ui_opendialog_execute(&opendialog)) {
-		visualconfig_load_skin(self, psy_path_full(psy_ui_opendialog_path(
-			&opendialog)));
-	}
-	psy_ui_opendialog_dispose(&opendialog);
+void visualconfig_on_file_accept_load_skin(VisualConfig* self,
+	psy_Property* sender, const char* path)
+{
+	visualconfig_load_skin(self, path);
 }
 
 void visualconfig_load_control_skin(VisualConfig* self)

@@ -254,7 +254,8 @@ psy_ui_ComponentImp* allocinit_frameimp(psy_ui_x11_ImpFactory* self,
 		component,
 		parent ? parent->imp : 0,
 		winapp->appclass,
-		0, 0, 800, 600, 0 /* frame */,
+		0, 0, 800, 600,
+		psy_ui_FRAME,
 		//CW_USEDEFAULT, CW_USEDEFAULT,
 		//CW_USEDEFAULT, CW_USEDEFAULT,
 		//WS_OVERLAPPEDWINDOW,
@@ -278,7 +279,8 @@ psy_ui_ComponentImp* allocinit_toolframeimp(psy_ui_x11_ImpFactory* self,
 		parent ? parent->imp : 0,
 		winapp->appclass,
 		0, 0, 800, 600,
-		1 /* frame */, 0); 
+		psy_ui_TOOLFRAME,
+		0); 
 	if (rv->hwnd == 0) {
 		free(rv);
 		rv = 0;
@@ -299,7 +301,8 @@ psy_ui_ComponentImp* allocinit_popupimp(psy_ui_x11_ImpFactory* self,
 		parent ? parent->imp : 0,
 		x11app->appclass,
 		0, 0, 1, 1,
-		2 /* popup */, 0); 
+		psy_ui_POPUP,
+		0); 
 	
 	if (rv->hwnd == 0) {		
 		free(rv);

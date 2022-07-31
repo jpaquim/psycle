@@ -7,8 +7,10 @@
 
 
 #include "audioconfig.h"
+
 /* platform */
 #include "../../detail/portable.h"
+#include "../../detail/psyconf.h"
 
 
 /* prototypes */
@@ -208,9 +210,9 @@ void audioconfig_make_driver_list(AudioConfig* self)
 	psy_property_append_str(self->drivers, "asio", ".\\asiodriver.dll");
 #elif defined(DIVERSALIS__OS__LINUX)
 	psy_property_append_str(self->drivers, "alsa",
-		"../../driver/alsa/libpsyalsa.so");
+		PSYCLE_AUDIO_DRIVER_DIR"/alsa/libpsyalsa.so");
 		psy_property_append_str(self->drivers, "jack",
-		"../../driver/jack/libpsyjack.so");
+		PSYCLE_AUDIO_DRIVER_DIR"/jack/libpsyjack.so");
 #endif
 }
 

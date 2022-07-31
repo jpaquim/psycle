@@ -141,11 +141,13 @@ void help_loadpage(Help* self, uintptr_t index)
 {	
 	if (self->dir_config && psy_table_at(&self->filenames, index) != NULL) {
 		psy_Path path;
-
-		psy_path_init(&path, NULL);
-		psy_path_set_prefix(&path, dirconfig_doc(self->dir_config));
+		char norm[4096];
+		
+		psy_path_init(&path, NULL);		
+		psy_dir_normalize(dirconfig_doc(self->dir_config), norm);	
+		psy_path_set_prefix(&path, norm);		
 		psy_path_set_name(&path, (const char*)psy_table_at(&self->filenames,
-			index));		
+			index));
 		help_load(self, psy_path_full(&path));
 		psy_path_dispose(&path);
 	}
@@ -156,7 +158,7 @@ void help_load(Help* self, const char* path)
 {
 	FILE* fp;	
 	
-	psy_ui_label_set_text(&self->text, "");
+	psy_ui_label_set_text(&self->text, "");	
 	fp = fopen(path, "rb");
 	if (fp) {
 		char data[BLOCKSIZE];

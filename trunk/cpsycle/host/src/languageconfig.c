@@ -40,6 +40,7 @@ void languageconfig_init(LanguageConfig* self, psy_Property* parent,
 	languageconfig_makelanguagechoice(self);
 	languageconfig_makelanguagelist(self);
 	languageconfig_setdefaultlanguage(self);
+	languageconfig_update_language(self);
 	languageconfig_connect_choice(self);
 }
 
@@ -64,8 +65,12 @@ void languageconfig_makelanguagelist(LanguageConfig* self)
 	char currdir[4096];
 	
 	assert(self);
-	
-	if (psy_workdir(currdir)) {
+#if defined DIVERSALIS__OS__POSIX
+	psy_snprintf(currdir, 4096, "%s", "./host");
+#else
+	psy_workdir(currdir);
+#endif
+	if (psy_strlen(currdir) > 0) {
 		psy_dir_enumerate(self, currdir, "*.ini", 0, (psy_fp_findfile)
 			languageconfig_enumlanguagedir);
 	}
@@ -189,7 +194,7 @@ void languageconfig_update_language(LanguageConfig* self)
 	psy_Property* lang;
 
 	assert(self);
-
+	
 	if (lang = psy_property_at_choice(self->languagechoice)) {
 		/*
 		** This updates also the ui components over the translator language

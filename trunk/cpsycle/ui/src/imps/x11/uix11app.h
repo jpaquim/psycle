@@ -57,6 +57,7 @@ typedef struct psy_ui_X11App {
 	/* references */
 	psy_ui_App* app;
 	psy_ui_x11_Cursors cursors;
+	psy_List* fonts;
 } psy_ui_X11App;
 
 void psy_ui_x11app_init(psy_ui_X11App*, psy_ui_App*, void* instance);

@@ -7,6 +7,7 @@
 #define FILEVIEW_H
 
 /* local */
+#include "dirconfig.h"
 #include "filebox.h"
 /* ui */
 #include <uibutton.h>
@@ -67,7 +68,6 @@ void fileviewsavefilter_init(FileViewSaveFilter*, psy_ui_Component* parent);
 INLINE psy_ui_Component* fileviewsavefilter_base(FileViewSaveFilter* self)
 {
 	return &self->component;
-
 }
 
 typedef struct FileViewLinks {
@@ -107,10 +107,12 @@ typedef struct FileView {
 	psy_ui_Label dir;
 	psy_ui_Component filebar;	
 	psy_ui_Label filedesc;
-	psy_ui_TextArea filename;	
+	psy_ui_TextArea filename;
+	/* references */
+	DirConfig* dirconfig;
 } FileView;
 
-void fileview_init(FileView*, psy_ui_Component* parent);
+void fileview_init(FileView*, psy_ui_Component* parent, DirConfig*);
 
 INLINE psy_ui_Component* fileview_base(FileView* self)
 {

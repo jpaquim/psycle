@@ -1,19 +1,20 @@
 CC = g++
 INC = -I ../../ -I ../../psycle -I ../../../dsp/src
-LDFLAGS = -lcontainer -ldsp -shared
-LIBDIRS = -L ../../../container/src -L ../../../dsp/src
+LDFLAGS = -ldsp -shared
+LIBDIRS = -L ../../../dsp/src
 OUTPUTFILE = legasynth-303.so
 OUTPUTDIR = ../../build/
-src = $(wildcard *.cpp)
-
+src = $(wildcard *.cpp) \
+	  $(wildcard lib/*.cpp) \
+	  $(wildcard 303/*.cpp)
 obj = $(src:.cpp=.o)
 
 $(OUTPUTFILE): $(obj)
 	$(CC) $(LIBDIRS) $(INC) -g -fPIC -o $(OUTPUTDIR)$@ $^ $(LDFLAGS)
 	
 %.o: %.cpp
-	$(CC) -g $(INC) -c $(src) -fPIC
+	$(CC) -g $(INC) -c $^ -fPIC -o $@
 	
-.PHONY: clean	
+.PHONY: clean
 clean:
-	rm -f $(obj) $(OUTPUTFILE)
+	rm -f *.o

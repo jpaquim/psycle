@@ -68,7 +68,8 @@ static void psy_ui_winimp_register_native(psy_ui_WinApp*,
 	uintptr_t handle, psy_ui_ComponentImp*, bool top_level);
 static void psy_ui_winimp_unregister_native(psy_ui_WinApp*,
 	uintptr_t handle);
-static psy_List* psy_ui_winimp_fonts(psy_ui_WinApp*);
+static const psy_List* psy_ui_winimp_fonts(const psy_ui_WinApp*);
+static void psy_ui_winimp_read_fonts(psy_ui_WinApp*);
 
 /* vtable */
 static psy_ui_AppImpVTable imp_vtable;
@@ -160,7 +161,9 @@ void psy_ui_winapp_init(psy_ui_WinApp* self, psy_ui_App* app, HINSTANCE instance
 	psy_table_init(&self->selfmap);
 	psy_table_init(&self->winidmap);
 	psy_table_init(&self->toplevelmap);
-	self->defaultbackgroundbrush = CreateSolidBrush(0x00232323);	
+	self->defaultbackgroundbrush = CreateSolidBrush(0x00232323);
+	self->fonts = NULL;
+	psy_ui_winimp_read_fonts(self);
 }
 
 void psy_ui_winapp_dispose(psy_ui_WinApp* self)
@@ -170,6 +173,7 @@ void psy_ui_winapp_dispose(psy_ui_WinApp* self)
 	psy_table_dispose(&self->winidmap);
 	psy_table_dispose(&self->toplevelmap);
 	DeleteObject(self->defaultbackgroundbrush);
+	psy_list_deallocate(&self->fonts, NULL);
 	CoUninitialize();	
 }
 
@@ -1029,17 +1033,21 @@ void psy_ui_winimp_unregister_native(psy_ui_WinApp* self, uintptr_t handle)
 
 BOOL CALLBACK EnumFamCallBack(LPLOGFONT lplf, LPNEWTEXTMETRIC lpntm, DWORD FontType, LPVOID lParam);
 
-psy_List* psy_ui_winimp_fonts(psy_ui_WinApp* self)
+const psy_List* psy_ui_winimp_fonts(const psy_ui_WinApp* self)
+{
+	return self->fonts;
+}
+
+void psy_ui_winimp_read_fonts(psy_ui_WinApp* self)
 {
 	HDC hdc;
 	psy_List* rv;
 
 	hdc = GetDC(NULL);
-	rv = NULL;
+	psy_list_deallocate(&self->fonts, NULL);	
 	EnumFontFamilies(hdc, (LPCTSTR)NULL,
-		(FONTENUMPROC)EnumFamCallBack, (LPARAM)&rv);
-	ReleaseDC(NULL, hdc);
-	return rv;
+		(FONTENUMPROC)EnumFamCallBack, (LPARAM)&self->fonts);
+	ReleaseDC(NULL, hdc);	
 }
 
 BOOL CALLBACK EnumFamCallBack(LPLOGFONT lplf, LPNEWTEXTMETRIC lpntm, DWORD FontType, LPVOID lParam)

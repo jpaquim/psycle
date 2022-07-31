@@ -17,7 +17,7 @@ PLUGDIRS :=\
 			druttis_koruz/src\
 			druttis_phantom/src\
 			druttis_slicit/src\
-			druttis_pluckedstring/src\			
+			druttis_pluckedstring/src\
 			dw_eq/src\
 			dw_granulizer/src\
 			dw_iopan/src\

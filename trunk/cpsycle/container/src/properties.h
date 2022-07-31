@@ -95,6 +95,8 @@ typedef struct psy_Property {
 	psy_Signal rebuild;
 	psy_Signal scrollto;	
 	psy_Signal before_destroyed;
+	psy_Signal signal_file_request;
+	psy_Signal signal_file_accept;
 	psy_PropertyItem item;
 	psy_List* children;
 	struct psy_Property* parent;
@@ -225,6 +227,8 @@ bool psy_property_translation_prevented(const psy_Property*);
 bool psy_property_hasid(const psy_Property* self, int id);
 /* signals */
 psy_Property* psy_property_connect(psy_Property*, void* context, void* fp);
+psy_Property* psy_property_connect_file_accept(psy_Property*, void* context,
+	void* fp);
 void psy_property_disconnect(psy_Property*, void* context);
 psy_Property* psy_property_connect_children(psy_Property*, int recursive,
 	void* context, void* fp);

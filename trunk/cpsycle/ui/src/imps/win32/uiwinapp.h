@@ -48,7 +48,8 @@ typedef struct psy_ui_WinApp {
 	psy_Table winidmap;
 	uintptr_t winid;
 	HBRUSH defaultbackgroundbrush;		
-	HHOOK mousehook;	
+	HHOOK mousehook;
+	psy_List* fonts;	
 	/* references */
 	psy_ui_App* app;
 } psy_ui_WinApp;

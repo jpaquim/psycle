@@ -67,6 +67,7 @@ typedef struct PropertiesRenderState {
 	struct PropertiesRenderLine* property_line_selected;
 	psy_ui_Component* view;
 	psy_ui_Component* renderer;
+	psy_ui_Notebook* notebook;
 	FileBox* filebox;
 } PropertiesRenderState;
 

@@ -65,7 +65,8 @@ static void psy_ui_x11app_register_native(psy_ui_X11App*,
 	uintptr_t handle, psy_ui_ComponentImp*, bool top_level);
 static void psy_ui_x11app_unregister_native(psy_ui_X11App*,
 	uintptr_t handle);
-static psy_List* psy_ui_x11app_fonts(psy_ui_X11App*);
+static const psy_List* psy_ui_x11app_fonts(const psy_ui_X11App*);
+static void psy_ui_x11app_read_fonts(psy_ui_X11App*);
 
 /* vtable */
 static psy_ui_AppImpVTable imp_vtable;
@@ -164,8 +165,10 @@ void psy_ui_x11app_init(psy_ui_X11App* self, psy_ui_App* app,
 	self->shiftstate = FALSE;
 	self->controlstate = FALSE;
 	self->altstate = FALSE;
-	self->resetcursor = TRUE;
+	self->resetcursor = TRUE;	
 	XSetErrorHandler(errorHandler);
+	self->fonts = NULL;	
+	psy_ui_x11app_read_fonts(self);
 }
 
 void psy_ui_x11app_initdbe(psy_ui_X11App* self)
@@ -229,6 +232,7 @@ void psy_ui_x11app_dispose(psy_ui_X11App* self)
 	psy_ui_x11colours_dispose(&self->colourmap);
 	psy_list_free(self->targetids);	
 	psy_ui_x11_cursors_dispose(&self->cursors);
+	psy_list_deallocate(&self->fonts, NULL);
 }
 
 int psy_ui_x11app_run(psy_ui_X11App* self)
@@ -873,15 +877,19 @@ void psy_ui_x11app_unregister_native(psy_ui_X11App* self,
 	psy_table_remove(&self->toplevelmap, handle);
 }
 
-psy_List* psy_ui_x11app_fonts(psy_ui_X11App* self)
+const psy_List* psy_ui_x11app_fonts(const psy_ui_X11App* self)
 {
-	psy_List* rv;    
+	return self->fonts;
+}
+
+void psy_ui_x11app_read_fonts(psy_ui_X11App* self)
+{		
     int	j;
     FcObjectSet *os = 0;
     FcFontSet *fs;
     FcPattern *pat;    
-        
-	rv = NULL;
+        	
+	psy_list_deallocate(&self->fonts, (psy_fp_disposefunc)NULL);		
 	// if (!FcInit ())
     // {
 	//	 fprintf (stderr, "Can't init font config library\n");
@@ -904,7 +912,7 @@ psy_List* psy_ui_x11app_fonts(psy_ui_X11App* self)
 			fontinfo = (psy_ui_FontInfo*)malloc(sizeof(
 				psy_ui_FontInfo));
 			psy_ui_fontinfo_init(fontinfo, file, 18);
-			psy_list_append(&rv, fontinfo);
+			psy_list_append(&self->fonts, fontinfo);
 		}		
     }
     if (fs) {
@@ -914,7 +922,7 @@ psy_List* psy_ui_x11app_fonts(psy_ui_X11App* self)
 		FcFontSetDestroy(fs);
     }
     // FcFini();    
-	return rv;
+	return ;
 }
 
 #endif /* PSYCLE_TK_X11 */

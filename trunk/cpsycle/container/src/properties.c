@@ -157,7 +157,9 @@ void psy_property_init_type(psy_Property* self, const char* key,
 	psy_signal_init(&self->changed);
 	psy_signal_init(&self->rebuild);
 	psy_signal_init(&self->scrollto);
-	psy_signal_init(&self->before_destroyed);	
+	psy_signal_init(&self->before_destroyed);
+	psy_signal_init(&self->signal_file_request);
+	psy_signal_init(&self->signal_file_accept);
 	psy_propertyitem_init(&self->item);	
 	psy_strreset(&self->item.key, key);	
 	self->item.typ = typ;
@@ -177,6 +179,8 @@ void psy_property_dispose(psy_Property* self)
 			psy_property_dispose);
 	}
 	psy_propertyitem_dispose(&self->item);
+	psy_signal_dispose(&self->signal_file_accept);
+	psy_signal_dispose(&self->signal_file_request);
 	psy_signal_dispose(&self->before_destroyed);
 	psy_signal_dispose(&self->rebuild);
 	psy_signal_dispose(&self->changed);
@@ -213,6 +217,8 @@ psy_Property* psy_property_clone(const psy_Property* self)
 		rv->parent = NULL;
 		rv->children = NULL;
 		rv->dispose = NULL;
+		psy_signal_init(&rv->signal_file_accept);
+		psy_signal_init(&rv->signal_file_request);
 		psy_signal_init(&rv->before_destroyed);
 		psy_signal_init(&rv->changed);
 		psy_signal_init(&rv->rebuild);
@@ -682,8 +688,9 @@ void psy_property_sort_keys(psy_Property* self)
 			psy_table_insert(&propertiesptr, i, (psy_Property*)psy_list_entry(p));
 		}
 		psy_qsort(&propertiesptr, 
-			psy_table_insert, psy_table_at,
-			0, (int)(num - 1), psy_property_comp_key);
+			(psy_fp_set_index_double)psy_table_insert,
+			(psy_fp_index_double)psy_table_at,
+			0, (int)(num - 1), (psy_fp_comp)psy_property_comp_key);
 		p = psy_property_begin(self);
 		for (i = 0; p != NULL && i < num; p = p->next, ++i) {
 			p->entry = psy_table_at(&propertiesptr, i);
@@ -1440,10 +1447,21 @@ psy_Property* psy_property_connect(psy_Property* self, void* context, void* fp)
 	return self;
 }
 
-void psy_property_disconnect(psy_Property* self, void* context)
+psy_Property* psy_property_connect_file_accept(psy_Property* self,
+	void* context, void* fp)
 {
 	assert(self);
 
+	psy_signal_connect(&self->signal_file_accept, context, fp);
+	return self;
+}
+
+void psy_property_disconnect(psy_Property* self, void* context)
+{
+	assert(self);
+	
+	psy_signal_disconnect_context(&self->signal_file_accept, context);
+	psy_signal_disconnect_context(&self->signal_file_request, context);
 	psy_signal_disconnect_context(&self->changed, context);
 	psy_signal_disconnect_context(&self->rebuild, context);
 	psy_signal_disconnect_context(&self->before_destroyed, context);
