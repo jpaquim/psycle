@@ -48,11 +48,17 @@ extern "C" {
 ** psy_ui_Button
 */
 
+typedef enum psy_ui_ClickMode {
+	psy_ui_CLICK_MODE_PRESS,
+	psy_ui_CLICK_MODE_RELEASE,
+	psy_ui_CLICK_MODE_REPEAT	
+} psy_ui_ClickMode;
+
 typedef struct psy_ui_Button {
 	/* inherits */
 	psy_ui_Component component;	
 	/* signals */
-	psy_Signal signal_clicked;
+	psy_Signal signal_clicked;	
 	/* internal */
 	char_dyn_t* text;	
 	psy_ui_ButtonIcon icon;
@@ -74,6 +80,11 @@ typedef struct psy_ui_Button {
 	char* light_path;
 	char* dark_path;	
 	psy_ui_Colour bitmaptransparency;
+	psy_ui_ClickMode click_mode;
+	uintptr_t repeat_rate;
+	uintptr_t first_repeat_rate;
+	bool first_repeat;
+	psy_ui_MouseEvent repeat_event;
 	/* references */
 	psy_Property* property;
 } psy_ui_Button;

@@ -284,7 +284,8 @@ int psy_audio_psy3loader_read_info(psy_audio_PSY3Loader* self)
 	int status;
 	char name[129];
 	char author[65];
-	char comments[65536];	
+	char comments[65536];
+		
 	psy_audio_SongProperties songproperties;
 
 	if (status = psyfile_readstring(self->fp, name,
@@ -299,8 +300,23 @@ int psy_audio_psy3loader_read_info(psy_audio_PSY3Loader* self)
 			sizeof(comments))) {
 		return status;
 	}
-	psy_audio_songproperties_init(&songproperties, name, author,
-		comments);
+	if (self->songfile->convert_dos_utf8) {	
+		char* name_utf8;
+		char* author_utf8;
+		char* comments_utf8;
+				
+		name_utf8 =	psy_dos_to_utf8(name, NULL);
+		author_utf8 = psy_dos_to_utf8(author, NULL);							
+		comments_utf8 = psy_dos_to_utf8(comments, NULL);
+		psy_audio_songproperties_init(&songproperties, name_utf8, author_utf8,
+			comments_utf8);
+		free(name_utf8);
+		free(author_utf8);
+		free(comments_utf8);
+	} else {
+		psy_audio_songproperties_init(&songproperties, name, author,
+			comments);
+	}
 	psy_audio_song_setproperties(self->song, &songproperties);
 	/* bugfix. There were songs with incorrect size. */
 	if (psyfile_currchunkversion(self->fp) == 0) {

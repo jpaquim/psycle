@@ -15,41 +15,49 @@
 #include "../../detail/portable.h"
 
 /* prototypes */
-static void dev_dispose(psy_ui_x11_ColorDialogImp*);
-static int dev_execute(psy_ui_x11_ColorDialogImp*);
-static const char* dev_path(psy_ui_x11_ColorDialogImp*);
-psy_ui_Colour dev_color(psy_ui_x11_ColorDialogImp*);
+static void dev_dispose(psy_ui_x11_ColourDialogImp*);
+static int dev_execute(psy_ui_x11_ColourDialogImp*);
+static const char* dev_path(psy_ui_x11_ColourDialogImp*);
+static psy_ui_Colour dev_colour(psy_ui_x11_ColourDialogImp*);
+static void dev_setcolour(psy_ui_x11_ColourDialogImp*, psy_ui_Colour);
 
 /* vtable */
 static psy_ui_ColourDialogImpVTable imp_vtable;
 static int imp_vtable_initialized = 0;
 
-static void imp_vtable_init(psy_ui_x11_ColorDialogImp* self)
+static void imp_vtable_init(psy_ui_x11_ColourDialogImp* self)
 {
 	if (!imp_vtable_initialized) {
 		imp_vtable = *self->imp.vtable;
-		imp_vtable.dev_dispose = (psy_ui_fp_colourdialogimp_dev_dispose)
+		imp_vtable.dev_dispose =
+			(psy_ui_fp_colourdialogimp_dev_dispose)
 			dev_dispose;
-		imp_vtable.dev_execute = (psy_ui_fp_colourdialogimp_dev_execute)
+		imp_vtable.dev_execute =
+			(psy_ui_fp_colourdialogimp_dev_execute)
 			dev_execute;
-		imp_vtable.dev_colour = (psy_ui_fp_colourdialogimp_dev_colour)dev_color;
+		imp_vtable.dev_colour =
+			(psy_ui_fp_colourdialogimp_dev_colour)
+			dev_colour;
+		imp_vtable.dev_setcolour =
+			(psy_ui_fp_colourdialogimp_dev_setcolour)
+			dev_setcolour;
 		imp_vtable_initialized = 1;
 	}
 }
 
-void psy_ui_x11_colordialogimp_init(psy_ui_x11_ColorDialogImp* self)
+void psy_ui_x11_colourdialogimp_init(psy_ui_x11_ColourDialogImp* self)
 {
 	psy_ui_colourdialogimp_init(&self->imp);
 	imp_vtable_init(self);	
 	self->imp.vtable = &imp_vtable;
-	self->color = psy_ui_colour_make(0x00000000);
+	self->colour = psy_ui_colour_make(0x00000000);
 }
 
-void dev_dispose(psy_ui_x11_ColorDialogImp* self)
+void dev_dispose(psy_ui_x11_ColourDialogImp* self)
 {
 }
 
-int dev_execute(psy_ui_x11_ColorDialogImp* self)
+int dev_execute(psy_ui_x11_ColourDialogImp* self)
 {
 	int rv;
 	//static CHOOSECOLOR cc;
@@ -72,9 +80,14 @@ int dev_execute(psy_ui_x11_ColorDialogImp* self)
 	return rv;
 }
 
-psy_ui_Colour dev_color(psy_ui_x11_ColorDialogImp* self)
+psy_ui_Colour dev_colour(psy_ui_x11_ColourDialogImp* self)
 {
-	return self->color;	
+	return self->colour;	
+}
+
+void dev_setcolour(psy_ui_x11_ColourDialogImp* self, psy_ui_Colour colour)
+{
+	self->colour = colour;
 }
 
 #endif

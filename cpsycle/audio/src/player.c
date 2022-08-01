@@ -1099,7 +1099,8 @@ void psy_audio_player_start_threads(psy_audio_Player* self, uintptr_t thread_cou
 
 		/* start the scheduling threads */
 		thread = (psy_Thread*)malloc(sizeof(psy_Thread));
-		psy_thread_init_start(thread, self, psy_audio_player_thread_function);
+		psy_thread_init_start(thread, self,
+			(psy_fp_thread_callback)psy_audio_player_thread_function);
 		psy_list_append(&self->threads_, thread);			
 	}
 }

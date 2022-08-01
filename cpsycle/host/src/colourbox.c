@@ -45,9 +45,9 @@ static void vtable_init(ColourBox* self)
 
 /* implementation */
 void colourbox_init(ColourBox* self, psy_ui_Component* parent)
-{
+{	
 	assert(self);
-
+	
 	psy_ui_component_init(&self->component, parent, NULL);
 	vtable_init(self);
 	self->property = NULL;
@@ -55,14 +55,12 @@ void colourbox_init(ColourBox* self, psy_ui_Component* parent)
 		psy_ui_ALIGN_LEFT, psy_ui_margin_make_em(
 			0.0, 1.0, 0.0, 0.0));	
 	// psy_ui_component_set_align_expand(&self->component, psy_ui_HEXPAND);
-	psy_ui_label_init(&self->label, &self->component);
-	psy_ui_label_prevent_translation(&self->label);	
-	psy_ui_label_set_char_number(&self->label, 20.0);
+	psy_ui_textarea_init_single_line(&self->edit, &self->component);	
+	psy_ui_textarea_set_char_number(&self->edit, 20.0);
 	psy_ui_component_init(&self->colour, &self->component, NULL);	
 	psy_ui_component_set_preferred_size(&self->colour,
 		psy_ui_size_make_em(4.0, 1.0));	
-	psy_ui_label_data_exchange(&self->label, self->property,
-		psy_ui_PROPERTY_MODE_VALUE);
+	psy_ui_textarea_data_exchange(&self->edit, self->property);
 	psy_ui_button_init_connect(&self->dialog, &self->component,
 		self, colourbox_on_dialog);
 	psy_ui_button_prevent_translation(&self->dialog);
@@ -103,8 +101,7 @@ void colourbox_data_exchange(ColourBox* self, psy_Property* property)
 	self->property = property;
 	if (property) {
 		colourbox_on_property_changed(self, property);
-		psy_ui_label_data_exchange(&self->label, property,
-			psy_ui_PROPERTY_MODE_VALUE);
+		psy_ui_textarea_data_exchange(&self->edit, property);
 		psy_property_connect(property, self,
 			colourbox_on_property_changed);
 		psy_signal_connect(&self->property->before_destroyed, self,

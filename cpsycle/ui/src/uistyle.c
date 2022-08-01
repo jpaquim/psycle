@@ -227,6 +227,15 @@ void psy_ui_style_set_font(psy_ui_Style* self, const char* family, double size)
 	psy_ui_font_init(&self->font, &fontinfo);
 }
 
+void psy_ui_style_set_font_string(psy_ui_Style* self, const char* str)
+{
+	psy_ui_FontInfo fontinfo;
+	
+	psy_ui_font_dispose(&self->font);
+	psy_ui_fontinfo_init_string(&fontinfo, str);
+	psy_ui_font_init(&self->font, &fontinfo);
+}
+
 void psy_ui_style_set_background_id(psy_ui_Style* self,
 	uintptr_t id)
 {	

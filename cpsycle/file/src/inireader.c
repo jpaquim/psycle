@@ -27,7 +27,6 @@ typedef enum {
 } PropertiesIOState;
 
 static int reallocstr(char** str, size_t size, size_t* cap);
-static void dos_to_utf8(unsigned char *in, unsigned char *out);
 
 static char_dyn_t* lastkey(const char* key)
 {
@@ -158,9 +157,8 @@ int inireader_load(psy_IniReader* self, const char* path)
 			if (state == INIREADER_STATE_ADDVAL) {				
 				if (self->dos_to_utf8 && psy_strlen(value)) {
 					char* out;
-				
-					out = (char*)malloc(psy_strlen(value) * 2 + 1);
-					dos_to_utf8(value, out);				
+									
+					out = psy_dos_to_utf8(value, out);
 					psy_signal_emit(&self->signal_read, self, 2, key, out);
 					free(out);
 					out = NULL;
@@ -185,9 +183,8 @@ int inireader_load(psy_IniReader* self, const char* path)
 			}
 			if (self->dos_to_utf8 && psy_strlen(value)) {
 				char* out;
-				
-				out = (char*)malloc(psy_strlen(value) * 2 + 1);
-				dos_to_utf8(value, out);				
+								
+				out = psy_dos_to_utf8(value, out);				
 				psy_signal_emit(&self->signal_read, self, 2, key, out);
 				free(out);
 				out = NULL;
@@ -204,28 +201,6 @@ int inireader_load(psy_IniReader* self, const char* path)
 	return PSY_ERRFILE;
 }
 
-void dos_to_utf8(unsigned char *in, unsigned char *out)
-{	
-	char* p;
-		
-	if (!in) {
-		return;
-	}		
-    for (p = in; (*p) != '\0'; p++) {
-        uint8_t ch = *p;
-        
-        if (ch < 0x80) {
-			*out = ch;
-            ++out;
-        } else {
-			*out = (0xc0 | (ch >> 6));
-			out++;
-            *out = (0x80 | (ch & 0x3f));
-            out++;
-        }
-    }
-    *out = '\0';
-}
 
 int reallocstr(char** str, size_t size, size_t* cap)
 {

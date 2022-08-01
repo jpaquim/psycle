@@ -157,4 +157,41 @@ INLINE char* psy_strlwr(char* str)
     return (ret);
 }
 
+
+/*
+** converts dos ascii to utf8
+** NULL allcoates memory or
+** out needs allocated memory of strlen(in) * 2 + 1
+*/
+
+INLINE char* psy_dos_to_utf8(char *in, char *out)
+{
+	char* p;
+	char* q;
+		
+	if (!in) {
+		return NULL;
+	}
+	if (out == NULL) {		
+		out = (char*)malloc(sizeof(char) * psy_strlen(in) * 2 + 1);
+	}
+	q = out;	
+    for (p = in; (*p) != '\0'; p++) {
+        uint8_t ch = *p;
+        
+        if (ch < 0x80) {
+			*q = ch;
+            ++q;
+        } else {
+			*q = (0xc0 | (ch >> 6));
+			q++;
+            *q = (0x80 | (ch & 0x3f));
+            q++;
+        }
+    }
+    *q = '\0';
+    return out;
+}
+
+
 #endif /* PORTABLE_H */

@@ -15,13 +15,13 @@
 extern "C" {
 #endif
 
-typedef struct psy_ui_x11_ColorDialogImp {
+typedef struct psy_ui_x11_ColourDialogImp {
 	psy_ui_ColourDialogImp imp;
 	struct psy_ui_Component* parent;		
-	psy_ui_Colour color;
-} psy_ui_x11_ColorDialogImp;
+	psy_ui_Colour colour;
+} psy_ui_x11_ColourDialogImp;
 
-void psy_ui_x11_colordialogimp_init(psy_ui_x11_ColorDialogImp*);
+void psy_ui_x11_colourdialogimp_init(psy_ui_x11_ColourDialogImp*);
 
 #ifdef __cplusplus
 }

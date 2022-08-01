@@ -37,7 +37,7 @@ void psy_audio_songproperties_init(psy_audio_SongProperties* self,
 	self->octave = 4;
 	self->tpb = 24;
 	self->extraticksperbeat = 0;
-	self->samplerindex = 0x3E;
+	self->samplerindex = 0x3E;	
 }
 
 void psy_audio_songproperties_init_all(psy_audio_SongProperties* self,

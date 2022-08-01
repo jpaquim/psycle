@@ -129,8 +129,9 @@ static void propertiesrenderline_on_destroyed(PropertiesRenderLine*);
 static void propertiesrenderline_before_property_destroyed(
 	PropertiesRenderLine*, psy_Property* sender);
 static void propertiesrenderline_build(PropertiesRenderLine*);
-static psy_ui_Component* propertiesrenderline_build_main_section(
-	PropertiesRenderLine*);
+static psy_ui_Component* propertiesrenderline_build_section(
+	PropertiesRenderLine*, uintptr_t section_style_type,
+	uintptr_t header_style_type);
 static void propertiesrenderline_build_children(PropertiesRenderLine*,
 	psy_ui_Component* parent);
 static void propertiesrenderline_on_mouse_down(PropertiesRenderLine*,
@@ -180,9 +181,7 @@ void propertiesrenderline_init(PropertiesRenderLine* self,
 	self->property = property;	
 	self->state = state;
 	self->level = level;	
-	psy_ui_component_set_align(&self->component, psy_ui_ALIGN_TOP);
-	psy_ui_component_set_default_align(&self->component, psy_ui_ALIGN_TOP,
-		psy_ui_margin_zero());	
+	psy_ui_component_set_align(&self->component, psy_ui_ALIGN_TOP);	
 	if (psy_property_hidden(self->property)) {
 		psy_ui_component_hide(&self->component);
 	}
@@ -236,8 +235,14 @@ void propertiesrenderline_build(PropertiesRenderLine* self)
 	if (self->level != 0) {
 		if (psy_property_is_section(self->property) &&
 				psy_property_hint(self->property) != PSY_PROPERTY_HINT_RANGE) {
-			if (self->level == 1) {
-				lines = propertiesrenderline_build_main_section(self);
+			if (self->level == 1) {				
+				lines = propertiesrenderline_build_section(self,
+					self->state->mainsectionstyle,
+					self->state->mainsectionheaderstyle);
+			} else if (self->level == 2) {
+				lines = propertiesrenderline_build_section(self,
+					STYLE_PROPERTYVIEW_SUBSECTION,
+					STYLE_PROPERTYVIEW_SUBSECTIONHEADER);
 			}
 		} else {
 			psy_ui_component_set_align_expand(&self->component, psy_ui_HEXPAND);
@@ -412,22 +417,22 @@ void propertiesrenderline_build(PropertiesRenderLine* self)
 	}
 }
 
-psy_ui_Component* propertiesrenderline_build_main_section(PropertiesRenderLine* self)
+psy_ui_Component* propertiesrenderline_build_section(PropertiesRenderLine* self,
+	uintptr_t section_style, uintptr_t section_header_style)
 {
 	psy_ui_Label* label;
 	psy_ui_Component* rv;
 
 	assert(self);
 
-	psy_ui_component_set_style_type(&self->component,
-		self->state->mainsectionstyle);
+	psy_ui_component_set_style_type(&self->component, section_style);
 	label = psy_ui_label_allocinit(&self->component);
-	psy_ui_component_set_margin(psy_ui_label_base(label),
-		psy_ui_margin_make_em(0.0, 0.0, 0.5, 0.0));
+	psy_ui_component_set_align(psy_ui_label_base(label), psy_ui_ALIGN_TOP);
 	psy_ui_component_set_style_type(psy_ui_label_base(label),
-		self->state->mainsectionheaderstyle);
+		section_header_style);
 	psy_ui_label_set_text(label, psy_property_text(self->property));
 	rv = psy_ui_component_allocinit(&self->component, NULL);
+	psy_ui_component_set_align(rv, psy_ui_ALIGN_TOP);
 	psy_ui_component_set_margin(rv, psy_ui_margin_make_em(0.0, 1.0, 0.0, 2.0));
 	psy_ui_component_set_default_align(rv, psy_ui_ALIGN_TOP,
 		psy_ui_margin_zero());

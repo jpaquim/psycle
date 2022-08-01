@@ -35,6 +35,7 @@ typedef struct Help {
 	psy_ui_AlignType lastalign;
 	/* references */
 	DirConfig* dir_config;
+	bool dos_to_utf8;
 } Help;
 
 void help_init(Help*, psy_ui_Component* parent, DirConfig*);

@@ -1570,7 +1570,8 @@ bool psy_property_is_hex(const psy_Property* self)
 	assert(self);
 
 	return psy_property_is_int(self) &&
-		(psy_property_hint(self) == PSY_PROPERTY_HINT_EDITHEX);
+		(psy_property_hint(self) == PSY_PROPERTY_HINT_EDITHEX ||
+		 psy_property_hint(self) == PSY_PROPERTY_HINT_EDITCOLOR);
 }
 
 bool psy_property_is_bool(const psy_Property* self)

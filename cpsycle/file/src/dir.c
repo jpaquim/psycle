@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -272,7 +272,7 @@ bool psy_file_is_directory(const psy_Path* p)
 
 	filename = psy_path_full(p);
 	if (stat(filename, &sb) == -1) {
-		return psy_INDEX_INVALID;
+		return FALSE;
 	}
 	return S_ISDIR(sb.st_mode) != 0;
 }

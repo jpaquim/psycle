@@ -14,6 +14,7 @@
 #include <string.h>
 /* platform */
 #include "../../detail/portable.h"
+#include "../../detail/os.h"
 
 #define BLOCKSIZE 128 * 1024
 
@@ -50,6 +51,11 @@ void help_init(Help* self, psy_ui_Component* parent, DirConfig* dir_config)
 	psy_ui_component_init(help_base(self), parent, NULL);
 	vtable_init(self);
 	self->dir_config = dir_config;
+#if defined DIVERSALIS__OS__POSIX	
+	self->dos_to_utf8 = TRUE;
+#else
+	self->dos_to_utf8 = FALSE;	
+#endif	
 	psy_ui_tabbar_init(&self->tabbar, help_base(self));
 	self->lastalign = psy_ui_ALIGN_NONE;
 	psy_ui_component_set_align(psy_ui_tabbar_base(&self->tabbar),
@@ -162,12 +168,21 @@ void help_load(Help* self, const char* path)
 	fp = fopen(path, "rb");
 	if (fp) {
 		char data[BLOCKSIZE];
-		uintptr_t lenfile;				
+		uintptr_t lenfile;
 
 		memset(data, 0, BLOCKSIZE);
 		lenfile = fread(data, 1, sizeof(data), fp);
 		while (lenfile > 0) {
-			psy_ui_label_add_text(&self->text, (char*)data);			
+			if (self->dos_to_utf8) {
+				char* out;
+								
+				out = psy_dos_to_utf8((char*)data, NULL);
+				psy_ui_label_add_text(&self->text, out);
+				free(out);
+				out = NULL;			
+			} else {
+				psy_ui_label_add_text(&self->text, (char*)data);
+			}
 			lenfile = fread(data, 1, sizeof(data), fp);
 		}
 		fclose(fp);

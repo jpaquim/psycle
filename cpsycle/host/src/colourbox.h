@@ -10,7 +10,7 @@
 /* ui */
 // #include <uitextarea.h>
 #include <uibutton.h>
-#include <uilabel.h>
+#include <uitextarea.h>
 
 /* ColourBox */
 
@@ -19,7 +19,7 @@ typedef struct ColourBox {
 	psy_ui_Component component;
 	/* inrernal */
 	psy_ui_Component colour;	
-	psy_ui_Label label;
+	psy_ui_TextArea edit;
 	psy_ui_Button dialog;
 	/* references */
 	psy_Property* property;

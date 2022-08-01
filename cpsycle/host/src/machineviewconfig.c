@@ -32,6 +32,8 @@ static void machineviewconfig_makestackview(MachineViewConfig*,
 	psy_Property* parent);
 static void machineviewconfig_maketheme(MachineViewConfig*,
 	psy_Property* parent);
+static void machineviewconfig_makevu(MachineViewConfig*,
+	psy_Property* parent);	
 static void machineviewconfig_setcoords(MachineViewConfig*, psy_Property*);
 static void machineviewconfig_setsource(MachineViewConfig*, psy_ui_RealRectangle*,
 	intptr_t vals[4]);
@@ -49,7 +51,28 @@ static void machineviewconfig_set_colour(MachineViewConfig*,
 	const char* key, uintptr_t style_id, psy_ui_Colour);
 static void machineviewconfig_set_style_background_colour(MachineViewConfig*,
 	const char* key, uintptr_t style_id, psy_ui_Colour);
-static void machineviewconfig_on_load_bitmap(MachineViewConfig*, psy_Property* sender);
+static void machineviewconfig_on_load_bitmap(MachineViewConfig*,
+	psy_Property* sender);
+static void machineviewconfig_on_vu_colour(MachineViewConfig*,
+	psy_Property* sender);
+static void machineviewconfig_on_vu_background_colour(MachineViewConfig*,
+	psy_Property* sender);	
+static void machineviewconfig_on_vu_clip_colour(MachineViewConfig*,
+	psy_Property* sender);
+static void machineviewconfig_on_generator_font(MachineViewConfig*,
+	psy_Property* sender);
+static void machineviewconfig_on_generator_font_colour(MachineViewConfig*,
+	psy_Property* sender);
+static void machineviewconfig_on_effect_font(MachineViewConfig*,
+	psy_Property* sender);
+static void machineviewconfig_on_effect_font_colour(MachineViewConfig*,
+	psy_Property* sender);
+static void machineviewconfig_on_background_colour(MachineViewConfig*,
+	psy_Property* sender);
+static void machineviewconfig_on_triangle_size(MachineViewConfig*,
+	psy_Property* sender);
+static void machineviewconfig_on_poly_colour(MachineViewConfig*,
+	psy_Property* sender);	
 
 void machineviewconfig_init(MachineViewConfig* self, psy_Property* parent)
 {
@@ -102,6 +125,7 @@ void machineviewconfig_makeview(MachineViewConfig* self, psy_Property* parent)
 		PROPERTY_ID_DRAWVIRTUALGENERATORS);	
 	machineviewconfig_makestackview(self, self->machineview);
 	machineviewconfig_maketheme(self, self->machineview);
+	machineviewconfig_makevu(self, parent);
 	machineviewconfig_resettheme(self);
 }
 
@@ -119,61 +143,42 @@ void machineviewconfig_makestackview(MachineViewConfig* self, psy_Property* pare
 void machineviewconfig_maketheme(MachineViewConfig* self, psy_Property* parent)
 {	
 	intptr_t style_value = 0;
-	const char* style_str = "";
+	const char* style_str = "";	
 
 	assert(self);
 	
 	/* define theme properties */	
 	self->theme = psy_property_set_text(
 		psy_property_append_section(parent, "theme"),
-		"settings.mv.theme.theme");	
-	psy_property_set_text(
+		"settings.mv.theme.theme");		
+	/* generator */
+	psy_property_connect(psy_property_set_text(psy_property_append_font(
+		self->theme, "generator_font", PSYCLE_DEFAULT_MACHINE_FONT),
+		"settings.mv.theme.generators-font-face"),
+		self, machineviewconfig_on_generator_font);
+	psy_property_connect(psy_property_set_text(
 		psy_property_set_hint(psy_property_append_int(self->theme,
-			"vu2", 0x00403731, 0, 0),
+			"mv_generator_fontcolour", style_value, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
-		"settings.mv.theme.vu-background");
-	psy_property_set_text(
+		"settings.mv.theme.generators-font"),
+		self, machineviewconfig_on_generator_font_colour);
+	/* effect */
+	psy_property_connect(psy_property_set_text(psy_property_append_font(
+		self->theme, "effect_font", PSYCLE_DEFAULT_MACHINE_FONT),
+		"settings.mv.theme.effect-fontface"),
+		self, machineviewconfig_on_effect_font);
+	psy_property_connect(psy_property_set_text(
 		psy_property_set_hint(psy_property_append_int(self->theme,
-			"vu1", 0x0080FF80, 0, 0),
+			"mv_effect_fontcolour", style_value, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
-		"settings.mv.theme.vu-bar");
-	psy_property_set_text(
+		"settings.mv.theme.effects-font"),
+		self, machineviewconfig_on_effect_font_colour);
+	psy_property_connect(psy_property_set_text(
 		psy_property_set_hint(psy_property_append_int(self->theme,
-			"vu3", 0x00262bd7, 0, 0),
-			PSY_PROPERTY_HINT_EDITCOLOR),
-		"settings.mv.theme.onclip");
-	psy_property_set_text(
-		psy_property_append_str(self->theme,
-			"generator_fontface", style_str),
-		"settings.mv.theme.generators-font-face");
-	psy_property_set_text(
-		psy_property_set_hint(psy_property_append_int(self->theme,
-			"generator_font_point", 0x00000050, 0, 0),
-			PSY_PROPERTY_HINT_EDITCOLOR),
-		"settings.mv.theme.generators-font-point");
-	psy_property_set_text(psy_property_set_hint(
-		psy_property_append_int(self->theme,
-			"generator_font_flags", 0x00000000, 0, 0),
-		PSY_PROPERTY_HINT_EDITCOLOR),
-		"settings.mv.theme.generator_font_flags");
-	psy_property_set_text(psy_property_append_str(self->theme,
-		"effect_fontface", style_str),
-		"settings.mv.theme.effect-fontface");
-	psy_property_set_text(
-		psy_property_set_hint(psy_property_append_int(self->theme,
-			"effect_font_point", 0x00000050, 0, 0),
-			PSY_PROPERTY_HINT_EDITCOLOR),
-		"settings.mv.theme.effect-font-point");
-	psy_property_set_text(
-		psy_property_set_hint(psy_property_append_int(self->theme,
-			"effect_font_flags", 0x00000000, 0, 0),
-			PSY_PROPERTY_HINT_EDITCOLOR),
-		"settings.mv.theme.effect-font-flags");	
-	psy_property_set_text(
-		psy_property_set_hint(psy_property_append_int(self->theme,
-			"mv_colour", style_value,
-			0, 0), PSY_PROPERTY_HINT_EDITCOLOR),
-		"settings.mv.theme.background");
+			"mv_colour", style_value, 0, 0), PSY_PROPERTY_HINT_EDITCOLOR),			
+		"settings.mv.theme.background"),
+		self, machineviewconfig_on_background_colour);
+	/* wire */
 	psy_property_set_text(
 		psy_property_set_hint(psy_property_append_int(self->theme,
 			"mv_wirecolour", style_value, 0, 0),
@@ -184,21 +189,12 @@ void machineviewconfig_maketheme(MachineViewConfig* self, psy_Property* parent)
 			"mv_wirecolour2", style_value, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
 		"settings.mv.theme.wirecolour2");
-	psy_property_set_text(
+	psy_property_connect(psy_property_set_text(
 		psy_property_set_hint(psy_property_append_int(self->theme,
 			"mv_polycolour", style_value, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
-		"settings.mv.theme.polygons");
-	psy_property_set_text(
-		psy_property_set_hint(psy_property_append_int(self->theme,
-			"mv_generator_fontcolour", style_value, 0, 0),
-			PSY_PROPERTY_HINT_EDITCOLOR),
-		"settings.mv.theme.generators-font");
-	psy_property_set_text(
-		psy_property_set_hint(psy_property_append_int(self->theme,
-			"mv_effect_fontcolour", style_value, 0, 0),
-			PSY_PROPERTY_HINT_EDITCOLOR),
-		"settings.mv.theme.effects-font");
+		"settings.mv.theme.polygons"),
+		self, machineviewconfig_on_poly_colour);
 	psy_property_set_text(
 		psy_property_set_hint(psy_property_append_int(self->theme,
 			"mv_wirewidth", 0x00000001, 0, 0),
@@ -213,11 +209,12 @@ void machineviewconfig_maketheme(MachineViewConfig* self, psy_Property* parent)
 		psy_property_append_str(self->theme,
 			"machine_background", style_str),
 		"settings.mv.theme.machine-background");
-	psy_property_set_text(
+	psy_property_connect(psy_property_set_text(
 		psy_property_set_hint(psy_property_append_int(self->theme,
 			"mv_triangle_size", style_value, 0, 0),
 			PSY_PROPERTY_HINT_EDIT),
-		"settings.mv.theme.polygon-size");	
+		"settings.mv.theme.polygon-size"),
+		self, machineviewconfig_on_triangle_size);
 	self->machineskins =
 		psy_property_connect(psy_property_set_id(psy_property_set_hint(
 			psy_property_set_text(psy_property_append_choice(
@@ -226,6 +223,33 @@ void machineviewconfig_maketheme(MachineViewConfig* self, psy_Property* parent)
 			PROPERTY_ID_MACHINESKIN),
 			self, machineviewconfig_on_load_bitmap);
 	machineviewconfig_update_machine_skins(self);	
+}
+
+void machineviewconfig_makevu(MachineViewConfig* self, psy_Property* parent)
+{
+	psy_Property* vu;
+	
+	vu = psy_property_set_text(
+		psy_property_append_section(parent, "vucolors"),
+		"VU Colors");	
+	psy_property_connect(psy_property_set_text(
+		psy_property_set_hint(psy_property_append_int(vu,
+			"vu2", 0x00403731, 0, 0),
+			PSY_PROPERTY_HINT_EDITCOLOR),
+		"settings.mv.theme.vu-background"),
+		self, machineviewconfig_on_vu_background_colour);
+	psy_property_connect(psy_property_set_text(
+		psy_property_set_hint(psy_property_append_int(vu,
+			"vu1", 0x0080FF80, 0, 0),
+			PSY_PROPERTY_HINT_EDITCOLOR),
+		"settings.mv.theme.vu-bar"),
+		self, machineviewconfig_on_vu_colour);
+	psy_property_connect(psy_property_set_text(
+		psy_property_set_hint(psy_property_append_int(vu,
+			"vu3", 0x00262bd7, 0, 0),
+			PSY_PROPERTY_HINT_EDITCOLOR),
+		"settings.mv.theme.onclip"),
+		self, machineviewconfig_on_vu_clip_colour);		
 }
 
 void machineviewconfig_update_machine_skins(MachineViewConfig* self)
@@ -320,15 +344,19 @@ void machineviewconfig_load_colours(MachineViewConfig* self)
 			10), 0));
 	style = psy_ui_style(STYLE_MV_MASTER);
 	style = psy_ui_style(STYLE_MV_GENERATOR);
-	read_colour(self->theme, "mv_generator_fontcolour", style, TRUE);
-	psy_ui_style_set_font(style,
-		psy_property_at_str(self->theme, "generator_fontface", "Tahoma"),
-		(int32_t)psy_property_at_int(self->theme, "generator_font_point", 16));
+	read_colour(self->theme, "mv_generator_fontcolour", style, TRUE);	
+	psy_ui_style_set_font_string(style,	 psy_property_at_str(self->theme,
+		"generator_font", PSYCLE_DEFAULT_MACHINE_FONT));		
 	style = psy_ui_style(STYLE_MV_EFFECT);
 	read_colour(self->theme, "mv_effect_fontcolour", style, TRUE);
-	psy_ui_style_set_font(style,
-		psy_property_at_str(self->theme, "effect_fontface", "Tahoma"),
-		(int32_t)psy_property_at_int(self->theme, "effect_font_point", 16));
+	psy_ui_style_set_font_string(style,	 psy_property_at_str(self->theme,
+		"effect_font", PSYCLE_DEFAULT_MACHINE_FONT));
+	/* vu */
+	style = psy_ui_style(STYLE_MAIN_VU);
+	read_colour(self->machineview->parent, "vucolors.vu1", style, TRUE);
+	read_colour(self->machineview->parent, "vucolors.vu2", style, FALSE);
+	style = psy_ui_style(STYLE_CLIPBOX_SELECT);
+	read_colour(self->machineview->parent, "vucolors.vu3", style, FALSE);
 }
 
 void read_colour(psy_Property* config, const char* key, psy_ui_Style* style, bool fore)
@@ -344,6 +372,104 @@ void read_colour(psy_Property* config, const char* key, psy_ui_Style* style, boo
 				(uint32_t)psy_property_item_int(p)));
 		}
 	}
+}
+
+void machineviewconfig_on_vu_colour(MachineViewConfig* self,
+	psy_Property* sender)
+{
+	psy_ui_Style* style;
+			
+	style = psy_ui_style(STYLE_MAIN_VU);
+	psy_ui_style_set_colour(style, psy_ui_colour_make(
+		psy_property_item_int(sender)));
+}
+
+void machineviewconfig_on_vu_background_colour(MachineViewConfig* self,
+	psy_Property* sender)	
+{
+	psy_ui_Style* style;
+			
+	style = psy_ui_style(STYLE_MAIN_VU);
+	psy_ui_style_set_background_colour(style, psy_ui_colour_make(
+		psy_property_item_int(sender)));
+}
+
+void machineviewconfig_on_vu_clip_colour(MachineViewConfig* self,
+	psy_Property* sender)	
+{
+	psy_ui_Style* style;
+			
+	style = psy_ui_style(STYLE_CLIPBOX_SELECT);
+	psy_ui_style_set_background_colour(style, psy_ui_colour_make(
+		psy_property_item_int(sender)));
+}
+
+void machineviewconfig_on_generator_font(MachineViewConfig* self,
+	psy_Property* sender)
+{
+	psy_ui_Style* style;
+		
+	style = psy_ui_style(STYLE_MV_GENERATOR);	
+	psy_ui_style_set_font_string(style, psy_property_item_str(sender));
+}
+
+void machineviewconfig_on_generator_font_colour(MachineViewConfig* self,
+	psy_Property* sender)
+{
+	psy_ui_Style* style;
+		
+	style = psy_ui_style(STYLE_MV_GENERATOR);	
+	psy_ui_style_set_colour(style, psy_ui_colour_make(
+		psy_property_item_int(sender)));
+}
+
+void machineviewconfig_on_effect_font(MachineViewConfig* self,
+	psy_Property* sender)
+{
+	psy_ui_Style* style;
+		
+	style = psy_ui_style(STYLE_MV_EFFECT);	
+	psy_ui_style_set_font_string(style, psy_property_item_str(sender));
+}
+
+void machineviewconfig_on_effect_font_colour(MachineViewConfig* self,
+	psy_Property* sender)
+{
+	psy_ui_Style* style;
+		
+	style = psy_ui_style(STYLE_MV_EFFECT);
+	psy_ui_style_set_colour(style, psy_ui_colour_make(
+		psy_property_item_int(sender)));
+}
+
+void machineviewconfig_on_background_colour(MachineViewConfig* self,
+	psy_Property* sender)
+{
+	psy_ui_Style* style;
+			
+	style = psy_ui_style(STYLE_MV_WIRES);
+	psy_ui_style_set_background_colour(style, psy_ui_colour_make(
+		psy_property_item_int(sender)));
+}
+
+void machineviewconfig_on_poly_colour(MachineViewConfig* self,
+	psy_Property* sender)
+{
+	psy_ui_Style* style;	
+			
+	style = psy_ui_style(STYLE_MV_WIRE_POLY);
+	psy_ui_style_set_colour(style, psy_ui_colour_make(
+		(uint32_t)psy_property_item_int(sender)));	
+}
+
+void machineviewconfig_on_triangle_size(MachineViewConfig* self,
+	psy_Property* sender)
+{
+	psy_ui_Style* style;	
+			
+	style = psy_ui_style(STYLE_MV_WIRE_POLY);
+	psy_ui_style_set_background_size_px(style, psy_ui_realsize_make(
+		psy_property_item_int(sender), psy_property_item_int(sender)));
 }
 
 void machineviewconfig_on_load_bitmap(MachineViewConfig* self, psy_Property* sender)
@@ -435,6 +561,7 @@ void machineviewconfig_save(MachineViewConfig* self)
 {
 	psy_ui_Style* style;
 	psy_ui_FontInfo fontinfo;
+	char font_str[256];
 
 	assert(self);	
 	
@@ -455,29 +582,33 @@ void machineviewconfig_save(MachineViewConfig* self)
 		(int)style->background.size.height);	
 	psy_property_set_int(self->theme, "mv_wirewidth", 0x00000001);
 	psy_property_set_int(self->theme, "mv_wireaa", 0x01);	
-
-	style = psy_ui_style(STYLE_MV_GENERATOR);
-	fontinfo = psy_ui_font_fontinfo(&style->font);
+	/* generator */
+	style = psy_ui_style(STYLE_MV_GENERATOR);	
 	psy_property_set_int(self->theme, "mv_generator_fontcolour",
 		psy_ui_colour_colorref(&style->colour));
-	psy_property_set_str(self->theme, "generator_fontface",
-		fontinfo.lfFaceName);
-	psy_property_set_int(self->theme, "generator_font_point",
-		fontinfo.lfHeight);
-	psy_property_set_int(self->theme, "generator_font_flags",
-		0x00000000);
+	fontinfo = psy_ui_font_fontinfo(&style->font);	
+	psy_ui_fontinfo_string(&fontinfo, font_str, 256);
+	psy_property_set_font(self->theme, "generator_font", font_str);
+	psy_property_set_str(self->theme, "machine_background",
+		style->background.image_path);
+	/* effect */		
 	style = psy_ui_style(STYLE_MV_EFFECT);
-	fontinfo = psy_ui_font_fontinfo(&style->font);
 	psy_property_set_int(self->theme, "mv_effect_fontcolour",
 		psy_ui_colour_colorref(&style->colour));
-	psy_property_set_str(self->theme, "effect_fontface",
-		fontinfo.lfFaceName);
-	psy_property_set_int(self->theme, "effect_font_point",
-		fontinfo.lfHeight);
-	psy_property_set_int(self->theme, "effect_font_flags",
-		0x00000000);		
+	fontinfo = psy_ui_font_fontinfo(&style->font);
+	psy_ui_fontinfo_string(&fontinfo, font_str, 256);
+	psy_property_set_font(self->theme, "effect_font", font_str);
 	psy_property_set_str(self->theme, "machine_background",
-		style->background.image_path);	
+		style->background.image_path);
+	/* vu */
+	style = psy_ui_style(STYLE_MAIN_VU);
+	psy_property_set_int(self->machineview->parent, "vucolors.vu1",
+		psy_ui_colour_colorref(&style->colour));
+	psy_property_set_int(self->machineview->parent, "vucolors.vu2",
+		psy_ui_colour_colorref(&style->background.colour));
+	style = psy_ui_style(STYLE_CLIPBOX_SELECT);
+	psy_property_set_int(self->machineview->parent, "vucolors.vu3",
+		psy_ui_colour_colorref(&style->background.colour));
 }
 
 void machineviewconfig_setcoords(MachineViewConfig* self, psy_Property* p)
@@ -844,7 +975,15 @@ void machineviewconfig_set_style_default_colours(MachineViewConfig* self)
 	psy_ui_style_set_font(style, "Tahoma", 12);
 	psy_ui_style_set_colours(style,
 		psy_ui_colour_make(0x00D1C5B6),
-		psy_ui_colour_make(0x003E2f25));
+		psy_ui_colour_make(0x003E2f25));		
+	/* vu */
+	style = psy_ui_style(STYLE_MAIN_VU);
+	psy_ui_style_set_colours(style,
+		psy_ui_colour_make(0x0080FF80),
+		psy_ui_colour_make(0x00403731));	
+	style = psy_ui_style(STYLE_CLIPBOX_SELECT);
+	psy_ui_style_set_background_colour(style,	
+		psy_ui_colour_make(0x00262bd7));
 }
 
 void machineviewconfig_set_style_default_skin(MachineViewConfig* self)
@@ -856,7 +995,8 @@ void machineviewconfig_set_style_default_skin(MachineViewConfig* self)
 
 	style = psy_ui_style(STYLE_MV_MASTER);
 	psy_ui_style_set_size(style, psy_ui_size_make_px(138.0, 35.0));	
-	psy_ui_style_set_background_id(style, IDB_MACHINESKIN);	
+	psy_ui_style_set_font_string(style, PSYCLE_DEFAULT_MACHINE_FONT);
+	psy_ui_style_set_background_id(style, IDB_MACHINESKIN);
 	psy_ui_style_set_background_repeat(style, psy_ui_NOREPEAT);
 	psy_ui_style_set_background_position_px(style, 0.0, -52.0);
 	psy_ui_style_set_background_size_px(style,
@@ -868,6 +1008,7 @@ void machineviewconfig_set_style_default_skin(MachineViewConfig* self)
 	psy_ui_style_set_padding_px(style, 3.0, 0, 0.0, 20.0);
 
 	style = psy_ui_style(STYLE_MV_GENERATOR);
+	psy_ui_style_set_font_string(style, PSYCLE_DEFAULT_MACHINE_FONT);
 	psy_ui_style_set_size(style, psy_ui_size_make_px(138.0, 52.0));	
 	psy_ui_style_set_background_id(style, IDB_MACHINESKIN);	
 	psy_ui_style_set_background_repeat(style, psy_ui_NOREPEAT);
@@ -937,7 +1078,8 @@ void machineviewconfig_set_style_default_skin(MachineViewConfig* self)
 		psy_ui_point_make_px(0.0, 0.0), psy_ui_size_make_px(6.0, 13.0)));
 
 	style = psy_ui_style(STYLE_MV_EFFECT);
-	psy_ui_style_set_size(style, psy_ui_size_make_px(138.0, 52.0));	
+	psy_ui_style_set_font_string(style, PSYCLE_DEFAULT_MACHINE_FONT);
+	psy_ui_style_set_size(style, psy_ui_size_make_px(138.0, 52.0));		
 	psy_ui_style_set_background_id(style, IDB_MACHINESKIN);	
 	psy_ui_style_set_background_repeat(style, psy_ui_NOREPEAT);
 	psy_ui_style_set_background_size_px(style,

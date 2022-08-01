@@ -34,7 +34,7 @@ typedef struct psy_audio_SongProperties {
 	char* credits;
 	char* comments;
 	psy_dsp_big_beat_t bpm;
-	uintptr_t samplerindex;
+	uintptr_t samplerindex;	
 } psy_audio_SongProperties;
 
 void psy_audio_songproperties_init(psy_audio_SongProperties*, const char* title,

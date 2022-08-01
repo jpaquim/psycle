@@ -40,6 +40,7 @@ typedef struct psy_audio_SongFile {
 	uintptr_t machinesoloed;
 	/* MachineID X [psy_Table* LegacyWires (ConnectionID X psy_audio_LegacyWire*)] */
 	psy_audio_LegacyWires* legacywires;
+	bool convert_dos_utf8;
 } psy_audio_SongFile;
 
 void psy_audio_songfile_init(psy_audio_SongFile*);

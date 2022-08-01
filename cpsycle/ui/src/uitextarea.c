@@ -722,6 +722,7 @@ void psy_ui_textarea_data_exchange(psy_ui_TextArea* self,
 			psy_ui_textarea_on_property_changed);
 		psy_signal_connect(&self->property->before_destroyed, self,
 			psy_ui_textarea_before_property_destroyed);
+		psy_ui_textarea_enable_input_field(self);
 	}
 }
 
