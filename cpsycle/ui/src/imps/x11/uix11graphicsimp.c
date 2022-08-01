@@ -468,33 +468,53 @@ void psy_ui_x11_g_imp_drawbitmap(psy_ui_x11_GraphicsImp* self,
 	}    
     imp = (psy_ui_x11_BitmapImp*)bitmap->imp;    
     if (imp->pixmap) {  
-		if (imp->mask) {			
-			XSetClipMask(self->display, self->gc, imp->mask);
-			XSetClipOrigin(self->display, self->gc, 
+		if (imp->mask) {
+			XGCValues gcv;
+			int func;
+			int fore;
+			int bg;
+						
+			XGetGCValues(self->display, self->gc,
+				GCFunction | GCForeground | GCBackground, &gcv);
+			func = gcv.function;
+			fore = gcv.foreground;
+			bg = gcv.background;
+			
+			XSetForeground(self->display, self->gc,
+				BlackPixel(self->display, DefaultScreen(self->display)));
+			XSetBackground(self->display, self->gc,
+				WhitePixel(self->display, DefaultScreen(self->display)));
+			gcv.function = GXand;
+			XChangeGC(self->display, self->gc, GCFunction, &gcv);
+			XCopyPlane(self->display, imp->mask, self->window, self->gc,
+				0, 0, width, height, 
 				x - (int)(self->org.x),
-				y - (int)(self->org.y));
+				y - (int)(self->org.y),
+				1);
+			gcv.function = GXor;
+			XChangeGC(self->display, self->gc, GCFunction, &gcv);
+			XCopyArea(self->display, imp->pixmap, self->window, self->gc,
+				xsrc, ysrc, width, height, x - (int)(self->org.x),
+				y - (int)(self->org.y));												
+			gcv.function = func;
+			gcv.foreground = fore;
+			gcv.background = bg;
+			XChangeGC(self->display, self->gc,
+				GCFunction | GCForeground | GCBackground, &gcv);				
+		} else {		
+			XCopyArea(self->display, imp->pixmap, self->window, self->gc,
+				xsrc, ysrc, width, height, x - (int)(self->org.x),
+				y - (int)(self->org.y));		
 		}
-		XCopyArea(self->display, imp->pixmap, self->window, self->gc,
-			xsrc, ysrc, width, height, x - (int)(self->org.x),
-			y - (int)(self->org.y));		
     }
 }
 
 void psy_ui_x11_g_imp_drawstretchedbitmap(psy_ui_x11_GraphicsImp* self,
 	psy_ui_Bitmap* bitmap, double x, double y, double width,
 	double height, double xsrc, double ysrc, double wsrc, double hsrc)
-{
-	/* Pixmap xtbitmap; 
-    
-    xtbitmap = ((psy_ui_x11_BitmapImp*)bitmap->imp)->pixmap;
-    if (xtbitmap) {        
-        XCopyArea(self->display, xtbitmap, self->window, self->gc,
-            xsrc, ysrc, width, height,
-            x - (int)(self->org.x),
-            y - (int)(self->org.y));
-    }*/
-    psy_ui_x11_g_imp_drawbitmap(self, bitmap,
-		x, y, width, height, xsrc, ysrc);
+{	
+	/* todo */
+    psy_ui_x11_g_imp_drawbitmap(self, bitmap, x, y, width, height, xsrc, ysrc);
 }
 
 void psy_ui_x11_g_imp_setcolour(psy_ui_x11_GraphicsImp* self, psy_ui_Colour color)
