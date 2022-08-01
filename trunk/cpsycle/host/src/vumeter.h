@@ -24,18 +24,10 @@ extern "C" {
 //          |     
 //       Vumeter < >---- Workspace < >---- Song <>---- Machines
 
-typedef struct {
-	psy_ui_Colour rms;
-	psy_ui_Colour peak;
-	psy_ui_Colour background;
-	psy_ui_Colour border;
-} VumeterSkin;
-
 typedef struct Vumeter {
 	/* inherits */
 	psy_ui_Component component;
 	/* internal */
-	VumeterSkin skin;	
 	psy_dsp_amp_t leftavg;
 	psy_dsp_amp_t rightavg;
 	psy_dsp_amp_t l_log;

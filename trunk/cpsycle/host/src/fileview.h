@@ -93,7 +93,9 @@ typedef struct FileView {
 	/* signals */
 	psy_Signal signal_selected;
 	/* internal */
-	FileBox filebox;	
+	FileBox filebox;
+	psy_ui_Component left;
+	psy_ui_Component options;
 	psy_ui_Component filters;
 	FileViewFilter dirfilter;
 	FileViewSaveFilter savefilter;	

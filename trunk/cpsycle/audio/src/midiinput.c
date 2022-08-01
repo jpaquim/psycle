@@ -29,12 +29,15 @@ void psy_audio_midiinputstats_init(psy_audio_MidiInputStats* self)
 }
 
 void psy_audio_midiinput_init(psy_audio_MidiInput* self, psy_audio_Song* song)
-{				
+{	
+	uintptr_t i;
+				
 	psy_audio_midiconfig_init(&self->midiconfig);
 	memset(self->channelsetting, -1, sizeof(int) * psy_audio_MAX_MIDI_CHANNELS);
 	memset(self->channelinstmap, 0, sizeof(uintptr_t) * MAX_INSTRUMENTS);
-	memset(self->channelgeneratormap, psy_INDEX_INVALID, sizeof(uintptr_t) *
-		psy_audio_MAX_MIDI_CHANNELS);
+	for (i = 0; i < psy_audio_MAX_MIDI_CHANNELS; ++i) {
+		self->channelgeneratormap[i] = psy_INDEX_INVALID;
+	}	
 	memset(self->channelnoteoff, TRUE, sizeof(bool) *
 		psy_audio_MAX_MIDI_CHANNELS);
 	memset(self->channelcontroller, -1, sizeof(int) * psy_audio_MAX_MIDI_CHANNELS *

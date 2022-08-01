@@ -63,7 +63,7 @@ static void psy_propertyreader_on_read_key(psy_PropertyReader*,
 static void psy_propertyreader_on_read_section(psy_PropertyReader*,
 	psy_IniReader* sender, const char* key);
 static bool psy_propertyreader_extract_type(psy_PropertyReader*,
-	const char* text, const char** typestr, const char** valstr);
+	const char* text, const char** typestr, const char ** valstr);
 
 /* implementation */
 void psy_propertyreader_init(psy_PropertyReader* self, psy_Property* root,
@@ -122,7 +122,7 @@ void psy_propertyreader_on_read_key(psy_PropertyReader* self, psy_IniReader* sen
 	append = self->config.allow_append || (self->curr && self->curr->item.allow_append);
 	if (p) {
 		const char* valstr;
-		char* typestr;
+		const char* typestr;
 
 		typestr = NULL;
 		p->item.marked = TRUE;

@@ -311,16 +311,15 @@ psy_ui_ComponentImp* allocinit_popupimp(psy_ui_x11_ImpFactory* self,
 	return (psy_ui_ComponentImp*)rv;
 }
 
-psy_ui_ColourDialogImp* allocinit_colordialogimp(psy_ui_x11_ImpFactory* self,
+psy_ui_ColourDialogImp* allocinit_colourdialogimp(psy_ui_x11_ImpFactory* self,
 	struct psy_ui_Component* parent)
 {	
-	psy_ui_x11_ColorDialogImp* imp;
-	psy_ui_X11App* xtapp;
-
-	xtapp = (psy_ui_X11App*)psy_ui_app()->imp;
-	imp = (psy_ui_x11_ColorDialogImp*)malloc(sizeof(psy_ui_x11_ColorDialogImp));
+	psy_ui_x11_ColourDialogImp* imp;
+	
+	imp = (psy_ui_x11_ColourDialogImp*)malloc(
+		sizeof(psy_ui_x11_ColourDialogImp));
 	if (imp) {
-		psy_ui_x11_colordialogimp_init(imp);
+		psy_ui_x11_colourdialogimp_init(imp);
 		return &imp->imp;
 	}
 	return 0;
@@ -330,9 +329,7 @@ psy_ui_OpenDialogImp* allocinit_opendialogimp(psy_ui_x11_ImpFactory* self,
 	struct psy_ui_Component* parent)
 {
 	psy_ui_x11_OpenDialogImp* imp;
-	psy_ui_X11App* winapp;
-
-	winapp = (psy_ui_X11App*)psy_ui_app()->imp;
+	
 	imp = (psy_ui_x11_OpenDialogImp*)malloc(sizeof(psy_ui_x11_OpenDialogImp));
 	if (imp) {
 		psy_ui_x11_opendialogimp_init(imp, parent);
@@ -349,9 +346,7 @@ psy_ui_OpenDialogImp* allocinit_all_opendialogimp(psy_ui_x11_ImpFactory* self,
 	const char* initialdir)
 {
 	psy_ui_x11_OpenDialogImp* imp;
-	psy_ui_X11App* winapp;
-
-	winapp = (psy_ui_X11App*)psy_ui_app()->imp;
+	
 	imp = (psy_ui_x11_OpenDialogImp*)malloc(sizeof(psy_ui_x11_OpenDialogImp));
 	if (imp) {
 		psy_ui_x11_opendialogimp_init_all(imp, parent,
@@ -364,10 +359,8 @@ psy_ui_OpenDialogImp* allocinit_all_opendialogimp(psy_ui_x11_ImpFactory* self,
 psy_ui_SaveDialogImp* allocinit_savedialogimp(psy_ui_x11_ImpFactory* self,
 	struct psy_ui_Component* parent)
 {
-	psy_ui_x11_SaveDialogImp* imp;
-	psy_ui_X11App* winapp;
-
-	winapp = (psy_ui_X11App*)psy_ui_app()->imp;
+	psy_ui_x11_SaveDialogImp* imp;	
+	
 	imp = (psy_ui_x11_SaveDialogImp*)malloc(sizeof(psy_ui_x11_SaveDialogImp));
 	if (imp) {
 		psy_ui_x11_savedialogimp_init(imp, parent);
@@ -383,10 +376,8 @@ psy_ui_SaveDialogImp* allocinit_all_savedialogimp(psy_ui_x11_ImpFactory* self,
 	const char* defaultextension,
 	const char* initialdir)
 {
-	psy_ui_x11_SaveDialogImp* imp;
-	psy_ui_X11App* winapp;
-
-	winapp = (psy_ui_X11App*)psy_ui_app()->imp;
+	psy_ui_x11_SaveDialogImp* imp;	
+	
 	imp = (psy_ui_x11_SaveDialogImp*)malloc(sizeof(psy_ui_x11_SaveDialogImp));
 	if (imp) {
 		psy_ui_x11_savedialogimp_init_all(imp, parent,
@@ -399,10 +390,8 @@ psy_ui_SaveDialogImp* allocinit_all_savedialogimp(psy_ui_x11_ImpFactory* self,
 psy_ui_FolderDialogImp* allocinit_folderdialogimp(psy_ui_x11_ImpFactory* self,
 	struct psy_ui_Component* parent)
 {
-	psy_ui_x11_FolderDialogImp* imp;
-	psy_ui_X11App* winapp;
-
-	winapp = (psy_ui_X11App*)psy_ui_app()->imp;
+	psy_ui_x11_FolderDialogImp* imp;	
+	
 	imp = (psy_ui_x11_FolderDialogImp*)malloc(
 		sizeof(psy_ui_x11_FolderDialogImp));
 	if (imp) {
@@ -417,10 +406,8 @@ psy_ui_FolderDialogImp* allocinit_all_folderdialogimp(
 	const char* title,	
 	const char* initialdir)
 {
-	psy_ui_x11_FolderDialogImp* imp;
-	psy_ui_X11App* winapp;
-
-	winapp = (psy_ui_X11App*)psy_ui_app()->imp;
+	psy_ui_x11_FolderDialogImp* imp;	
+	
 	imp = (psy_ui_x11_FolderDialogImp*)malloc(sizeof(
 		psy_ui_x11_FolderDialogImp));
 	if (imp) {
@@ -434,22 +421,14 @@ psy_ui_FolderDialogImp* allocinit_all_folderdialogimp(
 psy_ui_FontDialogImp* allocinit_fontdialogimp(psy_ui_x11_ImpFactory* self,
 	struct psy_ui_Component* parent)
 {
-	psy_ui_x11_FontDialogImp* imp;
-	psy_ui_X11App* winapp;
-
-	winapp = (psy_ui_X11App*)psy_ui_app()->imp;
+	psy_ui_x11_FontDialogImp* imp;	
+	
 	imp = (psy_ui_x11_FontDialogImp*) malloc(sizeof(psy_ui_x11_FontDialogImp));
 	if (imp) {
 		psy_ui_x11_fontdialogimp_init(imp);
 		return &imp->imp;
 	}
 	return 0;
-}
-
-psy_ui_ColourDialogImp* allocinit_colourdialogimp(psy_ui_x11_ImpFactory* self,
-	struct psy_ui_Component* parent)
-{
-	return NULL;
 }
 
 #endif /* PSYCLE_TK_X11 */

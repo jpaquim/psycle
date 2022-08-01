@@ -108,6 +108,7 @@ void psy_timers_addtimer(psy_Timers* self, uintptr_t id, void* context,
 				
 		task = (psy_TimerTask*)p->entry;
 		if (task->id == id && (customid == customid)) {
+			task->interval = interval;
 			return;			
 		}		
 	}

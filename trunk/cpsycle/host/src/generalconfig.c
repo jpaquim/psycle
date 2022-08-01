@@ -54,7 +54,7 @@ void generalconfig_make(GeneralConfig* self, psy_Property* parent)
 		"settings.general.show-sequenceedit"),
 		PROPERTY_ID_SHOWSEQUENCEEDIT);
 	psy_property_set_id(psy_property_set_text(
-		psy_property_append_bool(self->general, "showstepsequencer", TRUE),
+		psy_property_append_bool(self->general, "showstepsequencer", FALSE),
 		"settings.general.show-sequencestepbar"),
 		PROPERTY_ID_SHOWSTEPSEQUENCER);
 	psy_property_set_id(psy_property_set_text(

@@ -172,6 +172,7 @@ void fileviewlinks_init(FileViewLinks* self, psy_ui_Component* parent)
 {
 	psy_ui_component_init(&self->component, parent, NULL);
 	fileviewlinks_vtable_init(self);
+	psy_ui_component_set_style_type(&self->component, STYLE_FILEVIEW_LINKS);
 	psy_ui_component_set_default_align(&self->component, psy_ui_ALIGN_TOP,
 		psy_ui_margin_zero());
 	psy_signal_init(&self->signal_selected);
@@ -262,30 +263,41 @@ void fileview_init(FileView* self, psy_ui_Component* parent,
 	psy_ui_component_set_style_type(&self->dir.component,
 		STYLE_FILEVIEW_DIRBAR);
 	psy_ui_component_set_align(psy_ui_label_base(&self->dir),
-		psy_ui_ALIGN_TOP);
+		psy_ui_ALIGN_TOP);	
 	psy_ui_component_init_align(&self->filebar, &self->bottom, NULL,
 		psy_ui_ALIGN_TOP);
-	psy_ui_label_init_text(&self->filedesc, &self->filebar, "file.file");
+	psy_ui_component_set_margin(&self->filebar,
+		psy_ui_margin_make_em(0.5, 0.0, 0.0, 0.0));
+	psy_ui_label_init_text(&self->filedesc, &self->filebar, "file.file");	
 	psy_ui_component_set_align(&self->filedesc.component,
 		psy_ui_ALIGN_LEFT);
 	psy_ui_textarea_init_single_line(&self->filename, &self->filebar);	
 	psy_ui_textarea_set_text(&self->filename, PSYCLE_UNTITLED);
 	psy_ui_component_set_align(&self->filename.component,
 		psy_ui_ALIGN_CLIENT);
+	/* left */			
+	psy_ui_component_init(&self->left, fileview_base(self), NULL);	
+	psy_ui_component_set_align(&self->left, psy_ui_ALIGN_LEFT);
+	psy_ui_component_init(&self->options, &self->left, NULL);
+	psy_ui_component_set_style_type(&self->options, STYLE_FILEVIEW_OPTIONS);
+	psy_ui_component_set_align(&self->options, psy_ui_ALIGN_TOP);	
 	/* filter panel */
-	psy_ui_component_init(&self->filters, fileview_base(self), NULL);
+	psy_ui_component_init(&self->filters, &self->options, NULL);
+	psy_ui_component_set_style_type(&self->filters, STYLE_FILEVIEW_FILTERS);
 	psy_ui_component_set_align(&self->filters, psy_ui_ALIGN_LEFT);
 	fileviewfilter_init(&self->dirfilter, &self->filters);
 	psy_ui_component_set_align(&self->dirfilter.component, psy_ui_ALIGN_TOP);
 	fileviewsavefilter_init(&self->savefilter, &self->filters);
 	psy_ui_component_set_align(&self->savefilter.component, psy_ui_ALIGN_TOP);
+	psy_ui_component_set_margin(&self->savefilter.component,
+		psy_ui_margin_make_em(1.0, 0.0, 0.0, 0.0));
 	/* buttons */
-	psy_ui_component_init_align(&self->buttons, fileview_base(self), NULL,			
+	psy_ui_component_init_align(&self->buttons, &self->options, NULL,			
 		psy_ui_ALIGN_LEFT);
+	psy_ui_component_set_style_type(&self->buttons, STYLE_FILEVIEW_BUTTONS);
 	psy_ui_component_set_margin(&self->buttons, psy_ui_margin_make_em(
-		0.0, 3.0, 0.0, 3.0));
-	psy_ui_button_init_text(&self->save, &self->buttons,
-		"file.save");
+		0.0, 0.5, 0.0, 0.5));
+	psy_ui_button_init_text(&self->save, &self->buttons, "file.save");
 	psy_ui_component_set_align(&self->save.component, psy_ui_ALIGN_TOP);
 	psy_ui_button_init_text_connect(&self->refresh, &self->buttons,
 		"file.refresh", self, fileview_on_filter);
@@ -297,7 +309,7 @@ void fileview_init(FileView* self, psy_ui_Component* parent,
 		"file.exit", self, fileview_on_hide);
 	psy_ui_component_set_align(&self->exit.component, psy_ui_ALIGN_TOP);
 	/* file links */
-	fileviewlinks_init(&self->links, &self->component);
+	fileviewlinks_init(&self->links, &self->options);	
 	psy_ui_component_set_align(&self->links.component, psy_ui_ALIGN_LEFT);
 	psy_signal_connect(&self->links.signal_selected, self,
 		fileview_on_link);
@@ -306,7 +318,7 @@ void fileview_init(FileView* self, psy_ui_Component* parent,
 	psy_ui_component_set_align(&self->filebox.component,
 		psy_ui_ALIGN_CLIENT);			
 	psy_ui_component_set_margin(&self->filebox.component, psy_ui_margin_make_em(
-		0.0, 0.0, 0.0, 3.0));
+		0.0, 0.0, 0.0, 1.0));
 	psy_ui_component_set_align(psy_ui_textarea_base(&self->filename),
 		psy_ui_ALIGN_TOP);
 	fileview_build_drives(self);		
@@ -335,8 +347,9 @@ void fileview_build_drives(FileView* self)
 		fileviewlinks_add(&self->links, (char*)psy_list_entry(p), 
 			(char*)psy_list_entry(p));
 	}
+	psy_list_deallocate(&q, NULL);	
 	fileviewlinks_add(&self->links, "Songs", dirconfig_songs(self->dirconfig));
-	psy_list_deallocate(&q, NULL);
+	fileviewlinks_add(&self->links, "Home", psy_dir_home());	
 }
 
 void fileview_on_file_selected(FileView* self, FileBox* sender)

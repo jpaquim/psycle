@@ -16,20 +16,6 @@
 /* std */
 #include <math.h>
 
-static VumeterSkin vumeterdefaultskin;
-static int vumeterdefaultskin_initialized = 0;
-
-static void vumeterskin_init(Vumeter* self)
-{	
-	if (!vumeterdefaultskin_initialized) {
-		vumeterdefaultskin.background = psy_ui_colour_make(0x00282828);
-		vumeterdefaultskin.rms = psy_ui_colour_make(0x004DFFA6);
-		vumeterdefaultskin.peak = psy_ui_colour_make(0x004D4DFF);
-		vumeterdefaultskin.border = psy_ui_colour_make(0x003E3E3E);
-		vumeterdefaultskin_initialized = 1;
-	}
-	self->skin = vumeterdefaultskin;
-}
 
 /* prototypes */
 static void vumeter_ondraw(Vumeter*, psy_ui_Graphics*);
@@ -59,8 +45,7 @@ void vumeter_init(Vumeter* self, psy_ui_Component* parent,
 	psy_ui_component_set_style_type(&self->component, STYLE_MAIN_VU);	
 	self->leftavg = self->rightavg = 0;
 	self->workspace = workspace;
-	self->l_log = self->r_log = -10000;
-	vumeterskin_init(self);	
+	self->l_log = self->r_log = -10000;	
 }
 
 void vumeter_ondraw(Vumeter* self, psy_ui_Graphics* g)
@@ -70,42 +55,46 @@ void vumeter_ondraw(Vumeter* self, psy_ui_Graphics* g)
 	psy_ui_RealSize size;	
 	double vuprevL;
 	double vuprevR;
+	psy_ui_Colour bg;
+	psy_ui_Colour rms;
+	psy_ui_Colour peak;
 	
-	size = psy_ui_component_size_px(&self->component);
+	size = psy_ui_component_scroll_size_px(&self->component);
 	left = psy_ui_realrectangle_make(
 		psy_ui_realpoint_make(0, 5),
 		psy_ui_realsize_make(size.width, 5));
 	right = left;
 	right.top += 6;
-	right.bottom += 6;
-	psy_ui_drawsolidrectangle(g, left, self->skin.background);
-	psy_ui_drawsolidrectangle(g, right, self->skin.background);		
+	right.bottom += 6;	
 	left.right = (int) (self->leftavg * size.width); 
 	right.right = (int) (self->rightavg * size.width);
-	psy_ui_drawsolidrectangle(g, left, self->skin.rms);
-	psy_ui_drawsolidrectangle(g, right, self->skin.rms);
+	rms = psy_ui_component_colour(&self->component);	
+	psy_ui_drawsolidrectangle(g, left, rms);
+	psy_ui_drawsolidrectangle(g, right, rms);
 	vuprevL = (40.0 + self->l_log) * size.width / 40.f;
 	vuprevR = (40.0 + self->r_log) * size.width / 40.f;
 	if (vuprevL > size.width) vuprevL = size.width;
 	if (vuprevR > size.width) vuprevR = size.width;
+	peak = psy_ui_style(STYLE_CLIPBOX_SELECT)->background.colour;
 	if (vuprevL > left.left) {		
 		left.left = left.right;
 		left.right = vuprevL;
-		psy_ui_drawsolidrectangle(g, left, self->skin.peak);
+		psy_ui_drawsolidrectangle(g, left, peak);
 	}
 	if (vuprevR > right.left) {
 		right.left = right.right;
 		right.right = vuprevR;
-		psy_ui_drawsolidrectangle(g, right, self->skin.peak);
+		psy_ui_drawsolidrectangle(g, right, peak);
 	}
+	bg = psy_ui_component_background_colour(&self->component);
 	left = psy_ui_realrectangle_make(
 		psy_ui_realpoint_make(left.right, left.top),
 		psy_ui_realsize_make(size.width - left.right, 5));
 	right = psy_ui_realrectangle_make(
 		psy_ui_realpoint_make(right.right, right.top),
 		psy_ui_realsize_make(size.width - right.right, 5));
-	psy_ui_drawsolidrectangle(g, left, self->skin.border);
-	psy_ui_drawsolidrectangle(g, right, self->skin.border);
+	psy_ui_drawsolidrectangle(g, left, bg);
+	psy_ui_drawsolidrectangle(g, right, bg);
 }
 
 void vumeter_idle(Vumeter* self)

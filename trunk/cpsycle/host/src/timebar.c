@@ -67,6 +67,9 @@ void timebar_init(TimeBar* self, psy_ui_Component* parent,
 	/* bpm -1 */
 	psy_ui_button_init_connect(&self->less, timebar_base(self),
 		self, timebar_onlessclicked);
+	self->less.click_mode = psy_ui_CLICK_MODE_REPEAT;
+	self->less.first_repeat_rate = 300;
+	self->less.repeat_rate = 50;
 	psy_ui_button_set_icon(&self->less, psy_ui_ICON_LESS);
 	/* bpm (realbpm) number label */
 	psy_ui_label_init(&self->bpmlabel, timebar_base(self));
@@ -79,7 +82,10 @@ void timebar_init(TimeBar* self, psy_ui_Component* parent,
 	/* bpm +1 */
 	psy_ui_button_init_connect(&self->more, timebar_base(self),
 		self, timebar_onmoreclicked);		
-	psy_ui_button_set_icon(&self->more, psy_ui_ICON_MORE);		
+	psy_ui_button_set_icon(&self->more, psy_ui_ICON_MORE);
+	self->more.click_mode = psy_ui_CLICK_MODE_REPEAT;
+	self->more.first_repeat_rate = 300;
+	self->more.repeat_rate = 50;
 #ifdef PSYCLE_TIMEBAR_OLD
 	/* bpm + 10 */
 	psy_ui_button_init_connect(&self->moremore, timebar_base(self),

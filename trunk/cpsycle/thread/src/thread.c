@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -18,9 +18,11 @@
 	#error "unsupported operating system"
 #endif
 
+
+/* implementation */
 void psy_thread_init(psy_Thread* self)
-{
-	self->native_handle_ = NULL;
+{	
+	self->native_handle_ = 0;	
 	/*self->native_handle_ = 
 	#if defined DIVERSALIS__OS__POSIX
 		self->native_handle_ = pthread_self();
@@ -38,23 +40,23 @@ void psy_thread_init_all(psy_Thread* self, psy_native_handle_type native_handle)
 
 void psy_thread_init_start(psy_Thread* self, void* context, psy_fp_thread_callback callback)
 {	
-	#if defined DIVERSALIS__OS__POSIX
-		pthread_create(&self->native_handle_, NULL, (void* (*)(void*))callback,
-			(void*)context);
-	#elif defined DIVERSALIS__OS__MICROSOFT		
-		self->native_handle_ = (HANDLE)_beginthreadex(0, 0, callback, context, 0, 0);		
-	#else
-		#error "unsupported operating system"
-	#endif
+#if defined DIVERSALIS__OS__POSIX
+	pthread_create(&self->native_handle_, NULL, (void* (*)(void*))callback,
+		(void*)context);
+#elif defined DIVERSALIS__OS__MICROSOFT		
+	self->native_handle_ = (HANDLE)_beginthreadex(0, 0, callback, context, 0, 0);		
+#else
+	#error "unsupported operating system"
+#endif
 }
 
 void psy_thread_dispose(psy_Thread* self)
 {	
 	if (self->native_handle_) {
-	#if defined DIVERSALIS__OS__MICROSOFT
+#if defined DIVERSALIS__OS__MICROSOFT
 		psy_thread_join(self);
 		CloseHandle(self->native_handle_);
-	#endif
+#endif
 	}
 }
 
@@ -78,7 +80,7 @@ void psy_thread_join(psy_Thread* self)
 			int ret;
 			void *ret_join;
 
-			ret = pthread_join(&self->native_handle_, &ret_join);			
+			ret = pthread_join(self->native_handle_, &ret_join);			
 		#elif defined DIVERSALIS__OS__MICROSOFT		
 			WaitForSingleObject(self->native_handle_, INFINITE);
 		#else

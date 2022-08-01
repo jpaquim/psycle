@@ -43,6 +43,8 @@ void fileline_init(FileLine* self, psy_ui_Component* parent, const char* path,
 {	
 	psy_ui_component_init(&self->component, parent, NULL);
 	fileline_vtable_init(self);
+	psy_ui_component_set_preferred_height(&self->component, 
+		psy_ui_value_make_eh(1.5));
 	self->path = psy_strdup(path);
 	psy_ui_component_set_align_expand(&self->component, psy_ui_HEXPAND);
 	psy_ui_component_set_align(&self->component, psy_ui_ALIGN_TOP);
@@ -53,6 +55,7 @@ void fileline_init(FileLine* self, psy_ui_Component* parent, const char* path,
 	psy_ui_button_prevent_translation(&self->name);
 	psy_ui_button_set_text_alignment(&self->name,
 		psy_ui_ALIGNMENT_LEFT | psy_ui_ALIGNMENT_CENTER_VERTICAL);
+	self->name.stoppropagation = FALSE;	
 	psy_ui_component_set_margin(&self->name.component, psy_ui_margin_make_em(
 		0.0, 1.0, 0.0, 0.0));
 	if (is_dir) {
@@ -64,12 +67,14 @@ void fileline_init(FileLine* self, psy_ui_Component* parent, const char* path,
 		psy_ui_button_set_text(&self->name, psy_path_filename(&extract));
 		psy_path_dispose(&extract);		
 	}
-	if (!is_dir) {
+	if (!is_dir) {	
 		uintptr_t size;
 		char str[256];
 
 		/* size */
 		psy_ui_label_init(&self->size, &self->component);
+		psy_ui_component_set_margin(&self->size.component,
+			psy_ui_margin_make_em(0.0, 1.0, 0.0, 0.0));
 		psy_ui_component_set_align(psy_ui_label_base(&self->size),
 			psy_ui_ALIGN_RIGHT);
 		psy_ui_label_prevent_translation(&self->size);
@@ -123,6 +128,7 @@ static void filebox_on_dir_button(FileBox*, psy_ui_Button* sender);
 static void filebox_on_timer(FileBox*, uintptr_t timer_id);
 static psy_List* filebox_sort(psy_List* source, psy_fp_comp comp);
 static int filebox_comp_filename(psy_List* p, psy_List* q);
+static void filebox_on_mouse_down(FileBox*, psy_ui_MouseEvent* ev);
 
 /* vtable */
 static psy_ui_ComponentVtable filebox_vtable;
@@ -135,6 +141,9 @@ static void filebox_vtable_init(FileBox* self)
 		filebox_vtable.on_destroyed =
 			(psy_ui_fp_component_event)
 			filebox_on_destroyed;
+		filebox_vtable.on_mouse_down =
+			(psy_ui_fp_component_on_mouse_event)
+			filebox_on_mouse_down;
 		filebox_vtable.on_timer =
 			(psy_ui_fp_component_on_timer)
 			filebox_on_timer;
@@ -171,6 +180,7 @@ void filebox_init(FileBox* self, psy_ui_Component* parent)
 		psy_ui_size_make_em(0.0, 1.0));	
 	psy_ui_scroller_init(&self->scroller, &self->component, 
 		NULL, NULL);
+	self->scroller.prevent_mouse_down_propagation = FALSE;
 	psy_ui_scroller_set_client(&self->scroller, &self->pane);
 	psy_ui_component_set_style_type(&self->scroller.component, 
 		STYLE_SEQLISTVIEW);
@@ -301,6 +311,8 @@ void filebox_set_wildcard(FileBox* self, const char* wildcard)
 
 void filebox_set_directory(FileBox* self, const char* path)
 {	
+	assert(self);
+	
 #if defined DIVERSALIS__OS__POSIX	
 	char norm[4096];
 
@@ -321,6 +333,8 @@ void filebox_set_directory(FileBox* self, const char* path)
 
 void filebox_on_dir_button(FileBox* self, psy_ui_Button* sender)
 {
+	assert(self);
+	
 	if (strcmp(psy_ui_button_text(sender), psy_SLASHSTR"..") == 0 ||
 			(strcmp(psy_ui_button_text(sender), "..") == 0)) {
 		psy_path_remove_dir(&self->curr_dir);
@@ -351,15 +365,37 @@ void filebox_on_timer(FileBox* self, uintptr_t timer_id)
 
 void filebox_on_button(FileBox* self, psy_ui_Button* sender)
 {
+	assert(self);
+	
 	self->selindex = psy_ui_component_index(
 		psy_ui_component_parent(psy_ui_button_base(sender)));
 	psy_signal_emit(&self->signal_selected, self, 0);
+}
+
+void filebox_on_mouse_down(FileBox* self, psy_ui_MouseEvent* ev)
+{
+	assert(self);
+	
+	if (psy_ui_mouseevent_button(ev) == 2) {
+		psy_path_remove_dir(&self->curr_dir);
+#if defined DIVERSALIS__OS__POSIX
+		if (psy_strlen(psy_path_prefix(&self->curr_dir)) == 0) {
+			psy_path_set_prefix(&self->curr_dir, "/");
+		}
+#endif
+		filebox_read(self, psy_path_prefix(&self->curr_dir));
+		psy_ui_component_align(&self->component);
+		psy_ui_component_invalidate(&self->component);
+	}
+	psy_ui_mouseevent_stop_propagation(ev);
 }
 
 const char* filebox_file_name(FileBox* self)
 {
 	FileLine* file_line;
 
+	assert(self);
+	
 	file_line = (FileLine*)psy_ui_component_at(&self->filepane, self->selindex);
 	if (file_line) {
 		return psy_ui_button_text(&file_line->name);

@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -14,8 +14,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+
+/* prototypes */
 static void eventdrivers_ondriverinput(psy_audio_EventDrivers*, psy_EventDriver*);
 
+
+/* implementation */
 void psy_audio_eventdrivers_init(psy_audio_EventDrivers* self, void* systemhandle)
 {
 	self->eventdrivers = NULL;	
@@ -40,7 +44,7 @@ void psy_audio_eventdrivers_initkbd(psy_audio_EventDrivers* self)
 			eventdriverentry->library = NULL;
 			psy_list_append(&self->eventdrivers, eventdriverentry);
 			psy_eventdriver_connect(self->kbddriver, self,
-				eventdrivers_ondriverinput);
+				(EVENTDRIVERWORKFN)eventdrivers_ondriverinput);
 		}
 	}
 }
@@ -110,7 +114,7 @@ psy_EventDriver* psy_audio_eventdrivers_load(psy_audio_EventDrivers* self, const
 						eventdriverentry->library = library;
 						psy_list_append(&self->eventdrivers, eventdriverentry);
 						psy_eventdriver_connect(eventdriver, self,
-							eventdrivers_ondriverinput);
+							(EVENTDRIVERWORKFN)eventdrivers_ondriverinput);
 						psy_eventdriver_open(eventdriver);						
 					}
 				}

@@ -25,6 +25,7 @@
 #include "xmsongloader.h"
 /* platform */
 #include "../../detail/portable.h"
+#include "../../detail/os.h"
 
 #if defined DIVERSALIS__OS__POSIX
 #include <errno.h>
@@ -55,13 +56,18 @@ void psy_audio_songfile_init(psy_audio_SongFile* self)
 	self->song = NULL;
 	self->file = NULL;
 	self->serr = NULL;
+#if defined DIVERSALIS__OS__POSIX	
+	self->convert_dos_utf8 = TRUE;
+#else	
+	self->convert_dos_utf8 = FALSE;
+#endif	
 }
 
 void psy_audio_songfile_init_song(psy_audio_SongFile* self,
 	psy_audio_Song* song)
 {
 	psy_audio_songfile_init(self);
-	self->song = song;
+	self->song = song;	
 }
 
 void psy_audio_songfile_dispose(psy_audio_SongFile* self)
