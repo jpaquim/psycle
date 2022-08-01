@@ -187,7 +187,10 @@ void dev_preparemask(psy_ui_x11_BitmapImp* self, psy_ui_Colour clrtrans)
 	psy_ui_X11App* x11app;
 	int screen;
 	GC gc_src;
-	GC gc_dst;	
+	GC gc_dst;
+	XImage* xi;
+	int x, y;
+	XGCValues gcv;
 	
 	x11app = (psy_ui_X11App*)psy_ui_app()->imp;
 	screen = DefaultScreen(x11app->dpy);
@@ -207,31 +210,51 @@ void dev_preparemask(psy_ui_x11_BitmapImp* self, psy_ui_Colour clrtrans)
 		1);
 	gc_src = XCreateGC(x11app->dpy, self->pixmap, 0, NULL);
 	gc_dst = XCreateGC(x11app->dpy, self->mask, 0, NULL);
+		
 	/* Change the background to trans color */
-	// XSetForeground(x11app->dpy, gc_dst, 
-	//	WhitePixel(x11app->dpy, screen));
 	XSetBackground(x11app->dpy, gc_dst, psy_ui_x11app_colourindex(
 		x11app, clrtrans));
 	/* This call sets up the mask bitmap. */	
 	XCopyPlane(x11app->dpy, self->pixmap, self->mask, gc_dst,
-		0, 0, (int)size.width, (int)size.height, 0, 0, 1);	
+		0, 0, (int)size.width, (int)size.height, 0, 0, 1);
+	
 	/*
 	** Now, we need to paint onto the original image, making
-	** sure that the "transparent" area is set to black. What
-	** we do is AND the monochrome image onto the color Image
-	** first. When blitting from mono to color, the monochrome
-	** pixel is first transformed as follows:
-	** if  1 (black) it is mapped to the color set by XSetForeground().
-	** if  0 (white) is is mapped to the color set by XSetBackground().
-	** Only then is the raster operation performed.
-	*/	
-	XSetForeground(x11app->dpy, gc_src, WhitePixel(x11app->dpy, screen));
-	XSetBackground(x11app->dpy, gc_src, BlackPixel(x11app->dpy, screen));
-	XSetFunction(x11app->dpy, gc_src, GXand);
+	** sure that the "transparent" area is set to black.
+	*/
+	
+	/* todo: this doesnt work
+	XSetForeground(x11app->dpy, gc_src,
+		WhitePixel(x11app->dpy, DefaultScreen(x11app->dpy)));
+	XSetBackground(x11app->dpy, gc_src,
+		BlackPixel(x11app->dpy, DefaultScreen(x11app->dpy)));
+	gcv.function = GXand;
+	XChangeGC(x11app->dpy, gc_src, GCFunction, &gcv);
 	XCopyPlane(x11app->dpy, self->mask, self->pixmap, gc_src,
-		0, 0, (int)size.width, (int)size.height, 0, 0, 1);
+		0, 0, (int)size.width, (int)size.height, 0, 0, 1); */
+		
+	/* instead changing manually */
+	xi = XGetImage(x11app->dpy, self->pixmap, 0, 0, (int)size.width,
+		(int)size.height, AllPlanes, ZPixmap);
+	for (int x = 0; x < (int)size.width; x++) {
+		for (int y = 0; y < (int)size.height; y++) {
+			uint8_t r; uint8_t g; uint8_t b;
+			unsigned long pixel;
+			
+			pixel = XGetPixel(xi, x, y);
+			r = (uint8_t)(pixel>>16);
+			g = (uint8_t)((pixel&0x00ff00)>>8);
+			b = (uint8_t)(pixel&0x0000ff);
+			if (r == clrtrans.r && g == clrtrans.g && b == clrtrans.b) {				
+				XPutPixel(xi, x, y, BlackPixel(x11app->dpy, screen));				
+			}
+		}
+	}
+	XPutImage(x11app->dpy, self->pixmap, gc_src, xi, 0, 0, 0, 0,
+		(int)size.width, (int)size.height);
+	XDestroyImage(xi);	
 	XFreeGC(x11app->dpy, gc_src);
-	XFreeGC(x11app->dpy, gc_dst);	
+	XFreeGC(x11app->dpy, gc_dst);		
 }
 
 uintptr_t dev_native(psy_ui_x11_BitmapImp* self)
