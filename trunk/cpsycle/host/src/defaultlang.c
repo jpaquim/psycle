@@ -240,12 +240,14 @@ void make_translator_default(psy_Dictionary* dict)
 	psy_dictionary_set(dict, "settings.dirs.dirs", "Directories");
 	psy_dictionary_set(dict, "settings.dirs.song", "Song directory");
 	psy_dictionary_set(dict, "settings.dirs.samples", "Samples directory");
+	psy_dictionary_set(dict, "settings.dirs.plugins", "Plugins");
 	psy_dictionary_set(dict, "settings.dirs.plugin32", "Plug-in32 directory");
 	psy_dictionary_set(dict, "settings.dirs.plugin64", "Plug-in64 directory");
 	psy_dictionary_set(dict, "settings.dirs.lua", "Lua-scripts directory");
 	psy_dictionary_set(dict, "settings.dirs.vst32", "Vst32 directories");
 	psy_dictionary_set(dict, "settings.dirs.vst64", "Vst64 directories");
 	psy_dictionary_set(dict, "settings.dirs.ladspa", "Ladspa directories");
+	psy_dictionary_set(dict, "settings.dirs.lv2", "Lv2 directories");
 	psy_dictionary_set(dict, "settings.dirs.skin", "Skin directory");
 	psy_dictionary_set(dict, "settings.dirs.doc", "Documentation directory");
 	/* settings.theme */	

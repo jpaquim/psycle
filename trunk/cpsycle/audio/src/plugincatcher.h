@@ -66,7 +66,7 @@ typedef struct psy_audio_PluginScanTask {
 
 void psy_audio_pluginscantask_init_all(psy_audio_PluginScanTask*,
 	psy_audio_MachineType type, const char* wildcard, const char* label, const char* key,
-	bool recursive);
+	int recursive);
 
 /* psy_audio_PluginCategories */
 typedef struct psy_audio_PluginCategories

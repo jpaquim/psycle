@@ -45,7 +45,7 @@ void sampleeditorbar_init(SampleEditorBar* self, psy_ui_Component* parent,
 
 	self->workspace = workspace;
 	self->editor = editor;
-	psy_ui_component_init(&self->component, parent, NULL);
+	psy_ui_component_init(&self->component, parent, NULL);	
 	psy_ui_checkbox_init(&self->selecttogether, &self->component);
 	psy_ui_checkbox_set_text(&self->selecttogether,
 		"samplesview.select-together");

@@ -19,9 +19,10 @@
 
 /* prototypes */
 static void dirconfig_make(DirConfig*, psy_Property* parent);
+static void dirconfig_make_plugin_dirs(DirConfig* self, psy_Property* parent);
 static void dirconfig_make_default_user_presets(DirConfig*);
-static void dirconfig_append_dir_edit(DirConfig*, const char* key,
-	const char* label, const char* defaultdir);
+static void dirconfig_append_dir_edit(DirConfig*, psy_Property* parent,
+	const char* key, const char* label, const char* defaultdir);
 
 /* implementation */
 void dirconfig_init(DirConfig* self, psy_Property* parent)
@@ -61,48 +62,50 @@ void dirconfig_make(DirConfig* self, psy_Property* parent)
 		psy_property_set_text(
 			psy_property_append_str(self->directories,
 				"app", PSYCLE_APP64_DIR), "App directory"));
-#endif	
-#if defined(DIVERSALIS__OS__MICROSOFT)		
-	dirconfig_append_dir_edit(self,
-		"songs", "settings.dirs.song",
-		PSYCLE_SONGS_DEFAULT_DIR);
-#else
-	psy_snprintf(path, 4096, "%s", psy_dir_home());
-	printf("path %s\n", path);
-	/* dirconfig_makedirectory(self, "songs", "settings.dirs.song",
-	   path); */
-	dirconfig_append_dir_edit(self,
-		"songs", "settings.dirs.song",
-		PSYCLE_SONGS_DEFAULT_DIR);
 #endif		
-	dirconfig_append_dir_edit(self,
+	dirconfig_append_dir_edit(self, self->directories,
+		"songs", "settings.dirs.song",
+		PSYCLE_SONGS_DEFAULT_DIR);
+	dirconfig_append_dir_edit(self, self->directories,
 		"samples", "settings.dirs.samples",
-		PSYCLE_SAMPLES_DEFAULT_DIR);
-	dirconfig_append_dir_edit(self,
-		"plugins32", "settings.dirs.plugin32",
-		PSYCLE_PLUGINS32_DEFAULT_DIR);
-	dirconfig_append_dir_edit(self,
-		"plugins64", "settings.dirs.plugin64",
-		PSYCLE_PLUGINS64_DEFAULT_DIR);
-	dirconfig_append_dir_edit(self,
-		"luascripts", "settings.dirs.lua",
-		PSYCLE_LUASCRIPTS_DEFAULT_DIR);
-	dirconfig_append_dir_edit(self,
-		"vsts32", "settings.dirs.vst32",
-		PSYCLE_VSTS32_DEFAULT_DIR);
-	dirconfig_append_dir_edit(self,
-		"vsts64", "settings.dirs.vst64",
-		PSYCLE_VSTS64_DEFAULT_DIR);
-	dirconfig_append_dir_edit(self,
-		"ladspas", "settings.dirs.ladspa",
-		PSYCLE_LADSPAS_DEFAULT_DIR);
-	dirconfig_append_dir_edit(self,
-		"skin", "settings.dirs.skin",
-		PSYCLE_SKINS_DEFAULT_DIR);
-	dirconfig_append_dir_edit(self,
+		PSYCLE_SAMPLES_DEFAULT_DIR);	
+	dirconfig_append_dir_edit(self, self->directories,
 		"doc", "settings.dirs.doc",
 		PSYCLE_DOC_DEFAULT_DIR);		
 	dirconfig_make_default_user_presets(self);
+	dirconfig_make_plugin_dirs(self, self->directories);
+}
+
+void dirconfig_make_plugin_dirs(DirConfig* self, psy_Property* parent)
+{	
+	assert(self);
+	
+	self->plugins = psy_property_set_text(
+		psy_property_append_section(parent, "plugins"),
+		"settings.dirs.plugins");
+	dirconfig_append_dir_edit(self, self->plugins,
+		"plugins32", "settings.dirs.plugin32",
+		PSYCLE_PLUGINS32_DEFAULT_DIR);
+	dirconfig_append_dir_edit(self, self->plugins,
+		"plugins64", "settings.dirs.plugin64",
+		PSYCLE_PLUGINS64_DEFAULT_DIR);
+	dirconfig_append_dir_edit(self, self->plugins,
+		"luascripts", "settings.dirs.lua",
+		PSYCLE_LUASCRIPTS_DEFAULT_DIR);
+	dirconfig_append_dir_edit(self, self->plugins,
+		"vsts32", "settings.dirs.vst32",
+		PSYCLE_VSTS32_DEFAULT_DIR);
+	dirconfig_append_dir_edit(self, self->plugins,
+		"vsts64", "settings.dirs.vst64",
+		PSYCLE_VSTS64_DEFAULT_DIR);
+	dirconfig_append_dir_edit(self, self->plugins,
+		"ladspas", "settings.dirs.ladspa",
+		PSYCLE_LADSPAS_DEFAULT_DIR);
+#ifdef PSYCLE_USE_LV2		
+	dirconfig_append_dir_edit(self, self->plugins,
+		"lv2s", "settings.dirs.lv2",
+		PSYCLE_LV2_DEFAULT_DIR);
+#endif		
 }
 
 void dirconfig_make_default_user_presets(DirConfig* self)
@@ -113,28 +116,27 @@ void dirconfig_make_default_user_presets(DirConfig* self)
 
 	psy_path_init(&defaultuserpresetpath, psy_dir_home());
 	psy_path_set_name(&defaultuserpresetpath, "Presets");
-	dirconfig_append_dir_edit(self, 
+	dirconfig_append_dir_edit(self, self->directories,
 		"presets", "User Presets directory",
 		psy_path_full(&defaultuserpresetpath));
 	psy_path_dispose(&defaultuserpresetpath);
 }
 
-void dirconfig_append_dir_edit(DirConfig* self, const char* key,
-	const char* label, const char* defaultdir)
+void dirconfig_append_dir_edit(DirConfig* self, psy_Property* parent,
+	const char* key, const char* label, const char* defaultdir)
 {
 	assert(self);
 
 	psy_property_set_hint(psy_property_set_text(
-		psy_property_append_str(self->directories, key, defaultdir),
-		label), PSY_PROPERTY_HINT_EDITDIR);
+		psy_property_append_str(parent, key, defaultdir), label),
+		PSY_PROPERTY_HINT_EDITDIR);
 }
 /* properties */
 const char* dirconfig_app(const DirConfig* self)
 {
 	assert(self);
 
-	return psy_property_at_str(self->directories, "app",
-		PSYCLE_APP64_DIR);
+	return psy_property_at_str(self->directories, "app", PSYCLE_APP64_DIR);
 }
 
 const char* dirconfig_songs(const DirConfig* self)
@@ -157,7 +159,7 @@ const char* dirconfig_plugins32(const DirConfig* self)
 {
 	assert(self);
 
-	return psy_property_at_str(self->directories, "plugins32",
+	return psy_property_at_str(self->plugins, "plugins32",
 		PSYCLE_PLUGINS32_DEFAULT_DIR);
 }
 
@@ -165,7 +167,7 @@ const char* dirconfig_plugins64(const DirConfig* self)
 {
 	assert(self);
 
-	return psy_property_at_str(self->directories, "plugins64",
+	return psy_property_at_str(self->plugins, "plugins64",
 		PSYCLE_PLUGINS32_DEFAULT_DIR);
 }
 
@@ -174,10 +176,10 @@ const char* dirconfig_plugins_curr_platform(const DirConfig* self)
 	assert(self);
 
 #if (DIVERSALIS__CPU__SIZEOF_POINTER == 4)
-	return psy_property_at_str(self->directories, "plugins32",
+	return psy_property_at_str(self->plugins, "plugins32",
 		PSYCLE_PLUGINS32_DEFAULT_DIR);
 #else
-	return psy_property_at_str(self->directories, "plugins64",
+	return psy_property_at_str(self->plugins, "plugins64",
 		PSYCLE_PLUGINS32_DEFAULT_DIR);
 #endif
 }
@@ -186,7 +188,7 @@ const char* dirconfig_lua_scripts(const DirConfig* self)
 {
 	assert(self);
 
-	return psy_property_at_str(self->directories, "luascripts",
+	return psy_property_at_str(self->plugins, "luascripts",
 		PSYCLE_LUASCRIPTS_DEFAULT_DIR);
 }
 
@@ -194,7 +196,7 @@ const char* dirconfig_vsts32(const DirConfig* self)
 {
 	assert(self);
 
-	return psy_property_at_str(self->directories, "vsts32",
+	return psy_property_at_str(self->plugins, "vsts32",
 		PSYCLE_VSTS32_DEFAULT_DIR);
 }
 
@@ -202,7 +204,7 @@ const char* dirconfig_vsts64(const DirConfig* self)
 {
 	assert(self);
 
-	return psy_property_at_str(self->directories, "vsts64",
+	return psy_property_at_str(self->plugins, "vsts64",
 		PSYCLE_VSTS64_DEFAULT_DIR);
 }
 
@@ -210,7 +212,15 @@ const char* dirconfig_ladspa_dir(const DirConfig* self)
 {
 	assert(self);
 
-	return psy_property_at_str(self->directories, "ladspas",
+	return psy_property_at_str(self->plugins, "ladspas",
+		PSYCLE_LADSPAS_DEFAULT_DIR);
+}
+
+const char* dirconfig_lv2_dir(const DirConfig* self)
+{
+	assert(self);
+
+	return psy_property_at_str(self->plugins, "lv2s",
 		PSYCLE_LADSPAS_DEFAULT_DIR);
 }
 

@@ -18,8 +18,13 @@
 #include "luaplugin.h"
 #include "sampler.h"
 #include "xmsampler.h"
+#ifdef PSYCLE_USE_VST2
 #include "vstplugin.h"
+#endif
 #include "ladspaplugin.h"
+#ifdef PSYCLE_USE_LV2
+#include "lv2plugin.h"
+#endif
 /* file */
 #include <dir.h>
 /* platform*/
@@ -378,7 +383,7 @@ uintptr_t psy_audio_pluginsections_num_plugins(const psy_audio_PluginSections*
 /* psy_audio_PluginScanTask */
 void psy_audio_pluginscantask_init_all(psy_audio_PluginScanTask* self,
 	psy_audio_MachineType type, const char* wildcard, const char* label,
-	const char* key, bool recursive)
+	const char* key, int recursive)
 {
 	self->type = type;
 	psy_snprintf(self->wildcard, 255, "%s", wildcard);
@@ -549,7 +554,7 @@ void plugincatcher_initscantasks(psy_audio_PluginCatcher* self)
 		"*.lua", "Luas", "luascripts", FALSE);
 	psy_list_append(&self->scantasks, task);
 
-	/* vsts */
+#ifdef PSYCLE_USE_VST2	
 	task = (psy_audio_PluginScanTask*)malloc(sizeof(psy_audio_PluginScanTask));
 #if (DIVERSALIS__CPU__SIZEOF_POINTER == 4)
 	psy_audio_pluginscantask_init_all(task, psy_audio_VST,
@@ -559,12 +564,20 @@ void plugincatcher_initscantasks(psy_audio_PluginCatcher* self)
 		"*"MODULEEXT, "Vsts 64bit", "vsts64", TRUE);
 #endif
 	psy_list_append(&self->scantasks, task);
+#endif	
 
 	/* ladspas */
 	task = (psy_audio_PluginScanTask*)malloc(sizeof(psy_audio_PluginScanTask));
 	psy_audio_pluginscantask_init_all(task, psy_audio_LADSPA,
 		"*"MODULEEXT, "Ladspas", "ladspas", TRUE);
 	psy_list_append(&self->scantasks, task);
+	
+#ifdef PSYCLE_USE_LV2	
+	task = (psy_audio_PluginScanTask*)malloc(sizeof(psy_audio_PluginScanTask));
+	psy_audio_pluginscantask_init_all(task, psy_audio_LV2,
+		"*.lv2", "LV2s", "lv2s", FALSE);
+	psy_list_append(&self->scantasks, task);
+#endif	
 }
 
 void plugincatcher_makeinternals(psy_audio_PluginCatcher* self)
@@ -619,11 +632,17 @@ void plugincatcher_scan_multipath(psy_audio_PluginCatcher* self,
 
 void psy_audio_plugincatcher_scan(psy_audio_PluginCatcher* self)
 {
+	psy_Property* plugin_dirs;
+	
 	self->abort = FALSE;
 	self->scanning = TRUE;
 	self->all = psy_audio_pluginsections_section_plugins(&self->sections,
 		"all");
 	if (!self->all) {
+		return;
+	}
+	plugin_dirs = psy_property_at_section(self->directories, "plugins");
+	if (!plugin_dirs) {		
 		return;
 	}
 	psy_signal_emit(&self->signal_scanstart, self, 0);	
@@ -636,8 +655,8 @@ void psy_audio_plugincatcher_scan(psy_audio_PluginCatcher* self)
 			const char* path;
 
 			task = (psy_audio_PluginScanTask*)p->entry;
-			psy_signal_emit(&self->signal_taskstart, self, 1, task);
-			path = psy_property_at_str(self->directories, task->key, NULL);
+			psy_signal_emit(&self->signal_taskstart, self, 1, task);			
+			path = psy_property_at_str(plugin_dirs, task->key, NULL);
 			if (path) {				
 				plugincatcher_scan_multipath(self, path, task->wildcard,
 					task->type, task->recursive);
@@ -666,7 +685,8 @@ int isplugin(int type)
 	return
 		type == psy_audio_PLUGIN ||
 		type == psy_audio_VST ||
-		type == psy_audio_LADSPA;
+		type == psy_audio_LADSPA ||
+		type == psy_audio_LV2;
 }
 
 int on_enum_dir(psy_audio_PluginCatcher* self, const char* path, int type)
@@ -674,6 +694,9 @@ int on_enum_dir(psy_audio_PluginCatcher* self, const char* path, int type)
 	psy_audio_MachineInfo macinfo;
 	char name[_MAX_PATH];
 
+	if (type == psy_audio_LV2) {
+		printf("%s\n", path);
+	}
 	psy_signal_emit(&self->signal_scanfile, self, 2, path, type);
 	machineinfo_init(&macinfo);	
 	switch (type) {
@@ -693,6 +716,7 @@ int on_enum_dir(psy_audio_PluginCatcher* self, const char* path, int type)
 				psy_signal_emit(&self->signal_scanprogress, self, 1, 1);
 			}
 			break;
+#ifdef PSYCLE_USE_VST2			
 		case psy_audio_VST:			
 			if (psy_audio_plugin_vst_test(path, &macinfo)) {
 				psy_audio_plugincatcher_catchername(path, name, macinfo.shellidx);
@@ -701,6 +725,7 @@ int on_enum_dir(psy_audio_PluginCatcher* self, const char* path, int type)
 				psy_signal_emit(&self->signal_scanprogress, self, 1, 1);
 			}
 			break;
+#endif			
 		case psy_audio_LADSPA: {
 			uintptr_t shellidx;
 
@@ -713,6 +738,21 @@ int on_enum_dir(psy_audio_PluginCatcher* self, const char* path, int type)
 				psy_signal_emit(&self->signal_scanprogress, self, 1, 1);
 			}
 			break; }
+#ifdef PSYCLE_USE_LV2
+		case psy_audio_LV2: {
+			uintptr_t shellidx;			
+			
+			shellidx = 0;										
+			for (; psy_audio_lv2plugin_test(path, &macinfo,
+					shellidx) != 0; ++shellidx) {
+				
+				psy_audio_plugincatcher_catchername(path, name, macinfo.shellidx);
+				makeplugininfo(self->all, name, path, macinfo.type,
+					&macinfo, &self->categorydefaults);
+				psy_signal_emit(&self->signal_scanprogress, self, 1, 1);
+			}
+			break; }
+#endif						
 		default:
 			break;
 	}

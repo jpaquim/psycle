@@ -41,7 +41,7 @@ void init_host_styles(psy_ui_Styles* self, psy_ui_ThemeMode theme)
 	style = psy_ui_style_allocinit();	
 	psy_ui_style_set_colours(style, material.onprimary_medium,
 		material.overlay_12p);
-	psy_ui_style_set_padding_em(style, 0.0, 1.0, 0.0, 1.0);
+	//psy_ui_style_set_padding_em(style, 0.0, 1.0, 0.0, 1.0);
 	psy_ui_styles_set_style(self, STYLE_STATUSBAR, style);
 	
 	style = psy_ui_style_allocinit();
@@ -956,7 +956,7 @@ void init_light_theme(psy_ui_Styles* self)
 
 	style = psy_ui_style_allocinit();
 	psy_ui_style_set_colours(style, light.cl_font_1, light.cl_white_1);
-	psy_ui_style_set_padding_em(style, 0.0, 1.0, 0.0, 1.0);
+	//psy_ui_style_set_padding_em(style, 0.0, 0.0, 0.0, 0.0);
 	psy_ui_styles_set_style(self, STYLE_STATUSBAR, style);
 
 	style = psy_ui_style_allocinit();

@@ -77,8 +77,8 @@ void register_bitmaps(psy_ui_App* app, const char* app_bmp_path)
 	psy_ui_app_add_app_bmp(app, IDB_WIRES_LIGHT, "wires-light.bmp");
 	psy_ui_app_add_app_bmp(app, IDB_MATRIX_LIGHT, "matrix-light.bmp");
 	psy_ui_app_add_app_bmp(app, IDB_NEWMACHINE_LIGHT, "newmachine-light.bmp");
-	psy_ui_app_add_app_bmp(app, IDB_EXIT_LIGHT, "exit-light.bmp");
-	psy_ui_app_add_app_bmp(app, IDB_EXIT_DARK, "exit-dark.bmp");
+	psy_ui_app_add_app_bmp(app, IDB_EXIT_LIGHT, "exit_light.bmp");
+	psy_ui_app_add_app_bmp(app, IDB_EXIT_DARK, "exit_dark.bmp");
 	psy_ui_app_add_app_bmp(app, IDB_ARROW_DOWN_DARK, "arrow-down-dark.bmp");
 	psy_ui_app_add_app_bmp(app, IDB_ARROW_UP_DARK, "arrow-up-dark.bmp");
 	psy_ui_app_add_app_bmp(app, IDB_SEQ_DEL_TRACK, "seq-del-track.bmp");
