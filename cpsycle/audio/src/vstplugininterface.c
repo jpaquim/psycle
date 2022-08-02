@@ -1,20 +1,27 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
-#include "../../detail/os.h"
 
 #include "vstplugininterface.h"
-// local
+
+#ifdef PSYCLE_USE_VST2
+
+#include "../../detail/os.h"
+
+/* local */
 #if defined(DIVERSALIS__OS__UNIX)
 #define _inline static inline
 #endif
 #include "aeffectx.h"
 #include "buffercontext.h"
-// std
+/* std */
 #include <stdlib.h>
 
-// psy_audio_VstInterface
+
+/* implementation */
 void psy_audio_vstinterface_init(psy_audio_VstInterface* self,
 	AEffect* effect, void* user)
 {
@@ -76,7 +83,8 @@ void psy_audio_vstinterface_work(psy_audio_VstInterface* self,
 		(VstInt32)bc->numsamples);
 }
 
-void psy_audio_vstinterface_tick(psy_audio_VstInterface* self, struct VstEvents* vstevents)
+void psy_audio_vstinterface_tick(psy_audio_VstInterface* self,
+	struct VstEvents* vstevents)
 {
 	vstevents->reserved = 0;
 	self->effect->dispatcher(self->effect, effProcessEvents, 0, 0,
@@ -202,12 +210,14 @@ bool psy_audio_vstinterface_haseditor(const psy_audio_VstInterface* self)
 	return (self->effect->flags & effFlagsHasEditor) == effFlagsHasEditor;
 }
 
-void psy_audio_vstinterface_openeditor(psy_audio_VstInterface* self, void* handle)
+void psy_audio_vstinterface_openeditor(psy_audio_VstInterface* self,
+	void* handle)
 {
 	self->effect->dispatcher(self->effect, effEditOpen, 0, 0, handle, 0);
 }
 
-void psy_audio_vstinterface_closeeditor(psy_audio_VstInterface* self, void* handle)
+void psy_audio_vstinterface_closeeditor(psy_audio_VstInterface* self,
+	void* handle)
 {
 	self->effect->dispatcher(self->effect, effEditClose, 0, 0, handle, 0);
 }
@@ -216,3 +226,5 @@ void psy_audio_vstinterface_editoridle(psy_audio_VstInterface* self)
 {	
 	self->effect->dispatcher(self->effect, effEditIdle, 0, 0, 0, 0);
 }
+
+#endif /* PSYCLE_USE_VST2 */

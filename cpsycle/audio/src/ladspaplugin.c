@@ -321,15 +321,20 @@ void preparebuffers(psy_audio_LadspaPlugin* self,
 		if (LADSPA_IS_PORT_AUDIO(iPortDescriptor))
 		{
 			if (LADSPA_IS_PORT_INPUT(iPortDescriptor)) {
-				self->psDescriptor->connect_port(self->handle,
-					lPortIndex, psy_audio_buffer_at(bc->output,
-					indexinput));
+				if (indexinput < 2) {
+					self->psDescriptor->connect_port(self->handle,
+						lPortIndex, psy_audio_buffer_at(bc->output,
+						indexinput));
 				//inportmap[indexinput] = lPortIndex;
+				}
 				indexinput++;
+				
 			}
 			else if (LADSPA_IS_PORT_OUTPUT(iPortDescriptor)) {
-				self->psDescriptor->connect_port(self->handle, lPortIndex,
-					psy_audio_buffer_at(bc->output, indexoutput));
+				if (indexoutput < 2) {
+					self->psDescriptor->connect_port(self->handle, lPortIndex,
+						psy_audio_buffer_at(bc->output, indexoutput));
+				}
 				indexoutput++;
 			}
 		}

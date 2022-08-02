@@ -217,12 +217,16 @@ void psy_ui_button_on_draw(psy_ui_Button* self, psy_ui_Graphics* g)
 		double ratio;
 						
 		srcbpmsize = psy_ui_bitmap_size(&self->bitmapicon);		
+#if PSYCLE_USE_TK == PSYCLE_TK_X11
+		destbpmsize = srcbpmsize;
+#else		
 		ratio = (tm->tmAscent - tm->tmDescent) / srcbpmsize.height;
 		if (fabs(ratio - 1.0) < 0.15) {
 			ratio = 1.0;
 		}		
 		destbpmsize.width = srcbpmsize.width * ratio;
 		destbpmsize.height = srcbpmsize.height * ratio;
+#endif		
 		vcenter = (size.height - destbpmsize.height) / 2.0;		
 		
 		psy_ui_drawstretchedbitmap(g, &self->bitmapicon,
@@ -308,10 +312,14 @@ double psy_ui_button_width(psy_ui_Button* self)
 		double ratio;
 
 		srcbpmsize = psy_ui_bitmap_size(&self->bitmapicon);
+#if PSYCLE_USE_TK == PSYCLE_TK_X11
+		ratio = 1.0;
+#else		
 		ratio = (tm->tmAscent - tm->tmDescent) / srcbpmsize.height;
 		if (fabs(ratio - 1.0) < 0.15) {
 			ratio = 1.0;
 		}
+#endif		
 		rv += srcbpmsize.width * ratio;	
 		if (psy_strlen(text) > 0) {
 			rv += tm->tmAveCharWidth * self->bitmapident;

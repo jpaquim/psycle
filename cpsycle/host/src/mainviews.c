@@ -52,6 +52,8 @@ void mainviews_init_view_status_bars(MainViews* self)
 	psy_ui_notebook_init(&self->viewstatusbars, &self->component);	
 	psy_ui_component_set_align(psy_ui_notebook_base(&self->viewstatusbars),
 		psy_ui_ALIGN_BOTTOM);
+	psy_ui_component_set_style_type(&self->viewstatusbars.component, 
+		STYLE_STATUSBAR);
 	psy_ui_component_set_default_align(
 		psy_ui_notebook_base(&self->viewstatusbars),
 		psy_ui_ALIGN_LEFT, psy_ui_defaults_hmargin(psy_ui_defaults()));	

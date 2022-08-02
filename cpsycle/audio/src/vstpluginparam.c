@@ -7,6 +7,9 @@
 
 
 #include "vstpluginparam.h"
+
+#ifdef PSYCLE_USE_VST2
+
 #include "../../detail/os.h"
 /* local */
 #if defined(DIVERSALIS__OS__UNIX)
@@ -141,3 +144,5 @@ void vstpluginparam_range(psy_audio_VstPluginParam* self,
 	*minval = 0;
 	*maxval = 0xFFFF;
 }
+
+#endif /* PSYCLE_USE_VST2 */

@@ -34,7 +34,7 @@ void machineviewbar_init(MachineViewBar* self, psy_ui_Component* parent,
 {
 	psy_ui_component_init(machineviewbar_base(self), parent, NULL);
 	self->workspace = workspace;
-	self->machines = NULL;
+	self->machines = NULL;	
 	psy_ui_component_set_default_align(machineviewbar_base(self),
 		psy_ui_ALIGN_LEFT, psy_ui_margin_make_em(0.0, 4.0, 0.0, 0.0));
 	psy_ui_component_set_align_expand(&self->component, psy_ui_HEXPAND);

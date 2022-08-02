@@ -4,6 +4,10 @@
 #ifndef psy_audio_VSTPLUGIN_H
 #define psy_audio_VSTPLUGIN_H
 
+#include "../../detail/psyconf.h"
+
+#ifdef PSYCLE_USE_VST2
+
 // local
 #include "custommachine.h"
 #include "library.h"
@@ -46,5 +50,7 @@ INLINE psy_audio_Machine* psy_audio_vstplugin_base(psy_audio_VstPlugin* self)
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* PSYCLE_USE_VST2 */
 
 #endif /* psy_audio_VSTPLUGIN_H */

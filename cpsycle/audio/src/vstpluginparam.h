@@ -4,6 +4,10 @@
 #ifndef psy_audio_VSTPLUGINPARAM_H
 #define psy_audio_VSTPLUGINPARAM_H
 
+#include "../../detail/psyconf.h"
+
+#ifdef PSYCLE_USE_VST2
+
 // local
 #include "custommachine.h"
 #include "vstplugininterface.h"
@@ -30,5 +34,7 @@ psy_audio_VstPluginParam* psy_audio_vstpluginparam_allocinit(struct AEffect*,
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* PSYCLE_USE_VST2 */
 
 #endif /* psy_audio_VSTPLUGINPARAM_H */

@@ -15,6 +15,7 @@ struct psy_Property;
 typedef struct DirConfig {	
 	/* internal */
 	struct psy_Property* directories;	
+	struct psy_Property* plugins;
 } DirConfig;
 
 void dirconfig_init(DirConfig*, struct psy_Property* parent);
@@ -30,6 +31,7 @@ const char* dirconfig_lua_scripts(const DirConfig*);
 const char* dirconfig_vsts32(const DirConfig*);
 const char* dirconfig_vsts64(const DirConfig*);
 const char* dirconfig_ladspas(const DirConfig*);
+const char* dirconfig_lv2(const DirConfig*);
 const char* dirconfig_skins(const DirConfig*);
 const char* dirconfig_doc(const DirConfig*);
 const char* dirconfig_config_dir(const DirConfig*);

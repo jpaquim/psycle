@@ -5,6 +5,9 @@
 #define psy_audio_VSTPLUGININTERFACE_H
 
 #include "../../detail/psydef.h"
+
+#ifdef PSYCLE_USE_VST2
+
 // local
 #include "machinedefs.h"
 // dsp
@@ -64,5 +67,7 @@ void psy_audio_vstinterface_editoridle(psy_audio_VstInterface*);
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* PSYCLE_USE_VST2 */
 
 #endif /* psy_audio_VSTPLUGININTERFACE_H */

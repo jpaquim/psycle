@@ -211,9 +211,9 @@ int isplugin(int type)
 		(type == psy_audio_VST) ||
 		(type == psy_audio_VSTFX) ||
 		(type == psy_audio_LUA) ||
-		(type == psy_audio_LADSPA);
+		(type == psy_audio_LADSPA) || 
+		(type == psy_audio_LV2);
 }
-
 
 /* PluginFilterGroup */
 
@@ -421,9 +421,11 @@ void pluginfilter_init(PluginFilter* self)
 	pluginfiltergroup_add(&self->types,
 		psy_strhash("vst"), "Vst", TRUE);
 	pluginfiltergroup_add(&self->types,
-		psy_strhash("lua"), "Lua", TRUE);
+		psy_strhash("lua"), "Lua", TRUE);		
 	pluginfiltergroup_add(&self->types,
 		psy_strhash("ladspa"), "Ladspa", TRUE);
+	pluginfiltergroup_add(&self->types,
+		psy_strhash("lv2"), "LV2", TRUE);
 	pluginfiltergroup_init(&self->categories, psy_strhash("categories"),
 		"newmachine.categories");
 	pluginfiltergroup_init(&self->sort, psy_strhash("sort"),
@@ -535,6 +537,10 @@ void searchfilter(psy_Property* plugin, PluginFilter* filter,
 	}	
 	if (!pluginfiltergroup_selected(&filter->types, psy_strhash("ladspa")) &&
 			mactype == psy_audio_LADSPA) {		
+		return;
+	}
+	if (!pluginfiltergroup_selected(&filter->types, psy_strhash("lv2")) &&
+			mactype == psy_audio_LV2) {
 		return;
 	}	
 	if (!pluginfiltergroup_selected(&filter->types, psy_strhash("lua")) &&
@@ -849,6 +855,9 @@ uintptr_t plugintype(psy_Property* property, char* text)
 		break;
 		case psy_audio_LADSPA:
 			strcpy(text, "lad");
+			break;
+		case psy_audio_LV2:
+			strcpy(text, "lv2");
 			break;
 		default:
 			strcpy(text, "int");

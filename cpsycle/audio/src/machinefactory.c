@@ -16,8 +16,13 @@
 #include "luaplugin.h"
 #include "sampler.h"
 #include "xmsampler.h"
+#ifdef PSYCLE_USE_VST2
 #include "vstplugin.h"
+#endif
 #include "ladspaplugin.h"
+#ifdef PSYCLE_USE_LV2
+#include "lv2plugin.h"
+#endif
 #include "machineproxy.h"
 #include "virtualgenerator.h"
 
@@ -193,8 +198,9 @@ psy_audio_Machine* psy_audio_machinefactory_makemachinefrompath(psy_audio_Machin
 			} else {
 				rv = 0;
 			}		
-			break;
+			break;		
 		}
+#ifdef PSYCLE_USE_VST2		
 		case psy_audio_VST:
 		case psy_audio_VSTFX: {			
 			psy_audio_VstPlugin* plugin;			
@@ -211,8 +217,8 @@ psy_audio_Machine* psy_audio_machinefactory_makemachinefrompath(psy_audio_Machin
 			} else {
 				rv = NULL;
 			}
-			break;	
-		}
+			break; }
+#endif			
 		case psy_audio_PLUGIN: {
 			psy_audio_Machine* plugin;
 
@@ -279,6 +285,25 @@ psy_audio_Machine* psy_audio_machinefactory_makemachinefrompath(psy_audio_Machin
 			}
 
 			break; }
+#ifdef PSYCLE_USE_LV2			
+		case psy_audio_LV2: {
+			psy_audio_Machine* plugin;
+
+			plugin = (psy_audio_Machine*)malloc(sizeof(psy_audio_LV2Plugin));
+			if (plugin) {
+				psy_audio_lv2plugin_init((psy_audio_LV2Plugin*)plugin,
+					self->machinecallback, path, shellidx);
+				if (psy_audio_machine_info(plugin)) {
+					rv = plugin;
+				} else {
+					psy_audio_machine_dispose(plugin);
+					free(plugin);
+				}
+			} else {
+				rv = 0;
+			}
+			break; }
+#endif						
 		default:
 			rv = 0;
 			break;

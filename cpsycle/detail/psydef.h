@@ -10,9 +10,14 @@
 #include "stdint.h"
 #include <stddef.h>
 #include "psyversion.h"
+#include "os.h"
 
 #ifndef __cplusplus
+#ifdef DIVERSALIS__OS__POSIX
+#include <stdbool.h>
+#else
 typedef uint8_t bool;
+#endif
 #endif
 
 #ifndef FALSE

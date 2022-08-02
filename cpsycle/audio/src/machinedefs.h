@@ -45,6 +45,7 @@ typedef enum  {
 	psy_audio_LUA = 17,
 	psy_audio_LADSPA = 18,
 	psy_audio_VIRTUALGENERATOR = 19,
+	psy_audio_LV2 = 20,
 	psy_audio_DUMMY = 255
 } psy_audio_MachineType;
 

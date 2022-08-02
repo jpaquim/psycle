@@ -73,6 +73,7 @@
 #define PSYCLE_VSTS32_DEFAULT_DIR "/usr/lib/vst"
 #define PSYCLE_VSTS64_DEFAULT_DIR "/usr/lib/vst"
 #define PSYCLE_LADSPAS_DEFAULT_DIR "/usr/lib/ladspa"
+#define PSYCLE_LV2_DEFAULT_DIR "/usr/lib/lv2"
 #define PSYCLE_SKINS_DEFAULT_DIR PSYCLE_APP_DIR "/skins"
 #define PSYCLE_DOC_DEFAULT_DIR PSYCLE_APP_DIR "/doc"
 #define PSYCLE_USERPRESETS_DEFAULT_DIR PSYCLE_APP_DIR "/Presets"
@@ -121,6 +122,12 @@
 #define PSYCLE_USE_PSY3
 #define PSYCLE_USE_PSY2
 #define PSYCLE_USE_XM
+
+#define PSYCLE_USE_VST2
+
+#if defined(DIVERSALIS__OS__UNIX)
+	#define PSYCLE_USE_LV2
+#endif
 
 /* #define PSYCLE_TIMEBAR_OLD */
 
