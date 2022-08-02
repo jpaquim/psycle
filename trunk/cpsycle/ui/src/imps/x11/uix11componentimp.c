@@ -340,7 +340,7 @@ void psy_ui_x11_component_create_window(psy_ui_x11_ComponentImp* self,
 		if (self->mapped) {
 			XMapWindow(x11app->dpy, self->hwnd);
 		}
-		XSetWMProtocols(x11app->dpy, self->hwnd, &x11app->wmDeleteMessage, 1);		
+		XSetWMProtocols(x11app->dpy, self->hwnd, &x11app->wmDeleteMessage, 1);
 		if (x11app->dbe) {
 			self->d_backBuf = XdbeAllocateBackBufferName(x11app->dpy,
 				self->hwnd, XdbeBackground);

@@ -17,7 +17,7 @@ extern "C" {
 // Displays a plugin custom ui instead the paramview. So far only vsts use
 // this view.
 
-typedef struct {
+typedef struct MachineEditorView {
 	// inherits
    psy_ui_Component component;
    // references

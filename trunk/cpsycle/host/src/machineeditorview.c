@@ -7,10 +7,15 @@
 
 #include <imps/win32/uiwincomponentimp.h>
 
+
 #include <stdlib.h>
 #include <string.h>
 
-static void machineeditorview_on_destroyed(MachineEditorView*);
+#if PSYCLE_USE_TK == PSYCLE_TK_X11
+#include <imps/x11/uix11componentimp.h>
+#include <imps/x11/uix11app.h>
+#endif
+
 static void machineeditorview_onpreferredsize(MachineEditorView*,
 	psy_ui_Size* limit, psy_ui_Size* rv);
 static void machineeditorview_on_timer(MachineEditorView*, uintptr_t id);
@@ -30,10 +35,7 @@ static bool machineeditorview_vtable_initialized = FALSE;
 static void machineeditorview_vtable_init(MachineEditorView* self)
 {
 	if (!machineeditorview_vtable_initialized) {
-		machineeditorview_vtable = *(self->component.vtable);
-		machineeditorview_vtable.on_destroyed =
-			(psy_ui_fp_component_event)
-			machineeditorview_on_destroyed;
+		machineeditorview_vtable = *(self->component.vtable);		
 		machineeditorview_vtable.onpreferredsize =
 			(psy_ui_fp_component_on_preferred_size)
 			machineeditorview_onpreferredsize;
@@ -47,29 +49,30 @@ static void machineeditorview_vtable_init(MachineEditorView* self)
 
 void machineeditorview_init(MachineEditorView* self, psy_ui_Component* parent,
 	psy_audio_Machine* machine, Workspace* workspace)
-{
+{		
 	psy_ui_component_init(&self->component, parent, NULL);
 	machineeditorview_vtable_init(self);	
 	self->machine = machine;
 	self->workspace = workspace;
-	psy_audio_machine_seteditorhandle(machine,
-		(void*)self->component.imp->vtable->dev_platform(
-			self->component.imp));
+#if PSYCLE_USE_TK == PSYCLE_TK_X11	
+	psy_ui_x11_ComponentImp* imp;
+	
+	imp = (psy_ui_x11_ComponentImp*)(self->component.imp);
+	psy_audio_machine_seteditorhandle(machine, (void*)imp->hwnd);	
+#else
+	psy_ui_x11_ComponentImp* imp;
+	
+	imp = (psy_ui_win_ComponentImp*)(self->component.imp);	
+	psy_ui_x11app_flush_events((psy_ui_X11App*)psy_ui_app()->imp);
+	psy_audio_machine_seteditorhandle(machine, (void*)imp->hwnd);
+#endif	
 	psy_signal_connect(&workspace->signal_machineeditresize, self,
 		machineeditorview_onmachineeditresize);	
 }
 
-void machineeditorview_on_destroyed(MachineEditorView* self)
-{
-	if (self->machine) {
-		psy_audio_machine_seteditorhandle(self->machine, NULL);
-		psy_signal_disconnect_context(&self->workspace->signal_machineeditresize, self);
-	}
-}
-
 MachineEditorView* machineeditorview_alloc(void)
 {
-	return (MachineEditorView*) malloc(sizeof(MachineEditorView));
+	return (MachineEditorView*)malloc(sizeof(MachineEditorView));
 }
 
 MachineEditorView* machineeditorview_allocinit(psy_ui_Component* parent,

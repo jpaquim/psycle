@@ -1172,6 +1172,7 @@ void newmachine_onscanfile(NewMachine* self, psy_audio_PluginCatcher* sender,
 	const char* path, int type)
 {
 	psy_ui_label_set_text(&self->scanview.processview.scanfile, path);
+	workspace_output_status(self->workspace, path);
 	pluginscanstatusview_inc_file_count(&self->scanview.processview.statusview);
 }
 

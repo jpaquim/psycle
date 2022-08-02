@@ -268,7 +268,7 @@ void psy_ui_appstyles_initdarktheme(psy_ui_Styles* self,
 	psy_ui_styles_set_style(self, psy_ui_STYLE_SPLITTER_SELECT, style);
 	/* psy_ui_STYLE_PROGRESSBAR */
 	style = psy_ui_style_allocinit();
-	psy_ui_style_set_colour(style, material.secondary);
+	psy_ui_style_set_colour(style, psy_ui_colour_make(0xA036A3));
 	psy_ui_style_set_size(style, psy_ui_size_make_em(20.0, 1.0));	
 	psy_ui_styles_set_style(self, psy_ui_STYLE_PROGRESSBAR, style);
 	/* switch */

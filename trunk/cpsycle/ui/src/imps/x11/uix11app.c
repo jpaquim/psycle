@@ -425,6 +425,7 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
             bool close;
             bool ismain;
 
+			printf("onclose\n");
 			ismain = (imp->component == psy_ui_app()->main);
 			close = imp->component->vtable->onclose(imp->component);
 			if (imp->component->signal_close.slots) {

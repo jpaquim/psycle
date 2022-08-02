@@ -25,6 +25,15 @@ extern "C" {
 
 /* MainStatusBar */
 
+typedef struct StatusLabel {
+	/* inherits */
+	psy_ui_Component component;
+	psy_ui_ProgressBar progressbar;
+	psy_ui_Label label;
+} StatusLabel;
+
+void statuslabel_init(StatusLabel*, psy_ui_Component* parent);
+
 typedef enum {
 	TERMINALMSGTYPE_ERROR,
 	TERMINALMSGTYPE_WARNING,
@@ -38,13 +47,11 @@ typedef struct MainStatusBar {
 	psy_ui_Component component;
 	/* internal */
 	psy_ui_Component pane;
-	psy_ui_ProgressBar progressbar;
+	StatusLabel statusbarlabel;	
 	psy_ui_Button toggleterminal;	
 	psy_ui_Button togglekbdhelp;
 	psy_ui_Button turnoff;
-	ClockBar clockbar;
-	psy_ui_Notebook viewstatusbars;
-	psy_ui_Label statusbarlabel;
+	ClockBar clockbar;	
 	ZoomBox zoombox;	
 	intptr_t pluginscanprogress;	
 	psy_List* strbuffer;
