@@ -65,11 +65,13 @@ void zoombox_init(ZoomBox* self, psy_ui_Component* parent)
 	psy_ui_button_set_text(&self->zoomout, "-");	
 	psy_ui_button_set_char_number(&self->zoomout, 2);
 	/* zoom */
-	psy_ui_textarea_init_single_line(&self->zoom, zoombox_base(self));	
+	psy_ui_textarea_init_single_line(&self->zoom, zoombox_base(self));		
 	psy_ui_component_set_style_type(psy_ui_textarea_base(&self->zoom),
 		STYLE_ZOOMBOX_EDIT);
 	psy_ui_textarea_set_char_number(&self->zoom, 7);
-	psy_ui_textarea_enable_input_field(&self->zoom);	
+	psy_ui_textarea_enable_input_field(&self->zoom);
+	psy_ui_component_set_preferred_height(&self->zoom.component,
+		psy_ui_value_make_eh(1.0));
 	psy_signal_connect(&self->zoom.signal_accept, self,
 		zoombox_on_edit_accept);
 	psy_signal_connect(&self->zoom.signal_reject, self,

@@ -116,6 +116,7 @@ void parameterbar_onalign(ParameterBar* self)
 
 /* MachineFrame */
 /* prototypes */
+
 static void machineframe_on_destroyed(MachineFrame*);
 static void machineframe_initparamview(MachineFrame*, Workspace*);
 static void machineframe_toggleparameterbox(MachineFrame*,
@@ -142,6 +143,7 @@ static void machineframe_onzoomboxchanged(MachineFrame*, ZoomBox* sender);
 static void machineframe_on_mouse_up(MachineFrame*, psy_ui_Component* sender,
 	psy_ui_MouseEvent*);
 static void machineframe_on_timer(MachineFrame* self, uintptr_t timerid);
+static bool machineframe_on_close(MachineFrame*);
 
 /* vtable */
 static psy_ui_ComponentVtable machineframe_vtable;
@@ -157,6 +159,9 @@ static void machineframe_vtable_init(MachineFrame* self)
 		machineframe_vtable.on_timer =
 			(psy_ui_fp_component_on_timer)
 			machineframe_on_timer;
+		machineframe_vtable.onclose =
+			(psy_ui_fp_component_onclose)
+			machineframe_on_close;
 		machineframe_vtable_initialized = TRUE;
 	}
 	self->component.vtable = &machineframe_vtable;
@@ -173,12 +178,14 @@ void machineframe_init(MachineFrame* self, psy_ui_Component* parent,
 	psy_ui_component_seticonressource(&self->component, IDI_MACPARAM);	
 	self->view = NULL;
 	self->paramview = NULL;
+	self->editorview = NULL;
 	self->paramviews = paramviews;
 	self->machine = NULL;
 	self->machineview = parent;
 	self->showfullmenu = FALSE;
 	self->macid = psy_INDEX_INVALID;
-	self->machine = machine;	
+	self->machine = machine;
+	self->workspace = workspace;
 	parameterbar_init(&self->parameterbar, &self->component, workspace);
 	psy_ui_component_set_align(&self->parameterbar.component, psy_ui_ALIGN_TOP);
 	newvalview_init(&self->newval, &self->component, 0, 0, 0, 0, 0,
@@ -236,6 +243,17 @@ void machineframe_on_destroyed(MachineFrame* self)
 	paramviews_erase(self->paramviews, self->macid);	
 }
 
+bool machineframe_on_close(MachineFrame* self)
+{
+	if (self->editorview && self->machine) {
+		psy_audio_machine_seteditorhandle(self->machine, NULL);
+		psy_signal_disconnect_context(
+			&self->workspace->signal_machineeditresize, self->editorview);
+		psy_ui_component_stop_timer(&self->editorview->component, 0);
+	}
+	return TRUE;
+}
+
 MachineFrame* machineframe_alloc(void)
 {
 	return (MachineFrame*)malloc(sizeof(MachineFrame));
@@ -261,12 +279,10 @@ void machineframe_initparamview(MachineFrame* self, Workspace* workspace)
 		return;
 	}
 	if (psy_audio_machine_haseditor(self->machine)) {
-		MachineEditorView* editorview;
-
-		editorview = machineeditorview_allocinit(
+		self->editorview = machineeditorview_allocinit(
 			psy_ui_notebook_base(&self->notebook), self->machine, workspace);
-		if (editorview) {
-			machineframe_setview(self, &editorview->component,
+		if (self->editorview) {
+			machineframe_setview(self, &self->editorview->component,
 				self->machine);
 		}
 	} else {

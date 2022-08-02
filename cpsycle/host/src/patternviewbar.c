@@ -17,6 +17,7 @@ void patternviewstatus_init(PatternViewStatus* self, psy_ui_Component* parent,
 {	
 	psy_ui_component_init(&self->component, parent, NULL);
 	self->workspace = workspace;
+	psy_ui_component_set_align_expand(&self->component, psy_ui_HEXPAND);
 	psy_ui_component_set_default_align(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_margin_make_em(0.0, 1.0, 0.0, 0.0));
 	/* pattern index */
@@ -140,8 +141,6 @@ void patternviewbar_init(PatternViewBar* self, psy_ui_Component* parent,
 		psy_ui_ALIGN_LEFT, psy_ui_defaults_hmargin(psy_ui_defaults()));	
 	/* Zoom */
 	zoombox_init(&self->zoombox, patternviewbar_base(self));
-	psy_ui_component_set_preferred_size(&self->zoombox.component,
-		psy_ui_size_make_em(16.0, 1.0));
 	psy_signal_connect(&self->zoombox.signal_changed, self,
 		patternviewbar_on_zoombox_changed);	
 	zoombox_data_exchange(&self->zoombox, patternviewconfig_property(
@@ -149,12 +148,14 @@ void patternviewbar_init(PatternViewBar* self, psy_ui_Component* parent,
 	patterncursorstepbox_init(&self->cursorstep, &self->component, workspace);	
 	/* Move cursor when paste */
 	psy_ui_checkbox_init(&self->movecursorwhenpaste, patternviewbar_base(self));
+	psy_ui_checkbox_prevent_wrap(&self->movecursorwhenpaste);
 	psy_ui_checkbox_set_text(&self->movecursorwhenpaste,
 		"settings.pv.move-cursor-when-paste");	
 	psy_signal_connect(&self->movecursorwhenpaste.signal_clicked, self,
 		patternviewbar_on_move_cursor_when_paste);
 	/* Default line */
 	psy_ui_checkbox_init(&self->defaultentries, patternviewbar_base(self));
+	psy_ui_checkbox_prevent_wrap(&self->defaultentries);
 	psy_ui_checkbox_set_text(&self->defaultentries,
 		"settings.visual.default-line");
 	if (patternviewconfig_defaultline(psycleconfig_patview(
@@ -166,6 +167,7 @@ void patternviewbar_init(PatternViewBar* self, psy_ui_Component* parent,
 	/* Single pattern display mode */
 	psy_ui_checkbox_init(&self->displaysinglepattern,
 		patternviewbar_base(self));
+	psy_ui_checkbox_prevent_wrap(&self->displaysinglepattern);
 	psy_ui_checkbox_set_text(&self->displaysinglepattern,
 		"settings.pv.displaysinglepattern");
 	if (patternviewconfig_single_mode(psycleconfig_patview(

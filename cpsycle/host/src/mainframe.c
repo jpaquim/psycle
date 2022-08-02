@@ -319,24 +319,24 @@ void mainframe_init_minmaximize(MainFrame* self)
 void mainframe_init_view_statusbars(MainFrame* self)
 {
 	machineviewbar_init(&self->machineviewbar,
-		psy_ui_notebook_base(&self->statusbar.viewstatusbars),
+		psy_ui_notebook_base(&self->mainviews.viewstatusbars),
 		&self->workspace);
 	patternviewbar_init(&self->patternviewbar,
-		psy_ui_notebook_base(&self->statusbar.viewstatusbars),
+		psy_ui_notebook_base(&self->mainviews.viewstatusbars),
 		&self->workspace.config.visual.patview,
 		&self->workspace);	
 	sampleeditorbar_init(&self->samplesview.sampleeditor.sampleeditortbar,
-		psy_ui_notebook_base(&self->statusbar.viewstatusbars),
+		psy_ui_notebook_base(&self->mainviews.viewstatusbars),
 		&self->samplesview.sampleeditor, &self->workspace);
 	samplesview_connectstatusbar(&self->samplesview);
 	instrumentsviewbar_init(&self->instrumentsviewbar,
-		psy_ui_notebook_base(&self->statusbar.viewstatusbars), &self->workspace);
+		psy_ui_notebook_base(&self->mainviews.viewstatusbars), &self->workspace);
 	instrumentsview_setstatusbar(&self->instrumentsview,
 		&self->instrumentsviewbar);
 	plugineditorbar_init(&self->plugineditorbar,
-		psy_ui_notebook_base(&self->statusbar.viewstatusbars));
+		psy_ui_notebook_base(&self->mainviews.viewstatusbars));
 	plugineditorbar_set_editor(&self->plugineditorbar, &self->plugineditor);
-	psy_ui_notebook_select(&self->statusbar.viewstatusbars, 0);
+	psy_ui_notebook_select(&self->mainviews.viewstatusbars, 0);
 }
 
 void mainframe_connect_statusbar(MainFrame* self)
@@ -926,16 +926,17 @@ void mainframe_on_tabbar_changed(MainFrame* self, psy_ui_TabBar* sender,
 	}	
 	psy_ui_component_select_section(&self->mainviews.notebook.component,
 		psy_ui_tab_target_id(tab), psy_INDEX_INVALID);	
-	psy_ui_notebook_select(&self->statusbar.viewstatusbars, tabindex);
+	psy_ui_notebook_select(&self->mainviews.viewstatusbars, tabindex);
 	psy_ui_notebook_select(&self->mainviews.mainviewbar.viewtabbars, tabindex);
 	component = psy_ui_notebook_active_page(&self->mainviews.notebook);
 	if (component) {
 		workspace_on_view_changed(&self->workspace, viewindex_make(
-			tabindex, psy_ui_component_section(component), psy_INDEX_INVALID,
+			tabindex, psy_ui_component_section(component),
+			psy_INDEX_INVALID,
 			psy_INDEX_INVALID));
 		psy_ui_component_set_focus(component);
-	}
-	psy_ui_component_align(&self->mainviews.component);
+	}		
+	psy_ui_component_align(&self->mainviews.component);	
 	psy_ui_component_invalidate(&self->mainviews.component);	
 }
 
@@ -1425,7 +1426,7 @@ bool mainframe_on_input_handler_callback(MainFrame* self, int message, void* par
 
 void mainframe_plugineditor_on_focus(MainFrame* self, psy_ui_Component* sender)
 {
-	psy_ui_notebook_select(&self->statusbar.viewstatusbars, 4);
+	psy_ui_notebook_select(&self->mainviews.viewstatusbars, 4);
 }
 
 void mainframe_add_link(MainFrame* self, Link* link)

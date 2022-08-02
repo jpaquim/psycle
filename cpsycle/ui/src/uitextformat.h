@@ -25,7 +25,7 @@ typedef struct psy_ui_TextFormat {
     double textheight;
     double linespacing;
     uintptr_t numavgchars;
-    uintptr_t nummaxchars;
+    uintptr_t nummaxchars;    
     psy_ui_TextAlignment textalignment;
 } psy_ui_TextFormat;
 

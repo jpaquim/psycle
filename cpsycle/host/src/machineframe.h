@@ -55,6 +55,7 @@ typedef struct ParameterBar {
 void parameterbar_init(ParameterBar*, psy_ui_Component* parent, Workspace*);
 
 struct ParamViews;
+struct MachineEditorView;
 
 /* MachineFrame */
 typedef struct MachineFrame {
@@ -77,6 +78,8 @@ typedef struct MachineFrame {
 	/* references */
 	ParamView* paramview;
 	struct ParamViews* paramviews;
+	Workspace* workspace;
+	struct MachineEditorView* editorview;
 } MachineFrame;
 
 void machineframe_init(MachineFrame*, psy_ui_Component* parent,

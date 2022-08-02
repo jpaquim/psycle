@@ -50,7 +50,7 @@ typedef struct psy_ui_TextAreaPane {
     psy_Signal signal_reject;
     /* internal */
 	double charnumber;
-	int linenumber;
+	uintptr_t linenumber;
     bool isinputfield;    
     char* text;
     psy_ui_TextFormat format;
@@ -64,7 +64,7 @@ void psy_ui_textareapane_set_text(psy_ui_TextAreaPane*, const char* text);
 void psy_ui_textareapane_add_text(psy_ui_TextAreaPane*, const char* text);
 const char* psy_ui_textareapane_text(const psy_ui_TextAreaPane* self);
 void psy_ui_textareapane_set_char_number(psy_ui_TextAreaPane*, double number);
-void psy_ui_textareapane_set_line_number(psy_ui_TextAreaPane*, int number);
+void psy_ui_textareapane_set_line_number(psy_ui_TextAreaPane*, uintptr_t number);
 void psy_ui_textareapane_enable_edit(psy_ui_TextAreaPane*);
 void psy_ui_textareapane_prevent_edit(psy_ui_TextAreaPane*);
 void psy_ui_textareapane_set_sel(psy_ui_TextAreaPane*, uintptr_t cpmin,
@@ -139,7 +139,7 @@ INLINE void psy_ui_textarea_set_char_number(psy_ui_TextArea* self, int number)
     psy_ui_textareapane_set_char_number(&self->pane, number);
 }
 
-INLINE void psy_ui_textarea_setlinenumber(psy_ui_TextArea* self, int number)
+INLINE void psy_ui_textarea_setlinenumber(psy_ui_TextArea* self, uintptr_t number)
 {
     psy_ui_textareapane_set_line_number(&self->pane, number);
 }

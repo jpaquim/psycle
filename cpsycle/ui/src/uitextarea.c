@@ -92,9 +92,9 @@ void psy_ui_textareapane_init(psy_ui_TextAreaPane* self,
 	psy_ui_component_set_aligner(&self->component, NULL);
 	psy_ui_component_set_tab_index(&self->component, 0);
 	self->charnumber = 0.0;
-	self->linenumber = 1;
+	self->linenumber = psy_INDEX_INVALID;
 	self->isinputfield = FALSE;	
-	self->text = psy_strdup("textinput	tab1	tab2 word line break");
+	self->text = psy_strdup("");
 	self->cp = 0;
 	psy_ui_textformat_init(&self->format);
 	psy_signal_init(&self->signal_change);
@@ -169,7 +169,7 @@ void psy_ui_textareapane_set_char_number(psy_ui_TextAreaPane* self,
 }
 
 void psy_ui_textareapane_set_line_number(psy_ui_TextAreaPane* self,
-	int number)
+	uintptr_t number)
 {
 	self->linenumber = number;
 }
@@ -180,6 +180,7 @@ void psy_ui_textareapane_on_preferred_size(psy_ui_TextAreaPane* self,
 	const psy_ui_TextMetric* tm;	
 	double width;
 	const psy_ui_Font* font;
+	uintptr_t lines;
 	
 	font = psy_ui_component_font(psy_ui_textareapane_base(self));
 	tm = psy_ui_component_textmetric(psy_ui_textareapane_base(self));	
@@ -193,9 +194,12 @@ void psy_ui_textareapane_on_preferred_size(psy_ui_TextAreaPane* self,
 		width = psy_max(psy_ui_value_px(&limit->width, tm, limit),
 			self->format.nummaxchars * tm->tmAveCharWidth);
 	}
-	*rv = psy_ui_size_make_px(width,
-		psy_ui_textformat_numlines(&self->format) *
-			(tm->tmHeight * 1.0));	
+	if (self->linenumber == psy_INDEX_INVALID) {
+		lines = psy_ui_textformat_numlines(&self->format);
+	} else {
+		lines = self->linenumber;
+	}
+	*rv = psy_ui_size_make_px(width, lines * (tm->tmHeight * 1.0));	
 }
 
 void psy_ui_textareapane_enable_edit(psy_ui_TextAreaPane* self)
@@ -669,8 +673,11 @@ void psy_ui_textarea_init_single_line(psy_ui_TextArea* self,
 	psy_ui_textformat_set_alignment(&self->pane.format,
 		psy_ui_textalignment_make(psy_ui_ALIGNMENT_LEFT |
 			psy_ui_ALIGNMENT_CENTER_VERTICAL));
+	psy_ui_component_set_overflow(&self->pane.component,
+		psy_ui_OVERFLOW_HIDDEN);
 	psy_ui_component_set_align(&self->pane.component,
 		psy_ui_ALIGN_CLIENT);
+	self->pane.linenumber = 1;
 }
 
 void psy_ui_textarea_on_destroyed(psy_ui_TextArea* self)
