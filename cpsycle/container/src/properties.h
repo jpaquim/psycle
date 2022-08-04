@@ -232,6 +232,7 @@ psy_Property* psy_property_connect_file_accept(psy_Property*, void* context,
 void psy_property_disconnect(psy_Property*, void* context);
 psy_Property* psy_property_connect_children(psy_Property*, int recursive,
 	void* context, void* fp);
+void psy_property_notify(psy_Property*);
 void psy_property_notify_all(psy_Property*);
 void psy_property_rebuild(psy_Property*);
 void psy_property_scrollto(psy_Property*);

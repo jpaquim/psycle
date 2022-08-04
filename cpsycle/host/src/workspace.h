@@ -8,6 +8,7 @@
 
 /* host */
 #include "config.h"
+#include "fileview.h"
 #include "hostmachinecallback.h"
 #include "inputhandler.h"
 #include "pluginscanthread.h"
@@ -77,7 +78,6 @@ typedef struct Workspace {
 	psy_Signal signal_viewselected;	
 	psy_Signal signal_parametertweak;
 	psy_Signal signal_status_out;	
-	psy_Signal signal_togglegear;
 	psy_Signal signal_machineeditresize;
 	psy_Signal signal_buschanged;
 	psy_Signal signal_gearselect;	
@@ -107,6 +107,7 @@ typedef struct Workspace {
 	struct ParamViews* paramviews;
 	psy_Logger* terminal_output;
 	uintptr_t terminalstyleid;
+	FileView* fileview;
 } Workspace;
 
 void workspace_init(Workspace*, psy_ui_Component* handle);

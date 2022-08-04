@@ -12,6 +12,7 @@
 
 /* local */
 #include "custommachine.h"
+#include "lv2param.h"
 /* lilv */
 #include "lilv/lilv.h"
 /* lv2 */
@@ -21,6 +22,12 @@
 extern "C" {
 #endif
 
+/* LilvTestUriMap: Copyright 2007-2020 David Robillard <d@drobilla.net> */
+typedef struct {
+  char**   uris;
+  uint32_t n_uris;
+} LilvTestUriMap;
+
 typedef struct LV2Plugin {
 	/* inherits */
 	psy_audio_CustomMachine custommachine;
@@ -29,20 +36,23 @@ typedef struct LV2Plugin {
 	void* editorhandle;
 	LilvWorld*        world;
 	const LilvPlugin* plugin;
-	LilvInstance*     instance;
-	LilvNodes* 	required_features;
+	LilvInstance*     instance;	
+	LilvTestUriMap    uri_table;
+    LV2_URID_Map       map;
+    LV2_Feature        map_feature;
+    LV2_URID_Unmap     unmap;
+    LV2_Feature        unmap_feature;
+    const LV2_Feature *features[2];
 	psy_Table inportmap; // int x int
 	psy_Table outportmap; // int x int
-	int numInputs;
-	int numOutputs;
+	uintptr_t numInputs;
+	uintptr_t numOutputs;
 	psy_Table parameters;
-	LilvNode* lv2_InputPort;
-	LilvNode* lv2_OutputPort;
-	LilvNode* lv2_AudioPort;
-	LilvNode* lv2_ControlPort;
-	LilvNode* lv2_connectionOptional;
-//	psy_Table tracknote;
-//	psy_Table parameters;
+	LilvNode* input_port_class;
+	LilvNode* output_port_class;
+	LilvNode* audio_port_class;
+	LilvNode* control_port_class;	
+//	psy_Table tracknote;	
 } psy_audio_LV2Plugin;
 
 void psy_audio_lv2plugin_init(psy_audio_LV2Plugin*, psy_audio_MachineCallback*,

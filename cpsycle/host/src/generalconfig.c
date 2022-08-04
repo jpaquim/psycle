@@ -11,6 +11,7 @@
 #include "resources/resource.h"
 
 static void generalconfig_make(GeneralConfig*, psy_Property*);
+static void generalconfig_make_workbench(GeneralConfig*, psy_Property* parent);
 
 void generalconfig_init(GeneralConfig* self, psy_Property* parent)
 {
@@ -39,37 +40,64 @@ void generalconfig_make(GeneralConfig* self, psy_Property* parent)
 		IDB_TOGGLE_DARK);
 	psy_property_hide(psy_property_set_text(
 		psy_property_append_str(self->general, "version", "alpha"),
-		"settings.general.version"));
-	psy_property_set_text(
-		psy_property_append_bool(self->general, "showaboutatstart", TRUE),
-		"settings.general.show-about-at-startup");
+		"settings.general.version"));	
 	psy_property_set_text(
 		psy_property_append_bool(self->general, "showsonginfoonload", TRUE),
-		"settings.general.show-song-info-on-load");
-	psy_property_set_text(
-		psy_property_append_bool(self->general, "showmaximizedatstart", TRUE),
-		"settings.general.show-maximized-at-startup");
-	psy_property_set_id(psy_property_set_text(
-		psy_property_append_bool(self->general, "showsequenceedit", FALSE),
-		"settings.general.show-sequenceedit"),
-		PROPERTY_ID_SHOWSEQUENCEEDIT);
-	psy_property_set_id(psy_property_set_text(
-		psy_property_append_bool(self->general, "showstepsequencer", FALSE),
-		"settings.general.show-sequencestepbar"),
-		PROPERTY_ID_SHOWSTEPSEQUENCER);
-	psy_property_set_id(psy_property_set_text(
-		psy_property_append_bool(self->general, "showplaylist", FALSE),
-		"settings.general.show-playlist"),
-		PROPERTY_ID_SHOWPLAYLIST);
-	psy_property_set_text(
-		psy_property_append_bool(self->general, "saverecentsongs", TRUE),
-		"settings.general.save-recent-songs");
+		"settings.general.show-song-info-on-load");		
 	psy_property_set_text(
 		psy_property_append_bool(self->general, "playsongafterload", TRUE),
 		"settings.general.play-song-after-load");
 	psy_property_set_text(
 		psy_property_append_bool(self->general, "showpatternnames", FALSE),
 		"settings.general.show-pattern-names");
+	psy_property_set_text(
+		psy_property_append_bool(self->general, "saverecentsongs", TRUE),
+		"settings.general.save-recent-songs");
+	generalconfig_make_workbench(self, self->general);
+}
+
+void generalconfig_make_workbench(GeneralConfig* self, psy_Property* parent)
+{
+	psy_Property* bench;
+	
+	bench = psy_property_set_text(psy_property_append_section(parent,
+		"bench"), "settings.general.bench");
+	psy_property_set_text(
+		psy_property_append_bool(bench, "showaboutatstart", TRUE),
+		"settings.general.show-about-at-startup");		
+	psy_property_set_text(
+		psy_property_append_bool(bench, "showmaximizedatstart", TRUE),
+		"settings.general.show-maximized-at-startup");
+	psy_property_set_id(psy_property_set_text(
+		psy_property_append_bool(bench, "showsequenceedit", FALSE),
+		"settings.general.show-sequenceedit"),
+		PROPERTY_ID_SHOWSEQUENCEEDIT);
+	psy_property_set_id(psy_property_set_text(
+		psy_property_append_bool(bench, "showstepsequencer", FALSE),
+		"settings.general.show-sequencestepbar"),
+		PROPERTY_ID_SHOWSTEPSEQUENCER);
+	psy_property_set_text(
+		psy_property_append_bool(bench, "showpianokbd", FALSE),
+		"settings.general.show-pianokbd");
+	psy_property_set_id(psy_property_set_text(
+		psy_property_append_bool(bench, "showplaylist", FALSE),
+		"settings.general.show-playlist"),
+		PROPERTY_ID_SHOWPLAYLIST);
+	psy_property_set_text(
+		psy_property_append_bool(bench, "showplugineditor", FALSE),
+		"settings.general.show-plugineditor");		
+	psy_property_set_text(
+			psy_property_append_bool(bench, "showparamrack", FALSE),
+		"settings.general.show-paramrack");		
+	psy_property_set_text(
+		psy_property_append_bool(bench, "showgear", FALSE),
+		"settings.general.show-gear");
+	psy_property_set_text(
+		psy_property_append_bool(bench, "showmidi", FALSE),
+		"settings.general.show-midi");
+	psy_property_set_text(
+		psy_property_append_bool(bench, "showcpu", FALSE),
+		"settings.general.show-cpu");
 }
 
 bool generalconfig_showing_song_info_on_load(const GeneralConfig* self)
@@ -97,21 +125,21 @@ void generalconfig_show_about_at_start(GeneralConfig* self)
 {
 	assert(self);
 
-	psy_property_set_bool(self->general, "showaboutatstart", TRUE);
+	psy_property_set_bool(self->general, "bench.showaboutatstart", TRUE);
 }
 
 void generalconfig_hide_about_at_start(GeneralConfig* self)
 {
 	assert(self);
 
-	psy_property_set_bool(self->general, "showaboutatstart", FALSE);
+	psy_property_set_bool(self->general, "bench.showaboutatstart", FALSE);
 }
 
 bool generalconfig_showing_about_at_start(const GeneralConfig* self)
 {
 	assert(self);
 
-	return psy_property_at_bool(self->general, "showaboutatstart", TRUE);
+	return psy_property_at_bool(self->general, "bench.showaboutatstart", TRUE);
 }
 
 ViewIndex generalconfig_start_view(const GeneralConfig* self)
@@ -128,7 +156,7 @@ bool generalconfig_show_maximized_at_start(const GeneralConfig* self)
 {
 	assert(self);
 
-	return psy_property_at_bool(self->general, "showmaximizedatstart", TRUE);
+	return psy_property_at_bool(self->general, "bench.showmaximizedatstart", TRUE);
 }
 
 bool generalconfig_saving_recent_songs(const GeneralConfig* self)
@@ -171,35 +199,42 @@ bool generalconfig_showsequenceedit(const GeneralConfig* self)
 {
 	assert(self);
 
-	return psy_property_at_bool(self->general, "showsequenceedit", FALSE);
+	return psy_property_at_bool(self->general, "bench.showsequenceedit", FALSE);
 }
 
 void generalconfig_setsequenceeditshowstate(GeneralConfig* self, bool state)
 {
 	assert(self);
 
-	psy_property_set_bool(self->general, "showsequenceedit", state);
+	psy_property_set_bool(self->general, "bench.showsequenceedit", state);
 }
 
 bool generalconfig_showstepsequencer(const GeneralConfig* self)
 {
 	assert(self);
 
-	return psy_property_at_bool(self->general, "showstepsequencer", FALSE);
+	return psy_property_at_bool(self->general, "bench.showstepsequencer", FALSE);
+}
+
+bool generalconfig_showpianokbd(const GeneralConfig* self)
+{
+	assert(self);
+
+	return psy_property_at_bool(self->general, "bench.showpianokbd", FALSE);
 }
 
 bool generalconfig_showplaylist(const GeneralConfig* self)
 {
 	assert(self);
 
-	return psy_property_at_bool(self->general, "showplaylist", TRUE);
+	return psy_property_at_bool(self->general, "bench.showplaylist", TRUE);
 }
 
 void generalconfig_setplaylistshowstate(GeneralConfig* self, bool state)
 {
 	assert(self);
 
-	psy_property_set_bool(self->general, "showplaylist", state);
+	psy_property_set_bool(self->general, "bench.showplaylist", state);
 }
 
 void generalconfig_setstepsequencershowstate(GeneralConfig* self, bool state)
@@ -207,6 +242,13 @@ void generalconfig_setstepsequencershowstate(GeneralConfig* self, bool state)
 	assert(self);
 
 	psy_property_set_bool(self->general, "showstepsequencer", state);
+}
+
+void generalconfig_setpianokbdshowstate(GeneralConfig* self, bool state)
+{
+	assert(self);
+
+	psy_property_set_bool(self->general, "bench.showpianokbd", state);
 }
 
 void generalconfig_show_pattern_names(GeneralConfig* self)
@@ -241,6 +283,7 @@ bool generalconfig_connect(GeneralConfig* self, const char* key, void* context,
 	p = generalconfig_property(self, key);
 	if (p) {
 		psy_property_connect(p, context, fp);
+		psy_property_notify(p);
 		return TRUE;
 	}
 	return FALSE;

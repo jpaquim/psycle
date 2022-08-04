@@ -68,7 +68,7 @@ typedef struct psy_ui_App {
 	psy_ui_DragEvent dragevent;	
 	psy_ui_EventDispatch eventdispatch;
 	psy_Table components;
-	psy_ui_Bitmaps bitmaps;
+	psy_ui_Bitmaps bitmaps;	
 } psy_ui_App;
 
 psy_ui_App* psy_ui_app(void);

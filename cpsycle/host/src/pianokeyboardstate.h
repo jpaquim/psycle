@@ -9,7 +9,7 @@
 /* audio */
 #include <pattern.h>
 /* ui */
-#include <uivalue.h>
+#include <uidef.h>
 #include <uigeometry.h>
 /* dsp */
 #include <notestab.h>
@@ -23,55 +23,70 @@ typedef struct KeyboardState {
 	uint8_t keymax;
 	psy_dsp_NotesTabMode notemode;
 	bool drawpianokeys;
-	psy_ui_Value keyheight;
-	double keyheightpx;
-	double keyboardheightpx;
-	psy_ui_Value defaultkeyheight;	
+	psy_ui_Value key_extent;
+	double key_extent_px;
+	double keyboard_extent_px;
+	psy_ui_Value default_key_extent;
+	psy_ui_Orientation orientation;	
 } KeyboardState;
 
-void keyboardstate_init(KeyboardState*);
+void keyboardstate_init(KeyboardState*, psy_ui_Orientation);
 
-INLINE intptr_t keyboardstate_numkeys(KeyboardState* self)
+INLINE intptr_t keyboardstate_num_keys(const KeyboardState* self)
 {
 	assert(self);
 
 	return self->keymax - self->keymin;
 }
 
-INLINE double keyboardstate_height(KeyboardState* self,
+INLINE double keyboardstate_extent(const KeyboardState* self,
 	const psy_ui_TextMetric* tm)
 {
 	assert(self);
 
-	return keyboardstate_numkeys(self) *
-		psy_ui_value_px(&self->keyheight, tm, NULL);
+	return keyboardstate_num_keys(self) * psy_ui_value_px(&self->key_extent, tm,
+		NULL);
 }
 
-INLINE double keyboardstate_keytopx(KeyboardState* self, intptr_t key)
+INLINE double keyboardstate_key_to_px(KeyboardState* self, intptr_t key)
 {
 	assert(self);
 
-	return self->keyboardheightpx - (key + 1) * self->keyheightpx;
+	if (self->orientation == psy_ui_VERTICAL) {
+		return self->keyboard_extent_px - (key + 1) * self->key_extent_px;
+	}
+	return (key + 1) * self->key_extent_px;
 }
 
-INLINE uint8_t keyboardstate_screen_to_key(KeyboardState* self, psy_ui_RealPoint pt,
-	double width)
+INLINE uint8_t keyboardstate_screen_to_key(KeyboardState* self,
+	psy_ui_RealPoint pt, double extent)
 {
 	uint8_t rv;
 	assert(self);
 
 	rv = 0;
-	if (self->keymax - 1 >= pt.y / self->keyheightpx) {		
-		rv = (uint8_t)(self->keymax - pt.y / self->keyheightpx);
+	if (self->orientation == psy_ui_HORIZONTAL) {
+		double swap;
+		
+		swap = pt.x;
+		pt.x = pt.y;
+		pt.y = swap;
+	}
+	if (self->keymax - 1 >= pt.y / self->key_extent_px) {
+		if (self->orientation == psy_ui_VERTICAL) {
+			rv = (uint8_t)(self->keymax - pt.y / self->key_extent_px);
+		} else {
+			rv = (uint8_t)(pt.y / self->key_extent_px) - 1;
+		}
 		rv = psy_min(self->keymax, rv);
 		rv = psy_max(self->keymin, rv);
 	}
 	if (rv != psy_audio_NOTECOMMANDS_EMPTY && psy_dsp_isblack(rv)) {				
-		if (pt.x > (width * 0.60)) {
-			double cpy;
+		if (pt.x > (extent * 0.60)) {
+			double cp;
 
-			cpy = keyboardstate_keytopx(self, rv) + (self->keyheightpx / 2);
-			if (pt.y > cpy) {
+			cp = keyboardstate_key_to_px(self, rv) + (self->key_extent_px / 2);
+			if (pt.y > cp) {
 				if (rv > self->keymin) {
 					rv--;
 				}
@@ -92,10 +107,10 @@ INLINE void pianokeyboardstate_clip(KeyboardState* self,
 	assert(self);	
 	
 	*rv_keymin = (uint8_t)psy_max((int16_t)self->keymin, (int16_t)
-		((self->keyboardheightpx - clip_bottom_px) / self->keyheightpx - 1));
+		((self->keyboard_extent_px - clip_bottom_px) / self->key_extent_px - 1));
 	*rv_keymax = (uint8_t)psy_max(0, psy_min((int16_t)self->keymax, (int16_t)
-		((self->keyboardheightpx - clip_top_px + self->keyheightpx) /
-		self->keyheightpx)));	
+		((self->keyboard_extent_px - clip_top_px + self->key_extent_px) /
+		self->key_extent_px)));	
 }
 
 INLINE void keyboardstate_update_metrics(KeyboardState* self,
@@ -103,9 +118,8 @@ INLINE void keyboardstate_update_metrics(KeyboardState* self,
 {
 	assert(self);
 
-	self->keyheightpx = psy_ui_value_px(
-		&self->keyheight, tm, NULL);
-	self->keyboardheightpx = keyboardstate_height(self, tm);
+	self->key_extent_px = psy_ui_value_px(&self->key_extent, tm, NULL);
+	self->keyboard_extent_px = keyboardstate_extent(self, tm);
 }
 
 #ifdef __cplusplus

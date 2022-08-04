@@ -112,6 +112,8 @@ void init_host_styles(psy_ui_Styles* self, psy_ui_ThemeMode theme)
 	
 	style = psy_ui_style_allocinit();
 	psy_ui_style_set_padding_em(style, 0.0, 0.0, 0.0, 1.0);
+	// psy_ui_style_set_colours(style, psy_ui_colour_make(0xFFFFFF),
+	//	psy_ui_colour_make(0x009B7800));
 	psy_ui_styles_set_style(self, STYLE_SEQBAR, style);
 
 	style = psy_ui_style_allocinit();

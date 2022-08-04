@@ -155,7 +155,7 @@ typedef struct psy_ui_RealRectangle {
 	double left;
 	double top;
 	double right;
-	double bottom;
+	double bottom;	
 } psy_ui_RealRectangle;
 
 INLINE void psy_ui_realrectangle_init(psy_ui_RealRectangle* self)
@@ -171,7 +171,7 @@ INLINE void psy_ui_realrectangle_init_all(psy_ui_RealRectangle* self,
 	self->left = topleft.x;
 	self->top = topleft.y;
 	self->right = topleft.x + size.width;
-	self->bottom = topleft.y + size.height;
+	self->bottom = topleft.y + size.height;	
 }
 
 INLINE psy_ui_RealRectangle psy_ui_realrectangle_make(psy_ui_RealPoint topleft,

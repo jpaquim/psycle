@@ -258,12 +258,19 @@ void make_translator_default(psy_Dictionary* dict)
 	/* settings.general */	
 	psy_dictionary_set(dict, "settings.general.general", "General");
 	psy_dictionary_set(dict, "settings.general.version", "Version");
+	psy_dictionary_set(dict, "settings.general.bench", "Workbench");
 	psy_dictionary_set(dict, "settings.general.show-about-at-startup", "Show About At Startup");
 	psy_dictionary_set(dict, "settings.general.show-song-info-on-load", "Show Song Info On Load");
 	psy_dictionary_set(dict, "settings.general.show-maximized-at-startup", "Show maximized at startup");
 	psy_dictionary_set(dict, "settings.general.show-playlist", "Show Playlist/Recentsongs");
+	psy_dictionary_set(dict, "settings.general.show-pianokbd", "Show Pianokeyboard");
 	psy_dictionary_set(dict, "settings.general.show-sequenceedit", "Show Sequenceeditor");
 	psy_dictionary_set(dict, "settings.general.show-sequencestepbar", "Show Sequencestepbar");
+	psy_dictionary_set(dict, "settings.general.show-plugineditor", "Show Gear");
+	psy_dictionary_set(dict, "settings.general.show-paramrack", "Show Parameter Rack");
+	psy_dictionary_set(dict, "settings.general.show-gear", "Show Gear");
+	psy_dictionary_set(dict, "settings.general.show-midi", "Show Midi Monitor");
+	psy_dictionary_set(dict, "settings.general.show-cpu", "Show CPU Monitor");
 	psy_dictionary_set(dict, "settings.general.save-recent-songs", "Save recent songs");
 	psy_dictionary_set(dict, "settings.general.play-song-after-load", "Play Song After Load");	
 	psy_dictionary_set(dict, "settings.general.show-pattern-names", "Show Pattern Names");
@@ -549,11 +556,13 @@ void make_translator_default(psy_Dictionary* dict)
 	psy_dictionary_set(dict, "seqview.copy", "Copy");
 	psy_dictionary_set(dict, "seqview.paste", "Paste");
 	psy_dictionary_set(dict, "seqview.singlesel", "SingleSel");
-	psy_dictionary_set(dict, "seqview.multisel", "MultiSel");	
-	psy_dictionary_set(dict, "seqview.showseqeditor", "Show SequenceEditor");
-	psy_dictionary_set(dict, "seqview.hideseqeditor", "Hide SequenceEditor");
-	psy_dictionary_set(dict, "seqview.showstepsequencer", "Show Stepsequencer");
-	psy_dictionary_set(dict, "seqview.hidestepsequencer", "Hide Stepsequencer");
+	psy_dictionary_set(dict, "seqview.multisel", "MultiSel");
+	psy_dictionary_set(dict, "seqview.showpianokbd", "Pianokeyboard");
+	psy_dictionary_set(dict, "seqview.hidepianokbd", "Pianokeyboard");
+	psy_dictionary_set(dict, "seqview.showseqeditor", "SequenceEditor");
+	psy_dictionary_set(dict, "seqview.hideseqeditor", "SequenceEditor");
+	psy_dictionary_set(dict, "seqview.showstepsequencer", "Stepsequencer");
+	psy_dictionary_set(dict, "seqview.hidestepsequencer", "Stepsequencer");
 	/* seqedit */
 	psy_dictionary_set(dict, "seqedit.track", "Track");
 	psy_dictionary_set(dict, "seqedit.move", "Move");

@@ -261,6 +261,7 @@ void psy_ui_x11_componentimp_init(psy_ui_x11_ComponentImp* self,
 	self->visible = parent ? TRUE : FALSE;
 	self->viewcomponents = NULL;
 	self->above = FALSE;
+	self->maximize = FALSE;
 	psy_ui_realrectangle_init(&self->exposearea);
 	self->exposeareavalid = FALSE;
 	self->expose_rectangles = NULL;
@@ -386,7 +387,32 @@ void psy_ui_x11_componentimp_stay_always_on_top(psy_ui_x11_ComponentImp* self)
 	event.xclient.data.l[3] = 0;	
 	event.xclient.data.l[4] = 0;	
     XSendEvent(x11app->dpy, DefaultRootWindow(x11app->dpy), False,
-		SubstructureRedirectMask|SubstructureNotifyMask, &event);			
+		SubstructureRedirectMask|SubstructureNotifyMask, &event);
+}
+
+void psy_ui_x11_componentimp_maximize(psy_ui_x11_ComponentImp* self)
+{
+	XEvent event;
+    psy_ui_X11App* x11app;
+
+	self->visible = TRUE;
+	x11app = (psy_ui_X11App*)psy_ui_app()->imp;
+	memset(&event, 0, sizeof(event));
+    event.xclient.type = ClientMessage;
+    event.xclient.serial = 0;
+    event.xclient.send_event = True;
+    event.xclient.display = x11app->dpy;
+    event.xclient.window  = self->hwnd;
+    event.xclient.message_type = x11app->wmNetState;
+    event.xclient.format = 32;
+
+    event.xclient.data.l[0] = 1;
+    event.xclient.data.l[1] = x11app->wmStateMaximizedHorz;
+	event.xclient.data.l[2] = x11app->wmStateMaximizedVert;;
+	event.xclient.data.l[3] = 1;	
+	event.xclient.data.l[4] = 0;	
+    XSendEvent(x11app->dpy, DefaultRootWindow(x11app->dpy), False,
+		SubstructureRedirectMask|SubstructureNotifyMask, &event); 
 }
 
 
@@ -493,10 +519,12 @@ void dev_show(psy_ui_x11_ComponentImp* self)
 
 void dev_showstate(psy_ui_x11_ComponentImp* self, int state)
 {
-	psy_ui_X11App* x11app;
+	XEvent event;
+    psy_ui_X11App* x11app;
 
+	x11app = (psy_ui_X11App*)psy_ui_app()->imp;
 	self->visible = TRUE;
-    x11app = (psy_ui_X11App*)psy_ui_app()->imp;
+	self->maximize = (state == 1);
 	XMapWindow(x11app->dpy, self->hwnd);	
 	self->mapped = TRUE;	
 }

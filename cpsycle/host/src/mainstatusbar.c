@@ -14,9 +14,6 @@
 #include "../../detail/portable.h"
 
 
-/* StatusLabel */
-
-
 /* prototypes */
 static void statuslabel_init_label(StatusLabel*);
 static void statuslabel_init_progress_bar(StatusLabel*);
@@ -80,11 +77,11 @@ static void mainstatusbar_init_turnoff_button(MainStatusBar*);
 static void mainstatusbar_init_clock_bar(MainStatusBar*);
 static void mainstatusbar_init_kbd_help_button(MainStatusBar*);
 static void mainstatusbar_init_terminal_button(MainStatusBar*);
-static void mainstatusbar_onsongloadprogress(MainStatusBar*, Workspace* sender,
-	intptr_t progress);
-static void mainstatusbar_onpluginscanprogress(MainStatusBar*, Workspace*,
-	int progress);
-static void mainstatusbar_onstatus(MainStatusBar*, Workspace* sender,
+static void mainstatusbar_on_song_load_progress(MainStatusBar*,
+	Workspace* sender, intptr_t progress);
+static void mainstatusbar_on_plugin_scan_progress(MainStatusBar*,
+	Workspace* sender, int progress);
+static void mainstatusbar_on_status(MainStatusBar*, Workspace* sender,
 	const char* text);
 
 /* vtable */
@@ -128,7 +125,8 @@ void mainstatusbar_init(MainStatusBar* self, psy_ui_Component* parent,
 
 void mainstatusbar_on_destroyed(MainStatusBar* self)
 {
-	psy_list_deallocate(&self->strbuffer, NULL);
+	free(self->strbuffer);
+	self->strbuffer = NULL;
 	psy_lock_dispose(&self->outputlock);
 }
 
@@ -145,7 +143,7 @@ void mainstatusbar_init_status_label(MainStatusBar* self)
 	psy_ui_component_set_align(&self->statusbarlabel.component,
 		psy_ui_ALIGN_CLIENT);
 	workspace_connect_status(self->workspace, self,
-		(fp_workspace_output)mainstatusbar_onstatus);
+		(fp_workspace_output)mainstatusbar_on_status);
 }
 
 void mainstatusbar_init_turnoff_button(MainStatusBar* self)
@@ -182,8 +180,7 @@ void mainstatusbar_init_kbd_help_button(MainStatusBar* self)
 
 void mainstatusbar_init_terminal_button(MainStatusBar* self)
 {		
-	psy_ui_button_init_text(&self->toggleterminal, &self->pane,
-		"Terminal");
+	psy_ui_button_init_text(&self->toggleterminal, &self->pane, "Terminal");
 	psy_ui_component_set_style_type(&self->toggleterminal.component,
 		self->workspace->terminalstyleid);
 	psy_ui_component_set_align(psy_ui_button_base(&self->toggleterminal),
@@ -196,19 +193,19 @@ void mainstatusbar_init_progress_bar(MainStatusBar* self)
 {
 	self->pluginscanprogress = -1;	
 	workspace_connect_load_progress(self->workspace, self,
-		(fp_workspace_songloadprogress)mainstatusbar_onsongloadprogress);
+		(fp_workspace_songloadprogress)mainstatusbar_on_song_load_progress);
 	psy_signal_connect(&self->workspace->signal_scanprogress, self,
-		mainstatusbar_onpluginscanprogress);
+		mainstatusbar_on_plugin_scan_progress);
 }
 
-void mainstatusbar_onstatus(MainStatusBar* self, Workspace* sender,
+void mainstatusbar_on_status(MainStatusBar* self, Workspace* sender,
 	const char* text)
 {
 	assert(self);
 
 	if (text) {
 		psy_lock_enter(&self->outputlock);
-		psy_list_append(&self->strbuffer, psy_strdup(text));
+		psy_strreset(&self->strbuffer, text);
 		psy_lock_leave(&self->outputlock);
 	}	
 }
@@ -217,20 +214,22 @@ void mainstatusbar_update_terminal_button(MainStatusBar* self)
 {
 	if (psy_ui_componentstyle_style_id(&self->component.style,
 			psy_ui_STYLESTATE_NONE) != self->workspace->terminalstyleid) {
-		psy_ui_component_set_style_type(psy_ui_button_base(&self->toggleterminal),
+		psy_ui_component_set_style_type(
+			psy_ui_button_base(&self->toggleterminal),
 			self->workspace->terminalstyleid);
 		psy_ui_component_invalidate(psy_ui_button_base(&self->toggleterminal));
 	}
 }
 
-void mainstatusbar_set_default_status_text(MainStatusBar* self, const char* text)
+void mainstatusbar_set_default_status_text(MainStatusBar* self,
+	const char* text)
 {
 	psy_ui_label_set_text(&self->statusbarlabel.label, text);
 	psy_ui_label_set_default_text(&self->statusbarlabel.label, text);
 }
 
-void mainstatusbar_onsongloadprogress(MainStatusBar* self, Workspace* workspace,
-	intptr_t progress)
+void mainstatusbar_on_song_load_progress(MainStatusBar* self,
+	Workspace* sender, intptr_t progress)
 {
 	if (progress == -1) {
 		workspace_output(self->workspace, "\n");
@@ -239,8 +238,8 @@ void mainstatusbar_onsongloadprogress(MainStatusBar* self, Workspace* workspace,
 		progress / 100.f);
 }
 
-void mainstatusbar_onpluginscanprogress(MainStatusBar* self, Workspace* workspace,
-	int progress)
+void mainstatusbar_on_plugin_scan_progress(MainStatusBar* self,
+	Workspace* sender, int progress)
 {
 	self->pluginscanprogress = progress;
 }
@@ -249,24 +248,23 @@ void mainstatusbar_idle(MainStatusBar* self)
 {
 	if (self->pluginscanprogress != -1) {
 		if (self->pluginscanprogress == 0) {
-			psy_ui_progressbar_set_progress(&self->statusbarlabel.progressbar, 0);
+			psy_ui_progressbar_set_progress(&self->statusbarlabel.progressbar,
+				0);
 			self->pluginscanprogress = -1;
 		} else {
 			psy_ui_progressbar_tick(&self->statusbarlabel.progressbar);
 		}
-	}	
+	}		
+	psy_lock_enter(&self->outputlock);		
 	if (self->strbuffer) {
-		psy_List* p;
-
-		psy_lock_enter(&self->outputlock);
-		for (p = self->strbuffer; p != NULL; p = p->next) {
 #ifndef PSYCLE_DEBUG_PREVENT_TIMER_DRAW
-			psy_ui_label_set_text(&self->statusbarlabel.label, (const char*)p->entry);
-			psy_ui_label_fadeout(&self->statusbarlabel.label);
-#endif
-		}
-		psy_list_deallocate(&self->strbuffer, NULL);
-		psy_lock_leave(&self->outputlock);
-	}	
+		psy_ui_label_set_text(&self->statusbarlabel.label,
+			(const char*)self->strbuffer);
+		psy_ui_label_fadeout(&self->statusbarlabel.label);
+#endif		
+		free(self->strbuffer);
+		self->strbuffer = NULL;
+	}
+	psy_lock_leave(&self->outputlock);	
 	mainstatusbar_update_terminal_button(self);
 }

@@ -67,10 +67,12 @@ static void vtable_init(MachineBar* self)
 void machinebar_init(MachineBar* self, psy_ui_Component* parent, Workspace* workspace)
 {		
 	psy_ui_Margin margin;
+	GeneralConfig* general;
 
 	psy_ui_component_init(&self->component, parent, NULL);
-	vtable_init(self);
+	vtable_init(self);	
 	self->workspace = workspace;
+	general = &workspace->config.general;
 	psy_ui_margin_init_em(&margin, 0.0, 2.0, 0.0, 0.0);			
 	self->selchange = 0;	
 	self->machines = &workspace->song->machines;	
@@ -87,15 +89,25 @@ void machinebar_init(MachineBar* self, psy_ui_Component* parent, Workspace* work
 	machinebar_buildmachinebox(self);
 	/* Tool Buttons */
 	psy_ui_button_init(&self->gear, &self->component);
-	psy_ui_button_set_text(&self->gear, "machinebar.gear");
+	psy_ui_button_data_exchange(&self->gear,
+		generalconfig_property(general, "bench.showgear"));	
+	psy_ui_button_set_text(&self->gear, "machinebar.gear");	
 	psy_ui_button_init(&self->dock, &self->component);
+	psy_ui_button_data_exchange(&self->dock,
+		generalconfig_property(general, "bench.showparamrack"));	
 	psy_ui_button_set_text(&self->dock, "machinebar.dock");
 	psy_ui_button_init(&self->editor, &self->component);
+	psy_ui_button_data_exchange(&self->editor,
+		generalconfig_property(general, "bench.showplugineditor"));	
 	psy_ui_button_set_text(&self->editor, "machinebar.editor");
 	psy_ui_button_init(&self->cpu, &self->component);
 	psy_ui_button_set_text(&self->cpu, "machinebar.cpu");
+	psy_ui_button_data_exchange(&self->cpu,
+		generalconfig_property(general, "bench.showcpu"));
 	psy_ui_button_init(&self->midi, &self->component);
-	psy_ui_button_set_text(&self->midi, "machinebar.midi");	
+	psy_ui_button_set_text(&self->midi, "machinebar.midi");
+	psy_ui_button_data_exchange(&self->midi,
+		generalconfig_property(general, "bench.showmidi"));	
 	self->prevent_selchange_notify = FALSE;
 	psy_ui_combobox_init(&self->selectinstparam, &self->component);
 	psy_ui_combobox_set_char_number(&self->selectinstparam, 14);
@@ -122,7 +134,6 @@ void machinebar_on_destroyed(MachineBar* self)
 	psy_table_dispose(&self->comboboxslots);
 	psy_table_dispose(&self->slotscombobox);
 }
-
 
 MachineBarInstParamMode machinebar_mode(MachineBar* self)
 {

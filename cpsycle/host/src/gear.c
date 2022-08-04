@@ -59,7 +59,7 @@ static void gear_on_master(Gear*, psy_ui_Component* sender);
 static void gear_onconnect_to_master(Gear*, psy_ui_Component* sender);
 static void gear_onmuteunmute(Gear*, psy_ui_Component* sender);
 static void gear_connect_song(Gear*);
-static void gear_on_hide(Gear*);
+static void gear_on_close_button(Gear*, psy_ui_Button* sender);
 static void gear_on_machine_selected(Gear*, psy_audio_Machines* sender,
 	uintptr_t slot);
 static void gear_show_generators(Gear*);
@@ -129,8 +129,8 @@ void gear_init(Gear* self, psy_ui_Component* parent, ParamViews* param_views,
 void gear_init_title(Gear* self)
 {	
 	titlebar_init(&self->titlebar, gear_base(self), "machinebar.gear");
-	titlebar_hide_on_close(&self->titlebar);
-	titlebar_enable_drag(&self->titlebar, "gear");
+	psy_signal_connect(&self->titlebar.hide.signal_clicked, self,
+		gear_on_close_button);
 }
 
 void gear_oncreate(Gear* self, psy_ui_Component* sender)
@@ -257,10 +257,10 @@ void gear_on_master(Gear* self, psy_ui_Component* sender)
 	}
 }
 
-void gear_on_hide(Gear* self)
-{	
-	psy_ui_component_hide(&self->component);
-	psy_ui_component_align(psy_ui_component_parent(&self->component));
+void gear_on_close_button(Gear* self, psy_ui_Button* sender)
+{
+	psy_property_set_item_bool(generalconfig_property(
+		&self->workspace->config.general, "bench.showgear"), FALSE);
 }
 
 void gear_onconnect_to_master(Gear* self, psy_ui_Component* sender)

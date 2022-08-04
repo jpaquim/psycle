@@ -84,6 +84,7 @@ static void plugineditor_on_file_selected(PluginEditor*, psy_ui_Component* sende
 static int plugineditor_on_enum_dir(PluginEditor*, const char* path, int flag);
 static void plugineditor_on_create_new_plugin(PluginEditor*, psy_ui_Component* sender);
 static void writetext(const char* path, const char* text);
+static void plugineditor_on_close_button(PluginEditor*, psy_ui_Button* sender);
 
 /* vtable */
 static psy_ui_ComponentVtable vtable;
@@ -174,8 +175,9 @@ void plugineditor_on_destroyed(PluginEditor* self)
 
 void plugineditor_init_title_bar(PluginEditor* self)
 {
-	titlebar_init(&self->titlebar, &self->component, "Plugin Editor");
-	titlebar_hide_on_close(&self->titlebar);
+	titlebar_init(&self->titlebar, &self->component, "machinebar.editor");
+	psy_signal_connect(&self->titlebar.hide.signal_clicked, self,
+		plugineditor_on_close_button);
 }
 
 void plugineditor_on_machines_change_slot(PluginEditor* self,
@@ -399,4 +401,10 @@ void plugineditor_update_font(PluginEditor* self)
 		psy_ui_component_align_full(&self->component);
 		psy_ui_component_invalidate(&self->component);
 	}
+}
+
+void plugineditor_on_close_button(PluginEditor* self, psy_ui_Button* sender)
+{
+	psy_property_set_item_bool(generalconfig_property(
+		&self->workspace->config.general, "bench.showplugineditor"), FALSE);
 }

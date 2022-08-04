@@ -226,7 +226,7 @@ void pianogrid_drawuncoveredbottombackground(Pianogrid* self,
 
 	assert(self);	
 
-	blankstart = self->keyboardstate->keyboardheightpx;
+	blankstart = self->keyboardstate->keyboard_extent_px;
 	if (blankstart - psy_ui_component_scroll_top_px(&self->component) <
 			size.height) {
 		psy_ui_drawsolidrectangle(g, psy_ui_realrectangle_make(
@@ -248,7 +248,7 @@ void pianogrid_on_preferred_size(Pianogrid* self, const psy_ui_Size* limit,
 	assert(self);
 	
 	rv->height = psy_ui_value_make_px((self->keyboardstate->keymax -
-		self->keyboardstate->keymin) * self->keyboardstate->keyheightpx);	
+		self->keyboardstate->keymin) * self->keyboardstate->key_extent_px);	
 	rv->width = psy_ui_value_make_px(pianogridstate_beattopx(self->gridstate,
 		patternviewstate_length(self->gridstate->pv)));		
 }
@@ -825,10 +825,10 @@ bool pianogrid_scrollup(Pianogrid* self, psy_audio_SequenceCursor cursor)
 	assert(self);
 	
 	line = self->keyboardstate->keymax - cursor.key - 2;
-	linepx = self->keyboardstate->keyheightpx * line;
+	linepx = self->keyboardstate->key_extent_px * line;
 	topline = 0;
 	dlines = (intptr_t)((psy_ui_component_scroll_top_px(&self->component) - linepx) /
-		(self->keyboardstate->keyheightpx));
+		(self->keyboardstate->key_extent_px));
 	if (dlines > 0) {		
 		psy_ui_component_set_scroll_top(&self->component,
 			psy_ui_value_make_px(
@@ -850,9 +850,9 @@ bool pianogrid_scrolldown(Pianogrid* self, psy_audio_SequenceCursor cursor)
 	assert(self);
 
 	clientsize = psy_ui_component_clientsize_px(&self->component);		
-	visilines = (intptr_t)floor(clientsize.height / self->keyboardstate->keyheightpx);
+	visilines = (intptr_t)floor(clientsize.height / self->keyboardstate->key_extent_px);
 	topline = (intptr_t)ceil(psy_ui_component_scroll_top_px(&self->component) /
-		self->keyboardstate->keyheightpx);
+		self->keyboardstate->key_extent_px);
 	line = self->keyboardstate->keymax - cursor.key + 1;
 	dlines = (intptr_t)(line - topline - visilines);
 	if (dlines > 0) {		

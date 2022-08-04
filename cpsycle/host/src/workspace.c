@@ -80,7 +80,8 @@ void workspace_init(Workspace* self, psy_ui_Component* main)
 	self->restoreloop = TRUE;
 	self->modified_without_undo = FALSE;
 	self->paramviews = NULL;
-	self->terminal_output = NULL;	
+	self->terminal_output = NULL;
+	self->fileview = NULL;
 	viewhistory_init(&self->view_history);
 	psy_playlist_init(&self->playlist);
 	workspace_init_plugin_catcher_and_machinefactory(self);
@@ -126,7 +127,6 @@ void workspace_init_signals(Workspace* self)
 	psy_signal_init(&self->signal_viewselected);	
 	psy_signal_init(&self->signal_parametertweak);
 	psy_signal_init(&self->signal_status_out);
-	psy_signal_init(&self->signal_togglegear);
 	psy_signal_init(&self->signal_machineeditresize);
 	psy_signal_init(&self->signal_buschanged);
 	psy_signal_init(&self->signal_gearselect);
@@ -168,8 +168,7 @@ void workspace_dispose_signals(Workspace* self)
 	psy_signal_dispose(&self->signal_plugincachechanged);	
 	psy_signal_dispose(&self->signal_viewselected);
 	psy_signal_dispose(&self->signal_parametertweak);
-	psy_signal_dispose(&self->signal_status_out);
-	psy_signal_dispose(&self->signal_togglegear);
+	psy_signal_dispose(&self->signal_status_out);	
 	psy_signal_dispose(&self->signal_machineeditresize);
 	psy_signal_dispose(&self->signal_buschanged);
 	psy_signal_dispose(&self->signal_gearselect);
@@ -1018,16 +1017,28 @@ void workspace_output_status(Workspace* self, const char* text)
 
 void workspace_toggle_gear(Workspace* self)
 {
+	psy_Property* p;
+	
 	assert(self);
-	self->gearvisible = !self->gearvisible;
-	psy_signal_emit(&self->signal_togglegear, self, 0);
+	
+	p = generalconfig_property(&self->config.general, "bench.showgear");
+	if (p) {	
+		psy_property_set_item_bool(p, !psy_property_item_bool(p));
+	}	
 }
 
 bool workspace_gear_visible(const Workspace* self)
 {
+	const psy_Property* p;
+	
 	assert(self);
-
-	return self->gearvisible;
+	
+	p = generalconfig_property(&((Workspace*)self)->config.general,
+		"bench.showgear");
+	if (p) {	
+		return psy_property_item_bool(p);
+	}
+	return FALSE;
 }
 
 bool workspace_song_modified(const Workspace* self)
@@ -1036,7 +1047,8 @@ bool workspace_song_modified(const Workspace* self)
 
 	return self->modified_without_undo ||
 		psy_list_size(self->undoredo.undo) != self->undo_save_point ||
-		psy_list_size(self->song->machines.undoredo.undo) != self->machines_undo_save_point;
+		psy_list_size(self->song->machines.undoredo.undo) !=
+			self->machines_undo_save_point;
 }
 
 void workspace_scan_plugins(Workspace* self)

@@ -54,7 +54,7 @@ typedef struct MainStatusBar {
 	ClockBar clockbar;	
 	ZoomBox zoombox;	
 	intptr_t pluginscanprogress;	
-	psy_List* strbuffer;
+	char* strbuffer;
 	psy_Lock outputlock;
 	/* references */
 	Workspace* workspace;

@@ -99,6 +99,9 @@ typedef struct MainFrame {
 	PlayPosBar playposbar;
 	TrackScopeView trackscopeview;	
 	StepsequencerView stepsequencerview;
+	psy_ui_Component keyboardview;
+	KeyboardState keyboardstate;
+	PianoKeyboard keyboard;
 	SeqView sequenceview;
 	SequencerBar sequencerbar;
 	psy_ui_Splitter splitbarparamrack;

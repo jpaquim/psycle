@@ -119,7 +119,7 @@ void pianoroll_init(Pianoroll* self, psy_ui_Component* parent,
 	self->opcount = 0;
 	self->center_key = TRUE;
 	/* shared states */
-	keyboardstate_init(&self->keyboardstate);
+	keyboardstate_init(&self->keyboardstate, psy_ui_VERTICAL);
 	pianogridstate_init(&self->gridstate, pvstate);	
 	/* bar */
 	pianobar_init(&self->bar, &self->component);
@@ -142,8 +142,7 @@ void pianoroll_init(Pianoroll* self, psy_ui_Component* parent,
 		pianoroll_on_display_active_tracks);
 	/* left area (keyboardheader, keyboard) */
 	psy_ui_component_init(&self->left, &self->component, NULL);
-	psy_ui_component_set_align(&self->left, psy_ui_ALIGN_LEFT);
-	
+	psy_ui_component_set_align(&self->left, psy_ui_ALIGN_LEFT);	
 	/* top area (beatruler) */
 	psy_ui_component_init(&self->top, &self->component, NULL);
 	psy_ui_component_set_align(&self->top, psy_ui_ALIGN_TOP);
@@ -216,7 +215,7 @@ void pianoroll_scroll_to_key(Pianoroll* self, uint8_t key)
 {
 	psy_ui_component_set_scroll_top(pianogrid_base(&self->grid),
 		psy_ui_value_make_px(
-			self->keyboardstate.keyheightpx *
+			self->keyboardstate.key_extent_px *
 			(self->keyboardstate.keymax - key)));
 }
 
@@ -273,9 +272,9 @@ void pianoroll_update_scroll(Pianoroll* self)
 	psy_ui_component_setscrollstep(pianogrid_base(&self->grid),
 		psy_ui_size_make_px(
 			pianogridstate_steppx(&self->gridstate),
-			self->keyboardstate.keyheightpx));
+			self->keyboardstate.key_extent_px));
 	psy_ui_component_set_scroll_step_height(pianokeyboard_base(&self->keyboard),
-		psy_ui_value_make_px(self->keyboardstate.keyheightpx));
+		psy_ui_value_make_px(self->keyboardstate.key_extent_px));
 	psy_ui_component_set_scroll_step_width(pianoruler_base(&self->header),
 		psy_ui_value_make_px(pianogridstate_steppx(&self->gridstate)));
 	psy_ui_component_updateoverflow(pianogrid_base(&self->grid));
@@ -355,14 +354,14 @@ void pianoroll_on_key_height_changed(Pianoroll* self, ZoomBox* sender)
 {
 	assert(self);
 
-	self->keyboardstate.keyheight = psy_ui_mul_value_real(
-		self->keyboardstate.defaultkeyheight, zoombox_rate(sender));
+	self->keyboardstate.key_extent = psy_ui_mul_value_real(
+		self->keyboardstate.default_key_extent, zoombox_rate(sender));
 	keyboardstate_update_metrics(&self->keyboardstate,
 		psy_ui_component_textmetric(&self->component));
 	psy_ui_component_set_scroll_step_height(pianogrid_base(&self->grid),
-		psy_ui_value_make_px(self->keyboardstate.keyheightpx));
+		psy_ui_value_make_px(self->keyboardstate.key_extent_px));
 	psy_ui_component_set_scroll_step_height(pianokeyboard_base(&self->keyboard),
-		psy_ui_value_make_px(self->keyboardstate.keyheightpx));
+		psy_ui_value_make_px(self->keyboardstate.key_extent_px));
 	psy_ui_component_updateoverflow(pianogrid_base(&self->grid));
 	psy_ui_component_set_scroll_top(&self->keyboard.component,
 		psy_ui_component_scroll_top(pianogrid_base(&self->grid)));
