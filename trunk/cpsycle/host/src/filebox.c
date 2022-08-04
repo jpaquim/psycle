@@ -307,6 +307,8 @@ void filebox_set_wildcard(FileBox* self, const char* wildcard)
 {
 	psy_strreset(&self->wildcard, wildcard);
 	filebox_read(self, psy_path_full(&self->curr_dir));
+	psy_ui_component_align(&self->component);
+	psy_ui_component_invalidate(&self->component);
 }
 
 void filebox_set_directory(FileBox* self, const char* path)

@@ -23,10 +23,8 @@
 
 /* prototypes */
 static void fileviewfilter_on_destroyed(FileViewFilter*);
-static void fileviewfilter_update(FileViewFilter*);
-static void fileviewfilter_on_checkbox(FileViewFilter*,
-	psy_ui_CheckBox* sender);
-static void fileviewfilter_clear(FileViewFilter*);
+static void fileviewfilter_build(FileViewFilter*, psy_Property* types);
+static void fileviewfilter_on_item(FileViewFilter* self, psy_Property* sender);
 
 /* vtable */
 static psy_ui_ComponentVtable fileviewfilter_vtable;
@@ -46,7 +44,9 @@ static void fileviewfilter_vtable_init(FileViewFilter* self)
 
 /* implementation */
 void fileviewfilter_init(FileViewFilter* self, psy_ui_Component* parent)
-{
+{	
+	assert(self);
+	
 	psy_ui_component_init(fileviewfilter_base(self), parent, NULL);
 	fileviewfilter_vtable_init(self);	
 	psy_ui_component_set_default_align(&self->component, psy_ui_ALIGN_TOP,
@@ -58,57 +58,58 @@ void fileviewfilter_init(FileViewFilter* self, psy_ui_Component* parent)
 		0.0, 0.0, 0.0, 2.0));
 	psy_ui_component_set_default_align(&self->items, psy_ui_ALIGN_TOP,
 		psy_ui_defaults_vmargin(psy_ui_appdefaults()));
-	psy_ui_checkbox_init_text(&self->psy, &self->items, "psy");	
-	psy_ui_checkbox_init_text(&self->mod, &self->items, "mod");
-	self->filter = FILEVIEWFILTER_PSY;
-	self->showall = FALSE;
-	fileviewfilter_update(self);
-	psy_signal_connect(&self->psy.signal_clicked, self,
-		fileviewfilter_on_checkbox);
-	psy_signal_connect(&self->mod.signal_clicked, self,
-		fileviewfilter_on_checkbox);
+	psy_property_init(&self->filter);
+	self->types = psy_property_append_choice(&self->filter, "types", 0);
+	psy_property_set_text(psy_property_set_id(
+		psy_property_append_str(self->types, "psy", "*.psy"),
+		FILEVIEWFILTER_PSY), "Psycle");
+	psy_property_set_text(psy_property_set_id(
+		psy_property_append_str(self->types, "mod", "*.mod"),
+		FILEVIEWFILTER_MOD), "Module");	
+	fileviewfilter_build(self, self->types);	
+	self->showall = FALSE;	
 	psy_signal_init(&self->signal_changed);
+	psy_property_connect(self->types, self, fileviewfilter_on_item);
 }
 
 void fileviewfilter_on_destroyed(FileViewFilter* self)
 {
+	psy_property_dispose(&self->filter);
 	psy_signal_dispose(&self->signal_changed);
 }
 
-void fileviewfilter_update(FileViewFilter* self)
+void fileviewfilter_build(FileViewFilter* self, psy_Property* types)
 {
-	fileviewfilter_clear(self);
-	switch (self->filter) {
-	case FILEVIEWFILTER_PSY:
-		psy_ui_checkbox_check(&self->psy);
-		break;
-	case FILEVIEWFILTER_MOD:
-		psy_ui_checkbox_check(&self->mod);
-		break;
-	default:;
+	psy_List* p;			
+	
+	for (p = psy_property_begin(types); p  != NULL; p = p->next) {
+		psy_Property* curr;
+		psy_ui_CheckBox* check;
+		
+		curr = (psy_Property*)p->entry;	
+		check = psy_ui_checkbox_allocinit(&self->items);
+		psy_ui_checkbox_data_exchange(check, curr);
 	}
 }
 
-void fileviewfilter_on_checkbox(FileViewFilter* self, psy_ui_CheckBox* sender)
+const char* fileviewfilter_type(const FileViewFilter* self)
 {
-	fileviewfilter_clear(self);
-	if (sender == &self->psy) {
-		psy_ui_checkbox_check(&self->psy);
-		self->showall = FALSE;
-		self->filter = FILEVIEWFILTER_PSY;
-		psy_signal_emit(&self->signal_changed, self, 0);
-	} else if (sender == &self->mod) {
-		psy_ui_checkbox_check(&self->mod);
-		self->showall = FALSE;
-		self->filter = FILEVIEWFILTER_MOD;
-		psy_signal_emit(&self->signal_changed, self, 0);
+	static const char* all = "*.*";	
+	psy_Property* item;
+	
+	if (self->showall) {
+		return all;
 	}
+	item = psy_property_at_choice(self->types);
+	if (item) {
+		return psy_property_item_str(item);
+	}	
+	return all;
 }
 
-void fileviewfilter_clear(FileViewFilter* self)
-{
-	psy_ui_checkbox_disable_check(&self->psy);
-	psy_ui_checkbox_disable_check(&self->mod);
+void fileviewfilter_on_item(FileViewFilter* self, psy_Property* sender)
+{	
+	psy_signal_emit(&self->signal_changed, self, 0);
 }
 
 /* FileViewSaveFilter */
@@ -126,24 +127,6 @@ void fileviewsavefilter_init(FileViewSaveFilter* self, psy_ui_Component* parent)
 		0.0, 0.0, 0.0, 2.0));	
 }
 
-const char* fileviewfilter_wildcard(const FileViewFilter* self)
-{
-	static const char* all = "*.*";
-	static const char* psy = "*.psy";
-	static const char* mod = "*.mod";
-	static const char* xm = "*.xm";
-	
-	if (self->showall) {
-		return all;
-	}
-	if (self->filter == FILEVIEWFILTER_PSY) {
-		return psy;
-	}
-	if (self->filter == FILEVIEWFILTER_MOD) {
-		 return mod;
-	}
-	return psy;
-}
 
 /* FileViewFolderLinks */
 
@@ -249,6 +232,7 @@ void fileview_init(FileView* self, psy_ui_Component* parent,
 	psy_ui_component_init(fileview_base(self), parent, NULL);
 	vtable_init(self);
 	self->dirconfig = dirconfig;
+	self->property = NULL;
 	psy_ui_component_set_id(fileview_base(self), VIEW_ID_FILEVIEW);
 	psy_ui_component_set_preferred_size(&self->component,
 		psy_ui_size_make_em(80.0, 25.0));
@@ -356,7 +340,14 @@ void fileview_on_file_selected(FileView* self, FileBox* sender)
 {		
 	psy_ui_textarea_set_text(&self->filename,
 		filebox_file_name(&self->filebox));
-	psy_signal_emit(&self->signal_selected, self, 0);	
+	if (self->property) {
+		char path[4096];
+		
+		filebox_full_name(&self->filebox, path, 4096);
+		psy_property_set_item_str(self->property, path);
+	} else {
+		psy_signal_emit(&self->signal_selected, self, 0);
+	}
 }
 
 void fileview_on_dir_changed(FileView* self, FileBox* sender)
@@ -399,12 +390,12 @@ void fileview_set_directory(FileView* self, const char* path)
 }
 
 void fileview_on_filter(FileView* self, psy_ui_Component* sender)
-{
+{	
 	if (sender == psy_ui_button_base(&self->showall)) {
 		self->dirfilter.showall = TRUE;
-	}	
-	filebox_set_wildcard(&self->filebox,
-		fileviewfilter_wildcard(&self->dirfilter));	
+	}		
+	filebox_set_wildcard(&self->filebox, 
+		fileviewfilter_type(&self->dirfilter));		
 	psy_ui_component_align_full(&self->filebox.component);
 }
 

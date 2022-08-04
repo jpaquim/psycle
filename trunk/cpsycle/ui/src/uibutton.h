@@ -85,6 +85,7 @@ typedef struct psy_ui_Button {
 	uintptr_t first_repeat_rate;
 	bool first_repeat;
 	psy_ui_MouseEvent repeat_event;
+	bool text_setted;
 	/* references */
 	psy_Property* property;
 } psy_ui_Button;

@@ -7,7 +7,7 @@ libthread.a: $(obj)
 	ar rsv $@ $^
 
 %.o: %.c
-	$(CC) -O2 -g3 $(inc) -c $(src)
+	$(CC) -O3 -g3 $(inc) -c $(src)
 
 .PHONY: clean	
 clean:

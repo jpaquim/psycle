@@ -68,7 +68,7 @@ typedef struct MidiChannelMappingView {
 	// inherits
 	psy_ui_Component component;
 	// internal data
-	psy_ui_Value colx[4];
+	double colx_px[4];
 	// references
 	Workspace* workspace;
 } MidiChannelMappingView;

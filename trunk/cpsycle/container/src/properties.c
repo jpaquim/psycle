@@ -1073,8 +1073,9 @@ psy_Property* psy_property_set_choice(psy_Property* self, const char* key,
 	rv = psy_property_at(self, key, PSY_PROPERTY_TYPE_NONE);
 	if (rv) {
 		if (!psy_property_readonly(rv)) {
+			psy_signal_emit(&self->changed, self, 0);			
 			rv->item.typ = PSY_PROPERTY_TYPE_CHOICE;
-			psy_property_set_item_int(rv, value);			
+			psy_property_set_item_int(rv, value);
 		}
 	} else {
 		rv = psy_property_append_int(self, key, value, 0, 0);
@@ -1487,20 +1488,27 @@ psy_Property* psy_property_connect_children(psy_Property* self, int recursive,
 	return self;
 }
 
+void psy_property_notify(psy_Property* self)
+{
+	assert(self);
+	
+	psy_signal_emit(&self->changed, self, 0);
+}
+
 void psy_property_notify_all(psy_Property* self)
 {
 	psy_List* p;
 
 	assert(self);
 
+	if (psy_property_type(self) != PSY_PROPERTY_TYPE_ACTION) {
+		psy_signal_emit(&self->changed, self, 0);
+	}
 	for (p = self->children; p != NULL; p = p->next) {
 		psy_Property* curr;
 
 		curr = (psy_Property*)p->entry;
-		psy_property_notify_all(curr);
-		if (psy_property_type(curr) != PSY_PROPERTY_TYPE_ACTION) {
-			psy_signal_emit(&curr->changed, curr, 0);
-		}
+		psy_property_notify_all(curr);		
 	}
 }
 

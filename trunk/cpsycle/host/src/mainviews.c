@@ -16,8 +16,6 @@
 #include "../../detail/portable.h"
 
 
-/* MainViews */
-
 /* prototypes */
 static void mainviews_init_view_status_bars(MainViews*);
 static void mainviews_on_extract(MainViews*, psy_ui_Button* sender);
@@ -27,7 +25,8 @@ static void mainviews_on_float(MainViews*, psy_ui_Button* sender);
 static void mainviews_float(MainViews*);
 
 /* implementation */
-void mainviews_init(MainViews* self, psy_ui_Component* parent, psy_ui_Component* pane, Workspace* workspace)
+void mainviews_init(MainViews* self, psy_ui_Component* parent,
+	psy_ui_Component* pane, Workspace* workspace)
 {	
 	psy_ui_component_init(&self->component, parent, NULL);
 	self->workspace = workspace;

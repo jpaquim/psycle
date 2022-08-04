@@ -43,9 +43,11 @@ typedef struct SequencerBar {
 	psy_ui_CheckBox recordnoteoff;
 	psy_ui_CheckBox recordtweak;
 	psy_ui_CheckBox multichannelaudition;
-	psy_ui_CheckBox allownotestoeffect;	
+	psy_ui_CheckBox allownotestoeffect;
+	psy_ui_Component view_buttons;
 	psy_ui_Button toggleseqedit;
 	psy_ui_Button togglestepseq;
+	psy_ui_Button togglekbd;
 } SequencerBar;
 
 void sequencerbar_init(SequencerBar* self, psy_ui_Component* parent,

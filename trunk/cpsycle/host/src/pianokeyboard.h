@@ -27,24 +27,36 @@ typedef enum {
 	KEYBOARDTYPE_NUM
 } KeyboardType;
 
+typedef struct PianoKeyColours {
+	psy_ui_Colour keyseparator;
+	psy_ui_Colour keywhite;
+	psy_ui_Colour keyblack;
+	psy_ui_Colour keyactive;
+} PianoKeyColours;
+
+void pianokeycolours_init(PianoKeyColours*);
+
 /* Keyboard */
 typedef struct PianoKeyboard {
 	/* inherits */
-	psy_ui_Component component;
+	psy_ui_Component component;	
 	uint8_t active_note;
 	intptr_t scroll;
 	intptr_t scrollspeed;
-	intptr_t scrollcount;
+	intptr_t scrollcount;	
 	/* references */
 	KeyboardState* keyboardstate;
+	PianoKeyColours colours;
 	psy_audio_Player* player;
 	psy_ui_Component* grid;
 } PianoKeyboard;
 
 void pianokeyboard_init(PianoKeyboard*, psy_ui_Component* parent,
-	KeyboardState*, psy_audio_Player* player, psy_ui_Component* grid);
+	KeyboardState*, psy_audio_Player* player, psy_ui_Component* grid);	
 
 void pianokeyboard_set_keyboard_type(PianoKeyboard*, KeyboardType);
+void pianokeyboard_idle(PianoKeyboard*);
+
 void pianokeyboard_idle(PianoKeyboard*);
 
 INLINE psy_ui_Component* pianokeyboard_base(PianoKeyboard* self)

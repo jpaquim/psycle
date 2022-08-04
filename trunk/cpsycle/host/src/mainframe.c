@@ -41,6 +41,7 @@ static void mainframe_init_param_rack(MainFrame*);
 static void mainframe_init_cpu_view(MainFrame*);
 static void mainframe_init_midi_monitor(MainFrame*);
 static void mainframe_init_step_sequencer_view(MainFrame*);
+static void mainframe_init_keyboard_view(MainFrame*);
 static void mainframe_init_seq_editor(MainFrame*);
 static void mainframe_init_recent_view(MainFrame*);
 static void mainframe_init_file_view(MainFrame*);
@@ -57,11 +58,9 @@ static void mainframe_checkplaystartwithrctrl(MainFrame*, psy_ui_KeyboardEvent*)
 static void mainframe_on_key_up(MainFrame*, psy_ui_KeyboardEvent*);
 static void mainframe_delegate_keyboard(MainFrame*, intptr_t message,
 	psy_ui_KeyboardEvent*);
-static void mainframe_on_toggle_gear(MainFrame*, Workspace* sender);
 static void mainframe_on_recent_songs(MainFrame*, psy_Property* sender);
 static void mainframe_on_file_save_view(MainFrame*, psy_ui_Component* sender);
 static void mainframe_on_disk_op(MainFrame*, psy_ui_Component* sender);
-static void mainframe_on_plugin_editor(MainFrame*, psy_ui_Component* sender);
 static void mainframe_on_tabbar_changed(MainFrame*, psy_ui_TabBar* sender,
 	uintptr_t tabindex);
 static void mainframe_on_script_tabbar_changed(MainFrame*, psy_ui_Component* sender,
@@ -76,12 +75,12 @@ static void mainframe_update_songtitle(MainFrame*);
 static void mainframe_on_timer(MainFrame*, uintptr_t timerid);
 static bool mainframe_on_input(MainFrame*, InputHandler* sender);
 static bool mainframe_on_notes(MainFrame*, InputHandler* sender);
+static void mainframe_on_piano_kbd(MainFrame*, psy_Property* sender);
 static void mainframe_on_seq_editor(MainFrame*, psy_Property* sender);
 static void mainframe_on_step_sequencer(MainFrame*, psy_Property* sender);
 static void mainframe_on_toggle_scripts(MainFrame*, psy_ui_Component* sender);
-static void mainframe_update_step_sequencer_buttons(MainFrame*);
 static void mainframe_connect_step_sequencer_buttons(MainFrame*);
-static void mainframe_update_seq_editor_buttons(MainFrame*);
+static void mainframe_connect_piano_kbd_buttons(MainFrame*);
 static void mainframe_connect_seq_editor_buttons(MainFrame*);
 static void mainframe_on_toggle_terminal(MainFrame*, psy_ui_Component* sender);
 static void mainframe_on_toggle_kbd_help(MainFrame*, psy_ui_Component* sender);
@@ -108,6 +107,11 @@ static void mainframe_plugineditor_on_focus(MainFrame*, psy_ui_Component* sender
 static void mainframe_seqeditor_on_float(MainFrame*, psy_ui_Button* sender);
 static void mainframe_on_metronome_bar(MainFrame*, psy_Property* sender);
 static void mainframe_on_trackscope_view(MainFrame*, psy_Property* sender);
+static void mainframe_on_plugin_editor(MainFrame*, psy_Property* sender);
+static void mainframe_on_param_rack(MainFrame*, psy_Property* sender);
+static void mainframe_on_gear(MainFrame*, psy_Property* sender);
+static void mainframe_on_midi_monitor(MainFrame*, psy_Property* sender);
+static void mainframe_on_cpu_view(MainFrame*, psy_Property* sender);
 
 /* vtable */
 static psy_ui_ComponentVtable vtable;
@@ -177,6 +181,7 @@ void mainframe_init(MainFrame* self)
 	mainframe_init_file_view(self);
 	mainframe_init_sequence_view(self);
 	mainframe_init_sequencer_bar(self);
+	mainframe_init_keyboard_view(self);
 	mainframe_init_step_sequencer_view(self);
 	mainframe_init_seq_editor(self);
 	mainframe_init_plugin_editor(self);
@@ -186,11 +191,20 @@ void mainframe_init(MainFrame* self)
 	mainframe_init_interpreter(self);
 	mainstatusbar_update_terminal_button(&self->statusbar);
 	mainframe_connect_song(self);
-	mainframe_connect_workspace(self);
-	mainframe_update_step_sequencer_buttons(self);
-	mainframe_connect_step_sequencer_buttons(self);
-	mainframe_update_seq_editor_buttons(self);
-	mainframe_connect_seq_editor_buttons(self);	
+	mainframe_connect_workspace(self);	
+	mainframe_connect_piano_kbd_buttons(self);	
+	mainframe_connect_step_sequencer_buttons(self);	
+	mainframe_connect_seq_editor_buttons(self);
+	generalconfig_connect(&self->workspace.config.general,
+		"bench.showplugineditor", self, mainframe_on_plugin_editor);
+		generalconfig_connect(&self->workspace.config.general,
+		"bench.showparamrack", self, mainframe_on_param_rack);
+	generalconfig_connect(&self->workspace.config.general,
+		"bench.showgear", self, mainframe_on_gear);
+	generalconfig_connect(&self->workspace.config.general,
+		"bench.showmidi", self, mainframe_on_midi_monitor);	
+	generalconfig_connect(&self->workspace.config.general,
+		"bench.showcpu", self, mainframe_on_cpu_view);
 #ifdef PSYCLE_MAKE_DEFAULT_LANG
 	save_translator_default();
 	save_translator_template();
@@ -482,9 +496,6 @@ void mainframe_init_gear(MainFrame* self)
 	psy_ui_splitter_init(&self->gearsplitter, &self->client);
 	psy_ui_component_set_align(psy_ui_splitter_base(&self->gearsplitter),
 		psy_ui_ALIGN_RIGHT);
-	psy_ui_splitter_settoggle(&self->gearsplitter, gear_base(&self->gear));
-	psy_ui_splitter_setbutton(&self->gearsplitter,
-		&self->machinebar.gear);
 	psy_ui_component_hide(psy_ui_splitter_base(&self->gearsplitter));
 }
 
@@ -496,11 +507,7 @@ void mainframe_init_param_rack(MainFrame* self)
 		psy_ui_ALIGN_BOTTOM);
 	psy_ui_splitter_init(&self->splitbarparamrack, &self->client);
 	psy_ui_component_set_align(psy_ui_splitter_base(&self->splitbarparamrack),
-		psy_ui_ALIGN_BOTTOM);
-	psy_ui_splitter_settoggle(&self->splitbarparamrack,
-		&self->paramrack.component);
-	psy_ui_splitter_setbutton(&self->splitbarparamrack,
-		&self->machinebar.dock);
+		psy_ui_ALIGN_BOTTOM);	
 	psy_ui_component_hide(psy_ui_splitter_base(&self->splitbarparamrack));
 }
 
@@ -523,15 +530,89 @@ void mainframe_init_midi_monitor(MainFrame* self)
 {
 	midimonitor_init(&self->midimonitor, &self->client, &self->workspace);
 	psy_ui_component_hide(midimonitor_base(&self->midimonitor));
-	psy_ui_component_set_align(midimonitor_base(&self->midimonitor), psy_ui_ALIGN_RIGHT);
+	psy_ui_component_set_align(midimonitor_base(&self->midimonitor),
+		psy_ui_ALIGN_RIGHT);
 	psy_ui_splitter_init(&self->midisplitter, &self->client);
 	psy_ui_component_set_align(psy_ui_splitter_base(&self->midisplitter),
-		psy_ui_ALIGN_RIGHT);
-	psy_ui_splitter_settoggle(&self->midisplitter,
-		midimonitor_base(&self->midimonitor));
-	psy_ui_splitter_setbutton(&self->midisplitter,
-		&self->machinebar.midi);
-	psy_ui_component_hide(psy_ui_splitter_base(&self->midisplitter));
+		psy_ui_ALIGN_RIGHT);	
+	psy_ui_component_hide(psy_ui_splitter_base(&self->midisplitter));	
+}
+
+void mainframe_on_plugin_editor(MainFrame* self, psy_Property* sender)
+{	
+	if (psy_property_item_bool(sender)) {
+		psy_ui_component_show(&self->plugineditor.component);
+		psy_ui_component_show(psy_ui_splitter_base(
+			&self->splitbarplugineditor));
+	} else {
+		psy_ui_component_hide(&self->plugineditor.component);
+		psy_ui_component_hide(psy_ui_splitter_base(
+			&self->splitbarplugineditor));
+	}
+	if (psy_ui_component_visible(&self->component)){
+		psy_ui_component_align(&self->pane);
+		psy_ui_component_invalidate(&self->pane);
+	}
+}
+
+void mainframe_on_param_rack(MainFrame* self, psy_Property* sender)
+{	
+	if (psy_property_item_bool(sender)) {
+		psy_ui_component_show(&self->paramrack.component);
+		psy_ui_component_show(psy_ui_splitter_base(&self->splitbarparamrack));
+	} else {
+		psy_ui_component_hide(&self->paramrack.component);
+		psy_ui_component_hide(psy_ui_splitter_base(&self->splitbarparamrack));
+	}
+	if (psy_ui_component_visible(&self->component)){
+		psy_ui_component_align(&self->client);
+		psy_ui_component_invalidate(&self->client);
+	}
+}
+
+void mainframe_on_gear(MainFrame* self, psy_Property* sender)
+{	
+	if (psy_property_item_bool(sender)) {
+		psy_ui_component_show(&self->gear.component);
+		psy_ui_component_show(psy_ui_splitter_base(&self->gearsplitter));
+	} else {
+		psy_ui_component_hide(&self->gear.component);
+		psy_ui_component_hide(psy_ui_splitter_base(&self->gearsplitter));
+	}
+	if (psy_ui_component_visible(&self->component)){
+		psy_ui_component_align(&self->client);
+		psy_ui_component_invalidate(&self->client);
+	}
+}
+
+void mainframe_on_midi_monitor(MainFrame* self, psy_Property* sender)
+{	
+	if (psy_property_item_bool(sender)) {
+		psy_ui_component_show(&self->midimonitor.component);
+		psy_ui_component_show(psy_ui_splitter_base(&self->midisplitter));
+	} else {
+		psy_ui_component_hide(&self->midimonitor.component);
+		psy_ui_component_hide(psy_ui_splitter_base(&self->midisplitter));
+	}
+	if (psy_ui_component_visible(&self->component)){
+		psy_ui_component_align(&self->client);
+		psy_ui_component_invalidate(&self->client);
+	}
+}
+
+void mainframe_on_cpu_view(MainFrame* self, psy_Property* sender)
+{	
+	if (psy_property_item_bool(sender)) {
+		psy_ui_component_show(&self->cpuview.component);
+		psy_ui_component_show(psy_ui_splitter_base(&self->cpusplitter));
+	} else {
+		psy_ui_component_hide(&self->cpuview.component);
+		psy_ui_component_hide(psy_ui_splitter_base(&self->cpusplitter));
+	}
+	if (psy_ui_component_visible(&self->component)){
+		psy_ui_component_align(&self->client);
+		psy_ui_component_invalidate(&self->client);
+	}
 }
 
 void mainframe_init_step_sequencer_view(MainFrame* self)
@@ -544,6 +625,23 @@ void mainframe_init_step_sequencer_view(MainFrame* self)
 		workspace_conf(&self->workspace)))) {
 		psy_ui_component_hide(stepsequencerview_base(&self->stepsequencerview));
 	}	
+}
+
+void mainframe_init_keyboard_view(MainFrame* self)
+{
+	psy_ui_component_init(&self->keyboardview, &self->pane, NULL);
+	psy_ui_component_set_align(&self->keyboardview, psy_ui_ALIGN_BOTTOM);
+	keyboardstate_init(&self->keyboardstate, psy_ui_HORIZONTAL);	
+	pianokeyboard_init(&self->keyboard, &self->keyboardview,
+		&self->keyboardstate, &self->workspace.player, NULL);
+	psy_ui_component_set_align(pianokeyboard_base(&self->keyboard),
+		psy_ui_ALIGN_CENTER);
+	psy_ui_component_set_preferred_width(&self->keyboard.component,
+		psy_ui_value_make_ew(keyboardstate_num_keys(&self->keyboardstate)));		
+	if (!generalconfig_showpianokbd(psycleconfig_general(
+			workspace_conf(&self->workspace)))) {
+		psy_ui_component_hide(&self->keyboardview);
+	}			
 }
 
 void mainframe_init_seq_editor(MainFrame* self)
@@ -581,7 +679,7 @@ void mainframe_init_recent_view(MainFrame* self)
 		psy_ui_component_hide(psy_ui_splitter_base(&self->playlistsplitter));
 	}
 	generalconfig_connect(&self->workspace.config.general,
-		"showplaylist", self, mainframe_on_recent_songs);	
+		"bench.showplaylist", self, mainframe_on_recent_songs);	
 }
 
 void mainframe_init_file_view(MainFrame* self)
@@ -590,6 +688,7 @@ void mainframe_init_file_view(MainFrame* self)
 	fileview_init(&self->fileview,
 		psy_ui_notebook_base(&self->mainviews.notebook),
 		&self->workspace.config.directories);
+	self->workspace.fileview = &self->fileview;
 	fileview_set_directory(&self->fileview,	
 		dirconfig_songs(&self->workspace.config.directories));
 	psy_ui_component_set_align(fileview_base(&self->fileview),
@@ -600,7 +699,7 @@ void mainframe_init_file_view(MainFrame* self)
 	psy_signal_connect(&self->fileview.signal_selected,
 		self, mainframe_on_file_load);
 	if (keyboardmiscconfig_ft2fileexplorer(psycleconfig_misc(
-		workspace_conf(&self->workspace)))) {
+			workspace_conf(&self->workspace)))) {
 		filebar_useft2fileexplorer(&self->filebar);
 	}
 	psy_signal_connect(&self->filebar.diskop.signal_clicked, self,
@@ -610,16 +709,16 @@ void mainframe_init_file_view(MainFrame* self)
 void mainframe_init_sequence_view(MainFrame* self)
 {
 	psy_ui_Size size;
+	
 	psy_ui_component_init_align(&self->left, &self->pane, NULL,
-		psy_ui_ALIGN_LEFT);	
+		psy_ui_ALIGN_LEFT);
 	psy_ui_splitter_init(&self->splitbar, &self->pane);
 	seqview_init(&self->sequenceview, &self->left, &self->workspace);
 	psy_ui_component_set_align(seqview_base(&self->sequenceview),
 		psy_ui_ALIGN_CLIENT);
 	size = psy_ui_component_preferred_size(seqview_base(&self->sequenceview),
 		NULL);
-	psy_ui_component_set_preferred_size(&self->left,
-		psy_ui_size_make(size.width, psy_ui_value_zero()));
+	psy_ui_component_set_preferred_width(&self->left, size.width);
 }
 
 void mainframe_init_sequencer_bar(MainFrame* self)
@@ -627,7 +726,7 @@ void mainframe_init_sequencer_bar(MainFrame* self)
 	sequencerbar_init(&self->sequencerbar, &self->left,
 		&self->workspace.config.misc, &self->workspace.config.general);
 	psy_ui_component_set_align(sequencerbar_base(&self->sequencerbar),
-		psy_ui_ALIGN_BOTTOM);	
+		psy_ui_ALIGN_BOTTOM);
 }
 
 void mainframe_init_plugin_editor(MainFrame* self)
@@ -635,9 +734,7 @@ void mainframe_init_plugin_editor(MainFrame* self)
 	plugineditor_init(&self->plugineditor, &self->pane, &self->workspace);	
 	psy_ui_component_set_align(plugineditor_base(&self->plugineditor),
 		psy_ui_ALIGN_LEFT);
-	psy_ui_component_hide(plugineditor_base(&self->plugineditor));
-	psy_signal_connect(&self->machinebar.editor.signal_clicked, self,
-		mainframe_on_plugin_editor);                   
+	psy_ui_component_hide(plugineditor_base(&self->plugineditor));	
 	psy_ui_splitter_init(&self->splitbarplugineditor, &self->pane);
 	psy_ui_component_set_align(psy_ui_splitter_base(&self->splitbarplugineditor),
 		psy_ui_ALIGN_LEFT);
@@ -657,8 +754,6 @@ void mainframe_connect_workspace(MainFrame* self)
 		psy_INDEX_INVALID, self, (fp_inputhandler_input)mainframe_on_notes);
 	inputhandler_connect_host(&self->workspace.inputhandler,
 		self, (fp_inputhandler_hostcallback)mainframe_on_input_handler_callback);	
-	psy_signal_connect(&self->workspace.signal_togglegear, self,
-		mainframe_on_toggle_gear);
 	psy_signal_connect(&self->checkunsavedbox.signal_execute, self,
 		mainframe_on_check_unsaved);	
 	psy_signal_connect(&self->workspace.signal_songchanged, self,
@@ -788,15 +883,6 @@ void mainframe_update_songtitle(MainFrame* self)
 		workspace_song_title(&self->workspace));
 }
 
-void mainframe_on_toggle_gear(MainFrame* self, Workspace* sender)
-{
-	if (psy_ui_component_visible(&self->gearsplitter.component)) {
-		psy_ui_component_hide(&self->gearsplitter.component);
-	} else {
-		psy_ui_component_show(&self->gearsplitter.component);
-	}
-}
-
 void mainframe_on_recent_songs(MainFrame* self, psy_Property* sender)
 {
 	if (psy_property_item_bool(sender)) {
@@ -819,20 +905,9 @@ void mainframe_on_file_save_view(MainFrame* self, psy_ui_Component* sender)
 
 void mainframe_on_disk_op(MainFrame* self, psy_ui_Component* sender)
 {	
+	self->fileview.property = NULL;
 	workspace_select_view(&self->workspace, viewindex_make(VIEW_ID_FILEVIEW,
-		0, 0, psy_INDEX_INVALID));	
-}
-
-void mainframe_on_plugin_editor(MainFrame* self, psy_ui_Component* sender)
-{
-	if (psy_ui_component_visible(&self->plugineditor.component)) {
-		psy_ui_button_disable_highlight(&self->machinebar.editor);
-		psy_ui_component_hide(&self->splitbarplugineditor.component);
-	} else {
-		psy_ui_button_highlight(&self->machinebar.editor);
-		psy_ui_component_show(&self->splitbarplugineditor.component);
-	}
-	psy_ui_component_toggle_visibility(&self->plugineditor.component);
+		0, 0, psy_INDEX_INVALID));
 }
 
 void mainframe_on_render(MainFrame* self, psy_ui_Component* sender)
@@ -1058,89 +1133,73 @@ bool mainframe_on_close(MainFrame* self)
 	return TRUE;
 }
 
-void mainframe_on_seq_editor(MainFrame* self, psy_Property* sender)
-{
-	if (psy_property_item_bool(sender)) {
-		psy_ui_component_show_align(seqeditor_base(&self->seqeditor));
-		psy_ui_component_show_align(&self->splitseqeditor.component);
-	} else {
-		psy_ui_component_hide_align(seqeditor_base(&self->seqeditor));
-		psy_ui_component_hide_align(&self->splitseqeditor.component);
-	}
-	mainframe_update_seq_editor_buttons(self);
-}
-
-void mainframe_update_seq_editor_buttons(MainFrame* self)
-{
-	if (generalconfig_showsequenceedit(psycleconfig_general(
-		workspace_conf(&self->workspace)))) {
-		psy_ui_button_set_text(&self->sequencerbar.toggleseqedit,
-			"seqview.hideseqeditor");
-		psy_ui_button_highlight(&self->sequencerbar.toggleseqedit);
-		psy_ui_button_set_icon(&self->sequencerbar.toggleseqedit,
-			psy_ui_ICON_LESS);		
-	} else {
-		psy_ui_button_set_text(&self->sequencerbar.toggleseqedit,
-			"seqview.showseqeditor");
-		psy_ui_button_disable_highlight(
-			&self->sequencerbar.toggleseqedit);
-		psy_ui_button_set_icon(&self->sequencerbar.toggleseqedit,
-			psy_ui_ICON_MORE);
-	}
-}
-
-void mainframe_connect_seq_editor_buttons(MainFrame* self)
-{	
-	generalconfig_connect(&self->workspace.config.general, 
-		"showsequenceedit", self, mainframe_on_seq_editor);	
-	psy_ui_button_data_exchange(&self->sequencerbar.toggleseqedit,
-		generalconfig_property(psycleconfig_general(workspace_conf(
-			&self->workspace)), "showsequenceedit"));
-}
-
 void mainframe_on_toggle_scripts(MainFrame* self, psy_ui_Component* sender)
 {
 	psy_ui_component_toggle_visibility(psy_ui_tabbar_base(&self->scripttabbar));
 }
 
+void mainframe_on_seq_editor(MainFrame* self, psy_Property* sender)
+{
+	if (psy_property_item_bool(sender)) {
+		psy_ui_component_show(seqeditor_base(&self->seqeditor));
+		psy_ui_component_show(&self->splitseqeditor.component);
+	} else {
+		psy_ui_component_hide(seqeditor_base(&self->seqeditor));
+		psy_ui_component_hide(&self->splitseqeditor.component);
+	}
+	psy_ui_component_align(&self->pane);
+	psy_ui_component_invalidate(&self->pane);
+}
+
+void mainframe_on_piano_kbd(MainFrame* self, psy_Property* sender)
+{
+	if (psy_property_item_bool(sender)) {
+		psy_ui_component_show(&self->keyboardview);
+	} else {
+		psy_ui_component_hide(&self->keyboardview);
+	}
+	psy_ui_component_align(&self->pane);
+	psy_ui_component_invalidate(&self->pane);
+}
+
 void mainframe_on_step_sequencer(MainFrame* self, psy_Property* sender)
 {
 	if (psy_property_item_bool(sender)) {
-		psy_ui_component_show_align(stepsequencerview_base(
+		psy_ui_component_show(stepsequencerview_base(
 			&self->stepsequencerview));		
 	} else {
-		psy_ui_component_hide_align(stepsequencerview_base(
+		psy_ui_component_hide(stepsequencerview_base(
 			&self->stepsequencerview));		
 	}
-	mainframe_update_step_sequencer_buttons(self);
+	psy_ui_component_align(&self->pane);
+	psy_ui_component_invalidate(&self->pane);
 }
 
-void mainframe_update_step_sequencer_buttons(MainFrame* self)
-{
-	if (generalconfig_showstepsequencer(psycleconfig_general(
-			workspace_conf(&self->workspace)))) {
-		psy_ui_button_set_text(&self->sequencerbar.togglestepseq,
-			"seqview.hidestepsequencer");
-		psy_ui_button_highlight(&self->sequencerbar.togglestepseq);
-		psy_ui_button_set_icon(&self->sequencerbar.togglestepseq,
-			psy_ui_ICON_LESS);
-	} else {
-		psy_ui_button_set_text(&self->sequencerbar.togglestepseq,
-			"seqview.showstepsequencer");
-		psy_ui_button_disable_highlight(
-			&self->sequencerbar.togglestepseq);
-		psy_ui_button_set_icon(&self->sequencerbar.togglestepseq,
-			psy_ui_ICON_MORE);
-	}
+void mainframe_connect_seq_editor_buttons(MainFrame* self)
+{	
+	generalconfig_connect(&self->workspace.config.general, 
+		"bench.showsequenceedit", self, mainframe_on_seq_editor);	
+	psy_ui_button_data_exchange(&self->sequencerbar.toggleseqedit,
+		generalconfig_property(psycleconfig_general(workspace_conf(
+			&self->workspace)), "bench.showsequenceedit"));
 }
 
 void mainframe_connect_step_sequencer_buttons(MainFrame* self)
 {
 	generalconfig_connect(&self->workspace.config.general,
-		"showstepsequencer", self, mainframe_on_step_sequencer);
+		"bench.showstepsequencer", self, mainframe_on_step_sequencer);
 	psy_ui_button_data_exchange(&self->sequencerbar.togglestepseq,
 		generalconfig_property(psycleconfig_general(workspace_conf(
-			&self->workspace)), "showstepsequencer"));	
+			&self->workspace)), "bench.showstepsequencer"));	
+}
+
+void mainframe_connect_piano_kbd_buttons(MainFrame* self)
+{
+	generalconfig_connect(&self->workspace.config.general,
+		"bench.showpianokbd", self, mainframe_on_piano_kbd);
+	psy_ui_button_data_exchange(&self->sequencerbar.togglekbd,
+		generalconfig_property(psycleconfig_general(workspace_conf(
+			&self->workspace)), "bench.showpianokbd"));	
 }
 
 void mainframe_on_toggle_terminal(MainFrame* self, psy_ui_Component* sender)

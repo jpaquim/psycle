@@ -42,6 +42,8 @@ typedef struct psy_ui_X11App {
 	Atom wmDeleteMessage;
 	Atom wmNetState;
 	Atom wmStateAbove;
+	Atom wmStateMaximizedVert;
+	Atom wmStateMaximizedHorz;
 	bool running;	
 	psy_ui_X11Colours colourmap;
 	XVisualInfo* vinfo;
@@ -53,7 +55,7 @@ typedef struct psy_ui_X11App {
 	bool shiftstate;
 	bool controlstate;
 	bool altstate;
-	bool resetcursor;
+	bool resetcursor;	
 	/* references */
 	psy_ui_App* app;
 	psy_ui_x11_Cursors cursors;

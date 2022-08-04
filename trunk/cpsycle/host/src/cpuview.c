@@ -136,8 +136,9 @@ static void cpuview_init_performance(CPUView*);
 static void cpuview_init_modules(CPUView*, Workspace* workspace);
 static void cpuview_on_timer(CPUView*, psy_ui_Component* sender,
 	uintptr_t timerid);
-static void cpuview_on_hide(CPUView*);
+static void cpuview_on_close_button(CPUView*, psy_ui_Button* sender);
 static void cpuview_on_cpu_performance(CPUView*, psy_ui_CheckBox* sender);
+
 
 /* implementation */
 void cpuview_init(CPUView* self, psy_ui_Component* parent,
@@ -169,8 +170,8 @@ void cpuview_init_title(CPUView* self)
 {	
 	titlebar_init(&self->titlebar, &self->component,
 		"Psycle DSP/CPU Performance Monitor");		
-	titlebar_hide_on_close(&self->titlebar);
-	titlebar_enable_drag(&self->titlebar, "cpu");
+	psy_signal_connect(&self->titlebar.hide.signal_clicked, self,
+		cpuview_on_close_button);
 }
 
 void cpuview_init_core_info(CPUView* self)
@@ -270,9 +271,10 @@ void cpuview_on_timer(CPUView* self, psy_ui_Component* sender,
 	psy_ui_component_invalidate(&self->modules.component);
 }
 
-void cpuview_on_hide(CPUView* self)
+void cpuview_on_close_button(CPUView* self, psy_ui_Button* sender)
 {
-	psy_ui_component_hide_align(&self->component);
+	psy_property_set_item_bool(generalconfig_property(
+		&self->workspace->config.general, "bench.showcpu"), FALSE);
 }
 
 void cpuview_on_cpu_performance(CPUView* self, psy_ui_CheckBox* sender)

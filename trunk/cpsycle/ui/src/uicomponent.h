@@ -521,7 +521,9 @@ void psy_ui_componentimp_init(psy_ui_ComponentImp*);
 void psy_ui_componentimp_dispose(psy_ui_ComponentImp*);
 
 INLINE void psy_ui_component_invalidate(psy_ui_Component* self)
-{	
+{
+	assert(self);
+	
 	if (psy_ui_component_draw_visible(self)) {
 		self->vtable->invalidate(self);
 	}
@@ -685,12 +687,18 @@ INLINE psy_ui_Value psy_ui_component_scroll_left(psy_ui_Component* self)
 	return psy_ui_value_make_px(-position.left);	
 }
 
-INLINE double psy_ui_component_scroll_left_px(psy_ui_Component* self)
+INLINE double psy_ui_component_scroll_left_px(const psy_ui_Component* self)
 {		
 	psy_ui_RealRectangle position;
 
 	position = psy_ui_component_position(self);
 	return -floor(position.left);
+}
+
+INLINE void psy_ui_component_set_scroll_left_px(psy_ui_Component* self,
+	double left)
+{
+	psy_ui_component_set_scroll_left(self, psy_ui_value_make_px(left));
 }
 
 void psy_ui_component_set_scroll_top(psy_ui_Component*, psy_ui_Value top);

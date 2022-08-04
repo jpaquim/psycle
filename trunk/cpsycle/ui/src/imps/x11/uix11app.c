@@ -144,6 +144,10 @@ void psy_ui_x11app_init(psy_ui_X11App* self, psy_ui_App* app,
 		False);
 	self->wmNetState = XInternAtom(self->dpy, "_NET_WM_STATE",
 		False);
+	self->wmStateMaximizedVert = XInternAtom(self->dpy,
+		"_NET_WM_STATE_MAXIMIZED_VERT", FALSE);
+    self->wmStateMaximizedHorz = XInternAtom(self->dpy,
+		"_NET_WM_STATE_MAXIMIZED_HORZ", FALSE);
 	self->running = FALSE;
 	shape_extension = XShapeQueryExtension (self->dpy,
 		&shapeEventBase,
@@ -317,12 +321,12 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 		   event->xgraphicsexpose.width, event->xgraphicsexpose.height);
 		*/
 		break;
-	case Expose: {
+	case Expose: {		
 		const psy_ui_Border* border;
 		psy_ui_RealRectangle* r;
 		psy_ui_RealRectangle* rc;
 		psy_List* p;
-
+				
 		border = psy_ui_component_border(imp->component);					
 		rc = (psy_ui_RealRectangle*)malloc(sizeof(psy_ui_RealRectangle));
 		*rc = psy_ui_realrectangle_make(
@@ -332,7 +336,7 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 				psy_ui_realsize_make(
 					event->xexpose.width,
 					event->xexpose.height));		
-		psy_list_append(&imp->expose_rectangles, rc);
+		psy_list_append(&imp->expose_rectangles, rc);		
 		if (event->xexpose.count > 0) {
 			return 0;
 		}
@@ -386,6 +390,10 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 		if (imp->above) {			
 			psy_ui_x11_componentimp_stay_always_on_top(imp);
 		}
+		if (imp->maximize) {
+			imp->maximize = FALSE;			
+			psy_ui_x11_componentimp_maximize(imp);			
+		}
 		break;
 	case UnmapNotify:
 		psy_signal_emit(&imp->component->signal_hide,
@@ -396,7 +404,7 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 		break;
 	case ConfigureNotify: {
 		XConfigureEvent xce = event->xconfigure;
-
+						
 		if (xce.width != imp->prev_w || xce.height != imp->prev_h) {
 			imp->prev_w = xce.width;
 			imp->prev_h = xce.height;

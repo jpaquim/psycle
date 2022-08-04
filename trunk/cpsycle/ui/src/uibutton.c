@@ -28,7 +28,8 @@ static void psy_ui_button_on_update_styles(psy_ui_Button*);
 static void psy_ui_button_load_bitmaps(psy_ui_Button*);
 static void psy_ui_button_on_property_changed(psy_ui_Button*,
 	psy_Property* sender);
-static void psy_ui_button_before_property_destroyed(psy_ui_Button*, psy_Property* sender);
+static void psy_ui_button_before_property_destroyed(psy_ui_Button*,
+	psy_Property* sender);
 static void psy_ui_button_on_repeat_timer(psy_ui_Button*, uintptr_t id);
 
 /* vtable */
@@ -102,6 +103,7 @@ void psy_ui_button_init(psy_ui_Button* self, psy_ui_Component* parent)
 	self->repeat_rate = 0;
 	self->first_repeat_rate = 0;
 	self->first_repeat = TRUE;
+	self->text_setted = FALSE;
 	psy_ui_colour_init(&self->bitmaptransparency);
 	psy_ui_bitmap_init(&self->bitmapicon);
 	psy_signal_init(&self->signal_clicked);	
@@ -268,7 +270,8 @@ void psy_ui_button_on_draw(psy_ui_Button* self, psy_ui_Graphics* g)
 		if (psy_ui_component_input_prevented(&self->component)) {
 			psy_ui_set_text_colour(g, psy_ui_colour_make(0x00777777));
 		} else {
-			psy_ui_set_text_colour(g, psy_ui_component_colour(&self->component));
+			psy_ui_set_text_colour(g, psy_ui_component_colour(
+				&self->component));
 		}
 		psy_ui_textoutrectangle(g, psy_ui_realpoint_make(cpx, vcenter),
 			psy_ui_ETO_CLIPPED, r, text, strlen(text));
@@ -429,6 +432,7 @@ void psy_ui_button_set_text(psy_ui_Button* self, const char* text)
 	if (self->translate) {
 		psy_strreset(&self->translation, psy_ui_translate(text));
 	}
+	self->text_setted = TRUE;
 	psy_ui_component_invalidate(psy_ui_button_base(self));
 }
 
@@ -526,13 +530,15 @@ void psy_ui_button_load_bitmaps(psy_ui_Button* self)
 {
 	if (psy_ui_app_hasdarktheme(psy_ui_app())) {		
 		if (self->darkresourceid != psy_INDEX_INVALID) {
-			psy_ui_bitmap_load_resource(&self->bitmapicon, self->darkresourceid);
+			psy_ui_bitmap_load_resource(&self->bitmapicon,
+				self->darkresourceid);
 		} else if (psy_strlen(self->dark_path) > 0) {
 			psy_ui_bitmap_load(&self->bitmapicon, self->dark_path);
 		}
 	} else {
 		if (self->lightresourceid != psy_INDEX_INVALID) {
-			psy_ui_bitmap_load_resource(&self->bitmapicon, self->lightresourceid);
+			psy_ui_bitmap_load_resource(&self->bitmapicon,
+				self->lightresourceid);
 		} else if (psy_strlen(self->light_path) > 0) {
 			psy_ui_bitmap_load(&self->bitmapicon, self->light_path);
 		}
@@ -550,8 +556,10 @@ void psy_ui_button_data_exchange(psy_ui_Button* self, psy_Property* property)
 
 	self->property = property;
 	if (property) {		
-		psy_ui_button_on_property_changed(self, property);	
-		psy_ui_button_set_text(self, psy_property_text(property));
+		psy_ui_button_on_property_changed(self, property);
+		if (!self->text_setted) {			
+			psy_ui_button_set_text(self, psy_property_text(property));
+		}
 		psy_property_connect(property, self,
 			psy_ui_button_on_property_changed);
 		psy_signal_connect(&self->property->before_destroyed, self,
@@ -559,11 +567,23 @@ void psy_ui_button_data_exchange(psy_ui_Button* self, psy_Property* property)
 	}
 }
 
-void psy_ui_button_on_property_changed(psy_ui_Button* self, psy_Property* sender)
+void psy_ui_button_on_property_changed(psy_ui_Button* self,
+	psy_Property* sender)
 {	
+	assert(self);
+	
+	if (!psy_property_is_bool(sender)) {
+		return;
+	}
+	if (psy_property_item_bool(sender)) {
+		psy_ui_button_highlight(self);
+	} else {		
+		psy_ui_button_disable_highlight(self);	
+	}
 }
 
-void psy_ui_button_before_property_destroyed(psy_ui_Button* self, psy_Property* sender)
+void psy_ui_button_before_property_destroyed(psy_ui_Button* self,
+	psy_Property* sender)
 {
 	assert(self);
 

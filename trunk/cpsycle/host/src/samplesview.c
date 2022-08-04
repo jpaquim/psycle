@@ -49,6 +49,10 @@ static void samplessongimportview_oncopy(SamplesSongImportView*,
 	psy_ui_Component* sender);
 static void samplessongimportview_onsamplesboxchanged(SamplesSongImportView*,
 	psy_ui_Component* sender);
+static void samplessongimportview_on_load(SamplesSongImportView*,
+	psy_Property* sender);
+static void samplessongimportview_load_song(SamplesSongImportView*,
+	const char* path);	
 
 /* implementation */
 void samplessongimportview_init(SamplesSongImportView* self, psy_ui_Component* parent,
@@ -90,50 +94,77 @@ void samplessongimportview_init(SamplesSongImportView* self, psy_ui_Component* p
 	/* samplebox */
 	wavebox_init(&self->samplebox, &self->component, workspace);
 	psy_ui_component_set_align(&self->samplebox.component,
-		psy_ui_ALIGN_BOTTOM);	
+		psy_ui_ALIGN_BOTTOM);
+	psy_property_init_type(&self->song_load, "load", PSY_PROPERTY_TYPE_STRING);
+	psy_property_connect(&self->song_load, self,
+		samplessongimportview_on_load);
 }
 
 void samplessongimportview_on_destroy(SamplesSongImportView* self,
 	psy_ui_Component* sender)
 {
+	psy_property_dispose(&self->song_load);
 	if (self->source) {
 		psy_audio_song_deallocate(self->source);
 		self->source = NULL;
 	}	
 }
 
+void samplessongimportview_on_load(SamplesSongImportView* self,
+	psy_Property* sender)
+{
+	samplessongimportview_load_song(self, psy_property_item_str(sender));
+	workspace_select_view(self->workspace, viewindex_make(VIEW_ID_SAMPLESVIEW,
+		0, 0, psy_INDEX_INVALID));
+}
+
 void samplessongimportview_onloadsong(SamplesSongImportView* self,
 	psy_ui_Component* sender)
 {
-	psy_ui_OpenDialog dialog;
-	
-	psy_ui_opendialog_init_all(&dialog, 0, "Load Song",
-		psy_audio_songfile_loadfilter(),
-		psy_audio_songfile_standardloadfilter(),
-		dirconfig_songs(&self->workspace->config.directories));
-	if (psy_ui_opendialog_execute(&dialog)) {
-		psy_audio_SongFile songfile;
-
-		if (self->source) {
-			psy_audio_song_deallocate(self->source);			
-		}	
-		self->source = psy_audio_song_allocinit(
-			&self->workspace->machinefactory);
-		psy_audio_songfile_init(&songfile);
-		songfile.song = self->source;
-		songfile.file = 0;		
-		psy_audio_songfile_load(&songfile, psy_path_full(psy_ui_opendialog_path(&dialog)));
-		if (!songfile.err) {
-			psy_ui_label_set_text(&self->songname,
-				self->source->properties.title);
-			samplesbox_setsamples(&self->samplesbox, &self->source->samples);			
-		} else {
-			psy_ui_label_set_text(&self->songname,
-				"No source song loaded");
+	if (keyboardmiscconfig_ft2fileexplorer(psycleconfig_misc(
+			workspace_conf(self->workspace)))) {
+		self->workspace->fileview->property = &self->song_load;
+		workspace_select_view(self->workspace, viewindex_make(VIEW_ID_FILEVIEW,
+			0, 0, psy_INDEX_INVALID));
+	} else {
+		
+		psy_ui_OpenDialog dialog;
+		
+		psy_ui_opendialog_init_all(&dialog, 0, "Load Song",
+			psy_audio_songfile_loadfilter(),
+			psy_audio_songfile_standardloadfilter(),
+			dirconfig_songs(&self->workspace->config.directories));
+		if (psy_ui_opendialog_execute(&dialog)) {
+			samplessongimportview_load_song(self, 
+				psy_path_full(psy_ui_opendialog_path(&dialog)));			
 		}
-		psy_audio_songfile_dispose(&songfile);
+		psy_ui_opendialog_dispose(&dialog);
 	}
-	psy_ui_opendialog_dispose(&dialog);
+}
+
+void samplessongimportview_load_song(SamplesSongImportView* self,
+	const char* path)
+{	
+	psy_audio_SongFile songfile;
+
+	if (self->source) {
+		psy_audio_song_deallocate(self->source);			
+	}	
+	self->source = psy_audio_song_allocinit(
+		&self->workspace->machinefactory);
+	psy_audio_songfile_init(&songfile);
+	songfile.song = self->source;
+	songfile.file = 0;		
+	psy_audio_songfile_load(&songfile, path);
+	if (!songfile.err) {
+		psy_ui_label_set_text(&self->songname,
+			self->source->properties.title);
+		samplesbox_setsamples(&self->samplesbox, &self->source->samples);			
+	} else {
+		psy_ui_label_set_text(&self->songname,
+			"No source song loaded");
+	}
+	psy_audio_songfile_dispose(&songfile);	
 }
 
 void samplessongimportview_oncopy(SamplesSongImportView* self,
@@ -1076,7 +1107,7 @@ void samplesview_init(SamplesView* self, psy_ui_Component* parent,
 		samplesview_oninstrumentslotchanged);
 	/* ImportView */
 	samplessongimportview_init(&self->songimport,
-		&self->clientnotebook.component, NULL, workspace);
+		&self->clientnotebook.component, self, workspace);
 	/* WaveEditorView */
 	sampleeditor_init(&self->sampleeditor, &self->clientnotebook.component,
 		workspace);

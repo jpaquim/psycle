@@ -25,12 +25,6 @@ extern "C" {
 ** ft2style fileexplorer
 */
 
-typedef enum {
-	FILEVIEWFILTER_ALL,
-	FILEVIEWFILTER_PSY,
-	FILEVIEWFILTER_MOD
-} FileViewFilterType;
-
 typedef struct FileViewFilter {
 	/* inherits */
 	psy_ui_Component component;
@@ -39,20 +33,25 @@ typedef struct FileViewFilter {
 	/* internal */
 	psy_ui_Label desc;
 	psy_ui_Component items;
-	psy_ui_CheckBox psy;
-	psy_ui_CheckBox mod;
-	FileViewFilterType filter;
 	bool showall;
+	psy_Property filter;
+	psy_Property* types;
 } FileViewFilter;
 
 void fileviewfilter_init(FileViewFilter*, psy_ui_Component* parent);
 
-const char* fileviewfilter_wildcard(const FileViewFilter*);
+const char* fileviewfilter_type(const FileViewFilter*);
 
 INLINE psy_ui_Component* fileviewfilter_base(FileViewFilter* self)
 {
 	return &self->component;
 }
+
+typedef enum {
+	FILEVIEWFILTER_ALL,
+	FILEVIEWFILTER_PSY,
+	FILEVIEWFILTER_MOD
+} FileViewFilterType;
 
 typedef struct FileViewSaveFilter {
 	/* inherits */
@@ -112,6 +111,7 @@ typedef struct FileView {
 	psy_ui_TextArea filename;
 	/* references */
 	DirConfig* dirconfig;
+	psy_Property* property;
 } FileView;
 
 void fileview_init(FileView*, psy_ui_Component* parent, DirConfig*);

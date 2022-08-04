@@ -77,8 +77,8 @@ static psy_ui_RealRectangle view_translation(psy_ui_ViewComponentImp*,
 	const psy_ui_RealRectangle*);
 static psy_ui_RealPoint translatecoords(psy_ui_ViewComponentImp*,
 	psy_ui_Component* src, psy_ui_Component* dst);
-psy_ui_RealRectangle view_intersection(psy_ui_ViewComponentImp*, 
-	const psy_ui_RealRectangle*);
+bool view_intersection(psy_ui_ViewComponentImp*, 
+	const psy_ui_RealRectangle*, psy_ui_RealRectangle* rv);
 
 static uintptr_t dev_platform_handle(psy_ui_ViewComponentImp* self)
 { 
@@ -608,12 +608,11 @@ void view_dev_invalidate(psy_ui_ViewComponentImp* self)
 void view_dev_invalidaterect(psy_ui_ViewComponentImp* self,
 	const psy_ui_RealRectangle* r)
 {
-	if (psy_ui_component_draw_visible(self->view) && r) {	
+	if (r) {	
 		psy_ui_RealRectangle rc;
-		
-		rc = view_intersection(self, r);
-		if (!psy_ui_realrectangle_empty(&rc)) {		
-			psy_ui_component_invalidate_rect(self->view, rc);
+				
+		if (view_intersection(self, r, &rc)) {
+			self->view->imp->vtable->dev_invalidaterect(self->view->imp, &rc);			
 		}
 	}
 }
@@ -635,44 +634,43 @@ psy_ui_RealRectangle view_translation(psy_ui_ViewComponentImp* self,
 			psy_ui_realrectangle_size(r));	
 }
 
-psy_ui_RealRectangle view_intersection(psy_ui_ViewComponentImp* self, 
-	const psy_ui_RealRectangle* rc)
-{	
-	psy_ui_RealRectangle rv;
+bool view_intersection(psy_ui_ViewComponentImp* self,
+	const psy_ui_RealRectangle* rc, psy_ui_RealRectangle* rv)
+{		
 	psy_ui_Component* curr;
 	psy_ui_RealRectangle parent_position;
 	psy_ui_RealRectangle client;	
 		
 	assert(self);
-		
+			
 	curr = self->component;	
 	parent_position = psy_ui_component_position(curr);	
 	client = psy_ui_realrectangle_make(
 			psy_ui_realpoint_zero(),
 			psy_ui_realrectangle_size(&parent_position));
 	if (rc) {
-		rv = *rc;
+		*rv = *rc;
 	} else {
-		rv = client;
+		*rv = client;
 	}			
-	if (!psy_ui_realrectangle_intersection(&rv, &client)) {
-		return rv;
+	if (!psy_ui_realrectangle_intersection(rv, &client)) {
+		return FALSE;
 	}
 	while (curr && curr != self->view && psy_ui_component_parent(curr)) {
 		psy_ui_RealRectangle client;
 		
-		psy_ui_realrectangle_move(&rv, psy_ui_realrectangle_topleft(
+		psy_ui_realrectangle_move(rv, psy_ui_realrectangle_topleft(
 			&parent_position));
 		curr = psy_ui_component_parent(curr);
 		parent_position = psy_ui_component_position(curr);
 		client = psy_ui_realrectangle_make(
 			psy_ui_realpoint_zero(),
 			psy_ui_realrectangle_size(&parent_position));			
-		if (!psy_ui_realrectangle_intersection(&rv, &client)) {
-			break;
+		if (!psy_ui_realrectangle_intersection(rv, &client)) {
+			return FALSE;
 		}		
 	}
-	return rv;
+	return TRUE;
 }
 
 psy_ui_RealPoint translatecoords(psy_ui_ViewComponentImp* self,

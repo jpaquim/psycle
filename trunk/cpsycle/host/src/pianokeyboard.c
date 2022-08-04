@@ -15,11 +15,13 @@
 
 /* prototypes */
 static void pianokeyboard_on_draw(PianoKeyboard*, psy_ui_Graphics*);
+static void pianokeyboard_draw_vertical(PianoKeyboard*, psy_ui_Graphics*);
+static void pianokeyboard_draw_horizontal(PianoKeyboard*, psy_ui_Graphics*);
 static void pianokeyboard_on_mouse_down(PianoKeyboard*, psy_ui_MouseEvent*);
 static void pianokeyboard_on_mouse_move(PianoKeyboard*, psy_ui_MouseEvent*);
 static void pianokeyboard_on_mouse_up(PianoKeyboard*, psy_ui_MouseEvent*);
-static void pianokeyboard_on_preferred_size(PianoKeyboard*, const psy_ui_Size* limit,
-	psy_ui_Size* rv);
+static void pianokeyboard_on_preferred_size(PianoKeyboard*,
+	const psy_ui_Size* limit, psy_ui_Size* rv);
 static void pianokeyboard_on_timer(PianoKeyboard*, uintptr_t timer_id);
 static void pianokeyboard_play(PianoKeyboard*, uint8_t key);
 static uint8_t pianokeyboard_top_key(const PianoKeyboard*);
@@ -68,7 +70,7 @@ void pianokeyboard_init(PianoKeyboard* self, psy_ui_Component* parent,
 	assert(player);
 
 	psy_ui_component_init(pianokeyboard_base(self), parent, NULL);	
-	pianokeyboard_vtable_init(self);
+	pianokeyboard_vtable_init(self);	
 	self->keyboardstate =  keyboardstate;
 	self->player = player;
 	self->active_note = psy_audio_NOTECOMMANDS_EMPTY;
@@ -76,11 +78,25 @@ void pianokeyboard_init(PianoKeyboard* self, psy_ui_Component* parent,
 	self->scroll = 0;
 	self->scrollspeed = 1;
 	self->scrollcount = 0;
-	psy_ui_component_set_preferred_width(pianokeyboard_base(self),
-		psy_ui_value_make_ew(10.0));	
+	if (self->keyboardstate->orientation == psy_ui_VERTICAL) {
+		psy_ui_component_set_preferred_width(pianokeyboard_base(self),
+			psy_ui_value_make_ew(10.0));
+	} else {
+		psy_ui_component_set_preferred_height(pianokeyboard_base(self),
+			psy_ui_value_make_ew(8.0));
+	}
 }
 
 void pianokeyboard_on_draw(PianoKeyboard* self, psy_ui_Graphics* g)
+{
+	if (self->keyboardstate->orientation == psy_ui_VERTICAL) {
+		pianokeyboard_draw_vertical(self, g);
+	} else {
+		pianokeyboard_draw_horizontal(self, g);
+	}
+}
+
+void pianokeyboard_draw_vertical(PianoKeyboard* self, psy_ui_Graphics* g)
 {	
 	uint8_t key;	
 	psy_ui_RealSize size;
@@ -98,8 +114,8 @@ void pianokeyboard_on_draw(PianoKeyboard* self, psy_ui_Graphics* g)
 	keyactive = psy_ui_colour_make(0x00808080);
 	size = psy_ui_component_scroll_size_px(pianokeyboard_base(self));
 	tm = psy_ui_component_textmetric(pianokeyboard_base(self));
-	self->keyboardstate->keyboardheightpx = keyboardstate_height(self->keyboardstate, tm);
-	self->keyboardstate->keyheightpx = psy_ui_value_px(&self->keyboardstate->keyheight, tm, NULL);
+	self->keyboardstate->keyboard_extent_px = keyboardstate_extent(self->keyboardstate, tm);
+	self->keyboardstate->key_extent_px = psy_ui_value_px(&self->keyboardstate->key_extent, tm, NULL);
 	psy_ui_setcolour(g, keyseparator);
 	if (self->keyboardstate->drawpianokeys) {
 		psy_ui_set_text_colour(g, keyseparator);
@@ -108,56 +124,56 @@ void pianokeyboard_on_draw(PianoKeyboard* self, psy_ui_Graphics* g)
 	}
 	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 	for (key = self->keyboardstate->keymin; key < self->keyboardstate->keymax; ++key) {
-		double cpy;
+		double cp;
 
-		cpy = keyboardstate_keytopx(self->keyboardstate, key);
-		psy_ui_drawline(g, psy_ui_realpoint_make(0, cpy),
-			psy_ui_realpoint_make(size.width, cpy));
+		cp = keyboardstate_key_to_px(self->keyboardstate, key);
+		psy_ui_drawline(g, psy_ui_realpoint_make(0, cp),
+			psy_ui_realpoint_make(size.width, cp));
 		if (self->keyboardstate->drawpianokeys) {
 			if (psy_dsp_isblack(key)) {
 				psy_ui_Colour keycolour;				
 								
 				psy_ui_drawsolidrectangle(g, psy_ui_realrectangle_make(
-					psy_ui_realpoint_make(size.width * 0.60, cpy),
+					psy_ui_realpoint_make(size.width * 0.60, cp),
 					psy_ui_realsize_make(size.width * 0.40,
-						self->keyboardstate->keyheightpx)),
+						self->keyboardstate->key_extent_px)),
 					keywhite);
 				if (key > 0 && psy_audio_player_is_active_key(self->player, key - 1)) {
 					psy_ui_drawsolidrectangle(g, psy_ui_realrectangle_make(
 						psy_ui_realpoint_make(size.width * 0.60,
-							cpy + self->keyboardstate->keyheightpx / 2),
+							cp + self->keyboardstate->key_extent_px / 2),
 						psy_ui_realsize_make(size.width * 0.40,
-							self->keyboardstate->keyheightpx / 2)),
+							self->keyboardstate->key_extent_px / 2)),
 						keyactive);
 				} else if (psy_audio_player_is_active_key(self->player, key + 1)) {
 					psy_ui_drawsolidrectangle(g, psy_ui_realrectangle_make(
-						psy_ui_realpoint_make(size.width * 0.60, cpy),
+						psy_ui_realpoint_make(size.width * 0.60, cp),
 						psy_ui_realsize_make(size.width * 0.40,
-							self->keyboardstate->keyheightpx / 2)),
+							self->keyboardstate->key_extent_px / 2)),
 						keyactive);
 				}
 				psy_ui_drawline(g,
-					psy_ui_realpoint_make(0.0, cpy +
-						self->keyboardstate->keyheightpx / 2),
-					psy_ui_realpoint_make(size.width, cpy +
-						self->keyboardstate->keyheightpx / 2));
+					psy_ui_realpoint_make(0.0, cp +
+						self->keyboardstate->key_extent_px / 2),
+					psy_ui_realpoint_make(size.width, cp +
+						self->keyboardstate->key_extent_px / 2));
 				if (psy_audio_player_is_active_key(self->player, key)) {
 					keycolour = keyactive;
 				} else {
 					keycolour = keyblack;
 				}
 			psy_ui_drawsolidrectangle(g,
-				psy_ui_realrectangle_make(psy_ui_realpoint_make(0, cpy),
+				psy_ui_realrectangle_make(psy_ui_realpoint_make(0, cp),
 					psy_ui_realsize_make(size.width * 0.60,
-						self->keyboardstate->keyheightpx)),
+						self->keyboardstate->key_extent_px)),
 				keycolour);
 			} else {
 			psy_ui_RealRectangle r;
 			psy_ui_Colour keycolour;
 
-			r = psy_ui_realrectangle_make(psy_ui_realpoint_make(0.0, cpy),
+			r = psy_ui_realrectangle_make(psy_ui_realpoint_make(0.0, cp),
 				psy_ui_realsize_make(size.width,
-					self->keyboardstate->keyheightpx));
+					self->keyboardstate->key_extent_px));
 			if (psy_audio_player_is_active_key(self->player, key)) {
 				keycolour = keyactive;
 			} else {
@@ -166,14 +182,14 @@ void pianokeyboard_on_draw(PianoKeyboard* self, psy_ui_Graphics* g)
 			psy_ui_drawsolidrectangle(g, r, keycolour);
 			if (psy_dsp_iskey_c(key) || psy_dsp_iskey_e(key)) {
 				psy_ui_drawline(g,
-					psy_ui_realpoint_make(0, cpy + self->keyboardstate->keyheightpx),
-					psy_ui_realpoint_make(size.width, cpy + self->keyboardstate->keyheightpx));
+					psy_ui_realpoint_make(0, cp + self->keyboardstate->key_extent_px),
+					psy_ui_realpoint_make(size.width, cp + self->keyboardstate->key_extent_px));
 				if (psy_dsp_iskey_c(key)) {
 					psy_ui_set_text_colour(g, keyblack);
 					psy_ui_textoutrectangle(g,
 						psy_ui_realpoint_make(
 							size.width - tm->tmAveCharWidth * 4,
-							cpy),
+							cp),
 						psy_ui_ETO_CLIPPED, r,
 						psy_dsp_notetostr(key, self->keyboardstate->notemode),
 						psy_strlen(psy_dsp_notetostr(key, self->keyboardstate->notemode)));
@@ -196,9 +212,9 @@ void pianokeyboard_on_draw(PianoKeyboard* self, psy_ui_Graphics* g)
 				bg = psy_ui_component_background_colour(curr);
 			}
 		}
-		r = psy_ui_realrectangle_make(psy_ui_realpoint_make(0.0, cpy),
+		r = psy_ui_realrectangle_make(psy_ui_realpoint_make(0.0, cp),
 			psy_ui_realsize_make(size.width,
-				self->keyboardstate->keyheightpx));
+				self->keyboardstate->key_extent_px));
 		if (psy_dsp_isblack(key) && psy_strlen(psy_dsp_notetostr(key,
 			self->keyboardstate->notemode)) > 0) {
 			psy_ui_colour_add_rgb(&bg, 5, 5, 5);
@@ -216,6 +232,153 @@ void pianokeyboard_on_draw(PianoKeyboard* self, psy_ui_Graphics* g)
 	}
 }
 
+void pianokeyboard_draw_horizontal(PianoKeyboard* self, psy_ui_Graphics* g)
+{	
+	uint8_t key;	
+	psy_ui_RealSize size;
+	const psy_ui_TextMetric* tm;
+	psy_ui_Colour keyseparator;
+	psy_ui_Colour keywhite;
+	psy_ui_Colour keyblack;
+	psy_ui_Colour keyactive;
+
+	assert(self);
+
+	keyblack = psy_ui_colour_make(0x00595959);
+	keywhite = psy_ui_colour_make(0x00C0C0C0);
+	keyseparator = psy_ui_colour_make(0x999999);
+	keyactive = psy_ui_colour_make(0x00808080);
+	size = psy_ui_component_scroll_size_px(pianokeyboard_base(self));
+	tm = psy_ui_component_textmetric(pianokeyboard_base(self));
+	self->keyboardstate->keyboard_extent_px = keyboardstate_extent(self->keyboardstate, tm);
+	self->keyboardstate->key_extent_px = psy_ui_value_px(&self->keyboardstate->key_extent, tm, NULL);
+	psy_ui_setcolour(g, keyseparator);
+	if (self->keyboardstate->drawpianokeys) {
+		psy_ui_set_text_colour(g, keyseparator);
+	} else {
+		psy_ui_set_text_colour(g, keywhite);
+	}
+	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
+	for (key = self->keyboardstate->keymin; key < self->keyboardstate->keymax; ++key) {
+		double cp;
+
+		cp = keyboardstate_key_to_px(self->keyboardstate, key);
+		psy_ui_drawline(g, psy_ui_realpoint_make(cp, 0),
+			psy_ui_realpoint_make(cp, size.height));
+		if (self->keyboardstate->drawpianokeys) {
+			if (psy_dsp_isblack(key)) {
+				psy_ui_Colour keycolour;				
+								
+				psy_ui_drawsolidrectangle(g,
+					psy_ui_realrectangle_make(
+						psy_ui_realpoint_make(cp, size.height * 0.60),
+						psy_ui_realsize_make(
+							self->keyboardstate->key_extent_px,
+							size.height * 0.40)),
+					keywhite);
+				if (key > 0 && psy_audio_player_is_active_key(self->player, key - 1)) {
+					psy_ui_drawsolidrectangle(g,
+						psy_ui_realrectangle_make(
+							psy_ui_realpoint_make(
+								cp + self->keyboardstate->key_extent_px / 2,
+								size.height * 0.60),
+						psy_ui_realsize_make(
+							self->keyboardstate->key_extent_px / 2,
+							size.height * 0.40)),
+						keyactive);
+				} else if (psy_audio_player_is_active_key(self->player, key + 1)) {
+					psy_ui_drawsolidrectangle(g, psy_ui_realrectangle_make(
+						psy_ui_realpoint_make(cp, size.width * 0.60),
+						psy_ui_realsize_make(
+							self->keyboardstate->key_extent_px / 2,
+							size.height * 0.40)),
+						keyactive);
+				}
+				psy_ui_drawline(g,
+					psy_ui_realpoint_make(cp +
+						self->keyboardstate->key_extent_px / 2, 0.0),
+					psy_ui_realpoint_make(cp +
+						self->keyboardstate->key_extent_px / 2,
+						size.height));
+				if (psy_audio_player_is_active_key(self->player, key)) {
+					keycolour = keyactive;
+				} else {
+					keycolour = keyblack;
+				}
+				psy_ui_drawsolidrectangle(g,
+					psy_ui_realrectangle_make(psy_ui_realpoint_make(cp, 0),
+					psy_ui_realsize_make(
+						self->keyboardstate->key_extent_px,
+						size.height * 0.60)),
+				keycolour);
+			} else {
+				psy_ui_RealRectangle r;
+				psy_ui_Colour keycolour;
+
+				r = psy_ui_realrectangle_make(
+						psy_ui_realpoint_make(cp, 0.0),
+						psy_ui_realsize_make(
+							self->keyboardstate->key_extent_px,
+							size.height));
+				if (psy_audio_player_is_active_key(self->player, key)) {
+					keycolour = keyactive;
+				} else {
+					keycolour = keywhite;
+				}
+				psy_ui_drawsolidrectangle(g, r, keycolour);
+				if (psy_dsp_iskey_c(key) || psy_dsp_iskey_e(key)) {
+					psy_ui_drawline(g,
+						psy_ui_realpoint_make(cp + self->keyboardstate->key_extent_px, 0),
+						psy_ui_realpoint_make(cp + self->keyboardstate->key_extent_px, size.height));
+					if (psy_dsp_iskey_c(key)) {
+						psy_ui_set_text_colour(g, keyblack);
+						psy_ui_textoutrectangle(g,
+							psy_ui_realpoint_make(							
+								cp,
+								size.height - tm->tmHeight * 1.0),
+							psy_ui_ETO_CLIPPED, r,
+							psy_dsp_notetostr(key, self->keyboardstate->notemode),
+							psy_strlen(psy_dsp_notetostr(key, self->keyboardstate->notemode)));
+						psy_ui_set_text_colour(g, keyseparator);
+					}
+				}
+			}
+		} else {
+			psy_ui_RealRectangle r;
+			psy_ui_Colour restorebg;
+			psy_ui_Colour bg;
+			psy_ui_Component* curr;
+
+			restorebg = psy_ui_component_background_colour(&self->component);
+			bg = restorebg;
+			curr = &self->component;
+			while (curr && bg.mode.transparent) {
+				curr = psy_ui_component_parent(curr);
+				if (curr) {
+					bg = psy_ui_component_background_colour(curr);
+				}
+			}
+			r = psy_ui_realrectangle_make(psy_ui_realpoint_make(cp, 0.0),
+				psy_ui_realsize_make(
+					self->keyboardstate->key_extent_px,
+					size.height));
+			if (psy_dsp_isblack(key) && psy_strlen(psy_dsp_notetostr(key,
+				self->keyboardstate->notemode)) > 0) {
+				psy_ui_colour_add_rgb(&bg, 5, 5, 5);
+				psy_ui_set_background_colour(g, bg);
+			} else {
+				psy_ui_set_background_colour(g, bg);
+			}
+			psy_ui_textoutrectangle(g,
+				psy_ui_realrectangle_topleft(&r),
+				psy_ui_ETO_CLIPPED | psy_ui_ETO_OPAQUE, r,
+				psy_dsp_notetostr(key, self->keyboardstate->notemode),
+				psy_strlen(psy_dsp_notetostr(key, self->keyboardstate->notemode)));
+			psy_ui_set_background_colour(g, restorebg);
+		}
+	}
+}
+
 void pianokeyboard_on_mouse_down(PianoKeyboard* self, psy_ui_MouseEvent* ev)
 {
 	psy_ui_RealSize size;
@@ -226,7 +389,10 @@ void pianokeyboard_on_mouse_down(PianoKeyboard* self, psy_ui_MouseEvent* ev)
 	size = psy_ui_component_scroll_size_px(pianokeyboard_base(self));
 	pianokeyboard_play(self,
 		keyboardstate_screen_to_key(self->keyboardstate,
-			psy_ui_mouseevent_offset(ev), size.width));
+			psy_ui_mouseevent_offset(ev),
+			(self->keyboardstate->orientation == psy_ui_VERTICAL)
+			? size.width
+			: size.height));
 	psy_ui_mouseevent_stop_propagation(ev);
 }
 
@@ -244,34 +410,61 @@ void pianokeyboard_on_mouse_move(PianoKeyboard* self, psy_ui_MouseEvent* ev)
 		size = psy_ui_component_scroll_size_px(pianokeyboard_base(self));
 		pianokeyboard_play(self,
 			keyboardstate_screen_to_key(self->keyboardstate,
-				psy_ui_mouseevent_offset(ev), size.width));
+				psy_ui_mouseevent_offset(ev),
+				(self->keyboardstate->orientation == psy_ui_VERTICAL)
+				? size.width
+				: size.height));
 	}
 	size = psy_ui_component_client_size(&self->component);	
-	if (pt.y - psy_ui_component_scroll_top_px(&self->component) > psy_ui_value_px(&size.height,
-			psy_ui_component_textmetric(&self->component), NULL)) {
-		if (self->scroll == 0) {
-			psy_ui_component_start_timer(&self->component, 0, 10);
+	if (self->keyboardstate->orientation == psy_ui_VERTICAL) {
+		if (pt.y - psy_ui_component_scroll_top_px(&self->component) > psy_ui_value_px(&size.height,
+				psy_ui_component_textmetric(&self->component), NULL)) {
+			if (self->scroll == 0) {
+				psy_ui_component_start_timer(&self->component, 0, 10);
+			}
+			self->scroll = 1;
+		} else if (pt.y < psy_ui_component_scroll_top_px(&self->component)) {
+			if (self->scroll == 0) {
+				psy_ui_component_start_timer(&self->component, 0, 10);
+			}
+			self->scroll = -1;
+		} else {
+			if (self->scroll != 0) {
+				psy_ui_component_stop_timer(&self->component, 0);
+				self->scroll = 0;
+				self->scrollcount = 0;
+			}				
 		}
-		self->scroll = 1;
-	} else if (pt.y < psy_ui_component_scroll_top_px(&self->component)) {
-		if (self->scroll == 0) {
-			psy_ui_component_start_timer(&self->component, 0, 10);
-		}
-		self->scroll = -1;
 	} else {
-		if (self->scroll != 0) {
-			psy_ui_component_stop_timer(&self->component, 0);
-			self->scroll = 0;
-			self->scrollcount = 0;
-		}				
+		/*if (pt.x - psy_ui_component_scroll_left_px(&self->component) > psy_ui_value_px(&size.width,
+				psy_ui_component_textmetric(&self->component), NULL)) {
+			if (self->scroll == 0) {
+				psy_ui_component_start_timer(&self->component, 0, 10);
+			}
+			self->scroll = 1;
+		} else if (pt.x < psy_ui_component_scroll_left_px(&self->component)) {
+			if (self->scroll == 0) {
+				psy_ui_component_start_timer(&self->component, 0, 10);
+			}
+			self->scroll = -1;
+		} else {
+			if (self->scroll != 0) {
+				psy_ui_component_stop_timer(&self->component, 0);
+				self->scroll = 0;
+				self->scrollcount = 0;
+			}				
+		}*/		
 	}
-	psy_ui_mouseevent_stop_propagation(ev);
+	psy_ui_mouseevent_stop_propagation(ev);	
 }
 
 uint8_t pianokeyboard_top_key(const PianoKeyboard* self)
 {
 	return keyboardstate_screen_to_key(self->keyboardstate,
-		psy_ui_realpoint_make(0.0, psy_ui_component_scroll_top_px(&self->component)), 0.0);
+		self->keyboardstate->orientation == psy_ui_VERTICAL
+		? psy_ui_realpoint_make(0.0, psy_ui_component_scroll_top_px(&self->component))
+		: psy_ui_realpoint_make(psy_ui_component_scroll_left_px(&self->component), 0.0),
+		0.0);
 }
 
 void pianokeyboard_on_mouse_up(PianoKeyboard* self, psy_ui_MouseEvent* ev)
@@ -344,7 +537,7 @@ void pianokeyboard_on_preferred_size(PianoKeyboard* self, const psy_ui_Size* lim
 	psy_ui_Size* rv)
 {
 	*rv = psy_ui_size_make(psy_ui_value_make_ew(10.0),
-		psy_ui_value_make_px(self->keyboardstate->keyboardheightpx));
+		psy_ui_value_make_px(self->keyboardstate->keyboard_extent_px));
 }
 
 void pianokeyboard_on_timer(PianoKeyboard* self, uintptr_t timer_id)
@@ -365,9 +558,16 @@ void pianokeyboard_on_timer(PianoKeyboard* self, uintptr_t timer_id)
 			} else {
 				++dest_key;
 				--play_key;
-			}			
-			psy_ui_component_set_scroll_top_px(self->grid,
-				dest_key * self->keyboardstate->keyheightpx);
+			}
+			if (self->grid) {
+				if (self->keyboardstate->orientation == psy_ui_VERTICAL) {
+					psy_ui_component_set_scroll_top_px(self->grid,
+						dest_key * self->keyboardstate->key_extent_px);
+				} else {
+					psy_ui_component_set_scroll_left_px(self->grid,
+						dest_key * self->keyboardstate->key_extent_px);
+				}
+			}
 			pianokeyboard_play(self, play_key);
 		} else {
 			--self->scrollcount;

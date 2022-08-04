@@ -358,7 +358,7 @@ psy_audio_MachineInfo* info(psy_audio_LadspaPlugin* self)
 uintptr_t numinputs(psy_audio_LadspaPlugin* self)
 {
 	return (info(self) ?
-		(self->plugininfo->mode == psy_audio_MACHMODE_FX ? 2 : 0)
+		((self->plugininfo->mode == psy_audio_MACHMODE_FX) ? 2 : 0)
 		: 0);
 }
 

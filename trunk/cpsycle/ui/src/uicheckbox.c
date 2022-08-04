@@ -229,7 +229,17 @@ void psy_ui_checkbox_data_exchange(psy_ui_CheckBox* self,
 void psy_ui_checkbox_on_property_changed(psy_ui_CheckBox* self,
 	psy_Property* sender)
 {
-	if (psy_property_item_bool(sender)) {		
+	if (psy_property_is_choice_item(sender)) {
+		bool checked;
+		
+		checked = (psy_property_at_choice(psy_property_parent(sender))
+			== sender);
+		if (checked) {
+			psy_ui_checkbox_mark(self);
+		} else {
+			psy_ui_checkbox_unmark(self);
+		}
+	} else if (psy_property_item_bool(sender)) {		
 		psy_ui_checkbox_mark(self);
 	} else {
 		psy_ui_checkbox_unmark(self);
@@ -250,10 +260,25 @@ void psy_ui_checkbox_on_mouse_down(psy_ui_CheckBox* self,
 	assert(self);
 
 	super_vtable.on_mouse_down(psy_ui_checkbox_base(self), ev);
-	if (psy_ui_checkbox_checked(self)) {
-		psy_ui_checkbox_disable_check(self);
+	if (self->property) {
+		if (psy_property_is_choice_item(self->property)) {
+			intptr_t index;
+
+			if (!psy_property_parent(self->property)) {
+				return;
+			}
+			index = psy_property_index(self->property);
+			psy_property_set_item_int(psy_property_parent(self->property), index);
+		} else {
+			psy_property_set_item_bool(self->property, 
+				!psy_ui_checkbox_checked(self));
+		}
 	} else {
-		psy_ui_checkbox_check(self);
+		if (psy_ui_checkbox_checked(self)) {
+			psy_ui_checkbox_disable_check(self);
+		} else {
+			psy_ui_checkbox_check(self);
+		}
 	}
 	psy_signal_emit(&self->signal_clicked, &self->component, 0);
 }
