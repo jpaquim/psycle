@@ -431,10 +431,9 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 			XEvent e;			
 			uintptr_t hwnd;
             bool close;
-            bool ismain;
-
-			printf("onclose\n");
-			ismain = (imp->component == psy_ui_app()->main);
+            bool is_main;
+			
+			is_main = (imp->component == psy_ui_app()->main);
 			close = imp->component->vtable->onclose(imp->component);
 			if (imp->component->signal_close.slots) {
 				psy_signal_emit(&imp->component->signal_close,
@@ -447,7 +446,7 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 			psy_ui_x11app_flush_events(self);
 			XDestroyWindow(self->dpy, event->xclient.window);
 			psy_ui_x11app_flush_events(self);			
-			if (ismain) {
+			if (is_main) {
 				self->running = FALSE;
 			}
 		}

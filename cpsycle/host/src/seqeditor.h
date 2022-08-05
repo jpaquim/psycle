@@ -29,18 +29,18 @@ typedef struct SeqEditor {
 	psy_ui_Component spacer;	
 	SeqEditHeader header;	
 	psy_ui_Scroller scroller;	
-	psy_ui_Component left;
-	SeqEditorHeaderDescBar headerdescbar;
-	ZoomBox vzoom;
+	SeqEditorHeaderDescBar headerdescbar;	
+	psy_ui_Component tracks;
+	psy_ui_Component tracks_header;
+	psy_ui_Component tracks_pane;
 	psy_ui_Component trackdescpane;
 	SeqEditTrackDesc trackdesc;
-	SeqEditorTracks tracks;		
+	SeqEditorTracks track_items;
 	SeqEditProperties properties;
 	psy_ui_Splitter splitbar_properties;
 	SeqEditState state;
 	SequenceCmds cmds;	
-	bool expanded;
-	psy_ui_TextArea edit;
+	bool expanded;	
 } SeqEditor;
 
 void seqeditor_init(SeqEditor*, psy_ui_Component* parent, Workspace*);

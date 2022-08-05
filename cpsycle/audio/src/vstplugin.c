@@ -1,13 +1,16 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
-#include "../../detail/os.h"
+
 
 #include "vstplugin.h"
 
 #ifdef PSYCLE_USE_VST2
 
+#include "../../detail/os.h"
 #if defined(DIVERSALIS__OS__UNIX)
 #define _inline static inline
 #endif
@@ -457,7 +460,8 @@ void processevents(psy_audio_VstPlugin* self, psy_audio_BufferContext* bc)
 			}
 			note->key = psy_audio_patternentry_front(entry)->note;
 			note->midichan = midichannel;			
-		} else if (psy_audio_patternentry_front(entry)->note == psy_audio_NOTECOMMANDS_RELEASE) {
+		} else if (psy_audio_patternentry_front(entry)->note ==
+				psy_audio_NOTECOMMANDS_RELEASE) {
 			if (psy_table_exists(&self->tracknote, entry->track)) {
 				VstNote* note;
 				
@@ -536,8 +540,8 @@ static int FilterException(int code, struct _EXCEPTION_POINTERS *ep)
 }
 #endif
 
-static int makemachineinfo(AEffect* effect, psy_audio_MachineInfo* info, const char* filename,
-	int shellidx)
+static int makemachineinfo(AEffect* effect, psy_audio_MachineInfo* info,
+	const char* filename, int shellidx)
 {
 	char effectName[256] = {0};
 	char vendorString[256] = {0};
@@ -839,7 +843,8 @@ int mode(psy_audio_VstPlugin* self)
 	return psy_audio_vstinterface_mode(&self->mi);	
 }
 
-void programname(psy_audio_VstPlugin* self, uintptr_t bnkidx, uintptr_t prgidx, char* val)
+void programname(psy_audio_VstPlugin* self, uintptr_t bnkidx, uintptr_t prgidx,
+	char* val)
 {
 	assert(self);
 
@@ -991,18 +996,20 @@ void update_vsttimeinfo(psy_audio_VstPlugin* self)
 		sequencertime->timesig_denominator;
 }
 
-// VSTCALLBACK
-VstIntPtr VSTCALLBACK hostcallback(AEffect* effect, VstInt32 opcode, VstInt32 index,
-	VstIntPtr value, void* ptr, float opt)
+/* vstcallback */
+VstIntPtr VSTCALLBACK hostcallback(AEffect* effect, VstInt32 opcode,
+	VstInt32 index, VstIntPtr value, void* ptr, float opt)
 {
 	VstIntPtr result = 0;
 	psy_audio_VstPlugin* self = 0;
 
+#ifdef PSYCLE_DEBUG_VST2_OPCODES
 	if (opcode != audioMasterGetTime) {
 		TRACE("vst-opcode: ");
 		TRACE_INT(opcode);
 		TRACE("\n");
 	}
+#endif	
 	if (effect) {
 		self = (psy_audio_VstPlugin*)effect->user;
 	} else if (opcode == audioMasterVersion) {
