@@ -564,6 +564,7 @@ void make_translator_default(psy_Dictionary* dict)
 	psy_dictionary_set(dict, "seqview.showstepsequencer", "Stepsequencer");
 	psy_dictionary_set(dict, "seqview.hidestepsequencer", "Stepsequencer");
 	/* seqedit */
+	psy_dictionary_set(dict, "seqedit.editor", "Sequence Editor");
 	psy_dictionary_set(dict, "seqedit.track", "Track");
 	psy_dictionary_set(dict, "seqedit.move", "Move");
 	psy_dictionary_set(dict, "seqedit.reorder", "Reorder");

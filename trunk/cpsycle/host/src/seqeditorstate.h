@@ -8,8 +8,6 @@
 
 /* host */
 #include "sequencehostcmds.h"
-/* ui */
-#include <uitextarea.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -74,13 +72,11 @@ typedef struct SeqEditState {
 	/* references */
 	psy_audio_SequenceEntry* seqentry;
 	Workspace* workspace;	
-	SequenceCmds* cmds;
-	psy_ui_TextArea* edit;
+	SequenceCmds* cmds;	
 	psy_ui_Component* view;
 } SeqEditState;
 
-void seqeditstate_init(SeqEditState*, SequenceCmds*, psy_ui_TextArea*,
-	psy_ui_Component* view);
+void seqeditstate_init(SeqEditState*, SequenceCmds*, psy_ui_Component* view);
 void seqeditstate_dispose(SeqEditState*);
 
 psy_audio_Sequence* seqeditstate_sequence(SeqEditState*);

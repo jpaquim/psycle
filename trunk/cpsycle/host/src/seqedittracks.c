@@ -59,17 +59,19 @@ static void seqeditortracks_vtable_init(SeqEditorTracks* self)
 	}
 	self->component.vtable = &seqeditortracks_vtable;
 }
+
 /* implementation */
 void seqeditortracks_init(SeqEditorTracks* self, psy_ui_Component* parent,
 	SeqEditState* state, Workspace* workspace)
-{
+{		
+	psy_ui_component_init(&self->component, parent, NULL);
+	seqeditortracks_vtable_init(self);
 	self->workspace = workspace;
 	self->state = state;
 	self->playline = NULL;
 	self->cursorline = NULL;
-	self->seqeditposline = NULL;	
-	psy_ui_component_init(&self->component, parent, NULL);
-	seqeditortracks_vtable_init(self);		
+	self->seqeditposline = NULL;
+	psy_ui_component_set_style_type(&self->component, STYLE_SEQEDT_TRACKS);
 	psy_ui_component_setscrollstep(&self->component,
 		psy_ui_size_make_em(8.0, 0.0));	
 	psy_ui_component_set_wheel_scroll(&self->component, 1);	

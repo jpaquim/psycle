@@ -124,6 +124,7 @@
 #define PSYCLE_USE_XM
 
 #define PSYCLE_USE_VST2
+/* #define PSYCLE_DEBUG_VST2_OPCODES */
 
 #if defined(DIVERSALIS__OS__UNIX)
 	#define PSYCLE_USE_LV2

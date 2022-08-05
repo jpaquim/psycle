@@ -7,7 +7,7 @@ obj = $(src:.c=.o)
 
 LDFLAGS = -no-pie -lncurses -lthread -laudio -llilv-0 -ldsp -laudio -lscript -lfile -lpsyui -lfontconfig -lfreetype -lGL -lX11 -lXft -lXext -lXmu -lm -llua5.3 -lpthread -ldl -lstdc++ -lcontainer
 
-all: CFLAGS = -g -O3
+all: CFLAGS = -g3 -O3
 all: psycle
 
 debug: CFLAGS = -DDEBUG -g3

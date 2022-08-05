@@ -121,6 +121,9 @@ void init_host_styles(psy_ui_Styles* self, psy_ui_ThemeMode theme)
 		material.surface_overlay_9p);
 	psy_ui_styles_set_style(self, STYLE_SEQEDT, style);
 	
+	style = psy_ui_style_allocinit();	
+	psy_ui_styles_set_style(self, STYLE_SEQEDT_TRACKS, style);
+	
 	style = psy_ui_style_allocinit();
 	psy_ui_style_set_colours(style,
 		psy_ui_colour_weighted(&material.onsecondary, material.light),

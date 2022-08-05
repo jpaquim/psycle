@@ -99,7 +99,7 @@ void seqeditruler_ondraw(SeqEditRuler* self, psy_ui_Graphics* g)
 
 	size = psy_ui_component_size_px(&self->component);
 	tm = psy_ui_component_textmetric(&self->component);	
-	baseline = size.height - tm->tmHeight - 2;	
+	baseline = size.height - tm->tmHeight + 2;	
 	seqeditruler_drawruler(self, g, baseline);	
 	seqeditruler_draweditposition(self, g, baseline);
 }
