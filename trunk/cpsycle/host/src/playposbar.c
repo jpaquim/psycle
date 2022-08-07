@@ -25,13 +25,14 @@ void playposbar_init(PlayPosBar* self, psy_ui_Component* parent,
 	assert(player);
 
 	psy_ui_component_init(&self->component, parent, NULL);	
-	psy_ui_component_set_align_expand(&self->component, psy_ui_HEXPAND);
-	psy_ui_component_set_default_align(&self->component, psy_ui_ALIGN_LEFT,
-		psy_ui_defaults_hmargin(psy_ui_defaults()));
+	psy_ui_component_set_preferred_width(&self->component,
+		psy_ui_value_make_ew(30.0));		
 	self->player = player;	
-	psy_ui_label_init(&self->position, &self->component);	
-	psy_ui_label_prevent_translation(&self->position);
-	psy_ui_label_set_char_number(&self->position, 24.0);
+	psy_ui_label_init(&self->position, &self->component);
+	psy_ui_component_set_align(&self->position.component, psy_ui_ALIGN_CLIENT);
+	psy_ui_label_set_text_alignment(&self->position, psy_ui_ALIGNMENT_CENTER);
+	psy_ui_label_prevent_translation(&self->position);	
+	psy_ui_label_prevent_wrap(&self->position);
 	playposbar_updatelabel(self);		
 }
 

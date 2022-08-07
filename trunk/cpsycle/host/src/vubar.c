@@ -15,6 +15,8 @@ void vubar_init(VuBar* self, psy_ui_Component* parent, Workspace* workspace)
 	assert(workspace);
 
 	psy_ui_component_init(vubar_base(self), parent, NULL);
+	psy_ui_component_set_preferred_width(vubar_base(self),
+		psy_ui_value_make_ew(30.0));
 	clipbox_init(&self->clipbox, vubar_base(self), workspace);
 	psy_ui_component_set_align(clipbox_base(&self->clipbox),
 		psy_ui_ALIGN_RIGHT);
