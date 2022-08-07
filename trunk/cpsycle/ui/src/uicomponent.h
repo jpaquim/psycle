@@ -214,8 +214,9 @@ typedef struct psy_ui_Component {
 	psy_ui_Bitmap bufferbitmap;
 	bool drawtobuffer;
 	bool ncpaint;
-	bool blitscroll;
+	bool blitscroll;	
 	psy_ui_ComponentBackground componentbackground;
+	bool capture_relative;
 } psy_ui_Component;
 
 void psy_ui_replacedefaultfont(psy_ui_Component* main,

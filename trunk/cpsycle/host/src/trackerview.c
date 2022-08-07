@@ -136,7 +136,8 @@ void trackergrid_init(TrackerGrid* self, psy_ui_Component* parent,
 	self->state->midline = FALSE;	
 	self->state->show_empty_data = FALSE;	
 	self->effcursor_always_down = FALSE;	
-	self->prevent_event_driver = FALSE;	
+	self->prevent_event_driver = FALSE;
+	self->down = FALSE;
 	psy_ui_realsize_init(&self->size);
 	psy_ui_realsize_init(&self->line_size);	
 	trackergrid_connect_input_handler(self, input_handler);
@@ -1064,6 +1065,7 @@ void trackergrid_on_mouse_down(TrackerGrid* self, psy_ui_MouseEvent* ev)
 {
 	assert(self);
 	
+	self->down = TRUE;
 	if (trackdrag_active(&self->state->track_config->resize)) {
 		psy_signal_emit(&self->signal_colresize, self, 0);
 	} else if (patternviewstate_sequence(self->state->pv) && psy_ui_mouseevent_button(ev) == 1) {		
@@ -1144,9 +1146,11 @@ void trackergrid_on_mouse_up(TrackerGrid* self, psy_ui_MouseEvent* ev)
 	assert(self);
 
 	psy_ui_component_release_capture(&self->component);
-	if (psy_ui_mouseevent_button(ev) != 1) {
+	if (!self->down || psy_ui_mouseevent_button(ev) != 1) {
+		self->down = FALSE;
 		return;
-	}		
+	}
+	self->down = FALSE;
 	if (trackdrag_active(&self->state->track_config->resize)) {
 		/* End track resize */
 		trackdrag_stop(&self->state->track_config->resize);		

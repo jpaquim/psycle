@@ -24,18 +24,22 @@ typedef struct {
 	Visual* visual;
 } PlatformXtGC;
 
+struct psy_ui_X11App;
+
 typedef struct psy_ui_x11_GraphicsImp {
 	psy_ui_GraphicsImp imp;
 	GC gc;
 	Display* display;
 	Window window;
 	Visual* visual;
+	int screen;
+	struct psy_ui_X11App* x11app;
 	Region region;
 	XftDraw* xfd;
 	XftColor black;
 	XftFont* xftfont;
 	XftFont* defaultfont;
-	XftColor textcolor;
+	XftColor textcolor;	
 	psy_ui_Colour textbackgroundcolor;
 	unsigned int backgroundmode;
 	psy_ui_RealPoint org;	

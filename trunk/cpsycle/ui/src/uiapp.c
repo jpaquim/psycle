@@ -26,7 +26,7 @@
 	#error "Platform not supported"
 #endif
 
-/* global app reference set by app_init */
+/* global app reference set by app_init accessed via psy_ui_app() */
 static psy_ui_App* app = NULL;
 
 /* psy_ui_AppZoom */
@@ -92,7 +92,7 @@ void psy_ui_app_init(psy_ui_App* self, bool dark, uintptr_t instance)
 
 	app = self;
 	self->main = NULL;
-	self->capture_ = NULL;	
+	self->captures_ = NULL;	
 	self->alignvalid = TRUE;
 	self->mousetracking = FALSE;
 	self->hover = NULL;
@@ -177,11 +177,12 @@ void psy_ui_app_dispose(psy_ui_App* self)
 		free(self->impfactory);
 		self->impfactory = NULL;
 	}	
+	psy_list_free(self->captures_);
 	psy_translator_dispose(&self->translator);
 	psy_ui_dragevent_dispose(&self->dragevent);
 	psy_ui_eventdispatch_dispose(&self->eventdispatch);
 	psy_table_dispose(&self->components);
-	psy_timers_dispose(&self->wintimers);
+	psy_timers_dispose(&self->wintimers);	
 	psy_ui_bitmaps_dispose(&self->bitmaps);
 }
 
@@ -383,7 +384,8 @@ psy_ui_Style* psy_ui_app_style(psy_ui_App* self, uintptr_t styletype)
 	return psy_ui_defaults_style(&self->defaults, styletype);
 }
 
-const psy_ui_Style* psy_ui_app_style_const(const psy_ui_App* self, uintptr_t styletype)
+const psy_ui_Style* psy_ui_app_style_const(const psy_ui_App* self,
+	uintptr_t styletype)
 {
 	return psy_ui_defaults_style_const(&self->defaults, styletype);
 }
@@ -424,6 +426,44 @@ void psy_ui_app_set_focus(psy_ui_App* self, psy_ui_Component* component)
 		psy_ui_eventdispatch_send(&self->eventdispatch, component, &ev);
 		psy_ui_event_init(&ev, psy_ui_FOCUSIN);
 		psy_ui_eventdispatch_send(&self->eventdispatch, component, &ev);
+	}	
+}
+
+void psy_ui_app_push_capture(psy_ui_App* self, psy_ui_Component* component)
+{
+	psy_List* p;
+
+	assert(self);
+		
+	p = psy_list_last(self->captures_);
+	if (p && (p->entry == component)) {
+		/* keep component, already is capture top */
+		return;		
+	}
+	psy_list_append(&self->captures_, component);	
+}
+
+void psy_ui_app_pop_capture(psy_ui_App* self)
+{
+	psy_List* p;
+
+	assert(self);
+	
+	p = psy_list_last(self->captures_);
+	if (p) {
+		psy_list_remove(&self->captures_, p);		
+	}	
+}
+
+void psy_ui_app_remove_capture(psy_ui_App* self, psy_ui_Component* component)
+{
+	psy_List* p;
+
+	assert(self);
+	
+	p = psy_list_findentry(self->captures_, component);
+	if (p) {
+		psy_list_remove(&self->captures_, p);
 	}	
 }
 

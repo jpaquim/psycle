@@ -266,3 +266,12 @@ psy_ui_Value psy_ui_max_values(psy_ui_Value lhs, psy_ui_Value rhs,
 	}
 	return rhs;
 }
+
+psy_ui_Value psy_ui_min_values(psy_ui_Value lhs, psy_ui_Value rhs,
+	const psy_ui_TextMetric* tm, const psy_ui_Size* pesize)
+{
+	if (psy_ui_value_comp(&lhs, &rhs, tm, pesize) < 0) {
+		return lhs;
+	}
+	return rhs;
+}

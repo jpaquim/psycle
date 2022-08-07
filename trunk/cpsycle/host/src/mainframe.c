@@ -870,6 +870,10 @@ void mainframe_connect_song(MainFrame* self)
 		psy_signal_connect(
 			&workspace_song(&self->workspace)->patterns.signal_numsongtrackschanged,
 			self, mainframe_on_songtracks_changed);
+		vubar_set_machine(&self->vubar, psy_audio_machines_master(
+			psy_audio_song_machines(workspace_song(&self->workspace))));
+	} else {
+		vubar_set_machine(&self->vubar, NULL);
 	}
 }
 

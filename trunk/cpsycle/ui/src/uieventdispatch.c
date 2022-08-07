@@ -63,11 +63,11 @@ void psy_ui_eventdispatch_send(psy_ui_EventDispatch* self,
 		}		
 		break;	
 	case psy_ui_MOUSEDOWN:
-	case psy_ui_MOUSEUP:
+	case psy_ui_MOUSEUP:		
 	case psy_ui_DBLCLICK:
-	case psy_ui_MOUSEMOVE:		
+	case psy_ui_MOUSEMOVE:
 		psy_ui_eventdispatch_handle_mouse_event(self, (psy_ui_MouseEvent*)ev,
-			component);
+			component);				
 		break;	
 	case psy_ui_MOUSEENTER:
 		psy_ui_eventdispatch_handle_mouse_enter(self, component);				
@@ -280,6 +280,7 @@ psy_ui_Component* psy_ui_eventdispatch_target(psy_ui_EventDispatch* self,
 	psy_ui_Component* curr;
 	uintptr_t index;	
 
+	curr = component;
 	if (psy_ui_app_capture(psy_ui_app())) {
 		curr = psy_ui_app_capture(psy_ui_app());
 		while (curr && curr != component) {
@@ -289,9 +290,11 @@ psy_ui_Component* psy_ui_eventdispatch_target(psy_ui_EventDispatch* self,
 			psy_ui_realpoint_sub(pt, psy_ui_realrectangle_topleft(&r));		
 			curr = psy_ui_component_parent(curr);			
 		}
-		return psy_ui_app_capture(psy_ui_app());
-	}
-	curr = component;
+		curr = psy_ui_app_capture(psy_ui_app());
+		if (!curr->capture_relative) {
+			return curr;
+		}
+	}	
 	while (curr) {
 		component = curr;
 		curr = psy_ui_component_intersect(curr, *pt, &index);

@@ -170,31 +170,26 @@ static void x11_imp_vtable_init(psy_ui_x11_GraphicsImp* self)
 /* implementation */
 void psy_ui_x11_graphicsimp_init(psy_ui_x11_GraphicsImp* self, 
 	PlatformXtGC* platformgc)
-{
-	int screen;
-	
+{	
 	psy_ui_graphics_imp_init(&self->imp);
 	x11_imp_vtable_init(self);	
 	self->display = platformgc->display;
 	self->window = platformgc->window;
 	self->visual = platformgc->visual;
 	self->gc = platformgc->gc;
-	screen = DefaultScreen(self->display);
-	self->xfd = XftDrawCreate(
-		self->display,
-		self->window,
-		self->visual,
-	    DefaultColormap(self->display, screen));
-	self->defaultfont = XftFontOpenXlfd(self->display,
-		screen, "FreeSans");
+	self->screen = DefaultScreen(self->display);
+	self->x11app = (psy_ui_X11App*)psy_ui_app()->imp;	
+	self->xfd = XftDrawCreate(self->display, self->window, self->visual,
+	    DefaultColormap(self->display, self->screen));
+	self->defaultfont = XftFontOpenXlfd(self->display, self->screen,
+		"FreeSans");
 	if (!self->defaultfont) {
-		self->defaultfont = XftFontOpenName(self->display, screen, "FreeSans");
+		self->defaultfont = XftFontOpenName(self->display, self->screen,
+			"FreeSans");
 	}
 	self->xftfont = self->defaultfont;
-	XftColorAllocName(self->display,
-		self->visual,
-		DefaultColormap(self->display, screen),
-		"black", &self->black);
+	XftColorAllocName(self->display, self->visual, DefaultColormap(
+		self->display, self->screen), "black", &self->black);
 	self->textcolor.color.red   = 0xFFFF;
 	self->textcolor.color.green = 0xFFFF;
 	self->textcolor.color.blue  = 0xFFFF;
@@ -212,59 +207,48 @@ void psy_ui_x11_graphicsimp_init(psy_ui_x11_GraphicsImp* self,
 void psy_ui_x11_graphicsimp_init_bitmap(psy_ui_x11_GraphicsImp* self,
 	psy_ui_Bitmap* bitmap)
 {
-	psy_ui_x11_BitmapImp* imp;
-	psy_ui_X11App* x11app;
-	int screen;
+	psy_ui_x11_BitmapImp* imp;	
 		
-	x11app = (psy_ui_X11App*)psy_ui_app()->imp;	
+	self->x11app = (psy_ui_X11App*)psy_ui_app()->imp;
 	psy_ui_graphics_imp_init(&self->imp);
 	x11_imp_vtable_init(self);
 	imp = (psy_ui_x11_BitmapImp*)bitmap->imp;
-	self->display = x11app->dpy;
+	self->display = self->x11app->dpy;
 	self->window = imp->pixmap;
-	self->visual = x11app->visual;
-	screen = DefaultScreen(self->display);
-	self->xfd = XftDrawCreate(
-		self->display,
-		self->window,
-		self->visual,
-	    DefaultColormap(self->display, screen));
+	self->visual = self->x11app->visual;
+	self->screen = DefaultScreen(self->display);	
+	self->xfd = XftDrawCreate(self->display, self->window, self->visual,
+	    DefaultColormap(self->display, self->screen));
 	self->defaultfont = XftFontOpenXlfd(self->display,
-		screen, "arial");
+		self->screen, "arial");
 	if (!self->defaultfont) {
-		self->defaultfont = XftFontOpenName(self->display, screen, "arial");
+		self->defaultfont = XftFontOpenName(self->display, self->screen,
+			"arial");
 	}
 	self->xftfont = self->defaultfont;
-	XftColorAllocName(self->display,
-		self->visual,
-		DefaultColormap(self->display, screen),
-		"black", &self->black);
+	XftColorAllocName(self->display, self->visual, DefaultColormap(
+		self->display, self->screen), "black", &self->black);
 	psy_ui_realpoint_init(&self->org);
 	self->region = XCreateRegion();
 	self->shareddc = FALSE;
 	self->bitmap = TRUE;
-	self->gc = XCreateGC(x11app->dpy, self->window, 0, NULL);
+	self->gc = XCreateGC(self->display, self->window, 0, NULL);
 	psy_ui_realpoint_init(&self->cp);
 }
 
 void psy_ui_x11_graphicsimp_updatexft(psy_ui_x11_GraphicsImp* self)
 {
 	XftDrawDestroy(self->xfd);
-	self->xfd = XftDrawCreate(
-		self->display,
-		self->window,
-		self->visual,
-	    DefaultColormap(self->display, DefaultScreen(self->display)));	
+	self->xfd = XftDrawCreate(self->display, self->window, self->visual,
+	    DefaultColormap(self->display, self->screen));
 }
 
 void psy_ui_x11_g_imp_dispose(psy_ui_x11_GraphicsImp* self)
 {		
 	XDestroyRegion(self->region);	
 	XFreeGC(self->display, self->gc);	
-	XftColorFree(self->display,
-	   self->visual,	   
-	   DefaultColormap(self->display, DefaultScreen(self->display)),
-	   &self->black);
+	XftColorFree(self->display, self->visual, DefaultColormap(self->display,
+		self->screen), &self->black);
 	XftFontClose(self->display, self->defaultfont);
 	XftDrawDestroy(self->xfd);	
 }
@@ -326,9 +310,7 @@ void psy_ui_x11_g_imp_textoutrectangle(psy_ui_x11_GraphicsImp* self,
 psy_ui_Size psy_ui_x11_g_imp_textsize(psy_ui_x11_GraphicsImp* self,
     const char* str, uintptr_t count)
 {
-	psy_ui_Size	rv;
-
-	if (str) {		
+	if (str) {
 		XGlyphInfo extents;
 							
 		XftTextExtentsUtf8(self->display, self->xftfont,
@@ -336,13 +318,9 @@ psy_ui_Size psy_ui_x11_g_imp_textsize(psy_ui_x11_GraphicsImp* self,
 		count,
 		&extents);
 								
-		rv.width = psy_ui_value_make_px(extents.width); 
-		rv.height = psy_ui_value_make_px(extents.height);
-	} else {
-		rv.width = psy_ui_value_make_px(0); 
-		rv.height = psy_ui_value_make_px(0);
+		return psy_ui_size_make_px(extents.width, extents.height);		
 	}
-	return rv;
+	return psy_ui_size_zero();	
 }
 
 void psy_ui_x11_g_imp_drawrectangle(psy_ui_x11_GraphicsImp* self,
@@ -357,8 +335,7 @@ void psy_ui_x11_g_imp_drawrectangle(psy_ui_x11_GraphicsImp* self,
 void psy_ui_x11_g_imp_drawroundrectangle(psy_ui_x11_GraphicsImp* self,
     const psy_ui_RealRectangle r, psy_ui_RealSize cornersize)
 {	
-	XmuDrawRoundedRectangle(self->display,
-		self->window, self->gc,
+	XmuDrawRoundedRectangle(self->display, self->window, self->gc,
 		r.left - (int)(self->org.x),
 		r.top - (int)(self->org.y),
 		r.right - r.left - 1, r.bottom - r.top - 1,
@@ -369,20 +346,22 @@ void psy_ui_x11_g_imp_drawsolidrectangle(psy_ui_x11_GraphicsImp* self,
 	const psy_ui_RealRectangle r, psy_ui_Colour colour)
 {
 	if (!colour.mode.transparent) {
-		XGCValues xgcv;
-		psy_ui_X11App* x11app;		
+		XGCValues xgcv;		
 
-		x11app = (psy_ui_X11App*)psy_ui_app()->imp;
-		XGetGCValues(self->display, self->gc, GCForeground | GCBackground,
-			&xgcv);
-		XSetForeground(self->display, self->gc,
-			psy_ui_x11app_colourindex(x11app, colour));
+		if (!colour.mode.gc) {			
+			XGetGCValues(self->display, self->gc, GCForeground | GCBackground,
+				&xgcv);
+			XSetForeground(self->display, self->gc,
+				psy_ui_x11app_colourindex(self->x11app, colour));
+		}
 		XFillRectangle(self->display, self->window, self->gc,
 			r.left - (int)(self->org.x),
 			r.top - (int)(self->org.y),
 			r.right- r.left, r.bottom - r.top);
-		XChangeGC(self->display, self->gc, GCForeground | GCBackground,
+		if (!colour.mode.gc) {
+			XChangeGC(self->display, self->gc, GCForeground | GCBackground,
 				&xgcv);
+		}
 	}
 }
 
@@ -391,13 +370,12 @@ void psy_ui_x11_g_imp_drawsolidroundrectangle(psy_ui_x11_GraphicsImp* self,
     psy_ui_Colour colour)
 {
 	if (!colour.mode.transparent) {
-		XGCValues xgcv;
-		psy_ui_X11App* x11app;		
-
-		x11app = (psy_ui_X11App*)psy_ui_app()->imp;
-		XGetGCValues(self->display, self->gc, GCForeground | GCBackground, &xgcv);
+		XGCValues xgcv;		
+		
+		XGetGCValues(self->display, self->gc, GCForeground | GCBackground,
+			&xgcv);
 		XSetForeground(self->display, self->gc,
-			psy_ui_x11app_colourindex(x11app, colour));		
+			psy_ui_x11app_colourindex(self->x11app, colour));
 		XmuFillRoundedRectangle(self->display,
 			self->window, self->gc,
 			r.left - (int)(self->org.x),
@@ -416,17 +394,15 @@ void psy_ui_x11_g_imp_drawsolidpolygon(psy_ui_x11_GraphicsImp* self,
 	XPoint* xpts;
 	unsigned int i;
 	XGCValues xgcv;
-	psy_ui_X11App* x11app;
-	
-	x11app = (psy_ui_X11App*)psy_ui_app()->imp;
+		
 	xpts = (XPoint*)malloc(sizeof(XPoint) * numpoints);
 	for (i = 0; i < numpoints; ++i) {
 		xpts[i].x = pts[i].x - (int)(self->org.x);
 		xpts[i].y = pts[i].y - (int)(self->org.y);
 	} 	
 	XGetGCValues(self->display, self->gc, GCForeground | GCBackground, &xgcv);
-	XSetForeground(self->display, self->gc, psy_ui_x11app_colourindex(x11app,
-		psy_ui_colour_make(inner)));	
+	XSetForeground(self->display, self->gc, psy_ui_x11app_colourindex(
+		self->x11app, psy_ui_colour_make(inner)));	
 	XFillPolygon(
       self->display,
       self->window,
@@ -480,10 +456,10 @@ void psy_ui_x11_g_imp_drawbitmap(psy_ui_x11_GraphicsImp* self,
 			fore = gcv.foreground;
 			bg = gcv.background;
 			
-			XSetForeground(self->display, self->gc,
-				BlackPixel(self->display, DefaultScreen(self->display)));
-			XSetBackground(self->display, self->gc,
-				WhitePixel(self->display, DefaultScreen(self->display)));
+			XSetForeground(self->display, self->gc, BlackPixel(self->display,
+				self->screen));
+			XSetBackground(self->display, self->gc, WhitePixel(self->display,
+				self->screen));
 			gcv.function = GXand;
 			XChangeGC(self->display, self->gc, GCFunction, &gcv);
 			XCopyPlane(self->display, imp->mask, self->window, self->gc,
@@ -517,13 +493,11 @@ void psy_ui_x11_g_imp_drawstretchedbitmap(psy_ui_x11_GraphicsImp* self,
     psy_ui_x11_g_imp_drawbitmap(self, bitmap, x, y, width, height, xsrc, ysrc);
 }
 
-void psy_ui_x11_g_imp_setcolour(psy_ui_x11_GraphicsImp* self, psy_ui_Colour color)
-{
-	psy_ui_X11App* x11app;		
-
-	x11app = (psy_ui_X11App*)psy_ui_app()->imp;
-	XSetForeground(self->display, self->gc,
-		psy_ui_x11app_colourindex(x11app, color));
+void psy_ui_x11_g_imp_setcolour(psy_ui_x11_GraphicsImp* self,
+	psy_ui_Colour colour)
+{	
+	XSetForeground(self->display, self->gc, psy_ui_x11app_colourindex(
+		self->x11app, colour));
 }
 
 void psy_ui_x11_g_imp_setbackgroundmode(psy_ui_x11_GraphicsImp* self,
@@ -534,13 +508,10 @@ void psy_ui_x11_g_imp_setbackgroundmode(psy_ui_x11_GraphicsImp* self,
 
 void psy_ui_x11_g_imp_setbackgroundcolour(psy_ui_x11_GraphicsImp* self,
     psy_ui_Colour color)
-{
-	psy_ui_X11App* x11app;
-
-	x11app = (psy_ui_X11App*)psy_ui_app()->imp;
+{	
 	self->textbackgroundcolor = color;
-	XSetBackground(self->display, self->gc,
-		psy_ui_x11app_colourindex(x11app, color));
+	XSetBackground(self->display, self->gc, psy_ui_x11app_colourindex(
+		self->x11app, color));
 }
 
 void psy_ui_x11_g_imp_settextcolour(psy_ui_x11_GraphicsImp* self,
