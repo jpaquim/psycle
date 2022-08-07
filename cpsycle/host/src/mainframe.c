@@ -322,8 +322,7 @@ void mainframe_init_status_bar(MainFrame* self)
 void mainframe_init_minmaximize(MainFrame* self)
 {
 	mainviewbar_add_minmaximze(&self->mainviews.mainviewbar, &self->left);
-	mainviewbar_add_minmaximze(&self->mainviews.mainviewbar,
-		songbar_base(&self->songbar));
+	mainviewbar_add_minmaximze(&self->mainviews.mainviewbar, &self->toprow1);
 	mainviewbar_add_minmaximze(&self->mainviews.mainviewbar,
 		machinebar_base(&self->machinebar));
 	mainviewbar_add_minmaximze(&self->mainviews.mainviewbar,
@@ -374,35 +373,42 @@ void mainframe_init_bars(MainFrame* self)
 	psy_ui_component_set_default_align(&self->toprows, psy_ui_ALIGN_TOP,
 		psy_ui_margin_zero());
 	/* row0 */
-	psy_ui_component_init(&self->toprow0, &self->toprows, NULL);
-	/* vugroup */
-	vubar_init(&self->vubar, &self->toprow0, &self->workspace);	
-	psy_ui_component_set_align(&self->vubar.component, psy_ui_ALIGN_RIGHT);
-	psy_ui_component_set_style_type(&self->toprow0, STYLE_TOPROW0);
+	psy_ui_component_init(&self->toprow0, &self->toprows, NULL);		
 	psy_ui_component_init(&self->toprow0_client, &self->toprow0, NULL);
-	psy_ui_component_set_align(&self->toprow0_client, psy_ui_ALIGN_TOP);
-	psy_ui_component_init(&self->toprow0_bars, &self->toprow0_client, NULL);
-	psy_ui_component_set_align(&self->toprow0_bars, psy_ui_ALIGN_TOP);
-	psy_ui_component_set_style_type(&self->toprow0_bars, STYLE_TOPROW0_BARS);
+	psy_ui_component_set_align(&self->toprow0_client, psy_ui_ALIGN_CLIENT);	
 	psy_ui_margin_init_em(&margin, 0.0, 2.0, 0.0, 0.0);
-	psy_ui_component_set_default_align(&self->toprow0_bars, psy_ui_ALIGN_LEFT,
+	psy_ui_component_set_default_align(&self->toprow0_client, psy_ui_ALIGN_LEFT,
 		margin);
-	filebar_init(&self->filebar, &self->toprow0_bars, &self->workspace);
-	undoredobar_init(&self->undoredobar, &self->toprow0_bars, &self->workspace);
-	playbar_init(&self->playbar, &self->toprow0_bars, &self->workspace);	
-	playposbar_init(&self->playposbar, &self->toprow0_bars,
-		workspace_player(&self->workspace));
-	metronomebar_init(&self->metronomebar, &self->toprow0_bars, &self->workspace);
+	/* filebar */
+	filebar_init(&self->filebar, &self->toprow0_client, &self->workspace);
+	/* undoredo */
+	undoredobar_init(&self->undoredobar, &self->toprow0_client, &self->workspace);
+	/* playbar */
+	playbar_init(&self->playbar, &self->toprow0_client, &self->workspace);
+	/* metronomebar */
+	metronomebar_init(&self->metronomebar, playbar_base(&self->playbar),
+		&self->workspace);
 	if (!metronomeconfig_showmetronomebar(&self->workspace.config.metronome)) {
 		psy_ui_component_hide(metronomebar_base(&self->metronomebar));
 	}
 	metronomeconfig_connect(&self->workspace.config.metronome,
-		"showmetronome", self, mainframe_on_metronome_bar);
-	margin.right = psy_ui_value_make_px(0);
+		"showmetronome", self, mainframe_on_metronome_bar);	
 	psy_ui_component_set_margin(metronomebar_base(&self->metronomebar), margin);
-	/* row1 */	
-	songbar_init(&self->songbar, &self->toprows, &self->workspace);
-	psy_ui_component_set_style_type(&self->songbar.component, STYLE_TOPROW1);
+	psy_ui_component_set_align(metronomebar_base(&self->metronomebar),
+		psy_ui_ALIGN_TOP);
+	/* playposition */	
+	playposbar_init(&self->playposbar, &self->toprow0, workspace_player(
+		&self->workspace));
+	psy_ui_component_set_align(&self->playposbar.component, psy_ui_ALIGN_RIGHT);	
+	/* row1 */
+	psy_ui_component_init(&self->toprow1, &self->toprows, NULL);
+	psy_ui_component_set_style_type(&self->toprow1, STYLE_TOPROW1);
+	/* songbar */	
+	songbar_init(&self->songbar, &self->toprow1, &self->workspace);
+	psy_ui_component_set_align(&self->songbar.component, psy_ui_ALIGN_CLIENT);	
+	/* vubar */
+	vubar_init(&self->vubar, &self->toprow1, &self->workspace);	
+	psy_ui_component_set_align(&self->vubar.component, psy_ui_ALIGN_RIGHT);
 	/* row2 */	
 	machinebar_init(&self->machinebar, &self->toprows, &self->workspace);
 	psy_ui_component_set_style_type(&self->machinebar.component, STYLE_TOPROW2);
@@ -1407,8 +1413,7 @@ bool mainframe_accept_frame_move(const MainFrame* self, psy_ui_Component*
 	const psy_ui_Component* curr;
 	const psy_ui_Component* accept[] = {
 		&self->top,
-		&self->toprows,
-		&self->toprow0_bars,
+		&self->toprows,		
 		&self->toprow0_client,
 		&self->filebar.component,
 		&self->songbar.component,
@@ -1513,11 +1518,13 @@ void mainframe_seqeditor_on_float(MainFrame* self, psy_ui_Button* sender)
 void mainframe_on_metronome_bar(MainFrame* self, psy_Property* sender)
 {
 	if (psy_property_item_bool(sender)) {
-		psy_ui_component_show_align(metronomebar_base(
-			&self->metronomebar));
+		psy_ui_component_show(metronomebar_base(&self->metronomebar));
 	} else {
-		psy_ui_component_hide_align(metronomebar_base(
-			&self->metronomebar));
+		psy_ui_component_hide(metronomebar_base(&self->metronomebar));
+	}
+	if (psy_ui_component_draw_visible(&self->pane)) {
+		psy_ui_component_align(&self->pane);
+		psy_ui_component_invalidate(&self->pane);
 	}
 }
 

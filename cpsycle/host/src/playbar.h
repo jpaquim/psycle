@@ -21,6 +21,7 @@ typedef struct PlayBar {
 	/* inherits */
 	psy_ui_Component component;
 	/* internal */
+	psy_ui_Component buttons;
 	psy_ui_Button loop;
 	psy_ui_ComboBox playmode;	
 	psy_ui_TextArea loopbeatsedit;	

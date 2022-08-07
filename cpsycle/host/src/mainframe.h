@@ -75,8 +75,8 @@ typedef struct MainFrame {
 	psy_ui_Component top;	
 	psy_ui_Component toprows;
 	psy_ui_Component toprow0;
-	psy_ui_Component toprow0_client;
-	psy_ui_Component toprow0_bars;	
+	psy_ui_Component toprow0_client;	
+	psy_ui_Component toprow1;
 	psy_ui_Component topspacer;
 	psy_ui_Component client;
 	/* includes tabbar */
