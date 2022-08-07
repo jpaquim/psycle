@@ -17,7 +17,8 @@ extern "C" {
 
 typedef struct psy_ui_ColourMode {
 	bool inherit;
-	bool transparent;	
+	bool transparent;
+	bool gc;	
 } psy_ui_ColourMode;
 
 
@@ -25,12 +26,15 @@ INLINE void psy_ui_colourmode_init(psy_ui_ColourMode* self)
 {
 	self->inherit = TRUE;
 	self->transparent = FALSE;
+	self->gc = FALSE;
 }
 
-INLINE void psy_ui_colourmode_init_all(psy_ui_ColourMode* self, bool inherit, bool transparent)
+INLINE void psy_ui_colourmode_init_all(psy_ui_ColourMode* self, bool inherit,
+	bool transparent, bool gc)
 {
 	self->inherit = inherit;
 	self->transparent = transparent;
+	self->gc = gc;
 }
 
 typedef struct psy_ui_Colour
@@ -45,15 +49,16 @@ typedef struct psy_ui_Colour
 
 INLINE void psy_ui_colour_init(psy_ui_Colour* self)
 {	
-	psy_ui_colourmode_init_all(&self->mode, FALSE, TRUE);
+	psy_ui_colourmode_init_all(&self->mode, FALSE, TRUE, FALSE);
 	self->overlay = 0;
 	self->r = self->g = self->b = 0;
 	self->a = 0xFF;
 }
 
-INLINE void psy_ui_colour_init_rgb(psy_ui_Colour* self, uint8_t r, uint8_t g, uint8_t b)
+INLINE void psy_ui_colour_init_rgb(psy_ui_Colour* self, uint8_t r, uint8_t g,
+	uint8_t b)
 {	
-	psy_ui_colourmode_init_all(&self->mode, FALSE, FALSE);
+	psy_ui_colourmode_init_all(&self->mode, FALSE, FALSE, FALSE);
 	self->overlay = 0;
 	self->a = 0xFF;
 	self->r = r;
@@ -61,9 +66,10 @@ INLINE void psy_ui_colour_init_rgb(psy_ui_Colour* self, uint8_t r, uint8_t g, ui
 	self->b = b;
 }
 
-INLINE void psy_ui_colour_init_rgba(psy_ui_Colour* self, uint8_t r, uint8_t g, uint8_t b, uint8_t a)
+INLINE void psy_ui_colour_init_rgba(psy_ui_Colour* self, uint8_t r, uint8_t g,
+	uint8_t b, uint8_t a)
 {
-	psy_ui_colourmode_init_all(&self->mode, FALSE, FALSE);
+	psy_ui_colourmode_init_all(&self->mode, FALSE, FALSE, FALSE);
 	self->overlay = 0;
 	self->a = a;
 	self->r = r;
@@ -96,7 +102,7 @@ INLINE psy_ui_Colour psy_ui_colour_make_overlay(uint8_t value)
 {
 	psy_ui_Colour rv;
 
-	psy_ui_colourmode_init_all(&rv.mode, FALSE, FALSE);
+	psy_ui_colourmode_init_all(&rv.mode, FALSE, FALSE, FALSE);
 	rv.overlay = value;
 	rv.r = rv.b = rv.g = rv.a = 0;
 	return rv;
@@ -127,6 +133,17 @@ INLINE void psy_ui_colour_set(psy_ui_Colour* self, psy_ui_Colour colour)
 	assert(self);
 
 	*self = colour;	
+}
+
+INLINE psy_ui_Colour psy_ui_colour_make_gc(void)
+{
+	psy_ui_Colour rv;
+	
+	psy_ui_colourmode_init_all(&rv.mode, FALSE, FALSE, TRUE);
+	rv.overlay = 0;
+	rv.r = rv.g = rv.b = 0;
+	rv.a = 0xFF;
+	return rv;
 }
 
 INLINE psy_ui_Colour psy_ui_colour_make_rgb(uint8_t r, uint8_t g, uint8_t b)
@@ -276,6 +293,11 @@ INLINE psy_ui_Colour psy_ui_colour_weighted(const psy_ui_Colour* self, int weigh
 }
 
 /* standard colours */
+
+INLINE psy_ui_Colour psy_ui_colour_gc(void)
+{	
+	return psy_ui_colour_make_gc();
+}
 
 INLINE psy_ui_Colour psy_ui_colour_white(void)
 {

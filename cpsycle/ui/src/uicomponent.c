@@ -15,6 +15,7 @@
 #include "uiviewcomponentimp.h"
 /* std */
 #include <math.h>
+#include <stdio.h>
 /* platform */
 #include "../../detail/portable.h"
 
@@ -216,13 +217,32 @@ void psy_ui_component_set_focus(psy_ui_Component* self)
 
 void psy_ui_component_capture(psy_ui_Component* self)
 {
-	self->imp->vtable->dev_capture(self->imp);
+	assert(self);
+	assert(self->imp);
+		
+	if (psy_ui_app_capture(psy_ui_app()) != self) {		
+		psy_ui_app_push_capture(psy_ui_app(), self);
+		if (self->imp) {
+			self->imp->vtable->dev_capture(self->imp);
+		}
+	}
 }
 
 void psy_ui_component_release_capture(psy_ui_Component* self)
-{
-	psy_ui_app_setcapture(psy_ui_app(), NULL);
-	self->imp->vtable->dev_releasecapture(self->imp);
+{		
+	psy_ui_Component* restore;
+	
+	assert(self);
+	assert(self->imp);
+		
+	if (self->imp) {	
+		self->imp->vtable->dev_releasecapture(self->imp);
+	}
+	psy_ui_app_pop_capture(psy_ui_app());
+	restore = psy_ui_app_capture(psy_ui_app());
+	if (restore && restore->imp) {		
+		restore->imp->vtable->dev_capture(restore->imp);	
+	}
 }
 
 static void psy_ui_component_checkbackgroundanimation(psy_ui_Component*);
@@ -502,6 +522,7 @@ void dispose(psy_ui_Component* self)
 	if (psy_ui_app()->focus == self) {
 		psy_ui_app()->focus = NULL;
 	}
+	psy_ui_app_remove_capture(psy_ui_app(), self);
 }
 
 void destroy(psy_ui_Component* self)
@@ -686,6 +707,7 @@ void psy_ui_component_init_base(psy_ui_Component* self) {
 	self->opcount = 0;
 	self->draggable = FALSE;
 	self->dropdown = FALSE;
+	self->capture_relative = FALSE;
 	self->ncpaint = FALSE;
 	self->blitscroll = FALSE;
 	psy_ui_bitmap_init(&self->bufferbitmap);

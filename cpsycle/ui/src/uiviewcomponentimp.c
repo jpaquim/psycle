@@ -568,8 +568,7 @@ void view_dev_setorder(psy_ui_ViewComponentImp* self, psy_ui_ViewComponentImp*
 }
 
 void view_dev_capture(psy_ui_ViewComponentImp* self)
-{
-	psy_ui_app_setcapture(psy_ui_app(), self->component);
+{	
 	self->view->imp->vtable->dev_capture(self->view->imp);
 }
 

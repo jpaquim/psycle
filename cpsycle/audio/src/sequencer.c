@@ -1051,7 +1051,7 @@ void psy_audio_sequencer_patternloop(psy_audio_Sequencer* self,
 		if (self->loop.count > 0) {
 			self->loop.active = 1;
 			psy_audio_sequencer_jumpto(self, self->loop.offset);
-		} else {
+		} else {			
 			self->loop.offset = offset;
 		}
 	} else if (self->loop.count > 0 && offset != self->loop.offset) {

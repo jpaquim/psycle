@@ -18,8 +18,9 @@ void vubar_init(VuBar* self, psy_ui_Component* parent, Workspace* workspace)
 	clipbox_init(&self->clipbox, vubar_base(self), workspace);
 	psy_ui_component_set_align(clipbox_base(&self->clipbox),
 		psy_ui_ALIGN_RIGHT);
-	vumeter_init(&self->vumeter, vubar_base(self), workspace);
-	psy_ui_component_set_align(vumeter_base(&self->vumeter), psy_ui_ALIGN_TOP);
+	vumeter_init(&self->vumeter, vubar_base(self));
+	psy_ui_component_set_align(vumeter_base(&self->vumeter),
+		psy_ui_ALIGN_TOP);
 	volslider_init(&self->volslider, vubar_base(self), workspace);
 	psy_ui_component_set_align(volslider_base(&self->volslider),
 		psy_ui_ALIGN_TOP);
@@ -35,4 +36,11 @@ void vubar_reset(VuBar* self)
 void vubar_idle(VuBar* self)
 {
 	vumeter_idle(&self->vumeter);
+}
+
+void vubar_set_machine(VuBar* self, psy_audio_Machine* machine)
+{
+	assert(self);
+	
+	vumeter_set_machine(&self->vumeter, machine);
 }

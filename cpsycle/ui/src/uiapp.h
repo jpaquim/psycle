@@ -61,14 +61,14 @@ typedef struct psy_ui_App {
 	bool setpositioncacheonly;	
 	psy_Timers wintimers;
 	/* references */
-	struct psy_ui_Component* main;
-	struct psy_ui_Component* capture_;
+	struct psy_ui_Component* main;	
 	struct psy_ui_Component* hover;
 	struct psy_ui_Component* focus;
 	psy_ui_DragEvent dragevent;	
 	psy_ui_EventDispatch eventdispatch;
 	psy_Table components;
-	psy_ui_Bitmaps bitmaps;	
+	psy_ui_Bitmaps bitmaps;
+	psy_List* captures_;	
 } psy_ui_App;
 
 psy_ui_App* psy_ui_app(void);
@@ -109,14 +109,19 @@ void psy_ui_app_add_app_bmp(psy_ui_App*, uintptr_t id,
 
 
 INLINE struct psy_ui_Component* psy_ui_app_capture(psy_ui_App* self)
-{
-	return self->capture_;
+{	
+	psy_List* p;
+	
+	p = psy_list_last(self->captures_);
+	if (p) {
+		return (struct psy_ui_Component*)p->entry;
+	}
+	return NULL;	
 }
 
-INLINE void psy_ui_app_setcapture(psy_ui_App* self, struct psy_ui_Component* component)
-{
-	self->capture_ = component;
-}
+void psy_ui_app_push_capture(psy_ui_App*, struct psy_ui_Component*);
+void psy_ui_app_pop_capture(psy_ui_App*);
+void psy_ui_app_remove_capture(psy_ui_App*, struct psy_ui_Component*);
 
 INLINE struct psy_ui_Component* psy_ui_app_hover(psy_ui_App* self)
 {

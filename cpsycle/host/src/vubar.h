@@ -44,6 +44,7 @@ void vubar_init(VuBar*, psy_ui_Component* parent, Workspace*);
 
 void vubar_reset(VuBar*);
 void vubar_idle(VuBar*);
+void vubar_set_machine(VuBar*, psy_audio_Machine*);
 
 INLINE psy_ui_Component* vubar_base(VuBar* self)
 {

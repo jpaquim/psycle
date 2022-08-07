@@ -15,6 +15,8 @@
 #include "uix11fontimp.h"
 #include "uix11graphicsimp.h"
 #include "uix11keyboardevent.h"
+/* container */
+#include <qsort.h>
 /* X11 */
 #include <X11/IntrinsicP.h>
 #include <X11/ShellP.h>
@@ -67,6 +69,8 @@ static void psy_ui_x11app_unregister_native(psy_ui_X11App*,
 	uintptr_t handle);
 static const psy_List* psy_ui_x11app_fonts(const psy_ui_X11App*);
 static void psy_ui_x11app_read_fonts(psy_ui_X11App*);
+static psy_List* psy_ui_x11app_sort(psy_List* source, psy_fp_comp comp);
+static int psy_ui_x11app_comp_filename(psy_List* p, psy_List* q);
 
 /* vtable */
 static psy_ui_AppImpVTable imp_vtable;
@@ -895,7 +899,8 @@ void psy_ui_x11app_read_fonts(psy_ui_X11App* self)
     int	j;
     FcObjectSet *os = 0;
     FcFontSet *fs;
-    FcPattern *pat;    
+    FcPattern *pat; 
+    psy_List* fonts;   
         	
 	psy_list_deallocate(&self->fonts, (psy_fp_disposefunc)NULL);		
 	// if (!FcInit ())
@@ -930,7 +935,58 @@ void psy_ui_x11app_read_fonts(psy_ui_X11App* self)
 		FcFontSetDestroy(fs);
     }
     // FcFini();    
+    fonts = psy_ui_x11app_sort(self->fonts,
+		(psy_fp_comp)psy_ui_x11app_comp_filename);
+    psy_list_free(self->fonts);
+    self->fonts = fonts;
 	return ;
+}
+
+psy_List* psy_ui_x11app_sort(psy_List* source, psy_fp_comp comp)
+{
+	psy_List* rv;
+
+	rv = NULL;
+	if (source) {		
+		uintptr_t num;
+		psy_Table arrayptr;
+		psy_List* p;
+		uintptr_t i;
+
+		num = psy_list_size(source);
+		if (num == 0) {
+			return NULL;
+		}
+		psy_table_init(&arrayptr);
+		p = source;
+		for (i = 0; p != NULL && i < num; p = p->next, ++i) {
+			psy_table_insert(&arrayptr, i, p);
+		}
+		psy_qsort(&arrayptr,
+			(psy_fp_set_index_double)psy_table_insert,
+			(psy_fp_index_double)psy_table_at,
+			0, (int)(num - 1), comp);
+		for (i = 0; i < num; ++i) {
+			psy_ui_FontInfo* font_info;
+			psy_List* p;
+			
+			p = (psy_List*)psy_table_at(&arrayptr, i);
+			font_info = (psy_ui_FontInfo*)(p->entry);
+			psy_list_append(&rv, font_info);
+		}
+		psy_table_dispose(&arrayptr);
+	}
+	return rv;
+}
+
+int psy_ui_x11app_comp_filename(psy_List* p, psy_List* q)
+{
+	psy_ui_FontInfo* left;
+	psy_ui_FontInfo* right;
+
+	left = (psy_ui_FontInfo*)p->entry;
+	right = (psy_ui_FontInfo*)q->entry;
+	return strcmp(left->lfFaceName, right->lfFaceName);
 }
 
 #endif /* PSYCLE_TK_X11 */

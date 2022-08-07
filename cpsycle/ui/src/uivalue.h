@@ -194,6 +194,9 @@ INLINE psy_ui_Value psy_ui_mul_value_real(psy_ui_Value lhs, double factor)
 
 psy_ui_Value psy_ui_max_values(psy_ui_Value lhs, psy_ui_Value rhs,
 	const psy_ui_TextMetric* tm, const struct psy_ui_Size* pesize);
+	
+psy_ui_Value psy_ui_min_values(psy_ui_Value lhs, psy_ui_Value rhs,
+	const psy_ui_TextMetric* tm, const struct psy_ui_Size* pesize);
 
 INLINE psy_ui_Value psy_ui_value_zero(void)
 {
