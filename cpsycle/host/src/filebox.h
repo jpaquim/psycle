@@ -41,7 +41,7 @@ typedef struct FileBox {
 	psy_Path curr_dir;
 	bool rebuild;
 	char* wildcard;
-	bool dirsonly;
+	bool dirsonly;	
 	/* signal */
 	psy_Signal signal_selected;	
 	psy_Signal signal_dir_changed;

@@ -9,10 +9,13 @@
 /* local */
 #include "dirconfig.h"
 #include "filebox.h"
+#include "recentview.h"
+#include "propertiesview.h"
 /* ui */
 #include <uibutton.h>
 #include <uicheckbox.h>
 #include <uilabel.h>
+#include <uinotebook.h>
 #include <uitabbar.h>
 #include <uitextarea.h>
 
@@ -32,10 +35,10 @@ typedef struct FileViewFilter {
 	psy_Signal signal_changed;
 	/* internal */
 	psy_ui_Label desc;
-	psy_ui_Component items;
+	psy_ui_Component items;	
 	bool showall;
 	psy_Property filter;
-	psy_Property* types;
+	psy_Property* types;	
 } FileViewFilter;
 
 void fileviewfilter_init(FileViewFilter*, psy_ui_Component* parent);
@@ -84,7 +87,7 @@ void fileviewlinks_add(FileViewLinks*, const char* label,
 	const char* path);
 const char* fileviewlinks_path(FileViewLinks*, uintptr_t index);
 
-
+/* FileView */
 
 typedef struct FileView {
 	/* inherits */
@@ -92,7 +95,9 @@ typedef struct FileView {
 	/* signals */
 	psy_Signal signal_selected;
 	/* internal */
+	psy_ui_Notebook notebook;
 	FileBox filebox;
+	PlaylistView recent;
 	psy_ui_Component left;
 	psy_ui_Component options;
 	psy_ui_Component filters;
@@ -114,7 +119,8 @@ typedef struct FileView {
 	psy_Property* property;
 } FileView;
 
-void fileview_init(FileView*, psy_ui_Component* parent, DirConfig*);
+void fileview_init(FileView*, psy_ui_Component* parent, DirConfig*,
+	InputHandler*, psy_Playlist*);
 
 INLINE psy_ui_Component* fileview_base(FileView* self)
 {

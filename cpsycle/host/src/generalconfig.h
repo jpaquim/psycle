@@ -19,8 +19,7 @@ extern "C" {
 /* GeneralConfig */
 
 enum {
-	PROPERTY_ID_SHOWSTEPSEQUENCER = 20000,
-	PROPERTY_ID_SHOWPLAYLIST,
+	PROPERTY_ID_SHOWSTEPSEQUENCER = 20000,	
 	PROPERTY_ID_SHOWSEQUENCEEDIT,
 	PROPERTY_ID_SHOWMINIVIEW
 };
@@ -55,8 +54,6 @@ bool generalconfig_showstepsequencer(const GeneralConfig*);
 bool generalconfig_showpianokbd(const GeneralConfig*);
 void generalconfig_setstepsequencershowstate(GeneralConfig*, bool state);
 void generalconfig_setpianokbdshowstate(GeneralConfig*, bool state);
-bool generalconfig_showplaylist(const GeneralConfig*);
-void generalconfig_setplaylistshowstate(GeneralConfig*, bool state);
 void generalconfig_show_pattern_names(GeneralConfig*);
 void generalconfig_show_pattern_ids(GeneralConfig*);
 

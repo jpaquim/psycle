@@ -294,22 +294,21 @@ void init_host_styles(psy_ui_Styles* self, psy_ui_ThemeMode theme)
 		material.surface_overlay_5p);
 	psy_ui_styles_set_style(self, STYLE_TOP, style);	
 	
-	style = psy_ui_style_allocinit();	
+	style = psy_ui_style_allocinit();
+	psy_ui_style_set_padding_em(style, 0.0, 0.0, 0.0, 1.0);
 	psy_ui_styles_set_style(self, STYLE_TOPROWS, style);
 	
 	style = psy_ui_style_allocinit();
-	psy_ui_style_set_background_colour(style, material.surface_overlay_8p);
+	psy_ui_style_set_background_colour(style, material.surface_overlay_8p);	
 	psy_ui_styles_set_style(self, STYLE_TOPROW0, style);
 
-	style = psy_ui_style_allocinit();	
+	style = psy_ui_style_allocinit();
 	psy_ui_styles_set_style(self, STYLE_TOPROW0_BARS, style);
 	
 	style = psy_ui_style_allocinit();
-	psy_ui_style_set_padding_em(style, 0.0, 0.0, 0.0, 1.0);
 	psy_ui_styles_set_style(self, STYLE_TOPROW1, style);
 	
 	style = psy_ui_style_allocinit();	
-	psy_ui_style_set_padding_em(style, 0.0, 0.0, 0.0, 1.0);
 	psy_ui_styles_set_style(self, STYLE_TOPROW2, style);
 	
 	style = psy_ui_style_allocinit();	

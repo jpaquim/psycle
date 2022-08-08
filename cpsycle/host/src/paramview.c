@@ -68,10 +68,7 @@ void paramview_init(ParamView* self, psy_ui_Component* parent,
 }
 
 void paramview_on_destroyed(ParamView* self)
-{
-	if (self->frameview && *self->frameview) {
-		*self->frameview = NULL;
-	}	
+{	
 }
 
 ParamView* paramview_alloc(void)

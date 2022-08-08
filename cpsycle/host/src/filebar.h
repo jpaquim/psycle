@@ -23,7 +23,6 @@ typedef struct FileBar {
 	psy_ui_Component component;
 	/* internal */
 	psy_ui_Label header;
-	psy_ui_Button recentbutton;
 	psy_ui_Button newbutton;
 	psy_ui_Button diskop;
 	psy_ui_Button loadbutton;

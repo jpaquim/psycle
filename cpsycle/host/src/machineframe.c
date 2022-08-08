@@ -153,15 +153,12 @@ static void machineframe_vtable_init(MachineFrame* self)
 {
 	if (!machineframe_vtable_initialized) {
 		machineframe_vtable = *(self->component.vtable);
-		machineframe_vtable.on_destroyed =
-			(psy_ui_fp_component_event)
-			machineframe_on_destroyed;
-		machineframe_vtable.on_timer =
-			(psy_ui_fp_component_on_timer)
-			machineframe_on_timer;
 		machineframe_vtable.onclose =
 			(psy_ui_fp_component_onclose)
 			machineframe_on_close;
+		machineframe_vtable.on_timer =
+			(psy_ui_fp_component_on_timer)
+			machineframe_on_timer;
 		machineframe_vtable_initialized = TRUE;
 	}
 	self->component.vtable = &machineframe_vtable;
@@ -232,17 +229,6 @@ void machineframe_init(MachineFrame* self, psy_ui_Component* parent,
 	machineframe_updatepwr(self);	
 }
 
-void machineframe_on_destroyed(MachineFrame* self)
-{	
-	/*
-	** Paramview stores pointers of all machineframes
-	** erase the frame from paramviews
-	*/
-	self->machine = NULL;
-	self->view = NULL;
-	paramviews_erase(self->paramviews, self->macid);	
-}
-
 bool machineframe_on_close(MachineFrame* self)
 {
 	if (self->editorview && self->machine) {
@@ -251,6 +237,15 @@ bool machineframe_on_close(MachineFrame* self)
 			&self->workspace->signal_machineeditresize, self->editorview);
 		psy_ui_component_stop_timer(&self->editorview->component, 0);
 	}
+	/*
+	** Paramview stores pointers of all machineframes erase the frame from
+	** paramviews
+	*/
+	if (self->machine) {
+		paramviews_erase(self->paramviews, self->macid);
+	}
+	self->machine = NULL;
+	self->view = NULL;	
 	return TRUE;
 }
 
