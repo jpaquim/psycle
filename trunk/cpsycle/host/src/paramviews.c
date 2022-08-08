@@ -87,7 +87,7 @@ void paramviews_removeall(ParamViews* self)
 	psy_List* frames;
 	psy_List* p;
 	
-	frames = NULL;
+	frames = NULL;	
 	// copy machine frame pointers to a list to prevent traversing with invalid
 	// tableiterators after calling frame destroy
 	for (it = psy_table_begin(&self->frames);
@@ -97,9 +97,12 @@ void paramviews_removeall(ParamViews* self)
 	}
 	// destroy frames	
 	for (p = frames; p != NULL; p = p->next) {
-		// a frame will erase themself from paramviews (calling paramviews_erase)
-		// in on_destroy
-		psy_ui_component_destroy((psy_ui_Component*)psy_list_entry(p));
+		psy_ui_Component* frame;
+		
+		frame = (psy_ui_Component*)psy_list_entry(p);
+		/* a frame will erase themself from paramviews in on_close */
+		frame->vtable->onclose(frame);		
+		psy_ui_component_destroy(frame);		
 	}
 	psy_list_free(frames);
 	frames = NULL;

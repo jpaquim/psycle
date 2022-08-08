@@ -31,7 +31,6 @@
 #include "plugineditorbar.h"
 #include "patternview.h"
 #include "patternviewbar.h"
-#include "recentview.h"
 #include "renderview.h"
 #include "sequencerbar.h"
 #include "samplesview.h"
@@ -127,9 +126,7 @@ typedef struct MainFrame {
 	CPUView cpuview;
 	psy_ui_Splitter cpusplitter;
 	MidiMonitor midimonitor;
-	psy_ui_Splitter midisplitter;
-	PlaylistView playlist;
-	psy_ui_Splitter playlistsplitter;
+	psy_ui_Splitter midisplitter;	
 	FileView fileview;
 	MainStatusBar statusbar;	
 	psy_ui_Component left;

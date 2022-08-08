@@ -43,7 +43,6 @@ static void mainframe_init_midi_monitor(MainFrame*);
 static void mainframe_init_step_sequencer_view(MainFrame*);
 static void mainframe_init_keyboard_view(MainFrame*);
 static void mainframe_init_seq_editor(MainFrame*);
-static void mainframe_init_recent_view(MainFrame*);
 static void mainframe_init_file_view(MainFrame*);
 static void mainframe_init_sequence_view(MainFrame*);
 static void mainframe_init_sequencer_bar(MainFrame*);
@@ -58,7 +57,6 @@ static void mainframe_checkplaystartwithrctrl(MainFrame*, psy_ui_KeyboardEvent*)
 static void mainframe_on_key_up(MainFrame*, psy_ui_KeyboardEvent*);
 static void mainframe_delegate_keyboard(MainFrame*, intptr_t message,
 	psy_ui_KeyboardEvent*);
-static void mainframe_on_recent_songs(MainFrame*, psy_Property* sender);
 static void mainframe_on_file_save_view(MainFrame*, psy_ui_Component* sender);
 static void mainframe_on_disk_op(MainFrame*, psy_ui_Component* sender);
 static void mainframe_on_tabbar_changed(MainFrame*, psy_ui_TabBar* sender,
@@ -176,8 +174,7 @@ void mainframe_init(MainFrame* self)
 	mainframe_init_gear(self);
 	mainframe_init_param_rack(self);
 	mainframe_init_cpu_view(self);
-	mainframe_init_midi_monitor(self);
-	mainframe_init_recent_view(self);
+	mainframe_init_midi_monitor(self);	
 	mainframe_init_file_view(self);
 	mainframe_init_sequence_view(self);
 	mainframe_init_sequencer_bar(self);
@@ -670,30 +667,14 @@ void mainframe_init_seq_editor(MainFrame* self)
 		self, mainframe_seqeditor_on_float);
 }
 
-void mainframe_init_recent_view(MainFrame* self)
-{
-	playlistview_init(&self->playlist, &self->pane,
-		psy_ui_notebook_base(&self->mainviews.mainviewbar.viewtabbars),		
-		&self->workspace);
-	psy_ui_component_set_align(playlistview_base(&self->playlist),
-		psy_ui_ALIGN_LEFT);
-	 psy_ui_splitter_init(&self->playlistsplitter, &self->pane);
-	 psy_ui_component_set_align(psy_ui_splitter_base(&self->playlistsplitter),
-		psy_ui_ALIGN_LEFT);
-	if (!generalconfig_showplaylist(&self->workspace.config.general)) {
-		psy_ui_component_hide(playlistview_base(&self->playlist));
-		psy_ui_component_hide(psy_ui_splitter_base(&self->playlistsplitter));
-	}
-	generalconfig_connect(&self->workspace.config.general,
-		"bench.showplaylist", self, mainframe_on_recent_songs);	
-}
-
 void mainframe_init_file_view(MainFrame* self)
 {	
 	/* ft2 style file load view */
 	fileview_init(&self->fileview,
 		psy_ui_notebook_base(&self->mainviews.notebook),
-		&self->workspace.config.directories);
+		&self->workspace.config.directories,
+		&self->workspace.inputhandler,
+		&self->workspace.playlist);
 	self->workspace.fileview = &self->fileview;
 	fileview_set_directory(&self->fileview,	
 		dirconfig_songs(&self->workspace.config.directories));
@@ -891,17 +872,6 @@ void mainframe_update_songtitle(MainFrame* self)
 	psy_ui_component_set_title(mainframe_base(self), title);
 	mainstatusbar_set_default_status_text(&self->statusbar,
 		workspace_song_title(&self->workspace));
-}
-
-void mainframe_on_recent_songs(MainFrame* self, psy_Property* sender)
-{
-	if (psy_property_item_bool(sender)) {
-		psy_ui_component_show_align(playlistview_base(&self->playlist));
-		psy_ui_component_show_align(&self->playlistsplitter.component);
-	} else {
-		psy_ui_component_hide_align(playlistview_base(&self->playlist));
-		psy_ui_component_hide_align(&self->playlistsplitter.component);
-	}	
 }
 
 void mainframe_on_file_save_view(MainFrame* self, psy_ui_Component* sender)

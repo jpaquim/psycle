@@ -9,7 +9,7 @@
 /* host */
 #include "inputdefiner.h"
 #include "filebox.h"
-#include "workspace.h"
+#include "inputhandler.h"
 /* ui */
 #include <uicombobox.h>
 #include <uilabel.h>

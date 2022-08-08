@@ -78,11 +78,7 @@ void generalconfig_make_workbench(GeneralConfig* self, psy_Property* parent)
 		PROPERTY_ID_SHOWSTEPSEQUENCER);
 	psy_property_set_text(
 		psy_property_append_bool(bench, "showpianokbd", FALSE),
-		"settings.general.show-pianokbd");
-	psy_property_set_id(psy_property_set_text(
-		psy_property_append_bool(bench, "showplaylist", FALSE),
-		"settings.general.show-playlist"),
-		PROPERTY_ID_SHOWPLAYLIST);
+		"settings.general.show-pianokbd");	
 	psy_property_set_text(
 		psy_property_append_bool(bench, "showplugineditor", FALSE),
 		"settings.general.show-plugineditor");		
@@ -221,20 +217,6 @@ bool generalconfig_showpianokbd(const GeneralConfig* self)
 	assert(self);
 
 	return psy_property_at_bool(self->general, "bench.showpianokbd", FALSE);
-}
-
-bool generalconfig_showplaylist(const GeneralConfig* self)
-{
-	assert(self);
-
-	return psy_property_at_bool(self->general, "bench.showplaylist", TRUE);
-}
-
-void generalconfig_setplaylistshowstate(GeneralConfig* self, bool state)
-{
-	assert(self);
-
-	psy_property_set_bool(self->general, "bench.showplaylist", state);
 }
 
 void generalconfig_setstepsequencershowstate(GeneralConfig* self, bool state)

@@ -196,7 +196,6 @@ void fileviewlinks_on_button(FileViewLinks* self, psy_ui_Button* sender)
 }
 
 
-
 /* FileView */
 
 /* prototypes */
@@ -208,6 +207,8 @@ static void fileview_on_link(FileView* self, FileViewLinks* sender, intptr_t ind
 static void fileview_update_path(FileView*);
 static void fileview_on_filter(FileView*, psy_ui_Component* sender);
 static void fileview_on_hide(FileView*, psy_ui_Component* sender);
+static void fileview_on_recent_selected(FileView*, PropertiesView* sender,
+	psy_Property*);
 
 /* vtable */
 static psy_ui_ComponentVtable vtable;
@@ -227,7 +228,7 @@ static void vtable_init(FileView* self)
 
 /* implementation */
 void fileview_init(FileView* self, psy_ui_Component* parent,
-	DirConfig* dirconfig)
+	DirConfig* dirconfig, InputHandler* input_handler, psy_Playlist* playlist)
 {		
 	psy_ui_component_init(fileview_base(self), parent, NULL);
 	vtable_init(self);
@@ -274,7 +275,7 @@ void fileview_init(FileView* self, psy_ui_Component* parent,
 	fileviewsavefilter_init(&self->savefilter, &self->filters);
 	psy_ui_component_set_align(&self->savefilter.component, psy_ui_ALIGN_TOP);
 	psy_ui_component_set_margin(&self->savefilter.component,
-		psy_ui_margin_make_em(1.0, 0.0, 0.0, 0.0));
+		psy_ui_margin_make_em(1.0, 0.0, 0.0, 0.0));	
 	/* buttons */
 	psy_ui_component_init_align(&self->buttons, &self->options, NULL,			
 		psy_ui_ALIGN_LEFT);
@@ -297,12 +298,22 @@ void fileview_init(FileView* self, psy_ui_Component* parent,
 	psy_ui_component_set_align(&self->links.component, psy_ui_ALIGN_LEFT);
 	psy_signal_connect(&self->links.signal_selected, self,
 		fileview_on_link);
+	/* notebook */
+	psy_ui_notebook_init(&self->notebook, &self->component);
+	psy_ui_component_set_align(&self->notebook.component, psy_ui_ALIGN_CLIENT);	
 	/* files */
-	filebox_init(&self->filebox, &self->component);	
+	filebox_init(&self->filebox, psy_ui_notebook_base(&self->notebook));
 	psy_ui_component_set_align(&self->filebox.component,
 		psy_ui_ALIGN_CLIENT);			
 	psy_ui_component_set_margin(&self->filebox.component, psy_ui_margin_make_em(
 		0.0, 0.0, 0.0, 1.0));
+	/* recent */
+	playlistview_init(&self->recent, psy_ui_notebook_base(&self->notebook),
+		NULL, input_handler, playlist);
+	psy_ui_component_set_align(&self->recent.component, psy_ui_ALIGN_CLIENT);
+	psy_signal_connect(&self->recent.view.signal_selected, self,
+		fileview_on_recent_selected);		
+	psy_ui_notebook_select(&self->notebook, 0);
 	psy_ui_component_set_align(psy_ui_textarea_base(&self->filename),
 		psy_ui_ALIGN_TOP);
 	fileview_build_drives(self);		
@@ -333,7 +344,26 @@ void fileview_build_drives(FileView* self)
 	}
 	psy_list_deallocate(&q, NULL);	
 	fileviewlinks_add(&self->links, "Songs", dirconfig_songs(self->dirconfig));
-	fileviewlinks_add(&self->links, "Home", psy_dir_home());	
+	fileviewlinks_add(&self->links, "Home", psy_dir_home());
+	fileviewlinks_add(&self->links, "Recent", "//recent");
+}
+
+void fileview_on_recent_selected(FileView* self, PropertiesView* sender,
+	psy_Property* property)
+{		
+	psy_Path recent_path;
+	
+	psy_path_init(&recent_path, psy_property_item_str(property));		
+	fileview_set_directory(self, psy_path_prefix(&recent_path));	
+	psy_ui_textarea_set_text(&self->filename,
+		psy_path_filename(&recent_path));		
+	psy_path_dispose(&recent_path);
+	if (self->property) {		
+		psy_property_set_item_str(self->property, 
+			psy_property_item_str(property));
+	} else {
+		psy_signal_emit(&self->signal_selected, self, 0);
+	}
 }
 
 void fileview_on_file_selected(FileView* self, FileBox* sender)
@@ -378,14 +408,23 @@ void fileview_on_link(FileView* self, FileViewLinks* sender, intptr_t index)
 	const char* path;
 	
 	path = fileviewlinks_path(sender, index);
-	if (path) {
+	if (strcmp(path, "//recent") == 0) {
+		if (psy_ui_notebook_pageindex(&self->notebook) == 1) {
+			psy_ui_notebook_select(&self->notebook, 0);
+		} else {
+			psy_ui_notebook_select(&self->notebook, 1);
+		}
+	} else if (path) {
+		if (psy_ui_notebook_pageindex(&self->notebook) == 1) {
+			psy_ui_notebook_select(&self->notebook, 0);
+		}
 		fileview_set_directory(self, path);
 	}	
 }
 
 void fileview_set_directory(FileView* self, const char* path)
 {	
-	filebox_set_directory(&self->filebox, path);	
+	filebox_set_directory(&self->filebox, path);
 	fileview_update_path(self);			
 }
 

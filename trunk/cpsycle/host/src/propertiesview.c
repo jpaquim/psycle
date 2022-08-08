@@ -738,7 +738,9 @@ void propertiesview_init(PropertiesView* self, psy_ui_Component* parent,
 	psy_ui_component_set_tab_index(&self->component, 0);	
 	self->maximize_main_sections = TRUE;
 	psy_signal_init(&self->signal_selected);		
-	psy_ui_component_init(&self->viewtabbar, tabbarparent, NULL);	
+	if (tabbarparent) {
+		psy_ui_component_init(&self->viewtabbar, tabbarparent, NULL);
+	}
 	psy_ui_notebook_init(&self->notebook, &self->component);
 	psy_ui_component_set_align(&self->notebook.component, psy_ui_ALIGN_CLIENT);
 	/* filebox */

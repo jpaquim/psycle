@@ -476,9 +476,7 @@ void dev_destroy(psy_ui_x11_ComponentImp* self)
 	psy_ui_X11App* x11app;
 	XEvent event;
 	Window window;
-	bool deallocate;
-
-	deallocate = self->component->deallocate;
+	
     x11app = (psy_ui_X11App*)psy_ui_app()->imp;
 	self->mapped = FALSE;
 	self->visible = FALSE;
@@ -487,24 +485,7 @@ void dev_destroy(psy_ui_x11_ComponentImp* self)
 		psy_ui_x11app_flush_events(x11app);
 	}
 	XDestroyWindow(x11app->dpy, window);
-	if (self->parent == NULL) {
-		XEvent event;	
-		XSync(x11app->dpy, FALSE);
-		while (x11app->running) {
-			if (XPending(x11app->dpy)) {
-				if (XCheckTypedWindowEvent(x11app->dpy, window,
-						DestroyNotify, &event)) {
-					psy_ui_x11app_handle_event(x11app, &event);
-					break;
-				}
-			} else {
-				break;
-			}
-		}
-    } else {	
-		deallocate = self->component->deallocate;
-		psy_ui_x11app_flush_events(x11app);
-	}
+	psy_ui_x11app_flush_events(x11app);	
 }
 
 void dev_show(psy_ui_x11_ComponentImp* self)
