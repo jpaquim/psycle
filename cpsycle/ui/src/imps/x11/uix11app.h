@@ -51,10 +51,6 @@ typedef struct psy_ui_X11App {
 	bool dbe;
 	bool dograb;
 	Window grabwin;
-	psy_List* targetids;	
-	bool shiftstate;
-	bool controlstate;
-	bool altstate;
 	bool resetcursor;	
 	/* references */
 	psy_ui_App* app;

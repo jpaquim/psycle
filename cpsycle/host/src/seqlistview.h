@@ -18,13 +18,14 @@ extern "C" {
 struct SeqView;
 
 /* SeqViewTrack */
+
 typedef struct SeqViewTrack {
 	/* inherits */
 	psy_ui_Component component;
 	uintptr_t trackindex;
 	/* references */
 	SeqViewState* state;
-	psy_audio_SequenceTrack* track;	
+	psy_audio_SequenceTrack* track;
 } SeqViewTrack;
 
 void seqviewtrack_init(SeqViewTrack*, psy_ui_Component* parent,
@@ -34,27 +35,41 @@ SeqViewTrack* seqviewtrack_alloc(void);
 SeqViewTrack* seqviewtrack_allocinit(psy_ui_Component* parent,
 	uintptr_t trackindex, psy_audio_SequenceTrack*, SeqViewState*);
 
+/* SeqViewItem */
+
+typedef struct SeqViewItem {
+	/* inherits */
+	psy_ui_Component component;
+	psy_audio_SequenceEntry* seqentry;
+	psy_audio_OrderIndex order_index;	
+	Workspace* workspace;
+	SeqViewState* state;
+} SeqViewItem;
+
+void seqviewitem_init(SeqViewItem*, psy_ui_Component* parent,
+	psy_audio_SequenceEntry*, psy_audio_OrderIndex, SeqViewState*, Workspace*);
+
+SeqViewItem* seqviewitem_alloc(void);
+SeqViewItem* seqviewitem_allocinit(psy_ui_Component* parent,
+	psy_audio_SequenceEntry*, psy_audio_OrderIndex, SeqViewState*, Workspace*);
+
 /* SeqviewList */
+
 typedef struct SeqviewList {
 	/* inherits */
 	psy_ui_Component component;	
 	/* internal */
 	int foundselected;	
-	double avgcharwidth;
-	bool showpatternnames;	
-	uintptr_t lastplayrow;	
+	double avgcharwidth;	
 	/* references */
 	SeqViewState* state;	
 } SeqviewList;
 
 void seqviewlist_init(SeqviewList*, psy_ui_Component* parent, SeqViewState*);
-void seqviewlist_showpatternnames(SeqviewList*);
-void seqviewlist_showpatternslots(SeqviewList*);
 void seqviewlist_rename(SeqviewList*);
-void seqviewlist_computetextsizes(SeqviewList*);
-void seqviewlist_onpatternnamechanged(SeqviewList*,
-	psy_audio_Patterns*, uintptr_t slot);
 void seqviewlist_build(SeqviewList*);
+void seqviewlist_on_pattern_name_changed(SeqviewList*, psy_audio_Patterns*,
+	uintptr_t slot);
 
 INLINE psy_ui_Component* seqviewlist_base(SeqviewList* self)
 {
