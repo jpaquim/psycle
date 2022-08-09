@@ -30,8 +30,6 @@
 #include <stdio.h>
 
 
-static psy_ui_MouseEvent buttonpressevent;
-
 /* prototypes */
 static void psy_ui_x11app_initdbe(psy_ui_X11App*);
 static void psy_ui_x11app_dispose(psy_ui_X11App*);
@@ -46,14 +44,8 @@ static void psy_ui_x11app_mousewheel(psy_ui_X11App*,
 	psy_ui_x11_ComponentImp*, XEvent*);
 static int psy_ui_x11app_translate_x11button(int button);
 static int psy_ui_x11app_make_x11button(int button);
-static bool psy_ui_x11app_sendeventtoparent(psy_ui_X11App*,
-	psy_ui_x11_ComponentImp*, int mask, XEvent*);
 static void psy_ui_x11app_adjustcoordinates(psy_ui_Component*,
 	psy_ui_RealPoint*);
-static void psy_ui_x11app_update_keyevent_mods(psy_ui_X11App*,
-	psy_ui_KeyboardEvent*);
-static void psy_ui_x11app_update_mouseevent_mods(psy_ui_X11App*,
-	psy_ui_MouseEvent*);
 static XButtonEvent psy_ui_X11app_make_x11buttonevent(
 	psy_ui_MouseEvent*, Display*, int hwnd);	
 static void psy_ui_x11app_sendx11event(psy_ui_X11App*, int mask,
@@ -168,11 +160,7 @@ void psy_ui_x11app_init(psy_ui_X11App* self, psy_ui_App* app,
 	}
 	psy_ui_x11colours_init(&self->colourmap, self->dpy);
 	self->dograb = FALSE;
-	self->grabwin = 0;
-	self->targetids = NULL;	
-	self->shiftstate = FALSE;
-	self->controlstate = FALSE;
-	self->altstate = FALSE;
+	self->grabwin = 0;	
 	self->resetcursor = TRUE;	
 	XSetErrorHandler(errorHandler);
 	self->fonts = NULL;	
@@ -237,8 +225,7 @@ void psy_ui_x11app_dispose(psy_ui_X11App* self)
 	psy_table_dispose(&self->winidmap);
 	psy_table_dispose(&self->toplevelmap);
 	XCloseDisplay(self->dpy);
-	psy_ui_x11colours_dispose(&self->colourmap);
-	psy_list_free(self->targetids);	
+	psy_ui_x11colours_dispose(&self->colourmap);	
 	psy_ui_x11_cursors_dispose(&self->cursors);
 	psy_list_deallocate(&self->fonts, NULL);
 }
@@ -512,14 +499,13 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 			return 0;
 		}		
 		psy_ui_mouseevent_init_all(&ev,	
-				psy_ui_realpoint_make(event->xbutton.x,
-					event->xbutton.y),
-				psy_ui_x11app_translate_x11button(
-					event->xbutton.button),
-				0, 0, 0);
+			psy_ui_realpoint_make(event->xbutton.x,
+				event->xbutton.y),
+			psy_ui_x11app_translate_x11button(event->xbutton.button),
+			0,
+			(event->xbutton.state &  ShiftMask) == ShiftMask,
+			(event->xbutton.state &  ControlMask) == ControlMask);
 		ev.event.timestamp_ = (uintptr_t)event->xbutton.time;
-		psy_ui_event_settype(&ev.event,	psy_ui_MOUSEDOWN);
-		psy_ui_x11app_update_mouseevent_mods(self, &ev);		
 		psy_ui_eventdispatch_send(&self->app->eventdispatch,
 			imp->component, &ev.event);		
 		break; }
@@ -529,10 +515,11 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 		psy_ui_mouseevent_init_all(&ev,	
 			psy_ui_realpoint_make(event->xbutton.x, event->xbutton.y),			
 			psy_ui_x11app_translate_x11button(event->xbutton.button),
-			0, 0, 0);
+			0,
+			(event->xbutton.state &  ShiftMask) == ShiftMask,
+			(event->xbutton.state &  ControlMask) == ControlMask);
 		ev.event.timestamp_ = (uintptr_t)event->xbutton.time;
-		psy_ui_event_settype(&ev.event, psy_ui_MOUSEUP);
-		psy_ui_x11app_update_mouseevent_mods(self, &ev);		
+		psy_ui_event_settype(&ev.event, psy_ui_MOUSEUP);		
 		psy_ui_eventdispatch_send(&self->app->eventdispatch,
 			imp->component, &ev.event);
 		return 0;		
@@ -555,9 +542,10 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 		}
 		psy_ui_mouseevent_init_all(&ev,
 			psy_ui_realpoint_make(xme.x, xme.y),			
-			button, 0, 0, 0);
-		psy_ui_event_settype(&ev.event, psy_ui_MOUSEMOVE);
-		psy_ui_x11app_update_mouseevent_mods(self, &ev);		
+			button, 0,
+			(event->xbutton.state &  ShiftMask) == ShiftMask,
+			(event->xbutton.state &  ControlMask) == ControlMask);
+		psy_ui_event_settype(&ev.event, psy_ui_MOUSEMOVE);		
 		ev.event.timestamp_ = (uintptr_t)event->xbutton.time;
 		restorecursor = self->resetcursor;
 		self->resetcursor = FALSE;		
@@ -627,22 +615,6 @@ void psy_ui_x11app_adjustcoordinates(psy_ui_Component* component,
 	}
 }
 
-void psy_ui_x11app_update_keyevent_mods(psy_ui_X11App* self,
-	psy_ui_KeyboardEvent* ev)
-{
-	ev->shift_key_ = self->shiftstate;
-	ev->ctrl_key_ = self->controlstate;
-	ev->alt_key_ = self->altstate;
-}
-
-void psy_ui_x11app_update_mouseevent_mods(psy_ui_X11App* self,
-	psy_ui_MouseEvent* ev)
-{
-	ev->shift_key_ = self->shiftstate;
-	ev->ctrl_key_ = self->controlstate;
-	/* ev->alt_key = self->altstate; */
-}
-
 int psy_ui_x11app_translate_x11button(int button)
 {
 	static const int map[] = { 0, 1, 3, 2 };
@@ -678,33 +650,12 @@ void psy_ui_x11app_mousewheel(psy_ui_X11App* self,
 	}
 	psy_ui_mouseevent_init_all(&ev,
 		psy_ui_realpoint_make(xe->xbutton.x, xe->xbutton.y),		
-		0, delta, 0, 0);		
-	psy_ui_x11app_update_mouseevent_mods(self, &ev);
+		0, delta, 
+		(xe->xbutton.state &  ShiftMask) == ShiftMask,
+		(xe->xbutton.state &  ControlMask) == ControlMask);	
 	psy_ui_mouseevent_settype(&ev, psy_ui_WHEEL);
 	psy_ui_eventdispatch_send(&self->app->eventdispatch,
 		imp->component, psy_ui_mouseevent_base(&ev));	
-}
-
-bool psy_ui_x11app_sendeventtoparent(psy_ui_X11App* self,
-	psy_ui_x11_ComponentImp* imp, int mask, XEvent* xev)
-{
-	if (xev && psy_table_at(&self->selfmap,
-			(uintptr_t)imp->parent->hwnd)) {
-		XEvent event;
-
-		psy_list_append(&self->targetids, (void*)imp->hwnd);
-		self->eventretarget = imp->component;
-		event = *xev;
-		event.xany.window = imp->parent->hwnd;		
-		XSendEvent(self->dpy, imp->parent->hwnd, True, mask, xev);		
-		self->eventretarget = 0;
-		return TRUE;
-	} else {
-		psy_list_free(self->targetids);
-		self->targetids = NULL;
-	}
-	self->eventretarget = 0;
-	return FALSE;
 }
 
 void psy_ui_x11app_onappdefaultschange(psy_ui_X11App* self)
