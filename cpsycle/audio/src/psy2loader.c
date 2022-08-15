@@ -281,7 +281,7 @@ int psy2loader_read_header(PSY2Loader* self)
 		0,
 		beatspermin,
 		0x3E);
-	psy_audio_song_setproperties(self->song, &songproperties);
+	psy_audio_song_set_properties(self->song, &songproperties);
 	psy_audio_songproperties_dispose(&songproperties);
 	return PSY_OK;
 }
@@ -711,7 +711,7 @@ int psy2loader_read_machines(PSY2Loader* self)
 			int32_t y;
 			psy_audio_MachineFactory* factory;
 
-			factory = self->song->machinefactory;
+			factory = self->song->machine_factory;
 
 			if (status = psyfile_read(self->fp, &x, sizeof(x))) {
 				return status;

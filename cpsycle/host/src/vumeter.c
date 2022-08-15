@@ -9,6 +9,8 @@
 #include "vumeter.h"
 /* host */
 #include "styles.h"
+/* ui */
+#include <uiapp.h>
 /* dsp */
 #include <convert.h>
 #include <operations.h>
@@ -18,7 +20,8 @@
 
 
 /* prototypes */
-static void vumeter_ondraw(Vumeter*, psy_ui_Graphics*);
+static void vumeter_on_draw(Vumeter*, psy_ui_Graphics*);
+static void vumeter_on_align(Vumeter*);
 
 /* vtable */
 static psy_ui_ComponentVtable vumeter_vtable;
@@ -30,7 +33,10 @@ static void vumeter_vtable_init(Vumeter* self)
 		vumeter_vtable = *(self->component.vtable);
 		vumeter_vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
-			vumeter_ondraw;
+			vumeter_on_draw;
+		vumeter_vtable.onalign =
+			(psy_ui_fp_component_event)
+			vumeter_on_align;
 		vumeter_vtable_initialized = TRUE;
 	}
 	psy_ui_component_set_vtable(&self->component, &vumeter_vtable);
@@ -41,17 +47,18 @@ void vumeter_init(Vumeter* self, psy_ui_Component* parent)
 {					
 	psy_ui_component_init(&self->component, parent, NULL);
 	vumeter_vtable_init(self);
-	psy_ui_component_set_style_type(&self->component, STYLE_MAIN_VU);	
+	psy_ui_component_set_style_type(&self->component, STYLE_MAIN_VU);
 	self->leftavg = self->rightavg = 0;	
 	self->l_log = self->r_log = -10000;
 	self->machine = NULL;
+	self->channel_height = 5.0;
 }
 
-void vumeter_ondraw(Vumeter* self, psy_ui_Graphics* g)
+void vumeter_on_draw(Vumeter* self, psy_ui_Graphics* g)
 {	
 	psy_ui_RealRectangle left;
 	psy_ui_RealRectangle right;	
-	psy_ui_RealSize size;	
+	psy_ui_RealSize size;
 	double vuprevL;
 	double vuprevR;
 	psy_ui_Colour bg;	
@@ -59,13 +66,13 @@ void vumeter_ondraw(Vumeter* self, psy_ui_Graphics* g)
 	
 	size = psy_ui_component_scroll_size_px(&self->component);
 	left = psy_ui_realrectangle_make(
-		psy_ui_realpoint_make(0.0, 5.0),
-		psy_ui_realsize_make(size.width, 5.0));
+		psy_ui_realpoint_make(0.0, 1.0),
+		psy_ui_realsize_make(size.width, self->channel_height));
 	right = left;
-	right.top += 6;
-	right.bottom += 6;	
-	left.right = (int) (self->leftavg * size.width); 
-	right.right = (int) (self->rightavg * size.width);	
+	right.top += self->channel_height + 1;
+	right.bottom += self->channel_height + 1;	
+	left.right = floor(self->leftavg * size.width); 
+	right.right = floor(self->rightavg * size.width);	
 	psy_ui_drawsolidrectangle(g, left, psy_ui_colour_gc());
 	psy_ui_drawsolidrectangle(g, right, psy_ui_colour_gc());
 	vuprevL = (40.0 + self->l_log) * size.width / 40.f;
@@ -90,10 +97,10 @@ void vumeter_ondraw(Vumeter* self, psy_ui_Graphics* g)
 	bg = psy_ui_component_background_colour(&self->component);
 	left = psy_ui_realrectangle_make(
 		psy_ui_realpoint_make(left.right, left.top),
-		psy_ui_realsize_make(size.width - left.right, 5.0));
+		psy_ui_realsize_make(size.width - left.right, self->channel_height));
 	right = psy_ui_realrectangle_make(
 		psy_ui_realpoint_make(right.right, right.top),
-		psy_ui_realsize_make(size.width - right.right, 5.0));
+		psy_ui_realsize_make(size.width - right.right, self->channel_height));
 	psy_ui_drawsolidrectangle(g, left, bg);
 	psy_ui_drawsolidrectangle(g, right, bg);
 }
@@ -145,4 +152,12 @@ void vumeter_set_machine(Vumeter* self, psy_audio_Machine* machine)
 	assert(self);
 		
 	self->machine = machine;
+}
+
+void vumeter_on_align(Vumeter* self)
+{
+	psy_ui_RealSize size;
+	
+	size = psy_ui_component_scroll_size_px(&self->component);
+	self->channel_height = psy_max(1.0, size.height / 2.0 - 2);
 }

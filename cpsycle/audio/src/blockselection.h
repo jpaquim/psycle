@@ -59,16 +59,17 @@ INLINE void psy_audio_blockselection_disable(
 INLINE bool psy_audio_blockselection_test(psy_audio_BlockSelection* self,
 	uintptr_t track, psy_dsp_big_beat_t absoffset)
 {
+	/* todo abs */
 	return psy_audio_blockselection_valid(self) &&
 		track >= self->topleft.track &&
 		track < self->bottomright.track&&
-		absoffset >= self->topleft.absoffset /* + self->topleft.seqoffset */ &&
-		absoffset < self->bottomright.absoffset /* + self->bottomright.seqoffset */;
+		absoffset >= self->topleft.offset /* + self->topleft.seqoffset */ &&
+		absoffset < self->bottomright.offset /* + self->bottomright.seqoffset */;
 }
 
 INLINE bool psy_audio_blockselection_test_line(const psy_audio_BlockSelection* self,
 	uintptr_t track, uintptr_t line)
-{
+{	
 	return psy_audio_blockselection_valid(self) &&
 		track >= self->topleft.track &&
 		track < self->bottomright.track&&
@@ -88,12 +89,14 @@ void psy_audio_blockselection_select(psy_audio_BlockSelection*,
 
 INLINE psy_dsp_big_beat_t psy_audio_blockselection_start_offset(const psy_audio_BlockSelection* self)
 {
-	return self->topleft.absoffset;
+	/* todo abs */
+	return self->topleft.offset;
 }
 
 INLINE psy_dsp_big_beat_t psy_audio_blockselection_end_offset(const psy_audio_BlockSelection* self)
 {
-	return self->bottomright.absoffset;
+	/* todo abs */
+	return self->bottomright.offset;
 }
 
 #ifdef __cplusplus

@@ -316,8 +316,8 @@ void BlockRemoveCommandExecute(BlockRemoveCommand* self, psy_Property* param)
 	psy_audio_OrderIndex curr;
 
 	psy_audio_exclusivelock_enter();
-	curr = self->selection.topleft.orderindex;
-	for (; curr.order <= self->selection.bottomright.orderindex.order; ++curr.order) {
+	curr = self->selection.topleft.order_index;
+	for (; curr.order <= self->selection.bottomright.order_index.order; ++curr.order) {
 		psy_audio_SequenceEntry* entry;
 
 		entry = psy_audio_sequence_entry(self->sequence, curr);
@@ -343,8 +343,8 @@ void BlockRemoveCommandRevert(BlockRemoveCommand* self)
 	if (self->remove) {
 		psy_audio_OrderIndex curr;
 
-		curr = self->selection.topleft.orderindex;
-		for (; curr.order <= self->selection.bottomright.orderindex.order; ++curr.order) {
+		curr = self->selection.topleft.order_index;
+		for (; curr.order <= self->selection.bottomright.order_index.order; ++curr.order) {
 			psy_audio_SequenceEntry* entry;
 
 			entry = psy_audio_sequence_entry(self->sequence, curr);
@@ -445,21 +445,24 @@ void BlockPasteCommandExecute(BlockPasteCommand* self, psy_Property* params)
 	psy_audio_SequenceEntry* seqentry;
 	psy_audio_OrderIndex curr;	
 	uintptr_t order;
+	
+	/* todo abs */
 
 	self->selection.topleft = self->destcursor;
 	self->selection.bottomright = self->destcursor;
-	self->selection.bottomright.absoffset = self->destcursor.absoffset +
+	self->selection.bottomright.offset = self->destcursor.offset +
 		psy_audio_pattern_length(self->source);
 	order = psy_audio_sequence_order(self->sequence,
-		self->selection.bottomright.orderindex.track,
-	psy_audio_sequencecursor_offset_abs(&self->selection.bottomright));
-	self->selection.bottomright.orderindex.order = order;
-	psy_audio_sequencecursor_updateseqoffset(&self->selection.bottomright,
-		self->sequence);
-
+		self->selection.bottomright.order_index.track,		
+	psy_audio_sequencecursor_offset(&self->selection.bottomright));
+	psy_audio_sequencecursor_set_order_index(
+		&self->selection.bottomright,
+		psy_audio_orderindex_make(
+			self->selection.bottomright.order_index.track,
+			order));
 	psy_audio_exclusivelock_enter();
-	curr = self->selection.topleft.orderindex;
-	for (; curr.order <= self->selection.bottomright.orderindex.order; ++curr.order) {
+	curr = self->selection.topleft.order_index;
+	for (; curr.order <= self->selection.bottomright.order_index.order; ++curr.order) {
 		psy_audio_SequenceEntry* entry;
 
 		entry = psy_audio_sequence_entry(self->sequence, curr);
@@ -477,9 +480,9 @@ void BlockPasteCommandExecute(BlockPasteCommand* self, psy_Property* params)
 	}	
 	psy_audio_sequencetrackiterator_init(&it);
 	psy_audio_sequence_begin(self->sequence, 0,
-		psy_audio_sequencecursor_offset_abs(&self->destcursor),
+		psy_audio_sequencecursor_offset(&self->destcursor),
 		&it);	
-	dstoffset = psy_audio_sequencecursor_pattern_offset(&self->destcursor);
+	dstoffset = psy_audio_sequencecursor_offset(&self->destcursor);
 	srcoffset = 0;
 	trackoffset = self->destcursor.track;	
 	if (it.sequencentrynode) {
@@ -547,8 +550,8 @@ void BlockPasteCommandRevert(BlockPasteCommand* self)
 		psy_audio_exclusivelock_enter();
 		psy_audio_OrderIndex curr;		
 
-		curr = self->selection.topleft.orderindex;
-		for (; curr.order <= self->selection.bottomright.orderindex.order; ++curr.order) {
+		curr = self->selection.topleft.order_index;
+		for (; curr.order <= self->selection.bottomright.order_index.order; ++curr.order) {
 			psy_audio_SequenceEntry* entry;
 
 			entry = psy_audio_sequence_entry(self->sequence, curr);

@@ -174,14 +174,14 @@ void patternblockmenu_onimport(PatternBlockMenu* self,
 	psy_ui_Component* sender)
 {
 	patterncmds_import_pattern(self->pvstate->cmds,
-		patternviewstate_bpl(self->pvstate));
+		psy_audio_sequencecursor_bpl(&self->pvstate->cursor));		
 }
 
 void patternblockmenu_onexport(PatternBlockMenu* self,
 	psy_ui_Component* sender)
 {
 	patterncmds_export_pattern(self->pvstate->cmds,		
-		patternviewstate_bpl(self->pvstate),
+		psy_audio_sequencecursor_bpl(&self->pvstate->cursor),
 		patternviewstate_num_song_tracks(self->pvstate));
 }
 

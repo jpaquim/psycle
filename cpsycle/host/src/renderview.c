@@ -196,7 +196,7 @@ void renderview_configure_player_record(RenderView* self)
 	psy_audio_player_setposition(workspace_player(self->workspace), 0);
 	psy_audio_sequence_setplayselection(
 		&workspace_song(self->workspace)->sequence,
-		&self->workspace->song->sequence.sequenceselection);
+		&self->workspace->song->sequence.selection);
 	psy_audio_sequencer_set_play_mode(
 		&workspace_player(self->workspace)->sequencer,
 		renderview_record_mode(self));

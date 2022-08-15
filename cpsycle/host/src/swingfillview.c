@@ -164,7 +164,7 @@ void swingfillview_onapply(SwingFillView* self, psy_ui_Component* sender)
 		psy_audio_pattern_swingfill(patternviewstate_pattern(self->pvstate),
 			&self->pvstate->selection,
 			self->trackmodeswingfill,
-			patternviewstate_bpl(self->pvstate),
+			psy_audio_sequencecursor_bpl(&self->pvstate->cursor),
 			swingfillview_values(self));
 	}
 }

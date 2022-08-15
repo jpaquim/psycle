@@ -69,15 +69,18 @@ void psy_audio_sequencetrack_dispose(psy_audio_SequenceTrack*);
 
 psy_audio_SequenceTrack* psy_audio_sequencetrack_alloc(void);
 psy_audio_SequenceTrack* psy_audio_sequencetrack_allocinit(void);
-psy_audio_SequenceTrack* psy_audio_sequencetrack_clone(psy_audio_SequenceTrack* src);
+psy_audio_SequenceTrack* psy_audio_sequencetrack_clone(
+	psy_audio_SequenceTrack* src);
 void psy_audio_sequencetrack_deallocate(psy_audio_SequenceTrack*);
 
 psy_dsp_big_beat_t psy_audio_sequencetrack_duration(
 	const psy_audio_SequenceTrack*, const psy_audio_Patterns*);
 
-void psy_audio_sequencetrack_setname(psy_audio_SequenceTrack* self, const char* name);
+void psy_audio_sequencetrack_set_name(psy_audio_SequenceTrack*,
+	const char* name);
 
-INLINE const char* psy_audio_sequencetrack_name(const psy_audio_SequenceTrack* self)
+INLINE const char* psy_audio_sequencetrack_name(
+	const psy_audio_SequenceTrack* self)
 {
 	assert(self);
 
@@ -93,6 +96,7 @@ psy_audio_SequenceEntry* psy_audio_sequencetrack_entry(psy_audio_SequenceTrack*,
 psy_audio_SequenceEntryNode* psy_audio_sequencetrack_node_at_offset(
 	psy_audio_SequenceTrack*, psy_dsp_big_beat_t offset);
 uintptr_t psy_audio_sequencetrack_size(const psy_audio_SequenceTrack*);
+
 /*
 ** psy_audio_SequenceTrackIterator
 **
@@ -214,8 +218,7 @@ struct psy_audio_Sequencer;
 
 /* psy_audio_Sequence */
 typedef struct psy_audio_Sequence {
-	/* signals */
-	psy_Signal signal_changed;
+	/* signals */	
 	psy_Signal signal_insert;
 	psy_Signal signal_remove;
 	psy_Signal signal_reorder;
@@ -226,7 +229,7 @@ typedef struct psy_audio_Sequence {
 	psy_Signal signal_clear;
 	psy_Signal signal_mutechanged;
 	psy_Signal signal_solochanged;
-	psy_Signal signal_cursorchanged;
+	psy_Signal signal_cursorchanged;	
 	/* internal */	
 	psy_Table tracks;
 	psy_audio_SequenceTrack globaltrack;
@@ -236,7 +239,7 @@ typedef struct psy_audio_Sequence {
 	/* editposition */
 	psy_audio_SequenceCursor cursor;
 	psy_audio_SequenceCursor lastcursor;
-	psy_audio_SequenceSelection sequenceselection;
+	psy_audio_SequenceSelection selection;
 	/* calcduration */
 	struct psy_audio_Sequencer* sequencerduration;
 	psy_dsp_big_seconds_t durationms;

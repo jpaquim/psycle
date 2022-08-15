@@ -78,9 +78,9 @@ void seqeditortracks_init(SeqEditorTracks* self, psy_ui_Component* parent,
 	psy_ui_component_set_overflow(&self->component, psy_ui_OVERFLOW_SCROLL);	
 	psy_ui_component_set_default_align(&self->component,
 		psy_ui_ALIGN_TOP, psy_ui_margin_zero());
-	psy_signal_connect(&workspace->song->sequence.sequenceselection.signal_select, self,
+	psy_signal_connect(&workspace->song->sequence.selection.signal_select, self,
 		seqeditortracks_onsequenceselectionselect);
-	psy_signal_connect(&workspace->song->sequence.sequenceselection.signal_deselect, self,
+	psy_signal_connect(&workspace->song->sequence.selection.signal_deselect, self,
 		seqeditortracks_onsequenceselectiondeselect);
 	seqeditortracks_build(self);
 	psy_signal_connect(&self->state->signal_cursorchanged, self,
@@ -212,7 +212,7 @@ void seqeditortracks_updateseqeditlineposition(SeqEditorTracks* self)
 		seqentry = psy_audio_sequence_entry(
 			seqeditstate_sequence(self->state),
 			psy_audio_sequenceselection_first(
-				&self->workspace->song->sequence.sequenceselection));
+				&self->workspace->song->sequence.selection));
 		if (seqentry) {
 			seqeditorline_updateposition(self->seqeditposline,
 				seqentry->offset);
@@ -222,8 +222,7 @@ void seqeditortracks_updateseqeditlineposition(SeqEditorTracks* self)
 
 void seqeditortracks_on_timer(SeqEditorTracks* self, uintptr_t timerid)
 {		
-	if (psy_audio_player_playing(workspace_player(
-			self->workspace))) {
+	if (psy_audio_player_playing(workspace_player(self->workspace))) {
 		seqeditorplayline_update(self->playline);
 	}
 }

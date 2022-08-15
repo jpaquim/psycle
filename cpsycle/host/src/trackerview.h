@@ -53,8 +53,6 @@ void trackergrid_init(TrackerGrid*, psy_ui_Component* parent,
 void trackergrid_build(TrackerGrid*);
 void trackergrid_show_empty_data(TrackerGrid*, int showstate);
 void trackergrid_invalidate_playbar(TrackerGrid*);
-void trackergrid_invalidate_line(TrackerGrid*, intptr_t line);
-void trackergrid_invalidate_lines(TrackerGrid*, intptr_t line1, intptr_t line2);
 void trackergrid_invalidate_cursor(TrackerGrid*);
 void trackergrid_invalidate_internal_cursor(TrackerGrid*,
 	psy_audio_SequenceCursor);

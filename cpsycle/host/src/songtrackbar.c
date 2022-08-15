@@ -55,7 +55,7 @@ void songtrackbar_build(SongTrackBar* self)
 	}	
 	if (workspace_song(self->workspace)) {
 		psy_ui_combobox_select(&self->tracknumbers,
-			psy_audio_song_numsongtracks(workspace_song(self->workspace)) -
+			psy_audio_song_num_song_tracks(workspace_song(self->workspace)) -
 			MIN_TRACKS);
 	}
 }
@@ -64,7 +64,7 @@ void songtrackbar_onselchange(SongTrackBar* self, psy_ui_Component* sender,
 	intptr_t index)
 {		
 	if (workspace_song(self->workspace)) {
-		psy_audio_song_setnumsongtracks(workspace_song(self->workspace),
+		psy_audio_song_set_num_song_tracks(workspace_song(self->workspace),
 			index + MIN_TRACKS);
 	}
 }
@@ -79,7 +79,7 @@ void songtrackbar_onsongchanged(SongTrackBar* self, Workspace* sender)
 {	
 	if (workspace_song(sender)) {
 		psy_ui_combobox_select(&self->tracknumbers,
-			psy_audio_song_numsongtracks(workspace_song(sender)) - MIN_TRACKS);
+			psy_audio_song_num_song_tracks(workspace_song(sender)) - MIN_TRACKS);
 		psy_signal_connect(
 			&workspace_song(sender)->patterns.signal_numsongtrackschanged,
 			self, songtrackbar_onsongtracknumchanged);

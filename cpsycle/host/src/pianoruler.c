@@ -83,7 +83,7 @@ psy_audio_BlockSelection pianoruler_clipselection(PianoRuler* self,
 	assert(self);
 
 	pianogridstate_clip(self->gridstate, clip.left, clip.right,
-		&rv.topleft.absoffset, &rv.bottomright.absoffset);
+		&rv.topleft.offset, &rv.bottomright.offset);
 	return rv;
 }
 
@@ -116,15 +116,15 @@ void pianoruler_drawruler(PianoRuler* self, psy_ui_Graphics* g,
 	psy_ui_drawline(g, psy_ui_realpoint_make(scrollleft, baseline),
 		psy_ui_realpoint_make(size.width + scrollleft, baseline));
 	c = patternviewstate_draw_offset(self->gridstate->pv,
-		clip.topleft.absoffset);
+		clip.topleft.offset);
 	currstep = pianogridstate_beattosteps(self->gridstate, c);		
 	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
-	for (; c <= clip.bottomright.absoffset;
+	for (; c <= clip.bottomright.offset;
 			c += pianogridstate_step(self->gridstate), ++currstep) {
 		double cpx;
 		
 		cpx = pianogridstate_beattopx(self->gridstate, c);
-		if (c > clip.bottomright.absoffset) {
+		if (c > clip.bottomright.offset) {
 			break;
 		}
 		psy_ui_drawline(g, psy_ui_realpoint_make(cpx, baseline),

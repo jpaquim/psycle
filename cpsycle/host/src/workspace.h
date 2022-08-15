@@ -108,6 +108,7 @@ typedef struct Workspace {
 	psy_Logger* terminal_output;
 	uintptr_t terminalstyleid;
 	FileView* fileview;
+	int dbg;
 } Workspace;
 
 void workspace_init(Workspace*, psy_ui_Component* handle);

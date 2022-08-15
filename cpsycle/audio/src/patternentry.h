@@ -22,14 +22,14 @@ extern "C" {
 typedef struct {
 	psy_List* events;
 	/* position in beat unit */
-	psy_dsp_big_beat_t offset;
+	psy_dsp_big_beat_t offset;	
 	/* sound driver callback event position */
 	psy_dsp_big_beat_t delta;
 	/* current sequencer bpm */
 	psy_dsp_big_beat_t bpm;
 	/* the tracker channel */
 	uintptr_t track; 
-	uintptr_t priority;
+	uintptr_t priority;	
 } psy_audio_PatternEntry;
 
 void psy_audio_patternentry_init(psy_audio_PatternEntry*);

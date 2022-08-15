@@ -292,8 +292,9 @@ void seqedittrack_on_mouse_down(SeqEditTrack* self, psy_ui_MouseEvent* ev)
 				psy_audio_SequenceCursor cursor;
 				
 				psy_audio_sequencecursor_init(&cursor);
-				cursor.orderindex = psy_audio_orderindex_make(self->trackindex,
-					psy_INDEX_INVALID);
+				psy_audio_sequencecursor_set_order_index(&cursor,
+					psy_audio_orderindex_make(self->trackindex,
+					psy_INDEX_INVALID));
 				psy_audio_sequence_set_cursor(
 					psy_audio_song_sequence(workspace_song(self->workspace)),
 					cursor);				
@@ -328,15 +329,12 @@ void seqedittrack_on_mouse_move(SeqEditTrack* self, psy_ui_MouseEvent* ev)
 		}		
 	} else if (self->state->dragstatus == SEQEDIT_DRAG_LENGTH) {
 		psy_dsp_big_beat_t dragposition;
-			
+					
 		dragposition = seqeditstate_quantize(self->state,
 			seqeditstate_pxtobeat(self->state, psy_ui_mouseevent_pt(ev).x));
 		psy_audio_sequenceentry_setlength(self->state->seqentry,
 			psy_max(1.0, dragposition - psy_audio_sequenceentry_offset(
-				self->state->seqentry)));
-		psy_audio_sequence_reposition_track(
-			&workspace_song(self->workspace)->sequence, self->currtrack);
-			
+				self->state->seqentry)));			
 	} else if ((self->state->dragtype & SEQEDIT_DRAGTYPE_MOVE) ==
 			SEQEDIT_DRAGTYPE_MOVE) {
 		psy_dsp_big_beat_t dragposition;
@@ -354,6 +352,7 @@ void seqedittrack_on_mouse_move(SeqEditTrack* self, psy_ui_MouseEvent* ev)
 			(self->state->seqentry->offset -
 				self->state->seqentry->repositionoffset);
 		self->state->seqentry->offset = dragposition;
+		self->workspace->dbg = 1;
 		psy_audio_sequence_reposition_track(
 			&workspace_song(self->workspace)->sequence, self->currtrack);
 	}	

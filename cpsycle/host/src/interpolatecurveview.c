@@ -496,8 +496,9 @@ void interpolatecurveview_set_selection(InterpolateCurveView* self,
 {
 	assert(selection);
 
-	self->box.range = selection->bottomright.absoffset -
-		selection->topleft.absoffset;
+	/* todo abs */
+	self->box.range = selection->bottomright.offset -
+		selection->topleft.offset;
 	self->box.selection = *selection;
 	interpolatecurvebox_buildkeyframes(&self->box);
 	if (self->box.keyframes) {
@@ -529,13 +530,14 @@ void interpolatecurvebox_buildkeyframes(InterpolateCurveBox* self)
 		psy_audio_PatternNode* q;
 		intptr_t insertlast = 1;
 
+		/* todo abs */
 		p = psy_audio_pattern_greaterequal(pattern,
-			(psy_dsp_beat_t)self->selection.topleft.absoffset);
+			(psy_dsp_beat_t)self->selection.topleft.offset);
 		if (p) {
 			psy_audio_PatternEntry* entry;
 
 			entry = psy_audio_patternnode_entry(p);
-			if (entry->offset > self->selection.topleft.absoffset) {
+			if (entry->offset > self->selection.topleft.offset) {
 				KeyFrame* keyframe;
 
 				keyframe = keyframe_allocinit(0.f, 0,
@@ -550,17 +552,17 @@ void interpolatecurvebox_buildkeyframes(InterpolateCurveBox* self)
 			q = p->next;
 
 			entry = psy_audio_patternnode_entry(p);
-			if (entry->offset < self->selection.bottomright.absoffset) {
+			if (entry->offset < self->selection.bottomright.offset) {
 				if (entry->track == self->selection.topleft.track) {
 					KeyFrame* keyframe;
 
 					keyframe = keyframe_allocinit(
-						entry->offset - self->selection.topleft.absoffset,
+						entry->offset - self->selection.topleft.offset,
 						psy_audio_patternentry_front(entry)->parameter,
 						INTERPOLATECURVETYPE_LINEAR);
 					if (keyframe) {
 						psy_list_append(&self->keyframes, keyframe);
-						if (entry->offset == self->selection.bottomright.absoffset - 0.25f) {
+						if (entry->offset == self->selection.bottomright.offset - 0.25f) {
 							insertlast = 0;
 							break;
 						}
@@ -574,8 +576,9 @@ void interpolatecurvebox_buildkeyframes(InterpolateCurveBox* self)
 		if (insertlast) {
 			KeyFrame* keyframe;
 
+			/* todo abs */
 			keyframe = keyframe_allocinit(
-				self->selection.bottomright.absoffset - self->selection.topleft.absoffset - 0.25f,
+				self->selection.bottomright.offset - self->selection.topleft.offset - 0.25f,
 				0,
 				INTERPOLATECURVETYPE_LINEAR);
 			if (keyframe) {
@@ -605,18 +608,22 @@ void interpolatecurveview_oninterpolate(InterpolateCurveView* self,
 
 		entry = (KeyFrame*) self->box.keyframes->entry;
 		lastentry = entry;
-		lastoffset = entry->offset + self->box.selection.topleft.absoffset;
+		/* todo abs */
+		lastoffset = entry->offset + self->box.selection.topleft.offset;
 		lastvalue = entry->value;
 		for (kf = self->box.keyframes->next; kf != 0; kf = kf->next) {
 			KeyFrame* entry;
 			psy_audio_SequenceCursor start;
 			psy_audio_SequenceCursor end;
 
+			/* todo abs */
 			psy_audio_sequencecursor_init(&start);
 			psy_audio_sequencecursor_init(&end);
-			start.absoffset = lastoffset;
+			/* todo abs */
+			start.offset = lastoffset;
 			entry = (KeyFrame*)kf->entry;
-			end.absoffset = (entry->offset + self->box.selection.topleft.absoffset);
+			/* todo abs */
+			end.offset = (entry->offset + self->box.selection.topleft.offset);
 			if (lastentry->curve == INTERPOLATECURVETYPE_LINEAR) {
 				psy_audio_pattern_blockinterpolaterange(pattern,
 					start, end,
@@ -626,7 +633,7 @@ void interpolatecurveview_oninterpolate(InterpolateCurveView* self,
 					start, end,
 					bpl, lastvalue, entry->value);
 			}
-			lastoffset = entry->offset + self->box.selection.topleft.absoffset;
+			lastoffset = entry->offset + self->box.selection.topleft.offset;
 			lastvalue = entry->value;
 			lastentry = entry;
 		}

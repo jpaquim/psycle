@@ -30,6 +30,7 @@ void seqeditorheaderdescbar_init(SeqEditorHeaderDescBar* self,
 	psy_ui_Margin margin;
 
 	psy_ui_component_init(&self->component, parent, NULL);
+	psy_ui_component_set_style_type(&self->component, STYLE_SEQEDT_TRACKS);
 	self->state = state;
 	psy_ui_component_set_preferred_size(&self->component,
 		psy_ui_size_make_em(40.0, 2.0));	
@@ -95,7 +96,7 @@ void seqeditorheaderdescbar_onmovetrackup(SeqEditorHeaderDescBar* self,
 				editpos.track);
 			--editpos.track;
 			psy_audio_sequencecursor_init(&cursor);
-			cursor.orderindex = editpos;
+			psy_audio_sequencecursor_set_order_index(&cursor, editpos);
 			if (self->state->workspace && workspace_song(self->state->workspace)) {
 				psy_audio_sequence_set_cursor(
 					psy_audio_song_sequence(workspace_song(self->state->workspace)),
@@ -121,7 +122,7 @@ void seqeditorheaderdescbar_onmovetrackdown(SeqEditorHeaderDescBar* self,
 				editpos.track + 1);
 			++editpos.track;			
 			psy_audio_sequencecursor_init(&cursor);
-			cursor.orderindex = editpos;
+			psy_audio_sequencecursor_set_order_index(&cursor, editpos);
 			if (self->state->workspace && workspace_song(self->state->workspace)) {
 				psy_audio_sequence_set_cursor(
 					psy_audio_song_sequence(workspace_song(self->state->workspace)),

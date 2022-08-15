@@ -712,6 +712,7 @@ void psy_ui_component_init_base(psy_ui_Component* self) {
 	self->blitscroll = FALSE;
 	psy_ui_bitmap_init(&self->bufferbitmap);
 	self->drawtobuffer = FALSE;
+	self->prevent_draw = FALSE;
 	psy_ui_component_updatefont(self);	
 	if (self->imp) {
 		self->imp->vtable->dev_setbackgroundcolour(self->imp,
@@ -2103,72 +2104,74 @@ void psy_ui_notify_style_update(psy_ui_Component* main)
 
 void psy_ui_component_draw(psy_ui_Component* self, psy_ui_Graphics* g)
 {	
-	psy_ui_Graphics bitmap_g;
-	psy_ui_Graphics* temp_g;	
-	psy_ui_RealRectangle oldclip;
-	psy_ui_RealRectangle clip;
-	psy_ui_RealSize size;
-			
-	temp_g = NULL;	
-	oldclip = psy_ui_graphics_cliprect(g);
-	if (self->drawtobuffer) {
-		if (psy_ui_bitmap_empty(&self->bufferbitmap)) {
-			psy_ui_RealSize size;
+	if (!self->prevent_draw) {
+		psy_ui_Graphics bitmap_g;
+		psy_ui_Graphics* temp_g;	
+		psy_ui_RealRectangle oldclip;
+		psy_ui_RealRectangle clip;
+		psy_ui_RealSize size;
+				
+		temp_g = NULL;	
+		oldclip = psy_ui_graphics_cliprect(g);
+		if (self->drawtobuffer) {
+			if (psy_ui_bitmap_empty(&self->bufferbitmap)) {
+				psy_ui_RealSize size;
 
-			psy_ui_bitmap_dispose(&self->bufferbitmap);
-			size = psy_ui_component_scroll_size_px(self);
-			psy_ui_bitmap_init_size(&self->bufferbitmap, size);
-			psy_ui_graphics_init_bitmap(&bitmap_g, &self->bufferbitmap);			
-			temp_g = g;
-			g = &bitmap_g;
-		} else {			
-			psy_ui_drawfullbitmap(g, &self->bufferbitmap,
-				psy_ui_realpoint_zero());			
-			return;
+				psy_ui_bitmap_dispose(&self->bufferbitmap);
+				size = psy_ui_component_scroll_size_px(self);
+				psy_ui_bitmap_init_size(&self->bufferbitmap, size);
+				psy_ui_graphics_init_bitmap(&bitmap_g, &self->bufferbitmap);			
+				temp_g = g;
+				g = &bitmap_g;
+			} else {			
+				psy_ui_drawfullbitmap(g, &self->bufferbitmap,
+					psy_ui_realpoint_zero());			
+				return;
+			}
+		}		
+		psy_ui_setfont(g, psy_ui_component_font(self));
+		size = psy_ui_component_scroll_size_px(self);
+		clip = psy_ui_realrectangle_make(psy_ui_realpoint_zero(), size);
+		if ((oldclip.bottom - oldclip.top != 0.0)) {
+			psy_ui_realrectangle_intersection(&clip, &oldclip);
 		}
-	}		
-	psy_ui_setfont(g, psy_ui_component_font(self));
-	size = psy_ui_component_scroll_size_px(self);
-	clip = psy_ui_realrectangle_make(psy_ui_realpoint_zero(), size);
-	if ((oldclip.bottom - oldclip.top != 0.0)) {
-		psy_ui_realrectangle_intersection(&clip, &oldclip);
-	}
-	psy_ui_graphics_set_clip_rect(g, clip);
-	/* draw background */		
-	psy_ui_componentbackground_draw(&self->componentbackground, g);		
-	psy_ui_component_draw_border(self, g);
-	/* prepare colours */
-	psy_ui_setcolour(g, psy_ui_component_colour(self));
-	psy_ui_set_text_colour(g, psy_ui_component_colour(self));
-	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
-	if (self->vtable->ondraw) {
-		psy_ui_Margin padding;
-		const psy_ui_TextMetric* tm;
-		psy_ui_RealPoint origin;
+		psy_ui_graphics_set_clip_rect(g, clip);
+		/* draw background */		
+		psy_ui_componentbackground_draw(&self->componentbackground, g);		
+		psy_ui_component_draw_border(self, g);
+		/* prepare colours */
+		psy_ui_setcolour(g, psy_ui_component_colour(self));
+		psy_ui_set_text_colour(g, psy_ui_component_colour(self));
+		psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
+		if (self->vtable->ondraw) {
+			psy_ui_Margin padding;
+			const psy_ui_TextMetric* tm;
+			psy_ui_RealPoint origin;
 
-		origin = psy_ui_origin(g);
-		/* spacing */
-		padding = psy_ui_component_padding(self);
-		if (!psy_ui_margin_iszero(&padding)) {
-			tm = psy_ui_component_textmetric(self);			
-			psy_ui_setorigin(g, psy_ui_realpoint_make(
-				origin.x - (int)psy_ui_value_px(&padding.left, tm, NULL),
-				origin.y - (int)psy_ui_value_px(&padding.top, tm, NULL)));
+			origin = psy_ui_origin(g);
+			/* spacing */
+			padding = psy_ui_component_padding(self);
+			if (!psy_ui_margin_iszero(&padding)) {
+				tm = psy_ui_component_textmetric(self);			
+				psy_ui_setorigin(g, psy_ui_realpoint_make(
+					origin.x - (int)psy_ui_value_px(&padding.left, tm, NULL),
+					origin.y - (int)psy_ui_value_px(&padding.top, tm, NULL)));
+			}
+			self->vtable->ondraw(self, g);
+			psy_signal_emit(&self->signal_draw, self, 1, g);
+			psy_ui_setorigin(g, origin);
+		}	
+		psy_ui_component_draw_children(self, g);	
+		if (self->drawtobuffer && temp_g) {		
+			psy_ui_graphics_dispose(&bitmap_g);	
+			g = temp_g;
+			if (!psy_ui_bitmap_empty(&self->bufferbitmap)) {
+				psy_ui_drawfullbitmap(g, &self->bufferbitmap,
+					psy_ui_realpoint_zero());
+			}
 		}
-		self->vtable->ondraw(self, g);
-		psy_signal_emit(&self->signal_draw, self, 1, g);
-		psy_ui_setorigin(g, origin);
-	}	
-	psy_ui_component_draw_children(self, g);	
-	if (self->drawtobuffer && temp_g) {		
-		psy_ui_graphics_dispose(&bitmap_g);	
-		g = temp_g;
-		if (!psy_ui_bitmap_empty(&self->bufferbitmap)) {
-			psy_ui_drawfullbitmap(g, &self->bufferbitmap,
-				psy_ui_realpoint_zero());
-		}
+		psy_ui_graphics_set_clip_rect(g, oldclip);
 	}
-	psy_ui_graphics_set_clip_rect(g, oldclip);
 }
 
 void psy_ui_component_draw_children(psy_ui_Component* self, psy_ui_Graphics* g)

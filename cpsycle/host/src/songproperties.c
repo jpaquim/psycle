@@ -46,7 +46,6 @@ static void songpropertiesview_onkeyup(SongPropertiesView*,
 	psy_ui_Component* sender, psy_ui_KeyboardEvent*);
 static bool songpropertiesview_haseditfocus(SongPropertiesView*);
 static int songpropertiesview_realbpm(SongPropertiesView*);
-static uintptr_t songpropertiesview_realtpb(SongPropertiesView*);
 static void songpropertiesview_updaterealspeed(SongPropertiesView*);
 
 /* implementation */
@@ -179,19 +178,22 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 void songpropertiesview_read(SongPropertiesView* self)
 {	
 	if (self->song) {
-		psy_ui_textarea_set_text(&self->edit_title,
-			self->song->properties.title);
-		psy_ui_textarea_set_text(&self->edit_credits,
-			self->song->properties.credits);
+		psy_ui_textarea_set_text(&self->edit_title,			
+			psy_audio_song_title(self->song));
+		psy_ui_textarea_set_text(&self->edit_credits,			
+			psy_audio_song_credits(self->song));
 		psy_ui_textarea_set_text(&self->edit_comments,
-			self->song->properties.comments);
-		intedit_set_value(&self->tempo, (int)self->song->properties.bpm);
-		intedit_set_value(&self->lpb, (int)self->song->properties.lpb);
-		intedit_set_value(&self->tpb, (int)self->song->properties.tpb);
-		intedit_set_value(&self->etpb, (int)
-			self->song->properties.extraticksperbeat);
-		intedit_set_value(&self->samplerindex, (int)
-			self->song->properties.samplerindex);
+			psy_audio_song_comments(self->song));			
+		intedit_set_value(&self->tempo,
+			(int)psy_audio_song_bpm(self->song));
+		intedit_set_value(&self->lpb,
+			(int)psy_audio_song_lpb(self->song));
+		intedit_set_value(&self->tpb,
+			(int)psy_audio_song_tpb(self->song));
+		intedit_set_value(&self->etpb,
+			(int)psy_audio_song_extra_ticks_per_beat(self->song));			
+		intedit_set_value(&self->samplerindex,
+			(int)psy_audio_song_sampler_index(self->song));			
 		songpropertiesview_updaterealspeed(self);
 	}
 }
@@ -244,7 +246,7 @@ void songpropertiesview_oneditaccept(SongPropertiesView* self,
 		if (sender == &self->edit_title) {
 			psy_audio_song_settitle(self->song, psy_ui_textarea_text(sender));
 		} else if (sender == &self->edit_credits) {
-			psy_audio_song_setcredits(self->song, psy_ui_textarea_text(sender));
+			psy_audio_song_set_credits(self->song, psy_ui_textarea_text(sender));
 		}
 	}
 	psy_ui_component_set_focus(psy_ui_component_parent(&self->component));
@@ -351,15 +353,9 @@ int songpropertiesview_realbpm(SongPropertiesView* self)
 {
 	return (int)((self->song->properties.bpm *
 		self->song->properties.tpb) /
-		(float)(self->song->properties.extraticksperbeat *
-			self->song->properties.lpb +
-			self->song->properties.tpb));
-}
-uintptr_t songpropertiesview_realtpb(SongPropertiesView* self)
-{	
-	return self->song->properties.tpb +
-		(self->song->properties.extraticksperbeat *
-			self->song->properties.lpb);
+		(float)(psy_audio_song_extra_ticks_per_beat(self->song) *
+			psy_audio_song_lpb(self->song) +
+			psy_audio_song_tpb(self->song)));
 }
 
 void songpropertiesview_updaterealspeed(SongPropertiesView* self)
@@ -370,6 +366,6 @@ void songpropertiesview_updaterealspeed(SongPropertiesView* self)
 		songpropertiesview_realbpm(self));
 	psy_ui_label_set_text(&self->realtempo, text);
 	psy_snprintf(text, 128, "%d", (int)
-		songpropertiesview_realtpb(self));
+		psy_audio_song_real_tpb(self->song));
 	psy_ui_label_set_text(&self->realticksperbeat, text);
 }

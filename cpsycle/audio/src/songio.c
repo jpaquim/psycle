@@ -372,7 +372,7 @@ void psy_audio_songfile_warn(psy_audio_SongFile* self, const char* text)
 void psy_audio_songfile_createmaster(psy_audio_SongFile* self)
 {	
 	psy_audio_machines_insertmaster(&self->song->machines,
-		psy_audio_machinefactory_makemachine(self->song->machinefactory,
+		psy_audio_machinefactory_makemachine(self->song->machine_factory,
 		psy_audio_MASTER, NULL, UINTPTR_MAX));
 }
 

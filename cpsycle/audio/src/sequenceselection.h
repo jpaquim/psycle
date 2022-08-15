@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #ifndef psy_audio_SEQUENCESELECTION_H
@@ -13,26 +13,29 @@
 
 #include "../../detail/psydef.h"
 
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/* psy_audio_OrderIndex
+/*
+** psy_audio_OrderIndex
 **
 ** Addresses a SequenceEntry inside psy_audio_Sequence
 */
+
 typedef struct psy_audio_OrderIndex {
 	uintptr_t track;
 	uintptr_t order;
 } psy_audio_OrderIndex;
 
-INLINE psy_audio_OrderIndex psy_audio_orderindex_make(
-	uintptr_t trackidx, uintptr_t orderidx)
+INLINE psy_audio_OrderIndex psy_audio_orderindex_make(uintptr_t track,
+	uintptr_t order)
 {
 	psy_audio_OrderIndex rv;
 
-	rv.track = trackidx;
-	rv.order = orderidx;
+	rv.track = track;
+	rv.order = order;
 	return rv;
 }
 

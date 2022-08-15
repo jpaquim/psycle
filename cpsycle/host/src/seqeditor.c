@@ -95,6 +95,7 @@ void seqeditor_init(SeqEditor* self, psy_ui_Component* parent,
 	psy_ui_component_set_align(&self->header.component, psy_ui_ALIGN_CLIENT);
 	/* tracks pane */
 	psy_ui_component_init(&self->tracks_pane, &self->tracks, NULL);	
+	psy_ui_component_set_style_type(&self->tracks_pane, STYLE_SEQEDT_TRACKS);
 	psy_ui_component_set_align(&self->tracks_pane, psy_ui_ALIGN_CLIENT);	
 	/* track description */
 	psy_ui_component_init(&self->trackdescpane, &self->tracks_pane, NULL);
@@ -351,7 +352,7 @@ void seqeditor_on_toggle_loop(SeqEditor* self, psy_ui_Button* sender)
 
 void seqeditor_on_cursor_changed(SeqEditor* self, psy_audio_Sequence* sender)
 {
-	if (!psy_audio_orderindex_equal(&sender->cursor.orderindex,
-			sender->lastcursor.orderindex)) {		
+	if (!psy_audio_orderindex_equal(&sender->cursor.order_index,
+			sender->lastcursor.order_index)) {		
 	}
 }

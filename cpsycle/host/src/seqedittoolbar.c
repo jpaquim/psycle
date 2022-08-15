@@ -125,9 +125,9 @@ void seqedittoolbar_init(SeqEditToolBar* self, psy_ui_Component* parent,
 		seqeditortoolbar_ondragmodemove);
 	psy_signal_connect(&self->reorder.signal_clicked, self,
 		seqeditortoolbar_ondragmodereorder);
-	psy_signal_connect(&state->workspace->song->sequence.sequenceselection.signal_select,
+	psy_signal_connect(&state->workspace->song->sequence.selection.signal_select,
 		self, seqeditortoolbar_onsequenceselectionselect);
-	psy_signal_connect(&state->workspace->song->sequence.sequenceselection.signal_deselect,
+	psy_signal_connect(&state->workspace->song->sequence.selection.signal_deselect,
 		self, seqeditortoolbar_onsequenceselectiondeselect);
 }
 
@@ -328,7 +328,7 @@ void seqeditortoolbar_ontrackeditaccept(SeqEditToolBar* self,
 	editposition = seqeditstate_editposition(self->state);
 	track = psy_audio_sequence_track_at(sequence, editposition.track);
 	if (track) {
-		psy_audio_sequencetrack_setname(track, psy_ui_textarea_text(sender));
+		psy_audio_sequencetrack_set_name(track, psy_ui_textarea_text(sender));
 		psy_signal_emit(&sequence->signal_clear, sequence, 0);
 	}
 	psy_ui_component_set_focus(self->state->view);
