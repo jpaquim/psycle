@@ -8,14 +8,9 @@
 
 #include "patternnavigator.h"
 
-/* PatternLineNavigator */
-
-/* prototypes */
-static void patternlinenavigator_update_order(PatternLineNavigator*,
-	psy_audio_SequenceCursor*);
 
 /* implementation */
-void patternlinennavigator_init(PatternLineNavigator* self, PatternViewState*
+void patternlinenavigator_init(PatternLineNavigator* self, PatternViewState*
 	state, bool wraparound)
 {
 	self->state = state;
@@ -23,51 +18,67 @@ void patternlinennavigator_init(PatternLineNavigator* self, PatternViewState*
 	self->wraparound = wraparound;	
 }
 
-psy_audio_SequenceCursor patternlinennavigator_up(PatternLineNavigator* self,
+psy_audio_SequenceCursor patternlinenavigator_up(PatternLineNavigator* self,
 	uintptr_t lines, psy_audio_SequenceCursor cursor)
 {
-	psy_audio_SequenceCursor rv;
-
+	psy_audio_SequenceCursor rv;	
+	
 	assert(self);
 	assert(self->state);
 	
 	self->wrap = FALSE;
-	rv = cursor;
-	if (lines > 0) {
-		int currlines;
-		double bpl;
-		psy_dsp_big_beat_t minabsoffset;
-		psy_dsp_big_beat_t maxabsoffset;
-
-		maxabsoffset = patternviewstate_length(self->state);
-		if (patternviewstate_single_mode(self->state)) {
-			minabsoffset = cursor.seqoffset;
-			maxabsoffset += cursor.seqoffset;			
-		} else {
-			minabsoffset = 0.0;
-		}
-		bpl = 1.0 / (double)rv.lpb;
-		currlines = cast_decimal(rv.absoffset / bpl);		
-		psy_audio_sequencecursor_setabsoffset(&rv,
-			(currlines - (intptr_t)lines) * bpl);
-		if (rv.absoffset < minabsoffset) {
-			if (self->wraparound) {
-				psy_audio_sequencecursor_setabsoffset(&rv,
-					rv.absoffset - minabsoffset + maxabsoffset);
-				if (rv.absoffset < minabsoffset) {
-					psy_audio_sequencecursor_setabsoffset(&rv, minabsoffset);
-				}
-				self->wrap = TRUE;
-			} else {				
-				psy_audio_sequencecursor_setabsoffset(&rv, minabsoffset);
-			}
-		}		
-		patternlinenavigator_update_order(self, &rv);		
+	rv = cursor;	
+	if (lines > 0) {		
+		psy_audio_SequenceEntry* seqentry;
+		
+		seqentry = psy_audio_sequence_entry(self->state->sequence,
+			rv.order_index);
+		if (seqentry) {
+			intptr_t currlines;
+			double bpl;
+			psy_dsp_big_beat_t offset;
+			
+			bpl = 1.0 / (double)rv.lpb;						
+			currlines = cast_decimal(rv.offset / bpl);		
+			offset = (currlines - (intptr_t)lines) * bpl;
+			if (offset < 0.0) {
+				if (patternviewstate_single_mode(self->state)) {			
+					if (self->wraparound) {						
+						rv = patternlinenavigator_end(self, rv);
+						self->wrap = TRUE;						
+					}					
+				} else {
+					uintptr_t order;
+					double abs_offset;
+					
+					abs_offset = psy_audio_sequenceentry_offset(seqentry) +
+						offset;					
+					order = psy_audio_sequence_order(self->state->sequence,
+						rv.order_index.track, abs_offset);
+					if (order != psy_INDEX_INVALID) {
+						psy_audio_sequencecursor_set_order_index(&rv,
+							psy_audio_orderindex_make(rv.order_index.track,
+								order));
+						seqentry = psy_audio_sequence_entry(
+							self->state->sequence, rv.order_index);
+						assert(seqentry);
+						offset = abs_offset - psy_audio_sequenceentry_offset(
+							seqentry);
+						psy_audio_sequencecursor_set_offset(&rv, offset);
+					} else if (self->wraparound) {
+						rv = patternlinenavigator_end(self, rv);
+						self->wrap = TRUE;						
+					}
+				}				
+			} else {
+				psy_audio_sequencecursor_set_offset(&rv, offset);
+			}			
+		}				
 	}
 	return rv;
 }
 
-psy_audio_SequenceCursor patternlinennavigator_down(
+psy_audio_SequenceCursor patternlinenavigator_down(
 	PatternLineNavigator* self, uintptr_t lines,
 	psy_audio_SequenceCursor cursor)
 {
@@ -77,98 +88,118 @@ psy_audio_SequenceCursor patternlinennavigator_down(
 	assert(self->state);
 
 	self->wrap = FALSE;
-	rv = cursor;
+	rv = cursor;		
 	if (lines > 0) {
+		psy_audio_SequenceEntry* seqentry;
 		int currlines;
 		double bpl;
-		psy_dsp_big_beat_t minabsoffset;
-		psy_dsp_big_beat_t maxabsoffset;		
-
-		maxabsoffset = patternviewstate_length(self->state);
-		if (patternviewstate_single_mode(self->state)) {
-			minabsoffset = cursor.seqoffset;
-			maxabsoffset += cursor.seqoffset;
-		} else {
-			minabsoffset = 0;
-		}
+				
 		bpl = 1.0 / (double)rv.lpb;
-		currlines = cast_decimal(rv.absoffset / bpl);
-		psy_audio_sequencecursor_setabsoffset(&rv,
-			(currlines + lines) * bpl);
-		if (rv.absoffset >= maxabsoffset) {
-			if (self->wraparound) {
-				psy_audio_sequencecursor_setabsoffset(&rv,
-					minabsoffset);
-				if (rv.absoffset > maxabsoffset - bpl) {
-					psy_audio_sequencecursor_setabsoffset(&rv,
-						maxabsoffset - bpl);
+		currlines = cast_decimal(rv.offset / bpl);
+		seqentry = psy_audio_sequence_entry(self->state->sequence,
+			rv.order_index);
+		if (seqentry) {					
+			double offset;
+			
+			offset = (currlines + lines) * bpl;		
+			if (offset >= psy_audio_sequenceentry_length(seqentry)) {				
+				if (patternviewstate_single_mode(self->state)) {
+					if (self->wraparound) {
+						offset = 0.0;
+						self->wrap = TRUE;
+					} else {
+						offset = psy_audio_sequencecursor_offset(&rv);
+					}
+				} else {
+					uintptr_t order;
+					double abs_offset;
+					
+					abs_offset = psy_audio_sequenceentry_offset(seqentry) +
+						offset;
+					order = psy_audio_sequence_order(self->state->sequence,
+						rv.order_index.track, abs_offset);
+					if (order != psy_INDEX_INVALID) {
+						psy_audio_sequencecursor_set_order_index(&rv,
+							psy_audio_orderindex_make(rv.order_index.track,
+								order));
+						seqentry = psy_audio_sequence_entry(
+							self->state->sequence, rv.order_index);
+						assert(seqentry);
+						offset = abs_offset - psy_audio_sequenceentry_offset(
+							seqentry);
+					} else if (self->wraparound) {
+						psy_audio_sequencecursor_set_order_index(&rv,
+							psy_audio_orderindex_make(0, 0));
+						offset = 0.0;							
+						self->wrap = TRUE;
+					}
 				}
-				self->wrap = TRUE;
-			} else {
-				psy_audio_sequencecursor_setabsoffset(&rv,
-					maxabsoffset - bpl);
 			}
-		}		
-		patternlinenavigator_update_order(self, &rv);				
+			psy_audio_sequencecursor_set_offset(&rv, offset);
+		}
 	}
 	return rv;
 }
 
-psy_audio_SequenceCursor patternlinennavigator_home(PatternLineNavigator* self,
+psy_audio_SequenceCursor patternlinenavigator_home(PatternLineNavigator* self,
 	psy_audio_SequenceCursor cursor)
 {
-	psy_audio_SequenceCursor rv;
-	psy_dsp_big_beat_t minabsoffset;
+	psy_audio_SequenceCursor rv;	
 
 	assert(self);
 
 	rv = cursor;
-	self->wrap = FALSE;
-	if (patternviewstate_single_mode(self->state)) {
-		minabsoffset = cursor.seqoffset;
-	} else {
-		minabsoffset = 0.0;
+	self->wrap = FALSE;	
+	if (!patternviewstate_single_mode(self->state)) {
+		psy_audio_sequencecursor_set_order_index(&rv,
+		psy_audio_orderindex_make(0, 0));
 	}
-	psy_audio_sequencecursor_setabsoffset(&rv, minabsoffset);
-	patternlinenavigator_update_order(self, &rv);
+	psy_audio_sequencecursor_set_offset(&rv, 0.0);
 	return rv;
 }
 
-psy_audio_SequenceCursor patternlinennavigator_end(PatternLineNavigator* self,
+psy_audio_SequenceCursor patternlinenavigator_end(PatternLineNavigator* self,
 	psy_audio_SequenceCursor cursor)
 {	
 	psy_audio_SequenceCursor rv;
-	psy_dsp_big_beat_t maxabsoffset;
+	psy_audio_SequenceEntry* seqentry;
+	double bpl;
 
 	assert(self);
 
 	rv = cursor;
 	self->wrap = FALSE;
-	maxabsoffset = patternviewstate_length(self->state);
-	if (patternviewstate_single_mode(self->state)) {
-		maxabsoffset += cursor.seqoffset;
-	}
-	psy_audio_sequencecursor_setabsoffset(&rv, maxabsoffset -
-		patternviewstate_bpl(self->state));
-	patternlinenavigator_update_order(self, &rv);	
-	return rv;
-}
-
-void patternlinenavigator_update_order(PatternLineNavigator* self,
-	psy_audio_SequenceCursor* cursor)
-{
-	if (!patternviewstate_single_mode(self->state)) {
-		psy_audio_Sequence* sequence;
-
-		sequence = patternviewstate_sequence(self->state);
-		if (sequence) {
-			cursor->orderindex.order = psy_audio_sequence_order(sequence,
-				cursor->orderindex.track, cursor->absoffset);			 
-			psy_audio_sequencecursor_updateseqoffset(cursor, sequence);
+	seqentry = NULL;
+	bpl = 1.0 / (double)rv.lpb;
+	if (patternviewstate_single_mode(self->state)) {				
+		seqentry = psy_audio_sequence_entry(self->state->sequence,
+			rv.order_index);
+		assert(seqentry);
+		
+	} else {
+		const psy_audio_SequenceTrack* seqtrack;		
+		uintptr_t num_orders;
+		
+		seqtrack = psy_audio_sequence_track_at_const(self->state->sequence,
+			rv.order_index.track);
+		assert(seqtrack);
+		num_orders = psy_audio_sequencetrack_size(seqtrack);		
+		if (num_orders != 0) {			
+			psy_audio_OrderIndex last;
+			
+			last = psy_audio_orderindex_make(rv.order_index.track,
+				num_orders - 1);
+			seqentry = psy_audio_sequence_entry(self->state->sequence, last);
+			assert(seqentry);
+			psy_audio_sequencecursor_set_order_index(&rv, last);			
 		}
 	}
+	if (seqentry) {
+		psy_audio_sequencecursor_set_offset(&rv,			
+			psy_audio_sequenceentry_length(seqentry) - bpl);
+	}
+	return rv;
 }
-
 
 /* PatternColNavigator */
 

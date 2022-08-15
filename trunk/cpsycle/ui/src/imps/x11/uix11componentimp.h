@@ -38,7 +38,7 @@ typedef struct psy_ui_x11_ComponentImp {
 	bool visible;
 	psy_List* viewcomponents;
 	int prev_w; // used to detect change with ConfigureNotify that can be
-	int prev_h; // triggered for other reasons than resize		
+	int prev_h; // triggered for other reasons than resize	
 	bool mapped;
 	psy_ui_Graphics g;	
 	struct psy_ui_x11_ComponentImp* parent;

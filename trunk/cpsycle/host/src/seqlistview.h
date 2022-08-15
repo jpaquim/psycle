@@ -70,6 +70,7 @@ void seqviewlist_rename(SeqviewList*);
 void seqviewlist_build(SeqviewList*);
 void seqviewlist_on_pattern_name_changed(SeqviewList*, psy_audio_Patterns*,
 	uintptr_t slot);
+void seqviewlist_set_song(SeqviewList*, psy_audio_Song*);
 
 INLINE psy_ui_Component* seqviewlist_base(SeqviewList* self)
 {

@@ -24,6 +24,8 @@ void seqeditpropertiesentry_init(SeqEditPropertiesEntry* self,
 	psy_ui_component_init(&self->component, parent, NULL);	
 	psy_ui_component_set_title(&self->component, title);
 	self->state = state;
+	psy_ui_component_set_default_align(&self->component, psy_ui_ALIGN_TOP,
+		psy_ui_margin_make_em(0.0, 0.0, 0.5, 0.0));
 }
 
 /* SeqEditPropertiesSeqEntry */
@@ -37,7 +39,7 @@ static void seqeditpropertiesseqentry_select(SeqEditPropertiesSeqEntry*,
 void seqeditpropertiesseqentry_init(SeqEditPropertiesSeqEntry* self,
 	psy_ui_Component* parent, const char* title, SeqEditState* state)
 {
-	seqeditpropertiesentry_init(&self->entry, parent, title, state);
+	seqeditpropertiesentry_init(&self->entry, parent, title, state);	
 	psy_signal_connect(&self->entry.component.signal_selectsection, self,
 		seqeditpropertiesseqentry_select);
 	self->orderindex = psy_audio_orderindex_make_invalid();	
@@ -45,20 +47,17 @@ void seqeditpropertiesseqentry_init(SeqEditPropertiesSeqEntry* self,
 	labelpair_init(&self->offset, seqeditpropertiesseqentry_base(self),
 		"seqedit.position", state->propertiesview_desc_column_width);
 	psy_ui_component_set_align(psy_ui_label_base(&self->offset.second),
-		psy_ui_ALIGN_CLIENT);
-	psy_ui_component_set_align(labelpair_base(&self->offset), psy_ui_ALIGN_TOP);
+		psy_ui_ALIGN_CLIENT);	
 	/* length */
 	labelpair_init(&self->length, seqeditpropertiesseqentry_base(self),
 		"seqedit.length", state->propertiesview_desc_column_width);
 	psy_ui_component_set_align(psy_ui_label_base(&self->length.second),
-		psy_ui_ALIGN_CLIENT);
-	psy_ui_component_set_align(labelpair_base(&self->length), psy_ui_ALIGN_TOP);
+		psy_ui_ALIGN_CLIENT);	
 	/* end */
 	labelpair_init(&self->end, seqeditpropertiesseqentry_base(self),
 		"seqedit.end", state->propertiesview_desc_column_width);
 	psy_ui_component_set_align(psy_ui_label_base(&self->end.second),
-		psy_ui_ALIGN_CLIENT);
-	psy_ui_component_set_align(labelpair_base(&self->end), psy_ui_ALIGN_TOP);	
+		psy_ui_ALIGN_CLIENT);	
 }
 
 void seqeditpropertiesseqentry_select(SeqEditPropertiesSeqEntry* self,
@@ -107,7 +106,7 @@ void seqeditentryproperties_update(SeqEditPropertiesSeqEntry* self)
 	}
 }
 
-/* SeqEditLoopProperties */
+/* SeqEditEmptyProperties */
 
 /* implementation */
 void seqeditemptyproperties_init(SeqEditEmptyProperties* self,
@@ -158,11 +157,7 @@ void seqeditmarkerproperties_init(SeqEditMarkerProperties* self,
 	psy_signal_connect(&self->entry.entry.component.signal_selectsection, self,
 		seqeditmarkerproperties_select);
 	psy_ui_component_set_id(&self->entry.entry.component, SEQEDITITEM_MARKER);
-	labeledit_init(&self->name, &self->entry.entry.component, "seqedit.name");
-	psy_ui_component_set_margin(&self->name.component,
-		psy_ui_margin_make_em(0.5, 0.0, 0.0, 0.0));	
-	psy_ui_component_set_align(labeledit_base(&self->name),
-		psy_ui_ALIGN_TOP);	
+	labeledit_init(&self->name, &self->entry.entry.component, "seqedit.name");	
 	psy_signal_connect(&self->name.edit.signal_accept,
 		self, seqeditmarkerproperties_on_edit_accept);
 	psy_signal_connect(&self->name.edit.signal_reject,
@@ -241,24 +236,15 @@ void seqedittimesigproperties_init(SeqEditTimesigProperties* self,
 	self->timesigindex = psy_INDEX_INVALID;	
 	/* numerator */
 	intedit_init(&self->numerator, seqedittimesigproperties_base(self),
-		"seqedit.numerator", 1, 1, 0xF);
-	psy_ui_component_set_align(intedit_base(&self->numerator),
-		psy_ui_ALIGN_TOP);
-	psy_ui_label_set_char_number(&self->numerator.desc, 14.0);
-	psy_ui_component_set_margin(&self->numerator.component,
-		psy_ui_margin_make_em(0.5, 0.0, 0.0, 0.0));	
+		"seqedit.numerator", 1, 1, 0xF);	
+	psy_ui_label_set_char_number(&self->numerator.desc, 14.0);	
 	/* denominator */
 	intedit_init(&self->denominator, seqedittimesigproperties_base(self),
-		"seqedit.denominator", 1, 1, 0xF);
-	psy_ui_component_set_align(intedit_base(&self->denominator),
-		psy_ui_ALIGN_TOP);
+		"seqedit.denominator", 1, 1, 0xF);	
 	psy_ui_label_set_char_number(&self->denominator.desc, 14.0);
 	/* position */	
 	labelpair_init(&self->offset, seqedittimesigproperties_base(self),
-		"seqedit.position", state->propertiesview_desc_column_width);
-	psy_ui_component_set_align(labelpair_base(&self->offset), psy_ui_ALIGN_TOP);	
-	psy_ui_component_set_margin(labelpair_base(&self->offset),
-		psy_ui_margin_make_em(0.5, 0.0, 0.0, 0.0));
+		"seqedit.position", state->propertiesview_desc_column_width);		
 	/* connect signals */
 	psy_signal_connect(&self->numerator.signal_changed, self,
 		seqedittimesigproperties_on_numerator);
@@ -371,19 +357,14 @@ void seqeditloopproperties_init(SeqEditLoopProperties* self,
 	psy_signal_connect(&self->entry.component.signal_selectsection, self,
 		seqeditloopproperties_select);
 	intedit_init(&self->numloops, seqeditloopproperties_base(self),
-		"seqedit.repetitions", 1, 1, 0xF);
-	psy_ui_component_set_align(intedit_base(&self->numloops),
-		psy_ui_ALIGN_TOP);
+		"seqedit.repetitions", 1, 1, 0xF);	
 	psy_ui_label_set_char_number(&self->numloops.desc,
-		state->propertiesview_desc_column_width);
-	psy_ui_component_set_margin(&self->numloops.component,
-		psy_ui_margin_make_em(0.5, 0.0, 0.0, 0.0));	
+		state->propertiesview_desc_column_width);	
 	/* position */
 	labelpair_init(&self->offset, seqeditloopproperties_base(self),
 		"seqedit.position", state->propertiesview_desc_column_width);
 	psy_ui_component_set_align(psy_ui_label_base(&self->offset.second),
-		psy_ui_ALIGN_CLIENT);
-	psy_ui_component_set_align(labelpair_base(&self->offset), psy_ui_ALIGN_TOP);
+		psy_ui_ALIGN_CLIENT);	
 	/* length */
 	labelpair_init(&self->length, seqeditloopproperties_base(self),
 		"seqedit.length", state->propertiesview_desc_column_width);
@@ -395,8 +376,6 @@ void seqeditloopproperties_init(SeqEditLoopProperties* self,
 		"seqedit.end", state->propertiesview_desc_column_width);
 	psy_ui_component_set_align(psy_ui_label_base(&self->end.second),
 		psy_ui_ALIGN_CLIENT);
-	psy_ui_component_set_align(labelpair_base(&self->end), psy_ui_ALIGN_TOP);	
-
 	seqeditloopproperties_setloopindex(self, psy_INDEX_INVALID);	
 	psy_signal_connect(&self->numloops.signal_changed, self,
 		seqeditloopproperties_on_num_loops);	
@@ -506,6 +485,7 @@ void seqeditproperties_init(SeqEditProperties* self, psy_ui_Component* parent,
 {	
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_set_id(&self->component, SEQEDIT_PROPERTIESVIEW);
+	psy_ui_component_set_style_type(&self->component, STYLE_SEQEDT_PROPERTIES);
 	self->state = state;
 	self->itemtype = SEQEDITITEM_NONE;
 	self->param1 = 0;

@@ -28,13 +28,13 @@ typedef struct psy_audio_SongProperties {
 	uint8_t octave;
 	uintptr_t lpb;
 	uintptr_t tpb;
-	uintptr_t extraticksperbeat;
+	uintptr_t extra_ticks_per_beat;
 	/* read-only */
 	char* title;
 	char* credits;
 	char* comments;
 	psy_dsp_big_beat_t bpm;
-	uintptr_t samplerindex;	
+	uintptr_t sampler_index;
 } psy_audio_SongProperties;
 
 void psy_audio_songproperties_init(psy_audio_SongProperties*, const char* title,
@@ -44,15 +44,15 @@ void psy_audio_songproperties_init_all(psy_audio_SongProperties*, const char* ti
 	int octave,
 	uintptr_t lpb,
 	int tpb,
-	int extraticksperbeat,
+	int extra_ticks_per_beat,
 	psy_dsp_big_beat_t bpm,
-	uintptr_t samplerindex);
+	uintptr_t sampler_index);
 void psy_audio_songproperties_copy(psy_audio_SongProperties*, const psy_audio_SongProperties* other);
 void psy_audio_songproperties_dispose(psy_audio_SongProperties*);
 
 /* Properties */
 
-INLINE void psy_audio_songproperties_setbpm(psy_audio_SongProperties* self,
+INLINE void psy_audio_songproperties_set_bpm(psy_audio_SongProperties* self,
 	psy_dsp_big_beat_t bpm)
 {
 	assert(self);
@@ -74,7 +74,7 @@ INLINE psy_dsp_big_beat_t psy_audio_songproperties_bpm(const
 	return self->bpm;
 }
 
-INLINE void psy_audio_songproperties_setlpb(psy_audio_SongProperties* self,
+INLINE void psy_audio_songproperties_set_lpb(psy_audio_SongProperties* self,
 	uintptr_t lpb)
 {
 	assert(self);
@@ -90,7 +90,7 @@ INLINE uintptr_t psy_audio_songproperties_lpb(const
 	return self->lpb;
 }
 
-INLINE void psy_audio_songproperties_setoctave(psy_audio_SongProperties* self,
+INLINE void psy_audio_songproperties_set_octave(psy_audio_SongProperties* self,
 	uint8_t octave)
 {
 	assert(self);
@@ -106,7 +106,7 @@ INLINE uint8_t psy_audio_songproperties_octave(const
 	return self->octave;
 }
 
-INLINE void psy_audio_songproperties_settpb(psy_audio_SongProperties* self,
+INLINE void psy_audio_songproperties_set_tpb(psy_audio_SongProperties* self,
 	uintptr_t tpb)
 {
 	assert(self);
@@ -122,20 +122,20 @@ INLINE uintptr_t psy_audio_songproperties_tpb(const
 	return self->tpb;
 }
 
-INLINE void psy_audio_songproperties_setextraticksperbeat(
-	psy_audio_SongProperties* self, uintptr_t extraticksperbeat)
+INLINE void psy_audio_songproperties_set_extra_ticks_per_beat(
+	psy_audio_SongProperties* self, uintptr_t extra_ticks_per_beat)
 {
 	assert(self);
 
-	self->extraticksperbeat = extraticksperbeat;
+	self->extra_ticks_per_beat = extra_ticks_per_beat;
 }
 
-INLINE uintptr_t psy_audio_songproperties_extraticksperbeat(const
+INLINE uintptr_t psy_audio_songproperties_extra_ticks_per_beat(const
 	psy_audio_SongProperties* self)
 {
 	assert(self);
 
-	return self->extraticksperbeat;
+	return self->extra_ticks_per_beat;
 }
 
 INLINE const char* psy_audio_songproperties_title(const
@@ -146,10 +146,10 @@ INLINE const char* psy_audio_songproperties_title(const
 	return self->title;
 }
 
-void psy_audio_songproperties_settitle(psy_audio_SongProperties* self,
+void psy_audio_songproperties_set_title(psy_audio_SongProperties* self,
 	const char* title);
 
-void psy_audio_songproperties_setcredits(psy_audio_SongProperties* self,
+void psy_audio_songproperties_set_credits(psy_audio_SongProperties* self,
 	const char* credits);
 
 INLINE const char* psy_audio_songproperties_credits(const
@@ -160,7 +160,7 @@ INLINE const char* psy_audio_songproperties_credits(const
 	return self->credits;
 }
 
-void psy_audio_songproperties_setcomments(psy_audio_SongProperties* self,
+void psy_audio_songproperties_set_comments(psy_audio_SongProperties* self,
 	const char* comments);
 
 INLINE const char* psy_audio_songproperties_comments(const
@@ -171,27 +171,27 @@ INLINE const char* psy_audio_songproperties_comments(const
 	return self->comments;
 }
 
-INLINE uintptr_t psy_audio_songproperties_samplerindex(const
+INLINE uintptr_t psy_audio_songproperties_sampler_index(const
 	psy_audio_SongProperties* self)
 {
 	assert(self);
 
-	return self->samplerindex;
+	return self->sampler_index;
 }
 
-INLINE void psy_audio_songproperties_setsamplerindex(
-	psy_audio_SongProperties* self, uintptr_t samplerindex)
+INLINE void psy_audio_songproperties_set_sampler_index(
+	psy_audio_SongProperties* self, uintptr_t sampler_index)
 {
 	assert(self);
 
-	self->samplerindex = samplerindex;
+	self->sampler_index = sampler_index;
 }
 
 /* psy_audio_Song */
 typedef struct psy_audio_Song {
 	/* signals */
 	psy_Signal signal_load_progress;
-	psy_Signal signal_saveprogress;
+	psy_Signal signal_save_progress;
 	/* public data */	
 	psy_audio_SongProperties properties;
 	psy_audio_Machines machines;
@@ -202,7 +202,7 @@ typedef struct psy_audio_Song {
 	char* filename;
 	bool song_has_file;
 	/* references */
-	struct psy_audio_MachineFactory* machinefactory;
+	struct psy_audio_MachineFactory* machine_factory;
 } psy_audio_Song;
 
 /* initializes a song with a master and one sequence track/entry/pattern */
@@ -224,7 +224,7 @@ void psy_audio_song_deallocate(psy_audio_Song*);
 /* clears the song completly (no master, no pattern, no sequence track/entry) */
 void psy_audio_song_clear(psy_audio_Song*);
 /* adds a virtual generator */
-void psy_audio_song_insertvirtualgenerator(psy_audio_Song*,
+void psy_audio_song_insert_virtual_generator(psy_audio_Song*,
 	uintptr_t virtual_inst, uintptr_t mac_idx, uintptr_t inst_idx);
 /* getter of the song parts */
 /* return: Machines of song */
@@ -266,7 +266,7 @@ INLINE psy_audio_Instruments* psy_audio_song_instruments(psy_audio_Song* self)
 /* Properties */
 
 /* set SongProperties */
-void psy_audio_song_setproperties(psy_audio_Song*, const psy_audio_SongProperties*);
+void psy_audio_song_set_properties(psy_audio_Song*, const psy_audio_SongProperties*);
 
 /* set song title */
 INLINE void psy_audio_song_settitle(psy_audio_Song* self,
@@ -274,7 +274,7 @@ INLINE void psy_audio_song_settitle(psy_audio_Song* self,
 {
 	assert(self);
 
-	psy_audio_songproperties_settitle(&self->properties, title);
+	psy_audio_songproperties_set_title(&self->properties, title);
 }
 
 /* return song title */
@@ -294,12 +294,12 @@ INLINE const char* psy_audio_song_credits(const psy_audio_Song* self)
 }
 
 /* set song comments */
-INLINE void psy_audio_song_setcomments(psy_audio_Song* self,
+INLINE void psy_audio_song_set_comments(psy_audio_Song* self,
 	const char* comments)
 {
 	assert(self);
 
-	psy_audio_songproperties_setcomments(&self->properties, comments);
+	psy_audio_songproperties_set_comments(&self->properties, comments);
 }
 
 /* return song comments */
@@ -308,16 +308,16 @@ INLINE const char* psy_audio_song_comments(const psy_audio_Song* self)
 	return psy_audio_songproperties_comments(&self->properties);
 }
 
-INLINE void psy_audio_song_setcredits(psy_audio_Song* self,
+INLINE void psy_audio_song_set_credits(psy_audio_Song* self,
 	const char* credits)
 {
 	assert(self);
 
-	psy_audio_songproperties_setcredits(&self->properties, credits);
+	psy_audio_songproperties_set_credits(&self->properties, credits);
 }
 
 /* set song properties bpm */
-void psy_audio_song_setbpm(psy_audio_Song*, psy_dsp_big_beat_t bpm);
+void psy_audio_song_set_bpm(psy_audio_Song*, psy_dsp_big_beat_t bpm);
 /* return song properties bpm */
 INLINE psy_dsp_big_beat_t psy_audio_song_bpm(const psy_audio_Song* self)
 {
@@ -326,15 +326,15 @@ INLINE psy_dsp_big_beat_t psy_audio_song_bpm(const psy_audio_Song* self)
 	return psy_audio_songproperties_bpm(&self->properties);
 }
 /* set song properties lpb */
-INLINE void psy_audio_song_setlpb(psy_audio_Song* self, uintptr_t lpb)
+INLINE void psy_audio_song_set_lpb(psy_audio_Song* self, uintptr_t lpb)
 {
 	psy_audio_SequenceCursor cursor;
 
 	assert(self);
 
-	psy_audio_songproperties_setlpb(&self->properties, lpb);
+	psy_audio_songproperties_set_lpb(&self->properties, lpb);
 	cursor = psy_audio_sequence_cursor(&self->sequence);			
-	psy_audio_sequencecursor_setlpb(&cursor, lpb);
+	psy_audio_sequencecursor_set_lpb(&cursor, lpb);
 	psy_audio_sequence_set_cursor(&self->sequence, cursor);
 }
 /* return song properties lpb */
@@ -349,7 +349,7 @@ INLINE void psy_audio_song_setoctave(psy_audio_Song* self, uint8_t octave)
 {
 	assert(self);
 
-	psy_audio_songproperties_setoctave(&self->properties, octave);
+	psy_audio_songproperties_set_octave(&self->properties, octave);
 }
 /* return song properties lpb */
 INLINE uint8_t psy_audio_song_octave(const psy_audio_Song* self)
@@ -359,7 +359,7 @@ INLINE uint8_t psy_audio_song_octave(const psy_audio_Song* self)
 	return psy_audio_songproperties_octave(&self->properties);
 }
 /* set song properties songtrack (pattern channels) number */
-INLINE void psy_audio_song_setnumsongtracks(psy_audio_Song* self,
+INLINE void psy_audio_song_set_num_song_tracks(psy_audio_Song* self,
 	uintptr_t numtracks)
 {
 	assert(self);
@@ -367,7 +367,7 @@ INLINE void psy_audio_song_setnumsongtracks(psy_audio_Song* self,
 	psy_audio_patterns_set_num_tracks(&self->patterns, numtracks);
 }
 /* return song numtracks (pattern channels) */
-INLINE uintptr_t psy_audio_song_numsongtracks(const psy_audio_Song* self)
+INLINE uintptr_t psy_audio_song_num_song_tracks(const psy_audio_Song* self)
 {
 	assert(self);
 
@@ -381,43 +381,53 @@ INLINE uintptr_t psy_audio_song_tpb(const psy_audio_Song* self)
 	return psy_audio_songproperties_tpb(&self->properties);
 }
 /* set song properties ticks per beat */
-INLINE void psy_audio_song_settpb(psy_audio_Song* self, uintptr_t tpb)
+INLINE void psy_audio_song_set_tpb(psy_audio_Song* self, uintptr_t tpb)
 {
 	assert(self);
 
-	psy_audio_songproperties_settpb(&self->properties, tpb);
+	psy_audio_songproperties_set_tpb(&self->properties, tpb);
 }
 /* return song properties extraticksperbeat */
-INLINE uintptr_t psy_audio_song_extraticksperbeat(const psy_audio_Song* self)
+INLINE uintptr_t psy_audio_song_extra_ticks_per_beat(const psy_audio_Song* self)
 {
 	assert(self);
 
-	return psy_audio_songproperties_extraticksperbeat(&self->properties);
+	return psy_audio_songproperties_extra_ticks_per_beat(&self->properties);
 }
 /* set song properties ticks per beat */
-INLINE void psy_audio_song_setextraticksperbeat(psy_audio_Song* self,
-	uintptr_t extraticksperbeat)
+INLINE void psy_audio_song_set_extra_ticks_per_beat(psy_audio_Song* self,
+	uintptr_t extra_ticks_per_beat)
 {
 	assert(self);
 
-	psy_audio_songproperties_setextraticksperbeat(&self->properties,
-		extraticksperbeat);
+	psy_audio_songproperties_set_extra_ticks_per_beat(&self->properties,
+		extra_ticks_per_beat);
+}
+/* calculates real tpb */
+INLINE uintptr_t psy_audio_song_real_tpb(psy_audio_Song* self)
+{	
+	assert(self);
+	
+	return (psy_audio_song_tpb(self) +
+		(psy_audio_song_extra_ticks_per_beat(self) *
+			psy_audio_song_lpb(self)));
 }
 /* return song sampler machine index */
-INLINE uintptr_t psy_audio_song_samplerindex(const psy_audio_Song* self)
+INLINE uintptr_t psy_audio_song_sampler_index(const psy_audio_Song* self)
 {
 	assert(self);
 
-	return psy_audio_songproperties_samplerindex(&self->properties);
+	return psy_audio_songproperties_sampler_index(&self->properties);
 }
 
 /* set song sampler machine index */
-INLINE void psy_audio_song_setsamplerindex(psy_audio_Song* self,
-	uintptr_t samplerindex)
+INLINE void psy_audio_song_set_sampler_index(psy_audio_Song* self,
+	uintptr_t sampler_index)
 {
 	assert(self);
 
-	psy_audio_songproperties_setsamplerindex(&self->properties, samplerindex);
+	psy_audio_songproperties_set_sampler_index(&self->properties,
+		sampler_index);
 }
 
 void psy_audio_song_set_file(psy_audio_Song* self, const char* filename);

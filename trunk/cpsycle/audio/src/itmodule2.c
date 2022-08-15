@@ -309,7 +309,7 @@ int itmodule2_loaditmodule(ITModule2* self)
 		}
 		psy_table_insert(&self->xmtovirtual, i,
 			(void*)(uintptr_t)virtualInst);
-		psy_audio_song_insertvirtualgenerator(self->songfile->song,
+		psy_audio_song_insert_virtual_generator(self->songfile->song,
 			virtualInst++, 0, i);			
 	}
 	for (i = 0; i < self->fileheader.sampNum; i++)
@@ -380,7 +380,7 @@ int itmodule2_loaditmodule(ITModule2* self)
 			itmodule2_loaditpattern(self, i, &numchans);				
 		}
 	}
-	psy_audio_song_setnumsongtracks(self->song,
+	psy_audio_song_set_num_song_tracks(self->song,
 		 psy_max(numchans + 1, (int)self->maxextracolumn));
 	psy_audio_reposition(&self->songfile->song->sequence);
 	free(pointersi);
@@ -395,7 +395,7 @@ void itmodule2_setsongcomments(ITModule2* self)
 
 	comments = strdup("Imported from Impulse Tracker Module: ");
 	comments = psy_strcat_realloc(comments, self->songfile->path);
-	psy_audio_song_setcomments(self->song, comments);
+	psy_audio_song_set_comments(self->song, comments);
 	free(comments);
 	comments = NULL;
 }
@@ -403,7 +403,7 @@ void itmodule2_setsongcomments(ITModule2* self)
 bool itmodule2_makexmsampler(ITModule2* self)
 {
 	self->sampler = psy_audio_machinefactory_makemachine(
-		self->songfile->song->machinefactory, psy_audio_XMSAMPLER, "",
+		self->songfile->song->machine_factory, psy_audio_XMSAMPLER, "",
 		psy_INDEX_INVALID);
 	if (self->sampler) {
 		psy_audio_Wire wire;
@@ -583,8 +583,7 @@ int itmodule2_readmessage(ITModule2* self)
 			return status;
 		}
 		comments[self->fileheader.msgLen + 1] = '\0';
-		psy_audio_songproperties_setcomments(
-			&self->songfile->song->properties, comments);
+		psy_audio_song_set_comments(self->songfile->song, comments);
 		free(comments);
 	}
 	return PSY_OK;
@@ -1825,7 +1824,7 @@ bool itmodule2_loads3mpatternx(ITModule2* self, uint16_t patidx)
 	node = NULL;
 	for (row = 0; row < 64; row++)
 	{
-		self->extracolumn = (int16_t)psy_audio_song_numsongtracks(self->song);
+		self->extracolumn = (int16_t)psy_audio_song_num_song_tracks(self->song);
 		psyfile_read(fp, &newEntry, 1);
 		append = TRUE;
 		while (newEntry)
@@ -1951,7 +1950,7 @@ bool itmodule2_loads3mpatternx(ITModule2* self, uint16_t patidx)
 			} else {
 				pent.cmd = volume;
 			}
-			if (channel < psy_audio_song_numsongtracks(self->song)) {
+			if (channel < psy_audio_song_num_song_tracks(self->song)) {
 				itmodule_writepatternentry(self, &node, append, pattern,
 					row, channel, &pent);
 			}

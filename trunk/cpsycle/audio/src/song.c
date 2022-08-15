@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -13,14 +13,17 @@
 /* platform */
 #include "../../detail/portable.h"
 
+
 /* psy_audio_SongProperties */
+
 /* prototypes */
-static void song_initproperties(psy_audio_Song*);
-static void song_initmachines(psy_audio_Song*);
-static void song_initpatterns(psy_audio_Song*);
-static void song_initsequence(psy_audio_Song*);
-static void song_initsignals(psy_audio_Song*);
-static void song_disposesignals(psy_audio_Song*);
+static void song_init_properties(psy_audio_Song*);
+static void song_init_machines(psy_audio_Song*);
+static void song_init_patterns(psy_audio_Song*);
+static void song_init_sequence(psy_audio_Song*);
+static void song_init_signals(psy_audio_Song*);
+static void song_dispose_signals(psy_audio_Song*);
+
 /* implementation */
 void psy_audio_songproperties_init(psy_audio_SongProperties* self,
 	const char* title,
@@ -36,8 +39,8 @@ void psy_audio_songproperties_init(psy_audio_SongProperties* self,
 	self->lpb = 4;	
 	self->octave = 4;
 	self->tpb = 24;
-	self->extraticksperbeat = 0;
-	self->samplerindex = 0x3E;	
+	self->extra_ticks_per_beat = 0;
+	self->sampler_index = 0x3E;	
 }
 
 void psy_audio_songproperties_init_all(psy_audio_SongProperties* self,
@@ -45,9 +48,9 @@ void psy_audio_songproperties_init_all(psy_audio_SongProperties* self,
 	int octave,
 	uintptr_t lpb,
 	int tpb,
-	int extraticksperbeat,
+	int extra_ticks_per_beat,
 	psy_dsp_big_beat_t bpm,
-	uintptr_t sampler)
+	uintptr_t sampler_index)
 {
 	assert(self);
 
@@ -57,9 +60,9 @@ void psy_audio_songproperties_init_all(psy_audio_SongProperties* self,
 	self->lpb = lpb;	
 	self->octave = octave;
 	self->tpb = tpb;
-	self->extraticksperbeat = extraticksperbeat;
+	self->extra_ticks_per_beat = extra_ticks_per_beat;
 	self->bpm = bpm;
-	self->samplerindex = sampler;
+	self->sampler_index = sampler_index;
 }
 
 void psy_audio_songproperties_dispose(psy_audio_SongProperties* self)
@@ -74,7 +77,8 @@ void psy_audio_songproperties_dispose(psy_audio_SongProperties* self)
 	self->comments = NULL;
 }
 
-void psy_audio_songproperties_copy(psy_audio_SongProperties* self, const psy_audio_SongProperties* other)
+void psy_audio_songproperties_copy(psy_audio_SongProperties* self,
+	const psy_audio_SongProperties* other)
 {
 	assert(self);
 
@@ -87,24 +91,25 @@ void psy_audio_songproperties_copy(psy_audio_SongProperties* self, const psy_aud
 		self->lpb = other->lpb;
 		self->octave = other->octave;
 		self->tpb = other->tpb;
-		self->extraticksperbeat = other->extraticksperbeat;		
+		self->extra_ticks_per_beat = other->extra_ticks_per_beat;
+		self->sampler_index = other->sampler_index;
 	}
 }
 
 // Properties
-void psy_audio_songproperties_settitle(psy_audio_SongProperties* self,
+void psy_audio_songproperties_set_title(psy_audio_SongProperties* self,
 	const char* title)
 {
 	psy_strreset(&self->title, title);
 }
 
-void psy_audio_songproperties_setcomments(psy_audio_SongProperties* self,
+void psy_audio_songproperties_set_comments(psy_audio_SongProperties* self,
 	const char* comments)
 {
 	psy_strreset(&self->comments, comments);
 }
 
-void psy_audio_songproperties_setcredits(psy_audio_SongProperties* self,
+void psy_audio_songproperties_set_credits(psy_audio_SongProperties* self,
 	const char* credits)
 {
 	psy_strreset(&self->credits, credits);
@@ -112,34 +117,34 @@ void psy_audio_songproperties_setcredits(psy_audio_SongProperties* self,
 
 /* psy_audio_Song */
 void psy_audio_song_init(psy_audio_Song* self, psy_audio_MachineFactory*
-	machinefactory)
+	machine_factory)
 {
 	assert(self);
 
-	self->machinefactory = machinefactory;
+	self->machine_factory = machine_factory;
 	self->filename = psy_strdup(PSYCLE_UNTITLED);
 	self->song_has_file = FALSE;
 	psy_audio_songproperties_init(&self->properties, "Untitled", "Unnamed",
 		"No Comments");	
-	song_initmachines(self);
-	song_initpatterns(self);
-	song_initsequence(self);
+	song_init_machines(self);
+	song_init_patterns(self);
+	song_init_sequence(self);
 	psy_audio_samples_init(&self->samples);
 	psy_audio_instruments_init(&self->instruments);
-	song_initsignals(self);
+	song_init_signals(self);
 }
 
-void song_initmachines(psy_audio_Song* self)
+void song_init_machines(psy_audio_Song* self)
 {
 	assert(self);
 
 	psy_audio_machines_init(&self->machines);
 	psy_audio_machines_insertmaster(&self->machines,
-		psy_audio_machinefactory_makemachine(self->machinefactory,
+		psy_audio_machinefactory_makemachine(self->machine_factory,
 			psy_audio_MASTER, NULL, psy_INDEX_INVALID));
 }
 
-void song_initpatterns(psy_audio_Song* self)
+void song_init_patterns(psy_audio_Song* self)
 {
 	assert(self);
 
@@ -148,7 +153,7 @@ void song_initpatterns(psy_audio_Song* self)
 		psy_audio_pattern_allocinit());
 }
 
-void song_initsequence(psy_audio_Song* self)
+void song_init_sequence(psy_audio_Song* self)
 {
 	assert(self);
 
@@ -159,12 +164,12 @@ void song_initsequence(psy_audio_Song* self)
 		psy_audio_orderindex_make(0, 0), 0);
 }
 
-void song_initsignals(psy_audio_Song* self)
+void song_init_signals(psy_audio_Song* self)
 {
 	assert(self);
 
 	psy_signal_init(&self->signal_load_progress);
-	psy_signal_init(&self->signal_saveprogress);
+	psy_signal_init(&self->signal_save_progress);
 }
 
 void psy_audio_song_dispose(psy_audio_Song* self)
@@ -177,17 +182,17 @@ void psy_audio_song_dispose(psy_audio_Song* self)
 	psy_audio_patterns_dispose(&self->patterns);	
 	psy_audio_samples_dispose(&self->samples);
 	psy_audio_instruments_dispose(&self->instruments);
-	song_disposesignals(self);
+	song_dispose_signals(self);
 	free(self->filename);
 	self->filename = NULL;
 }
 
-void song_disposesignals(psy_audio_Song* self)
+void song_dispose_signals(psy_audio_Song* self)
 {
 	assert(self);
 
 	psy_signal_dispose(&self->signal_load_progress);
-	psy_signal_dispose(&self->signal_saveprogress);
+	psy_signal_dispose(&self->signal_save_progress);
 }
 
 psy_audio_Song* psy_audio_song_alloc(void)
@@ -196,13 +201,13 @@ psy_audio_Song* psy_audio_song_alloc(void)
 }
 
 psy_audio_Song* psy_audio_song_allocinit(psy_audio_MachineFactory*
-	machinefactory)
+	machine_factory)
 {
 	psy_audio_Song* rv;
 
 	rv = psy_audio_song_alloc();
 	if (rv) {
-		psy_audio_song_init(rv, machinefactory);
+		psy_audio_song_init(rv, machine_factory);
 	}
 	return rv;
 }
@@ -224,7 +229,7 @@ void psy_audio_song_clear(psy_audio_Song* self)
 	psy_audio_machines_clear(&self->machines);
 }
 
-void psy_audio_song_setproperties(psy_audio_Song* self,
+void psy_audio_song_set_properties(psy_audio_Song* self,
 	const psy_audio_SongProperties* properties)
 {	
 	assert(self);
@@ -232,14 +237,14 @@ void psy_audio_song_setproperties(psy_audio_Song* self,
 	psy_audio_songproperties_copy(&self->properties, properties);
 }
 
-void psy_audio_song_setbpm(psy_audio_Song* self, psy_dsp_big_beat_t bpm)
+void psy_audio_song_set_bpm(psy_audio_Song* self, psy_dsp_big_beat_t bpm)
 {
 	assert(self);
 
-	psy_audio_songproperties_setbpm(&self->properties, bpm);		
+	psy_audio_songproperties_set_bpm(&self->properties, bpm);		
 }
 
-void psy_audio_song_insertvirtualgenerator(psy_audio_Song* self,
+void psy_audio_song_insert_virtual_generator(psy_audio_Song* self,
 	uintptr_t virtual_inst, uintptr_t mac_idx, uintptr_t inst_idx)
 {
 	assert(self);
@@ -256,7 +261,7 @@ void psy_audio_song_insertvirtualgenerator(psy_audio_Song* self,
 			psy_audio_machines_remove(&self->machines, virtual_inst, FALSE);
 		}
 		machine = psy_audio_machinefactory_makemachinefrompath(
-			self->machinefactory, psy_audio_VIRTUALGENERATOR, NULL,
+			self->machine_factory, psy_audio_VIRTUALGENERATOR, NULL,
 			mac_idx, inst_idx);
 		if (machine) {
 			psy_audio_machine_seteditname(machine, "Virtual Generator");

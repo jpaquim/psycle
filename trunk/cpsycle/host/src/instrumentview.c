@@ -121,7 +121,7 @@ void virtualgeneratorbox_updategenerator(VirtualGeneratorsBox* self)
 	if (psy_ui_checkbox_checked(&self->active)) {
 		if (psy_ui_combobox_cursel(&self->generators) != -1 &&
 				psy_ui_combobox_cursel(&self->samplers) != -1) {			
-			psy_audio_song_insertvirtualgenerator(self->workspace->song,
+			psy_audio_song_insert_virtual_generator(self->workspace->song,
 				psy_ui_combobox_cursel(&self->generators) + 0x81,
 				(uintptr_t)psy_ui_combobox_itemdata(&self->samplers,
 					psy_ui_combobox_cursel(&self->samplers)),

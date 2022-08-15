@@ -217,6 +217,7 @@ typedef struct psy_ui_Component {
 	bool blitscroll;	
 	psy_ui_ComponentBackground componentbackground;
 	bool capture_relative;
+	bool prevent_draw;
 } psy_ui_Component;
 
 void psy_ui_replacedefaultfont(psy_ui_Component* main,

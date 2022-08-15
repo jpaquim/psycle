@@ -126,7 +126,7 @@ int midiloader_load(MidiLoader* self)
     uint16_t currtrack;    
     
     status = PSY_OK;
-    psy_audio_song_setbpm(self->songfile->song, 120.0);
+    psy_audio_song_set_bpm(self->songfile->song, 120.0);
     status = midiloader_readmthd(self);    
     currtrack = 0;
     while (!psyfile_eof(self->fp) && currtrack < self->mthd.numtracks) {
@@ -561,7 +561,7 @@ int midiloader_readmeta_text(MidiLoader* self)
     if (status = midiloader_readvarlentext(self->fp, &text)) {
         return status;
     }
-    psy_audio_song_setcomments(self->songfile->song, text);
+    psy_audio_song_set_comments(self->songfile->song, text);
     free(text);
     return PSY_OK;
 }
@@ -574,7 +574,7 @@ int midiloader_readmeta_copyright(MidiLoader* self)
     if (status = midiloader_readvarlentext(self->fp, &text)) {
         return status;
     }
-    psy_audio_song_setcredits(self->songfile->song, text);
+    psy_audio_song_set_credits(self->songfile->song, text);
     free(text);
     return PSY_OK;
 }
@@ -587,7 +587,7 @@ int midiloader_readmeta_sequencetrackname(MidiLoader* self)
     if (status = midiloader_readvarlentext(self->fp, &text)) {
         return status;
     }    
-    psy_audio_sequencetrack_setname(self->currtrack.track, text);
+    psy_audio_sequencetrack_set_name(self->currtrack.track, text);
     psy_audio_pattern_setname(self->currtrack.pattern, text);
     free(text);
     return PSY_OK;
@@ -713,7 +713,7 @@ int midiloader_readmeta_tempo(MidiLoader* self)
     bpm = (uintptr_t)(bpm * 1000) / 1000.0f;
     if (self->currtrack.position == 0.0) {
         /* tempo event at track start: set change as song tempo */
-        psy_audio_song_setbpm(self->songfile->song, bpm);
+        psy_audio_song_set_bpm(self->songfile->song, bpm);
     } else {
         /* tempo event inside track: insert pattern bpm change */
         psy_audio_PatternEvent ev;
@@ -721,7 +721,8 @@ int midiloader_readmeta_tempo(MidiLoader* self)
         psy_audio_patternevent_init(&ev);
         ev.cmd = psy_audio_PATTERNCMD_SET_TEMPO;
         ev.parameter = (uint8_t)bpm;
-        self->currtrack.patternnode = psy_audio_pattern_insert(self->currtrack.pattern,
+        self->currtrack.patternnode = psy_audio_pattern_insert(
+			self->currtrack.pattern,
             self->currtrack.patternnode, self->currtrack.automationchannel,
             self->currtrack.position - self->currtrack.patternoffset, &ev);
     }

@@ -64,15 +64,16 @@ void psy_audio_blockselection_startdrag(psy_audio_BlockSelection* self,
 		self->topleft.track = cursor.track;
 		self->bottomright.track = dragselectionbase.track;
 	}
-	if (cursor.absoffset >= dragselectionbase.absoffset) {
-		psy_audio_sequencecursor_setabsoffset(&self->topleft,
-			dragselectionbase.absoffset);
-		psy_audio_sequencecursor_setabsoffset(&self->bottomright,
-			cursor.absoffset + bpl);
+	/* todo abs */
+	if (cursor.offset >= dragselectionbase.offset) {
+		psy_audio_sequencecursor_set_offset(&self->topleft,
+			dragselectionbase.offset);
+		psy_audio_sequencecursor_set_offset(&self->bottomright,
+			cursor.offset + bpl);
 	} else {
-		psy_audio_sequencecursor_setabsoffset(&self->topleft, cursor.absoffset);
-		psy_audio_sequencecursor_setabsoffset(&self->bottomright,
-			dragselectionbase.absoffset + bpl);
+		psy_audio_sequencecursor_set_offset(&self->topleft, cursor.offset);
+		psy_audio_sequencecursor_set_offset(&self->bottomright,
+			dragselectionbase.offset + bpl);
 	}
 	self->bottomright.track += 1;	
 }
@@ -85,6 +86,7 @@ void psy_audio_blockselection_drag(psy_audio_BlockSelection* self,
 
 	assert(self);
 
+	/* todo abs */
 	bpl = psy_audio_sequencecursor_bpl(&cursor);
 	if (cursor.track >= dragselectionbase.track) {
 		self->topleft.track = dragselectionbase.track;
@@ -93,17 +95,19 @@ void psy_audio_blockselection_drag(psy_audio_BlockSelection* self,
 		self->topleft.track = cursor.track;
 		self->bottomright.track = dragselectionbase.track + 1;
 	}
-	if (cursor.absoffset >= dragselectionbase.absoffset) {
-		psy_audio_sequencecursor_setabsoffset(&self->topleft,
-			dragselectionbase.absoffset);
-		psy_audio_sequencecursor_setabsoffset(&self->bottomright,
-			cursor.absoffset + bpl);
-		self->bottomright.orderindex = cursor.orderindex;
+	if (cursor.offset >= dragselectionbase.offset) {
+		psy_audio_sequencecursor_set_offset(&self->topleft,
+			dragselectionbase.offset);
+		psy_audio_sequencecursor_set_offset(&self->bottomright,
+			cursor.offset + bpl);
+		psy_audio_sequencecursor_set_order_index(&self->bottomright,
+			psy_audio_sequencecursor_order_index(&cursor));
 	} else {
-		psy_audio_sequencecursor_setabsoffset(&self->topleft, cursor.absoffset);
-		psy_audio_sequencecursor_setabsoffset(&self->bottomright,
-			dragselectionbase.absoffset + bpl);		
-		self->topleft.orderindex = cursor.orderindex;
+		psy_audio_sequencecursor_set_offset(&self->topleft, cursor.offset);
+		psy_audio_sequencecursor_set_offset(&self->bottomright,
+			dragselectionbase.offset + bpl);
+		psy_audio_sequencecursor_set_order_index(&self->topleft,
+			psy_audio_sequencecursor_order_index(&cursor));
 	}	
 }
 
@@ -111,9 +115,10 @@ void psy_audio_blockselection_select(psy_audio_BlockSelection* self,
 	uintptr_t track, uintptr_t numtracks,
 	psy_dsp_big_beat_t offset, psy_dsp_big_beat_t length)
 {	
-	psy_audio_sequencecursor_setabsoffset(&self->topleft, offset);
+	/* todo abs */
+	psy_audio_sequencecursor_set_offset(&self->topleft, offset);
 	self->topleft.track = track;
-	psy_audio_sequencecursor_setabsoffset(&self->bottomright, offset + length);
+	psy_audio_sequencecursor_set_offset(&self->bottomright, offset + length);
 	self->bottomright.track = track + numtracks;	
 	psy_audio_blockselection_enable(self);	
 }

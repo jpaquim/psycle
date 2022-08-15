@@ -182,7 +182,7 @@ bool xmsongloader_isvalid(XMSongLoader* self)
 bool xmsongloader_makexmsampler(XMSongLoader* self)
 {
 	self->sampler = psy_audio_machinefactory_makemachine(
-		self->songfile->song->machinefactory, psy_audio_XMSAMPLER, "",
+		self->songfile->song->machine_factory, psy_audio_XMSAMPLER, "",
 		psy_INDEX_INVALID);
 	if (self->sampler) {
 		psy_audio_Wire wire;
@@ -222,7 +222,7 @@ void xmsongloader_setsongcomments(XMSongLoader* self)
 	
 	comments = strdup("Imported from FastTracker II Module: ");
 	comments = psy_strcat_realloc(comments, self->songfile->path);
-	psy_audio_song_setcomments(self->song, comments);
+	psy_audio_song_set_comments(self->song, comments);
 	free(comments);
 	comments = NULL;	
 }
@@ -245,18 +245,18 @@ int xmsongloader_loadpatterns(XMSongLoader* self, uintptr_t* rv_nextstart)
 	}	
 	xmsongloader_setsamplerslidemode(self);	
 	xmsongloader_setsamplerpanningmode(self);
-	psy_audio_song_setnumsongtracks(self->song,
+	psy_audio_song_set_num_song_tracks(self->song,
 		psy_max(self->header.channels, 4));	
 	self->instrcount = self->header.instruments;
-	psy_audio_song_setbpm(self->song, self->header.tempo);
-	psy_audio_song_settpb(self->song, 24);
+	psy_audio_song_set_bpm(self->song, self->header.tempo);
+	psy_audio_song_set_tpb(self->song, 24);
 	extraticks = 0;
-	psy_audio_song_setlpb(self->song,
+	psy_audio_song_set_lpb(self->song,
 		calclpbfromspeed(self->header.speed, &extraticks));
 	if (extraticks != 0) {
-		psy_audio_song_setextraticksperbeat(self->song, extraticks);		
+		psy_audio_song_set_extra_ticks_per_beat(self->song, extraticks);		
 	}		
-	self->maxextracolumn = (int16_t)psy_audio_song_numsongtracks(self->song);
+	self->maxextracolumn = (int16_t)psy_audio_song_num_song_tracks(self->song);
 	// Since in XM we load first the patterns, we initialize the map linearly.
 	// Later, on the instruments, we will only create the virtual instruments
 	// of existing sampled instruments
@@ -275,7 +275,7 @@ int xmsongloader_loadpatterns(XMSongLoader* self, uintptr_t* rv_nextstart)
 			return status;
 		}
 	}
-	psy_audio_song_setnumsongtracks(self->song, self->maxextracolumn);	
+	psy_audio_song_set_num_song_tracks(self->song, self->maxextracolumn);	
 	xmsongloader_makesequence(self, &self->header);
 	*rv_nextstart = nextpatstart;
 	return PSY_OK;
@@ -934,7 +934,7 @@ int xmsongloader_loadinstruments(XMSongLoader* self, uintptr_t instr_start)
 		}
 		if (psy_table_exists(&self->xmtovirtual, i)) {
 			// sampulse: 0
-			psy_audio_song_insertvirtualgenerator(self->songfile->song,
+			psy_audio_song_insert_virtual_generator(self->songfile->song,
 				(uintptr_t)psy_table_at(&self->xmtovirtual, i), 0, i);
 		}
 	}
@@ -1617,10 +1617,10 @@ int modsongloader_load(MODSongLoader* self)
 		return status;
 	}
 	modsongloader_setnumsongtracks(self);
-	psy_audio_song_setbpm(self->song, 125);
-	psy_audio_song_setlpb(self->song, 4);
-	psy_audio_song_settpb(self->song, 24);
-	psy_audio_song_setextraticksperbeat(self->song, 0);	
+	psy_audio_song_set_bpm(self->song, 125);
+	psy_audio_song_set_lpb(self->song, 4);
+	psy_audio_song_set_tpb(self->song, 24);
+	psy_audio_song_set_extra_ticks_per_beat(self->song, 0);	
 	
 	virtidx = MAX_MACHINES;
 	for (i = 0; i < 31; ++i) {
@@ -1636,7 +1636,7 @@ int modsongloader_load(MODSongLoader* self)
 	for(i = 0; i < 31; ++i) {
 		modsongloader_loadinstrument(self, i);
 		// sampulse: 0
-		psy_audio_song_insertvirtualgenerator(self->songfile->song,
+		psy_audio_song_insert_virtual_generator(self->songfile->song,
 			(uintptr_t)psy_table_at(&self->xmtovirtual, i), 0, i);
 	}
 	modsongloader_makesequence(self, &self->header);
@@ -1668,7 +1668,7 @@ bool modsongloader_isvalid(MODSongLoader* self)
 bool modsongloader_makexmsampler(MODSongLoader* self)
 {
 	self->sampler = psy_audio_machinefactory_makemachine(
-		self->songfile->song->machinefactory, psy_audio_XMSAMPLER, "",
+		self->songfile->song->machine_factory, psy_audio_XMSAMPLER, "",
 		psy_INDEX_INVALID);
 	if (self->sampler) {
 		psy_audio_Wire wire;
@@ -1730,7 +1730,7 @@ void modsongloader_setsongcomments(MODSongLoader* self)
 
 	comments = strdup("Imported from MOD Module: ");
 	comments = psy_strcat_realloc(comments, self->songfile->path);
-	psy_audio_song_setcomments(self->song, comments);
+	psy_audio_song_set_comments(self->song, comments);
 	free(comments);
 	comments = NULL;
 }
@@ -1745,24 +1745,24 @@ void modsongloader_setnumsongtracks(MODSongLoader* self)
 	pID[3] = self->header.pID[3];
 	pID[4] = 0;
 	if (!strncmp(pID, "M.K.", 4)) {
-		psy_audio_song_setnumsongtracks(self->song, 4);
+		psy_audio_song_set_num_song_tracks(self->song, 4);
 	} else if (!strncmp(pID, "M!K!", 4)) {
-		psy_audio_song_setnumsongtracks(self->song, 4);
+		psy_audio_song_set_num_song_tracks(self->song, 4);
 	} else if (!strncmp(pID + 1, "CHN", 4)) {
 		char tmp[2]; tmp[0] = pID[0]; tmp[1] = 0;
-		psy_audio_song_setnumsongtracks(self->song, atoi(tmp));
+		psy_audio_song_set_num_song_tracks(self->song, atoi(tmp));
 	} else if (!strncmp(pID + 2, "CH", 4)) {
 		char tmp[3]; tmp[0] = pID[0]; tmp[1] = pID[1]; tmp[2] = 0;
-		psy_audio_song_setnumsongtracks(self->song, atoi(tmp));
+		psy_audio_song_set_num_song_tracks(self->song, atoi(tmp));
 	}
 }
 
 void modsongloader_setchannelpanning(MODSongLoader* self)
 {
-	if (psy_audio_song_numsongtracks(self->song) <= 8) {
+	if (psy_audio_song_num_song_tracks(self->song) <= 8) {
 		uintptr_t i;
 				
-		for (i = 0; i < psy_audio_song_numsongtracks(self->song); ++i) {
+		for (i = 0; i < psy_audio_song_num_song_tracks(self->song); ++i) {
 			uintptr_t paramidx;
 			psy_audio_MachineParam* param;
 
@@ -1780,7 +1780,7 @@ void modsongloader_setchannelpanning(MODSongLoader* self)
 	} else {
 		uintptr_t i;
 		
-		for (i = 0; i < psy_audio_song_numsongtracks(self->song); ++i) {
+		for (i = 0; i < psy_audio_song_num_song_tracks(self->song); ++i) {
 			uintptr_t paramidx;
 			psy_audio_MachineParam* param;
 
@@ -1814,13 +1814,13 @@ int modsongloader_loadpatterns(MODSongLoader* self)
 
 		// get pattern data
 		if (status = modsongloader_loadsinglepattern(self, j,
-				(int)psy_audio_song_numsongtracks(self->song))) {
+				(int)psy_audio_song_num_song_tracks(self->song))) {
 			return status;
 		}
 	}
 	if (self->speedpatch) {
-		psy_audio_song_setnumsongtracks(self->song,
-			psy_audio_song_numsongtracks(self->song) + 1);		
+		psy_audio_song_set_num_song_tracks(self->song,
+			psy_audio_song_num_song_tracks(self->song) + 1);		
 	}
 	return PSY_OK;
 }
@@ -2040,7 +2040,7 @@ int modsongloader_loadsinglepattern(MODSongLoader* self, int patidx, int tracks)
 							entry._cmd =psy_audio_PATTERNCMD_EXTENDED;
 							entry._parameter =psy_audio_PATTERNCMD_ROW_EXTRATICKS | extraticks;
 							modsongloader_writepatternentry(self, ppattern, row,
-								(int)psy_audio_song_numsongtracks(self->song), &entry);
+								(int)psy_audio_song_num_song_tracks(self->song), &entry);
 						}
 					}
 					else

@@ -25,7 +25,7 @@ static const char* notetostr(psy_audio_PatternEvent ev,
 static void trackercolumn_on_draw(TrackerColumn*, psy_ui_Graphics*);
 static void trackercolumn_draw_track_events(TrackerColumn*, psy_ui_Graphics*);
 static  TrackerColumnFlags trackercolumn_columnflags(TrackerColumn*,
-	uintptr_t line);
+	uintptr_t line, double seqoffset);
 static void trackercolumn_draw_entry(TrackerColumn*, psy_ui_Graphics*,
 	psy_audio_PatternEntry*, double y, TrackerColumnFlags, TrackDef*);
 static void trackercolumn_draw_digit(TrackerColumn*, psy_ui_Graphics*,
@@ -121,8 +121,9 @@ void trackercolumn_draw_track_events(TrackerColumn* self, psy_ui_Graphics* g)
 	psy_List** events;
 	psy_List* p;
 	double cpy;	
-	uintptr_t line;
+	uintptr_t line;	
 	TrackDef* trackdef;
+	uintptr_t lpb;
 	
 	events = trackereventtable_track(&self->state->track_events,
 		self->track);
@@ -133,33 +134,46 @@ void trackercolumn_draw_track_events(TrackerColumn* self, psy_ui_Graphics* g)
 		self->line_size.height - 1);
 	self->draw_restore_fg_colour = psy_ui_component_colour(&self->component);
 	self->draw_restore_bg_colour = psy_ui_component_background_colour(&self->component);
-	for (p = *events,			
-			cpy = trackerstate_beat_to_px(self->state,
-				patternviewstate_draw_offset(self->state->pv,
-					self->state->track_events.clip.topleft.absoffset),
-				self->line_size.height),
-			line = (uintptr_t)(self->state->track_events.clip.topleft.absoffset *
-				self->state->track_events.clip.topleft.lpb);
-			p != NULL;
-			p = p->next, ++line, cpy += self->line_size.height) {
-		trackercolumn_draw_entry(self, g, (psy_audio_PatternEntry*)p->entry,
-			cpy, trackercolumn_columnflags(self, line), trackdef);
+	lpb = self->state->pv->cursor.lpb;
+	if (patternviewstate_single_mode(self->state->pv)) {
+		cpy = trackerstate_beat_to_px(self->state, 
+				self->state->track_events.top,				
+				self->line_size.height);
+		line = self->state->track_events.top * lpb;				
+	}
+	for (p = *events; p != NULL; p = p->next) {
+		TrackerEventPair* pair;
+		
+		pair = (TrackerEventPair*)p->entry;
+		if (!patternviewstate_single_mode(self->state->pv)) {
+			cpy = trackerstate_beat_to_px(self->state, 
+				pair->offset + pair->seqoffset,				
+				self->line_size.height);
+			line = (uintptr_t)(pair->offset * (double)lpb);
+		}
+		trackercolumn_draw_entry(self, g, pair->entry,
+			cpy, trackercolumn_columnflags(self, line, pair->seqoffset), trackdef);
+		if (patternviewstate_single_mode(self->state->pv)) {
+			cpy += self->line_size.height;
+			++line;
+		}
 	}	
 }
 
 TrackerColumnFlags trackercolumn_columnflags(TrackerColumn* self,
-	uintptr_t line)
+	uintptr_t line, double seqoffset)
 {
-	TrackerColumnFlags rv;	
-
+	TrackerColumnFlags rv;
+	uintptr_t line_abs;
+	uintptr_t lpb;
+		
 	assert(self);
 	
+	lpb = psy_audio_sequencecursor_lpb(&self->state->pv->cursor);		
 	if (self->state->draw_beat_highlights) {
-		uintptr_t lpb;
-
-		lpb = patternviewstate_lpb(self->state->pv);
-		rv.beat = (line % lpb) == 0;
-		rv.beat4 = (line % (lpb * 4)) == 0;		
+		
+		rv.beat = ((line) % lpb) == 0;
+		rv.beat4 = ((line) % (lpb * 4)) == 0;		
 		rv.mid = self->state->midline &&
 			(line == trackerstate_midline(self->state,
 			psy_ui_component_scroll_top_px(psy_ui_component_parent(
@@ -168,14 +182,17 @@ TrackerColumnFlags trackercolumn_columnflags(TrackerColumn* self,
 				self->line_size.height));
 	} else {
 		rv.beat = rv.beat4 = rv.mid = FALSE;
-	}		 
+	}
+	line_abs = (uintptr_t)(seqoffset * (double)lpb) + line;		
 	rv.cursor = (self->track == self->state->pv->cursor.track) &&
-		(psy_audio_sequencecursor_line(&self->state->pv->cursor) == line);
+		(self->state->track_events.cursor_line_abs == line_abs);
 	rv.selection = psy_audio_blockselection_test_line(
-		&self->state->pv->selection, self->track, line);
+		&self->state->pv->selection, self->track, line);	
 	rv.playbar = self->state->draw_playbar &&
 		self->workspace->player.sequencer.hostseqtime.currplaying &&
-		(self->workspace->player.sequencer.hostseqtime.currplaycursor.linecache == line);
+		(psy_audio_sequencecursor_line_abs(
+			&self->workspace->player.sequencer.hostseqtime.currplaycursor,
+			self->state->pv->sequence) == line_abs);
 	rv.focus = TRUE;
 	return rv;
 }
@@ -424,7 +441,7 @@ void trackercolumn_on_mouse_up(TrackerColumn* self, psy_ui_MouseEvent* ev)
 }
 
 void trackercolumn_on_align(TrackerColumn* self)
-{
+{	
 	trackercolumn_update_size(self);
 }
 

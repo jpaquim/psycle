@@ -1,5 +1,5 @@
 CC = gcc
-inc = -I../../container/src -I../../../diversalis/src -I../../thread/src -I../../file/src -I/usr/include/lua5.3
+inc = -I../../container/src -I../../../diversalis/src -I../../thread/src -I../../file/src -I/usr/include/lua5.4
 src = $(wildcard *.c)
 obj = $(src:.c=.o)
 

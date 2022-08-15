@@ -117,11 +117,13 @@ void init_host_styles(psy_ui_Styles* self, psy_ui_ThemeMode theme)
 	psy_ui_styles_set_style(self, STYLE_SEQBAR, style);
 
 	style = psy_ui_style_allocinit();
-	psy_ui_style_set_colours(style, material.onsecondary,
-		material.surface_overlay_9p);
+	psy_ui_style_set_background_colour(style,
+		material.surface_overlay_5p);
 	psy_ui_styles_set_style(self, STYLE_SEQEDT, style);
 	
 	style = psy_ui_style_allocinit();	
+	psy_ui_style_set_colours(style, material.onsecondary,
+		material.surface_overlay_9p);
 	psy_ui_styles_set_style(self, STYLE_SEQEDT_TRACKS, style);
 	
 	style = psy_ui_style_allocinit();
@@ -249,15 +251,17 @@ void init_host_styles(psy_ui_Styles* self, psy_ui_ThemeMode theme)
 	style = psy_ui_style_allocinit();
 	psy_ui_style_set_colour(style, material.onprimary_strong);
 	psy_ui_styles_set_style(self, STYLE_SEQEDT_LOOP_ACTIVE, style);
+	
+	style = psy_ui_style_allocinit();
+	psy_ui_style_set_padding_em(style, 0.5, 0.5, 0.5, 0.5);	
+	psy_ui_styles_set_style(self, STYLE_SEQEDT_PROPERTIES, style);	
 
 	style = psy_ui_style_allocinit();
 	psy_ui_style_set_colours(style, material.secondary,
 		psy_ui_colour_overlayed(&material.surface, &material.overlay, 0.24));
 	psy_ui_styles_set_style(self, STYLE_SEQ_PROGRESS, style);
 	
-	style = psy_ui_style_allocinit();
-	psy_ui_style_set_colour(style, psy_ui_colour_weighted(&material.primary,
-		material.medium));
+	style = psy_ui_style_allocinit();	
 	psy_ui_style_set_background_overlay(style, 7);
 	psy_ui_styles_set_style(self, STYLE_MACHINEBOX, style);
 	
@@ -624,7 +628,8 @@ void init_host_styles(psy_ui_Styles* self, psy_ui_ThemeMode theme)
 	psy_ui_styles_set_style(self, STYLE_CLIPBOX_SELECT, style);
 
 	style = psy_ui_style_allocinit();
-	psy_ui_style_set_size(style, psy_ui_size_make_em(25.0, 1.0));
+	psy_ui_style_set_size(style, psy_ui_size_make_em(25.0, 0.8));
+	psy_ui_style_set_margin_em(style, 0.0, 0.5, 0.2, 0.0);
 	psy_ui_styles_set_style(self, STYLE_MAIN_VU, style);
 	
 	style = psy_ui_style_allocinit();	
@@ -715,7 +720,7 @@ void init_host_styles(psy_ui_Styles* self, psy_ui_ThemeMode theme)
 	
 	style = psy_ui_style_allocinit();
 	psy_ui_style_set_padding_em(style, 0.2, 0.0, 0.2, 0.0);
-	psy_ui_style_set_margin_em(style, 0.3, 0.0, 0.0, 0.0);		
+	psy_ui_style_set_margin_em(style, 0.3, 0.0, 0.0, 0.0);
 	psy_ui_style_set_colour(style, psy_ui_colour_make(0x55FF45));
 	psy_ui_style_set_background_overlay(style, 4);
 	psy_ui_styles_set_style(self, STYLE_FILEVIEW_DIRBAR, style);

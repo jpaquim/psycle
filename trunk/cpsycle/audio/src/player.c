@@ -79,7 +79,8 @@ psy_audio_PatternEvent psy_audio_patterndefaults_event(const
 	psy_audio_PatternDefaults* self, uintptr_t track)
 {	
 	return psy_audio_sequence_pattern_event_at_cursor(&self->sequence,
-		psy_audio_sequencecursor_make(track, 0.0));
+		psy_audio_sequencecursor_make(psy_audio_orderindex_make(0, 0),
+		track, 0.0));
 }
 
 psy_audio_PatternEvent psy_audio_patterndefaults_fill_event(const
@@ -91,7 +92,8 @@ psy_audio_PatternEvent psy_audio_patterndefaults_fill_event(const
 
 	rv = src;
 	defaultevent = psy_audio_sequence_pattern_event_at_cursor(&self->sequence,
-		psy_audio_sequencecursor_make(track, 0.0));
+		psy_audio_sequencecursor_make(psy_audio_orderindex_make(0, 0),
+		track, 0.0));
 	if (defaultevent.note != psy_audio_NOTECOMMANDS_EMPTY) {
 		rv.note = defaultevent.note;
 	}
@@ -419,7 +421,7 @@ void psy_audio_player_work_machine(psy_audio_Player* self, uintptr_t amount,
 			}
 			psy_audio_buffercontext_init(&bc, events, output, output, amount,
 				(self->song && !self->sequencer.metronome.active)
-				? psy_audio_song_numsongtracks(self->song)
+				? psy_audio_song_num_song_tracks(self->song)
 				: MAX_TRACKS);			
 			psy_audio_buffer_scale(output, psy_audio_machine_amprange(machine),
 				amount);
@@ -687,7 +689,7 @@ void psy_audio_player_set_song(psy_audio_Player* self, psy_audio_Song* song)
 		psy_audio_player_set_octave(self, psy_audio_song_octave(self->song));
 		self->sequencer.metronome = restore_metronome;		
 		psy_audio_player_set_sampler_index(self,
-			psy_audio_song_samplerindex(self->song));		
+			psy_audio_song_sampler_index(self->song));		
 	}
 }
 
@@ -768,7 +770,7 @@ void psy_audio_player_start_currseqpos(psy_audio_Player* self)
 	if (self->song) {
 		psy_audio_player_setposition(self,
 			psy_audio_sequence_offset(&self->song->sequence,
-				psy_audio_sequencecursor_orderindex(
+				psy_audio_sequencecursor_order_index(
 					&self->song->sequence.cursor)));
 		psy_audio_player_start(self);
 	}
@@ -846,7 +848,7 @@ void psy_audio_player_set_lpb(psy_audio_Player* self, uintptr_t lpb)
 		return;
 	}	
 	if (self->song) {
-		psy_audio_song_setlpb(self->song, lpb);
+		psy_audio_song_set_lpb(self->song, lpb);
 	}
 	psy_audio_sequencer_set_lpb(&self->sequencer, lpb);
 	psy_signal_emit(&self->signal_lpbchanged, self, 1, lpb);	

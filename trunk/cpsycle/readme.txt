@@ -17,11 +17,19 @@ the solution. If something went wrong press CTRL + SHIFT + B to try again.
 
 Linux
 
-A basic port has now been done to let cpsycle run on a linux platform.
-It is experimental and images arent supported and some native components
-available under win32 aren't yet emulated. If you like to compile and test it
-still, install the base compiler system and needed dev libaries of x11,
-xft and asound2 and others.
+A basic port has now been done to let cpsycle run on a linux platform. It is
+experimental, but if you like to compile and test it still, install the base
+compiler system and needed dev libaries of x11, xft and asound2 and others.
+Some Linux vst will work, lv2 plugins most probably not (just started the host),
+ladspa "should" work. The alsa driver should work, jack probably not.
+Window resize is extreme laggy and needs to be improved. If you want to exclude
+the non-free vst2 interface, outcomment the USE_VST flag 
+in ./detail/psyconfig.h.
+
+List for debian:
+build-essential liblilv-dev liblua5.4-dev libfreetype-dev libfontconfig-dev
+libgl-dev libx11-dev libxft-dev libxext-dev libxmu-dev, libasound2-dev,
+libjack-jackd2-dev, libstk-dev (some psycle plugins need it)
 
 In cpsycle run
     make

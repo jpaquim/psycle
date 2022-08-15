@@ -261,7 +261,7 @@ void psy_ui_x11_componentimp_init(psy_ui_x11_ComponentImp* self,
 	self->visible = parent ? TRUE : FALSE;
 	self->viewcomponents = NULL;
 	self->above = FALSE;
-	self->maximize = FALSE;
+	self->maximize = FALSE;	
 	psy_ui_realrectangle_init(&self->exposearea);
 	self->exposeareavalid = FALSE;
 	self->expose_rectangles = NULL;

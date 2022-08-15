@@ -113,10 +113,24 @@ void trackconfig_track_position(TrackConfig*, uintptr_t track, double x,
 
 
 /* TrackerEventTable */
+
+typedef struct TrackerEventPair {
+	double offset;
+	double seqoffset;
+	psy_audio_PatternEntry* entry;
+} TrackerEventPair;
+
+TrackerEventPair* trackereventpair_allocinit(double offset,
+	double seqoffset, psy_audio_PatternEntry*);
+
 typedef struct TrackerEventTable {
 	psy_Table tracks;	
-	psy_audio_BlockSelection clip;
-	uintptr_t currcursorline;	
+	uintptr_t cursor_line_abs;
+	uintptr_t play_line_abs;
+	double top;
+	double seqoffset;
+	uintptr_t left;
+	uintptr_t right;
 } TrackerEventTable;
 
 void trackereventtable_init(TrackerEventTable*);
@@ -136,6 +150,7 @@ typedef struct TrackerColumnFlags {
 } TrackerColumnFlags;
 
 /* TrackerState */
+
 typedef struct TrackerState {		
 	/* internal */
 	PatternViewState* pv;	
@@ -159,11 +174,11 @@ uintptr_t trackerstate_px_to_track(const TrackerState*, double x,
 double trackerstate_base_width(TrackerState*, uintptr_t track,
 	const psy_ui_TextMetric*);
 
-void trackerstate_clip(TrackerState*, const psy_ui_RealRectangle* clip,
-	psy_audio_BlockSelection* rv,
-	const psy_ui_TextMetric*);
+void trackerstate_track_clip(TrackerState*, const psy_ui_RealRectangle*,
+	const psy_ui_TextMetric*, uintptr_t* rv_left, uintptr_t* rv_right);
 void trackerstate_update_clip_events(TrackerState*,
-	const psy_audio_BlockSelection* clip);
+	psy_ui_RealRectangle* g_clip, double line_height, const psy_ui_TextMetric*,
+	psy_audio_Player*);
 
 void trackerstate_start_drag_selection(TrackerState*, psy_audio_SequenceCursor);
 void trackerstate_drag_selection(TrackerState*, psy_audio_SequenceCursor);
@@ -196,7 +211,7 @@ INLINE psy_dsp_big_beat_t trackerstate_px_to_beat(
 
 	return patternviewstate_quantize(self->pv,
 		(px / (psy_dsp_big_beat_t)line_height) *
-		patternviewstate_bpl(self->pv));
+		psy_audio_sequencecursor_bpl(&self->pv->cursor));
 }
 
 INLINE psy_dsp_big_beat_t trackerstate_pxtobeatnotquantized(
@@ -204,11 +219,9 @@ INLINE psy_dsp_big_beat_t trackerstate_pxtobeatnotquantized(
 {
 	assert(self);
 
-	return (px / line_height) * patternviewstate_bpl(self->pv);
+	return (px / line_height) * psy_audio_sequencecursor_bpl(&self->pv->cursor);
 }
 
-void trackerstate_line_clip(TrackerState*, const psy_ui_RealRectangle* clip,
-	psy_audio_BlockSelection* rv, double line_height);
 
 INLINE uintptr_t trackerstate_midline(const TrackerState* self,
 	double scrolltop_px, double client_height, double line_height)

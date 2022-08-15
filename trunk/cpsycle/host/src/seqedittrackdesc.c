@@ -58,16 +58,16 @@ void seqedittrackdesc_init(SeqEditTrackDesc* self, psy_ui_Component* parent,
 	SeqEditState* state, Workspace* workspace)
 {	
 	psy_ui_component_init(&self->component, parent, NULL);	
-	seqedittrackdesc_vtable_init(self);
+	seqedittrackdesc_vtable_init(self);	
 	psy_signal_init(&self->signal_resize);
 	self->workspace = workspace;
 	self->state = state;		
 	psy_ui_component_set_default_align(&self->component,
 		psy_ui_ALIGN_TOP, psy_ui_margin_zero());	
 	seqedittrackdesc_build(self);	
-	psy_signal_connect(&workspace->song->sequence.sequenceselection.signal_select, self,
+	psy_signal_connect(&workspace->song->sequence.selection.signal_select, self,
 		seqedittrackdesc_onsequenceselectionselect);
-	psy_signal_connect(&workspace->song->sequence.sequenceselection.signal_deselect, self,
+	psy_signal_connect(&workspace->song->sequence.selection.signal_deselect, self,
 		seqedittrackdesc_onsequenceselectiondeselect);	
 }
 
@@ -136,7 +136,7 @@ void seqedittrackdesc_build(SeqEditTrackDesc* self)
 		psy_audio_OrderIndex editposition;
 
 		editposition = psy_audio_sequenceselection_first(
-			&self->state->cmds->workspace->song->sequence.sequenceselection);
+			&self->state->cmds->workspace->song->sequence.selection);
 		for (t = 0; t < psy_audio_sequence_width(sequence); ++t) {
 			SequenceTrackBox* trackbox;
 			psy_audio_SequenceTrack* track;

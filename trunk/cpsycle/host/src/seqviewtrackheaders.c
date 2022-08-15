@@ -53,8 +53,7 @@ void seqviewtrackheaders_init(SeqviewTrackHeaders* self,
 	psy_ui_component_set_default_align(&self->client,
 		psy_ui_ALIGN_LEFT, psy_ui_margin_zero());
 	psy_ui_component_set_align_expand(&self->client, psy_ui_HEXPAND);
-	psy_ui_component_setscrollstep(&self->client,
-		psy_ui_size_make(self->state->trackwidth, self->state->line_height));
+	psy_ui_component_setscrollstep(&self->client, self->state->item_size);
 	psy_ui_component_set_overflow(&self->client, psy_ui_OVERFLOW_HSCROLL);
 	seqviewtrackheaders_build(self);
 }
@@ -79,8 +78,7 @@ void seqviewtrackheaders_build(SeqviewTrackHeaders* self)
 			if (sequencetrackbox) {
 				psy_ui_component_set_minimum_size(
 					sequencetrackbox_base(sequencetrackbox),
-					psy_ui_size_make(
-						self->state->trackwidth,
+					psy_ui_size_make(self->state->item_size.width,
 						psy_ui_value_zero()));
 				psy_signal_connect(&sequencetrackbox->trackbox.signal_close,
 					self, seqviewtrackheaders_on_del_track);

@@ -7,20 +7,47 @@
 
 
 #include "seqviewstate.h"
+#include "sequenceview.h"
 
 /* SeqViewState */
-void seqviewstate_init(SeqViewState* self, SequenceCmds* cmds)
+void seqviewstate_init(SeqViewState* self, SequenceCmds* cmds, SeqView* seqview)
 {	
 	assert(self);
 	assert(cmds);
 
 	self->cmds = cmds;
-	self->trackwidth = psy_ui_value_make_ew(16.0);	
-	self->line_height = psy_ui_value_make_eh(1.2);	
+	self->seqview = seqview;
+	self->item_size = psy_ui_size_make_em(16.0, 1.2);	
 	self->colwidth = 10.0;
 	self->cmd = SEQLVCMD_NONE;
-	self->cmd_orderindex = psy_audio_orderindex_make_invalid();
-	self->col = 0;
-	self->active = FALSE;
-	self->showpatternnames = FALSE;
+	self->cmd_orderindex = psy_audio_orderindex_make_invalid();	
+	self->showpatternnames = FALSE;	
+}
+
+void sequencelistviewstate_realign(SeqViewState* self, SeqViewAlign align)
+{
+	assert(self);
+	
+	seqview_realign(self->seqview, align);
+}
+
+void sequencelistviewstate_realign_full(SeqViewState* self)
+{
+	assert(self);
+	
+	seqview_realign(self->seqview, SEQVIEW_ALIGN_FULL);
+}
+
+void sequencelistviewstate_realign_list(SeqViewState* self)
+{
+	assert(self);
+	
+	seqview_realign(self->seqview,  SEQVIEW_ALIGN_LIST);
+}
+
+void sequencelistviewstate_repaint_list(SeqViewState* self)
+{
+	assert(self);
+	
+	seqview_realign(self->seqview, SEQVIEW_ALIGN_REPAINT_LIST);
 }

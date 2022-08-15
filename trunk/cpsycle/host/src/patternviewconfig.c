@@ -14,6 +14,8 @@
 /* prototypes*/
 static void patternviewconfig_make(PatternViewConfig*, psy_Property*
 	parent);
+static void patternviewconfig_on_single_mode(PatternViewConfig*,
+	psy_Property* sender);	
 
 /* implementation */
 void patternviewconfig_init(PatternViewConfig* self, psy_Property* parent,
@@ -125,6 +127,8 @@ void patternviewconfig_make(PatternViewConfig* self, psy_Property* parent)
 		psy_property_append_int(choice, "splithorizontal",
 			0, 0, 0),
 		"settings.pv.splithorizontal");	
+	patternviewconfig_connect(self, "displaysinglepattern",
+		self, patternviewconfig_on_single_mode);
 }
 
 void patternviewconfig_reset_theme(PatternViewConfig* self)
@@ -263,13 +267,16 @@ double patternviewconfig_linenumber_num_digits(const PatternViewConfig* self)
 	rv = 0.0;
 	if (patternviewconfig_line_numbers(self)) {
 		rv += 5.0;
+		if (patternviewconfig_linenumbersinhex(self)) {
+			
+		}
 		if (patternviewconfig_showbeatoffset(self)) {
 			rv += 5.0;
 		}
 		if (!patternviewconfig_single_mode(self)) {
-			rv += 3.0;
+			rv += 1.0;
 		}
-	}
+	}	
 	return rv;
 }
 
@@ -366,9 +373,7 @@ PatternDisplayMode patternviewconfig_pattern_display(const PatternViewConfig* se
 
 bool patternviewconfig_single_mode(const PatternViewConfig* self)
 {
-	return self->singlemode;
-	/* return psy_property_at_bool(self->patternview, "displaysinglepattern",
-		TRUE); */
+	return self->singlemode;	
 }
 
 bool patternviewconfig_use_header_bitmap(const PatternViewConfig* self)
@@ -453,4 +458,9 @@ psy_Property* patternviewconfig_property(PatternViewConfig* self, const char* ke
 	assert(self);
 
 	return psy_property_at(self->patternview, key, PSY_PROPERTY_TYPE_NONE);
+}
+
+void patternviewconfig_on_single_mode(PatternViewConfig* self, psy_Property* sender)
+{
+	self->singlemode = psy_property_item_bool(sender);	
 }

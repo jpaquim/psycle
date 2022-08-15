@@ -122,6 +122,9 @@ void patterndefaultline_update_preferred_size(PatternDefaultLine* self)
 	if (patternviewconfig_linenumber_num_digits(self->config) == 0.0) {
 		psy_ui_component_hide(&self->desc.component);
 	}else {
+	
+		
+		
 		psy_ui_component_set_preferred_size(&self->desc.component,
 			psy_ui_size_make(
 				psy_ui_mul_values(

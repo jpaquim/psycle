@@ -256,7 +256,7 @@ int psy_audio_psy3saver_write_sngi(psy_audio_PSY3Saver* self)
 		return status;
 	}
 	if (status = psyfile_write_int32(self->fp, (int32_t)
-			psy_audio_song_numsongtracks(self->song))) {
+			psy_audio_song_num_song_tracks(self->song))) {
 		return status;
 	}
 	if (status = psyfile_write_int32(self->fp, (int32_t)
@@ -351,7 +351,7 @@ int psy_audio_psy3saver_write_sngi(psy_audio_PSY3Saver* self)
 	if (0) {
 		uint32_t t;
 
-		for(t = 0; t < psy_audio_song_numsongtracks(self->song); ++t) {
+		for(t = 0; t < psy_audio_song_num_song_tracks(self->song); ++t) {
 			/*_trackNames[0][t]); */
 			if (status = psyfile_writestring(self->fp, "")) {
 				return status;
@@ -365,12 +365,12 @@ int psy_audio_psy3saver_write_sngi(psy_audio_PSY3Saver* self)
 	}
 	/* extraticks per beat */
 	if (status = psyfile_write_int32(self->fp, (int32_t)
-			psy_audio_song_extraticksperbeat(self->song))) {
+			psy_audio_song_extra_ticks_per_beat(self->song))) {
 		return status;
 	}
 	/* sampler index */
 	if (status = psyfile_write_uint32(self->fp, (uint32_t)
-			psy_audio_song_samplerindex(self->song))) {
+			psy_audio_song_sampler_index(self->song))) {
 		return status;
 	}
 	if (status = psyfile_updatesize(self->fp, sizepos, NULL)) {
@@ -556,7 +556,7 @@ int psy_audio_psy3saver_write_patd(psy_audio_PSY3Saver* self)
 			lpb = (int32_t)self->song->properties.lpb;
 			pat = psy_audio_allocoldpattern(pattern, lpb, &patternLines);
 			/* ok save it */
-			songtracks = (int32_t)psy_audio_song_numsongtracks(self->song);
+			songtracks = (int32_t)psy_audio_song_num_song_tracks(self->song);
 			source = malloc(songtracks * patternLines * EVENT_SIZE);
 			copy = source;
 			for (y = 0; y < patternLines; y++)

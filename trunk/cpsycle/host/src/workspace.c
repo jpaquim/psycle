@@ -71,7 +71,7 @@ void workspace_init(Workspace* self, psy_ui_Component* main)
 	self->undo_save_point = 0;
 	self->gearvisible = FALSE;
 	self->machines_undo_save_point = 0;	
-	self->terminalstyleid = STYLE_TERM_BUTTON;
+	self->terminalstyleid = STYLE_TERM_BUTTON;	
 	self->restoreview = viewindex_make(VIEW_ID_MACHINEVIEW,
 		SECTION_ID_MACHINEVIEW_WIRES, psy_INDEX_INVALID, psy_INDEX_INVALID);
 	self->playrow = FALSE;
@@ -82,6 +82,7 @@ void workspace_init(Workspace* self, psy_ui_Component* main)
 	self->paramviews = NULL;
 	self->terminal_output = NULL;
 	self->fileview = NULL;
+	self->dbg = 0;
 	viewhistory_init(&self->view_history);
 	psy_playlist_init(&self->playlist);
 	workspace_init_plugin_catcher_and_machinefactory(self);
@@ -362,8 +363,8 @@ void workspace_set_song(Workspace* self, psy_audio_Song* song, const char* filen
 		psy_signal_emit(&self->song->patterns.signal_numsongtrackschanged, self,
 			1, self->song->patterns.songtracks);
 		psy_audio_song_deallocate(old_song);
-		psy_audio_sequenceselection_clear(&self->song->sequence.sequenceselection);
-		psy_audio_sequenceselection_select_first(&self->song->sequence.sequenceselection,
+		psy_audio_sequenceselection_clear(&self->song->sequence.selection);
+		psy_audio_sequenceselection_select_first(&self->song->sequence.selection,
 			psy_audio_orderindex_make(0, 0));		
 		psy_audio_sequencecursor_init(&cursor);
 		psy_audio_sequence_set_cursor(&self->song->sequence, cursor);
@@ -1293,7 +1294,7 @@ void workspace_on_input(Workspace* self, uintptr_t cmdid)
 	case CMD_COLUMN_D:
 	case CMD_COLUMN_E:
 	case CMD_COLUMN_F:
-		if (self->song && psy_audio_song_numsongtracks(self->song) >=
+		if (self->song && psy_audio_song_num_song_tracks(self->song) >=
 				(uintptr_t)(cmdid - CMD_COLUMN_0)) {
 			self->song->sequence.cursor.track = (cmdid - CMD_COLUMN_0);			
 			psy_audio_sequence_set_cursor(psy_audio_song_sequence(self->song),

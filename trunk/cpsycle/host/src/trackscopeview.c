@@ -74,7 +74,7 @@ void trackscopes_init(TrackScopes* self, psy_ui_Component* parent,
 void trackscopes_ondraw(TrackScopes* self, psy_ui_Graphics* g)
 {
 	if (workspace_song(self->workspace)) {
-		uintptr_t numtracks = psy_audio_song_numsongtracks(
+		uintptr_t numtracks = psy_audio_song_num_song_tracks(
 			workspace_song(self->workspace));
 		uintptr_t c;
 		intptr_t rows = 1;
@@ -247,7 +247,8 @@ void trackscopes_onalign(TrackScopes* self)
 	if (workspace_song(self->workspace)) {
 		uintptr_t numtracks;
 
-		numtracks = psy_audio_song_numsongtracks(workspace_song(self->workspace));
+		numtracks = psy_audio_song_num_song_tracks(workspace_song(
+			self->workspace));
 		if (numtracks <= 32) {
 			self->maxcolumns = 16;
 		} else {
@@ -270,8 +271,8 @@ void trackscopes_onpreferredsize(TrackScopes* self, psy_ui_Size* limit,
 uintptr_t trackscopes_numrows(const TrackScopes* self)
 {	
 	if (workspace_song_const(self->workspace) &&
-			psy_audio_song_numsongtracks(workspace_song_const(self->workspace))
-			> 16) {
+			psy_audio_song_num_song_tracks(workspace_song_const(
+				self->workspace)) > 16) {
 		return 2;
 	}
 	return 1;
@@ -287,7 +288,8 @@ void trackscopes_on_mouse_down(TrackScopes* self, psy_ui_MouseEvent* ev)
 		double trackwidth;
 		uintptr_t numtracks;
 		
-		numtracks = psy_audio_song_numsongtracks(workspace_song(self->workspace));
+		numtracks = psy_audio_song_num_song_tracks(workspace_song(
+			self->workspace));
 		columns = numtracks < self->maxcolumns ? numtracks : self->maxcolumns;
 		size = psy_ui_component_scroll_size(&self->component);
 		tm = psy_ui_component_textmetric(&self->component);

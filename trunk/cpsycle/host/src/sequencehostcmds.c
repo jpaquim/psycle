@@ -41,25 +41,25 @@ void sequencecmds_newentry(SequenceCmds* self,
 			patidx = psy_audio_patterns_append(self->patterns, newpattern);
 			psy_undoredo_execute(&self->workspace->undoredo,
 				&psy_audio_sequenceinsertcommand_alloc(self->sequence,
-					&self->workspace->song->sequence.sequenceselection,
+					&self->workspace->song->sequence.selection,
 					psy_audio_sequenceselection_first(
-						&self->workspace->song->sequence.sequenceselection),
+						&self->workspace->song->sequence.selection),
 					patidx)->command);
 			break; }
 		case psy_audio_SEQUENCEENTRY_SAMPLE: {			
 			psy_undoredo_execute(&self->workspace->undoredo,
 				&psy_audio_sequencesampleinsertcommand_alloc(self->sequence,
-					&self->workspace->song->sequence.sequenceselection,
+					&self->workspace->song->sequence.selection,
 					psy_audio_sequenceselection_first(
-						&self->workspace->song->sequence.sequenceselection),
+						&self->workspace->song->sequence.selection),
 					self->workspace->song->samples.selected)->command);
 			break; }
 		case psy_audio_SEQUENCEENTRY_MARKER: {
 			psy_undoredo_execute(&self->workspace->undoredo,
 				&psy_audio_sequencemarkerinsertcommand_alloc(self->sequence,
-					&self->workspace->song->sequence.sequenceselection,
+					&self->workspace->song->sequence.selection,
 					psy_audio_sequenceselection_first(
-						&self->workspace->song->sequence.sequenceselection),
+						&self->workspace->song->sequence.selection),
 					"Untitled")->command);
 			break; }
 		default:
@@ -80,22 +80,22 @@ void sequencecmds_insertentry(SequenceCmds* self,
 			entry = (psy_audio_SequencePatternEntry*)
 				psy_audio_sequence_entry(self->sequence,
 				psy_audio_sequenceselection_first(
-					&self->workspace->song->sequence.sequenceselection));
+					&self->workspace->song->sequence.selection));
 			if (entry) {
 				psy_undoredo_execute(&self->workspace->undoredo,
 					&psy_audio_sequenceinsertcommand_alloc(self->sequence,
-						&self->workspace->song->sequence.sequenceselection,
+						&self->workspace->song->sequence.selection,
 						psy_audio_sequenceselection_first(
-							&self->workspace->song->sequence.sequenceselection),
+							&self->workspace->song->sequence.selection),
 						entry->patternslot)->command);
 			}
 			break; }
 		case psy_audio_SEQUENCEENTRY_MARKER: {
 			psy_undoredo_execute(&self->workspace->undoredo,
 				&psy_audio_sequencemarkerinsertcommand_alloc(self->sequence,
-					&self->workspace->song->sequence.sequenceselection,
+					&self->workspace->song->sequence.selection,
 					psy_audio_sequenceselection_first(
-						&self->workspace->song->sequence.sequenceselection),
+						&self->workspace->song->sequence.selection),
 					"Untitled")->command);
 			break; }
 		default:
@@ -111,7 +111,7 @@ void sequencecmds_cloneentry(SequenceCmds* self)
 
 		sequencecmds_update(self);
 		pattern = psy_audio_sequence_pattern(self->sequence,
-			psy_audio_sequenceselection_first(&self->workspace->song->sequence.sequenceselection));
+			psy_audio_sequenceselection_first(&self->workspace->song->sequence.selection));
 		if (pattern) {
 			psy_audio_Pattern* newpattern;
 			uintptr_t patidx;
@@ -120,8 +120,8 @@ void sequencecmds_cloneentry(SequenceCmds* self)
 			patidx = psy_audio_patterns_append(self->patterns, newpattern);
 			psy_undoredo_execute(&self->workspace->undoredo,
 				&psy_audio_sequenceinsertcommand_alloc(self->sequence,
-					&self->workspace->song->sequence.sequenceselection,
-					psy_audio_sequenceselection_first(&self->workspace->song->sequence.sequenceselection),
+					&self->workspace->song->sequence.selection,
+					psy_audio_sequenceselection_first(&self->workspace->song->sequence.selection),
 					patidx)->command);
 		}
 	}
@@ -137,7 +137,7 @@ void sequencecmds_delentry(SequenceCmds* self)
 		psy_audio_player_stop(&self->workspace->player);
 		psy_undoredo_execute(&self->workspace->undoredo,
 			&psy_audio_sequenceremovecommand_alloc(self->sequence,
-				&self->workspace->song->sequence.sequenceselection)->command);
+				&self->workspace->song->sequence.selection)->command);
 		if (playing) {
 			psy_audio_exclusivelock_enter();		
 			psy_audio_player_setposition(&self->workspace->player,
@@ -155,7 +155,7 @@ void sequencecmds_incpattern(SequenceCmds* self)
 
 		psy_undoredo_execute(&self->workspace->undoredo,
 			&psy_audio_sequencechangepatterncommand_alloc(self->sequence,
-				&self->workspace->song->sequence.sequenceselection, 1)->command);
+				&self->workspace->song->sequence.selection, 1)->command);
 	}
 }
 
@@ -166,7 +166,7 @@ void sequencecmds_decpattern(SequenceCmds* self)
 
 		psy_undoredo_execute(&self->workspace->undoredo,
 			&psy_audio_sequencechangepatterncommand_alloc(self->sequence,
-				&self->workspace->song->sequence.sequenceselection, -1)->command);
+				&self->workspace->song->sequence.selection, -1)->command);
 	}
 }
 
@@ -177,7 +177,7 @@ void sequencecmds_changepattern(SequenceCmds* self, uintptr_t step)
 
 		psy_undoredo_execute(&self->workspace->undoredo,
 			&psy_audio_sequencechangepatterncommand_alloc(self->sequence,
-				&self->workspace->song->sequence.sequenceselection, step)->command);
+				&self->workspace->song->sequence.selection, step)->command);
 	}
 }
 
@@ -199,7 +199,7 @@ void sequencecmds_copy(SequenceCmds* self)
 		psy_audio_sequencepaste_copy(
 			&self->workspace->sequencepaste,
 			self->sequence,
-			&self->workspace->song->sequence.sequenceselection);
+			&self->workspace->song->sequence.selection);
 	}
 }
 
@@ -218,12 +218,12 @@ void sequencecmds_paste(SequenceCmds* self)
 
 			order = (psy_audio_Order*)psy_list_entry(p);
 			if (order->entry->type == psy_audio_SEQUENCEENTRY_PATTERN) {
-				insertposition = psy_audio_sequenceselection_first(&self->workspace->song->sequence.sequenceselection);
+				insertposition = psy_audio_sequenceselection_first(&self->workspace->song->sequence.selection);
 				insertposition.order += order->index.order;
 				insertposition.track += order->index.track;
 				psy_undoredo_execute(&self->workspace->undoredo,
 					&psy_audio_sequenceinsertcommand_alloc(self->sequence,
-						&self->workspace->song->sequence.sequenceselection,
+						&self->workspace->song->sequence.selection,
 						insertposition,
 						((psy_audio_SequencePatternEntry*)order->entry)->patternslot)->command);
 				newentry = (psy_audio_SequencePatternEntry*)
@@ -258,7 +258,7 @@ void sequencecmds_clear(SequenceCmds* self)
 		*/
 		psy_undoredo_execute(&self->workspace->undoredo,
 			&psy_audio_sequenceclearcommand_alloc(self->sequence,
-				&self->sequence->sequenceselection)->command);
+				&self->sequence->selection)->command);
 		psy_audio_player_set_song(&self->workspace->player, restore_song);		
 		psy_audio_exclusivelock_leave();		
 	}
@@ -267,19 +267,16 @@ void sequencecmds_clear(SequenceCmds* self)
 void sequencecmds_append_track(SequenceCmds* self)
 {
 	if (workspace_song(self->workspace)) {
-		psy_audio_SequenceCursor cursor;
-
 		sequencecmds_update(self);
 		psy_audio_exclusivelock_enter();
 		psy_audio_sequence_append_track(self->sequence,
 			psy_audio_sequencetrack_allocinit());
-		psy_audio_exclusivelock_leave();
-		cursor = psy_audio_sequencecursor_make(0, 0.0);
-		cursor.orderindex = psy_audio_orderindex_make(
-			psy_audio_sequence_width(&self->workspace->song->sequence) - 1,
-			psy_INDEX_INVALID);
-		cursor.patternid = psy_INDEX_INVALID;
-		psy_audio_sequence_set_cursor(self->sequence, cursor);
+		psy_audio_exclusivelock_leave();		
+		psy_audio_sequence_set_cursor(self->sequence,
+			psy_audio_sequencecursor_make(psy_audio_orderindex_make(
+					psy_audio_sequence_width(&self->workspace->song->sequence) - 1,
+					psy_INDEX_INVALID),		
+				0, 0.0));
 	}
 }
 
@@ -290,13 +287,13 @@ void sequencecmds_insert_track(SequenceCmds* self)
 
 		sequencecmds_update(self);		
 		editpos = psy_audio_sequenceselection_first(
-			&self->workspace->song->sequence.sequenceselection);
+			&self->workspace->song->sequence.selection);
 		psy_audio_exclusivelock_enter();		
 		editpos.track = psy_audio_sequence_set_track(self->sequence,
 			psy_audio_sequencetrack_allocinit(), editpos.track);			
 		psy_audio_exclusivelock_leave();	
 		psy_audio_sequenceselection_select_first(
-			&self->workspace->song->sequence.sequenceselection, editpos);
+			&self->workspace->song->sequence.selection, editpos);
 	}
 }
 
@@ -312,18 +309,22 @@ void sequencecmds_remove_track(SequenceCmds* self, uintptr_t trackindex)
 			psy_audio_exclusivelock_leave();
 			cursor = self->sequence->cursor;
 			if (trackindex >= psy_audio_sequence_width(self->sequence)) {
+				psy_audio_OrderIndex index;
+				
+				index = cursor.order_index;
 				if (psy_audio_sequence_width(self->sequence) > 0) {
-					cursor.orderindex.track = psy_audio_sequence_width(self->sequence) - 1;
+					index.track = psy_audio_sequence_width(self->sequence) - 1;
 				} else {
-					cursor.orderindex.track = psy_INDEX_INVALID;
+					index.track = psy_INDEX_INVALID;
 				}
-				if (cursor.orderindex.order >= psy_audio_sequence_track_size(self->sequence, trackindex)) {
+				if (index.order >= psy_audio_sequence_track_size(self->sequence, trackindex)) {
 					if (psy_audio_sequence_track_size(self->sequence, trackindex) > 0) {
-						cursor.orderindex.order = psy_audio_sequence_track_size(self->sequence, trackindex) - 1;
+						index.order = psy_audio_sequence_track_size(self->sequence, trackindex) - 1;
 					} else {
-						cursor.orderindex.order = psy_INDEX_INVALID;
+						index.order = psy_INDEX_INVALID;
 					}
-				}				
+				}
+				psy_audio_sequencecursor_set_order_index(&cursor, index);		
 			}	
 			psy_audio_sequence_set_cursor(self->sequence, cursor);
 		}
@@ -339,10 +340,10 @@ void sequencecmds_changeplayposition(SequenceCmds* self)
 		sequencecmds_update(self);
 		entry = psy_audio_sequence_entry(self->sequence,
 			psy_audio_sequenceselection_first(
-				&self->workspace->song->sequence.sequenceselection));
+				&self->workspace->song->sequence.selection));
 		psy_audio_exclusivelock_enter();
 		psy_audio_sequence_setplayselection(self->sequence,
-			&self->workspace->song->sequence.sequenceselection);
+			&self->workspace->song->sequence.selection);
 		psy_audio_exclusivelock_leave();
 		if (entry) {
 			startposition = entry->offset;

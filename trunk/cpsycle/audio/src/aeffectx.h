@@ -1043,7 +1043,7 @@ typedef struct VstFileType
 	char mimeType2[128];		///< additional MIME type
 } VstFileType;
 
-INLINE InitVstFileType (struct VstFileType* self,
+INLINE void /* void added to psycle to avoid warning */ InitVstFileType (struct VstFileType* self,
 	const char* _name, const char* _macType, const char* _dosType,
 	const char* _unixType, const char* _mimeType1, const char* _mimeType2)
 {

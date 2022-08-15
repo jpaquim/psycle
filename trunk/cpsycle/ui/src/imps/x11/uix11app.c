@@ -334,8 +334,7 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 		imp->exposeareavalid = TRUE;		
 		for (p = imp->expose_rectangles; p != NULL; p = p->next) {			
 			psy_ui_x11_GraphicsImp* gx11;
-			XRectangle rectangle;
-			psy_ui_RealMargin spacing;
+			XRectangle rectangle;			
 			psy_ui_RealRectangle clip;
 
 			r = (psy_ui_RealRectangle*)p->entry;

@@ -119,30 +119,32 @@ INLINE void pianogridstate_clip(PianoGridState* self,
 	*rv_left = pianogridstate_quantize(self,
 		pianogridstate_pxtobeat(self, clip_left_px) +
 		((patternviewstate_single_mode(self->pv))
-		? self->pv->cursor.seqoffset
+		? psy_audio_sequencecursor_seqoffset(&self->pv->cursor, self->pv->sequence)
 		: 0.0));
 	if (patternviewstate_pattern(self->pv)) {
 		*rv_right = psy_min(			
 			patternviewstate_length(self->pv) +
 			((patternviewstate_single_mode(self->pv))
-				? self->pv->cursor.seqoffset
+				? psy_audio_sequencecursor_seqoffset(&self->pv->cursor, self->pv->sequence)
 				: 0.0),
 			pianogridstate_pxtobeat(self, clip_right_px) +
 			((patternviewstate_single_mode(self->pv))
-			? self->pv->cursor.seqoffset
+			? psy_audio_sequencecursor_seqoffset(&self->pv->cursor, self->pv->sequence)
 			: 0.0));
 	} else {
 		*rv_right = 0.0;
 	}
 }
 
-INLINE bool pianogridstate_testselection(PianoGridState* self, uint8_t key, double offset)
+INLINE bool pianogridstate_testselection(PianoGridState* self, uint8_t key,
+	double offset)
 {
+	/* todo abs */
 	return self->pv->selection.valid &&
 		key >= self->pv->selection.topleft.key &&
 		key < self->pv->selection.bottomright.key&&
-		offset >= self->pv->selection.topleft.absoffset &&
-		offset < self->pv->selection.bottomright.absoffset;
+		offset >= self->pv->selection.topleft.offset &&
+		offset < self->pv->selection.bottomright.offset;
 }
 
 #ifdef __cplusplus

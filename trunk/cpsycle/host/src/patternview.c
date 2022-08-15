@@ -42,6 +42,10 @@ static void patternview_on_column_resize(PatternView*, TrackerGrid*);
 static void patternview_update_scroll_step(PatternView*);
 static void patternview_select_display(PatternView*, PatternDisplayMode);
 static void patternview_update_font(PatternView*);
+static void patternview_on_track_reposition(PatternView*, psy_audio_Sequence*,
+	uintptr_t trackidx);
+static void patternview_on_pattern_length_changed(PatternView*, psy_audio_Patterns*,
+	uintptr_t pattern_idx);
 
 /* vtable */
 static psy_ui_ComponentVtable vtable;
@@ -197,9 +201,9 @@ void patternview_on_song_changed(PatternView* self, Workspace* sender)
 	assert(self);
 
 	patternview_connect_song(self);	
-	self->state.pv->cursor.orderindex = psy_audio_orderindex_make_invalid();
-	self->state.pv->cursor.patternid = psy_INDEX_INVALID;
-	patternview_update_cursor(self);
+	psy_audio_sequencecursor_set_order_index(&self->state.pv->cursor,	
+		psy_audio_orderindex_make_invalid());	
+	patternview_update_cursor(self);	
 }
 
 void patternview_connect_song(PatternView* self)
@@ -215,7 +219,11 @@ void patternview_connect_song(PatternView* self)
 		psy_signal_connect(&song->sequence.signal_cursorchanged, self,
 			patternview_on_cursor_changed);
 		psy_signal_connect(&song->patterns.signal_numsongtrackschanged, self,
-			patternview_num_tracks_changed);		
+			patternview_num_tracks_changed);
+		psy_signal_connect(&song->sequence.signal_trackreposition,
+			self, patternview_on_track_reposition);
+		psy_signal_connect(&song->patterns.signal_lengthchanged,
+			self, patternview_on_pattern_length_changed);
 	} else {
 		patternviewstate_set_sequence(self->state.pv, NULL);
 		patternproperties_set_patterns(&self->properties, NULL);
@@ -323,15 +331,15 @@ void patternview_on_grid_scroll(PatternView* self, psy_ui_Component* sender)
 
 void patternview_on_cursor_changed(PatternView* self,
 	psy_audio_Sequence* sender)
-{
+{	
 	patternview_update_cursor(self);	
 }
 
 void patternview_update_cursor(PatternView* self)
-{
-	patternviewstate_sync_cursor_to_sequence(self->state.pv);
-	patternproperties_select(&self->properties,
-		self->state.pv->cursor.patternid);
+{	
+	patternviewstate_sync_cursor_to_sequence(self->state.pv);	
+//	patternproperties_select(&self->properties,
+//		self->state.pv->cursor.patternid);
 }
 
 void patternview_num_tracks_changed(PatternView* self,
@@ -472,4 +480,26 @@ void patternview_update_scroll_step(PatternView* self)
 		&self->header.header), step);
 	psy_ui_component_set_scroll_step_height(trackergrid_base(
 		&self->trackerview.grid), self->state.line_height);	
+}
+
+void patternview_on_track_reposition(PatternView* self,
+	psy_audio_Sequence* sender, uintptr_t trackidx)
+{
+	if (!patternviewstate_single_mode(self->state.pv)) {	
+		psy_ui_component_align(&self->trackerview.scroller.pane);
+		psy_ui_component_align(&self->trackerview.lines.pane);
+		psy_ui_component_invalidate(&self->trackerview.component);
+		psy_ui_component_invalidate(&self->trackerview.lines.pane);
+	}
+}
+
+void patternview_on_pattern_length_changed(PatternView* self,
+	psy_audio_Patterns* sender, uintptr_t pattern_idx)
+{
+	if (patternviewstate_single_mode(self->state.pv)) {
+		psy_ui_component_align(&self->trackerview.scroller.pane);
+		psy_ui_component_align(&self->trackerview.lines.pane);
+		psy_ui_component_invalidate(&self->trackerview.component);
+		psy_ui_component_invalidate(&self->trackerview.lines.pane);
+	} /* else handled in patternview_on_track_reposition */
 }

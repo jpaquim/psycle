@@ -12,12 +12,12 @@
 #include "patternhostcmds.h"
 #include "styles.h"
 #include "trackercmds.h"
-#include "workspace.h"
 /* ui */
 #include <uiapp.h>
 /* audio */
 #include <pattern.h>
 #include <sequence.h>
+
 
 typedef enum {
 	PATTERNCURSOR_STEP_BEAT,
@@ -26,6 +26,7 @@ typedef enum {
 } PatternCursorStepMode;
 
 /* PatternViewState */
+
 typedef struct PatternViewState {
 	/* internal */	
 	psy_audio_SequenceCursor cursor;
@@ -70,20 +71,6 @@ INLINE void patternviewstate_set_sequence(PatternViewState* self,
 	}
 }
 
-INLINE void patternviewstate_displaypattern(PatternViewState* self)
-{
-	if (self->patconfig) {
-		patternviewconfig_display_single_pattern(self->patconfig);
-	}	
-}
-
-INLINE void patternviewstate_displaysequence(PatternViewState* self)
-{
-	if (self->patconfig) {
-		patternviewconfig_display_sequence(self->patconfig);
-	}
-}
-
 INLINE psy_audio_Sequence* patternviewstate_sequence(PatternViewState* self)
 {
 	assert(self);
@@ -108,7 +95,7 @@ INLINE psy_audio_Pattern* patternviewstate_pattern(PatternViewState* self)
 	}
 	return psy_audio_sequence_pattern(
 		self->sequence,
-		self->cursor.orderindex);
+		self->cursor.order_index);
 }
 
 INLINE const psy_audio_Pattern* patternviewstate_pattern_const(
@@ -152,23 +139,26 @@ INLINE psy_dsp_big_beat_t patternviewstate_length(const PatternViewState* self)
 {
 	assert(self);
 
+	if (!self->sequence) {
+		return 0.0;
+	}
 	if (patternviewstate_single_mode(self)) {
-		const psy_audio_Pattern* pattern;
-
-		pattern = patternviewstate_pattern_const(self);
-		if (pattern) {
-			return psy_audio_pattern_length(pattern);
+		psy_audio_SequenceEntry* seqentry;
+		
+		seqentry = psy_audio_sequence_entry(self->sequence,
+			self->cursor.order_index);
+		if (seqentry) {
+			return psy_audio_sequenceentry_length(seqentry);			
 		}
-	} else if (patternviewstate_sequence_const(self)) {
+	} else {
 		psy_audio_SequenceTrack* track;
 
-		track = psy_audio_sequence_track_at(
-			patternviewstate_sequence_const(self), self->cursor.orderindex.track);
+		track = psy_audio_sequence_track_at(self->sequence,
+			self->cursor.order_index.track);
 		if (track) {
 			return psy_audio_sequencetrack_duration(track,
 				patternviewstate_patterns_const(self));
-		}
-		return psy_audio_sequence_duration(patternviewstate_sequence_const(self));
+		}		
 	}
 	return 0.0;
 }
@@ -182,38 +172,19 @@ INLINE uintptr_t patternviewstate_num_song_tracks(const PatternViewState* self)
 	return 0;
 }
 
-INLINE uintptr_t patternviewstate_lpb(const PatternViewState* self)
-{
-	return self->cursor.lpb;
-}
-
-INLINE psy_dsp_big_beat_t patternviewstate_bpl(const PatternViewState* self)
-{
-	return (psy_dsp_big_beat_t)1.0 / self->cursor.lpb;
-}
-
 INLINE intptr_t patternviewstate_beat_to_line(const PatternViewState* self,
 	psy_dsp_big_beat_t offset)
 {
 	assert(self);
 
-	return cast_decimal(offset * patternviewstate_lpb(self));
+	return cast_decimal(offset * self->cursor.lpb);
 }
 
 INLINE uintptr_t patternviewstate_numlines(const PatternViewState* self)
 {
 	assert(self);
 	
-	return patternviewstate_beat_to_line(self,
-		patternviewstate_length(self));
-}
-
-INLINE intptr_t patternviewstate_seqstartline(const PatternViewState* self)
-{	
-	return patternviewstate_beat_to_line(self,
-		(patternviewstate_single_mode(self)
-		? self->cursor.seqoffset
-		: 0.0));
+	return patternviewstate_beat_to_line(self, patternviewstate_length(self));
 }
 
 INLINE psy_dsp_big_beat_t patternviewstate_quantize(const PatternViewState*
@@ -222,7 +193,7 @@ INLINE psy_dsp_big_beat_t patternviewstate_quantize(const PatternViewState*
 	assert(self);
 
 	return patternviewstate_beat_to_line(self, position) *
-		((psy_dsp_big_beat_t)1.0 / patternviewstate_lpb(self));
+		((psy_dsp_big_beat_t)1.0 / self->cursor.lpb);
 }
 
 
@@ -231,7 +202,7 @@ INLINE psy_dsp_big_beat_t patternviewstate_draw_offset(const PatternViewState*
 {
 	return absoffset -
 		(patternviewstate_single_mode(self)
-		? self->cursor.seqoffset
+		? psy_audio_sequencecursor_seqoffset(&self->cursor, self->sequence)
 		: 0.0);
 }
 
@@ -283,10 +254,12 @@ INLINE bool patternviewstate_move_cursor_one_step(const PatternViewState* self)
 	return TRUE;
 }
 
-INLINE PatternCursorStepMode patternviewstate_pgupdowntype(const PatternViewState* self)
+INLINE PatternCursorStepMode patternviewstate_pgupdowntype(
+	const PatternViewState* self)
 {
 	if (self->keymiscconfig) {
-		return ((PatternCursorStepMode)keyboardmiscconfig_pgupdowntype(self->keymiscconfig));
+		return ((PatternCursorStepMode)keyboardmiscconfig_pgupdowntype(
+			self->keymiscconfig));
 	}
 	return TRUE;
 }
@@ -299,17 +272,20 @@ INLINE intptr_t patternviewstate_pgupdownstep(const PatternViewState* self)
 	return 4;
 }
 
-INLINE intptr_t patternviewstate_curr_pgup_down_step(const PatternViewState* self)
+INLINE intptr_t patternviewstate_curr_pgup_down_step(
+	const PatternViewState* self)
 {
 	if (patternviewstate_pgupdowntype(self) == PATTERNCURSOR_STEP_BEAT) {
 		return self->cursor.lpb;
-	} else if (patternviewstate_pgupdowntype(self) == PATTERNCURSOR_STEP_4BEAT) {
+	} else if (patternviewstate_pgupdowntype(self) ==
+			PATTERNCURSOR_STEP_4BEAT) {
 		return self->cursor.lpb * 4;
 	}
 	return patternviewstate_pgupdownstep(self);
 }
 
-INLINE bool patternviewstate_hasmovecursorwhenpaste(const PatternViewState* self)
+INLINE bool patternviewstate_hasmovecursorwhenpaste(
+	const PatternViewState* self)
 {
 	if (self->patconfig) {
 		return patternviewconfig_ismovecursorwhenpaste(self->patconfig);
@@ -326,10 +302,13 @@ INLINE bool patternviewstate_movecursorwhenpaste(PatternViewState* self)
 
 		cursor = self->cursor;
 		cursor.track += self->patternpaste.maxsongtracks;
-		cursor.absoffset += self->patternpaste.length;
-		if (cursor.absoffset >= psy_audio_pattern_length(patternviewstate_pattern(self))) {
-			cursor.absoffset = psy_audio_pattern_length(patternviewstate_pattern(self)) -
-				patternviewstate_bpl(self);
+		cursor.offset += self->patternpaste.length;
+		/* todo abs */
+		if (cursor.offset >= psy_audio_pattern_length(
+				patternviewstate_pattern(self))) {
+			cursor.offset = psy_audio_pattern_length(
+				patternviewstate_pattern(self)) -
+				psy_audio_sequencecursor_bpl(&cursor);
 		}
 		psy_audio_sequence_set_cursor(self->sequence, cursor);
 		return TRUE;
@@ -394,13 +373,13 @@ INLINE void patternviewstate_interpolatelinear(PatternViewState* self)
 {
 	if (patternviewstate_pattern(self)) {
 		psy_audio_pattern_blockinterpolatelinear(
-			patternviewstate_pattern(self),
-			&self->selection);
+			patternviewstate_pattern(self), &self->selection);
 		patternviewstate_invalidate(self);
 	}
 }
 
-INLINE void patternviewstate_block_transpose(PatternViewState* self, intptr_t offset)
+INLINE void patternviewstate_block_transpose(PatternViewState* self,
+	intptr_t offset)
 {
 	assert(self);
 

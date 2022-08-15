@@ -44,7 +44,6 @@ void trackerlinenumbers_init(TrackerLineNumbers*, psy_ui_Component* parent,
 	TrackerState*, Workspace*);
 
 void trackerlinenumbers_invalidate_cursor(TrackerLineNumbers*);
-void trackerlinenumbers_invalidate_line(TrackerLineNumbers*, intptr_t line);
 void trackerlinenumbers_invalidate_playbar(TrackerLineNumbers*);
 void trackerlinenumbers_update_format(TrackerLineNumbers*);
 void trackerlinenumbers_show_cursor(TrackerLineNumbers*);

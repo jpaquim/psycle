@@ -39,6 +39,7 @@ void seqview_init(SeqView*, psy_ui_Component* parent, Workspace*);
 
 void seqview_clear(SeqView*);
 void seqview_idle(SeqView*);
+void seqview_realign(SeqView*, SeqViewAlign);
 
 INLINE psy_ui_Component* seqview_base(SeqView* self)
 {

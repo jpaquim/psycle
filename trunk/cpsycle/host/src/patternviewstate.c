@@ -18,6 +18,7 @@
 #include "../../detail/trace.h"
 #include "../../detail/portable.h"
 
+
 /* implementation */
 void patternviewstate_init(PatternViewState* self,
 	PatternViewConfig* patconfig, KeyboardMiscConfig* keymiscconfig,
@@ -61,10 +62,10 @@ void patternviewstate_select_bar(PatternViewState* self)
 	if (patternviewstate_pattern(self)) {
 		psy_audio_blockselection_select(&self->selection,
 			self->cursor.track, 1,
-			self->cursor.absoffset,
+			self->cursor.offset,
 			4.0);
-		if (self->cursor.absoffset > patternviewstate_pattern(self)->length) {
-			self->cursor.absoffset = patternviewstate_pattern(self)->length;
+		if (self->cursor.offset > patternviewstate_pattern(self)->length) {
+			self->cursor.offset = patternviewstate_pattern(self)->length;
 		}
 		patternviewstate_invalidate(self);
 	}
@@ -106,18 +107,38 @@ void patternviewstate_sequencestart(PatternViewState* self,
 
 		sequence = patternviewstate_sequence(self);		
 		psy_audio_sequence_begin(sequence,
-			self->cursor.orderindex.track,
+			self->cursor.order_index.track,
 			offset, rv);
 		if (rv->sequencentrynode) {
 			seqoffset = psy_audio_sequencetrackiterator_seqoffset(rv);
 			if (rv->pattern) {
 				length = rv->pattern->length;
 			}
+		} else {
+			psy_audio_SequenceEntry* entry;
+			psy_audio_Sequence* sequence;
+
+			sequence = patternviewstate_sequence(self);	
+			entry = psy_audio_sequence_entry(sequence,
+				psy_audio_orderindex_make(self->cursor.order_index.track, 0));
+			if (entry) {
+				psy_audio_sequence_begin(sequence,
+					self->cursor.order_index.track,
+					psy_audio_sequenceentry_offset(entry),					
+					rv);
+			}
 		}
 	} else {
+		psy_audio_Sequence* sequence;
+
+		sequence = patternviewstate_sequence(self);
 		rv->sequencentrynode = NULL;
-		rv->patternnode = psy_audio_pattern_greaterequal(
-			patternviewstate_pattern(self), offset - seqoffset);
+		psy_audio_sequence_begin(sequence,
+			self->cursor.order_index.track,
+			psy_audio_sequencecursor_seqoffset(&self->cursor, self->sequence) +
+			offset, rv);
+		// rv->patternnode = psy_audio_pattern_greaterequal(
+		//	patternviewstate_pattern(self), offset - seqoffset);
 	}	
 }
 

@@ -93,7 +93,11 @@ INLINE bool psy_audio_hostsequencertime_playing(const psy_audio_HostSequencerTim
 
 INLINE bool psy_audio_hostsequencertime_play_line_changed(const psy_audio_HostSequencerTime* self)
 {
-	return (self->currplaycursor.linecache != self->lastplaycursor.linecache);
+	return
+	 (!psy_audio_orderindex_equal(&self->currplaycursor.order_index,
+			self->lastplaycursor.order_index) ||	 
+		(self->currplaycursor.offset - self->lastplaycursor.offset) >=
+		(1.0 /  self->currplaycursor.lpb));
 }
 
 typedef enum {

@@ -16,7 +16,11 @@
 #define EXPORT __declspec (dllexport)
 #else
 #define EXPORT
+#ifndef __x86_64
 #define __cdecl __attribute__((__cdecl__))
+#else
+#define __cdecl
+#endif
 #endif
 #endif
 

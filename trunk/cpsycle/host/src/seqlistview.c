@@ -68,9 +68,9 @@ void seqviewitem_init(SeqViewItem* self, psy_ui_Component* parent,
 	self->workspace = workspace;
 	psy_ui_component_set_align(&self->component, psy_ui_ALIGN_TOP);
 	psy_ui_component_set_preferred_size(&self->component,
-		psy_ui_size_make(self->state->trackwidth, self->state->line_height));		
+		self->state->item_size);
 	if (psy_audio_sequenceselection_is_selected(
-			&self->workspace->song->sequence.sequenceselection,
+			&self->workspace->song->sequence.selection,
 			self->order_index)) {
 		psy_ui_component_add_style_state(&self->component,
 			psy_ui_STYLESTATE_SELECT);
@@ -113,7 +113,7 @@ bool seqviewitem_playing(const SeqViewItem* self)
 	
 	seqtime = &self->workspace->player.sequencer.hostseqtime;
 	return (seqtime->currplaying &&  psy_audio_orderindex_equal(
-		&seqtime->currplaycursor.orderindex, self->order_index));
+		&seqtime->currplaycursor.order_index, self->order_index));
 }
 
 void seqviewitem_draw_entry(SeqViewItem* self, psy_ui_Graphics* g,
@@ -128,7 +128,7 @@ void seqviewitem_draw_entry(SeqViewItem* self, psy_ui_Graphics* g,
 	tm = psy_ui_component_textmetric(&self->component);	
 	psy_ui_colour_init(&bg);
 	cp = psy_ui_realpoint_make(0.0, floor((psy_ui_value_px(
-		&self->state->line_height, tm, NULL) - tm->tmHeight) /
+		&self->state->item_size.height, tm, NULL) - tm->tmHeight) /
 		2.0 + 0.5));
 	seqviewitem_text(self, text);
 	len = psy_strlen(text);
@@ -139,9 +139,10 @@ void seqviewitem_draw_entry(SeqViewItem* self, psy_ui_Graphics* g,
 		double pos;
 		uintptr_t col;
 		
-		pos = psy_audio_player_rowprogress(self->state->cmds->player, self->order_index.track) * 
-			psy_ui_value_px(&self->state->trackwidth, psy_ui_component_textmetric(
-				&self->component), NULL);		
+		pos = psy_audio_player_rowprogress(self->state->cmds->player,
+			self->order_index.track) * 
+			psy_ui_value_px(&self->state->item_size.width,
+				psy_ui_component_textmetric(&self->component), NULL);		
 		col = (uintptr_t)(pos / self->state->colwidth + 0.5);
 		col = psy_min(col, strlen(text));
 		psy_ui_set_text_colour(g, psy_ui_style_const(STYLE_SEQ_PROGRESS)->colour);
@@ -180,9 +181,9 @@ void seqviewitem_draw_progress_bar(SeqViewItem* self, psy_ui_Graphics* g)
 			psy_ui_realsize_make(
 				psy_audio_player_rowprogress(self->state->cmds->player,
 					self->order_index.track) *
-				psy_ui_value_px(&self->state->trackwidth,
+				psy_ui_value_px(&self->state->item_size.width,
 				psy_ui_component_textmetric(&self->component), NULL),
-			psy_ui_value_px(&self->state->line_height,
+			psy_ui_value_px(&self->state->item_size.height,
 				psy_ui_component_textmetric(&self->component), NULL))),
 		psy_ui_style_const(STYLE_SEQ_PROGRESS)->background.colour);
 }
@@ -201,23 +202,27 @@ void seqviewitem_text(SeqViewItem* self, char* text)
 			self->state->cmds->patterns);
 		if (self->state->showpatternnames) {
 			if (pattern) {
-				psy_snprintf(text, 20, "%02X: %s %06.2f", self->order_index.order,
+				psy_snprintf(text, 20, "%02X: %s %06.2f",
+					self->order_index.order,
 					psy_audio_pattern_name(pattern),
 					(float)psy_audio_sequenceentry_offset(self->seqentry));
 			} else {
-				psy_snprintf(text, 20, "%02X:%02X(ERR) %06.2f", (int)self->order_index.order,
+				psy_snprintf(text, 20, "%02X:%02X(ERR) %06.2f",
+					(int)self->order_index.order,
 					(int)psy_audio_sequencepatternentry_patternslot(
 						seqpatternentry),
 					(float)psy_audio_sequenceentry_offset(self->seqentry));
 			}
 		} else {
 			if (pattern) {
-				psy_snprintf(text, 20, "%02X:%02X  %06.2f", self->order_index.order,
+				psy_snprintf(text, 20, "%02X:%02X  %06.2f",
+					self->order_index.order,
 					(int)psy_audio_sequencepatternentry_patternslot(
 						seqpatternentry),
 					(float)psy_audio_sequenceentry_offset(self->seqentry));
 			} else {
-				psy_snprintf(text, 20, "%02X:%02XE %06.2f", self->order_index.order,
+				psy_snprintf(text, 20, "%02X:%02XE %06.2f",
+					self->order_index.order,
 					(int)psy_audio_sequencepatternentry_patternslot(
 						seqpatternentry),
 					(float)psy_audio_sequenceentry_offset(self->seqentry));
@@ -260,17 +265,18 @@ void seqviewitem_on_mouse_down(SeqViewItem* self, psy_ui_MouseEvent* ev)
 	sequence = &self->state->cmds->workspace->song->sequence;
 	cursor = sequence->cursor;		
 	self->state->cmd_orderindex = self->order_index;
-	cursor.orderindex = self->order_index;
+	psy_audio_sequencecursor_set_order_index(&cursor,
+		self->order_index);
 	if (psy_ui_mouseevent_ctrl_key(ev)) {		
 		if (!psy_audio_sequenceselection_is_selected(
-				&sequence->sequenceselection,
+				&sequence->selection,
 				self->order_index)) {
 			psy_audio_sequenceselection_select_first(
-				&sequence->sequenceselection,
+				&sequence->selection,
 				self->order_index);
 		} else {
 			psy_audio_sequenceselection_deselect(
-				&sequence->sequenceselection,
+				&sequence->selection,
 				self->order_index);
 		}
 	} else {
@@ -292,7 +298,8 @@ void seqviewitem_on_mouse_double_click(SeqViewItem* self, psy_ui_MouseEvent* ev)
 	sequence = &self->state->cmds->workspace->song->sequence;
 	cursor = sequence->cursor;
 	self->state->cmd_orderindex = self->order_index;
-	cursor.orderindex = self->order_index;	
+	psy_audio_sequencecursor_set_order_index(&cursor,
+		self->order_index);
 	psy_audio_sequence_set_cursor(sequence, cursor);		
 	sequencecmds_changeplayposition(self->state->cmds);
 	psy_ui_mouseevent_stop_propagation(ev);
@@ -301,8 +308,14 @@ void seqviewitem_on_mouse_double_click(SeqViewItem* self, psy_ui_MouseEvent* ev)
 /* SeqViewTrack */
 
 /* prototypes */
+static void seqviewtrack_on_destroyed(SeqViewTrack*);
 static void seqviewtrack_on_mouse_down(SeqViewTrack*, psy_ui_MouseEvent*);
 static void seqviewtrack_build(SeqViewTrack*);
+static void seqviewtrack_on_sequence_insert(SeqViewTrack*,
+	psy_audio_Sequence* sender, psy_audio_OrderIndex*);
+static void seqviewtrack_on_sequence_remove(SeqViewTrack*,
+	psy_audio_Sequence* sender, psy_audio_OrderIndex*);	
+
 
 /* vtable */
 static psy_ui_ComponentVtable seqviewtrack_vtable;
@@ -311,7 +324,10 @@ static bool seqviewtrack_vtable_initialized = FALSE;
 static void seqviewtrack_vtable_init(SeqViewTrack* self)
 {
 	if (!seqviewtrack_vtable_initialized) {
-		seqviewtrack_vtable = *(self->component.vtable);		
+		seqviewtrack_vtable = *(self->component.vtable);
+		seqviewtrack_vtable.on_destroyed =
+			(psy_ui_fp_component_event)
+			seqviewtrack_on_destroyed;
 		seqviewtrack_vtable.on_mouse_down =
 			(psy_ui_fp_component_on_mouse_event)
 			seqviewtrack_on_mouse_down;		
@@ -334,13 +350,40 @@ void seqviewtrack_init(SeqViewTrack* self, psy_ui_Component* parent,
 	self->state = state;
 	self->trackindex = trackindex;
 	self->track = track;	
-	if (psy_audio_sequenceselection_first(&state->cmds->workspace->song->sequence.sequenceselection).track ==
+	if (psy_audio_sequenceselection_first(
+			&state->cmds->workspace->song->sequence.selection).track ==
 			trackindex) {
 		psy_ui_component_add_style_state(&self->component,
 			psy_ui_STYLESTATE_SELECT);
 	}
+	if (workspace_song(state->cmds->workspace)) {
+		psy_audio_Song* song;
+		psy_audio_Sequence* sequence;
+	
+		song = workspace_song(state->cmds->workspace);
+		sequence = psy_audio_song_sequence(song);	
+		psy_signal_connect(&sequence->signal_insert,
+			self, seqviewtrack_on_sequence_insert);
+		psy_signal_connect(&sequence->signal_remove,
+			self, seqviewtrack_on_sequence_remove);		
+	}
 	seqviewtrack_build(self);
 }
+
+void seqviewtrack_on_destroyed(SeqViewTrack* self)
+{
+	if (workspace_song(self->state->cmds->workspace)) {
+		psy_audio_Song* song;
+		psy_audio_Sequence* sequence;
+	
+		song = workspace_song(self->state->cmds->workspace);
+		sequence = psy_audio_song_sequence(song);	
+		psy_signal_disconnect(&sequence->signal_insert,
+			self, seqviewtrack_on_sequence_insert);
+		psy_signal_disconnect(&sequence->signal_remove,
+			self, seqviewtrack_on_sequence_remove);
+	}
+}		
 
 SeqViewTrack* seqviewtrack_alloc(void)
 {
@@ -366,6 +409,7 @@ void seqviewtrack_build(SeqViewTrack* self)
 	uintptr_t row;
 	psy_List* p;
 	
+	psy_ui_component_clear(&self->component);
 	p = self->track->nodes;
 	row = 0;
 	for (; p != NULL; psy_list_next(&p), ++row) {		
@@ -374,6 +418,20 @@ void seqviewtrack_build(SeqViewTrack* self)
 			psy_audio_orderindex_make(self->trackindex, row),
 			self->state, self->state->cmds->workspace);
 	}
+}
+
+void seqviewtrack_on_sequence_insert(SeqViewTrack* self,
+	psy_audio_Sequence* sender, psy_audio_OrderIndex* order_index)
+{		
+	seqviewtrack_build(self);
+	sequencelistviewstate_realign_list(self->state);	
+}
+
+void seqviewtrack_on_sequence_remove(SeqViewTrack* self,
+	psy_audio_Sequence* sender, psy_audio_OrderIndex* order_index)
+{	
+	seqviewtrack_build(self);
+	sequencelistviewstate_realign_list(self->state);
 }
 
 void seqviewtrack_on_mouse_down(SeqViewTrack* self, psy_ui_MouseEvent* ev)
@@ -386,10 +444,9 @@ void seqviewtrack_on_mouse_down(SeqViewTrack* self, psy_ui_MouseEvent* ev)
 		psy_ui_mouseevent_stop_propagation(ev);
 		return;
 	}	
-	cursor = psy_audio_sequencecursor_make(0, 0.0);
-	cursor.orderindex = psy_audio_orderindex_make(self->trackindex,
-		psy_INDEX_INVALID);
-	cursor.patternid = psy_INDEX_INVALID;
+	cursor = psy_audio_sequencecursor_make(
+		psy_audio_orderindex_make(self->trackindex, psy_INDEX_INVALID),
+		0, 0.0);	
 	psy_audio_sequence_set_cursor(sequence, cursor);
 	psy_ui_mouseevent_stop_propagation(ev);	
 }
@@ -408,6 +465,13 @@ static void seqviewlist_on_sequence_select(SeqviewList*,
 	psy_audio_SequenceSelection*, psy_audio_OrderIndex*);
 static void seqviewlist_on_sequence_deselect(SeqviewList*,
 	psy_audio_SequenceSelection*, psy_audio_OrderIndex*);
+static void seqviewlist_on_track_insert(SeqviewList*, psy_audio_Sequence*,
+	uintptr_t trackidx);
+static void seqviewlist_on_track_remove(SeqviewList*, psy_audio_Sequence*,
+	uintptr_t trackidx);
+static void seqviewlist_on_track_swap(SeqviewList*,
+	psy_audio_Sequence* sender, uintptr_t first, uintptr_t second);
+static void seqviewlist_set_player(SeqviewList*, psy_audio_Player*);
 
 /* vtable */
 static psy_ui_ComponentVtable seqviewlist_vtable;
@@ -433,52 +497,81 @@ void seqviewlist_init(SeqviewList* self, psy_ui_Component* parent,
 {
 	psy_ui_component_init(&self->component, parent, NULL);
 	seqviewlist_vtable_init(self);	
-	self->state = state;	
+	self->state = state;
+	/* init component */
 	psy_ui_component_set_wheel_scroll(&self->component, 1);	
 	psy_ui_component_set_default_align(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_margin_zero());
 	psy_ui_component_set_align_expand(&self->component, psy_ui_HEXPAND);
 	psy_ui_component_set_overflow(&self->component, psy_ui_OVERFLOW_SCROLL);
-	if (self->state->cmds->sequence && self->state->cmds->sequence->patterns) {
-		psy_signal_connect(
-			&self->state->cmds->sequence->patterns->signal_namechanged,
-			self, seqviewlist_on_pattern_name_changed);
+	psy_ui_component_setscrollstep(&self->component, self->state->item_size);		
+	psy_ui_component_set_overflow(&self->component, psy_ui_OVERFLOW_SCROLL);
+	/* connect */
+	seqviewlist_set_player(self, &self->state->cmds->workspace->player);			
+	if (workspace_song(state->cmds->workspace)) {
+		seqviewlist_set_song(self, workspace_song(state->cmds->workspace));
 	}
-	psy_signal_connect(&self->state->cmds->workspace->player.sequencer.signal_play_line_changed, self,
-		seqviewlist_on_playline_changed);
-	psy_signal_connect(&self->state->cmds->workspace->player.sequencer.signal_play_status_changed, self,
-		seqviewlist_on_playstatus_changed);
-	psy_ui_component_setscrollstep(&self->component,
-		psy_ui_size_make(self->state->trackwidth, self->state->line_height));
-	psy_ui_component_set_overflow(&self->component, psy_ui_OVERFLOW_SCROLL);	
+	/* build */
 	seqviewlist_build(self);	
+}
+
+void seqviewlist_set_player(SeqviewList* self, psy_audio_Player* player)
+{
+	assert(self);
+	assert(player);
+	
+	psy_signal_connect(&player->sequencer.signal_play_line_changed,
+		self, seqviewlist_on_playline_changed);
+	psy_signal_connect(&player->sequencer.signal_play_status_changed,
+		self, seqviewlist_on_playstatus_changed);
+}
+
+void seqviewlist_set_song(SeqviewList* self, psy_audio_Song* song)
+{
+	assert(self);
+	
+	if (song) {
+		psy_audio_Sequence* sequence;
+		psy_audio_Patterns* patterns;
+		
+		sequence = psy_audio_song_sequence(song);
+		psy_signal_connect(&sequence->selection.signal_select,
+			self, seqviewlist_on_sequence_select);
+		psy_signal_connect(&sequence->selection.signal_deselect,
+			self, seqviewlist_on_sequence_deselect);
+		psy_signal_connect(&sequence->signal_trackinsert, self,
+			seqviewlist_on_track_insert);
+		psy_signal_connect(&sequence->signal_trackswap, self,
+			seqviewlist_on_track_swap);
+		psy_signal_connect(&sequence->signal_trackremove, self,
+			seqviewlist_on_track_remove);
+		patterns = psy_audio_song_patterns(song);
+		psy_signal_connect(&patterns->signal_namechanged,
+			self, seqviewlist_on_pattern_name_changed);	
+	}
 }
 
 void seqviewlist_build(SeqviewList* self)
 {	
-	uintptr_t trackindex = 0;	
+	uintptr_t track_index;
 	
+	assert(self);
+	
+	track_index = 0;		
 	psy_ui_component_clear(&self->component);
-	for (; trackindex < psy_audio_sequence_width(self->state->cmds->sequence);
-			++trackindex) {
-		seqviewtrack_allocinit(&self->component, trackindex,
-			psy_audio_sequence_track_at(self->state->cmds->sequence, trackindex),
-			self->state);	
-	}
-	psy_ui_component_align(&self->component);
-	psy_signal_connect(
-		&self->state->cmds->workspace->song->sequence.sequenceselection.signal_select,
-		self, seqviewlist_on_sequence_select);
-	psy_signal_connect(
-		&self->state->cmds->workspace->song->sequence.sequenceselection.signal_deselect,
-		self, seqviewlist_on_sequence_deselect);	
+	for (; track_index < psy_audio_sequence_width(self->state->cmds->sequence);
+			++track_index) {
+		seqviewtrack_allocinit(&self->component, track_index,
+			psy_audio_sequence_track_at(self->state->cmds->sequence,
+			track_index), self->state);	
+	}	
 }
 
 void seqviewlist_on_preferred_size(SeqviewList* self,
 	const psy_ui_Size* limit, psy_ui_Size* rv)
 {	
 	seqviewlist_super_vtable.onpreferredsize(&self->component, limit, rv);	
-	psy_ui_value_add(&rv->width, &self->state->trackwidth,
+	psy_ui_value_add(&rv->width, &self->state->item_size.width,
 		psy_ui_component_textmetric(&self->component), NULL);	
 }
 
@@ -488,8 +581,8 @@ void seqviewlist_on_playline_changed(SeqviewList* self,
 	psy_audio_OrderIndex last;
 	psy_audio_OrderIndex curr;	
 	
-	last = sender->hostseqtime.lastplaycursor.orderindex;
-	curr = sender->hostseqtime.currplaycursor.orderindex;
+	last = sender->hostseqtime.lastplaycursor.order_index;
+	curr = sender->hostseqtime.currplaycursor.order_index;
 	if (last.order != curr.order) {		
 		seqviewlist_invalidate_item(self, last);
 	}	
@@ -535,7 +628,7 @@ void seqviewlist_on_sequence_select(SeqviewList* self,
 	track = psy_ui_component_at(&self->component, index->track);
 	if (track) {				
 		psy_ui_Component* row;
-		
+				
 		psy_ui_component_add_style_state(track, psy_ui_STYLESTATE_SELECT);
 		row = psy_ui_component_at(track, index->order);
 		if (row) {			
@@ -562,4 +655,22 @@ void seqviewlist_on_sequence_deselect(SeqviewList* self,
 			psy_ui_component_remove_style_state(row, psy_ui_STYLESTATE_SELECT);
 		}		
 	}
+}
+
+void seqviewlist_on_track_insert(SeqviewList* self, psy_audio_Sequence* sender,
+	uintptr_t trackidx)
+{
+	seqviewlist_build(self);	
+}
+
+void seqviewlist_on_track_remove(SeqviewList* self, psy_audio_Sequence* sender,
+	uintptr_t trackidx)
+{
+	seqviewlist_build(self);
+}
+
+void seqviewlist_on_track_swap(SeqviewList* self, psy_audio_Sequence* sender,
+	uintptr_t first, uintptr_t second)
+{
+	seqviewlist_build(self);	
 }

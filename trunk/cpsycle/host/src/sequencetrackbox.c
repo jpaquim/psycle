@@ -186,10 +186,10 @@ void sequencetrackbox_on_label_click(SequenceTrackBox* self, psy_ui_Label* sende
 	psy_audio_OrderIndex editposition;	
 	psy_audio_SequenceCursor cursor;
 
-	editposition = psy_audio_sequenceselection_first(&self->workspace->song->sequence.sequenceselection);
+	editposition = psy_audio_sequenceselection_first(&self->workspace->song->sequence.selection);
 	editposition.track = self->trackidx;	
 	psy_audio_sequencecursor_init(&cursor);	
-	cursor.orderindex = editposition;
+	psy_audio_sequencecursor_set_order_index(&cursor, editposition);	
 	if (self->workspace && workspace_song(self->workspace)) {
 		psy_audio_sequence_set_cursor(
 			psy_audio_song_sequence(workspace_song(self->workspace)),

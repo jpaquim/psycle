@@ -43,7 +43,7 @@ void psy_audio_wav_songio_load(psy_audio_SongFile* self)
 		psy_audio_pattern_setlength(pattern,
 			(sample->numframes / (psy_dsp_beat_t)sample->samplerate) / 60 * 125);
 		psy_audio_patterns_insert(&self->song->patterns, 0, pattern);
-		psy_audio_song_setnumsongtracks(self->song, 1);
+		psy_audio_song_set_num_song_tracks(self->song, 1);
 	}				
 	psy_audio_sequence_append_track(&self->song->sequence,
 		psy_audio_sequencetrack_allocinit());		
@@ -52,8 +52,9 @@ void psy_audio_wav_songio_load(psy_audio_SongFile* self)
 	{
 		psy_audio_Machine* machine;
 
-		machine = psy_audio_machinefactory_makemachine(self->song->machinefactory,
-			psy_audio_SAMPLER, "", psy_INDEX_INVALID);
+		machine = psy_audio_machinefactory_makemachine(
+			self->song->machine_factory, psy_audio_SAMPLER, "",
+			psy_INDEX_INVALID);
 		if (machine) {
 			psy_audio_machines_insert(&self->song->machines, 0, machine);
 			psy_audio_machines_connect(&self->song->machines,

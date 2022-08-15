@@ -6,10 +6,10 @@
 #if !defined(VUMETER_H)
 #define VUMETER_H
 
-/* host */
-#include "workspace.h"
 /* ui */
 #include "uicomponent.h"
+/* audio */
+#include <machine.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -35,9 +35,9 @@ typedef struct Vumeter {
 	psy_dsp_amp_t rightavg;
 	psy_dsp_amp_t l_log;
 	psy_dsp_amp_t r_log;
+	double channel_height;
 	/* references */
-	psy_audio_Machine* machine;
-	Workspace* workspace;
+	psy_audio_Machine* machine;	
 } Vumeter;
 
 void vumeter_init(Vumeter*, psy_ui_Component* parent);

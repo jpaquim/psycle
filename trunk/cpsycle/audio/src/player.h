@@ -155,7 +155,7 @@ INLINE void psy_audio_player_setbpm(psy_audio_Player* self,
 {	
 	psy_audio_sequencer_setbpm(&self->sequencer, bpm);
 	if (self->song) {
-		psy_audio_song_setbpm(self->song, psy_audio_sequencer_bpm(
+		psy_audio_song_set_bpm(self->song, psy_audio_sequencer_bpm(
 			&self->sequencer));
 	}
 }
@@ -186,7 +186,7 @@ INLINE void psy_audio_player_setextraticksperbeat(psy_audio_Player* self,
 {
 	psy_audio_sequencer_set_extra_ticks_per_beat(&self->sequencer, ticks);
 	if (self->song) {
-		self->song->properties.extraticksperbeat = ticks;
+		psy_audio_song_set_extra_ticks_per_beat(self->song, ticks);		
 	}
 }
 
@@ -197,11 +197,11 @@ INLINE psy_dsp_big_beat_t psy_audio_player_extraticksperbeat(
 }
 
 INLINE void psy_audio_player_set_sampler_index(psy_audio_Player* self,
-	uintptr_t samplerindex)
+	uintptr_t sampler_index)
 {
-	self->sequencer.sample_event.mach = (uint8_t)samplerindex;
+	self->sequencer.sample_event.mach = (uint8_t)sampler_index;
 	if (self->song) {
-		self->song->properties.samplerindex = samplerindex;
+		psy_audio_song_set_sampler_index(self->song, sampler_index);
 	}
 }
 
