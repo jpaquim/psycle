@@ -82,6 +82,7 @@
 #if defined(_MSC_VER) && _MSC_VER > 1200
 #define PSYCLE_DEFAULT_FONT "Tahoma; 20"
 #define PSYCLE_DEFAULT_PATTERN_FONT "Verdana; 18"
+#define PSYCLE_DEFAULT_MACHINE_FONT "verdana; 12"
 #elif defined(DIVERSALIS__OS__MICROSOFT)
 #define PSYCLE_DEFAULT_FONT "tahoma; 16"
 #define PSYCLE_DEFAULT_PATTERN_FONT "verdana; 16"

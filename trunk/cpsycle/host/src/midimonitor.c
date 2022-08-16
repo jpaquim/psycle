@@ -229,8 +229,7 @@ void midichannelmappingview_ondraw(MidiChannelMappingView* self,
 	psy_audio_MidiInput* midiinput;
 	intptr_t ch;
 	double cpy;	
-	const psy_ui_TextMetric* tm;
-	intptr_t i;
+	const psy_ui_TextMetric* tm;	
 	double line_height;
 
 	tm = psy_ui_component_textmetric(&self->component);	

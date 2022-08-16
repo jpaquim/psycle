@@ -321,6 +321,7 @@ void psy_ui_win_g_imp_drawsolidrectangle(psy_ui_win_GraphicsImp* self,
 		HBRUSH hBrush;
 		RECT   rect;
 		
+		hBrush = CreateSolidBrush(psy_ui_colour_colorref(&colour));
 		SetRect(&rect,
 			(int)r.left - (int)(self->org.x),
 			(int)r.top - (int)(self->org.y),
@@ -539,10 +540,10 @@ void psy_ui_win_g_imp_setcolour(psy_ui_win_GraphicsImp* self, psy_ui_Colour colo
 	HPEN pen;
 
 	GetObject(self->pen, sizeof(LOGPEN), &currpen);
+	self->colour = colour;
 	currpen.lopnColor = psy_ui_colour_colorref(&colour);
 	pen = CreatePenIndirect(&currpen);
-	SelectObject(self->hdc, pen);
-	self->curr_colour = colour;
+	SelectObject(self->hdc, pen);	
 	if (self->pen) {
 		DeleteObject(self->pen);
 	}
@@ -565,8 +566,7 @@ void psy_ui_win_g_imp_setbackgroundcolour(psy_ui_win_GraphicsImp* self, psy_ui_C
 }
 
 void psy_ui_win_g_imp_settextcolour(psy_ui_win_GraphicsImp* self, psy_ui_Colour colour)
-{
-	self->curr_colour = colour;
+{	
 	SetTextColor(self->hdc, psy_ui_colour_colorref(&colour));
 }
 

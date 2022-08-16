@@ -659,7 +659,7 @@ void mainframe_init_keyboard_view(MainFrame* self)
 	psy_ui_component_set_align(pianokeyboard_base(&self->keyboard),
 		psy_ui_ALIGN_CENTER);
 	psy_ui_component_set_preferred_width(&self->keyboard.component,
-		psy_ui_value_make_ew(keyboardstate_num_keys(&self->keyboardstate)));		
+		psy_ui_value_make_ew((double)keyboardstate_num_keys(&self->keyboardstate)));		
 	if (!generalconfig_showpianokbd(psycleconfig_general(
 			workspace_conf(&self->workspace)))) {
 		psy_ui_component_hide(&self->keyboardview);

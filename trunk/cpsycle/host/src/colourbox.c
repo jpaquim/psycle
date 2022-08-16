@@ -56,7 +56,7 @@ void colourbox_init(ColourBox* self, psy_ui_Component* parent)
 			0.0, 1.0, 0.0, 0.0));	
 	// psy_ui_component_set_align_expand(&self->component, psy_ui_HEXPAND);
 	psy_ui_textarea_init_single_line(&self->edit, &self->component);	
-	psy_ui_textarea_set_char_number(&self->edit, 20.0);
+	psy_ui_textarea_set_char_number(&self->edit, (int)20.0);
 	psy_ui_component_init(&self->colour, &self->component, NULL);	
 	psy_ui_component_set_preferred_size(&self->colour,
 		psy_ui_size_make_em(4.0, 1.0));	

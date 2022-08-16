@@ -1040,8 +1040,7 @@ const psy_List* psy_ui_winimp_fonts(const psy_ui_WinApp* self)
 
 void psy_ui_winimp_read_fonts(psy_ui_WinApp* self)
 {
-	HDC hdc;
-	psy_List* rv;
+	HDC hdc;	
 
 	hdc = GetDC(NULL);
 	psy_list_deallocate(&self->fonts, NULL);	
