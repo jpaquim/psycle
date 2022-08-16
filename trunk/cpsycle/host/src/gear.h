@@ -41,9 +41,7 @@ typedef struct GearButtons {
 	psy_ui_Button properties;
 	psy_ui_Button exchange;
 	psy_ui_Button clone;
-	psy_ui_Button showmaster;
-	psy_ui_Button connecttomaster;
-	psy_ui_Button muteunmute;
+	psy_ui_Button showmaster;	
 } GearButtons;
 
 void gearbuttons_init(GearButtons*, psy_ui_Component* parent,
@@ -59,15 +57,16 @@ typedef struct Gear {
 	psy_ui_Component component;
 	/* ui elements */
 	psy_ui_Component client;
-	psy_ui_TabBar tabbar;
+	psy_ui_TabBar tabbar;	
 	TitleBar titlebar;
+	psy_ui_Label label;
 	psy_ui_Notebook notebook;
 	psy_ui_ListBox listbox;	
 	MachinesBox machinesboxgen;
 	MachinesBox machinesboxfx;
 	InstrumentsBox instrumentsbox;
 	SamplesBox samplesbox;	
-	GearButtons buttons;
+	GearButtons buttons;	
 	/* references */
 	psy_audio_Machines* machines;
 	struct ParamViews* param_views;

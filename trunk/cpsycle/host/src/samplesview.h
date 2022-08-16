@@ -170,7 +170,7 @@ typedef struct SamplesSongImportView {
 	psy_ui_Component bar;
 	psy_ui_Button add;
 	WaveBox samplebox;
-	psy_Property song_load;
+	psy_Property song_load;	
 	/* references */
 	psy_audio_Song* source;
 	struct SamplesView* view;
@@ -209,6 +209,7 @@ typedef struct SamplesView {
 	psy_ui_Component loop;
 	SamplesLoopView waveloop;	
 	WaveBox wavebox;
+	psy_Property sample_load;
 	/* references */
 	Workspace* workspace;
 } SamplesView;

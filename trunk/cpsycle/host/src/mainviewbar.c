@@ -18,7 +18,6 @@
 static void mainviewbar_on_destroyed(MainViewBar*);
 static void mainviewbar_init_navigation(MainViewBar*, Workspace*);
 static void mainviewbar_init_main_tabbar(MainViewBar*);
-static void mainviewbar_init_help_settings_tabbar(MainViewBar*s);
 static void mainviewbar_init_view_tabbars(MainViewBar*);
 static void mainviewbar_on_maxminimize_view(MainViewBar*,
 	psy_ui_Button* sender);
@@ -64,8 +63,7 @@ void mainviewbar_init(MainViewBar* self, psy_ui_Component* parent,
 	psy_ui_component_set_align(psy_ui_button_base(&self->extract),
 		psy_ui_ALIGN_RIGHT);
 	mainviewbar_init_navigation(self, workspace);	
-	mainviewbar_init_main_tabbar(self);
-	mainviewbar_init_help_settings_tabbar(self);
+	mainviewbar_init_main_tabbar(self);	
 	mainviewbar_init_view_tabbars(self);
 	minmaximize_init(&self->minmaximize, pane);
 }
@@ -122,18 +120,6 @@ void mainviewbar_init_main_tabbar(MainViewBar* self)
 		VIEW_ID_SONGPROPERTIES,
 		psy_INDEX_INVALID, psy_INDEX_INVALID,
 		psy_ui_colour_white());
-}
-
-void mainviewbar_init_help_settings_tabbar(MainViewBar* self)
-{	
-	psy_ui_tabbar_append(&self->tabbar, "main.settings",
-		VIEW_ID_SETTINGSVIEW,
-		IDB_SETTINGS_LIGHT, IDB_SETTINGS_DARK,
-		psy_ui_colour_white());		
-	psy_ui_tabbar_append(&self->tabbar, "main.help",		
-		VIEW_ID_HELPVIEW,
-		psy_INDEX_INVALID, psy_INDEX_INVALID,
-		psy_ui_colour_white());;
 }
 
 

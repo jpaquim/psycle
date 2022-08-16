@@ -636,7 +636,7 @@ void propertiesrenderer_build(PropertiesRenderer* self)
 		if (self->properties) {
 			propertiesrenderline_allocinit(&self->client, &self->state,
 				self->properties, 0);
-		}
+		}		
 	}
 }
 
@@ -734,12 +734,13 @@ void propertiesview_init(PropertiesView* self, psy_ui_Component* parent,
 {
 	psy_ui_component_init(&self->component, parent, NULL);
 	propertiesview_vtable_init(self);
-	psy_ui_component_set_id(&self->component, VIEW_ID_SONGPROPERTIES);
+	psy_ui_component_set_id(&self->component, VIEW_ID_SETTINGSVIEW);
 	psy_ui_component_set_tab_index(&self->component, 0);	
 	self->maximize_main_sections = TRUE;
 	psy_signal_init(&self->signal_selected);		
 	if (tabbarparent) {
 		psy_ui_component_init(&self->viewtabbar, tabbarparent, NULL);
+		psy_ui_component_set_id(&self->viewtabbar, VIEW_ID_SETTINGSVIEW);	
 	}
 	psy_ui_notebook_init(&self->notebook, &self->component);
 	psy_ui_component_set_align(&self->notebook.component, psy_ui_ALIGN_CLIENT);
@@ -952,10 +953,12 @@ void propertiesview_on_scroll_pane_align(PropertiesView* self,
 }
 
 void propertiesview_on_show(PropertiesView* self)
-{
+{	
 	if (!self->renderer.state.do_build) {
-		self->renderer.state.do_build = TRUE;
+		self->renderer.state.do_build = TRUE;		
 		propertiesrenderer_build(&self->renderer);
+		psy_ui_component_align(&self->scroller.pane);
+		psy_ui_component_invalidate(&self->scroller.pane);
 	}
 }
 

@@ -15,9 +15,9 @@
 extern "C" {
 #endif
 
-// aim: displays the samples of the current song. It is divided into two views.
-//      The upper displays the first sample of group, the lower all the samples
-//      of the selected group.
+// Displays the samples of the current song. It is divided into two views.
+// The upper displays the first sample of group, the lower all the samples
+// of the selected group.
 
 typedef struct SamplesBox {
 	// inherits
@@ -29,8 +29,12 @@ typedef struct SamplesBox {
 	psy_ui_Label header;
 	psy_ui_Label group;
 	psy_ui_ListBox subsamplelist;
+	psy_Property sample_load;
+	bool load_on_select;
+	uintptr_t restore_view;
 	// references
-	psy_audio_Samples* samples;	
+	psy_audio_Samples* samples;
+	Workspace* workspace;
 } SamplesBox;
 
 void samplesbox_init(SamplesBox*, psy_ui_Component* parent, psy_audio_Samples*,

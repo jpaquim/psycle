@@ -1004,13 +1004,16 @@ void samplesloopview_oneditchangedsustainend(SamplesLoopView* self,
 
 /* SamplesView */
 /* prototypes */
+static void samplesview_ondestroyed(SamplesView*);
 static void samplesview_onsamplesboxchanged(SamplesView*, psy_ui_Component* sender);
-static void samplesview_onloadsample(SamplesView*, psy_ui_Component* sender);
+static void samplesview_onloadsamplebtn(SamplesView*, psy_ui_Component* sender);
+static void samplesview_on_load_sample(SamplesView*, psy_Property* sender);
+static void samplesview_load_sample(SamplesView*, const char* path);
 static void samplesview_onsavesample(SamplesView*, psy_ui_Component* sender);
 static void samplesview_ondeletesample(SamplesView*, psy_ui_Component* sender);
 static void samplesview_onduplicatesample(SamplesView*, psy_ui_Component* sender);
 static void samplesview_onsongchanged(SamplesView*, Workspace* sender);
-static void samplesview_oninstrumentslotchanged(SamplesView* self,
+static void samplesview_oninstrumentslotchanged(SamplesView*,
 	psy_audio_Instrument* sender, const psy_audio_InstrumentIndex* slot);
 static uintptr_t samplesview_freesampleslot(SamplesView*, uintptr_t startslot,
 	uintptr_t maxslots);
@@ -1023,6 +1026,23 @@ static void samplesview_onresamplermethodchanged(SamplesView*,
 static void samplesview_onselectsection(SamplesView*, psy_ui_Component* sender,
 	uintptr_t section, uintptr_t options);
 
+/* vtable */
+static psy_ui_ComponentVtable samplesview_vtable;
+static bool samplesview_vtable_initialized = FALSE;
+
+static void samplesview_vtable_init(SamplesView* self)
+{
+	if (!samplesview_vtable_initialized) {
+		samplesview_vtable = *(self->component.vtable);		
+		samplesview_vtable.on_destroyed =
+			(psy_ui_fp_component_event)
+			samplesview_ondestroyed;		
+		samplesview_vtable_initialized = TRUE;
+	}
+	psy_ui_component_set_vtable(samplesview_base(self), &samplesview_vtable);
+}
+
+
 /* implementation */
 void samplesview_init(SamplesView* self, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, Workspace* workspace)
@@ -1031,6 +1051,7 @@ void samplesview_init(SamplesView* self, psy_ui_Component* parent,
 	psy_ui_Margin waveboxmargin;	
 		
 	psy_ui_component_init(&self->component, parent, NULL);
+	samplesview_vtable_init(self);
 	psy_ui_component_set_id(samplesview_base(self), VIEW_ID_SAMPLESVIEW);
 	psy_ui_component_set_title(samplesview_base(self), "main.samples");
 	psy_ui_margin_init_em(&waveboxmargin, 0.5, 1.0, 0.0, 0.5);
@@ -1047,6 +1068,8 @@ void samplesview_init(SamplesView* self, psy_ui_Component* parent,
 	psy_ui_component_set_align(&self->buttons.component, psy_ui_ALIGN_TOP);
 	/* tabbarparent */
 	psy_ui_tabbar_init(&self->clienttabbar, tabbarparent);
+	psy_ui_component_set_id(psy_ui_tabbar_base(&self->clienttabbar),
+		VIEW_ID_SAMPLESVIEW);
 	psy_ui_component_set_align(&self->clienttabbar.component, psy_ui_ALIGN_LEFT);
 	psy_ui_component_hide(&self->clienttabbar.component);
 	psy_ui_tabbar_append_tabs(&self->clienttabbar, "Properties", "Import", "Editor", NULL);
@@ -1055,7 +1078,7 @@ void samplesview_init(SamplesView* self, psy_ui_Component* parent,
 	psy_ui_component_set_align(&self->samplesbox.component,
 		psy_ui_ALIGN_CLIENT);
 	psy_signal_connect(&self->buttons.load.signal_clicked, self,
-		samplesview_onloadsample);
+		samplesview_onloadsamplebtn);
 	psy_signal_connect(&self->buttons.save.signal_clicked, self,
 		samplesview_onsavesample);
 	psy_signal_connect(&self->buttons.duplicate.signal_clicked, self,
@@ -1123,6 +1146,14 @@ void samplesview_init(SamplesView* self, psy_ui_Component* parent,
 	psy_ui_tabbar_select(&self->tabbar, 0);
 	psy_signal_connect(&samplesview_base(self)->signal_selectsection, self,
 		samplesview_onselectsection);
+	psy_property_init_type(&self->sample_load, "load",
+		PSY_PROPERTY_TYPE_STRING);
+	psy_property_connect(&self->sample_load, self, samplesview_on_load_sample);
+}
+
+void samplesview_ondestroyed(SamplesView* self)
+{	
+	psy_property_dispose(&self->sample_load);
 }
 
 void samplesview_onconfigure(SamplesView* self, PatternViewConfig* config,
@@ -1186,48 +1217,67 @@ void samplesview_connectstatusbar(SamplesView* self)
 		self, samplesview_onresamplermethodchanged);
 }
 
+void samplesview_on_load_sample(SamplesView* self, psy_Property* sender)
+{	
+	samplesview_load_sample(self, psy_property_item_str(sender));	
+	workspace_select_view(self->workspace, viewindex_make(VIEW_ID_SAMPLESVIEW,
+		0, 0, psy_INDEX_INVALID));
+}
 
-void samplesview_onloadsample(SamplesView* self, psy_ui_Component* sender)
+void samplesview_onloadsamplebtn(SamplesView* self, psy_ui_Component* sender)
 {
-	if (workspace_song(self->workspace)) {
+	if (keyboardmiscconfig_ft2fileexplorer(psycleconfig_misc(
+			workspace_conf(self->workspace)))) {
+		self->workspace->fileview->property = &self->sample_load;
+		workspace_select_view(self->workspace, viewindex_make(VIEW_ID_FILEVIEW,
+			0, 0, psy_INDEX_INVALID));
+	} else {		
 		psy_ui_OpenDialog dialog;
 		static char filter[] =
 			"Wav Files (*.wav)|*.wav|"
 			"IFF psy_audio_Samples (*.iff)|*.iff|"
 			"All Files (*.*)|*.*";
-
+		
 		psy_ui_opendialog_init_all(&dialog, 0, "Load Sample", filter, "WAV",
 			dirconfig_samples(&self->workspace->config.directories));
 		if (psy_ui_opendialog_execute(&dialog)) {
-			psy_audio_Sample* sample;
-			psy_audio_SampleIndex index;
-			psy_audio_Instrument* instrument;
-			psy_audio_InstrumentEntry entry;			
-
-			sample = psy_audio_sample_allocinit(0);			
-			psy_audio_sample_load(sample, psy_ui_opendialog_path(&dialog));			
-			index = samplesbox_selected(&self->samplesbox);
-			psy_audio_samples_insert(&workspace_song(self->workspace)->samples, sample,
-				index);
-			instrument = psy_audio_instrument_allocinit();
-			psy_audio_instrumententry_init(&entry);
-			entry.sampleindex = index;
-			psy_audio_instrument_addentry(instrument, &entry);
-			psy_audio_instrument_setname(instrument, psy_audio_sample_name(sample));
-			psy_audio_instruments_insert(&workspace_song(self->workspace)->instruments, instrument,
-				psy_audio_instrumentindex_make(0, index.slot));
-			samplesview_setsample(self, index);
-			psy_signal_prevent(
-				&workspace_song(self->workspace)->instruments.signal_slotchange,
-				self, samplesview_oninstrumentslotchanged);
-			psy_audio_instruments_select(&workspace_song(self->workspace)->instruments,
-				psy_audio_instrumentindex_make(0, index.slot));
-			psy_signal_enable(
-				&workspace_song(self->workspace)->instruments.signal_slotchange,
-				self, samplesview_oninstrumentslotchanged);
-			psy_ui_component_invalidate(&self->component);
+			samplesview_load_sample(self, psy_path_full(psy_ui_opendialog_path(
+				&dialog)));			
 		}
 		psy_ui_opendialog_dispose(&dialog);
+	}
+}
+
+void samplesview_load_sample(SamplesView* self, const char* path)
+{
+	if (workspace_song(self->workspace)) {		
+		psy_audio_Sample* sample;
+		psy_audio_SampleIndex index;
+		psy_audio_Instrument* instrument;
+		psy_audio_InstrumentEntry entry;			
+
+		sample = psy_audio_sample_allocinit(0);			
+		psy_audio_sample_load(sample, path);
+		index = samplesbox_selected(&self->samplesbox);
+		psy_audio_samples_insert(&workspace_song(self->workspace)->samples,
+			sample, index);
+		instrument = psy_audio_instrument_allocinit();
+		psy_audio_instrumententry_init(&entry);
+		entry.sampleindex = index;
+		psy_audio_instrument_addentry(instrument, &entry);
+		psy_audio_instrument_setname(instrument, psy_audio_sample_name(sample));
+		psy_audio_instruments_insert(&workspace_song(self->workspace)->instruments, instrument,
+			psy_audio_instrumentindex_make(0, index.slot));
+		samplesview_setsample(self, index);
+		psy_signal_prevent(
+			&workspace_song(self->workspace)->instruments.signal_slotchange,
+			self, samplesview_oninstrumentslotchanged);
+		psy_audio_instruments_select(&workspace_song(self->workspace)->instruments,
+			psy_audio_instrumentindex_make(0, index.slot));
+		psy_signal_enable(
+			&workspace_song(self->workspace)->instruments.signal_slotchange,
+			self, samplesview_oninstrumentslotchanged);
+		psy_ui_component_invalidate(&self->component);
 	}
 }
 
@@ -1246,7 +1296,7 @@ void samplesview_onsavesample(SamplesView* self, psy_ui_Component* sender)
 		dirconfig_samples(&self->workspace->config.directories));
 	if (wavebox_sample(&self->wavebox) && psy_ui_savedialog_execute(&dialog)) {		
 		psy_audio_sample_save(wavebox_sample(&self->wavebox),
-			psy_ui_savedialog_path(&dialog));	
+			psy_path_full(psy_ui_savedialog_path(&dialog)));	
 	}
 	psy_ui_savedialog_dispose(&dialog);
 }

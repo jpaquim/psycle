@@ -149,19 +149,23 @@ void psy_audio_sample_allocwavedata(psy_audio_Sample* self)
 	psy_audio_buffer_clearsamples(&self->channels, self->numframes);
 }
 
-void psy_audio_sample_load(psy_audio_Sample* self, const psy_Path* path)
+void psy_audio_sample_load(psy_audio_Sample* self, const char* filename)
 {	
+	psy_Path path;
+	
 	assert(self);
-
-	psy_audio_wave_load(self, psy_path_full(path));		
-	psy_audio_sample_setname(self, psy_path_filename(path));	
+	
+	psy_audio_wave_load(self, filename);	
+	psy_path_init(&path, filename);
+	psy_audio_sample_setname(self, psy_path_filename(&path));	
+	psy_path_dispose(&path);
 }
 
-void psy_audio_sample_save(psy_audio_Sample* self, const psy_Path* path)
+void psy_audio_sample_save(psy_audio_Sample* self, const char* path)
 {
 	assert(self);
 
-	psy_audio_wave_save(self, psy_path_full(path));
+	psy_audio_wave_save(self, path);
 }
 
 // Properties

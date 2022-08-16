@@ -64,6 +64,7 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 	psy_ui_component_set_title(songpropertiesview_base(self), "main.properties");
 	psy_ui_component_set_style_type(&self->component, STYLE_SONGPROPERTIES);
 	psy_ui_component_init(&self->viewtabbar, tabbarparent, NULL);
+	psy_ui_component_set_id(&self->viewtabbar, VIEW_ID_SONGPROPERTIES);
 	psy_ui_component_init(&self->top, &self->component, NULL);
 	psy_ui_component_set_align(&self->top, psy_ui_ALIGN_TOP);
 	psy_ui_component_set_default_align(&self->top, psy_ui_ALIGN_TOP,

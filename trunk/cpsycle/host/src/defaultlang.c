@@ -60,8 +60,8 @@ void make_translator_default(psy_Dictionary* dict)
 	psy_dictionary_set(dict, "main.instrument", "Instrument");
 	psy_dictionary_set(dict, "main.instruments", "Instruments");
 	psy_dictionary_set(dict, "main.scripts", "...");
-	psy_dictionary_set(dict, "main.help", "Help");
-	psy_dictionary_set(dict, "main.settings", "Settings");
+	psy_dictionary_set(dict, "main.help", "?");
+	psy_dictionary_set(dict, "main.settings", "");
 	psy_dictionary_set(dict, "main.properties", "Properties");
 	psy_dictionary_set(dict, "main.exit", "Exit");
 	psy_dictionary_set(dict, "main.kbd", "Kbd");
@@ -171,6 +171,10 @@ void make_translator_default(psy_Dictionary* dict)
 	psy_dictionary_set(dict, "gear.instruments", "Instruments");
 	psy_dictionary_set(dict, "gear.generators", "Generators");
 	psy_dictionary_set(dict, "gear.waves", "Waves");
+	psy_dictionary_set(dict, "gear.labelgenerator", "Machines:Generator");
+	psy_dictionary_set(dict, "gear.labeleffect", "Machines:Effect");
+	psy_dictionary_set(dict, "gear.labelinstruments", "Instruments");
+	psy_dictionary_set(dict, "gear.labelsamples", "Sampled sounds");
 	/* cpu */	
 	psy_dictionary_set(dict, "cpu.performance", "CPU Performance");
 	psy_dictionary_set(dict, "cpu.resources", "Windows Resources");
@@ -501,10 +505,10 @@ void make_translator_default(psy_Dictionary* dict)
 	psy_dictionary_set(dict, "patternview.apply", "Apply");
 	psy_dictionary_set(dict, "patternview.tracker", "Tracker");
 	psy_dictionary_set(dict, "patternview.roll", "Pianoroll");
-	psy_dictionary_set(dict, "patternview.horz", "Horizontal");
-	psy_dictionary_set(dict, "patternview.vert", "Vertical");
-	psy_dictionary_set(dict, "patternview.split", "Split");
-	psy_dictionary_set(dict, "patternview.properties", "Properties");
+	psy_dictionary_set(dict, "patternview.horz", "H");
+	psy_dictionary_set(dict, "patternview.vert", "V");
+	psy_dictionary_set(dict, "patternview.split", "|");
+	psy_dictionary_set(dict, "patternview.properties", "...");
 	psy_dictionary_set(dict, "patternview.beats", "Beats");
 	psy_dictionary_set(dict, "patternview.keyboard", "Keyboard");
 	psy_dictionary_set(dict, "patternview.showtracks", "Show Tracks");

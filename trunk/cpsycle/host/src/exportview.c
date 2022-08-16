@@ -46,7 +46,8 @@ void exportview_init(ExportView* self, psy_ui_Component* parent,
 	exportview_make(self);
 	propertiesview_init(&self->view, &self->component,
 		tabbarparent, self->properties, 3, FALSE,
-		&workspace->inputhandler);	
+		&workspace->inputhandler);
+	psy_ui_component_set_id(&self->view.viewtabbar, VIEW_ID_EXPORTVIEW);		
 	psy_ui_component_set_align(propertiesview_base(&self->view),
 		psy_ui_ALIGN_CLIENT);
 }
