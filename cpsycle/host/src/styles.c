@@ -568,6 +568,11 @@ void init_host_styles(psy_ui_Styles* self, psy_ui_ThemeMode theme)
 	
 	style = psy_ui_style_allocinit();
 	psy_ui_style_set_colour(style, material.onprimary_medium);
+	psy_ui_border_init_solid(&style->border, material.surface_overlay_7p);	
+	psy_ui_styles_set_style(self, STYLE_GEAR, style);
+	
+	style = psy_ui_style_allocinit();
+	psy_ui_style_set_colour(style, material.onprimary_medium);
 	psy_ui_border_init_solid(&style->border, material.surface_overlay_7p);
 	psy_ui_border_setradius_px(&style->border, 6.0);	
 	psy_ui_styles_set_style(self, STYLE_RECENTVIEW_MAINSECTION, style);
@@ -594,13 +599,9 @@ void init_host_styles(psy_ui_Styles* self, psy_ui_ThemeMode theme)
 	psy_ui_styles_set_style(self, STYLE_RECENTVIEW_LINE_SELECT, style);
 	
 	style = psy_ui_style_allocinit();
-	psy_ui_style_set_colours(style, material.onprimary_weak,
-		material.overlay_1p);
-	psy_ui_border_init_bottom(&style->border, psy_ui_BORDER_SOLID,
-		material.surface_overlay_7p);
+	psy_ui_style_set_background_overlay(style, 4);
+	psy_ui_style_set_padding_em(style, 0.125, 0.5, 0.125, 1.0);
 	psy_ui_style_set_margin_em(style, 0.0, 0.0, 0.4, 0.0);
-	//psy_ui_style_set_padding_em(style, 0.5, 0.0, 0.5, 1.0);
-	psy_ui_style_set_padding_em(style, 0.125, 1.0, 0.125, 1.0);
 	psy_ui_style_set_background_overlay(style, 4);
 	psy_ui_styles_set_style(self, STYLE_HEADER, style);	
 	

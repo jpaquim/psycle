@@ -10,10 +10,13 @@
 #include "trackergridstate.h"
 
 
+/* PatternLineNavigator */
+
 typedef struct PatternLineNavigator {
+	/* internal */
 	PatternViewState* state;
 	bool wrap;
-	bool wraparound;
+	bool wrap_around;
 } PatternLineNavigator;
 
 void patternlinenavigator_init(PatternLineNavigator*, PatternViewState*,
@@ -33,10 +36,13 @@ INLINE bool patternlinennavigator_wrap(const PatternLineNavigator* self)
 	return self->wrap;
 }
 
+/* PatternColNavigator */
+
 typedef struct PatternColNavigator {
+	/* internal */
 	TrackerState* state;
 	bool wrap;
-	bool wraparound;
+	bool wrap_around;
 } PatternColNavigator;
 
 void patterncolnavigator_init(PatternColNavigator*, TrackerState*,

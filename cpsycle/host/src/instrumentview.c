@@ -456,6 +456,7 @@ void instrumentview_init(InstrumentView* self, psy_ui_Component* parent,
 	psy_ui_component_set_title(instrumentview_base(self), "main.instruments");
 	psy_ui_component_set_style_type(&self->component, STYLE_INSTRVIEW);	
 	psy_ui_component_init(&self->viewtabbar, tabbarparent, NULL);
+	psy_ui_component_set_id(&self->viewtabbar, VIEW_ID_INSTRUMENTSVIEW);
 	self->statusbar = NULL;
 	self->player = &workspace->player;
 	self->workspace = workspace;

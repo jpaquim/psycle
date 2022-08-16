@@ -78,6 +78,8 @@ typedef struct MainFrame {
 	psy_ui_Component toprow1;
 	psy_ui_Component topspacer;
 	psy_ui_Component client;
+	psy_ui_Button settings_btn;
+	psy_ui_Button help_btn;
 	/* includes tabbar */
 	MainViews mainviews;
 	/* excludes tabbar and includes bottom views */

@@ -44,8 +44,9 @@ void patternviewtabbar_init(PatternViewTabBar* self, psy_ui_Component* parent,
 	assert(self);
 
 	psy_ui_component_init_align(&self->component, parent, NULL,
-		psy_ui_ALIGN_LEFT);
+		psy_ui_ALIGN_LEFT);		
 	vtable_init(self);
+	psy_ui_component_set_id(&self->component, VIEW_ID_PATTERNVIEW);
 	self->patconfig = patconfig;
 	psy_signal_init(&self->signal_toggle_properties);
 	psy_ui_tabbar_init(&self->tabbar, &self->component);

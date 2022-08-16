@@ -661,7 +661,7 @@ void trackergrid_row_clear(TrackerGrid* self)
 			&removecommand_allocinit(pattern, self->state->pv->cursor,
 				self->state->pv->sequence)->command);
 		self->prevent_cursor = FALSE;
-		trackergrid_advance_line(self);		
+		trackergrid_advance_line(self);
 	} else {
 		TrackDef* trackdef;
 		TrackColumnDef* columndef;
@@ -1493,7 +1493,7 @@ void trackergrid_set_cursor(TrackerGrid* self, psy_audio_SequenceCursor cursor)
 void trackergrid_on_timer(TrackerGrid* self, uintptr_t id)
 {
 	if (trackergrid_check_update(self)) {
-		// psy_ui_component_invalidate(&self->component);
+		psy_ui_component_invalidate(&self->component);
 	}
 }
 

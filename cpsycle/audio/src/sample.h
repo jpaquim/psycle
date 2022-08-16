@@ -163,8 +163,8 @@ psy_audio_WaveDataController* psy_audio_sample_allociterator(psy_audio_Sample*,
 */
 void psy_audio_sample_allocwavedata(psy_audio_Sample*);
 
-void psy_audio_sample_load(psy_audio_Sample*, const psy_Path* path);
-void psy_audio_sample_save(psy_audio_Sample*, const psy_Path* path);
+void psy_audio_sample_load(psy_audio_Sample*, const char* path);
+void psy_audio_sample_save(psy_audio_Sample*, const char* path);
 
 /* Properties */
 void psy_audio_sample_setname(psy_audio_Sample*, const char* name);

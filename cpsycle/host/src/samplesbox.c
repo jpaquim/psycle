@@ -7,6 +7,8 @@
 
 
 #include "samplesbox.h"
+/* ui */
+#include <uiopendialog.h>
 /* platform */
 #include "../../detail/portable.h"
 
@@ -22,6 +24,9 @@ static void samplesbox_onsamplelistchanged(SamplesBox*, psy_ui_Component* sender
 	int slot);
 static void samplesbox_onsubsamplelistchanged(SamplesBox*, psy_ui_Component* sender,
 	int slot);
+static void samplesbox_file_select_sample(SamplesBox*);
+static void samplesbox_on_load_sample(SamplesBox*, psy_Property* sender);
+static void samplesbox_load_sample(SamplesBox*, const char* path);
 
 /* vtable */
 static psy_ui_ComponentVtable vtable;
@@ -43,10 +48,11 @@ void samplesbox_init(SamplesBox* self, psy_ui_Component* parent,
 	psy_audio_Samples* samples, Workspace* workspace)
 {	
 	psy_ui_Margin margin;
-
-	psy_ui_margin_init_em(&margin, 0.0, 0.0, 1.0, 0.0);	
+	
 	psy_ui_component_init(&self->component, parent, NULL);
 	vtable_init(self);
+	self->workspace = workspace;
+	psy_ui_margin_init_em(&margin, 0.0, 0.0, 1.0, 0.0);	
 	psy_ui_label_init(&self->header, &self->component);
 	psy_ui_label_set_text(&self->header, "samplesview.groupsfirstsample");
 	psy_ui_label_set_char_number(&self->header, 25);
@@ -70,11 +76,17 @@ void samplesbox_init(SamplesBox* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->samplelist.signal_selchanged, self,
 		samplesbox_onsamplelistchanged);
 	psy_signal_connect(&self->subsamplelist.signal_selchanged, self,
-		samplesbox_onsubsamplelistchanged);	
+		samplesbox_onsubsamplelistchanged);
+	psy_property_init_type(&self->sample_load, "load",
+		PSY_PROPERTY_TYPE_STRING);
+	psy_property_connect(&self->sample_load, self, samplesbox_on_load_sample);
+	self->load_on_select = FALSE;
+	self->restore_view = psy_INDEX_INVALID;
 }
 
 void samplesbox_on_destroyed(SamplesBox* self)
 {
+	psy_property_dispose(&self->sample_load);
 	psy_signal_dispose(&self->signal_changed);
 }
 
@@ -132,13 +144,19 @@ void samplesbox_onsamplelistchanged(SamplesBox* self, psy_ui_Component* sender,
 	int slot)
 {
 	samplesbox_buildsubsamplelist(self, slot, FALSE);
-	psy_ui_listbox_setcursel(&self->subsamplelist, 0);	
+	psy_ui_listbox_setcursel(&self->subsamplelist, 0);
+	if (self->load_on_select) {
+		samplesbox_file_select_sample(self);
+	}
 	psy_signal_emit(&self->signal_changed, self, 0);
 }
 
 void samplesbox_onsubsamplelistchanged(SamplesBox* self, psy_ui_Component* sender,
 	int slot)
 {	
+	if (self->load_on_select) {
+		samplesbox_file_select_sample(self);
+	}
 	psy_signal_emit(&self->signal_changed, self, 0);	
 }
 
@@ -190,5 +208,61 @@ void samplesbox_select(SamplesBox* self, psy_audio_SampleIndex index)
 	}
 	if (currindex.subslot != index.subslot) {
 		psy_ui_listbox_setcursel(&self->subsamplelist, index.subslot);
+	}
+}
+
+void samplesbox_file_select_sample(SamplesBox* self)
+{
+	if (keyboardmiscconfig_ft2fileexplorer(psycleconfig_misc(
+			workspace_conf(self->workspace)))) {
+		self->workspace->fileview->property = &self->sample_load;
+		workspace_select_view(self->workspace, viewindex_make(VIEW_ID_FILEVIEW,
+			0, 0, psy_INDEX_INVALID));
+	} else {		
+		psy_ui_OpenDialog dialog;
+		static char filter[] =
+			"Wav Files (*.wav)|*.wav|"
+			"IFF psy_audio_Samples (*.iff)|*.iff|"
+			"All Files (*.*)|*.*";
+		
+		psy_ui_opendialog_init_all(&dialog, 0, "Load Sample", filter, "WAV",
+			dirconfig_samples(&self->workspace->config.directories));
+		if (psy_ui_opendialog_execute(&dialog)) {
+			samplesbox_load_sample(self, psy_path_full(psy_ui_opendialog_path(
+				&dialog)));			
+		}
+		psy_ui_opendialog_dispose(&dialog);
+	}
+}
+
+void samplesbox_on_load_sample(SamplesBox* self, psy_Property* sender)
+{	
+	samplesbox_load_sample(self, psy_property_item_str(sender));	
+	workspace_select_view(self->workspace, viewindex_make(VIEW_ID_SAMPLESVIEW,
+		0, 0, psy_INDEX_INVALID));
+}
+
+void samplesbox_load_sample(SamplesBox* self, const char* path)
+{
+	if (workspace_song(self->workspace)) {		
+		psy_audio_Sample* sample;
+		psy_audio_SampleIndex index;
+		psy_audio_Instrument* instrument;
+		psy_audio_InstrumentEntry entry;			
+
+		sample = psy_audio_sample_allocinit(0);			
+		psy_audio_sample_load(sample, path);
+		index = samplesbox_selected(self);
+		psy_audio_samples_insert(&workspace_song(self->workspace)->samples,
+			sample, index);
+		instrument = psy_audio_instrument_allocinit();
+		psy_audio_instrumententry_init(&entry);
+		entry.sampleindex = index;
+		psy_audio_instrument_addentry(instrument, &entry);
+		psy_audio_instrument_setname(instrument, psy_audio_sample_name(sample));
+		psy_audio_instruments_insert(
+			&workspace_song(self->workspace)->instruments, instrument,
+			psy_audio_instrumentindex_make(0, index.slot));		
+		psy_ui_component_invalidate(&self->component);
 	}
 }

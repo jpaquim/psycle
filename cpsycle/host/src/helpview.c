@@ -45,6 +45,7 @@ void helpview_init_tabbar(HelpView* self, psy_ui_Component* tabbarparent,
 {	
 	psy_ui_component_init_align(&self->bar, tabbarparent, NULL,
 		psy_ui_ALIGN_LEFT);
+	psy_ui_component_set_id(&self->bar, VIEW_ID_HELPVIEW);
 	psy_ui_tabbar_init(&self->tabbar, &self->bar);
 	psy_ui_component_set_align_expand(&self->bar, psy_ui_HEXPAND);
 	psy_ui_component_set_align(psy_ui_tabbar_base(&self->tabbar),

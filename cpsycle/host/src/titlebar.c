@@ -51,13 +51,13 @@ void titlebar_init(TitleBar* self, psy_ui_Component* parent,
 	psy_ui_component_init_align(&self->client, &self->component, NULL,
 		psy_ui_ALIGN_CLIENT);
 	psy_ui_label_init_text(&self->title, &self->client, title);
-	psy_ui_component_set_align(&self->title.component, psy_ui_ALIGN_LEFT);
+	psy_ui_label_set_text_alignment(&self->title,
+		psy_ui_ALIGNMENT_CENTER);
+	psy_ui_component_set_align(&self->title.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_button_init(&self->hide, &self->component);
 	psy_ui_button_prevent_translation(&self->hide);
 	psy_ui_button_set_text(&self->hide, "X");	
-	psy_ui_component_set_align(&self->hide.component, psy_ui_ALIGN_RIGHT);	
-	psy_ui_component_set_margin(&self->hide.component,
-		psy_ui_margin_make_em(0.0, 2.0, 0.0, 0.0));	
+	psy_ui_component_set_align(&self->hide.component, psy_ui_ALIGN_RIGHT);		
 }
 
 void titlebar_on_destroyed(TitleBar* self)

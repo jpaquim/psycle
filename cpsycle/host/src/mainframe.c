@@ -110,6 +110,8 @@ static void mainframe_on_param_rack(MainFrame*, psy_Property* sender);
 static void mainframe_on_gear(MainFrame*, psy_Property* sender);
 static void mainframe_on_midi_monitor(MainFrame*, psy_Property* sender);
 static void mainframe_on_cpu_view(MainFrame*, psy_Property* sender);
+static void mainframe_on_help(MainFrame*, psy_ui_Button* sender);
+static void mainframe_on_settings(MainFrame*, psy_ui_Button* sender);
 
 /* vtable */
 static psy_ui_ComponentVtable vtable;
@@ -392,11 +394,28 @@ void mainframe_init_bars(MainFrame* self)
 		"showmetronome", self, mainframe_on_metronome_bar);	
 	psy_ui_component_set_margin(metronomebar_base(&self->metronomebar), margin);
 	psy_ui_component_set_align(metronomebar_base(&self->metronomebar),
-		psy_ui_ALIGN_TOP);
+		psy_ui_ALIGN_TOP);		
+	/* settings button */
+	psy_ui_button_init_text_connect(&self->settings_btn, &self->toprow0,
+		"main.settings", self, mainframe_on_settings);
+	psy_ui_button_load_resource(&self->settings_btn,
+		IDB_SETTINGS_LIGHT, IDB_SETTINGS_DARK,
+		psy_ui_colour_white());
+	psy_ui_component_set_id(psy_ui_button_base(&self->settings_btn),
+		VIEW_ID_SETTINGSVIEW);
+	psy_ui_component_set_align(psy_ui_button_base(&self->settings_btn),
+		psy_ui_ALIGN_RIGHT);
+	/* help button */
+	psy_ui_button_init_text_connect(&self->help_btn, &self->toprow0,
+		"main.help", self, mainframe_on_help);
+	psy_ui_component_set_id(psy_ui_button_base(&self->help_btn),
+		VIEW_ID_HELPVIEW);
+	psy_ui_component_set_align(psy_ui_button_base(&self->help_btn),
+		psy_ui_ALIGN_RIGHT);		
 	/* playposition */	
 	playposbar_init(&self->playposbar, &self->toprow0, workspace_player(
 		&self->workspace));
-	psy_ui_component_set_align(&self->playposbar.component, psy_ui_ALIGN_RIGHT);	
+	psy_ui_component_set_align(&self->playposbar.component, psy_ui_ALIGN_RIGHT);
 	/* row1 */
 	psy_ui_component_init(&self->toprow1, &self->toprows, NULL);
 	psy_ui_component_set_style_type(&self->toprow1, STYLE_TOPROW1);
@@ -918,12 +937,14 @@ void mainframe_on_timer(MainFrame* self, uintptr_t timerid)
 	}
 }
 
-void mainframe_on_view_selected(MainFrame* self, Workspace* sender, uintptr_t index,
-	uintptr_t section, int options)
+void mainframe_on_view_selected(MainFrame* self, Workspace* sender,
+	uintptr_t view_id, uintptr_t section, int options)
 {
 	psy_ui_Component* view;
 
-	if (index == VIEW_ID_CHECKUNSAVED) {
+	assert(self);
+	
+	if (view_id == VIEW_ID_CHECKUNSAVED) {
 		if (options == CONFIRM_CLOSE) {
 			self->checkunsavedbox.mode = (ConfirmBoxAction)options;
 			confirmbox_set_labels(&self->checkunsavedbox,
@@ -942,15 +963,20 @@ void mainframe_on_view_selected(MainFrame* self, Workspace* sender, uintptr_t in
 				"msg.seqclear", "msg.yes", "msg.no");
 		}
 	}
-	if (index == psy_INDEX_INVALID) {
+	if (view_id == psy_INDEX_INVALID) {
 		view = psy_ui_notebook_active_page(&self->mainviews.notebook);
 	} else {
-		psy_ui_notebook_select_by_component_id(&self->mainviews.notebook, index);
-		view = psy_ui_notebook_active_page(&self->mainviews.notebook);
+		psy_ui_notebook_select_by_component_id(&self->mainviews.notebook,
+			view_id);
+		view = psy_ui_notebook_active_page(&self->mainviews.notebook);				
 	}
 	if (view) {
-		if (index != psy_INDEX_INVALID) {
-			psy_ui_tabbar_select(&self->mainviews.mainviewbar.tabbar, index);
+		if (view_id != psy_INDEX_INVALID) {
+			psy_ui_tabbar_select(&self->mainviews.mainviewbar.tabbar, view_id);
+			psy_ui_notebook_select_by_component_id
+				(&self->mainviews.mainviewbar.viewtabbars, view_id);
+			psy_ui_component_invalidate(
+				&self->mainviews.mainviewbar.viewtabbars.component);
 		}
 		if (section != psy_INDEX_INVALID) {
 			psy_ui_component_select_section(view, section, options);
@@ -981,10 +1007,12 @@ void mainframe_on_tabbar_changed(MainFrame* self, psy_ui_TabBar* sender,
 	}	
 	psy_ui_component_select_section(&self->mainviews.notebook.component,
 		psy_ui_tab_target_id(tab), psy_INDEX_INVALID);	
-	psy_ui_notebook_select(&self->mainviews.viewstatusbars, tabindex);
-	psy_ui_notebook_select(&self->mainviews.mainviewbar.viewtabbars, tabindex);
-	component = psy_ui_notebook_active_page(&self->mainviews.notebook);
-	if (component) {
+	psy_ui_notebook_select(&self->mainviews.viewstatusbars, tabindex);	
+	component = psy_ui_notebook_active_page(&self->mainviews.notebook);	
+	if (component) {		
+		psy_ui_notebook_select_by_component_id
+			(&self->mainviews.mainviewbar.viewtabbars,
+			psy_ui_component_id(component));
 		workspace_on_view_changed(&self->workspace, viewindex_make(
 			tabindex, psy_ui_component_section(component),
 			psy_INDEX_INVALID,
@@ -1510,4 +1538,17 @@ void mainframe_on_trackscope_view(MainFrame* self, psy_Property* sender)
 	}
 	psy_ui_component_align(&self->pane);
 	psy_ui_component_invalidate(&self->pane);
+}
+
+void mainframe_on_help(MainFrame* self, psy_ui_Button* sender)
+{
+	workspace_select_view(&self->workspace,
+		viewindex_make(VIEW_ID_HELPVIEW, 0, 0, psy_INDEX_INVALID));
+}
+
+void mainframe_on_settings(MainFrame* self, psy_ui_Button* sender)
+{
+	workspace_select_view(&self->workspace,
+		viewindex_make(VIEW_ID_SETTINGSVIEW, 0, psy_INDEX_INVALID,
+			psy_INDEX_INVALID));
 }
