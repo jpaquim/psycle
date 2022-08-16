@@ -599,7 +599,7 @@ void psy_ui_button_on_repeat_timer(psy_ui_Button* self, uintptr_t id)
 			self->repeat_rate) {		
 		psy_ui_component_start_timer(&self->component, id,
 			self->repeat_rate);		
-		self->first_repeat == FALSE;
+		self->first_repeat = FALSE;
 	}
 	psy_ui_button_emit(self, &self->repeat_event);
 }

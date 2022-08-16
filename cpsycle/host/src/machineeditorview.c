@@ -60,10 +60,9 @@ void machineeditorview_init(MachineEditorView* self, psy_ui_Component* parent,
 	imp = (psy_ui_x11_ComponentImp*)(self->component.imp);
 	psy_audio_machine_seteditorhandle(machine, (void*)imp->hwnd);	
 #else
-	psy_ui_x11_ComponentImp* imp;
+	psy_ui_win_ComponentImp* imp;
 	
 	imp = (psy_ui_win_ComponentImp*)(self->component.imp);	
-	psy_ui_x11app_flush_events((psy_ui_X11App*)psy_ui_app()->imp);
 	psy_audio_machine_seteditorhandle(machine, (void*)imp->hwnd);
 #endif	
 	psy_signal_connect(&workspace->signal_machineeditresize, self,

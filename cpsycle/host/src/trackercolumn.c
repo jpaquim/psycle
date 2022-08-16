@@ -139,7 +139,7 @@ void trackercolumn_draw_track_events(TrackerColumn* self, psy_ui_Graphics* g)
 		cpy = trackerstate_beat_to_px(self->state, 
 				self->state->track_events.top,				
 				self->line_size.height);
-		line = self->state->track_events.top * lpb;				
+		line = (uintptr_t)(self->state->track_events.top * lpb);
 	}
 	for (p = *events; p != NULL; p = p->next) {
 		TrackerEventPair* pair;

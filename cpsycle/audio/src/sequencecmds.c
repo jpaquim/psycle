@@ -300,8 +300,7 @@ void psy_audio_sequenceremovecommand_dispose(psy_audio_SequenceRemoveCommand* se
 void psy_audio_sequenceremovecommand_execute(psy_audio_SequenceRemoveCommand* self,
 	psy_Property* params)
 {
-	psy_audio_OrderIndex editposition;
-	psy_audio_OrderIndex next;
+	psy_audio_OrderIndex editposition;	
 	psy_audio_SequenceCursor cursor;
 	psy_dsp_big_beat_t pattern_offset;
 

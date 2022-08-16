@@ -109,8 +109,9 @@ psy_dsp_big_beat_t psy_audio_sequencecursor_seqoffset(
 void psy_audio_sequencecursor_trace(const psy_audio_SequenceCursor* self)
 {
 	printf("trk: %u  order: %u pos %f\n",
-		self->order_index.track, self->order_index.order,
-		self->offset);
+		(unsigned int)self->order_index.track,
+		(unsigned int)self->order_index.order,
+		(float)self->offset);
 		
 }
 

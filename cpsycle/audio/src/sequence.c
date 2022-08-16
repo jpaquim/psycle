@@ -1118,8 +1118,6 @@ void psy_audio_sequence_set_cursor(psy_audio_Sequence* self,
 	psy_audio_SequenceCursor cursor)
 {
 	// if (!psy_audio_sequencecursor_equal(&cursor, &self->cursor)) {
-		psy_audio_SequenceEntry* entry;
-
 		self->cursor = cursor;
 		if (!psy_audio_orderindex_equal(&self->lastcursor.order_index,
 				self->cursor.order_index)) {					
