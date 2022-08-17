@@ -37,10 +37,10 @@ typedef struct VstPlugin {
 	psy_Table parameters;
 } psy_audio_VstPlugin;
 
-void psy_audio_vstplugin_init(psy_audio_VstPlugin*, psy_audio_MachineCallback*,
+int psy_audio_vstplugin_init(psy_audio_VstPlugin*, psy_audio_MachineCallback*,
 	const char* path);
 
-bool psy_audio_plugin_vst_test(const char* path, psy_audio_MachineInfo* rv);
+bool psy_audio_vstplugin_test(const char* path, psy_audio_MachineInfo* rv);
 
 INLINE psy_audio_Machine* psy_audio_vstplugin_base(psy_audio_VstPlugin* self)
 {

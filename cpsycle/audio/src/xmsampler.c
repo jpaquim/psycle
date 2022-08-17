@@ -212,11 +212,13 @@ static void sampler_vtable_init(psy_audio_XMSampler* self)
 	}
 }
 
-void psy_audio_xmsampler_init(psy_audio_XMSampler* self,
+int psy_audio_xmsampler_init(psy_audio_XMSampler* self,
 	psy_audio_MachineCallback* callback)
 {
+	int status;
 	int i;
 
+	status = PSY_OK;
 	psy_audio_custommachine_init(&self->custommachine, callback);
 	sampler_vtable_init(self);
 	psy_audio_xmsampler_base(self)->vtable = &sampler_vtable;
@@ -260,6 +262,7 @@ void psy_audio_xmsampler_init(psy_audio_XMSampler* self,
 		(fp_samplerticktimer_onwork)psy_audio_xmsampler_on_timerwork);
 	
 	psy_audio_xmsampler_initparameters(self);
+	return status;
 }
 
 void dispose(psy_audio_XMSampler* self)

@@ -191,10 +191,11 @@ static void vtable_init(psy_audio_LV2Plugin* self)
 	}
 }
 
-void psy_audio_lv2plugin_init(psy_audio_LV2Plugin* self,
+int psy_audio_lv2plugin_init(psy_audio_LV2Plugin* self,
 	psy_audio_MachineCallback* callback, const char* path,
 	uintptr_t shell_index)
-{			
+{	
+	int status;
 	const LilvPlugins* plugins;
 	LilvNode*          uri;
 	LilvNode*          name;
@@ -204,6 +205,7 @@ void psy_audio_lv2plugin_init(psy_audio_LV2Plugin* self,
 	
 	assert(self);
 
+	status = PSY_OK;
 	psy_audio_custommachine_init(&self->custommachine, callback);
 	vtable_init(self);
 	psy_audio_lv2plugin_base(self)->vtable = &vtable;
@@ -234,16 +236,18 @@ void psy_audio_lv2plugin_init(psy_audio_LV2Plugin* self,
 	self->audio_port_class = lilv_new_uri(self->world, LV2_CORE__AudioPort);
 	self->control_port_class = lilv_new_uri(self->world, LV2_CORE__ControlPort);	
 	if (!uri) {
+		status = PSY_ERRFILE;
 		psy_audio_machine_bypass(psy_audio_lv2plugin_base(self));
-		return;
+		return status;
 	}
 	lilv_world_load_bundle(self->world, uri);
 	lilv_world_load_specifications(self->world);
 	lilv_world_load_plugin_classes(self->world);
 	plugins = lilv_world_get_all_plugins(self->world);
 	if (!plugins) {
+		status = PSY_ERRFILE;
 		psy_audio_machine_bypass(psy_audio_lv2plugin_base(self));
-		return;
+		return status;
 	}
 	i = 0;
 	for (it = lilv_plugins_begin(plugins);
@@ -278,6 +282,7 @@ void psy_audio_lv2plugin_init(psy_audio_LV2Plugin* self,
 				prepareparams(self);				
 				lilv_instance_activate(self->instance);						
 			} else {
+				status = PSY_ERRRUN;
 				psy_audio_machine_bypass(psy_audio_lv2plugin_base(self));
 			}			
 			break;
@@ -288,6 +293,7 @@ void psy_audio_lv2plugin_init(psy_audio_LV2Plugin* self,
 		psy_audio_machine_seteditname(psy_audio_lv2plugin_base(self),
 			lilv_node_as_string(lilv_plugin_get_name(self->plugin)));
 	}
+	return status;
 } 
 
 void dispose(psy_audio_LV2Plugin* self)

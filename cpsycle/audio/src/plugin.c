@@ -258,13 +258,15 @@ static void vtable_init(psy_audio_Plugin* self)
 	}
 }
 
-void psy_audio_plugin_init(psy_audio_Plugin* self, psy_audio_MachineCallback* callback,
-	const char* path, const char* root)
+int psy_audio_plugin_init(psy_audio_Plugin* self, psy_audio_MachineCallback*
+	callback, const char* path, const char* root)
 {
-	GETINFO GetInfo;
+	int status;
+	GETINFO GetInfo;	
 		
 	psy_audio_custommachine_init(&self->custommachine, callback);	
 	vtable_init(self);
+	status = PSY_OK;
 	psy_audio_plugin_base(self)->vtable = &vtable;
 	psy_audio_logicalchannels_init(&self->logicalchannels);
 	psy_table_init(&self->parameters);
@@ -279,11 +281,13 @@ void psy_audio_plugin_init(psy_audio_Plugin* self, psy_audio_MachineCallback* ca
 	self->currprog = 0;
 	GetInfo = (GETINFO)psy_library_functionpointer(&self->library, "GetInfo");
 	if (!GetInfo) {
-		psy_library_dispose(&self->library);		
+		psy_library_dispose(&self->library);
+		status = PSY_ERRRUN;		
 	} else {		
 		self->mi = mi_create(self->library.module);		
 		if (!self->mi) {
-			psy_library_dispose(&self->library);			
+			psy_library_dispose(&self->library);
+			status = PSY_ERRRUN;
 		} else {						
 			CMachineInfo* pInfo = GetInfo();
 			if (pInfo) {				
@@ -305,6 +309,7 @@ void psy_audio_plugin_init(psy_audio_Plugin* self, psy_audio_MachineCallback* ca
 	if (!psy_audio_machine_editname(psy_audio_plugin_base(self))) {
 		psy_audio_machine_seteditname(psy_audio_plugin_base(self), "Plugin");
 	}
+	return status;
 }
 
 void tweakdefaults(psy_audio_Plugin* self, CMachineInfo* info)

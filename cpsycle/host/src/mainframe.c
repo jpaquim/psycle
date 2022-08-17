@@ -425,6 +425,8 @@ void mainframe_init_bars(MainFrame* self)
 	/* vubar */
 	vubar_init(&self->vubar, &self->toprow1, &self->workspace);	
 	psy_ui_component_set_align(&self->vubar.component, psy_ui_ALIGN_RIGHT);
+	psy_ui_component_set_margin(&self->vubar.component,
+		psy_ui_margin_make_em(0.0, 0.75, 0.0, 0.0));
 	/* row2 */	
 	machinebar_init(&self->machinebar, &self->toprows, &self->workspace);
 	psy_ui_component_set_style_type(&self->machinebar.component, STYLE_TOPROW2);
@@ -449,7 +451,8 @@ void mainframe_init_tabbars(MainFrame* self)
 	psy_ui_tabbar_init(&self->scripttabbar, &self->mainviews.component);
 	psy_ui_component_set_align(&self->scripttabbar.component, psy_ui_ALIGN_TOP);
 	psy_ui_component_hide(&self->scripttabbar.component);	
-	psy_ui_button_init_text_connect(&self->togglescripts, &self->mainviews.mainviewbar.tabbars,
+	psy_ui_button_init_text_connect(&self->togglescripts,
+		&self->mainviews.mainviewbar.tabbars,
 		"main.scripts", self, mainframe_on_toggle_scripts);
 	psy_ui_component_set_align(psy_ui_button_base(&self->togglescripts),
 		psy_ui_ALIGN_LEFT);
@@ -465,7 +468,8 @@ void mainframe_init_main_pane(MainFrame* self)
 		psy_ui_notebook_base(&self->mainviews.notebook),
 		psy_ui_notebook_base(&self->mainviews.mainviewbar.viewtabbars),
 		&self->workspace);
-	samplesview_init(&self->samplesview, psy_ui_notebook_base(&self->mainviews.notebook),
+	samplesview_init(&self->samplesview, psy_ui_notebook_base(
+		&self->mainviews.notebook),
 		psy_ui_notebook_base(&self->mainviews.mainviewbar.viewtabbars),
 		&self->workspace);
 	instrumentview_init(&self->instrumentsview,

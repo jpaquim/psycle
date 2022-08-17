@@ -24,6 +24,7 @@ static int wavoscrefcounter = 0;
 
 void psy_audio_waveosc_init(psy_audio_WaveOsc* self, psy_audio_WaveShape shape, int frequency)
 {
+	float speed;
 	waveosctables_init();
 	++wavoscrefcounter;
 	self->shape = shape;
@@ -38,7 +39,11 @@ void psy_audio_waveosc_init(psy_audio_WaveOsc* self, psy_audio_WaveShape shape, 
 	psy_audio_wavedatacontroller_init(&self->sampleiterator);
 	psy_audio_wavedatacontroller_initcontroller(&self->sampleiterator,
 		psy_audio_waveosc_sample(self, frequency), psy_dsp_RESAMPLERQUALITY_LINEAR);
-	psy_audio_wavedatacontroller_setspeed(&self->sampleiterator, frequency / self->basefrequency);
+	speed = frequency / self->basefrequency;
+	if (speed == 0) {
+		speed = 0.0001;
+	}
+	psy_audio_wavedatacontroller_setspeed(&self->sampleiterator, speed);
 	psy_audio_wavedatacontroller_play(&self->sampleiterator);
 }
 
@@ -78,12 +83,12 @@ void psy_audio_waveosc_work(psy_audio_WaveOsc* self, uintptr_t amount, float* da
 		uintptr_t numsamples;
 		uintptr_t dstpos;
 		intptr_t nextsamples;		
-
+		
 		psy_audio_buffer_init(&output, 1);
 		output.samples[0] = data;
 		numsamples = amount;
 		dstpos = 0;
-		nextsamples = numsamples;
+		nextsamples = numsamples;		
 		while (numsamples) {
 			intptr_t nextsamples;
 			
@@ -103,6 +108,9 @@ void psy_audio_waveosc_work(psy_audio_WaveOsc* self, uintptr_t amount, float* da
 						double speed;
 
 						speed = f / self->basefrequency;
+						if (speed == 0.0) {
+							speed = 0.00001;
+						}
 						psy_audio_wavedatacontroller_setspeed(&self->sampleiterator,
 							speed);
 					}
@@ -127,7 +135,7 @@ void psy_audio_waveosc_work(psy_audio_WaveOsc* self, uintptr_t amount, float* da
 }
 
 void psy_audio_waveosc_setfrequency(psy_audio_WaveOsc* self, double frequency)
-{	
+{		
 	self->frequency = frequency;	
 	psy_audio_wavedatacontroller_setsample(&self->sampleiterator,
 		psy_audio_waveosc_sample(self, frequency));

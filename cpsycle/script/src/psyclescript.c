@@ -69,7 +69,9 @@ int psyclescript_load(psy_PsycleScript* self, const char* path)
 	free(self->modulepath);
 	self->modulepath = strdup(path);
 	psy_snprintf(temp, _MAX_PATH, "%s", path);
+#if defined DIVERSALIS__OS__MICROSOFT  	
 	psy_replacechar(temp, '\\', '/');
+#endif	
 	status = luaL_loadfile(self->L, temp);
 	if (status) {
 		const char* msg =lua_tostring(self->L, -1);
@@ -196,7 +198,9 @@ void psyclescript_setsearchpath(psy_PsycleScript* self, const char* modulepath)
 		psy_path_prefix(&path),
 		psy_path_prefix(&path), psy_path_name(&path),
 		psy_path_prefix(&path));
+#if defined DIVERSALIS__OS__MICROSOFT   		
 	psy_replacechar(luapath, '/', '\\');
+#endif
 	lua_getglobal(self->L, "package");
 	lua_pushstring(self->L, luapath);
 	lua_setfield(self->L, -2, "path");

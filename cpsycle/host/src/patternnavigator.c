@@ -116,7 +116,11 @@ psy_audio_SequenceCursor patternlinenavigator_down(
 		if (offset >= psy_audio_sequenceentry_length(seqentry)) {
 			if (patternviewstate_single_mode(self->state)) {
 				if (self->wrap_around) {
-					rv = patternlinenavigator_home(self, rv);
+					offset -= psy_audio_sequenceentry_length(seqentry);
+					if (offset > psy_audio_sequenceentry_length(seqentry)) {
+						offset = psy_audio_sequenceentry_length(seqentry) - bpl;
+					}
+					psy_audio_sequencecursor_set_offset(&rv, offset);
 					self->wrap = TRUE;
 				} else {
 					rv = patternlinenavigator_end(self, rv);

@@ -27,8 +27,8 @@ typedef struct psy_audio_Plugin {
 	psy_audio_LogicalChannels logicalchannels;
 } psy_audio_Plugin;
 
-void psy_audio_plugin_init(psy_audio_Plugin*, psy_audio_MachineCallback*, const char* path,
-	const char* root);
+int psy_audio_plugin_init(psy_audio_Plugin*, psy_audio_MachineCallback*,
+	const char* path, const char* root);
 int psy_audio_plugin_psycle_test(const char* path, const char* root, psy_audio_MachineInfo*);
 void psy_audio_plugin_tweakpreset(psy_audio_Plugin*, struct psy_audio_Preset*);
 

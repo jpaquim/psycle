@@ -16,7 +16,8 @@
 extern "C" {
 #endif
 
-typedef struct {
+typedef struct psy_audio_LadspaPlugin {
+	/* inherits */
 	psy_audio_CustomMachine custommachine;	
 	psy_Library library;
 	psy_audio_MachineInfo* plugininfo;
@@ -34,8 +35,10 @@ typedef struct {
 	psy_Table parameters;
 } psy_audio_LadspaPlugin;
 
-void psy_audio_ladspaplugin_init(psy_audio_LadspaPlugin*, psy_audio_MachineCallback*, const char* path, uintptr_t shellidx);
-int psy_audio_plugin_ladspa_test(const char* path, psy_audio_MachineInfo*, uintptr_t shellidx);
+int psy_audio_ladspaplugin_init(psy_audio_LadspaPlugin*,
+	psy_audio_MachineCallback*, const char* path, uintptr_t shellidx);
+int psy_audio_ladspaplugin_test(const char* path, psy_audio_MachineInfo*,
+	uintptr_t shellidx);
 
 INLINE psy_audio_Machine* psy_audio_ladspaplugin_base(psy_audio_LadspaPlugin* self)
 {

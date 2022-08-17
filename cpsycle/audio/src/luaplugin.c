@@ -264,10 +264,10 @@ int luapluginparam_type(psy_audio_LuaPluginMachineParam* self)
 static int luaplugin_parse_machineinfo(psy_PsycleScript* self, psy_audio_MachineInfo* rv);
 
 static int luaplugin_machineinfo(psy_PsycleScript* self, psy_audio_MachineInfo* rv)
-{
+{	
 	int err = 0;
 	lua_getglobal(self->L, "psycle");
-	if (lua_isnil(self->L, -1)) {
+	if (lua_isnil(self->L, -1)) {		
 		err = 1; // throw std::runtime_error("Psycle not available.");
 		return err;
 	}
@@ -275,11 +275,11 @@ static int luaplugin_machineinfo(psy_PsycleScript* self, psy_audio_MachineInfo* 
 	if (!lua_isnil(self->L, -1)) {
 		int status = lua_pcall(self->L, 0, 1, 0);    
 		if (status) {         
-			const char* msg = lua_tostring(self->L, -1); 
+			const char* msg = lua_tostring(self->L, -1);			
 			// ui::error(msg);
 			err = 1; // throw std::runtime_error(msg);
 			return err;
-		}		
+		}				
 		luaplugin_parse_machineinfo(self, rv);
 	} else {
 		err = 1;
@@ -484,11 +484,11 @@ static void vtable_init(psy_audio_LuaPlugin* self)
 	psy_audio_luaplugin_base(self)->vtable = &vtable;
 }
 		
-void psy_audio_luaplugin_init(psy_audio_LuaPlugin* self, psy_audio_MachineCallback* callback,
+int psy_audio_luaplugin_init(psy_audio_LuaPlugin* self, psy_audio_MachineCallback* callback,
 	const char* path)
 {
-	int err = 0;	
-
+	int status;
+	
 	self->plugininfo = 0;
 	self->usenoteon = FALSE;
 	self->hostview = NULL;
@@ -496,24 +496,24 @@ void psy_audio_luaplugin_init(psy_audio_LuaPlugin* self, psy_audio_MachineCallba
 	vtable_init(self);	
 	self->lock = psy_lock_allocinit();
 	if (!self->lock) {
-		return;
+		return PSY_ERRRUN;
 	}
 	psy_audio_luapluginmachineparam_init(&self->parameter, self, UINTPTR_MAX);
 	psyclescript_init(&self->script);
-	if (err = psyclescript_load(&self->script, path)) {
-		return;	
+	if (status = psyclescript_load(&self->script, path)) {
+		return status;	
 	}
-	if (err = psyclescript_preparestate(&self->script, psycle_methods,
-		self)) {
-		return;
+	if (status = psyclescript_preparestate(&self->script, psycle_methods,
+			self)) {
+		return status;
 	}
 	psy_audio_plugin_luascript_exportcmodules(&self->script);
 	// psy_luaui_init(&self->ui, &self->script);
-	if (err = psyclescript_run(&self->script)) {
-		return;
+	if (status = psyclescript_run(&self->script)) {
+		return status;
 	}
-	if (err = psyclescript_start(&self->script)) {
-		return;
+	if (status = psyclescript_start(&self->script)) {
+		return status;
 	}
 	self->plugininfo = machineinfo_allocinit();
 	if (luaplugin_machineinfo(&self->script, self->plugininfo) != 0) {
@@ -525,6 +525,7 @@ void psy_audio_luaplugin_init(psy_audio_LuaPlugin* self, psy_audio_MachineCallba
 	luaplugin_initmachine(self);	
 	psy_audio_machine_seteditname(psy_audio_luaplugin_base(self),
 		self->plugininfo->shortname);
+	return PSY_OK;
 }
 
 void dispose(psy_audio_LuaPlugin* self)
@@ -554,14 +555,15 @@ void reload(psy_audio_LuaPlugin* self)
 	}	
 }
 
-int psy_audio_plugin_luascript_test(const char* path, psy_audio_MachineInfo* machineinfo)
+int psy_audio_luaplugin_test(const char* path, psy_audio_MachineInfo*
+	machineinfo)
 {		
 	psy_PsycleScript script;
 	int err = 0;	
 	
 	psyclescript_init(&script);
 	err = psyclescript_load(&script, path);
-	if (err) {
+	if (err) {		
 		return 0;
 	}
 	err = psyclescript_preparestate(&script, psycle_methods, 0);
@@ -570,8 +572,7 @@ int psy_audio_plugin_luascript_test(const char* path, psy_audio_MachineInfo* mac
 	}	
 	psy_audio_plugin_luascript_exportcmodules(&script);
 	err = psyclescript_run(&script);
-	if (err)
-	{
+	if (err) {
 		return 0;
 	}
 	err = luaplugin_machineinfo(&script, machineinfo);
@@ -579,7 +580,7 @@ int psy_audio_plugin_luascript_test(const char* path, psy_audio_MachineInfo* mac
 		psy_audio_LuaPlugin plugin;
 		
 		psy_audio_luaplugin_init(&plugin, NULL, path);
-		if (psy_audio_machine_info(psy_audio_luaplugin_base(&plugin))) {
+		if (psy_audio_machine_info(psy_audio_luaplugin_base(&plugin))) {			
 			machineinfo_copy(machineinfo,
 				psy_audio_machine_info(psy_audio_luaplugin_base(&plugin)));
 			err = 0;
@@ -589,7 +590,7 @@ int psy_audio_plugin_luascript_test(const char* path, psy_audio_MachineInfo* mac
 		}
 		psy_audio_machine_dispose(psy_audio_luaplugin_base(&plugin));		
 	}
-	if (err) {
+	if (err) {		
 		return 0;
 	}	
 	psyclescript_dispose(&script);

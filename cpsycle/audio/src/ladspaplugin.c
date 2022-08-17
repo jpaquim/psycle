@@ -115,12 +115,14 @@ static void vtable_init(psy_audio_LadspaPlugin* self)
 }
 
 /* implementation */
-void psy_audio_ladspaplugin_init(psy_audio_LadspaPlugin* self,
+int psy_audio_ladspaplugin_init(psy_audio_LadspaPlugin* self,
 	psy_audio_MachineCallback* callback, const char* path,
 	uintptr_t shellidx)
 {
+	int status;
 	LADSPA_Descriptor_Function pfDescriptorFunction;
 
+	status = PSY_OK;
 	psy_audio_custommachine_init(&self->custommachine, callback);
 	vtable_init(self);	
 	psy_audio_machine_setcallback(&self->custommachine.machine,
@@ -136,6 +138,7 @@ void psy_audio_ladspaplugin_init(psy_audio_LadspaPlugin* self,
 		psy_library_functionpointer(&self->library, "ladspa_descriptor");					
 	if (!pfDescriptorFunction) {
 		psy_library_dispose(&self->library);
+		status = PSY_ERRRUN;
 	} else {
 		/*Step three: Get the descriptor of the selected plugin (a shared library can have
 		several plugins*/
@@ -168,9 +171,14 @@ void psy_audio_ladspaplugin_init(psy_audio_LadspaPlugin* self,
 					self->plugininfo->shortname);
 				prepareparams(self);
 				psy_audio_ladspainterface_activate(&self->mi);				
+			} else {
+				status = PSY_ERRRUN;
 			}
+		} else {
+			status = PSY_ERRRUN;
 		}
-	}	
+	}
+	return status;
 }
 
 LADSPA_Handle instantiate(const LADSPA_Descriptor* psDescriptor)
@@ -214,7 +222,7 @@ psy_audio_Machine* clone(psy_audio_LadspaPlugin* self)
 	return rv ? &rv->custommachine.machine : 0;
 }
 
-int psy_audio_plugin_ladspa_test(const char* path, psy_audio_MachineInfo*
+int psy_audio_ladspaplugin_test(const char* path, psy_audio_MachineInfo*
 	machine_info, uintptr_t shellidx)
 {
 	int rv = 0;

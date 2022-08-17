@@ -36,12 +36,13 @@ static void pianogrid_drawuncoveredrightbackground(Pianogrid*,
 	psy_ui_Graphics* g, psy_ui_RealSize);
 static void pianogrid_drawuncoveredbottombackground(Pianogrid*,
 	psy_ui_Graphics*, psy_ui_RealSize);
-static void pianogrid_on_preferred_size(Pianogrid* self, const psy_ui_Size* limit,
-	psy_ui_Size* rv);
+static void pianogrid_on_preferred_size(Pianogrid* self,
+	const psy_ui_Size* limit, psy_ui_Size* rv);
 static void pianogrid_on_mouse_down(Pianogrid*, psy_ui_MouseEvent*);
 static void pianogrid_on_mouse_move(Pianogrid*, psy_ui_MouseEvent*);
 static void pianogrid_on_mouse_up(Pianogrid*, psy_ui_MouseEvent*);
-static psy_audio_SequenceCursor pianogrid_make_cursor(Pianogrid* self, double x, double y);
+static psy_audio_SequenceCursor pianogrid_make_cursor(Pianogrid*,
+	psy_ui_RealPoint);
 static void pianogrid_on_focus(Pianogrid*);
 static void pianogrid_on_focus_lost(Pianogrid*);
 static bool pianogrid_on_roll_cmds(Pianogrid*, InputHandler* sender);
@@ -257,8 +258,8 @@ void pianogrid_on_preferred_size(Pianogrid* self, const psy_ui_Size* limit,
 
 void pianogrid_on_mouse_down(Pianogrid* self, psy_ui_MouseEvent* ev)
 {
-	self->dragcursor = pianogrid_make_cursor(self, psy_ui_mouseevent_pt(ev).x,
-		psy_ui_mouseevent_pt(ev).y);	
+	self->dragcursor = pianogrid_make_cursor(self, psy_ui_mouseevent_offset(
+		ev));
 	self->gridstate->pv->dragselectionbase = self->dragcursor;
 	self->last_drag_cursor = self->dragcursor;
 	if (psy_ui_mouseevent_button(ev) != 2) {
@@ -447,9 +448,9 @@ void pianogrid_on_mouse_move(Pianogrid* self, psy_ui_MouseEvent* ev)
 		if (self->hoverpatternentry != oldhover) {
 			psy_ui_component_invalidate(&self->component);
 		}
-		if (((psy_ui_mouseevent_button(ev) == 1) && (!self->edit_mode || psy_ui_mouseevent_ctrl_key(ev)))) {
-			cursor = pianogrid_make_cursor(self, psy_ui_mouseevent_pt(ev).x,
-				psy_ui_mouseevent_pt(ev).y);
+		if (((psy_ui_mouseevent_button(ev) == 1) && (!self->edit_mode ||
+				psy_ui_mouseevent_ctrl_key(ev)))) {
+			cursor = pianogrid_make_cursor(self, psy_ui_mouseevent_offset(ev));				
 			if (cursor.key != self->last_drag_cursor.key ||
 				cursor.offset != self->last_drag_cursor.offset) {
 				if (!self->gridstate->pv->selection.valid) {
@@ -531,7 +532,8 @@ void pianogrid_on_mouse_up(Pianogrid* self, psy_ui_MouseEvent* ev)
 	if (self->prevent_context_menu) {				
 		self->prevent_context_menu = FALSE;			
 	} else if (!self->gridstate->pv->selection.valid) {		
-		if (!self->edit_mode || ((psy_ui_mouseevent_button(ev) == 1 && psy_ui_mouseevent_ctrl_key(ev)))) {
+		if (!self->edit_mode || ((psy_ui_mouseevent_button(ev) == 1 &&
+				psy_ui_mouseevent_ctrl_key(ev)))) {
 			pianogrid_set_cursor(self, self->dragcursor);			
 		}
 	}
@@ -540,19 +542,16 @@ void pianogrid_on_mouse_up(Pianogrid* self, psy_ui_MouseEvent* ev)
 	psy_ui_mouseevent_stop_propagation(ev);
 }
 
-psy_audio_SequenceCursor pianogrid_make_cursor(Pianogrid* self, double x, double y)
+psy_audio_SequenceCursor pianogrid_make_cursor(Pianogrid* self,
+	psy_ui_RealPoint pt)
 {
 	psy_audio_SequenceCursor rv;
 
 	rv = self->gridstate->pv->cursor;	
 	rv.offset = pianogridstate_quantize(self->gridstate,
-		pianogridstate_pxtobeat(self->gridstate, x)) +
-		((patternviewstate_single_mode(self->gridstate->pv))
-		? psy_audio_sequencecursor_seqoffset(
-			&rv,
-			patternviewstate_sequence(self->gridstate->pv))
-		: 0);
-	rv.key = keyboardstate_screen_to_key(self->keyboardstate, psy_ui_realpoint_make(0, y), 0.0);	
+		pianogridstate_pxtobeat(self->gridstate, pt.x));
+	rv.key = keyboardstate_screen_to_key(self->keyboardstate,
+		psy_ui_realpoint_make(0, pt.y), 0.0);	
 	return rv;
 }
 
