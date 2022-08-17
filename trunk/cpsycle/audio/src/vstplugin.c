@@ -136,7 +136,7 @@ static const char* MIDI_CHAN_NAMES[16] = {
 	"MIDI Channel 13","MIDI Channel 14","MIDI Channel 15","MIDI Channel 16"
 };
 
-// init vstplugin class vtable
+/* vtable */
 static MachineVtable vtable;
 static int vtable_initialized = FALSE;
 
@@ -177,13 +177,16 @@ static void vtable_init(psy_audio_VstPlugin* self)
 	}
 }
 
-void psy_audio_vstplugin_init(psy_audio_VstPlugin* self,
+/* implementation */
+int psy_audio_vstplugin_init(psy_audio_VstPlugin* self,
 	psy_audio_MachineCallback* callback, const char* path)
-{		
+{	
+	int status;	
 	PluginEntryProc mainproc;
 	
 	assert(self);
 
+	status = PSY_OK;
 	psy_audio_custommachine_init(&self->custommachine, callback);
 	vtable_init(self);
 	psy_audio_vstplugin_base(self)->vtable = &vtable;
@@ -223,12 +226,17 @@ void psy_audio_vstplugin_init(psy_audio_VstPlugin* self,
 			psy_audio_machine_seteditname(psy_audio_vstplugin_base(self),
 				self->plugininfo->shortname);			
 			initparameters(self);
+		} else {
+			status = PSY_ERRRUN;
 		}
+	} else {
+		status = PSY_ERRRUN;
 	}
 	if (!psy_audio_machine_editname(psy_audio_vstplugin_base(self))) {
 		psy_audio_machine_seteditname(psy_audio_vstplugin_base(self),
 			"VstPlugin");
 	}
+	return status;
 } 
 
 void dispose(psy_audio_VstPlugin* self)
@@ -285,7 +293,7 @@ PluginEntryProc getmainentry(psy_Library* library)
 	return rv;
 }
 
-bool psy_audio_plugin_vst_test(const char* path, psy_audio_MachineInfo* rv)
+bool psy_audio_vstplugin_test(const char* path, psy_audio_MachineInfo* rv)
 {
 	bool success = FALSE;
 	

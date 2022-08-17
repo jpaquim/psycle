@@ -11,6 +11,8 @@
 #include "volslider.h"
 #include "vumeter.h"
 #include "workspace.h"
+/* ui */
+#include <uilabel.h>
 
 /*
 ** VuBar
@@ -18,13 +20,13 @@
 ** Composite of Vumeter, VolumeSlider and ClipBox. Displays and controls the
 ** Master volume and displays a clip warning if the amp range overflows
 **
-** Structure:
 ** psy_ui_ComponentImp
 **          ^
 **          |
 **        VuBar <>------ Vumeter
 **               |------ VolSlider
 **               |------ ClipBox
+**               |-------psy_ui_Label
 */
 
 #ifdef __cplusplus
@@ -35,6 +37,7 @@ typedef struct VuBar {
 	/* inherits */
 	psy_ui_Component component;
 	/* internal */
+	psy_ui_Label label;
 	Vumeter vumeter;
 	VolSlider volslider;
 	ClipBox clipbox;	

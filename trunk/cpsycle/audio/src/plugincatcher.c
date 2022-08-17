@@ -140,8 +140,7 @@ int psy_audio_pluginsections_load(psy_audio_PluginSections* self)
 {
 	int rv;
 	psy_PropertyReader propertyreader;
-
-	printf("pluginsection-ini: %s\n", self->inipath);	
+	
 	psy_audio_pluginsections_reset(self);
 	psy_propertyreader_init(&propertyreader, self->sections,
 		self->inipath);
@@ -618,8 +617,7 @@ void plugincatcher_scan_multipath(psy_audio_PluginCatcher* self,
 	strcpy(text, multipath);	
 	token = strtok(text, seps);
 	while (token != NULL && !self->abort) {
-		if (recursive) {		
-			printf("%s\n", token);	
+		if (recursive) {			
 			psy_dir_enumerate_recursive(self, token, wildcard, option,
 				(psy_fp_findfile)on_enum_dir);
 		} else {
@@ -693,10 +691,7 @@ int on_enum_dir(psy_audio_PluginCatcher* self, const char* path, int type)
 {
 	psy_audio_MachineInfo macinfo;
 	char name[_MAX_PATH];
-
-	if (type == psy_audio_LV2) {
-		printf("%s\n", path);
-	}
+	
 	psy_signal_emit(&self->signal_scanfile, self, 2, path, type);
 	machineinfo_init(&macinfo);	
 	switch (type) {
@@ -708,8 +703,8 @@ int on_enum_dir(psy_audio_PluginCatcher* self, const char* path, int type)
 				psy_signal_emit(&self->signal_scanprogress, self, 1, 1);
 			}
 			break;
-		case psy_audio_LUA:
-			if (psy_audio_plugin_luascript_test(path, &macinfo)) {
+		case psy_audio_LUA:			
+			if (psy_audio_luaplugin_test(path, &macinfo)) {
 				psy_audio_plugincatcher_catchername(path, name, macinfo.shellidx);
 				makeplugininfo(self->all, name, path, macinfo.type,
 					&macinfo, &self->categorydefaults);
@@ -718,7 +713,7 @@ int on_enum_dir(psy_audio_PluginCatcher* self, const char* path, int type)
 			break;
 #ifdef PSYCLE_USE_VST2			
 		case psy_audio_VST:			
-			if (psy_audio_plugin_vst_test(path, &macinfo)) {
+			if (psy_audio_vstplugin_test(path, &macinfo)) {
 				psy_audio_plugincatcher_catchername(path, name, macinfo.shellidx);
 				makeplugininfo(self->all, name, path, macinfo.type,
 					&macinfo, &self->categorydefaults);
@@ -727,10 +722,10 @@ int on_enum_dir(psy_audio_PluginCatcher* self, const char* path, int type)
 			break;
 #endif			
 		case psy_audio_LADSPA: {
-			uintptr_t shellidx;
+			uintptr_t shellidx;			
 
 			shellidx = 0;
-			for (; psy_audio_plugin_ladspa_test(path, &macinfo, shellidx) != 0;
+			for (; psy_audio_ladspaplugin_test(path, &macinfo, shellidx) != 0;
 					++shellidx) {
 				psy_audio_plugincatcher_catchername(path, name, macinfo.shellidx);
 				makeplugininfo(self->all, name, path, macinfo.type,

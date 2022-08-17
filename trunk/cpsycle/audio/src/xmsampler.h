@@ -97,7 +97,7 @@ typedef struct psy_audio_XMSampler {
 	uintptr_t strobe;
 } psy_audio_XMSampler;
 
-void psy_audio_xmsampler_init(psy_audio_XMSampler*, psy_audio_MachineCallback*);
+int psy_audio_xmsampler_init(psy_audio_XMSampler*, psy_audio_MachineCallback*);
 
 INLINE psy_audio_XMSampler* psy_audio_xmsampler_alloc(void)
 {

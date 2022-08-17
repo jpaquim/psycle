@@ -28,11 +28,13 @@ void volslider_init(VolSlider* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->component, parent, NULL);
 	self->workspace = workspace;	
 	psy_ui_slider_init(&self->slider, &self->component);
-	psy_ui_slider_set_text(&self->slider, "VU");	
+	psy_ui_component_set_align(&self->slider.component, psy_ui_ALIGN_TOP);
+	psy_ui_component_hide(&self->slider.desc.component);
 	psy_ui_slider_setvaluecharnumber(&self->slider, 10.0);
+	psy_ui_component_set_margin(&self->slider.pane.component,
+		psy_ui_margin_make_em(0.0, 1.0, 0.0, 0.0));
 	psy_ui_slider_startpoll(&self->slider);
 	psy_ui_slider_set_wheel_step(&self->slider, 0.02);	
-	psy_ui_component_set_align(&self->slider.component, psy_ui_ALIGN_TOP);
 	psy_ui_slider_connect(&self->slider, self,
 		(ui_slider_fpdescribe)volslider_on_describe,
 		(ui_slider_fptweak)volslider_on_tweak,

@@ -145,6 +145,9 @@ INLINE void psy_audio_wavedatacontroller_setspeed(
 	psy_audio_WaveDataController* self, double value)
 {
 	// 4294967296 is a left shift of 32bits
+	if (value == 0.0) {
+		value = 0.0001;
+	}
 	self->speed = (int64_t)(value * 4294967296.0);
 	psy_dsp_resampler_setspeed(&self->resampler.resampler, value);
 	self->speedinternal =

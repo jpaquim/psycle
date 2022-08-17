@@ -374,7 +374,7 @@ INLINE bool psy_dsp_envelopecontroller_releasing(psy_dsp_EnvelopeController* sel
 }
 
 INLINE bool psy_dsp_envelopecontroller_playing(psy_dsp_EnvelopeController* self)
-{	
+{		
 	return self->currstage != NULL;	
 }
 

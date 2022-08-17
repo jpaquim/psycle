@@ -127,8 +127,13 @@ static void vtable_init(psy_audio_Master* self)
 	}
 }
 
-void psy_audio_master_init(psy_audio_Master* self, psy_audio_MachineCallback* callback)
+/* implementation */
+
+int psy_audio_master_init(psy_audio_Master* self, psy_audio_MachineCallback* callback)
 {	
+	int status;
+	
+	status = PSY_OK;
 	memset(self, 0, sizeof(psy_audio_Master));
 	psy_audio_custommachine_init(&self->custommachine, callback);
 	vtable_init(self);
@@ -155,6 +160,7 @@ void psy_audio_master_init(psy_audio_Master* self, psy_audio_MachineCallback* ca
 		master_level_normvalue);
 	psy_audio_machine_setposition(&self->custommachine.machine, 320, 200);	
 	self->dostart = TRUE;
+	return status;
 }
 
 void master_dispose(psy_audio_Master* self)

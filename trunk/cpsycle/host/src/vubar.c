@@ -16,7 +16,12 @@ void vubar_init(VuBar* self, psy_ui_Component* parent, Workspace* workspace)
 
 	psy_ui_component_init(vubar_base(self), parent, NULL);
 	psy_ui_component_set_preferred_width(vubar_base(self),
-		psy_ui_value_make_ew(30.0));
+		psy_ui_value_make_ew(34.0));
+	psy_ui_label_init_text(&self->label, vubar_base(self), "Vu");
+	psy_ui_component_set_margin(psy_ui_label_base(&self->label),
+		psy_ui_margin_make_em(0.0, 1.0, 0.0, 0.0));
+	psy_ui_component_set_align(psy_ui_label_base(&self->label),
+		psy_ui_ALIGN_LEFT);
 	clipbox_init(&self->clipbox, vubar_base(self), workspace);
 	psy_ui_component_set_align(clipbox_base(&self->clipbox),
 		psy_ui_ALIGN_RIGHT);

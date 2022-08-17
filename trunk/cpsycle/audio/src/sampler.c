@@ -382,12 +382,14 @@ static void sampler_vtable_init(psy_audio_Sampler* self)
 ** for samplerate, samples and instruments.
 ** This avoids the static global::player calls of psycle-mfc
 */
-void psy_audio_sampler_init(psy_audio_Sampler* self,
+int psy_audio_sampler_init(psy_audio_Sampler* self,
 	psy_audio_MachineCallback* callback)
 {
+	int status;
 	int i;
 
 	assert(self);
+	status = PSY_OK;
 	/* SetSampleRate(Global::player().SampleRate()); */
 	psy_audio_custommachine_init(&self->custommachine, callback);
 	sampler_vtable_init(self);
@@ -413,8 +415,9 @@ void psy_audio_sampler_init(psy_audio_Sampler* self,
 		self, /* ticktimer callback context (self of sampler) */
 		(fp_samplerticktimer_ontick)psy_audio_sampler_on_timertick,
 		(fp_samplerticktimer_onwork)psy_audio_sampler_on_timerwork);
-	psy_audio_sampler_setsamplerate(self,
-		psy_audio_machine_samplerate(psy_audio_sampler_base(self)));
+	psy_audio_sampler_setsamplerate(self, psy_audio_machine_samplerate(
+		psy_audio_sampler_base(self)));
+	return status;
 }
 
 void psy_audio_sampler_init_voices(psy_audio_Sampler* self)

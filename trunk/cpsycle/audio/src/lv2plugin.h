@@ -55,7 +55,7 @@ typedef struct LV2Plugin {
 //	psy_Table tracknote;	
 } psy_audio_LV2Plugin;
 
-void psy_audio_lv2plugin_init(psy_audio_LV2Plugin*, psy_audio_MachineCallback*,
+int psy_audio_lv2plugin_init(psy_audio_LV2Plugin*, psy_audio_MachineCallback*,
 	const char* path, uintptr_t shell_index);
 
 bool psy_audio_lv2plugin_test(const char* path, psy_audio_MachineInfo* rv,

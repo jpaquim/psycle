@@ -15,22 +15,22 @@ extern "C" {
 
 #define psy_ui_CURRENT_TIME 0
 
-	typedef enum psy_ui_EventType {
-		psy_ui_UNKNOWNEVENT = 1,
-		psy_ui_KEYDOWN = 2,
-		psy_ui_KEYUP = 3,
-		psy_ui_MOUSEDOWN = 4,
-		psy_ui_MOUSEUP = 5,
-		psy_ui_MOUSEMOVE = 6,
-		psy_ui_DBLCLICK = 7,
-		psy_ui_MOUSEENTER = 8,
-		psy_ui_MOUSELEAVE = 9,
-		psy_ui_DRAG = 10,
-		psy_ui_FOCUS = 11,
-		psy_ui_FOCUSOUT = 12,
-		psy_ui_FOCUSIN = 13,
-		psy_ui_RESIZE = 14,
-		psy_ui_WHEEL = 15
+typedef enum psy_ui_EventType {
+	psy_ui_UNKNOWNEVENT = 1,
+	psy_ui_KEYDOWN = 2,
+	psy_ui_KEYUP = 3,
+	psy_ui_MOUSEDOWN = 4,
+	psy_ui_MOUSEUP = 5,
+	psy_ui_MOUSEMOVE = 6,
+	psy_ui_DBLCLICK = 7,
+	psy_ui_MOUSEENTER = 8,
+	psy_ui_MOUSELEAVE = 9,
+	psy_ui_DRAG = 10,
+	psy_ui_FOCUS = 11,
+	psy_ui_FOCUSOUT = 12,
+	psy_ui_FOCUSIN = 13,
+	psy_ui_RESIZE = 14,
+	psy_ui_WHEEL = 15
 } psy_ui_EventType;
 
 /* Forward Handler for Event target */

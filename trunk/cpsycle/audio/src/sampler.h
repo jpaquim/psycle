@@ -179,6 +179,9 @@ int psy_audio_samplervoice_tick(psy_audio_SamplerVoice*, psy_audio_PatternEvent*
 void psy_audio_samplervoice_performfxold(psy_audio_SamplerVoice*);
 void psy_audio_samplervoice_performfxnew(psy_audio_SamplerVoice*);
 
+
+/* psy_audio_Sampler */
+
 typedef struct psy_audio_Sampler {
 	/* inherits */
 	psy_audio_CustomMachine custommachine;
@@ -205,8 +208,7 @@ typedef struct psy_audio_Sampler {
 	int32_t linearslide;
 } psy_audio_Sampler;
 
-void psy_audio_sampler_init(psy_audio_Sampler*,
-	psy_audio_MachineCallback*);
+int psy_audio_sampler_init(psy_audio_Sampler*, psy_audio_MachineCallback*);
 
 INLINE psy_audio_Sampler* psy_audio_sampler_alloc(void)
 {
