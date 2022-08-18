@@ -11,25 +11,33 @@
 #include <assert.h>
 #include <malloc.h>
 #include <stdio.h>
+#include <stdlib.h>
 /* types */
 #include "../../detail/psyconf.h"
+#include "../../detail/os.h"
+#include "../../detail/cpu.h"
 
 /* implementation */
 void* psy_dsp_aligned_memory_alloc(size_t alignment, size_t count, size_t size) {
-#if POSIX
+#if defined(PSYCLE_USE_SSE) && defined(DIVERSALIS__CPU__X86__SSE)
+#if defined(_WIN32)
+	return _aligned_malloc(size * count, alignment);
+#elif _POSIX_C_SOURCE >= 200112L
 	void* address;
 	int err;
 	
 	err = posix_memalign(&address, alignment, size * count);
 	if (err) {
+		free(address);
 	    address = 0;
 	}
-	return address;
-#elif defined(_WIN32) && defined(PSYCLE_USE_SSE) && defined(DIVERSALIS__CPU__X86__SSE)
-		return _aligned_malloc(size * count, alignment);
+	return address;		
 #else
 	return 0;
-#endif	
+#endif
+#else
+	return 0;
+#endif
 }
 
 void psy_dsp_aligned_memory_dealloc(void* address) {

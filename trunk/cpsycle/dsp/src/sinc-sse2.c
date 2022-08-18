@@ -11,18 +11,40 @@
 #include <assert.h>
 #include <math.h>
 
-#if DIVERSALIS__CPU__X86__SSE >= 2 && defined DIVERSALIS__COMPILER__MICROSOFT && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
+#if DIVERSALIS__CPU__X86__SSE >= 2 && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
 
 #include "sse_mathfun.h"
 #include <xmmintrin.h>
 #include <emmintrin.h>
 
-typedef __declspec(align(16))
-	union {
-		float f[4];
-		int i[4];
-		v4sf  v;
-	} V4SF;
+#if defined DIVERSALIS__COMPILER__GNU
+	#define UNIVERSALIS__COMPILER__ATTRIBUTE(x) __attribute__((x))
+#elif defined DIVERSALIS__COMPILER__MICROSOFT
+	#define UNIVERSALIS__COMPILER__ATTRIBUTE(x) __declspec(x)
+#else
+	#define UNIVERSALIS__COMPILER__ATTRIBUTE(x)
+#endif
+
+#if defined DIVERSALIS__COMPILER__GNU
+	#define UNIVERSALIS__COMPILER__ALIGN(bytes) UNIVERSALIS__COMPILER__ATTRIBUTE(aligned(bytes))
+	// note: a bit field is packed to 1 bit, not one byte.
+	#define UNIVERSALIS__COMPILER__DOALIGN(bytes, what) what UNIVERSALIS__COMPILER__ATTRIBUTE(aligned(bytes))
+#elif defined DIVERSALIS__COMPILER__MICROSOFT
+	#define UNIVERSALIS__COMPILER__ALIGN(bytes) UNIVERSALIS__COMPILER__ATTRIBUTE(align(bytes))
+	// see also: #pragma pack(x) in the optimization section
+	#define UNIVERSALIS__COMPILER__DOALIGN(bytes, what) UNIVERSALIS__COMPILER__ATTRIBUTE(align(bytes)) what
+#else
+	/// memory alignment.
+	///\see packed
+	#define UNIVERSALIS__COMPILER__ALIGN(bytes)
+	#define UNIVERSALIS__COMPILER__DOALIGN(bytes, what)
+#endif
+
+typedef UNIVERSALIS__COMPILER__DOALIGN(16, union {
+		  float f[4];
+		  int i[4];
+		  v4sf  v;
+		} ) V4SF;
 
 extern float cubic_table[CUBIC_RESOLUTION * 4];
 
