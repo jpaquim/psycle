@@ -168,7 +168,7 @@ void seqviewitem_textout_digit(SeqViewItem* self, psy_ui_Graphics* g,
 		char digitstr[2];
 
 		digitstr[0] = str[digit];
-		digitstr[1] = '\n';		
+		digitstr[1] = '\n';
 		psy_ui_textout(g, cp, digitstr, 1);		
 		cp.x += self->state->colwidth;
 	}
@@ -333,7 +333,7 @@ static void seqviewtrack_vtable_init(SeqViewTrack* self)
 			seqviewtrack_on_mouse_down;		
 		seqviewtrack_vtable_initialized = TRUE;
 	}
-	self->component.vtable = &seqviewtrack_vtable;
+	psy_ui_component_set_vtable(&self->component, &seqviewtrack_vtable);
 }
 
 /* implementation */

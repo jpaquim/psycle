@@ -15,8 +15,9 @@
 #include "cpu.h"
 #include "os.h"
 
-#if defined DIVERSALIS__OS__MICROSOFT && defined(DIVERSALIS__CPU__X86__SSE)
-	#define PSYCLE_USE_SSE	/* enable support for SSE */
+#if defined(DIVERSALIS__CPU__X86__SSE)
+	/* enable support for SSE */
+	#define PSYCLE_USE_SSE
 #endif
 
 #define PSYCLE_TK_WIN32 1

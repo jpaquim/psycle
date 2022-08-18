@@ -1,7 +1,10 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-202 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
+
 
 #include "operations.h"
 #include "../../detail/psyconf.h"
@@ -53,7 +56,7 @@ void psy_dsp_sse2_init(psy_dsp_Operations* self)
 }
 
 void* dsp_memory_alloc(size_t count, size_t size)
-{
+{	
 	if ((count & 3) != 0) {
 		count += (4 - (count % 4));
 	}
@@ -68,16 +71,18 @@ void dsp_memory_dealloc(void* address)
 void dsp_add(psy_dsp_amp_t *src, psy_dsp_amp_t *dst, uintptr_t num, psy_dsp_amp_t vol)
 {
 	if (is_aligned(dst, 16) && (num % 4 == 0)) {
+/* omp parallel causes extreme high cpu usage
 #if defined DIVERSALIS__COMPILER__GNU
-		numSamples += 3;
-		numSamples >>= 2;
+		num += 3;
+		num >>= 2;
 		typedef float vec __attribute__((vector_size(4 * sizeof(float))));
 		const vec vol_vec = { vol, vol, vol, vol };
-		const vec* src = (const vec*)(src);
-		vec* dst = (vec*)(pDstSamples);
+		const vec* vsrc = (const vec*)(src);
+		vec* vdst = (vec*)(dst);
 #pragma omp parallel for // with gcc, build with the -fopenmp flag
-		for (int i = 0; i < num; ++i) dst[i] += src[i] * vol_vec;
-#elif defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
+		for (int i = 0; i < num; ++i) vdst[i] += vsrc[i] * vol_vec;
+#el*/
+#if defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
 		const __m128 volps = _mm_set_ps1(vol);
 		const __m128* psrc = (const __m128*)src;
 		__m128* pdst = (__m128*)dst;
@@ -159,7 +164,7 @@ void dsp_mul(psy_dsp_amp_t *dst, uintptr_t num, psy_dsp_amp_t multi)
 }
 	
 void dsp_movmul(psy_dsp_amp_t *src, psy_dsp_amp_t *dst, uintptr_t num, psy_dsp_amp_t multi)
-{
+{	
 #if defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
 	const __m128 volps = _mm_set_ps1(multi);
 	const __m128* psrc = (__m128*)src;
