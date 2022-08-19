@@ -41,7 +41,7 @@ typedef struct TrackerGrid {
 	bool prevent_event_driver;
 	psy_ui_RealSize size;
 	psy_ui_RealSize line_size;
-	bool down;
+	bool down;	
 	/* references */
 	TrackerState* state;	
 	Workspace* workspace;

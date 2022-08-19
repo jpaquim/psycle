@@ -41,6 +41,8 @@ static void trackercolumn_update_size(TrackerColumn*);
 static void trackercolumn_update_cursor(TrackerColumn*, double position);
 static bool trackercolumn_is_over_note(const TrackerColumn*, double position);
 static bool trackercolumn_is_over_column(const TrackerColumn*, double position);
+static bool trackercolumn_in_selection(TrackerColumn*, uintptr_t track,
+	psy_dsp_big_beat_t offset_abs);
 
 /* vtable */
 static psy_ui_ComponentVtable trackercolumn_vtable;
@@ -186,8 +188,8 @@ TrackerColumnFlags trackercolumn_columnflags(TrackerColumn* self,
 	line_abs = (uintptr_t)(seqoffset * (double)lpb) + line;		
 	rv.cursor = (self->track == self->state->pv->cursor.track) &&
 		(self->state->track_events.cursor_line_abs == line_abs);
-	rv.selection = psy_audio_blockselection_test_line(
-		&self->state->pv->selection, self->track, line);	
+	rv.selection = trackercolumn_in_selection(self, self->track,
+		line_abs * (1.0 / (double)lpb));	
 	rv.playbar = self->state->draw_playbar &&
 		self->workspace->player.sequencer.hostseqtime.currplaying &&
 		(psy_audio_sequencecursor_line_abs(
@@ -195,6 +197,23 @@ TrackerColumnFlags trackercolumn_columnflags(TrackerColumn* self,
 			self->state->pv->sequence) == line_abs);
 	rv.focus = TRUE;
 	return rv;
+}
+
+bool trackercolumn_in_selection(TrackerColumn* self, uintptr_t track,
+	psy_dsp_big_beat_t offset_abs)
+{	
+	if (!psy_audio_blockselection_valid(&self->state->pv->selection)) {
+		return FALSE;
+	}
+	if (!(track >= self->state->pv->selection.topleft.track &&
+			track < self->state->pv->selection.bottomright.track)) {
+		return FALSE;
+	}				
+	if (offset_abs >= self->state->track_events.selection_top_abs &&
+		offset_abs < self->state->track_events.selection_bottom_abs) {
+		return TRUE;
+	}
+	return FALSE;
 }
 
 void trackercolumn_draw_entry(TrackerColumn* self, psy_ui_Graphics* g,
@@ -388,7 +407,7 @@ void trackercolumn_on_mouse_down(TrackerColumn* self, psy_ui_MouseEvent* ev)
 			psy_audio_blockselection_disable(&self->state->pv->selection);
 			psy_ui_component_invalidate(psy_ui_component_parent(&self->component));
 		}
-		self->state->pv->dragselectionbase = trackerstate_make_cursor(
+		self->state->pv->selection.drag_base = trackerstate_make_cursor(
 			self->state, psy_ui_mouseevent_pt(ev), self->track,
 			self->line_size.height,
 			psy_ui_component_textmetric(&self->component));

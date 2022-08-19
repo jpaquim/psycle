@@ -260,7 +260,7 @@ void pianogrid_on_mouse_down(Pianogrid* self, psy_ui_MouseEvent* ev)
 {
 	self->dragcursor = pianogrid_make_cursor(self, psy_ui_mouseevent_offset(
 		ev));
-	self->gridstate->pv->dragselectionbase = self->dragcursor;
+	self->gridstate->pv->selection.drag_base = self->dragcursor;
 	self->last_drag_cursor = self->dragcursor;
 	if (psy_ui_mouseevent_button(ev) != 2) {
 		psy_audio_blockselection_disable(&self->gridstate->pv->selection);
@@ -454,6 +454,7 @@ void pianogrid_on_mouse_move(Pianogrid* self, psy_ui_MouseEvent* ev)
 			if (cursor.key != self->last_drag_cursor.key ||
 				cursor.offset != self->last_drag_cursor.offset) {
 				if (!self->gridstate->pv->selection.valid) {
+					
 					pianogrid_startdragselection(self, cursor);
 				} else {
 					pianogrid_dragselection(self, cursor);
@@ -473,19 +474,19 @@ void pianogrid_startdragselection(Pianogrid* self, psy_audio_SequenceCursor curs
 	bpl = 1.0 / psy_audio_player_lpb(workspace_player(self->workspace));	
 	self->gridstate->pv->selection.topleft.track = cursor.track;
 	self->gridstate->pv->selection.bottomright.track = cursor.track + 1;
-	if (cursor.key >= self->gridstate->pv->dragselectionbase.key) {
-		self->gridstate->pv->selection.topleft.key = self->gridstate->pv->dragselectionbase.key;
+	if (cursor.key >= self->gridstate->pv->selection.drag_base.key) {
+		self->gridstate->pv->selection.topleft.key = self->gridstate->pv->selection.drag_base.key;
 		self->gridstate->pv->selection.bottomright.key = cursor.key;
 	} else {
 		self->gridstate->pv->selection.topleft.key = cursor.key;
-		self->gridstate->pv->selection.bottomright.key = self->gridstate->pv->dragselectionbase.key;
+		self->gridstate->pv->selection.bottomright.key = self->gridstate->pv->selection.drag_base.key;
 	}
-	if (cursor.offset >= self->gridstate->pv->dragselectionbase.offset) {
-		self->gridstate->pv->selection.topleft.offset = self->gridstate->pv->dragselectionbase.offset;
+	if (cursor.offset >= self->gridstate->pv->selection.drag_base.offset) {
+		self->gridstate->pv->selection.topleft.offset = self->gridstate->pv->selection.drag_base.offset;
 		self->gridstate->pv->selection.bottomright.offset = cursor.offset + bpl;
 	} else {
 		self->gridstate->pv->selection.topleft.offset = cursor.offset;
-		self->gridstate->pv->selection.bottomright.offset = self->gridstate->pv->dragselectionbase.offset + bpl;
+		self->gridstate->pv->selection.bottomright.offset = self->gridstate->pv->selection.drag_base.offset + bpl;
 	}
 	self->gridstate->pv->selection.bottomright.key += 1;
 }
@@ -496,19 +497,19 @@ void pianogrid_dragselection(Pianogrid* self, psy_audio_SequenceCursor cursor)
 
 	bpl = 1.0 / psy_audio_player_lpb(workspace_player(self->workspace));
 	/* intptr_t restoremidline = self->midline; */
-	if (cursor.key >= self->gridstate->pv->dragselectionbase.key) {
-		self->gridstate->pv->selection.topleft.key = self->gridstate->pv->dragselectionbase.key;
+	if (cursor.key >= self->gridstate->pv->selection.drag_base.key) {
+		self->gridstate->pv->selection.topleft.key = self->gridstate->pv->selection.drag_base.key;
 		self->gridstate->pv->selection.bottomright.key = cursor.key + 1;
 	} else {
 		self->gridstate->pv->selection.topleft.key = cursor.key;
-		self->gridstate->pv->selection.bottomright.key = self->gridstate->pv->dragselectionbase.key + 1;
+		self->gridstate->pv->selection.bottomright.key = self->gridstate->pv->selection.drag_base.key + 1;
 	}
-	if (cursor.offset >= self->gridstate->pv->dragselectionbase.offset) {
-		self->gridstate->pv->selection.topleft.offset = self->gridstate->pv->dragselectionbase.offset;
+	if (cursor.offset >= self->gridstate->pv->selection.drag_base.offset) {
+		self->gridstate->pv->selection.topleft.offset = self->gridstate->pv->selection.drag_base.offset;
 		self->gridstate->pv->selection.bottomright.offset = cursor.offset + bpl;
 	} else {
 		self->gridstate->pv->selection.topleft.offset = cursor.offset;
-		self->gridstate->pv->selection.bottomright.offset = self->gridstate->pv->dragselectionbase.offset + bpl;
+		self->gridstate->pv->selection.bottomright.offset = self->gridstate->pv->selection.drag_base.offset + bpl;
 	}
 	/* self->midline = 0; */
 	if (cursor.offset < self->last_drag_cursor.offset) {
@@ -655,7 +656,7 @@ void pianogrid_rowclear(Pianogrid* self)
 
 void pianogrid_blockstart(Pianogrid* self)
 {
-	self->gridstate->pv->dragselectionbase = self->gridstate->pv->cursor;
+	self->gridstate->pv->selection.drag_base = self->gridstate->pv->cursor;
 	pianogrid_startdragselection(self, self->gridstate->pv->cursor);
 	psy_ui_component_invalidate(&self->component);
 }
@@ -1079,12 +1080,18 @@ bool pianogrid_handle_command(Pianogrid* self, uintptr_t cmd)
 	case CMD_BLOCKDELETE:
 		patternviewstate_block_delete(self->gridstate->pv);
 		break;
-	case CMD_SELECTALL:
-		patternviewstate_select_all(self->gridstate->pv);
-		break;
-	case CMD_SELECTBAR:
-		patternviewstate_select_bar(self->gridstate->pv);
-		break;
+	case CMD_SELECTALL: {
+		PatternSelect select;
+		
+		patternselect_init(&select, self->gridstate->pv);
+		patternselect_select_all(&select);		
+		break; }
+	case CMD_SELECTBAR: {
+		PatternSelect select;
+		
+		patternselect_init(&select, self->gridstate->pv);
+		patternselect_select_bar(&select);
+		break; }
 	case CMD_BLOCKUNMARK:
 		patternviewstate_block_unmark(self->gridstate->pv);
 		break;

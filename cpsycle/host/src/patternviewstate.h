@@ -30,8 +30,7 @@ typedef enum {
 typedef struct PatternViewState {
 	/* internal */	
 	psy_audio_SequenceCursor cursor;
-	psy_audio_BlockSelection selection;
-	psy_audio_SequenceCursor dragselectionbase;
+	psy_audio_BlockSelection selection;	
 	psy_audio_Pattern patternpaste;
 	bool chord;
 	uintptr_t chord_begin;
@@ -206,9 +205,7 @@ INLINE psy_dsp_big_beat_t patternviewstate_draw_offset(const PatternViewState*
 		: 0.0);
 }
 
-void patternviewstate_select_col(PatternViewState*);
-void patternviewstate_select_bar(PatternViewState*);
-void patternviewstate_select_all(PatternViewState*);
+
 
 INLINE double patternviewstate_preferredtrackwidth(const
 	PatternViewState* self)
