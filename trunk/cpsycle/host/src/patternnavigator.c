@@ -447,3 +447,137 @@ psy_audio_SequenceCursor patterncolnavigator_end(PatternColNavigator* self,
 	}
 	return rv;
 }
+
+
+/* PatternSelect */
+
+void patternselect_init(PatternSelect* self, PatternViewState* state)
+{
+	self->state = state;	
+}
+
+void patternselect_select_col(PatternSelect* self)
+{
+	psy_audio_SequenceCursor top;
+	psy_audio_SequenceCursor bottom;
+	
+	assert(self);
+	
+	if (patternviewstate_single_mode(self->state)) {				
+		top = psy_audio_sequencecursor_make(
+			self->state->cursor.order_index,
+			self->state->cursor.track, 
+			0.0);
+		bottom = psy_audio_sequencecursor_make(
+			self->state->cursor.order_index,
+			self->state->cursor.track + 1,
+			patternviewstate_length(self->state));
+	} else {		
+		const psy_audio_SequenceTrack* seqtrack;		
+		const psy_audio_SequenceEntry* last_entry;
+		uintptr_t num_orders;
+		
+		seqtrack = psy_audio_sequence_track_at_const(self->state->sequence,
+			self->state->cursor.order_index.track);
+		if (!seqtrack) {
+			return;
+		}
+		num_orders = psy_audio_sequencetrack_size(seqtrack);		
+		if (num_orders == 0) {
+			return;
+		}
+		last_entry = psy_audio_sequence_entry(self->state->sequence,
+			psy_audio_orderindex_make(self->state->cursor.order_index.track,
+				num_orders - 1));
+		if (!last_entry) {
+			return;
+		}
+		top = psy_audio_sequencecursor_make(
+			psy_audio_orderindex_make(self->state->cursor.order_index.track, 0),
+			self->state->cursor.track,
+			0.0);
+		bottom = psy_audio_sequencecursor_make(
+			psy_audio_orderindex_make(
+				self->state->cursor.order_index.track,
+				num_orders -1),			
+			self->state->cursor.track + 1,
+			psy_audio_sequenceentry_length(last_entry));			
+	}
+	self->state->selection = psy_audio_blockselection_make(top, bottom);	
+	patternviewstate_invalidate(self->state);	
+}
+
+void patternselect_select_bar(PatternSelect* self)
+{		
+	psy_audio_SequenceCursor top;
+	psy_audio_SequenceCursor bottom;
+	const psy_audio_SequenceEntry* seq_entry;
+	
+	assert(self);
+		
+	seq_entry = psy_audio_sequence_entry(self->state->sequence,
+		psy_audio_sequencecursor_order_index(&self->state->cursor));
+	if (!seq_entry) {
+		return;
+	}
+	top = self->state->cursor;
+	bottom = psy_audio_sequencecursor_make(
+		self->state->cursor.order_index,
+		self->state->cursor.track + 1,
+		psy_min(
+			psy_audio_sequencecursor_offset(&self->state->cursor) + 4.0,
+			psy_audio_sequenceentry_length(seq_entry)));	
+	self->state->selection = psy_audio_blockselection_make(top, bottom);	
+	patternviewstate_invalidate(self->state);	
+}
+
+void patternselect_select_all(PatternSelect* self)
+{
+	psy_audio_SequenceCursor top;
+	psy_audio_SequenceCursor bottom;
+	
+	assert(self);
+	
+	if (patternviewstate_single_mode(self->state)) {				
+		top = psy_audio_sequencecursor_make(
+			self->state->cursor.order_index,
+			0, 
+			0.0);
+		bottom = psy_audio_sequencecursor_make(
+			self->state->cursor.order_index,
+			patternviewstate_num_song_tracks(self->state),
+			patternviewstate_length(self->state));
+	} else {
+		const psy_audio_SequenceTrack* seqtrack;		
+		const psy_audio_SequenceEntry* last_entry;
+		uintptr_t num_orders;
+		
+		seqtrack = psy_audio_sequence_track_at_const(self->state->sequence,
+			self->state->cursor.order_index.track);
+		if (!seqtrack) {
+			return;
+		}
+		num_orders = psy_audio_sequencetrack_size(seqtrack);		
+		if (num_orders == 0) {
+			return;
+		}
+		last_entry = psy_audio_sequence_entry(self->state->sequence,
+			psy_audio_orderindex_make(self->state->cursor.order_index.track,
+				num_orders - 1));
+		if (!last_entry) {
+			return;
+		}
+		top = psy_audio_sequencecursor_make(
+			psy_audio_orderindex_make(self->state->cursor.order_index.track, 0),
+			0,
+			0.0);
+		bottom = psy_audio_sequencecursor_make(
+			psy_audio_orderindex_make(
+				self->state->cursor.order_index.track,
+				num_orders -1),			
+			patternviewstate_num_song_tracks(self->state),
+			psy_audio_sequenceentry_length(last_entry));			
+	}
+	self->state->selection = psy_audio_blockselection_make(top, bottom);	
+	patternviewstate_invalidate(self->state);	
+}

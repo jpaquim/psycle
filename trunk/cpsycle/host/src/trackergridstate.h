@@ -131,6 +131,8 @@ typedef struct TrackerEventTable {
 	double seqoffset;
 	uintptr_t left;
 	uintptr_t right;
+	psy_dsp_big_beat_t selection_top_abs;
+	psy_dsp_big_beat_t selection_bottom_abs;
 } TrackerEventTable;
 
 void trackereventtable_init(TrackerEventTable*);
@@ -138,6 +140,8 @@ void trackereventtable_dispose(TrackerEventTable*);
 
 void trackereventtable_clear_events(TrackerEventTable*);
 psy_List** trackereventtable_track(TrackerEventTable*, uintptr_t index);
+void trackereventtable_prepare_selection(TrackerEventTable*,
+	psy_audio_Sequence*, const psy_audio_BlockSelection*);
 
 typedef struct TrackerColumnFlags {
 	int playbar;
@@ -180,8 +184,6 @@ void trackerstate_update_clip_events(TrackerState*,
 	psy_ui_RealRectangle* g_clip, double line_height, const psy_ui_TextMetric*,
 	psy_audio_Player*);
 
-void trackerstate_start_drag_selection(TrackerState*, psy_audio_SequenceCursor);
-void trackerstate_drag_selection(TrackerState*, psy_audio_SequenceCursor);
 psy_audio_SequenceCursor trackerstate_checkcursorbounds(TrackerState*,
 	psy_audio_SequenceCursor);
 

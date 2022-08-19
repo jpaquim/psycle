@@ -27,9 +27,12 @@ extern "C" {
 #define psy_audio_GLOBALPATTERN_TIMESIGTRACK 0
 #define psy_audio_GLOBALPATTERN_LOOPTRACK 1
 
+struct psy_audio_Sequence;
+
 typedef struct psy_audio_BlockSelection {
 	psy_audio_SequenceCursor topleft;
-	psy_audio_SequenceCursor bottomright;
+	psy_audio_SequenceCursor bottomright;	
+	psy_audio_SequenceCursor drag_base;
 	bool valid;
 } psy_audio_BlockSelection;
 
@@ -77,15 +80,10 @@ INLINE bool psy_audio_blockselection_test_line(const psy_audio_BlockSelection* s
 		line < psy_audio_sequencecursor_line(&self->bottomright);
 }
 
-void psy_audio_blockselection_startdrag(psy_audio_BlockSelection*,
-	psy_audio_SequenceCursor dragselectionbase,
+void psy_audio_blockselection_startdrag(psy_audio_BlockSelection*,	
 	psy_audio_SequenceCursor cursor);
 void psy_audio_blockselection_drag(psy_audio_BlockSelection*,
-	psy_audio_SequenceCursor dragselectionbase,
-	psy_audio_SequenceCursor cursor);
-void psy_audio_blockselection_select(psy_audio_BlockSelection*,
-	uintptr_t track, uintptr_t numtracks,
-	psy_dsp_big_beat_t offset, psy_dsp_big_beat_t length);
+	psy_audio_SequenceCursor, struct psy_audio_Sequence*);
 
 INLINE psy_dsp_big_beat_t psy_audio_blockselection_start_offset(const psy_audio_BlockSelection* self)
 {

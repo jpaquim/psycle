@@ -286,6 +286,7 @@ void trackereventtable_init(TrackerEventTable* self)
 	psy_table_init(&self->tracks);
 	self->cursor_line_abs = 0;
 	self->play_line_abs = 0;
+	self->selection_top_abs = self->selection_bottom_abs = 0.0;
 }
 
 void trackereventtable_dispose(TrackerEventTable* self)
@@ -348,6 +349,32 @@ TrackerEventPair* trackereventpair_allocinit(double offset, double seqoffset,
 	rv->seqoffset = seqoffset;
 	rv->entry = entry;
 	return rv;
+}
+
+void trackereventtable_prepare_selection(TrackerEventTable* self,
+	psy_audio_Sequence* sequence, const psy_audio_BlockSelection* selection)
+{
+	psy_audio_SequenceEntry* top_entry;
+	psy_audio_SequenceEntry* bottom_entry;
+	
+	self->selection_top_abs = self->selection_bottom_abs = 0.0;	
+	if (!psy_audio_blockselection_valid(selection)) {
+		return;
+	}			
+	top_entry = psy_audio_sequence_entry(sequence,
+		selection->topleft.order_index);
+	if (!top_entry) {
+		return;
+	}
+	bottom_entry = psy_audio_sequence_entry(sequence,
+		selection->bottomright.order_index);
+	if (!bottom_entry) {
+		return;
+	}		
+	self->selection_top_abs = psy_audio_sequenceentry_offset(top_entry) +
+		psy_audio_sequencecursor_offset(&selection->topleft);
+	self->selection_bottom_abs = psy_audio_sequenceentry_offset(bottom_entry) +
+		psy_audio_sequencecursor_offset(&selection->bottomright);		
 }
 
 /* TrackerState */
@@ -608,24 +635,6 @@ void trackerstate_track_clip(TrackerState* self,
 	if (*rv_right > patternviewstate_num_song_tracks(self->pv)) {
 		*rv_right = patternviewstate_num_song_tracks(self->pv);
 	}	
-}
-
-void trackerstate_start_drag_selection(TrackerState* self,
-	psy_audio_SequenceCursor cursor)
-{
-	assert(self);
-
-	psy_audio_blockselection_startdrag(&self->pv->selection,
-		self->pv->dragselectionbase, cursor);
-}
-
-void trackerstate_drag_selection(TrackerState* self, psy_audio_SequenceCursor
-	cursor)
-{
-	assert(self);
-
-	psy_audio_blockselection_drag(&self->pv->selection,
-		self->pv->dragselectionbase, cursor);
 }
 
 psy_audio_SequenceCursor trackerstate_checkcursorbounds(TrackerState* self,

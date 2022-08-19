@@ -43,49 +43,6 @@ void patternviewstate_dispose(PatternViewState* self)
 	psy_audio_pattern_dispose(&self->patternpaste);
 }
 
-void patternviewstate_select_col(PatternViewState* self)
-{
-	assert(self);
-
-	if (patternviewstate_pattern(self)) {
-		psy_audio_blockselection_select(&self->selection,
-			self->cursor.track, 1, 0.0,
-			psy_audio_pattern_length(patternviewstate_pattern(self)));
-		patternviewstate_invalidate(self);
-	}
-}
-
-void patternviewstate_select_bar(PatternViewState* self)
-{
-	assert(self);
-
-	if (patternviewstate_pattern(self)) {
-		psy_audio_blockselection_select(&self->selection,
-			self->cursor.track, 1,
-			self->cursor.offset,
-			4.0);
-		if (self->cursor.offset > patternviewstate_pattern(self)->length) {
-			self->cursor.offset = patternviewstate_pattern(self)->length;
-		}
-		patternviewstate_invalidate(self);
-	}
-}
-
-void patternviewstate_select_all(PatternViewState* self)
-{
-	assert(self);
-
-	if (patternviewstate_pattern(self)) {
-		psy_audio_blockselection_init(&self->selection);
-		self->selection.topleft.key = psy_audio_NOTECOMMANDS_B9;
-		psy_audio_blockselection_select(&self->selection,
-			0, patternviewstate_num_song_tracks(self),
-			0.0, psy_audio_pattern_length(
-				patternviewstate_pattern(self)));
-		patternviewstate_invalidate(self);
-	}
-}
-
 void patternviewstate_sequencestart(PatternViewState* self,
 	double startoffset, psy_audio_SequenceTrackIterator* rv)
 {

@@ -67,4 +67,18 @@ INLINE bool patterncolnavigator_wrap(const PatternColNavigator* self)
 	return self->wrap;
 }
 
+
+/* PatternSelect */
+
+typedef struct PatternSelect {
+	/* internal */
+	PatternViewState* state;	
+} PatternSelect;
+
+void patternselect_init(PatternSelect*, PatternViewState*);
+
+void patternselect_select_col(PatternSelect*);
+void patternselect_select_bar(PatternSelect*);
+void patternselect_select_all(PatternSelect*);
+
 #endif /* PATTERNNAVIGATOR_H */
