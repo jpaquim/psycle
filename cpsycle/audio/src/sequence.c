@@ -242,15 +242,23 @@ psy_audio_SequenceEntryNode* psy_audio_sequencetrack_node_at_offset(
 	r = psy_audio_sequencetrack_size(self) - 1;	
 	while (r >= l) {
 		psy_audio_SequenceEntry* entry;
+		psy_audio_SequenceEntry* next_entry;
+		double reposition;
 
 		mid = (l + r) / 2;
 		entry = psy_audio_sequencetrack_entry(self, mid);
 		if (!entry) {
 			mid = psy_INDEX_INVALID;
 			break;
-		}		
+		}
+		next_entry = psy_audio_sequencetrack_entry(self, mid + 1);
+		if (next_entry) {
+			reposition = psy_audio_sequenceentry_reposition_offset(next_entry);
+		} else {
+			reposition = 0.0;
+		}
 		if (offset >= psy_audio_sequenceentry_offset(entry) &&
-			offset < psy_audio_sequenceentry_right_offset(entry)) {
+			offset < psy_audio_sequenceentry_right_offset(entry) + reposition) {
 			break;
 		} else {
 			if (offset > psy_audio_sequenceentry_offset(entry)) {

@@ -1593,6 +1593,7 @@ static void trackerview_on_play_status_changed(TrackerView*, Workspace* sender);
 static void trackerview_on_grid_scroll(TrackerView*, psy_ui_Component*);
 static bool trackerview_playing_following_song(const TrackerView*);
 static void trackerview_on_mouse_down(TrackerView*, psy_ui_MouseEvent*);
+static void trackerview_on_draw(TrackerView*, psy_ui_Graphics*);
 
 /* vtable */
 static psy_ui_ComponentVtable trackerview_vtable;
@@ -1601,7 +1602,10 @@ static bool trackerview_vtable_initialized = FALSE;
 static void trackerview_vtable_init(TrackerView* self)
 {
 	if (!trackerview_vtable_initialized) {
-		trackerview_vtable = *(self->component.vtable);		
+		trackerview_vtable = *(self->component.vtable);
+		trackerview_vtable.ondraw =
+			(psy_ui_fp_component_ondraw)
+			trackerview_on_draw;
 		trackerview_vtable.on_mouse_down =
 			(psy_ui_fp_component_on_mouse_event)
 			trackerview_on_mouse_down;
@@ -1818,4 +1822,10 @@ void trackerview_on_mouse_down(TrackerView* self, psy_ui_MouseEvent* ev)
 		psy_ui_component_set_focus(&self->grid.component);
 		psy_ui_mouseevent_stop_propagation(ev);
 	}
+}
+
+void trackerview_on_draw(TrackerView* self, psy_ui_Graphics* g)
+{
+	trackerstate_update_abs_positions(self->grid.state,
+		&self->workspace->player);
 }

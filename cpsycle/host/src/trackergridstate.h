@@ -183,6 +183,7 @@ void trackerstate_track_clip(TrackerState*, const psy_ui_RealRectangle*,
 void trackerstate_update_clip_events(TrackerState*,
 	psy_ui_RealRectangle* g_clip, double line_height, const psy_ui_TextMetric*,
 	psy_audio_Player*);
+void trackerstate_update_abs_positions(TrackerState*, const psy_audio_Player*);	
 
 psy_audio_SequenceCursor trackerstate_checkcursorbounds(TrackerState*,
 	psy_audio_SequenceCursor);

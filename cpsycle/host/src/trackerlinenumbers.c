@@ -19,7 +19,7 @@
 static void trackerlinenumbers_connect_configuration(TrackerLineNumbers*);
 static void trackerlinenumbers_on_draw(TrackerLineNumbers*, psy_ui_Graphics*);
 static TrackerColumnFlags trackerlinennumbers_column_flags(TrackerLineNumbers*,
-	intptr_t line, double seqoffset);
+	intptr_t line, intptr_t seqline);
 static void trackerlinennumbers_draw_text(TrackerLineNumbers*, psy_ui_Graphics*,
 	const char* format, double y, double width, const char* text);
 static void trackerlinenumbers_invalidate_cursor_internal(TrackerLineNumbers*,
@@ -35,6 +35,12 @@ static void trackerlinenumbers_on_show_cursor(TrackerLineNumbers*,
 	psy_Property* sender);
 static void trackerlinenumbers_on_show_in_hex(TrackerLineNumbers*,
 	psy_Property* sender);
+static void trackerlinennumbers_save_colours(TrackerLineNumbers*,
+	psy_ui_Graphics*);	
+static void trackerlinennumbers_set_colours(TrackerLineNumbers*,
+	psy_ui_Graphics*, psy_ui_Style*);
+static void trackerlinennumbers_text(TrackerLineNumbers*, int line,
+	int pat_idx, char* rv);	
 
 /* vtable */
 static psy_ui_ComponentVtable trackerlinenumbers_vtable;
@@ -73,8 +79,7 @@ void trackerlinenumbers_init(TrackerLineNumbers* self,
 	self->draw_restore_fg_colour = psy_ui_colour_white();
 	self->draw_restore_bg_colour = psy_ui_colour_black();
 	psy_ui_realsize_init(&self->size);
-	psy_ui_realsize_init(&self->line_size);	
-	self->cursor_line_abs = psy_INDEX_INVALID;
+	psy_ui_realsize_init(&self->line_size);		
 	psy_audio_sequencecursor_init(&self->old_cursor);
 	trackerlinenumbers_update_format(self);		
 	psy_ui_component_set_scroll_step_height(&self->component,
@@ -101,33 +106,19 @@ void trackerlinenumbers_connect_configuration(TrackerLineNumbers* self)
 }
 
 void trackerlinenumbers_update_format(TrackerLineNumbers* self)
-{
-	static const char* format_hex_beat_seqstart = "%.2X %.2X %.3f";
-	static const char* format_hex_beat = "%X %.3f";
+{	
 	static const char* format_hex_seqstart = "%.2X %.2X";
 	static const char* format_hex = "%X";
 
-	static const char* format_beat_seqstart = "%X %i %.3f";
-	static const char* format_beat = "%i %.3f";
 	static const char* format_seqstart = "%X %i";
 	static const char* format = "%i";
 
-	if (self->show_in_hex) {
-		if (self->show_beat) {
-			self->format = format_hex_beat;
-			self->format_seqstart = format_hex_beat_seqstart;
-		} else {
-			self->format = format_hex;
-			self->format_seqstart = format_hex_seqstart;			
-		}
-	} else {
-		if (self->show_beat) {
-			self->format = format_beat;
-			self->format_seqstart = format_beat_seqstart;
-		} else {
-			self->format = format;
-			self->format_seqstart = format_seqstart;
-		}
+	if (self->show_in_hex) {		
+		self->format = format_hex;
+		self->format_seqstart = format_hex_seqstart;		
+	} else {		
+		self->format = format;
+		self->format_seqstart = format_seqstart;		
 	}
 }
 
@@ -135,117 +126,81 @@ void trackerlinenumbers_on_draw(TrackerLineNumbers* self, psy_ui_Graphics* g)
 {	
 	psy_ui_RealSize size;
 	psy_ui_RealRectangle g_clip;
-	double cpy;
-	uintptr_t line_start;
-	uintptr_t line_end;
-	uintptr_t line;
-	intptr_t seqline;
-	double offset;			
-	double seqoffset;	
 	double clip_offset_top;
-	double clip_offset_bottom;
-	uintptr_t maxlines;
+	double clip_offset_bottom;	
+	uintptr_t line;
+	uintptr_t num_clip_lines;
+	intptr_t seqline;
+	uintptr_t num_entry_lines;	
+	uintptr_t count;	
 	uintptr_t patidx;	
-	psy_audio_SequenceTrackIterator ite;		
-	uintptr_t lpb;	
-	
+	psy_audio_SequenceTrackIterator ite;
+	double cpy;
+		
 	assert(self);
 			
 	if (!patternviewstate_sequence(self->state->pv)) {
 		return;
 	}	
 	/* prepare clipping */
-	g_clip = psy_ui_graphics_cliprect(g);	
-	/*
-	** single mode: offsets 0.0 at seq_entry begin (relative to seq_entry)
-	** all        : offsets 0.0 at sequence begin (absolute to sequence)
-	**/
+	g_clip = psy_ui_graphics_cliprect(g);		
 	clip_offset_top = trackerstate_px_to_beat(self->state,
 		psy_max(0.0, g_clip.top), self->line_size.height);
 	clip_offset_bottom = trackerstate_px_to_beat(self->state,
 		psy_max(0.0, g_clip.bottom), self->line_size.height);		
 	clip_offset_bottom = psy_min(clip_offset_bottom,
-		patternviewstate_length(self->state->pv));
-	lpb = self->state->pv->cursor.lpb;	
-	line_start = floor(clip_offset_top * lpb);
-	line_end = floor(clip_offset_bottom * lpb);
-	cpy = line_start * self->line_size.height;	
-	if (!patternviewstate_single_mode(self->state->pv)) {
+		patternviewstate_length(self->state->pv));	
+	line = 	floor(clip_offset_top * self->state->pv->cursor.lpb);	
+	num_clip_lines = floor(clip_offset_bottom * self->state->pv->cursor.lpb) -
+		line;
+	cpy = line * self->line_size.height;
+	if (patternviewstate_single_mode(self->state->pv)) {
+		seqline = patternviewstate_beat_to_line(self->state->pv,
+			psy_audio_sequencecursor_seqoffset(&self->state->pv->cursor,
+			self->state->pv->sequence));
+		num_entry_lines = patternviewstate_beat_to_line(self->state->pv,
+			patternviewstate_length(self->state->pv));		
+	} else {
 		psy_audio_sequencetrackiterator_init(&ite);
 		psy_audio_sequence_begin(self->state->pv->sequence,			
 			self->state->pv->cursor.order_index.track, clip_offset_top, &ite);				
 		patidx = psy_audio_sequencetrackiterator_patidx(&ite);		
-		seqoffset = psy_audio_sequencetrackiterator_seqoffset(&ite);		
-		seqline = patternviewstate_beat_to_line(self->state->pv, seqoffset);		
-	} else {
-		psy_audio_SequenceEntry* seq_entry;
-		
-		seq_entry = psy_audio_sequence_entry(self->state->pv->sequence,
-			psy_audio_sequencecursor_order_index(&self->state->pv->cursor));
-		if (seq_entry) {
-			seqoffset = psy_audio_sequenceentry_offset(seq_entry);
-		} else {
-			seqoffset = 0.0;
-		}
-	}
-	offset = clip_offset_top;	
-	self->cursor_line_abs = psy_audio_sequencecursor_line_abs(
-		&self->state->pv->cursor, self->state->pv->sequence);
-	self->play_line_abs = psy_audio_sequencecursor_line_abs(
-		&self->workspace->player.sequencer.hostseqtime.currplaycursor,
-		self->state->pv->sequence);
+		seqline = patternviewstate_beat_to_line(self->state->pv, 
+			psy_audio_sequencetrackiterator_seqoffset(&ite));
+		num_entry_lines = patternviewstate_beat_to_line(self->state->pv,
+			psy_audio_sequencetrackiterator_entry_length(&ite));
+		line -= seqline;		
+	}	
 	/* prepare draw */
-	self->draw_restore_fg_colour = psy_ui_component_colour(&self->component);
-	self->draw_restore_bg_colour = psy_ui_component_background_colour(
-		&self->component);
+	trackerlinennumbers_save_colours(self, g);
 	size = psy_ui_component_scroll_size_px(&self->component);
-	/* draw lines */
-	for (line = line_start; line <= line_end; ++line) {
-		char text[64];
-		psy_ui_Style* style;
+	/* draw lines */	
+	count = 0;	
+	while (count <= num_clip_lines) {
+		char text[64];		
 		
-		if (!patternviewstate_single_mode(self->state->pv)) {
-			if (seqline > line) {
-				text[0] = '\0';
-			} else if (seqline == line) {
-				psy_snprintf(text, 64, self->format_seqstart, (int)patidx,
-					(int)line - seqline, (float)offset);
-			} else {
-				psy_snprintf(text, 64, self->format, (int)(line - seqline),
-					(float)offset);
-			}
-			style = trackerstate_column_style(self->state,
-			trackerlinennumbers_column_flags(self, line - seqline, seqoffset),
-			0);
-		} else {
-			psy_snprintf(text, 64, self->format, (int)(line), (float)offset);
-			style = trackerstate_column_style(self->state,
-			trackerlinennumbers_column_flags(self, line, seqoffset), 0);
-		}		
-		if (style) {
-			if (style->background.colour.mode.transparent) {
-				psy_ui_set_background_colour(g, self->draw_restore_bg_colour);
-			} else {
-				psy_ui_set_background_colour(g, style->background.colour);
-			}
-			if (style->colour.mode.transparent) {
-				psy_ui_set_text_colour(g, self->draw_restore_fg_colour);
-			} else {
-				psy_ui_set_text_colour(g, style->colour);
-			}
-		}	
-		trackerlinennumbers_draw_text(self, g, text, cpy, size.width, text);
+		if (line < num_entry_lines) {
+			trackerlinennumbers_text(self, line, patidx, text);		
+			trackerlinennumbers_set_colours(self, g, trackerstate_column_style(
+				self->state, trackerlinennumbers_column_flags(self, line, seqline),
+				0));
+			trackerlinennumbers_draw_text(self, g, text, cpy, size.width, text);
+		}
 		cpy += self->line_size.height;
-		offset += psy_audio_sequencecursor_bpl(&self->state->pv->cursor);
-		if (!patternviewstate_single_mode(self->state->pv)) {
-			if (offset >= seqoffset + psy_audio_sequencetrackiterator_entry_length(&ite)) {
+		++line;
+		++count;		
+		if (!patternviewstate_single_mode(self->state->pv)) {			
+			if (line >= num_entry_lines) {
 				if (psy_audio_sequencetrackiterator_has_next_entry(&ite)) {
 					psy_audio_sequencetrackiterator_inc_entry(&ite);					
-					seqoffset = psy_audio_sequencetrackiterator_seqoffset(&ite);
 					seqline = patternviewstate_beat_to_line(self->state->pv,
-						seqoffset);
-					patidx = psy_audio_sequencetrackiterator_patidx(&ite);
-					offset = seqoffset;								
+						psy_audio_sequencetrackiterator_seqoffset(&ite));
+					line = 0;
+					cpy = (line + seqline) * self->line_size.height;
+					num_entry_lines = patternviewstate_beat_to_line(
+						self->state->pv,
+						psy_audio_sequencetrackiterator_entry_length(&ite));					
+					patidx = psy_audio_sequencetrackiterator_patidx(&ite);					
 				} else {
 					break;
 				}
@@ -257,19 +212,56 @@ void trackerlinenumbers_on_draw(TrackerLineNumbers* self, psy_ui_Graphics* g)
 	}	
 }
 
+void trackerlinennumbers_text(TrackerLineNumbers* self, int line,
+	int pat_idx, char* rv)
+{
+	if (line < 0) {
+		rv[0] = '\0';
+	} else if (!patternviewstate_single_mode(self->state->pv) && line == 0) {			
+		psy_snprintf(rv, 64, self->format_seqstart, pat_idx, line);
+	} else {
+		psy_snprintf(rv, 64, self->format, line);
+	}
+}
+
+void trackerlinennumbers_save_colours(TrackerLineNumbers* self,
+	psy_ui_Graphics* g)
+{
+	self->draw_restore_fg_colour = psy_ui_component_colour(&self->component);
+	self->draw_restore_bg_colour = psy_ui_component_background_colour(
+		&self->component);
+}
+
+void trackerlinennumbers_set_colours(TrackerLineNumbers* self,
+	psy_ui_Graphics* g, psy_ui_Style* style)
+{
+	if (style) {
+		if (style->background.colour.mode.transparent) {
+			psy_ui_set_background_colour(g, self->draw_restore_bg_colour);
+		} else {
+			psy_ui_set_background_colour(g, style->background.colour);
+		}
+		if (style->colour.mode.transparent) {
+			psy_ui_set_text_colour(g, self->draw_restore_fg_colour);
+		} else {
+			psy_ui_set_text_colour(g, style->colour);
+		}
+	}
+}
+
 TrackerColumnFlags trackerlinennumbers_column_flags(TrackerLineNumbers* self,
-	intptr_t line, double seqoffset)
+	intptr_t line, intptr_t seqline)
 {
 	TrackerColumnFlags rv;	
 	uintptr_t line_abs;
 	uintptr_t lpb;
 	
 	lpb = psy_audio_sequencecursor_lpb(&self->state->pv->cursor);	
-	line_abs = (uintptr_t)(seqoffset * (double)lpb) + line;		
+	line_abs = seqline + line;		
 	rv.playbar = psy_audio_player_playing(workspace_player(self->workspace)) &&
-		(self->play_line_abs == line_abs);
+		(self->state->track_events.play_line_abs == line_abs);
 	rv.mid = 0;	
-	rv.cursor = (self->cursor_line_abs == line_abs);
+	rv.cursor = (self->state->track_events.cursor_line_abs == line_abs);
 	// rv.cursor = (keyboardmiscconfig_following_song(&self->workspace->config.misc) ||
 	//	!self->workspace->player.sequencer.hostseqtime.currplaying) &&
 	//	self->draw_cursor &&
