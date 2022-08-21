@@ -136,7 +136,7 @@ void trackergrid_init(TrackerGrid* self, psy_ui_Component* parent,
 	self->state->show_empty_data = FALSE;	
 	self->effcursor_always_down = FALSE;	
 	self->prevent_event_driver = FALSE;
-	self->down = FALSE;
+	self->down = FALSE;	
 	psy_ui_realsize_init(&self->size);
 	psy_ui_realsize_init(&self->line_size);	
 	trackergrid_connect_input_handler(self, input_handler);

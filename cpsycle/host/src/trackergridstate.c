@@ -775,11 +775,8 @@ void trackerstate_update_clip_events(TrackerState* self,
 		psy_audio_sequence_begin(self->pv->sequence,
 			self->pv->cursor.order_index.track, offset,
 		&ite);
-	}	
-	length = 0.0;
-	if (ite.pattern) {
-		length = ite.pattern->length;
-	}
+	}			
+	length = psy_audio_sequencetrackiterator_entry_length(&ite);
 	seqoffset = psy_audio_sequencetrackiterator_seqoffset(&ite);
 	self->track_events.seqoffset = seqoffset;
 	self->track_events.top = offset;	

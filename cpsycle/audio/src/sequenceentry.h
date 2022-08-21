@@ -102,6 +102,12 @@ INLINE psy_dsp_big_beat_t psy_audio_sequenceentry_offset(
 	return self->offset;
 }
 
+INLINE psy_dsp_big_beat_t psy_audio_sequenceentry_reposition_offset(
+	const psy_audio_SequenceEntry* self)
+{
+	return self->repositionoffset;
+}
+
 INLINE psy_dsp_big_beat_t psy_audio_sequenceentry_right_offset(
 	const psy_audio_SequenceEntry* self)
 {

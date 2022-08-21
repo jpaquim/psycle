@@ -520,13 +520,14 @@ void psy_audio_sequence_begin(psy_audio_Sequence* self,
 {			
 	psy_audio_SequenceEntry* entry;	
 	psy_audio_SequenceTrack* track;
-
+	
 	rv->patterns = self->patterns;
 	if (track_idx == psy_audio_GLOBALTRACK) {		
 		track = &self->globaltrack;
 	} else {
 		track = psy_audio_sequence_track_at(self, track_idx);
 	}
+	rv->track = track;
 	if (!track) {
 		rv->sequencentrynode = NULL;
 		rv->pattern = NULL;
@@ -560,6 +561,7 @@ void psy_audio_sequence_begin(psy_audio_Sequence* self,
 
 void psy_audio_sequencetrackiterator_init(psy_audio_SequenceTrackIterator* self)
 {	
+	self->track = NULL;
 	self->patterns = NULL;
 	self->sequencentrynode = NULL;
 	self->patternnode = NULL;	
