@@ -208,9 +208,12 @@ void psy_ui_button_on_draw(psy_ui_Button* self, psy_ui_Graphics* g)
 	if ((self->textalignment & psy_ui_ALIGNMENT_CENTER_HORIZONTAL) ==
 		psy_ui_ALIGNMENT_CENTER_HORIZONTAL) {
 		cpx = (size.width - psy_ui_button_width(self)) / 2.0;
+	} else if ((self->textalignment & psy_ui_ALIGNMENT_RIGHT) ==
+			psy_ui_ALIGNMENT_RIGHT) {	
+		cpx = size.width - psy_ui_button_width(self);
 	} else {
 		cpx = 0.0;
-	}	
+	}
 	psy_ui_button_width(self);
 	if (!psy_ui_bitmap_empty(&self->bitmapicon)) {		
 		psy_ui_RealSize srcbpmsize;

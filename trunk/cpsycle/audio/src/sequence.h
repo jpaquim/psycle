@@ -103,10 +103,11 @@ uintptr_t psy_audio_sequencetrack_size(const psy_audio_SequenceTrack*);
 ** Iterator the player uses to advance through the track and pattern
 */
 typedef struct psy_audio_SequenceTrackIterator {
-	psy_audio_Patterns* patterns;	
+	psy_audio_Patterns* patterns;
+	psy_audio_SequenceTrack* track;	
 	psy_audio_SequenceEntryNode* sequencentrynode;
 	psy_audio_PatternNode* patternnode;
-	psy_audio_Pattern* pattern;	
+	psy_audio_Pattern* pattern;
 } psy_audio_SequenceTrackIterator;
 
 void psy_audio_sequencetrackiterator_init(psy_audio_SequenceTrackIterator*);

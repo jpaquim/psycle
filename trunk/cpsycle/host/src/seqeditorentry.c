@@ -134,7 +134,11 @@ void seqeditentry_startdrag(SeqEditEntry* self, psy_ui_MouseEvent* ev)
 			psy_ui_component_setcursor(&self->component,
 				psy_ui_CURSORSTYLE_COL_RESIZE);
 		} else {
-			self->state->dragstatus = SEQEDIT_DRAG_START;
+			if (!psy_audio_orderindex_equal(&self->seqpos,
+					psy_audio_orderindex_make(self->seqpos.track, 0)) ||
+					(self->state->dragtype != SEQEDIT_DRAGTYPE_MOVE)) {
+				self->state->dragstatus = SEQEDIT_DRAG_START;				
+			}
 		}		
 	} else if (psy_ui_mouseevent_button(ev) == 2) {
 		self->state->dragstatus = SEQEDIT_DRAG_REMOVE;

@@ -35,6 +35,8 @@ typedef struct TrackerLineNumbers {
 	psy_ui_RealSize line_size;	
 	psy_ui_Colour draw_restore_fg_colour;
 	psy_ui_Colour draw_restore_bg_colour;
+	uintptr_t cursor_line_abs;
+	uintptr_t play_line_abs;
 	/* references */
 	TrackerState* state;
 	Workspace* workspace;

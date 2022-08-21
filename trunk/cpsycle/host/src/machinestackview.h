@@ -95,6 +95,8 @@ typedef struct MachineStackState {
 	uintptr_t selected;
 	uintptr_t effectinsertpos;
 	bool effectinsertright;
+	psy_ui_Size inputs_size;
+	psy_ui_Size volume_size;
 	psy_ui_Size effectsize;
 	psy_ui_Size effectsizesmall;
 	psy_ui_Size columnsize;
@@ -156,10 +158,11 @@ typedef struct MachineStackDesc {
 	psy_ui_Button volumes;
 	/* references */
 	struct MachineStackView* view;
+	MachineStackState* state;
 } MachineStackDesc;
 
 void machinestackdesc_init(MachineStackDesc*, psy_ui_Component* parent,
-	struct MachineStackView*);
+	struct MachineStackView*, MachineStackState*);
 
 /* MachineStackInputs */
 typedef struct MachineStackInputs {

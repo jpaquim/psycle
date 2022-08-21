@@ -542,13 +542,21 @@ static uintptr_t machinestackstate_buildcolumnoutchain(MachineStackState*,
 /* implementation */
 void machinestackstate_init(MachineStackState* self, ParamViews* paramviews)
 {
+	psy_ui_Value spacing;
+	psy_ui_Style* effect_style;
+	
 	psy_table_init(&self->columns);	
 	self->machines = NULL;	
 	self->selected = psy_INDEX_INVALID;
 	/* self->effectsize = psy_ui_size_make_px(138.0, 52.0); */
-	self->effectsize = psy_ui_size_make(
+	
+	effect_style = psy_ui_style(STYLE_MV_EFFECT);
+	self->inputs_size = psy_ui_size_make(
 		psy_ui_value_make_px(138.0),
-		psy_ui_value_make_px(52.0));
+		psy_ui_value_make_px(52.0 + 19.0));		
+	self->volume_size = psy_ui_size_make(
+		psy_ui_value_make_px(138.0 + 19),
+		psy_ui_value_make_px(182.0));
 	self->effectsizesmall = 
 		psy_ui_size_make(
 			psy_ui_value_make_px(138.0),
@@ -817,117 +825,53 @@ static void machinestackdesc_ontogglevolumes(MachineStackDesc*,
 	psy_ui_Button* sender);
 static void machinestackdesc_configureeffects(MachineStackDesc*,
 	psy_ui_Button* sender);
-/* vtable */
-static psy_ui_ComponentVtable machinestackdesc_vtable;
-static bool machinestackdesc_vtable_initialized = FALSE;
 
-static psy_ui_ComponentVtable* machinestackdesc_vtable_init(MachineStackDesc* self)
-{
-	if (!machinestackdesc_vtable_initialized) {
-		machinestackdesc_vtable = *(self->component.vtable);
-		machinestackdesc_vtable.onalign =
-			(psy_ui_fp_component_event)
-			machinestackdesc_onalign;
-		machinestackdesc_vtable.onpreferredsize =
-			(psy_ui_fp_component_on_preferred_size)
-			machinestackdesc_onpreferredsize;
-		machinestackdesc_vtable_initialized = TRUE;
-	}
-	return &machinestackdesc_vtable;
-}
 /* implementation */
 void machinestackdesc_init(MachineStackDesc* self, psy_ui_Component* parent,
-	MachineStackView* view)
+	MachineStackView* view, MachineStackState* state)
 {
 	psy_ui_component_init(&self->component, parent, NULL);
-	psy_ui_component_set_vtable(&self->component,
-		machinestackdesc_vtable_init(self));
 	self->view = view;
-	psy_ui_component_setcolour(&self->component,
-		psy_ui_colour_make(0x00AABBBB));	
+	self->state = state;
+	// psy_ui_component_setcolour(&self->component,
+	//	psy_ui_colour_make(0x00AABBBB));
+	psy_ui_component_set_padding(&self->component,
+		psy_ui_margin_make_em(0.0, 1.0, 0.0, 0.0));	
 	psy_ui_label_init_text(&self->inputs, &self->component,
 		"stackview.inputs");
+	psy_ui_label_prevent_wrap(&self->inputs);
+	psy_ui_component_set_style_type(&self->inputs.component,
+		psy_ui_STYLE_BUTTON);	
+	psy_ui_label_set_text_alignment(&self->inputs,
+		psy_ui_ALIGNMENT_TOP | psy_ui_ALIGNMENT_RIGHT);
+	psy_ui_component_set_align(&self->inputs.component,
+		psy_ui_ALIGN_TOP);
+	psy_ui_component_set_preferred_height(&self->inputs.component,
+		self->state->inputs_size.height);
 	psy_ui_button_init_text_connect(&self->effects, &self->component,
 		"stackview.effects", self, machinestackdesc_configureeffects);
+	psy_ui_button_set_text_alignment(&self->effects,
+		psy_ui_ALIGNMENT_TOP | psy_ui_ALIGNMENT_RIGHT);
+	psy_ui_component_set_align(&self->effects.component,
+		psy_ui_ALIGN_TOP);
 	psy_ui_button_load_resource(&self->effects, IDB_SETTINGS_LIGHT,
 		IDB_SETTINGS_DARK, psy_ui_colour_white());
-	psy_ui_button_init_text_connect(&self->outputs, &self->component,
-		"stackview.outputs", self, machinestackdesc_ontoggleoutputs);
-	psy_ui_button_set_icon(&self->outputs, psy_ui_ICON_LESS);
 	psy_ui_button_init_text_connect(&self->volumes, &self->component,
 		"stackview.volumes", self, machinestackdesc_ontogglevolumes);
-	psy_ui_button_set_icon(&self->volumes, psy_ui_ICON_LESS);	
-}
-
-void machinestackdesc_onalign(MachineStackDesc* self)
-{	
-	psy_ui_Size size;
-	psy_ui_RealSize sizepx;
-	psy_ui_Size insize;
-	psy_ui_RealSize insizepx;
-	psy_ui_Size btnsize;
-	psy_ui_Size effectsize;	
-	psy_ui_RealSize effectsizepx;
-	psy_ui_Size outsize;
-	psy_ui_RealSize outsizepx;
-	psy_ui_Size volumesize;
-	psy_ui_RealSize volumesizepx;
-	const psy_ui_TextMetric* tm;
-	double margin_left;
-
-	margin_left = 8.0;
-	tm = psy_ui_component_textmetric(&self->component);
-	size = psy_ui_component_scroll_size(&self->component);
-	sizepx = psy_ui_component_scroll_size_px(&self->component);
-	if (psy_ui_component_visible(&self->view->scroller_columns.hscroll->component)) {
-		sizepx.height -= tm->tmHeight * 1.5;
-	}
-	insize = psy_ui_component_preferred_size(&self->view->inputs.component,
-		NULL);
-	insizepx = psy_ui_size_px(&insize, tm, NULL);
-	effectsize = psy_ui_component_preferred_size(&self->view->pane.component,
-		NULL);
-	effectsizepx = psy_ui_size_px(&effectsize, tm, NULL);
-	btnsize = psy_ui_component_preferred_size(psy_ui_button_base(
-		&self->effects), NULL);
-	if (psy_ui_component_visible(&self->view->outputs.component)) {
-		outsize = psy_ui_component_preferred_size(&self->view->outputs.component,
-			NULL);
-	} else {
-		outsize = psy_ui_size_make_em(0.0, 1.0);
-	}
-	outsizepx = psy_ui_size_px(&outsize, tm, NULL);
-	if (psy_ui_component_visible(&self->view->outputs.component)) {
-		volumesize = psy_ui_component_preferred_size(&self->view->volumes.component,
-			NULL);
-	} else {
-		volumesize = psy_ui_size_make_em(0.0, 1.0);
-	}
-	volumesizepx = psy_ui_size_px(&volumesize, tm, NULL);
-	volumesizepx.height = psy_max(182.0, volumesizepx.height);
-	psy_ui_component_setposition(&self->inputs.component,
-		psy_ui_rectangle_make(
-			psy_ui_point_make_px(margin_left, 0.0),
-			psy_ui_size_make(size.width, btnsize.height)));
-	psy_ui_component_setposition(&self->effects.component,
-		psy_ui_rectangle_make(
-			psy_ui_point_make_px(margin_left, insizepx.height),
-			psy_ui_size_make(size.width, btnsize.height)));
-	psy_ui_component_setposition(&self->outputs.component,
-		psy_ui_rectangle_make(
-			psy_ui_point_make_px(margin_left, sizepx.height - volumesizepx.height -
-				outsizepx.height),
-			psy_ui_size_make(size.width, btnsize.height)));
-	psy_ui_component_setposition(&self->volumes.component,
-		psy_ui_rectangle_make(
-			psy_ui_point_make_px(margin_left, sizepx.height - volumesizepx.height),
-			psy_ui_size_make(size.width, btnsize.height)));
-}
-
-void machinestackdesc_onpreferredsize(MachineStackDesc* self,
-	const psy_ui_Size* limit, psy_ui_Size* rv)
-{
-	psy_ui_size_setem(rv, 18.0, 10.0);
+	psy_ui_button_set_icon(&self->volumes, psy_ui_ICON_LESS);
+	psy_ui_component_set_align(&self->volumes.component,
+		psy_ui_ALIGN_BOTTOM);	
+	psy_ui_component_set_preferred_height(&self->volumes.component,
+		self->state->volume_size.height);	
+	psy_ui_button_set_text_alignment(&self->volumes,
+		psy_ui_ALIGNMENT_TOP | psy_ui_ALIGNMENT_RIGHT);		
+	psy_ui_button_init_text_connect(&self->outputs, &self->component,
+		"stackview.outputs", self, machinestackdesc_ontoggleoutputs);		
+	psy_ui_button_set_icon(&self->outputs, psy_ui_ICON_LESS);
+	psy_ui_component_set_align(&self->outputs.component,
+		psy_ui_ALIGN_BOTTOM);	
+	psy_ui_button_set_text_alignment(&self->outputs,
+		psy_ui_ALIGNMENT_TOP | psy_ui_ALIGNMENT_RIGHT);
 }
 
 void machinestackdesc_ontoggleoutputs(MachineStackDesc* self,
@@ -1006,15 +950,8 @@ void machinestackinputs_init(MachineStackInputs* self,
 
 void machinestackinputs_onpreferredsize(MachineStackInputs* self,
 	const psy_ui_Size* limit, psy_ui_Size* rv)
-{
-	psy_ui_Value spacing;
-	psy_ui_Style* effect_style;
-	
-	effect_style = psy_ui_style(STYLE_MV_EFFECT);
-	rv->height = effect_style->position.rectangle->size.height;
-	spacing = psy_ui_value_make_eh(1.0);
-	psy_ui_value_add(&rv->height, &spacing,
-		psy_ui_component_textmetric(&self->component), NULL);
+{	
+	rv->height = self->state->inputs_size.height;
 	rv->width = self->state->columnsize.width;
 	/* + 1: empty space to add new generator */
 	psy_ui_value_mul_real(&rv->width, 
@@ -1501,12 +1438,10 @@ void machinestackvolumes_build(MachineStackVolumes* self)
 			psy_ui_Margin margin;
 
 			psy_ui_component_set_align(component, psy_ui_ALIGN_LEFT);
-			psy_ui_component_set_minimum_size(component, psy_ui_size_make(
-				psy_ui_value_make_px(138.0 + 19),
-				psy_ui_value_make_px(182.0)));
-			psy_ui_component_setmaximumsize(component, psy_ui_size_make(
-				psy_ui_value_make_px(138.0 + 19),
-				psy_ui_value_make_px(182.0)));
+			psy_ui_component_set_minimum_size(component,
+				self->state->volume_size);
+			psy_ui_component_setmaximumsize(component,
+				self->state->volume_size);
 			margin = psy_ui_margin_make(
 				psy_ui_value_make_eh(0.0), psy_ui_value_make_px(1.0),
 				psy_ui_value_make_eh(0.0), psy_ui_value_make_ew(0.0));
@@ -1565,9 +1500,12 @@ void machinestackview_init(MachineStackView* self, psy_ui_Component* parent,
 	vtable_init(self);	
 	psy_ui_component_set_style_type(&self->component, STYLE_MV_STACK);
 	self->paramviews = paramviews;
-	self->workspace = workspace;	
+	self->workspace = workspace;
+	/* state */
 	machinestackstate_init(&self->state, self->paramviews);
-	machinestackdesc_init(&self->desc, &self->component, self);
+	/* desc column */
+	machinestackdesc_init(&self->desc, &self->component, self,
+		&self->state);
 	psy_ui_component_set_align(&self->desc.component, psy_ui_ALIGN_LEFT);
 	psy_ui_component_init(&self->columns, &self->component, NULL);
 	psy_ui_component_set_align(&self->columns, psy_ui_ALIGN_VCLIENT);
