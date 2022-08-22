@@ -1683,48 +1683,32 @@ void trackerview_connect_song(TrackerView* self)
 }
 
 void trackerview_on_cursor_changed(TrackerView* self, psy_audio_Sequence* sender)
-{			
+{		
+	bool invalidate_cursor;	
+		
 	if (psy_audio_sequence_lpb_changed(sender)) {		
 		psy_ui_component_align(&self->component);
-		psy_ui_component_invalidate(&self->component);		
+		psy_ui_component_invalidate(&self->component);
 	}
-	if (trackerview_playing_following_song(self)) {
-		bool wrap;
-
-		wrap = FALSE;		
-		if (patternviewstate_single_mode(self->grid.state->pv)) {
-			wrap = (psy_audio_sequencecursor_offset(&self->grid.state->pv->sequence->cursor) <
-				psy_audio_sequencecursor_offset(&self->grid.state->pv->sequence->lastcursor));
-		} else {
-			wrap = (psy_audio_sequencecursor_offset_abs(&self->grid.state->pv->sequence->cursor,
-				self->grid.state->pv->sequence) <
-				psy_audio_sequencecursor_offset_abs(&self->grid.state->pv->sequence->lastcursor,
-				self->grid.state->pv->sequence));
-		}
-		if (wrap) {
-			psy_ui_component_set_scroll_top_px(&self->grid.component, 0.0);
-			psy_ui_component_invalidate(&self->grid.component);
-		}
-	} else {
-		bool invalidate_cursor;	
-		
-		invalidate_cursor = TRUE;
-		if (patternviewstate_single_mode(self->grid.state->pv)) {			
-			if (!psy_audio_orderindex_equal(
-					&self->grid.state->pv->sequence->cursor.order_index,
-					self->grid.state->pv->sequence->lastcursor.order_index)) {
-				psy_ui_component_align(&self->grid.component);			
-				psy_ui_component_align(&self->lines.component);
-				psy_ui_component_invalidate(&self->grid.component);
-				psy_ui_component_invalidate(&self->lines.component);
-				invalidate_cursor = FALSE;
+	invalidate_cursor = TRUE;			
+	if (patternviewstate_single_mode(self->grid.state->pv)) {		
+		if (!psy_audio_orderindex_equal(
+				&self->grid.state->pv->sequence->cursor.order_index,
+				self->grid.state->pv->sequence->lastcursor.order_index)) {
+			if (trackerview_playing_following_song(self)) {						
+				psy_ui_component_set_scroll_top_px(&self->grid.component, 0.0);
 			}
-		}
-		if (invalidate_cursor) {
-			trackerlinenumbers_invalidate_cursor(&self->lines.linenumbers);
-			trackergrid_invalidate_cursor(&self->grid);
-		}
+			psy_ui_component_align(&self->grid.component);			
+			psy_ui_component_align(&self->lines.pane);
+			psy_ui_component_invalidate(&self->grid.component);
+			psy_ui_component_invalidate(&self->lines.pane);				
+			invalidate_cursor = FALSE;
+		}			
 	}
+	if (invalidate_cursor && !(trackerview_playing_following_song(self))) {
+		trackerlinenumbers_invalidate_cursor(&self->lines.linenumbers);
+		trackergrid_invalidate_cursor(&self->grid);
+	}	
 }
 
 void trackerview_on_play_line_changed(TrackerView* self, Workspace* sender)
