@@ -71,6 +71,7 @@ void psy_ui_textareapane_set_sel(psy_ui_TextAreaPane*, uintptr_t cpmin,
     uintptr_t cpmax);
 uintptr_t psy_ui_textareapane_cursor_line(const psy_ui_TextAreaPane*);
 uintptr_t psy_ui_textareapane_cursor_column(const psy_ui_TextAreaPane*);
+uintptr_t psy_ui_textareapane_num_lines(const psy_ui_TextAreaPane*);
 
 INLINE psy_ui_Component* psy_ui_textareapane_base(psy_ui_TextAreaPane* self)
 {
@@ -165,6 +166,7 @@ void psy_ui_textarea_word_wrap(psy_ui_TextArea*);
 void psy_ui_textarea_line_wrap(psy_ui_TextArea*);
 uintptr_t psy_ui_textarea_cursor_line(const psy_ui_TextArea*);
 uintptr_t psy_ui_textarea_cursor_column(const psy_ui_TextArea*);
+uintptr_t psy_ui_textarea_num_lines(const psy_ui_TextArea*);
 
 INLINE psy_ui_Component* psy_ui_textarea_base(psy_ui_TextArea* self)
 {

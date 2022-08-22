@@ -198,6 +198,9 @@ int driver_init(psy_AudioDriver* driver)
 	self->period_size = 0;
 	self->output = 0;
 	
+	self->running_ = FALSE;
+	self->stop_requested_ = FALSE;
+	
 	pthread_mutexattr_init(&recursiveattr);
 	pthread_mutexattr_settype(&recursiveattr, PTHREAD_MUTEX_RECURSIVE);
 	pthread_mutex_init(&self->mutex, &recursiveattr);
@@ -326,7 +329,7 @@ int driver_open(psy_AudioDriver* driver)
 	// { scoped_lock lock(mutex_);
 	// while (!running_) condition_.wait(lock);
 	// }	
-	self->stop_requested_ = FALSE;	
+	self->stop_requested_ = FALSE;
 	if (pthread_create(&threadid, NULL, (void*(*)(void*))thread_function,
 		(void*) driver) == 0)
 	{		
@@ -349,6 +352,7 @@ void thread_function(void* driver) {
 	// notify that the thread is now running
 	// { scoped_lock lock(mutex_);	
 	pthread_mutex_lock(&self->mutex);
+	pthread_detach(pthread_self());
 	self->running_ = TRUE;	
 	//}
 	//condition_.notify_one();
@@ -387,8 +391,9 @@ void thread_function(void* driver) {
 notify_termination:	
 	self->running_ = FALSE;
 	// }
-	pthread_mutex_unlock(&self->mutex);	
+	pthread_mutex_unlock(&self->mutex);		
 	printf("Leave Alsa Thread\n");
+	pthread_exit(0);
 }
 
 /// Underrun and suspend recovery
@@ -445,8 +450,9 @@ int driver_close(psy_AudioDriver* driver)
     do_stop(self);    
 	if (self->handle) {
 		free(self->areas);
-		free(self->samples);
+		free(self->samples);		
 		snd_pcm_close(self->handle);
+		snd_config_update_free_global();
 	}	
 }
 

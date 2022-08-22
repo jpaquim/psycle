@@ -344,10 +344,7 @@ void mainframe_init_view_statusbars(MainFrame* self)
 	instrumentsviewbar_init(&self->instrumentsviewbar,
 		psy_ui_notebook_base(&self->mainviews.viewstatusbars), &self->workspace);
 	instrumentsview_setstatusbar(&self->instrumentsview,
-		&self->instrumentsviewbar);
-	plugineditorbar_init(&self->plugineditorbar,
-		psy_ui_notebook_base(&self->mainviews.viewstatusbars));
-	plugineditorbar_set_editor(&self->plugineditorbar, &self->plugineditor);
+		&self->instrumentsviewbar);	
 	psy_ui_notebook_select(&self->mainviews.viewstatusbars, 0);
 }
 
@@ -932,7 +929,7 @@ void mainframe_on_timer(MainFrame* self, uintptr_t timerid)
 	mainstatusbar_idle(&self->statusbar);
 	trackscopeview_idle(&self->trackscopeview);
 	seqview_idle(&self->sequenceview);
-	plugineditorbar_idle(&self->plugineditorbar);
+	plugineditorbar_idle(&self->plugineditor.status);
  	playposbar_idle(&self->playposbar);	
 	machineview_idle(&self->machineview);	
 	if (self->titlemodified != workspace_song_modified(&self->workspace)) {

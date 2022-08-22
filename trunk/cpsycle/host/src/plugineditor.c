@@ -163,6 +163,9 @@ void plugineditor_init(PluginEditor* self, psy_ui_Component* parent,
 		plugineditor_on_file_selected);
 	psy_ui_component_set_preferred_size(&self->component,
 		psy_ui_size_make_em(80.0, 0.0));		
+	plugineditorbar_init(&self->status, &self->component);	
+	plugineditorbar_set_editor(&self->status, self);
+	psy_ui_component_set_align(&self->status.component, psy_ui_ALIGN_BOTTOM);
 	psy_table_init(&self->pluginmappping);
 	plugineditor_build_plugin_list(self, workspace);
 	plugineditor_connect_machine_signals(self, workspace);
