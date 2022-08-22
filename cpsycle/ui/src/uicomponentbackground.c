@@ -80,7 +80,12 @@ void psy_ui_componentbackground_draw_image(psy_ui_ComponentBackground* self,
 				}
 			}
 		} else {
-			if (style->background.align & psy_ui_ALIGNMENT_CENTER_HORIZONTAL) {
+			if (((style->background.align & psy_ui_ALIGNMENT_RIGHT) ==
+					psy_ui_ALIGNMENT_RIGHT) &&
+				!((style->background.align & psy_ui_ALIGNMENT_LEFT) ==
+					psy_ui_ALIGNMENT_LEFT)) {
+				cp.x = size.width - bmpsize.width;
+			} else if (style->background.align & psy_ui_ALIGNMENT_CENTER_HORIZONTAL) {
 				cp.x = (size.width - bmpsize.width) / 2.0;
 			}
 			if (style->background.align & psy_ui_ALIGNMENT_CENTER_VERTICAL) {

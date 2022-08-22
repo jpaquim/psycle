@@ -6,6 +6,7 @@
 #include "../../detail/prefix.h"
 
 
+#include "bitmaps.h"
 /* host */
 #include "./resources/resource.h"
 /* ui */
@@ -15,7 +16,7 @@
 /* implementation */
 void register_bitmaps(psy_ui_App* app, const char* app_bmp_path)
 {
-	psy_ui_app_set_bmp_path(app, app_bmp_path);	
+	psy_ui_app_set_bmp_path(app, app_bmp_path);		
 	psy_ui_app_add_app_bmp(app, IDB_MACHINESKIN, "machine_skin.bmp");
 	psy_ui_app_add_app_bmp(app, IDB_PARAMKNOB, "TbMainKnob.bmp");
 	psy_ui_app_add_app_bmp(app, IDB_ABOUT, "splash_screen.bmp");

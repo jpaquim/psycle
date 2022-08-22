@@ -442,6 +442,8 @@ uintptr_t psy_ui_textareapane_cursor_line(const psy_ui_TextAreaPane*
 	uintptr_t numlines;
 	uintptr_t linestart;
 
+	assert(self);
+	
 	numlines = psy_ui_textformat_numlines(&self->format);
 	if (numlines == 0) {
 		return 0;
@@ -465,6 +467,8 @@ uintptr_t psy_ui_textareapane_cursor_column(const psy_ui_TextAreaPane*
 	uintptr_t line;	
 	uintptr_t linestart;
 
+	assert(self);
+	
 	line = psy_ui_textareapane_cursor_line(self);
 	if (line > 0) {
 		linestart = psy_ui_textformat_line_at(&self->format, line - 1) +
@@ -473,6 +477,13 @@ uintptr_t psy_ui_textareapane_cursor_column(const psy_ui_TextAreaPane*
 		linestart = 0;
 	}
 	return self->cp - linestart;
+}
+
+uintptr_t psy_ui_textareapane_num_lines(const psy_ui_TextAreaPane* self)
+{
+	assert(self);
+	
+	return psy_ui_textformat_numlines(&self->format);
 }
 
 
@@ -936,3 +947,9 @@ uintptr_t psy_ui_textarea_cursor_column(const psy_ui_TextArea* self)
 {
 	return psy_ui_textareapane_cursor_column(&self->pane);
 }
+
+uintptr_t psy_ui_textarea_num_lines(const psy_ui_TextArea* self)
+{
+	return psy_ui_textareapane_num_lines(&self->pane);
+}
+

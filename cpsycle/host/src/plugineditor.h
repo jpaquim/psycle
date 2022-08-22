@@ -7,6 +7,7 @@
 #define PLUGINEDITOR_H
 
 /* host */
+#include "plugineditorbar.h"
 #include "titlebar.h"
 #include "workspace.h"
 /* ui */
@@ -61,6 +62,7 @@ typedef struct PluginEditor {
 	uintptr_t instanceidx;
 	psy_Table pluginmappping;
 	double zoom;
+	PluginEditorBar status;
 	/* references */
 	Workspace* workspace;
 } PluginEditor;

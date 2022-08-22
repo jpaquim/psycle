@@ -28,7 +28,6 @@
 #include "playbar.h"
 #include "playposbar.h"
 #include "plugineditor.h"
-#include "plugineditorbar.h"
 #include "patternview.h"
 #include "patternviewbar.h"
 #include "renderview.h"
@@ -122,8 +121,7 @@ typedef struct MainFrame {
 	Gear gear;
 	psy_ui_Splitter gearsplitter;
 	PluginEditor plugineditor;
-	psy_ui_Splitter splitbarplugineditor;
-	PluginEditorBar plugineditorbar;
+	psy_ui_Splitter splitbarplugineditor;	
 	VuBar vubar;
 	CPUView cpuview;
 	psy_ui_Splitter cpusplitter;

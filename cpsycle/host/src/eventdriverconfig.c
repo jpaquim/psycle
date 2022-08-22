@@ -21,6 +21,7 @@
 #define PSY_EVENTDRIVER_KBD_GUID 0x0001
 #define PSY_EVENTDRIVER_MMEMIDI_GUID 0x0002
 #define PSY_EVENTDRIVER_DXJOYSTICK_GUID 0x0003
+#define PSY_EVENTDRIVER_ALSAMIDI_GUID 0x00020
 
 /* prototypes */
 static void eventdriverconfig_make_input(EventDriverConfig*);
@@ -96,7 +97,11 @@ void eventdriverconfig_make_driver_list(EventDriverConfig* self)
 	psy_property_set_id(psy_property_append_str(self->installeddriver, "mmemidi", ".\\mmemidi.dll"),
 		PSY_EVENTDRIVER_MMEMIDI_GUID);
 	psy_property_set_id(psy_property_append_str(self->installeddriver, "dxjoystick", ".\\dxjoystick.dll"),
-		PSY_EVENTDRIVER_DXJOYSTICK_GUID);
+		PSY_EVENTDRIVER_DXJOYSTICK_GUID); 
+#elif defined(DIVERSALIS__OS__LINUX)
+	psy_property_set_id(psy_property_append_str(self->installeddriver, "alsamidi",
+		PSYCLE_AUDIO_DRIVER_DIR"/alsamidi/libpsyalsamidi.so"),
+		PSY_EVENTDRIVER_ALSAMIDI_GUID);
 #endif
 	psy_property_connect(
 	psy_property_set_id(psy_property_set_text(

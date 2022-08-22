@@ -41,8 +41,7 @@ void samplesviewbuttons_init(SamplesViewButtons* self, psy_ui_Component* parent,
 
 /* SamplesSongImportView */
 /* prototypes */
-static void samplessongimportview_on_destroy(SamplesSongImportView*,
-	psy_ui_Component* sender);
+static void samplessongimportview_on_destroyed(SamplesSongImportView*);
 static void samplessongimportview_onloadsong(SamplesSongImportView*,
 	psy_ui_Component* sender);
 static void samplessongimportview_oncopy(SamplesSongImportView*,
@@ -54,14 +53,33 @@ static void samplessongimportview_on_load(SamplesSongImportView*,
 static void samplessongimportview_load_song(SamplesSongImportView*,
 	const char* path);	
 
+/* vtable */
+static psy_ui_ComponentVtable samplessongimportview_vtable;
+static bool samplessongimportview_vtable_initialized = FALSE;
+
+static void samplessongimportview_vtable_init(SamplesSongImportView* self)
+{
+	if (!samplessongimportview_vtable_initialized) {
+		samplessongimportview_vtable = *(self->component.vtable);		
+		samplessongimportview_vtable.on_destroyed =
+			(psy_ui_fp_component_event)
+			samplessongimportview_on_destroyed;		
+		samplessongimportview_vtable_initialized = TRUE;
+	}
+	psy_ui_component_set_vtable(&self->component,
+		&samplessongimportview_vtable);
+}
+
+
 /* implementation */
-void samplessongimportview_init(SamplesSongImportView* self, psy_ui_Component* parent,
-	SamplesView* view, Workspace* workspace)
-{	
+void samplessongimportview_init(SamplesSongImportView* self,
+	psy_ui_Component* parent, SamplesView* view, Workspace* workspace)
+{		
+	psy_ui_component_init(&self->component, parent, NULL);
+	samplessongimportview_vtable_init(self);
 	self->view = view;
 	self->source = 0;
 	self->workspace = workspace;
-	psy_ui_component_init(&self->component, parent, NULL);	
 	psy_ui_component_init(&self->header, &self->component, NULL);
 	psy_ui_component_set_align(&self->header, psy_ui_ALIGN_TOP);
 	psy_ui_component_set_default_align(&self->header, psy_ui_ALIGN_LEFT,
@@ -100,8 +118,7 @@ void samplessongimportview_init(SamplesSongImportView* self, psy_ui_Component* p
 		samplessongimportview_on_load);
 }
 
-void samplessongimportview_on_destroy(SamplesSongImportView* self,
-	psy_ui_Component* sender)
+void samplessongimportview_on_destroyed(SamplesSongImportView* self)
 {
 	psy_property_dispose(&self->song_load);
 	if (self->source) {
@@ -1041,7 +1058,6 @@ static void samplesview_vtable_init(SamplesView* self)
 	}
 	psy_ui_component_set_vtable(samplesview_base(self), &samplesview_vtable);
 }
-
 
 /* implementation */
 void samplesview_init(SamplesView* self, psy_ui_Component* parent,
