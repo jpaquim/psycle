@@ -222,9 +222,9 @@ const char* audioconfig_driver_path(AudioConfig* self)
 
 	assert(self);
 
-	if (p = psy_property_at(self->inputoutput, "audiodrivers",
-		PSY_PROPERTY_TYPE_NONE)) {
-		if (p = psy_property_at_choice(p)) {
+	if ((p = psy_property_at(self->inputoutput, "audiodrivers",
+			PSY_PROPERTY_TYPE_NONE))) {
+		if ((p = psy_property_at_choice(p))) {
 			return psy_property_item_str(p);
 		}
 	}
@@ -238,9 +238,9 @@ const char* audioconfig_driverkey(AudioConfig* self)
 
 	assert(self);
 
-	if (p = psy_property_at(self->inputoutput, "audiodrivers",
-		PSY_PROPERTY_TYPE_NONE)) {
-		if (p = psy_property_at_choice(p)) {
+	if ((p = psy_property_at(self->inputoutput, "audiodrivers",
+		PSY_PROPERTY_TYPE_NONE))) {
+		if ((p = psy_property_at_choice(p))) {
 			rv = psy_property_key(p);
 		}
 	}
@@ -333,8 +333,8 @@ uintptr_t audioconfig_num_threads(const AudioConfig* self)
 
 	assert(self);
 
-	if (p = psy_property_at(self->inputoutput, "threads",
-			PSY_PROPERTY_TYPE_NONE)) {		
+	if ((p = psy_property_at(self->inputoutput, "threads",
+			PSY_PROPERTY_TYPE_NONE))) {
 		return psy_property_at_int(p, "num", 0);		
 	}
 	return 0;

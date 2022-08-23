@@ -110,13 +110,14 @@ int loadspecific(psy_audio_AudioRecorder* self, psy_audio_SongFile* songfile,
 	int status;
 
 	// size of this part params to load
-	if (status = psyfile_read(songfile->file, &size, sizeof(size))) {
+	if ((status = psyfile_read(songfile->file, &size, sizeof(size)))) {
 		return status;
 	}
-	if (status = psyfile_read(songfile->file, &readcaptureidx, sizeof(readcaptureidx))) {
+	if ((status = psyfile_read(songfile->file, &readcaptureidx,
+			sizeof(readcaptureidx)))) {
 		return status;
 	}
-	if (status = psyfile_read(songfile->file, &gainvol, sizeof(gainvol))) {
+	if ((status = psyfile_read(songfile->file, &gainvol, sizeof(gainvol)))) {
 		return status;
 	}
 	self->_gainvol = gainvol;
@@ -133,13 +134,13 @@ int savespecific(psy_audio_AudioRecorder* self, psy_audio_SongFile* songfile,
 	
 	size = sizeof(self->_captureidx) + sizeof(self->_gainvol);
 	// size of this part params to save
-	if (status = psyfile_write_uint32(songfile->file, size)) {
+	if ((status = psyfile_write_uint32(songfile->file, size))) {
 		return status;
 	}
-	if (status = psyfile_write_int32(songfile->file, self->_captureidx)) {
+	if ((status = psyfile_write_int32(songfile->file, self->_captureidx))) {
 		return status;
 	}
-	if (status = psyfile_write_float(songfile->file, self->_gainvol)) {
+	if ((status = psyfile_write_float(songfile->file, self->_gainvol))) {
 		return status;
 	}
 	return PSY_OK;
@@ -167,8 +168,7 @@ int describevalue(psy_audio_AudioRecorder* self, char* text, uintptr_t param,
 			log10(self->_gainvol));
 		psy_snprintf(text, 10, "%.2f dB", db);
 		return 1;
-	} else
-	if (param == 1) {
+	} else if (param == 1) {
 		if (value < psy_audio_machine_numcaptures(
 			psy_audio_audiorecorder_base(self))) {
 			psy_snprintf(text, 128, "%s", psy_audio_machine_capturename(

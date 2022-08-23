@@ -678,16 +678,16 @@ int loadspecific(psy_audio_VstPlugin* self, psy_audio_SongFile* songfile,
 
 	assert(self);
 
-	if (status = psyfile_read(songfile->file, &size, sizeof(size))) {
+	if ((status = psyfile_read(songfile->file, &size, sizeof(size)))) {
 		return status;
 	}
 	if(size) {
 		uint32_t count;
 
-		if (status = psyfile_read(songfile->file, &program, sizeof program)) {
+		if ((status = psyfile_read(songfile->file, &program, sizeof program))) {
 			return status;
 		}
-		if (status = psyfile_read(songfile->file, &count, sizeof count)) {
+		if ((status = psyfile_read(songfile->file, &count, sizeof count))) {
 			return status;
 		}
 		size -= sizeof(program) + sizeof(count) + sizeof(float) * count;
@@ -700,8 +700,8 @@ int loadspecific(psy_audio_VstPlugin* self, psy_audio_SongFile* songfile,
 				for(i = 0; i < count; ++i) {
 					float temp;
 				
-					if (status = psyfile_read(songfile->file, &temp,
-							sizeof(temp))) {
+					if ((status = psyfile_read(songfile->file, &temp,
+							sizeof(temp)))) {
 						return status;
 					}
 					psy_audio_vstinterface_setparametervalue(&self->mi, i,
@@ -721,7 +721,7 @@ int loadspecific(psy_audio_VstPlugin* self, psy_audio_SongFile* songfile,
 				
 				data = (char*)malloc(size);
 				// Number of parameters
-				if (status = psyfile_read(songfile->file, data, size)) {
+				if ((status = psyfile_read(songfile->file, data, size))) {
 					free(data);
 					return status;
 				}
@@ -766,19 +766,19 @@ int savespecific(psy_audio_VstPlugin* self, psy_audio_SongFile* songfile,
 	} else {
 		size += sizeof(float) * count;
 	}
-	if (status = psyfile_write(songfile->file, &size, sizeof(size))) {
+	if ((status = psyfile_write(songfile->file, &size, sizeof(size)))) {
 		return status;
 	}
 	program = psy_audio_vstinterface_program(&self->mi);
-	if (status = psyfile_write(songfile->file, &program, sizeof(program))) {
+	if ((status = psyfile_write(songfile->file, &program, sizeof(program)))) {
 		return status;
 	}
-	if (status = psyfile_write(songfile->file, &count, sizeof count)) {
+	if ((status = psyfile_write(songfile->file, &count, sizeof count))) {
 		return status;
 	}
 
 	if (data) {
-		if (status = psyfile_write(songfile->file, data, (uint32_t)chunksize)) {
+		if ((status = psyfile_write(songfile->file, data, (uint32_t)chunksize))) {
 			return status;
 		}
 	} else {
@@ -788,7 +788,7 @@ int savespecific(psy_audio_VstPlugin* self, psy_audio_SongFile* songfile,
 			float temp;
 			
 			temp = psy_audio_vstinterface_parametervalue(&self->mi, i);
-			if (status = psyfile_write(songfile->file, &temp, sizeof(float))) {
+			if ((status = psyfile_write(songfile->file, &temp, sizeof(float)))) {
 				return status;
 			}
 		}
@@ -1087,16 +1087,16 @@ VstIntPtr VSTCALLBACK hostcallback(AEffect* effect, VstInt32 opcode,
 		}
 		break;
 	case audioMasterCanDo:
-		if (result = (strcmp((char*)ptr, "sizeWindow") == 0)) {
+		if ((result = (strcmp((char*)ptr, "sizeWindow") == 0))) {
 			break;
 		}		
-		if (result = (strcmp((char*)ptr, "sendVstTimeInfo") == 0)) {
+		if ((result = (strcmp((char*)ptr, "sendVstTimeInfo") == 0))) {
 			break;
 		}
-		if (result = (strcmp((char*)ptr, "sendVstMidiEvent") == 0)) {
+		if ((result = (strcmp((char*)ptr, "sendVstMidiEvent") == 0))) {
 			break;
 		}
-		if (result = (strcmp((char*)ptr, "sendVstEvents") == 0)) {
+		if ((result = (strcmp((char*)ptr, "sendVstEvents") == 0))) {
 			break;
 		}
 		break;

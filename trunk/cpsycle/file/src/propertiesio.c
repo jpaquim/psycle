@@ -10,7 +10,6 @@
 /* local */
 #include "inireader.h"
 /* std */
-#include <malloc.h>
 #include <errno.h>
 /* platform */
 #include "../../detail/portable.h"

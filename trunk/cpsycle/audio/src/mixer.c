@@ -1789,10 +1789,10 @@ int loadspecific(psy_audio_Mixer* self, struct psy_audio_SongFile* songfile,
 	int32_t solocolumn;
 	int status;
 
-	if (status = psyfile_read(songfile->file, &filesize, sizeof(filesize))) {
+	if ((status = psyfile_read(songfile->file, &filesize, sizeof(filesize)))) {
 		return status;
 	}
-	if (status = psyfile_read(songfile->file, &solocolumn, sizeof(solocolumn))) {
+	if ((status = psyfile_read(songfile->file, &solocolumn, sizeof(solocolumn)))) {
 		return status;
 	}	
 	if (solocolumn == -1) {		
@@ -1803,19 +1803,19 @@ int loadspecific(psy_audio_Mixer* self, struct psy_audio_SongFile* songfile,
 	} else {
 		self->returnsolo = (uintptr_t)solocolumn - 0x0D;
 	}	
-	if (status = psyfile_read(songfile->file, &self->master.volume, sizeof(float))) {
+	if ((status = psyfile_read(songfile->file, &self->master.volume, sizeof(float)))) {
 		return status;
 	}
-	if (status = psyfile_read(songfile->file, &self->master.gain, sizeof(float))) {
+	if ((status = psyfile_read(songfile->file, &self->master.gain, sizeof(float)))) {
 		return status;
 	}
-	if (status = psyfile_read(songfile->file, &self->master.drymix, sizeof(float))) {
+	if ((status = psyfile_read(songfile->file, &self->master.drymix, sizeof(float)))) {
 		return status;
 	}
-	if (status = psyfile_read(songfile->file, &numins, sizeof(int32_t))) {
+	if ((status = psyfile_read(songfile->file, &numins, sizeof(int32_t)))) {
 		return status;
 	}
-	if (status = psyfile_read(songfile->file, &numrets, sizeof(int32_t))) {
+	if ((status = psyfile_read(songfile->file, &numrets, sizeof(int32_t)))) {
 		return status;
 	}
 	self->custommachine.slot = slot;
@@ -1831,34 +1831,34 @@ int loadspecific(psy_audio_Mixer* self, struct psy_audio_SongFile* songfile,
 		for (j = 0; j < numrets; ++j) {
 			float send = 0.0f;
 
-			if (status = psyfile_read(songfile->file, &send, sizeof(float))) {
+			if ((status = psyfile_read(songfile->file, &send, sizeof(float)))) {
 				return status;
 			}
 			if (channel) {
 				psy_table_insert(&channel->sendvols, j, (void*)(intptr_t)(send * 0xFF));
 			}
 		}
-		if (status = psyfile_read(songfile->file, &temp, sizeof(float))) {
+		if ((status = psyfile_read(songfile->file, &temp, sizeof(float)))) {
 			return status;
 		}
 		channel->volume = temp;		
-		if (status = psyfile_read(songfile->file, &temp, sizeof(float))) {
+		if ((status = psyfile_read(songfile->file, &temp, sizeof(float)))) {
 			return status;
 		}
 		channel->panning = temp;		
-		if (status = psyfile_read(songfile->file, &temp, sizeof(float))) {
+		if ((status = psyfile_read(songfile->file, &temp, sizeof(float)))) {
 			return status;
 		}
 		channel->drymix = temp;		
-		if (status = psyfile_read(songfile->file, &temp8, sizeof(uint8_t))) {
+		if ((status = psyfile_read(songfile->file, &temp8, sizeof(uint8_t)))) {
 			return status;
 		}
 		channel->mute = temp8;		
-		if (status = psyfile_read(songfile->file, &temp8, sizeof(uint8_t))) {
+		if ((status = psyfile_read(songfile->file, &temp8, sizeof(uint8_t)))) {
 			return status;
 		}
 		channel->dryonly = temp8;		
-		if (status = psyfile_read(songfile->file, &temp8, sizeof(uint8_t))) {
+		if ((status = psyfile_read(songfile->file, &temp8, sizeof(uint8_t)))) {
 			return status;
 		}
 		channel->wetonly = temp8;		
@@ -1879,17 +1879,17 @@ int loadspecific(psy_audio_Mixer* self, struct psy_audio_SongFile* songfile,
 			float wiremultiplier;
 
 			// Incoming (Return) connections psy_audio_Machine number
-			if (status = psyfile_read(songfile->file, &inputmachine, sizeof(inputmachine))) {
+			if ((status = psyfile_read(songfile->file, &inputmachine, sizeof(inputmachine)))) {
 				return status;
 			}
 			// volume value for the current return wire. Range 0.0..1.0. (As
 			// opposed to the standard wires)
-			if (status = psyfile_read(songfile->file, &inputconvol, sizeof(inputconvol))) {
+			if ((status = psyfile_read(songfile->file, &inputconvol, sizeof(inputconvol)))) {
 				return status;
 			}
 			// Ignore. (value to divide returnVolume for work. The reason is
 			// because natives output at -32768.0f..32768.0f range )
-			if (status = psyfile_read(songfile->file, &wiremultiplier, sizeof(wiremultiplier))) {
+			if ((status = psyfile_read(songfile->file, &wiremultiplier, sizeof(wiremultiplier)))) {
 				return status;
 			}
 			//bugfix on 1.10.1 alpha
@@ -1913,17 +1913,17 @@ int loadspecific(psy_audio_Mixer* self, struct psy_audio_SongFile* songfile,
 			float wiremultiplier;
 			
 			// Outgoing (Send) connections psy_audio_Machine number
-			if (status = psyfile_read(songfile->file, &inputmachine, sizeof(inputmachine))) {
+			if ((status = psyfile_read(songfile->file, &inputmachine, sizeof(inputmachine)))) {
 
 			}
 			// volume value for the current send wire. Range 0.0..1.0. (As
 			// opposed to the standard wires)
-			if (status = psyfile_read(songfile->file, &inputconvol, sizeof(inputconvol))) {
+			if ((status = psyfile_read(songfile->file, &inputconvol, sizeof(inputconvol)))) {
 				return status;
 			}
 			// Ignore. (value to divide returnVolume for work. The reason is
 			// because natives output at -32768.0f..32768.0f range )
-			if (status = psyfile_read(songfile->file, &wiremultiplier, sizeof(wiremultiplier))) {
+			if ((status = psyfile_read(songfile->file, &wiremultiplier, sizeof(wiremultiplier)))) {
 				return status;
 			}
 			// bugfix on 1.10.1 alpha
@@ -1939,7 +1939,7 @@ int loadspecific(psy_audio_Mixer* self, struct psy_audio_SongFile* songfile,
 		for (j = 0; j < numrets; ++j) {
 			uint8_t send = 0;
 
-			if (status = psyfile_read(songfile->file, &send, sizeof(uint8_t))) {
+			if ((status = psyfile_read(songfile->file, &send, sizeof(uint8_t)))) {
 				return status;
 			}
 			if (send != 0) {
@@ -1953,16 +1953,16 @@ int loadspecific(psy_audio_Mixer* self, struct psy_audio_SongFile* songfile,
 			float panning;
 			uint8_t mute;
 
-			if (status = psyfile_read(songfile->file, &mastersend, sizeof(uint8_t))) {
+			if ((status = psyfile_read(songfile->file, &mastersend, sizeof(uint8_t)))) {
 				return status;
 			}
-			if (status = psyfile_read(songfile->file, &volume, sizeof(float))) {
+			if ((status = psyfile_read(songfile->file, &volume, sizeof(float)))) {
 				return status;
 			}
-			if (status = psyfile_read(songfile->file, &panning, sizeof(float))) {
+			if ((status = psyfile_read(songfile->file, &panning, sizeof(float)))) {
 				return status;
 			}
-			if (status = psyfile_read(songfile->file, &mute, sizeof(uint8_t))) {
+			if ((status = psyfile_read(songfile->file, &mute, sizeof(uint8_t)))) {
 				return status;
 			}
 			if (channel) {
@@ -2000,7 +2000,7 @@ int savespecific(psy_audio_Mixer* self, struct psy_audio_SongFile* songfile,
 	size += (3 * sizeof(float) + 3 * sizeof(unsigned char) + (uint32_t)self->sends.count * sizeof(float)) * (uint32_t)self->inputs.count;
 	size += (2 * sizeof(float) + 2 * sizeof(unsigned char) + (uint32_t)self->sends.count * sizeof(unsigned char) + 2 * sizeof(float) + sizeof(uint32_t)) * (uint32_t)self->returns.count;
 	size += (2 * sizeof(float) + sizeof(uint32_t)) * (uint32_t)self->sends.count;
-	if (status = psyfile_write(songfile->file, &size, sizeof(size))) {
+	if ((status = psyfile_write(songfile->file, &size, sizeof(size)))) {
 		return status;
 	}
 	if (self->returnsolo == psy_INDEX_INVALID && self->inputsolo == psy_INDEX_INVALID) {
@@ -2012,16 +2012,16 @@ int savespecific(psy_audio_Mixer* self, struct psy_audio_SongFile* songfile,
 			solocolumn = (int32_t)self->returnsolo + 0xD;
 		}
 	}
-	if (status = psyfile_write(songfile->file, &solocolumn, sizeof(solocolumn))) {
+	if ((status = psyfile_write(songfile->file, &solocolumn, sizeof(solocolumn)))) {
 		return status;
 	}
-	if (status = psyfile_write(songfile->file, &self->master.volume, sizeof(float))) {
+	if ((status = psyfile_write(songfile->file, &self->master.volume, sizeof(float)))) {
 		return status;
 	}
-	if (status = psyfile_write(songfile->file, &self->master.gain, sizeof(float))) {
+	if ((status = psyfile_write(songfile->file, &self->master.gain, sizeof(float)))) {
 		return status;
 	}
-	if (status = psyfile_write(songfile->file, &self->master.drymix, sizeof(float))) {
+	if ((status = psyfile_write(songfile->file, &self->master.drymix, sizeof(float)))) {
 		return status;
 	}
 	numins = (uint32_t)numinputcolumns(self);
@@ -2040,26 +2040,26 @@ int savespecific(psy_audio_Mixer* self, struct psy_audio_SongFile* songfile,
 			float sendvol;
 
 			sendvol = (int)(intptr_t)psy_table_at(&channel->sendvols, j) / (psy_dsp_amp_t) 0xFF;
-			if (status = psyfile_write(songfile->file, &sendvol, sizeof(float))) {
+			if ((status = psyfile_write(songfile->file, &sendvol, sizeof(float)))) {
 				return status;
 			}
 		}
-		if (status = psyfile_write(songfile->file, &channel->volume, sizeof(float))) {
+		if ((status = psyfile_write(songfile->file, &channel->volume, sizeof(float)))) {
 			return status;
 		}
-		if (status = psyfile_write(songfile->file, &channel->panning, sizeof(float))) {
+		if ((status = psyfile_write(songfile->file, &channel->panning, sizeof(float)))) {
 			return status;
 		}
-		if (status = psyfile_write(songfile->file, &channel->drymix, sizeof(float))) {
+		if ((status = psyfile_write(songfile->file, &channel->drymix, sizeof(float)))) {
 			return status;
 		}
-		if (status = psyfile_write(songfile->file, &channel->mute, sizeof(uint8_t))) {
+		if ((status = psyfile_write(songfile->file, &channel->mute, sizeof(uint8_t)))) {
 			return status;
 		}
-		if (status = psyfile_write(songfile->file, &channel->dryonly, sizeof(uint8_t))) {
+		if ((status = psyfile_write(songfile->file, &channel->dryonly, sizeof(uint8_t)))) {
 			return status;
 		}
-		if (status = psyfile_write(songfile->file, &channel->wetonly, sizeof(uint8_t))) {
+		if ((status = psyfile_write(songfile->file, &channel->wetonly, sizeof(uint8_t)))) {
 			return status;
 		}
 	}
@@ -2079,15 +2079,15 @@ int savespecific(psy_audio_Mixer* self, struct psy_audio_SongFile* songfile,
 		//volume = wireRet.GetVolume();
 		volMultiplier = 1.0f; // wireRet.GetVolMultiplier();
 		// Incoming connections psy_audio_Machine number
-		if (status = psyfile_write_int32(songfile->file, (int32_t)channel->fxslot)) {
+		if ((status = psyfile_write_int32(songfile->file, (int32_t)channel->fxslot))) {
 			return status;
 		}
 		// Incoming connections psy_audio_Machine vol
-		if (status = psyfile_write_float(songfile->file, channel->volume)) {
+		if ((status = psyfile_write_float(songfile->file, channel->volume))) {
 			return status;
 		}
 		// Value to multiply input_convol[] to have a 0.0...1.0 range
-		if (status = psyfile_write_float(songfile->file, volMultiplier)) {
+		if ((status = psyfile_write_float(songfile->file, volMultiplier))) {
 			return status;
 		}
 		//Sending machines and values
@@ -2109,15 +2109,15 @@ int savespecific(psy_audio_Mixer* self, struct psy_audio_SongFile* songfile,
 		}
 		volMultiplier = 1.0f;
 		// send connections psy_audio_Machine number
-		if (status = psyfile_write(songfile->file, &wMacIdx, sizeof(int))) {
+		if ((status = psyfile_write(songfile->file, &wMacIdx, sizeof(int)))) {
 			return status;
 		}
 		// send connections psy_audio_Machine vol
-		if (status = psyfile_write(songfile->file, &volume, sizeof(float))) {
+		if ((status = psyfile_write(songfile->file, &volume, sizeof(float)))) {
 			return status;
 		}
 		// Value to multiply input_convol[] to have a 0.0...1.0 range
-		if (status = psyfile_write(songfile->file, &volMultiplier, sizeof(float))) {
+		if ((status = psyfile_write(songfile->file, &volMultiplier, sizeof(float)))) {
 			return status;
 		}
 
@@ -2129,16 +2129,16 @@ int savespecific(psy_audio_Mixer* self, struct psy_audio_SongFile* songfile,
 			send = psy_table_exists(&channel->sendsto, j);
 			psyfile_write(songfile->file, &send, sizeof(uint8_t));
 		}
-		if (status = psyfile_write(songfile->file, &channel->mastersend, sizeof(uint8_t))) {
+		if ((status = psyfile_write(songfile->file, &channel->mastersend, sizeof(uint8_t)))) {
 			return status;
 		}
-		if (status = psyfile_write(songfile->file, &channel->volume, sizeof(float))) {
+		if ((status = psyfile_write(songfile->file, &channel->volume, sizeof(float)))) {
 			return status;
 		}
-		if (status = psyfile_write(songfile->file, &channel->panning, sizeof(float))) {
+		if ((status = psyfile_write(songfile->file, &channel->panning, sizeof(float)))) {
 			return status;
 		}
-		if (status = psyfile_write(songfile->file, &channel->mute, sizeof(uint8_t))) {
+		if ((status = psyfile_write(songfile->file, &channel->mute, sizeof(uint8_t)))) {
 			return status;
 		}
 	}

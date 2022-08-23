@@ -500,19 +500,19 @@ int psy_audio_luaplugin_init(psy_audio_LuaPlugin* self, psy_audio_MachineCallbac
 	}
 	psy_audio_luapluginmachineparam_init(&self->parameter, self, UINTPTR_MAX);
 	psyclescript_init(&self->script);
-	if (status = psyclescript_load(&self->script, path)) {
+	if ((status = psyclescript_load(&self->script, path))) {
 		return status;	
 	}
-	if (status = psyclescript_preparestate(&self->script, psycle_methods,
-			self)) {
+	if ((status = psyclescript_preparestate(&self->script, psycle_methods,
+			self))) {
 		return status;
 	}
 	psy_audio_plugin_luascript_exportcmodules(&self->script);
 	// psy_luaui_init(&self->ui, &self->script);
-	if (status = psyclescript_run(&self->script)) {
+	if ((status = psyclescript_run(&self->script))) {
 		return status;
 	}
-	if (status = psyclescript_start(&self->script)) {
+	if ((status = psyclescript_start(&self->script))) {
 		return status;
 	}
 	self->plugininfo = machineinfo_allocinit();
@@ -1268,10 +1268,10 @@ int loadspecific(psy_audio_LuaPlugin* self, psy_audio_SongFile* songfile,
 	psy_Table vals;
 	int status;
 
-	if (status = psyfile_read(songfile->file, &size, sizeof(size))) {
+	if ((status = psyfile_read(songfile->file, &size, sizeof(size)))) {
 		return status;
 	}
-	if (status = psyfile_read(songfile->file, &numparams, sizeof(numparams))) {
+	if ((status = psyfile_read(songfile->file, &numparams, sizeof(numparams)))) {
 		return status;
 	}
 	//Read vals and names to do SetParameter.
@@ -1281,7 +1281,7 @@ int loadspecific(psy_audio_LuaPlugin* self, psy_audio_SongFile* songfile,
 	psy_lock_enter(self->lock);
 	for (i = 0; i < numparams; i++) {
 		int temp;
-		if (status = psyfile_read(songfile->file, &temp, sizeof(temp))) {
+		if ((status = psyfile_read(songfile->file, &temp, sizeof(temp)))) {
 			psy_table_dispose(&vals);
 			psy_table_dispose(&ids);
 			return status;
@@ -1291,7 +1291,7 @@ int loadspecific(psy_audio_LuaPlugin* self, psy_audio_SongFile* songfile,
 	for (i = 0; i < numparams; i++) {
 		char id[1024];
 
-		if (status = psyfile_readstring(songfile->file, id, 1024)) {
+		if ((status = psyfile_readstring(songfile->file, id, 1024))) {
 			return status;
 		}
 		psy_table_insert_strhash(&ids, id, (void*)(uintptr_t)i);
@@ -1354,10 +1354,10 @@ int savespecific(psy_audio_LuaPlugin* self, psy_audio_SongFile* songfile,
 			const char* id = luaplugin_id(self, i);
 			size += (uint32_t)psy_strlen(id) + 1;
 		}
-		if (status = psyfile_write(songfile->file, &size, sizeof(size))) {
+		if ((status = psyfile_write(songfile->file, &size, sizeof(size)))) {
 			return status;
 		}
-		if (status = psyfile_write(songfile->file, &count, sizeof(count))) {
+		if ((status = psyfile_write(songfile->file, &count, sizeof(count)))) {
 			return status;
 		}
 		for (i = 0; i < count; i++)
@@ -1376,11 +1376,11 @@ int savespecific(psy_audio_LuaPlugin* self, psy_audio_SongFile* songfile,
 		for (i = 0; i < count; i++) {
 			const char* id = luaplugin_id(self, i);
 
-			if (status = psyfile_writestring(songfile->file, id)) {
+			if ((status = psyfile_writestring(songfile->file, id))) {
 				return status;
 			}
 		}
-		if (status = psyfile_write(songfile->file, &size2, sizeof(size2))) {
+		if ((status = psyfile_write(songfile->file, &size2, sizeof(size2)))) {
 			return status;
 		}
 		if (size2)

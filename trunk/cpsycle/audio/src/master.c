@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -42,7 +42,7 @@ static const char* master_editname(psy_audio_Master* self)
 static uintptr_t numinputs(psy_audio_Master* self) { return 2; }
 static uintptr_t numoutputs(psy_audio_Master* self) { return 2; }
 static uintptr_t slot(psy_audio_Master* self) { return psy_audio_MASTER_INDEX; }
-// Parameters
+/* Parameters */
 static psy_audio_MachineParam* parameter(psy_audio_Master*, uintptr_t param);
 static psy_audio_MachineParam* tweakparameter(psy_audio_Master*,
 	uintptr_t param);
@@ -115,7 +115,7 @@ static void vtable_init(psy_audio_Master* self)
 		vtable.loadspecific = (fp_machine_loadspecific)master_loadspecific;
 		vtable.savespecific = (fp_machine_savespecific)master_savespecific;
 		vtable.editname = (fp_machine_editname) master_editname;		
-		// Parameter
+		/* Parameter */
 		vtable.parameter = (fp_machine_parameter)parameter;
 		vtable.tweakparameter = (fp_machine_tweakparameter)tweakparameter;
 		vtable.numparametercols = (fp_machine_numparametercols)numparametercols;
@@ -208,7 +208,7 @@ void master_seqtick(psy_audio_Master* self, uintptr_t channel,
 						psy_dsp_amp_t nv;
 							
 						nv = ev->parameter / (psy_dsp_amp_t)0x1FE;
-						// here ev->vol is used by the sequencer as src mac slot
+						/* here ev->vol is used by the sequencer as src mac slot */
 						psy_audio_connections_setwirevolume(&machines->connections,
 							psy_audio_wire_make(ev->vol, output_socket->slot), nv * nv * 4.f);
 					}
@@ -479,14 +479,14 @@ int master_loadspecific(psy_audio_Master* self, psy_audio_SongFile* songfile,
 	unsigned char decreaseOnClip = 0;
 	int status;
 
-	// size of this part params to load
-	if (status = psyfile_read(songfile->file, &size, sizeof size)) {
+	/* size of this part params to load */
+	if ((status = psyfile_read(songfile->file, &size, sizeof size))) {
 		return status;
 	}
-	if (status = psyfile_read(songfile->file, &outdry, sizeof outdry)) {
+	if ((status = psyfile_read(songfile->file, &outdry, sizeof outdry))) {
 		return status;
 	}
-	if (status = psyfile_read(songfile->file, &decreaseOnClip, sizeof decreaseOnClip)) {
+	if ((status = psyfile_read(songfile->file, &decreaseOnClip, sizeof decreaseOnClip))) {
 		return status;
 	}
 	self->volume = outdry / (psy_dsp_amp_t) 256;
@@ -503,14 +503,14 @@ int master_savespecific(psy_audio_Master* self, psy_audio_SongFile* songfile,
 				
 	size = sizeof outdry + sizeof decreaseOnClip;
 	outdry = (int32_t)(self->volume * 256);
-	// size of this part params to save
-	if (status = psyfile_write(songfile->file, &size, sizeof(size))) {
+	/* size of this part params to save */
+	if ((status = psyfile_write(songfile->file, &size, sizeof(size)))) {
 		return status;
 	}
-	if (status = psyfile_write(songfile->file, &outdry, sizeof(outdry))) {
+	if ((status = psyfile_write(songfile->file, &outdry, sizeof(outdry)))) {
 		return status;
 	}
-	if (status = psyfile_write(songfile->file, &decreaseOnClip, sizeof(decreaseOnClip))) {
+	if ((status = psyfile_write(songfile->file, &decreaseOnClip, sizeof(decreaseOnClip)))) {
 		return status;
 	}
 	return PSY_OK;

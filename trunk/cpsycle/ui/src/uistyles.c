@@ -40,14 +40,15 @@ void psy_ui_styles_dispose(psy_ui_Styles* self)
 	psy_property_dispose(&self->config);
 }
 
-void psy_ui_styles_set_style(psy_ui_Styles* self, uintptr_t styletype, psy_ui_Style* style)
+void psy_ui_styles_set_style(psy_ui_Styles* self, uintptr_t styletype,
+	psy_ui_Style* style)
 {
 	psy_ui_Style* currstyle;
 
 	assert(self);
 	assert(style);	
 	
-	if (currstyle = (psy_ui_Style*)psy_table_at(&self->styles, styletype)) {
+	if ((currstyle = (psy_ui_Style*)psy_table_at(&self->styles, styletype))) {
 		psy_ui_style_deallocate(currstyle);
 	}
 	psy_table_insert(&self->styles, styletype, style);

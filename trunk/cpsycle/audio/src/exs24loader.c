@@ -139,10 +139,10 @@ int psy_audio_exs24loader_load(psy_audio_EXS24Loader* self)
 	self->songfile->legacywires = &self->legacywires;
 	status = PSY_OK;	
 	
-	if (status = psy_audio_exs24loader_readmagic(self)) {
+	if ((status = psy_audio_exs24loader_readmagic(self))) {
 		return status;
 	}
-	if (status = psy_audio_exs24loader_readsizeexpand(self)) {
+	if ((status = psy_audio_exs24loader_readsizeexpand(self))) {
 		return status;
 	}
 	datasize = psyfile_filesize(self->fp);
@@ -161,7 +161,7 @@ int psy_audio_exs24loader_load(psy_audio_EXS24Loader* self)
 		if (psyfile_seek(self->fp, i) == -1) {
 			return PSY_ERRFILE;
 		}		
-		if (status = psyfile_read(self->fp, &sig, 4)) {
+		if ((status = psyfile_read(self->fp, &sig, 4))) {
 			return status;
 		}
 		if (self->big_endian) {
@@ -170,7 +170,7 @@ int psy_audio_exs24loader_load(psy_audio_EXS24Loader* self)
 		if (psyfile_seek(self->fp, i + 4) == -1) {
 			return PSY_ERRFILE;
 		}		
-		if (status = psyfile_read(self->fp, &size, 4)) {
+		if ((status = psyfile_read(self->fp, &size, 4))) {
 			return status;
 		}
 		if (self->big_endian) {
@@ -179,7 +179,7 @@ int psy_audio_exs24loader_load(psy_audio_EXS24Loader* self)
 		if (psyfile_seek(self->fp, i + 16) == -1) {
 			return PSY_ERRFILE;
 		}
-		if (status = psyfile_read(self->fp, &magic, 4)) {
+		if ((status = psyfile_read(self->fp, &magic, 4))) {
 			return status;
 		}
 		if (self->big_endian) {
@@ -274,7 +274,7 @@ int psy_audio_exs24loader_readmagic(psy_audio_EXS24Loader* self)
 	if (psyfile_seek(self->fp, 16) == -1) {
 		return PSY_ERRFILE;
 	}
-	if (status = psyfile_read(self->fp, &magic, 4)) {
+	if ((status = psyfile_read(self->fp, &magic, 4))) {
 		return status;
 	}	
 	magic[4] = '\0';
@@ -298,7 +298,7 @@ int psy_audio_exs24loader_readsizeexpand(psy_audio_EXS24Loader* self)
 	if (psyfile_seek(self->fp, 4) == -1) {
 		return PSY_ERRFILE;
 	}
-	if (status = psyfile_read(self->fp, &headersize, 4)) {
+	if ((status = psyfile_read(self->fp, &headersize, 4))) {
 		return status;
 	}
 	if (self->big_endian) {
@@ -320,7 +320,7 @@ int psy_audio_exs24loader_readzone(psy_audio_EXS24Loader* self,
 	if (psyfile_seek(self->fp, i + 8) == -1) {
 		return PSY_ERRFILE;
 	}
-	if (status = psyfile_read(self->fp, &zone->id, 4)) {
+	if ((status = psyfile_read(self->fp, &zone->id, 4))) {
 		return status;
 	}
 	if (self->big_endian) {
@@ -329,14 +329,14 @@ int psy_audio_exs24loader_readzone(psy_audio_EXS24Loader* self,
 	if (psyfile_seek(self->fp, i + 20) == -1) {
 		return PSY_ERRFILE;
 	}
-	if (status = psyfile_read(self->fp, &zone->name, 4)) {
+	if ((status = psyfile_read(self->fp, &zone->name, 4))) {
 		return status;
 	}
 	/* rtrim zone.name = rtrim(fh : read(64)) */
 	if (psyfile_seek(self->fp, i + 84) == -1) {
 		return PSY_ERRFILE;
 	}
-	if (status = psyfile_read(self->fp, &zone_opts, 1)) {
+	if ((status = psyfile_read(self->fp, &zone_opts, 1))) {
 		return status;
 	}
 	zone->pitch = (zone_opts & (1 << 1)) == 0;
@@ -345,13 +345,13 @@ int psy_audio_exs24loader_readzone(psy_audio_EXS24Loader* self,
 	if (psyfile_seek(self->fp, i + 85) == -1) {
 		return PSY_ERRFILE;
 	}
-	if (status = psyfile_read(self->fp, &zone->key, 1)) {
+	if ((status = psyfile_read(self->fp, &zone->key, 1))) {
 		return status;
 	}	
 	if (psyfile_seek(self->fp, i + 86) == -1) {
 		return PSY_ERRFILE;
 	}
-	if (status = psyfile_read(self->fp, &zone->fine_tuning, 1)) {
+	if ((status = psyfile_read(self->fp, &zone->fine_tuning, 1))) {
 		return status;
 	}
 	/* zone->fine_tuning = twos_complement(zone->fine_tuning, 8); */
@@ -359,53 +359,53 @@ int psy_audio_exs24loader_readzone(psy_audio_EXS24Loader* self,
 	if (psyfile_seek(self->fp, i + 87) == -1) {
 		return PSY_ERRFILE;
 	}
-	if (status = psyfile_read(self->fp, &zone->pan, 1)) {
+	if ((status = psyfile_read(self->fp, &zone->pan, 1))) {
 		return status;
 	}
 	/* twos_complement(string.byte(fh:read(1)), 8) */
 	if (psyfile_seek(self->fp, i + 88) == -1) {
 		return PSY_ERRFILE;
 	}
-	if (status = psyfile_read(self->fp, &zone->volume, 1)) {
+	if ((status = psyfile_read(self->fp, &zone->volume, 1))) {
 		return status;
 	}
 	/* twos_complement(string.byte(fh:read(1)), 8) */
 	if (psyfile_seek(self->fp, i + 164) == -1) {
 		return PSY_ERRFILE;
 	}
-	if (status = psyfile_read(self->fp, &zone->coarse_tuning, 1)) {
+	if ((status = psyfile_read(self->fp, &zone->coarse_tuning, 1))) {
 		return status;
 	}
 	/* twos_complement(string.byte(fh:read(1)), 8) */
 	if (psyfile_seek(self->fp, i + 90) == -1) {
 		return PSY_ERRFILE;
 	}
-	if (status = psyfile_read(self->fp, &zone->key_low, 1)) {
+	if ((status = psyfile_read(self->fp, &zone->key_low, 1))) {
 		return status;
 	}
 	if (psyfile_seek(self->fp, i + 91) == -1) {
 		return PSY_ERRFILE;
 	}
-	if (status = psyfile_read(self->fp, &zone->key_high, 1)) {
+	if ((status = psyfile_read(self->fp, &zone->key_high, 1))) {
 		return status;
 	}	
 	zone->velocity_range_on = (zone_opts & (1 << 3)) != 0;
 	if (psyfile_seek(self->fp, i + 93) == -1) {
 		return PSY_ERRFILE;
 	}
-	if (status = psyfile_read(self->fp, &zone->velocity_low, 1)) {
+	if ((status = psyfile_read(self->fp, &zone->velocity_low, 1))) {
 		return status;
 	}	
 	if (psyfile_seek(self->fp, i + 94) == -1) {
 		return PSY_ERRFILE;
 	}
-	if (status = psyfile_read(self->fp, &zone->velocity_high, 1)) {
+	if ((status = psyfile_read(self->fp, &zone->velocity_high, 1))) {
 		return status;
 	}
 	if (psyfile_seek(self->fp, i + 96) == -1) {
 		return PSY_ERRFILE;
 	}
-	if (status = psyfile_read(self->fp, &zone->sample_start, 4)) {
+	if ((status = psyfile_read(self->fp, &zone->sample_start, 4))) {
 		return status;
 	}
 	if (self->big_endian) {
@@ -414,7 +414,7 @@ int psy_audio_exs24loader_readzone(psy_audio_EXS24Loader* self,
 	if (psyfile_seek(self->fp, i + 100) == -1) {
 		return PSY_ERRFILE;
 	}
-	if (status = psyfile_read(self->fp, &zone->sample_end, 4)) {
+	if ((status = psyfile_read(self->fp, &zone->sample_end, 4))) {
 		return status;
 	}
 	if (self->big_endian) {
@@ -423,7 +423,7 @@ int psy_audio_exs24loader_readzone(psy_audio_EXS24Loader* self,
 	if (psyfile_seek(self->fp, i + 104) == -1) {
 		return PSY_ERRFILE;
 	}
-	if (status = psyfile_read(self->fp, &zone->loop_start, 4)) {
+	if ((status = psyfile_read(self->fp, &zone->loop_start, 4))) {
 		return status;
 	}
 	if (self->big_endian) {
@@ -432,7 +432,7 @@ int psy_audio_exs24loader_readzone(psy_audio_EXS24Loader* self,
 	if (psyfile_seek(self->fp, i + 108) == -1) {
 		return PSY_ERRFILE;
 	}
-	if (status = psyfile_read(self->fp, &zone->loop_end, 4)) {
+	if ((status = psyfile_read(self->fp, &zone->loop_end, 4))) {
 		return status;
 	}
 	if (self->big_endian) {
@@ -441,7 +441,7 @@ int psy_audio_exs24loader_readzone(psy_audio_EXS24Loader* self,
 	if (psyfile_seek(self->fp, i + 112) == -1) {
 		return PSY_ERRFILE;
 	}
-	if (status = psyfile_read(self->fp, &zone->loop_crossfade, 4)) {
+	if ((status = psyfile_read(self->fp, &zone->loop_crossfade, 4))) {
 		return status;
 	}
 	if (self->big_endian) {
@@ -450,7 +450,7 @@ int psy_audio_exs24loader_readzone(psy_audio_EXS24Loader* self,
 	if (psyfile_seek(self->fp, i + 117) == -1) {
 		return PSY_ERRFILE;
 	}
-	if (status = psyfile_read(self->fp, &loop_opts, 1)) {
+	if ((status = psyfile_read(self->fp, &loop_opts, 1))) {
 		return status;
 	}	
 	zone->loop_on = (loop_opts & (1 << 0)) != 0;
@@ -461,14 +461,14 @@ int psy_audio_exs24loader_readzone(psy_audio_EXS24Loader* self,
 		if (psyfile_seek(self->fp, i + 166) == -1) {
 			return PSY_ERRFILE;
 		}
-		if (status = psyfile_read(self->fp, &zone->output, 1)) {
+		if ((status = psyfile_read(self->fp, &zone->output, 1))) {
 			return status;
 		}
 	}
 	if (psyfile_seek(self->fp, i + 172) == -1) {
 		return PSY_ERRFILE;
 	}
-	if (status = psyfile_read(self->fp, &zone->group_index, 4)) {
+	if ((status = psyfile_read(self->fp, &zone->group_index, 4))) {
 		return status;
 	}
 	if (self->big_endian) {
@@ -477,7 +477,7 @@ int psy_audio_exs24loader_readzone(psy_audio_EXS24Loader* self,
 	if (psyfile_seek(self->fp, i + 176) == -1) {
 		return PSY_ERRFILE;
 	}
-	if (status = psyfile_read(self->fp, &zone->sample_index, 4)) {
+	if ((status = psyfile_read(self->fp, &zone->sample_index, 4))) {
 		return status;
 	}
 	if (self->big_endian) {
@@ -488,7 +488,7 @@ int psy_audio_exs24loader_readzone(psy_audio_EXS24Loader* self,
 		if (psyfile_seek(self->fp, i + 188) == -1) {
 			return PSY_ERRFILE;
 		}
-		if (status = psyfile_read(self->fp, &zone->sample_fade, 4)) {
+		if ((status = psyfile_read(self->fp, &zone->sample_fade, 4))) {
 			return status;
 		}
 		if (self->big_endian) {
@@ -500,7 +500,7 @@ int psy_audio_exs24loader_readzone(psy_audio_EXS24Loader* self,
 		if (psyfile_seek(self->fp, i + 192) == -1) {
 			return PSY_ERRFILE;
 		}
-		if (status = psyfile_read(self->fp, &zone->offset, 4)) {
+		if ((status = psyfile_read(self->fp, &zone->offset, 4))) {
 			return status;
 		}
 		if (self->big_endian) {
@@ -518,7 +518,7 @@ int psy_audio_exs24loader_readsample(psy_audio_EXS24Loader* self,
 	if (psyfile_seek(self->fp, i + 8) == -1) {
 		return PSY_ERRFILE;
 	}
-	if (status = psyfile_read(self->fp, &sample->id, 4)) {
+	if ((status = psyfile_read(self->fp, &sample->id, 4))) {
 		return status;
 	}
 	if (self->big_endian) {
@@ -527,14 +527,14 @@ int psy_audio_exs24loader_readsample(psy_audio_EXS24Loader* self,
 	if (psyfile_seek(self->fp, i + 20) == -1) {
 		return PSY_ERRFILE;
 	}
-	if (status = psyfile_read(self->fp, &sample->name, 64)) {
+	if ((status = psyfile_read(self->fp, &sample->name, 64))) {
 		return status;
 	}
 	/* rtrim(fh : read(64)) */
 	if (psyfile_seek(self->fp, i + 88) == -1) {
 		return PSY_ERRFILE;
 	}
-	if (status = psyfile_read(self->fp, &sample->length, 4)) {
+	if ((status = psyfile_read(self->fp, &sample->length, 4))) {
 		return status;
 	}
 	if (self->big_endian) {
@@ -543,7 +543,7 @@ int psy_audio_exs24loader_readsample(psy_audio_EXS24Loader* self,
 	if (psyfile_seek(self->fp, i + 92) == -1) {
 		return PSY_ERRFILE;
 	}
-	if (status = psyfile_read(self->fp, &sample->sample_rate, 4)) {
+	if ((status = psyfile_read(self->fp, &sample->sample_rate, 4))) {
 		return status;
 	}
 	if (self->big_endian) {
@@ -552,13 +552,13 @@ int psy_audio_exs24loader_readsample(psy_audio_EXS24Loader* self,
 	if (psyfile_seek(self->fp, i + 96) == -1) {
 		return PSY_ERRFILE;
 	}
-	if (status = psyfile_read(self->fp, &sample->bit_depth, 1)) {
+	if ((status = psyfile_read(self->fp, &sample->bit_depth, 1))) {
 		return status;
 	}
 	if (psyfile_seek(self->fp, i + 112) == -1) {
 		return PSY_ERRFILE;
 	}
-	if (status = psyfile_read(self->fp, &sample->type, 4)) {
+	if ((status = psyfile_read(self->fp, &sample->type, 4))) {
 		return status;
 	}
 	if (self->big_endian) {
@@ -567,7 +567,7 @@ int psy_audio_exs24loader_readsample(psy_audio_EXS24Loader* self,
 	if (psyfile_seek(self->fp, i + 164) == -1) {
 		return PSY_ERRFILE;
 	}
-	if (status = psyfile_read(self->fp, &sample->file_path, 256)) {
+	if ((status = psyfile_read(self->fp, &sample->file_path, 256))) {
 		return status;
 	}
 	/* rtrim(fh : read(256)) */
@@ -575,7 +575,7 @@ int psy_audio_exs24loader_readsample(psy_audio_EXS24Loader* self,
 		if (psyfile_seek(self->fp, i + 420) == -1) {
 			return PSY_ERRFILE;
 		}
-		if (status = psyfile_read(self->fp, &sample->file_name, 256)) {
+		if ((status = psyfile_read(self->fp, &sample->file_name, 256))) {
 			return status;
 		}
 		/* rtrim(fh : read(256)) */
@@ -583,7 +583,7 @@ int psy_audio_exs24loader_readsample(psy_audio_EXS24Loader* self,
 		if (psyfile_seek(self->fp, i + 20) == -1) {
 			return PSY_ERRFILE;
 		}
-		if (status = psyfile_read(self->fp, &sample->file_name, 64)) {
+		if ((status = psyfile_read(self->fp, &sample->file_name, 64))) {
 			return status;
 		}
 		/* rtrim(fh : read(64)) */

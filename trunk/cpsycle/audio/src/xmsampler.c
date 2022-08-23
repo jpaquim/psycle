@@ -1256,13 +1256,13 @@ int savespecificchunk(psy_audio_XMSampler* self, psy_audio_SongFile* songfile,
 	// and seek back to write the correct value.
 	uint32_t size = 0;
 	uint32_t filepos = psyfile_getpos(songfile->file);
-	if (status = psyfile_write(songfile->file, &size, sizeof(size))) {
+	if ((status = psyfile_write(songfile->file, &size, sizeof(size)))) {
 		return status;
 	}
-	if (status = psyfile_write_uint32(songfile->file, XMSAMPLER_VERSION)) {
+	if ((status = psyfile_write_uint32(songfile->file, XMSAMPLER_VERSION))) {
 		return status;
 	}
-	if (status = psyfile_write_uint32(songfile->file, self->_numVoices)) {
+	if ((status = psyfile_write_uint32(songfile->file, self->_numVoices))) {
 		return status;
 	}
 	resamplerquality = psy_dsp_RESAMPLERQUALITY_LINEAR;
@@ -1277,29 +1277,30 @@ int savespecificchunk(psy_audio_XMSampler* self, psy_audio_SongFile* songfile,
 	psyfile_write_int32(songfile->file, temp); // quality
 	//TODO: zxxMap cannot be edited right now.
 	for (i = 0; i < 128; i++) {
-		if (status = psyfile_write_int32(songfile->file, 0)) { // zxxMap[i].mode);
+		if ((status = psyfile_write_int32(songfile->file, 0))) { // zxxMap[i].mode);
 			return status;
 		}
-		if (status = psyfile_write_int32(songfile->file, 0)) { // zxxMap[i].value);
+		if ((status = psyfile_write_int32(songfile->file, 0))) { // zxxMap[i].value);
 			return status;
 		}
 	}
-	if (status = psyfile_write_uint8(songfile->file, (uint8_t)(self->m_bAmigaSlides != 0))) {
+	if ((status = psyfile_write_uint8(songfile->file,
+			(uint8_t)(self->m_bAmigaSlides != 0)))) {
 		return status;
 	}
-	if (status = psyfile_write_uint8(songfile->file, (uint8_t)self->m_UseFilters)) {
+	if ((status = psyfile_write_uint8(songfile->file, (uint8_t)self->m_UseFilters))) {
 		return status;
 	}
-	if (status = psyfile_write_int32(songfile->file, self->m_GlobalVolume)) {
+	if ((status = psyfile_write_int32(songfile->file, self->m_GlobalVolume))) {
 		return status;
 	}
-	if (status = psyfile_write_int32(songfile->file, self->m_PanningMode)) {
+	if ((status = psyfile_write_int32(songfile->file, self->m_PanningMode))) {
 		return status;
 	}
 	for (i = 0; i < MAX_TRACKS; i++) {
 		psy_audio_xmsamplerchannel_save(&self->m_Channel[i], songfile);
 	}
-	if (status = psyfile_write_uint32(songfile->file, (uint32_t)self->instrumentbank)) {
+	if ((status = psyfile_write_uint32(songfile->file, (uint32_t)self->instrumentbank))) {
 		return status;
 	}
 	endpos = psyfile_getpos(songfile->file);
@@ -1307,7 +1308,7 @@ int savespecificchunk(psy_audio_XMSampler* self, psy_audio_SongFile* songfile,
 		return PSY_ERRFILE;
 	}
 	size = (uint32_t)(endpos - filepos - sizeof(size));
-	if (status = psyfile_write_uint32(songfile->file, size)) {
+	if ((status = psyfile_write_uint32(songfile->file, size))) {
 		return status;
 	}
 	if (psyfile_seek(songfile->file, endpos) == -1) {
@@ -1329,11 +1330,11 @@ int loadspecificchunk(psy_audio_XMSampler* self, psy_audio_SongFile* songfile,
 
 	// psy_audio_xmsampler_defaultC4(self, TRUE);
 	// self->instrumentbank = 1;
-	if (status = psyfile_read(songfile->file, &size, sizeof(size))) {
+	if ((status = psyfile_read(songfile->file, &size, sizeof(size)))) {
 		return status;
 	}
 	filepos = psyfile_getpos(songfile->file);
-	if (status = psyfile_read(songfile->file, &filevers, sizeof(filevers))) {
+	if ((status = psyfile_read(songfile->file, &filevers, sizeof(filevers)))) {
 		return status;
 	}
 			
@@ -1350,12 +1351,12 @@ int loadspecificchunk(psy_audio_XMSampler* self, psy_audio_SongFile* songfile,
 		psy_dsp_ResamplerQuality resamplertype;
 
 		// numSubtracks
-		if (status = psyfile_read(songfile->file, &temp, sizeof(temp))) {
+		if ((status = psyfile_read(songfile->file, &temp, sizeof(temp)))) {
 			return status;
 		}
 		self->_numVoices = temp;
 		// quality
-		if (status = psyfile_read(songfile->file, &temp, sizeof(temp))) {
+		if ((status = psyfile_read(songfile->file, &temp, sizeof(temp)))) {
 			return status;
 		}
 		switch (temp) {
@@ -1369,25 +1370,25 @@ int loadspecificchunk(psy_audio_XMSampler* self, psy_audio_SongFile* songfile,
 		}
 		psy_audio_xmsampler_setresamplerquality(self, resamplertype);
 		for (i = 0; i < 128; ++i) {
-			if (status = psyfile_read(songfile->file, &zxxMap[i].mode, sizeof(zxxMap[i].mode))) {
+			if ((status = psyfile_read(songfile->file, &zxxMap[i].mode, sizeof(zxxMap[i].mode)))) {
 				return status;
 			}
-			if (status = psyfile_read(songfile->file, &zxxMap[i].value, sizeof(zxxMap[i].value))) {
+			if ((status = psyfile_read(songfile->file, &zxxMap[i].value, sizeof(zxxMap[i].value)))) {
 				return status;
 			}
 		}
-		if (status = psyfile_read(songfile->file, &m_bAmigaSlides, sizeof(m_bAmigaSlides))) {
+		if ((status = psyfile_read(songfile->file, &m_bAmigaSlides, sizeof(m_bAmigaSlides)))) {
 			return status;
 		}
 		self->m_bAmigaSlides = m_bAmigaSlides;
-		if (status = psyfile_read(songfile->file, &m_UseFilters, sizeof(m_UseFilters))) {
+		if ((status = psyfile_read(songfile->file, &m_UseFilters, sizeof(m_UseFilters)))) {
 			return status;
 		}
 		self->m_UseFilters = m_UseFilters;
-		if (status = psyfile_read(songfile->file, &m_GlobalVolume, sizeof(m_GlobalVolume))) {
+		if ((status = psyfile_read(songfile->file, &m_GlobalVolume, sizeof(m_GlobalVolume)))) {
 			return status;
 		}
-		if (status = psyfile_read(songfile->file, &m_PanningMode, sizeof(m_PanningMode))) {
+		if ((status = psyfile_read(songfile->file, &m_PanningMode, sizeof(m_PanningMode)))) {
 			return status;
 		}
 		// self->masterchannel.volume = m_GlobalVolume / 127.f;
@@ -1398,7 +1399,7 @@ int loadspecificchunk(psy_audio_XMSampler* self, psy_audio_SongFile* songfile,
 		if ((filevers & XMSAMPLER_VERSION & 0x0000FFFF) >= 0x02) {
 			uint32_t temp32;
 
-			if (status = psyfile_read(songfile->file, &temp32, sizeof(temp32))) {
+			if ((status = psyfile_read(songfile->file, &temp32, sizeof(temp32)))) {
 				return status;
 			}
 			self->instrumentbank = temp32;

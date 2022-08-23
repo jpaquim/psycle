@@ -65,7 +65,7 @@ bool bitsblock_readblock(BitsBlock* self, PsyFile* file)
 	if (!self->pdata) {
 		return FALSE;
 	}
-	if (status = psyfile_read(file, self->pdata, size)) {
+	if ((status = psyfile_read(file, self->pdata, size))) {
 		free(self->pdata);
 		return FALSE;
 	}
@@ -181,7 +181,7 @@ int itmodule2_load(ITModule2* self)
 {	
 	int status;
 
-	if (status = psyfile_read(self->fp, &self->fileheader, sizeof(self->fileheader))) {
+	if ((status = psyfile_read(self->fp, &self->fileheader, sizeof(self->fileheader)))) {
 		return status;
 	}
 	if (psyfile_seek(self->fp, 0) == -1) {
@@ -190,7 +190,7 @@ int itmodule2_load(ITModule2* self)
 	if (self->fileheader.tag == IMPM_ID) {
 		return itmodule2_loaditmodule(self);
 	}
-	if (status = psyfile_read(self->fp, &self->s3mFileH, sizeof(self->s3mFileH))) {
+	if ((status = psyfile_read(self->fp, &self->s3mFileH, sizeof(self->s3mFileH)))) {
 		return status;
 	}
 	if (psyfile_seek(self->fp, 0) == -1) {
@@ -218,7 +218,7 @@ int itmodule2_loaditmodule(ITModule2* self)
 	assert(self->song);	
 
 	itmodule2_reset(self);
-	if (status = psyfile_read(self->fp, &self->fileheader, sizeof(self->fileheader))) {
+	if ((status = psyfile_read(self->fp, &self->fileheader, sizeof(self->fileheader)))) {
 		return status;
 	}
 	psy_audio_song_settitle(self->song, self->fileheader.songName);
@@ -229,12 +229,12 @@ int itmodule2_loaditmodule(ITModule2* self)
 	itmodule2_setsamplerslidemode(self);
 	itmodule2_setglobalvolume(self);
 	itmodule2_setupchannels(self);
-	if (status = itmodule2_readsequence(self)) {
+	if ((status = itmodule2_readsequence(self))) {
 		return status;
 	}		
 	if (self->fileheader.insNum) {
 		pointersi = malloc(self->fileheader.insNum * sizeof(uint32_t));
-		if (status = psyfile_read(self->fp, pointersi, self->fileheader.insNum * sizeof(uint32_t))) {
+		if ((status = psyfile_read(self->fp, pointersi, self->fileheader.insNum * sizeof(uint32_t)))) {
 			// clean up
 			free(pointersi);
 			return status;
@@ -244,7 +244,7 @@ int itmodule2_loaditmodule(ITModule2* self)
 	}
 	if (self->fileheader.sampNum) {
 		pointerss = malloc(self->fileheader.sampNum * sizeof(uint32_t));
-		if (status = psyfile_read(self->fp, pointerss, self->fileheader.sampNum * sizeof(uint32_t))) {
+		if ((status = psyfile_read(self->fp, pointerss, self->fileheader.sampNum * sizeof(uint32_t)))) {
 			// clean up
 			free(pointersi);
 			free(pointerss);
@@ -255,7 +255,7 @@ int itmodule2_loaditmodule(ITModule2* self)
 	}
 	if (self->fileheader.patNum) {
 		pointersp = malloc(self->fileheader.patNum * sizeof(uint32_t));
-		if (status = psyfile_read(self->fp, pointersp, self->fileheader.patNum * sizeof(uint32_t))) {
+		if ((status = psyfile_read(self->fp, pointersp, self->fileheader.patNum * sizeof(uint32_t)))) {
 			// clean up
 			free(pointersi);
 			free(pointerss);
@@ -265,10 +265,10 @@ int itmodule2_loaditmodule(ITModule2* self)
 	} else {
 		pointersp = NULL;
 	}
-	if (status = itmodule2_readmidiembedded(self)) {
+	if ((status = itmodule2_readmidiembedded(self))) {
 		return status;
 	}
-	if (status = itmodule2_readmessage(self)) {
+	if ((status = itmodule2_readmessage(self))) {
 		return status;
 	}
 	virtualInst = MAX_MACHINES;
@@ -290,20 +290,20 @@ int itmodule2_loaditmodule(ITModule2* self)
 			itInsHeader1x curh;
 			int status;
 
-			if (status = psyfile_read(self->fp, &curh, sizeof(curh))) {
+			if ((status = psyfile_read(self->fp, &curh, sizeof(curh)))) {
 				return status;
 			}
-			if (status = itmodule2_loadolditinst(self, &curh, instrument)) {
+			if ((status = itmodule2_loadolditinst(self, &curh, instrument))) {
 				return status;
 			}
 		} else {
 			itInsHeader2x curh;
 			int status;
 
-			if (status = psyfile_read(self->fp, &curh, sizeof(curh))) {
+			if ((status = psyfile_read(self->fp, &curh, sizeof(curh)))) {
 				return status;
 			}
-			if (status = itmodule2_loaditinst(self, &curh, instrument)) {
+			if ((status = itmodule2_loaditinst(self, &curh, instrument))) {
 				return status;
 			}
 		}
@@ -520,14 +520,14 @@ int itmodule2_readmidiembedded(ITModule2* self)
 		int status;
 
 		self->embeddeddata = (EmbeddedMIDIData*)malloc(sizeof(EmbeddedMIDIData));
-		if (status = psyfile_read(self->fp, &skipnum, sizeof(int16_t))) {
+		if ((status = psyfile_read(self->fp, &skipnum, sizeof(int16_t)))) {
 			return status;
 		}
 		// This is some strange data. It is not documented.
 		if (psyfile_skip(self->fp, skipnum * 8) == -1) {
 			return PSY_ERRFILE;
 		}
-		if (status = psyfile_read(self->fp, self->embeddeddata, sizeof(EmbeddedMIDIData))) {
+		if ((status = psyfile_read(self->fp, self->embeddeddata, sizeof(EmbeddedMIDIData)))) {
 			return status;
 		}
 
@@ -578,7 +578,7 @@ int itmodule2_readmessage(ITModule2* self)
 		// NewLine = 0Dh (13 dec)
 		// EndOfMsg = 0
 		comments = malloc(self->fileheader.msgLen + 2);
-		if (status = psyfile_read(self->fp, comments, self->fileheader.msgLen)) {
+		if ((status = psyfile_read(self->fp, comments, self->fileheader.msgLen))) {
 			free(comments);
 			return status;
 		}
@@ -854,7 +854,7 @@ int itmodule2_readsequence(ITModule2* self)
 	for (i = 0; i < self->fileheader.ordNum; ++i) {
 		uint8_t patidx;
 		
-		if (status = psyfile_read(self->fp, &patidx, sizeof(uint8_t))) {			
+		if ((status = psyfile_read(self->fp, &patidx, sizeof(uint8_t)))) {
 			break;
 		}			
 		psy_audio_sequence_insert(&self->songfile->song->sequence,
@@ -1181,7 +1181,7 @@ bool itmodule2_loaditpattern(ITModule2* self, int patidx, int* numchans)
 	pent = pempty;
 
 	psyfile_skip(fp, 2); // packedSize
-	if (status = psyfile_read(self->fp, &rowCount, sizeof(int16_t))) {
+	if ((status = psyfile_read(self->fp, &rowCount, sizeof(int16_t)))) {
 		return status;
 	}	
 	psyfile_skip(fp, 4); // unused
@@ -1212,7 +1212,7 @@ bool itmodule2_loaditpattern(ITModule2* self, int patidx, int* numchans)
 			if (newEntry & 0x80) {
 				uint8_t tmp_u8;
 
-				if (status = psyfile_read(self->fp, &tmp_u8, sizeof(uint8_t))) {
+				if ((status = psyfile_read(self->fp, &tmp_u8, sizeof(uint8_t)))) {
 					return status;
 				}
 				mask[channel] = tmp_u8;
@@ -1222,7 +1222,7 @@ bool itmodule2_loaditpattern(ITModule2* self, int patidx, int* numchans)
 			{
 				uint8_t note;
 				
-				if (status = psyfile_read(self->fp, &note, sizeof(uint8_t))) {
+				if ((status = psyfile_read(self->fp, &note, sizeof(uint8_t)))) {
 					return status;
 				}
 				if (note == 255) pent.note = psy_audio_NOTECOMMANDS_RELEASE;
@@ -1235,7 +1235,7 @@ bool itmodule2_loaditpattern(ITModule2* self, int patidx, int* numchans)
 			if (mask[channel] & 2) {
 				uint8_t tmp_u8;
 
-				if (status = psyfile_read(self->fp, &tmp_u8, sizeof(uint8_t))) {
+				if ((status = psyfile_read(self->fp, &tmp_u8, sizeof(uint8_t)))) {
 					return status;
 				}
 				pent.inst = tmp_u8 - 1;
@@ -1246,7 +1246,7 @@ bool itmodule2_loaditpattern(ITModule2* self, int patidx, int* numchans)
 			{
 				uint8_t tmp;				
 
-				if (status = psyfile_read(self->fp, &tmp, sizeof(uint8_t))) {
+				if ((status = psyfile_read(self->fp, &tmp, sizeof(uint8_t)))) {
 					return status;
 				}
 				// Volume ranges from 0->64
@@ -1293,10 +1293,10 @@ bool itmodule2_loaditpattern(ITModule2* self, int patidx, int* numchans)
 				uint8_t command;
 				uint8_t param;
 
-				if (status = psyfile_read(self->fp, &command, sizeof(uint8_t))) {
+				if ((status = psyfile_read(self->fp, &command, sizeof(uint8_t)))) {
 					return status;
 				}
-				if (status = psyfile_read(self->fp, &param, sizeof(uint8_t))) {
+				if ((status = psyfile_read(self->fp, &param, sizeof(uint8_t)))) {
 					return status;
 				}
 				if (command != 0) pent.parameter = param;
@@ -1749,7 +1749,7 @@ bool itmodule2_loads3msampledatax(ITModule2* self, psy_audio_Sample* wave, uint3
 
 			for (j = 0; j < iLen * 2; j += 2, out++)
 			{
-				wNew = (0xFF & smpbuf[j] | smpbuf[j + 1] << 8) + offset;
+				wNew = ((0xFF & smpbuf[j]) | (smpbuf[j + 1] << 8)) + offset;
 				wave->channels.samples[0][out] = (psy_dsp_amp_t)wNew;				
 			}
 			if (bstereo) {
@@ -1757,7 +1757,7 @@ bool itmodule2_loads3msampledatax(ITModule2* self, psy_audio_Sample* wave, uint3
 				psyfile_read(fp, smpbuf, iLen * 2);
 				for (j = 0; j < iLen * 2; j += 2, out++)
 				{
-					wNew = (0xFF & smpbuf[j] | smpbuf[j + 1] << 8) + offset;
+					wNew = ((0xFF & smpbuf[j]) | (smpbuf[j + 1] << 8)) + offset;
 					wave->channels.samples[1][out] = (psy_dsp_amp_t)wNew;					
 				}
 			}
@@ -1838,13 +1838,13 @@ bool itmodule2_loads3mpatternx(ITModule2* self, uint16_t patidx)
 				int status;
 				
 				// hi=oct, lo=note, 255=empty note,	254=key off
-				if (status = psyfile_read(self->fp, &note, sizeof(uint8_t))) {
+				if ((status = psyfile_read(self->fp, &note, sizeof(uint8_t)))) {
 					return status;
 				} 
 				if (note == 254) pent.note = psy_audio_NOTECOMMANDS_RELEASE;
 				else if (note == 255) pent.note = 255;
 				else pent.note = ((note >> 4) * 12 + (note & 0xF) + 12);  // +12 since ST3 C-4 is Psycle's C-5
-				if (status = psyfile_read(self->fp, &tmp, sizeof(uint8_t))) {
+				if ((status = psyfile_read(self->fp, &tmp, sizeof(uint8_t)))) {
 					return status;
 				}
 				pent.inst = tmp - 1;
@@ -1854,7 +1854,7 @@ bool itmodule2_loads3mpatternx(ITModule2* self, uint16_t patidx)
 				uint8_t tmp;
 				int status;
 				
-				if (status = psyfile_read(self->fp, &tmp, sizeof(uint8_t))) {
+				if ((status = psyfile_read(self->fp, &tmp, sizeof(uint8_t)))) {
 					return status;
 				} 
 				volume = (tmp < 64) ? tmp : 63;
@@ -1865,10 +1865,10 @@ bool itmodule2_loads3mpatternx(ITModule2* self, uint16_t patidx)
 				uint8_t param;
 				int status;
 
-				if (status = psyfile_read(self->fp, &command, sizeof(uint8_t))) {
+				if ((status = psyfile_read(self->fp, &command, sizeof(uint8_t)))) {
 					return status;
 				}
-				if (status = psyfile_read(self->fp, &param, sizeof(uint8_t))) {
+				if ((status = psyfile_read(self->fp, &param, sizeof(uint8_t)))) {
 					return status;
 				}
 				if (command != 0) pent.parameter = param;

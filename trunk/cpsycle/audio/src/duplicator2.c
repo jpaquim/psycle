@@ -250,24 +250,24 @@ int loadspecific(psy_audio_Duplicator2* self, psy_audio_SongFile* songfile,
 	int status;
 
 	// size of this part params to load
-	if (status = psyfile_read(songfile->file, &size, sizeof(size))) {
+	if ((status = psyfile_read(songfile->file, &size, sizeof(size)))) {
 		return status;
 	}
 	// TODO: endianess
-	if (status = psyfile_read(songfile->file, macoutput, DUPLICATOR2_NUMOUTPUTS *
-			sizeof(int16_t))) {
+	if ((status = psyfile_read(songfile->file, macoutput, DUPLICATOR2_NUMOUTPUTS *
+			sizeof(int16_t)))) {
 		return status;
 	}
-	if (status = psyfile_read(songfile->file, noteoffset, DUPLICATOR2_NUMOUTPUTS *
-			sizeof(int16_t))) {
+	if ((status = psyfile_read(songfile->file, noteoffset, DUPLICATOR2_NUMOUTPUTS *
+			sizeof(int16_t)))) {
 		return status;
 	}
-	if (status = psyfile_read(songfile->file, lowkey, DUPLICATOR2_NUMOUTPUTS *
-			sizeof(int16_t))) {
+	if ((status = psyfile_read(songfile->file, lowkey, DUPLICATOR2_NUMOUTPUTS *
+			sizeof(int16_t)))) {
 		return status;
 	}
-	if (status = psyfile_read(songfile->file, highkey, DUPLICATOR2_NUMOUTPUTS *
-			sizeof(int16_t))) {
+	if ((status = psyfile_read(songfile->file, highkey, DUPLICATOR2_NUMOUTPUTS *
+			sizeof(int16_t)))) {
 		return status;
 	}
 	for (i = 0; i < DUPLICATOR2_NUMOUTPUTS; ++i) {
@@ -307,24 +307,24 @@ int savespecific(psy_audio_Duplicator2* self, psy_audio_SongFile* songfile,
 	}	
 	size = sizeof(macoutput) + sizeof(noteoffset) + sizeof(lowkey) + sizeof(highkey);
 	// size of this part params to save
-	if (status = psyfile_write(songfile->file, &size, sizeof(size))) {
+	if ((status = psyfile_write(songfile->file, &size, sizeof(size)))) {
 		return status;
 	}
 	// TODO: endianess
-	if (status = psyfile_write(songfile->file, &macoutput[0],
-			DUPLICATOR2_NUMOUTPUTS * sizeof(int16_t))) {
+	if ((status = psyfile_write(songfile->file, &macoutput[0],
+			DUPLICATOR2_NUMOUTPUTS * sizeof(int16_t)))) {
 		return status;
 	}
-	if (status = psyfile_write(songfile->file, &noteoffset[0],
-			DUPLICATOR2_NUMOUTPUTS * sizeof(int16_t))) {
+	if ((status = psyfile_write(songfile->file, &noteoffset[0],
+			DUPLICATOR2_NUMOUTPUTS * sizeof(int16_t)))) {
 		return status;
 	}
-	if (status = psyfile_write(songfile->file, &lowkey[0],
-			DUPLICATOR2_NUMOUTPUTS * sizeof(int16_t))) {
+	if ((status = psyfile_write(songfile->file, &lowkey[0],
+			DUPLICATOR2_NUMOUTPUTS * sizeof(int16_t)))) {
 		return status;
 	}
-	if (status = psyfile_write(songfile->file, &highkey[0],
-			DUPLICATOR2_NUMOUTPUTS * sizeof(int16_t))) {
+	if ((status = psyfile_write(songfile->file, &highkey[0],
+			DUPLICATOR2_NUMOUTPUTS * sizeof(int16_t)))) {
 		return status;
 	}
 	return PSY_OK;

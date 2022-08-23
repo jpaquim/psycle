@@ -1073,7 +1073,7 @@ psy_ui_Component* psy_ui_component_set_align(psy_ui_Component* self,
 		psy_ui_Component* parent;
 
 		self->align = align;
-		if (parent = psy_ui_component_parent(self)) {
+		if ((parent = psy_ui_component_parent(self))) {
 			psy_ui_component_check_sorted_align(parent, align);
 		}
 		self->vtable->setalign(self, align);
@@ -2196,9 +2196,9 @@ void psy_ui_component_draw_children(psy_ui_Component* self, psy_ui_Graphics* g)
 				psy_ui_RealRectangle intersection;				
 
 				position = psy_ui_component_position(component);
-				if (self->aligner &&
-					(self->aligner->alignsorted == psy_ui_ALIGN_TOP && position.bottom < clip.top) ||
-					(self->aligner->alignsorted == psy_ui_ALIGN_LEFT && position.right < clip.left)) {
+				if ((self->aligner) &&
+					(((self->aligner->alignsorted == psy_ui_ALIGN_TOP) && (position.bottom < clip.top)) ||
+					((self->aligner->alignsorted == psy_ui_ALIGN_LEFT) && (position.right < clip.left)))) {
 					continue;
 				}
 				intersection = clip;				
@@ -2219,8 +2219,8 @@ void psy_ui_component_draw_children(psy_ui_Component* self, psy_ui_Graphics* g)
 					psy_ui_setorigin(g, origin);
 					/* terminate? */
 					if (self->aligner &&
-						(self->aligner->alignsorted == psy_ui_ALIGN_TOP && position.top > clip.bottom) ||
-						(self->aligner->alignsorted == psy_ui_ALIGN_LEFT && position.left > clip.right)) {
+						(((self->aligner->alignsorted == psy_ui_ALIGN_TOP) && (position.top > clip.bottom)) ||
+						((self->aligner->alignsorted == psy_ui_ALIGN_LEFT) && (position.left > clip.right)))) {
 						break;
 					}
 				}

@@ -24,7 +24,7 @@ void psy_audio_patternio_load(psy_audio_Pattern* pattern, const psy_Path* path, 
 {
 	FILE* fp;
 
-	if (fp = fopen(psy_path_full(path), "rb")) {
+	if ((fp = fopen(psy_path_full(path), "rb"))) {
 		loadblock(fp, pattern, bpl);
 	}
 	fclose(fp);
@@ -92,7 +92,7 @@ void psy_audio_patternio_save(psy_audio_Pattern* pattern, const psy_Path* path, 
 {
 	FILE* fp;
 	
-	if (fp = fopen(psy_path_full(path), "wb")) {
+	if ((fp = fopen(psy_path_full(path), "wb"))) {
 		saveblock(fp, pattern, bpl, songtracks);
 		fflush(fp);
 		fclose(fp);
