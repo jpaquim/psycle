@@ -12,12 +12,7 @@
 #include "hashtbl.h"
 #include "qsort.h"
 /* std */
-#include <assert.h>
-#include <stdio.h>
 #include <stddef.h>
-#include <stdlib.h>
-#include <string.h>
-#include <malloc.h>
 /* platform */
 #include "../../detail/portable.h"
 
@@ -1040,8 +1035,8 @@ const char* psy_property_at_str(const psy_Property* self, const char* key,
 	assert(self);
 
 	property = psy_property_at_const(self, key, PSY_PROPERTY_TYPE_NONE);
-	if (property && property->item.typ == PSY_PROPERTY_TYPE_STRING ||
-		property && property->item.typ == PSY_PROPERTY_TYPE_FONT) {
+	if ((property && (property->item.typ == PSY_PROPERTY_TYPE_STRING)) ||
+		(property && (property->item.typ == PSY_PROPERTY_TYPE_FONT))) {
 		return property->item.value.s;
 	}
 	return defaulttext;

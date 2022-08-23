@@ -24,7 +24,7 @@
 #include "gverb.h"
 #include "gverbdsp.h"
 #include <cstdlib>
-#include <malloc.h>
+// #include <malloc.h>
 #include <cmath>
 #include <cstring>
 

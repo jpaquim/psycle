@@ -233,17 +233,17 @@ int loadspecific(psy_audio_Duplicator* self, psy_audio_SongFile* songfile,
 	int16_t noteoffset[DUPLICATOR_NUMOUTPUTS];
 	int status;
 
-	// size of this part params to load
-	if (status = psyfile_read(songfile->file, &size, sizeof(size))) {
+	/* size of this part params to load */
+	if ((status = psyfile_read(songfile->file, &size, sizeof(size)))) {
 		return status;
 	}
-	// TODO: endianess
-	if (status = psyfile_read(songfile->file, &macoutput[0],
-		DUPLICATOR_NUMOUTPUTS * sizeof(int16_t))) {
+	/* TODO: endianess */
+	if ((status = psyfile_read(songfile->file, &macoutput[0],
+			DUPLICATOR_NUMOUTPUTS * sizeof(int16_t)))) {
 		return status;
 	}
-	if (status = psyfile_read(songfile->file, &noteoffset[0],
-		DUPLICATOR_NUMOUTPUTS * sizeof(int16_t))) {
+	if ((status = psyfile_read(songfile->file, &noteoffset[0],
+		DUPLICATOR_NUMOUTPUTS * sizeof(int16_t)))) {
 		return status;
 	}
 	for (i = 0; i < DUPLICATOR_NUMOUTPUTS; ++i) {
@@ -278,16 +278,16 @@ int savespecific(psy_audio_Duplicator* self, psy_audio_SongFile* songfile,
 	}
 	size = sizeof(macoutput) + sizeof(noteoffset);
 	// size of this part params to save
-	if (status = psyfile_write(songfile->file, &size, sizeof(size))) {
+	if ((status = psyfile_write(songfile->file, &size, sizeof(size)))) {
 		return status;
 	}
 	// TODO: endianess
-	if (status = psyfile_write(songfile->file, &macoutput[0], DUPLICATOR_NUMOUTPUTS *
-			sizeof(int16_t))) {
+	if ((status = psyfile_write(songfile->file, &macoutput[0],
+			DUPLICATOR_NUMOUTPUTS * sizeof(int16_t)))) {
 		return status;
 	}
-	if (status = psyfile_write(songfile->file, &noteoffset[0], DUPLICATOR_NUMOUTPUTS *
-			sizeof(int16_t))) {
+	if ((status = psyfile_write(songfile->file, &noteoffset[0],
+			DUPLICATOR_NUMOUTPUTS * sizeof(int16_t)))) {
 		return status;
 	}
 	return PSY_OK;

@@ -29,7 +29,8 @@ void psy_table_init_keysize(psy_Table* self, uintptr_t keysize)
 	assert(self);
 
 	self->arraysize = keysize;
-	self->keys = (psy_TableHashEntry**)malloc(sizeof(psy_TableHashEntry*) * self->arraysize);
+	self->keys = (psy_TableHashEntry**)malloc(sizeof(psy_TableHashEntry*) *
+		self->arraysize);
 	if (self->keys) {		
 		memset(self->keys, 0, sizeof(psy_TableHashEntry*) * self->arraysize);
 		self->count = 0;
@@ -297,7 +298,8 @@ void psy_tableiterator_init(psy_TableIterator* self, psy_Table* table)
 	self->curr = self->pos < psy_TABLEKEYS ? table->keys[self->pos] : 0;
 }
 
-uintptr_t psy_tableiterator_equal(const psy_TableIterator* lhs, const psy_TableIterator* rhs)
+uintptr_t psy_tableiterator_equal(const psy_TableIterator* lhs,
+	const psy_TableIterator* rhs)
 {
 	return lhs->curr == rhs->curr;
 }
@@ -350,9 +352,9 @@ uintptr_t psy_strhash(const char* str)
 		uintptr_t hash = 5381;
 		int c;
 		
-		while (c = *str++)
+		while ((c = *str++)) {
 			hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
-
+		}
 		return hash;
 	}
 	return psy_INDEX_INVALID;
@@ -397,13 +399,14 @@ const char* psy_dictionary_at(const psy_Dictionary* self, const char* key)
 	return NULL;
 }
 
-void psy_dictionary_set(psy_Dictionary* self, const char* key, const char* value)
+void psy_dictionary_set(psy_Dictionary* self, const char* key,
+	const char* value)
 {
 	char* old;
 
 	assert(self);
 
-	if (old = psy_table_at_strhash(&self->container, key)) {
+	if ((old = psy_table_at_strhash(&self->container, key))) {
 		if (value == old) {
 			return;
 		}
@@ -412,13 +415,14 @@ void psy_dictionary_set(psy_Dictionary* self, const char* key, const char* value
 	psy_table_insert_strhash(&self->container, key, psy_strdup(value));
 }
 
-void psy_dictionary_set_hash(psy_Dictionary* self, uintptr_t hash_key, const char* value)
+void psy_dictionary_set_hash(psy_Dictionary* self, uintptr_t hash_key,
+	const char* value)
 {
 	char* old;
 
 	assert(self);
 
-	if (old = psy_table_at(&self->container, hash_key)) {
+	if ((old = psy_table_at(&self->container, hash_key))) {
 		if (value == old) {
 			return;
 		}

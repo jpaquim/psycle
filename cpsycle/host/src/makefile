@@ -5,7 +5,7 @@ LIBDIRS = -L ../../thread/src -L ../../script/src -L ../../container/src -L ../.
 src = $(wildcard *.c)
 obj = $(src:.c=.o)
 
-LDFLAGS = -no-pie -fopenmp -lthread -laudio -llilv-0 -ldsp -laudio -lscript -lfile -lpsyui -lfontconfig -lfreetype -lGL -lX11 -lXft -lXext -lXmu -lm -llua5.4 -lpthread -ldl -lstdc++ -lcontainer
+LDFLAGS = -no-pie -Wparentheses -lthread -laudio -llilv-0 -ldsp -laudio -lscript -lfile -lpsyui -lfontconfig -lfreetype -lGL -lX11 -lXft -lXext -lXmu -lm -llua5.4 -lpthread -ldl -lstdc++ -lcontainer
 
 all: CFLAGS = -g3 -O3
 all: psycle

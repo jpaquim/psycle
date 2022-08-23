@@ -365,9 +365,9 @@ void psy_ui_button_on_mouse_down(psy_ui_Button* self, psy_ui_MouseEvent* ev)
 		psy_ui_mouseevent_stop_propagation(ev);
 	}
 	if (!psy_ui_component_input_prevented(&self->component)) {
-		if ((self->allowrightclick || psy_ui_mouseevent_button(ev) == 1) && 
-				self->click_mode == psy_ui_CLICK_MODE_PRESS ||
-				self->click_mode == psy_ui_CLICK_MODE_REPEAT) {
+		if ((self->allowrightclick || (psy_ui_mouseevent_button(ev) == 1)) && 
+				((self->click_mode == psy_ui_CLICK_MODE_PRESS) ||
+				(self->click_mode == psy_ui_CLICK_MODE_REPEAT))) {
 			psy_ui_button_emit(self, ev);
 			if (self->repeat_rate != 0) {
 				self->repeat_event = *ev;

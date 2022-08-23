@@ -207,7 +207,7 @@ int psyfile_readstring(PsyFile* self, char* pData, uint32_t maxBytes)
 			}
 		}
 		do {
-			if (status = psyfile_read(self, &c, sizeof(c)) != PSY_OK) {
+			if ((status = psyfile_read(self, &c, sizeof(c))) != PSY_OK) {
 				return status;
 			}
 		} while (c != 0);
@@ -226,14 +226,14 @@ int psyfile_writeheader(PsyFile* file, char* data, uint32_t version,
 {	
 	int status;
 
-	if (status = psyfile_write(file, data, 4)) {
+	if ((status = psyfile_write(file, data, 4))) {
 		return status;
 	}
-	if (status = psyfile_write_uint32(file, version)) {
+	if ((status = psyfile_write_uint32(file, version))) {
 		return status;
 	}
 	*pos = psyfile_getpos(file);
-	if (status = psyfile_write_uint32(file, size)) {
+	if ((status = psyfile_write_uint32(file, size))) {
 		return status;
 	}
 	return status;
@@ -255,10 +255,10 @@ int psyfile_updatesize(PsyFile* file, uint32_t startpos, uint32_t* rv_size)
 	
 	pos2 = psyfile_getpos(file); 
 	size = (pos2 - startpos - 4);
-	if (status = psyfile_seek(file, startpos) == -1) {
+	if ((status = psyfile_seek(file, startpos) == -1)) {
 		return PSY_ERRFILE;
 	}
-	if (status = psyfile_write(file, &size, sizeof(size))) {
+	if ((status = psyfile_write(file, &size, sizeof(size)))) {
 		return status;
 	}
 	if (psyfile_seek(file, pos2) == -1) {

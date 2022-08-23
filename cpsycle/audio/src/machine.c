@@ -930,7 +930,7 @@ int loadwiremapping(psy_audio_Machine* self, psy_audio_SongFile* songfile,
 		psy_audio_LegacyWire* wire;
 		int32_t wireidx;
 		
-		if (status = psyfile_read(songfile->file, &wireidx, sizeof(wireidx))) {
+		if ((status = psyfile_read(songfile->file, &wireidx, sizeof(wireidx)))) {
 			return status;
 		}
 		wire = psy_table_at(legacywiretable, wireidx);
@@ -944,7 +944,7 @@ int loadwiremapping(psy_audio_Machine* self, psy_audio_SongFile* songfile,
 			psy_audio_songfile_warn(songfile,
 				"loadwiremapping old psy3 max connections limit reached");
 		}
-		if (status = machine_readpinmapping(self, songfile, &wire->pinmapping)) {
+		if ((status = machine_readpinmapping(self, songfile, &wire->pinmapping))) {
 			return status;
 		}
 	}
@@ -976,7 +976,7 @@ int machine_readpinmapping(psy_audio_Machine* self, psy_audio_SongFile* songfile
 	int32_t j;
 	int status;
 
-	if (status = psyfile_read(songfile->file, &numpairs, sizeof(numpairs))) {
+	if ((status = psyfile_read(songfile->file, &numpairs, sizeof(numpairs)))) {
 		return status;
 	}
 	psy_audio_pinmapping_clear(pinmapping);
@@ -984,10 +984,10 @@ int machine_readpinmapping(psy_audio_Machine* self, psy_audio_SongFile* songfile
 		int16_t src;
 		int16_t dst;
 
-		if (status = psyfile_read(songfile->file, &src, sizeof(src))) {
+		if ((status = psyfile_read(songfile->file, &src, sizeof(src)))) {
 			return status;
 		}
-		if (status = psyfile_read(songfile->file, &dst, sizeof(dst))) {
+		if ((status = psyfile_read(songfile->file, &dst, sizeof(dst)))) {
 			return status;
 		}
 		psy_audio_pinmapping_connect(pinmapping, src, dst);
@@ -1005,10 +1005,10 @@ int savespecific(psy_audio_Machine* self, psy_audio_SongFile* songfile,
 		
 	numparams = (uint32_t) psy_audio_machine_numtweakparameters(self);
 	size = sizeof(numparams) + (numparams * sizeof(numparams));		
-	if (status = psyfile_write(songfile->file, &size, sizeof(size))) {
+	if ((status = psyfile_write(songfile->file, &size, sizeof(size)))) {
 		return status;
 	}
-	if (status = psyfile_write(songfile->file, &numparams, sizeof(numparams))) {
+	if ((status = psyfile_write(songfile->file, &numparams, sizeof(numparams)))) {
 		return status;
 	}
 	for (i = 0; i < numparams; ++i) {
@@ -1019,7 +1019,7 @@ int savespecific(psy_audio_Machine* self, psy_audio_SongFile* songfile,
 		if (param) {
 			scaled = (int32_t)psy_audio_machine_parameter_scaledvalue(self, param);
 		}		
-		if (status = psyfile_write_int32(songfile->file, scaled)) {
+		if ((status = psyfile_write_int32(songfile->file, scaled))) {
 			return status;
 		}
 	}
@@ -1051,7 +1051,7 @@ int savewiremapping(psy_audio_Machine* self, psy_audio_SongFile* songfile,
 			i = psy_tableiterator_key(&it);
 
 			if (i <= INT32_MAX) {
-				if (status = psyfile_write_int32(songfile->file, (int32_t)i)) {
+				if ((status = psyfile_write_int32(songfile->file, (int32_t)i))) {
 					return status;
 				}
 			} else {
@@ -1060,7 +1060,7 @@ int savewiremapping(psy_audio_Machine* self, psy_audio_SongFile* songfile,
 				return PSY_OK;
 			}
 			if (i <= INT32_MAX) {
-				if (status = psyfile_write_int32(songfile->file, (int32_t)numPairs)) {
+				if ((status = psyfile_write_int32(songfile->file, (int32_t)numPairs))) {
 					return status;
 				}
 			} else {
@@ -1073,7 +1073,7 @@ int savewiremapping(psy_audio_Machine* self, psy_audio_SongFile* songfile,
 
 				pair = (psy_audio_PinConnection*)node->entry;
 				if (pair->src <= INT16_MAX) {
-					if (status = psyfile_write_int16(songfile->file, (int16_t)pair->src)) {
+					if ((status = psyfile_write_int16(songfile->file, (int16_t)pair->src))) {
 						return status;
 					}
 				} else {
@@ -1082,7 +1082,7 @@ int savewiremapping(psy_audio_Machine* self, psy_audio_SongFile* songfile,
 					return PSY_OK;
 				}
 				if (pair->dst <= INT16_MAX) {
-					if (status = psyfile_write_int16(songfile->file, (int16_t)pair->dst)) {
+					if ((status = psyfile_write_int16(songfile->file, (int16_t)pair->dst))) {
 						return status;
 					}
 				} else {

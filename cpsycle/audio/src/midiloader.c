@@ -134,14 +134,14 @@ int midiloader_load(MidiLoader* self)
         char idstr[5];
         uint32_t chunkstart;
 
-        if (status = midiloader_readchunk(self, &mtrkchunk)) {
+        if ((status = midiloader_readchunk(self, &mtrkchunk))) {
             break;
         }
         chunkstart = psyfile_getpos(self->fp);
         memcpy(idstr, mtrkchunk.id, 4);
         idstr[4] = '\0';
         if (strcmp(idstr, "MTrk") == 0) {
-            if (status = midiloader_readtrk(self, mtrkchunk, currtrack)) {
+            if ((status = midiloader_readtrk(self, mtrkchunk, currtrack))) {
                 break;
             }
             ++currtrack;
@@ -160,18 +160,18 @@ int midiloader_readmthd(MidiLoader* self)
     int status;
     
     self->fp = self->songfile->file;
-    if (status = midiloader_readchunk(self, &mthdchunk)) {
+    if ((status = midiloader_readchunk(self, &mthdchunk))) {
         return status;
     }
-    if (status = psyfile_read(self->fp, &self->mthd.format, 2)) {
+    if ((status = psyfile_read(self->fp, &self->mthd.format, 2))) {
         return status;
     }
     self->mthd.format = swapshort(self->mthd.format);
-    if (status = psyfile_read(self->fp, &self->mthd.numtracks, 2)) {
+    if ((status = psyfile_read(self->fp, &self->mthd.numtracks, 2))) {
         return status;
     }
     self->mthd.numtracks = swapshort(self->mthd.numtracks);
-    if (status = psyfile_read(self->fp, &self->mthd.division, 2)) {
+    if ((status = psyfile_read(self->fp, &self->mthd.division, 2))) {
         return status;
     }
     self->mthd.division = swapshort(self->mthd.division);
@@ -186,7 +186,7 @@ int midiloader_readtrk(MidiLoader* self, MCHUNK chunk, uintptr_t trackidx)
     status = PSY_OK;
     eoftrack = FALSE;       
     midiloader_appendtrack(self, trackidx);
-    if (status = midiloader_readtrackevents(self, chunk, trackidx)) {
+    if ((status = midiloader_readtrackevents(self, chunk, trackidx))) {
         return status;
     }
     if (self->currtrack.pattern) {
@@ -238,15 +238,15 @@ int midiloader_readtrackevents(MidiLoader* self, MCHUNK chunk, uintptr_t trackid
     eoftrack = FALSE;
     currentpos = psyfile_getpos(self->fp);
     /* insert events */
-    while (!eoftrack && !psyfile_eof(self->fp) ||
+    while ((!eoftrack && !psyfile_eof(self->fp)) ||
             (psyfile_getpos(self->fp) - currentpos < chunk.length)) {
         uint32_t ln;
         uint32_t hn;
 
-        if (status = midiloader_readdeltatime(self)) {
+        if ((status = midiloader_readdeltatime(self))) {
             return status;
         }        
-        if (status = midiloader_readstatusbyte(self)) {
+        if ((status = midiloader_readstatusbyte(self))) {
             return status;
         }
         ln = self->currtrack.runningstatus & 0x0F;
@@ -308,7 +308,7 @@ int midiloader_readstatusbyte(MidiLoader* self)
     uint8_t statusbyte;
     int status;
 
-    if (status = psyfile_read(self->fp, &statusbyte, 1)) {
+    if ((status = psyfile_read(self->fp, &statusbyte, 1))) {
         return status;
     }
     if (statusbyte < 0x80) {        
@@ -327,7 +327,7 @@ int midiloader_readdeltatime(MidiLoader* self)
     uint32_t deltatime;
     psy_dsp_big_beat_t offset;    
 
-    if (status = readvarlen(self->fp, &deltatime)) {
+    if ((status = readvarlen(self->fp, &deltatime))) {
         return status;
     }
     offset = deltatime / (psy_dsp_big_beat_t)self->mthd.division;
@@ -342,10 +342,10 @@ int midiloader_readnoteon(MidiLoader* self)
     uint8_t vol;    
     psy_audio_PatternEvent ev;
 
-    if (status = midiloader_readbyte1(self, &note)) {
+    if ((status = midiloader_readbyte1(self, &note))) {
         return status;
     }
-    if (status = psyfile_read(self->fp, &vol, 1)) {
+    if ((status = psyfile_read(self->fp, &vol, 1))) {
         return status;
     }
     if (vol == 0) {
@@ -369,10 +369,10 @@ int midiloader_readnoteoff(MidiLoader* self)
     uint8_t note;
     uint8_t vol;    
 
-    if (status = midiloader_readbyte1(self, &note)) {
+    if ((status = midiloader_readbyte1(self, &note))) {
         return status;
     }
-    if (status = psyfile_read(self->fp, &vol, 1)) {
+    if ((status = psyfile_read(self->fp, &vol, 1))) {
         return status;
     }
     midiloader_marknoteoff(self, note);
@@ -399,10 +399,10 @@ int midiloader_readpolyphonicpressure(MidiLoader* self)
     uint8_t byte1;
     uint8_t byte2;        
 
-    if (status = midiloader_readbyte1(self, &byte1)) {
+    if ((status = midiloader_readbyte1(self, &byte1))) {
         return status;
     }
-    if (status = psyfile_read(self->fp, &byte2, 1)) {
+    if ((status = psyfile_read(self->fp, &byte2, 1))) {
         return status;
     }
     return PSY_OK;
@@ -417,10 +417,10 @@ int midiloader_readcontroller(MidiLoader* self)
     psy_audio_PatternNode* node;
     psy_audio_PatternNode* prev;
     
-    if (status = midiloader_readbyte1(self, &controller)) {
+    if ((status = midiloader_readbyte1(self, &controller))) {
         return status;
     }
-    if (status = psyfile_read(self->fp, &value, 1)) {
+    if ((status = psyfile_read(self->fp, &value, 1))) {
         return status;
     }
     psy_audio_patternevent_init(&ev);
@@ -450,7 +450,7 @@ int midiloader_readprogramchange(MidiLoader* self)
     int status;
     uint8_t byte1;    
 
-    if (status = midiloader_readbyte1(self, &byte1)) {
+    if ((status = midiloader_readbyte1(self, &byte1))) {
         return status;
     }    
     return PSY_OK;
@@ -461,7 +461,7 @@ int midiloader_readchannelpressure(MidiLoader* self)
     int status;
     uint8_t byte1;
 
-    if (status = midiloader_readbyte1(self, &byte1)) {
+    if ((status = midiloader_readbyte1(self, &byte1))) {
         return status;
     }
     return PSY_OK;
@@ -473,10 +473,10 @@ int midiloader_readpitchbend(MidiLoader* self)
     uint8_t byte1;
     uint8_t byte2;    
 
-    if (status = midiloader_readbyte1(self, &byte1)) {
+    if ((status = midiloader_readbyte1(self, &byte1))) {
         return status;
     }
-    if (status = psyfile_read(self->fp, &byte2, 1)) {
+    if ((status = psyfile_read(self->fp, &byte2, 1))) {
         return status;
     }    
     return PSY_OK;
@@ -490,7 +490,7 @@ int midiloader_readmetaevent(MidiLoader* self, bool* rv_eoftrack)
     
     status = PSY_OK;
     *rv_eoftrack = FALSE;
-    if (status = midiloader_readbyte1(self, &byte1)) {
+    if ((status = midiloader_readbyte1(self, &byte1))) {
         return status;
     }
     switch (byte1) {
@@ -558,7 +558,7 @@ int midiloader_readmeta_text(MidiLoader* self)
     int status;
     char_dyn_t* text;
 
-    if (status = midiloader_readvarlentext(self->fp, &text)) {
+    if ((status = midiloader_readvarlentext(self->fp, &text))) {
         return status;
     }
     psy_audio_song_set_comments(self->songfile->song, text);
@@ -571,7 +571,7 @@ int midiloader_readmeta_copyright(MidiLoader* self)
     int status;
     char_dyn_t* text;
 
-    if (status = midiloader_readvarlentext(self->fp, &text)) {
+    if ((status = midiloader_readvarlentext(self->fp, &text))) {
         return status;
     }
     psy_audio_song_set_credits(self->songfile->song, text);
@@ -584,7 +584,7 @@ int midiloader_readmeta_sequencetrackname(MidiLoader* self)
     int status;
     char_dyn_t* text;    
 
-    if (status = midiloader_readvarlentext(self->fp, &text)) {
+    if ((status = midiloader_readvarlentext(self->fp, &text))) {
         return status;
     }    
     psy_audio_sequencetrack_set_name(self->currtrack.track, text);
@@ -598,7 +598,7 @@ int midiloader_readmeta_instrument(MidiLoader* self)
     int status;
     char_dyn_t* text;
 
-    if (status = midiloader_readvarlentext(self->fp, &text)) {
+    if ((status = midiloader_readvarlentext(self->fp, &text))) {
         return status;
     }
     free(text);
@@ -610,7 +610,7 @@ int midiloader_readmeta_lyric(MidiLoader* self)
     int status;
     char_dyn_t* text;
 
-    if (status = midiloader_readvarlentext(self->fp, &text)) {
+    if ((status = midiloader_readvarlentext(self->fp, &text))) {
         return status;
     }
     free(text);
@@ -622,7 +622,7 @@ int midiloader_readmeta_marker(MidiLoader* self)
     int status;
     char_dyn_t* text;
 
-    if (status = midiloader_readvarlentext(self->fp, &text)) {
+    if ((status = midiloader_readvarlentext(self->fp, &text))) {
         return status;
     }
     free(text);
@@ -634,7 +634,7 @@ int midiloader_readmeta_cuepoint(MidiLoader* self)
     int status;
     char_dyn_t* text;
 
-    if (status = midiloader_readvarlentext(self->fp, &text)) {
+    if ((status = midiloader_readvarlentext(self->fp, &text))) {
         return status;
     }
     free(text);
@@ -646,7 +646,7 @@ int midiloader_readmeta_programpatchname(MidiLoader* self)
     int status;
     char_dyn_t* text;
 
-    if (status = midiloader_readvarlentext(self->fp, &text)) {
+    if ((status = midiloader_readvarlentext(self->fp, &text))) {
         return status;
     }
     free(text);
@@ -658,7 +658,7 @@ int midiloader_readmeta_deviceportname(MidiLoader* self)
     int status;
     char_dyn_t* text;
 
-    if (status = midiloader_readvarlentext(self->fp, &text)) {
+    if ((status = midiloader_readvarlentext(self->fp, &text))) {
         return status;
     }
     free(text);
@@ -673,7 +673,7 @@ int midiloader_readmeta_midiport(MidiLoader* self)
     if (psyfile_skip(self->fp, 1) == -1) {
         return PSY_ERRFILE;
     }
-    if (status = psyfile_read(self->fp, &pp, 1)) {
+    if ((status = psyfile_read(self->fp, &pp, 1))) {
         return PSY_ERRFILE;
     }
     return PSY_OK;
@@ -699,13 +699,13 @@ int midiloader_readmeta_tempo(MidiLoader* self)
     if (psyfile_skip(self->fp, 1) == -1) {
         return PSY_ERRFILE;
     }
-    if (status = psyfile_read(self->fp, &tt1, 1)) {
+    if ((status = psyfile_read(self->fp, &tt1, 1))) {
         return status;
     }
-    if (status = psyfile_read(self->fp, &tt2, 1)) {
+    if ((status = psyfile_read(self->fp, &tt2, 1))) {
         return status;
     }
-    if (status = psyfile_read(self->fp, &tt3, 1)) {
+    if ((status = psyfile_read(self->fp, &tt3, 1))) {
         return status;
     }
     microsecsperquarternote = tt3 | (tt2 << 8) | (tt1 << 16);
@@ -741,19 +741,19 @@ int midiloader_readmeta_smpte(MidiLoader* self)
     if (psyfile_skip(self->fp, 1) == -1) {
         return PSY_ERRFILE;
     }
-    if (status = psyfile_read(self->fp, &hr, 1)) {
+    if ((status = psyfile_read(self->fp, &hr, 1))) {
         return status;
     }
-    if (status = psyfile_read(self->fp, &mn, 1)) {
+    if ((status = psyfile_read(self->fp, &mn, 1))) {
         return status;
     }
-    if (status = psyfile_read(self->fp, &se, 1)) {
+    if ((status = psyfile_read(self->fp, &se, 1))) {
         return status;
     }
-    if (status = psyfile_read(self->fp, &fr, 1)) {
+    if ((status = psyfile_read(self->fp, &fr, 1))) {
         return status;
     }
-    if (status = psyfile_read(self->fp, &ff, 1)) {
+    if ((status = psyfile_read(self->fp, &ff, 1))) {
         return status;
     }
     return PSY_OK;
@@ -770,16 +770,16 @@ int midiloader_readmeta_timesignature(MidiLoader* self)
     if (psyfile_skip(self->fp, 1) == -1) {
         return PSY_ERRFILE;
     }
-    if (status = psyfile_read(self->fp, &nn, 1)) {
+    if ((status = psyfile_read(self->fp, &nn, 1))) {
         return status;
     }
-    if (status = psyfile_read(self->fp, &dd, 1)) {
+    if ((status = psyfile_read(self->fp, &dd, 1))) {
         return status;
     }
-    if (status = psyfile_read(self->fp, &cc, 1)) {
+    if ((status = psyfile_read(self->fp, &cc, 1))) {
         return status;
     }
-    if (status = psyfile_read(self->fp, &bb, 1)) {
+    if ((status = psyfile_read(self->fp, &bb, 1))) {
         return status;
     }
     return PSY_OK;
@@ -794,10 +794,10 @@ int midiloader_readmeta_keysignature(MidiLoader* self)
     if (psyfile_skip(self->fp, 1) == -1) {
         return PSY_ERRFILE;
     }
-    if (status = psyfile_read(self->fp, &sf, 1)) {
+    if ((status = psyfile_read(self->fp, &sf, 1))) {
         return status;
     }
-    if (status = psyfile_read(self->fp, &mi, 1)) {
+    if ((status = psyfile_read(self->fp, &mi, 1))) {
         return status;
     }
     return PSY_OK;
@@ -808,7 +808,7 @@ int midiloader_readmeta_properietaryevent(MidiLoader* self)
     int status;
     uint32_t length;
 
-    if (status = readvarlen(self->fp, &length)) {
+    if ((status = readvarlen(self->fp, &length))) {
         return status;
     }
     if (psyfile_skip(self->fp, length) == -1) {
@@ -824,10 +824,10 @@ int midiloader_readchunk(MidiLoader* self, MCHUNK* rv)
 
     assert(rv);
     
-    if (status = psyfile_read(self->fp, &rv->id, sizeof(rv->id))) {
+    if ((status = psyfile_read(self->fp, &rv->id, sizeof(rv->id)))) {
         return status;
     }
-    if (status = psyfile_read(self->fp, &rv->length, sizeof(rv->length))) {
+    if ((status = psyfile_read(self->fp, &rv->length, sizeof(rv->length)))) {
         return status;
     }
     rv->length = swaplong(rv->length);
@@ -846,7 +846,7 @@ int midiloader_readbyte1(MidiLoader* self, uint8_t* rv)
 
     if (self->currtrack.hasrunningstatus) {
         *rv = self->currtrack.byte1;
-    } else if (status = psyfile_read(self->fp, rv, 1)) {
+    } else if ((status = psyfile_read(self->fp, rv, 1))) {
         return status;
     }
     return PSY_OK;
@@ -915,7 +915,7 @@ int midiloader_readvarlentext(PsyFile* fp, char_dyn_t** rv)
 
     assert(rv);
     *rv = NULL;
-    if (status = readvarlen(fp, &length)) {
+    if ((status = readvarlen(fp, &length))) {
         return status;
     }
     if (length) {        
@@ -928,7 +928,7 @@ int midiloader_readvarlentext(PsyFile* fp, char_dyn_t** rv)
 
             memset(*rv, 0, size);
             for (i = 0; i < length; ++i) {
-                if (status = psyfile_read(fp, &((*rv)[i]), 1)) {
+                if ((status = psyfile_read(fp, &((*rv)[i]), 1))) {
                     free(*rv);
                     return status;
                 }
@@ -948,17 +948,15 @@ int readvarlen(PsyFile* fp, uint32_t* rv)
     unsigned char c;
     int status;
 
-    if (status = psyfile_read(fp, &temp, 1)) {
+    if ((status = psyfile_read(fp, &temp, 1))) {
         *rv = 0;
         return status;
     }
     value = temp;
-    if (value & 0x80)
-    {
+    if (value & 0x80) {
         value &= 0x7F;
-        do
-        {
-            if (status = psyfile_read(fp, &temp, 1)) {
+        do {
+            if ((status = psyfile_read(fp, &temp, 1))) {
                 return status;
             }
             value = (value << 7) + ((c = temp) & 0x7F);

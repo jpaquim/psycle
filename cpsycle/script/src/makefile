@@ -7,7 +7,7 @@ libscript.a: $(obj)
 	ar rsv $@ $^
 
 %.o: %.c
-	$(CC) -O2 -g3 $(inc) -c $(src)
+	$(CC) -O2 -g3 -Wparentheses $(inc) -c $(src)
 
 .PHONY: clean	
 clean:

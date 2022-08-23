@@ -113,7 +113,7 @@ int psy_audio_songfile_load(psy_audio_SongFile* self, const char* filename)
 			psy_audio_PSY3Loader psy3loader;
 
 			psy_audio_psy3loader_init(&psy3loader, self);
-			if (status = psy_audio_psy3loader_load(&psy3loader)) {
+			if ((status = psy_audio_psy3loader_load(&psy3loader))) {
 				psy_audio_songfile_errfile(self);
 			}
 			psy_audio_psy3loader_dispose(&psy3loader);
@@ -143,7 +143,7 @@ int psy_audio_songfile_load(psy_audio_SongFile* self, const char* filename)
 
 			psyfile_seek(self->file, 0);
 			itmodule2_init(&itmodule, self);
-			if (status = itmodule2_load(&itmodule)) {
+			if ((status = itmodule2_load(&itmodule))) {
 				psy_audio_songfile_errfile(self);
 			}
 			itmodule2_dispose(&itmodule);			
@@ -152,7 +152,7 @@ int psy_audio_songfile_load(psy_audio_SongFile* self, const char* filename)
 
 			psyfile_seek(self->file, 0);
 			midiloader_init(&midifile, self);			
-			if (status = midiloader_load(&midifile)) {			
+			if ((status = midiloader_load(&midifile))) {
 				psy_audio_songfile_errfile(self);
 			}
 			midiloader_dispose(&midifile);			
@@ -165,7 +165,7 @@ int psy_audio_songfile_load(psy_audio_SongFile* self, const char* filename)
 
 				psyfile_seek(self->file, 0);
 				xmsongloader_init(&loader, self);
-				if (status = xmsongloader_load(&loader)) {
+				if ((status = xmsongloader_load(&loader))) {
 					psy_audio_songfile_errfile(self);
 				}
 				xmsongloader_dispose(&loader);				
@@ -174,7 +174,7 @@ int psy_audio_songfile_load(psy_audio_SongFile* self, const char* filename)
 
 				psyfile_seek(self->file, 0);
 				modsongloader_init(&loader, self);
-				if (status = modsongloader_load(&loader)) {
+				if ((status = modsongloader_load(&loader))) {
 					psy_audio_songfile_errfile(self);
 				}				
 				modsongloader_dispose(&loader);				
@@ -211,7 +211,7 @@ int psy_audio_songfile_save(psy_audio_SongFile* self, const char* filename)
 		psy_audio_PSY3Saver psy3saver;
 
 		psy_audio_psy3saver_init(&psy3saver, self);
-		if (status = psy_audio_psy3saver_save(&psy3saver)) {
+		if ((status = psy_audio_psy3saver_save(&psy3saver))) {
 			psy_audio_songfile_errfile(self);
 		}
 		psy_audio_psy3saver_dispose(&psy3saver);
@@ -236,7 +236,7 @@ int psy_audio_songfile_exportmodule(psy_audio_SongFile* self, const char* filena
 		XMSongExport moduleexport;
 
 		xmsongexport_init(&moduleexport, self);
-		if (status = xmsongexport_exportsong(&moduleexport)) {
+		if ((status = xmsongexport_exportsong(&moduleexport))) {
 			psy_audio_songfile_errfile(self);
 		}
 		xmsongexport_dispose(&moduleexport);
@@ -261,7 +261,7 @@ int psy_audio_songfile_export_midi_file(psy_audio_SongFile* self, const char* fi
 		psy_audio_MidiSongExport moduleexport;
 
 		psy_audio_midisongexport_init(&moduleexport, self);
-		if (status = psy_audio_midisongexport_save(&moduleexport)) {
+		if ((status = psy_audio_midisongexport_save(&moduleexport))) {
 			psy_audio_songfile_errfile(self);
 		}
 		psy_audio_midisongexport_dispose(&moduleexport);
@@ -286,7 +286,7 @@ int psy_audio_songfile_export_ly_file(psy_audio_SongFile* self, const char* file
 		psy_audio_LySongExport lyexport;
 
 		psy_audio_lysongexport_init(&lyexport, self);
-		if (status = psy_audio_lysongexport_save(&lyexport)) {
+		if ((status = psy_audio_lysongexport_save(&lyexport))) {
 			psy_audio_songfile_errfile(self);
 		}
 		psy_audio_lysongexport_dispose(&lyexport);
@@ -335,7 +335,7 @@ int psy_audio_songfile_loadinstrument(psy_audio_SongFile* self, const char* file
 		XMSongLoader xmsongloader;
 
 		xmsongloader_init(&xmsongloader, self);
-		if (status = xmsongloader_loadxi(&xmsongloader, index)) {
+		if ((status = xmsongloader_loadxi(&xmsongloader, index))) {
 			psy_audio_songfile_errfile(self);
 		}
 		xmsongloader_dispose(&xmsongloader);
@@ -343,7 +343,7 @@ int psy_audio_songfile_loadinstrument(psy_audio_SongFile* self, const char* file
 		psy_audio_PSY3Loader psy3songloader;
 
 		psy_audio_psy3loader_init(&psy3songloader, self);
-		if (status = psy_audio_psy3loader_loadpsins(&psy3songloader, index)) {
+		if ((status = psy_audio_psy3loader_loadpsins(&psy3songloader, index))) {
 			psy_audio_songfile_errfile(self);
 		}
 		psy_audio_psy3loader_dispose(&psy3songloader);
@@ -351,7 +351,7 @@ int psy_audio_songfile_loadinstrument(psy_audio_SongFile* self, const char* file
 		psy_audio_EXS24Loader instloader;
 
 		psy_audio_exs24loader_init(&instloader, self);
-		if (status = psy_audio_exs24loader_load(&instloader)) {
+		if ((status = psy_audio_exs24loader_load(&instloader))) {
 			psy_audio_songfile_errfile(self);
 		}
 		psy_audio_exs24loader_dispose(&instloader);

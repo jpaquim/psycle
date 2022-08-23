@@ -588,7 +588,7 @@ int loadspecific(psy_audio_Plugin* self, psy_audio_SongFile* songfile,
 
 	clearparameters(self);
 	// size of whole structure
-	if (status = psyfile_read(songfile->file, &size, sizeof(size))) {
+	if ((status = psyfile_read(songfile->file, &size, sizeof(size)))) {
 		return status;
 	}
 	if(size) {
@@ -596,14 +596,14 @@ int loadspecific(psy_audio_Plugin* self, psy_audio_SongFile* songfile,
 		uint32_t i;
 
 		// size of vars
-		if (status = psyfile_read(songfile->file, &numparams, sizeof(numparams))) {
+		if ((status = psyfile_read(songfile->file, &numparams, sizeof(numparams)))) {
 			return status;
 		}
 		for (i = 0; i < numparams; ++i) {
 			int32_t temp;
 			psy_audio_MachineParam* param;
 			
-			if (status = psyfile_read(songfile->file, &temp, sizeof(temp))) {
+			if ((status = psyfile_read(songfile->file, &temp, sizeof(temp)))) {
 				return status;
 			}
 			if (i < numparameters(self)) {
@@ -632,7 +632,7 @@ int loadspecific(psy_audio_Plugin* self, psy_audio_SongFile* songfile,
 			// This way we guarantee that the plugin will have enough bytes,
 			// even if it does not fit what it reads.
 			pData = (unsigned char*)malloc(psy_max(size,size2));
-			if (status = psyfile_read(songfile->file, pData, size)) { // Read internal data.			
+			if ((status = psyfile_read(songfile->file, pData, size))) { // Read internal data.
 				free(pData);
 				return status;
 			}
@@ -656,10 +656,10 @@ int savespecific(psy_audio_Plugin* self, psy_audio_SongFile* songfile,
 		psy_audio_plugin_base(self));
 	size2 = mi_getdatasize(self->mi);
 	size = size2 + sizeof(count) + sizeof(int) * count;
-	if (status = psyfile_write(songfile->file, &size, sizeof(size))) {
+	if ((status = psyfile_write(songfile->file, &size, sizeof(size)))) {
 		return status;
 	}
-	if (status = psyfile_write(songfile->file, &count, sizeof(count))) {
+	if ((status = psyfile_write(songfile->file, &count, sizeof(count)))) {
 		return status;
 	}
 	for (i = 0; i < count; ++i) {
@@ -671,7 +671,7 @@ int savespecific(psy_audio_Plugin* self, psy_audio_SongFile* songfile,
 			scaled = psy_audio_machine_parameter_scaledvalue(
 				psy_audio_plugin_base(self), param);			
 		}
-		if (status = psyfile_write_int32(songfile->file, (int32_t)scaled)) {
+		if ((status = psyfile_write_int32(songfile->file, (int32_t)scaled))) {
 			return status;
 		}
 	}
@@ -680,7 +680,7 @@ int savespecific(psy_audio_Plugin* self, psy_audio_SongFile* songfile,
 
 		data = malloc(size2);
 		mi_getdata(self->mi, data);
-		if (status = psyfile_write(songfile->file, data, size2)) { //data chunk		
+		if ((status = psyfile_write(songfile->file, data, size2))) { // data chunk
 			free(data);
 			return status;
 		}

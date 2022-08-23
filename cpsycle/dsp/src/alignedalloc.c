@@ -9,7 +9,6 @@
 #include "alignedalloc.h"
 /* std */
 #include <assert.h>
-#include <malloc.h>
 #include <stdio.h>
 #include <stdlib.h>
 /* types */

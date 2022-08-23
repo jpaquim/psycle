@@ -56,13 +56,13 @@ int psy_audio_lysongexport_save(psy_audio_LySongExport* self)
 {	
 	int status;
 	
-	if (status = psy_audio_lysongexport_write_header(self)) {
+	if ((status = psy_audio_lysongexport_write_header(self))) {
 		return status;
 	}	
-	if (status = psy_audio_lysongexport_write_songinfo(self)) {
+	if ((status = psy_audio_lysongexport_write_songinfo(self))) {
 		return status;
 	}
-	if (status = psy_audio_lysongexport_write_seqd(self)) {
+	if ((status = psy_audio_lysongexport_write_seqd(self))) {
 		return status;
 	}
 	return PSY_OK;

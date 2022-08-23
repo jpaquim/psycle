@@ -7,7 +7,7 @@ libdsp.a: $(obj)
 	ar rsv $@ $^
 
 %.o: %.c
-	$(CC) -O2 $(inc) -g -fPIC -fopenmp -c $(src) 
+	$(CC) -O2 $(inc) -g -fPIC -Wparentheses -c $(src) 
 
 .PHONY: clean	
 clean:

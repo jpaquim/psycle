@@ -58,13 +58,13 @@ int xmsongexport_exportsong(XMSongExport* self)
 	assert(self->songfile->song);
 	assert(self->songfile->file);
 
-	if (status = xmsongexport_writesongheader(self)) {
+	if ((status = xmsongexport_writesongheader(self))) {
 		return PSY_ERRFILE;
 	}
-	if (status = xmsongexport_savepatterns(self)) {
+	if ((status = xmsongexport_savepatterns(self))) {
 		return PSY_ERRFILE;
 	}
-	if (status = xmsongexport_saveinstruments(self)) {
+	if ((status = xmsongexport_saveinstruments(self))) {
 		return PSY_ERRFILE;
 	}
 	return PSY_OK;
@@ -116,7 +116,7 @@ int xmsongexport_writesongheader(XMSongExport* self)
 	//If there is a sampler machine, we have to take the samples into account.
 	samInstruments = (int32_t)psy_audio_instruments_size(&self->song->instruments, 0); //0; // (hasSampler) ? song.GetHighestInstrumentIndex() + 1 : 0;
 
-	if (status = psyfile_write(self->fp, XM_HEADER, 17)) { //ID text
+	if ((status = psyfile_write(self->fp, XM_HEADER, 17))) { //ID text
 		return status;
 	}
 	// Module name
@@ -129,21 +129,21 @@ int xmsongexport_writesongheader(XMSongExport* self)
 	for (i = 3; i < 20 && i < psy_strlen(psy_audio_song_title(self->song)); ++i) {
 		modulename[i] = psy_audio_song_title(self->song)[i];
 	}	
-	if (status = psyfile_write(self->fp, modulename, sizeof(modulename))) {
+	if ((status = psyfile_write(self->fp, modulename, sizeof(modulename)))) {
 		return status;
 	}
 	// The hex  value  0x1A  in  a  normal  XM  file or 0x00  in  a  Stripped  on	
 	temp = 0x1A;
-	if (status = psyfile_write(self->fp, &temp, 1)) {
+	if ((status = psyfile_write(self->fp, &temp, 1))) {
 		return status;
 	}
 	// Tracker name
-	if (status = psyfile_write(self->fp, "FastTracker v2.00   ", 20)) {
+	if ((status = psyfile_write(self->fp, "FastTracker v2.00   ", 20))) {
 		return status;
 	}
 	// Version number	
 	temp = 0x0104;
-	if (status = psyfile_write(self->fp, &temp, 2)) {
+	if ((status = psyfile_write(self->fp, &temp, 2))) {
 		return status;
 	}
 
@@ -181,7 +181,7 @@ int xmsongexport_savepatterns(XMSongExport* self)
 	int status;
 
 	for (i = 0; i < self->m_Header.patterns; ++i) {
-		if (status = xmsongexport_savesinglepattern(self, i)) {
+		if ((status = xmsongexport_savesinglepattern(self, i))) {
 			return status;
 		}
 	}
@@ -215,7 +215,7 @@ int xmsongexport_savesinglepattern(XMSongExport* self, int patIdx)
 	ptHeader.rows = psy_min(256, lines);
 	//ptHeader.packedsize = 0; implicit from memset.
 
-	if (status = psyfile_write(self->fp, &ptHeader, sizeof(ptHeader))) {
+	if ((status = psyfile_write(self->fp, &ptHeader, sizeof(ptHeader)))) {
 		return status;
 	}
 	currentpos = psyfile_getpos(self->fp);
@@ -267,7 +267,7 @@ int xmsongexport_savesinglepattern(XMSongExport* self, int patIdx)
 						pData->_note == psy_audio_NOTECOMMANDS_TWEAKSLIDE) {
 					unsigned char compressed = 0x80;
 
-					if (status = psyfile_write(self->fp, &compressed, 1)) {
+					if ((status = psyfile_write(self->fp, &compressed, 1))) {
 						free(ppattern);
 						return status;
 					}
@@ -277,26 +277,26 @@ int xmsongexport_savesinglepattern(XMSongExport* self, int patIdx)
 						unsigned char compressed = 0x80 + 2 + 8 + 16;
 						unsigned char val = XMCMD_MIDI_MACRO;
 
-						if (status = psyfile_write(self->fp, &compressed, 1)) {
+						if ((status = psyfile_write(self->fp, &compressed, 1))) {
 							free(ppattern);
 							return status;						
 						}
-						if (status = psyfile_write(self->fp, &pData->_inst, 1)) {
+						if ((status = psyfile_write(self->fp, &pData->_inst, 1))) {
 							free(ppattern);
 							return status;
 						}
-						if (status = psyfile_write(self->fp, &val, 1)) {
+						if ((status = psyfile_write(self->fp, &val, 1))) {
 							free(ppattern);
 							return status;
 						}
-						if (status = psyfile_write(self->fp, &pData->_cmd, 1)) {
+						if ((status = psyfile_write(self->fp, &pData->_cmd, 1))) {
 							free(ppattern);
 							return status;
 						}
 					} else {
 					unsigned char compressed = 0x80;
 
-					if (status = psyfile_write(self->fp, &compressed, 1)) {
+					if ((status = psyfile_write(self->fp, &compressed, 1))) {
 						free(ppattern);
 						return status;
 					}
@@ -370,37 +370,37 @@ int xmsongexport_savesinglepattern(XMSongExport* self, int patIdx)
 					+ (bWriteType << 3) + (bWriteParam << 4);
 
 				if (compressed != 0x9F) {
-					if (status = psyfile_write(self->fp, &compressed, 1)) { // 0x9F means to write everything.
+					if ((status = psyfile_write(self->fp, &compressed, 1))) { // 0x9F means to write everything.
 						free(ppattern);
 						return status;
 					}
 				}
 				if (bWriteNote) {
-					if (status = psyfile_write(self->fp, &note, 1)) {
+					if ((status = psyfile_write(self->fp, &note, 1))) {
 						free(ppattern);
 						return status;
 					}
 				}
 				if (bWriteInstr) {
-					if (status = psyfile_write(self->fp, &instr, 1)) {
+					if ((status = psyfile_write(self->fp, &instr, 1))) {
 						free(ppattern);
 						return status;
 					}
 				}
 				if (bWriteVol) {
-					if (status = psyfile_write(self->fp, &vol, 1)) {
+					if ((status = psyfile_write(self->fp, &vol, 1))) {
 						free(ppattern);
 						return status;
 					}					
 				}
 				if (bWriteType) {
-					if (status = psyfile_write(self->fp, &type, 1)) {
+					if ((status = psyfile_write(self->fp, &type, 1))) {
 						free(ppattern);
 						return status;
 					}
 				}
 				if (bWriteParam) {
-					if (status = psyfile_write(self->fp, &param, 1)) {
+					if ((status = psyfile_write(self->fp, &param, 1))) {
 						free(ppattern);
 						return status;
 					}
@@ -412,14 +412,14 @@ int xmsongexport_savesinglepattern(XMSongExport* self, int patIdx)
 			free(ppattern);
 			return status;
 		}
-		if (status = psyfile_write(self->fp, &ptHeader, sizeof(ptHeader))) {
+		if ((status = psyfile_write(self->fp, &ptHeader, sizeof(ptHeader)))) {
 			free(ppattern);
 			return status;
 		}
 		psyfile_skip(self->fp, ptHeader.packedsize);		
 	}	
 	else {
-		if (status = psyfile_write(self->fp, &ptHeader, sizeof(ptHeader))) {
+		if ((status = psyfile_write(self->fp, &ptHeader, sizeof(ptHeader)))) {
 			free(ppattern);
 			ppattern = NULL;
 			return status;
@@ -736,7 +736,7 @@ int xmsongexport_saveemptyinstrument(XMSongExport* self, const char* name)
 	insHeader.size = sizeof(insHeader);
 	strncpy(insHeader.name, name, 22); //Names are not null terminated
 	//insHeader.samples = 0; Implicit by memset
-	if (status = psyfile_write(self->fp, &insHeader, sizeof(insHeader))) {
+	if ((status = psyfile_write(self->fp, &insHeader, sizeof(insHeader)))) {
 		return status;
 	}
 	return PSY_OK;
@@ -766,7 +766,7 @@ int xmsongexport_savesampulseinstrument(XMSongExport* self, int instIdx)
 
 		insHeader.size = sizeof(insHeader);
 		//insHeader.samples = 0; Implicit by memset
-		if (status = psyfile_write(self->fp, &insHeader, sizeof(insHeader))) {
+		if ((status = psyfile_write(self->fp, &insHeader, sizeof(insHeader)))) {
 			return PSY_ERRFILE;
 		}
 	} else {
@@ -775,29 +775,29 @@ int xmsongexport_savesampulseinstrument(XMSongExport* self, int instIdx)
 
 		insHeader.size = sizeof(insHeader) + sizeof(XMSAMPLEHEADER);
 		insHeader.samples = (uint16_t)psy_audio_samples_size(&self->song->samples, instIdx);
-		if (status = psyfile_write(self->fp, &insHeader, sizeof(insHeader))) {
+		if ((status = psyfile_write(self->fp, &insHeader, sizeof(insHeader)))) {
 			return PSY_ERRFILE;
 		}
 		xmsongexport_setsampulseenvelopes(self, instIdx, &samphead);
 		samphead.volfade = (uint16_t)
 			(floor(psy_audio_instrument_volumefadespeed(inst) * 32768.0f));
 		samphead.shsize = sizeof(XMSAMPLESTRUCT);
-		if (status = psyfile_write(self->fp, &samphead, sizeof(samphead))) {
+		if ((status = psyfile_write(self->fp, &samphead, sizeof(samphead)))) {
 			return PSY_ERRFILE;
 		}
 		for (ite = psy_audio_samples_groupbegin(&self->song->samples, instIdx);
 				!psy_tableiterator_equal(&ite, psy_table_end());
 				psy_tableiterator_inc(&ite)) {
-			if (status = xmsongexport_savesampleheader(self, instIdx,
-					(int)psy_tableiterator_key(&ite))) {
+			if ((status = xmsongexport_savesampleheader(self, instIdx,
+					(int)psy_tableiterator_key(&ite)))) {
 				return status;
 			}
 		}
 		for (ite = psy_audio_samples_groupbegin(&self->song->samples, instIdx);
 				!psy_tableiterator_equal(&ite, psy_table_end());
 				psy_tableiterator_inc(&ite)) {
-			if (status = xmsongexport_savesampledata(self, instIdx,
-					(int)psy_tableiterator_key(&ite))) {
+			if ((status = xmsongexport_savesampledata(self, instIdx,
+					(int)psy_tableiterator_key(&ite)))) {
 				return status;
 			}
 		}		
@@ -826,14 +826,14 @@ int xmsongexport_savesamplerinstrument(XMSongExport* self, int instIdx)
 
 		insHeader.size = sizeof(insHeader) + sizeof(XMSAMPLEHEADER);
 		insHeader.samples = 1;		
-		if (status = psyfile_write(self->fp, &insHeader, sizeof(insHeader))) {
+		if ((status = psyfile_write(self->fp, &insHeader, sizeof(insHeader)))) {
 			return PSY_ERRFILE;
 		}		
 		memset(&_samph, 0, sizeof(_samph));
 		xmsongexport_setsamplerenvelopes(self, instIdx, &_samph);
 		_samph.volfade = 0x400;
 		_samph.shsize = sizeof(XMSAMPLESTRUCT);
-		if (status = psyfile_write(self->fp, &_samph, sizeof(_samph))) {
+		if ((status = psyfile_write(self->fp, &_samph, sizeof(_samph)))) {
 			return PSY_ERRFILE;
 		}
 		xmsongexport_savesampleheader(self, instIdx, 0);
@@ -843,7 +843,7 @@ int xmsongexport_savesamplerinstrument(XMSongExport* self, int instIdx)
 
 		insHeader.size = sizeof(insHeader);
 		//insHeader.samples = 0; Implicit by memset
-		if (status = psyfile_write(self->fp, &insHeader, sizeof(insHeader))) {
+		if ((status = psyfile_write(self->fp, &insHeader, sizeof(insHeader)))) {
 			return PSY_ERRFILE;
 		}
 	}
@@ -893,7 +893,7 @@ int xmsongexport_savesampleheader(XMSongExport* self, int instIdx, int sampleIdx
 	stheader.type = type;
 	stheader.pan = (uint8_t)(wave->panfactor * 255.f);
 
-	if (status = psyfile_write(self->fp, &stheader, sizeof(stheader))) {
+	if ((status = psyfile_write(self->fp, &stheader, sizeof(stheader)))) {
 		return PSY_ERRFILE;
 	}
 	return PSY_OK;
@@ -918,7 +918,7 @@ int xmsongexport_savesampledata(XMSongExport* self, int instrIdx, int sampleinde
 		short delta = (int16_t)samples[j] - prev;
 
 		//This is expected to be in little endian.
-		if (status = psyfile_write(self->fp, &delta, sizeof(int16_t))) {
+		if ((status = psyfile_write(self->fp, &delta, sizeof(int16_t)))) {
 			return PSY_ERRFILE;
 		}
 		prev = (short)samples[j];

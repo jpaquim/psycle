@@ -1,6 +1,6 @@
 CC = gcc
 inc = -I ../src -I../../thread/src -I ../src -I../../container/src -I../../file/src -I../../../diversalis/src -I/usr/include/freetype2
-cflags = -Wfatal-errors
+cflags = -Wfatal-errors -Wparentheses
 src = $(wildcard *.c)
 srcimp = $(wildcard imps/x11/*.c)
 obj = $(src:.c=.o)

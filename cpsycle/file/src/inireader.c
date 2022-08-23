@@ -8,10 +8,7 @@
 
 #include "inireader.h"
 /* std */
-#include <malloc.h>
-#include <stdio.h>
 #include <errno.h>
-#include <assert.h>
 /* platform */
 #include "../../detail/portable.h"
 
