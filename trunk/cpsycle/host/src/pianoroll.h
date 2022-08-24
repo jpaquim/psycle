@@ -17,6 +17,7 @@
 #include <uicombobox.h>
 #include <uilabel.h>
 #include <uiscroller.h>
+#include <uisplitbar.h>
 /* audio */
 #include <pattern.h>
 
@@ -57,6 +58,39 @@ INLINE psy_ui_Component* pianobar_base(PianoBar* self)
 	return &self->component;
 }
 
+
+/* ParamRuler */
+typedef struct ParamRuler {
+	/* inherits */
+	psy_ui_Component component;	
+} ParamRuler;
+
+void paramruler_init(ParamRuler*, psy_ui_Component* parent);
+
+
+/* ParamDraw */
+typedef struct ParamDraw {
+	/* inherits */
+	psy_ui_Component component;	
+} ParamDraw;
+
+void paramdraw_init(ParamDraw*, psy_ui_Component* parent);
+
+
+/* ParamRoll */
+typedef struct ParamRoll {
+	/* inherits */
+	psy_ui_Component component;
+	/* internal */	
+	psy_ui_Component left;
+	ParamRuler ruler;	
+	psy_ui_Component pane;
+	ParamDraw draw;
+	psy_ui_ScrollBar hscroll;		
+} ParamRoll;
+
+void paramroll_init(ParamRoll*, psy_ui_Component* parent);
+
 /* Pianoroll */
 typedef struct Pianoroll {
 	/* inherits */
@@ -64,17 +98,20 @@ typedef struct Pianoroll {
 	/* internal */
 	psy_ui_Component top;
 	PianoRuler header;
-	psy_ui_Component left;
+	psy_ui_Component left_top;	
 	psy_ui_ComboBox keytype;
+	psy_ui_Component client;	
 	Pianogrid grid;
-	psy_ui_Scroller scroller;
+	psy_ui_Scroller scroller;	
 	PianoBar bar;	
 	KeyboardState keyboardstate;
 	psy_ui_Component keyboardpane;
 	PianoKeyboard keyboard;	
-	PianoGridState gridstate;	
+	PianoGridState gridstate;
+	ParamRoll param_roll;	
+	psy_ui_Splitter splitter;	
 	uintptr_t opcount;
-	bool center_key;
+	bool center_key;	
 	/* references */
 	Workspace* workspace;
 } Pianoroll;

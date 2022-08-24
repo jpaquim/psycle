@@ -55,6 +55,113 @@ void pianobar_init(PianoBar* self, psy_ui_Component* parent)
 		"patternview.active");	
 }
 
+
+/* ParamRuler */
+
+/* prototypes */
+static void paramruler_on_draw(ParamRuler*, psy_ui_Graphics*);
+
+/* vtable */
+static psy_ui_ComponentVtable paramruler_vtable;
+static bool paramruler_vtable_initialized = FALSE;
+
+static void paramruler_table_init(ParamRuler* self)
+{
+	assert(self);
+
+	if (!paramruler_vtable_initialized) {
+		paramruler_vtable = *(self->component.vtable);
+		paramruler_vtable.ondraw =
+			(psy_ui_fp_component_ondraw)
+			paramruler_on_draw;		
+		paramruler_vtable_initialized = TRUE;
+	}
+	psy_ui_component_set_vtable(&self->component, &paramruler_vtable);	
+}
+
+void paramruler_init(ParamRuler* self, psy_ui_Component* parent)
+{
+	psy_ui_component_init(&self->component, parent, NULL);
+	paramruler_table_init(self);
+}
+
+void paramruler_on_draw(ParamRuler* self, psy_ui_Graphics* g)
+{
+	psy_ui_RealSize size;
+	uintptr_t i;
+	uintptr_t step;
+	uintptr_t maxval;
+	
+	size = psy_ui_component_size_px(&self->component);
+	maxval = 256;
+	step = maxval / 8;
+	for (i = 0; i < maxval; i += step) {
+		double cpy;
+		
+		cpy = i * (size.height / (double)maxval);
+		psy_ui_drawline(g, psy_ui_realpoint_make(0, cpy),
+			psy_ui_realpoint_make(size.width, cpy));
+	}
+}
+
+/* ParamDraw */
+
+/* prototypes */
+static void paramdraw_on_draw(ParamDraw*, psy_ui_Graphics*);
+
+/* vtable */
+static psy_ui_ComponentVtable paramdraw_vtable;
+static bool paramdraw_vtable_initialized = FALSE;
+
+static void paramdraw_table_init(ParamDraw* self)
+{
+	assert(self);
+
+	if (!paramdraw_vtable_initialized) {
+		paramdraw_vtable = *(self->component.vtable);
+		paramdraw_vtable.ondraw =
+			(psy_ui_fp_component_ondraw)
+			paramdraw_on_draw;		
+		paramdraw_vtable_initialized = TRUE;
+	}
+	psy_ui_component_set_vtable(&self->component, &paramdraw_vtable);	
+}
+
+/* ParamDraw */
+void paramdraw_init(ParamDraw* self, psy_ui_Component* parent)
+{
+	psy_ui_component_init(&self->component, parent, NULL);
+	paramdraw_table_init(self);
+}
+
+void paramdraw_on_draw(ParamDraw* self, psy_ui_Graphics* g)
+{
+	
+}
+
+/* ParamRoll */
+void paramroll_init(ParamRoll* self, psy_ui_Component* parent)
+{
+	psy_ui_component_init(&self->component, parent, NULL);
+	/* left */
+	psy_ui_component_init(&self->left, &self->component, NULL);
+	psy_ui_component_set_align(&self->left, psy_ui_ALIGN_LEFT);
+	psy_ui_component_set_preferred_width(&self->left,
+		psy_ui_value_make_ew(10.0));
+	paramruler_init(&self->ruler, &self->left);
+	psy_ui_component_set_align(&self->ruler.component, psy_ui_ALIGN_CLIENT);
+	/* pane */
+	psy_ui_component_init(&self->pane, &self->component, NULL);
+	psy_ui_component_set_align(&self->pane, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_set_preferred_height(&self->left,
+		psy_ui_value_make_eh(10.0));
+	paramdraw_init(&self->draw, &self->pane);
+	psy_ui_component_set_align(&self->draw.component, psy_ui_ALIGN_CLIENT);
+	/* hscroll */
+	psy_ui_scrollbar_init(&self->hscroll, &self->component);
+	psy_ui_component_set_align(&self->hscroll.component, psy_ui_ALIGN_BOTTOM);		
+}
+
 /* Pianoroll */
 
 /* protoypes */
@@ -139,32 +246,40 @@ void pianoroll_init(Pianoroll* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->bar.track_curr.signal_clicked, self,
 		pianoroll_on_display_current_track);
 	psy_signal_connect(&self->bar.tracks_active.signal_clicked, self,
-		pianoroll_on_display_active_tracks);
-	/* left area (keyboardheader, keyboard) */
-	psy_ui_component_init(&self->left, &self->component, NULL);
-	psy_ui_component_set_align(&self->left, psy_ui_ALIGN_LEFT);	
+		pianoroll_on_display_active_tracks);			
+	/* paramroll */
+	paramroll_init(&self->param_roll, &self->component);
+	psy_ui_component_set_align(&self->param_roll.component,
+		psy_ui_ALIGN_BOTTOM);
+	/* client */
+	psy_ui_component_init(&self->client, &self->component, NULL);
+	psy_ui_component_set_align(&self->client, psy_ui_ALIGN_CLIENT);
+	/* left top area (keyboardheader, keyboard) */
+	psy_ui_component_init(&self->left_top, &self->client, NULL);
+	psy_ui_component_set_align(&self->left_top, psy_ui_ALIGN_LEFT);	
 	/* top area (beatruler) */
-	psy_ui_component_init(&self->top, &self->component, NULL);
+	psy_ui_component_init(&self->top, &self->client, NULL);
 	psy_ui_component_set_align(&self->top, psy_ui_ALIGN_TOP);
 	psy_ui_component_set_preferred_height(&self->top,
 		psy_ui_value_make_eh(1.0));
 	pianoruler_init(&self->header, &self->top, &self->gridstate);
 	psy_ui_component_set_align(pianoruler_base(&self->header),
-		psy_ui_ALIGN_FIXED);
+		psy_ui_ALIGN_FIXED);	
 	/* client area (event grid) */
-	pianogrid_init(&self->grid, &self->component, &self->keyboardstate,
-		&self->gridstate, &workspace->inputhandler, self->workspace);
-	psy_ui_scroller_init(&self->scroller, &self->component, NULL, NULL);
+	pianogrid_init(&self->grid, &self->client, &self->keyboardstate,
+		&self->gridstate, &workspace->inputhandler, self->workspace);	
+	psy_ui_scroller_init(&self->scroller, &self->client,
+		&self->param_roll.hscroll, NULL);
 	psy_ui_scroller_set_client(&self->scroller, pianogrid_base(&self->grid));
 	psy_ui_component_set_align(&self->scroller.component, psy_ui_ALIGN_CLIENT);	
 	psy_ui_component_set_align(&self->grid.component, psy_ui_ALIGN_FIXED);
 	/* Keyboard */
-	psy_ui_component_init(&self->keyboardpane, &self->left, NULL);
+	psy_ui_component_init(&self->keyboardpane, &self->left_top, NULL);
 	psy_ui_component_set_align(&self->keyboardpane, psy_ui_ALIGN_CLIENT);
 	pianokeyboard_init(&self->keyboard, &self->keyboardpane,
 		&self->keyboardstate, &self->workspace->player,
 		&self->grid.component);
-	psy_ui_combobox_init(&self->keytype, &self->left);
+	psy_ui_combobox_init(&self->keytype, &self->left_top);
 	psy_ui_combobox_set_char_number(&self->keytype, 6);
 	psy_ui_combobox_add_text(&self->keytype, "Keys");
 	psy_ui_combobox_add_text(&self->keytype, "Notes");
@@ -179,12 +294,17 @@ void pianoroll_init(Pianoroll* self, psy_ui_Component* parent,
 		pianoroll_on_keytype_changed);
 	psy_ui_component_set_align(&self->keyboard.component,
 		psy_ui_ALIGN_HCLIENT);
+	/* splitter */
+	psy_ui_splitter_init(&self->splitter, &self->component);
+	psy_ui_component_set_align(psy_ui_splitter_base(&self->splitter),
+		psy_ui_ALIGN_BOTTOM);							
 	/* connect signals */
 	psy_signal_connect(&pianogrid_base(&self->grid)->signal_scrolled, self,
 		pianoroll_on_grid_scroll);
 	psy_signal_connect(&self->workspace->song->sequence.signal_cursorchanged,
 		self, pianoroll_on_cursor_changed);
-	psy_signal_connect(&self->workspace->player.sequencer.signal_play_line_changed, self,
+	psy_signal_connect(
+		&self->workspace->player.sequencer.signal_play_line_changed, self,
 		pianoroll_on_play_line_changed);
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		pianoroll_on_song_changed);	
@@ -350,6 +470,8 @@ void pianoroll_on_beat_width_changed(Pianoroll* self, ZoomBox* sender)
 	psy_ui_component_update(pianoruler_base(&self->header));
 	psy_ui_component_align(&self->scroller.pane);
 	psy_ui_component_invalidate(&self->scroller.pane);
+	psy_ui_component_align(&self->param_roll.component);
+	psy_ui_component_invalidate(&self->param_roll.component);
 }
 
 void pianoroll_on_key_height_changed(Pianoroll* self, ZoomBox* sender)

@@ -399,8 +399,7 @@ void pianogrid_on_mouse_move(Pianogrid* self, psy_ui_MouseEvent* ev)
 	psy_audio_SequenceCursor cursor;
 
 	assert(self);
-	
-	
+		
 	if (patternviewstate_sequence(self->gridstate->pv)) {
 		psy_audio_PatternEntry* oldhover;
 		psy_audio_PatternNode* node;
@@ -929,14 +928,21 @@ void pianogrid_invalidate_lines(Pianogrid* self, intptr_t line1, intptr_t line2)
 
 void pianogrid_invalidate_cursor(Pianogrid* self)
 {
+	psy_audio_Sequence* sequence;
+	
 	assert(self);
-
-	if (psy_ui_component_draw_visible(pianogrid_base(self))) {
-		pianogrid_invalidate_line(self, psy_audio_sequencecursor_line(
-			&self->old_cursor));
-		pianogrid_invalidate_line(self, psy_audio_sequencecursor_line(
-			&self->gridstate->pv->cursor));
-	}	
+	
+	sequence = patternviewstate_sequence(self->gridstate->pv);
+	if (!sequence) {
+		return;
+	}
+	if (!psy_ui_component_draw_visible(pianogrid_base(self))) {
+		return;
+	}
+	pianogrid_invalidate_line(self, psy_audio_sequencecursor_line_abs(
+		&self->old_cursor, sequence));
+	pianogrid_invalidate_line(self, psy_audio_sequencecursor_line_abs(
+		&self->gridstate->pv->cursor, sequence));
 	self->old_cursor = self->gridstate->pv->cursor;
 }
 
