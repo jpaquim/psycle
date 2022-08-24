@@ -249,25 +249,40 @@ void pianogriddraw_drawcursor(PianoGridDraw* self, psy_ui_Graphics* g, psy_audio
 			keyboardmiscconfig_following_song(&self->workspace->config.misc))) {
 		psy_ui_Style* style;
 		psy_audio_SequenceCursor cursor;
+		psy_audio_SequenceEntry* seq_entry;	
+		double cursor_offset_abs;
 		intptr_t key;
-
-		cursor = self->gridstate->pv->cursor;
+		
+		cursor = self->gridstate->pv->cursor;		
+		seq_entry = psy_audio_sequence_entry(self->gridstate->pv->sequence,
+			psy_audio_sequencecursor_order_index(&cursor));			
+		if (!seq_entry) {
+			return;
+		}
+		cursor_offset_abs = psy_audio_sequencecursor_offset(&cursor) +
+			psy_audio_sequenceentry_offset(seq_entry);
+		if (!(cursor_offset_abs >= psy_audio_sequenceentry_offset(seq_entry) &&
+				(cursor_offset_abs < psy_audio_sequenceentry_offset(seq_entry) +
+				psy_audio_sequenceentry_length(seq_entry)))) {
+			return;			
+		}
 		if (cursor.key != psy_audio_NOTECOMMANDS_EMPTY) {
 			key = cursor.key;
 		} else {
 			key = psy_audio_NOTECOMMANDS_MIDDLEC;
 		}
-		style = psy_ui_style(STYLE_PV_CURSOR);
+		style = psy_ui_style(STYLE_PV_CURSOR);		
 		psy_ui_drawsolidrectangle(g, psy_ui_realrectangle_make(
 			psy_ui_realpoint_make(
 				pianogridstate_beattopx(self->gridstate,
-					patternviewstate_draw_offset(self->gridstate->pv,
-						cursor.offset)),
+					(patternviewstate_single_mode(self->gridstate->pv))
+					? psy_audio_sequencecursor_offset(&cursor)
+					: cursor_offset_abs),
 				keyboardstate_key_to_px(self->keyboardstate, key)),
 			psy_ui_realsize_make(
 				pianogridstate_steppx(self->gridstate),
 				self->keyboardstate->key_extent_px)),
-			style->background.colour);
+			style->background.colour);		
 		// patternviewskin_cursorcolour(patternviewstate_skin(self->gridstate->pv),
 		//	0, 0));
 	}
