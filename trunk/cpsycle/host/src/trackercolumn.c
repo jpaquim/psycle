@@ -187,14 +187,13 @@ TrackerColumnFlags trackercolumn_columnflags(TrackerColumn* self,
 	}
 	line_abs = (uintptr_t)(seqoffset * (double)lpb) + line;		
 	rv.cursor = (self->track == self->state->pv->cursor.track) &&
-		(self->state->track_events.cursor_line_abs == line_abs);
+		(self->state->pv->cursor.abs_line == line_abs);
 	rv.selection = trackercolumn_in_selection(self, self->track,
 		line_abs * (1.0 / (double)lpb));	
 	rv.playbar = self->state->draw_playbar &&
-		self->workspace->player.sequencer.hostseqtime.currplaying &&
-		(psy_audio_sequencecursor_line_abs(
-			&self->workspace->player.sequencer.hostseqtime.currplaycursor,
-			self->state->pv->sequence) == line_abs);
+		self->workspace->player.sequencer.hostseqtime.currplaying &&		
+		(self->workspace->player.sequencer.hostseqtime.currplaycursor.abs_line
+			== line_abs);
 	rv.focus = TRUE;
 	return rv;
 }

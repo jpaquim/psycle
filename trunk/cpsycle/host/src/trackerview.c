@@ -1684,13 +1684,15 @@ void trackerview_connect_song(TrackerView* self)
 
 void trackerview_on_cursor_changed(TrackerView* self, psy_audio_Sequence* sender)
 {		
-	bool invalidate_cursor;	
+	bool invalidate_cursor;
+	bool invalidate_align;
 		
 	if (psy_audio_sequence_lpb_changed(sender)) {		
 		psy_ui_component_align(&self->component);
 		psy_ui_component_invalidate(&self->component);
 	}
-	invalidate_cursor = TRUE;			
+	invalidate_cursor = TRUE;
+	invalidate_align = FALSE;
 	if (patternviewstate_single_mode(self->grid.state->pv)) {		
 		if (!psy_audio_orderindex_equal(
 				&self->grid.state->pv->sequence->cursor.order_index,
@@ -1698,17 +1700,27 @@ void trackerview_on_cursor_changed(TrackerView* self, psy_audio_Sequence* sender
 			if (trackerview_playing_following_song(self)) {						
 				psy_ui_component_set_scroll_top_px(&self->grid.component, 0.0);
 			}
-			psy_ui_component_align(&self->grid.component);			
-			psy_ui_component_align(&self->lines.pane);
-			psy_ui_component_invalidate(&self->grid.component);
-			psy_ui_component_invalidate(&self->lines.pane);				
+			invalidate_align = TRUE;
 			invalidate_cursor = FALSE;
 		}			
+	} else if (trackerview_playing_following_song(self)) {		
+		if (self->grid.state->pv->sequence->cursor.order_index.order <=
+				self->grid.state->pv->sequence->lastcursor.order_index.order) {
+			psy_ui_component_set_scroll_top_px(&self->grid.component, 0.0);
+			invalidate_align = TRUE;
+			invalidate_cursor = FALSE;		
+		}
 	}
 	if (invalidate_cursor && !(trackerview_playing_following_song(self))) {
 		trackerlinenumbers_invalidate_cursor(&self->lines.linenumbers);
 		trackergrid_invalidate_cursor(&self->grid);
-	}	
+	}
+	if (invalidate_align) {
+		psy_ui_component_align(&self->grid.component);			
+		psy_ui_component_align(&self->lines.pane);
+		psy_ui_component_invalidate(&self->grid.component);
+		psy_ui_component_invalidate(&self->lines.pane);				
+	}
 }
 
 void trackerview_on_play_line_changed(TrackerView* self, Workspace* sender)

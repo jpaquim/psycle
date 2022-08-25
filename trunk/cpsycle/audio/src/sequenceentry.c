@@ -162,8 +162,8 @@ void psy_audio_static_sequencepatternentry_setlength(
 	if (self->patterns) {
 		pattern = psy_audio_patterns_at(self->patterns,
 			psy_audio_sequencepatternentry_patternslot(self));
-		if (pattern) {
-			psy_audio_pattern_setlength(pattern, length);
+		if (pattern) {			
+			psy_audio_pattern_setlength(pattern, length);			
 		}
 	}
 }

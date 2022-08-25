@@ -125,8 +125,6 @@ TrackerEventPair* trackereventpair_allocinit(double offset,
 
 typedef struct TrackerEventTable {
 	psy_Table tracks;	
-	uintptr_t cursor_line_abs;
-	uintptr_t play_line_abs;
 	double top;
 	double seqoffset;
 	uintptr_t left;
