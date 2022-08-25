@@ -81,6 +81,7 @@ void seqeditstate_dispose(SeqEditState*);
 
 psy_audio_Sequence* seqeditstate_sequence(SeqEditState*);
 const psy_audio_Sequence* seqeditstate_sequence_const(const SeqEditState*);
+psy_audio_Patterns* seqeditstate_patterns(SeqEditState*);
 void seqeditstate_outputstatusposition(SeqEditState*);
 
 INLINE psy_audio_OrderIndex seqeditstate_editposition(const SeqEditState* self)
@@ -124,9 +125,11 @@ INLINE void seqeditstate_setcursor(SeqEditState* self,
 {
 	assert(self);
 
-	self->cursorposition = cursorposition;
-	seqeditstate_outputstatusposition(self);
-	psy_signal_emit(&self->signal_cursorchanged, self, 0);
+	if (self->cursorposition != cursorposition) {
+		self->cursorposition = cursorposition;
+		seqeditstate_outputstatusposition(self);
+		psy_signal_emit(&self->signal_cursorchanged, self, 0);
+	}
 }
 
 psy_dsp_big_beat_t seqeditstate_quantize(const SeqEditState*,

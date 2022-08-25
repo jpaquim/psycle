@@ -59,6 +59,14 @@ psy_audio_Sequence* seqeditstate_sequence(SeqEditState* self)
 	return NULL;
 }
 
+psy_audio_Patterns* seqeditstate_patterns(SeqEditState* self)
+{
+	if (workspace_song(self->workspace)) {
+		return &workspace_song(self->workspace)->patterns;
+	}
+	return NULL;
+}
+
 const psy_audio_Sequence* seqeditstate_sequence_const(const SeqEditState* self)
 {
 	if (workspace_song_const(self->workspace)) {

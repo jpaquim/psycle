@@ -69,7 +69,7 @@ void pianogriddraw_init(PianoGridDraw*,
 	bool cursoronnoterelease,	
 	psy_ui_RealSize, Workspace*);
 
-void pianogriddraw_ondraw(PianoGridDraw*, psy_ui_Graphics*);
+void pianogriddraw_on_draw(PianoGridDraw*, psy_ui_Graphics*);
 
 INLINE void pianogriddraw_preventgrid(PianoGridDraw* self)
 {

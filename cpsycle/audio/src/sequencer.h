@@ -77,7 +77,7 @@ INLINE bool psy_audio_sequencertime_playing(const psy_audio_SequencerTime*
 typedef struct psy_audio_HostSequencerTime {
 	bool currplaying;
 	psy_audio_SequenceCursor lastplaycursor;
-	psy_audio_SequenceCursor currplaycursor;
+	psy_audio_SequenceCursor currplaycursor;	
 } psy_audio_HostSequencerTime;
 
 void psy_audio_hostsequencertime_init(psy_audio_HostSequencerTime*);
@@ -385,8 +385,7 @@ psy_audio_SequencerTrack* psy_audio_sequencer_curr_track(psy_audio_Sequencer*,
 	uintptr_t track);
 psy_audio_SequenceEntry* psy_audio_sequencer_curr_seq_entry(
 	psy_audio_Sequencer*, uintptr_t track_index);
-psy_audio_SequenceCursor psy_audio_sequencer_play_cursor(
-	const psy_audio_Sequencer*);
+psy_audio_SequenceCursor psy_audio_sequencer_play_cursor(const psy_audio_Sequencer*);
 
 #ifdef __cplusplus
 }

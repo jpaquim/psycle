@@ -34,12 +34,12 @@ void psy_audio_hostsequencertime_init(psy_audio_HostSequencerTime* self)
 void psy_audio_hostsequencertime_set_play_cursor(psy_audio_HostSequencerTime* self,
 	psy_audio_SequenceCursor cursor)
 {
-	self->currplaycursor = cursor;
+	self->currplaycursor = cursor;	
 }
 
 void psy_audio_hostsequencertime_update_last_play_cursor(psy_audio_HostSequencerTime* self)
 {
-	self->lastplaycursor = self->currplaycursor;
+	self->lastplaycursor = self->currplaycursor;	
 }
 
 
@@ -1827,23 +1827,26 @@ psy_audio_SequenceEntry* psy_audio_sequencer_curr_seq_entry(psy_audio_Sequencer*
 	return rv;
 }
 
-psy_audio_SequenceCursor psy_audio_sequencer_play_cursor(
-	const psy_audio_Sequencer* self)
-{
+psy_audio_SequenceCursor psy_audio_sequencer_play_cursor(const psy_audio_Sequencer* self)	
+{	
 	psy_audio_SequenceCursor rv;
-
+	
 	if (self->sequence) {
-		psy_audio_SequenceEntry* seqentry;
+		psy_audio_SequenceEntry* seq_entry;
 
-		seqentry = psy_audio_sequencer_curr_seq_entry(
+		seq_entry = psy_audio_sequencer_curr_seq_entry(
 			(psy_audio_Sequencer*)self,
 			self->sequence->cursor.order_index.track);
-		if (seqentry) {
+		if (seq_entry) {
 			rv = self->sequence->cursor;
 			psy_audio_sequencecursor_set_order_index(&rv,
-				psy_audio_orderindex_make(rv.order_index.track, seqentry->row));							
-			rv.offset = self->seqtime.linecounter / (double)self->lpb -
-				psy_audio_sequenceentry_offset(seqentry);			
+				psy_audio_orderindex_make(rv.order_index.track,
+					seq_entry->row));							
+			rv.offset = (self->seqtime.linecounter / (double)self->lpb) -
+				psy_audio_sequenceentry_offset(seq_entry);
+			rv.abs_offset = psy_audio_sequenceentry_offset(seq_entry) +
+				rv.offset;				
+			rv.abs_line = (uintptr_t)(rv.abs_offset * (double)self->lpb);	
 			return rv;
 		}
 	}
@@ -1859,8 +1862,8 @@ void psy_audio_sequencer_update_host_seq_time(psy_audio_Sequencer* self, bool fo
 		
 	play_status_changed = psy_audio_sequencer_playing(self) !=
 		psy_audio_hostsequencertime_playing(&self->hostseqtime);
-	if (psy_audio_hostsequencertime_playing(&self->hostseqtime) || play_status_changed) {
-		psy_audio_exclusivelock_enter();
+	if (psy_audio_hostsequencertime_playing(&self->hostseqtime) || play_status_changed) {				
+		psy_audio_exclusivelock_enter();		
 		psy_audio_hostsequencertime_set_play_cursor(&self->hostseqtime,
 			psy_audio_sequencer_play_cursor(self));
 		if (play_status_changed) {

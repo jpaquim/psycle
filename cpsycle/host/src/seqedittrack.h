@@ -24,23 +24,19 @@ typedef struct SeqEditTrack {
 	psy_ui_Component component;	
 	psy_audio_SequenceTrack* currtrack;	
 	uintptr_t trackindex;
-	SeqEditState* state;	
-	Workspace* workspace;	
+	SeqEditState* state;		
 	//psy_ui_Component* view;
-	psy_List* entries;
+	psy_List* entries;			
 } SeqEditTrack;
 
 void seqedittrack_init(SeqEditTrack*, psy_ui_Component* parent,
-	SeqEditState*, Workspace*);
+	SeqEditState*, psy_audio_SequenceTrack*, uintptr_t trackindex);	
 void seqedittrack_dispose(SeqEditTrack*);
 
 SeqEditTrack* seqedittrack_alloc(void);
 SeqEditTrack* seqedittrack_allocinit(psy_ui_Component* parent,
-	SeqEditState*, Workspace*);
+	SeqEditState*, psy_audio_SequenceTrack*, uintptr_t trackindex);
 
-void seqedittrack_setsequencetrack(SeqEditTrack*,	
-	psy_audio_SequenceTrack*,
-	uintptr_t trackindex);
 
 INLINE psy_ui_Component* seqedittrack_base(SeqEditTrack* self)
 {

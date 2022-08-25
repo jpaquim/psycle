@@ -13,7 +13,7 @@
 /* SeqEditorTracks */
 /* prototypes */
 static void seqeditortracks_on_mouse_down(SeqEditorTracks*, psy_ui_MouseEvent*);
-static void seqeditortracks_onmousemove(SeqEditorTracks*, psy_ui_MouseEvent*);
+static void seqeditortracks_on_mouse_move(SeqEditorTracks*, psy_ui_MouseEvent*);
 static void seqeditortracks_on_mouse_up(SeqEditorTracks*, psy_ui_MouseEvent*);
 static void seqeditortracks_onmouseenter(SeqEditorTracks*);
 static void seqeditortracks_onmouseleave(SeqEditorTracks*);
@@ -48,7 +48,7 @@ static void seqeditortracks_vtable_init(SeqEditorTracks* self)
 			seqeditortracks_on_mouse_up;
 		seqeditortracks_vtable.on_mouse_move =
 			(psy_ui_fp_component_on_mouse_event)
-			seqeditortracks_onmousemove;
+			seqeditortracks_on_mouse_move;
 		seqeditortracks_vtable.onmouseenter =
 			(psy_ui_fp_component_event)
 			seqeditortracks_onmouseenter;
@@ -107,8 +107,7 @@ void seqeditortracks_build(SeqEditorTracks* self)
 						
 			seqtrack = psy_audio_sequence_track_at(sequence, t);			
 			seqedittrack = seqedittrack_allocinit(&self->component,
-				self->state, self->workspace);						
-			seqedittrack_setsequencetrack(seqedittrack, seqtrack, t);			
+				self->state, seqtrack, t);			
 		}
 		spacer = psy_ui_component_allocinit(&self->component, NULL);
 		psy_ui_component_set_minimum_size(spacer,
@@ -243,13 +242,14 @@ void seqeditortracks_on_mouse_down(SeqEditorTracks* self,
 	}
 }
 
-void seqeditortracks_onmousemove(SeqEditorTracks* self,
+void seqeditortracks_on_mouse_move(SeqEditorTracks* self,
 	psy_ui_MouseEvent* ev)
 {	
 	seqeditstate_setcursor(self->state, seqeditstate_quantize(self->state,
 		seqeditstate_pxtobeat(self->state, psy_ui_mouseevent_pt(ev).x)));
-	if (self->state->dragstatus && (self->state->dragtype & SEQEDIT_DRAGTYPE_MOVE)
-			== SEQEDIT_DRAGTYPE_MOVE) {
+	if (self->state->dragstatus &&
+			(self->state->dragtype & SEQEDIT_DRAGTYPE_MOVE) ==
+			SEQEDIT_DRAGTYPE_MOVE) {
 		seqeditortracks_updateseqeditlineposition(self);
 	}
 }

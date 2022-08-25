@@ -24,7 +24,9 @@ void psy_audio_sequencecursor_init(psy_audio_SequenceCursor* self)
 	self->lpb = 4;
 	self->column = 0;
 	self->digit = 0;	
-	self->noteindex = 0;	
+	self->noteindex = 0;
+	self->abs_offset = 0.0;
+	self->abs_line = 0;
 }
 
 void psy_audio_sequencecursor_init_all(psy_audio_SequenceCursor* self,

@@ -167,7 +167,7 @@ void pianogrid_on_draw(Pianogrid* self, psy_ui_Graphics* g)
 		self->cursoronnoterelease,
 		psy_ui_component_scroll_size_px(pianogrid_base(self)),		
 		self->workspace);
-	pianogriddraw_ondraw(&griddraw, g);
+	pianogriddraw_on_draw(&griddraw, g);
 }
 
 psy_audio_BlockSelection pianogrid_clipselection(Pianogrid* self,
@@ -546,10 +546,33 @@ psy_audio_SequenceCursor pianogrid_make_cursor(Pianogrid* self,
 	psy_ui_RealPoint pt)
 {
 	psy_audio_SequenceCursor rv;
-
+	psy_audio_Sequence* sequence;
+	psy_dsp_big_beat_t offset;
+	psy_audio_OrderIndex order_index;
+	
 	rv = self->gridstate->pv->cursor;	
-	rv.offset = pianogridstate_quantize(self->gridstate,
+	sequence = patternviewstate_sequence(self->gridstate->pv);
+	if (!sequence) {
+		return rv;
+	}	
+	offset = pianogridstate_quantize(self->gridstate,
 		pianogridstate_pxtobeat(self->gridstate, pt.x));
+	if (!patternviewstate_single_mode(self->gridstate->pv)) {
+		psy_audio_SequenceEntry* seq_entry;
+		
+		order_index = psy_audio_orderindex_make(rv.order_index.track,
+			psy_audio_sequence_order(sequence, rv.order_index.track, offset));
+		seq_entry = psy_audio_sequence_entry(sequence, order_index);
+		if (seq_entry) {
+			offset -= psy_audio_sequenceentry_offset(seq_entry);
+		} else {
+			return rv;
+		}
+	} else {
+		order_index = rv.order_index;
+	}	
+	psy_audio_sequencecursor_set_offset(&rv, offset);
+	psy_audio_sequencecursor_set_order_index(&rv, order_index);	
 	rv.key = keyboardstate_screen_to_key(self->keyboardstate,
 		psy_ui_realpoint_make(0, pt.y), 0.0);	
 	return rv;
@@ -868,6 +891,47 @@ bool pianogrid_scrolldown(Pianogrid* self, psy_audio_SequenceCursor cursor)
 	}
 	return TRUE;
 
+}
+
+void pianogrid_invalidate_playbar(Pianogrid* self)
+{		
+	psy_audio_Sequence* sequence;
+	psy_audio_HostSequencerTime* seqtime;
+	double last;
+	double curr;
+	double minval;
+	double maxval;
+	psy_ui_RealSize size;
+	psy_ui_RealSize stepsize;
+
+	sequence = patternviewstate_sequence(self->gridstate->pv);
+	if (!sequence) {
+		return;
+	}
+	seqtime = &self->workspace->player.sequencer.hostseqtime;
+	last = seqtime->lastplaycursor.offset;
+	if (!patternviewstate_single_mode(self->gridstate->pv)) {
+		last += psy_audio_sequencecursor_seqoffset(&seqtime->lastplaycursor,
+			sequence);
+	}
+	last = pianogridstate_beattopx(self->gridstate, last);
+	curr = seqtime->currplaycursor.offset;
+	if (!patternviewstate_single_mode(self->gridstate->pv)) {
+		curr += psy_audio_sequencecursor_seqoffset(&seqtime->currplaycursor,
+			sequence);
+	}	
+	curr = pianogridstate_beattopx(self->gridstate, curr);		
+	minval = psy_min(last, curr);
+	maxval = psy_max(last, curr);
+	size = psy_ui_component_scroll_size_px(&self->component);
+	psy_ui_component_invalidate_rect(&self->component, 
+		psy_ui_realrectangle_make(
+			psy_ui_realpoint_make(			
+				minval,
+				psy_ui_component_scroll_top_px(&self->component)),
+			psy_ui_realsize_make(
+				maxval - minval + pianogridstate_steppx(self->gridstate),
+				size.height)));
 }
 
 void pianogrid_invalidate_line(Pianogrid* self, intptr_t line)

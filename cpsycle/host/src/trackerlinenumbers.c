@@ -259,9 +259,10 @@ TrackerColumnFlags trackerlinennumbers_column_flags(TrackerLineNumbers* self,
 	lpb = psy_audio_sequencecursor_lpb(&self->state->pv->cursor);	
 	line_abs = seqline + line;		
 	rv.playbar = psy_audio_player_playing(workspace_player(self->workspace)) &&
-		(self->state->track_events.play_line_abs == line_abs);
+		(self->workspace->player.sequencer.hostseqtime.currplaycursor.abs_line ==
+		line_abs);
 	rv.mid = 0;	
-	rv.cursor = (self->state->track_events.cursor_line_abs == line_abs);
+	rv.cursor = (self->state->pv->cursor.abs_line == line_abs);
 	// rv.cursor = (keyboardmiscconfig_following_song(&self->workspace->config.misc) ||
 	//	!self->workspace->player.sequencer.hostseqtime.currplaying) &&
 	//	self->draw_cursor &&

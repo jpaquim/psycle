@@ -166,7 +166,6 @@ void paramroll_init(ParamRoll* self, psy_ui_Component* parent)
 
 /* protoypes */
 static void pianoroll_on_timer(Pianoroll*, uintptr_t timerid);
-static void pianoroll_on_play_line_changed(Pianoroll*, Workspace* sender);
 static void pianoroll_on_lpb_changed(Pianoroll*, psy_audio_Player* sender,
 	uintptr_t lpb);
 static void pianoroll_on_align(Pianoroll*);
@@ -183,9 +182,11 @@ static void pianoroll_on_display_current_track(Pianoroll*, psy_ui_Button* sender
 static void pianoroll_on_display_active_tracks(Pianoroll*, psy_ui_Button* sender);
 static void pianoroll_update_track_display_buttons(Pianoroll*);
 static void pianoroll_on_cursor_changed(Pianoroll*, psy_audio_Sequence* sender);
+static void pianoroll_on_play_line_changed(Pianoroll*, Workspace* sender);
 static void pianoroll_on_song_changed(Pianoroll*, Workspace* sender);
 static void pianoroll_on_configure(Pianoroll*, PatternViewConfig* sender,
 	psy_Property*);
+static bool pianoroll_playing_following_song(const Pianoroll*);
 
 /* vtable */
 static psy_ui_ComponentVtable pianoroll_vtable;
@@ -339,20 +340,6 @@ void pianoroll_scroll_to_key(Pianoroll* self, uint8_t key)
 			(self->keyboardstate.keymax - key)));
 }
 
-void pianoroll_on_play_line_changed(Pianoroll* self, Workspace* sender)
-{
-	assert(self);
-
-	if (!psy_ui_component_draw_visible(pianoroll_base(self))) {
-		return;
-	}	
-	pianogrid_invalidate_lines(&self->grid,
-		psy_audio_sequencecursor_line(
-		&self->workspace->player.sequencer.hostseqtime.lastplaycursor),
-		psy_audio_sequencecursor_line(
-		&self->workspace->player.sequencer.hostseqtime.currplaycursor));
-}
-
 void pianoroll_on_timer(Pianoroll* self, uintptr_t timerid)
 {
 	assert(self);
@@ -423,9 +410,48 @@ void pianoroll_on_cursor_changed(Pianoroll* self, psy_audio_Sequence* sender)
 {	
 	assert(self);
 	
-	pianoroll_scroll_to_order(self);
-	pianogrid_update_cursor(&self->grid, sender->cursor);	
+	bool invalidate_cursor;	
+		
+	if (psy_audio_sequence_lpb_changed(sender)) {		
+		psy_ui_component_align(&self->component);
+		psy_ui_component_invalidate(&self->component);
+	}
+	invalidate_cursor = TRUE;			
+	if (patternviewstate_single_mode(self->gridstate.pv)) {		
+		if (!psy_audio_orderindex_equal(
+				&sender->cursor.order_index,
+				sender->lastcursor.order_index)) {
+			if (pianoroll_playing_following_song(self)) {						
+				psy_ui_component_set_scroll_left_px(&self->grid.component, 0.0);
+			}
+			psy_ui_component_align(&self->grid.component);						
+			psy_ui_component_invalidate(&self->grid.component);			
+			invalidate_cursor = FALSE;
+		}			
+	}
+	if (invalidate_cursor && !(pianoroll_playing_following_song(self))) {
+		pianogrid_invalidate_cursor(&self->grid);		
+	}
 }
+
+void pianoroll_on_play_line_changed(Pianoroll* self, Workspace* sender)
+{
+	assert(self);
+
+	if (!psy_ui_component_draw_visible(pianoroll_base(self))) {
+		return;
+	}	
+	pianogrid_invalidate_playbar(&self->grid);
+	pianogrid_invalidate_cursor(&self->grid);	
+}
+
+
+bool pianoroll_playing_following_song(const Pianoroll* self)
+{
+	return self->workspace->player.sequencer.hostseqtime.currplaying &&
+		keyboardmiscconfig_following_song(&self->workspace->config.misc);
+}
+
 
 void pianoroll_on_song_changed(Pianoroll* self, Workspace* workspace)
 {	

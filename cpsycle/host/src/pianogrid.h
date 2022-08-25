@@ -54,6 +54,7 @@ void pianogrid_init(Pianogrid*, psy_ui_Component* parent, KeyboardState*,
 void pianogrid_invalidate_line(Pianogrid*, intptr_t line);
 void pianogrid_invalidate_lines(Pianogrid*, intptr_t line1, intptr_t line2);
 void pianogrid_invalidate_cursor(Pianogrid*);
+void pianogrid_invalidate_playbar(Pianogrid*);
 void pianogrid_update_cursor(Pianogrid*, psy_audio_SequenceCursor);
 void pianogrid_set_cursor(Pianogrid*, psy_audio_SequenceCursor);
 void pianogrid_onpatternchange(Pianogrid*);

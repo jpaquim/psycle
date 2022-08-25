@@ -442,9 +442,11 @@ void psy_audio_pattern_setlength(psy_audio_Pattern* self, psy_dsp_big_beat_t len
 {
 	assert(self);
 
-	self->length = length;
-	++self->opcount;
-	psy_signal_emit(&self->signal_lengthchanged, self, 0);
+	if (self->length != length) {
+		self->length = length;
+		++self->opcount;
+		psy_signal_emit(&self->signal_lengthchanged, self, 0);
+	}
 }
 
 void psy_audio_pattern_scale(psy_audio_Pattern* self, float factor)

@@ -23,15 +23,21 @@ extern "C" {
 
 struct psy_audio_SequenceEntry;
 
-typedef struct psy_audio_SequenceCursor {	
+typedef struct psy_audio_SequenceCursor {
+	/* index to the sequence entry */
 	psy_audio_OrderIndex order_index;
-	psy_dsp_big_beat_t offset;	
-	uintptr_t track;	
+	/* offset in sequence entry */
+	psy_dsp_big_beat_t offset;
+	/* channel track in the pattern */
+	uintptr_t track;
 	uintptr_t lpb;
 	uintptr_t column;
 	uintptr_t digit;
 	uint8_t key;
-	uintptr_t noteindex;	
+	uintptr_t noteindex;
+	/* abs values temporarily valid in some cases */
+	psy_dsp_big_beat_t abs_offset;	
+	uintptr_t abs_line;
 } psy_audio_SequenceCursor;
 
 void psy_audio_sequencecursor_init(psy_audio_SequenceCursor*);

@@ -283,9 +283,7 @@ void trackdef_deallocate(TrackDef* self)
 /* TrackerEventTable */
 void trackereventtable_init(TrackerEventTable* self)
 {
-	psy_table_init(&self->tracks);
-	self->cursor_line_abs = 0;
-	self->play_line_abs = 0;
+	psy_table_init(&self->tracks);	
 	self->selection_top_abs = self->selection_bottom_abs = 0.0;
 }
 
@@ -679,6 +677,7 @@ psy_audio_SequenceCursor trackerstate_make_cursor(TrackerState* self,
 	offset = trackerstate_px_to_beat(self, pt.y, line_height);	
 	if (!patternviewstate_single_mode(self->pv)) {
 		psy_audio_SequenceEntry* seq_entry;
+		
 		order_index = psy_audio_orderindex_make(rv.order_index.track,
 			psy_audio_sequence_order(sequence, rv.order_index.track, offset));
 		seq_entry = psy_audio_sequence_entry(sequence, order_index);
@@ -857,11 +856,11 @@ void trackerstate_update_clip_events(TrackerState* self,
 
 void trackerstate_update_abs_positions(TrackerState* self,
 	const psy_audio_Player* player)
-{
+{		
 	assert(self);
-	
-	self->track_events.cursor_line_abs = psy_audio_sequencecursor_line_abs(
-		&self->pv->cursor, self->pv->sequence);	
-	self->track_events.play_line_abs = psy_audio_sequencecursor_line_abs(
-		&player->sequencer.hostseqtime.currplaycursor, self->pv->sequence);
+			
+	self->pv->cursor.abs_offset = psy_audio_sequencecursor_offset_abs(
+		&self->pv->cursor, self->pv->sequence);
+	self->pv->cursor.abs_line = (uintptr_t)(self->pv->cursor.abs_offset *
+		(double)self->pv->cursor.lpb);
 }
