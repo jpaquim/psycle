@@ -163,7 +163,7 @@ static void vtable_init(ParamRackPane* self)
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
 		vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			paramrackpane_on_destroyed;		
 		vtable_initialized = TRUE;
 	}
@@ -520,7 +520,7 @@ static void paramrackmodebar_vtable_init(ParamRackModeBar* self)
 	if (!paramrackmodebar_vtable_initialized) {
 		paramrackmodebar_vtable = *(self->component.vtable);
 		paramrackmodebar_vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			paramrackmodebar_on_destroyed;
 		paramrackmodebar_vtable_initialized = TRUE;
 	}

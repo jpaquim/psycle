@@ -255,13 +255,13 @@ static void vtable_init(WaveBox* self)
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
 		vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			wavebox_on_destroyed;
 		vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
 			wavebox_ondraw;
 		vtable.onsize =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			wavebox_onsize;
 		vtable_initialized = TRUE;
 	}

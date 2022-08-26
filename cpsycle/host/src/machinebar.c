@@ -56,7 +56,7 @@ static void vtable_init(MachineBar* self)
 	if (!vtable_initialized) {
 		vtable = *(machinebar_base(self)->vtable);
 		vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			machinebar_on_destroyed;
 		vtable_initialized = TRUE;
 	}

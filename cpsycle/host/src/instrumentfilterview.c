@@ -16,19 +16,19 @@
 
 /* prototypes */
 static void instrumentfilterview_on_destroyed(InstrumentFilterView*);
-static void instrumentfilterview_updateslider(InstrumentFilterView*);
-static void instrumentfilterview_fillfiltercombobox(InstrumentFilterView*);
-static void instrumentfilterview_ondescribe(InstrumentFilterView*,
+static void instrumentfilterview_update_slider(InstrumentFilterView*);
+static void instrumentfilterview_fill_filter_combobox(InstrumentFilterView*);
+static void instrumentfilterview_on_describe(InstrumentFilterView*,
 	psy_ui_Slider*, char* text);
-static void instrumentfilterview_ontweak(InstrumentFilterView*,
+static void instrumentfilterview_on_tweak(InstrumentFilterView*,
 	psy_ui_Slider*, float value);
-static void instrumentfilterview_onvalue(InstrumentFilterView*,
+static void instrumentfilterview_on_value(InstrumentFilterView*,
 	psy_ui_Slider*, float* value);
-static void instrumentfilterview_onfiltercomboboxchanged(InstrumentFilterView*,
-	psy_ui_ComboBox* sender, int index);
-static void instrumentfilterview_ontweaked(InstrumentFilterView*,
+static void instrumentfilterview_on_filter_combobox_changed(
+	InstrumentFilterView*, psy_ui_ComboBox* sender, int index);
+static void instrumentfilterview_on_tweaked(InstrumentFilterView*,
 	psy_ui_Component*, int pointindex);
-static void instrumentfilterview_onenvelopeviewtweaked(InstrumentFilterView*,
+static void instrumentfilterview_on_envelopeview_tweaked(InstrumentFilterView*,
 	psy_ui_Component* sender, int pointindex);
 
 /* vtable */
@@ -40,7 +40,7 @@ static void instrumentfilterview_vtable_init(InstrumentFilterView* self)
 	if (!instrumentfilterview_vtable_initialized) {
 		instrumentfilterview_vtable = *(self->component.vtable);
 		instrumentfilterview_vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			instrumentfilterview_on_destroyed;
 		instrumentfilterview_vtable_initialized = TRUE;
 	}
@@ -49,8 +49,7 @@ static void instrumentfilterview_vtable_init(InstrumentFilterView* self)
 
 /* implementation */
 void instrumentfilterview_init(InstrumentFilterView* self,
-	psy_ui_Component* parent, psy_audio_Instruments* instruments,
-	Workspace* workspace)
+	psy_ui_Component* parent, psy_audio_Instruments* instruments)
 {
 	psy_ui_Margin margin;
 	int i;
@@ -85,10 +84,10 @@ void instrumentfilterview_init(InstrumentFilterView* self,
 	psy_ui_combobox_init(&self->filtertype, &self->filter);
 	psy_ui_combobox_set_char_number(&self->filtertype, 20);
 	psy_ui_component_set_align(&self->filtertype.component, psy_ui_ALIGN_LEFT);
-	instrumentfilterview_fillfiltercombobox(self);
+	instrumentfilterview_fill_filter_combobox(self);
 	psy_ui_combobox_select(&self->filtertype, (int)F_NONE);
 	psy_signal_connect(&self->filtertype.signal_selchanged, self,
-		instrumentfilterview_onfiltercomboboxchanged);
+		instrumentfilterview_on_filter_combobox_changed);
 	psy_ui_slider_init(&self->randomcutoff, &self->top);
 	psy_ui_slider_set_text(&self->randomcutoff, "Random Cutoff");
 	psy_ui_slider_setdefaultvalue(&self->randomcutoff, 0.0);
@@ -110,14 +109,14 @@ void instrumentfilterview_init(InstrumentFilterView* self,
 		psy_ui_defaults_vmargin(psy_ui_defaults()));
 	adsrsliders_init(&self->adsrsliders, &self->bottom);	
 	psy_ui_slider_setdefaultvalue(&self->adsrsliders.decay, 0.370 /
-		adsrsliders_maxtime(&self->adsrsliders));
+		adsrsliders_max_time(&self->adsrsliders));
 	psy_ui_slider_setdefaultvalue(&self->adsrsliders.sustain, 0.5);
 	psy_ui_slider_setdefaultvalue(&self->adsrsliders.release, 0.370 /
-		adsrsliders_maxtime(&self->adsrsliders));	
+		adsrsliders_max_time(&self->adsrsliders));	
 	psy_signal_connect(&self->adsrsliders.signal_tweaked, self,
-		instrumentfilterview_ontweaked);
+		instrumentfilterview_on_tweaked);
 	psy_signal_connect(&self->envelopeview.envelopebox.signal_tweaked, self,
-		instrumentfilterview_ontweaked);
+		instrumentfilterview_on_tweaked);
 	psy_ui_slider_init(&self->cutoff, &self->bottom);
 	psy_ui_slider_setdefaultvalue(&self->cutoff, 1.0);
 	psy_ui_slider_set_text(&self->cutoff, "instrumentview.cut-off");
@@ -131,13 +130,13 @@ void instrumentfilterview_init(InstrumentFilterView* self,
 		psy_ui_slider_setcharnumber(sliders[i], 18);
 		psy_ui_slider_setvaluecharnumber(sliders[i], 15);
 		psy_ui_slider_connect(sliders[i], self,
-			(ui_slider_fpdescribe)instrumentfilterview_ondescribe,
-			(ui_slider_fptweak)instrumentfilterview_ontweak,
-			(ui_slider_fpvalue)instrumentfilterview_onvalue);
+			(ui_slider_fpdescribe)instrumentfilterview_on_describe,
+			(ui_slider_fptweak)instrumentfilterview_on_tweak,
+			(ui_slider_fpvalue)instrumentfilterview_on_value);
 	}
-	instrumentfilterview_updateslider(self);
+	instrumentfilterview_update_slider(self);
 	psy_signal_connect(&self->envelopeview.signal_tweaked, self,
-		instrumentfilterview_onenvelopeviewtweaked);
+		instrumentfilterview_on_envelopeview_tweaked);
 }
 
 void instrumentfilterview_on_destroyed(InstrumentFilterView* self)
@@ -145,7 +144,7 @@ void instrumentfilterview_on_destroyed(InstrumentFilterView* self)
 	psy_signal_dispose(&self->signal_status);
 }
 
-void instrumentfilterview_updateslider(InstrumentFilterView* self)
+void instrumentfilterview_update_slider(InstrumentFilterView* self)
 {	
 	psy_ui_slider_update(&self->randomcutoff);
 	psy_ui_slider_update(&self->randomresonance);
@@ -154,7 +153,7 @@ void instrumentfilterview_updateslider(InstrumentFilterView* self)
 	psy_ui_slider_update(&self->modamount);
 }
 
-void instrumentfilterview_fillfiltercombobox(InstrumentFilterView* self)
+void instrumentfilterview_fill_filter_combobox(InstrumentFilterView* self)
 {
 	uintptr_t ft;
 
@@ -164,13 +163,13 @@ void instrumentfilterview_fillfiltercombobox(InstrumentFilterView* self)
 	}
 }
 
-void instrumentfilterview_onfiltercomboboxchanged(InstrumentFilterView* self,
+void instrumentfilterview_on_filter_combobox_changed(InstrumentFilterView* self,
 	psy_ui_ComboBox* sender, int index)
 {
 	self->instrument->filtertype = (psy_dsp_FilterType)index;
 }
 
-void instrumentfilterview_setinstrument(InstrumentFilterView* self,
+void instrumentfilterview_set_instrument(InstrumentFilterView* self,
 	psy_audio_Instrument* instrument)
 {	
 	self->instrument = instrument;
@@ -189,10 +188,10 @@ void instrumentfilterview_setinstrument(InstrumentFilterView* self,
 		envelopeview_setenvelope(&self->envelopeview, NULL);
 		psy_ui_combobox_select(&self->filtertype, (intptr_t)F_NONE);
 	}
-	instrumentfilterview_updateslider(self);	
+	instrumentfilterview_update_slider(self);	
 }
 
-void instrumentfilterview_ondescribe(InstrumentFilterView* self,
+void instrumentfilterview_on_describe(InstrumentFilterView* self,
 	psy_ui_Slider* slider, char* text)
 {
 	if (!self->instrument) {		
@@ -235,7 +234,7 @@ void instrumentfilterview_ondescribe(InstrumentFilterView* self,
 	}
 }
 
-void instrumentfilterview_ontweak(InstrumentFilterView* self,
+void instrumentfilterview_on_tweak(InstrumentFilterView* self,
 	psy_ui_Slider* slider, float value)
 {
 	if (!self->instrument) {
@@ -258,7 +257,7 @@ void instrumentfilterview_ontweak(InstrumentFilterView* self,
 	envelopeview_update(&self->envelopeview);
 }
 
-void instrumentfilterview_onvalue(InstrumentFilterView* self,
+void instrumentfilterview_on_value(InstrumentFilterView* self,
 	psy_ui_Slider* slider, float* value)
 {
 	if (slider == &self->cutoff) {
@@ -284,7 +283,7 @@ void instrumentfilterview_onvalue(InstrumentFilterView* self,
 	}
 }
 
-void instrumentfilterview_ontweaked(InstrumentFilterView* self,
+void instrumentfilterview_on_tweaked(InstrumentFilterView* self,
 	psy_ui_Component* sender, int pointindex)
 {
 	if (self->instrument) {
@@ -301,7 +300,7 @@ void instrumentfilterview_ontweaked(InstrumentFilterView* self,
 	}
 }
 
-void instrumentfilterview_onenvelopeviewtweaked(InstrumentFilterView* self,
+void instrumentfilterview_on_envelopeview_tweaked(InstrumentFilterView* self,
 	psy_ui_Component* sender, int pointindex)
 {
 	adsrsliders_update(&self->adsrsliders);

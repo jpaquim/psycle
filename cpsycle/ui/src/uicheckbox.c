@@ -35,7 +35,7 @@ static void vtable_init(psy_ui_CheckBox* self)
 		vtable = *(self->component.vtable);
 		super_vtable = *(psy_ui_checkbox_base(self)->vtable);
 		vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			psy_ui_checkbox_on_destroyed;
 		vtable.on_mouse_down =
 			(psy_ui_fp_component_on_mouse_event)

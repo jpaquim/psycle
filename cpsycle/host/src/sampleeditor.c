@@ -548,7 +548,7 @@ static void vtable_init(SampleBox* self)
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
 		vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			samplebox_on_destroyed;
 		vtable_initialized = TRUE;
 	}
@@ -695,7 +695,7 @@ static void sampleeditor_vtable_init(SampleEditor* self)
 	if (!vtable_initialized) {
 		sampleeditor_vtable = *(self->component.vtable);
 		sampleeditor_vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			sampleeditor_on_destroyed;
 		sampleeditor_vtable_initialized = TRUE;
 	}

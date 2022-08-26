@@ -33,7 +33,7 @@ static void scrollzoomvtable_init(ScrollZoom* self)
 	if (!scrollzoom_vtable_initialized) {
 		scrollzoom_vtable = *(self->component.vtable);
 		scrollzoom_vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			scrollzoom_on_destroyed;
 		scrollzoom_vtable.ondraw =
 			(psy_ui_fp_component_ondraw)

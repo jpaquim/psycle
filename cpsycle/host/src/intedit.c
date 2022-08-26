@@ -37,7 +37,7 @@ static void intedit_vtable_init(IntEdit* self)
 	if (!intedit_vtable_initialized) {
 		intedit_vtable = *(self->component.vtable);
 		intedit_vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			intedit_on_destroyed;		
 		intedit_vtable_initialized = TRUE;
 	}

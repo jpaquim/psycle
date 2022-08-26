@@ -34,7 +34,7 @@ static void vtable_init(MachineComboBox* self)
 		vtable = *(self->machinebox.component.vtable);
 		super_vtable = *(self->machinebox.component.vtable);
 		vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			machinecombobox_on_destroyed;
 		vtable_initialized = TRUE;
 	}

@@ -925,7 +925,7 @@ static void machinestackinputs_vtable_init(MachineStackInputs* self)
 			(psy_ui_fp_component_on_preferred_size)
 			machinestackinputs_onpreferredsize;
 		machinestackinputs_vtable.onmouseenter =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			machinestackinputs_onmouseenter;
 		machinestackinputs_vtable.on_mouse_double_click =
 			(psy_ui_fp_component_on_mouse_event)
@@ -986,7 +986,7 @@ void machinestackinputs_build(MachineStackInputs* self)
 					first = machinestackcolumn_at(column, 0);
 					arrow = arrowui_allocinit(&self->component,						
 						psy_audio_wire_make(column->inputroute, first),
-						self->workspace);
+						self->state->machines);
 					component = &arrow->component;
 				}
 			}
@@ -1297,7 +1297,7 @@ void machinestackpane_build(MachineStackPane* self)
 					first = machinestackcolumn_at(column, 0);
 					arrow = arrowui_allocinit(&trackpane->client.component,
 						psy_audio_wire_make(column->inputroute, first),
-							self->workspace);
+							self->state->machines);
 					if (arrow) {
 						psy_ui_Margin levelmargin;
 
@@ -1482,7 +1482,7 @@ static void vtable_init(MachineStackView* self)
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);		
 		vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			machinestackview_destroyed;
 		vtable_initialized = TRUE;
 	}

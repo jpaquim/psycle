@@ -12,9 +12,10 @@
 #include "uiapp.h"
 /* platform */
 #include "../../detail/portable.h"
-#include "../../detail/trace.h"
+
 
 /* ListBoxClient */
+
 /* prototypes*/
 static void psy_ui_listboxclient_on_destroyed(psy_ui_ListBoxClient*);
 static void psy_ui_listboxclient_on_draw(psy_ui_ListBoxClient*,
@@ -35,7 +36,7 @@ static void psy_ui_listboxclient_vtable_init(psy_ui_ListBoxClient* self)
 	if (!psy_ui_listboxclient_vtable_initialized) {
 		psy_ui_listboxclient_vtable = *(self->component.vtable);
 		psy_ui_listboxclient_vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			psy_ui_listboxclient_on_destroyed;
 		psy_ui_listboxclient_vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
@@ -47,7 +48,7 @@ static void psy_ui_listboxclient_vtable_init(psy_ui_ListBoxClient* self)
 			(psy_ui_fp_component_on_mouse_event)
 			psy_ui_listboxclient_on_mouse_down;
 		psy_ui_listboxclient_vtable.onsize =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			psy_ui_listboxclient_on_size;
 		psy_ui_listboxclient_vtable_initialized = TRUE;
 	}
@@ -201,7 +202,7 @@ static void psy_ui_listbox_vtable_init(psy_ui_ListBox* self)
 	if (!psy_ui_listbox_vtable_initialized) {
 		psy_ui_listbox_vtable = *(self->component.vtable);
 		psy_ui_listbox_vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			psy_ui_listbox_on_destroyed;
 		psy_ui_listbox_vtable.onpreferredsize =
 			(psy_ui_fp_component_on_preferred_size)

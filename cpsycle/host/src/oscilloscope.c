@@ -36,7 +36,7 @@ static void vtable_init(Oscilloscope* self)
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
 		vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			oscilloscope_on_destroyed;
 		vtable.ondraw =
 			(psy_ui_fp_component_ondraw)

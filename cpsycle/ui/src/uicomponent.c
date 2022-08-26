@@ -255,8 +255,8 @@ static void destroy(psy_ui_Component*);
 static void show(psy_ui_Component*);
 static void showstate(psy_ui_Component*, int state);
 static void hide(psy_ui_Component*);
-static int visible(psy_ui_Component*);
-static int draw_visible(psy_ui_Component*);
+static bool visible(const psy_ui_Component*);
+static bool draw_visible(const psy_ui_Component*);
 static void move(psy_ui_Component*, psy_ui_Point);
 static void resize(psy_ui_Component*, psy_ui_Size);
 static void clientresize(psy_ui_Component*, psy_ui_Size);
@@ -338,7 +338,7 @@ static void on_mouse_move(psy_ui_Component* self, psy_ui_MouseEvent* ev)
 	}
 }
 
-static void onmousewheel(psy_ui_Component* self, psy_ui_MouseEvent* ev) { }
+static void on_mouse_wheel(psy_ui_Component* self, psy_ui_MouseEvent* ev) { }
 
 static void on_mouse_up(psy_ui_Component* self, psy_ui_MouseEvent* ev)
 {
@@ -432,7 +432,7 @@ static void vtable_init(void)
 		vtable.onclose = onclose;
 		vtable.on_mouse_down = on_mouse_down;
 		vtable.on_mouse_move = on_mouse_move;
-		vtable.onmousewheel = onmousewheel;
+		vtable.on_mouse_wheel = on_mouse_wheel;
 		vtable.on_mouse_up = on_mouse_up;
 		vtable.on_mouse_double_click = on_mouse_double_click;
 		vtable.onmouseenter = onmouseenter;
@@ -563,7 +563,7 @@ void hide(psy_ui_Component* self)
 {	
 }
 
-int visible(psy_ui_Component* self)
+bool visible(const psy_ui_Component* self)
 {	
 	assert(self);
 	assert(self->imp);
@@ -571,7 +571,7 @@ int visible(psy_ui_Component* self)
 	return self->imp->vtable->dev_visible(self->imp);
 }
 
-int draw_visible(psy_ui_Component* self)
+bool draw_visible(const psy_ui_Component* self)
 {
 	assert(self);	
 	assert(self->imp);

@@ -44,7 +44,7 @@ static void vtable_init(SpectrumAnalyzer* self)
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
 		vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			spectrumanalyzer_on_destroyed;
 		vtable.ondraw =
 			(psy_ui_fp_component_ondraw)

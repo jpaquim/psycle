@@ -14,6 +14,7 @@
 /* platform */
 #include "../../detail/portable.h"
 
+
 /* psy_ui_SliderPane */
 
 /* prototypes */
@@ -21,12 +22,17 @@ static void psy_ui_sliderpane_on_destroyed(psy_ui_SliderPane*);
 static void psy_ui_sliderpane_initsignals(psy_ui_SliderPane*);
 static void psy_ui_sliderpane_disposesignals(psy_ui_SliderPane*);
 static void psy_ui_sliderpane_ondraw(psy_ui_SliderPane*, psy_ui_Graphics*);
-static void psy_ui_sliderpane_drawverticalruler(psy_ui_SliderPane*, psy_ui_Graphics*);
+static void psy_ui_sliderpane_drawverticalruler(psy_ui_SliderPane*,
+	psy_ui_Graphics*);
 static void psy_ui_sliderpane_onalign(psy_ui_SliderPane*);
-static void psy_ui_sliderpane_on_mouse_down(psy_ui_SliderPane*, psy_ui_MouseEvent*);
-static void psy_ui_sliderpane_on_mouse_up(psy_ui_SliderPane*, psy_ui_MouseEvent*);
-static void psy_ui_sliderpane_onmousemove(psy_ui_SliderPane*, psy_ui_MouseEvent*);
-static void psy_ui_sliderpane_onmousewheel(psy_ui_SliderPane*, psy_ui_MouseEvent*);
+static void psy_ui_sliderpane_on_mouse_down(psy_ui_SliderPane*,
+	psy_ui_MouseEvent*);
+static void psy_ui_sliderpane_on_mouse_up(psy_ui_SliderPane*,
+	psy_ui_MouseEvent*);
+static void psy_ui_sliderpane_onmousemove(psy_ui_SliderPane*,
+	psy_ui_MouseEvent*);
+static void psy_ui_sliderpane_on_mouse_wheel(psy_ui_SliderPane*,
+	psy_ui_MouseEvent*);
 static void psy_ui_sliderpane_onmouseenter(psy_ui_SliderPane*);
 static void psy_ui_sliderpane_onmouseleave(psy_ui_SliderPane*);
 static void psy_ui_sliderpane_on_timer(psy_ui_SliderPane*, uintptr_t timerid);
@@ -34,7 +40,8 @@ static void psy_ui_sliderpane_updatevalue(psy_ui_SliderPane*);
 static void psy_ui_sliderpane_describevalue(psy_ui_SliderPane*);
 static void psy_ui_sliderpane_onpreferredsize(psy_ui_SliderPane*,
 	psy_ui_Size* limit, psy_ui_Size* rv);
-static psy_ui_RealRectangle psy_ui_sliderpane_sliderposition(const psy_ui_SliderPane*);
+static psy_ui_RealRectangle psy_ui_sliderpane_sliderposition(
+	const psy_ui_SliderPane*);
 
 /* vtable */
 static psy_ui_ComponentVtable vtable;
@@ -45,7 +52,7 @@ static void vtable_init(psy_ui_SliderPane* self)
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
 		vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			psy_ui_sliderpane_on_destroyed;
 		vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
@@ -57,22 +64,22 @@ static void vtable_init(psy_ui_SliderPane* self)
 			(psy_ui_fp_component_on_mouse_event)
 			psy_ui_sliderpane_on_mouse_down;
 		vtable.onalign =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			psy_ui_sliderpane_onalign;
 		vtable.on_mouse_move =
 			(psy_ui_fp_component_on_mouse_event)
 			psy_ui_sliderpane_onmousemove;
-		vtable.onmousewheel =
+		vtable.on_mouse_wheel =
 			(psy_ui_fp_component_on_mouse_event)
-			psy_ui_sliderpane_onmousewheel;
+			psy_ui_sliderpane_on_mouse_wheel;
 		vtable.on_mouse_up =
 			(psy_ui_fp_component_on_mouse_event)
 			psy_ui_sliderpane_on_mouse_up;
 		vtable.onmouseenter =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			psy_ui_sliderpane_onmouseenter;
 		vtable.onmouseleave = 
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			psy_ui_sliderpane_onmouseleave;
 		vtable.on_timer =
 			(psy_ui_fp_component_on_timer)
@@ -85,6 +92,8 @@ static void vtable_init(psy_ui_SliderPane* self)
 /* implementation */
 void psy_ui_sliderpane_init(psy_ui_SliderPane* self, psy_ui_Component* parent)
 {	
+	assert(self);
+	
 	psy_ui_component_init(&self->component, parent, NULL);
 	vtable_init(self);	
 	self->slider = NULL;	
@@ -287,7 +296,7 @@ void psy_ui_sliderpane_on_mouse_up(psy_ui_SliderPane* self, psy_ui_MouseEvent* e
 	}
 }
 
-void psy_ui_sliderpane_onmousewheel(psy_ui_SliderPane* self, psy_ui_MouseEvent* ev)
+void psy_ui_sliderpane_on_mouse_wheel(psy_ui_SliderPane* self, psy_ui_MouseEvent* ev)
 {
 	if (psy_ui_mouseevent_delta(ev) != 0) {
 		if (psy_ui_mouseevent_delta(ev) > 0) {

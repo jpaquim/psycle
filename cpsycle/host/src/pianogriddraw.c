@@ -38,6 +38,10 @@ static void pianogriddraw_draw_cursor(PianoGridDraw*, psy_ui_Graphics*,
 	psy_audio_BlockSelection);
 static psy_ui_Colour pianogriddraw_cellcolour(PianoGridDraw*,
 	uintptr_t step, uint8_t key, bool sel);
+static bool pianogriddraw_in_selection(PianoGridDraw*, uint8_t key,
+	psy_dsp_big_beat_t offset_abs);
+static void pianogriddraw_prepare_selection(PianoGridDraw* self,
+	psy_audio_Sequence* sequence, const psy_audio_BlockSelection* selection);
 
 /* implementation */
 void pianogriddraw_init(PianoGridDraw* self,
@@ -120,7 +124,10 @@ void pianogriddraw_draw_cells(PianoGridDraw* self, psy_ui_Graphics* g,
 	uint8_t key;
 
 	assert(self);
-
+	
+	pianogriddraw_prepare_selection(self,
+		self->gridstate->pv->sequence,
+		&self->gridstate->pv->selection);
 	for (key = clip.bottomright.key; key <= clip.topleft.key; ++key) {
 		double cpy;
 		uintptr_t steps;
@@ -138,11 +145,28 @@ void pianogriddraw_draw_cells(PianoGridDraw* self, psy_ui_Graphics* g,
 					cpy),
 				psy_ui_realsize_make(
 					pianogridstate_steppx(self->gridstate) + 1,
-					self->keyboardstate->key_extent_px + 1)),
+					self->keyboardstate->key_extent_px + 1)),									
 				pianogriddraw_cellcolour(self, steps, key,
-					pianogridstate_testselection(self->gridstate, key, c)));
+					pianogriddraw_in_selection(self, key, c)));
 		}
 	}
+}
+
+bool pianogriddraw_in_selection(PianoGridDraw* self, uint8_t key,
+	psy_dsp_big_beat_t offset_abs)
+{	
+	if (!psy_audio_blockselection_valid(&self->gridstate->pv->selection)) {
+		return FALSE;
+	}		
+	if (!(key >= self->gridstate->pv->selection.topleft.key &&
+			key < self->gridstate->pv->selection.bottomright.key)) {
+		return FALSE;
+	}				
+	if (offset_abs >= self->selection_top_abs &&
+		offset_abs < self->selection_bottom_abs) {
+		return TRUE;
+	}
+	return FALSE;
 }
 
 psy_ui_Colour pianogriddraw_cellcolour(PianoGridDraw* self, uintptr_t step, uint8_t key, bool sel)
@@ -187,6 +211,35 @@ psy_ui_Colour pianogriddraw_cellcolour(PianoGridDraw* self, uintptr_t step, uint
 		psy_ui_colour_add_rgb(&rv, -4, -4, -4);
 	}
 	return rv;
+}
+
+void pianogriddraw_prepare_selection(PianoGridDraw* self,
+	psy_audio_Sequence* sequence, const psy_audio_BlockSelection* selection)
+{	
+	psy_audio_SequenceEntry* top_entry;
+	psy_audio_SequenceEntry* bottom_entry;
+
+	if (!psy_audio_blockselection_valid(&self->gridstate->pv->selection)) {
+		return;
+	}	
+	self->selection_top_abs = self->selection_bottom_abs = 0.0;	
+	if (!psy_audio_blockselection_valid(selection)) {
+		return;
+	}			
+	top_entry = psy_audio_sequence_entry(sequence,
+		selection->topleft.order_index);
+	if (!top_entry) {
+		return;
+	}
+	bottom_entry = psy_audio_sequence_entry(sequence,
+		selection->bottomright.order_index);
+	if (!bottom_entry) {
+		return;
+	}		
+	self->selection_top_abs = psy_audio_sequenceentry_offset(top_entry) +
+		psy_audio_sequencecursor_offset(&selection->topleft);
+	self->selection_bottom_abs = psy_audio_sequenceentry_offset(bottom_entry) +
+		psy_audio_sequencecursor_offset(&selection->bottomright);
 }
 
 

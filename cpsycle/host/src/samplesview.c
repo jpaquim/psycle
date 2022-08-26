@@ -62,7 +62,7 @@ static void samplessongimportview_vtable_init(SamplesSongImportView* self)
 	if (!samplessongimportview_vtable_initialized) {
 		samplessongimportview_vtable = *(self->component.vtable);		
 		samplessongimportview_vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			samplessongimportview_on_destroyed;		
 		samplessongimportview_vtable_initialized = TRUE;
 	}
@@ -1052,7 +1052,7 @@ static void samplesview_vtable_init(SamplesView* self)
 	if (!samplesview_vtable_initialized) {
 		samplesview_vtable = *(self->component.vtable);		
 		samplesview_vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			samplesview_ondestroyed;		
 		samplesview_vtable_initialized = TRUE;
 	}

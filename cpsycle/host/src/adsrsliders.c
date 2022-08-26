@@ -14,6 +14,7 @@
 /* platform */
 #include "../../detail/portable.h"
 
+
 /* prototypes */
 static void adsrsliders_on_destroyed(AdsrSliders*);
 static void adsrsliders_on_volume_view_describe(AdsrSliders*,
@@ -32,7 +33,7 @@ static void vtable_init(AdsrSliders* self)
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
 		vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			adsrsliders_on_destroyed;
 		vtable_initialized = TRUE;
 	}
@@ -64,12 +65,12 @@ void adsrsliders_init(AdsrSliders* self, psy_ui_Component* parent)
 	psy_ui_slider_init(&self->release, &self->component);
 	psy_ui_slider_set_text(&self->release, "instrumentview.release");
 	psy_ui_slider_setdefaultvalue(&self->attack, 0.005 /
-		adsrsliders_maxtime(self));
+		adsrsliders_max_time(self));
 	psy_ui_slider_setdefaultvalue(&self->decay, 0.005 /
-		adsrsliders_maxtime(self));
+		adsrsliders_max_time(self));
 	psy_ui_slider_setdefaultvalue(&self->sustain, 1.0);
 	psy_ui_slider_setdefaultvalue(&self->release, 0.005 /
-		adsrsliders_maxtime(self));
+		adsrsliders_max_time(self));
 	for (i = 0; i < 4; ++i) {				
 		psy_ui_slider_setcharnumber(sliders[i], 21);
 		psy_ui_slider_setvaluecharnumber(sliders[i], 15);
@@ -159,18 +160,18 @@ void adsrsliders_on_volume_view_tweak(AdsrSliders* self,
 	}
 	if (slider == &self->attack) {
 		psy_dsp_envelope_setattacktime(self->envelope,
-			(psy_dsp_seconds_t)(value * adsrsliders_maxtime(self)));
+			(psy_dsp_seconds_t)(value * adsrsliders_max_time(self)));
 		psy_signal_emit(&self->signal_tweaked, self, 1, 1);
 	} else if (slider == &self->decay) {
 		psy_dsp_envelope_setdecaytime(self->envelope,
-			((psy_dsp_seconds_t)(value * adsrsliders_maxtime(self))));
+			((psy_dsp_seconds_t)(value * adsrsliders_max_time(self))));
 		psy_signal_emit(&self->signal_tweaked, self, 1, 2);
 	} else if (slider == &self->sustain) {
 		psy_dsp_envelope_setsustainvalue(self->envelope, value);
 		psy_signal_emit(&self->signal_tweaked, self, 1, 2);
 	} else if (slider == &self->release) {
 		psy_dsp_envelope_setreleasetime(self->envelope,
-			(psy_dsp_seconds_t)(value * adsrsliders_maxtime(self)));
+			(psy_dsp_seconds_t)(value * adsrsliders_max_time(self)));
 		psy_signal_emit(&self->signal_tweaked, self, 1, 3);
 	}	
 }
@@ -182,7 +183,7 @@ void adsrsliders_on_volume_view_value(AdsrSliders* self,
 		if (self->envelope) {
 			*value = (psy_dsp_seconds_t)
 				(psy_dsp_envelope_attacktime(self->envelope) /
-					adsrsliders_maxtime(self));
+					adsrsliders_max_time(self));
 		} else {
 			*value = 0.f;
 		}
@@ -190,7 +191,7 @@ void adsrsliders_on_volume_view_value(AdsrSliders* self,
 		if (self->envelope) {
 			*value = (psy_dsp_seconds_t)
 				(psy_dsp_envelope_decaytime(self->envelope) /
-					adsrsliders_maxtime(self));
+					adsrsliders_max_time(self));
 		} else {
 			*value = 0.f;
 		}	
@@ -204,18 +205,9 @@ void adsrsliders_on_volume_view_value(AdsrSliders* self,
 		if (self->envelope) {
 			*value = (psy_dsp_seconds_t)
 				(psy_dsp_envelope_releasetime(self->envelope) /
-					adsrsliders_maxtime(self));
+					adsrsliders_max_time(self));
 		} else {
 			*value = 0.5f;
 		}	
 	}
-}
-
-psy_dsp_big_seconds_t adsrsliders_maxtime(const AdsrSliders* self)
-{
-	if (self->envelope && self->envelope->timemode ==
-			psy_dsp_ENVELOPETIME_TICK) {
-		return 300.0;	
-	}
-	return 5.0;
 }

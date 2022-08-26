@@ -199,7 +199,7 @@ static void vtable_init(MidiChannelMappingView* self)
 			(psy_ui_fp_component_ondraw)
 			midichannelmappingview_ondraw;		
 		midichannelmappingview_vtable.onalign =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			midichannelmappingview_on_align;			
 		midichannelmappingview_vtable_initialized = TRUE;
 	}

@@ -38,7 +38,7 @@ static void vtable_init(FileEdit* self)
 		vtable = *(self->component.vtable);
 		super_vtable = *(self->component.vtable);
 		vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			fileedit_on_destroyed;		
 		vtable_initialized = TRUE;
 	}

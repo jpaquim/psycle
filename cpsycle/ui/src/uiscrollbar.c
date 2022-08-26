@@ -42,7 +42,7 @@ static void psy_ui_scrollbarpane_vtable_init(psy_ui_ScrollBarPane* self)
 	if (!psy_ui_scrollbarpane_vtable_initialized) {
 		psy_ui_scrollbarpane_vtable = *(self->component.vtable);
 		psy_ui_scrollbarpane_vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			psy_ui_scrollbarpane_on_destroyed;
 		psy_ui_scrollbarpane_vtable.on_mouse_down =
 			(psy_ui_fp_component_on_mouse_event)
@@ -327,9 +327,9 @@ static void psy_ui_scrollbar_vtable_init(psy_ui_ScrollBar* self)
 	if (!psy_ui_scrollbar_vtable_initialized) {
 		psy_ui_scrollbar_vtable = *(self->component.vtable);
 		psy_ui_scrollbar_vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			psy_ui_scrollbarpane_on_destroyed;
-		psy_ui_scrollbar_vtable.onmousewheel =
+		psy_ui_scrollbar_vtable.on_mouse_wheel =
 			(psy_ui_fp_component_on_mouse_event)
 			psy_ui_scrollbar_on_wheel;		
 		psy_ui_scrollbar_vtable_initialized = TRUE;

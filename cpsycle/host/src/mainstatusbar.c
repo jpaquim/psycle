@@ -28,7 +28,7 @@ static void status_label_vtable_init(StatusLabel* self)
 	if (!status_label_vtable_initialized) {
 		status_label_vtable = *(self->component.vtable);
 		status_label_vtable.onalign =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			statuslabel_on_align;		
 		status_label_vtable_initialized = TRUE;
 	}
@@ -93,7 +93,7 @@ static void vtable_init(MainStatusBar* self)
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
 		vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			mainstatusbar_on_destroyed;		
 		vtable_initialized = TRUE;
 	}

@@ -1,6 +1,6 @@
 /*
 ** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -14,22 +14,22 @@
 /* std */
 #include <math.h>
 /* platform */
-#include "../../detail/trace.h"
 #include "../../detail/portable.h"
 
 /* prototypes */
-static void trackscopes_ondraw(TrackScopes*, psy_ui_Graphics*);
+static void trackscopes_on_draw(TrackScopes*, psy_ui_Graphics*);
+static void trackscopes_draw_track(TrackScopes*, psy_ui_Graphics*,
+	psy_ui_RealPoint, uintptr_t track);
+static void trackscopes_draw_track_index(TrackScopes*, psy_ui_Graphics*,
+	psy_ui_RealPoint, uintptr_t track);
+static void trackscopes_draw_track_muted(TrackScopes*, psy_ui_Graphics*,
+	psy_ui_RealPoint, uintptr_t track);
 static void trackscopes_on_mouse_down(TrackScopes*, psy_ui_MouseEvent*);
-static void trackscopes_drawtrack(TrackScopes*, psy_ui_Graphics*,
-	double x, double y, uintptr_t track);
-static void trackscopes_drawtrackindex(TrackScopes*, psy_ui_Graphics*,
-	double x, double y, uintptr_t track);
-static void trackscopes_drawtrackmuted(TrackScopes*, psy_ui_Graphics*, double x,
-	double y, uintptr_t track);
-static void trackscopes_onalign(TrackScopes*);
-static void trackscopes_onpreferredsize(TrackScopes*, psy_ui_Size* limit,
+static void trackscopes_on_align(TrackScopes*);
+static void trackscopes_on_preferred_size(TrackScopes*, psy_ui_Size* limit,
 	psy_ui_Size* rv);
-static uintptr_t trackscopes_numrows(const TrackScopes*);
+static uintptr_t trackscopes_num_rows(const TrackScopes*);
+uintptr_t trackscopes_num_columns(const TrackScopes*);
 
 /* vtable */
 static psy_ui_ComponentVtable vtable;
@@ -40,14 +40,14 @@ static psy_ui_ComponentVtable* vtable_init(TrackScopes* self)
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);		
 		vtable.onalign =
-			(psy_ui_fp_component_event)
-			trackscopes_onalign;
+			(psy_ui_fp_component)
+			trackscopes_on_align;
 		vtable.onpreferredsize =
 			(psy_ui_fp_component_on_preferred_size)
-			trackscopes_onpreferredsize;
+			trackscopes_on_preferred_size;
 		vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
-			trackscopes_ondraw;
+			trackscopes_on_draw;
 		vtable.on_mouse_down =
 			(psy_ui_fp_component_on_mouse_event)
 			trackscopes_on_mouse_down;
@@ -71,50 +71,51 @@ void trackscopes_init(TrackScopes* self, psy_ui_Component* parent,
 	self->running = TRUE;	
 }
 
-void trackscopes_ondraw(TrackScopes* self, psy_ui_Graphics* g)
+void trackscopes_on_draw(TrackScopes* self, psy_ui_Graphics* g)
 {
 	if (workspace_song(self->workspace)) {
-		uintptr_t numtracks = psy_audio_song_num_song_tracks(
-			workspace_song(self->workspace));
+		uintptr_t numtracks;
 		uintptr_t c;
 		intptr_t rows = 1;
 		uintptr_t currtrack;
-		double cpx;
-		double cpy;
+		psy_ui_RealPoint cp;		
 								
 		currtrack = 0;
-		for (c = 0, cpx = cpy = 0; c < numtracks; ++c) {
-			trackscopes_drawtrackindex(self, g, cpx, cpy, c);
+		psy_ui_realpoint_init(&cp);
+		numtracks = psy_audio_song_num_song_tracks(workspace_song(
+			self->workspace));
+		for (c = 0; c < numtracks; ++c) {
+			trackscopes_draw_track_index(self, g, cp, c);
 			if (!psy_audio_trackstate_istrackmuted(
 					&workspace_song(self->workspace)->patterns.trackstate, c)) {
-				trackscopes_drawtrack(self, g, cpx, cpy, c);
+				trackscopes_draw_track(self, g, cp, c);
 			} else {
-				trackscopes_drawtrackmuted(self, g, cpx, cpy, c);
+				trackscopes_draw_track_muted(self, g, cp, c);
 			}
 			if (currtrack < self->maxcolumns - 1) {
 				++currtrack;
-				cpx += self->trackwidth;
+				cp.x += self->trackwidth;
 			} else {
 				currtrack = 0;
-				cpx = 0;
-				cpy += self->trackheight;			
+				cp.x = 0;
+				cp.y += self->trackheight;			
 			}
 		}
 	}
 }
 
-void trackscopes_drawtrackindex(TrackScopes* self, psy_ui_Graphics* g,
-	double x, double y, uintptr_t track)
+void trackscopes_draw_track_index(TrackScopes* self, psy_ui_Graphics* g,
+	psy_ui_RealPoint pt, uintptr_t track)
 {
 	char text[40];
 		
 	psy_snprintf(text, 40, "%X", (int)track);
-	psy_ui_textout(g, psy_ui_realpoint_make(x + 3, y + 2), text, strlen(text));
+	psy_ui_textout(g, psy_ui_realpoint_make(pt.x + 3, pt.y + 2), text, strlen(text));
 }
 
 
-void trackscopes_drawtrack(TrackScopes* self, psy_ui_Graphics* g,
-	double x, double y, uintptr_t track)
+void trackscopes_draw_track(TrackScopes* self, psy_ui_Graphics* g,
+	psy_ui_RealPoint pt, uintptr_t track)
 {
 	uintptr_t lastmachine;
 	double width;
@@ -130,8 +131,8 @@ void trackscopes_drawtrack(TrackScopes* self, psy_ui_Graphics* g,
 			psy_table_at(&workspace_player(self->workspace)->sequencer.lastmachine,
 				track);
 		psy_snprintf(text, 40, "%X", lastmachine);
-		psy_ui_textout(g, psy_ui_realpoint_make(x + width - 10, y + height - self->textheight), text,
-			strlen(text));
+		psy_ui_textout(g, psy_ui_realpoint_make(pt.x + width - 10,
+			pt.y + height - self->textheight), text, strlen(text));
 	} else {
 		lastmachine = psy_INDEX_INVALID;
 	}	
@@ -140,9 +141,9 @@ void trackscopes_drawtrack(TrackScopes* self, psy_ui_Graphics* g,
 		double centery;
 		bool active = FALSE;
 		
-		centery = height / 2 + y;
-		machine = psy_audio_machines_at(&workspace_song(self->workspace)->machines,
-			lastmachine);
+		centery = height / 2 + pt.y;
+		machine = psy_audio_machines_at(
+			&workspace_song(self->workspace)->machines, lastmachine);
 		if (machine) {
 			psy_audio_Buffer* memory;
 			
@@ -172,8 +173,8 @@ void trackscopes_drawtrack(TrackScopes* self, psy_ui_Graphics* g,
 						active = TRUE;
 						step = 1;
 						px = (float)width / (float)numsamples;
-						py = (float)height * psy_audio_buffer_rangefactor(memory,
-							PSY_DSP_AMP_RANGE_VST) / 3;						
+						py = (float)height * psy_audio_buffer_rangefactor(
+							memory, PSY_DSP_AMP_RANGE_VST) / 3;						
 						writepos = memory->writepos;
 						if (writepos >= numsamples) {
 							frame = numsamples - writepos;
@@ -193,8 +194,10 @@ void trackscopes_drawtrack(TrackScopes* self, psy_ui_Graphics* g,
 									continue;
 								}
 								psy_ui_drawline(g,
-									psy_ui_realpoint_make(x + x1, centery + y1),
-									psy_ui_realpoint_make(x + x2, centery + y2));
+									psy_ui_realpoint_make(
+										pt.x + x1, centery + y1),
+									psy_ui_realpoint_make(
+										pt.x + x2, centery + y2));
 							}
 							++frame;
 							if (frame >= numsamples) {
@@ -206,14 +209,14 @@ void trackscopes_drawtrack(TrackScopes* self, psy_ui_Graphics* g,
 			}			
 		}
 		if (!active) {
-			psy_ui_drawline(g, psy_ui_realpoint_make(x, centery),
-				psy_ui_realpoint_make(x + width, centery));
+			psy_ui_drawline(g, psy_ui_realpoint_make(pt.x, centery),
+				psy_ui_realpoint_make(pt.x + width, centery));
 		}
 	}	
 }
 
-void trackscopes_drawtrackmuted(TrackScopes* self, psy_ui_Graphics* g, double x,
-	double y, uintptr_t track)
+void trackscopes_draw_track_muted(TrackScopes* self, psy_ui_Graphics* g,
+	psy_ui_RealPoint pt, uintptr_t track)
 {	
 	double width;
 	double height;
@@ -222,20 +225,27 @@ void trackscopes_drawtrackmuted(TrackScopes* self, psy_ui_Graphics* g, double x,
 	width = self->trackwidth;
 	height = self->trackheight;
 	ident = width * 0.25;	
-	psy_ui_moveto(g, psy_ui_realpoint_make(x + ident, y + (int)(height * 0.2)));
+	psy_ui_moveto(g, psy_ui_realpoint_make(pt.x + ident,
+		pt.y + (int)(height * 0.2)));
 	psy_ui_curveto(g,
-		psy_ui_realpoint_make(x + width - ident * 2, y + (int)(height * 0.3)),
-		psy_ui_realpoint_make(x + width - ident, y + (int)(height * 0.6)),
-		psy_ui_realpoint_make(x + width - (int)(ident * 0.5), y + (int)(height * 0.9)));
-	psy_ui_moveto(g,
-		psy_ui_realpoint_make(x + ident + (int)(width * 0.1), y + (int)(height * 0.8)));
+		psy_ui_realpoint_make(pt.x + width - ident * 2,
+			pt.y + (int)(height * 0.3)),
+		psy_ui_realpoint_make(pt.x + width - ident,
+			pt.y + (int)(height * 0.6)),
+		psy_ui_realpoint_make(pt.x + width - (int)(ident * 0.5),
+			pt.y + (int)(height * 0.9)));
+	psy_ui_moveto(g, psy_ui_realpoint_make(pt.x + ident + (int)(width * 0.1),
+			pt.y + (int)(height * 0.8)));
 	psy_ui_curveto(g,
-		psy_ui_realpoint_make(x + ident + (int)(width * 0.3), y + (int)(height * 0.4)),
-		psy_ui_realpoint_make(x + width - ident * 2, y + (int)(height * 0.2)),
-		psy_ui_realpoint_make(x + width - (int)(ident * 0.5), y + (int)(height * 0.25)));
+		psy_ui_realpoint_make(pt.x + ident + (int)(width * 0.3),
+			pt.y + (int)(height * 0.4)),
+		psy_ui_realpoint_make(pt.x + width - ident * 2,
+			pt.y + (int)(height * 0.2)),
+		psy_ui_realpoint_make(pt.x + width - (int)(ident * 0.5),
+			pt.y + (int)(height * 0.25)));
 }
 
-void trackscopes_onalign(TrackScopes* self)
+void trackscopes_on_align(TrackScopes* self)
 {
 	const psy_ui_TextMetric* tm;
 	psy_ui_Size size;	
@@ -244,77 +254,72 @@ void trackscopes_onalign(TrackScopes* self)
 	size = psy_ui_component_scroll_size(&self->component);	
 	self->trackheight = (int)(tm->tmHeight * 2.75f);
 	self->textheight = tm->tmHeight;
-	if (workspace_song(self->workspace)) {
-		uintptr_t numtracks;
-
-		numtracks = psy_audio_song_num_song_tracks(workspace_song(
-			self->workspace));
-		if (numtracks <= 32) {
-			self->maxcolumns = 16;
-		} else {
-			self->maxcolumns = 32;
-		}		
-	} else {
-		self->maxcolumns = 16;
-	}
-	self->trackwidth = psy_ui_value_px(&size.width, tm, NULL) / self->maxcolumns;
+	self->maxcolumns = trackscopes_num_columns(self);	
+	self->trackwidth = psy_ui_value_px(&size.width, tm, NULL) /
+		self->maxcolumns;
 }
 
-void trackscopes_onpreferredsize(TrackScopes* self, psy_ui_Size* limit,
+void trackscopes_on_preferred_size(TrackScopes* self, psy_ui_Size* limit,
 	psy_ui_Size* rv)
 {			
 	
 	rv->width = psy_ui_value_make_ew(2 * 30);
-	rv->height = psy_ui_value_make_eh(trackscopes_numrows(self) * 2.75);
+	rv->height = psy_ui_value_make_eh(trackscopes_num_rows(self) * 2.75);
 }
 
-uintptr_t trackscopes_numrows(const TrackScopes* self)
-{	
-	if (workspace_song_const(self->workspace) &&
-			psy_audio_song_num_song_tracks(workspace_song_const(
-				self->workspace)) > 16) {
-		return 2;
+uintptr_t trackscopes_num_rows(const TrackScopes* self)
+{		 
+	if (workspace_song_const(self->workspace)) {		
+		return (uintptr_t)ceil(
+			(double)psy_audio_song_num_song_tracks(workspace_song_const(
+				self->workspace)) /
+			(double)trackscopes_num_columns(self));
 	}
 	return 1;
 }
 
-void trackscopes_on_mouse_down(TrackScopes* self, psy_ui_MouseEvent* ev)
+uintptr_t trackscopes_num_columns(const TrackScopes* self)
 {
+	uintptr_t rv;
+	
 	if (workspace_song(self->workspace)) {
-		intptr_t columns;
-		psy_ui_Size size;
-		const psy_ui_TextMetric* tm;
-		uintptr_t track;
-		double trackwidth;
 		uintptr_t numtracks;
-		
+
 		numtracks = psy_audio_song_num_song_tracks(workspace_song(
 			self->workspace));
-		columns = numtracks < self->maxcolumns ? numtracks : self->maxcolumns;
-		size = psy_ui_component_scroll_size(&self->component);
-		tm = psy_ui_component_textmetric(&self->component);
-		trackwidth = psy_ui_value_px(&size.width, tm, NULL) / columns;
-		track = (uintptr_t)((psy_ui_mouseevent_pt(ev).x / trackwidth) + floor(psy_ui_mouseevent_pt(ev).y / self->trackheight) * columns);
-		if (psy_ui_mouseevent_button(ev) == 1) {
-			if (!psy_audio_trackstate_istrackmuted(
-					&workspace_song(self->workspace)->patterns.trackstate, track)) {
-				psy_audio_trackstate_mutetrack(
-					&workspace_song(self->workspace)->patterns.trackstate, track);
-			} else {
-				psy_audio_trackstate_unmutetrack(
-					&workspace_song(self->workspace)->patterns.trackstate, track);
-			}
-		} else if (psy_ui_mouseevent_button(ev) == 2) {
-			if (psy_audio_patterns_istracksoloed(&workspace_song(self->workspace)->patterns,
-						track)) {
-				psy_audio_patterns_deactivatesolotrack(
-					&workspace_song(self->workspace)->patterns);
-			} else {
-				psy_audio_patterns_activatesolotrack(
-					&workspace_song(self->workspace)->patterns, track);
-			}
-			psy_ui_component_invalidate(&self->component);
+		if (numtracks > 32) {
+			return 32;
+		}		
+	}
+	return 16;
+}
+
+void trackscopes_on_mouse_down(TrackScopes* self, psy_ui_MouseEvent* ev)
+{
+	uintptr_t track;				
+	uintptr_t row;
+	psy_audio_Patterns* patterns;
+		
+	if (!workspace_song(self->workspace)) {
+		return;
+	}								
+	patterns = &workspace_song(self->workspace)->patterns;
+	row = (uintptr_t)(psy_ui_mouseevent_pt(ev).y / self->trackheight);
+	track = (row * self->maxcolumns) +
+		((uintptr_t)(psy_ui_mouseevent_pt(ev).x / self->trackwidth));
+	if (psy_ui_mouseevent_button(ev) == 1) {
+		if (!psy_audio_trackstate_istrackmuted(&patterns->trackstate, track)) {
+			psy_audio_trackstate_mutetrack(&patterns->trackstate, track);
+		} else {
+			psy_audio_trackstate_unmutetrack(&patterns->trackstate, track);
 		}
+	} else if (psy_ui_mouseevent_button(ev) == 2) {
+		if (psy_audio_patterns_istracksoloed(patterns, track)) {
+			psy_audio_patterns_deactivatesolotrack(patterns);
+		} else {
+			psy_audio_patterns_activatesolotrack(patterns, track);
+		}
+		psy_ui_component_invalidate(&self->component);
 	}
 }
 

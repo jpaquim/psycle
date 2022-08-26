@@ -14,20 +14,21 @@ extern "C" {
 #endif
 
 /* ArrowUi */
+
 typedef struct ArrowUi {
 	/* inherits */
 	psy_ui_Component component;
 	/* internal */
 	psy_audio_Wire wire;	
-	Workspace* workspace;
+	psy_audio_Machines* machines;
 } ArrowUi;
 
-void arrowui_init(ArrowUi*, psy_ui_Component* parent,	
-	psy_audio_Wire, Workspace*);
+void arrowui_init(ArrowUi*, psy_ui_Component* parent, psy_audio_Wire,
+	psy_audio_Machines*);
 
 ArrowUi* arrowui_alloc(void);
-ArrowUi* arrowui_allocinit(psy_ui_Component* parent,
-	psy_audio_Wire, Workspace*);
+ArrowUi* arrowui_allocinit(psy_ui_Component* parent, psy_audio_Wire,
+	psy_audio_Machines*);
 
 #ifdef __cplusplus
 }

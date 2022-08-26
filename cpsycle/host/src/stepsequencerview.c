@@ -147,7 +147,7 @@ static void vtable_init(StepsequencerBar* self)
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
 		vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			stepsequencerbar_on_destroyed;
 		vtable.on_mouse_down =
 			(psy_ui_fp_component_on_mouse_event)
@@ -489,7 +489,7 @@ static void stepsequencerbarselect_vtable_init(StepsequencerBarSelect* self)
 	if (!stepsequencerbarselect_vtable_initialized) {
 		stepsequencerbarselect_vtable = *(self->component.vtable);
 		stepsequencerbarselect_vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			stepsequencerbarselect_on_destroyed;
 		stepsequencerbarselect_vtable.on_mouse_down =
 			(psy_ui_fp_component_on_mouse_event)

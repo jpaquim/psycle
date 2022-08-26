@@ -162,7 +162,7 @@ static void vtable_init(InputDefiner* self)
 		vtable = *(self->component.vtable);
 		super_vtable = *(self->component.vtable);
 		vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			inputdefiner_on_destroyed;
 		vtable.on_key_down =
 			(psy_ui_fp_component_on_key_event)
@@ -171,7 +171,7 @@ static void vtable_init(InputDefiner* self)
 			(psy_ui_fp_component_on_key_event)
 			inputdefiner_on_key_up;		
 		vtable.on_focuslost =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			inputdefiner_on_focus_lost;
 		vtable_initialized = TRUE;
 	}

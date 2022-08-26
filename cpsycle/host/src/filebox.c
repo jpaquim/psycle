@@ -30,7 +30,7 @@ static void fileline_vtable_init(FileLine* self)
 	if (!fileline_vtable_initialized) {
 		fileline_vtable = *(self->component.vtable);
 		fileline_vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			fileline_on_destroyed;
 		fileline_vtable_initialized = TRUE;
 	}
@@ -139,7 +139,7 @@ static void filebox_vtable_init(FileBox* self)
 	if (!filebox_vtable_initialized) {
 		filebox_vtable = *(self->component.vtable);
 		filebox_vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			filebox_on_destroyed;
 		filebox_vtable.on_mouse_down =
 			(psy_ui_fp_component_on_mouse_event)

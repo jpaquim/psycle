@@ -152,8 +152,8 @@ void psy_audio_sequenceselection_deselect(psy_audio_SequenceSelection* self,
 	}
 }
 
-bool psy_audio_sequenceselection_is_selected(const psy_audio_SequenceSelection* self,
-	psy_audio_OrderIndex index)
+bool psy_audio_sequenceselection_is_selected(const psy_audio_SequenceSelection*
+	self, psy_audio_OrderIndex index)
 {
 	psy_List* p;
 

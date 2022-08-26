@@ -58,7 +58,9 @@ typedef struct PianoGridDraw {
 	bool drawgrid;
 	bool drawentries;
 	bool drawcursor;
-	bool drawplaybar;	
+	bool drawplaybar;
+	psy_dsp_big_beat_t selection_top_abs;
+	psy_dsp_big_beat_t selection_bottom_abs;	
 } PianoGridDraw;
 
 void pianogriddraw_init(PianoGridDraw*,

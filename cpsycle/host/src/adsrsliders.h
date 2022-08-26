@@ -36,7 +36,16 @@ void adsrsliders_init(AdsrSliders*, psy_ui_Component* parent);
 void adsrsliders_set_envelope(AdsrSliders*,
 	psy_dsp_Envelope*);
 void adsrsliders_update(AdsrSliders*);
-psy_dsp_big_seconds_t adsrsliders_maxtime(const AdsrSliders*);
+
+INLINE psy_dsp_big_seconds_t adsrsliders_max_time(const AdsrSliders* self)
+{
+	if (self->envelope && self->envelope->timemode ==
+			psy_dsp_ENVELOPETIME_TICK) {
+		return 300.0;	
+	}
+	return 5.0;
+}
+
 
 INLINE psy_ui_Component* adsrsliders_base(AdsrSliders* self)
 {

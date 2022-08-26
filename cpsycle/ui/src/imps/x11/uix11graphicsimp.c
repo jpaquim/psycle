@@ -559,28 +559,88 @@ void psy_ui_x11_g_imp_drawline(psy_ui_x11_GraphicsImp* self,
 void psy_ui_x11_g_imp_moveto(psy_ui_x11_GraphicsImp* self, psy_ui_RealPoint pt)
 {	
 	self->cp = pt;
-//	MoveToEx(self->hdc, pt.x, pt.y, NULL);
 }
 
 void psy_ui_x11_g_imp_devcurveto(psy_ui_x11_GraphicsImp* self,
 	psy_ui_RealPoint control_p1, psy_ui_RealPoint control_p2,
 	psy_ui_RealPoint p)    
 {
-	/* todo */
-	
-	psy_ui_x11_g_imp_drawline(self,
-		self->cp.x - - (int)(self->org.x), self->cp.y - - (int)(self->org.y),
-		p.x - (int)(self->org.x), p.y - (int)(self->org.y));
-	
-	/* POINT pts[3];
-   
-	pts[0].x = control_p1.x;
-	pts[0].y = control_p1.y;
-	pts[1].x = control_p2.x;
-	pts[1].y = control_p2.y;
-	pts[2].x = p.x;
-	pts[2].y = p.y;
-	PolyBezierTo(self->hdc, pts, 3); */
+	/* from FLTK/blob/master/src/fl_curve.cxx */	
+	double x = self->cp.x;
+	double y = self->cp.y;
+	double x1 = control_p1.x;
+	double yy1 = control_p1.y;
+	double x2 = control_p2.x;
+	double y2 = control_p2.y;
+	double x3 = p.x;
+	double y3 = p.y;;
+
+	/* find the area: */
+	double a = fabs((x-x2)*(y3-yy1)-(y-y2)*(x3-x1));
+	double b = fabs((x-x3)*(y2-yy1)-(y-y3)*(x2-x1));
+	if (b > a) a = b;
+
+	/* use that to guess at the number of segments: */
+	int nSeg = (int)(sqrt(a)/4);
+	if (nSeg > 1) {
+		double e;
+		/* coefficients of 3rd order equation: */
+		double xa;
+		double xb;
+		double xc;
+		/* forward differences: */
+		double dx1;
+		double dx3;
+		double dx2;
+		/* coefficients of 3rd order equation: */
+		double ya;
+		double yb;
+		double yc;
+		/* forward differences: */
+		double dy1;
+		double dy3;
+		double dy2;
+				
+		if (nSeg > 100) {
+			nSeg = 100; /* make huge curves not hang forever */
+		}
+		e = 1.0/nSeg;
+		/* calculate the coefficients of 3rd order equation: */
+		xa = (x3-3*x2+3*x1-x);
+		xb = 3*(x2-2*x1+x);
+		xc = 3*(x1-x);
+		/* calculate the forward differences: */
+		dx1 = ((xa*e+xb)*e+xc)*e;
+		dx3 = 6*xa*e*e*e;
+		dx2 = dx3 + 2*xb*e*e;
+		/* calculate the coefficients of 3rd order equation: */
+		ya = (y3-3*y2+3*yy1-y);
+		yb = 3*(y2-2*yy1+y);
+		yc = 3*(yy1-y);
+		/* calculate the forward differences: */
+		dy1 = ((ya*e+yb)*e+yc)*e;
+		dy3 = 6*ya*e*e*e;
+		dy2 = dy3 + 2*yb*e*e;
+		/* draw points 1 .. nSeg-2: */
+		for (int i=2; i<nSeg; i++) {
+			double lastx;
+			double lasty;
+			
+			lastx = x;
+			lasty = y;
+			x += dx1;
+			dx1 += dx2;
+			dx2 += dx3;
+			y += dy1;
+			dy1 += dy2;
+			dy2 += dy3;
+			psy_ui_x11_g_imp_drawline(self, lastx, lasty, x, y);      
+		}
+		/* draw point nSeg-1: */
+		psy_ui_x11_g_imp_drawline(self, x, y, x+dx1, y+dy1);
+	} else {
+		psy_ui_x11_g_imp_drawline(self, x, y, x3, y3);  
+	} 
 }
 
 void psy_ui_x11_g_imp_devdrawarc(psy_ui_x11_GraphicsImp* self,

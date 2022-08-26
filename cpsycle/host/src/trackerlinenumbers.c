@@ -54,7 +54,7 @@ static void trackerlinenumbers_vtable_init(TrackerLineNumbers* self)
 			(psy_ui_fp_component_ondraw)
 			trackerlinenumbers_on_draw;
 		trackerlinenumbers_vtable.onalign =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			trackerlinenumbers_on_align;
 		trackerlinenumbers_vtable.onpreferredsize =
 			(psy_ui_fp_component_on_preferred_size)

@@ -915,12 +915,21 @@ bool  psy_audio_machines_is_connect_as_mixersend(const psy_audio_Machines* self)
 	return self->mixersendconnect;
 }
 
-void psy_audio_machines_selectwire(psy_audio_Machines* self, psy_audio_Wire wire)
+bool psy_audio_machines_wire_selected(const psy_audio_Machines* self,
+	psy_audio_Wire wire)
+{
+	assert(self);
+	
+	return psy_audio_wire_equal(&self->selectedwire, &wire);
+}
+
+void psy_audio_machines_selectwire(psy_audio_Machines* self,
+	psy_audio_Wire wire)
 {
 	assert(self);
 
 	self->selectedwire = wire;
-	psy_signal_emit(&self->signal_wireselected, self, 1, &wire);
+	psy_signal_emit(&self->signal_wireselected, self, 0);
 }
 
 MachineList* psy_audio_machines_level(psy_audio_Machines* self, uintptr_t slot,

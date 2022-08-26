@@ -32,9 +32,9 @@ static void vtable_init(ZoomBox* self)
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
 		vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			zoombox_on_destroyed;
-		vtable.onmousewheel =
+		vtable.on_mouse_wheel =
 			(psy_ui_fp_component_on_mouse_event)
 			zoombox_on_mouse_wheel;		
 		vtable_initialized = TRUE;
@@ -56,8 +56,8 @@ void zoombox_init(ZoomBox* self, psy_ui_Component* parent)
 	self->property = NULL;
 	psy_ui_component_set_style_type(&self->component, STYLE_ZOOMBOX);
 	psy_ui_component_set_align_expand(&self->component, psy_ui_HEXPAND);
-	psy_ui_component_set_default_align(&self->component,
-		psy_ui_ALIGN_LEFT, psy_ui_margin_zero());
+	psy_ui_component_set_default_align(&self->component, psy_ui_ALIGN_LEFT,
+		psy_ui_margin_zero());
 	psy_ui_button_init_connect(&self->zoomout, zoombox_base(self),
 		self, zoombox_on_zoom_out);
 	/* zoom out */
@@ -165,6 +165,8 @@ void zoombox_data_exchange(ZoomBox* self, psy_Property* property)
 void zoombox_on_property_changed(ZoomBox* self,
 	psy_Property* sender)
 {
+	assert(self);
+	
 	if (self->zoomrate != psy_property_item_double(sender)) {
 		self->zoomrate = psy_property_item_double(sender);
 		zoombox_update(self);
@@ -254,8 +256,8 @@ void zoombox_on_edit_accept(ZoomBox* self, psy_ui_TextArea* sender)
 			*p = '\0';
 		}
 		rate = atoi(temp);
-		zoombox_set_rate(self,  psy_min(self->range.second, psy_max(self->range.first,
-			(double)(rate / 100.0))));
+		zoombox_set_rate(self,  psy_min(self->range.second,
+			psy_max(self->range.first, (double)(rate / 100.0))));
 		psy_ui_component_set_focus(&self->component);
 	}
 }

@@ -601,7 +601,7 @@ static void pluginsview_vtable_init(PluginsView* self)
 		pluginsview_vtable = *(self->component.vtable);
 		pluginsview_super_vtable = pluginsview_vtable;
 		pluginsview_vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			pluginsview_on_destroyed;
 		pluginsview_vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
@@ -619,10 +619,10 @@ static void pluginsview_vtable_init(PluginsView* self)
 			(psy_ui_fp_component_on_mouse_event)
 			pluginsview_onmousedoubleclick;
 		pluginsview_vtable.onpreferredsize =
-			(psy_ui_fp_component_onpreferredscrollsize)
+			(psy_ui_fp_component_on_preferred_size)
 			pluginsview_onpreferredscrollsize;
 		pluginsview_vtable.ondragstart =
-			(psy_ui_fp_component_ondragstart)
+			(psy_ui_fp_component_on_drag_event)
 			pluginsview_ondragstart;
 		pluginsview_vtable_initialized = TRUE;
 	}

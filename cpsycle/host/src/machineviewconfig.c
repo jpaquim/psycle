@@ -334,7 +334,8 @@ void machineviewconfig_load_colours(MachineViewConfig* self)
 	style = psy_ui_style(STYLE_MV_WIRE);
 	read_colour(self->theme, "mv_wirecolour", style, TRUE);
 	style = psy_ui_style(STYLE_MV_WIRE_SELECT);
-	read_colour(self->theme, "mv_selwirecolour", style, TRUE);
+	psy_ui_style_set_colour(style, psy_ui_colour_make(0xFFFFFF));
+	//read_colour(self->theme, "mv_selwirecolour", style, TRUE);
 	style = psy_ui_style(STYLE_MV_WIRE_HOVER);
 	read_colour(self->theme, "mv_hoverwirecolour", style, TRUE);
 	style = psy_ui_style(STYLE_MV_WIRE_POLY);

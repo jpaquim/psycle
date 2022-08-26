@@ -53,7 +53,7 @@ static void vtable_init(TransformPatternView* self)
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
 		vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			transformpatternview_on_destroyed;
 		vtable_initialized = TRUE;
 	}

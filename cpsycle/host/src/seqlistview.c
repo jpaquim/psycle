@@ -326,7 +326,7 @@ static void seqviewtrack_vtable_init(SeqViewTrack* self)
 	if (!seqviewtrack_vtable_initialized) {
 		seqviewtrack_vtable = *(self->component.vtable);
 		seqviewtrack_vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			seqviewtrack_on_destroyed;
 		seqviewtrack_vtable.on_mouse_down =
 			(psy_ui_fp_component_on_mouse_event)

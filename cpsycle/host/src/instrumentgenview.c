@@ -27,12 +27,17 @@ static void instrumentgeneralview_onnnacut(InstrumentGeneralView*);
 static void instrumentgeneralview_onnnarelease(InstrumentGeneralView*);
 static void instrumentgeneralview_onnnafadeout(InstrumentGeneralView*);
 static void instrumentgeneralview_onnnanone(InstrumentGeneralView*);
-static void instrumentgeneralview_nnahighlight(InstrumentGeneralView*, psy_ui_Button*);
+static void instrumentgeneralview_nnahighlight(InstrumentGeneralView*,
+	psy_ui_Button*);
 /* dct */
-static void instrumentgeneralview_ondctnone(InstrumentGeneralView*, psy_ui_Button* sender);	
-static void instrumentgeneralview_ondctnote(InstrumentGeneralView*, psy_ui_Button* sender);
-static void instrumentgeneralview_ondctsample(InstrumentGeneralView*, psy_ui_Button* sender);
-static void instrumentgeneralview_ondctinstrument(InstrumentGeneralView*, psy_ui_Button* sender);
+static void instrumentgeneralview_ondctnone(InstrumentGeneralView*,
+	psy_ui_Button* sender);	
+static void instrumentgeneralview_ondctnote(InstrumentGeneralView*,
+	psy_ui_Button* sender);
+static void instrumentgeneralview_ondctsample(InstrumentGeneralView*,
+	psy_ui_Button* sender);
+static void instrumentgeneralview_ondctinstrument(InstrumentGeneralView*,
+	psy_ui_Button* sender);
 static void instrumentgeneralview_updatedct(InstrumentGeneralView*);
 /* dca */
 static void instrumentgeneralview_ondcacut(InstrumentGeneralView*);

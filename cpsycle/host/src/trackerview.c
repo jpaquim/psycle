@@ -34,7 +34,8 @@ static psy_ui_RealRectangle trackergrid_selection_bounds(TrackerGrid*);
 static void trackergrid_drag_selection(TrackerGrid*, psy_audio_SequenceCursor);
 static void trackergrid_on_scroll(TrackerGrid*, psy_ui_Component* sender);
 static void trackergrid_clear_midline(TrackerGrid*);
-static void trackergrid_input_value(TrackerGrid*, uintptr_t value, bool isdigit);
+static void trackergrid_input_value(TrackerGrid*, uintptr_t value,
+	bool isdigit);
 static void trackergrid_prev_track(TrackerGrid*);
 static void trackergrid_next_track(TrackerGrid*);
 static void trackergrid_prev_line(TrackerGrid*);
@@ -77,7 +78,7 @@ static void vtable_init(TrackerGrid* self)
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
 		vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			trackergrid_on_destroyed;
 		vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
@@ -95,16 +96,16 @@ static void vtable_init(TrackerGrid* self)
 			(psy_ui_fp_component_on_mouse_event)
 			trackergrid_on_mouse_doubleclick;
 		vtable.onalign =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			trackergrid_on_align;
 		vtable.on_timer =
 			(psy_ui_fp_component_on_timer)
 			trackergrid_on_timer;
 		vtable.on_focus =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			trackergrid_on_focus;
 		vtable.on_focuslost =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			trackergrid_on_focus_lost;
 		vtable_initialized = TRUE;
 	}

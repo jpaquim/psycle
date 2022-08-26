@@ -30,16 +30,16 @@ static void newmachinesection_vtable_init(NewMachineSection* self)
 	if (!newmachinesection_vtable_initialized) {
 		newmachinesection_vtable = *(self->component.vtable);
 		newmachinesection_vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			newmachinesection_on_destroyed;
 		newmachinesection_vtable.on_mouse_down =
 			(psy_ui_fp_component_on_mouse_event)
 			newmachinesection_on_mouse_down;
 		newmachinesection_vtable.ondragover =
-			(psy_ui_fp_component_ondragover)
+			(psy_ui_fp_component_on_drag_event)
 			newmachinesection_on_drag_over;
 		newmachinesection_vtable.ondrop =
-			(psy_ui_fp_component_ondrop)
+			(psy_ui_fp_component_on_drag_event)
 			newmachinesection_on_drop;
 		newmachinesection_vtable.onlanguagechanged =
 			(psy_ui_fp_component_onlanguagechanged)

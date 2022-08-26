@@ -41,9 +41,9 @@ static void vtable_init(psy_ui_ComboBox* self)
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
 		vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			psy_ui_combobox_on_destroyed;
-		vtable.onmousewheel =
+		vtable.on_mouse_wheel =
 			(psy_ui_fp_component_on_mouse_event)
 			psy_ui_combobox_on_mouse_wheel;		
 		vtable_initialized = TRUE;

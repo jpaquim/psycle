@@ -43,7 +43,7 @@ static void vtable_init(psy_ui_Button* self)
 		vtable = *(psy_ui_button_base(self)->vtable);
 		super_vtable = *(psy_ui_button_base(self)->vtable);
 		vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			psy_ui_button_on_destroyed;
 		vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
@@ -64,7 +64,7 @@ static void vtable_init(psy_ui_Button* self)
 			(psy_ui_fp_component_onlanguagechanged)
 			psy_ui_button_on_language_changed;
 		vtable.onupdatestyles =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			psy_ui_button_on_update_styles;
 		vtable.on_timer =
 			(psy_ui_fp_component_on_timer)
