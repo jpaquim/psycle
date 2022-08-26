@@ -28,7 +28,7 @@ static void trackheaderview_vtable_init(SeqviewTrackHeaders* self)
 	if (!trackheaderviews_vtable_initialized) {
 		trackheaderviews_vtable = *(self->component.vtable);
 		trackheaderviews_vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			seqviewtrackheaders_on_destroyed;		
 		trackheaderviews_vtable.on_mouse_up =
 			(psy_ui_fp_component_on_mouse_event)

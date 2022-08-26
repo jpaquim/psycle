@@ -38,7 +38,7 @@ static void vtable_init(psy_ui_Label* self)
 		vtable = *(self->component.vtable);
 		super_vtable = *(self->component.vtable);
 		vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			psy_ui_label_on_destroyed;
 		vtable.ondraw =
 			(psy_ui_fp_component_ondraw)

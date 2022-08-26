@@ -102,6 +102,8 @@ const psy_audio_Machine* psy_audio_machines_selectedmachine_const(const
 uintptr_t psy_audio_machines_paramselected(const psy_audio_Machines*);
 void psy_audio_machines_selectwire(psy_audio_Machines*, psy_audio_Wire);
 psy_audio_Wire psy_audio_machines_selectedwire(const psy_audio_Machines*);
+bool psy_audio_machines_wire_selected(const psy_audio_Machines*,
+	psy_audio_Wire);
 uintptr_t psy_audio_machines_tweakparam(psy_audio_Machines*);
 uintptr_t psy_audio_machines_soloed(psy_audio_Machines*);
 void psy_audio_machines_solo(psy_audio_Machines*, uintptr_t slot);

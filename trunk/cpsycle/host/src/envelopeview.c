@@ -44,10 +44,10 @@ static void envelopebox_vtable_init(EnvelopeBox* self)
 	if (!envelopebox_vtable_initialized) {
 		envelopebox_vtable = *(self->component.vtable);
 		envelopebox_vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			envelopebox_on_destroyed;
 		envelopebox_vtable.onsize =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			envelopebox_onsize;
 		envelopebox_vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
@@ -623,7 +623,7 @@ static psy_ui_ComponentVtable* envelopeview_vtable_init(EnvelopeView* self)
 	if (!envelopeview_vtable_initialized) {
 		envelopeview_vtable = *(self->component.vtable);
 		envelopeview_vtable.on_destroyed =
-			(psy_ui_fp_component_destroy)
+			(psy_ui_fp_component)
 			envelopeview_on_destroyed;
 		envelopeview_vtable_initialized = TRUE;
 	}
@@ -643,7 +643,8 @@ void envelopeview_init(EnvelopeView* self, psy_ui_Component* parent)
 	psy_ui_component_set_align(envelopebox_base(&self->envelopebox),
 		psy_ui_ALIGN_CLIENT);
 	scrollzoom_init(&self->zoom, envelopeview_base(self));
-	psy_ui_component_set_align(scrollzoom_base(&self->zoom), psy_ui_ALIGN_BOTTOM);
+	psy_ui_component_set_align(scrollzoom_base(&self->zoom),
+		psy_ui_ALIGN_BOTTOM);
 	psy_ui_component_set_preferred_size(scrollzoom_base(&self->zoom),
 		psy_ui_size_make(psy_ui_value_make_px(0),
 		psy_ui_value_make_eh(1)));
@@ -693,7 +694,8 @@ void envelopeview_setenvelope(EnvelopeView* self,
 	} else {
 		psy_ui_button_disable_highlight(&self->bar.ticks);
 	}
-	if (!settings || (settings && settings->timemode == psy_dsp_ENVELOPETIME_SECONDS)) {
+	if (!settings || (settings && settings->timemode ==
+			psy_dsp_ENVELOPETIME_SECONDS)) {
 		psy_ui_button_highlight(&self->bar.millisec);
 	} else {
 		psy_ui_button_disable_highlight(&self->bar.millisec);

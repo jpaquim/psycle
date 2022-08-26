@@ -335,7 +335,7 @@ void psy_ui_eventdispatch_notify(psy_ui_EventDispatch* self,
 		psy_signal_emit(&component->signal_mousemove, component, 1, ev);
 		break;
 	case psy_ui_WHEEL:
-		component->vtable->onmousewheel(component, (psy_ui_MouseEvent*)ev);
+		component->vtable->on_mouse_wheel(component, (psy_ui_MouseEvent*)ev);
 		psy_signal_emit(&component->signal_mousewheel, component, 1, ev);
 		break;
 	case psy_ui_KEYDOWN:

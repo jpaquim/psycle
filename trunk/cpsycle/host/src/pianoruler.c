@@ -64,7 +64,7 @@ void pianoruler_onpreferredsize(PianoRuler* self, const psy_ui_Size* limit,
 		? psy_ui_value_make_px(pianogridstate_beattopx(self->gridstate,
 			patternviewstate_length(self->gridstate->pv)))
 		: psy_ui_value_make_px(0.0);
-	rv->height = psy_ui_value_make_eh(1.0);
+	rv->height = psy_ui_value_make_eh(2.0);
 }
 
 void pianoruler_ondraw(PianoRuler* self, psy_ui_Graphics* g)
@@ -98,6 +98,10 @@ void pianoruler_drawruler(PianoRuler* self, psy_ui_Graphics* g,
 	psy_dsp_big_beat_t c;
 	double scrollleft;	
 	psy_ui_Style* style;
+	psy_ui_Colour overlaycolour;
+	psy_ui_Colour linecolour;
+	psy_ui_Colour linebeatcolour;
+	psy_ui_Colour linebeat4colour;
 	
 	assert(self);
 
@@ -106,13 +110,31 @@ void pianoruler_drawruler(PianoRuler* self, psy_ui_Graphics* g,
 	}
 	tm = psy_ui_component_textmetric(&self->component);
 	size = psy_ui_component_scroll_size_px(&self->component);	
-	baseline = size.height - 1;
-	baselinetop = baseline - tm->tmHeight / 3;
+	baseline = size.height - tm->tmHeight + 2;
+	
+	//size.height - 1;
+	baselinetop = baseline + tm->tmHeight / 3;
 	scrollleft = psy_ui_component_scroll_left_px(&self->component);
 	style = psy_ui_style(STYLE_PV_ROWBEAT);
 	psy_ui_setcolour(g, style->background.colour);
 	// patternviewskin_rowbeatcolour(patternviewstate_skin(self->gridstate->pv),
 	//	0, 0));
+	linecolour = psy_ui_style(STYLE_SEQEDT_RULER_BOTTOM)->colour;
+	if (psy_ui_app_hasdarktheme(psy_ui_app())) {
+		overlaycolour = psy_ui_colour_white();
+	} else {
+		overlaycolour = psy_ui_colour_black();
+	}
+	linebeatcolour = psy_ui_colour_overlayed(&linecolour, &overlaycolour, 0.10);
+	linebeat4colour = psy_ui_colour_overlayed(&linecolour, &overlaycolour, 0.20);
+	psy_ui_drawsolidrectangle(g, psy_ui_realrectangle_make(
+		psy_ui_realpoint_zero(), psy_ui_realsize_make(size.width, baseline)),
+		psy_ui_style(STYLE_SEQEDT_RULER_TOP)->background.colour);	
+	psy_ui_drawsolidrectangle(g, psy_ui_realrectangle_make(
+		psy_ui_realpoint_make(0, baseline),
+		psy_ui_realsize_make(size.width, size.height - baseline)),
+		psy_ui_style(STYLE_SEQEDT_RULER_BOTTOM)->background.colour);
+	psy_ui_setcolour(g, linecolour);	
 	psy_ui_drawline(g, psy_ui_realpoint_make(scrollleft, baseline),
 		psy_ui_realpoint_make(size.width + scrollleft, baseline));
 	c = patternviewstate_draw_offset(self->gridstate->pv,
@@ -155,7 +177,7 @@ void pianoruler_drawbeat(PianoRuler* self, psy_ui_Graphics* g, intptr_t beat,
 		//	0, 0));
 	}
 	psy_ui_drawline(g, psy_ui_realpoint_make(x, baseline),
-		psy_ui_realpoint_make(x, baseline - tmheight / 2));
+		psy_ui_realpoint_make(x, baseline + tmheight / 2));
 	psy_snprintf(txt, 40, "%d", beat);
 	psy_ui_textout(g, psy_ui_realpoint_make(x + 3, baseline - tmheight), txt, psy_strlen(txt));
 	style = psy_ui_style(STYLE_PV_ROWBEAT);

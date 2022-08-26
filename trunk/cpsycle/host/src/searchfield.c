@@ -33,7 +33,7 @@ static void searchfield_vtable_init(SearchField* self)
 	if (!searchfield_vtable_initialized) {
 		searchfield_vtable = *(self->component.vtable);
 		searchfield_vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			searchfield_on_destroyed;
 		searchfield_vtable.onlanguagechanged =
 			(psy_ui_fp_component_onlanguagechanged)

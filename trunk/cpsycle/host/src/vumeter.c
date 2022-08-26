@@ -35,7 +35,7 @@ static void vumeter_vtable_init(Vumeter* self)
 			(psy_ui_fp_component_ondraw)
 			vumeter_on_draw;
 		vumeter_vtable.onalign =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			vumeter_on_align;
 		vumeter_vtable_initialized = TRUE;
 	}

@@ -46,7 +46,7 @@ static void seqeditruler_vtable_init(SeqEditRuler* self)
 	if (!seqeditruler_vtable_initialized) {
 		seqeditruler_vtable = *(self->component.vtable);
 		seqeditruler_vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			seqeditruler_on_destroyed;
 		seqeditruler_vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
@@ -58,10 +58,10 @@ static void seqeditruler_vtable_init(SeqEditRuler* self)
 			(psy_ui_fp_component_on_mouse_event)
 			seqeditruler_onmousemove;
 		seqeditruler_vtable.onmouseenter =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			seqeditruler_onmouseenter;
 		seqeditruler_vtable.onmouseleave =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			seqeditruler_onmouseleave;
 		seqeditruler_vtable_initialized = TRUE;
 	}
@@ -109,6 +109,7 @@ void seqeditruler_drawruler(SeqEditRuler* self, psy_ui_Graphics* g,
 {
 	const psy_ui_TextMetric* tm;
 	psy_ui_RealSize size;	
+	psy_ui_RealRectangle clip_g;
 	double textline;
 	double linewidth;
 	psy_dsp_big_beat_t duration;
@@ -147,9 +148,13 @@ void seqeditruler_drawruler(SeqEditRuler* self, psy_ui_Graphics* g,
 	psy_ui_setcolour(g, linecolour);
 	psy_ui_drawline(g, psy_ui_realpoint_make(0, baseline),
 		psy_ui_realpoint_make(linewidth, baseline));
-	clipstart = 0;
-	clipend = duration;
+	clip_g = psy_ui_graphics_cliprect(g);
+	clipstart = seqeditstate_pxtobeat(self->state, clip_g.left);
+	clipend = psy_min(seqeditstate_pxtobeat(self->state, clip_g.right),
+		duration);
 	step = seqeditruler_step(self);
+	
+	clipstart = floor(clipstart / step) * step;
 	for (currbeat = clipstart; currbeat <= clipend; currbeat += step) {
 		double cpx;
 		char txt[64];

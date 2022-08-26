@@ -30,7 +30,7 @@ static void newmachinedetail_vtable_init(NewMachineDetail* self)
 	if (!newmachinedetail_vtable_initialized) {
 		newmachinedetail_vtable = *(self->component.vtable);
 		newmachinedetail_vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			newmachinedetail_on_destroyed;
 		newmachinedetail_vtable_initialized = TRUE;
 	}

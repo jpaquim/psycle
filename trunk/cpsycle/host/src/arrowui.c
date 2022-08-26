@@ -10,12 +10,13 @@
 /* host */
 #include "styles.h" 
 
-/* ArrowUi */
 
 /* prototypes */
-static void arrowui_ondraw(ArrowUi*, psy_ui_Graphics*);
+static void arrowui_on_destroyed(ArrowUi*);
+static void arrowui_on_draw(ArrowUi*, psy_ui_Graphics*);
 static void arrowui_on_mouse_down(ArrowUi*, psy_ui_MouseEvent*);
-static bool arrowui_selected(const ArrowUi*);
+static void arrowui_on_wire_selected(ArrowUi*, psy_audio_Machines* sender);
+static void arrowui_select_wire(ArrowUi*);
 
 /* vtable */
 static psy_ui_ComponentVtable arrowui_vtable;
@@ -26,10 +27,13 @@ static void arrowui_vtable_init(ArrowUi* self)
 	assert(self);
 
 	if (!arrowui_vtable_initialized) {
-		arrowui_vtable = *(self->component.vtable);		
+		arrowui_vtable = *(self->component.vtable);
+		arrowui_vtable.on_destroyed =
+			(psy_ui_fp_component)
+			arrowui_on_destroyed;
 		arrowui_vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
-			arrowui_ondraw;		
+			arrowui_on_draw;
 		arrowui_vtable.on_mouse_down =
 			(psy_ui_fp_component_on_mouse_event)
 			arrowui_on_mouse_down;
@@ -40,17 +44,21 @@ static void arrowui_vtable_init(ArrowUi* self)
 
 /* implementation */
 void arrowui_init(ArrowUi* self, psy_ui_Component* parent,
-	psy_audio_Wire wire, Workspace* workspace)
+	psy_audio_Wire wire, psy_audio_Machines* machines)
 {
 	assert(self);
-	assert(workspace);
-	assert(workspace->song);	
+	assert(machines);	
 
-	psy_ui_component_init(&self->component, parent, NULL);	
+	psy_ui_component_init(&self->component, parent, NULL);		
 	arrowui_vtable_init(self);	
-	psy_ui_component_set_style_type(&self->component, STYLE_MV_ARROW);
+	psy_ui_component_set_style_type(&self->component, STYLE_MV_WIRE);
+	psy_ui_component_set_style_type_select(&self->component,
+		STYLE_MV_WIRE_SELECT);
 	self->wire = wire;
-	self->workspace = workspace;	
+	self->machines = machines;
+	psy_signal_connect(&self->machines->signal_wireselected, self,
+		arrowui_on_wire_selected);
+	arrowui_select_wire(self);
 }
 
 ArrowUi* arrowui_alloc(void)
@@ -58,61 +66,62 @@ ArrowUi* arrowui_alloc(void)
 	return (ArrowUi*)malloc(sizeof(ArrowUi));
 }
 
-ArrowUi* arrowui_allocinit(psy_ui_Component* parent,
-	psy_audio_Wire wire, Workspace* workspace)
+ArrowUi* arrowui_allocinit(psy_ui_Component* parent, psy_audio_Wire wire,
+	psy_audio_Machines* machines)
 {
 	ArrowUi* rv;
 
 	rv = arrowui_alloc();
 	if (rv) {
-		arrowui_init(rv, parent, wire, workspace);
+		arrowui_init(rv, parent, wire, machines);
 		rv->component.deallocate = TRUE;
 	}
 	return rv;
 }
 
-void arrowui_ondraw(ArrowUi* self, psy_ui_Graphics* g)
+void arrowui_on_destroyed(ArrowUi* self)
 {
-	psy_ui_RealSize size;
-	psy_ui_Style* style;
-
-	assert(self);
-	
-	if (arrowui_selected(self)) {		
-		style = psy_ui_style(STYLE_MV_WIRE_SELECT);		
-	} else {
-		style = psy_ui_style(STYLE_MV_WIRE);		
-	}
-	psy_ui_setcolour(g, style->colour);
-	size = psy_ui_component_size_px(&self->component);
-	psy_ui_drawline(g, 
-		psy_ui_realpoint_make(0, size.height / 2),
-		psy_ui_realpoint_make(size.width / 2, size.height / 2));
-	psy_ui_drawline(g,
-		psy_ui_realpoint_make(size.width / 2, size.height / 2),
-		psy_ui_realpoint_make(size.width / 2, size.height));
+	psy_signal_disconnect(&self->machines->signal_wireselected, self,
+		arrowui_on_wire_selected);
 }
 
-bool arrowui_selected(const ArrowUi* self)
+void arrowui_on_draw(ArrowUi* self, psy_ui_Graphics* g)
 {
-	if (workspace_song(self->workspace) &&
-			psy_audio_wire_valid(&self->wire)) {
-		psy_audio_Machines* machines;
-		psy_audio_Wire selectedwire;
+	psy_ui_RealSize size;
+	psy_ui_RealPoint center;
 
-		machines = &self->workspace->song->machines;
-		selectedwire = psy_audio_machines_selectedwire(machines);
-		return psy_audio_wire_equal(&self->wire, &selectedwire);
-	}
-	return FALSE;
+	assert(self);
+		
+	size = psy_ui_component_size_px(&self->component);
+	center = psy_ui_realpoint_make(size.width / 2.0, size.height / 2.0);
+	psy_ui_drawline(g, psy_ui_realpoint_make(0.0, center.y), center);
+	psy_ui_drawline(g, center, psy_ui_realpoint_make(center.x, size.height));
 }
 
 void arrowui_on_mouse_down(ArrowUi* self, psy_ui_MouseEvent* ev)
-{
-	if (workspace_song(self->workspace)) {
-		psy_audio_Machines* machines;
+{	
+	assert(self);
+	
+	psy_audio_machines_selectwire(self->machines, self->wire);	
+}
 
-		machines = &self->workspace->song->machines;
-		psy_audio_machines_selectwire(machines, self->wire);
+void arrowui_on_wire_selected(ArrowUi* self, psy_audio_Machines* sender)
+{	
+	assert(self);
+	
+	arrowui_select_wire(self);
+}
+
+void arrowui_select_wire(ArrowUi* self)
+{		
+	assert(self);		
+	assert(self->machines);
+		
+	if (psy_audio_machines_wire_selected(self->machines, self->wire)) {		
+		psy_ui_component_add_style_state(&self->component,
+			psy_ui_STYLESTATE_SELECT);
+	} else {
+		psy_ui_component_remove_style_state(&self->component,
+			psy_ui_STYLESTATE_SELECT);
 	}
 }

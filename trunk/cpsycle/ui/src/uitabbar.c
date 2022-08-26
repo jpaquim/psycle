@@ -32,7 +32,7 @@ static void psy_ui_tab_vtable_init(psy_ui_Tab* self)
 	if (!psy_ui_tab_vtable_initialized) {
 		psy_ui_tab_vtable = *(self->component.vtable);
 		psy_ui_tab_vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			psy_ui_tab_on_destroyed;
 		psy_ui_tab_vtable.on_mouse_down =
 			(psy_ui_fp_component_on_mouse_event)
@@ -47,7 +47,7 @@ static void psy_ui_tab_vtable_init(psy_ui_Tab* self)
 			(psy_ui_fp_component_onlanguagechanged)
 			psy_ui_tab_onlanguagechanged;
 		psy_ui_tab_vtable.onupdatestyles =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			psy_ui_tab_onupdatestyles;
 		psy_ui_tab_vtable_initialized = TRUE;
 	}
@@ -286,7 +286,7 @@ void psy_ui_tab_loadbitmaps(psy_ui_Tab* self)
 /* prototypes */
 static void tabbar_on_destroyed(psy_ui_TabBar*);
 static void tabbar_on_tab_clicked(psy_ui_TabBar*, psy_ui_Tab* sender);
-static void tabbar_onmousewheel(psy_ui_TabBar*, psy_ui_MouseEvent*);
+static void tabbar_on_mouse_wheel(psy_ui_TabBar*, psy_ui_MouseEvent*);
 /* vtable */
 static psy_ui_ComponentVtable vtable;
 static bool vtable_initialized = FALSE;
@@ -296,11 +296,11 @@ static void vtable_init(psy_ui_TabBar* self)
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
 		vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			tabbar_on_destroyed;
-		vtable.onmousewheel =
+		vtable.on_mouse_wheel =
 			(psy_ui_fp_component_on_mouse_event)
-			tabbar_onmousewheel;
+			tabbar_on_mouse_wheel;
 		vtable_initialized = TRUE;
 	}
 	self->component.vtable = &vtable;
@@ -473,7 +473,7 @@ const psy_ui_Tab* psy_ui_tabbar_tab_const(const psy_ui_TabBar* self,
 	return psy_ui_tabbar_tab((psy_ui_TabBar*)self, tabindex);
 }
 
-void tabbar_onmousewheel(psy_ui_TabBar* self, psy_ui_MouseEvent* ev)
+void tabbar_on_mouse_wheel(psy_ui_TabBar* self, psy_ui_MouseEvent* ev)
 {
 	intptr_t delta;
 

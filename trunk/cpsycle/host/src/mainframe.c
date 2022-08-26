@@ -125,7 +125,7 @@ static void vtable_init(MainFrame* self)
 			(psy_ui_fp_component_onclose)
 			mainframe_on_close;
 		vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			mainframe_on_destroyed;
 		vtable.on_key_down =
 			(psy_ui_fp_component_on_key_event)
@@ -134,7 +134,7 @@ static void vtable_init(MainFrame* self)
 			(psy_ui_fp_component_on_key_event)
 			mainframe_on_key_up;
 		vtable.ondragover =
-			(psy_ui_fp_component_ondragover)
+			(psy_ui_fp_component_on_drag_event)
 			mainframe_on_drag_over;
 		vtable.on_mouse_down =
 			(psy_ui_fp_component_on_mouse_event)
@@ -149,10 +149,10 @@ static void vtable_init(MainFrame* self)
 			(psy_ui_fp_component_on_mouse_event)
 			mainframe_on_mouse_move;
 		vtable.ondrop =
-			(psy_ui_fp_component_ondrop)
+			(psy_ui_fp_component_on_drag_event)
 			mainframe_on_drop;
 		vtable.on_focus =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			mainframe_on_focus;
 		vtable.on_timer =
 			(psy_ui_fp_component_on_timer)
@@ -675,6 +675,7 @@ void mainframe_init_seq_editor(MainFrame* self)
 	psy_ui_component_setmaximumsize(seqeditor_base(&self->seqeditor),
 		psy_ui_size_make(psy_ui_value_zero(), psy_ui_value_make_ph(0.7)));
 	psy_ui_splitter_init(&self->splitseqeditor, &self->pane);
+	// self->splitseqeditor.direct = TRUE;
 	psy_ui_component_set_align(psy_ui_splitter_base(&self->splitseqeditor),
 		psy_ui_ALIGN_BOTTOM);
 	if (!generalconfig_showsequenceedit(psycleconfig_general(

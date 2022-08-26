@@ -35,7 +35,7 @@ static void fileviewfilter_vtable_init(FileViewFilter* self)
 	if (!fileviewfilter_vtable_initialized) {
 		fileviewfilter_vtable = *(self->component.vtable);
 		fileviewfilter_vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			fileviewfilter_on_destroyed;
 		fileviewfilter_vtable_initialized = TRUE;
 	}
@@ -143,7 +143,7 @@ static void fileviewlinks_vtable_init(FileViewLinks* self)
 	if (!fileviewlinks_vtable_initialized) {
 		fileviewlinks_vtable = *(self->component.vtable);
 		fileviewlinks_vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			fileviewlinks_on_destroyed;
 		fileviewlinks_vtable_initialized = TRUE;
 	}
@@ -219,7 +219,7 @@ static void vtable_init(FileView* self)
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
 		vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			fileview_on_destroyed;
 		vtable_initialized = TRUE;
 	}

@@ -27,6 +27,7 @@ static psy_ui_RealPoint splitter_hthumbcenter(const psy_ui_Splitter*);
 static void psy_ui_splitter_on_button(psy_ui_Splitter*);
 static void psy_ui_splitter_on_show_toggle(psy_ui_Splitter*, psy_ui_Component* sender);
 static void psy_ui_splitter_on_hide_toggle(psy_ui_Splitter*, psy_ui_Component* sender);
+static void splitter_update_positions(psy_ui_Splitter*);
 
 /* vtable */
 static psy_ui_ComponentVtable vtable;
@@ -54,13 +55,13 @@ static void vtable_init(psy_ui_Splitter* self)
 			(psy_ui_fp_component_on_mouse_event)
 			splitter_on_mouse_up;
 		vtable.onmouseenter =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			splitter_on_mouse_enter;
 		vtable.hide =
-			(psy_ui_fp_component_hide)
+			(psy_ui_fp_component)
 			splitter_on_hide;
 		vtable.show =
-			(psy_ui_fp_component_show)
+			(psy_ui_fp_component)
 			splitter_on_show;
 		vtable_initialized = TRUE;
 	}
@@ -78,6 +79,7 @@ void psy_ui_splitter_init(psy_ui_Splitter* self, psy_ui_Component* parent)
 	self->isvertical = TRUE;
 	self->toggle = NULL;
 	self->button = NULL;
+	self->direct = FALSE;
 	psy_ui_size_init(&self->restoresize);
 	psy_ui_component_set_align(&self->component, psy_ui_ALIGN_LEFT);
 	psy_ui_component_set_style_types(&self->component,
@@ -278,75 +280,85 @@ void splitter_onmousemove(psy_ui_Splitter* self, psy_ui_MouseEvent* ev)
 			default:
 				break;
 		}
-		psy_ui_component_move(&self->component,
-			psy_ui_point_make_px(newposition.left, newposition.top));
-		psy_ui_realrectangle_union(&newposition, &position);
-		psy_ui_component_invalidate_rect(psy_ui_component_parent(&self->component),
-			newposition);		
+		psy_ui_component_move(&self->component, psy_ui_point_make_px(
+			newposition.left, newposition.top));
+		if (self->direct) {
+			splitter_update_positions(self);	
+		} else {
+			psy_ui_realrectangle_union(&newposition, &position);
+			psy_ui_component_invalidate_rect(psy_ui_component_parent(
+				&self->component), newposition);		
+		}
 	}
 	splitter_setcursor(self);
 }
 
 void splitter_on_mouse_up(psy_ui_Splitter* self, psy_ui_MouseEvent* ev)
-{			
+{				
 	if (psy_ui_mouseevent_button(ev) == 1) {
-		psy_ui_RealRectangle position;
-		psy_ui_Component* prev;
-		psy_ui_Component* next;
-
 		psy_ui_component_release_capture(&self->component);
-		prev = splitter_prev(self);
-		next = splitter_next(self);		
-		if (prev) {
-			position = psy_ui_component_position(&self->component);
-			if (prev->align == psy_ui_ALIGN_LEFT) {
-				psy_ui_RealRectangle prev_position;
+		splitter_update_positions(self);
+	}
+	self->resize = 0;
+	psy_ui_component_remove_style_state(&self->component,
+		psy_ui_STYLESTATE_SELECT);	
+}
 
-				prev_position = psy_ui_component_position(prev);
-				psy_ui_component_set_preferred_size(prev,
-					psy_ui_size_make(
-						psy_ui_value_make_px(position.left -
-							prev_position.left),
-						psy_ui_component_scroll_size(prev).height));
-			} else if (prev->align == psy_ui_ALIGN_RIGHT) {
-				psy_ui_RealRectangle prev_position;
+void splitter_update_positions(psy_ui_Splitter* self)
+{	
+	psy_ui_RealRectangle position;
+	psy_ui_Component* prev;
+	psy_ui_Component* next;
+	
+	prev = splitter_prev(self);
+	next = splitter_next(self);		
+	if (prev) {
+		position = psy_ui_component_position(&self->component);
+		if (prev->align == psy_ui_ALIGN_LEFT) {
+			psy_ui_RealRectangle prev_position;
 
-				prev_position = psy_ui_component_position(prev);
-				psy_ui_component_set_preferred_size(prev,
-					psy_ui_size_make(
-						psy_ui_value_make_px(
-							prev_position.right - position.right),
-						psy_ui_component_scroll_size(prev).height));
-			} else if (prev->align == psy_ui_ALIGN_TOP) {				
-				psy_ui_component_set_preferred_size(prev,
-					psy_ui_size_make(
-						psy_ui_component_scroll_size(prev).width,
-						psy_ui_value_make_px(position.top)));
-			} else if (prev->align == psy_ui_ALIGN_BOTTOM) {
-				psy_ui_RealRectangle prev_position;
-				
-				prev_position = psy_ui_component_position(prev);				
-				psy_ui_component_set_preferred_size(prev,
-					psy_ui_size_make(
-						psy_ui_component_scroll_size(prev).width,
-						psy_ui_value_make_px(prev_position.bottom -
-							position.bottom)));
-			}
-			psy_ui_component_align(psy_ui_component_parent(&self->component));
-			psy_ui_component_invalidate(psy_ui_component_parent(&self->component));
-		}		
-		splitter_setcursor(self);		
+			prev_position = psy_ui_component_position(prev);
+			psy_ui_component_set_preferred_size(prev,
+				psy_ui_size_make(
+					psy_ui_value_make_px(position.left -
+						prev_position.left),
+					psy_ui_component_scroll_size(prev).height));
+		} else if (prev->align == psy_ui_ALIGN_RIGHT) {
+			psy_ui_RealRectangle prev_position;
+
+			prev_position = psy_ui_component_position(prev);
+			psy_ui_component_set_preferred_size(prev,
+				psy_ui_size_make(
+					psy_ui_value_make_px(
+						prev_position.right - position.right),
+					psy_ui_component_scroll_size(prev).height));
+		} else if (prev->align == psy_ui_ALIGN_TOP) {				
+			psy_ui_component_set_preferred_size(prev,
+				psy_ui_size_make(
+					psy_ui_component_scroll_size(prev).width,
+					psy_ui_value_make_px(position.top)));
+		} else if (prev->align == psy_ui_ALIGN_BOTTOM) {
+			psy_ui_RealRectangle prev_position;
+			
+			prev_position = psy_ui_component_position(prev);				
+			psy_ui_component_set_preferred_size(prev,
+				psy_ui_size_make(
+					psy_ui_component_scroll_size(prev).width,
+					psy_ui_value_make_px(prev_position.bottom -
+						position.bottom)));
+		}
+		psy_ui_component_align(psy_ui_component_parent(&self->component));
+		psy_ui_component_invalidate(psy_ui_component_parent(&self->component));
+	} else {
 		if (prev) {
 			psy_ui_component_invalidate(prev);
 		}
 		if (next) {
 			psy_ui_component_invalidate(next);
 		}
-		psy_ui_component_invalidate(&self->component);
-	}	
-	self->resize = 0;
-	psy_ui_component_remove_style_state(&self->component,
-		psy_ui_STYLESTATE_SELECT);	
+		psy_ui_component_invalidate(&self->component);	
+	}
+	splitter_setcursor(self);		
 }
 
 void splitter_on_mouse_enter(psy_ui_Splitter* self)

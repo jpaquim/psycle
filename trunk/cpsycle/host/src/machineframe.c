@@ -30,7 +30,7 @@ static psy_ui_ComponentVtable* vtable_init(ParameterBar* self)
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
 		vtable.onalign =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			parameterbar_onalign;
 		vtable_initialized = TRUE;
 	}

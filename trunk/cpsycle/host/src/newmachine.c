@@ -152,7 +152,7 @@ static void newmachinefiltergroup_vtable_init(NewMachineFilterGroup*
 	if (!newmachinefiltergroup_vtable_initialized) {
 		newmachinefiltergroup_vtable = *(self->component.vtable);		
 		newmachinefiltergroup_vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			newmachinefiltergroup_on_destroyed;
 		newmachinefiltergroup_vtable_initialized = TRUE;
 	}
@@ -377,7 +377,7 @@ static void newmachinefiltersbar_vtable_init(NewMachineFiltersBar* self)
 	if (!newmachinefiltersbar_vtable_initialized) {
 		newmachinefiltersbar_vtable = *(self->component.vtable);		
 		newmachinefiltersbar_vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			newmachinefiltersbar_on_destroyed;
 		newmachinefiltersbar_vtable_initialized = TRUE;
 	}
@@ -521,7 +521,7 @@ static void newmachinesectionspane_vtable_init(NewMachineSectionsPane* self)
 	if (!newmachinesectionspane_vtable_initialized) {
 		newmachinesectionspane_vtable = *(self->component.vtable);
 		newmachinesectionspane_vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			newmachinesectionspane_on_destroyed;
 		newmachinesectionspane_vtable.on_mouse_down =
 			(psy_ui_fp_component_on_mouse_event)
@@ -821,7 +821,7 @@ static void newmachine_vtable_init(NewMachine* self)
 	if (!newmachine_vtable_initialized) {
 		newmachine_vtable = *(self->component.vtable);
 		newmachine_vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			newmachine_on_destroyed;
 		newmachine_vtable.on_mouse_down =
 			(psy_ui_fp_component_on_mouse_event)

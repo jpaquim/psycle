@@ -91,7 +91,7 @@ static void instrumentkeyboardview_vtable_init(InstrumentKeyboardView* self)
 			(psy_ui_fp_component_ondraw)
 			instrumentkeyboardview_ondraw;
 		instrumentkeyboardview_vtable.onsize =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			instrumentkeyboardview_onsize;
 		instrumentkeyboardview_vtable_initialized = TRUE;
 	}
@@ -258,7 +258,7 @@ static void instrumententryview_vtable_init(InstrumentEntryView* self)
 	if (!instrumententryview_vtable_initialized) {
 		instrumententryview_vtable = *(self->component.vtable);
 		instrumententryview_vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			instrumententryview_on_destroyed;
 		instrumententryview_vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
@@ -273,7 +273,7 @@ static void instrumententryview_vtable_init(InstrumentEntryView* self)
 			(psy_ui_fp_component_on_mouse_event)
 			instrumententryview_on_mouse_up;
 		instrumententryview_vtable.onsize =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			instrumententryview_onsize;
 		instrumententryview_vtable.onpreferredsize =
 			(psy_ui_fp_component_on_preferred_size)
@@ -946,7 +946,7 @@ static void instrumententryrow_vtableinit_init(InstrumentEntryRow* self)
 	if (!instrumententryrow_vtable_initialized) {
 		instrumententryrow_vtable = *(self->component.vtable);
 		instrumententryrow_vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			instrumententryrow_on_destroyed;
 		instrumententryrow_vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
@@ -958,10 +958,10 @@ static void instrumententryrow_vtableinit_init(InstrumentEntryRow* self)
 			(psy_ui_fp_component_on_mouse_event)
 			instrumententryrow_on_mouse_down;
 		instrumententryrow_vtable.onmouseenter =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			instrumententryrow_onmouseenter;
 		instrumententryrow_vtable.onmouseleave =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			instrumententryrow_onmouseleave;
 		instrumententryrow_vtable_initialized = TRUE;
 	}
@@ -1219,7 +1219,7 @@ static void instrumententrytableview_vtable_init(InstrumentEntryTableView* self)
 	if (!instrumententrytableview_vtable_initialized) {
 		instrumententrytableview_vtable = *(self->component.vtable);
 		instrumententryview_vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			instrumententrytableview_on_destroyed;
 		instrumententrytableview_vtable.onpreferredsize =
 			(psy_ui_fp_component_on_preferred_size)
@@ -1338,7 +1338,7 @@ static void instrumentnotemapview_vtable_init(InstrumentNoteMapView* self)
 	if (!instrumentnotemapview_vtable_initialized) {
 		instrumentnotemapview_vtable = *(self->component.vtable);
 		instrumentnotemapview_vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			instrumentnotemapview_on_destroyed;
 		instrumentnotemapview_vtable.onlanguagechanged =
 			(psy_ui_fp_component_onlanguagechanged)

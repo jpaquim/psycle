@@ -37,7 +37,7 @@ static void seqeditentry_vtable_init(SeqEditEntry* self)
 	if (!seqeditentry_vtable_initialized) {
 		seqeditentry_vtable = *(self->component.vtable);
 		seqeditentry_vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			seqeditentry_on_destroyed;
 		seqeditentry_vtable.onpreferredsize =
 			(psy_ui_fp_component_on_preferred_size)
@@ -358,7 +358,7 @@ static void seqeditsampleentry_vtable_init(
 	if (!seqeditsampleentry_vtable_initialized) {
 		seqeditsampleentry_vtable = *(seqeditsampleentry_base(self)->vtable);		
 		seqeditsampleentry_vtable.onalign =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			seqeditsampleentry_onalign;
 		seqeditsampleentry_vtable.on_mouse_down =
 			(psy_ui_fp_component_on_mouse_event)
@@ -386,7 +386,8 @@ void seqeditsampleentry_init(SeqEditSampleEntry* self,
 	psy_ui_component_set_style_types(seqeditsampleentry_base(self),
 		STYLE_SEQEDT_SAMPLE, STYLE_SEQEDT_SAMPLE_HOVER,
 		STYLE_SEQEDT_SAMPLE_SELECTED, psy_INDEX_INVALID);
-	wavebox_init(&self->wavebox, seqeditsampleentry_base(self), state->workspace);
+	wavebox_init(&self->wavebox, seqeditsampleentry_base(self),
+		state->workspace);
 	wavebox_setnowavetext(&self->wavebox, "");
 	psy_ui_component_buffer(&self->wavebox.component);
 	psy_ui_component_set_align(&self->wavebox.component, psy_ui_ALIGN_CLIENT);

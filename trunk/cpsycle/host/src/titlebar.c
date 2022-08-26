@@ -26,10 +26,10 @@ static void titlebar_vtable_init(TitleBar* self)
 	if (!titlebar_vtable_initialized) {
 		titlebar_vtable = *(self->component.vtable);		
 		titlebar_vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			titlebar_on_destroyed;
 		titlebar_vtable.ondragstart =
-			(psy_ui_fp_component_ondragstart)
+			(psy_ui_fp_component_on_drag_event)
 			titlebar_on_drag_start;
 		titlebar_vtable_initialized = TRUE;
 	}

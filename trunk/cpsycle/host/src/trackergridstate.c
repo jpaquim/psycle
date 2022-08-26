@@ -372,7 +372,7 @@ void trackereventtable_prepare_selection(TrackerEventTable* self,
 	self->selection_top_abs = psy_audio_sequenceentry_offset(top_entry) +
 		psy_audio_sequencecursor_offset(&selection->topleft);
 	self->selection_bottom_abs = psy_audio_sequenceentry_offset(bottom_entry) +
-		psy_audio_sequencecursor_offset(&selection->bottomright);		
+		psy_audio_sequencecursor_offset(&selection->bottomright);
 }
 
 /* TrackerState */

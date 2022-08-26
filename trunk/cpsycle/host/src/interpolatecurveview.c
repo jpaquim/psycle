@@ -90,7 +90,7 @@ static void interpolatecurvebox_vtable_init(InterpolateCurveBox* self)
 	if (!interpolatecurvebox_vtable_initialized) {
 		interpolatecurvebox_vtable = *(self->component.vtable);
 		interpolatecurvebox_vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			interpolatecurvebox_on_destroyed;
 		interpolatecurvebox_vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
@@ -457,7 +457,7 @@ static void vtable_init(InterpolateCurveView* self)
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
 		vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			interpolatecurveview_on_destroyed;
 		vtable_initialized = TRUE;
 	}

@@ -35,10 +35,10 @@ static void renderview_vtable_init(RenderView* self)
 	if (!renderview_vtable_initialized) {
 		renderview_vtable = *(self->component.vtable);
 		renderview_vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			renderview_on_destroyed;
 		renderview_vtable.on_focus =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			renderview_on_focus;
 		renderview_vtable_initialized = TRUE;
 	}

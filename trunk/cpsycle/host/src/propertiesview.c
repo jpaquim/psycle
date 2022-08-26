@@ -158,7 +158,7 @@ static void propertiesrenderline_vtable_init(PropertiesRenderLine* self)
 	if (!propertiesrenderline_vtable_initialized) {
 		propertiesrenderline_vtable = *(self->component.vtable);
 		propertiesrenderline_vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			propertiesrenderline_on_destroyed;
 		propertiesrenderline_vtable.on_mouse_down =
 			(psy_ui_fp_component_on_mouse_event)
@@ -568,7 +568,7 @@ static void propertiesrenderer_vtable_init(PropertiesRenderer* self)
 	if (!propertiesrenderer_vtable_initialized) {
 		propertiesrenderer_vtable = *(self->component.vtable);
 		propertiesrenderer_vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			propertiesrenderer_on_destroyed;
 		propertiesrenderer_vtable.on_timer =
 			(psy_ui_fp_component_on_timer)
@@ -711,7 +711,7 @@ static void propertiesview_vtable_init(PropertiesView* self)
 	if (!propertiesview_vtable_initialized) {
 		propertiesview_vtable = *(self->component.vtable);
 		propertiesview_vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			propertiesview_on_destroyed;
 		propertiesview_vtable.on_mouse_down =
 			(psy_ui_fp_component_on_mouse_event)
@@ -720,7 +720,7 @@ static void propertiesview_vtable_init(PropertiesView* self)
 			(psy_ui_fp_component_on_mouse_event)
 			propertiesview_on_mouse_up;
 		propertiesview_vtable.show =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			propertiesview_on_show;
 	}
 	psy_ui_component_set_vtable(propertiesview_base(self),

@@ -328,7 +328,7 @@ static void trackerheader_connectsong(TrackerHeader*);
 static void trackerheader_oncursorchanged(TrackerHeader*, psy_audio_Sequence*);
 static void trackerheader_on_timer(TrackerHeader*, uintptr_t timerid);
 static void trackerheader_updateplayons(TrackerHeader*);
-static void trackerheader_onmousewheel(TrackerHeader*, psy_ui_MouseEvent*);
+static void trackerheader_on_mouse_wheel(TrackerHeader*, psy_ui_MouseEvent*);
 static void trackerheader_ontrackstatechanged(TrackerHeader*,
 	psy_audio_TrackState* sender);
 
@@ -341,14 +341,14 @@ static void trackerheader_vtable_init(TrackerHeader* self)
 	if (!trackerheader_vtable_initialized) {
 		trackerheader_vtable = *(self->component.vtable);
 		trackerheader_vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			trackerheader_on_destroyed;
 		trackerheader_vtable.on_timer =
 			(psy_ui_fp_component_on_timer)
 			trackerheader_on_timer;
-		trackerheader_vtable.onmousewheel =
+		trackerheader_vtable.on_mouse_wheel =
 			(psy_ui_fp_component_on_mouse_event)
-			trackerheader_onmousewheel;
+			trackerheader_on_mouse_wheel;
 		trackerheader_vtable_initialized = TRUE;
 	}
 	psy_ui_component_set_vtable(&self->component, &trackerheader_vtable);	
@@ -447,7 +447,7 @@ void trackerheader_updateplayons(TrackerHeader* self)
 	}
 }
 
-void trackerheader_onmousewheel(TrackerHeader* self, psy_ui_MouseEvent* ev)
+void trackerheader_on_mouse_wheel(TrackerHeader* self, psy_ui_MouseEvent* ev)
 {	
 	psy_audio_player_sendcmd(workspace_player(self->workspace), "tracker",
 		psy_eventdrivercmd_makeid(

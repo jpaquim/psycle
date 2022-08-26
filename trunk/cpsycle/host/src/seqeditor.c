@@ -45,7 +45,7 @@ static void seqeditor_vtable_init(SeqEditor* self)
 	if (!seqeditor_vtable_initialized) {
 		seqeditor_vtable = *(self->component.vtable);
 		seqeditor_vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			seqeditor_on_destroyed;
 		seqeditor_vtable.on_mouse_move =
 			(psy_ui_fp_component_on_mouse_event)

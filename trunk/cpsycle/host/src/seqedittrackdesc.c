@@ -41,13 +41,13 @@ static void seqedittrackdesc_vtable_init(SeqEditTrackDesc* self)
 	if (!seqedittrackdesc_vtable_initialized) {
 		seqedittrackdesc_vtable = *(self->component.vtable);		
 		seqedittrackdesc_vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			seqedittrackdesc_on_destroyed;		
 		seqedittrackdesc_vtable.ondragover =
-			(psy_ui_fp_component_ondragover)
+			(psy_ui_fp_component_on_drag_event)
 			seqedittrackdesc_ondragover;
 		seqedittrackdesc_vtable.ondrop =
-			(psy_ui_fp_component_ondrop)
+			(psy_ui_fp_component_on_drag_event)
 			seqedittrackdesc_ondragdrop;
 		seqedittrackdesc_vtable_initialized = TRUE;
 	}

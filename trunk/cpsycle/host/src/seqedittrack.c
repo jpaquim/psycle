@@ -43,10 +43,10 @@ static void seqedittrack_vtable_init(SeqEditTrack* self)
 	if (!seqedittrack_vtable_initialized) {
 		seqedittrack_vtable = *(self->component.vtable);
 		seqedittrack_vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			seqedittrack_on_destroyed;
 		seqedittrack_vtable.onalign =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			seqedittrack_on_align;
 		seqedittrack_vtable.onpreferredsize =
 			(psy_ui_fp_component_on_preferred_size)

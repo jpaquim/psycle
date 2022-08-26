@@ -171,7 +171,7 @@ static void panui_vtable_init(PanUi* self)
 	if (!panui_vtable_initialized) {
 		panui_vtable = *(self->component.vtable);		
 		panui_vtable.onalign =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			panui_onalign;
 		panui_vtable.on_mouse_down =
 			(psy_ui_fp_component_on_mouse_event)

@@ -82,10 +82,10 @@ static void pianogrid_vtable_init(Pianogrid* self)
 			(psy_ui_fp_component_on_preferred_size)
 			pianogrid_on_preferred_size;
 		pianogrid_vtable.on_focus =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			pianogrid_on_focus;
 		pianogrid_vtable.on_focuslost =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			pianogrid_on_focus_lost;
 		pianogrid_vtable_initialized = TRUE;
 	}

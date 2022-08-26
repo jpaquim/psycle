@@ -60,7 +60,7 @@ void psy_audio_blockselection_startdrag(psy_audio_BlockSelection* self,
 	bpl = psy_audio_sequencecursor_bpl(&cursor);
 	self->drag_base = self->topleft;
 	self->topleft = cursor;
-	self->bottomright = cursor;
+	self->bottomright = cursor;	
 	if (cursor.track >= self->drag_base.track) {
 		self->topleft.track = self->drag_base.track;
 		self->bottomright.track = cursor.track;
@@ -79,7 +79,9 @@ void psy_audio_blockselection_startdrag(psy_audio_BlockSelection* self,
 		psy_audio_sequencecursor_set_offset(&self->bottomright,
 			self->drag_base.offset + bpl);
 	}
-	self->bottomright.track += 1;	
+	self->bottomright.track += 1;
+	self->topleft.key = 100;
+	self->bottomright.key = 0;	
 }
 
 void psy_audio_blockselection_drag(psy_audio_BlockSelection* self,

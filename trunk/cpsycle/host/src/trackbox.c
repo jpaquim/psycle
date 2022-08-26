@@ -35,7 +35,7 @@ static void trackbox_vtable_init(TrackBox* self)
 	if (!trackbox_vtable_initialized) {
 		trackbox_vtable = *(self->component.vtable);
 		trackbox_vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			trackbox_on_destroyed;
 		trackbox_vtable_initialized = TRUE;
 	}

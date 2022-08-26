@@ -39,7 +39,7 @@ static void vtable_init(ParamView* self)
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
 		vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			paramview_on_destroyed;
 		vtable.on_timer =
 			(psy_ui_fp_component_on_timer)

@@ -61,7 +61,7 @@ static void vtable_init(psy_ui_TextAreaPane* self)
 		vtable = *(self->component.vtable);
 		super_vtable = *(self->component.vtable);
 		vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			psy_ui_textareapane_on_destroyed;
 		vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
@@ -70,7 +70,7 @@ static void vtable_init(psy_ui_TextAreaPane* self)
 			(psy_ui_fp_component_on_preferred_size)
 			psy_ui_textareapane_on_preferred_size;		
 		vtable.on_focuslost =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			psy_ui_textareapane_on_focus_lost;
 		vtable.on_key_down =
 			(psy_ui_fp_component_on_key_event)
@@ -646,7 +646,7 @@ static void psy_ui_textarea_vtable_init(psy_ui_TextArea* self)
 		psy_ui_textarea_vtable = *(self->component.vtable);
 		psy_ui_textarea_super_vtable = *(self->component.vtable);
 		psy_ui_textarea_vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			psy_ui_textarea_on_destroyed;		
 		psy_ui_textarea_vtable_initialized = TRUE;
 	}

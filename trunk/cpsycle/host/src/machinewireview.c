@@ -101,10 +101,10 @@ static void machinewireview_setmachines(MachineWireView*, psy_audio_Machines*);
 static void machinewireview_ondraw(MachineWireView*, psy_ui_Graphics*);
 static void machinewireview_drawdragwire(MachineWireView*, psy_ui_Graphics*);
 static bool machinewireview_wiredragging(const MachineWireView*);
-static void machinewireview_drawwires(MachineWireView*, psy_ui_Graphics*);
-static void machinewireview_drawwire(MachineWireView*, psy_ui_Graphics*,
+static void machinewireview_draw_wires(MachineWireView*, psy_ui_Graphics*);
+static void machinewireview_draw_wire(MachineWireView*, psy_ui_Graphics*,
 	uintptr_t slot);
-static void machinewireview_drawwirearrow(MachineWireView*, psy_ui_Graphics*,
+static void machinewireview_draw_wire_arrow(MachineWireView*, psy_ui_Graphics*,
 	psy_ui_RealPoint p1, psy_ui_RealPoint p2);
 static psy_ui_RealPoint rotate_point(psy_ui_RealPoint, double phi);
 static psy_ui_RealPoint move_point(psy_ui_RealPoint pt, psy_ui_RealPoint d);
@@ -129,7 +129,7 @@ static bool machinewireview_dragging_newconnection(const MachineWireView*);
 static void machinewireview_onmachineselected(MachineWireView*,
 	psy_audio_Machines*, uintptr_t slot);
 static void machinewireview_onwireselected(MachineWireView*,
-	psy_audio_Machines* sender, psy_audio_Wire);
+	psy_audio_Machines* sender);
 static void machinewireview_onmachineinsert(MachineWireView*,
 	psy_audio_Machines*, uintptr_t slot);
 static void machinewireview_onmachineremoved(MachineWireView*,
@@ -166,7 +166,7 @@ static void vtable_init(MachineWireView* self)
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
 		vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			machinewireview_on_destroyed;
 		vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
@@ -190,7 +190,7 @@ static void vtable_init(MachineWireView* self)
 			(psy_ui_fp_component_on_preferred_size)
 			machinewireview_onpreferredsize;
 		vtable.onalign =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			machinewireview_onalign;
 		vtable_initialized = TRUE;
 	}
@@ -273,7 +273,7 @@ void machinewireview_ondraw(MachineWireView* self, psy_ui_Graphics* g)
 	if (!self->machines) {
 		return;
 	}
-	machinewireview_drawwires(self, g);					
+	machinewireview_draw_wires(self, g);					
 	for (p = self->machines->selection.entries; p != NULL; p = p->next) {
 		psy_audio_MachineIndex* index;
 		psy_ui_Component* machineui;
@@ -294,18 +294,18 @@ void machinewireview_ondraw(MachineWireView* self, psy_ui_Graphics* g)
 	machinewireview_drawdragwire(self, g);	
 }
 
-void machinewireview_drawwires(MachineWireView* self, psy_ui_Graphics* g)
+void machinewireview_draw_wires(MachineWireView* self, psy_ui_Graphics* g)
 {
 	psy_TableIterator it;
 	
 	for (it = psy_table_begin(&self->machineuis.machineuis); 
 			!psy_tableiterator_equal(&it, psy_table_end()); 
 			psy_tableiterator_inc(&it)) {
-		machinewireview_drawwire(self, g, psy_tableiterator_key(&it));
+		machinewireview_draw_wire(self, g, psy_tableiterator_key(&it));
 	}
 }
 
-void machinewireview_drawwire(MachineWireView* self, psy_ui_Graphics* g,
+void machinewireview_draw_wire(MachineWireView* self, psy_ui_Graphics* g,
 	uintptr_t slot)
 {		
 	psy_audio_MachineSockets* sockets;
@@ -315,9 +315,11 @@ void machinewireview_drawwire(MachineWireView* self, psy_ui_Graphics* g,
 	if (sockets) {
 		psy_TableIterator it;
 		psy_ui_Component* machineui;
+		psy_audio_Wire selectedwire;
 
 		machineui = (psy_ui_Component*)machinewireviewuis_at(&self->machineuis,
 			slot);
+		selectedwire = psy_audio_machines_selectedwire(self->machines);
 		for (it = psy_audio_wiresockets_begin(&sockets->outputs);
 				!psy_tableiterator_equal(&it, psy_table_end());
 				psy_tableiterator_inc(&it)) {
@@ -326,9 +328,7 @@ void machinewireview_drawwire(MachineWireView* self, psy_ui_Graphics* g,
 			socket = (psy_audio_WireSocket*)psy_tableiterator_value(&it);		
 			if (socket->slot != psy_INDEX_INVALID) {
 				psy_ui_Component* inmachineui;
-				psy_audio_Wire selectedwire;
-
-				selectedwire = psy_audio_machines_selectedwire(self->machines);
+								
 				inmachineui = (psy_ui_Component*)machinewireviewuis_at(
 					&self->machineuis, socket->slot);
 				if (inmachineui && machineui) {
@@ -351,7 +351,7 @@ void machinewireview_drawwire(MachineWireView* self, psy_ui_Graphics* g,
 					in = machinewireview_centerposition(
 							psy_ui_component_position(inmachineui));
 					psy_ui_drawline(g, out, in);
-					machinewireview_drawwirearrow(self, g, out, in);						
+					machinewireview_draw_wire_arrow(self, g, out, in);						
 				}
 			}
 		}
@@ -366,7 +366,7 @@ psy_ui_RealPoint  machinewireview_centerposition(psy_ui_RealRectangle r)
 }
 
 
-void machinewireview_drawwirearrow(MachineWireView* self, psy_ui_Graphics* g,
+void machinewireview_draw_wire_arrow(MachineWireView* self, psy_ui_Graphics* g,
 	psy_ui_RealPoint p1, psy_ui_RealPoint p2)
 {			
 	psy_ui_RealPoint center;
@@ -1063,7 +1063,7 @@ void machinewireview_onmachineselected(MachineWireView* self,
 }
 
 void machinewireview_onwireselected(MachineWireView* self,
-	psy_audio_Machines* sender, psy_audio_Wire wire)
+	psy_audio_Machines* sender)
 {	
 	psy_ui_component_invalidate(&self->component);
 }

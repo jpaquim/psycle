@@ -56,7 +56,7 @@ static void vtable_init(PatternView* self)
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
 		vtable.on_destroyed =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			patternview_on_destroyed;
 		vtable.on_mouse_down =
 			(psy_ui_fp_component_on_mouse_event)
@@ -68,7 +68,7 @@ static void vtable_init(PatternView* self)
 			(psy_ui_fp_component_on_key_event)
 			patternview_on_key_down;		
 		vtable.on_focus =
-			(psy_ui_fp_component_event)
+			(psy_ui_fp_component)
 			patternview_on_focus;
 		vtable_initialized = TRUE;
 	}
