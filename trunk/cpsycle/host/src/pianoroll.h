@@ -9,6 +9,7 @@
 /* host */
 #include "patternhostcmds.h"
 #include "pianokeyboard.h"
+#include "paramroll.h"
 #include "pianoruler.h"
 #include "pianogrid.h"
 #include "workspace.h"
@@ -49,7 +50,7 @@ typedef struct PianoBar {
 	psy_ui_Button select_mode;
 } PianoBar;
 
-void pianobar_init(PianoBar*, psy_ui_Component* parent);
+void pianobar_init(PianoBar*, psy_ui_Component* parent, PianoGridState*);
 
 INLINE psy_ui_Component* pianobar_base(PianoBar* self)
 {
@@ -58,46 +59,13 @@ INLINE psy_ui_Component* pianobar_base(PianoBar* self)
 	return &self->component;
 }
 
-
-/* ParamRuler */
-typedef struct ParamRuler {
-	/* inherits */
-	psy_ui_Component component;	
-} ParamRuler;
-
-void paramruler_init(ParamRuler*, psy_ui_Component* parent);
-
-
-/* ParamDraw */
-typedef struct ParamDraw {
-	/* inherits */
-	psy_ui_Component component;	
-} ParamDraw;
-
-void paramdraw_init(ParamDraw*, psy_ui_Component* parent);
-
-
-/* ParamRoll */
-typedef struct ParamRoll {
-	/* inherits */
-	psy_ui_Component component;
-	/* internal */	
-	psy_ui_Component left;
-	ParamRuler ruler;	
-	psy_ui_Component pane;
-	ParamDraw draw;
-	psy_ui_ScrollBar hscroll;		
-} ParamRoll;
-
-void paramroll_init(ParamRoll*, psy_ui_Component* parent);
-
 /* Pianoroll */
 typedef struct Pianoroll {
 	/* inherits */
 	psy_ui_Component component;
 	/* internal */
-	psy_ui_Component top;
-	PianoRuler header;
+	psy_ui_Component ruler_pane;
+	PianoRuler ruler;
 	psy_ui_Component left_top;	
 	psy_ui_ComboBox keytype;
 	psy_ui_Component client;	
@@ -111,14 +79,13 @@ typedef struct Pianoroll {
 	ParamRoll param_roll;	
 	psy_ui_Splitter splitter;	
 	uintptr_t opcount;
-	bool center_key;	
+	bool center_key;		
 	/* references */
 	Workspace* workspace;
 } Pianoroll;
 
 void pianoroll_init(Pianoroll*, psy_ui_Component* parent, PatternViewState*,
 	Workspace*);
-void pianoroll_scroll_to_order(Pianoroll*);
 void pianoroll_scroll_to_key(Pianoroll*, uint8_t key);
 void pianoroll_update_scroll(Pianoroll*);
 void pianoroll_make_cmds(psy_Property* parent);

@@ -365,6 +365,8 @@ psy_ui_Component* machineui_create(psy_audio_Machine* machine,
 	psy_ui_Component* newui;
 	const psy_audio_MachineInfo* info;
 	assert(machine);
+	assert(workspace);
+	assert(workspace->song);
 
 	newui = NULL;
 	info = psy_audio_machine_info(machine);
@@ -387,7 +389,7 @@ psy_ui_Component* machineui_create(psy_audio_Machine* machine,
 		effectui = (EffectUi*)malloc(sizeof(EffectUi));
 		if (effectui) {
 			effectui_init(effectui, parent, psy_audio_machine_slot(machine),
-				paramviews, workspace);
+				paramviews, &workspace->song->machines);
 			effectui->preventmachinepos = !machinepos;
 			newui = &effectui->component;
 		}		
@@ -397,7 +399,7 @@ psy_ui_Component* machineui_create(psy_audio_Machine* machine,
 		generatorui = (GeneratorUi*)malloc(sizeof(GeneratorUi));
 		if (generatorui) {
 			generatorui_init(generatorui, parent, psy_audio_machine_slot(machine),
-				paramviews, workspace);
+				paramviews, &workspace->song->machines);
 			generatorui->preventmachinepos = !machinepos;
 			newui = &generatorui->component;
 		}

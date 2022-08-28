@@ -8,6 +8,7 @@
 
 /* host */
 #include "trackergridstate.h"
+#include "pianokeyboardstate.h"
 
 
 /* PatternLineNavigator */
@@ -23,13 +24,13 @@ void patternlinenavigator_init(PatternLineNavigator*, PatternViewState*,
 	bool wraparound);
 
 psy_audio_SequenceCursor patternlinenavigator_up(PatternLineNavigator*,
-	uintptr_t lines, psy_audio_SequenceCursor);
+	uintptr_t lines, const psy_audio_SequenceCursor*);
 psy_audio_SequenceCursor patternlinenavigator_down(PatternLineNavigator*,
-	uintptr_t lines, psy_audio_SequenceCursor);
+	uintptr_t lines, const psy_audio_SequenceCursor*);
 psy_audio_SequenceCursor patternlinenavigator_home(PatternLineNavigator*,
-	psy_audio_SequenceCursor); /* ft2 home */
+	const psy_audio_SequenceCursor*); /* ft2 home */
 psy_audio_SequenceCursor patternlinenavigator_end(PatternLineNavigator*,
-	psy_audio_SequenceCursor); /* ft2 end */
+	const psy_audio_SequenceCursor*); /* ft2 end */
 
 INLINE bool patternlinennavigator_wrap(const PatternLineNavigator* self)
 {
@@ -49,20 +50,43 @@ void patterncolnavigator_init(PatternColNavigator*, TrackerState*,
 	bool wraparound);
 
 psy_audio_SequenceCursor patterncolnavigator_prev_track(PatternColNavigator*,
-	psy_audio_SequenceCursor);
+	const psy_audio_SequenceCursor*);
 psy_audio_SequenceCursor patterncolnavigator_next_track(PatternColNavigator*,
-	psy_audio_SequenceCursor);
+	const psy_audio_SequenceCursor*);
 psy_audio_SequenceCursor patterncolnavigator_prev_col(PatternColNavigator*,
-	psy_audio_SequenceCursor);
+	const psy_audio_SequenceCursor*);
 psy_audio_SequenceCursor patterncolnavigator_next_col(PatternColNavigator*,
-	psy_audio_SequenceCursor);
+	const psy_audio_SequenceCursor*);
 psy_audio_SequenceCursor patterncolnavigator_home(PatternColNavigator*,
-	psy_audio_SequenceCursor);
+	const psy_audio_SequenceCursor*);
 psy_audio_SequenceCursor patterncolnavigator_end(PatternColNavigator*,
-	psy_audio_SequenceCursor);
+	const psy_audio_SequenceCursor*);
 
 
 INLINE bool patterncolnavigator_wrap(const PatternColNavigator* self)
+{
+	return self->wrap;
+}
+
+
+/* PatternKeyNavigator */
+
+typedef struct PatternKeyNavigator {
+	/* internal */
+	KeyboardState* state;
+	bool wrap;
+	bool wrap_around;
+} PatternKeyNavigator;
+
+void patternkeynavigator_init(PatternKeyNavigator*, KeyboardState*,
+	bool wraparound);
+
+psy_audio_SequenceCursor patternkeynavigator_up(PatternKeyNavigator*,
+	uintptr_t lines, const psy_audio_SequenceCursor*);
+psy_audio_SequenceCursor patternkeynavigator_down(PatternKeyNavigator*,
+	uintptr_t lines, const psy_audio_SequenceCursor*);
+
+INLINE bool patternkeynavigator_wrap(const PatternKeyNavigator* self)
 {
 	return self->wrap;
 }

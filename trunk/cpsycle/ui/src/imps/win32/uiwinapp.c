@@ -383,7 +383,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 		switch (message) {
 		case WM_SHOWWINDOW:
 			if (component) {
-				if (wParam != FALSE) {
+				if (wParam != FALSE) {					
 					psy_signal_emit(&component->signal_show, component, 0);
 				} else {
 					psy_signal_emit(&component->signal_hide, component, 0);

@@ -8,7 +8,6 @@
 
 #include "seqviewtrackheaders.h"
 
-/* SeqviewTrackHeaders */
 
 /* prototypes */
 static void seqviewtrackheaders_on_destroyed(SeqviewTrackHeaders*);
@@ -35,7 +34,7 @@ static void trackheaderview_vtable_init(SeqviewTrackHeaders* self)
 			seqviewtrackheaders_on_mouse_up;
 		trackheaderviews_vtable_initialized = TRUE;
 	}
-	self->component.vtable = &trackheaderviews_vtable;
+	psy_ui_component_set_vtable(&self->component, &trackheaderviews_vtable);
 }
 
 /* implemenetation */
@@ -53,7 +52,7 @@ void seqviewtrackheaders_init(SeqviewTrackHeaders* self,
 	psy_ui_component_set_default_align(&self->client,
 		psy_ui_ALIGN_LEFT, psy_ui_margin_zero());
 	psy_ui_component_set_align_expand(&self->client, psy_ui_HEXPAND);
-	psy_ui_component_setscrollstep(&self->client, self->state->item_size);
+	psy_ui_component_set_scroll_step(&self->client, self->state->item_size);
 	psy_ui_component_set_overflow(&self->client, psy_ui_OVERFLOW_HSCROLL);
 	seqviewtrackheaders_build(self);
 }
@@ -70,7 +69,8 @@ void seqviewtrackheaders_build(SeqviewTrackHeaders* self)
 		uintptr_t t;		
 		psy_ui_Button* newtrack;
 
-		for (t = 0; t < psy_audio_sequence_width(self->state->cmds->sequence); ++t) {
+		for (t = 0; t < psy_audio_sequence_width(self->state->cmds->sequence);
+				++t) {
 			SequenceTrackBox* sequencetrackbox;
 			
 			sequencetrackbox = sequencetrackbox_allocinit(&self->client,

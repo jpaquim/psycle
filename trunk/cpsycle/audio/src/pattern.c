@@ -760,61 +760,6 @@ psy_audio_SequenceCursor psy_audio_pattern_searchinpattern(psy_audio_Pattern*
 	return cursor;
 }
 
-/* psy_audio_SequenceCursorNavigator */
-/* implementation */
-
-bool psy_audio_patterncursornavigator_advancekeys(psy_audio_SequenceCursorNavigator*
-	self, uint8_t lines)
-{
-	uint8_t maxkey;
-
-	assert(self);
-	assert(self->cursor);
-	assert(self->pattern);
-
-	maxkey = self->maxkeys;
-	if (lines > 0) {
-		self->cursor->key += lines;
-		if (self->cursor->key >= maxkey) {
-			if (self->wrap) {
-				self->cursor->key = self->cursor->key - maxkey;
-				if (self->cursor->key > maxkey - 1) {
-					self->cursor->key = maxkey - 1;
-				}
-				return FALSE;
-			} else {
-				self->cursor->key = maxkey - 1;
-			}
-		}
-	}
-	return TRUE;
-}
-
-bool psy_audio_patterncursornavigator_prevkeys(
-	psy_audio_SequenceCursorNavigator* self, uint8_t lines)
-{
-	uint8_t maxkey;
-
-	assert(self);
-	assert(self->cursor);
-	assert(self->pattern);
-
-	maxkey = self->maxkeys;
-	if (lines > 0) {
-		if (self->cursor->key >= lines) {
-			self->cursor->key -= lines;
-		} else {
-			if (self->wrap) {
-				self->cursor->key += maxkey;
-				return TRUE;
-			} else {
-				self->cursor->key = 0;
-			}
-		}
-	}
-	return FALSE;
-}
-
 void psy_audio_pattern_blockcopy(psy_audio_Pattern* self,
 	psy_audio_Pattern* source, psy_audio_BlockSelection selection)
 {

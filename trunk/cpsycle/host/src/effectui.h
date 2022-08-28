@@ -34,7 +34,7 @@ typedef struct EffectUi {
 } EffectUi;
 
 void effectui_init(EffectUi*, psy_ui_Component* parent, uintptr_t slot,
-	ParamViews*, Workspace*);
+	ParamViews*, psy_audio_Machines*);
 
 #ifdef __cplusplus
 }

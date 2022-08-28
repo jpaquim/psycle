@@ -329,31 +329,6 @@ void psy_audio_pattern_add_seqiterator(psy_audio_Pattern*,
 void psy_audio_pattern_remove_seqiterator(psy_audio_Pattern*,
 	struct psy_audio_SequenceTrackIterator*);
 
-/* psy_audio_SequenceCursorNavigator */
-typedef struct {
-	psy_audio_SequenceCursor* cursor;
-	psy_audio_Pattern* pattern;	
-	psy_dsp_big_beat_t bpl;
-	bool wrap;
-	uint8_t maxkeys;
-} psy_audio_SequenceCursorNavigator;
-
-INLINE void psy_audio_patterncursornavigator_init(psy_audio_SequenceCursorNavigator* self,
-	psy_audio_SequenceCursor* cursor, psy_audio_Pattern* pattern,
-	psy_dsp_big_beat_t bpl, bool wrap, uint8_t maxkeys)
-{
-	self->cursor = cursor;
-	self->pattern = pattern;
-	self->bpl = bpl;
-	self->wrap = wrap;
-	self->maxkeys = maxkeys;
-}
-
-bool psy_audio_patterncursornavigator_advancekeys(
-	psy_audio_SequenceCursorNavigator*, uint8_t lines);
-bool psy_audio_patterncursornavigator_prevkeys(
-	psy_audio_SequenceCursorNavigator*, uint8_t lines);
-
 #ifdef __cplusplus
 }
 #endif

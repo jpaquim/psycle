@@ -53,24 +53,25 @@ static void seqviewitem_vtable_init(SeqViewItem* self)
 
 /* implementation */
 void seqviewitem_init(SeqViewItem* self, psy_ui_Component* parent,
-	psy_audio_SequenceEntry* seqentry, psy_audio_OrderIndex order_index,
-	SeqViewState* state, Workspace* workspace)
+	psy_audio_SequenceEntry* seq_entry, psy_audio_OrderIndex order_index,
+	SeqViewState* state)
 {
-	assert(seqentry);
+	assert(self);
+	assert(seq_entry);
+	assert(state->cmds->sequence);	
 	
 	psy_ui_component_init(&self->component, parent, NULL);
-	seqviewitem_vtable_init(self);
+	seqviewitem_vtable_init(self);	
+	self->seqentry = seq_entry;
+	self->order_index = order_index;	
+	self->state = state;	
 	psy_ui_component_set_style_type_select(&self->component,
 		STYLE_SEQLISTVIEW_ITEM_SELECT);
-	self->seqentry = seqentry;
-	self->order_index = order_index;	
-	self->state = state;
-	self->workspace = workspace;
 	psy_ui_component_set_align(&self->component, psy_ui_ALIGN_TOP);
 	psy_ui_component_set_preferred_size(&self->component,
 		self->state->item_size);
 	if (psy_audio_sequenceselection_is_selected(
-			&self->workspace->song->sequence.selection,
+			&self->state->cmds->sequence->selection,
 			self->order_index)) {
 		psy_ui_component_add_style_state(&self->component,
 			psy_ui_STYLESTATE_SELECT);
@@ -84,13 +85,13 @@ SeqViewItem* seqviewitem_alloc(void)
 
 SeqViewItem* seqviewitem_allocinit(psy_ui_Component* parent,
 	psy_audio_SequenceEntry* entry, psy_audio_OrderIndex order_index,
-	SeqViewState* state, Workspace* workspace)
+	SeqViewState* state)
 {
 	SeqViewItem* rv;
 
 	rv = seqviewitem_alloc();
 	if (rv) {
-		seqviewitem_init(rv, parent, entry, order_index, state, workspace);
+		seqviewitem_init(rv, parent, entry, order_index, state);
 		psy_ui_component_deallocate_after_destroyed(&rv->component);
 	}
 	return rv;
@@ -111,7 +112,7 @@ bool seqviewitem_playing(const SeqViewItem* self)
 {
 	const psy_audio_HostSequencerTime* seqtime;
 	
-	seqtime = &self->workspace->player.sequencer.hostseqtime;
+	seqtime = &self->state->cmds->player->sequencer.hostseqtime;
 	return (seqtime->currplaying &&  psy_audio_orderindex_equal(
 		&seqtime->currplaycursor.order_index, self->order_index));
 }
@@ -338,21 +339,27 @@ static void seqviewtrack_vtable_init(SeqViewTrack* self)
 
 /* implementation */
 void seqviewtrack_init(SeqViewTrack* self, psy_ui_Component* parent,
-	uintptr_t trackindex, psy_audio_SequenceTrack* track, SeqViewState* state)
+	uintptr_t track_index, SeqViewState* state)
 {
+	assert(self);
+	assert(state->cmds->sequence);	
+	
 	psy_ui_component_init(&self->component, parent, NULL);
 	seqviewtrack_vtable_init(self);	
+	self->state = state;
+	self->trackindex = track_index;	
+	self->track = psy_audio_sequence_track_at(self->state->cmds->sequence,
+		track_index);
+	psy_ui_component_set_preferred_width(&self->component,
+		state->item_size.width);
 	psy_ui_component_set_align(&self->component, psy_ui_ALIGN_LEFT);
 	psy_ui_component_set_style_type(&self->component,
 		STYLE_SEQLISTVIEW_TRACK);
 	psy_ui_component_set_style_type_select(&self->component,		
-		STYLE_SEQLISTVIEW_TRACK_SELECT);	
-	self->state = state;
-	self->trackindex = trackindex;
-	self->track = track;	
+		STYLE_SEQLISTVIEW_TRACK_SELECT);		
 	if (psy_audio_sequenceselection_first(
 			&state->cmds->workspace->song->sequence.selection).track ==
-			trackindex) {
+			track_index) {
 		psy_ui_component_add_style_state(&self->component,
 			psy_ui_STYLESTATE_SELECT);
 	}
@@ -391,14 +398,13 @@ SeqViewTrack* seqviewtrack_alloc(void)
 }
 
 SeqViewTrack* seqviewtrack_allocinit(psy_ui_Component* parent,
-	uintptr_t trackindex, psy_audio_SequenceTrack* track,
-	SeqViewState* state)
+	uintptr_t track_index, SeqViewState* state)
 {
 	SeqViewTrack* rv;
 
 	rv = seqviewtrack_alloc();
 	if (rv) {
-		seqviewtrack_init(rv, parent, trackindex, track, state);
+		seqviewtrack_init(rv, parent, track_index, state);
 		psy_ui_component_deallocate_after_destroyed(&rv->component);
 	}
 	return rv;
@@ -406,17 +412,17 @@ SeqViewTrack* seqviewtrack_allocinit(psy_ui_Component* parent,
 
 void seqviewtrack_build(SeqViewTrack* self)
 {
-	uintptr_t row;
 	psy_List* p;
+	uintptr_t row;
 	
-	psy_ui_component_clear(&self->component);
-	p = self->track->nodes;
-	row = 0;
-	for (; p != NULL; psy_list_next(&p), ++row) {		
+	assert(self);
+		
+	psy_ui_component_clear(&self->component);	
+	for (p = self->track->nodes, row = 0; p != NULL; psy_list_next(&p), ++row) {		
 		seqviewitem_allocinit(&self->component, 
 			(psy_audio_SequenceEntry*)(p->entry),
 			psy_audio_orderindex_make(self->trackindex, row),
-			self->state, self->state->cmds->workspace);
+			self->state);
 	}
 }
 
@@ -500,12 +506,9 @@ void seqviewlist_init(SeqviewList* self, psy_ui_Component* parent,
 	self->state = state;
 	/* init component */
 	psy_ui_component_set_wheel_scroll(&self->component, 1);	
-	psy_ui_component_set_default_align(&self->component, psy_ui_ALIGN_LEFT,
-		psy_ui_margin_zero());
 	psy_ui_component_set_align_expand(&self->component, psy_ui_HEXPAND);
 	psy_ui_component_set_overflow(&self->component, psy_ui_OVERFLOW_SCROLL);
-	psy_ui_component_setscrollstep(&self->component, self->state->item_size);		
-	psy_ui_component_set_overflow(&self->component, psy_ui_OVERFLOW_SCROLL);
+	psy_ui_component_set_scroll_step(&self->component, self->state->item_size);	
 	/* connect */
 	seqviewlist_set_player(self, &self->state->cmds->workspace->player);			
 	if (workspace_song(state->cmds->workspace)) {
@@ -560,10 +563,8 @@ void seqviewlist_build(SeqviewList* self)
 	track_index = 0;		
 	psy_ui_component_clear(&self->component);
 	for (; track_index < psy_audio_sequence_width(self->state->cmds->sequence);
-			++track_index) {
-		seqviewtrack_allocinit(&self->component, track_index,
-			psy_audio_sequence_track_at(self->state->cmds->sequence,
-			track_index), self->state);	
+			++track_index) {		
+		seqviewtrack_allocinit(&self->component, track_index, self->state);	
 	}	
 }
 

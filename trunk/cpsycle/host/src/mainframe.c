@@ -112,6 +112,7 @@ static void mainframe_on_midi_monitor(MainFrame*, psy_Property* sender);
 static void mainframe_on_cpu_view(MainFrame*, psy_Property* sender);
 static void mainframe_on_help(MainFrame*, psy_ui_Button* sender);
 static void mainframe_on_settings(MainFrame*, psy_ui_Button* sender);
+static void mainframe_on_show(MainFrame*, psy_ui_Component* sender);
 
 /* vtable */
 static psy_ui_ComponentVtable vtable;
@@ -222,7 +223,9 @@ void mainframe_init(MainFrame* self)
 void mainframe_init_frame(MainFrame* self)
 {
 	psy_ui_frame_init_main(mainframe_base(self));
-	vtable_init(self);			
+	vtable_init(self);
+	psy_signal_connect(&self->component.signal_show, self, mainframe_on_show);	
+	self->starting = TRUE;	
 	psy_ui_component_doublebuffer(mainframe_base(self));
 	psy_ui_app_setmain(psy_ui_app(), mainframe_base(self));
 	psy_ui_component_seticonressource(mainframe_base(self), IDI_PSYCLEICON);
@@ -274,7 +277,7 @@ void mainframe_init_workspace(MainFrame* self)
 
 void mainframe_init_layout(MainFrame* self)
 {	
-	mainstatusbar_init(&self->statusbar, &self->pane, &self->workspace);
+	mainstatusbar_init(&self->statusbar, &self->pane, &self->workspace);	
 	psy_ui_component_set_align(mainstatusbar_base(&self->statusbar),
 		psy_ui_ALIGN_BOTTOM);
 	psy_ui_component_init_align(&self->client, &self->pane, NULL,
@@ -283,7 +286,8 @@ void mainframe_init_layout(MainFrame* self)
 		NULL, psy_ui_ALIGN_TOP);	
 	psy_ui_component_set_default_align(&self->top, psy_ui_ALIGN_TOP,
 		psy_ui_margin_zero());
-	mainviews_init(&self->mainviews, &self->client, &self->pane, &self->workspace);
+	mainviews_init(&self->mainviews, &self->client, &self->pane,
+		&self->workspace);
 	psy_ui_component_set_align(&self->mainviews.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_component_init_align(&self->right, &self->client, NULL,
 		psy_ui_ALIGN_RIGHT);
@@ -768,7 +772,6 @@ void mainframe_connect_workspace(MainFrame* self)
 		mainframe_on_song_changed);
 	psy_signal_connect(&self->workspace.signal_gearselect, self,
 		mainframe_on_gear_select);	
-	psy_ui_component_start_timer(mainframe_base(self), 0, 50);
 }
 
 void mainframe_init_interpreter(MainFrame* self)
@@ -925,6 +928,9 @@ void mainframe_on_export(MainFrame* self, psy_ui_Component* sender)
 
 void mainframe_on_timer(MainFrame* self, uintptr_t timerid)
 {	
+	if (self->starting) {		
+		self->starting = FALSE;
+	}
 	vubar_idle(&self->vubar);
 	workspace_idle(&self->workspace);
 	mainstatusbar_idle(&self->statusbar);
@@ -1553,4 +1559,11 @@ void mainframe_on_settings(MainFrame* self, psy_ui_Button* sender)
 	workspace_select_view(&self->workspace,
 		viewindex_make(VIEW_ID_SETTINGSVIEW, 0, psy_INDEX_INVALID,
 			psy_INDEX_INVALID));
+}
+
+void mainframe_on_show(MainFrame* self, psy_ui_Component* sender)
+{
+	if (self->starting) {
+		psy_ui_component_start_timer(mainframe_base(self), 0, 50);		
+	}
 }

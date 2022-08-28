@@ -24,12 +24,6 @@ extern "C" {
 ** Pianogriddraw
 */
 
-typedef enum {
-	PIANOROLL_TRACK_DISPLAY_ALL,
-	PIANOROLL_TRACK_DISPLAY_CURRENT,
-	PIANOROLL_TRACK_DISPLAY_ACTIVE
-} PianoTrackDisplay;
-
 /* PianogridTrackEvent */
 typedef struct PianogridTrackEvent {
 	uint8_t note;
@@ -46,8 +40,7 @@ typedef struct PianogridTrackEvent {
 /* PianoGridDraw */
 typedef struct PianoGridDraw {
 	const psy_ui_TextMetric* tm;
-	psy_ui_RealSize size;	
-	bool cursoronnoterelease;
+	psy_ui_RealSize size;		
 	psy_dsp_big_beat_t sequenceentryoffset;	
 	PianoTrackDisplay trackdisplay;	
 	/* references */
@@ -64,11 +57,8 @@ typedef struct PianoGridDraw {
 } PianoGridDraw;
 
 void pianogriddraw_init(PianoGridDraw*,
-	KeyboardState*, PianoGridState*,	
-	psy_dsp_big_beat_t sequenceentryoffset,
+	KeyboardState*, PianoGridState*,		
 	psy_audio_PatternEntry* hoverpatternentry,	
-	PianoTrackDisplay,
-	bool cursoronnoterelease,	
 	psy_ui_RealSize, Workspace*);
 
 void pianogriddraw_on_draw(PianoGridDraw*, psy_ui_Graphics*);
