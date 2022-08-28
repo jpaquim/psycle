@@ -15,7 +15,7 @@
 
 /* GeneratorUi */
 static void generatorui_on_mouse_down(GeneratorUi*, psy_ui_MouseEvent*);
-static void generatorui_onmousedoubleclick(GeneratorUi*, psy_ui_MouseEvent*);
+static void generatorui_on_mouse_double_click(GeneratorUi*, psy_ui_MouseEvent*);
 static void generatorui_move(GeneratorUi*, psy_ui_Point topleft);
 static void generatorui_on_timer(GeneratorUi*, uintptr_t timerid);
 /* vtable */
@@ -35,7 +35,7 @@ static void generatorui_vtable_init(GeneratorUi* self)
 			generatorui_on_mouse_down;
 		generatorui_vtable.on_mouse_double_click =
 			(psy_ui_fp_component_on_mouse_event)
-			generatorui_onmousedoubleclick;
+			generatorui_on_mouse_double_click;
 		generatorui_vtable.move =
 			(psy_ui_fp_component_move)
 			generatorui_move;		
@@ -49,20 +49,18 @@ static void generatorui_vtable_init(GeneratorUi* self)
 
 /* implementation */
 void generatorui_init(GeneratorUi* self, psy_ui_Component* parent,
-	uintptr_t slot, ParamViews* paramviews, Workspace* workspace)
+	uintptr_t slot, ParamViews* paramviews, psy_audio_Machines* machines)
 {
 	assert(self);
-	assert(workspace);
-	assert(workspace->song);
+	assert(machines);	
 
 	psy_ui_component_init(&self->component, parent, NULL);
 	generatorui_vtable_init(self);	
 	self->paramviews = paramviews;
-	self->machines = &workspace->song->machines;
+	self->machines = machines;
 	assert(self->machines);
 	self->machine = psy_audio_machines_at(self->machines, slot);
-	assert(self->machine);
-	self->workspace = workspace;
+	assert(self->machine);	
 	self->preventmachinepos = FALSE;
 	psy_ui_component_set_style_type(&self->component, STYLE_MV_GENERATOR);
 	psy_ui_component_init(&self->mute, &self->component, NULL);
@@ -78,7 +76,8 @@ void generatorui_init(GeneratorUi* self, psy_ui_Component* parent,
 	panui_init(&self->pan, &self->component, self->machine,
 		STYLE_MV_GENERATOR_PAN, STYLE_MV_GENERATOR_PAN_SLIDER);
 	vuui_init(&self->vu, &self->component, self->machine,
-		STYLE_MV_GENERATOR_VU, STYLE_MV_GENERATOR_VU0, STYLE_MV_GENERATOR_VUPEAK);
+		STYLE_MV_GENERATOR_VU, STYLE_MV_GENERATOR_VU0,
+		STYLE_MV_GENERATOR_VUPEAK);
 	psy_ui_component_start_timer(&self->component, 0, 50);
 }
 
@@ -99,10 +98,12 @@ void generatorui_on_mouse_down(GeneratorUi* self, psy_ui_MouseEvent* ev)
 	assert(self);
 
 	if (psy_ui_mouseevent_button(ev) == 1) {		
-		if (psy_audio_machine_slot(self->machine) != psy_audio_machines_selected(self->machines)) {			
+		if (psy_audio_machine_slot(self->machine) !=
+				psy_audio_machines_selected(self->machines)) {			
 			if (psy_ui_mouseevent_ctrl_key(ev)) {
 				psy_audio_machineselection_select(&self->machines->selection,
-					psy_audio_machineindex_make(psy_audio_machine_slot(self->machine)));
+					psy_audio_machineindex_make(psy_audio_machine_slot(
+						self->machine)));
 			} else {
 				psy_audio_machines_select(self->machines,
 					psy_audio_machine_slot(self->machine));
@@ -123,7 +124,8 @@ void generatorui_on_mouse_down(GeneratorUi* self, psy_ui_MouseEvent* ev)
 	}
 }
 
-void generatorui_onmousedoubleclick(GeneratorUi* self, psy_ui_MouseEvent* ev)
+void generatorui_on_mouse_double_click(GeneratorUi* self,
+	psy_ui_MouseEvent* ev)
 {	
 	if (psy_ui_mouseevent_button(ev) == 1 &&
 			ev->event.target_ != &self->solo &&
@@ -137,6 +139,9 @@ void generatorui_onmousedoubleclick(GeneratorUi* self, psy_ui_MouseEvent* ev)
 
 void generatorui_on_timer(GeneratorUi* self, uintptr_t timerid)
 {
+	if (!psy_ui_component_draw_visible(&self->component)) {
+		return;
+	}
 	if (psy_audio_machine_muted(self->machine)) {
 		psy_ui_component_add_style_state(&self->mute, psy_ui_STYLESTATE_SELECT);
 	} else {
@@ -150,9 +155,7 @@ void generatorui_on_timer(GeneratorUi* self, uintptr_t timerid)
 		psy_ui_component_remove_style_state(&self->solo,
 			psy_ui_STYLESTATE_SELECT);
 	}
-	if (psy_ui_component_draw_visible(&self->component)) {
-		if (vuui_update(&self->vu)) {
-			psy_ui_component_invalidate(vuui_base(&self->vu));
-		}
+	if (vuui_update(&self->vu)) {
+		psy_ui_component_invalidate(vuui_base(&self->vu));		
 	}
 }

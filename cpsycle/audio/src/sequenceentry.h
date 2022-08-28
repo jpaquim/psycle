@@ -58,13 +58,10 @@ typedef struct psy_audio_SequenceEntryVtable {
 
 typedef struct psy_audio_SequenceEntry {
 	psy_audio_SequenceEntryVtable* vtable;
-	int type;
+	psy_audio_SequenceEntryType type;
 	/* absolute start position (in beats) in the song */
 	psy_dsp_big_beat_t offset;	
-	/*
-	** offset to the playlist index position allowing free positioning
-	** needed to reposition the sequence
-	*/
+	/* offset to the playlist index position allowing free positioning */
 	psy_dsp_big_beat_t repositionoffset;
 	uintptr_t row;
 	bool selplay;

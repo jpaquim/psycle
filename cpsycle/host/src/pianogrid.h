@@ -34,9 +34,7 @@ typedef struct Pianogrid {
 	/* internal */	
 	psy_audio_PatternEntry* hoverpatternentry;	
 	psy_audio_SequenceCursor old_cursor;
-	psy_audio_SequenceCursor dragcursor;
-	bool cursoronnoterelease;
-	PianoTrackDisplay trackdisplay;
+	psy_audio_SequenceCursor dragcursor;	
 	psy_audio_SequenceCursor last_drag_cursor;
 	bool prevent_context_menu;
 	bool edit_mode;
@@ -52,20 +50,8 @@ void pianogrid_init(Pianogrid*, psy_ui_Component* parent, KeyboardState*,
 	PianoGridState*, InputHandler*, Workspace*);
 
 void pianogrid_invalidate_line(Pianogrid*, intptr_t line);
-void pianogrid_invalidate_lines(Pianogrid*, intptr_t line1, intptr_t line2);
 void pianogrid_invalidate_cursor(Pianogrid*);
 void pianogrid_invalidate_playbar(Pianogrid*);
-void pianogrid_update_cursor(Pianogrid*, psy_audio_SequenceCursor);
-void pianogrid_set_cursor(Pianogrid*, psy_audio_SequenceCursor);
-void pianogrid_onpatternchange(Pianogrid*);
-void pianogrid_settrackdisplay(Pianogrid*, PianoTrackDisplay);
-
-INLINE PianoTrackDisplay pianogrid_trackdisplay(const Pianogrid* self)
-{
-	assert(self);
-
-	return self->trackdisplay;
-}
 
 INLINE const psy_audio_BlockSelection* pianogrid_selection(const Pianogrid* self)
 {
@@ -80,21 +66,6 @@ INLINE psy_ui_Component* pianogrid_base(Pianogrid* self)
 
 	return &self->component;
 }
-
-void pianogrid_startdragselection(Pianogrid*, psy_audio_SequenceCursor);
-void pianogrid_dragselection(Pianogrid*, psy_audio_SequenceCursor);
-bool pianogrid_keyhittest(Pianogrid*, psy_audio_PatternNode*,
-	uintptr_t track, uint8_t cursorkey);
-bool pianogrid_scrollright(Pianogrid*, psy_audio_SequenceCursor);
-bool pianogrid_scrollleft(Pianogrid*, psy_audio_SequenceCursor);
-bool pianogrid_scrollup(Pianogrid*, psy_audio_SequenceCursor);
-bool pianogrid_scrolldown(Pianogrid*, psy_audio_SequenceCursor);
-void pianogrid_prevline(Pianogrid*);
-void pianogrid_prevlines(Pianogrid*, uintptr_t lines, bool wrap);
-void pianogrid_prevkeys(Pianogrid*, uint8_t lines, bool wrap);
-void pianogrid_advanceline(Pianogrid*);
-void pianogrid_advancelines(Pianogrid*, uintptr_t lines, bool wrap);
-void pianogrid_advancekeys(Pianogrid*, uint8_t lines, bool wrap);
 
 #ifdef __cplusplus
 }

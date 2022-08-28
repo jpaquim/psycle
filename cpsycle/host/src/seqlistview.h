@@ -29,43 +29,42 @@ typedef struct SeqViewTrack {
 } SeqViewTrack;
 
 void seqviewtrack_init(SeqViewTrack*, psy_ui_Component* parent,
-	uintptr_t trackindex, psy_audio_SequenceTrack*, SeqViewState*);
+	uintptr_t trackindex, SeqViewState*);
 
 SeqViewTrack* seqviewtrack_alloc(void);
 SeqViewTrack* seqviewtrack_allocinit(psy_ui_Component* parent,
-	uintptr_t trackindex, psy_audio_SequenceTrack*, SeqViewState*);
+	uintptr_t trackindex, SeqViewState*);
 
 /* SeqViewItem */
 
 typedef struct SeqViewItem {
 	/* inherits */
-	psy_ui_Component component;
-	psy_audio_SequenceEntry* seqentry;
-	psy_audio_OrderIndex order_index;	
-	Workspace* workspace;
+	psy_ui_Component component;	
+	psy_audio_OrderIndex order_index;
+	/* references */
+	psy_audio_SequenceEntry* seqentry;	
+	psy_audio_Sequencer* sequencer;
 	SeqViewState* state;
 } SeqViewItem;
 
 void seqviewitem_init(SeqViewItem*, psy_ui_Component* parent,
-	psy_audio_SequenceEntry*, psy_audio_OrderIndex, SeqViewState*, Workspace*);
+	psy_audio_SequenceEntry*, psy_audio_OrderIndex, SeqViewState*);
 
 SeqViewItem* seqviewitem_alloc(void);
 SeqViewItem* seqviewitem_allocinit(psy_ui_Component* parent,
-	psy_audio_SequenceEntry*, psy_audio_OrderIndex, SeqViewState*, Workspace*);
+	psy_audio_SequenceEntry*, psy_audio_OrderIndex, SeqViewState*);
 
 /* SeqviewList */
 
 typedef struct SeqviewList {
 	/* inherits */
 	psy_ui_Component component;	
-	/* internal */
-	int foundselected;	
-	double avgcharwidth;	
 	/* references */
 	SeqViewState* state;	
 } SeqviewList;
 
 void seqviewlist_init(SeqviewList*, psy_ui_Component* parent, SeqViewState*);
+
 void seqviewlist_rename(SeqviewList*);
 void seqviewlist_build(SeqviewList*);
 void seqviewlist_on_pattern_name_changed(SeqviewList*, psy_audio_Patterns*,

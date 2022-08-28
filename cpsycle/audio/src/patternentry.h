@@ -19,7 +19,7 @@ extern "C" {
 #endif
 
 /* an event with additional position and track information */
-typedef struct {
+typedef struct psy_audio_PatternEntry {
 	psy_List* events;
 	/* position in beat unit */
 	psy_dsp_big_beat_t offset;	
@@ -83,6 +83,12 @@ INLINE void psy_audio_patternentry_setbpm(psy_audio_PatternEntry* self, psy_dsp_
 	assert(self);
 
 	self->bpm = bpm;
+}
+
+INLINE psy_dsp_big_beat_t psy_audio_patternentry_offset(
+	const psy_audio_PatternEntry* self)
+{
+	return self->offset;
 }
 
 void psy_audio_patternentry_addevent(psy_audio_PatternEntry*,

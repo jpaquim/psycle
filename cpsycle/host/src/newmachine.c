@@ -561,7 +561,7 @@ void newmachinesectionspane_init(NewMachineSectionsPane* self,
 	/* pane */
 	psy_ui_component_init(&self->pane, &self->component, NULL);	
 	psy_ui_component_set_overflow(&self->pane, psy_ui_OVERFLOW_VSCROLL);
-	psy_ui_component_setscrollstep(&self->pane,
+	psy_ui_component_set_scroll_step(&self->pane,
 		psy_ui_size_make_em(0.0, 1.0));
 	psy_ui_component_set_wheel_scroll(&self->pane, 4);
 	/* filtersbar */

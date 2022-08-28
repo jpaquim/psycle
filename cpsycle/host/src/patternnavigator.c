@@ -19,7 +19,7 @@ void patternlinenavigator_init(PatternLineNavigator* self, PatternViewState*
 }
 
 psy_audio_SequenceCursor patternlinenavigator_up(PatternLineNavigator* self,
-	uintptr_t lines, psy_audio_SequenceCursor cursor)
+	uintptr_t lines, const psy_audio_SequenceCursor* cursor)
 {
 	psy_audio_SequenceCursor rv;
 	psy_audio_SequenceEntry* seqentry;
@@ -27,16 +27,17 @@ psy_audio_SequenceCursor patternlinenavigator_up(PatternLineNavigator* self,
 	
 	assert(self);
 	assert(self->state);
+	assert(cursor);
 	
 	self->wrap = FALSE;	
 	if (lines == 0) {
-		return cursor;
+		return *cursor;
 	}
 	sequence = patternviewstate_sequence(self->state);
 	if (!sequence) {
-		return cursor;
+		return *cursor;
 	}
-	rv = cursor;				
+	rv = *cursor;				
 	seqentry = psy_audio_sequence_entry(sequence,
 		psy_audio_sequencecursor_order_index(&rv));
 	if (seqentry) {
@@ -50,10 +51,10 @@ psy_audio_SequenceCursor patternlinenavigator_up(PatternLineNavigator* self,
 		if (offset < 0.0) {
 			if (patternviewstate_single_mode(self->state)) {			
 				if (self->wrap_around) {						
-					rv = patternlinenavigator_end(self, rv);
+					rv = patternlinenavigator_end(self, &rv);
 					self->wrap = TRUE;						
 				} else {
-					rv = patternlinenavigator_home(self, rv);					
+					rv = patternlinenavigator_home(self, &rv);					
 				}					
 			} else {						
 				psy_dsp_big_beat_t abs_offset;
@@ -70,10 +71,10 @@ psy_audio_SequenceCursor patternlinenavigator_up(PatternLineNavigator* self,
 					psy_audio_sequencecursor_set_offset(&rv, abs_offset -
 						psy_audio_sequenceentry_offset(seqentry));					
 				} else if (self->wrap_around) {
-					rv = patternlinenavigator_end(self, rv);
+					rv = patternlinenavigator_end(self, &rv);
 					self->wrap = TRUE;						
 				} else {
-					rv = patternlinenavigator_home(self, rv);
+					rv = patternlinenavigator_home(self, &rv);
 				}
 			}				
 		} else {
@@ -85,7 +86,7 @@ psy_audio_SequenceCursor patternlinenavigator_up(PatternLineNavigator* self,
 
 psy_audio_SequenceCursor patternlinenavigator_down(
 	PatternLineNavigator* self, uintptr_t lines,
-	psy_audio_SequenceCursor cursor)
+	const psy_audio_SequenceCursor* cursor)
 {
 	psy_audio_SequenceCursor rv;
 	psy_audio_SequenceEntry* seqentry;
@@ -93,16 +94,17 @@ psy_audio_SequenceCursor patternlinenavigator_down(
 
 	assert(self);	
 	assert(self->state);
+	assert(cursor);
 
 	self->wrap = FALSE;	
 	if (lines == 0) {
-		return cursor;
+		return *cursor;
 	}
 	sequence = patternviewstate_sequence(self->state);
 	if (!sequence) {
-		return cursor;
+		return *cursor;
 	}
-	rv = cursor;	
+	rv = *cursor;	
 	seqentry = psy_audio_sequence_entry(sequence,
 		psy_audio_sequencecursor_order_index(&rv));
 	if (seqentry) {
@@ -123,7 +125,7 @@ psy_audio_SequenceCursor patternlinenavigator_down(
 					psy_audio_sequencecursor_set_offset(&rv, offset);
 					self->wrap = TRUE;
 				} else {
-					rv = patternlinenavigator_end(self, rv);
+					rv = patternlinenavigator_end(self, &rv);
 				}
 			} else {
 				psy_dsp_big_beat_t abs_offset;
@@ -140,10 +142,10 @@ psy_audio_SequenceCursor patternlinenavigator_down(
 					psy_audio_sequencecursor_set_offset(&rv, abs_offset -
 						psy_audio_sequenceentry_offset(seqentry));					
 				} else if (self->wrap_around) {
-					rv = patternlinenavigator_home(self, rv);
+					rv = patternlinenavigator_home(self, &rv);
 					self->wrap = TRUE;						
 				} else {
-					rv = patternlinenavigator_end(self, rv);
+					rv = patternlinenavigator_end(self, &rv);
 				}				
 			}
 		} else {
@@ -154,14 +156,15 @@ psy_audio_SequenceCursor patternlinenavigator_down(
 }
 
 psy_audio_SequenceCursor patternlinenavigator_home(PatternLineNavigator* self,
-	psy_audio_SequenceCursor cursor)
+	const psy_audio_SequenceCursor* cursor)
 {
 	psy_audio_SequenceCursor rv;	
 
 	assert(self);
 	assert(self->state);
+	assert(cursor);
 	
-	rv = cursor;
+	rv = *cursor;
 	self->wrap = FALSE;	
 	if (!patternviewstate_single_mode(self->state)) {
 		psy_audio_sequencecursor_set_order_index(&rv,
@@ -172,7 +175,7 @@ psy_audio_SequenceCursor patternlinenavigator_home(PatternLineNavigator* self,
 }
 
 psy_audio_SequenceCursor patternlinenavigator_end(PatternLineNavigator* self,
-	psy_audio_SequenceCursor cursor)
+	const psy_audio_SequenceCursor* cursor)
 {	
 	psy_audio_SequenceCursor rv;
 	psy_audio_Sequence* sequence;
@@ -181,12 +184,13 @@ psy_audio_SequenceCursor patternlinenavigator_end(PatternLineNavigator* self,
 
 	assert(self);
 	assert(self->state);
+	assert(cursor);
 
 	sequence = patternviewstate_sequence(self->state);
 	if (!sequence) {
-		return cursor;
+		return *cursor;
 	}
-	rv = cursor;
+	rv = *cursor;
 	self->wrap = FALSE;
 	seqentry = NULL;
 	bpl = psy_audio_sequencecursor_bpl(&rv);
@@ -225,21 +229,24 @@ psy_audio_SequenceCursor patternlinenavigator_end(PatternLineNavigator* self,
 void patterncolnavigator_init(PatternColNavigator* self, TrackerState* state,
 	bool wrap_around)
 {
+	assert(self);
+	
 	self->state = state;
 	self->wrap = FALSE;
 	self->wrap_around = wrap_around;
 }
 
 psy_audio_SequenceCursor patterncolnavigator_prev_track(
-	PatternColNavigator* self, psy_audio_SequenceCursor cursor)
+	PatternColNavigator* self, const psy_audio_SequenceCursor* cursor)
 {
 	psy_audio_SequenceCursor rv;
 
 	assert(self);
 	assert(self->state);
+	assert(cursor);
 
-	self->wrap = FALSE;
-	rv = cursor;
+	rv = *cursor;
+	self->wrap = FALSE;	
 	rv.column = rv.digit = 0;	
 	if (rv.track > 0) {
 		--rv.track;		
@@ -251,15 +258,16 @@ psy_audio_SequenceCursor patterncolnavigator_prev_track(
 }
 
 psy_audio_SequenceCursor patterncolnavigator_next_track(
-	PatternColNavigator* self, psy_audio_SequenceCursor cursor)
+	PatternColNavigator* self, const psy_audio_SequenceCursor* cursor)
 {
 	psy_audio_SequenceCursor rv;
 
 	assert(self);
 	assert(self->state);
+	assert(cursor);
 
-	self->wrap = FALSE;
-	rv = cursor;
+	rv = *cursor;
+	self->wrap = FALSE;	
 	rv.column = rv.digit = 0;
 	if (rv.track < patternviewstate_num_song_tracks(self->state->pv) - 1) {
 		++rv.track;
@@ -271,7 +279,7 @@ psy_audio_SequenceCursor patterncolnavigator_next_track(
 }
 
 psy_audio_SequenceCursor patterncolnavigator_next_col(PatternColNavigator* self,
-	psy_audio_SequenceCursor cursor)
+	const psy_audio_SequenceCursor* cursor)
 {
 	psy_audio_SequenceCursor rv;
 	TrackDef* trackdef;
@@ -279,12 +287,13 @@ psy_audio_SequenceCursor patterncolnavigator_next_col(PatternColNavigator* self,
 	const psy_audio_Pattern* pattern;
 
 	assert(self);
+	assert(cursor);
 
 	pattern = patternviewstate_pattern(self->state->pv);
 	if (!pattern) {
-		return cursor;
+		return *cursor;
 	}
-	rv = cursor;
+	rv = *cursor;
 	self->wrap = FALSE;
 	trackdef = trackerconfig_trackdef(self->state->track_config, rv.track);
 	if (rv.column == trackdef_num_columns(trackdef) - 1 &&
@@ -318,20 +327,21 @@ psy_audio_SequenceCursor patterncolnavigator_next_col(PatternColNavigator* self,
 }
 
 psy_audio_SequenceCursor patterncolnavigator_prev_col(PatternColNavigator* self,
-	psy_audio_SequenceCursor cursor)
+	const psy_audio_SequenceCursor* cursor)
 {
 	psy_audio_SequenceCursor rv;
 	const psy_audio_Pattern* pattern;
 
 	assert(self);
+	assert(cursor);
 
 	pattern = patternviewstate_pattern(self->state->pv);
 	assert(self);
 
 	if (!pattern) {
-		return cursor;
+		return *cursor;
 	}
-	rv = cursor;
+	rv = *cursor;
 	self->wrap = FALSE;
 	if ((rv.column == 0) || (self->state->track_config->multicolumn &&
 		rv.noteindex > 0 &&
@@ -382,18 +392,19 @@ psy_audio_SequenceCursor patterncolnavigator_prev_col(PatternColNavigator* self,
 }
 
 psy_audio_SequenceCursor patterncolnavigator_home(PatternColNavigator* self,
-	psy_audio_SequenceCursor cursor)
+	const psy_audio_SequenceCursor* cursor)
 {
 	psy_audio_SequenceCursor rv;
 	const psy_audio_Pattern* pattern;
 
 	assert(self);
+	assert(cursor);
 
 	pattern = patternviewstate_pattern(self->state->pv);
 	if (!pattern) {
-		return cursor;
+		return *cursor;
 	}
-	rv = cursor;
+	rv = *cursor;
 	self->wrap = FALSE;
 
 	if (rv.column != 0) {
@@ -406,7 +417,7 @@ psy_audio_SequenceCursor patterncolnavigator_home(PatternColNavigator* self,
 }
 
 psy_audio_SequenceCursor patterncolnavigator_end(PatternColNavigator* self,
-	psy_audio_SequenceCursor cursor)
+	const psy_audio_SequenceCursor* cursor)
 {
 	psy_audio_SequenceCursor rv;
 	TrackDef* trackdef;
@@ -414,12 +425,13 @@ psy_audio_SequenceCursor patterncolnavigator_end(PatternColNavigator* self,
 	const psy_audio_Pattern* pattern;
 
 	assert(self);
+	assert(cursor);
 
 	pattern = patternviewstate_pattern(self->state->pv);
 	if (!pattern) {
-		return cursor;
+		return *cursor;
 	}
-	rv = cursor;
+	rv = *cursor;
 	self->wrap = FALSE;
 
 	trackdef = trackerconfig_trackdef(self->state->track_config, rv.track);
@@ -448,6 +460,70 @@ psy_audio_SequenceCursor patterncolnavigator_end(PatternColNavigator* self,
 	return rv;
 }
 
+
+/* PatternKeyNavigator */
+
+/* implementation */
+void patternkeynavigator_init(PatternKeyNavigator* self, KeyboardState* state,
+	bool wrap_around)
+{
+	self->state = state;
+	self->wrap = FALSE;
+	self->wrap_around = wrap_around;	
+}
+
+psy_audio_SequenceCursor patternkeynavigator_up(PatternKeyNavigator* self,
+	uintptr_t keys, const psy_audio_SequenceCursor* cursor)
+{
+	psy_audio_SequenceCursor rv;
+	
+	assert(self);
+	assert(cursor);
+	
+	rv = *cursor;
+	self->wrap = FALSE;	
+	if (keys > 0) {
+		if (rv.key >= keys) {
+			rv.key -= keys;
+		} else {
+			if (self->wrap_around) {
+				rv.key += self->state->keymax;
+				self->wrap =TRUE;
+			} else {
+				rv.key = 0;
+			}
+		}
+	}	
+	return rv;
+}
+
+psy_audio_SequenceCursor patternkeynavigator_down(
+	PatternKeyNavigator* self, uintptr_t keys,
+	const psy_audio_SequenceCursor* cursor)
+{
+	psy_audio_SequenceCursor rv;
+	
+	assert(self);
+	assert(cursor);
+	
+	rv = *cursor;	
+	self->wrap = FALSE;
+	if (keys > 0) {
+		rv.key += keys;
+		if (rv.key >= self->state->keymax) {
+			if (self->wrap_around) {
+				rv.key = rv.key - self->state->keymax;
+				if (rv.key > self->state->keymax - 1) {
+					rv.key = self->state->keymax - 1;
+				}				
+			} else {
+				rv.key = self->state->keymax - 1;
+				self->wrap = TRUE;
+			}
+		}
+	}	
+	return rv;
+}
 
 /* PatternSelect */
 

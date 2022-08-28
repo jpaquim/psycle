@@ -289,7 +289,7 @@ void instrumententryview_init(InstrumentEntryView* self,
 	instrumententryview_vtable_init(self);
 	self->component.vtable = &instrumententryview_vtable;	
 	psy_ui_component_set_wheel_scroll(&self->component, 1);	
-	psy_ui_component_setscrollstep(&self->component,
+	psy_ui_component_set_scroll_step(&self->component,
 		psy_ui_size_make_em(0.0, 1.0));
 	self->instrument = 0;
 	self->metrics.keysize = 8;
@@ -1243,7 +1243,7 @@ void instrumententrytableview_init(InstrumentEntryTableView* self,
 		psy_INDEX_INVALID);
 	instrumententrytableview_build(self);	
 	psy_ui_component_set_wheel_scroll(&self->component, 4);
-	psy_ui_component_setscrollstep(&self->component,
+	psy_ui_component_set_scroll_step(&self->component,
 		psy_ui_size_make_em(0.0, 1.0));
 	psy_ui_component_set_overflow(&self->component, psy_ui_OVERFLOW_VSCROLL);
 }

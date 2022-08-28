@@ -417,7 +417,16 @@ void psy_ui_button_emit(psy_ui_Button* self, psy_ui_MouseEvent* ev)
 	self->ctrlstate = psy_ui_mouseevent_ctrl_key(ev);
 	psy_signal_emit(&self->signal_clicked, self, 0);
 	if (self->property) {
-		if (psy_property_is_bool(self->property)) {
+		if (psy_property_is_choice_item(self->property)) {
+			intptr_t index;
+
+			if (!psy_property_parent(self->property)) {
+				return;
+			}
+			index = psy_property_index(self->property);
+			psy_property_set_item_int(psy_property_parent(self->property),
+				index);
+		} else if (psy_property_is_bool(self->property)) {
 			psy_property_set_item_bool(self->property,
 				!psy_property_item_bool(self->property));
 		} else {
@@ -575,6 +584,18 @@ void psy_ui_button_on_property_changed(psy_ui_Button* self,
 {	
 	assert(self);
 	
+	if (psy_property_is_choice_item(sender)) {
+		bool checked;
+		
+		checked = (psy_property_at_choice(psy_property_parent(sender))
+			== sender);
+		if (checked) {
+			psy_ui_button_highlight(self);
+		} else {
+			psy_ui_button_disable_highlight(self);	
+		}
+		return;
+	}	
 	if (!psy_property_is_bool(sender)) {
 		return;
 	}

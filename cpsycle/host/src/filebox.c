@@ -176,7 +176,7 @@ void filebox_init(FileBox* self, psy_ui_Component* parent)
 	psy_ui_component_set_align(&self->pane, psy_ui_ALIGN_CLIENT);
 	psy_ui_component_set_overflow(&self->pane, psy_ui_OVERFLOW_SCROLL);
 	psy_ui_component_set_wheel_scroll(&self->pane, 2);	
-	psy_ui_component_setscrollstep(&self->pane,
+	psy_ui_component_set_scroll_step(&self->pane,
 		psy_ui_size_make_em(0.0, 1.0));	
 	psy_ui_scroller_init(&self->scroller, &self->component, 
 		NULL, NULL);

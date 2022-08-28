@@ -600,7 +600,7 @@ void propertiesrenderer_init(PropertiesRenderer* self, psy_ui_Component* parent,
 #endif	
 	psy_signal_init(&self->signal_selected);	
 	psy_ui_component_set_overflow(&self->component, psy_ui_OVERFLOW_VSCROLL);	
-	psy_ui_component_setscrollstep(&self->component,
+	psy_ui_component_set_scroll_step(&self->component,
 		psy_ui_size_make_em(0.0, 4.0));	
 	propertiesrenderer_build(self);	
 	psy_ui_component_start_timer(&self->component, 0, 100);

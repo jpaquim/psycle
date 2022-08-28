@@ -124,8 +124,7 @@ void psy_ui_x11app_init(psy_ui_X11App* self, psy_ui_App* app,
 
 	psy_ui_appimp_init(&self->imp);
 	imp_vtable_init(self);
-	self->app = app;
-	printf("open display\n");
+	self->app = app;	
 	self->dpy = XOpenDisplay(NULL);
 	psy_ui_x11_cursors_init(&self->cursors, self->dpy);
 	self->appclass = szAppClass;
@@ -369,8 +368,7 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 		imp->exposeareavalid = FALSE;
 		break; }
 	case MapNotify:		
-		psy_signal_emit(&imp->component->signal_show,
-			imp->component, 0);
+		psy_signal_emit(&imp->component->signal_show, imp->component, 0);
 		if (self->dograb && imp->hwnd == self->grabwin) {
 			XGrabPointer(self->dpy,self->grabwin,True,
 			PointerMotionMask | ButtonReleaseMask | ButtonPressMask,
@@ -395,7 +393,7 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 	case ConfigureNotify: {
 		XConfigureEvent xce = event->xconfigure;
 						
-		if (xce.width != imp->prev_w || xce.height != imp->prev_h) {
+		if (xce.width != imp->prev_w || xce.height != imp->prev_h) {			
 			imp->prev_w = xce.width;
 			imp->prev_h = xce.height;
 			psy_list_deallocate(&imp->expose_rectangles, NULL);

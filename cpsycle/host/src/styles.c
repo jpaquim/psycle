@@ -340,7 +340,7 @@ void init_host_styles(psy_ui_Styles* self, psy_ui_ThemeMode theme)
 	
 	style = psy_ui_style_allocinit();
 	psy_ui_style_set_background_colour(style, material.surface_overlay_5p);	
-	psy_ui_style_set_background_id(style, IDB_ABOUT);	
+	psy_ui_style_set_background_id(style, IDB_ABOUT);
 	style->background.repeat = psy_ui_NOREPEAT;
 	style->background.align = psy_ui_ALIGNMENT_CENTER;
 	psy_ui_styles_set_style(self, STYLE_ABOUT, style);

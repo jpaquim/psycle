@@ -104,7 +104,7 @@ void psy_ui_textareapane_init(psy_ui_TextAreaPane* self,
 		psy_ui_STYLE_EDIT);
 	psy_ui_component_set_style_type_focus(&self->component,
 		psy_ui_STYLE_EDIT_FOCUS);
-	psy_ui_component_setscrollstep(psy_ui_textareapane_base(self),
+	psy_ui_component_set_scroll_step(psy_ui_textareapane_base(self),
 		psy_ui_size_make_em(1.0, 1.0));		
 	psy_ui_component_set_wheel_scroll(&self->component, 4);
 	psy_ui_component_set_overflow(&self->component,

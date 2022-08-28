@@ -141,6 +141,7 @@ typedef struct MainFrame {
 	ParamViews paramviews;
 	psy_ui_RealPoint frame_drag_offset;
 	bool allow_frame_move;	
+	bool starting;	
 } MainFrame;
 
 void mainframe_init(MainFrame*);

@@ -192,9 +192,7 @@ void patterntrackbox_on_mouse_down(PatternTrackBox* self, psy_ui_MouseEvent* ev)
 {
 	if (patternviewstate_patterns(self->state->pv)) {
 		psy_audio_Patterns* patterns;		
-		psy_ui_RealPoint pt;		
-		
-		pt = psy_ui_mouseevent_pt(ev);		
+				
 		patterns = patternviewstate_patterns(self->state->pv);		
 		if (psy_ui_mouseevent_target(ev) == &self->solo) {
 			if (psy_audio_patterns_istracksoloed(patterns, self->index)) {
@@ -214,6 +212,13 @@ void patterntrackbox_on_mouse_down(PatternTrackBox* self, psy_ui_MouseEvent* ev)
 			} else {
 				psy_audio_patterns_armtrack(patterns, self->index);
 			}			
+		} else if (self->index != psy_audio_sequencecursor_track(
+				patternviewstate_cursor(self->state->pv))) {
+			psy_audio_SequenceCursor cursor;
+			
+			cursor = *patternviewstate_cursor(self->state->pv);
+			cursor.track = self->index;
+			psy_audio_sequence_set_cursor(self->state->pv->sequence, cursor);
 		}
 	}
 }

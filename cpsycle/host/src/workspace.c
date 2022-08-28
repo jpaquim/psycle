@@ -543,7 +543,7 @@ psy_Playlist* workspace_playlist(Workspace* self)
 void workspace_load_configuration(Workspace* self)
 {
 	psy_Path path;
-	const char* driverkey;
+	const char* driverkey;	
 	psy_PropertyReader propertyreader;
 
 	assert(self);

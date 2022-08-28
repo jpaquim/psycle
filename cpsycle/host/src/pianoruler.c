@@ -19,7 +19,7 @@ static void pianoruler_drawruler(PianoRuler*, psy_ui_Graphics*,
 	psy_audio_BlockSelection);
 static void pianoruler_drawbeat(PianoRuler*, psy_ui_Graphics*, intptr_t beat,
 	double x, double baseline, double tmheight);
-static void pianoruler_onpreferredsize(PianoRuler*, const psy_ui_Size* limit,
+static void pianoruler_on_preferred_size(PianoRuler*, const psy_ui_Size* limit,
 	psy_ui_Size* rv);
 
 /* vtable */
@@ -37,11 +37,10 @@ static void pianoruler_vtable_init(PianoRuler* self)
 			pianoruler_ondraw;
 		pianoruler_vtable.onpreferredsize =
 			(psy_ui_fp_component_on_preferred_size)
-			pianoruler_onpreferredsize;
+			pianoruler_on_preferred_size;
 		pianoruler_vtable_initialized = TRUE;
 	}
-	psy_ui_component_set_vtable(pianoruler_base(self),
-		&pianoruler_vtable);
+	psy_ui_component_set_vtable(pianoruler_base(self), &pianoruler_vtable);
 }
 
 void pianoruler_init(PianoRuler* self, psy_ui_Component* parent,
@@ -55,7 +54,7 @@ void pianoruler_init(PianoRuler* self, psy_ui_Component* parent,
 	self->gridstate = gridstate;
 }
 
-void pianoruler_onpreferredsize(PianoRuler* self, const psy_ui_Size* limit,
+void pianoruler_on_preferred_size(PianoRuler* self, const psy_ui_Size* limit,
 	psy_ui_Size* rv)
 {
 	assert(self);

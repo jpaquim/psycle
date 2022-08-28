@@ -51,18 +51,16 @@ static void effectui_vtable_init(EffectUi* self)
 
 /* implementation */
 void effectui_init(EffectUi* self, psy_ui_Component* parent,
-	uintptr_t slot, ParamViews* paramviews, Workspace* workspace)
+	uintptr_t slot, ParamViews* paramviews, psy_audio_Machines* machines)
 {
 	assert(self);
-	assert(workspace);
-	assert(workspace->song);	
+	assert(machines);	
 
 	psy_ui_component_init(&self->component, parent, NULL);	
 	effectui_vtable_init(self);	
 	psy_ui_component_set_style_type(&self->component, STYLE_MV_EFFECT);
 	self->paramviews = paramviews;
-	self->machines = &workspace->song->machines;
-	assert(self->machines);
+	self->machines = machines;	
 	self->machine = psy_audio_machines_at(self->machines, slot);
 	assert(self->machine);
 	self->preventmachinepos = FALSE;
@@ -138,6 +136,9 @@ void effectui_onmousedoubleclick(EffectUi* self, psy_ui_MouseEvent* ev)
 
 void effectui_on_timer(EffectUi* self, uintptr_t timerid)
 {
+	if (!psy_ui_component_draw_visible(&self->component)) {
+		return;
+	}
 	if (psy_audio_machine_muted(self->machine)) {
 		psy_ui_component_add_style_state(&self->mute,
 			psy_ui_STYLESTATE_SELECT);
@@ -151,10 +152,8 @@ void effectui_on_timer(EffectUi* self, uintptr_t timerid)
 	} else {
 		psy_ui_component_remove_style_state(&self->bypass,
 			psy_ui_STYLESTATE_SELECT);
-	}
-	if (psy_ui_component_draw_visible(&self->component)) {
-		if (vuui_update(&self->vu)) {
-			psy_ui_component_invalidate(vuui_base(&self->vu));
-		}
+	}	
+	if (vuui_update(&self->vu)) {
+		psy_ui_component_invalidate(vuui_base(&self->vu));	
 	}
 }

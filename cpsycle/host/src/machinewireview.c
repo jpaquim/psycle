@@ -209,7 +209,7 @@ void machinewireview_init(MachineWireView* self, psy_ui_Component* parent,
 		workspace);
 	self->opcount = 0;
 	self->centermaster = TRUE;
-	psy_ui_component_setscrollstep(&self->component,
+	psy_ui_component_set_scroll_step(&self->component,
 		psy_ui_size_make_px(10.0, 1.0));	
 	self->machines = NULL;
 	self->paramviews = paramviews;

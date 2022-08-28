@@ -1,6 +1,6 @@
 /*
 ** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #if !defined(GENERATORUI_H)
@@ -30,12 +30,11 @@ typedef struct GeneratorUi {
 	/* references */
 	psy_audio_Machine* machine;
 	psy_audio_Machines* machines;
-	ParamViews* paramviews;
-	Workspace* workspace;
+	ParamViews* paramviews;	
 } GeneratorUi;
 
 void generatorui_init(GeneratorUi*, psy_ui_Component* parent, uintptr_t slot,
-	ParamViews* paramviews, Workspace*);
+	ParamViews* paramviews, psy_audio_Machines*);
 
 #ifdef __cplusplus
 }

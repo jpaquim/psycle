@@ -809,7 +809,7 @@ INLINE psy_ui_Overflow psy_ui_component_overflow(psy_ui_Component* self)
 	return self->scroll->overflow;
 }
 
-INLINE void psy_ui_component_setscrollstep(psy_ui_Component* self,
+INLINE void psy_ui_component_set_scroll_step(psy_ui_Component* self,
 	psy_ui_Size step)
 {
 	assert(self);

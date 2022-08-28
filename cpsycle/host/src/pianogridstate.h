@@ -15,32 +15,28 @@
 extern "C" {
 #endif
 
+typedef enum PianoTrackDisplay {
+	PIANOROLL_TRACK_DISPLAY_ALL,
+	PIANOROLL_TRACK_DISPLAY_CURRENT,
+	PIANOROLL_TRACK_DISPLAY_ACTIVE
+} PianoTrackDisplay;
+
 /* PianoGridState */
 typedef struct PianoGridState {
 	PatternViewState* pv;	
 	double pxperbeat;
-	double defaultbeatwidth;	
+	double defaultbeatwidth;
+	psy_Property track_display;
+	psy_Property* track_all;
+	psy_Property* track_current;
+	psy_Property* track_active;
 } PianoGridState;
 
 void pianogridstate_init(PianoGridState*, PatternViewState*);
+void pianogridstate_dispose(PianoGridState*);
 
 
-INLINE psy_audio_SequenceCursor pianogridstate_setcursor(PianoGridState* self,
-	psy_audio_SequenceCursor cursor)
-{
-	assert(self);
-
-	self->pv->cursor = cursor;
-}
-
-INLINE psy_audio_SequenceCursor pianogridstate_cursor(const PianoGridState* self)
-{
-	assert(self);
-
-	return self->pv->cursor;
-}
-
-INLINE void pianogridstate_setzoom(PianoGridState* self, psy_dsp_big_beat_t rate)
+INLINE void pianogridstate_set_zoom(PianoGridState* self, psy_dsp_big_beat_t rate)
 {
 	assert(self);
 
@@ -91,7 +87,7 @@ INLINE psy_dsp_big_beat_t pianogridstate_step(const PianoGridState* self)
 {
 	assert(self);
 
-	return 1 / (psy_dsp_big_beat_t)self->pv->cursor.lpb;
+	return psy_audio_sequencecursor_bpl(patternviewstate_cursor(self->pv));
 }
 
 INLINE double pianogridstate_steppx(const PianoGridState* self)
@@ -136,16 +132,7 @@ INLINE void pianogridstate_clip(PianoGridState* self,
 	}
 }
 
-INLINE bool pianogridstate_testselection(PianoGridState* self, uint8_t key,
-	double offset)
-{
-	/* todo abs */
-	return self->pv->selection.valid &&
-		key >= self->pv->selection.topleft.key &&
-		key < self->pv->selection.bottomright.key&&
-		offset >= self->pv->selection.topleft.offset &&
-		offset < self->pv->selection.bottomright.offset;
-}
+PianoTrackDisplay pianogridstate_track_display(const PianoGridState*);
 
 #ifdef __cplusplus
 }

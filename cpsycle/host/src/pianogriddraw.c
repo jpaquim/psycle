@@ -46,22 +46,18 @@ static void pianogriddraw_prepare_selection(PianoGridDraw* self,
 /* implementation */
 void pianogriddraw_init(PianoGridDraw* self,
 	KeyboardState* keyboardstate, PianoGridState* gridstate,	
-	psy_dsp_big_beat_t sequenceentryoffset,
 	psy_audio_PatternEntry* hoverpatternentry,	
-	PianoTrackDisplay trackdisplay,
-	bool cursoronnoterelease,	
 	psy_ui_RealSize size, Workspace* workspace)
 {	
 	assert(self);
+	assert(gridstate);
 	
 	self->workspace = workspace;
 	self->keyboardstate = keyboardstate;
 	self->gridstate = gridstate;
 	self->size = size;	
-	self->sequenceentryoffset = sequenceentryoffset;
 	self->hoverpatternentry =hoverpatternentry;	
-	self->trackdisplay = trackdisplay;	
-	self->cursoronnoterelease = cursoronnoterelease;	
+	self->trackdisplay = pianogridstate_track_display(self->gridstate);	
 	self->drawgrid = TRUE;
 	self->drawentries = TRUE;
 	self->drawcursor = TRUE;
@@ -93,7 +89,6 @@ void pianogriddraw_on_draw(PianoGridDraw* self, psy_ui_Graphics* g)
 		return;
 	}
 	clip = pianogriddraw_clip_selection(self, psy_ui_graphics_cliprect(g));
-	/* self->cursoronnoterelease = FALSE; */
 	if (self->drawgrid) {
 		pianogriddraw_draw_grid(self, g, clip);
 	}
@@ -300,7 +295,7 @@ void pianogriddraw_draw_cursor(PianoGridDraw* self, psy_ui_Graphics* g, psy_audi
 {
 	assert(self);
 
-	if (self->gridstate->pv->sequence && !self->cursoronnoterelease &&
+	if (self->gridstate->pv->sequence &&
 		!(psy_audio_player_playing(workspace_player(self->workspace)) &&
 			keyboardmiscconfig_following_song(&self->workspace->config.misc))) {
 		psy_ui_Style* style;
@@ -578,8 +573,7 @@ void pianogriddraw_draw_event(PianoGridDraw* self, psy_ui_Graphics* g,
 			pianogridstate_quantize(self->gridstate, ev->offset)) {
 			psy_ui_Style* style;
 
-			style = psy_ui_style(STYLE_PV_CURSOR);
-			self->cursoronnoterelease = TRUE;
+			style = psy_ui_style(STYLE_PV_CURSOR);			
 			colour = style->background.colour;
 			// patternviewskin_cursorcolour(patternviewstate_skin(self->gridstate->pv),
 			//	0, 0);

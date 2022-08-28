@@ -209,7 +209,7 @@ void trackergrid_prev_track(TrackerGrid* self)
 
 	patterncolnavigator_init(&navigator, self->state, TRUE);
 	cursor = patterncolnavigator_prev_track(&navigator,
-		self->state->pv->cursor);
+		patternviewstate_cursor(self->state->pv));
 	if (patterncolnavigator_wrap(&navigator)) {
 		trackergrid_scroll_right(self, cursor);
 	} else {
@@ -227,7 +227,7 @@ void trackergrid_next_track(TrackerGrid* self)
 
 	patterncolnavigator_init(&navigator, self->state, TRUE);
 	cursor = patterncolnavigator_next_track(&navigator,
-		self->state->pv->cursor);
+		patternviewstate_cursor(self->state->pv));
 	if (patterncolnavigator_wrap(&navigator)) {
 		trackergrid_scroll_left(self, cursor);
 	} else {
@@ -527,18 +527,13 @@ void trackergrid_select_machine(TrackerGrid* self)
 	psy_audio_PatternEvent ev;
 
 	assert(self);
-
-	if (!patternviewstate_sequence(self->state->pv)) {
-		return;
-	}
-	pattern = psy_audio_sequence_pattern(
-		patternviewstate_sequence(self->state->pv),
-		patternviewstate_cursor(self->state->pv).order_index);
+	
+	pattern = patternviewstate_pattern(self->state->pv);
 	if (!pattern) {
 		return;
 	}
 	ev = psy_audio_pattern_event_at_cursor(pattern,
-		patternviewstate_cursor(self->state->pv));
+		*patternviewstate_cursor(self->state->pv));
 	if (!psy_audio_patternevent_empty(&ev)) {
 		psy_audio_machines_select(
 			&workspace_song(self->workspace)->machines,
@@ -581,12 +576,7 @@ void trackergrid_row_delete(TrackerGrid* self)
 
 	assert(self);
 
-	if (!patternviewstate_sequence(self->state->pv)) {
-		return;
-	}
-	pattern = psy_audio_sequence_pattern(
-		patternviewstate_sequence(self->state->pv),
-		patternviewstate_cursor(self->state->pv).order_index);
+	pattern = patternviewstate_pattern(self->state->pv);
 	if (!pattern) {
 		return;
 	}
@@ -648,12 +638,7 @@ void trackergrid_row_clear(TrackerGrid* self)
 
 	assert(self);
 
-	if (!patternviewstate_sequence(self->state->pv)) {
-		return;
-	}
-	pattern = psy_audio_sequence_pattern(
-		patternviewstate_sequence(self->state->pv),
-		patternviewstate_cursor(self->state->pv).order_index);
+	pattern = patternviewstate_pattern(self->state->pv);
 	if (!pattern) {
 		return;
 	}
@@ -696,12 +681,7 @@ bool trackergrid_insert_note(TrackerGrid* self, intptr_t note_id)
 
 	assert(self);
 
-	if (!patternviewstate_sequence(self->state->pv)) {
-		return 0;
-	}
-	pattern = psy_audio_sequence_pattern(
-		patternviewstate_sequence(self->state->pv),
-		patternviewstate_cursor(self->state->pv).order_index);
+	pattern = patternviewstate_pattern(self->state->pv);
 	if (!pattern) {
 		return 0;
 	}
@@ -743,7 +723,7 @@ bool trackergrid_insert_note(TrackerGrid* self, intptr_t note_id)
 		if (insert) {			
 			psy_undoredo_execute(&self->workspace->undoredo,
 				&insertcommand_allocinit(pattern,
-					patternviewstate_cursor(self->state->pv), ev,
+					*patternviewstate_cursor(self->state->pv), ev,
 					patternviewstate_sequence(self->state->pv))->command);			
 			if (self->state->pv->chord != FALSE) {
 				trackergrid_next_track(self);
@@ -770,12 +750,7 @@ bool trackergrid_on_midi_cmds(TrackerGrid* self, InputHandler* sender)
 	if (self->prevent_event_driver) {
 		return 0;
 	}
-	if (!patternviewstate_sequence(self->state->pv)) {
-		return 0;
-	}
-	pattern = psy_audio_sequence_pattern(
-		patternviewstate_sequence(self->state->pv),
-		patternviewstate_cursor(self->state->pv).order_index);
+	pattern = patternviewstate_pattern(self->state->pv);
 	if (!pattern) {
 		return 0;
 	}		
@@ -819,18 +794,13 @@ void trackergrid_input_value(TrackerGrid* self, uintptr_t newvalue, bool isdigit
 	psy_audio_Pattern* pattern;
 
 	assert(self);	
-
-	if (!patternviewstate_sequence(self->state->pv) || newvalue == -1) {
-		return;
-	}
-	pattern = psy_audio_sequence_pattern(
-		patternviewstate_sequence(self->state->pv),
-		patternviewstate_cursor(self->state->pv).order_index);
+	
+	pattern = patternviewstate_pattern(self->state->pv);
 	if (!pattern) {
 		return;
 	}
 	ev = psy_audio_pattern_event_at_cursor(pattern,
-		patternviewstate_cursor(self->state->pv));
+		*patternviewstate_cursor(self->state->pv));
 	if (isdigit) {			
 		TrackDef* trackdef;			
 
@@ -1262,12 +1232,7 @@ void trackergrid_reset_pattern_sync(TrackerGrid* self)
 
 	assert(self);
 
-	if (!patternviewstate_sequence(self->state->pv)) {
-		return;
-	}
-	pattern = psy_audio_sequence_pattern(
-		patternviewstate_sequence(self->state->pv),
-		patternviewstate_cursor(self->state->pv).order_index);
+	pattern = patternviewstate_pattern(self->state->pv);
 	if (pattern) {
 		self->component.opcount = pattern->opcount;
 	} else {
@@ -1280,10 +1245,10 @@ void trackergrid_block_start(TrackerGrid* self)
 	assert(self);
 
 	self->state->pv->selection = psy_audio_blockselection_make(		
-		patternviewstate_cursor(self->state->pv),
-		patternviewstate_cursor(self->state->pv));
+		*patternviewstate_cursor(self->state->pv),
+		*patternviewstate_cursor(self->state->pv));
 	psy_audio_blockselection_startdrag(&self->state->pv->selection,
-		patternviewstate_cursor(self->state->pv));		
+		*patternviewstate_cursor(self->state->pv));		
 	psy_ui_component_invalidate(&self->component);
 }
 
@@ -1460,12 +1425,7 @@ void trackergrid_tweak(TrackerGrid* self, int slot, uintptr_t tweak,
 		int value;
 		psy_audio_Pattern* pattern;		
 
-		if (!patternviewstate_sequence(self->state->pv)) {
-			return;
-		}
-		pattern = psy_audio_sequence_pattern(
-			patternviewstate_sequence(self->state->pv),
-			patternviewstate_cursor(self->state->pv).order_index);
+		pattern = patternviewstate_pattern(self->state->pv);
 		if (!pattern) {
 			return;
 		}
@@ -1730,7 +1690,7 @@ void trackerview_on_play_line_changed(TrackerView* self, Workspace* sender)
 		return;
 	}
 	if (trackerview_playing_following_song(self)) {		
-		trackergrid_scroll_down(&self->grid, patternviewstate_cursor(
+		trackergrid_scroll_down(&self->grid, *patternviewstate_cursor(
 			self->grid.state->pv), FALSE);		
 	}
 	trackergrid_invalidate_playbar(&self->grid);

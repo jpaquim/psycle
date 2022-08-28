@@ -51,10 +51,10 @@ INLINE void patternviewstate_set_cursor(PatternViewState* self,
 	self->cursor = cursor;
 }
 
-INLINE psy_audio_SequenceCursor patternviewstate_cursor(const
+INLINE const psy_audio_SequenceCursor* patternviewstate_cursor(const
 	PatternViewState* self)
 {
-	return self->cursor;
+	return &self->cursor;
 }
 
 void patternviewstate_sync_cursor_to_sequence(PatternViewState* self);
@@ -92,9 +92,8 @@ INLINE psy_audio_Pattern* patternviewstate_pattern(PatternViewState* self)
 	if (!self->sequence) {
 		return NULL;
 	}
-	return psy_audio_sequence_pattern(
-		self->sequence,
-		self->cursor.order_index);
+	return psy_audio_sequence_pattern(self->sequence,
+		psy_audio_sequencecursor_order_index(&self->cursor));
 }
 
 INLINE const psy_audio_Pattern* patternviewstate_pattern_const(
