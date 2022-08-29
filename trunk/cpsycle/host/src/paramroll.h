@@ -36,12 +36,17 @@ void paramruler_init(ParamRuler*, psy_ui_Component* parent);
 typedef struct ParamDraw {
 	/* inherits */
 	psy_ui_Component component;
+	bool tweaking;
+	psy_audio_SequenceCursor tweak_cursor;
 	/* references */
 	PianoGridState* state;
+	Workspace* workspace;
+	psy_audio_PatternNode* tweak_node;
+	psy_audio_Pattern* tweak_pattern;
 } ParamDraw;
 
 void paramdraw_init(ParamDraw*, psy_ui_Component* parent,
-	PianoGridState*);
+	PianoGridState*, Workspace*);
 
 
 /* ParamRoll */
@@ -53,11 +58,11 @@ typedef struct ParamRoll {
 	ParamRuler ruler;	
 	psy_ui_Component pane;
 	ParamDraw draw;
-	psy_ui_ScrollBar hscroll;		
+	psy_ui_ScrollBar hscroll;	
 } ParamRoll;
 
 void paramroll_init(ParamRoll*, psy_ui_Component* parent,
-	PianoGridState*);
+	PianoGridState*, Workspace*);
 
 INLINE psy_ui_Component* paramroll_base(ParamRoll* self)
 {

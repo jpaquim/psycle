@@ -73,7 +73,7 @@ static void machineview_vtable_init(MachineView* self)
 			machineview_on_key_down;
 		machineview_vtable.section =
 			(psy_ui_fp_component_section)
-			machineview_section;		
+			machineview_section;
 		machineview_vtable.on_focus =
 			(psy_ui_fp_component)
 			machineview_on_focus;
@@ -298,25 +298,25 @@ void machineview_selectsection(MachineView* self, psy_ui_Component* sender,
 	uintptr_t section, uintptr_t options)
 {
 	switch (section) {
-		case SECTION_ID_MACHINEVIEW_NEWMACHINE:
-			if (options & NEWMACHINE_INSERT) {
-				newmachine_insertmode(&self->newmachine);
-			} else if (options & NEWMACHINE_APPEND) {
-				newmachine_appendmode(&self->newmachine);
-			} else if (options & NEWMACHINE_APPENDSTACK) {				
-				newmachine_appendmode(&self->newmachine);
-			} else if (options & NEWMACHINE_ADDEFFECT) {
-				self->wireview.addeffect = 1;
-				self->wireview.randominsert = 0;
-				newmachine_addeffectmode(&self->newmachine);
-			} else if (options & NEWMACHINE_ADDEFFECTSTACK) {
-				self->wireview.addeffect = 1;
-				self->wireview.randominsert = 0;				
-				newmachine_addeffectmode(&self->newmachine);				
-			}
-			break;
-		default:
-			break;
+	case SECTION_ID_MACHINEVIEW_NEWMACHINE:
+		if (options & NEWMACHINE_INSERT) {
+			newmachine_insertmode(&self->newmachine);
+		} else if (options & NEWMACHINE_APPEND) {
+			newmachine_appendmode(&self->newmachine);
+		} else if (options & NEWMACHINE_APPENDSTACK) {				
+			newmachine_appendmode(&self->newmachine);
+		} else if (options & NEWMACHINE_ADDEFFECT) {
+			self->wireview.addeffect = 1;
+			self->wireview.randominsert = 0;
+			newmachine_addeffectmode(&self->newmachine);
+		} else if (options & NEWMACHINE_ADDEFFECTSTACK) {
+			self->wireview.addeffect = 1;
+			self->wireview.randominsert = 0;				
+			newmachine_addeffectmode(&self->newmachine);				
+		}
+		break;
+	default:
+		break;
 	}
 	psy_ui_tabbar_select(&self->tabbar, section);
 }

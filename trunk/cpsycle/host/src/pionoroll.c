@@ -105,7 +105,7 @@ static void pianoroll_vtable_init(Pianoroll* self)
 			pianoroll_on_mouse_down;		
 		pianoroll_vtable.on_timer =
 			(psy_ui_fp_component_on_timer)
-			pianoroll_on_timer;
+			pianoroll_on_timer;		
 		pianoroll_vtable_initialized = TRUE;
 	}
 	psy_ui_component_set_vtable(&self->component, &pianoroll_vtable);
@@ -144,7 +144,7 @@ void pianoroll_init(Pianoroll* self, psy_ui_Component* parent,
 		pianoroll_on_select_mode);			
 	/* paramroll */
 	paramroll_init(&self->param_roll, &self->component,
-		&self->gridstate);
+		&self->gridstate, workspace);
 	psy_ui_component_set_align(&self->param_roll.component,
 		psy_ui_ALIGN_BOTTOM);
 	/* client */
@@ -183,6 +183,8 @@ void pianoroll_init(Pianoroll* self, psy_ui_Component* parent,
 	psy_ui_combobox_select(&self->keytype, 0);
 	psy_ui_component_set_preferred_height(&self->keytype.component,
 		psy_ui_value_make_eh(2.0));
+	psy_ui_component_set_preferred_width(&self->keytype.component,
+		psy_ui_value_make_ew(10.0));
 	psy_ui_component_hide(&self->keytype.expand.component);
 	psy_ui_component_set_align(&self->keytype.component,
 		psy_ui_ALIGN_TOP);

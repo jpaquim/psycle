@@ -26,7 +26,7 @@ typedef struct GeneratorUi {
 	EditnameUi editname;
 	PanUi pan;
 	VuUi vu;
-	bool preventmachinepos;
+	bool prevent_machine_pos;
 	/* references */
 	psy_audio_Machine* machine;
 	psy_audio_Machines* machines;
@@ -35,6 +35,29 @@ typedef struct GeneratorUi {
 
 void generatorui_init(GeneratorUi*, psy_ui_Component* parent, uintptr_t slot,
 	ParamViews* paramviews, psy_audio_Machines*);
+	
+GeneratorUi* generatorui_alloc(void);
+GeneratorUi* generatorui_alloc_init(psy_ui_Component* parent, uintptr_t mac_id,
+	ParamViews*, psy_audio_Machines*);	
+	
+INLINE void generatorui_prevent_machine_pos(GeneratorUi* self)
+{
+	assert(self);
+	
+	self->prevent_machine_pos = TRUE;	
+}
+
+INLINE void generator_enable_machine_pos(GeneratorUi* self)
+{
+	assert(self);
+	
+	self->prevent_machine_pos = FALSE;	
+}	
+	
+INLINE psy_ui_Component* generatorui_base(GeneratorUi* self)
+{
+	return &self->component;
+}
 
 #ifdef __cplusplus
 }

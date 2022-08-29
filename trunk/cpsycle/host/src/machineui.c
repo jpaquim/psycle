@@ -359,55 +359,57 @@ void vudisplay_drawpeak(VuDisplay* self, psy_ui_Graphics* g,
 }
 
 psy_ui_Component* machineui_create(psy_audio_Machine* machine, 
-	psy_ui_Component* parent, ParamViews* paramviews, bool machinepos,
+	psy_ui_Component* parent, ParamViews* paramviews, bool machine_pos,
 	Workspace* workspace)
 {	
-	psy_ui_Component* newui;
+	psy_ui_Component* rv;
+	psy_audio_Machines* machines;
 	const psy_audio_MachineInfo* info;
-	assert(machine);
+	uintptr_t mac_id;
+	
+	assert(machine);	
 	assert(workspace);
 	assert(workspace->song);
 
-	newui = NULL;
+	rv = NULL;	
 	info = psy_audio_machine_info(machine);
 	if (!info) {
 		return NULL;
-	}
-	if (psy_audio_machine_slot(machine) == psy_audio_MASTER_INDEX) {
-		MasterUi* masterui;
+	}	
+	machines = &workspace->song->machines;
+	mac_id = psy_audio_machine_slot(machine);
+	if (mac_id == psy_audio_MASTER_INDEX) {
+		MasterUi* ui;
 
-		masterui = (MasterUi*)malloc(sizeof(MasterUi));
-		if (masterui) {
-			masterui_init(masterui, parent, paramviews, workspace);
-			masterui->preventmachinepos = !machinepos;
-			newui = &masterui->component;
+		ui = masterui_alloc_init(parent, paramviews, machines);
+		if (ui) {
+			if (!machine_pos) {
+				masterui_prevent_machine_pos(ui);
+			}
+			rv = masterui_base(ui);
 		}
-	} else if (psy_audio_machine_slot(machine) >= 0x40 &&
-			psy_audio_machine_slot(machine) < 0x80) {
-		EffectUi* effectui;
+	} else if (mac_id >= 0x40 && mac_id < 0x80) {
+		EffectUi* ui;
 
-		effectui = (EffectUi*)malloc(sizeof(EffectUi));
-		if (effectui) {
-			effectui_init(effectui, parent, psy_audio_machine_slot(machine),
-				paramviews, &workspace->song->machines);
-			effectui->preventmachinepos = !machinepos;
-			newui = &effectui->component;
-		}		
+		ui = effectui_alloc_init(parent, mac_id, paramviews, machines);
+		if (ui) {
+			if (!machine_pos) {
+				effectui_prevent_machine_pos(ui);
+			}
+			rv = effectui_base(ui);
+		}
 	} else {
-		GeneratorUi* generatorui;
+		GeneratorUi* ui;
 
-		generatorui = (GeneratorUi*)malloc(sizeof(GeneratorUi));
-		if (generatorui) {
-			generatorui_init(generatorui, parent, psy_audio_machine_slot(machine),
-				paramviews, &workspace->song->machines);
-			generatorui->preventmachinepos = !machinepos;
-			newui = &generatorui->component;
+		ui = generatorui_alloc_init(parent, mac_id, paramviews, machines);
+		if (ui) {
+			if (!machine_pos) {
+				generatorui_prevent_machine_pos(ui);
+			}
+			rv = generatorui_base(ui);
 		}
 	}	
-	if (newui) {
-		newui->deallocate = TRUE;
-	}
-	return newui;	
+	return rv;	
 }
 
 void machineui_drawhighlight(psy_ui_Graphics* g, psy_ui_RealRectangle position)

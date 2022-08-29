@@ -230,7 +230,8 @@ typedef struct psy_audio_Sequence {
 	psy_Signal signal_clear;
 	psy_Signal signal_mutechanged;
 	psy_Signal signal_solochanged;
-	psy_Signal signal_cursorchanged;	
+	psy_Signal signal_cursorchanged;
+	psy_Signal signal_tweak;
 	/* internal */	
 	psy_Table tracks;
 	psy_audio_SequenceTrack globaltrack;
@@ -274,6 +275,9 @@ psy_audio_OrderIndex psy_audio_sequence_reorder(psy_audio_Sequence*,
 void psy_audio_sequence_resetpatterns(psy_audio_Sequence*);
 void psy_audio_sequence_fillpatterns(psy_audio_Sequence*);
 void psy_audio_reposition(psy_audio_Sequence*);
+
+void psy_audio_sequence_tweak(psy_audio_Sequence*);
+
 uintptr_t psy_audio_sequence_order(const psy_audio_Sequence*,
 	uintptr_t trackidx, psy_dsp_big_beat_t position);
 psy_audio_Pattern* psy_audio_sequence_pattern(psy_audio_Sequence*,

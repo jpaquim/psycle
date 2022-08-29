@@ -9,6 +9,7 @@
 #include "patternview.h"
 /* host */
 #include "styles.h"
+#include "viewindex.h"
 /* platform */
 #include "../../detail/portable.h"
 
@@ -46,6 +47,9 @@ static void patternview_on_track_reposition(PatternView*, psy_audio_Sequence*,
 	uintptr_t trackidx);
 static void patternview_on_pattern_length_changed(PatternView*,
 	psy_audio_Patterns*, uintptr_t pattern_idx);
+static void patternview_select_section(PatternView*, psy_ui_Component* sender,
+	uintptr_t section, uintptr_t options);	
+static uintptr_t patternview_section(const PatternView*);
 
 /* vtable */
 static psy_ui_ComponentVtable vtable;
@@ -70,6 +74,9 @@ static void vtable_init(PatternView* self)
 		vtable.on_focus =
 			(psy_ui_fp_component)
 			patternview_on_focus;
+		vtable.section =
+			(psy_ui_fp_component_section)
+			patternview_section;
 		vtable_initialized = TRUE;
 	}
 	psy_ui_component_set_vtable(patternview_base(self), &vtable);
@@ -163,7 +170,9 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->workspace->signal_parametertweak, self,
 		patternview_on_parameter_tweak);	
 	psy_signal_connect(&psy_ui_app_zoom(psy_ui_app())->signal_zoom, self,
-		patternview_on_app_zoom);	
+		patternview_on_app_zoom);
+	psy_signal_connect(&self->component.signal_selectsection, self,
+		patternview_select_section);	
 	/* configuration */
 	pvconfig = &self->workspace->config.visual.patview;
 	patternviewconfig_connect(pvconfig,
@@ -511,4 +520,55 @@ void patternview_on_pattern_length_changed(PatternView* self,
 		psy_ui_component_invalidate(&self->trackerview.component);
 		psy_ui_component_invalidate(&self->trackerview.lines.pane);
 	} /* else handled in patternview_on_track_reposition */
+}
+
+uintptr_t patternview_section(const PatternView* self)
+{
+	assert(self);
+	
+	switch (self->display) {
+	case PATTERN_DISPLAYMODE_TRACKER:
+		return SECTION_ID_PATTERNVIEW_TRACKER;		
+	case PATTERN_DISPLAYMODE_PIANOROLL:
+		return SECTION_ID_PATTERNVIEW_PIANO;
+	case PATTERN_DISPLAYMODE_TRACKER_PIANOROLL_VERTICAL:
+		return SECTION_ID_PATTERNVIEW_VSPLIT;
+	case PATTERN_DISPLAYMODE_TRACKER_PIANOROLL_HORIZONTAL:
+		return SECTION_ID_PATTERNVIEW_HSPLIT;
+	default:
+		return SECTION_ID_PATTERNVIEW_TRACKER;
+	}	
+}
+
+void patternview_select_section(PatternView* self, psy_ui_Component* sender,
+	uintptr_t section, uintptr_t options)
+{
+	PatternViewConfig* pvconfig;
+	
+	assert(self);
+	
+	if (section == psy_INDEX_INVALID) {
+		return;
+	}
+	pvconfig = &self->workspace->config.visual.patview;
+	switch (section) {
+	case SECTION_ID_PATTERNVIEW_TRACKER:		
+		patternviewconfig_select_pattern_display(pvconfig,
+			PATTERN_DISPLAYMODE_TRACKER);
+		break;
+	case SECTION_ID_PATTERNVIEW_PIANO:		
+		patternviewconfig_select_pattern_display(pvconfig,
+			PATTERN_DISPLAYMODE_PIANOROLL);
+		break;
+	case SECTION_ID_PATTERNVIEW_VSPLIT:
+		patternviewconfig_select_pattern_display(pvconfig,
+			PATTERN_DISPLAYMODE_TRACKER_PIANOROLL_VERTICAL);
+		break;
+	case SECTION_ID_PATTERNVIEW_HSPLIT:
+		patternviewconfig_select_pattern_display(pvconfig,
+			PATTERN_DISPLAYMODE_TRACKER_PIANOROLL_HORIZONTAL);
+		break;
+	default:
+		break;
+	}	
 }

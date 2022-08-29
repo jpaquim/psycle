@@ -7,6 +7,10 @@
 
 
 #include "paramroll.h"
+/* host */
+#include "patterncmds.h"
+/* platform */
+#include "../../detail/portable.h"
 
 /* ParamRuler */
 
@@ -67,6 +71,11 @@ static void paramdraw_draw_entries(ParamDraw*, psy_ui_Graphics*);
 static void paramdraw_on_preferred_size(ParamDraw*, const psy_ui_Size* limit,
 	psy_ui_Size* rv);
 static void paramdraw_on_track_display(ParamDraw*, psy_Property* sender);
+static void paramdraw_on_mouse_down(ParamDraw*, psy_ui_MouseEvent*);
+static void paramdraw_on_mouse_up(ParamDraw*, psy_ui_MouseEvent*);
+static void paramdraw_on_mouse_move(ParamDraw*, psy_ui_MouseEvent*);
+static uint8_t paramdraw_tweak_value(ParamDraw*, psy_ui_MouseEvent*);
+static void paramdraw_output(ParamDraw*, uint8_t value);
 
 /* vtable */
 static psy_ui_ComponentVtable paramdraw_vtable;
@@ -84,6 +93,15 @@ static void paramdraw_vtable_init(ParamDraw* self)
 		paramdraw_vtable.onpreferredsize =
 			(psy_ui_fp_component_on_preferred_size)
 			paramdraw_on_preferred_size;
+		paramdraw_vtable.on_mouse_down =
+			(psy_ui_fp_component_on_mouse_event)
+			paramdraw_on_mouse_down;
+		paramdraw_vtable.on_mouse_up =
+			(psy_ui_fp_component_on_mouse_event)
+			paramdraw_on_mouse_up;
+		paramdraw_vtable.on_mouse_move =
+			(psy_ui_fp_component_on_mouse_event)
+			paramdraw_on_mouse_move;
 		paramdraw_vtable_initialized = TRUE;
 	}
 	psy_ui_component_set_vtable(&self->component, &paramdraw_vtable);	
@@ -91,14 +109,18 @@ static void paramdraw_vtable_init(ParamDraw* self)
 
 /* implementation */
 void paramdraw_init(ParamDraw* self, psy_ui_Component* parent,
-	PianoGridState* state)
+	PianoGridState* state, Workspace* workspace)
 {
 	assert(self);
 	assert(state);
+	assert(workspace);
 	
 	psy_ui_component_init(&self->component, parent, NULL);
-	paramdraw_vtable_init(self);
+	paramdraw_vtable_init(self);	
 	self->state = state;
+	self->workspace = workspace;
+	self->tweak_pattern = NULL;
+	self->tweak_node = NULL;
 	psy_property_connect(&self->state->track_display,
 		self, paramdraw_on_track_display);	
 }
@@ -198,11 +220,147 @@ void paramdraw_on_track_display(ParamDraw* self, psy_Property* sender)
 	psy_ui_component_invalidate(&self->component);
 }
 
+void paramdraw_on_mouse_down(ParamDraw* self, psy_ui_MouseEvent* ev)
+{
+	psy_audio_SequenceCursor cursor;		
+	psy_audio_PatternNode* prev;
+		
+	assert(self);
+	
+	cursor = self->state->pv->cursor;
+	psy_audio_sequencecursor_set_offset(&cursor,
+		pianogridstate_quantize(self->state, pianogridstate_pxtobeat(
+		self->state, psy_ui_mouseevent_offset(ev).x)));		
+	if (patternviewstate_sequence(self->state->pv)) {		
+		psy_audio_sequence_set_cursor(patternviewstate_sequence(
+			self->state->pv), cursor);
+	}
+	self->tweak_pattern = patternviewstate_pattern(self->state->pv);
+	if (!self->tweak_pattern) {
+		return;
+	}	
+	self->tweak_node = psy_audio_pattern_findnode_cursor(self->tweak_pattern,
+		self->state->pv->cursor, &prev);
+	if (self->tweak_node) {
+		psy_audio_PatternEntry* entry;
+		psy_audio_PatternEvent* pat_ev;
+
+		entry = (psy_audio_PatternEntry*)self->tweak_node->entry;
+		pat_ev = psy_audio_patternentry_front(entry);		
+		if (psy_ui_mouseevent_button(ev) == 2) {
+			pat_ev->cmd = 0x00;
+			pat_ev->parameter = 0x00;
+			self->tweak_pattern = NULL;
+			self->tweak_node = NULL;			
+		} else {
+			pat_ev->cmd = 0x0C;
+			pat_ev->parameter = paramdraw_tweak_value(self, ev);			
+			paramdraw_output(self, pat_ev->parameter);
+		}
+		psy_ui_component_invalidate(&self->component);
+	} else if (psy_ui_mouseevent_button(ev) == 1) {			
+		psy_audio_PatternEvent pat_ev;
+			
+		psy_audio_patternevent_init(&pat_ev);
+		pat_ev.cmd = 0x0C;
+		pat_ev.parameter = paramdraw_tweak_value(self, ev);
+		self->tweak_node = psy_audio_pattern_insert(self->tweak_pattern,
+			prev,
+			psy_audio_sequencecursor_track(&self->state->pv->cursor),
+			psy_audio_sequencecursor_offset(&self->state->pv->cursor),
+			&pat_ev);
+		paramdraw_output(self, pat_ev.parameter);
+		psy_ui_component_invalidate(&self->component);
+	} else {
+		self->tweak_pattern = NULL;
+		self->tweak_node = NULL;	
+	}	
+	if (self->tweak_node) {
+		psy_ui_component_capture(&self->component);		
+	}
+	psy_ui_mouseevent_stop_propagation(ev);
+}
+
+void paramdraw_on_mouse_move(ParamDraw* self, psy_ui_MouseEvent* ev)
+{
+	assert(self);
+	
+	if (self->tweak_node) {
+		uint8_t value;
+		psy_audio_PatternEntry* entry;
+		psy_audio_PatternEvent* pat_ev;
+		
+		entry = (psy_audio_PatternEntry*)self->tweak_node->entry;
+		pat_ev = psy_audio_patternentry_front(entry);
+		value = paramdraw_tweak_value(self, ev);
+		if (pat_ev->parameter != value) {			
+			pat_ev->parameter = value;
+			psy_audio_sequence_tweak(self->state->pv->sequence);			
+			psy_ui_component_invalidate(&self->component);
+			paramdraw_output(self, value);
+		}		
+	}
+	psy_ui_mouseevent_stop_propagation(ev);
+}
+
+void paramdraw_on_mouse_up(ParamDraw* self, psy_ui_MouseEvent* ev)
+{
+	assert(self);
+	
+	psy_ui_component_release_capture(&self->component);
+	if (self->tweak_pattern && self->tweak_node) {
+		psy_audio_PatternEntry* entry;
+		psy_audio_PatternEvent* pat_ev;
+		
+		entry = (psy_audio_PatternEntry*)self->tweak_node->entry;
+		pat_ev = psy_audio_patternentry_front(entry);				
+		psy_undoredo_execute(&self->workspace->undoredo,
+			&insertcommand_allocinit(self->tweak_pattern,
+				self->state->pv->cursor, *pat_ev, 
+				self->state->pv->sequence)->command);
+		psy_ui_component_invalidate(&self->component);		
+	}
+	self->tweak_pattern = NULL;
+	self->tweak_node = NULL;
+	psy_ui_mouseevent_stop_propagation(ev);
+}
+
+void paramdraw_output(ParamDraw* self, uint8_t value)
+{
+	char str[64];
+			
+	psy_snprintf(str, 64, "Tweak Cmd 0C Parameter %X", (int)value);
+	workspace_output_status(self->workspace, str);
+}
+
+uint8_t paramdraw_tweak_value(ParamDraw* self, psy_ui_MouseEvent* ev)
+{
+	psy_ui_RealSize size;				
+	uintptr_t maxval;
+	uint8_t cmd;
+	double px;
+	intptr_t val;		
+		
+	size = psy_ui_component_scroll_size_px(&self->component);
+	maxval = 256;
+	cmd = 0x0C;
+	px = size.height / (double)maxval;
+	val = (intptr_t)(psy_ui_mouseevent_offset(ev).y / px);
+	if (val < 0) {
+		val = 255;
+	} else if (val < 256) {
+		val = maxval - val;
+	} else {
+		val = 0;
+	}
+	return (uint8_t)val;
+}
+
 /* ParamRoll */
 
 /* implementation */
 void paramroll_init(ParamRoll* self, psy_ui_Component* parent,
-	PianoGridState* state)
+	PianoGridState* state, Workspace* workspace)
 {
 	assert(self);
 	assert(state);
@@ -220,7 +378,7 @@ void paramroll_init(ParamRoll* self, psy_ui_Component* parent,
 	psy_ui_component_set_align(&self->pane, psy_ui_ALIGN_CLIENT);
 	psy_ui_component_set_preferred_height(&self->left,
 		psy_ui_value_make_eh(10.0));
-	paramdraw_init(&self->draw, &self->pane, state);
+	paramdraw_init(&self->draw, &self->pane, state, workspace);
 	psy_ui_component_set_align(&self->draw.component, psy_ui_ALIGN_FIXED);
 	/* hscroll */
 	psy_ui_scrollbar_init(&self->hscroll, &self->component);

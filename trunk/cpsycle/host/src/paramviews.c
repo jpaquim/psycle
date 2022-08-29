@@ -7,11 +7,10 @@
 
 
 #include "paramviews.h"
-/* platform */
-#include "../../detail/portable.h"
+
 
 /* prototypes */
-static void paramviews_onsongchanged(ParamViews*, Workspace* sender);
+static void paramviews_on_song_changed(ParamViews*, Workspace* sender);
 static psy_audio_Machines* paramviews_machines(ParamViews*);
 
 /* implementation */
@@ -26,76 +25,91 @@ void paramviews_init(ParamViews* self, psy_ui_Component* view,
 	self->workspace = workspace;	
 	psy_table_init(&self->frames);
 	psy_signal_connect(&workspace->signal_songchanged, self,
-		paramviews_onsongchanged);
+		paramviews_on_song_changed);
 }
 
 void paramviews_dispose(ParamViews* self)
 {	
-	paramviews_removeall(self);
+	assert(self);
+	
+	paramviews_remove_all(self);
 	psy_table_dispose(&self->frames);
 }
 
 psy_audio_Machines* paramviews_machines(ParamViews* self)
 {
+	assert(self);
+	
 	return (workspace_song(self->workspace))
 		? &workspace_song(self->workspace)->machines
 		: NULL;
 }
 
-void paramviews_show(ParamViews* self, uintptr_t macid)
+void paramviews_show(ParamViews* self, uintptr_t mac_id)
 {
-	if (paramviews_machines(self)) {
-		psy_audio_Machine* machine;
-
-		machine = psy_audio_machines_at(paramviews_machines(self), macid);
-		if (machine) {
-			MachineFrame* frame;
-
-			frame = paramviews_frame(self, macid);
-			if (!frame) {
-				frame = machineframe_allocinit(self->view, machine, self,
-					self->workspace);
-				if (frame) {
-					psy_table_insert(&self->frames, macid, (void*)frame);
-				}
-			}
-			if (frame) {
-				psy_ui_component_show(&frame->component);
-			}
+	psy_audio_Machine* machine;
+	MachineFrame* frame;
+	
+	assert(self);
+	
+	if (!paramviews_machines(self)) {
+		return;
+	}	
+	machine = psy_audio_machines_at(paramviews_machines(self), mac_id);
+	if (!machine) {
+		return;
+	}
+	frame = paramviews_frame(self, mac_id);
+	if (!frame) {
+		frame = machineframe_allocinit(self->view, machine, self,
+			self->workspace);
+		if (frame) {
+			psy_table_insert(&self->frames, mac_id, (void*)frame);
 		}
+	}
+	if (frame) {
+		psy_ui_component_show(&frame->component);
 	}
 }
 
-void paramviews_erase(ParamViews* self, uintptr_t macid)
+void paramviews_erase(ParamViews* self, uintptr_t mac_id)
 {
-	psy_table_remove(&self->frames, macid);	
+	assert(self);
+	
+	psy_table_remove(&self->frames, mac_id);	
 }
 
-void paramviews_remove(ParamViews* self, uintptr_t macid)
+void paramviews_remove(ParamViews* self, uintptr_t mac_id)
 {	
 	MachineFrame* frame;
 
-	frame = paramviews_frame(self, macid);
+	assert(self);
+	
+	frame = paramviews_frame(self, mac_id);
 	if (frame) {	
 		psy_ui_component_destroy(&frame->component);		
 	}
 }
 
-void paramviews_removeall(ParamViews* self)
+void paramviews_remove_all(ParamViews* self)
 {	
 	psy_TableIterator it;	
 	psy_List* frames;
 	psy_List* p;
 	
+	assert(self);
+	
 	frames = NULL;	
-	// copy machine frame pointers to a list to prevent traversing with invalid
-	// tableiterators after calling frame destroy
+	/*
+	** copy machine frame pointers to a list to prevent traversing with invalid
+	** tableiterators after calling frame destroy
+	*/
 	for (it = psy_table_begin(&self->frames);
 			!psy_tableiterator_equal(&it, psy_table_end());
 			psy_tableiterator_inc(&it)) {		
 		psy_list_append(&frames, psy_tableiterator_value(&it));
 	}
-	// destroy frames	
+	/* destroy frames */
 	for (p = frames; p != NULL; p = p->next) {
 		psy_ui_Component* frame;
 		
@@ -106,16 +120,20 @@ void paramviews_removeall(ParamViews* self)
 	}
 	psy_list_free(frames);
 	frames = NULL;
-	// assert if all frames were removed
+	/* assert if all frames were removed */
 	assert(psy_table_size(&self->frames) == 0);
 }
 
-MachineFrame* paramviews_frame(ParamViews* self, uintptr_t macid)
+MachineFrame* paramviews_frame(ParamViews* self, uintptr_t mac_id)
 {
-	return (MachineFrame*)psy_table_at(&self->frames, macid);
+	assert(self);
+	
+	return (MachineFrame*)psy_table_at(&self->frames, mac_id);
 }
 
-void paramviews_onsongchanged(ParamViews* self, Workspace* sender)
+void paramviews_on_song_changed(ParamViews* self, Workspace* sender)
 {
-	paramviews_removeall(self);
+	assert(self);
+	
+	paramviews_remove_all(self);
 }

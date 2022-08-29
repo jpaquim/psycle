@@ -61,7 +61,7 @@ void generatorui_init(GeneratorUi* self, psy_ui_Component* parent,
 	assert(self->machines);
 	self->machine = psy_audio_machines_at(self->machines, slot);
 	assert(self->machine);	
-	self->preventmachinepos = FALSE;
+	self->prevent_machine_pos = FALSE;
 	psy_ui_component_set_style_type(&self->component, STYLE_MV_GENERATOR);
 	psy_ui_component_init(&self->mute, &self->component, NULL);
 	psy_ui_component_set_style_type(&self->mute, STYLE_MV_GENERATOR_MUTE);
@@ -81,12 +81,30 @@ void generatorui_init(GeneratorUi* self, psy_ui_Component* parent,
 	psy_ui_component_start_timer(&self->component, 0, 50);
 }
 
+GeneratorUi* generatorui_alloc(void)
+{
+	return (GeneratorUi*)malloc(sizeof(GeneratorUi));
+}
+
+GeneratorUi* generatorui_alloc_init(psy_ui_Component* parent, uintptr_t mac_id,
+	ParamViews* paramviews, psy_audio_Machines* machines)
+{
+	GeneratorUi* rv;
+	
+	rv = generatorui_alloc();
+	if (rv) {
+		generatorui_init(rv, parent, mac_id, paramviews, machines);
+		psy_ui_component_deallocate_after_destroyed(&rv->component);
+	}
+	return rv;
+}
+
 void generatorui_move(GeneratorUi* self, psy_ui_Point topleft)
 {
 	assert(self);
 
 	generatorui_super_vtable.move(&self->component, topleft);
-	if (!self->preventmachinepos) {
+	if (!self->prevent_machine_pos) {
 		psy_audio_machine_setposition(self->machine,
 			psy_ui_value_px(&topleft.x, NULL, NULL),
 			psy_ui_value_px(&topleft.y, NULL, NULL));

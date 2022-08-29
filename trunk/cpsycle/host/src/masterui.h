@@ -19,14 +19,37 @@ extern "C" {
 typedef struct MasterUi {
 	/* inherits */
 	psy_ui_Component component;
-	bool preventmachinepos;
+	bool prevent_machine_pos;
 	/* internal */	
 	psy_audio_Machine* machine;
 	ParamViews* paramviews;
 } MasterUi;
 
 void masterui_init(MasterUi*, psy_ui_Component* parent, ParamViews*,
-	Workspace*);
+	psy_audio_Machines*);
+
+MasterUi* masterui_alloc(void);
+MasterUi* masterui_alloc_init(psy_ui_Component* parent, ParamViews*,
+	psy_audio_Machines*);
+
+INLINE void masterui_prevent_machine_pos(MasterUi* self)
+{
+	assert(self);
+	
+	self->prevent_machine_pos = TRUE;	
+}
+
+INLINE void masterui_enable_machine_pos(MasterUi* self)
+{
+	assert(self);
+	
+	self->prevent_machine_pos = FALSE;	
+}
+
+INLINE psy_ui_Component* masterui_base(MasterUi* self)
+{
+	return &self->component;
+}
 
 #ifdef __cplusplus
 }

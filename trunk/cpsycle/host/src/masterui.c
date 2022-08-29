@@ -16,10 +16,10 @@
 
 
 /* prototypes */
-static void masterui_ondraw(MasterUi*, psy_ui_Graphics*);
-static void masterui_onmousedoubleclick(MasterUi*, psy_ui_MouseEvent*);
-static void masterui_drawhighlight(MasterUi*, psy_ui_Graphics*);
-static void masterui_move(MasterUi*, psy_ui_Point topleft);
+static void masterui_on_draw(MasterUi*, psy_ui_Graphics*);
+static void masterui_on_mouse_double_click(MasterUi*, psy_ui_MouseEvent*);
+static void masterui_move(MasterUi*, psy_ui_Point top_left);
+static void masterui_draw_label(MasterUi*, psy_ui_Graphics*);
 
 /* vtable */
 static psy_ui_ComponentVtable masterui_vtable;
@@ -35,10 +35,10 @@ static void masterui_vtable_init(MasterUi* self)
 		masterui_super_vtable = masterui_vtable;		
 		masterui_vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
-			masterui_ondraw;
+			masterui_on_draw;
 		masterui_vtable.on_mouse_double_click =
 			(psy_ui_fp_component_on_mouse_event)
-			masterui_onmousedoubleclick;
+			masterui_on_mouse_double_click;
 		masterui_vtable.move =
 			(psy_ui_fp_component_move)
 			masterui_move;		
@@ -49,57 +49,83 @@ static void masterui_vtable_init(MasterUi* self)
 
 /* implementation */
 void masterui_init(MasterUi* self, psy_ui_Component* parent,
-	ParamViews* paramviews, Workspace* workspace)
+	ParamViews* paramviews, psy_audio_Machines* machines)
 {
 	assert(self);
-	assert(parent);
-	assert(workspace);
-	assert(workspace->song);	
+	assert(machines);	
 
 	psy_ui_component_init(&self->component, parent, NULL);	
 	masterui_vtable_init(self);	
 	psy_ui_component_set_style_type(&self->component, STYLE_MV_MASTER);
 	self->paramviews = paramviews;
-	self->machine = psy_audio_machines_master(&workspace->song->machines);
+	self->machine = psy_audio_machines_master(machines);
 	assert(self->machine);
-	self->preventmachinepos = FALSE;
-	self->component.dbg = 300;
+	self->prevent_machine_pos = FALSE;	
 }
 
-void masterui_move(MasterUi* self, psy_ui_Point topleft)
+MasterUi* masterui_alloc(void)
+{
+	return (MasterUi*)malloc(sizeof(MasterUi));
+}
+
+MasterUi* masterui_alloc_init(psy_ui_Component* parent, ParamViews* paramviews,
+	psy_audio_Machines* machines)
+{
+	MasterUi* rv;
+	
+	rv = masterui_alloc();
+	if (rv) {
+		masterui_init(rv, parent, paramviews, machines);
+		psy_ui_component_deallocate_after_destroyed(&rv->component);
+	}
+	return rv;
+}
+
+void masterui_move(MasterUi* self, psy_ui_Point top_left)
 {
 	assert(self);
 
-	masterui_super_vtable.move(&self->component, topleft);
-	if (!self->preventmachinepos) {		
+	masterui_super_vtable.move(&self->component, top_left);
+	if (!self->prevent_machine_pos) {		
 		psy_audio_machine_setposition(self->machine,
-			psy_ui_value_px(&topleft.x, NULL, NULL),
-			psy_ui_value_px(&topleft.y, NULL, NULL));
+			psy_ui_value_px(&top_left.x, NULL, NULL),
+			psy_ui_value_px(&top_left.y, NULL, NULL));
 	}
 }
 
-void masterui_ondraw(MasterUi* self, psy_ui_Graphics* g)
+void masterui_on_draw(MasterUi* self, psy_ui_Graphics* g)
 {
 	psy_ui_Style* style;
 
 	assert(self);
 
 	style = psy_ui_style(STYLE_MV_MASTER);
-	if (style && psy_ui_bitmap_empty(&style->background.bitmap)) {
-		psy_ui_RealRectangle r;
-
-		r = psy_ui_realrectangle_make(
-			psy_ui_realpoint_make(5.0, 5.0), style->background.size);
-		psy_ui_textoutrectangle(g,
-			psy_ui_realpoint_make(5.0, 5.0), psy_ui_ETO_CLIPPED, r, "Master",
-			psy_strlen("Master"));
+	if (psy_ui_bitmap_empty(&style->background.bitmap)) {
+		masterui_draw_label(self, g);
 	}	
 }
 
-void masterui_onmousedoubleclick(MasterUi* self, psy_ui_MouseEvent* ev)
+void masterui_draw_label(MasterUi* self, psy_ui_Graphics* g)
+{	
+	psy_ui_RealPoint cp;	
+	psy_ui_Style* style;
+
+	assert(self);	
+
+	cp = psy_ui_realpoint_make(5.0, 5.0);	
+	style = psy_ui_style(STYLE_MV_MASTER);	
+	psy_ui_textoutrectangle(g, cp, psy_ui_ETO_CLIPPED,
+		psy_ui_realrectangle_make(cp, style->background.size),
+		"Master", psy_strlen("Master"));
+}
+
+void masterui_on_mouse_double_click(MasterUi* self, psy_ui_MouseEvent* ev)
 {
+	assert(self);
+	
 	if (psy_ui_mouseevent_button(ev) == 1 && self->paramviews) {
-		paramviews_show(self->paramviews, psy_audio_machine_slot(self->machine));		
+		paramviews_show(self->paramviews, psy_audio_machine_slot(
+			self->machine));		
 	}
 	psy_ui_mouseevent_stop_propagation(ev);
 }

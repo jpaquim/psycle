@@ -327,6 +327,7 @@ psy_audio_SequenceEntry* psy_audio_sequenceposition_entry(
 }
 
 /* Sequence */
+
 /* prototypes */
 static void psy_audio_sequence_initsignals(psy_audio_Sequence*);
 static void psy_audio_sequence_initglobaltrack(psy_audio_Sequence*);
@@ -334,7 +335,7 @@ static void psy_audio_sequence_dispose_signals(psy_audio_Sequence*);
 static void sequence_onpatternlengthchanged(psy_audio_Sequence*,
 	psy_audio_Pattern* sender);
 static void sequence_makeiterator(psy_audio_Sequence*, psy_List* entries,
-	psy_audio_SequenceTrackIterator* rv);
+	psy_audio_SequenceTrackIterator* rv);	
 
 /* implementation */
 void psy_audio_sequence_init(psy_audio_Sequence* self,
@@ -384,6 +385,7 @@ void psy_audio_sequence_initsignals(psy_audio_Sequence* self)
 	psy_signal_init(&self->signal_solochanged);
 	psy_signal_init(&self->signal_mutechanged);
 	psy_signal_init(&self->signal_cursorchanged);
+	psy_signal_init(&self->signal_tweak);
 }
 
 void psy_audio_sequence_dispose(psy_audio_Sequence* self)
@@ -414,6 +416,7 @@ void psy_audio_sequence_dispose_signals(psy_audio_Sequence* self)
 	psy_signal_dispose(&self->signal_solochanged);
 	psy_signal_dispose(&self->signal_mutechanged);
 	psy_signal_dispose(&self->signal_cursorchanged);
+	psy_signal_dispose(&self->signal_tweak);
 }
 
 void psy_audio_sequence_copy(psy_audio_Sequence* self, psy_audio_Sequence* other)
@@ -1949,4 +1952,9 @@ psy_audio_PatternEvent psy_audio_sequence_pattern_event_at_cursor(
 		return psy_audio_pattern_event_at_cursor(pattern, cursor);
 	}
 	return psy_audio_patternevent_zero();
+}
+
+void psy_audio_sequence_tweak(psy_audio_Sequence* self)
+{
+	psy_signal_emit(&self->signal_tweak, self, 0);	
 }
