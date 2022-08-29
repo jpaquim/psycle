@@ -9,9 +9,9 @@
 #include "effectui.h"
 /* host */
 #include "styles.h"
-#include "paramview.h"
 /* ui*/
 #include <uiapp.h>
+
 
 /* prototypes */
 static void effectui_on_mouse_down(EffectUi*, psy_ui_MouseEvent*);
@@ -63,13 +63,15 @@ void effectui_init(EffectUi* self, psy_ui_Component* parent,
 	self->machines = machines;	
 	self->machine = psy_audio_machines_at(self->machines, slot);
 	assert(self->machine);
-	self->preventmachinepos = FALSE;
+	self->prevent_machine_pos = FALSE;
 	psy_ui_component_init(&self->mute, &self->component, NULL);
 	psy_ui_component_set_style_type(&self->mute, STYLE_MV_EFFECT_MUTE);
-	psy_ui_component_set_style_type_select(&self->mute, STYLE_MV_EFFECT_MUTE_SELECT);
+	psy_ui_component_set_style_type_select(&self->mute,
+		STYLE_MV_EFFECT_MUTE_SELECT);
 	psy_ui_component_init(&self->bypass, &self->component, NULL);
 	psy_ui_component_set_style_type(&self->bypass, STYLE_MV_EFFECT_BYPASS);
-	psy_ui_component_set_style_type_select(&self->bypass, STYLE_MV_EFFECT_BYPASS_SELECT);
+	psy_ui_component_set_style_type_select(&self->bypass,
+		STYLE_MV_EFFECT_BYPASS_SELECT);
 	editnameui_init(&self->editname, &self->component, self->machine,
 		STYLE_MV_EFFECT_NAME);
 	panui_init(&self->pan, &self->component, self->machine,
@@ -79,12 +81,30 @@ void effectui_init(EffectUi* self, psy_ui_Component* parent,
 	psy_ui_component_start_timer(&self->component, 0, 50);
 }
 
+EffectUi* effectui_alloc(void)
+{
+	return (EffectUi*)malloc(sizeof(EffectUi));
+}
+
+EffectUi* effectui_alloc_init(psy_ui_Component* parent, uintptr_t mac_id,
+	ParamViews* paramviews, psy_audio_Machines* machines)
+{
+	EffectUi* rv;
+	
+	rv = effectui_alloc();
+	if (rv) {
+		effectui_init(rv, parent, mac_id, paramviews, machines);
+		psy_ui_component_deallocate_after_destroyed(&rv->component);
+	}
+	return rv;
+}
+
 void effectui_move(EffectUi* self, psy_ui_Point topleft)
 {
 	assert(self);
 
 	effectui_super_vtable.move(&self->component, topleft);	
-	if (!self->preventmachinepos) {		
+	if (!self->prevent_machine_pos) {		
 		psy_audio_machine_setposition(self->machine,
 			psy_ui_value_px(&topleft.x, NULL, NULL),
 			psy_ui_value_px(&topleft.y, NULL, NULL));
@@ -125,11 +145,12 @@ void effectui_on_mouse_down(EffectUi* self, psy_ui_MouseEvent* ev)
 
 void effectui_onmousedoubleclick(EffectUi* self, psy_ui_MouseEvent* ev)
 {
-	if (psy_ui_mouseevent_button(ev) == 1 &&
-			ev->event.target_ != &self->bypass &&
-			ev->event.target_ != &self->mute &&
-			self->paramviews) {
-		paramviews_show(self->paramviews, psy_audio_machine_slot(self->machine));
+	if (self->paramviews && 
+			psy_ui_mouseevent_button(ev) == 1 &&
+			psy_ui_mouseevent_target(ev) != &self->bypass &&
+			psy_ui_mouseevent_target(ev) != &self->mute) {
+		paramviews_show(self->paramviews, psy_audio_machine_slot(
+			self->machine));
 	}
 	psy_ui_mouseevent_stop_propagation(ev);
 }

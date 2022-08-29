@@ -1010,7 +1010,7 @@ void trackergrid_on_mouse_down(TrackerGrid* self, psy_ui_MouseEvent* ev)
 		if (!psy_ui_component_has_focus(&self->component)) {
 			psy_ui_component_set_focus(&self->component);
 		}
-		psy_ui_component_capture(&self->component);		
+		psy_ui_component_capture(&self->component);
 	}
 }
 
@@ -1042,7 +1042,8 @@ void trackergrid_on_mouse_move(TrackerGrid* self, psy_ui_MouseEvent* ev)
 				psy_ui_RealRectangle rc_curr;
 				
 				rc = trackergrid_selection_bounds(self);
-				if (!psy_audio_blockselection_valid(&self->state->pv->selection)) {
+				if (!psy_audio_blockselection_valid(
+						&self->state->pv->selection)) {
 					psy_audio_blockselection_startdrag(
 						&self->state->pv->selection, cursor);
 				} else {
@@ -1555,6 +1556,9 @@ static void trackerview_on_grid_scroll(TrackerView*, psy_ui_Component*);
 static bool trackerview_playing_following_song(const TrackerView*);
 static void trackerview_on_mouse_down(TrackerView*, psy_ui_MouseEvent*);
 static void trackerview_on_draw(TrackerView*, psy_ui_Graphics*);
+static void trackerview_on_sequence_tweak(TrackerView*,
+	psy_audio_Sequence* sender);
+
 
 /* vtable */
 static psy_ui_ComponentVtable trackerview_vtable;
@@ -1639,11 +1643,15 @@ void trackerview_connect_song(TrackerView* self)
 	if (patternviewstate_sequence(self->grid.state->pv)) {
 		psy_signal_connect(&patternviewstate_sequence(
 			self->grid.state->pv)->signal_cursorchanged,
-			self, trackerview_on_cursor_changed);		
+			self, trackerview_on_cursor_changed);
+		psy_signal_connect(&patternviewstate_sequence(
+			self->grid.state->pv)->signal_tweak,
+			self, trackerview_on_sequence_tweak);
 	}
 }
 
-void trackerview_on_cursor_changed(TrackerView* self, psy_audio_Sequence* sender)
+void trackerview_on_cursor_changed(TrackerView* self,
+	psy_audio_Sequence* sender)
 {		
 	bool invalidate_cursor;
 	bool invalidate_align;
@@ -1785,4 +1793,11 @@ void trackerview_on_draw(TrackerView* self, psy_ui_Graphics* g)
 {
 	trackerstate_update_abs_positions(self->grid.state,
 		&self->workspace->player);
+}
+
+void trackerview_on_sequence_tweak(TrackerView* self,
+	psy_audio_Sequence* sender)
+{
+	trackergrid_invalidate_internal_cursor(&self->grid,
+		self->grid.state->pv->cursor);
 }

@@ -9,8 +9,6 @@
 /* host */
 #include "machineui.h"
 #include "paramviews.h"
-/* ui */
-#include <uilabel.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -26,7 +24,7 @@ typedef struct EffectUi {
 	EditnameUi editname;
 	PanUi pan;
 	VuUi vu;
-	bool preventmachinepos;
+	bool prevent_machine_pos;
 	/* references */
 	psy_audio_Machine* machine;
 	psy_audio_Machines* machines;
@@ -35,6 +33,30 @@ typedef struct EffectUi {
 
 void effectui_init(EffectUi*, psy_ui_Component* parent, uintptr_t slot,
 	ParamViews*, psy_audio_Machines*);
+	
+EffectUi* effectui_alloc(void);
+EffectUi* effectui_alloc_init(psy_ui_Component* parent, uintptr_t mac_id,
+	ParamViews*, psy_audio_Machines*);
+	
+INLINE void effectui_prevent_machine_pos(EffectUi* self)
+{
+	assert(self);
+	
+	self->prevent_machine_pos = TRUE;	
+}
+
+INLINE void effectui_enable_machine_pos(EffectUi* self)
+{
+	assert(self);
+	
+	self->prevent_machine_pos = FALSE;	
+}	
+	
+	
+INLINE psy_ui_Component* effectui_base(EffectUi* self)
+{
+	return &self->component;
+}
 
 #ifdef __cplusplus
 }

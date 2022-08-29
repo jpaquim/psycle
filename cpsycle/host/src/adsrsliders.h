@@ -46,7 +46,6 @@ INLINE psy_dsp_big_seconds_t adsrsliders_max_time(const AdsrSliders* self)
 	return 5.0;
 }
 
-
 INLINE psy_ui_Component* adsrsliders_base(AdsrSliders* self)
 {
 	return &self->component;

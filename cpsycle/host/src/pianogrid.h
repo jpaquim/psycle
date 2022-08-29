@@ -12,11 +12,8 @@
 #include "pianokeyboard.h"
 #include "pianoruler.h"
 #include "workspace.h"
-#include "zoombox.h"
 /* ui */
-#include <uicombobox.h>
-#include <uilabel.h>
-#include <uiscroller.h>
+#include <uicomponent.h>
 /* audio */
 #include <pattern.h>
 
@@ -42,7 +39,7 @@ typedef struct Pianogrid {
 	psy_audio_PatternEvent play_event;
 	/* references */
 	KeyboardState* keyboardstate;
-	PianoGridState* gridstate;
+	PianoGridState* state;
 	Workspace* workspace;
 } Pianogrid;
 
@@ -57,7 +54,7 @@ INLINE const psy_audio_BlockSelection* pianogrid_selection(const Pianogrid* self
 {
 	assert(self);
 
-	return &self->gridstate->pv->selection;
+	return &self->state->pv->selection;
 }
 
 INLINE psy_ui_Component* pianogrid_base(Pianogrid* self)

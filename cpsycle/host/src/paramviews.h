@@ -31,7 +31,7 @@ void paramviews_show(ParamViews*, uintptr_t macid);
 MachineFrame* paramviews_frame(ParamViews*, uintptr_t macid);
 void paramviews_erase(ParamViews*, uintptr_t macid);
 void paramviews_remove(ParamViews*, uintptr_t macid);
-void paramviews_removeall(ParamViews*);
+void paramviews_remove_all(ParamViews*);
 
 #ifdef __cplusplus
 }

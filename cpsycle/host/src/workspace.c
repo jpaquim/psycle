@@ -878,7 +878,7 @@ void workspace_select_view(Workspace* self, ViewIndex view_index)
 	if (view_index.id == VIEW_ID_CHECKUNSAVED &&
 			workspace_current_view(self).id != VIEW_ID_CHECKUNSAVED &&
 			workspace_current_view(self).id != VIEW_ID_CONFIRM) {
-		workspace_save_view(self);
+		workspace_save_view(self);		
 	}
 	psy_signal_emit(&self->signal_viewselected, self, 3, view_index.id,
 		view_index.section, view_index.option);
@@ -1129,12 +1129,28 @@ void workspace_on_input(Workspace* self, uintptr_t cmdid)
 			VIEW_ID_HELPVIEW, SECTION_ID_HELPVIEW_HELP, 0,
 			psy_INDEX_INVALID));
 		break;
-	case CMD_IMM_EDITPATTERN:
-		workspace_select_view(self,
-			viewindex_make(
-				VIEW_ID_PATTERNVIEW, psy_INDEX_INVALID,
-				psy_INDEX_INVALID, psy_INDEX_INVALID));
-		break;
+	case CMD_IMM_EDITPATTERN: {
+		ViewIndex view;
+		
+		view = workspace_current_view(self);		
+		if (view.id != VIEW_ID_PATTERNVIEW) {
+			workspace_select_view(self, viewindex_make(VIEW_ID_PATTERNVIEW,
+				psy_INDEX_INVALID, psy_INDEX_INVALID, 0));
+		} else {
+			if (view.section == SECTION_ID_PATTERNVIEW_TRACKER) {
+				printf("s %d\n", (int)SECTION_ID_PATTERNVIEW_PIANO);
+				workspace_select_view(self, viewindex_make(
+					VIEW_ID_PATTERNVIEW,
+					SECTION_ID_PATTERNVIEW_PIANO,
+					psy_INDEX_INVALID, 0));
+			} else {
+				printf("s %d\n", (int)SECTION_ID_PATTERNVIEW_TRACKER);
+				workspace_select_view(self, viewindex_make(
+					VIEW_ID_PATTERNVIEW,
+					SECTION_ID_PATTERNVIEW_TRACKER, psy_INDEX_INVALID, 0));
+			}
+		}				
+		break; }
 	case CMD_IMM_EDITINSTR:		
 		workspace_select_view(self, viewindex_make(
 			VIEW_ID_INSTRUMENTSVIEW, psy_INDEX_INVALID,

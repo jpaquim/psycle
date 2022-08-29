@@ -207,7 +207,7 @@ void psy_audio_pattern_setevent(psy_audio_Pattern* self, psy_audio_PatternNode* 
 	if (node) {
 		psy_audio_PatternEntry* entry;
 			
-		entry = (psy_audio_PatternEntry*) node->entry;
+		entry = (psy_audio_PatternEntry*)node->entry;
 		if (event) {			
 			psy_audio_patternentry_setevent(entry, event, index);			
 		} else {

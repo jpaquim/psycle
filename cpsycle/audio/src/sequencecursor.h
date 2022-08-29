@@ -69,6 +69,12 @@ INLINE uintptr_t psy_audio_sequencecursor_digit(const
 	return (self->digit);
 }
 
+INLINE uintptr_t psy_audio_sequencecursor_key(const
+	psy_audio_SequenceCursor* self)
+{
+	return (self->key);
+}
+
 INLINE uintptr_t psy_audio_sequencecursor_note_index(const
 	psy_audio_SequenceCursor* self)
 {

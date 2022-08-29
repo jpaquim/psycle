@@ -65,7 +65,7 @@ static void mainframe_on_script_tabbar_changed(MainFrame*, psy_ui_Component* sen
 	uintptr_t tabindex);
 static void mainframe_on_song_changed(MainFrame*, Workspace* sender);
 static void mainframe_on_view_selected(MainFrame*, Workspace*, uintptr_t view,
-	uintptr_t section, int option);
+	uintptr_t section, uintptr_t option);
 static void mainframe_on_focus(MainFrame*);
 static void mainframe_on_render(MainFrame*, psy_ui_Component* sender);
 static void mainframe_on_export(MainFrame*, psy_ui_Component* sender);
@@ -946,7 +946,7 @@ void mainframe_on_timer(MainFrame* self, uintptr_t timerid)
 }
 
 void mainframe_on_view_selected(MainFrame* self, Workspace* sender,
-	uintptr_t view_id, uintptr_t section, int options)
+	uintptr_t view_id, uintptr_t section, uintptr_t options)
 {
 	psy_ui_Component* view;
 
@@ -986,7 +986,7 @@ void mainframe_on_view_selected(MainFrame* self, Workspace* sender,
 			psy_ui_component_invalidate(
 				&self->mainviews.mainviewbar.viewtabbars.component);
 		}
-		if (section != psy_INDEX_INVALID) {
+		if (section != psy_INDEX_INVALID) {					
 			psy_ui_component_select_section(view, section, options);
 		}
 		psy_ui_component_set_focus(view);

@@ -8,12 +8,9 @@
 
 #include "pianogrid.h"
 /* local */
-#include "trackergridstate.h"
 #include "patterncmds.h"
 #include "patternnavigator.h"
 #include "cmdsnotes.h"
-/* platform */
-#include "../../detail/portable.h"
 
 #define CMD_ENTER 1100
 
@@ -26,7 +23,7 @@ static void pianogrid_on_preferred_size(Pianogrid* self,
 static void pianogrid_on_mouse_down(Pianogrid*, psy_ui_MouseEvent*);
 static void pianogrid_on_mouse_move(Pianogrid*, psy_ui_MouseEvent*);
 static void pianogrid_on_mouse_up(Pianogrid*, psy_ui_MouseEvent*);
-static void pianogrid_on_track_display(Pianogrid*, psy_Property* sender);
+static void pianogrid_on_display(Pianogrid*, psy_Property* sender);
 static psy_audio_SequenceCursor pianogrid_make_cursor(Pianogrid*,
 	psy_ui_RealPoint);
 static void pianogrid_on_focus(Pianogrid*);
@@ -34,16 +31,10 @@ static void pianogrid_on_focus_lost(Pianogrid*);
 static bool pianogrid_on_roll_cmds(Pianogrid*, InputHandler* sender);
 static bool pianogrid_on_note_cmds(Pianogrid*, InputHandler* sender);
 static bool pianogrid_handle_command(Pianogrid*, uintptr_t cmd);
-static void pianogrid_nav_up(Pianogrid*);
-static void pianogrid_nav_down(Pianogrid*);
-/* block operations */
 static void pianogrid_enter(Pianogrid*);
 static void pianogrid_row_clear(Pianogrid*);
 static void pianogrid_block_start(Pianogrid*);
 static void pianogrid_block_end(Pianogrid*);
-
-static void pianogrid_start_drag_selection(Pianogrid*,
-	psy_audio_SequenceCursor);
 static void pianogrid_drag_selection(Pianogrid*, psy_audio_SequenceCursor);
 static bool pianogrid_key_hit_test(Pianogrid*, psy_audio_PatternNode*,
 	uintptr_t track, uint8_t cursorkey);
@@ -97,7 +88,7 @@ static void pianogrid_vtable_init(Pianogrid* self)
 
 /* implementation */
 void pianogrid_init(Pianogrid* self, psy_ui_Component* parent,
-	KeyboardState* keyboardstate, PianoGridState* gridstate,
+	KeyboardState* keyboardstate, PianoGridState* state,
 	InputHandler* input_handler, Workspace* workspace)
 {
 	assert(self);
@@ -109,7 +100,7 @@ void pianogrid_init(Pianogrid* self, psy_ui_Component* parent,
 		STYLE_PV_TRACK_VIEW_SELECT);
 	psy_ui_component_set_wheel_scroll(pianogrid_base(self), 4);
 	self->workspace = workspace;
-	self->gridstate = gridstate;
+	self->state = state;
 	self->keyboardstate = keyboardstate;	
 	self->prevent_context_menu = FALSE;
 	self->hoverpatternentry = NULL;	
@@ -118,8 +109,8 @@ void pianogrid_init(Pianogrid* self, psy_ui_Component* parent,
 	pianogrid_connect_input_handler(self, input_handler);
 	psy_audio_sequencecursor_init(&self->old_cursor);
 	psy_ui_component_set_overflow(pianogrid_base(self), psy_ui_OVERFLOW_SCROLL);
-	psy_property_connect(&self->gridstate->track_display,
-		self, pianogrid_on_track_display);
+	psy_property_connect(&self->state->track_display, self,
+		pianogrid_on_display);
 }
 
 void pianogrid_connect_input_handler(Pianogrid* self,
@@ -135,18 +126,16 @@ void pianogrid_connect_input_handler(Pianogrid* self,
 
 void pianogrid_on_draw(Pianogrid* self, psy_ui_Graphics* g)
 {
-	PianoGridDraw griddraw;	
-
 	assert(self);
 
-	if (!patternviewstate_sequence(self->gridstate->pv)) {		
-		return;
-	}	
-	pianogriddraw_init(&griddraw, self->keyboardstate, self->gridstate,		
-		self->hoverpatternentry,		
-		psy_ui_component_scroll_size_px(pianogrid_base(self)),		
-		self->workspace);
-	pianogriddraw_on_draw(&griddraw, g);
+	if (patternviewstate_sequence(self->state->pv)) {
+		PianoGridDraw grid_draw;	
+		
+		pianogriddraw_init(&grid_draw, self->keyboardstate, self->state,		
+			self->hoverpatternentry, psy_ui_component_scroll_size_px(
+			pianogrid_base(self)), self->workspace);
+		pianogriddraw_on_draw(&grid_draw, g);
+	}
 }
 
 void pianogrid_on_preferred_size(Pianogrid* self, const psy_ui_Size* limit,
@@ -156,19 +145,20 @@ void pianogrid_on_preferred_size(Pianogrid* self, const psy_ui_Size* limit,
 	
 	rv->height = psy_ui_value_make_px((self->keyboardstate->keymax -
 		self->keyboardstate->keymin) * self->keyboardstate->key_extent_px);	
-	rv->width = psy_ui_value_make_px(pianogridstate_beattopx(self->gridstate,
-		patternviewstate_length(self->gridstate->pv)));		
+	rv->width = psy_ui_value_make_px(pianogridstate_beattopx(self->state,
+		patternviewstate_length(self->state->pv)));		
 }
 
 void pianogrid_on_mouse_down(Pianogrid* self, psy_ui_MouseEvent* ev)
 {
 	self->dragcursor = pianogrid_make_cursor(self, psy_ui_mouseevent_offset(
-		ev));
-	self->gridstate->pv->selection.drag_base = self->dragcursor;
-	self->last_drag_cursor = self->dragcursor;
+		ev));		
+	psy_audio_blockselection_init_all(&self->state->pv->selection,
+		self->dragcursor, self->dragcursor);
+	psy_audio_blockselection_disable(&self->state->pv->selection);
 	if (psy_ui_mouseevent_button(ev) != 2) {
-		psy_audio_blockselection_disable(&self->gridstate->pv->selection);
-		self->gridstate->pv->selection.topleft = self->dragcursor;		
+		psy_audio_blockselection_disable(&self->state->pv->selection);
+		self->state->pv->selection.topleft = self->dragcursor;		
 	}
 	if (psy_ui_mouseevent_button(ev) == 2) {
 		/* right button */
@@ -176,15 +166,15 @@ void pianogrid_on_mouse_down(Pianogrid* self, psy_ui_MouseEvent* ev)
 		psy_audio_PatternNode* prev;
 		psy_audio_Pattern* pattern;
 		
-		pattern = patternviewstate_pattern(self->gridstate->pv);
+		pattern = patternviewstate_pattern(self->state->pv);
 		if (!pattern) {
 			return;
 		}
 		node = psy_audio_pattern_find_node(
 			pattern,
-			self->gridstate->pv->cursor.track,
+			self->state->pv->cursor.track,
 			self->dragcursor.offset,
-			pianogridstate_step(self->gridstate), &prev);
+			pianogridstate_step(self->state), &prev);
 		if (!node) {
 			if (prev) {
 				psy_audio_PatternEntry* preventry;
@@ -272,7 +262,7 @@ void pianogrid_on_mouse_down(Pianogrid* self, psy_ui_MouseEvent* ev)
 					self->preventscrollleft = TRUE;
 					psy_undoredo_execute(&self->workspace->undoredo,
 						&insertcommand_allocinit(patternviewstate_pattern(
-							self->gridstate->pv),
+							self->state->pv),
 							self->dragcursor, release,
 							&self->workspace->song->sequence)->command);
 					self->preventscrollleft = FALSE;
@@ -283,7 +273,7 @@ void pianogrid_on_mouse_down(Pianogrid* self, psy_ui_MouseEvent* ev)
 				}
 			}
 			psy_ui_mouseevent_stop_propagation(ev);
-			self->gridstate->pv->selection.valid = FALSE;
+			self->state->pv->selection.valid = FALSE;
 		}
 	} else if (!psy_ui_mouseevent_ctrl_key(ev)  &&	
 			(psy_ui_mouseevent_button(ev) == 1)) {
@@ -296,7 +286,7 @@ void pianogrid_on_mouse_down(Pianogrid* self, psy_ui_MouseEvent* ev)
 			self->preventscrollleft = TRUE;
 			psy_undoredo_execute(&self->workspace->undoredo,
 				&insertcommand_allocinit(
-					patternviewstate_pattern(self->gridstate->pv),
+					patternviewstate_pattern(self->state->pv),
 					self->dragcursor, patternevent,
 					&self->workspace->song->sequence)->command);
 			self->play_event = patternevent;
@@ -315,37 +305,37 @@ void pianogrid_on_mouse_move(Pianogrid* self, psy_ui_MouseEvent* ev)
 
 	assert(self);
 		
-	if (patternviewstate_sequence(self->gridstate->pv)) {
+	if (patternviewstate_sequence(self->state->pv)) {
 		psy_audio_PatternEntry* oldhover;
 		psy_audio_PatternNode* node;
 		psy_audio_PatternNode* prev;
 		psy_audio_Pattern* pattern;
 
 		oldhover = self->hoverpatternentry;
-		pattern = patternviewstate_pattern(self->gridstate->pv);
+		pattern = patternviewstate_pattern(self->state->pv);
 		if (!pattern) {
 			return;
 		}
 		node = psy_audio_pattern_find_node(pattern,
-			self->gridstate->pv->cursor.track,
-				pianogridstate_quantize(self->gridstate,
-					pianogridstate_pxtobeat(self->gridstate,
+			self->state->pv->cursor.track,
+				pianogridstate_quantize(self->state,
+					pianogridstate_pxtobeat(self->state,
 						psy_ui_mouseevent_pt(ev).x -
 						psy_ui_component_scroll_left_px(&self->component)) +
-					(patternviewstate_single_mode(self->gridstate->pv))
+					(patternviewstate_single_mode(self->state->pv))
 					? psy_audio_sequencecursor_seqoffset(
-						&self->gridstate->pv->cursor,
-						patternviewstate_sequence(self->gridstate->pv))
+						&self->state->pv->cursor,
+						patternviewstate_sequence(self->state->pv))
 					: 0.0),
-				pianogridstate_step(self->gridstate), &prev);
+				pianogridstate_step(self->state), &prev);
 		if (!node) {
 			if (prev) {
 				psy_audio_PatternEntry* preventry;
 
 				preventry = psy_audio_patternnode_entry(prev);
-				if (preventry->track != self->gridstate->pv->cursor.track) {
+				if (preventry->track != self->state->pv->cursor.track) {
 					prev = psy_audio_patternnode_prev_track(prev,
-						self->gridstate->pv->cursor.track);
+						self->state->pv->cursor.track);
 				}
 				if (psy_audio_patternentry_front(preventry)->note ==
 						psy_audio_NOTECOMMANDS_RELEASE) {
@@ -355,7 +345,7 @@ void pianogrid_on_mouse_move(Pianogrid* self, psy_ui_MouseEvent* ev)
 			node = prev;
 		}
 		if (node && pianogrid_key_hit_test(self, node,
-				self->gridstate->pv->cursor.track, keyboardstate_screen_to_key(
+				self->state->pv->cursor.track, keyboardstate_screen_to_key(
 				self->keyboardstate, psy_ui_mouseevent_pt(ev), 0.0))) {
 			self->hoverpatternentry = psy_audio_patternnode_entry(node);
 		} else {
@@ -367,11 +357,12 @@ void pianogrid_on_mouse_move(Pianogrid* self, psy_ui_MouseEvent* ev)
 		if (((psy_ui_mouseevent_button(ev) == 1) && (!self->edit_mode ||
 				psy_ui_mouseevent_ctrl_key(ev)))) {
 			cursor = pianogrid_make_cursor(self, psy_ui_mouseevent_offset(ev));				
-			if (cursor.key != self->last_drag_cursor.key ||
-				cursor.offset != self->last_drag_cursor.offset) {
-				if (!self->gridstate->pv->selection.valid) {
-					
-					pianogrid_start_drag_selection(self, cursor);
+			if (!psy_audio_sequencecursor_equal(&cursor,
+					&self->last_drag_cursor)) {
+				if (!psy_audio_blockselection_valid(
+						&self->state->pv->selection)) {
+					psy_audio_blockselection_startdrag(
+						&self->state->pv->selection, cursor);
 				} else {
 					pianogrid_drag_selection(self, cursor);
 				}
@@ -382,74 +373,23 @@ void pianogrid_on_mouse_move(Pianogrid* self, psy_ui_MouseEvent* ev)
 	}
 }
 
-void pianogrid_start_drag_selection(Pianogrid* self,
-	psy_audio_SequenceCursor cursor)
-{
-	psy_dsp_big_beat_t bpl;
-
-	self->gridstate->pv->selection.valid = TRUE;
-	bpl = 1.0 / psy_audio_player_lpb(workspace_player(self->workspace));	
-	self->gridstate->pv->selection.topleft.track = cursor.track;
-	self->gridstate->pv->selection.bottomright.track = cursor.track + 1;
-	if (cursor.key >= self->gridstate->pv->selection.drag_base.key) {
-		self->gridstate->pv->selection.topleft.key =
-			self->gridstate->pv->selection.drag_base.key;
-		self->gridstate->pv->selection.bottomright.key = cursor.key;
-	} else {
-		self->gridstate->pv->selection.topleft.key = cursor.key;
-		self->gridstate->pv->selection.bottomright.key =
-			self->gridstate->pv->selection.drag_base.key;
-	}
-	if (cursor.offset >= self->gridstate->pv->selection.drag_base.offset) {
-		self->gridstate->pv->selection.topleft.offset =
-			self->gridstate->pv->selection.drag_base.offset;
-		self->gridstate->pv->selection.bottomright.offset = cursor.offset + bpl;
-	} else {
-		self->gridstate->pv->selection.topleft.offset = cursor.offset;
-		self->gridstate->pv->selection.bottomright.offset =
-			self->gridstate->pv->selection.drag_base.offset + bpl;
-	}
-	self->gridstate->pv->selection.bottomright.key += 1;
-}
-
 void pianogrid_drag_selection(Pianogrid* self, psy_audio_SequenceCursor cursor)
 {
-	psy_dsp_big_beat_t bpl;
-
-	bpl = 1.0 / psy_audio_player_lpb(workspace_player(self->workspace));
-	/* intptr_t restoremidline = self->midline; */
-	if (cursor.key >= self->gridstate->pv->selection.drag_base.key) {
-		self->gridstate->pv->selection.topleft.key =
-			self->gridstate->pv->selection.drag_base.key;
-		self->gridstate->pv->selection.bottomright.key = cursor.key + 1;
+	psy_audio_blockselection_drag(&self->state->pv->selection,
+		cursor, self->state->pv->sequence);
+	if (psy_audio_sequencecursor_offset(&cursor) <
+			psy_audio_sequencecursor_offset(&self->last_drag_cursor)) {
+//		pianogrid_scroll_left(self, cursor);
 	} else {
-		self->gridstate->pv->selection.topleft.key = cursor.key;
-		self->gridstate->pv->selection.bottomright.key =
-			self->gridstate->pv->selection.drag_base.key + 1;
+//		pianogrid_scroll_right(self, cursor);
 	}
-	if (cursor.offset >= self->gridstate->pv->selection.drag_base.offset) {
-		self->gridstate->pv->selection.topleft.offset =
-			self->gridstate->pv->selection.drag_base.offset;
-		self->gridstate->pv->selection.bottomright.offset = cursor.offset + bpl;
+	if (psy_audio_sequencecursor_key(&cursor) <
+			psy_audio_sequencecursor_key(&self->last_drag_cursor)) {
+		pianogrid_scroll_down(self, cursor);
 	} else {
-		self->gridstate->pv->selection.topleft.offset = cursor.offset;
-		self->gridstate->pv->selection.bottomright.offset =
-			self->gridstate->pv->selection.drag_base.offset + bpl;
-	}
-	/* self->midline = 0; */
-	if (cursor.offset < self->last_drag_cursor.offset) {
-		/* pianogrid_scroll_left(self, cursor); */
-	} else {	
-		/* pianogrid_scroll_right(self, cursor); */
-	}
-	if (cursor.key < self->last_drag_cursor.key) {
-		/* pianogrid_scroll_up(self, cursor); */
-	} else {
-		/* pianogrid_scroll_down(self, cursor); */
-	}
-	/* self->midline = restoremidline; */
+		pianogrid_scroll_up(self, cursor);
+	}	
 }
-
 
 void pianogrid_on_mouse_up(Pianogrid* self, psy_ui_MouseEvent* ev)
 {
@@ -457,7 +397,7 @@ void pianogrid_on_mouse_up(Pianogrid* self, psy_ui_MouseEvent* ev)
 		
 	if (self->prevent_context_menu) {				
 		self->prevent_context_menu = FALSE;			
-	} else if (!self->gridstate->pv->selection.valid) {		
+	} else if (!self->state->pv->selection.valid) {		
 		if (!self->edit_mode || ((psy_ui_mouseevent_button(ev) == 1 &&
 				psy_ui_mouseevent_ctrl_key(ev)))) {
 			pianogrid_set_cursor(self, self->dragcursor);			
@@ -468,7 +408,7 @@ void pianogrid_on_mouse_up(Pianogrid* self, psy_ui_MouseEvent* ev)
 	psy_ui_mouseevent_stop_propagation(ev);
 }
 
-void pianogrid_on_track_display(Pianogrid* self, psy_Property* sender)
+void pianogrid_on_display(Pianogrid* self, psy_Property* sender)
 {
 	psy_ui_component_invalidate(&self->component);
 }
@@ -480,14 +420,14 @@ psy_audio_SequenceCursor pianogrid_make_cursor(Pianogrid* self,
 	psy_audio_Sequence* sequence;
 	psy_dsp_big_beat_t offset;	
 	
-	rv = *patternviewstate_cursor(self->gridstate->pv);
-	sequence = patternviewstate_sequence(self->gridstate->pv);
+	rv = *patternviewstate_cursor(self->state->pv);
+	sequence = patternviewstate_sequence(self->state->pv);
 	if (!sequence) {
 		return rv;
 	}	
-	offset = pianogridstate_quantize(self->gridstate,
-		pianogridstate_pxtobeat(self->gridstate, pt.x));
-	if (!patternviewstate_single_mode(self->gridstate->pv)) {
+	offset = pianogridstate_quantize(self->state,
+		pianogridstate_pxtobeat(self->state, pt.x));
+	if (!patternviewstate_single_mode(self->state->pv)) {
 		psy_audio_OrderIndex order_index;
 		psy_audio_SequenceEntry* seq_entry;
 				
@@ -542,39 +482,15 @@ bool pianogrid_key_hit_test(Pianogrid* self, psy_audio_PatternNode* node,
 		cursorkey && !noteoff);
 }
 
-void pianogrid_nav_up(Pianogrid* self)
-{
-	if (self->gridstate->pv->cursor.key < self->keyboardstate->keymax - 1) {
-		psy_audio_SequenceCursor cursor;
-
-		cursor = *patternviewstate_cursor(self->gridstate->pv);
-		++cursor.key;
-		pianogrid_scroll_up(self, cursor);
-		pianogrid_set_cursor(self, cursor);
-	}
-}
-
-void pianogrid_nav_down(Pianogrid* self)
-{
-	if (self->gridstate->pv->cursor.key > self->keyboardstate->keymin) {
-		psy_audio_SequenceCursor cursor;
-
-		cursor = *patternviewstate_cursor(self->gridstate->pv);
-		--cursor.key;
-		pianogrid_scroll_down(self, cursor);
-		pianogrid_set_cursor(self, cursor);
-	}
-}
-
 void pianogrid_enter(Pianogrid* self)
 {
 	psy_audio_PatternEvent patternevent;
 
 	psy_audio_patternevent_clear(&patternevent);
-	patternevent.note = self->gridstate->pv->cursor.key;
+	patternevent.note = self->state->pv->cursor.key;
 	psy_undoredo_execute(&self->workspace->undoredo,
-		&insertcommand_allocinit(patternviewstate_pattern(self->gridstate->pv),
-			self->gridstate->pv->cursor, patternevent,
+		&insertcommand_allocinit(patternviewstate_pattern(self->state->pv),
+			self->state->pv->cursor, patternevent,
 			&self->workspace->song->sequence)->command);
 	pianogrid_advance_line(self);
 }
@@ -585,27 +501,28 @@ void pianogrid_row_clear(Pianogrid* self)
 	
 	assert(self);
 
-	pattern = patternviewstate_pattern(self->gridstate->pv);
-	if (!pattern) {
-		return;
-	}	
-	psy_undoredo_execute(&self->workspace->undoredo,
-		&removecommand_allocinit(pattern,
-			self->gridstate->pv->cursor,
+	pattern = patternviewstate_pattern(self->state->pv);
+	if (pattern) {		
+		psy_undoredo_execute(&self->workspace->undoredo,
+			&removecommand_allocinit(pattern, self->state->pv->cursor,
 			&self->workspace->song->sequence)->command);
-	pianogrid_advance_line(self);
+		pianogrid_advance_line(self);
+	}
 }
 
 void pianogrid_block_start(Pianogrid* self)
 {
-	self->gridstate->pv->selection.drag_base = self->gridstate->pv->cursor;
-	pianogrid_start_drag_selection(self, self->gridstate->pv->cursor);
+	self->state->pv->selection = psy_audio_blockselection_make(		
+		*patternviewstate_cursor(self->state->pv),
+		*patternviewstate_cursor(self->state->pv));
+	psy_audio_blockselection_startdrag(&self->state->pv->selection,
+		*patternviewstate_cursor(self->state->pv));		
 	psy_ui_component_invalidate(&self->component);
 }
 
 void pianogrid_block_end(Pianogrid* self)
 {
-	pianogrid_drag_selection(self, self->gridstate->pv->cursor);
+	pianogrid_drag_selection(self, self->state->pv->cursor);
 	psy_ui_component_invalidate(&self->component);
 }
 
@@ -613,23 +530,21 @@ void pianogrid_prev_line(Pianogrid* self)
 {
 	assert(self);
 
-	pianogrid_prev_lines(self, 
-		keyboardmiscconfig_cursor_step(self->gridstate->pv->keymiscconfig),
-		TRUE);
+	pianogrid_prev_lines(self, keyboardmiscconfig_cursor_step(
+		self->state->pv->keymiscconfig), TRUE);
 }
 
 void pianogrid_prev_lines(Pianogrid* self, uintptr_t lines, bool wrap)
 {	
 	assert(self);
 
-	if (patternviewstate_pattern(self->gridstate->pv) &&
-		patternviewstate_sequence(self->gridstate->pv)) {
+	if (patternviewstate_sequence(self->state->pv)) {
 		PatternLineNavigator navigator;
 		psy_audio_SequenceCursor cursor;
 
-		patternlinenavigator_init(&navigator, self->gridstate->pv, wrap);
+		patternlinenavigator_init(&navigator, self->state->pv, wrap);
 		cursor = patternlinenavigator_up(&navigator, lines,
-			patternviewstate_cursor(self->gridstate->pv));
+			patternviewstate_cursor(self->state->pv));
 		if (!patternlinennavigator_wrap(&navigator)) {
 			pianogrid_scroll_left(self, cursor);
 		} else {
@@ -641,23 +556,22 @@ void pianogrid_prev_lines(Pianogrid* self, uintptr_t lines, bool wrap)
 
 void pianogrid_prev_keys(Pianogrid* self, uint8_t lines, bool wrap)
 {
-	PatternKeyNavigator navigator;	
-	psy_audio_SequenceCursor cursor;
-	
 	assert(self);
 
-	if (!patternviewstate_sequence(self->gridstate->pv)) {
-		return;
+	if (patternviewstate_sequence(self->state->pv)) {
+		PatternKeyNavigator navigator;	
+		psy_audio_SequenceCursor cursor;
+	
+		patternkeynavigator_init(&navigator, self->keyboardstate, FALSE);	
+		cursor = patternkeynavigator_up(&navigator, lines,
+			patternviewstate_cursor(self->state->pv));
+		if (patternkeynavigator_wrap(&navigator)) {	
+			pianogrid_scroll_down(self, cursor);
+		} else {
+			pianogrid_scroll_up(self, cursor);
+		}
+		pianogrid_set_cursor(self, cursor);
 	}
-	patternkeynavigator_init(&navigator, self->keyboardstate, FALSE);	
-	cursor = patternkeynavigator_up(&navigator, lines,
-		patternviewstate_cursor(self->gridstate->pv));
-	if (patternkeynavigator_wrap(&navigator)) {	
-		pianogrid_scroll_down(self, cursor);
-	} else {
-		pianogrid_scroll_up(self, cursor);
-	}
-	pianogrid_set_cursor(self, cursor);
 }
 
 void pianogrid_advance_line(Pianogrid* self)
@@ -665,63 +579,60 @@ void pianogrid_advance_line(Pianogrid* self)
 	assert(self);
 
 	pianogrid_advance_lines(self, keyboardmiscconfig_cursor_step(
-		self->gridstate->pv->keymiscconfig), TRUE);
+		self->state->pv->keymiscconfig), TRUE);
 }
 
 void pianogrid_advance_lines(Pianogrid* self, uintptr_t lines, bool wrap)
-{
-	PatternLineNavigator navigator;
-	psy_audio_SequenceCursor cursor;
+{	
+	assert(self);	
 
-	assert(self);
-	assert(self->workspace);
-
-	if (!patternviewstate_sequence(self->gridstate->pv)) {
-		return;
+	if (patternviewstate_sequence(self->state->pv)) {
+		PatternLineNavigator navigator;
+		psy_audio_SequenceCursor cursor;
+	
+		patternlinenavigator_init(&navigator, self->state->pv, wrap);
+		cursor = patternlinenavigator_down(&navigator, lines,
+			patternviewstate_cursor(self->state->pv));
+		if (patternlinennavigator_wrap(&navigator)) {
+			pianogrid_scroll_left(self, cursor);
+		} else {
+			pianogrid_scroll_right(self, cursor);
+		}
+		pianogrid_set_cursor(self, cursor);
 	}
-	patternlinenavigator_init(&navigator, self->gridstate->pv, wrap);
-	cursor = patternlinenavigator_down(&navigator, lines,
-		patternviewstate_cursor(self->gridstate->pv));
-	if (patternlinennavigator_wrap(&navigator)) {
-		pianogrid_scroll_left(self, cursor);
-	} else {
-		pianogrid_scroll_right(self, cursor);
-	}
-	pianogrid_set_cursor(self, cursor);
 }
 
 void pianogrid_advance_keys(Pianogrid* self, uint8_t lines, bool wrap)
-{
-	PatternKeyNavigator navigator;	
-	psy_audio_SequenceCursor cursor;
-	
+{	
 	assert(self);
 
-	if (!patternviewstate_sequence(self->gridstate->pv)) {
-		return;
+	if (patternviewstate_sequence(self->state->pv)) {
+		PatternKeyNavigator navigator;	
+		psy_audio_SequenceCursor cursor;
+	
+		patternkeynavigator_init(&navigator, self->keyboardstate, FALSE);	
+		cursor = patternkeynavigator_down(&navigator, lines,
+			patternviewstate_cursor(self->state->pv));
+		if (patternkeynavigator_wrap(&navigator)) {	
+			pianogrid_scroll_up(self, cursor);
+		} else {
+			pianogrid_scroll_down(self, cursor);
+		}
+		pianogrid_set_cursor(self, cursor);
 	}
-	patternkeynavigator_init(&navigator, self->keyboardstate, FALSE);	
-	cursor = patternkeynavigator_down(&navigator, lines,
-		patternviewstate_cursor(self->gridstate->pv));
-	if (patternkeynavigator_wrap(&navigator)) {	
-		pianogrid_scroll_up(self, cursor);
-	} else {
-		pianogrid_scroll_down(self, cursor);
-	}
-	pianogrid_set_cursor(self, cursor);
 }
 
 bool pianogrid_scroll_left(Pianogrid* self, psy_audio_SequenceCursor cursor)
 {		
 	assert(self);
 	
-	if (pianogridstate_pxtobeat(self->gridstate,
+	if (pianogridstate_pxtobeat(self->state,
 		psy_ui_component_scroll_left_px(&self->component)) >
-			patternviewstate_draw_offset(self->gridstate->pv, cursor.offset)) {
+			patternviewstate_draw_offset(self->state->pv, cursor.offset)) {
 		psy_ui_component_set_scroll_left(&self->component,
 			psy_ui_value_make_px(pianogridstate_quantizebeattopx(
-				self->gridstate,
-				patternviewstate_draw_offset(self->gridstate->pv,
+				self->state,
+				patternviewstate_draw_offset(self->state->pv,
 					cursor.offset))));
 		return FALSE;
 	}
@@ -738,18 +649,18 @@ bool pianogrid_scroll_right(Pianogrid* self, psy_audio_SequenceCursor cursor)
 
 	clientsize = psy_ui_component_clientsize_px(&self->component);
 	visilines = (intptr_t)((clientsize.width /
-		(psy_dsp_big_beat_t)self->gridstate->pxperbeat) * cursor.lpb);	
+		(psy_dsp_big_beat_t)self->state->pxperbeat) * cursor.lpb);	
 	--visilines;	
-	line = pianogridstate_beattosteps(self->gridstate,
-		patternviewstate_draw_offset(self->gridstate->pv,
+	line = pianogridstate_beattosteps(self->state,
+		patternviewstate_draw_offset(self->state->pv,
 		cursor.offset));
 	if (visilines < line - psy_ui_component_scroll_left_px(&self->component) /
-		pianogridstate_steppx(self->gridstate) + 2) {
+		pianogridstate_steppx(self->state) + 2) {
 		intptr_t dlines;
 		
 		dlines = (intptr_t)((line - psy_ui_component_scroll_left_px(
 			&self->component) /
-			pianogridstate_steppx(self->gridstate) - visilines + 16));
+			pianogridstate_steppx(self->state) - visilines + 16));
 		self->component.blitscroll = TRUE;
 		psy_ui_component_set_scroll_left(&self->component,		
 			psy_ui_value_make_px(
@@ -813,7 +724,6 @@ bool pianogrid_scroll_down(Pianogrid* self, psy_audio_SequenceCursor cursor)
 		return FALSE;
 	}
 	return TRUE;
-
 }
 
 void pianogrid_invalidate_playbar(Pianogrid* self)
@@ -827,23 +737,23 @@ void pianogrid_invalidate_playbar(Pianogrid* self)
 	psy_ui_RealSize size;
 	psy_ui_RealSize stepsize;
 
-	sequence = patternviewstate_sequence(self->gridstate->pv);
+	sequence = patternviewstate_sequence(self->state->pv);
 	if (!sequence) {
 		return;
 	}
 	seqtime = &self->workspace->player.sequencer.hostseqtime;
 	last = seqtime->lastplaycursor.offset;
-	if (!patternviewstate_single_mode(self->gridstate->pv)) {
+	if (!patternviewstate_single_mode(self->state->pv)) {
 		last += psy_audio_sequencecursor_seqoffset(&seqtime->lastplaycursor,
 			sequence);
 	}
-	last = pianogridstate_beattopx(self->gridstate, last);
+	last = pianogridstate_beattopx(self->state, last);
 	curr = seqtime->currplaycursor.offset;
-	if (!patternviewstate_single_mode(self->gridstate->pv)) {
+	if (!patternviewstate_single_mode(self->state->pv)) {
 		curr += psy_audio_sequencecursor_seqoffset(&seqtime->currplaycursor,
 			sequence);
 	}	
-	curr = pianogridstate_beattopx(self->gridstate, curr);		
+	curr = pianogridstate_beattopx(self->state, curr);		
 	minval = psy_min(last, curr);
 	maxval = psy_max(last, curr);
 	size = psy_ui_component_scroll_size_px(&self->component);
@@ -853,7 +763,7 @@ void pianogrid_invalidate_playbar(Pianogrid* self)
 				minval,
 				psy_ui_component_scroll_top_px(&self->component)),
 			psy_ui_realsize_make(
-				maxval - minval + pianogridstate_steppx(self->gridstate),
+				maxval - minval + pianogridstate_steppx(self->state),
 				size.height)));
 }
 
@@ -869,14 +779,14 @@ void pianogrid_invalidate_line(Pianogrid* self, intptr_t line)
 
 	scrolltoppx = psy_ui_component_scroll_top_px(pianogrid_base(self));
 	size = psy_ui_component_clientsize_px(&self->component);
-	stepsize = psy_ui_realsize_make(pianogridstate_steppx(self->gridstate),
+	stepsize = psy_ui_realsize_make(pianogridstate_steppx(self->state),
 		size.height);
 	seqline = 0;
-	if (patternviewstate_single_mode(self->gridstate->pv)) {
+	if (patternviewstate_single_mode(self->state->pv)) {
 		seqline = (intptr_t)(
-			psy_audio_sequencecursor_seqoffset(&self->gridstate->pv->cursor,
-			patternviewstate_sequence(self->gridstate->pv)) *
-			self->gridstate->pv->cursor.lpb);
+			psy_audio_sequencecursor_seqoffset(&self->state->pv->cursor,
+			patternviewstate_sequence(self->state->pv)) *
+			self->state->pv->cursor.lpb);
 	}
 	r1 = psy_ui_realrectangle_make(psy_ui_realpoint_make(
 		(line - seqline) * stepsize.width, scrolltoppx), stepsize);
@@ -889,31 +799,31 @@ void pianogrid_invalidate_cursor(Pianogrid* self)
 	
 	assert(self);
 	
-	sequence = patternviewstate_sequence(self->gridstate->pv);
-	if (!sequence) {
-		return;
-	}
 	if (!psy_ui_component_draw_visible(pianogrid_base(self))) {
 		return;
 	}
+	sequence = patternviewstate_sequence(self->state->pv);
+	if (!sequence) {
+		return;
+	}	
 	pianogrid_invalidate_line(self, psy_audio_sequencecursor_line_abs(
 		&self->old_cursor, sequence));
 	pianogrid_invalidate_line(self, psy_audio_sequencecursor_line_abs(
-		&self->gridstate->pv->cursor, sequence));
-	self->old_cursor = self->gridstate->pv->cursor;
+		&self->state->pv->cursor, sequence));
+	self->old_cursor = self->state->pv->cursor;
 }
 
 void pianogrid_set_cursor(Pianogrid* self, psy_audio_SequenceCursor cursor)
 {
 	assert(self);
 	
-	if (patternviewstate_sequence(self->gridstate->pv)) {
+	if (patternviewstate_sequence(self->state->pv)) {
 		bool restore;
 
 		restore = self->preventscrollleft;
 		self->preventscrollleft = TRUE;
 		psy_audio_sequence_set_cursor(patternviewstate_sequence(
-			self->gridstate->pv), cursor);
+			self->state->pv), cursor);
 		self->preventscrollleft = restore;
 	}
 }
@@ -946,7 +856,7 @@ bool pianogrid_on_note_cmds(Pianogrid* self, InputHandler* sender)
 		bool chord;
 		psy_audio_PatternEvent ev;		
 		
-		pattern = patternviewstate_pattern(self->gridstate->pv);
+		pattern = patternviewstate_pattern(self->state->pv);
 		if (!pattern) {
 			return TRUE;
 		}
@@ -958,8 +868,8 @@ bool pianogrid_on_note_cmds(Pianogrid* self, InputHandler* sender)
 			psy_audio_player_playevent(&self->workspace->player, &ev);
 			return 1;
 		} else if (cmd.id == CMD_NOTE_CHORD_END) {
-			self->gridstate->pv->cursor.track =
-				self->gridstate->pv->chord_begin;
+			self->state->pv->cursor.track =
+				self->state->pv->chord_begin;
 			return 1;
 		} else if (cmd.id >= CMD_NOTE_CHORD_C_0 && cmd.id < CMD_NOTE_STOP) {
 			chord = TRUE;
@@ -972,19 +882,19 @@ bool pianogrid_on_note_cmds(Pianogrid* self, InputHandler* sender)
 		}
 		psy_undoredo_execute(&self->workspace->undoredo,
 			&insertcommand_allocinit(pattern,
-				self->gridstate->pv->cursor, ev,
+				self->state->pv->cursor, ev,
 				&self->workspace->song->sequence)->command);
 		if (chord != FALSE) {
-			++self->gridstate->pv->cursor.track;
+			++self->state->pv->cursor.track;
 		} else {
-			self->gridstate->pv->cursor.track =
-				self->gridstate->pv->chord_begin;
+			self->state->pv->cursor.track =
+				self->state->pv->chord_begin;
 		}
 		if (ev.note < psy_audio_NOTECOMMANDS_RELEASE) {
-			self->gridstate->pv->cursor.key = ev.note;
+			self->state->pv->cursor.key = ev.note;
 		}
 		pianogrid_set_cursor(self,
-			*patternviewstate_cursor(self->gridstate->pv));
+			*patternviewstate_cursor(self->state->pv));
 		return 1;
 	}
 	return 0;
@@ -1007,21 +917,21 @@ bool pianogrid_handle_command(Pianogrid* self, uintptr_t cmd)
 	handled = TRUE;
 	switch (cmd) {
 	case CMD_NAVUP:
-		pianogrid_nav_up(self);
+		pianogrid_advance_keys(self, 1, FALSE);
 		break;
 	case CMD_NAVPAGEUP:
-		pianogrid_prev_lines(self,
-			patternviewstate_curr_pgup_down_step(self->gridstate->pv), 0);
+		pianogrid_prev_lines(self, patternviewstate_curr_pgup_down_step(
+			self->state->pv), FALSE);
 		break;
 	case CMD_NAVPAGEUPKEYBOARD:
 		pianogrid_advance_keys(self, 12, 0);
 		break;
 	case CMD_NAVDOWN:
-		pianogrid_nav_down(self);
+		pianogrid_prev_keys(self, 1, FALSE);
 		break;
 	case CMD_NAVPAGEDOWN:
 		pianogrid_advance_lines(self,
-			patternviewstate_curr_pgup_down_step(self->gridstate->pv), 0);
+			patternviewstate_curr_pgup_down_step(self->state->pv), 0);
 		break;
 	case CMD_NAVPAGEDOWNKEYBOARD:
 		pianogrid_prev_keys(self, 12, 0);
@@ -1045,31 +955,31 @@ bool pianogrid_handle_command(Pianogrid* self, uintptr_t cmd)
 		pianogrid_row_clear(self);
 		break;
 	case CMD_BLOCKPASTE:
-		patternviewstate_block_paste(self->gridstate->pv);
+		patternviewstate_block_paste(self->state->pv);
 		break;
 	case CMD_BLOCKCOPY:
-		patternviewstate_block_copy(self->gridstate->pv);
+		patternviewstate_block_copy(self->state->pv);
 		break;
 	case CMD_BLOCKCUT:
-		patternviewstate_block_cut(self->gridstate->pv);
+		patternviewstate_block_cut(self->state->pv);
 		break;
 	case CMD_BLOCKDELETE:
-		patternviewstate_block_delete(self->gridstate->pv);
+		patternviewstate_block_delete(self->state->pv);
 		break;
 	case CMD_SELECTALL: {
 		PatternSelect select;
 		
-		patternselect_init(&select, self->gridstate->pv);
+		patternselect_init(&select, self->state->pv);
 		patternselect_select_all(&select);		
 		break; }
 	case CMD_SELECTBAR: {
 		PatternSelect select;
 		
-		patternselect_init(&select, self->gridstate->pv);
+		patternselect_init(&select, self->state->pv);
 		patternselect_select_bar(&select);
 		break; }
 	case CMD_BLOCKUNMARK:
-		patternviewstate_block_unmark(self->gridstate->pv);
+		patternviewstate_block_unmark(self->state->pv);
 		break;
 	default:
 		handled = FALSE;
