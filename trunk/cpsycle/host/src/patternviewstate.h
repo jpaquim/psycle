@@ -95,6 +95,15 @@ INLINE psy_dsp_big_beat_t beatconvert_px_to_beat(const BeatConvert* self,
 		(double)self->beat_line->bpl);
 }
 
+/* BeatClip */
+
+typedef struct BeatClip {
+	psy_dsp_big_beat_t begin;
+	psy_dsp_big_beat_t end;	
+} BeatClip;
+
+void beatclip_init(BeatClip*, BeatConvert*, double begin_px, double end_px);
+
 
 typedef enum {
 	PATTERNCURSOR_STEP_BEAT,

@@ -46,7 +46,7 @@ static void machineview_onconfigure(MachineView*, MachineViewConfig*,
 	psy_Property*);
 static void machineview_onnewmachineselected(MachineView*,
 	psy_ui_Component* sender, psy_Property*);
-static void machineview_onshow(MachineView*);
+static void machineview_onalign(MachineView*);
 
 /* vtable */
 static psy_ui_ComponentVtable machineview_vtable;
@@ -76,10 +76,10 @@ static void machineview_vtable_init(MachineView* self)
 			machineview_section;
 		machineview_vtable.on_focus =
 			(psy_ui_fp_component)
-			machineview_on_focus;
-		machineview_vtable.show =
+			machineview_on_focus;		
+		machineview_vtable.onalign =
 			(psy_ui_fp_component)
-			machineview_onshow;
+			machineview_onalign;
 		machineview_vtable_initialized = TRUE;
 	}
 	psy_ui_component_set_vtable(machineview_base(self),
@@ -435,10 +435,11 @@ void machineview_idle(MachineView* self)
 	machineproperties_idle(&self->properties);
 }
 
-void machineview_onshow(MachineView* self)
+void machineview_onalign(MachineView* self)
 {
-	if (self->wireview.centermaster) {
+	if (self->wireview.centermaster && psy_ui_component_draw_visible(
+			&self->wireview.component)) {
 		machinewireview_centermaster(&self->wireview);
-		self->wireview.centermaster = FALSE;
+		self->wireview.centermaster = FALSE;		
 	}
 }

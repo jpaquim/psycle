@@ -84,6 +84,7 @@ static void pianoroll_align(Pianoroll*, bool keys, bool grid);
 static void pianoroll_sync_scroll_left(Pianoroll*);
 static void pianoroll_sync_scroll_top(Pianoroll*);
 static void pianoroll_update_scroll_step(Pianoroll*);
+static void pianoroll_on_single_display(Pianoroll*, psy_Property* sender);
 
 /* vtable */
 static psy_ui_ComponentVtable pianoroll_vtable;
@@ -212,7 +213,9 @@ void pianoroll_init(Pianoroll* self, psy_ui_Component* parent,
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		pianoroll_on_song_changed);	
 	psy_signal_connect(&workspace->player.signal_lpbchanged, self,
-		pianoroll_on_lpb_changed);	
+		pianoroll_on_lpb_changed);
+	patternviewconfig_connect(&self->workspace->config.visual.patview,
+		"displaysinglepattern", self, pianoroll_on_single_display);
 	psy_ui_component_start_timer(&self->component, 0, PIANOROLL_REFRESHRATE);
 	/* configuration */	
 	keyboardstate_update_metrics(&self->keyboardstate,
@@ -471,6 +474,12 @@ void pianoroll_on_select_mode(Pianoroll* self, psy_ui_Button* sender)
 	psy_ui_button_highlight(sender);
 	psy_ui_button_disable_highlight(&self->bar.edit_mode);
 }
+
+void pianoroll_on_single_display(Pianoroll* self, psy_Property* sender)
+{
+	pianoroll_align(self, TRUE, TRUE);	
+}
+
 
 void pianoroll_make_cmds(psy_Property* parent)
 {

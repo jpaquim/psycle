@@ -587,6 +587,8 @@ void instrumentview_init(InstrumentView* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->filter.signal_status, self,
 		instrumentview_on_status_changed);
 	psy_ui_tabbar_select(&self->tabbar, 0);
+	instrumentview_set_instrument(self,
+		psy_audio_instrumentindex_make_invalid());
 }
 
 void instrumentview_on_instrument_insert(InstrumentView* self,
@@ -642,7 +644,7 @@ void instrumentview_set_instrument(InstrumentView* self,
 	virtualgeneratorbox_update(&self->header.virtualgenerators);
 	if (instrument) {
 		psy_ui_notebook_select(&self->clientnotebook, 1);
-	} else {
+	} else {		
 		psy_ui_notebook_select(&self->clientnotebook, 0);
 	}
 }

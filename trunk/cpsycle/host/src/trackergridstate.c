@@ -743,14 +743,11 @@ psy_ui_Style* trackerstate_column_style(TrackerState* self,
 }
 
 void trackerstate_update_clip_events(TrackerState* self,	
-	psy_ui_RealRectangle* g_clip,
-	double line_height,
-	const psy_ui_TextMetric* tm,
-	psy_audio_Player* player)
+	psy_ui_RealRectangle* g_clip, const psy_ui_TextMetric* tm)
 {
-	uintptr_t track;	
-	double offset;
-	double bottom;
+	uintptr_t track;
+	BeatClip clip;	
+	double offset;	
 	double seqoffset;
 	double length;
 	psy_audio_SequenceTrackIterator ite;	
@@ -761,8 +758,9 @@ void trackerstate_update_clip_events(TrackerState* self,
 		return;
 	}
 	trackereventtable_clear_events(&self->track_events);
-	offset = trackerstate_px_to_beat(self, psy_max(0.0, g_clip->top));	
-	bottom = trackerstate_px_to_beat(self, psy_max(0.0, g_clip->bottom));
+	beatclip_init(&clip, &self->beat_convert, g_clip->top,
+		g_clip->bottom);	
+	offset = clip.begin;	
 	trackerstate_track_clip(self, g_clip, tm, &self->track_events.left,
 		&self->track_events.right);
 	psy_audio_sequencetrackiterator_init(&ite);	
@@ -783,9 +781,9 @@ void trackerstate_update_clip_events(TrackerState* self,
 	self->track_events.top = offset;	
 	if (patternviewstate_single_mode(self->pv)) {
 		offset += seqoffset;
-		bottom += seqoffset;
+		clip.end += seqoffset;
 	}		
-	while (offset <= bottom) {
+	while (offset <= clip.end) {
 		bool fill;
 
 		fill = !(offset >= seqoffset && offset < seqoffset + length) || !ite.patternnode;

@@ -125,8 +125,7 @@ void trackerlinenumbers_on_draw(TrackerLineNumbers* self, psy_ui_Graphics* g)
 {	
 	psy_ui_RealSize size;
 	psy_ui_RealRectangle g_clip;
-	double clip_offset_top;
-	double clip_offset_bottom;	
+	BeatClip clip;	
 	uintptr_t line;
 	uintptr_t num_clip_lines;
 	intptr_t seqline;
@@ -142,17 +141,15 @@ void trackerlinenumbers_on_draw(TrackerLineNumbers* self, psy_ui_Graphics* g)
 		return;
 	}	
 	/* prepare clipping */
-	g_clip = psy_ui_graphics_cliprect(g);		
-	clip_offset_top = trackerstate_px_to_beat(self->state,
-		psy_max(0.0, g_clip.top));
-	clip_offset_bottom = trackerstate_px_to_beat(self->state,
-		psy_max(0.0, g_clip.bottom));
-	clip_offset_bottom = psy_min(clip_offset_bottom,
-		patternviewstate_length(self->state->pv));	
-	line = 	floor(clip_offset_top * self->state->pv->cursor.lpb);	
-	num_clip_lines = floor(clip_offset_bottom * self->state->pv->cursor.lpb) -
-		line;
-	cpy = line * self->state->beat_convert.line_px;
+	g_clip = psy_ui_graphics_cliprect(g);
+	beatclip_init(&clip, &self->state->beat_convert, g_clip.top,
+		g_clip.bottom);
+	clip.end = psy_min(clip.end, patternviewstate_length(
+		self->state->pv));	
+	line = beatline_beat_to_line(&self->state->pv->beat_line, clip.begin);
+	num_clip_lines = beatline_beat_to_line(&self->state->pv->beat_line,
+		clip.end) - line;
+	cpy = beatconvert_beat_to_px(&self->state->beat_convert, clip.begin);		
 	if (patternviewstate_single_mode(self->state->pv)) {		
 		seqline = beatline_beat_to_line(&self->state->pv->beat_line,
 			psy_audio_sequencecursor_seqoffset(&self->state->pv->cursor,
@@ -162,7 +159,7 @@ void trackerlinenumbers_on_draw(TrackerLineNumbers* self, psy_ui_Graphics* g)
 	} else {
 		psy_audio_sequencetrackiterator_init(&ite);
 		psy_audio_sequence_begin(self->state->pv->sequence,			
-			self->state->pv->cursor.order_index.track, clip_offset_top, &ite);				
+			self->state->pv->cursor.order_index.track, clip.begin, &ite);				
 		patidx = psy_audio_sequencetrackiterator_patidx(&ite);		
 		seqline = beatline_beat_to_line(&self->state->pv->beat_line,
 			psy_audio_sequencetrackiterator_seqoffset(&ite));
