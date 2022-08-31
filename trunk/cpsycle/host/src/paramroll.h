@@ -57,8 +57,7 @@ typedef struct ParamRoll {
 	psy_ui_Component left;
 	ParamRuler ruler;	
 	psy_ui_Component pane;
-	ParamDraw draw;
-	psy_ui_ScrollBar hscroll;	
+	ParamDraw draw;	
 } ParamRoll;
 
 void paramroll_init(ParamRoll*, psy_ui_Component* parent,

@@ -595,15 +595,15 @@ void patternviewtheme_load_bitmap(PatternViewTheme* self)
 				}
 				if (s = psy_property_at_str(coords, "playing_on_source", 0)) {
 					skin_psh_values(s, 4, vals);
-					patternviewtheme_set_source(self, &src, vals);
+					patternviewtheme_set_source(self, &src, vals);					
 				}
 				if (s = psy_property_at_str(coords, "playing_on_dest", 0)) {
 					skin_psh_values(s, 2, vals);
-					patternviewtheme_set_dest(self, &dst, vals, 2);
+					patternviewtheme_set_dest(self, &dst, vals, 2);					
 					patternviewtheme_set_style_coords(self,
 						STYLE_PV_TRACK_HEADER_PLAY,
 						STYLE_PV_TRACK_HEADER_PLAY_SELECT,
-						src, dst);
+						src, dst);									
 				}
 				if (transparency = psy_property_at(coords, "transparency",
 					PSY_PROPERTY_TYPE_NONE)) {

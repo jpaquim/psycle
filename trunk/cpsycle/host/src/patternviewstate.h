@@ -19,6 +19,83 @@
 #include <sequence.h>
 
 
+typedef struct BeatLine {	
+	uintptr_t lpb;
+	psy_dsp_big_beat_t bpl;
+} BeatLine;
+
+void beatline_init(BeatLine*, uintptr_t lpb);
+
+INLINE psy_dsp_big_beat_t beatline_set_lpb(BeatLine* self, uintptr_t lpb)
+{
+	assert(self);
+	
+	if (self->lpb != lpb) {
+		self->lpb = lpb;
+		self->bpl = 1.0 / (double)lpb;
+	}
+}
+
+INLINE intptr_t beatline_beat_to_line(const BeatLine* self,
+	psy_dsp_big_beat_t offset)
+{
+	assert(self);
+
+	return cast_decimal(offset * self->lpb);
+}
+
+INLINE psy_dsp_big_beat_t beatline_quantize(const BeatLine* self,
+	psy_dsp_big_beat_t position)
+{		
+	assert(self);
+		
+	return beatline_beat_to_line(self, position) *
+		((psy_dsp_big_beat_t)1.0 / self->lpb);
+}
+
+typedef struct BeatConvert {
+	BeatLine* beat_line;	
+	double line_px;	
+} BeatConvert;
+
+void beatconvert_init(BeatConvert*, BeatLine* beat_line,  double line_px);
+
+INLINE void beatconvert_set_line_px(BeatConvert* self, double line_px)
+{
+	assert(self);
+	
+	self->line_px = line_px;	
+}
+
+/* quantized */
+INLINE double beatconvert_beat_to_px(const BeatConvert* self,
+	psy_dsp_big_beat_t position)
+{	
+	assert(self);
+	
+	return self->line_px * beatline_beat_to_line(self->beat_line, position);
+}
+
+/* not quantized */
+INLINE double beatconvert_raw_beat_to_px(const BeatConvert* self,
+	psy_dsp_big_beat_t position)
+{	
+	assert(self);
+	
+	return self->line_px * (double)self->beat_line->lpb * position;		
+}
+
+/* quantized */
+INLINE psy_dsp_big_beat_t beatconvert_px_to_beat(const BeatConvert* self,
+	double px)
+{		
+	assert(self);
+	
+	return beatline_quantize(self->beat_line, (px / self->line_px) *
+		(double)self->beat_line->bpl);
+}
+
+
 typedef enum {
 	PATTERNCURSOR_STEP_BEAT,
 	PATTERNCURSOR_STEP_4BEAT,
@@ -28,6 +105,7 @@ typedef enum {
 /* PatternViewState */
 
 typedef struct PatternViewState {
+	BeatLine beat_line;
 	/* internal */	
 	psy_audio_SequenceCursor cursor;
 	psy_audio_BlockSelection selection;	
@@ -49,6 +127,7 @@ INLINE void patternviewstate_set_cursor(PatternViewState* self,
 	psy_audio_SequenceCursor cursor)
 {
 	self->cursor = cursor;
+	beatline_set_lpb(&self->beat_line, cursor.lpb);
 }
 
 INLINE const psy_audio_SequenceCursor* patternviewstate_cursor(const
@@ -170,30 +249,13 @@ INLINE uintptr_t patternviewstate_num_song_tracks(const PatternViewState* self)
 	return 0;
 }
 
-INLINE intptr_t patternviewstate_beat_to_line(const PatternViewState* self,
-	psy_dsp_big_beat_t offset)
-{
-	assert(self);
-
-	return cast_decimal(offset * self->cursor.lpb);
-}
-
 INLINE uintptr_t patternviewstate_numlines(const PatternViewState* self)
-{
+{		
 	assert(self);
-	
-	return patternviewstate_beat_to_line(self, patternviewstate_length(self));
+		
+	return beatline_beat_to_line(&self->beat_line,
+		patternviewstate_length(self));
 }
-
-INLINE psy_dsp_big_beat_t patternviewstate_quantize(const PatternViewState*
-	self, psy_dsp_big_beat_t position)
-{
-	assert(self);
-
-	return patternviewstate_beat_to_line(self, position) *
-		((psy_dsp_big_beat_t)1.0 / self->cursor.lpb);
-}
-
 
 INLINE psy_dsp_big_beat_t patternviewstate_draw_offset(const PatternViewState*
 	self, psy_dsp_big_beat_t absoffset)
@@ -204,27 +266,12 @@ INLINE psy_dsp_big_beat_t patternviewstate_draw_offset(const PatternViewState*
 		: 0.0);
 }
 
-
-
-INLINE double patternviewstate_preferredtrackwidth(const
-	PatternViewState* self)
-{	
-	psy_ui_Style* style;
-
-	style = psy_ui_style(STYLE_PV_TRACK_HEADER);
-	return style->background.size.width;
-}
-
 INLINE void patternviewstate_invalidate(PatternViewState* self)
 {
 	if (patternviewstate_pattern(self)) {
 		patternviewstate_pattern(self)->opcount++;
 	}
 }
-
-void patternviewstate_sequencestart(PatternViewState*,
-	double startoffset, psy_audio_SequenceTrackIterator* rv);
-
 
 INLINE bool patternviewstate_ft2home(const PatternViewState* self)
 {

@@ -2075,7 +2075,8 @@ void init_patternview_styles(psy_ui_Styles* self)
 	psy_ui_styles_set_style(self, STYLE_PV_TRACK_VIEW_SELECT, style);
 
 	style = psy_ui_style_allocinit();	
-	psy_ui_style_set_background_id(style, IDB_HEADERSKIN);	
+	psy_ui_style_set_background_id(style, IDB_HEADERSKIN);
+	style->background.repeat = psy_ui_NOREPEAT;	
 	psy_ui_style_set_background_size_px(style,
 		psy_ui_realsize_make(102.0, 23.0));
 	psy_ui_style_set_background_position_px(style, -2.0, -0.0);
@@ -2083,6 +2084,7 @@ void init_patternview_styles(psy_ui_Styles* self)
 
 	style = psy_ui_style_allocinit();	
 	psy_ui_style_set_background_id(style, IDB_HEADERSKIN);	
+	style->background.repeat = psy_ui_NOREPEAT;
 	psy_ui_style_set_background_size_px(style,
 		psy_ui_realsize_make(9, 17));
 	psy_ui_style_set_background_position_px(style, 0.0, -23.0);
@@ -2090,7 +2092,8 @@ void init_patternview_styles(psy_ui_Styles* self)
 	psy_ui_styles_set_style(self, STYLE_PV_TRACK_HEADER_DIGITX0, style);
 
 	style = psy_ui_style_allocinit();	
-	psy_ui_style_set_background_id(style, IDB_HEADERSKIN);	
+	psy_ui_style_set_background_id(style, IDB_HEADERSKIN);
+	style->background.repeat = psy_ui_NOREPEAT;
 	psy_ui_style_set_background_size_px(style, psy_ui_realsize_make(9, 17));
 	psy_ui_style_set_background_position_px(style, 0.0, -23.0);
 	psy_ui_style_set_padding_px(style, 3.0, 0.0, 0.0, 22.0);
@@ -2116,7 +2119,8 @@ void init_patternview_styles(psy_ui_Styles* self)
 	psy_ui_styles_set_style(self, STYLE_PV_TRACK_HEADER_SOLO, style);
 
 	style = psy_ui_style_allocinit();	
-	psy_ui_style_set_background_id(style, IDB_HEADERSKIN);	
+	psy_ui_style_set_background_id(style, IDB_HEADERSKIN);
+	style->background.repeat = psy_ui_NOREPEAT;
 	psy_ui_style_set_background_size_px(style,
 		psy_ui_realsize_make(17.0, 17.0));
 	psy_ui_style_set_background_position_px(style, -62, -40.0);
@@ -2131,6 +2135,7 @@ void init_patternview_styles(psy_ui_Styles* self)
 
 	style = psy_ui_style_allocinit();	
 	psy_ui_style_set_background_id(style, IDB_HEADERSKIN);	
+	style->background.repeat = psy_ui_NOREPEAT;
 	psy_ui_style_set_background_size_px(style,
 		psy_ui_realsize_make(17.0, 17.0));
 	psy_ui_style_set_background_position_px(style, -96.0, -40.0);	
@@ -2140,29 +2145,21 @@ void init_patternview_styles(psy_ui_Styles* self)
 
 	style = psy_ui_style_allocinit();	
 	psy_ui_style_set_position(style, psy_ui_rectangle_make(
-		psy_ui_point_make_px(5.0, 3.0), psy_ui_size_make_px(7, 17)));
+		psy_ui_point_make_px(5.0, 3.0), psy_ui_size_make_px(8.0, 17.0)));
 	psy_ui_styles_set_style(self, STYLE_PV_TRACK_HEADER_PLAY, style);
 
 	style = psy_ui_style_allocinit();	
-	psy_ui_style_set_background_id(style, IDB_HEADERSKIN);	
+	psy_ui_style_set_background_id(style, IDB_HEADERSKIN);
+	style->background.repeat = psy_ui_NOREPEAT;
 	psy_ui_style_set_background_size_px(style,
-		psy_ui_realsize_make(8, 17));
+		psy_ui_realsize_make(8.0, 17.0));
 	psy_ui_style_set_background_position_px(style, 0.0, -40.0);	
 	psy_ui_style_set_position(style, psy_ui_rectangle_make(
-		psy_ui_point_make_px(3.0, 5.0), psy_ui_size_make_px(8, 17)));
+		psy_ui_point_make_px(5.0, 3.0), psy_ui_size_make_px(8.0, 17.0)));
 	psy_ui_styles_set_style(self, STYLE_PV_TRACK_HEADER_PLAY_SELECT, style);
 
 	style = psy_ui_style_allocinit();	
 	psy_ui_styles_set_style(self, STYLE_PV_TRACK_HEADER_TEXT, style);
-
-	style = psy_ui_style_allocinit();	
-	psy_ui_style_set_background_id(style, IDB_HEADERSKIN);	
-	psy_ui_style_set_background_size_px(style,
-		psy_ui_realsize_make(8, 17));
-	psy_ui_style_set_background_position_px(style, 0.0, -40.0);
-	psy_ui_style_set_position(style, psy_ui_rectangle_make(
-		psy_ui_point_make_px(3.0, 5.0), psy_ui_size_make_px(8, 17)));
-	psy_ui_styles_set_style(self, STYLE_PV_TRACK_HEADER_PLAY_SELECT, style);
 
 	/* copy to classic */
 	style = psy_ui_style_clone(psy_ui_styles_at(self, STYLE_PV_TRACK_HEADER));

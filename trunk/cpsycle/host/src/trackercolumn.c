@@ -87,8 +87,7 @@ void trackercolumn_init(TrackerColumn* self, psy_ui_Component* parent,
 	self->track = index;
 	self->draw_restore_fg_colour = psy_ui_colour_white();
 	self->draw_restore_bg_colour = psy_ui_colour_black();
-	psy_ui_realsize_init(&self->size);
-	psy_ui_realsize_init(&self->line_size);
+	psy_ui_realsize_init(&self->size);	
 }
 
 TrackerColumn* trackercolumn_alloc(void)
@@ -133,14 +132,13 @@ void trackercolumn_draw_track_events(TrackerColumn* self, psy_ui_Graphics* g)
 	self->digitsize = psy_ui_realsize_make(
 		psy_ui_value_px(&self->state->track_config->flatsize,
 			psy_ui_component_textmetric(&self->component), NULL),
-		self->line_size.height - 1);
+		self->state->beat_convert.line_px - 1);
 	self->draw_restore_fg_colour = psy_ui_component_colour(&self->component);
 	self->draw_restore_bg_colour = psy_ui_component_background_colour(&self->component);
 	lpb = self->state->pv->cursor.lpb;
 	if (patternviewstate_single_mode(self->state->pv)) {
 		cpy = trackerstate_beat_to_px(self->state, 
-				self->state->track_events.top,				
-				self->line_size.height);
+				self->state->track_events.top);
 		line = (uintptr_t)(self->state->track_events.top * lpb);
 	}
 	for (p = *events; p != NULL; p = p->next) {
@@ -149,14 +147,13 @@ void trackercolumn_draw_track_events(TrackerColumn* self, psy_ui_Graphics* g)
 		pair = (TrackerEventPair*)p->entry;
 		if (!patternviewstate_single_mode(self->state->pv)) {
 			cpy = trackerstate_beat_to_px(self->state, 
-				pair->offset + pair->seqoffset,				
-				self->line_size.height);
+				pair->offset + pair->seqoffset);
 			line = (uintptr_t)(pair->offset * (double)lpb);
 		}
 		trackercolumn_draw_entry(self, g, pair->entry,
 			cpy, trackercolumn_columnflags(self, line, pair->seqoffset), trackdef);
 		if (patternviewstate_single_mode(self->state->pv)) {
-			cpy += self->line_size.height;
+			cpy += self->state->beat_convert.line_px;
 			++line;
 		}
 	}	
@@ -177,11 +174,10 @@ TrackerColumnFlags trackercolumn_columnflags(TrackerColumn* self,
 		rv.beat = ((line) % lpb) == 0;
 		rv.beat4 = ((line) % (lpb * 4)) == 0;		
 		rv.mid = self->state->midline &&
-			(line == trackerstate_midline(self->state,
+			(line == trackerstate_mid_line(self->state,
 			psy_ui_component_scroll_top_px(psy_ui_component_parent(
 				&self->component)),
-				self->size.height,
-				self->line_size.height));
+				self->size.height));
 	} else {
 		rv.beat = rv.beat4 = rv.mid = FALSE;
 	}
@@ -408,7 +404,7 @@ void trackercolumn_on_mouse_down(TrackerColumn* self, psy_ui_MouseEvent* ev)
 		}
 		self->state->pv->selection.drag_base = trackerstate_make_cursor(
 			self->state, psy_ui_mouseevent_pt(ev), self->track,
-			self->line_size.height,
+			self->state->beat_convert.line_px,
 			psy_ui_component_textmetric(&self->component));
 	}
 	if (trackdrag_active(&self->state->track_config->resize)) {		
@@ -470,13 +466,10 @@ void trackercolumn_on_preferred_size(TrackerColumn* self,
 	psy_ui_size_setpx(rv, trackerstate_trackwidth(self->state, self->track,
 		psy_ui_component_textmetric(&self->component)),
 		patternviewstate_numlines(self->state->pv) *
-		self->line_size.height);
+		self->state->beat_convert.line_px);
 }
 
 void trackercolumn_update_size(TrackerColumn* self)
 {
-	self->size = psy_ui_component_scroll_size_px(&self->component);
-	self->line_size = psy_ui_realsize_make(self->size.width,
-		psy_ui_value_px(&self->state->line_height,
-			psy_ui_component_textmetric(&self->component), NULL));
+	self->size = psy_ui_component_scroll_size_px(&self->component);	
 }

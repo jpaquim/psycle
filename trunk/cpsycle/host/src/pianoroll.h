@@ -78,6 +78,7 @@ typedef struct Pianoroll {
 	PianoGridState gridstate;
 	ParamRoll param_roll;	
 	psy_ui_Splitter splitter;	
+	psy_ui_ScrollBar hscroll;
 	uintptr_t opcount;
 	bool center_key;		
 	/* references */
@@ -87,7 +88,6 @@ typedef struct Pianoroll {
 void pianoroll_init(Pianoroll*, psy_ui_Component* parent, PatternViewState*,
 	Workspace*);
 void pianoroll_scroll_to_key(Pianoroll*, uint8_t key);
-void pianoroll_update_scroll(Pianoroll*);
 void pianoroll_make_cmds(psy_Property* parent);
 
 INLINE psy_ui_Component* pianoroll_base(Pianoroll* self)

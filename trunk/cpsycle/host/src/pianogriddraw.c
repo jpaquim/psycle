@@ -117,31 +117,42 @@ void pianogriddraw_draw_cells(PianoGridDraw* self, psy_ui_Graphics* g,
 	psy_audio_BlockSelection clip)
 {
 	uint8_t key;
+	uintptr_t seqline;
+	double seqoffset;
 
 	assert(self);
 	
 	pianogriddraw_prepare_selection(self,
 		self->gridstate->pv->sequence,
 		&self->gridstate->pv->selection);
+	if (patternviewstate_single_mode(self->gridstate->pv)) {
+		seqoffset = psy_audio_sequencecursor_seqoffset(
+			&self->gridstate->pv->cursor, self->gridstate->pv->sequence);
+		seqline = (uintptr_t)(seqoffset *
+			(double)self->gridstate->pv->cursor.lpb);
+	} else {
+		seqoffset = 0;
+		seqline = 0;
+	}
 	for (key = clip.bottomright.key; key <= clip.topleft.key; ++key) {
 		double cpy;
-		uintptr_t steps;
+		uintptr_t line;
 		psy_dsp_big_beat_t c;
 
 		cpy = keyboardstate_key_to_px(self->keyboardstate, key);
 		c = clip.topleft.offset;
-		steps = pianogridstate_beattosteps(self->gridstate, c);
+		line = pianogridstate_beat_to_line(self->gridstate, c);
 		for (; c <= clip.bottomright.offset;
-			c += pianogridstate_step(self->gridstate), ++steps) {
+			c += pianogridstate_step(self->gridstate), ++line) {
 			psy_ui_drawsolidrectangle(g, psy_ui_realrectangle_make(
 				psy_ui_realpoint_make(
-					pianogridstate_beattopx(self->gridstate,
+					pianogridstate_beat_to_px(self->gridstate,
 						patternviewstate_draw_offset(self->gridstate->pv, c)),
 					cpy),
 				psy_ui_realsize_make(
 					pianogridstate_steppx(self->gridstate) + 1,
 					self->keyboardstate->key_extent_px + 1)),									
-				pianogriddraw_cellcolour(self, steps, key,
+				pianogriddraw_cellcolour(self, line + seqline, key,
 					pianogriddraw_in_selection(self, key, c)));
 		}
 	}
@@ -156,7 +167,7 @@ bool pianogriddraw_in_selection(PianoGridDraw* self, uint8_t key,
 	if (!(key >= self->gridstate->pv->selection.topleft.key &&
 			key < self->gridstate->pv->selection.bottomright.key)) {
 		return FALSE;
-	}				
+	}					
 	if (offset_abs >= self->selection_top_abs &&
 		offset_abs < self->selection_bottom_abs) {
 		return TRUE;
@@ -164,7 +175,8 @@ bool pianogriddraw_in_selection(PianoGridDraw* self, uint8_t key,
 	return FALSE;
 }
 
-psy_ui_Colour pianogriddraw_cellcolour(PianoGridDraw* self, uintptr_t step, uint8_t key, bool sel)
+psy_ui_Colour pianogriddraw_cellcolour(PianoGridDraw* self, uintptr_t step,
+	uint8_t key, bool sel)
 {
 	psy_ui_Colour rv;
 	psy_ui_Style* style;
@@ -252,7 +264,7 @@ void pianogriddraw_draw_step_separators(PianoGridDraw* self, psy_ui_Graphics* g,
 		c += pianogridstate_step(self->gridstate)) {
 		double cpx;
 
-		cpx = pianogridstate_beattopx(self->gridstate,
+		cpx = pianogridstate_beat_to_px(self->gridstate,
 			patternviewstate_draw_offset(self->gridstate->pv, c));
 		psy_ui_drawline(g,
 			psy_ui_realpoint_make(cpx, 0.0),
@@ -278,12 +290,12 @@ void pianogriddraw_draw_key_separators(PianoGridDraw* self, psy_ui_Graphics* g,
 			cpy = keyboardstate_key_to_px(self->keyboardstate, key);
 			psy_ui_drawline(g,
 				psy_ui_realpoint_make(
-					pianogridstate_beattopx(self->gridstate,
+					pianogridstate_beat_to_px(self->gridstate,
 						patternviewstate_draw_offset(self->gridstate->pv,
 							clip.topleft.offset)),
 					cpy),
 				psy_ui_realpoint_make(
-					pianogridstate_beattopx(self->gridstate,
+					pianogridstate_beat_to_px(self->gridstate,
 						patternviewstate_draw_offset(self->gridstate->pv,
 							clip.bottomright.offset)),
 					cpy));
@@ -325,7 +337,7 @@ void pianogriddraw_draw_cursor(PianoGridDraw* self, psy_ui_Graphics* g, psy_audi
 		style = psy_ui_style(STYLE_PV_CURSOR);		
 		psy_ui_drawsolidrectangle(g, psy_ui_realrectangle_make(
 			psy_ui_realpoint_make(
-				pianogridstate_beattopx(self->gridstate,
+				pianogridstate_beat_to_px(self->gridstate,
 					(patternviewstate_single_mode(self->gridstate->pv))
 					? psy_audio_sequencecursor_offset(&cursor)
 					: cursor_offset_abs),
@@ -368,7 +380,7 @@ void pianogriddraw_draw_playbar(PianoGridDraw* self, psy_ui_Graphics* g)
 		psy_ui_drawsolidrectangle(g,
 			psy_ui_realrectangle_make(
 				psy_ui_realpoint_make(											
-					pianogridstate_beattopx(self->gridstate, offset),
+					pianogridstate_beat_to_px(self->gridstate, offset),
 					0.0),
 				psy_ui_realsize_make(
 					pianogridstate_steppx(self->gridstate),
@@ -544,8 +556,10 @@ void pianogriddraw_draw_event(PianoGridDraw* self, psy_ui_Graphics* g,
 
 	cursor = self->gridstate->pv->cursor;
 	left = (patternviewstate_draw_offset(self->gridstate->pv,
-		ev->offset)) * self->gridstate->pxperbeat;
-	width = length * self->gridstate->pxperbeat;
+		ev->offset)) * self->gridstate->beat_convert.line_px *
+		psy_audio_sequencecursor_lpb(&self->gridstate->pv->cursor);
+	width = length * self->gridstate->beat_convert.line_px *
+		psy_audio_sequencecursor_lpb(&self->gridstate->pv->cursor);
 	corner = psy_ui_realsize_make(2, 2);
 	r = psy_ui_realrectangle_make(
 		psy_ui_realpoint_make(
@@ -554,30 +568,11 @@ void pianogriddraw_draw_event(PianoGridDraw* self, psy_ui_Graphics* g,
 			self->keyboardstate->key_extent_px + 1),
 		psy_ui_realsize_make(
 			width,
-			psy_max(1.0, self->keyboardstate->key_extent_px - 2)));
-	/* if (ev->hover) {
-		colour = patternviewskin_eventhovercolour(patternviewstate_skin(self->gridstate->pv), 0, 0);
-	} else if (ev->track == cursor.track) {
-		colour = patternviewskin_eventcurrchannelcolour(patternviewstate_skin(self->gridstate->pv),
-			0, 0);
-	} else {
-		colour = patternviewskin_eventcolour(patternviewstate_skin(self->gridstate->pv), ev->track,
-			psy_audio_patterns_num_tracks(&self->workspace->song->patterns));
-	}*/
+			psy_max(1.0, self->keyboardstate->key_extent_px - 2)));	
 	colour = psy_ui_colour_white();
 	if (!ev->noterelease) {
 		psy_ui_drawsolidroundrectangle(g, r, corner, colour);
-	} else {
-		if (self->gridstate->pv->cursor.key == ev->note &&
-			self->gridstate->pv->cursor.offset ==
-			pianogridstate_quantize(self->gridstate, ev->offset)) {
-			psy_ui_Style* style;
-
-			style = psy_ui_style(STYLE_PV_CURSOR);			
-			colour = style->background.colour;
-			// patternviewskin_cursorcolour(patternviewstate_skin(self->gridstate->pv),
-			//	0, 0);
-		}
+	} else {		
 		psy_ui_setcolour(g, colour);
 		psy_ui_drawroundrectangle(g, r, corner);
 	}

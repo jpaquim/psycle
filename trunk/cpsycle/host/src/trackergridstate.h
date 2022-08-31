@@ -155,7 +155,8 @@ typedef struct TrackerColumnFlags {
 
 typedef struct TrackerState {		
 	/* internal */
-	PatternViewState* pv;	
+	PatternViewState* pv;
+	BeatConvert beat_convert;
 	TrackConfig* track_config;	
 	TrackerEventTable track_events;	
 	bool show_empty_data;
@@ -188,50 +189,30 @@ psy_audio_SequenceCursor trackerstate_checkcursorbounds(TrackerState*,
 
 /* quantized */
 INLINE double trackerstate_beat_to_px(TrackerState* self,
-	psy_dsp_big_beat_t position, double linheight)
-{
+	psy_dsp_big_beat_t position)
+{	
 	assert(self);
-
-	return linheight * patternviewstate_beat_to_line(self->pv,
-		position);
-}
-
-INLINE double trackerstate_linetopx(TrackerState* self,
-	uintptr_t line, double line_height)
-{
-	assert(self);
-
-	return line_height * line;
+		
+	return beatconvert_beat_to_px(&self->beat_convert, position);
 }
 
 /* quantized */
 INLINE psy_dsp_big_beat_t trackerstate_px_to_beat(
-	const TrackerState* self, double px, double line_height)
-{
+	const TrackerState* self, double px)
+{	
 	assert(self);
-
-	return patternviewstate_quantize(self->pv,
-		(px / (psy_dsp_big_beat_t)line_height) *
-		psy_audio_sequencecursor_bpl(&self->pv->cursor));
+		
+	return beatconvert_px_to_beat(&self->beat_convert, px);	
 }
 
-INLINE psy_dsp_big_beat_t trackerstate_pxtobeatnotquantized(
-	TrackerState* self, double px, double line_height)
-{
-	assert(self);
-
-	return (px / line_height) * psy_audio_sequencecursor_bpl(&self->pv->cursor);
-}
-
-
-INLINE uintptr_t trackerstate_midline(const TrackerState* self,
-	double scrolltop_px, double client_height, double line_height)
-{
+INLINE uintptr_t trackerstate_mid_line(const TrackerState* self,
+	double scrolltop_px, double client_height)
+{	
 	intptr_t visilines;
-
-	visilines = (intptr_t)(client_height / line_height);
-	return patternviewstate_beat_to_line(self->pv, trackerstate_px_to_beat(
-		self, scrolltop_px, line_height) + visilines / 2);
+		
+	visilines = (intptr_t)(client_height / self->beat_convert.line_px);	
+	return beatline_beat_to_line(self->beat_convert.beat_line,
+		trackerstate_px_to_beat(self, scrolltop_px) + visilines / 2);
 }
 
 psy_audio_SequenceCursor trackerstate_make_cursor(TrackerState*,
@@ -239,5 +220,7 @@ psy_audio_SequenceCursor trackerstate_make_cursor(TrackerState*,
 	const psy_ui_TextMetric*);
 psy_ui_Style* trackerstate_column_style(TrackerState*, TrackerColumnFlags,
 	uintptr_t track);
+	
+void trackerstate_update_textmetric(TrackerState*, const psy_ui_TextMetric*);
 
 #endif /* TRACKERGRIDSTATE_H */

@@ -380,9 +380,13 @@ void trackereventtable_prepare_selection(TrackerEventTable* self,
 /* implementation */
 void trackerstate_init(TrackerState* self, TrackConfig* track_config,
 	PatternViewState* pvstate)
-{			
+{	
+	assert(self);		
+	assert(pvstate);
+	
 	self->track_config = track_config;
-	self->pv = pvstate;
+	self->pv = pvstate;	
+	beatconvert_init(&self->beat_convert, &self->pv->beat_line, 19);
 	self->draw_beat_highlights = TRUE;	
 	self->draw_playbar = TRUE;
 	self->show_empty_data = FALSE;
@@ -674,7 +678,7 @@ psy_audio_SequenceCursor trackerstate_make_cursor(TrackerState* self,
 	if (!sequence) {
 		return rv;
 	}		
-	offset = trackerstate_px_to_beat(self, pt.y, line_height);	
+	offset = trackerstate_px_to_beat(self, pt.y);	
 	if (!patternviewstate_single_mode(self->pv)) {
 		psy_audio_SequenceEntry* seq_entry;
 		
@@ -757,10 +761,8 @@ void trackerstate_update_clip_events(TrackerState* self,
 		return;
 	}
 	trackereventtable_clear_events(&self->track_events);
-	offset = trackerstate_px_to_beat(self,
-		psy_max(0.0, g_clip->top), line_height);	
-	bottom = trackerstate_px_to_beat(self,
-		psy_max(0.0, g_clip->bottom), line_height);
+	offset = trackerstate_px_to_beat(self, psy_max(0.0, g_clip->top));	
+	bottom = trackerstate_px_to_beat(self, psy_max(0.0, g_clip->bottom));
 	trackerstate_track_clip(self, g_clip, tm, &self->track_events.left,
 		&self->track_events.right);
 	psy_audio_sequencetrackiterator_init(&ite);	
@@ -863,4 +865,13 @@ void trackerstate_update_abs_positions(TrackerState* self,
 		&self->pv->cursor, self->pv->sequence);
 	self->pv->cursor.abs_line = (uintptr_t)(self->pv->cursor.abs_offset *
 		(double)self->pv->cursor.lpb);
+}
+
+void trackerstate_update_textmetric(TrackerState* self,
+	const psy_ui_TextMetric* tm)
+{
+	assert(self);
+	
+	beatconvert_set_line_px(&self->beat_convert, psy_ui_value_px(
+		&self->line_height, tm, NULL));
 }

@@ -13,10 +13,10 @@
 #include "../../detail/portable.h"
 
 /* prototypes */
-static void patterntrackbox_ondraw(PatternTrackBox*, psy_ui_Graphics*);
-static void patterntrackbox_drawnumber(PatternTrackBox*, psy_ui_Graphics*);
-static void patterntrackbox_drawselection(PatternTrackBox*, psy_ui_Graphics*);
-static void patterntrackbox_drawtext(PatternTrackBox*, psy_ui_Graphics*);
+static void patterntrackbox_on_draw(PatternTrackBox*, psy_ui_Graphics*);
+static void patterntrackbox_draw_number(PatternTrackBox*, psy_ui_Graphics*);
+static void patterntrackbox_draw_selection(PatternTrackBox*, psy_ui_Graphics*);
+static void patterntrackbox_draw_text(PatternTrackBox*, psy_ui_Graphics*);
 static void patterntrackbox_on_mouse_down(PatternTrackBox*, psy_ui_MouseEvent*);
 static void patterntrackbox_on_preferred_size(PatternTrackBox*,
 	const psy_ui_Size* limit, psy_ui_Size* rv);
@@ -32,7 +32,7 @@ static void patterntrackbox_vtable_init(PatternTrackBox* self)
 		patterntrackbox_vtable = *(self->component.vtable);
 		patterntrackbox_vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
-			patterntrackbox_ondraw;
+			patterntrackbox_on_draw;
 		patterntrackbox_vtable.on_mouse_down =
 			(psy_ui_fp_component_on_mouse_event)
 			patterntrackbox_on_mouse_down;		
@@ -95,24 +95,24 @@ PatternTrackBox* patterntrackbox_allocinit(psy_ui_Component* parent,
 	return rv;
 }
 
-void patterntrackbox_playon(PatternTrackBox* self)
+void patterntrackbox_play_on(PatternTrackBox* self)
 {
 	psy_ui_component_add_style_state(&self->play, psy_ui_STYLESTATE_SELECT);
 }
 
-void patterntrackbox_playoff(PatternTrackBox* self)
+void patterntrackbox_play_off(PatternTrackBox* self)
 {
 	psy_ui_component_remove_style_state(&self->play, psy_ui_STYLESTATE_SELECT);
 }
 
-void patterntrackbox_ondraw(PatternTrackBox* self, psy_ui_Graphics* g)
+void patterntrackbox_on_draw(PatternTrackBox* self, psy_ui_Graphics* g)
 {
-	patterntrackbox_drawnumber(self, g);
-	patterntrackbox_drawselection(self, g);
-	patterntrackbox_drawtext(self, g);
+	patterntrackbox_draw_number(self, g);
+	patterntrackbox_draw_selection(self, g);
+	patterntrackbox_draw_text(self, g);
 }
 
-void patterntrackbox_drawnumber(PatternTrackBox* self, psy_ui_Graphics* g)
+void patterntrackbox_draw_number(PatternTrackBox* self, psy_ui_Graphics* g)
 {
 	psy_ui_Style* style_x0;
 	psy_ui_Style* style_0x;
@@ -146,7 +146,7 @@ void patterntrackbox_drawnumber(PatternTrackBox* self, psy_ui_Graphics* g)
 			-style_0x->background.position.y));
 }
 
-void patterntrackbox_drawselection(PatternTrackBox* self, psy_ui_Graphics* g)
+void patterntrackbox_draw_selection(PatternTrackBox* self, psy_ui_Graphics* g)
 {
 	if (self->index == psy_audio_sequencecursor_track(
 		&self->state->pv->cursor)) {
@@ -158,7 +158,7 @@ void patterntrackbox_drawselection(PatternTrackBox* self, psy_ui_Graphics* g)
 	}
 }
 
-void patterntrackbox_drawtext(PatternTrackBox* self, psy_ui_Graphics* g)
+void patterntrackbox_draw_text(PatternTrackBox* self, psy_ui_Graphics* g)
 {
 	psy_ui_Style* style_text;
 
@@ -328,13 +328,14 @@ void patterntrack_onpreferredsize(PatternTrack* self,
 
 /* prototypes */
 static void trackerheader_on_destroyed(TrackerHeader*);
-static void trackerheader_onsongchanged(TrackerHeader*, Workspace* sender);
-static void trackerheader_connectsong(TrackerHeader*);
-static void trackerheader_oncursorchanged(TrackerHeader*, psy_audio_Sequence*);
-static void trackerheader_on_timer(TrackerHeader*, uintptr_t timerid);
-static void trackerheader_updateplayons(TrackerHeader*);
+static void trackerheader_on_song_changed(TrackerHeader*, Workspace* sender);
+static void trackerheader_connect_song(TrackerHeader*);
+static void trackerheader_on_cursor_changed(TrackerHeader*,
+	psy_audio_Sequence*);
+static void trackerheader_on_timer(TrackerHeader*, uintptr_t timer_id);
+static void trackerheader_update_play_ons(TrackerHeader*);
 static void trackerheader_on_mouse_wheel(TrackerHeader*, psy_ui_MouseEvent*);
-static void trackerheader_ontrackstatechanged(TrackerHeader*,
+static void trackerheader_on_track_state_changed(TrackerHeader*,
 	psy_audio_TrackState* sender);
 
 /* vtable */
@@ -371,8 +372,8 @@ void trackerheader_init(TrackerHeader* self, psy_ui_Component* parent,
 	self->workspace = workspace;	
 	psy_table_init(&self->boxes);	
 	psy_signal_connect(&workspace->signal_songchanged, self,
-		trackerheader_onsongchanged);
-	trackerheader_connectsong(self);	
+		trackerheader_on_song_changed);
+	trackerheader_connect_song(self);	
 	trackerheader_build(self);	
 	psy_ui_component_start_timer(&self->component, 0, 50);
 }
@@ -400,24 +401,24 @@ void trackerheader_build(TrackerHeader* self)
 	psy_ui_component_align(trackerheader_base(self));
 }
 
-void trackerheader_onsongchanged(TrackerHeader* self, Workspace* sender)
+void trackerheader_on_song_changed(TrackerHeader* self, Workspace* sender)
 {
-	trackerheader_connectsong(self);
+	trackerheader_connect_song(self);
 }
 
-void trackerheader_connectsong(TrackerHeader* self)
+void trackerheader_connect_song(TrackerHeader* self)
 {
 	if (workspace_song(self->workspace)) {
 		psy_signal_connect(&psy_audio_song_sequence(workspace_song(
 			self->workspace))->signal_cursorchanged,
-			self, trackerheader_oncursorchanged);
+			self, trackerheader_on_cursor_changed);
 		psy_signal_connect(&psy_audio_song_patterns(workspace_song(
 			self->workspace))->trackstate.signal_changed,
-			self, trackerheader_ontrackstatechanged);
+			self, trackerheader_on_track_state_changed);
 	}
 }
 
-void trackerheader_oncursorchanged(TrackerHeader* self,
+void trackerheader_on_cursor_changed(TrackerHeader* self,
 	psy_audio_Sequence* sender)
 {		
 	if (psy_audio_sequencecursor_track(&sender->lastcursor) !=
@@ -426,12 +427,12 @@ void trackerheader_oncursorchanged(TrackerHeader* self,
 	}		
 }
 
-void trackerheader_on_timer(TrackerHeader* self, uintptr_t timerid)
+void trackerheader_on_timer(TrackerHeader* self, uintptr_t timer_id)
 {	
-	trackerheader_updateplayons(self);
+	trackerheader_update_play_ons(self);
 }
 
-void trackerheader_updateplayons(TrackerHeader* self)
+void trackerheader_update_play_ons(TrackerHeader* self)
 {
 	psy_TableIterator it;
 
@@ -445,9 +446,9 @@ void trackerheader_updateplayons(TrackerHeader* self)
 		track = (PatternTrack*)psy_tableiterator_value(&it);
 		if ((psy_audio_activechannels_playon(&self->workspace->player.playon,
 				psy_tableiterator_key(&it)))) {
-			patterntrackbox_playon(&track->trackbox);
+			patterntrackbox_play_on(&track->trackbox);
 		} else {
-			patterntrackbox_playoff(&track->trackbox);
+			patterntrackbox_play_off(&track->trackbox);
 		}
 	}
 }
@@ -461,7 +462,7 @@ void trackerheader_on_mouse_wheel(TrackerHeader* self, psy_ui_MouseEvent* ev)
 			: CMD_COLUMNPREV));
 }
 
-void trackerheader_ontrackstatechanged(TrackerHeader* self,
+void trackerheader_on_track_state_changed(TrackerHeader* self,
 	psy_audio_TrackState* sender)
 {
 	psy_TableIterator it;

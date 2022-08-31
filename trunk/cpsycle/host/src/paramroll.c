@@ -49,17 +49,23 @@ void paramruler_on_draw(ParamRuler* self, psy_ui_Graphics* g)
 	psy_ui_RealSize size;
 	uintptr_t i;
 	uintptr_t step;
-	uintptr_t maxval;
+	uintptr_t maxval;	
 	
-	size = psy_ui_component_size_px(&self->component);
+	size = psy_ui_component_size_px(&self->component);	
 	maxval = 256;
 	step = maxval / 8;
 	for (i = 0; i < maxval; i += step) {
 		double cpy;
+		double w;
 		
 		cpy = i * (size.height / (double)maxval);
+		if (i == 0x80) {
+			w = size.width;
+		} else {
+			w = size.width / 2;
+		}
 		psy_ui_drawline(g, psy_ui_realpoint_make(0, cpy),
-			psy_ui_realpoint_make(size.width, cpy));
+			psy_ui_realpoint_make(w, cpy));		
 	}
 }
 
@@ -67,6 +73,7 @@ void paramruler_on_draw(ParamRuler* self, psy_ui_Graphics* g)
 
 /* prototypes */
 static void paramdraw_on_draw(ParamDraw*, psy_ui_Graphics*);
+static void paramdraw_draw_mid_line(ParamDraw*, psy_ui_Graphics*);
 static void paramdraw_draw_entries(ParamDraw*, psy_ui_Graphics*);
 static void paramdraw_on_preferred_size(ParamDraw*, const psy_ui_Size* limit,
 	psy_ui_Size* rv);
@@ -76,6 +83,8 @@ static void paramdraw_on_mouse_up(ParamDraw*, psy_ui_MouseEvent*);
 static void paramdraw_on_mouse_move(ParamDraw*, psy_ui_MouseEvent*);
 static uint8_t paramdraw_tweak_value(ParamDraw*, psy_ui_MouseEvent*);
 static void paramdraw_output(ParamDraw*, uint8_t value);
+static void paramdraw_on_mouse_wheel(ParamDraw*, psy_ui_MouseEvent*);
+static psy_audio_SequenceCursor paramdraw_make_cursor(ParamDraw*, double x);
 
 /* vtable */
 static psy_ui_ComponentVtable paramdraw_vtable;
@@ -102,6 +111,9 @@ static void paramdraw_vtable_init(ParamDraw* self)
 		paramdraw_vtable.on_mouse_move =
 			(psy_ui_fp_component_on_mouse_event)
 			paramdraw_on_mouse_move;
+		paramdraw_vtable.on_mouse_wheel =
+			(psy_ui_fp_component_on_mouse_event)
+			paramdraw_on_mouse_wheel;
 		paramdraw_vtable_initialized = TRUE;
 	}
 	psy_ui_component_set_vtable(&self->component, &paramdraw_vtable);	
@@ -129,8 +141,34 @@ void paramdraw_on_draw(ParamDraw* self, psy_ui_Graphics* g)
 {
 	assert(self);
 	
+	paramdraw_draw_mid_line(self, g);
 	paramdraw_draw_entries(self, g);
 }
+
+void paramdraw_draw_mid_line(ParamDraw* self, psy_ui_Graphics* g)
+{
+	psy_ui_RealSize size;
+	uintptr_t i;
+	uintptr_t step;
+	uintptr_t maxval;
+	const psy_ui_TextMetric* tm;
+	double cpy;
+	psy_ui_Colour restore;
+	psy_ui_Colour colour;
+	
+	restore = psy_ui_component_colour(&self->component);
+	colour = psy_ui_colour_make(0x333333);	
+	psy_ui_setcolour(g, colour);
+	size = psy_ui_component_size_px(&self->component);
+	tm = psy_ui_component_textmetric(&self->component);
+	maxval = 256;
+	step = maxval / 8;
+	i = 0x80;	
+	cpy = i * (size.height / (double)maxval);		
+	psy_ui_drawline(g, psy_ui_realpoint_make(0, cpy),
+		psy_ui_realpoint_make(size.width, cpy));
+	psy_ui_setcolour(g, restore);
+}	
 
 void paramdraw_draw_entries(ParamDraw* self, psy_ui_Graphics* g)
 {
@@ -188,7 +226,7 @@ void paramdraw_draw_entries(ParamDraw* self, psy_ui_Graphics* g)
 				offset += seqoffset;
 			}
 			psy_ui_drawrectangle(g, psy_ui_realrectangle_make(
-				psy_ui_realpoint_make(pianogridstate_beattopx(
+				psy_ui_realpoint_make(pianogridstate_raw_beat_to_px(
 					self->state, offset), cpy),
 				pt_size));			
 		}
@@ -208,7 +246,7 @@ void paramdraw_on_preferred_size(ParamDraw* self, const psy_ui_Size* limit,
 {
 	assert(self);
 
-	rv->width = psy_ui_value_make_px(pianogridstate_beattopx(self->state,
+	rv->width = psy_ui_value_make_px(pianogridstate_beat_to_px(self->state,
 		patternviewstate_length(self->state->pv)));
 	if (limit) {
 		rv->height = limit->height;
@@ -221,19 +259,15 @@ void paramdraw_on_track_display(ParamDraw* self, psy_Property* sender)
 }
 
 void paramdraw_on_mouse_down(ParamDraw* self, psy_ui_MouseEvent* ev)
-{
-	psy_audio_SequenceCursor cursor;		
+{	
 	psy_audio_PatternNode* prev;
 		
 	assert(self);
 	
-	cursor = self->state->pv->cursor;
-	psy_audio_sequencecursor_set_offset(&cursor,
-		pianogridstate_quantize(self->state, pianogridstate_pxtobeat(
-		self->state, psy_ui_mouseevent_offset(ev).x)));		
 	if (patternviewstate_sequence(self->state->pv)) {		
 		psy_audio_sequence_set_cursor(patternviewstate_sequence(
-			self->state->pv), cursor);
+			self->state->pv), paramdraw_make_cursor(self,
+				psy_ui_mouseevent_offset(ev).x));
 	}
 	self->tweak_pattern = patternviewstate_pattern(self->state->pv);
 	if (!self->tweak_pattern) {
@@ -281,6 +315,18 @@ void paramdraw_on_mouse_down(ParamDraw* self, psy_ui_MouseEvent* ev)
 	psy_ui_mouseevent_stop_propagation(ev);
 }
 
+psy_audio_SequenceCursor paramdraw_make_cursor(ParamDraw* self, double x)
+{
+	psy_audio_SequenceCursor rv;	
+		
+	assert(self);
+	
+	rv = self->state->pv->cursor;
+	psy_audio_sequencecursor_set_offset(&rv, pianogridstate_px_to_beat(
+		self->state, x));
+	return rv;
+}
+
 void paramdraw_on_mouse_move(ParamDraw* self, psy_ui_MouseEvent* ev)
 {
 	assert(self);
@@ -299,6 +345,33 @@ void paramdraw_on_mouse_move(ParamDraw* self, psy_ui_MouseEvent* ev)
 			psy_ui_component_invalidate(&self->component);
 			paramdraw_output(self, value);
 		}		
+	} else if (psy_ui_mouseevent_button(ev) == 0) {
+		psy_audio_SequenceCursor cursor;
+		psy_audio_Pattern* pattern;
+		psy_audio_PatternNode* prev;
+		psy_audio_PatternNode* node;
+		
+		cursor = paramdraw_make_cursor(self, psy_ui_mouseevent_offset(ev).x);
+		pattern = patternviewstate_pattern(self->state->pv);
+		if (!pattern) {
+			return;
+		}	
+		node = psy_audio_pattern_findnode_cursor(pattern, cursor,
+			&prev);
+		if (node) {
+			psy_audio_PatternEntry* entry;
+			psy_audio_PatternEvent* pat_ev;
+
+			entry = (psy_audio_PatternEntry*)node->entry;
+			pat_ev = psy_audio_patternentry_front(entry);
+			if (pat_ev->cmd == 0x0C) {
+				paramdraw_output(self, pat_ev->parameter);
+			} else {
+				paramdraw_output(self, paramdraw_tweak_value(self, ev));				
+			}
+		} else {
+			paramdraw_output(self, paramdraw_tweak_value(self, ev));
+		}
 	}
 	psy_ui_mouseevent_stop_propagation(ev);
 }
@@ -322,6 +395,64 @@ void paramdraw_on_mouse_up(ParamDraw* self, psy_ui_MouseEvent* ev)
 	}
 	self->tweak_pattern = NULL;
 	self->tweak_node = NULL;
+	psy_ui_mouseevent_stop_propagation(ev);
+}
+
+void paramdraw_on_mouse_wheel(ParamDraw* self, psy_ui_MouseEvent* ev)
+{
+	if (!patternviewstate_sequence(self->state->pv)) {		
+		return;
+	}	
+	if (psy_ui_mouseevent_delta(ev) != 0) {
+		psy_audio_SequenceCursor cursor;
+		intptr_t value;
+		psy_audio_PatternNode* prev;
+		
+		cursor = paramdraw_make_cursor(self, psy_ui_mouseevent_offset(ev).x);
+		if (!psy_audio_sequencecursor_equal(&cursor, &self->state->pv->cursor)) {						
+			psy_audio_sequence_set_cursor(patternviewstate_sequence(
+				self->state->pv), cursor);
+		}
+		self->tweak_pattern = patternviewstate_pattern(self->state->pv);
+		if (!self->tweak_pattern) {
+			return;
+		}	
+		self->tweak_node = psy_audio_pattern_findnode_cursor(self->tweak_pattern,
+			self->state->pv->cursor, &prev);
+		if (self->tweak_node) {			
+			psy_audio_PatternEntry* entry;
+			psy_audio_PatternEvent* pat_ev;
+
+			entry = (psy_audio_PatternEntry*)self->tweak_node->entry;
+			pat_ev = psy_audio_patternentry_front(entry);					
+			if (pat_ev->cmd == 0x0C) {
+				value = pat_ev->parameter;
+			} else {
+				return;
+			}			
+		} else {
+			return;
+		}	
+		if (psy_ui_mouseevent_delta(ev) > 0) {
+			value += 1;
+		} else {
+			value -= 1;
+		}
+		value = psy_max(0, psy_min(0xFF, value));
+		if (self->tweak_node) {			
+			psy_audio_PatternEntry* entry;
+			psy_audio_PatternEvent* pat_ev;
+
+			entry = (psy_audio_PatternEntry*)self->tweak_node->entry;
+			pat_ev = psy_audio_patternentry_front(entry);					
+			if (pat_ev->cmd == 0x0C) {							
+				pat_ev->parameter = value;
+				psy_audio_sequence_tweak(self->state->pv->sequence);			
+				psy_ui_component_invalidate(&self->component);
+				paramdraw_output(self, pat_ev->parameter);
+			}			
+		}		
+	}
 	psy_ui_mouseevent_stop_propagation(ev);
 }
 
@@ -369,18 +500,13 @@ void paramroll_init(ParamRoll* self, psy_ui_Component* parent,
 	/* left */
 	psy_ui_component_init(&self->left, &self->component, NULL);
 	psy_ui_component_set_align(&self->left, psy_ui_ALIGN_LEFT);
-	psy_ui_component_set_preferred_width(&self->left,
-		psy_ui_value_make_ew(10.0));
+	psy_ui_component_set_preferred_size(&self->left,
+		psy_ui_size_make_em(10.0, 8.0));
 	paramruler_init(&self->ruler, &self->left);
 	psy_ui_component_set_align(&self->ruler.component, psy_ui_ALIGN_CLIENT);
 	/* pane */
 	psy_ui_component_init(&self->pane, &self->component, NULL);
-	psy_ui_component_set_align(&self->pane, psy_ui_ALIGN_CLIENT);
-	psy_ui_component_set_preferred_height(&self->left,
-		psy_ui_value_make_eh(10.0));
+	psy_ui_component_set_align(&self->pane, psy_ui_ALIGN_CLIENT);	
 	paramdraw_init(&self->draw, &self->pane, state, workspace);
-	psy_ui_component_set_align(&self->draw.component, psy_ui_ALIGN_FIXED);
-	/* hscroll */
-	psy_ui_scrollbar_init(&self->hscroll, &self->component);
-	psy_ui_component_set_align(&self->hscroll.component, psy_ui_ALIGN_BOTTOM);		
+	psy_ui_component_set_align(&self->draw.component, psy_ui_ALIGN_FIXED);	
 }
