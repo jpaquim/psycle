@@ -61,15 +61,15 @@ void pianobar_init(PianoBar* self, psy_ui_Component* parent,
 
 /* protoypes */
 static void pianoroll_on_destroyed(Pianoroll*);
-static void pianoroll_on_timer(Pianoroll*, uintptr_t timerid);
+static void pianoroll_on_timer(Pianoroll*, uintptr_t timer_id);
 static void pianoroll_on_lpb_changed(Pianoroll*, psy_audio_Player* sender,
 	uintptr_t lpb);
 static void pianoroll_on_align(Pianoroll*);
 static void pianoroll_on_mouse_down(Pianoroll*, psy_ui_MouseEvent*);
 static void pianoroll_on_grid_scroll(Pianoroll*, psy_ui_Component* sender);
-static void pianoroll_on_beat_width_changed(Pianoroll*, ZoomBox* sender);
-static void pianoroll_on_key_height_changed(Pianoroll*, ZoomBox* sender);
-static void pianoroll_on_keytype_changed(Pianoroll*, psy_ui_Component* sender,
+static void pianoroll_on_beat_width(Pianoroll*, ZoomBox* sender);
+static void pianoroll_on_key_height(Pianoroll*, ZoomBox* sender);
+static void pianoroll_on_key_type(Pianoroll*, psy_ui_Component* sender,
 	intptr_t index);
 static void pianoroll_on_edit_mode(Pianoroll*, psy_ui_Button* sender);
 static void pianoroll_on_select_mode(Pianoroll*, psy_ui_Button* sender);
@@ -83,6 +83,7 @@ static bool pianoroll_playing_following_song(const Pianoroll*);
 static void pianoroll_align(Pianoroll*, bool keys, bool grid);
 static void pianoroll_sync_scroll_left(Pianoroll*);
 static void pianoroll_sync_scroll_top(Pianoroll*);
+static void pianoroll_update_scroll_step(Pianoroll*);
 
 /* vtable */
 static psy_ui_ComponentVtable pianoroll_vtable;
@@ -133,20 +134,25 @@ void pianoroll_init(Pianoroll* self, psy_ui_Component* parent,
 	pianobar_init(&self->bar, &self->component, &self->gridstate);
 	psy_ui_component_set_align(&self->bar.component, psy_ui_ALIGN_BOTTOM);
 	psy_signal_connect(&self->bar.zoombox_beatwidth.signal_changed, self,
-		pianoroll_on_beat_width_changed);
+		pianoroll_on_beat_width);
 	psy_signal_connect(&self->bar.zoombox_keyheight.signal_changed, self,
-		pianoroll_on_key_height_changed);
+		pianoroll_on_key_height);
 	psy_ui_component_set_align(&self->bar.zoombox_keyheight.component,
 		psy_ui_ALIGN_LEFT);
 	psy_signal_connect(&self->bar.edit_mode.signal_clicked, self,
 		pianoroll_on_edit_mode);
 	psy_signal_connect(&self->bar.select_mode.signal_clicked, self,
-		pianoroll_on_select_mode);			
+		pianoroll_on_select_mode);
+	/* hscroll */
+	psy_ui_scrollbar_init(&self->hscroll, &self->component);
+	psy_ui_component_set_align(&self->hscroll.component, psy_ui_ALIGN_BOTTOM);
+	psy_ui_component_set_padding(&self->hscroll.component,
+		psy_ui_margin_make_em(0.0, 0.0, 0.0, 10.0));
 	/* paramroll */
 	paramroll_init(&self->param_roll, &self->component,
 		&self->gridstate, workspace);
 	psy_ui_component_set_align(&self->param_roll.component,
-		psy_ui_ALIGN_BOTTOM);
+		psy_ui_ALIGN_BOTTOM);	
 	/* client */
 	psy_ui_component_init(&self->client, &self->component, NULL);
 	psy_ui_component_set_align(&self->client, psy_ui_ALIGN_CLIENT);
@@ -165,7 +171,7 @@ void pianoroll_init(Pianoroll* self, psy_ui_Component* parent,
 	pianogrid_init(&self->grid, &self->client, &self->keyboardstate,
 		&self->gridstate, &workspace->inputhandler, self->workspace);	
 	psy_ui_scroller_init(&self->scroller, &self->client,
-		&self->param_roll.hscroll, NULL);
+		&self->hscroll, NULL);
 	psy_ui_scroller_set_client(&self->scroller, pianogrid_base(&self->grid));
 	psy_ui_component_set_align(&self->scroller.component, psy_ui_ALIGN_CLIENT);	
 	psy_ui_component_set_align(&self->grid.component, psy_ui_ALIGN_FIXED);
@@ -181,15 +187,11 @@ void pianoroll_init(Pianoroll* self, psy_ui_Component* parent,
 	psy_ui_combobox_add_text(&self->keytype, "Notes");
 	psy_ui_combobox_add_text(&self->keytype, "Drums");
 	psy_ui_combobox_select(&self->keytype, 0);
-	psy_ui_component_set_preferred_height(&self->keytype.component,
-		psy_ui_value_make_eh(2.0));
-	psy_ui_component_set_preferred_width(&self->keytype.component,
-		psy_ui_value_make_ew(10.0));
-	psy_ui_component_hide(&self->keytype.expand.component);
-	psy_ui_component_set_align(&self->keytype.component,
-		psy_ui_ALIGN_TOP);
+	psy_ui_component_set_preferred_size(&self->keytype.component,
+		psy_ui_size_make_em(10.0, 2.0));	
+	psy_ui_component_set_align(&self->keytype.component, psy_ui_ALIGN_TOP);
 	psy_signal_connect(&self->keytype.signal_selchanged, self,
-		pianoroll_on_keytype_changed);
+		pianoroll_on_key_type);
 	psy_ui_component_set_align(&self->keyboard.component,
 		psy_ui_ALIGN_HCLIENT);
 	/* splitter */
@@ -230,27 +232,33 @@ void pianoroll_scroll_to_key(Pianoroll* self, uint8_t key)
 			(self->keyboardstate.keymax - key)));
 }
 
-void pianoroll_on_timer(Pianoroll* self, uintptr_t timerid)
+void pianoroll_on_timer(Pianoroll* self, uintptr_t timer_id)
 {
+	psy_audio_Pattern* pattern;
+	
 	assert(self);
-
-	if (patternviewstate_pattern(self->gridstate.pv)) {
-		if (patternviewstate_pattern(self->gridstate.pv) &&
-				patternviewstate_pattern(self->gridstate.pv)->opcount != self->opcount) {
+	
+	if (!psy_ui_component_draw_visible(&self->component)) {
+		return;
+	}
+	pattern = patternviewstate_pattern(self->gridstate.pv);
+	if (pattern) {
+		if (pattern->opcount != self->opcount) {
 			psy_ui_component_invalidate(pianogrid_base(&self->grid));
-		}
-		self->opcount = patternviewstate_pattern(self->gridstate.pv)
-			? patternviewstate_pattern(self->gridstate.pv)->opcount
-			: 0;
+			psy_ui_component_invalidate(paramroll_base(&self->param_roll));
+			self->opcount = pattern->opcount;
+		}		
+	} else {
+		self->opcount = 0;
 	}
 	pianokeyboard_idle(&self->keyboard);
 }
 
 void pianoroll_on_align(Pianoroll* self)
 {
-	assert(self);
+	assert(self);	
 	
-	pianoroll_update_scroll(self);
+	pianoroll_update_scroll_step(self);
 	if (self->center_key && psy_ui_component_draw_visible(&self->component)) {
 		self->center_key = FALSE;
 		pianoroll_scroll_to_key(self, 84);
@@ -264,10 +272,8 @@ void pianoroll_on_mouse_down(Pianoroll* self, psy_ui_MouseEvent* ev)
 	psy_ui_component_set_focus(pianoroll_base(self));
 }
 
-void pianoroll_update_scroll(Pianoroll* self)
-{	
-	assert(self);	
-	
+void pianoroll_update_scroll_step(Pianoroll* self)
+{
 	psy_ui_component_set_scroll_step(pianogrid_base(&self->grid),
 		psy_ui_size_make_px(
 			pianogridstate_steppx(&self->gridstate),
@@ -276,10 +282,6 @@ void pianoroll_update_scroll(Pianoroll* self)
 		psy_ui_value_make_px(self->keyboardstate.key_extent_px));
 	psy_ui_component_set_scroll_step_width(pianoruler_base(&self->ruler),
 		psy_ui_value_make_px(pianogridstate_steppx(&self->gridstate)));
-	psy_ui_component_updateoverflow(pianogrid_base(&self->grid));
-	psy_ui_component_invalidate(pianogrid_base(&self->grid));
-	psy_ui_component_invalidate(pianoruler_base(&self->ruler));
-	psy_ui_component_invalidate(pianokeyboard_base(&self->keyboard));
 }
 
 void pianoroll_on_lpb_changed(Pianoroll* self, psy_audio_Player* sender,
@@ -400,7 +402,7 @@ void pianoroll_sync_scroll_top(Pianoroll* self)
 	self->keyboard.component.blitscroll = FALSE;
 }
 
-void pianoroll_on_beat_width_changed(Pianoroll* self, ZoomBox* sender)
+void pianoroll_on_beat_width(Pianoroll* self, ZoomBox* sender)
 {
 	assert(self);
 
@@ -410,7 +412,7 @@ void pianoroll_on_beat_width_changed(Pianoroll* self, ZoomBox* sender)
 	pianoroll_align(self, FALSE, TRUE);
 }
 
-void pianoroll_on_key_height_changed(Pianoroll* self, ZoomBox* sender)
+void pianoroll_on_key_height(Pianoroll* self, ZoomBox* sender)
 {
 	assert(self);
 
@@ -433,21 +435,19 @@ void pianoroll_align(Pianoroll* self, bool keys, bool grid)
 		psy_ui_component_align(&self->scroller.pane);
 		psy_ui_component_align(&self->ruler_pane);
 		psy_ui_component_align(&self->param_roll.pane);
+		psy_ui_component_align(&self->component);
 	}
 	if (keys) {
 		psy_ui_component_align(&self->keyboardpane);
 	}
-	if (grid) {
-		psy_ui_component_invalidate(&self->scroller.pane);		
-		psy_ui_component_invalidate(&self->ruler_pane);
-		psy_ui_component_invalidate(&self->param_roll.component);
-	}
-	if (keys) {
+	if (grid) {		
+		psy_ui_component_invalidate(&self->component);
+	} else if (keys) {
 		psy_ui_component_invalidate(&self->keyboardpane);
 	}
 }
 
-void pianoroll_on_keytype_changed(Pianoroll* self, psy_ui_Component* sender,
+void pianoroll_on_key_type(Pianoroll* self, psy_ui_Component* sender,
 	intptr_t index)
 {
 	assert(self);

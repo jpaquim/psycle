@@ -180,7 +180,8 @@ void psy_ui_sliderpane_ondraw(psy_ui_SliderPane* self, psy_ui_Graphics* g)
 		psy_ui_component_textmetric(&self->component));
 }
 
-void psy_ui_sliderpane_drawverticalruler(psy_ui_SliderPane* self, psy_ui_Graphics* g)
+void psy_ui_sliderpane_drawverticalruler(psy_ui_SliderPane* self,
+	psy_ui_Graphics* g)
 {
 	double step = 0;
 	double markwidth = 5;
@@ -208,7 +209,8 @@ void psy_ui_sliderpane_onalign(psy_ui_SliderPane* self)
 		psy_ui_component_textmetric(psy_ui_sliderpane_base(self)), NULL);
 }
 
-void psy_ui_sliderpane_on_mouse_down(psy_ui_SliderPane* self, psy_ui_MouseEvent* ev)
+void psy_ui_sliderpane_on_mouse_down(psy_ui_SliderPane* self,
+	psy_ui_MouseEvent* ev)
 {
 	if (psy_ui_mouseevent_button(ev) == 1) {
 		psy_ui_RealSize size;
@@ -219,7 +221,8 @@ void psy_ui_sliderpane_on_mouse_down(psy_ui_SliderPane* self, psy_ui_MouseEvent*
 				self->value * (size.width - self->slidersizepx.width);
 		} else if (self->orientation == psy_ui_VERTICAL) {
 			self->tweakbase = psy_ui_mouseevent_pt(ev).y -
-				((1.0 - self->value) * (size.height - self->slidersizepx.width));
+				((1.0 - self->value) * (size.height -
+					self->slidersizepx.width));
 		}
 		if (self->poll) {
 			psy_ui_component_stop_timer(&self->component, 0);
@@ -285,7 +288,8 @@ void psy_ui_sliderpane_onmousemove(psy_ui_SliderPane* self, psy_ui_MouseEvent* e
 	}
 }
 
-void psy_ui_sliderpane_on_mouse_up(psy_ui_SliderPane* self, psy_ui_MouseEvent* ev)
+void psy_ui_sliderpane_on_mouse_up(psy_ui_SliderPane* self,
+	psy_ui_MouseEvent* ev)
 {
 	if (self->tweakbase != -1) {
 		self->tweakbase = -1;
@@ -296,7 +300,8 @@ void psy_ui_sliderpane_on_mouse_up(psy_ui_SliderPane* self, psy_ui_MouseEvent* e
 	}
 }
 
-void psy_ui_sliderpane_on_mouse_wheel(psy_ui_SliderPane* self, psy_ui_MouseEvent* ev)
+void psy_ui_sliderpane_on_mouse_wheel(psy_ui_SliderPane* self,
+	psy_ui_MouseEvent* ev)
 {
 	if (psy_ui_mouseevent_delta(ev) != 0) {
 		if (psy_ui_mouseevent_delta(ev) > 0) {
@@ -392,8 +397,8 @@ void psy_ui_sliderpane_describevalue(psy_ui_SliderPane* self)
 	}
 }
 
-void psy_ui_sliderpane_onpreferredsize(psy_ui_SliderPane* self, psy_ui_Size* limit,
-	psy_ui_Size* rv)
+void psy_ui_sliderpane_onpreferredsize(psy_ui_SliderPane* self,
+	psy_ui_Size* limit, psy_ui_Size* rv)
 {	
 	if (self->orientation == psy_ui_HORIZONTAL) {
 		rv->width = psy_ui_value_make_ew(20);
@@ -404,7 +409,8 @@ void psy_ui_sliderpane_onpreferredsize(psy_ui_SliderPane* self, psy_ui_Size* lim
 	}
 }
 
-psy_ui_RealRectangle psy_ui_sliderpane_sliderposition(const psy_ui_SliderPane* self)
+psy_ui_RealRectangle psy_ui_sliderpane_sliderposition(
+	const psy_ui_SliderPane* self)
 {
 	psy_ui_RealSize size;
 

@@ -38,9 +38,7 @@ typedef struct TrackerGrid {
 	bool effcursor_always_down;	
 	bool prevent_cursor;
 	psy_Table columns;
-	bool prevent_event_driver;
-	psy_ui_RealSize size;
-	psy_ui_RealSize line_size;
+	bool prevent_event_driver;	
 	bool down;	
 	/* references */
 	TrackerState* state;	

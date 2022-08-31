@@ -19,13 +19,36 @@
 #include "../../detail/portable.h"
 
 
+/* BeatLine */
+
+/* implementation */
+void beatline_init(BeatLine* self, uintptr_t lpb)
+{	
+	assert(self);
+	
+	self->lpb = 0;
+	beatline_set_lpb(self, lpb);	
+}
+
+/* BeatConvert */
+
+/* implementation */
+void beatconvert_init(BeatConvert* self, BeatLine* beat_line, double line_px)
+{
+	assert(self);
+	
+	self->beat_line = beat_line;	
+	beatconvert_set_line_px(self, line_px);
+}
+
 /* implementation */
 void patternviewstate_init(PatternViewState* self,
 	PatternViewConfig* patconfig, KeyboardMiscConfig* keymiscconfig,
 	psy_audio_Sequence* sequence, PatternCmds* cmds)
 {
 	psy_audio_sequencecursor_init(&self->cursor);
-	psy_audio_blockselection_init(&self->selection);	
+	psy_audio_blockselection_init(&self->selection);
+	beatline_init(&self->beat_line, self->cursor.lpb);	
 	self->sequence = sequence;	
 	self->patconfig = patconfig;
 	self->keymiscconfig = keymiscconfig;	
@@ -41,62 +64,6 @@ void patternviewstate_init(PatternViewState* self,
 void patternviewstate_dispose(PatternViewState* self)
 {	
 	psy_audio_pattern_dispose(&self->patternpaste);
-}
-
-void patternviewstate_sequencestart(PatternViewState* self,
-	double startoffset, psy_audio_SequenceTrackIterator* rv)
-{
-	double offset;
-	double seqoffset;
-	double length;	
-
-	assert(self);
-	
-	rv->pattern = patternviewstate_pattern(self);
-	rv->patternnode = NULL;
-	rv->patterns = patternviewstate_patterns(self);
-	seqoffset = 0.0;
-	length = rv->pattern->length;
-	offset = startoffset;	
-	if (!patternviewstate_single_mode(self) &&
-			patternviewstate_sequence(self)) {		
-		psy_audio_Sequence* sequence;
-
-		sequence = patternviewstate_sequence(self);		
-		psy_audio_sequence_begin(sequence,
-			self->cursor.order_index.track,
-			offset, rv);
-		if (rv->sequencentrynode) {
-			seqoffset = psy_audio_sequencetrackiterator_seqoffset(rv);
-			if (rv->pattern) {
-				length = rv->pattern->length;
-			}
-		} else {
-			psy_audio_SequenceEntry* entry;
-			psy_audio_Sequence* sequence;
-
-			sequence = patternviewstate_sequence(self);	
-			entry = psy_audio_sequence_entry(sequence,
-				psy_audio_orderindex_make(self->cursor.order_index.track, 0));
-			if (entry) {
-				psy_audio_sequence_begin(sequence,
-					self->cursor.order_index.track,
-					psy_audio_sequenceentry_offset(entry),					
-					rv);
-			}
-		}
-	} else {
-		psy_audio_Sequence* sequence;
-
-		sequence = patternviewstate_sequence(self);
-		rv->sequencentrynode = NULL;
-		psy_audio_sequence_begin(sequence,
-			self->cursor.order_index.track,
-			psy_audio_sequencecursor_seqoffset(&self->cursor, self->sequence) +
-			offset, rv);
-		// rv->patternnode = psy_audio_pattern_greaterequal(
-		//	patternviewstate_pattern(self), offset - seqoffset);
-	}	
 }
 
 void patternviewstate_sync_cursor_to_sequence(PatternViewState* self)

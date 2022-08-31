@@ -469,6 +469,10 @@ void patternview_update_font(PatternView* self)
 	psy_ui_font_init(&font, &fontinfo);
 	psy_ui_component_set_font(&self->component, &font);	
 	psy_ui_font_dispose(&font);		
+	trackerstate_update_textmetric(&self->state, 
+		psy_ui_component_textmetric(&self->component));
+	trackerstate_update_textmetric(&self->defaultline.state, 
+		psy_ui_component_textmetric(&self->component));
 	keyboardstate_update_metrics(&self->pianoroll.keyboardstate,
 		psy_ui_component_textmetric(&self->component));
 	patternview_update_scroll_step(self);

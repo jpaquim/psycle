@@ -13,8 +13,9 @@ void pianogridstate_init(PianoGridState* self, PatternViewState* pvstate)
 	assert(self);
 
 	self->pv = pvstate;	
-	self->defaultbeatwidth = 90;
-	self->pxperbeat = self->defaultbeatwidth;
+	self->default_line_extent = 20;	
+	beatconvert_init(&self->beat_convert, &self->pv->beat_line,
+		self->default_line_extent);
 	psy_property_init_type(&self->track_display, "track-display",
 		PSY_PROPERTY_TYPE_CHOICE);
 	psy_property_set_item_int(&self->track_display,

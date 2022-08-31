@@ -24,8 +24,8 @@ typedef enum PianoTrackDisplay {
 /* PianoGridState */
 typedef struct PianoGridState {
 	PatternViewState* pv;	
-	double pxperbeat;
-	double defaultbeatwidth;
+	BeatConvert beat_convert;
+	double default_line_extent;
 	psy_Property track_display;
 	psy_Property* track_all;
 	psy_Property* track_current;
@@ -40,47 +40,42 @@ INLINE void pianogridstate_set_zoom(PianoGridState* self, psy_dsp_big_beat_t rat
 {
 	assert(self);
 
-	self->pxperbeat = self->defaultbeatwidth * rate;
+	self->beat_convert.line_px = self->default_line_extent * rate;
 }
 
-INLINE intptr_t pianogridstate_beattosteps(const PianoGridState* self,
+INLINE intptr_t pianogridstate_beat_to_line(const PianoGridState* self,
+	psy_dsp_big_beat_t position)
+{	
+	assert(self);
+	
+	return beatline_beat_to_line(self->beat_convert.beat_line, position);	
+}
+
+/* quantized */
+INLINE psy_dsp_big_beat_t pianogridstate_px_to_beat(
+	const PianoGridState* self, double px)
+{	
+	assert(self);
+	
+	return beatconvert_px_to_beat(&self->beat_convert, px);	
+}
+
+/* quantized */
+INLINE double pianogridstate_beat_to_px(const PianoGridState* self,
 	psy_dsp_big_beat_t position)
 {
 	assert(self);
-
-	return (intptr_t)(position * self->pv->cursor.lpb);
+	
+	return beatconvert_beat_to_px(&self->beat_convert, position);
 }
 
-INLINE psy_dsp_big_beat_t pianogridstate_quantize(const PianoGridState* self,
+/* not quantized */
+INLINE double pianogridstate_raw_beat_to_px(const PianoGridState* self,
 	psy_dsp_big_beat_t position)
 {
 	assert(self);
-
-	return pianogridstate_beattosteps(self, position) *
-		(1 / (psy_dsp_big_beat_t)self->pv->cursor.lpb);
-}
-
-INLINE psy_dsp_big_beat_t pianogridstate_pxtobeat(const PianoGridState* self, double px)
-{
-	assert(self);
-
-	return (psy_dsp_big_beat_t)(px / self->pxperbeat);
-}
-
-INLINE double pianogridstate_beattopx(const PianoGridState* self, psy_dsp_big_beat_t position)
-{
-	assert(self);
-
-	return position * self->pxperbeat;
-}
-
-INLINE double pianogridstate_quantizebeattopx(const PianoGridState* self,
-	psy_dsp_big_beat_t position)
-{
-	assert(self);
-
-	return pianogridstate_beattopx(self, pianogridstate_quantize(self,
-		position));
+	
+	return beatconvert_raw_beat_to_px(&self->beat_convert, position);
 }
 
 INLINE psy_dsp_big_beat_t pianogridstate_step(const PianoGridState* self)
@@ -94,15 +89,7 @@ INLINE double pianogridstate_steppx(const PianoGridState* self)
 {
 	assert(self);
 
-	return pianogridstate_beattopx(self, pianogridstate_step(self));
-}
-
-INLINE psy_dsp_big_beat_t pianogridstate_stepstobeat(PianoGridState* self,
-	intptr_t steps)
-{
-	assert(self);
-
-	return steps * pianogridstate_step(self);
+	return self->beat_convert.line_px;
 }
 
 INLINE void pianogridstate_clip(PianoGridState* self,
@@ -112,18 +99,17 @@ INLINE void pianogridstate_clip(PianoGridState* self,
 	assert(self);
 	assert(rv_left && rv_right);
 
-	*rv_left = pianogridstate_quantize(self,
-		pianogridstate_pxtobeat(self, clip_left_px) +
+	*rv_left = pianogridstate_px_to_beat(self, clip_left_px) +
 		((patternviewstate_single_mode(self->pv))
 		? psy_audio_sequencecursor_seqoffset(&self->pv->cursor, self->pv->sequence)
-		: 0.0));
+		: 0.0);
 	if (patternviewstate_pattern(self->pv)) {
 		*rv_right = psy_min(			
 			patternviewstate_length(self->pv) +
 			((patternviewstate_single_mode(self->pv))
 				? psy_audio_sequencecursor_seqoffset(&self->pv->cursor, self->pv->sequence)
 				: 0.0),
-			pianogridstate_pxtobeat(self, clip_right_px) +
+			pianogridstate_px_to_beat(self, clip_right_px) +
 			((patternviewstate_single_mode(self->pv))
 			? psy_audio_sequencecursor_seqoffset(&self->pv->cursor, self->pv->sequence)
 			: 0.0));
