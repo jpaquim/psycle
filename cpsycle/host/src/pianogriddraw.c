@@ -81,14 +81,14 @@ psy_audio_BlockSelection pianogriddraw_clip_selection(PianoGridDraw* self,
 
 void pianogriddraw_on_draw(PianoGridDraw* self, psy_ui_Graphics* g)
 {
-	psy_audio_BlockSelection clip;
+	psy_audio_BlockSelection clip;	
 
 	assert(self);
 
 	if (!patternviewstate_sequence(self->gridstate->pv)) {		
 		return;
 	}
-	clip = pianogriddraw_clip_selection(self, psy_ui_graphics_cliprect(g));
+	clip = pianogriddraw_clip_selection(self, psy_ui_graphics_cliprect(g));	
 	if (self->drawgrid) {
 		pianogriddraw_draw_grid(self, g, clip);
 	}

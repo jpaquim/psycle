@@ -96,10 +96,13 @@ INLINE void pianogridstate_clip(PianoGridState* self,
 	double clip_left_px, double clip_right_px,
 	psy_dsp_big_beat_t* rv_left, psy_dsp_big_beat_t* rv_right)
 {
+	BeatClip clip;
+	
 	assert(self);
 	assert(rv_left && rv_right);
 
-	*rv_left = pianogridstate_px_to_beat(self, clip_left_px) +
+	beatclip_init(&clip, &self->beat_convert, clip_left_px, clip_right_px);		
+	*rv_left = clip.begin +
 		((patternviewstate_single_mode(self->pv))
 		? psy_audio_sequencecursor_seqoffset(&self->pv->cursor, self->pv->sequence)
 		: 0.0);
@@ -109,7 +112,7 @@ INLINE void pianogridstate_clip(PianoGridState* self,
 			((patternviewstate_single_mode(self->pv))
 				? psy_audio_sequencecursor_seqoffset(&self->pv->cursor, self->pv->sequence)
 				: 0.0),
-			pianogridstate_px_to_beat(self, clip_right_px) +
+			clip.end +
 			((patternviewstate_single_mode(self->pv))
 			? psy_audio_sequencecursor_seqoffset(&self->pv->cursor, self->pv->sequence)
 			: 0.0));

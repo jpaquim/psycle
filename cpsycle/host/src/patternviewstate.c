@@ -41,6 +41,30 @@ void beatconvert_init(BeatConvert* self, BeatLine* beat_line, double line_px)
 	beatconvert_set_line_px(self, line_px);
 }
 
+/* BeatClip */
+
+/* prototypes */
+static void beatclip_clip(BeatClip*, BeatConvert*, double begin_px,
+	double end_px);
+
+/* implementation */
+void beatclip_init(BeatClip* self, BeatConvert* convert, double begin_px,
+	double end_px)
+{	
+	assert(self);	
+		
+	beatclip_clip(self, convert, begin_px, end_px);
+}
+
+void beatclip_clip(BeatClip* self, BeatConvert* convert,
+	double begin_px, double end_px)
+{
+	assert(self);
+	
+	self->begin = beatconvert_px_to_beat(convert, psy_max(0.0, begin_px));
+	self->end = beatconvert_px_to_beat(convert, psy_max(0.0, end_px));
+}
+
 /* implementation */
 void patternviewstate_init(PatternViewState* self,
 	PatternViewConfig* patconfig, KeyboardMiscConfig* keymiscconfig,

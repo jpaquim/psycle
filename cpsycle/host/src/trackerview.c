@@ -187,9 +187,7 @@ void trackergrid_on_draw(TrackerGrid* self, psy_ui_Graphics* g)
 	g_clip = psy_ui_graphics_cliprect(g);
 	/* prepares patternentry draw done in trackergridcolumn */	
 	trackerstate_update_clip_events(self->state, &g_clip,
-		self->state->beat_convert.line_px,
-		psy_ui_component_textmetric(
-		&self->component), &self->workspace->player);
+		psy_ui_component_textmetric(&self->component));
 	trackereventtable_prepare_selection(&self->state->track_events,
 		self->state->pv->sequence, &self->state->pv->selection);
 }

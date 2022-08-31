@@ -180,8 +180,7 @@ double trackerstate_base_width(TrackerState*, uintptr_t track,
 void trackerstate_track_clip(TrackerState*, const psy_ui_RealRectangle*,
 	const psy_ui_TextMetric*, uintptr_t* rv_left, uintptr_t* rv_right);
 void trackerstate_update_clip_events(TrackerState*,
-	psy_ui_RealRectangle* g_clip, double line_height, const psy_ui_TextMetric*,
-	psy_audio_Player*);
+	psy_ui_RealRectangle* g_clip, const psy_ui_TextMetric*);
 void trackerstate_update_abs_positions(TrackerState*, const psy_audio_Player*);	
 
 psy_audio_SequenceCursor trackerstate_checkcursorbounds(TrackerState*,

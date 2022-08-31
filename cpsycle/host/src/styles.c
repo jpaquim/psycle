@@ -45,6 +45,11 @@ void init_host_styles(psy_ui_Styles* self, psy_ui_ThemeMode theme)
 	//psy_ui_style_set_padding_em(style, 0.0, 1.0, 0.0, 1.0);
 	psy_ui_styles_set_style(self, STYLE_STATUSBAR, style);
 	
+	style = psy_ui_style_allocinit();	
+	psy_ui_style_set_colours(style, material.onprimary_medium,
+		material.surface_overlay_9p);	
+	psy_ui_styles_set_style(self, STYLE_VIEWSTATUSBAR, style);
+	
 	style = psy_ui_style_allocinit();
 	psy_ui_styles_set_style(self, STYLE_SEQVIEW_BUTTONS, style);
 	
@@ -300,7 +305,12 @@ void init_host_styles(psy_ui_Styles* self, psy_ui_ThemeMode theme)
 	psy_ui_styles_set_style(self, STYLE_TOP, style);	
 	
 	style = psy_ui_style_allocinit();
-	psy_ui_style_set_padding_em(style, 0.0, 0.0, 0.0, 1.0);	
+	psy_ui_style_set_padding_em(style, 0.0, 0.0, 0.0, 1.0);
+	// psy_ui_style_set_background_id(style, IDB_GUI);
+	// style->background.repeat = psy_ui_NOREPEAT;
+	// style->background.align = psy_ui_ALIGNMENT_RIGHT;
+	// psy_ui_bitmap_settransparency(&style->background.bitmap,
+	// psy_ui_colour_white());
 	psy_ui_styles_set_style(self, STYLE_TOPROWS, style);
 	
 	style = psy_ui_style_allocinit();
@@ -975,7 +985,7 @@ void init_light_theme(psy_ui_Styles* self)
 		material.surface_overlay_5p);
 	psy_ui_styles_set_style(self, STYLE_TOP, style);
 
-	style = psy_ui_style_allocinit();
+	style = psy_ui_style_allocinit();	
 	psy_ui_styles_set_style(self, STYLE_TOPROWS, style);
 
 	style = psy_ui_style_allocinit();

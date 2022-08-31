@@ -34,13 +34,18 @@ extern "C" {
 // 2. subslot:   selects a slot inside a group pointing
 //	             to a instrument
 
-typedef struct {
+typedef struct psy_audio_InstrumentIndex {
 	uintptr_t groupslot;
 	uintptr_t subslot;
 } psy_audio_InstrumentIndex;
 
 psy_audio_InstrumentIndex psy_audio_instrumentindex_make(uintptr_t groupslot,
 	uintptr_t subslot);
+	
+INLINE psy_audio_InstrumentIndex psy_audio_instrumentindex_make_invalid(void)
+{
+	return psy_audio_instrumentindex_make(psy_INDEX_INVALID, psy_INDEX_INVALID);
+}	
 
 INLINE uintptr_t psy_audio_instrumentindex_group(const psy_audio_InstrumentIndex* self)
 {
