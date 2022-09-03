@@ -173,14 +173,12 @@ void paramdraw_draw_mid_line(ParamDraw* self, psy_ui_Graphics* g)
 void paramdraw_draw_entries(ParamDraw* self, psy_ui_Graphics* g)
 {
 	psy_audio_Sequence* sequence;
-	psy_audio_PatternNode* currnode;
-	psy_TableIterator it;
+	psy_audio_PatternNode* currnode;	
 	psy_audio_SequenceTrackIterator ite;
 	psy_dsp_big_beat_t seqoffset;	
 	bool track_display;
 	psy_ui_RealSize size;
-	psy_ui_RealSize pt_size;
-	uintptr_t i;	
+	psy_ui_RealSize pt_size;	
 	uintptr_t maxval;
 	uint8_t param;
 	double px;
@@ -446,7 +444,7 @@ void paramdraw_on_mouse_wheel(ParamDraw* self, psy_ui_MouseEvent* ev)
 			entry = (psy_audio_PatternEntry*)self->tweak_node->entry;
 			pat_ev = psy_audio_patternentry_front(entry);					
 			if (pat_ev->cmd == 0x0C) {							
-				pat_ev->parameter = value;
+				pat_ev->parameter = (uint8_t)value;
 				psy_audio_sequence_tweak(self->state->pv->sequence);			
 				psy_ui_component_invalidate(&self->component);
 				paramdraw_output(self, pat_ev->parameter);

@@ -180,8 +180,7 @@ void trackergrid_connect_input_handler(TrackerGrid* self,
 }
 
 void trackergrid_on_draw(TrackerGrid* self, psy_ui_Graphics* g)
-{
-	psy_audio_BlockSelection clip;
+{	
 	psy_ui_RealRectangle g_clip;
 		
 	g_clip = psy_ui_graphics_cliprect(g);
@@ -1619,8 +1618,7 @@ void trackerview_on_song_changed(TrackerView* self, Workspace* sender)
 
 void trackerview_connect_song(TrackerView* self)
 {
-	if (patternviewstate_sequence(self->grid.state->pv)) {
-		printf("connect song\n");
+	if (patternviewstate_sequence(self->grid.state->pv)) {		
 		psy_signal_connect(&patternviewstate_sequence(
 			self->grid.state->pv)->signal_cursorchanged,
 			self, trackerview_on_cursor_changed);
@@ -1635,10 +1633,8 @@ void trackerview_on_cursor_changed(TrackerView* self,
 {		
 	bool invalidate_cursor;
 	bool invalidate_align;
-		
-	printf("on cursor changed\n");
+			
 	if (psy_audio_sequence_lpb_changed(sender)) {		
-		printf("cursor changed\n");
 		psy_ui_component_align(&self->component);
 		psy_ui_component_invalidate(&self->component);
 	}

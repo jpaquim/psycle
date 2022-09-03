@@ -279,9 +279,7 @@ uintptr_t trackscopes_num_rows(const TrackScopes* self)
 }
 
 uintptr_t trackscopes_num_columns(const TrackScopes* self)
-{
-	uintptr_t rv;
-	
+{	
 	if (workspace_song(self->workspace)) {
 		uintptr_t numtracks;
 

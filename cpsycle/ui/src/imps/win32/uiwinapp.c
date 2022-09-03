@@ -230,7 +230,7 @@ LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 	if (imp) {		
 		winproc = imp->wndproc;
 		component = imp->component;
-		switch (message) {
+		switch (message) {		
 		case WM_NCDESTROY:
 			/* restore default winproc */			
 #if defined(_WIN64)		

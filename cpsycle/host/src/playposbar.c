@@ -47,7 +47,7 @@ void playposbar_updatelabel(PlayPosBar* self)
 	char text[80];
 
 	currplaytime = psy_audio_sequencer_curr_play_time(
-		&self->player->sequencer);
+		&self->player->sequencer);	
 	psy_snprintf(text, 40, "%02dm%02ds %.2fb %d/%d",
 		(int)(currplaytime / 60), ((int)currplaytime % 60),
 		(float)psy_audio_player_position(self->player),

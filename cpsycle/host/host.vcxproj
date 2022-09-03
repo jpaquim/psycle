@@ -378,6 +378,7 @@
     <ClCompile Include="src\paramgear.c" />
     <ClCompile Include="src\paramlistbox.c" />
     <ClCompile Include="src\parammap.c" />
+    <ClCompile Include="src\paramroll.c" />
     <ClCompile Include="src\paramtweak.c" />
     <ClCompile Include="src\paramview.c" />
     <ClCompile Include="src\paramviews.c" />
@@ -471,6 +472,7 @@
     <ClCompile Include="src\trackscopeview.c" />
     <ClCompile Include="src\transformpatternview.c" />
     <ClCompile Include="src\undoredobar.c" />
+    <ClCompile Include="src\valueui.c" />
     <ClCompile Include="src\viewframe.c" />
     <ClCompile Include="src\viewhistory.c" />
     <ClCompile Include="src\viewindex.c" />
@@ -584,6 +586,7 @@
     <ClInclude Include="src\paramgear.h" />
     <ClInclude Include="src\paramlistbox.h" />
     <ClInclude Include="src\parammap.h" />
+    <ClInclude Include="src\paramroll.h" />
     <ClInclude Include="src\paramtweak.h" />
     <ClInclude Include="src\paramview.h" />
     <ClInclude Include="src\paramviews.h" />
@@ -677,6 +680,7 @@
     <ClInclude Include="src\trackscopeview.h" />
     <ClInclude Include="src\transformpatternview.h" />
     <ClInclude Include="src\undoredobar.h" />
+    <ClInclude Include="src\valueui.h" />
     <ClInclude Include="src\viewframe.h" />
     <ClInclude Include="src\viewhistory.h" />
     <ClInclude Include="src\viewindex.h" />

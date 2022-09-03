@@ -136,7 +136,7 @@ void cmdplayer_init(CmdPlayer* self)
 	cmdplayer_makedirectories(self);	
 	cmdplayer_initplugincatcherandmachinefactory(self);
 	self->song = NULL;	
-	psy_audio_player_init(&self->player, self->song, (void*)0);	
+	psy_audio_player_init(&self->player, &self->machinecallback, self->song, (void*)0);
 	psy_audio_machinecallback_setplayer(&self->machinecallback, &self->player);	
 	printf("init\n");
 	audioconfig_init(&self->audioconfig, self->config, &self->player);
@@ -179,8 +179,9 @@ void cmdplayer_initplugincatcherandmachinefactory(CmdPlayer* self)
 		printf("no plugin cache found, start scanning\n");
 		cmdplayer_scanplugins(self);
 	}
-	psy_audio_machinefactory_init(&self->machinefactory, &self->machinecallback, 
-		&self->plugincatcher);
+	psy_audio_machinefactory_init(&self->machinefactory);
+	//, & self->machinecallback,
+	//	&self->plugincatcher);
 }
 
 void cmdplayer_scanplugins(CmdPlayer* self)

@@ -78,6 +78,7 @@ void workspace_init(Workspace* self, psy_ui_Component* main)
 	self->terminal_output = NULL;
 	self->fileview = NULL;
 	self->dbg = 0;
+	self->song = NULL;
 	viewhistory_init(&self->view_history);
 	psy_playlist_init(&self->playlist);
 	workspace_init_player(self);
@@ -85,8 +86,7 @@ void workspace_init(Workspace* self, psy_ui_Component* main)
 		&self->player.machinefactory);
 	psy_audio_plugincatcher_set_directories(&self->plugincatcher,
 		psycleconfig_directories(&self->config)->directories);
-	psy_audio_plugincatcher_load(&self->plugincatcher);
-	self->song = psy_audio_song_allocinit(&self->player.machinefactory);
+	psy_audio_plugincatcher_load(&self->plugincatcher);	
 	psy_audio_machinecallback_set_song(&self->hostmachinecallback.machinecallback, self->song);	
 	psy_audio_sequencepaste_init(&self->sequencepaste);
 	psy_undoredo_init(&self->undoredo);
@@ -105,7 +105,7 @@ void workspace_init_player(Workspace* self)
 		&self->signal_machineeditresize,
 		&self->signal_buschanged);		
 	psy_audio_player_init(&self->player,
-		&self->hostmachinecallback.machinecallback, self->song,
+		&self->hostmachinecallback.machinecallback, NULL,
 		/* mainwindow platform handle for directx driver */
 		(self->main)
 		? psy_ui_component_platform(self->main)
@@ -123,6 +123,8 @@ void workspace_init_player(Workspace* self)
 	psy_audio_eventdrivers_setcmds(&self->player.eventdrivers,
 		cmdproperties_create());
 	psy_audio_luabind_setplayer(&self->player);
+	self->song = psy_audio_song_allocinit(&self->player.machinefactory);
+	psy_audio_player_set_song(&self->player, self->song);
 }
 
 void workspace_init_audio(Workspace* self)

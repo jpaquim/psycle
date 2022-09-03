@@ -26,7 +26,7 @@ typedef struct BeatLine {
 
 void beatline_init(BeatLine*, uintptr_t lpb);
 
-INLINE psy_dsp_big_beat_t beatline_set_lpb(BeatLine* self, uintptr_t lpb)
+INLINE void beatline_set_lpb(BeatLine* self, uintptr_t lpb)
 {
 	assert(self);
 	
