@@ -155,14 +155,16 @@ void psy_ui_appstyles_initdarktheme(psy_ui_Styles* self,
 	psy_ui_style_set_colour(style,
 		psy_ui_colour_weighted(&material.primary, material.medium));
 	psy_ui_style_set_padding_em(style, 0.0, 1.0, 0.0, 1.0);
-	psy_ui_style_set_margin_em(style, 0.0, 0.3, 0.0, 0.0);
+	psy_ui_style_set_margin_em(style, 0.0, 0.3, 0.0, 0.0);	
 	psy_ui_styles_set_style(self, psy_ui_STYLE_TAB, style);
 	/* tab::hover */
 	style = psy_ui_style_allocinit();
 	psy_ui_style_set_colour(style, material.onprimary);
-	psy_ui_style_set_background_colour(style, psy_ui_colour_make_overlay(4));
+	psy_ui_style_set_background_colour(style, psy_ui_colour_make_overlay(6));
 	psy_ui_style_set_padding_em(style, 0.0, 1.0, 0.0, 1.0);
 	psy_ui_style_set_margin_em(style, 0.0, 0.3, 0.0, 0.0);
+	psy_ui_border_init_solid_radius(&style->border,
+		material.surface_overlay_7p, 6.0);
 	psy_ui_styles_set_style(self, psy_ui_STYLE_TAB_HOVER, style);
 	/* tab::select */
 	style = psy_ui_style_allocinit();
@@ -623,7 +625,7 @@ void psy_ui_appstyles_inittheme_win98(psy_ui_Styles* self, bool keepfont)
 	/* button */
 	style = psy_ui_style_allocinit();
 	psy_ui_style_set_colours(style, win.cl_black, win.cl_silver);
-	psy_ui_style_set_border(style, &win.raised);	
+	psy_ui_style_set_border(style, &win.raised);
 	psy_ui_style_set_padding_em(style, 0.25, 1.0, 0.25, 1.0);
 	psy_ui_styles_set_style(self, psy_ui_STYLE_BUTTON, style);
 	/* button::hover */

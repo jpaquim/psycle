@@ -70,24 +70,28 @@ static void hostmachinecallbackvtable_init(HostMachineCallback* self)
 }
 
 /* implementation */
-void hostmachinecallback_init(HostMachineCallback* self,
-	psy_audio_MachineFactory* factory,
+void hostmachinecallback_init(HostMachineCallback* self,	
 	DirConfig* dir_config,
 	psy_Signal* signal_machineeditresize,
 	psy_Signal* signal_buschanged)
 {
 	assert(self);
-	assert(factory);
 	assert(dir_config);	
 	assert(signal_machineeditresize);
 
 	psy_audio_machinecallback_init(&self->machinecallback);
 	hostmachinecallbackvtable_init(self);
-	self->machine_factory = factory;
+	self->machine_factory = NULL;
 	self->dir_config = dir_config;
 	self->logger = NULL;
 	self->signal_machineeditresize = signal_machineeditresize;
 	self->signal_buschanged = signal_buschanged;
+}
+
+void hostmachinecallback_set_machine_factory(HostMachineCallback* self,
+	psy_audio_MachineFactory* factory)
+{
+	self->machine_factory = factory;
 }
 
 psy_audio_MachineFactory* hostmachinecallback_on_machinefactory(HostMachineCallback* self)

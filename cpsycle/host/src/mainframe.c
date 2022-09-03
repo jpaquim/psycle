@@ -1041,7 +1041,7 @@ void mainframe_on_script_tabbar_changed(MainFrame* self, psy_ui_Component* sende
 		psy_audio_Machine* machine;
 		
 		machine = psy_audio_machinefactory_makemachinefrompath(
-			&self->workspace.machinefactory, psy_audio_LUA, link->dllname_,
+			&self->workspace.player.machinefactory, psy_audio_LUA, link->dllname_,
 			0, 0);
 		if (machine) {
 			psy_audio_machine_sethostview(machine, &self->mainviews.notebook.component);

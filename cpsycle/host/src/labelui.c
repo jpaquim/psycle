@@ -19,13 +19,12 @@
 #include "../../detail/portable.h"
 
 
-/* LabelUi */
 /* prototypes */
-static void labelui_ondraw(LabelUi*, psy_ui_Graphics*);
+static void labelui_on_draw(LabelUi*, psy_ui_Graphics*);
 static void labelui_invalidate(LabelUi*);
-static void labelui_onpreferredsize(LabelUi*, const psy_ui_Size* limit,
+static void labelui_on_preferred_size(LabelUi*, const psy_ui_Size* limit,
 	psy_ui_Size* rv);
-static void labelui_updateparam(LabelUi*);
+static void labelui_update(LabelUi*);
 
 /* vtable */
 static psy_ui_ComponentVtable labelui_vtable;
@@ -39,10 +38,10 @@ static void labelui_vtable_init(LabelUi* self)
 		labelui_vtable = *(self->component.vtable);
 		labelui_vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
-			labelui_ondraw;
+			labelui_on_draw;
 		labelui_vtable.onpreferredsize =
 			(psy_ui_fp_component_on_preferred_size)
-			labelui_onpreferredsize;		
+			labelui_on_preferred_size;		
 		labelui_vtable_initialized = TRUE;
 	}
 	psy_ui_component_set_vtable(&self->component, &labelui_vtable);
@@ -82,7 +81,7 @@ LabelUi* labelui_allocinit(psy_ui_Component* parent,
 	return rv;
 }
 
-void labelui_ondraw(LabelUi* self, psy_ui_Graphics* g)
+void labelui_on_draw(LabelUi* self, psy_ui_Graphics* g)
 {		
 	double half;
 	psy_ui_RealRectangle r;
@@ -94,7 +93,7 @@ void labelui_ondraw(LabelUi* self, psy_ui_Graphics* g)
 	title_style = psy_ui_style(STYLE_MACPARAM_TITLE);
 	bottom_style = psy_ui_style(STYLE_MACPARAM_BOTTOM);
 	str[0] = '\0';
-	labelui_updateparam(self);
+	labelui_update(self);
 	size = psy_ui_component_scroll_size_px(&self->component);
 	half = size.height / 2;
 	r = psy_ui_realrectangle_make(
@@ -125,10 +124,10 @@ void labelui_ondraw(LabelUi* self, psy_ui_Graphics* g)
 		r, str, psy_strlen(str));
 }
 
-void labelui_onpreferredsize(LabelUi* self, const psy_ui_Size* limit,
+void labelui_on_preferred_size(LabelUi* self, const psy_ui_Size* limit,
 	psy_ui_Size* rv)
 {
-	labelui_updateparam(self);
+	labelui_update(self);
 	if (self->param) {
 		if (psy_audio_machineparam_type(self->param) & MPF_SMALL) {
 			psy_ui_size_setem(rv, PARAMWIDTH_SMALL, 2.0);
@@ -138,7 +137,7 @@ void labelui_onpreferredsize(LabelUi* self, const psy_ui_Size* limit,
 	psy_ui_size_setem(rv, PARAMWIDTH, 2.0);
 }
 
-void labelui_updateparam(LabelUi* self)
+void labelui_update(LabelUi* self)
 {
 	if (self->machine && self->paramidx != psy_INDEX_INVALID) {
 		self->param = psy_audio_machine_parameter(self->machine,

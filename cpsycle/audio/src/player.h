@@ -57,6 +57,9 @@ psy_audio_PatternEvent psy_audio_patterndefaults_fill_event(const
 
 /* psy_audio_Player */
 typedef struct psy_audio_Player {
+	/* inherits */
+	psy_audio_CustomMachine custommachine;
+	/* internal */
 	psy_AudioDriver* driver;
 	psy_audio_Song* song;	
 	psy_audio_MachineFactory machinefactory;
@@ -91,10 +94,15 @@ typedef struct psy_audio_Player {
 	psy_List* nodes_queue_;
 	psy_Lock mutex;
 	psy_Lock block;
-	uintptr_t waiting;	
+	uintptr_t waiting;
+	/* parameters */
+	psy_audio_CustomMachineParam tempo_param;
+	psy_audio_CustomMachineParam lpb_param;
 } psy_audio_Player;
 
-void psy_audio_player_init(psy_audio_Player*, psy_audio_Song*,
+void psy_audio_player_init(psy_audio_Player*,
+	psy_audio_MachineCallback* callback,
+	psy_audio_Song*,
 	void* systemhandle);
 void psy_audio_player_dispose(psy_audio_Player*);
 

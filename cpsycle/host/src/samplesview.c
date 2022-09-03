@@ -168,7 +168,7 @@ void samplessongimportview_load_song(SamplesSongImportView* self,
 		psy_audio_song_deallocate(self->source);			
 	}	
 	self->source = psy_audio_song_allocinit(
-		&self->workspace->machinefactory);
+		&self->workspace->player.machinefactory);
 	psy_audio_songfile_init(&songfile);
 	songfile.song = self->source;
 	songfile.file = 0;		

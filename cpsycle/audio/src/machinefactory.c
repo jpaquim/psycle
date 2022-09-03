@@ -33,11 +33,12 @@
 #define _MAX_PATH 4096
 #endif
 
-void psy_audio_machinefactory_init(psy_audio_MachineFactory* self, psy_audio_MachineCallback* callback,
-	psy_audio_PluginCatcher* catcher)
+void psy_audio_machinefactory_init(psy_audio_MachineFactory* self)
 {
-	self->machinecallback = callback;
-	self->catcher = catcher;
+	assert(self);
+	
+	self->machinecallback = NULL;
+	self->catcher = NULL;
 #ifdef PSYCLE_USE_MACHINEPROXY
 	self->createasproxy = TRUE;
 #else
@@ -51,6 +52,22 @@ void psy_audio_machinefactory_dispose(psy_audio_MachineFactory* self)
 {
 	free(self->errstr);
 	self->errstr = NULL;
+}
+
+void psy_audio_machinefactory_set_callback(psy_audio_MachineFactory* self,
+	psy_audio_MachineCallback* callback)
+{
+	assert(self);
+	
+	self->machinecallback = callback;
+}
+
+void psy_audio_machinefactory_set_plugin_catcher(psy_audio_MachineFactory* self,
+	psy_audio_PluginCatcher* plugin_catcher)
+{
+	assert(self);
+	
+	self->catcher = plugin_catcher;
 }
 
 void psy_audio_machinefactory_seterrorstr(psy_audio_MachineFactory* self, const char* str)

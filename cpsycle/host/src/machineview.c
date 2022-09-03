@@ -372,7 +372,7 @@ void machineview_onnewmachineselected(MachineView* self,
 		return;
 	}	
 	machine = psy_audio_machinefactory_make_info(
-		&self->workspace->machinefactory, &machineinfo);
+		&self->workspace->player.machinefactory, &machineinfo);
 	machineinfo_dispose(&machineinfo);
 	if (machine) {
 		if (self->newmachine.appendstack &&
@@ -409,7 +409,7 @@ void machineview_onnewmachineselected(MachineView* self,
 		
 	} else {
 		workspace_output_error(self->workspace,
-			self->workspace->machinefactory.errstr);
+			self->workspace->player.machinefactory.errstr);
 	}	
 	self->newmachine.appendstack = FALSE;
 }

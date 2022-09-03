@@ -7,6 +7,7 @@
 #define TIMEBAR_H
 
 /* host */
+#include "valueui.h"
 #include "workspace.h"
 /* audio */
 #include <player.h>
@@ -32,14 +33,12 @@ typedef struct TimeBar {
 	/* inherits */
 	psy_ui_Component component;
 	/* internal */
-	psy_ui_Label desc;
-	psy_ui_Label bpmlabel;
+	psy_ui_Label desc;	
+	ValueUi bpmlabel;
 	psy_ui_Button lessless;
 	psy_ui_Button less;
 	psy_ui_Button more;
 	psy_ui_Button moremore;	
-	psy_dsp_big_beat_t bpm;
-	psy_dsp_big_beat_t realbpm;
 	/* references */
 	psy_audio_Player* player;
 } TimeBar;

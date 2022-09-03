@@ -84,7 +84,6 @@ typedef struct Workspace {
 	psy_audio_Song* song;
 	psy_audio_Player player;
 	psy_audio_PluginCatcher plugincatcher;	
-	psy_audio_MachineFactory machinefactory;	
 	PsycleConfig config;
 	psy_Playlist playlist;
 	psy_ui_Component* main;	

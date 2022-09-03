@@ -30,6 +30,7 @@ typedef struct ParamTweak {
     struct psy_audio_Machine* machine;
     uintptr_t paramidx;
     struct psy_audio_MachineParam* param;
+    float tweakscale;
 } ParamTweak;
 
 void paramtweak_init(ParamTweak*);

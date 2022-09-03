@@ -34,9 +34,8 @@
 #endif
 
 /* audio */
-static void workspace_init_player(Workspace*);
 static void workspace_init_audio(Workspace*);
-static void workspace_init_plugin_catcher_and_machinefactory(Workspace*);
+static void workspace_init_player(Workspace*);
 static void workspace_init_signals(Workspace*);
 static void workspace_dispose_signals(Workspace*);
 static void workspace_update_play_status(Workspace*, bool follow_song);
@@ -61,11 +60,7 @@ static void workspace_on_terminal_error(Workspace*,
 void workspace_init(Workspace* self, psy_ui_Component* main)
 {
 	assert(self);
-
-	hostmachinecallback_init(&self->hostmachinecallback,
-		&self->machinefactory, &self->config.directories,
-		&self->signal_machineeditresize,
-		&self->signal_buschanged);
+	
 	psy_audio_init();
 	self->main = main;
 	self->undo_save_point = 0;
@@ -85,32 +80,58 @@ void workspace_init(Workspace* self, psy_ui_Component* main)
 	self->dbg = 0;
 	viewhistory_init(&self->view_history);
 	psy_playlist_init(&self->playlist);
-	workspace_init_plugin_catcher_and_machinefactory(self);
+	workspace_init_player(self);
 	psycleconfig_init(&self->config, &self->player, &self->pluginscanthread,
-		&self->machinefactory);
+		&self->player.machinefactory);
 	psy_audio_plugincatcher_set_directories(&self->plugincatcher,
 		psycleconfig_directories(&self->config)->directories);
 	psy_audio_plugincatcher_load(&self->plugincatcher);
-	self->song = psy_audio_song_allocinit(&self->machinefactory);
+	self->song = psy_audio_song_allocinit(&self->player.machinefactory);
 	psy_audio_machinecallback_set_song(&self->hostmachinecallback.machinecallback, self->song);	
 	psy_audio_sequencepaste_init(&self->sequencepaste);
 	psy_undoredo_init(&self->undoredo);
 	workspace_init_signals(self);
-	workspace_init_player(self);	
+	workspace_init_audio(self);	
 	eventdriverconfig_register_event_drivers(&self->config.input);
 	inputhandler_init(&self->inputhandler, &self->player, NULL, NULL);	
 }
 
-void workspace_init_plugin_catcher_and_machinefactory(Workspace* self)
+void workspace_init_player(Workspace* self)
 {
 	assert(self);
 
-	psy_audio_plugincatcher_init(&self->plugincatcher);	
-	psy_audio_machinefactory_init(&self->machinefactory,
-		&self->hostmachinecallback.machinecallback,
-		&self->plugincatcher);
-	pluginscanthread_init(&self->pluginscanthread, &self->plugincatcher);
+	hostmachinecallback_init(&self->hostmachinecallback,
+		&self->config.directories,
+		&self->signal_machineeditresize,
+		&self->signal_buschanged);		
+	psy_audio_player_init(&self->player,
+		&self->hostmachinecallback.machinecallback, self->song,
+		/* mainwindow platform handle for directx driver */
+		(self->main)
+		? psy_ui_component_platform(self->main)
+		: NULL);	
+	psy_audio_plugincatcher_init(&self->plugincatcher);		
+	psy_audio_machinefactory_set_callback(&self->player.machinefactory,
+		&self->hostmachinecallback.machinecallback);
+	hostmachinecallback_set_machine_factory(&self->hostmachinecallback,	
+		&self->player.machinefactory);
+	psy_audio_machinefactory_set_plugin_catcher(&self->player.machinefactory,
+		&self->plugincatcher);	
+	pluginscanthread_init(&self->pluginscanthread, &self->plugincatcher);	
+	psy_audio_machinecallback_setplayer(&self->hostmachinecallback.machinecallback,
+		&self->player);
+	psy_audio_eventdrivers_setcmds(&self->player.eventdrivers,
+		cmdproperties_create());
+	psy_audio_luabind_setplayer(&self->player);
 }
+
+void workspace_init_audio(Workspace* self)
+{
+	audioconfig_driverconfigure_section(&self->config.audio);
+	eventdriverconfig_update_active(&self->config.input);
+	eventdriverconfig_show_active(&self->config.input, 0);	
+}
+
 
 void workspace_init_signals(Workspace* self)
 {
@@ -143,8 +164,7 @@ void workspace_dispose(Workspace* self)
 	self->song = NULL;
 	psycleconfig_dispose(&self->config);	
 	psy_audio_plugincatcher_save(&self->plugincatcher);
-	psy_audio_plugincatcher_dispose(&self->plugincatcher);
-	psy_audio_machinefactory_dispose(&self->machinefactory);
+	psy_audio_plugincatcher_dispose(&self->plugincatcher);	
 	psy_undoredo_dispose(&self->undoredo);
 	viewhistory_dispose(&self->view_history);
 	workspace_dispose_signals(self);	
@@ -203,30 +223,6 @@ void workspace_save_styles(Workspace* self)
 	}
 }
 
-void workspace_init_player(Workspace* self)
-{
-	assert(self);
-		
-	psy_audio_player_init(&self->player, self->song,
-		/* mainwindow platform handle for directx driver */
-		(self->main)
-		? psy_ui_component_platform(self->main)
-		: NULL);
-	psy_audio_machinecallback_setplayer(&self->hostmachinecallback.machinecallback,
-		&self->player);
-	psy_audio_eventdrivers_setcmds(&self->player.eventdrivers,
-		cmdproperties_create());
-	psy_audio_luabind_setplayer(&self->player);
-	workspace_init_audio(self);	
-}
-
-void workspace_init_audio(Workspace* self)
-{
-	audioconfig_driverconfigure_section(&self->config.audio);
-	eventdriverconfig_update_active(&self->config.input);
-	eventdriverconfig_show_active(&self->config.input, 0);	
-}
-
 void workspace_config_visual(Workspace* self)
 {
 	psy_ui_Font font;
@@ -251,8 +247,8 @@ void workspace_newsong(Workspace* self)
 {
 	assert(self);
 		
-	workspace_set_song(self, psy_audio_song_allocinit(&self->machinefactory),
-		WORKSPACE_NEWSONG);
+	workspace_set_song(self, psy_audio_song_allocinit(
+		&self->player.machinefactory), WORKSPACE_NEWSONG);
 	workspace_select_view(self, viewindex_make(VIEW_ID_MACHINEVIEW, 0,
 		psy_INDEX_INVALID, 0));
 }
@@ -282,7 +278,7 @@ void workspace_load_song(Workspace* self, const char* filename, bool play)
 
 	assert(self);
 
-	song = psy_audio_song_allocinit(&self->machinefactory);	
+	song = psy_audio_song_allocinit(&self->player.machinefactory);	
 	if (song) {
 		psy_audio_SongFile songfile;
 
@@ -563,10 +559,10 @@ void workspace_load_configuration(Workspace* self)
 	if (compatconfig_loadnewblitz(psycleconfig_compat(
 		workspace_conf(self)))) {
 		psy_audio_machinefactory_loadnewgamefxandblitzifversionunknown(
-			&self->machinefactory);
+			&self->player.machinefactory);
 	} else {
 		psy_audio_machinefactory_loadoldgamefxandblitzifversionunknown(
-			&self->machinefactory);
+			&self->player.machinefactory);
 	}
 	psy_audio_player_set_sampler_index(&self->player,
 		seqeditconfig_machine(&self->config.seqedit));

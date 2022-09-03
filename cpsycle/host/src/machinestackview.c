@@ -1641,7 +1641,7 @@ void machinestackview_addeffect(MachineStackView* self,
 	psy_audio_Machine* effect;	
 	
 	effect = psy_audio_machinefactory_make_info(
-		&self->workspace->machinefactory, machineinfo);	
+		&self->workspace->player.machinefactory, machineinfo);	
 	if (effect) {
 		uintptr_t macid;
 		MachineStackColumn* insertcolumn;
