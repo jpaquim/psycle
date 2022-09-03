@@ -24,8 +24,39 @@ extern "C" {
 
 struct psy_ui_Bitmap;
 
+
+typedef struct psy_ui_BmpHeader {
+	uint16_t type;       /* Magic identifier            */
+	uint32_t size;       /* File size in bytes          */
+	uint16_t reserved1;
+	uint16_t reserved2;
+	uint32_t offset;     /* Offset to image data, bytes */
+} psy_ui_BmpHeader;
+
+typedef struct psy_ui_BmpInfo {
+	uint32_t size;             /* Header size in bytes      */
+	int32_t width;             /* Width and height of image */
+	int32_t height;
+	uint16_t planes;           /* Number of colour planes   */
+	uint16_t bits;             /* Bits per pixel            */
+	uint32_t compression;      /* Compression type          */
+	uint32_t imagesize;        /* Image size in bytes       */
+	int32_t xresolution;
+	int32_t yresolution;       /* Pixels per meter          */
+	uint32_t ncolours;         /* Number of colours         */
+	uint32_t importantcolours; /* Important colours         */
+} psy_ui_BmpInfo;
+
+typedef struct psy_ui_BmpColourIndex {
+	uint8_t r, g, b, junk;
+} psy_ui_BmpColourIndex;
+
 typedef struct psy_ui_BmpReader {
-	struct psy_ui_Bitmap* bitmap;			
+	struct psy_ui_Bitmap* bitmap;
+	psy_ui_BmpHeader header;
+	psy_ui_BmpInfo infoheader;
+	psy_ui_BmpColourIndex colourindex[256];
+	bool verbose;
 } psy_ui_BmpReader;
 
 void psy_ui_bmpreader_init(psy_ui_BmpReader*,

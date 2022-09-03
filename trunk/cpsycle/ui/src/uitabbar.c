@@ -12,7 +12,6 @@
 /* platform */
 #include "../../detail/portable.h"
 
-/* psy_ui_Tab */
 
 /* protoypes */
 static void psy_ui_tab_on_destroyed(psy_ui_Tab*);
@@ -23,6 +22,7 @@ static void psy_ui_tab_onpreferredsize(psy_ui_Tab*,
 static void psy_ui_tab_onlanguagechanged(psy_ui_Tab*);
 static void psy_ui_tab_onupdatestyles(psy_ui_Tab*);
 static void psy_ui_tab_loadbitmaps(psy_ui_Tab*);
+
 /* vtable */
 static psy_ui_ComponentVtable psy_ui_tab_vtable;
 static bool psy_ui_tab_vtable_initialized = FALSE;

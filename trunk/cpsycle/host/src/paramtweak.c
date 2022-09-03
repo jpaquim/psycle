@@ -28,6 +28,7 @@ void paramtweak_init(ParamTweak* self)
 	self->machine = NULL;
 	self->paramidx = psy_INDEX_INVALID;
 	self->active = FALSE;
+	self->tweakscale = 200.f;
 }
 
 void paramtweak_begin(ParamTweak* self, psy_audio_Machine* machine,
@@ -113,7 +114,8 @@ void paramtweak_onmousemove(ParamTweak* self, psy_ui_MouseEvent* ev)
 		}
 		if ((paramtype != MPF_CHECK) && (paramtype != MPF_SWITCH)) {
 			// todo add fine/ultrafine tweak
-			val = self->tweakval + (self->tweakbase - (float)psy_ui_mouseevent_pt(ev).y) / 200.f;
+			val = self->tweakval + (self->tweakbase -
+				(float)psy_ui_mouseevent_pt(ev).y) / self->tweakscale;
 			if (val > 1.f) {
 				val = 1.f;
 			} else if (val < 0.f) {

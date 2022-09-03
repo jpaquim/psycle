@@ -43,10 +43,11 @@ typedef struct HostMachineCallback {
 	psy_Signal* signal_buschanged;
 } HostMachineCallback;
 
-void hostmachinecallback_init(HostMachineCallback*,
-	psy_audio_MachineFactory*, DirConfig*,
-	psy_Signal* signal_machineeditresize,
-	psy_Signal* signal_buschanged);
+void hostmachinecallback_init(HostMachineCallback*, DirConfig*,
+	psy_Signal* signal_machineeditresize, psy_Signal* signal_buschanged);
+	
+void hostmachinecallback_set_machine_factory(HostMachineCallback*,
+	psy_audio_MachineFactory*);
 
 
 #ifdef __cplusplus

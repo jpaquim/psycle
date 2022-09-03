@@ -44,8 +44,13 @@ typedef struct psy_audio_MachineFactory {
 	char* errstr;
 } psy_audio_MachineFactory;
 
-void psy_audio_machinefactory_init(psy_audio_MachineFactory*, psy_audio_MachineCallback*, psy_audio_PluginCatcher*);
+void psy_audio_machinefactory_init(psy_audio_MachineFactory*);
 void psy_audio_machinefactory_dispose(psy_audio_MachineFactory*);
+
+void psy_audio_machinefactory_set_callback(psy_audio_MachineFactory*,
+	psy_audio_MachineCallback*);
+void psy_audio_machinefactory_set_plugin_catcher(psy_audio_MachineFactory*,
+	psy_audio_PluginCatcher*);
 psy_audio_Machine* psy_audio_machinefactory_makemachine(psy_audio_MachineFactory*, psy_audio_MachineType,
 	const char* plugincatchername, uintptr_t instindex);
 psy_audio_Machine* psy_audio_machinefactory_makemachinefrompath(psy_audio_MachineFactory*, psy_audio_MachineType,

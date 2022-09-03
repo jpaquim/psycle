@@ -6,6 +6,8 @@
 #if !defined(LINESPERBEATBAR_H)
 #define LINESPERBEATBAR_H
 
+/* host */
+#include "valueui.h"
 /* audio */
 #include <player.h>
 /* ui */
@@ -29,13 +31,11 @@ typedef struct LinesPerBeatBar {
 	/* description label */
 	psy_ui_Label desc;
 	/* displays the player lpb */
-	psy_ui_Label number;
+	ValueUi number;
 	/* decrement lpb button by -1 */
 	psy_ui_Button less;
 	/* increment lpb button by +1 */
-	psy_ui_Button more;
-	/* lpb display cache */
-	uintptr_t lpb;
+	psy_ui_Button more;	
 	/* references */
 	psy_audio_Player* player;
 } LinesPerBeatBar;

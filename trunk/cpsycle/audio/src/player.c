@@ -13,6 +13,7 @@
 #include "exclusivelock.h"
 #include "kbddriver.h"
 #include "master.h"
+#include "plugin_interface.h"
 #include "silentdriver.h"
 /* dsp */
 #include <operations.h>
@@ -146,14 +147,28 @@ static unsigned int __stdcall psy_audio_player_thread_function(psy_audio_Player*
 static unsigned int psy_audio_player_thread_function(psy_audio_Player*);
 #endif
 static void psy_audio_player_process_loop(psy_audio_Player*);
+static void psy_audio_player_on_bpm_tweak(psy_audio_Player*,
+	psy_audio_MachineParam* sender, float value);
+static void psy_audio_player_on_bpm_norm_value(psy_audio_Player*,
+	psy_audio_MachineParam* sender, float* rv);
+static void psy_audio_player_on_bpm_describe(psy_audio_Player*,
+	psy_audio_MachineParam* sender, int* active, char* rv);
+static void psy_audio_player_on_lpb_tweak(psy_audio_Player*,
+	psy_audio_MachineParam* sender, float value);
+static void psy_audio_player_on_lpb_norm_value(psy_audio_Player*,
+	psy_audio_MachineParam* sender, float* rv);
+static void psy_audio_player_on_lpb_describe(psy_audio_Player*,
+	psy_audio_MachineParam* sender, int* active, char* rv);
 
 /* implementation */
-void psy_audio_player_init(psy_audio_Player* self, psy_audio_Song* song,
+void psy_audio_player_init(psy_audio_Player* self,
+	psy_audio_MachineCallback* callback, psy_audio_Song* song,
 	void* handle)
 {
 	assert(self);
 
-	psy_audio_machinefactory_init(&self->machinefactory, NULL, NULL);
+	psy_audio_machinefactory_init(&self->machinefactory);
+	psy_audio_custommachine_init(&self->custommachine, callback);
 	psy_audio_song_init(&self->emptysong, &self->machinefactory);
 	if (song) {
 		self->song = song;		
@@ -181,9 +196,7 @@ void psy_audio_player_init(psy_audio_Player* self, psy_audio_Song* song,
 		&self->song->machines);
 	mainframe = handle;
 	psy_audio_midiinput_init(&self->midiinput, self->song);
-	psy_audio_activechannels_init(&self->playon);
-	psy_audio_player_initdriver(self);
-	psy_audio_eventdrivers_init(&self->eventdrivers, handle);
+	psy_audio_activechannels_init(&self->playon);	
 	psy_signal_connect(&self->eventdrivers.signal_input, self,
 		psy_audio_player_oneventdriverinput);
 	psy_audio_player_initsignals(self);
@@ -195,6 +208,27 @@ void psy_audio_player_init(psy_audio_Player* self, psy_audio_Song* song,
 #ifdef PSYCLE_LOG_WORKEVENTS
 	psyfile_create(&logfile, "C:\\Users\\user\\psycle-workevent-log.txt", 1);
 #endif
+	psy_audio_player_initdriver(self);
+	psy_audio_eventdrivers_init(&self->eventdrivers, handle);
+	/* parameters */
+	psy_audio_custommachineparam_init(&self->tempo_param,
+		"Tempo (Bpm)", "BPM", MPF_STATE | MPF_SMALL,
+		0, 999);	
+	psy_signal_connect(&self->tempo_param.machineparam.signal_tweak, self,
+		psy_audio_player_on_bpm_tweak);
+	psy_signal_connect(&self->tempo_param.machineparam.signal_normvalue, self,
+		psy_audio_player_on_bpm_norm_value);
+	psy_signal_connect(&self->tempo_param.machineparam.signal_describe, self,
+		psy_audio_player_on_bpm_describe);
+	psy_audio_custommachineparam_init(&self->lpb_param,
+		"Lines per Beat", "LPB", MPF_STATE | MPF_SMALL,
+		1, 99);	
+	psy_signal_connect(&self->lpb_param.machineparam.signal_tweak, self,
+		psy_audio_player_on_lpb_tweak);
+	psy_signal_connect(&self->lpb_param.machineparam.signal_normvalue, self,
+		psy_audio_player_on_lpb_norm_value);
+	psy_signal_connect(&self->lpb_param.machineparam.signal_describe, self,
+		psy_audio_player_on_lpb_describe);
 }
 
 void psy_audio_player_initdriver(psy_audio_Player* self)
@@ -243,6 +277,9 @@ void psy_audio_player_dispose(psy_audio_Player* self)
 	psy_audio_midiinput_dispose(&self->midiinput);
 	psy_audio_song_dispose(&self->emptysong);
 	psy_audio_machinefactory_dispose(&self->machinefactory);
+	psy_audio_custommachineparam_dispose(&self->tempo_param);
+	psy_audio_custommachineparam_dispose(&self->lpb_param);
+	psy_audio_custommachine_dispose(&self->custommachine);
 }
 
 /*
@@ -850,8 +887,16 @@ void psy_audio_player_set_lpb(psy_audio_Player* self, uintptr_t lpb)
 	if (self->song) {
 		psy_audio_song_set_lpb(self->song, lpb);
 	}
-	psy_audio_sequencer_set_lpb(&self->sequencer, lpb);
-	psy_signal_emit(&self->signal_lpbchanged, self, 1, lpb);	
+	psy_audio_sequencer_set_lpb(&self->sequencer, lpb);	
+	/*if (self->song) {
+		psy_audio_SequenceCursor cursor;
+		
+		cursor = psy_audio_sequence_cursor(&self->song->sequence);
+		psy_audio_sequencecursor_set_lpb(&cursor, lpb);
+		printf("set cursor\n");
+		psy_audio_sequence_set_cursor(&self->song->sequence, cursor);		
+	}*/
+	psy_signal_emit(&self->signal_lpbchanged, self, 1, lpb);
 }
 
 /* Audio driver set, get, load, unload, restart, ..., methods */
@@ -1207,3 +1252,54 @@ bool psy_audio_player_enabled(const psy_audio_Player* self)
 	}
 	return FALSE;
 }
+
+void psy_audio_player_on_bpm_tweak(psy_audio_Player* self,
+	psy_audio_MachineParam* sender, float value)
+{
+	psy_audio_sequencer_setbpm(&self->sequencer, value * 999.0);
+}
+
+void psy_audio_player_on_bpm_norm_value(psy_audio_Player* self,
+	psy_audio_MachineParam* sender, float* rv)
+{
+	*rv = psy_audio_sequencer_bpm(&self->sequencer) / 999.0;
+}
+
+void psy_audio_player_on_bpm_describe(psy_audio_Player* self,
+	psy_audio_MachineParam* sender, int* active, char* rv)
+{
+	float bpm;
+	float real_bpm;
+
+	assert(self);
+
+	bpm = psy_audio_player_bpm(self);
+	real_bpm = psy_audio_player_realbpm(self);
+	psy_snprintf(rv, 64, "%d (%.2f)", (int)bpm, real_bpm);
+	*active = TRUE;
+}
+
+void psy_audio_player_on_lpb_tweak(psy_audio_Player* self,
+	psy_audio_MachineParam* sender, float value)
+{
+	psy_audio_player_set_lpb(self, value * 99);
+}
+
+void psy_audio_player_on_lpb_norm_value(psy_audio_Player* self,
+	psy_audio_MachineParam* sender, float* rv)
+{
+	*rv = psy_audio_player_lpb(self) / 99;
+}
+
+void psy_audio_player_on_lpb_describe(psy_audio_Player* self,
+	psy_audio_MachineParam* sender, int* active, char* rv)
+{
+	float lpb;	
+
+	assert(self);
+
+	lpb = psy_audio_player_lpb(self);	
+	psy_snprintf(rv, 64, "%d", (int)lpb);
+	*active = TRUE;
+}
+

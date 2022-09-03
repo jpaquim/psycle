@@ -1620,6 +1620,7 @@ void trackerview_on_song_changed(TrackerView* self, Workspace* sender)
 void trackerview_connect_song(TrackerView* self)
 {
 	if (patternviewstate_sequence(self->grid.state->pv)) {
+		printf("connect song\n");
 		psy_signal_connect(&patternviewstate_sequence(
 			self->grid.state->pv)->signal_cursorchanged,
 			self, trackerview_on_cursor_changed);
@@ -1635,7 +1636,9 @@ void trackerview_on_cursor_changed(TrackerView* self,
 	bool invalidate_cursor;
 	bool invalidate_align;
 		
+	printf("on cursor changed\n");
 	if (psy_audio_sequence_lpb_changed(sender)) {		
+		printf("cursor changed\n");
 		psy_ui_component_align(&self->component);
 		psy_ui_component_invalidate(&self->component);
 	}

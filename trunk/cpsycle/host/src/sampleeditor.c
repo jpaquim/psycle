@@ -751,7 +751,7 @@ void sampleeditor_init(SampleEditor* self, psy_ui_Component* parent,
 void sampleeditor_initsampler(SampleEditor* self)
 {	
 	psy_audio_xmsampler_init(&self->sampler,
-		self->workspace->machinefactory.machinecallback);
+		self->workspace->player.machinefactory.machinecallback);
 	psy_audio_buffer_init(&self->samplerbuffer, 2);
 	psy_audio_buffer_allocsamples(&self->samplerbuffer,
 		psy_audio_MAX_STREAM_SIZE);	
