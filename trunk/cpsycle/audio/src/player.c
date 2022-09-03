@@ -188,6 +188,7 @@ void psy_audio_player_init(psy_audio_Player* self,
 	self->stop_requested_ = FALSE;
 	self->nodes_queue_ = NULL;
 	self->active_note = psy_audio_NOTECOMMANDS_EMPTY;
+	self->vumode = VUMETER_RMS;
 	psy_lock_init(&self->mutex);
 	psy_lock_init(&self->block);
 	psy_dsp_dither_init(&self->dither);	
@@ -197,10 +198,8 @@ void psy_audio_player_init(psy_audio_Player* self,
 	mainframe = handle;
 	psy_audio_midiinput_init(&self->midiinput, self->song);
 	psy_audio_activechannels_init(&self->playon);	
-	psy_signal_connect(&self->eventdrivers.signal_input, self,
-		psy_audio_player_oneventdriverinput);
 	psy_audio_player_initsignals(self);
-	self->vumode = VUMETER_RMS;
+	
 	psy_table_init(&self->notestotracks);
 	psy_table_init(&self->trackstonotes);
 	psy_table_init(&self->worked);
@@ -210,6 +209,8 @@ void psy_audio_player_init(psy_audio_Player* self,
 #endif
 	psy_audio_player_initdriver(self);
 	psy_audio_eventdrivers_init(&self->eventdrivers, handle);
+	psy_signal_connect(&self->eventdrivers.signal_input, self,
+		psy_audio_player_oneventdriverinput);
 	/* parameters */
 	psy_audio_custommachineparam_init(&self->tempo_param,
 		"Tempo (Bpm)", "BPM", MPF_STATE | MPF_SMALL,

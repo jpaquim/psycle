@@ -112,7 +112,6 @@ static void mainframe_on_midi_monitor(MainFrame*, psy_Property* sender);
 static void mainframe_on_cpu_view(MainFrame*, psy_Property* sender);
 static void mainframe_on_help(MainFrame*, psy_ui_Button* sender);
 static void mainframe_on_settings(MainFrame*, psy_ui_Button* sender);
-static void mainframe_on_show(MainFrame*, psy_ui_Component* sender);
 
 /* vtable */
 static psy_ui_ComponentVtable vtable;
@@ -218,13 +217,13 @@ void mainframe_init(MainFrame* self)
 		mainframe_on_script_tabbar_changed);
 	workspace_select_start_view(&self->workspace);
 	self->machineview.wireview.centermaster = TRUE;	
+	psy_ui_component_start_timer(mainframe_base(self), 0, 50);
 }
 
 void mainframe_init_frame(MainFrame* self)
 {
 	psy_ui_frame_init_main(mainframe_base(self));
 	vtable_init(self);
-	psy_signal_connect(&self->component.signal_show, self, mainframe_on_show);	
 	self->starting = TRUE;	
 	psy_ui_component_doublebuffer(mainframe_base(self));
 	psy_ui_app_setmain(psy_ui_app(), mainframe_base(self));
@@ -928,9 +927,10 @@ void mainframe_on_export(MainFrame* self, psy_ui_Component* sender)
 
 void mainframe_on_timer(MainFrame* self, uintptr_t timerid)
 {	
-	if (self->starting) {		
-		self->starting = FALSE;
+	if (self->starting && !psy_ui_component_draw_visible(&self->component)) {
+		return;
 	}
+	self->starting = FALSE;	
 	vubar_idle(&self->vubar);
 	workspace_idle(&self->workspace);
 	mainstatusbar_idle(&self->statusbar);
@@ -1561,9 +1561,3 @@ void mainframe_on_settings(MainFrame* self, psy_ui_Button* sender)
 			psy_INDEX_INVALID));
 }
 
-void mainframe_on_show(MainFrame* self, psy_ui_Component* sender)
-{
-	if (self->starting) {
-		psy_ui_component_start_timer(mainframe_base(self), 0, 50);		
-	}
-}

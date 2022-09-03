@@ -1138,7 +1138,6 @@ void psy_audio_sequence_set_cursor(psy_audio_Sequence* self,
 			psy_audio_sequenceselection_select_first(&self->selection,
 				self->cursor.order_index);
 		}		
-		printf("set cursor %d, %d\n", self->cursor.lpb, self->lastcursor.lpb);
 		psy_signal_emit(&self->signal_cursorchanged, self, 0);
 		self->lastcursor = self->cursor;
 	// }

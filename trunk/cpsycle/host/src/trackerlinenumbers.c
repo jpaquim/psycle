@@ -155,7 +155,8 @@ void trackerlinenumbers_on_draw(TrackerLineNumbers* self, psy_ui_Graphics* g)
 			psy_audio_sequencecursor_seqoffset(&self->state->pv->cursor,
 			self->state->pv->sequence));
 		num_entry_lines = beatline_beat_to_line(&self->state->pv->beat_line,
-			patternviewstate_length(self->state->pv));		
+			patternviewstate_length(self->state->pv));
+		patidx = 0;
 	} else {
 		psy_audio_sequencetrackiterator_init(&ite);
 		psy_audio_sequence_begin(self->state->pv->sequence,			

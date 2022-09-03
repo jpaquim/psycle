@@ -92,12 +92,12 @@ void lenvelope_start(LEnvelope* self)
 {
 	self->lv_ = self->startpeak_;
 	self->stage_ = 0;
-	self->up_ = false;	
+	self->up_ = FALSE;	
 	lenvelope_calcstage(self, self->startpeak_,
 		*((double*)psy_table_at(&self->peaks_, 0)),
 		*((double*)psy_table_at(&self->times_, 0)),
 		*((lua_Integer*)psy_table_at(&self->types_, 0)));
-	self->susdone_ = false;
+	self->susdone_ = FALSE;
 }
 
 bool lenvelope_is_playing(const LEnvelope* self)
@@ -243,7 +243,7 @@ void lenvelope_release(LEnvelope* self)
 {
   if (lenvelope_is_playing(self)) {
     // int old = stage_;
-    self->susdone_ = true;
+    self->susdone_ = TRUE;
     if (self->stage_ != self->sus_) {
 		uintptr_t peak_size;
 						

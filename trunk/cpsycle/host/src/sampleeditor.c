@@ -332,8 +332,8 @@ static void sampleeditor_onstop(SampleEditor*, psy_ui_Component* sender);
 static void sampleeditor_onprocess(SampleEditor*, psy_ui_Component* sender);
 static void sampleeditor_oncrop(SampleEditor*, psy_ui_Component* sender);
 static void sampleeditor_ondelete(SampleEditor*, psy_ui_Component* sender);
-static void sampleeditor_onmasterworked(SampleEditor*, psy_audio_Machine*,
-	uintptr_t slot, psy_audio_BufferContext*);
+// static void sampleeditor_onmasterworked(SampleEditor*, psy_audio_Machine*,
+//	uintptr_t slot, psy_audio_BufferContext*);
 static void sampleeditor_onselectionchanged(SampleEditor*, SampleBox*,
 	WaveBox* wavebox);
 static void sampleeditor_onscrollzoom_customdraw(SampleEditor*,
@@ -766,11 +766,11 @@ void sampleeditor_on_destroyed(SampleEditor* self)
 	psy_signal_dispose(&self->signal_samplemodified);
 	psy_signal_disconnect(&self->workspace->signal_songchanged, self,
 		sampleeditor_onsongchanged);
-	if (workspace_song(self->workspace)) {
-		psy_signal_disconnect(&psy_audio_machines_master(
-			&workspace_song(self->workspace)->machines)->signal_worked, self,
-			sampleeditor_onmasterworked);
-	}
+	// if (workspace_song(self->workspace)) {
+	//	psy_signal_disconnect(&psy_audio_machines_master(
+	//		&workspace_song(self->workspace)->machines)->signal_worked, self,
+	//		sampleeditor_onmasterworked);
+	// }
 }
 
 void sampleeditor_setsample(SampleEditor* self, psy_audio_Sample* sample)
@@ -815,9 +815,9 @@ void sampleeditor_connectmachinessignals(SampleEditor* self,
 {
 	if (workspace && workspace->song &&
 			psy_audio_machines_master(&workspace->song->machines)) {
-		psy_signal_connect(
-			&psy_audio_machines_master(&workspace->song->machines)->signal_worked, self,
-			sampleeditor_onmasterworked);
+		// psy_signal_connect(
+		//	&psy_audio_machines_master(&workspace->song->machines)->signal_worked, self,
+		//	sampleeditor_onmasterworked);
 	}
 }
 
@@ -859,9 +859,9 @@ void sampleeditor_onstop(SampleEditor* self, psy_ui_Component* sender)
 	psy_audio_exclusivelock_leave();
 }
 
-void sampleeditor_onmasterworked(SampleEditor* self, psy_audio_Machine* machine,
-	uintptr_t slot, psy_audio_BufferContext* bc)
-{
+//void sampleeditor_onmasterworked(SampleEditor* self, psy_audio_Machine* machine,
+//	uintptr_t slot, psy_audio_BufferContext* bc)
+//{
 	/*psy_audio_BufferContext samplerbc;
 		
 	psy_audio_buffercontext_init(&samplerbc, self->samplerevents, 0,
@@ -874,9 +874,8 @@ void sampleeditor_onmasterworked(SampleEditor* self, psy_audio_Machine* machine,
 		psy_audio_patternentry_dispose(&self->samplerentry);
 	}
 	psy_list_free(self->samplerevents);
-	self->samplerevents = 0;*/
-	
-}
+	self->samplerevents = 0;*/	
+//}
 
 void sampleeditor_onprocess(SampleEditor* self, psy_ui_Component* sender)
 {
