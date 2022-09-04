@@ -510,7 +510,7 @@ static void newmachinesectionspane_on_language_changed(NewMachineSectionsPane*);
 static void newmachinesectionpane_on_mouse_down(NewMachineSectionsPane*,
 	psy_ui_MouseEvent*);
 static void newmachinesectionspane_onplugincachechanged(NewMachineSectionsPane*,
-	Workspace* sender);
+	PluginScanThread* sender);
 
 /* vtable */
 static psy_ui_ComponentVtable newmachinesectionspane_vtable;
@@ -579,8 +579,8 @@ void newmachinesectionspane_init(NewMachineSectionsPane* self,
 	psy_ui_component_set_align(&self->scroller_sections.component,
 		psy_ui_ALIGN_CLIENT);
 	/* connect */
-	psy_signal_connect(&workspace->signal_plugincachechanged, self,
-		newmachinesectionspane_onplugincachechanged);
+	psy_signal_connect(&workspace->pluginscanthread.signal_plugincachechanged,
+		self, newmachinesectionspane_onplugincachechanged);
 	newmachinesectionspane_buildsections(self);
 }
 
@@ -660,7 +660,7 @@ void newmachinesectionspane_buildsections(NewMachineSectionsPane* self)
 	psy_table_clear(&self->newmachinesections);
 	psy_ui_component_clear(&self->sections);
 	p = psy_property_begin(
-		self->workspace->plugincatcher.sections.sections);
+		self->workspace->player.plugincatcher.sections.sections);
 	selidx = psy_INDEX_INVALID;
 	for (i = 0; p != 0; p = p->next, ++i) {
 		psy_Property* property;
@@ -668,7 +668,7 @@ void newmachinesectionspane_buildsections(NewMachineSectionsPane* self)
 
 		property = (psy_Property*)psy_list_entry(p);			
 		section = newmachinesection_allocinit(&self->sections, property,
-			&self->filter, self->workspace);		
+			&self->filter, &self->workspace->player.plugincatcher);
 		if (section) {
 			psy_signal_connect(&section->pluginview.signal_selected,
 				self->newmachine, newmachine_onpluginselected);
@@ -682,7 +682,7 @@ void newmachinesectionspane_buildsections(NewMachineSectionsPane* self)
 				newmachinesectionspane_on_section_renamed);
 			psy_ui_component_set_align(&section->component, psy_ui_ALIGN_TOP);
 			if (p == psy_property_begin(
-					self->workspace->plugincatcher.sections.sections)) {
+					self->workspace->player.plugincatcher.sections.sections)) {
 				self->newmachine->selectedsection = section;
 				selidx = i;
 				psy_ui_component_add_style_state(&section->component,
@@ -705,7 +705,7 @@ void newmachinesectionspane_build_nav_sections(NewMachineSectionsPane* self)
 	psy_ui_tabbar_clear(&self->navsections);
 	psy_ui_tabbar_prevent_translation(&self->navsections);
 	self->newmachine->selectedsection = NULL;
-	p = psy_property_begin(self->workspace->plugincatcher.sections.sections);
+	p = psy_property_begin(self->workspace->player.plugincatcher.sections.sections);
 	for (; p != 0; p = p->next) {
 		psy_Property* section;
 
@@ -768,7 +768,7 @@ void newmachinesectionpane_on_mouse_down(NewMachineSectionsPane* self,
 }
 
 void newmachinesectionspane_onplugincachechanged(
-	NewMachineSectionsPane* self, Workspace* sender)
+	NewMachineSectionsPane* self, PluginScanThread* sender)
 {
 	newmachinesectionspane_buildsections(self);
 	newmachinefiltersbar_setfilter(&self->filtersbar, &self->filter);	
@@ -779,13 +779,13 @@ void newmachinesectionspane_onplugincachechanged(
 /* prototypes */
 static void newmachine_on_destroyed(NewMachine*);
 static NewMachineSectionsPane* newmachine_add_sections_pane(NewMachine*);
-static void newmachine_onplugincachechanged(NewMachine*, Workspace*);
+static void newmachine_onplugincachechanged(NewMachine*, PluginScanThread*);
 static void newmachine_on_mouse_down(NewMachine*, psy_ui_MouseEvent*);
 static void newmachine_on_focus(NewMachine*, psy_ui_Component* sender);
 static void newmachine_onrescan(NewMachine*, psy_ui_Component* sender);
-static void newmachine_onscanstart(NewMachine*, Workspace*);
-static void newmachine_onscanend(NewMachine*, Workspace*);
-static void newmachine_onpluginscanprogress(NewMachine*, Workspace*,
+static void newmachine_onscanstart(NewMachine*, PluginScanThread*);
+static void newmachine_onscanend(NewMachine*, PluginScanThread*);
+static void newmachine_onpluginscanprogress(NewMachine*, PluginScanThread*,
 	int progress);
 static void newmachine_onplugincategorychanged(NewMachine*, NewMachineDetail*
 	sender);
@@ -898,21 +898,21 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 		self, newmachine_onremovepane);	
 	/* connect to signals */
 	psy_signal_init(&self->signal_selected);	
-	psy_signal_connect(&workspace->signal_plugincachechanged, self,
-		newmachine_onplugincachechanged);
+	psy_signal_connect(&workspace->pluginscanthread.signal_plugincachechanged,
+		self, newmachine_onplugincachechanged);
 	psy_signal_connect(&self->component.signal_focus, self,
 		newmachine_on_focus);	
 	psy_signal_connect(&self->rescanbar.rescan.signal_clicked, self,
 		newmachine_onrescan);
-	psy_signal_connect(&workspace->signal_scanstart, self,
+	psy_signal_connect(&workspace->pluginscanthread.signal_scanstart, self,
 		newmachine_onscanstart);
-	psy_signal_connect(&workspace->signal_scanend, self,
+	psy_signal_connect(&workspace->pluginscanthread.signal_scanend, self,
 		newmachine_onscanend);
-	psy_signal_connect(&workspace->signal_scanprogress, self,
+	psy_signal_connect(&workspace->pluginscanthread.signal_scanprogress, self,
 		newmachine_onpluginscanprogress);
-	psy_signal_connect(&workspace->signal_scantaskstart, self,
+	psy_signal_connect(&workspace->pluginscanthread.signal_scantaskstart, self,
 		newmachine_onscantaskstart);
-	psy_signal_connect(&workspace->signal_scanfile, self,
+	psy_signal_connect(&workspace->pluginscanthread.signal_scanfile, self,
 		newmachine_onscanfile);
 	psy_signal_connect(&self->rescanbar.add.signal_clicked,
 		self, newmachine_on_add_selected_plugin);
@@ -1002,7 +1002,7 @@ void newmachine_checkselections(NewMachine* self, PluginsView* sender)
 	}	
 }
 
-void newmachine_onplugincachechanged(NewMachine* self, Workspace* sender)
+void newmachine_onplugincachechanged(NewMachine* self, PluginScanThread* sender)
 {	
 	newmachine_updateplugins(self);
 	newmachinedetail_reset(&self->detail);	
@@ -1026,26 +1026,26 @@ void newmachine_on_focus(NewMachine* self, psy_ui_Component* sender)
 
 void newmachine_onrescan(NewMachine* self, psy_ui_Component* sender)
 {	
-	if (!psy_audio_plugincatcher_scanning(&self->workspace->plugincatcher)) {
+	if (!psy_audio_plugincatcher_scanning(&self->workspace->player.plugincatcher)) {
 		psy_ui_label_set_text(&self->scanview.processview.scanfile, "");		
 		workspace_scan_plugins(self->workspace);
 	}
 }
 
-void newmachine_onpluginscanprogress(NewMachine* self, Workspace* workspace,
+void newmachine_onpluginscanprogress(NewMachine* self, PluginScanThread* sender,
 	int progress)
 {	
 	pluginscanstatusview_inc_plugin_count(
 		&self->scanview.processview.statusview);	
 }
 
-void newmachine_onscanstart(NewMachine* self, Workspace* sender)
+void newmachine_onscanstart(NewMachine* self, PluginScanThread* sender)
 {
 	pluginscanview_reset(&self->scanview);
 	psy_ui_notebook_select(&self->notebook, 1);	
 }
 
-void newmachine_onscanend(NewMachine* self, Workspace* sender)
+void newmachine_onscanend(NewMachine* self, PluginScanThread* sender)
 {	
 	pluginscanview_scanstop(&self->scanview);
 	psy_ui_notebook_select(&self->notebook, 0);	
@@ -1130,7 +1130,7 @@ void newmachine_onplugincategorychanged(NewMachine* self,
 	psy_Property* all;
 
 	all = psy_audio_pluginsections_section_plugins(
-		&self->workspace->plugincatcher.sections, "all");
+		&self->workspace->player.plugincatcher.sections, "all");
 	if (self->selectedplugin && all) {
 		psy_Property* plugin;
 
@@ -1188,11 +1188,11 @@ void newmachine_oncreatesection(NewMachine* self, psy_ui_Component* sender)
 
 	psy_snprintf(sectionkey, 64, "section%d", (int)self->newsectioncount);
 	while (psy_audio_pluginsections_section(
-			&self->workspace->plugincatcher.sections, sectionkey)) {
+			&self->workspace->player.plugincatcher.sections, sectionkey)) {
 		++self->newsectioncount;
 		psy_snprintf(sectionkey, 64, "section%d", (int)self->newsectioncount);
 	}
-	psy_audio_pluginsections_add(&self->workspace->plugincatcher.sections,
+	psy_audio_pluginsections_add(&self->workspace->player.plugincatcher.sections,
 		sectionkey, NULL);
 	++self->newsectioncount;
 	if (self->curr_sections_pane) {
@@ -1207,7 +1207,7 @@ void newmachine_onaddtosection(NewMachine* self, psy_ui_Component* sender)
 
 		machineinfo_init(&macinfo);
 		newmachine_selectedmachineinfo(self, &macinfo);
-		psy_audio_pluginsections_add(&self->workspace->plugincatcher.sections,
+		psy_audio_pluginsections_add(&self->workspace->player.plugincatcher.sections,
 			psy_property_key(self->selectedsection->section), &macinfo);
 		self->selectedplugin = NULL;
 		newmachinesection_find_plugins(self->selectedsection);
@@ -1220,7 +1220,7 @@ void newmachine_onremovefromsection(NewMachine* self, psy_ui_Component* sender)
 {
 	if (newmachine_checkplugin(self) && self->curr_sections_pane) {
 		psy_audio_pluginsections_remove(
-			&self->workspace->plugincatcher.sections,
+			&self->workspace->player.plugincatcher.sections,
 			self->selectedsection->section,
 			psy_property_key(self->selectedplugin));
 		self->selectedplugin = NULL;
@@ -1243,7 +1243,7 @@ void newmachine_onremovesection(NewMachine* self, psy_ui_Component* sender)
 			return;
 		}
 		psy_audio_pluginsections_removesection(
-			&self->workspace->plugincatcher.sections,
+			&self->workspace->player.plugincatcher.sections,
 			self->selectedsection->section);
 		newmachinesectionspane_buildsections(self->curr_sections_pane);		
 	}
@@ -1254,7 +1254,7 @@ void newmachine_onclearsection(NewMachine* self, psy_ui_Component* sender)
 	if (newmachine_checksection(self) && self->curr_sections_pane) {
 		self->selectedplugin = NULL;
 		psy_audio_pluginsections_clear_plugins(
-			&self->workspace->plugincatcher.sections,
+			&self->workspace->player.plugincatcher.sections,
 			newmachinesection_key(self->selectedsection));
 		newmachinesectionspane_buildsections(self->curr_sections_pane);		
 	}

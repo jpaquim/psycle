@@ -39,7 +39,7 @@ static void machinebar_oninstrumentnamechanged(MachineBar*, psy_ui_Component* se
 static void machinebar_oninstrumentinsert(MachineBar*, psy_audio_Instruments* sender, uintptr_t slot);
 static void machinebar_oninstrumentslotchanged(MachineBar* self, psy_audio_Instrument* sender,
 	const psy_audio_InstrumentIndex* slot);
-static void machinebar_onsongchanged(MachineBar*, Workspace* sender);
+static void machinebar_on_song_changed(MachineBar*, psy_audio_Player* sender);
 static void machinebar_connectsongsignals(MachineBar*);
 static void machinebar_connectinstrumentsignals(MachineBar*);
 static void machinebar_clearmachinebox(MachineBar* self);
@@ -124,8 +124,8 @@ void machinebar_init(MachineBar* self, psy_ui_Component* parent, Workspace* work
 	psy_ui_combobox_select(&self->instparambox, 0);
 	psy_signal_connect(&self->instparambox.signal_selchanged, self,
 		machinebar_oninstparamboxselchange);
-	psy_signal_connect(&workspace->signal_songchanged, self,
-		machinebar_onsongchanged);
+	psy_signal_connect(&workspace->player.signal_song_changed, self,
+		machinebar_on_song_changed);
 	machinebar_connectsongsignals(self);		
 }
 
@@ -416,11 +416,14 @@ void machinebar_oninstparamboxselchange(MachineBar* self, psy_ui_Component* send
 	}	
 }
 
-void machinebar_onsongchanged(MachineBar* self, Workspace* sender)
+void machinebar_on_song_changed(MachineBar* self, psy_audio_Player* sender)
 {	
-	if (sender->song) {
-		self->machines = &sender->song->machines;
-		self->instruments = &sender->song->instruments;
+	psy_audio_Song* song;
+	
+	song = psy_audio_player_song(sender);
+	if (song) {
+		self->machines = &song->machines;
+		self->instruments = &song->instruments;
 	} else {
 		self->machines = NULL;
 		self->instruments = NULL;

@@ -318,3 +318,10 @@ void psy_audio_eventdrivers_sendcmd(psy_audio_EventDrivers* self,
 	psy_audio_cmddriver_setcmd(self->cmddriver, section, cmd);
 	psy_signal_emit(&self->signal_input, self->cmddriver, 0);
 }
+
+void psy_audio_eventdrivers_connect(psy_audio_EventDrivers* self, void* context,
+	fp_eventdriver_input fp)
+{
+	psy_signal_connect(&self->signal_input, context, fp);
+}
+

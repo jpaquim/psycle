@@ -435,10 +435,7 @@ void machinesbox_setmachines(MachinesBox* self, psy_audio_Machines* machines)
 
 void machinesbox_on_key_down(MachinesBox* self, psy_ui_Component* sender, psy_ui_KeyboardEvent* ev)
 {
-	psy_ui_keyboardevent_stop_propagation(ev);
-	if (psy_ui_keyboardevent_keycode(ev) == psy_ui_KEY_ESCAPE) {
-		workspace_toggle_gear(self->workspace);		
-	}
+	psy_ui_keyboardevent_stop_propagation(ev);	
 }
 
 void machinesbox_onkeyup(MachinesBox* self, psy_ui_Component* sender , psy_ui_KeyboardEvent* ev)

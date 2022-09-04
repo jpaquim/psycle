@@ -86,7 +86,7 @@ void oscilloscope_init_memory(Oscilloscope* self)
 
 void oscilloscope_on_destroyed(Oscilloscope* self)
 {
-	psy_signal_disconnect_context(&self->workspace->signal_songchanged, self);	
+	// psy_signal_disconnect_context(&self->player.signal_song_changed, self);	
 	if (self->hold_buffer) {
 		psy_audio_buffer_deallocate(self->hold_buffer);
 	}

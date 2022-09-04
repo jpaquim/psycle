@@ -31,17 +31,17 @@ typedef struct NewMachineSection {
 	psy_ui_TextArea name;
 	PluginsView pluginview;	
 	/* references */
-	psy_Property* section;	
-	Workspace* workspace;
+	psy_Property* section;
 	PluginFilter* filter;
+	psy_audio_PluginCatcher* plugin_catcher;
 } NewMachineSection;
 
 void newmachinesection_init(NewMachineSection* self, psy_ui_Component* parent,
-	psy_Property* section, PluginFilter* filter, Workspace*);
+	psy_Property* section, PluginFilter* filter, psy_audio_PluginCatcher*);
 
 NewMachineSection* newmachinesection_alloc(void);
 NewMachineSection* newmachinesection_allocinit(psy_ui_Component* parent,
-	psy_Property* section, PluginFilter* filter, Workspace*);
+	psy_Property* section, PluginFilter* filter, psy_audio_PluginCatcher*);
 
 void newmachinesection_find_plugins(NewMachineSection*);
 const char* newmachinesection_key(const NewMachineSection*);

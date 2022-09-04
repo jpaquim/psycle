@@ -42,7 +42,7 @@ void samplesviewbuttons_init(SamplesViewButtons* self, psy_ui_Component* parent,
 /* SamplesSongImportView */
 /* prototypes */
 static void samplessongimportview_on_destroyed(SamplesSongImportView*);
-static void samplessongimportview_onloadsong(SamplesSongImportView*,
+static void samplessongimportview_on_load_song_button(SamplesSongImportView*,
 	psy_ui_Component* sender);
 static void samplessongimportview_oncopy(SamplesSongImportView*,
 	psy_ui_Component* sender);
@@ -93,7 +93,7 @@ void samplessongimportview_init(SamplesSongImportView* self,
 	psy_ui_button_init(&self->browse, &self->header);
 	psy_ui_button_set_text(&self->browse, "Select a song");
 	psy_signal_connect(&self->browse.signal_clicked, self,
-		samplessongimportview_onloadsong);		
+		samplessongimportview_on_load_song_button);		
 	/* bar */
 	psy_ui_component_init(&self->bar, &self->component, NULL);
 	psy_ui_component_set_align(&self->bar, psy_ui_ALIGN_LEFT);		
@@ -127,22 +127,16 @@ void samplessongimportview_on_destroyed(SamplesSongImportView* self)
 	}	
 }
 
-void samplessongimportview_on_load(SamplesSongImportView* self,
-	psy_Property* sender)
-{
-	samplessongimportview_load_song(self, psy_property_item_str(sender));
-	workspace_select_view(self->workspace, viewindex_make(VIEW_ID_SAMPLESVIEW,
-		0, 0, psy_INDEX_INVALID));
-}
 
-void samplessongimportview_onloadsong(SamplesSongImportView* self,
+void samplessongimportview_on_load_song_button(SamplesSongImportView* self,
 	psy_ui_Component* sender)
 {
-	if (keyboardmiscconfig_ft2fileexplorer(psycleconfig_misc(
+	if (keyboardmiscconfig_ft2_file_view(psycleconfig_misc(
 			workspace_conf(self->workspace)))) {
-		self->workspace->fileview->property = &self->song_load;
-		workspace_select_view(self->workspace, viewindex_make(VIEW_ID_FILEVIEW,
-			0, 0, psy_INDEX_INVALID));
+		fileview_set_callbacks(self->workspace->fileview,
+			&self->song_load, NULL);		
+		workspace_select_view(self->workspace, viewindex_make(
+			VIEW_ID_FILEVIEW, 0, 0, psy_INDEX_INVALID));
 	} else {
 		
 		psy_ui_OpenDialog dialog;
@@ -157,6 +151,14 @@ void samplessongimportview_onloadsong(SamplesSongImportView* self,
 		}
 		psy_ui_opendialog_dispose(&dialog);
 	}
+}
+
+void samplessongimportview_on_load(SamplesSongImportView* self,
+	psy_Property* sender)
+{
+	samplessongimportview_load_song(self, psy_property_item_str(sender));
+	workspace_select_view(self->workspace, viewindex_make(VIEW_ID_SAMPLESVIEW,
+		0, 0, psy_INDEX_INVALID));
 }
 
 void samplessongimportview_load_song(SamplesSongImportView* self,
@@ -360,6 +362,7 @@ void samplesheaderview_onnextsample(SamplesHeaderView* self, psy_ui_Component* s
 }
 
 /* GeneralView */
+
 /* prototypes */
 static void generalview_setsample(SamplesGeneralView*, psy_audio_Sample*);
 static void generalview_fillpandescription(SamplesGeneralView*, char* txt);
@@ -368,6 +371,7 @@ static void generalview_ontweak(SamplesGeneralView*, psy_ui_Slider*, float value
 static void generalview_onvalue(SamplesGeneralView*, psy_ui_Slider*, float* value);
 static void generalview_updatetext(SamplesGeneralView*);
 static void generalview_updatesliders(SamplesGeneralView*);
+
 /* implementation */
 void samplesgeneralview_init(SamplesGeneralView* self, psy_ui_Component* parent,
 	Workspace* workspace)
@@ -1029,7 +1033,8 @@ static void samplesview_load_sample(SamplesView*, const char* path);
 static void samplesview_onsavesample(SamplesView*, psy_ui_Component* sender);
 static void samplesview_ondeletesample(SamplesView*, psy_ui_Component* sender);
 static void samplesview_onduplicatesample(SamplesView*, psy_ui_Component* sender);
-static void samplesview_onsongchanged(SamplesView*, Workspace* sender);
+static void samplesview_on_song_changed(SamplesView*,
+	psy_audio_Player* sender);
 static void samplesview_oninstrumentslotchanged(SamplesView*,
 	psy_audio_Instrument* sender, const psy_audio_InstrumentIndex* slot);
 static uintptr_t samplesview_freesampleslot(SamplesView*, uintptr_t startslot,
@@ -1151,8 +1156,8 @@ void samplesview_init(SamplesView* self, psy_ui_Component* parent,
 	sampleeditor_init(&self->sampleeditor, &self->clientnotebook.component,
 		workspace);
 	psy_ui_notebook_select(&self->clientnotebook, 0);
-	psy_signal_connect(&workspace->signal_songchanged, self,
-		samplesview_onsongchanged);
+	psy_signal_connect(&workspace->player.signal_song_changed, self,
+		samplesview_on_song_changed);
 	psy_ui_notebook_select(&self->clientnotebook, 0);
 	psy_ui_notebook_connect_controller(&self->clientnotebook,
 		&self->clienttabbar.signal_change);
@@ -1242,11 +1247,12 @@ void samplesview_on_load_sample(SamplesView* self, psy_Property* sender)
 
 void samplesview_onloadsamplebtn(SamplesView* self, psy_ui_Component* sender)
 {
-	if (keyboardmiscconfig_ft2fileexplorer(psycleconfig_misc(
+	if (keyboardmiscconfig_ft2_file_view(psycleconfig_misc(
 			workspace_conf(self->workspace)))) {
-		self->workspace->fileview->property = &self->sample_load;
-		workspace_select_view(self->workspace, viewindex_make(VIEW_ID_FILEVIEW,
-			0, 0, psy_INDEX_INVALID));
+		fileview_set_callbacks(self->workspace->fileview,
+			&self->sample_load, NULL);
+		workspace_select_view(self->workspace, viewindex_make(
+			VIEW_ID_FILEVIEW, 0, 0, psy_INDEX_INVALID));
 	} else {		
 		psy_ui_OpenDialog dialog;
 		static char filter[] =
@@ -1382,7 +1388,7 @@ void samplesview_onsamplemodified(SamplesView* self, SampleEditor* sender, psy_a
 	samplesloopview_setsample(&self->waveloop, sample);
 }
 
-void samplesview_onsongchanged(SamplesView* self, Workspace* sender)
+void samplesview_on_song_changed(SamplesView* self, psy_audio_Player* sender)
 {
 	if (sender->song) {
 		psy_signal_connect(&sender->song->instruments.signal_slotchange, self,

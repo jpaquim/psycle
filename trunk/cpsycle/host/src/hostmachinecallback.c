@@ -20,7 +20,6 @@
 #endif
 
 /* prototypes */
-static psy_audio_MachineFactory* hostmachinecallback_on_machinefactory(HostMachineCallback*);
 static bool hostmachinecallback_on_machine_file_select_load(HostMachineCallback*,
 	char filter[], char inoutName[]);
 static bool hostmachinecallback_on_machine_file_select_save(HostMachineCallback*,
@@ -42,10 +41,7 @@ static void hostmachinecallbackvtable_init(HostMachineCallback* self)
 	assert(self);
 
 	if (!hostmachinecallback_vtable_initialized) {
-		hostmachinecallback_vtable = *self->machinecallback.vtable;
-		hostmachinecallback_vtable.machinefactory =
-			(fp_mcb_machinefactory)
-			hostmachinecallback_on_machinefactory;
+		hostmachinecallback_vtable = *self->machinecallback.vtable;		
 		hostmachinecallback_vtable.fileselect_load =
 			(fp_mcb_fileselect_load)
 			hostmachinecallback_on_machine_file_select_load;
@@ -80,23 +76,11 @@ void hostmachinecallback_init(HostMachineCallback* self,
 	assert(signal_machineeditresize);
 
 	psy_audio_machinecallback_init(&self->machinecallback);
-	hostmachinecallbackvtable_init(self);
-	self->machine_factory = NULL;
+	hostmachinecallbackvtable_init(self);	
 	self->dir_config = dir_config;
 	self->logger = NULL;
 	self->signal_machineeditresize = signal_machineeditresize;
 	self->signal_buschanged = signal_buschanged;
-}
-
-void hostmachinecallback_set_machine_factory(HostMachineCallback* self,
-	psy_audio_MachineFactory* factory)
-{
-	self->machine_factory = factory;
-}
-
-psy_audio_MachineFactory* hostmachinecallback_on_machinefactory(HostMachineCallback* self)
-{
-	return self->machine_factory;
 }
 
 bool hostmachinecallback_on_machine_file_select_load(HostMachineCallback* self, char filter[],

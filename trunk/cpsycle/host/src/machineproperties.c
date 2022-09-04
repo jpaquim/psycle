@@ -13,8 +13,8 @@
 #include "../../detail/portable.h"
 
 /* prototypes */
-static void machineproperties_onsongchanged(MachineProperties*,
-	Workspace* sender);
+static void machineproperties_on_song_changed(MachineProperties*,
+	psy_audio_Player* sender);
 static void machineproperties_connectsongsignals(MachineProperties*);
 static void machineproperties_ontogglebus(MachineProperties*,
 	psy_ui_Component* sender);
@@ -86,8 +86,8 @@ void machineproperties_init(MachineProperties* self, psy_ui_Component* parent,
 		machineproperties_onhide);
 	psy_ui_button_prevent_translation(&self->cancel);
 	psy_ui_button_set_text(&self->cancel, "X");
-	psy_signal_connect(&self->workspace->signal_songchanged, self,
-		machineproperties_onsongchanged);
+	psy_signal_connect(&self->workspace->player.signal_song_changed, self,
+		machineproperties_on_song_changed);
 	machineproperties_connectsongsignals(self);
 	psy_ui_component_prevent_input(&self->component, psy_ui_RECURSIVE);
 	psy_ui_component_enable_input(&self->component, psy_ui_NONE_RECURSIVE);
@@ -189,11 +189,17 @@ void machineproperties_oneditreject(MachineProperties* self,
 	psy_ui_component_set_focus(psy_ui_component_parent(&self->component));
 }
 
-void machineproperties_onsongchanged(MachineProperties* self, Workspace* sender)
+void machineproperties_on_song_changed(MachineProperties* self,
+	psy_audio_Player* sender)
 {
-	self->machines = (workspace_song(sender))
-		? &workspace_song(sender)->machines
-		: NULL;
+	psy_audio_Song* song;
+	
+	song = psy_audio_player_song(sender);
+	if (song) {
+		self->machines = &song->machines;
+	} else {
+		self->machines = NULL;
+	}
 	machineproperties_setmachine(self, NULL);
 	machineproperties_connectsongsignals(self);
 }

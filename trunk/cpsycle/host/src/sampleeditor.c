@@ -325,7 +325,8 @@ static void sampleeditorplaybar_initalign(SampleEditorPlayBar*);
 static void sampleeditor_initsampler(SampleEditor*);
 static void sampleeditor_on_destroy(SampleEditor*, psy_ui_Component* sender);
 static void sampleeditor_onzoom(SampleEditor*, psy_ui_Component* sender);
-static void sampleeditor_onsongchanged(SampleEditor*, Workspace* sender);
+static void sampleeditor_on_song_changed(SampleEditor*,
+	psy_audio_Player* sender);
 static void sampleeditor_connectmachinessignals(SampleEditor*, Workspace*);
 static void sampleeditor_onplay(SampleEditor*, psy_ui_Component* sender);
 static void sampleeditor_onstop(SampleEditor*, psy_ui_Component* sender);
@@ -741,8 +742,8 @@ void sampleeditor_init(SampleEditor* self, psy_ui_Component* parent,
 	psy_ui_component_set_preferred_size(&self->zoom.component,
 		psy_ui_size_make_em(0.0, 2.0));	
 	psy_signal_connect(&self->zoom.signal_zoom, self, sampleeditor_onzoom);
-	psy_signal_connect(&workspace->signal_songchanged, self,
-		sampleeditor_onsongchanged);	
+	psy_signal_connect(&workspace->player.signal_song_changed, self,
+		sampleeditor_on_song_changed);	
 	sampleeditor_initsampler(self);
 	sampleeditor_connectmachinessignals(self, workspace);	
 	psy_signal_init(&self->signal_samplemodified);	
@@ -764,8 +765,8 @@ void sampleeditor_on_destroyed(SampleEditor* self)
 	psy_audio_machine_dispose(&self->sampler.custommachine.machine);	
 	psy_audio_buffer_dispose(&self->samplerbuffer);	
 	psy_signal_dispose(&self->signal_samplemodified);
-	psy_signal_disconnect(&self->workspace->signal_songchanged, self,
-		sampleeditor_onsongchanged);
+	psy_signal_disconnect(&self->workspace->player.signal_song_changed, self,
+		sampleeditor_on_song_changed);
 	// if (workspace_song(self->workspace)) {
 	//	psy_signal_disconnect(&psy_audio_machines_master(
 	//		&workspace_song(self->workspace)->machines)->signal_worked, self,
@@ -804,9 +805,9 @@ void sampleeditor_onzoom(SampleEditor* self, psy_ui_Component* sender)
 	psy_ui_component_invalidate(&self->header.component);
 }
 
-void sampleeditor_onsongchanged(SampleEditor* self, Workspace* sender)
+void sampleeditor_on_song_changed(SampleEditor* self, psy_audio_Player* sender)
 {
-	sampleeditor_connectmachinessignals(self, sender);
+	sampleeditor_connectmachinessignals(self, self->workspace);
 	sampleeditorbar_clearselection(&self->sampleeditortbar);
 }
 

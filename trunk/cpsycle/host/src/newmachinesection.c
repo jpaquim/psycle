@@ -12,7 +12,7 @@
 /* platform */
 #include "../../detail/portable.h"
 
-/* NewMachineSection */
+
 /* prototypes */
 static void newmachinesection_on_destroyed(NewMachineSection*);
 static void newmachinesection_on_mouse_down(NewMachineSection*,
@@ -21,7 +21,8 @@ static void newmachinesection_on_edit_name_accept(NewMachineSection*, psy_ui_Tex
 static void newmachinesection_on_drag_over(NewMachineSection*, psy_ui_DragEvent*);
 static void newmachinesection_on_drop(NewMachineSection*, psy_ui_DragEvent*);
 static void newmachinesection_on_language_changed(NewMachineSection*);
-// vtable
+
+/* vtable */
 static psy_ui_ComponentVtable newmachinesection_vtable;
 static bool newmachinesection_vtable_initialized = FALSE;
 
@@ -48,11 +49,15 @@ static void newmachinesection_vtable_init(NewMachineSection* self)
 	}
 	self->component.vtable = &newmachinesection_vtable;
 }
-// implementation
+
+/* implementation */
 void newmachinesection_init(NewMachineSection* self, psy_ui_Component* parent,
 	psy_Property* section, PluginFilter* filter,
-	Workspace* workspace)
+	psy_audio_PluginCatcher* plugin_catcher)
 {
+	assert(self);
+	assert(plugin_catcher);
+	
 	psy_ui_component_init(&self->component, parent, NULL);
 	newmachinesection_vtable_init(self);	
 	psy_signal_init(&self->signal_selected);
@@ -61,9 +66,9 @@ void newmachinesection_init(NewMachineSection* self, psy_ui_Component* parent,
 	psy_ui_component_set_style_types(&self->component,
 		STYLE_NEWMACHINE_SECTION, psy_INDEX_INVALID,
 		STYLE_NEWMACHINE_SECTION_SELECTED, psy_INDEX_INVALID);	
-	self->section  = section;	
-	self->workspace = workspace;
+	self->section  = section;		
 	self->filter = filter;
+	self->plugin_catcher = plugin_catcher;
 	psy_ui_component_init(&self->header, &self->component, NULL);
 	psy_ui_component_set_align(&self->header, psy_ui_ALIGN_TOP);
 	psy_ui_component_set_style_type(&self->header,
@@ -94,14 +99,14 @@ NewMachineSection* newmachinesection_alloc(void)
 }
 
 NewMachineSection* newmachinesection_allocinit(psy_ui_Component* parent,
-	psy_Property* property, PluginFilter* filter,
-	Workspace* workspace)
+	psy_Property* property, PluginFilter* filter, psy_audio_PluginCatcher*
+		plugin_catcher)
 {
 	NewMachineSection* rv;
 
 	rv = newmachinesection_alloc();
 	if (rv) {
-		newmachinesection_init(rv, parent, property, filter, workspace);
+		newmachinesection_init(rv, parent, property, filter, plugin_catcher);
 		psy_ui_component_deallocate_after_destroyed(&rv->component);
 	}
 	return rv;
@@ -202,7 +207,7 @@ void newmachinesection_on_drag_over(NewMachineSection* self, psy_ui_DragEvent* e
 
 			plugin = (psy_Property*)p->entry;
 			if (!psy_audio_pluginsections_pluginbyid(
-					&self->workspace->plugincatcher.sections, self->section,
+					&self->plugin_catcher->sections, self->section,
 					psy_property_key(plugin))) {
 				ev->mouse.event.default_prevented_ = TRUE;
 				break;
@@ -220,7 +225,7 @@ void newmachinesection_on_drop(NewMachineSection* self, psy_ui_DragEvent* ev)
 		bool drop;
 
 		drop = FALSE;
-		sections = &self->workspace->plugincatcher.sections;
+		sections = &self->plugin_catcher->sections;
 		for (p = psy_property_begin(ev->dataTransfer); p != NULL; p = p->next) {
 			psy_Property* plugindrag;
 			const char* plugid;
@@ -237,8 +242,8 @@ void newmachinesection_on_drop(NewMachineSection* self, psy_ui_DragEvent* ev)
 					plugin = psy_audio_pluginsections_pluginbyid(sections, section,
 						plugid);
 				} else {
-					plugin = psy_audio_plugincatcher_at(&self->workspace->plugincatcher,
-					plugid);
+					plugin = psy_audio_plugincatcher_at(self->plugin_catcher,
+						plugid);
 				}
 				if (plugin) {
 					plugin = psy_audio_pluginsections_add_property(sections,

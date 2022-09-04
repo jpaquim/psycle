@@ -475,7 +475,7 @@ static void seqeditproperties_on_item_selected(SeqEditProperties*,
 static void seqeditproperties_on_track_reposition(SeqEditProperties*,
 	psy_audio_Sequence* sender, uintptr_t trackidx);
 static void seqeditproperties_on_song_changed(SeqEditProperties*,
-	Workspace* sender);
+	psy_audio_Player* sender);
 static void seqeditproperties_connect_song(SeqEditProperties*);
 static void seqeditproperties_set_caption(SeqEditProperties*, const char* text);
 
@@ -520,8 +520,9 @@ void seqeditproperties_init(SeqEditProperties* self, psy_ui_Component* parent,
 	seqeditproperties_select(self, SEQEDITITEM_NONE, 0, 0);
 	psy_signal_connect(&self->state->signal_itemselected, self,
 		seqeditproperties_on_item_selected);
-	psy_signal_connect(&self->state->cmds->workspace->signal_songchanged, self,
-		seqeditproperties_on_song_changed);
+	psy_signal_connect(
+		&self->state->cmds->workspace->player.signal_song_changed,
+		self, seqeditproperties_on_song_changed);
 	seqeditproperties_connect_song(self);
 	psy_ui_notebook_select(&self->notebook, 0);
 }
@@ -558,7 +559,7 @@ void seqeditproperties_on_item_selected(SeqEditProperties* self,
 }
 
 void seqeditproperties_on_song_changed(SeqEditProperties* self,
-	Workspace* sender)
+	psy_audio_Player* sender)
 {
 	seqeditproperties_connect_song(self);
 	seqeditproperties_select(self, SEQEDITITEM_NONE, 0, 0);

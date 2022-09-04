@@ -87,7 +87,7 @@ typedef int (*fp_mcb_onmessage)(void*);
 typedef void (*fp_mcb_buschanged)(void*);
 typedef const char* (*fp_mcb_language)(void*);
 
-typedef struct  {
+typedef struct {
 	fp_mcb_samplerate samplerate;
 	fp_mcb_bpm bpm;
 	fp_mcb_sequencertime sequencertime;
@@ -123,7 +123,7 @@ typedef struct psy_audio_MachineCallback {
 } psy_audio_MachineCallback;
 
 void psy_audio_machinecallback_init(psy_audio_MachineCallback*);
-void psy_audio_machinecallback_setplayer(psy_audio_MachineCallback*,
+void psy_audio_machinecallback_set_player(psy_audio_MachineCallback*,
 	struct psy_audio_Player*);
 void psy_audio_machinecallback_set_song(psy_audio_MachineCallback*,
 	struct psy_audio_Song*);

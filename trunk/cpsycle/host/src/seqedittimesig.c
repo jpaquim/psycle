@@ -288,7 +288,8 @@ static void seqedittimesigs_onpreferredsize(SeqEditTimeSigs*,
 static void seqedittimesigs_editnode(SeqEditTimeSigs*, psy_audio_PatternNode*,
 	psy_ui_RealPoint);
 static void seqedittimesigs_onalign(SeqEditTimeSigs*);
-static void seqedittimesigs_onsongchanged(SeqEditTimeSigs*, Workspace* sender);
+static void seqedittimesigs_on_song_changed(SeqEditTimeSigs*,
+	psy_audio_Player* sender);
 static void seqedittimesigs_build(SeqEditTimeSigs*);
 static void seqedittimesigs_ontimesigchanged(SeqEditTimeSigs*, SeqEditState* sender);
 static void seqedittimesigs_remove(SeqEditTimeSigs*, psy_audio_PatternNode*);
@@ -342,8 +343,9 @@ void seqedittimesigs_init(SeqEditTimeSigs* self, psy_ui_Component* parent,
 	self->state = state;		
 	self->entries = NULL;	
 	seqedittimesigstate_init(&self->timesigstate);
-	psy_signal_connect(&self->state->cmds->workspace->signal_songchanged, self,
-		seqedittimesigs_onsongchanged);
+	psy_signal_connect(
+		&self->state->cmds->workspace->player.signal_song_changed, self,
+		seqedittimesigs_on_song_changed);
 	seqedittimesigs_build(self);
 	psy_signal_connect(&self->state->signal_timesigchanged, self,
 		seqedittimesigs_ontimesigchanged);
@@ -509,7 +511,8 @@ void seqedittimesigs_onalign(SeqEditTimeSigs* self)
 	}
 }
 
-void seqedittimesigs_onsongchanged(SeqEditTimeSigs* self, Workspace* sender)
+void seqedittimesigs_on_song_changed(SeqEditTimeSigs* self,
+	psy_audio_Player* sender)
 {
 	seqedittimesigs_build(self);
 	psy_ui_component_invalidate(&self->component);

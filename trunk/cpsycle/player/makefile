@@ -2,6 +2,6 @@ SUBDIRS := ../container/src ../file/src ../dsp/src ../audio/src ../player/src ..
 
 all: $(SUBDIRS)
 $(SUBDIRS):
-	$(MAKE) -C $@
+	$(MAKE) -C $@	
 
 .PHONY: all $(SUBDIRS)

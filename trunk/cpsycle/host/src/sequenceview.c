@@ -12,7 +12,7 @@
 
 
 /* prototypes */
-static void seqview_on_song_changed(SeqView*, Workspace* sender);
+static void seqview_on_song_changed(SeqView*, psy_audio_Player* sender);
 static void seqview_on_sequence_select(SeqView*,
 	psy_audio_SequenceSelection*, psy_audio_OrderIndex*);
 static void seqview_on_track_reposition(SeqView*,
@@ -23,7 +23,7 @@ static void seqview_on_pattern_names(SeqView*, psy_Property*);
 static void seqview_on_scroll(SeqView*, psy_ui_Component* sender);
 static void seqview_rebuild(SeqView*);
 static void seqview_on_edit_seqlist(SeqView*, psy_ui_Button* sender);
-static void seqview_connect_song(SeqView*, Workspace*);
+static void seqview_connect_song(SeqView*, psy_audio_Song*);
 static void seqview_on_track_insert(SeqView*, psy_audio_Sequence* sender,
 	uintptr_t trackidx);
 static void seqview_on_track_remove(SeqView*, psy_audio_Sequence* sender,
@@ -84,10 +84,10 @@ void seqview_init(SeqView* self, psy_ui_Component* parent, Workspace* workspace)
 	/* duration*/
 	seqviewduration_init(&self->duration, seqview_base(self), workspace);
 	psy_ui_component_set_align(&self->duration.component, psy_ui_ALIGN_BOTTOM);	
-	psy_signal_connect(&workspace->signal_songchanged, self,
+	psy_signal_connect(&workspace->player.signal_song_changed, self,
 		seqview_on_song_changed);		
 	/* connect song */
-	seqview_connect_song(self, workspace);
+	seqview_connect_song(self, workspace_song(workspace));
 	/* connect config */	
 	seqview_on_pattern_names(self, generalconfig_property(
 		psycleconfig_general(workspace_conf(workspace)),
@@ -119,24 +119,24 @@ void seqview_idle(SeqView* self)
 	seqviewduration_idle(&self->duration);
 }
 
-void seqview_on_song_changed(SeqView* self, Workspace* sender)
+void seqview_on_song_changed(SeqView* self, psy_audio_Player* sender)
 {
 	assert(self);
 	
 	sequencecmds_update(&self->cmds);
-	seqviewlist_set_song(&self->listview, workspace_song(sender));
-	seqview_connect_song(self, sender);	
+	seqviewlist_set_song(&self->listview, psy_audio_player_song(sender));	
+	seqview_connect_song(self, psy_audio_player_song(sender));	
 	seqview_rebuild(self);
 }
 
-void seqview_connect_song(SeqView* self, Workspace* workspace)
+void seqview_connect_song(SeqView* self, psy_audio_Song* song)
 {	
-	if (workspace_song(workspace)) {
+	if (song) {
 		psy_audio_Sequence* sequence;
 		psy_audio_Patterns* patterns;
 		
-		sequence = psy_audio_song_sequence(workspace_song(workspace));
-		patterns = psy_audio_song_patterns(workspace_song(workspace));
+		sequence = psy_audio_song_sequence(song);
+		patterns = psy_audio_song_patterns(song);
 		psy_signal_connect(&patterns->signal_namechanged,
 			&self->listview, seqviewlist_on_pattern_name_changed);		
 		psy_signal_connect(&sequence->signal_trackreposition,

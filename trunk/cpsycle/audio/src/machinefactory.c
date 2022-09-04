@@ -33,12 +33,14 @@
 #define _MAX_PATH 4096
 #endif
 
-void psy_audio_machinefactory_init(psy_audio_MachineFactory* self)
+void psy_audio_machinefactory_init(psy_audio_MachineFactory* self,
+	psy_audio_MachineCallback* callback,
+	psy_audio_PluginCatcher* catcher)
 {
 	assert(self);
 	
-	self->machinecallback = NULL;
-	self->catcher = NULL;
+	self->machinecallback = callback;
+	self->catcher = catcher;
 #ifdef PSYCLE_USE_MACHINEPROXY
 	self->createasproxy = TRUE;
 #else

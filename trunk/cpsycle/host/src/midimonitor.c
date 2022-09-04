@@ -363,7 +363,8 @@ static void midimonitor_initcorestatusleft(MidiMonitor*);
 static void midimonitor_initcorestatusright(MidiMonitor*);
 static void midimonitor_initflags(MidiMonitor*);
 static void midimonitor_initchannelmapping(MidiMonitor*);
-static void midimonitor_onsongchanged(MidiMonitor*, Workspace* sender);
+static void midimonitor_on_song_changed(MidiMonitor*,
+	psy_audio_Player* sender);
 static void midimonitor_onmachineslotchange(MidiMonitor* self,
 	psy_audio_Machines* sender, uintptr_t slot);
 static void midimonitor_on_timer(MidiMonitor*, uintptr_t timerid);
@@ -505,15 +506,15 @@ void midimonitor_initchannelmapping(MidiMonitor* self)
 	psy_ui_component_set_align(&self->scroller.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_component_set_align(&self->channelmapping.component,
 		psy_ui_ALIGN_HCLIENT);
-	psy_signal_connect(&self->workspace->signal_songchanged, self,
-		midimonitor_onsongchanged);	
+	psy_signal_connect(&self->workspace->player.signal_song_changed, self,
+		midimonitor_on_song_changed);	
 	if (workspace_song(self->workspace)) {
 		psy_signal_connect(&workspace_song(self->workspace)->machines.signal_slotchange,
 			self, midimonitor_onmachineslotchange);
 	}
 }
 
-void midimonitor_onsongchanged(MidiMonitor* self, Workspace* sender)
+void midimonitor_on_song_changed(MidiMonitor* self, psy_audio_Player* sender)
 {
 	self->channelmapupdate =
 		workspace_player(self->workspace)->midiinput.stats.channelmapupdate - 1;

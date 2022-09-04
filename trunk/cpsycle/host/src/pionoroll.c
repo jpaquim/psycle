@@ -78,7 +78,7 @@ static void pianoroll_on_play_status_changed(Pianoroll*,
 	psy_audio_Sequencer* sender);
 static void pianoroll_on_play_line_changed(Pianoroll*,
 	psy_audio_Sequencer* sender);
-static void pianoroll_on_song_changed(Pianoroll*, Workspace* sender);
+static void pianoroll_on_song_changed(Pianoroll*, psy_audio_Player* sender);
 static bool pianoroll_playing_following_song(const Pianoroll*);
 static void pianoroll_align(Pianoroll*, bool keys, bool grid);
 static void pianoroll_sync_scroll_left(Pianoroll*);
@@ -210,7 +210,7 @@ void pianoroll_init(Pianoroll* self, psy_ui_Component* parent,
 	psy_signal_connect(
 		&self->workspace->player.sequencer.signal_play_status_changed, self,
 		pianoroll_on_play_status_changed);		
-	psy_signal_connect(&workspace->signal_songchanged, self,
+	psy_signal_connect(&workspace->player.signal_song_changed, self,
 		pianoroll_on_song_changed);	
 	psy_signal_connect(&workspace->player.signal_lpbchanged, self,
 		pianoroll_on_lpb_changed);
@@ -365,14 +365,13 @@ bool pianoroll_playing_following_song(const Pianoroll* self)
 		keyboardmiscconfig_following_song(&self->workspace->config.misc);
 }
 
-void pianoroll_on_song_changed(Pianoroll* self, Workspace* workspace)
+void pianoroll_on_song_changed(Pianoroll* self, psy_audio_Player* sender)
 {	
 	assert(self);
 	
-	if (workspace->song) {
-		psy_signal_connect(
-			&self->workspace->song->sequence.signal_cursorchanged, self,
-			pianoroll_on_cursor_changed);
+	if (sender->song) {
+		psy_signal_connect(&sender->song->sequence.signal_cursorchanged,
+			self, pianoroll_on_cursor_changed);
 	}
 	psy_audio_sequencecursor_init(&self->grid.old_cursor);
 }

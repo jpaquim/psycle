@@ -63,7 +63,7 @@ static void mainframe_on_tabbar_changed(MainFrame*, psy_ui_TabBar* sender,
 	uintptr_t tabindex);
 static void mainframe_on_script_tabbar_changed(MainFrame*, psy_ui_Component* sender,
 	uintptr_t tabindex);
-static void mainframe_on_song_changed(MainFrame*, Workspace* sender);
+static void mainframe_on_song_changed(MainFrame*, psy_audio_Player* sender);
 static void mainframe_on_view_selected(MainFrame*, Workspace*, uintptr_t view,
 	uintptr_t section, uintptr_t option);
 static void mainframe_on_focus(MainFrame*);
@@ -83,14 +83,12 @@ static void mainframe_connect_seq_editor_buttons(MainFrame*);
 static void mainframe_on_toggle_terminal(MainFrame*, psy_ui_Component* sender);
 static void mainframe_on_toggle_kbd_help(MainFrame*, psy_ui_Component* sender);
 static void mainframe_on_exit(MainFrame*, psy_ui_Component* sender);
-static void mainframe_on_songtracks_changed(MainFrame*, psy_audio_Patterns* sender,
-	uintptr_t numsongtracks);
+static void mainframe_on_songtracks_changed(MainFrame*,
+	psy_audio_Patterns* sender);
 static bool mainframe_on_close(MainFrame*);
 static void mainframe_on_check_unsaved(MainFrame*, ConfirmBox* sender,
 	int option, int mode);
 static void mainframe_on_file_load(MainFrame*, FileView* sender);
-static void mainframe_on_gear_select(MainFrame*, Workspace* sender,
-	psy_List* machinelist);
 static void mainframe_on_drag_over(MainFrame*, psy_ui_DragEvent*);
 static void mainframe_on_drop(MainFrame*, psy_ui_DragEvent*);
 static void mainframe_on_mouse_down(MainFrame*, psy_ui_MouseEvent*);
@@ -709,7 +707,7 @@ void mainframe_init_file_view(MainFrame* self)
 	psy_ui_component_hide(&self->fileview.component);
 	psy_signal_connect(&self->fileview.signal_selected,
 		self, mainframe_on_file_load);
-	if (keyboardmiscconfig_ft2fileexplorer(psycleconfig_misc(
+	if (keyboardmiscconfig_ft2_file_view(psycleconfig_misc(
 			workspace_conf(&self->workspace)))) {
 		filebar_useft2fileexplorer(&self->filebar);
 	}
@@ -767,10 +765,8 @@ void mainframe_connect_workspace(MainFrame* self)
 		self, (fp_inputhandler_hostcallback)mainframe_on_input_handler_callback);	
 	psy_signal_connect(&self->checkunsavedbox.signal_execute, self,
 		mainframe_on_check_unsaved);	
-	psy_signal_connect(&self->workspace.signal_songchanged, self,
-		mainframe_on_song_changed);
-	psy_signal_connect(&self->workspace.signal_gearselect, self,
-		mainframe_on_gear_select);	
+	psy_signal_connect(&self->workspace.player.signal_song_changed, self,
+		mainframe_on_song_changed);	
 }
 
 void mainframe_init_interpreter(MainFrame* self)
@@ -853,11 +849,11 @@ bool mainframe_on_notes(MainFrame* self, InputHandler* sender)
 	return 0;
 }
 
-void mainframe_on_song_changed(MainFrame* self, Workspace* sender)
+void mainframe_on_song_changed(MainFrame* self, psy_audio_Player* sender)
 {
-	if (workspace_song_has_file(sender)) {
+	if (workspace_song_has_file(&self->workspace)) {
 		if (generalconfig_showing_song_info_on_load(psycleconfig_general(
-				workspace_conf(sender)))) {
+				workspace_conf(&self->workspace)))) {
 			workspace_select_view(&self->workspace,
 				viewindex_make(VIEW_ID_SONGPROPERTIES, psy_INDEX_INVALID,
 					psy_INDEX_INVALID, psy_INDEX_INVALID));			
@@ -867,12 +863,23 @@ void mainframe_on_song_changed(MainFrame* self, Workspace* sender)
 	mainframe_connect_song(self);
 	vubar_reset(&self->vubar);
 	clockbar_reset(&self->statusbar.clockbar);
-	psy_ui_component_align(&self->client);
-	psy_ui_component_align(mainframe_base(self));
-	if (!workspace_song_has_file(sender)) {
+	psy_ui_component_align(trackscopeview_base(&self->trackscopeview));
+	psy_ui_component_align(&self->pane);
+	psy_ui_component_invalidate(&self->pane);
+	if (!workspace_song_has_file(&self->workspace)) {
 		machinewireview_centermaster(&self->machineview.wireview);
 	}
 }
+
+void mainframe_on_songtracks_changed(MainFrame* self,
+	psy_audio_Patterns* sender)
+{
+	/* TrackScopes can change its height, realign mainframe */
+	psy_ui_component_align(trackscopeview_base(&self->trackscopeview));
+	psy_ui_component_align(&self->pane);
+	psy_ui_component_invalidate(&self->pane);
+}
+
 
 void mainframe_connect_song(MainFrame* self)
 {
@@ -1049,15 +1056,6 @@ void mainframe_on_script_tabbar_changed(MainFrame* self, psy_ui_Component* sende
 	}
 }
 
-void mainframe_on_songtracks_changed(MainFrame* self, psy_audio_Patterns* sender,
-	uintptr_t numsongtracks)
-{
-	/* TrackScopes can change its height, realign mainframe */
-	psy_ui_component_align(trackscopeview_base(&self->trackscopeview));
-	psy_ui_component_align(&self->pane);
-	psy_ui_component_invalidate(&self->pane);
-}
-
 /*
 ** called if a button is clicked in the checkunsavedbox
 ** option: which button pressed
@@ -1075,7 +1073,7 @@ void mainframe_on_check_unsaved(MainFrame* self, ConfirmBox* sender,
 			if (mode == CONFIRM_CLOSE) {
 				psy_ui_app_close(psy_ui_app());
 			} else if (mode == CONFIRM_LOAD) {
-				if (keyboardmiscconfig_ft2fileexplorer(psycleconfig_misc(
+				if (keyboardmiscconfig_ft2_file_view(psycleconfig_misc(
 					workspace_conf(&self->workspace)))) {
 					char path[4096];
 					
@@ -1103,7 +1101,7 @@ void mainframe_on_check_unsaved(MainFrame* self, ConfirmBox* sender,
 			if (mode == CONFIRM_CLOSE) {				
 				psy_ui_app_close(psy_ui_app());
 			} else if (mode == CONFIRM_LOAD) {
-				if (keyboardmiscconfig_ft2fileexplorer(psycleconfig_misc(
+				if (keyboardmiscconfig_ft2_file_view(psycleconfig_misc(
 					workspace_conf(&self->workspace)))) {
 					char path[4096];
 
@@ -1317,12 +1315,6 @@ void mainframe_delegate_keyboard(MainFrame* self, intptr_t message,
 		psy_eventdriverinput_make(message, psy_ui_keyboardevent_encode(ev,
 			message == psy_EVENTDRIVER_RELEASE),
 			psy_ui_keyboardevent_repeat(ev)));
-}
-
-void mainframe_on_gear_select(MainFrame* self, Workspace* sender,
-	psy_List* machinelist)
-{
-	gear_select(&self->gear, machinelist);
 }
 
 void mainframe_on_drag_over(MainFrame* self, psy_ui_DragEvent* ev)

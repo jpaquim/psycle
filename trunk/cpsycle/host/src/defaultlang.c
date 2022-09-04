@@ -426,6 +426,7 @@ void make_translator_default(psy_Dictionary* dict)
 	psy_dictionary_set(dict, "instrumentsbox.group-instruments", "Group Instruments");
 	/* instrumentview */
 	psy_dictionary_set(dict, "instrumentview.instrument", "Instrument");
+	psy_dictionary_set(dict, "instrumentview.empty", "No Instrument");
 	psy_dictionary_set(dict, "instrumentview.instrument-name", "Instrument Name");
 	psy_dictionary_set(dict, "instrumentview.new-note-action", "New Note Action");
 	psy_dictionary_set(dict, "instrumentview.same", "but if the same");

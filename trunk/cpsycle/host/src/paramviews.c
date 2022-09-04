@@ -10,7 +10,7 @@
 
 
 /* prototypes */
-static void paramviews_on_song_changed(ParamViews*, Workspace* sender);
+static void paramviews_on_song_changed(ParamViews*, psy_audio_Player* sender);
 static psy_audio_Machines* paramviews_machines(ParamViews*);
 
 /* implementation */
@@ -24,7 +24,7 @@ void paramviews_init(ParamViews* self, psy_ui_Component* view,
 	self->view = view;
 	self->workspace = workspace;	
 	psy_table_init(&self->frames);
-	psy_signal_connect(&workspace->signal_songchanged, self,
+	psy_signal_connect(&workspace->player.signal_song_changed, self,
 		paramviews_on_song_changed);
 }
 
@@ -131,7 +131,7 @@ MachineFrame* paramviews_frame(ParamViews* self, uintptr_t mac_id)
 	return (MachineFrame*)psy_table_at(&self->frames, mac_id);
 }
 
-void paramviews_on_song_changed(ParamViews* self, Workspace* sender)
+void paramviews_on_song_changed(ParamViews* self, psy_audio_Player* sender)
 {
 	assert(self);
 	

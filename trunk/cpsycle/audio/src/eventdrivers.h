@@ -25,12 +25,15 @@ extern "C" {
 ** container for all active inputdriver
 */
 
+
+typedef void (*fp_eventdriver_input)(void* context, psy_EventDriver* sender);
+
 typedef struct {
 	psy_EventDriver* eventdriver;
 	psy_Library* library;
 } psy_audio_EventDriverEntry;
 
-typedef struct {
+typedef struct psy_audio_EventDrivers {
 	psy_EventDriver* kbddriver;
 	psy_EventDriver* cmddriver;
 	psy_List* eventdrivers;
@@ -62,6 +65,8 @@ psy_audio_EventDriverEntry* psy_audio_eventdrivers_entry(psy_audio_EventDrivers*
 void psy_audio_eventdrivers_idle(psy_audio_EventDrivers*);
 void psy_audio_eventdrivers_sendcmd(psy_audio_EventDrivers*,
 	const char* section, psy_EventDriverCmd cmd);
+void psy_audio_eventdrivers_connect(psy_audio_EventDrivers*, void* context,
+	fp_eventdriver_input);
 
 #ifdef __cplusplus
 }

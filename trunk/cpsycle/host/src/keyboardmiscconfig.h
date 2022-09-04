@@ -59,7 +59,7 @@ uintptr_t keyboardmiscconfig_pgupdowntype(const KeyboardMiscConfig*);
 intptr_t keyboardmiscconfig_pgupdownstep(const KeyboardMiscConfig*);
 void keyboardmiscconfig_setcursorstep(KeyboardMiscConfig*, int step);
 intptr_t keyboardmiscconfig_cursor_step(const KeyboardMiscConfig*);
-bool keyboardmiscconfig_ft2fileexplorer(const KeyboardMiscConfig*);
+bool keyboardmiscconfig_ft2_file_view(const KeyboardMiscConfig*);
 bool keyboardmiscconfig_following_song(const KeyboardMiscConfig*);
 void keyboardmiscconfig_follow_song(KeyboardMiscConfig*);
 void keyboardmiscconfig_stop_follow_song(KeyboardMiscConfig*);

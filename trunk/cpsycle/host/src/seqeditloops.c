@@ -349,7 +349,8 @@ static psy_audio_PatternNode* seqeditloops_findloopstart(SeqEditLoops*,
 static psy_audio_PatternNode* seqeditloops_findloopend(SeqEditLoops*,
 	psy_audio_PatternNode* begin);
 static void seqeditloops_onalign(SeqEditLoops*);
-static void seqeditloops_onsongchanged(SeqEditLoops*, Workspace* sender);
+static void seqeditloops_on_song_changed(SeqEditLoops*,
+	psy_audio_Player* sender);
 static SeqEditLoop* seqeditloops_loopcomponent(SeqEditLoops*,
 	psy_audio_PatternNode*);
 static void seqeditloops_remove(SeqEditLoops*, psy_audio_PatternNode*);
@@ -406,8 +407,9 @@ void seqeditloops_init(SeqEditLoops* self, psy_ui_Component* parent,
 	seqeditloopstate_init(&self->loopstate);
 	psy_ui_component_set_preferred_height(&self->component,
 		psy_ui_value_make_eh(2.0));
-	psy_signal_connect(&self->state->cmds->workspace->signal_songchanged, self,
-		seqeditloops_onsongchanged);
+	psy_signal_connect(
+		&self->state->cmds->workspace->player.signal_song_changed,
+		self, seqeditloops_on_song_changed);
 	psy_signal_connect(&self->state->signal_loopchanged, self,
 		seqeditloops_onloopchanged);
 }
@@ -612,7 +614,7 @@ void seqeditloops_onalign(SeqEditLoops* self)
 	}
 }
 
-void seqeditloops_onsongchanged(SeqEditLoops* self, Workspace* sender)
+void seqeditloops_on_song_changed(SeqEditLoops* self, psy_audio_Player* sender)
 {
 	seqeditloops_build(self);
 	psy_ui_component_invalidate(&self->component);

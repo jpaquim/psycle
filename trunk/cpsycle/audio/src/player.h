@@ -59,10 +59,13 @@ psy_audio_PatternEvent psy_audio_patterndefaults_fill_event(const
 typedef struct psy_audio_Player {
 	/* inherits */
 	psy_audio_CustomMachine custommachine;
+	/* signals */
+	psy_Signal signal_song_changed;
 	/* internal */
 	psy_AudioDriver* driver;
 	psy_audio_Song* song;	
 	psy_audio_MachineFactory machinefactory;
+	psy_audio_PluginCatcher plugincatcher;
 	psy_audio_Song emptysong; /* dummy song while song switching */
 	psy_audio_Sequencer sequencer;	
 	psy_Signal signal_lpbchanged;
@@ -100,9 +103,7 @@ typedef struct psy_audio_Player {
 	psy_audio_CustomMachineParam lpb_param;
 } psy_audio_Player;
 
-void psy_audio_player_init(psy_audio_Player*,
-	psy_audio_MachineCallback* callback,
-	psy_audio_Song*,
+void psy_audio_player_init(psy_audio_Player*, psy_audio_MachineCallback*,
 	void* systemhandle);
 void psy_audio_player_dispose(psy_audio_Player*);
 

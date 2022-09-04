@@ -1,5 +1,7 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
@@ -18,7 +20,7 @@ static void machinecombobox_onmachinesinsert(MachineComboBox*, psy_audio_Machine
 static int machinecombobox_insertmachine(MachineComboBox*, size_t slot, psy_audio_Machine*);
 static void machinecombobox_onmachinesremoved(MachineComboBox*, psy_audio_Machines* sender, uintptr_t slot);
 static void machinecombobox_onmachineselect(MachineComboBox*, psy_audio_Machines* sender, uintptr_t slot);
-static void machinecombobox_onsongchanged(MachineComboBox*, Workspace* sender);
+static void machinecombobox_on_song_changed(MachineComboBox*, psy_audio_Player* sender);
 static void machinecombobox_connectsongsignals(MachineComboBox*);
 static void machinecombobox_connectinstrumentsignals(MachineComboBox*);
 static void machinecombobox_clearmachinebox(MachineComboBox* self);
@@ -72,8 +74,8 @@ void machinecombobox_on_destroyed(MachineComboBox* self)
 	psy_table_dispose(&self->comboboxslots);
 	psy_table_dispose(&self->slotscombobox);
 	if (self->machines) {
-		psy_signal_disconnect(&self->workspace->signal_songchanged, self,
-			machinecombobox_onsongchanged);
+		psy_signal_disconnect(&self->workspace->player.signal_song_changed,
+			self, machinecombobox_on_song_changed);
 		psy_signal_disconnect(&self->machines->signal_insert, self,
 			machinecombobox_onmachinesinsert);
 		psy_signal_disconnect(&self->machines->signal_removed, self,
@@ -173,10 +175,19 @@ void machinecombobox_onmachineselect(MachineComboBox* self, psy_audio_Machines* 
 }
 
 
-void machinecombobox_onsongchanged(MachineComboBox* self, Workspace* sender)
+void machinecombobox_on_song_changed(MachineComboBox* self,
+	psy_audio_Player* sender)
 {	
-	self->machines = &sender->song->machines;
-	self->instruments = &sender->song->instruments;
+	psy_audio_Song* song;
+	
+	song = psy_audio_player_song(sender);
+	if (song) {
+		self->machines = &song->machines;
+		self->instruments = &song->instruments;
+	} else {
+		self->machines = NULL;
+		self->instruments = NULL;
+	}
 	machinecombobox_connectsongsignals(self);
 	machinecombobox_buildmachinebox(self);
 }

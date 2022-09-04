@@ -150,7 +150,8 @@ static void paramrackpane_onconnected(ParamRackPane*,
 	psy_audio_Connections* con, uintptr_t outputslot, uintptr_t inputslot);
 static void paramrackpane_ondisconnected(ParamRackPane*,
 	psy_audio_Connections* con, uintptr_t outputslot, uintptr_t inputslot);
-static void paramrackpane_onsongchanged(ParamRackPane*, Workspace* sender);
+static void paramrackpane_on_song_changed(ParamRackPane*,
+	psy_audio_Player* sender);
 static void paramrackpane_onmachineselected(ParamRackPane*,
 	psy_audio_Machines* sender, uintptr_t slot);
 
@@ -191,8 +192,8 @@ void paramrackpane_init(ParamRackPane* self, psy_ui_Component* parent,
 	psy_table_init(&self->boxes);	
 	paramrackpane_connectsong(self);
 	paramrackpane_build(self);
-	psy_signal_connect(&workspace->signal_songchanged, self,
-		paramrackpane_onsongchanged);
+	psy_signal_connect(&workspace->player.signal_song_changed, self,
+		paramrackpane_on_song_changed);
 }
 
 void paramrackpane_on_destroyed(ParamRackPane* self)
@@ -246,7 +247,8 @@ void paramrackpane_build(ParamRackPane* self)
 	psy_ui_component_invalidate(psy_ui_component_parent(&self->component));
 }
 
-void paramrackpane_onsongchanged(ParamRackPane* self, Workspace* sender)
+void paramrackpane_on_song_changed(ParamRackPane* self,
+	psy_audio_Player* sender)
 {	
 	self->lastselected = psy_INDEX_INVALID;
 	paramrackpane_connectsong(self);
@@ -617,7 +619,7 @@ static void paramrack_on_mode_selected(ParamRack*, ParamRackModeBar* sender,
 	intptr_t index);
 static void paramrack_on_align(ParamRack*, psy_ui_Component* sender);
 static void paramrack_on_level_changed(ParamRack*, IntEdit* sender);
-static void paramrack_on_select(ParamRack*, psy_ui_Button* sender);
+// static void paramrack_on_select(ParamRack*, psy_ui_Button* sender);
 static void paramrack_on_machine_selected(ParamRack*,
 	psy_audio_Machines*, uintptr_t slot);
 static void paramrack_on_song_changed(ParamRack*, Workspace* sender);
@@ -645,10 +647,10 @@ void paramrack_init(ParamRack* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->modebar.signal_select, self,
 		paramrack_on_mode_selected);
 	/* BatchBar */
-	paramrackbatchbar_init(&self->batchbar, &self->bottom);
-	psy_ui_component_set_align(&self->batchbar.component, psy_ui_ALIGN_RIGHT);
-	psy_signal_connect(&self->batchbar.select.signal_clicked, self,
-		paramrack_on_select);
+	// paramrackbatchbar_init(&self->batchbar, &self->bottom);
+	// psy_ui_component_set_align(&self->batchbar.component, psy_ui_ALIGN_RIGHT);
+	// psy_signal_connect(&self->batchbar.select.signal_clicked, self,
+	//	paramrack_on_select);
 	/* Pane */
 	paramrackpane_init(&self->pane, &self->component, workspace);	
 	psy_ui_component_set_overflow(&self->pane.component,
@@ -660,7 +662,7 @@ void paramrack_init(ParamRack* self, psy_ui_Component* parent,
 	psy_ui_component_set_align(&self->scroller.component, psy_ui_ALIGN_CLIENT);	
 	psy_signal_connect(&self->component.signal_align, self,
 		paramrack_on_align);
-	psy_signal_connect(&workspace->signal_songchanged, self,
+	psy_signal_connect(&workspace->player.signal_song_changed, self,
 		paramrack_on_song_changed);
 	paramrack_connect_song(self);
 	paramrackmodebar_setmode(&self->modebar, self->pane.mode);	
@@ -696,7 +698,7 @@ void paramrack_on_level_changed(ParamRack* self, IntEdit* sender)
 	}
 }
 
-void paramrack_on_select(ParamRack* self, psy_ui_Button* sender)
+/* void paramrack_on_select(ParamRack* self, psy_ui_Button* sender)
 {
 	psy_TableIterator it;
 	psy_List* slotlist;	
@@ -715,7 +717,7 @@ void paramrack_on_select(ParamRack* self, psy_ui_Button* sender)
 	}
 	workspace_multi_select_gear(self->workspace, slotlist);
 	psy_list_free(slotlist);	
-}
+} */
 
 void paramrack_on_song_changed(ParamRack* self, Workspace* sender)
 {		
