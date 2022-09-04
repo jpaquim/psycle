@@ -236,8 +236,8 @@ void pluginscanview_init(PluginScanView* self, psy_ui_Component* parent,
 	self->workspace = workspace;
 	psy_ui_component_set_padding(&self->component,
 		psy_ui_margin_make_em(0.5, 0.5, 0.0, 0.0));
-	pluginscanprocessview_init(&self->processview,
-		&self->component, &workspace->plugincatcher);
+	pluginscanprocessview_init(&self->processview, &self->component,
+		&workspace->player.plugincatcher);
 	psy_ui_component_set_align(&self->processview.component,
 		psy_ui_ALIGN_CLIENT);
 	psy_signal_connect(&self->processview.taskview.abort.signal_clicked,

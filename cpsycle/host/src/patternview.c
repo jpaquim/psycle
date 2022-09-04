@@ -18,7 +18,7 @@
 static void patternview_on_destroyed(PatternView*);
 static void patternview_rebuild(PatternView*);
 static void patternview_on_toggle_properties(PatternView*, PatternViewTabBar*);
-static void patternview_on_song_changed(PatternView*, Workspace* sender);
+static void patternview_on_song_changed(PatternView*, psy_audio_Player* sender);
 static void patternview_connect_song(PatternView*);
 static void patternview_on_configure(PatternView*, PatternViewConfig*,
 	psy_Property*);
@@ -105,7 +105,7 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 	psy_ui_notebook_init(&self->editnotebook, psy_ui_notebook_base(
 		&self->notebook));	
 	psy_ui_notebook_select(&self->editnotebook, 0);
-	psy_signal_connect(&workspace->signal_songchanged, self,
+	psy_signal_connect(&workspace->player.signal_song_changed, self,
 		patternview_on_song_changed);
 	/* pattern properties */
 	patternproperties_init(&self->properties, &self->component);	
@@ -205,7 +205,7 @@ void patternview_on_toggle_properties(PatternView* self,
 	psy_ui_component_invalidate(&self->component);	
 }
 
-void patternview_on_song_changed(PatternView* self, Workspace* sender)
+void patternview_on_song_changed(PatternView* self, psy_audio_Player* sender)
 {	
 	assert(self);
 

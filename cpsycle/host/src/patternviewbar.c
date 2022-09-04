@@ -116,7 +116,8 @@ static void patternviewbar_on_playline_changed(PatternViewBar*, Workspace*
 	sender);
 static void patternviewbar_on_playstatus_changed(PatternViewBar*, Workspace*
 	sender);
-static void patternviewbar_on_song_changed(PatternViewBar*, Workspace* sender);
+static void patternviewbar_on_song_changed(PatternViewBar*,
+	psy_audio_Player* sender);
 static void patternviewbar_connect_song(PatternViewBar*);
 static void patternviewbar_update_status(PatternViewBar*);
 
@@ -167,7 +168,7 @@ void patternviewbar_init(PatternViewBar* self, psy_ui_Component* parent,
 			workspace_conf(workspace)), 
 			"displaysinglepattern"));
 	patternviewstatus_init(&self->status, patternviewbar_base(self), workspace);	
-	psy_signal_connect(&workspace->signal_songchanged, self,
+	psy_signal_connect(&workspace->player.signal_song_changed, self,
 		patternviewbar_on_song_changed);	
 	patternviewbar_update_status(self);
 	patternviewbar_connect_song(self);
@@ -177,7 +178,8 @@ void patternviewbar_init(PatternViewBar* self, psy_ui_Component* parent,
 		patternviewbar_on_playstatus_changed);
 }
 
-void patternviewbar_on_song_changed(PatternViewBar* self, Workspace* sender)
+void patternviewbar_on_song_changed(PatternViewBar* self,
+	psy_audio_Player* sender)
 {
 	assert(self);
 

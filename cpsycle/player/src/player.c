@@ -1,19 +1,19 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 #include "../../detail/os.h"
 
-#include <stdio.h>
-#include <string.h>
-// audio
+/* audio */
 #include <audioconfig.h>
 #include <machinefactory.h>
 #include <player.h>
 #include <plugincatcher.h>
 #include <songio.h>
 #include <exclusivelock.h>
-// file
+/* file */
 #include <dir.h>
 #ifdef DIVERSALIS__OS__MICROSOFT
 #include <windows.h>
@@ -24,14 +24,15 @@
 #define _MAX_PATH 4096
 #endif
 #include <dir.h>
+/* std */
+#include <stdio.h>
+#include <string.h>
 
 typedef struct CmdPlayer {
-	// inherits
+	/* inherits */
 	psy_audio_MachineCallback machinecallback;
-	// internal
-	psy_audio_Player player;
-	psy_audio_PluginCatcher plugincatcher;
-	psy_audio_MachineFactory machinefactory;
+	/* internal */
+	psy_audio_Player player;	
 	psy_audio_Song* song;	
 	psy_Property* config;
 	psy_Property* directories;	
@@ -39,7 +40,7 @@ typedef struct CmdPlayer {
 } CmdPlayer;
 
 static void cmdplayer_init(CmdPlayer*);
-static void cmdplayer_initplugincatcherandmachinefactory(CmdPlayer*);
+static void cmdplayer_init_player(CmdPlayer*);
 static void cmdplayer_dispose(CmdPlayer*);
 static void cmdplayer_parse(CmdPlayer*, int argc, char* argv[]);
 static void cmdplayer_printoutputdriverlist(CmdPlayer*);
@@ -124,23 +125,34 @@ static void vtable_init(CmdPlayer* self)
 		vtable.output = (fp_mcb_output)machinecallback_output;
 		vtable_initialized = TRUE;
 	}
+	self->machinecallback.vtable = &vtable;
 }
 
 void cmdplayer_init(CmdPlayer* self)
 {
+	psy_audio_init();
 	psy_audio_machinecallback_init(&self->machinecallback);
-	vtable_init(self);
-	self->machinecallback.vtable = &vtable;    
-	self->config = psy_property_allocinit_key(NULL);	    	
-	psy_audio_init();    
+	vtable_init(self);	    
+	self->config = psy_property_allocinit_key(NULL);	    		   
 	cmdplayer_makedirectories(self);	
-	cmdplayer_initplugincatcherandmachinefactory(self);
-	self->song = NULL;	
-	psy_audio_player_init(&self->player, &self->machinecallback, self->song, (void*)0);
-	psy_audio_machinecallback_setplayer(&self->machinecallback, &self->player);	
-	printf("init\n");
-	audioconfig_init(&self->audioconfig, self->config, &self->player);
-	printf("init\n");
+	cmdplayer_init_player(self);
+	self->song = NULL;		
+	audioconfig_init(&self->audioconfig, self->config, &self->player);	
+}
+
+void cmdplayer_dispose(CmdPlayer* self)
+{
+	psy_audio_player_dispose(&self->player);
+	if (self->song) {
+		psy_audio_song_deallocate(self->song);
+		self->song = NULL;
+	}
+	if (self->config) {
+		psy_property_deallocate(self->config);
+		self->config = NULL;
+	}	
+	audioconfig_dispose(&self->audioconfig);
+	psy_audio_dispose();
 }
 
 void cmdplayer_restartdriver(CmdPlayer* self)
@@ -169,29 +181,27 @@ void cmdplayer_restartdriver(CmdPlayer* self)
 	}
 }
 
-void cmdplayer_initplugincatcherandmachinefactory(CmdPlayer* self)
+void cmdplayer_init_player(CmdPlayer* self)
 {
-	psy_audio_plugincatcher_init(&self->plugincatcher);
-	psy_audio_plugincatcher_set_directories(&self->plugincatcher, self->directories);
-	psy_signal_connect(&self->plugincatcher.signal_scanfile, self,
+	psy_audio_player_init(&self->player, &self->machinecallback, NULL);
+	psy_audio_plugincatcher_set_directories(&self->player.plugincatcher,
+		self->directories);
+	psy_signal_connect(&self->player.plugincatcher.signal_scanfile, self,
 		cmdplayer_onscanfile);
-	if (psy_audio_plugincatcher_load(&self->plugincatcher) == PSY_ERRFILE) {
+	if (psy_audio_plugincatcher_load(&self->player.plugincatcher) == PSY_ERRFILE) {
 		printf("no plugin cache found, start scanning\n");
 		cmdplayer_scanplugins(self);
-	}
-	psy_audio_machinefactory_init(&self->machinefactory);
-	//, & self->machinecallback,
-	//	&self->plugincatcher);
+	}	
 }
 
 void cmdplayer_scanplugins(CmdPlayer* self)
 {		
 	int status;
 
-	psy_audio_plugincatcher_scan(&self->plugincatcher);
-	if (status = psy_audio_plugincatcher_save(&self->plugincatcher)) {
+	psy_audio_plugincatcher_scan(&self->player.plugincatcher);
+	if ((status = psy_audio_plugincatcher_save(&self->player.plugincatcher))) {
 		printf("Error saving plugin scanner list:\n");
-		printf("%s\n",  self->plugincatcher.sections.inipath);
+		printf("%s\n",  self->player.plugincatcher.sections.inipath);
 	}
 }
 
@@ -233,22 +243,6 @@ void cmdplayer_makedirectories(CmdPlayer* self)
 		PSY_PROPERTY_HINT_EDITDIR);
 }
 
-void cmdplayer_dispose(CmdPlayer* self)
-{
-	psy_audio_player_dispose(&self->player);
-	if (self->song) {
-		psy_audio_song_deallocate(self->song);
-		self->song = NULL;
-	}
-	if (self->config) {
-		psy_property_deallocate(self->config);
-		self->config = NULL;
-	}
-	psy_audio_plugincatcher_dispose(&self->plugincatcher);
-	psy_audio_machinefactory_dispose(&self->machinefactory);	
-	audioconfig_dispose(&self->audioconfig);
-	psy_audio_dispose();
-}
 
 typedef enum CmdPlayerParseState {
 	CMDPLAYER_PARSE_START = 1,
@@ -363,32 +357,40 @@ void cmdplayer_loadandrun(CmdPlayer* self, const char* path)
 }
 
 void cmdplayer_loadsong(CmdPlayer* self, const char* path)
-{		
+{	
+	psy_audio_Song* song;	
 	psy_audio_Song* old_song;
 	psy_audio_SongFile songfile;
 
 	psy_audio_player_stop(&self->player);
 	old_song = self->song;
 	psy_audio_exclusivelock_enter();	
-	self->song = psy_audio_song_allocinit(&self->machinefactory);
-	psy_audio_machinecallback_set_song(&self->machinecallback, self->song);
-	songfile.song = self->song;
-	songfile.file = 0;
+	song = psy_audio_song_allocinit(&self->player.machinefactory);
+	assert(song);
 	psy_audio_songfile_init(&songfile);
+	songfile.song = song;
+	songfile.file = 0;
+	psy_audio_player_setemptysong(&self->player);
+	psy_audio_machinecallback_set_song(&self->machinecallback, song);	
 	if (path) {
 		printf("path: %s\n", path);
 	}
-	psy_audio_songfile_load(&songfile, path);	
-	if (songfile.err) {
-		fprintf(stderr, "Couldn't load song\n");
-	}	
-	psy_audio_player_set_song(&self->player, self->song);	
-	cmdplayer_applysongproperties(self);
+	if (psy_audio_songfile_load(&songfile, path) != PSY_OK) {
+		psy_audio_song_deallocate(song);
+		if (songfile.err) {
+			fprintf(stderr, "Couldn't load song\n");			
+		}	
+	} else {
+		psy_audio_player_set_song(&self->player, song);
+		self->song = song;
+	}
+	psy_audio_songfile_dispose(&songfile);
 	psy_audio_exclusivelock_leave();
 	if (old_song) {
 		psy_audio_song_deallocate(old_song);
 	}
-	psy_audio_songfile_dispose(&songfile);
+	
+	cmdplayer_applysongproperties(self);
 }
 
 void cmdplayer_applysongproperties(CmdPlayer* self)
@@ -403,9 +405,12 @@ void cmdplayer_run(CmdPlayer* self)
 	int progress;
 	
 	cmdplayer_restartdriver(self);
+	psy_audio_exclusivelock_enter();		
+	psy_audio_player_stop(&self->player);
 	psy_audio_sequencer_stop_loop(&self->player.sequencer);
-	psy_audio_player_setposition(&self->player, (psy_dsp_big_beat_t)0.0);
+	psy_audio_player_setposition(&self->player, 0.0);
 	psy_audio_player_start(&self->player);
+	psy_audio_exclusivelock_leave();		
 	c = '\0';
 	progress = 4;
 	while (psy_audio_player_playing(&self->player)) {

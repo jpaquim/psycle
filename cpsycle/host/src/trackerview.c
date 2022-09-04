@@ -1519,7 +1519,7 @@ void trackergrid_on_focus_lost(TrackerGrid* self)
 /* TrackerView */
 
 /* prototypes */
-static void trackerview_on_song_changed(TrackerView*, Workspace* sender);
+static void trackerview_on_song_changed(TrackerView*, psy_audio_Player* sender);
 static void trackerview_connect_song(TrackerView*);
 static void trackerview_on_cursor_changed(TrackerView*, psy_audio_Sequence*
 	sender);
@@ -1585,7 +1585,7 @@ void trackerview_init(TrackerView* self, psy_ui_Component* parent,
 	psy_ui_scroller_set_client(&self->scroller, &self->grid.component);	
 	psy_ui_component_set_align(&self->scroller.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_component_set_align(&self->grid.component, psy_ui_ALIGN_FIXED);
-	psy_signal_connect(&workspace->signal_songchanged, self,
+	psy_signal_connect(&workspace->player.signal_song_changed, self,
 		trackerview_on_song_changed);
 	psy_signal_connect(&self->grid.component.signal_scrolled, self,
 		trackerview_on_grid_scroll);
@@ -1610,7 +1610,7 @@ void trackerview_init(TrackerView* self, psy_ui_Component* parent,
 	trackerview_configure(self);
 }
 
-void trackerview_on_song_changed(TrackerView* self, Workspace* sender)
+void trackerview_on_song_changed(TrackerView* self, psy_audio_Player* sender)
 {
 	psy_audio_sequencecursor_init(&self->grid.old_cursor);
 	trackerview_connect_song(self);

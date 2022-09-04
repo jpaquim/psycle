@@ -72,7 +72,8 @@ static void plugineditor_on_destroyed(PluginEditor*);
 static void plugineditor_init_title_bar(PluginEditor*);
 static void plugineditor_on_machines_change_slot(PluginEditor*,
 	psy_audio_Machines*, uintptr_t slot);
-static void plugineditor_on_song_changed(PluginEditor*, Workspace* sender);
+static void plugineditor_on_song_changed(PluginEditor*,
+	psy_audio_Player* sender);
 static void plugineditor_connect_machine_signals(PluginEditor*, Workspace*);
 static void plugineditor_on_new_plugin(PluginEditor*, psy_ui_Component* sender);
 static void plugineditor_on_reload(PluginEditor*, psy_ui_Component* sender);
@@ -155,7 +156,7 @@ void plugineditor_init(PluginEditor* self, psy_ui_Component* parent,
 	/* editor */
 	psy_ui_editor_init(&self->editor, &self->component);	
 	psy_ui_component_set_align(&self->editor.component, psy_ui_ALIGN_CLIENT);	
-	psy_signal_connect(&workspace->signal_songchanged, self,
+	psy_signal_connect(&workspace->player.signal_song_changed, self,
 		plugineditor_on_song_changed);
 	psy_signal_connect(&self->pluginselector.signal_selchanged, self,
 		plugineditor_on_plugin_selected);
@@ -196,8 +197,8 @@ void plugineditor_on_machines_change_slot(PluginEditor* self,
 		
 		psy_snprintf(catchername, 256, "%s:0",
 			psy_audio_machine_info(machine)->name);		
-		path = psy_audio_plugincatcher_search_path(&self->workspace->plugincatcher, catchername,
-			psy_audio_LUA);
+		path = psy_audio_plugincatcher_search_path(
+			&self->workspace->player.plugincatcher, catchername, psy_audio_LUA);
 		if (path) {
 			if (self->basepath == 0 || (strcmp(path, self->basepath) != 0)) {
 				psy_ui_editor_load(&self->editor, path);
@@ -208,9 +209,9 @@ void plugineditor_on_machines_change_slot(PluginEditor* self,
 	}
 }
 
-void plugineditor_on_song_changed(PluginEditor* self, Workspace* sender)
+void plugineditor_on_song_changed(PluginEditor* self, psy_audio_Player* sender)
 {
-	plugineditor_connect_machine_signals(self, sender);
+	plugineditor_connect_machine_signals(self, self->workspace);
 }
 
 void plugineditor_connect_machine_signals(PluginEditor* self,
@@ -257,7 +258,7 @@ void plugineditor_build_plugin_list(PluginEditor* self, Workspace* workspace)
 	psy_Property* all;
 
 	all = psy_audio_pluginsections_section_plugins(
-		&workspace->plugincatcher.sections, "all");
+		&workspace->player.plugincatcher.sections, "all");
 	psy_table_clear(&self->pluginmappping);
 	psy_ui_combobox_clear(&self->pluginselector);
 	if (all) {
@@ -269,7 +270,8 @@ void plugineditor_build_plugin_list(PluginEditor* self, Workspace* workspace)
 
 			property = (psy_Property*)psy_list_entry(p);
 			if (psy_property_at_int(property, "type", -1) == psy_audio_LUA) {
-				psy_ui_combobox_add_text(&self->pluginselector, psy_property_key(property));
+				psy_ui_combobox_add_text(&self->pluginselector,
+					psy_property_key(property));
 				psy_table_insert(&self->pluginmappping, (uintptr_t)c, property);
 				++c;
 			}

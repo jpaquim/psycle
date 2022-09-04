@@ -12,7 +12,7 @@
 
 /* prototypes */
 static void seqeditor_on_destroyed(SeqEditor*);
-static void seqeditor_on_song_changed(SeqEditor*, Workspace* sender);
+static void seqeditor_on_song_changed(SeqEditor*, psy_audio_Player* sender);
 static void seqeditor_update_song(SeqEditor*);
 static void seqeditor_build(SeqEditor*);
 static void seqeditor_on_tracks_scroll(SeqEditor*, psy_ui_Component* sender);
@@ -129,7 +129,7 @@ void seqeditor_init(SeqEditor* self, psy_ui_Component* parent,
 	/* update */	
 	seqeditor_update_song(self);	
 	/* connect signals */
-	psy_signal_connect(&self->state.workspace->signal_songchanged, self,
+	psy_signal_connect(&self->state.workspace->player.signal_song_changed, self,
 		seqeditor_on_song_changed);
 	psy_signal_connect(&self->track_items.component.signal_scrolled, self,
 		seqeditor_on_tracks_scroll);	
@@ -148,7 +148,7 @@ void seqeditor_on_destroyed(SeqEditor* self)
 	seqeditstate_dispose(&self->state);
 }
 
-void seqeditor_on_song_changed(SeqEditor* self, Workspace* sender)
+void seqeditor_on_song_changed(SeqEditor* self, psy_audio_Player* sender)
 {	
 	seqeditor_update_song(self);
 }

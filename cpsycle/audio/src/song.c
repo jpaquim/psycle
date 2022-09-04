@@ -122,6 +122,11 @@ void psy_audio_song_init(psy_audio_Song* self, psy_audio_MachineFactory*
 	assert(self);
 
 	self->machine_factory = machine_factory;
+	if (self->machine_factory->machinecallback) {
+		psy_audio_machinecallback_set_song(
+			self->machine_factory->machinecallback,
+			self);
+	}	
 	self->filename = psy_strdup(PSYCLE_UNTITLED);
 	self->song_has_file = FALSE;
 	psy_audio_songproperties_init(&self->properties, "Untitled", "Unnamed",
@@ -131,7 +136,7 @@ void psy_audio_song_init(psy_audio_Song* self, psy_audio_MachineFactory*
 	song_init_sequence(self);
 	psy_audio_samples_init(&self->samples);
 	psy_audio_instruments_init(&self->instruments);
-	song_init_signals(self);
+	song_init_signals(self);	
 }
 
 void song_init_machines(psy_audio_Song* self)

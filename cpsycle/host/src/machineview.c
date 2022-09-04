@@ -34,7 +34,8 @@ static void machineview_on_tabbar_changed(MachineView*, psy_ui_TabBar* sender,
 	uintptr_t index);
 static void machineview_connectsignals(MachineView*);
 static uintptr_t machineview_section(const MachineView*);
-static void machineview_onsongchanged(MachineView*, Workspace* sender);
+static void machineview_on_song_changed(MachineView*,
+	psy_audio_Player* sender);
 static void machineview_on_mouse_down(MachineView*, psy_ui_MouseEvent*);
 static void machineview_on_mouse_up(MachineView*, psy_ui_MouseEvent*);
 static void machineview_onmousedoubleclick(MachineView*, psy_ui_MouseEvent*);
@@ -194,8 +195,8 @@ void machineview_connectsignals(MachineView* self)
 		&self->tabbar.signal_change);
 	psy_signal_connect(&self->tabbar.signal_change, self,
 		machineview_on_tabbar_changed);
-	psy_signal_connect(&self->workspace->signal_songchanged, self,
-		machineview_onsongchanged);
+	psy_signal_connect(&self->workspace->player.signal_song_changed, self,
+		machineview_on_song_changed);
 }
 
 void machineview_onmousedoubleclick(MachineView* self, psy_ui_MouseEvent* ev)
@@ -267,8 +268,6 @@ void machineview_on_key_down(MachineView* self, psy_ui_KeyboardEvent* ev)
 				psy_ui_component_set_focus(
 					psy_ui_notebook_active_page(&self->notebook));
 			}
-		} else if (self->workspace->gearvisible) {
-			workspace_toggle_gear(self->workspace);
 		}
 		psy_ui_keyboardevent_stop_propagation(ev);
 	} 
@@ -321,7 +320,7 @@ void machineview_selectsection(MachineView* self, psy_ui_Component* sender,
 	psy_ui_tabbar_select(&self->tabbar, section);
 }
 
-void machineview_onsongchanged(MachineView* self, Workspace* sender)
+void machineview_on_song_changed(MachineView* self, psy_audio_Player* sender)
 {	
 	psy_ui_tabbar_select(&self->tabbar, SECTION_ID_MACHINEVIEW_WIRES);	
 }

@@ -80,7 +80,7 @@ static void mainstatusbar_init_terminal_button(MainStatusBar*);
 static void mainstatusbar_on_song_load_progress(MainStatusBar*,
 	Workspace* sender, intptr_t progress);
 static void mainstatusbar_on_plugin_scan_progress(MainStatusBar*,
-	Workspace* sender, int progress);
+	PluginScanThread* sender, int progress);
 static void mainstatusbar_on_status(MainStatusBar*, Workspace* sender,
 	const char* text);
 
@@ -194,7 +194,7 @@ void mainstatusbar_init_progress_bar(MainStatusBar* self)
 	self->pluginscanprogress = -1;	
 	workspace_connect_load_progress(self->workspace, self,
 		(fp_workspace_songloadprogress)mainstatusbar_on_song_load_progress);
-	psy_signal_connect(&self->workspace->signal_scanprogress, self,
+	psy_signal_connect(&self->workspace->pluginscanthread.signal_scanprogress, self,
 		mainstatusbar_on_plugin_scan_progress);
 }
 
@@ -239,7 +239,7 @@ void mainstatusbar_on_song_load_progress(MainStatusBar* self,
 }
 
 void mainstatusbar_on_plugin_scan_progress(MainStatusBar* self,
-	Workspace* sender, int progress)
+	PluginScanThread* sender, int progress)
 {
 	self->pluginscanprogress = progress;
 }

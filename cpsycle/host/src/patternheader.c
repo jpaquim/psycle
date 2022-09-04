@@ -328,7 +328,8 @@ void patterntrack_onpreferredsize(PatternTrack* self,
 
 /* prototypes */
 static void trackerheader_on_destroyed(TrackerHeader*);
-static void trackerheader_on_song_changed(TrackerHeader*, Workspace* sender);
+static void trackerheader_on_song_changed(TrackerHeader*,
+	psy_audio_Player* sender);
 static void trackerheader_connect_song(TrackerHeader*);
 static void trackerheader_on_cursor_changed(TrackerHeader*,
 	psy_audio_Sequence*);
@@ -371,7 +372,7 @@ void trackerheader_init(TrackerHeader* self, psy_ui_Component* parent,
 	self->state = state;	
 	self->workspace = workspace;	
 	psy_table_init(&self->boxes);	
-	psy_signal_connect(&workspace->signal_songchanged, self,
+	psy_signal_connect(&workspace->player.signal_song_changed, self,
 		trackerheader_on_song_changed);
 	trackerheader_connect_song(self);	
 	trackerheader_build(self);	
@@ -401,7 +402,8 @@ void trackerheader_build(TrackerHeader* self)
 	psy_ui_component_align(trackerheader_base(self));
 }
 
-void trackerheader_on_song_changed(TrackerHeader* self, Workspace* sender)
+void trackerheader_on_song_changed(TrackerHeader* self,
+	psy_audio_Player* sender)
 {
 	trackerheader_connect_song(self);
 }

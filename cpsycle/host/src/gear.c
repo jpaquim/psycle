@@ -44,7 +44,7 @@ void gearbuttons_init(GearButtons* self, psy_ui_Component* parent,
 static void gear_init_title(Gear*);
 static void gear_oncreate(Gear*, psy_ui_Component* sender);
 static void gear_on_delete(Gear*, psy_ui_Component* sender);
-static void gear_on_song_changed(Gear*, Workspace* sender);
+static void gear_on_song_changed(Gear*, psy_audio_Player* sender);
 static void gear_connect_song(Gear*);
 static void gear_onclone(Gear*, psy_ui_Component* sender);
 static void gear_on_exchange(Gear* self, psy_ui_Component* sender);
@@ -67,8 +67,12 @@ void gear_init(Gear* self, psy_ui_Component* parent, ParamViews* param_views,
 	psy_ui_component_set_style_type(gear_base(self), STYLE_GEAR);
 	self->workspace = workspace;
 	self->param_views = param_views;
-	self->machines = &workspace->song->machines;
-	psy_signal_connect(&workspace->signal_songchanged, self,
+	if (workspace_song(self->workspace)) {
+		self->machines = &workspace_song(self->workspace)->machines;
+	} else {
+		self->machines = NULL;
+	}
+	psy_signal_connect(&workspace->player.signal_song_changed, self,
 		gear_on_song_changed);
 	/* client */
 	psy_ui_component_init(&self->client, gear_base(self), NULL);
@@ -156,15 +160,26 @@ void gear_on_delete(Gear* self, psy_ui_Component* sender)
 	}
 }
 
-void gear_on_song_changed(Gear* self, Workspace* sender)
+void gear_on_song_changed(Gear* self, psy_audio_Player* sender)
 {	
-	self->machines = &sender->song->machines;
-	machinesbox_setmachines(&self->machinesboxgen, &sender->song->machines);
-	machinesbox_setmachines(&self->machinesboxfx, &sender->song->machines);
-	instrumentsbox_setinstruments(&self->instrumentsbox,
-		&sender->song->instruments);
-	samplesbox_setsamples(&self->samplesbox, &sender->song->samples);
-	gear_connect_song(self);
+	psy_audio_Song* song;
+	
+	song = psy_audio_player_song(sender);
+	if (song) {
+		self->machines = &song->machines;
+		machinesbox_setmachines(&self->machinesboxgen, &song->machines);
+		machinesbox_setmachines(&self->machinesboxfx, &song->machines);
+		instrumentsbox_setinstruments(&self->instrumentsbox,
+			&song->instruments);
+		samplesbox_setsamples(&self->samplesbox, &song->samples);
+		gear_connect_song(self);
+	} else {
+		self->machines = NULL;
+		machinesbox_setmachines(&self->machinesboxgen, NULL);
+		machinesbox_setmachines(&self->machinesboxfx, NULL);
+		instrumentsbox_setinstruments(&self->instrumentsbox, NULL);
+		samplesbox_setsamples(&self->samplesbox, NULL);
+	}
 	psy_ui_component_invalidate(gear_base(self));
 }
 

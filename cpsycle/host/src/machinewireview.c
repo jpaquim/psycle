@@ -138,7 +138,8 @@ static void machinewireview_onconnected(MachineWireView*,
 	psy_audio_Connections*, uintptr_t outputslot, uintptr_t inputslot);
 static void machinewireview_ondisconnected(MachineWireView*,
 	psy_audio_Connections*, uintptr_t outputslot, uintptr_t inputslot);
-static void machinewireview_onsongchanged(MachineWireView*, Workspace* sender);
+static void machinewireview_on_song_changed(MachineWireView*,
+	psy_audio_Player* sender);
 static void machinewireview_build(MachineWireView*);
 static void machinewireview_destroywireframes(MachineWireView*);
 static void machinewireview_showwireview(MachineWireView*, psy_audio_Wire);
@@ -227,8 +228,8 @@ void machinewireview_init(MachineWireView* self, psy_ui_Component* parent,
 	psy_ui_component_set_wheel_scroll(&self->component, 4);	
 	psy_ui_component_set_overflow(&self->component, psy_ui_OVERFLOW_SCROLL);	
 	psy_audio_wire_init(&self->hoverwire);
-	psy_signal_connect(&workspace->signal_songchanged, self,
-		machinewireview_onsongchanged);	
+	psy_signal_connect(&workspace->player.signal_song_changed, self,
+		machinewireview_on_song_changed);	
 	if (workspace_song(workspace)) {
 		machinewireview_setmachines(self,
 			psy_audio_song_machines(workspace_song(workspace)));
@@ -1148,7 +1149,8 @@ void machinewireview_build(MachineWireView* self)
 	++self->component.opcount;
 }
 
-void machinewireview_onsongchanged(MachineWireView* self, Workspace* sender)
+void machinewireview_on_song_changed(MachineWireView* self,
+	psy_audio_Player* sender)
 {	
 	if (sender->song) {
 		machinewireview_setmachines(self, psy_audio_song_machines(sender->song));
@@ -1156,7 +1158,7 @@ void machinewireview_onsongchanged(MachineWireView* self, Workspace* sender)
 		machinewireview_setmachines(self, NULL);
 	}	
 	psy_ui_component_set_scroll(&self->component, psy_ui_point_zero());
-	self->centermaster = !workspace_song_has_file(sender);
+	self->centermaster = !workspace_song_has_file(self->workspace);
 	if (psy_ui_component_draw_visible(&self->component)) {		
 		psy_ui_component_invalidate(&self->component);
 	}	

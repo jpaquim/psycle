@@ -24,6 +24,14 @@ extern "C" {
 #endif
 
 typedef struct PluginScanThread {
+	/* signals */
+	psy_Signal signal_plugincachechanged;
+	psy_Signal signal_scanprogress;
+	psy_Signal signal_scanstart;
+	psy_Signal signal_scanend;
+	psy_Signal signal_scanfile;
+	psy_Signal signal_scantaskstart;
+	/* internal */
 	psy_Thread pluginscanthread;
 	psy_Lock pluginscanlock;
 	psy_audio_PluginCatcher* plugincatcher;
@@ -43,6 +51,7 @@ void pluginscanthread_init(PluginScanThread*, psy_audio_PluginCatcher*);
 void pluginscanthread_dispose(PluginScanThread*);
 
 void pluginscanthread_start(PluginScanThread*);
+void pluginscanthread_idle(PluginScanThread*);
 
 struct Workspace;
 

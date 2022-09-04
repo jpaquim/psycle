@@ -19,7 +19,8 @@
 #include "../../detail/trace.h"
 
 /* MachineViewBar */
-static void machineviewbar_onsongchanged(MachineViewBar*, Workspace* sender);
+static void machineviewbar_on_song_changed(MachineViewBar*,
+	psy_audio_Player* sender);
 static void machineviewbar_setmachines(MachineViewBar*, psy_audio_Machines*);
 static void machineviewbar_onmixerconnectmodeclick(MachineViewBar*,
 	psy_ui_Component* sender);
@@ -43,8 +44,8 @@ void machineviewbar_init(MachineViewBar* self, psy_ui_Component* parent,
 	psy_ui_component_hide(psy_ui_checkbox_base(&self->mixersend));	
 	psy_signal_connect(&self->mixersend.signal_clicked, self,
 		machineviewbar_onmixerconnectmodeclick);	
-	psy_signal_connect(&workspace->signal_songchanged, self,
-		machineviewbar_onsongchanged);
+	psy_signal_connect(&workspace->player.signal_song_changed, self,
+		machineviewbar_on_song_changed);
 	if (workspace_song(workspace)) {
 		machineviewbar_setmachines(self,
 			psy_audio_song_machines(workspace_song(workspace)));
@@ -73,7 +74,8 @@ void machineviewbar_updateconnectasmixersend(MachineViewBar* self)
 	}
 }
 
-void machineviewbar_onsongchanged(MachineViewBar* self, Workspace* sender)
+void machineviewbar_on_song_changed(MachineViewBar* self,
+	psy_audio_Player* sender)
 {		
 	if (sender->song) {
 		machineviewbar_setmachines(self, psy_audio_song_machines(sender->song));

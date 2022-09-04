@@ -53,23 +53,20 @@ InputSlot* inputslot_allocinit(InputHandlerType type,
 }
 
 /* InputHandler */
+
 /* prototypes */
-static void inputhandler_oneventdriverinput(InputHandler* self,
-	psy_EventDriver* sender);
 static bool inputhandler_sendmessage(InputHandler*, int msg, void* param1);
+
 /* implementation */
-void inputhandler_init(InputHandler* self, psy_audio_Player* player,
-	void* hostcontext, fp_inputhandler_hostcallback callback)
+void inputhandler_init(InputHandler* self)
 {
 	assert(self);
 
-	self->slots = NULL;
 	self->cmd.id = -1;
-	self->hostcontext = hostcontext;
-	self->hostcallback = callback;
-	self->sender = NULL;
-	psy_signal_connect(&player->eventdrivers.signal_input,
-		self, inputhandler_oneventdriverinput);
+	self->slots = NULL;	
+	self->hostcontext = NULL;
+	self->hostcallback = NULL;
+	self->sender = NULL;	
 }
 
 void inputhandler_dispose(InputHandler* self)
@@ -94,8 +91,7 @@ void inputhandler_connect_host(InputHandler* self, void* context,
 	self->hostcallback = callback;
 }
 
-void inputhandler_oneventdriverinput(InputHandler* self,
-	psy_EventDriver* sender)
+void inputhandler_event_driver_input(InputHandler* self, psy_EventDriver* sender)
 {
 	psy_List* p;
 

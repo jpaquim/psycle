@@ -293,13 +293,12 @@ uintptr_t psy_audio_psy_audio_patterns_trackarmedcount(const
 }
 
 void psy_audio_patterns_set_num_tracks(psy_audio_Patterns* self,
-	uintptr_t numtracks)
+	uintptr_t num_tracks)
 {
 	assert(self);
 
-	self->songtracks = numtracks;
-	psy_signal_emit(&self->signal_numsongtrackschanged, self, 1,
-		numtracks);
+	self->songtracks = num_tracks;
+	psy_signal_emit(&self->signal_numsongtrackschanged, self, 0);
 }
 
 uintptr_t psy_audio_patterns_num_tracks(const psy_audio_Patterns* self)

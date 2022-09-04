@@ -213,7 +213,7 @@ void samplesbox_select(SamplesBox* self, psy_audio_SampleIndex index)
 
 void samplesbox_file_select_sample(SamplesBox* self)
 {
-	if (keyboardmiscconfig_ft2fileexplorer(psycleconfig_misc(
+	if (keyboardmiscconfig_ft2_file_view(psycleconfig_misc(
 			workspace_conf(self->workspace)))) {
 		self->workspace->fileview->property = &self->sample_load;
 		workspace_select_view(self->workspace, viewindex_make(VIEW_ID_FILEVIEW,

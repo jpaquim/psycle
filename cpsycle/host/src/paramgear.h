@@ -117,7 +117,7 @@ typedef struct ParamRack {
 	/* internal */
 	ParamRackPane pane;
 	psy_ui_Component bottom;
-	ParamRackBatchBar batchbar;
+	// ParamRackBatchBar batchbar;
 	ParamRackModeBar modebar;	
 	IntEdit leveledit;
 	psy_ui_Scroller scroller;

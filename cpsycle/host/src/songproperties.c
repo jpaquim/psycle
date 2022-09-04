@@ -18,8 +18,8 @@
 
 /* prototypes */
 static void songpropertiesview_read(SongPropertiesView*);
-static void songpropertiesview_onsongchanged(SongPropertiesView*,
-	Workspace* sender);
+static void songpropertiesview_on_song_changed(SongPropertiesView*,
+	psy_audio_Player* sender);
 static void songpropertiesview_onhide(SongPropertiesView*,
 	psy_ui_Component* sender);
 static void songpropertiesview_oneditaccept(SongPropertiesView*,
@@ -166,8 +166,8 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->edit_comments.component.signal_keydown, self,
 		songpropertiesview_onfilterkeys);
 	songpropertiesview_read(self);	
-	psy_signal_connect(&workspace->signal_songchanged, self,
-		songpropertiesview_onsongchanged);
+	psy_signal_connect(&workspace->player.signal_song_changed, self,
+		songpropertiesview_on_song_changed);
 	psy_signal_connect(&self->component.signal_hide, self,
 		songpropertiesview_onhide);
 	psy_signal_connect(&self->component.signal_keydown, self,
@@ -199,15 +199,15 @@ void songpropertiesview_read(SongPropertiesView* self)
 	}
 }
 
-void songpropertiesview_onsongchanged(SongPropertiesView* self,
-	Workspace* sender)
+void songpropertiesview_on_song_changed(SongPropertiesView* self,
+	psy_audio_Player* sender)
 {
-	if (workspace_song_has_file(sender)) {
+	if (workspace_song_has_file(self->workspace)) {
 		songpropertiesview_disableedit(self);
 	} else {
 		songpropertiesview_enableedit(self);
 	}
-	self->song = workspace_song(sender);
+	self->song = psy_audio_player_song(sender);
 	songpropertiesview_read(self);
 }
 

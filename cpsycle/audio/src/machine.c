@@ -92,10 +92,15 @@ static struct psy_audio_Instruments* machinecallback_instruments(psy_audio_Machi
 	return NULL;
 }
 
-static struct psy_audio_MachineFactory* machinecallback_machinefactory(psy_audio_MachineCallback*
-	self) {
-	return 0;
+static psy_audio_MachineFactory* machinecallback_machinefactory(
+		psy_audio_MachineCallback* self)
+{
+	if (self->player) {
+		return &self->player->machinefactory;
+	}
+	return NULL;
 }
+
 static bool machinecallback_fileselect_load(psy_audio_MachineCallback* self) { return FALSE; }
 static bool machinecallback_fileselect_save(psy_audio_MachineCallback* self) { return FALSE; }
 static bool machinecallback_editresize(psy_audio_MachineCallback* self, psy_audio_Machine* sender,
@@ -162,53 +167,77 @@ static bool psy_audio_machinecallbackvtable_initialized = FALSE;
 static void psy_audio_machinecallbackvtable_init(void)
 {
 	if (!psy_audio_machinecallbackvtable_initialized) {
-		psy_audio_machinecallbackvtable_vtable.samplerate = (fp_mcb_samplerate)
+		psy_audio_machinecallbackvtable_vtable.samplerate =
+			(fp_mcb_samplerate)
 			machinecallback_samplerate;
-		psy_audio_machinecallbackvtable_vtable.bpm = (fp_mcb_bpm)
+		psy_audio_machinecallbackvtable_vtable.bpm =
+			(fp_mcb_bpm)
 			machinecallback_bpm;
-		psy_audio_machinecallbackvtable_vtable.sequencertime = (fp_mcb_sequencertime)
+		psy_audio_machinecallbackvtable_vtable.sequencertime =
+			(fp_mcb_sequencertime)
 			machinecallback_sequencertime;
-		psy_audio_machinecallbackvtable_vtable.beatspertick = (fp_mcb_beatspertick)
+		psy_audio_machinecallbackvtable_vtable.beatspertick =
+			(fp_mcb_beatspertick)
 			machinecallback_beatspertick;
-		psy_audio_machinecallbackvtable_vtable.beatspersample = (fp_mcb_beatspersample)
+		psy_audio_machinecallbackvtable_vtable.beatspersample =
+			(fp_mcb_beatspersample)
 			machinecallback_beatspersample;
-		psy_audio_machinecallbackvtable_vtable.currbeatsperline = (fp_mcb_currbeatsperline)
+		psy_audio_machinecallbackvtable_vtable.currbeatsperline =
+			(fp_mcb_currbeatsperline)
 			machinecallback_currbeatsperline;
-		psy_audio_machinecallbackvtable_vtable.samples = (fp_mcb_samples)
+		psy_audio_machinecallbackvtable_vtable.samples =
+			(fp_mcb_samples)
 			machinecallback_samples;
-		psy_audio_machinecallbackvtable_vtable.machines = (fp_mcb_machines)
+		psy_audio_machinecallbackvtable_vtable.machines =
+			(fp_mcb_machines)
 			machinecallback_machines;
-		psy_audio_machinecallbackvtable_vtable.instruments = (fp_mcb_instruments)
+		psy_audio_machinecallbackvtable_vtable.instruments =
+			(fp_mcb_instruments)
 			machinecallback_instruments;
-		psy_audio_machinecallbackvtable_vtable.machinefactory = (fp_mcb_machinefactory)
+		psy_audio_machinecallbackvtable_vtable.machinefactory =
+			(fp_mcb_machinefactory)
 			machinecallback_machinefactory;
-		psy_audio_machinecallbackvtable_vtable.fileselect_load = (fp_mcb_fileselect_load)
+		psy_audio_machinecallbackvtable_vtable.fileselect_load =
+			(fp_mcb_fileselect_load)
 			machinecallback_fileselect_load;
-		psy_audio_machinecallbackvtable_vtable.fileselect_save = (fp_mcb_fileselect_save)
+		psy_audio_machinecallbackvtable_vtable.fileselect_save =
+			(fp_mcb_fileselect_save)
 			machinecallback_fileselect_save;
-		psy_audio_machinecallbackvtable_vtable.editresize = (fp_mcb_editresize)
+		psy_audio_machinecallbackvtable_vtable.editresize =
+			(fp_mcb_editresize)
 			machinecallback_editresize;
 		psy_audio_machinecallbackvtable_vtable.fileselect_directory =
-			(fp_mcb_fileselect_directory)machinecallback_fileselect_directory;
-		psy_audio_machinecallbackvtable_vtable.output = (fp_mcb_output)
+			(fp_mcb_fileselect_directory)
+			machinecallback_fileselect_directory;
+		psy_audio_machinecallbackvtable_vtable.output =
+			(fp_mcb_output)
 			machinecallback_output;
-		psy_audio_machinecallbackvtable_vtable.addcapture = (fp_mcb_addcapture)
+		psy_audio_machinecallbackvtable_vtable.addcapture =
+			(fp_mcb_addcapture)
 			machinecallback_addcapture;
-		psy_audio_machinecallbackvtable_vtable.removecapture = (fp_mcb_removecapture)
+		psy_audio_machinecallbackvtable_vtable.removecapture =
+			(fp_mcb_removecapture)
 			machinecallback_removecapture;
-		psy_audio_machinecallbackvtable_vtable.readbuffers = (fp_mcb_readbuffers)
+		psy_audio_machinecallbackvtable_vtable.readbuffers =
+			(fp_mcb_readbuffers)
 			machinecallback_readbuffers;
-		psy_audio_machinecallbackvtable_vtable.capturename = (fp_mcb_capturename)
+		psy_audio_machinecallbackvtable_vtable.capturename =
+			(fp_mcb_capturename)
 			machinecallback_capturename;
-		psy_audio_machinecallbackvtable_vtable.numcaptures = (fp_mcb_numcaptures)
+		psy_audio_machinecallbackvtable_vtable.numcaptures =
+			(fp_mcb_numcaptures)
 			machinecallback_numcaptures;
-		psy_audio_machinecallbackvtable_vtable.playbackname = (fp_mcb_playbackname)
+		psy_audio_machinecallbackvtable_vtable.playbackname =
+			(fp_mcb_playbackname)
 			machinecallback_playbackname;
-		psy_audio_machinecallbackvtable_vtable.numplaybacks = (fp_mcb_numplaybacks)
+		psy_audio_machinecallbackvtable_vtable.numplaybacks =
+			(fp_mcb_numplaybacks)
 			machinecallback_numplaybacks;
-		psy_audio_machinecallbackvtable_vtable.language = (fp_mcb_language)
+		psy_audio_machinecallbackvtable_vtable.language =
+			(fp_mcb_language)
 			machinecallback_language;
-		psy_audio_machinecallbackvtable_vtable.buschanged = (fp_mcb_buschanged)
+		psy_audio_machinecallbackvtable_vtable.buschanged =
+			(fp_mcb_buschanged)
 			machinecallback_buschanged;
 		psy_audio_machinecallbackvtable_initialized = TRUE;
 	}
@@ -221,10 +250,10 @@ void psy_audio_machinecallback_init(psy_audio_MachineCallback* self)
 	self->song = NULL;
 }
 
-void psy_audio_machinecallback_setplayer(psy_audio_MachineCallback* self,
+void psy_audio_machinecallback_set_player(psy_audio_MachineCallback* self,
 	psy_audio_Player* player)
 {
-	self->player = player;
+	self->player = player;	
 }
 
 void psy_audio_machinecallback_set_song(psy_audio_MachineCallback* self,

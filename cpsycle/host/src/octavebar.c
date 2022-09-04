@@ -18,7 +18,7 @@ static void octavebar_on_octavebox_sekected(OctaveBar*,
 	psy_ui_Component* sender, intptr_t sel);
 static void octavebar_on_octave_changed(OctaveBar*, psy_audio_Player*,
 	intptr_t octave);
-static void octavebar_on_song_changed(OctaveBar*, Workspace* sender);
+static void octavebar_on_song_changed(OctaveBar*, psy_audio_Player* sender);
 
 /* implementation */
 void octavebar_init(OctaveBar* self, psy_ui_Component* parent,
@@ -39,7 +39,7 @@ void octavebar_init(OctaveBar* self, psy_ui_Component* parent,
 		octavebar_on_octavebox_sekected);
 	psy_signal_connect(&workspace->player.signal_octavechanged, self,
 		octavebar_on_octave_changed);
-	psy_signal_connect(&workspace->signal_songchanged, self,
+	psy_signal_connect(&workspace->player.signal_song_changed, self,
 		octavebar_on_song_changed);	
 }
 
@@ -70,7 +70,7 @@ void octavebar_on_octave_changed(OctaveBar* self, psy_audio_Player* sender,
 	psy_ui_combobox_select(&self->octavebox, psy_audio_player_octave(sender));
 }
 
-void octavebar_on_song_changed(OctaveBar* self, Workspace* sender)
+void octavebar_on_song_changed(OctaveBar* self, psy_audio_Player* sender)
 {	
-	psy_ui_combobox_select(&self->octavebox, psy_audio_player_octave(&sender->player));
+	psy_ui_combobox_select(&self->octavebox, psy_audio_player_octave(sender));
 }

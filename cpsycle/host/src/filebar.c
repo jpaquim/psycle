@@ -56,7 +56,7 @@ void filebar_init(FileBar* self, psy_ui_Component* parent, Workspace* workspace)
 		"file.render");	
 	psy_ui_button_load_resource(&self->renderbutton, IDB_PULSE_LIGHT,
 		IDB_PULSE_DARK, psy_ui_colour_white());
-	if (keyboardmiscconfig_ft2fileexplorer(psycleconfig_misc(
+	if (keyboardmiscconfig_ft2_file_view(psycleconfig_misc(
 		workspace_conf(workspace)))) {
 		filebar_useft2fileexplorer(self);
 	} else {
@@ -112,7 +112,7 @@ void filebar_ondiskop(FileBar* self, psy_ui_Component* sender)
 
 void filebar_onloadsong(FileBar* self, psy_ui_Component* sender)
 {	
-	if (!keyboardmiscconfig_ft2fileexplorer(psycleconfig_misc(
+	if (!keyboardmiscconfig_ft2_file_view(psycleconfig_misc(
 		workspace_conf(self->workspace)))) {
 		if (keyboardmiscconfig_savereminder(&self->workspace->config.misc) &&
 			workspace_song_modified(self->workspace)) {

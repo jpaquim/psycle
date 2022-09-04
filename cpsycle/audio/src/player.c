@@ -162,19 +162,19 @@ static void psy_audio_player_on_lpb_describe(psy_audio_Player*,
 
 /* implementation */
 void psy_audio_player_init(psy_audio_Player* self,
-	psy_audio_MachineCallback* callback, psy_audio_Song* song,
-	void* handle)
+	psy_audio_MachineCallback* callback, void* handle)
 {
 	assert(self);
 
-	psy_audio_machinefactory_init(&self->machinefactory);
-	psy_audio_custommachine_init(&self->custommachine, callback);
-	psy_audio_song_init(&self->emptysong, &self->machinefactory);
-	if (song) {
-		self->song = song;		
-	} else {
-		self->song = &self->emptysong;
-	}	
+	psy_audio_plugincatcher_init(&self->plugincatcher);
+	psy_audio_machinefactory_init(&self->machinefactory, callback,
+		&self->plugincatcher);
+	if (callback) {
+		psy_audio_machinecallback_set_player(callback, self);		
+	}
+	psy_audio_custommachine_init(&self->custommachine, callback);	
+	psy_audio_song_init(&self->emptysong, &self->machinefactory);	
+	self->song = &self->emptysong;		
 	self->recordingnotes = FALSE;
 	self->recordnoteoff = FALSE;
 	self->multichannelaudition = FALSE;	
@@ -245,6 +245,7 @@ void psy_audio_player_initsignals(psy_audio_Player* self)
 {
 	assert(self);
 
+	psy_signal_init(&self->signal_song_changed);
 	psy_signal_init(&self->signal_lpbchanged);
 	psy_signal_init(&self->signal_inputevent);
 	psy_signal_init(&self->signal_octavechanged);
@@ -262,6 +263,7 @@ void psy_audio_player_dispose(psy_audio_Player* self)
 	psy_list_deallocate(&self->nodes_queue_, NULL);
 	psy_lock_dispose(&self->mutex);
 	psy_lock_dispose(&self->block);
+	psy_signal_dispose(&self->signal_song_changed);
 	psy_signal_dispose(&self->signal_lpbchanged);
 	psy_signal_dispose(&self->signal_inputevent);
 	psy_signal_dispose(&self->signal_octavechanged);
@@ -278,6 +280,8 @@ void psy_audio_player_dispose(psy_audio_Player* self)
 	psy_audio_midiinput_dispose(&self->midiinput);
 	psy_audio_song_dispose(&self->emptysong);
 	psy_audio_machinefactory_dispose(&self->machinefactory);
+	psy_audio_plugincatcher_save(&self->plugincatcher);	
+	psy_audio_plugincatcher_dispose(&self->plugincatcher);
 	psy_audio_custommachineparam_dispose(&self->tempo_param);
 	psy_audio_custommachineparam_dispose(&self->lpb_param);
 	psy_audio_custommachine_dispose(&self->custommachine);
@@ -714,12 +718,21 @@ void psy_audio_player_set_song(psy_audio_Player* self, psy_audio_Song* song)
 {
 	assert(self);
 
+	if (self->song == song) {
+		return;
+	}
+	psy_audio_player_stop(self);
+	dsp.clear(bufferdriver, MAX_SAMPLES_WORKFN);
 	self->song = song;
 	psy_audio_midiinput_setsong(&self->midiinput, song);
 	if (self->song) {		
 		psy_audio_SequencerMetronome restore_metronome;
 		
-		restore_metronome = self->sequencer.metronome;
+		if (self->machinefactory.machinecallback) {
+			psy_audio_machinecallback_set_song(
+				self->machinefactory.machinecallback, self->song);
+		}
+		restore_metronome = self->sequencer.metronome;		
 		psy_audio_sequencer_reset(&self->sequencer, &song->sequence,
 			&song->machines, psy_audiodriver_samplerate(self->driver));		
 		psy_audio_player_setbpm(self, psy_audio_song_bpm(self->song));
@@ -727,8 +740,10 @@ void psy_audio_player_set_song(psy_audio_Player* self, psy_audio_Song* song)
 		psy_audio_player_set_octave(self, psy_audio_song_octave(self->song));
 		self->sequencer.metronome = restore_metronome;		
 		psy_audio_player_set_sampler_index(self,
-			psy_audio_song_sampler_index(self->song));		
+			psy_audio_song_sampler_index(self->song));
+		psy_audio_player_setposition(self, 0.0);	
 	}
+	psy_signal_emit(&self->signal_song_changed, self, 0);
 }
 
 void psy_audio_player_set_octave(psy_audio_Player* self, uint8_t octave)

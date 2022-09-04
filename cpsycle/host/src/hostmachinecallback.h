@@ -35,8 +35,7 @@ extern "C" {
 typedef struct HostMachineCallback {
 	/* implements */
 	psy_audio_MachineCallback machinecallback;
-	/* references */
-	psy_audio_MachineFactory* machine_factory;
+	/* references */	
 	DirConfig* dir_config;
 	psy_Logger* logger;
 	psy_Signal* signal_machineeditresize;
@@ -46,9 +45,12 @@ typedef struct HostMachineCallback {
 void hostmachinecallback_init(HostMachineCallback*, DirConfig*,
 	psy_Signal* signal_machineeditresize, psy_Signal* signal_buschanged);
 	
-void hostmachinecallback_set_machine_factory(HostMachineCallback*,
-	psy_audio_MachineFactory*);
 
+INLINE psy_audio_MachineCallback* hostmachinecallback_base(
+	HostMachineCallback* self)
+{
+	return &self->machinecallback;
+}
 
 #ifdef __cplusplus
 }

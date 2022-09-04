@@ -298,7 +298,7 @@ intptr_t keyboardmiscconfig_cursor_step(const KeyboardMiscConfig* self)
 }
 
 
-bool keyboardmiscconfig_ft2fileexplorer(const KeyboardMiscConfig* self)
+bool keyboardmiscconfig_ft2_file_view(const KeyboardMiscConfig* self)
 {
 	assert(self);
 #if PSYCLE_USE_TK == PSYCLE_TK_X11

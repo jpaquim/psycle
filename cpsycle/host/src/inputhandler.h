@@ -58,8 +58,7 @@ typedef struct InputHandler {
 	psy_EventDriver* sender;
 } InputHandler;
 
-void inputhandler_init(InputHandler*, psy_audio_Player*,
-	void* hostcontext, fp_inputhandler_hostcallback);
+void inputhandler_init(InputHandler*);
 void inputhandler_dispose(InputHandler*);
 
 void inputhandler_connect(InputHandler*, InputHandlerType type,
@@ -69,6 +68,8 @@ void inputhandler_connect_host(InputHandler*, void* context,
 	fp_inputhandler_hostcallback);
 psy_EventDriverCmd inputhandler_cmd(const InputHandler*);
 psy_EventDriver* inputhandler_sender(const InputHandler*);
+
+void inputhandler_event_driver_input(InputHandler* self, psy_EventDriver*);
 
 #ifdef __cplusplus
 }

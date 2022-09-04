@@ -1455,8 +1455,8 @@ void machinestackvolumes_build(MachineStackVolumes* self)
 
 /* prototypes */
 static void machinestackview_destroyed(MachineStackView*);
-static void machinestackview_onsongchanged(MachineStackView*,
-	Workspace* sender);
+static void machinestackview_on_song_changed(MachineStackView*,
+	psy_audio_Player* sender);
 static void machinestackview_onbuschanged(MachineStackView*, Workspace*,
 	psy_audio_Machine*);
 static void machinestackview_build(MachineStackView*);
@@ -1532,8 +1532,8 @@ void machinestackview_init(MachineStackView* self, psy_ui_Component* parent,
 	psy_ui_component_set_preferred_size(&self->spacer, psy_ui_size_make_em(0.0, 0.5));
 	psy_ui_component_set_aligner(&self->spacer, NULL);	
 	psy_ui_component_set_align(&self->spacer, psy_ui_ALIGN_BOTTOM);	
-	psy_signal_connect(&workspace->signal_songchanged, self,
-		machinestackview_onsongchanged);	
+	psy_signal_connect(&workspace->player.signal_song_changed, self,
+		machinestackview_on_song_changed);	
 	psy_signal_connect(&workspace->signal_buschanged, self,
 		machinestackview_onbuschanged);
 	machinestackview_setmachines(self, workspace_song(workspace)
@@ -1545,11 +1545,12 @@ void machinestackview_destroyed(MachineStackView* self)
 	machinestackstate_dispose(&self->state);
 }
 
-void machinestackview_onsongchanged(MachineStackView* self, Workspace* sender)
+void machinestackview_on_song_changed(MachineStackView* self,
+	psy_audio_Player* sender)
 {
 	machinestackview_setmachines(self,
-		(sender->song)
-		? &sender->song->machines
+		(psy_audio_player_song(sender))		
+		? &psy_audio_player_song(sender)->machines
 		: NULL);	
 }
 

@@ -19,8 +19,8 @@ static void songtrackbar_build(SongTrackBar*);
 static void songtrackbar_onselchange(SongTrackBar*, psy_ui_Component* sender,
 	intptr_t index);
 static void songtrackbar_onsongtracknumchanged(SongTrackBar*,
-	psy_audio_Patterns*, uintptr_t numsongtracks);
-static void songtrackbar_onsongchanged(SongTrackBar*, Workspace* sender);
+	psy_audio_Patterns*);
+static void songtrackbar_on_song_changed(SongTrackBar*, psy_audio_Player* sender);
 
 /* implementation */
 void songtrackbar_init(SongTrackBar* self, psy_ui_Component* parent,
@@ -40,8 +40,8 @@ void songtrackbar_init(SongTrackBar* self, psy_ui_Component* parent,
 		songtrackbar_onselchange);
 	psy_signal_connect(&workspace->song->patterns.signal_numsongtrackschanged,
 		self, songtrackbar_onsongtracknumchanged);
-	psy_signal_connect(&workspace->signal_songchanged, self,
-		songtrackbar_onsongchanged);	
+	psy_signal_connect(&workspace->player.signal_song_changed, self,
+		songtrackbar_on_song_changed);	
 }
 
 void songtrackbar_build(SongTrackBar* self)
@@ -70,18 +70,24 @@ void songtrackbar_onselchange(SongTrackBar* self, psy_ui_Component* sender,
 }
 
 void songtrackbar_onsongtracknumchanged(SongTrackBar* self,
-	psy_audio_Patterns* patterns, uintptr_t numsongtracks)
-{
-	psy_ui_combobox_select(&self->tracknumbers, numsongtracks - MIN_TRACKS);
+	psy_audio_Patterns* patterns)
+{	
+	assert(self);
+	assert(patterns);
+	
+	psy_ui_combobox_select(&self->tracknumbers,  psy_audio_patterns_num_tracks(
+		patterns) - MIN_TRACKS);
 }
 
-void songtrackbar_onsongchanged(SongTrackBar* self, Workspace* sender)
+void songtrackbar_on_song_changed(SongTrackBar* self, psy_audio_Player* sender)
 {	
-	if (workspace_song(sender)) {
+	if (psy_audio_player_song(sender)) {
 		psy_ui_combobox_select(&self->tracknumbers,
-			psy_audio_song_num_song_tracks(workspace_song(sender)) - MIN_TRACKS);
+			psy_audio_song_num_song_tracks(psy_audio_player_song(sender)) - MIN_TRACKS);		
 		psy_signal_connect(
-			&workspace_song(sender)->patterns.signal_numsongtrackschanged,
+			&psy_audio_player_song(sender)->patterns.signal_numsongtrackschanged,
 			self, songtrackbar_onsongtracknumchanged);
+		songtrackbar_onsongtracknumchanged(self, psy_audio_song_patterns(
+			psy_audio_player_song(sender)));
 	}
 }
