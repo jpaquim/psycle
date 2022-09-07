@@ -43,6 +43,8 @@ typedef struct psy_ui_ComponentStyle {
 								**   overridestyle
 								*/
 	psy_ui_Style overridestyle;	/* overrides currstyle for component setter */
+	bool override_margin;
+	bool override_padding;
 	psy_ui_StyleState states;	/* bit flag holding the activated states */	
 	psy_ui_SizeHints* sizehints;
 	intptr_t debugflag;
@@ -88,12 +90,13 @@ const psy_ui_Style* psy_ui_componentstyle_currstyle_const(const psy_ui_Component
 INLINE void psy_ui_componentstyle_setmargin(psy_ui_ComponentStyle* self,
 		psy_ui_Margin margin)
 {
-	psy_ui_style_setmargin(&self->overridestyle, margin);	
+	psy_ui_style_setmargin(&self->overridestyle, margin);
+	self->override_margin = TRUE;
 }
 
 INLINE psy_ui_Margin psy_ui_componentstyle_margin(const psy_ui_ComponentStyle* self)
 {	
-	if (self->overridestyle.marginset) {
+	if (self->override_margin) {
 		return self->overridestyle.margin;
 	} 
 	return psy_ui_componentstyle_currstyle_const(self)->margin;
@@ -102,11 +105,12 @@ INLINE psy_ui_Margin psy_ui_componentstyle_margin(const psy_ui_ComponentStyle* s
 INLINE void psy_ui_componentstyle_set_padding(psy_ui_ComponentStyle* self, psy_ui_Margin spacing)
 {
 	psy_ui_style_setpadding(&self->overridestyle, spacing);
+	self->override_padding = TRUE;
 }
 
 INLINE psy_ui_Margin psy_ui_componentstyle_spacing(const psy_ui_ComponentStyle * self)
 {
-	if (self->overridestyle.paddingset) {
+	if (self->override_padding) {
 		return self->overridestyle.padding;
 	}
 	return psy_ui_componentstyle_currstyle_const(self)->padding;

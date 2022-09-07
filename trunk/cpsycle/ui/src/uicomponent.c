@@ -2151,7 +2151,7 @@ void psy_ui_component_draw(psy_ui_Component* self, psy_ui_Graphics* g)
 			origin = psy_ui_origin(g);
 			/* spacing */
 			padding = psy_ui_component_padding(self);
-			if (!psy_ui_margin_iszero(&padding)) {
+			if (!psy_ui_margin_is_zero(&padding)) {
 				tm = psy_ui_component_textmetric(self);			
 				psy_ui_setorigin(g, psy_ui_realpoint_make(
 					origin.x - (int)psy_ui_value_px(&padding.left, tm, NULL),

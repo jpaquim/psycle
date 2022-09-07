@@ -376,7 +376,7 @@ bool psy_ui_app_hasdarktheme(const psy_ui_App* self)
 {
 	assert(self);
 
-	return psy_ui_defaults()->styles.theme == psy_ui_DARKTHEME;
+	return (psy_ui_defaults()->styles.theme_mode == psy_ui_DARKTHEME);
 }
 
 psy_ui_Style* psy_ui_app_style(psy_ui_App* self, uintptr_t styletype)

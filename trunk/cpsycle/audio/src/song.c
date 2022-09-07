@@ -10,6 +10,7 @@
 /* local */
 #include "constants.h"
 #include "machinefactory.h"
+#include "songio.h"
 /* platform */
 #include "../../detail/portable.h"
 
@@ -286,4 +287,26 @@ void psy_audio_song_set_file(psy_audio_Song* self, const char* filename)
 		psy_strreset(&self->filename, PSYCLE_UNTITLED);
 		self->song_has_file = FALSE;
 	}
+}
+
+int psy_audio_song_save(psy_audio_Song* self, const char* path,
+	void* context_err, fp_string_output err)
+{
+	assert(self);
+		
+	if (psy_strlen(path) > 0) {
+		psy_audio_SongFile songfile;
+		int status;
+
+		psy_audio_songfile_init_song(&songfile, self);
+		status = psy_audio_songfile_save(&songfile, path);
+		if (status && context_err && err) {
+			err(context_err, songfile.serr);
+		} else {			
+			self->song_has_file = TRUE;
+		}
+		psy_audio_songfile_dispose(&songfile);
+		return status;	
+	}
+	return PSY_ERRFILE;
 }

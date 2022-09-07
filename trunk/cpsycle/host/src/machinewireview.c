@@ -15,11 +15,8 @@
 #include "styles.h"
 /* audio */
 #include <exclusivelock.h>
-/* std */
-#include <math.h>
 /* platform */
 #include "../../detail/portable.h"
-#include "../../detail/trace.h"
 
 
 void machinewireviewuis_init(MachineWireViewUis* self, psy_ui_Component* view,
@@ -84,16 +81,6 @@ void machinewireviewuis_removeall(MachineWireViewUis* self)
 	psy_table_clear(&self->machineuis);
 }
 
-void machinewireviewuis_redrawvus(MachineWireViewUis* self)
-{
-	if (psy_ui_component_draw_visible(self->view) &&
-			!machineui_vumeter_prevented()) {
-		psy_ui_component_invalidate_rect(self->view, 
-			psy_ui_component_bounds(self->view));
-		psy_ui_component_update(self->view);		
-	}
-}
-
 /* MachineWireView */
 /* prototypes */
 static void machinewireview_on_destroyed(MachineWireView*);
@@ -116,10 +103,6 @@ static bool machinewireview_movemachine(MachineWireView*, uintptr_t slot,
 static void machinewireview_onmousedoubleclick(MachineWireView*,
 	psy_ui_MouseEvent*);
 static void machinewireview_on_key_down(MachineWireView*, psy_ui_KeyboardEvent*);
-static uintptr_t machinewireview_machineleft(MachineWireView*, uintptr_t src);
-static uintptr_t machinewireview_machineright(MachineWireView*, uintptr_t src);
-static uintptr_t machinewireview_machineup(MachineWireView*, uintptr_t src);
-static uintptr_t machinewireview_machinedown(MachineWireView*, uintptr_t src);
 static uintptr_t machinewireview_hittest(const MachineWireView*);
 static psy_audio_Wire machinewireview_hittestwire(MachineWireView*,
 	psy_ui_RealPoint);
@@ -155,8 +138,6 @@ static bool machinewireview_drag_machine(MachineWireView*, uintptr_t slot,
 	double x, double y);
 static void machinewireview_setdragstatus(MachineWireView*, uintptr_t slot);
 static void machinewireview_onalign(MachineWireView*);
-static void machinewireview_redrawvus(MachineWireView*);
-static bool machinewireview_redrawstate(MachineWireView*);
 
 /* vtable */
 static psy_ui_ComponentVtable vtable;
@@ -207,8 +188,7 @@ void machinewireview_init(MachineWireView* self, psy_ui_Component* parent,
 	vtable_init(self);	
 	psy_ui_component_set_style_type(&self->component, STYLE_MV_WIRES);
 	machinewireviewuis_init(&self->machineuis, &self->component, paramviews,
-		workspace);
-	self->opcount = 0;
+		workspace);	
 	self->centermaster = TRUE;
 	psy_ui_component_set_scroll_step(&self->component,
 		psy_ui_size_make_px(10.0, 1.0));	
@@ -605,8 +585,7 @@ void machinewireview_on_mouse_move(MachineWireView* self, psy_ui_MouseEvent* ev)
 			}			
 		} else if (machinewireview_dragging_connection(self)) {
 			self->dragpt = psy_ui_mouseevent_pt(ev);
-			psy_ui_component_invalidate(&self->component);
-			++self->component.opcount;
+			psy_ui_component_invalidate(&self->component);			
 		}		
 	} else if (self->showwirehover) {
 		psy_audio_Wire hoverwire;
@@ -623,8 +602,7 @@ void machinewireview_on_mouse_move(MachineWireView* self, psy_ui_MouseEvent* ev)
 				r = psy_ui_component_position(machineui);
 				if (psy_ui_realrectangle_intersect(&r, psy_ui_mouseevent_pt(ev))) {
 					psy_audio_wire_invalidate(&self->hoverwire);
-					psy_ui_component_invalidate(&self->component);
-					++self->component.opcount;
+					psy_ui_component_invalidate(&self->component);					
 					return;
 				}
 			}
@@ -636,15 +614,13 @@ void machinewireview_on_mouse_move(MachineWireView* self, psy_ui_MouseEvent* ev)
 				r = psy_ui_component_position(machineui);
 				if (psy_ui_realrectangle_intersect(&r, psy_ui_mouseevent_pt(ev))) {
 					psy_audio_wire_invalidate(&self->hoverwire);
-					psy_ui_component_invalidate(&self->component);
-					++self->component.opcount;
+					psy_ui_component_invalidate(&self->component);					
 					return;
 				}
 			}
 		}
 		if (!psy_audio_wire_equal(&hoverwire, &self->hoverwire)) {
-			self->hoverwire = hoverwire;
-			++self->component.opcount;
+			self->hoverwire = hoverwire;			
 			psy_ui_component_invalidate(&self->component);
 		}		
 	}
@@ -706,6 +682,54 @@ bool machinewireview_drag_machine(MachineWireView* self, uintptr_t slot,
 		return TRUE;
 	}
 	return FALSE;
+/* multidrag
+	psy_List* p;
+	bool drag;
+	double dx;
+	double dy;
+	psy_ui_Component* machineui;
+	
+	assert(self);
+	
+	drag = FALSE;
+	
+	machineui = (psy_ui_Component*)machinewireviewuis_at(&self->machineuis,
+		slot);
+	dx = dy = 0.0;
+	if (machineui) {
+		dx = x - psy_ui_component_position(machineui).left;
+		dy = y - psy_ui_component_position(machineui).top;
+	}	
+	for (p = self->machines->selection.entries; p != NULL; p = p->next) {
+		psy_audio_MachineIndex* index;		
+
+		index = (psy_audio_MachineIndex*)p->entry;
+		machineui = (psy_ui_Component*)machinewireviewuis_at(&self->machineuis,
+			index->macid);
+		// machineui = machinewireviewuis_at(&self->machineuis, index->macid);
+		if (machineui) {		
+			psy_ui_RealRectangle r_old;
+			psy_ui_RealRectangle r_new;
+			double x, y;
+		
+			x = psy_ui_component_position(machineui).left + dx,
+			y = psy_ui_component_position(machineui).top + dy;
+			r_old = machinewireview_updaterect(self, index->macid);
+			psy_ui_realrectangle_expand_all(&r_old,
+				PSYCLE_MACHINE_BORDER_DISTANCE);		
+			psy_ui_component_move(machineui, psy_ui_point_make_px(
+				psy_max(0.0, x), psy_max(0.0, y)));
+			machinewireview_setdragstatus(self, index->macid);		
+			r_new = machinewireview_updaterect(self, index->macid);
+			psy_ui_realrectangle_union(&r_new, &r_old);
+			psy_ui_realrectangle_expand_all(&r_new,
+				PSYCLE_MACHINE_BORDER_DISTANCE);
+			psy_ui_component_invalidate_rect(&self->component, r_new);		
+			drag = TRUE;
+		}
+	}
+	return drag;
+*/
 }
 
 void machinewireview_setdragstatus(MachineWireView* self, uintptr_t slot)
@@ -802,50 +826,6 @@ void machinewireview_on_key_down(MachineWireView* self, psy_ui_KeyboardEvent* ev
 				}
 			}
 		}
-	} else if (psy_ui_keyboardevent_keycode(ev) == psy_ui_KEY_UP) {
-		if (psy_ui_keyboardevent_shiftkey(ev)) {
-			machinewireview_movemachine(self, self->selectedslot, 0, -10);
-		} else {
-			uintptr_t index;
-
-			index = machinewireview_machineup(self, self->selectedslot);
-			if (index != psy_INDEX_INVALID) {
-				psy_audio_machines_select(self->machines, index);
-			}
-		}
-	} else if (psy_ui_keyboardevent_keycode(ev) == psy_ui_KEY_DOWN) {
-		if (psy_ui_keyboardevent_shiftkey(ev)) {
-			machinewireview_movemachine(self, self->selectedslot, 0, 10);
-		} else {
-			uintptr_t index;
-
-			index = machinewireview_machinedown(self, self->selectedslot);
-			if (index != psy_INDEX_INVALID) {
-				psy_audio_machines_select(self->machines, index);
-			}
-		}
-	} else if (psy_ui_keyboardevent_keycode(ev) == psy_ui_KEY_LEFT) {
-		if (psy_ui_keyboardevent_shiftkey(ev)) {
-			machinewireview_movemachine(self, self->selectedslot, -10, 0);
-		} else {
-			uintptr_t index;
-
-			index = machinewireview_machineleft(self, self->selectedslot);
-			if (index != psy_INDEX_INVALID) {
-				psy_audio_machines_select(self->machines, index);
-			}
-		}
-	} else if (psy_ui_keyboardevent_keycode(ev) == psy_ui_KEY_RIGHT) {
-		if (psy_ui_keyboardevent_shiftkey(ev)) {
-			machinewireview_movemachine(self, self->selectedslot, 10, 0);
-		} else {
-			uintptr_t index;
-
-			index = machinewireview_machineright(self, self->selectedslot);
-			if (index != psy_INDEX_INVALID) {
-				psy_audio_machines_select(self->machines, index);
-			}
-		}
 	} else if (psy_ui_keyboardevent_keycode(ev) == psy_ui_KEY_DELETE &&
 			psy_audio_wire_valid(&selectedwire)) {
 		psy_audio_exclusivelock_enter();
@@ -861,134 +841,6 @@ void machinewireview_on_key_down(MachineWireView* self, psy_ui_KeyboardEvent* ev
 	} else if (psy_ui_keyboardevent_repeat(ev)) {
 		psy_ui_keyboardevent_stop_propagation(ev);
 	}
-}
-
-uintptr_t machinewireview_machineleft(MachineWireView* self, uintptr_t src)
-{
-	uintptr_t rv;
-	psy_ui_Component* srcmachineui;
-	double currpos;	
-
-	rv = psy_INDEX_INVALID;
-	srcmachineui = machinewireviewuis_at(&self->machineuis, src);
-	if (srcmachineui) {
-		psy_TableIterator it;
-		double srcpos;
-
-		srcpos = psy_ui_component_position(srcmachineui).left;
-		currpos = (double)INTPTR_MAX;
-		for (it = psy_table_begin(&self->machineuis.machineuis);
-				!psy_tableiterator_equal(&it, psy_table_end());
-				psy_tableiterator_inc(&it)) {
-			psy_ui_Component* machineui;
-
-			machineui = (psy_ui_Component*)psy_tableiterator_value(&it);
-			if (psy_ui_component_position(machineui).left < srcpos) {
-				if (currpos == INTPTR_MAX ||
-						currpos < psy_ui_component_position(machineui).left) {
-					rv = psy_tableiterator_key(&it);
-					currpos = psy_ui_component_position(machineui).left;
-				}
-			}
-		}
-	}
-	return rv;
-}
-
-uintptr_t machinewireview_machineright(MachineWireView* self, uintptr_t src)
-{
-	uintptr_t rv;
-	psy_ui_Component* srcmachineui;
-	double currpos;
-
-	rv = psy_INDEX_INVALID;
-	srcmachineui = machinewireviewuis_at(&self->machineuis, src);
-	if (srcmachineui) {
-		psy_TableIterator it;
-		double srcpos;
-
-		srcpos = psy_ui_component_position(srcmachineui).left;
-		currpos = (double)INTPTR_MIN;
-		for (it = psy_table_begin(&self->machineuis.machineuis);
-				!psy_tableiterator_equal(&it, psy_table_end());
-				psy_tableiterator_inc(&it)) {
-			psy_ui_Component* machineui;
-
-			machineui = (psy_ui_Component*)psy_tableiterator_value(&it);
-			if (psy_ui_component_position(machineui).left > srcpos) {
-				if (currpos == (double)INTPTR_MIN ||
-						currpos > psy_ui_component_position(machineui).left) {
-					rv = psy_tableiterator_key(&it);
-					currpos = psy_ui_component_position(machineui).left;
-				}
-			}
-		}
-	}
-	return rv;
-}
-
-uintptr_t machinewireview_machineup(MachineWireView* self, uintptr_t src)
-{
-	uintptr_t rv;
-	psy_ui_Component* srcmachineui;
-	double currpos;
-
-	rv = psy_INDEX_INVALID;
-	srcmachineui = machinewireviewuis_at(&self->machineuis, src);
-	if (srcmachineui) {
-		psy_TableIterator it;
-		double srcpos;				
-
-		srcpos = psy_ui_component_position(srcmachineui).top;
-		currpos = (double)INTPTR_MAX;
-		for (it = psy_table_begin(&self->machineuis.machineuis);
-				!psy_tableiterator_equal(&it, psy_table_end());
-				psy_tableiterator_inc(&it)) {
-			psy_ui_Component* machineui;
-
-			machineui = (psy_ui_Component*)psy_tableiterator_value(&it);
-			if (psy_ui_component_position(machineui).top < srcpos) {
-				if (currpos == INTPTR_MAX ||
-					currpos < psy_ui_component_position(machineui).top) {
-					rv = psy_tableiterator_key(&it);
-					currpos = psy_ui_component_position(machineui).top;
-				}
-			}
-		}
-	}
-	return rv;
-}
-
-uintptr_t machinewireview_machinedown(MachineWireView* self, uintptr_t src)
-{
-	uintptr_t rv;
-	psy_ui_Component* srcmachineui;
-	double currpos;
-
-	rv = psy_INDEX_INVALID;
-	srcmachineui = machinewireviewuis_at(&self->machineuis, src);
-	if (srcmachineui) {
-		psy_TableIterator it;
-		double srcpos;
-
-		srcpos = psy_ui_component_position(srcmachineui).bottom;
-		currpos = INTPTR_MIN;
-		for (it = psy_table_begin(&self->machineuis.machineuis);
-				!psy_tableiterator_equal(&it, psy_table_end());
-				psy_tableiterator_inc(&it)) {
-			psy_ui_Component* machineui;
-
-			machineui = (psy_ui_Component*)psy_tableiterator_value(&it);
-			if (psy_ui_component_position(machineui).bottom > srcpos) {
-				if (currpos == (double)INTPTR_MIN ||
-					currpos > psy_ui_component_position(machineui).bottom) {
-					rv = psy_tableiterator_key(&it);
-					currpos = psy_ui_component_position(machineui).bottom;
-				}
-			}
-		}
-	}
-	return rv;
 }
 
 psy_audio_Wire machinewireview_hittestwire(MachineWireView* self, psy_ui_RealPoint pt)
@@ -1092,8 +944,7 @@ void machinewireview_onmachineinsert(MachineWireView* self,
 					psy_ui_value_make_px(psy_max(0.0, self->dragpt.y - size.height / 2))));
 		}
 		psy_ui_component_updateoverflow(&self->component);
-		psy_ui_component_invalidate(&self->component);
-		++self->component.opcount;
+		psy_ui_component_invalidate(&self->component);		
 		self->randominsert = 1;
 	}
 }
@@ -1104,22 +955,19 @@ void machinewireview_onmachineremoved(MachineWireView* self,
 	machinewireviewuis_remove(&self->machineuis, slot);
 	paramviews_remove(self->paramviews, slot);
 	psy_ui_component_updateoverflow(&self->component);
-	psy_ui_component_invalidate(&self->component);
-	++self->component.opcount;
+	psy_ui_component_invalidate(&self->component);	
 }
 
 void machinewireview_onconnected(MachineWireView* self,
 	psy_audio_Connections* sender, uintptr_t src, uintptr_t dst)
 {
-	psy_ui_component_invalidate(&self->component);
-	++self->component.opcount;
+	psy_ui_component_invalidate(&self->component);	
 }
 
 void machinewireview_ondisconnected(MachineWireView* self,
 	psy_audio_Connections* sender, uintptr_t src, uintptr_t dst)
 {
-	psy_ui_component_invalidate(&self->component);
-	++self->component.opcount;
+	psy_ui_component_invalidate(&self->component);	
 }
 
 void machinewireview_build(MachineWireView* self)
@@ -1145,8 +993,7 @@ void machinewireview_build(MachineWireView* self)
 			// if only master exists, center
 			machinewireview_centermaster(self);
 		}
-	}
-	++self->component.opcount;
+	}	
 }
 
 void machinewireview_on_song_changed(MachineWireView* self,
@@ -1163,24 +1010,12 @@ void machinewireview_on_song_changed(MachineWireView* self,
 		psy_ui_component_invalidate(&self->component);
 	}	
 	psy_ui_component_align(&self->component);
-	psy_ui_component_updateoverflow(&self->component);
-	++self->component.opcount;
+	psy_ui_component_updateoverflow(&self->component);	
 }
 
 void machinewireview_idle(MachineWireView* self)
 {				
 	machinewireview_destroywireframes(self);	
-	machinewireview_redrawstate(self);	
-}
-
-bool machinewireview_redrawstate(MachineWireView* self)
-{
-	if (self->machines && self->opcount != self->machines->opcount) {
-		psy_ui_component_invalidate(&self->component);
-		self->opcount = self->machines->opcount;
-		return TRUE;
-	}
-	return FALSE;
 }
 
 void machinewireview_destroywireframes(MachineWireView* self)

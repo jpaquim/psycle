@@ -444,7 +444,9 @@ void instrumentsviewbar_on_song_changed(InstrumentsViewBar* self,
 }
 
 /* InstrumentView */
+
 /* prototypes */
+static void instrumentview_on_destroyed(InstrumentView*);
 static void instrumentview_on_create_instrument(InstrumentView*,
 	psy_ui_Component* sender);
 static void instrumentview_on_load_instrument_button(InstrumentView*,
@@ -452,8 +454,12 @@ static void instrumentview_on_load_instrument_button(InstrumentView*,
 static void instrumentview_on_load_instrument(InstrumentView*,
 	psy_Property* sender);
 static void instrumentview_load_instrument(InstrumentView*, const char* path);
-static void instrumentview_on_save_instrument(InstrumentView*,
+static void instrumentview_on_save_instrument_button(InstrumentView*,
 	psy_ui_Component* sender);
+static void instrumentview_on_save_instrument(InstrumentView*,
+	psy_Property* sender);
+static void instrumentview_save_instrument(InstrumentView*, const char* path,
+	psy_audio_Instrument* instrument);
 static void instrumentview_on_delete_instrument(InstrumentView*,
 	psy_ui_Component* sender);
 static void instrumentview_on_instrument_insert(InstrumentView*,
@@ -474,6 +480,23 @@ static void instrumentview_on_song_changed(InstrumentView*,
 	psy_audio_Player* sender);
 static void instrumentview_on_status_changed(InstrumentView*,
 	psy_ui_Component* sender, char* text);
+	
+/* vtable */
+static psy_ui_ComponentVtable instrumentview_vtable;
+static bool instrumentview_vtable_initialized = FALSE;
+
+static void instrumentview_vtable_init(InstrumentView* self)
+{
+	if (!instrumentview_vtable_initialized) {
+		instrumentview_vtable = *(self->component.vtable);		
+		instrumentview_vtable.on_destroyed =
+			(psy_ui_fp_component)
+			instrumentview_on_destroyed;		
+		instrumentview_vtable_initialized = TRUE;
+	}
+	psy_ui_component_set_vtable(instrumentview_base(self),
+		&instrumentview_vtable);
+}
 
 /* implementation */
 void instrumentview_init(InstrumentView* self, psy_ui_Component* parent,
@@ -482,6 +505,7 @@ void instrumentview_init(InstrumentView* self, psy_ui_Component* parent,
 	psy_ui_Margin margin;	
 
 	psy_ui_component_init(&self->component, parent, NULL);
+	instrumentview_vtable_init(self);
 	psy_ui_component_set_id(instrumentview_base(self), VIEW_ID_INSTRUMENTSVIEW);
 	psy_ui_component_set_title(instrumentview_base(self), "main.instruments");
 	psy_ui_component_set_style_type(&self->component, STYLE_INSTRVIEW);	
@@ -579,7 +603,7 @@ void instrumentview_init(InstrumentView* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->buttons.load.signal_clicked, self,
 		instrumentview_on_load_instrument_button);
 	psy_signal_connect(&self->buttons.save.signal_clicked, self,
-		instrumentview_on_save_instrument);
+		instrumentview_on_save_instrument_button);
 	psy_signal_connect(&self->buttons.del.signal_clicked, self,
 		instrumentview_on_delete_instrument);	
 	psy_signal_connect(&self->volume.signal_status, self,
@@ -597,6 +621,16 @@ void instrumentview_init(InstrumentView* self, psy_ui_Component* parent,
 		PSY_PROPERTY_TYPE_STRING);
 	psy_property_connect(&self->instrument_load, self,
 		instrumentview_on_load_instrument);
+	psy_property_init_type(&self->instrument_save, "save",
+		PSY_PROPERTY_TYPE_STRING);
+	psy_property_connect(&self->instrument_save, self,
+		instrumentview_on_save_instrument);
+}
+
+void instrumentview_on_destroyed(InstrumentView* self)
+{
+	psy_property_dispose(&self->instrument_load);
+	psy_property_dispose(&self->instrument_save);
 }
 
 void instrumentview_on_instrument_insert(InstrumentView* self,
@@ -776,36 +810,77 @@ void instrumentview_load_instrument(InstrumentView* self, const char* path)
 	instrumentsbox_rebuild(&self->instrumentsbox);
 }
 
-void instrumentview_on_save_instrument(InstrumentView* self,
+void instrumentview_on_save_instrument_button(InstrumentView* self,
 	psy_ui_Component* sender)
 {
-	if (workspace_song(self->workspace)) {
-		psy_ui_SaveDialog dialog;		
-		psy_audio_Song* song;
+	psy_audio_Song* song;
+	psy_audio_Instrument* instrument;
 
-		psy_audio_Instrument* instrument;
-		song = workspace_song(self->workspace);
-		instrument = psy_audio_instruments_at(&song->instruments,
-			psy_audio_instruments_selected(&song->instruments));
+	song = workspace_song(self->workspace);		
+	if (!song) {
+		return;
+	}
+	instrument = psy_audio_instruments_at(&song->instruments,
+		psy_audio_instruments_selected(&song->instruments));
+	if (!instrument) {
+		return;
+	}
+	if (keyboardmiscconfig_ft2_file_view(psycleconfig_misc(
+			workspace_conf(self->workspace)))) {
+		fileview_set_callbacks(self->workspace->fileview,
+			NULL, &self->instrument_save);		
+		workspace_select_view(self->workspace, viewindex_make(
+			VIEW_ID_FILEVIEW, 0, 0, psy_INDEX_INVALID));
+	} else {	
+		psy_ui_SaveDialog dialog;		
+		
 		if (instrument) {
 			psy_ui_savedialog_init_all(&dialog, 0, "Save Instrument",
 				psy_audio_songfile_instsavefilter(),
 				psy_audio_songfile_standardinstsavefilter(),
 				dirconfig_samples(&self->workspace->config.directories));
-			if (psy_ui_savedialog_execute(&dialog)) {				
-				psy_audio_SongFile songfile;
-				PsyFile file;
-
-				psy_audio_songfile_init(&songfile);
-				songfile.song = song;
-				songfile.file = &file;
-				psy_audio_songfile_saveinstrument(&songfile,
-					psy_path_full(psy_ui_savedialog_path(&dialog)),
-					instrument);
-				psy_audio_songfile_dispose(&songfile);
+			if (psy_ui_savedialog_execute(&dialog)) {	
+				instrumentview_save_instrument(self, psy_path_full(
+					psy_ui_savedialog_path(&dialog)),
+					instrument);					
 			}
 			psy_ui_savedialog_dispose(&dialog);
 		}
+	}
+}
+
+void instrumentview_on_save_instrument(InstrumentView* self,
+	psy_Property* sender)
+{
+	psy_audio_Song* song;	
+
+	song = workspace_song(self->workspace);		
+	if (song) {
+		psy_audio_Instrument* instrument;
+		
+		instrument = psy_audio_instruments_at(&song->instruments,
+			psy_audio_instruments_selected(&song->instruments));
+		if (instrument) {			
+			instrumentview_save_instrument(self, psy_property_item_str(sender),
+			instrument);	
+		}
+	}
+	workspace_select_view(self->workspace, viewindex_make(
+		VIEW_ID_INSTRUMENTSVIEW, 0, 0, psy_INDEX_INVALID));
+}
+
+void instrumentview_save_instrument(InstrumentView* self, const char* path,
+	psy_audio_Instrument* instrument)
+{
+	if (workspace_song(self->workspace)) {
+		psy_audio_SongFile songfile;
+		PsyFile file;
+
+		psy_audio_songfile_init(&songfile);
+		songfile.song = workspace_song(self->workspace);		;
+		songfile.file = &file;
+		psy_audio_songfile_saveinstrument(&songfile, path, instrument);
+		psy_audio_songfile_dispose(&songfile);
 	}
 }
 

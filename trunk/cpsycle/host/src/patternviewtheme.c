@@ -645,40 +645,40 @@ void patternviewtheme_switch_to_text(PatternViewTheme* self)
 	styles = &psy_ui_appdefaults()->styles;
 
 	style = psy_ui_style_clone(psy_ui_style(STYLE_PV_TRACK_TEXT_HEADER));
-	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER, style);
+	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER, "", style);
 
 	style = psy_ui_style_clone(psy_ui_style(STYLE_PV_TRACK_TEXT_HEADER_DIGITX0));
-	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER_DIGITX0, style);
+	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER_DIGITX0, "", style);
 
 	style = psy_ui_style_clone(psy_ui_style(STYLE_PV_TRACK_TEXT_HEADER_DIGIT0X));
-	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER_DIGIT0X, style);
+	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER_DIGIT0X, "", style);
 
 	style = psy_ui_style_clone(psy_ui_style(STYLE_PV_TRACK_TEXT_HEADER_MUTE));
-	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER_MUTE, style);
+	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER_MUTE, "", style);
 
 	style = psy_ui_style_clone(psy_ui_style(STYLE_PV_TRACK_TEXT_HEADER_MUTE_SELECT));
-	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER_MUTE_SELECT, style);
+	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER_MUTE_SELECT, "", style);
 
 	style = psy_ui_style_clone(psy_ui_style(STYLE_PV_TRACK_TEXT_HEADER_SOLO));
-	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER_SOLO, style);
+	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER_SOLO, "", style);
 
 	style = psy_ui_style_clone(psy_ui_style(STYLE_PV_TRACK_TEXT_HEADER_SOLO_SELECT));
-	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER_SOLO_SELECT, style);
+	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER_SOLO_SELECT, "", style);
 
 	style = psy_ui_style_clone(psy_ui_style(STYLE_PV_TRACK_TEXT_HEADER_RECORD));
-	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER_RECORD, style);
+	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER_RECORD, "", style);
 
 	style = psy_ui_style_clone(psy_ui_style(STYLE_PV_TRACK_TEXT_HEADER_RECORD_SELECT));
-	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER_RECORD_SELECT, style);
+	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER_RECORD_SELECT, "", style);
 
 	/* style = psy_ui_style_clone(psy_ui_style(STYLE_PV_TRACK_TEXT_HEADER_PLAY));
-	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER_PLAY, style);
+	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER_PLAY, "", style);
 
 	style = psy_ui_style_clone(psy_ui_style(STYLE_PV_TRACK_TEXT_HEADER_PLAY_SELECT));
-	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER_PLAY_SELECT, style); */
+	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER_PLAY_SELECT, "", style); */
 
 	style = psy_ui_style_clone(psy_ui_style(STYLE_PV_TRACK_TEXT_HEADER_TEXT));
-	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER_TEXT, style);
+	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER_TEXT, "", style);
 }
 
 void patternviewtheme_switch_to_classic(PatternViewTheme* self)
@@ -690,40 +690,40 @@ void patternviewtheme_switch_to_classic(PatternViewTheme* self)
 	styles = &psy_ui_appdefaults()->styles;
 
 	style = psy_ui_style_clone(psy_ui_style(STYLE_PV_TRACK_CLASSIC_HEADER));
-	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER, style);
+	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER, "", style);
 
 	style = psy_ui_style_clone(psy_ui_style(STYLE_PV_TRACK_CLASSIC_HEADER_DIGITX0));
-	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER_DIGITX0, style);
+	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER_DIGITX0, "", style);
 
 	style = psy_ui_style_clone(psy_ui_style(STYLE_PV_TRACK_CLASSIC_HEADER_DIGIT0X));
-	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER_DIGIT0X, style);
+	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER_DIGIT0X, "", style);
 
 	style = psy_ui_style_clone(psy_ui_style(STYLE_PV_TRACK_CLASSIC_HEADER_MUTE));
-	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER_MUTE, style);
+	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER_MUTE, "", style);
 
 	style = psy_ui_style_clone(psy_ui_style(STYLE_PV_TRACK_CLASSIC_HEADER_MUTE_SELECT));
-	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER_MUTE_SELECT, style);
+	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER_MUTE_SELECT, "", style);
 
 	style = psy_ui_style_clone(psy_ui_style(STYLE_PV_TRACK_CLASSIC_HEADER_SOLO));
-	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER_SOLO, style);
+	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER_SOLO, "", style);
 
 	style = psy_ui_style_clone(psy_ui_style(STYLE_PV_TRACK_CLASSIC_HEADER_SOLO_SELECT));
-	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER_SOLO_SELECT, style);
+	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER_SOLO_SELECT, "", style);
 
 	style = psy_ui_style_clone(psy_ui_style(STYLE_PV_TRACK_CLASSIC_HEADER_RECORD));
-	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER_RECORD, style);
+	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER_RECORD, "", style);
 
 	style = psy_ui_style_clone(psy_ui_style(STYLE_PV_TRACK_CLASSIC_HEADER_RECORD_SELECT));
-	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER_RECORD_SELECT, style);
+	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER_RECORD_SELECT, "", style);
 
 	style = psy_ui_style_clone(psy_ui_style(STYLE_PV_TRACK_CLASSIC_HEADER_PLAY));
-	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER_PLAY, style);
+	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER_PLAY, "", style);
 
 	style = psy_ui_style_clone(psy_ui_style(STYLE_PV_TRACK_CLASSIC_HEADER_PLAY_SELECT));
-	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER_PLAY_SELECT, style);
+	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER_PLAY_SELECT, "", style);
 
 	style = psy_ui_style_clone(psy_ui_style(STYLE_PV_TRACK_CLASSIC_HEADER_TEXT));
-	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER_TEXT, style);
+	psy_ui_styles_set_style(styles, STYLE_PV_TRACK_HEADER_TEXT, "", style);
 }
 
 void patternviewtheme_set_source(PatternViewTheme* self, psy_ui_RealRectangle* r,

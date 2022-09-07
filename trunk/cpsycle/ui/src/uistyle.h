@@ -19,20 +19,22 @@
 extern "C" {
 #endif
 
+/* psy_ui_ThemeMode */
 typedef enum psy_ui_ThemeMode {
 	psy_ui_LIGHTTHEME = 0,
 	psy_ui_DARKTHEME  = 1,
 	psy_ui_WIN98THEME = 2
 } psy_ui_ThemeMode;
 
-typedef enum {
+/* psy_ui_BackgroundRepeat */
+typedef enum psy_ui_BackgroundRepeat {
 	psy_ui_NOREPEAT,
 	psy_ui_REPEAT,	
 } psy_ui_BackgroundRepeat;
 
+/* psy_ui_Background */
 typedef struct psy_ui_Background {
 	psy_ui_Colour colour;
-	psy_ui_Colour overlay;
 	uintptr_t image_id;
 	char* image_path;
 	psy_ui_Bitmap bitmap;
@@ -53,14 +55,13 @@ void psy_ui_background_copy(psy_ui_Background*,
 
 /* psy_ui_Style */
 typedef struct psy_ui_Style {
+	char* name;	
 	psy_ui_Font font;	
 	psy_ui_Colour colour;	
 	psy_ui_Background background;	
 	psy_ui_Border border;
-	psy_ui_Margin margin;
-	bool marginset;
+	psy_ui_Margin margin;	
 	psy_ui_Margin padding;	
-	bool paddingset;
 	psy_ui_Position position;
 	int dbgflag;	
 } psy_ui_Style;
@@ -76,21 +77,28 @@ void psy_ui_style_copy(psy_ui_Style*, const psy_ui_Style* other);
 
 psy_ui_Style* psy_ui_style_alloc(void);
 psy_ui_Style* psy_ui_style_allocinit(void);
-psy_ui_Style* psy_ui_style_allocinit_colours(psy_ui_Colour,
-	psy_ui_Colour background);
 psy_ui_Style* psy_ui_style_clone(const psy_ui_Style* other);
 void psy_ui_style_deallocate(psy_ui_Style*);
 
-/* Properties */
-INLINE void psy_ui_style_set_colour(psy_ui_Style* self, psy_ui_Colour colour)
+void psy_ui_style_set_name(psy_ui_Style* self, const char* name);
+
+INLINE const char* psy_ui_style_name(const psy_ui_Style* self)
 {
-	self->colour = colour;	
+	if (self->name) {
+		return self->name;
+	}
+	return "";
 }
 
 INLINE void psy_ui_style_set_background_colour(psy_ui_Style* self,
 	psy_ui_Colour colour)
 {
 	self->background.colour = colour;
+}
+
+INLINE void psy_ui_style_set_colour(psy_ui_Style* self, psy_ui_Colour colour)
+{
+	self->colour = colour;	
 }
 
 INLINE void psy_ui_style_set_background_overlay(psy_ui_Style* self,
@@ -126,8 +134,7 @@ void psy_ui_style_set_font_string(psy_ui_Style*, const char*);
 
 INLINE void psy_ui_style_setmargin(psy_ui_Style* self, psy_ui_Margin margin)
 {
-	self->margin = margin;
-	self->marginset = TRUE;
+	self->margin = margin;	
 }
 
 INLINE psy_ui_Margin psy_ui_style_margin(const psy_ui_Style* self)
@@ -145,8 +152,7 @@ INLINE void psy_ui_style_set_margin_em(psy_ui_Style* self,
 INLINE void psy_ui_style_setpadding(psy_ui_Style* self,
 	psy_ui_Margin padding)
 {
-	self->padding = padding;
-	self->paddingset = TRUE;
+	self->padding = padding;	
 }
 
 INLINE void psy_ui_style_set_padding_em(psy_ui_Style* self,
@@ -184,6 +190,11 @@ INLINE void psy_ui_style_set_size(psy_ui_Style* self, psy_ui_Size size)
 	psy_ui_position_set_size(&self->position, size);	
 }
 
+INLINE psy_ui_Size psy_ui_style_size(psy_ui_Style* self)
+{
+	return psy_ui_position_size(&self->position);	
+}
+
 INLINE void psy_ui_style_set_background_repeat(psy_ui_Style* self,
 	psy_ui_BackgroundRepeat repeat)
 {
@@ -211,7 +222,6 @@ INLINE void psy_ui_style_set_border(psy_ui_Style* self,
 
 	self->border = *border;
 }
-
 
 #ifdef __cplusplus
 }

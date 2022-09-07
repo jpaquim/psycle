@@ -78,6 +78,7 @@ void effectui_init(EffectUi* self, psy_ui_Component* parent,
 		STYLE_MV_EFFECT_PAN, STYLE_MV_EFFECT_PAN_SLIDER);
 	vuui_init(&self->vu, &self->component, self->machine,
 		STYLE_MV_EFFECT_VU, STYLE_MV_EFFECT_VU0, STYLE_MV_EFFECT_VUPEAK);
+	self->counter = 0;
 	psy_ui_component_start_timer(&self->component, 0, 50);
 }
 
@@ -157,23 +158,29 @@ void effectui_onmousedoubleclick(EffectUi* self, psy_ui_MouseEvent* ev)
 
 void effectui_on_timer(EffectUi* self, uintptr_t timerid)
 {
-	if (!psy_ui_component_draw_visible(&self->component)) {
-		return;
+	if (self->counter > 0) {
+		--self->counter;
 	}
-	if (psy_audio_machine_muted(self->machine)) {
-		psy_ui_component_add_style_state(&self->mute,
-			psy_ui_STYLESTATE_SELECT);
-	} else {
-		psy_ui_component_remove_style_state(&self->mute,
-			psy_ui_STYLESTATE_SELECT);
+	if (self->counter == 0) {
+		if (!psy_ui_component_draw_visible(&self->component)) {
+			return;
+		}
+		if (psy_audio_machine_muted(self->machine)) {
+			psy_ui_component_add_style_state(&self->mute,
+				psy_ui_STYLESTATE_SELECT);
+		} else {
+			psy_ui_component_remove_style_state(&self->mute,
+				psy_ui_STYLESTATE_SELECT);
+		}
+		if (psy_audio_machine_bypassed(self->machine)) {
+			psy_ui_component_add_style_state(&self->bypass,
+				psy_ui_STYLESTATE_SELECT);
+		} else {
+			psy_ui_component_remove_style_state(&self->bypass,
+				psy_ui_STYLESTATE_SELECT);
+		}
+		self->counter = 4;
 	}
-	if (psy_audio_machine_bypassed(self->machine)) {
-		psy_ui_component_add_style_state(&self->bypass,
-			psy_ui_STYLESTATE_SELECT);
-	} else {
-		psy_ui_component_remove_style_state(&self->bypass,
-			psy_ui_STYLESTATE_SELECT);
-	}	
 	if (vuui_update(&self->vu)) {
 		psy_ui_component_invalidate(vuui_base(&self->vu));	
 	}

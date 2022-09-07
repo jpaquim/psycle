@@ -30,7 +30,7 @@
 /* prototypes */
 static void visualconfig_make(VisualConfig*, psy_Property*);
 static void visualconfig_load_control_skin(VisualConfig* self);
-static void visualconfig_on_set_app_theme(VisualConfig*, psy_Property* sender);
+static void visualconfig_on_app_theme(VisualConfig*, psy_Property* sender);
 static void visualconfig_on_reset_skin(VisualConfig*, psy_Property* sender);
 static void visualconfig_on_load_skin(VisualConfig*, psy_Property* sender);
 static void visualconfig_on_file_accept_load_skin(VisualConfig*,
@@ -98,7 +98,7 @@ void visualconfig_make(VisualConfig* self, psy_Property* parent)
 		psy_property_set_text(psy_property_append_choice(self->visual,
 			"apptheme", 1), "settings.visual.apptheme"),
 			PROPERTY_ID_APPTHEME),
-			self, visualconfig_on_set_app_theme);			
+			self, visualconfig_on_app_theme);			
 	psy_property_set_text(
 		psy_property_append_int(self->apptheme, "light", psy_ui_LIGHTTHEME, 0, 2),
 		"settings.visual.light");
@@ -108,6 +108,9 @@ void visualconfig_make(VisualConfig* self, psy_Property* parent)
 	psy_property_set_text(
 		psy_property_append_int(self->apptheme, "win98", psy_ui_WIN98THEME, 0, 2),
 		"Windows 98");
+	psy_property_set_text(
+		psy_property_append_int(self->apptheme, "win98", psy_ui_WIN98THEME, 0, 2),
+		"Windows 98");	
 	patternviewconfig_init(&self->patview, self->visual,
 		PSYCLE_SKINS_DEFAULT_DIR);
 	machineviewconfig_init(&self->macview, self->visual);
@@ -229,6 +232,8 @@ void visualconfig_load_control_skin(VisualConfig* self)
 {
 	psy_ui_OpenDialog opendialog;
 
+	assert(self);
+	
 	psy_ui_opendialog_init_all(&opendialog, 0,
 		"Load Dial Bitmap",
 		"Control Skins|*.psc|Bitmaps|*.bmp", "psc",
@@ -240,12 +245,14 @@ void visualconfig_load_control_skin(VisualConfig* self)
 	psy_ui_opendialog_dispose(&opendialog);
 }
 
-void visualconfig_on_set_app_theme(VisualConfig* self, psy_Property* sender)
+void visualconfig_on_app_theme(VisualConfig* self, psy_Property* sender)
 {
-	visualconfig_set_app_theme(self);
+	assert(self);
+	
+	visualconfig_reset_app_theme(self);
 }
 
-void visualconfig_set_app_theme(VisualConfig* self)
+void visualconfig_reset_app_theme(VisualConfig* self)
 {
 	psy_Property* choice;
 
@@ -261,9 +268,7 @@ void visualconfig_set_app_theme(VisualConfig* self)
 		init_host_styles(&psy_ui_appdefaults()->styles, theme);
 		machineviewconfig_load(&self->macview);
 		machineparamconfig_update_styles(&self->macparam);
-		patternviewtheme_write_styles(&self->patview.theme);
-		psy_ui_defaults_load_theme(psy_ui_appdefaults(),
-			dirconfig_config_dir(self->dirconfig), theme);
+		patternviewtheme_write_styles(&self->patview.theme);		
 		if (psy_ui_app()->imp) {
 			psy_ui_app()->imp->vtable->dev_onappdefaultschange(
 				psy_ui_app()->imp);

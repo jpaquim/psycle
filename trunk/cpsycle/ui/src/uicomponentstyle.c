@@ -21,6 +21,8 @@ void psy_ui_componentstyle_init(psy_ui_ComponentStyle* self)
 
 	self->styles = NULL;	
 	psy_ui_style_init(&self->overridestyle);
+	self->override_margin = FALSE;
+	self->override_padding = FALSE;
 	self->currstyle = psy_INDEX_INVALID;
 	self->states = psy_ui_STYLESTATE_NONE;		
 	if (!sizehints_initialized) {

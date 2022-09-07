@@ -29,6 +29,7 @@ typedef struct ValueUi {
 	/* internal */	
 	ParamTweak paramtweak;
 	uintptr_t paramidx;
+	float last;
 	/* references */	
 	struct psy_audio_Machine* machine;
 	struct psy_audio_MachineParam* param;

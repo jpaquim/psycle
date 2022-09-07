@@ -375,6 +375,7 @@ void wavebox_ondraw(WaveBox* self, psy_ui_Graphics* g)
 		psy_ui_RealRectangle sustain_doubleloop_rc;
 		bool firstselstart = TRUE;
 		psy_ui_RealRectangle clip;
+		psy_ui_RealRectangle r;
 
 		clip = psy_ui_graphics_cliprect(g);
 		if (self->context.sample->loop.type != psy_audio_SAMPLE_LOOP_DO_NOT) {
@@ -417,26 +418,23 @@ void wavebox_ondraw(WaveBox* self, psy_ui_Graphics* g)
 		if (self->context.selection.hasselection) {
 			psy_ui_drawsolidrectangle(g, wavebox_framerangetoscreen(self,
 				self->context.selection.end, self->context.selection.end), psy_ui_colour_make(0x00B1C8B0));
-		}	
-		if (self->drawline) {
-			if (clip.left > 0) {
-				prevframe = (int)(self->context.offsetstep * (clip.left - 1) +
-					(int)((float)(waveboxcontext_numframes(&self->context)) * self->context.zoomleft));
-			} else {
-				prevframe = 0;
-			}
-			lastframevalue = wavebox_amp(self, (float)prevframe);
+		}			
+		if (clip.left > 0) {
+			prevframe = (int)(self->context.offsetstep * (clip.left - 1) +
+				(int)((float)(waveboxcontext_numframes(&self->context)) * self->context.zoomleft));
+		} else {
+			prevframe = 0;
 		}
+		lastframevalue = wavebox_amp(self, (float)prevframe);
+		r.top = 0;
+		r.bottom = size.height;
 		for (x = clip.left; x < clip.right; ++x) {
 			float frame;
 			uintptr_t realframe;
 			psy_dsp_amp_t framevalue;
-			psy_ui_RealRectangle r;
-
+			
 			frame = (float)((self->context.offsetstep * x +
-				((double)waveboxcontext_numframes(&self->context) * self->context.zoomleft)));
-			r.left = x;
-			r.right = x+1;
+				((double)waveboxcontext_numframes(&self->context) * self->context.zoomleft)));		
 			realframe = waveboxcontext_realframe(&self->context, (uintptr_t)frame);
 			if (frame >= waveboxcontext_numframes(&self->context)) {
 				break;
@@ -451,9 +449,10 @@ void wavebox_ondraw(WaveBox* self, psy_ui_Graphics* g)
 				} else {
 					psy_ui_setcolour(g, psy_ui_colour_make(0x00262626));
 				}
-				r.top = 0;
-				r.bottom = size.height;
+				
 				if (firstselstart || self->dragstarted == FALSE) {
+					r.left = x;
+					r.right = x+1;
 					psy_ui_drawrectangle(g, r);
 					firstselstart = FALSE;
 					psy_ui_setcolour(g, psy_ui_colour_make(0x00FF2288));
@@ -467,24 +466,17 @@ void wavebox_ondraw(WaveBox* self, psy_ui_Graphics* g)
 				psy_ui_setcolour(g, psy_ui_colour_make(0x00D1C5B6));
 			} else {
 				psy_ui_setcolour(g, psy_ui_colour_make(0x00B1C8B0));
-			}
-			r.top = centery - (int)(framevalue * scaley);
-			r.bottom = centery;
-			if (self->drawline) {
+			}					
+			if (self->drawline) {			
 				psy_ui_drawline(g,
-					psy_ui_realpoint_make(r.left - 1, centery - (int)(lastframevalue * scaley)),
-					psy_ui_realpoint_make(r.left, r.top));
-				lastframevalue = framevalue;
+					psy_ui_realpoint_make(x - 1, centery - (int)(lastframevalue * scaley)),
+					psy_ui_realpoint_make(x, centery - (int)(framevalue * scaley)));
 			} else {
-				if (r.top > r.bottom) {
-					double temp;
-					temp = r.top;
-					r.top = r.bottom;
-					r.bottom = temp;
-				}
-				psy_ui_drawrectangle(g, r); /* x, centery, x, centery - (int)(framevalue * scaley)); */
+				psy_ui_drawline(g,
+					psy_ui_realpoint_make(x, centery - (int)(framevalue * scaley)),
+					psy_ui_realpoint_make(x, centery));		
 			}
-			
+			lastframevalue = framevalue;
 			if (frame >= waveboxcontext_numframes(&self->context)) {
 				break;
 			}

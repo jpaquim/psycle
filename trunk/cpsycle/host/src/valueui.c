@@ -23,7 +23,7 @@
 /* prototypes */
 static void valueui_onpreferredsize(ValueUi*, const psy_ui_Size* limit,
 	psy_ui_Size* rv);
-static void valueui_updateparam(ValueUi*);
+static void valueui_update_param(ValueUi*);
 static void valueui_on_mouse_down(ValueUi*, psy_ui_MouseEvent*);
 static void valueui_on_mouse_up(ValueUi*, psy_ui_MouseEvent*);
 static void valueui_onmousemove(ValueUi*, psy_ui_MouseEvent*);
@@ -74,6 +74,7 @@ void valueui_init(ValueUi* self, psy_ui_Component* parent,
 	self->param = param;
 	self->paramidx = paramidx;
 	self->machine = machine;
+	self->last = -1.f;
 	paramtweak_init(&self->paramtweak);
 	psy_ui_component_start_timer(&self->label.component, 0, 50);	
 }
@@ -132,34 +133,46 @@ void valueui_on_mouse_up(ValueUi* self, psy_ui_MouseEvent* ev)
 	}
 }
 
-void valueui_updateparam(ValueUi* self)
+void valueui_update_param(ValueUi* self)
 {
+	char str[128];
+	float value;
+		
 	if (self->machine && self->paramidx != psy_INDEX_INVALID) {
 		self->param = psy_audio_machine_parameter(self->machine,
 			self->paramidx);							
 	}
-	if (self->param) {
-		char str[128];	
-		
-		if (self->machine) {			
-			if (!psy_audio_machine_parameter_describe(self->machine,
-					self->param, str)) {
-				psy_snprintf(str, 128, "%d",
-					(int)psy_audio_machineparam_scaledvalue(self->param));
-			}
-		} else {			
-			if (!psy_audio_machineparam_describe(self->param, str)) {
-				psy_snprintf(str, 128, "%d",
-					(int)psy_audio_machineparam_scaledvalue(self->param));
-			}
-		}
-#ifndef PSYCLE_DEBUG_PREVENT_TIMER_DRAW		
-		psy_ui_label_set_text(&self->label, str);
-#endif		
+	if (!self->param) {
+		return;
+	}		
+	if (self->machine) {			
+		value = psy_audio_machine_parameter_normvalue(self->machine,
+			self->param);
+	} else {
+		value = psy_audio_machineparam_normvalue(self->param);
 	}
+	if (value == self->last) {
+		return;
+	}
+	self->last = value;	
+	if (self->machine) {			
+		if (!psy_audio_machine_parameter_describe(self->machine, self->param,
+				str)) {
+			psy_snprintf(str, 128, "%d",
+				(int)psy_audio_machineparam_scaledvalue(self->param));
+		}
+	} else {
+		if (!psy_audio_machineparam_describe(self->param, str)) {
+			psy_snprintf(str, 128, "%d",
+				(int)psy_audio_machineparam_scaledvalue(self->param));
+		}
+	}
+#ifndef PSYCLE_DEBUG_PREVENT_TIMER_DRAW		
+	psy_ui_label_set_text(&self->label, str);
+#endif
 }
 
 void valueui_on_timer(ValueUi* self, uintptr_t timerid)
 {
-	valueui_updateparam(self);
+	valueui_update_param(self);
 }

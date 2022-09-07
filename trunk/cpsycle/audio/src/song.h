@@ -12,6 +12,8 @@
 #include "patterns.h"
 #include "samples.h"
 #include "sequence.h"
+/* container */
+#include <logger.h>
 
 /*
 ** psy_audio_Song hold everything comprising a "tracker module",
@@ -431,7 +433,9 @@ INLINE void psy_audio_song_set_sampler_index(psy_audio_Song* self,
 }
 
 void psy_audio_song_set_file(psy_audio_Song* self, const char* filename);
-
+int psy_audio_song_save(psy_audio_Song*, const char* path,
+	void* context_err, fp_string_output err);
+	
 #ifdef __cplusplus
 }
 #endif

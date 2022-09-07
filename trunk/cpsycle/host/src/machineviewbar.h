@@ -28,12 +28,12 @@ typedef struct MachineViewBar {
 	psy_ui_Component component;
 	/* internal */	
 	psy_ui_CheckBox mixersend;	
-	/* references */
-	psy_audio_Machines* machines;
-	Workspace* workspace;
+	/* references */	
+	psy_audio_Player* player;
 } MachineViewBar;
 
-void machineviewbar_init(MachineViewBar*, psy_ui_Component* parent, Workspace*);
+void machineviewbar_init(MachineViewBar*, psy_ui_Component* parent,
+	psy_audio_Player*);
 
 INLINE psy_ui_Component* machineviewbar_base(MachineViewBar* self)
 {

@@ -431,6 +431,12 @@ void machinebar_on_song_changed(MachineBar* self, psy_audio_Player* sender)
 	machinebar_connectsongsignals(self);
 	machinebar_buildmachinebox(self);
 	machinebar_buildinstrumentlist(self);
+	if (self->machines) {
+		printf("%u\n", psy_audio_machines_selected(self->machines));
+		psy_ui_combobox_select(&self->machinebox,
+			machinebar_comboboxindex(self,
+			psy_audio_machines_selected(self->machines)));
+	}
 	if (self->instruments) {
 		psy_ui_combobox_select(&self->instparambox,
 			psy_audio_instruments_selected(self->instruments).subslot);

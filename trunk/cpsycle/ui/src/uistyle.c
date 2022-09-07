@@ -18,8 +18,7 @@
 /* psy_ui_Background */
 void psy_ui_background_init(psy_ui_Background* self)
 {
-	psy_ui_colour_init(&self->colour);
-	self->overlay = psy_ui_colour_make(psy_ui_RGB_WHITE);
+	psy_ui_colour_init(&self->colour);	
 	self->image_id = psy_INDEX_INVALID;
 	self->image_path = NULL;
 	psy_ui_bitmap_init(&self->bitmap);
@@ -51,8 +50,7 @@ void psy_ui_background_copy(psy_ui_Background* self, const psy_ui_Background* ot
 	self->position = other->position;
 	self->position_set = other->position_set;
 	self->size = other->size;
-	self->size_set = other->size_set;
-	self->overlay = other->overlay;	
+	self->size_set = other->size_set;	
 }
 
 /* Helper */
@@ -82,15 +80,14 @@ static psy_ui_Colour readcolour(psy_Property* parent, const char* key)
 /* psy_ui_Style */
 void psy_ui_style_init(psy_ui_Style* self)
 {
+	self->name = psy_strdup("");
 	psy_ui_colour_init(&self->colour);
 	self->colour.mode.inherit = TRUE;
 	psy_ui_font_init(&self->font, NULL);	
 	psy_ui_background_init(&self->background);		
 	psy_ui_border_init(&self->border);
-	psy_ui_margin_init(&self->margin);
-	self->marginset = FALSE;
-	psy_ui_margin_init(&self->padding);
-	self->paddingset = FALSE;
+	psy_ui_margin_init(&self->margin);	
+	psy_ui_margin_init(&self->padding);	
 	psy_ui_position_init(&self->position);	
 	self->dbgflag = 0;	
 }
@@ -102,6 +99,7 @@ void psy_ui_style_init_default(psy_ui_Style* self, uintptr_t styletype)
 
 void psy_ui_style_init_copy(psy_ui_Style* self, const psy_ui_Style* other)
 {	
+	self->name = psy_strdup("");
 	psy_ui_border_init(&self->border);
 	psy_ui_font_init(&self->font, NULL);
 	psy_ui_font_copy(&self->font, &other->font);
@@ -113,16 +111,15 @@ void psy_ui_style_init_copy(psy_ui_Style* self, const psy_ui_Style* other)
 void psy_ui_style_init_colours(psy_ui_Style* self, psy_ui_Colour colour,
 	psy_ui_Colour background)
 {
+	self->name = psy_strdup("");
 	self->colour = colour;	
 	self->colour.mode.inherit = TRUE;
 	psy_ui_font_init(&self->font, NULL);
 	psy_ui_background_init(&self->background);
 	self->background.colour = background;	
 	psy_ui_border_init(&self->border);
-	psy_ui_margin_init(&self->margin);
-	self->marginset = FALSE;
-	psy_ui_margin_init(&self->padding);
-	self->paddingset = FALSE;
+	psy_ui_margin_init(&self->margin);	
+	psy_ui_margin_init(&self->padding);	
 	psy_ui_position_init(&self->position);	
 	self->dbgflag = 0;
 }
@@ -147,6 +144,8 @@ void psy_ui_styles_init_property(psy_ui_Style* self, psy_Property* style)
 
 void psy_ui_style_dispose(psy_ui_Style* self)
 {		
+	free(self->name);
+	self->name = NULL;
 	psy_ui_font_dispose(&self->font);
 	psy_ui_background_dispose(&self->background);
 	psy_ui_position_dispose(&self->position);
@@ -154,13 +153,12 @@ void psy_ui_style_dispose(psy_ui_Style* self)
 
 void psy_ui_style_copy(psy_ui_Style* self, const psy_ui_Style* other)
 {
+	psy_strreset(&self->name, other->name);
 	self->colour = other->colour;	
 	psy_ui_background_copy(&self->background, &other->background);	
 	self->border = other->border;
-	self->margin = other->margin;
-	self->marginset = other->marginset;
+	self->margin = other->margin;	
 	self->padding = other->padding;
-	self->paddingset = other->paddingset;
 	psy_ui_position_dispose(&self->position);
 	psy_ui_position_init(&self->position);
 	if (psy_ui_position_is_active(&other->position)) {
@@ -186,18 +184,6 @@ psy_ui_Style* psy_ui_style_allocinit(void)
 	return rv;
 }
 
-psy_ui_Style* psy_ui_style_allocinit_colours(psy_ui_Colour colour,
-	psy_ui_Colour background)
-{
-	psy_ui_Style* rv;
-
-	rv = psy_ui_style_alloc();
-	if (rv) {
-		psy_ui_style_init_colours(rv, colour, background);
-	}
-	return rv;
-}
-
 psy_ui_Style* psy_ui_style_clone(const psy_ui_Style* other)
 {
 	if (other) {
@@ -216,6 +202,11 @@ void psy_ui_style_deallocate(psy_ui_Style* self)
 {
 	psy_ui_style_dispose(self);
 	free(self);
+}
+
+void psy_ui_style_set_name(psy_ui_Style* self, const char* name)
+{
+	psy_strreset(&self->name, name);
 }
 
 void psy_ui_style_set_font(psy_ui_Style* self, const char* family, double size)

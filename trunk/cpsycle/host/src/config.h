@@ -50,6 +50,8 @@ void psycleconfig_init(PsycleConfig*, psy_audio_Player*,
 void psycleconfig_dispose(PsycleConfig*);
 
 void psycleconfig_notify_all(PsycleConfig*);
+void psycleconfig_load_driver_configurations(PsycleConfig*);
+void psycleconfig_save_configuration(PsycleConfig*);
 
 INLINE GeneralConfig* psycleconfig_general(PsycleConfig* self)
 {

@@ -134,7 +134,7 @@ void samplessongimportview_on_load_song_button(SamplesSongImportView* self,
 	if (keyboardmiscconfig_ft2_file_view(psycleconfig_misc(
 			workspace_conf(self->workspace)))) {
 		fileview_set_callbacks(self->workspace->fileview,
-			&self->song_load, NULL);		
+			&self->song_load, NULL);
 		workspace_select_view(self->workspace, viewindex_make(
 			VIEW_ID_FILEVIEW, 0, 0, psy_INDEX_INVALID));
 	} else {
@@ -1030,7 +1030,9 @@ static void samplesview_onsamplesboxchanged(SamplesView*, psy_ui_Component* send
 static void samplesview_onloadsamplebtn(SamplesView*, psy_ui_Component* sender);
 static void samplesview_on_load_sample(SamplesView*, psy_Property* sender);
 static void samplesview_load_sample(SamplesView*, const char* path);
-static void samplesview_onsavesample(SamplesView*, psy_ui_Component* sender);
+static void samplesview_on_save_sample(SamplesView*, psy_Property* sender);
+static void samplesview_onsavesamplebtn(SamplesView*, psy_ui_Component* sender);
+static void samplesview_save_sample(SamplesView*, const char* path);
 static void samplesview_ondeletesample(SamplesView*, psy_ui_Component* sender);
 static void samplesview_onduplicatesample(SamplesView*, psy_ui_Component* sender);
 static void samplesview_on_song_changed(SamplesView*,
@@ -1093,7 +1095,8 @@ void samplesview_init(SamplesView* self, psy_ui_Component* parent,
 		VIEW_ID_SAMPLESVIEW);
 	psy_ui_component_set_align(&self->clienttabbar.component, psy_ui_ALIGN_LEFT);
 	psy_ui_component_hide(&self->clienttabbar.component);
-	psy_ui_tabbar_append_tabs(&self->clienttabbar, "Properties", "Import", "Editor", NULL);
+	psy_ui_tabbar_append_tabs(&self->clienttabbar, "Properties", "Import",
+		"Editor", NULL);
 	samplesbox_init(&self->samplesbox, &self->left,
 		&workspace->song->samples, workspace);
 	psy_ui_component_set_align(&self->samplesbox.component,
@@ -1101,7 +1104,7 @@ void samplesview_init(SamplesView* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->buttons.load.signal_clicked, self,
 		samplesview_onloadsamplebtn);
 	psy_signal_connect(&self->buttons.save.signal_clicked, self,
-		samplesview_onsavesample);
+		samplesview_onsavesamplebtn);
 	psy_signal_connect(&self->buttons.duplicate.signal_clicked, self,
 		samplesview_onduplicatesample);
 	psy_signal_connect(&self->buttons.del.signal_clicked, self,
@@ -1170,11 +1173,15 @@ void samplesview_init(SamplesView* self, psy_ui_Component* parent,
 	psy_property_init_type(&self->sample_load, "load",
 		PSY_PROPERTY_TYPE_STRING);
 	psy_property_connect(&self->sample_load, self, samplesview_on_load_sample);
+	psy_property_init_type(&self->sample_save, "save",
+		PSY_PROPERTY_TYPE_STRING);
+	psy_property_connect(&self->sample_save, self, samplesview_on_save_sample);
 }
 
 void samplesview_ondestroyed(SamplesView* self)
 {	
 	psy_property_dispose(&self->sample_load);
+	psy_property_dispose(&self->sample_save);
 }
 
 void samplesview_onconfigure(SamplesView* self, PatternViewConfig* config,
@@ -1238,19 +1245,23 @@ void samplesview_connectstatusbar(SamplesView* self)
 		self, samplesview_onresamplermethodchanged);
 }
 
-void samplesview_on_load_sample(SamplesView* self, psy_Property* sender)
-{	
-	samplesview_load_sample(self, psy_property_item_str(sender));	
-	workspace_select_view(self->workspace, viewindex_make(VIEW_ID_SAMPLESVIEW,
-		0, 0, psy_INDEX_INVALID));
-}
-
 void samplesview_onloadsamplebtn(SamplesView* self, psy_ui_Component* sender)
 {
 	if (keyboardmiscconfig_ft2_file_view(psycleconfig_misc(
-			workspace_conf(self->workspace)))) {
+			workspace_conf(self->workspace)))) {		
+		psy_Property types;
+		
 		fileview_set_callbacks(self->workspace->fileview,
 			&self->sample_load, NULL);
+		psy_property_init_type(&types, "types", PSY_PROPERTY_TYPE_CHOICE);		
+		psy_property_set_text(psy_property_set_id(
+			psy_property_append_str(&types, "wav", "*.wav"),
+			FILEVIEWFILTER_PSY), "Wave");
+		psy_property_set_text(psy_property_set_id(
+			psy_property_append_str(&types, "iff", "*.iff"),
+			FILEVIEWFILTER_PSY), "IFF");
+		fileview_set_filter(self->workspace->fileview, &types);
+		psy_property_dispose(&types);
 		workspace_select_view(self->workspace, viewindex_make(
 			VIEW_ID_FILEVIEW, 0, 0, psy_INDEX_INVALID));
 	} else {		
@@ -1268,6 +1279,13 @@ void samplesview_onloadsamplebtn(SamplesView* self, psy_ui_Component* sender)
 		}
 		psy_ui_opendialog_dispose(&dialog);
 	}
+}
+
+void samplesview_on_load_sample(SamplesView* self, psy_Property* sender)
+{	
+	samplesview_load_sample(self, psy_property_item_str(sender));	
+	workspace_select_view(self->workspace, viewindex_make(VIEW_ID_SAMPLESVIEW,
+		0, 0, psy_INDEX_INVALID));
 }
 
 void samplesview_load_sample(SamplesView* self, const char* path)
@@ -1303,24 +1321,48 @@ void samplesview_load_sample(SamplesView* self, const char* path)
 	}
 }
 
-void samplesview_onsavesample(SamplesView* self, psy_ui_Component* sender)
+void samplesview_onsavesamplebtn(SamplesView* self, psy_ui_Component* sender)
 {
-	psy_ui_SaveDialog dialog;
-	static char filter[] =
-		"Wav Files (*.wav)|*.wav|"
-		"IFF psy_audio_Samples (*.iff)|*.iff|"
-		"All Files (*.*)|*.*";
+	if (keyboardmiscconfig_ft2_file_view(psycleconfig_misc(
+			workspace_conf(self->workspace)))) {
+		if (wavebox_sample(&self->wavebox)) {
+			fileview_set_callbacks(self->workspace->fileview, NULL,
+				&self->sample_save);
+			workspace_select_view(self->workspace, viewindex_make(
+				VIEW_ID_FILEVIEW, 0, 0, psy_INDEX_INVALID));			
+		}
+	} else {
+		psy_ui_SaveDialog dialog;
+		static char filter[] =
+			"Wav Files (*.wav)|*.wav|"
+			"IFF psy_audio_Samples (*.iff)|*.iff|"
+			"All Files (*.*)|*.*";
 
-	psy_ui_savedialog_init_all(&dialog, 0,
-		"Save Sample",
-		filter,
-		"WAV",
-		dirconfig_samples(&self->workspace->config.directories));
-	if (wavebox_sample(&self->wavebox) && psy_ui_savedialog_execute(&dialog)) {		
-		psy_audio_sample_save(wavebox_sample(&self->wavebox),
-			psy_path_full(psy_ui_savedialog_path(&dialog)));	
+		psy_ui_savedialog_init_all(&dialog, 0,
+			"Save Sample",
+			filter,
+			"WAV",
+			dirconfig_samples(&self->workspace->config.directories));
+		if (wavebox_sample(&self->wavebox) && psy_ui_savedialog_execute(&dialog)) {		
+			psy_audio_sample_save(wavebox_sample(&self->wavebox),
+				psy_path_full(psy_ui_savedialog_path(&dialog)));	
+		}
+		psy_ui_savedialog_dispose(&dialog);
 	}
-	psy_ui_savedialog_dispose(&dialog);
+}
+
+void samplesview_on_save_sample(SamplesView* self, psy_Property* sender)
+{
+	samplesview_save_sample(self, psy_property_item_str(sender));	
+	workspace_select_view(self->workspace, viewindex_make(VIEW_ID_SAMPLESVIEW,
+		0, 0, psy_INDEX_INVALID));
+}
+
+void samplesview_save_sample(SamplesView* self, const char* path)
+{
+	if (wavebox_sample(&self->wavebox)) {
+		psy_audio_sample_save(wavebox_sample(&self->wavebox), path);
+	}
 }
 
 void samplesview_ondeletesample(SamplesView* self, psy_ui_Component* sender)

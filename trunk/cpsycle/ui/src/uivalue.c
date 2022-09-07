@@ -1,6 +1,6 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
@@ -9,13 +9,20 @@
 /* local */
 #include "uivalue.h"
 #include "uigeometry.h"
+/* platform */
+#include "../../detail/portable.h"
 /* std */
-#include <assert.h>
+#include <ctype.h>
 #include <math.h>
 
 
+/* psy_ui_TextMetric */
+
+/* implementation */
 void psy_ui_textmetric_init(psy_ui_TextMetric* self)
 {
+	assert(self);
+	
 	self->tmHeight = 0;
 	self->tmAscent = 0;
 	self->tmDescent = 0;
@@ -38,6 +45,17 @@ void psy_ui_textmetric_init(psy_ui_TextMetric* self)
 	self->tmCharSet = 0;
 }
 
+
+/* psy_ui_Value */
+
+enum {	
+	STATE_NUMBER = 1,
+	STATE_DECIMAL = 2,
+	STATE_SPACE = 3
+};
+
+/* implementation */
+
 void psy_ui_value_init(psy_ui_Value* self)
 {
 	assert(self);
@@ -45,6 +63,74 @@ void psy_ui_value_init(psy_ui_Value* self)
 	*self = psy_ui_value_make_px(0.0);
 	self->set = TRUE;
 }
+
+psy_ui_Value psy_ui_value_make_string(const char* str)
+{
+	psy_ui_Value rv;
+	char* s;
+	char* p;
+	char* q;
+	char* unit;	
+	int state;
+	
+	psy_ui_value_init(&rv);
+	if (!str) {
+		return rv;
+	}
+	s = psy_strdup(str);
+	p = s;
+	state = STATE_NUMBER;	
+	
+	while ((*p) != '\0' && (*p) == ' ') ++p;
+	q = p;	
+	while ((*q) != '\0') {
+		if (state == STATE_NUMBER) {
+			if (isdigit(*q)) {	
+				state == STATE_NUMBER;
+			} else if ((*q) == '.') {
+				state == STATE_DECIMAL;
+			} else if((*q) == ' ') {
+				state = STATE_SPACE;
+			} else {
+				break;
+			}
+		} else if (state == STATE_DECIMAL) {
+			if (isdigit(*q)) {				
+				state == STATE_DECIMAL;
+			} else if((*q) == ' ') {
+				state = STATE_SPACE;
+			} else {
+				break;
+			}
+		} else if (state == STATE_SPACE) {		
+			if ((*q) == ' ') {
+				state = STATE_SPACE;
+			} else {
+				break;
+			}
+		}
+		++q;
+	}
+	unit = psy_strdup(q);
+	*q = '\0';
+	rv.quantity = atof(s);
+	if (strcmp(unit, "eh") == 0) {
+		rv.unit = psy_ui_UNIT_EH;
+	} else if (strcmp(unit, "ew") == 0) {
+		rv.unit = psy_ui_UNIT_EW;
+	} else if (strcmp(unit, "px") == 0) {
+		rv.unit = psy_ui_UNIT_PX;
+	} else if (strcmp(unit, "pw") == 0) {
+		rv.unit = psy_ui_UNIT_PW;
+	} else if (strcmp(unit, "pw") == 0) {
+		rv.unit = psy_ui_UNIT_PH;
+	}
+	free(unit);
+	free(s);
+	return rv;	
+}
+
+
 
 void psy_ui_value_add(psy_ui_Value* self, const psy_ui_Value* other,
 	const psy_ui_TextMetric* tm, const psy_ui_Size* pesize)
@@ -225,6 +311,36 @@ double psy_ui_value_ew(const psy_ui_Value* self,
 	} else {
 		rv = self->quantity;
 	}	
+	return rv;
+}
+
+char* psy_ui_value_to_string(psy_ui_Value* self, char* rv)
+{
+	assert(self);
+	
+	if (!rv) {
+		return rv;
+	}
+	switch (self->unit) {
+	case psy_ui_UNIT_EH:
+		psy_snprintf(rv, 64, "%f eh", self->quantity);
+		break;
+	case psy_ui_UNIT_EW:
+		psy_snprintf(rv, 64, "%f ew", self->quantity);
+		break;
+	case psy_ui_UNIT_PX:
+		psy_snprintf(rv, 64, "%f px", self->quantity);
+		break;
+	case psy_ui_UNIT_PW:
+		psy_snprintf(rv, 64, "%f pw", self->quantity);
+		break;
+	case psy_ui_UNIT_PH:
+		psy_snprintf(rv, 64, "%f ph", self->quantity);
+		break;
+	default:
+		psy_snprintf(rv, 64, "%f", self->quantity);
+		break;
+	}
 	return rv;
 }
 

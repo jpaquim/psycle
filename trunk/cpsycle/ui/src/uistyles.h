@@ -15,20 +15,18 @@ extern "C" {
 
 /* psy_ui_Styles */
 typedef struct psy_ui_Styles {
-	psy_Table styles;
-	psy_Property config;
-	psy_ui_ThemeMode theme;
+	psy_Table styles;	
+	psy_ui_ThemeMode theme_mode;
 } psy_ui_Styles;
 
 void psy_ui_styles_init(psy_ui_Styles*);
 void psy_ui_styles_dispose(psy_ui_Styles*);
 
-void psy_ui_styles_set_style(psy_ui_Styles*, uintptr_t styletype, psy_ui_Style*);
+void psy_ui_styles_set_style(psy_ui_Styles*, uintptr_t styletype,
+	const char* name, psy_ui_Style*);
 psy_ui_Style* psy_ui_styles_at(psy_ui_Styles* self, uintptr_t styletype);
 const psy_ui_Style* psy_ui_styles_at_const(const psy_ui_Styles*,
 	uintptr_t styletype);
-void psy_ui_styles_configure(psy_ui_Styles*, psy_Property*);
-const psy_Property* psy_ui_styles_configuration(const psy_ui_Styles*);
 
 #ifdef __cplusplus
 }

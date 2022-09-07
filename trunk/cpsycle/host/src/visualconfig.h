@@ -54,7 +54,7 @@ void visualconfig_set_directories(VisualConfig* self, struct DirConfig*);
 void visualconfig_load_skin(VisualConfig*, const char* path);
 void visualconfig_reset_skin(VisualConfig*);
 void visualconfig_reset_control_skin(VisualConfig*);
-void visualconfig_set_app_theme(VisualConfig*);
+void visualconfig_reset_app_theme(VisualConfig*);
 
 const char* visualconfig_default_font_str(const VisualConfig*);
 void visualconfig_set_default_font(VisualConfig*, psy_Property*);

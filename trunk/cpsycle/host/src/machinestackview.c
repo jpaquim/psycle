@@ -975,24 +975,23 @@ void machinestackinputs_build(MachineStackInputs* self)
 				component = machineui_create(
 					psy_audio_machines_at(self->state->machines, column->input),
 					&self->component, self->state->paramviews, FALSE,
-					self->workspace);
+					self->workspace);				
+			} else if (!column || column->offset != 0) {
+				component = psy_ui_component_allocinit(&self->component, NULL);					
 			} else {
-				if (!column || column->offset != 0) {
-					component = psy_ui_component_allocinit(&self->component, NULL);					
-				} else {
-					ArrowUi* arrow;
-					uintptr_t first;
+				ArrowUi* arrow;
+				uintptr_t first;
 
-					first = machinestackcolumn_at(column, 0);
-					arrow = arrowui_allocinit(&self->component,						
-						psy_audio_wire_make(column->inputroute, first),
-						self->state->machines);
-					component = &arrow->component;
-				}
+				first = machinestackcolumn_at(column, 0);
+				arrow = arrowui_allocinit(&self->component,						
+					psy_audio_wire_make(column->inputroute, first),
+					self->state->machines);
+				component = &arrow->component;			
 			}
 			if (component) {
 				psy_ui_component_set_minimum_size(component,
 					self->state->columnsize);
+				psy_ui_component_set_align(component, psy_ui_ALIGN_LEFT);
 			}
 		}		
 	}	
@@ -1355,6 +1354,7 @@ psy_ui_Component* machinestackpane_insert(MachineStackPane* self, uintptr_t slot
 		} else {
 			psy_ui_component_set_minimum_size(rv, self->state->effectsize);
 		}
+		psy_ui_component_set_align(rv, psy_ui_ALIGN_TOP);
 		rv->deallocate = TRUE;
 		return rv;
 	}	

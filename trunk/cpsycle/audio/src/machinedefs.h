@@ -16,14 +16,14 @@ enum {
 
 #define psy_audio_MACH_AUTO_POSITION -1.0
 
-typedef enum {
+typedef enum psy_audio_MachineMode {
 	psy_audio_MACHMODE_GENERATOR = 0,
 	psy_audio_MACHMODE_FX = 1,
 	psy_audio_MACHMODE_MASTER = 2,
 	psy_audio_MACHMODE_UNDEFINED = 3,
 } psy_audio_MachineMode;
 
-typedef enum  {
+typedef enum psy_audio_MachineType {
 	psy_audio_UNDEFINED = -1,
 	psy_audio_MASTER = 0,
 	psy_audio_SINE = 1, /*< now a plugin */

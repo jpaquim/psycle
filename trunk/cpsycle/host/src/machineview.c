@@ -281,21 +281,25 @@ void machineview_on_focus(MachineView* self)
 	}
 }
 
-void machineview_on_tabbar_changed(MachineView* self, psy_ui_TabBar* sender, uintptr_t index)
+void machineview_on_tabbar_changed(MachineView* self, psy_ui_TabBar* sender,
+	uintptr_t index)
 {
-	ViewIndex entry;
+	ViewIndex curr;
 
-	entry = workspace_current_view(self->workspace);
-	if (entry.id != VIEW_ID_MACHINEVIEW || entry.section != index) {
-		workspace_on_view_changed(self->workspace, viewindex_make(
-			VIEW_ID_MACHINEVIEW, index, psy_INDEX_INVALID,
-			psy_INDEX_INVALID));
+	assert(self);
+	
+	curr = workspace_current_view(self->workspace);
+	if (curr.id != VIEW_ID_MACHINEVIEW || curr.section != index) {
+		workspace_add_view(self->workspace, viewindex_make(
+			VIEW_ID_MACHINEVIEW, index, psy_INDEX_INVALID, psy_INDEX_INVALID));
 	}
 }
 
 void machineview_selectsection(MachineView* self, psy_ui_Component* sender,
 	uintptr_t section, uintptr_t options)
 {
+	assert(self);
+	
 	switch (section) {
 	case SECTION_ID_MACHINEVIEW_NEWMACHINE:
 		if (options & NEWMACHINE_INSERT) {
@@ -337,8 +341,7 @@ void machineview_onconfigure(MachineView* self, MachineViewConfig* sender,
 		machineui_enable_macindex();
 	} else {
 		machineui_prevent_macindex();
-	}
-	self->wireview.showwirehover = machineviewconfig_wirehover(sender);	
+	}	
 	if (machineviewconfig_virtualgenerators(sender)) {
 		machinewireview_showvirtualgenerators(&self->wireview);
 		machinestackview_showvirtualgenerators(&self->stackview);

@@ -365,3 +365,4 @@ void audioconfig_on_driver_select(AudioConfig* self, psy_Property* sender)
 {
 	audioconfig_select_driver(self, self->audioenabled);	
 }
+

@@ -101,7 +101,7 @@ void filebar_onnewsong(FileBar* self, psy_ui_Component* sender)
 			viewindex_make(VIEW_ID_CHECKUNSAVED, 0,
 			CONFIRM_NEW, psy_INDEX_INVALID));
 	} else {
-		workspace_newsong(self->workspace);
+		workspace_new_song(self->workspace);
 	}
 }
 
