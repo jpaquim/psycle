@@ -190,11 +190,10 @@ void psy_ui_realrectangle_trace(const psy_ui_RealRectangle* self)
 /* Margin */
 void psy_ui_margin_init(psy_ui_Margin* self)
 {
-	self->top = psy_ui_value_make_px(0);
-	self->right = psy_ui_value_make_px(0);
-	self->bottom = psy_ui_value_make_px(0);
-	self->left = psy_ui_value_make_px(0);
-	psy_ui_margin_setroundmode(self, psy_ui_ROUND_FLOOR);
+	self->top = psy_ui_value_make_eh(0.0);
+	self->right = psy_ui_value_make_ew(0.0);
+	self->bottom = psy_ui_value_make_eh(0.0);
+	self->left = psy_ui_value_make_ew(0.0);	
 }
 
 void psy_ui_margin_init_all(psy_ui_Margin* self, psy_ui_Value top,
@@ -209,31 +208,28 @@ void psy_ui_margin_init_all(psy_ui_Margin* self, psy_ui_Value top,
 void psy_ui_margin_init_em(psy_ui_Margin* self, double top,
 	double right, double bottom, double left)
 {
-	psy_ui_value_seteh(&self->top, top);
-	psy_ui_value_setew(&self->right, right);
-	psy_ui_value_seteh(&self->bottom, bottom);
-	psy_ui_value_setew(&self->left, left);
-	psy_ui_margin_setroundmode(self, psy_ui_ROUND_FLOOR);
+	self->top = psy_ui_value_make_eh(top);
+	self->right = psy_ui_value_make_ew(right);
+	self->bottom = psy_ui_value_make_eh(bottom);
+	self->left = psy_ui_value_make_ew(left);	
 }
 
 void psy_ui_margin_init_perc(psy_ui_Margin* self, double top,
 	double right, double bottom, double left)
 {
-	psy_ui_value_setph(&self->top, top);
-	psy_ui_value_setpw(&self->right, right);
-	psy_ui_value_setph(&self->bottom, bottom);
-	psy_ui_value_setpw(&self->left, left);
-	psy_ui_margin_setroundmode(self, psy_ui_ROUND_FLOOR);
+	self->top = psy_ui_value_make_ph(top);
+	self->right = psy_ui_value_make_pw(right);
+	self->bottom = psy_ui_value_make_ph(bottom);
+	self->left = psy_ui_value_make_pw(left);
 }
 
 void psy_ui_margin_init_px(psy_ui_Margin* self, double top,
 	double right, double bottom, double left)
 {
-	psy_ui_value_setpx(&self->top, top);
-	psy_ui_value_setpx(&self->right, right);
-	psy_ui_value_setpx(&self->bottom, bottom);
-	psy_ui_value_setpx(&self->left, left);
-	psy_ui_margin_setroundmode(self, psy_ui_ROUND_FLOOR);
+	self->top = psy_ui_value_make_px(top);
+	self->right = psy_ui_value_make_px(right);
+	self->bottom = psy_ui_value_make_px(bottom);
+	self->left = psy_ui_value_make_px(left);	
 }
 
 void psy_ui_margin_settop(psy_ui_Margin* self, psy_ui_Value value)
@@ -345,6 +341,11 @@ void psy_ui_position_activate(psy_ui_Position* self)
 	self->rectangle = (psy_ui_Rectangle*)malloc(sizeof(psy_ui_Rectangle));
 	psy_ui_rectangle_init(self->rectangle);
 	psy_ui_rectangle_deactivate(self->rectangle);
+}
+
+psy_ui_Size psy_ui_position_size(const psy_ui_Position* self)
+{
+	return psy_ui_rectangle_size(self->rectangle);
 }
 
 bool psy_ui_position_is_active(const psy_ui_Position* self)

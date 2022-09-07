@@ -52,8 +52,6 @@ static void trackergrid_set_default_event(TrackerGrid*,
 static void trackergrid_enable_pattern_sync(TrackerGrid*);
 static void trackergrid_prevent_pattern_sync(TrackerGrid*);
 static void trackergrid_reset_pattern_sync(TrackerGrid*);
-static void trackergrid_on_goto_cursor(TrackerGrid*, Workspace* sender,
-	psy_audio_SequenceCursor*);
 static bool trackergrid_on_tracker_cmds(TrackerGrid*, InputHandler*);
 static bool trackergrid_on_note_cmds(TrackerGrid*, InputHandler* sender);
 static bool trackergrid_insert_note(TrackerGrid*, intptr_t note_id);
@@ -137,9 +135,7 @@ void trackergrid_init(TrackerGrid* self, psy_ui_Component* parent,
 	psy_audio_blockselection_init(&self->state->pv->selection);
 	/* handle midline invalidation */
 	psy_signal_connect(&self->component.signal_scroll, self,
-		trackergrid_on_scroll);		
-	psy_signal_connect(&self->workspace->signal_gotocursor, self,
-		trackergrid_on_goto_cursor);
+		trackergrid_on_scroll);			
 	psy_ui_component_start_timer(&self->component, 0, 50);	
 }
 
@@ -1450,23 +1446,6 @@ void trackergrid_show_empty_data(TrackerGrid* self, int showstate)
 
 	self->state->show_empty_data = showstate;
 	psy_ui_component_invalidate(&self->component);
-}
-
-void trackergrid_on_goto_cursor(TrackerGrid* self, Workspace* sender,
-	psy_audio_SequenceCursor* cursor)
-{			
-/*	double y;
-	psy_ui_RealSize clientsize;
-	
-	y = trackerstate_beat_to_px(self->state, psy_audio_sequencecursor_offset(
-			cursor));
-	clientsize = psy_ui_component_clientsize_px(&self->component);
-	if (y < psy_ui_component_scroll_top_px(&self->component) ||
-		y > psy_ui_component_scroll_top_px(&self->component) + clientsize.height) {
-		psy_ui_component_set_scroll_top_px(&self->component,
-			trackerstate_beat_to_px(self->state,
-				psy_audio_sequencecursor_offset(cursor)));
-	}*/
 }
 
 void trackergrid_build(TrackerGrid* self)

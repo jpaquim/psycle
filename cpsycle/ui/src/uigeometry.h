@@ -625,6 +625,11 @@ INLINE psy_ui_Rectangle psy_ui_rectangle_make_px(const psy_ui_RealRectangle* r)
 	return rv;
 }
 
+INLINE psy_ui_Size psy_ui_rectangle_size(const psy_ui_Rectangle* self)
+{
+	return self->size;
+}
+
 typedef struct psy_ui_Position {
 	psy_ui_Rectangle* rectangle;	
 } psy_ui_Position;
@@ -635,6 +640,7 @@ void psy_ui_position_dispose(psy_ui_Position*);
 void psy_ui_position_set_rectangle(psy_ui_Position*, psy_ui_Rectangle);
 void psy_ui_position_set_topleft(psy_ui_Position*, psy_ui_Point);
 void psy_ui_position_set_size(psy_ui_Position*, psy_ui_Size);
+psy_ui_Size psy_ui_position_size(const psy_ui_Position*);
 
 INLINE psy_ui_Rectangle psy_ui_position_rectangle(const psy_ui_Position* self)
 {
@@ -663,13 +669,16 @@ void psy_ui_margin_settop(psy_ui_Margin*, psy_ui_Value value);
 void psy_ui_margin_setright(psy_ui_Margin*, psy_ui_Value value);
 void psy_ui_margin_setbottom(psy_ui_Margin*, psy_ui_Value value);
 void psy_ui_margin_setleft(psy_ui_Margin*, psy_ui_Value value);
-psy_ui_Value psy_ui_margin_width(psy_ui_Margin*, const psy_ui_TextMetric*, const psy_ui_Size* pesize);
-double psy_ui_margin_width_px(psy_ui_Margin*, const psy_ui_TextMetric*, const psy_ui_Size* pesize);
+psy_ui_Value psy_ui_margin_width(psy_ui_Margin*, const psy_ui_TextMetric*,
+	const psy_ui_Size* pesize);
+double psy_ui_margin_width_px(psy_ui_Margin*, const psy_ui_TextMetric*,
+	const psy_ui_Size* pesize);
 psy_ui_Value psy_ui_margin_height(psy_ui_Margin*, const psy_ui_TextMetric*,
 	const psy_ui_Size* pesize);
-double psy_ui_margin_height_px(psy_ui_Margin*, const psy_ui_TextMetric*, const psy_ui_Size* pesize);
+double psy_ui_margin_height_px(psy_ui_Margin*, const psy_ui_TextMetric*,
+	const psy_ui_Size* pesize);
 
-INLINE bool psy_ui_margin_iszero(const psy_ui_Margin* self)
+INLINE bool psy_ui_margin_is_zero(const psy_ui_Margin* self)
 {
 	return psy_ui_value_iszero(&self->left) &&
 		psy_ui_value_iszero(&self->top) &&
@@ -721,7 +730,8 @@ INLINE psy_ui_Margin psy_ui_margin_zero(void)
 	return rv;
 }
 
-INLINE void psy_ui_margin_setroundmode(psy_ui_Margin* self, psy_ui_Round round)
+INLINE void psy_ui_margin_set_round_mode(psy_ui_Margin* self,
+	psy_ui_Round round)
 {
 	psy_ui_value_setroundmode(&self->top, round);
 	psy_ui_value_setroundmode(&self->right, round);

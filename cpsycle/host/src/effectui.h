@@ -25,6 +25,7 @@ typedef struct EffectUi {
 	PanUi pan;
 	VuUi vu;
 	bool prevent_machine_pos;
+	uintptr_t counter;
 	/* references */
 	psy_audio_Machine* machine;
 	psy_audio_Machines* machines;

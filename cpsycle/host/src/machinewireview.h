@@ -62,13 +62,11 @@ typedef struct MachineWireView {
 	uintptr_t selectedslot;	
 	psy_audio_Wire dragwire;	
 	psy_audio_Wire hoverwire;	
-	psy_audio_PluginCatcher plugincatcher;	
 	int randominsert;
 	int addeffect;
 	bool mousemoved;
 	bool showwirehover;	
-	bool drawvirtualgenerators;
-	uintptr_t opcount;
+	bool drawvirtualgenerators;	
 	bool centermaster;	
 	/* references */
 	psy_audio_Machines* machines;	

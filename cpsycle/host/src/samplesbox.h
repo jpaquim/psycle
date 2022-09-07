@@ -29,7 +29,7 @@ typedef struct SamplesBox {
 	psy_ui_Label header;
 	psy_ui_Label group;
 	psy_ui_ListBox subsamplelist;
-	psy_Property sample_load;
+	psy_Property sample_load;	
 	bool load_on_select;
 	uintptr_t restore_view;
 	// references

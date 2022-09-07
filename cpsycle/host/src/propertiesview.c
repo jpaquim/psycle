@@ -234,7 +234,7 @@ void propertiesrenderline_build(PropertiesRenderLine* self)
 	lines = &self->component;
 	if (self->level != 0) {
 		if (psy_property_is_section(self->property) &&
-				psy_property_hint(self->property) != PSY_PROPERTY_HINT_RANGE) {
+				psy_property_hint(self->property) != PSY_PROPERTY_HINT_RANGE) {			
 			if (self->level == 1) {				
 				lines = propertiesrenderline_build_section(self,
 					self->state->mainsectionstyle,
@@ -243,6 +243,10 @@ void propertiesrenderline_build(PropertiesRenderLine* self)
 				lines = propertiesrenderline_build_section(self,
 					STYLE_PROPERTYVIEW_SUBSECTION,
 					STYLE_PROPERTYVIEW_SUBSECTIONHEADER);
+			} else {
+				lines = propertiesrenderline_build_section(self,
+					STYLE_PROPERTYVIEW_SECTION,
+					STYLE_PROPERTYVIEW_SECTIONHEADER);
 			}
 		} else {
 			psy_ui_component_set_align_expand(&self->component, psy_ui_HEXPAND);
@@ -430,7 +434,7 @@ psy_ui_Component* propertiesrenderline_build_section(PropertiesRenderLine* self,
 	psy_ui_component_set_align(psy_ui_label_base(label), psy_ui_ALIGN_TOP);
 	psy_ui_component_set_style_type(psy_ui_label_base(label),
 		section_header_style);
-	psy_ui_label_set_text(label, psy_property_text(self->property));
+	psy_ui_label_set_text(label, psy_property_text(self->property));	
 	rv = psy_ui_component_allocinit(&self->component, NULL);
 	psy_ui_component_set_align(rv, psy_ui_ALIGN_TOP);
 	psy_ui_component_set_margin(rv, psy_ui_margin_make_em(0.0, 1.0, 0.0, 2.0));

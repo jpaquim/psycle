@@ -78,10 +78,26 @@ void fileviewfilter_on_destroyed(FileViewFilter* self)
 	psy_signal_dispose(&self->signal_changed);
 }
 
+void fileviewfilter_set_filter(FileViewFilter* self, const psy_Property* types)
+{		
+	assert(self);
+	
+	if (types) {
+		psy_property_clear(&self->filter);
+		psy_property_append_property(&self->filter, psy_property_clone(types));
+		self->types = psy_property_at(&self->filter, "types",
+			PSY_PROPERTY_TYPE_NONE);
+		fileviewfilter_build(self, self->types);
+	}
+}
+
 void fileviewfilter_build(FileViewFilter* self, psy_Property* types)
 {
 	psy_List* p;			
 	
+	assert(self);
+	
+	psy_ui_component_clear(&self->items);
 	for (p = psy_property_begin(types); p  != NULL; p = p->next) {
 		psy_Property* curr;
 		psy_ui_CheckBox* check;
@@ -209,6 +225,7 @@ static void fileview_on_filter(FileView*, psy_ui_Component* sender);
 static void fileview_on_hide(FileView*, psy_ui_Component* sender);
 static void fileview_on_recent_selected(FileView*, PropertiesView* sender,
 	psy_Property*);
+static void fileview_on_save_button(FileView*, psy_ui_Component* sender);	
 
 /* vtable */
 static psy_ui_ComponentVtable vtable;
@@ -233,7 +250,7 @@ void fileview_init(FileView* self, psy_ui_Component* parent,
 	psy_ui_component_init(fileview_base(self), parent, NULL);
 	vtable_init(self);
 	self->dirconfig = dirconfig;
-	self->property = NULL;
+	self->load = self->save = NULL;	
 	psy_ui_component_set_id(fileview_base(self), VIEW_ID_FILEVIEW);
 	psy_ui_component_set_preferred_size(&self->component,
 		psy_ui_size_make_em(80.0, 25.0));
@@ -282,8 +299,9 @@ void fileview_init(FileView* self, psy_ui_Component* parent,
 	psy_ui_component_set_style_type(&self->buttons, STYLE_FILEVIEW_BUTTONS);
 	psy_ui_component_set_margin(&self->buttons, psy_ui_margin_make_em(
 		0.0, 0.5, 0.0, 0.5));
-	psy_ui_button_init_text(&self->save, &self->buttons, "file.save");
-	psy_ui_component_set_align(&self->save.component, psy_ui_ALIGN_TOP);
+	psy_ui_button_init_text_connect(&self->save_button, &self->buttons,
+		"file.save", self, fileview_on_save_button);
+	psy_ui_component_set_align(&self->save_button.component, psy_ui_ALIGN_TOP);
 	psy_ui_button_init_text_connect(&self->refresh, &self->buttons,
 		"file.refresh", self, fileview_on_filter);
 	psy_ui_component_set_align(&self->refresh.component, psy_ui_ALIGN_TOP);
@@ -318,6 +336,7 @@ void fileview_init(FileView* self, psy_ui_Component* parent,
 		psy_ui_ALIGN_TOP);
 	fileview_build_drives(self);		
 	psy_signal_init(&self->signal_selected);
+	psy_signal_init(&self->signal_save);
 	psy_signal_connect(&self->filebox.signal_selected, self,
 		fileview_on_file_selected);
 	psy_signal_connect(&self->filebox.signal_dir_changed, self,
@@ -329,7 +348,8 @@ void fileview_init(FileView* self, psy_ui_Component* parent,
 
 void fileview_on_destroyed(FileView* self)
 {	
-	psy_signal_dispose(&self->signal_selected);		
+	psy_signal_dispose(&self->signal_selected);
+	psy_signal_dispose(&self->signal_save);
 }
 
 void fileview_build_drives(FileView* self)
@@ -358,9 +378,8 @@ void fileview_on_recent_selected(FileView* self, PropertiesView* sender,
 	psy_ui_textarea_set_text(&self->filename,
 		psy_path_filename(&recent_path));		
 	psy_path_dispose(&recent_path);
-	if (self->property) {		
-		psy_property_set_item_str(self->property, 
-			psy_property_item_str(property));
+	if (self->load) {		
+		psy_property_set_item_str(self->load, psy_property_item_str(property));
 	} else {
 		psy_signal_emit(&self->signal_selected, self, 0);
 	}
@@ -370,11 +389,11 @@ void fileview_on_file_selected(FileView* self, FileBox* sender)
 {		
 	psy_ui_textarea_set_text(&self->filename,
 		filebox_file_name(&self->filebox));
-	if (self->property) {
+	if (self->load) {
 		char path[4096];
 		
 		filebox_full_name(&self->filebox, path, 4096);
-		psy_property_set_item_str(self->property, path);
+		psy_property_set_item_str(self->load, path);
 	} else {
 		psy_signal_emit(&self->signal_selected, self, 0);
 	}
@@ -433,12 +452,30 @@ void fileview_on_filter(FileView* self, psy_ui_Component* sender)
 	if (sender == psy_ui_button_base(&self->showall)) {
 		self->dirfilter.showall = TRUE;
 	}		
-	filebox_set_wildcard(&self->filebox, 
-		fileviewfilter_type(&self->dirfilter));		
+	filebox_set_wildcard(&self->filebox, fileviewfilter_type(&self->dirfilter));
 	psy_ui_component_align_full(&self->filebox.component);
 }
 
 void fileview_on_hide(FileView* self, psy_ui_Component* sender)
 {
 	psy_ui_component_hide_align(fileview_base(self));
+}
+
+void fileview_on_save_button(FileView* self, psy_ui_Component* sender)
+{
+	if (self->save) {	
+		char path[4096];
+	
+		fileview_filename(self, path, 4096);
+		psy_property_set_item_str(self->save, path);
+	} else {
+		psy_signal_emit(&self->signal_save, self, 0);
+	}
+}
+
+void fileview_set_filter(FileView* self, const psy_Property* types)
+{
+	fileviewfilter_set_filter(&self->dirfilter, types);
+	filebox_set_wildcard(&self->filebox, fileviewfilter_type(&self->dirfilter));
+	psy_ui_component_align_full(&self->filebox.component);
 }

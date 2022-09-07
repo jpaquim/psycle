@@ -72,13 +72,10 @@ typedef struct NewMachineSectionBar {
 	psy_ui_Button addtosection;
 	psy_ui_Button removefromsection;
 	psy_ui_Button addpane;
-	psy_ui_Button removepane;
-	/* references */
-	Workspace* workspace;
+	psy_ui_Button removepane;	
 } NewMachineSectionBar;
 
-void newmachinesectionbar_init(NewMachineSectionBar*, psy_ui_Component* parent,
-	Workspace*);
+void newmachinesectionbar_init(NewMachineSectionBar*, psy_ui_Component* parent);
 
 /* NewMachineFilterGroup */
 typedef struct NewMachineFilterGroup {
@@ -190,7 +187,7 @@ typedef struct NewMachineSectionsPane {
 	psy_ui_Component sections;
 	psy_ui_Scroller scroller_sections;
 	NewMachineFiltersBar filtersbar;
-	Workspace* workspace;
+	PluginScanThread* plugin_scan_thread;
 	psy_Table newmachinesections;
 	PluginFilter filter;	
 	/* references */
@@ -198,11 +195,12 @@ typedef struct NewMachineSectionsPane {
 } NewMachineSectionsPane;
 
 void newmachinesectionspane_init(NewMachineSectionsPane*,
-	psy_ui_Component* parent, struct NewMachine*, Workspace*);
+	psy_ui_Component* parent, struct NewMachine*,
+	PluginScanThread*);
 
 NewMachineSectionsPane* newmachinesectionspane_alloc(void);
 NewMachineSectionsPane* newmachinesectionspane_allocinit(
-	psy_ui_Component* parent, struct NewMachine*, Workspace*);
+	psy_ui_Component* parent, struct NewMachine*, PluginScanThread*);
 
 void newmachinesectionspane_checkselections(NewMachineSectionsPane*,
 	PluginsView* sender);

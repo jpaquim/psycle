@@ -408,6 +408,10 @@ psy_ui_Component* machineui_create(psy_audio_Machine* machine,
 			}
 			rv = generatorui_base(ui);
 		}
+	}
+	if (rv) {
+		psy_ui_component_set_id(rv, mac_id);
+		psy_ui_component_set_align(rv, psy_ui_ALIGN_NONE);
 	}	
 	return rv;	
 }

@@ -21,6 +21,7 @@ typedef struct psy_audio_PSY3Loader {
 	struct PsyFile* fp;
 	struct psy_audio_Song* song;
 	int progress;
+	int32_t seqbus;
 } psy_audio_PSY3Loader;
 
 void psy_audio_psy3loader_init(psy_audio_PSY3Loader*,

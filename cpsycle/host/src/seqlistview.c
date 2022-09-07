@@ -189,9 +189,9 @@ void seqviewitem_draw_progress_bar(SeqViewItem* self, psy_ui_Graphics* g)
 		psy_ui_style_const(STYLE_SEQ_PROGRESS)->background.colour);
 }
 
-void seqviewitem_text(SeqViewItem* self, char* text)
+void seqviewitem_text(SeqViewItem* self, char* rv)
 {
-	text[0] = '\0';
+	rv[0] = '\0';
 	switch (self->seqentry->type) {
 	case psy_audio_SEQUENCEENTRY_PATTERN: {
 		psy_audio_Pattern* pattern;
@@ -203,12 +203,12 @@ void seqviewitem_text(SeqViewItem* self, char* text)
 			self->state->cmds->patterns);
 		if (self->state->showpatternnames) {
 			if (pattern) {
-				psy_snprintf(text, 20, "%02X: %s %06.2f",
+				psy_snprintf(rv, 20, "%02X: %s %06.2f",
 					self->order_index.order,
 					psy_audio_pattern_name(pattern),
 					(float)psy_audio_sequenceentry_offset(self->seqentry));
 			} else {
-				psy_snprintf(text, 20, "%02X:%02X(ERR) %06.2f",
+				psy_snprintf(rv, 20, "%02X:%02X(ERR) %06.2f",
 					(int)self->order_index.order,
 					(int)psy_audio_sequencepatternentry_patternslot(
 						seqpatternentry),
@@ -216,13 +216,13 @@ void seqviewitem_text(SeqViewItem* self, char* text)
 			}
 		} else {
 			if (pattern) {
-				psy_snprintf(text, 20, "%02X:%02X  %06.2f",
+				psy_snprintf(rv, 20, "%02X:%02X  %06.2f",
 					self->order_index.order,
 					(int)psy_audio_sequencepatternentry_patternslot(
 						seqpatternentry),
 					(float)psy_audio_sequenceentry_offset(self->seqentry));
 			} else {
-				psy_snprintf(text, 20, "%02X:%02XE %06.2f",
+				psy_snprintf(rv, 20, "%02X:%02XE %06.2f",
 					self->order_index.order,
 					(int)psy_audio_sequencepatternentry_patternslot(
 						seqpatternentry),
@@ -234,7 +234,7 @@ void seqviewitem_text(SeqViewItem* self, char* text)
 		psy_audio_SequenceSampleEntry* seqsampleentry;
 
 		seqsampleentry = (psy_audio_SequenceSampleEntry*)self->seqentry;
-		psy_snprintf(text, 64, "%02X:%02X:%02X", self->order_index.order,
+		psy_snprintf(rv, 64, "%02X:%02X:%02X", self->order_index.order,
 			(int)psy_audio_sequencesampleentry_samplesindex(seqsampleentry).slot,
 			(int)psy_audio_sequencesampleentry_samplesindex(seqsampleentry).subslot);
 		break; }
@@ -243,7 +243,7 @@ void seqviewitem_text(SeqViewItem* self, char* text)
 
 		seqmarkerentry = (psy_audio_SequenceMarkerEntry*)self->seqentry;
 		if (seqmarkerentry->text) {
-			psy_snprintf(text, 20, "%02X:%s", self->order_index.order,
+			psy_snprintf(rv, 20, "%02X:%s", self->order_index.order,
 				seqmarkerentry->text,
 				(float)psy_audio_sequenceentry_offset(self->seqentry));
 		}

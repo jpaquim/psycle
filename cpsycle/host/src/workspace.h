@@ -48,11 +48,6 @@
 extern "C" {
 #endif
 
-enum {
-	WORKSPACE_NEWSONG,
-	WORKSPACE_LOADSONG
-};
-
 
 struct Workspace;
 
@@ -65,11 +60,9 @@ struct ParamViews;
 
 typedef struct Workspace {	
 	HostMachineCallback hostmachinecallback;
-	/* signals */	
-	psy_Signal signal_gotocursor;	
+	/* signals */		
 	psy_Signal signal_load_progress;	
 	psy_Signal signal_viewselected;	
-	psy_Signal signal_parametertweak;
 	psy_Signal signal_status_out;	
 	psy_Signal signal_machineeditresize;
 	psy_Signal signal_buschanged;
@@ -99,12 +92,10 @@ void workspace_init(Workspace*, psy_ui_Component* handle);
 void workspace_dispose(Workspace*);
 
 void workspace_load_configuration(Workspace*);
-void workspace_postload_driver_configurations(Workspace*);
 void workspace_start_audio(Workspace*);
-void workspace_save_configuration(Workspace*);
 void workspace_clear_sequence_paste(Workspace*);
 void workspace_save_styles(Workspace*);
-void workspace_newsong(Workspace*);
+void workspace_new_song(Workspace*);
 void workspace_load_song_fileselect(Workspace*);
 void workspace_load_song(Workspace*, const char*, bool play);
 bool workspace_save_song_fileselect(Workspace*);
@@ -142,9 +133,7 @@ INLINE psy_audio_Player* workspace_player(Workspace* self)
 	return &self->player;
 }
 
-psy_Property* workspace_recentsongs(Workspace*);
 psy_Playlist* workspace_playlist(Workspace*);
-void workspace_load_recent_songs(Workspace*);
 void workspace_undo(Workspace*);
 void workspace_redo(Workspace*);
 void workspace_edit_quantize_change(Workspace*, int diff);
@@ -155,9 +144,7 @@ void workspace_idle(Workspace*);
 void workspace_select_view(Workspace*, ViewIndex);
 void workspace_save_view(Workspace*);
 void workspace_restore_view(Workspace*);
-void workspace_parameter_tweak(Workspace*, int slot, uintptr_t tweak,
-	float value);
-void workspace_on_view_changed(Workspace*, ViewIndex);
+void workspace_add_view(Workspace*, ViewIndex);
 void workspace_back(Workspace*);
 void workspace_forward(Workspace*);
 void workspace_update_currview(Workspace*);
@@ -170,7 +157,6 @@ void workspace_output_warning(Workspace*, const char* text);
 void workspace_output_error(Workspace*, const char* text);
 void workspace_output(Workspace*, const char* text);
 void workspace_output_status(Workspace*, const char* text);
-void workspace_goto_cursor(Workspace*, psy_audio_SequenceCursor);
 void workspace_connect_status(Workspace*, void* context, fp_workspace_output);
 void workspace_connect_load_progress(Workspace*, void* context,
 	fp_workspace_songloadprogress);

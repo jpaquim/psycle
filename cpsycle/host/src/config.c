@@ -128,3 +128,40 @@ void psycleconfig_on_import_config(PsycleConfig* self, psy_Property* sender)
 	}
 	psy_ui_opendialog_dispose(&opendialog);
 }
+
+void psycleconfig_load_driver_configurations(PsycleConfig* self)
+{	
+	psy_Path path;
+	psy_PropertyReader propertyreader;
+
+	assert(self);
+		
+	psy_path_init(&path, NULL);
+	psy_path_set_prefix(&path, dirconfig_config_dir(&self->directories));
+	psy_path_set_name(&path, PSYCLE_INI);	
+	audioconfig_make_driver_configurations(psycleconfig_audio(self), TRUE);
+	psy_propertyreader_init(&propertyreader, &self->config,
+		psy_path_full(&path));	
+	psy_propertyreader_load(&propertyreader);
+	psy_propertyreader_dispose(&propertyreader);	
+	psy_path_dispose(&path);	
+}
+
+void psycleconfig_save_configuration(PsycleConfig* self)
+{
+	psy_Path path;
+	psy_PropertyWriter propertywriter;
+
+	assert(self);
+	
+	psy_path_init(&path, NULL);
+	psy_path_set_prefix(&path, dirconfig_config_dir(&self->directories));
+	psy_path_set_name(&path, PSYCLE_INI);
+	eventdriverconfig_make(&self->input);
+	midiviewconfig_make_controller_save(psycleconfig_midi(self));
+	psy_propertywriter_init(&propertywriter, &self->config,
+		psy_path_full(&path));
+	psy_propertywriter_save(&propertywriter);
+	psy_propertywriter_dispose(&propertywriter);	
+	psy_path_dispose(&path);
+}

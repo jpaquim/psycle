@@ -40,6 +40,7 @@
 #include "stepsequencerview.h"
 #include "songbar.h"
 #include "songproperties.h"
+#include "styleview.h"
 #include <uitabbar.h>
 #include "trackscopeview.h"
 #include "undoredobar.h"
@@ -116,6 +117,7 @@ typedef struct MainFrame {
 	ExportView exportview;
 	RenderView renderview;	
 	PropertiesView settingsview;
+	StyleView styleview;
 	HelpView helpview;	
 	KbdHelp kbdhelp;
 	Gear gear;

@@ -118,6 +118,7 @@ int psy_audio_psy3loader_load(psy_audio_PSY3Loader* self)
 	int status;
 
 	self->progress = 0;
+	self->seqbus = -1;
 	self->songfile->legacywires = &self->legacywires;
 	if ((status = psy_audio_psy3loader_read_version(self))) {
 		return status;
@@ -262,7 +263,11 @@ void psy_audio_psy3loader_postload(psy_audio_PSY3Loader* self)
 			(psy_audio_Machine*)psy_tableiterator_value(&it),
 			self->songfile,
 			psy_tableiterator_key(&it));
-	}		
+	}
+	if (self->seqbus >= 0) {
+		psy_audio_machines_select(psy_audio_song_machines(self->song),
+			self->seqbus);
+	}
 }
 
 void psy_audio_psy3loader_set_instrument_names(psy_audio_PSY3Loader* self)
@@ -342,8 +347,7 @@ int psy_audio_psy3loader_read_sngi(psy_audio_PSY3Loader* self)
 	int32_t temp;
 	uint32_t utemp;
 	int32_t songtracks;
-	int32_t tracksoloed;
-	int32_t seqbus;
+	int32_t tracksoloed;	
 	int32_t paramselected;
 	int32_t auxcolselected;
 	int32_t instselected;	
@@ -410,10 +414,10 @@ int psy_audio_psy3loader_read_sngi(psy_audio_PSY3Loader* self)
 	if ((status = psyfile_read(self->fp, &temp, sizeof temp))) {
 		return status;
 	}
-	seqbus = temp;
+	self->seqbus = temp;
 	if ((status = psyfile_read(self->fp, &temp, sizeof temp))) {
 		return status;
-	}
+	}	
 	paramselected = temp;
 	if ((status = psyfile_read(self->fp, &temp, sizeof temp))) {
 		return status;

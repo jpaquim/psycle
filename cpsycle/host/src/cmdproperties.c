@@ -514,6 +514,10 @@ void cmdproperties_make_general(psy_Property* self)
 			psy_audio_encodeinput(psy_ui_KEY_F12, 0, 0, 0, 0), 0, 0), CMD_IMM_TERMINAL),
 		"term"), "cmds.terminal");
 	psy_property_set_text(psy_property_set_short_text(
+		psy_property_set_id(psy_property_append_int(general, "cmd_styles",
+			psy_audio_encodeinput(psy_ui_KEY_F12, 1, 0, 0, 0), 0, 0), CMD_IMM_STYLES),
+		"styles"), "cmds.styles");
+	psy_property_set_text(psy_property_set_short_text(
 		psy_property_set_id(psy_property_append_int(general, "cmd_instrdec",
 			psy_audio_encodeinput(psy_ui_KEY_DOWN, 0, 1, 0, 0), 0, 0), CMD_IMM_INSTRDEC),
 		"inst-1"), "cmds.instrdec");

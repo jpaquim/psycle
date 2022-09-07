@@ -142,6 +142,7 @@ typedef struct InstrumentView {
 	InstrumentFilterView filter;
 	InstrumentPitchView pitch;
 	psy_Property instrument_load;
+	psy_Property instrument_save;
 	// references
 	InstrumentsViewBar* statusbar;
 	psy_audio_Player* player;

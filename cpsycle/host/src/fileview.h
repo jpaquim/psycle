@@ -44,6 +44,7 @@ typedef struct FileViewFilter {
 void fileviewfilter_init(FileViewFilter*, psy_ui_Component* parent);
 
 const char* fileviewfilter_type(const FileViewFilter*);
+void fileviewfilter_set_filter(FileViewFilter*, const psy_Property* types);
 
 INLINE psy_ui_Component* fileviewfilter_base(FileViewFilter* self)
 {
@@ -94,6 +95,7 @@ typedef struct FileView {
 	psy_ui_Component component;
 	/* signals */
 	psy_Signal signal_selected;
+	psy_Signal signal_save;
 	/* internal */
 	psy_ui_Notebook notebook;
 	FileBox filebox;
@@ -104,7 +106,7 @@ typedef struct FileView {
 	FileViewFilter dirfilter;
 	FileViewSaveFilter savefilter;	
 	psy_ui_Component buttons;	
-	psy_ui_Button save;
+	psy_ui_Button save_button;
 	psy_ui_Button showall;
 	psy_ui_Button refresh;
 	psy_ui_Button exit;
@@ -116,7 +118,8 @@ typedef struct FileView {
 	psy_ui_TextArea filename;
 	/* references */
 	DirConfig* dirconfig;
-	psy_Property* property;
+	psy_Property* load;
+	psy_Property* save;
 } FileView;
 
 void fileview_init(FileView*, psy_ui_Component* parent, DirConfig*,
@@ -129,11 +132,13 @@ INLINE psy_ui_Component* fileview_base(FileView* self)
 
 void fileview_filename(FileView* self, char* filename, uintptr_t maxsize);
 void fileview_set_directory(FileView* self, const char* directory);
+void fileview_set_filter(FileView*, const psy_Property* types);
 
 INLINE void fileview_set_callbacks(FileView* self, psy_Property* load,
 	psy_Property* save)
 {
-	self->property = load;
+	self->load = load;
+	self->save = save;
 }
 
 #ifdef __cplusplus

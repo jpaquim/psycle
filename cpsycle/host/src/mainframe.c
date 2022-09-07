@@ -12,6 +12,8 @@
 #include "cmdsnotes.h"
 #include "resources/resource.h"
 #include "styles.h"
+/* ui */
+#include <uidefaults.h>
 /* file */
 #include <dir.h>
 /* platform */
@@ -57,7 +59,7 @@ static void mainframe_checkplaystartwithrctrl(MainFrame*, psy_ui_KeyboardEvent*)
 static void mainframe_on_key_up(MainFrame*, psy_ui_KeyboardEvent*);
 static void mainframe_delegate_keyboard(MainFrame*, intptr_t message,
 	psy_ui_KeyboardEvent*);
-static void mainframe_on_file_save_view(MainFrame*, psy_ui_Component* sender);
+static void mainframe_on_file_save_view(MainFrame*, FileView* sender);
 static void mainframe_on_disk_op(MainFrame*, psy_ui_Component* sender);
 static void mainframe_on_tabbar_changed(MainFrame*, psy_ui_TabBar* sender,
 	uintptr_t tabindex);
@@ -227,7 +229,7 @@ void mainframe_init_frame(MainFrame* self)
 	psy_ui_app_setmain(psy_ui_app(), mainframe_base(self));
 	psy_ui_component_seticonressource(mainframe_base(self), IDI_PSYCLEICON);
 	init_host_styles(&psy_ui_appdefaults()->styles,
-		psy_ui_defaults()->styles.theme);
+		psy_ui_defaults()->styles.theme_mode);
 	self->titlemodified = FALSE;
 	self->allow_frame_move = FALSE;
 	psy_ui_component_init(&self->pane, mainframe_base(self),
@@ -237,7 +239,7 @@ void mainframe_init_frame(MainFrame* self)
 }
 
 void mainframe_on_destroyed(MainFrame* self)
-{
+{	
 	paramviews_dispose(&self->paramviews);
 	startscript_dispose(&self->startscript);
 	links_dispose(&self->links);
@@ -267,8 +269,7 @@ void mainframe_init_workspace(MainFrame* self)
 {
 	workspace_init(&self->workspace, mainframe_base(self));
 	paramviews_init(&self->paramviews, &self->component, &self->workspace);
-	workspace_set_param_views(&self->workspace, &self->paramviews);
-	workspace_load_recent_songs(&self->workspace);
+	workspace_set_param_views(&self->workspace, &self->paramviews);	
 	workspace_load_configuration(&self->workspace);
 }
 
@@ -333,7 +334,7 @@ void mainframe_init_view_statusbars(MainFrame* self)
 {
 	machineviewbar_init(&self->machineviewbar,
 		psy_ui_notebook_base(&self->mainviews.viewstatusbars),
-		&self->workspace);
+		&self->workspace.player);
 	patternviewbar_init(&self->patternviewbar,
 		psy_ui_notebook_base(&self->mainviews.viewstatusbars),
 		&self->workspace.config.visual.patview,
@@ -486,6 +487,10 @@ void mainframe_init_main_pane(MainFrame* self)
 	psy_ui_component_set_id(&self->settingsview.component,
 		VIEW_ID_SETTINGSVIEW);
 	psy_ui_component_set_title(&self->settingsview.component, "main.settings");	
+	styleview_init(&self->styleview,	
+		psy_ui_notebook_base(&self->mainviews.notebook),
+		psy_ui_notebook_base(&self->mainviews.mainviewbar.viewtabbars),		
+		&self->workspace);	
 	helpview_init(&self->helpview,
 		psy_ui_notebook_base(&self->mainviews.notebook),
 		psy_ui_notebook_base(&self->mainviews.mainviewbar.viewtabbars),
@@ -702,7 +707,7 @@ void mainframe_init_file_view(MainFrame* self)
 		dirconfig_songs(&self->workspace.config.directories));
 	psy_ui_component_set_align(fileview_base(&self->fileview),
 		psy_ui_ALIGN_LEFT);
-	psy_signal_connect(&self->fileview.save.signal_clicked, self,
+	psy_signal_connect(&self->fileview.signal_save, self,
 		mainframe_on_file_save_view);
 	psy_ui_component_hide(&self->fileview.component);
 	psy_signal_connect(&self->fileview.signal_selected,
@@ -814,6 +819,11 @@ bool mainframe_on_input(MainFrame* self, InputHandler* sender)
 	case CMD_IMM_TERMINAL:
 		mainframe_on_toggle_terminal(self, mainframe_base(self));
 		return 1;
+	case CMD_IMM_STYLES:
+		workspace_select_view(&self->workspace,	viewindex_make(
+			VIEW_ID_STYLEVIEW, psy_INDEX_INVALID, psy_INDEX_INVALID,
+			psy_INDEX_INVALID));
+		return 1;
 	case CMD_IMM_FULLSCREEN:
 		psy_ui_component_togglefullscreen(mainframe_base(self));		
 		return 1;
@@ -856,7 +866,7 @@ void mainframe_on_song_changed(MainFrame* self, psy_audio_Player* sender)
 				workspace_conf(&self->workspace)))) {
 			workspace_select_view(&self->workspace,
 				viewindex_make(VIEW_ID_SONGPROPERTIES, psy_INDEX_INVALID,
-					psy_INDEX_INVALID, psy_INDEX_INVALID));			
+					psy_INDEX_INVALID, psy_INDEX_INVALID));
 		}
 	}
 	mainframe_update_songtitle(self);
@@ -904,20 +914,32 @@ void mainframe_update_songtitle(MainFrame* self)
 		workspace_song_title(&self->workspace));
 }
 
-void mainframe_on_file_save_view(MainFrame* self, psy_ui_Component* sender)
+void mainframe_on_file_save_view(MainFrame* self, FileView* sender)
 {
 	char path[4096];
 
-	psy_ui_component_show_align(fileview_base(&self->fileview));
-	fileview_filename(&self->fileview, path, 4096);
-	workspace_save_song(&self->workspace, path);	
+	psy_ui_component_show_align(fileview_base(sender));
+	fileview_filename(sender, path, 4096);
+	workspace_save_song(&self->workspace, path);
 }
 
 void mainframe_on_disk_op(MainFrame* self, psy_ui_Component* sender)
 {	
-	self->fileview.property = NULL;
-	workspace_select_view(&self->workspace, viewindex_make(VIEW_ID_FILEVIEW,
-		0, 0, psy_INDEX_INVALID));
+	fileview_set_callbacks(&self->fileview, NULL, NULL);
+	psy_Property types;
+		
+	fileview_set_callbacks(&self->fileview, NULL, NULL);
+	psy_property_init_type(&types, "types", PSY_PROPERTY_TYPE_CHOICE);		
+	psy_property_set_text(psy_property_set_id(
+		psy_property_append_str(&types, "psy", "*.psy"),
+		FILEVIEWFILTER_PSY), "Psycle");
+	psy_property_set_text(psy_property_set_id(
+		psy_property_append_str(&types, "mod", "*.mod"),
+		FILEVIEWFILTER_MOD), "Module");	
+	fileview_set_filter(&self->fileview, &types);
+	psy_property_dispose(&types);
+	workspace_select_view(&self->workspace, viewindex_make(
+		VIEW_ID_FILEVIEW, 0, 0, psy_INDEX_INVALID));
 }
 
 void mainframe_on_render(MainFrame* self, psy_ui_Component* sender)
@@ -1028,10 +1050,9 @@ void mainframe_on_tabbar_changed(MainFrame* self, psy_ui_TabBar* sender,
 		psy_ui_notebook_select_by_component_id
 			(&self->mainviews.mainviewbar.viewtabbars,
 			psy_ui_component_id(component));
-		workspace_on_view_changed(&self->workspace, viewindex_make(
+		workspace_add_view(&self->workspace, viewindex_make(
 			tabindex, psy_ui_component_section(component),
-			psy_INDEX_INVALID,
-			psy_INDEX_INVALID));
+			psy_INDEX_INVALID, psy_INDEX_INVALID));
 		psy_ui_component_set_focus(component);
 	}		
 	psy_ui_component_align(&self->mainviews.component);	
@@ -1085,7 +1106,7 @@ void mainframe_on_check_unsaved(MainFrame* self, ConfirmBox* sender,
 					workspace_load_song_fileselect(&self->workspace);
 				}
 			} else if (mode == CONFIRM_NEW) {
-				workspace_newsong(&self->workspace);
+				workspace_new_song(&self->workspace);
 			}
 		}
 		break;
@@ -1114,7 +1135,7 @@ void mainframe_on_check_unsaved(MainFrame* self, ConfirmBox* sender,
 					workspace_load_song_fileselect(&self->workspace);
 				}
 			} else if (mode == CONFIRM_NEW) {
-				workspace_newsong(&self->workspace);
+				workspace_new_song(&self->workspace);
 			}
 		}
 		break; }
@@ -1132,10 +1153,7 @@ void mainframe_on_exit(MainFrame* self, psy_ui_Component* sender)
 }
 
 bool mainframe_on_close(MainFrame* self)
-{
-	printf("save configuration\n");
-	workspace_save_configuration(&self->workspace);
-	printf("saved configuration\n");
+{		
 	if (keyboardmiscconfig_savereminder(&self->workspace.config.misc) &&
 			workspace_song_modified(&self->workspace)) {
 		workspace_select_view(&self->workspace,

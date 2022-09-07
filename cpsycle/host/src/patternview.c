@@ -37,8 +37,8 @@ static void patternview_on_grid_scroll(PatternView*, psy_ui_Component*);
 static void patternview_on_app_zoom(PatternView*, psy_ui_AppZoom*);
 static void patternview_num_tracks_changed(PatternView*, psy_audio_Pattern*,
 	uintptr_t numsongtracks);
-static void patternview_on_parameter_tweak(PatternView*, Workspace*,
-	int slot, uintptr_t tweak, float normvalue);
+// static void patternview_on_parameter_tweak(PatternView*, Workspace*,
+//	int slot, uintptr_t tweak, float normvalue);
 static void patternview_on_column_resize(PatternView*, TrackerGrid*);
 static void patternview_update_scroll_step(PatternView*);
 static void patternview_select_display(PatternView*, PatternDisplayMode);
@@ -167,8 +167,8 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 	/* connect */	
 	psy_signal_connect(&self->trackerview.grid.component.signal_scrolled, self,
 		patternview_on_grid_scroll);	
-	psy_signal_connect(&self->workspace->signal_parametertweak, self,
-		patternview_on_parameter_tweak);	
+// 	psy_signal_connect(&self->workspace->signal_parametertweak, self,
+//		patternview_on_parameter_tweak);	
 	psy_signal_connect(&psy_ui_app_zoom(psy_ui_app())->signal_zoom, self,
 		patternview_on_app_zoom);
 	psy_signal_connect(&self->component.signal_selectsection, self,
@@ -438,13 +438,13 @@ void patternview_on_column_resize(PatternView* self, TrackerGrid* sender)
 	psy_ui_component_invalidate(&self->component);
 }
 
-void patternview_on_parameter_tweak(PatternView* self, Workspace* sender,
+/*void patternview_on_parameter_tweak(PatternView* self, Workspace* sender,
 	int slot, uintptr_t tweak, float normvalue)
 {
 	assert(self);
 
 	trackergrid_tweak(&self->trackerview.grid, slot, tweak, normvalue);	
-}
+}*/
 
 void patternview_on_app_zoom(PatternView* self, psy_ui_AppZoom* sender)
 {

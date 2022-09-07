@@ -31,8 +31,7 @@ void newmachinesearchbar_init(NewMachineSearchBar* self,
 		psy_ui_ALIGN_TOP);
 	psy_signal_connect(&self->search.signal_changed, self,
 		newmachinesearchbar_on_search_field_change);
-	searchfield_set_default_text(&self->search,
-		"newmachine.search-plugin");
+	searchfield_set_default_text(&self->search, "newmachine.search-plugin");
 }
 
 void newmachinesearchbar_setfilter(NewMachineSearchBar* self,
@@ -67,22 +66,19 @@ void newmachinerescanbar_init(NewMachineRescanBar* self,
 	self->workspace = workspace;	
 	psy_ui_button_init_text(&self->rescan, &self->component,
 		"newmachine.rescan");	
-	psy_ui_label_init_text(&self->desc, &self->component,
-		"newmachine.in");	
+	psy_ui_label_init_text(&self->desc, &self->component, "newmachine.in");	
 	psy_ui_button_init_text(&self->selectdirectories, &self->component,
 		"newmachine.plugin-directories");	
 	psy_ui_button_load_resource(&self->selectdirectories,
 		IDB_SETTINGS_DARK, IDB_SETTINGS_DARK, psy_ui_colour_white());		
 	psy_signal_connect(&self->selectdirectories.signal_clicked, self,
 		newmachinerescanbar_onselectdirectories);
-	psy_ui_button_init_text(&self->cancel, &self->component,
-		"Cancel");		
+	psy_ui_button_init_text(&self->cancel, &self->component, "Cancel");		
 	psy_ui_component_set_align(psy_ui_button_base(&self->cancel),
 		psy_ui_ALIGN_RIGHT);
 	psy_ui_component_set_preferred_width(psy_ui_button_base(
 		&self->cancel), psy_ui_value_make_ew(15.0));
-	psy_ui_button_init_text(&self->add, &self->component,
-		"OK");
+	psy_ui_button_init_text(&self->add, &self->component, "OK");
 	psy_ui_component_set_preferred_width(psy_ui_button_base(&self->add),
 		psy_ui_value_make_ew(15.0));		
 	psy_ui_component_set_align(psy_ui_button_base(&self->add),
@@ -103,14 +99,13 @@ static void newmachinefiltergroup_on_destroyed(NewMachineFilterGroup*);
 
 /* implementation */
 void newmachinesectionbar_init(NewMachineSectionBar* self,
-	psy_ui_Component* parent, Workspace* workspace)
+	psy_ui_Component* parent)
 {	
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_set_style_type(&self->component,
 		STYLE_NEWMACHINE_SECTIONBAR);
 	psy_ui_component_set_default_align(&self->component,
-		psy_ui_ALIGN_LEFT, psy_ui_defaults_hmargin(psy_ui_defaults()));
-	self->workspace = workspace;	
+		psy_ui_ALIGN_LEFT, psy_ui_defaults_hmargin(psy_ui_defaults()));	
 	psy_ui_button_init_text(&self->removesection, &self->component,
 		"newmachine.remove");
 	psy_ui_button_init_text(&self->clearsection, &self->component,
@@ -121,14 +116,10 @@ void newmachinesectionbar_init(NewMachineSectionBar* self,
 		"newmachine.mksection");
 	psy_ui_button_init_text(&self->removefromsection, &self->component,
 		"newmachine.delete");
-	psy_ui_button_init_text(&self->removepane, &self->component,
-		"-");
-	psy_ui_component_set_align(&self->removepane.component,
-		psy_ui_ALIGN_RIGHT);
-	psy_ui_button_init_text(&self->addpane, &self->component,
-		"+");
-	psy_ui_component_set_align(&self->addpane.component,
-		psy_ui_ALIGN_RIGHT);
+	psy_ui_button_init_text(&self->removepane, &self->component, "-");
+	psy_ui_component_set_align(&self->removepane.component, psy_ui_ALIGN_RIGHT);
+	psy_ui_button_init_text(&self->addpane, &self->component, "+");
+	psy_ui_component_set_align(&self->addpane.component, psy_ui_ALIGN_RIGHT);
 }
 
 /* NewMachineFilterGroup */
@@ -537,11 +528,11 @@ static void newmachinesectionspane_vtable_init(NewMachineSectionsPane* self)
 /* implementation */
 void newmachinesectionspane_init(NewMachineSectionsPane* self,
 	psy_ui_Component* parent, NewMachine* newmachine,
-	Workspace* workspace)
+	PluginScanThread* plugin_scan_thread)
 {	
 	psy_ui_component_init(&self->component, parent, NULL);
 	newmachinesectionspane_vtable_init(self);
-	self->workspace = workspace;	
+	self->plugin_scan_thread = plugin_scan_thread;	
 	self->newmachine = newmachine;
 	psy_table_init(&self->newmachinesections);
 	/* filter */
@@ -566,7 +557,7 @@ void newmachinesectionspane_init(NewMachineSectionsPane* self,
 	psy_ui_component_set_wheel_scroll(&self->pane, 4);
 	/* filtersbar */
 	newmachinefiltersbar_init(&self->filtersbar, &self->pane,
-		&self->filter, workspace_plugincatcher(self->workspace));	
+		&self->filter, plugin_scan_thread->plugincatcher);	
 	/* sections */	
 	psy_ui_component_init(&self->sections, &self->pane, NULL);
 	psy_ui_component_set_align(&self->sections, psy_ui_ALIGN_TOP);
@@ -579,7 +570,7 @@ void newmachinesectionspane_init(NewMachineSectionsPane* self,
 	psy_ui_component_set_align(&self->scroller_sections.component,
 		psy_ui_ALIGN_CLIENT);
 	/* connect */
-	psy_signal_connect(&workspace->pluginscanthread.signal_plugincachechanged,
+	psy_signal_connect(&plugin_scan_thread->signal_plugincachechanged,
 		self, newmachinesectionspane_onplugincachechanged);
 	newmachinesectionspane_buildsections(self);
 }
@@ -597,14 +588,14 @@ NewMachineSectionsPane* newmachinesectionspane_alloc(void)
 }
 
 NewMachineSectionsPane* newmachinesectionspane_allocinit(
-	psy_ui_Component* parent,
-	NewMachine* newmachine, Workspace* workspace)
+	psy_ui_Component* parent, NewMachine* newmachine,
+	PluginScanThread* plugin_scan_thread)
 {
 	NewMachineSectionsPane* rv;
 
 	rv = newmachinesectionspane_alloc();
 	if (rv) {
-		newmachinesectionspane_init(rv, parent, newmachine, workspace);
+		newmachinesectionspane_init(rv, parent, newmachine, plugin_scan_thread);
 		rv->component.deallocate = TRUE;
 	}
 	return rv;
@@ -660,7 +651,7 @@ void newmachinesectionspane_buildsections(NewMachineSectionsPane* self)
 	psy_table_clear(&self->newmachinesections);
 	psy_ui_component_clear(&self->sections);
 	p = psy_property_begin(
-		self->workspace->player.plugincatcher.sections.sections);
+		self->plugin_scan_thread->plugincatcher->sections.sections);
 	selidx = psy_INDEX_INVALID;
 	for (i = 0; p != 0; p = p->next, ++i) {
 		psy_Property* property;
@@ -668,7 +659,7 @@ void newmachinesectionspane_buildsections(NewMachineSectionsPane* self)
 
 		property = (psy_Property*)psy_list_entry(p);			
 		section = newmachinesection_allocinit(&self->sections, property,
-			&self->filter, &self->workspace->player.plugincatcher);
+			&self->filter, self->plugin_scan_thread->plugincatcher);
 		if (section) {
 			psy_signal_connect(&section->pluginview.signal_selected,
 				self->newmachine, newmachine_onpluginselected);
@@ -682,7 +673,7 @@ void newmachinesectionspane_buildsections(NewMachineSectionsPane* self)
 				newmachinesectionspane_on_section_renamed);
 			psy_ui_component_set_align(&section->component, psy_ui_ALIGN_TOP);
 			if (p == psy_property_begin(
-					self->workspace->player.plugincatcher.sections.sections)) {
+					self->plugin_scan_thread->plugincatcher->sections.sections)) {
 				self->newmachine->selectedsection = section;
 				selidx = i;
 				psy_ui_component_add_style_state(&section->component,
@@ -705,7 +696,7 @@ void newmachinesectionspane_build_nav_sections(NewMachineSectionsPane* self)
 	psy_ui_tabbar_clear(&self->navsections);
 	psy_ui_tabbar_prevent_translation(&self->navsections);
 	self->newmachine->selectedsection = NULL;
-	p = psy_property_begin(self->workspace->player.plugincatcher.sections.sections);
+	p = psy_property_begin(self->plugin_scan_thread->plugincatcher->sections.sections);
 	for (; p != 0; p = p->next) {
 		psy_Property* section;
 
@@ -874,8 +865,7 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->detail.signal_categorychanged, self,
 		newmachine_onplugincategorychanged);	
 	/* sectionbar */
-	newmachinesectionbar_init(&self->sectionbar, &self->component,
-		self->workspace);
+	newmachinesectionbar_init(&self->sectionbar, &self->component);
 	psy_ui_component_set_align(&self->sectionbar.component,
 		psy_ui_ALIGN_BOTTOM);
 	/* sections */
@@ -932,7 +922,7 @@ NewMachineSectionsPane* newmachine_add_sections_pane(NewMachine* self)
 	NewMachineSectionsPane* rv;
 	
 	rv = newmachinesectionspane_allocinit(&self->sections, self,
-		self->workspace);
+		&self->workspace->pluginscanthread);
 	if (rv) {
 		psy_ui_component_set_align(&rv->component, psy_ui_ALIGN_CLIENT);
 	}	

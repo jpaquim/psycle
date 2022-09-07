@@ -215,7 +215,8 @@ void samplesbox_file_select_sample(SamplesBox* self)
 {
 	if (keyboardmiscconfig_ft2_file_view(psycleconfig_misc(
 			workspace_conf(self->workspace)))) {
-		self->workspace->fileview->property = &self->sample_load;
+		fileview_set_callbacks(self->workspace->fileview, &self->sample_load,
+			NULL);		
 		workspace_select_view(self->workspace, viewindex_make(VIEW_ID_FILEVIEW,
 			0, 0, psy_INDEX_INVALID));
 	} else {		

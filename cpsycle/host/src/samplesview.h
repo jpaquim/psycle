@@ -210,8 +210,9 @@ typedef struct SamplesView {
 	SamplesLoopView waveloop;	
 	WaveBox wavebox;
 	psy_Property sample_load;
+	psy_Property sample_save;	
 	/* references */
-	Workspace* workspace;
+	Workspace* workspace;	
 } SamplesView;
 
 void samplesview_init(SamplesView*, psy_ui_Component* parent,

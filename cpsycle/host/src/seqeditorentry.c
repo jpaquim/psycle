@@ -299,9 +299,10 @@ void seqeditpatternentry_on_mouse_down(SeqEditPatternEntry* self,
 				cursor = sequence->cursor;
 				psy_audio_sequencecursor_set_order_index(&cursor,
 					self->seqeditorentry.seqpos);
-				cursor.offset = self->seqeditorentry.state->dragposition;
+				psy_audio_sequencecursor_set_offset(&cursor,
+					self->seqeditorentry.state->dragposition);
 				psy_audio_sequence_set_cursor(sequence, cursor);				
-				workspace_goto_cursor(self->seqeditorentry.state->workspace, cursor);
+				// workspace_goto_cursor(self->seqeditorentry.state->workspace, cursor);
 			} else {
 				psy_audio_SequenceCursor cursor;
 
@@ -309,7 +310,7 @@ void seqeditpatternentry_on_mouse_down(SeqEditPatternEntry* self,
 				psy_audio_sequencecursor_set_order_index(&cursor,
 					self->seqeditorentry.seqpos);				
 				psy_audio_sequence_set_cursor(sequence, cursor);								
-				workspace_goto_cursor(self->seqeditorentry.state->workspace, cursor);
+				// workspace_goto_cursor(self->seqeditorentry.state->workspace, cursor);
 			}
 			if (workspace_current_view(self->seqeditorentry.state->workspace).id !=
 				VIEW_ID_PATTERNVIEW) {
