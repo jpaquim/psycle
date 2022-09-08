@@ -26,7 +26,7 @@ void styleviewbar_init(StyleViewBar* self, psy_ui_Component* parent)
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_set_default_align(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
-	psy_ui_button_init_text(&self->diskop, &self->component, "DiskOp");
+	psy_ui_button_init_text(&self->diskop, &self->component, "DiskOp");	
 }
 
 
@@ -35,6 +35,9 @@ void styleviewbar_init(StyleViewBar* self, psy_ui_Component* parent)
 /* prototypes */
 static void styleview_on_show(StyleView*);
 static void styleview_on_destroyed(StyleView*);
+static void styleview_on_diskop(StyleView*, psy_ui_Component* sender);
+static void styleview_on_load(StyleView*, psy_Property* sender);
+static void styleview_on_save(StyleView*, psy_Property* sender);
 
 /* vtable */
 static psy_ui_ComponentVtable styleview_vtable;
@@ -74,21 +77,70 @@ void styleview_init(StyleView* self, psy_ui_Component* parent,
 	propertiesview_init(&self->view, &self->component,
 		tabbarparent, self->styles_property, 3, TRUE,
 		&self->workspace->inputhandler);
-	psy_ui_component_set_align(&self->view.component,
-		psy_ui_ALIGN_CLIENT);
+	psy_ui_component_set_align(&self->view.component, psy_ui_ALIGN_CLIENT);
+	psy_property_init_type(&self->load, "load", PSY_PROPERTY_TYPE_STRING);
+	psy_property_connect(&self->load, self, styleview_on_load);
+	psy_property_init_type(&self->save, "save", PSY_PROPERTY_TYPE_STRING);
+	psy_property_connect(&self->save, self, styleview_on_save);
+	psy_signal_connect(&self->bar.diskop.signal_clicked, self,
+		styleview_on_diskop);
 }
 
 void styleview_on_destroyed(StyleView* self)
 {
+	assert(self);
+	
 	psy_property_deallocate(self->styles_property);
+	psy_property_dispose(&self->load);
+	psy_property_dispose(&self->save);
 }
 
 void styleview_on_show(StyleView* self)
 {
+	assert(self);
+	
 	if (!self->view.renderer.state.do_build) {
 		self->view.renderer.state.do_build = TRUE;		
 		propertiesrenderer_build(&self->view.renderer);
 		psy_ui_component_align(&self->view.scroller.pane);
 		psy_ui_component_invalidate(&self->view.scroller.pane);
 	}	
+}
+
+void styleview_on_diskop(StyleView* self, psy_ui_Component* sender)
+{
+	assert(self);
+	
+	fileview_set_callbacks(self->workspace->fileview,
+		&self->load, &self->save);
+	workspace_select_view(self->workspace, viewindex_make(
+		VIEW_ID_FILEVIEW, 0, 0, psy_INDEX_INVALID));			
+}
+
+void styleview_on_load(StyleView* self, psy_Property* sender)
+{
+	psy_PropertyReader reader;
+		
+	assert(self);
+	
+	psy_propertyreader_init(&reader, self->styles_property,
+		psy_property_item_str(sender));
+	psy_propertyreader_load(&reader);	
+	psy_propertyreader_dispose(&reader);
+	workspace_select_view(self->workspace, viewindex_make(
+		VIEW_ID_STYLEVIEW, 0, 0, psy_INDEX_INVALID));
+}
+
+void styleview_on_save(StyleView* self, psy_Property* sender)
+{	
+	psy_PropertyWriter writer;
+
+	assert(self);
+
+	psy_propertywriter_init(&writer, self->styles_property,
+		psy_property_item_str(sender));
+	psy_propertywriter_save(&writer);
+	psy_propertywriter_dispose(&writer);	
+	workspace_select_view(self->workspace, viewindex_make(
+		VIEW_ID_STYLEVIEW, 0, 0, psy_INDEX_INVALID));
 }

@@ -2005,34 +2005,151 @@ void init_psycletheme_styles(psy_ui_Styles* self)
 	init_machineparam_styles(self);
 	init_patternview_styles(self);
 }
-
+	
 void init_machineview_styles(psy_ui_Styles* self)
 {	
-	uintptr_t styles[] = {
-		STYLE_MV, STYLE_MV_WIRES, STYLE_MV_STACK, STYLE_MV_PROPERTIES,
-		STYLE_MV_NEWMACHINE, STYLE_MV_WIRE, STYLE_MV_WIRE_SELECT,
-		STYLE_MV_WIRE_HOVER, STYLE_MV_WIRE_POLY, STYLE_MV_MASTER,
-		STYLE_MV_MASTER_NAME, STYLE_MV_GENERATOR,
-		STYLE_MV_GENERATOR_NAME, STYLE_MV_GENERATOR_MUTE,
-		STYLE_MV_GENERATOR_MUTE_SELECT, STYLE_MV_GENERATOR_SOLO,
-		STYLE_MV_GENERATOR_SOLO_SELECT, STYLE_MV_GENERATOR_VU,
-		STYLE_MV_GENERATOR_VU0, STYLE_MV_GENERATOR_VUPEAK,
-		STYLE_MV_GENERATOR_PAN, STYLE_MV_GENERATOR_PAN_SLIDER,
-		STYLE_MV_EFFECT, STYLE_MV_EFFECT_NAME, STYLE_MV_EFFECT_MUTE,
-		STYLE_MV_EFFECT_MUTE_SELECT, STYLE_MV_EFFECT_BYPASS,
-		STYLE_MV_EFFECT_BYPASS_SELECT, STYLE_MV_EFFECT_VU,
-		STYLE_MV_EFFECT_VU0, STYLE_MV_EFFECT_VUPEAK,
-		STYLE_MV_EFFECT_PAN, STYLE_MV_EFFECT_PAN_SLIDER, STYLE_MV_ARROW,
-		STYLE_MV_CHECK, STYLE_MV_KNOB, STYLE_MV_LABEL, STYLE_MV_HEADER,
-		STYLE_MV_LEVEL, 0
-	};
-	int i;
+	psy_ui_Style* style;
+	
+	style = psy_ui_style_allocinit();
+	psy_ui_styles_set_style(self, STYLE_MV, "mv", style);
+	
+	style = psy_ui_style_allocinit();
+	psy_ui_styles_set_style(self, STYLE_MV_WIRES, "mv_wires", style);
+	
+	style = psy_ui_style_allocinit();
+	psy_ui_styles_set_style(self, STYLE_MV_STACK, "mv_stack", style);
+	
+	style = psy_ui_style_allocinit();
+	psy_ui_styles_set_style(self, STYLE_MV_PROPERTIES, "mv_properties", style);
+	
+	style = psy_ui_style_allocinit();
+	psy_ui_styles_set_style(self, STYLE_MV_NEWMACHINE, "mv_newmachine", style);
+	
+	style = psy_ui_style_allocinit();
+	psy_ui_styles_set_style(self, STYLE_MV_WIRE, "mv_wire", style);
+	
+	style = psy_ui_style_allocinit();
+	psy_ui_styles_set_style(self, STYLE_MV_WIRE_SELECT, "mv_wire::select",
+		style);
+		
+	style = psy_ui_style_allocinit();
+	psy_ui_styles_set_style(self, STYLE_MV_WIRE_HOVER, "mv_wire::hover", style);
+		
+	style = psy_ui_style_allocinit();
+	psy_ui_styles_set_style(self, STYLE_MV_WIRE_POLY, "mv_wire_poly", style);
+	
+	style = psy_ui_style_allocinit();
+	psy_ui_styles_set_style(self, STYLE_MV_MASTER, "mv_master", style);
+	
+	style = psy_ui_style_allocinit();
+	psy_ui_styles_set_style(self, STYLE_MV_MASTER_NAME, "mv_master_name", style);
+	
+	style = psy_ui_style_allocinit();
+	psy_ui_styles_set_style(self, STYLE_MV_GENERATOR, "mv_generator", style);
+	
+	style = psy_ui_style_allocinit();
+	psy_ui_styles_set_style(self, STYLE_MV_GENERATOR_NAME, "mv_generator_name",
+		style);
+	
+	style = psy_ui_style_allocinit();
+	psy_ui_styles_set_style(self, STYLE_MV_GENERATOR_MUTE, "mv_generator_mute",
+		style);
 
-	for (i = 0; styles[i] != 0; ++i) {
-		psy_ui_styles_set_style(self, styles[i], "",
-			psy_ui_style_allocinit());
-	}
-	/* style configuration in machineviewconfig */
+	style = psy_ui_style_allocinit();
+	psy_ui_styles_set_style(self, STYLE_MV_GENERATOR_MUTE_SELECT,
+		"mv_generator_mute::select", style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_styles_set_style(self, STYLE_MV_GENERATOR_SOLO,
+		"mv_generator_solo", style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_styles_set_style(self, STYLE_MV_GENERATOR_SOLO_SELECT,
+		"mv_generator_solo::select", style);
+	
+	style = psy_ui_style_allocinit();
+	psy_ui_styles_set_style(self, STYLE_MV_GENERATOR_VU,
+		"mv_generator_vu", style);	
+	
+	style = psy_ui_style_allocinit();
+	psy_ui_styles_set_style(self, STYLE_MV_GENERATOR_VU0,
+		"mv_generator_vu0", style);
+	
+	style = psy_ui_style_allocinit();
+	psy_ui_styles_set_style(self, STYLE_MV_GENERATOR_VUPEAK,
+		"mv_generator_vupeak", style);
+	
+	style = psy_ui_style_allocinit();
+	psy_ui_styles_set_style(self, STYLE_MV_GENERATOR_PAN,
+		"mv_generator_pan", style);
+	
+	style = psy_ui_style_allocinit();
+	psy_ui_styles_set_style(self, STYLE_MV_GENERATOR_PAN_SLIDER,
+		"mv_generator_pan_slider", style);
+	
+	style = psy_ui_style_allocinit();
+	psy_ui_styles_set_style(self, STYLE_MV_EFFECT,
+		"mv_effect", style);		
+	
+	style = psy_ui_style_allocinit();
+	psy_ui_styles_set_style(self, STYLE_MV_EFFECT_NAME,
+		"mv_effect_name", style);
+	
+	style = psy_ui_style_allocinit();
+	psy_ui_styles_set_style(self, STYLE_MV_EFFECT_MUTE,
+		"mv_effect_mute", style);
+	
+	style = psy_ui_style_allocinit();
+	psy_ui_styles_set_style(self, STYLE_MV_EFFECT_MUTE_SELECT,
+		"mv_effect_mute::select", style);
+	
+	style = psy_ui_style_allocinit();
+	psy_ui_styles_set_style(self, STYLE_MV_EFFECT_BYPASS,
+		"mv_effect_bypass", style);
+	
+	style = psy_ui_style_allocinit();
+	psy_ui_styles_set_style(self, STYLE_MV_EFFECT_BYPASS_SELECT,
+		"effect_bypass::select", style);
+	
+	style = psy_ui_style_allocinit();
+	psy_ui_styles_set_style(self, STYLE_MV_EFFECT_VU,
+		"mv_effect_vu", style);
+	
+	style = psy_ui_style_allocinit();
+	psy_ui_styles_set_style(self, STYLE_MV_EFFECT_VU0,
+		"mv_effect_vu0", style);
+	
+	style = psy_ui_style_allocinit();
+	psy_ui_styles_set_style(self, STYLE_MV_EFFECT_VUPEAK,
+		"mv_effect_vupeak", style);
+	
+	style = psy_ui_style_allocinit();
+	psy_ui_styles_set_style(self, STYLE_MV_EFFECT_PAN,
+		"mv_effect_pan", style);
+	
+	style = psy_ui_style_allocinit();
+	psy_ui_styles_set_style(self, STYLE_MV_EFFECT_PAN_SLIDER,
+		"mv_effect_pan_slider", style);
+	
+	style = psy_ui_style_allocinit();
+	psy_ui_styles_set_style(self, STYLE_MV_ARROW, "mv_arrow", style);
+	
+	style = psy_ui_style_allocinit();
+	psy_ui_styles_set_style(self, STYLE_MV_CHECK, "mv_check", style);
+	
+	style = psy_ui_style_allocinit();
+	psy_ui_styles_set_style(self, STYLE_MV_KNOB, "mv_knob", style);
+	
+	style = psy_ui_style_allocinit();
+	psy_ui_styles_set_style(self, STYLE_MV_LABEL, "mv_label", style);
+	
+	style = psy_ui_style_allocinit();
+	psy_ui_styles_set_style(self, STYLE_MV_HEADER, "mv_header", style);
+	
+	style = psy_ui_style_allocinit();
+	psy_ui_styles_set_style(self, STYLE_MV_LEVEL, "mv_level", style);
+			
+	/* configuration in machineviewconfig */
 }
 
 void init_machineparam_styles(psy_ui_Styles* self)

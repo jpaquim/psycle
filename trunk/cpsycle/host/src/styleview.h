@@ -31,6 +31,8 @@ typedef struct StyleView {
 	PropertiesView view;
 	psy_Property* styles_property;
 	Workspace* workspace;
+	psy_Property load;
+	psy_Property save;
 } StyleView;
 
 void styleview_init(StyleView*, psy_ui_Component* parent,
