@@ -10,6 +10,8 @@
 #include "uiapp.h"
 #include "uicomponent.h"
 #include "uistyleproperty.h"
+/* file */
+#include <propertiesio.h>
 /* platform */
 #include "../../detail/portable.h"
 
@@ -31,8 +33,11 @@ static void psy_ui_style_property_on_int_choice(intptr_t*,
 static void psy_ui_style_property_on_colour(psy_ui_Colour* value,
 	psy_Property* sender);
 	
+static bool prevent_align = FALSE;
+	
 static void align(void);
 
+/* styles */
 psy_Property* psy_ui_styles_property_make(psy_ui_Styles* styles)
 {
 	psy_Property* rv;
@@ -41,6 +46,37 @@ psy_Property* psy_ui_styles_property_make(psy_ui_Styles* styles)
 	rv = psy_property_allocinit_key(NULL);
 	psy_ui_styles_property_append(rv, styles);
 	return rv;
+}
+
+void psy_ui_styles_load(psy_Property* styles, const char* path)
+{
+	psy_PropertyReader reader;
+		
+	assert(styles);
+	
+	if (!path) {
+		return;
+	}
+	psy_propertyreader_init(&reader, styles, path);
+	prevent_align = TRUE;
+	psy_propertyreader_load(&reader);
+	prevent_align = FALSE;
+	psy_propertyreader_dispose(&reader);
+	align();
+}
+
+void psy_ui_styles_save(psy_Property* styles, const char* path)
+{	
+	psy_PropertyWriter writer;
+
+	assert(styles);
+
+	if (!path) {
+		return;
+	}
+	psy_propertywriter_init(&writer, styles, path);
+	psy_propertywriter_save(&writer);
+	psy_propertywriter_dispose(&writer);		
 }
 
 void psy_ui_styles_property_append(psy_Property* parent, psy_ui_Styles* styles)
@@ -62,6 +98,7 @@ void psy_ui_styles_property_append(psy_Property* parent, psy_ui_Styles* styles)
 	}	
 }
 
+/* style */
 void psy_ui_style_property_append(psy_Property* parent, psy_ui_Style* style)
 {
 	psy_Property* p;	
@@ -198,11 +235,13 @@ void psy_ui_style_property_on_colour(psy_ui_Colour* value, psy_Property* sender)
 	assert(sender);
 	
 	*value = psy_ui_colour_make(psy_property_item_int(sender));	
-	align();
+	psy_ui_component_invalidate(psy_ui_app_main(psy_ui_app()));
 }
 
 void align(void)
 {
-	psy_ui_component_align_full(psy_ui_app_main(psy_ui_app()));
-	psy_ui_component_invalidate(psy_ui_app_main(psy_ui_app()));
+	if (!prevent_align) {
+		psy_ui_component_align_full(psy_ui_app_main(psy_ui_app()));
+		psy_ui_component_invalidate(psy_ui_app_main(psy_ui_app()));
+	}
 }

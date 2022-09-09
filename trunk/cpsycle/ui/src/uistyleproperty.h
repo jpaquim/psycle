@@ -16,6 +16,8 @@
 extern "C" {
 #endif
 
+void psy_ui_styles_load(psy_Property* styles, const char* path);
+void psy_ui_styles_save(psy_Property* styles, const char* path);
 psy_Property* psy_ui_styles_property_make(psy_ui_Styles*);
 void psy_ui_styles_property_append(psy_Property* parent, psy_ui_Styles*);
 void psy_ui_style_property_append(psy_Property* parent, psy_ui_Style*);
