@@ -412,6 +412,7 @@ psy_ui_Component* machineui_create(psy_audio_Machine* machine,
 	if (rv) {
 		psy_ui_component_set_id(rv, mac_id);
 		psy_ui_component_set_align(rv, psy_ui_ALIGN_NONE);
+		psy_ui_component_align(rv);
 	}	
 	return rv;	
 }

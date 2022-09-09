@@ -654,6 +654,11 @@ void make_translator_default(psy_Dictionary* dict)
 	psy_dictionary_set(dict, "samplesview.doublecont", "Double Cont Loop");
 	psy_dictionary_set(dict, "samplesview.doublesus", "Double Sus Loop");
 	psy_dictionary_set(dict, "samplesview.lines", "Lines");
+	psy_dictionary_set(dict, "samplesview.source", "Source");
+	psy_dictionary_set(dict, "samplesview.nosongloaded", "No Song Loaded");
+	psy_dictionary_set(dict, "samplesview.loadsong", "Load Song");
+	psy_dictionary_set(dict, "samplesview.songselect", "Select a song");
+	psy_dictionary_set(dict, "samplesview.copy", "Copy");
 	/* cmds */	
 	psy_dictionary_set(dict, "cmds.keymap", "Keymap");	
 	psy_dictionary_set(dict, "cmds.help", "Help");

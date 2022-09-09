@@ -86,12 +86,12 @@ void samplessongimportview_init(SamplesSongImportView* self,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	psy_ui_component_set_padding(&self->header,
 		psy_ui_margin_make_em(0.5, 0.0, 0.5, 0.0));
-	psy_ui_label_init_text(&self->label, &self->header, "Source");
+	psy_ui_label_init_text(&self->label, &self->header, "samplesview.source");
 	psy_ui_label_init_text(&self->songname, &self->header,
-		"No song loaded");
+		"samplesview.nosongloaded");
 	psy_ui_label_set_char_number(&self->songname, 30);	
 	psy_ui_button_init(&self->browse, &self->header);
-	psy_ui_button_set_text(&self->browse, "Select a song");
+	psy_ui_button_set_text(&self->browse, "samplesview.songselect");
 	psy_signal_connect(&self->browse.signal_clicked, self,
 		samplessongimportview_on_load_song_button);		
 	/* bar */
@@ -99,7 +99,7 @@ void samplessongimportview_init(SamplesSongImportView* self,
 	psy_ui_component_set_align(&self->bar, psy_ui_ALIGN_LEFT);		
 	psy_ui_component_set_minimum_size(&self->bar, psy_ui_size_make_em(12, 1));
 	psy_ui_button_init(&self->add, &self->bar);
-	psy_ui_button_set_text(&self->add, "<- Copy");	
+	psy_ui_button_set_text(&self->add, "samplesview.copy");	
 	psy_ui_component_set_align(&self->add.component, psy_ui_ALIGN_CENTER);
 	psy_signal_connect(&self->add.signal_clicked, self,
 		samplessongimportview_oncopy);
@@ -141,7 +141,8 @@ void samplessongimportview_on_load_song_button(SamplesSongImportView* self,
 		
 		psy_ui_OpenDialog dialog;
 		
-		psy_ui_opendialog_init_all(&dialog, 0, "Load Song",
+		psy_ui_opendialog_init_all(&dialog, 0,
+			psy_ui_translate("samplesview.loadsong"),
 			psy_audio_songfile_loadfilter(),
 			psy_audio_songfile_standardloadfilter(),
 			dirconfig_songs(&self->workspace->config.directories));

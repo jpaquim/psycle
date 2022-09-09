@@ -45,6 +45,8 @@ static bool styleview_vtable_initialized = FALSE;
 
 static void styleview_vtable_init(StyleView* self)
 {
+	assert(self);
+	
 	if (!styleview_vtable_initialized) {
 		styleview_vtable = *(self->component.vtable);		
 		styleview_vtable.on_destroyed =
@@ -119,28 +121,18 @@ void styleview_on_diskop(StyleView* self, psy_ui_Component* sender)
 
 void styleview_on_load(StyleView* self, psy_Property* sender)
 {
-	psy_PropertyReader reader;
-		
 	assert(self);
 	
-	psy_propertyreader_init(&reader, self->styles_property,
-		psy_property_item_str(sender));
-	psy_propertyreader_load(&reader);	
-	psy_propertyreader_dispose(&reader);
+	psy_ui_styles_load(self->styles_property, psy_property_item_str(sender));
 	workspace_select_view(self->workspace, viewindex_make(
 		VIEW_ID_STYLEVIEW, 0, 0, psy_INDEX_INVALID));
 }
 
 void styleview_on_save(StyleView* self, psy_Property* sender)
 {	
-	psy_PropertyWriter writer;
-
 	assert(self);
 
-	psy_propertywriter_init(&writer, self->styles_property,
-		psy_property_item_str(sender));
-	psy_propertywriter_save(&writer);
-	psy_propertywriter_dispose(&writer);	
+	psy_ui_styles_save(self->styles_property, psy_property_item_str(sender));
 	workspace_select_view(self->workspace, viewindex_make(
 		VIEW_ID_STYLEVIEW, 0, 0, psy_INDEX_INVALID));
 }
