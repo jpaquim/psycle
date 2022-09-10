@@ -100,12 +100,10 @@ bool psy_ui_componentstyle_updatestate(psy_ui_ComponentStyle* self)
 	
 	if (psy_ui_componentstyle_hasstate(self, psy_ui_STYLESTATE_DISABLED)) {
 		state = psy_ui_STYLESTATE_DISABLED;
-	} else if (psy_ui_componentstyle_hasstate(self,
-			psy_ui_STYLESTATE_SELECT)) {
-		state = psy_ui_STYLESTATE_SELECT;
-	} else if (psy_ui_componentstyle_hasstate(self,
-			psy_ui_STYLESTATE_ACTIVE)) {
+	} else if (psy_ui_componentstyle_hasstate(self, psy_ui_STYLESTATE_ACTIVE)) {
 		state = psy_ui_STYLESTATE_ACTIVE;	
+	} else if (psy_ui_componentstyle_hasstate(self, psy_ui_STYLESTATE_SELECT)) {
+		state = psy_ui_STYLESTATE_SELECT;	
 	} else if (psy_ui_componentstyle_hasstate(self, psy_ui_STYLESTATE_FOCUS)) {
 		state = psy_ui_STYLESTATE_FOCUS;
 	} else if (psy_ui_componentstyle_hasstate(self, psy_ui_STYLESTATE_HOVER)) {
