@@ -145,7 +145,7 @@ void psy_ui_notebook_on_align(psy_ui_Notebook* self)
 
 void psy_ui_notebook_on_tabbar_change(psy_ui_Notebook* self,
 	psy_ui_Component* sender, uintptr_t tabindex)
-{
+{	
 	psy_ui_notebook_select(self, tabindex);
 }
 

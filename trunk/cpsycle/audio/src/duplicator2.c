@@ -46,7 +46,7 @@ static psy_audio_MachineInfo const macinfo = {
 		" (debug build)"
 		#endif
 		,	
-	"Duplicator 2",
+	"Duplicator2",
 	"Psycledelics",
 	"help",	
 	psy_audio_DUPLICATOR2,

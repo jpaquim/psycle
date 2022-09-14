@@ -29,6 +29,26 @@ typedef enum {
 	BLACK
 } Colours;
 
+typedef enum psy_audio_MachinesInsertMode {
+	psy_audio_MACHINES_INSERT_GENERATORS_ENABLED = 1,
+	psy_audio_MACHINES_INSERT_EFFECTS_ENABLED = 2,
+	psy_audio_MACHINES_INSERT_MODE_INSERT = 4,
+	psy_audio_MACHINES_INSERT_MODE_APPEND = 8,
+	psy_audio_MACHINES_INSERT_MODE_ADDEFFECT = 16,
+	psy_audio_MACHINES_INSERT_MODE_APPENDSTACK = 32,
+	psy_audio_MACHINES_INSERT_MODE_ADDEFFECTSTACK = 64
+} psy_audio_MachinesInsertMode;
+
+typedef struct psy_audio_MachinesInsert {
+	psy_audio_MachinesInsertMode mode;
+	uintptr_t prev;
+	uintptr_t next;
+	bool appendstack;
+	bool addeffect;
+} psy_audio_MachinesInsert;
+
+void psy_audio_machinesinsert_init(psy_audio_MachinesInsert*);
+
 typedef struct psy_audio_Machines {	
 	psy_Table slots;	
 	psy_Table inputbuffers;
@@ -61,6 +81,7 @@ typedef struct psy_audio_Machines {
 	uintptr_t currlevel;
 	uintptr_t maxlevel;
 	uintptr_t opcount;
+	psy_audio_MachinesInsert insert;
 } psy_audio_Machines;
 
 void psy_audio_machines_init(psy_audio_Machines*);
@@ -137,7 +158,9 @@ MachineList* psy_audio_machines_leafs(psy_audio_Machines*);
 uintptr_t psy_audio_machines_levelofmachine(psy_audio_Machines*, uintptr_t slot);
 
 uintptr_t psy_audio_machines_maxindex(psy_audio_Machines*);
-
+void psy_audio_machines_rewire(psy_audio_Machines*, uintptr_t mac,
+	uintptr_t prev, uintptr_t next);
+	
 #ifdef __cplusplus
 }
 #endif

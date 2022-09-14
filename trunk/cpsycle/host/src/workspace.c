@@ -85,7 +85,7 @@ void workspace_init_views(Workspace* self)
 	self->machines_undo_save_point = 0;	
 	self->terminalstyleid = STYLE_TERM_BUTTON;	
 	self->restoreview = viewindex_make(VIEW_ID_MACHINEVIEW,
-		SECTION_ID_MACHINEVIEW_WIRES, psy_INDEX_INVALID, psy_INDEX_INVALID);	
+		SECTION_ID_MACHINEVIEW_WIRES, psy_INDEX_INVALID, psy_INDEX_INVALID);
 	self->modified_without_undo = FALSE;
 	self->paramviews = NULL;
 	self->terminal_output = NULL;
@@ -943,7 +943,8 @@ void workspace_on_input(Workspace* self, uintptr_t cmdid)
 	case CMD_IMM_ADDMACHINE:
 		workspace_select_view(self, 
 			viewindex_make(VIEW_ID_MACHINEVIEW,
-			SECTION_ID_MACHINEVIEW_NEWMACHINE, NEWMACHINE_APPEND, 0));
+			SECTION_ID_MACHINEVIEW_NEWMACHINE,
+			psy_audio_MACHINES_INSERT_MODE_APPEND, 0));
 		break;
 	case CMD_IMM_EDITMACHINE:
 		if (workspace_current_view(self).id != VIEW_ID_MACHINEVIEW) {

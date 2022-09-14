@@ -69,11 +69,6 @@ void machineview_init(MachineView*, psy_ui_Component* parent,
 
 void machineview_idle(MachineView*);
 
-INLINE void machineview_centermaster(MachineView* self)
-{
-	machinewireview_centermaster(&self->wireview);
-}
-
 INLINE psy_ui_Component* machineview_base(MachineView* self)
 {
 	return &self->component;

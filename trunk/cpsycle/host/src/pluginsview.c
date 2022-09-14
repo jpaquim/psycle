@@ -503,28 +503,23 @@ psy_Property* search(psy_Property* source, PluginFilter* filter)
 	return rv;
 }
 
+static bool internal_type(int type);
+
 void searchfilter(psy_Property* plugin, PluginFilter* filter,
 	psy_Property* parent)
 {
-	psy_audio_MachineInfo machineinfo;
+	psy_Property* p;
 	bool intern;
 	int mactype;
-	int macmode;
-	uintptr_t category;	
-	
-	machineinfo_init(&machineinfo);
-	psy_audio_machineinfo_from_property(plugin, &machineinfo);
-	intern = machineinfo_internal(&machineinfo);
-	mactype = machineinfo.type;
-	macmode = machineinfo.mode;
-	if (psy_strlen(machineinfo.category)) {
-		category = psy_strhash(machineinfo.category);
-	} else {
-		category = psy_INDEX_INVALID;
-	}
-	machineinfo_dispose(&machineinfo);
-	if (category != psy_INDEX_INVALID &&
-			!pluginfiltergroup_selected(&filter->categories, category)) {		
+	int macmode;	
+	const char* category;
+				
+	mactype = psy_property_at_int(plugin, "type", psy_audio_UNDEFINED);
+	intern = internal_type(mactype);
+	macmode = psy_property_at_int(plugin, "mode", 0);
+	category = psy_property_at_str(plugin, "category", "");			
+	if ((psy_strlen(category) > 0) && (!pluginfiltergroup_selected(
+			&filter->categories, psy_strhash(category)))) {
 		return;
 	}	
 	if (!pluginfiltergroup_selected(&filter->types, psy_strhash("vst")) &&
@@ -560,6 +555,15 @@ void searchfilter(psy_Property* plugin, PluginFilter* filter,
 		return;
 	}
 	psy_property_append_property(parent, psy_property_clone(plugin));
+}
+
+bool internal_type(int type)
+{	
+	return (!(type == psy_audio_PLUGIN ||
+		type == psy_audio_LUA ||
+		type == psy_audio_VST ||
+		type == psy_audio_VSTFX ||
+		type == psy_audio_LADSPA));
 }
 
 /* PluginsView */

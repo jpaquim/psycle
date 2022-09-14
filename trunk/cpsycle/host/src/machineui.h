@@ -107,7 +107,7 @@ void panui_init(PanUi*, psy_ui_Component* parent, psy_audio_Machine*,
 
 psy_ui_Component* machineui_create(psy_audio_Machine* machine,
 	psy_ui_Component* parent, ParamViews* paramviews,
-	bool machinepos, Workspace* workspace);
+	bool machinepos, psy_audio_Machines* machines);
 
 void machineui_drawhighlight(psy_ui_Graphics* g, psy_ui_RealRectangle position);
 

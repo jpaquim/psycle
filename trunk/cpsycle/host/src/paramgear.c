@@ -115,13 +115,13 @@ void paramrackbox_on_add_effect(ParamRackBox* self,
 			workspace_select_view(self->workspace,
 				viewindex_make(VIEW_ID_MACHINEVIEW,
 				SECTION_ID_MACHINEVIEW_NEWMACHINE,
-				NEWMACHINE_ADDEFFECT,
+				psy_audio_MACHINES_INSERT_MODE_ADDEFFECT,
 				psy_INDEX_INVALID));
 		} else {
 			workspace_select_view(self->workspace,
 				viewindex_make(VIEW_ID_MACHINEVIEW,
 					SECTION_ID_MACHINEVIEW_NEWMACHINE,
-					NEWMACHINE_APPEND,
+					psy_audio_MACHINES_INSERT_MODE_APPEND,
 					psy_INDEX_INVALID));
 		}
 	}

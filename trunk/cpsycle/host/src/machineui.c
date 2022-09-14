@@ -360,23 +360,20 @@ void vudisplay_drawpeak(VuDisplay* self, psy_ui_Graphics* g,
 
 psy_ui_Component* machineui_create(psy_audio_Machine* machine, 
 	psy_ui_Component* parent, ParamViews* paramviews, bool machine_pos,
-	Workspace* workspace)
+	psy_audio_Machines* machines)
 {	
-	psy_ui_Component* rv;
-	psy_audio_Machines* machines;
+	psy_ui_Component* rv;	
 	const psy_audio_MachineInfo* info;
 	uintptr_t mac_id;
 	
 	assert(machine);	
-	assert(workspace);
-	assert(workspace->song);
+	assert(machines);	
 
 	rv = NULL;	
 	info = psy_audio_machine_info(machine);
 	if (!info) {
 		return NULL;
 	}	
-	machines = &workspace->song->machines;
 	mac_id = psy_audio_machine_slot(machine);
 	if (mac_id == psy_audio_MASTER_INDEX) {
 		MasterUi* ui;

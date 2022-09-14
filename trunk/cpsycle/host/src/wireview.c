@@ -322,7 +322,7 @@ void wireview_onaddeffect(WireView* self, psy_ui_Component* sender)
 			viewindex_make(
 				VIEW_ID_MACHINEVIEW,
 				SECTION_ID_MACHINEVIEW_NEWMACHINE,
-				NEWMACHINE_ADDEFFECT,
+				psy_audio_MACHINES_INSERT_MODE_ADDEFFECT,
 				psy_INDEX_INVALID));
 	}
 }

@@ -17,6 +17,23 @@
 /* platform */
 #include "../../detail/trace.h"
 
+
+/* psy_audio_MachinesInsert */
+
+/* implementation */
+void psy_audio_machinesinsert_init(psy_audio_MachinesInsert* self)
+{	
+	assert(self);
+	
+	self->mode = psy_audio_MACHINES_INSERT_MODE_APPEND;
+	self->prev = psy_INDEX_INVALID;
+	self->next = psy_INDEX_INVALID;
+	self->appendstack = FALSE;
+	self->addeffect = FALSE;
+}
+
+/* psy_audio_Machines */
+
 /* prototypes */
 static void machines_initsignals(psy_audio_Machines*);
 static void machines_disposesignals(psy_audio_Machines*);
@@ -66,6 +83,7 @@ void psy_audio_machines_init(psy_audio_Machines* self)
 	psy_audio_wire_init(&self->selectedwire);
 	psy_undoredo_init(&self->undoredo);
 	machines_initsignals(self);
+	psy_audio_machinesinsert_init(&self->insert);
 }
 
 void machines_initsignals(psy_audio_Machines* self)
@@ -1045,8 +1063,6 @@ void compute_leafs(psy_audio_Machines* self, uintptr_t slot,
 	}
 }
 
-
-
 uintptr_t psy_audio_machines_levelofmachine(psy_audio_Machines* self, uintptr_t slot)
 {
 	uintptr_t rv;
@@ -1076,4 +1092,20 @@ uintptr_t psy_audio_machines_depth(psy_audio_Machines* self)
 	assert(self);
 
 	return self->maxlevel;
+}
+
+void psy_audio_machines_rewire(psy_audio_Machines* self,
+	uintptr_t mac, uintptr_t prev, uintptr_t next)
+{
+	assert(self);
+	
+	psy_audio_exclusivelock_enter();
+	if (prev != psy_INDEX_INVALID) {		
+		psy_audio_machines_connect(self, psy_audio_wire_make(prev, mac));										
+	}
+	if (next != psy_INDEX_INVALID) {
+		psy_audio_machines_disconnect(self, psy_audio_wire_make(prev, next));
+		psy_audio_machines_connect(self, psy_audio_wire_make(mac, next));		
+	}	
+	psy_audio_exclusivelock_leave();
 }

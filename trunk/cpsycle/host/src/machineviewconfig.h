@@ -26,9 +26,7 @@ enum {
 
 struct DirConfig;
 
-typedef struct MachineViewConfig {
-	/* signals */
-	psy_Signal signal_changed;	
+typedef struct MachineViewConfig {		
 	psy_Property* machineview;
 	psy_Property* stackview;
 	psy_Property* theme;	
@@ -40,6 +38,10 @@ typedef struct MachineViewConfig {
 
 void machineviewconfig_init(MachineViewConfig*, psy_Property* parent);
 void machineviewconfig_dispose(MachineViewConfig*);
+
+bool machineviewconfig_connect(MachineViewConfig*, const char* key,
+	void* context, void* fp);
+psy_Property* machineviewconfig_property(MachineViewConfig*, const char* key);
 
 void machineviewconfig_setdirectories(MachineViewConfig*, struct DirConfig*);
 void machineviewconfig_update_machine_skins(MachineViewConfig*);
