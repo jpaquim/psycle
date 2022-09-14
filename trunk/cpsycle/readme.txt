@@ -27,9 +27,8 @@ the non-free vst2 interface, outcomment the USE_VST flag
 in ./detail/psyconfig.h.
 
 List for debian:
-build-essential liblilv-dev liblua5.4-dev libfreetype-dev libfontconfig-dev
-libgl-dev libx11-dev libxft-dev libxext-dev libxmu-dev, libasound2-dev,
-libjack-jackd2-dev, libstk-dev (some psycle plugins need it)
+sudo apt-get update
+sudo apt-get install build-essential liblilv-dev liblua5.4-dev libfreetype-dev libfontconfig-dev libgl-dev libx11-dev libxft-dev libxext-dev libxmu-dev libasound2-dev libjack-jackd2-dev libstk-dev
 
 In cpsycle run
     make
