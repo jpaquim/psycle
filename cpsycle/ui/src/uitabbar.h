@@ -61,8 +61,7 @@ typedef struct psy_ui_Tab {
 	bool prevent_translation;
 	uintptr_t lightresourceid;
 	uintptr_t darkresourceid;
-	psy_ui_Colour bitmaptransparency;
-	uintptr_t target_id;
+	psy_ui_Colour bitmaptransparency;	
 } psy_ui_Tab;
 
 void psy_ui_tab_init(psy_ui_Tab*, psy_ui_Component* parent,
@@ -89,20 +88,11 @@ INLINE const char* psy_ui_tab_key(const psy_ui_Tab* self)
 
 	return self->key;
 }
+
 void psy_ui_tab_set_mode(psy_ui_Tab*, TabMode);
 void psy_ui_tab_prevent_translation(psy_ui_Tab*);
 void psy_ui_tab_load_resource(psy_ui_Tab*, uintptr_t lightresourceid,
 	uintptr_t darkresourceid, psy_ui_Colour);
-
-INLINE void psy_ui_tab_set_target_id(psy_ui_Tab* self, uintptr_t target_id)
-{
-	self->target_id = target_id;
-}
-
-INLINE uintptr_t psy_ui_tab_target_id(const psy_ui_Tab* self)
-{
-	return self->target_id;
-}
 
 INLINE psy_ui_Component* psy_ui_tab_base(psy_ui_Tab* self)
 {
@@ -129,6 +119,7 @@ psy_ui_Tab* psy_ui_tabbar_append(psy_ui_TabBar*, const char* label,
 	uintptr_t dark_resource_id, psy_ui_Colour transparency);
 void psy_ui_tabbar_append_tabs(psy_ui_TabBar*, const char* label, ...);
 void psy_ui_tabbar_clear(psy_ui_TabBar*);
+void psy_ui_tabbar_select_id(psy_ui_TabBar*, uintptr_t id);
 void psy_ui_tabbar_select(psy_ui_TabBar*, uintptr_t tab_index);
 void psy_ui_tabbar_mark(psy_ui_TabBar*, uintptr_t tab_index);
 void psy_ui_tabbar_unmark(psy_ui_TabBar*);

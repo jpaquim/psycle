@@ -177,7 +177,6 @@ void machinestackinputs_init(MachineStackInputs*, psy_ui_Component* parent,
 	MachineStackState*, Workspace*);
 
 void machinestackinputs_build(MachineStackInputs*);
-void machinestackinputs_updatevus(MachineStackInputs*);
 
 /* MachineStackOutputs */
 
@@ -211,7 +210,6 @@ void machinestackpane_init(MachineStackPane*, psy_ui_Component* parent,
 	MachineStackState*, Workspace*);
 
 void machinestackpane_build(MachineStackPane*);
-void machinestackpane_updatevus(MachineStackPane*);
 
 
 /* MachineStackVolumes */
@@ -286,8 +284,6 @@ typedef struct MachineStackView {
 void machinestackview_init(MachineStackView*, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, ParamViews*, Workspace*);
 
-void machinestackview_addeffect(MachineStackView*,
-	const psy_audio_MachineInfo*);
 void machinestackview_updateskin(MachineStackView*);
 void machinestackview_showvirtualgenerators(MachineStackView*);
 void machinestackview_hidevirtualgenerators(MachineStackView*);

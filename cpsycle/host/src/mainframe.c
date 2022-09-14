@@ -875,10 +875,7 @@ void mainframe_on_song_changed(MainFrame* self, psy_audio_Player* sender)
 	clockbar_reset(&self->statusbar.clockbar);
 	psy_ui_component_align(trackscopeview_base(&self->trackscopeview));
 	psy_ui_component_align(&self->pane);
-	psy_ui_component_invalidate(&self->pane);
-	if (!workspace_song_has_file(&self->workspace)) {
-		machinewireview_centermaster(&self->machineview.wireview);
-	}
+	psy_ui_component_invalidate(&self->pane);	
 }
 
 void mainframe_on_songtracks_changed(MainFrame* self,
@@ -1043,7 +1040,7 @@ void mainframe_on_tabbar_changed(MainFrame* self, psy_ui_TabBar* sender,
 		return;
 	}	
 	psy_ui_component_select_section(&self->mainviews.notebook.component,
-		psy_ui_tab_target_id(tab), psy_INDEX_INVALID);	
+		psy_ui_component_id(&tab->component), psy_INDEX_INVALID);	
 	psy_ui_notebook_select(&self->mainviews.viewstatusbars, tabindex);	
 	component = psy_ui_notebook_active_page(&self->mainviews.notebook);	
 	if (component) {		

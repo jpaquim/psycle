@@ -62,8 +62,7 @@ typedef struct MachineWireView {
 	uintptr_t selectedslot;	
 	psy_audio_Wire dragwire;	
 	psy_audio_Wire hoverwire;	
-	int randominsert;
-	int addeffect;
+	int randominsert;	
 	bool mousemoved;
 	bool showwirehover;	
 	bool drawvirtualgenerators;	
@@ -77,7 +76,7 @@ typedef struct MachineWireView {
 void machinewireview_init(MachineWireView*, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, ParamViews*, Workspace*);
 
-void machinewireview_centermaster(MachineWireView*);
+void machinewireview_center_master(MachineWireView*);
 void machinewireview_showvirtualgenerators(MachineWireView*);
 void machinewireview_hidevirtualgenerators(MachineWireView*);
 void machinewireview_idle(MachineWireView*);

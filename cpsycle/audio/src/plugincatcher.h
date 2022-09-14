@@ -151,9 +151,6 @@ INLINE void psy_audio_plugincatcher_notifychange(psy_audio_PluginCatcher* self)
 	psy_signal_emit(&self->signal_changed, self, 0);
 }
 
-void psy_audio_machineinfo_from_property(const psy_Property* property,
-	psy_audio_MachineInfo* rv);
-
 #ifdef __cplusplus
 }
 #endif

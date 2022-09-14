@@ -75,8 +75,7 @@ void psy_ui_tab_init(psy_ui_Tab* self, psy_ui_Component* parent,
 	self->istoggle = FALSE;
 	self->mode = psy_ui_TABMODE_SINGLESEL;
 	self->checkstate = 0;	
-	self->index = index;
-	self->target_id = psy_INDEX_INVALID;
+	self->index = index;	
 	self->bitmapident = 1.0;
 	self->lightresourceid = psy_INDEX_INVALID;
 	self->darkresourceid = psy_INDEX_INVALID;
@@ -393,8 +392,35 @@ void psy_ui_tabbar_unmark(psy_ui_TabBar* self)
 		psy_ui_STYLESTATE_SELECT);
 }
 
+void psy_ui_tabbar_select_id(psy_ui_TabBar* self, uintptr_t id)
+{
+	psy_List* p;
+	psy_List* q;
+	uintptr_t i;
+	
+	assert(self);
+	
+	if (id == psy_INDEX_INVALID) {
+		return;		
+	}
+	for (i = 0, p = q = psy_ui_component_children(&self->component,
+			psy_ui_NONE_RECURSIVE); p != NULL; ++i, p = p->next) {
+		psy_ui_Component* component;
+		
+		component = (psy_ui_Component*)p->entry;
+		if (psy_ui_component_id(component) == id) {
+			psy_ui_tabbar_select(self, i);	
+			break;
+		}
+	}
+	psy_list_free(q);
+	q = NULL;
+}
+
 void psy_ui_tabbar_select(psy_ui_TabBar* self, uintptr_t tabindex)
 {
+	assert(self);
+	
 	psy_ui_tabbar_mark(self, tabindex);	
 	psy_signal_emit(&self->signal_change, self, 1, tabindex);	
 }
@@ -409,7 +435,7 @@ psy_ui_Tab* psy_ui_tabbar_append(psy_ui_TabBar* self, const char* label,
 
 	rv = psy_ui_tab_allocinit(&self->component, label, self->num_tabs);
 	if (rv) {
-		psy_ui_tab_set_target_id(rv, target_id);
+		psy_ui_component_set_id(&rv->component, target_id);
 		if (self->prevent_translation) {
 			psy_ui_tab_prevent_translation(rv);
 		}

@@ -18,7 +18,7 @@ const psy_audio_MachineInfo* psy_audio_dummymachine_info(void)
 			" (debug build)"
 			#endif
 			,		
-		"Dummy Plug",
+		"Dummy",
 		"Psycledelics",
 		"help",		
 		psy_audio_DUMMY,

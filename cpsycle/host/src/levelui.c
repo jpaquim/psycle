@@ -17,10 +17,11 @@
 /* LevelUi */
 
 /* prototypes */
-static void levelui_ondraw(LevelUi*, psy_ui_Graphics*);
-static void levelui_vumeterdraw(LevelUi*, psy_ui_Graphics*,
+static void levelui_on_draw(LevelUi*, psy_ui_Graphics*);
+static void levelui_draw_value(LevelUi*, psy_ui_Graphics*,
 	psy_ui_RealPoint topleft, double value);
-static void levelui_updateparam(LevelUi*);
+static void levelui_update_parameter(LevelUi*);
+static void levelui_on_timer(LevelUi*, uintptr_t timerid);
 
 /* vtable */
 static psy_ui_ComponentVtable levelui_vtable;
@@ -34,7 +35,10 @@ static void levelui_vtable_init(LevelUi* self)
 		levelui_vtable = *(self->component.vtable);
 		levelui_vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
-			levelui_ondraw;		
+			levelui_on_draw;	
+		levelui_vtable.on_timer =
+			(psy_ui_fp_component_on_timer)
+			levelui_on_timer;		
 		levelui_vtable_initialized = TRUE;
 	}
 	psy_ui_component_set_vtable(&self->component, &levelui_vtable);
@@ -52,7 +56,8 @@ void levelui_init(LevelUi* self, psy_ui_Component* parent,
 	psy_ui_component_set_style_type(&self->component, STYLE_MV_LEVEL);
 	self->machine = machine;
 	self->paramidx = paramidx;
-	self->param = param;	
+	self->param = param;
+	psy_ui_component_start_timer(&self->component, 0, 50);
 }
 
 LevelUi* levelui_alloc(void)
@@ -74,18 +79,18 @@ LevelUi* levelui_allocinit(psy_ui_Component* parent,
 	return rv;
 }
 
-void levelui_ondraw(LevelUi* self, psy_ui_Graphics* g)
+void levelui_on_draw(LevelUi* self, psy_ui_Graphics* g)
 {		
-	levelui_updateparam(self);
+	levelui_update_parameter(self);
 	if (self->param) {
-		levelui_vumeterdraw(self, g, psy_ui_realpoint_zero(),
+		levelui_draw_value(self, g, psy_ui_realpoint_zero(),
 			(double)psy_audio_machineparam_normvalue(self->param));
 	} else {
-		levelui_vumeterdraw(self, g, psy_ui_realpoint_zero(), 0.0);
+		levelui_draw_value(self, g, psy_ui_realpoint_zero(), 0.0);
 	}
 }
 
-void levelui_vumeterdraw(LevelUi* self, psy_ui_Graphics* g,
+void levelui_draw_value(LevelUi* self, psy_ui_Graphics* g,
 	psy_ui_RealPoint topleft, double value)
 {
 	double ypos;
@@ -117,10 +122,15 @@ void levelui_vumeterdraw(LevelUi* self, psy_ui_Graphics* g,
 			-vuon_style->background.position.y + ypos));
 }
 
-void levelui_updateparam(LevelUi* self)
+void levelui_update_parameter(LevelUi* self)
 {
 	if (self->machine && self->paramidx != psy_INDEX_INVALID) {
 		self->param = psy_audio_machine_parameter(self->machine,
 			self->paramidx);
 	}
+}
+
+void levelui_on_timer(LevelUi* self, uintptr_t timerid)
+{		
+	psy_ui_component_invalidate(&self->component);	
 }

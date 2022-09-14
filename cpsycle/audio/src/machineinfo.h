@@ -1,12 +1,15 @@
 /*
 ** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #ifndef psy_audio_MACHINEINFO_H
 #define psy_audio_MACHINEINFO_H
 
 #include "../../detail/psydef.h"
+
+/* container */
+#include <properties.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -40,7 +43,10 @@ typedef struct psy_audio_MachineInfo {
 } psy_audio_MachineInfo;
 
 void machineinfo_init(psy_audio_MachineInfo*);
+void psy_audio_machineinfo_init_property(psy_audio_MachineInfo*,
+	const psy_Property*);
 void machineinfo_dispose(psy_audio_MachineInfo*);
+
 psy_audio_MachineInfo* machineinfo_alloc(void);
 psy_audio_MachineInfo* machineinfo_allocinit(void);
 psy_audio_MachineInfo* machineinfo_clone(const psy_audio_MachineInfo*);
@@ -60,12 +66,7 @@ void machineinfo_set(psy_audio_MachineInfo*,
 		const char* helptext,
 		const char* desc,
 		const char* category);
-struct CMachineInfo;		
-void machineinfo_setnativeinfo(psy_audio_MachineInfo*,
-		struct CMachineInfo*,
-		int type,		
-		const char* modulepath,
-		int shellidx);
+
 void machineinfo_init_copy(psy_audio_MachineInfo*, psy_audio_MachineInfo* other);
 void machineinfo_copy(psy_audio_MachineInfo*, const psy_audio_MachineInfo* other);
 void machineinfo_clear(psy_audio_MachineInfo*);

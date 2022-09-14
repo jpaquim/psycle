@@ -55,6 +55,8 @@ void machineproperties_init(MachineProperties* self, psy_ui_Component* parent,
 {
 	psy_ui_component_init(&self->component, parent, NULL);	
 	machineproperties_vtable_init(self);
+	psy_ui_component_set_id(&self->component,
+		SECTION_ID_MACHINEVIEW_PROPERTIES);
 	self->workspace = workspace;
 	self->machine = NULL;
 	self->machines =

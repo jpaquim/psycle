@@ -161,8 +161,7 @@ void newmachinedetail_update(NewMachineDetail* self,
 		psy_Path path;
 
 		self->plugin = property;
-		machineinfo_init(&machineinfo);
-		psy_audio_machineinfo_from_property(property, &machineinfo);		
+		psy_audio_machineinfo_init_property(&machineinfo, property);		
 		newmachinedetail_setdescription(self, machineinfo.desc);		
 		psy_path_init(&path, machineinfo.modulepath);
 		newmachinedetail_setplugname(self, machineinfo.name);

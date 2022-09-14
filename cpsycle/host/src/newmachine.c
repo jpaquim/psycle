@@ -802,6 +802,7 @@ static void newmachine_on_add_selected_plugin(NewMachine*,
 	psy_ui_Button* sender);
 static void newmachine_on_cancel(NewMachine*,
 	psy_ui_Button* sender);
+static void newmachine_add_machine(NewMachine*, psy_Property* plugininfo);
 
 /* vtable */
 static psy_ui_ComponentVtable newmachine_vtable;
@@ -827,13 +828,13 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {	
 	psy_ui_component_init(&self->component, parent, NULL);
-	newmachine_vtable_init(self);	
+	newmachine_vtable_init(self);
+	psy_ui_component_set_id(&self->component,
+		SECTION_ID_MACHINEVIEW_NEWMACHINE);
 	psy_ui_component_set_style_type(&self->component, STYLE_MV_NEWMACHINE);
 	psy_ui_component_set_padding(&self->component,
 		psy_ui_margin_make_em(0.0, 0.0, 0.0, 1.0));
 	self->workspace = workspace;	
-	self->mode = NEWMACHINE_APPEND;
-	self->appendstack = FALSE;
 	self->restoresection = SECTION_ID_MACHINEVIEW_WIRES;
 	self->selectedplugin = NULL;
 	self->selectedsection = NULL;
@@ -952,14 +953,73 @@ void newmachine_onpluginselected(NewMachine* self, PluginsView* sender)
 
 void newmachine_emit_selected_plugin(NewMachine* self)
 {			
-	psy_signal_emit(&self->signal_selected, self, 1,
-		self->selectedplugin);
+	//psy_signal_emit(&self->signal_selected, self, 1,
+	//	self->selectedplugin);
 	if (self->selectedplugin) {
+		newmachine_add_machine(self, self->selectedplugin);
 		plugincatcher_incfavorite(
 			workspace_plugincatcher(self->workspace),
 			psy_property_key(self->selectedplugin));		
 	}
 }
+
+void newmachine_add_machine(NewMachine* self, psy_Property* plugininfo)
+{
+	psy_audio_Machine* machine;
+	psy_audio_MachineInfo machineinfo;	
+	
+	psy_audio_machineinfo_init_property(&machineinfo, plugininfo);	
+	/*if (self->newmachine.restoresection == SECTION_ID_MACHINEVIEW_STACK &&
+			self->stackview.state.insertmachinemode ==
+			NEWMACHINE_ADDEFFECTSTACK) {
+		self->newmachine.restoresection = psy_INDEX_INVALID;
+		machinestackview_addeffect(&self->stackview, &machineinfo);
+		machineinfo_dispose(&machineinfo);
+		psy_ui_tabbar_select(&self->tabbar, SECTION_ID_MACHINEVIEW_STACK);
+		return;
+	}*/	
+	machine = psy_audio_machinefactory_make_info(
+		&self->workspace->player.machinefactory, &machineinfo);
+	machineinfo_dispose(&machineinfo);
+	if (machine) {
+		psy_audio_Machines* machines;
+		
+		machines = &workspace_song(self->workspace)->machines;
+		if (machines->insert.appendstack &&
+			psy_audio_machine_mode(machine) == psy_audio_MACHMODE_FX) {
+			psy_audio_machine_setbus(machine);
+		}
+		if (machines->insert.addeffect) {
+			uintptr_t slot;
+					
+			slot = psy_audio_machines_append(machines, machine);
+			psy_audio_machines_disconnect(machines,
+				psy_audio_machines_selectedwire(machines));				
+			psy_audio_machines_connect(machines,
+				psy_audio_wire_make(
+					psy_audio_machines_selectedwire(machines).src, slot));
+			psy_audio_machines_connect(machines,
+				psy_audio_wire_make(slot, psy_audio_machines_selectedwire(
+					machines).dst));
+			psy_audio_machines_select(machines, slot);
+			machines->insert.addeffect = FALSE;
+		} else if (machines->insert.mode == psy_audio_MACHINES_INSERT_MODE_INSERT) {
+			psy_audio_machines_insert(machines,
+				psy_audio_machines_selected(machines), machine);
+		} else {
+			psy_audio_machines_select(machines, psy_audio_machines_append(
+				machines, machine));
+		}
+	} else {
+		workspace_output_error(self->workspace,
+			self->workspace->player.machinefactory.errstr);
+	}
+	workspace_select_view(self->workspace,  viewindex_make(VIEW_ID_MACHINEVIEW,
+		self->restoresection, psy_INDEX_INVALID, psy_INDEX_INVALID));
+	if (workspace_song(self->workspace)) {
+		workspace_song(self->workspace)->machines.insert.appendstack = FALSE;
+	}
+}			
 
 void newmachine_on_add_selected_plugin(NewMachine* self,
 	psy_ui_Button* sender)
@@ -1041,72 +1101,28 @@ void newmachine_onscanend(NewMachine* self, PluginScanThread* sender)
 	psy_ui_notebook_select(&self->notebook, 0);	
 }
 
-void newmachine_enableall(NewMachine* self)
-{
-/*	pluginsview_enableall(&self->pluginsview);	*/
-}
-
-void newmachine_enablegenerators(NewMachine* self)
-{	
-/*	pluginsview_enablegenerators(&self->pluginsview); */
-}
-
-void newmachine_preventgenerators(NewMachine* self)
-{
-/*	pluginsview_preventgenerators(&self->pluginsview); */
-}
-
-void newmachine_enableeffects(NewMachine* self)
-{
-/*	pluginsview_enableeffects(&self->pluginsview); */
-}
-
-void newmachine_preventeffects(NewMachine* self)
-{
-/*	pluginsview_preventeffects(&self->pluginsview); */
-}
-
 void newmachine_insertmode(NewMachine* self)
 {
-	if (workspace_song(self->workspace)) {
-		uintptr_t index;
-
-		index = psy_audio_machines_selected(
-			&workspace_song(self->workspace)->machines);
-		if (index != psy_INDEX_INVALID) {
-			if (index < 0x40) {
-				newmachine_enablegenerators(self);
-				newmachine_preventeffects(self);
-			} else {
-				newmachine_enableeffects(self);
-				newmachine_preventgenerators(self);
-			}
-		}
-	}
-	self->mode = NEWMACHINE_INSERT;	
+	if (workspace_song(self->workspace)) {		
+		self->workspace->song->machines.insert.mode =
+			psy_audio_MACHINES_INSERT_MODE_INSERT;	
+	}	
 }
 
 void newmachine_appendmode(NewMachine* self)
-{
-	newmachine_enableall(self);
-	self->mode = NEWMACHINE_APPEND;	
+{	
+	if (workspace_song(self->workspace)) {
+		self->workspace->song->machines.insert.mode =
+			psy_audio_MACHINES_INSERT_MODE_APPEND;	
+	}
 }
 
 void newmachine_addeffectmode(NewMachine* self)
-{	
-	newmachine_preventgenerators(self);
-	newmachine_enableeffects(self);
-	self->mode = NEWMACHINE_ADDEFFECT;	
-}
-
-bool newmachine_selectedmachineinfo(const NewMachine* self,
-	psy_audio_MachineInfo* rv)
-{
-	if (self->selectedplugin) {
-		psy_audio_machineinfo_from_property(self->selectedplugin, rv);
-		return TRUE;
+{		
+	if (workspace_song(self->workspace)) {
+		self->workspace->song->machines.insert.mode =
+			psy_audio_MACHINES_INSERT_MODE_ADDEFFECT;	
 	}
-	return FALSE;
 }
 
 void newmachine_on_mouse_down(NewMachine* self, psy_ui_MouseEvent* ev)
@@ -1192,11 +1208,11 @@ void newmachine_oncreatesection(NewMachine* self, psy_ui_Component* sender)
 
 void newmachine_onaddtosection(NewMachine* self, psy_ui_Component* sender)
 {
-	if (newmachine_checkplugin(self) && self->curr_sections_pane) {
-		psy_audio_MachineInfo macinfo;
+	if (newmachine_checkplugin(self) && self->curr_sections_pane &&
+			self->selectedplugin) {
+		psy_audio_MachineInfo macinfo;		
 
-		machineinfo_init(&macinfo);
-		newmachine_selectedmachineinfo(self, &macinfo);
+		psy_audio_machineinfo_init_property(&macinfo, self->selectedplugin);		
 		psy_audio_pluginsections_add(&self->workspace->player.plugincatcher.sections,
 			psy_property_key(self->selectedsection->section), &macinfo);
 		self->selectedplugin = NULL;

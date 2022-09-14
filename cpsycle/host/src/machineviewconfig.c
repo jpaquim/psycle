@@ -26,7 +26,7 @@
 
 #define PSYCLE__PATH__DEFAULT_MACHINE_SKIN "Psycle Default (internal)"
 
-static void machineviewconfig_makeview(MachineViewConfig*,
+static void machineviewconfig_make(MachineViewConfig*,
 	psy_Property* parent);
 static void machineviewconfig_makestackview(MachineViewConfig*,
 	psy_Property* parent);
@@ -80,25 +80,24 @@ void machineviewconfig_init(MachineViewConfig* self, psy_Property* parent)
 
 	self->parent = parent;
 	self->dirconfig = NULL;		
-	machineviewconfig_makeview(self, parent);
-	psy_signal_init(&self->signal_changed);	
+	machineviewconfig_make(self, parent);	
 }
 
 void machineviewconfig_dispose(MachineViewConfig* self)
 {
-	assert(self);
-
-	psy_signal_dispose(&self->signal_changed);	
+	assert(self);	
 }
 
 void machineviewconfig_setdirectories(MachineViewConfig* self,
 	DirConfig* dirconfig)
 {
+	assert(self);
+	
 	self->dirconfig = dirconfig;	
 	machineviewconfig_update_machine_skins(self);
 }
 
-void machineviewconfig_makeview(MachineViewConfig* self, psy_Property* parent)
+void machineviewconfig_make(MachineViewConfig* self, psy_Property* parent)
 {	
 	assert(self);
 
@@ -1205,33 +1204,46 @@ void machineviewconfig_set_param_bottom_colour(MachineViewConfig* self,
 void machineviewconfig_set_colour(MachineViewConfig* self,
 	const char* key, uintptr_t style_id, psy_ui_Colour colour)
 {
-	psy_ui_Style* style;
-	psy_Property* property;
+	psy_ui_Style* style;	
 
 	style = psy_ui_style(style_id);
 	if (style) {
 		psy_ui_style_set_colour(style, colour);
 	}
-	property = psy_property_set_int(self->theme, key,
-		psy_ui_colour_colorref(&colour));
-	if (property) {
-		psy_signal_emit(&self->signal_changed, self, 1, property);
-	}
+	psy_property_set_int(self->theme, key, psy_ui_colour_colorref(&colour));	
 }
 
 void machineviewconfig_set_style_background_colour(MachineViewConfig* self,
 	const char* key, uintptr_t style_id, psy_ui_Colour colour)
 {
-	psy_ui_Style* style;
-	psy_Property* property;
+	psy_ui_Style* style;	
 
 	style = psy_ui_style(style_id);
 	if (style) {
 		psy_ui_style_set_background_colour(style, colour);
 	}
-	property = psy_property_set_int(self->theme, key,
-		psy_ui_colour_colorref(&colour));
-	if (property) {
-		psy_signal_emit(&self->signal_changed, self, 1, property);
+	psy_property_set_int(self->theme, key, psy_ui_colour_colorref(&colour));
+}
+
+bool machineviewconfig_connect(MachineViewConfig* self, const char* key,
+	void* context, void* fp)
+{
+	psy_Property* p;
+
+	assert(self);
+
+	p = machineviewconfig_property(self, key);
+	if (p) {
+		psy_property_connect(p, context, fp);
+		return TRUE;
 	}
+	return FALSE;
+}
+
+psy_Property* machineviewconfig_property(MachineViewConfig* self,
+	const char* key)
+{
+	assert(self);
+
+	return psy_property_at(self->machineview, key, PSY_PROPERTY_TYPE_NONE);
 }

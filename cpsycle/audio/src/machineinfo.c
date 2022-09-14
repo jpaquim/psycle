@@ -35,6 +35,30 @@ void machineinfo_init(psy_audio_MachineInfo* self)
 	self->category = psy_strdup("");
 }
 
+void psy_audio_machineinfo_init_property(psy_audio_MachineInfo* self,
+	const psy_Property* property)
+{
+	assert(self);
+	
+	machineinfo_init(self);
+	machineinfo_set(self,
+		psy_property_at_str(property, "author", ""),
+		psy_property_at_str(property, "command", ""),
+		psy_property_at_int(property, "flags", 0),
+		psy_property_at_int(property, "mode", 0),
+		psy_property_at_str(property, "name", ""),
+		psy_property_at_str(property, "shortname", ""),
+		(int16_t)psy_property_at_int(property, "apiversion", 0),
+		(int16_t)psy_property_at_int(property, "plugversion", 0),
+		(psy_audio_MachineType)psy_property_at_int(property, "type",
+			psy_audio_UNDEFINED),
+		psy_property_at_str(property, "path", ""),
+		psy_property_at_int(property, "shellidx", 0),
+		psy_property_at_str(property, "help", ""),
+		psy_property_at_str(property, "desc", ""),
+		psy_property_at_str(property, "category", ""));
+}
+
 void machineinfo_init_copy(psy_audio_MachineInfo* self,
 	psy_audio_MachineInfo* src)
 {
@@ -110,35 +134,6 @@ void machineinfo_set(psy_audio_MachineInfo* self,
 	psy_strreset(&self->category, category);
 }
 
-void machineinfo_setnativeinfo(psy_audio_MachineInfo* self,
-	CMachineInfo* info,
-	int type,
-	const char* modulepath,
-	int shellidx)
-{
-	assert(self);
-	
-	machineinfo_dispose(self);
-	psy_strreset(&self->author, info->Author);
-	psy_strreset(&self->command, info->Command);
-	self->flags = info->Flags;
-	self->mode = ((info->Flags & 3) == 3)
-		? psy_audio_MACHMODE_GENERATOR
-		: psy_audio_MACHMODE_FX;
-	psy_strreset(&self->name, info->Name);
-	psy_strreset(&self->shortname, info->ShortName);
-	self->apiversion = info->APIVersion;
-	self->plugversion = info->PlugVersion;
-	self->type = type;
-	psy_strreset(&self->modulepath, modulepath);
-	self->shellidx = shellidx;
-	psy_strreset(&self->helptext, info->Command);
-	if (self->mode == psy_audio_MACHMODE_GENERATOR) {
-		psy_strreset(&self->desc, "Psycle instrument");
-	} else {
-		psy_strreset(&self->desc, "Psycle effect");
-	}
-}
 
 void machineinfo_dispose(psy_audio_MachineInfo* self)
 {
@@ -161,6 +156,7 @@ void machineinfo_dispose(psy_audio_MachineInfo* self)
 	free(self->category);
 	self->category = NULL;
 }
+
 
 psy_audio_MachineInfo* machineinfo_alloc(void)
 {

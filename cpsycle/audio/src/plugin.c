@@ -40,6 +40,8 @@ static int pluginparam_type(psy_audio_PluginMachineParam*);
 static int pluginparam_label(psy_audio_PluginMachineParam*, char* text);
 static int pluginparam_name(psy_audio_PluginMachineParam*, char* text);
 static int pluginparam_describe(psy_audio_PluginMachineParam*, char* text);
+static void psy_audio_plugin_machineinfo_set(psy_audio_MachineInfo*,
+	CMachineInfo*, const char* modulepath);
 
 static psy_audio_MachineParam* pluginparam_base(
 	psy_audio_PluginMachineParam* self)
@@ -289,17 +291,19 @@ int psy_audio_plugin_init(psy_audio_Plugin* self, psy_audio_MachineCallback*
 			psy_library_dispose(&self->library);
 			status = PSY_ERRRUN;
 		} else {						
-			CMachineInfo* pInfo = GetInfo();
-			if (pInfo) {				
+			CMachineInfo* cinfo;
+			
+			cinfo = GetInfo();
+			if (cinfo) {				
 				mi_resetcallback(self->mi);
 				mi_setcallback(self->mi, callback);
 				mi_init(self->mi);
-				tweakdefaults(self, pInfo);
+				tweakdefaults(self, cinfo);
 				self->plugininfo = machineinfo_allocinit();												
-				machineinfo_setnativeinfo(self->plugininfo, pInfo, psy_audio_PLUGIN,
-					self->library.path, 0);								
+				psy_audio_plugin_machineinfo_set(self->plugininfo, cinfo,
+					self->library.path);
 				psy_audio_machine_seteditname(psy_audio_plugin_base(self),
-					pInfo->ShortName);
+					cinfo->ShortName);
 				if (strcmp(self->plugininfo->shortname, "BexPhase!") == 0) {
 					self->preventnewline = 1;
 				}
@@ -406,8 +410,8 @@ int psy_audio_plugin_psycle_test(const char* path, const char* root, psy_audio_M
 		if (GetInfo != NULL) {	
 			CMachineInfo* nativeinfo = GetInfo();
 			if (nativeinfo) {				
-				machineinfo_setnativeinfo(info, nativeinfo, psy_audio_PLUGIN,
-					library.path, 0);
+				psy_audio_plugin_machineinfo_set(info, nativeinfo,
+					library.path);
 				rv = 1;
 			}
 		}
@@ -416,6 +420,37 @@ int psy_audio_plugin_psycle_test(const char* path, const char* root, psy_audio_M
 	}
 	return rv;	
 }
+
+void psy_audio_plugin_machineinfo_set(psy_audio_MachineInfo* self,
+	CMachineInfo* info, const char* modulepath)
+{
+	char desc[256];
+	
+	assert(self);
+	
+	machineinfo_dispose(self);
+	psy_strreset(&self->author, info->Author);
+	psy_strreset(&self->command, info->Command);
+	self->flags = info->Flags;
+	self->mode = ((info->Flags & 3) == 3)
+		? psy_audio_MACHMODE_GENERATOR
+		: psy_audio_MACHMODE_FX;
+	psy_strreset(&self->name, info->Name);
+	psy_strreset(&self->shortname, info->ShortName);
+	psy_snprintf(desc, 256, "Psycle %s by %s ",
+		(self->mode == psy_audio_MACHMODE_FX)
+		? "effect"
+		: "instrument",
+		self->author);	
+	psy_strreset(&self->desc, desc);			
+	self->apiversion = info->APIVersion;
+	self->plugversion = info->PlugVersion;
+	self->type = psy_audio_PLUGIN;
+	psy_strreset(&self->modulepath, modulepath);
+	self->shellidx = 0;
+	psy_strreset(&self->helptext, info->Command);	
+}
+
 
 void seqtick(psy_audio_Plugin* self, uintptr_t channel,
 	const psy_audio_PatternEvent* ev)

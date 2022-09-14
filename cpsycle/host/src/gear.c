@@ -138,13 +138,18 @@ void gear_init_title(Gear* self)
 
 void gear_oncreate(Gear* self, psy_ui_Component* sender)
 {	
-	workspace_select_view(self->workspace,
-		viewindex_make(VIEW_ID_MACHINEVIEW,
-		SECTION_ID_MACHINEVIEW_NEWMACHINE,
-		(psy_audio_machines_selected(&self->workspace->song->machines)
-			!= psy_INDEX_INVALID)
-		? NEWMACHINE_INSERT
-		: NEWMACHINE_APPEND,
+	if (workspace_song(self->workspace)) {
+		psy_audio_Machines* machines;
+		
+		machines = &self->workspace->song->machines;
+		if (psy_audio_machines_selected(machines) != psy_INDEX_INVALID) {
+			machines->insert.mode = psy_audio_MACHINES_INSERT_MODE_INSERT;
+		} else {
+			machines->insert.mode = psy_audio_MACHINES_INSERT_MODE_APPEND;
+		}
+	}
+	workspace_select_view(self->workspace, viewindex_make(VIEW_ID_MACHINEVIEW,
+		SECTION_ID_MACHINEVIEW_NEWMACHINE, psy_INDEX_INVALID,
 		psy_INDEX_INVALID));
 }
 

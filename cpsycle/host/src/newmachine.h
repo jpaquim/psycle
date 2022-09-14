@@ -222,10 +222,8 @@ typedef struct NewMachine {
 	PluginScanView scanview;
 	NewMachineSectionBar sectionbar;
 	NewMachineRescanBar rescanbar;		
-	psy_ui_Scroller scroller_all;
-	/* data */
-	bool appendstack;
-	int mode;
+	psy_ui_Scroller scroller_all;		
+	// int mode;
 	uintptr_t newsectioncount;	
 	/* references */
 	Workspace* workspace;
@@ -238,18 +236,10 @@ typedef struct NewMachine {
 void newmachine_init(NewMachine*, psy_ui_Component* parent, Workspace*);
 
 void newmachine_updateplugins(NewMachine*);
-void newmachine_enableall(NewMachine*);
-void newmachine_enablegenerators(NewMachine*);
-void newmachine_preventgenerators(NewMachine*);
-void newmachine_enableeffects(NewMachine*);
-void newmachine_preventeffects(NewMachine*);
 
 void newmachine_insertmode(NewMachine*);
 void newmachine_appendmode(NewMachine*);
 void newmachine_addeffectmode(NewMachine*);
-
-bool newmachine_selectedmachineinfo(const NewMachine*,
-	psy_audio_MachineInfo* rv);
 
 void newmachine_onpluginselected(NewMachine*, PluginsView* sender);
 void newmachine_onsectionselected(NewMachine*,
