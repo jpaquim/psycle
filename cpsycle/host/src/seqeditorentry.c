@@ -315,7 +315,7 @@ void seqeditpatternentry_on_mouse_down(SeqEditPatternEntry* self,
 			if (workspace_current_view(self->seqeditorentry.state->workspace).id !=
 				VIEW_ID_PATTERNVIEW) {
 				workspace_select_view(self->seqeditorentry.state->workspace,
-					viewindex_make(VIEW_ID_PATTERNVIEW,
+					viewindex_make_all(VIEW_ID_PATTERNVIEW,
 						workspace_current_view(self->seqeditorentry.state->workspace).section,
 						0, psy_INDEX_INVALID));
 			}
@@ -481,7 +481,7 @@ void seqeditsampleentry_on_mouse_down(SeqEditSampleEntry* self,
 			if (workspace_current_view(self->seqeditorentry.state->workspace).id !=
 					VIEW_ID_SAMPLESVIEW) {
 				workspace_select_view(self->seqeditorentry.state->workspace,
-					viewindex_make(
+					viewindex_make_all(
 						VIEW_ID_SAMPLESVIEW,
 						workspace_current_view(self->seqeditorentry.state->workspace).section,
 						0, psy_INDEX_INVALID));

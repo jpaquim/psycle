@@ -39,6 +39,8 @@ LevelUi* levelui_alloc(void);
 LevelUi* levelui_allocinit(psy_ui_Component* parent,
 	struct psy_audio_Machine*, uintptr_t paramidx,
 	struct psy_audio_MachineParam*);
+	
+void levelui_idle(LevelUi*);
 
 INLINE psy_ui_Component* levelui_base(LevelUi* self)
 {

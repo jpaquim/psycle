@@ -20,14 +20,12 @@
 /* platform */
 #include "../../detail/portable.h"
 
-static void machineparamconfig_makeview(MachineParamConfig*, psy_Property*);
-static void machineparamconfig_maketheme(MachineParamConfig*, psy_Property*);
+static void machineparamconfig_make(MachineParamConfig*, psy_Property*);
+static void machineparamconfig_make_theme(MachineParamConfig*, psy_Property*);
 static void machineparamconfig_set_colour(MachineParamConfig*,
 	const char* key, uintptr_t style_id, psy_ui_Colour);
 static void machineparamconfig_set_style_background_colour(MachineParamConfig*,
 	const char* key, uintptr_t style_id, psy_ui_Colour);
-static void machineparamconfig_on_property_changed(MachineParamConfig*,
-	psy_Property* sender);
 
 void machineparamconfig_init(MachineParamConfig* self, psy_Property* parent)
 {
@@ -35,17 +33,12 @@ void machineparamconfig_init(MachineParamConfig* self, psy_Property* parent)
 
 	self->parent = parent;
 	self->dirconfig = NULL;
-	machineparamconfig_makeview(self, parent);
-	psy_signal_init(&self->signal_changed);
-	psy_signal_init(&self->signal_themechanged);
+	machineparamconfig_make(self, parent);	
 }
 
 void machineparamconfig_dispose(MachineParamConfig* self)
 {
-	assert(self);
-
-	psy_signal_dispose(&self->signal_changed);
-	psy_signal_dispose(&self->signal_themechanged);	
+	assert(self);		
 }
 
 
@@ -55,7 +48,7 @@ void machineparamconfig_setdirectories(MachineParamConfig* self,
 	self->dirconfig = dirconfig;
 }
 
-void machineparamconfig_makeview(MachineParamConfig* self, psy_Property* parent)
+void machineparamconfig_make(MachineParamConfig* self, psy_Property* parent)
 {
 	assert(self);
 
@@ -73,10 +66,11 @@ void machineparamconfig_makeview(MachineParamConfig* self, psy_Property* parent)
 		psy_property_append_action(self->paramview, "defaultskin"),
 		"settings.paramview.default-skin"),
 		PROPERTY_ID_DEFAULTCONTROLSKIN);
-	machineparamconfig_maketheme(self, self->paramview);
+	machineparamconfig_make_theme(self, self->paramview);
 }
 
-void machineparamconfig_maketheme(MachineParamConfig* self, psy_Property* parent)
+void machineparamconfig_make_theme(MachineParamConfig* self,
+	psy_Property* parent)
 {
 	psy_List* p;
 
@@ -139,14 +133,7 @@ void machineparamconfig_maketheme(MachineParamConfig* self, psy_Property* parent
 		psy_property_set_hint(psy_property_append_int(self->theme,
 			"machineGUIHFontBottomColor", 0x00E7BD18, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
-		"settings.paramview.theme.selvalue-font");
-	for (p = psy_property_begin(self->theme); p != NULL; p = p->next) {
-		psy_Property* curr;
-
-		curr = (psy_Property*)p->entry;
-		psy_property_connect(curr, self, 
-			machineparamconfig_on_property_changed);
-	}
+		"settings.paramview.theme.selvalue-font");	
 }
 
 void machineparamconfig_resettheme(MachineParamConfig* self)
@@ -154,7 +141,7 @@ void machineparamconfig_resettheme(MachineParamConfig* self)
 	if (self->theme) {
 		psy_property_remove(self->paramview, self->theme);
 	}
-	machineparamconfig_maketheme(self, self->paramview);
+	machineparamconfig_make_theme(self, self->paramview);
 	machineparamconfig_update_styles(self);
 }
 
@@ -166,20 +153,6 @@ void machineparamconfig_settheme(MachineParamConfig* self, psy_Property* theme)
 		psy_property_sync(self->theme, theme);
 		machineparamconfig_update_styles(self);		
 	}
-}
-
-bool machineparamconfig_hasthemeproperty(const MachineParamConfig* self,
-	psy_Property* property)
-{
-	return (self->theme && psy_property_in_section(property, self->theme));
-}
-
-bool machineparamconfig_hasproperty(const MachineParamConfig* self,
-	psy_Property* property)
-{
-	assert(self && self->paramview);
-
-	return psy_property_in_section(property, self->paramview);
 }
 
 const char* machineparamconfig_dialbpm(const MachineParamConfig* self)
@@ -207,18 +180,6 @@ psy_ui_FontInfo machineparamconfig_fontinfo(const MachineParamConfig* self)
 	psy_ui_fontinfo_init_string(&rv,
 		psy_property_at_str(self->paramview, "font", "tahoma; 16"));
 	return rv;
-}
-
-void machineparamconfig_on_property_changed(MachineParamConfig* self,
-	psy_Property* sender)
-{
-	assert(self);
-
-	if (machineparamconfig_hasthemeproperty(self, sender)) {
-		machineparamconfig_update_styles(self);				
-	} else {
-		psy_signal_emit(&self->signal_changed, self, 1, sender);
-	}
 }
 
 void machineparamconfig_update_styles(MachineParamConfig* self)
@@ -349,13 +310,8 @@ void machineparamconfig_set_param_title_background_colour(MachineParamConfig* se
 
 void machineparamconfig_set_param_machinedial_bmp(MachineParamConfig* self,
 	const char* str)
-{
-	psy_Property* property;
-	
-	property = psy_property_set_str(self->theme, "machinedial_bmp", str);
-	if (property) {
-		psy_signal_emit(&self->signal_changed, self, 1, property);
-	}
+{		
+	psy_property_set_str(self->theme, "machinedial_bmp", str);	
 }
 
 void machineparamconfig_set_colour(MachineParamConfig* self,
@@ -368,11 +324,7 @@ void machineparamconfig_set_colour(MachineParamConfig* self,
 	if (style) {
 		psy_ui_style_set_colour(style, colour);
 	}
-	property = psy_property_set_int(self->theme, key,
-		psy_ui_colour_colorref(&colour));
-	if (property) {
-		psy_signal_emit(&self->signal_changed, self, 1, property);
-	}
+	psy_property_set_int(self->theme, key, psy_ui_colour_colorref(&colour));
 }
 
 void machineparamconfig_set_style_background_colour(MachineParamConfig* self,
@@ -385,9 +337,5 @@ void machineparamconfig_set_style_background_colour(MachineParamConfig* self,
 	if (style) {
 		psy_ui_style_set_background_colour(style, colour);
 	}
-	property = psy_property_set_int(self->theme, key,
-		psy_ui_colour_colorref(&colour));
-	if (property) {
-		psy_signal_emit(&self->signal_changed, self, 1, property);
-	}
+	psy_property_set_int(self->theme, key, psy_ui_colour_colorref(&colour));
 }

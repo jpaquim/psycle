@@ -216,8 +216,8 @@ void mainframe_init(MainFrame* self)
 	psy_signal_connect(&self->scripttabbar.signal_change, self,
 		mainframe_on_script_tabbar_changed);
 	workspace_select_start_view(&self->workspace);
-	self->machineview.wireview.centermaster = TRUE;	
-	psy_ui_component_start_timer(mainframe_base(self), 0, 50);
+	self->machineview.wireview.pane.centermaster = TRUE;	
+	psy_ui_component_start_timer(mainframe_base(self), 0, 50);	
 }
 
 void mainframe_init_frame(MainFrame* self)
@@ -798,7 +798,7 @@ bool mainframe_on_input(MainFrame* self, InputHandler* sender)
 	case CMD_IMM_INFOPATTERN:
 		if (workspace_current_view(&self->workspace).id != VIEW_ID_PATTERNVIEW) {
 			workspace_select_view(&self->workspace,
-				viewindex_make(VIEW_ID_PATTERNVIEW, 0, 0, psy_INDEX_INVALID));
+				viewindex_make_all(VIEW_ID_PATTERNVIEW, 0, 0, psy_INDEX_INVALID));
 		}
 		if (!psy_ui_component_visible(&self->patternview.properties.component)) {
 			psy_ui_Tab* tab;
@@ -820,7 +820,7 @@ bool mainframe_on_input(MainFrame* self, InputHandler* sender)
 		mainframe_on_toggle_terminal(self, mainframe_base(self));
 		return 1;
 	case CMD_IMM_STYLES:
-		workspace_select_view(&self->workspace,	viewindex_make(
+		workspace_select_view(&self->workspace,	viewindex_make_all(
 			VIEW_ID_STYLEVIEW, psy_INDEX_INVALID, psy_INDEX_INVALID,
 			psy_INDEX_INVALID));
 		return 1;
@@ -865,7 +865,7 @@ void mainframe_on_song_changed(MainFrame* self, psy_audio_Player* sender)
 		if (generalconfig_showing_song_info_on_load(psycleconfig_general(
 				workspace_conf(&self->workspace)))) {
 			workspace_select_view(&self->workspace,
-				viewindex_make(VIEW_ID_SONGPROPERTIES, psy_INDEX_INVALID,
+				viewindex_make_all(VIEW_ID_SONGPROPERTIES, psy_INDEX_INVALID,
 					psy_INDEX_INVALID, psy_INDEX_INVALID));
 		}
 	}
@@ -935,19 +935,19 @@ void mainframe_on_disk_op(MainFrame* self, psy_ui_Component* sender)
 		FILEVIEWFILTER_MOD), "Module");	
 	fileview_set_filter(&self->fileview, &types);
 	psy_property_dispose(&types);
-	workspace_select_view(&self->workspace, viewindex_make(
+	workspace_select_view(&self->workspace, viewindex_make_all(
 		VIEW_ID_FILEVIEW, 0, 0, psy_INDEX_INVALID));
 }
 
 void mainframe_on_render(MainFrame* self, psy_ui_Component* sender)
 {
-	workspace_select_view(&self->workspace, viewindex_make(
+	workspace_select_view(&self->workspace, viewindex_make_all(
 		VIEW_ID_RENDERVIEW, 0, psy_INDEX_INVALID, psy_INDEX_INVALID));
 }
 
 void mainframe_on_export(MainFrame* self, psy_ui_Component* sender)
 {
-	workspace_select_view(&self->workspace, viewindex_make(
+	workspace_select_view(&self->workspace, viewindex_make_all(
 		VIEW_ID_EXPORTVIEW, 0, psy_INDEX_INVALID, psy_INDEX_INVALID));
 }
 
@@ -1047,7 +1047,7 @@ void mainframe_on_tabbar_changed(MainFrame* self, psy_ui_TabBar* sender,
 		psy_ui_notebook_select_by_component_id
 			(&self->mainviews.mainviewbar.viewtabbars,
 			psy_ui_component_id(component));
-		workspace_add_view(&self->workspace, viewindex_make(
+		workspace_add_view(&self->workspace, viewindex_make_all(
 			tabindex, psy_ui_component_section(component),
 			psy_INDEX_INVALID, psy_INDEX_INVALID));
 		psy_ui_component_set_focus(component);
@@ -1154,7 +1154,7 @@ bool mainframe_on_close(MainFrame* self)
 	if (keyboardmiscconfig_savereminder(&self->workspace.config.misc) &&
 			workspace_song_modified(&self->workspace)) {
 		workspace_select_view(&self->workspace,
-			viewindex_make(VIEW_ID_CHECKUNSAVED, 0,
+			viewindex_make_all(VIEW_ID_CHECKUNSAVED, 0,
 			CONFIRM_CLOSE, psy_INDEX_INVALID));
 		return FALSE;
 	}
@@ -1263,7 +1263,7 @@ void mainframe_on_file_load(MainFrame* self, FileView* sender)
 	if (keyboardmiscconfig_savereminder(&self->workspace.config.misc) &&
 			workspace_song_modified(&self->workspace)) {
 		workspace_select_view(&self->workspace,
-			viewindex_make(VIEW_ID_CHECKUNSAVED, SECTION_ID_FILEVIEW,
+			viewindex_make_all(VIEW_ID_CHECKUNSAVED, SECTION_ID_FILEVIEW,
 			CONFIRM_LOAD, psy_INDEX_INVALID));
 	} else {
 		workspace_load_song(&self->workspace,
@@ -1558,13 +1558,13 @@ void mainframe_on_trackscope_view(MainFrame* self, psy_Property* sender)
 void mainframe_on_help(MainFrame* self, psy_ui_Button* sender)
 {
 	workspace_select_view(&self->workspace,
-		viewindex_make(VIEW_ID_HELPVIEW, 0, 0, psy_INDEX_INVALID));
+		viewindex_make_all(VIEW_ID_HELPVIEW, 0, 0, psy_INDEX_INVALID));
 }
 
 void mainframe_on_settings(MainFrame* self, psy_ui_Button* sender)
 {
 	workspace_select_view(&self->workspace,
-		viewindex_make(VIEW_ID_SETTINGSVIEW, 0, psy_INDEX_INVALID,
+		viewindex_make_all(VIEW_ID_SETTINGSVIEW, 0, psy_INDEX_INVALID,
 			psy_INDEX_INVALID));
 }
 

@@ -14,6 +14,7 @@
 #include "newmachine.h"
 #include "paramview.h"
 #include "paramviews.h"
+#include "wireframes.h"
 #include "workspace.h"
 /* ui */
 #include <uitabbar.h>
@@ -24,37 +25,38 @@ extern "C" {
 #endif
 
 /*
-** MachineWireView
+** MachineWirePane
 **
 ** Displays and edits machines with their wires
 */
 
-/* MachineWireViewUis */
 
-typedef struct MachineWireViewUis {
+/* MachineWirePaneUis */
+
+typedef struct MachineWirePaneUis {
 	psy_Table machineuis;
 	psy_ui_Component* view;
 	psy_audio_Machines* machines;	
 	ParamViews* paramviews;
 	Workspace* workspace;
-} MachineWireViewUis;
+} MachineWirePaneUis;
 
-void machinewireviewuis_init(MachineWireViewUis*, psy_ui_Component*,
+void machinewireviewuis_init(MachineWirePaneUis*, psy_ui_Component*,
 	ParamViews*, Workspace*);
-void machinewireviewuis_dispose(MachineWireViewUis*);
+void machinewireviewuis_dispose(MachineWirePaneUis*);
 
-psy_ui_Component* machinewireviewwuis_at(MachineWireViewUis*,
+psy_ui_Component* machinewireviewwuis_at(MachineWirePaneUis*,
 	uintptr_t slot);
-void machinewireviewuis_remove(MachineWireViewUis*, uintptr_t slot);
-void machinewireviewuis_redrawvus(MachineWireViewUis*);
+void machinewireviewuis_remove(MachineWirePaneUis*, uintptr_t slot);
+void machinewireviewuis_redrawvus(MachineWirePaneUis*);
 
-/* MachineWireView */
-typedef struct MachineWireView {
+/* MachineWirePane */
+typedef struct MachineWirePane {
 	/* inherits */
 	psy_ui_Component component;
 	/* internal */
-	MachineWireViewUis machineuis;
-	psy_List* wireframes;
+	MachineWirePaneUis machineuis;
+	WireFrames wireframes;
 	psy_ui_RealPoint dragpt;
 	uintptr_t dragslot;
 	psy_ui_Component* dragmachineui;
@@ -71,19 +73,55 @@ typedef struct MachineWireView {
 	psy_audio_Machines* machines;	
 	Workspace* workspace;		
 	ParamViews* paramviews;
+} MachineWirePane;
+
+void machinewirepane_init(MachineWirePane*, psy_ui_Component* parent,
+	psy_ui_Component* tabbarparent, ParamViews*, Workspace*);
+
+void machinewirepane_center_master(MachineWirePane*);
+void machinewirepane_showvirtualgenerators(MachineWirePane*);
+void machinewirepane_hidevirtualgenerators(MachineWirePane*);
+void machinewirepane_idle(MachineWirePane*);
+
+INLINE psy_ui_Component* machinewirepane_base(MachineWirePane* self)
+{
+	return &self->component;
+}
+
+/* MachineWireView */
+typedef struct MachineWireView {
+	/* inherits */	
+	psy_ui_Scroller scroller;
+	/* internal */
+	MachineWirePane pane;
 } MachineWireView;
 
 void machinewireview_init(MachineWireView*, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, ParamViews*, Workspace*);
 
-void machinewireview_center_master(MachineWireView*);
-void machinewireview_showvirtualgenerators(MachineWireView*);
-void machinewireview_hidevirtualgenerators(MachineWireView*);
-void machinewireview_idle(MachineWireView*);
+INLINE void machinewireview_center_master(MachineWireView* self)
+{
+	machinewirepane_center_master(&self->pane);
+}
+
+INLINE void machinewireview_showvirtualgenerators(MachineWireView* self)
+{
+	machinewirepane_showvirtualgenerators(&self->pane);
+}
+
+INLINE void machinewireview_hidevirtualgenerators(MachineWireView* self)
+{
+	machinewirepane_hidevirtualgenerators(&self->pane);
+}
+
+INLINE void machinewireview_idle(MachineWireView* self)
+{
+	machinewirepane_idle(&self->pane);
+}
 
 INLINE psy_ui_Component* machinewireview_base(MachineWireView* self)
 {
-	return &self->component;
+	return psy_ui_scroller_base(&self->scroller);
 }
 
 #ifdef __cplusplus

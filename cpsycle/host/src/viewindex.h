@@ -60,16 +60,28 @@ typedef struct ViewIndex {
 	uintptr_t seqpos;
 } ViewIndex;
 
-INLINE ViewIndex viewindex_make(uintptr_t id, uintptr_t section,
+INLINE ViewIndex viewindex_make_all(uintptr_t id, uintptr_t section,
 	uintptr_t option, uintptr_t seqpos)
 {
 	ViewIndex rv;
 
 	rv.id = id;
-	rv.section = section;
-	rv.seqpos = seqpos;
+	rv.section = section;	
 	rv.option = option;
+	rv.seqpos = seqpos;
 	return rv;
+}
+
+INLINE ViewIndex viewindex_make(uintptr_t id)
+{
+	return viewindex_make_all(id, psy_INDEX_INVALID, psy_INDEX_INVALID,
+		psy_INDEX_INVALID);
+}
+
+INLINE ViewIndex viewindex_make_section(uintptr_t id, uintptr_t section)
+{
+	return viewindex_make_all(id, section, psy_INDEX_INVALID,
+		psy_INDEX_INVALID);
 }
 
 #ifdef __cplusplus

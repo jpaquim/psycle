@@ -56,6 +56,14 @@ typedef void (*fp_workspace_output)(void* context,
 typedef void (*fp_workspace_songloadprogress)(void* context,
 	struct Workspace* sender, intptr_t progress);
 
+typedef struct MachinesInsert {
+	uintptr_t replace_mac;
+	uintptr_t prev;
+	uintptr_t next;	
+} MachinesInsert;
+
+void machinesinsert_init(MachinesInsert*);
+
 struct ParamViews;
 
 typedef struct Workspace {	
@@ -85,6 +93,7 @@ typedef struct Workspace {
 	psy_Logger* terminal_output;
 	uintptr_t terminalstyleid;
 	FileView* fileview;
+	MachinesInsert insert;
 	int dbg;
 } Workspace;
 

@@ -84,8 +84,10 @@ void contrib_init(Contrib* self, psy_ui_Component* parent)
 		"VST Virtual Studio Technology v2.4 (c)1998-2006 Steinberg");	
 }
 
+
 /* Version */
 
+/* implementation */
 void version_init(Version* self, psy_ui_Component* parent)
 {
 	psy_ui_component_init(version_base(self), parent, NULL);
@@ -99,7 +101,8 @@ void version_init(Version* self, psy_ui_Component* parent)
 	psy_ui_label_set_text(&self->versioninfo, PSYCLE__BUILD__IDENTIFIER("\r\n"));
 }
 
-/* Version */
+
+/* Licence */
 
 /* prototypes */
 static void licence_set_en(Licence*);
@@ -253,10 +256,12 @@ void licence_setlanguage(Licence* self)
 	// psy_ui_editor_gotoline(&self->licenceinfo, 0);
 }
 
+
 /* About */
 
 /* prototypes */
 static void about_init_buttons(About*);
+static void about_init_show_about(About*);
 static void about_on_button(About*, psy_ui_Button* sender);
 static void about_select_infobox(About*, uintptr_t index);
 static void about_on_mouse_doubleclick(About*, psy_ui_MouseEvent*);
@@ -287,8 +292,9 @@ void about_init(About* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_ui_component_init(about_base(self), parent, NULL);	
 	about_vtable_init(self);
 	psy_ui_component_set_style_type(about_base(self), STYLE_ABOUT);
-	self->workspace = workspace;	
-	about_init_buttons(self);
+	self->workspace = workspace;
+	self->next_view = viewindex_make(VIEW_ID_MACHINEVIEW);
+	about_init_buttons(self);	
 	psy_ui_notebook_init(&self->notebook, about_base(self));
 	psy_ui_component_hide(psy_ui_notebook_base(&self->notebook));
 	psy_ui_component_set_preferred_size(psy_ui_notebook_base(&self->notebook),
@@ -299,32 +305,49 @@ void about_init(About* self, psy_ui_Component* parent, Workspace* workspace)
 	version_init(&self->version, psy_ui_notebook_base(&self->notebook));
 	licence_init(&self->licence, psy_ui_notebook_base(&self->notebook));	
 	psy_ui_notebook_select(&self->notebook, 0);
-	psy_signal_connect(&about_base(self)->signal_focus, self, about_on_focus);
+	psy_signal_connect(&about_base(self)->signal_focus, self, about_on_focus);	
 }
 
 void about_init_buttons(About* self)
 {	
 	psy_ui_component_init_align(&self->bottom, &self->component, NULL,
-		psy_ui_ALIGN_BOTTOM);
+		psy_ui_ALIGN_BOTTOM);	
 	psy_ui_component_set_margin(&self->bottom,
 		psy_ui_margin_make(psy_ui_value_zero(), psy_ui_value_zero(),
-			psy_ui_value_make_ph(0.15), psy_ui_value_zero()));
+			psy_ui_value_make_ph(0.15), psy_ui_value_zero()));	
 	psy_ui_component_init_align(&self->buttons, &self->bottom, NULL,
 		psy_ui_ALIGN_CENTER);
-	psy_ui_component_set_default_align(&self->buttons, psy_ui_ALIGN_LEFT,
-		psy_ui_margin_make_em(0.0, 20.0, 0.0, 0.0));			
-	psy_ui_button_init_text_connect(&self->contribbutton, &self->buttons,
+	psy_ui_component_init_align(&self->buttons_row0, &self->buttons,
+		NULL, psy_ui_ALIGN_TOP);
+	psy_ui_component_set_margin(&self->buttons_row0,
+		psy_ui_margin_make_em(0.0, 0.0, 1.3, 0.0));
+	about_init_show_about(self);
+	psy_ui_component_init_align(&self->buttons_row1, &self->buttons,
+		NULL, psy_ui_ALIGN_TOP);	
+	psy_ui_component_set_default_align(&self->buttons_row1, psy_ui_ALIGN_LEFT,
+		psy_ui_margin_make_em(0.0, 20.0, 0.0, 0.0));
+	psy_ui_button_init_text_connect(&self->contribbutton, &self->buttons_row1,
 		"help.contributors-credits", self, about_on_button);
-	psy_ui_button_init_connect(&self->versionbutton, &self->buttons,
+	psy_ui_button_init_connect(&self->versionbutton, &self->buttons_row1,
 		self, about_on_button);
 	psy_ui_button_prevent_translation(&self->versionbutton);
 	psy_ui_button_set_text(&self->versionbutton, PSYCLE__VERSION);
-	psy_ui_button_init_text_connect(&self->licencebutton, &self->buttons,
+	psy_ui_button_init_text_connect(&self->licencebutton, &self->buttons_row1,
 		"help.licence", self, about_on_button);
-	psy_ui_button_init_text_connect(&self->ok_button, &self->buttons,
+	psy_ui_button_init_text_connect(&self->ok_button, &self->buttons_row1,
 		"help.ok", self, about_on_button);
 	psy_ui_component_set_margin(psy_ui_button_base(&self->ok_button),
 		psy_ui_margin_zero());
+}
+
+void about_init_show_about(About* self)
+{	
+	psy_ui_checkbox_init(&self->show_at_start, &self->buttons_row0);
+	psy_ui_checkbox_data_exchange(&self->show_at_start,
+		generalconfig_property(&self->workspace->config.general,
+			"bench.showaboutatstart"));
+	psy_ui_component_set_align(psy_ui_checkbox_base(&self->show_at_start),
+		psy_ui_ALIGN_LEFT);	
 }
 
 void about_on_focus(About* self)
@@ -341,9 +364,7 @@ void about_on_button(About* self, psy_ui_Button* sender)
 	} else if (sender == &self->licencebutton) {
 		about_select_infobox(self, 2);
 	} else {
-		workspace_select_view(self->workspace,
-			viewindex_make(VIEW_ID_MACHINEVIEW,
-			psy_INDEX_INVALID, psy_INDEX_INVALID, psy_INDEX_INVALID));
+		workspace_select_view(self->workspace, self->next_view);
 	}	
 }
 
@@ -362,8 +383,6 @@ void about_select_infobox(About* self, uintptr_t index)
 
 void about_on_mouse_doubleclick(About* self, psy_ui_MouseEvent* ev)
 {
-	workspace_select_view(self->workspace,
-		viewindex_make(VIEW_ID_MACHINEVIEW, psy_INDEX_INVALID,
-			psy_INDEX_INVALID, psy_INDEX_INVALID));
+	workspace_select_view(self->workspace, self->next_view);
 	psy_ui_mouseevent_stop_propagation(ev);
 }

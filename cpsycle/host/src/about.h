@@ -91,13 +91,17 @@ typedef struct About {
 	psy_ui_Notebook notebook;
 	psy_ui_Component bottom;
 	psy_ui_Component buttons;
+	psy_ui_Component buttons_row0;
+	psy_ui_Component buttons_row1;	
+	psy_ui_CheckBox show_at_start;
 	Contrib contrib;
 	Version version;
 	Licence licence;	
 	psy_ui_Button contribbutton;
 	psy_ui_Button versionbutton;
 	psy_ui_Button licencebutton;
-	psy_ui_Button ok_button;
+	psy_ui_Button ok_button;	
+	ViewIndex next_view;
 	/* references */
 	Workspace* workspace;
 } About;

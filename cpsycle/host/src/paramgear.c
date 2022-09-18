@@ -113,15 +113,15 @@ void paramrackbox_on_add_effect(ParamRackBox* self,
 			psy_audio_machines_selectwire(&self->workspace->song->machines,
 				psy_audio_wire_make(self->slot, self->nextbox->slot));
 			workspace_select_view(self->workspace,
-				viewindex_make(VIEW_ID_MACHINEVIEW,
+				viewindex_make_all(VIEW_ID_MACHINEVIEW,
 				SECTION_ID_MACHINEVIEW_NEWMACHINE,
-				psy_audio_MACHINES_INSERT_MODE_ADDEFFECT,
+				psy_INDEX_INVALID, //psy_audio_MACHINES_INSERT_MODE_ADDEFFECT,
 				psy_INDEX_INVALID));
 		} else {
 			workspace_select_view(self->workspace,
-				viewindex_make(VIEW_ID_MACHINEVIEW,
+				viewindex_make_all(VIEW_ID_MACHINEVIEW,
 					SECTION_ID_MACHINEVIEW_NEWMACHINE,
-					psy_audio_MACHINES_INSERT_MODE_APPEND,
+					psy_INDEX_INVALID, //psy_audio_MACHINES_INSERT_MODE_APPEND,
 					psy_INDEX_INVALID));
 		}
 	}

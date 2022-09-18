@@ -217,7 +217,7 @@ void samplesbox_file_select_sample(SamplesBox* self)
 			workspace_conf(self->workspace)))) {
 		fileview_set_callbacks(self->workspace->fileview, &self->sample_load,
 			NULL);		
-		workspace_select_view(self->workspace, viewindex_make(VIEW_ID_FILEVIEW,
+		workspace_select_view(self->workspace, viewindex_make_all(VIEW_ID_FILEVIEW,
 			0, 0, psy_INDEX_INVALID));
 	} else {		
 		psy_ui_OpenDialog dialog;
@@ -239,7 +239,7 @@ void samplesbox_file_select_sample(SamplesBox* self)
 void samplesbox_on_load_sample(SamplesBox* self, psy_Property* sender)
 {	
 	samplesbox_load_sample(self, psy_property_item_str(sender));	
-	workspace_select_view(self->workspace, viewindex_make(VIEW_ID_SAMPLESVIEW,
+	workspace_select_view(self->workspace, viewindex_make_all(VIEW_ID_SAMPLESVIEW,
 		0, 0, psy_INDEX_INVALID));
 }
 

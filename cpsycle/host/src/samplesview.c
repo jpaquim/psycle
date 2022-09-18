@@ -135,7 +135,7 @@ void samplessongimportview_on_load_song_button(SamplesSongImportView* self,
 			workspace_conf(self->workspace)))) {
 		fileview_set_callbacks(self->workspace->fileview,
 			&self->song_load, NULL);
-		workspace_select_view(self->workspace, viewindex_make(
+		workspace_select_view(self->workspace, viewindex_make_all(
 			VIEW_ID_FILEVIEW, 0, 0, psy_INDEX_INVALID));
 	} else {
 		
@@ -158,7 +158,7 @@ void samplessongimportview_on_load(SamplesSongImportView* self,
 	psy_Property* sender)
 {
 	samplessongimportview_load_song(self, psy_property_item_str(sender));
-	workspace_select_view(self->workspace, viewindex_make(VIEW_ID_SAMPLESVIEW,
+	workspace_select_view(self->workspace, viewindex_make_all(VIEW_ID_SAMPLESVIEW,
 		0, 0, psy_INDEX_INVALID));
 }
 
@@ -1263,7 +1263,7 @@ void samplesview_onloadsamplebtn(SamplesView* self, psy_ui_Component* sender)
 			FILEVIEWFILTER_PSY), "IFF");
 		fileview_set_filter(self->workspace->fileview, &types);
 		psy_property_dispose(&types);
-		workspace_select_view(self->workspace, viewindex_make(
+		workspace_select_view(self->workspace, viewindex_make_all(
 			VIEW_ID_FILEVIEW, 0, 0, psy_INDEX_INVALID));
 	} else {		
 		psy_ui_OpenDialog dialog;
@@ -1285,7 +1285,7 @@ void samplesview_onloadsamplebtn(SamplesView* self, psy_ui_Component* sender)
 void samplesview_on_load_sample(SamplesView* self, psy_Property* sender)
 {	
 	samplesview_load_sample(self, psy_property_item_str(sender));	
-	workspace_select_view(self->workspace, viewindex_make(VIEW_ID_SAMPLESVIEW,
+	workspace_select_view(self->workspace, viewindex_make_all(VIEW_ID_SAMPLESVIEW,
 		0, 0, psy_INDEX_INVALID));
 }
 
@@ -1329,7 +1329,7 @@ void samplesview_onsavesamplebtn(SamplesView* self, psy_ui_Component* sender)
 		if (wavebox_sample(&self->wavebox)) {
 			fileview_set_callbacks(self->workspace->fileview, NULL,
 				&self->sample_save);
-			workspace_select_view(self->workspace, viewindex_make(
+			workspace_select_view(self->workspace, viewindex_make_all(
 				VIEW_ID_FILEVIEW, 0, 0, psy_INDEX_INVALID));			
 		}
 	} else {
@@ -1355,7 +1355,7 @@ void samplesview_onsavesamplebtn(SamplesView* self, psy_ui_Component* sender)
 void samplesview_on_save_sample(SamplesView* self, psy_Property* sender)
 {
 	samplesview_save_sample(self, psy_property_item_str(sender));	
-	workspace_select_view(self->workspace, viewindex_make(VIEW_ID_SAMPLESVIEW,
+	workspace_select_view(self->workspace, viewindex_make_all(VIEW_ID_SAMPLESVIEW,
 		0, 0, psy_INDEX_INVALID));
 }
 

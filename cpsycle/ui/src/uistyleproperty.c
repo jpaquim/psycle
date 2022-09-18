@@ -93,13 +93,13 @@ void psy_ui_styles_property_append(psy_Property* parent, psy_ui_Styles* styles)
 		
 		style = (psy_ui_Style*)psy_tableiterator_value(&it);
 		if (psy_strlen(psy_ui_style_name(style)) > 0) {
-			psy_ui_style_property_append(parent, style);
+			psy_ui_style_property_make(parent, style);
 		}
 	}	
 }
 
 /* style */
-void psy_ui_style_property_append(psy_Property* parent, psy_ui_Style* style)
+void psy_ui_style_property_make(psy_Property* parent, psy_ui_Style* style)
 {
 	psy_Property* p;	
 	

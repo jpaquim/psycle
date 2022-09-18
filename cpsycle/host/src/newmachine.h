@@ -208,9 +208,7 @@ void newmachinesectionspane_buildsections(NewMachineSectionsPane*);
 
 typedef struct NewMachine {
 	/* inherits */
-	psy_ui_Component component;
-	/* signals */
-	psy_Signal signal_selected;	
+	psy_ui_Component component;		
 	/* internal */
 	/* ui elements */
 	psy_ui_Notebook notebook;
@@ -236,10 +234,6 @@ typedef struct NewMachine {
 void newmachine_init(NewMachine*, psy_ui_Component* parent, Workspace*);
 
 void newmachine_updateplugins(NewMachine*);
-
-void newmachine_insertmode(NewMachine*);
-void newmachine_appendmode(NewMachine*);
-void newmachine_addeffectmode(NewMachine*);
 
 void newmachine_onpluginselected(NewMachine*, PluginsView* sender);
 void newmachine_onsectionselected(NewMachine*,

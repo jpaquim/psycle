@@ -33,6 +33,17 @@
 #include <unistd.h>
 #endif
 
+/* MachinesInsert */
+
+/* implementation */
+void machinesinsert_init(MachinesInsert* self)
+{	
+	assert(self);
+	
+	self->replace_mac = psy_INDEX_INVALID;
+	self->prev = psy_INDEX_INVALID;
+	self->next = psy_INDEX_INVALID;	
+}
 
 /* prototypes */
 static void workspace_init_views(Workspace*);
@@ -70,7 +81,8 @@ void workspace_init(Workspace* self, psy_ui_Component* main)
 	assert(self);
 	
 	self->dbg = 0;	
-	self->main = main;	
+	self->main = main;
+	machinesinsert_init(&self->insert);
 	workspace_init_views(self);
 	workspace_init_player(self);	
 	workspace_init_song(self);	
@@ -84,7 +96,7 @@ void workspace_init_views(Workspace* self)
 	self->undo_save_point = 0;	
 	self->machines_undo_save_point = 0;	
 	self->terminalstyleid = STYLE_TERM_BUTTON;	
-	self->restoreview = viewindex_make(VIEW_ID_MACHINEVIEW,
+	self->restoreview = viewindex_make_all(VIEW_ID_MACHINEVIEW,
 		SECTION_ID_MACHINEVIEW_WIRES, psy_INDEX_INVALID, psy_INDEX_INVALID);
 	self->modified_without_undo = FALSE;
 	self->paramviews = NULL;
@@ -251,7 +263,7 @@ void workspace_new_song(Workspace* self)
 	psy_audio_player_set_sampler_index(&self->player,
 		seqeditconfig_machine(&self->config.seqedit));	
 	psy_audio_exclusivelock_leave();
-	workspace_select_view(self, viewindex_make(VIEW_ID_MACHINEVIEW, 0,
+	workspace_select_view(self, viewindex_make_all(VIEW_ID_MACHINEVIEW, 0,
 		psy_INDEX_INVALID, 0));
 }
 
@@ -942,29 +954,29 @@ void workspace_on_input(Workspace* self, uintptr_t cmdid)
 	switch (cmdid) {
 	case CMD_IMM_ADDMACHINE:
 		workspace_select_view(self, 
-			viewindex_make(VIEW_ID_MACHINEVIEW,
+			viewindex_make_all(VIEW_ID_MACHINEVIEW,
 			SECTION_ID_MACHINEVIEW_NEWMACHINE,
-			psy_audio_MACHINES_INSERT_MODE_APPEND, 0));
+			psy_INDEX_INVALID, psy_INDEX_INVALID));			
 		break;
 	case CMD_IMM_EDITMACHINE:
 		if (workspace_current_view(self).id != VIEW_ID_MACHINEVIEW) {
-			workspace_select_view(self, viewindex_make(VIEW_ID_MACHINEVIEW,
+			workspace_select_view(self, viewindex_make_all(VIEW_ID_MACHINEVIEW,
 				psy_INDEX_INVALID, psy_INDEX_INVALID, 0));
 		} else {
 			if (workspace_current_view(self).section == SECTION_ID_MACHINEVIEW_WIRES) {
-				workspace_select_view(self, viewindex_make(
+				workspace_select_view(self, viewindex_make_all(
 					VIEW_ID_MACHINEVIEW,
 					SECTION_ID_MACHINEVIEW_STACK,
 					psy_INDEX_INVALID, 0));
 			} else {
 				workspace_select_view(self,
-					viewindex_make(VIEW_ID_MACHINEVIEW,
+					viewindex_make_all(VIEW_ID_MACHINEVIEW,
 					SECTION_ID_MACHINEVIEW_WIRES, psy_INDEX_INVALID, 0));
 			}
 		}
 		break;
 	case CMD_IMM_HELP:
-		workspace_select_view(self, viewindex_make(
+		workspace_select_view(self, viewindex_make_all(
 			VIEW_ID_HELPVIEW, SECTION_ID_HELPVIEW_HELP, 0,
 			psy_INDEX_INVALID));
 		break;
@@ -973,31 +985,31 @@ void workspace_on_input(Workspace* self, uintptr_t cmdid)
 		
 		view = workspace_current_view(self);		
 		if (view.id != VIEW_ID_PATTERNVIEW) {
-			workspace_select_view(self, viewindex_make(
+			workspace_select_view(self, viewindex_make_all(
 				VIEW_ID_PATTERNVIEW, psy_INDEX_INVALID,
 				psy_INDEX_INVALID, 0));
 		} else if (view.section == SECTION_ID_PATTERNVIEW_TRACKER) {				
-			workspace_select_view(self, viewindex_make(
+			workspace_select_view(self, viewindex_make_all(
 				VIEW_ID_PATTERNVIEW, SECTION_ID_PATTERNVIEW_PIANO,
 				psy_INDEX_INVALID, 0));
 		} else {				
-			workspace_select_view(self, viewindex_make(
+			workspace_select_view(self, viewindex_make_all(
 				VIEW_ID_PATTERNVIEW, SECTION_ID_PATTERNVIEW_TRACKER,
 				psy_INDEX_INVALID, 0));		
 		}				
 		break; }
 	case CMD_IMM_EDITINSTR:		
-		workspace_select_view(self, viewindex_make(
+		workspace_select_view(self, viewindex_make_all(
 			VIEW_ID_INSTRUMENTSVIEW, psy_INDEX_INVALID,
 			psy_INDEX_INVALID, psy_INDEX_INVALID));
 		break;
 	case CMD_IMM_EDITSAMPLE:
-		workspace_select_view(self, viewindex_make(
+		workspace_select_view(self, viewindex_make_all(
 			VIEW_ID_SAMPLESVIEW, psy_INDEX_INVALID,
 			psy_INDEX_INVALID, psy_INDEX_INVALID));
 		break;
 	case CMD_IMM_EDITWAVE:
-		workspace_select_view(self, viewindex_make(
+		workspace_select_view(self, viewindex_make_all(
 			VIEW_ID_SAMPLESVIEW, 2, 
 				psy_INDEX_INVALID, psy_INDEX_INVALID));
 		break;
@@ -1016,12 +1028,12 @@ void workspace_on_input(Workspace* self, uintptr_t cmdid)
 			!globalconfig_audio_enabled(&self->config.global));
 		break;
 	case CMD_IMM_SETTINGS:
-		workspace_select_view(self, viewindex_make(VIEW_ID_SETTINGSVIEW, 0, 0, 0));
+		workspace_select_view(self, viewindex_make_all(VIEW_ID_SETTINGSVIEW, 0, 0, 0));
 		break;
 	case CMD_IMM_LOADSONG:
 		if (keyboardmiscconfig_savereminder(&self->config.misc) &&
 				workspace_song_modified(self)) {
-			workspace_select_view(self, viewindex_make(VIEW_ID_CHECKUNSAVED,
+			workspace_select_view(self, viewindex_make_all(VIEW_ID_CHECKUNSAVED,
 				0, CONFIRM_LOAD, psy_INDEX_INVALID));
 		} else {
 			workspace_load_song_fileselect(self);
@@ -1108,39 +1120,39 @@ void workspace_on_input(Workspace* self, uintptr_t cmdid)
 		break;
 	case CMD_IMM_TAB1:
 		workspace_select_view(self,
-			viewindex_make(0, psy_INDEX_INVALID, psy_INDEX_INVALID, psy_INDEX_INVALID));
+			viewindex_make_all(0, psy_INDEX_INVALID, psy_INDEX_INVALID, psy_INDEX_INVALID));
 		break;
 	case CMD_IMM_TAB2:
 		workspace_select_view(self,
-			viewindex_make(1, psy_INDEX_INVALID, psy_INDEX_INVALID, psy_INDEX_INVALID));
+			viewindex_make_all(1, psy_INDEX_INVALID, psy_INDEX_INVALID, psy_INDEX_INVALID));
 		break;
 	case CMD_IMM_TAB3:
 		workspace_select_view(self,
-			viewindex_make(2, psy_INDEX_INVALID, psy_INDEX_INVALID, psy_INDEX_INVALID));
+			viewindex_make_all(2, psy_INDEX_INVALID, psy_INDEX_INVALID, psy_INDEX_INVALID));
 		break;
 	case CMD_IMM_TAB4:
 		workspace_select_view(self,
-			viewindex_make(3, psy_INDEX_INVALID, psy_INDEX_INVALID, psy_INDEX_INVALID));
+			viewindex_make_all(3, psy_INDEX_INVALID, psy_INDEX_INVALID, psy_INDEX_INVALID));
 		break;
 	case CMD_IMM_TAB5:
 		workspace_select_view(self,
-			viewindex_make(4, psy_INDEX_INVALID, psy_INDEX_INVALID, psy_INDEX_INVALID));
+			viewindex_make_all(4, psy_INDEX_INVALID, psy_INDEX_INVALID, psy_INDEX_INVALID));
 		break;
 	case CMD_IMM_TAB6:
 		workspace_select_view(self,
-			viewindex_make(psy_INDEX_INVALID, 0, psy_INDEX_INVALID, psy_INDEX_INVALID));
+			viewindex_make_all(psy_INDEX_INVALID, 0, psy_INDEX_INVALID, psy_INDEX_INVALID));
 		break;
 	case CMD_IMM_TAB7:
 		workspace_select_view(self,
-			viewindex_make(psy_INDEX_INVALID, 1, psy_INDEX_INVALID, psy_INDEX_INVALID));
+			viewindex_make_all(psy_INDEX_INVALID, 1, psy_INDEX_INVALID, psy_INDEX_INVALID));
 		break;
 	case CMD_IMM_TAB8:
 		workspace_select_view(self,
-			viewindex_make(psy_INDEX_INVALID, 2, psy_INDEX_INVALID, psy_INDEX_INVALID));
+			viewindex_make_all(psy_INDEX_INVALID, 2, psy_INDEX_INVALID, psy_INDEX_INVALID));
 		break;
 	case CMD_IMM_TAB9:
 		workspace_select_view(self,
-			viewindex_make(psy_INDEX_INVALID, 3, psy_INDEX_INVALID, psy_INDEX_INVALID));
+			viewindex_make_all(psy_INDEX_INVALID, 3, psy_INDEX_INVALID, psy_INDEX_INVALID));
 		break;
 	default:
 		break;

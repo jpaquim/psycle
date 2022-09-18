@@ -115,7 +115,7 @@ void styleview_on_diskop(StyleView* self, psy_ui_Component* sender)
 	
 	fileview_set_callbacks(self->workspace->fileview,
 		&self->load, &self->save);
-	workspace_select_view(self->workspace, viewindex_make(
+	workspace_select_view(self->workspace, viewindex_make_all(
 		VIEW_ID_FILEVIEW, 0, 0, psy_INDEX_INVALID));			
 }
 
@@ -124,7 +124,7 @@ void styleview_on_load(StyleView* self, psy_Property* sender)
 	assert(self);
 	
 	psy_ui_styles_load(self->styles_property, psy_property_item_str(sender));
-	workspace_select_view(self->workspace, viewindex_make(
+	workspace_select_view(self->workspace, viewindex_make_all(
 		VIEW_ID_STYLEVIEW, 0, 0, psy_INDEX_INVALID));
 }
 
@@ -133,6 +133,6 @@ void styleview_on_save(StyleView* self, psy_Property* sender)
 	assert(self);
 
 	psy_ui_styles_save(self->styles_property, psy_property_item_str(sender));
-	workspace_select_view(self->workspace, viewindex_make(
+	workspace_select_view(self->workspace, viewindex_make_all(
 		VIEW_ID_STYLEVIEW, 0, 0, psy_INDEX_INVALID));
 }

@@ -10,6 +10,7 @@
 #include "machineframe.h"
 #include "machineeditorview.h" /* vst view */
 #include "machineui.h"
+#include "machineviewmenu.h"
 #include "machinestackview.h"
 #include "machinewireview.h"
 #include "machineproperties.h"
@@ -34,9 +35,9 @@ extern "C" {
 ** wiremonitors. Composite of Wire-/Stackview and Newmachine.
 **
 ** MachineStackPane: displays stacks of the machines starting with their leafs
-** MachineWireView:  displays and edits machines with their wires
+** MachineWirePane:  displays and edits machines with their wires
 ** NewMachine:       displays available machines to select the new machine
-** MachineView:      tabbed view with MachineStack-/MachineWireView and
+** MachineView:      tabbed view with MachineStack-/MachineWirePane and
 **                   NewMachine
 ** MachineViewBar:   Statusbar that displays actions in the wireview and adds
 **                   a selector for the mixer, if new wires are added to the
@@ -55,10 +56,10 @@ typedef struct MachineView {
 	psy_ui_TabBar tabbar;
 	MachineProperties properties;
 	psy_ui_Notebook notebook;	
-	MachineWireView wireview;
-	psy_ui_Scroller scroller;
-	MachineStackView stackview;	
-	NewMachine newmachine;	
+	MachineWireView wireview;	
+	MachineStackView stackview;
+	NewMachine newmachine;
+	MachineMenu machine_menu;
 	bool shownewmachine;	
 	/* references */
 	Workspace* workspace;	
