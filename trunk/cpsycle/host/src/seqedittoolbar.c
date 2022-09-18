@@ -297,7 +297,7 @@ void seqeditortoolbar_onsamplerindexchange(SeqEditToolBar* self,
 void seqeditortoolbar_onconfigure(SeqEditToolBar* self, psy_ui_Button* sender)
 {
 	workspace_select_view(self->state->workspace,
-		viewindex_make(VIEW_ID_SETTINGSVIEW, 11, 0, psy_INDEX_INVALID));
+		viewindex_make_all(VIEW_ID_SETTINGSVIEW, 11, 0, psy_INDEX_INVALID));
 }
 
 psy_audio_SequenceSampleEntry* seqeditortoolbar_sampleentry(SeqEditToolBar* self)

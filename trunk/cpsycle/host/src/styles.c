@@ -841,6 +841,13 @@ void init_host_styles(psy_ui_Styles* self, psy_ui_ThemeMode theme)
 	psy_ui_styles_set_style(self, STYLE_FILEVIEW_OPTIONS,
 		"fileview_options", style);
 	
+	style = psy_ui_style_allocinit();		
+	// psy_ui_border_init_top(&style->border, psy_ui_BORDER_SOLID,
+	//	material.surface_overlay_12p);
+	// psy_ui_style_set_margin_em(style, 1.6, 0.0, 1.6, 0.0);
+	psy_ui_style_set_size(style, psy_ui_size_make_em(0.0, 0.1));
+	psy_ui_styles_set_style(self, STYLE_SEPARATOR, "separator", style);
+	
 	init_envelope_styles(self);
 	init_psycletheme_styles(self);
 }

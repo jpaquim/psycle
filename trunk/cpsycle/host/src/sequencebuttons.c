@@ -221,7 +221,7 @@ void sequencebuttons_onclear(SequenceButtons* self, psy_ui_Button* sender)
 {
 	if (workspace_song(self->cmds->workspace)) {
 		workspace_select_view(self->cmds->workspace,
-			viewindex_make(
+			viewindex_make_all(
 				VIEW_ID_CHECKUNSAVED, 0,
 				CONFIRM_SEQUENCECLEAR,
 				psy_INDEX_INVALID));

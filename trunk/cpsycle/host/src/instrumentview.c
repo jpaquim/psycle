@@ -765,7 +765,7 @@ void instrumentview_on_load_instrument_button(InstrumentView* self,
 			workspace_conf(self->workspace)))) {
 		fileview_set_callbacks(self->workspace->fileview,
 			&self->instrument_load, NULL);		
-		workspace_select_view(self->workspace, viewindex_make(
+		workspace_select_view(self->workspace, viewindex_make_all(
 			VIEW_ID_FILEVIEW, 0, 0, psy_INDEX_INVALID));
 	} else {				
 		psy_ui_OpenDialog dialog;				
@@ -786,7 +786,7 @@ void instrumentview_on_load_instrument(InstrumentView* self,
 	psy_Property* sender)
 {
 	instrumentview_load_instrument(self, psy_property_item_str(sender));	
-	workspace_select_view(self->workspace, viewindex_make(
+	workspace_select_view(self->workspace, viewindex_make_all(
 		VIEW_ID_INSTRUMENTSVIEW, 0, 0, psy_INDEX_INVALID));
 }
 
@@ -829,7 +829,7 @@ void instrumentview_on_save_instrument_button(InstrumentView* self,
 			workspace_conf(self->workspace)))) {
 		fileview_set_callbacks(self->workspace->fileview,
 			NULL, &self->instrument_save);		
-		workspace_select_view(self->workspace, viewindex_make(
+		workspace_select_view(self->workspace, viewindex_make_all(
 			VIEW_ID_FILEVIEW, 0, 0, psy_INDEX_INVALID));
 	} else {	
 		psy_ui_SaveDialog dialog;		
@@ -865,7 +865,7 @@ void instrumentview_on_save_instrument(InstrumentView* self,
 			instrument);	
 		}
 	}
-	workspace_select_view(self->workspace, viewindex_make(
+	workspace_select_view(self->workspace, viewindex_make_all(
 		VIEW_ID_INSTRUMENTSVIEW, 0, 0, psy_INDEX_INVALID));
 }
 

@@ -18,22 +18,6 @@
 #include "../../detail/trace.h"
 
 
-/* psy_audio_MachinesInsert */
-
-/* implementation */
-void psy_audio_machinesinsert_init(psy_audio_MachinesInsert* self)
-{	
-	assert(self);
-	
-	self->mode = psy_audio_MACHINES_INSERT_MODE_APPEND;
-	self->prev = psy_INDEX_INVALID;
-	self->next = psy_INDEX_INVALID;
-	self->appendstack = FALSE;
-	self->addeffect = FALSE;
-}
-
-/* psy_audio_Machines */
-
 /* prototypes */
 static void machines_initsignals(psy_audio_Machines*);
 static void machines_disposesignals(psy_audio_Machines*);
@@ -53,7 +37,8 @@ static uintptr_t machines_findmaxindex(psy_audio_Machines*);
 static void compute_leafs(psy_audio_Machines*, uintptr_t slot,
 	psy_List** leafs);
 static void machines_tracepath(const char* text, psy_List* path);
-// implementation
+
+/* implementation */
 void psy_audio_machines_init(psy_audio_Machines* self)
 {
 	assert(self);
@@ -82,8 +67,7 @@ void psy_audio_machines_init(psy_audio_Machines* self)
 	self->preventundoredo = FALSE;
 	psy_audio_wire_init(&self->selectedwire);
 	psy_undoredo_init(&self->undoredo);
-	machines_initsignals(self);
-	psy_audio_machinesinsert_init(&self->insert);
+	machines_initsignals(self);	
 }
 
 void machines_initsignals(psy_audio_Machines* self)

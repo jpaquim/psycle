@@ -580,7 +580,7 @@ void machinestackstate_init(MachineStackState* self, ParamViews* paramviews)
 	self->preventrebuild = FALSE;
 	self->rewire = FALSE;
 	self->paramviews = paramviews;
-	self->insertmachinemode = psy_audio_MACHINES_INSERT_MODE_APPEND;
+	// self->insertmachinemode = psy_audio_MACHINES_INSERT_MODE_APPEND;
 	psy_audio_wire_init(&self->oldwire);
 	psy_audio_wire_init(&self->newwire);
 }
@@ -910,7 +910,7 @@ void machinestackdesc_configureeffects(MachineStackDesc* self,
 	psy_ui_Button* sender)
 {
 	workspace_select_view(self->view->workspace,
-		viewindex_make(VIEW_ID_SETTINGSVIEW, 2, 1, psy_INDEX_INVALID));
+		viewindex_make_all(VIEW_ID_SETTINGSVIEW, 2, 1, psy_INDEX_INVALID));
 }
 
 /* MachineStackInputs */
@@ -1015,7 +1015,7 @@ void machinestackinputs_onmouseenter(MachineStackInputs* self)
 void machinestackinputs_onmousedoubleclick(MachineStackInputs* self,
 	psy_ui_MouseEvent* ev)
 {
-	self->state->insertmachinemode = psy_audio_MACHINES_INSERT_MODE_APPENDSTACK;	
+	// self->state->insertmachinemode = psy_audio_MACHINES_INSERT_MODE_APPENDSTACK;	
 }
 
 
@@ -1206,7 +1206,7 @@ void machinestackpanetrack_onmousedoubleclick(MachineStackPaneTrack* self,
 	MachineStackColumn* column;	
 
 	self->state->columnselected = TRUE;	
-	self->state->insertmachinemode = psy_audio_MACHINES_INSERT_MODE_ADDEFFECTSTACK;	
+	// self->state->insertmachinemode = psy_audio_MACHINES_INSERT_MODE_ADDEFFECTSTACK;	
 	column = machinestackstate_column(self->state, self->column);	
 	if (column && column->chain) {
 		psy_List* p;

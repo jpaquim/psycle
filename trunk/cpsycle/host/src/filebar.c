@@ -98,7 +98,7 @@ void filebar_onnewsong(FileBar* self, psy_ui_Component* sender)
 	if (keyboardmiscconfig_savereminder(&self->workspace->config.misc) &&
 			workspace_song_modified(self->workspace)) {
 		workspace_select_view(self->workspace,
-			viewindex_make(VIEW_ID_CHECKUNSAVED, 0,
+			viewindex_make_all(VIEW_ID_CHECKUNSAVED, 0,
 			CONFIRM_NEW, psy_INDEX_INVALID));
 	} else {
 		workspace_new_song(self->workspace);
@@ -117,7 +117,7 @@ void filebar_onloadsong(FileBar* self, psy_ui_Component* sender)
 		if (keyboardmiscconfig_savereminder(&self->workspace->config.misc) &&
 			workspace_song_modified(self->workspace)) {
 			workspace_select_view(self->workspace,
-				viewindex_make(VIEW_ID_CHECKUNSAVED, 0,
+				viewindex_make_all(VIEW_ID_CHECKUNSAVED, 0,
 				CONFIRM_LOAD, psy_INDEX_INVALID));
 		} else {
 			workspace_load_song_fileselect(self->workspace);

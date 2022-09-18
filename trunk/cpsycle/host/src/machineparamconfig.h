@@ -29,9 +29,8 @@ enum {
 struct DirConfig;
 
 typedef struct MachineParamConfig {
-    /* signals */
-	psy_Signal signal_changed;
-	psy_Signal signal_themechanged;
+    /* signals */	
+	// psy_Signal signal_themechanged;
     /* internal */
 	psy_Property* paramview;
 	psy_Property* theme;	
@@ -47,10 +46,6 @@ void machineparamconfig_setdirectories(MachineParamConfig*, struct DirConfig*);
 void machineparamconfig_resettheme(MachineParamConfig*);
 void machineparamconfig_settheme(MachineParamConfig*, psy_Property* theme);
 void machineparamconfig_update_styles(MachineParamConfig*);
-
-bool machineparamconfig_hasthemeproperty(const MachineParamConfig*,
-	psy_Property*);
-bool machineparamconfig_hasproperty(const MachineParamConfig*, psy_Property*);
 
 const char* machineparamconfig_dialbpm(const MachineParamConfig*);
 void machineparamconfig_set_dial_bpm(MachineParamConfig*, const char* filename);

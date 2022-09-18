@@ -256,7 +256,8 @@ typedef enum {
 	STYLE_FILEVIEW_LINKS = 374500,
 	STYLE_FILEVIEW_BUTTONS = 374510,
 	STYLE_FILEVIEW_OPTIONS = 374520,
-	STYLE_GEAR = 374540
+	STYLE_GEAR = 374540,
+	STYLE_SEPARATOR = 374560
 } HostStyles;
 
 void init_host_styles(psy_ui_Styles*, psy_ui_ThemeMode);

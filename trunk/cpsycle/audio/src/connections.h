@@ -167,6 +167,8 @@ INLINE void psy_audio_wire_init_all(psy_audio_Wire* self, uintptr_t src,
 {
 	self->src = src;
 	self->dst = dst;
+	self->src_id = psy_INDEX_INVALID;
+	self->dst_id = psy_INDEX_INVALID;
 }
 
 psy_audio_Wire psy_audio_wire_make(uintptr_t src, uintptr_t dst);

@@ -573,12 +573,12 @@ void midimonitor_updatechannelmap(MidiMonitor* self)
 void midimonitor_onconfigure(MidiMonitor* self)
 {	
 	workspace_select_view(self->workspace,
-		viewindex_make(VIEW_ID_SETTINGSVIEW, 6, 0, psy_INDEX_INVALID));
+		viewindex_make_all(VIEW_ID_SETTINGSVIEW, 6, 0, psy_INDEX_INVALID));
 }
 
 void midimonitor_onmapconfigure(MidiMonitor* self)
 {
-	workspace_select_view(self->workspace, viewindex_make(
+	workspace_select_view(self->workspace, viewindex_make_all(
 		VIEW_ID_SETTINGSVIEW, 7, 0, psy_INDEX_INVALID));
 }
 

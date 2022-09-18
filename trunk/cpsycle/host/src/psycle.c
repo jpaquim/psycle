@@ -39,7 +39,8 @@ int psycle_run(uintptr_t instance, int options)
 			psy_ui_component_showmaximized(mainframe_base(mainframe));
 		} else {
 			psy_ui_component_showstate(mainframe_base(mainframe), options);
-		}		
+		}
+		mainframe->machineview.wireview.pane.centermaster = TRUE;
 		err = psy_ui_app_run(&app); /* event loop start */
 	}	
 	psy_ui_app_dispose(&app); /* clean up */
