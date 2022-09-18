@@ -327,8 +327,11 @@ bool psy_audio_machines_valid_connection(psy_audio_Machines* self, psy_audio_Wir
 
 	assert(self);
 
+	if (wire.src == wire.dst) {
+		return FALSE;
+	}
 	src = psy_audio_machines_at(self, wire.src);
-	dst = psy_audio_machines_at(self, wire.dst);
+	dst = psy_audio_machines_at(self, wire.dst);	
 	if (src && dst) {
 		return (psy_audio_machine_numoutputs(src) > 0 &&
 			psy_audio_machine_numinputs(dst) > 0);

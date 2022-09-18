@@ -44,18 +44,6 @@ static void machineview_on_vu_meters(MachineView*, psy_Property* sender);
 static void machineview_on_machine_index(MachineView*, psy_Property* sender);
 static void machineview_on_machine_properties(MachineView*,
 	psy_ui_Component* sender);
-static void machineview_on_open_parameters(MachineView*,
-	psy_ui_Component* sender);
-static void machineview_on_machine_clone(MachineView* self,
-	psy_ui_Component* sender);
-static void machineview_on_machine_delete(MachineView* self,
-	psy_ui_Component* sender);
-static void machineview_on_machine_mute(MachineView* self,
-	psy_ui_Component* sender);
-static void machineview_on_machine_bypass(MachineView* self,
-	psy_ui_Component* sender);
-static void machineview_on_machine_solo(MachineView* self,
-	psy_ui_Component* sender);
 
 /* vtable */
 static psy_ui_ComponentVtable machineview_vtable;
@@ -154,7 +142,8 @@ void machineview_init_wire_view(MachineView* self,
 	
 	machinewireview_init(&self->wireview,
 		psy_ui_notebook_base(&self->notebook), tabbarparent,
-		self->workspace->paramviews, self->workspace);	
+		self->workspace->paramviews, &self->machine_menu,
+		self->workspace);	
 	psy_ui_component_set_align(machinewireview_base(&self->wireview),
 		psy_ui_ALIGN_CLIENT);
 	self->machine_menu.state.wireframes = &self->wireview.pane.wireframes;
@@ -218,19 +207,7 @@ void machineview_connect_signals(MachineView* self)
 	machineviewconfig_connect(&self->workspace->config.visual.macview,
 		"drawmachineindexes", self, machineview_on_machine_index);
 	psy_signal_connect(&self->machine_menu.properties.signal_clicked,
-		self, machineview_on_machine_properties);
-	psy_signal_connect(&self->machine_menu.parameters.signal_clicked,
-		self, machineview_on_open_parameters);
-	psy_signal_connect(&self->machine_menu.clone.signal_clicked,
-		self, machineview_on_machine_clone);
-	psy_signal_connect(&self->machine_menu.del.signal_clicked,
-		self, machineview_on_machine_delete);
-	psy_signal_connect(&self->machine_menu.mute.signal_clicked,
-		self, machineview_on_machine_mute);
-	psy_signal_connect(&self->machine_menu.bypass.signal_clicked,
-		self, machineview_on_machine_bypass);
-	psy_signal_connect(&self->machine_menu.solo.signal_clicked,
-		self, machineview_on_machine_solo);
+		self, machineview_on_machine_properties);	
 }
 
 void machineview_on_mouse_double_click(MachineView* self, psy_ui_MouseEvent* ev)
@@ -289,10 +266,6 @@ void machineview_on_mouse_up(MachineView* self, psy_ui_MouseEvent* ev)
 				SECTION_ID_MACHINEVIEW_NEWMACHINE) {
 			psy_ui_tabbar_select(&self->tabbar,
 				self->newmachine.restoresection);
-		} else {		
-			psy_ui_component_toggle_visibility(
-				&self->machine_menu.component);
-				// machineproperties_base(&self->properties));
 		}
 	}
 }
@@ -417,113 +390,4 @@ void machineview_on_machine_properties(MachineView* self,
 	assert(self);
 	
 	psy_ui_component_toggle_visibility(&self->properties.component);
-}
-
-void machineview_on_open_parameters(MachineView* self,
-	psy_ui_Component* sender)
-{
-	assert(self);
-	
-	if (self->workspace->paramviews && self->workspace->song) {
-		paramviews_show(self->workspace->paramviews,
-			psy_audio_machines_selected(&self->workspace->song->machines));
-	}
-}
-
-void machineview_on_machine_mute(MachineView* self, psy_ui_Component* sender)
-{
-	assert(self);
-	
-	if (workspace_song(self->workspace)) {
-		psy_audio_Machines* machines;
-		uintptr_t mac_id;
-		
-		machines = psy_audio_song_machines(workspace_song(self->workspace));
-		mac_id = psy_audio_machines_selected(machines);
-		if (mac_id != psy_INDEX_INVALID) {
-			psy_audio_Machine* machine;
-			
-			machine = psy_audio_machines_at(machines, mac_id);
-			if (machine) {			
-				if (psy_audio_machine_muted(machine)) {
-					psy_audio_machine_unmute(machine);
-				} else {
-					psy_audio_machine_mute(machine);
-				}
-			}
-		}		
-	}
-}
-
-void machineview_on_machine_clone(MachineView* self, psy_ui_Component* sender)
-{
-	assert(self);
-	
-	if (workspace_song(self->workspace)) {
-		psy_audio_Machines* machines;
-		uintptr_t mac_id;
-		
-		machines = psy_audio_song_machines(workspace_song(self->workspace));
-		mac_id = psy_audio_machines_selected(machines);
-		if (mac_id != psy_INDEX_INVALID) {
-			/* todo */
-		}		
-	}	
-}
-
-void machineview_on_machine_delete(MachineView* self, psy_ui_Component* sender)
-{
-	assert(self);
-	
-	if (workspace_song(self->workspace)) {
-		psy_audio_Machines* machines;
-		uintptr_t mac_id;
-		
-		machines = psy_audio_song_machines(workspace_song(self->workspace));
-		mac_id = psy_audio_machines_selected(machines);
-		if (mac_id != psy_INDEX_INVALID) {
-			psy_audio_machines_remove(machines, mac_id, TRUE);
-		}		
-	}	
-}
-
-void machineview_on_machine_bypass(MachineView* self, psy_ui_Component* sender)
-{
-	assert(self);
-	
-	if (workspace_song(self->workspace)) {
-		psy_audio_Machines* machines;
-		uintptr_t mac_id;
-		
-		machines = psy_audio_song_machines(workspace_song(self->workspace));
-		mac_id = psy_audio_machines_selected(machines);
-		if (mac_id != psy_INDEX_INVALID) {
-			psy_audio_Machine* machine;
-			
-			machine = psy_audio_machines_at(machines, mac_id);
-			if (machine) {			
-				if (psy_audio_machine_bypassed(machine)) {
-					psy_audio_machine_bypass(machine);
-				} else {
-					psy_audio_machine_bypass(machine);
-				}
-			}
-		}		
-	}
-}
-
-void machineview_on_machine_solo(MachineView* self, psy_ui_Component* sender)
-{
-	assert(self);
-	
-	if (workspace_song(self->workspace)) {
-		psy_audio_Machines* machines;
-		uintptr_t mac_id;
-		
-		machines = psy_audio_song_machines(workspace_song(self->workspace));
-		mac_id = psy_audio_machines_selected(machines);
-		if (mac_id != psy_INDEX_INVALID) {
-			psy_audio_machines_solo(machines, mac_id);			
-		}		
-	}
 }

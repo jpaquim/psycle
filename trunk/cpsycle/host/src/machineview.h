@@ -10,7 +10,6 @@
 #include "machineframe.h"
 #include "machineeditorview.h" /* vst view */
 #include "machineui.h"
-#include "machineviewmenu.h"
 #include "machinestackview.h"
 #include "machinewireview.h"
 #include "machineproperties.h"
@@ -60,7 +59,7 @@ typedef struct MachineView {
 	MachineStackView stackview;
 	NewMachine newmachine;
 	MachineMenu machine_menu;
-	bool shownewmachine;	
+	bool shownewmachine;
 	/* references */
 	Workspace* workspace;	
 } MachineView;

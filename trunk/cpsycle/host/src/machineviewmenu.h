@@ -25,7 +25,14 @@ struct WireFrames;
 typedef struct MachineMenuState {
 	psy_audio_Machines* machines;
 	struct WireFrames* wireframes;
+	uintptr_t mac_id;
+	psy_ui_Component* menu;
 } MachineMenuState;
+
+void machinemenustate_init(MachineMenuState*, struct WireFrames*,
+	psy_ui_Component* menu);
+	
+void machinemenustate_hide_menu(MachineMenuState*);
 
 typedef struct MachineConnectionsMenu {
 	/* inherits */
@@ -54,6 +61,7 @@ typedef struct MachineMenu {
 	psy_ui_Component component;
 	/* internal */
 	psy_ui_Component pane;
+	psy_ui_Label machine;
 	psy_ui_Button parameters;
 	psy_ui_Button properties;
 	psy_ui_Button bank;
@@ -79,6 +87,8 @@ void machinemenu_init(MachineMenu*, psy_ui_Component* parent,
 	struct WireFrames*);
 
 void machinemenu_set_machines(MachineMenu*, psy_audio_Machines*);
+void machinemenu_select(MachineMenu*, uintptr_t mac_id);
+void machinemenu_hide(MachineMenu*);
 
 INLINE psy_ui_Component* machinemenu_base(MachineMenu* self)
 {
