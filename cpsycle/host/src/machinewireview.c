@@ -199,7 +199,7 @@ static void vtable_init(MachineWirePane* self)
 /* implementation */
 void machinewirepane_init(MachineWirePane* self, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, ParamViews* paramviews,
-	Workspace* workspace)
+	MachineMenu* machine_menu, Workspace* workspace)
 {
 	assert(self);
 	
@@ -214,11 +214,12 @@ void machinewirepane_init(MachineWirePane* self, psy_ui_Component* parent,
 	self->machines = NULL;
 	self->paramviews = paramviews;
 	self->workspace = workspace;
-	self->machines = &workspace->song->machines;	
+	self->machines = &workspace->song->machines;
+	self->machine_menu = machine_menu;
 	wireframes_init(&self->wireframes, self->workspace, &self->component);	
 	self->randominsert = 1;	
 	self->showwirehover = FALSE;
-	self->drawvirtualgenerators = FALSE;	
+	self->drawvirtualgenerators = FALSE;
 	self->dragslot = psy_INDEX_INVALID;
 	self->dragmode = MACHINEVIEW_DRAG_MACHINE;
 	self->selectedslot = psy_audio_MASTER_INDEX;
@@ -728,54 +729,6 @@ bool machinewirepane_drag_machine(MachineWirePane* self, uintptr_t slot,
 		return TRUE;
 	}
 	return FALSE;
-/* multidrag
-	psy_List* p;
-	bool drag;
-	double dx;
-	double dy;
-	psy_ui_Component* machineui;
-	
-	assert(self);
-	
-	drag = FALSE;
-	
-	machineui = (psy_ui_Component*)machinewireviewuis_at(&self->machineuis,
-		slot);
-	dx = dy = 0.0;
-	if (machineui) {
-		dx = x - psy_ui_component_position(machineui).left;
-		dy = y - psy_ui_component_position(machineui).top;
-	}	
-	for (p = self->machines->selection.entries; p != NULL; p = p->next) {
-		psy_audio_MachineIndex* index;		
-
-		index = (psy_audio_MachineIndex*)p->entry;
-		machineui = (psy_ui_Component*)machinewireviewuis_at(&self->machineuis,
-			index->macid);
-		// machineui = machinewireviewuis_at(&self->machineuis, index->macid);
-		if (machineui) {		
-			psy_ui_RealRectangle r_old;
-			psy_ui_RealRectangle r_new;
-			double x, y;
-		
-			x = psy_ui_component_position(machineui).left + dx,
-			y = psy_ui_component_position(machineui).top + dy;
-			r_old = machinewirepane_update_rect(self, index->macid);
-			psy_ui_realrectangle_expand_all(&r_old,
-				PSYCLE_MACHINE_BORDER_DISTANCE);		
-			psy_ui_component_move(machineui, psy_ui_point_make_px(
-				psy_max(0.0, x), psy_max(0.0, y)));
-			machinewirepane_setdragstatus(self, index->macid);		
-			r_new = machinewirepane_update_rect(self, index->macid);
-			psy_ui_realrectangle_union(&r_new, &r_old);
-			psy_ui_realrectangle_expand_all(&r_new,
-				PSYCLE_MACHINE_BORDER_DISTANCE);
-			psy_ui_component_invalidate_rect(&self->component, r_new);		
-			drag = TRUE;
-		}
-	}
-	return drag;
-*/
 }
 
 void machinewirepane_setdragstatus(MachineWirePane* self, uintptr_t slot)
@@ -831,7 +784,7 @@ void machinewirepane_on_mouse_up(MachineWirePane* self, psy_ui_MouseEvent* ev)
 						if (psy_audio_machines_valid_connection(self->machines,
 							psy_audio_wire_make(slot, self->dragslot))) {
 							psy_audio_machines_connect(self->machines,
-								psy_audio_wire_make(slot, self->dragslot));							
+								psy_audio_wire_make(slot, self->dragslot));
 						}
 					} else if (psy_audio_machines_valid_connection(
 						self->machines, psy_audio_wire_make(self->dragslot,
@@ -841,13 +794,17 @@ void machinewirepane_on_mouse_up(MachineWirePane* self, psy_ui_MouseEvent* ev)
 					}
 				}
 				psy_ui_mouseevent_stop_propagation(ev);
-			} else if (psy_ui_mouseevent_button(ev) == 2) {
-				/* if (!self->workspace->gearvisible) {
-
-					workspace_toggle_gear(self->workspace);					
-				}
-				psy_ui_mouseevent_stop_propagation(ev); */
+			} else if (psy_ui_mouseevent_button(ev) == 2) {	
+				machinemenu_select(self->machine_menu, self->dragslot);			
+				psy_ui_component_toggle_visibility(
+					&self->machine_menu->component);
+				psy_ui_mouseevent_stop_propagation(ev);
 			}			
+		}
+	} else {		 
+		if (psy_ui_component_visible(&self->machine_menu->component)) {
+			machinemenu_hide(self->machine_menu);
+			psy_ui_mouseevent_stop_propagation(ev);
 		}
 	}
 	self->dragslot = psy_INDEX_INVALID;
@@ -1245,7 +1202,8 @@ void machinewirepane_on_virtual_generators(MachineWirePane* self,
 
 /* implementation */
 void machinewireview_init(MachineWireView* self, psy_ui_Component* parent,
-	psy_ui_Component* tabbarparent, ParamViews* paramviews, Workspace* workspace)
+	psy_ui_Component* tabbarparent, ParamViews* paramviews,
+	MachineMenu* machine_menu, Workspace* workspace)
 {
 	assert(self);
 		
@@ -1253,7 +1211,7 @@ void machinewireview_init(MachineWireView* self, psy_ui_Component* parent,
 	psy_ui_component_set_id(machinewireview_base(self),
 		SECTION_ID_MACHINEVIEW_WIRES);
 	machinewirepane_init(&self->pane, machinewireview_base(self),
-		tabbarparent, workspace->paramviews, workspace);
+		tabbarparent, workspace->paramviews, machine_menu, workspace);
 	psy_ui_scroller_set_client(&self->scroller,
 		machinewirepane_base(&self->pane));	
 	psy_ui_component_set_align(machinewirepane_base(&self->pane),

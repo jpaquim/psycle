@@ -10,6 +10,7 @@
 #include "machineframe.h"
 #include "machineeditorview.h" /* vst view */
 #include "machineui.h"
+#include "machineviewmenu.h"
 #include "machinestackview.h"
 #include "newmachine.h"
 #include "paramview.h"
@@ -73,10 +74,12 @@ typedef struct MachineWirePane {
 	psy_audio_Machines* machines;	
 	Workspace* workspace;		
 	ParamViews* paramviews;
+	MachineMenu* machine_menu;
 } MachineWirePane;
 
 void machinewirepane_init(MachineWirePane*, psy_ui_Component* parent,
-	psy_ui_Component* tabbarparent, ParamViews*, Workspace*);
+	psy_ui_Component* tabbarparent, ParamViews*, MachineMenu*,
+	Workspace*);
 
 void machinewirepane_center_master(MachineWirePane*);
 void machinewirepane_showvirtualgenerators(MachineWirePane*);
@@ -97,7 +100,7 @@ typedef struct MachineWireView {
 } MachineWireView;
 
 void machinewireview_init(MachineWireView*, psy_ui_Component* parent,
-	psy_ui_Component* tabbarparent, ParamViews*, Workspace*);
+	psy_ui_Component* tabbarparent, ParamViews*, MachineMenu*, Workspace*);
 
 INLINE void machinewireview_center_master(MachineWireView* self)
 {
