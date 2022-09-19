@@ -33,6 +33,7 @@
 #include <unistd.h>
 #endif
 
+
 /* MachinesInsert */
 
 /* implementation */
@@ -40,10 +41,34 @@ void machinesinsert_init(MachinesInsert* self)
 {	
 	assert(self);
 	
-	self->replace_mac = psy_INDEX_INVALID;
-	self->prev = psy_INDEX_INVALID;
-	self->next = psy_INDEX_INVALID;	
+	machineinsert_reset(self);
+	self->random_position = TRUE;
 }
+
+void machineinsert_reset(MachinesInsert* self)
+{
+	self->replace_mac = psy_INDEX_INVALID;
+	self->wire = psy_audio_wire_zero();	
+}
+
+void machineinsert_append(MachinesInsert* self, psy_audio_Wire wire)
+{
+	assert(self);
+	
+	self->replace_mac = psy_INDEX_INVALID;
+	self->wire = wire;
+}
+
+void machineinsert_replace(MachinesInsert* self, uintptr_t replace_mac)
+{
+	assert(self);
+	
+	self->replace_mac = replace_mac;
+	self->wire = psy_audio_wire_zero();
+}
+
+
+/* Workspace */
 
 /* prototypes */
 static void workspace_init_views(Workspace*);

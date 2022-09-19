@@ -478,6 +478,19 @@ void make_translator_default(psy_Dictionary* dict)
 	psy_dictionary_set(dict, "machineview.editname", "Editname");
 	psy_dictionary_set(dict, "machineview.mute", "Mute");
 	psy_dictionary_set(dict, "machineview.pwr", "Pwr");
+	/* machinemenu */
+	psy_dictionary_set(dict, "mvmenu.parameters", "Open parameters");		
+	psy_dictionary_set(dict, "mvmenu.bank", "Open bank manager");	
+	psy_dictionary_set(dict, "mvmenu.connect", "Connect to");	
+	psy_dictionary_set(dict, "mvmenu.connections", "Connections");	
+	psy_dictionary_set(dict, "mvmenu.replace", "Replace machine");	
+	psy_dictionary_set(dict, "mvmenu.clone", "Clone machine");	
+	psy_dictionary_set(dict, "mvmenu.insertbefore", "Insert effect before");	
+	psy_dictionary_set(dict, "mvmenu.insertafter", "Insert effect after");	
+	psy_dictionary_set(dict, "mvmenu.delete", "Delete machine");	
+	psy_dictionary_set(dict, "mvmenu.mute", "Mute");	
+	psy_dictionary_set(dict, "mvmenu.solo", "Solo");	
+	psy_dictionary_set(dict, "mvmenu.bypass", "Bypass");
 	/* stackview */
 	psy_dictionary_set(dict, "stackview.inputs", "Inputs");
 	psy_dictionary_set(dict, "stackview.effects", "Effects");

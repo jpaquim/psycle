@@ -56,13 +56,22 @@ typedef void (*fp_workspace_output)(void* context,
 typedef void (*fp_workspace_songloadprogress)(void* context,
 	struct Workspace* sender, intptr_t progress);
 
+/* MachinesInsert */
+
 typedef struct MachinesInsert {
 	uintptr_t replace_mac;
-	uintptr_t prev;
-	uintptr_t next;	
+	psy_audio_Wire wire;
+	bool random_position;
 } MachinesInsert;
 
 void machinesinsert_init(MachinesInsert*);
+
+void machineinsert_reset(MachinesInsert*);
+void machineinsert_append(MachinesInsert*, psy_audio_Wire);
+void machineinsert_replace(MachinesInsert*, uintptr_t replace_mac);
+
+
+/* Workspace */
 
 struct ParamViews;
 

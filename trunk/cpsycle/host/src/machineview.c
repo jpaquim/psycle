@@ -15,7 +15,6 @@
 
 /* prototypes */
 static void machineview_init_component(MachineView*, psy_ui_Component* parent);
-static void machineview_init_properties_view(MachineView*);
 static void machineview_init_notebook(MachineView*,
 	psy_ui_Component* tabbarparent);
 static void machineview_init_wire_view(MachineView*,
@@ -42,8 +41,7 @@ static void machineview_select_section(MachineView*, psy_ui_Component* sender,
 	uintptr_t section, uintptr_t options);
 static void machineview_on_vu_meters(MachineView*, psy_Property* sender);
 static void machineview_on_machine_index(MachineView*, psy_Property* sender);
-static void machineview_on_machine_properties(MachineView*,
-	psy_ui_Component* sender);
+
 
 /* vtable */
 static psy_ui_ComponentVtable machineview_vtable;
@@ -85,7 +83,7 @@ void machineview_init(MachineView* self, psy_ui_Component* parent,
 {
 	assert(self);
 	
-	machineview_init_component(self, parent);
+	machineview_init_component(self, parent);	
 	self->shownewmachine = FALSE;
 	self->workspace = workspace;
 	machinemenu_init(&self->machine_menu, &self->component, NULL);
@@ -94,7 +92,6 @@ void machineview_init(MachineView* self, psy_ui_Component* parent,
 		psy_ui_ALIGN_RIGHT);	
 	psy_ui_component_hide(&self->machine_menu.component);
 	machineview_init_notebook(self, tabbarparent);
-	machineview_init_properties_view(self);
 	machineview_init_wire_view(self, tabbarparent);
 	machineview_init_stack_view(self, tabbarparent);	
 	machineview_init_new_machine(self, tabbarparent);	
@@ -112,17 +109,6 @@ void machineview_init_component(MachineView* self, psy_ui_Component* parent)
 	psy_ui_component_set_style_type(&self->component, STYLE_MV);
 	psy_ui_component_set_title(machineview_base(self), "main.machines");
 	psy_ui_component_set_id(machineview_base(self), VIEW_ID_MACHINEVIEW);
-}
-
-void machineview_init_properties_view(MachineView* self)
-{
-	assert(self);
-	
-	machineproperties_init(&self->properties, machineview_base(self),
-		self->workspace);
-	psy_ui_component_set_align(machineproperties_base(&self->properties),
-		psy_ui_ALIGN_RIGHT);
-	psy_ui_component_hide(machineproperties_base(&self->properties));
 }
 
 void machineview_init_notebook(MachineView* self,
@@ -206,8 +192,6 @@ void machineview_connect_signals(MachineView* self)
 		"drawvumeters", self, machineview_on_vu_meters);
 	machineviewconfig_connect(&self->workspace->config.visual.macview,
 		"drawmachineindexes", self, machineview_on_machine_index);
-	psy_signal_connect(&self->machine_menu.properties.signal_clicked,
-		self, machineview_on_machine_properties);	
 }
 
 void machineview_on_mouse_double_click(MachineView* self, psy_ui_MouseEvent* ev)
@@ -347,7 +331,7 @@ void machineview_set_song(MachineView* self, psy_audio_Song* song)
 {
 	assert(self);
 	
-	if (song) {
+	if (song) {		
 		machinemenu_set_machines(&self->machine_menu,
 			psy_audio_song_machines(song));
 	} else {
@@ -358,8 +342,7 @@ void machineview_set_song(MachineView* self, psy_audio_Song* song)
 void machineview_idle(MachineView* self)
 {		
 	machinewireview_idle(&self->wireview);	
-	machinestackview_idle(&self->stackview);
-	machineproperties_idle(&self->properties);
+	machinestackview_idle(&self->stackview);	
 }
 
 void machineview_on_vu_meters(MachineView* self, psy_Property* sender)
@@ -382,12 +365,4 @@ void machineview_on_machine_index(MachineView* self, psy_Property* sender)
 	} else {
 		machineui_prevent_macindex();
 	}
-}
-
-void machineview_on_machine_properties(MachineView* self,
-	psy_ui_Component* sender)
-{
-	assert(self);
-	
-	psy_ui_component_toggle_visibility(&self->properties.component);
 }

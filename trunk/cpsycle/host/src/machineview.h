@@ -12,7 +12,6 @@
 #include "machineui.h"
 #include "machinestackview.h"
 #include "machinewireview.h"
-#include "machineproperties.h"
 #include "newmachine.h"
 #include "paramview.h"
 #include "paramviews.h"
@@ -52,8 +51,7 @@ typedef struct MachineView {
 	/* inherits */
 	psy_ui_Component component;
 	/* internal */
-	psy_ui_TabBar tabbar;
-	MachineProperties properties;
+	psy_ui_TabBar tabbar;	
 	psy_ui_Notebook notebook;	
 	MachineWireView wireview;	
 	MachineStackView stackview;

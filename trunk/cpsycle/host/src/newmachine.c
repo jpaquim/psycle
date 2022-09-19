@@ -979,6 +979,7 @@ void newmachine_add_machine(NewMachine* self, psy_Property* plugininfo)
 	machineinfo_dispose(&machineinfo);
 	if (machine) {
 		psy_audio_Machines* machines;
+		uintptr_t mac_id;
 		
 		machines = &workspace_song(self->workspace)->machines;
 		if (self->workspace->insert.replace_mac != psy_INDEX_INVALID &&
@@ -986,16 +987,20 @@ void newmachine_add_machine(NewMachine* self, psy_Property* plugininfo)
 			psy_audio_machine_setbus(machine);
 		}
 		if (self->workspace->insert.replace_mac != psy_INDEX_INVALID) {
+			mac_id = self->workspace->insert.replace_mac;
 			psy_audio_machines_insert(machines,
-				self->workspace->insert.replace_mac, machine);				
+				self->workspace->insert.replace_mac, machine);
 		} else {
-			psy_audio_machines_select(machines, psy_audio_machines_append(
-				machines, machine));
+			mac_id = psy_audio_machines_append(machines, machine);
+			psy_audio_machines_select(machines, mac_id);			
 		}
+		psy_audio_machines_rewire(machines, mac_id,
+			self->workspace->insert.wire);		
 	} else {
 		workspace_output_error(self->workspace,
 			self->workspace->player.machinefactory.errstr);
 	}
+	machineinsert_reset(&self->workspace->insert);
 	workspace_select_view(self->workspace,  viewindex_make_all(VIEW_ID_MACHINEVIEW,
 		self->restoresection, psy_INDEX_INVALID, psy_INDEX_INVALID));	
 }			

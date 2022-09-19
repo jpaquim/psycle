@@ -15,6 +15,9 @@
 #include "../../detail/portable.h"
 
 
+#define PREVENT_MASTER 0
+#define ALLOW_MASTER 1
+
 /* MachineMenuState */
 
 /* implementation */
@@ -36,6 +39,27 @@ void machinemenustate_hide_menu(MachineMenuState* self)
 	if (self->menu) {
 		psy_ui_component_hide_align(self->menu);
 	}
+}
+
+bool machinemenustate_invalid(const MachineMenuState* self)
+{
+	assert(self);
+	
+	return ((!self->machines) || (self->mac_id == psy_INDEX_INVALID));
+}
+
+psy_audio_Machine* machinemenustate_machine(MachineMenuState* self,
+	bool allow_master)
+{
+	assert(self);
+	
+	if (!allow_master && (self->mac_id == psy_audio_MASTER_INDEX)) {		
+		return NULL;
+	}
+	if (machinemenustate_invalid(self)) {		
+		return NULL;
+	}
+	return psy_audio_machines_at(self->machines, self->mac_id);
 }
 
 /* MachineConnectionsMenu */
@@ -317,6 +341,75 @@ void machineconnecttomenu_on_connection(MachineConnectToMenu* self,
 	machinemenustate_hide_menu(self->state);
 }
 
+/* MachineMenuTitle */
+
+static void machinemenutitle_on_accept_edit(MachineMenuTitle*,
+	psy_ui_TextArea* sender);
+
+/* implementation */
+void machinemenutitle_init(MachineMenuTitle* self, psy_ui_Component* parent,
+	MachineMenuState* state)
+{
+	assert(self);
+
+	psy_ui_component_init_align(&self->component, parent, NULL,
+		psy_ui_ALIGN_TOP);
+	self->state = state;	
+	psy_ui_component_set_style_type(&self->component, STYLE_HEADER);
+	psy_ui_component_init_align(&self->client, &self->component, NULL,
+		psy_ui_ALIGN_CLIENT);
+	psy_ui_label_init(&self->mac_id, &self->component);
+	psy_ui_label_set_char_number(&self->mac_id, 4);
+	psy_ui_component_set_align(&self->mac_id.component, psy_ui_ALIGN_LEFT);
+	psy_ui_label_prevent_translation(&self->mac_id);
+	psy_ui_textarea_init_single_line(&self->title, &self->client);
+	psy_ui_textarea_set_char_number(&self->title, 32);
+	psy_ui_component_set_align(&self->title.component, psy_ui_ALIGN_CLIENT);
+	psy_signal_connect(&self->title.signal_accept, self,
+		machinemenutitle_on_accept_edit);
+	psy_ui_textarea_enable_input_field(&self->title);
+	psy_ui_button_init(&self->hide, &self->component);
+	psy_ui_button_prevent_translation(&self->hide);
+	psy_ui_button_set_text(&self->hide, "X");	
+	psy_ui_component_set_align(&self->hide.component, psy_ui_ALIGN_RIGHT);
+}
+
+void machinemenutitle_update(MachineMenuTitle* self)
+{	
+	psy_audio_Machine* machine;	
+	char str[64];
+	
+	assert(self);
+	
+	machine = machinemenustate_machine(self->state, ALLOW_MASTER);
+	if (machine) {
+		psy_ui_textarea_set_text(&self->title,
+			psy_audio_machine_editname(machine));
+		psy_snprintf(str, 64, "%.2X", (int)psy_audio_machine_slot(machine));
+		psy_ui_label_set_text(&self->mac_id, str);
+	} else {
+		psy_ui_textarea_set_text(&self->title,
+			"No machine selected");
+		psy_ui_label_set_text(&self->mac_id, "--");
+	}
+}
+
+void machinemenutitle_on_accept_edit(MachineMenuTitle* self,
+	psy_ui_TextArea* sender)
+{
+	psy_audio_Machine* machine;	
+	
+	assert(self);
+	
+	if (machinemenustate_invalid(self->state) || (self->state->mac_id ==
+			psy_audio_MASTER_INDEX)) {
+		return;
+	}	
+	psy_audio_machines_rename(self->state->machines, self->state->mac_id,
+		psy_ui_textarea_text(&self->title));
+}
+
+
 /* MachineMenu */
 
 /* prototypes */
@@ -326,6 +419,12 @@ static void machinemenu_on_open_parameters(MachineMenu*,
 	psy_ui_Component* sender);
 static void machinemenu_on_machine_clone(MachineMenu*,
 	psy_ui_Component* sender);
+static void machinemenu_on_machine_insert_before(MachineMenu*,
+	psy_ui_Component* sender);	
+static void machinemenu_on_machine_insert_after(MachineMenu*,
+	psy_ui_Component* sender);
+static void machinemenu_on_machine_replace(MachineMenu*,
+	psy_ui_Component* sender);
 static void machinemenu_on_machine_delete(MachineMenu*,
 	psy_ui_Component* sender);
 static void machinemenu_on_machine_mute(MachineMenu*,
@@ -334,9 +433,27 @@ static void machinemenu_on_machine_bypass(MachineMenu*,
 	psy_ui_Component* sender);
 static void machinemenu_on_machine_solo(MachineMenu*,
 	psy_ui_Component* sender);
-static void machinemenu_update_machine_label(MachineMenu*);
-static void machinemenu_editname(MachineMenu*, char* rv, uintptr_t strlen);
 static void machinemenu_update_machine(MachineMenu*);
+static void machinemenu_on_timer(MachineMenu*, uintptr_t timerid);
+static void machinemenu_on_close_button(MachineMenu*, psy_ui_Button* sender);
+
+/* vtable */
+static psy_ui_ComponentVtable machinemenu_vtable;
+static bool machinemenu_vtable_initialized = FALSE;
+
+static void machinemenu_vtable_init(MachineMenu* self)
+{
+	assert(self);
+	
+	if (!machinemenu_vtable_initialized) {
+		machinemenu_vtable = *(self->component.vtable);
+		machinemenu_vtable.on_timer =
+			(psy_ui_fp_component_on_timer)
+			machinemenu_on_timer;
+		machinemenu_vtable_initialized = TRUE;
+	}
+	psy_ui_component_set_vtable(&self->component, &machinemenu_vtable);	
+}	
 
 /* implementation */
 void machinemenu_init(MachineMenu* self, psy_ui_Component* parent,
@@ -345,52 +462,52 @@ void machinemenu_init(MachineMenu* self, psy_ui_Component* parent,
 	assert(self);
 		
 	psy_ui_component_init(&self->component, parent, NULL);
+	machinemenu_vtable_init(self);
 	machinemenustate_init(&self->state, wireframes, &self->component);	
 	psy_ui_component_init(&self->pane, &self->component, NULL);
 	psy_ui_component_set_align(&self->pane, psy_ui_ALIGN_RIGHT);
 	psy_ui_component_set_default_align(&self->pane, psy_ui_ALIGN_TOP,		
 		psy_ui_margin_zero());
-	psy_ui_label_init(&self->machine, &self->pane);
-	psy_ui_label_prevent_translation(&self->machine);
-	psy_ui_label_set_text_alignment(&self->machine,
-		psy_ui_ALIGNMENT_CENTER);
-	psy_ui_component_set_margin(psy_ui_label_base(&self->machine),
+	machinemenutitle_init(&self->title_bar, &self->pane, &self->state);
+	psy_ui_component_set_margin(&self->title_bar.component,
 		psy_ui_margin_make_em(0.0, 0.0, 1.0, 0.0));
+	psy_signal_connect(&self->title_bar.hide.signal_clicked, self,
+		machinemenu_on_close_button);	
 	psy_ui_button_init_text_connect(&self->parameters, &self->pane,
-		"Open parameters", self, machinemenu_on_open_parameters);
-	psy_ui_button_init_text(&self->properties, &self->pane, "Open properties");	
-	psy_ui_button_init_text(&self->bank, &self->pane, "Open bank manager");
+		"mvmenu.parameters", self, machinemenu_on_open_parameters);	
+	psy_ui_button_init_text(&self->bank, &self->pane, "mvmenu.bank");
 	psy_ui_component_init(&self->separator1, &self->pane, NULL);
 	psy_ui_component_set_style_type(&self->separator1, STYLE_SEPARATOR);
 	psy_ui_component_set_margin(&self->separator1, psy_ui_margin_make_em(
 		0.4, 0.0, 0.4, 0.0));
-	psy_ui_button_init_text_connect(&self->connect, &self->pane, "Connect to",
+	psy_ui_button_init_text_connect(&self->connect, &self->pane, "mvmenu.connect",
 		self, machinemenu_on_connect_to);
 	psy_ui_button_init_text_connect(&self->connections, &self->pane,
-		"Connections",
+		"mvmenu.connections",
 		self, machinemenu_on_connections);
 	psy_ui_component_init(&self->separator2, &self->pane, NULL);
 	psy_ui_component_set_style_type(&self->separator2, STYLE_SEPARATOR);
 	psy_ui_component_set_margin(&self->separator2, psy_ui_margin_make_em(
 		0.4, 0.0, 0.4, 0.0));
-	psy_ui_button_init_text(&self->replace, &self->pane, "Replace machine");
-	psy_ui_button_init_text_connect(&self->clone, &self->pane, "Clone machine",
+	psy_ui_button_init_text_connect(&self->replace, &self->pane, "mvmenu.replace",
+		self, machinemenu_on_machine_replace);
+	psy_ui_button_init_text_connect(&self->clone, &self->pane, "mvmenu.clone",
 		self, machinemenu_on_machine_clone);
-	psy_ui_button_init_text(&self->insertbefore, &self->pane,
-		"Insert effect before");
-	psy_ui_button_init_text(&self->insertafter, &self->pane,
-		"Insert effect after");
-	psy_ui_button_init_text_connect(&self->del, &self->pane, "Delete machine",
+	psy_ui_button_init_text_connect(&self->insertbefore, &self->pane,
+		"mvmenu.insertbefore", self, machinemenu_on_machine_insert_before);
+	psy_ui_button_init_text_connect(&self->insertafter, &self->pane,
+		"mvmenu.insertafter", self, machinemenu_on_machine_insert_after);
+	psy_ui_button_init_text_connect(&self->del, &self->pane, "mvmenu.delete",
 		self, machinemenu_on_machine_delete);
 	psy_ui_component_init(&self->separator3, &self->pane, NULL);
 	psy_ui_component_set_style_type(&self->separator3, STYLE_SEPARATOR);
 	psy_ui_component_set_margin(&self->separator3, psy_ui_margin_make_em(
 		0.4, 0.0, 0.4, 0.0));
-	psy_ui_button_init_text_connect(&self->mute, &self->pane, "Mute",
+	psy_ui_button_init_text_connect(&self->mute, &self->pane, "mvmenu.mute",
 		self, machinemenu_on_machine_mute);
-	psy_ui_button_init_text_connect(&self->solo, &self->pane, "Solo",
+	psy_ui_button_init_text_connect(&self->solo, &self->pane, "mvmenu.solo",
 		self, machinemenu_on_machine_solo);
-	psy_ui_button_init_text_connect(&self->bypass, &self->pane, "Bypass",
+	psy_ui_button_init_text_connect(&self->bypass, &self->pane, "mvmenu.bypass",
 		self, machinemenu_on_machine_bypass);
 	machineconnecttomenu_init(&self->connect_to_menu, &self->component,
 		&self->state);
@@ -403,6 +520,7 @@ void machinemenu_init(MachineMenu* self, psy_ui_Component* parent,
 		psy_ui_ALIGN_RIGHT);
 	psy_ui_component_hide(&self->connections_menu.component);
 	psy_ui_component_hide(machinemenu_base(self));
+	psy_ui_component_start_timer(&self->component, 0, 100);
 }
 
 void machinemenu_on_connect_to(MachineMenu* self, psy_ui_Component* sender)
@@ -448,48 +566,11 @@ void machinemenu_update_machine(MachineMenu* self)
 	
 	machineconnectionsmenu_fill(&self->connections_menu);
 	machineconnecttomenu_fill(&self->connect_to_menu);
-	machinemenu_update_machine_label(self);
+	machinemenutitle_update(&self->title_bar);	
 	psy_ui_component_align(psy_ui_component_parent(&self->component));
 	psy_ui_component_invalidate(psy_ui_component_parent(&self->component));
 }
 
-void machinemenu_update_machine_label(MachineMenu* self)
-{
-	assert(self);
-	
-	if (self->state.machines && self->state.mac_id != psy_INDEX_INVALID) {
-		psy_audio_Machine* machine;
-		
-		machine = psy_audio_machines_at(self->state.machines,
-			self->state.mac_id);
-		if (machine) {
-			char editname[130];
-	
-			machinemenu_editname(self, editname, 130);			
-			psy_ui_label_set_text(&self->machine, editname);
-		}
-	} else {
-		psy_ui_label_set_text(&self->machine, "No machine selected");
-	}
-}
-
-void machinemenu_editname(MachineMenu* self, char* rv, uintptr_t strlen)
-{
-	assert(self);
-
-	rv[0] = '\0';
-	if (self->state.machines && self->state.mac_id != psy_INDEX_INVALID) {
-		psy_audio_Machine* machine;
-		
-		machine = psy_audio_machines_at(self->state.machines,
-			self->state.mac_id);
-		if (machine) {			
-			psy_snprintf(rv, strlen, "%.2X:%s", (int)
-				psy_audio_machine_slot(machine),
-				psy_audio_machine_editname(machine));
-		}
-	}
-}
 
 void machinemenu_on_open_parameters(MachineMenu* self,
 	psy_ui_Component* sender)
@@ -506,73 +587,167 @@ void machinemenu_on_open_parameters(MachineMenu* self,
 
 void machinemenu_on_machine_mute(MachineMenu* self, psy_ui_Component* sender)
 {
-	assert(self);
+	psy_audio_Machine* machine;
 	
-	if (self->state.machines && self->state.mac_id != psy_INDEX_INVALID) {
-		psy_audio_Machine* machine;
+	assert(self);
 		
-		machine = psy_audio_machines_at(self->state.machines,
-			self->state.mac_id);
-		if (machine) {			
-			if (psy_audio_machine_muted(machine)) {
-				psy_audio_machine_unmute(machine);
-			} else {
-				psy_audio_machine_mute(machine);
-			}
-		}		
-	}
 	machinemenu_hide(self);
+	machine = machinemenustate_machine(&self->state, PREVENT_MASTER);
+	if (machine) {
+		if (psy_audio_machine_muted(machine)) {
+			psy_audio_machine_unmute(machine);
+		} else {
+			psy_audio_machine_mute(machine);
+		}
+	}	
 }
 
 void machinemenu_on_machine_clone(MachineMenu* self, psy_ui_Component* sender)
 {
+	psy_audio_Machine* machine;
 	assert(self);
 	
-	if (self->state.machines && self->state.mac_id != psy_INDEX_INVALID) {
-			/* todo */
+	machinemenu_hide(self);
+	machine = machinemenustate_machine(&self->state, PREVENT_MASTER);
+	if (machine) {
+		psy_audio_Machine* clone;		
+		
+		clone = psy_audio_machine_clone(machine);
+		if (clone) {
+			Workspace* workspace;
+			double x, y;
+			psy_ui_Style* style;
+			psy_ui_Size size;
+			const psy_ui_TextMetric* tm;
+			
+			if (psy_audio_machine_mode(machine) == psy_audio_MACHMODE_FX) {
+				style = psy_ui_style(STYLE_MV_EFFECT);
+			} else {
+				style = psy_ui_style(STYLE_MV_GENERATOR);
+			}
+			size = psy_ui_style_size(style);
+			psy_audio_machine_position(machine, &x, &y);
+			tm = psy_ui_component_textmetric(&self->component);
+			x += 32;
+			y += psy_ui_value_px(&size.height, tm, NULL) + 8;
+			psy_audio_machine_setposition(clone, x, y);
+			workspace = self->state.wireframes->workspace;
+			workspace->insert.random_position = TRUE;			
+			psy_audio_machines_append(self->state.machines, clone);
+		}
 	}	
+}
+
+void machinemenu_on_machine_insert_before(MachineMenu* self,
+	psy_ui_Component* sender)
+{
+	Workspace* workspace;
+	psy_audio_WireSocket* socket;
+	psy_audio_Wire wire;
+	
+	assert(self);
+	
+	machinemenu_hide(self);
+	if (machinemenustate_invalid(&self->state)) {
+		return;
+	}	
+	workspace = self->state.wireframes->workspace;	
+	socket = psy_audio_machines_input_socket(self->state.machines,
+		self->state.mac_id, 0);
+	wire.dst = self->state.mac_id;
+	if (socket) {
+		wire.src = socket->slot;
+	} else {
+		wire.src = psy_INDEX_INVALID;
+	}
+	machineinsert_append(&workspace->insert, wire);
+	workspace_select_view(workspace, viewindex_make_section(
+		VIEW_ID_MACHINEVIEW, SECTION_ID_MACHINEVIEW_NEWMACHINE));
+}
+	
+void machinemenu_on_machine_insert_after(MachineMenu* self,
+	psy_ui_Component* sender)
+{
+	Workspace* workspace;
+	psy_audio_WireSocket* socket;
+	psy_audio_Wire wire;
+	
+	assert(self);
+	
+	machinemenu_hide(self);
+	if (machinemenustate_invalid(&self->state) ||
+			self->state.mac_id == psy_audio_MASTER_INDEX) {
+		return;
+	}	
+	workspace = self->state.wireframes->workspace;
+	socket = psy_audio_machines_output_socket(self->state.machines,
+		self->state.mac_id, 0);
+	wire.src = self->state.mac_id;
+	if (socket) {
+		wire.dst = socket->slot;
+	} else {
+		wire.dst = psy_INDEX_INVALID;
+	}	
+	machineinsert_append(&workspace->insert, wire);
+	workspace_select_view(workspace, viewindex_make_section(
+		VIEW_ID_MACHINEVIEW, SECTION_ID_MACHINEVIEW_NEWMACHINE));
+}
+
+void machinemenu_on_machine_replace(MachineMenu* self,
+	psy_ui_Component* sender)
+{
+	Workspace* workspace;
+	
+	machinemenu_hide(self);
+	if (machinemenustate_invalid(&self->state) ||
+			self->state.mac_id == psy_audio_MASTER_INDEX) {
+		return;
+	}
+	workspace = self->state.wireframes->workspace;
+	machineinsert_replace(&workspace->insert, self->state.mac_id);
+	workspace_select_view(workspace, viewindex_make_section(
+		VIEW_ID_MACHINEVIEW, SECTION_ID_MACHINEVIEW_NEWMACHINE));
 }
 
 void machinemenu_on_machine_delete(MachineMenu* self, psy_ui_Component* sender)
 {
 	assert(self);
 	
-	if (self->state.machines && self->state.mac_id != psy_INDEX_INVALID &&
-			self->state.mac_id != psy_audio_MASTER_INDEX) {
-		psy_audio_machines_remove(self->state.machines, self->state.mac_id,
-			TRUE);		
-	}
-	machinemenu_hide(self);
+	machinemenu_hide(self);	
+	if (machinemenustate_invalid(&self->state) ||
+			self->state.mac_id == psy_audio_MASTER_INDEX) {
+		return;
+	}	
+	psy_audio_machines_remove(self->state.machines, self->state.mac_id, TRUE);		
 }
 
 void machinemenu_on_machine_bypass(MachineMenu* self, psy_ui_Component* sender)
 {
-	assert(self);
+	psy_audio_Machine* machine;
 	
-	if (self->state.machines && self->state.mac_id != psy_INDEX_INVALID) {
-		psy_audio_Machine* machine;
+	assert(self);
 		
-		machine = psy_audio_machines_at(self->state.machines,
-			self->state.mac_id);
-		if (machine) {			
-			if (psy_audio_machine_bypassed(machine)) {
-				psy_audio_machine_bypass(machine);
-			} else {
-				psy_audio_machine_bypass(machine);
-			}
+	machinemenu_hide(self);	
+	machine = machinemenustate_machine(&self->state, PREVENT_MASTER);
+	if (machine) {			
+		if (psy_audio_machine_bypassed(machine)) {
+			psy_audio_machine_bypass(machine);
+		} else {
+			psy_audio_machine_bypass(machine);	
 		}
-	}
-	machinemenu_hide(self);
+	}	
 }
 
 void machinemenu_on_machine_solo(MachineMenu* self, psy_ui_Component* sender)
 {
 	assert(self);
 	
-	if (self->state.machines && self->state.mac_id != psy_INDEX_INVALID) {
-			psy_audio_machines_solo(self->state.machines, self->state.mac_id);		
-	}
 	machinemenu_hide(self);
+	if (machinemenustate_invalid(&self->state) ||
+			(self->state.mac_id == psy_audio_MASTER_INDEX)) {		
+		return;
+	}
+	psy_audio_machines_solo(self->state.machines, self->state.mac_id);	
 }
 
 void machinemenu_hide(MachineMenu* self)
@@ -582,4 +757,38 @@ void machinemenu_hide(MachineMenu* self)
 	psy_ui_component_hide(&self->connect_to_menu.component);
 	psy_ui_component_hide(&self->connections_menu.component);
 	psy_ui_component_hide_align(&self->component);	
+}
+
+void machinemenu_on_timer(MachineMenu* self, uintptr_t timerid)
+{
+	psy_audio_Machine* machine;
+	
+	assert(self);
+			
+	machine = machinemenustate_machine(&self->state, PREVENT_MASTER);
+	if (machine) {	
+		if (self->state.mac_id == psy_audio_machines_soloed(
+				self->state.machines)) {
+			psy_ui_button_highlight(&self->solo);
+		} else {
+			psy_ui_button_disable_highlight(&self->solo);
+		}
+		if (psy_audio_machine_muted(machine)) {
+			psy_ui_button_highlight(&self->mute);
+		} else {
+			psy_ui_button_disable_highlight(&self->mute);
+		}
+		if (psy_audio_machine_bypassed(machine)) {
+			psy_ui_button_highlight(&self->bypass);
+		} else {
+			psy_ui_button_disable_highlight(&self->bypass);
+		}
+	}
+}
+
+void machinemenu_on_close_button(MachineMenu* self, psy_ui_Button* sender)
+{
+	assert(self);
+	
+	machinemenu_hide(self);
 }

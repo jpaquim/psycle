@@ -318,11 +318,12 @@ void wireview_ondeleteconnection(WireView* self, psy_ui_Component* sender)
 void wireview_onaddeffect(WireView* self, psy_ui_Component* sender)
 {
 	if (self->workspace && workspace_song(self->workspace)) {
+		machineinsert_append(&self->workspace->insert, self->wire);
 		workspace_select_view(self->workspace,
 			viewindex_make_all(
 				VIEW_ID_MACHINEVIEW,
 				SECTION_ID_MACHINEVIEW_NEWMACHINE,
-				psy_INDEX_INVALID,  // psy_audio_MACHINES_INSERT_MODE_ADDEFFECT,
+				psy_INDEX_INVALID,
 				psy_INDEX_INVALID));
 	}
 }

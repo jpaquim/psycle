@@ -7,9 +7,11 @@
 #define MACHINEMENU_H
 
 /* host */
+#include "titlebar.h"
 #include "workspace.h"
 /* ui */
 #include <uibutton.h>
+#include <uitextarea.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -33,6 +35,9 @@ void machinemenustate_init(MachineMenuState*, struct WireFrames*,
 	psy_ui_Component* menu);
 	
 void machinemenustate_hide_menu(MachineMenuState*);
+bool machinemenustate_invalid(const MachineMenuState*);
+psy_audio_Machine* machinemenustate_machine(MachineMenuState*,
+	bool allow_master);
 
 typedef struct MachineConnectionsMenu {
 	/* inherits */
@@ -56,14 +61,31 @@ typedef struct MachineConnectToMenu {
 void machineconnecttomenu_init(MachineConnectToMenu*,
 	psy_ui_Component* parent, MachineMenuState*);
 
+	
+/* TitleBar */
+
+typedef struct MachineMenuTitle {
+	/*/ inherits */
+	psy_ui_Component component;
+	psy_ui_Component client;
+	psy_ui_Label mac_id;
+	psy_ui_TextArea title;
+	psy_ui_Button hide;
+	/* references */
+	MachineMenuState* state;
+} MachineMenuTitle;
+
+void machinemenutitle_init(MachineMenuTitle*, psy_ui_Component* parent,
+	MachineMenuState*);	
+void machinemenutitle_update(MachineMenuTitle*);
+
 typedef struct MachineMenu {
 	/* inherits */
 	psy_ui_Component component;
 	/* internal */
 	psy_ui_Component pane;
-	psy_ui_Label machine;
-	psy_ui_Button parameters;
-	psy_ui_Button properties;
+	MachineMenuTitle title_bar;
+	psy_ui_Button parameters;	
 	psy_ui_Button bank;
 	psy_ui_Component separator1;
 	psy_ui_Button connect;

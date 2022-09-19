@@ -78,7 +78,8 @@ void machines_initsignals(psy_audio_Machines* self)
 	psy_signal_init(&self->signal_removed);
 	psy_signal_init(&self->signal_slotchange);
 	psy_signal_init(&self->signal_paramselected);
-	psy_signal_init(&self->signal_wireselected);	
+	psy_signal_init(&self->signal_wireselected);
+	psy_signal_init(&self->signal_renamed);
 }
 
 void psy_audio_machines_dispose(psy_audio_Machines* self)
@@ -110,6 +111,7 @@ void machines_disposesignals(psy_audio_Machines* self)
 	psy_signal_dispose(&self->signal_slotchange);
 	psy_signal_dispose(&self->signal_paramselected);
 	psy_signal_dispose(&self->signal_wireselected);
+	psy_signal_dispose(&self->signal_renamed);
 }
 
 void machines_free(psy_audio_Machines* self)
@@ -826,6 +828,20 @@ void psy_audio_machines_solo(psy_audio_Machines* self, uintptr_t slot)
 	}
 }
 
+void psy_audio_machines_rename(psy_audio_Machines* self, uintptr_t mac_id,
+	const char* name)
+{
+	psy_audio_Machine* machine;
+
+	assert(self);
+	
+	machine = psy_audio_machines_at(self, mac_id);
+	if (machine) {
+		psy_audio_machine_seteditname(machine, name);
+		psy_signal_emit(&self->signal_renamed, self, 1, mac_id);
+	}
+}
+
 psy_audio_Machine* psy_audio_machines_master(psy_audio_Machines* self)
 {
 	assert(self);
@@ -1050,7 +1066,8 @@ void compute_leafs(psy_audio_Machines* self, uintptr_t slot,
 	}
 }
 
-uintptr_t psy_audio_machines_levelofmachine(psy_audio_Machines* self, uintptr_t slot)
+uintptr_t psy_audio_machines_levelofmachine(psy_audio_Machines* self,
+	uintptr_t slot)
 {
 	uintptr_t rv;
 	MachineList* path;
@@ -1082,17 +1099,45 @@ uintptr_t psy_audio_machines_depth(psy_audio_Machines* self)
 }
 
 void psy_audio_machines_rewire(psy_audio_Machines* self,
-	uintptr_t mac, uintptr_t prev, uintptr_t next)
+	uintptr_t mac, psy_audio_Wire wire)
 {
 	assert(self);
 	
 	psy_audio_exclusivelock_enter();
-	if (prev != psy_INDEX_INVALID) {		
-		psy_audio_machines_connect(self, psy_audio_wire_make(prev, mac));										
+	if (wire.src != psy_INDEX_INVALID) {		
+		psy_audio_machines_connect(self, psy_audio_wire_make(wire.src, mac));
 	}
-	if (next != psy_INDEX_INVALID) {
-		psy_audio_machines_disconnect(self, psy_audio_wire_make(prev, next));
-		psy_audio_machines_connect(self, psy_audio_wire_make(mac, next));		
+	if (wire.dst != psy_INDEX_INVALID) {
+		psy_audio_machines_disconnect(self, wire);
+		psy_audio_machines_connect(self, psy_audio_wire_make(mac, wire.dst));		
 	}	
 	psy_audio_exclusivelock_leave();
+}
+
+psy_audio_WireSocket* psy_audio_machines_output_socket(psy_audio_Machines* self,
+	uintptr_t mac_id, uintptr_t wire_num)
+{	
+	psy_audio_MachineSockets* sockets;
+	
+	assert(self);
+		
+	sockets = psy_audio_connections_at(&self->connections, mac_id);
+	if (sockets) {		
+		return psy_audio_wiresockets_at(&sockets->outputs, wire_num);		
+	}	
+	return NULL;
+}
+
+psy_audio_WireSocket* psy_audio_machines_input_socket(psy_audio_Machines* self,
+	uintptr_t mac_id, uintptr_t wire_num)
+{
+		psy_audio_MachineSockets* sockets;
+	
+	assert(self);
+		
+	sockets = psy_audio_connections_at(&self->connections, mac_id);
+	if (sockets) {		
+		return psy_audio_wiresockets_at(&sockets->inputs, wire_num);		
+	}	
+	return NULL;
 }

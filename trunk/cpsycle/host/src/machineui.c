@@ -21,8 +21,6 @@
 #include "../../detail/trace.h"
 
 
-
-static void editnameui_update(EditnameUi*);
 static void editnameui_editname(EditnameUi*, char* rv, uintptr_t strlen);
 
 
