@@ -67,7 +67,7 @@ void psy_audio_pinmapping_connect(psy_audio_PinMapping*, uintptr_t src,
 void psy_audio_pinmapping_disconnect(psy_audio_PinMapping*, uintptr_t src,
 	uintptr_t dst);
 
-typedef struct {
+typedef struct psy_audio_WireSocket {
 	uintptr_t slot;	
 	psy_dsp_amp_t volume;
 	psy_audio_PinMapping mapping;
@@ -140,7 +140,7 @@ void wiresockets_insert(psy_audio_WireSockets* self,
 void wiresockets_remove(psy_audio_WireSockets* self,
 	psy_audio_WireSocket* socket);
 
-typedef struct {	
+typedef struct psy_audio_MachineSockets {	
 	psy_audio_WireSockets inputs;
 	psy_audio_WireSockets outputs;
 } psy_audio_MachineSockets;

@@ -217,7 +217,6 @@ void machinewirepane_init(MachineWirePane* self, psy_ui_Component* parent,
 	self->machines = &workspace->song->machines;
 	self->machine_menu = machine_menu;
 	wireframes_init(&self->wireframes, self->workspace, &self->component);	
-	self->randominsert = 1;	
 	self->showwirehover = FALSE;
 	self->drawvirtualgenerators = FALSE;
 	self->dragslot = psy_INDEX_INVALID;
@@ -506,7 +505,7 @@ void machinewirepane_on_mouse_double_click(MachineWirePane* self,
 				wireframes_show(&self->wireframes, selectedwire);
 				psy_ui_component_invalidate(&self->component);
 			} else {				
-				self->randominsert = 0;
+				self->workspace->insert.random_position = FALSE;
 				return;
 			}
 		} else if (machinewireviewuis_at(&self->machineuis, self->dragslot)) {			
@@ -955,7 +954,7 @@ void machinewirepane_on_machine_insert(MachineWirePane* self,
 
 		machineui = (psy_ui_Component*)machinewireviewuis_insert(
 			&self->machineuis, slot);
-		if (machineui && !self->randominsert) {
+		if (machineui && !self->workspace->insert.random_position) {
 			psy_ui_RealSize size;			
 
 			size = psy_ui_component_scroll_size_px(machineui);
@@ -964,9 +963,10 @@ void machinewirepane_on_machine_insert(MachineWirePane* self,
 					psy_ui_value_make_px(psy_max(0.0, self->dragpt.x - size.width / 2)),
 					psy_ui_value_make_px(psy_max(0.0, self->dragpt.y - size.height / 2))));
 		}
+		psy_ui_component_align(&self->component);
 		psy_ui_component_updateoverflow(&self->component);
 		psy_ui_component_invalidate(&self->component);		
-		self->randominsert = 1;
+		self->workspace->insert.random_position = TRUE;
 	}
 }
 

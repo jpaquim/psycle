@@ -1133,8 +1133,10 @@ void machinestackpanetrackclient_init(MachineStackPaneTrackClient* self,
 /* MachineStackPaneTrack */
 
 /* prototypes */
-static void machinestackpanetrack_onmousedoubleclick(MachineStackPaneTrack*,
+static void machinestackpanetrack_on_mouse_double_click(MachineStackPaneTrack*,
 	psy_ui_MouseEvent*);
+static void machinestackpane_prepare_add_effect(MachineStackPaneTrack* self,
+	uintptr_t effectinsertpos, bool effectinsertright);
 
 /* vtable */
 static psy_ui_ComponentVtable machinestackpanetrack_vtable;
@@ -1147,7 +1149,7 @@ static psy_ui_ComponentVtable* machinestackpanetrack_vtable_init(
 		machinestackpanetrack_vtable = *(self->component.vtable);		
 		machinestackpanetrack_vtable.on_mouse_double_click =
 			(psy_ui_fp_component_on_mouse_event)
-			machinestackpanetrack_onmousedoubleclick;
+			machinestackpanetrack_on_mouse_double_click;
 		machinestackpanetrack_vtable_initialized = TRUE;
 	}
 	return &machinestackpanetrack_vtable;
@@ -1200,20 +1202,23 @@ MachineStackPaneTrack* machinestackpanetrack_allocinit(
 	return rv;
 }
 
-void machinestackpanetrack_onmousedoubleclick(MachineStackPaneTrack* self,
+void machinestackpanetrack_on_mouse_double_click(MachineStackPaneTrack* self,
 	psy_ui_MouseEvent* ev)
 {
 	MachineStackColumn* column;	
 
 	self->state->columnselected = TRUE;	
 	// self->state->insertmachinemode = psy_audio_MACHINES_INSERT_MODE_ADDEFFECTSTACK;	
-	column = machinestackstate_column(self->state, self->column);	
-	if (column && column->chain) {
+	column = machinestackstate_column(self->state, self->column);
+	if (column && column->chain) {		
 		psy_List* p;
 		psy_List* q;
 		uintptr_t effect;
 		uintptr_t c;
+		uintptr_t effectinsertpos;
+		bool effectinsertright;
 
+		effectinsertright = FALSE;
 		q = psy_ui_component_children(&self->client.component, psy_ui_NONE_RECURSIVE);
 		effect = psy_INDEX_INVALID;
 		for (p = q, c = 0; p != NULL; psy_list_next(&p), ++c) {
@@ -1232,74 +1237,67 @@ void machinestackpanetrack_onmousedoubleclick(MachineStackPaneTrack* self,
 		}
 		psy_list_free(q);
 		if (effect == psy_INDEX_INVALID) {
-			self->state->effectinsertpos = c - column->offset;
-			self->state->effectinsertright = (psy_ui_mouseevent_pt(ev).x >
+			effectinsertpos = c - column->offset;
+			effectinsertright = (psy_ui_mouseevent_pt(ev).x >
 				psy_ui_value_px(&self->state->effectsize.width,
 					psy_ui_component_textmetric(&self->component), NULL));
 			self->state->selected = self->column;	
 					
 		} else {
-			self->state->effectinsertpos = psy_INDEX_INVALID;
-			self->state->effectinsertright = FALSE;			
+			effectinsertpos = psy_INDEX_INVALID;
+			effectinsertright = FALSE;			
 			psy_ui_mouseevent_stop_propagation(ev);
-		}				
+		}
+		machinestackpane_prepare_add_effect(self, effectinsertpos,
+			effectinsertright);						
 	} else {
 		psy_ui_mouseevent_stop_propagation(ev);
 	}
 }
 
-/*void machinestackpane_prepare_add_effect(MachineStackView* self,
-	const psy_audio_MachineInfo* machineinfo)
+void machinestackpane_prepare_add_effect(MachineStackPaneTrack* self,
+	uintptr_t effectinsertpos, bool effectinsertright)
 {
-	psy_audio_Machine* effect;	
+	MachineStackColumn* insertcolumn;
 	
-	effect = psy_audio_machinefactory_make_info(
-		&self->workspace->player.machinefactory, machineinfo);	
-	if (effect) {
-		uintptr_t macid;
-		MachineStackColumn* insertcolumn;
+	insertcolumn = machinestackstate_column(self->state, self->column);
+	if (insertcolumn) {
+		uintptr_t firstmacid;
+		bool hasinput;
+		uintptr_t insertpos;
+		psy_audio_Machine* input;
+		uintptr_t prevmacid;
+		uintptr_t nextmacid;
 
-		macid = psy_audio_machines_append(self->state.machines, effect);		
-		insertcolumn = machinestackstate_selectedcolumn(&self->state);
-		if (insertcolumn) {
-			uintptr_t firstmacid;
-			bool hasinput;
-			uintptr_t insertpos;
-			psy_audio_Machine* input;
-			uintptr_t prevmacid;
-			uintptr_t nextmacid;
-
-			firstmacid = machinestackcolumn_at(insertcolumn, 0);
-			prevmacid = psy_INDEX_INVALID;
-			nextmacid = psy_INDEX_INVALID;
-			input = psy_audio_machines_at(self->state.machines, firstmacid);
-			hasinput = (input && (psy_audio_machine_isbus(input) ||
-				psy_audio_machine_mode(input) == psy_audio_MACHMODE_GENERATOR));
-			insertpos = self->state.effectinsertpos;
-			if (!hasinput) {
-				if (self->state.effectinsertpos > 0) {
-					insertpos -= 1;
-				} else {
-					insertpos = psy_INDEX_INVALID;
-				}
-			}
-			if (insertpos != psy_INDEX_INVALID) {
-				prevmacid = machinestackcolumn_at(insertcolumn, insertpos);
+		firstmacid = machinestackcolumn_at(insertcolumn, 0);
+		prevmacid = psy_INDEX_INVALID;
+		nextmacid = psy_INDEX_INVALID;
+		input = psy_audio_machines_at(self->state->machines, firstmacid);
+		hasinput = (input && (psy_audio_machine_isbus(input) ||
+			psy_audio_machine_mode(input) == psy_audio_MACHMODE_GENERATOR));
+		insertpos = effectinsertpos;
+		if (!hasinput) {
+			if (effectinsertpos > 0) {
+				insertpos -= 1;
 			} else {
-				prevmacid = insertcolumn->inputroute;
-				nextmacid = machinestackcolumn_at(insertcolumn, 0);
+				insertpos = psy_INDEX_INVALID;
 			}
-			if (self->state.effectinsertright) {
-				nextmacid = psy_INDEX_INVALID;
-			} else if (insertpos != psy_INDEX_INVALID) {
-				nextmacid = machinestackcolumn_at(insertcolumn, insertpos + 1);				
-			}
-			self->state.machines.insert.mac = macid;
-			self->state.machines.insert.prev = prevmacid;
-			self->state.machines.insert.next = nextmacid;			
-		}		
+		}
+		if (insertpos != psy_INDEX_INVALID) {
+			prevmacid = machinestackcolumn_at(insertcolumn, insertpos);
+		} else {
+			prevmacid = insertcolumn->inputroute;
+			nextmacid = machinestackcolumn_at(insertcolumn, 0);
+		}
+		if (effectinsertright) {
+			nextmacid = psy_INDEX_INVALID;
+		} else if (insertpos != psy_INDEX_INVALID) {
+			nextmacid = machinestackcolumn_at(insertcolumn, insertpos + 1);				
+		}
+		machineinsert_append(&self->workspace->insert, psy_audio_wire_make(
+			prevmacid, nextmacid));
 	}
-}*/
+}
 
 
 /* MachineStackPane */

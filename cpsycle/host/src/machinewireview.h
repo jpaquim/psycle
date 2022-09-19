@@ -65,7 +65,6 @@ typedef struct MachineWirePane {
 	uintptr_t selectedslot;	
 	psy_audio_Wire dragwire;	
 	psy_audio_Wire hoverwire;	
-	int randominsert;	
 	bool mousemoved;
 	bool showwirehover;	
 	bool drawvirtualgenerators;	

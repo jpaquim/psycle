@@ -14,10 +14,13 @@
 
 
 /* prototypes */
+static void effectui_on_destroyed(EffectUi*);
 static void effectui_on_mouse_down(EffectUi*, psy_ui_MouseEvent*);
 static void effectui_onmousedoubleclick(EffectUi*, psy_ui_MouseEvent*);
 static void effectui_move(EffectUi*, psy_ui_Point topleft);
 static void effectui_updatevolumedisplay(EffectUi*);
+static void effectui_on_machine_renamed(EffectUi*, psy_audio_Machines* sender,
+	uintptr_t mac_id);
 static void effectui_on_timer(EffectUi*, uintptr_t timerid);
 	
 /* vtable */
@@ -32,6 +35,9 @@ static void effectui_vtable_init(EffectUi* self)
 	if (!effectui_vtable_initialized) {
 		effectui_vtable = *(self->component.vtable);
 		effectui_super_vtable = effectui_vtable;
+		effectui_vtable.on_destroyed =
+			(psy_ui_fp_component)
+			effectui_on_destroyed;
 		effectui_vtable.on_mouse_down =
 			(psy_ui_fp_component_on_mouse_event)
 			effectui_on_mouse_down;
@@ -79,7 +85,18 @@ void effectui_init(EffectUi* self, psy_ui_Component* parent,
 	vuui_init(&self->vu, &self->component, self->machine,
 		STYLE_MV_EFFECT_VU, STYLE_MV_EFFECT_VU0, STYLE_MV_EFFECT_VUPEAK);
 	self->counter = 0;
+	psy_signal_connect(&machines->signal_renamed, self,
+		effectui_on_machine_renamed);
 	psy_ui_component_start_timer(&self->component, 0, 50);
+}
+
+void effectui_on_destroyed(EffectUi* self)
+{
+	assert(self);
+	
+	if (self->machines) {
+		psy_signal_disconnect_context(&self->machines->signal_renamed, self);
+	}
 }
 
 EffectUi* effectui_alloc(void)
@@ -156,15 +173,25 @@ void effectui_onmousedoubleclick(EffectUi* self, psy_ui_MouseEvent* ev)
 	psy_ui_mouseevent_stop_propagation(ev);
 }
 
+void effectui_on_machine_renamed(EffectUi* self,
+	psy_audio_Machines* sender, uintptr_t mac_id)
+{
+	assert(self);
+	
+	if (psy_audio_machine_slot(self->machine) == mac_id) {
+		editnameui_update(&self->editname);
+	}
+}
+
 void effectui_on_timer(EffectUi* self, uintptr_t timerid)
 {
+	if (!psy_ui_component_draw_visible(&self->component)) {
+		return;
+	}	
 	if (self->counter > 0) {
 		--self->counter;
 	}
-	if (self->counter == 0) {
-		if (!psy_ui_component_draw_visible(&self->component)) {
-			return;
-		}
+	if (self->counter == 0) {		
 		if (psy_audio_machine_muted(self->machine)) {
 			psy_ui_component_add_style_state(&self->mute,
 				psy_ui_STYLESTATE_SELECT);

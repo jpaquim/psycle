@@ -13,11 +13,18 @@
 /* ui */
 #include <uiapp.h>
 
+
 /* GeneratorUi */
+
+/* prototypes */
+static void generatorui_on_destroyed(GeneratorUi*);
 static void generatorui_on_mouse_down(GeneratorUi*, psy_ui_MouseEvent*);
 static void generatorui_on_mouse_double_click(GeneratorUi*, psy_ui_MouseEvent*);
 static void generatorui_move(GeneratorUi*, psy_ui_Point topleft);
 static void generatorui_on_timer(GeneratorUi*, uintptr_t timerid);
+static void generatorui_on_machine_renamed(GeneratorUi*, psy_audio_Machines* sender,
+	uintptr_t mac_id);
+
 /* vtable */
 static psy_ui_ComponentVtable generatorui_vtable;
 static psy_ui_ComponentVtable generatorui_super_vtable;
@@ -29,7 +36,10 @@ static void generatorui_vtable_init(GeneratorUi* self)
 
 	if (!generatorui_vtable_initialized) {
 		generatorui_vtable = *(self->component.vtable);
-		generatorui_super_vtable = generatorui_vtable;		
+		generatorui_super_vtable = generatorui_vtable;
+		generatorui_vtable.on_destroyed =
+			(psy_ui_fp_component)
+			generatorui_on_destroyed;
 		generatorui_vtable.on_mouse_down =
 			(psy_ui_fp_component_on_mouse_event)
 			generatorui_on_mouse_down;
@@ -41,7 +51,7 @@ static void generatorui_vtable_init(GeneratorUi* self)
 			generatorui_move;		
 		generatorui_vtable.on_timer =
 			(psy_ui_fp_component_on_timer)
-			generatorui_on_timer;		
+			generatorui_on_timer;
 		generatorui_vtable_initialized = TRUE;
 	}
 	psy_ui_component_set_vtable(&self->component, &generatorui_vtable);
@@ -79,7 +89,18 @@ void generatorui_init(GeneratorUi* self, psy_ui_Component* parent,
 		STYLE_MV_GENERATOR_VU, STYLE_MV_GENERATOR_VU0,
 		STYLE_MV_GENERATOR_VUPEAK);
 	self->counter = 0;
+	psy_signal_connect(&machines->signal_renamed, self,
+		generatorui_on_machine_renamed);
 	psy_ui_component_start_timer(&self->component, 0, 50);
+}
+
+void generatorui_on_destroyed(GeneratorUi* self)
+{
+	assert(self);
+	
+	if (self->machines) {
+		psy_signal_disconnect_context(&self->machines->signal_renamed, self);
+	}
 }
 
 GeneratorUi* generatorui_alloc(void)
@@ -156,8 +177,18 @@ void generatorui_on_mouse_double_click(GeneratorUi* self,
 	psy_ui_mouseevent_stop_propagation(ev);
 }
 
-void generatorui_on_timer(GeneratorUi* self, uintptr_t timerid)
+void generatorui_on_machine_renamed(GeneratorUi* self,
+	psy_audio_Machines* sender, uintptr_t mac_id)
 {
+	assert(self);
+	
+	if (psy_audio_machine_slot(self->machine) == mac_id) {
+		editnameui_update(&self->editname);
+	}
+}
+
+void generatorui_on_timer(GeneratorUi* self, uintptr_t timerid)
+{	
 	if (!psy_ui_component_draw_visible(&self->component)) {
 		return;
 	}

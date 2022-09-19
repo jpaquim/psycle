@@ -44,6 +44,8 @@ typedef struct EditnameUi {
 
 void editnameui_init(EditnameUi*, psy_ui_Component* parent, psy_audio_Machine*,
 	uintptr_t style);
+	
+void editnameui_update(EditnameUi*);
 
 typedef struct VuValues {
 	/* output level for display(0 .. 1.f) */
@@ -118,6 +120,7 @@ bool machineui_vumeter_prevented(void);
 void machineui_enable_macindex(void);
 void machineui_prevent_macindex(void);
 bool machineui_maxindex_prevented(void);
+
 
 #ifdef __cplusplus
 }

@@ -54,6 +54,7 @@ typedef struct psy_audio_Machines {
 	psy_Signal signal_slotchange;
 	psy_Signal signal_paramselected;
 	psy_Signal signal_wireselected;
+	psy_Signal signal_renamed;
 	psy_audio_Machine* master;
 	bool mixersendconnect;
 	psy_UndoRedo undoredo;
@@ -124,6 +125,8 @@ void psy_audio_machines_connect_as_mixersend(psy_audio_Machines*);
 void psy_audio_machines_connect_as_mixerinput(psy_audio_Machines*);
 bool psy_audio_machines_is_connect_as_mixersend(const psy_audio_Machines*);
 void psy_audio_machines_selectwire(psy_audio_Machines*, psy_audio_Wire);
+void psy_audio_machines_rename(psy_audio_Machines*, uintptr_t mac_id,
+	const char* name);
 
 INLINE bool psy_audio_machines_hasmixer(const psy_audio_Machines* self)
 {
@@ -139,7 +142,12 @@ uintptr_t psy_audio_machines_levelofmachine(psy_audio_Machines*, uintptr_t slot)
 
 uintptr_t psy_audio_machines_maxindex(psy_audio_Machines*);
 void psy_audio_machines_rewire(psy_audio_Machines*, uintptr_t mac,
-	uintptr_t prev, uintptr_t next);
+	psy_audio_Wire);
+	
+psy_audio_WireSocket* psy_audio_machines_output_socket(psy_audio_Machines*,
+	uintptr_t mac_id, uintptr_t wire_num);
+psy_audio_WireSocket* psy_audio_machines_input_socket(psy_audio_Machines*,
+	uintptr_t mac_id, uintptr_t wire_num);
 	
 #ifdef __cplusplus
 }
