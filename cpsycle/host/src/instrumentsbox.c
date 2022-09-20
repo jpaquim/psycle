@@ -93,7 +93,7 @@ void instrumentsbox_buildlist(InstrumentsBox* self)
 	char buffer[FT2_INSTRUMENTNAME_LEN + 4];
 
 	psy_ui_listbox_clear(&self->instrumentlist);
-	groupslot = psy_ui_listbox_cursel(&self->grouplist);
+	groupslot = psy_ui_listbox_cur_sel(&self->grouplist);
 	if (groupslot == psy_INDEX_INVALID) {
 		groupslot = 0;
 	}
@@ -121,8 +121,8 @@ void instrumentsbox_ongrouplistchanged(InstrumentsBox* self, psy_ui_Component*
 
 	index = instrumentsbox_selected(self);
 	instrumentsbox_buildlist(self);
-	psy_ui_listbox_setcursel(&self->grouplist, index.groupslot);
-	psy_ui_listbox_setcursel(&self->instrumentlist, index.subslot);
+	psy_ui_listbox_set_cur_sel(&self->grouplist, index.groupslot);
+	psy_ui_listbox_set_cur_sel(&self->instrumentlist, index.subslot);
 	psy_audio_instruments_select(self->instruments, index);
 }
 
@@ -133,7 +133,7 @@ void instrumentsbox_onlistchanged(InstrumentsBox* self, psy_ui_Component*
 
 	psy_signal_disconnect(&self->instruments->signal_slotchange, self,
 		instrumentsbox_oninstrumentslotchanged);
-	groupslot = psy_ui_listbox_cursel(&self->grouplist);
+	groupslot = psy_ui_listbox_cur_sel(&self->grouplist);
 	if (groupslot == psy_INDEX_INVALID) {
 		groupslot = 0;
 	}
@@ -158,7 +158,7 @@ void instrumentsbox_oninstrumentinsert(InstrumentsBox* self, psy_ui_Component*
 	} else {
 		psy_snprintf(buffer, sizeof(buffer), "%02X:%s", (int)slot->subslot, "");
 	}
-	psy_ui_listbox_settext(&self->instrumentlist, buffer, slot->subslot);
+	psy_ui_listbox_set_text(&self->instrumentlist, buffer, slot->subslot);
 
 	if (psy_audio_instruments_group_at(self->instruments, slot->groupslot)) {
 		psy_snprintf(buffer, 20, "%02X*:%s", slot->groupslot,
@@ -167,7 +167,7 @@ void instrumentsbox_oninstrumentinsert(InstrumentsBox* self, psy_ui_Component*
 		psy_snprintf(buffer, 20, "%02X:%s", slot->groupslot,
 			instrumentsbox_groupname(self, slot->groupslot));
 	}
-	psy_ui_listbox_settext(&self->grouplist, buffer, slot->groupslot);
+	psy_ui_listbox_set_text(&self->grouplist, buffer, slot->groupslot);
 }
 
 void instrumentsbox_oninstrumentremoved(InstrumentsBox* self, psy_ui_Component*
@@ -179,7 +179,7 @@ void instrumentsbox_oninstrumentremoved(InstrumentsBox* self, psy_ui_Component*
 	assert(!psy_audio_instrumentindex_invalid(slot));	
 	
 	psy_snprintf(buffer, sizeof(buffer), "%02X:%s", (int)slot->subslot, "");	
-	psy_ui_listbox_settext(&self->instrumentlist, buffer, slot->subslot);
+	psy_ui_listbox_set_text(&self->instrumentlist, buffer, slot->subslot);
 
 	if (psy_audio_instruments_group_at(self->instruments, slot->groupslot)) {		
 		psy_snprintf(buffer, 20, "%02X*:%s", slot->groupslot,
@@ -188,7 +188,7 @@ void instrumentsbox_oninstrumentremoved(InstrumentsBox* self, psy_ui_Component*
 		psy_snprintf(buffer, 20, "%02X:%s", slot->groupslot,
 			instrumentsbox_groupname(self, slot->groupslot));
 	}
-	psy_ui_listbox_settext(&self->grouplist, buffer, slot->groupslot);
+	psy_ui_listbox_set_text(&self->grouplist, buffer, slot->groupslot);
 }
 
 const char* instrumentsbox_groupname(InstrumentsBox* self, uintptr_t groupslot)
@@ -213,8 +213,8 @@ void instrumentsbox_oninstrumentslotchanged(InstrumentsBox* self,
 
 	if (slot->groupslot != index.groupslot && slot->subslot != index.subslot) {
 		instrumentsbox_buildlist(self);
-		psy_ui_listbox_setcursel(&self->grouplist, slot->groupslot);
-		psy_ui_listbox_setcursel(&self->instrumentlist, slot->subslot);
+		psy_ui_listbox_set_cur_sel(&self->grouplist, slot->groupslot);
+		psy_ui_listbox_set_cur_sel(&self->instrumentlist, slot->subslot);
 	}
 }
 
@@ -224,8 +224,8 @@ void instrumentsbox_setinstruments(InstrumentsBox* self, psy_audio_Instruments*
 	self->instruments = instruments;
 	instrumentsbox_buildgroup(self);
 	instrumentsbox_buildlist(self);
-	psy_ui_listbox_setcursel(&self->grouplist, 0);
-	psy_ui_listbox_setcursel(&self->instrumentlist, 0);	
+	psy_ui_listbox_set_cur_sel(&self->grouplist, 0);
+	psy_ui_listbox_set_cur_sel(&self->instrumentlist, 0);	
 	psy_signal_connect(&instruments->signal_insert, self,
 		instrumentsbox_oninstrumentinsert);
 	psy_signal_connect(&instruments->signal_removed, self,
@@ -237,8 +237,8 @@ void instrumentsbox_setinstruments(InstrumentsBox* self, psy_audio_Instruments*
 psy_audio_InstrumentIndex instrumentsbox_selected(InstrumentsBox* self)
 {
 	return psy_audio_instrumentindex_make(
-		psy_ui_listbox_cursel(&self->grouplist),
-		psy_ui_listbox_cursel(&self->instrumentlist));
+		psy_ui_listbox_cur_sel(&self->grouplist),
+		psy_ui_listbox_cur_sel(&self->instrumentlist));
 }
 
 void instrumentsbox_rebuild(InstrumentsBox* self)
@@ -246,9 +246,9 @@ void instrumentsbox_rebuild(InstrumentsBox* self)
 	instrumentsbox_buildgroup(self);
 	instrumentsbox_buildlist(self);
 	if (self->instruments) {
-		psy_ui_listbox_setcursel(&self->grouplist,
+		psy_ui_listbox_set_cur_sel(&self->grouplist,
 			psy_audio_instruments_selected(self->instruments).groupslot);
-		psy_ui_listbox_setcursel(&self->instrumentlist,
+		psy_ui_listbox_set_cur_sel(&self->instrumentlist,
 			psy_audio_instruments_selected(self->instruments).subslot);
 	}
 }

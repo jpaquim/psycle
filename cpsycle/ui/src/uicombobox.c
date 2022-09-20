@@ -192,7 +192,7 @@ void psy_ui_combobox_set_text(psy_ui_ComboBox* self, const char* text,
 {
 	assert(self);
 
-	psy_ui_listbox_settext(&self->listbox, text, index);
+	psy_ui_listbox_set_text(&self->listbox, text, index);
 	if (index == psy_ui_combobox_cursel(self)) {
 		char text[512];
 
@@ -205,8 +205,8 @@ void psy_ui_combobox_text(psy_ui_ComboBox* self, char* text)
 {
 	assert(self);
 
-	psy_ui_listbox_text(&self->listbox, text,
-		psy_ui_listbox_cursel(&self->listbox));
+	psy_ui_listbox_text(&self->listbox, text, psy_ui_listbox_cur_sel(
+		&self->listbox));
 }
 
 void psy_ui_combobox_text_at(psy_ui_ComboBox* self, char* text, intptr_t index)
@@ -238,7 +238,7 @@ void psy_ui_combobox_select(psy_ui_ComboBox* self, intptr_t index)
 
 	assert(self);
 
-	psy_ui_listbox_setcursel(&self->listbox, index);
+	psy_ui_listbox_set_cur_sel(&self->listbox, index);
 	psy_ui_listbox_text(&self->listbox, text, index);	
 	psy_ui_label_set_text(&self->textfield, text);
 }
@@ -247,7 +247,7 @@ intptr_t psy_ui_combobox_cursel(const psy_ui_ComboBox* self)
 {
 	assert(self);
 
-	return psy_ui_listbox_cursel(&self->listbox);
+	return psy_ui_listbox_cur_sel(&self->listbox);
 }
 
 void psy_ui_combobox_set_char_number(psy_ui_ComboBox* self, double number)
@@ -300,7 +300,7 @@ void psy_ui_combobox_onselchange(psy_ui_ComboBox* self,
 	assert(self);
 
 	psy_ui_dropdownbox_hide(&self->dropdown);
-	psy_ui_listbox_setcursel(&self->listbox, index);
+	psy_ui_listbox_set_cur_sel(&self->listbox, index);
 	psy_ui_combobox_text(self, text);
 	psy_ui_label_set_text(&self->textfield, text);
 	if (self->property && index != psy_property_item_int(self->property)) {

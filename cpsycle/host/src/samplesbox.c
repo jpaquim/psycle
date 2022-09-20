@@ -135,7 +135,7 @@ void samplesbox_buildsubsamplelist(SamplesBox* self, uintptr_t slot, bool create
 		if (create) {
 			psy_ui_listbox_add_text(&self->subsamplelist, text);
 		} else {
-			psy_ui_listbox_settext(&self->subsamplelist, text, subslot);
+			psy_ui_listbox_set_text(&self->subsamplelist, text, subslot);
 		}
 	}	
 }
@@ -144,7 +144,7 @@ void samplesbox_onsamplelistchanged(SamplesBox* self, psy_ui_Component* sender,
 	int slot)
 {
 	samplesbox_buildsubsamplelist(self, slot, FALSE);
-	psy_ui_listbox_setcursel(&self->subsamplelist, 0);
+	psy_ui_listbox_set_cur_sel(&self->subsamplelist, 0);
 	if (self->load_on_select) {
 		samplesbox_file_select_sample(self);
 	}
@@ -179,8 +179,8 @@ void samplesbox_setsamples(SamplesBox* self, psy_audio_Samples* samples)
 	self->samples = samples;
 	samplesbox_buildsamplelist(self);
 	samplesbox_buildsubsamplelist(self, 0, TRUE);
-	psy_ui_listbox_setcursel(&self->samplelist, 0);
-	psy_ui_listbox_setcursel(&self->subsamplelist, 0);	
+	psy_ui_listbox_set_cur_sel(&self->samplelist, 0);
+	psy_ui_listbox_set_cur_sel(&self->subsamplelist, 0);	
 	if (self->samples) {
 		psy_signal_connect(&samples->signal_insert, self,
 			samplesbox_onsampleinsert);	
@@ -193,8 +193,8 @@ psy_audio_SampleIndex samplesbox_selected(SamplesBox* self)
 {
 	psy_audio_SampleIndex rv;
 
-	rv.slot = psy_ui_listbox_cursel(&self->samplelist);
-	rv.subslot = psy_ui_listbox_cursel(&self->subsamplelist);
+	rv.slot = psy_ui_listbox_cur_sel(&self->samplelist);
+	rv.subslot = psy_ui_listbox_cur_sel(&self->subsamplelist);
 	return rv;	
 }
 
@@ -204,10 +204,10 @@ void samplesbox_select(SamplesBox* self, psy_audio_SampleIndex index)
 	
 	currindex = samplesbox_selected(self);
 	if (currindex.slot != index.slot) {
-		psy_ui_listbox_setcursel(&self->samplelist, index.slot);
+		psy_ui_listbox_set_cur_sel(&self->samplelist, index.slot);
 	}
 	if (currindex.subslot != index.subslot) {
-		psy_ui_listbox_setcursel(&self->subsamplelist, index.subslot);
+		psy_ui_listbox_set_cur_sel(&self->subsamplelist, index.subslot);
 	}
 }
 

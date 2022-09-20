@@ -491,6 +491,13 @@ void make_translator_default(psy_Dictionary* dict)
 	psy_dictionary_set(dict, "mvmenu.mute", "Mute");	
 	psy_dictionary_set(dict, "mvmenu.solo", "Solo");	
 	psy_dictionary_set(dict, "mvmenu.bypass", "Bypass");
+	psy_dictionary_set(dict, "mvmenu.inputs", "Inputs");
+	psy_dictionary_set(dict, "mvmenu.outputs", "Outputs");
+	psy_dictionary_set(dict, "mvmenu.sure", "Are you sure?");
+	psy_dictionary_set(dict, "mvmenu.yes", "Yes");
+	psy_dictionary_set(dict, "mvmenu.no", "No");
+	psy_dictionary_set(dict, "mvmenu.noconnections", "No Connections");
+	psy_dictionary_set(dict, "mvmenu.nodestinations", "No destinations");
 	/* stackview */
 	psy_dictionary_set(dict, "stackview.inputs", "Inputs");
 	psy_dictionary_set(dict, "stackview.effects", "Effects");

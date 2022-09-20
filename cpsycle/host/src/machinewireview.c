@@ -120,7 +120,8 @@ static bool machinewirepane_move_machine(MachineWirePane*, uintptr_t slot,
 	double dx, double dy);
 static void machinewirepane_on_mouse_double_click(MachineWirePane*,
 	psy_ui_MouseEvent*);
-static void machinewirepane_on_key_down(MachineWirePane*, psy_ui_KeyboardEvent*);
+static void machinewirepane_on_key_down(MachineWirePane*,
+	psy_ui_KeyboardEvent*);
 static uintptr_t machinewirepane_hittest(const MachineWirePane*);
 static psy_audio_Wire machinewirepane_hit_test_wire(MachineWirePane*,
 	psy_ui_RealPoint);
@@ -529,6 +530,10 @@ void machinewirepane_on_mouse_down(MachineWirePane* self, psy_ui_MouseEvent* ev)
 	self->dragmode = MACHINEVIEW_DRAG_NONE;
 	self->dragslot = machinewirepane_hittest(self);
 	self->dragmachineui = machinewireviewuis_at(&self->machineuis, self->dragslot);
+	if (psy_ui_component_visible(&self->machine_menu->component)) {
+		psy_ui_component_hide_align(&self->machine_menu->component);
+		psy_ui_component_invalidate(&self->machine_menu->component);
+	}
 	if (psy_ui_mouseevent_button(ev) == 1) {
 		if (self->dragslot != psy_audio_MASTER_INDEX) {			
 			psy_audio_machines_selectwire(self->machines, 
@@ -794,9 +799,11 @@ void machinewirepane_on_mouse_up(MachineWirePane* self, psy_ui_MouseEvent* ev)
 				}
 				psy_ui_mouseevent_stop_propagation(ev);
 			} else if (psy_ui_mouseevent_button(ev) == 2) {	
-				machinemenu_select(self->machine_menu, self->dragslot);			
-				psy_ui_component_toggle_visibility(
-					&self->machine_menu->component);
+				machinemenu_select(self->machine_menu, self->dragslot);
+				if (!psy_ui_component_visible(&self->machine_menu->component)) {
+					psy_ui_component_show_align(&self->machine_menu->component);
+					psy_ui_component_invalidate(&self->machine_menu->component);
+				}
 				psy_ui_mouseevent_stop_propagation(ev);
 			}			
 		}

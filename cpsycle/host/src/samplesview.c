@@ -283,7 +283,7 @@ void samplesheaderview_init(SamplesHeaderView* self, psy_ui_Component* parent,
 	psy_ui_label_set_char_number(&self->channellabel, 7);	
 }
 
-void samplesheaderview_setsample(SamplesHeaderView* self, psy_audio_Sample* sample)
+void samplesheaderview_set_sample(SamplesHeaderView* self, psy_audio_Sample* sample)
 {
 	char text[20];
 
@@ -335,12 +335,12 @@ void samplesheaderview_oneditsamplename(SamplesHeaderView* self, psy_ui_TextArea
 		if (index.subslot == 0) {
 			psy_snprintf(text, 20, "%02X:%s", 
 			(int)index.slot, psy_audio_sample_name(self->sample));
-			psy_ui_listbox_settext(&self->view->samplesbox.samplelist, text, 
+			psy_ui_listbox_set_text(&self->view->samplesbox.samplelist, text, 
 				index.slot);
 		}
 		psy_snprintf(text, 20, "%02X:%s", 
 			(int)index.subslot, psy_audio_sample_name(self->sample));
-		psy_ui_listbox_settext(&self->view->samplesbox.subsamplelist, text,
+		psy_ui_listbox_set_text(&self->view->samplesbox.subsamplelist, text,
 			index.subslot);
 	}
 }
@@ -365,7 +365,7 @@ void samplesheaderview_onnextsample(SamplesHeaderView* self, psy_ui_Component* s
 /* GeneralView */
 
 /* prototypes */
-static void generalview_setsample(SamplesGeneralView*, psy_audio_Sample*);
+static void generalview_set_sample(SamplesGeneralView*, psy_audio_Sample*);
 static void generalview_fillpandescription(SamplesGeneralView*, char* txt);
 static void generalview_ondescribe(SamplesGeneralView*, psy_ui_Slider*, char* txt);
 static void generalview_ontweak(SamplesGeneralView*, psy_ui_Slider*, float value);
@@ -440,7 +440,7 @@ void generalview_updatesliders(SamplesGeneralView* self)
 	psy_ui_slider_update(&self->pitchfinetune);
 }
 
-void generalview_setsample(SamplesGeneralView* self, psy_audio_Sample* sample)
+void generalview_set_sample(SamplesGeneralView* self, psy_audio_Sample* sample)
 {
 	self->sample = sample;
 	if (self->sample) {
@@ -569,7 +569,7 @@ void generalview_fillpandescription(SamplesGeneralView* self, char* txt) {
 
 /* SamplesVibratoView */
 /* prototypes */
-static void vibratoview_setsample(SamplesVibratoView*, psy_audio_Sample*);
+static void vibratoview_set_sample(SamplesVibratoView*, psy_audio_Sample*);
 static void vibratoview_ondescribe(SamplesVibratoView*, psy_ui_Slider*, char* txt);
 static void vibratoview_ontweak(SamplesVibratoView*, psy_ui_Slider*, float value);
 static void vibratoview_onvalue(SamplesVibratoView*, psy_ui_Slider*, float* value);
@@ -635,7 +635,7 @@ void samplesvibratoview_init(SamplesVibratoView* self, psy_ui_Component* parent,
 	}	
 }
 
-void vibratoview_setsample(SamplesVibratoView* self, psy_audio_Sample* sample)
+void vibratoview_set_sample(SamplesVibratoView* self, psy_audio_Sample* sample)
 {
 	self->sample = sample;
 	if (self->sample) {
@@ -756,7 +756,7 @@ psy_audio_WaveForms vibratoview_comboboxtowaveform(int combobox_index)
 }
 
 /* Waveloop Setting View */
-static void samplesloopview_setsample(SamplesLoopView*, psy_audio_Sample*);
+static void samplesloopview_set_sample(SamplesLoopView*, psy_audio_Sample*);
 static int LoopTypeToComboBox(psy_audio_SampleLoopType looptype);
 static psy_audio_SampleLoopType ComboBoxToLoopType(int combobox_index);
 static void samplesloopview_samplecontloopchanged(SamplesLoopView*, psy_audio_Sample* sender);
@@ -854,7 +854,7 @@ void samplesloopview_init(SamplesLoopView* self, psy_ui_Component* parent,
 	psy_audio_sampleloop_init(&self->currsustainloop);
 }
 
-void samplesloopview_setsample(SamplesLoopView* self, psy_audio_Sample* sample)
+void samplesloopview_set_sample(SamplesLoopView* self, psy_audio_Sample* sample)
 {
 	char tmp[40];
 
@@ -914,7 +914,7 @@ void samplesloopview_on_timer(SamplesLoopView* self, psy_ui_Component* sender,
 	if (!psy_audio_sampleloop_equal(&self->currloop, &self->sample->loop) ||
 			!psy_audio_sampleloop_equal(&self->currsustainloop,
 			&self->sample->sustainloop)) {			
-		samplesloopview_setsample(self, self->sample);
+		samplesloopview_set_sample(self, self->sample);
 	}		
 }
 
@@ -1232,10 +1232,10 @@ void samplesview_setsample(SamplesView* self, psy_audio_SampleIndex index)
 	workspace_song(self->workspace)->samples.selected = index;
 	wavebox_setsample(&self->wavebox, sample, 0);
 	sampleeditor_setsample(&self->sampleeditor, sample);
-	samplesheaderview_setsample(&self->header, sample);
-	generalview_setsample(&self->general, sample);
-	vibratoview_setsample(&self->vibrato, sample);
-	samplesloopview_setsample(&self->waveloop, sample);
+	samplesheaderview_set_sample(&self->header, sample);
+	generalview_set_sample(&self->general, sample);
+	vibratoview_set_sample(&self->vibrato, sample);
+	samplesloopview_set_sample(&self->waveloop, sample);
 	samplesbox_select(&self->samplesbox, index);
 }
 
@@ -1425,10 +1425,10 @@ uintptr_t samplesview_freesampleslot(SamplesView* self, uintptr_t startslot,
 
 void samplesview_onsamplemodified(SamplesView* self, SampleEditor* sender, psy_audio_Sample* sample)
 {
-	samplesheaderview_setsample(&self->header, sample);
-	generalview_setsample(&self->general, sample);
-	vibratoview_setsample(&self->vibrato, sample);
-	samplesloopview_setsample(&self->waveloop, sample);
+	samplesheaderview_set_sample(&self->header, sample);
+	generalview_set_sample(&self->general, sample);
+	vibratoview_set_sample(&self->vibrato, sample);
+	samplesloopview_set_sample(&self->waveloop, sample);
 }
 
 void samplesview_on_song_changed(SamplesView* self, psy_audio_Player* sender)

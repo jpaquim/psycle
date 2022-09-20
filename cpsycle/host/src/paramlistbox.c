@@ -34,7 +34,7 @@ void parameterlistbox_init(ParameterListBox* self, psy_ui_Component* parent,
 	knobui_init(&self->knob, &self->component, machine, paramindex, NULL);
 	psy_ui_component_set_align(&self->knob.component, psy_ui_ALIGN_TOP);
 	psy_ui_listbox_init(&self->listbox, &self->component);	
-	psy_ui_listbox_setcharnumber(&self->listbox, 10.0);
+	psy_ui_listbox_set_char_number(&self->listbox, 10.0);
 	psy_signal_connect(&self->listbox.signal_selchanged, self,
 		parameterlistbox_onlistboxselected);		
 	psy_ui_component_set_align(&self->listbox.component, psy_ui_ALIGN_CLIENT);	
@@ -104,5 +104,5 @@ void parameterlistbox_setmachine(ParameterListBox* self,
 
 intptr_t parameterlistbox_selected(ParameterListBox* self)
 {
-	return psy_ui_listbox_cursel(&self->listbox);
+	return psy_ui_listbox_cur_sel(&self->listbox);
 }

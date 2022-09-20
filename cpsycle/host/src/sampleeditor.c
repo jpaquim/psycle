@@ -296,7 +296,7 @@ void sampleprocessview_init(SampleEditorProcessView* self,
 		psy_ui_notebook_base(&self->notebook), NULL);
 	sampleeditluaprocessor_init(&self->luaprocessor,
 		psy_ui_notebook_base(&self->notebook));
-	psy_ui_listbox_setcursel(&self->processors, 0);
+	psy_ui_listbox_set_cur_sel(&self->processors, 0);
 	psy_ui_notebook_select(&self->notebook, 0);
 	psy_signal_connect(&self->processors.signal_selchanged, self,
 		sampleeditorprocessview_onprocessorselected);	
@@ -884,7 +884,7 @@ void sampleeditor_onprocess(SampleEditor* self, psy_ui_Component* sender)
 
 	intptr_t selected;
 
-	selected = psy_ui_listbox_cursel(&self->processview.processors);
+	selected = psy_ui_listbox_cur_sel(&self->processview.processors);
 	for (it = psy_table_begin(&self->samplebox.waveboxes);
 			!psy_tableiterator_equal(&it, psy_table_end());
 			psy_tableiterator_inc(&it)) {

@@ -8,6 +8,7 @@
 
 /* host */
 #include "machineui.h"
+#include "machineviewmenu.h"
 #include "headerui.h"
 #include "paramviews.h"
 #include "workspace.h"
@@ -87,6 +88,7 @@ uintptr_t machinestackcolumn_at(const MachineStackColumn*,
 uintptr_t machinestackcolumn_nextindex(const MachineStackColumn*,
 	uintptr_t index);
 bool machinestackcolumn_connectedtomaster(const MachineStackColumn*);
+void machinestackcolumn_trace(const MachineStackColumn*);
 
 /* MachineStackState */
 typedef struct MachineStackState {
@@ -111,6 +113,7 @@ typedef struct MachineStackState {
 	uintptr_t insertmachinemode;
 	bool drawsmalleffects;		
 	ParamViews* paramviews;
+	MachineMenu* machine_menu;
 } MachineStackState;
 
 void machinestackstate_init(MachineStackState*, ParamViews*);
@@ -278,11 +281,11 @@ typedef struct MachineStackView {
 	MachineStackState state;
 	/* references */
 	Workspace* workspace;	
-	ParamViews* paramviews;
+	ParamViews* paramviews;	
 } MachineStackView;
 
 void machinestackview_init(MachineStackView*, psy_ui_Component* parent,
-	psy_ui_Component* tabbarparent, ParamViews*, Workspace*);
+	psy_ui_Component* tabbarparent, ParamViews*, MachineMenu*, Workspace*);
 
 void machinestackview_updateskin(MachineStackView*);
 void machinestackview_showvirtualgenerators(MachineStackView*);
