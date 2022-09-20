@@ -335,8 +335,8 @@ void instrumentheaderview_oneditaccept(InstrumentHeaderView* self,
 			psy_ui_textarea_text(sender));
 		psy_snprintf(text, 20, "%02X:%s", 
 			(int)index.subslot, psy_audio_instrument_name(self->instrument));
-		psy_ui_listbox_settext(&self->view->instrumentsbox.instrumentlist, text,
-			index.subslot);		
+		psy_ui_listbox_set_text(&self->view->instrumentsbox.instrumentlist,
+			text, index.subslot);		
 	} else if (psy_strlen(psy_ui_textarea_text(sender)) > 0) {
 		if (workspace_song(self->view->workspace)) {
 			psy_audio_Instrument* instrument;

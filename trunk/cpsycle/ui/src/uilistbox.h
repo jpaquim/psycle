@@ -1,15 +1,14 @@
 /*
 ** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #ifndef psy_ui_LISTBOX_H
 #define psy_ui_LISTBOX_H
 
-#include "../../detail/psyconf.h"
-
-/* ui */
+/* local */
 #include "uiscroller.h"
+/* container */
 #include <hashtbl.h>
 
 #ifdef __cplusplus
@@ -17,17 +16,17 @@ extern "C" {
 #endif
 
 /*
-** psy_ui_ListBoxClient
+** psy_ui_ListBoxPane
 **
 ** psy_ui_Component
 **      ^
 **      |
-** psy_ui_ListBox <>----<> psy_ui_ListBoxClient           
+** psy_ui_ListBox <>----<> psy_ui_ListBoxPane           
 */
 
 
-/* psy_ui_ListBoxClient */
-typedef struct psy_ui_ListBoxClient {
+/* psy_ui_ListBoxPane */
+typedef struct psy_ui_ListBoxPane {
     /* inherits */
     psy_ui_Component component;
     /* signals */
@@ -36,14 +35,14 @@ typedef struct psy_ui_ListBoxClient {
     psy_Table items;
     intptr_t selindex;
     double charnumber;
-} psy_ui_ListBoxClient;
+} psy_ui_ListBoxPane;
 
-void psy_ui_listboxclient_init(psy_ui_ListBoxClient*, psy_ui_Component* parent);
-void psy_ui_listboxclient_clear(psy_ui_ListBoxClient*);
-intptr_t psy_ui_listboxclient_addtext(psy_ui_ListBoxClient*, const char* text);
-void psy_ui_listboxclient_setcursel(psy_ui_ListBoxClient*, intptr_t index);
-intptr_t psy_ui_listboxclient_cursel(const psy_ui_ListBoxClient*);
-void psy_ui_listboxclient_setcharnumber(psy_ui_ListBoxClient*, double num);
+void psy_ui_listboxpane_init(psy_ui_ListBoxPane*, psy_ui_Component* parent);
+void psy_ui_listboxpane_clear(psy_ui_ListBoxPane*);
+intptr_t psy_ui_listboxpane_add_text(psy_ui_ListBoxPane*, const char* text);
+void psy_ui_listboxpane_set_cur_sel(psy_ui_ListBoxPane*, intptr_t index);
+intptr_t psy_ui_listboxpane_cur_sel(const psy_ui_ListBoxPane*);
+void psy_ui_listboxpane_set_char_number(psy_ui_ListBoxPane*, double num);
 
 /* psy_ui_ListBox */
 typedef struct psy_ui_ListBox  {
@@ -52,22 +51,22 @@ typedef struct psy_ui_ListBox  {
     /* signals */
     psy_Signal signal_selchanged;    
     /* internal */
-    psy_ui_ListBoxClient client;
+    psy_ui_ListBoxPane pane;
     psy_ui_Scroller scroller;
     double charnumber;
 } psy_ui_ListBox;
 
 void psy_ui_listbox_init(psy_ui_ListBox*, psy_ui_Component* parent);
-void psy_ui_listbox_init_multiselect(psy_ui_ListBox*, psy_ui_Component* parent);
+void psy_ui_listbox_init_multi_select(psy_ui_ListBox*, psy_ui_Component* parent);
 intptr_t psy_ui_listbox_add_text(psy_ui_ListBox*, const char* text);
-void psy_ui_listbox_settext(psy_ui_ListBox*, const char* text, intptr_t index);
+void psy_ui_listbox_set_text(psy_ui_ListBox*, const char* text, intptr_t index);
 void psy_ui_listbox_clear(psy_ui_ListBox*);
-void psy_ui_listbox_setcursel(psy_ui_ListBox*, intptr_t index);
-intptr_t psy_ui_listbox_cursel(const psy_ui_ListBox*);
-void psy_ui_listbox_addsel(psy_ui_ListBox*, intptr_t index);
-void psy_ui_listbox_selitems(psy_ui_ListBox*, intptr_t* items, intptr_t maxitems);
-intptr_t psy_ui_listbox_selcount(psy_ui_ListBox*);
-void psy_ui_listbox_setcharnumber(psy_ui_ListBox*, double num);
+void psy_ui_listbox_set_cur_sel(psy_ui_ListBox*, intptr_t index);
+intptr_t psy_ui_listbox_cur_sel(const psy_ui_ListBox*);
+void psy_ui_listbox_add_sel(psy_ui_ListBox*, intptr_t index);
+void psy_ui_listbox_sel_items(psy_ui_ListBox*, intptr_t* items, intptr_t maxitems);
+intptr_t psy_ui_listbox_sel_count(psy_ui_ListBox*);
+void psy_ui_listbox_set_char_number(psy_ui_ListBox*, double num);
 intptr_t psy_ui_listbox_count(const psy_ui_ListBox*);
 
 INLINE psy_ui_Component* psy_ui_listbox_base(psy_ui_ListBox* self)

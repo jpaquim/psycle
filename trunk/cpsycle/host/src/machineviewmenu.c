@@ -18,6 +18,28 @@
 #define PREVENT_MASTER 0
 #define ALLOW_MASTER 1
 
+
+void machinemenuconfirm_init(MachineMenuConfirm* self,
+	psy_ui_Component* parent)
+{
+	psy_ui_component_init(&self->component, parent, NULL);	
+	psy_ui_label_init_text(&self->msg, &self->component, "mvmenu.sure");
+	psy_ui_component_set_style_type(&self->msg.component,
+		STYLE_TERM_BUTTON_WARNING);
+	psy_ui_label_prevent_wrap(&self->msg);
+	psy_ui_label_set_text_alignment(&self->msg, psy_ui_ALIGNMENT_CENTER);
+	psy_ui_component_set_align(&self->msg.component, psy_ui_ALIGN_TOP);
+	psy_ui_component_init_align(&self->client, &self->component, NULL,
+		psy_ui_ALIGN_TOP);
+	psy_ui_component_init_align(&self->buttons, &self->client, NULL,
+		psy_ui_ALIGN_CENTER);
+	psy_ui_button_init_text(&self->ok, &self->buttons, "mvmenu.yes");
+	
+	psy_ui_component_set_align(&self->ok.component, psy_ui_ALIGN_LEFT);
+	psy_ui_button_init_text(&self->cancel, &self->buttons, "mvmenu.no");
+	psy_ui_component_set_align(&self->cancel.component, psy_ui_ALIGN_LEFT);
+}
+
 /* MachineMenuState */
 
 /* implementation */
@@ -97,11 +119,21 @@ void machineconnectionsmenu_init(MachineConnectionsMenu* self,
 	assert(self);
 	
 	psy_ui_component_init(&self->component, parent, NULL);
-	vtable_init(self);
 	self->state = state;
 	psy_table_init(&self->wires);
-	psy_ui_component_set_default_align(&self->component, psy_ui_ALIGN_TOP,		
+	psy_ui_component_set_padding(&self->component, psy_ui_margin_make_em(
+		0.0, 1.0, 0.0, 1.0));	
+	psy_ui_component_init_align(&self->pane, &self->component, NULL,
+		psy_ui_ALIGN_CLIENT);
+	psy_ui_component_set_scroll_step_height(&self->pane,
+		psy_ui_value_make_eh(1.0));
+	psy_ui_component_set_wheel_scroll(&self->pane, 4);
+	psy_ui_component_set_overflow(&self->pane, psy_ui_OVERFLOW_VSCROLL);
+	psy_ui_component_set_default_align(&self->pane, psy_ui_ALIGN_TOP,		
 		psy_ui_margin_zero());
+	psy_ui_scroller_init(&self->scroller, &self->component, NULL, NULL);
+	psy_ui_scroller_set_client(&self->scroller, &self->pane);
+	psy_ui_component_set_align(&self->scroller.component, psy_ui_ALIGN_CLIENT);	
 	machineconnectionsmenu_fill(self);
 }
 
@@ -119,15 +151,12 @@ void machineconnectionsmenu_fill(MachineConnectionsMenu* self)
 	
 	assert(self);
 	
-	psy_ui_component_clear(&self->component);
+	psy_ui_component_clear(&self->pane);
 	psy_table_dispose_all(&self->wires, NULL);
 	psy_table_init(&self->wires);		
-	if (!self->state->machines) {
+	if (machinemenustate_invalid(self->state)) {
 		return;
-	}
-	if (self->state->mac_id == psy_INDEX_INVALID) {
-		return;
-	}
+	}	
 	sockets = psy_audio_connections_at(&self->state->machines->connections,
 		self->state->mac_id);
 	idx = 0;
@@ -136,8 +165,8 @@ void machineconnectionsmenu_fill(MachineConnectionsMenu* self)
 		psy_ui_Label* label;		
 		psy_TableIterator it;
 		/* inputs */
-		label = psy_ui_label_allocinit(&self->component);
-		psy_ui_label_set_text(label, "Inputs");
+		label = psy_ui_label_allocinit(&self->pane);
+		psy_ui_label_set_text(label, "mvmenu.inputs");
 		for (it = psy_audio_wiresockets_begin(&sockets->inputs);
 			!psy_tableiterator_equal(&it, psy_table_end());
 			psy_tableiterator_inc(&it)) {
@@ -161,13 +190,13 @@ void machineconnectionsmenu_fill(MachineConnectionsMenu* self)
 			}
 		}		
 		/* separator */
-		separator = psy_ui_component_allocinit(&self->component, NULL);
+		separator = psy_ui_component_allocinit(&self->pane, NULL);
 		psy_ui_component_set_style_type(separator, STYLE_SEPARATOR);
 			psy_ui_component_set_margin(separator, psy_ui_margin_make_em(
 			0.4, 0.0, 0.4, 0.0));
 		/* outputs */	
-		label = psy_ui_label_allocinit(&self->component);
-		psy_ui_label_set_text(label, "Outputs");
+		label = psy_ui_label_allocinit(&self->pane);
+		psy_ui_label_set_text(label, "mvmenu.outputs");
 		for (it = psy_audio_wiresockets_begin(&sockets->outputs);
 			!psy_tableiterator_equal(&it, psy_table_end());
 			psy_tableiterator_inc(&it)) {
@@ -193,8 +222,8 @@ void machineconnectionsmenu_fill(MachineConnectionsMenu* self)
 	} else {		
 		psy_ui_Label* label;		
 		
-		label = psy_ui_label_allocinit(&self->component);
-		psy_ui_label_set_text(label, "No connections");
+		label = psy_ui_label_allocinit(&self->pane);
+		psy_ui_label_set_text(label, "mvmenu.noconnections");
 	}
 }
 
@@ -206,7 +235,7 @@ void machineconnectionsmenu_append(MachineConnectionsMenu* self, char* str,
 	
 	assert(self);
 	
-	button = psy_ui_button_allocinit(&self->component);
+	button = psy_ui_button_allocinit(&self->pane);
 	newwire = (psy_audio_Wire*)malloc(sizeof(psy_audio_Wire));	
 	*newwire = wire;
 	psy_table_insert(&self->wires, idx, newwire);
@@ -251,10 +280,21 @@ void machineconnecttomenu_init(MachineConnectToMenu* self,
 {
 	assert(self);
 	
-	psy_ui_component_init(&self->component, parent, NULL);
+	psy_ui_component_init(&self->component, parent, NULL);	
 	self->state = state;
-	psy_ui_component_set_default_align(&self->component, psy_ui_ALIGN_TOP,		
+	psy_ui_component_set_padding(&self->component, psy_ui_margin_make_em(
+		0.0, 1.0, 0.0, 1.0));
+	psy_ui_component_init_align(&self->pane, &self->component, NULL,
+		psy_ui_ALIGN_CLIENT);
+	psy_ui_component_set_scroll_step_height(&self->pane,
+		psy_ui_value_make_eh(1.0));
+	psy_ui_component_set_wheel_scroll(&self->pane, 4);
+	psy_ui_component_set_overflow(&self->pane, psy_ui_OVERFLOW_VSCROLL);
+	psy_ui_component_set_default_align(&self->pane, psy_ui_ALIGN_TOP,		
 		psy_ui_margin_zero());
+	psy_ui_scroller_init(&self->scroller, &self->component, NULL, NULL);
+	psy_ui_scroller_set_client(&self->scroller, &self->pane);
+	psy_ui_component_set_align(&self->scroller.component, psy_ui_ALIGN_CLIENT);	
 	machineconnecttomenu_fill(self);
 }
 
@@ -265,40 +305,38 @@ void machineconnecttomenu_fill(MachineConnectToMenu* self)
 	
 	assert(self);
 	
-	psy_ui_component_clear(&self->component);
-	if (!self->state->machines) {
-		return;
-	}
-	if (self->state->mac_id == psy_INDEX_INVALID ||
-			self->state->mac_id == psy_audio_MASTER_INDEX) {
-		return;
-	}
+	psy_ui_component_clear(&self->pane);
 	connections = FALSE;
-	for (it = psy_audio_machines_begin(self->state->machines);
-			!psy_tableiterator_equal(&it, psy_table_end());
-			psy_tableiterator_inc(&it)) {
-		psy_audio_Wire wire;
-		
-		wire = psy_audio_wire_make(self->state->mac_id,
-			psy_tableiterator_key(&it));
-		if (psy_audio_machines_valid_connection(self->state->machines, wire) &&
-				(!psy_audio_machines_connected(self->state->machines, wire))) {
-			psy_audio_Machine* machine;
-			char str[64];
+	if (self->state->mac_id != psy_audio_MASTER_INDEX &&
+			!machinemenustate_invalid(self->state)) {				
+		for (it = psy_audio_machines_begin(self->state->machines);
+				!psy_tableiterator_equal(&it, psy_table_end());
+				psy_tableiterator_inc(&it)) {
+			psy_audio_Wire wire;
+			
+			wire = psy_audio_wire_make(self->state->mac_id,
+				psy_tableiterator_key(&it));
+			if (psy_audio_machines_valid_connection(self->state->machines,
+						wire) &&
+					(!psy_audio_machines_connected(self->state->machines,
+						wire))) {
+				psy_audio_Machine* machine;
+				char str[64];
 
-			machine = (psy_audio_Machine*)psy_tableiterator_value(&it);
-			assert(machine);		
-			psy_snprintf(str, 64, "%02X: %s", psy_tableiterator_key(&it), 
-				psy_audio_machine_editname(machine));
-			machineconnecttomenu_append(self, str, wire.dst);
-			connections = TRUE;
+				machine = (psy_audio_Machine*)psy_tableiterator_value(&it);
+				assert(machine);		
+				psy_snprintf(str, 64, "%02X: %s", psy_tableiterator_key(&it), 
+					psy_audio_machine_editname(machine));
+				machineconnecttomenu_append(self, str, wire.dst);
+				connections = TRUE;
+			}
 		}
 	}
 	if (!connections) {
 		psy_ui_Label* label;		
 		
-		label = psy_ui_label_allocinit(&self->component);
-		psy_ui_label_set_text(label, "No destinations");
+		label = psy_ui_label_allocinit(&self->pane);
+		psy_ui_label_set_text(label, "mvmenu.nodestinations");
 	}
 }
 
@@ -309,7 +347,7 @@ void machineconnecttomenu_append(MachineConnectToMenu* self, char* str,
 	
 	assert(self);
 	
-	button = psy_ui_button_allocinit(&self->component);
+	button = psy_ui_button_allocinit(&self->pane);
 	psy_ui_button_prevent_translation(button);
 	psy_ui_button_set_text(button, str);
 	psy_ui_component_set_id(psy_ui_button_base(button), dst);
@@ -425,6 +463,10 @@ static void machinemenu_on_machine_insert_after(MachineMenu*,
 	psy_ui_Component* sender);
 static void machinemenu_on_machine_replace(MachineMenu*,
 	psy_ui_Component* sender);
+static void machinemenu_on_machine_delete_confirm(MachineMenu*,
+	psy_ui_Component* sender);
+static void machinemenu_on_machine_confirm_reject(MachineMenu*,
+	psy_ui_Component* sender);
 static void machinemenu_on_machine_delete(MachineMenu*,
 	psy_ui_Component* sender);
 static void machinemenu_on_machine_mute(MachineMenu*,
@@ -498,7 +540,13 @@ void machinemenu_init(MachineMenu* self, psy_ui_Component* parent,
 	psy_ui_button_init_text_connect(&self->insertafter, &self->pane,
 		"mvmenu.insertafter", self, machinemenu_on_machine_insert_after);
 	psy_ui_button_init_text_connect(&self->del, &self->pane, "mvmenu.delete",
-		self, machinemenu_on_machine_delete);
+		self, machinemenu_on_machine_delete_confirm);
+	machinemenuconfirm_init(&self->confirm, &self->pane);
+	psy_signal_connect(&self->confirm.ok.signal_clicked, self,
+		machinemenu_on_machine_delete);
+	psy_signal_connect(&self->confirm.cancel.signal_clicked, self,
+		machinemenu_on_machine_confirm_reject);		
+	psy_ui_component_hide(&self->confirm.component);
 	psy_ui_component_init(&self->separator3, &self->pane, NULL);
 	psy_ui_component_set_style_type(&self->separator3, STYLE_SEPARATOR);
 	psy_ui_component_set_margin(&self->separator3, psy_ui_margin_make_em(
@@ -519,7 +567,7 @@ void machinemenu_init(MachineMenu* self, psy_ui_Component* parent,
 	psy_ui_component_set_align(&self->connections_menu.component,
 		psy_ui_ALIGN_RIGHT);
 	psy_ui_component_hide(&self->connections_menu.component);
-	psy_ui_component_hide(machinemenu_base(self));
+	psy_ui_component_hide(machinemenu_base(self));	
 	psy_ui_component_start_timer(&self->component, 0, 100);
 }
 
@@ -709,16 +757,30 @@ void machinemenu_on_machine_replace(MachineMenu* self,
 		VIEW_ID_MACHINEVIEW, SECTION_ID_MACHINEVIEW_NEWMACHINE));
 }
 
+void machinemenu_on_machine_delete_confirm(MachineMenu* self,
+	psy_ui_Component* sender)
+{
+	psy_ui_component_toggle_visibility(&self->confirm.component);
+	psy_ui_component_align(psy_ui_component_parent(&self->component));
+	psy_ui_component_invalidate(psy_ui_component_parent(&self->component));
+}
+
 void machinemenu_on_machine_delete(MachineMenu* self, psy_ui_Component* sender)
 {
 	assert(self);
-	
+		
 	machinemenu_hide(self);	
 	if (machinemenustate_invalid(&self->state) ||
 			self->state.mac_id == psy_audio_MASTER_INDEX) {
 		return;
 	}	
 	psy_audio_machines_remove(self->state.machines, self->state.mac_id, TRUE);		
+}
+
+void machinemenu_on_machine_confirm_reject(MachineMenu* self,
+	psy_ui_Component* sender)
+{
+	machinemenu_hide(self);
 }
 
 void machinemenu_on_machine_bypass(MachineMenu* self, psy_ui_Component* sender)
@@ -755,7 +817,10 @@ void machinemenu_hide(MachineMenu* self)
 	assert(self);
 	
 	psy_ui_component_hide(&self->connect_to_menu.component);
+	psy_ui_component_set_scroll_top_px(&self->connect_to_menu.pane, 0.0);
 	psy_ui_component_hide(&self->connections_menu.component);
+	psy_ui_component_set_scroll_top_px(&self->connections_menu.pane, 0.0);
+	psy_ui_component_hide(&self->confirm.component);
 	psy_ui_component_hide_align(&self->component);	
 }
 

@@ -24,6 +24,20 @@ extern "C" {
 
 struct WireFrames;
 
+typedef struct MachineMenuConfirm {
+	/* inherits */
+	psy_ui_Component component;
+	psy_ui_Label msg;
+	psy_ui_Component client;
+	psy_ui_Component buttons;
+	psy_ui_Button ok;
+	psy_ui_Button cancel;
+} MachineMenuConfirm;
+
+void machinemenuconfirm_init(MachineMenuConfirm*,
+	psy_ui_Component* parent);
+
+
 typedef struct MachineMenuState {
 	psy_audio_Machines* machines;
 	struct WireFrames* wireframes;
@@ -43,6 +57,8 @@ typedef struct MachineConnectionsMenu {
 	/* inherits */
 	psy_ui_Component component;
 	/* internal */
+	psy_ui_Component pane;
+	psy_ui_Scroller scroller;
 	psy_Table wires;	
 	/* references */
 	MachineMenuState* state;	
@@ -54,6 +70,9 @@ void machineconnectionsmenu_init(MachineConnectionsMenu*,
 typedef struct MachineConnectToMenu {
 	/* inherits */
 	psy_ui_Component component;
+	/* internal */
+	psy_ui_Component pane;
+	psy_ui_Scroller scroller;
 	/* references */
 	MachineMenuState* state;
 } MachineConnectToMenu;
@@ -101,7 +120,8 @@ typedef struct MachineMenu {
 	psy_ui_Button solo;
 	psy_ui_Button bypass;	
 	MachineConnectToMenu connect_to_menu;
-	MachineConnectionsMenu connections_menu;	
+	MachineConnectionsMenu connections_menu;
+	MachineMenuConfirm confirm;	
 	MachineMenuState state;
 } MachineMenu;
 

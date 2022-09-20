@@ -142,7 +142,7 @@ void machineview_init_stack_view(MachineView* self,
 	
 	machinestackview_init(&self->stackview,
 		psy_ui_notebook_base(&self->notebook), tabbarparent,
-		self->workspace->paramviews, self->workspace);
+		self->workspace->paramviews, &self->machine_menu, self->workspace);
 }
 
 void machineview_init_new_machine(MachineView* self,
@@ -198,14 +198,16 @@ void machineview_on_mouse_double_click(MachineView* self, psy_ui_MouseEvent* ev)
 {		
 	assert(self);
 		
-	if (psy_ui_component_section(&self->component) !=
-			SECTION_ID_MACHINEVIEW_NEWMACHINE) {		
-		self->newmachine.restoresection = psy_ui_component_section(
-			&self->component);		
-		self->shownewmachine = TRUE;
-		return;
-	} else {
-		self->shownewmachine = FALSE;
+	if (psy_ui_mouseevent_button(ev) == 1) {
+		if (psy_ui_component_section(&self->component) !=
+				SECTION_ID_MACHINEVIEW_NEWMACHINE) {		
+			self->newmachine.restoresection = psy_ui_component_section(
+				&self->component);		
+			self->shownewmachine = TRUE;
+			return;
+		} else {
+			self->shownewmachine = FALSE;
+		}
 	}
 	psy_ui_mouseevent_stop_propagation(ev);
 }
@@ -219,33 +221,13 @@ void machineview_on_mouse_up(MachineView* self, psy_ui_MouseEvent* ev)
 {
 	assert(self);
 	
-	if (self->shownewmachine) {
-		/*if (psy_ui_component_section(&self->component) ==
-				SECTION_ID_MACHINEVIEW_STACK) {
-			self->newmachine.restoresection = SECTION_ID_MACHINEVIEW_STACK;
-			if (self->stackview.state.insertmachinemode ==
-					psy_audio_MACHINES_INSERT_MODE_ADDEFFECTSTACK) {
-				workspace_select_view(self->workspace,
-					viewindex_make_all(
-					VIEW_ID_MACHINEVIEW,
-					SECTION_ID_MACHINEVIEW_NEWMACHINE,
-					psy_audio_MACHINES_INSERT_MODE_ADDEFFECTSTACK,
-					psy_INDEX_INVALID));
-			} else {
-				workspace_select_view(self->workspace,
-					viewindex_make_all(VIEW_ID_MACHINEVIEW,
-					SECTION_ID_MACHINEVIEW_NEWMACHINE,
-					psy_audio_MACHINES_INSERT_MODE_APPENDSTACK,
-					psy_INDEX_INVALID));
-			}
-		} else {*/
-			psy_ui_component_select_section(machineview_base(self),
-				SECTION_ID_MACHINEVIEW_NEWMACHINE,
-				psy_INDEX_INVALID);
-		// }
+	if (self->shownewmachine) {		
+		psy_ui_component_select_section(machineview_base(self),
+			SECTION_ID_MACHINEVIEW_NEWMACHINE,
+			psy_INDEX_INVALID);		
 		self->shownewmachine = FALSE;
 		psy_ui_mouseevent_stop_propagation(ev);
-	}	else if (psy_ui_mouseevent_button(ev) == 2) {
+	} else if (psy_ui_mouseevent_button(ev) == 2) {
 		if (psy_ui_tabbar_selected(&self->tabbar) ==
 				SECTION_ID_MACHINEVIEW_NEWMACHINE) {
 			psy_ui_tabbar_select(&self->tabbar,
