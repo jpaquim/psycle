@@ -40,11 +40,11 @@ typedef struct psy_ui_ComponentStyle {
 								** - if no state available points to the style
 								**   for STYLESTATE_NONE
 								** - if no style at all available points to
-								**   overridestyle
+								**   inlinestyle
 								*/
-	psy_ui_Style overridestyle;	/* overrides currstyle for component setter */
-	bool override_margin;
-	bool override_padding;
+	psy_ui_Style inlinestyle;	/* overrides currstyle for component setter */
+	bool inline_margin;
+	bool inline_padding;
 	psy_ui_StyleState states;	/* bit flag holding the activated states */	
 	psy_ui_SizeHints* sizehints;
 	intptr_t debugflag;
@@ -90,49 +90,49 @@ const psy_ui_Style* psy_ui_componentstyle_currstyle_const(const psy_ui_Component
 INLINE void psy_ui_componentstyle_setmargin(psy_ui_ComponentStyle* self,
 		psy_ui_Margin margin)
 {
-	psy_ui_style_setmargin(&self->overridestyle, margin);
-	self->override_margin = TRUE;
+	psy_ui_style_setmargin(&self->inlinestyle, margin);
+	self->inline_margin = TRUE;
 }
 
 INLINE psy_ui_Margin psy_ui_componentstyle_margin(const psy_ui_ComponentStyle* self)
 {	
-	if (self->override_margin) {
-		return self->overridestyle.margin;
+	if (self->inline_margin) {
+		return self->inlinestyle.margin;
 	} 
 	return psy_ui_componentstyle_currstyle_const(self)->margin;
 }
 
 INLINE void psy_ui_componentstyle_set_padding(psy_ui_ComponentStyle* self, psy_ui_Margin spacing)
 {
-	psy_ui_style_setpadding(&self->overridestyle, spacing);
-	self->override_padding = TRUE;
+	psy_ui_style_setpadding(&self->inlinestyle, spacing);
+	self->inline_padding = TRUE;
 }
 
 INLINE psy_ui_Margin psy_ui_componentstyle_spacing(const psy_ui_ComponentStyle * self)
 {
-	if (self->override_padding) {
-		return self->overridestyle.padding;
+	if (self->inline_padding) {
+		return self->inlinestyle.padding;
 	}
 	return psy_ui_componentstyle_currstyle_const(self)->padding;
 }
 
 INLINE psy_ui_Colour psy_ui_componentstyle_colour(const psy_ui_ComponentStyle* self)
 {
-	if (!self->overridestyle.colour.mode.transparent) {
-		return self->overridestyle.colour;
+	if (!self->inlinestyle.colour.mode.transparent) {
+		return self->inlinestyle.colour;
 	}
 	return psy_ui_componentstyle_currstyle_const(self)->colour;
 }
 
 INLINE void psy_ui_componentstyle_setcolour(psy_ui_ComponentStyle* self, psy_ui_Colour colour)
 {
-	self->overridestyle.colour = colour;
+	self->inlinestyle.colour = colour;
 }
 
 INLINE psy_ui_Colour psy_ui_componentstyle_backgroundcolour(const psy_ui_ComponentStyle* self)
 {
-	if (!self->overridestyle.background.colour.mode.transparent) {
-		return self->overridestyle.background.colour;
+	if (!self->inlinestyle.background.colour.mode.transparent) {
+		return self->inlinestyle.background.colour;
 	}
 	return psy_ui_componentstyle_currstyle_const(self)->background.colour;
 }
@@ -140,13 +140,13 @@ INLINE psy_ui_Colour psy_ui_componentstyle_backgroundcolour(const psy_ui_Compone
 INLINE void psy_ui_componentstyle_setbackgroundcolour(psy_ui_ComponentStyle* self,
 	psy_ui_Colour colour)
 {
-	self->overridestyle.background.colour = colour;
+	self->inlinestyle.background.colour = colour;
 }
 
 INLINE const psy_ui_Border* psy_ui_componentstyle_border(const psy_ui_ComponentStyle* self)
 {
-	if (self->overridestyle.border.mode.set) {
-		return &self->overridestyle.border;
+	if (self->inlinestyle.border.mode.set) {
+		return &self->inlinestyle.border;
 	}
 	return &psy_ui_componentstyle_currstyle_const(self)->border;
 }
@@ -154,10 +154,10 @@ INLINE const psy_ui_Border* psy_ui_componentstyle_border(const psy_ui_ComponentS
 INLINE void psy_ui_componentstyle_setborder(psy_ui_ComponentStyle* self, const psy_ui_Border* border)
 {
 	if (!border) {
-		self->overridestyle.border.mode.set = 0;
+		self->inlinestyle.border.mode.set = 0;
 		return;
 	}
-	self->overridestyle.border = *border;
+	self->inlinestyle.border = *border;
 }
 
 void psy_ui_componentstyle_usesizehints(psy_ui_ComponentStyle*);

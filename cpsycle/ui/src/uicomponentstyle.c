@@ -20,9 +20,9 @@ void psy_ui_componentstyle_init(psy_ui_ComponentStyle* self)
 	assert(self);
 
 	self->styles = NULL;	
-	psy_ui_style_init(&self->overridestyle);
-	self->override_margin = FALSE;
-	self->override_padding = FALSE;
+	psy_ui_style_init(&self->inlinestyle);
+	self->inline_margin = FALSE;
+	self->inline_padding = FALSE;
 	self->currstyle = psy_INDEX_INVALID;
 	self->states = psy_ui_STYLESTATE_NONE;		
 	if (!sizehints_initialized) {
@@ -42,7 +42,7 @@ void psy_ui_componentstyle_dispose(psy_ui_ComponentStyle* self)
 		psy_table_dispose(self->styles);
 		free(self->styles);
 	}
-	psy_ui_style_dispose(&self->overridestyle);
+	psy_ui_style_dispose(&self->inlinestyle);
 	if (self->sizehints != &sizehints) {
 		free(self->sizehints);
 		self->sizehints = NULL;
@@ -176,7 +176,7 @@ bool psy_ui_componentstyle_removestate(psy_ui_ComponentStyle* self,
 psy_ui_Style* psy_ui_componentstyle_currstyle(psy_ui_ComponentStyle* self)
 {	
 	if (self->currstyle == psy_INDEX_INVALID) {
-		return &self->overridestyle;
+		return &self->inlinestyle;
 	}
 	return psy_ui_style(self->currstyle);
 }

@@ -7,6 +7,7 @@
 #define MACHINEMENU_H
 
 /* host */
+#include "presetsview.h"
 #include "titlebar.h"
 #include "workspace.h"
 /* ui */
@@ -121,6 +122,7 @@ typedef struct MachineMenu {
 	psy_ui_Button bypass;	
 	MachineConnectToMenu connect_to_menu;
 	MachineConnectionsMenu connections_menu;
+	PresetsView presets;
 	MachineMenuConfirm confirm;	
 	MachineMenuState state;
 } MachineMenu;

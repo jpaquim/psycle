@@ -66,6 +66,8 @@ void playbar_init(PlayBar* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_ui_component_set_align(&self->buttons, psy_ui_ALIGN_TOP);
 	psy_ui_component_set_default_align(&self->buttons, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
+	psy_ui_component_set_minimum_size(playbar_base(self), 
+		psy_ui_size_make_em(30.0, 0.0));
 	self->workspace = workspace;
 	self->player = workspace_player(workspace);
 	/* loop */
