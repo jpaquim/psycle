@@ -443,23 +443,7 @@ void psy_ui_lclaligner_preferred_size(psy_ui_LCLAligner* self,
 				}
 			} else if (curr->align == psy_ui_ALIGN_CLIENT ||
 					curr->align == psy_ui_ALIGN_CENTER) {
-				if (psy_ui_value_px(&maxsize.height, tm, NULL) < cp.y +
-						psy_ui_value_px(&componentsize.height, c_tm, NULL) +
-					psy_ui_margin_height_px(&c_margin, c_tm, NULL))
-				{
-					maxsize.height = psy_ui_value_make_px(cp.y +
-							psy_ui_value_px(&componentsize.height,
-							c_tm, NULL) +
-						psy_ui_margin_height_px(&c_margin,
-							c_tm, NULL));
-				}
-				if (psy_ui_value_px(&maxsize.width, tm, NULL) <
-						psy_ui_value_px(&componentsize.width, c_tm, NULL) +
-					psy_ui_margin_width_px(&c_margin, c_tm, NULL)) {
-					maxsize.width = psy_ui_value_make_px(
-						psy_ui_value_px(&componentsize.width, c_tm, NULL) +
-						psy_ui_margin_width_px(&c_margin, c_tm, NULL));
-				}
+				client = curr;				
 			} else if (curr->align == psy_ui_ALIGN_TOP ||
 					curr->align == psy_ui_ALIGN_BOTTOM) {
 				cp.y += psy_ui_value_px(&componentsize.height, c_tm, NULL) +
@@ -526,6 +510,42 @@ void psy_ui_lclaligner_preferred_size(psy_ui_LCLAligner* self,
 		}
 	}
 	psy_list_free(q);
+	q = NULL;
+	if (client) {
+		psy_ui_Size componentsize;
+		psy_ui_Size limit;
+		const psy_ui_TextMetric* c_tm;
+		psy_ui_Margin c_margin;					
+
+		c_margin = psy_ui_component_margin(client);	
+		if (size.width.quantity != 0) {
+			limit.width = psy_ui_value_make_px(psy_ui_value_px(
+				&size.width, tm, NULL) - cp_topleft.x - cp_bottomright.x);		
+		} else {
+			limit.width = psy_ui_value_make_px(0);
+		}
+		limit.height = size.height;		
+		componentsize = psy_ui_component_preferred_size(client, &limit);
+		psy_ui_aligner_adjust_minmax_size(client, tm, &componentsize,
+			NULL);
+		c_tm = psy_ui_component_textmetric(client);
+		if (psy_ui_value_px(&maxsize.height, tm, NULL) < cp.y +
+					psy_ui_value_px(&componentsize.height, c_tm, NULL) +
+				psy_ui_margin_height_px(&c_margin, c_tm, NULL)) {
+			maxsize.height = psy_ui_value_make_px(cp.y +
+					psy_ui_value_px(&componentsize.height,
+					c_tm, NULL) +
+				psy_ui_margin_height_px(&c_margin,
+					c_tm, NULL));
+		}
+		if (psy_ui_value_px(&maxsize.width, tm, NULL) <
+				psy_ui_value_px(&componentsize.width, c_tm, NULL) +
+			psy_ui_margin_width_px(&c_margin, c_tm, NULL)) {
+			maxsize.width = psy_ui_value_make_px(
+				psy_ui_value_px(&componentsize.width, c_tm, NULL) +
+				psy_ui_margin_width_px(&c_margin, c_tm, NULL));
+		}
+	}
 	*rv = maxsize;	
 	psy_ui_aligner_add_border(group, rv);
 }

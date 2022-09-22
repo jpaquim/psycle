@@ -455,6 +455,8 @@ static void machinemenu_on_connect_to(MachineMenu*, psy_ui_Component* sender);
 static void machinemenu_on_connections(MachineMenu*, psy_ui_Component* sender);
 static void machinemenu_on_open_parameters(MachineMenu*,
 	psy_ui_Component* sender);
+static void machinemenu_on_open_bank_manager(MachineMenu*,
+	psy_ui_Component* sender);
 static void machinemenu_on_machine_clone(MachineMenu*,
 	psy_ui_Component* sender);
 static void machinemenu_on_machine_insert_before(MachineMenu*,
@@ -517,7 +519,8 @@ void machinemenu_init(MachineMenu* self, psy_ui_Component* parent,
 		machinemenu_on_close_button);	
 	psy_ui_button_init_text_connect(&self->parameters, &self->pane,
 		"mvmenu.parameters", self, machinemenu_on_open_parameters);	
-	psy_ui_button_init_text(&self->bank, &self->pane, "mvmenu.bank");
+	psy_ui_button_init_text_connect(&self->bank, &self->pane, "mvmenu.bank",
+		self, machinemenu_on_open_bank_manager);
 	psy_ui_component_init(&self->separator1, &self->pane, NULL);
 	psy_ui_component_set_style_type(&self->separator1, STYLE_SEPARATOR);
 	psy_ui_component_set_margin(&self->separator1, psy_ui_margin_make_em(
@@ -567,6 +570,10 @@ void machinemenu_init(MachineMenu* self, psy_ui_Component* parent,
 	psy_ui_component_set_align(&self->connections_menu.component,
 		psy_ui_ALIGN_RIGHT);
 	psy_ui_component_hide(&self->connections_menu.component);
+	presetsview_init(&self->presets, &self->component);
+	psy_ui_component_set_align(&self->presets.component,
+		psy_ui_ALIGN_RIGHT);
+	psy_ui_component_hide(&self->presets.component);
 	psy_ui_component_hide(machinemenu_base(self));	
 	psy_ui_component_start_timer(&self->component, 0, 100);
 }
@@ -576,7 +583,7 @@ void machinemenu_on_connect_to(MachineMenu* self, psy_ui_Component* sender)
 	assert(self);
 	
 	psy_ui_component_hide(&self->connections_menu.component);
-	psy_ui_component_toggle_visibility(&self->connect_to_menu.component);	
+	psy_ui_component_toggle_visibility(&self->connect_to_menu.component);
 	psy_ui_component_align(psy_ui_component_parent(&self->component));
 	psy_ui_component_invalidate(psy_ui_component_parent(&self->component));
 }
@@ -631,6 +638,16 @@ void machinemenu_on_open_parameters(MachineMenu* self,
 	if (paramviews) {
 		paramviews_show(paramviews, self->state.mac_id);
 	}
+}
+
+void machinemenu_on_open_bank_manager(MachineMenu* self,
+	psy_ui_Component* sender)
+{
+	assert(self);
+	
+	psy_ui_component_toggle_visibility(&self->presets.component);
+	psy_ui_component_align(psy_ui_component_parent(&self->component));
+	psy_ui_component_invalidate(psy_ui_component_parent(&self->component));
 }
 
 void machinemenu_on_machine_mute(MachineMenu* self, psy_ui_Component* sender)
@@ -821,6 +838,7 @@ void machinemenu_hide(MachineMenu* self)
 	psy_ui_component_hide(&self->connections_menu.component);
 	psy_ui_component_set_scroll_top_px(&self->connections_menu.pane, 0.0);
 	psy_ui_component_hide(&self->confirm.component);
+	psy_ui_component_hide(&self->presets.component);
 	psy_ui_component_hide_align(&self->component);	
 }
 

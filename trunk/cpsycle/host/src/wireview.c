@@ -377,7 +377,7 @@ void wireframe_init(WireFrame* self, psy_ui_Component* parent,
 	assert(workspace->song);
 	assert(psy_audio_wire_valid(&wire));
 
-	psy_ui_frame_init(wireframe_base(self), (parent->view)
+	psy_ui_toolframe_init(wireframe_base(self), (parent->view)
 		? parent->view : parent);
 	psy_ui_component_doublebuffer(wireframe_base(self));
 	psy_ui_component_seticonressource(wireframe_base(self), IDI_MACPARAM);

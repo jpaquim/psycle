@@ -59,6 +59,7 @@ void psy_ui_combobox_init(psy_ui_ComboBox* self, psy_ui_Component* parent)
 	psy_ui_component_init(&self->component, parent, NULL);
 	vtable_init(self);
 	self->property = NULL;
+	self->simple = FALSE;
 	psy_signal_init(&self->signal_selchanged);
 	psy_table_init(&self->itemdata);
 	psy_ui_component_set_style_type(&self->component, psy_ui_STYLE_COMBOBOX);
@@ -108,6 +109,58 @@ void psy_ui_combobox_init(psy_ui_ComboBox* self, psy_ui_Component* parent)
 		psy_ui_ALIGN_LEFT);
 	psy_ui_button_set_icon(&self->expand, psy_ui_ICON_DOWN);
 }
+
+void psy_ui_combobox_init_simple(psy_ui_ComboBox* self,
+	psy_ui_Component* parent)
+{
+	assert(self);
+
+	psy_ui_component_init(&self->component, parent, NULL);
+	vtable_init(self);
+	self->property = NULL;
+	self->simple = TRUE;
+	psy_signal_init(&self->signal_selchanged);
+	psy_table_init(&self->itemdata);
+	psy_ui_component_set_style_type(&self->component, psy_ui_STYLE_COMBOBOX);
+	psy_ui_component_set_align_expand(psy_ui_combobox_base(self),
+		psy_ui_HEXPAND);	
+	/* listbox */
+	psy_ui_component_init(&self->pane, &self->component, NULL);
+	psy_ui_component_set_padding(&self->pane, psy_ui_margin_make_em(
+		0.0, 0.2, 0.2, 0.2));
+	psy_ui_component_set_align(&self->pane, psy_ui_ALIGN_CLIENT);
+	psy_ui_listbox_init(&self->listbox, &self->pane);
+	self->listbox.scroller.prevent_mouse_down_propagation = FALSE;
+	psy_signal_connect(&self->listbox.signal_selchanged, self,
+		psy_ui_combobox_onselchange);
+	psy_ui_component_set_align(&self->listbox.component,
+		psy_ui_ALIGN_CLIENT);	
+	/* textfield */
+	psy_ui_component_init(&self->editpane, &self->component, NULL);
+	psy_ui_component_set_align(&self->editpane, psy_ui_ALIGN_TOP);	
+	psy_ui_label_init(&self->textfield, &self->editpane);
+	psy_ui_label_prevent_translation(&self->textfield);
+	psy_ui_component_set_style_type(psy_ui_label_base(&self->textfield),
+		psy_ui_STYLE_COMBOBOX_TEXT);
+	psy_ui_component_set_align(psy_ui_label_base(&self->textfield),
+		psy_ui_ALIGN_LEFT);
+	psy_ui_label_set_char_number(&self->textfield, 10.0);
+	psy_signal_connect(&psy_ui_label_base(&self->textfield)->signal_mousedown,
+		self, psy_ui_combobox_on_text_field);
+	/* less */
+	psy_ui_button_init_connect(&self->less, &self->editpane,
+		self, psy_ui_combobox_on_less);
+	psy_ui_component_set_align(psy_ui_button_base(&self->less),
+		psy_ui_ALIGN_LEFT);
+	psy_ui_button_set_icon(&self->less, psy_ui_ICON_LESS);
+	/* more */
+	psy_ui_button_init_connect(&self->more, &self->editpane,
+		self, psy_ui_combobox_on_more);
+	psy_ui_button_set_icon(&self->more, psy_ui_ICON_MORE);
+	psy_ui_component_set_align(psy_ui_button_base(&self->more),
+		psy_ui_ALIGN_LEFT);	
+}
+
 
 void psy_ui_combobox_on_destroyed(psy_ui_ComboBox* self)
 {
@@ -363,6 +416,9 @@ void psy_ui_combobox_expand(psy_ui_ComboBox* self)
 {
 	assert(self);
 
+	if (self->simple) {
+		return;
+	}
 	if (!psy_ui_component_visible(&self->dropdown.component)) {
 		psy_ui_dropdownbox_show(&self->dropdown, &self->component);
 		psy_ui_component_capture(&self->dropdown.component);

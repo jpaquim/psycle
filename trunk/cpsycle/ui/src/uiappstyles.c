@@ -82,8 +82,8 @@ void psy_ui_appstyles_initdarktheme(psy_ui_Styles* self,
 	/* label::disabled */
 	style = psy_ui_style_allocinit();
 	psy_ui_style_set_colour(style,
-		psy_ui_colour_weighted(&material.onsurface, material.weak));
-		psy_ui_styles_set_style(self, psy_ui_STYLE_LABEL_DISABLED, "label::disabled", style);
+	psy_ui_colour_weighted(&material.onsurface, material.weak));
+	psy_ui_styles_set_style(self, psy_ui_STYLE_LABEL_DISABLED, "label::disabled", style);
 	style = psy_ui_style_allocinit();
 	psy_ui_style_set_colour(style, material.secondary);	
 	psy_ui_styles_set_style(self, psy_ui_STYLE_LABEL_SELECT, "label::select", style);

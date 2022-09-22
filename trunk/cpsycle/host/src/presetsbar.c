@@ -78,7 +78,8 @@ void presetsbar_init(PresetsBar* self, psy_ui_Component* parent,
 		"machineframe.import");
 	psy_ui_button_init_text(&self->exportpresets, &self->component,
 		"machineframe.export");
-	psy_ui_label_init_text(&self->program, &self->component, "machineframe.program");
+	psy_ui_label_init_text(&self->program, &self->component,
+		"machineframe.program");
 	psy_ui_combobox_init(&self->programbox, &self->component);
 	psy_ui_combobox_set_char_number(&self->programbox, 20);
 	psy_ui_button_init_text(&self->savepresets, &self->component,
@@ -133,7 +134,8 @@ void presetsbar_setmachine(PresetsBar* self, psy_audio_Machine* machine)
 				presets,
 				psy_audio_machine_numtweakparameters(self->machine),
 				psy_audio_machine_datasize(self->machine),
-				dirconfig_plugins_curr_platform(&self->workspace->config.directories));
+				dirconfig_plugins_curr_platform(
+					&self->workspace->config.directories));
 			if (status != psy_audio_PRESETIO_OK) {
 				psy_audio_machine_setpresets(self->machine, NULL);
 				psy_audio_presets_dispose(presets);
