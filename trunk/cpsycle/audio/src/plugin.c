@@ -727,6 +727,11 @@ int savespecific(psy_audio_Plugin* self, psy_audio_SongFile* songfile,
 
 void setpresets(psy_audio_Plugin* self, psy_audio_Presets* presets)
 {
+	assert(self);
+	
+	if (self->presets == presets) {
+		return;
+	}
 	if (self->presets) {
 		psy_audio_presets_dispose(self->presets);
 		free(self->presets);		

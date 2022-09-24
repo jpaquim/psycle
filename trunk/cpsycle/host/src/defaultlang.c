@@ -516,6 +516,10 @@ void make_translator_default(psy_Dictionary* dict)
 	psy_dictionary_set(dict, "machineframe.import", "Import");
 	psy_dictionary_set(dict, "machineframe.export", "Export");
 	psy_dictionary_set(dict, "machineframe.saveas", "Save as");
+	psy_dictionary_set(dict, "machineframe.delete", "Delete");
+	psy_dictionary_set(dict, "machineframe.preview", "Preview");
+	psy_dictionary_set(dict, "machineframe.use", "Use");
+	psy_dictionary_set(dict, "machineframe.close", "Close");
 	/* patternview */
 	psy_dictionary_set(dict, "patternview.line", "Line");
 	psy_dictionary_set(dict, "patternview.defaults", "Defaults");

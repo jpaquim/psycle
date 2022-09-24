@@ -10,6 +10,8 @@
 #include "titlebar.h"
 #include "workspace.h"
 /* ui */
+#include <uibutton.h>
+#include <uicheckbox.h>
 #include <uicombobox.h>
 
 #ifdef __cplusplus
@@ -24,14 +26,26 @@ typedef struct PresetsView {
 	/* internal */
 	TitleBar title_bar;
 	psy_ui_Component client;
-	psy_ui_ComboBox presets;	
-	psy_ui_Component buttons;
-	psy_ui_Button importpresets;
-	psy_ui_Button exportpresets;
-	psy_ui_Button savepresets;
+	psy_ui_ComboBox programbox;	
+	psy_ui_Component buttons;	
+	psy_ui_Button save;
+	psy_ui_Button del;
+	psy_ui_Button import;
+	psy_ui_Button export_preset;
+	psy_ui_CheckBox preview;
+	psy_ui_Component bottom;
+	psy_ui_Button use;
+	psy_ui_Button close;
+	psy_Property presets_load;
+	psy_Property presets_save;
+	uintptr_t mac_id;
+	/* references */
+	Workspace* workspace;
 } PresetsView;
 
-void presetsview_init(PresetsView*, psy_ui_Component* parent);
+void presetsview_init(PresetsView*, psy_ui_Component* parent, Workspace*);
+
+void presetsview_set_mac_id(PresetsView*, uintptr_t mac_id);
 
 #ifdef __cplusplus
 }

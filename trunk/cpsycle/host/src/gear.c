@@ -64,7 +64,7 @@ void gear_init(Gear* self, psy_ui_Component* parent, ParamViews* param_views,
 	Workspace* workspace)
 {			
 	psy_ui_component_init(gear_base(self), parent, NULL);	
-	psy_ui_component_set_style_type(gear_base(self), STYLE_GEAR);
+	psy_ui_component_set_style_type(gear_base(self), STYLE_BOX);
 	self->workspace = workspace;
 	self->param_views = param_views;
 	if (workspace_song(self->workspace)) {

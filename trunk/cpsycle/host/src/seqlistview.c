@@ -148,7 +148,7 @@ void seqviewitem_draw_entry(SeqViewItem* self, psy_ui_Graphics* g,
 		col = psy_min(col, strlen(text));
 		psy_ui_set_text_colour(g, psy_ui_style_const(STYLE_SEQ_PROGRESS)->colour);
 		seqviewitem_textout_digit(self, g, text, col, cp);
-		psy_ui_set_text_colour(g, psy_ui_style_const(STYLE_SEQLISTVIEW)->colour);
+		psy_ui_set_text_colour(g, psy_ui_style_const(STYLE_BOX)->colour);
 		seqviewitem_textout_digit(self, g, text + col, 
 			len - col, psy_ui_realpoint_make(col * self->state->colwidth, cp.y));
 	} else {		

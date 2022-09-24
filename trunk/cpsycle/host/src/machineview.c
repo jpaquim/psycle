@@ -25,6 +25,7 @@ static void machineview_init_new_machine(MachineView*,
 	psy_ui_Component* tabbarparent);
 static void machineview_init_tabbar(MachineView*,
 	psy_ui_Component* tabbarparent);
+static void machineview_init_menu(MachineView*);
 static void machineview_on_tabbar_changed(MachineView*, psy_ui_TabBar* sender,
 	uintptr_t index);
 static void machineview_connect_signals(MachineView*);
@@ -85,17 +86,14 @@ void machineview_init(MachineView* self, psy_ui_Component* parent,
 	
 	machineview_init_component(self, parent);	
 	self->shownewmachine = FALSE;
-	self->workspace = workspace;
-	machinemenu_init(&self->machine_menu, &self->component, NULL);
-	machineview_set_song(self, workspace_song(workspace));
-	psy_ui_component_set_align(&self->machine_menu.component,
-		psy_ui_ALIGN_RIGHT);	
-	psy_ui_component_hide(&self->machine_menu.component);
+	self->workspace = workspace;	
 	machineview_init_notebook(self, tabbarparent);
 	machineview_init_wire_view(self, tabbarparent);
 	machineview_init_stack_view(self, tabbarparent);	
 	machineview_init_new_machine(self, tabbarparent);	
 	machineview_init_tabbar(self, tabbarparent);
+	machineview_init_menu(self);
+	machineview_set_song(self, workspace_song(workspace));
 	machineview_connect_signals(self);	
 	psy_ui_tabbar_select(&self->tabbar, SECTION_ID_MACHINEVIEW_WIRES);	
 }
@@ -131,8 +129,7 @@ void machineview_init_wire_view(MachineView* self,
 		self->workspace->paramviews, &self->machine_menu,
 		self->workspace);	
 	psy_ui_component_set_align(machinewireview_base(&self->wireview),
-		psy_ui_ALIGN_CLIENT);
-	self->machine_menu.state.wireframes = &self->wireview.pane.wireframes;
+		psy_ui_ALIGN_CLIENT);	
 }
 
 void machineview_init_stack_view(MachineView* self,
@@ -174,6 +171,17 @@ void machineview_init_tabbar(MachineView* self, psy_ui_Component* tabbarparent)
 	psy_ui_tabbar_append(&self->tabbar, "machineview.new-machine",
 		SECTION_ID_MACHINEVIEW_NEWMACHINE, IDB_NEWMACHINE_LIGHT,
 		IDB_NEWMACHINE_DARK, psy_ui_colour_white());
+}
+
+void machineview_init_menu(MachineView* self)
+{
+	assert(self);
+	
+	machinemenu_init(&self->machine_menu, &self->component,
+		&self->wireview.pane.wireframes);
+	psy_ui_component_set_align(&self->machine_menu.component,
+		psy_ui_ALIGN_RIGHT);	
+	psy_ui_component_hide(&self->machine_menu.component);
 }
 
 void machineview_connect_signals(MachineView* self)

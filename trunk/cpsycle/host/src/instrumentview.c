@@ -273,7 +273,7 @@ void instrumentheaderview_init(InstrumentHeaderView* self,
 	self->instrument = NULL;
 	self->instruments = instruments;
 	psy_ui_component_init(&self->component, parent, NULL);
-	psy_ui_component_set_style_type(&self->component, STYLE_INSTRVIEW_HEADER);
+	psy_ui_component_set_style_type(&self->component, STYLE_VIEW_HEADER);
 	psy_ui_component_set_default_align(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	psy_ui_label_init_text(&self->namelabel, &self->component,

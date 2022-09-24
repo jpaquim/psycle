@@ -393,7 +393,7 @@ void machinemenutitle_init(MachineMenuTitle* self, psy_ui_Component* parent,
 	psy_ui_component_init_align(&self->component, parent, NULL,
 		psy_ui_ALIGN_TOP);
 	self->state = state;	
-	psy_ui_component_set_style_type(&self->component, STYLE_HEADER);
+	psy_ui_component_set_style_type(&self->component, STYLE_TITLEBAR);
 	psy_ui_component_init_align(&self->client, &self->component, NULL,
 		psy_ui_ALIGN_CLIENT);
 	psy_ui_label_init(&self->mac_id, &self->component);
@@ -504,6 +504,8 @@ void machinemenu_init(MachineMenu* self, psy_ui_Component* parent,
 	WireFrames* wireframes)
 {
 	assert(self);
+	assert(wireframes);
+	assert(wireframes->workspace);
 		
 	psy_ui_component_init(&self->component, parent, NULL);
 	machinemenu_vtable_init(self);
@@ -569,10 +571,9 @@ void machinemenu_init(MachineMenu* self, psy_ui_Component* parent,
 		&self->state);
 	psy_ui_component_set_align(&self->connections_menu.component,
 		psy_ui_ALIGN_RIGHT);
-	psy_ui_component_hide(&self->connections_menu.component);
-	presetsview_init(&self->presets, &self->component);
-	psy_ui_component_set_align(&self->presets.component,
-		psy_ui_ALIGN_RIGHT);
+	psy_ui_component_hide(&self->connections_menu.component);	
+	presetsview_init(&self->presets, &self->component, wireframes->workspace);
+	psy_ui_component_set_align(&self->presets.component, psy_ui_ALIGN_RIGHT);
 	psy_ui_component_hide(&self->presets.component);
 	psy_ui_component_hide(machinemenu_base(self));	
 	psy_ui_component_start_timer(&self->component, 0, 100);
@@ -612,7 +613,8 @@ void machinemenu_select(MachineMenu* self, uintptr_t mac_id)
 	assert(self);
 	
 	self->state.mac_id = mac_id;
-	machinemenu_update_machine(self);	
+	machinemenu_update_machine(self);
+	presetsview_set_mac_id(&self->presets, mac_id);
 }
 
 void machinemenu_update_machine(MachineMenu* self)

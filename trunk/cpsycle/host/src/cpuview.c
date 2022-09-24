@@ -149,8 +149,7 @@ void cpuview_init(CPUView* self, psy_ui_Component* parent,
 	psy_ui_margin_init_em(&margin, 0.0, 0.0, 0.5, 2.0);		
 	psy_ui_component_init(&self->component, parent, NULL);
 	self->lastnummachines = psy_INDEX_INVALID;
-	psy_ui_component_set_style_type(&self->component,
-		STYLE_RECENTVIEW_MAINSECTION);
+	psy_ui_component_set_style_type(&self->component, STYLE_BOX);
 	self->workspace = workspace;
 	psy_ui_margin_init(&self->topmargin);		
 	psy_ui_component_init_align(&self->top, &self->component, NULL,

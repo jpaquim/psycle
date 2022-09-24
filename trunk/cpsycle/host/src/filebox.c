@@ -182,8 +182,7 @@ void filebox_init(FileBox* self, psy_ui_Component* parent)
 		NULL, NULL);
 	self->scroller.prevent_mouse_down_propagation = FALSE;
 	psy_ui_scroller_set_client(&self->scroller, &self->pane);
-	psy_ui_component_set_style_type(&self->scroller.component, 
-		STYLE_SEQLISTVIEW);
+	psy_ui_component_set_style_type(&self->scroller.component, STYLE_BOX);
 	psy_ui_component_set_padding(psy_ui_scroller_base(&self->scroller),
 		psy_ui_margin_make_em(0.5, 0.5, 0.0, 1.0));
 	psy_ui_component_set_align(&self->scroller.component, psy_ui_ALIGN_CLIENT);
