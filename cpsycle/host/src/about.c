@@ -371,13 +371,13 @@ void about_on_button(About* self, psy_ui_Button* sender)
 void about_select_infobox(About* self, uintptr_t index)
 {
 	psy_ui_notebook_select(&self->notebook, index);
-	if (psy_ui_component_visible(psy_ui_notebook_base(&self->notebook))) {
-		 psy_ui_style_set_background_id(psy_ui_componentstyle_currstyle(
-			 &self->component.style), IDB_ABOUT);
+	/*if (psy_ui_component_visible(psy_ui_notebook_base(&self->notebook))) {
+		psy_ui_componentstyle_set_background_id(&self->component.style,
+			IDB_ABOUT);
 	} else {
-		 psy_ui_style_set_background_id(psy_ui_componentstyle_currstyle(
-			 &self->component.style), psy_INDEX_INVALID);
-	}
+		 psy_ui_componentstyle_set_background_id(&self->component.style,
+			psy_INDEX_INVALID);
+	}*/
 	psy_ui_component_toggle_visibility(psy_ui_notebook_base(&self->notebook));	
 }
 

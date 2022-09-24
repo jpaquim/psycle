@@ -47,7 +47,7 @@ void titlebar_init(TitleBar* self, psy_ui_Component* parent,
 	titlebar_vtable_init(self);
 	self->component.draggable = TRUE;
 	self->dragid = NULL;
-	psy_ui_component_set_style_type(&self->component, STYLE_HEADER);
+	psy_ui_component_set_style_type(&self->component, STYLE_TITLEBAR);
 	psy_ui_component_init_align(&self->client, &self->component, NULL,
 		psy_ui_ALIGN_CLIENT);
 	psy_ui_label_init_text(&self->title, &self->client, title);

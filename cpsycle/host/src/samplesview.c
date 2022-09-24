@@ -246,7 +246,7 @@ void samplesheaderview_init(SamplesHeaderView* self, psy_ui_Component* parent,
 	self->view = view;
 	self->instruments = instruments;	
 	psy_ui_component_init(&self->component, parent, NULL);
-	psy_ui_component_set_style_type(&self->component, STYLE_SAMPLESVIEW_HEADER);	
+	psy_ui_component_set_style_type(&self->component, STYLE_VIEW_HEADER);	
 	psy_ui_component_set_default_align(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	/* sample name */
@@ -1285,8 +1285,7 @@ void samplesview_onloadsamplebtn(SamplesView* self, psy_ui_Component* sender)
 void samplesview_on_load_sample(SamplesView* self, psy_Property* sender)
 {	
 	samplesview_load_sample(self, psy_property_item_str(sender));	
-	workspace_select_view(self->workspace, viewindex_make_all(VIEW_ID_SAMPLESVIEW,
-		0, 0, psy_INDEX_INVALID));
+	workspace_select_view(self->workspace, viewindex_make(VIEW_ID_SAMPLESVIEW));
 }
 
 void samplesview_load_sample(SamplesView* self, const char* path)

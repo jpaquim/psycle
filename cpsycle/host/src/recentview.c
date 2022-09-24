@@ -28,7 +28,7 @@ void playlistview_init(PlaylistView* self, psy_ui_Component* parent,
 		tabbarparent, playlist->recentsongs, 1, FALSE,
 		inputhandler);	
 	propertiesrenderer_set_style(&self->view.renderer,
-		STYLE_RECENTVIEW_MAINSECTION,
+		STYLE_BOX,
 		STYLE_RECENTVIEW_MAINSECTIONHEADER,
 		STYLE_RECENTVIEW_LINE,
 		STYLE_RECENTVIEW_LINE_HOVER,

@@ -397,8 +397,7 @@ void midimonitor_init(MidiMonitor* self, psy_ui_Component* parent, Workspace*
 	self->workspace = workspace;
 	self->channelstatcounter = 0;
 	psy_ui_component_set_vtable(midimonitor_base(self), midimonitor_vtable_init(self));
-	psy_ui_component_set_style_type(&self->component,
-		STYLE_RECENTVIEW_MAINSECTION);
+	psy_ui_component_set_style_type(&self->component, STYLE_BOX);
 	midimonitor_inittitlebar(self);
 	psy_ui_component_init(&self->client, midimonitor_base(self), NULL);
 	psy_ui_component_set_align(&self->client, psy_ui_ALIGN_CLIENT);

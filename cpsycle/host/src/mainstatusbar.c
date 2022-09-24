@@ -107,6 +107,7 @@ void mainstatusbar_init(MainStatusBar* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->component, parent, NULL);	
 	vtable_init(self);	
 	psy_ui_component_set_style_type(&self->component, STYLE_STATUSBAR);
+	// psy_ui_component_add_style_type(&self->component, STYLE_STATUSBAR1);
 	psy_ui_component_init(&self->pane, &self->component, NULL);
 	psy_ui_component_set_align(&self->pane, psy_ui_ALIGN_CLIENT);	
 	self->workspace = workspace;	
@@ -183,10 +184,11 @@ void mainstatusbar_init_terminal_button(MainStatusBar* self)
 	psy_ui_button_init_text(&self->toggleterminal, &self->pane, "Terminal");
 	psy_ui_component_set_style_type(&self->toggleterminal.component,
 		self->workspace->terminalstyleid);
+	self->terminal_button_mode = self->workspace->terminalstyleid;
 	psy_ui_component_set_align(psy_ui_button_base(&self->toggleterminal),
 		psy_ui_ALIGN_RIGHT);
 	psy_ui_button_load_resource(&self->toggleterminal, IDB_TERM, IDB_TERM,
-		psy_ui_colour_white());
+		psy_ui_colour_white());	
 }
 
 void mainstatusbar_init_progress_bar(MainStatusBar* self)
@@ -212,11 +214,11 @@ void mainstatusbar_on_status(MainStatusBar* self, Workspace* sender,
 
 void mainstatusbar_update_terminal_button(MainStatusBar* self)
 {
-	if (psy_ui_componentstyle_style_id(&self->component.style,
-			psy_ui_STYLESTATE_NONE) != self->workspace->terminalstyleid) {
+	if (self->terminal_button_mode != self->workspace->terminalstyleid) {
 		psy_ui_component_set_style_type(
 			psy_ui_button_base(&self->toggleterminal),
 			self->workspace->terminalstyleid);
+		self->terminal_button_mode = self->workspace->terminalstyleid;
 		psy_ui_component_invalidate(psy_ui_button_base(&self->toggleterminal));
 	}
 }

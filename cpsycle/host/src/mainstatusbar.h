@@ -56,6 +56,7 @@ typedef struct MainStatusBar {
 	intptr_t pluginscanprogress;	
 	char* strbuffer;
 	psy_Lock outputlock;
+	uintptr_t terminal_button_mode;
 	/* references */
 	Workspace* workspace;
 } MainStatusBar;

@@ -280,8 +280,11 @@ void mainframe_init_layout(MainFrame* self)
 		psy_ui_ALIGN_BOTTOM);
 	psy_ui_component_init_align(&self->client, &self->pane, NULL,
 		psy_ui_ALIGN_CLIENT);	
-	psy_ui_component_init_align(&self->top, &self->pane,
-		NULL, psy_ui_ALIGN_TOP);	
+	psy_ui_component_init_align(&self->top, &self->pane, NULL,
+		psy_ui_ALIGN_TOP);
+	psy_ui_component_set_margin(&self->top, psy_ui_margin_make_em(
+		0.0, 0.0, 0.5, 0.0));
+	psy_ui_component_set_style_type(&self->top, STYLE_TOP);
 	psy_ui_component_set_default_align(&self->top, psy_ui_ALIGN_TOP,
 		psy_ui_margin_zero());
 	mainviews_init(&self->mainviews, &self->client, &self->pane,
@@ -417,7 +420,6 @@ void mainframe_init_bars(MainFrame* self)
 	psy_ui_component_set_align(&self->playposbar.component, psy_ui_ALIGN_RIGHT);
 	/* row1 */
 	psy_ui_component_init(&self->toprow1, &self->toprows, NULL);
-	psy_ui_component_set_style_type(&self->toprow1, STYLE_TOPROW1);
 	/* songbar */	
 	songbar_init(&self->songbar, &self->toprow1, &self->workspace);
 	psy_ui_component_set_align(&self->songbar.component, psy_ui_ALIGN_CLIENT);	
@@ -428,7 +430,6 @@ void mainframe_init_bars(MainFrame* self)
 		psy_ui_margin_make_em(0.0, 0.75, 0.0, 0.0));
 	/* row2 */	
 	machinebar_init(&self->machinebar, &self->toprows, &self->workspace);
-	psy_ui_component_set_style_type(&self->machinebar.component, STYLE_TOPROW2);
 	/* scopebar */
 	trackscopeview_init(&self->trackscopeview, &self->top, &self->workspace);
 	if (!patternviewconfig_show_trackscopes(psycleconfig_patview(
@@ -437,12 +438,7 @@ void mainframe_init_bars(MainFrame* self)
 		trackscopes_stop(&self->trackscopeview.scopes);
 	}
 	patternviewconfig_connect(&self->workspace.config.visual.patview,
-		"trackscopes", self, mainframe_on_trackscope_view);
-	psy_ui_component_init(&self->topspacer, &self->pane, NULL);
-	psy_ui_component_set_align(&self->topspacer, psy_ui_ALIGN_TOP);	
-	psy_ui_component_set_preferred_size(&self->topspacer,
-		psy_ui_size_make_em(0.0, 0.5));
-	psy_ui_component_set_style_type(&self->topspacer, STYLE_TOP);
+		"trackscopes", self, mainframe_on_trackscope_view);	
 }
 
 void mainframe_init_tabbars(MainFrame* self)
@@ -1514,8 +1510,7 @@ void mainframe_add_link(MainFrame* self, Link* link)
 {
 	links_add(&self->links, link);
 	psy_ui_tabbar_append(&self->scripttabbar, link->label_,
-		psy_INDEX_INVALID,
-		psy_INDEX_INVALID, psy_INDEX_INVALID,
+		psy_INDEX_INVALID, psy_INDEX_INVALID, psy_INDEX_INVALID,
 		psy_ui_colour_white());
 }
 
@@ -1557,14 +1552,15 @@ void mainframe_on_trackscope_view(MainFrame* self, psy_Property* sender)
 
 void mainframe_on_help(MainFrame* self, psy_ui_Button* sender)
 {
-	workspace_select_view(&self->workspace,
-		viewindex_make_all(VIEW_ID_HELPVIEW, 0, 0, psy_INDEX_INVALID));
+	assert(self);
+	
+	workspace_select_view(&self->workspace, viewindex_make(VIEW_ID_HELPVIEW));
 }
 
 void mainframe_on_settings(MainFrame* self, psy_ui_Button* sender)
 {
-	workspace_select_view(&self->workspace,
-		viewindex_make_all(VIEW_ID_SETTINGSVIEW, 0, psy_INDEX_INVALID,
-			psy_INDEX_INVALID));
+	assert(self);
+	
+	workspace_select_view(&self->workspace, viewindex_make(
+		VIEW_ID_SETTINGSVIEW));
 }
-

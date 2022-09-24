@@ -51,19 +51,19 @@ const char* psy_audio_presetsio_statusstr(int status)
 	return "Preset File Error";
 }
 
-int psy_audio_presetsio_load(const psy_Path* path, psy_audio_Presets* presets,
+int psy_audio_presetsio_load(const char* path, psy_audio_Presets* presets,
 	uintptr_t numparameters, uintptr_t datasizestruct, const char* pluginroot)
 {	
 	int status;
 	FILE* fp;
 		
 	status = psy_audio_PRESETIO_OK;
-	fp = fopen(psy_path_full(path), "rb");
+	fp = fopen(path, "rb");
 	/* if not found, check if it is in the root plugin dir */
 	if (!fp) {
 		psy_Path rootpath;
 
-		psy_path_init(&rootpath, psy_path_full(path));
+		psy_path_init(&rootpath, path);
 		psy_path_set_prefix(&rootpath, pluginroot);
 		fp = fopen(psy_path_full(&rootpath), "rb");
 		psy_path_dispose(&rootpath);
@@ -73,7 +73,7 @@ int psy_audio_presetsio_load(const psy_Path* path, psy_audio_Presets* presets,
 		psy_Path underscorepath;
 		char* name;
 
-		psy_path_init(&underscorepath, psy_path_full(path));
+		psy_path_init(&underscorepath, path);
 		name = strdup(psy_path_name(&underscorepath));
 		psy_replacechar(name, '-', '_');
 		psy_path_set_name(&underscorepath, name);
@@ -197,14 +197,14 @@ int presetio_loadversion1(FILE* fp, uintptr_t numparameters,
 	return status;
 }
 
-int psy_audio_presetsio_save(const psy_Path* path, psy_audio_Presets* presets)
+int psy_audio_presetsio_save(const char* path, psy_audio_Presets* presets)
 {
 	int status;
 	FILE* fp;
 
 	status = psy_audio_PRESETIO_OK;
 	if (presets && !psy_audio_presets_empty(presets)) {
-		if (!(fp = fopen(psy_path_full(path), "wb")))
+		if (!(fp = fopen(path, "wb")))
 		{
 			status = psy_audio_PRESETIO_ERROR_WRITEOPEN;			
 			return status;
@@ -296,14 +296,14 @@ int psy_audio_presetsio_saveversion1(FILE* fp, psy_audio_Presets* presets)
 /* preset io */
 static int psy_audio_presetio_savefxpversion0(FILE*, psy_audio_Preset*);
 
-int psy_audio_presetio_savefxp(const psy_Path* path, psy_audio_Preset* preset)
+int psy_audio_presetio_savefxp(const char* path, psy_audio_Preset* preset)
 {
 	int status;
 	FILE* fp;
 
 	status = psy_audio_PRESETIO_OK;
 	if (preset) {
-		if (!(fp = fopen(psy_path_full(path), "wb")))
+		if (!(fp = fopen(path, "wb")))
 		{
 			status = psy_audio_PRESETIO_ERROR_WRITEOPEN;
 			return status;

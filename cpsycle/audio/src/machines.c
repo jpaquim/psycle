@@ -1,9 +1,10 @@
 /*
 ** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
-** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/prefix.h"
+
 
 #include "machines.h"
 #include "machinescmds.h"
@@ -17,10 +18,11 @@
 /* platform */
 #include "../../detail/trace.h"
 
+/* #define DEBUG_TRACE_MACHINE_PATH */
 
 /* prototypes */
-static void machines_initsignals(psy_audio_Machines*);
-static void machines_disposesignals(psy_audio_Machines*);
+static void machines_init_signals(psy_audio_Machines*);
+static void machines_dispose_signals(psy_audio_Machines*);
 static void machines_free(psy_audio_Machines*);
 static uintptr_t machines_freeslot(psy_audio_Machines*, uintptr_t start);
 static void machines_setpath(psy_audio_Machines*, MachineList* path);
@@ -36,7 +38,9 @@ static bool isleaf(psy_audio_Machines*, uintptr_t slot, psy_Table* worked);
 static uintptr_t machines_findmaxindex(psy_audio_Machines*);
 static void compute_leafs(psy_audio_Machines*, uintptr_t slot,
 	psy_List** leafs);
+#ifdef DEBUG_TRACE_MACHINE_PATH	
 static void machines_tracepath(const char* text, psy_List* path);
+#endif
 
 /* implementation */
 void psy_audio_machines_init(psy_audio_Machines* self)
@@ -67,10 +71,10 @@ void psy_audio_machines_init(psy_audio_Machines* self)
 	self->preventundoredo = FALSE;
 	psy_audio_wire_init(&self->selectedwire);
 	psy_undoredo_init(&self->undoredo);
-	machines_initsignals(self);	
+	machines_init_signals(self);	
 }
 
-void machines_initsignals(psy_audio_Machines* self)
+void machines_init_signals(psy_audio_Machines* self)
 {
 	assert(self);
 
@@ -87,7 +91,7 @@ void psy_audio_machines_dispose(psy_audio_Machines* self)
 	assert(self);
 
 	psy_audio_machineselection_dispose(&self->selection);
-	machines_disposesignals(self);
+	machines_dispose_signals(self);
 	machines_free(self);
 	psy_table_dispose(&self->inputbuffers);
 	psy_table_dispose(&self->outputbuffers);
@@ -102,7 +106,7 @@ void psy_audio_machines_dispose(psy_audio_Machines* self)
 	self->mixercount = 0;
 }
 
-void machines_disposesignals(psy_audio_Machines* self)
+void machines_dispose_signals(psy_audio_Machines* self)
 {
 	assert(self);
 
@@ -432,40 +436,43 @@ void machines_sortpath(psy_audio_Machines* self)
 
 	if (self->path) {
 		psy_Table worked;
-		psy_List* sorted = 0;
-		psy_List* p;
-		psy_List* q;
+		psy_List* sorted ;
 
 		psy_table_init(&worked);
-		p = self->path;
+		sorted = NULL;
+#ifdef DEBUG_TRACE_MACHINE_PATH		
 		machines_tracepath("single", self->path);
+#endif	
 		while (self->path) {
+			psy_List* p;			
+		
 			p = self->path;			
 			while (p != NULL) {
-				uintptr_t slot;
-				slot = (uintptr_t)psy_list_entry(p);
-				if (isleaf(self, slot, &worked)) {
-					psy_list_append(&sorted, (void*)(uintptr_t)slot);
+				uintptr_t mac_id;
+				
+				mac_id = (uintptr_t)psy_list_entry(p);
+				if (isleaf(self, mac_id, &worked)) {
+					psy_list_append(&sorted, (void*)(uintptr_t)mac_id);
 					p = psy_list_remove(&self->path, p);
 				} else {
 					psy_list_next(&p);
 				}
 			}						
-			for (q = sorted; q != 0;  q = q->next) {
-				uintptr_t slot;
-
-				slot = (uintptr_t)q->entry;
-				psy_table_insert(&worked, slot, 0);				
+			for (p = sorted; p != NULL;  p = p->next) {				
+				psy_table_insert(&worked, (uintptr_t)(p->entry), 0);
 			}
 			psy_list_append(&sorted, (void*)(uintptr_t)psy_INDEX_INVALID);
 		}
 		psy_table_dispose(&worked);
 		psy_list_free(self->path);
 		self->path = sorted;
+#ifdef DEBUG_TRACE_MACHINE_PATH
 		machines_tracepath("multi", self->path);
+#endif		
 	}	
 }
 
+#ifdef DEBUG_TRACE_MACHINE_PATH
 void machines_tracepath(const char* text, psy_List* path)
 {
 	psy_List* p;
@@ -481,6 +488,7 @@ void machines_tracepath(const char* text, psy_List* path)
 	}
 	TRACE("\n");
 }
+#endif
 
 bool isleaf(psy_audio_Machines* self, uintptr_t slot, psy_Table* worked)
 {
