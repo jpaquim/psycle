@@ -127,6 +127,7 @@ psy_Property* psy_ui_style_property_make_colour(psy_Property* parent,
 			parent, key, psy_ui_colour_colorref(colour), 0, 0),
 		PSY_PROPERTY_HINT_EDITCOLOR);
 	psy_property_connect(p, colour, psy_ui_style_property_on_colour);
+	return p;
 }
 
 psy_Property* psy_ui_style_property_make_margin(psy_Property* parent,
@@ -234,7 +235,7 @@ void psy_ui_style_property_on_colour(psy_ui_Colour* value, psy_Property* sender)
 	assert(value);
 	assert(sender);
 	
-	*value = psy_ui_colour_make(psy_property_item_int(sender));	
+	*value = psy_ui_colour_make((uint32_t)psy_property_item_int(sender));	
 	psy_ui_component_invalidate(psy_ui_app_main(psy_ui_app()));
 }
 

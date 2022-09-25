@@ -507,8 +507,7 @@ static bool internal_type(int type);
 
 void searchfilter(psy_Property* plugin, PluginFilter* filter,
 	psy_Property* parent)
-{
-	psy_Property* p;
+{	
 	bool intern;
 	int mactype;
 	int macmode;	

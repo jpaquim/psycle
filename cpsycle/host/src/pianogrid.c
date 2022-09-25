@@ -730,8 +730,7 @@ void pianogrid_invalidate_playbar(Pianogrid* self)
 	double curr;
 	double minval;
 	double maxval;
-	psy_ui_RealSize size;
-	psy_ui_RealSize stepsize;
+	psy_ui_RealSize size;	
 
 	sequence = patternviewstate_sequence(self->state->pv);
 	if (!sequence) {
