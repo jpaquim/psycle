@@ -64,9 +64,11 @@ void seqviewitem_init(SeqViewItem* self, psy_ui_Component* parent,
 	seqviewitem_vtable_init(self);	
 	self->seqentry = seq_entry;
 	self->order_index = order_index;	
-	self->state = state;	
+	self->state = state;
+	psy_ui_component_set_style_type(&self->component,
+		psy_ui_STYLE_LIST_ITEM);
 	psy_ui_component_set_style_type_select(&self->component,
-		STYLE_SEQLISTVIEW_ITEM_SELECT);
+		psy_ui_STYLE_LIST_ITEM_SELECT);
 	psy_ui_component_set_align(&self->component, psy_ui_ALIGN_TOP);
 	psy_ui_component_set_preferred_size(&self->component,
 		self->state->item_size);

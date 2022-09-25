@@ -28,7 +28,6 @@ void filebar_init(FileBar* self, psy_ui_Component* parent, Workspace* workspace)
 {	
 	psy_ui_component_init(filebar_base(self), parent, NULL);	
 	self->workspace = workspace;
-	psy_ui_component_set_style_type(filebar_base(self), STYLE_FILEBAR);
 	psy_ui_component_set_default_align(filebar_base(self), psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));	
 	psy_ui_label_init_text(&self->header, filebar_base(self), "file.song");	

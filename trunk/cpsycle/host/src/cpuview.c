@@ -148,11 +148,13 @@ void cpuview_init(CPUView* self, psy_ui_Component* parent,
 
 	psy_ui_margin_init_em(&margin, 0.0, 0.0, 0.5, 2.0);		
 	psy_ui_component_init(&self->component, parent, NULL);
-	self->lastnummachines = psy_INDEX_INVALID;
-	psy_ui_component_set_style_type(&self->component, STYLE_BOX);
+	self->lastnummachines = psy_INDEX_INVALID;	
 	self->workspace = workspace;
+	psy_ui_component_init_align(&self->client, &self->component, NULL,
+		psy_ui_ALIGN_CLIENT);
+	psy_ui_component_set_style_type(&self->client, STYLE_SIDE_VIEW);
 	psy_ui_margin_init(&self->topmargin);		
-	psy_ui_component_init_align(&self->top, &self->component, NULL,
+	psy_ui_component_init_align(&self->top, &self->client, NULL,
 		psy_ui_ALIGN_BOTTOM);
 	psy_ui_component_set_margin(&self->top, margin);
 	cpuview_init_title(self);
@@ -213,8 +215,8 @@ void cpuview_init_modules(CPUView* self, Workspace* workspace)
 {
 	psy_ui_Margin margin;
 
-	cpumoduleview_init(&self->modules, &self->component, workspace);
-	psy_ui_scroller_init(&self->scroller, &self->component, NULL, NULL);
+	cpumoduleview_init(&self->modules, &self->client, workspace);
+	psy_ui_scroller_init(&self->scroller, &self->client, NULL, NULL);
 	psy_ui_scroller_set_client(&self->scroller, &self->modules.component);
 	psy_ui_component_set_align(&self->scroller.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_margin_init_em(&margin, 1.0, 0.0, 0.0, 2.0);

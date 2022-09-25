@@ -170,8 +170,10 @@ void psy_ui_combobox_on_destroyed(psy_ui_ComboBox* self)
 		psy_property_disconnect(self->property, self);
 	}
 	psy_table_dispose(&self->itemdata);
-	psy_signal_dispose(&self->signal_selchanged);	
- 	psy_ui_component_destroy(&self->dropdown.component);
+	psy_signal_dispose(&self->signal_selchanged);
+	if (!self->simple) {
+		psy_ui_component_destroy(&self->dropdown.component);
+	}
 }
 
 psy_ui_ComboBox* psy_ui_combobox_alloc(void)
@@ -352,7 +354,9 @@ void psy_ui_combobox_onselchange(psy_ui_ComboBox* self,
 
 	assert(self);
 
-	psy_ui_dropdownbox_hide(&self->dropdown);
+	if (!self->simple) {
+		psy_ui_dropdownbox_hide(&self->dropdown);
+	}
 	psy_ui_listbox_set_cur_sel(&self->listbox, index);
 	psy_ui_combobox_text(self, text);
 	psy_ui_label_set_text(&self->textfield, text);

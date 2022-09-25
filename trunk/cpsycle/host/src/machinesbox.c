@@ -50,15 +50,16 @@ static void vtable_init(MachinesBox* self)
 void machinesbox_init(MachinesBox* self, psy_ui_Component* parent,
 	psy_audio_Machines* machines, MachineBoxMode mode, Workspace* workspace)
 {	
+	assert(self);
+	
 	psy_ui_component_init(&self->component, parent, NULL);
-	vtable_init(self);
-	psy_ui_component_set_style_types(&self->component, STYLE_MACHINEBOX,
-		psy_INDEX_INVALID, psy_INDEX_INVALID, psy_INDEX_INVALID);
-	self->workspace = workspace;
+	vtable_init(self);	
+	self->workspace = workspace;	
 	self->mode = mode;
 	self->showslots = 1;
 	psy_table_init(&self->listboxslots);
-	psy_table_init(&self->slotslistbox);
+	psy_table_init(&self->slotslistbox);	
+	psy_ui_component_set_style_type(&self->component, STYLE_BOX);
 	psy_ui_listbox_init_multi_select(&self->listbox, &self->component);
 	psy_ui_component_set_align(&self->listbox.component, psy_ui_ALIGN_CLIENT);
 	machinesbox_setmachines(self, machines);

@@ -86,8 +86,10 @@ void psy_ui_style_init(psy_ui_Style* self)
 	psy_ui_font_init(&self->font, NULL);	
 	psy_ui_background_init(&self->background);		
 	psy_ui_border_init(&self->border);
-	psy_ui_margin_init(&self->margin);	
-	psy_ui_margin_init(&self->padding);	
+	psy_ui_margin_init(&self->margin);
+	self->margin_set = FALSE;
+	psy_ui_margin_init(&self->padding);
+	self->padding_set = FALSE;
 	psy_ui_position_init(&self->position);	
 	self->dbgflag = 0;	
 }
@@ -99,47 +101,17 @@ void psy_ui_style_init_default(psy_ui_Style* self, uintptr_t styletype)
 
 void psy_ui_style_init_copy(psy_ui_Style* self, const psy_ui_Style* other)
 {	
-	self->name = psy_strdup("");
-	psy_ui_border_init(&self->border);
-	psy_ui_font_init(&self->font, NULL);
-	psy_ui_font_copy(&self->font, &other->font);
-	psy_ui_background_init(&self->background);	
-	psy_ui_background_copy(&self->background, &other->background);
+	psy_ui_style_init(self);
 	psy_ui_style_copy(self, other);		
 }
 
 void psy_ui_style_init_colours(psy_ui_Style* self, psy_ui_Colour colour,
 	psy_ui_Colour background)
 {
-	self->name = psy_strdup("");
-	self->colour = colour;	
-	self->colour.mode.inherit = TRUE;
-	psy_ui_font_init(&self->font, NULL);
-	psy_ui_background_init(&self->background);
-	self->background.colour = background;	
-	psy_ui_border_init(&self->border);
-	psy_ui_margin_init(&self->margin);	
-	psy_ui_margin_init(&self->padding);	
-	psy_ui_position_init(&self->position);	
-	self->dbgflag = 0;
-}
-
-void psy_ui_styles_init_property(psy_ui_Style* self, psy_Property* style)
-{	
-	psy_ui_Colour colour;
-
 	psy_ui_style_init(self);
-	if (!style) {
-		return;
-	}
-	colour = readcolour(style, "color");
-	if (!colour.mode.transparent) {
-		self->colour = colour;
-	}
-	colour = readcolour(style, "background-color");
-	if (!colour.mode.transparent) {
-		self->background.colour = colour;
-	}	
+	self->colour = colour;
+	self->colour.mode.inherit = TRUE;
+	self->background.colour = background;
 }
 
 void psy_ui_style_dispose(psy_ui_Style* self)
@@ -157,8 +129,10 @@ void psy_ui_style_copy(psy_ui_Style* self, const psy_ui_Style* other)
 	self->colour = other->colour;	
 	psy_ui_background_copy(&self->background, &other->background);	
 	self->border = other->border;
-	self->margin = other->margin;	
+	self->margin = other->margin;
+	self->margin_set = other->margin_set;
 	self->padding = other->padding;
+	self->padding_set = other->padding_set;
 	psy_ui_position_dispose(&self->position);
 	psy_ui_position_init(&self->position);
 	if (psy_ui_position_is_active(&other->position)) {

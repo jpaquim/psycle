@@ -297,14 +297,14 @@ void transformpatternview_applyto(TransformPatternView* self, int index)
 
 		component = (psy_ui_Component*)psy_list_entry(p);		
 		if (c == self->applyto) {			
-			psy_ui_component_setcolour(component,
+			psy_ui_component_set_colour(component,
 				psy_ui_colour_make(0x00B1C8B0));
 		} else {
-			psy_ui_component_setcolour(component,
+			psy_ui_component_set_colour(component,
 				psy_ui_colour_make(0x00BDBDBD));
 		}
 		if (component == &self->currselection.component && !self->patternselection.valid) {
-			psy_ui_component_setcolour(component,
+			psy_ui_component_set_colour(component,
 				psy_ui_colour_make(0x00666666));
 		}		
 	}

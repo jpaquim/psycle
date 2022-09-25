@@ -65,7 +65,7 @@ void seqeditor_init(SeqEditor* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->component, parent, NULL);
 	seqeditor_vtable_init(self);
 	psy_ui_component_set_title(&self->component, "seqedit.editor");	
-	psy_ui_component_set_style_type(&self->component, STYLE_SEQEDT);
+	psy_ui_component_set_style_type(&self->component, STYLE_SIDE_VIEW);
 	psy_ui_component_set_preferred_height(&self->component,
 		psy_ui_value_make_ph(0.20));	
 	sequencecmds_init(&self->cmds, workspace);
