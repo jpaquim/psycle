@@ -40,6 +40,7 @@ typedef struct CPUView {
 	psy_ui_Component component;
 	// ui elements
 	TitleBar titlebar;
+	psy_ui_Component client;
 	psy_ui_Label coreinfo;
 	psy_ui_Component top;
 	psy_ui_Margin topmargin;

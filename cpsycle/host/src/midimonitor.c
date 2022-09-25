@@ -396,13 +396,11 @@ void midimonitor_init(MidiMonitor* self, psy_ui_Component* parent, Workspace*
 	midimonitor_vtable_init(self);
 	self->workspace = workspace;
 	self->channelstatcounter = 0;
-	psy_ui_component_set_vtable(midimonitor_base(self), midimonitor_vtable_init(self));
-	psy_ui_component_set_style_type(&self->component, STYLE_BOX);
+	psy_ui_component_set_vtable(midimonitor_base(self), midimonitor_vtable_init(self));	
 	midimonitor_inittitlebar(self);
 	psy_ui_component_init(&self->client, midimonitor_base(self), NULL);
-	psy_ui_component_set_align(&self->client, psy_ui_ALIGN_CLIENT);
-	psy_ui_component_set_margin(&self->client,
-		psy_ui_defaults_cmargin(psy_ui_defaults()));	
+	psy_ui_component_set_style_type(&self->client, STYLE_SIDE_VIEW);
+	psy_ui_component_set_align(&self->client, psy_ui_ALIGN_CLIENT);	
 	psy_ui_component_init(&self->top, &self->client, NULL);
 	psy_ui_margin_init(&self->topmargin);
 	psy_ui_component_set_align(&self->top, psy_ui_ALIGN_TOP);	

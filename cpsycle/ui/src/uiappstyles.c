@@ -321,6 +321,17 @@ void psy_ui_appstyles_initdarktheme(psy_ui_Styles* self,
 	psy_ui_border_init_solid_radius(&style->border,
 		material.surface_overlay_8p, 6.0);
 	psy_ui_styles_set_style(self, psy_ui_STYLE_CHECKMARK_SELECT, "checkmark::select", style);
+	/* listitem */
+	style = psy_ui_style_allocinit();
+	//psy_ui_style_set_colour(style, material.onprimary_medium);
+	psy_ui_styles_set_style(self, psy_ui_STYLE_LIST_ITEM,
+		"list_item", style);
+	/* listitem::select */
+	style = psy_ui_style_allocinit();
+	psy_ui_style_set_colours(style, psy_ui_colour_make(0xFFFFFF),
+		psy_ui_colour_make(0x009B7800));
+	psy_ui_styles_set_style(self, psy_ui_STYLE_LIST_ITEM_SELECT,
+		"list_item::select", style);	
 	/* editor */
 	style = psy_ui_style_allocinit();
 #if defined(DIVERSALIS__OS__UNIX)
@@ -563,6 +574,18 @@ void psy_ui_appstyles_initlighttheme(psy_ui_Styles* self,
 	style = psy_ui_style_allocinit();
 	psy_ui_style_set_colours(style, light.cl_font_1, light.cl_white);
 	psy_ui_styles_set_style(self, psy_ui_STYLE_CHECKMARK, "", style);
+	/* listitem */
+	style = psy_ui_style_allocinit();
+	psy_ui_style_set_colours(style, material.onprimary_medium,
+		material.surface_overlay_5p);
+	psy_ui_styles_set_style(self, psy_ui_STYLE_LIST_ITEM,
+		"list_item", style);
+	/* listitem::select */
+	style = psy_ui_style_allocinit();
+	psy_ui_style_set_colours(style, psy_ui_colour_make(0xFFFFFF),
+		light.cl_blue_3);
+	psy_ui_styles_set_style(self, psy_ui_STYLE_LIST_ITEM_SELECT,
+		"list_item::select", style);
 	/* editor */
 	style = psy_ui_style_allocinit();
 #if defined(DIVERSALIS__OS__UNIX)
@@ -789,6 +812,16 @@ void psy_ui_appstyles_inittheme_win98(psy_ui_Styles* self, bool keepfont)
 	style = psy_ui_style_allocinit();
 	psy_ui_style_set_colours(style, win.cl_black, win.cl_white);
 	psy_ui_styles_set_style(self, psy_ui_STYLE_CHECKMARK, "", style);
+	/* listitem */
+	style = psy_ui_style_allocinit();
+	psy_ui_style_set_colours(style, win.cl_black, win.cl_white);
+	psy_ui_styles_set_style(self, psy_ui_STYLE_LIST_ITEM,
+		"list_item", style);
+	/* listitem::select */
+	style = psy_ui_style_allocinit();
+	psy_ui_style_set_colours(style, win.cl_white, win.cl_navy);
+	psy_ui_styles_set_style(self, psy_ui_STYLE_LIST_ITEM_SELECT,
+		"list_item::select", style);
 	/* editor */
 	style = psy_ui_style_allocinit();	
 #if defined(DIVERSALIS__OS__UNIX)

@@ -9,6 +9,7 @@
 #include "helpview.h"
 /* host */
 #include "resources/resource.h"
+#include "styles.h"
 
 /* prototypes */
 static void helpview_init_base(HelpView*, psy_ui_Component* parent);
@@ -32,6 +33,7 @@ void helpview_init(HelpView* self, psy_ui_Component* parent,
 void helpview_init_base(HelpView* self, psy_ui_Component* parent)
 {
 	psy_ui_component_init(helpview_base(self), parent, NULL);
+	psy_ui_component_set_style_type(helpview_base(self), STYLE_SIDE_VIEW);
 	psy_ui_component_set_id(helpview_base(self), VIEW_ID_HELPVIEW);
 	psy_ui_component_set_title(helpview_base(self), "main.help");
 	psy_signal_connect(&helpview_base(self)->signal_focus, self,

@@ -316,7 +316,7 @@ INLINE bool psy_ui_component_hasalign(const psy_ui_Component* self)
 INLINE void psy_ui_component_set_margin(psy_ui_Component* self,
 	psy_ui_Margin margin)
 {	
-	psy_ui_componentstyle_setmargin(&self->style, margin);	
+	psy_ui_componentstyle_set_margin(&self->style, margin);	
 }
 
 INLINE psy_ui_Margin psy_ui_component_margin(const psy_ui_Component* self)
@@ -332,7 +332,7 @@ INLINE void psy_ui_component_set_padding(psy_ui_Component* self,
 
 INLINE psy_ui_Margin psy_ui_component_padding(const psy_ui_Component* self)
 {	
-	return psy_ui_componentstyle_spacing(&self->style);
+	return psy_ui_componentstyle_padding(&self->style);
 }
 
 void psy_ui_component_check_sorted_align(psy_ui_Component*, psy_ui_AlignType);
@@ -634,7 +634,7 @@ psy_ui_Size psy_ui_component_client_size(const psy_ui_Component*);
 */
 psy_ui_Size psy_ui_component_scroll_size(const psy_ui_Component*);
 
-void psy_ui_component_setcolour(psy_ui_Component*, psy_ui_Colour);
+void psy_ui_component_set_colour(psy_ui_Component*, psy_ui_Colour);
 psy_ui_Colour psy_ui_component_colour(psy_ui_Component*);
 void psy_ui_component_set_background_colour(psy_ui_Component*, psy_ui_Colour);
 psy_ui_Colour psy_ui_component_background_colour(psy_ui_Component*);

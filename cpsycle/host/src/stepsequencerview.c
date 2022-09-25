@@ -609,7 +609,7 @@ void stepsequencerview_init(StepsequencerView* self, psy_ui_Component* parent,
 	assert(workspace);
 
 	psy_ui_component_init(&self->component, parent, NULL);		
-	psy_ui_component_set_style_type(&self->component, STYLE_STEPSEQUENCER);	
+	psy_ui_component_set_style_type(&self->component, STYLE_SIDE_VIEW);	
 	psy_ui_component_set_default_align(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_margin_make_em(0.5, 0.0, 0.5, 2.0));
 	stepsequencerstate_init(&self->state, workspace);

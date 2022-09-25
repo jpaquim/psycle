@@ -64,7 +64,6 @@ void gear_init(Gear* self, psy_ui_Component* parent, ParamViews* param_views,
 	Workspace* workspace)
 {			
 	psy_ui_component_init(gear_base(self), parent, NULL);	
-	psy_ui_component_set_style_type(gear_base(self), STYLE_BOX);
 	self->workspace = workspace;
 	self->param_views = param_views;
 	if (workspace_song(self->workspace)) {
@@ -77,15 +76,14 @@ void gear_init(Gear* self, psy_ui_Component* parent, ParamViews* param_views,
 	/* client */
 	psy_ui_component_init(&self->client, gear_base(self), NULL);
 	psy_ui_component_set_align(&self->client, psy_ui_ALIGN_CLIENT);
-	psy_ui_component_set_margin(&self->client,
-		psy_ui_defaults_cmargin(psy_ui_defaults()));
+	psy_ui_component_set_style_type(&self->client, STYLE_SIDE_VIEW);	
 	/* titlebar */
 	gear_init_title(self);
 	/* label */
 	psy_ui_label_init_text(&self->label, &self->component, "Machines:Generator");
 	psy_ui_component_set_align(psy_ui_label_base(&self->label), psy_ui_ALIGN_TOP);
 	psy_ui_component_set_margin(psy_ui_label_base(&self->label),
-		psy_ui_margin_make_em(0.0, 0.0, 0.25, 1.5));
+		psy_ui_margin_make_em(0.0, 0.0, 0.25, 0.0));
 	/* client */
 	psy_ui_tabbar_init(&self->tabbar, &self->client);
 	psy_ui_tabbar_append_tabs(&self->tabbar, "gear.generators", "gear.effects",
@@ -94,7 +92,7 @@ void gear_init(Gear* self, psy_ui_Component* parent, ParamViews* param_views,
 	psy_ui_component_set_align(psy_ui_tabbar_base(&self->tabbar), psy_ui_ALIGN_BOTTOM);
 	psy_ui_notebook_init(&self->notebook, &self->client);
 	psy_ui_component_set_margin(psy_ui_notebook_base(&self->notebook),
-		psy_ui_margin_make_em(0.0, 1.0, 0.0, 1.0));
+		psy_ui_margin_make_em(0.0, 1.0, 0.0, 0.0));
 	psy_ui_component_set_align(psy_ui_notebook_base(&self->notebook),
 		psy_ui_ALIGN_CLIENT);
 	machinesbox_init(&self->machinesboxgen, psy_ui_notebook_base(&self->notebook), 

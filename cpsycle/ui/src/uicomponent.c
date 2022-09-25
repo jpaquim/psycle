@@ -47,7 +47,7 @@ static void psy_ui_component_dispose_signals(psy_ui_Component*);
 void psy_ui_component_set_background_colour(psy_ui_Component* self,
 	psy_ui_Colour colour)
 {			
-	psy_ui_componentstyle_setbackgroundcolour(&self->style, colour);	
+	psy_ui_componentstyle_set_background_colour(&self->style, colour);	
 	psy_ui_component_invalidate(self);
 }
 
@@ -87,7 +87,7 @@ psy_ui_Colour psy_ui_component_background_colour(psy_ui_Component* self)
 	while (curr) {
 		psy_ui_Colour colour;
 
-		colour = psy_ui_componentstyle_backgroundcolour(&curr->style);		
+		colour = psy_ui_componentstyle_background_colour(&curr->style);		
 		base = colour;
 		if (colour.overlay != 0) {
 			psy_ui_Colour overlaycolour;
@@ -103,7 +103,8 @@ psy_ui_Colour psy_ui_component_background_colour(psy_ui_Component* self)
 				overlay += colour.overlay;
 				curr = psy_ui_component_parent(curr);
 				if (curr) {
-					colour = psy_ui_componentstyle_backgroundcolour(&curr->style);
+					colour = psy_ui_componentstyle_background_colour(
+						&curr->style);
 				}
 			}				
 			if (!curr) {				
@@ -122,9 +123,9 @@ psy_ui_Colour psy_ui_component_background_colour(psy_ui_Component* self)
 	return base;
 }
 
-void psy_ui_component_setcolour(psy_ui_Component* self, psy_ui_Colour colour)
+void psy_ui_component_set_colour(psy_ui_Component* self, psy_ui_Colour colour)
 {
-	psy_ui_componentstyle_setcolour(&self->style, colour);	
+	psy_ui_componentstyle_set_colour(&self->style, colour);	
 }
 
 psy_ui_Colour psy_ui_component_colour(psy_ui_Component* self)
@@ -173,10 +174,10 @@ psy_ui_Colour psy_ui_component_colour(psy_ui_Component* self)
 	return base;
 }
 
-void psy_ui_component_setborder(psy_ui_Component* self,
+void psy_ui_component_set_border(psy_ui_Component* self,
 	const psy_ui_Border* border)
 {
-	psy_ui_componentstyle_setborder(&self->style, border);	
+	psy_ui_componentstyle_set_border(&self->style, border);	
 }
 
 const psy_ui_Border* psy_ui_component_border(const psy_ui_Component* self)
@@ -1790,12 +1791,13 @@ double lines(double pos, double size, double scrollsize, double step,
 
 void psy_ui_component_draw_border(psy_ui_Component* self, psy_ui_Graphics* g)
 {	
-	psy_ui_RealSize size;
+	psy_ui_RealSize size;	
 
-	size = psy_ui_component_scroll_size_px(self);	
+	size = psy_ui_component_scroll_size_px(self);		
 	psy_ui_drawborder(g,
 		psy_ui_realrectangle_make(psy_ui_realpoint_zero(), size),
-		psy_ui_component_border(self), psy_ui_component_textmetric(self));
+		psy_ui_component_border(self),
+		psy_ui_component_textmetric(self));
 }
 
 void psy_ui_component_usescroll(psy_ui_Component* self)
@@ -1957,22 +1959,22 @@ void psy_ui_component_set_style_types(psy_ui_Component* self,
 	uintptr_t standard, uintptr_t hover, uintptr_t select,
 	uintptr_t disabled)
 {
-	psy_ui_componentstyle_setstyle(&self->style,
+	psy_ui_componentstyle_set_style(&self->style,
 		psy_ui_STYLESTATE_NONE, standard);
-	psy_ui_componentstyle_setstyle(&self->style,
+	psy_ui_componentstyle_set_style(&self->style,
 		psy_ui_STYLESTATE_HOVER, hover);
-	psy_ui_componentstyle_setstyle(&self->style,
+	psy_ui_componentstyle_set_style(&self->style,
 		psy_ui_STYLESTATE_SELECT, select);
-	psy_ui_componentstyle_setstyle(&self->style,
+	psy_ui_componentstyle_set_style(&self->style,
 		psy_ui_STYLESTATE_DISABLED, disabled);	
 	psy_ui_component_checkbackgroundanimation(self);
 }
 
 void psy_ui_component_checkbackgroundanimation(psy_ui_Component* self)
 {	
-	if (psy_ui_componentstyle_currstyle_const(&self->style)->background.animation.enabled) {
+	if (psy_ui_componentstyle_background_animation_enabled(&self->style)) {
 		psy_ui_component_start_timer(self, 65535, 50);
-	} else {		
+	} else {
 		psy_ui_component_stop_timer(self, 65535);
 	}
 }
@@ -1980,7 +1982,7 @@ void psy_ui_component_checkbackgroundanimation(psy_ui_Component* self)
 void psy_ui_component_set_style_type(psy_ui_Component* self,
 	uintptr_t standard)
 {
-	psy_ui_componentstyle_setstyle(&self->style,
+	psy_ui_componentstyle_set_style(&self->style,
 		psy_ui_STYLESTATE_NONE, standard);	
 	psy_ui_component_checkbackgroundanimation(self);
 }
@@ -1988,7 +1990,7 @@ void psy_ui_component_set_style_type(psy_ui_Component* self,
 void psy_ui_component_set_style_type_hover(psy_ui_Component* self,
 	uintptr_t hover)
 {
-	psy_ui_componentstyle_setstyle(&self->style,
+	psy_ui_componentstyle_set_style(&self->style,
 		psy_ui_STYLESTATE_HOVER, hover);	
 	psy_ui_component_checkbackgroundanimation(self);
 }
@@ -1996,7 +1998,7 @@ void psy_ui_component_set_style_type_hover(psy_ui_Component* self,
 void psy_ui_component_set_style_type_focus(psy_ui_Component* self,
 	uintptr_t focus)
 {
-	psy_ui_componentstyle_setstyle(&self->style,
+	psy_ui_componentstyle_set_style(&self->style,
 		psy_ui_STYLESTATE_FOCUS, focus);	
 	psy_ui_component_checkbackgroundanimation(self);
 }
@@ -2004,7 +2006,7 @@ void psy_ui_component_set_style_type_focus(psy_ui_Component* self,
 void psy_ui_component_set_style_type_active(psy_ui_Component* self,
 	uintptr_t active)
 {
-	psy_ui_componentstyle_setstyle(&self->style,
+	psy_ui_componentstyle_set_style(&self->style,
 		psy_ui_STYLESTATE_ACTIVE, active);	
 	psy_ui_component_checkbackgroundanimation(self);
 }
@@ -2012,7 +2014,7 @@ void psy_ui_component_set_style_type_active(psy_ui_Component* self,
 void psy_ui_component_set_style_type_select(psy_ui_Component* self,
 	uintptr_t select)
 {
-	psy_ui_componentstyle_setstyle(&self->style,
+	psy_ui_componentstyle_set_style(&self->style,
 		psy_ui_STYLESTATE_SELECT, select);	
 	psy_ui_component_checkbackgroundanimation(self);
 }
@@ -2020,7 +2022,7 @@ void psy_ui_component_set_style_type_select(psy_ui_Component* self,
 void psy_ui_component_set_style_type_disabled(psy_ui_Component* self,
 	uintptr_t disabled)
 {
-	psy_ui_componentstyle_setstyle(&self->style,
+	psy_ui_componentstyle_set_style(&self->style,
 		psy_ui_STYLESTATE_DISABLED, disabled);
 	psy_ui_component_checkbackgroundanimation(self);
 }
@@ -2037,7 +2039,7 @@ void psy_ui_component_set_style_state(psy_ui_Component* self,
 void psy_ui_component_add_style_state(psy_ui_Component* self,
 	psy_ui_StyleState state)
 {	
-	if (psy_ui_componentstyle_addstate(&self->style, state)) {
+	if (psy_ui_componentstyle_add_state(&self->style, state)) {
 		psy_ui_component_checkbackgroundanimation(self);
 		psy_ui_component_invalidate(self);
 	}
@@ -2060,7 +2062,7 @@ void psy_ui_component_addstylestate_children(psy_ui_Component* self,
 void psy_ui_component_remove_style_state(psy_ui_Component* self,
 	psy_ui_StyleState state)
 {
-	if (psy_ui_componentstyle_removestate(&self->style, state)) {
+	if (psy_ui_componentstyle_remove_state(&self->style, state)) {
 		psy_ui_component_invalidate(self);
 	}
 }
@@ -2079,14 +2081,13 @@ void psy_ui_notify_style_update(psy_ui_Component* main)
 		psy_List* p;
 		psy_List* q;
 
-		psy_ui_componentstyle_updatecurrstate(&main->style);
 		main->vtable->onupdatestyles(main);
 		psy_signal_emit(&main->signal_styleupdate, main, 0);
-		for (p = q = psy_ui_component_children(main, psy_ui_RECURSIVE); p != NULL; p = p->next) {
+		for (p = q = psy_ui_component_children(main, psy_ui_RECURSIVE);
+				p != NULL; p = p->next) {
 			psy_ui_Component* child;
 
 			child = (psy_ui_Component*)psy_list_entry(p);			
-			psy_ui_componentstyle_updatecurrstate(&child->style);
 			child->vtable->onupdatestyles(child);
 			psy_signal_emit(&child->signal_styleupdate, child, 0);
 			if (child->imp) {
@@ -2149,7 +2150,7 @@ void psy_ui_component_draw(psy_ui_Component* self, psy_ui_Graphics* g)
 			psy_ui_RealPoint origin;
 
 			origin = psy_ui_origin(g);
-			/* spacing */
+			/* padding */
 			padding = psy_ui_component_padding(self);
 			if (!psy_ui_margin_is_zero(&padding)) {
 				tm = psy_ui_component_textmetric(self);			
@@ -2253,7 +2254,8 @@ uintptr_t psy_ui_component_id(const psy_ui_Component* self)
 	return self->id;
 }
 
-psy_ui_Component* psy_ui_component_by_id(psy_ui_Component* self, uintptr_t id, int recursive)
+psy_ui_Component* psy_ui_component_by_id(psy_ui_Component* self, uintptr_t id,
+	int recursive)
 {
 	psy_ui_Component* rv;
 	psy_List* p;
@@ -2265,7 +2267,8 @@ psy_ui_Component* psy_ui_component_by_id(psy_ui_Component* self, uintptr_t id, i
 		return self;		
 	}
 	/* is id from direct children */
-	for (p = q = psy_ui_component_children(self, psy_ui_NONE_RECURSIVE); p != NULL; p = p->next) {
+	for (p = q = psy_ui_component_children(self, psy_ui_NONE_RECURSIVE);
+			p != NULL; p = p->next) {
 		psy_ui_Component* component;
 		
 		component = (psy_ui_Component*)p->entry;

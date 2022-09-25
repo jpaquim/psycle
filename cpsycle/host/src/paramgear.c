@@ -629,10 +629,11 @@ static void paramrack_connect_song(ParamRack*);
 void paramrack_init(ParamRack* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {
-	psy_ui_component_init(&self->component, parent, NULL);	
+	psy_ui_component_init(&self->component, parent, NULL);
+	self->workspace = workspace;
+	psy_ui_component_set_style_type(&self->component, STYLE_SIDE_VIEW);
 	psy_ui_component_set_preferred_size(&self->component,
-		psy_ui_size_make_em(0.0, 10.0));		
-	self->workspace = workspace;	
+		psy_ui_size_make_em(0.0, 10.0));			
 	/* Bottom */
 	psy_ui_component_init_align(&self->bottom, &self->component, NULL,
 		psy_ui_ALIGN_BOTTOM);	

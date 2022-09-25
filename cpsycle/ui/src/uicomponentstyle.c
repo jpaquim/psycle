@@ -15,52 +15,27 @@
 static bool sizehints_initialized = FALSE;
 static psy_ui_SizeHints sizehints;
 
-void psy_ui_componentstyle_init(psy_ui_ComponentStyle* self)
-{
-	assert(self);
+/* psy_ui_ComponentStyleStates */
 
-	self->styles = NULL;	
-	psy_ui_style_init(&self->inlinestyle);
-	self->inline_margin = FALSE;
-	self->inline_padding = FALSE;
-	self->currstyle = psy_INDEX_INVALID;
-	self->states = psy_ui_STYLESTATE_NONE;		
-	if (!sizehints_initialized) {
-		psy_ui_sizehints_init(&sizehints);
-		sizehints_initialized = TRUE;
-	}
-	self->sizehints = &sizehints;
-	self->debugflag = 0;
-}
-
-void psy_ui_componentstyle_dispose(psy_ui_ComponentStyle* self)
+/* implementation */
+void psy_ui_componentstylestates_init(psy_ui_ComponentStyleStates* self)
 {
 	assert(self);
 	
-	self->currstyle = psy_INDEX_INVALID;
+	self->styles = NULL;
+}
+
+void psy_ui_componentstylestates_dispose(psy_ui_ComponentStyleStates* self)
+{
+	assert(self);
+	
 	if (self->styles) {
 		psy_table_dispose(self->styles);
 		free(self->styles);
 	}
-	psy_ui_style_dispose(&self->inlinestyle);
-	if (self->sizehints != &sizehints) {
-		free(self->sizehints);
-		self->sizehints = NULL;
-	}
 }
 
-bool psy_ui_componentstyle_hasstyle(const psy_ui_ComponentStyle* self,
-	psy_ui_StyleState state)
-{
-	assert(self);
-
-	if (!self->styles) {
-		FALSE;
-	}
-	return psy_table_exists(self->styles, (uintptr_t)state);
-}
-
-uintptr_t psy_ui_componentstyle_style_id(psy_ui_ComponentStyle* self,
+uintptr_t psy_ui_componentstylestates_style_id(psy_ui_ComponentStyleStates* self,
 	psy_ui_StyleState state)
 {
 	uintptr_t styleid;	
@@ -84,7 +59,71 @@ uintptr_t psy_ui_componentstyle_style_id(psy_ui_ComponentStyle* self,
 	return psy_INDEX_INVALID;
 }
 
-bool psy_ui_componentstyle_hasstate(const psy_ui_ComponentStyle* self,
+void psy_ui_componentstylestates_setstyle(psy_ui_ComponentStyleStates* self,
+	psy_ui_StyleState state, uintptr_t style_id)
+{
+	assert(self);
+
+	if (style_id != psy_INDEX_INVALID) {		
+		if (!self->styles) {
+			self->styles = (psy_Table*)malloc(sizeof(psy_Table));			
+			psy_table_init_keysize(self->styles, 11);
+		}
+		psy_table_insert(self->styles, state, (void*)(uintptr_t)style_id);
+	} else if (self->styles) {
+		psy_table_remove(self->styles, state);
+	}	
+}
+
+/* psy_ui_ComponentStyle */
+
+/* prototypes */
+static uintptr_t psy_ui_componentstyle_style_id(psy_ui_ComponentStyle*,
+	psy_ui_StyleState);
+static bool psy_ui_componentstyle_has_state(const psy_ui_ComponentStyle*,
+	psy_ui_StyleState);
+/* sets the currstate according to current style state */
+static void psy_ui_componentstyle_updatecurrstate(psy_ui_ComponentStyle*);
+/* selects a state from the states flag (see todo) */
+static bool psy_ui_componentstyle_updatestate(psy_ui_ComponentStyle*);
+
+/* implementation */
+void psy_ui_componentstyle_init(psy_ui_ComponentStyle* self)
+{
+	assert(self);
+
+	psy_ui_componentstylestates_init(&self->styles);
+	psy_ui_style_init(&self->inlinestyle);	
+	self->currstyle = psy_INDEX_INVALID;
+	self->states = psy_ui_STYLESTATE_NONE;		
+	if (!sizehints_initialized) {
+		psy_ui_sizehints_init(&sizehints);
+		sizehints_initialized = TRUE;
+	}
+	self->sizehints = &sizehints;
+	self->debugflag = 0;
+}
+
+void psy_ui_componentstyle_dispose(psy_ui_ComponentStyle* self)
+{
+	assert(self);
+	
+	self->currstyle = psy_INDEX_INVALID;
+	psy_ui_componentstylestates_dispose(&self->styles);	
+	psy_ui_style_dispose(&self->inlinestyle);
+	if (self->sizehints != &sizehints) {
+		free(self->sizehints);
+		self->sizehints = NULL;
+	}
+}
+
+uintptr_t psy_ui_componentstyle_style_id(psy_ui_ComponentStyle* self,
+	psy_ui_StyleState state)
+{
+	return psy_ui_componentstylestates_style_id(&self->styles, state);
+}
+
+bool psy_ui_componentstyle_has_state(const psy_ui_ComponentStyle* self,
 	psy_ui_StyleState state)
 {
 	assert(self);
@@ -98,15 +137,15 @@ bool psy_ui_componentstyle_updatestate(psy_ui_ComponentStyle* self)
 
 	assert(self);
 	
-	if (psy_ui_componentstyle_hasstate(self, psy_ui_STYLESTATE_DISABLED)) {
+	if (psy_ui_componentstyle_has_state(self, psy_ui_STYLESTATE_DISABLED)) {
 		state = psy_ui_STYLESTATE_DISABLED;
-	} else if (psy_ui_componentstyle_hasstate(self, psy_ui_STYLESTATE_ACTIVE)) {
+	} else if (psy_ui_componentstyle_has_state(self, psy_ui_STYLESTATE_ACTIVE)) {
 		state = psy_ui_STYLESTATE_ACTIVE;	
-	} else if (psy_ui_componentstyle_hasstate(self, psy_ui_STYLESTATE_SELECT)) {
+	} else if (psy_ui_componentstyle_has_state(self, psy_ui_STYLESTATE_SELECT)) {
 		state = psy_ui_STYLESTATE_SELECT;	
-	} else if (psy_ui_componentstyle_hasstate(self, psy_ui_STYLESTATE_FOCUS)) {
+	} else if (psy_ui_componentstyle_has_state(self, psy_ui_STYLESTATE_FOCUS)) {
 		state = psy_ui_STYLESTATE_FOCUS;
-	} else if (psy_ui_componentstyle_hasstate(self, psy_ui_STYLESTATE_HOVER)) {
+	} else if (psy_ui_componentstyle_has_state(self, psy_ui_STYLESTATE_HOVER)) {
 		state = psy_ui_STYLESTATE_HOVER;
 	} else {
 		state = psy_ui_STYLESTATE_NONE;
@@ -126,24 +165,16 @@ bool psy_ui_componentstyle_setcurrstate(psy_ui_ComponentStyle* self,
 	return self->currstyle != oldstyle;
 }
 
-void psy_ui_componentstyle_setstyle(psy_ui_ComponentStyle* self,
+void psy_ui_componentstyle_set_style(psy_ui_ComponentStyle* self,
 	psy_ui_StyleState state, uintptr_t style_id)
 {
 	assert(self);
 
-	if (style_id != psy_INDEX_INVALID) {		
-		if (!self->styles) {
-			self->styles = (psy_Table*)malloc(sizeof(psy_Table));			
-			psy_table_init_keysize(self->styles, 11);
-		}
-		psy_table_insert(self->styles, state, (void*)(uintptr_t)style_id);
-	} else if (self->styles) {
-		psy_table_remove(self->styles, state);
-	}
+	psy_ui_componentstylestates_setstyle(&self->styles, state, style_id);	
 	psy_ui_componentstyle_setcurrstate(self, self->states);
 }
 
-bool psy_ui_componentstyle_addstate(psy_ui_ComponentStyle* self,
+bool psy_ui_componentstyle_add_state(psy_ui_ComponentStyle* self,
 	psy_ui_StyleState state)
 {
 	uintptr_t newstate;
@@ -158,7 +189,7 @@ bool psy_ui_componentstyle_addstate(psy_ui_ComponentStyle* self,
 	return FALSE;
 }
 
-bool psy_ui_componentstyle_removestate(psy_ui_ComponentStyle* self,
+bool psy_ui_componentstyle_remove_state(psy_ui_ComponentStyle* self,
 	psy_ui_StyleState state)
 {
 	uintptr_t newstate;
@@ -257,4 +288,10 @@ void psy_ui_componentstyle_usesizehints(psy_ui_ComponentStyle* self)
 	if (self->sizehints == &sizehints) {
 		self->sizehints = psy_ui_sizehints_allocinit();
 	}
+}
+
+bool psy_ui_componentstyle_background_animation_enabled(
+	const psy_ui_ComponentStyle* self)
+{
+	return (psy_ui_componentstyle_currstyle_const(self)->background.animation.enabled);
 }

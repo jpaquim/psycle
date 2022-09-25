@@ -744,7 +744,7 @@ void dev_scrollto(psy_ui_x11_ComponentImp* self, intptr_t dx, intptr_t dy,
 		dev_invalidaterect(self, r);
 	} else {
 		dev_invalidate(self);
-	}
+	}	
 	/* todo */
 	/* if (dx != 0 || dy != 0) {
 		XWindowAttributes win_attr;

@@ -26,7 +26,8 @@ void sequencerbar_init(SequencerBar* self, psy_ui_Component* parent,
 	assert(general);
 	
 	psy_ui_component_init(&self->component, parent, NULL);
-	psy_ui_component_set_style_type(&self->component, STYLE_SEQBAR);	
+	psy_ui_component_set_padding(&self->component, 
+		psy_ui_margin_make_em(0.0, 0.0, 0.0, 1.0));	
 	psy_ui_component_set_default_align(&self->component, psy_ui_ALIGN_TOP,
 		psy_ui_margin_make_em(0.0, 0.0, 0.25, 0.0));		
 	psy_ui_checkbox_init_exchange(&self->follow_song, &self->component,				

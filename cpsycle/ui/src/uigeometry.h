@@ -188,7 +188,8 @@ INLINE psy_ui_RealRectangle psy_ui_realrectangle_make(psy_ui_RealPoint topleft,
 
 INLINE psy_ui_RealRectangle psy_ui_realrectangle_zero(void)
 {
-	return psy_ui_realrectangle_make(psy_ui_realpoint_zero(), psy_ui_realsize_zero());
+	return psy_ui_realrectangle_make(psy_ui_realpoint_zero(),
+		psy_ui_realsize_zero());
 }
 
 INLINE double psy_ui_realrectangle_width(const psy_ui_RealRectangle* self)
@@ -196,7 +197,8 @@ INLINE double psy_ui_realrectangle_width(const psy_ui_RealRectangle* self)
 	return self->right - self->left;
 }
 
-INLINE void psy_ui_realrectangle_setwidth(psy_ui_RealRectangle* self, double width)
+INLINE void psy_ui_realrectangle_setwidth(psy_ui_RealRectangle* self,
+	double width)
 {
 	self->right = self->left + width;
 }
@@ -208,7 +210,8 @@ INLINE void psy_ui_realrectangle_resize(psy_ui_RealRectangle* self, double width
 	self->bottom = self->top + height;
 }
 
-INLINE void psy_ui_realrectangle_set_left_resize(psy_ui_RealRectangle* self, double left)
+INLINE void psy_ui_realrectangle_set_left_resize(psy_ui_RealRectangle* self,
+	double left)
 {
 	double width;
 
@@ -737,6 +740,22 @@ INLINE void psy_ui_margin_set_round_mode(psy_ui_Margin* self,
 	psy_ui_value_setroundmode(&self->right, round);
 	psy_ui_value_setroundmode(&self->bottom, round);
 	psy_ui_value_setroundmode(&self->left, round);
+}
+
+INLINE void psy_ui_margin_deactivate(psy_ui_Margin* self)
+{
+	self->top.set = FALSE;
+	self->right.set = FALSE;
+	self->bottom.set = FALSE;
+	self->left.set = FALSE;
+}
+
+INLINE void psy_ui_margin_activate(psy_ui_Margin* self)
+{
+	self->top.set = TRUE;
+	self->right.set = TRUE;
+	self->bottom.set = TRUE;
+	self->left.set = TRUE;
 }
 
 typedef struct psy_ui_RealMargin {

@@ -29,7 +29,7 @@ void samplesviewbuttons_init(SamplesViewButtons* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {	
 	psy_ui_component_init(&self->component, parent, NULL);
-	psy_ui_component_set_style_type(&self->component, STYLE_SAMPLESVIEW_BUTTONS);
+	psy_ui_component_set_style_type(&self->component, STYLE_BUTTONS);
 	psy_ui_component_set_default_align(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));	
 	psy_ui_button_init_text(&self->load, &self->component, "file.load");
@@ -1080,7 +1080,7 @@ void samplesview_init(SamplesView* self, psy_ui_Component* parent,
 	psy_ui_component_set_title(samplesview_base(self), "main.samples");
 	psy_ui_margin_init_em(&waveboxmargin, 0.5, 1.0, 0.0, 0.5);
 	self->workspace = workspace;	
-	psy_ui_component_set_style_type(&self->component, STYLE_SAMPLESVIEW);	
+	psy_ui_component_set_style_type(&self->component, STYLE_CLIENT_VIEW);	
 	/* header */
 	samplesheaderview_init(&self->header, &self->component,
 		&workspace->song->instruments, self, workspace);	

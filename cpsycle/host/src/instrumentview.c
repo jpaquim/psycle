@@ -404,7 +404,7 @@ void instrumentviewbuttons_init(InstrumentViewButtons* self,
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_set_default_align(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
-	psy_ui_component_set_style_type(&self->component, STYLE_INSTRVIEW_BUTTONS);	
+	psy_ui_component_set_style_type(&self->component, STYLE_BUTTONS);	
 	psy_ui_button_init_text(&self->create, &self->component, "file.new");
 	psy_ui_button_init_text(&self->load, &self->component, "file.load");
 	psy_ui_button_init_text(&self->save, &self->component, "file.save");
@@ -508,7 +508,7 @@ void instrumentview_init(InstrumentView* self, psy_ui_Component* parent,
 	instrumentview_vtable_init(self);
 	psy_ui_component_set_id(instrumentview_base(self), VIEW_ID_INSTRUMENTSVIEW);
 	psy_ui_component_set_title(instrumentview_base(self), "main.instruments");
-	psy_ui_component_set_style_type(&self->component, STYLE_INSTRVIEW);	
+	psy_ui_component_set_style_type(&self->component, STYLE_CLIENT_VIEW);	
 	psy_ui_component_init(&self->viewtabbar, tabbarparent, NULL);
 	psy_ui_component_set_id(&self->viewtabbar, VIEW_ID_INSTRUMENTSVIEW);
 	self->statusbar = NULL;

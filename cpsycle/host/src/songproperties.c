@@ -62,7 +62,7 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_set_id(songpropertiesview_base(self), VIEW_ID_SONGPROPERTIES);
 	psy_ui_component_set_title(songpropertiesview_base(self), "main.properties");
-	psy_ui_component_set_style_type(&self->component, STYLE_SONGPROPERTIES);
+	psy_ui_component_set_style_type(&self->component, STYLE_CLIENT_VIEW);
 	psy_ui_component_init(&self->viewtabbar, tabbarparent, NULL);
 	psy_ui_component_set_id(&self->viewtabbar, VIEW_ID_SONGPROPERTIES);
 	psy_ui_component_init(&self->top, &self->component, NULL);
@@ -70,17 +70,18 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 	psy_ui_component_set_default_align(&self->top, psy_ui_ALIGN_TOP,
 		psy_ui_margin_zero());
 	/* title */
-	psy_ui_component_init(&self->title, &self->top, NULL);	
+	psy_ui_component_init(&self->title, &self->top, NULL);
+	psy_ui_component_set_style_type(&self->title, STYLE_VIEW_HEADER);
 	psy_ui_label_init(&self->label_title, &self->title);
 	psy_ui_label_set_text_alignment(&self->label_title, psy_ui_ALIGNMENT_RIGHT);
 	psy_ui_label_set_text(&self->label_title, "songproperties.title");
 	psy_ui_label_set_char_number(&self->label_title, charnum);
-	psy_ui_component_set_align(&self->label_title.component, psy_ui_ALIGN_LEFT);
-	psy_ui_component_set_margin(&self->label_title.component, margin);
+	psy_ui_component_set_align(&self->label_title.component, psy_ui_ALIGN_LEFT);	
 	psy_ui_textarea_init_single_line(&self->edit_title, &self->title);	
 	psy_ui_textarea_enable_input_field(&self->edit_title);
 	psy_ui_component_set_align(&self->edit_title.component, psy_ui_ALIGN_CLIENT);
-	psy_ui_component_set_margin(&self->edit_title.component, margin);
+	psy_ui_component_set_margin(&self->edit_title.component,
+		psy_ui_margin_make_em(0.0, 2.0, 0.0, 2.0));
 	psy_signal_connect(&self->edit_title.signal_accept, self,
 		songpropertiesview_oneditaccept);
 	psy_signal_connect(&self->edit_title.signal_reject, self,
@@ -89,6 +90,8 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 		songpropertiesview_onfilterkeys);
 	/* credits */
 	psy_ui_component_init(&self->credits, &self->top, NULL);
+	psy_ui_component_set_margin(&self->credits,
+		psy_ui_margin_make_em(1.0, 0.0, 0.0, 0.0));
 	psy_ui_label_init_text(&self->label_credits, &self->credits,
 		"songproperties.credits");
 	psy_ui_label_set_char_number(&self->label_credits, charnum);

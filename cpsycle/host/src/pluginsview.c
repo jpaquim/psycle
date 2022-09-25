@@ -636,9 +636,7 @@ static void pluginsview_vtable_init(PluginsView* self)
 /* implementation */
 void pluginsview_init(PluginsView* self, psy_ui_Component* parent)
 {
-	psy_ui_component_init(&self->component, parent, NULL);
-	psy_ui_component_set_style_type(pluginsview_base(self), 
-		STYLE_PLUGINVIEW);
+	psy_ui_component_init(&self->component, parent, NULL);	
 	pluginsview_vtable_init(self);	
 	self->component.draggable = TRUE;
 	psy_signal_init(&self->signal_selected);
@@ -772,9 +770,9 @@ void pluginsview_drawitem(PluginsView* self, psy_ui_Graphics* g,
 	psy_ui_Colour bgcolour;
 
 	if (sel) {
-		itemstyle = psy_ui_style(STYLE_PLUGINVIEW_ITEM_SELECTED);
+		itemstyle = psy_ui_style(psy_ui_STYLE_LIST_ITEM_SELECT);
 	} else {
-		itemstyle = psy_ui_style(STYLE_PLUGINVIEW_ITEM);
+		itemstyle = psy_ui_style(psy_ui_STYLE_LIST_ITEM);
 	}
 
 	if (itemstyle->background.colour.mode.transparent) {

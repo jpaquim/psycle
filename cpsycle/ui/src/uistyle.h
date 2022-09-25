@@ -60,8 +60,10 @@ typedef struct psy_ui_Style {
 	psy_ui_Colour colour;	
 	psy_ui_Background background;	
 	psy_ui_Border border;
-	psy_ui_Margin margin;	
-	psy_ui_Margin padding;	
+	psy_ui_Margin margin;
+	bool margin_set;	
+	psy_ui_Margin padding;
+	bool padding_set;
 	psy_ui_Position position;
 	int dbgflag;	
 } psy_ui_Style;
@@ -71,7 +73,6 @@ void psy_ui_style_init_default(psy_ui_Style*, uintptr_t styletype);
 void psy_ui_style_init_copy(psy_ui_Style*, const psy_ui_Style* other);
 void psy_ui_style_init_colours(psy_ui_Style*, psy_ui_Colour foreground,
 	psy_ui_Colour background);
-void psy_ui_styles_init_property(psy_ui_Style*, psy_Property* style);
 void psy_ui_style_dispose(psy_ui_Style*);
 void psy_ui_style_copy(psy_ui_Style*, const psy_ui_Style* other);
 
@@ -134,7 +135,8 @@ void psy_ui_style_set_font_string(psy_ui_Style*, const char*);
 
 INLINE void psy_ui_style_setmargin(psy_ui_Style* self, psy_ui_Margin margin)
 {
-	self->margin = margin;	
+	self->margin = margin;
+	self->margin_set = TRUE;
 }
 
 INLINE psy_ui_Margin psy_ui_style_margin(const psy_ui_Style* self)
@@ -146,13 +148,14 @@ INLINE void psy_ui_style_set_margin_em(psy_ui_Style* self,
 	double top, double right, double bottom, double left)
 {
 	psy_ui_style_setmargin(self,
-		psy_ui_margin_make_em(top, right, bottom, left));
+		psy_ui_margin_make_em(top, right, bottom, left));	
 }
 
 INLINE void psy_ui_style_setpadding(psy_ui_Style* self,
 	psy_ui_Margin padding)
 {
-	self->padding = padding;	
+	self->padding = padding;
+	self->padding_set = TRUE;
 }
 
 INLINE void psy_ui_style_set_padding_em(psy_ui_Style* self,

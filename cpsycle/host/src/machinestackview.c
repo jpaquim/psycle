@@ -1238,7 +1238,7 @@ void machinestackpanetrack_init(MachineStackPaneTrack* self,
 	psy_ui_component_init(&self->component, parent, NULL);	
 	psy_ui_component_set_vtable(&self->component,
 		machinestackpanetrack_vtable_init(self));	
-	psy_ui_component_setcolour(&self->component,
+	psy_ui_component_set_colour(&self->component,
 		psy_ui_colour_make(0x00CACACA));
 	psy_ui_component_set_align_expand(&self->component, psy_ui_HEXPAND);	
 	machinestackpanetrackclient_init(&self->client, &self->component,

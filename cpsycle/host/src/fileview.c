@@ -296,7 +296,7 @@ void fileview_init(FileView* self, psy_ui_Component* parent,
 	/* buttons */
 	psy_ui_component_init_align(&self->buttons, &self->options, NULL,			
 		psy_ui_ALIGN_LEFT);
-	psy_ui_component_set_style_type(&self->buttons, STYLE_FILEVIEW_BUTTONS);
+	psy_ui_component_set_style_type(&self->buttons, STYLE_BUTTONS);
 	psy_ui_component_set_margin(&self->buttons, psy_ui_margin_make_em(
 		0.0, 0.5, 0.0, 0.5));
 	psy_ui_button_init_text_connect(&self->save_button, &self->buttons,
