@@ -554,7 +554,7 @@ void machinestackcolumn_trace(const MachineStackColumn* self)
 		uintptr_t mac_id;
 		
 		mac_id = (uintptr_t)psy_list_entry_const(p);
-		printf("mac %d ", mac_id);
+		printf("mac %d ", (int)mac_id);
 	}
 	printf("\n");
 }
@@ -567,8 +567,7 @@ static uintptr_t machinestackstate_buildcolumnoutchain(MachineStackState*,
 
 /* implementation */
 void machinestackstate_init(MachineStackState* self, ParamViews* paramviews)
-{
-	psy_ui_Value spacing;
+{	
 	psy_ui_Style* effect_style;
 	
 	psy_table_init(&self->columns);	

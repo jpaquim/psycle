@@ -350,13 +350,13 @@
     <ClCompile Include="src\machineeditorview.c" />
     <ClCompile Include="src\machineframe.c" />
     <ClCompile Include="src\machineparamconfig.c" />
-    <ClCompile Include="src\machineproperties.c" />
     <ClCompile Include="src\machinesbox.c" />
     <ClCompile Include="src\machinestackview.c" />
     <ClCompile Include="src\machineui.c" />
     <ClCompile Include="src\machineview.c" />
     <ClCompile Include="src\machineviewbar.c" />
     <ClCompile Include="src\machineviewconfig.c" />
+    <ClCompile Include="src\machineviewmenu.c" />
     <ClCompile Include="src\machinewireview.c" />
     <ClCompile Include="src\mainframe.c" />
     <ClCompile Include="src\mainstatusbar.c" />
@@ -411,6 +411,7 @@
     <ClCompile Include="src\pluginsview.c" />
     <ClCompile Include="src\predefsconfig.c" />
     <ClCompile Include="src\presetsbar.c" />
+    <ClCompile Include="src\presetsview.c" />
     <ClCompile Include="src\propertiesview.c" />
     <ClCompile Include="src\psycle.c" />
     <ClCompile Include="src\rangeedit.c" />
@@ -459,6 +460,7 @@
     <ClCompile Include="src\stepsequencerview.c" />
     <ClCompile Include="src\stereophase.c" />
     <ClCompile Include="src\styles.c" />
+    <ClCompile Include="src\styleview.c" />
     <ClCompile Include="src\swingfillview.c" />
     <ClCompile Include="src\switchui.c" />
     <ClCompile Include="src\timebar.c" />
@@ -482,6 +484,7 @@
     <ClCompile Include="src\vumeter.c" />
     <ClCompile Include="src\vuscope.c" />
     <ClCompile Include="src\wavebox.c" />
+    <ClCompile Include="src\wireframes.c" />
     <ClCompile Include="src\wireview.c" />
     <ClCompile Include="src\workspace.c" />
     <ClCompile Include="src\zoombox.c" />
@@ -558,13 +561,13 @@
     <ClInclude Include="src\machineeditorview.h" />
     <ClInclude Include="src\machineframe.h" />
     <ClInclude Include="src\machineparamconfig.h" />
-    <ClInclude Include="src\machineproperties.h" />
     <ClInclude Include="src\machinesbox.h" />
     <ClInclude Include="src\machinestackview.h" />
     <ClInclude Include="src\machineui.h" />
     <ClInclude Include="src\machineview.h" />
     <ClInclude Include="src\machineviewbar.h" />
     <ClInclude Include="src\machineviewconfig.h" />
+    <ClInclude Include="src\machineviewmenu.h" />
     <ClInclude Include="src\machinewireview.h" />
     <ClInclude Include="src\mainframe.h" />
     <ClInclude Include="src\mainstatusbar.h" />
@@ -619,6 +622,7 @@
     <ClInclude Include="src\pluginsview.h" />
     <ClInclude Include="src\predefsconfig.h" />
     <ClInclude Include="src\presetsbar.h" />
+    <ClInclude Include="src\presetsview.h" />
     <ClInclude Include="src\propertiesview.h" />
     <ClInclude Include="src\rangeedit.h" />
     <ClInclude Include="src\realedit.h" />
@@ -667,6 +671,7 @@
     <ClInclude Include="src\stepsequencerview.h" />
     <ClInclude Include="src\stereophase.h" />
     <ClInclude Include="src\styles.h" />
+    <ClInclude Include="src\styleview.h" />
     <ClInclude Include="src\swingfillview.h" />
     <ClInclude Include="src\switchui.h" />
     <ClInclude Include="src\timebar.h" />
@@ -690,6 +695,7 @@
     <ClInclude Include="src\vumeter.h" />
     <ClInclude Include="src\vuscope.h" />
     <ClInclude Include="src\wavebox.h" />
+    <ClInclude Include="src\wireframes.h" />
     <ClInclude Include="src\wireview.h" />
     <ClInclude Include="src\workspace.h" />
     <ClInclude Include="src\zoombox.h" />
@@ -787,10 +793,6 @@
     <Image Include="wires-dark.bmp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="$(SolutionDir)audio\audio.vcxproj">
-      <Project>{40ec0ff3-1592-49d3-ac1b-3c5f85d268a9}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
     <ProjectReference Include="$(SolutionDir)container\container.vcxproj">
       <Project>{8ceb65bd-4b67-416c-9dde-03f395cc522f}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>

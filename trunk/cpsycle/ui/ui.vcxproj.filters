@@ -304,6 +304,9 @@
     <ClCompile Include="src\imps\x11\uix11cursors.c">
       <Filter>imps\x11\common</Filter>
     </ClCompile>
+    <ClCompile Include="src\uistyleproperty.c">
+      <Filter>common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\uibutton.h">
@@ -557,6 +560,9 @@
     </ClInclude>
     <ClInclude Include="src\imps\x11\uix11cursors.h">
       <Filter>imps\x11\common</Filter>
+    </ClInclude>
+    <ClInclude Include="src\uistyleproperty.h">
+      <Filter>common</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

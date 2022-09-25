@@ -402,9 +402,6 @@
     <ClCompile Include="src\presetsbar.c">
       <Filter>machine\machineview\params</Filter>
     </ClCompile>
-    <ClCompile Include="src\machineproperties.c">
-      <Filter>machine\machineview</Filter>
-    </ClCompile>
     <ClCompile Include="src\paramviews.c">
       <Filter>machine\machineview\params</Filter>
     </ClCompile>
@@ -692,6 +689,18 @@
     </ClCompile>
     <ClCompile Include="src\paramroll.c">
       <Filter>pattern\pianoroll</Filter>
+    </ClCompile>
+    <ClCompile Include="src\machineviewmenu.c">
+      <Filter>machine\machineview</Filter>
+    </ClCompile>
+    <ClCompile Include="src\presetsview.c">
+      <Filter>machine\common</Filter>
+    </ClCompile>
+    <ClCompile Include="src\wireframes.c">
+      <Filter>machine\machineview\wires</Filter>
+    </ClCompile>
+    <ClCompile Include="src\styleview.c">
+      <Filter>configuration</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -998,9 +1007,6 @@
     <ClInclude Include="src\presetsbar.h">
       <Filter>machine\machineview\params</Filter>
     </ClInclude>
-    <ClInclude Include="src\machineproperties.h">
-      <Filter>machine\machineview</Filter>
-    </ClInclude>
     <ClInclude Include="src\paramviews.h">
       <Filter>machine\machineview\params</Filter>
     </ClInclude>
@@ -1288,6 +1294,18 @@
     </ClInclude>
     <ClInclude Include="src\paramroll.h">
       <Filter>pattern\pianoroll</Filter>
+    </ClInclude>
+    <ClInclude Include="src\machineviewmenu.h">
+      <Filter>machine\machineview</Filter>
+    </ClInclude>
+    <ClInclude Include="src\presetsview.h">
+      <Filter>machine\common</Filter>
+    </ClInclude>
+    <ClInclude Include="src\wireframes.h">
+      <Filter>machine\machineview\wires</Filter>
+    </ClInclude>
+    <ClInclude Include="src\styleview.h">
+      <Filter>configuration</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

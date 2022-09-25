@@ -434,9 +434,7 @@ void machinemenutitle_update(MachineMenuTitle* self)
 
 void machinemenutitle_on_accept_edit(MachineMenuTitle* self,
 	psy_ui_TextArea* sender)
-{
-	psy_audio_Machine* machine;	
-	
+{	
 	assert(self);
 	
 	if (machinemenustate_invalid(self->state) || (self->state->mac_id ==

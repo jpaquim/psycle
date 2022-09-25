@@ -309,8 +309,6 @@ uintptr_t machineview_section(const MachineView* self)
 
 void machineview_on_song_changed(MachineView* self, psy_audio_Player* sender)
 {	
-	psy_audio_Song* song;
-	
 	assert(self);
 			
 	machineview_set_song(self, psy_audio_player_song(sender));
