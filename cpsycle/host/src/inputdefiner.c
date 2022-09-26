@@ -187,7 +187,7 @@ void inputdefiner_init(InputDefiner* self, psy_ui_Component* parent)
 	vtable_init(self);
 	self->property = NULL;
 	psy_ui_component_set_style_type_focus(inputdefiner_base(self),
-		STYLE_INPUTDEFINER_FOCUS);
+		psy_ui_STYLE_EDIT_FOCUS);
 	psy_ui_component_set_tab_index(inputdefiner_base(self), 0);
 	psy_ui_label_init(&self->label, &self->component);
 	psy_ui_component_set_align(psy_ui_label_base(&self->label),

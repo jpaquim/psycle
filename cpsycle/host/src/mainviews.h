@@ -32,7 +32,6 @@ typedef struct MainViews {
 	MainViewBar mainviewbar;
 	psy_ui_Notebook notebook;
 	EmptyViewPage empty_page;
-	psy_ui_Notebook viewstatusbars;
 	/* references */
 	Workspace* workspace;
 } MainViews;

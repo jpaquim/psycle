@@ -163,6 +163,7 @@ static uintptr_t machineproxy_numbanks(psy_audio_MachineProxy*);
 static void machineproxy_setcurrbank(psy_audio_MachineProxy*, uintptr_t prgidx);
 static uintptr_t machineproxy_currbank(psy_audio_MachineProxy*);
 static void machineproxy_currentpreset(psy_audio_MachineProxy*, struct psy_audio_Preset*);
+static void machineproxy_tweakpreset(psy_audio_MachineProxy*, struct psy_audio_Preset*);
 static void machineproxy_setpresets(psy_audio_MachineProxy*, struct psy_audio_Presets*);
 static struct psy_audio_Presets* machineproxy_presets(psy_audio_MachineProxy*);
 static bool machineproxy_acceptpresets(psy_audio_MachineProxy*);
@@ -303,6 +304,7 @@ static void vtable_init(psy_audio_MachineProxy* self)
 		vtable.setcurrbank = (fp_machine_setcurrbank)machineproxy_setcurrbank;
 		vtable.currbank = (fp_machine_currbank)machineproxy_currbank;
 		vtable.currentpreset = (fp_machine_currentpreset)machineproxy_currentpreset;
+		vtable.tweakpreset = (fp_machine_currentpreset)machineproxy_tweakpreset;
 		vtable.setpresets = (fp_machine_setpresets)machineproxy_setpresets;
 		vtable.presets = (fp_machine_presets)machineproxy_presets;
 		vtable.acceptpresets = (fp_machine_acceptpresets)machineproxy_acceptpresets;
@@ -1996,6 +1998,23 @@ void machineproxy_currentpreset(psy_audio_MachineProxy* self, struct psy_audio_P
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except (FilterException(self, "currentpreset", GetExceptionCode(),
+			GetExceptionInformation())) {
+		}
+#endif		
+	}
+}
+
+void machineproxy_tweakpreset(psy_audio_MachineProxy* self, struct psy_audio_Preset* preset)
+{	
+	if (self->crashed == 0) {
+#if defined DIVERSALIS__OS__MICROSOFT        
+		__try
+#endif		
+		{
+			psy_audio_machine_tweakpreset(self->client, preset);
+		}
+#if defined DIVERSALIS__OS__MICROSOFT		
+		__except (FilterException(self, "tweakpreset", GetExceptionCode(),
 			GetExceptionInformation())) {
 		}
 #endif		

@@ -421,6 +421,8 @@ void instrumentsviewbar_init(InstrumentsViewBar* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {
 	psy_ui_component_init(instrumentsviewbar_base(self), parent, NULL);
+	psy_ui_component_set_id(instrumentsviewbar_base(self),
+		VIEW_ID_INSTRUMENTSVIEW);	
 	self->workspace = workspace;
 	psy_ui_component_set_default_align(instrumentsviewbar_base(self),
 		psy_ui_ALIGN_LEFT, psy_ui_margin_make(
@@ -574,7 +576,12 @@ void instrumentview_init(InstrumentView* self, psy_ui_Component* parent,
 		&workspace->song->instruments);	
 	instrumentpitchview_init(&self->pitch,
 		psy_ui_notebook_base(&self->notebook),
-		&workspace->song->instruments, workspace);
+		&workspace->song->instruments, workspace);		
+	instrumentsviewbar_init(&self->instrumentsviewbar, &self->component,
+		self->workspace);
+	psy_ui_component_set_align(&self->instrumentsviewbar.component,
+		psy_ui_ALIGN_BOTTOM);
+	instrumentsview_setstatusbar(self, &self->instrumentsviewbar);
 	/* connect signals */
 	psy_ui_notebook_connect_controller(&self->notebook,
 		&self->tabbar.signal_change);

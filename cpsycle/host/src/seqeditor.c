@@ -72,11 +72,7 @@ void seqeditor_init(SeqEditor* self, psy_ui_Component* parent,
 	seqeditstate_init(&self->state, &self->cmds, &self->component);	
 	/* toolbar */
 	seqedittoolbar_init(&self->toolbar, &self->component, &self->state);
-	psy_ui_component_set_align(&self->toolbar.component, psy_ui_ALIGN_TOP);	
-	/* spacer */
-	psy_ui_component_init_align(&self->spacer, &self->component, NULL,
-		psy_ui_ALIGN_TOP);
-	psy_ui_component_set_style_type(&self->spacer, STYLE_SEQEDT_SPACER);
+	psy_ui_component_set_align(&self->toolbar.component, psy_ui_ALIGN_TOP);		
 	/* track_header */
 	psy_ui_component_init(&self->tracks, &self->component, NULL);	
 	psy_ui_component_set_align(&self->tracks, psy_ui_ALIGN_CLIENT);

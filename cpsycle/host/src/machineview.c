@@ -86,7 +86,9 @@ void machineview_init(MachineView* self, psy_ui_Component* parent,
 	
 	machineview_init_component(self, parent);	
 	self->shownewmachine = FALSE;
-	self->workspace = workspace;	
+	self->workspace = workspace;
+	machineviewbar_init(&self->machineviewbar, &self->component,
+		&self->workspace->player);
 	machineview_init_notebook(self, tabbarparent);
 	machineview_init_wire_view(self, tabbarparent);
 	machineview_init_stack_view(self, tabbarparent);	
@@ -104,7 +106,6 @@ void machineview_init_component(MachineView* self, psy_ui_Component* parent)
 	
 	psy_ui_component_init(machineview_base(self), parent, NULL);
 	machineview_vtable_init(self);	
-	psy_ui_component_set_style_type(&self->component, STYLE_MV);
 	psy_ui_component_set_title(machineview_base(self), "main.machines");
 	psy_ui_component_set_id(machineview_base(self), VIEW_ID_MACHINEVIEW);
 }

@@ -25,8 +25,7 @@ typedef struct SeqEditor {
 	/* inherits */
 	psy_ui_Component component;
 	/* internal */
-	SeqEditToolBar toolbar;
-	psy_ui_Component spacer;	
+	SeqEditToolBar toolbar;	
 	SeqEditHeader header;	
 	psy_ui_Scroller scroller;	
 	SeqEditorHeaderDescBar headerdescbar;	

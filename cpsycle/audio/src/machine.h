@@ -274,6 +274,8 @@ typedef void (*fp_machine_selectauxcolumn)(struct psy_audio_Machine*, uintptr_t 
 /* presets */
 typedef void (*fp_machine_currentpreset)(struct psy_audio_Machine*,
 	struct psy_audio_Preset*);
+typedef void (*fp_machine_tweakpreset)(struct psy_audio_Machine*,
+	struct psy_audio_Preset*);
 typedef void (*fp_machine_setpresets)(struct psy_audio_Machine*,
 	struct psy_audio_Presets*);
 typedef struct psy_audio_Presets* (*fp_machine_presets)(
@@ -387,6 +389,7 @@ typedef struct {
 	fp_machine_currbank currbank;
 	fp_machine_numbanks numbanks;
 	fp_machine_currentpreset currentpreset;
+	fp_machine_tweakpreset tweakpreset;
 	fp_machine_setpresets setpresets;
 	fp_machine_presets presets;
 	fp_machine_acceptpresets acceptpresets;
@@ -879,6 +882,12 @@ INLINE void psy_audio_machine_currentpreset(psy_audio_Machine* self,
 	struct psy_audio_Preset* preset)
 {
 	self->vtable->currentpreset(self, preset);
+}
+
+INLINE void psy_audio_machine_tweakpreset(psy_audio_Machine* self,
+	struct psy_audio_Preset* preset)
+{
+	self->vtable->tweakpreset(self, preset);
 }
 
 INLINE void psy_audio_machine_setpresets(psy_audio_Machine* self,

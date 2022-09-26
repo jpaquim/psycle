@@ -1,22 +1,26 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "plugin.h"
-// local
+/* local */
 #include "pattern.h"
 #include "plugin_interface.h"
 #include "preset.h"
 #include "presets.h"
 #include "songio.h"
-// std
+/* std */
 #include <math.h>
-// platform
+/* platform */
 #include "../../detail/portable.h"
 #include "../../detail/trace.h"
 
-// psy_audio_PluginMachineParam
+
+/* psy_audio_PluginMachineParam */
 typedef struct psy_audio_PluginMachineParam {
 	psy_audio_MachineParam machineparam;
 	struct CMachineInterface* mi;
@@ -242,6 +246,7 @@ static void vtable_init(psy_audio_Plugin* self)
 		vtable.data = (fp_machine_data)data;
 		vtable.datasize = (fp_machine_datasize)datasize;
 		vtable.currentpreset = (fp_machine_currentpreset)currentpreset;
+		vtable.tweakpreset = (fp_machine_tweakpreset)psy_audio_plugin_tweakpreset;
 		vtable.setpresets = (fp_machine_setpresets)setpresets;
 		vtable.presets = (fp_machine_presets)presets;
 		vtable.acceptpresets = (fp_machine_acceptpresets)acceptpresets;

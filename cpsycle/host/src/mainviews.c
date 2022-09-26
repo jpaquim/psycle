@@ -17,7 +17,6 @@
 
 
 /* prototypes */
-static void mainviews_init_view_status_bars(MainViews*);
 static void mainviews_on_extract(MainViews*, psy_ui_Button* sender);
 static void mainviews_extract(MainViews*);
 static void mainviews_dock(MainViews*, psy_ui_Component* page);
@@ -36,8 +35,7 @@ void mainviews_init(MainViews* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->mainviewbar.view_float.signal_clicked,
 		self, mainviews_on_float);
 	psy_ui_component_set_align(mainviewbar_base(&self->mainviewbar),
-		psy_ui_ALIGN_TOP);
-	mainviews_init_view_status_bars(self);
+		psy_ui_ALIGN_TOP);	
 	psy_ui_notebook_init(&self->notebook, &self->component);
 	self->notebook.page_not_found_index = VIEW_ID_FLOATED;
 	psy_ui_component_set_align(psy_ui_notebook_base(&self->notebook),
@@ -45,19 +43,6 @@ void mainviews_init(MainViews* self, psy_ui_Component* parent,
 	emptyviewpage_init(&self->empty_page, 
 		psy_ui_notebook_base(&self->notebook));	
 }
-
-void mainviews_init_view_status_bars(MainViews* self)
-{
-	psy_ui_notebook_init(&self->viewstatusbars, &self->component);	
-	psy_ui_component_set_align(psy_ui_notebook_base(&self->viewstatusbars),
-		psy_ui_ALIGN_BOTTOM);
-	psy_ui_component_set_style_type(&self->viewstatusbars.component, 
-		STYLE_VIEWSTATUSBAR);
-	psy_ui_component_set_default_align(
-		psy_ui_notebook_base(&self->viewstatusbars),
-		psy_ui_ALIGN_LEFT, psy_ui_defaults_hmargin(psy_ui_defaults()));	
-}
-
 
 void mainviews_on_extract(MainViews* self, psy_ui_Button* sender)
 {

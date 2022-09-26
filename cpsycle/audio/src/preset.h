@@ -25,16 +25,21 @@ typedef struct psy_audio_Preset {
 
 void psy_audio_preset_init(psy_audio_Preset*);
 void psy_audio_preset_dispose(psy_audio_Preset*);
+
 psy_audio_Preset* psy_audio_preset_alloc(void);
 psy_audio_Preset* psy_audio_preset_allocinit(void);
+
 void psy_audio_preset_clear(psy_audio_Preset*);
 void psy_audio_preset_setname(psy_audio_Preset*, const char* name);
 const char* psy_audio_preset_name(psy_audio_Preset*);
-void psy_audio_preset_setvalue(psy_audio_Preset*, uintptr_t param, intptr_t value);
+void psy_audio_preset_setvalue(psy_audio_Preset*, uintptr_t param,
+	intptr_t value);
 intptr_t psy_audio_preset_value(psy_audio_Preset*, uintptr_t param);
 void psy_audio_preset_setdatastruct(psy_audio_Preset* self,
-    uintptr_t num, const char* newname, int const* parameters, uintptr_t size, void* newdata);
-void psy_audio_preset_putdata(psy_audio_Preset*, uintptr_t size, void* newdata);
+    uintptr_t num, const char* newname, int const* parameters, uintptr_t size,
+	void* newdata);
+void psy_audio_preset_putdata(psy_audio_Preset*, uintptr_t size,
+	void* newdata);
 
 INLINE uintptr_t psy_audio_preset_numparameters(psy_audio_Preset* self)
 {

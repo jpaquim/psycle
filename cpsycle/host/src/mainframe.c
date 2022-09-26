@@ -32,8 +32,6 @@ static void mainframe_init_workspace(MainFrame*);
 static void mainframe_init_layout(MainFrame*);
 static void mainframe_init_terminal(MainFrame*);
 static void mainframe_init_kbd_help(MainFrame*);
-static void mainframe_init_status_bar(MainFrame*);
-static void mainframe_init_view_statusbars(MainFrame*);
 static void mainframe_connect_statusbar(MainFrame*);
 static void mainframe_init_tabbars(MainFrame*);
 static void mainframe_init_main_pane(MainFrame*);
@@ -101,7 +99,6 @@ static bool mainframe_accept_frame_move(const MainFrame*, psy_ui_Component*
 	target);
 static bool mainframe_on_input_handler_callback(MainFrame*, int message,
 	void* param1);
-static void mainframe_plugineditor_on_focus(MainFrame*, psy_ui_Component* sender);
 static void mainframe_seqeditor_on_float(MainFrame*, psy_ui_Button* sender);
 static void mainframe_on_metronome_bar(MainFrame*, psy_Property* sender);
 static void mainframe_on_trackscope_view(MainFrame*, psy_Property* sender);
@@ -184,7 +181,7 @@ void mainframe_init(MainFrame* self)
 	mainframe_init_step_sequencer_view(self);
 	mainframe_init_seq_editor(self);
 	mainframe_init_plugin_editor(self);
-	mainframe_init_status_bar(self);
+	mainframe_connect_statusbar(self);
 	mainframe_init_minmaximize(self);
 	mainframe_update_songtitle(self);
 	mainframe_init_interpreter(self);
@@ -317,12 +314,6 @@ void mainframe_init_kbd_help(MainFrame* self)
 	psy_ui_component_hide(kbdhelp_base(&self->kbdhelp));
 }
 
-void mainframe_init_status_bar(MainFrame* self)
-{
-	mainframe_init_view_statusbars(self);
-	mainframe_connect_statusbar(self);
-}
-
 void mainframe_init_minmaximize(MainFrame* self)
 {
 	mainviewbar_add_minmaximze(&self->mainviews.mainviewbar, &self->left);
@@ -331,26 +322,6 @@ void mainframe_init_minmaximize(MainFrame* self)
 		machinebar_base(&self->machinebar));
 	mainviewbar_add_minmaximze(&self->mainviews.mainviewbar,
 		trackscopeview_base(&self->trackscopeview));
-}
-
-void mainframe_init_view_statusbars(MainFrame* self)
-{
-	machineviewbar_init(&self->machineviewbar,
-		psy_ui_notebook_base(&self->mainviews.viewstatusbars),
-		&self->workspace.player);
-	patternviewbar_init(&self->patternviewbar,
-		psy_ui_notebook_base(&self->mainviews.viewstatusbars),
-		&self->workspace.config.visual.patview,
-		&self->workspace);	
-	sampleeditorbar_init(&self->samplesview.sampleeditor.sampleeditortbar,
-		psy_ui_notebook_base(&self->mainviews.viewstatusbars),
-		&self->samplesview.sampleeditor, &self->workspace);
-	samplesview_connectstatusbar(&self->samplesview);
-	instrumentsviewbar_init(&self->instrumentsviewbar,
-		psy_ui_notebook_base(&self->mainviews.viewstatusbars), &self->workspace);
-	instrumentsview_setstatusbar(&self->instrumentsview,
-		&self->instrumentsviewbar);	
-	psy_ui_notebook_select(&self->mainviews.viewstatusbars, 0);
 }
 
 void mainframe_connect_statusbar(MainFrame* self)
@@ -748,9 +719,7 @@ void mainframe_init_plugin_editor(MainFrame* self)
 	psy_ui_splitter_init(&self->splitbarplugineditor, &self->pane);
 	psy_ui_component_set_align(psy_ui_splitter_base(&self->splitbarplugineditor),
 		psy_ui_ALIGN_LEFT);
-	psy_ui_component_hide(psy_ui_splitter_base(&self->splitbarplugineditor));
-	psy_signal_connect(&self->plugineditor.editor.textarea.pane.component.signal_focus,
-		self, mainframe_plugineditor_on_focus);
+	psy_ui_component_hide(psy_ui_splitter_base(&self->splitbarplugineditor));	
 }
 
 void mainframe_connect_workspace(MainFrame* self)
@@ -826,11 +795,11 @@ bool mainframe_on_input(MainFrame* self, InputHandler* sender)
 		break;
 	case CMD_EDT_EDITQUANTIZEDEC:
 		workspace_edit_quantize_change(&self->workspace, -1);
-		patterncursorstepbox_update(&self->patternviewbar.cursorstep);
+		// patterncursorstepbox_update(&self->patternviewbar.cursorstep);
 		return 1;
 	case CMD_EDT_EDITQUANTIZEINC:
 		workspace_edit_quantize_change(&self->workspace, 1);
-		patterncursorstepbox_update(&self->patternviewbar.cursorstep);
+		// patterncursorstepbox_update(&self->patternviewbar.cursorstep);
 		return 1;
 	}
 	workspace_on_input(&self->workspace, cmd.id);
@@ -992,7 +961,7 @@ void mainframe_on_view_selected(MainFrame* self, Workspace* sender,
 			confirmbox_set_labels(&self->checkunsavedbox,
 				"msg.seqclear", "msg.yes", "msg.no");
 		}
-	}
+	}	
 	if (view_id == psy_INDEX_INVALID) {
 		view = psy_ui_notebook_active_page(&self->mainviews.notebook);
 	} else {
@@ -1001,7 +970,7 @@ void mainframe_on_view_selected(MainFrame* self, Workspace* sender,
 		view = psy_ui_notebook_active_page(&self->mainviews.notebook);				
 	}
 	if (view) {
-		if (view_id != psy_INDEX_INVALID) {
+		if (view_id != psy_INDEX_INVALID) {			
 			psy_ui_tabbar_select(&self->mainviews.mainviewbar.tabbar, view_id);
 			psy_ui_notebook_select_by_component_id
 				(&self->mainviews.mainviewbar.viewtabbars, view_id);
@@ -1037,7 +1006,6 @@ void mainframe_on_tabbar_changed(MainFrame* self, psy_ui_TabBar* sender,
 	}	
 	psy_ui_component_select_section(&self->mainviews.notebook.component,
 		psy_ui_component_id(&tab->component), psy_INDEX_INVALID);	
-	psy_ui_notebook_select(&self->mainviews.viewstatusbars, tabindex);	
 	component = psy_ui_notebook_active_page(&self->mainviews.notebook);	
 	if (component) {		
 		psy_ui_notebook_select_by_component_id
@@ -1428,7 +1396,7 @@ bool mainframe_accept_frame_move(const MainFrame* self, psy_ui_Component*
 		&self->songbar.component,
 		&self->playbar.component,
 		&self->undoredobar.component,
-		&self->machineviewbar.component,
+		&self->machinebar.component,
 		&self->vubar.component,
 		&self->vubar.vumeter.component,
 		NULL
@@ -1501,11 +1469,6 @@ bool mainframe_on_input_handler_callback(MainFrame* self, int message, void* par
 		(psy_ui_Component*)param1));		
 }
 
-void mainframe_plugineditor_on_focus(MainFrame* self, psy_ui_Component* sender)
-{
-	psy_ui_notebook_select(&self->mainviews.viewstatusbars, 4);
-}
-
 void mainframe_add_link(MainFrame* self, Link* link)
 {
 	links_add(&self->links, link);
@@ -1554,7 +1517,7 @@ void mainframe_on_help(MainFrame* self, psy_ui_Button* sender)
 {
 	assert(self);
 	
-	workspace_select_view(&self->workspace, viewindex_make(VIEW_ID_HELPVIEW));
+	workspace_select_view(&self->workspace, viewindex_make(VIEW_ID_HELPVIEW));	
 }
 
 void mainframe_on_settings(MainFrame* self, psy_ui_Button* sender)

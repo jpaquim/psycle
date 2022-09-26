@@ -122,10 +122,17 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 		NULL, &self->cmds);
 	trackerstate_init(&self->state, &self->track_config, &self->pvstate);
 	patternview_connect_song(self);
+	/* bar */
+	patternviewbar_init(&self->patternviewbar, &self->component,
+		&self->workspace->config.visual.patview, self->workspace);
+	psy_ui_component_set_margin(&self->patternviewbar.component,
+		psy_ui_margin_make_em(0.5, 0.0, 0.25, 0.0));
+	psy_ui_component_set_align(&self->patternviewbar.component,
+		psy_ui_ALIGN_BOTTOM);
 	/* header */
 	trackerheaderview_init(&self->header, &self->component, 
 		&self->track_config, &self->state, self->workspace);	
-	psy_ui_component_set_align(&self->header.component, psy_ui_ALIGN_TOP);	
+	psy_ui_component_set_align(&self->header.component, psy_ui_ALIGN_TOP);
 	/* defaultline */
 	patterndefaultline_init(&self->defaultline, &self->component,
 		&self->track_config, &workspace->config.visual.patview, workspace);	

@@ -7,6 +7,8 @@
 
 
 #include "sampleeditor.h"
+/* host */
+#include "styles.h"
 /* audio */
 #include <exclusivelock.h>
 #include <operations.h>
