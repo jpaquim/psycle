@@ -20,7 +20,6 @@
 /* prototypes */
 static void dirconfig_make(DirConfig*, psy_Property* parent);
 static void dirconfig_make_plugin_dirs(DirConfig* self, psy_Property* parent);
-static void dirconfig_make_default_user_presets(DirConfig*);
 static void dirconfig_append_dir_edit(DirConfig*, psy_Property* parent,
 	const char* key, const char* label, const char* defaultdir);
 
@@ -71,8 +70,10 @@ void dirconfig_make(DirConfig* self, psy_Property* parent)
 		PSYCLE_SAMPLES_DEFAULT_DIR);	
 	dirconfig_append_dir_edit(self, self->directories,
 		"doc", "settings.dirs.doc",
-		PSYCLE_DOC_DEFAULT_DIR);		
-	dirconfig_make_default_user_presets(self);
+		PSYCLE_DOC_DEFAULT_DIR);
+	dirconfig_append_dir_edit(self, self->directories,
+		"presets", "User Presets directory",
+		PSYCLE_USERPRESETS_DEFAULT_DIR);			
 	dirconfig_make_plugin_dirs(self, self->directories);
 }
 
@@ -106,20 +107,6 @@ void dirconfig_make_plugin_dirs(DirConfig* self, psy_Property* parent)
 		"lv2s", "settings.dirs.lv2",
 		PSYCLE_LV2_DEFAULT_DIR);
 #endif		
-}
-
-void dirconfig_make_default_user_presets(DirConfig* self)
-{
-	psy_Path defaultuserpresetpath;
-
-	assert(self);
-
-	psy_path_init(&defaultuserpresetpath, psy_dir_home());
-	psy_path_set_name(&defaultuserpresetpath, "Presets");
-	dirconfig_append_dir_edit(self, self->directories,
-		"presets", "User Presets directory",
-		psy_path_full(&defaultuserpresetpath));
-	psy_path_dispose(&defaultuserpresetpath);
 }
 
 void dirconfig_append_dir_edit(DirConfig* self, psy_Property* parent,

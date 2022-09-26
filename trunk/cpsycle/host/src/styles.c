@@ -224,12 +224,6 @@ void init_host_styles(psy_ui_Styles* self, psy_ui_ThemeMode theme)
 
 	style = psy_ui_style_allocinit();
 	psy_ui_style_set_background_colour(style,
-		material.surface_overlay_8p);
-	psy_ui_styles_set_style(self, STYLE_SEQEDT_SPACER, "style_seqedt_spacer",
-		style);
-
-	style = psy_ui_style_allocinit();
-	psy_ui_style_set_background_colour(style,
 		material.surface_overlay_8p);	
 	psy_ui_styles_set_style(self, STYLE_SEQEDT_RULER_TOP, "seqedt_ruler_top",
 		style);
@@ -331,17 +325,7 @@ void init_host_styles(psy_ui_Styles* self, psy_ui_ThemeMode theme)
 	psy_ui_style_set_background_overlay(style, 9);
 	psy_ui_style_set_padding_em(style, 0.5, 0.5, 0.5, 0.5);
 	psy_ui_styles_set_style(self, STYLE_CLIENT_VIEW, "clientview",
-		style);
-	
-	style = psy_ui_style_allocinit();
-	psy_ui_style_set_background_colour(style, material.surface_overlay_9p);
-	psy_ui_styles_set_style(self, STYLE_SONGPROPERTIES_COMMENTS,
-		"songproperties_comments", style);
-
-	style = psy_ui_style_allocinit();
-	psy_ui_style_set_background_colour(style, material.surface_overlay_9p);
-	psy_ui_styles_set_style(self, STYLE_SONGPROPERTIES_COMMENTS_EDIT,
-		"songproperties_comments_edit", style);
+		style);	
 	
 	style = psy_ui_style_allocinit();
 	psy_ui_style_set_background_colour(style, material.surface_overlay_5p);	
@@ -432,13 +416,7 @@ void init_host_styles(psy_ui_Styles* self, psy_ui_ThemeMode theme)
 		material.surface_overlay_16p);
 	psy_ui_styles_set_style(self, STYLE_TABLEROW_SELECT, "tablerow::select",
 		style);
-	
-	style = psy_ui_style_allocinit();
-	psy_ui_style_set_colour(style, material.onprimary_medium);
-	psy_ui_style_set_background_overlay(style, 6);
-	psy_ui_styles_set_style(self, STYLE_INPUTDEFINER_FOCUS,
-		"inputdefiner::focus", style);
-	
+		
 	style = psy_ui_style_allocinit();
 	psy_ui_style_set_margin_em(style, 0.0, 0.0, 0.5, 0.0);
 	psy_ui_style_set_padding_em(style, 0.0, 0.0, 0.0, 0.0);	
@@ -463,12 +441,7 @@ void init_host_styles(psy_ui_Styles* self, psy_ui_ThemeMode theme)
 	psy_ui_style_set_margin_em(style, 0.0, 0.0, 1.0, 0.0);
 	psy_ui_styles_set_style(self, STYLE_NEWMACHINE_SECTION_HEADER,
 		"newmachine_section::header", style);
-	
-	style = psy_ui_style_allocinit();
-	psy_ui_style_set_margin_em(style, 0.5, 0.0, 1.0, 0.0);	
-	psy_ui_styles_set_style(self, STYLE_NEWMACHINE_SEARCHBAR,
-		"newmachine_searchbar", style);
-	
+		
 	style = psy_ui_style_allocinit();
 	psy_ui_style_set_colour(style, material.onprimary_medium);
 	psy_ui_border_init_solid(&style->border,
@@ -904,12 +877,6 @@ void init_light_theme(psy_ui_Styles* self)
 	psy_ui_styles_set_style(self, STYLE_SEQEDT_TOOLBAR, "", style);
 
 	style = psy_ui_style_allocinit();
-	psy_ui_style_set_background_colour(style,
-		material.surface_overlay_8p);
-	psy_ui_style_set_size(style, psy_ui_size_make_em(0.0, 0.25));
-	psy_ui_styles_set_style(self, STYLE_SEQEDT_SPACER, "", style);
-
-	style = psy_ui_style_allocinit();
 	psy_ui_style_set_colours(style, light.cl_font_1, light.cl_white_1);
 	psy_ui_styles_set_style(self, STYLE_SEQEDT_RULER_TOP, "", style);
 
@@ -985,15 +952,7 @@ void init_light_theme(psy_ui_Styles* self)
 	psy_ui_style_set_background_overlay(style, 9);
 	psy_ui_style_set_padding_em(style, 0.5, 0.5, 0.5, 0.5);
 	psy_ui_styles_set_style(self, STYLE_CLIENT_VIEW, "", style);
-
-	style = psy_ui_style_allocinit();
-	psy_ui_style_set_background_colour(style, material.surface_overlay_9p);
-	psy_ui_styles_set_style(self, STYLE_SONGPROPERTIES_COMMENTS, "", style);
-
-	style = psy_ui_style_allocinit();
-	psy_ui_style_set_background_colour(style, material.surface_overlay_9p);
-	psy_ui_styles_set_style(self, STYLE_SONGPROPERTIES_COMMENTS_EDIT, "", style);
-
+	
 	style = psy_ui_style_allocinit();
 	psy_ui_style_set_background_colour(style, material.surface_overlay_5p);
 	psy_ui_style_set_background_id(style, IDB_ABOUT);
@@ -1078,12 +1037,7 @@ void init_light_theme(psy_ui_Styles* self)
 	psy_ui_style_set_colours(style, material.onprimary_medium,
 		material.surface_overlay_16p);
 	psy_ui_styles_set_style(self, STYLE_TABLEROW_SELECT, "", style);
-
-	style = psy_ui_style_allocinit();
-	psy_ui_style_set_colour(style, material.onprimary_medium);
-	psy_ui_style_set_background_overlay(style, 6);
-	psy_ui_styles_set_style(self, STYLE_INPUTDEFINER_FOCUS, "", style);
-
+	
 	style = psy_ui_style_allocinit();
 	psy_ui_style_set_margin_em(style, 0.0, 0.0, 1.0, 0.0);
 	psy_ui_style_set_padding_em(style, 1.0, 0.0, 0.0, 0.0);
@@ -1106,11 +1060,7 @@ void init_light_theme(psy_ui_Styles* self)
 	style = psy_ui_style_allocinit();
 	psy_ui_style_set_margin_em(style, 0.0, 0.0, 1.0, 0.0);
 	psy_ui_styles_set_style(self, STYLE_NEWMACHINE_SECTION_HEADER, "", style);
-
-	style = psy_ui_style_allocinit();
-	psy_ui_style_set_margin_em(style, 0.5, 0.0, 0.5, 0.0);
-	psy_ui_styles_set_style(self, STYLE_NEWMACHINE_SEARCHBAR, "", style);
-
+	
 	style = psy_ui_style_allocinit();
 	psy_ui_style_set_colour(style, material.onprimary_medium);
 	psy_ui_border_init_solid(&style->border,
@@ -1417,10 +1367,6 @@ void init_win98_theme(psy_ui_Styles* self)
 	psy_ui_styles_set_style(self, STYLE_SEQEDT_TOOLBAR, "", style);
 
 	style = psy_ui_style_allocinit();
-	psy_ui_style_set_colours(style, win.cl_black, win.cl_medgray);
-	psy_ui_styles_set_style(self, STYLE_SEQEDT_SPACER, "", style);
-
-	style = psy_ui_style_allocinit();
 	psy_ui_style_set_colours(style, win.cl_black, win.cl_silver);
 	psy_ui_styles_set_style(self, STYLE_SEQEDT_RULER_TOP, "", style);
 
@@ -1492,15 +1438,6 @@ void init_win98_theme(psy_ui_Styles* self)
 
 	style = psy_ui_style_allocinit();
 	psy_ui_style_set_colours(style, win.cl_black, win.cl_silver);
-	psy_ui_border_init_solid(&style->border, win.cl_medgray);
-	psy_ui_styles_set_style(self, STYLE_SONGPROPERTIES_COMMENTS, "", style);
-
-	style = psy_ui_style_allocinit();
-	psy_ui_style_set_colours(style, win.cl_black, win.cl_white);
-	psy_ui_styles_set_style(self, STYLE_SONGPROPERTIES_COMMENTS_EDIT, "", style);
-
-	style = psy_ui_style_allocinit();
-	psy_ui_style_set_colours(style, win.cl_black, win.cl_silver);
 	psy_ui_style_set_background_id(style, IDB_ABOUT);
 	style->background.repeat = psy_ui_NOREPEAT;
 	style->background.align = psy_ui_ALIGNMENT_CENTER;
@@ -1566,10 +1503,6 @@ void init_win98_theme(psy_ui_Styles* self)
 	psy_ui_styles_set_style(self, STYLE_TABLEROW_SELECT, "", style);
 
 	style = psy_ui_style_allocinit();
-	psy_ui_style_set_colours(style, win.cl_black, win.cl_gray);
-	psy_ui_styles_set_style(self, STYLE_INPUTDEFINER_FOCUS, "", style);
-
-	style = psy_ui_style_allocinit();
 	psy_ui_style_set_margin_em(style, 0.0, 0.0, 1.0, 0.0);
 	psy_ui_style_set_padding_em(style, 1.0, 0.0, 0.0, 0.0);
 	psy_ui_border_init_top(&style->border, psy_ui_BORDER_SOLID, win.cl_gray);
@@ -1589,10 +1522,6 @@ void init_win98_theme(psy_ui_Styles* self)
 	style = psy_ui_style_allocinit();
 	psy_ui_style_set_margin_em(style, 0.0, 0.0, 1.0, 0.0);
 	psy_ui_styles_set_style(self, STYLE_NEWMACHINE_SECTION_HEADER, "", style);
-
-	style = psy_ui_style_allocinit();
-	psy_ui_style_set_margin_em(style, 0.5, 0.0, 0.5, 0.0);
-	psy_ui_styles_set_style(self, STYLE_NEWMACHINE_SEARCHBAR, "", style);
 
 	style = psy_ui_style_allocinit();
 	psy_ui_style_set_colour(style, win.cl_black);
@@ -1753,10 +1682,7 @@ void init_psycletheme_styles(psy_ui_Styles* self)
 void init_machineview_styles(psy_ui_Styles* self)
 {	
 	psy_ui_Style* style;
-	
-	style = psy_ui_style_allocinit();
-	psy_ui_styles_set_style(self, STYLE_MV, "mv", style);
-	
+		
 	style = psy_ui_style_allocinit();
 	psy_ui_styles_set_style(self, STYLE_MV_WIRES, "mv_wires", style);
 	

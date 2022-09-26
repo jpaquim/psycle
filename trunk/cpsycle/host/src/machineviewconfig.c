@@ -315,9 +315,7 @@ void machineviewconfig_load_background(MachineViewConfig* self)
 void machineviewconfig_load_colours(MachineViewConfig* self)
 {
 	psy_ui_Style* style;
-
-	style = psy_ui_style(STYLE_MV);
-	read_colour(self->theme, "mv_wirecolour", style, TRUE);
+	
 	style = psy_ui_style(STYLE_MV_WIRES);
 	read_colour(self->theme, "mv_wirecolour", style, TRUE);
 	read_colour(self->theme, "mv_colour", style, FALSE);
@@ -497,7 +495,7 @@ void machineviewconfig_load_bitmap(MachineViewConfig* self)
 		0 };
 	psy_ui_Style* style;
 
-	style = psy_ui_style(STYLE_MV);
+	style = psy_ui_style(STYLE_MV_WIRES);
 	psy_ui_style_set_background_id(style, psy_INDEX_INVALID);
 	psy_ui_style_setbackgroundpath(style, "");
 	machine_skin_name = machineviewconfig_machine_skin_name(self);
@@ -928,10 +926,7 @@ void machineviewconfig_set_style_default_settings(MachineViewConfig* self)
 void machineviewconfig_set_style_default_colours(MachineViewConfig* self)
 {
 	psy_ui_Style* style;
-
-	style = psy_ui_style(STYLE_MV);
-	psy_ui_style_set_colour(style,
-		psy_ui_colour_make(0x005F5F5F));
+	
 	style = psy_ui_style(STYLE_MV_WIRES);
 	psy_ui_style_set_colours(style,
 		psy_ui_colour_make(0x005F5F5F),
@@ -1156,7 +1151,7 @@ void machineviewconfig_set_background_colour(MachineViewConfig* self,
 	psy_ui_Colour colour)
 {
 	machineviewconfig_set_style_background_colour(self, "mv_colour",
-		STYLE_MV, colour);
+		STYLE_MV_WIRES, colour);
 }
 
 void machineviewconfig_set_poly_colour(MachineViewConfig* self,

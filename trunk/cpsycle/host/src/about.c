@@ -261,7 +261,7 @@ void licence_setlanguage(Licence* self)
 
 /* prototypes */
 static void about_init_buttons(About*);
-static void about_init_show_about(About*);
+static void about_init_show_about_at_start(About*);
 static void about_on_button(About*, psy_ui_Button* sender);
 static void about_select_infobox(About*, uintptr_t index);
 static void about_on_mouse_doubleclick(About*, psy_ui_MouseEvent*);
@@ -294,6 +294,7 @@ void about_init(About* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_ui_component_set_style_type(about_base(self), STYLE_ABOUT);
 	self->workspace = workspace;
 	self->next_view = viewindex_make(VIEW_ID_MACHINEVIEW);
+	about_init_show_about_at_start(self);
 	about_init_buttons(self);	
 	psy_ui_notebook_init(&self->notebook, about_base(self));
 	psy_ui_component_hide(psy_ui_notebook_base(&self->notebook));
@@ -311,38 +312,37 @@ void about_init(About* self, psy_ui_Component* parent, Workspace* workspace)
 void about_init_buttons(About* self)
 {	
 	psy_ui_component_init_align(&self->bottom, &self->component, NULL,
-		psy_ui_ALIGN_BOTTOM);	
+		psy_ui_ALIGN_BOTTOM);
 	psy_ui_component_set_margin(&self->bottom,
 		psy_ui_margin_make(psy_ui_value_zero(), psy_ui_value_zero(),
-			psy_ui_value_make_ph(0.15), psy_ui_value_zero()));	
+			psy_ui_value_make_ph(0.15), psy_ui_value_zero()));
 	psy_ui_component_init_align(&self->buttons, &self->bottom, NULL,
 		psy_ui_ALIGN_CENTER);
-	psy_ui_component_init_align(&self->buttons_row0, &self->buttons,
-		NULL, psy_ui_ALIGN_TOP);
-	psy_ui_component_set_margin(&self->buttons_row0,
-		psy_ui_margin_make_em(0.0, 0.0, 1.3, 0.0));
-	about_init_show_about(self);
-	psy_ui_component_init_align(&self->buttons_row1, &self->buttons,
-		NULL, psy_ui_ALIGN_TOP);	
-	psy_ui_component_set_default_align(&self->buttons_row1, psy_ui_ALIGN_LEFT,
-		psy_ui_margin_make_em(0.0, 20.0, 0.0, 0.0));
-	psy_ui_button_init_text_connect(&self->contribbutton, &self->buttons_row1,
+	psy_ui_component_set_default_align(&self->buttons, psy_ui_ALIGN_LEFT,
+		psy_ui_margin_make_em(0.0, 20.0, 0.0, 0.0));			
+	psy_ui_button_init_text_connect(&self->contribbutton, &self->buttons,
 		"help.contributors-credits", self, about_on_button);
-	psy_ui_button_init_connect(&self->versionbutton, &self->buttons_row1,
+	psy_ui_button_init_connect(&self->versionbutton, &self->buttons,
 		self, about_on_button);
 	psy_ui_button_prevent_translation(&self->versionbutton);
 	psy_ui_button_set_text(&self->versionbutton, PSYCLE__VERSION);
-	psy_ui_button_init_text_connect(&self->licencebutton, &self->buttons_row1,
+	psy_ui_button_init_text_connect(&self->licencebutton, &self->buttons,
 		"help.licence", self, about_on_button);
-	psy_ui_button_init_text_connect(&self->ok_button, &self->buttons_row1,
+	psy_ui_button_init_text_connect(&self->ok_button, &self->buttons,
 		"help.ok", self, about_on_button);
 	psy_ui_component_set_margin(psy_ui_button_base(&self->ok_button),
 		psy_ui_margin_zero());
 }
 
-void about_init_show_about(About* self)
+void about_init_show_about_at_start(About* self)
 {	
-	psy_ui_checkbox_init(&self->show_at_start, &self->buttons_row0);
+	psy_ui_component_init_align(&self->helpviewbar, &self->component, NULL,
+		psy_ui_ALIGN_BOTTOM);	
+	psy_ui_component_set_margin(&self->helpviewbar,
+		psy_ui_margin_make_em(0.0, 0.0, 0.5, 1.0));
+	psy_ui_checkbox_init(&self->show_at_start, &self->helpviewbar);
+	psy_ui_component_set_id(psy_ui_checkbox_base(&self->show_at_start),
+		VIEW_ID_HELPVIEW);
 	psy_ui_checkbox_data_exchange(&self->show_at_start,
 		generalconfig_property(&self->workspace->config.general,
 			"bench.showaboutatstart"));

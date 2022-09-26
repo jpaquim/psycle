@@ -23,8 +23,8 @@ void newmachinesearchbar_init(NewMachineSearchBar* self,
 	psy_ui_Component* parent, PluginFilter* filter)
 {
 	psy_ui_component_init(&self->component, parent, NULL);
-	psy_ui_component_set_style_type(&self->component,
-		STYLE_NEWMACHINE_SEARCHBAR);	
+	// psy_ui_component_set_style_type(&self->component,
+	//	STYLE_NEWMACHINE_SEARCHBAR);	
 	self->filter = filter;	
 	searchfield_init(&self->search, &self->component);
 	psy_ui_component_set_align(searchfield_base(&self->search),
@@ -830,10 +830,8 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->component, parent, NULL);
 	newmachine_vtable_init(self);
 	psy_ui_component_set_id(&self->component,
-		SECTION_ID_MACHINEVIEW_NEWMACHINE);
-	psy_ui_component_set_style_type(&self->component, STYLE_MV_NEWMACHINE);
-	psy_ui_component_set_padding(&self->component,
-		psy_ui_margin_make_em(0.0, 0.0, 0.0, 1.0));
+		SECTION_ID_MACHINEVIEW_NEWMACHINE);	
+	psy_ui_component_set_style_type(&self->component, STYLE_CLIENT_VIEW);
 	self->workspace = workspace;	
 	self->restoresection = SECTION_ID_MACHINEVIEW_WIRES;
 	self->selectedplugin = NULL;
@@ -851,6 +849,8 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 	newmachinesearchbar_init(&self->searchbar, &self->client, NULL);
 	psy_ui_component_set_align(&self->searchbar.component,
 		psy_ui_ALIGN_TOP);
+	psy_ui_component_set_margin(&self->searchbar.component,
+		psy_ui_margin_make_em(0.0, 0.0, 1.0, 0.0));		
 	/* scanview */
 	pluginscanview_init(&self->scanview, psy_ui_notebook_base(
 		&self->notebook), self->workspace);	

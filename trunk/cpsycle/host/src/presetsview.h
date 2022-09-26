@@ -13,6 +13,8 @@
 #include <uibutton.h>
 #include <uicheckbox.h>
 #include <uicombobox.h>
+/* audio */
+#include <preset.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -37,8 +39,10 @@ typedef struct PresetsView {
 	psy_ui_Button use;
 	psy_ui_Button close;
 	psy_Property presets_load;
-	psy_Property presets_save;
+	psy_Property presets_export;
 	uintptr_t mac_id;
+	psy_audio_Preset ini_preset;
+	bool preset_changed;
 	/* references */
 	Workspace* workspace;
 } PresetsView;

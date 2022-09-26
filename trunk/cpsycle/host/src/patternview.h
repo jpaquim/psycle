@@ -10,6 +10,7 @@
 #include "interpolatecurveview.h"
 #include "patternheader.h"
 #include "patternproperties.h"
+#include "patternviewbar.h"
 #include "patternviewmenu.h"
 #include "patternviewtabbar.h"
 #include "pianoroll.h"
@@ -49,7 +50,8 @@ typedef struct PatternView {
 	psy_ui_Component component;
 	/* internal */	
 	PatternViewTabBar tabbar;		
-	PatternDefaultLine defaultline;	
+	PatternDefaultLine defaultline;
+	PatternViewBar patternviewbar;
 	TrackerHeaderView header;
 	psy_ui_Notebook notebook;
 	psy_ui_Notebook editnotebook;	

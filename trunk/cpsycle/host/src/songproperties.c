@@ -145,10 +145,8 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 	psy_ui_label_set_char_number(&self->realticksperbeat, 8);			
 	psy_ui_component_set_margin(&self->samplerindex.component, margin);
 	/* Comments */
-	psy_ui_component_init(&self->comments, &self->component, NULL);
-	psy_ui_component_set_style_type(&self->comments,
-		STYLE_SONGPROPERTIES_COMMENTS);
-	psy_ui_component_set_align(&self->comments, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_init_align(&self->comments, &self->component, NULL,
+		psy_ui_ALIGN_CLIENT);
 	psy_ui_label_init_text(&self->label_comments, &self->comments,
 		"songproperties.extcomments");	
 	psy_ui_label_set_text_alignment(&self->label_comments,
@@ -158,8 +156,7 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 	psy_ui_component_set_margin(&self->label_comments.component,
 		psy_ui_margin_make_em(0.0, 2.0, 1.0, 3.0));
 	psy_ui_textarea_init(&self->edit_comments, &self->comments);
-	psy_ui_component_set_style_type(&self->edit_comments.component,
-		STYLE_SONGPROPERTIES_COMMENTS_EDIT);		
+	psy_ui_component_set_style_type(&self->edit_comments.component, STYLE_BOX);		
 	psy_ui_component_set_align(&self->edit_comments.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_component_set_margin(&self->edit_comments.component,
 		psy_ui_margin_make_em(0.0, 2.0, 1.0, 3.0));

@@ -21,7 +21,6 @@
 #include "kbdhelp.h"
 #include "machinebar.h"
 #include "machineview.h"
-#include "machineviewbar.h"
 #include "metronomebar.h"
 #include "midimonitor.h"
 #include "paramgear.h"
@@ -29,7 +28,6 @@
 #include "playposbar.h"
 #include "plugineditor.h"
 #include "patternview.h"
-#include "patternviewbar.h"
 #include "renderview.h"
 #include "sequencerbar.h"
 #include "samplesview.h"
@@ -132,10 +130,7 @@ typedef struct MainFrame {
 	MainStatusBar statusbar;	
 	psy_ui_Component left;
 	psy_ui_Component right;
-	Workspace workspace;
-	PatternViewBar patternviewbar;
-	MachineViewBar machineviewbar;
-	InstrumentsViewBar instrumentsviewbar;	
+	Workspace workspace;	
 	ConfirmBox checkunsavedbox;		
 	Interpreter interpreter;	
 	bool titlemodified;

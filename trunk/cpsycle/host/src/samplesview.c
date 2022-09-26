@@ -1159,6 +1159,12 @@ void samplesview_init(SamplesView* self, psy_ui_Component* parent,
 	/* WaveEditorView */
 	sampleeditor_init(&self->sampleeditor, &self->clientnotebook.component,
 		workspace);
+	sampleeditorbar_init(&self->sampleeditor.sampleeditortbar,
+		&self->component, &self->sampleeditor, self->workspace);
+	psy_ui_component_set_margin(&self->sampleeditor.sampleeditortbar.component,
+		psy_ui_margin_make_em(0.5, 0.0, 0.25, 2.0));
+	psy_ui_component_set_align(&self->sampleeditor.sampleeditortbar.component,
+		psy_ui_ALIGN_BOTTOM);
 	psy_ui_notebook_select(&self->clientnotebook, 0);
 	psy_signal_connect(&workspace->player.signal_song_changed, self,
 		samplesview_on_song_changed);
@@ -1177,6 +1183,7 @@ void samplesview_init(SamplesView* self, psy_ui_Component* parent,
 	psy_property_init_type(&self->sample_save, "save",
 		PSY_PROPERTY_TYPE_STRING);
 	psy_property_connect(&self->sample_save, self, samplesview_on_save_sample);
+	samplesview_connectstatusbar(self);
 }
 
 void samplesview_ondestroyed(SamplesView* self)

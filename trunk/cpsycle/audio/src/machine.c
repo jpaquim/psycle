@@ -445,6 +445,7 @@ static uintptr_t numbanks(psy_audio_Machine* self) { return 1; }
 static void setcurrbank(psy_audio_Machine* self, uintptr_t prgidx) { }
 static uintptr_t currbank(psy_audio_Machine* self) { return 0; }
 static void currentpreset(psy_audio_Machine* self, struct psy_audio_Preset* preset) {}
+static void tweakpreset(psy_audio_Machine* self, struct psy_audio_Preset* preset) {}
 static void setpresets(psy_audio_Machine* self, struct psy_audio_Presets* presets) {}
 static struct psy_audio_Presets* presets(psy_audio_Machine* self) { return NULL; }
 static bool acceptpresets(psy_audio_Machine* self) { return FALSE; }
@@ -700,6 +701,7 @@ static void vtable_init(void)
 		vtable.setcurrbank = setcurrbank;
 		vtable.currbank = currbank;
 		vtable.currentpreset = currentpreset;
+		vtable.tweakpreset = tweakpreset;
 		vtable.setpresets = setpresets;
 		vtable.presets = presets;
 		vtable.acceptpresets = acceptpresets;
