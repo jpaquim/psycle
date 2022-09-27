@@ -469,8 +469,8 @@ void newmachinesectionsheader_init(NewMachineSectionsHeader* self,
 	psy_ui_Component* parent, uintptr_t iconresourceid)
 {
 	psy_ui_component_init(&self->component, parent, NULL);
-	psy_ui_component_set_style_type(&self->component,
-		STYLE_NEWMACHINE_SECTIONS_HEADER);
+	psy_ui_component_set_margin(&self->component, psy_ui_margin_make_em(
+		0.0, 0.0, 0.5, 0.0));		
 	psy_ui_component_set_default_align(&self->component,
 		psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_appdefaults()));
