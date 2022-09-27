@@ -219,13 +219,14 @@ static void fileview_on_destroyed(FileView*);
 static void fileview_build_drives(FileView*);
 static void fileview_on_file_selected(FileView*, FileBox* sender);
 static void fileview_on_dir_changed(FileView*, FileBox* sender);
-static void fileview_on_link(FileView* self, FileViewLinks* sender, intptr_t index);
+static void fileview_on_link(FileView*, FileViewLinks* sender, intptr_t index);
 static void fileview_update_path(FileView*);
 static void fileview_on_filter(FileView*, psy_ui_Component* sender);
-static void fileview_on_hide(FileView*, psy_ui_Component* sender);
+static void fileview_on_exit(FileView*, psy_ui_Component* sender);
 static void fileview_on_recent_selected(FileView*, PropertiesView* sender,
 	psy_Property*);
-static void fileview_on_save_button(FileView*, psy_ui_Component* sender);	
+static void fileview_on_save_button(FileView*, psy_ui_Component* sender);
+static void fileview_update_save_view(FileView*, bool has_save);
 
 /* vtable */
 static psy_ui_ComponentVtable vtable;
@@ -246,7 +247,9 @@ static void vtable_init(FileView* self)
 /* implementation */
 void fileview_init(FileView* self, psy_ui_Component* parent,
 	DirConfig* dirconfig, InputHandler* input_handler, psy_Playlist* playlist)
-{		
+{	
+	assert(self);
+		
 	psy_ui_component_init(fileview_base(self), parent, NULL);
 	vtable_init(self);
 	self->dirconfig = dirconfig;
@@ -309,7 +312,7 @@ void fileview_init(FileView* self, psy_ui_Component* parent,
 		"file.showall", self, fileview_on_filter);
 	psy_ui_component_set_align(&self->showall.component, psy_ui_ALIGN_TOP);	
 	psy_ui_button_init_text_connect(&self->exit, &self->buttons,
-		"file.exit", self, fileview_on_hide);
+		"file.exit", self, fileview_on_exit);
 	psy_ui_component_set_align(&self->exit.component, psy_ui_ALIGN_TOP);
 	/* file links */
 	fileviewlinks_init(&self->links, &self->options);	
@@ -348,6 +351,8 @@ void fileview_init(FileView* self, psy_ui_Component* parent,
 
 void fileview_on_destroyed(FileView* self)
 {	
+	assert(self);
+	
 	psy_signal_dispose(&self->signal_selected);
 	psy_signal_dispose(&self->signal_save);
 }
@@ -357,6 +362,8 @@ void fileview_build_drives(FileView* self)
 	psy_List* p;
 	psy_List* q;	
 		
+	assert(self);
+	
 	fileviewlinks_add(&self->links, ".."psy_SLASHSTR, "..");	
 	for (q = p = psy_drives(); p != NULL; psy_list_next(&p)) {		
 		fileviewlinks_add(&self->links, (char*)psy_list_entry(p), 
@@ -373,6 +380,8 @@ void fileview_on_recent_selected(FileView* self, PropertiesView* sender,
 {		
 	psy_Path recent_path;
 	
+	assert(self);
+	
 	psy_path_init(&recent_path, psy_property_item_str(property));		
 	fileview_set_directory(self, psy_path_prefix(&recent_path));	
 	psy_ui_textarea_set_text(&self->filename,
@@ -387,6 +396,8 @@ void fileview_on_recent_selected(FileView* self, PropertiesView* sender,
 
 void fileview_on_file_selected(FileView* self, FileBox* sender)
 {		
+	assert(self);
+	
 	psy_ui_textarea_set_text(&self->filename,
 		filebox_file_name(&self->filebox));
 	if (self->load) {
@@ -401,18 +412,24 @@ void fileview_on_file_selected(FileView* self, FileBox* sender)
 
 void fileview_on_dir_changed(FileView* self, FileBox* sender)
 {
+	assert(self);
+	
 	psy_ui_label_set_text(&self->dir, psy_path_full(
 		&self->filebox.curr_dir));
 }
 
 void fileview_update_path(FileView* self)
 {	
+	assert(self);
+	
 	psy_ui_label_set_text(&self->dir, psy_path_full(
 		&self->filebox.curr_dir));	
 }
 
 void fileview_filename(FileView* self, char* filename, uintptr_t maxsize)
 {
+	assert(self);
+	
 	filename[0] = '\0';
 	if (psy_strlen(psy_ui_textarea_text(&self->filename)) > 0) {	
 		psy_snprintf(filename, maxsize, "%s%s%s",
@@ -425,6 +442,8 @@ void fileview_filename(FileView* self, char* filename, uintptr_t maxsize)
 void fileview_on_link(FileView* self, FileViewLinks* sender, intptr_t index)
 {
 	const char* path;
+	
+	assert(self);
 	
 	path = fileviewlinks_path(sender, index);
 	if (strcmp(path, "//recent") == 0) {
@@ -443,12 +462,16 @@ void fileview_on_link(FileView* self, FileViewLinks* sender, intptr_t index)
 
 void fileview_set_directory(FileView* self, const char* path)
 {	
+	assert(self);
+	
 	filebox_set_directory(&self->filebox, path);
 	fileview_update_path(self);			
 }
 
 void fileview_on_filter(FileView* self, psy_ui_Component* sender)
 {	
+	assert(self);
+	
 	if (sender == psy_ui_button_base(&self->showall)) {
 		self->dirfilter.showall = TRUE;
 	}		
@@ -456,13 +479,22 @@ void fileview_on_filter(FileView* self, psy_ui_Component* sender)
 	psy_ui_component_align_full(&self->filebox.component);
 }
 
-void fileview_on_hide(FileView* self, psy_ui_Component* sender)
+void fileview_on_exit(FileView* self, psy_ui_Component* sender)
 {
-	psy_ui_component_hide_align(fileview_base(self));
+	assert(self);
+	
+	if (self->load) {		
+		psy_signal_emit(&self->load->changed, &self->load, 0);
+	}
+	if (self->save) {			
+		psy_signal_emit(&self->save->changed, &self->save, 0);
+	}	
 }
 
 void fileview_on_save_button(FileView* self, psy_ui_Component* sender)
 {
+	assert(self);
+	
 	if (self->save) {	
 		char path[4096];
 	
@@ -475,7 +507,58 @@ void fileview_on_save_button(FileView* self, psy_ui_Component* sender)
 
 void fileview_set_filter(FileView* self, const psy_Property* types)
 {
+	assert(self);
+	
 	fileviewfilter_set_filter(&self->dirfilter, types);
 	filebox_set_wildcard(&self->filebox, fileviewfilter_type(&self->dirfilter));
 	psy_ui_component_align_full(&self->filebox.component);
+}
+
+void fileview_set_callbacks(FileView* self, psy_Property* load,
+	psy_Property* save)
+{
+	bool had_save;
+	bool has_save;
+	
+	assert(self);
+	
+	had_save = (self->save != NULL) || 
+		((self->save == NULL && self->load == NULL));
+	self->load = load;
+	self->save = save;	
+	if (!(self->load == NULL && self->save == NULL)) {	
+		if (self->load) {
+			psy_signal_prevent_all(&self->load->changed);
+			psy_property_set_item_str(self->load, "");
+			psy_signal_enable_all(&self->load->changed);		
+		}	
+		if (self->save) {
+			psy_signal_prevent_all(&self->save->changed);
+			psy_property_set_item_str(self->save, "");
+			psy_signal_enable_all(&self->save->changed);
+			psy_ui_component_show(&self->savefilter.component);
+		}		
+	}
+	has_save = (self->save != NULL) ||
+		((self->save == NULL && self->load == NULL));
+	if (has_save != had_save) {
+		fileview_update_save_view(self, has_save);
+	}
+}
+
+void fileview_update_save_view(FileView* self, bool has_save)
+{
+	assert(self);
+			
+	if (has_save) {
+		psy_ui_component_show(&self->savefilter.component);
+		psy_ui_component_show(psy_ui_button_base(&self->save_button));
+		psy_ui_component_align(&self->component);
+		psy_ui_component_invalidate(&self->component);		
+	} else {
+		psy_ui_component_hide(&self->savefilter.component);
+		psy_ui_component_hide(psy_ui_button_base(&self->save_button));
+		psy_ui_component_align(&self->component);
+		psy_ui_component_invalidate(&self->component);		
+	}	
 }

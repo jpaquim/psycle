@@ -26,7 +26,7 @@ static void presetsview_import(PresetsView*, const char* path);
 static void presetsview_on_export_button(PresetsView*,
 	psy_ui_Component* sender);
 static void presetsview_on_export(PresetsView*, psy_Property* sender);
-static void presetsview_buildprograms(PresetsView*, psy_audio_Machine*);
+static void presetsview_update_list(PresetsView*);
 static void presetsview_on_use(PresetsView*, psy_ui_Component* sender);
 static void presetsview_on_preset_selection_change(PresetsView*,
 	psy_ui_Component* sender, uintptr_t prog);
@@ -64,6 +64,8 @@ void presetsview_init(PresetsView* self, psy_ui_Component* parent,
 	psy_ui_component_set_preferred_width(&self->component,
 		psy_ui_value_make_ew(50.0));
 	titlebar_init(&self->title_bar, &self->component, "Preset");
+	psy_signal_connect(&self->title_bar.hide.signal_clicked, self,
+		presetsview_on_cancel);
 	presetsview_init_buttons(self);
 	psy_ui_component_init_align(&self->client, &self->component, NULL,
 		psy_ui_ALIGN_CLIENT);
@@ -141,11 +143,13 @@ void presetsview_on_import_button(PresetsView* self, psy_ui_Component* sender)
 		
 		fileview_set_callbacks(self->workspace->fileview,
 			&self->presets_load, NULL);
-		psy_property_init_type(&types, "types", PSY_PROPERTY_TYPE_CHOICE);		
+		psy_property_init_type(&types, "types", PSY_PROPERTY_TYPE_CHOICE);
 		psy_property_set_text(psy_property_set_id(
 			psy_property_append_str(&types, "prs", "*.prs"),
 			FILEVIEWFILTER_PSY), "Presets");		
 		fileview_set_filter(self->workspace->fileview, &types);
+		fileview_set_directory(self->workspace->fileview,
+			dirconfig_user_presets(&self->workspace->config.directories));
 		psy_property_dispose(&types);
 		workspace_select_view(self->workspace,
 			viewindex_make(VIEW_ID_FILEVIEW));
@@ -156,8 +160,10 @@ void presetsview_on_import(PresetsView* self, psy_Property* sender)
 {		
 	assert(self);
 	
-	presetsview_import(self, psy_property_item_str(sender));
-	workspace_select_view(self->workspace, viewindex_make(VIEW_ID_MACHINEVIEW));	
+	if (psy_strlen(psy_property_item_str(sender)) > 0) {
+		presetsview_import(self, psy_property_item_str(sender));		
+	}
+	workspace_select_view(self->workspace, viewindex_make(VIEW_ID_MACHINEVIEW));
 }
 
 void presetsview_import(PresetsView* self, const char* path)
@@ -186,7 +192,7 @@ void presetsview_import(PresetsView* self, const char* path)
 		presets = NULL;
 	}	
 	psy_audio_machine_setpresets(machine, presets);
-	presetsview_buildprograms(self, machine);
+	presetsview_update_list(self);
 }
 
 void presetsview_on_export_button(PresetsView* self, psy_ui_Component* sender)
@@ -215,38 +221,43 @@ void presetsview_on_export(PresetsView* self, psy_Property* sender)
 	assert(self);
 }
 
-void presetsview_buildprograms(PresetsView* self, psy_audio_Machine* machine)
-{			
-	uintptr_t numprograms;
-	uintptr_t i;
+void presetsview_update_list(PresetsView* self)
+{	
+	psy_audio_Machine* machine;
 	
 	assert(self);
-
+		
 	psy_ui_combobox_clear(&self->programbox);
-	if (!machine) {
-		return;
-	}
-	numprograms = psy_audio_machine_numprograms(machine);
-	for (i = 0; i < numprograms; ++i) {
-		char name[256];
+	machine = presetsview_machine(self);
+	if (machine) {
+		uintptr_t numprograms;
+		uintptr_t i;
+		
+		numprograms = psy_audio_machine_numprograms(machine);
+		for (i = 0; i < numprograms; ++i) {
+			char name[256];
 
-		psy_audio_machine_programname(machine, 0, i, name);
-		psy_ui_combobox_add_text(&self->programbox, name);
-	}	
+			psy_audio_machine_programname(machine, 0, i, name);
+			psy_ui_combobox_add_text(&self->programbox, name);
+		}
+	}
 }
 
 void presetsview_set_mac_id(PresetsView* self, uintptr_t mac_id)
 {
-	psy_audio_Machine* machine;
-		
-	assert(self);
-		
-	self->mac_id = mac_id;
-	machine = presetsview_machine(self);
-	psy_audio_preset_clear(&self->ini_preset);
-	self->preset_changed = FALSE;
-	if (machine) {
-		psy_audio_machine_currentpreset(machine, &self->ini_preset);		
+	if (self->mac_id != mac_id) {
+		psy_audio_Machine* machine;
+			
+		assert(self);
+			
+		self->mac_id = mac_id;
+		machine = presetsview_machine(self);
+		psy_audio_preset_clear(&self->ini_preset);
+		self->preset_changed = FALSE;
+		if (machine) {
+			psy_audio_machine_currentpreset(machine, &self->ini_preset);		
+		}
+		presetsview_update_list(self);
 	}
 }
 
@@ -271,18 +282,20 @@ void presetsview_on_use(PresetsView* self, psy_ui_Component* sender)
 void presetsview_on_preset_selection_change(PresetsView* self,
 	psy_ui_Component* sender, uintptr_t prog)
 {
-	psy_audio_Machine* machine;
-	uintptr_t prg;
+	if (psy_ui_checkbox_checked(&self->preview)) {
+		psy_audio_Machine* machine;
+		uintptr_t prg;
+			
+		assert(self);
 		
-	assert(self);
-	
-	machine = presetsview_machine(self);
-	if (!machine) {
-		return;
+		machine = presetsview_machine(self);
+		if (!machine) {
+			return;
+		}
+		prg =  psy_ui_combobox_cursel(&self->programbox);	
+		psy_audio_machine_setcurrprogram(machine, prg);
+		self->preset_changed = TRUE;
 	}
-	prg =  psy_ui_combobox_cursel(&self->programbox);	
-	psy_audio_machine_setcurrprogram(machine, prg);
-	self->preset_changed = TRUE;
 }
 
 void presetsview_on_cancel(PresetsView* self, psy_ui_Component* sender)
@@ -296,6 +309,11 @@ void presetsview_on_cancel(PresetsView* self, psy_ui_Component* sender)
 			self->preset_changed = FALSE;
 		}
 	}
+	psy_ui_component_hide(&self->component);
+	psy_ui_component_align(psy_ui_component_parent(
+		psy_ui_component_parent(&self->component)));
+	psy_ui_component_invalidate(psy_ui_component_parent(
+		psy_ui_component_parent(&self->component)));	
 }
 
 psy_audio_Machine* presetsview_machine(PresetsView* self)

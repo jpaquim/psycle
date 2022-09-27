@@ -133,13 +133,8 @@ INLINE psy_ui_Component* fileview_base(FileView* self)
 void fileview_filename(FileView* self, char* filename, uintptr_t maxsize);
 void fileview_set_directory(FileView* self, const char* directory);
 void fileview_set_filter(FileView*, const psy_Property* types);
-
-INLINE void fileview_set_callbacks(FileView* self, psy_Property* load,
-	psy_Property* save)
-{
-	self->load = load;
-	self->save = save;
-}
+void fileview_set_callbacks(FileView* self, psy_Property* load,
+	psy_Property* save);
 
 #ifdef __cplusplus
 }
