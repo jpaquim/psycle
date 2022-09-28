@@ -49,7 +49,9 @@ static psy_audio_MachineInfo const macinfo = {
 	0,				/* shellidx	*/
 	PS1SAMPLERHELP, /* help text */
 	"Stereo Sampler Unit. Inserts new sampler.",	/* desc */
-	"Sampler"		/* category */
+	"Sampler",		/* category */
+	psy_INDEX_INVALID,
+	""
 };
 
 const psy_audio_MachineInfo* psy_audio_sampler_info(void)

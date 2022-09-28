@@ -17,6 +17,8 @@
 #include "../../detail/portable.h"
 #include "../../detail/trace.h"
 
+#define IDB_SAMPULSE 40001 /* duplicate host/bitmaps.h */
+
 static const int m_FineSineData[256] = {
 	0,  2,  3,  5,  6,  8,  9, 11, 12, 14, 16, 17, 19, 20, 22, 23,
 	24, 26, 27, 29, 30, 32, 33, 34, 36, 37, 38, 39, 41, 42, 43, 44,
@@ -135,7 +137,9 @@ static psy_audio_MachineInfo const macinfo = {
 	0,			// shellidx	
 	SAMPLERHELP,	// help text
 	"Sampler with the essence of FastTracker II and Impulse Tracker II.",	// desc
-	"Sampler"		// category
+	"Sampler",		// category
+	IDB_SAMPULSE,
+	"Partially based on Satoshi Fujiwara 'XMSampler'\nIT Filtering from OpenMPT."
 };
 
 // prototypes

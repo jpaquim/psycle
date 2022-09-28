@@ -617,6 +617,8 @@ static int makemachineinfo(AEffect* effect, psy_audio_MachineInfo* info,
 			shellidx,
 			"",
 			"VST",
+			"",
+			psy_INDEX_INVALID,
 			"");		
 	}
 #if defined DIVERSALIS__OS__MICROSOFT        	

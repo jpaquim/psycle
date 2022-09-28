@@ -73,6 +73,7 @@ void psy_ui_label_enable_translation(psy_ui_Label*);
 void psy_ui_label_fadeout(psy_ui_Label*);
 void psy_ui_label_prevent_wrap(psy_ui_Label*);
 void psy_ui_label_enable_wrap(psy_ui_Label*);
+void psy_ui_label_enable_line_wrap(psy_ui_Label*);
 
 INLINE psy_ui_Component* psy_ui_label_base(psy_ui_Label* self)
 {

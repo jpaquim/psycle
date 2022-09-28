@@ -31,6 +31,10 @@ const psy_audio_MachineInfo* psy_audio_audiorecorder_info(void)
 		psy_audio_RECORDER,
 		0,
 		0,
+		"",
+		"",
+		"",
+		psy_INDEX_INVALID,
 		""
 	};
 	return &macinfo;

@@ -104,5 +104,6 @@ void register_bitmaps(psy_ui_App* app, const char* app_bmp_path)
 	psy_ui_app_add_app_bmp(app, IDB_STEP_DARK, "step-dark.bmp");
 	psy_ui_app_add_app_bmp(app, IDB_BITMAP3, "");
 	psy_ui_app_add_app_bmp(app, IDB_STEP_LIGHT, "step-light.bmp");
+	psy_ui_app_add_app_bmp(app, IDB_SAMPULSE, "sampulse.bmp");
 	// psy_ui_app_add_app_bmp(app, IDB_GUI, "gui.bmp");
 }

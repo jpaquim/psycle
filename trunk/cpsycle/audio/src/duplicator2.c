@@ -52,6 +52,10 @@ static psy_audio_MachineInfo const macinfo = {
 	psy_audio_DUPLICATOR2,
 	0,
 	0,
+	"",
+	"",
+	"",
+	psy_INDEX_INVALID,
 	""
 };
 
