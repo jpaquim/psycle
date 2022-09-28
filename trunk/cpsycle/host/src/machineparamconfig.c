@@ -72,8 +72,6 @@ void machineparamconfig_make(MachineParamConfig* self, psy_Property* parent)
 void machineparamconfig_make_theme(MachineParamConfig* self,
 	psy_Property* parent)
 {
-	psy_List* p;
-
 	assert(self);
 
 	self->theme = psy_property_set_text(
@@ -317,8 +315,7 @@ void machineparamconfig_set_param_machinedial_bmp(MachineParamConfig* self,
 void machineparamconfig_set_colour(MachineParamConfig* self,
 	const char* key, uintptr_t style_id, psy_ui_Colour colour)
 {
-	psy_ui_Style* style;
-	psy_Property* property;
+	psy_ui_Style* style;	
 
 	style = psy_ui_style(style_id);
 	if (style) {
@@ -330,8 +327,7 @@ void machineparamconfig_set_colour(MachineParamConfig* self,
 void machineparamconfig_set_style_background_colour(MachineParamConfig* self,
 	const char* key, uintptr_t style_id, psy_ui_Colour colour)
 {
-	psy_ui_Style* style;
-	psy_Property* property;
+	psy_ui_Style* style;	
 
 	style = psy_ui_style(style_id);
 	if (style) {

@@ -17,7 +17,7 @@
 #include "../../detail/portable.h"
 #include "../../detail/trace.h"
 
-#define IDB_SAMPULSE 40001 /* duplicate host/bitmaps.h */
+#define IDB_SAMPULSE 213 /* duplicate resource.h */
 
 static const int m_FineSineData[256] = {
 	0,  2,  3,  5,  6,  8,  9, 11, 12, 14, 16, 17, 19, 20, 22, 23,

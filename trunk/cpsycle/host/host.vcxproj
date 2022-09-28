@@ -764,6 +764,7 @@
     <Image Include="src\resources\pulse-light.bmp" />
     <Image Include="src\resources\redo-dark.bmp" />
     <Image Include="src\resources\redo-light.bmp" />
+    <Image Include="src\resources\sampulse.bmp" />
     <Image Include="src\resources\save-dark.bmp" />
     <Image Include="src\resources\save-light.bmp" />
     <Image Include="src\resources\search-dark.bmp" />

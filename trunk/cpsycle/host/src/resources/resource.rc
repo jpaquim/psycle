@@ -190,6 +190,8 @@ IDB_STEP_DARK           BITMAP                  "step-dark.bmp"
 
 IDB_STEP_LIGHT          BITMAP                  "step-light.bmp"
 
+IDB_SAMPULSE            BITMAP                  "sampulse.bmp"
+
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////

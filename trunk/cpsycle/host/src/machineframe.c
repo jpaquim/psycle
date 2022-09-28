@@ -232,7 +232,9 @@ void machineframe_init(MachineFrame* self, psy_ui_Component* parent,
 
 void machineframe_init_help(MachineFrame* self, psy_ui_Component* parent)
 {
-	psy_ui_component_init(&self->helpview, parent, NULL);		
+	psy_ui_component_init(&self->helpview, parent, NULL);
+	psy_ui_component_set_style_type(&self->helpview, STYLE_MACPARAM_TITLE);
+	//psy_ui_component_doublebuffer(&self->helpview);
 	psy_ui_label_init_text(&self->help, &self->helpview, "machineframe.about");	
 	psy_ui_component_set_wheel_scroll(&self->help.component, 4);	
 	psy_ui_component_set_overflow(&self->help.component,
@@ -242,6 +244,7 @@ void machineframe_init_help(MachineFrame* self, psy_ui_Component* parent)
 	psy_ui_component_set_scroll_step_height(psy_ui_label_base(&self->help),
 		psy_ui_value_make_eh(1.0));	
 	psy_ui_scroller_init(&self->scroller, &self->helpview, NULL, NULL);
+	psy_ui_component_set_style_type(&self->scroller.pane, STYLE_MACPARAM_TITLE);
 	psy_ui_scroller_set_client(&self->scroller, &self->help.component);
 	psy_ui_component_set_align(&self->scroller.component, psy_ui_ALIGN_CLIENT);	
 	psy_ui_component_init_align(&self->right, &self->helpview, NULL,
