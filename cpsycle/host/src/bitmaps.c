@@ -84,8 +84,7 @@ void register_bitmaps(psy_ui_App* app, const char* app_bmp_path)
 	psy_ui_app_add_app_bmp(app, IDB_ARROW_UP_DARK, "arrow-up-dark.bmp");
 	psy_ui_app_add_app_bmp(app, IDB_SEQ_DEL_TRACK, "seq-del-track.bmp");
 	psy_ui_app_add_app_bmp(app, IDB_SEQ_ADD_TRACK, "seq-add-track.bmp");
-	psy_ui_app_add_app_bmp(app, IDB_FLOAT_DARK, "float-dark.bmp");
-	psy_ui_app_add_app_bmp(app, IDB_BITMAP1, "");
+	psy_ui_app_add_app_bmp(app, IDB_FLOAT_DARK, "float-dark.bmp");	
 	psy_ui_app_add_app_bmp(app, IDB_FLOAT_LIGHT, "float-light,bmp");
 	psy_ui_app_add_app_bmp(app, IDB_FOLDER_DARK, "folder-dark.bmp");
 	psy_ui_app_add_app_bmp(app, IDB_FOLDER_LIGHT, "folder-light.bmp");
@@ -101,8 +100,7 @@ void register_bitmaps(psy_ui_App* app, const char* app_bmp_path)
 	psy_ui_app_add_app_bmp(app, IDB_TOGGLE_LIGHT, "toggle-light.bmp");
 	psy_ui_app_add_app_bmp(app, IDB_OPTIONS_DARK, "options-dark.bmp");
 	psy_ui_app_add_app_bmp(app, IDB_OPTIONS_LIGHT, "options-light.bmp");
-	psy_ui_app_add_app_bmp(app, IDB_STEP_DARK, "step-dark.bmp");
-	psy_ui_app_add_app_bmp(app, IDB_BITMAP3, "");
+	psy_ui_app_add_app_bmp(app, IDB_STEP_DARK, "step-dark.bmp");	
 	psy_ui_app_add_app_bmp(app, IDB_STEP_LIGHT, "step-light.bmp");
 	psy_ui_app_add_app_bmp(app, IDB_SAMPULSE, "sampulse.bmp");
 	// psy_ui_app_add_app_bmp(app, IDB_GUI, "gui.bmp");
