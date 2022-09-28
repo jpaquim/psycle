@@ -165,6 +165,8 @@ int psy_audio_ladspaplugin_init(psy_audio_LadspaPlugin* self,
 					shellidx,
 					"",
 					"LADSPA",
+					"",
+					psy_INDEX_INVALID,
 					"");
 				// TODO: for LADSPA, it is more correct to use psDescriptor->Label to identify it.						
 				psy_audio_machine_seteditname(psy_audio_ladspaplugin_base(self),
@@ -254,6 +256,8 @@ int psy_audio_ladspaplugin_test(const char* path, psy_audio_MachineInfo*
 					shellidx,
 					"",
 					"LADSPA",
+					"",
+					psy_INDEX_INVALID,
 					"");
 				// TODO: for LADSPA, it is more correct to use psDescriptor->Label to identify it.										
 				rv = 1;

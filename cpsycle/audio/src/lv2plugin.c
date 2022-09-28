@@ -273,6 +273,8 @@ int psy_audio_lv2plugin_init(psy_audio_LV2Plugin* self,
 				shell_index,
 				"",
 				lilv_node_as_string(lilv_plugin_get_project(self->plugin)),
+				"",
+				psy_INDEX_INVALID,
 				"");			
 			getnuminputsoutputs(self);
 			self->instance = lilv_plugin_instantiate(self->plugin,
@@ -435,6 +437,8 @@ bool psy_audio_lv2plugin_test(const char* path, psy_audio_MachineInfo* rv,
 						shell_index,
 						"",
 						lilv_node_as_string(lilv_plugin_get_project(plugin)),
+						"",
+						psy_INDEX_INVALID,
 						"");
 						success = TRUE;
 				}

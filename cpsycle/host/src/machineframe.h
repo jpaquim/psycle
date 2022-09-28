@@ -22,6 +22,7 @@
 #include <uitextarea.h>
 #include <uilabel.h>
 #include <uicombobox.h>
+#include <uiimage.h>
 #include <presets.h>
 #include <machine.h>
 
@@ -68,7 +69,12 @@ typedef struct MachineFrame {
 	ParameterListBox parameterbox;
 	ParamMap parammap;
 	psy_ui_Notebook notebook;
+	psy_ui_Component helpview;
+	psy_ui_Scroller scroller;
 	psy_ui_Label help;
+	psy_ui_Component right;
+	psy_ui_Image image;
+	psy_ui_Label image_desc;
 	psy_ui_Component* view;
 	psy_ui_Component* machineview;	
 	psy_audio_Machine* machine;	

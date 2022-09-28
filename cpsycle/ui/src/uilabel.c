@@ -396,6 +396,12 @@ void psy_ui_label_enable_wrap(psy_ui_Label* self)
 	psy_ui_textformat_word_wrap(&self->format);
 }
 
+void psy_ui_label_enable_line_wrap(psy_ui_Label* self)
+{
+	psy_ui_textformat_line_wrap(&self->format);
+}
+
+
 const char* psy_ui_label_text_internal(const psy_ui_Label* self)
 {
 	if (self->translate && self->translation) {

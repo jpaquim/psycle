@@ -361,7 +361,8 @@ int luaplugin_parse_machineinfo(psy_PsycleScript* self, psy_audio_MachineInfo* r
 	//    << result.vendor;
 	// result.desc = s.str();
 	machineinfo_set(rv, vendor, "", 0, mode, name, name, (short) apiversion, 
-		(short) version, psy_audio_LUA, "", 0, "", "Lua", "");
+		(short) version, psy_audio_LUA, "", 0, "", "Lua", "",
+		psy_INDEX_INVALID, "");
 	free(name);
 	free(vendor);
 	return err;

@@ -33,6 +33,8 @@ void machineinfo_init(psy_audio_MachineInfo* self)
 	self->helptext = psy_strdup("");
 	self->desc = psy_strdup("");
 	self->category = psy_strdup("");
+	self->image_id = psy_INDEX_INVALID;
+	self->image_desc = psy_strdup("");
 }
 
 void psy_audio_machineinfo_init_property(psy_audio_MachineInfo* self,
@@ -56,7 +58,9 @@ void psy_audio_machineinfo_init_property(psy_audio_MachineInfo* self,
 		psy_property_at_int(property, "shellidx", 0),
 		psy_property_at_str(property, "help", ""),
 		psy_property_at_str(property, "desc", ""),
-		psy_property_at_str(property, "category", ""));
+		psy_property_at_str(property, "category", ""),
+		psy_property_at_int(property, "imageid", psy_INDEX_INVALID),
+		psy_property_at_str(property, "imagedesc", ""));
 }
 
 void machineinfo_init_copy(psy_audio_MachineInfo* self,
@@ -77,6 +81,8 @@ void machineinfo_init_copy(psy_audio_MachineInfo* self,
 	self->helptext = psy_strdup(src->helptext);
 	self->desc = psy_strdup(src->desc);
 	self->category = psy_strdup(src->category);
+	self->image_id = src->image_id;
+	self->image_desc = psy_strdup(src->image_desc);
 }
 
 void machineinfo_copy(psy_audio_MachineInfo* self,
@@ -97,7 +103,9 @@ void machineinfo_copy(psy_audio_MachineInfo* self,
 	self->shellidx = src->shellidx;
 	self->helptext = psy_strdup(src->helptext);
 	self->desc = psy_strdup(src->desc);
-	self->category = psy_strdup(src->category);	
+	self->category = psy_strdup(src->category);
+	self->image_id = src->image_id;
+	self->image_desc = psy_strdup(src->image_desc);
 }
 
 void machineinfo_set(psy_audio_MachineInfo* self,
@@ -114,7 +122,9 @@ void machineinfo_set(psy_audio_MachineInfo* self,
 		uintptr_t shellidx,
 		const char* helptext,
 		const char* desc,
-		const char* category)
+		const char* category,
+		uintptr_t image_id,
+		const char* image_desc)
 {	
 	assert(self);
 		
@@ -132,6 +142,8 @@ void machineinfo_set(psy_audio_MachineInfo* self,
 	psy_strreset(&self->helptext, helptext);
 	psy_strreset(&self->desc, desc);
 	psy_strreset(&self->category, category);
+	self->image_id = image_id;
+	psy_strreset(&self->image_desc, image_desc);
 }
 
 
@@ -155,6 +167,8 @@ void machineinfo_dispose(psy_audio_MachineInfo* self)
 	self->desc = NULL;
 	free(self->category);
 	self->category = NULL;
+	free(self->image_desc);
+	self->image_desc = NULL;	
 }
 
 
@@ -195,6 +209,8 @@ psy_audio_MachineInfo* machineinfo_clone(const psy_audio_MachineInfo* self)
 		rv->helptext = psy_strdup(self->helptext);
 		rv->desc = psy_strdup(self->desc);
 		rv->category = psy_strdup(self->category);
+		rv->image_id = self->image_id;
+		rv->image_desc = psy_strdup(rv->image_desc);
 	}
 	return rv;
 }

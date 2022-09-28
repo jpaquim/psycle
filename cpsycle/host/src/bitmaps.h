@@ -15,6 +15,7 @@ extern "C" {
 struct psy_ui_App;
 
 // #define IDB_GUI 40000
+#define IDB_SAMPULSE 40001
 
 void register_bitmaps(struct psy_ui_App*, const char* app_bmp_path);
 

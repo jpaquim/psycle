@@ -24,6 +24,10 @@ const psy_audio_MachineInfo* psy_audio_dummymachine_info(void)
 		psy_audio_DUMMY,
 		0,
 		0,		
+		"",
+		"",
+		"",
+		psy_INDEX_INVALID,
 		""
 	};
 	return &macinfo;

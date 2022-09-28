@@ -12,6 +12,7 @@
 #include "resources/resource.h"
 #include "machineeditorview.h"
 #include "paramview.h"
+#include "styles.h"
 /* ui */
 #include <uiframe.h>
 /* platform */
@@ -19,6 +20,7 @@
 #include "../../detail/trace.h"
 
 /* ParameterBar */
+static void machineframe_init_help(MachineFrame*, psy_ui_Component* parent);
 static void parameterbar_onalign(ParameterBar*);
 
 /* vtable */
@@ -203,8 +205,7 @@ void machineframe_init(MachineFrame* self, psy_ui_Component* parent,
 	psy_ui_notebook_init(&self->notebook, &self->client);
 	psy_ui_component_set_align(psy_ui_notebook_base(&self->notebook),
 		psy_ui_ALIGN_CLIENT);
-	psy_ui_label_init(&self->help, psy_ui_notebook_base(&self->notebook));
-	psy_ui_label_set_text(&self->help, "machineframe.about");
+	machineframe_init_help(self, psy_ui_notebook_base(&self->notebook));	
 	psy_signal_connect(&self->parameterbar.parameters.signal_clicked, self,
 		machineframe_toggleparameterbox);
 	psy_signal_connect(&self->parameterbar.parammap.signal_clicked, self,
@@ -227,6 +228,48 @@ void machineframe_init(MachineFrame* self, psy_ui_Component* parent,
 		machineframe_onzoomboxchanged);	
 	machineframe_initparamview(self, workspace);
 	machineframe_updatepwr(self);	
+}
+
+void machineframe_init_help(MachineFrame* self, psy_ui_Component* parent)
+{
+	psy_ui_component_init(&self->helpview, parent, NULL);		
+	psy_ui_label_init_text(&self->help, &self->helpview, "machineframe.about");	
+	psy_ui_component_set_wheel_scroll(&self->help.component, 4);	
+	psy_ui_component_set_overflow(&self->help.component,
+		psy_ui_OVERFLOW_SCROLL);
+	psy_ui_component_set_align(&self->help.component, psy_ui_ALIGN_HCLIENT);
+	psy_ui_label_enable_wrap(&self->help);
+	psy_ui_component_set_scroll_step_height(psy_ui_label_base(&self->help),
+		psy_ui_value_make_eh(1.0));	
+	psy_ui_scroller_init(&self->scroller, &self->helpview, NULL, NULL);
+	psy_ui_scroller_set_client(&self->scroller, &self->help.component);
+	psy_ui_component_set_align(&self->scroller.component, psy_ui_ALIGN_CLIENT);	
+	psy_ui_component_init_align(&self->right, &self->helpview, NULL,
+		psy_ui_ALIGN_RIGHT);
+	psy_ui_component_set_padding(&self->right, psy_ui_margin_make_em(
+		1.0, 1.0, 1.0, 5.0));
+	psy_ui_component_setmaximumsize(&self->right, 
+			psy_ui_size_make_em(40.0, 0.0));
+	if (self->machine) {			
+		const psy_audio_MachineInfo* machine_info;
+		
+		machine_info = psy_audio_machine_info(self->machine);
+		if (machine_info) {			
+			psy_ui_label_init_text(&self->image_desc, &self->right,
+				machine_info->image_desc);
+			psy_ui_label_enable_wrap(&self->image_desc);
+			psy_ui_component_set_align(&self->image_desc.component,
+				psy_ui_ALIGN_BOTTOM);			
+			psy_ui_image_init_resource(&self->image, &self->right,
+				machine_info->image_id);
+			psy_ui_image_setbitmapalignment(&self->image,
+				psy_ui_ALIGNMENT_RIGHT);
+			psy_ui_component_set_align(&self->image.component,
+				psy_ui_ALIGN_BOTTOM);
+			psy_ui_component_set_margin(&self->image.component,
+				psy_ui_margin_make_em(0.0, 0.0, 1.0, 0.0));			
+		}
+	}	
 }
 
 bool machineframe_on_close(MachineFrame* self)

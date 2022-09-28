@@ -453,6 +453,7 @@ void psy_audio_plugin_machineinfo_set(psy_audio_MachineInfo* self,
 	self->type = psy_audio_PLUGIN;
 	psy_strreset(&self->modulepath, modulepath);
 	self->shellidx = 0;
+	self->image_id = psy_INDEX_INVALID;	
 	psy_strreset(&self->helptext, info->Command);	
 }
 

@@ -36,10 +36,12 @@ typedef struct psy_audio_MachineInfo {
 	/* module path */
 	char* modulepath;
 	/* shellidx */
-	uintptr_t shellidx;
+	uintptr_t shellidx;	
 	char* helptext;
 	char* desc;
-	char* category;	
+	char* category;
+	uintptr_t image_id;
+	char* image_desc;
 } psy_audio_MachineInfo;
 
 void machineinfo_init(psy_audio_MachineInfo*);
@@ -65,7 +67,9 @@ void machineinfo_set(psy_audio_MachineInfo*,
 		uintptr_t shellidx,
 		const char* helptext,
 		const char* desc,
-		const char* category);
+		const char* category,
+		uintptr_t image_id,
+		const char* image_desc);
 
 void machineinfo_init_copy(psy_audio_MachineInfo*, psy_audio_MachineInfo* other);
 void machineinfo_copy(psy_audio_MachineInfo*, const psy_audio_MachineInfo* other);
