@@ -129,8 +129,33 @@ void presetsview_connect_fileview(PresetsView* self)
 }
 
 void presetsview_on_save_button(PresetsView* self, psy_ui_Component* sender)
-{
+{		
+	psy_audio_Machine* machine;
+	psy_audio_Preset* preset;
+	psy_audio_Presets* presets;
+	intptr_t prg;
+			
 	assert(self);
+		
+	machine = presetsview_machine(self);
+	if (!machine) {
+		return;
+	}
+	prg =  psy_ui_combobox_cursel(&self->programbox);			
+	presets = psy_audio_machine_presets(machine);
+	if (presets) {
+		preset = psy_audio_preset_allocinit();
+		
+		psy_audio_machine_currentpreset(machine, preset);
+		if (prg == -1) {
+			psy_audio_preset_setname(preset, "untitled");			
+			psy_audio_presets_append(presets, preset);
+		} else {
+			psy_audio_presets_insert(presets, prg, preset);	
+		}
+		presetsview_update_list(self);
+	}
+	self->preset_changed = FALSE;
 }
 
 void presetsview_on_import_button(PresetsView* self, psy_ui_Component* sender)
