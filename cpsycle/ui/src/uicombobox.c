@@ -31,6 +31,8 @@ static void psy_ui_combobox_on_text_field(psy_ui_ComboBox*,
 static void psy_ui_combobox_expand(psy_ui_ComboBox*);
 static void psy_ui_combobox_on_mouse_wheel(psy_ui_ComboBox*,
 	psy_ui_MouseEvent*);
+static void psy_ui_combobox_on_textfield_changed(psy_ui_ComboBox*,
+	psy_ui_TextArea* sender);
 
 /* vtable */
 static psy_ui_ComponentVtable vtable;
@@ -80,15 +82,15 @@ void psy_ui_combobox_init(psy_ui_ComboBox* self, psy_ui_Component* parent)
 	psy_ui_component_set_align(&self->listbox.component,
 		psy_ui_ALIGN_CLIENT);
 	/* textfield */
-	psy_ui_label_init(&self->textfield, &self->component);
-	psy_ui_label_prevent_translation(&self->textfield);
-	psy_ui_component_set_style_type(psy_ui_label_base(&self->textfield),
+	psy_ui_textarea_init_single_line(&self->textfield, &self->component);	
+	psy_ui_component_set_style_type(psy_ui_textarea_base(&self->textfield),
 		psy_ui_STYLE_COMBOBOX_TEXT);
-	psy_ui_component_set_align(psy_ui_label_base(&self->textfield),
+	psy_ui_component_set_align(psy_ui_textarea_base(&self->textfield),
 		psy_ui_ALIGN_LEFT);
-	psy_ui_label_set_char_number(&self->textfield, 10.0);
-	psy_signal_connect(&psy_ui_label_base(&self->textfield)->signal_mousedown,
+	psy_ui_textarea_set_char_number(&self->textfield, 10.0);
+	psy_signal_connect(&psy_ui_textarea_base(&self->textfield)->signal_mousedown,
 		self, psy_ui_combobox_on_text_field);
+	psy_ui_textarea_prevent(&self->textfield);		
 	/* less */
 	psy_ui_button_init_connect(&self->less, &self->component,
 		self, psy_ui_combobox_on_less);
@@ -138,15 +140,16 @@ void psy_ui_combobox_init_simple(psy_ui_ComboBox* self,
 	/* textfield */
 	psy_ui_component_init(&self->editpane, &self->component, NULL);
 	psy_ui_component_set_align(&self->editpane, psy_ui_ALIGN_TOP);	
-	psy_ui_label_init(&self->textfield, &self->editpane);
-	psy_ui_label_prevent_translation(&self->textfield);
-	psy_ui_component_set_style_type(psy_ui_label_base(&self->textfield),
+	psy_ui_textarea_init_single_line(&self->textfield, &self->editpane);	
+	psy_ui_component_set_style_type(psy_ui_textarea_base(&self->textfield),
 		psy_ui_STYLE_COMBOBOX_TEXT);
-	psy_ui_component_set_align(psy_ui_label_base(&self->textfield),
+	psy_ui_component_set_align(psy_ui_textarea_base(&self->textfield),
 		psy_ui_ALIGN_LEFT);
-	psy_ui_label_set_char_number(&self->textfield, 10.0);
-	psy_signal_connect(&psy_ui_label_base(&self->textfield)->signal_mousedown,
+	psy_ui_textarea_set_char_number(&self->textfield, 10.0);
+	psy_signal_connect(&psy_ui_textarea_base(&self->textfield)->signal_mousedown,
 		self, psy_ui_combobox_on_text_field);
+	psy_signal_connect(&self->textfield.signal_change,
+		self, psy_ui_combobox_on_textfield_changed);
 	/* less */
 	psy_ui_button_init_connect(&self->less, &self->editpane,
 		self, psy_ui_combobox_on_less);
@@ -252,16 +255,18 @@ void psy_ui_combobox_set_text(psy_ui_ComboBox* self, const char* text,
 		char text[512];
 
 		psy_ui_combobox_text(self, text);
-		psy_ui_label_set_text(&self->textfield, text);
+		psy_ui_textarea_set_text(&self->textfield, text);
 	}
 }
 
-void psy_ui_combobox_text(psy_ui_ComboBox* self, char* text)
+void psy_ui_combobox_text(psy_ui_ComboBox* self, char* rv)
 {
+	const char* edit_text;
+	
 	assert(self);
 
-	psy_ui_listbox_text(&self->listbox, text, psy_ui_listbox_cur_sel(
-		&self->listbox));
+	edit_text = psy_ui_textarea_text(&self->textfield);
+	psy_snprintf(rv, 256, "%s", edit_text);
 }
 
 void psy_ui_combobox_text_at(psy_ui_ComboBox* self, char* text, intptr_t index)
@@ -284,7 +289,7 @@ void psy_ui_combobox_clear(psy_ui_ComboBox* self)
 
 	psy_ui_listbox_clear(&self->listbox);
 	psy_table_clear(&self->itemdata);
-	psy_ui_label_set_text(&self->textfield, "");
+	psy_ui_textarea_set_text(&self->textfield, "");
 }
 
 void psy_ui_combobox_select(psy_ui_ComboBox* self, intptr_t index)
@@ -295,7 +300,7 @@ void psy_ui_combobox_select(psy_ui_ComboBox* self, intptr_t index)
 
 	psy_ui_listbox_set_cur_sel(&self->listbox, index);
 	psy_ui_listbox_text(&self->listbox, text, index);	
-	psy_ui_label_set_text(&self->textfield, text);
+	psy_ui_textarea_set_text(&self->textfield, text);
 }
 
 intptr_t psy_ui_combobox_cursel(const psy_ui_ComboBox* self)
@@ -309,7 +314,7 @@ void psy_ui_combobox_set_char_number(psy_ui_ComboBox* self, double number)
 {
 	assert(self);
 
-	psy_ui_label_set_char_number(&self->textfield, number);
+	psy_ui_textarea_set_char_number(&self->textfield, number);
 }
 
 void psy_ui_combobox_setitemdata(psy_ui_ComboBox* self, uintptr_t index,
@@ -357,9 +362,9 @@ void psy_ui_combobox_onselchange(psy_ui_ComboBox* self,
 	if (!self->simple) {
 		psy_ui_dropdownbox_hide(&self->dropdown);
 	}
-	psy_ui_listbox_set_cur_sel(&self->listbox, index);
-	psy_ui_combobox_text(self, text);
-	psy_ui_label_set_text(&self->textfield, text);
+	psy_ui_listbox_set_cur_sel(&self->listbox, index);	
+	psy_ui_listbox_text(&self->listbox, text, index);
+	psy_ui_textarea_set_text(&self->textfield, text);
 	if (self->property && index != psy_property_item_int(self->property)) {
 		psy_property_set_item_int(self->property, index);
 	}
@@ -446,4 +451,10 @@ void psy_ui_combobox_on_mouse_wheel(psy_ui_ComboBox* self,
 		}
 	}
 	psy_ui_mouseevent_prevent_default(ev);
+}
+
+void psy_ui_combobox_on_textfield_changed(psy_ui_ComboBox* self,
+	psy_ui_TextArea* sender)
+{
+	psy_ui_listbox_set_cur_sel(&self->listbox, -1);
 }

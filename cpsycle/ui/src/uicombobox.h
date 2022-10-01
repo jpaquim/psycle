@@ -11,6 +11,7 @@
 #include "uidropdownbox.h"
 #include "uilabel.h"
 #include "uilistbox.h"
+#include "uitextarea.h"
 /* container */
 #include <hashtbl.h>
 
@@ -49,7 +50,7 @@ typedef struct psy_ui_ComboBox {
     psy_ui_Button more;    
     psy_ui_Button expand;
     psy_ui_Component editpane;
-    psy_ui_Label textfield;        
+    psy_ui_TextArea textfield;        
     psy_Table itemdata;
     bool simple;
     /* references */

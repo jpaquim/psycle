@@ -72,6 +72,7 @@ void presetsview_init(PresetsView* self, psy_ui_Component* parent,
 	psy_ui_component_set_default_align(&self->client, psy_ui_ALIGN_TOP,		
 		psy_ui_margin_zero());	
 	psy_ui_combobox_init_simple(&self->programbox, &self->client);
+	psy_ui_combobox_set_char_number(&self->programbox, 25.0);
 	psy_ui_component_set_align(&self->programbox.component,
 		psy_ui_ALIGN_CLIENT);	
 	presetsview_connect_fileview(self);
@@ -132,7 +133,7 @@ void presetsview_on_save_button(PresetsView* self, psy_ui_Component* sender)
 {		
 	psy_audio_Machine* machine;
 	psy_audio_Preset* preset;
-	psy_audio_Presets* presets;
+	psy_audio_Presets* presets;	
 	intptr_t prg;
 			
 	assert(self);
@@ -144,16 +145,24 @@ void presetsview_on_save_button(PresetsView* self, psy_ui_Component* sender)
 	prg =  psy_ui_combobox_cursel(&self->programbox);			
 	presets = psy_audio_machine_presets(machine);
 	if (presets) {
-		preset = psy_audio_preset_allocinit();
+		char text[256];
 		
+		preset = psy_audio_preset_allocinit();
 		psy_audio_machine_currentpreset(machine, preset);
+		psy_ui_combobox_text(&self->programbox, text);
+		if (psy_strlen(text) == 0) {
+			psy_audio_preset_setname(preset, "untitled");
+		} else {
+			psy_audio_preset_setname(preset, text);
+		}		
 		if (prg == -1) {
-			psy_audio_preset_setname(preset, "untitled");			
 			psy_audio_presets_append(presets, preset);
 		} else {
 			psy_audio_presets_insert(presets, prg, preset);	
 		}
 		presetsview_update_list(self);
+		psy_ui_component_align(&self->programbox.listbox.component);
+		psy_ui_component_invalidate(&self->programbox.listbox.component);
 	}
 	self->preset_changed = FALSE;
 }
