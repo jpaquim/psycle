@@ -26,12 +26,15 @@ static void presetsview_import(PresetsView*, const char* path);
 static void presetsview_on_export_button(PresetsView*,
 	psy_ui_Component* sender);
 static void presetsview_on_export(PresetsView*, psy_Property* sender);
+static void presetsview_export(PresetsView*, const char* path);
 static void presetsview_update_list(PresetsView*);
 static void presetsview_on_use(PresetsView*, psy_ui_Component* sender);
 static void presetsview_on_preset_selection_change(PresetsView*,
 	psy_ui_Component* sender, uintptr_t prog);
 static void presetsview_on_cancel(PresetsView*, psy_ui_Component* sender);
+static void presetsview_on_mouse_double_click(PresetsView*, psy_ui_MouseEvent*);
 static psy_audio_Machine* presetsview_machine(PresetsView*);
+static void presetsview_use(PresetsView*);
 
 /* vtable */
 static psy_ui_ComponentVtable vtable;
@@ -44,6 +47,9 @@ static void vtable_init(PresetsView* self)
 		vtable.on_destroyed =
 			(psy_ui_fp_component)
 			presetsview_on_destroyed;		
+		vtable.on_mouse_double_click =
+			(psy_ui_fp_component_on_mouse_event)
+			presetsview_on_mouse_double_click;		
 		vtable_initialized = TRUE;
 	}
 	psy_ui_component_set_vtable(&self->component, &vtable);
@@ -253,6 +259,34 @@ void presetsview_on_export_button(PresetsView* self, psy_ui_Component* sender)
 void presetsview_on_export(PresetsView* self, psy_Property* sender)
 {
 	assert(self);
+	
+	if (psy_strlen(psy_property_item_str(sender)) > 0) {
+		presetsview_export(self, psy_property_item_str(sender));		
+	}
+	workspace_select_view(self->workspace, viewindex_make(VIEW_ID_MACHINEVIEW));
+}
+
+void presetsview_export(PresetsView* self, const char* path)
+{	
+	int status;	
+	psy_audio_Machine* machine;
+	psy_audio_Presets* presets;
+		
+	assert(self);
+	
+	machine = presetsview_machine(self);
+	if (!machine) {
+		return;
+	}
+	presets = psy_audio_machine_presets(machine);
+	if (presets) {
+		status = psy_audio_presetsio_save(path,
+			psy_audio_machine_presets(machine));
+		if (status) {
+			workspace_output_error(self->workspace,
+				psy_audio_presetsio_statusstr(status));
+		}
+	}
 }
 
 void presetsview_update_list(PresetsView* self)
@@ -295,7 +329,25 @@ void presetsview_set_mac_id(PresetsView* self, uintptr_t mac_id)
 	}
 }
 
+void presetsview_on_mouse_double_click(PresetsView* self, psy_ui_MouseEvent* ev)
+{
+	assert(self);
+	
+	psy_ui_mouseevent_stop_propagation(ev);
+	presetsview_use(self);
+	psy_ui_component_hide(&self->component);
+	psy_ui_component_align(psy_ui_component_parent(
+		psy_ui_component_parent(&self->component)));
+	psy_ui_component_invalidate(psy_ui_component_parent(
+		psy_ui_component_parent(&self->component)));	
+}
+
 void presetsview_on_use(PresetsView* self, psy_ui_Component* sender)
+{
+	presetsview_use(self);
+}
+
+void presetsview_use(PresetsView* self)
 {
 	psy_audio_Machine* machine;
 	uintptr_t prg;
@@ -312,6 +364,7 @@ void presetsview_on_use(PresetsView* self, psy_ui_Component* sender)
 	self->preset_changed = FALSE;	
 	psy_audio_machine_currentpreset(machine, &self->ini_preset);	
 }
+
 
 void presetsview_on_preset_selection_change(PresetsView* self,
 	psy_ui_Component* sender, uintptr_t prog)
