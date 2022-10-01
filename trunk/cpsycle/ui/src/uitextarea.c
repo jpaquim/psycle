@@ -28,6 +28,8 @@ static void psy_ui_textareapane_on_draw(psy_ui_TextAreaPane*,
 	psy_ui_Graphics*);
 static void psy_ui_textareapane_on_mouse_down(psy_ui_TextAreaPane*,
 	psy_ui_MouseEvent*);
+static void psy_ui_textareapane_on_enable_input(psy_ui_TextAreaPane*);
+static void psy_ui_textareapane_on_prevent_input(psy_ui_TextAreaPane*);
 static void insertchar(psy_ui_TextAreaPane*, char c);
 static void deletechar(psy_ui_TextAreaPane*);
 static void removechar(psy_ui_TextAreaPane*);
@@ -78,6 +80,12 @@ static void vtable_init(psy_ui_TextAreaPane* self)
 		vtable.on_mouse_down =
 			(psy_ui_fp_component_on_mouse_event)
 			psy_ui_textareapane_on_mouse_down;
+		vtable.enableinput =
+			(psy_ui_fp_component)
+			psy_ui_textareapane_on_enable_input;
+		vtable.preventinput =
+			(psy_ui_fp_component)
+			psy_ui_textareapane_on_prevent_input;
 		vtable_initialized = TRUE;
 	}	
 	psy_ui_component_set_vtable(&self->component, &vtable);
@@ -96,6 +104,7 @@ void psy_ui_textareapane_init(psy_ui_TextAreaPane* self,
 	self->isinputfield = FALSE;	
 	self->text = psy_strdup("");
 	self->cp = 0;
+	self->prevent_input = FALSE;
 	psy_ui_textformat_init(&self->format);
 	psy_signal_init(&self->signal_change);
 	psy_signal_init(&self->signal_accept);
@@ -214,6 +223,16 @@ void psy_ui_textareapane_prevent_edit(psy_ui_TextAreaPane* self)
 		psy_ui_NONE_RECURSIVE);
 }
 
+void psy_ui_textareapane_on_enable_input(psy_ui_TextAreaPane* self)
+{
+	self->prevent_input = FALSE;
+}
+
+void psy_ui_textareapane_on_prevent_input(psy_ui_TextAreaPane* self)
+{
+	self->prevent_input = TRUE;
+}
+
 void psy_ui_textareapane_set_sel(psy_ui_TextAreaPane* self,
 	uintptr_t cpmin, uintptr_t cpmax)
 {
@@ -226,6 +245,9 @@ void psy_ui_textareapane_on_key_down(psy_ui_TextAreaPane* self,
 {	
 	assert(self);
 
+	if (self->prevent_input) {
+		return;
+	}
 	switch (psy_ui_keyboardevent_keycode(ev)) {
 	case psy_ui_KEY_ESCAPE:
 		if (self->isinputfield) {
@@ -600,7 +622,7 @@ void psy_ui_textareapane_on_draw(psy_ui_TextAreaPane* self,
 		psy_ui_component_size_px(psy_ui_textareapane_base(self)),
 		self->text);
 	psy_ui_textdraw_draw(&textdraw, g,
-		(psy_ui_component_has_focus(&self->component))
+		(psy_ui_component_has_focus(&self->component) && !(self->prevent_input))
 		? self->cp
 		: psy_INDEX_INVALID);	
 	psy_ui_textdraw_dispose(&textdraw);
