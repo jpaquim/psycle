@@ -40,7 +40,7 @@ int psycle_run(uintptr_t instance, int options)
 		} else {
 			psy_ui_component_showstate(mainframe_base(mainframe), options);
 		}
-		mainframe->machineview.wireview.pane.centermaster = TRUE;
+		mainframe->mainviews.machineview.wireview.pane.centermaster = TRUE;
 		err = psy_ui_app_run(&app); /* event loop start */
 	}	
 	psy_ui_app_dispose(&app); /* clean up */

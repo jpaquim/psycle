@@ -13,32 +13,24 @@
 #include "cpuview.h"
 #include "filebar.h"
 #include "fileview.h"
-#include "exportview.h"
 #include "gear.h"
-#include "helpview.h"
-#include "instrumentview.h"
 #include "interpreter.h"
 #include "kbdhelp.h"
 #include "machinebar.h"
-#include "machineview.h"
+
 #include "metronomebar.h"
 #include "midimonitor.h"
 #include "paramgear.h"
 #include "playbar.h"
 #include "playposbar.h"
 #include "plugineditor.h"
-#include "patternview.h"
-#include "renderview.h"
 #include "sequencerbar.h"
-#include "samplesview.h"
 #include "sequenceview.h"
 #include "seqeditor.h"
 #include "startscript.h"
 #include "stepbox.h"
 #include "stepsequencerview.h"
 #include "songbar.h"
-#include "songproperties.h"
-#include "styleview.h"
 #include <uitabbar.h>
 #include "trackscopeview.h"
 #include "undoredobar.h"
@@ -75,19 +67,15 @@ typedef struct MainFrame {
 	psy_ui_Component toprow0_client;	
 	psy_ui_Component toprow1;	
 	psy_ui_Component client;
+	psy_ui_Component left;
+	FrameDrag frame_drag;
 	psy_ui_Button settings_btn;
-	psy_ui_Button help_btn;
-	/* includes tabbar */
-	MainViews mainviews;
-	/* excludes tabbar and includes bottom views */
-	//psy_ui_Component mainpane;	
+	psy_ui_Button help_btn;	
+	MainViews mainviews;		
 	psy_ui_Terminal terminal;
 	psy_ui_Splitter splitbar;
 	psy_ui_Splitter splitbarterminal;
-	StartScript startscript;
-	Links links;
-	psy_ui_TabBar scripttabbar;	
-	psy_ui_Button togglescripts;
+	StartScript startscript;		
 	FileBar filebar;
 	UndoRedoBar undoredobar;
 	MachineBar machinebar;
@@ -106,16 +94,6 @@ typedef struct MainFrame {
 	ParamRack paramrack;
 	psy_ui_Splitter splitseqeditor;
 	SeqEditor seqeditor;
-	MachineView machineview;
-	PatternView patternview;		
-	SamplesView samplesview;
-	InstrumentView instrumentsview;
-	SongPropertiesView songpropertiesview;
-	ExportView exportview;
-	RenderView renderview;	
-	PropertiesView settingsview;
-	StyleView styleview;
-	HelpView helpview;	
 	KbdHelp kbdhelp;
 	Gear gear;
 	psy_ui_Splitter gearsplitter;
@@ -126,12 +104,8 @@ typedef struct MainFrame {
 	psy_ui_Splitter cpusplitter;
 	MidiMonitor midimonitor;
 	psy_ui_Splitter midisplitter;	
-	FileView fileview;
 	MainStatusBar statusbar;	
-	psy_ui_Component left;
-	psy_ui_Component right;
 	Workspace workspace;	
-	ConfirmBox checkunsavedbox;	
 	Interpreter interpreter;	
 	bool titlemodified;
 	ParamViews paramviews;
@@ -150,8 +124,6 @@ INLINE int mainframe_showmaximizedatstart(MainFrame* self)
 	return generalconfig_show_maximized_at_start(
 		psycleconfig_general(workspace_conf(&self->workspace)));
 }
-
-void mainframe_add_link(MainFrame*, Link*);
 
 INLINE psy_ui_Component* mainframe_base(MainFrame* self)
 {

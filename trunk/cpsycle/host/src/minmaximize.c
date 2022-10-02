@@ -11,9 +11,13 @@
 #include <uiapp.h>
 #include <uicomponent.h>
 
+
 /* implementation */
 void minmaximize_init(MinMaximize* self, psy_ui_Component* view)
 {
+	assert(self);
+	assert(view);
+	
 	self->minmaximize = NULL;
 	self->view = view;
 }
@@ -50,6 +54,6 @@ void minmaximize_toggle(MinMaximize* self)
 			}
 		}
 		psy_ui_component_align(self->view);
-		psy_ui_component_invalidate(psy_ui_app_main(psy_ui_app()));
+		psy_ui_component_invalidate(self->view);
 	}
 }

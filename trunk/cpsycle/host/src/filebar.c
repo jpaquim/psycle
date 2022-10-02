@@ -23,6 +23,8 @@ static void filebar_on_disk_op(FileBar*, psy_ui_Component* sender);
 static void filebar_onloadsong(FileBar*, psy_ui_Component* sender);
 static void filebar_onsavesong(FileBar*, psy_ui_Component* sender);
 static void filebar_on_ft2_explorer(FileBar*, psy_Property* sender);
+static void filebar_on_render(FileBar*, psy_ui_Component* sender);
+static void filebar_on_export(FileBar*, psy_ui_Component* sender);
 
 /* implementation */
 void filebar_init(FileBar* self, psy_ui_Component* parent, Workspace* workspace)
@@ -48,12 +50,12 @@ void filebar_init(FileBar* self, psy_ui_Component* parent, Workspace* workspace)
 		"file.save", self, filebar_onsavesong);
 	psy_ui_button_load_resource(&self->savebutton, IDB_SAVE_LIGHT,
 		IDB_SAVE_DARK, psy_ui_colour_white());
-	psy_ui_button_init_text(&self->exportbutton, filebar_base(self),
-		"file.export");
+	psy_ui_button_init_text_connect(&self->exportbutton, filebar_base(self),
+		"file.export", self, filebar_on_export);
 	psy_ui_button_load_resource(&self->exportbutton, IDB_EARTH_LIGHT,
 		IDB_EARTH_DARK, psy_ui_colour_white());
-	psy_ui_button_init_text(&self->renderbutton, filebar_base(self),
-		"file.render");	
+	psy_ui_button_init_text_connect(&self->renderbutton, filebar_base(self),
+		"file.render", self, filebar_on_render);	
 	psy_ui_button_load_resource(&self->renderbutton, IDB_PULSE_LIGHT,
 		IDB_PULSE_DARK, psy_ui_colour_white());
 	if (keyboardmiscconfig_ft2_file_view(psycleconfig_misc(
@@ -62,8 +64,7 @@ void filebar_init(FileBar* self, psy_ui_Component* parent, Workspace* workspace)
 	} else {
 		filebar_usenativefileexplorer(self);
 	}
-	keyboardmiscconfig_connect(
-		psycleconfig_misc(workspace_conf(workspace)),
+	keyboardmiscconfig_connect(psycleconfig_misc(workspace_conf(workspace)),
 		"ft2fileexplorer", self, filebar_on_ft2_explorer);
 }
 
@@ -149,4 +150,14 @@ void filebar_on_ft2_explorer(FileBar* self, psy_Property* sender)
 	}
 	psy_ui_component_align(psy_ui_app_main(psy_ui_app()));
 	psy_ui_component_invalidate(psy_ui_app_main(psy_ui_app()));
+}
+
+void filebar_on_render(FileBar* self, psy_ui_Component* sender)
+{
+	workspace_select_view(self->workspace, viewindex_make(VIEW_ID_RENDERVIEW));
+}
+
+void filebar_on_export(FileBar* self, psy_ui_Component* sender)
+{
+	workspace_select_view(self->workspace, viewindex_make(VIEW_ID_EXPORTVIEW));
 }
