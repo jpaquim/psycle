@@ -28,7 +28,7 @@ typedef struct FileBar {
 	psy_ui_Button loadbutton;
 	psy_ui_Button savebutton;
 	psy_ui_Button exportbutton;
-	psy_ui_Button renderbutton;
+	psy_ui_Button renderbutton;	
 	/* references */
 	Workspace* workspace;	
 } FileBar;

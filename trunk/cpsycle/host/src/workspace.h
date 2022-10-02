@@ -8,6 +8,7 @@
 
 /* host */
 #include "config.h"
+#include "confirmbox.h"
 #include "fileview.h"
 #include "hostmachinecallback.h"
 #include "inputhandler.h"
@@ -102,8 +103,11 @@ typedef struct Workspace {
 	psy_Logger* terminal_output;
 	uintptr_t terminalstyleid;
 	FileView* fileview;
+	ConfirmBox* confirm;
 	MachinesInsert insert;
 	int dbg;
+	psy_Property load;
+	psy_Property save;
 } Workspace;
 
 void workspace_init(Workspace*, psy_ui_Component* handle);
@@ -182,6 +186,10 @@ void workspace_app_title(Workspace*, char* rv_title, uintptr_t max_len);
 const char* workspace_song_title(const Workspace*);
 void workspace_select_start_view(Workspace*);
 void workspace_on_input(Workspace*, uintptr_t cmd);
+void workspace_confirm_new(Workspace*);
+void workspace_confirm_load(Workspace*);
+void workspace_confirm_close(Workspace*);
+void workspace_confirm_seqclear(Workspace*);
 
 INLINE bool workspace_song_has_file(const Workspace* self)
 {

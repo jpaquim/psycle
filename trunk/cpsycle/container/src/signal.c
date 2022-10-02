@@ -10,10 +10,11 @@
 #include <stdlib.h>
 #include <stdarg.h>          
 
-/*
-** psy_Slot
-** implementation
-*/
+/* psy_Slot */
+
+typedef void (*slotcallback0)(void*);
+
+/* implementation */
 void psy_slot_init_all(psy_Slot* self, void* context, void* fp)
 {
 	assert(self);
@@ -37,6 +38,13 @@ psy_Slot* psy_slot_allocinit_all(void* context, void* fp)
 		psy_slot_init_all(rv, context, fp);
 	}
 	return rv;
+}
+
+void psy_slot_emit(psy_Slot* self)
+{
+	if (self->fp) {
+		((slotcallback0)self->fp)(self->context);
+	}
 }
 
 /*

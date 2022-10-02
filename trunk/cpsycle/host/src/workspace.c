@@ -99,6 +99,19 @@ static void workspace_on_machine_insert(Workspace*,
 	psy_audio_Machines* sender, uintptr_t slot);
 static void workspace_on_machine_removed(Workspace*,
 	psy_audio_Machines* sender, uintptr_t slot);
+/* file */
+static void workspace_on_load(Workspace*, psy_Property* sender);
+static void workspace_on_save(Workspace*, psy_Property* sender);
+static void workspace_on_confirm_accept_new(Workspace*);
+static void workspace_on_confirm_reject_new(Workspace*);
+static void workspace_on_confirm_accept_load(Workspace*);
+static void workspace_on_confirm_reject_load(Workspace*);
+static void workspace_confirm_accept_close(Workspace*);
+static void workspace_confirm_reject_close(Workspace*);
+static void workspace_on_confirm_continue(Workspace*);
+static void workspace_confirm_accept_seqclear(Workspace*);
+static void workspace_confirm_reject_seqclear(Workspace*);
+
 
 /* implementation */
 void workspace_init(Workspace* self, psy_ui_Component* main)
@@ -127,6 +140,7 @@ void workspace_init_views(Workspace* self)
 	self->paramviews = NULL;
 	self->terminal_output = NULL;
 	self->fileview = NULL;
+	self->confirm = NULL;
 	psy_audio_sequencepaste_init(&self->sequencepaste);
 	viewhistory_init(&self->view_history);
 	psy_playlist_init(&self->playlist);
@@ -160,8 +174,48 @@ void workspace_init_player(Workspace* self)
 
 void workspace_init_song(Workspace* self)
 {
+	assert(self);
+	
 	self->song = psy_audio_song_allocinit(&self->player.machinefactory);
 	psy_audio_player_set_song(&self->player, self->song);
+	psy_property_init_type(&self->load, "load",
+		PSY_PROPERTY_TYPE_STRING);
+	psy_property_connect(&self->load, self, workspace_on_load);
+	psy_property_init_type(&self->save, "save",
+		PSY_PROPERTY_TYPE_STRING);
+	psy_property_connect(&self->save, self, workspace_on_save);
+}
+
+void workspace_on_load(Workspace* self, psy_Property* sender)
+{	
+	if (psy_strlen(psy_property_item_str(sender)) == 0) {
+		workspace_restore_view(self);
+		return;
+	}	
+	if (keyboardmiscconfig_savereminder(&self->config.misc) &&
+			workspace_song_modified(self)) {
+		workspace_confirm_load(self);
+	} else {
+		char path[4096];	
+		
+		fileview_filename(self->fileview, path, 4096);		
+		workspace_load_song(self, path,
+			generalconfig_playsongafterload(psycleconfig_general(
+				workspace_conf(self))));
+	}
+}
+
+void workspace_on_save(Workspace* self, psy_Property* sender)
+{
+	char path[4096];
+	
+	if (psy_strlen(psy_property_item_str(sender)) == 0) {
+		workspace_restore_view(self);
+		return;
+	}
+	psy_ui_component_show_align(fileview_base(self->fileview));
+	fileview_filename(self->fileview, path, 4096);
+	workspace_save_song(self, path);
 }
 
 void workspace_init_config(Workspace* self)
@@ -214,6 +268,8 @@ void workspace_dispose(Workspace* self)
 	psy_playlist_dispose(&self->playlist);
 	psy_audio_dispose();	
 	inputhandler_dispose(&self->inputhandler);
+	psy_property_dispose(&self->load);
+	psy_property_dispose(&self->save);
 }
 
 void workspace_dispose_signals(Workspace* self)
@@ -292,23 +348,188 @@ void workspace_new_song(Workspace* self)
 		psy_INDEX_INVALID, 0));
 }
 
-void workspace_load_song_fileselect(Workspace* self)
+void workspace_confirm_new(Workspace* self)
 {
-	psy_ui_OpenDialog dialog;
+	assert(self);
+	assert(self->confirm);
+		
+	confirmbox_set_labels(self->confirm, "msg.newsong", "msg.savenew",
+		"msg.nosavenew");	
+	confirmbox_set_callbacks(self->confirm,
+		psy_slot_make(self, workspace_on_confirm_accept_new),
+		psy_slot_make(self, workspace_on_confirm_reject_new),
+		psy_slot_make(self, workspace_on_confirm_continue));
+	workspace_select_view(self, viewindex_make(VIEW_ID_CHECKUNSAVED));
+}
 
-	psy_ui_opendialog_init_all(&dialog, NULL,
-		psy_ui_translate("file.loadsong"),
-		psy_audio_songfile_loadfilter(),
-		psy_audio_songfile_standardloadfilter(),
-		dirconfig_songs(psycleconfig_directories(
-			workspace_conf(self))));
-	if (psy_ui_opendialog_execute(&dialog)) {
-		workspace_load_song(self,
-			psy_path_full(psy_ui_opendialog_path(&dialog)),
+void workspace_on_confirm_accept_new(Workspace* self)
+{
+	assert(self);
+	
+	if (workspace_save_song_fileselect(self)) {
+		workspace_new_song(self);
+	}
+}
+
+void workspace_on_confirm_reject_new(Workspace* self)
+{
+	self->modified_without_undo = FALSE;
+	self->undo_save_point = psy_list_size(self->undoredo.undo);
+	self->machines_undo_save_point = psy_list_size(
+		self->song->machines.undoredo.undo);
+	workspace_new_song(self);
+}
+
+void workspace_confirm_load(Workspace* self)
+{
+	assert(self);
+	assert(self->confirm);
+	
+	confirmbox_set_labels(self->confirm, "msg.loadsong", "msg.saveload",
+		"msg.nosaveload");	
+	confirmbox_set_callbacks(self->confirm,
+		psy_slot_make(self, workspace_on_confirm_accept_load),
+		psy_slot_make(self, workspace_on_confirm_reject_load),
+		psy_slot_make(self, workspace_on_confirm_continue));
+	workspace_select_view(self, viewindex_make(VIEW_ID_CHECKUNSAVED));
+}
+
+void workspace_on_confirm_accept_load(Workspace* self)
+{
+	assert(self);
+	
+	if (keyboardmiscconfig_ft2_file_view(psycleconfig_misc(
+			workspace_conf(self)))) {
+		char path[4096];
+		
+		fileview_filename(self->fileview, path, 4096);
+		workspace_load_song(self, path,
 			generalconfig_playsongafterload(psycleconfig_general(
 				workspace_conf(self))));
+	} else {
+		workspace_load_song_fileselect(self);
 	}
-	psy_ui_opendialog_dispose(&dialog);
+}
+
+void workspace_on_confirm_reject_load(Workspace* self)
+{
+	char path[4096];
+		
+	fileview_filename(self->fileview, path, 4096);
+	workspace_load_song(self, path,
+		generalconfig_playsongafterload(psycleconfig_general(
+			workspace_conf(self))));
+}
+
+void workspace_on_confirm_continue(Workspace* self)
+{
+	assert(self);
+	
+	workspace_restore_view(self);
+}
+
+void workspace_confirm_close(Workspace* self)
+{
+	assert(self);
+	assert(self->confirm);
+	
+	confirmbox_set_labels(self->confirm, "msg.psyexit", "msg.saveexit",
+		"msg.nosaveexit");
+	confirmbox_set_callbacks(self->confirm,
+		psy_slot_make(self, workspace_confirm_accept_close),
+		psy_slot_make(self, workspace_confirm_reject_close),
+		psy_slot_make(self, workspace_on_confirm_continue));
+	workspace_select_view(self, viewindex_make(VIEW_ID_CHECKUNSAVED));
+}
+
+void workspace_confirm_accept_close(Workspace* self)
+{
+	if (workspace_save_song_fileselect(self)) {
+		psy_ui_app_close(psy_ui_app());
+	}
+}
+
+void workspace_confirm_reject_close(Workspace* self)
+{
+	assert(self);
+	
+	psy_ui_app_close(psy_ui_app());
+}
+
+void workspace_confirm_seqclear(Workspace* self)
+{
+	assert(self);
+	assert(self->confirm);
+	
+	if (!workspace_song(self)) {
+		return;
+	}
+	confirmbox_set_labels(self->confirm, "msg.seqclear", "msg.yes", "msg.no");	
+	confirmbox_set_callbacks(self->confirm,
+		psy_slot_make(self, workspace_confirm_accept_seqclear),
+		psy_slot_make(self, workspace_confirm_reject_seqclear),
+		psy_slot_make(self, workspace_on_confirm_continue));
+	workspace_select_view(self, viewindex_make(VIEW_ID_CHECKUNSAVED));
+}
+
+void workspace_confirm_accept_seqclear(Workspace* self)
+{
+	SequenceCmds cmds;
+	
+	assert(self);
+		
+	workspace_restore_view(self);
+	sequencecmds_init(&cmds, self);
+	sequencecmds_clear(&cmds);	
+}
+
+void workspace_confirm_reject_seqclear(Workspace* self)
+{
+	assert(self);
+	
+	workspace_restore_view(self);
+}
+
+void workspace_load_song_fileselect(Workspace* self)
+{
+	assert(self);
+	
+	if (!keyboardmiscconfig_ft2_file_view(psycleconfig_misc(
+			workspace_conf(self)))) {
+		psy_Property types;
+		
+		assert(self);
+					
+		fileview_set_callbacks(self->fileview, &self->load, &self->save);
+		psy_property_init_type(&types, "types", PSY_PROPERTY_TYPE_CHOICE);		
+		psy_property_set_text(psy_property_set_id(
+			psy_property_append_str(&types, "psy", "*.psy"),
+			FILEVIEWFILTER_PSY), "Psycle");
+		psy_property_set_text(psy_property_set_id(
+			psy_property_append_str(&types, "mod", "*.mod"),
+			FILEVIEWFILTER_MOD), "Module");	
+		fileview_set_filter(self->fileview, &types);
+		psy_property_dispose(&types);
+		workspace_save_view(self);
+		workspace_select_view(self, viewindex_make_all(
+			VIEW_ID_FILEVIEW, 0, 0, psy_INDEX_INVALID));
+	} else {			
+		psy_ui_OpenDialog dialog;
+
+		psy_ui_opendialog_init_all(&dialog, NULL,
+			psy_ui_translate("file.loadsong"),
+			psy_audio_songfile_loadfilter(),
+			psy_audio_songfile_standardloadfilter(),
+			dirconfig_songs(psycleconfig_directories(
+				workspace_conf(self))));
+		if (psy_ui_opendialog_execute(&dialog)) {
+			workspace_load_song(self,
+				psy_path_full(psy_ui_opendialog_path(&dialog)),
+				generalconfig_playsongafterload(psycleconfig_general(
+					workspace_conf(self))));
+		}
+		psy_ui_opendialog_dispose(&dialog);
+	}
 }
 
 void workspace_load_song(Workspace* self, const char* filename, bool play)
@@ -1058,8 +1279,7 @@ void workspace_on_input(Workspace* self, uintptr_t cmdid)
 	case CMD_IMM_LOADSONG:
 		if (keyboardmiscconfig_savereminder(&self->config.misc) &&
 				workspace_song_modified(self)) {
-			workspace_select_view(self, viewindex_make_all(VIEW_ID_CHECKUNSAVED,
-				0, CONFIRM_LOAD, psy_INDEX_INVALID));
+			workspace_confirm_load(self);
 		} else {
 			workspace_load_song_fileselect(self);
 		}

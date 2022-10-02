@@ -43,6 +43,7 @@ typedef struct PresetsView {
 	uintptr_t mac_id;
 	psy_audio_Preset ini_preset;
 	bool preset_changed;
+	char* presets_file_name;
 	/* references */
 	Workspace* workspace;
 } PresetsView;
