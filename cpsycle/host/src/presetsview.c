@@ -18,7 +18,9 @@ static void presetsview_on_destroyed(PresetsView*);
 static void presetsview_init_buttons(PresetsView*);
 static void presetsview_connect_fileview(PresetsView*);
 static void presetsview_on_save_button(PresetsView*,
-	psy_ui_Component* sender);	
+	psy_ui_Component* sender);
+static void presetsview_on_delete_button(PresetsView*,
+	psy_ui_Component* sender);
 static void presetsview_on_import_button(PresetsView*,
 	psy_ui_Component* sender);	
 static void presetsview_on_import(PresetsView*, psy_Property* sender);
@@ -35,6 +37,7 @@ static void presetsview_on_cancel(PresetsView*, psy_ui_Component* sender);
 static void presetsview_on_mouse_double_click(PresetsView*, psy_ui_MouseEvent*);
 static psy_audio_Machine* presetsview_machine(PresetsView*);
 static void presetsview_use(PresetsView*);
+static void presetsview_save_presets(PresetsView*);
 
 /* vtable */
 static psy_ui_ComponentVtable vtable;
@@ -67,6 +70,7 @@ void presetsview_init(PresetsView* self, psy_ui_Component* parent,
 	self->mac_id = psy_INDEX_INVALID;
 	psy_audio_preset_init(&self->ini_preset);
 	self->preset_changed = FALSE;
+	self->presets_file_name = NULL;
 	psy_ui_component_set_preferred_width(&self->component,
 		psy_ui_value_make_ew(50.0));
 	titlebar_init(&self->title_bar, &self->component, "Preset");
@@ -93,6 +97,8 @@ void presetsview_on_destroyed(PresetsView* self)
 	psy_property_dispose(&self->presets_load);
 	psy_property_dispose(&self->presets_export);
 	psy_audio_preset_dispose(&self->ini_preset);
+	free(self->presets_file_name);
+	self->presets_file_name = NULL;
 }
 
 void presetsview_init_buttons(PresetsView* self)
@@ -105,8 +111,8 @@ void presetsview_init_buttons(PresetsView* self)
 		psy_ui_margin_zero());
 	psy_ui_button_init_text_connect(&self->save, &self->buttons,
 		"machineframe.saveas", self, presetsview_on_save_button);
-	psy_ui_button_init_text(&self->del, &self->buttons,
-		"machineframe.delete");
+	psy_ui_button_init_text_connect(&self->del, &self->buttons,
+		"machineframe.delete", self, presetsview_on_delete_button);
 	psy_ui_button_init_text_connect(&self->import, &self->buttons,
 		"machineframe.import", self, presetsview_on_import_button);
 	psy_ui_button_init_text_connect(&self->export_preset, &self->buttons,
@@ -148,7 +154,7 @@ void presetsview_on_save_button(PresetsView* self, psy_ui_Component* sender)
 	if (!machine) {
 		return;
 	}
-	prg =  psy_ui_combobox_cursel(&self->programbox);			
+	prg =  psy_ui_combobox_cursel(&self->programbox);
 	presets = psy_audio_machine_presets(machine);
 	if (presets) {
 		char text[256];
@@ -164,13 +170,39 @@ void presetsview_on_save_button(PresetsView* self, psy_ui_Component* sender)
 		if (prg == -1) {
 			psy_audio_presets_append(presets, preset);
 		} else {
-			psy_audio_presets_insert(presets, prg, preset);	
+			psy_audio_presets_insert(presets, prg, preset);
 		}
 		presetsview_update_list(self);
 		psy_ui_component_align(&self->programbox.listbox.component);
 		psy_ui_component_invalidate(&self->programbox.listbox.component);
 	}
+	presetsview_save_presets(self);
 	self->preset_changed = FALSE;
+}
+
+void presetsview_on_delete_button(PresetsView* self, psy_ui_Component* sender)
+{
+	psy_audio_Machine* machine;
+	psy_audio_Preset* preset;
+	psy_audio_Presets* presets;	
+	intptr_t sel;
+	
+	assert(self);
+		
+	machine = presetsview_machine(self);
+	if (!machine) {
+		return;
+	}
+	sel =  psy_ui_combobox_cursel(&self->programbox);
+	presets = psy_audio_machine_presets(machine);
+	if (presets && sel != -1) {
+		psy_audio_presets_remove(presets, sel);
+		psy_audio_presets_remove_empty(presets);
+		presetsview_update_list(self);
+		psy_ui_component_align(&self->programbox.listbox.component);
+		psy_ui_component_invalidate(&self->programbox.listbox.component);
+		presetsview_save_presets(self);
+	}	
 }
 
 void presetsview_on_import_button(PresetsView* self, psy_ui_Component* sender)
@@ -230,7 +262,11 @@ void presetsview_import(PresetsView* self, const char* path)
 		psy_audio_presets_dispose(presets);
 		free(presets);
 		presets = NULL;
-	}	
+		free(self->presets_file_name);
+		self->presets_file_name = NULL;
+	} else {
+		psy_strreset(&self->presets_file_name, path);
+	}
 	psy_audio_machine_setpresets(machine, presets);
 	presetsview_update_list(self);
 }
@@ -412,4 +448,29 @@ psy_audio_Machine* presetsview_machine(PresetsView* self)
 	}
 	return psy_audio_machines_at(&self->workspace->song->machines,
 		self->mac_id);	
+}
+
+void presetsview_save_presets(PresetsView* self)
+{
+	int status;	
+	psy_audio_Machine* machine;
+	psy_audio_Presets* presets;
+		
+	assert(self);
+	
+	if (psy_strlen(self->presets_file_name) == 0) {
+		return;
+	}
+	machine = presetsview_machine(self);
+	if (!machine) {
+		return;
+	}
+	presets = psy_audio_machine_presets(machine);
+	if (presets) {		
+		status = psy_audio_presetsio_save(self->presets_file_name, presets);
+		if (status) {
+			workspace_output_error(self->workspace,
+				psy_audio_presetsio_statusstr(status));
+		}
+	}
 }

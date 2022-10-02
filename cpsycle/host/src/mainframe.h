@@ -9,7 +9,7 @@
 /* host */
 #include "mainviews.h"
 #include "mainstatusbar.h"
-#include "confirmbox.h"
+// #include "confirmbox.h"
 #include "cpuview.h"
 #include "filebar.h"
 #include "fileview.h"
@@ -131,7 +131,7 @@ typedef struct MainFrame {
 	psy_ui_Component left;
 	psy_ui_Component right;
 	Workspace workspace;	
-	ConfirmBox checkunsavedbox;		
+	ConfirmBox checkunsavedbox;	
 	Interpreter interpreter;	
 	bool titlemodified;
 	ParamViews paramviews;

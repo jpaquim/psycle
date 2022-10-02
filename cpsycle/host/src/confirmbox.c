@@ -7,41 +7,24 @@
 
 
 #include "confirmbox.h"
-/* std */
-#include <stdlib.h>
-#include <string.h>
 
 
 /* prototypes */
-static void confirmbox_on_destroyed(ConfirmBox*);
-static void confirmbox_onok(ConfirmBox*, psy_ui_Component* sender);
-static void confirmbox_onno(ConfirmBox*, psy_ui_Component* sender);
-static void confirmbox_oncontinue(ConfirmBox*, psy_ui_Component* sender);
-
-/* vtable */
-static psy_ui_ComponentVtable vtable;
-static bool vtable_initialized = FALSE;
-
-static void vtable_init(ConfirmBox* self)
-{
-	if (!vtable_initialized) {
-		vtable = *(self->component.vtable);
-		vtable.on_destroyed =
-			(psy_ui_fp_component)
-			confirmbox_on_destroyed;
-		vtable_initialized = TRUE;
-	}
-	psy_ui_component_set_vtable(&self->component, &vtable);
-}
+static void confirmbox_on_accept(ConfirmBox*, psy_ui_Component* sender);
+static void confirmbox_on_reject(ConfirmBox*, psy_ui_Component* sender);
+static void confirmbox_on_continue(ConfirmBox*, psy_ui_Component* sender);
 
 /* implementation */
 void confirmbox_init(ConfirmBox* self, psy_ui_Component* parent)
 {	
 	psy_ui_Margin padding;
 	
-	psy_ui_component_init(confirmbox_base(self), parent, NULL);
-	vtable_init(self);	
-	self->mode = CONFIRM_CLOSE;	
+	assert(self);
+	
+	psy_ui_component_init(confirmbox_base(self), parent, NULL);	
+	self->slot_accept = psy_slot_make(NULL, NULL);
+	self->slot_reject = psy_slot_make(NULL, NULL);
+	self->slot_cont = psy_slot_make(NULL, NULL);
 	psy_ui_component_init_align(&self->view, confirmbox_base(self), NULL,
 		psy_ui_ALIGN_CENTER);
 	psy_ui_component_set_default_align(&self->view,
@@ -52,25 +35,21 @@ void confirmbox_init(ConfirmBox* self, psy_ui_Component* parent)
 	psy_ui_label_init_text(&self->header, &self->view, "");
 	psy_ui_component_set_padding(&self->header.component, padding);
 	psy_ui_button_init_text_connect(&self->yes, &self->view, "msg.yes",
-		self, confirmbox_onok);
+		self, confirmbox_on_accept);
 	psy_ui_component_set_padding(&self->yes.component, padding);
 	psy_ui_button_init_text_connect(&self->no, &self->view, "msg.no",
-		self, confirmbox_onno);
+		self, confirmbox_on_reject);
 	psy_ui_component_set_padding(&self->no.component, padding);
 	psy_ui_button_init_text_connect(&self->cont, &self->view, "msg.cont",
-		self, confirmbox_oncontinue);
-	psy_ui_component_set_padding(&self->cont.component, padding);
-	psy_signal_init(&self->signal_execute);	
-}
-
-void confirmbox_on_destroyed(ConfirmBox* self)
-{
-	psy_signal_dispose(&self->signal_execute);	
+		self, confirmbox_on_continue);
+	psy_ui_component_set_padding(&self->cont.component, padding);	
 }
 
 void confirmbox_set_labels(ConfirmBox* self, const char* title,
 	const char* yesstr, const char* nostr)
 {		
+	assert(self);
+	
 	psy_ui_label_set_text(&self->title, title); 
 	psy_ui_label_set_text(&self->header, "");
 	psy_ui_button_set_text(&self->yes, yesstr);
@@ -79,17 +58,33 @@ void confirmbox_set_labels(ConfirmBox* self, const char* title,
 	psy_ui_component_align(&self->component);
 }
 
-void confirmbox_onok(ConfirmBox* self, psy_ui_Component* sender)
+void confirmbox_on_accept(ConfirmBox* self, psy_ui_Component* sender)
 {
-	psy_signal_emit(&self->signal_execute, self, 2, 0, self->mode);
+	assert(self);
+	
+	psy_slot_emit(&self->slot_accept);	
 }
 
-void confirmbox_onno(ConfirmBox* self, psy_ui_Component* sender)
+void confirmbox_on_reject(ConfirmBox* self, psy_ui_Component* sender)
 {
-	psy_signal_emit(&self->signal_execute, self, 2, 1, self->mode);
+	assert(self);
+	
+	psy_slot_emit(&self->slot_reject);	
 }
 
-void confirmbox_oncontinue(ConfirmBox* self, psy_ui_Component* sender)
+void confirmbox_on_continue(ConfirmBox* self, psy_ui_Component* sender)
 {
-	psy_signal_emit(&self->signal_execute, self, 2, 2, self->mode);
+	assert(self);
+	
+	psy_slot_emit(&self->slot_cont);	
+}
+
+void confirmbox_set_callbacks(ConfirmBox* self, psy_Slot accept,
+	psy_Slot reject, psy_Slot cont)
+{
+	assert(self);
+	
+	self->slot_accept = accept;
+	self->slot_reject = reject;
+	self->slot_cont = cont;
 }

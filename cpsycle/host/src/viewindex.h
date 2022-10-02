@@ -46,13 +46,6 @@ extern "C" {
 #define SECTION_ID_FILESELECT 0
 #define SECTION_ID_FILEVIEW 1
 
-typedef enum {
-	CONFIRM_CLOSE,
-	CONFIRM_LOAD,
-	CONFIRM_NEW,
-	CONFIRM_SEQUENCECLEAR
-} ConfirmBoxAction;
-
 typedef struct ViewIndex {
 	uintptr_t id;
 	uintptr_t section;

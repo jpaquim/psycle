@@ -60,6 +60,16 @@ void psy_slot_init_all(psy_Slot*, void* context, void* fp);
 psy_Slot* psy_slot_alloc(void);
 psy_Slot* psy_slot_allocinit_all(void* context, void* fp);
 
+INLINE psy_Slot psy_slot_make(void* context, void* fp)
+{
+	psy_Slot rv;
+	
+	psy_slot_init_all(&rv, context, fp);
+	return rv;
+}
+
+void psy_slot_emit(psy_Slot*);
+
 /* psy_Signal */
 typedef struct psy_Signal {
 	psy_List* slots;	

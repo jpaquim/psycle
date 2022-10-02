@@ -16,9 +16,10 @@
 #include <uiopendialog.h>
 #include <uisavedialog.h>
 
+
 /* prototypes */
 static void filebar_onnewsong(FileBar*, psy_ui_Component* sender);
-static void filebar_ondiskop(FileBar*, psy_ui_Component* sender);
+static void filebar_on_disk_op(FileBar*, psy_ui_Component* sender);
 static void filebar_onloadsong(FileBar*, psy_ui_Component* sender);
 static void filebar_onsavesong(FileBar*, psy_ui_Component* sender);
 static void filebar_on_ft2_explorer(FileBar*, psy_Property* sender);
@@ -36,7 +37,7 @@ void filebar_init(FileBar* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_ui_bitmap_load_resource(&self->newbutton.bitmapicon, IDB_NEW_DARK);
 	psy_ui_bitmap_settransparency(&self->newbutton.bitmapicon, psy_ui_colour_make(0x00FFFFFF));	
 	psy_ui_button_init_text_connect(&self->diskop, filebar_base(self),
-		"file.diskop", self, filebar_ondiskop);	
+		"file.diskop", self, filebar_on_disk_op);	
 	psy_ui_button_init_text(&self->loadbutton, filebar_base(self),
 		"file.load");
 	psy_ui_button_load_resource(&self->loadbutton, IDB_OPEN_LIGHT,
@@ -96,31 +97,41 @@ void filebar_onnewsong(FileBar* self, psy_ui_Component* sender)
 {
 	if (keyboardmiscconfig_savereminder(&self->workspace->config.misc) &&
 			workspace_song_modified(self->workspace)) {
-		workspace_select_view(self->workspace,
-			viewindex_make_all(VIEW_ID_CHECKUNSAVED, 0,
-			CONFIRM_NEW, psy_INDEX_INVALID));
+		workspace_confirm_new(self->workspace);		
 	} else {
 		workspace_new_song(self->workspace);
 	}
 }
 
-void filebar_ondiskop(FileBar* self, psy_ui_Component* sender)
+void filebar_on_disk_op(FileBar* self, psy_ui_Component* sender)
 {
-
+	psy_Property types;
+	
+	assert(self);
+				
+	fileview_set_callbacks(self->workspace->fileview, &self->workspace->load,
+		&self->workspace->save);
+	psy_property_init_type(&types, "types", PSY_PROPERTY_TYPE_CHOICE);		
+	psy_property_set_text(psy_property_set_id(
+		psy_property_append_str(&types, "psy", "*.psy"),
+		FILEVIEWFILTER_PSY), "Psycle");
+	psy_property_set_text(psy_property_set_id(
+		psy_property_append_str(&types, "mod", "*.mod"),
+		FILEVIEWFILTER_MOD), "Module");	
+	fileview_set_filter(self->workspace->fileview, &types);
+	psy_property_dispose(&types);
+	workspace_save_view(self->workspace);
+	workspace_select_view(self->workspace, viewindex_make_all(
+		VIEW_ID_FILEVIEW, 0, 0, psy_INDEX_INVALID));
 }
 
 void filebar_onloadsong(FileBar* self, psy_ui_Component* sender)
-{	
-	if (!keyboardmiscconfig_ft2_file_view(psycleconfig_misc(
-		workspace_conf(self->workspace)))) {
-		if (keyboardmiscconfig_savereminder(&self->workspace->config.misc) &&
-			workspace_song_modified(self->workspace)) {
-			workspace_select_view(self->workspace,
-				viewindex_make_all(VIEW_ID_CHECKUNSAVED, 0,
-				CONFIRM_LOAD, psy_INDEX_INVALID));
-		} else {
-			workspace_load_song_fileselect(self->workspace);
-		}
+{		
+	if (keyboardmiscconfig_savereminder(&self->workspace->config.misc) &&
+		workspace_song_modified(self->workspace)) {
+			workspace_confirm_load(self->workspace);			
+	} else {
+		workspace_load_song_fileselect(self->workspace);	
 	}
 }
 

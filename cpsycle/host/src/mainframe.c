@@ -57,8 +57,6 @@ static void mainframe_checkplaystartwithrctrl(MainFrame*, psy_ui_KeyboardEvent*)
 static void mainframe_on_key_up(MainFrame*, psy_ui_KeyboardEvent*);
 static void mainframe_delegate_keyboard(MainFrame*, intptr_t message,
 	psy_ui_KeyboardEvent*);
-static void mainframe_on_file_save_view(MainFrame*, FileView* sender);
-static void mainframe_on_disk_op(MainFrame*, psy_ui_Component* sender);
 static void mainframe_on_tabbar_changed(MainFrame*, psy_ui_TabBar* sender,
 	uintptr_t tabindex);
 static void mainframe_on_script_tabbar_changed(MainFrame*, psy_ui_Component* sender,
@@ -86,9 +84,6 @@ static void mainframe_on_exit(MainFrame*, psy_ui_Component* sender);
 static void mainframe_on_songtracks_changed(MainFrame*,
 	psy_audio_Patterns* sender);
 static bool mainframe_on_close(MainFrame*);
-static void mainframe_on_check_unsaved(MainFrame*, ConfirmBox* sender,
-	int option, int mode);
-static void mainframe_on_file_load(MainFrame*, FileView* sender);
 static void mainframe_on_drag_over(MainFrame*, psy_ui_DragEvent*);
 static void mainframe_on_drop(MainFrame*, psy_ui_DragEvent*);
 static void mainframe_on_mouse_down(MainFrame*, psy_ui_MouseEvent*);
@@ -478,6 +473,7 @@ void mainframe_init_main_pane(MainFrame* self)
 		mainframe_on_view_selected);
 	confirmbox_init(&self->checkunsavedbox,
 		psy_ui_notebook_base(&self->mainviews.notebook));
+	self->workspace.confirm = &self->checkunsavedbox;
 	psy_ui_component_set_id(confirmbox_base(&self->checkunsavedbox),
 		VIEW_ID_CHECKUNSAVED);
 	psy_signal_connect(&self->mainviews.mainviewbar.tabbar.signal_change, self,
@@ -673,18 +669,12 @@ void mainframe_init_file_view(MainFrame* self)
 	fileview_set_directory(&self->fileview,	
 		dirconfig_songs(&self->workspace.config.directories));
 	psy_ui_component_set_align(fileview_base(&self->fileview),
-		psy_ui_ALIGN_LEFT);
-	psy_signal_connect(&self->fileview.signal_save, self,
-		mainframe_on_file_save_view);
-	psy_ui_component_hide(&self->fileview.component);
-	psy_signal_connect(&self->fileview.signal_selected,
-		self, mainframe_on_file_load);
+		psy_ui_ALIGN_LEFT);	
+	psy_ui_component_hide(&self->fileview.component);	
 	if (keyboardmiscconfig_ft2_file_view(psycleconfig_misc(
 			workspace_conf(&self->workspace)))) {
 		filebar_useft2fileexplorer(&self->filebar);
-	}
-	psy_signal_connect(&self->filebar.diskop.signal_clicked, self,
-		mainframe_on_disk_op);
+	}	
 }
 
 void mainframe_init_sequence_view(MainFrame* self)
@@ -732,9 +722,7 @@ void mainframe_connect_workspace(MainFrame* self)
 		INPUTHANDLER_IMM, psy_EVENTDRIVER_CMD, "notes",
 		psy_INDEX_INVALID, self, (fp_inputhandler_input)mainframe_on_notes);
 	inputhandler_connect_host(&self->workspace.inputhandler,
-		self, (fp_inputhandler_hostcallback)mainframe_on_input_handler_callback);	
-	psy_signal_connect(&self->checkunsavedbox.signal_execute, self,
-		mainframe_on_check_unsaved);	
+		self, (fp_inputhandler_hostcallback)mainframe_on_input_handler_callback);
 	psy_signal_connect(&self->workspace.player.signal_song_changed, self,
 		mainframe_on_song_changed);	
 }
@@ -876,34 +864,6 @@ void mainframe_update_songtitle(MainFrame* self)
 		workspace_song_title(&self->workspace));
 }
 
-void mainframe_on_file_save_view(MainFrame* self, FileView* sender)
-{
-	char path[4096];
-
-	psy_ui_component_show_align(fileview_base(sender));
-	fileview_filename(sender, path, 4096);
-	workspace_save_song(&self->workspace, path);
-}
-
-void mainframe_on_disk_op(MainFrame* self, psy_ui_Component* sender)
-{	
-	fileview_set_callbacks(&self->fileview, NULL, NULL);
-	psy_Property types;
-		
-	fileview_set_callbacks(&self->fileview, NULL, NULL);
-	psy_property_init_type(&types, "types", PSY_PROPERTY_TYPE_CHOICE);		
-	psy_property_set_text(psy_property_set_id(
-		psy_property_append_str(&types, "psy", "*.psy"),
-		FILEVIEWFILTER_PSY), "Psycle");
-	psy_property_set_text(psy_property_set_id(
-		psy_property_append_str(&types, "mod", "*.mod"),
-		FILEVIEWFILTER_MOD), "Module");	
-	fileview_set_filter(&self->fileview, &types);
-	psy_property_dispose(&types);
-	workspace_select_view(&self->workspace, viewindex_make_all(
-		VIEW_ID_FILEVIEW, 0, 0, psy_INDEX_INVALID));
-}
-
 void mainframe_on_render(MainFrame* self, psy_ui_Component* sender)
 {
 	workspace_select_view(&self->workspace, viewindex_make_all(
@@ -942,26 +902,7 @@ void mainframe_on_view_selected(MainFrame* self, Workspace* sender,
 	psy_ui_Component* view;
 
 	assert(self);
-	
-	if (view_id == VIEW_ID_CHECKUNSAVED) {
-		if (options == CONFIRM_CLOSE) {
-			self->checkunsavedbox.mode = (ConfirmBoxAction)options;
-			confirmbox_set_labels(&self->checkunsavedbox,
-				"msg.psyexit", "msg.saveexit", "msg.nosaveexit");
-		} else if (options == CONFIRM_NEW) {
-			self->checkunsavedbox.mode = (ConfirmBoxAction)options;
-			confirmbox_set_labels(&self->checkunsavedbox,
-				"msg.newsong", "msg.savenew", "msg.nosavenew");
-		} else if (options == CONFIRM_LOAD) {
-			self->checkunsavedbox.mode = (ConfirmBoxAction)options;
-			confirmbox_set_labels(&self->checkunsavedbox,
-				"msg.loadsong", "msg.saveload", "msg.nosaveload");
-		} else if (options == CONFIRM_SEQUENCECLEAR) {
-			self->checkunsavedbox.mode = (ConfirmBoxAction)options;
-			confirmbox_set_labels(&self->checkunsavedbox,
-				"msg.seqclear", "msg.yes", "msg.no");
-		}
-	}	
+		
 	if (view_id == psy_INDEX_INVALID) {
 		view = psy_ui_notebook_active_page(&self->mainviews.notebook);
 	} else {
@@ -1038,76 +979,6 @@ void mainframe_on_script_tabbar_changed(MainFrame* self, psy_ui_Component* sende
 	}
 }
 
-/*
-** called if a button is clicked in the checkunsavedbox
-** option: which button pressed
-** mode  : source of request(app close, song load, song new)
-*/
-void mainframe_on_check_unsaved(MainFrame* self, ConfirmBox* sender,
-	int option, int mode)
-{
-	switch (option) {
-	case CONFIRM_YES:
-		if (mode == CONFIRM_SEQUENCECLEAR) {
-			workspace_restore_view(&self->workspace);
-			seqview_clear(&self->sequenceview);
-		} else if (workspace_save_song_fileselect(&self->workspace)) {
-			if (mode == CONFIRM_CLOSE) {
-				psy_ui_app_close(psy_ui_app());
-			} else if (mode == CONFIRM_LOAD) {
-				if (keyboardmiscconfig_ft2_file_view(psycleconfig_misc(
-					workspace_conf(&self->workspace)))) {
-					char path[4096];
-					
-					fileview_filename(&self->fileview, path, 4096);
-					workspace_load_song(&self->workspace, path,
-						generalconfig_playsongafterload(psycleconfig_general(
-							workspace_conf(&self->workspace))));
-				} else {
-					workspace_load_song_fileselect(&self->workspace);
-				}
-			} else if (mode == CONFIRM_NEW) {
-				workspace_new_song(&self->workspace);
-			}
-		}
-		break;
-	case CONFIRM_NO: {
-		if (mode == CONFIRM_SEQUENCECLEAR) {
-			workspace_restore_view(&self->workspace);
-		} else {
-			self->workspace.modified_without_undo = FALSE;
-			self->workspace.undo_save_point = psy_list_size(
-				self->workspace.undoredo.undo);
-			self->workspace.machines_undo_save_point = psy_list_size(
-				self->workspace.song->machines.undoredo.undo);
-			if (mode == CONFIRM_CLOSE) {				
-				psy_ui_app_close(psy_ui_app());
-			} else if (mode == CONFIRM_LOAD) {
-				if (keyboardmiscconfig_ft2_file_view(psycleconfig_misc(
-					workspace_conf(&self->workspace)))) {
-					char path[4096];
-
-					fileview_filename(&self->fileview, path, 4096);
-					workspace_load_song(&self->workspace,
-						path,
-						generalconfig_playsongafterload(psycleconfig_general(
-							workspace_conf(&self->workspace))));
-				} else {
-					workspace_load_song_fileselect(&self->workspace);
-				}
-			} else if (mode == CONFIRM_NEW) {
-				workspace_new_song(&self->workspace);
-			}
-		}
-		break; }
-	case CONFIRM_CONTINUE:
-		workspace_restore_view(&self->workspace);
-		break;
-	default:
-		break;
-	}
-}
-
 void mainframe_on_exit(MainFrame* self, psy_ui_Component* sender)
 {
 	psy_ui_app_close(psy_ui_app());
@@ -1117,9 +988,7 @@ bool mainframe_on_close(MainFrame* self)
 {		
 	if (keyboardmiscconfig_savereminder(&self->workspace.config.misc) &&
 			workspace_song_modified(&self->workspace)) {
-		workspace_select_view(&self->workspace,
-			viewindex_make_all(VIEW_ID_CHECKUNSAVED, 0,
-			CONFIRM_CLOSE, psy_INDEX_INVALID));
+		workspace_confirm_close(&self->workspace);
 		return FALSE;
 	}
 	psy_ui_component_stop_timer(mainframe_base(self), 0);
@@ -1214,27 +1083,6 @@ void mainframe_on_toggle_terminal(MainFrame* self, psy_ui_Component* sender)
 void mainframe_on_toggle_kbd_help(MainFrame* self, psy_ui_Component* sender)
 {
 	psy_ui_component_toggle_visibility(kbdhelp_base(&self->kbdhelp));
-}
-
-void mainframe_on_file_load(MainFrame* self, FileView* sender)
-{
-	char path[4096];	
-
-	fileview_filename(sender, path, 4096);
-	if (psy_strlen(path) == 0) {
-		return;
-	}
-	if (keyboardmiscconfig_savereminder(&self->workspace.config.misc) &&
-			workspace_song_modified(&self->workspace)) {
-		workspace_select_view(&self->workspace,
-			viewindex_make_all(VIEW_ID_CHECKUNSAVED, SECTION_ID_FILEVIEW,
-			CONFIRM_LOAD, psy_INDEX_INVALID));
-	} else {
-		workspace_load_song(&self->workspace,
-			path,
-			generalconfig_playsongafterload(psycleconfig_general(
-				workspace_conf(&self->workspace))));
-	}
 }
 
 void mainframe_on_key_down(MainFrame* self, psy_ui_KeyboardEvent* ev)
