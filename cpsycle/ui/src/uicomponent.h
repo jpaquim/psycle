@@ -370,7 +370,8 @@ void psy_ui_component_setmaximumsize(psy_ui_Component*, psy_ui_Size);
 const psy_ui_Size psy_ui_component_maximumsize(const psy_ui_Component*);
 void psy_ui_component_set_minimum_size(psy_ui_Component*, psy_ui_Size);
 const psy_ui_Size psy_ui_component_minimumsize(const psy_ui_Component*);
-void psy_ui_component_seticonressource(psy_ui_Component*, int ressourceid);
+void psy_ui_component_set_icon_ressource(psy_ui_Component*,
+	intptr_t ressourceid);
 void psy_ui_component_doublebuffer(psy_ui_Component*);
 
 INLINE bool psy_ui_component_doublebuffered(const psy_ui_Component* self)

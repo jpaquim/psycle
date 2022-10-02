@@ -174,7 +174,7 @@ void machineframe_init(MachineFrame* self, psy_ui_Component* parent,
 	machineframe_vtable_init(self);
 	psy_ui_component_move(&self->component,
 		psy_ui_point_make_em(20.0, 15.0));
-	psy_ui_component_seticonressource(&self->component, IDI_MACPARAM);	
+	psy_ui_component_set_icon_ressource(&self->component, IDI_MACPARAM);	
 	self->view = NULL;
 	self->paramview = NULL;
 	self->editorview = NULL;

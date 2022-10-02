@@ -7,7 +7,17 @@
 #define MAINVIEWS_H
 
 /* host */
+#include "exportview.h"
+#include "helpview.h"
+#include "instrumentview.h"
+#include "machineview.h"
 #include "mainviewbar.h"
+#include "patternview.h"
+#include "renderview.h"
+#include "samplesview.h"
+#include "songproperties.h"
+#include "startscript.h"
+#include "styleview.h"
 #include "viewframe.h"
 #include "workspace.h"
 /* ui */
@@ -21,9 +31,8 @@
 extern "C" {
 #endif
 
-/*
-** MainViews
-*/
+
+/* MainViews */
 
 typedef struct MainViews {
 	/* inherits */
@@ -32,12 +41,28 @@ typedef struct MainViews {
 	MainViewBar mainviewbar;
 	psy_ui_Notebook notebook;
 	EmptyViewPage empty_page;
+	MachineView machineview;
+	PatternView patternview;		
+	SamplesView samplesview;
+	InstrumentView instrumentsview;
+	SongPropertiesView songpropertiesview;
+	ExportView exportview;
+	RenderView renderview;	
+	PropertiesView settingsview;
+	StyleView styleview;
+	HelpView helpview;
+	ConfirmBox confirm;
+	FileView fileview;
+	Links links;
 	/* references */
 	Workspace* workspace;
 } MainViews;
 
-void mainviews_init(MainViews*, psy_ui_Component* parent, psy_ui_Component* pane,
-	Workspace* workspace);
+void mainviews_init(MainViews*, psy_ui_Component* parent,
+	psy_ui_Component* pane, Workspace*);
+
+void mainviews_align(MainViews*);
+void mainviews_add_link(MainViews*, Link*);
 
 INLINE psy_ui_Component* mainviews_base(MainViews* self)
 {

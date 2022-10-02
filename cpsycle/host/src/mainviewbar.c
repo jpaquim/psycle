@@ -19,8 +19,11 @@ static void mainviewbar_on_destroyed(MainViewBar*);
 static void mainviewbar_init_navigation(MainViewBar*, Workspace*);
 static void mainviewbar_init_main_tabbar(MainViewBar*);
 static void mainviewbar_init_view_tabbars(MainViewBar*);
+static void mainviewbar_init_script_tabbar(MainViewBar*);
 static void mainviewbar_on_maxminimize_view(MainViewBar*,
 	psy_ui_Button* sender);
+static void mainviewbar_on_toggle_scripts(MainViewBar*,
+	psy_ui_Component* sender);
 
 /* vtable */
 static psy_ui_ComponentVtable vtable;
@@ -65,6 +68,7 @@ void mainviewbar_init(MainViewBar* self, psy_ui_Component* parent,
 	mainviewbar_init_navigation(self, workspace);	
 	mainviewbar_init_main_tabbar(self);	
 	mainviewbar_init_view_tabbars(self);
+	mainviewbar_init_script_tabbar(self);
 	minmaximize_init(&self->minmaximize, pane);
 }
 
@@ -77,6 +81,17 @@ void mainviewbar_init_navigation(MainViewBar* self, Workspace* workspace)
 {
 	navigation_init(&self->navigation, &self->tabbars, workspace);
 	psy_ui_component_set_align(navigation_base(&self->navigation),
+		psy_ui_ALIGN_LEFT);
+}
+
+void mainviewbar_init_script_tabbar(MainViewBar* self)
+{	
+	psy_ui_tabbar_init(&self->scripttabbar, &self->component);
+	psy_ui_component_set_align(&self->scripttabbar.component, psy_ui_ALIGN_TOP);
+	psy_ui_component_hide(&self->scripttabbar.component);	
+	psy_ui_button_init_text_connect(&self->togglescripts, &self->tabbars,
+		"main.scripts", self, mainviewbar_on_toggle_scripts);
+	psy_ui_component_set_align(psy_ui_button_base(&self->togglescripts),
 		psy_ui_ALIGN_LEFT);
 }
 
@@ -130,4 +145,9 @@ void mainviewbar_init_view_tabbars(MainViewBar* self)
 		psy_ui_margin_make_em(0.0, 0.0, 0.0, 4.0));
 	psy_ui_component_set_align(&self->viewtabbars.component,
 		psy_ui_ALIGN_LEFT);
+}
+
+void mainviewbar_on_toggle_scripts(MainViewBar* self, psy_ui_Component* sender)
+{
+	psy_ui_component_toggle_visibility(psy_ui_tabbar_base(&self->scripttabbar));
 }

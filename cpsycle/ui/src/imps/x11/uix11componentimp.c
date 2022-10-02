@@ -595,7 +595,7 @@ psy_ui_RealRectangle dev_position(const psy_ui_x11_ComponentImp* self)
 
 	x11app = (psy_ui_X11App*)psy_ui_app()->imp;
 	XGetWindowAttributes(x11app->dpy, self->hwnd, &win_attr);
-	rv.left = win_attr.x;
+	rv.left = win_attr.x;	
 	rv.top = win_attr.y;
 	rv.right = win_attr.x + win_attr.width;
 	rv.bottom = win_attr.y + win_attr.height;

@@ -13,6 +13,166 @@
 #include "../../detail/portable.h"
 
 
+/* FrameDrag */
+
+/* prototypes */
+static void framedrag_on_mouse_down(FrameDrag*, psy_ui_Component* sender,
+	psy_ui_MouseEvent*);
+static void framedrag_on_mouse_double_click(FrameDrag*,
+	psy_ui_Component* sender, psy_ui_MouseEvent*);
+static void framedrag_on_mouse_move(FrameDrag*, psy_ui_Component* sender,
+	psy_ui_MouseEvent*);
+static void framedrag_on_mouse_up(FrameDrag*, psy_ui_Component* sender,
+	psy_ui_MouseEvent*);
+static bool framedrag_accept_frame_move(const FrameDrag*,
+	psy_ui_Component* target);
+
+/* implementation */
+void framedrag_init(FrameDrag* self, psy_ui_Component* frame)
+{
+	assert(self);
+	
+	self->frame = frame;
+	self->accept = NULL;
+	psy_signal_connect(&self->frame->signal_mousedown, self,
+		framedrag_on_mouse_down);
+	psy_signal_connect(&self->frame->signal_mouseup, self,
+		framedrag_on_mouse_up);
+	psy_signal_connect(&self->frame->signal_mousemove, self,
+		framedrag_on_mouse_move);
+	psy_signal_connect(&self->frame->signal_mousedoubleclick, self,
+		framedrag_on_mouse_double_click);	
+}
+
+void framedrag_dispose(FrameDrag* self)
+{
+	assert(self);
+	
+	psy_list_free(self->accept);
+	self->accept = NULL;
+}
+
+void framedrag_add(FrameDrag* self, const psy_ui_Component* component)
+{
+	assert(self);
+	
+	psy_list_append(&self->accept, (void*)component);
+}
+
+void framedrag_on_mouse_down(FrameDrag* self, psy_ui_Component* sender,
+	psy_ui_MouseEvent* ev)
+{
+	psy_ui_RealRectangle position;
+	
+	assert(self);
+		
+	self->frame_drag_offset = psy_ui_mouseevent_offset(ev);	
+	self->allow_frame_move = framedrag_accept_frame_move(self,
+		psy_ui_mouseevent_target(ev));	
+}
+
+void framedrag_on_mouse_double_click(FrameDrag* self, psy_ui_Component* sender,
+	psy_ui_MouseEvent* ev)
+{	
+	assert(self);
+	
+	if (framedrag_accept_frame_move(self, psy_ui_mouseevent_target(ev))) {		
+		switch (psy_ui_component_state(self->frame)) {
+		case psy_ui_COMPONENTSTATE_NORMAL:
+			psy_ui_component_set_state(self->frame,
+				psy_ui_COMPONENTSTATE_MAXIMIZED);
+			break;
+		case psy_ui_COMPONENTSTATE_MAXIMIZED:
+			psy_ui_component_set_state(self->frame,
+				psy_ui_COMPONENTSTATE_NORMAL);
+			break;
+		case psy_ui_COMPONENTSTATE_FULLSCREEN:
+			psy_ui_component_set_state(self->frame,
+				psy_ui_COMPONENTSTATE_NORMAL);
+			break;
+		default:
+			break;
+		}
+	}
+}
+
+bool framedrag_accept_frame_move(const FrameDrag* self, psy_ui_Component*
+	target)
+{
+	const psy_List* p;
+	bool rv;
+	
+	assert(self);
+
+	rv = FALSE;
+	for (p = self->accept; p != NULL; p = p->next) {
+		const psy_ui_Component* curr;
+		
+		curr = (const psy_ui_Component*)p->entry;	
+		if (curr == target) {
+			rv = TRUE;
+			break;
+		}		
+	}
+	return rv;
+}
+
+void framedrag_on_mouse_move(FrameDrag* self, psy_ui_Component* sender,
+	psy_ui_MouseEvent* ev)
+{	
+	assert(self);
+	
+	if (psy_ui_mouseevent_button(ev) == 1 && self->allow_frame_move) {
+		psy_ui_RealRectangle position;
+		psy_ui_ComponentState state;
+			
+		position = psy_ui_component_screenposition(self->frame);
+		state = psy_ui_component_state(self->frame);
+		if (state == psy_ui_COMPONENTSTATE_FULLSCREEN ||
+				state == psy_ui_COMPONENTSTATE_MAXIMIZED) {
+			psy_ui_RealRectangle normal;
+			double left;
+			double width;
+
+			normal = psy_ui_component_restore_position(self->frame);
+			psy_ui_component_set_state(self->frame,
+				psy_ui_COMPONENTSTATE_NORMAL);			
+			width = position.right - position.left;
+			if (self->frame_drag_offset.x > width / 2.0) {
+				double margin_right;
+
+				margin_right = width - psy_ui_mouseevent_offset(ev).x;
+				width = normal.right - normal.left;
+				left = psy_ui_mouseevent_offset(ev).x - (width - margin_right);				
+				self->frame_drag_offset.x = (width - margin_right);				
+			} else {
+				left = 0.0;
+			}
+			psy_ui_component_move(self->frame, psy_ui_point_make_px(left,
+				0.0));
+		} else {
+			psy_ui_Point pt;			
+			
+			pt = psy_ui_point_make_px(
+				position.left + (psy_ui_mouseevent_offset(ev).x -
+					self->frame_drag_offset.x),
+				position.top + (psy_ui_mouseevent_offset(ev).y -
+					self->frame_drag_offset.y));			
+			psy_ui_component_move(self->frame, pt);
+		}
+	}
+}
+
+void framedrag_on_mouse_up(FrameDrag* self, psy_ui_Component* sender,
+	psy_ui_MouseEvent* ev)
+{
+	assert(self);
+	
+	self->allow_frame_move = FALSE;
+}
+
+
+
 /* EmptyViewPage */
 
 void emptyviewpage_init(EmptyViewPage* self, psy_ui_Component* parent)

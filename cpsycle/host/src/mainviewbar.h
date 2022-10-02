@@ -31,7 +31,9 @@ typedef struct MainViewBar {
 	psy_ui_Button maximizebtn;
 	psy_ui_Component tabbars;
 	Navigation navigation;
-	psy_ui_TabBar tabbar;	
+	psy_ui_TabBar tabbar;
+	psy_ui_TabBar scripttabbar;
+	psy_ui_Button togglescripts;	
 	MinMaximize minmaximize;
 	psy_ui_Notebook viewtabbars;
 } MainViewBar;

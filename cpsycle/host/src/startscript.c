@@ -184,7 +184,7 @@ int startscript_addmenu(lua_State* L)
 		luaL_checkstring(L, -3),
 		(int)luaL_checkinteger(L, -2),
 		(int)luaL_checkinteger(L, -1));
-	mainframe_add_link(self->mainframe, &link);	
+	mainviews_add_link(&self->mainframe->mainviews, &link);	
 	link_dispose(&link);
 	return 0;
 }

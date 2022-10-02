@@ -19,6 +19,18 @@
 extern "C" {
 #endif
 
+
+typedef struct FrameDrag {
+	psy_ui_Component* frame;
+	psy_List* accept;
+	psy_ui_RealPoint frame_drag_offset;
+	bool allow_frame_move;
+} FrameDrag;
+
+void framedrag_init(FrameDrag*, psy_ui_Component* frame);
+void framedrag_add(FrameDrag*, const psy_ui_Component*);
+void framedrag_dispose(FrameDrag*);
+
 /*
 ** EmptyViewPage
 */

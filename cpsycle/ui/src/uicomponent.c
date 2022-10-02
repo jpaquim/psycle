@@ -1332,9 +1332,10 @@ psy_ui_Size psy_ui_component_client_size(const psy_ui_Component* self)
 	return rv;	
 }
 
-void psy_ui_component_seticonressource(psy_ui_Component* self, int ressourceid)
+void psy_ui_component_set_icon_ressource(psy_ui_Component* self,
+	intptr_t ressource_id)
 {
-	self->imp->vtable->dev_seticonressource(self->imp, ressourceid);
+	self->imp->vtable->dev_seticonressource(self->imp, ressource_id);
 }
 
 void psy_ui_component_clientresize(psy_ui_Component* self, psy_ui_Size size)

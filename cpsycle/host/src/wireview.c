@@ -31,8 +31,6 @@ static const uint32_t linepenbR = 0x00507050;
 static const uint32_t linepenL = 0x00c08080;
 static const uint32_t linepenR = 0x0080c080;
 
-static psy_dsp_amp_t dB(psy_dsp_amp_t amplitude);
-
 /* WireView */
 enum {
 	WIREVIEW_TAB_VUMETER = 0,
@@ -41,12 +39,21 @@ enum {
 	WIREVIEW_TAB_PHASE
 };
 
+/* linear -> deciBell */
+/* amplitude normalized to 1.0f. */
+static psy_dsp_amp_t dB(psy_dsp_amp_t amplitude)
+{
+	/* todo merge with psycle::helpers::math::linear_to_deci_bell */
+	return (psy_dsp_amp_t)(20.0 * log10(amplitude));
+}
+
 /* prototypes */
 static void wireview_initvolumeslider(WireView*);
 static void wireview_inittabbar(WireView*);
 static void wireview_initrategroup(WireView*);
 static void wireview_initbottomgroup(WireView*);
 static void wireview_updatetext(WireView*, psy_Translator*);
+static void wireview_updatetitle(WireView*, psy_audio_Machines*);
 static void wireview_ondescribevolume(WireView*, psy_ui_Slider*, char* txt);
 static void wireview_ontweakvolume(WireView*, psy_ui_Slider*, float value);
 static void wireview_onvaluevolume(WireView*, psy_ui_Slider*, float* value);
@@ -125,6 +132,10 @@ void wireview_init(WireView* self, psy_ui_Component* parent,
 		&self->tabbar.signal_change);
 	psy_ui_tabbar_select(&self->tabbar, WIREVIEW_TAB_VUMETER);
 	psy_signal_connect(&self->component.signal_timer, self, wireview_on_timer);
+	if (workspace_song(self->workspace)) {
+		wireview_updatetitle(self, psy_audio_song_machines(
+			workspace_song(self->workspace)));
+	}
 	psy_ui_component_start_timer(&self->component, 0, 50);
 }
 
@@ -218,6 +229,22 @@ void wireview_initbottomgroup(WireView* self)
 	psy_ui_button_init_connect(&self->addeffect, &self->bottomgroup,
 		self, wireview_onaddeffect);	
 	psy_ui_button_set_text(&self->addeffect, "Add Effect");
+}
+
+void wireview_updatetitle(WireView* self, psy_audio_Machines* machines)
+{
+	char title[128];
+	psy_audio_Machine* src;
+	psy_audio_Machine* dst;
+	
+	src = psy_audio_machines_at(machines, self->wire.src);
+	dst = psy_audio_machines_at(machines, self->wire.dst);
+	psy_snprintf(title, 128, "[%d] %s -> %s Connection Volume",
+		(int)psy_audio_connections_wireindex(&machines->connections,
+			self->wire),
+		(src) ? psy_audio_machine_editname(src) : "ERR",
+		(dst) ? psy_audio_machine_editname(dst) : "ERR");
+	psy_ui_component_set_title(&self->component, title);
 }
 
 void wireview_ondescribevolume(WireView* self, psy_ui_Slider* slider, char* txt)
@@ -365,49 +392,8 @@ uintptr_t wireview_currscope(WireView* self)
 	return psy_ui_tabbar_selected(&self->tabbar);
 }
 
-/* WireFrame */
-/* prototypes */
-static void wireframe_updatetitle(WireFrame*, psy_audio_Machines*);
-
-/* implementation */
-void wireframe_init(WireFrame* self, psy_ui_Component* parent,
-	psy_audio_Wire wire, Workspace* workspace)
-{	
-	assert(workspace);
-	assert(workspace->song);
-	assert(psy_audio_wire_valid(&wire));
-
-	psy_ui_toolframe_init(wireframe_base(self), (parent->view)
-		? parent->view : parent);
-	psy_ui_component_doublebuffer(wireframe_base(self));
-	psy_ui_component_seticonressource(wireframe_base(self), IDI_MACPARAM);
-	wireview_init(&self->wireview, wireframe_base(self),
-		&self->component, wire, workspace);
-	wireframe_updatetitle(self,
-		psy_audio_song_machines(workspace_song(workspace)));
-	psy_ui_component_setposition(wireframe_base(self),
-		psy_ui_rectangle_make(
-			psy_ui_point_make_em(18.0, 15.0),
-			psy_ui_size_make_em(80.0, 25.0)));	
-}
-
-void wireframe_updatetitle(WireFrame* self, psy_audio_Machines* machines)
-{
-	char title[128];
-	psy_audio_Machine* srcmachine;
-	psy_audio_Machine* dstmachine;
-	
-	srcmachine = psy_audio_machines_at(machines, self->wireview.wire.src);
-	dstmachine = psy_audio_machines_at(machines, self->wireview.wire.dst);
-	psy_snprintf(title, 128, "[%d] %s -> %s Connection Volume",
-		(int)psy_audio_connections_wireindex(&machines->connections,
-			self->wireview.wire),
-		(srcmachine) ? psy_audio_machine_editname(srcmachine) : "ERR",
-		(dstmachine) ? psy_audio_machine_editname(dstmachine) : "ERR");
-	psy_ui_component_set_title(wireframe_base(self), title);
-}
-
-void wireview_ondrawslidervu(WireView* self, psy_ui_Component* sender, psy_ui_Graphics* g)
+void wireview_ondrawslidervu(WireView* self, psy_ui_Component* sender,
+	psy_ui_Graphics* g)
 {
 	float maxL, maxR;
 	int rmsL, rmsR;
@@ -541,14 +527,6 @@ void wireview_ondrawslidervu(WireView* self, psy_ui_Component* sender, psy_ui_Gr
 	}	
 }
 
-/* linear -> deciBell */
-/* amplitude normalized to 1.0f. */
-psy_dsp_amp_t dB(psy_dsp_amp_t amplitude)
-{
-	/* todo merge with psycle::helpers::math::linear_to_deci_bell */
-	return (psy_dsp_amp_t)(20.0 * log10(amplitude));
-}
-
 void wireview_on_timer(WireView* self, uintptr_t timerid)
 {	
 	switch (psy_ui_notebook_pageindex(&self->notebook)) {
@@ -569,4 +547,29 @@ void wireview_on_timer(WireView* self, uintptr_t timerid)
 	}
 	vuscope_idle(&self->vuscope);
 	psy_ui_component_invalidate(&self->volslider.pane.component);
+}
+
+
+/* WireFrame */
+
+/* implementation */
+void wireframe_init(WireFrame* self, psy_ui_Component* parent,
+	psy_audio_Wire wire, Workspace* workspace)
+{	
+	assert(workspace);
+	assert(workspace->song);
+	assert(psy_audio_wire_valid(&wire));
+
+	psy_ui_toolframe_init(wireframe_base(self), (parent->view)
+		? parent->view : parent);
+	psy_ui_component_doublebuffer(wireframe_base(self));
+	psy_ui_component_set_icon_ressource(wireframe_base(self), IDI_MACPARAM);
+	wireview_init(&self->wireview, wireframe_base(self),
+		wireframe_base(self), wire, workspace);
+	psy_ui_component_set_title(wireframe_base(self), 
+		psy_ui_component_title(&self->wireview.component));	
+	psy_ui_component_setposition(wireframe_base(self),
+		psy_ui_rectangle_make(
+			psy_ui_point_make_em(18.0, 15.0),
+			psy_ui_size_make_em(80.0, 25.0)));	
 }
