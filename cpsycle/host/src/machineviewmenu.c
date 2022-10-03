@@ -650,6 +650,13 @@ void machinemenu_on_open_bank_manager(MachineMenu* self,
 	psy_ui_component_invalidate(psy_ui_component_parent(&self->component));
 }
 
+void machinemenu_show_bank_manager(MachineMenu* self)
+{
+	psy_ui_component_show(&self->presets.component);
+	psy_ui_component_align(psy_ui_component_parent(&self->component));
+	psy_ui_component_invalidate(psy_ui_component_parent(&self->component));
+}
+
 void machinemenu_on_machine_mute(MachineMenu* self, psy_ui_Component* sender)
 {
 	psy_audio_Machine* machine;

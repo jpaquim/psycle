@@ -133,6 +133,7 @@ void machinemenu_init(MachineMenu*, psy_ui_Component* parent,
 void machinemenu_set_machines(MachineMenu*, psy_audio_Machines*);
 void machinemenu_select(MachineMenu*, uintptr_t mac_id);
 void machinemenu_hide(MachineMenu*);
+void machinemenu_show_bank_manager(MachineMenu*);
 
 INLINE psy_ui_Component* machinemenu_base(MachineMenu* self)
 {

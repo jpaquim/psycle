@@ -48,6 +48,7 @@ typedef struct ParameterBar {
 	psy_ui_Button help;
 	psy_ui_Button isbus;
 	psy_ui_Button more;
+	psy_ui_Button bank;
 	PresetsBar presetsbar;
 	// references
 	psy_audio_Machine* machine;	

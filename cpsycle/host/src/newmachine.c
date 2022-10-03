@@ -22,9 +22,7 @@ static void newmachinesearchbar_on_search_field_change(
 void newmachinesearchbar_init(NewMachineSearchBar* self,
 	psy_ui_Component* parent, PluginFilter* filter)
 {
-	psy_ui_component_init(&self->component, parent, NULL);
-	// psy_ui_component_set_style_type(&self->component,
-	//	STYLE_NEWMACHINE_SEARCHBAR);	
+	psy_ui_component_init(&self->component, parent, NULL);	
 	self->filter = filter;	
 	searchfield_init(&self->search, &self->component);
 	psy_ui_component_set_align(searchfield_base(&self->search),

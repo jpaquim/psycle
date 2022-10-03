@@ -172,6 +172,7 @@ void presetsview_on_save_button(PresetsView* self, psy_ui_Component* sender)
 		} else {
 			psy_audio_presets_insert(presets, prg, preset);
 		}
+		psy_audio_presets_sort(presets);		
 		presetsview_update_list(self);
 		psy_ui_component_align(&self->programbox.listbox.component);
 		psy_ui_component_invalidate(&self->programbox.listbox.component);
@@ -198,6 +199,7 @@ void presetsview_on_delete_button(PresetsView* self, psy_ui_Component* sender)
 	if (presets && sel != -1) {
 		psy_audio_presets_remove(presets, sel);
 		psy_audio_presets_remove_empty(presets);
+		psy_audio_presets_sort(presets);
 		presetsview_update_list(self);
 		psy_ui_component_align(&self->programbox.listbox.component);
 		psy_ui_component_invalidate(&self->programbox.listbox.component);
@@ -241,7 +243,7 @@ void presetsview_on_import(PresetsView* self, psy_Property* sender)
 void presetsview_import(PresetsView* self, const char* path)
 {		
 	int status;
-	psy_audio_Presets* presets;
+	psy_audio_Presets* import;
 	psy_audio_Machine* machine;
 		
 	assert(self);
@@ -250,25 +252,35 @@ void presetsview_import(PresetsView* self, const char* path)
 	if (!machine) {
 		return;
 	}
-	presets = psy_audio_presets_allocinit();
+	import = psy_audio_presets_allocinit();
 	status = psy_audio_presetsio_load(path,
-		presets,
+		import,
 		psy_audio_machine_numtweakparameters(machine),
 		psy_audio_machine_datasize(machine),
 		dirconfig_plugins_curr_platform(&self->workspace->config.directories));
-	if (status) {
+	if (status != PSY_OK) {
 		workspace_output_error(self->workspace,
 			psy_audio_presetsio_statusstr(status));
-		psy_audio_presets_dispose(presets);
-		free(presets);
-		presets = NULL;
+		psy_audio_presets_dispose(import);
+		free(import);
+		import = NULL;
 		free(self->presets_file_name);
 		self->presets_file_name = NULL;
 	} else {
-		psy_strreset(&self->presets_file_name, path);
+		psy_audio_Presets* presets;
+		
+		psy_strreset(&self->presets_file_name, path);	
+		presets = psy_audio_machine_presets(machine);
+		if (presets) {
+			psy_audio_presets_merge(presets, import);
+			psy_audio_presets_dispose(import);
+			import = NULL;
+		} else {
+			presets = import;
+		}	
+		psy_audio_machine_setpresets(machine, presets);
+		presetsview_update_list(self);
 	}
-	psy_audio_machine_setpresets(machine, presets);
-	presetsview_update_list(self);
 }
 
 void presetsview_on_export_button(PresetsView* self, psy_ui_Component* sender)

@@ -1804,7 +1804,7 @@ void init_machineview_styles(psy_ui_Styles* self)
 
 void init_machineparam_styles(psy_ui_Styles* self)
 {
-	psy_ui_Style* style;
+	psy_ui_Style* style;	
 	
 	style = psy_ui_style_allocinit();
 	psy_ui_style_set_colours(style,

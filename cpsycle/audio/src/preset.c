@@ -61,7 +61,10 @@ void psy_audio_preset_setname(psy_audio_Preset* self, const char* name)
 
 const char* psy_audio_preset_name(psy_audio_Preset* self)
 {
-	return self->name;
+	if (self->name) {
+		return self->name;
+	}
+	return "";
 }
 
 void psy_audio_preset_setvalue(psy_audio_Preset* self, uintptr_t param,

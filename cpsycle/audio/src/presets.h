@@ -29,6 +29,9 @@ void psy_audio_presets_insert(psy_audio_Presets*, uintptr_t index,
 	psy_audio_Preset*);
 void psy_audio_presets_remove(psy_audio_Presets*, uintptr_t index);
 void psy_audio_presets_remove_empty(psy_audio_Presets*);
+void psy_audio_presets_sort(psy_audio_Presets*);
+void psy_audio_presets_merge(psy_audio_Presets*, psy_audio_Presets* src);
+
 psy_TableIterator psy_audio_presets_begin(psy_audio_Presets*);
 INLINE psy_audio_Preset* psy_audio_presets_at(psy_audio_Presets* self,
 	uintptr_t index)
