@@ -81,6 +81,8 @@ void parameterbar_init(ParameterBar* self, psy_ui_Component* parent,
 	psy_ui_button_set_text(&self->help, "machineframe.help");	
 	psy_ui_button_init(&self->isbus, &self->buttons);
 	psy_ui_button_set_text(&self->isbus, "machineframe.bus");	
+	psy_ui_button_init(&self->bank, &self->buttons);
+	psy_ui_button_set_text(&self->bank, "machineframe.bank");	
 	psy_ui_button_init(&self->more, &self->row0);
 	psy_ui_button_prevent_translation(&self->more);
 	psy_ui_button_set_text(&self->more, ". . .");
@@ -133,6 +135,8 @@ static void machineframe_updatepwr(MachineFrame*);
 static void machineframe_togglehelp(MachineFrame*,
 	psy_ui_Component* sender);
 static void machineframe_togglebus(MachineFrame*,
+	psy_ui_Component* sender);
+static void machineframe_on_bank_manager(MachineFrame*,
 	psy_ui_Component* sender);
 static void machineframe_toggleshowfullmenu(MachineFrame*,
 	psy_ui_Component* sender);
@@ -218,6 +222,8 @@ void machineframe_init(MachineFrame* self, psy_ui_Component* parent,
 		machineframe_togglepwr);
 	psy_signal_connect(&self->parameterbar.isbus.signal_clicked, self,
 		machineframe_togglebus);
+	psy_signal_connect(&self->parameterbar.bank.signal_clicked, self,
+		machineframe_on_bank_manager);
 	psy_signal_connect(&self->parameterbar.more.signal_clicked, self,
 		machineframe_toggleshowfullmenu);
 	psy_signal_connect(&self->component.signal_mouseup, self,
@@ -501,6 +507,14 @@ void machineframe_toggleshowfullmenu(MachineFrame* self,
 {
 	self->showfullmenu = !self->showfullmenu;
 	machineframe_resize(self);
+}
+
+void machineframe_on_bank_manager(MachineFrame* self,
+	psy_ui_Component* sender)
+{	
+	workspace_select_view(self->workspace, viewindex_make_all(
+		VIEW_ID_MACHINEVIEW, SECTION_ID_MACHINEVIEW_BANK_MANGER, self->macid,
+		psy_INDEX_INVALID));
 }
 
 void machineframe_resize(MachineFrame* self)

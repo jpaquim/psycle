@@ -42,6 +42,8 @@ static void machineview_select_section(MachineView*, psy_ui_Component* sender,
 	uintptr_t section, uintptr_t options);
 static void machineview_on_vu_meters(MachineView*, psy_Property* sender);
 static void machineview_on_machine_index(MachineView*, psy_Property* sender);
+static void machineview_on_select_section(MachineView*, psy_ui_Component* sender,
+	uintptr_t param1, uintptr_t param2);
 
 
 /* vtable */
@@ -96,8 +98,10 @@ void machineview_init(MachineView* self, psy_ui_Component* parent,
 	machineview_init_tabbar(self, tabbarparent);
 	machineview_init_menu(self);
 	machineview_set_song(self, workspace_song(workspace));
-	machineview_connect_signals(self);	
-	psy_ui_tabbar_select(&self->tabbar, SECTION_ID_MACHINEVIEW_WIRES);	
+	machineview_connect_signals(self);		
+	psy_ui_tabbar_select(&self->tabbar, SECTION_ID_MACHINEVIEW_WIRES);
+	psy_signal_connect(&self->component.signal_selectsection, self,
+		machineview_on_select_section);
 }
 
 void machineview_init_component(MachineView* self, psy_ui_Component* parent)
@@ -353,5 +357,20 @@ void machineview_on_machine_index(MachineView* self, psy_Property* sender)
 		machineui_enable_macindex();
 	} else {
 		machineui_prevent_macindex();
+	}
+}
+
+void machineview_on_select_section(MachineView* self, psy_ui_Component* sender,
+	uintptr_t param1, uintptr_t param2)
+{
+	assert(self);	
+	
+	if (param1 == SECTION_ID_MACHINEVIEW_BANK_MANGER) {
+		machinemenu_select(&self->machine_menu, param2);
+		machinemenu_show_bank_manager(&self->machine_menu);
+		if (!psy_ui_component_visible(&self->machine_menu.component)) {			
+			psy_ui_component_show_align(&self->machine_menu.component);
+			psy_ui_component_invalidate(&self->machine_menu.component);
+		}
 	}
 }

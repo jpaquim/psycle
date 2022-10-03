@@ -56,7 +56,8 @@ void machineparamconfig_make(MachineParamConfig* self, psy_Property* parent)
 		psy_property_append_section(parent, "paramview"),
 		"settings.paramview.native-machine-parameter-window");
 	psy_property_set_text(
-		psy_property_append_font(self->paramview, "font", PSYCLE_DEFAULT_FONT),
+		psy_property_append_font(self->paramview, "font",
+		PSYCLE_DEFAULT_MACPARAM_FONT),
 		"settings.paramview.font");
 	psy_property_set_id(psy_property_set_text(
 		psy_property_append_action(self->paramview, "loadcontrolskin"),
