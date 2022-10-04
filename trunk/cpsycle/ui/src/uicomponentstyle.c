@@ -10,10 +10,14 @@
 /* local */
 #include "uiapp.h"
 /* std */
+#include <stdio.h>
 #include <stdlib.h>
 
 static bool sizehints_initialized = FALSE;
 static psy_ui_SizeHints sizehints;
+
+psy_ui_Style empty_style;
+uintptr_t empty_style_initialized = 0;
 
 /* psy_ui_ComponentStyleStates */
 
@@ -92,10 +96,14 @@ void psy_ui_componentstyle_init(psy_ui_ComponentStyle* self)
 {
 	assert(self);
 
-	psy_ui_componentstylestates_init(&self->styles);
-	psy_ui_style_init(&self->inlinestyle);	
+	psy_ui_componentstylestates_init(&self->styles);	
+	if (empty_style_initialized == 0) {
+		psy_ui_style_init(&empty_style);		
+	}
+	++empty_style_initialized;
+	self->inlinestyle = &empty_style;
 	self->currstyle = psy_INDEX_INVALID;
-	self->states = psy_ui_STYLESTATE_NONE;		
+	self->states = psy_ui_STYLESTATE_NONE;
 	if (!sizehints_initialized) {
 		psy_ui_sizehints_init(&sizehints);
 		sizehints_initialized = TRUE;
@@ -110,11 +118,27 @@ void psy_ui_componentstyle_dispose(psy_ui_ComponentStyle* self)
 	
 	self->currstyle = psy_INDEX_INVALID;
 	psy_ui_componentstylestates_dispose(&self->styles);	
-	psy_ui_style_dispose(&self->inlinestyle);
 	if (self->sizehints != &sizehints) {
 		free(self->sizehints);
 		self->sizehints = NULL;
+	}	
+	if (self->inlinestyle != &empty_style) {
+		psy_ui_style_deallocate(self->inlinestyle);
+		self->inlinestyle = NULL;
 	}
+	assert(empty_style_initialized != 0);
+	--empty_style_initialized;
+	if (empty_style_initialized == 0) {
+		psy_ui_style_dispose(&empty_style);
+	}	
+}
+
+psy_ui_Style* psy_ui_componentstyle_inline_style(psy_ui_ComponentStyle* self)
+{	
+	if (self->inlinestyle == &empty_style) {
+		self->inlinestyle = psy_ui_style_allocinit();
+	}
+	return self->inlinestyle;
 }
 
 uintptr_t psy_ui_componentstyle_style_id(psy_ui_ComponentStyle* self,
@@ -207,14 +231,17 @@ bool psy_ui_componentstyle_remove_state(psy_ui_ComponentStyle* self,
 psy_ui_Style* psy_ui_componentstyle_currstyle(psy_ui_ComponentStyle* self)
 {	
 	if (self->currstyle == psy_INDEX_INVALID) {
-		return &self->inlinestyle;
+		return psy_ui_componentstyle_inline_style(self);
 	}
 	return psy_ui_style(self->currstyle);
 }
 
 const psy_ui_Style* psy_ui_componentstyle_currstyle_const(const psy_ui_ComponentStyle* self)
 {
-	return psy_ui_componentstyle_currstyle((psy_ui_ComponentStyle*)self);
+	if (self->currstyle == psy_INDEX_INVALID) {
+		return psy_ui_componentstyle_inline_style_const(self);
+	}
+	return psy_ui_style(((const psy_ui_ComponentStyle*)self)->currstyle);
 }
 
 void psy_ui_componentstyle_updatecurrstate(psy_ui_ComponentStyle* self)
