@@ -151,7 +151,7 @@ INLINE void psy_ui_style_set_margin_em(psy_ui_Style* self,
 		psy_ui_margin_make_em(top, right, bottom, left));	
 }
 
-INLINE void psy_ui_style_setpadding(psy_ui_Style* self,
+INLINE void psy_ui_style_set_padding(psy_ui_Style* self,
 	psy_ui_Margin padding)
 {
 	self->padding = padding;
@@ -161,14 +161,14 @@ INLINE void psy_ui_style_setpadding(psy_ui_Style* self,
 INLINE void psy_ui_style_set_padding_em(psy_ui_Style* self,
 	double top, double right, double bottom, double left)
 {
-	psy_ui_style_setpadding(self,
+	psy_ui_style_set_padding(self,
 		psy_ui_margin_make_em(top, right, bottom, left));	
 }
 
 INLINE void psy_ui_style_set_padding_px(psy_ui_Style* self,
 	double top, double right, double bottom, double left)
 {
-	psy_ui_style_setpadding(self,
+	psy_ui_style_set_padding(self,
 		psy_ui_margin_make_px(top, right, bottom, left));
 }
 

@@ -1130,6 +1130,25 @@ void dev_setcursor(psy_ui_x11_ComponentImp* self, psy_ui_CursorStyle
 
 void dev_seticonressource(psy_ui_x11_ComponentImp* self, int ressourceid)
 {
+	psy_ui_Bitmap icon;
+	psy_ui_x11_BitmapImp* x11bpm;
+	psy_ui_X11App* x11app;	
+	
+	assert(self);
+	x11app = (psy_ui_X11App*)psy_ui_app()->imp;		
+	psy_ui_bitmap_init(&icon);
+	psy_ui_bitmap_load_resource(&icon, ressourceid);	
+	x11bpm = (psy_ui_x11_BitmapImp*)icon.imp;
+	if (x11bpm->pixmap) {
+		XWMHints* win_hints;
+								
+		win_hints = XAllocWMHints();		
+		win_hints->flags = IconPixmapHint;
+		win_hints->icon_pixmap = x11bpm->pixmap;			
+		XSetWMHints(x11app->dpy, self->hwnd, win_hints);
+		XFree(win_hints);
+		XFlush(x11app->dpy);
+	}	
 	//psy_ui_WinApp* winapp;
 
 	//winapp = (psy_ui_WinApp*)app.platform;

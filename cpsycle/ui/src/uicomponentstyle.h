@@ -58,7 +58,7 @@ typedef struct psy_ui_ComponentStyle {
 								** - if no style at all available points to
 								**   inlinestyle
 								*/
-	psy_ui_Style inlinestyle;	/* overrides currstyle for component setter */	
+	psy_ui_Style* inlinestyle;	/* overrides currstyle for component setter */	
 	psy_ui_StyleState states;	/* bit flag holding the activated states */	
 	psy_ui_SizeHints* sizehints;
 	intptr_t debugflag;
@@ -88,20 +88,28 @@ psy_ui_Style* psy_ui_componentstyle_currstyle(psy_ui_ComponentStyle*);
 const psy_ui_Style* psy_ui_componentstyle_currstyle_const(
 	const psy_ui_ComponentStyle*);
 
+psy_ui_Style* psy_ui_componentstyle_inline_style(psy_ui_ComponentStyle*);
+	
+INLINE const psy_ui_Style* psy_ui_componentstyle_inline_style_const(
+	const psy_ui_ComponentStyle* self)
+{
+	return self->inlinestyle;
+}
+
 /*
 ** Properties
 */
 INLINE void psy_ui_componentstyle_set_margin(psy_ui_ComponentStyle* self,
 		psy_ui_Margin margin)
 {
-	psy_ui_style_setmargin(&self->inlinestyle, margin);	
+	psy_ui_style_setmargin(psy_ui_componentstyle_inline_style(self), margin);	
 }
 
 INLINE psy_ui_Margin psy_ui_componentstyle_margin(
 	const psy_ui_ComponentStyle* self)
 {	
-	if (self->inlinestyle.margin_set) {
-		return self->inlinestyle.margin;
+	if (psy_ui_componentstyle_inline_style_const(self)->margin_set) {
+		return psy_ui_componentstyle_inline_style_const(self)->margin;
 	} 
 	return psy_ui_componentstyle_currstyle_const(self)->margin;
 }
@@ -109,23 +117,23 @@ INLINE psy_ui_Margin psy_ui_componentstyle_margin(
 INLINE void psy_ui_componentstyle_set_padding(psy_ui_ComponentStyle* self,
 	psy_ui_Margin padding)
 {
-	psy_ui_style_setpadding(&self->inlinestyle, padding);	
+	psy_ui_style_set_padding(psy_ui_componentstyle_inline_style(self), padding);	
 }
 
 INLINE psy_ui_Margin psy_ui_componentstyle_padding(
 	const psy_ui_ComponentStyle * self)
 {
-	if (self->inlinestyle.padding_set) {
-		return self->inlinestyle.padding;
-	}
+	if (psy_ui_componentstyle_inline_style_const(self)->padding_set) {
+		return psy_ui_componentstyle_inline_style_const(self)->padding;
+	} 
 	return psy_ui_componentstyle_currstyle_const(self)->padding;
 }
 
 INLINE psy_ui_Colour psy_ui_componentstyle_colour(
 	const psy_ui_ComponentStyle* self)
-{
-	if (!self->inlinestyle.colour.mode.transparent) {
-		return self->inlinestyle.colour;
+{	
+	if (!psy_ui_componentstyle_inline_style_const(self)->colour.mode.transparent) {
+		return psy_ui_componentstyle_inline_style_const(self)->colour;
 	}
 	return psy_ui_componentstyle_currstyle_const(self)->colour;
 }
@@ -133,14 +141,14 @@ INLINE psy_ui_Colour psy_ui_componentstyle_colour(
 INLINE void psy_ui_componentstyle_set_colour(psy_ui_ComponentStyle* self,
 	psy_ui_Colour colour)
 {
-	self->inlinestyle.colour = colour;
+	psy_ui_componentstyle_inline_style(self)->colour = colour;	
 }
 
 INLINE psy_ui_Colour psy_ui_componentstyle_background_colour(
 	const psy_ui_ComponentStyle* self)
 {
-	if (!self->inlinestyle.background.colour.mode.transparent) {
-		return self->inlinestyle.background.colour;
+	if (!psy_ui_componentstyle_inline_style_const(self)->background.colour.mode.transparent) {
+		return psy_ui_componentstyle_inline_style_const(self)->background.colour;		
 	}
 	return psy_ui_componentstyle_currstyle_const(self)->background.colour;
 }
@@ -148,14 +156,15 @@ INLINE psy_ui_Colour psy_ui_componentstyle_background_colour(
 INLINE void psy_ui_componentstyle_set_background_colour(
 	psy_ui_ComponentStyle* self, psy_ui_Colour colour)
 {
-	self->inlinestyle.background.colour = colour;
+	psy_ui_componentstyle_inline_style(self)->background.colour = colour;	
 }
 
 INLINE const psy_ui_Border* psy_ui_componentstyle_border(
 	const psy_ui_ComponentStyle* self)
 {
-	if (self->inlinestyle.border.mode.set) {
-		return &self->inlinestyle.border;
+	
+	if (psy_ui_componentstyle_inline_style_const(self)->border.mode.set) {
+		return &psy_ui_componentstyle_inline_style_const(self)->border;
 	}
 	return &psy_ui_componentstyle_currstyle_const(self)->border;
 }
@@ -164,10 +173,10 @@ INLINE void psy_ui_componentstyle_set_border(psy_ui_ComponentStyle* self,
 	const psy_ui_Border* border)
 {
 	if (!border) {
-		self->inlinestyle.border.mode.set = 0;
+		psy_ui_componentstyle_inline_style(self)->border.mode.set = 0;
 		return;
 	}
-	self->inlinestyle.border = *border;
+	psy_ui_componentstyle_inline_style(self)->border = *border;
 }
 
 void psy_ui_componentstyle_usesizehints(psy_ui_ComponentStyle*);
