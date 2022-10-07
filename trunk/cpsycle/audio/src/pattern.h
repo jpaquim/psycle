@@ -141,8 +141,6 @@ typedef struct psy_audio_Pattern {
 	uintptr_t maxsongtracks;
 	char* name;
 	psy_audio_TimeSig timesig;	
-	/* references */
-	psy_List* seqiterators;
 } psy_audio_Pattern;
 
 /* initializes a pattern */
@@ -324,10 +322,10 @@ psy_audio_PatternNode* psy_audio_pattern_timesig_at(psy_audio_Pattern*, uintptr_
 /* return loop index */
 uintptr_t psy_audio_pattern_timesig_index(psy_audio_Pattern*, psy_audio_PatternNode*,
 	uintptr_t track);
-void psy_audio_pattern_add_seqiterator(psy_audio_Pattern*,	
-	struct psy_audio_SequenceTrackIterator*);
-void psy_audio_pattern_remove_seqiterator(psy_audio_Pattern*,
-	struct psy_audio_SequenceTrackIterator*);
+
+void psy_audio_add_seqiterator(struct psy_audio_SequenceTrackIterator*);
+void psy_audio_remove_seqiterator(struct psy_audio_SequenceTrackIterator*);
+void psy_audio_dispose_seqiterator(void);
 
 #ifdef __cplusplus
 }

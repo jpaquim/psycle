@@ -239,14 +239,10 @@ void sequencecmds_paste(SequenceCmds* self)
 void sequencecmds_clear(SequenceCmds* self)
 {
 	if (self->sequence) {		
-		psy_audio_Song* restore_song;		
-		
 		sequencecmds_update(self);
 		assert(self->sequence);
 		psy_audio_player_stop(&self->workspace->player);
-		psy_audio_exclusivelock_enter();
-		restore_song = psy_audio_player_song(&self->workspace->player);
-		psy_audio_player_setemptysong(&self->workspace->player);
+		psy_audio_exclusivelock_enter();		
 		workspace_clear_sequence_paste(self->workspace);
 		/* no undo / redo */
 		psy_audio_patterns_clear(self->sequence->patterns);
@@ -258,8 +254,7 @@ void sequencecmds_clear(SequenceCmds* self)
 		*/
 		psy_undoredo_execute(&self->workspace->undoredo,
 			&psy_audio_sequenceclearcommand_alloc(self->sequence,
-				&self->sequence->selection)->command);
-		psy_audio_player_set_song(&self->workspace->player, restore_song);		
+				&self->sequence->selection)->command);		
 		psy_audio_exclusivelock_leave();		
 	}
 }

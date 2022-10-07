@@ -183,8 +183,7 @@ void presetsview_on_save_button(PresetsView* self, psy_ui_Component* sender)
 
 void presetsview_on_delete_button(PresetsView* self, psy_ui_Component* sender)
 {
-	psy_audio_Machine* machine;
-	psy_audio_Preset* preset;
+	psy_audio_Machine* machine;	
 	psy_audio_Presets* presets;	
 	intptr_t sel;
 	

@@ -106,8 +106,7 @@ typedef struct psy_audio_SequenceTrackIterator {
 	psy_audio_Patterns* patterns;
 	psy_audio_SequenceTrack* track;	
 	psy_audio_SequenceEntryNode* sequencentrynode;
-	psy_audio_PatternNode* patternnode;
-	psy_audio_Pattern* pattern;
+	psy_audio_PatternNode* patternnode;	
 } psy_audio_SequenceTrackIterator;
 
 void psy_audio_sequencetrackiterator_init(psy_audio_SequenceTrackIterator*);
@@ -121,9 +120,6 @@ void psy_audio_sequencetrackiterator_inc_entry(psy_audio_SequenceTrackIterator*)
 void psy_audio_sequencetrackiterator_dec_entry(psy_audio_SequenceTrackIterator*);
 bool psy_audio_sequencetrackiterator_has_next_entry(
 	const psy_audio_SequenceTrackIterator*);
-
-void psy_audio_sequencetrackiterator_set_pattern(psy_audio_SequenceTrackIterator*,
-	psy_audio_Pattern*);
 
 INLINE psy_audio_PatternNode* psy_audio_sequencetrackiterator_patternnode(
 	psy_audio_SequenceTrackIterator* self)
@@ -162,6 +158,21 @@ INLINE uintptr_t psy_audio_sequencetrackiterator_patidx(
 	}	
 	return psy_INDEX_INVALID;
 }
+
+INLINE psy_audio_Pattern* psy_audio_sequencetrackiterator_pattern(psy_audio_SequenceTrackIterator* self)
+{
+	if (self->patterns) {
+		uintptr_t pat_idx;
+
+		pat_idx = psy_audio_sequencetrackiterator_patidx(self);
+		if (pat_idx != psy_INDEX_INVALID) {
+			return psy_audio_patterns_at(self->patterns, pat_idx);
+		}
+	}
+	return NULL;
+}
+
+void psy_audio_sequencetrackiterator_reset_pattern_node(psy_audio_SequenceTrackIterator*);
 
 INLINE psy_dsp_big_beat_t psy_audio_sequencetrackiterator_seqoffset(
 	psy_audio_SequenceTrackIterator* self)

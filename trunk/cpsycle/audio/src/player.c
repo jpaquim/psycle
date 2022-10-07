@@ -285,6 +285,7 @@ void psy_audio_player_dispose(psy_audio_Player* self)
 	psy_audio_custommachineparam_dispose(&self->tempo_param);
 	psy_audio_custommachineparam_dispose(&self->lpb_param);
 	psy_audio_custommachine_dispose(&self->custommachine);
+	psy_audio_dispose_seqiterator();
 }
 
 /*

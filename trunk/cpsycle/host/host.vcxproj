@@ -338,6 +338,7 @@
     <ClCompile Include="src\kbdbox.c" />
     <ClCompile Include="src\kbdhelp.c" />
     <ClCompile Include="src\keyboardmiscconfig.c" />
+    <ClCompile Include="src\keyboardview.c" />
     <ClCompile Include="src\knobui.c" />
     <ClCompile Include="src\labeledit.c" />
     <ClCompile Include="src\labelpair.c" />
@@ -549,6 +550,7 @@
     <ClInclude Include="src\kbdbox.h" />
     <ClInclude Include="src\kbdhelp.h" />
     <ClInclude Include="src\keyboardmiscconfig.h" />
+    <ClInclude Include="src\keyboardview.h" />
     <ClInclude Include="src\knobui.h" />
     <ClInclude Include="src\labeledit.h" />
     <ClInclude Include="src\labelpair.h" />
