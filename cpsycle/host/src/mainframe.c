@@ -551,18 +551,12 @@ void mainframe_init_keyboard_view(MainFrame* self)
 {
 	assert(self);
 	
-	psy_ui_component_init(&self->keyboardview, &self->pane, NULL);
-	psy_ui_component_set_align(&self->keyboardview, psy_ui_ALIGN_BOTTOM);
-	keyboardstate_init(&self->keyboardstate, psy_ui_HORIZONTAL);	
-	pianokeyboard_init(&self->keyboard, &self->keyboardview,
-		&self->keyboardstate, &self->workspace.player, NULL);
-	psy_ui_component_set_align(pianokeyboard_base(&self->keyboard),
-		psy_ui_ALIGN_CENTER);
-	psy_ui_component_set_preferred_width(&self->keyboard.component,
-		psy_ui_value_make_ew((double)keyboardstate_num_keys(&self->keyboardstate)));		
+	keyboardview_init(&self->keyboardview, &self->pane, &self->workspace);
+	psy_ui_component_set_align(keyboardview_base(&self->keyboardview),
+		psy_ui_ALIGN_BOTTOM);	
 	if (!generalconfig_showpianokbd(psycleconfig_general(
 			workspace_conf(&self->workspace)))) {
-		psy_ui_component_hide(&self->keyboardview);
+		psy_ui_component_hide(keyboardview_base(&self->keyboardview));
 	}			
 }
 
@@ -869,9 +863,9 @@ void mainframe_on_piano_kbd(MainFrame* self, psy_Property* sender)
 	assert(self);
 	
 	if (psy_property_item_bool(sender)) {
-		psy_ui_component_show(&self->keyboardview);
+		psy_ui_component_show(keyboardview_base(&self->keyboardview));
 	} else {
-		psy_ui_component_hide(&self->keyboardview);
+		psy_ui_component_hide(keyboardview_base(&self->keyboardview));
 	}
 	mainframe_align(self);
 }

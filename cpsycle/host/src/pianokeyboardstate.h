@@ -13,6 +13,8 @@
 #include <uigeometry.h>
 /* dsp */
 #include <notestab.h>
+/* std */
+#include <stdio.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -27,10 +29,12 @@ typedef struct KeyboardState {
 	double key_extent_px;
 	double keyboard_extent_px;
 	psy_ui_Value default_key_extent;
-	psy_ui_Orientation orientation;	
+	psy_ui_Orientation orientation;
+	bool white_size_fixed;
 } KeyboardState;
 
-void keyboardstate_init(KeyboardState*, psy_ui_Orientation);
+void keyboardstate_init(KeyboardState*, psy_ui_Orientation,
+	bool white_size_fixed);
 
 INLINE intptr_t keyboardstate_num_keys(const KeyboardState* self)
 {
@@ -58,6 +62,13 @@ INLINE double keyboardstate_key_to_px(KeyboardState* self, intptr_t key)
 	return (key + 1) * self->key_extent_px;
 }
 
+INLINE uint8_t keyboardstate_white_to_key(uint8_t white)
+{	
+	static const uint8_t keys[] = {0, 2, 4, 5, 7, 9, 11, 0};
+			
+	return (((white / 7) * 12) + keys[white % 7]);
+}
+
 INLINE uint8_t keyboardstate_screen_to_key(KeyboardState* self,
 	psy_ui_RealPoint pt, double extent)
 {
@@ -76,8 +87,18 @@ INLINE uint8_t keyboardstate_screen_to_key(KeyboardState* self,
 		if (self->orientation == psy_ui_VERTICAL) {
 			rv = (uint8_t)(self->keymax - pt.y / self->key_extent_px);
 		} else {
-			rv = (uint8_t)(pt.y / self->key_extent_px) - 1;
+			uint8_t white;
+			
+			white = (uint8_t)(pt.y / self->key_extent_px);			
+			rv = keyboardstate_white_to_key(white);
+			if (pt.x < (extent * 0.60) && white != 2 && white != 6) {
+				rv++;
+			}
+			rv = psy_min(self->keymax, rv);
+			rv = psy_max(self->keymin, rv);
+			return rv;
 		}
+		printf("%d\n", (int)rv);
 		rv = psy_min(self->keymax, rv);
 		rv = psy_max(self->keymin, rv);
 	}

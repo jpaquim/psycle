@@ -408,7 +408,7 @@ void psy_audio_sequencer_clearcurrtracks(psy_audio_Sequencer* self)
 	for (p = self->currtracks; p != NULL; psy_list_next(&p)) {
 		psy_audio_SequencerTrack* track;
 
-		track = (psy_audio_SequencerTrack*) p->entry;
+		track = (psy_audio_SequencerTrack*)p->entry;
 		if (track->iterator) {
 			psy_audio_sequencetrackiterator_dispose(track->iterator);
 			free(track->iterator);
@@ -698,7 +698,9 @@ void psy_audio_sequencer_notify_newline(psy_audio_Sequencer* self)
 		psy_TableIterator it;
 
 		if (psy_audio_sequencer_playing(self)) {
-			++self->seqtime.linecounter;
+			//++self->seqtime.linecounter;
+			self->seqtime.linecounter = (uintptr_t)(self->seqtime.position *
+				(double)self->lpb);
 		}
 		for (it = psy_audio_machines_begin(self->machines);
 				!psy_tableiterator_equal(&it, psy_table_end());

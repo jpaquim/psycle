@@ -226,6 +226,8 @@ void instrumentkeyboardview_updatemetrics(InstrumentKeyboardView* self)
 		psy_ui_value_make_px(self->metrics.line_height * 3));
 }
 
+
+
 /* InstrumentEntryView */
 /* prototypes */
 static void instrumententryview_on_destroyed(InstrumentEntryView*);
@@ -314,7 +316,7 @@ void instrumententryview_on_destroyed(InstrumentEntryView* self)
 		instrumententryview_onentryupdate);
 }
 
-void instrumententryview_setinstrument(InstrumentEntryView* self,
+void instrumententryview_set_instrument(InstrumentEntryView* self,
 	psy_audio_Instrument* instrument)
 {
 	self->instrument = instrument;
@@ -679,105 +681,20 @@ void instrumententryview_outputstatus(InstrumentEntryView* self, uint8_t key)
 	workspace_output_status(self->state->workspace, text);
 }
 
-/* Table */
-/* TableColumn */
-void instrumententrytablecolumn_init(InstrumentEntryTableColumn* self,
-	const char* label)
-{	
-	self->width = psy_ui_value_make_ew(COLWIDTH);
-	self->label = psy_strdup(label);
-	self->translation = NULL;
-}
-
-void instrumententrytablecolumn_dispose(InstrumentEntryTableColumn* self)
-{
-	free(self->label);
-	self->label = NULL;
-	free(self->translation);
-	self->translation = NULL;
-}
-
-InstrumentEntryTableColumn* instrumententrytablecolumn_alloc(void)
-{
-	return (InstrumentEntryTableColumn*)
-		malloc(sizeof(InstrumentEntryTableColumn));
-}
-
-InstrumentEntryTableColumn* instrumententrytablecolumn_allocinit(
-	const char* label)
-{
-	InstrumentEntryTableColumn* rv;
-	
-	rv = instrumententrytablecolumn_alloc();
-	if (rv) {
-		instrumententrytablecolumn_init(rv, label);
-	}
-	return rv;
-}
-
-void instrumententrytablecolumn_settranslation(InstrumentEntryTableColumn* self,
-	const char* text)
-{
-	psy_strreset(&self->translation, text);
-}
-
 /* InstrumentEntryState */
 /* implementation */
 void instrumententrystate_init(InstrumentEntryState* self, Workspace* workspace)
-{
-	InstrumentEntryTableColumn* column;				
+{	
 
 	self->workspace = workspace;
 	psy_signal_init(&self->signal_select);
-	psy_signal_init(&self->signal_entrychanged);
-	psy_table_init(&self->columns);
-	/* sample index */
-	column = instrumententrytablecolumn_allocinit("instrumentview.smplidx");
-	psy_table_insert(&self->columns, 0, column);
-	/* key low */
-	column = instrumententrytablecolumn_allocinit("instrumentview.keylo");
-	psy_table_insert(&self->columns, 1, column);
-	/* key hi */
-	column = instrumententrytablecolumn_allocinit("instrumentview.keyhi");
-	psy_table_insert(&self->columns, 2, column);
-	/* fixedkey */
-	column = instrumententrytablecolumn_allocinit("instrumentview.keyfixed");
-	psy_table_insert(&self->columns, 3, column);
-	self->curredit = NULL;
-	self->editcolumn = psy_INDEX_INVALID;
+	psy_signal_init(&self->signal_entrychanged);		
 }
 
 void instrumententrystate_dispose(InstrumentEntryState* self)
 {
 	psy_signal_dispose(&self->signal_select);
-	psy_signal_dispose(&self->signal_entrychanged);
-	psy_table_dispose_all(&self->columns, (psy_fp_disposefunc)
-		instrumententrytablecolumn_dispose);
-}
-
-InstrumentEntryTableColumn* instrumententrystate_at(
-	InstrumentEntryState* self, uintptr_t column)
-{
-	return (InstrumentEntryTableColumn*)psy_table_at(&self->columns, column);
-
-}
-
-void instrumententrystate_translate(InstrumentEntryState* self,
-	psy_Translator* translator)
-{
-	psy_TableIterator it;
-
-	assert(self);
-
-	for (it = psy_table_begin(&self->columns);
-			!psy_tableiterator_equal(&it, psy_table_end());
-			psy_tableiterator_inc(&it)) {
-		InstrumentEntryTableColumn* column;
-
-		column = (InstrumentEntryTableColumn*)psy_tableiterator_value(&it);
-		instrumententrytablecolumn_settranslation(column,
-			psy_translator_translate(translator, column->label));
-	}
+	psy_signal_dispose(&self->signal_entrychanged);	
 }
 
 void instrumententrystate_selectentry(
@@ -793,150 +710,140 @@ void instrumententrystate_updateentry(
 	psy_signal_emit(&self->signal_entrychanged, self, 1, entry);
 }
 
-double instrumententrystate_columnpx(
-	InstrumentEntryState* self, uintptr_t column,
-	const psy_ui_TextMetric* tm)
-{
-	if (psy_table_size(&self->columns) > 0) {
-		uintptr_t i;
-		uintptr_t numcolumns;
-		double rv;
-
-		numcolumns = psy_table_maxkey(&self->columns);
-		rv = 0.0;
-		for (i = 0; i < psy_min(numcolumns, column); ++i) {
-			InstrumentEntryTableColumn* column;
-
-			column = instrumententrystate_at(self, i);
-			if (column) {
-				rv += psy_ui_value_px(&column->width, tm, NULL);
-			}
-		}
-		return rv;
-	}
-	return 0.0;
-}
-
-uintptr_t instrumententrystate_pxtocolumn(
-	InstrumentEntryState* self, double x,
-	const psy_ui_TextMetric* tm)
-{
-	if (psy_table_size(&self->columns) > 0) {
-		uintptr_t rv;
-		uintptr_t i;
-		uintptr_t numcolumns;
-		double cpx;
-
-		numcolumns = psy_table_maxkey(&self->columns);
-		rv = psy_INDEX_INVALID;
-		cpx = 0.0;
-		for (i = 0; i <= numcolumns; ++i) {
-			InstrumentEntryTableColumn* column;
-			
-			column = instrumententrystate_at(self, i);
-			if (column) {
-				cpx += psy_ui_value_px(&column->width, tm, NULL);
-			}
-			if (cpx >= x) {
-				rv = i;
-				break;
-			}
-		}
-		return rv;
-	}
-	return 0;
-}
-
 /* InstrumentEntryTableViewHeader */
-/* prototypes */
-static void instrumententrytableviewheader_ondraw(InstrumentEntryTableViewHeader*,
-	psy_ui_Graphics*);
-static void instrumententrytableviewheader_onpreferredsize(InstrumentEntryTableViewHeader*,
-	const psy_ui_Size* limit, psy_ui_Size* rv);
-/* vtable */
-static psy_ui_ComponentVtable instrumententrytableviewheader_vtable;
-static bool instrumententrytableviewheader_vtable_initialized = FALSE;
 
-static void instrumententrytableviewheader_vtable_init(InstrumentEntryTableViewHeader* self)
-{
-	if (!instrumententrytableviewheader_vtable_initialized) {
-		instrumententrytableviewheader_vtable = *(self->component.vtable);
-		instrumententrytableviewheader_vtable.ondraw = (psy_ui_fp_component_ondraw)
-			instrumententrytableviewheader_ondraw;
-		instrumententrytableviewheader_vtable.onpreferredsize =
-			(psy_ui_fp_component_on_preferred_size)
-			instrumententrytableviewheader_onpreferredsize;
-		instrumententrytableviewheader_vtable_initialized = TRUE;
-	}
-}
 /* implementation */
 void instrumententrytableviewheader_init(InstrumentEntryTableViewHeader* self,
-	psy_ui_Component* parent, InstrumentEntryState* state,
-	Workspace* workspace)
+	psy_ui_Component* parent, InstrumentEntryState* state)
 {
 	psy_ui_component_init(&self->component, parent, NULL);
-	instrumententrytableviewheader_vtable_init(self);
-	self->component.vtable = &instrumententrytableviewheader_vtable;	
 	self->state = state;
+	psy_ui_component_set_default_align(&self->component,
+		psy_ui_ALIGN_LEFT, psy_ui_margin_zero());
+		/* index */
+	psy_ui_label_init_text(&self->index, &self->component,
+		"instrumentview.smplidx");
+	psy_ui_label_set_char_number(&self->index, COLWIDTH);
+	/* lo */
+	psy_ui_label_init_text(&self->key_lo, &self->component,
+		"instrumentview.keylo");
+	psy_ui_label_set_char_number(&self->key_lo, COLWIDTH);
+	/* hi */
+	psy_ui_label_init_text(&self->key_hi, &self->component,
+		"instrumentview.keyhi");
+	psy_ui_label_set_char_number(&self->key_hi, COLWIDTH);
+	/* fixed */
+	psy_ui_label_init_text(&self->key_fixed, &self->component,
+		"instrumentview.keyfixed");
+	psy_ui_label_set_char_number(&self->key_fixed, COLWIDTH);	
 }
 
-void instrumententrytableviewheader_ondraw(InstrumentEntryTableViewHeader* self,
-	psy_ui_Graphics* g)
-{		
-	psy_TableIterator it;
-	double cpx;
-	const psy_ui_TextMetric* tm;
+/* InstrumentEntryEdit */
 
-	tm = psy_ui_component_textmetric(&self->component);
-	for (it = psy_table_begin(&self->state->columns), cpx = 0.0;
-			!psy_tableiterator_equal(&it, psy_table_end());
-			psy_tableiterator_inc(&it)) {		
-		InstrumentEntryTableColumn* column;
+/* prototypes */
+static void instrumententryedit_on_edit_key_down(InstrumentEntryEdit*,
+	psy_ui_Component* sender, psy_ui_KeyboardEvent*);
+static void instrumententryedit_on_accept(InstrumentEntryEdit*,
+	psy_ui_Component* sender);
+static intptr_t instrumententryedit_value(InstrumentEntryEdit*);
 
-		column = (InstrumentEntryTableColumn*)psy_tableiterator_value(&it);
-		if (column->label) {
-			char* label;
-
-			if (column->translation) {
-				label = column->translation;
-			} else {
-				label = column->label;
-			}			
-			psy_ui_textout(g, psy_ui_realpoint_make(cpx, 0.0), label,
-				psy_strlen(label));
-		}
-		cpx += psy_ui_value_px(&column->width, tm, NULL);
-	}
-}
-
-void instrumententrytableviewheader_onpreferredsize(InstrumentEntryTableViewHeader* self,
-	const psy_ui_Size* limit, psy_ui_Size* rv)
+/* implementation */
+void instrumententryedit_init(InstrumentEntryEdit* self,
+	psy_ui_Component* parent, psy_audio_InstrumentEntry* entry,
+	uintptr_t column, InstrumentEntryState* state)
 {
-	*rv = psy_ui_size_make_em(80.0, 1.0);
+	psy_ui_textarea_init_single_line(&self->input, parent);
+	self->entry = entry;
+	self->column = column;
+	self->state = state;
+	psy_ui_textarea_set_char_number(&self->input, COLWIDTH);	
+	psy_ui_textarea_enable_input_field(&self->input);
+	instrumententryedit_read(self);
+	psy_signal_connect(&self->input.component.signal_keydown, self,
+		instrumententryedit_on_edit_key_down);	
+	psy_signal_connect(&self->input.signal_accept, self,
+		instrumententryedit_on_accept);
+}
+
+void instrumententryedit_read(InstrumentEntryEdit* self)
+{
+	char text[64];	
+	
+	if (!self->entry) {
+		return;
+	}
+	switch (self->column) {	
+	case 1:
+		psy_snprintf(text, 64, "%.3d", self->entry->keyrange.low);
+		break;
+	case 2:
+		psy_snprintf(text, 64, "%.3d", self->entry->keyrange.high);
+		break;
+	case 3:		
+		if (self->entry->fixedkey == psy_audio_NOTECOMMANDS_EMPTY) {
+			psy_snprintf(text, 64, "%s", "-");
+		} else {
+			psy_snprintf(text, 64, "%d", (int)self->entry->fixedkey);
+		}
+		break;
+	default:
+		text[0] = '\0';
+		break;
+	}
+	psy_ui_textarea_set_text(&self->input, text);
+}
+
+void instrumententryedit_on_edit_key_down(InstrumentEntryEdit* self,
+	psy_ui_Component* sender, psy_ui_KeyboardEvent* ev)
+{
+	if (isalpha(psy_ui_keyboardevent_keycode(ev))) {		
+		psy_ui_keyboardevent_prevent_default(ev);
+		psy_ui_keyboardevent_stop_propagation(ev);
+		return;
+	}	
+}
+
+void instrumententryedit_on_accept(InstrumentEntryEdit* self,
+	psy_ui_Component* sender)
+{
+	switch (self->column) {	
+	case 1:
+		self->entry->keyrange.low = (uint8_t)instrumententryedit_value(self);		
+		break;
+	case 2:
+		self->entry->keyrange.high = (uint8_t)instrumententryedit_value(self);
+		break;
+	case 3:		
+		if (strcmp(psy_ui_textarea_text(&self->input), "-") == 0) {
+			self->entry->fixedkey = psy_audio_NOTECOMMANDS_EMPTY;
+		} else {
+			self->entry->fixedkey = (uint8_t)instrumententryedit_value(self);
+		}		
+		break;
+	default:		
+		break;
+	}
+	instrumententrystate_updateentry(self->state, self->entry);
+}
+
+intptr_t instrumententryedit_value(InstrumentEntryEdit* self)
+{
+	return (intptr_t)atoi(psy_ui_textarea_text(&self->input));
 }
 
 /* InstrumentEntryRow */
+
 /* prototypes */
 static void instrumententryrow_on_destroyed(InstrumentEntryRow*);
-static void instrumententryrow_ondraw(InstrumentEntryRow*, psy_ui_Graphics*);
-static void instrumententryrow_onpreferredsize(InstrumentEntryRow*,
-		const psy_ui_Size* limit, psy_ui_Size* rv);
 static void instrumententryrow_on_mouse_down(InstrumentEntryRow*,
 	psy_ui_MouseEvent*);
-static void instrumententryrow_onmouseleave(InstrumentEntryRow*,
-	psy_ui_MouseEvent*);
-static void instrumententryrow_onmouseenter(InstrumentEntryRow*,
-	psy_ui_MouseEvent*);
-static psy_ui_Rectangle instrumententryrow_editposition(InstrumentEntryRow*,
-	uintptr_t column);
-static void instrumententryrow_oneditchanged(InstrumentEntryRow*, IntEdit* sender);
 static void instrumententryrow_onentryselected(
 	InstrumentEntryRow*, InstrumentEntryState* sender,
 	psy_audio_InstrumentEntry* entry);
 static void instrumententryrow_onentryupdate(
-	InstrumentEntryView*, InstrumentEntryState* sender,
+	InstrumentEntryRow*, InstrumentEntryState* sender,
 	psy_audio_InstrumentEntry* entry);
-static void instrumententryrow_updatestyles(InstrumentEntryRow*);
+
 /* vtable */
 static psy_ui_ComponentVtable instrumententryrow_vtable;
 static bool instrumententryrow_vtable_initialized = FALSE;
@@ -947,43 +854,41 @@ static void instrumententryrow_vtableinit_init(InstrumentEntryRow* self)
 		instrumententryrow_vtable = *(self->component.vtable);
 		instrumententryrow_vtable.on_destroyed =
 			(psy_ui_fp_component)
-			instrumententryrow_on_destroyed;
-		instrumententryrow_vtable.ondraw =
-			(psy_ui_fp_component_ondraw)
-			instrumententryrow_ondraw;
-		instrumententryrow_vtable.onpreferredsize =
-			(psy_ui_fp_component_on_preferred_size)
-			instrumententryrow_onpreferredsize;
+			instrumententryrow_on_destroyed;		
 		instrumententryrow_vtable.on_mouse_down =
 			(psy_ui_fp_component_on_mouse_event)
-			instrumententryrow_on_mouse_down;
-		instrumententryrow_vtable.onmouseenter =
-			(psy_ui_fp_component)
-			instrumententryrow_onmouseenter;
-		instrumententryrow_vtable.onmouseleave =
-			(psy_ui_fp_component)
-			instrumententryrow_onmouseleave;
+			instrumententryrow_on_mouse_down;		
 		instrumententryrow_vtable_initialized = TRUE;
 	}
 	self->component.vtable = &instrumententryrow_vtable;
 }
+
 /* implementation */
 void instrumententryrow_init(InstrumentEntryRow* self, psy_ui_Component* parent,
-	psy_ui_Component* view, psy_audio_InstrumentEntry* entry,
-	InstrumentEntryState* state)
+	psy_audio_InstrumentEntry* entry, InstrumentEntryState* state)
 {
+	char text[64];
+	
 	psy_ui_component_init(&self->component, parent, NULL);
-	instrumententryrow_vtableinit_init(self);	
-	psy_ui_component_set_style_types(&self->component,
-		STYLE_TABLEROW, STYLE_TABLEROW_HOVER, STYLE_TABLEROW_SELECT,
-		psy_INDEX_INVALID);
-	self->view = view;
+	instrumententryrow_vtableinit_init(self);		
 	self->entry = entry;
-	self->state = state;
-	self->hover = FALSE;
-	self->selected = FALSE;
-	psy_signal_connect(&self->state->signal_select, self,
-		instrumententryrow_onentryselected);
+	self->state = state;	
+	psy_ui_component_set_default_align(&self->component,
+		psy_ui_ALIGN_LEFT, psy_ui_margin_zero());
+	/* index */
+	psy_ui_label_init(&self->index, &self->component);
+	psy_ui_label_set_char_number(&self->index, COLWIDTH);
+	psy_ui_label_prevent_translation(&self->index);
+	psy_snprintf(text, 64, "%0X:%0X", self->entry->sampleindex.slot,
+		self->entry->sampleindex.subslot);
+	psy_ui_label_set_text(&self->index, text);	
+	/* lo */	
+	instrumententryedit_init(&self->key_lo, &self->component, entry, 1, state);		
+	instrumententryedit_init(&self->key_hi, &self->component, entry, 2, state);	
+	instrumententryedit_init(&self->key_fixed, &self->component, entry, 3,
+		state);		
+	// psy_signal_connect(&self->state->signal_select, self,
+	// 	instrumententryrow_onentryselected);
 	psy_signal_connect(&self->state->signal_entrychanged, self,
 		instrumententryrow_onentryupdate);
 }
@@ -994,262 +899,69 @@ InstrumentEntryRow* instrumententryrow_alloc(void)
 }
 
 InstrumentEntryRow* instrumententryrow_allocinit(
-	psy_ui_Component* parent, psy_ui_Component* view,
-	psy_audio_InstrumentEntry* entry, InstrumentEntryState* state)
+	psy_ui_Component* parent, psy_audio_InstrumentEntry* entry,
+	InstrumentEntryState* state)
 {
 	InstrumentEntryRow* rv;
 
 	rv = instrumententryrow_alloc();
 	if (rv) {
-		instrumententryrow_init(rv, parent, view, entry, state);
+		instrumententryrow_init(rv, parent, entry, state);
 		psy_ui_component_deallocate_after_destroyed(&rv->component);		
 	}
 	return rv;
 }
 
 void instrumententryrow_on_destroyed(InstrumentEntryRow* self)
-{	
-	self->state->curredit = NULL;
+{		
 	psy_signal_disconnect(&self->state->signal_select, self,
 		instrumententryrow_onentryselected);
 	psy_signal_disconnect(&self->state->signal_entrychanged, self,
 		instrumententryrow_onentryupdate);
 }
 
-void instrumententryrow_ondraw(InstrumentEntryRow* self, psy_ui_Graphics* g)
-{	
-	psy_ui_RealPoint cp;	
-	psy_TableIterator it;	
-
-	psy_ui_setcolour(g, psy_ui_colour_make(0x00CACACA));
-	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
-	psy_ui_set_text_colour(g, psy_ui_colour_make(0x00CACACA));
-	cp = psy_ui_realpoint_zero();	
-	for (it = psy_table_begin(&self->state->columns);
-			!psy_tableiterator_equal(&it, psy_table_end());
-			psy_tableiterator_inc(&it)) {
-		uintptr_t column;
-		InstrumentEntryTableColumn* columndef;
-		char text[64];				
-						
-		column = psy_tableiterator_key(&it);
-		columndef = (InstrumentEntryTableColumn*)psy_tableiterator_value(&it);
-		switch (column) {
-		case 0:
-			psy_snprintf(text, 64, "%0X:%0X", self->entry->sampleindex.slot,
-				self->entry->sampleindex.subslot);
-			break;
-		case 1:
-			psy_snprintf(text, 64, "%.3d", self->entry->keyrange.low);
-			break;
-		case 2:
-			psy_snprintf(text, 64, "%.3d", self->entry->keyrange.high);
-			break;
-		case 3:
-			if (self->entry->fixedkey == psy_audio_NOTECOMMANDS_EMPTY) {
-				psy_snprintf(text, 64, "%s", "-");
-			} else {
-				psy_snprintf(text, 64, "%d", (int)self->entry->fixedkey);
-			}
-			break;
-		default:
-			text[0] = '\0';
-			break;
-		}
-		psy_ui_textout(g, cp, text, psy_strlen(text));
-		cp.x += psy_ui_value_px(&columndef->width,
-			psy_ui_component_textmetric(&self->component), NULL);
-	}
-}
-
 void instrumententryrow_on_mouse_down(InstrumentEntryRow* self,
 	psy_ui_MouseEvent* ev)
-{	
-	if (self->selected) {
-		uintptr_t column;
-
-		column = instrumententrystate_pxtocolumn(self->state,
-			psy_ui_mouseevent_pt(ev).x,
-			psy_ui_component_textmetric(&self->component));
-		if (column) {
-			if (!self->state->curredit ||
-				psy_ui_component_parent(&self->state->curredit->component) != &self->component) {
-				if (self->state->curredit) {
-					psy_ui_component_destroy(&self->state->curredit->component);
-				}
-				self->state->curredit = intedit_allocinit(&self->component, "", 0, 0, 0);
-				psy_signal_connect(&self->state->curredit->signal_changed, self,
-					instrumententryrow_oneditchanged);
-			}
-			self->state->editcolumn = column;
-			switch (column) {
-			case 0:
-				intedit_set_value(self->state->curredit, (int)self->entry->sampleindex.subslot);
-				break;
-			case 1:
-				intedit_set_value(self->state->curredit, (uint8_t)self->entry->keyrange.low);
-				break;
-			case 2:
-				intedit_set_value(self->state->curredit, (uint8_t)self->entry->keyrange.high);
-				break;
-			case 3:
-				intedit_set_value(self->state->curredit, (uint8_t)self->entry->fixedkey);
-				break;
-			}
-			psy_ui_component_setposition(intedit_base(self->state->curredit),
-				instrumententryrow_editposition(self, column));
-		}
-	} else {
-		instrumententrystate_selectentry(self->state, self->entry);		
-	}
-}
-
-void instrumententryrow_oneditchanged(InstrumentEntryRow* self, IntEdit* sender)
-{
-	switch (self->state->editcolumn) {
-	case 0:
-		self->entry->sampleindex.subslot = intedit_value(self->state->curredit);
-		break;
-	case 1:
-		self->entry->keyrange.low = intedit_value(self->state->curredit);		
-		break;
-	case 2:
-		self->entry->keyrange.high = intedit_value(self->state->curredit);
-		break;
-	case 3:
-		self->entry->fixedkey = intedit_value(self->state->curredit);
-		break;
-	default:
-		break;
-	}
-	instrumententrystate_updateentry(self->state, self->entry);
-}
-
-psy_ui_Rectangle instrumententryrow_editposition(InstrumentEntryRow* self,
-	uintptr_t column)
 {		
-	InstrumentEntryTableColumn* columndef;
-	psy_ui_Size size;
-	psy_ui_RealRectangle position;
-	
-	columndef = instrumententrystate_at(self->state, column);
-	if (!columndef) {
-		return psy_ui_rectangle_make(psy_ui_point_zero(), psy_ui_size_zero());
-	}
-	size = psy_ui_component_scroll_size(&self->component);
-	position = psy_ui_component_position(&self->component);
-	return psy_ui_rectangle_make(
-		psy_ui_point_make_px(			
-			instrumententrystate_columnpx(self->state, column,
-				psy_ui_component_textmetric(&self->component)), 0.0),
-		psy_ui_size_make(columndef->width, size.height));
-}
-
-void instrumententryrow_onpreferredsize(InstrumentEntryRow* self,
-	const psy_ui_Size* limit, psy_ui_Size* rv)
-{
-	psy_ui_size_setem(rv, 120.0, 1.0);
-}
-
-void instrumententryrow_onmouseenter(InstrumentEntryRow* self,
-	psy_ui_MouseEvent* ev)
-{
-	self->hover = TRUE;
-	instrumententryrow_updatestyles(self);
-}
-
-void instrumententryrow_onmouseleave(InstrumentEntryRow* self,
-	psy_ui_MouseEvent* ev)
-{
-	self->hover = FALSE;
-	instrumententryrow_updatestyles(self);
+	instrumententrystate_selectentry(self->state, self->entry);	
 }
 
 void instrumententryrow_onentryselected(
 	InstrumentEntryRow* self, InstrumentEntryState* sender,
 	psy_audio_InstrumentEntry* entry)
 {
-	bool selected;
-	
-	selected = self->state->selectedentry == self->entry;
-	if (selected != self->selected) {
-		if (self->state->curredit) {
-			psy_ui_component_destroy(intedit_base(self->state->curredit));
-			self->state->curredit = NULL;
-		}
-		self->selected = selected;
-		instrumententryrow_updatestyles(self);
-	}
+		
 }
 
-void instrumententryrow_onentryupdate(
-	InstrumentEntryView* self, InstrumentEntryState* sender,
-	psy_audio_InstrumentEntry* entry)
+void instrumententryrow_onentryupdate(InstrumentEntryRow* self,
+	InstrumentEntryState* sender, psy_audio_InstrumentEntry* entry)
 {
-	psy_ui_component_invalidate(&self->component);
-}
-
-void instrumententryrow_updatestyles(InstrumentEntryRow* self)
-{		
-	/*
-	** if (self->selected) {
-	** 	self->component.style.currstyle = &self->component.style.select;
-	**  } else if (self->hover) {
-	** 	self->component.style.currstyle = &self->component.style.hover;
-	** } else {
-	** 	self->component.style.currstyle = &self->component.style.overridestyle;
-	** }
-	*/
-	psy_ui_component_invalidate(&self->component);
+	if (entry == self->entry) {
+		instrumententryedit_read(&self->key_lo);
+		instrumententryedit_read(&self->key_hi);
+		instrumententryedit_read(&self->key_fixed);	
+	}
 }
 
 /* InstrumentEntryTableView */
-/* prototypes */
-static void instrumententrytableview_on_destroyed(InstrumentEntryTableView*);
-static void instrumententrytableview_onpreferredsize(InstrumentEntryTableView*,
-	const psy_ui_Size* limit, psy_ui_Size* rv);
-static void instrumententrytableview_ondraw(InstrumentEntryTableView*,
-	psy_ui_Graphics*);
-/* vtable */
-static psy_ui_ComponentVtable instrumententrytableview_vtable;
-static bool instrumententrytableview_vtable_initialized = FALSE;
 
-static void instrumententrytableview_vtable_init(InstrumentEntryTableView* self)
-{
-	if (!instrumententrytableview_vtable_initialized) {
-		instrumententrytableview_vtable = *(self->component.vtable);
-		instrumententryview_vtable.on_destroyed =
-			(psy_ui_fp_component)
-			instrumententrytableview_on_destroyed;
-		instrumententrytableview_vtable.onpreferredsize =
-			(psy_ui_fp_component_on_preferred_size)
-			instrumententrytableview_onpreferredsize;		
-		instrumententrytableview_vtable_initialized = TRUE;
-	}
-	self->component.vtable = &instrumententrytableview_vtable;
-}
-
+/* implementation */
 void instrumententrytableview_init(InstrumentEntryTableView* self,
 	psy_ui_Component* parent, InstrumentEntryState* state)
 {
-	psy_ui_component_init(&self->component, parent, NULL);
-	instrumententrytableview_vtable_init(self);		
-	psy_ui_component_set_default_align(&self->component,
-		psy_ui_ALIGN_TOP, psy_ui_margin_zero());
+	psy_ui_component_init(&self->component, parent, NULL);	
 	self->state = state;	
-	self->instrument = NULL;		
-	psy_ui_component_set_style_types(&self->component,
-		STYLE_TABLEROW, psy_INDEX_INVALID, psy_INDEX_INVALID,
-		psy_INDEX_INVALID);
+	self->instrument = NULL;	
+	psy_ui_component_set_default_align(&self->component,
+		psy_ui_ALIGN_TOP, psy_ui_margin_zero());	
+//	psy_ui_component_set_style_types(&self->component,
+//		STYLE_TABLEROW, psy_INDEX_INVALID, psy_INDEX_INVALID,
+//		psy_INDEX_INVALID);
 	instrumententrytableview_build(self);	
 	psy_ui_component_set_wheel_scroll(&self->component, 4);
 	psy_ui_component_set_scroll_step(&self->component,
 		psy_ui_size_make_em(0.0, 1.0));
 	psy_ui_component_set_overflow(&self->component, psy_ui_OVERFLOW_VSCROLL);
-}
-
-void instrumententrytableview_on_destroyed(InstrumentEntryTableView* self)
-{	
 }
 
 void instrumententrytableview_setinstrument(InstrumentEntryTableView* self,
@@ -1265,33 +977,19 @@ void instrumententrytableview_setinstrument(InstrumentEntryTableView* self,
 void instrumententrytableview_build(InstrumentEntryTableView* self)
 {		
 	psy_ui_component_clear(&self->component);	
-	self->state->curredit = NULL;
 	if (self->instrument) {
-		psy_List* p;
-		uintptr_t i;
+		psy_List* p;		
 
-		for (i = 0, p = self->instrument->entries; p != NULL; p = p->next, ++i) {
+		for (p = self->instrument->entries; p != NULL; p = p->next) {
 			psy_audio_InstrumentEntry* entry;
 			InstrumentEntryRow* row;
 
 			entry = (psy_audio_InstrumentEntry*)psy_list_entry(p);
 			row = (InstrumentEntryRow*)instrumententryrow_allocinit(
-				&self->component, NULL, /* &self->component */
-				entry, self->state);			
+				&self->component, entry, self->state);			
 		}
 	}
 	psy_ui_component_align(&self->component);
-}
-
-void instrumententrytableview_onpreferredsize(InstrumentEntryTableView* self,
-	const psy_ui_Size* limit, psy_ui_Size* rv)
-{
-	if (self->instrument) {		
-		*rv = psy_ui_size_make_em(80.0,
-			psy_max(6.0, (double)psy_list_size(self->instrument->entries)));
-	} else {
-		*rv = psy_ui_size_make_em(80.0, 6.0);
-	}
 }
 
 /* InstrumentNoteMapButtons */
@@ -1318,8 +1016,10 @@ static void instrumentnotemapview_inittable(InstrumentNoteMapView*,
 	Workspace*);
 static void instrumentnotemapview_setmetrics(InstrumentNoteMapView*,
 	InstrumentNoteMapMetrics);
-static void instrumentnotemapview_onaddentry(InstrumentNoteMapView*, psy_ui_Component* sender);
-static void instrumentnotemapview_onremoveentry(InstrumentNoteMapView*, psy_ui_Component* sender);
+static void instrumentnotemapview_onaddentry(InstrumentNoteMapView*,
+	psy_ui_Component* sender);
+static void instrumentnotemapview_onremoveentry(InstrumentNoteMapView*,
+	psy_ui_Component* sender);
 static void instrumentnotemapview_onentryselected(InstrumentNoteMapView*,
 	InstrumentEntryState* sender, psy_audio_InstrumentEntry*);
 static void instrumentnotemapview_onsampleselected(InstrumentNoteMapView*,
@@ -1327,7 +1027,6 @@ static void instrumentnotemapview_onsampleselected(InstrumentNoteMapView*,
 static void instrumentnotemapview_onentryupdate(
 	InstrumentNoteMapView*, InstrumentEntryState* sender,
 	psy_audio_InstrumentEntry*);
-static void instrumentnotemapview_onlanguagechanged(InstrumentNoteMapView*);
 
 /* vtable */
 static psy_ui_ComponentVtable instrumentnotemapview_vtable;
@@ -1339,10 +1038,7 @@ static void instrumentnotemapview_vtable_init(InstrumentNoteMapView* self)
 		instrumentnotemapview_vtable = *(self->component.vtable);
 		instrumentnotemapview_vtable.on_destroyed =
 			(psy_ui_fp_component)
-			instrumentnotemapview_on_destroyed;
-		instrumentnotemapview_vtable.onlanguagechanged =
-			(psy_ui_fp_component_onlanguagechanged)
-			instrumentnotemapview_onlanguagechanged;
+			instrumentnotemapview_on_destroyed;		
 		instrumentnotemapview_vtable_initialized = TRUE;
 	}
 	self->component.vtable = &instrumentnotemapview_vtable;
@@ -1358,8 +1054,7 @@ void instrumentnotemapview_init(InstrumentNoteMapView* self,
 	instrumentnotemapview_vtable_init(self);	
 	self->metrics.keysize = 8;
 	self->metrics.line_height = 15;
-	instrumententrystate_init(&self->state, workspace);
-	instrumententrystate_translate(&self->state, psy_ui_translator());
+	instrumententrystate_init(&self->state, workspace);	
 	psy_ui_label_init_text(&self->label, &self->component,
 		"instrumentview.notemap");
 	psy_ui_component_set_align(&self->label.component, psy_ui_ALIGN_TOP);
@@ -1395,13 +1090,8 @@ void instrumentnotemapview_on_destroyed(InstrumentNoteMapView* self)
 	instrumententrystate_dispose(&self->state);
 }
 
-void instrumentnotemapview_onlanguagechanged(InstrumentNoteMapView* self)
-{
-	instrumententrystate_translate(&self->state, psy_ui_translator());
-	psy_ui_component_invalidate(&self->tableheader.component);
-}
-
-void instrumentnotemapview_initentries(InstrumentNoteMapView* self, Workspace* workspace)
+void instrumentnotemapview_initentries(InstrumentNoteMapView* self,
+	Workspace* workspace)
 {
 	psy_ui_Margin margin;
 
@@ -1422,31 +1112,34 @@ void instrumentnotemapview_initentries(InstrumentNoteMapView* self, Workspace* w
 	psy_ui_component_set_margin(&self->keyboard.component, margin);
 }
 
-void instrumentnotemapview_inittable(InstrumentNoteMapView* self, Workspace* workspace)
+void instrumentnotemapview_inittable(InstrumentNoteMapView* self,
+	Workspace* workspace)
 {
-	psy_ui_component_init(&self->table, &self->component, NULL);
-	psy_ui_component_set_align(&self->table, psy_ui_ALIGN_BOTTOM);
+	psy_ui_component_init_align(&self->table, &self->component, NULL,
+		psy_ui_ALIGN_BOTTOM);	
 	psy_ui_component_set_preferred_size(&self->table,
 		psy_ui_size_make_em(0.0, 6.0));	
-	instrumententrytableviewheader_init(&self->tableheader,
-		&self->table, &self->state, workspace);
-	psy_ui_component_set_align(&self->tableheader.component, psy_ui_ALIGN_TOP);
-	instrumententrytableview_init(&self->tableview,
-		&self->table, &self->state);
-	psy_ui_scroller_init(&self->scroller_table, &self->table, NULL, NULL);
-	psy_ui_scroller_set_client(&self->scroller, &self->tableview.component);
-	psy_ui_component_set_align(&self->scroller_table.component, psy_ui_ALIGN_CLIENT);
+	instrumententrytableviewheader_init(&self->tableheader, &self->table,
+		&self->state);
+	psy_ui_component_set_align(&self->tableheader.component, psy_ui_ALIGN_TOP);	
+	psy_ui_scroller_init(&self->scroller_table, &self->table, NULL, NULL);	
+	instrumententrytableview_init(&self->tableview, &self->scroller_table.pane,
+		&self->state);	
+	psy_ui_scroller_set_client(&self->scroller_table,
+		&self->tableview.component);
+	psy_ui_component_set_align(&self->scroller_table.component,
+		psy_ui_ALIGN_CLIENT);
 	psy_ui_component_set_align(&self->tableview.component, psy_ui_ALIGN_FIXED);	
 }
 
-void instrumentnotemapview_setinstrument(InstrumentNoteMapView* self,
+void instrumentnotemapview_set_instrument(InstrumentNoteMapView* self,
 	psy_audio_Instrument* instrument)
 {
 	psy_audio_InstrumentEntry* entry;
 
 	self->instrument = instrument;
 	self->state.selectedentry = NULL;
-	instrumententryview_setinstrument(&self->entryview, instrument);
+	instrumententryview_set_instrument(&self->entryview, instrument);
 	instrumententrytableview_setinstrument(&self->tableview, instrument);
 	entry = instrumententryview_selected(&self->entryview);
 	if (entry) {
@@ -1520,8 +1213,7 @@ void instrumentnotemapview_onentryselected(InstrumentNoteMapView* self,
 	} else {
 		self->keyboard.entry.keyrange.low = 255;
 		self->keyboard.entry.keyrange.high = 255;
-		samplesbox_select(&self->samplesbox,
-			psy_audio_sampleindex_make(0, 0));
+		samplesbox_select(&self->samplesbox, psy_audio_sampleindex_make(0, 0));
 	}
 	psy_ui_component_invalidate(&self->keyboard.component);
 }

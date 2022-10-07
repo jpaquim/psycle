@@ -9,13 +9,13 @@
 /* host */
 #include "mainviews.h"
 #include "mainstatusbar.h"
-// #include "confirmbox.h"
 #include "cpuview.h"
 #include "filebar.h"
 #include "fileview.h"
 #include "gear.h"
 #include "interpreter.h"
 #include "kbdhelp.h"
+#include "keyboardview.h"
 #include "machinebar.h"
 
 #include "metronomebar.h"
@@ -31,13 +31,13 @@
 #include "stepbox.h"
 #include "stepsequencerview.h"
 #include "songbar.h"
-#include <uitabbar.h>
 #include "trackscopeview.h"
 #include "undoredobar.h"
 #include "vubar.h"
 #include "workspace.h"
 /* ui */
 #include <uiframe.h>
+#include <uitabbar.h>
 #include <uiterminal.h>
 #include <uinotebook.h>
 #include <uisplitbar.h>
@@ -85,9 +85,7 @@ typedef struct MainFrame {
 	PlayPosBar playposbar;
 	TrackScopeView trackscopeview;	
 	StepsequencerView stepsequencerview;
-	psy_ui_Component keyboardview;
-	KeyboardState keyboardstate;
-	PianoKeyboard keyboard;
+	KeyboardView keyboardview;	
 	SeqView sequenceview;
 	SequencerBar sequencerbar;
 	psy_ui_Splitter splitbarparamrack;

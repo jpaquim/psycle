@@ -8,13 +8,15 @@
 
 #include "pianokeyboardstate.h"
 
-void keyboardstate_init(KeyboardState* self, psy_ui_Orientation orientation)
+void keyboardstate_init(KeyboardState* self, psy_ui_Orientation orientation,
+	bool white_size_fixed)
 {
 	assert(self);
 
 	self->orientation = orientation;
 	self->keymin = 0;
 	self->keymax = 119;
+	self->white_size_fixed = white_size_fixed;
 	if (self->orientation == psy_ui_VERTICAL) {
 		self->default_key_extent = psy_ui_value_make_eh(1.0);
 	} else {
