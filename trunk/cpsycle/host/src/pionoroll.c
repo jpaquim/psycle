@@ -129,7 +129,7 @@ void pianoroll_init(Pianoroll* self, psy_ui_Component* parent,
 	self->opcount = 0;
 	self->center_key = TRUE;
 	/* shared states */
-	keyboardstate_init(&self->keyboardstate, psy_ui_VERTICAL);
+	keyboardstate_init(&self->keyboardstate, psy_ui_VERTICAL, FALSE);
 	pianogridstate_init(&self->gridstate, pvstate);	
 	/* bar */
 	pianobar_init(&self->bar, &self->component, &self->gridstate);

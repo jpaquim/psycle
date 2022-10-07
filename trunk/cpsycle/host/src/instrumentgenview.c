@@ -154,7 +154,7 @@ void instrumentgeneralview_setinstrument(InstrumentGeneralView* self,
 	psy_audio_Instrument* instrument)
 {	
 	self->instrument = instrument;		
-	instrumentnotemapview_setinstrument(&self->notemapview, instrument);
+	instrumentnotemapview_set_instrument(&self->notemapview, instrument);
 	if (instrument) {
 		char text[128];
 
