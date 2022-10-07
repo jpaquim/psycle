@@ -61,9 +61,7 @@ void framedrag_add(FrameDrag* self, const psy_ui_Component* component)
 
 void framedrag_on_mouse_down(FrameDrag* self, psy_ui_Component* sender,
 	psy_ui_MouseEvent* ev)
-{
-	psy_ui_RealRectangle position;
-	
+{	
 	assert(self);
 		
 	self->frame_drag_offset = psy_ui_mouseevent_offset(ev);	

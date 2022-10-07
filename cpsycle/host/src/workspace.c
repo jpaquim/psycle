@@ -99,6 +99,7 @@ static void workspace_on_machine_insert(Workspace*,
 	psy_audio_Machines* sender, uintptr_t slot);
 static void workspace_on_machine_removed(Workspace*,
 	psy_audio_Machines* sender, uintptr_t slot);
+static void workspace_reset_undo_save_point(Workspace*);
 /* file */
 static void workspace_on_load(Workspace*, psy_Property* sender);
 static void workspace_on_save(Workspace*, psy_Property* sender);
@@ -373,10 +374,9 @@ void workspace_on_confirm_accept_new(Workspace* self)
 
 void workspace_on_confirm_reject_new(Workspace* self)
 {
-	self->modified_without_undo = FALSE;
-	self->undo_save_point = psy_list_size(self->undoredo.undo);
-	self->machines_undo_save_point = psy_list_size(
-		self->song->machines.undoredo.undo);
+	assert(self);
+
+	workspace_reset_undo_save_point(self);
 	workspace_new_song(self);
 }
 
@@ -415,6 +415,8 @@ void workspace_on_confirm_reject_load(Workspace* self)
 {
 	char path[4096];
 		
+	assert(self);
+
 	fileview_filename(self->fileview, path, 4096);
 	workspace_load_song(self, path,
 		generalconfig_playsongafterload(psycleconfig_general(
@@ -444,6 +446,8 @@ void workspace_confirm_close(Workspace* self)
 
 void workspace_confirm_accept_close(Workspace* self)
 {
+	assert(self);
+
 	if (workspace_save_song_fileselect(self)) {
 		psy_ui_app_close(psy_ui_app());
 	}
@@ -452,8 +456,22 @@ void workspace_confirm_accept_close(Workspace* self)
 void workspace_confirm_reject_close(Workspace* self)
 {
 	assert(self);
-	
+		
+	workspace_reset_undo_save_point(self);
 	psy_ui_app_close(psy_ui_app());
+}
+
+void workspace_reset_undo_save_point(Workspace* self)
+{
+	assert(self);
+
+	self->modified_without_undo = FALSE;
+	self->undo_save_point = psy_list_size(self->undoredo.undo);
+	if (self->song) {
+		self->machines_undo_save_point = psy_list_size(self->song->machines.undoredo.undo);
+	} else {
+		self->machines_undo_save_point = 0;
+	}
 }
 
 void workspace_confirm_seqclear(Workspace* self)

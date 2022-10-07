@@ -509,8 +509,8 @@ void searchfilter(psy_Property* plugin, PluginFilter* filter,
 	psy_Property* parent)
 {	
 	bool intern;
-	int mactype;
-	int macmode;	
+	intptr_t mactype;
+	intptr_t macmode;
 	const char* category;
 				
 	mactype = psy_property_at_int(plugin, "type", psy_audio_UNDEFINED);

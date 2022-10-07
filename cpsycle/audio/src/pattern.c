@@ -19,6 +19,7 @@ static uintptr_t defaultlines = 64;
 static double hermitecurveinterpolate(intptr_t kf0, intptr_t kf1, intptr_t kf2,
 	intptr_t kf3, intptr_t curposition, intptr_t maxposition, double tangmult,
 	bool interpolation);
+static psy_List* seqiterators = NULL;
 
 /* TimeSig */
 void psy_audio_timesig_init(psy_audio_TimeSig* self)
@@ -56,8 +57,7 @@ void psy_audio_pattern_init(psy_audio_Pattern* self)
 	self->length = defaultlines / (psy_dsp_big_beat_t)4.0;
 	self->name = strdup("Untitled");	
 	self->opcount = 0;
-	self->maxsongtracks = 0;
-	self->seqiterators = NULL;	
+	self->maxsongtracks = 0;	
 	psy_audio_timesig_init(&self->timesig);
 	psy_audio_pattern_init_signals(self);
 }
@@ -71,16 +71,15 @@ void psy_audio_pattern_init_signals(psy_audio_Pattern* self)
 }
 
 void psy_audio_pattern_dispose(psy_audio_Pattern* self)
-{	
+{		
 	assert(self);
+
 
 	psy_list_deallocate(&self->events,
 		(psy_fp_disposefunc)psy_audio_patternentry_dispose);
 	free(self->name);
 	self->name = NULL;		
-	psy_audio_pattern_dispose_signals(self);
-	psy_list_free(self->seqiterators);
-	self->seqiterators = NULL;	
+	psy_audio_pattern_dispose_signals(self);		
 }
 
 void psy_audio_pattern_dispose_signals(psy_audio_Pattern* self)
@@ -1134,21 +1133,25 @@ uintptr_t psy_audio_pattern_timesig_index(psy_audio_Pattern* self,
 	return rv;
 }
 
-void psy_audio_pattern_add_seqiterator(psy_audio_Pattern* self,
-	psy_audio_SequenceTrackIterator* iter)
+void psy_audio_add_seqiterator(psy_audio_SequenceTrackIterator* iter)
 {		
-	psy_list_append(&self->seqiterators, iter);
+	psy_list_append(&seqiterators, iter);
 }
 
-void psy_audio_pattern_remove_seqiterator(psy_audio_Pattern* self,
-	psy_audio_SequenceTrackIterator* iter)
+void psy_audio_remove_seqiterator(psy_audio_SequenceTrackIterator* iter)
 {
 	psy_List* p;
 
-	p = psy_list_findentry(self->seqiterators, iter);
+	p = psy_list_findentry(seqiterators, iter);
 	if (p) {
-		psy_list_remove(&self->seqiterators, p);
+		psy_list_remove(&seqiterators, p);
 	}	
+}
+
+void psy_audio_dispose_seqiterator(void)
+{
+	psy_list_free(seqiterators);
+	seqiterators = NULL;
 }
 
 void psy_audio_pattern_checkiterators(psy_audio_Pattern* self,
@@ -1159,7 +1162,8 @@ void psy_audio_pattern_checkiterators(psy_audio_Pattern* self,
 
 	assert(self);
 
-	for (q = p = self->seqiterators; q != NULL; p = q) {		
+	psy_audio_exclusivelock_enter();
+	for (q = p = seqiterators; q != NULL; p = q) {		
 		psy_audio_SequenceTrackIterator* it;
 		
 		q = p->next;
@@ -1168,4 +1172,5 @@ void psy_audio_pattern_checkiterators(psy_audio_Pattern* self,
 			psy_audio_sequencetrackiterator_inc(it);			
 		}
 	}
+	psy_audio_exclusivelock_leave();
 }

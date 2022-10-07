@@ -100,6 +100,9 @@
     <Filter Include="machine\plugineditor">
       <UniqueIdentifier>{a145b49d-3ea3-4483-bd9e-b2f9173aa910}</UniqueIdentifier>
     </Filter>
+    <Filter Include="machine\keyboard">
+      <UniqueIdentifier>{60652f62-d560-4370-96a0-77a1cb9ab31c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\eventdriverconfig.c">
@@ -701,6 +704,9 @@
     </ClCompile>
     <ClCompile Include="src\styleview.c">
       <Filter>configuration</Filter>
+    </ClCompile>
+    <ClCompile Include="src\keyboardview.c">
+      <Filter>machine\keyboard</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1306,6 +1312,9 @@
     </ClInclude>
     <ClInclude Include="src\styleview.h">
       <Filter>configuration</Filter>
+    </ClInclude>
+    <ClInclude Include="src\keyboardview.h">
+      <Filter>machine\keyboard</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

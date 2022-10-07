@@ -495,7 +495,8 @@ void BlockPasteCommandExecute(BlockPasteCommand* self, psy_Property* params)
 	currseqoffset = psy_audio_sequenceentry_offset(seqentry);
 	while (p != NULL) {
 		psy_audio_PatternEntry* pasteentry;
-		psy_audio_PatternNode* node;	
+		psy_audio_PatternNode* node;
+		psy_audio_Pattern* pattern;
 		psy_dsp_big_beat_t pattern_dest_offset;
 
 		pasteentry = psy_audio_patternnode_entry(p);
@@ -515,10 +516,11 @@ void BlockPasteCommandExecute(BlockPasteCommand* self, psy_Property* params)
 				seqentry = NULL;				
 			}
 		}
-		if (!it.sequencentrynode || !it.pattern) {
+		pattern = psy_audio_sequencetrackiterator_pattern(&it);
+		if (!it.sequencentrynode || !pattern) {
 			break;
 		}		
-		dest = it.pattern;
+		dest = pattern;
 		node = psy_audio_pattern_find_node(dest,
 			pasteentry->track + trackoffset,
 			pattern_dest_offset,

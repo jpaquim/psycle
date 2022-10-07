@@ -601,8 +601,7 @@ void pianokeyboard_drawwhitekeys_horizontal(PianoKeyboard* self,
 	psy_ui_set_text_colour(g, psy_ui_colour_make(0x00333333));	
 	for (key = self->keyboardstate->keymin; key < self->keyboardstate->keymax; ++key) {
 		if (!psy_dsp_isblack(key)) {
-			psy_ui_RealRectangle r;
-			psy_ui_Colour colour;
+			psy_ui_RealRectangle r;			
 
 			r = psy_ui_realrectangle_make(
 					psy_ui_realpoint_make(cp, 0),
@@ -639,8 +638,7 @@ void pianokeyboard_drawblackkeys_horizontal(PianoKeyboard* self,
 		} else {
 			psy_ui_RealRectangle r;
 			int x;
-			int width;
-			psy_ui_Colour colour;
+			int width;			
 
 			x = (int)cp - (int)(self->keyboardstate->key_extent_px * 0.68 / 2);
 			width = (int)(self->keyboardstate->key_extent_px * 0.68);
