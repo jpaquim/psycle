@@ -266,7 +266,8 @@ void machinesbox_clone(MachinesBox* self)
 						clone = psy_audio_machine_clone(srcmachine);
 						if (clone) {
 							psy_audio_machine_setposition(clone,
-								rand() / 64, rand() / 80);
+								psy_audio_MACH_AUTO_POSITION,
+								psy_audio_MACH_AUTO_POSITION);
 							psy_audio_machines_insert(self->machines, slot,
 								clone);
 						}

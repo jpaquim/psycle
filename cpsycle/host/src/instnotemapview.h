@@ -6,6 +6,7 @@
 
 #include "envelopeview.h"
 #include "instrumentsbox.h"
+#include "pianokeyboard.h"
 #include "intedit.h"
 #include "samplesbox.h"
 #include <uitabbar.h>
@@ -34,22 +35,6 @@ extern "C" {
 // The new combined Sampler (Sampulse PS1) uses the zone concept of
 // soundfonts, that use a list of zones, each with a keyrange define. This
 // allows additionaly sample layering for one note.
-
-typedef struct InstrumentNoteMapMetrics {
-	double keysize;
-	int line_height;
-} InstrumentNoteMapMetrics;
-
-typedef struct InstrumentKeyboardView {
-	/* inherits */
-	psy_ui_Component component;
-	/* internal */
-	psy_audio_InstrumentEntry entry;
-	InstrumentNoteMapMetrics metrics;
-} InstrumentKeyboardView;
-
-void instrumentkeyboardview_init(InstrumentKeyboardView*,
-	psy_ui_Component* parent);
 
 typedef struct {
 	psy_ui_Component component;
@@ -90,6 +75,28 @@ void instrumententrystate_updateentry(InstrumentEntryState*,
 	psy_audio_InstrumentEntry*);
 
 
+/* InstrumentRangeRow */
+
+typedef struct InstrumentRangeRow {
+	/* inherits */
+	psy_ui_Component component;
+	/* internal */
+	int dragmode;
+	uint8_t currkey;
+	double keysize;
+	/* references */
+	psy_audio_InstrumentEntry* entry;
+	InstrumentEntryState* state;	
+} InstrumentRangeRow;
+
+void instrumentrangerow_init(InstrumentRangeRow*,
+	psy_ui_Component* parent, psy_audio_InstrumentEntry*, InstrumentEntryState*);
+
+InstrumentRangeRow* instrumentrangerow_alloc(void);
+InstrumentRangeRow* instrumentrangerow_allocinit(
+	psy_ui_Component* parent, psy_audio_InstrumentEntry*,
+	InstrumentEntryState*);
+
 /* InstrumentEntryView */
 
 typedef struct InstrumentEntryView {
@@ -98,7 +105,6 @@ typedef struct InstrumentEntryView {
 	/* internal	*/
 	int dragmode;
 	uint8_t currkey;	
-	InstrumentNoteMapMetrics metrics;
 	/* references */
 	psy_audio_Instrument* instrument;	
 	InstrumentEntryState* state;
@@ -108,6 +114,7 @@ void instrumententryview_init(InstrumentEntryView*, psy_ui_Component* parent,
 	InstrumentEntryState*);
 void instrumententryview_setinstrument(InstrumentEntryView*,
 	psy_audio_Instrument*);
+void instrumententryview_build(InstrumentEntryView*);
 psy_audio_InstrumentEntry* instrumententryview_selected(InstrumentEntryView*);
 void instrumententryview_setsample(InstrumentEntryView*, psy_audio_SampleIndex);
 void instrumententryview_select(InstrumentEntryView*, uintptr_t row);
@@ -116,7 +123,6 @@ INLINE psy_ui_Component* instrumententryview_base(InstrumentEntryView* self)
 {
 	return &self->component;
 }
-
 
 /* TableHeader */
 
@@ -135,6 +141,7 @@ typedef struct InstrumentEntryTableViewHeader {
 void instrumententrytableviewheader_init(InstrumentEntryTableViewHeader*,
 	psy_ui_Component* parent, InstrumentEntryState*);
 
+/* InstrumentEntryEdit */
 
 typedef struct InstrumentEntryEdit {
 	/* inherits */
@@ -153,7 +160,7 @@ void instrumententryedit_read(InstrumentEntryEdit*);
 
 /* InstrumentEntryRow */
 
-typedef struct InstrumentEntryRow {
+typedef struct InstrumentEntryTableRow {
 	/* inherits */
 	psy_ui_Component component;
 	/* internal */	
@@ -164,14 +171,15 @@ typedef struct InstrumentEntryRow {
 	/* references */
 	psy_audio_InstrumentEntry* entry;
 	InstrumentEntryState* state;
-} InstrumentEntryRow;
+} InstrumentEntryTableRow;
 
-void instrumententryrow_init(InstrumentEntryRow*, psy_ui_Component* parent,
-	psy_audio_InstrumentEntry*, InstrumentEntryState*);
+void instrumententrytablerow_init(InstrumentEntryTableRow*,
+	psy_ui_Component* parent, psy_audio_InstrumentEntry*, InstrumentEntryState*);
 
-InstrumentEntryRow* instrumententryrow_alloc(void);
-InstrumentEntryRow* instrumententryrow_allocinit(psy_ui_Component* parent,
-	psy_audio_InstrumentEntry*, InstrumentEntryState*);
+InstrumentEntryTableRow* instrumententrytablerow_alloc(void);
+InstrumentEntryTableRow* instrumententrytablerow_allocinit(
+	psy_ui_Component* parent, psy_audio_InstrumentEntry*,
+	InstrumentEntryState*);
 
 
 /* TableView */
@@ -179,8 +187,7 @@ InstrumentEntryRow* instrumententryrow_allocinit(psy_ui_Component* parent,
 typedef struct InstrumentEntryTableView {
 	/* inherits */
 	psy_ui_Component component;		
-	/* internal */
-	InstrumentNoteMapMetrics metrics;	
+	/* internal */	
 	/* references */
 	psy_audio_Instrument* instrument;
 	InstrumentEntryState* state;
@@ -208,7 +215,8 @@ typedef struct InstrumentNoteMapView {
 	psy_ui_Label label;
 	InstrumentNoteMapButtons buttons;
 	psy_ui_Component entries;
-	InstrumentKeyboardView keyboard;
+	KeyboardState keyboard_state;
+	PianoKeyboard keyboard;		
 	InstrumentEntryView entryview;
 	psy_ui_Splitter splitter;
 	psy_ui_Component table;
@@ -216,8 +224,7 @@ typedef struct InstrumentNoteMapView {
 	InstrumentEntryTableViewHeader tableheader;
 	InstrumentEntryTableView tableview;	
 	psy_audio_Instrument* instrument;
-	psy_audio_Instruments* instruments;
-	InstrumentNoteMapMetrics metrics;
+	psy_audio_Instruments* instruments;	
 	SamplesBox samplesbox;
 	psy_ui_Scroller scroller;
 	psy_ui_Scroller scroller_table;
@@ -227,10 +234,8 @@ void instrumentnotemapview_init(InstrumentNoteMapView*,
 	psy_ui_Component* parent, Workspace*);
 void instrumentnotemapview_set_instrument(InstrumentNoteMapView*,
 	psy_audio_Instrument*);
-void instrumentnotemapview_update(InstrumentNoteMapView*);
 
-INLINE psy_ui_Component* instrumentnotemapview_base(
-	InstrumentNoteMapView* self)
+INLINE psy_ui_Component* instrumentnotemapview_base(InstrumentNoteMapView* self)
 {
 	return &self->component;
 }

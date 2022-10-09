@@ -19,12 +19,17 @@ void keyboardstate_init(KeyboardState* self, psy_ui_Orientation orientation,
 	self->white_size_fixed = white_size_fixed;
 	if (self->orientation == psy_ui_VERTICAL) {
 		self->default_key_extent = psy_ui_value_make_eh(1.0);
+		self->key_align = psy_ui_ALIGN_LEFT;
 	} else {
 		self->default_key_extent = psy_ui_value_make_ew(1.0);
+		self->key_align = psy_ui_ALIGN_BOTTOM;
 	}
+	self->align_keys = FALSE;	
 	self->key_extent = self->default_key_extent;
 	self->key_extent_px = 13;
 	self->keyboard_extent_px = 13 * (self->keymax - self->keymin);
 	self->notemode = psy_dsp_NOTESTAB_A220;
-	self->drawpianokeys = TRUE;	
+	self->drawpianokeys = TRUE;
+	self->entry.keyrange.low = 255;
+	self->entry.keyrange.high = 255;
 }

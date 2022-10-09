@@ -11,6 +11,8 @@
 /* ui */
 #include <uidef.h>
 #include <uigeometry.h>
+/* audio */
+#include <instrument.h>
 /* dsp */
 #include <notestab.h>
 /* std */
@@ -30,7 +32,10 @@ typedef struct KeyboardState {
 	double keyboard_extent_px;
 	psy_ui_Value default_key_extent;
 	psy_ui_Orientation orientation;
+	psy_ui_AlignType key_align;
 	bool white_size_fixed;
+	psy_audio_InstrumentEntry entry;
+	bool align_keys;
 } KeyboardState;
 
 void keyboardstate_init(KeyboardState*, psy_ui_Orientation,
@@ -40,7 +45,7 @@ INLINE intptr_t keyboardstate_num_keys(const KeyboardState* self)
 {
 	assert(self);
 
-	return self->keymax - self->keymin;
+	return (self->keymax - self->keymin);
 }
 
 INLINE double keyboardstate_extent(const KeyboardState* self,
