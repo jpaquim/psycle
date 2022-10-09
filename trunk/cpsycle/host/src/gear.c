@@ -42,11 +42,11 @@ void gearbuttons_init(GearButtons* self, psy_ui_Component* parent,
 
 /* prototypes */
 static void gear_init_title(Gear*);
-static void gear_oncreate(Gear*, psy_ui_Component* sender);
+static void gear_on_create(Gear*, psy_ui_Component* sender);
 static void gear_on_delete(Gear*, psy_ui_Component* sender);
 static void gear_on_song_changed(Gear*, psy_audio_Player* sender);
 static void gear_connect_song(Gear*);
-static void gear_onclone(Gear*, psy_ui_Component* sender);
+static void gear_on_clone(Gear*, psy_ui_Component* sender);
 static void gear_on_exchange(Gear* self, psy_ui_Component* sender);
 static void gear_on_parameters(Gear*, psy_ui_Component* sender);
 static void gear_on_master(Gear*, psy_ui_Component* sender);
@@ -112,10 +112,10 @@ void gear_init(Gear* self, psy_ui_Component* parent, ParamViews* param_views,
 	gearbuttons_init(&self->buttons, &self->client, param_views);
 	psy_ui_component_set_align(&self->buttons.component, psy_ui_ALIGN_RIGHT);
 	psy_signal_connect(&self->buttons.createreplace.signal_clicked, self,
-		gear_oncreate);
+		gear_on_create);
 	psy_signal_connect(&self->buttons.del.signal_clicked, self, gear_on_delete);
 	psy_signal_connect(&self->buttons.clone.signal_clicked, self,
-		gear_onclone);
+		gear_on_clone);
 	psy_signal_connect(&self->buttons.parameters.signal_clicked, self,
 		gear_on_parameters);
 	psy_signal_connect(&self->buttons.showmaster.signal_clicked, self,
@@ -134,7 +134,7 @@ void gear_init_title(Gear* self)
 		gear_on_close_button);
 }
 
-void gear_oncreate(Gear* self, psy_ui_Component* sender)
+void gear_on_create(Gear* self, psy_ui_Component* sender)
 {	
 	if (workspace_song(self->workspace)) {
 		psy_audio_Machines* machines;
@@ -226,8 +226,10 @@ void gear_show_effects(Gear* self)
 	}
 }
 
-void gear_onclone(Gear* self, psy_ui_Component* sender)
+void gear_on_clone(Gear* self, psy_ui_Component* sender)
 {
+	assert(self);
+	
 	switch (psy_ui_tabbar_selected(&self->tabbar)) {
 	case 0: machinesbox_clone(&self->machinesboxgen);
 		break;
@@ -240,6 +242,8 @@ void gear_onclone(Gear* self, psy_ui_Component* sender)
 
 void gear_on_exchange(Gear* self, psy_ui_Component* sender)
 {
+	assert(self);
+	
 	switch (psy_ui_tabbar_selected(&self->tabbar)) {
 	case 0: machinesbox_exchange(&self->machinesboxgen);
 		break;
@@ -252,6 +256,8 @@ void gear_on_exchange(Gear* self, psy_ui_Component* sender)
 
 void gear_on_parameters(Gear* self, psy_ui_Component* sender)
 {
+	assert(self);
+	
 	switch (psy_ui_tabbar_selected(&self->tabbar)) {
 	case 0: machinesbox_show_parameters(&self->machinesboxgen);
 		break;

@@ -25,6 +25,33 @@ extern "C" {
 */
 
 
+typedef struct psy_ui_ListItem {
+	char* text;
+	bool selected;
+} psy_ui_ListItem;
+
+void psy_ui_listitem_init(psy_ui_ListItem*, const char* text);
+void psy_ui_listitem_dispose(psy_ui_ListItem*);
+
+psy_ui_ListItem* psy_ui_listitem_alloc(void);
+psy_ui_ListItem* psy_ui_listitem_alloc_init(const char* text);
+
+INLINE void psy_ui_listitem_select(psy_ui_ListItem* self)
+{
+	self->selected = TRUE;
+}
+
+INLINE void psy_ui_listitem_deselect(psy_ui_ListItem* self)
+{
+	self->selected = FALSE;
+}
+
+INLINE const char* psy_ui_listitem_text(const psy_ui_ListItem* self)
+{
+	return self->text;
+}
+
+
 /* psy_ui_ListBoxPane */
 typedef struct psy_ui_ListBoxPane {
     /* inherits */
@@ -35,6 +62,7 @@ typedef struct psy_ui_ListBoxPane {
     psy_Table items;
     intptr_t selindex;
     double charnumber;
+    bool multiselect;    
 } psy_ui_ListBoxPane;
 
 void psy_ui_listboxpane_init(psy_ui_ListBoxPane*, psy_ui_Component* parent);
@@ -43,6 +71,10 @@ intptr_t psy_ui_listboxpane_add_text(psy_ui_ListBoxPane*, const char* text);
 void psy_ui_listboxpane_set_cur_sel(psy_ui_ListBoxPane*, intptr_t index);
 intptr_t psy_ui_listboxpane_cur_sel(const psy_ui_ListBoxPane*);
 void psy_ui_listboxpane_set_char_number(psy_ui_ListBoxPane*, double num);
+psy_ui_ListItem* psy_ui_listboxpane_item(psy_ui_ListBoxPane*, uintptr_t index);
+const psy_ui_ListItem* psy_ui_listboxpane_item_const(const psy_ui_ListBoxPane*,
+	uintptr_t index);
+
 
 /* psy_ui_ListBox */
 typedef struct psy_ui_ListBox  {
