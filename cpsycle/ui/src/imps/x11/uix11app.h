@@ -1,6 +1,6 @@
 /*
 ** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
-** copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
+** copyright 2000-2022 members of the psycle project http://psycle.sourceforge.net
 */
 
 #include "../../detail/psyconf.h"
@@ -25,6 +25,7 @@ extern "C" {
 #endif
 
 struct psy_ui_Component;
+struct psy_ui_x11_ComponentImp;
 
 typedef struct psy_ui_X11App {
 	/* implements */
@@ -68,6 +69,9 @@ INLINE int psy_ui_x11app_colourindex(psy_ui_X11App* self, psy_ui_Colour colour)
 
 void psy_ui_x11app_flush_events(psy_ui_X11App*);
 int psy_ui_x11app_handle_event(psy_ui_X11App*, XEvent*);
+
+int psy_ui_x11app_redraw_window(psy_ui_X11App*, struct psy_ui_x11_ComponentImp*,
+	psy_ui_RealRectangle*);
 
 INLINE void psy_ui_x11app_startgrab(psy_ui_X11App* self, Window w)
 {

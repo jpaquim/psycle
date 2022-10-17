@@ -42,6 +42,7 @@ static void psy_ui_win_g_imp_setbackgroundmode(psy_ui_win_GraphicsImp*, uintptr_
 static void psy_ui_win_g_imp_settextcolour(psy_ui_win_GraphicsImp*, psy_ui_Colour colour);
 static void psy_ui_win_g_imp_settextalign(psy_ui_win_GraphicsImp*, uintptr_t align);
 static void psy_ui_win_g_imp_setcolour(psy_ui_win_GraphicsImp*, psy_ui_Colour colour);
+static psy_ui_Colour psy_ui_win_g_imp_textcolour(const psy_ui_win_GraphicsImp*);
 static void psy_ui_win_g_imp_setfont(psy_ui_win_GraphicsImp*, psy_ui_Font* font);
 static const psy_ui_Font* psy_ui_win_g_imp_font(const psy_ui_win_GraphicsImp*);
 static void psy_ui_win_g_imp_moveto(psy_ui_win_GraphicsImp*, psy_ui_RealPoint pt);
@@ -116,6 +117,9 @@ static void win_imp_vtable_init(psy_ui_win_GraphicsImp* self)
 		win_imp_vtable.dev_settextcolour =
 			(psy_ui_fp_graphicsimp_dev_settextcolour)
 			psy_ui_win_g_imp_settextcolour;
+		win_imp_vtable.dev_textcolour =
+			(psy_ui_fp_graphicsimp_dev_colour)
+			psy_ui_win_g_imp_textcolour;
 		win_imp_vtable.dev_settextalign =
 			(psy_ui_fp_graphicsimp_dev_settextalign)
 			psy_ui_win_g_imp_settextalign;
@@ -568,6 +572,14 @@ void psy_ui_win_g_imp_setbackgroundcolour(psy_ui_win_GraphicsImp* self, psy_ui_C
 void psy_ui_win_g_imp_settextcolour(psy_ui_win_GraphicsImp* self, psy_ui_Colour colour)
 {	
 	SetTextColor(self->hdc, psy_ui_colour_colorref(&colour));
+}
+
+psy_ui_Colour psy_ui_win_g_imp_textcolour(const psy_ui_win_GraphicsImp* self) 
+{
+	COLORREF colorref;
+	
+	colorref = GetTextColor(self->hdc);
+	return psy_ui_colour_make(colorref);
 }
 
 void psy_ui_win_g_imp_settextalign(psy_ui_win_GraphicsImp* self, uintptr_t align)

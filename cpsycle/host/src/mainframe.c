@@ -40,7 +40,9 @@ static void mainframe_init_keyboard_view(MainFrame*);
 static void mainframe_init_seq_editor(MainFrame*);
 static void mainframe_init_sequence_view(MainFrame*);
 static void mainframe_init_sequencer_bar(MainFrame*);
+#ifdef PSYCLE_USE_PLUGIN_EDITOR
 static void mainframe_init_plugin_editor(MainFrame*);
+#endif
 static void mainframe_connect_song(MainFrame*);
 static void mainframe_init_minmaximize(MainFrame*);
 static void mainframe_connect_workspace(MainFrame*);
@@ -74,7 +76,9 @@ static bool mainframe_on_input_handler_callback(MainFrame*, int message,
 static void mainframe_seqeditor_on_float(MainFrame*, psy_ui_Button* sender);
 static void mainframe_on_metronome_bar(MainFrame*, psy_Property* sender);
 static void mainframe_on_trackscope_view(MainFrame*, psy_Property* sender);
+#ifdef PSYCLE_USE_PLUGIN_EDITOR
 static void mainframe_on_plugin_editor(MainFrame*, psy_Property* sender);
+#endif
 static void mainframe_on_param_rack(MainFrame*, psy_Property* sender);
 static void mainframe_on_gear(MainFrame*, psy_Property* sender);
 static void mainframe_on_midi_monitor(MainFrame*, psy_Property* sender);
@@ -136,7 +140,9 @@ void mainframe_init(MainFrame* self)
 	mainframe_init_keyboard_view(self);
 	mainframe_init_step_sequencer_view(self);
 	mainframe_init_seq_editor(self);
+#ifdef PSYCLE_USE_PLUGIN_EDITOR	
 	mainframe_init_plugin_editor(self);
+#endif	
 	mainframe_connect_statusbar(self);
 	mainframe_init_minmaximize(self);
 	mainframe_update_songtitle(self);
@@ -147,9 +153,11 @@ void mainframe_init(MainFrame* self)
 	mainframe_connect_piano_kbd_buttons(self);	
 	mainframe_connect_step_sequencer_buttons(self);	
 	mainframe_connect_seq_editor_buttons(self);
+#ifdef PSYCLE_USE_PLUGIN_EDITOR	
 	generalconfig_connect(&self->workspace.config.general,
 		"bench.showplugineditor", self, mainframe_on_plugin_editor);
-		generalconfig_connect(&self->workspace.config.general,
+#endif		
+	generalconfig_connect(&self->workspace.config.general,
 		"bench.showparamrack", self, mainframe_on_param_rack);
 	generalconfig_connect(&self->workspace.config.general,
 		"bench.showgear", self, mainframe_on_gear);
@@ -449,6 +457,7 @@ void mainframe_init_midi_monitor(MainFrame* self)
 	psy_ui_component_hide(psy_ui_splitter_base(&self->midisplitter));	
 }
 
+#ifdef PSYCLE_USE_PLUGIN_EDITOR
 void mainframe_on_plugin_editor(MainFrame* self, psy_Property* sender)
 {	
 	assert(self);
@@ -464,6 +473,7 @@ void mainframe_on_plugin_editor(MainFrame* self, psy_Property* sender)
 	}
 	mainframe_align(self);
 }
+#endif
 
 void mainframe_on_param_rack(MainFrame* self, psy_Property* sender)
 {	
@@ -610,6 +620,7 @@ void mainframe_init_sequencer_bar(MainFrame* self)
 		psy_ui_ALIGN_BOTTOM);
 }
 
+#ifdef PSYCLE_USE_PLUGIN_EDITOR
 void mainframe_init_plugin_editor(MainFrame* self)
 {
 	assert(self);
@@ -623,6 +634,7 @@ void mainframe_init_plugin_editor(MainFrame* self)
 		psy_ui_ALIGN_LEFT);
 	psy_ui_component_hide(psy_ui_splitter_base(&self->splitbarplugineditor));	
 }
+#endif
 
 void mainframe_connect_workspace(MainFrame* self)
 {
@@ -803,7 +815,9 @@ void mainframe_on_timer(MainFrame* self, uintptr_t timerid)
 	mainstatusbar_idle(&self->statusbar);
 	trackscopeview_idle(&self->trackscopeview);
 	seqview_idle(&self->sequenceview);
+#ifdef PSYCLE_USE_PLUGIN_EDITOR
 	plugineditorbar_idle(&self->plugineditor.status);
+#endif	
  	playposbar_idle(&self->playposbar);	
 	machineview_idle(&self->mainviews.machineview);	
 	if (self->titlemodified != workspace_song_modified(&self->workspace)) {

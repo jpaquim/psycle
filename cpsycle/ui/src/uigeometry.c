@@ -7,6 +7,8 @@
 
 
 #include "uigeometry.h"
+/* container */
+#include <list.h>
 /* std */
 #include <stdio.h>
 #include <stdlib.h>
@@ -29,6 +31,23 @@ int psy_ui_realrectangle_intersect_rectangle(const psy_ui_RealRectangle* self,
 		other->right < self->left ||
 		other->top > self->bottom ||
 		other->bottom < self->top);
+}
+
+
+psy_ui_RealRectangle* psy_ui_realrectangle_alloc(void)
+{
+	return (psy_ui_RealRectangle*)malloc(sizeof(psy_ui_RealRectangle));
+}
+
+psy_ui_RealRectangle* psy_ui_realrectangle_alloc_init(void)
+{
+	psy_ui_RealRectangle* rv;
+	
+	rv = psy_ui_realrectangle_alloc();
+	if (rv) {
+		psy_ui_realrectangle_init(rv);
+	}
+	return rv;
 }
 
 /*
@@ -185,6 +204,66 @@ void psy_ui_realrectangle_trace(const psy_ui_RealRectangle* self)
 		(int)self->top, (int)self->bottom,
 		(int)(self->right - self->left),
 		(int)(self->bottom - self->top));
+}
+
+psy_List* psy_ui_realrectangle_diff(const psy_ui_RealRectangle* self,
+	const psy_ui_RealRectangle* other)
+{	
+	psy_List* rv = NULL;
+	psy_ui_RealRectangle* top;
+	psy_ui_RealRectangle* left;
+	psy_ui_RealRectangle* right;
+	psy_ui_RealRectangle* bottom;
+	
+	top = left = right = bottom = NULL;	
+	if (psy_ui_realrectangle_intersect_rectangle(self, other)) {						
+		double raHeight = other->top - self->top;
+		
+		if (raHeight > 0) {
+			top = psy_ui_realrectangle_alloc();
+			*top = *self;
+			top->bottom = top->top + raHeight;
+		}
+		
+		double rbY = other->top + (other->bottom - other->top);
+		double rbHeight = (self->bottom - self->top) - (rbY - self->top);
+		if (rbHeight > 0 && rbY < self->top + (self->bottom - self->top)) {
+			bottom = psy_ui_realrectangle_alloc();
+			bottom->left = self->left;
+			bottom->top = rbY;
+			bottom->right = bottom->left + (self->right - self->left);
+			bottom->bottom = bottom->top + rbHeight;		
+		}
+
+		double rectAYH = self->top + (self->bottom - self->top);
+		double y1 = other->top > self->top ? other->top : self->top;
+		double y2 = rbY < rectAYH ? rbY : rectAYH;
+		double rcHeight = y2 - y1;
+
+		double rcWidth = other->left - self->left;
+		if (rcWidth > 0 && rcHeight > 0) {
+			left = psy_ui_realrectangle_alloc();
+			left->left = self->left;
+			left->top = y1;
+			left->right = left->left + rcWidth; 
+			left->bottom = left->top + rcHeight;		
+		}
+		
+		double rbX = other->left + (other->right - other->left);
+		double rdWidth = (self->right - self->left) - (rbX - self->left);
+		if (rdWidth > 0) {
+			right = psy_ui_realrectangle_alloc();
+			right->left = rbX;
+			right->top = y1;
+			right->right = right->left + rdWidth;
+			right->bottom = right->top + rcHeight;				
+		}		
+	}
+	psy_list_append(&rv, top);				
+	psy_list_append(&rv, right);		
+	psy_list_append(&rv, bottom);		
+	psy_list_append(&rv, left);	
+	return rv;
 }
 
 /* Margin */

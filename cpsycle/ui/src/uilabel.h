@@ -39,9 +39,11 @@ typedef struct psy_ui_Label {
     char* text;
     char* defaulttext;
     char* translation;    
-    bool translate;
-    bool fadeout;    
+    bool translate;    
     uintptr_t fadeoutcounter;
+    float fade_r;
+    float fade_g;
+    float fade_b;
     psy_ui_TextFormat format;
     psy_ui_PropertyDisplayMode property_display_mode;
     /* references */

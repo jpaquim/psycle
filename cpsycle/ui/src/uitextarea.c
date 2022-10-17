@@ -11,9 +11,9 @@
 #include "uiapp.h"
 #include "uiimpfactory.h"
 #include "uitextformat.h"
-#include "uitextdraw.h"
 /* platform */
 #include "../../detail/portable.h"
+
 
 /* psy_ui_TextAreaPane */
 
@@ -28,11 +28,19 @@ static void psy_ui_textareapane_on_draw(psy_ui_TextAreaPane*,
 	psy_ui_Graphics*);
 static void psy_ui_textareapane_on_mouse_down(psy_ui_TextAreaPane*,
 	psy_ui_MouseEvent*);
+static void psy_ui_textareapane_on_mouse_move(psy_ui_TextAreaPane*,
+	psy_ui_MouseEvent*);
+static void psy_ui_textareapane_on_mouse_up(psy_ui_TextAreaPane*,
+	psy_ui_MouseEvent*);
+static void psy_ui_textareapane_on_mouse_double_click(psy_ui_TextAreaPane*,
+	psy_ui_MouseEvent*);
 static void psy_ui_textareapane_on_enable_input(psy_ui_TextAreaPane*);
 static void psy_ui_textareapane_on_prevent_input(psy_ui_TextAreaPane*);
 static void insertchar(psy_ui_TextAreaPane*, char c);
+static void inserttext(psy_ui_TextAreaPane*, const char* insert);
 static void deletechar(psy_ui_TextAreaPane*);
 static void removechar(psy_ui_TextAreaPane*);
+static void deleteselection(psy_ui_TextAreaPane*);
 static char_dyn_t* lefttext(psy_ui_TextAreaPane*, uintptr_t split);
 static char_dyn_t* righttext(psy_ui_TextAreaPane*, uintptr_t split);
 static void psy_ui_textarea_on_edit_accept(psy_ui_TextArea*,
@@ -80,6 +88,15 @@ static void vtable_init(psy_ui_TextAreaPane* self)
 		vtable.on_mouse_down =
 			(psy_ui_fp_component_on_mouse_event)
 			psy_ui_textareapane_on_mouse_down;
+		vtable.on_mouse_move =
+			(psy_ui_fp_component_on_mouse_event)
+			psy_ui_textareapane_on_mouse_move;
+		vtable.on_mouse_up =
+			(psy_ui_fp_component_on_mouse_event)
+			psy_ui_textareapane_on_mouse_up;
+		vtable.on_mouse_double_click =
+			(psy_ui_fp_component_on_mouse_event)
+			psy_ui_textareapane_on_mouse_double_click;
 		vtable.enableinput =
 			(psy_ui_fp_component)
 			psy_ui_textareapane_on_enable_input;
@@ -101,10 +118,11 @@ void psy_ui_textareapane_init(psy_ui_TextAreaPane* self,
 	psy_ui_component_set_tab_index(&self->component, 0);
 	self->charnumber = 0.0;
 	self->linenumber = psy_INDEX_INVALID;
-	self->isinputfield = FALSE;	
+	self->isinputfield = FALSE;
 	self->text = psy_strdup("");
-	self->cp = 0;
+	psy_ui_textposition_init(&self->position);
 	self->prevent_input = FALSE;
+	self->down = FALSE;
 	psy_ui_textformat_init(&self->format);
 	psy_signal_init(&self->signal_change);
 	psy_signal_init(&self->signal_accept);
@@ -140,7 +158,7 @@ void psy_ui_textareapane_set_text(psy_ui_TextAreaPane* self,
 {	
 	psy_strreset(&self->text, text);
 	psy_ui_textformat_clear(&self->format);
-	self->cp = psy_min(self->cp, psy_strlen(text));
+	self->position.caret = psy_min(self->position.caret, psy_strlen(text));
 	psy_ui_component_invalidate(&self->component);
 }
 
@@ -243,9 +261,53 @@ void psy_ui_textareapane_set_sel(psy_ui_TextAreaPane* self,
 void psy_ui_textareapane_on_key_down(psy_ui_TextAreaPane* self,
 	psy_ui_KeyboardEvent* ev)
 {	
+	bool reset_selection;
+	
 	assert(self);
 
 	if (self->prevent_input) {
+		return;
+	}
+	if ((psy_ui_keyboardevent_keycode(ev) == psy_ui_KEY_SHIFT) ||
+		(psy_ui_keyboardevent_keycode(ev) == psy_ui_KEY_CONTROL)) {
+		return;
+	}
+	reset_selection = TRUE;
+	if (psy_ui_keyboardevent_ctrlkey(ev)) {
+		switch (psy_ui_keyboardevent_keycode(ev)) {
+		case psy_ui_KEY_C:		    
+			if (self->position.selection != psy_INDEX_INVALID) {				
+				uintptr_t sel_start;
+				uintptr_t sel_end;
+				uintptr_t sel_len;
+		
+				psy_ui_textposition_selection(&self->position, &sel_start,
+					&sel_end);
+				if (sel_end > sel_start) {
+					char* seltext;
+										
+					seltext = (char*)malloc((sel_end - sel_start) + 2);
+					psy_snprintf(seltext, sel_end - sel_start + 1, "%s",
+						self->text + sel_start);
+					psy_ui_clipboard_set_text(&psy_ui_app()->clipboard,
+						seltext);
+					free(seltext);
+					seltext = NULL;
+				}
+			}			
+			break;
+		case psy_ui_KEY_V:
+			if (psy_strlen(psy_ui_clipboard_text(&psy_ui_app()->clipboard))
+					> 0) {
+				inserttext(self, psy_ui_clipboard_text(
+					&psy_ui_app()->clipboard));
+			}
+			break;
+		default:
+			break;
+		}
+		psy_ui_keyboardevent_stop_propagation(ev);
+		psy_ui_component_invalidate(&self->component);
 		return;
 	}
 	switch (psy_ui_keyboardevent_keycode(ev)) {
@@ -257,9 +319,21 @@ void psy_ui_textareapane_on_key_down(psy_ui_TextAreaPane* self,
 		}
 		break;	
 	case psy_ui_KEY_LEFT:
+		if (psy_ui_keyboardevent_shiftkey(ev)) {
+			if (!psy_ui_textposition_has_selection(&self->position)) {
+				self->position.selection = self->position.caret;
+			}
+			reset_selection = FALSE;
+		}
 		psy_ui_textareapane_prev_col(self, 1);		
 		break;
 	case psy_ui_KEY_RIGHT:
+		if (psy_ui_keyboardevent_shiftkey(ev)) {
+			if (!psy_ui_textposition_has_selection(&self->position)) {
+				self->position.selection = self->position.caret;
+			}
+			reset_selection = FALSE;
+		}
 		psy_ui_textareapane_next_col(self, 1);
 		break;
 	case psy_ui_KEY_UP:
@@ -279,11 +353,11 @@ void psy_ui_textareapane_on_key_down(psy_ui_TextAreaPane* self,
 
 		currline = psy_ui_textareapane_cursor_line(self);
 		if (currline > 0) {
-			self->cp = psy_ui_textformat_line_at(&self->format,
+			self->position.caret = psy_ui_textformat_line_at(&self->format,
 				currline - 1) +
 				1;
 		} else {
-			self->cp = 0;
+			self->position.caret = 0;
 		}
 		psy_ui_textareapane_scroll_left(self);
 		break; }
@@ -291,16 +365,24 @@ void psy_ui_textareapane_on_key_down(psy_ui_TextAreaPane* self,
 		uintptr_t currline;		
 
 		currline = psy_ui_textareapane_cursor_line(self);						
-		self->cp = psy_min(
+		self->position.caret = psy_min(
 			psy_ui_textformat_line_at(&self->format, currline),
 			psy_strlen(self->text));
 		psy_ui_textareapane_scroll_right(self);
 		break; }
 	case psy_ui_KEY_BACK:
-		deletechar(self);
+		if (psy_ui_textposition_has_selection(&self->position)) {			
+			deleteselection(self);
+		} else {
+			deletechar(self);
+		}
 		break;
-	case psy_ui_KEY_DELETE:
-		removechar(self);
+	case psy_ui_KEY_DELETE:	
+		if (psy_ui_textposition_has_selection(&self->position)) {			
+			deleteselection(self);
+		} else {
+			removechar(self);
+		}
 		break;
 	case psy_ui_KEY_SPACE:
 		insertchar(self, ' ');
@@ -333,11 +415,15 @@ void psy_ui_textareapane_on_key_down(psy_ui_TextAreaPane* self,
 		}
 		break; }
 	}
+	if (reset_selection) {
+		self->position.selection = psy_INDEX_INVALID;
+	}
 	psy_ui_component_invalidate(&self->component);
 	psy_ui_keyboardevent_stop_propagation(ev);	
 }
 
-char psy_ui_textareapane_char_from_keycode(psy_ui_TextAreaPane* self, int keycode, bool shift_state)
+char psy_ui_textareapane_char_from_keycode(psy_ui_TextAreaPane* self,
+	int keycode, bool shift_state)
 {
 	switch (keycode) {
 		default:
@@ -349,22 +435,21 @@ char psy_ui_textareapane_char_from_keycode(psy_ui_TextAreaPane* self, int keycod
 void psy_ui_textareapane_prev_col(psy_ui_TextAreaPane* self,
 	uintptr_t step)
 {
-	if (self->cp > step) {
-		self->cp -= step;
+	if (self->position.caret > step) {
+		self->position.caret -= step;
 	} else {
-		self->cp = 0;
+		self->position.caret = 0;
 	}
 	psy_ui_textareapane_scroll_left(self);
 }
 
-void psy_ui_textareapane_next_col(psy_ui_TextAreaPane* self,
-	uintptr_t step)
+void psy_ui_textareapane_next_col(psy_ui_TextAreaPane* self, uintptr_t step)
 {	
-	self->cp = psy_min(self->cp + step, psy_strlen(self->text));
+	self->position.caret = psy_min(self->position.caret + step,
+		psy_strlen(self->text));
 }
 
-void psy_ui_textareapane_prev_lines(psy_ui_TextAreaPane* self,
-	uintptr_t step)
+void psy_ui_textareapane_prev_lines(psy_ui_TextAreaPane* self, uintptr_t step)
 {
 	uintptr_t currline;
 	double cpx;
@@ -381,7 +466,7 @@ void psy_ui_textareapane_prev_lines(psy_ui_TextAreaPane* self,
 	} else {
 		oldlinestart = 0;
 	}
-	offset = self->cp - oldlinestart;
+	offset = self->position.caret - oldlinestart;
 	if (currline > step) {
 		currline -= step;
 	} else {
@@ -402,7 +487,7 @@ void psy_ui_textareapane_prev_lines(psy_ui_TextAreaPane* self,
 		self->text + linestart, offset,
 		psy_ui_component_font(&self->component),
 		psy_ui_component_textmetric(&self->component));
-	self->cp = psy_ui_textformat_cursor_position(&self->format,
+	self->position.caret = psy_ui_textformat_cursor_position(&self->format,
 		self->text,
 		psy_ui_realpoint_make(cpx, cpy),
 		psy_ui_component_textmetric(&self->component),
@@ -429,7 +514,7 @@ void psy_ui_textareapane_advance_lines(psy_ui_TextAreaPane* self,
 	} else {
 		oldlinestart = 0;
 	}
-	offset = self->cp - oldlinestart;
+	offset = self->position.caret - oldlinestart;
 	if (currline + step < psy_ui_textformat_numlines(&self->format)) {
 		currline += step;
 	} else {
@@ -449,7 +534,7 @@ void psy_ui_textareapane_advance_lines(psy_ui_TextAreaPane* self,
 		self->text + linestart, offset,
 		psy_ui_component_font(&self->component),
 		psy_ui_component_textmetric(&self->component));
-	self->cp = psy_ui_textformat_cursor_position(&self->format,
+	self->position.caret = psy_ui_textformat_cursor_position(&self->format,
 		self->text,
 		psy_ui_realpoint_make(cpx, cpy),
 		psy_ui_component_textmetric(&self->component),
@@ -475,7 +560,7 @@ uintptr_t psy_ui_textareapane_cursor_line(const psy_ui_TextAreaPane*
 		uintptr_t cp;
 
 		cp = psy_ui_textformat_line_at(&self->format, line);
-		if (self->cp >= linestart && self->cp <= cp) {
+		if (self->position.caret >= linestart && self->position.caret <= cp) {
 			break;
 		}
 		linestart = cp + 1;
@@ -498,7 +583,7 @@ uintptr_t psy_ui_textareapane_cursor_column(const psy_ui_TextAreaPane*
 	} else {
 		linestart = 0;
 	}
-	return self->cp - linestart;
+	return self->position.caret - linestart;
 }
 
 uintptr_t psy_ui_textareapane_num_lines(const psy_ui_TextAreaPane* self)
@@ -517,8 +602,8 @@ void insertchar(psy_ui_TextAreaPane* self, char c)
 
 	insert[0] = c;
 	insert[1] = '\0';
-	left = lefttext(self, self->cp + 1);
-	right = righttext(self, self->cp);
+	left = lefttext(self, self->position.caret + 1);
+	right = righttext(self, self->position.caret);
 	left = psy_strcat_realloc(left, insert);
 	if (psy_strlen(right) > 0) {
 		left = psy_strcat_realloc(left, right);
@@ -528,18 +613,19 @@ void insertchar(psy_ui_TextAreaPane* self, char c)
 	left = NULL;
 	free(right);
 	right = NULL;
-	++self->cp;
+	++self->position.caret;
 	psy_ui_textformat_clear(&self->format);
 	psy_signal_emit(&self->signal_change, self, 0);
 }
 
-void deletechar(psy_ui_TextAreaPane* self)
-{
+void inserttext(psy_ui_TextAreaPane* self, const char* insert)
+{	
 	char* left;
 	char* right;
 
-	left = lefttext(self, self->cp);
-	right = righttext(self, self->cp);
+	left = lefttext(self, self->position.caret + 1);
+	right = righttext(self, self->position.caret);
+	left = psy_strcat_realloc(left, insert);
 	if (psy_strlen(right) > 0) {
 		left = psy_strcat_realloc(left, right);
 	}
@@ -548,8 +634,55 @@ void deletechar(psy_ui_TextAreaPane* self)
 	left = NULL;
 	free(right);
 	right = NULL;
-	if (self->cp > 0) {
-		--self->cp;
+	self->position.caret += psy_strlen(insert);
+	psy_ui_textformat_clear(&self->format);
+	psy_signal_emit(&self->signal_change, self, 0);
+}
+
+void deleteselection(psy_ui_TextAreaPane* self)
+{
+	char* left;
+	char* right;
+	uintptr_t sel_start;
+	uintptr_t sel_end;
+	uintptr_t sel_len;
+		
+	psy_ui_textposition_selection(&self->position, &sel_start,
+		&sel_end);	
+	if (sel_start < sel_end) {
+		++sel_start;
+	}
+	left = lefttext(self, sel_start);
+	right = righttext(self, sel_end);
+	if (psy_strlen(right) > 0) {
+		left = psy_strcat_realloc(left, right);
+	}
+	psy_strreset(&self->text, left);	
+	free(left);
+	left = NULL;
+	free(right);
+	right = NULL;
+	self->position.caret = sel_start;
+	psy_signal_emit(&self->signal_change, self, 0);
+}
+
+void deletechar(psy_ui_TextAreaPane* self)
+{
+	char* left;
+	char* right;
+
+	left = lefttext(self, self->position.caret);
+	right = righttext(self, self->position.caret);
+	if (psy_strlen(right) > 0) {
+		left = psy_strcat_realloc(left, right);
+	}
+	psy_strreset(&self->text, left);
+	free(left);
+	left = NULL;
+	free(right);
+	right = NULL;
+	if (self->position.caret > 0) {
+		--self->position.caret;
 	}
 	psy_ui_textformat_clear(&self->format);
 	psy_signal_emit(&self->signal_change, self, 0);
@@ -560,8 +693,8 @@ void removechar(psy_ui_TextAreaPane* self)
 	char* left;
 	char* right;
 
-	left = lefttext(self, self->cp + 1);
-	right = righttext(self, self->cp + 1);
+	left = lefttext(self, self->position.caret + 1);
+	right = righttext(self, self->position.caret + 1);
 	if (psy_strlen(right) > 0) {
 		left = psy_strcat_realloc(left, right);
 	}
@@ -606,7 +739,8 @@ char_dyn_t* righttext(psy_ui_TextAreaPane* self, uintptr_t split)
 void psy_ui_textareapane_on_focus_lost(psy_ui_TextAreaPane* self)
 {
 	assert(self);
-
+	
+	self->position.selection = psy_INDEX_INVALID;	
 	super_vtable.on_focuslost(&self->component);
 	if (self->isinputfield) {		
 		psy_signal_emit(&self->signal_accept, self, 0);		
@@ -620,18 +754,20 @@ void psy_ui_textareapane_on_draw(psy_ui_TextAreaPane* self,
 	
 	psy_ui_textdraw_init(&textdraw, &self->format,
 		psy_ui_component_size_px(psy_ui_textareapane_base(self)),
-		self->text);
-	psy_ui_textdraw_draw(&textdraw, g,
-		(psy_ui_component_has_focus(&self->component) && !(self->prevent_input))
-		? self->cp
-		: psy_INDEX_INVALID);	
+		self->text);	
+	psy_ui_textdraw_draw(&textdraw, g,		
+		self->position, (psy_ui_component_has_focus(&self->component) &&
+		!(self->prevent_input)));		
 	psy_ui_textdraw_dispose(&textdraw);
 }
 
 void psy_ui_textareapane_on_mouse_down(psy_ui_TextAreaPane* self,
 	psy_ui_MouseEvent* ev)
 {	
-	self->cp = psy_min(
+	self->down = TRUE;
+	self->sel_starting = TRUE;
+	self->position.selection = psy_INDEX_INVALID;
+	self->position.caret = psy_min(
 		psy_ui_textformat_cursor_position(&self->format, self->text,
 			psy_ui_mouseevent_offset(ev),
 			psy_ui_component_textmetric(&self->component),
@@ -640,6 +776,45 @@ void psy_ui_textareapane_on_mouse_down(psy_ui_TextAreaPane* self,
 	psy_ui_mouseevent_stop_propagation(ev);	
 	psy_ui_component_set_focus(&self->component);	
 	psy_ui_component_invalidate(&self->component);
+	psy_ui_component_capture(&self->component);
+}
+
+void psy_ui_textareapane_on_mouse_move(psy_ui_TextAreaPane* self,
+	psy_ui_MouseEvent* ev)
+{
+	if (self->down) {
+		uintptr_t pos;
+		
+		pos = psy_min(
+			psy_ui_textformat_cursor_position(&self->format, self->text,
+				psy_ui_mouseevent_offset(ev),
+				psy_ui_component_textmetric(&self->component),
+				psy_ui_component_font(&self->component)),
+				psy_strlen(self->text));
+		if (self->sel_starting) {
+			self->position.selection = pos;
+			self->sel_starting = FALSE;
+		}
+		self->position.caret = pos;
+		psy_ui_component_invalidate(&self->component);
+		psy_ui_mouseevent_stop_propagation(ev);	
+	}	
+}
+
+void psy_ui_textareapane_on_mouse_up(psy_ui_TextAreaPane* self,
+	psy_ui_MouseEvent* ev)
+{
+	psy_ui_component_release_capture(&self->component);
+	self->down = FALSE;
+}
+
+void psy_ui_textareapane_on_mouse_double_click(psy_ui_TextAreaPane* self,
+	psy_ui_MouseEvent* ev)
+{
+	self->position.caret = psy_strlen(self->text);
+	self->position.selection = 0;
+	psy_ui_component_invalidate(&self->component);
+	psy_ui_mouseevent_stop_propagation(ev);	
 }
 
 /* psy_ui_TextArea */
@@ -766,7 +941,8 @@ void psy_ui_textarea_data_exchange(psy_ui_TextArea* self,
 	}
 }
 
-void psy_ui_textarea_on_property_changed(psy_ui_TextArea* self, psy_Property* sender)
+void psy_ui_textarea_on_property_changed(psy_ui_TextArea* self,
+	psy_Property* sender)
 {
 	if (psy_property_is_int(sender)) {
 		char text[64];
@@ -785,7 +961,8 @@ void psy_ui_textarea_on_property_changed(psy_ui_TextArea* self, psy_Property* se
 	}
 }
 
-void psy_ui_textarea_before_property_destroyed(psy_ui_TextArea* self, psy_Property* sender)
+void psy_ui_textarea_before_property_destroyed(psy_ui_TextArea* self,
+	psy_Property* sender)
 {
 	assert(self);
 
@@ -821,7 +998,8 @@ void psy_ui_textarea_on_edit_accept(psy_ui_TextArea* self,
 				? strtol(psy_ui_textarea_text(self), NULL, 16)
 				: atoi(psy_ui_textarea_text(self)));
 		} else if (psy_property_is_string(self->property)) {
-			psy_property_set_item_str(self->property, psy_ui_textarea_text(self));
+			psy_property_set_item_str(self->property,
+				psy_ui_textarea_text(self));
 		}
 	}
 	psy_signal_emit(&self->signal_accept, self, 0);

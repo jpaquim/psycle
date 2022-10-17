@@ -188,8 +188,8 @@ psy_ui_Size dev_textsize(const psy_ui_x11_FontImp* self,
 		(const FcChar8*)text,
 		count,
 		&extents);							
-	rv.width = psy_ui_value_make_px(extents.width); 
-	rv.height = psy_ui_value_make_px(extents.height);
+	rv.width = psy_ui_value_make_px(extents.xOff); 
+	rv.height = psy_ui_value_make_px(extents.yOff);
 	return rv;
 }
 

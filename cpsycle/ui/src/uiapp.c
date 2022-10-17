@@ -118,6 +118,7 @@ void psy_ui_app_init(psy_ui_App* self, bool dark, uintptr_t instance)
 #endif
 	psy_timers_init(&self->wintimers);
 	psy_ui_bitmaps_init(&self->bitmaps);
+	psy_ui_clipboard_init(&self->clipboard);
 }
 
 void ui_app_init_imp_factory(psy_ui_App* self)
@@ -184,6 +185,7 @@ void psy_ui_app_dispose(psy_ui_App* self)
 	psy_table_dispose(&self->components);
 	psy_timers_dispose(&self->wintimers);	
 	psy_ui_bitmaps_dispose(&self->bitmaps);
+	psy_ui_clipboard_dispose(&self->clipboard);
 }
 
 void psy_ui_app_setmain(psy_ui_App* self, psy_ui_Component* main)

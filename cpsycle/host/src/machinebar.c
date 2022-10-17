@@ -96,10 +96,12 @@ void machinebar_init(MachineBar* self, psy_ui_Component* parent, Workspace* work
 	psy_ui_button_data_exchange(&self->dock,
 		generalconfig_property(general, "bench.showparamrack"));	
 	psy_ui_button_set_text(&self->dock, "machinebar.dock");
+#ifdef PSYCLE_USE_PLUGIN_EDITOR	
 	psy_ui_button_init(&self->editor, &self->component);
 	psy_ui_button_data_exchange(&self->editor,
 		generalconfig_property(general, "bench.showplugineditor"));	
 	psy_ui_button_set_text(&self->editor, "machinebar.editor");
+#endif	
 	psy_ui_button_init(&self->cpu, &self->component);
 	psy_ui_button_set_text(&self->cpu, "machinebar.cpu");
 	psy_ui_button_data_exchange(&self->cpu,

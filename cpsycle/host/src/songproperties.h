@@ -55,8 +55,6 @@ typedef struct SongPropertiesView {
 
 void songpropertiesview_init(SongPropertiesView*, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, Workspace*);
-void songpropertiesview_enableedit(SongPropertiesView*);
-void songpropertiesview_disableedit(SongPropertiesView*);
 
 INLINE psy_ui_Component* songpropertiesview_base(SongPropertiesView* self)
 {

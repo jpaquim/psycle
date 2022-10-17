@@ -18,6 +18,20 @@
 extern "C" {
 #endif
 
+typedef struct psy_ui_TextPosition {
+	uintptr_t caret;
+	uintptr_t selection;
+} psy_ui_TextPosition;
+
+void psy_ui_textposition_init(psy_ui_TextPosition*);
+
+bool psy_ui_textposition_has_selection(const psy_ui_TextPosition*);
+void psy_ui_textposition_selection(const psy_ui_TextPosition*,
+	uintptr_t* cp_start, uintptr_t* cp_end);
+
+psy_ui_TextPosition psy_ui_textposition_make(uintptr_t caret,
+	uintptr_t selection);
+
 typedef struct psy_ui_TextDraw {    
     psy_ui_TextFormat* format;
     psy_ui_RealSize size;    
@@ -29,7 +43,7 @@ void psy_ui_textdraw_init(psy_ui_TextDraw*, psy_ui_TextFormat*,
 void psy_ui_textdraw_dispose(psy_ui_TextDraw*);
 
 void psy_ui_textdraw_draw(psy_ui_TextDraw*, psy_ui_Graphics*,
-    uintptr_t cursorpos);
+    psy_ui_TextPosition, bool draw_caret);
 
 #ifdef __cplusplus
 }

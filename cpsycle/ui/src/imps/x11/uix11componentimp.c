@@ -99,6 +99,7 @@ static psy_ui_RealPoint translatecoords(psy_ui_x11_ComponentImp*,
 	psy_ui_Component* src, psy_ui_Component* dst);
 static psy_ui_RealPoint mapcoords(psy_ui_x11_ComponentImp* self,
 	psy_ui_Component* src, psy_ui_Component* dst);
+static psy_List* diff(const psy_ui_RealRectangle* rectA, const psy_ui_RealRectangle* rectB);
 
 // VTable init
 static psy_ui_ComponentImpVTable vtable;
@@ -737,71 +738,6 @@ psy_ui_Size dev_framesize(psy_ui_x11_ComponentImp* self)
 	return rv;
 }
 
-void dev_scrollto(psy_ui_x11_ComponentImp* self, intptr_t dx, intptr_t dy,
-	const psy_ui_RealRectangle* r)
-{	
-	if (r) {
-		dev_invalidaterect(self, r);
-	} else {
-		dev_invalidate(self);
-	}	
-	/* todo */
-	/* if (dx != 0 || dy != 0) {
-		XWindowAttributes win_attr;
-		psy_ui_x11_GraphicsImp* gx11;
-		XExposeEvent xev;
-		Region region;
-		XRectangle rectangle;
-		psy_ui_X11App* x11app;
-
-		x11app = (psy_ui_X11App*)psy_ui_app()->imp;
-		XGetWindowAttributes(x11app->dpy, self->hwnd, &win_attr);
-		gx11 = (psy_ui_x11_GraphicsImp*)self->g.imp;
-		region = XCreateRegion();
-		if (r == NULL) {
-			rectangle.x = 0;
-			rectangle.y = 0;
-			rectangle.width = (unsigned short) win_attr.width;
-			rectangle.height = (unsigned short) win_attr.height;
-		} else {
-			rectangle.x = r->left;
-			rectangle.y = r->top;
-			rectangle.width = r->right - r->left;
-			rectangle.height =  r->bottom - r->top;
-		}
-		XUnionRectWithRegion(&rectangle, region, region);
-		XSetRegion(x11app->dpy, gx11->gc, region);
-		XDestroyRegion(region);
-		XCopyArea(x11app->dpy, self->hwnd, self->hwnd,
-			gx11->gc,
-			(dx < 0) ? -dx : 0, // srcx
-			(dy < 0) ? -dy : 0, // srcy
-			(dx < 0) ? win_attr.width + dx : win_attr.width - dx, // srcwidth
-			(dy < 0) ? win_attr.height + dy : win_attr.height - dy, // srcheight
-			(dx < 0) ? 0 : dx, // destx
-			(dy < 0) ? 0 : dy); // desty
-		XSync(x11app->dpy, FALSE);
-		// printf("%d\n", dy);
-		xev.type = Expose;
-		xev.display = x11app->dpy;
-		xev.window = self->hwnd;
-		xev.count = 0;
-		if (dy < 0) {
-			xev.x = 0;
-			xev.y = win_attr.height + dy;
-			xev.width = win_attr.width;
-			xev.height = -dy;
-		} else if (dy > 0) {
-			xev.x = 0;
-			xev.y = 0;
-			xev.width = win_attr.width;
-			xev.height = dy;
-		}		
-		XSendEvent (x11app->dpy, self->hwnd, True, ExposureMask, (XEvent *)&xev);
-	}
-	*/
-}
-
 psy_ui_Component* dev_parent(psy_ui_x11_ComponentImp* self)
 {
 	return (self->parent)
@@ -955,7 +891,61 @@ void dev_invalidaterect(psy_ui_x11_ComponentImp* self,
 	xev.height = (int)r->bottom - (int)r->top;	
 	if (xev.width != 0 && xev.height != 0) {	
 		XSendEvent(x11app->dpy, self->hwnd, True, ExposureMask, (XEvent*)&xev);
+		XSync(x11app->dpy, FALSE);
 	}
+}
+
+#define WINDOW_SCROLL
+
+void dev_scrollto(psy_ui_x11_ComponentImp* self, intptr_t dx, intptr_t dy,
+	const psy_ui_RealRectangle* r)
+{	
+	if (r) {		
+#ifdef WINDOW_SCROLL
+		psy_ui_RealRectangle mv;		
+				
+		mv = *r;
+		psy_ui_realrectangle_move(&mv, psy_ui_realpoint_make(-dx, -dy));
+		if (psy_ui_realrectangle_intersection(&mv, r)) {
+			psy_ui_X11App* x11app;
+			psy_ui_x11_GraphicsImp* gx11;
+			psy_List* diff;
+			psy_List* p;
+				
+			x11app = (psy_ui_X11App*)psy_ui_app()->imp;
+			gx11 = (psy_ui_x11_GraphicsImp*)self->g.imp;				
+			psy_ui_graphics_set_clip_rect(&self->g, *r);						
+			XCopyArea(x11app->dpy, self->hwnd, self->hwnd, gx11->gc,
+				mv.left,             /* srcx */
+				mv.top,              /* srcy */
+				mv.right - mv.left,  /* srcwidth */
+				mv.bottom - mv.top,  /* srcheight */
+				mv.left + dx,        /* destx */
+				mv.top + dy);        /* desty */
+			XSync(x11app->dpy, FALSE);
+			mv = *r;
+			psy_ui_realrectangle_move(&mv, psy_ui_realpoint_make(dx, dy));			
+			psy_ui_realrectangle_intersection(&mv, r);
+			diff = psy_ui_realrectangle_diff(r, &mv);			
+			for (p = diff; p != NULL; p = p->next) {
+				psy_ui_RealRectangle* rc;
+				
+				rc = (psy_ui_RealRectangle*)p->entry;
+				if (rc) {		
+					psy_ui_x11app_redraw_window(x11app, self, rc);					
+				}
+			}
+			psy_list_free(diff);
+			diff = NULL;			
+		} else {
+			dev_invalidaterect(self, r);
+		}
+#else		
+	dev_invalidaterect(self, r);
+#endif		
+	} else {
+		dev_invalidate(self);
+	}	
 }
 
 void dev_update(psy_ui_x11_ComponentImp* self)

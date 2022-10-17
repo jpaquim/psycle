@@ -937,4 +937,43 @@ int psy_ui_x11app_comp_filename(psy_List* p, psy_List* q)
 	return strcmp(left->lfFaceName, right->lfFaceName);
 }
 
+int psy_ui_x11app_redraw_window(psy_ui_X11App* self,
+	psy_ui_x11_ComponentImp* imp,
+	psy_ui_RealRectangle* r)
+{
+	imp->exposeareavalid = TRUE;			
+	psy_ui_x11_GraphicsImp* gx11;
+	XRectangle rectangle;			
+	psy_ui_RealRectangle clip;
+	
+	if (!psy_ui_component_visible(imp->component)) {
+		return 0;
+	}
+	gx11 = (psy_ui_x11_GraphicsImp*)imp->g.imp;
+	/* reset scroll origin */
+	gx11->org.x = 0;
+	gx11->org.y = 0;							
+	psy_ui_graphics_set_clip_rect(&imp->g, *r);					
+	psy_ui_component_draw(imp->component, &imp->g);			
+	if (self->dbe) {
+		int w;
+		int h;
+
+		w  = r->right - r->left;
+		h  = r->bottom - r->top;
+		if (w != 0 && h != 0) {
+			psy_ui_x11_GraphicsImp* gx11;
+
+			gx11 = (psy_ui_x11_GraphicsImp*)imp->g.imp;
+			XCopyArea(self->dpy, imp->d_backBuf,
+				imp->hwnd, gx11->gc,
+				r->left, r->top,
+				w, h,
+				r->left, r->top);
+		}
+	}
+	imp->exposeareavalid = FALSE;
+	return 1;
+}
+
 #endif /* PSYCLE_TK_X11 */
