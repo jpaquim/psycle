@@ -44,6 +44,7 @@ static void psy_ui_x11_g_imp_setbackgroundmode(psy_ui_x11_GraphicsImp*, uintptr_
 static void psy_ui_x11_g_imp_settextcolour(psy_ui_x11_GraphicsImp*, psy_ui_Colour colour);
 static void psy_ui_x11_g_imp_settextalign(psy_ui_x11_GraphicsImp*, uintptr_t align);
 static void psy_ui_x11_g_imp_setcolour(psy_ui_x11_GraphicsImp*, psy_ui_Colour colour);
+static psy_ui_Colour psy_ui_x11_g_imp_textcolour(const psy_ui_x11_GraphicsImp*);
 static void psy_ui_x11_g_imp_setfont(psy_ui_x11_GraphicsImp*, psy_ui_Font* font);
 static const psy_ui_Font* psy_ui_x11_g_imp_font(const psy_ui_x11_GraphicsImp*);
 static void psy_ui_x11_g_imp_moveto(psy_ui_x11_GraphicsImp*, psy_ui_RealPoint pt);
@@ -123,6 +124,9 @@ static void x11_imp_vtable_init(psy_ui_x11_GraphicsImp* self)
 		x11_imp_vtable.dev_setcolour =
 			(psy_ui_fp_graphicsimp_dev_setcolour)
 			psy_ui_x11_g_imp_setcolour;
+		x11_imp_vtable.dev_textcolour =
+			(psy_ui_fp_graphicsimp_dev_colour)
+			psy_ui_x11_g_imp_textcolour;
 		x11_imp_vtable.dev_setfont =
 			(psy_ui_fp_graphicsimp_dev_setfont)
 			psy_ui_x11_g_imp_setfont;
@@ -526,6 +530,14 @@ void psy_ui_x11_g_imp_settextcolour(psy_ui_x11_GraphicsImp* self,
 	self->textcolor.color.green = g * 256;
 	self->textcolor.color.blue  = b * 256;
 	self->textcolor.color.alpha = 0xFFFF;
+}
+
+psy_ui_Colour psy_ui_x11_g_imp_textcolour(const psy_ui_x11_GraphicsImp* self) 
+{	
+	return psy_ui_colour_make_rgb(
+		(uint8_t)(self->textcolor.color.red / 256),
+		(uint8_t)(self->textcolor.color.green / 256),
+		(uint8_t)(self->textcolor.color.blue / 256));
 }
 
 void psy_ui_x11_g_imp_settextalign(psy_ui_x11_GraphicsImp* self, uintptr_t align)

@@ -22,8 +22,12 @@ static void psy_ui_label_on_preferred_size(psy_ui_Label*,
 static void psy_ui_label_on_language_changed(psy_ui_Label*);
 static void psy_ui_label_on_timer(psy_ui_Label*, uintptr_t timerid);
 static const char* psy_ui_label_text_internal(const psy_ui_Label*);
-static void psy_ui_label_on_property_changed(psy_ui_Label*, psy_Property* sender);
-static void psy_ui_label_before_property_destroyed(psy_ui_Label*, psy_Property* sender);
+static void psy_ui_label_on_property_changed(psy_ui_Label*,
+	psy_Property* sender);
+static void psy_ui_label_before_property_destroyed(psy_ui_Label*,
+	psy_Property* sender);
+static psy_ui_Colour psy_ui_label_fade_colour(const psy_ui_Label*);
+static void psy_ui_label_update_fade_step(psy_ui_Label*);
 
 /* vtable */
 static psy_ui_ComponentVtable vtable;
@@ -71,7 +75,7 @@ void psy_ui_label_init(psy_ui_Label* self, psy_ui_Component* parent)
 	self->translation = NULL;
 	self->translate = TRUE;
 	self->fadeoutcounter = 0;
-	self->fadeout = FALSE;
+	self->fade_r = self->fade_g = self->fade_b = 0.f;	
 	self->property = NULL;
 	self->property_display_mode = psy_ui_PROPERTY_MODE_VALUE;
 	psy_ui_textformat_init(&self->format);
@@ -142,6 +146,8 @@ void psy_ui_label_on_language_changed(psy_ui_Label* self)
 void psy_ui_label_data_exchange(psy_ui_Label* self, psy_Property* property,
 	psy_ui_PropertyDisplayMode mode)
 {
+	assert(self);
+	
 	self->property = property;
 	self->property_display_mode = mode;
 	if (self->property) {
@@ -155,6 +161,8 @@ void psy_ui_label_data_exchange(psy_ui_Label* self, psy_Property* property,
 
 void psy_ui_label_on_property_changed(psy_ui_Label* self, psy_Property* sender)
 {
+	assert(self);
+	
 	if (self->property_display_mode == psy_ui_PROPERTY_MODE_VALUE) {
 		if (psy_property_is_font(self->property)) {
 			char str[128];
@@ -230,6 +238,8 @@ void psy_ui_label_set_text(psy_ui_Label* self, const char* text)
 
 void psy_ui_label_add_text(psy_ui_Label* self, const char* text)
 {
+	assert(self);
+	
 	self->text = psy_strcat_realloc(self->text, text);
 	if (self->translate) {
 		self->translation = psy_strcat_realloc(self->translation,
@@ -259,6 +269,8 @@ void psy_ui_label_on_preferred_size(psy_ui_Label* self,
 	const psy_ui_TextMetric* tm;
 	const char* text;
 	const psy_ui_Font* font;
+	
+	assert(self);
 	
 	text = psy_ui_label_text_internal(self);
 	tm = psy_ui_component_textmetric(psy_ui_label_base(self));
@@ -305,39 +317,55 @@ void psy_ui_label_on_preferred_size(psy_ui_Label* self,
 void psy_ui_label_on_draw(psy_ui_Label* self, psy_ui_Graphics* g)
 {
 	psy_ui_TextDraw textdraw;
+	
+	assert(self);
 			
+	if (self->fadeoutcounter > 0) {				
+		psy_ui_set_text_colour(g, psy_ui_label_fade_colour(self));
+	}
 	psy_ui_textdraw_init(&textdraw, &self->format,
 		psy_ui_component_size_px(psy_ui_label_base(self)),
-		psy_ui_label_text_internal(self));
-	psy_ui_textdraw_draw(&textdraw, g, psy_INDEX_INVALID);
+		psy_ui_label_text_internal(self));	
+	psy_ui_textdraw_draw(&textdraw, g, psy_ui_textposition_make(
+		psy_INDEX_INVALID, psy_INDEX_INVALID), FALSE);
 	psy_ui_textdraw_dispose(&textdraw);
 }
 
 void psy_ui_label_set_char_number(psy_ui_Label* self, double number)
 {	
+	assert(self);
+	
 	self->charnumber = psy_max(0.0, number);
 }
 
 void psy_ui_label_set_line_spacing(psy_ui_Label* self, double line_spacing)
 {
+	assert(self);
+	
 	psy_ui_textformat_set_line_spacing(&self->format, line_spacing);	
 }
 
 void psy_ui_label_set_text_alignment(psy_ui_Label* self,
 	psy_ui_Alignment alignment)
 {
+	assert(self);
+	
 	psy_ui_textformat_set_alignment(&self->format,
 		psy_ui_textalignment_make(alignment));
 }
 
 void psy_ui_label_prevent_translation(psy_ui_Label* self)
 {
+	assert(self);
+	
 	self->translate = FALSE;
 	psy_strreset(&self->translation, NULL);	
 }
 
 void psy_ui_label_enable_translation(psy_ui_Label* self)
 {
+	assert(self);
+	
 	self->translate = TRUE;
 }
 
@@ -349,61 +377,96 @@ void psy_ui_label_fadeout(psy_ui_Label* self)
 	** stays full and then starts to fadeout. At zero the label text is reset
 	** to the default text
 	*/
-	self->fadeoutcounter = 100;
-	psy_ui_component_set_colour(psy_ui_label_base(self),
-		psy_ui_style_const(psy_ui_STYLE_ROOT)->colour);
+	assert(self);
+	
+	self->fadeoutcounter = 100;	
+	psy_ui_label_update_fade_step(self);
 	psy_ui_component_start_timer(&self->component, 0, 50);
 }
 
 void psy_ui_label_on_timer(psy_ui_Label* self, uintptr_t timerid)
 {
 	super_vtable.on_timer(&self->component, timerid);
-	if (self->fadeoutcounter > 0) {
-		psy_ui_Colour colour;
-		psy_ui_Colour bgcolour;
-		float fadeoutstep;
-
+	if (self->fadeoutcounter > 0) {		
 		--self->fadeoutcounter;
-		if (self->fadeoutcounter <= 80) {
-			colour = psy_ui_style_const(psy_ui_STYLE_ROOT)->colour;
-			bgcolour = psy_ui_component_background_colour(
-				psy_ui_label_base(self));
-			fadeoutstep = self->fadeoutcounter * 1 / 80.f;
-			psy_ui_colour_mul_rgb(&colour, fadeoutstep, fadeoutstep, fadeoutstep);
-			if (psy_ui_colour_colorref(&colour) > psy_ui_colour_colorref(&bgcolour)) {
-				psy_ui_component_set_colour(psy_ui_label_base(self), colour);
-			}
-			psy_ui_component_invalidate(psy_ui_label_base(self));
-		}
 		if (self->fadeoutcounter == 0) {
 			/* reset to default text */
-			psy_ui_label_set_text(self, self->defaulttext);
-			psy_ui_component_set_colour(psy_ui_label_base(self),
-				psy_ui_style_const(psy_ui_STYLE_ROOT)->colour);
+			psy_ui_label_set_text(self, self->defaulttext);			
 			psy_ui_component_stop_timer(&self->component, 0);
-		}
+		} else if (self->fadeoutcounter <= 80) {			
+			psy_ui_component_invalidate(psy_ui_label_base(self));
+		}		
 	}
+}
+
+void psy_ui_label_update_fade_step(psy_ui_Label* self)
+{
+	psy_ui_Colour fore;
+	psy_ui_Colour bg;
+	psy_ui_Component* curr;
+	float steps;
+	
+	assert(self);
+		
+	fore = psy_ui_component_colour(&self->component);
+	curr = psy_ui_component_parent(&self->component);
+	while (curr) {
+		bg = psy_ui_component_background_colour(curr);
+		if (!bg.mode.transparent) {
+			break;
+		}
+		curr = psy_ui_component_parent(curr);
+	}
+	steps = 80.f;	
+	self->fade_r = (bg.r - fore.r) / steps;
+	self->fade_g = (bg.g - fore.g) / steps;
+	self->fade_b = (bg.b - fore.b) / steps;	
+}
+
+psy_ui_Colour psy_ui_label_fade_colour(const psy_ui_Label* self)
+{
+	psy_ui_Colour rv;
+	
+	assert(self);
+		
+	rv = psy_ui_component_colour(&self->component);
+	if (self->fadeoutcounter > 0 && self->fadeoutcounter <= 80) {
+		float step;
+		
+		step = (float)(80 - self->fadeoutcounter);
+		psy_ui_colour_add_rgb(&rv, self->fade_r * step,
+			self->fade_g * step, self->fade_b * step);
+	}
+	return rv;
 }
 
 void psy_ui_label_prevent_wrap(psy_ui_Label* self)
 {
+	assert(self);
+	
 	psy_ui_textformat_prevent_wrap(&self->format);
 }
 
 void psy_ui_label_enable_wrap(psy_ui_Label* self)
 {
+	assert(self);
+	
 	psy_ui_textformat_line_wrap(&self->format);
 	psy_ui_textformat_word_wrap(&self->format);
 }
 
 void psy_ui_label_enable_line_wrap(psy_ui_Label* self)
 {
+	assert(self);
+	
 	psy_ui_textformat_line_wrap(&self->format);
 }
 
 
 const char* psy_ui_label_text_internal(const psy_ui_Label* self)
 {
+	assert(self);
+	
 	if (self->translate && self->translation) {
 		return self->translation;
 	}

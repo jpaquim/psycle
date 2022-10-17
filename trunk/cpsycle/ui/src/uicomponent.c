@@ -76,9 +76,9 @@ const psy_ui_Font* psy_ui_component_font(const psy_ui_Component* self)
 	return rv;
 }
 
-psy_ui_Colour psy_ui_component_background_colour(psy_ui_Component* self)
+psy_ui_Colour psy_ui_component_background_colour(const psy_ui_Component* self)
 {
-	psy_ui_Component* curr;
+	const psy_ui_Component* curr;
 	psy_ui_Colour base;
 	
 	assert(self);
@@ -101,7 +101,7 @@ psy_ui_Colour psy_ui_component_background_colour(psy_ui_Component* self)
 			overlay = 0;
 			while (curr && (colour.overlay != 0 || colour.mode.transparent)) {				
 				overlay += colour.overlay;
-				curr = psy_ui_component_parent(curr);
+				curr = psy_ui_component_parent_const(curr);
 				if (curr) {
 					colour = psy_ui_componentstyle_background_colour(
 						&curr->style);
@@ -115,7 +115,7 @@ psy_ui_Colour psy_ui_component_background_colour(psy_ui_Component* self)
 		} else if (!colour.mode.inherit) {
 			break;
 		}
-		curr = psy_ui_component_parent(curr);
+		curr = psy_ui_component_parent_const(curr);
 	}
 	if (!curr) {		
 		base = psy_ui_style_const(psy_ui_STYLE_ROOT)->background.colour;
@@ -128,9 +128,9 @@ void psy_ui_component_set_colour(psy_ui_Component* self, psy_ui_Colour colour)
 	psy_ui_componentstyle_set_colour(&self->style, colour);	
 }
 
-psy_ui_Colour psy_ui_component_colour(psy_ui_Component* self)
+psy_ui_Colour psy_ui_component_colour(const psy_ui_Component* self)
 {
-	psy_ui_Component* curr;
+	const psy_ui_Component* curr;
 	psy_ui_Colour base;
 
 	assert(self);
@@ -153,7 +153,7 @@ psy_ui_Colour psy_ui_component_colour(psy_ui_Component* self)
 			overlay = 0;
 			while (curr && (colour.overlay != 0 || colour.mode.transparent)) {
 				overlay += colour.overlay;
-				curr = psy_ui_component_parent(curr);
+				curr = psy_ui_component_parent_const(curr);
 				if (curr) {
 					colour = psy_ui_componentstyle_colour(&curr->style);
 				}
@@ -166,7 +166,7 @@ psy_ui_Colour psy_ui_component_colour(psy_ui_Component* self)
 		} else if (!colour.mode.inherit) {
 			break;
 		}
-		curr = psy_ui_component_parent(curr);
+		curr = psy_ui_component_parent_const(curr);
 	}
 	if (!curr) {
 		base = psy_ui_style_const(psy_ui_STYLE_ROOT)->colour;
@@ -1636,7 +1636,7 @@ void psy_ui_component_set_scroll_left(psy_ui_Component* self, psy_ui_Value left)
 	} else {		
 		psy_ui_component_scroll_to(self, newleft - position.left, 0.0, &r);
 	}
-	if (newleft - position.left < 0) {
+	/*if (newleft - position.left < 0) {
 		double delta;
 
 		delta = psy_ui_realrectangle_width(&r) - (newleft + psy_ui_realrectangle_width(&position));
@@ -1646,7 +1646,7 @@ void psy_ui_component_set_scroll_left(psy_ui_Component* self, psy_ui_Value left)
 					psy_ui_realpoint_make(psy_ui_realrectangle_width(&r) - delta, 0.0),
 					psy_ui_realsize_make(delta, psy_ui_realrectangle_height(&r))));
 		}
-	}
+	}*/
 	psy_signal_emit(&self->signal_scrolled, self, 0);	
 }
 
@@ -1690,8 +1690,8 @@ void psy_ui_component_set_scroll_top(psy_ui_Component* self, psy_ui_Value top)
 	} else {
 		psy_ui_component_scroll_to(self, 0.0, newtop - position.top, &r);		
 	}
-	range = psy_ui_component_verticalscrollrange(self);
-	if (newtop > 0) {
+	//range = psy_ui_component_verticalscrollrange(self);
+	/*if (newtop > 0) {
 		psy_ui_component_invalidate_rect(psy_ui_component_parent(self),
 			psy_ui_realrectangle_make(
 				psy_ui_realpoint_make(0.0, 0.0),
@@ -1705,7 +1705,7 @@ void psy_ui_component_set_scroll_top(psy_ui_Component* self, psy_ui_Value top)
 				psy_ui_realpoint_make(0.0, psy_ui_realrectangle_height(&r) - delta),
 				psy_ui_realsize_make(psy_ui_realrectangle_width(&r), delta)));
 		}
-	}
+	}*/
 	psy_signal_emit(&self->signal_scrolled, self, 0);
 }
 

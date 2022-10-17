@@ -95,8 +95,10 @@ typedef struct MainFrame {
 	KbdHelp kbdhelp;
 	Gear gear;
 	psy_ui_Splitter gearsplitter;
+#ifdef PSYCLE_USE_PLUGIN_EDITOR
 	PluginEditor plugineditor;
-	psy_ui_Splitter splitbarplugineditor;	
+	psy_ui_Splitter splitbarplugineditor;
+#endif	
 	VuBar vubar;
 	CPUView cpuview;
 	psy_ui_Splitter cpusplitter;

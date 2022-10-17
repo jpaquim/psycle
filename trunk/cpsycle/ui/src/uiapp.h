@@ -10,6 +10,7 @@
 #include "uieventdispatch.h"
 #include "uidefaults.h"
 #include "uibitmaps.h"
+#include "uiclipboard.h"
 #include "timers.h"
 /* container */
 #include <signal.h>
@@ -68,7 +69,8 @@ typedef struct psy_ui_App {
 	psy_ui_EventDispatch eventdispatch;
 	psy_Table components;
 	psy_ui_Bitmaps bitmaps;
-	psy_List* captures_;	
+	psy_List* captures_;
+	psy_ui_Clipboard clipboard;	
 } psy_ui_App;
 
 psy_ui_App* psy_ui_app(void);

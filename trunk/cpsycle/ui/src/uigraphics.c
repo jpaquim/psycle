@@ -41,6 +41,7 @@ static void setbackgroundmode(psy_ui_Graphics*, uintptr_t mode);
 static void settextcolour(psy_ui_Graphics*, psy_ui_Colour);
 static void settextalign(psy_ui_Graphics*, uintptr_t align);
 static void setcolour(psy_ui_Graphics*, psy_ui_Colour);
+static psy_ui_Colour textcolour(const psy_ui_Graphics*);
 static void setfont(psy_ui_Graphics*, const psy_ui_Font*);
 static void moveto(psy_ui_Graphics*, psy_ui_RealPoint point);
 static void curveto(psy_ui_Graphics*, psy_ui_RealPoint control_p1,
@@ -77,6 +78,7 @@ static void vtable_init(void)
 		vtable.settextcolour = settextcolour;
 		vtable.settextalign = settextalign;
 		vtable.setcolour = setcolour;
+		vtable.textcolour = textcolour;
 		vtable.setfont = setfont;
 		vtable.moveto = moveto;
 		vtable.curveto = curveto;
@@ -206,6 +208,11 @@ static void setcolour(psy_ui_Graphics* self, psy_ui_Colour colour)
 	self->imp->vtable->dev_setcolour(self->imp, colour);
 }
 
+static psy_ui_Colour textcolour(const psy_ui_Graphics* self)
+{
+	return self->imp->vtable->dev_textcolour(self->imp);
+}
+
 void setfont(psy_ui_Graphics* self, const psy_ui_Font* font)
 {
 	self->imp->vtable->dev_setfont(self->imp, font);
@@ -281,6 +288,10 @@ static void dev_setbackgroundmode(psy_ui_GraphicsImp* self, uintptr_t mode) { }
 static void dev_settextcolour(psy_ui_GraphicsImp* self, psy_ui_Colour colour) { }
 static void dev_settextalign(psy_ui_GraphicsImp* self, uintptr_t align) { }
 static void dev_setcolour(psy_ui_GraphicsImp* self, psy_ui_Colour colour) { }
+static psy_ui_Colour dev_textcolour(const psy_ui_GraphicsImp* self) 
+{
+	return psy_ui_colour_white();
+}
 static void dev_setfont(psy_ui_GraphicsImp* self, const psy_ui_Font* font) { }
 static const psy_ui_Font* dev_font(const psy_ui_GraphicsImp* self) { return NULL; }
 static void dev_moveto(psy_ui_GraphicsImp* self, psy_ui_RealPoint pt) { }
@@ -334,6 +345,7 @@ static void imp_vtable_init(psy_ui_GraphicsImp* self)
 		imp_vtable.dev_settextcolour = dev_settextcolour;
 		imp_vtable.dev_settextalign = dev_settextalign;
 		imp_vtable.dev_setcolour = dev_setcolour;
+		imp_vtable.dev_textcolour = dev_textcolour;
 		imp_vtable.dev_setfont = dev_setfont;
 		imp_vtable.dev_font = dev_font;
 		imp_vtable.dev_moveto = dev_moveto;

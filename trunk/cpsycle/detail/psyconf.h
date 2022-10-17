@@ -135,6 +135,8 @@
 	#define PSYCLE_USE_LV2
 #endif
 
+#define PSYCLE_USE_PLUGIN_EDITOR
+
 /* #define PSYCLE_TIMEBAR_OLD */
 
 /* debug */

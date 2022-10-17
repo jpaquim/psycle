@@ -88,6 +88,8 @@ typedef void (*psy_ui_fp_graphicsimp_dev_setbackgroundmode)(
 	struct psy_ui_GraphicsImp*, uintptr_t mode);
 typedef void (*psy_ui_fp_graphicsimp_dev_settextcolour)(
 	struct psy_ui_GraphicsImp*, psy_ui_Colour);
+typedef psy_ui_Colour (*psy_ui_fp_graphicsimp_dev_colour)(
+	const struct psy_ui_GraphicsImp*);
 typedef void (*psy_ui_fp_graphicsimp_dev_settextalign)(
 	struct psy_ui_GraphicsImp*, uintptr_t align);
 typedef void (*psy_ui_fp_graphicsimp_dev_setcolour)(struct psy_ui_GraphicsImp*,
@@ -138,6 +140,7 @@ typedef struct psy_ui_GraphicsImpVTable {
 	psy_ui_fp_graphicsimp_dev_settextcolour dev_settextcolour;
 	psy_ui_fp_graphicsimp_dev_settextalign dev_settextalign;
 	psy_ui_fp_graphicsimp_dev_setcolour dev_setcolour;
+	psy_ui_fp_graphicsimp_dev_colour dev_textcolour;
 	psy_ui_fp_graphicsimp_dev_setfont dev_setfont;
 	psy_ui_fp_graphicsimp_dev_font dev_font;
 	psy_ui_fp_graphicsimp_dev_moveto dev_moveto;
@@ -198,6 +201,8 @@ typedef void (*psy_ui_fp_graphics_settextalign)(struct psy_ui_Graphics*,
 	uintptr_t align);
 typedef void (*psy_ui_fp_graphics_setcolour)(struct psy_ui_Graphics*,
 	psy_ui_Colour);
+typedef psy_ui_Colour (*psy_ui_fp_graphics_colour)(
+	const struct psy_ui_Graphics*);
 typedef void (*psy_ui_fp_graphics_setfont)(struct psy_ui_Graphics*,
 	const psy_ui_Font*);
 typedef void (*psy_ui_fp_graphics_moveto)(struct psy_ui_Graphics*,
@@ -234,6 +239,7 @@ typedef struct psy_ui_GraphicsVTable {
 	psy_ui_fp_graphics_settextcolour settextcolour;
 	psy_ui_fp_graphics_settextalign settextalign;
 	psy_ui_fp_graphics_setcolour setcolour;	
+	psy_ui_fp_graphics_colour textcolour;
 	psy_ui_fp_graphics_setfont setfont;
 	psy_ui_fp_graphics_moveto moveto;
 	psy_ui_fp_graphics_curveto curveto;
@@ -263,6 +269,11 @@ INLINE void psy_ui_graphics_dispose(psy_ui_Graphics* self)
 INLINE void psy_ui_setcolour(psy_ui_Graphics* self, psy_ui_Colour colour)
 {
 	self->vtable->setcolour(self, colour);
+}
+
+INLINE psy_ui_Colour psy_ui_textcolour(const psy_ui_Graphics* self)
+{
+	return self->vtable->textcolour(self);
 }
 
 INLINE void psy_ui_textout(psy_ui_Graphics* self, psy_ui_RealPoint pt,

@@ -151,6 +151,8 @@ INLINE double psy_ui_realsize_height(const psy_ui_RealSize* self)
 
 /* psy_ui_RealRectangle */
 
+struct psy_List;
+
 typedef struct psy_ui_RealRectangle {
 	double left;
 	double top;
@@ -163,6 +165,10 @@ INLINE void psy_ui_realrectangle_init(psy_ui_RealRectangle* self)
 	/* assume IEEE754 */
 	memset(self, 0, sizeof(psy_ui_RealRectangle));	
 }
+
+psy_ui_RealRectangle* psy_ui_realrectangle_alloc(void);
+psy_ui_RealRectangle* psy_ui_realrectangle_alloc_init(void);
+
 
 INLINE void psy_ui_realrectangle_init_all(psy_ui_RealRectangle* self,
 	psy_ui_RealPoint topleft,
@@ -303,6 +309,8 @@ void psy_ui_realrectangle_expand_all(psy_ui_RealRectangle*, double margin);
 void psy_ui_realrectangle_move(psy_ui_RealRectangle*, psy_ui_RealPoint);
 void psy_ui_realrectangle_set_topleft(psy_ui_RealRectangle*,
 	psy_ui_RealPoint topleft);
+struct psy_List* psy_ui_realrectangle_diff(const psy_ui_RealRectangle*,
+	const psy_ui_RealRectangle* other);
 
 void psy_ui_error(const char* err, const char* shorterr);
 
