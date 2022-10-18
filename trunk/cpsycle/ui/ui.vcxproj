@@ -243,6 +243,7 @@
     <ClCompile Include="src\uiborder.c" />
     <ClCompile Include="src\uibutton.c" />
     <ClCompile Include="src\uicheckbox.c" />
+    <ClCompile Include="src\uiclipboard.c" />
     <ClCompile Include="src\uicolordialog.c" />
     <ClCompile Include="src\uicolour.c" />
     <ClCompile Include="src\uicombobox.c" />
@@ -328,6 +329,7 @@
     <ClInclude Include="src\uiborder.h" />
     <ClInclude Include="src\uibutton.h" />
     <ClInclude Include="src\uicheckbox.h" />
+    <ClInclude Include="src\uiclipboard.h" />
     <ClInclude Include="src\uicolordialog.h" />
     <ClInclude Include="src\uicolour.h" />
     <ClInclude Include="src\uicolours.h" />

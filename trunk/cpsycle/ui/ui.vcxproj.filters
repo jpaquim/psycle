@@ -307,6 +307,9 @@
     <ClCompile Include="src\uistyleproperty.c">
       <Filter>common</Filter>
     </ClCompile>
+    <ClCompile Include="src\uiclipboard.c">
+      <Filter>common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\uibutton.h">
@@ -562,6 +565,9 @@
       <Filter>imps\x11\common</Filter>
     </ClInclude>
     <ClInclude Include="src\uistyleproperty.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="src\uiclipboard.h">
       <Filter>common</Filter>
     </ClInclude>
   </ItemGroup>
